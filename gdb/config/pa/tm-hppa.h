@@ -41,18 +41,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define IEEE_FLOAT
 
-/* When passing a structure to a function, GCC passes the address
-   in a register, not the structure itself. */
+/* On the PA, any pass-by-value structure > 8 bytes is actually
+   passed via a pointer regardless of its type or the compiler
+   used.  */
 
-/* FIXME: I believe this is wrong.  I believe passing the address
-   depends only on the size of the argument being > 8, not on its type
-   (which is a much more sane way than the REG_STRUCT_HAS_ADDR way,
-   IMHO).  Also, as far as I know it is not dependent on it being
-   passed in a register.  This should be verified before changing
-   anything (in fact, printing structure arguments of
-   2,4,6,8,12,16,and 20 bytes should all be in the test suite).  */
-
-#define REG_STRUCT_HAS_ADDR(gcc_p) (1)
+#define REG_STRUCT_HAS_ADDR(gcc_p,type) \
+  (TYPE_LENGTH (type) > 8)
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -114,12 +108,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
 
-/* Largest integer type */
-#define LONGEST long
-
-/* Name of the builtin type for the LONGEST type above. */
-#define BUILTIN_TYPE_LONGEST builtin_type_long
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
@@ -128,7 +116,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Number of machine registers */
 
-#define NUM_REGS 100
+#define NUM_REGS 128
 
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */
@@ -142,10 +130,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   "sr3", "sr5", "sr6", "sr7", "cr0", "cr8", "cr9", "ccr", "cr12", "cr13", \
   "cr24", "cr25", "cr26", "mpsfu_high", "mpsfu_low", "mpsfu_ovflo", "pad", \
   "fpsr", "fpe1", "fpe2", "fpe3", "fpe4", "fpe5", "fpe6", "fpe7", \
-  "fr4", "fr5", "fr6", "fr7", "fr8", \
-  "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15", \
-  "fr16", "fr17", "fr18", "fr19", "fr20", "fr21", "fr22", "fr23", \
-  "fr24", "fr25", "fr26", "fr27", "fr28", "fr29", "fr30", "fr31"}
+  "fr4", "fr4R", "fr5", "fr5R", "fr6", "fr6R", "fr7", "fr7R", \
+  "fr8", "fr8R", "fr9", "fr9R", "fr10", "fr10R", "fr11", "fr11R", \
+  "fr12", "fr12R", "fr13", "fr13R", "fr14", "fr14R", "fr15", "fr15R", \
+  "fr16", "fr16R", "fr17", "fr17R", "fr18", "fr18R", "fr19", "fr19R", \
+  "fr20", "fr20R", "fr21", "fr21R", "fr22", "fr22R", "fr23", "fr23R", \
+  "fr24", "fr24R", "fr25", "fr25R", "fr26", "fr26R", "fr27", "fr27R", \
+  "fr28", "fr28R", "fr29", "fr29R", "fr30", "fr30R", "fr31", "fr31R"}
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -190,21 +181,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* PA specific macro to see if the current instruction is nullified. */
 #define INSTRUCTION_NULLIFIED ((int)read_register (IPSW_REGNUM) & 0x00200000)
 
+/* Number of bytes of storage in the actual machine representation
+   for register N.  On the PA-RISC, all regs are 4 bytes, including
+   the FP registers (they're accessed as two 4 byte halves).  */
+
+#define REGISTER_RAW_SIZE(N) 4
+
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
-#define REGISTER_BYTES (32 * 4 + 11 * 4 + 8 * 4 + 12 * 4 + 4 + 32 * 8)
+#define REGISTER_BYTES (NUM_REGS * REGISTER_RAW_SIZE (1))
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#define REGISTER_BYTE(N) \
- ((N) >= FP4_REGNUM ? ((N) - FP4_REGNUM) * 8 + 288 : (N) * 4)
-
-/* Number of bytes of storage in the actual machine representation
-   for register N.  On the PA-RISC, all regs are 4 bytes
-   except the floating point regs which are 8 bytes.  */
-
-#define REGISTER_RAW_SIZE(N) ((N) < FP4_REGNUM ? 4 : 8)
+#define REGISTER_BYTE(N) (N) * 4
 
 /* Number of bytes of storage in the program's representation
    for register N. */
@@ -213,7 +203,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
-#define MAX_REGISTER_RAW_SIZE 8
+#define MAX_REGISTER_RAW_SIZE 4
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
@@ -223,7 +213,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    of data in register N.  */
 
 #define REGISTER_VIRTUAL_TYPE(N) \
- ((N) < FP4_REGNUM ? builtin_type_int : builtin_type_double)
+ ((N) < FP4_REGNUM ? builtin_type_int : builtin_type_float)
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
@@ -367,6 +357,8 @@ text_space				; Otherwise, go through _sr4export,
 	break 4, 8
 	mtsp r21, sr0
 	ble,n 0(sr0, r22)
+	nop				; To avoid kernel bugs 
+	nop				; and keep the dummy 8 byte aligned
 
    The dummy decides if the target is in text space or data space. If
    it's in data space, there's no problem because the target can
@@ -375,7 +367,23 @@ text_space				; Otherwise, go through _sr4export,
    calls a function in text space and can return to any space. Instead
    of including fake instructions to represent saved registers, we
    know that the frame is associated with the call dummy and treat it
-   specially. */ 
+   specially.
+
+   The trailing NOPs are needed to avoid a bug in HPUX, BSD and OSF1 
+   kernels.   If the memory at the location pointed to by the PC is
+   0xffffffff then a ptrace step call will fail (even if the instruction
+   is nullified).
+
+   The code to pop a dummy frame single steps three instructions
+   starting with the last mtsp.  This includes the nullified "instruction"
+   following the ble (which is uninitialized junk).  If the 
+   "instruction" following the last BLE is 0xffffffff, then the ptrace
+   will fail and the dummy frame is not correctly popped.
+
+   By placing a NOP in the delay slot of the BLE instruction we can be 
+   sure that we never try to execute a 0xffffffff instruction and
+   avoid the kernel bug.  The second NOP is needed to keep the call
+   dummy 8 byte aligned.  */
 
 #define CALL_DUMMY {0x4BDA3FB9, 0x4BD93FB1, 0x4BD83FA9, 0x4BD73FA1,\
                     0x37C13FB9, 0x24201004, 0x2C391005, 0x24311006,\
@@ -383,9 +391,9 @@ text_space				; Otherwise, go through _sr4export,
                     0x20200000, 0x34210000, 0x002010b3, 0x82642022,\
                     0xe6c06000, 0x081f0242, 0x00010004, 0x00151820,\
                     0xe6c00002, 0xe4202000, 0x6bdf3fd1, 0x00010004,\
-                    0x00151820, 0xe6c00002}
+                    0x00151820, 0xe6c00002, 0x08000240, 0x08000240}
 
-#define CALL_DUMMY_LENGTH 104
+#define CALL_DUMMY_LENGTH 112
 #define CALL_DUMMY_START_OFFSET 0
 
 /*
