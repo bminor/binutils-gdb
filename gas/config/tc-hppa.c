@@ -1455,6 +1455,12 @@ pa_ip (str)
   pa_check_current_space_and_subspace ();
 #endif
 
+  /* Convert everything up to the first whitespace character into lower
+     case.  */
+  for (s = str; *s != ' ' && *s != '\t' && *s != '\n' && *s != '\0'; s++)
+    if (isupper (*s))
+      *s = tolower (*s);
+
   /* Skip to something interesting.  */
   for (s = str; isupper (*s) || islower (*s) || (*s >= '0' && *s <= '3'); ++s)
     ;
@@ -1479,14 +1485,6 @@ pa_ip (str)
     }
 
   save_s = str;
-
-  /* Convert everything into lower case.  */
-  while (*save_s)
-    {
-      if (isupper (*save_s))
-	*save_s = tolower (*save_s);
-      save_s++;
-    }
 
   /* Look up the opcode in the has table.  */
   if ((insn = (struct pa_opcode *) hash_find (op_hash, str)) == NULL)
