@@ -41,9 +41,9 @@ case "${host}" in
 
   a29k-*-*)			gas_host=a29k		;;
 
-  hppa-hp-hpux*)		gas_host=hppahpux	;;
-  hppa-hp-bsd*)			gas_host=hppabsd	;;
-  hppa-hp-osf*)			gas_host=hppaosf	;;
+  hppa*-hp-hpux*)		gas_host=hppahpux	;;
+  hppa*-hp-bsd*)		gas_host=hppabsd	;;
+  hppa*-hp-osf*)		gas_host=hppaosf	;;
 
   i[34]86-ibm-aix*)		gas_host=i386aix	;;
   i[34]86-*-isc*)		gas_host=sysv		;;
@@ -133,13 +133,15 @@ case ${generic_target} in
   m68k-wrs-vxworks)	obj_format=aout emulation=sun3 ;;    
   m68k-ericsson-[Oo][Ss][Ee])
 			obj_format=aout emulation=sun3 ;;
-  m68k-*-coff)		obj_format=coffbfd gas_target=m68kcoff ;;
+  m68k-*-coff | m68*-*-sysv*)
+			obj_format=coffbfd gas_target=m68kcoff ;;
   m68k-*-hpux)		obj_format=hp300 emulation=hp300 ;;
 
   # don't change emulation like *-*-bsd does
   mips-*-bsd*)		bfd_gas=yes obj_format=aout gas_target=mips-lit ;;
   mips-*-ultrix*)	obj_format=ecoff gas_target=mips-lit ;;
-  mips-*-ecoff)		obj_format=ecoff gas_target=mips-big ;;
+  mips-*-ecoffl*)	obj_format=ecoff gas_target=mips-lit ;;
+  mips-*-ecoff*)	obj_format=ecoff gas_target=mips-big ;;
   mips-*-irix*)		obj_format=ecoff gas_target=mips-big emulation=irix ;;
 
   sparclite*-fujitsu-none)

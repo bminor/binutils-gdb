@@ -1,5 +1,9 @@
 Fri Jun  4 07:51:18 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* configure.in (mips-*-ecoffl*): New target; use ecoff and
+	mips-lit.
+	(mips-*-ecoff*): Added trailing '*'.
+
 	* config/obj-ecoff.c (ecoff_build_procs): Force the adr of the
 	first FDR in a file to be zero.
 
