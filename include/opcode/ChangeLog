@@ -1,4 +1,8 @@
 start-sanitize-tic80
+Mon Jan 13 15:56:38 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (TIC80_OPERAND_FLOAT): Add for floating point operands.
+
 Mon Jan  6 10:51:15 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80.h (TIC80_OPERAND_SCALED): Operand may have optional
