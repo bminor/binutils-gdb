@@ -11,6 +11,11 @@
 	* elfcode.h (elf_slurp_symbol_table): Test elf_elfsections for NULL,
 	as can happen with a core file, before dereferencing.
 
+2001-12-19  Michael Snyder  <msnyder@redhat.com>
+
+	* elf32-i386.c (elf_i386_grok_psinfo): Fix copy-and-paste error:
+	target is i386 (not mips), and size of descdata is 124 (not 128).
+
 2001-12-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): If new_size

@@ -362,7 +362,7 @@ elf_i386_grok_psinfo (abfd, note)
       default:
 	return false;
 
-      case 128:		/* Linux/MIPS elf_prpsinfo */
+      case 124:		/* Linux/i386 elf_prpsinfo */
 	elf_tdata (abfd)->core_program
 	 = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
 	elf_tdata (abfd)->core_command
