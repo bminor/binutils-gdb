@@ -1,3 +1,13 @@
+2000-05-03  Martin v. Löwis  <loewis@informatik.hu-berlin.de>
+
+	* elflink.h (elf_link_add_object_symbols): Reset dynindx for
+	hidden and internal symbols.
+	(elf_fix_symbol_flags): Clear NEEDS_PLT for symbols with
+	visibility.
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Do not
+	assign a PLT or GOT entry to symbols with hidden and
+	internal visibility.
+
 2000-05-03  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* bfd/coff-go32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Add entry for

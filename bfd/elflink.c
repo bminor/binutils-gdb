@@ -238,8 +238,8 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
 	    }
 	  
 	  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-	  break;
-	  
+	  return true;
+
 	default:
 	  break;
 	}
