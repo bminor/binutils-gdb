@@ -97,4 +97,27 @@ make_solaris_order_map
 
 Do-last:
 
+# This must come after all other sanitizations.  Re-sanitize the .pot
+# file.
+if [ -n "${verbose}" ]; then
+   echo Re-computing files for gettext ...
+fi
+
+if [ -n "${safe}" -a ! -f po/.Recover/POTFILES.in ]; then
+   if [ -n "${verbose}" ]; then
+      echo Caching po/POTFILES.in in .Recover...
+   fi
+   mv po/POTFILES.in po/.Recover
+fi
+find . -name '*.[ch]' | sed -e 's,^\./,,' > po/POTFILES.in
+
+if [ -n "${safe}" -a ! -f po/.Recover/gprof.pot ]; then
+   if [ -n "${verbose}" ]; then
+      echo Caching po/gprof.pot in .Recover...
+   fi
+   mv po/gprof.pot po/.Recover
+fi
+xgettext `cat po/POTFILES.in` -o po/gprof.pot
+
+
 # eof
