@@ -1,3 +1,8 @@
+2003-02-21  Miles Bader  <miles@gnu.org>
+
+	* config/tc-v850.c (system_registers): Add v850e debug registers.
+	(system_register_name): Accept up to 27 (the last v850e sys register).
+
 2003-02-21  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/as.texinfo: Define new COFF-ELF variable to conditionalize text

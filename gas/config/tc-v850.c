@@ -519,7 +519,8 @@ v850_longcode (type)
 }
 
 /* The target specific pseudo-ops which we support.  */
-const pseudo_typeS md_pseudo_table[] = {
+const pseudo_typeS md_pseudo_table[] =
+{
   { "sdata",		v850_seg,		SDATA_SECTION		},
   { "tdata",		v850_seg,		TDATA_SECTION		},
   { "zdata",		v850_seg,		ZDATA_SECTION		},
@@ -549,7 +550,8 @@ const pseudo_typeS md_pseudo_table[] = {
 static struct hash_control *v850_hash;
 
 /* This table is sorted.  Suitable for searching by a binary search.  */
-static const struct reg_name pre_defined_registers[] = {
+static const struct reg_name pre_defined_registers[] =
+{
   { "ep",  30 },		/* ep - element ptr */
   { "gp",   4 },		/* gp - global ptr  */
   { "hp",   2 },		/* hp - handler stack ptr  */
@@ -594,12 +596,20 @@ static const struct reg_name pre_defined_registers[] = {
 #define REG_NAME_CNT						\
   (sizeof (pre_defined_registers) / sizeof (struct reg_name))
 
-static const struct reg_name system_registers[] = {
+static const struct reg_name system_registers[] =
+{
+  { "asid",  23 },
+  { "bpc",   22 },
+  { "bpav",  24 },
+  { "bpam",  25 },
+  { "bpdv",  26 },
+  { "bpdm",  27 },
   { "ctbp",  20 },
   { "ctpc",  16 },
   { "ctpsw", 17 },
   { "dbpc",  18 },
   { "dbpsw", 19 },
+  { "dir",   21 },
   { "ecr",    4 },
   { "eipc",   0 },
   { "eipsw",  1 },
@@ -611,7 +621,8 @@ static const struct reg_name system_registers[] = {
 #define SYSREG_NAME_CNT						\
   (sizeof (system_registers) / sizeof (struct reg_name))
 
-static const struct reg_name system_list_registers[] = {
+static const struct reg_name system_list_registers[] =
+{
   {"PS",      5 },
   {"SR",      0 + 1}
 };
@@ -619,7 +630,8 @@ static const struct reg_name system_list_registers[] = {
 #define SYSREGLIST_NAME_CNT					\
   (sizeof (system_list_registers) / sizeof (struct reg_name))
 
-static const struct reg_name cc_names[] = {
+static const struct reg_name cc_names[] =
+{
   { "c",  0x1 },
   { "e",  0x2 },
   { "ge", 0xe },
@@ -705,14 +717,14 @@ reg_name_search (regs, regcount, name, accept_numbers)
 }
 
 /* Summary of register_name().
- *
- * in: Input_line_pointer points to 1st char of operand.
- *
- * out: An expressionS.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.  */
+  
+   in: Input_line_pointer points to 1st char of operand.
+  
+   out: An expressionS.
+  	The operand may have been a register: in this case, X_op == O_register,
+  	X_add_number is set to the register number, and truth is returned.
+  	Input_line_pointer->(next non-blank) char after operand, or is in
+  	its original state.  */
 
 static bfd_boolean register_name PARAMS ((expressionS *));
 
@@ -758,18 +770,18 @@ register_name (expressionP)
 }
 
 /* Summary of system_register_name().
- *
- * in:  INPUT_LINE_POINTER points to 1st char of operand.
- *      EXPRESSIONP points to an expression structure to be filled in.
- *      ACCEPT_NUMBERS is true iff numerical register names may be used.
- *      ACCEPT_LIST_NAMES is true iff the special names PS and SR may be
- *      accepted.
- *
- * out: An expressionS structure in expressionP.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.  */
+  
+   in:  INPUT_LINE_POINTER points to 1st char of operand.
+        EXPRESSIONP points to an expression structure to be filled in.
+        ACCEPT_NUMBERS is true iff numerical register names may be used.
+        ACCEPT_LIST_NAMES is true iff the special names PS and SR may be
+        accepted.
+  
+   out: An expressionS structure in expressionP.
+  	The operand may have been a register: in this case, X_op == O_register,
+  	X_add_number is set to the register number, and truth is returned.
+  	Input_line_pointer->(next non-blank) char after operand, or is in
+  	its original state.  */
 
 static bfd_boolean system_register_name
   PARAMS ((expressionS *, bfd_boolean, bfd_boolean));
@@ -808,7 +820,7 @@ system_register_name (expressionP, accept_numbers, accept_list_names)
 	  /* Make sure that the register number is allowable.  */
 	  if (reg_number < 0
 	      || (reg_number > 5 && reg_number < 16)
-	      || reg_number > 20)
+	      || reg_number > 27)
 	    {
 	      reg_number = -1;
 	    }
@@ -846,14 +858,14 @@ system_register_name (expressionP, accept_numbers, accept_list_names)
 }
 
 /* Summary of cc_name().
- *
- * in: INPUT_LINE_POINTER points to 1st char of operand.
- *
- * out: An expressionS.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.  */
+  
+   in: INPUT_LINE_POINTER points to 1st char of operand.
+  
+   out: An expressionS.
+  	The operand may have been a register: in this case, X_op == O_register,
+  	X_add_number is set to the register number, and truth is returned.
+  	Input_line_pointer->(next non-blank) char after operand, or is in
+  	its original state.  */
 
 static bfd_boolean cc_name PARAMS ((expressionS *));
 
@@ -907,29 +919,29 @@ skip_white_space ()
 }
 
 /* Summary of parse_register_list ().
- *
- * in: INPUT_LINE_POINTER  points to 1st char of a list of registers.
- *     INSN                is the partially constructed instruction.
- *     OPERAND             is the operand being inserted.
- *
- * out: NULL if the parse completed successfully, otherwise a
- *      pointer to an error message is returned.  If the parse
- *      completes the correct bit fields in the instruction
- *      will be filled in.
- *
- * Parses register lists with the syntax:
- *
- *   { rX }
- *   { rX, rY }
- *   { rX - rY }
- *   { rX - rY, rZ }
- *   etc
- *
- * and also parses constant epxressions whoes bits indicate the
- * registers in the lists.  The LSB in the expression refers to
- * the lowest numbered permissable register in the register list,
- * and so on upwards.  System registers are considered to be very
- * high numbers.  */
+  
+   in: INPUT_LINE_POINTER  points to 1st char of a list of registers.
+       INSN                is the partially constructed instruction.
+       OPERAND             is the operand being inserted.
+  
+   out: NULL if the parse completed successfully, otherwise a
+        pointer to an error message is returned.  If the parse
+        completes the correct bit fields in the instruction
+        will be filled in.
+  
+   Parses register lists with the syntax:
+  
+     { rX }
+     { rX, rY }
+     { rX - rY }
+     { rX - rY, rZ }
+     etc
+  
+   and also parses constant epxressions whoes bits indicate the
+   registers in the lists.  The LSB in the expression refers to
+   the lowest numbered permissable register in the register list,
+   and so on upwards.  System registers are considered to be very
+   high numbers.  */
 
 static char *parse_register_list
   PARAMS ((unsigned long *, const struct v850_operand *));
@@ -970,7 +982,6 @@ parse_register_list (insn, operand)
   /* If the expression starts with a curly brace it is a register list.
      Otherwise it is a constant expression, whoes bits indicate which
      registers are to be included in the list.  */
-
   if (*input_line_pointer != '{')
     {
       int reg;
@@ -1055,9 +1066,7 @@ parse_register_list (insn, operand)
 	    }
 
 	  if (i == 32)
-	    {
-	      return _("illegal register included in list");
-	    }
+	    return _("illegal register included in list");
 	}
       else if (system_register_name (&exp, TRUE, TRUE))
 	{
@@ -1124,9 +1133,7 @@ parse_register_list (insn, operand)
 	    }
 	}
       else
-	{
-	  break;
-	}
+	break;
 
       skip_white_space ();
     }
@@ -1350,7 +1357,6 @@ md_begin ()
      has many identical opcode names that have different opcodes based
      on the operands.  This hash table then provides a quick index to
      the first opcode with a particular name in the opcode table.  */
-
   op = v850_opcodes;
   while (op->name)
     {
