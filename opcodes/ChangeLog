@@ -1,3 +1,8 @@
+2002-05-30  Diego Novillo  <dnovillo@redhat.com>
+
+	* d10v-opc.c (d10v_opcodes): `btsti' does not modify its
+        arguments.
+
 2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
 
 	* configure.in: Add DLX configuraton support.
