@@ -1,3 +1,9 @@
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Handle
+	GNU_ABI_TAG_FREEBSD and GNU_ABI_TAG_NETBSD.  Suggested by Momchil
+	Velikov.
+
 2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cli/cli-cmds.c (shell_escape): Silence warnings from old
