@@ -39,15 +39,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/mips.h"
 #include "elf-bfd.h"
 
+/* end-sanitize-carp end-sanitize-vr4xxx */
+
+/* Some MIPS boards don't support floating point, so we permit the
+   user to turn it off.  */
+
+enum mips_fpu_type
+{
+  MIPS_FPU_DOUBLE,	/* Full double precision floating point.  */
+  MIPS_FPU_SINGLE,	/* Single precision floating point (R4650).  */
+  MIPS_FPU_NONE		/* No floating point.  */
+};
+
+static int mips_fpu_type_auto = 1;
+#ifdef MIPS_DEFAULT_FPU_TYPE
+static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
+#else
+static enum mips_fpu_type mips_fpu = MIPS_FPU_DOUBLE;
+#endif
+#define MIPS_FPU_TYPE mips_fpu_type
+
+/* start-sanitize-carp start-sanitize-vr4xxx */
+
 /* MIPS specific per-architecture information */
 struct gdbarch_tdep
 {
   int elf_abi;
   /* mips options */
   int mips_eabi;
-  /* int mips_default_fpu_type;
-     Not yet.  The MIPS_DEFAULT_FPU_TYPE is set independant of the
-     current mips architecture.  */
+  enum mips_fpu_type mips_fpu_type;
   int mips_last_arg_regnum;
   int mips_last_fp_arg_regnum;
 };
@@ -65,6 +85,11 @@ struct gdbarch_tdep
 #if GDB_MULTI_ARCH
 #undef MIPS_LAST_ARG_REGNUM
 #define MIPS_LAST_ARG_REGNUM (gdbarch_tdep (current_gdbarch)->mips_last_arg_regnum)
+#endif
+
+#if GDB_MULTI_ARCH
+#undef MIPS_FPU_TYPE
+#define MIPS_FPU_TYPE (gdbarch_tdep (current_gdbarch)->mips_fpu_type)
 #endif
 
 /* end-sanitize-carp end-sanitize-vr4xxx */
@@ -89,12 +114,6 @@ static CORE_ADDR heuristic_proc_start PARAMS ((CORE_ADDR));
 
 static CORE_ADDR read_next_frame_reg PARAMS ((struct frame_info *, int));
 
-static void mips_set_fpu_command PARAMS ((char *, int,
-					  struct cmd_list_element *));
-
-static void mips_show_fpu_command PARAMS ((char *, int,
-					   struct cmd_list_element *));
-
 void mips_set_processor_type_command PARAMS ((char *, int));
 
 int mips_set_processor_type PARAMS ((char *));
@@ -116,13 +135,6 @@ static CORE_ADDR after_prologue PARAMS ((CORE_ADDR pc,
 char *mips_processor_type;
 
 char *tmp_mips_processor_type;
-
-/* Some MIPS boards don't support floating point, so we permit the
-   user to turn it off.  */
-
-enum mips_fpu_type mips_fpu;
-
-static char *mips_fpu_string;
 
 /* A set of original names, to be used when restoring back to generic
    registers from a specific set.  */
@@ -1889,7 +1901,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	 because those registers are normally skipped.  */
       if (typecode == TYPE_CODE_FLT
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM
-	  && mips_fpu != MIPS_FPU_NONE)
+	  && MIPS_FPU_TYPE != MIPS_FPU_NONE)
 	{
 	  if (!FP_REGISTER_DOUBLE && len == 8)
 	    {
@@ -2087,7 +2099,7 @@ mips_push_dummy_frame()
   mips_push_register (&sp, PC_REGNUM);
   mips_push_register (&sp, HI_REGNUM);
   mips_push_register (&sp, LO_REGNUM);
-  mips_push_register (&sp, mips_fpu == MIPS_FPU_NONE ? 0 : FCRCS_REGNUM);
+  mips_push_register (&sp, MIPS_FPU_TYPE == MIPS_FPU_NONE ? 0 : FCRCS_REGNUM);
 
   /* Save general CPU registers */
   PROC_REG_MASK(proc_desc) = GEN_REG_SAVE_MASK;
@@ -2099,8 +2111,8 @@ mips_push_dummy_frame()
 
   /* Save floating point registers starting with high order word */
   PROC_FREG_MASK(proc_desc) = 
-    mips_fpu == MIPS_FPU_DOUBLE ? FLOAT_REG_SAVE_MASK
-    : mips_fpu == MIPS_FPU_SINGLE ? FLOAT_SINGLE_REG_SAVE_MASK : 0;
+    MIPS_FPU_TYPE == MIPS_FPU_DOUBLE ? FLOAT_REG_SAVE_MASK
+    : MIPS_FPU_TYPE == MIPS_FPU_SINGLE ? FLOAT_SINGLE_REG_SAVE_MASK : 0;
   /* PROC_FREG_OFFSET is the offset of the first saved *double* register
      from FP.  */
   PROC_FREG_OFFSET(proc_desc) = sp - old_sp - 8;
@@ -2168,7 +2180,7 @@ mips_pop_frame()
 	        read_memory_integer (new_sp - 2*MIPS_REGSIZE, MIPS_REGSIZE));
       write_register (LO_REGNUM,
 	        read_memory_integer (new_sp - 3*MIPS_REGSIZE, MIPS_REGSIZE));
-      if (mips_fpu != MIPS_FPU_NONE)
+      if (MIPS_FPU_TYPE != MIPS_FPU_NONE)
 	write_register (FCRCS_REGNUM,
 	        read_memory_integer (new_sp - 4*MIPS_REGSIZE, MIPS_REGSIZE));
     }
@@ -2690,8 +2702,9 @@ mips_extract_return_value (valtype, regbuf, valbuf)
   
   regnum = 2;
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
-      && (mips_fpu == MIPS_FPU_DOUBLE
-	  || (mips_fpu == MIPS_FPU_SINGLE && len <= MIPS_FPU_SINGLE_REGSIZE)))
+      && (MIPS_FPU_TYPE == MIPS_FPU_DOUBLE
+	  || (MIPS_FPU_TYPE == MIPS_FPU_SINGLE
+	      && len <= MIPS_FPU_SINGLE_REGSIZE)))
     regnum = FP0_REGNUM;
 
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
@@ -2722,8 +2735,9 @@ mips_store_return_value (valtype, valbuf)
   
   regnum = 2;
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
-      && (mips_fpu == MIPS_FPU_DOUBLE
-	  || (mips_fpu == MIPS_FPU_SINGLE && len <= MIPS_REGSIZE)))
+      && (MIPS_FPU_TYPE == MIPS_FPU_DOUBLE
+	  || (MIPS_FPU_TYPE == MIPS_FPU_SINGLE
+	      && len <= MIPS_REGSIZE)))
     regnum = FP0_REGNUM;
 
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
@@ -2755,67 +2769,102 @@ in_sigtramp (pc, ignore)
   return (pc >= sigtramp_address && pc < sigtramp_end);
 }
 
-/* Command to set FPU type.  mips_fpu_string will have been set to the
-   user's argument.  Set mips_fpu based on mips_fpu_string, and then
-   canonicalize mips_fpu_string.  */
+/* Commands to show/set the MIPS FPU type.  */
 
-/*ARGSUSED*/
+static void show_mipsfpu_command PARAMS ((char *, int));
 static void
-mips_set_fpu_command (args, from_tty, c)
+show_mipsfpu_command (args, from_tty)
      char *args;
      int from_tty;
-     struct cmd_list_element *c;
 {
-  char *err = NULL;
-
-  if (mips_fpu_string == NULL || *mips_fpu_string == '\0')
-    mips_fpu = MIPS_FPU_DOUBLE;
-  else if (strcasecmp (mips_fpu_string, "double") == 0
-	   || strcasecmp (mips_fpu_string, "on") == 0
-	   || strcasecmp (mips_fpu_string, "1") == 0
-	   || strcasecmp (mips_fpu_string, "yes") == 0)
-    mips_fpu = MIPS_FPU_DOUBLE;
-  else if (strcasecmp (mips_fpu_string, "none") == 0
-	   || strcasecmp (mips_fpu_string, "off") == 0
-	   || strcasecmp (mips_fpu_string, "0") == 0
-	   || strcasecmp (mips_fpu_string, "no") == 0)
-    mips_fpu = MIPS_FPU_NONE;
-  else if (strcasecmp (mips_fpu_string, "single") == 0)
-    mips_fpu = MIPS_FPU_SINGLE;
-  else
-    err = strsave (mips_fpu_string);
-
-  if (mips_fpu_string != NULL)
-    free (mips_fpu_string);
-
-  switch (mips_fpu)
+  char *msg;
+  char *fpu;
+  switch (MIPS_FPU_TYPE)
     {
-    case MIPS_FPU_DOUBLE:
-      mips_fpu_string = strsave ("double");
-      break;
     case MIPS_FPU_SINGLE:
-      mips_fpu_string = strsave ("single");
+      fpu = "single-precision";
+      break;
+    case MIPS_FPU_DOUBLE:
+      fpu = "double-precision";
       break;
     case MIPS_FPU_NONE:
-      mips_fpu_string = strsave ("none");
+      fpu = "absent (none)";
       break;
     }
-
-  if (err != NULL)
-    {
-      struct cleanup *cleanups = make_cleanup (free, err);
-      error ("Unknown FPU type `%s'.  Use `double', `none', or `single'.",
-	     err);
-      do_cleanups (cleanups);
-    }
+  if (mips_fpu_type_auto)
+    printf_unfiltered ("The MIPS floating-point coprocessor is set automatically (currently %s)\n",
+		       fpu);
+  else
+    printf_unfiltered ("The MIPS floating-point coprocessor is assumed to be %s\n",
+		       fpu);
 }
 
+
+static void set_mipsfpu_command PARAMS ((char *, int));
 static void
-mips_show_fpu_command (args, from_tty, c)
+set_mipsfpu_command (args, from_tty)
      char *args;
      int from_tty;
-     struct cmd_list_element *c;
 {
+  printf_unfiltered ("\"set mipsfpu\" must be followed by \"double\", \"single\",\"none\" or \"auto\".\n");
+  show_mipsfpu_command (args, from_tty);
+}
+
+static void set_mipsfpu_single_command PARAMS ((char *, int));
+static void
+set_mipsfpu_single_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  mips_fpu_type = MIPS_FPU_SINGLE;
+  mips_fpu_type_auto = 0;
+  /* start-sanitize-carp start-sanitize-vr4xxx */
+  if (GDB_MULTI_ARCH)
+    {
+      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_SINGLE;
+    }
+  /* end-sanitize-carp end-sanitize-vr4xxx */
+}
+
+static void set_mipsfpu_double_command PARAMS ((char *, int));
+static void
+set_mipsfpu_double_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  mips_fpu_type = MIPS_FPU_DOUBLE;
+  mips_fpu_type_auto = 0;
+  /* start-sanitize-carp start-sanitize-vr4xxx */
+  if (GDB_MULTI_ARCH)
+    {
+      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_DOUBLE;
+    }
+  /* end-sanitize-carp end-sanitize-vr4xxx */
+}
+
+static void set_mipsfpu_none_command PARAMS ((char *, int));
+static void
+set_mipsfpu_none_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  mips_fpu_type = MIPS_FPU_NONE;
+  mips_fpu_type_auto = 0;
+  /* start-sanitize-carp start-sanitize-vr4xxx */
+  if (GDB_MULTI_ARCH)
+    {
+      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_NONE;
+    }
+  /* end-sanitize-carp end-sanitize-vr4xxx */
+}
+
+static void set_mipsfpu_auto_command PARAMS ((char *, int));
+static void
+set_mipsfpu_auto_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  mips_fpu_type_auto = 1;
 }
 
 /* Command to set the processor type.  */
@@ -3310,6 +3359,24 @@ mips_gdbarch_init (info, arches)
     }
   set_gdbarch_long_long_bit (gdbarch, 64);
 
+  /* enable/disable the MIPS FPU */
+  if (!mips_fpu_type_auto)
+    tdep->mips_fpu_type = mips_fpu_type;
+  else if (info.bfd_arch_info != NULL
+	   && info.bfd_arch_info->arch == bfd_arch_mips)
+    switch (info.bfd_arch_info->mach)
+      {
+      case bfd_mach_mips4111:
+      case bfd_mach_mips4121:
+	tdep->mips_fpu_type = MIPS_FPU_NONE;
+	break;
+      default:
+	tdep->mips_fpu_type = MIPS_FPU_DOUBLE;
+	break;
+      }
+  else
+    tdep->mips_fpu_type = MIPS_FPU_DOUBLE;
+
   if (gdbarch_debug)
     {
       fprintf_unfiltered (stderr,
@@ -3325,6 +3392,13 @@ mips_gdbarch_init (info, arches)
 			  "mips_gdbarch_init: MIPS_LAST_FP_ARG_REGNUM = %d (%d)\n",
 			  tdep->mips_last_fp_arg_regnum,
 			  tdep->mips_last_fp_arg_regnum - FP0_REGNUM);
+      fprintf_unfiltered (stderr,
+			  "mips_gdbarch_init: tdep->mips_fpu_type = %d (%s)\n",
+			  tdep->mips_fpu_type,
+			  (tdep->mips_fpu_type == MIPS_FPU_NONE ? "none"
+			   : tdep->mips_fpu_type == MIPS_FPU_SINGLE ? "single"
+			   : tdep->mips_fpu_type == MIPS_FPU_DOUBLE ? "double"
+			   : "???"));
     }
 
   return gdbarch;
@@ -3335,6 +3409,7 @@ mips_gdbarch_init (info, arches)
 void
 _initialize_mips_tdep ()
 {
+  static struct cmd_list_element *mipsfpulist = NULL;
   struct cmd_list_element *c;
 
   /* start-sanitize-carp start-sanitize-vr4xxx */
@@ -3347,31 +3422,34 @@ _initialize_mips_tdep ()
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */
 
-  c = add_set_cmd ("mipsfpu", class_support, var_string_noescape,
-		   (char *) &mips_fpu_string,
-		   "Set use of floating point coprocessor.\n\
-Set to `none' to avoid using floating point instructions when calling\n\
-functions or dealing with return values.  Set to `single' to use only\n\
-single precision floating point as on the R4650.  Set to `double' for\n\
-normal floating point support.",
-		   &setlist);
-  c->function.sfunc = mips_set_fpu_command;
-  c = add_show_from_set (c, &showlist);
-  c->function.sfunc = mips_show_fpu_command;
+  add_prefix_cmd ("mipsfpu", class_support, set_mipsfpu_command,
+		  "Set use of MIPS floating-point coprocessor.",
+		  &mipsfpulist, "set mipsfpu ", 0, &setlist);
+  add_cmd ("single", class_support, set_mipsfpu_single_command,
+	   "Select single-precision MIPS floating-point coprocessor.",
+	   &mipsfpulist);
+  add_cmd ("double", class_support, set_mipsfpu_double_command,
+	   "Select double-precision MIPS floating-point coprocessor .",
+	   &mipsfpulist);
+  add_alias_cmd ("on", "double", class_support, 1, &mipsfpulist);
+  add_alias_cmd ("yes", "double", class_support, 1, &mipsfpulist);
+  add_alias_cmd ("1", "double", class_support, 1, &mipsfpulist);
+  add_cmd ("none", class_support, set_mipsfpu_none_command,
+	   "Select no MIPS floating-point coprocessor.",
+	   &mipsfpulist);
+  add_alias_cmd ("off", "none", class_support, 1, &mipsfpulist);
+  add_alias_cmd ("no", "none", class_support, 1, &mipsfpulist);
+  add_alias_cmd ("0", "none", class_support, 1, &mipsfpulist);
+  add_cmd ("auto", class_support, set_mipsfpu_auto_command,
+	   "Select MIPS floating-point coprocessor automatically.",
+	   &mipsfpulist);
+  add_cmd ("mipsfpu", class_support, show_mipsfpu_command,
+	   "Show current use of MIPS floating-point coprocessor target.",
+	   &showlist);
 
-#ifndef MIPS_DEFAULT_FPU_TYPE
-  mips_fpu = MIPS_FPU_DOUBLE;
-  mips_fpu_string = strsave ("double");
-#else
-  mips_fpu = MIPS_DEFAULT_FPU_TYPE;
-  switch (mips_fpu) 
-  {
-    case MIPS_FPU_DOUBLE:  mips_fpu_string = strsave ("double");  break;
-    case MIPS_FPU_SINGLE:  mips_fpu_string = strsave ("single");  break;
-    case MIPS_FPU_NONE:    mips_fpu_string = strsave ("none");    break;
-  }    
-#endif
-
+  /* start-sanitize-carp start-sanitize-vr4xxx */
+#if !GDB_MULTI_ARCH
+  /* end-sanitize-carp end-sanitize-vr4xxx */
   c = add_set_cmd ("processor", class_support, var_string_noescape,
 		   (char *) &tmp_mips_processor_type,
 		   "Set the type of MIPS processor in use.\n\
@@ -3384,6 +3462,9 @@ Set this to be able to access processor-type-specific registers.\n\
 
   tmp_mips_processor_type = strsave (DEFAULT_MIPS_TYPE);
   mips_set_processor_type_command (strsave (DEFAULT_MIPS_TYPE), 0);
+  /* start-sanitize-carp start-sanitize-vr4xxx */
+#endif
+  /* end-sanitize-carp end-sanitize-vr4xxx */
 
   /* We really would like to have both "0" and "unlimited" work, but
      command.c doesn't deal with that.  So make it a var_zinteger

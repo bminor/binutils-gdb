@@ -1,3 +1,26 @@
+Fri Dec 18 14:23:34 1998  Andrew Cagney  <cagney@chook>
+
+	* config/mips/tm-mips.h (enum mips_fpu_type, mips_fpu): Move to
+ 	mips-tdep.c.
+
+	* mips-tdep.c (mips_fpu_string): Delete variable.
+	(mips_fpu_type_auto): New variable.
+	(mips_fpu_type): Rename mips_fpu.
+	(_initialize_mips_tdep): Delete initialization of mips_fpu et.al.
+  	Rewrite ``set mipsfpu'' command set.
+	(set_mipsfpu_command, show_mipsfpu_command,
+ 	set_mipsfpu_single_command, set_mipsfpu_double_command,
+ 	set_mipsfpu_none_command, set_mipsfpu_auto_command): New
+ 	functions, handle commands.
+	(mips_push_arguments, mips_push_dummy_frame, mips_pop_frame,
+ 	mips_extract_return_value): Update.
+	(start-sanitize-carp start-sanitize-vr4xxx);
+	(_initialize_mips_tdep): Set mips_fpu_type according to current
+ 	processor.
+	(_initialize_mips_tdep): Only define ``set processor'' command
+ 	when not multi-sim.
+	(end-sanitize-carp end-sanitize-vr4xxx)
+	
 start-sanitize-carp start-sanitize-vr4xxx
 Fri Dec 18 12:56:56 1998  Andrew Cagney  <cagney@chook>
 
