@@ -1,3 +1,18 @@
+2000-08-04  Rodney Brown  <RodneyBrown@pmsc.com>
+
+	* som.c (struct fixup_format): Constify `format'.
+	(som_hppa_howto_table): Use SOM_HOWTO macro.
+	(try_prev_fixup, hppa_som_reloc): Decorate unused parameter.
+	(som_bfd_reloc_type_lookup): Likewise.
+	(compare_subspaces): Remove unused `count1', `count2'.
+	(som_begin_writing): Remove unused `total_reloc_size'.
+	(som_bfd_derive_misc_symbol_info): Decorate unused parameter.
+	(som_print_symbol, som_bfd_is_local_label_name): Likewise.
+	(som_set_reloc_info): Constify `cp'. Remove unused `addend'.
+	(som_find_nearest_line): Decorate unused parameter(s).
+	(som_sizeof_headers, som_get_symbol_info, som_write_armap): Likewise.
+	(som_bfd_link_split_section): Likewise. 
+
 2000-08-03  Nick Clifton  <nickc@cygnus.com>
 
 	* section.c: Restore backed out code.

@@ -382,7 +382,7 @@ static const struct section_to_type stt[] = {
 struct fixup_format
 {
   int D;
-  char *format;
+  const char *format;
 };
 
 static const struct fixup_format som_fixup_formats[256] =
@@ -789,262 +789,262 @@ static const int comp3_opcodes[] =
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
-  {R_ZEROES, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ZEROES"},
-  {R_ZEROES, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ZEROES"},
-  {R_UNINIT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_UNINIT"},
-  {R_UNINIT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_UNINIT"},
-  {R_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RELOCATION"},
-  {R_DATA_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_ONE_SYMBOL"},
-  {R_DATA_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_ONE_SYMBOL"},
-  {R_DATA_PLABEL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_PLABEL"},
-  {R_DATA_PLABEL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_PLABEL"},
-  {R_SPACE_REF, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_SPACE_REF"},
-  {R_REPEATED_INIT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "REPEATED_INIT"},
-  {R_REPEATED_INIT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "REPEATED_INIT"},
-  {R_REPEATED_INIT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "REPEATED_INIT"},
-  {R_REPEATED_INIT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "REPEATED_INIT"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_PCREL_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PCREL_CALL"},
-  {R_SHORT_PCREL_MODE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_SHORT_PCREL_MODE"},
-  {R_LONG_PCREL_MODE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_LONG_PCREL_MODE"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_ABS_CALL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ABS_CALL"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_DP_RELATIVE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DP_RELATIVE"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_DLT_REL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DLT_REL"},
-  {R_DLT_REL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DLT_REL"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_CODE_ONE_SYMBOL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_ONE_SYMBOL"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_MILLI_REL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_MILLI_REL"},
-  {R_MILLI_REL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_MILLI_REL"},
-  {R_CODE_PLABEL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_PLABEL"},
-  {R_CODE_PLABEL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_PLABEL"},
-  {R_BREAKPOINT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_BREAKPOINT"},
-  {R_ENTRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ENTRY"},
-  {R_ENTRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ENTRY"},
-  {R_ALT_ENTRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_ALT_ENTRY"},
-  {R_EXIT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_EXIT"},
-  {R_BEGIN_TRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_BEGIN_TRY"},
-  {R_END_TRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_END_TRY"},
-  {R_END_TRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_END_TRY"},
-  {R_END_TRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_END_TRY"},
-  {R_BEGIN_BRTAB, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_BEGIN_BRTAB"},
-  {R_END_BRTAB, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_END_BRTAB"},
-  {R_STATEMENT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_STATEMENT"},
-  {R_STATEMENT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_STATEMENT"},
-  {R_STATEMENT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_STATEMENT"},
-  {R_DATA_EXPR, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_EXPR"},
-  {R_CODE_EXPR, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_CODE_EXPR"},
-  {R_FSEL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_FSEL"},
-  {R_LSEL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_LSEL"},
-  {R_RSEL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RSEL"},
-  {R_N_MODE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_N_MODE"},
-  {R_S_MODE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_S_MODE"},
-  {R_D_MODE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_D_MODE"},
-  {R_R_MODE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_R_MODE"},
-  {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
-  {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
-  {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
-  {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
-  {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
-  {R_TRANSLATED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_TRANSLATED"},
-  {R_AUX_UNWIND, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_AUX_UNWIND"},
-  {R_COMP1, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_COMP1"},
-  {R_COMP2, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_COMP2"},
-  {R_COMP3, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_COMP3"},
-  {R_PREV_FIXUP, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PREV_FIXUP"},
-  {R_PREV_FIXUP, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PREV_FIXUP"},
-  {R_PREV_FIXUP, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PREV_FIXUP"},
-  {R_PREV_FIXUP, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PREV_FIXUP"},
-  {R_SEC_STMT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_SEC_STMT"},
-  {R_N0SEL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_N0SEL"},
-  {R_N1SEL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_N1SEL"},
-  {R_LINETAB, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_LINETAB"},
-  {R_LINETAB_ESC, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_LINETAB_ESC"},
-  {R_LTP_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_LTP_OVERRIDE"},
-  {R_COMMENT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_COMMENT"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"}};
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_NO_RELOCATION, "R_NO_RELOCATION"),
+  SOM_HOWTO (R_ZEROES, "R_ZEROES"),
+  SOM_HOWTO (R_ZEROES, "R_ZEROES"),
+  SOM_HOWTO (R_UNINIT, "R_UNINIT"),
+  SOM_HOWTO (R_UNINIT, "R_UNINIT"),
+  SOM_HOWTO (R_RELOCATION, "R_RELOCATION"),
+  SOM_HOWTO (R_DATA_ONE_SYMBOL, "R_DATA_ONE_SYMBOL"),
+  SOM_HOWTO (R_DATA_ONE_SYMBOL, "R_DATA_ONE_SYMBOL"),
+  SOM_HOWTO (R_DATA_PLABEL, "R_DATA_PLABEL"),
+  SOM_HOWTO (R_DATA_PLABEL, "R_DATA_PLABEL"),
+  SOM_HOWTO (R_SPACE_REF, "R_SPACE_REF"),
+  SOM_HOWTO (R_REPEATED_INIT, "REPEATED_INIT"),
+  SOM_HOWTO (R_REPEATED_INIT, "REPEATED_INIT"),
+  SOM_HOWTO (R_REPEATED_INIT, "REPEATED_INIT"),
+  SOM_HOWTO (R_REPEATED_INIT, "REPEATED_INIT"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_PCREL_CALL, "R_PCREL_CALL"),
+  SOM_HOWTO (R_SHORT_PCREL_MODE, "R_SHORT_PCREL_MODE"),
+  SOM_HOWTO (R_LONG_PCREL_MODE, "R_LONG_PCREL_MODE"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_ABS_CALL, "R_ABS_CALL"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_DLT_REL, "R_DLT_REL"),
+  SOM_HOWTO (R_DLT_REL, "R_DLT_REL"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_CODE_ONE_SYMBOL, "R_CODE_ONE_SYMBOL"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_MILLI_REL, "R_MILLI_REL"),
+  SOM_HOWTO (R_MILLI_REL, "R_MILLI_REL"),
+  SOM_HOWTO (R_CODE_PLABEL, "R_CODE_PLABEL"),
+  SOM_HOWTO (R_CODE_PLABEL, "R_CODE_PLABEL"),
+  SOM_HOWTO (R_BREAKPOINT, "R_BREAKPOINT"),
+  SOM_HOWTO (R_ENTRY, "R_ENTRY"),
+  SOM_HOWTO (R_ENTRY, "R_ENTRY"),
+  SOM_HOWTO (R_ALT_ENTRY, "R_ALT_ENTRY"),
+  SOM_HOWTO (R_EXIT, "R_EXIT"),
+  SOM_HOWTO (R_BEGIN_TRY, "R_BEGIN_TRY"),
+  SOM_HOWTO (R_END_TRY, "R_END_TRY"),
+  SOM_HOWTO (R_END_TRY, "R_END_TRY"),
+  SOM_HOWTO (R_END_TRY, "R_END_TRY"),
+  SOM_HOWTO (R_BEGIN_BRTAB, "R_BEGIN_BRTAB"),
+  SOM_HOWTO (R_END_BRTAB, "R_END_BRTAB"),
+  SOM_HOWTO (R_STATEMENT, "R_STATEMENT"),
+  SOM_HOWTO (R_STATEMENT, "R_STATEMENT"),
+  SOM_HOWTO (R_STATEMENT, "R_STATEMENT"),
+  SOM_HOWTO (R_DATA_EXPR, "R_DATA_EXPR"),
+  SOM_HOWTO (R_CODE_EXPR, "R_CODE_EXPR"),
+  SOM_HOWTO (R_FSEL, "R_FSEL"),
+  SOM_HOWTO (R_LSEL, "R_LSEL"),
+  SOM_HOWTO (R_RSEL, "R_RSEL"),
+  SOM_HOWTO (R_N_MODE, "R_N_MODE"),
+  SOM_HOWTO (R_S_MODE, "R_S_MODE"),
+  SOM_HOWTO (R_D_MODE, "R_D_MODE"),
+  SOM_HOWTO (R_R_MODE, "R_R_MODE"),
+  SOM_HOWTO (R_DATA_OVERRIDE, "R_DATA_OVERRIDE"),
+  SOM_HOWTO (R_DATA_OVERRIDE, "R_DATA_OVERRIDE"),
+  SOM_HOWTO (R_DATA_OVERRIDE, "R_DATA_OVERRIDE"),
+  SOM_HOWTO (R_DATA_OVERRIDE, "R_DATA_OVERRIDE"),
+  SOM_HOWTO (R_DATA_OVERRIDE, "R_DATA_OVERRIDE"),
+  SOM_HOWTO (R_TRANSLATED, "R_TRANSLATED"),
+  SOM_HOWTO (R_AUX_UNWIND, "R_AUX_UNWIND"),
+  SOM_HOWTO (R_COMP1, "R_COMP1"),
+  SOM_HOWTO (R_COMP2, "R_COMP2"),
+  SOM_HOWTO (R_COMP3, "R_COMP3"),
+  SOM_HOWTO (R_PREV_FIXUP, "R_PREV_FIXUP"),
+  SOM_HOWTO (R_PREV_FIXUP, "R_PREV_FIXUP"),
+  SOM_HOWTO (R_PREV_FIXUP, "R_PREV_FIXUP"),
+  SOM_HOWTO (R_PREV_FIXUP, "R_PREV_FIXUP"),
+  SOM_HOWTO (R_SEC_STMT, "R_SEC_STMT"),
+  SOM_HOWTO (R_N0SEL, "R_N0SEL"),
+  SOM_HOWTO (R_N1SEL, "R_N1SEL"),
+  SOM_HOWTO (R_LINETAB, "R_LINETAB"),
+  SOM_HOWTO (R_LINETAB_ESC, "R_LINETAB_ESC"),
+  SOM_HOWTO (R_LTP_OVERRIDE, "R_LTP_OVERRIDE"),
+  SOM_HOWTO (R_COMMENT, "R_COMMENT"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED"),
+  SOM_HOWTO (R_RESERVED, "R_RESERVED")};
   
 /* Initialize the SOM relocation queue.  By definition the queue holds
    the last four multibyte fixups.  */
@@ -1158,7 +1158,7 @@ som_reloc_queue_find (p, size, queue)
 
 static unsigned char *
 try_prev_fixup (abfd, subspace_reloc_sizep, p, size, queue)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      int *subspace_reloc_sizep;
      unsigned char *p;
      unsigned int size;
@@ -1432,13 +1432,13 @@ log2 (x)
 static bfd_reloc_status_type
 hppa_som_reloc (abfd, reloc_entry, symbol_in, data,
 		input_section, output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
-     asymbol *symbol_in;
-     PTR data;
+     asymbol *symbol_in ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd)
     {
@@ -1721,7 +1721,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff, sym)
 /*ARGSUSED*/
 static reloc_howto_type *
 som_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   if ((int) code < (int) R_NO_RELOCATION + 255)
@@ -2539,7 +2539,6 @@ compare_subspaces (arg1, arg2)
 {
   asection **subspace1 = (asection **) arg1;
   asection **subspace2 = (asection **) arg2;
-  unsigned int count1, count2;
   
   if ((*subspace1)->target_index < (*subspace2)->target_index)
     return -1;
@@ -3280,7 +3279,6 @@ som_begin_writing (abfd)
 {
   unsigned long current_offset = 0;
   int strings_size = 0;
-  unsigned int total_reloc_size = 0;
   unsigned long num_spaces, num_subspaces, i;
   asection *section;
   unsigned int total_subspaces = 0;
@@ -3947,7 +3945,7 @@ som_compute_checksum (abfd)
 
 static void
 som_bfd_derive_misc_symbol_info (abfd, sym, info)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asymbol *sym;
      struct som_misc_symbol_info *info;
 {
@@ -4478,7 +4476,7 @@ som_make_empty_symbol (abfd)
 
 static void
 som_print_symbol (ignore_abfd, afile, symbol, how)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -4507,7 +4505,7 @@ som_print_symbol (ignore_abfd, afile, symbol, how)
 
 static boolean
 som_bfd_is_local_label_name (abfd, name)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
 {
   return (name[0] == 'L' && name[1] == '$');
@@ -4538,7 +4536,7 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
   unsigned int op, varname, deallocate_contents = 0;
   unsigned char *end_fixups = &fixup[end];
   const struct fixup_format *fp;
-  char *cp;
+  const char *cp;
   unsigned char *save_fixup;
   int variables[26], stack[20], c, v, count, prev_fixup, *sp, saved_unwind_bits;
   const int *subop;
@@ -4816,8 +4814,6 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 		;
 	      else if (som_hppa_howto_table[op].type == R_DATA_ONE_SYMBOL)
 		{
-		  unsigned addend = var ('V');
-
 		  /* Try what was specified in R_DATA_OVERRIDE first
 		     (if anything).  Then the hard way using the
 		     section contents.  */
@@ -5316,21 +5312,21 @@ som_set_arch_mach (abfd, arch, machine)
 static boolean
 som_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 			functionname_ptr, line_ptr)
-     bfd *abfd;
-     asection *section;
-     asymbol **symbols;
-     bfd_vma offset;
-     CONST char **filename_ptr;
-     CONST char **functionname_ptr;
-     unsigned int *line_ptr;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     asymbol **symbols ATTRIBUTE_UNUSED;
+     bfd_vma offset ATTRIBUTE_UNUSED;
+     CONST char **filename_ptr ATTRIBUTE_UNUSED;
+     CONST char **functionname_ptr ATTRIBUTE_UNUSED;
+     unsigned int *line_ptr ATTRIBUTE_UNUSED;
 {
   return (false);
 }
 
 static int
 som_sizeof_headers (abfd, reloc)
-     bfd *abfd;
-     boolean reloc;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean reloc ATTRIBUTE_UNUSED;
 {
   (*_bfd_error_handler) (_("som_sizeof_headers unimplemented"));
   fflush (stderr);
@@ -5387,7 +5383,7 @@ som_decode_symclass (symbol)
 
 static void
 som_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -6076,9 +6072,9 @@ static boolean
 som_write_armap (abfd, elength, map, orl_count, stridx)
      bfd *abfd;
      unsigned int elength;
-     struct orl *map;
-     unsigned int orl_count;
-     int stridx;
+     struct orl *map ATTRIBUTE_UNUSED;
+     unsigned int orl_count ATTRIBUTE_UNUSED;
+     int stridx ATTRIBUTE_UNUSED;
 {
   bfd *curr_bfd;
   struct stat statbuf;
@@ -6230,7 +6226,7 @@ som_bfd_free_cached_info (abfd)
 /* Linker support functions.  */
 static boolean
 som_bfd_link_split_section (abfd, sec)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
 {
   return (som_is_subspace (sec) && sec->_raw_size > 240000);
