@@ -1,5 +1,8 @@
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
+	* objdump.c (dump_section_header): Update for renaming of
+	SEC_SHORT to SEC_SMALL_DATA.  Print SEC_SHARED flag.
+
 	From Eli Zaretskii <eliz@gnu.org>:
 	* binutils.texi: Document cxxfilt as MS-DOS name for c++filt.
 
