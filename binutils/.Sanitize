@@ -64,7 +64,6 @@ ranlib.sh
 sanity.sh
 size.1
 size.c
-sparc-pinsn.c
 strip.1
 version.c
 
