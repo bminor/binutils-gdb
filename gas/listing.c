@@ -92,11 +92,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 */
 
 #include "as.h"
-<<<<<<< listing.c
-#include <ansidecl.h>
-=======
-
->>>>>>> 1.13
 #include <obstack.h>
 #include "input-file.h"
 #include "targ-cpu.h"
@@ -342,6 +337,9 @@ DEFUN(buffer_line,(file, line, size),
   {
     return "";
   }
+
+  if (file->linenum == 0)
+   rewind(file->file);
 
   if (file->end_pending == 10) {
       *p ++ = '\n';
@@ -867,6 +865,8 @@ DEFUN_VOID(listing_eject)
 void
 DEFUN_VOID(listing_flags)
 {
+  while ( (*input_line_pointer++) && (*input_line_pointer != '\n') )
+   input_line_pointer++;
   
 }
 void

@@ -120,6 +120,12 @@ sysv32)
 	emulation=sysv32
 	;;
 
+sim)	
+	obj_format=coffbfd
+	need_bfd="./../bfd/libbfd.a"
+	;;
+
+
 coff* | sysv*)
 	obj_format=coff
 

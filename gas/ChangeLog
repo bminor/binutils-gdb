@@ -1,3 +1,8 @@
+Tue Aug 25 15:13:48 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* listing.c (buffer_line): rewind to the start of include
+	files, they might be included twice.
+
 Mon Aug 24 12:45:43 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: defined TARGET_CPU for C code so that it can choose
@@ -141,6 +146,7 @@ Tue Jun 30 20:25:54 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
 
 	* Makefile.in: Add program_suffix (parallel to program_prefix)
 
+>>>>>>> 1.83
 Wed Jun 24 10:57:54 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* app.c (process_escape): new function to handle escapes the right
