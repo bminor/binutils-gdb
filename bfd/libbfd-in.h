@@ -25,7 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(String) dgettext (PACKAGE, String)
+/*  FIXME: We might want to use dgettext instead, in some cases.
+    This is still under investigation.  */
+#define _(String) gettext (String)
 #ifdef gettext_noop
 #define N_(String) gettext_noop (String)
 #else
