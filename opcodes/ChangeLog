@@ -1,3 +1,7 @@
+2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* mips-dis.c (is_newabi): EABI is not a NewABI.
+
 2002-05-13  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.in (shle-*-*elf*): Include sh64 support.

@@ -407,10 +407,8 @@ is_newabi (header)
   if (header->e_ident[EI_CLASS] == ELFCLASS64)
     return 1;
 
-  /* If a 32-bit ELF file, N32, EABI32, and EABI64 are new-style ABIs.  */
-  if ((header->e_flags & EF_MIPS_ABI2) != 0
-      || (header->e_flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI32
-      || (header->e_flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI64)
+  /* If a 32-bit ELF file, n32 is a new-style ABI.  */
+  if ((header->e_flags & EF_MIPS_ABI2) != 0)
     return 1;
 
   return 0;
