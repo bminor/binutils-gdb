@@ -253,7 +253,6 @@
 	relaxable_symbol.
 	* config/tc-m68k.h (TC_COFF_FIX2RTYPE): Tweak param name.
 	(TC_RELOC_RTSYM_LOC_FIXUP): Don't define.
-	(TC_FORCE_RELOCATION_LOCAL): Define this instead.
 	(TC_FIX_ADJUSTABLE): Don't define.
 	(EXTERN_FORCE_RELOC): Define.
 	(MD_APPLY_SYM_VALUE): Define.
@@ -437,11 +436,11 @@
 	(md_apply_fix3): Likewise.
 	(v850_force_relocation): Likewise.
 	(v850_comm): Change the current section.
-	(md_assemble):  Ensure that the	correct value is put in the
+	(md_assemble):  Ensure that the correct value is put in the
 	fixup.
 	(v850_sdata, v850_tdata, v850_zdata, v850_sbss, v850_tbss,
 	v850_zbss, v850_rosdata, v850_rozdata): Fix section book keeping.
-        Remove redundant v850ea support.
+	Remove redundant v850ea support.
 	* tc-v850.h (HANDLE_ALIGN): Define.
 	(v850_handle_align): Declare.
 	* doc/c-v850.c: Document -mrelax, .longcall and .longjump.
