@@ -22,14 +22,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef _ELF_MN10300_H
 #define _ELF_MN10300_H
 
-/* Relocations.  */
-#define R_MN10300_NONE		0
-#define R_MN10300_32		1
-#define R_MN10300_16		2
-#define R_MN10300_8		3
-#define R_MN10300_PCREL32	4
-#define R_MN10300_PCREL16	5
-#define R_MN10300_PCREL8	6
+/* Relocations.  Keep this list sorted wrt the numeric value.  */
+START_RELOC_NUMBERS (elf_mn10300_reloc_type)
+  RELOC_NUMBER (R_MN10300_NONE, 0)
+  RELOC_NUMBER (R_MN10300_32, 1)
+  RELOC_NUMBER (R_MN10300_16, 2)
+  RELOC_NUMBER (R_MN10300_8, 3)
+  RELOC_NUMBER (R_MN10300_PCREL32, 4)
+  RELOC_NUMBER (R_MN10300_PCREL16, 5)
+  RELOC_NUMBER (R_MN10300_PCREL8, 6)
+  RELOC_NUMBER (R_MN10300_GNU_VTINHERIT, 7)
+  RELOC_NUMBER (R_MN10300_GNU_VTENTRY, 8)
+END_RELOC_NUMBERS
 
 /* Machine variant if we know it.  This field was invented at Cygnus,
    but it is hoped that other vendors will adopt it.  If some standard
