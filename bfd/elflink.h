@@ -4314,9 +4314,6 @@ elf_bfd_final_link (abfd, info)
   /* Adjust the relocs to have the correct symbol indices.  */
   for (o = abfd->sections; o != NULL; o = o->next)
     {
-      struct elf_link_hash_entry **rel_hash;
-      Elf_Internal_Shdr *rel_hdr;
-
       if ((o->flags & SEC_RELOC) == 0)
 	continue;
 

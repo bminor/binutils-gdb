@@ -1,3 +1,8 @@
+1999-07-19  Andreas Schwab  <schwab@suse.de>
+
+	* elflink.h (elf_bfd_final_link): Remove unused variables rel_hash
+	and rel_hdr.
+
 Sat Jul 17 02:28:28 1999  Mark P. Mitchell  <mark@codesourcery.com>
 
 	* elflink.h (elf_link_adjust_relocs): New function.
