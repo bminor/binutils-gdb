@@ -26,7 +26,8 @@
 
 #include "bfd.h"
 #include "sim-main.h"
-
+#include "sim-utils.h"
+#include "sim-options.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -51,10 +52,6 @@ struct sim_state simulation = { 0 };
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, char **argv)
 {
-  /*FIXME - later make these configurable */
-  static void *eit_ram;
-  static int sizeof_eit_ram = 0x1000;
-
   STATE_OPEN_KIND (&simulation) = kind;
 
   /* establish the simulator configuration */

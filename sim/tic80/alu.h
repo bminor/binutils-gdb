@@ -15,14 +15,20 @@
 
 /* Bring data in from the cold */
 
-#define IMEM(EA) sim_core_read_4(sd, sim_core_execute_map, (EA))
+#define IMEM(EA) \
+(sim_core_read_4(sd, sim_core_execute_map, (EA), \
+ STATE_CPU (sd, 0), cia))
 
 #define MEM(SIGN, EA, NR_BYTES) \
-((SIGN##_##NR_BYTES) sim_core_read_##NR_BYTES (SD, sim_core_read_map, (EA) & ~(NR_BYTES - 1)))
+((SIGN##_##NR_BYTES) sim_core_read_##NR_BYTES (SD, sim_core_read_map, \
+                                               (EA) & ~(NR_BYTES - 1), \
+                                               STATE_CPU (sd, 0), cia))
 
 #define STORE(EA, NR_BYTES, VAL) \
 do { \
-  sim_core_write_##NR_BYTES (SD, sim_core_write_map, (EA) & ~(NR_BYTES - 1), (VAL)); \
+  sim_core_write_##NR_BYTES (SD, sim_core_write_map, \
+                             (EA) & ~(NR_BYTES - 1), (VAL), \
+                             STATE_CPU (sd, 0), cia); \
 } while (0)
 
 

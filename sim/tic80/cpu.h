@@ -20,12 +20,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 
-typedef struct _sim_cpu {
+struct _sim_cpu {
   unsigned32 reg[32];
   unsigned64 acc[4];
-  instruction_address cia;
+  sim_cia cia;
   sim_cpu_base base;
-} sim_cpu;
+};
 
 #define GPR(N) ((CPU)->reg[N])
 #define ACC(N) ((CPU)->acc[N])

@@ -27,6 +27,14 @@
 
 #include <signal.h>
 
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+
 void
 engine_init (SIM_DESC sd)
 {

@@ -1,3 +1,22 @@
+Fri May  2 14:57:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c: Include sim-utils.h and sim-options.h.
+
+	* sim-main.h (sim_state): Drop sim_events and sim_core members,
+ 	moved to simulator base type.
+
+	* alu.h (IMEM, MEM, STORE): Update track changes in common
+ 	directory.
+
+	* insns: Drop cia argument from functions, igen now handles this.
+
+	* interp.c (engine_init): Include string.h/strings.h to define
+ 	memset et.al.
+
+	* sim-main.h (sim_cia): Delcare, tracking common dir changes.
+
+	* cpu.h (sim_cpu): Update instruction_address with sim_cia.
+
 Wed Apr 30 11:26:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (signal.h): Include so that SIG* available to all

@@ -24,31 +24,25 @@
 #define _SIM_MAIN_H_
 
 #include "sim-basics.h"
-#include "sim-inline.h"
-#include "sim-types.h"
-#include "sim-bits.h"
-#include "sim-endian.h"
+
+#include <signal.h>
 
 /* These are generated files.  */
 #include "itable.h"
 #include "idecode.h"
 #include "idecode.h"
 
+typedef instruction_address sim_cia;
+static const sim_cia null_cia = {0}; /* Dummy */
+#define NULL_CIA null_cia
+
+#include "sim-base.h"
+
 #include "cpu.h"
 #include "alu.h"
 
-#include "sim-core.h"
-#include "sim-events.h"
-#include "sim-io.h"
-
 
 struct sim_state {
-
-  /* real time */
-  sim_events events;
-
-  /* memory and IO */
-  sim_core core;
 
   /* escape route for inner functions */
   int halt_ok;

@@ -75,7 +75,7 @@ void::function::do_and:signed32 *rDest, signed32 Source1, signed32 Source2
 
 
 // bbo.[a]
-instruction_address::function::do_bbo:instruction_address cia, instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
+instruction_address::function::do_bbo:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
 	if (MASKED32 (source, bitnum, bitnum))
 	  {
 	    if (annul)
@@ -84,16 +84,16 @@ instruction_address::function::do_bbo:instruction_address cia, instruction_addre
 	  }
 	return nia;
 31.BITNUM,26.Source,21.0b100101,15.A,14.SignedOffset::::bbo i
-	nia = do_bbo (_SD, cia, nia, BITNUM, rSource, A, vSignedOffset);
+	nia = do_bbo (_SD, nia, BITNUM, rSource, A, vSignedOffset);
 31.BITNUM,26.Source,21.0b11100101,13.A,12.0,11./,4.IndOff::::bbo r
-	nia = do_bbo (_SD, cia, nia, BITNUM, rSource, A, rIndOff);
+	nia = do_bbo (_SD, nia, BITNUM, rSource, A, rIndOff);
 31.BITNUM,26.Source,21.0b11100101,13.A,12.1,11./::::bbo l
 	long_immediate (LongSignedImmediate);
-	nia = do_bbo (_SD, cia, nia, BITNUM, rSource, A, LongSignedImmediate);
+	nia = do_bbo (_SD, nia, BITNUM, rSource, A, LongSignedImmediate);
 
 
 // bbz[.a]
-instruction_address::function::do_bbz:instruction_address cia, instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
+instruction_address::function::do_bbz:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
 	if (!MASKED32 (source, bitnum, bitnum))
 	  {
 	    if (annul)
@@ -102,16 +102,16 @@ instruction_address::function::do_bbz:instruction_address cia, instruction_addre
 	  }
 	return nia;
 31.BITNUM,26.Source,21.0b100100,15.A,14.SignedOffset::::bbz i
-	nia = do_bbz (_SD, cia, nia, BITNUM, rSource, A, vSignedOffset);
+	nia = do_bbz (_SD, nia, BITNUM, rSource, A, vSignedOffset);
 31.BITNUM,26.Source,21.0b11100100,13.A,12.0,11./,4.IndOff::::bbz r
-	nia = do_bbz (_SD, cia, nia, BITNUM, rSource, A, rIndOff);
+	nia = do_bbz (_SD, nia, BITNUM, rSource, A, rIndOff);
 31.BITNUM,26.Source,21.0b11100100,13.A,12.1,11./::::bbz l
 	long_immediate (LongSignedImmediate);
-	nia = do_bbz (_SD, cia, nia, BITNUM, rSource, A, LongSignedImmediate);
+	nia = do_bbz (_SD, nia, BITNUM, rSource, A, LongSignedImmediate);
 
 
 // bcnd[.a]
-instruction_address::function::do_bcnd:instruction_address cia, instruction_address nia, int Cond, unsigned32 source, int annul, unsigned32 offset
+instruction_address::function::do_bcnd:instruction_address nia, int Cond, unsigned32 source, int annul, unsigned32 offset
 	int condition;
 	int size = EXTRACTED32 (Cond, 31 - 27, 30 - 27);
 	int code = EXTRACTED32 (Cond, 29 - 27, 27 - 27);
@@ -142,12 +142,12 @@ instruction_address::function::do_bcnd:instruction_address cia, instruction_addr
 	  }
 	return nia;
 31.Code,26.Source,21.0b100110,15.A,14.SignedOffset::::bcnd i
-	nia = do_bcnd (_SD, cia, nia, Code, rSource, A, vSignedOffset);
+	nia = do_bcnd (_SD, nia, Code, rSource, A, vSignedOffset);
 31.Code,26.Source,21.0b11100110,13.A,12.0,11./,4.IndOff::::bcnd r
-	nia = do_bcnd (_SD, cia, nia, Code, rSource, A, rIndOff);
+	nia = do_bcnd (_SD, nia, Code, rSource, A, rIndOff);
 31.Code,26.Source,21.0b11100110,13.A,12.1,11./::::bcnd l
 	long_immediate (LongSignedImmediate);
-	nia = do_bcnd (_SD, cia, nia, Code, rSource, A, LongSignedImmediate);
+	nia = do_bcnd (_SD, nia, Code, rSource, A, LongSignedImmediate);
 
 
 // br[.a] - see bbz[.a]
@@ -165,7 +165,7 @@ instruction_address::function::do_bcnd:instruction_address cia, instruction_addr
 
 
 // bsr[.a]
-instruction_address::function::do_bsr:instruction_address cia, instruction_address nia, signed32 *rLink, int annul, unsigned32 offset
+instruction_address::function::do_bsr:instruction_address nia, signed32 *rLink, int annul, unsigned32 offset
 	if (annul)
 	  {
 	    *rLink = nia.ip;
@@ -176,12 +176,12 @@ instruction_address::function::do_bsr:instruction_address cia, instruction_addre
 	nia.dp = cia.ip + 4 * offset;
 	return nia;
 31.Link,26./,21.0b100000,15.A,14.SignedOffset::::bsr i
-	nia = do_bsr (_SD, cia, nia, rLink, A, vSignedOffset);
+	nia = do_bsr (_SD, nia, rLink, A, vSignedOffset);
 31.Link,26./,21.0b11100000,13.A,12.0,11./,4.IndOff::::bsr r
-	nia = do_bsr (_SD, cia, nia, rLink, A, rIndOff);
+	nia = do_bsr (_SD, nia, rLink, A, rIndOff);
 31.Link,26./,21.0b11100000,13.A,12.1,11./::::bsr l
 	long_immediate (LongSignedImmediate);
-	nia = do_bsr (_SD, cia, nia, rLink, A, LongSignedImmediate);
+	nia = do_bsr (_SD, nia, rLink, A, LongSignedImmediate);
 
 
 // cmnd
@@ -236,33 +236,33 @@ void::function::do_cmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 
 
 // dld[{.b|.h|.d}]
-void::function::do_dld:instruction_address cia, int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
-	do_ld (_SD, cia, Dest, Base, rBase, m, sz, S, Offset);
+void::function::do_dld:int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+	do_ld (_SD, Dest, Base, rBase, m, sz, S, Offset);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dld r
-	do_dld (_SD, cia, Dest, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_dld (_SD, Dest, rBase, &GPR(Base), m, sz, S, rIndOff);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.1,11.S,10.1,9./::::dld l
 	long_immediate (LongSignedImmediateOffset);
-	do_dld (_SD, cia, Dest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_dld (_SD, Dest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // dld.u[{.b|.h|.d}]
-void::function::do_dld_u:instruction_address cia, unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
-	do_ld_u (_SD, cia, rDest, Base, rBase, m, sz, S, Offset);
+void::function::do_dld_u:unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+	do_ld_u (_SD, rDest, Base, rBase, m, sz, S, Offset);
 31.Dest,26.Base,21.0b110101,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dld.u r
-	do_dld_u (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_dld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, rIndOff);
 31.Dest,26.Base,21.0b110101,15.m,14.sz,12.1,11.S,10.1,9./::::dld.u l
 	long_immediate (LongSignedImmediateOffset);
-	do_dld_u (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_dld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // dst[{.b|.h|.d}]
-void::function::do_dst:instruction_address cia, int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
-	do_st (_SD, cia, Source, Base, rBase, m, sz, S, Offset);
+void::function::do_dst:int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+	do_st (_SD, Source, Base, rBase, m, sz, S, Offset);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dst r
-	do_dst (_SD, cia, Source, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_dst (_SD, Source, rBase, &GPR(Base), m, sz, S, rIndOff);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.1,11.S,10.1,9./::::dst l
 	long_immediate (LongSignedImmediateOffset);
-	do_dst (_SD, cia, Source, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_dst (_SD, Source, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // estop
@@ -380,7 +380,7 @@ void::function::do_dst:instruction_address cia, int Source, unsigned32 Base, uns
 
 
 // jsr[.a]
-instruction_address::function::do_jsr:instruction_address cia, instruction_address nia, signed32 *rLink, int annul, unsigned32 offset, unsigned32 base
+instruction_address::function::do_jsr:instruction_address nia, signed32 *rLink, int annul, unsigned32 offset, unsigned32 base
 	if (annul)
 	  {
 	    *rLink = nia.ip;
@@ -394,16 +394,16 @@ instruction_address::function::do_jsr:instruction_address cia, instruction_addre
 	                (unsigned long) nia.dp);
 	return nia;
 31.Link,26.Base,21.0b100010,15.A,14.SignedOffset::::jsr i
-	nia = do_jsr (_SD, cia, nia, rLink, A, vSignedOffset, rBase);
+	nia = do_jsr (_SD, nia, rLink, A, vSignedOffset, rBase);
 31.Link,26.Base,21.0b11100010,13.A,12.0,11./,4.Source1::::jsr r
-	nia = do_jsr (_SD, cia, nia, rLink, A, rSource1, rBase);
+	nia = do_jsr (_SD, nia, rLink, A, rSource1, rBase);
 31.Link,26.Base,21.0b11100010,13.A,12.1,11./::::jsr l
 	long_immediate (LongSignedImmediate);
-	nia = do_jsr (_SD, cia, nia, rLink, A, LongSignedImmediate, rBase);
+	nia = do_jsr (_SD, nia, rLink, A, LongSignedImmediate, rBase);
 
 
 // ld[{.b.h.d}]
-void::function::do_ld:instruction_address cia, int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+void::function::do_ld:int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
 	unsigned32 addr;
 	switch (sz)
 	  {
@@ -439,16 +439,16 @@ void::function::do_ld:instruction_address cia, int Dest, unsigned32 Base, unsign
 	    engine_error (SD, CPU, cia, "ld - invalid sz %d", sz);
 	  }
 31.Dest,26.Base,21.0b0100,17.m,16.sz,14.SignedOffset::::ld i
-	do_ld (_SD, cia, Dest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+	do_ld (_SD, Dest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::ld r
-	do_ld (_SD, cia, Dest, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_ld (_SD, Dest, rBase, &GPR(Base), m, sz, S, rIndOff);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.1,11.S,10.0,9./::::ld l
 	long_immediate (LongSignedImmediateOffset);
-	do_ld (_SD, cia, Dest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_ld (_SD, Dest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // ld.u[{.b.h.d}]
-void::function::do_ld_u:instruction_address cia, unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+void::function::do_ld_u:unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
 	unsigned32 addr;
 	switch (sz)
 	  {
@@ -467,12 +467,12 @@ void::function::do_ld_u:instruction_address cia, unsigned32 *rDest, unsigned32 B
 	if (m)
 	  *rBase = addr;
 31.Dest,26.Base,21.0b0101,17.m,16.sz,14.SignedOffset::::ld.u i
-	do_ld_u (_SD, cia, rDest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+	do_ld_u (_SD, rDest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
 31.Dest,26.Base,21.0b110101,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::ld.u r
-	do_ld_u (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_ld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, rIndOff);
 31.Dest,26.Base,21.0b110101,15.m,14.sz,12.1,11.S,10.0,9./::::ld.u l
 	long_immediate (LongSignedImmediateOffset);
-	do_ld_u (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_ld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // lmo
@@ -527,16 +527,16 @@ void::function::do_or:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 
 
 // rdcr
-void::function::do_rdcr:instruction_address cia, unsigned32 Dest, int cr
+void::function::do_rdcr:unsigned32 Dest, int cr
 	if (Dest != 0)
 	  engine_error (SD, CPU, cia, "rdcr unimplement");
 31.Dest,26.0,21.0b0000100,14.UCRN::::rdcr i
-	do_rdcr (_SD, cia, Dest, UCRN);
+	do_rdcr (_SD, Dest, UCRN);
 31.Dest,26.0,21.0b110000100,12.0,11./,4.INDCR::::rdcr r
-	do_rdcr (_SD, cia, Dest, UCRN);
+	do_rdcr (_SD, Dest, UCRN);
 31.Dest,26.0,21.0b110000100,12.1,11./::::rdcr l
 	long_immediate (UnsignedControlRegisterNumber);
-	do_rdcr (_SD, cia, Dest, UnsignedControlRegisterNumber);
+	do_rdcr (_SD, Dest, UnsignedControlRegisterNumber);
 
 
 // rmo
@@ -553,7 +553,7 @@ void::function::do_rdcr:instruction_address cia, unsigned32 Dest, int cr
 
 
 // sl.{d|e|i}{m|s|z}
-void::function::do_shift:instruction_address cia, int Dest, int Source, int Merge, int i, int n, int EndMask, int Rotate
+void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndMask, int Rotate
 	/* see 10-30 for a reasonable description */
 	unsigned32 rotated;
 	unsigned32 endmask;
@@ -624,7 +624,7 @@ void::function::do_shift:instruction_address cia, int Dest, int Source, int Merg
 
 	  }
 31.Dest,26.Source,21.0b0001,17.Merge,14./,11.i,10.n,9.EndMask,4.Rotate::::sl i
-	do_shift (_SD, cia, Dest, Source, Merge, i, n, EndMask, Rotate);
+	do_shift (_SD, Dest, Source, Merge, i, n, EndMask, Rotate);
 31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.i,10.n,9.EndMask,4.RotReg::::sl r
 	int endmask;
 	if (EndMask == 0)
@@ -637,7 +637,7 @@ void::function::do_shift:instruction_address cia, int Dest, int Source, int Merg
 	                    cia.ip, Source);
 	    endmask = GPR (Source + 1) & 31;
 	  }
-	do_shift (_SD, cia, Dest, Source, Merge, i, n, endmask, GPR (RotReg) & 31);
+	do_shift (_SD, Dest, Source, Merge, i, n, endmask, GPR (RotReg) & 31);
 
 
 // sli.{d|e|i}{m|s|z}
@@ -662,7 +662,7 @@ void::function::do_shift:instruction_address cia, int Dest, int Source, int Merg
 
 
 // st[{.b|.h|.d}]
-void::function::do_st:instruction_address cia, int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+void::function::do_st:int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
 	unsigned32 addr;
 	switch (sz)
 	  {
@@ -692,12 +692,12 @@ void::function::do_st:instruction_address cia, int Source, unsigned32 Base, unsi
 	if (m)
 	  *rBase = addr;
 31.Source,26.Base,21.0b0110,17.m,16.sz,14.SignedOffset::::st i
-	do_st (_SD, cia, Source, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+	do_st (_SD, Source, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::st r
-	do_st (_SD, cia, Source, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_st (_SD, Source, rBase, &GPR(Base), m, sz, S, rIndOff);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.1,11.S,10.0,9./::::st l
 	long_immediate (LongSignedImmediateOffset);
-	do_st (_SD, cia, Source, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_st (_SD, Source, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // sub
@@ -738,7 +738,7 @@ void::function::do_subu:signed32 *rDest, signed32 Source1, signed32 Source2
 
 
 // trap
-void::function::do_trap:instruction_address cia, unsigned32 trap_number
+void::function::do_trap:unsigned32 trap_number
 	switch (trap_number)
 	  {
 	  case 72:
@@ -779,12 +779,12 @@ void::function::do_trap:instruction_address cia, unsigned32 trap_number
 	                  (unsigned long) cia.ip, trap_number);
 	  }
 31./,27.0,26./,21.0b0000001,14.UTN::::trap i
-	do_trap (_SD, cia, UTN);
+	do_trap (_SD, UTN);
 31./,27.0,26./,21.0b110000001,12.0,11./,4.INDTR::::trap r
-	do_trap (_SD, cia, UTN);
+	do_trap (_SD, UTN);
 31./,27.0,26./,21.0b110000001,12.1,11./::::trap l
 	long_immediate (UTN);
-	do_trap (_SD, cia, UTN);
+	do_trap (_SD, UTN);
 
 
 // vadd.{s|d}{s|d}
