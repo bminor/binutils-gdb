@@ -168,7 +168,7 @@ An archive with such an index speeds up linking to the library, and
 allows routines in the library to call each other without regard to
 their placement in the archive.
 
-You may use @samp{nm -s} or @samp{nm +print-armap} to list this index
+You may use @samp{nm -s} or @samp{nm --print-armap} to list this index
 table.  If an archive lacks the table, another form of @code{ar} called
 @code{ranlib} can be used to add just the table.
 
@@ -536,50 +536,79 @@ Requires prior use of @code{OPEN} or @code{CREATE}.
 @end table
 
 @node copy, nm, ar, Top
-
 @chapter copy
 
 @smallexample
-copy [-S] [-s srcfmt] [-d dtfmt] [-b bothfmts] infile [outfile] [-vV]
+copy [ -F @var{format} | --format=@var{format} ]
+     [ -I @var{format} | --input-format=@var{format} ]
+     [ -O @var{format} | --output-format=@var{format} ]
+     [ -S | --strip-all ]  [ -g | --strip-debug ]
+     [ -x | --discard-all ]  [ -X | --discard-locals ]
+     [ -v | --verbose ]  [ -V | --version ]
+     @var{infile} [@var{outfile}]
 @end smallexample
 
-The Gnu @code{copy} utility copies the contents of object files.  @code{copy} 
-uses the Gnu BFD Library to read and write the object files.  It
-can write the destination object file in a format different from that
-of the source object file.  The exact behavior of @code{copy} is controlled
-by command-line options.
+The GNU @code{copy} utility copies the contents of an object file to
+another.  @code{copy} uses the GNU BFD Library to read and write the
+object files.  It can write the destination object file in a format
+different from that of the source object file.  The exact behavior of
+@code{copy} is controlled by command-line options.
 
 @code{copy} creates temporary files to do its translations and
-deletes them afterward.  If no destination file is specified, a
-temporary file is created and the result is destructively renamed with
-the name of the input file.  @code{copy} uses BFD to do all its
+deletes them afterward.  @code{copy} uses BFD to do all its
 translation work; it knows about all the formats BFD knows about, and
 thus is able to recognize most formats without being told explicitly.
 @xref{BFD,,BFD,ld.info,Using LD, the GNU linker}.
 
 @table @code
+@item @var{infile}
+@itemx @var{outfile}
+The source and output files respectively.
+If you do not specify @var{outfile}, @code{copy} creates a
+temporary file and destructively renames the result with
+the name of the input file.
+
+@item -I @var{format}	
+@itemx --input-format=@var{format}
+Treat the source file's object format as specified, rather than
+attempting to deduce it.
+
+@item -O @var{format}
+@itemx --output-format=@var{format}
+Write the output file using the specified object format.
+
+@item -F @var{format}
+@itemx --format=@var{format}
+Use @var{format} as the object format for both the input and the output
+file; i.e. simply transfer data from source to destination with no
+translation.
+
 @item -S
-@cindex calls @samp{strip}
-Causes @code{copy} to strip relocation and symbol information from the
-source file as the file is copied.
+@itemx --strip-all
+Do not copy relocation and symbol information from the source file.
 
-@item -s @var{format}	
-Explicitly specifies the object format of the source file.
+@item -g
+@itemx --strip-debug
+Do not copy debugging symbols from the source file.
 
-@item -d @var{format}
-Explicitly specifies the object format of the desired output file.
+@item -x
+@itemx --discard-all
+Do not copy non-global symbols from the source file.
+@c FIXME any reason to prefer "non-global" to "local" here?
 
-@item -b @var{format}
-Explicitly specifies that the object format of the output should be the
-same as the input, i.e. a simple data transfer from source to
-destination with no translation involved.
-
-@item -v
-Show version number.
+@item -X
+@itemx --discard-locals
+Do not copy compiler-generated local symbols.
+(These usually start with @samp{L} or @samp{.}.)
 
 @item -V
-Requests verbose output.
+@itemx --version
+Show version number.
 
+@item -v
+@itemx --verbose
+Verbose output: list all object files modified.  In the case of
+archives, @samp{copy -V} lists all members of the archive.
 @end table
 
 @iftex
@@ -597,11 +626,11 @@ The GNU linker @code{ld} is now described in a separate manual.
 @kindex nm
 
 @smallexample
-  nm [ -a | +debug-syms ]  [ -g | +extern-only ]
-      [ -s | +print-armap ]  [ -o | +print-file-name ]  
-      [ -n | +numeric-sort ]  [ -p | +no-sort ]
-      [ -r | +reverse-sort ]  [ -u | +undefined-only ]  
-      [ +target @var{bfdname} ]
+  nm [ -a | --debug-syms ]  [ -g | --extern-only ]
+      [ -s | --print-armap ]  [ -o | --print-file-name ]  
+      [ -n | --numeric-sort ]  [ -p | --no-sort ]
+      [ -r | --reverse-sort ]  [ -u | --undefined-only ]  
+      [ --target @var{bfdname} ]
       [ @var{objfiles}@dots{} ]
 @end smallexample
 
@@ -617,35 +646,35 @@ Object files whose symbols are to be listed.  If no object files are
 listed as arguments, @code{nm} assumes @samp{a.out}.
 
 @item -a
-@itemx +debug-syms 
+@itemx --debug-syms 
 @cindex debugging symbols
 Display debugger-only symbols; normally these are not listed.
 
 @item -g
-@itemx +extern-only 
+@itemx --extern-only 
 @cindex external symbols
 Display only external symbols.
 
 @item -p
-@itemx +no-sort 
+@itemx --no-sort 
 @cindex sorting symbols
 Don't bother to sort the symbols in any order; just print them in the
 order encountered.
 
 @item -n
-@itemx +numeric-sort 
+@itemx --numeric-sort 
 Sort symbols numerically by their addresses, not alphabetically by their
 names. 
 
 @item -s
-@itemx +print-armap
+@itemx --print-armap
 @cindex symbol index, listing
 When listing symbols from archive members, include the index: a mapping
 (stored in the archive by @code{ar} or @code{ranlib}) of what modules
 contain definitions for what names.
 
 @item -o
-@itemx +print-file-name 
+@itemx --print-file-name 
 @cindex input file name
 @cindex file name
 @cindex source file name
@@ -654,19 +683,19 @@ rather than identifying the input file once only before all of its
 symbols. 
 
 @item -r
-@itemx +reverse-sort 
+@itemx --reverse-sort 
 Reverse the sense of the sort (whether numeric or alphabetic); let the
 last come first.
 
-@item +target @var{bfdname}
-@c @item +target
+@item --target @var{bfdname}
+@c @item --target
 @cindex object code format
 Specify an object code format other than your system's default format.
 @xref{objdump}, for information on listing available formats.
-@c FIXME what *does* +target/no arg do?
+@c FIXME what *does* --target/no arg do?
 
 @item -u
-@itemx +undefined-only 
+@itemx --undefined-only 
 @cindex external symbols
 @cindex undefined symbols
 Display only undefined symbols (those external to each object file).
@@ -818,7 +847,7 @@ relocation entries.  Using @samp{-x} is equivalent to specifying all of
 stores it in the archive.  The index lists each symbol defined by a
 member of an archive that is a relocatable object file.  
 
-You may use @samp{nm -s} or @samp{nm +print-armap} to list this index.
+You may use @samp{nm -s} or @samp{nm --print-armap} to list this index.
 
 An archive with such an index speeds up linking to the library, and
 allows routines in the library to call each other without regard to
@@ -835,9 +864,9 @@ The GNU @code{ranlib} program is another form of GNU @code{ar}; running
 @cindex section sizes
 
 @smallexample
-  size [ -A | -B | +format @var{compatibility} ]
-       [ +help ]  [ -d | -o | -x | +radix @var{number} ]
-       [ +target @var{bfdname} ]  [ -V | +version ]  
+  size [ -A | -B | --format @var{compatibility} ]
+       [ --help ]  [ -d | -o | -x | --radix @var{number} ]
+       [ --target @var{bfdname} ]  [ -V | --version ]  
        @var{objfiles}@dots{}
 @end smallexample
 
@@ -853,21 +882,21 @@ The object files to be examined.
 
 @item -A
 @itemx -B
-@itemx +format @var{compatibility}
+@itemx --format @var{compatibility}
 @cindex size display format
 Using one of these options, you can choose whether the output from GNU
 @code{size} resembles output from System V @code{size} (using @samp{-A},
-or @samp{+format sysv}), or Berkeley @code{size} (using @samp{-B}, or
-@samp{+format berkeley}).  The default is the one-line format similar to
+or @samp{--format sysv}), or Berkeley @code{size} (using @samp{-B}, or
+@samp{--format berkeley}).  The default is the one-line format similar to
 Berkeley's.  
-@c Bonus for doc-source readers: you can also say +format=strange (or
-@c anything else that starts with 's') for sysv, and +format=boring (or
+@c Bonus for doc-source readers: you can also say --format=strange (or
+@c anything else that starts with 's') for sysv, and --format=boring (or
 @c anything else that starts with 'b') for Berkeley.
 
 Here is an example of the Berkeley (default) format of output from
 @code{size}: 
 @smallexample
- eg$  size +format Berkeley ranlib size
+ eg$  size --format Berkeley ranlib size
 text    data    bss     dec     hex     filename
 294880  81920   11592   388392  5ed28   ranlib
 294880  81920   11888   388688  5ee50   size
@@ -877,7 +906,7 @@ text    data    bss     dec     hex     filename
 This is the same data, but displayed closer to System V conventions:
 
 @smallexample
- eg$  size +format SysV ranlib size
+ eg$  size --format SysV ranlib size
 ranlib  :
 section         size         addr
 .text         294880         8192       
@@ -894,24 +923,24 @@ section         size         addr
 Total         388688    
 @end smallexample
 
-@item +help
+@item --help
 Show a summary of acceptable arguments and options.
 
 @item -d
 @itemx -o
 @itemx -x
-@itemx +radix @var{number}
+@itemx --radix @var{number}
 @cindex size number format
 @cindex radix for section sizes
 Using one of these options, you can control whether the size of each
-section is given in decimal (@samp{-d}, or @samp{+radix 10}); octal
-(@samp{-o}, or @samp{+radix 8}); or hexadecimal (@samp{-x}, or
-@samp{+radix 16}).  In @samp{+radix @var{number}}, only the three
+section is given in decimal (@samp{-d}, or @samp{--radix 10}); octal
+(@samp{-o}, or @samp{--radix 8}); or hexadecimal (@samp{-x}, or
+@samp{--radix 16}).  In @samp{--radix @var{number}}, only the three
 values (8, 10, 16) are supported.  The total size is always given in two
 radices; decimal and hexadecimal for @samp{-d} or @samp{-x} output, or
 octal and hexadecimal if you're using @samp{-o}.
 
-@item +target @var{bfdname}
+@item --target @var{bfdname}
 @cindex object code format
 You can specify a particular object-code format for @var{objfiles} as
 @var{bfdname}.  This may not be necessary; @var{size} can
@@ -919,7 +948,7 @@ automatically recognize many formats.  @xref{objdump}, for information
 on listing available formats.
 
 @item -V
-@itemx +version
+@itemx --version
 Display version number information on @code{size} itself.
 
 @end table
@@ -933,7 +962,11 @@ Display version number information on @code{size} itself.
 @cindex symbols, discarding
 
 @smallexample
-  strip [ -v ] @var{objfiles}@dots{}
+strip [-F @var{format} | --format=@var{format} ]
+      [-I @var{format} | --input-format=@var{format} ]
+      [-O @var{format} | --output-format=@var{format} ]
+      [ -v | --verbose ]  [ -V | --version ]
+      @var{objfiles}@dots{}
 @end smallexample
 
 GNU @code{strip} discards all symbols from object files
@@ -947,9 +980,42 @@ rather than writing modified copies under different names.
 @end quotation
 
 @table @code
+@item -I @var{format}	
+@itemx --input-format=@var{format}
+Treat the original @var{objfiles} as files with the specified object
+code format.
+
+@item -O @var{format}
+@itemx --output-format=@var{format}
+Replace @var{objfiles} with files in the output format specified.
+
+@item -F @var{format}
+@itemx --format=@var{format}
+Treat the original @var{objfiles} as files with the specified object
+code format, and rewrite them in the same format.
+
+@item -g
+@itemx -S
+@itemx --strip-debug
+Remove debugging symbols only.
+
+@item -x
+@itemx --discard-all
+Remove non-global symbols.
+
+@item -X
+@itemx --discard-locals
+Remove compiler-generated local symbols.
+(These usually start with @code{L} or @code{.}.)
+
+@item -V
+@itemx --version
+Show version number.
+
 @item -v
-Verbose operation: list all object files modified.  In the case of
-archives, @samp{strip -v} lists all members of the archive.
+@itemx --verbose
+Verbose output: list all object files modified.  In the case of
+archives, @samp{strip -V} lists all members of the archive.
 @end table
 
 @node Index,  , strip, Top

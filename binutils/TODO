@@ -1,6 +1,8 @@
 o - strip
-	Implement various options
 	Make faster by using ftruncate if available (and format is suitable).
+
+o - nm, objdump
+    add option to demangle C++ names
 
 o - See also ../ld/TODO and ../bfd/TODO.
 
