@@ -1,7 +1,7 @@
 #
 # Some ARM tests
 #
-if [istarget arm-*-*] then {
+if [istarget *arm*-*-*] then {
     run_dump_test "inst"
 
     gas_test "arm3.s" "" $stdoptlist "Arm 3 instructions"

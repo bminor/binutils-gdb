@@ -1,3 +1,10 @@
+2000-06-09  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/macros/macros.exp: Run new test: strings.
+	* gas/macros/strings.s: New test: String expansion inside
+	macros.
+	* gas/macros/strings.d: New test results.
+	
 2000-06-04  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/i386/prefix.s: Modify so we have at least one x86 test that

@@ -20,3 +20,5 @@ case $target_triplet in {
 	run_dump_test semi
     }
 }
+
+run_dump_test strings
