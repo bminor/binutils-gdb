@@ -1108,7 +1108,7 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
     return FALSE;
 
   if (skip)
-    return TRUE;
+    goto nondefault;
 
   if (! override)
     {
@@ -1203,6 +1203,7 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
   /* We also need to define an indirection from the nondefault version
      of the symbol.  */
 
+nondefault:
   len = strlen (name);
   shortname = bfd_hash_allocate (&info->hash->table, len);
   if (shortname == NULL)
