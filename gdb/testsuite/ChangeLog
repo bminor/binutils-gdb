@@ -1,3 +1,8 @@
+2003-11-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/structs.exp: Use i*86-*-* instead of i686-*-* as a
+	pattern for the KFAILs.
+
 2003-11-25  Adam Fedor  <fedor@gnu.org>
 
 	* gdb.objc/objcdecode.exp: Test for PR objc/1238.
