@@ -186,8 +186,8 @@ first_link_map_member PARAMS ((void));
 static CORE_ADDR
 locate_base PARAMS ((void));
 
-static void
-solib_map_sections PARAMS ((struct so_list *));
+static int
+solib_map_sections PARAMS ((char *));
 
 #ifdef SVR4_SHARED_LIBS
 
@@ -224,7 +224,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static void solib_map_sections (struct so_list *so)
+	static int solib_map_sections (struct so_list *so)
 
 DESCRIPTION
 
@@ -243,10 +243,11 @@ FIXMES
 	expansion stuff?).
  */
 
-static void
-solib_map_sections (so)
-     struct so_list *so;
+static int
+solib_map_sections (arg)
+     char *arg;
 {
+  struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
   char *filename;
   char *scratch_pathname;
   int scratch_chan;
@@ -343,6 +344,8 @@ solib_map_sections (so)
 
   /* Free the file names, close the file now.  */
   do_cleanups (old_chain);
+
+  return (1);
 }
 
 #ifndef SVR4_SHARED_LIBS
@@ -986,12 +989,17 @@ find_solib (so_list_ptr)
 	  target_read_string ((CORE_ADDR) LM_NAME (new), &buffer,
 			      MAX_PATH_SIZE - 1, &errcode);
 	  if (errcode != 0)
-	    error ("find_solib: Can't read pathname for load map: %s\n",
-		   safe_strerror (errcode));
+	    {
+	      warning ("find_solib: Can't read pathname for load map: %s\n",
+		       safe_strerror (errcode));
+	      return (so_list_next);
+	    }
 	  strncpy (new -> so_name, buffer, MAX_PATH_SIZE - 1);
 	  new -> so_name[MAX_PATH_SIZE - 1] = '\0';
 	  free (buffer);
-	  solib_map_sections (new);
+	  catch_errors (solib_map_sections, (char *) new,
+			"Error while mapping shared library sections:\n",
+			RETURN_MASK_ALL);
 	}      
     }
   return (so_list_next);
@@ -1008,7 +1016,7 @@ symbol_add_stub (arg)
 
   if (so -> textsection)
     text_addr = so -> textsection -> addr;
-  else
+  else if (so -> abfd != NULL)
     {
       asection *lowest_sect;
 

@@ -1,3 +1,16 @@
+Wed Apr 22 12:58:23 1998 Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	Handle missing shared libraries during the examination of a core
+	dump gracefully.
+	* solib.c (find_solib):  Use catch_errors around call to
+	solib_map_sections. Use warning instead of error if reading of
+	the shared library name fails.
+	(solib_map_sections):  Change return and argument types to make
+	it callable from catch_errors.
+	(symbol_add_stub):  Avoid GDB core dump if solib->abfd is NULL.
+	* irix5-nat.c, osfsolib.c (xfer_link_map_member, solib_map_sections,
+	symbol_add_stub):  Ditto.
+
 Wed Apr 22 14:34:49 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* Makefile.in (INTL*): Add support to link in the intl library,

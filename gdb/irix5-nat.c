@@ -1,5 +1,5 @@
 /* Native support for the SGI Iris running IRIX version 5, for GDB.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998
    Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -352,8 +352,8 @@ xfer_link_map_member PARAMS ((struct so_list *, struct link_map *));
 static CORE_ADDR
 locate_base PARAMS ((void));
 
-static void
-solib_map_sections PARAMS ((struct so_list *));
+static int
+solib_map_sections PARAMS ((char *));
 
 /*
 
@@ -363,7 +363,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static void solib_map_sections (struct so_list *so)
+	static int solib_map_sections (struct so_list *so)
 
 DESCRIPTION
 
@@ -382,10 +382,11 @@ FIXMES
 	expansion stuff?).
  */
 
-static void
-solib_map_sections (so)
-     struct so_list *so;
+static int
+solib_map_sections (arg)
+     char *arg;
 {
+  struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
   char *filename;
   char *scratch_pathname;
   int scratch_chan;
@@ -447,6 +448,8 @@ solib_map_sections (so)
 
   /* Free the file names, close the file now.  */
   do_cleanups (old_chain);
+
+  return (1);
 }
 
 /*
@@ -731,7 +734,9 @@ xfer_link_map_member (so_list_ptr, lm)
 #endif
     }
 
-  solib_map_sections (so_list_ptr);
+  catch_errors (solib_map_sections, (char *) so_list_ptr,
+		"Error while mapping shared library sections:\n",
+		RETURN_MASK_ALL);
 }
 
 
@@ -810,7 +815,7 @@ symbol_add_stub (arg)
 
   if (so -> textsection)
     text_addr = so -> textsection -> addr;
-  else
+  else if (so -> abfd != NULL)
     {
       asection *lowest_sect;
 
