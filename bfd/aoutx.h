@@ -156,18 +156,21 @@ DESCRIPTION
 
 reloc_howto_type howto_table_ext[] = 
 {
-  HOWTO(RELOC_8,      0,  0,  	8,  false, 0, true,  true,0,"8",      false, 0,0x000000ff, false),
-  HOWTO(RELOC_16,     0,  1, 	16, false, 0, true,  true,0,"16",      false, 0,0x0000ffff, false),
-  HOWTO(RELOC_32,     0,  2, 	32, false, 0, true,  true,0,"32",      false, 0,0xffffffff, false),
+/*      type rightshift size bitsize pc_  bit absol compl  spec  name partial_ src_ dst_    pcrel_
+                                     rela pos ute   ain_on ial_       inplace  mask mask    offset
+                                     tive           _overf fn                                       */
+  HOWTO(RELOC_8,      0,  0,  	8,  false, 0, true,  true,0,"8",        false, 0,0x000000ff, false),
+  HOWTO(RELOC_16,     0,  1, 	16, false, 0, true,  true,0,"16",       false, 0,0x0000ffff, false),
+  HOWTO(RELOC_32,     0,  2, 	32, false, 0, true,  true,0,"32",       false, 0,0xffffffff, false),
   HOWTO(RELOC_DISP8,  0,  0, 	8,  true,  0, false, true,0,"DISP8", 	false, 0,0x000000ff, false),
   HOWTO(RELOC_DISP16, 0,  1, 	16, true,  0, false, true,0,"DISP16", 	false, 0,0x0000ffff, false),
   HOWTO(RELOC_DISP32, 0,  2, 	32, true,  0, false, true,0,"DISP32", 	false, 0,0xffffffff, false),
   HOWTO(RELOC_WDISP30,2,  2, 	30, true,  0, false, true,0,"WDISP30", 	false, 0,0x3fffffff, false),
   HOWTO(RELOC_WDISP22,2,  2, 	22, true,  0, false, true,0,"WDISP22", 	false, 0,0x003fffff, false),
   HOWTO(RELOC_HI22,   10, 2, 	22, false, 0, false, true,0,"HI22",	false, 0,0x003fffff, false),
-  HOWTO(RELOC_22,      0, 2, 	22, false, 0, false, true,0,"22",       false, 0,0x003fffff, false),
-  HOWTO(RELOC_13, 	0, 2, 	13, false, 0, false, true,0,"13",       false, 0,0x00001fff, false),
-  HOWTO(RELOC_LO10, 	0, 2, 	10, false, 0, false, true,0,"LO10",     false, 0,0x000003ff, false),
+  HOWTO(RELOC_22,     0,  2, 	22, false, 0, false, true,0,"22",       false, 0,0x003fffff, false),
+  HOWTO(RELOC_13,     0,  2, 	13, false, 0, false, true,0,"13",       false, 0,0x00001fff, false),
+  HOWTO(RELOC_LO10,   0,  2, 	10, false, 0, false, true,0,"LO10",     false, 0,0x000003ff, false),
   HOWTO(RELOC_SFA_BASE,0, 2, 	32, false, 0, false, true,0,"SFA_BASE", false, 0,0xffffffff, false),
   HOWTO(RELOC_SFA_OFF13,0,2, 	32, false, 0, false, true,0,"SFA_OFF13",false, 0,0xffffffff, false),
   HOWTO(RELOC_BASE10, 0,  2, 	16, false, 0, false, true,0,"BASE10",   false, 0,0x0000ffff, false),
@@ -179,7 +182,7 @@ reloc_howto_type howto_table_ext[] =
   HOWTO(RELOC_SEGOFF16,0, 2,	0,  false, 0, false, true,0,"SEGOFF16",	false, 0,0x00000000, false),
   HOWTO(RELOC_GLOB_DAT,0, 2,	0,  false, 0, false, true,0,"GLOB_DAT",	false, 0,0x00000000, false),
   HOWTO(RELOC_JMP_SLOT,0, 2,	0,  false, 0, false, true,0,"JMP_SLOT",	false, 0,0x00000000, false),
-  HOWTO(RELOC_RELATIVE,0, 2,	0,  false, 0, false,	true,0,"RELATIVE",	false, 0,0x00000000, false),
+  HOWTO(RELOC_RELATIVE,0, 2,	0,  false, 0, false, true,0,"RELATIVE",	false, 0,0x00000000, false),
 };
 
 /* Convert standard reloc records to "arelent" format (incl byte swap).  */
@@ -1247,19 +1250,20 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
   sym_pointer->e_type[0] &= ~N_TYPE;
 
   
-  if (bfd_get_output_section(cache_ptr) == obj_bsssec (abfd)) {
-    sym_pointer->e_type[0] |= N_BSS;
+  /* We attempt to order these tests by decreasing frequency of success,
+     according to tcov when linking the linker.  */
+  if (bfd_get_output_section(cache_ptr) == &bfd_abs_section) {
+    sym_pointer->e_type[0] |= N_ABS;
+  }
+  else if (bfd_get_output_section(cache_ptr) == obj_textsec (abfd)) {
+    sym_pointer->e_type[0] |= N_TEXT;
   }
   else if (bfd_get_output_section(cache_ptr) == obj_datasec (abfd)) {
     sym_pointer->e_type[0] |= N_DATA;
   }
-  else  if (bfd_get_output_section(cache_ptr) == obj_textsec (abfd)) {
-    sym_pointer->e_type[0] |= N_TEXT;
+  else if (bfd_get_output_section(cache_ptr) == obj_bsssec (abfd)) {
+    sym_pointer->e_type[0] |= N_BSS;
   }
-  else if (bfd_get_output_section(cache_ptr) == &bfd_abs_section) 
-    {
-      sym_pointer->e_type[0] |= N_ABS;
-    }
   else if (bfd_get_output_section(cache_ptr) == &bfd_und_section) 
     {
       sym_pointer->e_type[0] = (N_UNDF | N_EXT);
@@ -1295,11 +1299,11 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
     (sym_pointer+1)->e_type[0] = 1;
   }  
     
-  if (cache_ptr->flags & (BSF_GLOBAL | BSF_EXPORT)) {
-    sym_pointer->e_type[0] |= N_EXT;
-  }
   if (cache_ptr->flags & BSF_DEBUGGING) {
     sym_pointer->e_type[0] = ((aout_symbol_type *)cache_ptr)->type;
+  }
+  else if (cache_ptr->flags & (BSF_GLOBAL | BSF_EXPORT)) {
+    sym_pointer->e_type[0] |= N_EXT;
   }
   if (cache_ptr->flags & BSF_CONSTRUCTOR) {
     int type = ((aout_symbol_type *)cache_ptr)->type;
@@ -1451,7 +1455,7 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
 struct stringtab_entry {
   /* Hash value for this string.  Only useful so long as we aren't doing
      substring matches.  */
-  int hash;
+  unsigned int hash;
 
   /* Next node to look at, depending on whether the hash value of the string
      being searched for is less than or greater than the hash value of the
@@ -1535,23 +1539,28 @@ struct stringtab_data {
 
 /* Some utility functions for the string table code.  */
 
-static INLINE int
-hash (string)
-     char *string;
+/* For speed, only hash on the first this many bytes of strings.
+   This number was chosen by profiling ld linking itself, with -g.  */
+#define HASHMAXLEN 25
+
+#define HASH_CHAR(c) (sum ^= sum >> 20, sum ^= sum << 7, sum += (c))
+
+static INLINE unsigned int
+hash (string, len)
+     unsigned char *string;
+     register unsigned int len;
 {
-  unsigned int sum = 0;
-  while (*string)
+  register unsigned int sum = 0;
+
+  if (len > HASHMAXLEN)
     {
-#if 0
-      /* This expression borrowed from some code in gnu make.  */
-      sum += *string++, sum = (sum << 7) + (sum >> 20);
-#endif
-      /* This appears to get a better distribution, at least for my one
-	 test case.  Do some analysis on this later, get a real hash
-	 algorithm.  */
-      sum ^= sum >> 20;
-      sum ^= sum << 7;
-      sum += *string++;
+      HASH_CHAR (len);
+      len = HASHMAXLEN;
+    }
+
+  while (len--)
+    {
+      HASH_CHAR (*string++);
     }
   return sum;
 }
@@ -1581,15 +1590,9 @@ static INLINE int
 compare (entry, str, hash)
      struct stringtab_entry *entry;
      CONST char *str;
-     int hash;
+     unsigned int hash;
 {
-  if (hash == entry->hash)
-    return 0;
-  if (hash > entry->hash)
-    return 1;
-  if (hash < entry->hash)
-    return -1;
-  abort ();
+  return hash - entry->hash;
 }
 
 #ifdef GATHER_STATISTICS
@@ -1623,8 +1626,8 @@ add_to_stringtab (abfd, str, tab, check)
      int check;
 {
   struct stringtab_entry **ep;
-  struct stringtab_entry *entry;
-  int hashval, len;
+  register struct stringtab_entry *entry;
+  unsigned int hashval, len;
 
   if (str[0] == 0)
     {
@@ -1662,7 +1665,7 @@ add_to_stringtab (abfd, str, tab, check)
      zero.  With a balanced tree, this wouldn't be very useful, but without it,
      we might get a more even split at the top level, instead of skewing it
      badly should hash("/usr/lib/crt0.o") (or whatever) be far from zero. */
-  hashval = hash (str) ^ tab->hash_zero;
+  hashval = hash (str, len) ^ tab->hash_zero;
   ep = &tab->strings;
   if (!*ep)
     {
@@ -1673,13 +1676,19 @@ add_to_stringtab (abfd, str, tab, check)
 
   while (*ep)
     {
-      int cmp;
+      register int cmp;
+
       entry = *ep;
 #ifdef GATHER_STATISTICS
       tab->n_compares++;
 #endif
       cmp = compare (entry, str, hashval);
-      if (cmp == 0)
+      /* The not-equal cases are more frequent, so check them first.  */
+      if (cmp > 0)
+	ep = &entry->greater;
+      else if (cmp < 0)
+	ep = &entry->less;
+      else
 	{
 	  if (entry->string == str)
 	    {
@@ -1688,7 +1697,9 @@ add_to_stringtab (abfd, str, tab, check)
 #endif
 	      goto match;
 	    }
-	  if (!strcmp (entry->string, str))
+	  /* Compare the first bytes to save a function call if they
+	     don't match.  */
+	  if (entry->string[0] == str[0] && !strcmp (entry->string, str))
 	    {
 	    match:
 #ifdef GATHER_STATISTICS
@@ -1710,19 +1721,14 @@ add_to_stringtab (abfd, str, tab, check)
 #endif
 	  ep = &entry->greater;
 	}
-      else if (cmp > 0)
-	ep = &entry->greater;
-      else
-	/* cmp < 0 */
-	ep = &entry->less;
     }
 
   /* If we get here, nothing that's in the table already matched.
      EP points to the `next' field at the end of the chain; stick a
      new entry on here.  */
  add_it:
-  entry = (struct stringtab_entry *) bfd_alloc_by_size_t (abfd,
-							  sizeof (struct stringtab_entry));
+  entry = (struct stringtab_entry *)
+    bfd_alloc_by_size_t (abfd, sizeof (struct stringtab_entry));
 
   entry->less = entry->greater = 0;
   entry->hash = hashval;
@@ -1794,7 +1800,8 @@ emit_strtab (abfd, tab)
 	double n_compares = tab->n_compares;
 	double avg_compares = n_compares / n_syms;
 	/* The second value here should usually be near one.  */
-	fprintf (stderr, "\t    average %f per symbol (%f * log2 nstrings)\n",
+	fprintf (stderr,
+		 "\t    average %f comparisons per symbol (%f * log2 nstrings)\n",
 		 avg_compares, avg_compares / log2 (count));
       }
   }

@@ -1,3 +1,45 @@
+Fri Jun 25 17:09:55 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* aoutx.h (hash, compare, struct stringtab_entry, add_to_stringtab):
+	Use unsigned hash values for better hashing.
+	(hash): Hash in the string length for long strings.
+
+Thu Jun 24 15:47:51 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* aoutx.h (compare): Replace 3 if's with a subtraction.
+	(translate_to_native_sym_flags, add_to_stringtab): Reorder tests
+	in decreasing order of success, as an optimization.
+	(hash): Take a length arg; ignore chars after #25, for speed.
+	(add_to_stringtab): Pass length to hash.
+
+Thu Jun 24 17:25:51 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* elf32-sparc.c (sparc_reloc_map): Add SPARC_WDISP22 reloc.
+
+	* elfcode.h (elf_new_section_hook): Do nothing for now.
+	(elf_write_object_contents): Output common symbols the way ELF
+	wants them.
+
+Wed Jun 23 16:20:07 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* libelf.h (struct elf_obj_tdata and associated macros): Moved
+	here from elfcode.h.  A couple of size-specific structure pointers
+	were changed to PTR; uses fixed appropriately.
+	(elf32_symbol_type, elf64_symbol_type): Separated definitions.
+	(bfd_elf_mkobject): Renamed from bfd_elf32_mkobject.
+	(bfd_elf32_mkobject, bfd_elf64_mkobject, elf_mkobject): New
+	temporary macros to ease name change.
+	* elf.c (elf_read, elf_mkobject, elf_get_str_section,
+	elf_string_from_elf_section, bfd_elf_find_section): Moved here
+	from elfcode.h.
+	* doc/Makefile.in (libbfd.h): Process elf.c too.
+	* Makefile.in (elf.o): Note new dependencies.
+
+	* elfcode.h: Lots of stuff moved elsewhere.  Deleted some unused
+	code, tweaked some debug hooks.
+	(elf_slurp_reloca_table): Translate ELF section symbols into BFD
+	section symbols.
+
 Wed Jun 23 11:34:21 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* hosts/riscos.h: New file.
