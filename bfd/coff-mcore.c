@@ -577,6 +577,11 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 
 #define SELECT_RELOC(internal, howto) {internal.r_type = howto->type;}
 
+/* Make sure that the 'r_offset' field is copied properly
+   so that identical binaries will compare the same.  */
+#define SWAP_IN_RELOC_OFFSET         H_GET_32
+#define SWAP_OUT_RELOC_OFFSET        H_PUT_32
+
 #define COFF_PAGE_SIZE               0x1000
 
 #include "coffcode.h"

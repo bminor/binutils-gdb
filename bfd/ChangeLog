@@ -1,3 +1,8 @@
+2002-11-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-mcore.c (SWAP_IN_RELOC_OFFSET): Define.
+	(SWAP_OUT_RELOC_OFFSET): Define.
+
 2002-11-20  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf.c (_bfd_elf_link_hash_table_init): Make sure
