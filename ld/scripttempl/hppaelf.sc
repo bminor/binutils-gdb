@@ -3,7 +3,6 @@ OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 ENTRY("\$START\$")
 ${RELOCATING+${LIB_SEARCH_DIRS}}
-${RELOCATING+___stack_zero = ABSOLUTE(0x2000);}
 SECTIONS
 {
   .text ${RELOCATING+${TEXT_START_ADDR}}:
@@ -12,10 +11,11 @@ SECTIONS
     CREATE_OBJECT_SYMBOLS
     *(.PARISC.stubs)
     *(.text)
+    *(.PARISC.unwind)
     ${RELOCATING+etext = .};
     ${RELOCATING+_etext = .};
   }
-  .data  ${RELOCATING+ 0x40000000 } :
+  .data  0x40000000 :
   {
     ${RELOCATING+ . = . + 0x1000 };
     ${RELOCATING+__data_start = .};
@@ -24,7 +24,7 @@ SECTIONS
     ${RELOCATING+edata = .};
     ${RELOCATING+_edata = .};
   }
-  .bss ${RELOCATING+SIZEOF(.data) + ADDR(.data)} :
+  .bss 0x40000000 ${RELOCATING++SIZEOF(.data)} :
   {
    *(.bss)
    *(COMMON)

@@ -1,4 +1,16 @@
+Wed Nov 16 10:03:03 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* scripttempl/hppaelf.sc (.text): Place unwind descriptors in the
+	text segment.
+
 Sat Nov 12 15:55:56 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Patches from Eric Youngdale <eric@aib.com>:
+	* ldlang.c (lang_finish): Don't warn if entry symbol not found
+	when generating a shared library.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Warn if
+	attempting to place an orphaned relocation section when generating
+	a dynamically linked object.
 
 	* scripttempl/elf.sc: Add ENTRY(${ENTRY}), and default ${ENTRY} to
 	_start.
