@@ -5320,7 +5320,7 @@ static boolean elf_gc_sweep_symbol
 static boolean elf_gc_allocate_got_offsets
   PARAMS ((struct elf_link_hash_entry *h, PTR offarg));
 
-static boolean elf_gc_propogate_vtable_entries_used
+static boolean elf_gc_propagate_vtable_entries_used
   PARAMS ((struct elf_link_hash_entry *h, PTR dummy));
 
 static boolean elf_gc_smash_unused_vtentry_relocs
@@ -5542,7 +5542,7 @@ elf_gc_sweep_symbol (h, idxptr)
    elf_link_hash_traverse.  */
 
 static boolean
-elf_gc_propogate_vtable_entries_used (h, okp)
+elf_gc_propagate_vtable_entries_used (h, okp)
      struct elf_link_hash_entry *h;
      PTR okp;
 {
@@ -5559,7 +5559,7 @@ elf_gc_propogate_vtable_entries_used (h, okp)
     return true;
 
   /* Make sure the parent's table is up to date.  */
-  elf_gc_propogate_vtable_entries_used (h->vtable_parent, okp);
+  elf_gc_propagate_vtable_entries_used (h->vtable_parent, okp);
 
   if (h->vtable_entries_used == NULL)
     {
@@ -5653,7 +5653,7 @@ elf_gc_sections (abfd, info)
 
   /* Apply transitive closure to the vtable entry usage info.  */
   elf_link_hash_traverse (elf_hash_table (info),
-			  elf_gc_propogate_vtable_entries_used,
+			  elf_gc_propagate_vtable_entries_used,
 			  (PTR) &ok);
   if (!ok)
     return false;
