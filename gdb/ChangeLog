@@ -1,3 +1,12 @@
+2001-05-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* ui-out.h (make_cleanup_ui_out_begin_end): Declare.
+	* ui-out.c (struct ui_out_end_cleanup_data): Define.
+	(do_cleanup_end): New function.  Replace do_list_end.
+	(make_cleanup_ui_out_end): New function.
+	(make_cleanup_ui_out_begin_end): New function.
+	(make_cleanup_ui_out_list_end): Use make_cleanup_ui_out_end.
+
 2001-05-10  Elena Zannoni  <ezannoni@redhat.com>
 
         * MAINTAINERS: Declare xcoffread.c open to all maintainers,

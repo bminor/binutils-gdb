@@ -352,16 +352,44 @@ ui_out_list_end (struct ui_out *uiout)
   ui_out_end (uiout, ui_out_type_list);
 }
 
-static void
-do_list_end (void *uiout)
+struct ui_out_end_cleanup_data
 {
-  ui_out_list_end (uiout);
+  struct ui_out *uiout;
+  enum ui_out_type type;
+};
+
+static void
+do_cleanup_end (void *data)
+{
+  struct ui_out_end_cleanup_data *end_cleanup_data = data;
+  ui_out_end (end_cleanup_data->uiout, end_cleanup_data->type);
+  xfree (end_cleanup_data);
+}
+
+static struct cleanup *
+make_cleanup_ui_out_end (struct ui_out *uiout,
+			 enum ui_out_type type)
+{
+  struct ui_out_end_cleanup_data *end_cleanup_data;
+  end_cleanup_data = XMALLOC (struct ui_out_end_cleanup_data);
+  end_cleanup_data->uiout = uiout;
+  end_cleanup_data->type = type;
+  return make_cleanup (do_cleanup_end, end_cleanup_data);
+}
+
+struct cleanup *
+make_cleanup_ui_out_begin_end (struct ui_out *uiout,
+			       enum ui_out_type type,
+			       const char *id)
+{
+  ui_out_begin (uiout, type, id);
+  return make_cleanup_ui_out_end (uiout, type);
 }
 
 struct cleanup *
 make_cleanup_ui_out_list_end (struct ui_out *uiout)
 {
-  return make_cleanup (do_list_end, uiout);
+  return make_cleanup_ui_out_end (uiout, ui_out_type_list);
 }
 
 void
