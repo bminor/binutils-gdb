@@ -24,6 +24,8 @@ Do-first:
 
 Things-to-keep:
 
+amd.d
+amd.s
 float.l
 float.s
 general.l
