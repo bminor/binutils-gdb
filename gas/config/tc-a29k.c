@@ -76,7 +76,6 @@ md_pseudo_table[] = {
   { "align",	s_align_bytes,	4 },
   { "block", 	s_space,	0 },
   { "cputype",	s_ignore,	0 },	/* CPU as 29000 or 29050 */
-  { "line",	s_ignore,	0 },	/* Line number of coff symbol */
   { "reg",	s_lsym,		0 },	/* Register equate, same as equ */
   { "space",	s_ignore,	0 },	/* Listing control */
   { "sect",	s_ignore,	0 },	/* Creation of coff sections */
