@@ -1,5 +1,11 @@
 Thu Oct  2 18:40:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldlang.c (wild_doit): Rewrite flag handling for clarity.  If we
+ 	are not adding the first input section, and SEC_READONLY is clear
+ 	on the output section, then don't copy it from the input section.
+  	If SEC_READONLY is not set on the input section, then clear it on
+ 	the output section.
+
 	* configure.tgt (mips*-sgi-irix[56]*): Use elf32bsmip rather than
 	elf32bmip.
 	(mips*el-*-linux*): Change elf32lmip to elf32lsmip and elf32bmip
