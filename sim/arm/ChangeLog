@@ -1,3 +1,12 @@
+2002-07-05  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armemu.c (ARMul_Emulate32): Add more tests for valid MIA, MIAPH
+	and MIAxy instructions.
+	
+2002-06-21  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armos.h (ADP_Stopped_RunTimeError): Set correct value.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -50,7 +50,7 @@ Software Foundation raise funds for GNU development.''
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001
+Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001, 2002
    Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -722,6 +722,14 @@ the main command list, and should be used for those commands.  The usual
 place to add commands is in the @code{_initialize_@var{xyz}} routines at
 the ends of most source files.
 
+@findex add_setshow_cmd
+@findex add_setshow_cmd_full
+To add paired @samp{set} and @samp{show} commands, use
+@code{add_setshow_cmd} or @code{add_setshow_cmd_full}.  The former is
+a slightly simpler interface which is useful when you don't need to
+further modify the new command structures, while the latter returns
+the new command structures for manipulation.
+
 @cindex deprecating commands
 @findex deprecate_cmd
 Before removing commands from the command set it is a good idea to
@@ -946,7 +954,7 @@ be signaled.
 This function first opens the tuple and then establishes a cleanup
 (@pxref{Coding, Cleanups}) to close the tuple.  It provides a convenient
 and correct implementation of the non-portable@footnote{The function
-cast is not portable ISO-C.} code sequence:
+cast is not portable ISO C.} code sequence:
 @smallexample
 struct cleanup *old_cleanup;
 ui_out_tuple_begin (uiout, "...");
@@ -4793,11 +4801,12 @@ but does not require it, @value{GDBN} requires it.
 @value{GDBN}, as described in the following sections.
 
 
-@subsection ISO-C
+@subsection ISO C
 
-@value{GDBN} assumes an ISO-C compliant compiler.
+@value{GDBN} assumes an ISO/IEC 9899:1990 (a.k.a.@: ISO C90) compliant
+compiler.
 
-@value{GDBN} does not assume an ISO-C or POSIX compliant C library.
+@value{GDBN} does not assume an ISO C or POSIX compliant C library.
 
 
 @subsection Memory Management
@@ -5745,7 +5754,8 @@ Notes:
 @itemize @bullet
 @item
 Check the @code{autoconf} version carefully.  You want to be using the
-version taken from the @file{binutils} snapshot directory.  It is very
+version taken from the @file{binutils} snapshot directory, which can be
+found at @uref{ftp://sources.redhat.com/pub/binutils/}. It is very
 unlikely that a system installed version of @code{autoconf} (e.g.,
 @file{/usr/bin/autoconf}) is correct.
 @end itemize

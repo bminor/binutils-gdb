@@ -2,7 +2,7 @@
 # ie. a debug agent running as a native process on the same or
 # a different host.
 
-#   Copyright 2000 Free Software Foundation, Inc.
+#   Copyright 2000, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -89,7 +89,8 @@ global server_exec;
 global portnum;
 set portnum "2345";
 
-proc gdb_load { args } {
+proc gdb_load { arg } {
+    global host_exec;
     global server_exec;
     global portnum;
     global verbose;
@@ -133,49 +134,62 @@ proc gdb_load { args } {
     # Export the host:port pair.
     set gdbport $debughost$portnum;
 
-    if { $args == "" || $args == "{}" } {
-	if [info exists server_exec] {
-	    set args $server_exec;
-	} else {
+    # Remember new exec file.
+    if { $arg == "" } {
+	if { ! [info exists host_exec] } {
 	    send_gdb "info files\n";
 	    gdb_expect 30 {
 		-re "Symbols from \"(\[^\"\]+)\"" {
-		    set args $expect_out(1,string);
+		    set host_exec $expect_out(1,string);
 		    exp_continue;
 		}
 		-re "Local exec file:\[\r\n\]+\[ \t\]*`(\[^'\]+)'," {
-		    set args $expect_out(1,string);
+		    set host_exec $expect_out(1,string);
 		    exp_continue;
 		}
 		-re "$gdb_prompt $" { }
 	    }
 	}
+    } else {
+	set host_exec $arg
+	if [info exists server_exec] { unset server_exec }
     }
 
-    # remember new exec file 
-    set server_exec $args;
+    if { ! [info exists server_exec] } {
+	if [is_remote target] {
+	    set server_exec [remote_download target $host_exec]
+	} else {
+	    set server_exec $host_exec
+	}
+    }
 
     # Fire off the debug agent
     if [target_info exists gdb_server_args] {
         # This flavour of gdbserver takes as arguments those specified
         # in the board configuration file
         set custom_args [target_info gdb_server_args];
-        remote_spawn host \
-               "$gdbserver $custom_args >& /dev/null < /dev/null &" \
-               writeonly
+	set server_spawn_id [remote_spawn target \
+               "$gdbserver $custom_args"]
     } else {
         # This flavour of gdbserver takes as arguments the port information
         # and the name of the executable file to be debugged.
-        remote_spawn host \
-	    "$gdbserver $sockethost$portnum $args >& /dev/null < /dev/null &" \
-	    writeonly 
+	set server_spawn_id [remote_spawn target \
+	    "$gdbserver $sockethost$portnum $server_exec"]
     } 
+
+    # We can't call close, because if gdbserver is local then that means
+    # that it will get a SIGHUP.
+    ## close -i $server_spawn_id
+    wait -nowait -i $server_spawn_id
+
     # Give it a little time to establish
-    sleep 2
+    sleep 1
 
     # tell gdb what file we are debugging
-    if [gdb_file_cmd $args] {
-	return -1;
+    if { $arg != "" } {
+	if [gdb_file_cmd $arg] {
+	    return -1;
+	}
     }
 
     # attach to the "serial port"

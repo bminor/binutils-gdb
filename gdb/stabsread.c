@@ -256,34 +256,36 @@ static struct symbol *current_symbol = NULL;
       *(pp) = next_symbol_text (objfile);	\
   } while (0)
 
-/* FIXME: These probably should be our own types (like rs6000_builtin_type
-   has its own types) rather than builtin_type_*.  */
-static struct type **os9k_type_vector[] =
-{
-  0,
-  &builtin_type_int,
-  &builtin_type_char,
-  &builtin_type_long,
-  &builtin_type_short,
-  &builtin_type_unsigned_char,
-  &builtin_type_unsigned_short,
-  &builtin_type_unsigned_long,
-  &builtin_type_unsigned_int,
-  &builtin_type_float,
-  &builtin_type_double,
-  &builtin_type_void,
-  &builtin_type_long_double
-};
-
-static void os9k_init_type_vector (struct type **);
-
-static void
-os9k_init_type_vector (struct type **tv)
-{
-  unsigned int i;
-  for (i = 0; i < sizeof (os9k_type_vector) / sizeof (struct type **); i++)
-    tv[i] = (os9k_type_vector[i] == 0 ? 0 : *(os9k_type_vector[i]));
-}
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE /* FIXME: These probably should be our own types (like rs6000_builtin_type
+// OBSOLETE    has its own types) rather than builtin_type_*.  */
+// OBSOLETE static struct type **os9k_type_vector[] =
+// OBSOLETE {
+// OBSOLETE   0,
+// OBSOLETE   &builtin_type_int,
+// OBSOLETE   &builtin_type_char,
+// OBSOLETE   &builtin_type_long,
+// OBSOLETE   &builtin_type_short,
+// OBSOLETE   &builtin_type_unsigned_char,
+// OBSOLETE   &builtin_type_unsigned_short,
+// OBSOLETE   &builtin_type_unsigned_long,
+// OBSOLETE   &builtin_type_unsigned_int,
+// OBSOLETE   &builtin_type_float,
+// OBSOLETE   &builtin_type_double,
+// OBSOLETE   &builtin_type_void,
+// OBSOLETE   &builtin_type_long_double
+// OBSOLETE };
+// OBSOLETE
+// OBSOLETE static void os9k_init_type_vector (struct type **);
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE os9k_init_type_vector (struct type **tv)
+// OBSOLETE {
+// OBSOLETE   unsigned int i;
+// OBSOLETE   for (i = 0; i < sizeof (os9k_type_vector) / sizeof (struct type **); i++)
+// OBSOLETE     tv[i] = (os9k_type_vector[i] == 0 ? 0 : *(os9k_type_vector[i]));
+// OBSOLETE }
+#endif /* OBSOLETE OS9K */
 
 /* Look up a dbx type-number pair.  Return the address of the slot
    where the type for that number-pair is stored.
@@ -351,9 +353,11 @@ Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
 	  memset (&type_vector[old_len], 0,
 		  (type_vector_length - old_len) * sizeof (struct type *));
 
-	  if (os9k_stabs)
-	    /* Deal with OS9000 fundamental types.  */
-	    os9k_init_type_vector (type_vector);
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE 	  if (os9k_stabs)
+// OBSOLETE 	    /* Deal with OS9000 fundamental types.  */
+// OBSOLETE 	    os9k_init_type_vector (type_vector);
+#endif /* OBSOLETE OS9K */
 	}
       return (&type_vector[index]);
     }
@@ -2052,9 +2056,11 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	}
 #endif
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-      if (os9k_stabs)
-	add_symbol_to_list (sym, &global_symbols);
-      else
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE       if (os9k_stabs)
+// OBSOLETE 	add_symbol_to_list (sym, &global_symbols);
+// OBSOLETE       else
+#endif /* OBSOLETE OS9K */
 	add_symbol_to_list (sym, &local_symbols);
       break;
 
@@ -2589,21 +2595,24 @@ again:
       break;
 
     case 'f':			/* Function returning another type */
-      if (os9k_stabs && **pp == '(')
-	{
-	  /* Function prototype; parse it.
-	     We must conditionalize this on os9k_stabs because otherwise
-	     it could be confused with a Sun-style (1,3) typenumber
-	     (I think).  */
-	  struct type *t;
-	  ++*pp;
-	  while (**pp != ')')
-	    {
-	      t = read_type (pp, objfile);
-	      if (**pp == ',')
-		++ * pp;
-	    }
-	}
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE       if (os9k_stabs && **pp == '(')
+// OBSOLETE 	{
+// OBSOLETE 	  /* Function prototype; parse it.
+// OBSOLETE 	     We must conditionalize this on os9k_stabs because otherwise
+// OBSOLETE 	     it could be confused with a Sun-style (1,3) typenumber
+// OBSOLETE 	     (I think).  */
+// OBSOLETE 	  struct type *t;
+// OBSOLETE 	  ++*pp;
+// OBSOLETE 	  while (**pp != ')')
+// OBSOLETE 	    {
+// OBSOLETE 	      t = read_type (pp, objfile);
+// OBSOLETE 	      if (**pp == ',')
+// OBSOLETE 		++ * pp;
+// OBSOLETE 	    }
+// OBSOLETE 	}
+#endif /* OBSOLETE OS9K */
+
       type1 = read_type (pp, objfile);
       type = make_function_type (type1, dbx_lookup_type (typenums));
       break;
@@ -2684,22 +2693,36 @@ again:
       }
 
     case 'k':			/* Const qualifier on some type (Sun) */
-    case 'c':			/* Const qualifier on some type (OS9000) */
-      /* Because 'c' means other things to AIX and 'k' is perfectly good,
-         only accept 'c' in the os9k_stabs case.  */
-      if (type_descriptor == 'c' && !os9k_stabs)
-	return error_type (pp, objfile);
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE       /* ezannoni 2002-07-16: This can be safely deleted, because 'c'
+// OBSOLETE 	 means complex type in AIX stabs, while it means const qualifier
+// OBSOLETE 	 in os9k stabs.  Obviously we were supporting only the os9k meaning.
+// OBSOLETE 	 We were erroring out if we were reading AIX stabs.  Right now the
+// OBSOLETE 	 erroring out will happen in the default clause of the switch.  */
+// OBSOLETE     case 'c':			/* Const qualifier on some type (OS9000) */
+// OBSOLETE       /* Because 'c' means other things to AIX and 'k' is perfectly good,
+// OBSOLETE          only accept 'c' in the os9k_stabs case.  */
+// OBSOLETE       if (type_descriptor == 'c' && !os9k_stabs)
+// OBSOLETE 	return error_type (pp, objfile);
+#endif /* OBSOLETE OS9K */
       type = read_type (pp, objfile);
       type = make_cv_type (1, TYPE_VOLATILE (type), type,
 			   dbx_lookup_type (typenums));
       break;
 
     case 'B':			/* Volatile qual on some type (Sun) */
-    case 'i':			/* Volatile qual on some type (OS9000) */
-      /* Because 'i' means other things to AIX and 'B' is perfectly good,
-         only accept 'i' in the os9k_stabs case.  */
-      if (type_descriptor == 'i' && !os9k_stabs)
-	return error_type (pp, objfile);
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE       /* ezannoni 2002-07-16: This can be safely deleted, because 'i'
+// OBSOLETE 	 means imported type in AIX stabs, while it means volatile qualifier
+// OBSOLETE 	 in os9k stabs.  Obviously we were supporting only the os9k meaning.
+// OBSOLETE 	 We were erroring out if we were reading AIX stabs.  Right now the
+// OBSOLETE 	 erroring out will happen in the default clause of the switch.  */
+// OBSOLETE     case 'i':			/* Volatile qual on some type (OS9000) */
+// OBSOLETE       /* Because 'i' means other things to AIX and 'B' is perfectly good,
+// OBSOLETE          only accept 'i' in the os9k_stabs case.  */
+// OBSOLETE       if (type_descriptor == 'i' && !os9k_stabs)
+// OBSOLETE 	return error_type (pp, objfile);
+#endif /* OBSOLETE OS9K */
       type = read_type (pp, objfile);
       type = make_cv_type (TYPE_CONST (type), 1, type,
 			   dbx_lookup_type (typenums));
@@ -2804,10 +2827,12 @@ again:
       break;
 
     case 'b':
-      if (os9k_stabs)
-	/* Const and volatile qualified type.  */
-	type = read_type (pp, objfile);
-      else
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE       if (os9k_stabs)
+// OBSOLETE 	/* Const and volatile qualified type.  */
+// OBSOLETE 	type = read_type (pp, objfile);
+// OBSOLETE       else
+#endif /* OBSOLETE OS9K */
 	{
 	  /* Sun ACC builtin int type */
 	  type = read_sun_builtin_type (pp, typenums, objfile);
@@ -3666,8 +3691,10 @@ read_struct_fields (struct field_info *fip, char **pp, struct type *type,
 
   while (**pp != ';' && **pp != '\0')
     {
-      if (os9k_stabs && **pp == ',')
-	break;
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE       if (os9k_stabs && **pp == ',')
+// OBSOLETE 	break;
+#endif /* OBSOLETE OS9K */
       STABS_CONTINUE (pp, objfile);
       /* Get space to record the next field's data.  */
       new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
@@ -4329,9 +4356,11 @@ read_array_type (register char **pp, register struct type *type,
      Fortran adjustable arrays use Adigits or Tdigits for lower or upper;
      for these, produce a type like float[][].  */
 
-  if (os9k_stabs)
-    index_type = builtin_type_int;
-  else
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE   if (os9k_stabs)
+// OBSOLETE     index_type = builtin_type_int;
+// OBSOLETE   else
+#endif /* OBSOLETE OS9K */
     {
       index_type = read_type (pp, objfile);
       if (**pp != ';')
@@ -4345,7 +4374,12 @@ read_array_type (register char **pp, register struct type *type,
       (*pp)++;
       adjustable = 1;
     }
-  lower = read_huge_number (pp, os9k_stabs ? ',' : ';', &nbits);
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE   lower = read_huge_number (pp, os9k_stabs ? ',' : ';', &nbits);
+#else /* OBSOLETE OS9K */
+  lower = read_huge_number (pp, ';', &nbits);
+#endif /* OBSOLETE OS9K */
+
   if (nbits != 0)
     return error_type (pp, objfile);
 
@@ -4405,15 +4439,17 @@ read_enum_type (register char **pp, register struct type *type,
   osyms = *symlist;
   o_nsyms = osyms ? osyms->nsyms : 0;
 
-  if (os9k_stabs)
-    {
-      /* Size.  Perhaps this does not have to be conditionalized on
-         os9k_stabs (assuming the name of an enum constant can't start
-         with a digit).  */
-      read_huge_number (pp, 0, &nbits);
-      if (nbits != 0)
-	return error_type (pp, objfile);
-    }
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE   if (os9k_stabs)
+// OBSOLETE     {
+// OBSOLETE       /* Size.  Perhaps this does not have to be conditionalized on
+// OBSOLETE          os9k_stabs (assuming the name of an enum constant can't start
+// OBSOLETE          with a digit).  */
+// OBSOLETE       read_huge_number (pp, 0, &nbits);
+// OBSOLETE       if (nbits != 0)
+// OBSOLETE 	return error_type (pp, objfile);
+// OBSOLETE     }
+#endif /* OBSOLETE OS9K */
 
   /* The aix4 compiler emits an extra field before the enum members;
      my guess is it's a type of some sort.  Just ignore it.  */
@@ -4652,9 +4688,11 @@ read_huge_number (char **pp, int end, int *bits)
       p++;
     }
 
-  if (os9k_stabs)
-    upper_limit = ULONG_MAX / radix;
-  else
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE   if (os9k_stabs)
+// OBSOLETE     upper_limit = ULONG_MAX / radix;
+// OBSOLETE   else
+#endif /* OBSOLETE OS9K */
     upper_limit = LONG_MAX / radix;
 
   while ((c = *p++) >= '0' && c < ('0' + radix))
@@ -5366,7 +5404,9 @@ start_stabs (void)
   /* FIXME: If common_block_name is not already NULL, we should complain().  */
   common_block_name = NULL;
 
-  os9k_stabs = 0;
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE   os9k_stabs = 0;
+#endif /* OBSOLETE OS9K */
 }
 
 /* Call after end_symtab() */

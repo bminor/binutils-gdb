@@ -9,6 +9,52 @@
 	out what version of MI is running. Use this to determine the proper
 	output of setting a breakpoint.
 
+2002-07-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/gdbserver.exp (gdb_load): Don't use TCL varargs.
+	Improve support for reusing an exec file.  Copy exec file
+	to target, and run gdbserver on the target instead of on the host.
+
+2002-07-18  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/ending-run.exp: Don't expect to see the program end in
+	some orderly fashion when we're running on a real stand-alone
+	board.
+
+	* gdb.base/interrupt.exp: Correct logic for skipping tests on
+	targets that don't support interrupts.
+
+2002-07-10  Paul N. Hilfinger  <hilfingr@otisco.mckusick.com>
+
+	* gdb.base/attach.exp: Add patterns to match output from /proc-based
+	systems.
+	Move comments in expect statements to inside the actions, so that they
+	don't get matched against.
+
+2002-07-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/interrupt.exp: Setup xfail for all i386 BSD's on "call
+	function when asleep" test.
+
+2002-07-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/page.exp: Rewrite to handle problems with very long
+	`info set' output.  Update copyright.
+
+2002-06-26  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.hp/configure.in (AC_CONFIG_SUBDIRS): Do not try to configure
+	gdb.threads-hp.
+	* gdb.hp/configure: Regenerate.
+	* gdb.hp/gdb.threads-hp/configure.in: Delete file.
+	* gdb.hp/gdb.threads-hp/configure: Delete file.
+	* gdb.hp/gdb.threads-hp/Makefile.in: Delete file.
+
+2002-06-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/selftest.exp (do_stes_and_next): Skip calls to
+	setlocale, bindtextdomain and textdomain.
+
 2002-06-11  Jim Blandy  <jimb@redhat.com>
 
 	* lib/gdb.exp (get_debug_format): Tolerate message saying whether

@@ -1965,7 +1965,7 @@ set_upload_type (char *ignore, int from_tty)
 }
 
 void
-_initialize_inftarg (void)
+_initialize_wince (void)
 {
   struct cmd_list_element *set;
   init_child_ops ();

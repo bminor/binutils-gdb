@@ -136,9 +136,9 @@ static int es1800_insert_breakpoint (CORE_ADDR, char *);
 
 static void es1800_files_info (struct target_ops *);
 
-static int
-es1800_xfer_inferior_memory (CORE_ADDR, char *, int, int,
-			     struct mem_attrib *, struct target_ops *);
+static int es1800_xfer_inferior_memory (CORE_ADDR, char *, int, int,
+					struct mem_attrib *,
+					struct target_ops *);
 
 static void es1800_prepare_to_store (void);
 

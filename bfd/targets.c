@@ -526,6 +526,7 @@ extern const bfd_target bfd_elf32_i860_vec;
 extern const bfd_target bfd_elf32_i960_vec;
 extern const bfd_target bfd_elf32_ia64_big_vec;
 extern const bfd_target bfd_elf32_ia64_hpux_big_vec;
+extern const bfd_target bfd_elf32_ip2k_vec;
 extern const bfd_target bfd_elf32_little_generic_vec;
 extern const bfd_target bfd_elf32_littlearc_vec;
 extern const bfd_target bfd_elf32_littlearm_oabi_vec;
@@ -679,6 +680,7 @@ extern const bfd_target tic54x_coff1_vec;
 extern const bfd_target tic54x_coff2_beh_vec;
 extern const bfd_target tic54x_coff2_vec;
 extern const bfd_target tic80coff_vec;
+extern const bfd_target vaxbsd_vec;
 extern const bfd_target vaxnetbsd_vec;
 extern const bfd_target vax1knetbsd_vec;
 extern const bfd_target versados_vec;
@@ -727,7 +729,9 @@ static const bfd_target * const _bfd_target_vector[] = {
 	   it wasn't omitted by mistake.  */
 	&a29kcoff_big_vec,
 	&a_out_adobe_vec,
+#ifdef BFD64
 	&aix5coff64_vec,
+#endif
 	&aout0_big_vec,
 #if 0
 	/* We have no way of distinguishing these from other a.out variants */
@@ -787,6 +791,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_ia64_big_vec,
 #endif
 	&bfd_elf32_ia64_hpux_big_vec,
+	&bfd_elf32_ip2k_vec,
 	&bfd_elf32_little_generic_vec,
 	&bfd_elf32_littlearc_vec,
 	&bfd_elf32_littlearm_oabi_vec,
@@ -991,6 +996,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&tic54x_coff2_beh_vec,
 	&tic54x_coff2_vec,
 	&tic80coff_vec,
+	&vaxbsd_vec,
 	&vaxnetbsd_vec,
 	&vax1knetbsd_vec,
 	&versados_vec,

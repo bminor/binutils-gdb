@@ -87,8 +87,24 @@ mi_gdb_test "-interpreter-exec console \"set listsize 1\"" \
   "-interpreter-exec console \"set listsize 1\""
 
 mi_gdb_test "-interpreter-exec console \"list\"" \
-  {\~"32[ \t(\\t)]*callee1.*\\n".*\^done} \
+  {.*\~"32[ \t(\\t)]*callee1.*\\n".*\^done} \
   "-interpreter-exec console \"list\""
+
+mi_gdb_test "-exec-next" \
+  {.*\*stopped,reason="end-stepping-range",.*,file=".*basics.c",line="33"\}} \
+  "-exec-next to line 33"
+
+mi_gdb_test "-exec-next" \
+  {.*\*stopped,reason="end-stepping-range",.*,file=".*basics.c",line="35"\}} \
+  "-exec-next to line 35"
+
+mi_gdb_test "-exec-next" \
+  {.*\*stopped,reason="end-stepping-range",.*,file=".*basics.c",line="37"\}} \
+  "-exec-next to line 37"
+
+mi_gdb_test "-interpreter-exec console \"list\"" \
+  {\~"37[ \t(\\t)]*return 0;\\n".*^done} \
+  "-interpreter-exec console \"list\" at basics.c:37"
 
 mi_gdb_test "-interpreter-exec console \"help set args\"" \
   {\~"Set argument list to give program being debugged when it is started\.\\nFollow this command with any number of args, to be passed to the program\.".*\^done} \

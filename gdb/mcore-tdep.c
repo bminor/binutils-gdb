@@ -26,6 +26,7 @@
 #include "symfile.h"
 #include "gdbcore.h"
 #include "inferior.h"
+#include "arch-utils.h"
 
 /* Functions declared and used only in this file */
 
@@ -41,7 +42,7 @@ int mcore_use_struct_convention (int gcc_p, struct type *type);
 
 void _initialize_mcore (void);
 
-void mcore_init_extra_frame_info (struct frame_info *fi);
+void mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi);
 
 CORE_ADDR mcore_frame_saved_pc (struct frame_info *fi);
 
@@ -54,9 +55,9 @@ CORE_ADDR mcore_frame_locals_address (struct frame_info *fi);
 CORE_ADDR mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp);
 
 CORE_ADDR mcore_push_arguments (int nargs, struct value ** args, CORE_ADDR sp,
-			unsigned char struct_return, CORE_ADDR struct_addr);
+			int struct_return, CORE_ADDR struct_addr);
 
-void mcore_pop_frame (struct frame_info *fi);
+void mcore_pop_frame ();
 
 CORE_ADDR mcore_skip_prologue (CORE_ADDR pc);
 
@@ -76,22 +77,18 @@ void mcore_extract_return_value (struct type *type, char *regbuf, char *valbuf);
 int mcore_debug = 0;
 #endif
 
-/* The registers of the Motorola MCore processors */
-/* *INDENT-OFF* */
-char *mcore_register_names[] =
-{ "r0",   "r1",  "r2",    "r3",   "r4",   "r5",   "r6",   "r7",
-  "r8",   "r9",  "r10",   "r11",  "r12",  "r13",  "r14",  "r15",
-  "ar0",  "ar1", "ar2",   "ar3",  "ar4",  "ar5",  "ar6",  "ar7",
-  "ar8",  "ar9", "ar10", "ar11",  "ar12", "ar13", "ar14", "ar15",
-  "psr",  "vbr", "epsr",  "fpsr", "epc",  "fpc",  "ss0",  "ss1",
-  "ss2",  "ss3", "ss4",   "gcr",  "gsr",  "cr13", "cr14", "cr15",
-  "cr16", "cr17", "cr18", "cr19", "cr20", "cr21", "cr22", "cr23",
-  "cr24", "cr25", "cr26", "cr27", "cr28", "cr29", "cr30", "cr31",
-  "pc" };
-/* *INDENT-ON* */
 
+/* All registers are 4 bytes long.  */
+#define MCORE_REG_SIZE 4
+#define MCORE_NUM_REGS 65
 
+/* Some useful register numbers.  */
+#define PR_REGNUM 15
+#define FIRST_ARGREG 2
+#define LAST_ARGREG 7
+#define RETVAL_REGNUM 2
 
+  
 /* Additional info that we use for managing frames */
 struct frame_extra_info
   {
@@ -175,6 +172,68 @@ mcore_dump_insn (char *commnt, CORE_ADDR pc, int insn)
 #define mcore_insn_debug(args) {}
 #endif
 
+
+static struct type *
+mcore_register_virtual_type (int regnum)
+{
+  if (regnum < 0 || regnum >= MCORE_NUM_REGS)
+    internal_error (__FILE__, __LINE__,
+		    "mcore_register_virtual_type: illegal register number %d",
+		    regnum);
+  else
+    return builtin_type_int;
+}
+
+static int
+mcore_register_byte (int regnum)
+{
+  if (regnum < 0 || regnum >= MCORE_NUM_REGS)
+    internal_error (__FILE__, __LINE__,
+		    "mcore_register_byte: illegal register number %d",
+		    regnum);
+  else 
+    return (regnum * MCORE_REG_SIZE);
+}
+
+static int
+mcore_register_size (int regnum)
+{
+  
+  if (regnum < 0 || regnum >= MCORE_NUM_REGS)
+    internal_error (__FILE__, __LINE__,
+		    "mcore_register_size: illegal register number %d",
+		    regnum);
+  else
+    return MCORE_REG_SIZE;
+}
+
+/* The registers of the Motorola MCore processors */
+
+static const char *
+mcore_register_name (int regnum)
+{
+
+  static char *register_names[] = { 
+    "r0",   "r1",  "r2",    "r3",   "r4",   "r5",   "r6",   "r7",
+    "r8",   "r9",  "r10",   "r11",  "r12",  "r13",  "r14",  "r15",
+    "ar0",  "ar1", "ar2",   "ar3",  "ar4",  "ar5",  "ar6",  "ar7",
+    "ar8",  "ar9", "ar10", "ar11",  "ar12", "ar13", "ar14", "ar15",
+    "psr",  "vbr", "epsr",  "fpsr", "epc",  "fpc",  "ss0",  "ss1",
+    "ss2",  "ss3", "ss4",   "gcr",  "gsr",  "cr13", "cr14", "cr15",
+    "cr16", "cr17", "cr18", "cr19", "cr20", "cr21", "cr22", "cr23",
+    "cr24", "cr25", "cr26", "cr27", "cr28", "cr29", "cr30", "cr31",
+    "pc" 
+  };
+
+  if (regnum < 0 ||
+      regnum >= sizeof (register_names) / sizeof (register_names[0]))
+    internal_error (__FILE__, __LINE__,
+		    "mcore_register_name: illegal register number %d",
+		    regnum);
+  else
+    return register_names[regnum];
+}
+
 /* Given the address at which to insert a breakpoint (BP_ADDR),
    what will that breakpoint be?
 
@@ -190,6 +249,33 @@ mcore_breakpoint_from_pc (CORE_ADDR * bp_addr, int *bp_size)
   *bp_size = 2;
   return breakpoint;
 }
+
+static CORE_ADDR
+mcore_saved_pc_after_call (struct frame_info *frame)
+{
+  return read_register (PR_REGNUM);
+}
+
+/* This is currently handled by init_extra_frame_info.  */
+static void
+mcore_frame_init_saved_regs (struct frame_info *frame)
+{
+
+}
+
+/* This is currently handled by mcore_push_arguments  */
+static void
+mcore_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+{
+
+}
+
+static int
+mcore_reg_struct_has_addr (int gcc_p, struct type *type)
+{
+  return 0;
+}
+
 
 /* Helper function for several routines below.  This funtion simply
    sets up a fake, aka dummy, frame (not a _call_ dummy frame) that
@@ -697,9 +783,10 @@ mcore_frame_saved_pc (struct frame_info * fi)
    command, or the call dummy breakpoint gets hit. */
 
 void
-mcore_pop_frame (struct frame_info *fi)
+mcore_pop_frame (void)
 {
   int rn;
+  struct frame_info *fi = get_current_frame ();
 
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     generic_pop_dummy_frame ();
@@ -746,7 +833,7 @@ mcore_pop_frame (struct frame_info *fi)
 
 CORE_ADDR
 mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		      unsigned char struct_return, CORE_ADDR struct_addr)
+		      int struct_return, CORE_ADDR struct_addr)
 {
   int argreg;
   int argnum;
@@ -946,9 +1033,9 @@ mcore_store_return_value (struct type *type, char *valbuf)
    the prologue of this frame. */
 
 void
-mcore_init_extra_frame_info (struct frame_info *fi)
+mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (fi->next)
+  if (fi && fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
 
   frame_saved_regs_zalloc (fi);
@@ -981,10 +1068,107 @@ get_insn (CORE_ADDR pc)
   return extract_unsigned_integer (buf, 2);
 }
 
+static struct gdbarch *
+mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  static LONGEST call_dummy_words[7] = { };
+  struct gdbarch_tdep *tdep = NULL;
+  struct gdbarch *gdbarch;
+
+  /* find a candidate among the list of pre-declared architectures. */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return (arches->gdbarch);
+
+  gdbarch = gdbarch_alloc (&info, 0);
+
+  /* Registers: */
+
+  /* All registers are 32 bits */
+  set_gdbarch_register_size (gdbarch, MCORE_REG_SIZE);
+  set_gdbarch_max_register_raw_size (gdbarch, MCORE_REG_SIZE);
+  set_gdbarch_max_register_virtual_size (gdbarch, MCORE_REG_SIZE);
+  set_gdbarch_register_name (gdbarch, mcore_register_name);
+  set_gdbarch_register_virtual_type (gdbarch, mcore_register_virtual_type);
+  set_gdbarch_register_virtual_size (gdbarch, mcore_register_size);
+  set_gdbarch_register_raw_size (gdbarch, mcore_register_size);
+  set_gdbarch_register_byte (gdbarch, mcore_register_byte);
+  set_gdbarch_register_bytes (gdbarch, MCORE_REG_SIZE * MCORE_NUM_REGS);
+  set_gdbarch_num_regs (gdbarch, MCORE_NUM_REGS);
+  set_gdbarch_pc_regnum (gdbarch, 64);
+  set_gdbarch_sp_regnum (gdbarch, 0);
+  set_gdbarch_fp_regnum (gdbarch, 0);
+  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+
+  /* Call Dummies:  */
+
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
+  set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
+  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
+  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+  set_gdbarch_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
+  set_gdbarch_function_start_offset (gdbarch, 0);
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
+  set_gdbarch_breakpoint_from_pc (gdbarch, mcore_breakpoint_from_pc);
+  set_gdbarch_push_return_address (gdbarch, mcore_push_return_address);
+  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+  set_gdbarch_push_arguments (gdbarch, mcore_push_arguments);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
+
+  /* Frames:  */
+
+  set_gdbarch_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
+  set_gdbarch_frame_chain (gdbarch, mcore_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
+  set_gdbarch_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
+  set_gdbarch_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
+  set_gdbarch_store_return_value (gdbarch, mcore_store_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, 
+					       mcore_extract_return_value);
+  set_gdbarch_store_struct_return (gdbarch, mcore_store_struct_return);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 
+						       mcore_extract_struct_value_address);
+  set_gdbarch_skip_prologue (gdbarch, mcore_skip_prologue);
+  set_gdbarch_frame_args_skip (gdbarch, 0);
+  set_gdbarch_frame_args_address (gdbarch, mcore_frame_args_address);
+  set_gdbarch_frame_locals_address (gdbarch, mcore_frame_locals_address);
+  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  set_gdbarch_pop_frame (gdbarch, mcore_pop_frame);
+  set_gdbarch_virtual_frame_pointer (gdbarch, mcore_virtual_frame_pointer);
+
+  /* Misc.:  */
+
+  /* Stack grows down.  */
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  set_gdbarch_use_struct_convention (gdbarch, mcore_use_struct_convention);
+  set_gdbarch_believe_pcc_promotion (gdbarch, 1);
+  /* MCore will never pass a sturcture by reference. It will always be split
+     between registers and stack.  */
+  set_gdbarch_reg_struct_has_addr (gdbarch, mcore_reg_struct_has_addr);
+
+  return gdbarch;
+}
+
+static void
+mcore_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+
+}
+
 void
 _initialize_mcore_tdep (void)
 {
   extern int print_insn_mcore (bfd_vma, disassemble_info *);
+  gdbarch_register (bfd_arch_mcore, mcore_gdbarch_init, mcore_dump_tdep);
   tm_print_insn = print_insn_mcore;
 
 #ifdef MCORE_DEBUG

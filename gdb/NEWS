@@ -37,10 +37,14 @@ DEC Alpha (partial)				alpha*-*-*
 DEC VAX (partial)				vax-*-*
 NEC V850					v850-*-*
 National Semiconductor NS32000 (partial)	ns32k-*-*
+Motorola 68000 (partial)                        m68k-*-*
+Motorola MCORE                                  mcore-*-*
 
 * New targets.
 
 Atmel AVR					avr*-*-*
+Fujitsu FRV architecture added by Red Hat	frv*-*-*
+
 
 * New native configurations
 
@@ -55,6 +59,10 @@ Configurations that have been declared obsolete in this release have
 been commented out.  Unless there is activity to revive these
 configurations, the next release of GDB will have their sources
 permanently REMOVED.
+
+Mitsubishi D30V					d30v-*-*
+OS/9000						i[34]86-*-os9k
+Fujitsu FR30					fr30-*-elf*
 
 * REMOVED configurations and files
 

@@ -1396,6 +1396,7 @@ process_dst_block (struct objfile *objfile, dst_rec_ptr_t entry)
       symnum++;
     }
   BLOCK_NSYMS (block) = total_symbols;
+  BLOCK_HASHTABLE (block) = 0;
   BLOCK_START (block) = address;
   BLOCK_END (block) = address + size;
   BLOCK_SUPERBLOCK (block) = 0;
@@ -1480,6 +1481,7 @@ read_dst_symtab (struct objfile *objfile)
 			     (total_globals - 1) *
 			   sizeof (struct symbol *));
 	  BLOCK_NSYMS (global_block) = total_globals;
+	  BLOCK_HASHTABLE (global_block) = 0;
 	  for (symnum = 0; symnum < total_globals; symnum++)
 	    {
 	      nextsym = dst_global_symbols->next;

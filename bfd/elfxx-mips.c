@@ -373,14 +373,16 @@ static bfd *reldyn_sorting_bfd;
 #define ABI_N32_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2) != 0)
 
-/* Nonzero if ABFD is using the 64-bit ABI. */
+/* Nonzero if ABFD is using the N64 ABI.  */
 #define ABI_64_P(abfd) \
   ((get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64) != 0)
 
+/* Nonzero if ABFD is using NewABI conventions.  */
+#define NEWABI_P(abfd) (ABI_N32_P (abfd) || ABI_64_P (abfd))
+
+/* The IRIX compatibility level we are striving for.  */
 #define IRIX_COMPAT(abfd) \
   (get_elf_backend_data (abfd)->elf_backend_mips_irix_compat (abfd))
-
-#define NEWABI_P(abfd) (ABI_N32_P(abfd) || ABI_64_P(abfd))
 
 /* Whether we are trying to be compatible with IRIX at all.  */
 #define SGI_COMPAT(abfd) \
@@ -388,11 +390,11 @@ static bfd *reldyn_sorting_bfd;
 
 /* The name of the options section.  */
 #define MIPS_ELF_OPTIONS_SECTION_NAME(abfd) \
-  (IRIX_COMPAT (abfd) == ict_irix6 ? ".MIPS.options" : ".options")
+  (ABI_64_P (abfd) ? ".MIPS.options" : ".options")
 
 /* The name of the stub section.  */
 #define MIPS_ELF_STUB_SECTION_NAME(abfd) \
-  (IRIX_COMPAT (abfd) == ict_irix6 ? ".MIPS.stubs" : ".stub")
+  (ABI_64_P (abfd) ? ".MIPS.stubs" : ".stub")
 
 /* The size of an external REL relocation.  */
 #define MIPS_ELF_REL_SIZE(abfd) \
@@ -610,9 +612,8 @@ _bfd_mips_elf_read_ecoff_info (abfd, section, debug)
   if (ext_hdr == NULL && swap->external_hdr_size != 0)
     goto error_return;
 
-  if (bfd_get_section_contents (abfd, section, ext_hdr, (file_ptr) 0,
-				swap->external_hdr_size)
-      == false)
+  if (! bfd_get_section_contents (abfd, section, ext_hdr, (file_ptr) 0,
+				  swap->external_hdr_size))
     goto error_return;
 
   symhdr = &debug->symbolic_header;
@@ -1243,7 +1244,7 @@ mips_elf_output_extsym (h, data)
 	      h->esym.asym.value =
 		mips_elf_hash_table (einfo->info)->procedure_count;
 	    }
-	  else if (strcmp (name, "_gp_disp") == 0)
+	  else if (strcmp (name, "_gp_disp") == 0 && ! NEWABI_P (einfo->abfd))
 	    {
 	      h->esym.asym.sc = scAbs;
 	      h->esym.asym.st = stLabel;
@@ -2474,8 +2475,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 	    return bfd_reloc_outofrange;
 	  value
 	    = mips_elf_got_offset_from_index (elf_hash_table (info)->dynobj,
-					      abfd,
-					      value);
+					      abfd, value);
 	  overflowed_p = mips_elf_overflow_p (value, 16);
 	  break;
 	}
@@ -2517,8 +2517,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       if (value == MINUS_ONE)
 	return bfd_reloc_outofrange;
       value = mips_elf_got_offset_from_index (elf_hash_table (info)->dynobj,
-					      abfd,
-					      value);
+					      abfd, value);
       overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
@@ -2831,8 +2830,7 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 
   r_type = ELF_R_TYPE (output_bfd, rel->r_info);
   dynobj = elf_hash_table (info)->dynobj;
-  sreloc
-    = bfd_get_section_by_name (dynobj, ".rel.dyn");
+  sreloc = bfd_get_section_by_name (dynobj, ".rel.dyn");
   BFD_ASSERT (sreloc != NULL);
   BFD_ASSERT (sreloc->contents != NULL);
   BFD_ASSERT (sreloc->reloc_count * MIPS_ELF_REL_SIZE (output_bfd)
@@ -3642,7 +3640,8 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
      sh_offset == object size, and ld doesn't allow that.  While the check
      is arguably bogus for empty or SHT_NOBITS sections, it can easily be
      avoided by not emitting those useless sections in the first place.  */
-  if (IRIX_COMPAT (abfd) != ict_irix5 && (sec->flags & SEC_RELOC) != 0)
+  if ((IRIX_COMPAT (abfd) != ict_irix5 && (IRIX_COMPAT (abfd) != ict_irix6))
+      && (sec->flags & SEC_RELOC) != 0)
     {
       struct bfd_elf_section_data *esd;
       bfd_size_type amt = sizeof (Elf_Internal_Shdr);
@@ -4123,7 +4122,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 		    && ELF_R_TYPE (abfd, r->r_info) != R_MIPS16_26)
 		  break;
 
-	      if (! info->keep_memory)
+	      if (elf_section_data (o)->relocs != sec_relocs)
 		free (sec_relocs);
 
 	      if (r < rend)
@@ -4770,7 +4769,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	  /* Assume there are two loadable segments consisting of
 	     contiguous sections.  Is 5 enough?  */
 	  local_gotno = (loadable_size >> 16) + 5;
-	  if (IRIX_COMPAT (output_bfd) == ict_irix6)
+	  if (NEWABI_P (output_bfd))
 	    /* It's possible we will need GOT_PAGE entries as well as
 	       GOT16 entries.  Often, these will be able to share GOT
 	       entries, but not always.  */
@@ -5005,7 +5004,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       const char * msg = (const char *) NULL;
 
       /* Find the relocation howto for this relocation.  */
-      if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
+      if (r_type == R_MIPS_64 && ! NEWABI_P (input_bfd))
 	{
 	  /* Some 32-bit code uses R_MIPS_64.  In particular, people use
 	     64-bit code, but make sure all their addresses are in the
@@ -5122,7 +5121,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  Elf_Internal_Sym *sym;
 	  unsigned long r_symndx;
 
-	  if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd)
+	  if (r_type == R_MIPS_64 && ! NEWABI_P (output_bfd)
 	      && bfd_big_endian (input_bfd))
 	    rel->r_offset -= 4;
 
@@ -5298,7 +5297,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  continue;
 	}
 
-      if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
+      if (r_type == R_MIPS_64 && ! NEWABI_P (output_bfd))
 	/* See the comment above about using R_MIPS_64 in the 32-bit
 	   ABI.  Until now, we've been using the HOWTO for R_MIPS_32;
 	   that calculated the right value.  Now, however, we
@@ -5526,7 +5525,7 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
       sym->st_value = 1;
     }
-  else if (strcmp (name, "_gp_disp") == 0)
+  else if (strcmp (name, "_gp_disp") == 0 && ! NEWABI_P (output_bfd))
     {
       sym->st_shndx = SHN_ABS;
       sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
@@ -6106,7 +6105,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
      .dynamic end up in PT_DYNAMIC.  However, we do have to insert a
      PT_OPTIONS segement immediately following the program header
      table.  */
-  if (IRIX_COMPAT (abfd) == ict_irix6)
+  if (ABI_64_P (abfd))
     {
       for (s = abfd->sections; s; s = s->next)
 	if (elf_section_data (s)->this_hdr.sh_type == SHT_MIPS_OPTIONS)
@@ -6275,8 +6274,8 @@ _bfd_mips_elf_modify_segment_map (abfd)
    relocation.  */
 
 asection *
-_bfd_mips_elf_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *abfd;
+_bfd_mips_elf_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
@@ -6286,7 +6285,7 @@ _bfd_mips_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
   if (h != NULL)
     {
-      switch (ELF_R_TYPE (abfd, rel->r_info))
+      switch (ELF_R_TYPE (sec->owner, rel->r_info))
 	{
 	case R_MIPS_GNU_VTINHERIT:
 	case R_MIPS_GNU_VTENTRY:
@@ -6308,9 +6307,7 @@ _bfd_mips_elf_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }
@@ -6346,6 +6343,9 @@ _bfd_mips_elf_gc_sweep_hook (abfd, info, sec, relocs)
       case R_MIPS_CALL_LO16:
       case R_MIPS_GOT_HI16:
       case R_MIPS_GOT_LO16:
+      case R_MIPS_GOT_DISP:
+      case R_MIPS_GOT_PAGE:
+      case R_MIPS_GOT_OFST:
 	/* ??? It would seem that the existing MIPS code does no sort
 	   of reference counting or whatnot on its GOT and PLT entries,
 	   so it is not possible to garbage collect them at this time.  */
@@ -6415,6 +6415,70 @@ _bfd_mips_elf_hide_symbol (info, entry, force_local)
   got->_raw_size += MIPS_ELF_GOT_SIZE (dynobj);
 }
 
+#define PDR_SIZE 32
+
+boolean
+_bfd_mips_elf_discard_info (abfd, cookie, info)
+     bfd *abfd;
+     struct elf_reloc_cookie *cookie;
+     struct bfd_link_info *info;
+{
+  asection *o;
+  boolean ret = false;
+  unsigned char *tdata;
+  size_t i, skip;
+
+  o = bfd_get_section_by_name (abfd, ".pdr");
+  if (! o)
+    return false;
+  if (o->_raw_size == 0)
+    return false;
+  if (o->_raw_size % PDR_SIZE != 0)
+    return false;
+  if (o->output_section != NULL
+      && bfd_is_abs_section (o->output_section))
+    return false;
+
+  tdata = bfd_zmalloc (o->_raw_size / PDR_SIZE);
+  if (! tdata)
+    return false;
+
+  cookie->rels = _bfd_elf32_link_read_relocs (abfd, o, (PTR) NULL,
+					      (Elf_Internal_Rela *) NULL,
+					      info->keep_memory);
+  if (!cookie->rels)
+    {
+      free (tdata);
+      return false;
+    }
+
+  cookie->rel = cookie->rels;
+  cookie->relend = cookie->rels + o->reloc_count;
+
+  for (i = 0, skip = 0; i < o->_raw_size; i ++)
+    {
+      if (_bfd_elf32_reloc_symbol_deleted_p (i * PDR_SIZE, cookie))
+	{
+	  tdata[i] = 1;
+	  skip ++;
+	}
+    }
+
+  if (skip != 0)
+    {
+      elf_section_data (o)->tdata = tdata;
+      o->_cooked_size = o->_raw_size - skip * PDR_SIZE;
+      ret = true;
+    }
+  else
+    free (tdata);
+
+  if (! info->keep_memory)
+    free (cookie->rels);
+
+  return ret;
+}
+
 boolean
 _bfd_mips_elf_ignore_discarded_relocs (sec)
      asection *sec;
@@ -6422,6 +6486,39 @@ _bfd_mips_elf_ignore_discarded_relocs (sec)
   if (strcmp (sec->name, ".pdr") == 0)
     return true;
   return false;
+}
+
+boolean
+_bfd_mips_elf_write_section (output_bfd, sec, contents)
+     bfd *output_bfd;
+     asection *sec;
+     bfd_byte *contents;
+{
+  bfd_byte *to, *from, *end;
+  int i;
+
+  if (strcmp (sec->name, ".pdr") != 0)
+    return false;
+
+  if (elf_section_data (sec)->tdata == NULL)
+    return false;
+
+  to = contents;
+  end = contents + sec->_raw_size;
+  for (from = contents, i = 0;
+       from < end;
+       from += PDR_SIZE, i++)
+    {
+      if (((unsigned char *) elf_section_data (sec)->tdata)[i] == 1)
+	continue;
+      if (to != from)
+	memcpy (to, from, PDR_SIZE);
+      to += PDR_SIZE;
+    }
+  bfd_set_section_contents (output_bfd, sec->output_section, contents,
+			    (file_ptr) sec->output_offset,
+			    sec->_cooked_size);
+  return true;
 }
 
 /* MIPS ELF uses a special find_nearest_line routine in order the
@@ -7547,7 +7644,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
   asection *sec;
 
   /* Check if we have the same endianess */
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     return false;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour

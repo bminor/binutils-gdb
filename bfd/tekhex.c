@@ -242,7 +242,7 @@ tekhex_init ()
   static boolean inited = false;
   int val;
 
-  if (inited == false)
+  if (! inited)
     {
       inited = true;
       hex_init ();
@@ -485,7 +485,7 @@ pass_over (abfd, func)
   /* To the front of the file */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     abort ();
-  while (eof == false)
+  while (! eof)
     {
       char buffer[MAXCHUNK];
       char *src = buffer;
@@ -677,7 +677,7 @@ tekhex_set_section_contents (abfd, section, locationp, offset, bytes_to_do)
      bfd_size_type bytes_to_do;
 {
 
-  if (abfd->output_has_begun == false)
+  if (! abfd->output_has_begun)
     {
       /* The first time around, allocate enough sections to hold all the chunks */
       asection *s = abfd->sections;

@@ -52,7 +52,7 @@ struct varobj_root
   struct block *valid_block;
 
   /* The frame for this expression */
-  CORE_ADDR frame;
+  struct frame_id frame;
 
   /* If 1, "update" always recomputes the frame & valid block
      using the currently selected frame. */
@@ -456,7 +456,7 @@ varobj_create (char *objname,
          Since select_frame is so benign, just call it for all cases. */
       if (fi != NULL)
 	{
-	  var->root->frame = FRAME_FP (fi);
+	  get_frame_id (fi, &var->root->frame);
 	  old_fi = selected_frame;
 	  select_frame (fi);
 	}
@@ -514,13 +514,13 @@ char *
 varobj_gen_name (void)
 {
   static int id = 0;
-  char obj_name[31];
+  char *obj_name;
 
   /* generate a name for this object */
   id++;
-  sprintf (obj_name, "var%d", id);
+  xasprintf (&obj_name, "var%d", id);
 
-  return xstrdup (obj_name);
+  return obj_name;
 }
 
 /* Given an "objname", returns the pointer to the corresponding varobj
@@ -850,7 +850,8 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
   struct value *new;
   struct vstack *stack = NULL;
   struct vstack *result = NULL;
-  struct frame_info *old_fi;
+  struct frame_id old_fid;
+  struct frame_info *fi;
 
   /* sanity check: have we been passed a pointer? */
   if (changelist == NULL)
@@ -863,7 +864,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 
   /* Save the selected stack frame, since we will need to change it
      in order to evaluate expressions. */
-  old_fi = selected_frame;
+  get_frame_id (selected_frame, &old_fid);
 
   /* Update the root variable. value_of_root can return NULL
      if the variable is no longer around, i.e. we stepped out of
@@ -983,7 +984,9 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
     }
 
   /* Restore selected frame */
-  select_frame (old_fi);
+  fi = frame_find_by_id (old_fid);
+  if (fi)
+    select_frame (fi);
 
   if (type_changed)
     return -2;
@@ -1214,10 +1217,7 @@ create_child (struct varobj *parent, int index, char *name)
     child->error = 1;
   child->parent = parent;
   child->root = parent->root;
-  childs_name =
-    (char *) xmalloc ((strlen (parent->obj_name) + strlen (name) + 2) *
-		      sizeof (char));
-  sprintf (childs_name, "%s.%s", parent->obj_name, name);
+  xasprintf (&childs_name, "%s.%s", parent->obj_name, name);
   child->obj_name = childs_name;
   install_variable (child);
 
@@ -1306,7 +1306,8 @@ new_root_variable (void)
   var->root->lang = NULL;
   var->root->exp = NULL;
   var->root->valid_block = NULL;
-  var->root->frame = (CORE_ADDR) -1;
+  var->root->frame.base = 0;
+  var->root->frame.pc = 0;
   var->root->use_selected_frame = 0;
   var->root->rootvar = NULL;
 
@@ -1794,14 +1795,7 @@ c_name_of_child (struct varobj *parent, int index)
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      {
-	/* We never get here unless parent->num_children is greater than 0... */
-	int len = 1;
-	while ((int) pow ((double) 10, (double) len) < index)
-	  len++;
-	name = (char *) xmalloc (1 + len * sizeof (char));
-	sprintf (name, "%d", index);
-      }
+      xasprintf (&name, "%d", index);
       break;
 
     case TYPE_CODE_STRUCT:
@@ -1820,9 +1814,7 @@ c_name_of_child (struct varobj *parent, int index)
 	  break;
 
 	default:
-	  name =
-	    (char *) xmalloc ((strlen (parent->name) + 2) * sizeof (char));
-	  sprintf (name, "*%s", parent->name);
+	  xasprintf (&name, "*%s", parent->name);
 	  break;
 	}
       break;
@@ -1855,10 +1847,7 @@ c_value_of_root (struct varobj **var_handle)
   else
     {
       reinit_frame_cache ();
-
-
-      fi = find_frame_addr_in_frame_chain (var->root->frame);
-
+      fi = frame_find_by_id (var->root->frame);
       within_scope = fi != NULL;
       /* FIXME: select_frame could fail */
       if (within_scope)
@@ -2026,12 +2015,10 @@ c_variable_editable (struct varobj *var)
 static char *
 c_value_of_variable (struct varobj *var)
 {
-  struct type *type;
-
   /* BOGUS: if val_print sees a struct/class, it will print out its
      children instead of "{...}" */
-  type = get_type (var);
-  switch (TYPE_CODE (type))
+
+  switch (TYPE_CODE (get_type (var)))
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
@@ -2040,19 +2027,14 @@ c_value_of_variable (struct varobj *var)
 
     case TYPE_CODE_ARRAY:
       {
-	char number[18];
-	sprintf (number, "[%d]", var->num_children);
-	return xstrdup (number);
+	char *number;
+	xasprintf (&number, "[%d]", var->num_children);
+	return (number);
       }
       /* break; */
 
     default:
       {
-	long dummy;
-	struct ui_file *stb = mem_fileopen ();
-	struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
-	char *thevalue;
-
 	if (var->value == NULL)
 	  {
 	    /* This can happen if we attempt to get the value of a struct
@@ -2062,6 +2044,11 @@ c_value_of_variable (struct varobj *var)
 	  }
 	else
 	  {
+	    long dummy;
+	    struct ui_file *stb = mem_fileopen ();
+	    struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
+	    char *thevalue;
+
 	    if (VALUE_LAZY (var->value))
 	      gdb_value_fetch_lazy (var->value);
 	    val_print (VALUE_TYPE (var->value),
@@ -2070,11 +2057,9 @@ c_value_of_variable (struct varobj *var)
 		       format_code[(int) var->format], 1, 0, 0);
 	    thevalue = ui_file_xstrdup (stb, &dummy);
 	    do_cleanups (old_chain);
-	  }
-
 	return thevalue;
       }
-      /* break; */
+      }
     }
 }
 

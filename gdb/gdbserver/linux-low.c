@@ -1097,6 +1097,7 @@ regsets_store_inferior_registers ()
 	    }
 	}
       regset ++;
+      free (buf);
     }
   return 0;
 }

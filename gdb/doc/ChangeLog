@@ -1,3 +1,28 @@
+2002-07-10  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.texinfo (Create a release candiate): Add the location
+	where the proper version of autoconf can be retrieved.
+
+2002-07-09  Don Howard  <dhoward@redhat.com>
+
+	* gdb.texinfo (Command Files): Further describe the behavior of
+	sourced command files.
+
+2002-06-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (User Interface): ISO C rather than ISO-C.
+	(Coding): Clarify ISO C version that GDB assumes.
+
+2002-06-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdbint.texinfo (User Interface): Mention add_setshow_cmd and
+	add_setshow_cmd_full.
+
+2002-06-25  Don Howard  <dhoward@redhat.com>
+
+	* gdb.texinfo (Memory Region Attributes): Document new behavior
+	for 'mem' command.
+
 2002-06-11  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (Symbols): Update documentation for `info source'

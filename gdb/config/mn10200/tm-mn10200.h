@@ -197,9 +197,8 @@ extern CORE_ADDR mn10200_push_return_address (CORE_ADDR, CORE_ADDR);
 
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 
-extern CORE_ADDR
-mn10200_push_arguments (int, struct value **, CORE_ADDR,
-			unsigned char, CORE_ADDR);
+extern CORE_ADDR mn10200_push_arguments (int, struct value **, CORE_ADDR,
+					 unsigned char, CORE_ADDR);
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (mn10200_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 

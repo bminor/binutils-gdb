@@ -1,5 +1,5 @@
 /* BFD back-end for AMD 29000 COFF binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by David Wood at New York University 7/8/91.
 
@@ -175,7 +175,7 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       insn = bfd_get_32 (abfd, hit_data);
       /* consth, part 2
 	 Now relocate the reference.  */
-      if (part1_consth_active == false)
+      if (! part1_consth_active)
 	{
 	  *error_message = (char *) _("Missing IHIHALF");
 	  return bfd_reloc_dangerous;

@@ -312,7 +312,7 @@ CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 # your system doesn't have fcntl.h in /usr/include (which is where it
 # should be according to Posix).
 DEFS = @DEFS@
-GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config $(DEFS)
+GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config -DLOCALEDIR="\"$(prefix)/share/locale\"" $(DEFS)
 
 # M{H,T}_CFLAGS, if defined, have host- and target-dependent CFLAGS
 # from the config directory.
@@ -544,7 +544,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	scm-valprint.c source.c stabsread.c stack.c symfile.c \
 	symmisc.c symtab.c linespec.c target.c thread.c top.c tracepoint.c \
 	typeprint.c utils.c valarith.c valops.c valprint.c values.c \
-	serial.c ser-unix.c mdebugread.c os9kread.c \
+	serial.c ser-unix.c mdebugread.c \
 	tui/tui.c tui/tui.h tui/tuiCommand.c tui/tuiCommand.h \
 	tui/tuiData.c tui/tuiData.h tui/tuiDataWin.c tui/tuiDataWin.h \
 	tui/tuiDisassem.c tui/tuiDisassem.h tui/tuiGeneralWin.c \
@@ -583,14 +583,6 @@ readline_headers = \
 	$(READLINE_SRC)/keymaps.h \
 	$(READLINE_SRC)/readline.h
 
-udiheaders = \
-	$(srcdir)/29k-share/udi/udiproc.h \
-	$(srcdir)/29k-share/udi/udiphcfg.h \
-	$(srcdir)/29k-share/udi/udiphunix.h \
-	$(srcdir)/29k-share/udi/udiptcfg.h \
-	$(srcdir)/29k-share/udi/udipt29k.h \
-	$(srcdir)/29k-share/udi/udisoc.h
-
 xm_h =		@xm_h@
 tm_h =		@tm_h@
 nm_h =		@nm_h@
@@ -619,7 +611,7 @@ completer_h =	completer.h
 cp_abi_h =	cp-abi.h
 dcache_h =	dcache.h
 defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h \
-		gdbarch.h ui-file.h $(INCLUDE_DIR)/gdb/signals.h
+		gdbarch.h ui-file.h $(INCLUDE_DIR)/gdb/signals.h gdb_locale.h
 doublest_h =	doublest.h $(floatformat_h)
 dwarf2cfi_h =	dwarf2cfi.h
 event_loop_h =  event-loop.h
@@ -646,7 +638,7 @@ interps_h =	interps.h
 language_h =	language.h
 linespec_h =	linespec.h
 macroexp_h =	macroexp.h
-macrotab_h =    macrotab.h $(obstack_h) $(bcache_h)
+macrotab_h =    macrotab.h
 macroscope_h =  macroscope.h $(macrotab_h) $(symtab_h)
 memattr_h =     memattr.h
 monitor_h =	monitor.h
@@ -664,7 +656,7 @@ solist_h =	solist.h
 source_h =	source.h
 stabsread_h =	stabsread.h
 symfile_h =	symfile.h
-symtab_h =	symtab.h $(bcache_h)
+symtab_h =	symtab.h
 target_h =      target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
 terminal_h =	terminal.h
 top_h =		top.h
@@ -674,6 +666,7 @@ ui_out_h =      ui-out.h
 valprint_h =	valprint.h
 value_h =	value.h $(symtab_h) $(gdbtypes_h) $(expression_h) $(doublest_h)
 varobj_h =      varobj.h $(symtab_h) $(gdbtypes_h)
+vax_tdep_h =	vax-tdep.h osabi.h
 version_h = 	version.h
 wrapper_h =	wrapper.h
 xcoffsolib_h =	xcoffsolib.h
@@ -694,7 +687,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	jv-lang.h \
 	m2-lang.h  p-lang.h \
 	complaints.h valprint.h \
-	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
+	nindy-share/b.out.h \
 	nindy-share/block_io.h nindy-share/coff.h \
 	nindy-share/env.h nindy-share/stop.h \
 	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
@@ -704,7 +697,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 
 # Header files that already have srcdir in them, or which are in objdir.
 
-HFILES_WITH_SRCDIR = $(udiheaders) ../bfd/bfd.h
+HFILES_WITH_SRCDIR = ../bfd/bfd.h
 
 
 # GDB "info" files, which should be included in their entirety
@@ -751,7 +744,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	scm-exp.o scm-lang.o scm-valprint.o complaints.o typeprint.o \
 	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
-	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o \
+	nlmread.o serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
 	frame.o doublest.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o
@@ -884,7 +877,7 @@ init.c: $(INIT_FILES)
 	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
 	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' | \
-	( echo _initialize_gdbtypes ; grep -v -e '^_initialize_gdbtypes$$' ) > init.l-tmp
+	( echo _initialize_gdbtypes ; grep -v '^_initialize_gdbtypes$$' ) > init.l-tmp
 	@echo '/* Do not modify this file.  */' >>init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
 	@echo '#include "defs.h"' >>init.c-tmp
@@ -1207,9 +1200,7 @@ MAKEOVERRIDES=
 ## with no dependencies and no actions.
 unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 
-ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
-	29k-share/udi/udi2go32.c \
-	a29k-tdep.c a68v-nat.c \
+ALLDEPFILES = a68v-nat.c \
 	alpha-nat.c alphabsd-nat.c \
 	alpha-tdep.c alpha-linux-tdep.c alphabsd-tdep.c alphanbsd-tdep.c \
 	alpha-osf1-tdep.c alphafbsd-tdep.c \
@@ -1232,7 +1223,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	lynx-nat.c m3-nat.c \
 	m68hc11-tdep.c \
 	m68k-tdep.c \
-	m88k-nat.c m88k-tdep.c mac-nat.c \
+	m88k-nat.c m88k-tdep.c \
 	mcore-tdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-nat.c \
@@ -1246,11 +1237,11 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	ppc-sysv-tdep.o ppc-linux-nat.c ppc-linux-tdep.c \
 	ppcnbsd-nat.o ppcnbsd-tdep.o \
 	procfs.c \
-	remote-adapt.c remote-array.c remote-bug.c remote-e7000.c remote-eb.c \
+	remote-array.c remote-bug.c remote-e7000.c \
 	remote-es.c remote-hms.c remote-mips.c \
-	remote-mm.c remote-nindy.c remote-os9k.c remote-rdp.c remote-sim.c \
+	remote-nindy.c remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
-	remote-udi.c remote-vx.c remote-vx29k.c \
+	remote-vx.c \
 	rs6000-nat.c rs6000-tdep.c \
 	s390-tdep.c s390-nat.c \
 	ser-go32.c ser-pipe.c ser-tcp.c \
@@ -1266,15 +1257,6 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	xcoffread.c xcoffsolib.c \
 	xstormy16-tdep.c \
 	z8k-tdep.c
-
-udip2soc.o: $(srcdir)/29k-share/udi/udip2soc.c $(udiheaders)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udip2soc.c
-
-udi2go32.o: $(srcdir)/29k-share/udi/udi2go32.c $(udiheaders)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udi2go32.c
-
-udr.o: $(srcdir)/29k-share/udi/udr.c $(udiheaders) 
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udr.c
 
 a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h)
@@ -1487,6 +1469,9 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h)
+
+frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
+	$(arch_utils_h) $(regcache_h)
 
 regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(regcache_h)
 
@@ -1707,7 +1692,7 @@ ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(language_h) $(symfile_h) $(gdb_string_h) \
-	$(ui_out_h) $(completer_h)
+	$(ui_out_h) $(completer_h) $(regcache_h)
 
 inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
 	$(target_h) $(terminal_h) $(gdbthread_h) $(gdb_string_h)
@@ -1813,14 +1798,14 @@ mdebugread.o: mdebugread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
 
 mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 
-# os9kread assumes that sizeof(char*) <= sizeof(int).  This looses on
-# 64 bit targets where often, sizeof(int)=4 but sizeof(char*)=9.
-os9kread.o: os9kread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
-	        $(expression_h) $(gdb_stabs_h) $(gdbcore_h) $(gdbtypes_h) \
-		$(language_h) $(objfiles_h) $(stabsread_h) $(symfile_h) \
-		$(symtab_h) $(target_h) $(gdb_string_h)
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
-		$(srcdir)/os9kread.c
+# OBSOLETE # os9kread assumes that sizeof(char*) <= sizeof(int).  This looses on
+# OBSOLETE # 64 bit targets where often, sizeof(int)=4 but sizeof(char*)=9.
+# OBSOLETE os9kread.o: os9kread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
+# OBSOLETE 	        $(expression_h) $(gdb_stabs_h) $(gdbcore_h) $(gdbtypes_h) \
+# OBSOLETE 		$(language_h) $(objfiles_h) $(stabsread_h) $(symfile_h) \
+# OBSOLETE 		$(symtab_h) $(target_h) $(gdb_string_h)
+# OBSOLETE 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
+# OBSOLETE 		$(srcdir)/os9kread.c
 
 mem-break.o: mem-break.c $(defs_h) $(symtab_h) $(breakpoint_h) $(inferior_h) \
 	$(target_h)
@@ -1887,7 +1872,7 @@ nindy-tdep.o: nindy-tdep.c $(defs_h) $(frame_h) $(symtab_h)  $(gdbcore_h)
 ns32k-tdep.o: ns32k-tdep.c $(bfd_h) $(dis_asm_h) $(defs_h)
 
 objfiles.o: objfiles.c $(bfd_h) $(defs_h) $(objfiles_h) $(symfile_h) \
-	$(symtab_h) $(gdb_string_h) $(breakpoint_h)
+	$(symtab_h) $(gdb_string_h) $(breakpoint_h) $(bcache_h)
 
 solib-osf.o: solib-osf.c $(defs_h) $(inferior_h) $(symtab_h) $(objfiles_h) \
 	$(symfile_h) $(target_h) $(gdb_string_h) $(solist_h)
@@ -2020,9 +2005,9 @@ remote-nindy.o: remote-nindy.c $(floatformat_h) $(command_h) \
 	nindy-share/env.h nindy-share/stop.h $(remote_utils_h) \
 	$(symfile_h) $(regcache_h)
 
-remote-os9k.o: remote-os9k.c $(defs_h) $(gdbcore_h) \
-	$(command_h) $(monitor_h) $(remote_utils_h) $(symtab_h) $(symfile_h) \
-	$(objfiles_h) $(gdb_stabs_h) $(gdb_string_h) $(regcache_h)
+# OBSOLETE remote-os9k.o: remote-os9k.c $(defs_h) $(gdbcore_h) \
+# OBSOLETE 	$(command_h) $(monitor_h) $(remote_utils_h) $(symtab_h) $(symfile_h) \
+# OBSOLETE 	$(objfiles_h) $(gdb_stabs_h) $(gdb_string_h) $(regcache_h)
 
 remote-sds.o: remote-sds.c $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) $(symfile_h) $(terminal_h) \
@@ -2183,7 +2168,7 @@ sun3-nat.o: sun3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 symfile.o: symfile.c $(breakpoint_h) $(complaints_h) $(defs_h) \
 	$(expression_h) $(gdb_stabs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(gdbtypes_h) $(language_h) $(objfiles_h) $(symfile_h) $(symtab_h) \
-	$(target_h) $(gdb_string_h) $(completer_h)
+	$(target_h) $(gdb_string_h) $(completer_h) $(bcache_h)
 
 symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
@@ -2250,20 +2235,20 @@ valprint.o: valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 
 values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(symtab_h) $(target_h) $(value_h) \
-	$(gdb_string_h) scm-lang.h $(doublest_h)
+	$(gdb_string_h) scm-lang.h $(doublest_h) $(regcache_h)
 
 vax-tdep.o: vax-tdep.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h) \
-	$(arch_utils_h) $(inferior_h) vax-tdep.h
+	$(arch_utils_h) $(inferior_h) $(vax_tdep_h)
 
 x86-64-linux-tdep.o : x86-64-linux-tdep.c $(defs_h) $(inferior_h) \
 	$(gdbcore_h) $(regcache_h) x86-64-tdep.h i386-tdep.h $(dwarf2cfi_h)
 
-x86-64-tdep.o : x86-64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) $(gdbcmd_h) \
-	$(arch_utils_h) $(regcache_h) $(symfile_h) x86-64-tdep.h i386-tdep.h \
-	$(dwarf2cfi_h) $(gdb_assert_h)
+x86-64-tdep.o : x86-64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
+	$(gdbcmd_h) $(arch_utils_h) $(regcache_h) $(symfile_h) x86-64-tdep.h \
+	i386-tdep.h $(dwarf2cfi_h) $(gdb_assert_h) $(objfiles_h)
 
 x86-64-linux-nat.o : x86-64-linux-nat.c $(defs_h) $(inferior_h) \
-	$(gdbcore_h) $(regcache_h) i387-tdep.h $(gdb_assert_h) x86-64-tdep.h \
+	$(gdbcore_h) $(regcache_h) $(gdb_assert_h) x86-64-tdep.h \
 	i386-tdep.h
 
 win32-nat.o: win32-nat.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \

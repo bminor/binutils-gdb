@@ -187,7 +187,7 @@ or32_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 
       /* consth, part 2 
          Now relocate the reference.  */
-      if (part1_consth_active == false) 
+      if (! part1_consth_active) 
         {
           *error_message = (char *) "Missing IHIHALF";
           return bfd_reloc_dangerous;

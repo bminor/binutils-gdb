@@ -471,7 +471,7 @@ must_parse_int (ieee)
      common_header_type *ieee;
 {
   bfd_vma result;
-  BFD_ASSERT (parse_int (ieee, &result) == true);
+  BFD_ASSERT (parse_int (ieee, &result));
   return result;
 }
 
@@ -983,7 +983,7 @@ ieee_slurp_external_symbols (abfd)
 	    /* Fetch the default size if not resolved */
 	    size = must_parse_int (&(ieee->h));
 	    /* Fetch the defautlt value if available */
-	    if (parse_int (&(ieee->h), &value) == false)
+	    if (! parse_int (&(ieee->h), &value))
 	      {
 		value = 0;
 	      }
@@ -1058,7 +1058,7 @@ static boolean
 ieee_slurp_symbol_table (abfd)
      bfd *abfd;
 {
-  if (IEEE_DATA (abfd)->read_symbols == false)
+  if (! IEEE_DATA (abfd)->read_symbols)
     {
       if (! ieee_slurp_external_symbols (abfd))
 	return false;
@@ -1112,7 +1112,7 @@ ieee_get_symtab (abfd, location)
       if (! ieee_slurp_symbol_table (abfd))
 	return -1;
 
-      if (ieee->symbol_table_full == false)
+      if (! ieee->symbol_table_full)
 	{
 	  /* Arrgh - there are gaps in the table, run through and fill them */
 	  /* up with pointers to a null place */
@@ -1663,11 +1663,11 @@ ieee_object_p (abfd)
     }
   next_byte (&(ieee->h));
 
-  if (parse_int (&(ieee->h), &ieee->ad.number_of_bits_mau) == false)
+  if (! parse_int (&(ieee->h), &ieee->ad.number_of_bits_mau))
     {
       goto fail;
     }
-  if (parse_int (&(ieee->h), &ieee->ad.number_of_maus_in_address) == false)
+  if (! parse_int (&(ieee->h), &ieee->ad.number_of_maus_in_address))
     {
       goto fail;
     }
@@ -1690,7 +1690,7 @@ ieee_object_p (abfd)
 	}
 
       ieee->w.offset[part] = parse_i (&(ieee->h), &ok);
-      if (ok == false)
+      if (! ok)
 	{
 	  goto fail;
 	}
@@ -1895,7 +1895,7 @@ do_one (ieee, current_map, location_ptr, s, iterations)
 		    case 0:
 		    case 4:
 
-		      if (pcrel == true)
+		      if (pcrel)
 			{
 #if KEEPMINUSPCININST
 			  bfd_put_32 (ieee->h.abfd, -current_map->pc,
@@ -1917,7 +1917,7 @@ do_one (ieee, current_map, location_ptr, s, iterations)
 		      current_map->pc += 4;
 		      break;
 		    case 2:
-		      if (pcrel == true)
+		      if (pcrel)
 			{
 #if KEEPMINUSPCININST
 			  bfd_put_16 (ieee->h.abfd, (bfd_vma) -current_map->pc,
@@ -1941,7 +1941,7 @@ do_one (ieee, current_map, location_ptr, s, iterations)
 		      current_map->pc += 2;
 		      break;
 		    case 1:
-		      if (pcrel == true)
+		      if (pcrel)
 			{
 #if KEEPMINUSPCININST
 			  bfd_put_8 (ieee->h.abfd, (int) (-current_map->pc), location_ptr + current_map->pc);
@@ -1969,7 +1969,7 @@ do_one (ieee, current_map, location_ptr, s, iterations)
 	      default:
 		{
 		  bfd_vma this_size;
-		  if (parse_int (&(ieee->h), &this_size) == true)
+		  if (parse_int (&(ieee->h), &this_size))
 		    {
 		      unsigned int i;
 		      for (i = 0; i < this_size; i++)
@@ -2007,7 +2007,7 @@ ieee_slurp_section_data (abfd)
   ieee_per_section_type *current_map = (ieee_per_section_type *) NULL;
   asection *s;
   /* Seek to the start of the data area */
-  if (ieee->read_data == true)
+  if (ieee->read_data)
     return true;
   ieee->read_data = true;
   ieee_seek (ieee, ieee->w.r.data_part);
@@ -2625,7 +2625,7 @@ ieee_mkobject (abfd)
   output_buffer = 0;
   amt = sizeof (ieee_data_type);
   abfd->tdata.ieee_data = (ieee_data_type *) bfd_zalloc (abfd, amt);
-  return abfd->tdata.ieee_data ? true : false;
+  return abfd->tdata.ieee_data != NULL;
 }
 
 static void
@@ -3942,7 +3942,7 @@ ieee_bfd_debug_info_accumulate (abfd, section)
   if (section->owner->xvec != abfd->xvec)
     return;
   /* Only bother once per bfd */
-  if (ieee->done_debug == true)
+  if (ieee->done_debug)
     return;
   ieee->done_debug = true;
 

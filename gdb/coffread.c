@@ -1409,13 +1409,12 @@ patch_opaque_types (struct symtab *s)
 
   /* Go through the per-file symbols only */
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-  for (i = BLOCK_NSYMS (b) - 1; i >= 0; i--)
+  ALL_BLOCK_SYMBOLS (b, i, real_sym)
     {
       /* Find completed typedefs to use to fix opaque ones.
          Remove syms from the chain when their types are stored,
          but search the whole chain, as there may be several syms
          from different files with the same name.  */
-      real_sym = BLOCK_SYM (b, i);
       if (SYMBOL_CLASS (real_sym) == LOC_TYPEDEF &&
 	  SYMBOL_NAMESPACE (real_sym) == VAR_NAMESPACE &&
 	  TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR &&

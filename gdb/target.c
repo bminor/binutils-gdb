@@ -103,9 +103,8 @@ static void debug_to_store_registers (int);
 
 static void debug_to_prepare_to_store (void);
 
-static int
-debug_to_xfer_memory (CORE_ADDR, char *, int, int, struct mem_attrib *, 
-		      struct target_ops *);
+static int debug_to_xfer_memory (CORE_ADDR, char *, int, int,
+				 struct mem_attrib *, struct target_ops *);
 
 static void debug_to_files_info (struct target_ops *);
 
@@ -2305,7 +2304,7 @@ Set mode for reading from readonly sections.\n\
 When this mode is on, memory reads from readonly sections (such as .text)\n\
 will be read from the object file instead of from the target.  This will\n\
 result in significant performance improvement for remote targets.", "\
-Set mode for reading from readonly sections.\n",
+Show mode for reading from readonly sections.\n",
 			   NULL, NULL,
 			   &setlist, &showlist);
 

@@ -528,6 +528,26 @@ get_frame_pc (struct frame_info *frame)
   return frame->pc;
 }
 
+/* return the address of the PC for the given FRAME, ie the current PC value
+   if FRAME is the innermost frame, or the address adjusted to point to the
+   call instruction if not.  */
+
+CORE_ADDR
+frame_address_in_block (struct frame_info *frame)
+{
+  CORE_ADDR pc = frame->pc;
+
+  /* If we are not in the innermost frame, and we are not interrupted
+     by a signal, frame->pc points to the instruction following the
+     call. As a consequence, we need to get the address of the previous
+     instruction. Unfortunately, this is not straightforward to do, so
+     we just use the address minus one, which is a good enough
+     approximation.  */
+  if (frame->next != 0 && frame->next->signal_handler_caller == 0)
+    --pc;
+
+  return pc;
+}
 
 #ifdef FRAME_FIND_SAVED_REGS
 /* XXX - deprecated.  This is a compatibility function for targets
@@ -576,17 +596,7 @@ get_frame_saved_regs (struct frame_info *frame,
 struct block *
 get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
-  CORE_ADDR pc;
-
-  pc = frame->pc;
-  if (frame->next != 0 && frame->next->signal_handler_caller == 0)
-    /* We are not in the innermost frame and we were not interrupted
-       by a signal.  We need to subtract one to get the correct block,
-       in case the call instruction was the last instruction of the block.
-       If there are any machines on which the saved pc does not point to
-       after the call insn, we probably want to make frame->pc point after
-       the call insn anyway.  */
-    --pc;
+  const CORE_ADDR pc = frame_address_in_block (frame);
 
   if (addr_in_block)
     *addr_in_block = pc;
@@ -622,6 +632,8 @@ get_pc_function_start (CORE_ADDR pc)
   else if ((msymbol = lookup_minimal_symbol_by_pc (pc)) != NULL)
     {
       fstart = SYMBOL_VALUE_ADDRESS (msymbol);
+      if (!find_pc_section (fstart))
+	return 0;
     }
   else
     {
@@ -970,6 +982,7 @@ block_innermost_frame (struct block *block)
   struct frame_info *frame;
   register CORE_ADDR start;
   register CORE_ADDR end;
+  CORE_ADDR calling_pc;
 
   if (block == NULL)
     return NULL;
@@ -983,7 +996,8 @@ block_innermost_frame (struct block *block)
       frame = get_prev_frame (frame);
       if (frame == NULL)
 	return NULL;
-      if (frame->pc >= start && frame->pc < end)
+      calling_pc = frame_address_in_block (frame);
+      if (calling_pc >= start && calling_pc < end)
 	return frame;
     }
 }
@@ -1127,7 +1141,7 @@ struct dummy_frame
   CORE_ADDR fp;
   CORE_ADDR sp;
   CORE_ADDR top;
-  char *registers;
+  struct regcache *regcache;
 
   /* Address range of the call dummy code.  Look for PC in the range
      [LO..HI) (after allowing for DECR_PC_AFTER_BREAK).  */
@@ -1144,7 +1158,7 @@ static struct dummy_frame *dummy_frame_stack = NULL;
    adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
    to call this function after the PC has been adjusted.  */
 
-char *
+static struct regcache *
 generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummyframe;
@@ -1156,9 +1170,18 @@ generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 	    || fp == dummyframe->sp
 	    || fp == dummyframe->top))
       /* The frame in question lies between the saved fp and sp, inclusive */
-      return dummyframe->registers;
+      return dummyframe->regcache;
 
   return 0;
+}
+
+char *
+deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
+{
+  struct regcache *regcache = generic_find_dummy_frame (pc, fp);
+  if (regcache == NULL)
+    return NULL;
+  return deprecated_grub_regcache_for_registers (regcache);
 }
 
 /* Function: pc_in_call_dummy (pc, sp, fp)
@@ -1189,11 +1212,10 @@ generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
 CORE_ADDR
 generic_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
 {
-  char *dummy_regs = generic_find_dummy_frame (pc, fp);
+  struct regcache *dummy_regs = generic_find_dummy_frame (pc, fp);
 
   if (dummy_regs)
-    return extract_address (&dummy_regs[REGISTER_BYTE (regno)],
-			    REGISTER_RAW_SIZE (regno));
+    return regcache_read_as_address (dummy_regs, regno);
   else
     return 0;
 }
@@ -1220,7 +1242,7 @@ generic_push_dummy_frame (void)
     if (INNER_THAN (dummy_frame->fp, fp))	/* stale -- destroy! */
       {
 	dummy_frame_stack = dummy_frame->next;
-	xfree (dummy_frame->registers);
+	regcache_xfree (dummy_frame->regcache);
 	xfree (dummy_frame);
 	dummy_frame = dummy_frame_stack;
       }
@@ -1228,13 +1250,13 @@ generic_push_dummy_frame (void)
       dummy_frame = dummy_frame->next;
 
   dummy_frame = xmalloc (sizeof (struct dummy_frame));
-  dummy_frame->registers = xmalloc (REGISTER_BYTES);
+  dummy_frame->regcache = regcache_xmalloc (current_gdbarch);
 
   dummy_frame->pc = read_pc ();
   dummy_frame->sp = read_sp ();
   dummy_frame->top = dummy_frame->sp;
   dummy_frame->fp = fp;
-  read_register_bytes (0, dummy_frame->registers, REGISTER_BYTES);
+  regcache_cpy (dummy_frame->regcache, current_regcache);
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
 }
@@ -1282,10 +1304,10 @@ generic_pop_dummy_frame (void)
   if (!dummy_frame)
     error ("Can't pop dummy frame!");
   dummy_frame_stack = dummy_frame->next;
-  write_register_bytes (0, dummy_frame->registers, REGISTER_BYTES);
+  regcache_cpy (current_regcache, dummy_frame->regcache);
   flush_cached_frames ();
 
-  xfree (dummy_frame->registers);
+  regcache_xfree (dummy_frame->regcache);
   xfree (dummy_frame);
 }
 
@@ -1350,7 +1372,7 @@ generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
   /* If needed, find and return the value of the register.  */
   if (bufferp != NULL)
     {
-      char *registers;
+      struct regcache *registers;
 #if 1
       /* Get the address of the register buffer that contains all the
 	 saved registers for this dummy frame.  Cache that address.  */
@@ -1367,8 +1389,11 @@ generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
 #endif
       gdb_assert (registers != NULL);
       /* Return the actual value.  */
-      memcpy (bufferp, registers + REGISTER_BYTE (regnum),
-	      REGISTER_RAW_SIZE (regnum));
+      /* FIXME: cagney/2002-06-26: This should be via the
+         gdbarch_register_read() method so that it, on the fly,
+         constructs either a raw or pseudo register from the raw
+         register cache.  */
+      regcache_read (registers, regnum, bufferp);
     }
 }
 
@@ -1514,10 +1539,12 @@ generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	  if (lval)		/* found it in a CALL_DUMMY frame */
 	    *lval = not_lval;
 	  if (raw_buffer)
-	    memcpy (raw_buffer,
-		    generic_find_dummy_frame (frame->pc, frame->frame) +
-		    REGISTER_BYTE (regnum),
-		    REGISTER_RAW_SIZE (regnum));
+	    /* FIXME: cagney/2002-06-26: This should be via the
+	       gdbarch_register_read() method so that it, on the fly,
+	       constructs either a raw or pseudo register from the raw
+	       register cache.  */
+	    regcache_read (generic_find_dummy_frame (frame->pc, frame->frame),
+			   regnum, raw_buffer);
 	  return;
 	}
 

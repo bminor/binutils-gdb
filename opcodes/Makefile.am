@@ -30,6 +30,7 @@ HFILES = \
 	h8500-opc.h \
 	ia64-asmtab.h \
 	ia64-opc.h \
+	ip2k-desc.h ip2k-opc.h \
 	m32r-desc.h m32r-opc.h \
 	mcore-opc.h \
 	openrisc-desc.h openrisc-opc.h \
@@ -90,6 +91,11 @@ CFILES = \
 	ia64-opc.c \
 	ia64-gen.c \
 	ia64-asmtab.c \
+	ip2k-asm.c \
+	ip2k-desc.c \
+	ip2k-dis.c \
+	ip2k-ibld.c \
+	ip2k-opc.c \
 	m32r-asm.c \
 	m32r-desc.c \
 	m32r-dis.c \
@@ -189,6 +195,11 @@ ALL_MACHINES = \
 	i960-dis.lo \
 	ia64-dis.lo \
 	ia64-opc.lo \
+	ip2k-asm.lo \
+	ip2k-desc.lo \
+	ip2k-dis.lo \
+	ip2k-ibld.lo \
+	ip2k-opc.lo \
 	m32r-asm.lo \
 	m32r-desc.lo \
 	m32r-dis.lo \
@@ -312,7 +323,7 @@ uninstall_libopcodes:
 	rm -f $(DESTDIR)$(bfdincludedir)/dis-asm.h
 
 CLEANFILES = \
-	stamp-m32r stamp-fr30 stamp-frv stamp-openrisc \
+	stamp-ip2k stamp-m32r stamp-fr30 stamp-frv stamp-openrisc \
 	stamp-xstormy16 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
@@ -330,12 +341,14 @@ CGENDEPS = \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
 if CGEN_MAINT
+IP2K_DEPS = stamp-ip2k
 M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
 FRV_DEPS = stamp-frv
 OPENRISC_DEPS = stamp-openrisc
 XSTORMY16_DEPS = stamp-xstormy16
 else
+IP2K_DEPS =
 M32R_DEPS =
 FR30_DEPS =
 FRV_DEPS =
@@ -351,6 +364,11 @@ run-cgen:
 .PHONY: run-cgen
 
 # For now, require developers to configure with --enable-cgen-maint.
+$(srcdir)/ip2k-desc.h $(srcdir)/ip2k-desc.c $(srcdir)/ip2k-opc.h $(srcdir)/ip2k-opc.c $(srcdir)/ip2k-ibld.c $(srcdir)/ip2k-asm.c $(srcdir)/ip2k-dis.c: $(IP2K_DEPS)
+	@true
+stamp-ip2k: $(CGENDEPS) $(CPUDIR)/ip2k.cpu $(CPUDIR)/ip2k.opc
+	$(MAKE) run-cgen arch=ip2k prefix=ip2k options= extrafiles=
+
 $(srcdir)/m32r-desc.h $(srcdir)/m32r-desc.c $(srcdir)/m32r-opc.h $(srcdir)/m32r-opc.c $(srcdir)/m32r-ibld.c $(srcdir)/m32r-opinst.c $(srcdir)/m32r-asm.c $(srcdir)/m32r-dis.c: $(M32R_DEPS)
 	@true
 stamp-m32r: $(CGENDEPS) $(CPUDIR)/m32r.cpu $(CPUDIR)/m32r.opc
@@ -572,6 +590,23 @@ ia64-gen.lo: ia64-gen.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   ia64-opc-a.c ia64-opc-i.c ia64-opc-m.c ia64-opc-b.c \
   ia64-opc-f.c ia64-opc-x.c ia64-opc-d.c
 ia64-asmtab.lo: ia64-asmtab.c
+ip2k-asm.lo: ip2k-asm.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h ip2k-desc.h \
+  $(INCDIR)/opcode/cgen.h ip2k-opc.h opintl.h
+ip2k-desc.lo: ip2k-desc.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h ip2k-desc.h \
+  $(INCDIR)/opcode/cgen.h ip2k-opc.h opintl.h
+ip2k-dis.lo: ip2k-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h ip2k-desc.h $(INCDIR)/opcode/cgen.h \
+  ip2k-opc.h opintl.h
+ip2k-ibld.lo: ip2k-ibld.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h ip2k-desc.h $(INCDIR)/opcode/cgen.h \
+  ip2k-opc.h opintl.h
+ip2k-opc.lo: ip2k-opc.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h ip2k-desc.h \
+  $(INCDIR)/opcode/cgen.h ip2k-opc.h
 m32r-asm.lo: m32r-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-desc.h $(INCDIR)/opcode/cgen.h \
   m32r-opc.h opintl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h \

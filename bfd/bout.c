@@ -956,7 +956,7 @@ b_out_set_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  if (abfd->output_has_begun == false)
+  if (! abfd->output_has_begun)
     {
       /* Set by bfd.c handler.  */
       if (! aout_32_make_sections (abfd))

@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+boolean ppc64_elf_mark_entry_syms
+  PARAMS ((struct bfd_link_info *));
 bfd_vma ppc64_elf_toc
   PARAMS ((bfd *));
 int ppc64_elf_setup_section_lists

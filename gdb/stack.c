@@ -461,7 +461,7 @@ print_frame (struct frame_info *fi,
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
 
-  func = find_pc_function (fi->pc);
+  func = find_pc_function (frame_address_in_block (fi));
   if (func)
     {
       /* In certain pathological cases, the symtabs give the wrong
@@ -480,7 +480,7 @@ print_frame (struct frame_info *fi,
          ever changed many parts of GDB will need to be changed (and we'll
          create a find_pc_minimal_function or some such).  */
 
-      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (frame_address_in_block (fi));
       if (msymbol != NULL
 	  && (SYMBOL_VALUE_ADDRESS (msymbol)
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
@@ -528,7 +528,7 @@ print_frame (struct frame_info *fi,
     }
   else
     {
-      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (frame_address_in_block (fi));
       if (msymbol != NULL)
 	{
 	  funname = SYMBOL_NAME (msymbol);
@@ -1111,7 +1111,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
 	   fi = get_prev_frame (fi))
 	{
 	  QUIT;
-	  ps = find_pc_psymtab (fi->pc);
+	  ps = find_pc_psymtab (frame_address_in_block (fi));
 	  if (ps)
 	    PSYMTAB_TO_SYMTAB (ps);	/* Force syms to come in */
 	}

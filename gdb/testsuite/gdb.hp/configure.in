@@ -12,6 +12,6 @@ AC_SUBST(CC)
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../../..)
 AC_CANONICAL_SYSTEM
 
-AC_CONFIG_SUBDIRS(gdb.aCC gdb.base-hp gdb.compat gdb.defects gdb.objdbg gdb.threads-hp)
+AC_CONFIG_SUBDIRS(gdb.aCC gdb.base-hp gdb.compat gdb.defects gdb.objdbg)
 
 AC_OUTPUT(Makefile)

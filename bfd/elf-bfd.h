@@ -223,6 +223,12 @@ struct elf_link_local_dynamic_entry
   Elf_Internal_Sym isym;
 };
 
+struct elf_link_loaded_list
+{
+  struct elf_link_loaded_list *next;
+  bfd *abfd;
+};
+
 enum elf_link_info_type
 {
   ELF_INFO_TYPE_NONE,
@@ -297,6 +303,9 @@ struct elf_link_hash_table
 
   /* Cached start, size and alignment of PT_TLS segment.  */
   struct elf_link_tls_segment *tls_segment;
+
+  /* A linked list of BFD's loaded in the link.  */
+  struct elf_link_loaded_list *loaded;
 };
 
 /* Look up an entry in an ELF linker hash table.  */
@@ -408,8 +417,7 @@ enum elf_reloc_type_class {
 struct elf_reloc_cookie
 {
   Elf_Internal_Rela *rels, *rel, *relend;
-  PTR locsyms;
-  PTR locsym_shndx;
+  Elf_Internal_Sym *locsyms;
   bfd *abfd;
   size_t locsymcount;
   size_t extsymoff;
@@ -671,10 +679,9 @@ struct elf_backend_data
     PARAMS ((bfd *));
 
   /* This function is called during section gc to discover the section a
-     particular relocation refers to.  It need not be defined for hosts
-     that have no queer relocation types.  */
+     particular relocation refers to.  */
   asection * (*gc_mark_hook)
-    PARAMS ((bfd *abfd, struct bfd_link_info *, Elf_Internal_Rela *,
+    PARAMS ((asection *sec, struct bfd_link_info *, Elf_Internal_Rela *,
 	     struct elf_link_hash_entry *h, Elf_Internal_Sym *));
 
   /* This function, if defined, is called during the sweep phase of gc
@@ -704,7 +711,7 @@ struct elf_backend_data
     PARAMS ((bfd *, struct bfd_link_info *, PTR,
 	    boolean (*) (PTR, const char *, Elf_Internal_Sym *, asection *)));
 
-  /* Copy any information related to dynamic linking from a pre-existing 
+  /* Copy any information related to dynamic linking from a pre-existing
      symbol to a newly created symbol.  Also called to copy flags and
      other back-end info to a weakdef, in which case the symbol is not
      newly created and plt/got refcounts and dynamic indices should not
@@ -773,7 +780,7 @@ struct elf_backend_data
     PARAMS ((asection *, Elf_Internal_Phdr *));
 
   /* This function, if defined, returns true if copy_private_bfd_data
-     should be called.  It provides a way of overriding default 
+     should be called.  It provides a way of overriding default
      test conditions in _bfd_elf_copy_private_section_data.  */
   boolean (*copy_private_bfd_data_p)
     PARAMS ((bfd *, asection *, bfd *, asection *));
@@ -1208,6 +1215,9 @@ extern char *bfd_elf_string_from_elf_section
   PARAMS ((bfd *, unsigned, unsigned));
 extern char *bfd_elf_get_str_section
   PARAMS ((bfd *, unsigned));
+extern Elf_Internal_Sym *bfd_elf_get_elf_syms
+  PARAMS ((bfd *, Elf_Internal_Shdr *, size_t, size_t,
+	   Elf_Internal_Sym *, PTR, Elf_External_Sym_Shndx *));
 
 extern boolean _bfd_elf_copy_private_bfd_data
   PARAMS ((bfd *, bfd *));
@@ -1583,20 +1593,20 @@ extern boolean _bfd_elf64_reloc_symbol_deleted_p
   PARAMS ((bfd_vma, PTR));
 
 /* Exported interface for writing elf corefile notes. */
-extern char *elfcore_write_note 
-  PARAMS ((bfd *, char *, int *, char *, int, void *, int));
-extern char *elfcore_write_prpsinfo 
-  PARAMS ((bfd *, char *, int *, char *, char *));
-extern char *elfcore_write_prstatus 
-  PARAMS ((bfd *, char *, int *, long, int, void *));
-extern char * elfcore_write_pstatus 
-  PARAMS ((bfd *, char *, int *, long, int, void *));
-extern char *elfcore_write_prfpreg 
-  PARAMS ((bfd *, char *, int *, void *, int));
-extern char *elfcore_write_prxfpreg 
-  PARAMS ((bfd *, char *, int *, void *, int));
-extern char *elfcore_write_lwpstatus 
-  PARAMS ((bfd*, char*, int*, long, int, void*));
+extern char *elfcore_write_note
+  PARAMS ((bfd *, char *, int *, const char *, int, const PTR, int));
+extern char *elfcore_write_prpsinfo
+  PARAMS ((bfd *, char *, int *, const char *, const char *));
+extern char *elfcore_write_prstatus
+  PARAMS ((bfd *, char *, int *, long, int, const PTR));
+extern char * elfcore_write_pstatus
+  PARAMS ((bfd *, char *, int *, long, int, const PTR));
+extern char *elfcore_write_prfpreg
+  PARAMS ((bfd *, char *, int *, const PTR, int));
+extern char *elfcore_write_prxfpreg
+  PARAMS ((bfd *, char *, int *, const PTR, int));
+extern char *elfcore_write_lwpstatus
+  PARAMS ((bfd *, char *, int *, long, int, const PTR));
 
 /* SH ELF specific routine.  */
 

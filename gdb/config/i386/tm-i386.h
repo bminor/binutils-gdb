@@ -26,12 +26,6 @@
 
 #include "regcache.h"
 
-/* Forward declarations for prototypes.  */
-struct frame_info;
-struct frame_saved_regs;
-struct value;
-struct type;
-
 /* Print out the i387 floating point state.  */
 extern void i387_float_info (void);
 #define FLOAT_INFO { i387_float_info (); }

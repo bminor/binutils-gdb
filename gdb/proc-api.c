@@ -36,7 +36,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/procfs.h>
+#ifdef HAVE_SYS_PROC_H
 #include <sys/proc.h>	/* for struct proc */
+#endif
 #ifdef HAVE_SYS_USER_H
 #include <sys/user.h>	/* for struct user */
 #endif

@@ -52,6 +52,7 @@
 #include "stabsread.h"
 #include "complaints.h"
 #include "demangle.h"
+#include "gdb_assert.h"
 
 /* These are needed if the tm.h file does not contain the necessary
    mips specific definitions.  */
@@ -4726,6 +4727,11 @@ shrink_block (struct block *b, struct symtab *s)
 				   (sizeof (struct block)
 				    + ((BLOCK_NSYMS (b) - 1)
 				       * sizeof (struct symbol *))));
+
+  /* FIXME: Not worth hashing this block as it's built.  */
+  /* All callers should have created the block with new_block (), which
+     would mean it was not previously hashed.  Make sure.  */
+  gdb_assert (BLOCK_HASHTABLE (new) == 0);
 
   /* Should chase pointers to old one.  Fortunately, that`s just
      the block`s function and inferior blocks */

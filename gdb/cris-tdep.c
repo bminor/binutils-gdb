@@ -774,8 +774,8 @@ cris_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 /* Returns the register SRP (subroutine return pointer) which must contain 
    the content of the register PC after a function call.  */
 
-CORE_ADDR
-cris_saved_pc_after_call ()
+static CORE_ADDR
+cris_saved_pc_after_call (struct frame_info *frame)
 {
   return read_register (SRP_REGNUM);
 }
@@ -1155,7 +1155,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
   CORE_ADDR ip;
   struct symtab_and_line sal;
   int best_limit;
-  char *dummy_regs = generic_find_dummy_frame (fi->pc, fi->frame);
+  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
   
   /* Examine the entire prologue.  */
   register int frameless_p = 0; 
@@ -1520,7 +1520,7 @@ cris_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    all saved registers.  */
 
 void 
-cris_pop_frame ()
+cris_pop_frame (void)
 {
   register struct frame_info *fi = get_current_frame ();
   register int regno;

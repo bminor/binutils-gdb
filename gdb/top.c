@@ -723,12 +723,12 @@ execute_command (char *p, int from_tty)
 	execute_user_command (c, arg);
       else if (c->type == set_cmd || c->type == show_cmd)
 	do_setshow_command (arg, from_tty & caution, c);
-      else if (c->func == NULL)
+      else if (!cmd_func_p (c))
 	error ("That is not a command, just a help topic.");
       else if (call_command_hook)
 	call_command_hook (c, arg, from_tty & caution);
       else
-	(*c->func) (c, arg, from_tty & caution);
+	cmd_func (c, arg, from_tty & caution);
        
       /* If this command has been post-hooked, run the hook last. */
       execute_cmd_post_hook (c);
@@ -1057,7 +1057,7 @@ static int operate_saved_history = -1;
 /* This is put on the appropriate hook and helps operate-and-get-next
    do its work.  */
 void
-gdb_rl_operate_and_get_next_completion ()
+gdb_rl_operate_and_get_next_completion (void)
 {
   int delta = where_history () - operate_saved_history;
   /* The `key' argument to rl_get_previous_history is ignored.  */

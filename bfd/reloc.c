@@ -645,7 +645,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
   reloc_target_output_section = symbol->section->output_section;
 
   /* Convert input-section-relative symbol value to absolute.  */
-  if (output_bfd && howto->partial_inplace == false)
+  if (output_bfd && ! howto->partial_inplace)
     output_base = 0;
   else
     output_base = reloc_target_output_section->vma;
@@ -658,7 +658,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
   /* Here the variable relocation holds the final address of the
      symbol we are relocating against, plus any addend.  */
 
-  if (howto->pc_relative == true)
+  if (howto->pc_relative)
     {
       /* This is a PC relative relocation.  We want to set RELOCATION
 	 to the distance between the address of the symbol and the
@@ -691,13 +691,13 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
       relocation -=
 	input_section->output_section->vma + input_section->output_offset;
 
-      if (howto->pcrel_offset == true)
+      if (howto->pcrel_offset)
 	relocation -= reloc_entry->address;
     }
 
   if (output_bfd != (bfd *) NULL)
     {
-      if (howto->partial_inplace == false)
+      if (! howto->partial_inplace)
 	{
 	  /* This is a partial relocation, and we want to apply the relocation
 	     to the reloc entry rather than the raw data. Modify the reloc
@@ -1037,7 +1037,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
   reloc_target_output_section = symbol->section->output_section;
 
   /* Convert input-section-relative symbol value to absolute.  */
-  if (howto->partial_inplace == false)
+  if (! howto->partial_inplace)
     output_base = 0;
   else
     output_base = reloc_target_output_section->vma;
@@ -1050,7 +1050,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
   /* Here the variable relocation holds the final address of the
      symbol we are relocating against, plus any addend.  */
 
-  if (howto->pc_relative == true)
+  if (howto->pc_relative)
     {
       /* This is a PC relative relocation.  We want to set RELOCATION
 	 to the distance between the address of the symbol and the
@@ -1083,11 +1083,11 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
       relocation -=
 	input_section->output_section->vma + input_section->output_offset;
 
-      if (howto->pcrel_offset == true && howto->partial_inplace == true)
+      if (howto->pcrel_offset && howto->partial_inplace)
 	relocation -= reloc_entry->address;
     }
 
-  if (howto->partial_inplace == false)
+  if (! howto->partial_inplace)
     {
       /* This is a partial relocation, and we want to apply the relocation
 	 to the reloc entry rather than the raw data. Modify the reloc
@@ -3121,6 +3121,55 @@ ENUM
   BFD_RELOC_390_GOTENT
 ENUMDOC
   32 bit rel. offset to GOT entry.
+
+ENUM
+  BFD_RELOC_IP2K_FR9
+ENUMDOC
+  Scenix IP2K - 9-bit register number / data address
+ENUM
+  BFD_RELOC_IP2K_BANK
+ENUMDOC
+  Scenix IP2K - 4-bit register/data bank number
+ENUM
+  BFD_RELOC_IP2K_ADDR16CJP
+ENUMDOC
+  Scenix IP2K - low 13 bits of instruction word address
+ENUM
+  BFD_RELOC_IP2K_PAGE3
+ENUMDOC
+  Scenix IP2K - high 3 bits of instruction word address
+ENUM
+  BFD_RELOC_IP2K_LO8DATA
+ENUMX
+  BFD_RELOC_IP2K_HI8DATA
+ENUMX
+  BFD_RELOC_IP2K_EX8DATA
+ENUMDOC
+  Scenix IP2K - ext/low/high 8 bits of data address
+ENUM
+  BFD_RELOC_IP2K_LO8INSN
+ENUMX
+  BFD_RELOC_IP2K_HI8INSN
+ENUMDOC
+  Scenix IP2K - low/high 8 bits of instruction word address
+ENUM
+  BFD_RELOC_IP2K_PC_SKIP
+ENUMDOC
+  Scenix IP2K - even/odd PC modifier to modify snb pcl.0
+ENUM
+  BFD_RELOC_IP2K_TEXT
+ENUMDOC
+  Scenix IP2K - 16 bit word address in text section.
+ENUM
+  BFD_RELOC_IP2K_FR_OFFSET
+ENUMDOC
+  Scenix IP2K - 7-bit sp or dp offset
+ENUM
+  BFD_RELOC_VPE4KMATH_DATA
+ENUMX
+  BFD_RELOC_VPE4KMATH_INSN
+ENUMDOC
+  Scenix VPE4K coprocessor - data/insn-space addressing
 
 ENUM
   BFD_RELOC_VTABLE_INHERIT

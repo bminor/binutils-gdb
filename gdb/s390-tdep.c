@@ -955,7 +955,7 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
   if (fi->extra_info && fi->extra_info->saved_pc_valid)
     return fi->extra_info->saved_pc;
 
-  if (generic_find_dummy_frame (fi->pc, fi->frame))
+  if (deprecated_generic_find_dummy_frame (fi->pc, fi->frame))
     return generic_read_register_dummy (fi->pc, fi->frame, S390_PC_REGNUM);
 
   s390_frame_init_saved_regs (fi);
@@ -1009,7 +1009,7 @@ s390_frame_chain (struct frame_info *thisframe)
 {
   CORE_ADDR prev_fp = 0;
 
-  if (generic_find_dummy_frame (thisframe->pc, thisframe->frame))
+  if (deprecated_generic_find_dummy_frame (thisframe->pc, thisframe->frame))
     return generic_read_register_dummy (thisframe->pc, thisframe->frame,
                                         S390_SP_REGNUM);
   else
@@ -1189,7 +1189,7 @@ gdb_print_insn_s390 (bfd_vma memaddr, disassemble_info * info)
 
 /* Not the most efficent code in the world */
 int
-s390_fp_regnum ()
+s390_fp_regnum (void)
 {
   int regno = S390_SP_REGNUM;
   struct frame_extra_info fextra_info;
@@ -1204,7 +1204,7 @@ s390_fp_regnum ()
 }
 
 CORE_ADDR
-s390_read_fp ()
+s390_read_fp (void)
 {
   return read_register (s390_fp_regnum ());
 }
@@ -1246,7 +1246,7 @@ s390_pop_frame_regular (struct frame_info *frame)
    Used in the contexts of the "return" command, and of 
    target function calls from the debugger.  */
 void
-s390_pop_frame ()
+s390_pop_frame (void)
 {
   /* This function checks for and handles generic dummy frames, and
      calls back to our function for ordinary frames.  */
@@ -1874,7 +1874,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 
 void
-_initialize_s390_tdep ()
+_initialize_s390_tdep (void)
 {
 
   /* Hook us into the gdbarch mechanism.  */

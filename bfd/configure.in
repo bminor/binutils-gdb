@@ -365,6 +365,7 @@ changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/tahoe.h"'
 	;;
+  vax-*-netbsd*)	COREFILE=netbsd-core.lo ;;
   vax-*-ultrix2*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/vaxult2.h"'
@@ -581,6 +582,7 @@ do
     bfd_elf32_i960_vec)		tb="$tb elf32-i960.lo elf32.lo $elf" ;;
     bfd_elf32_ia64_big_vec)	tb="$tb elf32-ia64.lo elf32.lo $elf" ;;
     bfd_elf32_ia64_hpux_big_vec) tb="$tb elf32-ia64.lo elf32.lo $elf";;
+    bfd_elf32_ip2k_vec)		tb="$tb elf32-ip2k.lo elf32.lo $elf" ;;
     bfd_elf32_little_generic_vec) tb="$tb elf32-gen.lo elf32.lo $elf" ;;
     bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     bfd_elf32_littlearm_oabi_vec) tb="$tb elfarm-oabi.lo elf32.lo $elf" ;;
@@ -738,6 +740,7 @@ do
     tic80coff_vec)		tb="$tb coff-tic80.lo cofflink.lo" ;;
     vaxnetbsd_vec)		tb="$tb vaxnetbsd.lo aout32.lo" ;;
     vax1knetbsd_vec)		tb="$tb vax1knetbsd.lo aout32.lo" ;;
+    vaxbsd_vec)			tb="$tb vaxbsd.lo aout32.lo" ;;
     versados_vec)		tb="$tb versados.lo" ;;
     vms_alpha_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo"; target_size=64 ;;
     vms_vax_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo" ;;

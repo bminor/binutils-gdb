@@ -1,5 +1,5 @@
 /* Support for 32-bit SPARC NLM (NetWare Loadable Module)
-   Copyright 1993, 1994, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -296,9 +296,7 @@ nlm_sparc_read_import (abfd, sym)
     {
       asection *section;
 
-      if (nlm_sparc_read_reloc (abfd, sym, &section,
-			      &nlm_relocs -> reloc)
-	  == false)
+      if (! nlm_sparc_read_reloc (abfd, sym, &section, &nlm_relocs -> reloc))
 	return false;
       nlm_relocs -> section = section;
       nlm_relocs++;
@@ -342,7 +340,7 @@ nlm_sparc_write_import (abfd, sec, rel)
   bfd_put_32 (abfd, (bfd_vma) 1, temp);
   if (bfd_bwrite ((PTR) temp, (bfd_size_type) 4, abfd) != 4)
     return false;
-  if (nlm_sparc_write_reloc (abfd, sec, rel) == false)
+  if (! nlm_sparc_write_reloc (abfd, sec, rel))
     return false;
   return true;
 }
@@ -372,8 +370,7 @@ nlm_sparc_write_external (abfd, count, sym, relocs)
 
   for (i = 0; i < count; i++)
     {
-      if (nlm_sparc_write_reloc (abfd, relocs[i].sec,
-				 relocs[i].rel) == false)
+      if (! nlm_sparc_write_reloc (abfd, relocs[i].sec, relocs[i].rel))
 	return false;
     }
 

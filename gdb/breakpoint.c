@@ -6773,6 +6773,8 @@ delete_command (char *arg, int from_tty)
 {
   struct breakpoint *b, *temp;
 
+  dont_repeat ();
+
   if (arg == 0)
     {
       int breaks_to_delete = 0;

@@ -33,10 +33,11 @@ AM_PROG_CC_STDC
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
 
-dnl gdb doesn't use gettext, but bfd does.  We call this to ensure we
-dnl link with the correct libraries.
+dnl Set up for gettext.  PACKAGE is used when we call bindtextdomain.
 ALL_LINGUAS=
 CY_GNU_GETTEXT
+AC_DEFINE(PACKAGE, "gdb", [Name of this package. ])
+
 
 dnl List of object files added by configure.
 
@@ -120,7 +121,7 @@ esac; esac
 
 AC_CHECK_HEADERS(ctype.h nlist.h link.h thread_db.h proc_service.h \
 	memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
-	string.h sys/procfs.h sys/ptrace.h sys/reg.h stdint.h \
+	string.h sys/procfs.h sys/proc.h sys/ptrace.h sys/reg.h stdint.h \
 	term.h termio.h termios.h unistd.h wait.h sys/wait.h \
 	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h \
 	time.h sys/file.h sys/ioctl.h sys/user.h sys/fault.h sys/syscall.h \

@@ -2503,7 +2503,7 @@ set_disassembly_flavor_sfunc (char *args, int from_tty,
 }
 
 /* Return the ARM register name corresponding to register I.  */
-static char *
+static const char *
 arm_register_name (int i)
 {
   return arm_register_names[i];

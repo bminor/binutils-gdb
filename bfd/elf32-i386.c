@@ -57,7 +57,7 @@ static boolean elf_i386_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 static asection *elf_i386_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean elf_i386_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -1174,8 +1174,8 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
    relocation.  */
 
 static asection *
-elf_i386_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *abfd;
+elf_i386_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
@@ -1205,9 +1205,7 @@ elf_i386_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }
@@ -2428,7 +2426,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if (r_type == R_386_TLS_LE_32)
 	    {
-	      BFD_ASSERT (unresolved_reloc == false);
+	      BFD_ASSERT (! unresolved_reloc);
 	      if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
 		{
 		  unsigned int val, type;
@@ -2578,7 +2576,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  if (indx == 0)
 		    {
-	    	      BFD_ASSERT (unresolved_reloc == false);
+	    	      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_32 (output_bfd,
 				  relocation - dtpoff_base (info),
 				  htab->sgot->contents + off + 4);
@@ -2739,14 +2737,11 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
 
-      /* FIXME: Why do we allow debugging sections to escape this error?
-	 More importantly, why do we not emit dynamic relocs for
-	 R_386_32 above in debugging sections (which are ! SEC_ALLOC)?
-	 If we had emitted the dynamic reloc, we could remove the
-	 fudge here.  */
+      /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
+	 because such sections are not SEC_ALLOC and thus ld.so will
+	 not process them.  */
       if (unresolved_reloc
-	  && !(info->shared
-	       && (input_section->flags & SEC_DEBUGGING) != 0
+	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
 	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),

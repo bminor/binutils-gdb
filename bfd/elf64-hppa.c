@@ -195,6 +195,9 @@ static boolean elf64_hppa_create_dynamic_sections
 static boolean elf64_hppa_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 
+static boolean elf64_hppa_mark_milli_and_exported_functions
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+
 static boolean elf64_hppa_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
@@ -209,6 +212,9 @@ static boolean elf64_hppa_finish_dynamic_symbol
 static int elf64_hppa_additional_program_headers PARAMS ((bfd *));
 
 static boolean elf64_hppa_modify_segment_map PARAMS ((bfd *));
+
+static enum elf_reloc_type_class elf64_hppa_reloc_type_class
+  PARAMS ((const Elf_Internal_Rela *));
 
 static boolean elf64_hppa_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -585,7 +591,6 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
   struct elf64_hppa_link_hash_table *hppa_info;
   const Elf_Internal_Rela *relend;
   Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Shdr *shndx_hdr;
   const Elf_Internal_Rela *rel;
   asection *dlt, *plt, *stubs;
   char *buf;
@@ -607,15 +612,14 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
   /* If necessary, build a new table holding section symbols indices
-     for this BFD.  This is disgusting.  */
+     for this BFD.  */
 
   if (info->shared && hppa_info->section_syms_bfd != abfd)
     {
       unsigned long i;
       unsigned int highest_shndx;
-      Elf_Internal_Sym *local_syms, *isym;
-      Elf64_External_Sym *ext_syms, *esym;
-      Elf_External_Sym_Shndx *shndx_buf, *shndx;
+      Elf_Internal_Sym *local_syms = NULL;
+      Elf_Internal_Sym *isym, *isymend;
       bfd_size_type amt;
 
       /* We're done with the old cache of section index to section symbol
@@ -626,71 +630,26 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
       if (hppa_info->section_syms)
 	free (hppa_info->section_syms);
 
-      /* Allocate memory for the internal and external symbols.  */
-      amt = symtab_hdr->sh_info;
-      amt *= sizeof (Elf_Internal_Sym);
-      local_syms = (Elf_Internal_Sym *) bfd_malloc (amt);
-      if (local_syms == NULL)
-	return false;
-
-      amt = symtab_hdr->sh_info;
-      amt *= sizeof (Elf64_External_Sym);
-      ext_syms = (Elf64_External_Sym *) bfd_malloc (amt);
-      if (ext_syms == NULL)
+      /* Read this BFD's local symbols.  */
+      if (symtab_hdr->sh_info != 0)
 	{
-	  free (local_syms);
-	  return false;
+	  local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
+	  if (local_syms == NULL)
+	    local_syms = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+					       symtab_hdr->sh_info, 0,
+					       NULL, NULL, NULL);
+	  if (local_syms == NULL)
+	    return false;
 	}
 
-      /* Read in the local symbols.  */
-      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-          || bfd_bread (ext_syms, amt, abfd) != amt)
-        {
-	  free (ext_syms);
-	  free (local_syms);
-	  return false;
-        }
-
-      shndx_buf = NULL;
-      shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
-      if (shndx_hdr->sh_size != 0)
-	{
-	  amt = symtab_hdr->sh_info;
-	  amt *= sizeof (Elf_External_Sym_Shndx);
-	  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-	  if (shndx_buf == NULL)
-	    {
-	      free (ext_syms);
-	      free (local_syms);
-	      return false;
-	    }
-
-	  if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread (shndx_buf, amt, abfd) != amt)
-	    {
-	      free (shndx_buf);
-	      free (ext_syms);
-	      free (local_syms);
-	      return false;
-	    }
-	}
-
-      /* Swap in the local symbols, also record the highest section index
-	 referenced by the local symbols.  */
+      /* Record the highest section index referenced by the local symbols.  */
       highest_shndx = 0;
-      for (i = 0, isym = local_syms, esym = ext_syms, shndx = shndx_buf;
-	   i < symtab_hdr->sh_info;
-	   i++, esym++, isym++, shndx = (shndx != NULL ? shndx + 1 : NULL))
+      isymend = local_syms + symtab_hdr->sh_info;
+      for (isym = local_syms; isym < isymend; isym++)
 	{
-	  bfd_elf64_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
-				    isym);
 	  if (isym->st_shndx > highest_shndx)
 	    highest_shndx = isym->st_shndx;
 	}
-
-      /* Now we can free the external symbols.  */
-      free (shndx_buf);
-      free (ext_syms);
 
       /* Allocate an array to hold the section index to section symbol index
 	 mapping.  Bump by one since we start counting at zero.  */
@@ -701,14 +660,24 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 
       /* Now walk the local symbols again.  If we find a section symbol,
 	 record the index of the symbol into the section_syms array.  */
-      for (isym = local_syms, i = 0; i < symtab_hdr->sh_info; i++, isym++)
+      for (i = 0, isym = local_syms; isym < isymend; i++, isym++)
 	{
 	  if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
 	    hppa_info->section_syms[isym->st_shndx] = i;
 	}
 
-      /* We are finished with the local symbols.  Get rid of them.  */
-      free (local_syms);
+      /* We are finished with the local symbols.  */
+      if (local_syms != NULL
+	  && symtab_hdr->contents != (unsigned char *) local_syms)
+	{
+	  if (! info->keep_memory)
+	    free (local_syms);
+	  else
+	    {
+	      /* Cache the symbols for elf_link_input_bfd.  */
+	      symtab_hdr->contents = (unsigned char *) local_syms;
+	    }
+	}
 
       /* Record which BFD we built the section_syms mapping for.  */
       hppa_info->section_syms_bfd = abfd;
@@ -1073,7 +1042,7 @@ allocate_global_data_dlt (dyn_h, data)
 	     table since we might need to create a dynamic relocation
 	     against it.  */
 	  if (! h
-	      || (h && h->dynindx == -1))
+	      || (h->dynindx == -1 && h->type != STT_PARISC_MILLI))
 	    {
 	      bfd *owner;
 	      owner = (h ? h->root.u.def.section->owner : dyn_h->owner);
@@ -1168,7 +1137,7 @@ allocate_global_data_opd (dyn_h, data)
 	 we have to create an opd descriptor.  */
       else if (x->info->shared
 	       || h == NULL
-	       || h->dynindx == -1
+	       || (h->dynindx == -1 && h->type != STT_PARISC_MILLI)
 	       || (h->root.type == bfd_link_hash_defined
 		   || h->root.type == bfd_link_hash_defweak))
 	{
@@ -1542,7 +1511,8 @@ allocate_dynrel_entries (dyn_h, data)
       /* Make sure this symbol gets into the dynamic symbol table if it is
 	 not already recorded.  ?!? This should not be in the loop since
 	 the symbol need only be added once.  */
-      if (dyn_h->h == 0 || dyn_h->h->dynindx == -1)
+      if (dyn_h->h == 0
+	  || (dyn_h->h->dynindx == -1 && dyn_h->h->type != STT_PARISC_MILLI))
 	if (!_bfd_elf64_link_record_local_dynamic_symbol
 	    (x->info, rent->sec->owner, dyn_h->sym_indx))
 	  return false;
@@ -1610,6 +1580,36 @@ elf64_hppa_adjust_dynamic_symbol (info, h)
   return true;
 }
 
+/* This function is called via elf_link_hash_traverse to mark millicode
+   symbols with a dynindx of -1 and to remove the string table reference
+   from the dynamic symbol table.  If the symbol is not a millicode symbol,
+   elf64_hppa_mark_exported_functions is called.  */
+
+static boolean
+elf64_hppa_mark_milli_and_exported_functions (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct bfd_link_info *info = (struct bfd_link_info *)data;
+  struct elf_link_hash_entry *elf = h;
+
+  if (elf->root.type == bfd_link_hash_warning)
+    elf = (struct elf_link_hash_entry *) elf->root.u.i.link;
+
+  if (elf->type == STT_PARISC_MILLI)
+    {
+      if (elf->dynindx != -1)
+	{
+	  elf->dynindx = -1;
+	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+				  elf->dynstr_index);
+	}
+      return true;
+    }
+
+  return elf64_hppa_mark_exported_functions (h, data);
+}
+
 /* Set the final sizes of the dynamic sections and allocate memory for
    the contents of our special sections.  */
 
@@ -1630,6 +1630,19 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
+
+  /* Mark each function this program exports so that we will allocate
+     space in the .opd section for each function's FPTR.  If we are
+     creating dynamic sections, change the dynamic index of millicode
+     symbols to -1 and remove them from the string table for .dynstr.
+
+     We have to traverse the main linker hash table since we have to
+     find functions which may not have been mentioned in any relocs.  */
+  elf_link_hash_traverse (elf_hash_table (info),
+			  (elf_hash_table (info)->dynamic_sections_created
+			   ? elf64_hppa_mark_milli_and_exported_functions
+			   : elf64_hppa_mark_exported_functions),
+			  info);
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -1674,15 +1687,6 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 				    allocate_global_data_stub, &data);
       hppa_info->stub_sec->_raw_size = data.ofs;
     }
-
-  /* Mark each function this program exports so that we will allocate
-     space in the .opd section for each function's FPTR.
-
-     We have to traverse the main linker hash table since we have to
-     find functions which may not have been mentioned in any relocs.  */
-  elf_link_hash_traverse (elf_hash_table (info),
-			  elf64_hppa_mark_exported_functions,
-			  info);
 
   /* Allocate space for entries in the .opd section.  */
   if (elf64_hppa_hash_table (info)->opd_sec)
@@ -2099,11 +2103,6 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 		  stub->contents + dyn_h->stub_offset + 8);
     }
 
-  /* Millicode symbols should not be put in the dynamic
-     symbol table under any circumstances.  */
-  if (ELF_ST_TYPE (sym->st_info) == STT_PARISC_MILLI)
-    h->dynindx = -1;
-
   return true;
 }
 
@@ -2437,6 +2436,27 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
   return true;
 }
 
+/* Used to decide how to sort relocs in an optimal manner for the
+   dynamic linker, before writing them out.  */
+
+static enum elf_reloc_type_class
+elf64_hppa_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
+{
+  if (ELF64_R_SYM (rela->r_info) == 0)
+    return reloc_class_relative;
+
+  switch ((int) ELF64_R_TYPE (rela->r_info))
+    {
+    case R_PARISC_IPLT:
+      return reloc_class_plt;
+    case R_PARISC_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
+
 /* Finish up the dynamic sections.  */
 
 static boolean
@@ -2520,8 +2540,10 @@ elf64_hppa_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_RELA:
 	      s = hppa_info->other_rel_sec;
-	      if (! s)
+	      if (! s || ! s->_raw_size)
 		s = hppa_info->dlt_rel_sec;
+	      if (! s || ! s->_raw_size)
+		s = hppa_info->opd_rel_sec;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
@@ -2747,6 +2769,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_plt_header_size     0
 #define elf_backend_type_change_ok true
 #define elf_backend_get_symbol_type	     elf64_hppa_elf_get_symbol_type
+#define elf_backend_reloc_type_class	     elf64_hppa_reloc_type_class
 
 #include "elf64-target.h"
 

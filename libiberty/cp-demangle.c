@@ -51,6 +51,8 @@
 #include <string.h>
 #endif
 
+#include <ctype.h>
+
 #include "ansidecl.h"
 #include "libiberty.h"
 #include "dyn-string.h"
@@ -898,7 +900,7 @@ static status_t demangle_number_literally
 static status_t demangle_identifier
   PARAMS ((demangling_t, int, dyn_string_t));
 static status_t demangle_operator_name
-  PARAMS ((demangling_t, int, int *));
+  PARAMS ((demangling_t, int, int *, int *));
 static status_t demangle_nv_offset
   PARAMS ((demangling_t));
 static status_t demangle_v_offset
@@ -1325,7 +1327,7 @@ demangle_unqualified_name (dm, suppress_return_type)
       if (peek == 'c' && peek_char_next (dm) == 'v')
 	*suppress_return_type = 1;
 
-      RETURN_IF_ERROR (demangle_operator_name (dm, 0, &num_args));
+      RETURN_IF_ERROR (demangle_operator_name (dm, 0, &num_args, NULL));
     }
   else if (peek == 'C' || peek == 'D')
     {
@@ -1466,9 +1468,45 @@ demangle_identifier (dm, length, identifier)
 
   while (length-- > 0)
     {
+      int ch;
       if (end_of_name_p (dm))
 	return "Unexpected end of name in <identifier>.";
-      if (!dyn_string_append_char (identifier, next_char (dm)))
+      ch = next_char (dm);
+
+      /* Handle extended Unicode characters.  We encode them as __U{hex}_,
+         where {hex} omits leading 0's.  For instance, '$' is encoded as
+         "__U24_".  */
+      if (ch == '_'
+	  && peek_char (dm) == '_'
+	  && peek_char_next (dm) == 'U')
+	{
+	  char buf[10];
+	  int pos = 0;
+	  advance_char (dm); advance_char (dm); length -= 2;
+	  while (length-- > 0)
+	    {
+	      ch = next_char (dm);
+	      if (!isxdigit (ch))
+		break;
+	      buf[pos++] = ch;
+	    }
+	  if (ch != '_' || length < 0)
+	    return STATUS_ERROR;
+	  if (pos == 0)
+	    {
+	      /* __U_ just means __U.  */
+	      if (!dyn_string_append_cstr (identifier, "__U"))
+		return STATUS_ALLOCATION_FAILED;
+	      continue;
+	    }
+	  else
+	    {
+	      buf[pos] = '\0';
+	      ch = strtol (buf, 0, 16);
+	    }
+	}
+
+      if (!dyn_string_append_char (identifier, ch))
 	return STATUS_ALLOCATION_FAILED;
     }
 
@@ -1501,7 +1539,9 @@ demangle_identifier (dm, length, identifier)
 /* Demangles and emits an <operator-name>.  If SHORT_NAME is non-zero,
    the short form is emitted; otherwise the full source form
    (`operator +' etc.) is emitted.  *NUM_ARGS is set to the number of
-   operands that the operator takes.  
+   operands that the operator takes.  If TYPE_ARG is non-NULL,
+   *TYPE_ARG is set to 1 if the first argument is a type and 0
+   otherwise.
 
     <operator-name>
                   ::= nw        # new           
@@ -1551,15 +1591,17 @@ demangle_identifier (dm, length, identifier)
                   ::= cl        # ()            
                   ::= ix        # []            
                   ::= qu        # ?
-                  ::= sz        # sizeof 
+		  ::= st        # sizeof (a type)
+                  ::= sz        # sizeof (an expression)
                   ::= cv <type> # cast        
 		  ::= v [0-9] <source-name>  # vendor extended operator  */
 
 static status_t
-demangle_operator_name (dm, short_name, num_args)
+demangle_operator_name (dm, short_name, num_args, type_arg)
      demangling_t dm;
      int short_name;
      int *num_args;
+     int *type_arg;
 {
   struct operator_code
   {
@@ -1633,6 +1675,10 @@ demangle_operator_name (dm, short_name, num_args)
 
   DEMANGLE_TRACE ("operator-name", dm);
 
+  /* Assume the first argument is not a type.  */
+  if (type_arg)
+    *type_arg = 0;
+
   /* Is this a vendor-extended operator?  */
   if (c0 == 'v' && IS_DIGIT (c1))
     {
@@ -1649,6 +1695,16 @@ demangle_operator_name (dm, short_name, num_args)
       /* Demangle the converted-to type.  */
       RETURN_IF_ERROR (demangle_type (dm));
       *num_args = 0;
+      return STATUS_OK;
+    }
+
+  /* Is it the sizeof variant that takes a type?  */
+  if (c0 == 's' && c1 == 't')
+    {
+      RETURN_IF_ERROR (result_add (dm, " sizeof"));
+      *num_args = 1;
+      if (type_arg)
+	*type_arg = 1;
       return STATUS_OK;
     }
 
@@ -3154,6 +3210,7 @@ demangle_expression (dm)
     /* An operator expression.  */
     {
       int num_args;
+      int type_arg;
       status_t status = STATUS_OK;
       dyn_string_t operator_name;
 
@@ -3161,7 +3218,8 @@ demangle_expression (dm)
 	 operations in infix notation, capture the operator name
 	 first.  */
       RETURN_IF_ERROR (result_push (dm));
-      RETURN_IF_ERROR (demangle_operator_name (dm, 1, &num_args));
+      RETURN_IF_ERROR (demangle_operator_name (dm, 1, &num_args,
+					       &type_arg));
       operator_name = (dyn_string_t) result_pop (dm);
 
       /* If it's binary, do an operand first.  */
@@ -3182,7 +3240,10 @@ demangle_expression (dm)
       
       /* Emit its second (if binary) or only (if unary) operand.  */
       RETURN_IF_ERROR (result_add_char (dm, '('));
-      RETURN_IF_ERROR (demangle_expression (dm));
+      if (type_arg)
+	RETURN_IF_ERROR (demangle_type (dm));
+      else
+	RETURN_IF_ERROR (demangle_expression (dm));
       RETURN_IF_ERROR (result_add_char (dm, ')'));
 
       /* The ternary operator takes a third operand.  */
@@ -3857,6 +3918,7 @@ java_demangle_v3 (mangled)
 #endif /* IN_LIBGCC2 || IN_GLIBCPP_V3 */
 
 
+#ifndef IN_GLIBCPP_V3
 /* Demangle NAME in the G++ V3 ABI demangling style, and return either
    zero, indicating that some error occurred, or a demangling_t
    holding the results.  */
@@ -3894,7 +3956,6 @@ demangle_v3_with_details (name)
 }
 
 
-#ifndef IN_GLIBCPP_V3
 /* Return non-zero iff NAME is the mangled form of a constructor name
    in the G++ V3 ABI demangling style.  Specifically, return:
    - '1' if NAME is a complete object constructor,

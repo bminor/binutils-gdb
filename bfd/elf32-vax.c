@@ -38,7 +38,7 @@ static boolean elf_vax_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 static asection *elf_vax_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean elf_vax_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -542,13 +542,13 @@ elf32_vax_print_private_bfd_data (abfd, ptr)
   /* xgettext:c-format */
   fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
 
-  if (elf_elfheader (abfd)->e_flags & EF_NONPIC)
+  if (elf_elfheader (abfd)->e_flags & EF_VAX_NONPIC)
     fprintf (file, _(" [nonpic]"));
 
-  if (elf_elfheader (abfd)->e_flags & EF_DFLOAT)
+  if (elf_elfheader (abfd)->e_flags & EF_VAX_DFLOAT)
     fprintf (file, _(" [d-float]"));
 
-  if (elf_elfheader (abfd)->e_flags & EF_GFLOAT)
+  if (elf_elfheader (abfd)->e_flags & EF_VAX_GFLOAT)
     fprintf (file, _(" [g-float]"));
 
   fputc ('\n', file);
@@ -855,8 +855,8 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
    relocation.  */
 
 static asection *
-elf_vax_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *abfd;
+elf_vax_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
@@ -886,9 +886,7 @@ elf_vax_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }

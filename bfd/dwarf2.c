@@ -856,13 +856,18 @@ concat_filename (table, file)
   filename = table->files[file - 1].name;
   if (IS_ABSOLUTE_PATH(filename))
     return filename;
-
   else
     {
       char* dirname = (table->files[file - 1].dir
 		       ? table->dirs[table->files[file - 1].dir - 1]
 		       : table->comp_dir);
-      return (char*) concat (dirname, "/", filename, NULL);
+
+      /* Not all tools set DW_AT_comp_dir, so dirname may be unknown.  The
+	 best we can do is return the filename part.  */
+      if (dirname == NULL)
+	return filename;
+      else
+	return (char*) concat (dirname, "/", filename, NULL);
     }
 }
 
@@ -988,6 +993,13 @@ decode_line_info (unit, stash)
     {
       lh.total_length = read_8_bytes (abfd, line_ptr);
       line_ptr += 8;
+      offset_size = 8;
+    }
+  else if (lh.total_length == 0 && unit->addr_size == 8)
+    {
+      /* Handle (non-standard) 64-bit DWARF2 formats.  */
+      lh.total_length = read_4_bytes (abfd, line_ptr);
+      line_ptr += 4;
       offset_size = 8;
     }
   line_end = line_ptr + lh.total_length;

@@ -1316,8 +1316,10 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   struct type *value_type;
   unsigned char struct_return;
   CORE_ADDR struct_addr = 0;
+  struct regcache *retbuf;
+  struct cleanup *retbuf_cleanup;
   struct inferior_status *inf_status;
-  struct cleanup *old_chain;
+  struct cleanup *inf_status_cleanup;
   CORE_ADDR funaddr;
   int using_gcc;		/* Set to version of gcc in use, or zero if not gcc */
   CORE_ADDR real_pc;
@@ -1333,8 +1335,18 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   if (!target_has_execution)
     noprocess ();
 
+  /* Create a cleanup chain that contains the retbuf (buffer
+     containing the register values).  This chain is create BEFORE the
+     inf_status chain so that the inferior status can cleaned up
+     (restored or discarded) without having the retbuf freed.  */
+  retbuf = regcache_xmalloc (current_gdbarch);
+  retbuf_cleanup = make_cleanup_regcache_xfree (retbuf);
+
+  /* A cleanup for the inferior status.  Create this AFTER the retbuf
+     so that this can be discarded or applied without interfering with
+     the regbuf.  */
   inf_status = save_inferior_status (1);
-  old_chain = make_cleanup_restore_inferior_status (inf_status);
+  inf_status_cleanup = make_cleanup_restore_inferior_status (inf_status);
 
   /* PUSH_DUMMY_FRAME is responsible for saving the inferior registers
      (and POP_FRAME for restoring them).  (At least on most machines)
@@ -1656,7 +1668,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     SAVE_DUMMY_FRAME_TOS (sp);
 
   {
-    char *retbuf = (char*) alloca (REGISTER_BYTES);
     char *name;
     struct symbol *symbol;
 
@@ -1715,11 +1726,12 @@ Evaluation of the expression containing the function (%s) will be abandoned.",
 	  {
 	    /* The user wants to stay in the frame where we stopped (default).*/
 
-	    /* If we did the cleanups, we would print a spurious error
-	       message (Unable to restore previously selected frame),
-	       would write the registers from the inf_status (which is
-	       wrong), and would do other wrong things.  */
-	    discard_cleanups (old_chain);
+	    /* If we restored the inferior status (via the cleanup),
+	       we would print a spurious error message (Unable to
+	       restore previously selected frame), would write the
+	       registers from the inf_status (which is wrong), and
+	       would do other wrong things.  */
+	    discard_cleanups (inf_status_cleanup);
 	    discard_inferior_status (inf_status);
 
 	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
@@ -1737,11 +1749,12 @@ Evaluation of the expression containing the function (%s) will be abandoned.",
       {
 	/* We hit a breakpoint inside the FUNCTION. */
 
-	/* If we did the cleanups, we would print a spurious error
-	   message (Unable to restore previously selected frame),
-	   would write the registers from the inf_status (which is
-	   wrong), and would do other wrong things.  */
-	discard_cleanups (old_chain);
+	/* If we restored the inferior status (via the cleanup), we
+	   would print a spurious error message (Unable to restore
+	   previously selected frame), would write the registers from
+	   the inf_status (which is wrong), and would do other wrong
+	   things.  */
+	discard_cleanups (inf_status_cleanup);
 	discard_inferior_status (inf_status);
 
 	/* The following error message used to say "The expression
@@ -1761,7 +1774,10 @@ the function call).", name);
       }
 
     /* If we get here the called FUNCTION run to completion. */
-    do_cleanups (old_chain);
+
+    /* Restore the inferior status, via its cleanup.  At this stage,
+       leave the RETBUF alone.  */
+    do_cleanups (inf_status_cleanup);
 
     /* Figure out the value returned by the function.  */
 /* elz: I defined this new macro for the hppa architecture only.
@@ -1774,10 +1790,17 @@ the function call).", name);
 
 #ifdef VALUE_RETURNED_FROM_STACK
     if (struct_return)
-      return (struct value *) VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
+      {
+	do_cleanups (retbuf_cleanup);
+	return VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
+      }
 #endif
 
-    return value_being_returned (value_type, retbuf, struct_return);
+    {
+      struct value *retval = value_being_returned (value_type, retbuf, struct_return);
+      do_cleanups (retbuf_cleanup);
+      return retval;
+    }
   }
 }
 
@@ -2502,7 +2525,6 @@ value_struct_elt (struct value **argp, struct value **args,
  * ARGP is a pointer to a pointer to a value (the object)
  * METHOD is a string containing the method name
  * OFFSET is the offset within the value
- * STATIC_MEMFUNCP is set if the method is static
  * TYPE is the assumed type of the object
  * NUM_FNS is the number of overloaded instances
  * BASETYPE is set to the actual type of the subobject where the method is found
@@ -2593,7 +2615,6 @@ find_method_list (struct value **argp, char *method, int offset,
  * ARGP is a pointer to a pointer to a value (the object)
  * METHOD is the method name
  * OFFSET is the offset within the value contents
- * STATIC_MEMFUNCP is set if the method is static
  * NUM_FNS is the number of overloaded instances
  * BASETYPE is set to the type of the base subobject that defines the method
  * BOFFSET is the offset of the base subobject which defines the method */
@@ -2684,6 +2705,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   register int jj;
   register int ix;
   int static_offset;
+  struct cleanup *cleanups = NULL;
 
   char *obj_type_name = NULL;
   char *func_name = NULL;
@@ -2725,6 +2747,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
         }
 
       oload_syms = make_symbol_overload_list (fsym);
+      cleanups = make_cleanup (xfree, oload_syms);
       while (oload_syms[++i])
 	num_fns++;
       if (!num_fns)
@@ -2881,6 +2904,9 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	}
       *objp = temp;
     }
+  if (cleanups != NULL)
+    do_cleanups (cleanups);
+
   return oload_incompatible ? 100 : (oload_non_standard ? 10 : 0);
 }
 

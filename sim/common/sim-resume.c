@@ -65,24 +65,29 @@ sim_resume (SIM_DESC sd,
       int last_cpu_nr = sim_engine_last_cpu_nr (sd);
       int next_cpu_nr = sim_engine_next_cpu_nr (sd);
       int nr_cpus = sim_engine_nr_cpus (sd);
+      int sig_to_deliver;
 
       sim_events_preprocess (sd, last_cpu_nr >= nr_cpus, next_cpu_nr >= nr_cpus);
       if (next_cpu_nr >= nr_cpus)
 	next_cpu_nr = 0;
 
-      /* Only deliver the siggnal ]sic] the first time through - don't
-         re-deliver any siggnal during a restart. */
-      if (jmpval == sim_engine_restart_jmpval)
-	siggnal = 0;
+      /* Only deliver the SIGGNAL [sic] the first time through - don't
+         re-deliver any SIGGNAL during a restart.  NOTE: A new local
+         variable is used to avoid problems with the automatic
+         variable ``siggnal'' being trashed by a long jump.  */
+      if (jmpval == sim_engine_start_jmpval)
+	sig_to_deliver = siggnal;
+      else
+	sig_to_deliver = 0;
 
 #ifdef SIM_CPU_EXCEPTION_RESUME
       {
 	sim_cpu* cpu = STATE_CPU (sd, next_cpu_nr);
-	SIM_CPU_EXCEPTION_RESUME(sd, cpu, siggnal);
+	SIM_CPU_EXCEPTION_RESUME(sd, cpu, sig_to_deliver);
       }
 #endif
 
-      sim_engine_run (sd, next_cpu_nr, nr_cpus, siggnal);
+      sim_engine_run (sd, next_cpu_nr, nr_cpus, sig_to_deliver);
     }
   engine->jmpbuf = NULL;
 

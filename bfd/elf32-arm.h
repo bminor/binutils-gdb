@@ -58,7 +58,7 @@ static boolean elf32_arm_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static asection * elf32_arm_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean elf32_arm_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -639,12 +639,9 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
      int no_pipeline_knowledge;
 {
   Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Rela *free_relocs = NULL;
+  Elf_Internal_Rela *internal_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
   bfd_byte *contents = NULL;
-  bfd_byte *free_contents = NULL;
-  Elf32_External_Sym *extsyms = NULL;
-  Elf32_External_Sym *free_extsyms = NULL;
 
   asection *sec;
   struct elf32_arm_link_hash_table *globals;
@@ -677,13 +674,15 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
       symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
       /* Load the relocs.  */
-      irel = (_bfd_elf32_link_read_relocs (abfd, sec, (PTR) NULL,
-					   (Elf_Internal_Rela *) NULL, false));
+      internal_relocs
+	= _bfd_elf32_link_read_relocs (abfd, sec, (PTR) NULL,
+				       (Elf_Internal_Rela *) NULL, false);
 
-      BFD_ASSERT (irel != 0);
+      if (internal_relocs == NULL)
+	goto error_return;
 
-      irelend = irel + sec->reloc_count;
-      for (; irel < irelend; irel++)
+      irelend = internal_relocs + sec->reloc_count;
+      for (irel = internal_relocs; irel < irelend; irel++)
 	{
 	  long r_type;
 	  unsigned long r_index;
@@ -711,33 +710,8 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
 		  if (contents == NULL)
 		    goto error_return;
 
-		  free_contents = contents;
-
 		  if (!bfd_get_section_contents (abfd, sec, contents,
 						 (file_ptr) 0, sec->_raw_size))
-		    goto error_return;
-		}
-	    }
-
-	  /* Read this BFD's symbols if we haven't done so already.  */
-	  if (extsyms == NULL)
-	    {
-	      /* Get cached copy if it exists.  */
-	      if (symtab_hdr->contents != NULL)
-		extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
-	      else
-		{
-		  /* Go get them off disk.  */
-		  extsyms = ((Elf32_External_Sym *)
-			     bfd_malloc (symtab_hdr->sh_size));
-		  if (extsyms == NULL)
-		    goto error_return;
-
-		  free_extsyms = extsyms;
-
-		  if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		      || (bfd_bread (extsyms, symtab_hdr->sh_size, abfd)
-			  != symtab_hdr->sh_size))
 		    goto error_return;
 		}
 	    }
@@ -781,17 +755,27 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
 	      break;
 	    }
 	}
+
+      if (contents != NULL
+	  && elf_section_data (sec)->this_hdr.contents != contents)
+	free (contents);
+      contents = NULL;
+
+      if (internal_relocs != NULL
+	  && elf_section_data (sec)->relocs != internal_relocs)
+	free (internal_relocs);
+      internal_relocs = NULL;
     }
 
   return true;
 
 error_return:
-  if (free_relocs != NULL)
-    free (free_relocs);
-  if (free_contents != NULL)
-    free (free_contents);
-  if (free_extsyms != NULL)
-    free (free_extsyms);
+  if (contents != NULL
+      && elf_section_data (sec)->this_hdr.contents != contents)
+    free (contents);
+  if (internal_relocs != NULL
+      && elf_section_data (sec)->relocs != internal_relocs)
+    free (internal_relocs);
 
   return false;
 }
@@ -2223,7 +2207,7 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
   asection *sec;
 
   /* Check if we have the same endianess.  */
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     return false;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
@@ -2529,8 +2513,8 @@ elf32_arm_get_symbol_type (elf_sym, type)
 }
 
 static asection *
-elf32_arm_gc_mark_hook (abfd, info, rel, h, sym)
-       bfd *abfd;
+elf32_arm_gc_mark_hook (sec, info, rel, h, sym)
+       asection *sec;
        struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
@@ -2560,9 +2544,7 @@ elf32_arm_gc_mark_hook (abfd, info, rel, h, sym)
        }
      }
    else
-     {
-       return bfd_section_from_elf_index (abfd, sym->st_shndx);
-     }
+     return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }

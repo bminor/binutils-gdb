@@ -27,6 +27,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "floatformat.h"
+#include "symfile.h"
 #include "symtab.h"
 #include "gdbcmd.h"
 #include "command.h"
@@ -452,6 +453,42 @@ i386_get_frame_setup (CORE_ADDR pc)
   return (-1);
 }
 
+/* Signal trampolines don't have a meaningful frame.  The frame
+   pointer value we use is actually the frame pointer of the calling
+   frame -- that is, the frame which was in progress when the signal
+   trampoline was entered.  GDB mostly treats this frame pointer value
+   as a magic cookie.  We detect the case of a signal trampoline by
+   looking at the SIGNAL_HANDLER_CALLER field, which is set based on
+   PC_IN_SIGTRAMP.
+
+   When a signal trampoline is invoked from a frameless function, we
+   essentially have two frameless functions in a row.  In this case,
+   we use the same magic cookie for three frames in a row.  We detect
+   this case by seeing whether the next frame has
+   SIGNAL_HANDLER_CALLER set, and, if it does, checking whether the
+   current frame is actually frameless.  In this case, we need to get
+   the PC by looking at the SP register value stored in the signal
+   context.
+
+   This should work in most cases except in horrible situations where
+   a signal occurs just as we enter a function but before the frame
+   has been set up.  Incidentally, that's just what happens when we
+   call a function from GDB with a signal pending (there's a test in
+   the testsuite that makes this happen).  Therefore we pretend that
+   we have a frameless function if we're stopped at the start of a
+   function.  */
+
+/* Return non-zero if we're dealing with a frameless signal, that is,
+   a signal trampoline invoked from a frameless function.  */
+
+static int
+i386_frameless_signal_p (struct frame_info *frame)
+{
+  return (frame->next && frame->next->signal_handler_caller
+	  && (frameless_look_for_prologue (frame)
+	      || frame->pc == get_pc_function_start (frame->pc)));
+}
+
 /* Return the chain-pointer for FRAME.  In the case of the i386, the
    frame's nominal address is the address of a 4-byte word containing
    the calling frame's address.  */
@@ -459,7 +496,11 @@ i386_get_frame_setup (CORE_ADDR pc)
 static CORE_ADDR
 i386_frame_chain (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+    return frame->frame;
+
+  if (frame->signal_handler_caller
+      || i386_frameless_signal_p (frame))
     return frame->frame;
 
   if (! inside_entry_file (frame->pc))
@@ -472,7 +513,7 @@ i386_frame_chain (struct frame_info *frame)
    not have a from on the stack associated with it.  If it does not,
    return non-zero, otherwise return zero.  */
 
-int
+static int
 i386_frameless_function_invocation (struct frame_info *frame)
 {
   if (frame->signal_handler_caller)
@@ -481,18 +522,48 @@ i386_frameless_function_invocation (struct frame_info *frame)
   return frameless_look_for_prologue (frame);
 }
 
+/* Assuming FRAME is for a sigtramp routine, return the saved program
+   counter.  */
+
+static CORE_ADDR
+i386_sigtramp_saved_pc (struct frame_info *frame)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  CORE_ADDR addr;
+
+  addr = tdep->sigcontext_addr (frame);
+  return read_memory_unsigned_integer (addr + tdep->sc_pc_offset, 4);
+}
+
+/* Assuming FRAME is for a sigtramp routine, return the saved stack
+   pointer.  */
+
+static CORE_ADDR
+i386_sigtramp_saved_sp (struct frame_info *frame)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  CORE_ADDR addr;
+
+  addr = tdep->sigcontext_addr (frame);
+  return read_memory_unsigned_integer (addr + tdep->sc_sp_offset, 4);
+}
+
 /* Return the saved program counter for FRAME.  */
 
 static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
-    {
-      CORE_ADDR (*sigtramp_saved_pc) (struct frame_info *);
-      sigtramp_saved_pc = gdbarch_tdep (current_gdbarch)->sigtramp_saved_pc;
+  if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+    return generic_read_register_dummy (frame->pc, frame->frame,
+					PC_REGNUM);
 
-      gdb_assert (sigtramp_saved_pc != NULL);
-      return sigtramp_saved_pc (frame);
+  if (frame->signal_handler_caller)
+    return i386_sigtramp_saved_pc (frame);
+
+  if (i386_frameless_signal_p (frame))
+    {
+      CORE_ADDR sp = i386_sigtramp_saved_sp (frame->next);
+      return read_memory_unsigned_integer (sp, 4);
     }
 
   return read_memory_unsigned_integer (frame->frame + 4, 4);
@@ -503,13 +574,16 @@ i386_frame_saved_pc (struct frame_info *frame)
 static CORE_ADDR
 i386_saved_pc_after_call (struct frame_info *frame)
 {
+  if (frame->signal_handler_caller)
+    return i386_sigtramp_saved_pc (frame);
+
   return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
 }
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-int
+static int
 i386_frame_num_args (struct frame_info *fi)
 {
 #if 1
@@ -606,12 +680,11 @@ i386_frame_num_args (struct frame_info *fi)
    If the setup sequence is at the end of the function, then the next
    instruction will be a branch back to the start.  */
 
-void
+static void
 i386_frame_init_saved_regs (struct frame_info *fip)
 {
   long locals = -1;
   unsigned char op;
-  CORE_ADDR dummy_bottom;
   CORE_ADDR addr;
   CORE_ADDR pc;
   int i;
@@ -620,23 +693,6 @@ i386_frame_init_saved_regs (struct frame_info *fip)
     return;
 
   frame_saved_regs_zalloc (fip);
-
-  /* If the frame is the end of a dummy, compute where the beginning
-     would be.  */
-  dummy_bottom = fip->frame - 4 - REGISTER_BYTES - CALL_DUMMY_LENGTH;
-
-  /* Check if the PC points in the stack, in a dummy frame.  */
-  if (dummy_bottom <= fip->pc && fip->pc <= fip->frame)
-    {
-      /* All registers were saved by push_call_dummy.  */
-      addr = fip->frame;
-      for (i = 0; i < NUM_REGS; i++)
-	{
-	  addr -= REGISTER_RAW_SIZE (i);
-	  fip->saved_regs[i] = addr;
-	}
-      return;
-    }
 
   pc = get_pc_function_start (fip->pc);
   if (pc != 0)
@@ -666,7 +722,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
 /* Return PC of first real instruction.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_skip_prologue (CORE_ADDR pc)
 {
   unsigned char op;
@@ -767,66 +823,25 @@ i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
   return break_insn;
 }
 
-void
-i386_push_dummy_frame (void)
-{
-  CORE_ADDR sp = read_register (SP_REGNUM);
-  CORE_ADDR fp;
-  int regnum;
-  char regbuf[MAX_REGISTER_RAW_SIZE];
+/* Push the return address (pointing to the call dummy) onto the stack
+   and return the new value for the stack pointer.  */
 
-  sp = push_word (sp, read_register (PC_REGNUM));
-  sp = push_word (sp, read_register (FP_REGNUM));
-  fp = sp;
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
-    {
-      read_register_gen (regnum, regbuf);
-      sp = push_bytes (sp, regbuf, REGISTER_RAW_SIZE (regnum));
-    }
-  write_register (SP_REGNUM, sp);
-  write_register (FP_REGNUM, fp);
+static CORE_ADDR
+i386_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
+{
+  char buf[4];
+
+  store_unsigned_integer (buf, 4, CALL_DUMMY_ADDRESS ());
+  write_memory (sp - 4, buf, 4);
+  return sp - 4;
 }
 
-/* The i386 call dummy sequence:
-
-     call 11223344 (32-bit relative)
-     int 3
-
-   It is 8 bytes long.  */
-
-static LONGEST i386_call_dummy_words[] =
+static void
+i386_do_pop_frame (struct frame_info *frame)
 {
-  0x223344e8,
-  0xcc11
-};
-
-/* Insert the (relative) function address into the call sequence
-   stored at DYMMY.  */
-
-void
-i386_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-		     struct value **args, struct type *type, int gcc_p)
-{
-  int from, to, delta, loc;
-
-  loc = (int)(read_register (SP_REGNUM) - CALL_DUMMY_LENGTH);
-  from = loc + 5;
-  to = (int)(fun);
-  delta = to - from;
-
-  *((char *)(dummy) + 1) = (delta & 0xff);
-  *((char *)(dummy) + 2) = ((delta >> 8) & 0xff);
-  *((char *)(dummy) + 3) = ((delta >> 16) & 0xff);
-  *((char *)(dummy) + 4) = ((delta >> 24) & 0xff);
-}
-
-void
-i386_pop_frame (void)
-{
-  struct frame_info *frame = get_current_frame ();
   CORE_ADDR fp;
   int regnum;
-  char regbuf[MAX_REGISTER_RAW_SIZE];
+  char regbuf[I386_MAX_REGISTER_SIZE];
 
   fp = FRAME_FP (frame);
   i386_frame_init_saved_regs (frame);
@@ -846,6 +861,12 @@ i386_pop_frame (void)
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
+}
+
+static void
+i386_pop_frame (void)
+{
+  generic_pop_current_frame (i386_do_pop_frame);
 }
 
 
@@ -880,7 +901,7 @@ i386_get_longjmp_target (CORE_ADDR *pc)
 }
 
 
-CORE_ADDR
+static CORE_ADDR
 i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
@@ -898,7 +919,7 @@ i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
-void
+static void
 i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* Do nothing.  Everything was already done by i386_push_arguments.  */
@@ -914,15 +935,17 @@ i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
    function return value of TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-void
-i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+static void
+i386_extract_return_value (struct type *type, struct regcache *regcache,
+			   char *valbuf)
 {
   int len = TYPE_LENGTH (type);
+  char buf[I386_MAX_REGISTER_SIZE];
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       && TYPE_NFIELDS (type) == 1)
     {
-      i386_extract_return_value (TYPE_FIELD_TYPE (type, 0), regbuf, valbuf);
+      i386_extract_return_value (TYPE_FIELD_TYPE (type, 0), regcache, valbuf);
       return;
     }
 
@@ -939,8 +962,8 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	 its contents to the desired type.  This is probably not
 	 exactly how it would happen on the target itself, but it is
 	 the best we can do.  */
-      convert_typed_floating (&regbuf[REGISTER_BYTE (FP0_REGNUM)],
-			      builtin_type_i387_ext, valbuf, type);
+      regcache_read (regcache, FP0_REGNUM, buf);
+      convert_typed_floating (buf, builtin_type_i387_ext, valbuf, type);
     }
   else
     {
@@ -948,13 +971,16 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
-	memcpy (valbuf, &regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)], len);
+	{
+	  regcache_read (regcache, LOW_RETURN_REGNUM, buf);
+	  memcpy (valbuf, buf, len);
+	}
       else if (len <= (low_size + high_size))
 	{
-	  memcpy (valbuf,
-		  &regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)], low_size);
-	  memcpy (valbuf + low_size,
-		  &regbuf[REGISTER_BYTE (HIGH_RETURN_REGNUM)], len - low_size);
+	  regcache_read (regcache, LOW_RETURN_REGNUM, buf);
+	  memcpy (valbuf, buf, low_size);
+	  regcache_read (regcache, HIGH_RETURN_REGNUM, buf);
+	  memcpy (valbuf + low_size, buf, len - low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,
@@ -965,7 +991,7 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 /* Write into the appropriate registers a function return value stored
    in VALBUF of type TYPE, given in virtual format.  */
 
-void
+static void
 i386_store_return_value (struct type *type, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
@@ -1037,11 +1063,10 @@ i386_store_return_value (struct type *type, char *valbuf)
    the address in which a function should return its structure value,
    as a CORE_ADDR.  */
 
-CORE_ADDR
-i386_extract_struct_value_address (char *regbuf)
+static CORE_ADDR
+i386_extract_struct_value_address (struct regcache *regcache)
 {
-  return extract_address (&regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)],
-			  REGISTER_RAW_SIZE (LOW_RETURN_REGNUM));
+  return regcache_read_as_address (regcache, LOW_RETURN_REGNUM);
 }
 
 
@@ -1080,7 +1105,7 @@ i386_use_struct_convention (int gcc_p, struct type *type)
    register REGNUM.  Perhaps %esi and %edi should go here, but
    potentially they could be used for things other than address.  */
 
-struct type *
+static struct type *
 i386_register_virtual_type (int regnum)
 {
   if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
@@ -1101,7 +1126,7 @@ i386_register_virtual_type (int regnum)
    registers need conversion.  Even if we can't find a counterexample,
    this is still sloppy.  */
 
-int
+static int
 i386_register_convertible (int regnum)
 {
   return IS_FP_REGNUM (regnum);
@@ -1110,7 +1135,7 @@ i386_register_convertible (int regnum)
 /* Convert data from raw format for register REGNUM in buffer FROM to
    virtual format with type TYPE in buffer TO.  */
 
-void
+static void
 i386_register_convert_to_virtual (int regnum, struct type *type,
 				  char *from, char *to)
 {
@@ -1133,7 +1158,7 @@ i386_register_convert_to_virtual (int regnum, struct type *type,
 /* Convert data from virtual format with type TYPE in buffer FROM to
    raw format for register REGNUM in buffer TO.  */
 
-void
+static void
 i386_register_convert_to_raw (struct type *type, int regnum,
 			      char *from, char *to)
 {
@@ -1244,29 +1269,31 @@ i386_svr4_pc_in_sigtramp (CORE_ADDR pc, char *name)
 		   || strcmp ("sigvechandler", name) == 0));
 }
 
-/* Get saved user PC for sigtramp from the pushed ucontext on the
-   stack for all three variants of SVR4 sigtramps.  */
+/* Get address of the pushed ucontext (sigcontext) on the stack for
+   all three variants of SVR4 sigtramps.  */
 
-CORE_ADDR
-i386_svr4_sigtramp_saved_pc (struct frame_info *frame)
+static CORE_ADDR
+i386_svr4_sigcontext_addr (struct frame_info *frame)
 {
-  CORE_ADDR saved_pc_offset = 4;
+  int sigcontext_offset = -1;
   char *name = NULL;
 
   find_pc_partial_function (frame->pc, &name, NULL, NULL);
   if (name)
     {
       if (strcmp (name, "_sigreturn") == 0)
-	saved_pc_offset = 132 + 14 * 4;
+	sigcontext_offset = 132;
       else if (strcmp (name, "_sigacthandler") == 0)
-	saved_pc_offset = 80 + 14 * 4;
+	sigcontext_offset = 80;
       else if (strcmp (name, "sigvechandler") == 0)
-	saved_pc_offset = 120 + 14 * 4;
+	sigcontext_offset = 120;
     }
 
+  gdb_assert (sigcontext_offset != -1);
+
   if (frame->next)
-    return read_memory_integer (frame->next->frame + saved_pc_offset, 4);
-  return read_memory_integer (read_register (SP_REGNUM) + saved_pc_offset, 4);
+    return frame->next->frame + sigcontext_offset;
+  return read_register (SP_REGNUM) + sigcontext_offset;
 }
 
 
@@ -1303,14 +1330,16 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
-  tdep->sigtramp_saved_pc = i386_svr4_sigtramp_saved_pc;
+  tdep->sigcontext_addr = i386_svr4_sigcontext_addr;
+  tdep->sc_pc_offset = 14 * 4;
+  tdep->sc_sp_offset = 7 * 4;
 
   tdep->jb_pc_offset = 20;
 }
 
 /* DJGPP.  */
 
-void
+static void
 i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -1322,7 +1351,7 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 /* NetWare.  */
 
-void
+static void
 i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -1334,7 +1363,7 @@ i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
-struct gdbarch *
+static struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
@@ -1369,17 +1398,18 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep->jb_pc_offset = -1;
   tdep->struct_return = pcc_struct_return;
-  tdep->sigtramp_saved_pc = NULL;
   tdep->sigtramp_start = 0;
   tdep->sigtramp_end = 0;
+  tdep->sigcontext_addr = NULL;
   tdep->sc_pc_offset = -1;
+  tdep->sc_sp_offset = -1;
 
   /* The format used for `long double' on almost all i386 targets is
      the i387 extended floating-point format.  In fact, of all targets
      in the GCC 2.95 tree, only OSF/1 does it different, and insists
      on having a `long double' that's not `long' at all.  */
   set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
-  
+
   /* Although the i386 extended floating-point has only 80 significant
      bits, a `long double' actually takes up 96, probably to enforce
      alignment.  */
@@ -1388,7 +1418,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* NOTE: tm-i386aix.h, tm-i386bsd.h, tm-i386os9k.h, tm-ptx.h,
      tm-symmetry.h currently override this.  Sigh.  */
   set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
-  
+
   set_gdbarch_sp_regnum (gdbarch, 4);
   set_gdbarch_fp_regnum (gdbarch, 5);
   set_gdbarch_pc_regnum (gdbarch, 8);
@@ -1411,26 +1441,26 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
   set_gdbarch_register_byte (gdbarch, i386_register_byte);
   set_gdbarch_register_raw_size (gdbarch, i386_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 16);
-  set_gdbarch_max_register_virtual_size (gdbarch, 16);
+  set_gdbarch_max_register_raw_size (gdbarch, I386_MAX_REGISTER_SIZE);
+  set_gdbarch_max_register_virtual_size (gdbarch, I386_MAX_REGISTER_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
 
   /* Call dummy code.  */
-  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 5);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_length (gdbarch, 8);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_words (gdbarch, i386_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch,
-				       sizeof (i386_call_dummy_words));
+  set_gdbarch_call_dummy_words (gdbarch, NULL);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, i386_fix_call_dummy);
+  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch,
@@ -1440,21 +1470,21 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
 
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
 
   /* "An argument's size is increased, if necessary, to make it a
      multiple of [32-bit] words.  This may require tail padding,
      depending on the size of the argument" -- from the x86 ABI.  */
   set_gdbarch_parm_boundary (gdbarch, 32);
 
-  set_gdbarch_deprecated_extract_return_value (gdbarch,
-					       i386_extract_return_value);
+  set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
-  set_gdbarch_push_dummy_frame (gdbarch, i386_push_dummy_frame);
+  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+  set_gdbarch_push_return_address (gdbarch, i386_push_return_address);
   set_gdbarch_pop_frame (gdbarch, i386_pop_frame);
   set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+  set_gdbarch_extract_struct_value_address (gdbarch,
 					    i386_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
 
@@ -1477,7 +1507,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
                                            i386_frameless_function_invocation);
   set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, i386_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, default_frame_address);
   set_gdbarch_frame_locals_address (gdbarch, default_frame_address);

@@ -23,6 +23,10 @@
 
 #include "i386/tm-i386.h"
 
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+
 /* These defines allow the recognition of sigtramps as a function name
    <sigtramp>.
 
@@ -34,16 +38,5 @@
 #define SIGTRAMP_END(pc) i386bsd_sigtramp_end (pc)
 extern CORE_ADDR i386bsd_sigtramp_start (CORE_ADDR pc);
 extern CORE_ADDR i386bsd_sigtramp_end (CORE_ADDR pc);
-
-/* Shared library support.  */
-
-#ifndef SVR4_SHARED_LIBS
-
-/* Return non-zero if we are in a shared library trampoline code stub.  */
-
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
-  (name && !strcmp(name, "_DYNAMIC"))
-
-#endif /* !SVR4_SHARED_LIBS */
 
 #endif /* TM_FBSD_H */

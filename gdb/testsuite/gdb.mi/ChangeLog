@@ -1,3 +1,8 @@
+2002-06-25  Keith Seitz  <keiths@redhat.com>
+
+	* mi-cli.exp: Add tests to check if list_command in the console
+	is synchronized with MI's state.
+
 2002-06-24  Keith Seitz  <keiths@redhat.com>
 
 	* mi-cli.exp: New file.

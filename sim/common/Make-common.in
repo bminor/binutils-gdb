@@ -592,6 +592,7 @@ install-common: installdirs
 
 installdirs:
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(bindir)
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(libdir)
 
 check:
 	cd ../testsuite && $(MAKE) check RUNTESTFLAGS="$(RUNTESTFLAGS)"

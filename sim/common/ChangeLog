@@ -1,3 +1,26 @@
+2002-07-17  Andrew Cagney  <cagney@redhat.com>
+
+	* run-sim.h: Add #ifdef RUN_SIM_H wrapper.
+	(sim_set_callbacks, sim_size, sim_trace)
+	(sim_set_trace, sim_set_profile_size, sim_kill): Declare.  Moved
+	to here from "gdb/remote-sim.h".
+
+2002-07-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* sim-resume.c (sim_resume): Add local variable sig_to_deliver to
+	avoid possible longjmp problems with automatic variable siggnal.
+
+2002-07-14  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-07-11 Momchil Velikov <velco@fadata.bg>:
+	* Make-common.in (installdirs): Make $(libdir) too, needed when
+	installing libsim.a.
+
+2002-07-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* gennltvals.sh (dir): Mark d30v as obsolete.
+	* nltvals.def: Remove d30v.
+
 2002-06-17  Andrew Cagney  <cagney@redhat.com>
 
 	* hw-events.c (hw_event_queue_schedule): Initialize `dummy'.

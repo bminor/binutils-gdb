@@ -106,6 +106,7 @@ get_java_class_symtab (void)
       bl = (struct block *)
 	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
       BLOCK_NSYMS (bl) = 0;
+      BLOCK_HASHTABLE (bl) = 0;
       BLOCK_START (bl) = 0;
       BLOCK_END (bl) = 0;
       BLOCK_FUNCTION (bl) = NULL;

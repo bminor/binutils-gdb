@@ -1,6 +1,7 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,11 +23,22 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
+struct regcache;
+struct gdbarch;
+
+extern struct regcache *current_regcache;
+
+void regcache_xfree (struct regcache *regcache);
+struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);
+struct regcache *regcache_xmalloc (struct gdbarch *gdbarch);
+
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache. */
 
-void regcache_read (int rawnum, char *buf);
-void regcache_write (int rawnum, char *buf);
+void regcache_read (struct regcache *regcache, int rawnum, char *buf);
+void regcache_write (struct regcache *regcache, int rawnum, char *buf);
+int regcache_valid_p (struct regcache *regcache, int regnum);
+CORE_ADDR regcache_read_as_address (struct regcache *regcache, int rawnum);
 
 /* Transfer a raw register [0..NUM_REGS) between the regcache and the
    target.  These functions are called by the target in response to a
@@ -46,6 +58,23 @@ extern char *registers;
    referenced thread. */
 
 extern signed char *register_valid;
+
+/* Copy/duplicate the contents of a register cache.  By default, the
+   operation is pass-through.  Writes to DST and reads from SRC will
+   go through to the target.
+
+   The ``cpy'' functions can not have overlapping SRC and DST buffers.
+
+   ``no passthrough'' versions do not go through to the target.  They
+   only transfer values already in the cache.  */
+
+extern struct regcache *regcache_dup (struct regcache *regcache);
+extern struct regcache *regcache_dup_no_passthrough (struct regcache *regcache);
+extern void regcache_cpy (struct regcache *dest, struct regcache *src);
+extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache *src);
+
+extern char *deprecated_grub_regcache_for_registers (struct regcache *);
+extern char *deprecated_grub_regcache_for_register_valid (struct regcache *);
 
 extern int register_cached (int regnum);
 

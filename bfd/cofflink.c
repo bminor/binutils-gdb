@@ -757,6 +757,10 @@ _bfd_coff_final_link (abfd, info)
 	  o->flags |= SEC_RELOC;
 	  o->rel_filepos = rel_filepos;
 	  rel_filepos += o->reloc_count * relsz;
+	  /* In PE COFF, if there are at least 0xffff relocations an
+	     extra relocation will be written out to encode the count.  */
+	  if (obj_pe (abfd) && o->reloc_count >= 0xffff)
+	    rel_filepos += relsz;
 	}
 
       if (bfd_coff_long_section_names (abfd)

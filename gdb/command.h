@@ -210,6 +210,26 @@ extern void help_list (struct cmd_list_element *, char *,
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 			   char *, int, struct ui_file *);
 
+extern void add_setshow_cmd (char *name,
+			     enum command_class class,
+			     var_types var_type, void *var,
+			     char *set_doc, char *show_doc,
+			     cmd_sfunc_ftype *set_func,
+			     cmd_sfunc_ftype *show_func,
+			     struct cmd_list_element **set_list,
+			     struct cmd_list_element **show_list);
+
+extern void add_setshow_cmd_full (char *name,
+				  enum command_class class,
+				  var_types var_type, void *var,
+				  char *set_doc, char *show_doc,
+				  cmd_sfunc_ftype *set_func,
+				  cmd_sfunc_ftype *show_func,
+				  struct cmd_list_element **set_list,
+				  struct cmd_list_element **show_list,
+				  struct cmd_list_element **set_result,
+				  struct cmd_list_element **show_result);
+
 extern struct cmd_list_element *add_set_cmd (char *name, enum
 					     command_class class,
 					     var_types var_type, void *var,
@@ -259,5 +279,11 @@ extern void dont_repeat (void);
    as a class of commands.  */
 
 extern void not_just_help_class_command (char *, int);
+
+/* check function pointer */
+extern int cmd_func_p (struct cmd_list_element *cmd);
+
+/* call the command function */
+extern void cmd_func (struct cmd_list_element *cmd, char *args, int from_tty);
 
 #endif /* !defined (COMMAND_H) */

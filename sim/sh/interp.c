@@ -29,6 +29,7 @@
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
+#include "gdb/sim-sh.h"
 
 /* This file is local - if newlib changes, then so should this.  */
 #include "syscall.h"
@@ -1790,98 +1791,122 @@ sim_store_register (sd, rn, memory, length)
   val = swap (* (int *)memory);
   switch (rn)
     {
-    case  0: case  1: case  2: case  3: case  4: case  5: case  6: case  7:
-    case  8: case  9: case 10: case 11: case 12: case 13: case 14: case 15:
+    case SIM_SH_R0_REGNUM: case SIM_SH_R1_REGNUM: case SIM_SH_R2_REGNUM:
+    case SIM_SH_R3_REGNUM: case SIM_SH_R4_REGNUM: case SIM_SH_R5_REGNUM:
+    case SIM_SH_R6_REGNUM: case SIM_SH_R7_REGNUM: case SIM_SH_R8_REGNUM:
+    case SIM_SH_R9_REGNUM: case SIM_SH_R10_REGNUM: case SIM_SH_R11_REGNUM:
+    case SIM_SH_R12_REGNUM: case SIM_SH_R13_REGNUM: case SIM_SH_R14_REGNUM:
+    case SIM_SH_R15_REGNUM:
       saved_state.asregs.regs[rn] = val;
       break;
-    case 16:
+    case SIM_SH_PC_REGNUM:
       saved_state.asregs.pc = val;
       break;
-    case 17:
+    case SIM_SH_PR_REGNUM:
       PR = val;
       break;
-    case 18:
+    case SIM_SH_GBR_REGNUM:
       GBR = val;
       break;
-    case 19:
+    case SIM_SH_VBR_REGNUM:
       VBR = val;
       break;
-    case 20:
+    case SIM_SH_MACH_REGNUM:
       MACH = val;
       break;
-    case 21:
+    case SIM_SH_MACL_REGNUM:
       MACL = val;
       break;
-    case 22:
+    case SIM_SH_SR_REGNUM:
       SET_SR (val);
       break;
-    case 23:
+    case SIM_SH_FPUL_REGNUM:
       FPUL = val;
       break;
-    case 24:
+    case SIM_SH_FPSCR_REGNUM:
       SET_FPSCR (val);
       break;
-    case 25:
-      if (target_dsp)
-	A0G = val;
-    else case 26:
-      if (target_dsp)
-	A0 = val;
-    else case 27:
-      if (target_dsp)
-	A1G = val;
-    else case 28:
-      if (target_dsp)
-	A1 = val;
-    else case 29:
-      if (target_dsp)
-	M0 = val;
-    else case 30:
-      if (target_dsp)
-	M1 = val;
-    else case 31:
-      if (target_dsp)
-	X0 = val;
-    else case 32:
-      if (target_dsp)
-	X1 = val;
-    else case 33:
-      if (target_dsp)
-	Y0 = val;
-    else case 34:
-      if (target_dsp)
-	Y1 = val;
-    else case 40:
-      if (target_dsp)
-	SET_MOD (val);
-    else case 35: case 36: case 37: case 38: case 39:
-	SET_FI (rn - 25, val);
+    case SIM_SH_FR0_REGNUM: case SIM_SH_FR1_REGNUM: case SIM_SH_FR2_REGNUM:
+    case SIM_SH_FR3_REGNUM: case SIM_SH_FR4_REGNUM: case SIM_SH_FR5_REGNUM:
+    case SIM_SH_FR6_REGNUM: case SIM_SH_FR7_REGNUM: case SIM_SH_FR8_REGNUM:
+    case SIM_SH_FR9_REGNUM: case SIM_SH_FR10_REGNUM: case SIM_SH_FR11_REGNUM:
+    case SIM_SH_FR12_REGNUM: case SIM_SH_FR13_REGNUM: case SIM_SH_FR14_REGNUM:
+    case SIM_SH_FR15_REGNUM:
+      SET_FI (rn - SIM_SH_FR0_REGNUM, val);
       break;
-    case 41:
+    case SIM_SH_DSR_REGNUM:
+      DSR = val;
+      break;
+    case SIM_SH_A0G_REGNUM:
+      A0G = val;
+      break;
+    case SIM_SH_A0_REGNUM:
+      A0 = val;
+      break;
+    case SIM_SH_A1G_REGNUM:
+      A1G = val;
+      break;
+    case SIM_SH_A1_REGNUM:
+      A1 = val;
+      break;
+    case SIM_SH_M0_REGNUM:
+      M0 = val;
+      break;
+    case SIM_SH_M1_REGNUM:
+      M1 = val;
+      break;
+    case SIM_SH_X0_REGNUM:
+      X0 = val;
+      break;
+    case SIM_SH_X1_REGNUM:
+      X1 = val;
+      break;
+    case SIM_SH_Y0_REGNUM:
+      Y0 = val;
+      break;
+    case SIM_SH_Y1_REGNUM:
+      Y1 = val;
+      break;
+    case SIM_SH_MOD_REGNUM:
+      SET_MOD (val);
+      break;
+    case SIM_SH_RS_REGNUM:
+      RS = val;
+      break;
+    case SIM_SH_RE_REGNUM:
+      RE = val;
+      break;
+    case SIM_SH_SSR_REGNUM:
       SSR = val;
       break;
-    case 42:
+    case SIM_SH_SPC_REGNUM:
       SPC = val;
       break;
     /* The rn_bank idiosyncracies are not due to hardware differences, but to
        a weird aliasing naming scheme for sh3 / sh3e / sh4.  */
-    case 43:
-      if (target_dsp)
-	RS = val;
-    else case 44:
-      if (target_dsp)
-	RE = val;
-    else case 45: case 46: case 47: case 48: case 49: case 50:
+    case SIM_SH_R0_BANK0_REGNUM: case SIM_SH_R1_BANK0_REGNUM:
+    case SIM_SH_R2_BANK0_REGNUM: case SIM_SH_R3_BANK0_REGNUM:
+    case SIM_SH_R4_BANK0_REGNUM: case SIM_SH_R5_BANK0_REGNUM:
+    case SIM_SH_R6_BANK0_REGNUM: case SIM_SH_R7_BANK0_REGNUM:
       if (SR_MD && SR_RB)
-	Rn_BANK (rn - 43) = val;
+	Rn_BANK (rn - SIM_SH_R0_BANK0_REGNUM) = val;
       else
-	saved_state.asregs.regs[rn - 43] = val;
+	saved_state.asregs.regs[rn - SIM_SH_R0_BANK0_REGNUM] = val;
       break;
-    case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58:
-      if (target_dsp || ! SR_MD || ! SR_RB)
-	SET_Rn_BANK (rn - 51, val);
+    case SIM_SH_R0_BANK1_REGNUM: case SIM_SH_R1_BANK1_REGNUM:
+    case SIM_SH_R2_BANK1_REGNUM: case SIM_SH_R3_BANK1_REGNUM:
+    case SIM_SH_R4_BANK1_REGNUM: case SIM_SH_R5_BANK1_REGNUM:
+    case SIM_SH_R6_BANK1_REGNUM: case SIM_SH_R7_BANK1_REGNUM:
+      if (SR_MD && SR_RB)
+	saved_state.asregs.regs[rn - SIM_SH_R0_BANK1_REGNUM] = val;
       else
-	saved_state.asregs.regs[rn - 51] = val;
+	Rn_BANK (rn - SIM_SH_R0_BANK1_REGNUM) = val;
+      break;
+    case SIM_SH_R0_BANK_REGNUM: case SIM_SH_R1_BANK_REGNUM:
+    case SIM_SH_R2_BANK_REGNUM: case SIM_SH_R3_BANK_REGNUM:
+    case SIM_SH_R4_BANK_REGNUM: case SIM_SH_R5_BANK_REGNUM:
+    case SIM_SH_R6_BANK_REGNUM: case SIM_SH_R7_BANK_REGNUM:
+      SET_Rn_BANK (rn - SIM_SH_R0_BANK_REGNUM, val);
       break;
     default:
       return 0;
@@ -1901,96 +1926,120 @@ sim_fetch_register (sd, rn, memory, length)
   init_pointers ();
   switch (rn)
     {
-    case  0: case  1: case  2: case  3: case  4: case  5: case  6: case  7:
-    case  8: case  9: case 10: case 11: case 12: case 13: case 14: case 15:
+    case SIM_SH_R0_REGNUM: case SIM_SH_R1_REGNUM: case SIM_SH_R2_REGNUM:
+    case SIM_SH_R3_REGNUM: case SIM_SH_R4_REGNUM: case SIM_SH_R5_REGNUM:
+    case SIM_SH_R6_REGNUM: case SIM_SH_R7_REGNUM: case SIM_SH_R8_REGNUM:
+    case SIM_SH_R9_REGNUM: case SIM_SH_R10_REGNUM: case SIM_SH_R11_REGNUM:
+    case SIM_SH_R12_REGNUM: case SIM_SH_R13_REGNUM: case SIM_SH_R14_REGNUM:
+    case SIM_SH_R15_REGNUM:
       val = saved_state.asregs.regs[rn];
       break;
-    case 16:
+    case SIM_SH_PC_REGNUM:
       val = saved_state.asregs.pc;
       break;
-    case 17:
+    case SIM_SH_PR_REGNUM:
       val = PR;
       break;
-    case 18:
+    case SIM_SH_GBR_REGNUM:
       val = GBR;
       break;
-    case 19:
+    case SIM_SH_VBR_REGNUM:
       val = VBR;
       break;
-    case 20:
+    case SIM_SH_MACH_REGNUM:
       val = MACH;
       break;
-    case 21:
+    case SIM_SH_MACL_REGNUM:
       val = MACL;
       break;
-    case 22:
+    case SIM_SH_SR_REGNUM:
       val = GET_SR ();
       break;
-    case 23:
+    case SIM_SH_FPUL_REGNUM:
       val = FPUL;
       break;
-    case 24:
+    case SIM_SH_FPSCR_REGNUM:
       val = GET_FPSCR ();
       break;
-    case 25:
-      val = target_dsp ? SEXT (A0G) : FI (0);
+    case SIM_SH_FR0_REGNUM: case SIM_SH_FR1_REGNUM: case SIM_SH_FR2_REGNUM:
+    case SIM_SH_FR3_REGNUM: case SIM_SH_FR4_REGNUM: case SIM_SH_FR5_REGNUM:
+    case SIM_SH_FR6_REGNUM: case SIM_SH_FR7_REGNUM: case SIM_SH_FR8_REGNUM:
+    case SIM_SH_FR9_REGNUM: case SIM_SH_FR10_REGNUM: case SIM_SH_FR11_REGNUM:
+    case SIM_SH_FR12_REGNUM: case SIM_SH_FR13_REGNUM: case SIM_SH_FR14_REGNUM:
+    case SIM_SH_FR15_REGNUM:
+      val = FI (rn - SIM_SH_FR0_REGNUM);
       break;
-    case 26:
-      val = target_dsp ? A0 : FI (1);
+    case SIM_SH_DSR_REGNUM:
+      val = DSR;
       break;
-    case 27:
-      val = target_dsp ? SEXT (A1G) : FI (2);
+    case SIM_SH_A0G_REGNUM:
+      val = SEXT (A0G);
       break;
-    case 28:
-      val = target_dsp ? A1 : FI (3);
+    case SIM_SH_A0_REGNUM:
+      val = A0;
       break;
-    case 29:
-      val = target_dsp ? M0 : FI (4);
+    case SIM_SH_A1G_REGNUM:
+      val = SEXT (A1G);
       break;
-    case 30:
-      val = target_dsp ? M1 : FI (5);
+    case SIM_SH_A1_REGNUM:
+      val = A1;
       break;
-    case 31:
-      val = target_dsp ? X0 : FI (6);
+    case SIM_SH_M0_REGNUM:
+      val = M0;
       break;
-    case 32:
-      val = target_dsp ? X1 : FI (7);
+    case SIM_SH_M1_REGNUM:
+      val = M1;
       break;
-    case 33:
-      val = target_dsp ? Y0 : FI (8);
+    case SIM_SH_X0_REGNUM:
+      val = X0;
       break;
-    case 34:
-      val = target_dsp ? Y1 : FI (9);
+    case SIM_SH_X1_REGNUM:
+      val = X1;
       break;
-    case 35: case 36: case 37: case 38: case 39:
-      val = FI (rn - 25);
+    case SIM_SH_Y0_REGNUM:
+      val = Y0;
       break;
-    case 40:
-      val = target_dsp ? MOD : FI (15);
+    case SIM_SH_Y1_REGNUM:
+      val = Y1;
       break;
-    case 41:
+    case SIM_SH_MOD_REGNUM:
+      val = MOD;
+      break;
+    case SIM_SH_RS_REGNUM:
+      val = RS;
+      break;
+    case SIM_SH_RE_REGNUM:
+      val = RE;
+      break;
+    case SIM_SH_SSR_REGNUM:
       val = SSR;
       break;
-    case 42:
+    case SIM_SH_SPC_REGNUM:
       val = SPC;
       break;
     /* The rn_bank idiosyncracies are not due to hardware differences, but to
        a weird aliasing naming scheme for sh3 / sh3e / sh4.  */
-    case 43:
-      if (target_dsp)
-	val = RS;
-    else case 44:
-      if (target_dsp)
-	val = RE;
-    else case 45: case 46: case 47: case 48: case 49: case 50:
-	val = (SR_MD && SR_RB
-	       ? Rn_BANK (rn - 43)
-	       : saved_state.asregs.regs[rn - 43]);
+    case SIM_SH_R0_BANK0_REGNUM: case SIM_SH_R1_BANK0_REGNUM:
+    case SIM_SH_R2_BANK0_REGNUM: case SIM_SH_R3_BANK0_REGNUM:
+    case SIM_SH_R4_BANK0_REGNUM: case SIM_SH_R5_BANK0_REGNUM:
+    case SIM_SH_R6_BANK0_REGNUM: case SIM_SH_R7_BANK0_REGNUM:
+      val = (SR_MD && SR_RB
+	     ? Rn_BANK (rn - SIM_SH_R0_BANK0_REGNUM)
+	     : saved_state.asregs.regs[rn - SIM_SH_R0_BANK0_REGNUM]);
       break;
-    case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58:
-      val = (target_dsp || ! SR_MD || ! SR_RB
-	     ? Rn_BANK (rn - 51)
-	     : saved_state.asregs.regs[rn - 51]);
+    case SIM_SH_R0_BANK1_REGNUM: case SIM_SH_R1_BANK1_REGNUM:
+    case SIM_SH_R2_BANK1_REGNUM: case SIM_SH_R3_BANK1_REGNUM:
+    case SIM_SH_R4_BANK1_REGNUM: case SIM_SH_R5_BANK1_REGNUM:
+    case SIM_SH_R6_BANK1_REGNUM: case SIM_SH_R7_BANK1_REGNUM:
+      val = (! SR_MD || ! SR_RB
+	     ? Rn_BANK (rn - SIM_SH_R0_BANK1_REGNUM)
+	     : saved_state.asregs.regs[rn - SIM_SH_R0_BANK1_REGNUM]);
+      break;
+    case SIM_SH_R0_BANK_REGNUM: case SIM_SH_R1_BANK_REGNUM:
+    case SIM_SH_R2_BANK_REGNUM: case SIM_SH_R3_BANK_REGNUM:
+    case SIM_SH_R4_BANK_REGNUM: case SIM_SH_R5_BANK_REGNUM:
+    case SIM_SH_R6_BANK_REGNUM: case SIM_SH_R7_BANK_REGNUM:
+      val = Rn_BANK (rn - SIM_SH_R0_BANK_REGNUM);
       break;
     default:
       return 0;

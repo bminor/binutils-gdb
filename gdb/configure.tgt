@@ -66,14 +66,15 @@ avr-*-*)		gdb_target=avr
 cris*)                  gdb_target=cris ;;
 
 d10v-*-*)		gdb_target=d10v ;;
-d30v-*-*)		gdb_target=d30v ;;
+# OBSOLETE d30v-*-*)		gdb_target=d30v ;;
 
 h8300-*-*)		gdb_target=h8300 ;;
 h8500-*-*)		gdb_target=h8500 ;;
 
 
-fr30-*-elf*)		gdb_target=fr30 ;;
+# OBSOLETE fr30-*-elf*)		gdb_target=fr30 ;;
 
+frv-*-*)		gdb_target=frv ;;
 
 hppa*-*-bsd*)		gdb_target=hppabsd ;;
 hppa*-*-pro*)		gdb_target=hppapro ;;
@@ -93,12 +94,12 @@ i[3456]86-*-aix*)	gdb_target=i386aix ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
 i[3456]86-*-freebsd*)	gdb_target=fbsd ;;
 i[3456]86-*-netbsdelf*)	gdb_target=nbsdelf ;;
-i[3456]86-*-netbsd*)	gdb_target=nbsdaout ;;
-i[3456]86-*-os9k)	gdb_target=i386os9k ;;
+i[3456]86-*-netbsd* | i[3456]86-*-openbsd*)
+			gdb_target=nbsdaout ;;
+# OBSOLETE i[3456]86-*-os9k)	gdb_target=i386os9k ;;
 i[3456]86-*-go32*)	gdb_target=i386aout ;;
 i[3456]86-*-msdosdjgpp*) gdb_target=go32 ;;
 i[3456]86-*-lynxos*)	gdb_target=i386lynx ;;
-i[3456]86-*-openbsd*)	gdb_target=obsd ;;
 i[3456]86-*-solaris*)	gdb_target=i386sol2 ;;
 i[3456]86-*-sysv4.2*)	gdb_target=i386v42mp ;;
 i[3456]86-*-sysv4*)	gdb_target=i386v4 ;;
@@ -284,8 +285,8 @@ xstormy16-*-*)          gdb_target=xstormy16 ;;
 
 vax-*-*)		gdb_target=vax ;;
 
-fr30-*-*)		gdb_target=fr30
-			;;
+# OBSOLETE fr30-*-*)		gdb_target=fr30
+# OBSOLETE 			;;
 
 v850*-*-*)		gdb_target=v850
 			case ${gdb_host} in
@@ -314,4 +315,5 @@ mn10300)	gdb_multi_arch=yes ;;
 x86-64linux)    gdb_multi_arch=yes ;;
 v850)           gdb_multi_arch=yes ;;
 xstormy16)      gdb_multi_arch=yes ;;
+mcore)		gdb_multi_arch=yes ;;
 esac

@@ -1,6 +1,8 @@
 /* Do various things to symbol tables (other than lookup), for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2002 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -86,11 +88,17 @@ static void
 free_symtab_block (struct objfile *objfile, struct block *b)
 {
   register int i, n;
-  n = BLOCK_NSYMS (b);
+  struct symbol *sym, *next_sym;
+
+  n = BLOCK_BUCKETS (b);
   for (i = 0; i < n; i++)
     {
-      xmfree (objfile->md, SYMBOL_NAME (BLOCK_SYM (b, i)));
-      xmfree (objfile->md, (PTR) BLOCK_SYM (b, i));
+      for (sym = BLOCK_BUCKET (b, i); sym; sym = next_sym)
+	{
+	  next_sym = sym->hash_next;
+	  xmfree (objfile->md, SYMBOL_NAME (sym));
+	  xmfree (objfile->md, (PTR) sym);
+	}
     }
   xmfree (objfile->md, (PTR) b);
 }
@@ -161,7 +169,7 @@ print_symbol_bcache_statistics (void)
   ALL_OBJFILES (objfile)
   {
     printf_filtered ("Byte cache statistics for '%s':\n", objfile->name);
-    print_bcache_statistics (&objfile->psymbol_cache, "partial symbol cache");
+    print_bcache_statistics (objfile->psymbol_cache, "partial symbol cache");
   }
   immediate_quit--;
 }
@@ -196,9 +204,9 @@ print_objfile_statistics (void)
     printf_filtered ("  Total memory used for psymbol obstack: %d\n",
 		     obstack_memory_used (&objfile->psymbol_obstack));
     printf_filtered ("  Total memory used for psymbol cache: %d\n",
-		     obstack_memory_used (&objfile->psymbol_cache.cache));
+		     bcache_memory_used (objfile->psymbol_cache));
     printf_filtered ("  Total memory used for macro cache: %d\n",
-		     obstack_memory_used (&objfile->macro_cache.cache));
+		     bcache_memory_used (objfile->macro_cache));
     printf_filtered ("  Total memory used for symbol obstack: %d\n",
 		     obstack_memory_used (&objfile->symbol_obstack));
     printf_filtered ("  Total memory used for type obstack: %d\n",
@@ -457,8 +465,14 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	      fprintf_filtered (outfile, " under ");
 	      gdb_print_host_address (BLOCK_SUPERBLOCK (b), outfile);
 	    }
-	  blen = BLOCK_NSYMS (b);
-	  fprintf_filtered (outfile, ", %d syms in ", blen);
+	  /* drow/2002-07-10: We could save the total symbols count
+	     even if we're using a hashtable, but nothing else but this message
+	     wants it.  */
+	  blen = BLOCK_BUCKETS (b);
+	  if (BLOCK_HASHTABLE (b))
+	    fprintf_filtered (outfile, ", %d buckets in ", blen);
+	  else
+	    fprintf_filtered (outfile, ", %d syms in ", blen);
 	  print_address_numeric (BLOCK_START (b), 1, outfile);
 	  fprintf_filtered (outfile, "..");
 	  print_address_numeric (BLOCK_END (b), 1, outfile);
@@ -474,8 +488,8 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	  if (BLOCK_GCC_COMPILED (b))
 	    fprintf_filtered (outfile, ", compiled with gcc%d", BLOCK_GCC_COMPILED (b));
 	  fprintf_filtered (outfile, "\n");
-	  /* Now print each symbol in this block.  */
-	  /* FIXMED: Sort?  */
+	  /* Now print each symbol in this block (in no particular order, if
+	     we're using a hashtable).  */
 	  ALL_BLOCK_SYMBOLS (b, j, sym)
 	    {
 	      struct print_symbol_args s;

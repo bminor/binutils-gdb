@@ -2277,6 +2277,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    break;
 
 		  case XMC_RW:
+		  case XMC_TD:
 		    /* Data variables are recorded in the minimal symbol
 		       table, except for section symbols.  */
 		    if (*namestring != '.')

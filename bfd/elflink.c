@@ -278,11 +278,13 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
 	}
       else
 	{
-	  alc = bfd_malloc ((bfd_size_type) (p - name + 1));
+	  size_t len = p - name + 1;
+
+	  alc = bfd_malloc ((bfd_size_type) len);
 	  if (alc == NULL)
 	    return false;
-	  strncpy (alc, name, (size_t) (p - name));
-	  alc[p - name] = '\0';
+	  memcpy (alc, name, len - 1);
+	  alc[len - 1] = '\0';
 	  name = alc;
 	  copy = true;
 	}
@@ -355,7 +357,8 @@ _bfd_elf_link_renumber_dynsyms (output_bfd, info)
     {
       asection *p;
       for (p = output_bfd->sections; p ; p = p->next)
-	elf_section_data (p)->dynindx = ++dynsymcount;
+	if ((p->flags & SEC_EXCLUDE) == 0)
+	  elf_section_data (p)->dynindx = ++dynsymcount;
     }
 
   if (elf_hash_table (info)->dynlocal)

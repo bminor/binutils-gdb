@@ -1334,7 +1334,7 @@ static BOOL WINAPI (*DebugSetProcessKillOnExit)(BOOL);
 static BOOL WINAPI (*DebugActiveProcessStop)(DWORD);
 
 static int
-has_detach_ability ()
+has_detach_ability (void)
 {
   static HMODULE kernel32 = NULL;
 
@@ -1815,7 +1815,7 @@ init_child_ops (void)
 }
 
 void
-_initialize_inftarg (void)
+_initialize_win32_nat (void)
 {
   struct cmd_list_element *c;
 
