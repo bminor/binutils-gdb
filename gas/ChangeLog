@@ -1,3 +1,10 @@
+2004-03-19  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (mark_literal_frags): New function.
+	(xtensa_move_literals): Call mark_literal_frags for all literal
+	segments, including init and fini literal segments.
+	(xtensa_post_relax_hook): Swap use of xt_insn_sec and xt_literal_sec.
+
 2004-03-17  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.c: Include dw2gencfi.h.
