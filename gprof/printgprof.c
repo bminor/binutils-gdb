@@ -57,7 +57,7 @@ printprof()
 	flatprofline( np );
     }
     actime = 0.0;
-    cfree( sortednlp );
+    free( sortednlp );
     if ( bflag && !bsd_style_output ) {
 	flat_blurb(stdout);
     }
@@ -244,7 +244,7 @@ printgprof(timesortnlp)
 	if (bsd_style_output)
 	    printf( "\n" );
     }
-    cfree( timesortnlp );
+    free( timesortnlp );
     if ( bflag && !bsd_style_output) {
 	fsf_callg_blurb(stdout);
     }
@@ -759,7 +759,7 @@ printindex()
 	}
 	printf( "\n" );
     }
-    cfree( namesortnlp );
+    free( namesortnlp );
 }
 
 PTR
