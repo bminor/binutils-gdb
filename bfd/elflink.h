@@ -1058,7 +1058,7 @@ elf_link_add_object_symbols (abfd, info)
 	      if (p != NULL && p[1] == ELF_VER_CHR)
 		{
 		  char *shortname;
-		  struct elf_link_hash_entry *hi;
+		  struct elf_link_hash_entry *hold;
 
 		  shortname = bfd_hash_allocate (&info->hash->table,
 						 p - name + 1);
@@ -1067,24 +1067,77 @@ elf_link_add_object_symbols (abfd, info)
 		  strncpy (shortname, name, p - name);
 		  shortname[p - name] = '\0';
 
-		  hi = NULL;
-		  if (! (_bfd_generic_link_add_one_symbol
-			 (info, abfd, shortname, BSF_INDIRECT,
-			  bfd_ind_section_ptr, (bfd_vma) 0, name, false,
-			  collect, (struct bfd_link_hash_entry **) &hi)))
-		    goto error_return;
+		  /* First look to see if we have an existing symbol
+                     with this name.  */
+		  hold = elf_link_hash_lookup (elf_hash_table (info),
+					       shortname, false, false,
+					       false);
 
-		  if (hi->root.type == bfd_link_hash_indirect)
+		  /* If we are looking at a normal object, and the
+                     symbol was seen in a shared object, clobber the
+                     definition in the shared object.  */
+		  if (hold != NULL
+		      && ! dynamic
+		      && (hold->root.type == bfd_link_hash_defined
+			  || hold->root.type == bfd_link_hash_defweak)
+		      && (hold->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		      && ((hold->root.u.def.section->owner->flags & DYNAMIC)
+			  != 0))
 		    {
-		      hi->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
-		      if (dynamic)
-			hi->elf_link_hash_flags |= ELF_LINK_HASH_DEF_DYNAMIC;
-		      /* We don't set DEF_REGULAR because we don't the
-                         symbol to get exported even if we are
-                         exporting all defined symbols.  FIXME: What a
-                         hack. */
-		      /* FIXME: Do we need to copy any flags from H to
-                         HI?  */
+		      /* Change the hash table entry to undefined, so
+                         that _bfd_generic_link_add_one_symbol will do
+                         the right thing.  */
+		      hold->root.type = bfd_link_hash_undefined;
+		      hold->root.u.undef.abfd =
+			hold->root.u.def.section->owner;
+		      hold->verinfo.vertree = NULL;
+		      hold = NULL;
+		    }
+
+		  /* If we are looking at a shared object, and we have
+                     already seen this symbol defined elsewhere, then
+                     don't try to define it again. */
+		  if (hold != NULL
+		      && dynamic
+		      && (hold->root.type == bfd_link_hash_defined
+			  || hold->root.type == bfd_link_hash_defweak
+			  || hold->root.type == bfd_link_hash_indirect
+			  || (hold->root.type == bfd_link_hash_common
+			      && (bind == STB_WEAK
+				  || ELF_ST_TYPE (sym.st_info) == STT_FUNC))))
+		    {
+		      /* Don't add an indirect symbol.  */
+		    }
+		  else
+		    {
+		      struct elf_link_hash_entry *hi;
+
+		      hi = NULL;
+		      if (! (_bfd_generic_link_add_one_symbol
+			     (info, abfd, shortname, BSF_INDIRECT,
+			      bfd_ind_section_ptr, (bfd_vma) 0, name, false,
+			      collect, (struct bfd_link_hash_entry **) &hi)))
+			goto error_return;
+
+		      /* If there is a duplicate definition somewhere,
+                         then HI may not point to an indirect symbol.
+                         We will have reported an error to the user in
+                         that case.  */
+
+		      if (hi->root.type == bfd_link_hash_indirect)
+			{
+			  hi->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
+			  if (dynamic)
+			    hi->elf_link_hash_flags |=
+			      ELF_LINK_HASH_DEF_DYNAMIC;
+			  /* We don't set DEF_REGULAR because we don't
+			     the symbol to get exported even if we are
+			     exporting all defined symbols.  FIXME:
+			     What a hack. */
+			  /* FIXME: Do we need to copy any flags from
+			     H to HI?  */
+			}
 		    }
 
 		  /* We also need to define an indirection from the
@@ -1097,18 +1150,77 @@ elf_link_add_object_symbols (abfd, info)
 		  strncpy (shortname, name, p - name);
 		  strcpy (shortname + (p - name), p + 1);
 
-		  hi = NULL;
-		  if (! (_bfd_generic_link_add_one_symbol
-			 (info, abfd, shortname, BSF_INDIRECT,
-			  bfd_ind_section_ptr, (bfd_vma) 0, name, false,
-			  collect, (struct bfd_link_hash_entry **) &hi)))
-		    goto error_return;
+		  /* First look to see if we have an existing symbol
+                     with this name.  */
+		  hold = elf_link_hash_lookup (elf_hash_table (info),
+					       shortname, false, false,
+					       false);
 
-		  if (hi->root.type == bfd_link_hash_indirect)
+		  /* If we are looking at a normal object, and the
+                     symbol was seen in a shared object, clobber the
+                     definition in the shared object.  */
+		  if (hold != NULL
+		      && ! dynamic
+		      && (hold->root.type == bfd_link_hash_defined
+			  || hold->root.type == bfd_link_hash_defweak)
+		      && (hold->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		      && ((hold->root.u.def.section->owner->flags & DYNAMIC)
+			  != 0))
 		    {
-		      hi->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
-		      if (dynamic)
-			hi->elf_link_hash_flags |= ELF_LINK_HASH_DEF_DYNAMIC;
+		      /* Change the hash table entry to undefined, so
+                         that _bfd_generic_link_add_one_symbol will do
+                         the right thing.  */
+		      hold->root.type = bfd_link_hash_undefined;
+		      hold->root.u.undef.abfd =
+			hold->root.u.def.section->owner;
+		      hold->verinfo.vertree = NULL;
+		      hold = NULL;
+		    }
+
+		  /* If we are looking at a shared object, and we have
+                     already seen this symbol defined elsewhere, then
+                     don't try to define it again. */
+		  if (hold != NULL
+		      && dynamic
+		      && (hold->root.type == bfd_link_hash_defined
+			  || hold->root.type == bfd_link_hash_defweak
+			  || hold->root.type == bfd_link_hash_indirect
+			  || (hold->root.type == bfd_link_hash_common
+			      && (bind == STB_WEAK
+				  || ELF_ST_TYPE (sym.st_info) == STT_FUNC))))
+		    {
+		      /* Don't add an indirect symbol.  */
+		    }
+		  else
+		    {
+		      struct elf_link_hash_entry *hi;
+
+		      hi = NULL;
+		      if (! (_bfd_generic_link_add_one_symbol
+			     (info, abfd, shortname, BSF_INDIRECT,
+			      bfd_ind_section_ptr, (bfd_vma) 0, name, false,
+			      collect, (struct bfd_link_hash_entry **) &hi)))
+			goto error_return;
+
+		      /* If there is a duplicate definition somewhere,
+                         then HI may not point to an indirect symbol.
+                         We will have reported an error to the user in
+                         that case.  */
+
+		      if (hi->root.type == bfd_link_hash_indirect)
+			{
+			  hi->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
+			  if (dynamic)
+			    hi->elf_link_hash_flags |=
+			      ELF_LINK_HASH_DEF_DYNAMIC;
+			  /* We don't set DEF_REGULAR because we don't
+			     the symbol to get exported even if we are
+			     exporting all defined symbols.  FIXME:
+			     What a hack. */
+			  /* FIXME: Do we need to copy any flags from
+			     H to HI?  */
+			}
 		    }
 		}
 	    }
@@ -2602,6 +2714,7 @@ elf_link_assign_sym_version (h, data)
 				  & ELF_LINK_HASH_NEEDS_PLT) == 0)
 			    {
 			      sinfo->removed_dynamic = true;
+			      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 			      h->dynindx = -1;
 			      /* FIXME: The name of the symbol has
 				 already been recorded in the dynamic
@@ -2661,8 +2774,8 @@ elf_link_assign_sym_version (h, data)
 	  /* We could not find the version for a symbol when
              generating a shared archive.  Return an error.  */
 	  (*_bfd_error_handler)
-	    ("%s: invalid version %s", bfd_get_filename (sinfo->output_bfd),
-	     h->root.root.string);
+	    ("%s: undefined version name %s",
+	     bfd_get_filename (sinfo->output_bfd), h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  sinfo->failed = true;
 	  return false;
@@ -2717,6 +2830,7 @@ elf_link_assign_sym_version (h, data)
 			      & ELF_LINK_HASH_NEEDS_PLT) == 0)
 			{
 			  sinfo->removed_dynamic = true;
+			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 			  h->dynindx = -1;
 			  /* FIXME: The name of the symbol has already
 			     been recorded in the dynamic string table
@@ -2740,6 +2854,7 @@ elf_link_assign_sym_version (h, data)
 	      && (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) == 0)
 	    {
 	      sinfo->removed_dynamic = true;
+	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 	      h->dynindx = -1;
 	      /* FIXME: The name of the symbol has already been
 		 recorded in the dynamic string table section.  */
@@ -2827,12 +2942,12 @@ static boolean elf_reloc_link_order
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   struct bfd_link_order *));
 
-/* This struct is used to pass information to routines called via
-   elf_link_hash_traverse which must return failure.  */
+/* This struct is used to pass information to elf_link_output_extsym.  */
 
-struct elf_finfo_failed
+struct elf_outext_info
 {
   boolean failed;
+  boolean localsyms;
   struct elf_final_link_info *finfo;
 };
 
@@ -2859,7 +2974,7 @@ elf_bfd_final_link (abfd, info)
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Shdr *symstrtab_hdr;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  struct elf_finfo_failed eif;
+  struct elf_outext_info eoinfo;
 
   if (info->shared)
     abfd->flags |= DYNAMIC;
@@ -3196,6 +3311,23 @@ elf_bfd_final_link (abfd, info)
   /* That wrote out all the local symbols.  Finish up the symbol table
      with the global symbols.  */
 
+  if (info->strip != strip_all && info->shared)
+    {
+      /* Output any global symbols that got converted to local in a
+         version script.  We do this in a separate step since ELF
+         requires all local symbols to appear prior to any global
+         symbols.  FIXME: We should only do this if some global
+         symbols were, in fact, converted to become local.  FIXME:
+         Will this work correctly with the Irix 5 linker?  */
+      eoinfo.failed = false;
+      eoinfo.finfo = &finfo;
+      eoinfo.localsyms = true;
+      elf_link_hash_traverse (elf_hash_table (info), elf_link_output_extsym,
+			      (PTR) &eoinfo);
+      if (eoinfo.failed)
+	return false;
+    }
+
   /* The sh_info field records the index of the first non local
      symbol.  */
   symtab_hdr->sh_info = abfd->symcount;
@@ -3203,11 +3335,12 @@ elf_bfd_final_link (abfd, info)
     elf_section_data (finfo.dynsym_sec->output_section)->this_hdr.sh_info = 1;
 
   /* We get the global symbols from the hash table.  */
-  eif.failed = false;
-  eif.finfo = &finfo;
+  eoinfo.failed = false;
+  eoinfo.localsyms = false;
+  eoinfo.finfo = &finfo;
   elf_link_hash_traverse (elf_hash_table (info), elf_link_output_extsym,
-			  (PTR) &eif);
-  if (eif.failed)
+			  (PTR) &eoinfo);
+  if (eoinfo.failed)
     return false;
 
   /* Flush all symbols to the file.  */
@@ -3592,18 +3725,34 @@ elf_link_flush_output_syms (finfo)
 }
 
 /* Add an external symbol to the symbol table.  This is called from
-   the hash table traversal routine.  */
+   the hash table traversal routine.  When generating a shared object,
+   we go through the symbol table twice.  The first time we output
+   anything that might have been forced to local scope in a version
+   script.  The second time we output the symbols that are still
+   global symbols.  */
 
 static boolean
 elf_link_output_extsym (h, data)
      struct elf_link_hash_entry *h;
      PTR data;
 {
-  struct elf_finfo_failed *eif = (struct elf_finfo_failed *) data;
-  struct elf_final_link_info *finfo = eif->finfo;
+  struct elf_outext_info *eoinfo = (struct elf_outext_info *) data;
+  struct elf_final_link_info *finfo = eoinfo->finfo;
   boolean strip;
   Elf_Internal_Sym sym;
   asection *input_sec;
+
+  /* Decide whether to output this symbol in this pass.  */
+  if (eoinfo->localsyms)
+    {
+      if ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	return true;
+    }
+  else
+    {
+      if ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+	return true;
+    }
 
   /* If we are not creating a shared library, and this symbol is
      referenced by a shared library but is not defined anywhere, then
@@ -3622,7 +3771,7 @@ elf_link_output_extsym (h, data)
 	     (finfo->info, h->root.root.string, h->root.u.undef.abfd,
 	      (asection *) NULL, 0)))
 	{
-	  eif->failed = true;
+	  eoinfo->failed = true;
 	  return false;
 	}
     }
@@ -3655,8 +3804,10 @@ elf_link_output_extsym (h, data)
   sym.st_value = 0;
   sym.st_size = h->size;
   sym.st_other = h->other;
-  if (h->root.type == bfd_link_hash_undefweak
-      || h->root.type == bfd_link_hash_defweak)
+  if ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+    sym.st_info = ELF_ST_INFO (STB_LOCAL, h->type);
+  else if (h->root.type == bfd_link_hash_undefweak
+	   || h->root.type == bfd_link_hash_defweak)
     sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
   else
     sym.st_info = ELF_ST_INFO (STB_GLOBAL, h->type);
@@ -3689,7 +3840,7 @@ elf_link_output_extsym (h, data)
 						 input_sec->output_section);
 	    if (sym.st_shndx == (unsigned short) -1)
 	      {
-		eif->failed = true;
+		eoinfo->failed = true;
 		return false;
 	      }
 
@@ -3761,7 +3912,7 @@ elf_link_output_extsym (h, data)
       if (! ((*bed->elf_backend_finish_dynamic_symbol)
 	     (finfo->output_bfd, finfo->info, h, &sym)))
 	{
-	  eif->failed = true;
+	  eoinfo->failed = true;
 	  return false;
 	}
 
@@ -3835,7 +3986,7 @@ elf_link_output_extsym (h, data)
 
   if (! elf_link_output_sym (finfo, h->root.root.string, &sym, input_sec))
     {
-      eif->failed = true;
+      eoinfo->failed = true;
       return false;
     }
 
