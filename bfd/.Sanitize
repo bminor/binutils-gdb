@@ -90,6 +90,7 @@ oasys.c
 opncls.c
 reloc.c
 rs6000-core.c
+scripts
 seclet.c
 seclet.h
 section.c
