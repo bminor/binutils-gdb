@@ -1,3 +1,9 @@
+2003-04-15  H.J. Lu <hjl@gnu.org>
+
+	From Debian by Jack Howarth <howarth@nitro.med.uc.edu>:
+
+	* ldlex.l: Use YY_CURRENT_BUFFER instead of yy_current_buffer.
+
 2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
 
 	* h8-doc.texi: Replace occurrances of 'Hitachi' with 'Renesas'.

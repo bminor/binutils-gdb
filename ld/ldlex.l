@@ -611,7 +611,7 @@ yy_input (buf, result, max_size)
      int max_size;
 {
   *result = 0; 
-  if (yy_current_buffer->yy_input_file)
+  if (YY_CURRENT_BUFFER->yy_input_file)
     {
       if (yyin)
 	{
