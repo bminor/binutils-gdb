@@ -218,6 +218,7 @@ f-typeprint.c
 f-valprint.c
 findvar.c
 fork-child.c
+fr30-tdep.c
 frame.h
 gdb-stabs.h
 gdb.1
