@@ -1,3 +1,28 @@
+Tue Jun  6 13:53:06 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/obj-vms.c (vms_write_object_file, case N_DATA): Use
+	strcmp against FAKE_LABEL_NAME instead of checking third
+	character.  (Suggested by Pat Rankin.)
+
+Mon  5 Jun 20:10:46 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	Add support for N_ABS and N_ABS|N_EXT type symbols.
+
+	* config/obj-vms.h (LSY_S_M_{DEF,REL}, ENV_S_M_{DEF,NESTED}):
+	New macros for local symbols (from <lsydef.h> and <envdef.h>).
+	* config/obj-vms.c (Current_Environment): New file-scope variable.
+	(VMS_Local_Environment_Setup): New routine.
+	(GBLSYM_LCL): New macro.
+	(VMS_Global_Symbol_Spec): Handle local symbols too.
+	(VMS_Psect_Spec): Set GLOBALVALUE_BIT for absolute symbols.
+	(VMS_Emit_Globalvalues): Handle local and global absolute symbols.
+	(VMS_Store_PIC_Symbol_Reference): Ditto.
+	(vms_write_object_file: GSD symbol loop): Ditto.
+
+Mon Jun  5 16:10:40 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* config/tc-arm.h (LOCAL_LABELS_FB): Define.
+
 Mon Jun  5 02:17:58 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	* configure.in (i386-*-gnu*): Always use GNU ELF config.

@@ -200,6 +200,14 @@ static int struct_number;
 
 static int vax_g_doubles = 0;
 
+/* Local symbol references (used to handle N_ABS symbols; gcc does not
+   generate those, but they're possible with hand-coded assembler input)
+   are always made relative to some particular environment.  If the current
+   input has any such symbols, then we expect this to get incremented
+   exactly once and end up having all of them be in environment #0.  */
+
+static int Current_Environment = -1;
+
 
 /*
  * Variable descriptors are used tell the debugger the data types of certain
@@ -3656,9 +3664,10 @@ VMS_Modify_Psect_Attributes (Name, Attribute_Pointer)
 #define GBLSYM_REF 0
 #define GBLSYM_DEF 1
 #define GBLSYM_VAL 2
+#define GBLSYM_LCL 4	/* not GBL after all... */
 
 /*
- *	Define a global symbol
+ *	Define a global symbol (or possibly a local one).
  */
 static void
 VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Flags)
@@ -3679,9 +3688,10 @@ VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Flags)
   if (Object_Record_Offset == 0)
     PUT_CHAR (OBJ_S_C_GSD);
   /*
-   *	We are writing a Global symbol definition subrecord
+   *	We are writing a Global (or local) symbol definition subrecord.
    */
-  PUT_CHAR (((unsigned) Psect_Number <= 255) ? GSD_S_C_SYM : GSD_S_C_SYMW);
+  PUT_CHAR ((Flags & GBLSYM_LCL) != 0 ? GSD_S_C_LSY :
+	    ((unsigned) Psect_Number <= 255) ? GSD_S_C_SYM : GSD_S_C_SYMW);
   /*
    *	Data type is undefined
    */
@@ -3695,18 +3705,23 @@ VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Flags)
        *	Reference
        */
       PUT_SHORT (((Flags & GBLSYM_VAL) == 0) ? GSY_S_M_REL : 0);
+      if ((Flags & GBLSYM_LCL) != 0)	/* local symbols have extra field */
+	PUT_SHORT (Current_Environment);
     }
   else
     {
       /*
        *	Definition
+       *[ assert (LSY_S_M_DEF == GSY_S_M_DEF && LSY_S_M_REL == GSY_S_M_REL); ]
        */
       PUT_SHORT (((Flags & GBLSYM_VAL) == 0) ?
 		  GSY_S_M_DEF | GSY_S_M_REL : GSY_S_M_DEF);
+      if ((Flags & GBLSYM_LCL) != 0)	/* local symbols have extra field */
+	PUT_SHORT (Current_Environment);
       /*
        *	Psect Number
        */
-      if ((unsigned) Psect_Number <= 255)
+      if ((Flags & GBLSYM_LCL) == 0 && (unsigned) Psect_Number <= 255)
 	{
 	  PUT_CHAR (Psect_Number);
 	}
@@ -3727,8 +3742,40 @@ VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Flags)
   /*
    *	Flush the buffer if it is more than 75% full
    */
-  if (Object_Record_Offset >
-      (sizeof (Object_Record_Buffer) * 3 / 4))
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
+    Flush_VMS_Object_Record_Buffer ();
+}
+
+/*
+ *	Define an environment to support local symbol references.
+ *	This is just to mollify the linker; we don't actually do
+ *	anything useful with it.
+ */
+static void
+VMS_Local_Environment_Setup (Env_Name)
+    const char *Env_Name;
+{
+  /* We are writing a GSD record.  */
+  Set_VMS_Object_File_Record (OBJ_S_C_GSD);
+  /* If the buffer is empty we must insert the GSD record type.  */
+  if (Object_Record_Offset == 0)
+    PUT_CHAR (OBJ_S_C_GSD);
+  /* We are writing an ENV subrecord.  */
+  PUT_CHAR (GSD_S_C_ENV);
+
+  ++Current_Environment;	/* index of environment being defined */
+
+  /* ENV$W_FLAGS:  we are defining the next environment.  It's not nested.  */
+  PUT_SHORT (ENV_S_M_DEF);
+  /* ENV$W_ENVINDX:  index is always 0 for non-nested definitions.  */
+  PUT_SHORT (0);
+
+  /* ENV$B_NAMLNG + ENV$T_NAME:  environment name in ASCIC format.  */
+  if (!Env_Name) Env_Name = "";
+  PUT_COUNTED_STRING ((char *)Env_Name);
+
+  /* Flush the buffer if it is more than 75% full.  */
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
@@ -3792,7 +3839,9 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
   /*
    *	Modify the psect attributes according to any attribute string
    */
-  if (HAS_PSECT_ATTRIBUTES (Name))
+  if (vsp && S_GET_TYPE (vsp->Symbol) == N_ABS)
+    Psect_Attributes |= GLOBALVALUE_BIT;
+  else if (HAS_PSECT_ATTRIBUTES (Name))
     VMS_Modify_Psect_Attributes (Name, &Psect_Attributes);
   /*
    *	Check for globalref/def/val.
@@ -3951,7 +4000,7 @@ VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment)
   int Size;
   int Psect_Attributes;
   int globalvalue;
-  int typ;
+  int typ, abstyp;
 
   /*
    * Scan the symbol table for globalvalues, and emit def/ref when
@@ -3961,10 +4010,12 @@ VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment)
   for (sp = symbol_rootP; sp; sp = sp->sy_next)
     {
       typ = S_GET_RAW_TYPE (sp);
+      abstyp = ((typ & ~N_EXT) == N_ABS);
       /*
        *	See if this is something we want to look at.
        */
-      if (typ != (N_DATA | N_EXT) &&
+      if (!abstyp &&
+	  typ != (N_DATA | N_EXT) &&
 	  typ != (N_UNDF | N_EXT))
 	continue;
       /*
@@ -3972,18 +4023,39 @@ VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment)
        */
       Name = S_GET_NAME (sp);
 
-      if (!HAS_PSECT_ATTRIBUTES (Name))
+      if (abstyp)
+	{
+	  stripped_name = 0;
+	  Psect_Attributes = GLOBALVALUE_BIT;
+	}
+      else if (HAS_PSECT_ATTRIBUTES (Name))
+	{
+	  stripped_name = (char *) xmalloc (strlen (Name) + 1);
+	  strcpy (stripped_name, Name);
+	  Psect_Attributes = 0;
+	  VMS_Modify_Psect_Attributes (stripped_name, &Psect_Attributes);
+	}
+      else
 	continue;
-
-	stripped_name = (char *) xmalloc (strlen (Name) + 1);
-	strcpy (stripped_name, Name);
-	Psect_Attributes = 0;
-	VMS_Modify_Psect_Attributes (stripped_name, &Psect_Attributes);
 
       if ((Psect_Attributes & GLOBALVALUE_BIT) != 0)
 	{
 	  switch (typ)
 	    {
+	    case N_ABS:
+	      /* Local symbol references will want
+		 to have an environment defined.  */
+	      if (Current_Environment < 0)
+		VMS_Local_Environment_Setup (".N_ABS");
+	      VMS_Global_Symbol_Spec (Name, 0,
+				      S_GET_VALUE(sp),
+				      GBLSYM_DEF|GBLSYM_VAL|GBLSYM_LCL);
+	      break;
+	    case N_ABS | N_EXT:
+	      VMS_Global_Symbol_Spec (Name, 0,
+				      S_GET_VALUE(sp),
+				      GBLSYM_DEF|GBLSYM_VAL);
+	      break;
 	    case N_UNDF | N_EXT:
 	      VMS_Global_Symbol_Spec (stripped_name, 0, 0, GBLSYM_VAL);
 	      break;
@@ -4197,6 +4269,7 @@ VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
 {
   register struct VMS_Symbol *vsp = Symbol->sy_obj;
   char Local[32];
+  int local_sym = 0;
 
   /*
    *	We are writing a "Record_Type" record
@@ -4238,6 +4311,10 @@ VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
       /*
        *	Global symbol
        */
+    case N_ABS:
+      local_sym = 1;
+      /*FALLTHRU*/
+    case N_ABS | N_EXT:
 #ifdef	NOT_VAX_11_C_COMPATIBLE
     case N_UNDF | N_EXT:
     case N_DATA | N_EXT:
@@ -4251,7 +4328,16 @@ VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
       /*
        *	Stack the global symbol value
        */
-      PUT_CHAR (TIR_S_C_STA_GBL);
+      if (!local_sym)
+	{
+	  PUT_CHAR (TIR_S_C_STA_GBL);
+	}
+      else
+	{
+	  /* Local symbols have an extra field.  */
+	  PUT_CHAR (TIR_S_C_STA_LSY);
+	  PUT_SHORT (Current_Environment);
+	}
       PUT_COUNTED_STRING (Local);
       if (Offset)
 	{
@@ -4857,7 +4943,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	    char *sym_name = S_GET_NAME (sp);
 
 	    /* Always suppress local numeric labels.  */
-	    if (!sym_name || strlen (sym_name) <= 2 || sym_name[2] != '\001')
+	    if (!sym_name || strcmp (sym_name, FAKE_LABEL_NAME) != 0)
 	      {
 		/*
 		 *	Make a VMS data symbol entry.
@@ -4944,6 +5030,24 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 				  0,
 				  0,
 				  GBLSYM_REF);
+	  break;
+	  /*
+	   *	Absolute symbol
+	   */
+	case N_ABS:
+	case N_ABS | N_EXT:
+	  /*
+	   *	gcc doesn't generate these;
+	   *	VMS_Emit_Globalvalue handles them though.
+	   */
+	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
+	  vsp->Symbol = sp;
+	  vsp->Size = 4;
+	  vsp->Psect_Index = 0;
+	  vsp->Psect_Offset = S_GET_VALUE (sp);
+	  vsp->Next = VMS_Symbols;
+	  VMS_Symbols = vsp;
+	  sp->sy_obj = vsp;
 	  break;
 	  /*
 	   *	Anything else

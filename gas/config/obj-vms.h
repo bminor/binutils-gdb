@@ -305,6 +305,12 @@ extern void vms_write_object_file PARAMS ((unsigned,unsigned,unsigned,
 #define	GSY_S_M_DEF	2
 #define	GSY_S_M_UNI	4
 #define	GSY_S_M_REL	8
+
+#define	LSY_S_M_DEF	2
+#define	LSY_S_M_REL	8
+
+#define	ENV_S_M_DEF	1
+#define	ENV_S_M_NESTED	2
 
 #define	GPS_S_M_PIC	1
 #define	GPS_S_M_LIB	2
