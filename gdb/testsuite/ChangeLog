@@ -1,3 +1,9 @@
+2004-02-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/sim.exp (gdb_load): Handle $arg == "".
+	* lib/gdb.exp (gdb_run_cmd): Honor gdb,do_reload_on_run.
+	* gdb.objc/basicclass.exp: Use gdb_run_cmd.
+
 2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdb.base/maint.exp: Update test to reflect

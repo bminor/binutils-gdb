@@ -248,6 +248,12 @@ proc gdb_run_cmd {args} {
 	}
 	return
     }
+
+    if [target_info exists gdb,do_reload_on_run] {
+	if { [gdb_load ""] < 0 } {
+	    return;
+	}
+    }
     send_gdb "run $args\n"
 # This doesn't work quite right yet.
     gdb_expect 60 {

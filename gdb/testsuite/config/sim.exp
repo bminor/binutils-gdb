@@ -1,5 +1,5 @@
 # Test Framework Driver for GDB driving a builtin simulator
-#   Copyright 1994, 1997, 1998 Free Software Foundation, Inc.
+#   Copyright 1994, 1997, 1998, 2004 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,7 +55,9 @@ proc gdb_load { arg } {
     global GDB
     global gdb_prompt
 
-    if [gdb_file_cmd $arg] then { return -1 }
+    if { $arg != "" } {
+	if [gdb_file_cmd $arg] then { return -1 }
+    }
 
     gdb_target_sim
 
