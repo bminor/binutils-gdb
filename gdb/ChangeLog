@@ -1,3 +1,9 @@
+Tue Jun 14 17:24:41 1994  Tom Lord  (lord@x1.cygnus.com)
+
+	* gdba.el: Added menu windows and slightly improved window
+	handling to gdba.el.  Fixed numerous minor bugs that were causing
+	emacs and gdb to fall out of sync.
+
 Tue Jun 14 16:18:44 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* breakpoint.c: annotate changes lost at merge, put back in.
