@@ -627,7 +627,7 @@ struct coff_symfile_info {
 
 static int text_bfd_scnum;
 
-void
+static void
 coff_symfile_init (sf)
      struct sym_fns *sf;
 {
@@ -728,7 +728,7 @@ static bfd *symfile_bfd;
    shared libraries or add_file!  */
 
 /* ARGSUSED */
-void
+static void
 coff_symfile_read (sf, addr, mainline)
      struct sym_fns *sf;
      CORE_ADDR addr;
@@ -822,7 +822,7 @@ coff_symfile_read (sf, addr, mainline)
   select_source_symtab (0);	/* FIXME, this might be too slow, see dbxread */
 }
 
-void
+static void
 coff_new_init ()
 {
   /* There seems to be nothing to do except free_all_symtabs and set

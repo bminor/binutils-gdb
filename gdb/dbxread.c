@@ -491,7 +491,7 @@ static int header_file_prev_index;
 /* Free up old header file tables, and allocate new ones.
    We're reading a new symbol file now.  */
 
-void
+static void
 free_and_init_header_files ()
 {
   register int i;
@@ -1233,7 +1233,7 @@ pop_subfile ()
   return name;
 }
 
-void
+static void
 record_misc_function (name, address, type)
      char *name;
      CORE_ADDR address;
@@ -1271,7 +1271,7 @@ static bfd *symfile_bfd;
    MAINLINE is true if we are reading the main symbol
    table (as opposed to a shared lib or dynamically loaded file).  */
 
-void
+static void
 dbx_symfile_read (sf, addr, mainline)
      struct sym_fns *sf;
      CORE_ADDR addr;
@@ -1338,7 +1338,7 @@ dbx_symfile_read (sf, addr, mainline)
    symbol file is specified (not just adding some symbols from another
    file, e.g. a shared library).  */
 
-void
+static void
 dbx_new_init ()
 {
   /* Empty the hash table of global syms looking for values.  */
@@ -1373,7 +1373,7 @@ dbx_new_init ()
    be called unless this is an a.out (or very similar) file. 
    FIXME, there should be a cleaner peephole into the BFD environment here.  */
 
-void
+static void
 dbx_symfile_init (sf)
   struct sym_fns *sf;
 {
@@ -1562,7 +1562,7 @@ add_bincl_to_list (pst, name, instance)
    bincl in the list.  Return the partial symtab associated
    with that header_file_location.  */
 
-struct partial_symtab *
+static struct partial_symtab *
 find_corresponding_bincl_psymtab (name, instance)
      char *name;
      int instance;
