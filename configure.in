@@ -12,7 +12,8 @@ srcname="gnu development package"
 # XXX - FIXME there needs to be a case for hmake-dgux
 
 case "${host_os}" in
-sysv* | irix*) host_makefile_frag=config/hmake-sysv ;;
+sysv* | irix*)	host_makefile_frag=config/hmake-sysv ;;
+svr4)		host_makefile_frag=config/hmake-svr4 ;;
 esac
 
 # per-target:
