@@ -1,3 +1,24 @@
+2003-03-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_frameless_signal_p): Removed.
+	(i386_frame_chain): Removed.
+	(i386_sigtramp_saved_pc, i386_sigtramp_saved_sp): Removed.
+	(i386_frame_saved_pc): Removed.
+	(i386_saved_pc_after_call): Use frame_unwind_register to find the
+	saved PC.
+	(i386_frame_init_saved_regs): Removed.
+	(i386_do_pop_frame, i386_pop_frame): Removed.
+	(i386_frame_cache): New function.
+	(i386_frame_pop, i386_frame_pc_unwind, i386_frame_id_unwind,
+	i386_frame_register_unwind): New functions.
+	(i386_frame_unwind): New variable.
+	(i386_frame_p): New function.
+	(i386_unwind_dummy_id, i386_save_dummy_frame_tos): New functions.
+	(i386_gdbarch_init): Don't set deprecated_init_frame_pc,
+	pop_frame, deprecated_frame_init_saved_regs, frame_chain and
+	frame_saved_pc.  Set unwind_dummy_id and save_dummy_frame_tos.
+	Call frame_unwind_append_predicate.
+
 2003-03-07  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh: Don't generate two macro definitions when an
