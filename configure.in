@@ -331,7 +331,7 @@ esac
 
 case "${target}" in
   i[345]86-*-win32*)
-	  configdirs="$configdirs winsup" ;;
+	  configdirs="$configdirs winsup newlib" ;;
 esac
 
 # Remove more programs from consideration, based on the host or 
@@ -348,7 +348,7 @@ case "${host}" in
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
 	;;
   i[345]86-*-win32)
-     noconfigdirs="tk tcl expect dejagnu texinfo bison send-pr gprof rcs"
+     noconfigdirs="tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs"
     ;;
 esac
 
