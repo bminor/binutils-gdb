@@ -1,5 +1,8 @@
 Thu Sep 16 10:59:56 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* emulparms/elf64hppa.sh (DATA_START_SYMBOLS): Define.
+	(OTHER_READWRITE_SECTIONS): No longer define __hp_load_map.
+
 	* emulparms/elf64hppa.sh (TEXT_START_SYMBOLS): Define.
 
 Wed Sep 15 02:47:43 1999  Jeffrey A Law  (law@cygnus.com)

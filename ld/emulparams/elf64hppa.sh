@@ -24,7 +24,7 @@ OTHER_READONLY_SECTIONS='.PARISC.unwind : { *(.PARISC.unwind) } .stubs : { *(.st
 
 # The PA64 ELF port treats .plt sections differently than most.  We also have
 # to create a .opd section.  What most systems call the .got, we call the .dlt
-OTHER_READWRITE_SECTIONS='__hp_load_map = .; . += 16; .opd : { *(.opd) } __gp = .; .plt : { *(.plt) } .dlt : { *(.dlt) }'
+OTHER_READWRITE_SECTIONS='.opd : { *(.opd) } __gp = .; .plt : { *(.plt) } .dlt : { *(.dlt) }'
 
 # The PA64 ELF port has two additional bss sections. huge bss and thread bss.
 # Make sure they end up in the appropriate location.  We also have to set
@@ -42,6 +42,7 @@ OTHER_GOT_RELOC_SECTIONS='.rela.dlt : { *(.rela.dlt) }'
 # building unwinders instead of computing the base of the text segment
 # in the BFD backend.
 TEXT_START_SYMBOLS='__text_dummy = . ;'
+DATA_START_SYMBOLS='__hp_load_map = .; . += 16;'
 
 # The linker is required to define these two symbols.
 EXECUTABLE_SYMBOLS='__SYSTEM_ID = 0x214; _FPU_STATUS = 0x0;'
