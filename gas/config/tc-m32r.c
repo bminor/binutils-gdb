@@ -1758,7 +1758,7 @@ m32r_force_relocation (fix)
      fixS * fix;
 {
   if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT)
+      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
   if (! m32r_relax)
