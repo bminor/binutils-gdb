@@ -885,6 +885,13 @@ struct elf_obj_tdata
 
   /* Linker sections that we are interested in.  */
   struct elf_linker_section *linker_section[ (int)LINKER_SECTION_MAX ];
+
+  /* The Irix 5 support uses two virtual sections, which represent
+     text/data symbols defined in dynamic objects.  */
+  asymbol *elf_data_symbol;
+  asymbol *elf_text_symbol;
+  asection *elf_data_section;
+  asection *elf_text_section;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)

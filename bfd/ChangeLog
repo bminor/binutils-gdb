@@ -1,3 +1,37 @@
+2000-06-20  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* elf-bfd.h (struct elf_obj_tdata): Define per BFD Irix 5 virtual
+	sections elf_{text,data}_{section,symbol}.
+	* elf32-mips.c: mips_elf_{text,data}_{section,symbol}{,_ptr}: Remove.
+	(_bfd_mips_elf_hide_symbol): New function.
+	(elf_backend_hide_symbol): Map to the new function.
+	(_bfd_mips_elf_add_symbol_hook): Change to use new per BFD
+	definitions of mips_elf_{text,data}_{section,symbol}.
+	(mips_elf_local_relocation_p): Try to find the direct symbol
+	based on new check_forced argument.
+	(mips_elf_calculate_relocation): Use new version of
+	mips_elf_local_relocation_p.
+	(mips_elf_relocate_section): Likewise.
+	(_bfd_mips_elf_relocate_section): Likewise.
+	(mips_elf_sort_hash_table): Only assert that have enough GOT
+	space.
+	(mips_elf_got16_entry): Match all 32 bits to the existing GOT
+	entry if the relocation based on the new external argument.
+	(mips_elf_create_dynamic_relocation): Assert that we have a
+	section contents allocated where we can swap out the dynamic
+	relocations.
+	(mips_elf_calculate_relocation): Find the real hash-table entry
+	correctly by using h->root.root.type.  Only create a dynamic
+	relocation entry if the symbol is defined in a shared library.
+	Create an external GOT entry for the GOT16 relocation if the
+	symbol was forced local.
+	(_bfd_mips_elf_finish_dynamic_symbol): Don't assert there is a
+	dynamic index if the symbol was forced local.
+
+2000-06-20  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* elf32-mips.c: Fix typos in comments.
+	
 2000-06-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* rs6000-core.c: Wrap definition of `union VmInfo' within #ifdef
