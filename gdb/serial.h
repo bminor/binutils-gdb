@@ -62,7 +62,7 @@ void serial_add_interface PARAMS ((struct serial_ops *optable));
 
 serial_t serial_open PARAMS ((const char *name));
 
-serial_t serial_fdopen PARAMS ((int fd));
+serial_t serial_fdopen PARAMS ((const int fd));
 
 /* For most routines, if a failure is indicated, then errno should be
    examined.  */
