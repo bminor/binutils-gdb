@@ -1,3 +1,7 @@
+2002-02-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* symtab.c (sort_search_symbols): Use xfree.
+
 2002-02-23  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-linux-tdep.c (arm_linux_init_abi): Register

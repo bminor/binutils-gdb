@@ -2456,7 +2456,7 @@ sort_search_symbols (struct symbol_search *prevtail, int nfound)
     }
   symp->next = old_next;
 
-  free (symbols);
+  xfree (symbols);
   return symp;
 }
 
