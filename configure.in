@@ -18,7 +18,23 @@ esac
 
 # per-target:
 
-# XXX - FIXME there needs to be a case for tmake-a29k
+
+case "${target_vendor}" in
+amd)
+	case "${target_os}" in
+		ebmon) 	bfd_target="ebmon29k" 
+			;;
+		*) echo "bad target_os for amd"	;;
+	esac
+	;;
+*)
+	echo "bad target_vendor"
+	;;
+esac
+
+
+target_makefile_frag=config/t-${bfd_target}
+
 
 #
 # Local Variables:

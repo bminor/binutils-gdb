@@ -1,8 +1,13 @@
+Mon Oct 21 10:04:39 1991  Steve Chamberlain  (steve at rtl.cygnus.com)
+
+	* configure.in: added ebmon target.
+
 Wed Oct 16 22:49:58 1991  John Gilmore  (gnu at cygnus.com)
 
 	GDB-4.2 release!
 
 	* Makefile.in:  Roll VERSION to 4.2.
+	* README, TODO, WHATS.NEW:  Update.
 
 	* core.c (core_open):  Improve error message for bad file.
 	Pass .reg virtual memory address to fetch_core_registers to help

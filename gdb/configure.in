@@ -185,6 +185,7 @@ a29k)
 	none|aout|coff)	gdb_target=a29k ;;
 	sym1)	gdb_target=ultra3 ;;
 	kern)	gdb_target=a29k-kern ;;
+	ebmon)  gdb_target=a29k;;
 	esac
 	;;
 	
