@@ -1,3 +1,7 @@
+2003-10-11  Alan Modra  <alan@modra.org>
+
+	* section.c (bfd_get_section_size_before_reloc): Ignore reloc_done.
+
 2003-10-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".

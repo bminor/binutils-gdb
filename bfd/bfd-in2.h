@@ -1421,8 +1421,7 @@ extern const struct symbol_cache_entry * const bfd_com_symbol;
 extern const struct symbol_cache_entry * const bfd_und_symbol;
 extern const struct symbol_cache_entry * const bfd_ind_symbol;
 #define bfd_get_section_size_before_reloc(section) \
-     ((section)->reloc_done ? (abort (), (bfd_size_type) 1) \
-                            : (section)->_raw_size)
+     ((section)->_raw_size)
 #define bfd_get_section_size_after_reloc(section) \
      ((section)->reloc_done ? (section)->_cooked_size \
                             : (abort (), (bfd_size_type) 1))
