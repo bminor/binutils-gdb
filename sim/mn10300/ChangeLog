@@ -1,3 +1,7 @@
+Wed Mar 25 12:08:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* simops.c (OP_F0FD): Initialise variable 'sp'.
+
 Thu Mar 26 00:21:32 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-mn103int.c (decode_group): A group register every 4 bytes not

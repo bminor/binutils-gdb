@@ -2846,6 +2846,7 @@ void OP_F0FD (insn, extension)
 {
   unsigned int sp, next_pc;
 
+  sp = State.regs[REG_SP];
   PSW = State.mem[sp] | (State.mem[sp + 1] << 8);
   State.regs[REG_PC] = (State.mem[sp+4] | (State.mem[sp+5] << 8)
 	      | (State.mem[sp+6] << 16) | (State.mem[sp+7] << 24));
