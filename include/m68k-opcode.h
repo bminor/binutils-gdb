@@ -31,7 +31,9 @@ enum m68k_architecture {
 	m68851 = 0x40,
 
  /* handy aliases */
-	m68020up = (m68020 | m68030 | m68040),
+	m68040up = m68040,
+	m68030up = (m68030 | m68040up),
+	m68020up = (m68020 | m68030up),
 	m68010up = (m68010 | m68020up),
 	m68000up = (m68000 | m68010up),
 
@@ -1588,7 +1590,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"pdbws",	two(0xf048, 0x0008),	two(0xfff8, 0xffff),	"DsBw", m68851 },
 #endif /* NO_68851 */
 
-{"pea",		one(0044100),		one(0177700),		"!s", m68000 },
+{"pea",		one(0044100),		one(0177700),		"!s", m68000up },
 
 #ifndef NO_68851
 {"pflusha",	two(0xf000, 0x2400),	two(0xffff, 0xffff),	"",		m68030 | m68851 },
