@@ -541,8 +541,12 @@ print_insn_hppa (memaddr, info)
 		  fput_const (extract_5_load (insn), info);
 		  break;
 		case 's':
-		  (*info->fprintf_func) (info->stream,
-					 "sr%d", GET_FIELD (insn, 16, 17));
+		  {
+		    int space = GET_FIELD (insn, 16, 17);
+		    /* Zero means implicit addressing, not use of sr0.  */
+		    if (space != 0)
+		      (*info->fprintf_func) (info->stream, "sr%d", space);
+		  }
 		  break;
 
 		case 'S':
