@@ -747,6 +747,10 @@ M:2:ADDRESS_CLASS_NAME_TO_TYPE_FLAGS:int:address_class_name_to_type_flags:const 
 m:::int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup:::default_register_reggroup_p::0
 # Fetch the pointer to the ith function argument.
 F::FETCH_POINTER_ARGUMENT:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type
+
+# Return the appropriate register set for a core file section with
+# name SECT_NAME and size SECT_SIZE.
+M:::const struct regset *:regset_from_core_section:const char *sect_name, size_t sect_size:sect_name, sect_size
 EOF
 }
 
@@ -851,6 +855,7 @@ struct objfile;
 struct minimal_symbol;
 struct regcache;
 struct reggroup;
+struct regset;
 struct disassemble_info;
 
 extern struct gdbarch *current_gdbarch;

@@ -43,6 +43,7 @@ struct objfile;
 struct minimal_symbol;
 struct regcache;
 struct reggroup;
+struct regset;
 struct disassemble_info;
 
 extern struct gdbarch *current_gdbarch;
@@ -2364,6 +2365,15 @@ extern void set_gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, gdbarch
 #if !defined (FETCH_POINTER_ARGUMENT)
 #define FETCH_POINTER_ARGUMENT(frame, argi, type) (gdbarch_fetch_pointer_argument (current_gdbarch, frame, argi, type))
 #endif
+
+/* Return the appropriate register set for a core file section with
+   name SECT_NAME and size SECT_SIZE. */
+
+extern int gdbarch_regset_from_core_section_p (struct gdbarch *gdbarch);
+
+typedef const struct regset * (gdbarch_regset_from_core_section_ftype) (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
+extern const struct regset * gdbarch_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
+extern void set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch, gdbarch_regset_from_core_section_ftype *regset_from_core_section);
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
