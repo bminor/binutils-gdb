@@ -46,7 +46,7 @@ Thu May  1 10:40:47 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 Wed Apr 30 11:34:14 1997  Doug Evans  <dje@canuck.cygnus.com>
 
-	* cgen-mem.h, cgen-scache.[ch], cgen-sem.h, cgen-sim.h: New files.
+	* cgen-scache.[ch], cgen-sim.h: New files.
 	* cgen-trace.[ch], cgen-types.h, cgen-utils.c, genmloop.sh: New files.
 	* sim-model.c: New file.
 

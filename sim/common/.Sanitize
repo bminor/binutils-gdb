@@ -28,10 +28,8 @@ Make-common.in
 Makefile.in
 aclocal.m4
 callback.c
-cgen-mem.h
 cgen-scache.c
 cgen-scache.h
-cgen-sem.h
 cgen-sim.h
 cgen-trace.c
 cgen-trace.h
