@@ -1447,9 +1447,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_extract_struct_value_address (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, s390_fix_call_dummy);
-#ifdef GDB_NM_FILE
-  set_gdbarch_prepare_to_proceed (gdbarch, linuxthreads_prepare_to_proceed);
-#endif
   set_gdbarch_push_return_address (gdbarch, s390_push_return_address);
 
   switch (info.bfd_arch_info->mach)

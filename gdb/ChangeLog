@@ -1,3 +1,9 @@
+2001-11-08  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (s390_gdbarch_init): Use the default
+ 	prepare_to_proceed function established by config/nm-linux.h;
+ 	don't try to set it to linuxthreads_prepare_to_proceed.
+
 Wed Nov  7 20:38:14 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* i386-tdep.c: Include "i386-tdep.h".
