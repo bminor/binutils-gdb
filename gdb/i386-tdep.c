@@ -1351,6 +1351,17 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->sigtramp_end = 0;
   tdep->sc_pc_offset = -1;
 
+  /* The format used for `long double' on almost all i386 targets is
+     the i387 extended floating-point format.  In fact, of all targets
+     in the GCC 2.95 tree, only OSF/1 does it different, and insists
+     on having a `long double' that's not `long' at all.  */
+  set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
+  
+  /* Although the i386 extended floating-point has only 80 significant
+     bits, a `long double' actually takes up 96, probably to enforce
+     alignment.  */
+  set_gdbarch_long_double_bit (gdbarch, 96);
+
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);

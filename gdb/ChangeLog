@@ -1,5 +1,10 @@
 2002-06-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-i386.h (TARGET_LONG_DOUBLE_FORMAT,
+	TARGET_LONG_DOUBLE_BIT): Remove.  * i386-tdep.c
+	(i386_gdbarch_init): Initialize long_double_format and long_double
+	bit.
+
 	* config/i386/i386sol2.mt (TDEPFILES): Add i386-sol2-tdep.o and
 	i386bsd-tdep.o.  Remove solib.o, solib-svr4.o and solib-legacy.o.
 	Move these to ...

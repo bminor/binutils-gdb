@@ -32,19 +32,6 @@ struct frame_saved_regs;
 struct value;
 struct type;
 
-/* The format used for `long double' on almost all i386 targets is the
-   i387 extended floating-point format.  In fact, of all targets in the
-   GCC 2.95 tree, only OSF/1 does it different, and insists on having
-   a `long double' that's not `long' at all.  */
-
-#define TARGET_LONG_DOUBLE_FORMAT &floatformat_i387_ext
-
-/* Although the i386 extended floating-point has only 80 significant
-   bits, a `long double' actually takes up 96, probably to enforce
-   alignment.  */
-
-#define TARGET_LONG_DOUBLE_BIT 96
-
 /* Number of traps that happen between exec'ing the shell to run an
    inferior, and when we finally get to the inferior code.  This is 2
    on most implementations. */
