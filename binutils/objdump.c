@@ -178,8 +178,8 @@ show_line PARAMS ((bfd *, asection *, bfd_vma));
 
 static void
 disassemble_bytes PARAMS ((struct disassemble_info *, disassembler_ftype,
-			   boolean, bfd_byte *, long, long, arelent ***,
-			   arelent **));
+			   boolean, bfd_byte *, unsigned long, unsigned long,
+			   arelent ***, arelent **));
 
 static void
 disassemble_data PARAMS ((bfd *));
@@ -376,7 +376,7 @@ slurp_symtab (abfd)
 
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
     {
-      printf (_("No symbols in \"%s\".\n"), bfd_get_filename (abfd));
+      fprintf (stderr, _("%s: no symbols\n"), bfd_get_filename (abfd));
       symcount = 0;
       return NULL;
     }
@@ -393,8 +393,7 @@ slurp_symtab (abfd)
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (symcount == 0)
-    fprintf (stderr, _("%s: %s: No symbols\n"),
-	     program_name, bfd_get_filename (abfd));
+    fprintf (stderr, _("%s: no symbols\n"), bfd_get_filename (abfd));
   return sy;
 }
 
@@ -1153,8 +1152,8 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
      disassembler_ftype disassemble_fn;
      boolean insns;
      bfd_byte *data;
-     long start;
-     long stop;
+     unsigned long start;
+     unsigned long stop;
      arelent ***relppp;
      arelent **relppend;
 {
@@ -1163,7 +1162,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
   int bytes_per_line;
   boolean done_dot;
   int skip_addr_chars;
-  long i;
+  unsigned long i;
 
   aux = (struct objdump_disasm_info *) info->application_data;
   section = aux->sec;
@@ -1200,7 +1199,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
   i = start;
   while (i < stop)
     {
-      long z;
+      unsigned long z;
       int bytes;
       boolean need_nl = false;
 
@@ -2627,7 +2626,9 @@ main (argc, argv)
   char *target = default_target;
   boolean seenflag = false;
 
+#ifdef HAVE_SETLOCALE
   setlocale (LC_MESSAGES, "");
+#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 

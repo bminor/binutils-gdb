@@ -1,3 +1,9 @@
+Tue Oct 27 14:39:00 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* objdump.c (disassemble_bytes): Applied this patch from Philip
+	Blundell <pb@nexus.co.uk>:  Make address variables unsigned to
+	avoid problems when disassembling code at high-bit-set addresses. 
+
 Mon Oct 26 14:07:59 1998  Mumit Khan  <khan@xraylith.wisc.edu>
         
         * dllwrap.c (strhash): New function.
