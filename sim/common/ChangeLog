@@ -1,5 +1,8 @@
 Wed Apr  2 15:06:28 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* sim-endian.h: Move host {LITTLE,BIG}_ENDIAN support from here,
+	* sim-config.h: To here.
+
 	* Make-common.in (SIM_EXTRA_DEPS): New config var.
 	(sim_main_headers): Define.
 	(sim-*.o): Depend on $(SIM_EXTRA_DEPS).
