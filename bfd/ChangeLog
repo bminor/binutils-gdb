@@ -1,4 +1,12 @@
+Wed Aug 11 06:40:51 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ecoffswap.h (ecoff_swap_{hdr,ext}_{in,out}): Use signed
+	conversions for some fields.
+
 Tue Aug 10 13:32:23 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_gprel_reloc): If _gp is not defined, give an
+	error rather than aborting.
 
 	* libnlm.h (struct nlm_backend_data): Added mach field.
 	(nlm_machine): New accessor macro.
