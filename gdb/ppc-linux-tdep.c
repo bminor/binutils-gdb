@@ -941,6 +941,60 @@ ppc64_call_dummy_address (void)
 }
 
 
+/* Return the unrelocated code address at which execution begins for
+   ABFD, under the 64-bit PowerPC Linux ABI.
+
+   On that system, the ELF header's e_entry field (which is what
+   bfd_get_start_address gives you) is not the address of the actual
+   machine instruction you need to jump to, as it is on almost every
+   other target.  Instead, it's the address of a function descriptor
+   for the start function.  A function descriptor is a structure
+   containing three addresses: the entry point, the TOC pointer for
+   the function, and an environment pointer for the function.  The
+   first field is what we want to return.
+
+   So all we do is find the section containing the start address, read
+   the address-sized word there out of the BFD, and return that.  */
+static CORE_ADDR
+ppc64_linux_bfd_entry_point (struct gdbarch *gdbarch, bfd *abfd)
+{
+  bfd_vma start_address = bfd_get_start_address (abfd);
+  unsigned int addr_size = (bfd_arch_bits_per_address (abfd)
+                            / bfd_arch_bits_per_byte (abfd));
+  unsigned char *entry_pt_buf = alloca (addr_size);
+  asection *sec;
+  file_ptr desc_offset;
+
+  /* Find a data section containing an address-sized word at
+     start_address.  */
+  for (sec = abfd->sections; sec; sec = sec->next)
+    {
+      CORE_ADDR sec_vma = bfd_get_section_vma (abfd, sec);
+      CORE_ADDR sec_end_vma = sec_vma + bfd_section_size (abfd, sec);
+
+      if (sec_vma <= start_address
+          && start_address + addr_size <= sec_end_vma)
+        break;
+    }
+  if (! sec)
+    return 0;
+
+  /* Okay, we've found the section.  What is the function descriptor's
+     offset within that section?  */
+  desc_offset = start_address - bfd_get_section_vma (abfd, sec);
+
+  /* Seek to the descriptor, and read the first address-sized word it
+     contains.  */
+  if (bfd_seek (abfd, sec->filepos + desc_offset, SEEK_SET)
+      || bfd_bread (entry_pt_buf, addr_size, abfd) != addr_size)
+    return 0;
+      
+  /* That's the actual code entry point.  */
+  return (CORE_ADDR) bfd_get (bfd_arch_bits_per_address (abfd),
+                              abfd, entry_pt_buf);
+}
+
+
 enum {
   ELF_NGREG = 48,
   ELF_NFPREG = 33,
@@ -1072,6 +1126,8 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_in_solib_call_trampoline
         (gdbarch, ppc64_in_solib_call_trampoline);
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
+      
+      set_gdbarch_bfd_entry_point (gdbarch, ppc64_linux_bfd_entry_point);
     }
 }
 
