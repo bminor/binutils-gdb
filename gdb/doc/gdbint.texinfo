@@ -3273,7 +3273,7 @@ current stack frame storing each in @code{frame->saved_regs}.  Space for
 @code{DEPRECATED_FRAME_INIT_SAVED_REGS} using
 @code{frame_saved_regs_zalloc}.
 
-@code{FRAME_FIND_SAVED_REGS} and @code{EXTRA_FRAME_INFO} are deprecated.
+@code{FRAME_FIND_SAVED_REGS} is deprecated.
 
 @item FRAME_NUM_ARGS (@var{fi})
 @findex FRAME_NUM_ARGS
@@ -3673,11 +3673,6 @@ The number of the ``next program counter'' register, if defined.
 @findex PARM_BOUNDARY
 If non-zero, round arguments to a boundary of this many bits before
 pushing them on the stack.
-
-@item PRINT_TYPELESS_INTEGER
-@findex PRINT_TYPELESS_INTEGER
-This is an obscure substitute for @code{print_longest} that seems to
-have been defined for the Convex target.
 
 @item PROCESS_LINENUMBER_HOOK
 @findex PROCESS_LINENUMBER_HOOK
@@ -4143,8 +4138,6 @@ Add the macro @code{GDB_MULTI_ARCH}, defined as 0 (zero), to the file@*
 Some mechanisms do not work with multi-arch.  They include:
 
 @table @code
-@item EXTRA_FRAME_INFO
-Delete.
 @item FRAME_FIND_SAVED_REGS
 Replaced with @code{DEPRECATED_FRAME_INIT_SAVED_REGS}
 @end table

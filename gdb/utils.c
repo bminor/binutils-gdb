@@ -1261,7 +1261,7 @@ print_spaces (register int n, register struct ui_file *file)
 /* Print a host address.  */
 
 void
-gdb_print_host_address (void *addr, struct ui_file *stream)
+gdb_print_host_address (const void *addr, struct ui_file *stream)
 {
 
   /* We could use the %p conversion specifier to fprintf if we had any

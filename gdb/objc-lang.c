@@ -199,8 +199,10 @@ value_nsstring (char *ptr, int len)
   if (!target_has_execution)
     return 0;		/* Can't call into inferior to create NSString.  */
 
-  if (!(sym = lookup_struct_typedef("NSString", 0, 1)) &&
-      !(sym = lookup_struct_typedef("NXString", 0, 1)))
+  sym = lookup_struct_typedef("NSString", 0, 1);
+  if (sym == NULL)
+    sym = lookup_struct_typedef("NXString", 0, 1);
+  if (sym == NULL)
     type = lookup_pointer_type(builtin_type_void);
   else
     type = lookup_pointer_type(SYMBOL_TYPE (sym));
@@ -369,8 +371,6 @@ objc_printstr (struct ui_file *stream, char *string,
   int in_quotes = 0;
   int need_comma = 0;
   extern int inspect_it;
-  extern int repeat_count_threshold;
-  extern int print_max;
 
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in
@@ -890,8 +890,11 @@ selectors_info (char *regexp, int from_tty)
     }
 
   if (regexp != NULL)
-    if (0 != (val = re_comp (myregexp)))
-      error ("Invalid regexp (%s): %s", val, regexp);
+    {
+      val = re_comp (myregexp);
+      if (val != 0)
+	error ("Invalid regexp (%s): %s", val, regexp);
+    }
 
   /* First time thru is JUST to get max length and count.  */
   ALL_MSYMBOLS (objfile, msymbol)
@@ -1027,8 +1030,11 @@ classes_info (char *regexp, int from_tty)
     }
 
   if (regexp != NULL)
-    if (0 != (val = re_comp (myregexp)))
-      error ("Invalid regexp (%s): %s", val, regexp);
+    {
+      val = re_comp (myregexp);
+      if (val != 0)
+	error ("Invalid regexp (%s): %s", val, regexp);
+    }
 
   /* First time thru is JUST to get max length and count.  */
   ALL_MSYMBOLS (objfile, msymbol)
@@ -1714,7 +1720,10 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
   unsigned int i;
 
   find_objc_msgsend ();
-  if (new_pc != NULL) { *new_pc = 0; }
+  if (new_pc != NULL)
+    {
+      *new_pc = 0;
+    }
 
   for (i = 0; i < nmethcalls; i++) 
     if ((pc >= methcalls[i].begin) && (pc < methcalls[i].end)) 

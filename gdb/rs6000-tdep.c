@@ -1646,7 +1646,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
       CORE_ADDR gpr_addr = frame_addr + fdatap->gpr_offset;
       for (i = fdatap->saved_gpr; i < 32; i++)
 	{
-	  get_frame_saved_regs (fi)[i] = gpr_addr;
+	  get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = gpr_addr;
 	  gpr_addr += wordsize;
 	}
     }
@@ -1892,8 +1892,8 @@ rs6000_register_convert_to_virtual (int n, struct type *type,
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
-      double val = extract_floating (from, REGISTER_RAW_SIZE (n));
-      store_floating (to, TYPE_LENGTH (type), val);
+      double val = deprecated_extract_floating (from, REGISTER_RAW_SIZE (n));
+      deprecated_store_floating (to, TYPE_LENGTH (type), val);
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));
@@ -1908,8 +1908,8 @@ rs6000_register_convert_to_raw (struct type *type, int n,
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
-      double val = extract_floating (from, TYPE_LENGTH (type));
-      store_floating (to, REGISTER_RAW_SIZE (n), val);
+      double val = deprecated_extract_floating (from, TYPE_LENGTH (type));
+      deprecated_store_floating (to, REGISTER_RAW_SIZE (n), val);
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));

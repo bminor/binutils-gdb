@@ -1,3 +1,35 @@
+2003-04-10  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Don't continue to the
+	next relocation on an undefined symbol.
+
+2003-04-09  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section) <R_ALPHA_GPREL32>:
+	Ignore relocations against r_symndx == 0.
+
+2003-04-09  H.J. Lu <hjl@gnu.org>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Don't return
+	FALSE for undefined symbols.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
+
+2003-04-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Try DWARF3-standard
+	and IRIX-specific shift-to-64-bit 4-byte lengths before following
+	addr_size.
+
+2003-04-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-mips.c (bfd_elf32_bfd_reloc_type_lookup): Detect (ctor)
+	pointer size from ABI, not arch_bits_per_address.
+
+2003-04-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* elfn32-mips.c (elf32_mips_grok_prstatus): Adjust core file related
+	constants for n32 ABI.
+
 2003-04-06  Andrew Cagney  <cagney@redhat.com>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Disable

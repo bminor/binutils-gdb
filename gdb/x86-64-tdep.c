@@ -781,7 +781,7 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
 	     floating point format used by the FPU.  This is probably
 	     not exactly how it would happen on the target itself, but
 	     it is the best we can do.  */
-	  val = extract_floating (valbuf, TYPE_LENGTH (type));
+	  val = deprecated_extract_floating (valbuf, TYPE_LENGTH (type));
 	  floatformat_from_doublest (&floatformat_i387_ext, &val, buf);
 	  regcache_cooked_write_part (regcache, FP0_REGNUM,
 			  	      0, FPU_REG_RAW_SIZE, buf);

@@ -1,3 +1,7 @@
+2003-04-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb792.exp: Skip when C++.
+
 2003-02-23  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* mi-syn-frame.exp: Don't run this test when gdb,nosignals is set.

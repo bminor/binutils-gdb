@@ -1440,11 +1440,12 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
     case BFD_RELOC_CTOR:
       /* We need to handle BFD_RELOC_CTOR specially.
 	 Select the right relocation (R_MIPS_32 or R_MIPS_64) based on the
-	 size of addresses on this architecture.  */
-      if (bfd_arch_bits_per_address (abfd) == 32)
-	return &howto_table[(int) R_MIPS_32];
-      else
+	 size of addresses of the ABI.  */
+      if ((elf_elfheader (abfd)->e_flags & (E_MIPS_ABI_O64
+					    | E_MIPS_ABI_EABI64)) != 0)
 	return &elf_mips_ctor64_howto;
+      else
+	return &howto_table[(int) R_MIPS_32];
 
     case BFD_RELOC_MIPS16_JMP:
       return &elf_mips16_jump_howto;

@@ -2024,7 +2024,7 @@ elf32_mips_grok_prstatus (abfd, note)
       default:
 	return FALSE;
 
-      case 256:		/* Linux/MIPS */
+      case 440:		/* Linux/MIPS N32 */
 	/* pr_cursig */
 	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
 
@@ -2033,7 +2033,7 @@ elf32_mips_grok_prstatus (abfd, note)
 
 	/* pr_reg */
 	offset = 72;
-	raw_size = 180;
+	raw_size = 360;
 
 	break;
     }
