@@ -63,15 +63,11 @@ meminit ()
 	    {
 	      saved_state.bregp[tmp] = (unsigned char *) (saved_state.reg + tmp);
 	      saved_state.bregp[tmp + 8] = saved_state.bregp[tmp] + 1;
-	      if (HOST_IS_LITTLE_ENDIAN) 
-	       abort();
 	    }
 	  else
 	    {
 	      saved_state.bregp[tmp + 8] = (unsigned char *) (saved_state.reg + tmp);
 	      saved_state.bregp[tmp] = saved_state.bregp[tmp + 8] + 1;
-	      if (!HOST_IS_LITTLE_ENDIAN) 
-	       abort();
 	    }
 	}
 

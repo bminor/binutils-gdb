@@ -16,7 +16,7 @@
    MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 */
-
+#include "../endian.h"
 #define SET_WORD_MEM(x,y)  {saved_state.mem[(x)>>1] = y;}
 #define SET_BYTE_MEM(x,y)  {BYTE_MEM(x)=y;}
 
@@ -66,7 +66,7 @@ saved_state;
 #define OCRS (1<<4)
 
 
-#ifdef __GO32__
+#ifdef LITTLE_ENDIAN_HOST
 #define HOST_IS_LITTLE_ENDIAN 1
 #else
 #define HOST_IS_LITTLE_ENDIAN 0
