@@ -2674,6 +2674,7 @@ change_to_section (name, len, exp)
        unsigned int exp;
 {
 #ifndef BFD_ASSEMBLER
+#ifdef MANY_SEGMENTS
   unsigned int i;
   extern segment_info_type segment_info[];
 
@@ -2690,6 +2691,7 @@ change_to_section (name, len, exp)
   strncpy (segment_info[i].scnhdr.s_name, name, 8);
   segment_info[i].scnhdr.s_flags = 0 /* STYP_NOLOAD */;
   subseg_new (i, exp);
+#endif
 #endif
 }
 

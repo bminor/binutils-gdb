@@ -1,5 +1,7 @@
 Tue Sep  7 10:22:52 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
+	* read.c: (change_to_section): Don't include body if not MANY_SECTIONS.
+
 	* read.c: (s_stab, s_xstab, s_desc): New functions to parse
 	various stab-related directives.
 	* read.h: (s_stab, s_xstab, s_desc): New function prototypes.
