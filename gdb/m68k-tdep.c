@@ -327,20 +327,6 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct type *type,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-
-/* A function that tells us whether the function invocation represented
-   by fi does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-
-static int
-m68k_frameless_function_invocation (struct frame_info *fi)
-{
-  if (get_frame_type (fi) == SIGTRAMP_FRAME)
-    return 0;
-  else
-    return legacy_frameless_look_for_prologue (fi);
-}
-
 int
 delta68_in_sigtramp (CORE_ADDR pc, char *name)
 {
@@ -1111,7 +1097,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
 
-  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, m68k_frameless_function_invocation);
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
   set_gdbarch_register_type (gdbarch, m68k_register_type);

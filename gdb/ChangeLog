@@ -1,3 +1,10 @@
+2004-05-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68k-tdep.c (m68k_frameless_function_invocation): Remove
+	function.
+	(m68k_gdbarch_init): Don't set
+	deprecated_frameless_function_invocation.
+
 2004-05-07  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (skip_prologue_hard_way, hppa_frame_cache): Use 
