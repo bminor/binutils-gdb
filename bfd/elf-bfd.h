@@ -1,6 +1,6 @@
 /* BFD back-end data structures for ELF files.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+   2002 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -693,7 +693,7 @@ struct elf_backend_data
   /* Modify any information related to dynamic linking such that the
      symbol is not exported.  */
   void (*elf_backend_hide_symbol)
-    PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+    PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
 
   /* Emit relocations.  Overrides default routine for emitting relocs,
      except during a relocatable link, or if all relocs are being emitted.  */
@@ -1197,7 +1197,7 @@ extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
 extern void _bfd_elf_link_hash_copy_indirect
   PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
 extern void _bfd_elf_link_hash_hide_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
 extern boolean _bfd_elf_link_hash_table_init
   PARAMS ((struct elf_link_hash_table *, bfd *,
 	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,

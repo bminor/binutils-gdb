@@ -1286,14 +1286,23 @@ _bfd_elf_link_hash_copy_indirect (dir, ind)
 }
 
 void
-_bfd_elf_link_hash_hide_symbol (info, h)
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+_bfd_elf_link_hash_hide_symbol (info, h, force_local)
+     struct bfd_link_info *info;
      struct elf_link_hash_entry *h;
+     boolean force_local;
 {
-  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
   h->plt.offset = (bfd_vma) -1;
-  if ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
-    h->dynindx = -1;
+  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+  if (force_local)
+    {
+      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+      if (h->dynindx != -1)
+	{
+	  h->dynindx = -1;
+	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+				  h->dynstr_index);
+	}
+    }
 }
 
 /* Initialize an ELF linker hash table.  */

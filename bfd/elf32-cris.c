@@ -1,5 +1,5 @@
 /* CRIS-specific support for 32-bit ELF.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson, based on elf32-fr30.c
    PIC and shlib bits based primarily on elf32-m68k.c and elf32-i386.c.
@@ -90,7 +90,7 @@ static boolean elf_cris_finish_dynamic_symbol
 static boolean elf_cris_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static void elf_cris_hide_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
 static enum elf_reloc_type_class elf_cris_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
 
@@ -2028,13 +2028,14 @@ elf_cris_try_fold_plt_to_got (h, p)
    entry.  */
 
 static void
-elf_cris_hide_symbol (info, h)
+elf_cris_hide_symbol (info, h, force_local)
      struct bfd_link_info *info;
      struct elf_link_hash_entry *h;
+     boolean force_local;
 {
   elf_cris_adjust_gotplt_to_got ((struct elf_cris_link_hash_entry *) h, info);
 
-  _bfd_elf_link_hash_hide_symbol (info, h);
+  _bfd_elf_link_hash_hide_symbol (info, h, force_local);
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a

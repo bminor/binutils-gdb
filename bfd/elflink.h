@@ -2056,10 +2056,7 @@ elf_link_add_object_symbols (abfd, info)
 	      {
 	      case STV_INTERNAL:
 	      case STV_HIDDEN:
-		h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-		(*bed->elf_backend_hide_symbol) (info, h);
-		_bfd_elf_strtab_delref (hash_table->dynstr,
-					h->dynstr_index);
+		(*bed->elf_backend_hide_symbol) (info, h, true);
 		break;
 	      }
 
@@ -3873,16 +3870,13 @@ elf_fix_symbol_flags (h, eif)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
     {
       struct elf_backend_data *bed;
+      boolean force_local;
 
       bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
-      if (ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
-	  || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
-	{
-	  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-	  _bfd_elf_strtab_delref (elf_hash_table (eif->info)->dynstr,
-				  h->dynstr_index);
-	}
-      (*bed->elf_backend_hide_symbol) (eif->info, h);
+
+      force_local = (ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
+		     || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN);
+      (*bed->elf_backend_hide_symbol) (eif->info, h, force_local);
     }
 
   /* If this is a weak defined symbol in a dynamic object, and we know
@@ -4233,7 +4227,7 @@ elf_link_assign_sym_version (h, data)
 	      struct bfd_elf_version_expr *d;
 
 	      len = p - h->root.root.string;
-	      alc = bfd_alloc (sinfo->output_bfd, (bfd_size_type) len);
+	      alc = bfd_malloc ((bfd_size_type) len);
 	      if (alc == NULL)
 	        return false;
 	      strncpy (alc, h->root.root.string, len - 1);
@@ -4264,10 +4258,7 @@ elf_link_assign_sym_version (h, data)
 			      && info->shared
 			      && ! info->export_dynamic)
 			    {
-			      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-			      (*bed->elf_backend_hide_symbol) (info, h);
-			      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
-						      h->dynstr_index);
+			      (*bed->elf_backend_hide_symbol) (info, h, true);
 			    }
 
 			  break;
@@ -4275,7 +4266,7 @@ elf_link_assign_sym_version (h, data)
 		    }
 		}
 
-	      bfd_release (sinfo->output_bfd, alc);
+	      free (alc);
 	      break;
 	    }
 	}
@@ -4379,10 +4370,7 @@ elf_link_assign_sym_version (h, data)
 			  && info->shared
 			  && ! info->export_dynamic)
 			{
-			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-			  (*bed->elf_backend_hide_symbol) (info, h);
-			  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
-						  h->dynstr_index);
+			  (*bed->elf_backend_hide_symbol) (info, h, true);
 			}
 		      break;
 		    }
@@ -4400,10 +4388,7 @@ elf_link_assign_sym_version (h, data)
 	      && info->shared
 	      && ! info->export_dynamic)
 	    {
-	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-	      (*bed->elf_backend_hide_symbol) (info, h);
-	      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
-				      h->dynstr_index);
+	      (*bed->elf_backend_hide_symbol) (info, h, true);
 	    }
 	}
     }

@@ -211,7 +211,7 @@ static boolean mips_elf_stub_section_p
 static int sort_dynamic_relocs
   PARAMS ((const void *, const void *));
 static void _bfd_mips_elf_hide_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
 static void _bfd_mips_elf_copy_indirect_symbol
   PARAMS ((struct elf_link_hash_entry *,
 	   struct elf_link_hash_entry *));
@@ -4503,9 +4503,10 @@ mips_elf_link_hash_newfunc (entry, table, string)
 }
 
 static void
-_bfd_mips_elf_hide_symbol (info, entry)
+_bfd_mips_elf_hide_symbol (info, entry, force_local)
      struct bfd_link_info *info;
      struct elf_link_hash_entry *entry;
+     boolean force_local;
 {
   bfd *dynobj;
   asection *got;
@@ -4516,10 +4517,7 @@ _bfd_mips_elf_hide_symbol (info, entry)
   got = bfd_get_section_by_name (dynobj, ".got");
   g = (struct mips_got_info *) elf_section_data (got)->tdata;
 
-  h->root.elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
-  h->root.plt.offset = (bfd_vma) -1;
-  if ((h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
-    h->root.dynindx = -1;
+  _bfd_elf_link_hash_hide_symbol (info, &h->root, force_local);
 
   /* FIXME: Do we allocate too much GOT space here?  */
   g->local_gotno++;

@@ -1,5 +1,5 @@
 /* IA-64 support for 64-bit ELF
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -204,7 +204,7 @@ static struct bfd_hash_entry *elfNN_ia64_new_elf_hash_entry
 static void elfNN_ia64_hash_copy_indirect
   PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
 static void elfNN_ia64_hash_hide_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
 static struct bfd_link_hash_table *elfNN_ia64_hash_table_create
   PARAMS ((bfd *abfd));
 static struct elfNN_ia64_local_hash_entry *elfNN_ia64_local_hash_lookup
@@ -1646,18 +1646,17 @@ elfNN_ia64_hash_copy_indirect (xdir, xind)
 }
 
 static void
-elfNN_ia64_hash_hide_symbol (info, xh)
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+elfNN_ia64_hash_hide_symbol (info, xh, force_local)
+     struct bfd_link_info *info;
      struct elf_link_hash_entry *xh;
+     boolean force_local;
 {
   struct elfNN_ia64_link_hash_entry *h;
   struct elfNN_ia64_dyn_sym_info *dyn_i;
 
   h = (struct elfNN_ia64_link_hash_entry *)xh;
 
-  h->root.elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
-  if ((h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
-    h->root.dynindx = -1;
+  _bfd_elf_link_hash_hide_symbol (info, &h->root, force_local);
 
   for (dyn_i = h->info; dyn_i; dyn_i = dyn_i->next)
     dyn_i->want_plt2 = 0;

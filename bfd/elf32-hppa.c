@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
+   2002 Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -335,7 +335,7 @@ static boolean elf32_hppa_gc_sweep_hook
 	   asection *, const Elf_Internal_Rela *));
 
 static void elf32_hppa_hide_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
 
 static boolean elf32_hppa_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
@@ -1786,12 +1786,22 @@ elf32_hppa_gc_sweep_hook (abfd, info, sec, relocs)
    plabels.  */
 
 static void
-elf32_hppa_hide_symbol (info, h)
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+elf32_hppa_hide_symbol (info, h, force_local)
+     struct bfd_link_info *info;
      struct elf_link_hash_entry *h;
+     boolean force_local;
 {
-  if ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
-    h->dynindx = -1;
+  if (force_local)
+    {
+      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+      if (h->dynindx != -1)
+	{
+	  h->dynindx = -1;
+	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+				  h->dynstr_index);
+	}
+    }
+
   if (! ((struct elf32_hppa_link_hash_entry *) h)->plabel)
     {
       h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
@@ -2206,12 +2216,7 @@ clobber_millicode_symbols (h, info)
   if (h->type == STT_PARISC_MILLI
       && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
     {
-      struct elf32_hppa_link_hash_table *htab;
-
-      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
-      elf32_hppa_hide_symbol (info, h);
-      htab = hppa_link_hash_table (info);
-      _bfd_elf_strtab_delref (htab->elf.dynstr, h->dynstr_index);
+      elf32_hppa_hide_symbol (info, h, true);
 
       /* ?!? We only want to remove these from the dynamic symbol table.
 	 Therefore we do not leave ELF_LINK_FORCED_LOCAL set.  */

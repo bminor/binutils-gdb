@@ -1,3 +1,23 @@
+2002-01-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (elf_backend_data <elf_backend_hide_symbol>): Add
+	boolean param.
+	(_bfd_elf_link_hash_hide_symbol): Likewise.
+	* elflink.h (elf_link_add_object_symbols): Adjust call to
+	elf_backend_hide_symbol.
+	(elf_fix_symbol_flags): Likewise.
+	(elf_link_assign_sym_version): Likewise. Use bfd_malloc rather
+	than bfd_alloc.
+	* elf.c (_bfd_elf_link_hash_hide_symbol): Add "force_local" param.
+	Set ELF_LINK_FORCED_LOCAL and call _bfd_elf_strtab_delref.
+	* elf32-hppa.c (elf32_hppa_hide_symbol): Likewise.
+	(clobber_millicode_symbols): Adjust to suit new hide_symbol.
+	* elf32-cris.c (elf_cris_hide_symbol): Add "force_local" param
+	and adjust to suit.
+	* elf32-mips.c (_bfd_mips_elf_hide_symbol): Likewise, and call
+	_bfd_elf_link_hash_hide_symbol rather than duplicating code.
+	* elfxx-ia64.c (elfNN_ia64_hash_hide_symbol): Likewise.
+
 2002-01-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Test for a
