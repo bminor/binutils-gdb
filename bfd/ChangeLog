@@ -1,3 +1,41 @@
+Thu Jul 31 12:09:20 1997  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Don't set TEXTREL
+ 	if there is only a relocation to a read-only but not allocatable
+ 	section (like .stab).
+	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): Likewise.
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Likewise.
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Likewise.
+	* elf32-mips.c (mips_elf_size_dynamic_sections): Likewise.
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Likewise.
+
+	* elf32-ppc.c (ppc_elf_howto_raw): Correct various comments.
+	(ppc_elf_create_linker_section): These sections are not 
+	created by the linker (that is, they are created by the user
+	putting data in them). In particular, they can be the source
+	and target of relocations.
+	(ppc_elf_adjust_dynamic_symbol): Check postcondition of
+ 	bfd_elf32_link_record_dynamic_symbol.  Align 16-byte common
+ 	objects (for instance, 'long double') to 16-byte boundaries.
+	(ppc_elf_size_dynamic_sections): Make the code that generates
+	section symbols exactly the same as for sparc, reducing the
+	number of section symbols output.
+	(ppc_elf_check_relocs): Check postcondition of
+	bfd_elf32_link_record_dynamic_symbol.  Make default case the
+	same as corresponding code for sparc, fixing bug involving
+	.rela.stabs.
+	(ppc_elf_finish_dynamic_symbol): Fix case involving GOT symbols
+ 	forced to be local because of versioning (by replicating
+ 	corresponding change in sparc).  Treat R_PPC_RELATIVE RELA relocs
+ 	as usual in ELF, not as pseudo-REL relocs (as the sparc linker
+ 	does).
+	(ppc_elf_relocate_section): Add handy debugging code for when
+ 	assertion fails.  Add some more 'symbol made local because of
+ 	versioning' cases.
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Cope with addend when
+	processing a GOT relocation as required by ABI.
+
 Wed Jul 30 21:30:35 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* elflink.h (NAME(bfd_elf,record_link_assignment)): Remove any
