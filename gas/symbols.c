@@ -766,13 +766,33 @@ resolve_symbol_value (symp)
 	  if (seg_left != seg_right
 	      && seg_left != undefined_section
 	      && seg_right != undefined_section)
-	    as_bad ("%s is operation on symbols in different sections",
-		    S_GET_NAME (symp));
+	    {
+	      char *file;
+	      unsigned int line;
+
+	      if (expr_symbol_where (symp, &file, &line))
+		as_bad_where
+		  (file, line,
+		   "illegal operation on symbols in different sections");
+	      else
+		as_bad
+		  ("%s set to illegal operation on symbols in different sections",
+		   S_GET_NAME (symp));
+	    }
 	  if ((S_GET_SEGMENT (symp->sy_value.X_add_symbol)
 	       != absolute_section)
 	      && symp->sy_value.X_op != O_subtract)
-	    as_bad ("%s is illegal operation on non-absolute symbols",
-		    S_GET_NAME (symp));
+	    {
+	      char *file;
+	      unsigned int line;
+
+	      if (expr_symbol_where (symp, &file, &line))
+		as_bad_where (file, line,
+			      "illegal operation on non-absolute symbols");
+	      else
+		as_bad ("%s set to illegal operation on non-absolute symbols",
+			S_GET_NAME (symp));
+	    }
 	  left = S_GET_VALUE (symp->sy_value.X_add_symbol);
 	  right = S_GET_VALUE (symp->sy_value.X_op_symbol);
 	  switch (symp->sy_value.X_op)
@@ -1358,7 +1378,10 @@ S_SET_EXTERNAL (s)
      symbolS *s;
 {
   if ((s->bsym->flags & BSF_WEAK) != 0)
-    as_warn ("%s already declared as weak", S_GET_NAME (s));
+    {
+      as_bad ("%s already declared as weak", S_GET_NAME (s));
+      return;
+    }
   s->bsym->flags |= BSF_GLOBAL;
   s->bsym->flags &= ~(BSF_LOCAL|BSF_WEAK);
 }
@@ -1368,7 +1391,10 @@ S_CLEAR_EXTERNAL (s)
      symbolS *s;
 {
   if ((s->bsym->flags & BSF_WEAK) != 0)
-    as_warn ("%s already declared as weak", S_GET_NAME (s));
+    {
+      as_bad ("%s already declared as weak", S_GET_NAME (s));
+      return;
+    }
   s->bsym->flags |= BSF_LOCAL;
   s->bsym->flags &= ~(BSF_GLOBAL|BSF_WEAK);
 }
@@ -1378,7 +1404,10 @@ S_SET_WEAK (s)
      symbolS *s;
 {
   if ((s->bsym->flags & BSF_GLOBAL) != 0)
-    as_warn ("%s already declared as global", S_GET_NAME (s));
+    {
+      as_bad ("%s already declared as global", S_GET_NAME (s));
+      return;
+    }
   s->bsym->flags |= BSF_WEAK;
   s->bsym->flags &= ~(BSF_GLOBAL|BSF_LOCAL);
 }

@@ -1,3 +1,8 @@
+Fri Jul  5 11:07:24 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* symbols.c (S_SET_EXTERNAL): Change as_warn to as_bad.
+	(S_CLEAR_EXTERNAL, S_SET_WEAK): Likewise.
+
 Thu Jul  4 11:59:46 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (VERSION): Set to cygnus-2.7.1.
