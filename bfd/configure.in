@@ -78,6 +78,7 @@ i386)
 		;;
 	*)
 		case "${host_os}" in
+		go32) my_host=go32 ;;
 		sysv4*)	my_host=i386v4 ;;
 		sysv* | scosysv*) my_host=i386v ;;
 		mach*)	my_host=i386mach ;;
@@ -143,6 +144,7 @@ unknown)
 	case "${target_os}" in
 	bsd) bfd_target=${target_cpu}-aout ;;
 	sysv4*) bfd_target=${target_cpu}-elf ;;
+	go32) bfd_target=i386-aout ;;		
 	sysv* | scosysv*) bfd_target=${target_cpu}-coff ;;
 	none)	case "${target_cpu}" in
 		tahoe | vax)	bfd_target=${target_cpu} ;;
@@ -159,6 +161,7 @@ ibm)	my_host=rs6000
 amd)
 	case "${target_os}"  in
 		ebmon) bfd_target=a29k-coff ;;
+		udi) bfd_target=a29k-coff ;;
 		*) bfd_target=a29k-aout ;;
 	esac
 	;;
