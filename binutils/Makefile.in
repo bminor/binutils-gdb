@@ -16,6 +16,8 @@ bindir = $(prefix)/bin
 libdir = $(prefix)/lib
 libsubdir = $(libdir)/gcc/$(target)/$(version)
 
+TEXIDIR = $(srcdir)/../texinfo/fsf
+
 INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_FILE = $(INSTALL)
@@ -150,8 +152,16 @@ de-stage3: force
 	- (cd stage3 ; mv -f * ..)
 	- rmdir stage3
 
+binutils.dvi: binutils.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex binutils.texinfo
+	texindex binutils.??
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex binutils.texinfo
+
+binutils.info: binutils.texinfo
+	makeinfo binutils.texinfo
+
 clean:
-	-rm -f *.o *~ \#* core $(STAGESTUFF) TAGS
+	-rm -f *.o *~ \#* core $(STAGESTUFF) TAGS binutils.?? binutils.???
 
 etags tags: TAGS
 

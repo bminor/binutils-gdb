@@ -1,5 +1,7 @@
 Tue Oct  8 13:58:59 1991  Roland H. Pesch  (pesch at cygnus.com)
 
+	* Makefile.in: new targets binutils.dvi, binutils.info
+
 	* binutils.texinfo: remove most remaining FIXME's, delete
 	references to __.SYMDEF by name
 
