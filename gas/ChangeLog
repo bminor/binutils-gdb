@@ -1,3 +1,15 @@
+Sun Sep 17 22:17:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Set endian to little for mips-*-ultrix*.
+	* configure: Rebuild.
+
+Fri Sep 15 13:16:55 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* expr.c (current_location): New static function.  Handle magic
+	symbol `.'; in absolute section, return a constant.
+	(operand): Call current_location for '.' and '$', instead of doing
+	it inline.  In MRI mode, call current_location for '*'.
+
 Fri Sep 15 21:39:29 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-m68k.c: Change some "CONST" references to "const".

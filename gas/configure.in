@@ -208,7 +208,7 @@ changequote([,])dnl
       mips-dec-bsd*)        fmt=aout targ=mips-lit ;;
       mips-sony-bsd*)       fmt=ecoff targ=mips-big ;;
       mips-*-bsd*)          AC_MSG_ERROR(Unknown vendor for mips-bsd configuration.) ;;
-      mips-*-ultrix*)       fmt=ecoff targ=mips-lit ;;
+      mips-*-ultrix*)       fmt=ecoff targ=mips-lit endian=little ;;
       mips-*-ecoff*)        fmt=ecoff 
 			    case "$endian" in
 			    big) targ=mips-big ;;
