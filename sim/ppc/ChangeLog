@@ -1,3 +1,7 @@
+Wed Nov 20 00:36:55 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sim_calls.c (sim_resume): Reset sim_should_run if single stepping.
+
 Fri Nov 15 15:23:39 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* pk_disklabel.c (pk_disklabel_create_instance): Fix up some

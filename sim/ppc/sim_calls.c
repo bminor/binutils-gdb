@@ -26,6 +26,8 @@
 #include "psim.h"
 #include "options.h"
 
+#undef printf_filtered /* blow away the mapping */
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -59,7 +61,7 @@ sim_open (char *args)
   TRACE(trace_gdb, ("sim_open(args=%s) called\n", args ? args : "(null)"));
 
   if (root_device != NULL)
-    printf_filtered("Warning - re-open of simulator leaks memory\n");
+    sim_io_printf_filtered("Warning - re-open of simulator leaks memory\n");
   root_device = psim_tree();
   simulator = NULL;
 
@@ -252,20 +254,25 @@ sim_ctrl_c()
 void
 sim_resume (int step, int siggnal)
 {
-  void (*prev) ();
-
   TRACE(trace_gdb, ("sim_resume(step=%d, siggnal=%d)\n",
 		    step, siggnal));
 
-  prev = signal(SIGINT, sim_ctrl_c);
-  sim_should_run = 1;
-
   if (step)
-    psim_step(simulator);
+    {
+      psim_step(simulator);
+      /* sim_stop_reason has a sanity check for stopping while
+	 was_continuing.  We don't want that here so reset sim_should_run.  */
+      sim_should_run = 0;
+    }
   else
-    psim_run_until_stop(simulator, &sim_should_run);
+    {
+      void (*prev) ();
 
-  signal(SIGINT, prev);
+      prev = signal(SIGINT, sim_ctrl_c);
+      sim_should_run = 1;
+      psim_run_until_stop(simulator, &sim_should_run);
+      signal(SIGINT, prev);
+    }
 }
 
 void
@@ -280,9 +287,104 @@ sim_do_command (char *cmd)
   }
 }
 
+
+/* Map simulator IO operations onto the corresponding GDB I/O
+   functions.
+   
+   NB: Only a limited subset of operations are mapped across.  More
+   advanced operations (such as dup or write) must either be mapped to
+   one of the below calls or handled internally */
+
+static host_callback *callbacks;
+
+int
+sim_io_read_stdin(char *buf,
+		  int sizeof_buf)
+{
+  switch (CURRENT_STDIO) {
+  case DO_USE_STDIO:
+    return callbacks->read_stdin(callbacks, buf, sizeof_buf);
+    break;
+  case DONT_USE_STDIO:
+    return callbacks->read(callbacks, 0, buf, sizeof_buf);
+    break;
+  default:
+    error("sim_io_read_stdin: unaccounted switch\n");
+    break;
+  }
+}
+
+int
+sim_io_write_stdout(const char *buf,
+		    int sizeof_buf)
+{
+  switch (CURRENT_STDIO) {
+  case DO_USE_STDIO:
+    return callbacks->write_stdout(callbacks, buf, sizeof_buf);
+    break;
+  case DONT_USE_STDIO:
+    return callbacks->write(callbacks, 1, buf, sizeof_buf);
+    break;
+  default:
+    error("sim_io_write_stdout: unaccounted switch\n");
+    break;
+  }
+}
+
+int
+sim_io_write_stderr(const char *buf,
+		    int sizeof_buf)
+{
+  switch (CURRENT_STDIO) {
+  case DO_USE_STDIO:
+    /* NB: I think there should be an explicit write_stderr callback */
+    return callbacks->write(callbacks, 3, buf, sizeof_buf);
+    break;
+  case DONT_USE_STDIO:
+    return callbacks->write(callbacks, 3, buf, sizeof_buf);
+    break;
+  default:
+    error("sim_io_write_stderr: unaccounted switch\n");
+    break;
+  }
+}
+
+
+void
+sim_io_printf_filtered(const char *fmt,
+		       ...)
+{
+  char message[1024];
+  va_list ap;
+  /* format the message */
+  va_start(ap, fmt);
+  vsprintf(message, fmt, ap);
+  va_end(ap);
+  /* sanity check */
+  if (strlen(message) >= sizeof(message))
+    error("sim_io_printf_filtered: buffer overflow\n");
+  callbacks->printf_filtered(callbacks, "%s", message);
+}
+
+void
+sim_io_flush_stdoutput(void)
+{
+  switch (CURRENT_STDIO) {
+  case DO_USE_STDIO:
+    gdb_flush (gdb_stdout);
+    break;
+  case DONT_USE_STDIO:
+    break;
+  default:
+    error("sim_io_read_stdin: unaccounted switch\n");
+    break;
+  }
+}
+
 void
 sim_set_callbacks (host_callback *callback)
 {
+  callbacks = callback;
   TRACE(trace_gdb, ("sim_set_callbacks called\n"));
 }
 
@@ -301,9 +403,4 @@ zalloc(long size)
 void zfree(void *data)
 {
   mfree(NULL, data);
-}
-
-void flush_stdoutput(void)
-{
-  gdb_flush (gdb_stdout);
 }
