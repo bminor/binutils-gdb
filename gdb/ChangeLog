@@ -1,5 +1,8 @@
 Fri Sep 29 02:10:05 1995  steve chamberlain  <sac@slash.cygnus.com>
 
+	* config/arm/tm-arm.h (FRAME_CHAIN, FRAME_CHAIN_VALID):
+	Any pc > LOWESTPC is ok.
+
 	* remote-rdp.c (rdp_init): Take out variable baud rate stuff.
 	(remote_rdp_detatch): Delete.
 	* breakpoint.c (ctype.h): Don't include twice.
