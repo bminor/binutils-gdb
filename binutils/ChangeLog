@@ -1,3 +1,9 @@
+Wed Oct  7 12:53:52 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* copy.c (main): Even if is_strip, accept -d argument indicating
+	alternate output format.  Needed by gdb for Nindy.
+
+	* m68k-pinsn.c (print_insn_arg): Handle new "`" operand type.
 
 Tue Oct  6 16:33:56 1992  Jeffrey Osier  (jeffrey@cygnus.com)
 

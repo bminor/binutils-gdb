@@ -421,6 +421,12 @@ main(argc, argv)
 	      verbose = true;
 	      show_version = true;
 	      break;
+
+	      /* undocumented for now */
+	    case 'd':
+	      i++;
+	      output_target = argv[i];
+	      break;
 	    default:
 	      strip_usage();
 	  }

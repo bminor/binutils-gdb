@@ -420,6 +420,7 @@ print_insn_arg (d, buffer, p, addr, stream)
     case '?':
     case '/':
     case '&':
+    case '`':
 
       if (place == 'd')
 	{
