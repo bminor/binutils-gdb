@@ -257,12 +257,10 @@ typedef struct {
 
 typedef struct lang_wild_statement_struct {
   lang_statement_header_type header;
-  const char *section_name;
-  boolean sections_sorted;
   const char *filename;
   boolean filenames_sorted;
+  struct wildcard_list *section_list;
   boolean keep_sections;
-  struct name_list *exclude_filename_list;
   lang_statement_list_type children;
 } lang_wild_statement_type;
 
@@ -385,7 +383,7 @@ extern void lang_section_start PARAMS ((const char *, union etree_union *));
 extern void lang_add_entry PARAMS ((const char *, boolean));
 extern void lang_add_target PARAMS ((const char *));
 extern void lang_add_wild
-  PARAMS ((const char *, boolean, const char *, boolean, boolean, name_list *));
+  PARAMS ((struct wildcard_spec *, struct wildcard_list *, boolean));
 extern void lang_add_map PARAMS ((const char *));
 extern void lang_add_fill PARAMS ((int));
 extern lang_assignment_statement_type * lang_add_assignment PARAMS ((union etree_union *));

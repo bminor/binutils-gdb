@@ -1,50 +1,82 @@
+2001-08-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.texinfo (Input Section Basics): Clarify ordering of output
+	sections.
+	* ldlang.c (callback_t): Add wildcard_list param.
+	(walk_wild_section): Remove "section" param.  Rewrite for
+	lang_wild_statement_type change.  Remove unique_section_p test.
+	(walk_wild_file): Remove "section" param.
+	(walk_wild): Remove "section" and "file" params.
+	(lang_gc_wild): Likewise.
+	(wild): Likewise.  Modify for lang_wild_statement_type change.
+	(wild_sort): Likewise.  Add "sec" param.
+	(gc_section_callback): Likewise.
+	(output_section_callback): Likewise.  Do unique_section_p test.
+	(map_input_to_output_sections): Modify call to wild.
+	(lang_gc_sections_1): Likewise.
+	(print_wild_statement): Modify for lang_wild_statement_type
+	change.
+	(lang_add_wild): Replace filename, filenames_sorted param with
+	filespec.  Replace section_name, sections_sorted,
+	exclude_filename_list with section_list.
+	* ldlang.h (lang_add_wild): Here too.
+	(lang_wild_statement_type): Replace section_name, sections_sorted,
+	and exclude_filename_list with section_list.
+	* ldgram.y (current_file): Delete.
+	(%union): Add wildcard_list.
+	(file_NAME_list): Set type to wildcard_list.  Build a linked list
+	rather than calling lang_add_wild for each entry.
+	(input_section_spec_no_keep): Call lang_add_wild here instead.
+	* ld.h (struct wildcard_list): Declare.
+	* mri.c (mri_draw_tree): Modify to suit new lang_add_wild.
+
 2001-08-02  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* ldmain.c (main): initialize link_info.pei386_auto_import
 	* pe-dll.c: new tables for auto-export filtering
 	(auto_export): change API, pass abfd for contextual filtering.
-	Loop thru tables of excluded symbols instead of comparing 
+	Loop thru tables of excluded symbols instead of comparing
 	"by hand".
 
 2001-08-02  Paul Sokolovsky  <paul.sokolovsky@technologist.com>
 
-	* pe-dll.c: new variable pe_dll_enable_extra_debug. New 
-	static variable current_sec (static struct sec *). Add 
+	* pe-dll.c: new variable pe_dll_enable_extra_debug. New
+	static variable current_sec (static struct sec *). Add
 	forward declaration for add_bfd_to_link.
-	(process_def_file): Don't export undefined symbols. Do not 
-	export symbols starting with  "_imp__".  Call auto_export() 
+	(process_def_file): Don't export undefined symbols. Do not
+	export symbols starting with  "_imp__".  Call auto_export()
 	with new API.
 	(pe_walk_relocs_of_symbol): New function.
 	(generate_reloc): add optional extra debugging
-	(pe_dll_generate_def_file): eliminate extraneous initial blank 
+	(pe_dll_generate_def_file): eliminate extraneous initial blank
 	line in output
-	(make_one): enlarge symtab to make room for __nm__ symbols 
+	(make_one): enlarge symtab to make room for __nm__ symbols
 	(DATA auto-import support).
 	(make_singleton_name_thunk): New function.
 	(make_import_fixup_mark): New function.
 	(make_import_fixup_entry): New function.
 	(pe_create_import_fixup): New function.
-	(add_bfd_to_link): Specify that 'name' argument is a CONST 
+	(add_bfd_to_link): Specify that 'name' argument is a CONST
 	char *.
-	* pe-dll.h: declare new variable pe_dll_extra_pe_debug; 
-	declare new functions pe_walk_relocs_of_symbol and 
+	* pe-dll.h: declare new variable pe_dll_extra_pe_debug;
+	declare new functions pe_walk_relocs_of_symbol and
 	pe_create_import_fixup.
 	* emultempl/pe.em: add new options --enable-auto-import,
 	--disable-auto-import, and --enable-extra-pe-debug.
 	(make_import_fixup): New function.
 	(pe_find_data_imports): New function.
 	(pr_sym): New function.
-	(gld_${EMULATION_NAME}_after_open): Add optional extra pe 
+	(gld_${EMULATION_NAME}_after_open): Add optional extra pe
 	debugging. Call pe_find_data_imports.  Mark .idata as DATA, not
 	CODE.
 
 2001-08-02  Charles Wilson  <cwilson@ece.gatech.edu>
-	
+
 	* ld.texinfo: add additional documentation for
 	--export-all-symbols.  Document --out-implib,
 	--enable-auto-image-base, --disable-auto-image-base,
-	--dll-search-prefix, --enable-auto-import, and 
-	--disable-auto-import.  
+	--dll-search-prefix, --enable-auto-import, and
+	--disable-auto-import.
 	* ldint.texinfo: Add detailed documentation on auto-import
 	implementation.
 
@@ -166,11 +198,11 @@
 
 2001-06-18  H.J. Lu <hjl@gnu.org>
 
-        * Makefile.am (ld.1): Remove the prefix `$(srcdir)/'.
-        (diststuff): Add $(MANS).
-        * Makefile.in: Regenerated.
+	* Makefile.am (ld.1): Remove the prefix `$(srcdir)/'.
+	(diststuff): Add $(MANS).
+	* Makefile.in: Regenerated.
 
-        * ld.1: Removed.
+	* ld.1: Removed.
 
 2001-06-18  Hans-Peter Nilsson  <hp@axis.com>
 
@@ -208,9 +240,9 @@
 
 	* ldlang.c (walk_wild): Only call walk_wild_file if
 	lookup_name returns something.
-        (lookup_name): If load_symbols fails, return NULL.
-        (load_symbols): Chnage to a boolean function.
-        (open_input_bfds): If load_symbols fails then do not make the
+	(lookup_name): If load_symbols fails, return NULL.
+	(load_symbols): Chnage to a boolean function.
+	(open_input_bfds): If load_symbols fails then do not make the
 	executable.
 
 2001-06-08  Alan Modra  <amodra@bigpond.net.au>
@@ -388,12 +420,12 @@
 
 2001-05-02  Johan Rydberg  <jrydberg@opencores.org>
 
-        * emulparams/elf32openrisc.sh: New file.
+	* emulparams/elf32openrisc.sh: New file.
 
-        * Makefile.am: Add OpenRISC target.
-        * Makefile.in: Regenerated.
+	* Makefile.am: Add OpenRISC target.
+	* Makefile.in: Regenerated.
 
-        * configure.tgt: Add openrisc-*-* mapping.
+	* configure.tgt: Add openrisc-*-* mapping.
 
 2001-05-02  Nick Clifton  <nickc@redhat.com>
 
@@ -422,9 +454,9 @@
 
 2001-04-28  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
 
-        * ldlang.c (load_symbols): Give emulation a chance
-        to process unrecognized file before fatal error is
-        reported, not after.
+	* ldlang.c (load_symbols): Give emulation a chance
+	to process unrecognized file before fatal error is
+	reported, not after.
 
 2001-04-27  Sean McNeil <sean@mcneil.com>
 
@@ -558,9 +590,9 @@
 2001-02-26  H.J. Lu  <hjl@gnu.org>
 
 	* ldlang.c (open_input_bfds): Set the bfd error handler so
-        that problems can be caught whilst loading symbols.
-        (record_bfd_errors): New function: Report BFD errors and mark
-        the executable output as being invalid.
+	that problems can be caught whilst loading symbols.
+	(record_bfd_errors): New function: Report BFD errors and mark
+	the executable output as being invalid.
 
 2001-02-22  Timothy Wall  <twall@cygnus.com>
 

@@ -2539,7 +2539,8 @@ There are two ways to include more than one section:
 @noindent
 The difference between these is the order in which the @samp{.text} and
 @samp{.rdata} input sections will appear in the output section.  In the
-first example, they will be intermingled.  In the second example, all
+first example, they will be intermingled, appearing in the same order as
+they are found in the linker input.  In the second example, all
 @samp{.text} input sections will appear first, followed by all
 @samp{.rdata} input sections.
 

@@ -49,7 +49,6 @@ static enum section_type sectype;
 
 lang_memory_region_type *region;
 
-struct wildcard_spec current_file;
 boolean ldgram_want_filename = true;
 boolean had_script = false;
 boolean force_make_executable = false;
@@ -70,6 +69,7 @@ static int error_index;
   char *name;
   const char *cname;
   struct wildcard_spec wildcard;
+  struct wildcard_list *wildcard_list;
   struct name_list *name_list;
   int token;
   union etree_union *etree;
@@ -91,6 +91,7 @@ static int error_index;
 %type <etree> opt_exp_without_type
 %type <integer> fill_opt
 %type <name_list> exclude_name_list
+%type <wildcard_list> file_NAME_list
 %type <name> memspec_opt casesymlist
 %type <name> memspec_at_opt
 %type <cname> wildcard_name
@@ -417,8 +418,6 @@ wildcard_spec:
 			}
 	;
 
-
-
 exclude_name_list:
 		exclude_name_list wildcard_name
 			{
@@ -440,42 +439,42 @@ exclude_name_list:
 	;
 
 file_NAME_list:
+		file_NAME_list opt_comma wildcard_spec
+			{
+			  struct wildcard_list *tmp;
+			  tmp = (struct wildcard_list *) xmalloc (sizeof *tmp);
+			  tmp->next = $1;
+			  tmp->spec = $3;
+			  $$ = tmp;
+			}
+	|
 		wildcard_spec
 			{
-			  lang_add_wild ($1.name, $1.sorted,
-					 current_file.name,
-					 current_file.sorted,
-					 ldgram_had_keep, $1.exclude_name_list);
-			}
-	|	file_NAME_list opt_comma wildcard_spec
-			{
-			  lang_add_wild ($3.name, $3.sorted,
-					 current_file.name,
-					 current_file.sorted,
-					 ldgram_had_keep, $3.exclude_name_list);
+			  struct wildcard_list *tmp;
+			  tmp = (struct wildcard_list *) xmalloc (sizeof *tmp);
+			  tmp->next = NULL;
+			  tmp->spec = $1;
+			  $$ = tmp;
 			}
 	;
 
 input_section_spec_no_keep:
 		NAME
 			{
-			  lang_add_wild (NULL, false, $1, false,
-					 ldgram_had_keep, NULL);
+			  struct wildcard_spec tmp;
+			  tmp.name = $1;
+			  tmp.exclude_name_list = NULL;
+			  tmp.sorted = false;
+			  lang_add_wild (&tmp, NULL, ldgram_had_keep);
 			}
-        |	'['
+        |	'[' file_NAME_list ']'
 			{
-			  current_file.name = NULL;
-			  current_file.sorted = false;
+			  lang_add_wild (NULL, $2, ldgram_had_keep);
 			}
-		file_NAME_list ']'
-	|	wildcard_spec
+	|	wildcard_spec '(' file_NAME_list ')'
 			{
-			  current_file = $1;
-			  /* '*' matches any file name.  */
-			  if (strcmp (current_file.name, "*") == 0)
-			    current_file.name = NULL;
+			  lang_add_wild (&$1, $3, ldgram_had_keep);
 			}
-		'(' file_NAME_list ')'
 	;
 
 input_section_spec:

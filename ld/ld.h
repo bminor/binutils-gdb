@@ -73,6 +73,11 @@ struct wildcard_spec {
   boolean sorted;
 };
 
+struct wildcard_list {
+  struct wildcard_list *next;
+  struct wildcard_spec spec;
+};
+
 /* Extra information we hold on sections */
 typedef struct user_section_struct {
   /* Pointer to the section where this data will go */
