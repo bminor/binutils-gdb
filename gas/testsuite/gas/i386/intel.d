@@ -622,4 +622,4 @@ Disassembly of section .text:
  a72:	ff 25 d2 09 00 00 [ 	]*jmp    \*0x9d2
  a78:	e9 55 ff ff ff [ 	]*jmp    9d2 <bar>
  a7d:	8b 83 (00 00|d0 09) 00 00 [ 	]*mov    (0x0|0x9d0)\(%ebx\),%eax
- a83:	90 [ 	]*nop[ 	]*    
+[ 	]*...

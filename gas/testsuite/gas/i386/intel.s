@@ -617,4 +617,4 @@ rot5:
  jmp	[bar]
  jmp	bar
  mov	eax, DWORD PTR gs_foo@GOT[ebx]
- nop
+ .p2align 4,0
