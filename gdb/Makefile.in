@@ -1178,8 +1178,8 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	29k-share/udi/udi2go32.c \
 	a29k-tdep.c a68v-nat.c \
-	alpha-nat.c alphabsd-nat.c alpha-tdep.c alpha-linux-tdep.c \
-	alphafbsd-tdep.c \
+	alpha-nat.c alphabsd-nat.c alpha-tdep.c \
+	alpha-linux-tdep.c alpha-osf1-tdep.c alphafbsd-tdep.c \
 	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
 	armnbsd-nat.c armnbsd-tdep.c \
 	coff-solib.c \
@@ -1254,6 +1254,8 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(regcache_h) $(doublest_h) $(BFD_SRC)/elf-bfd.h alpha-tdep.h
 
 alpha-linux-tdep.o: alpha-linux-tdep.c $(defs_h) $(value_h) alpha-tdep.h
+
+alpha-osf1-tdep.o: alpha-osf1-tdep.c $(defs_h) $(value_h) alpha-tdep.h
 
 alphafbsd-tdep.o: alphafbsd-tdep.c $(defs_h) $(value_h) alpha-tdep.h
 

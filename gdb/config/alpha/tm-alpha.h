@@ -26,7 +26,6 @@
 
 #define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
-#include "regcache.h"
 #include "bfd.h"
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"
@@ -36,10 +35,9 @@ struct type;
 struct value;
 struct symbol;
 
-/* Number of traps that happen between exec'ing the shell 
- * to run an inferior, and when we finally get to 
- * the inferior code.  This is 2 on most implementations.
- */
+/* Number of traps that happen between exec'ing the shell
+   to run an inferior, and when we finally get to
+   the inferior code.  This is 2 on most implementations.  */
 #define START_INFERIOR_TRAPS_EXPECTED 3
 
 /* Offset from address of function to start of its code.
@@ -99,40 +97,10 @@ extern void alpha_print_extra_frame_info (struct frame_info *);
   alpha_setup_arbitrary_frame (argc, argv)
 extern struct frame_info *alpha_setup_arbitrary_frame (int, CORE_ADDR *);
 
-/* If PC is in a shared library trampoline code, return the PC
-   where the function itself actually starts.  If not, return 0.  */
-#define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)
-
-/* Return TRUE if procedure descriptor PROC is a procedure descriptor
-   that refers to a dynamically generated sigtramp function.
-
-   OSF/1 doesn't use dynamic sigtramp functions, so this is always
-   FALSE.  */
-
-#define PROC_DESC_IS_DYN_SIGTRAMP(proc)	(0)
-#define SET_PROC_DESC_IS_DYN_SIGTRAMP(proc)
-
-/* If PC is inside a dynamically generated sigtramp function, return
-   how many bytes the program counter is beyond the start of that
-   function.  Otherwise, return a negative value.
-
-   OSF/1 doesn't use dynamic sigtramp functions, so this always
-   returns -1.  */
-
-#define DYNAMIC_SIGTRAMP_OFFSET(pc)	(-1)
-
 /* Translate a signal handler frame into the address of the sigcontext
    structure.  */
 
 #define SIGCONTEXT_ADDR(frame) \
   (read_memory_integer ((frame)->next ? frame->next->frame : frame->frame, 8))
-
-/* If FRAME refers to a sigtramp frame, return the address of the next
-   frame.  */
-
-#define FRAME_PAST_SIGTRAMP_FRAME(frame, pc) \
-  (alpha_osf_skip_sigtramp_frame (frame, pc))
-extern CORE_ADDR alpha_osf_skip_sigtramp_frame (struct frame_info *,
-						CORE_ADDR);
 
 #endif /* TM_ALPHA_H */

@@ -29,7 +29,7 @@
 
 /* Are we currently handling a signal ?  */
 
-extern long alpha_linux_sigtramp_offset (CORE_ADDR);
+extern LONGEST alpha_linux_sigtramp_offset (CORE_ADDR);
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc, name)	(alpha_linux_sigtramp_offset (pc) >= 0)
 
@@ -42,41 +42,14 @@ extern long alpha_linux_sigtramp_offset (CORE_ADDR);
 /* Number of traps that happen between exec'ing the shell to run an
    inferior, and when we finally get to the inferior code.  This is 2
    on GNU/Linux and most implementations.  */
-
 #undef START_INFERIOR_TRAPS_EXPECTED
 #define START_INFERIOR_TRAPS_EXPECTED 2
-
-/* Return TRUE if procedure descriptor PROC is a procedure descriptor
-   that refers to a dynamically generated sigtramp function.  */
-
-#undef PROC_DESC_IS_DYN_SIGTRAMP
-#define PROC_SIGTRAMP_MAGIC	0x0e0f0f0f
-#define PROC_DESC_IS_DYN_SIGTRAMP(proc) ((proc)->pdr.isym		\
-					 == PROC_SIGTRAMP_MAGIC)
-#undef SET_PROC_DESC_IS_DYN_SIGTRAMP
-#define SET_PROC_DESC_IS_DYN_SIGTRAMP(proc) ((proc)->pdr.isym		\
-					     = PROC_SIGTRAMP_MAGIC)
-
-/* If PC is inside a dynamically generated sigtramp function, return
-   how many bytes the program counter is beyond the start of that
-   function.  Otherwise, return a negative value.  */
-
-#undef DYNAMIC_SIGTRAMP_OFFSET
-#define DYNAMIC_SIGTRAMP_OFFSET(pc)	(alpha_linux_sigtramp_offset (pc))
 
 /* Translate a signal handler frame into the address of the sigcontext
    structure.  */
 
 #undef SIGCONTEXT_ADDR
 #define SIGCONTEXT_ADDR(frame)			((frame)->frame - 0x298)
-
-/* If FRAME refers to a sigtramp frame, return the address of the next frame.
-
-   Under GNU/Linux, sigtramp handlers have dynamically generated
-   procedure descriptors that make this hack unnecessary.  */
-
-#undef FRAME_PAST_SIGTRAMP_FRAME
-#define FRAME_PAST_SIGTRAMP_FRAME(frame, pc)	(0)
 
 #include "tm-linux.h"
 

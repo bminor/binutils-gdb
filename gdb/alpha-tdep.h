@@ -96,6 +96,15 @@ struct gdbarch_tdep
   const char *abi_name;		/* Name of the above.  */
 
   CORE_ADDR vm_min_address;	/* used by heuristic_proc_start */
+
+  /* If PC is inside a dynamically-generated signal trampoline function
+     (i.e. one copied onto the user stack at run-time), return how many
+     bytes PC is beyond the start of that function.  Otherwise, return -1.  */
+  LONGEST (*dynamic_sigtramp_offset) (CORE_ADDR);
+
+  /* If FRAME refers to a sigtramp frame, return the address of the next
+     frame.  */
+  CORE_ADDR (*skip_sigtramp_frame) (struct frame_info *, CORE_ADDR);
 };
 
 void alpha_software_single_step (enum target_signal, int);

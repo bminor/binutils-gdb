@@ -167,8 +167,6 @@ static unsigned int heuristic_fence_post = 0;
 */
 /* *INDENT-ON* */
 
-
-
 #define PROC_LOW_ADDR(proc) ((proc)->pdr.adr)	/* least address */
 /* These next two fields are kind of being hijacked.  I wonder if
    iline is too small for the values it needs to hold, if GDB is
@@ -201,19 +199,53 @@ alpha_osf_in_sigtramp (CORE_ADDR pc, char *func_name)
   return (func_name != NULL && STREQ ("__sigtramp", func_name));
 }
 
-/* Under OSF/1, the __sigtramp routine is frameless and has a frame
-   size of zero, but we are able to backtrace through it.  */
-CORE_ADDR
-alpha_osf_skip_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
+static CORE_ADDR
+alpha_frame_past_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
 {
-  char *name;
-  find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  if (PC_IN_SIGTRAMP (pc, name))
-    return frame->frame;
-  else
-    return 0;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep->skip_sigtramp_frame != NULL)
+    return (tdep->skip_sigtramp_frame (frame, pc));
+
+  return (0);
 }
-
+
+static LONGEST
+alpha_dynamic_sigtramp_offset (CORE_ADDR pc)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  /* Must be provided by OS/ABI variant code if supported. */
+  if (tdep->dynamic_sigtramp_offset != NULL)
+    return (tdep->dynamic_sigtramp_offset (pc));
+
+  return (-1);
+}
+
+#define ALPHA_PROC_SIGTRAMP_MAGIC 0x0e0f0f0f
+
+/* Return TRUE if the procedure descriptor PROC is a procedure
+   descriptor that refers to a dynamically generated signal
+   trampoline routine.  */
+static int
+alpha_proc_desc_is_dyn_sigtramp (struct alpha_extra_func_info *proc)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep->dynamic_sigtramp_offset != NULL)
+    return (proc->pdr.isym == ALPHA_PROC_SIGTRAMP_MAGIC);
+
+  return (0);
+}
+
+static void
+alpha_set_proc_desc_is_dyn_sigtramp (struct alpha_extra_func_info *proc)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep->dynamic_sigtramp_offset != NULL)
+    proc->pdr.isym = ALPHA_PROC_SIGTRAMP_MAGIC;
+}
 
 /* Dynamically create a signal-handler caller procedure descriptor for
    the signal-handler return code starting at address LOW_ADDR.  The
@@ -242,7 +274,7 @@ push_sigtramp_desc (CORE_ADDR low_addr)
   PROC_FREG_MASK (proc_desc) = 0xffff;
   PROC_PC_REG (proc_desc) = 26;
   PROC_LOCALOFF (proc_desc) = 0;
-  SET_PROC_DESC_IS_DYN_SIGTRAMP (proc_desc);
+  alpha_set_proc_desc_is_dyn_sigtramp (proc_desc);
   return (proc_desc);
 }
 
@@ -734,7 +766,7 @@ after_prologue (CORE_ADDR pc, alpha_extra_func_info_t proc_desc)
 
   if (proc_desc)
     {
-      if (PROC_DESC_IS_DYN_SIGTRAMP (proc_desc))
+      if (alpha_proc_desc_is_dyn_sigtramp (proc_desc))
 	return PROC_LOW_ADDR (proc_desc);	/* "prologue" is in kernel */
 
       /* If function is frameless, then we need to do it the hard way.  I
@@ -876,7 +908,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
 
       /* If PC is inside a dynamically generated sigtramp handler,
          create and push a procedure descriptor for that code: */
-      offset = DYNAMIC_SIGTRAMP_OFFSET (pc);
+      offset = alpha_dynamic_sigtramp_offset (pc);
       if (offset >= 0)
 	return push_sigtramp_desc (pc - offset);
 
@@ -925,7 +957,7 @@ alpha_frame_chain (struct frame_info *frame)
   /* The previous frame from a sigtramp frame might be frameless
      and have frame size zero.  */
       && !frame->signal_handler_caller)
-    return FRAME_PAST_SIGTRAMP_FRAME (frame, saved_pc);
+    return alpha_frame_past_sigtramp_frame (frame, saved_pc);
   else
     return read_next_frame_reg (frame, PROC_FRAME_REG (proc_desc))
       + PROC_FRAME_OFFSET (proc_desc);
@@ -976,7 +1008,7 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
          Get the value of the frame relative sp, procedure might have been
          interrupted by a signal at it's very start.  */
       else if (frame->pc == PROC_LOW_ADDR (proc_desc)
-	       && !PROC_DESC_IS_DYN_SIGTRAMP (proc_desc))
+	       && !alpha_proc_desc_is_dyn_sigtramp (proc_desc))
 	frame->frame = read_next_frame_reg (frame->next, SP_REGNUM);
       else
 	frame->frame = read_next_frame_reg (frame->next, PROC_FRAME_REG (proc_desc))
@@ -1285,7 +1317,7 @@ alpha_pop_frame (void)
   flush_cached_frames ();
 
   if (proc_desc && (PROC_DESC_IS_DUMMY (proc_desc)
-		    || PROC_DESC_IS_DYN_SIGTRAMP (proc_desc)))
+		    || alpha_proc_desc_is_dyn_sigtramp (proc_desc)))
     {
       struct linked_proc_info *pi_ptr, *prev_ptr;
 
@@ -1934,6 +1966,9 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      decide when to stop looking.  */
   tdep->vm_min_address = (CORE_ADDR) 0x120000000;
 
+  tdep->dynamic_sigtramp_offset = NULL;
+  tdep->skip_sigtramp_frame = NULL;
+
   /* Type sizes */
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
@@ -2026,6 +2061,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_init_frame_pc_first (gdbarch, alpha_init_frame_pc_first);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   /* Floats are always passed as doubles.  */
   set_gdbarch_coerce_float_to_double (gdbarch,

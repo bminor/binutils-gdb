@@ -1,5 +1,46 @@
 2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (ALLDEPFILES): Add alpha-osf1-tdep.c.
+	(alpha-osf1-tdep.o): New dependency list.
+	* alpha-tdep.h (gdbarch_tdep): Add dynamic_sigtramp_offset
+	and skip_sigtramp_frame members.
+	* alpha-linux-tdep.c: Include gdbcore.h.
+	(alpha_linux_sigtramp_offset): Change return type to LONGEST.
+	(alpha_linux_init_abi): Initialize tdep->dynamic_sigtramp_offset.
+	* alpha-osf1-tdep.c: New file.
+	* alpha-tdep.c (alpha_osf_skip_sigtramp_frame): Moved to
+	alpha-osf1-dep.c.
+	(alpha_frame_past_sigtramp_frame): New function.
+	(alpha_dynamic_sigtramp_offset): Ditto.
+	(alpha_proc_desc_is_dyn_sigtramp): Ditto.
+	(alpha_set_proc_desc_is_dyn_sigtramp): Ditto.
+	(ALPHA_PROC_SIGTRAMP_MAGIC): Define.
+	(push_sigtramp_desc): Use alpha_set_proc_desc_is_dyn_sigtramp.
+	(after_prologue): Use alpha_proc_desc_is_dyn_sigtramp.
+	(find_proc_desc): Use alpha_dynamic_sigtramp_offset.
+	(alpha_frame_chain): Use alpha_frame_past_sigtramp_frame.
+	(alpha_init_extra_frame_info): Use alpha_proc_desc_is_dyn_sigtramp.
+	(alpha_pop_frame): Use alpha_proc_desc_is_dyn_sigtramp.
+	(alpha_gdbarch_init): Initialize tdep->dynamic_sigtramp_offset
+	and tdep->skip_sigtramp_frame.  Set gdbarch_skip_trampoline_code
+	to find_solib_trampoline_target.
+	* config/alpha/alpha-osf1.mt (TDEPFILES): Add alpha-osf1-tdep.o.
+	* config/alpha/tm-alpha.h: Remove inclusion of regcache.h.
+	(SKIP_TRAMPOLINE_CODE): Remove.
+	(PROC_DESC_IS_DYN_SIGTRAMP): Ditto.
+	(SET_PROC_DESC_IS_DYN_SIGTRAMP): Ditto.
+	(DYNAMIC_SIGTRAMP_OFFSET): Ditto.
+	(FRAME_PAST_SIGTRAMP_FRAME): Ditto.
+	* config/alpha/tm-alphalinux.h (PROC_DESC_IS_DYN_SIGTRAMP): Remove.
+	(PROC_SIGTRAMP_MAGIC): Ditto.
+	(PROC_DESC_IS_DYN_SIGTRAMP): Ditto.
+	(SET_PROC_DESC_IS_DYN_SIGTRAMP): Ditto.
+	(SET_PROC_DESC_IS_DYN_SIGTRAMP): Ditto.
+	(DYNAMIC_SIGTRAMP_OFFSET): Ditto.
+	(FRAME_PAST_SIGTRAMP_FRAME): Ditto.
+
+2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* NEWS: Note that Alpha targets are now multi-arch.
 
 2002-04-24  Michael Snyder  <msnyder@redhat.com>

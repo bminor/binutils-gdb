@@ -19,6 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdbcore.h"
 #include "value.h"
 
 #include "alpha-tdep.h"
@@ -45,7 +46,7 @@
    middle of the designated sequence, in which case there is no
    guarantee that we are in the middle of a sigreturn syscall.  Don't
    think this will be a problem in praxis, though.  */
-long
+LONGEST
 alpha_linux_sigtramp_offset (CORE_ADDR pc)
 {
   unsigned int i[3], w;
@@ -88,7 +89,9 @@ static void
 alpha_linux_init_abi (struct gdbarch_info info,
                       struct gdbarch *gdbarch)
 {
-  /* Place holder. */
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->dynamic_sigtramp_offset = alpha_linux_sigtramp_offset;
 }
 
 void
