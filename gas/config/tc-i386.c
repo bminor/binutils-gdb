@@ -4620,19 +4620,16 @@ md_apply_fix3 (fixP, valP, seg)
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 	{
-	  segT fseg = S_GET_SEGMENT (fixP->fx_addsy);
+	  segT sym_seg = S_GET_SEGMENT (fixP->fx_addsy);
 
-	  if ((fseg == seg
+	  if ((sym_seg == seg
 	       || (symbol_section_p (fixP->fx_addsy)
-		   && fseg != absolute_section))
-	      && !S_IS_EXTERNAL (fixP->fx_addsy)
-	      && !S_IS_WEAK (fixP->fx_addsy)
-	      && S_IS_DEFINED (fixP->fx_addsy)
-	      && !S_IS_COMMON (fixP->fx_addsy))
+		   && sym_seg != absolute_section))
+	      && !S_FORCE_RELOC (fixP->fx_addsy))
 	    {
 	      /* Yes, we add the values in twice.  This is because
-		 bfd_perform_relocation subtracts them out again.  I think
-		 bfd_perform_relocation is broken, but I don't dare change
+		 bfd_install_relocation subtracts them out again.  I think
+		 bfd_install_relocation is broken, but I don't dare change
 		 it.  FIXME.  */
 	      value += fixP->fx_where + fixP->fx_frag->fr_address;
 	    }
