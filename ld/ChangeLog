@@ -1,3 +1,12 @@
+Tue Aug  2 11:52:06 1994  Eric Youngdale  (ericy@cais.cais.com)
+
+	* emultempl/linux.em (gld${EMULATION_NAME}_find_address_statement):
+	New function; add 0x20 to any use of -Ttext.
+	(gld${EMULATION_NAME}_create_output_section_statements): New
+	function.
+	(ld_${EMULATION_NAME}_emulation): Use the new function
+	gld${EMULATION_NAME}_create_output_section_statements.
+
 Mon Aug  1 15:50:44 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* scripttempl/mips.sc: Redo script to set . outside of sections
