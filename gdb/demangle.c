@@ -40,11 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 # define DEFAULT_DEMANGLING_STYLE AUTO_DEMANGLING_STYLE_STRING
 #endif
 
-/* The current demangling style in affect.  Global so that the demangler
-   can read it (FIXME:  change the interface) */
-
-enum demangling_styles current_demangling_style;
-
 /* String name for the current demangling style.  Set by the "set demangling"
    command, printed as part of the output by the "show demangling" command. */
 
@@ -190,4 +185,5 @@ _initialize_demangler ()
 
    /* Set the default demangling style chosen at compilation time. */
    set_demangling_style (DEFAULT_DEMANGLING_STYLE);
+   set_cplus_marker_for_demangling (CPLUS_MARKER);
 }
