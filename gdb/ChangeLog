@@ -1,5 +1,6 @@
+Mon Jul 01 11:07:15 1996  Mark Alexander  <marka@cygnus.com>
 
-
+	* remote-e7000.c (e7000_stop): New function.
 
 Fri Jun 28 06:34:19 1996  Dawn Perchik  <dawn@cygnus.com>
 

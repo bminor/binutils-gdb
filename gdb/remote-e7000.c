@@ -2077,6 +2077,15 @@ e7000_wait (pid, status)
   return 0;
 }
 
+/* Stop the running program.  */
+
+static void
+e7000_stop ()  
+{
+  /* Sending a ^C is supposed to stop the running program.  */
+  putchar_e7000 (CTRLC);
+}
+
 /* Define the target subroutine names. */
 
 struct target_ops e7000_ops =
@@ -2116,7 +2125,7 @@ target e7000 foobar",
   0,				/* to_can_run */
   0,				/* to_notice_signals */
   0,				/* to_thread_alive */
-  0,				/* to_stop */
+  e7000_stop,			/* to_stop */
   process_stratum,		/* to_stratum */
   0,				/* next (unused) */
   1,				/* to_has_all_memory */
