@@ -1,5 +1,8 @@
 2001-04-06  J.T. Conklin  <jtc@redback.com>
 
+	* dcache.c (dcache_write_line): Fixed bugs where cache line was
+ 	not written to target correctly.
+
 	* gdbserver/low-hppabsd.c (read_inferior_memory): Add explicit 
 	void return value;
 	* gdbserver/low-nbsd.c: Likewise.

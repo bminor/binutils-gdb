@@ -278,20 +278,24 @@ dcache_write_line (DCACHE *dcache, register struct dcache_block *db)
       while (reg_len > 0)
 	{
 	  s = XFORM(memaddr);
-	  do {
+	  while (reg_len > 0) {
 	    if (db->state[s] == ENTRY_DIRTY)
 	      break;
 	    s++;
 	    reg_len--;
-	  } while (reg_len > 0);
+
+	    memaddr++;
+	    myaddr++;
+	    len--;
+	  }
 
 	  e = s;
-	  do {
+	  while (reg_len > 0) {
 	    if (db->state[e] != ENTRY_DIRTY)
 	      break;
 	    e++;
 	    reg_len--;
-	  } while (reg_len > 0);
+	  }
 
 	  dirty_len = e - s;
 	  while (dirty_len > 0)
@@ -304,6 +308,7 @@ dcache_write_line (DCACHE *dcache, register struct dcache_block *db)
 	      memset (&db->state[XFORM(memaddr)], ENTRY_OK, res);
 	      memaddr   += res;
 	      myaddr    += res;
+	      len       -= res;
 	      dirty_len -= res;
 	    }
 	}
