@@ -58,12 +58,12 @@ CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
 
 
-TARGETLIB = libopcode.a
+TARGETLIB = libopcodes.a
 
 
 DIS_LIBS = z8k-dis.o
 
-OFILES = $(DIS_LIBS)
+OFILES = $(DIS_LIBS) sparc-opc.o
 #### host and target dependent Makefile fragments come in here.
 ###
 
@@ -85,7 +85,7 @@ FLAGS_TO_PASS = \
 
 
 # C source files that correspond to .o's.
-CFILES = z8k-dis.o
+CFILES = z8k-dis.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -166,14 +166,15 @@ install:
 	-parent=`echo $(libdir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(libdir) ] ; then true ; else mkdir $(libdir) ; fi
-	$(INSTALL_DATA) libbfd.a $(libdir)/libbfd.a
-	$(RANLIB) $(libdir)/libbfd.a
-	-parent=`echo $(includedir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(includedir) ] ; then true ; else mkdir $(includedir) ; fi
-	$(INSTALL_DATA) $(INCDIR)/bfd.h $(includedir)/bfd.h
-	-if [ -z "$(oldincludedir)" ] ; then true ; else if [ -d $(oldincludedir) ] ; then true ; else mkdir $(oldincludedir) ; fi ; $(INSTALL_DATA) $(INCDIR)/bfd.h $(oldincludedir)/bfd.h ; fi
-	@$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	$(INSTALL_DATA) $(TARGET_LIB) $(libdir)/libopcodes.a
+	$(RANLIB) $(libdir)/libopcodes.a
+
+#	-parent=`echo $(includedir)|sed -e 's@/[^/]*$$@@'`; \
+#	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+#	-if [ -d $(includedir) ] ; then true ; else mkdir $(includedir) ; fi
+#	$(INSTALL_DATA) $(INCDIR)/bfd.h $(includedir)/bfd.h
+#	-if [ -z "$(oldincludedir)" ] ; then true ; else if [ -d $(oldincludedir) ] ; then true ; else mkdir $(oldincludedir) ; fi ; $(INSTALL_DATA) $(INCDIR)/bfd.h $(oldincludedir)/bfd.h ; fi
+#	@$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 # Target to uncomment host-specific lines in this makefile.  Such lines must
 # have the following string beginning in column 1: #__<hostname>__#

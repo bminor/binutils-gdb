@@ -1,3 +1,21 @@
+Tue Sep  8 17:02:58 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (install): Get the library name right here too.
+	Don't install bfd.h, since it's unrelated to this library.  No
+	subdirs to recurse into, either.
+	(CFILES): The source file has a .c suffix, not .o.
+
+	* sparc-opc.c: New file, moved from BFD.
+	* Makefile.in (OFILES): Build it.
+
+Thu Sep  3 16:59:20 1992  Michael Werner  (mtw@cygnus.com)
+
+	* z8k-dis.c: fixed forward refferences of some declarations.
+
+Mon Aug 31 16:09:45 1992  Michael Werner  (mtw@cygnus.com)
+
+	* Makefile.in: get the name of the library right
+
 Mon Aug 31 13:47:35 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* z8k-dis.c: knows how to disassemble z8k stuff
