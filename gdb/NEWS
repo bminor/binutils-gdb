@@ -120,9 +120,14 @@ documentation of `hookpost' in the GDB manual.
 
 * Changes in GNU/Linux native debugging.
 
+Support for debugging multi-threaded programs has been completely
+revised for all platforms except m68k and sparc.  You can now debug as
+many threads as your system allows you to have.
+
 Attach/detach is supported for multi-threaded programs.
 
-Support for SSE registers was added.
+Support for SSE registers was added for x86.  This doesn't work for
+multi-threaded programs though.
 
 * Changes in MIPS configurations.
 

@@ -1,3 +1,7 @@
+2001-08-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS: Update.
+
 2001-08-02  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	The following changes avoid polluting global namespace with the
