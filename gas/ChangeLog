@@ -1,3 +1,8 @@
+2003-07-30  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* config/tc-sh.c (md_assemble): For branches, check & update
+	valid_arch here.
+
 2003-07-30  Jason Eckhardt  <jle@rice.edu>
 
 	* config/tc-i860.c: Convert to ISO C90.

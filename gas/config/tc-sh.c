@@ -2383,6 +2383,12 @@ md_assemble (str)
       if (opcode->arg[0] == A_BDISP12
 	  || opcode->arg[0] == A_BDISP8)
 	{
+	  /* Since we skip get_specific here, we have to check & update
+	     valid_arch now.  */
+	  if (valid_arch & opcode->arch)
+	    valid_arch &= opcode->arch;
+	  else
+	    as_bad (_("Delayed branches not available on SH1"));
 	  parse_exp (op_end + 1, &operand[0]);
 	  build_relax (opcode, &operand[0]);
 	}
