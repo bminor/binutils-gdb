@@ -1,5 +1,9 @@
 2004-12-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-tdep.c (hppa_frame_prev_register_helper): Make 64-bit safe.
+
+2004-12-21  Mark Kettenis  <kettenis@gnu.org>
+
 	* hppa-tdep.c (hppa64_return_value): Fix previous commit.
 
 2004-12-21  Mark Kettenis  <kettenis@gnu.org>

@@ -2622,18 +2622,21 @@ hppa_frame_prev_register_helper (struct frame_info *next_frame,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
 				 int *realnump, void *valuep)
 {
+  struct gdbarch *arch = get_frame_arch (next_frame);
+
   if (regnum == HPPA_PCOQ_TAIL_REGNUM)
     {
       if (valuep)
 	{
+	  int size = register_size (arch, HPPA_PCOQ_HEAD_REGNUM);
 	  CORE_ADDR pc;
 
 	  trad_frame_get_prev_register (next_frame, saved_regs,
 					HPPA_PCOQ_HEAD_REGNUM, optimizedp,
 					lvalp, addrp, realnump, valuep);
 
-	  pc = extract_unsigned_integer (valuep, 4);
-	  store_unsigned_integer (valuep, 4, pc + 4);
+	  pc = extract_unsigned_integer (valuep, size);
+	  store_unsigned_integer (valuep, size, pc + 4);
 	}
 
       /* It's a computed value.  */
@@ -2652,10 +2655,7 @@ hppa_frame_prev_register_helper (struct frame_info *next_frame,
   if (regnum == HPPA_FLAGS_REGNUM)
     {
       if (valuep)
-	store_unsigned_integer (valuep, 
-			        register_size (get_frame_arch (next_frame), 
-					       regnum), 
-				0);
+	store_unsigned_integer (valuep, register_size (arch, regnum), 0);
 
       /* It's a computed value.  */
       *optimizedp = 0;
