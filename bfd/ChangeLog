@@ -3,6 +3,7 @@
 	* configure.in (AC_CHECK_FUNCS): Check for ftello, ftello64,
 	fseeko and fseeko64.  Determine bfd_file_ptr.
 	* configure: Re-generate.
+	* config.in: Re-generate.
 	
 2004-02-09  Anil Paranjpe  <anilp1@KPITCummins.com>
 
