@@ -1,3 +1,7 @@
+Thu Jul 14 11:21:27 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/{ptype.exp,ptype.c}: Add t_char_array test.
+
 Tue Jul 12 12:22:32 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* gdb.c++/cplusfuncs.cc: Include <stddef.h>, not <sys/types.h>,
