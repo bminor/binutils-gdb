@@ -463,7 +463,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 		      /* Check for and handle cretinous dbx symbol name
 			 continuation!  */
-		      if (*p == '\\')
+		      if (*p == '\\' || (*p == '?' && p[1] == '\0'))
 			p = next_symbol_text ();
 
 		      /* Point to the character after the name

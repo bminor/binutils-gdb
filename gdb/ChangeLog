@@ -1,5 +1,8 @@
 Tue Jan 25 11:31:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabsread.c (STABS_CONTINUE, error_type), partial-stab.h:
+	AIX can use ? instead of \ for continuation.  Deal with it.
+
 	* paread.c (read_unwind_info): Just assign to objfile->obj_private,
 	not OBJ_UNWIND_INFO.  Assigning to a cast is a GCC-ism which
 	the HP compiler in ANSI mode doesn't like.

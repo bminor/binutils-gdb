@@ -194,7 +194,8 @@ static int undef_types_length;
 /* Check for and handle cretinous stabs symbol name continuation!  */
 #define STABS_CONTINUE(pp)				\
   do {							\
-    if (**(pp) == '\\') *(pp) = next_symbol_text ();	\
+    if (**(pp) == '\\' || (**(pp) == '?' && (*(pp))[1] == '\0')) \
+      *(pp) = next_symbol_text ();	\
   } while (0)
 
 
@@ -1190,7 +1191,7 @@ error_type (pp)
 	}
 
       /* Check for and handle cretinous dbx symbol name continuation!  */
-      if ((*pp)[-1] == '\\')
+      if ((*pp)[-1] == '\\' || (*pp)[-1] == '?')
 	{
 	  *pp = next_symbol_text ();
 	}
