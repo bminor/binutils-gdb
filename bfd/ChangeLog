@@ -1,3 +1,9 @@
+Mon Jun 12 12:09:39 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* bfd-in.h (bfd_set_section_vma): Case true to a boolean.
+	(bfd_set_cacheable): Likewise.
+	* bfd-in2.h: Rebuilt.
+
 Fri Jun  9 12:20:28 1995  Steve Chamberlain  <sac@rtl.cygnus.com>
 
 	* elfcode.h (elf_sort_hdrs): Rewrite to be symmetrical.
