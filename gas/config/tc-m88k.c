@@ -1436,7 +1436,7 @@ m88k_do_align (n, fill)
      int n;
      const char *fill;
 {
-  if (!fill
+  if ((fill == NULL || *fill == 0)
       && strcmp (obj_segment_name (now_seg), ".init") == 0)
     {
       static const unsigned char nop_pattern[] = { 0xf4, 0x00, 0x58, 0x00 };
