@@ -38,112 +38,61 @@
 
 /* Local insertion and extraction functions.  */
 
-static unsigned long insert_bat
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bat
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_bba
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bba
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_bd
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bd
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_bdm
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bdm
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_bdp
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bdp
-  PARAMS ((unsigned long, int, int *));
-static int valid_bo
-  PARAMS ((long, int));
-static unsigned long insert_bo
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bo
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_boe
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_boe
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_dq
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_dq
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_ds
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_ds
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_de
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_de
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_des
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_des
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_li
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_li
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_mbe
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_mbe
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_mb6
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_mb6
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_nb
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_nb
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_nsi
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_nsi
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_ral
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_ram
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_raq
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_ras
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_rbs
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_rbs
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_rsq
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_rtq
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_sh6
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_sh6
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_spr
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_spr
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_tbr
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_tbr
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_ev2
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_ev2
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_ev4
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_ev4
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_ev8
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_ev8
-  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_bat (unsigned long, long, int, const char **);
+static long extract_bat (unsigned long, int, int *);
+static unsigned long insert_bba (unsigned long, long, int, const char **);
+static long extract_bba (unsigned long, int, int *);
+static unsigned long insert_bd (unsigned long, long, int, const char **);
+static long extract_bd (unsigned long, int, int *);
+static unsigned long insert_bdm (unsigned long, long, int, const char **);
+static long extract_bdm (unsigned long, int, int *);
+static unsigned long insert_bdp (unsigned long, long, int, const char **);
+static long extract_bdp (unsigned long, int, int *);
+static int valid_bo (long, int);
+static unsigned long insert_bo (unsigned long, long, int, const char **);
+static long extract_bo (unsigned long, int, int *);
+static unsigned long insert_boe (unsigned long, long, int, const char **);
+static long extract_boe (unsigned long, int, int *);
+static unsigned long insert_dq (unsigned long, long, int, const char **);
+static long extract_dq (unsigned long, int, int *);
+static unsigned long insert_ds (unsigned long, long, int, const char **);
+static long extract_ds (unsigned long, int, int *);
+static unsigned long insert_de (unsigned long, long, int, const char **);
+static long extract_de (unsigned long, int, int *);
+static unsigned long insert_des (unsigned long, long, int, const char **);
+static long extract_des (unsigned long, int, int *);
+static unsigned long insert_fxm (unsigned long, long, int, const char **);
+static long extract_fxm (unsigned long, int, int *);
+static unsigned long insert_li (unsigned long, long, int, const char **);
+static long extract_li (unsigned long, int, int *);
+static unsigned long insert_mbe (unsigned long, long, int, const char **);
+static long extract_mbe (unsigned long, int, int *);
+static unsigned long insert_mb6 (unsigned long, long, int, const char **);
+static long extract_mb6 (unsigned long, int, int *);
+static unsigned long insert_nb (unsigned long, long, int, const char **);
+static long extract_nb (unsigned long, int, int *);
+static unsigned long insert_nsi (unsigned long, long, int, const char **);
+static long extract_nsi (unsigned long, int, int *);
+static unsigned long insert_ral (unsigned long, long, int, const char **);
+static unsigned long insert_ram (unsigned long, long, int, const char **);
+static unsigned long insert_raq (unsigned long, long, int, const char **);
+static unsigned long insert_ras (unsigned long, long, int, const char **);
+static unsigned long insert_rbs (unsigned long, long, int, const char **);
+static long extract_rbs (unsigned long, int, int *);
+static unsigned long insert_rsq (unsigned long, long, int, const char **);
+static unsigned long insert_rtq (unsigned long, long, int, const char **);
+static unsigned long insert_sh6 (unsigned long, long, int, const char **);
+static long extract_sh6 (unsigned long, int, int *);
+static unsigned long insert_spr (unsigned long, long, int, const char **);
+static long extract_spr (unsigned long, int, int *);
+static unsigned long insert_tbr (unsigned long, long, int, const char **);
+static long extract_tbr (unsigned long, int, int *);
+static unsigned long insert_ev2 (unsigned long, long, int, const char **);
+static long extract_ev2 (unsigned long, int, int *);
+static unsigned long insert_ev4 (unsigned long, long, int, const char **);
+static long extract_ev4 (unsigned long, int, int *);
+static unsigned long insert_ev8 (unsigned long, long, int, const char **);
+static long extract_ev8 (unsigned long, int, int *);
 
 /* The operands table.
 
@@ -341,10 +290,14 @@ const struct powerpc_operand powerpc_operands[] =
   /* The FXM field in an XFX instruction.  */
 #define FXM FRS + 1
 #define FXM_MASK (0xff << 12)
-  { 8, 12, 0, 0, 0 },
+  { 8, 12, insert_fxm, extract_fxm, 0 },
+
+  /* Power4 version for mfcr.  */
+#define FXM4 FXM + 1
+  { 8, 12, insert_fxm, extract_fxm, PPC_OPERAND_OPTIONAL },
 
   /* The L field in a D or X form instruction.  */
-#define L FXM + 1
+#define L FXM4 + 1
   { 1, 21, 0, 0, PPC_OPERAND_OPTIONAL },
 
   /* The LEV field in a POWER SC form instruction.  */
@@ -1074,6 +1027,64 @@ extract_des (insn, dialect, invalid)
   return (((insn >> 2) & 0x3ffc) ^ 0x2000) - 0x2000;
 }
 
+static unsigned long insert_fxm (unsigned long insn,
+				 long value,
+				 int dialect,
+				 const char **errmsg)
+{
+  /* If the optional field on mfcr is missing that means we want to use
+     the old form of the instruction that moves the whole cr.  In that
+     case we'll have VALUE zero.  There doesn't seem to be a way to
+     distinguish this from the case where someone writes mfcr %r3,0.  */
+  if (value == 0)
+    ;
+
+  /* If only one bit of the FXM field is set, we can use the new form
+     of the instruction, which is faster.  */
+  else if ((dialect & PPC_OPCODE_POWER4) != 0 && (value & -value) == value)
+    insn |= 1 << 20;
+
+  /* Any other value on mfcr is an error.  */
+  else if ((insn & (0x3ff << 1)) == 19 << 1)
+    {
+      if (errmsg != NULL)
+	*errmsg = _("ignoring invalid mfcr mask");
+      value = 0;
+    }
+
+  return insn | ((value & 0xff) << 12);
+}
+
+static long extract_fxm (unsigned long insn, int dialect, int *invalid)
+{
+  long mask = (insn >> 12) & 0xff;
+
+  /* Is this a Power4 insn?  */
+  if ((insn & (1 << 20)) != 0)
+    {
+      if ((dialect & PPC_OPCODE_POWER4) == 0)
+	{
+	  if (invalid != NULL)
+	    *invalid = 1;
+	}
+      else
+	{
+	  /* Exactly one bit of MASK should be set.  */
+	  if ((mask == 0 || (mask & -mask) != mask) && invalid != NULL)
+	    *invalid = 1;
+	}
+    }
+
+  /* Check that non-power4 form of mfcr has a zero MASK.  */
+  else if ((insn & (0x3ff << 1)) == 19 << 1)
+    {
+      if (mask != 0 && invalid != NULL)
+	*invalid = 1;
+    }
+
+  return mask;
+}
+
 /* The LI field in an I form instruction.  The lower two bits are
    forced to zero.  */
 
@@ -1739,7 +1750,7 @@ extract_tbr (insn, dialect, invalid)
 #define XS_MASK XS (0x3f, 0x1ff, 1)
 
 /* A mask for the FXM version of an XFX form instruction.  */
-#define XFXFXM_MASK (X_MASK | (((unsigned long)1) << 20) | (((unsigned long)1) << 11))
+#define XFXFXM_MASK (X_MASK | (1 << 11))
 
 /* An XFX form instruction with the FXM field filled in.  */
 #define XFXM(op, xop, fxm) \
@@ -3286,7 +3297,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "iseleq",  X(31,79),      X_MASK,	PPCISEL,	{ RT, RA, RB } },
 { "isel",    XISEL(31,15),  XISEL_MASK,	PPCISEL,	{ RT, RA, RB, CRB } },
 
-{ "mfcr",    X(31,19),	XRARB_MASK,	COM,		{ RT } },
+{ "mfcr",    X(31,19),	XRARB_MASK,	NOPOWER4,	{ RT } },
+{ "mfcr",    X(31,19),	XFXFXM_MASK,	POWER4,		{ RT, FXM4 } },
 
 { "lwarx",   X(31,20),	X_MASK,		PPC,		{ RT, RA, RB } },
 
@@ -3437,7 +3449,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "dcbtstlse",X(31,142),X_MASK,		PPCCHLK64,	{ CT, RA, RB }},
 
-{ "mtcr",    XFXM(31,144,0xff), XFXFXM_MASK|FXM_MASK, COM,	{ RS }},
+{ "mtcr",    XFXM(31,144,0xff), XRARB_MASK, COM,	{ RS }},
 { "mtcrf",   X(31,144),	XFXFXM_MASK,	COM,		{ FXM, RS } },
 
 { "mtmsr",   X(31,146),	XRARB_MASK,	COM,		{ RS } },

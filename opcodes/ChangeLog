@@ -1,3 +1,12 @@
+2003-07-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c: Remove PARAMS from prototypes.
+	(FXM4): Define.
+	(insert_fxm): New function, used by both FXM and FXM4.
+	(extract_fxm): Likewise.
+	(XFXFXM_MASK): Remove 1 << 20 term.
+	(powerpc_opcodes): Add Power4 version of "mfcr".  Simplify "mtcr" mask.
+
 2003-07-01  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* s390-dis.c (s390_extract_operand): Add support for long displacements.
@@ -709,7 +718,7 @@
 
 2002-11-06  Aldy Hernandez  <aldyh@redhat.com>
 
-	* opcodes/ppc-opc.c: Change RD to RS for evmerge*.
+	* ppc-opc.c: Change RD to RS for evmerge*.
 
 2002-10-07  Nathan Tallent  <eraxxon@alumni.rice.edu>
 
@@ -1606,7 +1615,7 @@
 
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
-	* opcodes/po/POTFILES.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
 
 2002-01-19  Richard Earnshaw  <rearnsha@arm.com>
 
@@ -2171,9 +2180,9 @@
 
 2001-08-23  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
-	* opcodes/s390-opc.c: Add "low or high" and "not low or high"
+	* s390-opc.c: Add "low or high" and "not low or high"
 	branch instructions for gcc 3.0.
-	* opcodes/s390-opc.txt: Likewise.
+	* s390-opc.txt: Likewise.
 
 2001-08-21  Andreas Jaeger  <aj@suse.de>
 
