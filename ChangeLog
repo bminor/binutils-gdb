@@ -1,3 +1,10 @@
+start-sanitize-sky
+Wed Jan 28 11:59:32 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure.in: Add dvp-elf support.
+	* config.sub: Recognize dvp cpu.
+
+end-sanitize-sky
 Wed Jan 28 12:58:49 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.guess: Use ${UNAME_MACHINE} rather than i386 for cygwin32
