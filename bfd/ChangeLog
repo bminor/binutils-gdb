@@ -1,5 +1,8 @@
 Wed Dec 11 16:39:45 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
+	* cpu-h8300.c: disassemble branch displacements correctly
+	* coff-h8300.c: put reloc offsets out in 32bits
+
 	* makefile.dos, configdj.bat: New files from DJ
 	* cache.c: fopen with new macros is needed for DOS.
 	* ieee.c: environ renamed to envi to stop an include file
