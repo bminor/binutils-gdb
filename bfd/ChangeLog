@@ -1,3 +1,8 @@
+Mon Dec 30 11:54:56 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libbfd.c: Patch up the mmap code so that it is only built if BFD
+	is configured with --with-mmap.
+
 start-sanitize-tic80
 Sun Dec 29 10:48:57 1996  Fred Fish  <fnf@toadfish.ninemoons.com>
 
