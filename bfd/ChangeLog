@@ -1,3 +1,8 @@
+Fri Jul  2 09:25:20 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* libaout.h (GET_SWORD): Use the bfd_h_get_signed entry points
+	rather than casting the result of bfd_h_get.
+
 Fri Jul  2 10:13:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in, hosts/delta68.h, config/delta68.mh: Add stuff for
