@@ -67,7 +67,7 @@ if ![runto 'marker1'] then {
     continue
 }
 
-gdb_test "up" ".*main.*" "up from marker1"
+gdb_test "up" ".*foobar.*" "up from marker1"
 
 # Local classes in g++ get names like "main.1::InnerLocal", just like local
 # static variables.  Some targets use "___" instead of ".".
@@ -102,14 +102,43 @@ send_gdb "ptype Local\n"
 gdb_expect {
   -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype Local" }
   -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*\}.*$gdb_prompt $" {
-    # setup_kfail "gdb/483"
-    fail "ptype Local (gdb/483)"
+    kfail "gdb/483" "ptype Local"
   }
   -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*Local & operator *=\\((foobar__Fi${sep}::|)Local const *&\\);\[\r\n\t \]*Local\\((foobar__Fi${sep}::|)Local const *&\\);\[\r\n\t \]*Local\\((void|)\\);\[\r\n\t \]*char loc_foo\\(char\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype Local" }
   -re "type = class Local \{\r\n\[\t \]*public:\r\n\[\t \]*int loc1;\r\n\r\n\[\t \]*char loc_foo\\(char\\);\r\n\[\t \]*\\(Local at.*local\\.cc:\[0-9\]*\\)\r\n\}.*$gdb_prompt $" { xpass "ptype Local (old aCC)" }
   -re ".*$gdb_prompt $"   {  fail "ptype Local" }
   timeout             { fail "(timeout) ptype Local" }
 }
+
+gdb_test "break marker2"
+gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker2.*" \
+    "continuing to marker2"
+
+gdb_test "up" ".*main.*" "up from marker2"
+
+# Make sure that `Local' isn't in scope here; it's local to foobar.
+# setup_kfail "gdb/825"
+send_gdb "ptype Local\n"
+set eol "\[\t \]*\[\r\n\]+\[\t \]*"
+gdb_expect {
+    -re "No symbol \"Local\" in current context.*${gdb_prompt} $" {
+        pass "Local out of scope"
+    }
+    -re "ptype Local${eol}type = class Local {${eol}  public:${eol}    int loc1;${eol}${eol}    Local & operator=\\(Local const&\\);${eol}    Local\\(Local const&\\);${eol}    Local\\(\\);${eol}    char loc_foo\\(char\\);${eol}}${eol}${gdb_prompt} " {
+        # GCC emits STABS debugging information in a way that doesn't
+        # properly preserve the scoping of local classes.  I think
+        # we'd need to start using Sun's extensions to stabs to get
+        # this right.
+        kfail gdb/825 "Local out of scope"
+    }
+    -re ".*${gdb_prompt} $" {
+        fail "Local out of scope"
+    }
+    timeout {
+        fail "Local out of scope (timeout)"
+    }
+}
+        
 
 # DTS CLLbs14316 and CLLbs17058
 # coulter - I added a clause for HP's aCC compiler.  We print out the type

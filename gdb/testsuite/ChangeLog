@@ -1,3 +1,12 @@
+2003-02-05  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/local.exp: Don't expect Local to be in scope in main;
+	it's local to foobar.  Check for it there, and check that it's not
+	present in main.
+	* gdb.c++/local.cc (marker2): New function.
+	(foobar): Call marker1.
+	(main): Call marker2 instead of marker1.
+
 2003-02-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.disasm/mn10200.exp: Obsolete file.
