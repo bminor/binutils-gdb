@@ -931,22 +931,22 @@ static struct sparc_opcode sparc_opcodes[] = {
 
 /* Define branches -- one annulled, one without, etc. */
 #define br(opcode, mask, lose, flags) \
- { opcode, (mask)|ANNUL, (lose),       ",al",   (flags), v6 }, \
+ { opcode, (mask)|ANNUL, (lose),       ",a l",   (flags), v6 }, \
  { opcode, (mask)      , (lose)|ANNUL, "l",     (flags), v6 }
 
 #define brx(opcode, mask, lose, flags) /* v9 */ \
  { opcode, (mask), (lose)|ANNUL|BPRED, "Z,G",   (flags), v9 }, \
- { opcode, (mask), (lose)|ANNUL|BPRED, ",NZ,G",   (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",aZ,G", (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,NZ,G", (flags), v9 }, \
- { opcode, (mask)|BPRED, (lose)|ANNUL, ",TZ,G",   (flags), v9 }, \
- { opcode, (mask)|ANNUL|BPRED, (lose), ",a,TZ,G", (flags), v9 }, \
+ { opcode, (mask), (lose)|ANNUL|BPRED, ",N Z,G",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a Z,G", (flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,N Z,G", (flags), v9 }, \
+ { opcode, (mask)|BPRED, (lose)|ANNUL, ",T Z,G",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL|BPRED, (lose), ",a,T Z,G", (flags), v9 }, \
  { opcode, (mask), (lose)|ANNUL|BPRED, "z,G",   (flags), v9 }, \
- { opcode, (mask), (lose)|ANNUL|BPRED, ",Nz,G",   (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",az,G", (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,Nz,G", (flags), v9 }, \
- { opcode, (mask)|BPRED, (lose)|ANNUL, ",Tz,G",   (flags), v9 }, \
- { opcode, (mask)|ANNUL|BPRED, (lose), ",a,Tz,G", (flags), v9 }
+ { opcode, (mask), (lose)|ANNUL|BPRED, ",N z,G",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a z,G", (flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,N z,G", (flags), v9 }, \
+ { opcode, (mask)|BPRED, (lose)|ANNUL, ",T z,G",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL|BPRED, (lose), ",a,T z,G", (flags), v9 }
 
 /* Define four traps: reg+reg, reg + immediate, immediate alone, reg alone. */
 #define tr(opcode, mask, lose, flags) \
@@ -1001,11 +1001,11 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 
 #define brr(opcode, mask, lose, flags) /* v9 */ \
  { opcode, (mask), (lose)|ANNUL|BPRED, "1,k",   F_DELAYED|(flags), v9 }, \
- { opcode, (mask), (lose)|ANNUL|BPRED, ",N1,k", F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a1,k", F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,N1,k", F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|BPRED, (lose)|ANNUL, ",T1,k",   F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|ANNUL|BPRED, (lose), ",a,T1,k", F_DELAYED|(flags), v9 }
+ { opcode, (mask), (lose)|ANNUL|BPRED, ",N 1,k", F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a 1,k", F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,N 1,k", F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|BPRED, (lose)|ANNUL, ",T 1,k",   F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|ANNUL|BPRED, (lose), ",a,T 1,k", F_DELAYED|(flags), v9 }
 
 #define condr(bop, mask, flags) /* v9 */ \
   brr(bop, F2(0, 3)|COND(mask), F2(~0, ~3)|COND(~(mask)), (flags)) /* v9 */ \
@@ -1594,33 +1594,33 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 
 #define brfc(opcode, mask, lose) \
  { opcode, (mask), ANNUL|(lose), "l",   F_DELAYED, v6 }, \
- { opcode, (mask)|ANNUL, (lose), ",al", F_DELAYED, v6 }
+ { opcode, (mask)|ANNUL, (lose), ",a l", F_DELAYED, v6 }
 
 #define brfcx(opcode, mask, lose) /* v9 */ \
  { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), "6,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a6,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), ",N6,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a,N6,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), ",T6,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|BPRED|ANNUL, FBFCC(~0)|(lose), ",a,T6,G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a 6,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), ",N 6,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a,N 6,G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), ",T 6,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|BPRED|ANNUL, FBFCC(~0)|(lose), ",a,T 6,G", F_DELAYED, v9 }, \
  { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), "7,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a7,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), ",N7,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a,N7,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|BPRED, ANNUL|FBFCC(~1)|(lose), ",T7,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|BPRED|ANNUL, FBFCC(~1)|(lose), ",a,T7,G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a 7,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), ",N 7,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a,N 7,G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|BPRED, ANNUL|FBFCC(~1)|(lose), ",T 7,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|BPRED|ANNUL, FBFCC(~1)|(lose), ",a,T 7,G", F_DELAYED, v9 }, \
  { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), "8,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a8,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), ",N8,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a,N8,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|BPRED, ANNUL|FBFCC(~2)|(lose), ",T8,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|BPRED|ANNUL, FBFCC(~2)|(lose), ",a,T8,G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a 8,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), ",N 8,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a,N 8,G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|BPRED, ANNUL|FBFCC(~2)|(lose), ",T 8,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|BPRED|ANNUL, FBFCC(~2)|(lose), ",a,T 8,G", F_DELAYED, v9 }, \
  { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), "9,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a9,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a 9,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), ",N9,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a,N9,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|BPRED, ANNUL|FBFCC(~3)|(lose), ",T9,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|BPRED|ANNUL, FBFCC(~3)|(lose), ",a,T9,G", F_DELAYED, v9 }
+ { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a,N  9,G", F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|BPRED, ANNUL|FBFCC(~3)|(lose), ",T 9,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|BPRED|ANNUL, FBFCC(~3)|(lose), ",a,T 9,G", F_DELAYED, v9 }
 
 #define condfc(fop, cop, mask) \
   brfc(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask))), \
