@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "objfiles.h"
 #include "inferior.h"
 #include "infcall.h"
+#include "observer.h"
 #include "hppa-tdep.h"
 
 #include <dl.h>
@@ -533,7 +534,7 @@ __eh_notification;
 /* Is exception-handling support available with this executable? */
 static int hp_cxx_exception_support = 0;
 /* Has the initialize function been run? */
-int hp_cxx_exception_support_initialized = 0;
+static int hp_cxx_exception_support_initialized = 0;
 /* Address of __eh_notify_hook */
 static CORE_ADDR eh_notify_hook_addr = 0;
 /* Address of __d_eh_notify_callback */
@@ -1204,6 +1205,15 @@ hppa_hpux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
 }
 
 static void
+hppa_hpux_inferior_created (struct target_ops *objfile, int from_tty)
+{
+  /* Some HP-UX related globals to clear when a new "main"
+     symbol file is loaded.  HP-specific.  */
+  deprecated_hp_som_som_object_present = 0;
+  hp_cxx_exception_support_initialized = 0;
+}
+
+static void
 hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -1220,6 +1230,8 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_trampoline_code (gdbarch, hppa_hpux_skip_trampoline_code);
 
   frame_unwind_append_sniffer (gdbarch, hppa_hpux_sigtramp_unwind_sniffer);
+
+  observer_attach_inferior_created (hppa_hpux_inferior_created);
 }
 
 static void

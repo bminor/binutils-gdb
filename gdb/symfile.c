@@ -60,18 +60,6 @@
 #define O_BINARY 0
 #endif
 
-#ifdef HPUXHPPA
-
-/* Some HP-UX related globals to clear when a new "main"
-   symbol file is loaded. HP-specific.  */
-
-extern int hp_cxx_exception_support_initialized;
-#define RESET_HP_UX_GLOBALS() do {\
-                                    deprecated_hp_som_som_object_present = 0;             /* indicates HP-compiled code */        \
-                                    hp_cxx_exception_support_initialized = 0;  /* must reinitialize exception stuff */ \
-                              } while (0)
-#endif
-
 int (*deprecated_ui_load_progress_hook) (const char *section, unsigned long num);
 void (*deprecated_show_load_progress) (const char *section,
 			    unsigned long section_sent,
@@ -957,10 +945,6 @@ symbol_file_add_main_1 (char *args, int from_tty, int flags)
 {
   symbol_file_add (args, from_tty, NULL, 1, flags);
 
-#ifdef HPUXHPPA
-  RESET_HP_UX_GLOBALS ();
-#endif
-
   /* Getting new symbols may change our opinion about
      what is frameless.  */
   reinit_frame_cache ();
@@ -989,9 +973,6 @@ symbol_file_clear (int from_tty)
     symfile_objfile = NULL;
     if (from_tty)
       printf_unfiltered ("No symbol file now.\n");
-#ifdef HPUXHPPA
-    RESET_HP_UX_GLOBALS ();
-#endif
 }
 
 static char *
@@ -1944,9 +1925,6 @@ reread_symbols (void)
 	      if (objfile == symfile_objfile)
 		{
 		  (*objfile->sf->sym_new_init) (objfile);
-#ifdef HPUXHPPA
-		  RESET_HP_UX_GLOBALS ();
-#endif
 		}
 
 	      (*objfile->sf->sym_init) (objfile);

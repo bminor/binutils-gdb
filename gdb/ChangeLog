@@ -1,5 +1,16 @@
 2004-06-14  Randolph Chung  <tausq@debian.org>
 
+	* Makefile.in (hppa-hpux-tdep.o): Update dependency.
+	* hppa-hpux-tdep.c (hp_cxx_exception_support_initialized): Make 
+	static.
+	(hppa_hpux_inferior_created): New function.
+	(hppa_hpux_init_abi): Register observer.
+	* symfile.c (hp_cxx_exception_support_initialized)
+	(RESET_HP_UX_GLOBALS): Remove HPUXHPPA specific hacks.
+	(symbol_file_add_main_1, symbol_file_clear): Likewise.
+
+2004-06-14  Randolph Chung  <tausq@debian.org>
+
 	* MAINTAINERS (Write After Approval): Alphabetize my entry correctly.
 
 2004-06-14  Andrew Cagney  <cagney@gnu.org>
