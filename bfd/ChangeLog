@@ -1,3 +1,8 @@
+Fri Mar 28 14:44:08 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* m68klinux.c (MACHTYPE_OK): Define.
+	* i386linux.c (MACHTYPE_OK): Define.
+
 Fri Mar 28 11:56:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-mips.c (mips_ecoff_backend_data): Initialize new
