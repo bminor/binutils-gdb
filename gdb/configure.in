@@ -240,7 +240,7 @@ sparc)
 	;;
 
 h8300)
-	gdb_target=h8300hds 
+	gdb_target=h8300hms 
 	;;
 
 i860)	gdb_target=stratus
