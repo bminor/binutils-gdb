@@ -1,3 +1,7 @@
+2004-08-27  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.threads/bp_in_thread.exp: New testcase.
+
 2004-08-27  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Fix PR testsuite/1735.
