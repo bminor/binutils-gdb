@@ -1,3 +1,24 @@
+Fri Nov 25 13:37:10 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	Beginnings of template debugging tests.
+	* gdb.c++/templ-info.cc:  New file to test for template
+	debugging capability of the compiler.
+	* gdb.c++/Makefile.in:  Add rule to build templ-info.exp from
+	templ-info.cc.
+	* gdb.c++/templates.cc:  Add explicit template instantiations
+	to enable compiling with -fno-implicit-templates. Add destructor
+	and 'value' method to T5 class for template tests.
+	* gdb.c++/templates.exp:  Add testcases for printing of template
+	types, setting breakpoints on template methods and calling a
+	template method. 
+
+Sat Nov  5 00:20:17 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/hppa.exp (branch_tests): Allow any symbol as the
+	branch target since some assemblers (gas-2.5)  may emit a
+	relocation for the branch instead of resolving it in the
+	assembler.
+
 Sat Oct 29 02:40:40 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/a1-selftest.exp:  Remove RS/6000 xfail for backtrace
