@@ -1,3 +1,11 @@
+Tue Oct 26 10:24:31 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* Makefile.in (CHECKFLAGS): Pass down RUNTESTFLAGS.
+
+	From Jeff Law:
+	* config/tc-hppa.c (tc_gen_reloc): ELF32_HPPA_R_ADDEND ->
+	HPPA_R_ADDEND.
+
 Mon Oct 25 11:17:58 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* config/tc-sh.c (build_Mbytes): Write the relocs to the correct
