@@ -5664,7 +5664,9 @@ IA-64 options:\n\
 	stream);
 }
 
-static inline int
+/* Return true if TYPE fits in TEMPL at SLOT.  */
+
+static int
 match (int templ, int type, int slot)
 {
   enum ia64_unit unit;
@@ -5685,6 +5687,19 @@ match (int templ, int type, int slot)
     default:		result = 0; break;
     }
   return result;
+}
+
+/* Add a bit of extra goodness if a nop of type F or B would fit
+   in TEMPL at SLOT.  */
+
+static inline int
+extra_goodness (int templ, int slot)
+{
+  if (match (templ, IA64_TYPE_F, slot))
+    return 2;
+  if (match (templ, IA64_TYPE_B, slot))
+    return 1;
+  return 0;
 }
 
 /* This function is called once, at assembler startup time.  It sets
@@ -5739,7 +5754,11 @@ md_begin ()
       symbol_new (".<ltoff.fptr>", undefined_section, FUNC_LT_FPTR_RELATIVE,
 		  &zero_address_frag);
 
-  /* compute the table of best templates: */
+  /* Compute the table of best templates.  We compute goodness as a 
+     base 4 value, in which each match counts for 3, each F counts
+     for 2, each B counts for 1.  This should maximize the number of
+     F and B nops in the chosen bundles, which is good because these
+     pipelines are least likely to be overcommitted.  */
   for (i = 0; i < IA64_NUM_TYPES; ++i)
     for (j = 0; j < IA64_NUM_TYPES; ++j)
       for (k = 0; k < IA64_NUM_TYPES; ++k)
@@ -5753,24 +5772,28 @@ md_begin ()
 		  if (match (t, j, 1))
 		    {
 		      if (match (t, k, 2))
-			goodness = 3;
+			goodness = 3 + 3 + 3;
 		      else
-			goodness = 2;
+			goodness = 3 + 3 + extra_goodness (t, 2);
 		    }
 		  else if (match (t, j, 2))
-		    goodness = 2;
+		    goodness = 3 + 3 + extra_goodness (t, 1);
 		  else
-		    goodness = 1;
+		    {
+		      goodness = 3;
+		      goodness += extra_goodness (t, 1);
+		      goodness += extra_goodness (t, 2);
+		    }
 		}
 	      else if (match (t, i, 1))
 		{
 		  if (match (t, j, 2))
-		    goodness = 2;
+		    goodness = 3 + 3;
 		  else
-		    goodness = 1;
+		    goodness = 3 + extra_goodness (t, 2);
 		}
 	      else if (match (t, i, 2))
-		goodness = 1;
+		goodness = 3 + extra_goodness (t, 1);
 
 	      if (goodness > best)
 		{
