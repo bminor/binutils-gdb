@@ -42,6 +42,9 @@ struct v850_opcode
      operand table.  They appear in the order which the operands must
      appear in assembly code, and are terminated by a zero.  */
   unsigned char operands[8];
+
+  /* Which (if any) operand is a memory operand.  */
+  unsigned int memop;
 };
 
 /* The table itself is sorted by major opcode number, and is otherwise
@@ -51,7 +54,7 @@ extern const struct v850_opcode v850_opcodes[];
 extern const int v850_num_opcodes;
 
 
-/* The operands table is an array of struct powerpc_operand.  */
+/* The operands table is an array of struct v850_operand.  */
 
 struct v850_operand
 {
@@ -121,5 +124,16 @@ extern const struct v850_operand v850_operands[];
 
 /* This operand takes signed values */
 #define V850_OPERAND_SIGNED	0x08
+
+/* This operand is the ep register.  */
+#define V850_OPERAND_EP		0x10
+
+/* This operand is a PC displacement */
+#define V850_OPERAND_DISP	0x20
+
+/* This is a relaxable operand.   Only used for D9->D22 branch relaxing
+   right now.  We may need others in the future (or maybe handle them like
+   promoted operands on the mn10300?)  */
+#define V850_OPERAND_RELAX	0x40
 
 #endif /* V850_H */

@@ -1,3 +1,18 @@
+Sat Dec 14 10:48:31 1996  Fred Fish  <fnf@ninemoons.com>
+
+	* mn10200.h: Fix comment, mn10200_operand not powerpc_operand.
+	* mn10300.h: Fix comment, mn10300_operand not powerpc_operand.
+	* v850.h: Fix comment, v850_operand not powerpc_operand.
+	
+Mon Dec  9 16:45:39 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200.h: Flesh out structures and definitions needed by
+	the mn10200 assembler & disassembler.
+
+Tue Nov 26 10:46:56 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips.h: Add mips16 definitions.
+
 Mon Nov 25 17:56:54 1996  J.T. Conklin  <jtc@cygnus.com>
 
 	* m68k.h: Document new <, >, m, n, o and p operand specifiers.
