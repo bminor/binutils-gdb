@@ -1,5 +1,9 @@
 Wed Jun  7 17:46:33 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* mem-break.c (LITTLE_BREAKPOINT): If BREAKPOINT and
+	{LITTLE,BIG}_BREAKPOINT are all defined, don't redefine.
+	(BIG_BREAKPOINT): Ditto.
+
 	* config/rs6000/tm-rs6000.h (BREAKPOINT): Define as either
 	BIG_BREAKPOINT or LITTLE_BREAKPOINT depending on the target byte
 	order.
