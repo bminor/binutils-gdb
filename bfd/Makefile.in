@@ -24,6 +24,7 @@ srcdir = @srcdir@
 
 prefix = @prefix@
 
+program_transform_name = @program_transform_name@
 exec_prefix = @exec_prefix@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
@@ -625,15 +626,17 @@ force:
 
 install: $(ALLLIBS)
 	for f in $(ALLLIBS); do \
-	  rm -f $(libdir)/$$f; \
+	  tf=lib`echo $$f | sed -e 's/^lib//' | sed '$(program_transform_name)'`; \
+	  rm -f $(libdir)/$$tf; \
 	  if [ "$$f" = "$(SHLINK)" ]; then \
-	    ln -sf $(SHLIB) $(libdir)/$$f; \
+	    ts=lib`echo $(SHLIB) | sed -e 's/^lib//' | sed '$(program_transform_name)'`; \
+	    ln -sf $$ts $(libdir)/$$tf; \
 	  elif [ "$$f" = "$(SHLIB)" ]; then \
-	    $(INSTALL_PROGRAM) $$f $(libdir)/$$f; \
+	    $(INSTALL_PROGRAM) $$f $(libdir)/$$tf; \
 	  else \
-	    $(INSTALL_DATA) $$f $(libdir)/$$f; \
-	    $(RANLIB) $(libdir)/$$f; \
-	    chmod a-x $(libdir)/$$f; \
+	    $(INSTALL_DATA) $$f $(libdir)/$$tf; \
+	    $(RANLIB) $(libdir)/$$tf; \
+	    chmod a-x $(libdir)/$$tf; \
 	  fi; \
 	done
 # Install BFD include file, and others that it needs.  Install them

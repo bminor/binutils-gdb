@@ -1,3 +1,8 @@
+Tue Feb  6 12:12:22 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (program_transform_name): New variable.
+	(install): Transform library name before installing it.
+
 Mon Feb  5 10:38:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* archures.c (bfd_mach_i960_hx): Define.
