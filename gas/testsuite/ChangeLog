@@ -1,3 +1,7 @@
+2001-03-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gas/mri/mri.exp: Fix test of m6811/m6812 targets.
+
 2001-02-26  H.J. Lu  <hjl@gnu.org>
 
 	* gas/ia64/opc-a-err.l: Change "Operand [3|4]" to "Operand [34]".
