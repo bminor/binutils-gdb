@@ -5973,6 +5973,17 @@ mips16_macro (ip)
       macro_build ((char *) NULL, &icnt, &imm_expr, s, s3, xreg);
       macro_build ((char *) NULL, &icnt, &offset_expr, s2, "p");
       break;
+
+    case M_ABS:
+      expr1.X_add_number = 0;
+      macro_build ((char *) NULL, &icnt, &expr1, "slti", "x,8",  yreg);
+      if (xreg != yreg)
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		     "move", "y,X", xreg, yreg);
+      expr1.X_add_number = 2;
+      macro_build ((char *) NULL, &icnt, &expr1, "bteqz", "p");
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		   "neg", "x,w", xreg, xreg);
     }
 }
 

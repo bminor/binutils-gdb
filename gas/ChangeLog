@@ -1,3 +1,7 @@
+Mon Dec 30 11:35:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips16_macro): Add case for M_ABS.
+
 Fri Dec 27 22:51:51 1996  Fred Fish  <fnf@cygnus.com>
 
 	* NOTES.config (Implementation): as.h #define's "GAS" not "gas",
