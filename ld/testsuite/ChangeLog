@@ -1,3 +1,8 @@
+2003-04-25  Nick Clifton <nickc@redhat.com>
+            J"orn Rennecke <joern.rennecke@superh.com>
+
+	* lib/ld-lib.exp (big_or_little_endian): Also check for -mb and -ml.
+
 2003-04-24  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* ld-elfcomm/elfcomm.exp: Allow symbols to have '_' prepended.

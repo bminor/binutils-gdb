@@ -94,11 +94,11 @@ proc big_or_little_endian {} {
 
 	foreach x $tmp_flags {
 	    case $x in {
-		{*big*endian eb EB -eb -EB} {
+		{*big*endian eb EB -eb -EB -mb} {
 		    set flags " -EB"
 		    return $flags
 		}
-		{*little*endian el EL -el -EL} {
+		{*little*endian el EL -el -EL -ml} {
 		    set flags " -EL"
 		    return $flags
 		}
