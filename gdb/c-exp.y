@@ -41,6 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* These MUST be included in any grammar file!!!! 
    Please choose unique names! */
+#define	yymaxdepth c_maxdepth
 #define	yyparse	c_parse
 #define	yylex	c_lex
 #define	yyerror	c_error
@@ -60,9 +61,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyps	c_ps
 #define	yypv	c_pv
 #define	yys	c_s
+#define	yy_yys	c_yys
 #define	yystate	c_state
 #define	yytmp	c_tmp
 #define	yyv	c_v
+#define	yy_yyv	c_yyv
 #define	yyval	c_val
 #define	yylloc	c_lloc
 
