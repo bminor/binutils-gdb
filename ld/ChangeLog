@@ -1,3 +1,10 @@
+2002-01-29  Chris Demetriou  <cgd@broadcom.com>
+            Mitch Lichtenberg  <mpl@broadcom.com>
+
+	* emulparams/elf32bmip.sh (EXTRA_EM_FILE): Define to be mipself.
+	* emultempl/mipself.em: New file to handle MIPS ELF embedded
+	reloc creation (ld --embedded-relocs).
+
 2002-01-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure: Regenerated.
