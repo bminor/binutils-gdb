@@ -523,10 +523,15 @@ F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc::0:0
 # reqires that these methods be set up from the word go.  This also
 # avoids any potential problems with moving beyond multi-arch partial.
 v::DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
+# Replaced by push_dummy_code.
 v::CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
+# Replaced by push_dummy_code.
 f::CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void::::entry_point_address::0
+# Replaced by push_dummy_code.
 v::CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset
+# Replaced by push_dummy_code.
 v::CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset
+# Replaced by push_dummy_code.
 v::CALL_DUMMY_LENGTH:int:call_dummy_length
 # NOTE: cagney/2002-11-24: This function with predicate has a valid
 # (callable) initial value.  As a consequence, even when the predicate
@@ -534,10 +539,16 @@ v::CALL_DUMMY_LENGTH:int:call_dummy_length
 # migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
 # doesn't need to be modified.
 F::DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::generic_pc_in_call_dummy:generic_pc_in_call_dummy
+# Replaced by push_dummy_code.
 v::CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
+# Replaced by push_dummy_code.
 v::SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0
+# Replaced by push_dummy_code.
 V:2:DEPRECATED_CALL_DUMMY_STACK_ADJUST:int:deprecated_call_dummy_stack_adjust::::0
+# Replaced by push_dummy_code.
 F::FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
+# This is a replacement for FIX_CALL_DUMMY et.al.
+M::PUSH_DUMMY_CODE:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr:
 F:2:DEPRECATED_INIT_FRAME_PC_FIRST:CORE_ADDR:deprecated_init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev
 F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
 #

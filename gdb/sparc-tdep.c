@@ -3224,7 +3224,15 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0x30);
       set_gdbarch_call_dummy_length (gdbarch, 0x38);
 
-      /* NOTE: cagney/2002-04-26: Based from info posted by Peter
+      /* NOTE: cagney/2003-05-01: Using the just added push_dummy_code
+	 architecture method, it is now possible to implement a
+	 generic dummy frames based inferior function call that stores
+	 the breakpoint (and struct info) on the stack.  Further, by
+	 treating a SIGSEG at a breakpoint as equivalent to a SIGTRAP
+	 it is even possible to make this work when the stack is
+	 no-execute.
+
+	 NOTE: cagney/2002-04-26: Based from info posted by Peter
 	 Schauer around Oct '99.  Briefly, due to aspects of the SPARC
 	 ABI, it isn't possible to use ON_STACK with a strictly
 	 compliant compiler.

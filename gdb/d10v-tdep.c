@@ -956,6 +956,25 @@ pop_stack_item (struct stack_item *si)
 
 
 static CORE_ADDR
+d10v_push_dummy_code (struct gdbarch *gdbarch,
+		      CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
+		      struct value **args, int nargs,
+		      struct type *value_type,
+		      CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+{
+  /* Allocate space sufficient for a breakpoint.  */
+  sp = (sp - 4) & ~3;
+  /* Store the address of that breakpoint taking care to first convert
+     it into a code (IADDR) address from a stack (DADDR) address.
+     This of course assumes that the two virtual addresses map onto
+     the same real address.  */
+  (*bp_addr) = d10v_make_iaddr (d10v_convert_iaddr_to_raw (sp));
+  /* d10v always starts the call at the callee's entry point.  */
+  (*real_pc) = funaddr;
+  return sp;
+}
+
+static CORE_ADDR
 d10v_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
 		      CORE_ADDR dummy_addr, int nargs, struct value **args,
 		      CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
@@ -1617,6 +1636,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   set_gdbarch_extract_return_value (gdbarch, d10v_extract_return_value);
+  set_gdbarch_push_dummy_code (gdbarch, d10v_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, d10v_push_dummy_call);
   set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch, d10v_extract_struct_value_address);

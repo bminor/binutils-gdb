@@ -1,5 +1,21 @@
 2003-05-03  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (PUSH_DUMMY_CODE): New architecture method, add
+	comments noteing that it replaces the old FIX_CALL_DUMMY code.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* d10v-tdep.c (d10v_push_dummy_code): New function.
+	(d10v_gdbarch_init): Set push_dummy_code.
+	* infcall.c (legacy_push_dummy_code): New function.
+	(generic_push_dummy_code): New function.
+	(push_dummy_code): New function.
+	(call_function_by_hand): Call push_dummy_code.  Pass bp_addr,
+	instead of dummy_addr, to push_dummy_call.  Move call to
+	generic_save_call_dummy_addr to outside of CALL_DUMMY_LOCATION
+	switch.
+	* sparc-tdep.c (sparc_gdbarch_init): Mention push_dummy_code.
+
+2003-05-03  Andrew Cagney  <cagney@redhat.com>
+
 	* disasm.h (print_insn): Declare.
 	* disasm.c (init_gdb_disassemble_info): New function.
 	(gdb_disassembly): Call init_gdb_disassemble_info.

@@ -215,6 +215,140 @@ breakpoint_auto_delete_contents (void *arg)
   breakpoint_auto_delete (*(bpstat *) arg);
 }
 
+static CORE_ADDR
+legacy_push_dummy_code (struct gdbarch *gdbarch,
+			CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
+			struct value **args, int nargs,
+			struct type *value_type,
+			CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+{
+  /* CALL_DUMMY is an array of words (REGISTER_SIZE), but each word is
+     in host byte order.  Before calling FIX_CALL_DUMMY, we byteswap
+     it and remove any extra bytes which might exist because ULONGEST
+     is bigger than REGISTER_SIZE.  */
+  /* NOTE: This is pretty wierd, as the call dummy is actually a
+     sequence of instructions.  But CISC machines will have to pack
+     the instructions into REGISTER_SIZE units (and so will RISC
+     machines for which INSTRUCTION_SIZE is not REGISTER_SIZE).  */
+  /* NOTE: This is pretty stupid.  CALL_DUMMY should be in strict
+     target byte order. */
+  CORE_ADDR start_sp;
+  ULONGEST *dummy = alloca (SIZEOF_CALL_DUMMY_WORDS);
+  int sizeof_dummy1 = (REGISTER_SIZE * SIZEOF_CALL_DUMMY_WORDS
+		       / sizeof (ULONGEST));
+  char *dummy1 = alloca (sizeof_dummy1);
+  memcpy (dummy, CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS);
+  if (INNER_THAN (1, 2))
+    {
+      /* Stack grows down */
+      sp -= sizeof_dummy1;
+      start_sp = sp;
+    }
+  else
+    {
+      /* Stack grows up */
+      start_sp = sp;
+      sp += sizeof_dummy1;
+    }
+  /* NOTE: cagney/2002-09-10: Don't bother re-adjusting the stack
+     after allocating space for the call dummy.  A target can specify
+     a SIZEOF_DUMMY1 (via SIZEOF_CALL_DUMMY_WORDS) such that all local
+     alignment requirements are met.  */
+  /* Create a call sequence customized for this function and the
+     number of arguments for it.  */
+  {
+    int i;
+    for (i = 0; i < (int) (SIZEOF_CALL_DUMMY_WORDS / sizeof (dummy[0]));
+	 i++)
+      store_unsigned_integer (&dummy1[i * REGISTER_SIZE],
+			      REGISTER_SIZE,
+			      (ULONGEST) dummy[i]);
+  }
+  /* NOTE: cagney/2003-04-22: This computation of REAL_PC, BP_ADDR and
+     DUMMY_ADDR is pretty messed up.  It comes from constant tinkering
+     with the values.  Instead a FIX_CALL_DUMMY replacement
+     (PUSH_DUMMY_BREAKPOINT?) should just do everything.  */
+#ifdef GDB_TARGET_IS_HPPA
+  real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
+			    value_type, using_gcc);
+#else
+  if (FIX_CALL_DUMMY_P ())
+    {
+      /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
+      FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args, value_type,
+		      using_gcc);
+    }
+  (*real_pc) = start_sp;
+#endif
+  /* Yes, the offset is applied to the real_pc and not the dummy addr.
+     Ulgh!  Blame the HP/UX target.  */
+  (*bp_addr) = (*real_pc) + CALL_DUMMY_BREAKPOINT_OFFSET;
+  /* Yes, the offset is applied to the real_pc and not the
+     dummy_addr.  Ulgh!  Blame the HP/UX target.  */
+  (*real_pc) += CALL_DUMMY_START_OFFSET;
+  write_memory (start_sp, (char *) dummy1, sizeof_dummy1);
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+    generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
+  return sp;
+}
+
+static CORE_ADDR
+generic_push_dummy_code (struct gdbarch *gdbarch,
+			 CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
+			 struct value **args, int nargs,
+			 struct type *value_type,
+			 CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+{
+  /* Something here to findout the size of a breakpoint and then
+     allocate space for it on the stack.  */
+  int bplen;
+  /* This code assumes frame align.  */
+  gdb_assert (gdbarch_frame_align_p (gdbarch));
+  /* Force the stack's alignment.  The intent is to ensure that the SP
+     is aligned to at least a breakpoint instruction's boundary.  */
+  sp = gdbarch_frame_align (gdbarch, sp);
+  /* Allocate space for, and then position the breakpoint on the
+     stack.  */
+  if (gdbarch_inner_than (gdbarch, 1, 2))
+    {
+      CORE_ADDR bppc = sp;
+      gdbarch_breakpoint_from_pc (gdbarch, &bppc, &bplen);
+      sp = gdbarch_frame_align (gdbarch, sp - bplen);
+      (*bp_addr) = sp;
+      /* Should the breakpoint size/location be re-computed here?  */
+    }      
+  else
+    {
+      (*bp_addr) = sp;
+      gdbarch_breakpoint_from_pc (gdbarch, bp_addr, &bplen);
+      sp = gdbarch_frame_align (gdbarch, sp + bplen);
+    }
+  /* Inferior resumes at the function entry point.  */
+  (*real_pc) = funaddr;
+  return sp;
+}
+
+/* Provide backward compatibility.  Once FIX_CALL_DUMMY is eliminated,
+   this can be simplified.  */
+
+static CORE_ADDR
+push_dummy_code (struct gdbarch *gdbarch,
+		 CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
+		 struct value **args, int nargs,
+		 struct type *value_type,
+		 CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+{
+  if (gdbarch_push_dummy_code_p (gdbarch))
+    return gdbarch_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
+				    args, nargs, value_type, real_pc, bp_addr);
+  else if (FIX_CALL_DUMMY_P ())
+    return legacy_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
+				   args, nargs, value_type, real_pc, bp_addr);
+  else    
+    return generic_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
+				    args, nargs, value_type, real_pc, bp_addr);
+}
+
 /* All this stuff with a dummy frame may seem unnecessarily complicated
    (why not just save registers in GDB?).  The purpose of pushing a dummy
    frame which looks just like a real frame is so that if you call a
@@ -362,97 +496,50 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   struct_return = using_struct_return (function, funaddr, value_type,
 				       using_gcc);
 
+  /* Determine the location of the breakpoint (and possibly other
+     stuff) that the called function will return to.  The SPARC, for a
+     function returning a structure or union, needs to make space for
+     not just the breakpoint but also an extra word containing the
+     size (?) of the structure being passed.  */
+
+  /* The actual breakpoint (at BP_ADDR) is inserted separatly so there
+     is no need to write that out.  */
+
   switch (CALL_DUMMY_LOCATION)
     {
     case ON_STACK:
-      {
-	/* CALL_DUMMY is an array of words (REGISTER_SIZE), but each
-	   word is in host byte order.  Before calling FIX_CALL_DUMMY,
-	   we byteswap it and remove any extra bytes which might exist
-	   because ULONGEST is bigger than REGISTER_SIZE.  */
-	/* NOTE: This is pretty wierd, as the call dummy is actually a
-	   sequence of instructions.  But CISC machines will have to
-	   pack the instructions into REGISTER_SIZE units (and so will
-	   RISC machines for which INSTRUCTION_SIZE is not
-	   REGISTER_SIZE).  */
-	/* NOTE: This is pretty stupid.  CALL_DUMMY should be in
-	   strict target byte order. */
-	CORE_ADDR start_sp;
-	ULONGEST *dummy = alloca (SIZEOF_CALL_DUMMY_WORDS);
-	int sizeof_dummy1 = (REGISTER_SIZE * SIZEOF_CALL_DUMMY_WORDS
-			     / sizeof (ULONGEST));
-	char *dummy1 = alloca (sizeof_dummy1);
-	memcpy (dummy, CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS);
-	if (INNER_THAN (1, 2))
-	  {
-	    /* Stack grows down */
-	    sp -= sizeof_dummy1;
-	    start_sp = sp;
-	  }
-	else
-	  {
-	    /* Stack grows up */
-	    start_sp = sp;
-	    sp += sizeof_dummy1;
-	  }
-	/* NOTE: cagney/2002-09-10: Don't bother re-adjusting the
-	   stack after allocating space for the call dummy.  A target
-	   can specify a SIZEOF_DUMMY1 (via SIZEOF_CALL_DUMMY_WORDS)
-	   such that all local alignment requirements are met.  */
-	/* Create a call sequence customized for this function and the
-	   number of arguments for it.  */
+      /* "dummy_addr" is here just to keep old targets happy.  New
+	 targets return that same information via "sp" and "bp_addr".  */
+      if (INNER_THAN (1, 2))
 	{
-	  int i;
-	  for (i = 0; i < (int) (SIZEOF_CALL_DUMMY_WORDS / sizeof (dummy[0]));
-	       i++)
-	    store_unsigned_integer (&dummy1[i * REGISTER_SIZE],
-				    REGISTER_SIZE,
-				    (ULONGEST) dummy[i]);
+	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
+				using_gcc, args, nargs, value_type,
+				&real_pc, &bp_addr);
+	  dummy_addr = sp;
 	}
-	/* NOTE: cagney/2003-04-22: This computation of REAL_PC,
-	   BP_ADDR and DUMMY_ADDR is pretty messed up.  It comes from
-	   constant tinkering with the values.  Instead a
-	   FIX_CALL_DUMMY replacement (PUSH_DUMMY_BREAKPOINT?) should
-	   just do everything.  */
-#ifdef GDB_TARGET_IS_HPPA
-	real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
-				  value_type, using_gcc);
-#else
-	if (FIX_CALL_DUMMY_P ())
-	  {
-	    /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
-	    FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args, value_type,
-			    using_gcc);
-	  }
-	real_pc = start_sp;
-#endif
-	dummy_addr = start_sp;
-	/* Yes, the offset is applied to the real_pc and not the dummy
-	   addr.  Ulgh!  Blame the HP/UX target.  */
-	bp_addr = real_pc + CALL_DUMMY_BREAKPOINT_OFFSET;
-	/* Yes, the offset is applied to the real_pc and not the
-	   dummy_addr.  Ulgh!  Blame the HP/UX target.  */
-	real_pc += CALL_DUMMY_START_OFFSET;
-	write_memory (start_sp, (char *) dummy1, sizeof_dummy1);
-	if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-	  generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
-	break;
-      }
+      else
+	{
+	  dummy_addr = sp;
+	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
+				using_gcc, args, nargs, value_type,
+				&real_pc, &bp_addr);
+	}
+      break;
     case AT_ENTRY_POINT:
       real_pc = funaddr;
       dummy_addr = CALL_DUMMY_ADDRESS ();
       /* A call dummy always consists of just a single breakpoint, so
          it's address is the same as the address of the dummy.  */
       bp_addr = dummy_addr;
-      if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-	/* NOTE: cagney/2002-04-13: The entry point is going to be
-           modified with a single breakpoint.  */
-	generic_save_call_dummy_addr (CALL_DUMMY_ADDRESS (),
-				      CALL_DUMMY_ADDRESS () + 1);
       break;
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
+
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+    /* Save where the breakpoint is going to be inserted so that the
+       dummy-frame code is later able to re-identify it.  */
+    generic_save_call_dummy_addr (bp_addr, bp_addr + 1);
 
   if (nargs < TYPE_NFIELDS (ftype))
     error ("too few arguments in function call");
@@ -646,7 +733,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
        simply error out.  That would the implementation of this method
        for all ABIs (which is probably a good thing).  */
     sp = gdbarch_push_dummy_call (current_gdbarch, current_regcache,
-				  dummy_addr, nargs, args, sp, struct_return,
+				  bp_addr, nargs, args, sp, struct_return,
 				  struct_addr);
   else  if (DEPRECATED_PUSH_ARGUMENTS_P ())
     /* Keep old targets working.  */

@@ -196,6 +196,7 @@ struct gdbarch
   int sizeof_call_dummy_words;
   int deprecated_call_dummy_stack_adjust;
   gdbarch_fix_call_dummy_ftype *fix_call_dummy;
+  gdbarch_push_dummy_code_ftype *push_dummy_code;
   gdbarch_deprecated_init_frame_pc_first_ftype *deprecated_init_frame_pc_first;
   gdbarch_deprecated_init_frame_pc_ftype *deprecated_init_frame_pc;
   int believe_pcc_promotion;
@@ -357,6 +358,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_pc_in_call_dummy,
+  0,
   0,
   0,
   0,
@@ -665,6 +667,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of sizeof_call_dummy_words, invalid_p == 0 */
   /* Skip verify of deprecated_call_dummy_stack_adjust, has predicate */
   /* Skip verify of fix_call_dummy, has predicate */
+  /* Skip verify of push_dummy_code, has predicate */
   /* Skip verify of deprecated_init_frame_pc_first, has predicate */
   /* Skip verify of deprecated_init_frame_pc, has predicate */
   /* Skip verify of deprecated_get_saved_register, has predicate */
@@ -1964,6 +1967,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
     fprintf_unfiltered (file,
                         "gdbarch_dump: push_dummy_call = 0x%08lx\n",
                         (long) current_gdbarch->push_dummy_call);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_push_dummy_code_p() = %d\n",
+                        gdbarch_push_dummy_code_p (current_gdbarch));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: push_dummy_code = 0x%08lx\n",
+                        (long) current_gdbarch->push_dummy_code);
 #ifdef REGISTER_BYTE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3876,6 +3887,32 @@ set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch,
                             gdbarch_fix_call_dummy_ftype fix_call_dummy)
 {
   gdbarch->fix_call_dummy = fix_call_dummy;
+}
+
+int
+gdbarch_push_dummy_code_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->push_dummy_code != 0;
+}
+
+CORE_ADDR
+gdbarch_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->push_dummy_code == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_push_dummy_code invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_push_dummy_code called\n");
+  return gdbarch->push_dummy_code (gdbarch, sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr);
+}
+
+void
+set_gdbarch_push_dummy_code (struct gdbarch *gdbarch,
+                             gdbarch_push_dummy_code_ftype push_dummy_code)
+{
+  gdbarch->push_dummy_code = push_dummy_code;
 }
 
 int

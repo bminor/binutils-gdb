@@ -1135,6 +1135,8 @@ extern void set_gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdb
 #define DEPRECATED_USE_GENERIC_DUMMY_FRAMES (gdbarch_deprecated_use_generic_dummy_frames (current_gdbarch))
 #endif
 
+/* Replaced by push_dummy_code. */
+
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (CALL_DUMMY_LOCATION)
 #define CALL_DUMMY_LOCATION (AT_ENTRY_POINT)
@@ -1148,6 +1150,8 @@ extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_d
 #if !defined (CALL_DUMMY_LOCATION)
 #define CALL_DUMMY_LOCATION (gdbarch_call_dummy_location (current_gdbarch))
 #endif
+
+/* Replaced by push_dummy_code. */
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (CALL_DUMMY_ADDRESS)
@@ -1166,6 +1170,8 @@ extern void set_gdbarch_call_dummy_address (struct gdbarch *gdbarch, gdbarch_cal
 #endif
 #endif
 
+/* Replaced by push_dummy_code. */
+
 extern CORE_ADDR gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch, CORE_ADDR call_dummy_start_offset);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_START_OFFSET)
@@ -1175,6 +1181,8 @@ extern void set_gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch, CORE_A
 #define CALL_DUMMY_START_OFFSET (gdbarch_call_dummy_start_offset (current_gdbarch))
 #endif
 
+/* Replaced by push_dummy_code. */
+
 extern CORE_ADDR gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch, CORE_ADDR call_dummy_breakpoint_offset);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_BREAKPOINT_OFFSET)
@@ -1183,6 +1191,8 @@ extern void set_gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch, C
 #if !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (gdbarch_call_dummy_breakpoint_offset (current_gdbarch))
 #endif
+
+/* Replaced by push_dummy_code. */
 
 extern int gdbarch_call_dummy_length (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_length (struct gdbarch *gdbarch, int call_dummy_length);
@@ -1236,6 +1246,8 @@ extern void set_gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, gd
 #endif
 #endif
 
+/* Replaced by push_dummy_code. */
+
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (CALL_DUMMY_WORDS)
 #define CALL_DUMMY_WORDS (legacy_call_dummy_words)
@@ -1250,6 +1262,8 @@ extern void set_gdbarch_call_dummy_words (struct gdbarch *gdbarch, LONGEST * cal
 #define CALL_DUMMY_WORDS (gdbarch_call_dummy_words (current_gdbarch))
 #endif
 
+/* Replaced by push_dummy_code. */
+
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (SIZEOF_CALL_DUMMY_WORDS)
 #define SIZEOF_CALL_DUMMY_WORDS (legacy_sizeof_call_dummy_words)
@@ -1263,6 +1277,8 @@ extern void set_gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch, int si
 #if !defined (SIZEOF_CALL_DUMMY_WORDS)
 #define SIZEOF_CALL_DUMMY_WORDS (gdbarch_sizeof_call_dummy_words (current_gdbarch))
 #endif
+
+/* Replaced by push_dummy_code. */
 
 #if defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST)
 /* Legacy for systems yet to multi-arch DEPRECATED_CALL_DUMMY_STACK_ADJUST */
@@ -1300,6 +1316,8 @@ extern void set_gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdba
 #endif
 #endif
 
+/* Replaced by push_dummy_code. */
+
 #if defined (FIX_CALL_DUMMY)
 /* Legacy for systems yet to multi-arch FIX_CALL_DUMMY */
 #if !defined (FIX_CALL_DUMMY_P)
@@ -1336,6 +1354,14 @@ extern void set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch, gdbarch_fix_cal
 #define FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p) (gdbarch_fix_call_dummy (current_gdbarch, dummy, pc, fun, nargs, args, type, gcc_p))
 #endif
 #endif
+
+/* This is a replacement for FIX_CALL_DUMMY et.al. */
+
+extern int gdbarch_push_dummy_code_p (struct gdbarch *gdbarch);
+
+typedef CORE_ADDR (gdbarch_push_dummy_code_ftype) (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr);
+extern CORE_ADDR gdbarch_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr);
+extern void set_gdbarch_push_dummy_code (struct gdbarch *gdbarch, gdbarch_push_dummy_code_ftype *push_dummy_code);
 
 #if defined (DEPRECATED_INIT_FRAME_PC_FIRST)
 /* Legacy for systems yet to multi-arch DEPRECATED_INIT_FRAME_PC_FIRST */
