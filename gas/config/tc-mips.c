@@ -199,11 +199,6 @@ static int mips_4010 = -1;
 /* Whether the 4100 MADD16 and DMADD16 are permitted. */
 static int mips_4100 = -1;
 
-/* start-sanitize-tx19 */
-/* Whether Toshiba r3900 instructions are permitted. */
-static int mips_1900 = -1;
-/* end-sanitize-tx19 */
-
 /* start-sanitize-r5900 */
 /* Whether Toshiba r5900 instructions are permitted. */
 static int mips_5900 = -1;
@@ -211,6 +206,12 @@ static int mips_5900 = -1;
 
 /* Whether Toshiba r3900 instructions are permitted. */
 static int mips_3900 = -1;
+
+/* start-sanitize-tx19 */
+/* The tx19 (r1900) is a mips16 decoder with a tx39(r3900) behind it.
+   The tx19 related options and configuration bits are handled by 
+   the tx39 flags. */
+/* end-sanitize-tx19 */
 
 /* Whether the processor uses hardware interlocks to protect 
    reads from the HI and LO registers, and thus does not
@@ -801,19 +802,13 @@ md_begin ()
 	  if (mips_cpu == -1)
 	    mips_cpu = 3000;
 	}
-      /* start-sanitize-tx19 */
-      else if (strcmp (cpu, "r1900") == 0
-               || strcmp (cpu, "mipstx19") == 0)
-	{
-	  mips_opts.isa = 1;
-	  if (mips_cpu == -1)
-	    mips_cpu = 1900;
-          if (mips_1900 == -1)
-            mips_1900 = 1;
-	}
-      /* end-sanitize-tx19 */
       else if (strcmp (cpu, "r3900") == 0
-               || strcmp (cpu, "mipsr3900") == 0)
+               || strcmp (cpu, "mipsr3900") == 0
+               /* start-sanitize-tx19 */
+               || strcmp (cpu, "r1900") == 0
+               || strcmp (cpu, "mipstx19") == 0
+               /* end-sanitize-tx19 */
+               )
 	{
 	  mips_opts.isa = 1;
 	  if (mips_cpu == -1)
@@ -888,8 +883,8 @@ md_begin ()
 	}
       /* start-sanitize-r5900 */
       else if (strcmp (cpu, "r5900") == 0
-	       || strcmp (cpu, "mips64vr5900") == 0
-               || strcmp (cpu, "mips64vr5900el") == 0)
+	       || strcmp (cpu, "mips64r5900") == 0
+               || strcmp (cpu, "mips64r5900el") == 0)
 	{
 	  mips_opts.isa = 3;
 	  if (mips_cpu == -1)
@@ -8378,7 +8373,11 @@ struct option md_longopts[] = {
   {"m3900", no_argument, NULL, OPTION_M3900},
 #define OPTION_NO_M3900 (OPTION_MD_BASE + 27)
   {"no-m3900", no_argument, NULL, OPTION_NO_M3900},
-  
+
+  /* start-sanitize-tx19 */
+  {"m1900", no_argument, NULL, OPTION_M3900},
+  {"no-m1900", no_argument, NULL, OPTION_NO_M3900},
+  /* end-sanitize-tx19 */
 
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
@@ -8496,6 +8495,10 @@ md_parse_option (c, arg)
 		    || strcmp (p, "10k") == 0
 		    || strcmp (p, "10K") == 0)
 		  mips_cpu = 10000;
+                /* start-sanitize-tx19 */
+                else if (strcmp (p, "1900") == 0)
+                  mips_cpu = 3900;
+                /* end-sanitize-tx19 */
 		break;
 
 	      case '2':
