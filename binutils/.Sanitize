@@ -57,6 +57,7 @@ defparse.y
 deflex.l
 filemode.c
 gmalloc.c
+ieee.c
 is-ranlib.c
 is-strip.c
 mac-binutils.r

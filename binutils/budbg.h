@@ -1,5 +1,5 @@
 /* budbg.c -- Interfaces to the generic debugging information routines.
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -26,7 +26,7 @@
 
 /* Routine used to read generic debugging information.  */
 
-extern PTR read_debugging_info PARAMS ((bfd *));
+extern PTR read_debugging_info PARAMS ((bfd *, asymbol **, long));
 
 /* Routine used to print generic debugging information.  */
 
@@ -34,10 +34,15 @@ extern boolean print_debugging_info PARAMS ((FILE *, PTR));
 
 /* Routines used to read stabs information.  */
 
-extern PTR start_stab PARAMS ((PTR));
+extern PTR start_stab PARAMS ((PTR, boolean));
 
 extern boolean finish_stab PARAMS ((PTR, PTR));
 
 extern boolean parse_stab PARAMS ((PTR, PTR, int, int, bfd_vma, const char *));
+
+/* Routine used to read IEEE information.  */
+
+extern boolean parse_ieee
+  PARAMS ((PTR, bfd *, const bfd_byte *, bfd_size_type));
 
 #endif

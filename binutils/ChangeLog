@@ -1,3 +1,44 @@
+Thu Jan  4 16:31:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c: New file with code to read IEEE debugging information.
+	* budbg.h (parse_ieee): Declare.
+	* rddbg.c (read_debugging_info): Handle IEEE flavour files.
+	(read_ieee_debugging_info): New static function.
+	* Makefile.in: Rebuild dependencies.
+	(CFILES): Add ieee.c.
+	(OBJDUMP_OBJS): Add ieee.o.
+
+	* bucomm.h (xrealloc): Change type of first parameter from char *
+	to PTR.
+
+Tue Jan  2 17:44:07 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Add targets to automatically rebuild dependencies.
+	Remove targets which just listed dependencies of .o files.
+	(DEP): New variable.
+	(HFILES, GENERATED_HFILES): New variables.
+	(CFILES, GENERATED_CFILES): New variables.
+	(underscore.c): Don't do anything, just depend upon stamp-under.
+	(stamp-under): New target; do what underscore.c used to do.
+	(nlmconv.o): Depend upon sym.h and ecoff.h.
+	(.dep, .dep1, dep.sed, dep, dep-in): New targets.
+	(stage1, stage2, stage3, against, comparison): Remove.
+	(de-stage1, de-stage2, de-stage3): Remove.
+	(clean, distclean): Remove stamp-under and dep.sed.
+	* dep-in.sed: New file.
+
+	Implement generic debugging support.  Implement a stabs reader and
+	a generic printer.
+	* budbg.h, debug.c, debug.h, prdbg.c, rddbg.c, stabs.c: New files.
+	* objdump.c: Include "debug.h" and "budbg.h".
+	(dump_debugging): New global variable.
+	(usage): Mention --debugging.
+	(long_options): Add "debugging".
+	(display_bfd): Handle --debugging.
+	* Makefile.in (OBJDUMP_OBJS): New variable.
+	($(OBJDUMP_PROG)): Use $(OBJDUMP_OBJS).
+	* binutils.texi, objdump.1: Document --debugging.
+
 Sat Dec 30 09:59:51 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* nm.c ( long_options): Add "--defined-only" option.
