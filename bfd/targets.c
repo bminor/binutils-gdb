@@ -22,13 +22,14 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* This -*- C -*- source file will someday be machine-generated */
 
 /*** Defines the target vector through which operations dispatch */
-#include "sysdep.h"
+#include <sysdep.h>
 #include "bfd.h"
 #include "libbfd.h"
 
 extern bfd_target ecoff_little_vec;
 extern bfd_target ecoff_big_vec;
 extern bfd_target sunos_big_vec;
+extern bfd_target demo_64_vec;
 extern bfd_target srec_vec;
 extern bfd_target b_out_vec_little_host;
 extern bfd_target b_out_vec_big_host;
@@ -51,9 +52,10 @@ extern bfd_target m68kcoff_vec;
 #define ECOFF_BIG_VEC		ecoff_big_vec
 #define ICOFF_LITTLE_VEC	icoff_little_vec
 #define ICOFF_BIG_VEC		icoff_big_vec
-#define B_OUT_VEC_LITTLE_HOST	b_out_vec_little_host
-#define B_OUT_VEC_BIG_HOST	b_out_vec_big_host
+#define XB_OUT_VEC_LITTLE_HOST	b_out_vec_little_host
+#define XB_OUT_VEC_BIG_HOST	b_out_vec_big_host
 #define SUNOS_VEC_BIG_HOST	sunos_big_vec
+#define DEMO_64_VEC		demo_64_vec
 #define OASYS_VEC		oasys_vec
 #define IEEE_VEC		ieee_vec
 #define M88K_BCS_VEC		m88k_bcs_vec
@@ -87,6 +89,13 @@ bfd_target *target_vector[] = {
 #ifdef SUNOS_VEC_BIG_HOST
 	&SUNOS_VEC_BIG_HOST,
 #endif /* SUNOS_BIG_VEC */
+
+
+#ifdef HOST_64_BIT
+#ifdef DEMO_64_VEC
+	&DEMO_64_VEC,
+#endif
+#endif
 
 #ifdef M88K_BCS_VEC
 	&M88K_BCS_VEC,

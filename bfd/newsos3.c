@@ -20,10 +20,20 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define TARGET_BYTE_ORDER_BIG_P 1
 
+#define	PAGE_SIZE	4096
+#define	SEGMENT_SIZE	PAGE_SIZE
+#define TEXT_START_ADDR 0
+#define ARCH 32
+#define BYTES_IN_WORD 4
+
 #include <ansidecl.h>
-#include "sysdep.h"
+#include <sysdep.h>
 #include "bfd.h"
 #include "libbfd.h"
+#include "aout64.h"
+#include "stab.gnu.h"
+#include "ar.h"
+#include "liba.out.h"           /* BFD a.out internal data structures */
 
 int vfprintf(file, format, args) /* Temporary crock! */
      FILE *file; char *format; char *args;
@@ -31,20 +41,13 @@ int vfprintf(file, format, args) /* Temporary crock! */
     return _doprnt (format, args, file);
 }
 
-#define	PAGE_SIZE	4096
-#define	SEGMENT_SIZE	0x2000		/* FIXME, is this right?? */
-#define TEXT_START_ADDR PAGE_SIZE
 
-#include "a.out.gnu.h"
-#include "stab.gnu.h"
-#include "ar.h"
-#include "liba.out.h"           /* BFD a.out internal data structures */
 
 bfd_target *newsos3_callback ();
 
 bfd_target *
-newsos3_object_p (abfd)
-     bfd *abfd;
+DEFUN(newsos3_object_p,(abfd),
+     bfd *abfd)
 {
   unsigned char magicbuf[LONG_SIZE]; /* Raw bytes of magic number from file */
   unsigned long magic;		/* Swapped magic number */
@@ -54,37 +57,22 @@ newsos3_object_p (abfd)
   if (bfd_read ((PTR)magicbuf, 1, sizeof (magicbuf), abfd) !=
       sizeof (magicbuf))
     return 0;
-  magic = bfd_h_getlong (abfd, magicbuf);
+  magic = bfd_h_get_32 (abfd, magicbuf);
 
-  if (N_BADMAG (*((struct exec *) &magic))) return 0;
+  if (N_BADMAG (*((struct internal_exec *) &magic))) return 0;
 
-  return some_aout_object_p (abfd, newsos3_callback);
+  return aout_32_some_aout_object_p (abfd, newsos3_callback);
 }
 
 /* Finish up the reading of a NEWS-OS a.out file header */
 bfd_target *
-newsos3_callback (abfd)
-     bfd *abfd;
+DEFUN(newsos3_callback,(abfd),
+      bfd *abfd)
 {
-  struct exec *execp = exec_hdr (abfd);
-
-  /* The virtual memory addresses of the sections */
-  obj_datasec (abfd)->vma = N_DATADDR(*execp);
-  obj_bsssec (abfd)->vma = N_BSSADDR(*execp);
-  obj_textsec (abfd)->vma = N_TXTADDR(*execp);
-
-  /* The file offsets of the sections */
-  obj_textsec (abfd)->filepos = N_TXTOFF(*execp);
-  obj_datasec (abfd)->filepos = N_DATOFF(*execp);
-
-  /* The file offsets of the relocation info */
-  obj_textsec (abfd)->rel_filepos = N_TRELOFF(*execp);
-  obj_datasec (abfd)->rel_filepos = N_DRELOFF(*execp);
-
-  /* The file offsets of the string table and symbol table.  */
-  obj_str_filepos (abfd) = N_STROFF (*execp);
-  obj_sym_filepos (abfd) = N_SYMOFF (*execp);
-
+  struct internal_exec *execp = exec_hdr (abfd);
+  
+  WORK_OUT_FILE_POSITIONS(abfd, execp) ;
+  
   /* Determine the architecture and machine type of the object file.  */
   abfd->obj_arch = bfd_arch_m68k;
   abfd->obj_machine = 0;
@@ -97,85 +85,33 @@ newsos3_callback (abfd)
    file header, symbols, and relocation.  */
 
 boolean
-newsos3_write_object_contents (abfd)
-     bfd *abfd;
+DEFUN(newsos3_write_object_contents,(abfd),
+      bfd *abfd)
 {
-  size_t data_pad = 0;
-  unsigned char exec_bytes[EXEC_BYTES_SIZE];
-  struct exec *execp = exec_hdr (abfd);
+  bfd_size_type data_pad = 0;
+  struct external_exec exec_bytes;
+  struct internal_exec *execp = exec_hdr (abfd);
 
-  execp->a_text = obj_textsec (abfd)->size;
-
-  if (abfd->flags & D_PAGED)
-    execp->a_info = ZMAGIC;
-  else if (abfd->flags & WP_TEXT)
-    execp->a_info = NMAGIC;
-  else
-    execp->a_info = OMAGIC;
-
-  if (abfd->flags & D_PAGED) 
-      {
-	data_pad = ((obj_datasec(abfd)->size + PAGE_SIZE -1)
-		    & (- PAGE_SIZE)) - obj_datasec(abfd)->size;
-
-	if (data_pad > obj_bsssec(abfd)->size)
-	  execp->a_bss = 0;
-	else 
-	  execp->a_bss = obj_bsssec(abfd)->size - data_pad;
-	execp->a_data = obj_datasec(abfd)->size + data_pad;
-
-      }
-  else {
-    execp->a_data = obj_datasec (abfd)->size;
-    execp->a_bss = obj_bsssec (abfd)->size;
-  }
-
-  execp->a_syms = bfd_get_symcount (abfd) * sizeof (struct nlist);
-  execp->a_entry = bfd_get_start_address (abfd);
-
-  execp->a_trsize = ((obj_textsec (abfd)->reloc_count) *
-		     obj_reloc_entry_size (abfd));
-		       
-  execp->a_drsize = ((obj_datasec (abfd)->reloc_count) *
-		     obj_reloc_entry_size (abfd));
-
-  bfd_aout_swap_exec_header_out (abfd, execp, exec_bytes);
-
-  bfd_seek (abfd, 0L, false);
-  bfd_write ((PTR) exec_bytes, 1, EXEC_BYTES_SIZE, abfd);
-
-  /* Now write out reloc info, followed by syms and strings */
-
-  if (bfd_get_symcount (abfd) != 0) 
-    {
-      bfd_seek (abfd, (long)(N_SYMOFF(*execp)), false);
-      aout_write_syms (abfd);
-
-      bfd_seek (abfd, (long)(N_TRELOFF(*execp)), false);
-      if (!aout_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
-
-      bfd_seek (abfd, (long)(N_DRELOFF(*execp)), false);
-      if (!aout_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
-    }
+  WRITE_HEADERS(abfd, execp);
   return true;
 }
 
 /* Transfer vectors for NEWS-OS version 3 */
 
 /* We use BFD generic archive files.  */
-#define	aout_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define	aout_generic_stat_arch_elt	bfd_generic_stat_arch_elt
-#define	aout_slurp_armap		bfd_slurp_bsd_armap
-#define	aout_slurp_extended_name_table	bfd_true
-#define	aout_write_armap		bsd_write_armap
-#define	aout_truncate_arname		bfd_bsd_truncate_arname
+#define	aout_32_openr_next_archived_file	bfd_generic_openr_next_archived_file
+#define	aout_32_generic_stat_arch_elt	bfd_generic_stat_arch_elt
+#define	aout_32_slurp_armap		bfd_slurp_bsd_armap
+#define	aout_32_slurp_extended_name_table	bfd_true
+#define	aout_32_write_armap		bsd_write_armap
+#define	aout_32_truncate_arname		bfd_bsd_truncate_arname
 
 /* We don't support core files yet.  FIXME.  */
-#define	aout_core_file_failing_command	_bfd_dummy_core_file_failing_command
-#define	aout_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
-#define	aout_core_file_matches_executable_p	\
+#define	aout_32_core_file_failing_command	_bfd_dummy_core_file_failing_command
+#define	aout_32_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
+#define	aout_32_core_file_matches_executable_p	\
 				_bfd_dummy_core_file_matches_executable_p
-#define	aout_core_file_p		_bfd_dummy_target
+#define	aout_32_core_file_p		_bfd_dummy_target
 
 /* We define our own versions of these routines.  */
 
@@ -193,15 +129,15 @@ bfd_target newsos3_vec = /* Sony 68k-based machines running newos3 */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
 
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
+  _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+  _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
-  {_bfd_dummy_target, newsos3_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, aout_core_file_p},
-  {bfd_false, aout_mkobject,		/* bfd_set_format */
-     _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, newsos3_write_object_contents,	/* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
+    {_bfd_dummy_target, newsos3_object_p, /* bfd_check_format */
+       bfd_generic_archive_p, aout_32_core_file_p},
+    {bfd_false, aout_32_mkobject,	/* bfd_set_format */
+       _bfd_generic_mkarchive, bfd_false},
+    {bfd_false, newsos3_write_object_contents, /* bfd_write_contents */
+       _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE(aout)
-};
+  JUMP_TABLE(aout_32)
+  };

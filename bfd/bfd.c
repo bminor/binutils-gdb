@@ -2,7 +2,7 @@
 
 /*** bfd -- binary file diddling routines by Gumby Wallace of Cygnus Support.
 	    Every definition in this file should be exported and declared
-	    in bfd.c.  If you don't want it to be user-visible, put it in
+	    in bfd.h.  If you don't want it to be user-visible, put it in
 	    libbfd.c!
 */
 
@@ -25,7 +25,7 @@ along with BFD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
-#include "sysdep.h"
+#include <sysdep.h>
 #include "bfd.h"
 #include "libbfd.h"
 
@@ -81,7 +81,7 @@ bfd_error_vector_type bfd_error_vector =
   bfd_nonrepresentable_section 
   };
 
-#if !defined(ANSI_LIBRARIES)
+#if 1 || !defined(ANSI_LIBRARIES) && !defined(__STDC__)
 char *
 strerror (code)
      int code;
@@ -99,7 +99,9 @@ char *
 bfd_errmsg (error_tag)
      bfd_ec error_tag;
 {
-
+#ifndef errno
+  extern int errno;
+#endif
   if (error_tag == system_call_error)
     return strerror (errno);
 
@@ -206,7 +208,7 @@ bfd_target_list ()
 
   return name_list;
 }
-
+
 /** Init a bfd for read of the proper format.
  */
 
@@ -219,9 +221,9 @@ bfd_target_list ()
    guessing.  -- Gumby, 14 Februar 1991*/
 
 boolean
-bfd_check_format (abfd, format)
-     bfd *abfd;
-     bfd_format format;
+DEFUN(bfd_check_format,(abfd, format),
+      bfd *abfd AND
+      bfd_format format)
 {
   bfd_target **target, *save_targ, *right_targ;
   int match_count;
@@ -285,12 +287,12 @@ bfd_check_format (abfd, format)
   bfd_error = ((match_count == 0) ? file_not_recognized :
 	       file_ambiguously_recognized);
   return false;
-}
+    }
 
 boolean
-bfd_set_format (abfd, format)
-     bfd *abfd;
-     bfd_format format;
+DEFUN(bfd_set_format,(abfd, format),
+      bfd *abfd AND
+      bfd_format format)
 {
 
   if (bfd_read_p (abfd) ||
@@ -332,7 +334,7 @@ DEFUN(bfd_get_section_by_name,(abfd, name),
 sec_ptr
 DEFUN(bfd_make_section,(abfd, name),
       bfd *abfd AND
-      CONST char *name)
+      CONST char *CONST name)
 {
   asection *newsect;  
   asection **  prev = &abfd->sections;
@@ -432,12 +434,12 @@ bfd_set_section_size (abfd, ptr, val)
 }
 
 boolean
-bfd_set_section_contents (abfd, section, location, offset, count)
-     bfd *abfd;
-     sec_ptr section;
-     PTR location;
-     file_ptr offset;
-     int count;
+DEFUN(bfd_set_section_contents,(abfd, section, location, offset, count),
+      bfd *abfd AND
+      sec_ptr section AND
+      PTR location AND
+      file_ptr offset AND
+      bfd_size_type count)
 {
 	if (!(bfd_get_section_flags(abfd, section) &
 	      SEC_HAS_CONTENTS)) {
@@ -455,15 +457,15 @@ bfd_set_section_contents (abfd, section, location, offset, count)
 }
 
 boolean
-bfd_get_section_contents (abfd, section, location, offset, count)
-     bfd *abfd;
-     sec_ptr section;
-     PTR location;
-     file_ptr offset;
-     int count;
+DEFUN(bfd_get_section_contents,(abfd, section, location, offset, count),
+      bfd *abfd AND
+      sec_ptr section AND
+      PTR location AND
+      file_ptr offset AND
+      bfd_size_type count)
 {
   if (section->flags & SEC_CONSTRUCTOR) {
-    memset(location, 0, count);
+    memset(location, 0, (unsigned)count);
     return true;
   }
   else {
@@ -495,7 +497,7 @@ bfd_core_file_failing_signal (abfd)
 {
   if (abfd->format != bfd_core) {
     bfd_error = invalid_operation;
-    return NULL;
+    return 0;
   }
   return BFD_SEND (abfd, _core_file_failing_signal, (abfd));
 }
@@ -566,14 +568,15 @@ asymbol *symbol;
 {
   flagword type = symbol->flags;
   if (symbol->section != (asection *)NULL)
-    {
-      fprintf(file,"%08lx ", symbol->value+symbol->section->vma);
-    }
+      {
+
+	fprintf_vma(file, symbol->value+symbol->section->vma);
+      }
   else 
-    {
-      fprintf(file,"%08lx ", symbol->value);
-    }
-  fprintf(file,"%c%c%c%c%c%c%c",
+      {
+	fprintf_vma(file, symbol->value);
+      }
+  fprintf(file," %c%c%c%c%c%c%c",
 	  (type & BSF_LOCAL)  ? 'l':' ',
 	  (type & BSF_GLOBAL) ? 'g' : ' ',
 	  (type & BSF_IMPORT) ? 'i' : ' ',
@@ -635,16 +638,16 @@ this problem.
 */
 
 bfd_reloc_status_enum_type
-bfd_perform_relocation(abfd,
-		       reloc_entry,
-		       data,
-		       input_section,
-		       output_bfd)
-bfd *abfd;
-arelent *reloc_entry;
-PTR data;
-asection *input_section;
-bfd *output_bfd;
+DEFUN(bfd_perform_relocation,(abfd,
+			      reloc_entry,
+			      data,
+			      input_section,
+			      output_bfd),
+      bfd *abfd AND
+      arelent *reloc_entry AND
+      PTR data AND
+      asection *input_section AND
+      bfd *output_bfd)
 {
   bfd_vma relocation;
   bfd_reloc_status_enum_type flag = bfd_reloc_ok;
@@ -835,24 +838,24 @@ bfd *output_bfd;
 	{
 	case 0:
 	    {
-	      char x = bfd_getchar(abfd, (char *)data + addr);
+	      char x = bfd_get_8(abfd, (char *)data + addr);
 	      DOIT(x);
-	      bfd_putchar(abfd,x, (unsigned char *) data + addr);
+	      bfd_put_8(abfd,x, (unsigned char *) data + addr);
 	    }
 	  break;
 
 	case 1:
 	    { 
-	      short x = bfd_getshort(abfd, (bfd_byte *)data + addr);
+	      short x = bfd_get_16(abfd, (bfd_byte *)data + addr);
 	      DOIT(x);
-	      bfd_putshort(abfd, x,   (unsigned char *)data + addr);
+	      bfd_put_16(abfd, x,   (unsigned char *)data + addr);
 	    }
 	  break;
 	case 2:
 	    {
-	      long  x = bfd_getlong(abfd, (bfd_byte *) data + addr);
+	      long  x = bfd_get_32(abfd, (bfd_byte *) data + addr);
 	      DOIT(x);
-	      bfd_putlong(abfd,x,    (bfd_byte *)data + addr);
+	      bfd_put_32(abfd,x,    (bfd_byte *)data + addr);
 	    }	   
 	  break;
 	case 3:

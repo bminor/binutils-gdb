@@ -23,10 +23,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    able to test it there either since the latest merge!).  So it stays
    out by default.  */
 
+#include <sysdep.h>
 #define MIPS 1
+#if 0
+
 #include <stdio.h>
 #include <string.h>
-
+#endif
 #include "bfd.h"
 #include "libbfd.h"
 
@@ -36,7 +39,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define BADMAG(x) ECOFFBADMAG(x)
 
-#include "coff-code.h"
+#include "coffcode.h"
 bfd_target ecoff_little_vec =
     {"ecoff-littlemips",      /* name */
 	bfd_target_coff_flavour_enum,

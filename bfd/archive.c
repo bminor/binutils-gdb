@@ -29,7 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-#include "sysdep.h"
+#include <sysdep.h>
 #include "bfd.h"
 #include "libbfd.h"
 #include "ar.h"
@@ -169,6 +169,9 @@ get_extended_arelt_filename (arch, name)
      bfd *arch;
      char *name;
 {
+#ifndef errno
+  extern int errno;
+#endif
     unsigned long index = 0;
 
     /* Should extract string so that I can guarantee not to overflow into
@@ -196,7 +199,10 @@ struct areltdata *
 snarf_ar_hdr (abfd)
      bfd *abfd;
 {
-    extern int errno;
+#ifndef errno
+  extern int errno;
+#endif
+
     struct ar_hdr hdr;
     char *hdrp = (char *) &hdr;
     unsigned int parsed_size;
@@ -1061,7 +1067,7 @@ compute_and_write_armap (arch, elength)
 						    orl_max * sizeof (struct orl));
 		    }
 
-		(map[orl_count]).name = &((syms[src_count])->name);
+		(map[orl_count]).name = (char **) &((syms[src_count])->name);
 		(map[orl_count]).pos = elt_no;
 		(map[orl_count]).namidx = stridx;
 

@@ -24,8 +24,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define UNDERSCORE_HACK 1
 #define offsetof(type, identifier) (size_t) &(((type *) 0)->identifier) 
 #include <ansidecl.h>
+#include <sysdep.h>
 
-#include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
 #include "oasys.h"
@@ -134,7 +134,7 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
 	    }
 	    break;
 	  case RELOCATION_TYPE_UND:
-	    dest = data->symbols + bfd_h_getshort(abfd, (bfd_byte *)&record.symbol.refno[0]);
+	    dest = data->symbols + bfd_h_get_16(abfd, (bfd_byte *)&record.symbol.refno[0]);
 	    dest->section = (asection *)NULL;
 	    dest->flags = BSF_UNDEFINED;
 	    break;
@@ -150,7 +150,7 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
 	  dest->name = string_ptr;
 	  dest->the_bfd = abfd;
 	  dest->udata = (PTR)NULL;
-	  dest->value = bfd_h_getlong(abfd, &record.symbol.value[0]);
+	  dest->value = bfd_h_get_32(abfd, &record.symbol.value[0]);
 
 #ifdef UNDERSCORE_HACK
 	  if (record.symbol.name[0] != '_') {
@@ -223,14 +223,14 @@ DEFUN(oasys_archive_p,(abfd),
   bfd_read((PTR)&header_ext, 1, sizeof(header_ext), abfd);
 
 
-  header.version = bfd_h_get_x(abfd, header_ext.version);
-  header.mod_count = bfd_h_get_x(abfd, header_ext.mod_count);
-  header.mod_tbl_offset = bfd_h_get_x(abfd, header_ext.mod_tbl_offset);
-  header.sym_tbl_size = bfd_h_get_x(abfd, header_ext.sym_tbl_size);
-  header.sym_count = bfd_h_get_x(abfd, header_ext.sym_count);
-  header.sym_tbl_offset = bfd_h_get_x(abfd, header_ext.sym_tbl_offset);
-  header.xref_count = bfd_h_get_x(abfd, header_ext.xref_count);
-  header.xref_lst_offset = bfd_h_get_x(abfd, header_ext.xref_lst_offset);
+  header.version = bfd_h_get_32(abfd, header_ext.version);
+  header.mod_count = bfd_h_get_32(abfd, header_ext.mod_count);
+  header.mod_tbl_offset = bfd_h_get_32(abfd, header_ext.mod_tbl_offset);
+  header.sym_tbl_size = bfd_h_get_32(abfd, header_ext.sym_tbl_size);
+  header.sym_count = bfd_h_get_32(abfd, header_ext.sym_count);
+  header.sym_tbl_offset = bfd_h_get_32(abfd, header_ext.sym_tbl_offset);
+  header.xref_count = bfd_h_get_32(abfd, header_ext.xref_count);
+  header.xref_lst_offset = bfd_h_get_32(abfd, header_ext.xref_lst_offset);
 
   /*
     There isn't a magic number in an Oasys archive, so the best we
@@ -267,9 +267,9 @@ DEFUN(oasys_archive_p,(abfd),
       for (i = 0; i < header.mod_count; i++) {
 	bfd_read((PTR)&record_ext, 1, sizeof(record_ext), abfd);
 	
-	record.mod_size = bfd_h_get_x(abfd, record_ext.mod_size);
-	record.file_offset = bfd_h_get_x(abfd, record_ext.file_offset);
-	record.mod_name_length = bfd_h_get_x(abfd, record_ext.mod_name_length);
+	record.mod_size = bfd_h_get_32(abfd, record_ext.mod_size);
+	record.file_offset = bfd_h_get_32(abfd, record_ext.file_offset);
+	record.mod_name_length = bfd_h_get_32(abfd, record_ext.mod_name_length);
 
 	module[i].name = bfd_alloc(abfd,record.mod_name_length+1);
 
@@ -361,8 +361,8 @@ DEFUN(oasys_object_p,(abfd),
 	    BFD_FAIL();
 	  }
 
-	  s->size  = bfd_h_getlong(abfd, & record.section.value[0]) ;
-	  s->vma = bfd_h_getlong(abfd, &record.section.vma[0]);
+	  s->size  = bfd_h_get_32(abfd, & record.section.value[0]) ;
+	  s->vma = bfd_h_get_32(abfd, &record.section.vma[0]);
 	  s->flags |= SEC_LOAD | SEC_HAS_CONTENTS;
 	  had_usefull = true;
 	}
@@ -484,7 +484,7 @@ DEFUN(oasys_slurp_section_data,(abfd),
 	    data->sections[record.data.relb & RELOCATION_SECT_BITS];
 	  bfd_vma dst_offset ;
 	  per =  oasys_per_section(section);
-	  dst_offset = bfd_h_getlong(abfd, record.data.addr) ;
+	  dst_offset = bfd_h_get_32(abfd, record.data.addr) ;
 	  if (per->had_vma == false) {
 	    /* Take the first vma we see as the base */
 
@@ -658,11 +658,11 @@ DEFUN(oasys_get_section_contents,(abfd, section, location, offset, count),
       sec_ptr section AND
       PTR location AND
       file_ptr offset AND
-      int count)
+      bfd_size_type count)
 {
   oasys_per_section_type *p = (oasys_per_section_type *) section->used_by_bfd;
   oasys_slurp_section_data(abfd);
-  (void)  memcpy(location, p->data + offset, count);
+  (void)  memcpy(location, p->data + offset, (int)count);
   return true;
 }
 
@@ -750,17 +750,17 @@ DEFUN(oasys_write_syms, (abfd),
 
     if (g->flags & BSF_FORT_COMM) {
       symbol.relb = RELOCATION_TYPE_COM;
-      bfd_h_putshort(abfd, index, (uint8e_type *)(&symbol.refno[0]));
+      bfd_h_put_16(abfd, index, (uint8e_type *)(&symbol.refno[0]));
       index++;
     }
     else if (g->flags & BSF_ABSOLUTE) {
       symbol.relb = RELOCATION_TYPE_ABS;
-      bfd_h_putshort(abfd, 0, (uint8e_type *)(&symbol.refno[0]));
+      bfd_h_put_16(abfd, 0, (uint8e_type *)(&symbol.refno[0]));
 
     }
     else if (g->flags & BSF_UNDEFINED) {
       symbol.relb = RELOCATION_TYPE_UND ;
-      bfd_h_putshort(abfd, index, (uint8e_type *)(&symbol.refno[0]));
+      bfd_h_put_16(abfd, index, (uint8e_type *)(&symbol.refno[0]));
       /* Overload the value field with the output index number */
       index++;
     }
@@ -770,14 +770,14 @@ DEFUN(oasys_write_syms, (abfd),
     }
     else {
       symbol.relb = RELOCATION_TYPE_REL | g->section->output_section->target_index;
-      bfd_h_putshort(abfd, 0, (uint8e_type *)(&symbol.refno[0]));
+      bfd_h_put_16(abfd, 0, (uint8e_type *)(&symbol.refno[0]));
     }
     while (src[l]) {
       dst[l] = src[l];
       l++;
     }
 
-    bfd_h_putlong(abfd, g->value, symbol.value);
+    bfd_h_put_32(abfd, g->value, symbol.value);
 
       
     if (g->flags & BSF_LOCAL) {
@@ -812,8 +812,8 @@ DEFUN(oasys_write_sections, (abfd),
 						    s->name);
 	}
     out.relb = RELOCATION_TYPE_REL | s->target_index;
-    bfd_h_putlong(abfd, s->size, out.value);
-    bfd_h_putlong(abfd, s->vma, out.vma);
+    bfd_h_put_32(abfd, s->size, out.value);
+    bfd_h_put_32(abfd, s->vma, out.vma);
 
     oasys_write_record(abfd,
 		       oasys_record_is_section_enum,
@@ -858,8 +858,8 @@ DEFUN(oasys_write_end,(abfd),
   oasys_end_record_type end;
   uint8e_type null = 0;
   end.relb = RELOCATION_TYPE_ABS;
-  bfd_h_putlong(abfd, abfd->start_address, end.entry); 
-  bfd_h_putshort(abfd, 0, end.fill);
+  bfd_h_put_32(abfd, abfd->start_address, end.entry); 
+  bfd_h_put_16(abfd, 0, end.fill);
   end.zero =0;
   oasys_write_record(abfd,
 		     oasys_record_is_end_enum,
@@ -890,7 +890,7 @@ DEFUN(oasys_write_data, (abfd),
   for (s = abfd->sections; s != (asection *)NULL; s = s->next) {
     uint8e_type *raw_data = oasys_per_section(s)->data;
     oasys_data_record_type processed_data;
-    unsigned int current_byte_index = 0;
+   bfd_size_type current_byte_index = 0;
     unsigned int relocs_to_go = s->reloc_count;
     arelent **p = s->orelocation;
     if (s->reloc_count != 0) {
@@ -905,7 +905,7 @@ DEFUN(oasys_write_data, (abfd),
     current_byte_index = 0;
     processed_data.relb = s->target_index | RELOCATION_TYPE_REL;
 
-    while ((size_t)current_byte_index < s->size) 
+    while (current_byte_index < s->size) 
 	{
 	  /* Scan forwards by eight bytes or however much is left and see if
 	     there are any relocations going on */
@@ -916,7 +916,7 @@ DEFUN(oasys_write_data, (abfd),
 	  unsigned int long_length = 128;
 
 
-	  bfd_h_putlong(abfd, s->vma + current_byte_index, processed_data.addr);
+	  bfd_h_put_32(abfd, s->vma + current_byte_index, processed_data.addr);
 	  if ((size_t)(long_length + current_byte_index) > (size_t)(s->size)) {
 	    long_length = s->size - current_byte_index;
 	  }
@@ -944,14 +944,14 @@ DEFUN(oasys_write_data, (abfd),
 		    /* Also patch the raw data so that it doesn't have
 		       the -ve stuff any more */
 		    if (how->size != 2) {
-		      bfd_putshort(abfd, 
-				   bfd_getshort(abfd,raw_data) +
+		      bfd_put_16(abfd, 
+				   bfd_get_16(abfd,raw_data) +
 				   current_byte_index, raw_data);
 		    }
 
 		    else {
-		      bfd_putlong(abfd, 
-				  bfd_getlong(abfd,raw_data) +
+		      bfd_put_32(abfd, 
+				  bfd_get_32(abfd,raw_data) +
 				  current_byte_index, raw_data);
 		    }
 		  }
@@ -1050,7 +1050,7 @@ DEFUN(oasys_set_section_contents,(abfd, section, location, offset, count),
       sec_ptr section AND 
       PTR location AND
       file_ptr offset AND
-      int count)
+      bfd_size_type count)
 {
   if (count != 0) {
     if (oasys_per_section(section)->data == (bfd_byte *)NULL ) 
@@ -1196,25 +1196,25 @@ bfd_target oasys_vec =
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
 
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
+  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
-  {_bfd_dummy_target,
-     oasys_object_p,		/* bfd_check_format */
-     oasys_archive_p,
- _bfd_dummy_target,
+    {_bfd_dummy_target,
+       oasys_object_p,		/* bfd_check_format */
+       oasys_archive_p,
+       _bfd_dummy_target,
      },
-  {				/* bfd_set_format */
-    bfd_false,
-    oasys_mkobject, 
-    _bfd_generic_mkarchive,
-    bfd_false
+    {				/* bfd_set_format */
+      bfd_false,
+      oasys_mkobject, 
+      _bfd_generic_mkarchive,
+      bfd_false
+      },
+    {				/* bfd_write_contents */
+      bfd_false,
+      oasys_write_object_contents,
+      _bfd_write_archive_contents,
+      bfd_false,
     },
-  {				/* bfd_write_contents */
-    bfd_false,
-    oasys_write_object_contents,
-    _bfd_write_archive_contents,
-    bfd_false,
-  },
   JUMP_TABLE(oasys)
-};
+  };

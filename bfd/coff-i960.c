@@ -24,7 +24,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BADMAG(x) I960BADMAG(x)
 
 #include <ansidecl.h>
-
+#include <sysdep.h>
 #include "bfd.h"
 #include "libbfd.h"
 #include "obstack.h"
@@ -141,7 +141,7 @@ static reloc_howto_type howto_table[] =
 
 /* The real code is in coff-code.h */
 
-#include "coff-code.h"
+#include "coffcode.h"
 
 bfd_target icoff_little_vec =
 {

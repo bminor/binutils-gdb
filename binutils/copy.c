@@ -1,6 +1,6 @@
 /*** copy.c -- copy object file from input to output, optionally
      massaging it */
-
+#include <sysdep.h>
 #include "bfd.h"
 
 

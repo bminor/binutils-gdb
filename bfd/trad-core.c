@@ -3,7 +3,7 @@
 
 /* This file does not define a particular back-end, but it defines routines
    that can be used by other back-ends.  */
-
+#include <sysdep.h>
 #include "bfd.h"
 #include <stdio.h>
 #include "libbfd.h"
@@ -37,6 +37,7 @@ struct core_data {
   asection *reg_section;
 };
 
+/* ARGSUSED */
 bfd_target *
 trad_unix_core_file_p (abfd)
      bfd *abfd;
@@ -144,13 +145,15 @@ trad_unix_core_file_failing_command (abfd)
     return 0;
 }
 
+/* ARGSUSED */
 int
-trad_unix_core_file_failing_signal (abfd)
-     bfd *abfd;
+trad_unix_core_file_failing_signal (ignore_abfd)
+     bfd *ignore_abfd;
 {
   return -1;		/* FIXME, where is it? */
 }
 
+/* ARGSUSED */
 boolean
 trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
      bfd *core_bfd, *exec_bfd;

@@ -22,8 +22,8 @@ You should have received a copy of the GNU General Public License
 along with BFD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include "sysdep.h"
 
+#include <sysdep.h>
 #include "bfd.h"
 #include "libbfd.h"
 #include "ieee.h"
@@ -1042,7 +1042,7 @@ DEFUN(ieee_print_symbol,(ignore_abfd, afile,  symbol, how),
 }
 
 
-static boolean
+static void
 DEFUN(do_one,(ieee, current_map, location_ptr,s),
       ieee_data_type *ieee AND
       ieee_per_section_type *current_map AND
@@ -1126,14 +1126,14 @@ DEFUN(do_one,(ieee, current_map, location_ptr,s),
 				case 4:
 				  if (pcrel == true) 
 				      {
-					bfd_putlong(ieee->abfd, -current_map->pc, location_ptr +
+					bfd_put_32(ieee->abfd, -current_map->pc, location_ptr +
 						    current_map->pc);
 					r->relent.howto = &rel32_howto;
 					r->relent.addend -= current_map->pc;
 				      }
 				  else 
 				      {
-					bfd_putlong(ieee->abfd, 0, location_ptr +
+					bfd_put_32(ieee->abfd, 0, location_ptr +
 						    current_map->pc);
 					r->relent.howto = &abs32_howto;
 				      }
@@ -1141,12 +1141,12 @@ DEFUN(do_one,(ieee, current_map, location_ptr,s),
 				  break;
 				case 2:
 				  if (pcrel == true) {
-				    bfd_putshort(ieee->abfd, (int)(-current_map->pc),  location_ptr +current_map->pc);
+				    bfd_put_16(ieee->abfd, (int)(-current_map->pc),  location_ptr +current_map->pc);
 				    r->relent.addend -= current_map->pc;
 				    r->relent.howto = &rel16_howto;
 				  }
 				  else {
-				    bfd_putshort(ieee->abfd, 0,  location_ptr +current_map->pc);
+				    bfd_put_16(ieee->abfd, 0,  location_ptr +current_map->pc);
 				    r->relent.howto = &abs16_howto;
 				  }
 				  current_map->pc +=2;
@@ -1315,11 +1315,11 @@ DEFUN(ieee_get_section_contents,(abfd, section, location, offset, count),
       sec_ptr section AND
       PTR location AND
       file_ptr offset AND
-      int count)
+      bfd_size_type count)
 {
   ieee_per_section_type *p = (ieee_per_section_type *) section->used_by_bfd;
   ieee_slurp_section_data(abfd);
-  (void)  memcpy(location, p->data + offset, count);
+  (void)  memcpy(location, p->data + offset, (unsigned)count);
   return true;
 }
 
@@ -1453,7 +1453,7 @@ DEFUN(ieee_write_data_part,(abfd),
 	bfd_byte *stream = ieee_per_section(s)->data;
 	arelent **p = s->orelocation;
 	unsigned int relocs_to_go = s->reloc_count;
-	size_t current_byte_index = 0;
+	bfd_size_type current_byte_index = 0;
 
 	/* Sort the reloc records so we can insert them in the correct
 	   places */
@@ -1486,7 +1486,7 @@ DEFUN(ieee_write_data_part,(abfd),
 	  memset((PTR)stream, 0, s->size);
 	}
 	while (current_byte_index < s->size) {
-	  size_t run;
+	  bfd_size_type run;
 	  unsigned int MAXRUN = 32;
 	  if (relocs_to_go) {
 	    run = (*p)->address - current_byte_index;
@@ -1520,12 +1520,12 @@ DEFUN(ieee_write_data_part,(abfd),
 	      switch (r->howto->size) {
 	      case 2:
 
-		ov = bfd_getlong(abfd,
+		ov = bfd_get_32(abfd,
 				 stream+current_byte_index);
 	    current_byte_index +=4;
 		break;
 	      case 1:
-		ov = bfd_getshort(abfd,
+		ov = bfd_get_16(abfd,
 				  stream+current_byte_index);
 	    current_byte_index +=2;
 		break;
@@ -1588,12 +1588,14 @@ DEFUN(ieee_set_section_contents,(abfd, section, location, offset, count),
       sec_ptr section AND
       PTR location AND
       file_ptr offset AND
-      int count)
+      bfd_size_type count)
 {
   if (ieee_per_section(section)->data == (bfd_byte *)NULL) {
     init_for_output(abfd);
   }
-  (void) memcpy(ieee_per_section(section)->data + offset, location, count);
+  (void) memcpy(ieee_per_section(section)->data + offset,
+		location,
+		(unsigned int)count);
   return true;
 }
 
@@ -1861,9 +1863,8 @@ bfd_target ieee_vec =
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
+_do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
   { _bfd_dummy_target,
      ieee_object_p,		/* bfd_check_format */

@@ -19,7 +19,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* $Id$ */
 
 /*** libbfd.c -- random bfd support routines used internally only. */
-#include "sysdep.h"
+#include <sysdep.h>
 #include "bfd.h"
 #include "libbfd.h"
 
@@ -117,7 +117,7 @@ char *
 zalloc (size)
      bfd_size_type size;
 {
-  char *ptr = (char *) malloc (size);
+  char *ptr = (char *) malloc ((int)size);
 
   if ((ptr != NULL) && (size != 0))
    memset(ptr,0, size);
@@ -136,31 +136,40 @@ zalloc (size)
    contents (0 for non-archive elements).  For archive entries this is the
    first octet in the file, NOT the beginning of the archive header. */
 
-bfd_size_type
-bfd_read (ptr, size, nitems, abfd)
-     PTR ptr;
-     bfd_size_type size;
-     bfd_size_type nitems;
-     bfd *abfd;
+static 
+int DEFUN(real_read,(where, a,b, file),
+	  PTR where AND
+	  int a AND
+	  int b AND
+	  FILE *file)
 {
-  return fread (ptr, 1, size*nitems, bfd_cache_lookup(abfd));
+  return fread(where, a,b,file);
+}
+bfd_size_type
+DEFUN(bfd_read,(ptr, size, nitems, abfd),
+      PTR ptr AND
+      bfd_size_type size AND
+      bfd_size_type nitems AND
+      bfd *abfd)
+{
+  return (bfd_size_type)real_read (ptr, 1, (int)(size*nitems), bfd_cache_lookup(abfd));
 }
 
 bfd_size_type
-bfd_write (ptr, size, nitems, abfd)
-     PTR ptr;
-     bfd_size_type size;
-     bfd_size_type nitems;
-     bfd *abfd;
+DEFUN(bfd_write,(ptr, size, nitems, abfd),
+      PTR ptr AND
+      bfd_size_type size AND
+      bfd_size_type nitems AND
+      bfd *abfd)
 {
-  return fwrite (ptr, 1, size*nitems, bfd_cache_lookup(abfd));
+  return fwrite (ptr, 1, (int)(size*nitems), bfd_cache_lookup(abfd));
 }
 
 int
-bfd_seek (abfd, position, direction)
-bfd * CONST abfd;
-CONST file_ptr position;
-CONST int direction;
+DEFUN(bfd_seek,(abfd, position, direction),
+      bfd * CONST abfd AND
+      CONST file_ptr position AND
+      CONST int direction)
 {
 	/* For the time being, a bfd may not seek to it's end.  The
 	   problem is that we don't easily have a way to recognize
@@ -258,22 +267,22 @@ bfd_add_to_string_table (table, new_string, table_length, free_ptr)
  			     functions in swap.h #ifdef __GNUC__. 
   			     Gprof them later and find out.  */
 
-short
-_do_getbshort (addr)
+unsigned int
+_do_getb16 (addr)
 	register bfd_byte *addr;
 {
 	return (addr[0] << 8) | addr[1];
 }
 
-short
-_do_getlshort (addr)
+unsigned int
+_do_getl16 (addr)
 	register bfd_byte *addr;
 {
 	return (addr[1] << 8) | addr[0];
 }
 
 void
-_do_putbshort (data, addr)
+_do_putb16 (data, addr)
 	int data;		/* Actually short, but ansi C sucks */
 	register bfd_byte *addr;
 {
@@ -282,7 +291,7 @@ _do_putbshort (data, addr)
 }
 
 void
-_do_putlshort (data, addr)
+_do_putl16 (data, addr)
 	int data;		/* Actually short, but ansi C sucks */
 	register bfd_byte *addr;
 {
@@ -290,22 +299,67 @@ _do_putlshort (data, addr)
 	addr[1] = (bfd_byte)(data >> 8);
 }
 
-long
-_do_getblong (addr)
+unsigned int
+_do_getb32 (addr)
 	register bfd_byte *addr;
 {
 	return ((((addr[0] << 8) | addr[1]) << 8) | addr[2]) << 8 | addr[3];
 }
 
-long
-_do_getllong (addr)
+unsigned int
+_do_getl32 (addr)
 	register bfd_byte *addr;
 {
 	return ((((addr[3] << 8) | addr[2]) << 8) | addr[1]) << 8 | addr[0];
 }
 
+bfd_64_type
+_do_getb64(addr)
+	register bfd_byte *addr;
+{
+  bfd_64_type low, high;
+#ifdef __GNUC__
+  high= ((((((((addr[0]) << 8) |
+	      addr[1]) << 8) |
+	    addr[2]) << 8) |
+	  addr[3]) );
+
+  low = ((((((((addr[4]) << 8) |
+	      addr[5]) << 8) |
+	    addr[6]) << 8) |
+	  addr[7]));
+
+  return high << 32 | low;
+#else
+  BFD_FAIL();
+#endif
+
+}
+
+bfd_64_type
+_do_getl64 (addr)
+	register bfd_byte *addr;
+{
+  bfd_64_type low, high;
+#ifdef __GNUC__
+  high= (((((((addr[7] << 8) |
+	      addr[6]) << 8) |
+	    addr[5]) << 8) |
+	  addr[4]));
+
+  low = (((((((addr[3] << 8) |
+	      addr[2]) << 8) |
+	    addr[1]) << 8) |
+	  addr[0]) );
+
+  return high << 32 | low;
+#else
+  BFD_FAIL();
+#endif
+}
+
 void
-_do_putblong (data, addr)
+_do_putb32 (data, addr)
 	unsigned long data;
 	register bfd_byte *addr;
 {
@@ -316,7 +370,7 @@ _do_putblong (data, addr)
 }
 
 void
-_do_putllong (data, addr)
+_do_putl32 (data, addr)
 	unsigned long data;
 	register bfd_byte *addr;
 {
@@ -325,22 +379,62 @@ _do_putllong (data, addr)
 	addr[2] = (bfd_byte)(data >> 16);
 	addr[3] = (bfd_byte)(data >> 24);
 }
+void
+_do_putb64 (data, addr)
+	bfd_64_type data;
+	register bfd_byte *addr;
+{
+#ifdef __GNUC__
+	addr[0] = (bfd_byte)(data >> (7*8));
+	addr[1] = (bfd_byte)(data >> (6*8));
+	addr[2] = (bfd_byte)(data >> (5*8));
+	addr[3] = (bfd_byte)(data >> (4*8));
+	addr[4] = (bfd_byte)(data >> (3*8));
+	addr[5] = (bfd_byte)(data >> (2*8));
+	addr[6] = (bfd_byte)(data >> (1*8));
+	addr[7] = (bfd_byte)(data >> (0*8));
+#else
+BFD_FAIL();
+#endif
+
+}
+
+void
+_do_putl64 (data, addr)
+	bfd_64_type data;
+	register bfd_byte *addr;
+{
+#ifdef __GNUC__
+	addr[7] = (bfd_byte)(data >> (7*8));
+	addr[6] = (bfd_byte)(data >> (6*8));
+	addr[5] = (bfd_byte)(data >> (5*8));
+	addr[4] = (bfd_byte)(data >> (4*8));
+	addr[3] = (bfd_byte)(data >> (3*8));
+	addr[2] = (bfd_byte)(data >> (2*8));
+	addr[1] = (bfd_byte)(data >> (1*8));
+	addr[0] = (bfd_byte)(data >> (0*8));
+#else
+	BFD_FAIL();
+#endif
+
+}
+
 
 /* Default implementation */
 
 boolean
-bfd_generic_get_section_contents (abfd, section, location, offset, count)
-     bfd *abfd;
-     sec_ptr section;
-     PTR location;
-     file_ptr offset;
-     int count;
+DEFUN(bfd_generic_get_section_contents, (abfd, section, location, offset, count),
+      bfd *abfd AND
+      sec_ptr section AND
+      PTR location AND
+      file_ptr offset AND
+      bfd_size_type count)
 {
     if (count == 0)
 	return true;
-    if (offset >= section->size
-	|| bfd_seek(abfd, section->filepos + offset, SEEK_SET) == -1
-	|| bfd_read(location, 1, count, abfd) != count)
+    if ((bfd_size_type)offset >= section->size
+	|| bfd_seek(abfd,(file_ptr)( section->filepos + offset), SEEK_SET) == -1
+	|| bfd_read(location, (bfd_size_type)1, count, abfd) != count)
 	return (false); /* on error */
     return (true);
 }

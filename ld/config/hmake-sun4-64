@@ -1,6 +1,6 @@
-HDEFINES=-DHOST_SYS=SUN4_SYS  -DTARGET_64_BIT
+HDEFINES=-DHOST_SYS=SUN4_SYS  -DHOST_64_BIT="long long"
 YACC=yacc -tvd
-CC=/usr/local/bin/gcc -Wall -ansi
+CC=/usr/latest/bin/gcc -Wall -ansi
 #stuff for self hosting
 HOSTING_CRT0=/lib/crt0.o
 HOSTING_LIBS=/limbo/latest/=sun4/lib/gcc/sparc/1.93/gnulib  -lc

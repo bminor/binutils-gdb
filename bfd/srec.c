@@ -40,54 +40,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 
 
-/* $Id$
- * $Log$
- * Revision 1.8  1991/05/11 00:38:46  gnu
- * Cleanups of interface, including close_and_cleanup and write_contents
- * transfer vector changes.  See ChangeLog.
- *
- * Revision 1.7  1991/05/08  19:21:47  steve
- * Various portability lints.
- * Fixed reloc bug in ieee and oasys.
- *
- * Revision 1.6  1991/04/25  04:06:21  gnu
- * Fix minor pointer type problems that "cc" complains about.
- *
- * Revision 1.5  1991/04/23  22:44:14  steve
- * *** empty log message ***
- *
- * Revision 1.4  1991/04/23  16:01:02  steve
- * *** empty log message ***
- *
- * Revision 1.3  1991/04/08  23:22:31  steve
- * *** empty log message ***
- *
- * Revision 1.2  1991/04/03  22:10:51  steve
- * Fixed typo
- *
- * Revision 1.1.1.1  1991/03/21  21:11:22  gumby
- * Back from Intel with Steve
- *
- * Revision 1.1  1991/03/21  21:11:20  gumby
- * Initial revision
- *
- * Revision 1.1  1991/03/13  00:22:29  chrisb
- * Initial revision
- *
- * Revision 1.3  1991/03/10  19:11:40  rich
- *  Modified Files:
- *  	bfd.c coff-code.h libbfd.c libbfd.h srec.c sunos.c
- *
- * Working bugs out of coff support.
- *
- * Revision 1.2  1991/03/07  02:26:18  sac
- * Tidied up xfer table
- *
- * Revision 1.1  1991/03/05  16:28:12  sac
- * Initial revision
- *
- */
-#include "sysdep.h"
+
+#include <sysdep.h>
 #include "bfd.h"
 #include "libbfd.h"
 
@@ -403,28 +357,30 @@ srec_write_object_contents (abfd)
      bfd *abfd;
 {
   bfd_write("S9030000FC\n", 1,11,abfd);
+  return true;
 }
 
 static int 
-DEFUN(srec_sizeof_headers,(abfd),
-      bfd *abfd)
+DEFUN(srec_sizeof_headers,(abfd, exec),
+      bfd *abfd AND
+      boolean exec)
 {
 return 0;
 }
 
 /*SUPPRESS 460 */
 
-#define srec_new_section_hook bfd_false
+#define srec_new_section_hook (PROTO(boolean, (*), (bfd *, asection *)))bfd_false
 #define srec_get_symtab_upper_bound bfd_false
-#define srec_get_symtab bfd_false
-#define srec_get_reloc_upper_bound bfd_false
-#define srec_canonicalize_reloc bfd_false
-#define srec_make_empty_symbol bfd_false
-#define srec_print_symbol bfd_false
+#define srec_get_symtab (PROTO(unsigned int, (*), (bfd *, asymbol **)))bfd_0
+#define srec_get_reloc_upper_bound (PROTO(unsigned int, (*),(bfd*, asection *)))bfd_false
+#define srec_canonicalize_reloc (PROTO(unsigned int, (*),(bfd*,asection *, arelent **, asymbol **))) bfd_0
+#define srec_make_empty_symbol (PROTO(asymbol *,(*),(bfd*))) bfd_nullvoidptr
+#define srec_print_symbol (PROTO(void,(*),(bfd *, PTR, asymbol *, bfd_print_symbol_enum_type))) bfd_void
 
-#define srec_openr_next_archived_file bfd_false
-#define srec_find_nearest_line bfd_false
-#define srec_generic_stat_arch_elt bfd_false
+#define srec_openr_next_archived_file (PROTO(bfd *, (*), (bfd*,bfd*))) bfd_nullvoidptr
+#define srec_find_nearest_line (PROTO(boolean, (*),(bfd*,asection*,asymbol**,bfd_vma, CONST char**, CONST char**, unsigned int *))) bfd_false
+#define srec_generic_stat_arch_elt  (PROTO(int, (*), (bfd *,struct stat *))) bfd_0
 
 
 #define srec_core_file_failing_command (char *(*)())(bfd_nullvoidptr)
@@ -452,25 +408,25 @@ bfd_target srec_vec =
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
+  _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+  _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
-  {_bfd_dummy_target,
-     srec_object_p,		/* bfd_check_format */
-     (struct bfd_target *(*)()) bfd_nullvoidptr,
-     (struct bfd_target *(*)())     bfd_nullvoidptr,
-   },
-  {
-    bfd_false,
-    bfd_true,			/* mkobject */
-    _bfd_generic_mkarchive,
-    bfd_false,
-  },
-  {				/* bfd_write_contents */
-    bfd_false,
-    srec_write_object_contents,
-    _bfd_write_archive_contents,
-    bfd_false,
-  },
+    {_bfd_dummy_target,
+       srec_object_p,		/* bfd_check_format */
+       (struct bfd_target *(*)()) bfd_nullvoidptr,
+       (struct bfd_target *(*)())     bfd_nullvoidptr,
+     },
+    {
+      bfd_false,
+      bfd_true,			/* mkobject */
+      _bfd_generic_mkarchive,
+      bfd_false,
+    },
+    {				/* bfd_write_contents */
+      bfd_false,
+      srec_write_object_contents,
+      _bfd_write_archive_contents,
+      bfd_false,
+    },
   JUMP_TABLE(srec)
-};
+  };

@@ -29,7 +29,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define __BFD_H_SEEN__
 
 #include "ansidecl.h"
-#include "sysdep.h"
 #include "obstack.h"
 
 /* Make it easier to declare prototypes (puts conditional here) */
@@ -57,17 +56,18 @@ typedef  long int file_ptr;
 
 /* Support for different sizes of target format ints */
 
-#ifdef TARGET_64_BIT
-/* 64 bit machines use these items */
-typedef uint64_type rawdata_offset;
-typedef uint64_type bfd_vma;
-typedef uint64_type bfd_word;
-typedef uint64_type bfd_offset;
-typedef uint64_type bfd_size_type;
-typedef uint64_type  symvalue;
+#ifdef HOST_64_BIT
+typedef HOST_64_BIT rawdata_offset;
+typedef HOST_64_BIT bfd_vma;
+typedef HOST_64_BIT bfd_word;
+typedef HOST_64_BIT bfd_offset;
+typedef HOST_64_BIT bfd_size_type;
+typedef HOST_64_BIT  symvalue;
+typedef HOST_64_BIT bfd_64_type;
 #define printf_vma(x) printf("%08x%08x",uint64_typeHIGH(x),    uint64_typeLOW(x))
 #define fprintf_vma(s,x) fprintf(s,"%08x%08x",uint64_typeHIGH(x), uint64_typeLOW(x))
 #else
+typedef struct { int a,b;} bfd_64_type;
 typedef unsigned long int rawdata_offset;
 typedef unsigned long bfd_vma;
 typedef unsigned long bfd_offset;
@@ -356,7 +356,7 @@ typedef struct sec
   file_ptr filepos;		/* File position of section data */
   file_ptr rel_filepos;		/* File position of relocation info */
   file_ptr line_filepos;
-  struct user_section *userdata;
+  PTR *userdata;
   struct lang_output_section *otheruserdata;
   int index;			/* Which section is it 0..nth */
   alent *lineno; 
@@ -484,19 +484,19 @@ typedef struct bfd_target
   /* Byte swapping for data */
   /* Note that these don't take bfd as first arg.  Certain other handlers
      could do the same. */
-  SDEF (uint64_type,bfd_getx64, (bfd_byte *));
-  SDEF (void, bfd_putx64, (uint64_type, bfd_byte *));
-  SDEF (uint32_type, bfd_getx32, (bfd_byte *));
+  SDEF (bfd_64_type,bfd_getx64, (bfd_byte *));
+  SDEF (void, bfd_putx64, (bfd_64_type, bfd_byte *));
+  SDEF (unsigned int, bfd_getx32, (bfd_byte *));
   SDEF (void, bfd_putx32, (unsigned long, bfd_byte *));
-  SDEF (uint16_type, bfd_getx16, (bfd_byte *));
+  SDEF (unsigned int, bfd_getx16, (bfd_byte *));
   SDEF (void, bfd_putx16, (int, bfd_byte *));
 
   /* Byte swapping for headers */
-  SDEF (uint64_type, bfd_h_getx64, (bfd_byte *));
-  SDEF (void, bfd_h_putx64, (uint64_type, bfd_byte *));
-  SDEF (uint32_type, bfd_h_getx32, (bfd_byte *));
+  SDEF (bfd_64_type, bfd_h_getx64, (bfd_byte *));
+  SDEF (void, bfd_h_putx64, (bfd_64_type, bfd_byte *));
+  SDEF (unsigned int, bfd_h_getx32, (bfd_byte *));
   SDEF (void, bfd_h_putx32, (unsigned long, bfd_byte *));
-  SDEF (uint16_type, bfd_h_getx16, (bfd_byte *));
+  SDEF (unsigned int, bfd_h_getx16, (bfd_byte *));
   SDEF (void, bfd_h_putx16, (int, bfd_byte *));
 
   /* Format-dependent */

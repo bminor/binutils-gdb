@@ -1,3 +1,51 @@
+Mon May 20 17:12:17 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* everything: Removed sysdep.h from bfd.h and put back into files
+	from which it was split out. Now 64 bit version is built with a
+	-DHOST_64_BIT="long long" on the compile line.
+
+
+Fri May 17 19:35:26 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	Changed all the [get|put][name] routines to use  [get|put]_[size
+	in bytes].  
+
+	Put in support for 64 bit work. Now two versions of bfd may be
+	generated, according to the state of TARGET_64_BIT, one which is
+	32 bit only, and one which is 64/32 bits. 
+	Created new back end 'demo64' to test 64 bit functionality.
+
+	Renamed some files to work on DOS.
+
+	* archive.c: lint * bfd.c: prototypes and lint. * ecoff.c: added
+	64bit transfer 	* icoff.c: added 64bit transfer * ieee.c: name
+	chage, 64 bit transfer. * liba.out.h: Split out common code from
+	sunos and newsos into liba.out. Name changes and prototype mods. *
+	libbfd.c: lint and prototypes, extra 64bit swaps. * libbfd.h:
+	prototypes for new functions. * libcoff.h: lint * libieee.h: make
+	work on DOS * liboasys.h: make work on DOS * m88k-bcs.c: Name
+	change and 64bit stuff.* newsos3.c: common code removed, new jump
+	table. * oasys.c: Name change * opncls.c: Portability fixes *
+	srec.c: Name changes * sunos.c: Removed comon code. * targets.c:
+	Added demo * aout32, aout64.c include  aoutx.h * bout.c: used to
+	be called b.out.c * coffcode.h: used to be called coff-code.h, now
+	64bit ized. * demo64.c: 64 bit a.out back end
+
+
+	
+
+
+Thu May 16 16:02:07 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+	from bothner
+ 	* libieee.h: Make ieee_data and ieee_ar_data macros usable
+	on LHS of assignment, even when using old compilers.
+	* liboasys.h: Ditto for oasys_data and oasys_ar_data.
+	* m68kcoff.c: Add enum-to-int casts to accomodate old compilers.
+	* newsos3.c: Fix definitions of SEGMENT_SIZE and TEXT_START_ADDR.
+	* opncls.c: Define S_IXUSR, S_IXGRP, S_IXOTH if undefined.
+	* targets.c: Add declaration of newsos3_vec.
+
+
 Mon May 13 10:03:29 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* aout.c: fixxed some of the problems with filepos calculation.

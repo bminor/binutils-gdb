@@ -20,7 +20,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-#include "sysdep.h"
+#include <sysdep.h>
 #include "bfd.h"
 #include "libbfd.h"
 
@@ -64,7 +64,7 @@ bfd *new_bfd()
   if (!nbfd)
     return 0;
 
-  obstack_begin(&nbfd->memory, 128);
+  obstack_begin((PTR)&nbfd->memory, 128);
   
   nbfd->direction = no_direction;
   nbfd->iostream = NULL;
@@ -271,6 +271,16 @@ bfd_close (abfd)
       && abfd->flags & EXEC_P) {
     struct stat buf;
     stat(abfd->filename, &buf);
+#ifndef S_IXUSR
+#define S_IXUSR 0100	/* Execute by owner.  */
+#endif
+#ifndef S_IXGRP
+#define S_IXGRP 0010	/* Execute by group.  */
+#endif
+#ifndef S_IXOTH
+#define S_IXOTH 0001	/* Execute by others.  */
+#endif
+
     chmod(abfd->filename,buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH);
   }
   (void) obstack_free (&abfd->memory, (PTR)0);
@@ -301,12 +311,18 @@ DEFUN(bfd_create,(filename, template),
 
 /* Memory allocation */
 
+DEFUN(PTR bfd_alloc_by_size_t,(abfd, size),
+      bfd *abfd AND
+      size_t size)
+{
+  PTR res = obstack_alloc(&(abfd->memory), size);
+  return res;
+}
 DEFUN(PTR bfd_alloc, (abfd, size),
       bfd *abfd AND
       bfd_size_type size)
 {
-  PTR res = obstack_alloc(&(abfd->memory), (int)size);
-  return res;
+  return bfd_alloc_by_size_t(abfd, (size_t)size);
 }
 
 DEFUN(PTR bfd_zalloc,(abfd, size),

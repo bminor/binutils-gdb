@@ -90,15 +90,18 @@ PROTO (bfd *, new_bfd, ());
 PROTO (boolean, bfd_add_to_string_table, (char **table, char *new_string,
 					  unsigned int *table_length,
 					  char **free_ptr));
-     
-PROTO (long, _do_getblong, (unsigned char *addr));
-PROTO (long, _do_getllong, (unsigned char *addr));
-PROTO (short, _do_getbshort, (unsigned char *addr));
-PROTO (short, _do_getlshort, (unsigned char *addr));
-PROTO (void, _do_putblong, (unsigned long data, unsigned char *addr));
-PROTO (void, _do_putllong, (unsigned long data, unsigned char *addr));
-PROTO (void, _do_putbshort, (int data, unsigned char *addr));
-PROTO (void, _do_putlshort, (int data, unsigned char *addr));
+PROTO (bfd_64_type, _do_getb64, (unsigned char *addr));     
+PROTO (bfd_64_type, _do_getl64, (unsigned char *addr));     
+PROTO (unsigned int, _do_getb32, (unsigned char *addr));
+PROTO (unsigned int, _do_getl32, (unsigned char *addr));
+PROTO (unsigned int, _do_getb16, (unsigned char *addr));
+PROTO (unsigned int, _do_getl16, (unsigned char *addr));
+PROTO (void, _do_putb64, (bfd_64_type data, unsigned char *addr));
+PROTO (void, _do_putl64, (bfd_64_type data, unsigned char *addr));
+PROTO (void, _do_putb32, (unsigned long data, unsigned char *addr));
+PROTO (void, _do_putl32, (unsigned long data, unsigned char *addr));
+PROTO (void, _do_putb16, (int data, unsigned char *addr));
+PROTO (void, _do_putl16, (int data, unsigned char *addr));
 
 PROTO (boolean, bfd_false, (bfd *ignore));
 PROTO (boolean, bfd_true, (bfd *ignore));
@@ -134,7 +137,7 @@ PROTO (bfd *, bfd_generic_openr_next_archived_file, (bfd *archive,
 PROTO(int, bfd_generic_stat_arch_elt, (bfd *, struct stat *));
 
 PROTO(boolean, bfd_generic_get_section_contents,
-      (bfd *abfd, sec_ptr section, PTR location, file_ptr offset, int count));
+      (bfd *abfd, sec_ptr section, PTR location, file_ptr offset, bfd_size_type count));
 
 /* Macros to tell if bfds are read or write enabled.
 
