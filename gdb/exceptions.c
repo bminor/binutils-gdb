@@ -65,17 +65,16 @@ enum catcher_action {
 struct catcher
 {
   enum catcher_state state;
-  /* Scratch variables used when transitioning a state.  */
+  /* Jump buffer pointing back at the exception handler.  */
   SIGJMP_BUF buf;
-  int reason;
-  int val;
+  /* Status buffer belonging to that exception handler.  */
+  volatile struct exception *exception;
   /* Saved/current state.  */
   int mask;
   char *saved_error_pre_print;
   char *saved_quit_pre_print;
   struct ui_out *saved_uiout;
   struct cleanup *saved_cleanup_chain;
-  char **gdberrmsg;
   /* Back link.  */
   struct catcher *prev;
 };
@@ -86,12 +85,17 @@ static struct catcher *current_catcher;
 static SIGJMP_BUF *
 catcher_init (struct ui_out *func_uiout,
 	      char *errstring,
-	      char **gdberrmsg,
+	      volatile struct exception *exception,
 	      return_mask mask)
 {
   struct catcher *new_catcher = XZALLOC (struct catcher);
 
-  new_catcher->gdberrmsg = gdberrmsg;
+  /* Start with no exception, save it's address.  */
+  exception->reason = 0;
+  exception->error = NO_ERROR;
+  exception->message = NULL;
+  new_catcher->exception = exception;
+
   new_catcher->mask = mask;
 
   /* Override error/quit messages during FUNC. */
@@ -194,14 +198,8 @@ catcher_state_machine (enum catcher_action action)
 	{
 	case CATCH_ITER:
 	  {
-	    int reason = current_catcher->reason;
-	    /* If caller wants a copy of the low-level error message,
-	       make one.  This is used in the case of a silent error
-	       whereby the caller may optionally want to issue the
-	       message.  */
-	    if (current_catcher->gdberrmsg != NULL)
-	      *(current_catcher->gdberrmsg) = error_last_message ();
-	    if (current_catcher->mask & RETURN_MASK (reason))
+	    struct exception exception = *current_catcher->exception;
+	    if (current_catcher->mask & RETURN_MASK (exception.reason))
 	      {
 		/* Exit normally if this catcher can handle this
 		   exception.  The caller analyses the func return
@@ -213,7 +211,7 @@ catcher_state_machine (enum catcher_action action)
 	       relay the event to the next containing
 	       catch_errors(). */
 	    catcher_pop ();
-	    throw_exception (reason);
+	    throw_exception (exception);
 	  }
 	default:
 	  internal_error (__FILE__, __LINE__, "bad state");
@@ -223,10 +221,10 @@ catcher_state_machine (enum catcher_action action)
     }
 }
 
-/* Return for reason REASON to the nearest containing catch_errors().  */
+/* Return EXCEPTION to the nearest containing catch_errors().  */
 
 NORETURN void
-throw_exception (enum return_reason reason)
+throw_exception (struct exception exception)
 {
   quit_flag = 0;
   immediate_quit = 0;
@@ -243,22 +241,47 @@ throw_exception (enum return_reason reason)
     do_exec_error_cleanups (ALL_CLEANUPS);
 
   if (annotation_level > 1)
-    switch (reason)
+    switch (exception.reason)
       {
       case RETURN_QUIT:
 	annotate_quit ();
 	break;
       case RETURN_ERROR:
+	/* Assume that these are all errors.  */
 	annotate_error ();
 	break;
+      default:
+	internal_error (__FILE__, __LINE__, "Bad switch.");
       }
 
   /* Jump to the containing catch_errors() call, communicating REASON
      to that call via setjmp's return value.  Note that REASON can't
      be zero, by definition in defs.h. */
   catcher_state_machine (CATCH_THROWING);
-  current_catcher->reason = reason;
-  SIGLONGJMP (current_catcher->buf, current_catcher->reason);
+  *current_catcher->exception = exception;
+  SIGLONGJMP (current_catcher->buf, exception.reason);
+}
+
+NORETURN void
+throw_reason (enum return_reason reason)
+{
+  struct exception exception;
+  memset (&exception, 0, sizeof exception);
+
+  exception.reason = reason;
+  switch (reason)
+    {
+    case RETURN_QUIT:
+      break;
+    case RETURN_ERROR:
+      exception.error = GENERIC_ERROR;
+      exception.message = error_last_message ();
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
+    }
+  
+  throw_exception (exception);
 }
 
 /* Call FUNC() with args FUNC_UIOUT and FUNC_ARGS, catching any
@@ -304,6 +327,21 @@ catch_exceptions (struct ui_out *uiout,
 				    NULL, mask);
 }
 
+struct exception
+catch_exception (struct ui_out *uiout,
+		 catch_exception_ftype *func,
+		 void *func_args,
+		 return_mask mask)
+{
+  volatile struct exception exception;
+  SIGJMP_BUF *catch;
+  catch = catcher_init (uiout, NULL, &exception, mask);
+  for (SIGSETJMP ((*catch));
+       catcher_state_machine (CATCH_ITER);)
+    (*func) (uiout, func_args);
+  return exception;
+}
+
 int
 catch_exceptions_with_msg (struct ui_out *uiout,
 		  	   catch_exceptions_ftype *func,
@@ -312,17 +350,22 @@ catch_exceptions_with_msg (struct ui_out *uiout,
 			   char **gdberrmsg,
 		  	   return_mask mask)
 {
-  int val = 0;
-  enum return_reason caught;
-  SIGJMP_BUF *catch;
-  catch = catcher_init (uiout, errstring, gdberrmsg, mask);
-  for (caught = SIGSETJMP ((*catch));
-       catcher_state_machine (CATCH_ITER);)
+  volatile struct exception exception;
+  volatile int val = 0;
+  SIGJMP_BUF *catch = catcher_init (uiout, errstring, &exception, mask);
+  for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
     val = (*func) (uiout, func_args);
   gdb_assert (val >= 0);
-  gdb_assert (caught <= 0);
-  if (caught < 0)
-    return caught;
+  gdb_assert (exception.reason <= 0);
+  if (exception.reason < 0)
+    {
+      /* If caller wants a copy of the low-level error message, make
+	 one.  This is used in the case of a silent error whereby the
+	 caller may optionally want to issue the message.  */
+      if (gdberrmsg != NULL)
+	*gdberrmsg = exception.message;
+      return exception.reason;
+    }
   return val;
 }
 
@@ -330,20 +373,15 @@ int
 catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 	      return_mask mask)
 {
-  int val = 0;
-  enum return_reason caught;
-  SIGJMP_BUF *catch;
-  catch = catcher_init (uiout, errstring, NULL, mask);
+  volatile int val = 0;
+  volatile struct exception exception;
+  SIGJMP_BUF *catch = catcher_init (uiout, errstring, &exception, mask);
   /* This illustrates how it is possible to nest the mechanism and
      hence catch "break".  Of course this doesn't address the need to
      also catch "return".  */
-  for (caught = SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
-    for (; catcher_state_machine (CATCH_ITER_1);)
-      {
-	val = func (func_args);
-	break;
-      }
-  if (caught != 0)
+  for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
+    val = func (func_args);
+  if (exception.reason != 0)
     return 0;
   return val;
 }

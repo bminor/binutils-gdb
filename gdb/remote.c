@@ -2257,7 +2257,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
       pop_target ();
       if (async_p)
 	wait_forever_enabled_p = 1;
-      throw_exception (ex);
+      throw_reason (ex);
     }
 
   if (async_p)
@@ -2723,7 +2723,7 @@ interrupt_query (void)
 Give up (and stop debugging it)? "))
     {
       target_mourn_inferior ();
-      throw_exception (RETURN_QUIT);
+      throw_reason (RETURN_QUIT);
     }
 
   target_terminal_inferior ();

@@ -674,7 +674,7 @@ error_silent (const char *string, ...)
   ui_file_put (tmp_stream, do_write, gdb_lasterr);
   va_end (args);
 
-  throw_exception (RETURN_ERROR);
+  throw_reason (RETURN_ERROR);
 }
 
 /* Output an error message including any pre-print text to gdb_stderr.  */
@@ -711,7 +711,7 @@ error_stream_1 (struct ui_file *stream, enum return_reason reason)
   ui_file_put (stream, do_write, gdb_stderr);
   fprintf_filtered (gdb_stderr, "\n");
 
-  throw_exception (reason);
+  throw_reason (reason);
 }
 
 NORETURN void
@@ -866,7 +866,7 @@ NORETURN void
 internal_verror (const char *file, int line, const char *fmt, va_list ap)
 {
   internal_vproblem (&internal_error_problem, file, line, fmt, ap);
-  throw_exception (RETURN_ERROR);
+  throw_reason (RETURN_ERROR);
 }
 
 NORETURN void
@@ -1007,7 +1007,7 @@ quit (void)
     fprintf_unfiltered (gdb_stderr,
 			"Quit (expect signal SIGINT when the program is resumed)\n");
 #endif
-  throw_exception (RETURN_QUIT);
+  throw_reason (RETURN_QUIT);
 }
 
 /* Control C comes here */

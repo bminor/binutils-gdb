@@ -24,7 +24,7 @@
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H
 
-/* Reasons for calling throw_exception().  NOTE: all reason values
+/* Reasons for calling throw_exceptions().  NOTE: all reason values
    must be less than zero.  enum value 0 is reserved for internal use
    as the return value from an initial setjmp().  The function
    catch_exceptions() reserves values >= 0 as legal results from its
@@ -44,17 +44,38 @@ enum return_reason
 #define RETURN_MASK_ALL		(RETURN_MASK_QUIT | RETURN_MASK_ERROR)
 typedef int return_mask;
 
-/* Throw an exception of type RETURN_REASON.  Will execute a LONG JUMP
-   to the inner most containing exception handler established using
-   catch_exceptions() (or the legacy catch_errors()).
+/* Describe all exceptions.  */
+
+enum errors {
+  NO_ERROR,
+  /* Any generic error, the corresponding text is in
+     exception.message.  */
+  GENERIC_ERROR,
+  /* Add more errors here.  */
+  NR_ERRORS
+};
+
+struct exception
+{
+  enum return_reason reason;
+  enum errors error;
+  char *message;
+};
+
+/* Throw an exception (as described by "struct exception").  Will
+   execute a LONG JUMP to the inner most containing exception handler
+   established using catch_exceptions() (or similar).
 
    Code normally throws an exception using error() et.al.  For various
    reaons, GDB also contains code that throws an exception directly.
    For instance, the remote*.c targets contain CNTRL-C signal handlers
    that propogate the QUIT event up the exception chain.  ``This could
-   be a good thing or a dangerous thing.'' -- the Existential Wombat.  */
+   be a good thing or a dangerous thing.'' -- the Existential
+   Wombat.  */
 
-extern NORETURN void throw_exception (enum return_reason) ATTR_NORETURN;
+extern NORETURN void throw_exception (struct exception exception) ATTR_NORETURN;
+extern NORETURN void throw_reason (enum return_reason reason) ATTR_NORETURN;
+
 
 /* Call FUNC(UIOUT, FUNC_ARGS) but wrapped within an exception
    handler.  If an exception (enum return_reason) is thrown using
@@ -87,11 +108,16 @@ typedef int (catch_exceptions_ftype) (struct ui_out *ui_out, void *args);
 extern int catch_exceptions (struct ui_out *uiout,
 			     catch_exceptions_ftype *func, void *func_args,
 			     char *errstring, return_mask mask);
+typedef void (catch_exception_ftype) (struct ui_out *ui_out, void *args);
 extern int catch_exceptions_with_msg (struct ui_out *uiout,
 			     	      catch_exceptions_ftype *func, 
 			     	      void *func_args,
 			     	      char *errstring, char **gdberrmsg,
 				      return_mask mask);
+extern struct exception catch_exception (struct ui_out *uiout,
+					 catch_exception_ftype *func,
+					 void *func_args,
+					 return_mask mask);
 
 /* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
    otherwize the result from CATCH_ERRORS_FTYPE is returned. It is

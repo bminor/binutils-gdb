@@ -480,7 +480,7 @@ remote_fileio_ctrl_c_signal_handler (int signo)
   remote_fileio_sig_set (SIG_IGN);
   remote_fio_ctrl_c_flag = 1;
   if (!remote_fio_no_longjmp)
-    throw_exception (RETURN_QUIT);
+    throw_reason (RETURN_QUIT);
   remote_fileio_sig_set (remote_fileio_ctrl_c_signal_handler);
 }
 

@@ -1,3 +1,23 @@
+2005-01-12  Andrew Cagney  <cagney@gnu.org>
+
+	* exceptions.h (throw_reason): Rename throw_exception.
+	(enum errors, struct exception): Define.
+	(catch_exception_ftype): Define.
+	(catch_exception, throw_exception): Declare.
+	* exceptions.c (throw_exception): Rewrite.
+	(throw_reason): New function.
+	(struct catcher, catcher_state_machine): Replace "reason" with
+	"exception", delete "gdberrmsg".
+	(catch_exception): New function.
+	(catcher_init): Replace "gdberrmsg" parameter with "exception".
+	(catch_errors, catch_exceptions_with_msg): Re-implement passing
+	exception to catcher_init.
+	* utils.c (error_silent, error_stream_1): Use throw_reason.
+	(internal_verror, quit): Ditto.
+	* breakpoint.c (insert_catchpoint, break_command_1): Ditto.
+	* remote-fileio.c (remote_fileio_ctrl_c_signal_handler): Ditto.
+	* remote.c (remote_open_1, interrupt_query): Ditto.
+
 2005-01-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386fbsd-tdep.c: Update copyright year.  Include "gdbcore.h",

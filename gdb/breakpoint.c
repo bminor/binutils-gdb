@@ -734,7 +734,7 @@ insert_catchpoint (struct ui_out *uo, void *args)
     }
 
   if (val < 0)
-    throw_exception (RETURN_ERROR);
+    throw_reason (RETURN_ERROR);
 
   return 0;
 }
@@ -5153,7 +5153,7 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 	  /* If pending breakpoint support is turned off, throw error.  */
 
 	  if (pending_break_support == AUTO_BOOLEAN_FALSE)
-	    throw_exception (RETURN_ERROR);
+	    throw_reason (RETURN_ERROR);
 
           /* If pending breakpoint support is auto query and the user selects 
 	     no, then simply return the error code.  */
