@@ -969,7 +969,7 @@ i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
   CORE_ADDR fp;
 
   frame_unwind_register (next_frame, I386_EBP_REGNUM, buf);
-  fp = extract_typed_address (buf, builtin_type_void_data_ptr);
+  fp = extract_unsigned_integer (buf, 4);
 
   return frame_id_build (fp + 8, frame_pc_unwind (next_frame));
 }

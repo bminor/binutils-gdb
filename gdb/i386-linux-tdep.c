@@ -81,7 +81,7 @@ i386_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
    The instruction sequence for normal signals is
        pop    %eax
-       mov    $0x77,%eax
+       mov    $0x77, %eax
        int    $0x80
    or 0x58 0xb8 0x77 0x00 0x00 0x00 0xcd 0x80.
 
@@ -103,17 +103,17 @@ i386_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    to the ones used by the kernel.  Therefore, these trampolines are
    supported too.  */
 
-#define LINUX_SIGTRAMP_INSN0 (0x58)	/* pop %eax */
-#define LINUX_SIGTRAMP_OFFSET0 (0)
-#define LINUX_SIGTRAMP_INSN1 (0xb8)	/* mov $NNNN,%eax */
-#define LINUX_SIGTRAMP_OFFSET1 (1)
-#define LINUX_SIGTRAMP_INSN2 (0xcd)	/* int */
-#define LINUX_SIGTRAMP_OFFSET2 (6)
+#define LINUX_SIGTRAMP_INSN0	0x58	/* pop %eax */
+#define LINUX_SIGTRAMP_OFFSET0	0
+#define LINUX_SIGTRAMP_INSN1	0xb8	/* mov $NNNN, %eax */
+#define LINUX_SIGTRAMP_OFFSET1	1
+#define LINUX_SIGTRAMP_INSN2	0xcd	/* int */
+#define LINUX_SIGTRAMP_OFFSET2	6
 
 static const unsigned char linux_sigtramp_code[] =
 {
   LINUX_SIGTRAMP_INSN0,					/* pop %eax */
-  LINUX_SIGTRAMP_INSN1, 0x77, 0x00, 0x00, 0x00,		/* mov $0x77,%eax */
+  LINUX_SIGTRAMP_INSN1, 0x77, 0x00, 0x00, 0x00,		/* mov $0x77, %eax */
   LINUX_SIGTRAMP_INSN2, 0x80				/* int $0x80 */
 };
 
@@ -167,20 +167,20 @@ i386_linux_sigtramp_start (CORE_ADDR pc)
 
 /* This function does the same for RT signals.  Here the instruction
    sequence is
-       mov    $0xad,%eax
+       mov    $0xad, %eax
        int    $0x80
    or 0xb8 0xad 0x00 0x00 0x00 0xcd 0x80.
 
    The effect is to call the system call rt_sigreturn.  */
 
-#define LINUX_RT_SIGTRAMP_INSN0 (0xb8)	/* mov $NNNN,%eax */
-#define LINUX_RT_SIGTRAMP_OFFSET0 (0)
-#define LINUX_RT_SIGTRAMP_INSN1 (0xcd)	/* int */
-#define LINUX_RT_SIGTRAMP_OFFSET1 (5)
+#define LINUX_RT_SIGTRAMP_INSN0		0xb8 /* mov $NNNN, %eax */
+#define LINUX_RT_SIGTRAMP_OFFSET0	0
+#define LINUX_RT_SIGTRAMP_INSN1		0xcd /* int */
+#define LINUX_RT_SIGTRAMP_OFFSET1	5
 
 static const unsigned char linux_rt_sigtramp_code[] =
 {
-  LINUX_RT_SIGTRAMP_INSN0, 0xad, 0x00, 0x00, 0x00,	/* mov $0xad,%eax */
+  LINUX_RT_SIGTRAMP_INSN0, 0xad, 0x00, 0x00, 0x00,	/* mov $0xad, %eax */
   LINUX_RT_SIGTRAMP_INSN1, 0x80				/* int $0x80 */
 };
 
@@ -239,6 +239,9 @@ i386_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 	  || strcmp ("__restore_rt", name) == 0);
 }
 
+/* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
+#define I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET 20
+
 /* Assuming NEXT_FRAME is a frame following a GNU/Linux sigtramp
    routine, return the address of the associated sigcontext structure.  */
 
@@ -269,11 +272,14 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
   pc = i386_linux_rt_sigtramp_start (frame_pc_unwind (next_frame));
   if (pc)
     {
+      CORE_ADDR ucontext_addr;
+
       /* The sigcontext structure is part of the user context.  A
 	 pointer to the user context is passed as the third argument
 	 to the signal handler.  */
       read_memory (sp + 8, 4, buf);
-      return extract_unsigned_integer (buf, 4) + 20;
+      ucontext_addr = extract_unsigned_integer (buf, 4) + 20;
+      return ucontext_addr + I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
     }
 
   error ("Couldn't recognize signal trampoline.");
@@ -313,7 +319,7 @@ i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
    be considered too special-purpose for general consumption.  */
 
 static struct minimal_symbol *
-find_minsym_and_objfile (char *name, struct objfile **objfile_p)
+find_minsym_and_objfile (char *name, struct objfile **objfilep)
 {
   struct objfile *objfile;
 
@@ -326,7 +332,7 @@ find_minsym_and_objfile (char *name, struct objfile **objfile_p)
 	  if (SYMBOL_LINKAGE_NAME (msym)
 	      && strcmp (SYMBOL_LINKAGE_NAME (msym), name) == 0)
 	    {
-	      *objfile_p = objfile;
+	      *objfilep = objfile;
 	      return msym;
 	    }
 	}

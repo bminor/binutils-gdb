@@ -1,5 +1,19 @@
 2003-05-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_unwind_dummy_id): Use extract_unsigned_integer
+	instead of extract_typed_address for consistency with the rest of
+	the code in this file.
+	* i386-linux-tdep.c: Fix formatting in some comments.
+	(LINUX_SIGTRAMP_INSN0, LINUX_SIGTRAMP_OFFSET0,
+	LINUX_SIGTRAMP_INSN1, LINUX_SIGTRAMP_OFFSET1,
+	LINUX_SIGTRAMP_INSN2, LINUX_SIGTRAMP_OFFSET2,
+	LINUX_RT_SIGTRAMP_INSN0, LINUX_RT_SIGTRAMP_OFFSET0,
+	LINUX_RT_SIGTRAMP_INSN1, LINUX_RT_SIGTRAMP_OFFSET1): Drop
+	redundant parentheses.
+	(I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET): New define.
+	(i386_linux_sigcontext_addr): Use it.
+	(find_minsym_and_objfile): Change name of second argument.
+
 	* config/i386/x86-64linux.mt (GDB_MULTI_ARCH): Add back definition.
 
 	Revise the x86_64 (sub)taget.
