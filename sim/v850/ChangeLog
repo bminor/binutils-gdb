@@ -1,3 +1,34 @@
+Tue Oct 15 16:19:51 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* interp.c (MEM_SIZE):  It's now bytes, not a power of 2.
+	* (map):  Add support for external mem in the 1->2 meg range.
+	Also, abort() when memory access is way out of bounds.  (Better to
+	die than to give wrong result.  (This will be fixed later.))
+	* (sim_size):  MEM_SIZE is now bytes, not shift factor.
+
+Tue Oct  1 15:53:24 1996  Gavin Koch <gavin@cygnus.com>
+        
+        * simops.c (trace_input): Swapped order of operands for output
+        output of OP_IMM_REG.  Changed the fetching of the operands for
+        OP_LOAD32, and OP_STORE32 to work like op-function.
+        
+Mon Sep 30 15:46:33 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* interp.c:  Move includes of remote-sim.h and callback.h to
+	v850-sim.h.
+	* (lookup_hash): Add PC to report of hash failure.
+	* (map load_mem store_mem):  New memory subsystem.  Models V851
+	memory system.
+	* (sim_write sim_read):  Use new memory subsystem.
+	* (sim_resume):  Don't load and save PC into EIPC anymore.  Needed
+	to make user-defined traps work right.
+	* simops.c (OP_*):  Use new memory subsystem.
+	* (OP_14007E0 (reti)):  Implement reti.
+	* (OP_14996E0 (trap)):  Implement user-defined traps.  Move I/O to
+	trap 31.  Use new memory subsystem.
+	* v850_sim.h:  Prototypes for load_mem, store_mem and map.  Use
+	load_mem in RLW macro.
+
 Fri Sep 27 18:34:09 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* gencode.c (write_opcodes):  Output hex values for opcode mask
