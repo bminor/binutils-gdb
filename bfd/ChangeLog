@@ -1,5 +1,9 @@
 Tue Jul 26 11:04:00 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* elfcode.h (elf_adjust_dynamic_symbol): When handling a weak
+	symbol, correct check to see whether the equivalent normal symbol
+	was referenced.
+
 	Add support for creating shared libraries under i386 ELF and SPARC
 	ELF.  Based on patches by Eric Youngdale <ericy@cais.cais.com>.
 	* libelf.h (struct elf_link_hash_entry): Remove copy_offset field.
