@@ -434,7 +434,7 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 
 
 static void 
-DEFUN(obj_header_append,(abfd, filehdr, aouthdr),
+DEFUN(coff_header_append,(abfd, filehdr, aouthdr),
       bfd *abfd AND
       struct internal_filehdr *filehdr AND
       struct internal_aouthdr *aouthdr)
@@ -1742,7 +1742,7 @@ unsigned long file_cursor;
   bfd_write(buffer2, 1, string_byte_count, abfd);
 
 }
-  obj_header_append(abfd, &filehdr, &aouthdr);
+  coff_header_append(abfd, &filehdr, &aouthdr);
 
   bfd_close_all_done(abfd);
 }
