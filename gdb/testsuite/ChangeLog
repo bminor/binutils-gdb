@@ -1,3 +1,7 @@
+2002-01-10  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.c++/namespace.exp: Accept both '\0' and '\000'.
+
 2002-01-10  Jason Merrill  <jason@redhat.com>
 
 	* gdb.c++/namespace.exp: '\0', not '\000'.
