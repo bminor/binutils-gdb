@@ -1024,7 +1024,10 @@ output_prev_sec_find (os)
       lookup = &u->output_section_statement;
       if (lookup == os)
 	break;
-      if (lookup->bfd_section != NULL)
+      if (lookup->bfd_section != NULL
+          && lookup->bfd_section != bfd_abs_section_ptr
+          && lookup->bfd_section != bfd_com_section_ptr 
+          && lookup->bfd_section != bfd_und_section_ptr)
 	s = lookup->bfd_section;
     }
 
