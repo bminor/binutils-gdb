@@ -507,26 +507,28 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  strcmp (section->name, p->the_bfd_section->name) != 0)
 	continue;		/* not the section we need */
       if (memaddr >= p->addr)
-	if (memend <= p->endaddr)
-	  {
-	    /* Entire transfer is within this section.  */
-	    res = xfer_fn (p->bfd, p->the_bfd_section, myaddr,
-			   memaddr - p->addr, len);
-	    return (res != 0) ? len : 0;
-	  }
-	else if (memaddr >= p->endaddr)
-	  {
-	    /* This section ends before the transfer starts.  */
-	    continue;
-	  }
-	else
-	  {
-	    /* This section overlaps the transfer.  Just do half.  */
-	    len = p->endaddr - memaddr;
-	    res = xfer_fn (p->bfd, p->the_bfd_section, myaddr,
-			   memaddr - p->addr, len);
-	    return (res != 0) ? len : 0;
-	  }
+        {
+	  if (memend <= p->endaddr)
+	    {
+	      /* Entire transfer is within this section.  */
+	      res = xfer_fn (p->bfd, p->the_bfd_section, myaddr,
+	  		     memaddr - p->addr, len);
+	      return (res != 0) ? len : 0;
+	    }
+	  else if (memaddr >= p->endaddr)
+	    {
+	      /* This section ends before the transfer starts.  */
+	      continue;
+	    }
+	  else
+	    {
+	      /* This section overlaps the transfer.  Just do half.  */
+	      len = p->endaddr - memaddr;
+	      res = xfer_fn (p->bfd, p->the_bfd_section, myaddr,
+	  		     memaddr - p->addr, len);
+	      return (res != 0) ? len : 0;
+	    }
+        }
       else
 	nextsectaddr = min (nextsectaddr, p->addr);
     }
