@@ -7,8 +7,12 @@
 	(remote_fio_jmp_buf): Delete global variable.
 
 2003-06-10  Corinna Vinschen  <vinschen@redhat.com>
+            Martin M. Hunt  <hunt@redhat.com>
 
-	* Makefile.in: Add dependencies for remote-fileio.o.
+	* Makefile.in (REMOTE_OBS): Add remote-fileio.o
+	(SFILES): Add remote-fileio.c.
+	Add dependencies for building remote-fileio.o.  Add remote-fileio.h to
+	dependencies for building remote.o.
 	* remote-fileio.c: New file implementing the remote File-I/O protocol.
 	* remote-fileio.h: New header file defining remote File-I/O interface.
 	* remote.c (remote_write_bytes, remote_read_bytes): Remove  
@@ -17,13 +21,6 @@
 	'F' packet.
 	(_initialize_remote): Call initialize_remote_fileio().
 	* remote.h: Declare remote_write_bytes() and remote_read_bytes().
-
-2003-06-10  Martin M. Hunt  <hunt@redhat.com>
-
-	* Makefile.in (REMOTE_OBS): Add remote-fileio.o
-	(SFILES): Add remote-fileio.c.
-	Add dependencies for building remote-fileio.o.  Add remote-fileio.h to
-	dependencies for building remote.o.
 	* defs.h: Declare gdb_stdin, gdb_stdtargerr and gdb_stdtargin.
 	* main.c: New ui_file gdb_stdin, gdb_stdtargerr and gdb_stdtargin.
 	(captured_main): Initialize new ui_files.
