@@ -1,3 +1,7 @@
+2001-07-17  Elena Zannoni  <ezannoni@redhat.com>
+
+	* tui-file.c: Add include of tuiIO.h, for tuiPuts_unfiltered.
+
 2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tuiRegs.c (tuiDisplayRegistersFrom): Set scrollok to FALSE in

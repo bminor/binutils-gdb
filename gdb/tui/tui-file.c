@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "ui-file.h"
 #include "tui/tui-file.h"
+#include "tui/tuiIO.h"
 
 #include "tui.h"
 

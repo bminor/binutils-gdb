@@ -1995,7 +1995,8 @@ stack.o: stack.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	language.h target.h $(gdb_string_h) $(ui_out_h)
 
 ui-file.o: ui-file.c $(defs_h) ui-file.h
-tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(srcdir)/tui/tui-file.h
+tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(srcdir)/tui/tui-file.h \
+	$(srcdir)/tui/tuiIO.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-file.c
 
 ax-general.o: ax-general.c $(ax_h) $(defs_h) $(value_h)

@@ -1,5 +1,9 @@
 2001-07-17  Elena Zannoni  <ezannoni@redhat.com>
 
+	* Makefile.in (tui-file.o): Update dependencies.
+
+2001-07-17  Elena Zannoni  <ezannoni@redhat.com>
+
 	* top.c (catch_errors): Convert PTR to void * in parameters list.
 	(quit_cover): Ditto.
 
