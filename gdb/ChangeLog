@@ -1,3 +1,7 @@
+Thu Aug 18 17:01:35 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* nlm/i386.c, nlm/i386.h: New files that contain i386 specific code.
+
 Thu Aug 18 14:39:46 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* README: Grammar improvements, clarifications, updates.
