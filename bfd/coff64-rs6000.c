@@ -21,7 +21,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Internalcoff.h and coffcode.h modify themselves based on these flags.  */
-#define XCOFF64 
+#define XCOFF64
 #define RS6000COFF_C 1
 
 #include "bfd.h"
@@ -30,7 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/internal.h"
 #include "coff/rs6k64.h"
 #include "libcoff.h"
-
 
 #define GET_FILEHDR_SYMPTR bfd_h_get_64
 #define PUT_FILEHDR_SYMPTR bfd_h_put_64
@@ -70,7 +69,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define COFF_FORCE_SYMBOLS_IN_STRINGS
 #define COFF_DEBUG_STRING_WIDE_PREFIX
 
-
 #define COFF_ADJUST_SCNHDR_OUT_POST(ABFD,INT,EXT) \
 do { \
   memset (((SCNHDR *)EXT)->s_pad, 0, sizeof (((SCNHDR *)EXT)->s_pad));\
@@ -88,8 +86,7 @@ do { \
 #define GETHALF bfd_h_get_16
 #define GETBYTE bfd_h_get_8
 
-
-/* For XCOFF64, the effective width of symndx changes depending on 
+/* For XCOFF64, the effective width of symndx changes depending on
    whether we are the first entry.  Sigh.  */
 static void
 xcoff64_swap_lineno_in (abfd, ext1, in1)
@@ -102,10 +99,10 @@ xcoff64_swap_lineno_in (abfd, ext1, in1)
 
   in->l_lnno = bfd_h_get_32(abfd, (bfd_byte *) (ext->l_lnno));
   if (in->l_lnno == 0)
-    in->l_addr.l_symndx = 
+    in->l_addr.l_symndx =
 	    bfd_h_get_32(abfd, (bfd_byte *) ext->l_addr.l_symndx);
   else
-    in->l_addr.l_symndx = 
+    in->l_addr.l_symndx =
 	    bfd_h_get_64(abfd, (bfd_byte *) ext->l_addr.l_symndx);
 }
 
@@ -129,7 +126,6 @@ xcoff64_swap_lineno_out (abfd, inp, outp)
   return bfd_coff_linesz (abfd);
 }
 
-
 static void xcoff64_swap_sym_in PARAMS ((bfd *, PTR, PTR));
 static unsigned int xcoff64_swap_sym_out PARAMS ((bfd *, PTR, PTR));
 static void xcoff64_swap_aux_in PARAMS ((bfd *, PTR, int, int, int, int, PTR));
@@ -144,10 +140,9 @@ xcoff64_swap_sym_in (abfd, ext1, in1)
   SYMENT *ext = (SYMENT *)ext1;
   struct internal_syment      *in = (struct internal_syment *)in1;
 
-
   in->_n._n_n._n_zeroes = 0;
   in->_n._n_n._n_offset = bfd_h_get_32(abfd, (bfd_byte *) ext->e_offset);
-  in->n_value = bfd_h_get_64(abfd, (bfd_byte *) ext->e.e_value); 
+  in->n_value = bfd_h_get_64(abfd, (bfd_byte *) ext->e.e_value);
   in->n_scnum = bfd_h_get_16(abfd, (bfd_byte *) ext->e_scnum);
   in->n_type = bfd_h_get_16(abfd, (bfd_byte *) ext->e_type);
   in->n_sclass = bfd_h_get_8(abfd, ext->e_sclass);
@@ -189,7 +184,7 @@ xcoff64_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
     case C_FILE:
       if (ext->x_file.x_fname[0] == 0) {
 	  in->x_file.x_n.x_zeroes = 0;
-	  in->x_file.x_n.x_offset = 
+	  in->x_file.x_n.x_offset =
 	   bfd_h_get_32(abfd, (bfd_byte *) ext->x_file.x_n.x_offset);
 	} else {
 	    if (numaux > 1)
@@ -210,9 +205,9 @@ xcoff64_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
     case C_HIDEXT:
       if (indx + 1 == numaux)
 	{
-	  in->x_csect.x_scnlen.l = 
+	  in->x_csect.x_scnlen.l =
 	      bfd_h_get_32(abfd, ext->x_csect.x_scnlen_lo);
-	  /* FIXME: If we want section lengths larger than 32 bits, we need 
+	  /* FIXME: If we want section lengths larger than 32 bits, we need
 	     to modify the internal coff structures to support it.  */
 	  in->x_csect.x_parmhash = bfd_h_get_32 (abfd,
 						 ext->x_csect.x_parmhash);
@@ -260,11 +255,9 @@ xcoff64_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
 
 end: ;
   /* the semicolon is because MSVC doesn't like labels at
-     end of block. */
+     end of block.  */
 
 }
-
-
 
 static unsigned int
 xcoff64_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
@@ -326,10 +319,10 @@ xcoff64_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
 
   if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
     {
-      bfd_h_put_64(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, 
+      bfd_h_put_64(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr,
 	      (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_lnnoptr);
       PUTBYTE (abfd, _AUX_FCN, (bfd_byte *) ext->x_auxtype.x_auxtype);
-      PUTWORD(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, 
+      PUTWORD(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l,
 	      (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_endndx);
     }
   if (ISFCN (type))
@@ -337,16 +330,15 @@ xcoff64_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
 	     (bfd_byte *)  ext->x_sym.x_fcnary.x_fcn.x_fsize);
   else
     {
-      bfd_h_put_32(abfd, in->x_sym.x_misc.x_lnsz.x_lnno, 
+      bfd_h_put_32(abfd, in->x_sym.x_misc.x_lnsz.x_lnno,
 	      (bfd_byte *)ext->x_sym.x_fcnary.x_lnsz.x_lnno);
-      bfd_h_put_16(abfd, in->x_sym.x_misc.x_lnsz.x_size, 
+      bfd_h_put_16(abfd, in->x_sym.x_misc.x_lnsz.x_size,
 	      (bfd_byte *)ext->x_sym.x_fcnary.x_lnsz.x_size);
     }
 
 end:
   return bfd_coff_auxesz (abfd);
 }
-
 
 #define coff_SWAP_sym_in xcoff64_swap_sym_in
 #define coff_SWAP_sym_out xcoff64_swap_sym_out

@@ -60,7 +60,7 @@ static void coff_pointerize_aux
 static boolean make_a_section_from_file
   PARAMS ((bfd *, struct internal_scnhdr *, unsigned int));
 static const bfd_target *coff_real_object_p
-  PARAMS ((bfd *, unsigned, struct internal_filehdr *, 
+  PARAMS ((bfd *, unsigned, struct internal_filehdr *,
 	   struct internal_aouthdr *));
 static void fixup_symbol_value
   PARAMS ((bfd *, coff_symbol_type *, struct internal_syment *));
@@ -212,7 +212,7 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
     goto fail;
 
   /* Set the arch/mach *before* swapping in sections; section header swapping
-     may depend on arch/mach info. */
+     may depend on arch/mach info.  */
   if (bfd_coff_set_arch_mach_hook (abfd, (PTR) internal_f) == false)
     goto fail;
 
@@ -339,7 +339,6 @@ coff_get_symtab_upper_bound (abfd)
 
   return (bfd_get_symcount (abfd) + 1) * (sizeof (coff_symbol_type *));
 }
-
 
 /* Canonicalize a COFF symbol table.  */
 
@@ -692,7 +691,7 @@ coff_renumber_symbols (bfd_ptr, first_undef)
   for (symbol_index = 0; symbol_index < symbol_count; symbol_index++)
     {
       coff_symbol_type *coff_symbol_ptr = coff_symbol_from (bfd_ptr, symbol_ptr_ptr[symbol_index]);
-      symbol_ptr_ptr[symbol_index]->udata.i = symbol_index; 
+      symbol_ptr_ptr[symbol_index]->udata.i = symbol_index;
       if (coff_symbol_ptr && coff_symbol_ptr->native)
 	{
 	  combined_entry_type *s = coff_symbol_ptr->native;
@@ -821,7 +820,7 @@ coff_fix_symbol_name (abfd, symbol, native, string_size_p,
 
       if (bfd_coff_force_symnames_in_strings (abfd))
 	{
-          native->u.syment._n._n_n._n_offset = 
+          native->u.syment._n._n_n._n_offset =
 	      (*string_size_p + STRING_SIZE_SIZE);
 	  native->u.syment._n._n_n._n_zeroes = 0;
 	  *string_size_p += 6;  /* strlen(".file") + 1 */
@@ -900,7 +899,7 @@ coff_fix_symbol_name (abfd, symbol, native, string_size_p,
 	    abort ();
 	  if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
 	    abort ();
-	  native->u.syment._n._n_n._n_offset = 
+	  native->u.syment._n._n_n._n_offset =
 	      *debug_string_size_p + prefix_len;
 	  native->u.syment._n._n_n._n_zeroes = 0;
 	  *debug_string_size_p += name_length + 1 + prefix_len;
@@ -1103,7 +1102,7 @@ coff_write_native_symbol (abfd, symbol, written, string_size_p,
       while (lineno[count].line_number != 0)
 	{
 #if 0
-	  /* 13 april 92. sac 
+	  /* 13 april 92. sac
 	     I've been told this, but still need proof:
 	     > The second bug is also in `bfd/coffcode.h'.  This bug
 	     > causes the linker to screw up the pc-relocations for
@@ -1271,7 +1270,7 @@ coff_write_symbols (abfd)
 	  else if (c_symbol->native->u.syment.n_sclass == C_FILE
 		   && c_symbol->native->u.syment.n_numaux > 0)
 	    {
-	      if (bfd_coff_force_symnames_in_strings (abfd)) 
+	      if (bfd_coff_force_symnames_in_strings (abfd))
       		bfd_write (".file", 1, 6, abfd);
 	      maxlen = bfd_coff_filnmlen (abfd);
 	    }
@@ -1487,7 +1486,7 @@ coff_pointerize_aux (abfd, table_base, symbol, indaux, auxent)
 
 /* Allocate space for the ".debug" section, and read it.
    We did not read the debug section until now, because
-   we didn't want to go to the trouble until someone needed it. */
+   we didn't want to go to the trouble until someone needed it.  */
 
 static char *
 build_debug_section (abfd)
@@ -1509,7 +1508,7 @@ build_debug_section (abfd)
   if (debug_section == NULL)
     return NULL;
 
-  /* Seek to the beginning of the `.debug' section and read it. 
+  /* Seek to the beginning of the `.debug' section and read it.
      Save the current position first; it is needed by our caller.
      Then read debug section and reset the file pointer.  */
 
@@ -1522,7 +1521,6 @@ build_debug_section (abfd)
     return NULL;
   return debug_section;
 }
-
 
 /* Return a pointer to a malloc'd copy of 'name'.  'name' may not be
    \0-terminated, but will not exceed 'maxlen' characters.  The copy *will*
@@ -1611,7 +1609,7 @@ _bfd_coff_read_string_table (abfd)
 		 + obj_raw_syment_count (abfd) * bfd_coff_symesz (abfd)),
 		SEEK_SET) != 0)
     return NULL;
-    
+
   if (bfd_read (extstrsize, sizeof extstrsize, 1, abfd) != sizeof extstrsize)
     {
       if (bfd_get_error () != bfd_error_file_truncated)
@@ -1812,7 +1810,7 @@ coff_get_normalized_symtab (abfd)
 		    {
 		      break;
 		    }		/* if end of string */
-		}		/* possible lengths of this string. */
+		}		/* possible lengths of this string.  */
 
 	      if ((newstring = (PTR) bfd_alloc (abfd, ++i)) == NULL)
 		return (NULL);
@@ -2407,7 +2405,7 @@ bfd_coff_set_symbol_class (abfd, symbol, class)
 	 We cheat here by creating a fake native entry for it and
 	 then filling in the class.  This code is based on that in
 	 coff_write_alien_symbol().  */
-      
+
       combined_entry_type * native;
 
       native = (combined_entry_type *) bfd_alloc (abfd, sizeof (* native));
@@ -2415,10 +2413,10 @@ bfd_coff_set_symbol_class (abfd, symbol, class)
 	return false;
 
       memset (native, 0, sizeof (* native));
-      
+
       native->u.syment.n_type   = T_NULL;
       native->u.syment.n_sclass = class;
-      
+
       if (bfd_is_und_section (symbol->section))
 	{
 	  native->u.syment.n_scnum = N_UNDEF;
@@ -2437,19 +2435,19 @@ bfd_coff_set_symbol_class (abfd, symbol, class)
 				      + symbol->section->output_offset);
 	  if (! obj_pe (abfd))
 	    native->u.syment.n_value += symbol->section->output_section->vma;
-	  
+
 	  /* Copy the any flags from the the file header into the symbol.
 	     FIXME: Why?  */
 	  native->u.syment.n_flags = bfd_asymbol_bfd (& csym->symbol)->flags;
 	}
-      
+
       csym->native = native;
     }
   else
     {
       csym->native->u.syment.n_sclass = class;
     }
-  
+
   return true;
 }
 
