@@ -10,6 +10,10 @@ Thu Dec 19 13:11:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(copy_main): Handle OPTION_WEAKEN.
 	* binutils.texi, objcopy.1: Document --weaken.
 
+Wed Dec 18 22:49:13 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Use NewFolderRecursive for installation.
+
 Sat Dec  7 10:17:25 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in (install): Add "else true" clause to cater to

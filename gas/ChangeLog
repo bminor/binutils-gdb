@@ -5,6 +5,10 @@ Thu Dec 19 12:06:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 	the target symbol.  Remove obsolete code handling a special case
 	for i386 PIC.
 
+Wed Dec 18 22:54:39 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Use NewFolderRecursive for installation.
+
 start-sanitize-d10v
 Wed Dec 18 16:00:42 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
