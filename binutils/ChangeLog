@@ -1,3 +1,16 @@
+2001-05-16  Richard Henderson  <rth@redhat.com>
+
+	* readelf.c (do_debug_frames_interp): New.
+	(byte_get_little_endian): If BFD64, always read entire 8-byte fields.
+	(byte_get_big_endian): Likewise.
+	(parse_args) ['F']: Set do_debug_frames_interp.
+	(Frame_Chunk): Make data_factor signed, add fde_encoding.
+	(frame_display_row): Don't trunc pc_begin to int.
+	(size_of_encoded_value): New.
+	(display_debug_frames): Handle 64-bit targets.  Print raw data
+	unless do_debug_frames_interp.
+	(debug_displays): Remove duplicate .debug_frame.
+
 2001-05-15  Ralf Baechle  <ralf@gnu.org>
 
 	* readelf.c: Replace uses of EM_MIPS_RS4_BE with EM_MIPS_RS3_LE.
