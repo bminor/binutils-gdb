@@ -1,3 +1,14 @@
+Fri Jul 30 12:51:27 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+			  and Jim Kingdon (kingdon@cygnus.com)
+
+	* breakpoint.c (breakpoint_re_set_one):  Always reparse breakpoint
+	conditions, they might contain symbol table references.
+
+Fri Jul 30 12:51:27 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mipsread.c (parse_symbol):  Handle opaque struct definitions and
+	type naming for stTypedef symbols.
+
 Fri Jul 30 14:44:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* c-exp.y (yylex): Detect C++ nested types.
