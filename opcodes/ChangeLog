@@ -1,3 +1,7 @@
+Wed Nov 12 10:16:57 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c (sync,cache): These are 3900 insns.
+
 Tue Nov 11 23:53:41 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	sh-opc.h (sh_table): Remove ftst/nan.

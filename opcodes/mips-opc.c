@@ -291,7 +291,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"c.ngt.d", "M,S,T",	0x4620003f, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_D,	I4	},
 {"c.ngt.s", "S,T",	0x4600003f, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	I1	},
 {"c.ngt.s", "M,S,T",	0x4600003f, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_S,	I4	},
-{"cache",   "k,o(b)",	0xbc000000, 0xfc000000, RD_b,		I3	},
+{"cache",   "k,o(b)",	0xbc000000, 0xfc000000, RD_b,		I3|T3	},
 {"ceil.l.d", "D,S",	0x4620000a, 0xffff003f, WR_D|RD_S|FP_D,	I3	},
 {"ceil.l.s", "D,S",	0x4600000a, 0xffff003f, WR_D|RD_S|FP_S,	I3	},
 {"ceil.w.d", "D,S",	0x4620000e, 0xffff003f, WR_D|RD_S|FP_D,	I2	},
@@ -925,7 +925,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"invalidate", "t,o(b)",0xb8000000, 0xfc000000,	RD_t|RD_b,	I2	}, /* same */
 {"invalidate", "t,A(b)",2,    (int) M_SWR_AB,	INSN_MACRO	}, /* as swr */
 {"swxc1",   "S,t(b)",   0x4c000008, 0xfc0007ff, SM|RD_S|RD_t|RD_b,	I4	},
-{"sync",    "",		0x0000000f, 0xffffffff,	0,		I2	},
+{"sync",    "",		0x0000000f, 0xffffffff,	0,		I2|T3	},
 {"syscall", "",		0x0000000c, 0xffffffff,	TRAP,	I1		},
 {"syscall", "B",	0x0000000c, 0xfc00003f,	TRAP,	I1		},
 {"teqi",    "s,j",	0x040c0000, 0xfc1f0000, RD_s|TRAP,	I2	},
