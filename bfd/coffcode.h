@@ -2476,6 +2476,15 @@ coff_slurp_symbol_table (abfd)
 	      /* A C_HIDEXT symbol is not global.  */
 	      if (src->u.syment.n_sclass == C_HIDEXT)
 		dst->symbol.flags = BSF_LOCAL;
+	      /* A XTY_LD symbol should not go at the end.  */
+	      if (src->u.syment.n_numaux > 0)
+		{
+		  combined_entry_type *auxp;
+
+		  auxp = src + src->u.syment.n_numaux;
+		  if (SMTYP_SMTYP (auxp->u.auxent.x_csect.x_smtyp) == XTY_LD)
+		    dst->symbol.flags |= BSF_NOT_AT_END;
+		}
 #endif
 
 	      break;
@@ -2549,9 +2558,9 @@ coff_slurp_symbol_table (abfd)
 	      dst->symbol.flags = BSF_DEBUGGING;
 	      dst->symbol.value = src->u.syment.n_value;
 
-	      /* The value is actually a symbol index.  Save a pointer to
-	   the symbol instead of the index.  FIXME: This should use a
-	   union.  */
+	      /* The value is actually a symbol index.  Save a pointer
+		 to the symbol instead of the index.  FIXME: This
+		 should use a union.  */
 	      src->u.syment.n_value =
 		(long) (native_symbols + src->u.syment.n_value);
 	      src->fix_value = 1;

@@ -1,5 +1,8 @@
 Mon Oct  9 11:24:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (coff_slurp_symbol_table): Set BSF_NOT_AT_END for an
+	XCOFF XTY_LD symbol.
+
 	* targets.c (bfd_target): Rename _bfd_read_ar_hdr field to
 	_bfd_read_ar_hdr_fn.
 	* libbfd-in.h (_bfd_read_ar_hdr): Update accordingly.
