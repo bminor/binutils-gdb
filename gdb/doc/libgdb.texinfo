@@ -119,7 +119,7 @@ type of @code{gdb_error_t}.
 
 @deftypefun {const char *} gdb_error_msg (gdb_error_t @var{error})
 returns a reasonable error message for @var{error}.
-@end defun
+@end deftypefun
 
 
 @heading Blocking I/O
@@ -129,7 +129,7 @@ returns a reasonable error message for @var{error}.
 
 @heading Global Parameters
 @subheading the current directory 
-@deftypefun error_t gdb_cd (char * @var{dir})
+@deftypefun gdb_error_t gdb_cd (char * @var{dir})
 Specify gdb's default directory as well as the working
 directory for the inferior (when first started).@*
 (cd_command)
@@ -142,7 +142,7 @@ Make a copy of the name of gdb's default directory.@*
 
 
 @subheading controlling the input/output radix
-@deftypefun error_t gdb_set_base (int)
+@deftypefun gdb_error_t gdb_set_base (int)
 Change the default output radix to 10 or 16, or set it to 0
 (heuristic).  This command is mostly obsolete now that the print
 command allows formats to apply to aggregates, but is still handy
@@ -150,9 +150,9 @@ occasionally.@*
 (set_base_command)
 @end deftypefun
 
-@deftypefun error_t gdb_set_input_radix (int)
-@deftypefunx error_t gdb_set_output_radix (int)
-@deftypefunx error_t gdb_set_radix (int)
+@deftypefun gdb_error_t gdb_set_input_radix (int)
+@deftypefunx gdb_error_t gdb_set_output_radix (int)
+@deftypefunx gdb_error_t gdb_set_radix (int)
 Valid output radixes are only 0 (heuristic), 10, and 16.@*
 (set_radix)
 @end deftypefun
@@ -240,22 +240,22 @@ The client could use these declarations:
 
 @example
 struct my_cback
-{
+@{
   struct a_gdb_cback gdb_cback;  /* must be first */
   float magic_number;
-};
+@};
 
 void
 foo_helper (struct a_gdb_cback * callback, int i, char * cp)
-{
+@{
   foo ( ((struct my_cback *)callback)->magic_number, i, c);
-}
+@}
 
 struct my_cback
-{
+@{
    foo_helper,
    1079252848.8
-} the_cback;
+@} the_cback;
 @end example
 
 
@@ -929,9 +929,9 @@ struct gdb_bp_condition * @var{cond};
 
 typedef int (*gdb_bp_fn) (struct gdb_bp_condition *, int bp_num);
 struct gdb_bp_condition
-{
+@{
   gdb_bp_fn fn;
-};
+@};
 @end example
 Add a condition to a breakpoint.
 The condition is a callback which should return 
@@ -979,9 +979,9 @@ active (or `this_level_only'?? [[[?]]]).
 @example
 typedef void (*breakpoint_cback_fn) (struct breakpoint_cback *, int bp_num);
 struct breakpoint_cback
-{
+@{
   breakpoint_cback_fn fn;
-};
+@};
 @end example
 
 Breakpoints can have an associated function which is called
@@ -1113,12 +1113,12 @@ selected frame.
      instead. */
 frame1 = 0;
 level = -1;
-if (get_current_frame()) {
+if (get_current_frame()) @{
     for (frame1 = get_prev_frame (0);
 	 frame1 && frame1 != frame;
 	 frame1 = get_prev_frame (frame1))
       level++;
-}
+@}
 @end example
 
 
@@ -1331,11 +1331,11 @@ the number of string bytes printed.
  -- IDIOM: This prints the values of all convenience variables:
 @example
 for (var = internalvars; var; var = var->next)
-{
+@{
 printf_filtered ("$%s = ", var->name);
 value_print (var->value, stdout, 0, Val_pretty_default);
 printf_filtered ("\n");
-}
+@}
 @end example
 
 
@@ -1357,12 +1357,12 @@ First print it as a number.  Then perhaps print
  -- IDIOM: This is the core of a dissasemble command:
 @example
 for (pc = low; pc < high; )
-{
+@{
   print_address (pc, stdout);
   printf_filtered (":\t");
   pc += print_insn (pc, stdout);
   printf_filtered ("\n");
-}
+@}
 @end example
 Advice for computing pc extents like @code{low} and @code{high}
 can be found in `Symtabs' -- for example,  @code{gdb_find_line_pc_range}.@*
@@ -1468,3 +1468,4 @@ If @var{show} is negative, we never show the details of elements' types.
 [[[In the long run, we need something to programmaticly read off type 
    structures in a machine/language independent way.]]]
 
+@bye

@@ -1,3 +1,7 @@
+Wed Oct  6 13:23:01 1993  Tom Lord  (lord@rtl.cygnus.com)
+
+	* libgdb.texinfo: added `@' to braces that were unescaped.
+
 Mon Oct  4 10:42:18 1993  Tom Lord  (lord@rtl.cygnus.com)
 
 	* libgdb.texinfo: new file.  Spec for the gdb library.
