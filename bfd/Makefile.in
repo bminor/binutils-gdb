@@ -18,8 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-# $Id$
-
 srcdir = .
 
 prefix = /usr/local
@@ -42,7 +40,7 @@ man9dir = $(mandir)/man9
 infodir = $(prefix)/info
 includedir = $(prefix)/include
 oldincludedir =
-docdir = doc
+docdir = $(srcdir)/doc
 
 SHELL = /bin/sh
 
@@ -74,13 +72,19 @@ TARGETLIB = libbfd.a
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o ctor.o seclet.o
 
+# This is an independent variable so that targets can override it if
+# they want.  Until we get around to fixing the defaults for various targets,
+# default to all opcode tables.
+OPC = opc-sparc.o
+
 BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
-	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o
+	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
+	$(OPC)
 
 BFD_BACKENDS = oasys.o ieee.o srec.o elf.o stab-syms.o\
 	aout64.o aout32.o demo64.o sunos.o newsos3.o i386aout.o bout.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
-	coff-mips.o coff-rs6000.o coff-h8300.o coff-msym.o hppa.o
+	coff-mips.o coff-rs6000.o coff-h8300.o coff-msym.o hppa.o i386linux.o
 
 OPTIONAL_BACKENDS = trad-core.o
 
@@ -96,16 +100,21 @@ BFD_H=$(INCDIR)/bfd.h
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 coff-i386.c aout64.c aout32.c sunos.c demo64.c coff-i960.c srec.c tekhex.c \
 	 oasys.c ieee.c coff-m68k.c coff-a29k.c coff-rs6000.c coff-msym.c \
-	 format.c section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c seclet.c \
-	 coff-m88k.c coff-mips.c trad-core.c newsos3.c i386aout.c bout.c elf.c \
+	 format.c section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
+	 seclet.c coff-m88k.c coff-mips.c trad-core.c newsos3.c i386aout.c \
+	 i386linux.c bout.c elf.c \
 	 cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c cpu-vax.c \
 	 cpu-mips.c cpu-a29k.c cpu-i386.c cpu-rs6000.c coff-h8300.c hppa.c \
-	 cpu-hppa.c
+	 cpu-hppa.c \
+	opc-sparc.c opc-i960.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
 all: $(TARGETLIB) 
-	@$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)"
+	@$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" \
+		"INSTALL=$(INSTALL)" \
+		"INSTALL_DATA=$(INSTALL_DATA)" \
+		"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
 .NOEXPORT:
 
@@ -118,7 +127,10 @@ clean-info:
 	@$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
 	
 install-info: force
-	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
+	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)" \
+		"INSTALL=$(INSTALL)" \
+		"INSTALL_DATA=$(INSTALL_DATA)" \
+		"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
 # HDEPFILES comes from the host config; TDEPFILES from the target config.
 OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) $(HDEPFILES) $(TDEPFILES)
@@ -144,6 +156,9 @@ subdir_do: force
 					"CFLAGS=$(CFLAGS)" \
 					"RANLIB=$(RANLIB)" \
 					"MAKEINFO=$(MAKEINFO)" \
+					"INSTALL=$(INSTALL)" \
+					"INSTALL_DATA=$(INSTALL_DATA)" \
+					"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 					"BISON=$(BISON)" $(DO)) ; then true ; \
 			else exit 1 ; fi ; \
 		else true ; fi ; \
@@ -266,10 +281,13 @@ gen-aout: $(srcdir)/gen-aout.c Makefile
 
 headers:
 	(cd $(docdir); $(MAKE) protos)
-	# Rebuild prototypes in bfd.h
-	cp $(docdir)/bfd.h $(BFD_H)
-	cp $(docdir)/libbfd.h $(srcdir)/libbfd.h
-	cp $(docdir)/libcoff.h $(srcdir)/libcoff.h
+	# Could really use a "copy-if-change"...
+	cp $(docdir)/bfd.h bfd.h-new
+	$(srcdir)/../move-if-change bfd.h-new $(BFD_H)
+	cp $(docdir)/libbfd.h libbfd.h-new
+	$(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
+	cp $(docdir)/libcoff.h libcoff.h-new
+	$(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 
 bfd.info:
 	( cd $(docdir); $(MAKE) bfd.info)
@@ -303,7 +321,6 @@ sunos.o : sunos.c aoutf1.h $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
 demo64.o : demo64.c 
 
 srec.o : srec.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
-
 oasys.o : oasys.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/oasys.h liboasys.h 
 ieee.o : ieee.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
@@ -348,8 +365,13 @@ newsos3.o : newsos3.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
 i386aout.o : i386aout.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h libaout.h 
+i386linux.o : i386linux.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ar.h libaout.h
 bout.o : bout.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/bout.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h 
+  $(INCDIR)/bout.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h
+
+opc-sparc.o : opc-sparc.c $(INCDIR)/opcode/sparc.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 

@@ -1,3 +1,7 @@
+Tue Aug 11 12:19:42 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* opc-sparc.c: New file.
+
 Sat Aug  8 23:15:35 1992  Fred Fish  (fnf@cygnus.com)
 
 	* bout.c (bfd_reloc_status_type, callj_callback):  Cast void*
@@ -2471,7 +2475,3 @@ Wed Jan 16 01:55:53 1991  John Gilmore  (gnu at rtl)
 	obsolete definitions.
 	(_write_symbol_table):  Initialize <idx> counter.
 	(foop):  Eliminate debugging code.
-
-
-
-

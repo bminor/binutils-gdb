@@ -1,5 +1,7 @@
 Mon Aug 10 23:22:33 1992  Ken Raeburn  (raeburn@cygnus.com)
 
+	* sparc.h: Moved tables to BFD library.
+
 	* i386.h (i386_optab): Add fildq, fistpq aliases used by gcc.
 
 Sun Jun 28 13:29:03 1992  Fred Fish  (fnf@cygnus.com)
