@@ -1,6 +1,6 @@
 			 GDB SNAPSHOT SYSTEM
 			    (general info)
-			    Updated 5/7/93
+			    Updated 5/24/93
 
 WHAT ARE GDB SNAPSHOTS
 ----------------------
@@ -147,6 +147,24 @@ Do *not* send any questions about the snapshots or patches specific to
 the snapshots to bug-gdb@prep.ai.mit.edu (gateway'd to the usenet group
 gnu.gdb.bug).  Nobody there will have any idea what you are talking about
 and it will just cause confusion.
+
+
+BUG REPORTS
+-----------
+
+Send bug reports to gdb-patches@cygnus.com.
+
+Note that since no testing is done on the snapshots, and snapshots may even
+be made when gdb is in an inconsistent state, it may not be unusual for an
+occasional snapshot to have a very obvious bug, such as failure to compile
+on *any* machine.  It is likely that such bugs will be fixed by the next
+snapshot, so it really isn't necessary to report them unless they persist
+for a couple days.
+
+Bugs which are non-obvious, such as failure to compile on only a specific
+machine, a new machine dependent bug (particularly one not detected by the
+testsuite), missing machine dependent files, etc should be reported when
+you discover them, or have a suggested patch to fix them.
 
 
 FORMAT FOR PATCHES
