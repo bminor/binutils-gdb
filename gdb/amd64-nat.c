@@ -1,6 +1,6 @@
 /* Native-dependent code for AMD64.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -92,10 +92,11 @@ amd64_supply_native_gregset (struct regcache *regcache,
 			     const void *gregs, int regnum)
 {
   const char *regs = gregs;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int num_regs = amd64_native_gregset64_num_regs;
   int i;
 
-  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+  if (gdbarch_ptr_bit (gdbarch) == 32)
     num_regs = amd64_native_gregset32_num_regs;
 
   if (num_regs > NUM_REGS)
@@ -108,7 +109,7 @@ amd64_supply_native_gregset (struct regcache *regcache,
 	  int offset = amd64_native_gregset_reg_offset (i);
 
 	  if (offset != -1)
-	    regcache_raw_supply (current_regcache, i, regs + offset);
+	    regcache_raw_supply (regcache, i, regs + offset);
 	}
     }
 }
@@ -122,10 +123,11 @@ amd64_collect_native_gregset (const struct regcache *regcache,
 			      void *gregs, int regnum)
 {
   char *regs = gregs;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int num_regs = amd64_native_gregset64_num_regs;
   int i;
 
-  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+  if (gdbarch_ptr_bit (gdbarch) == 32)
     num_regs = amd64_native_gregset32_num_regs;
 
   if (num_regs > NUM_REGS)
@@ -138,7 +140,7 @@ amd64_collect_native_gregset (const struct regcache *regcache,
 	  int offset = amd64_native_gregset_reg_offset (i);
 
 	  if (offset != -1)
-	    regcache_raw_collect (current_regcache, i, regs + offset);
+	    regcache_raw_collect (regcache, i, regs + offset);
 	}
     }
 }

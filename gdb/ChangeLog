@@ -1,5 +1,9 @@
 2004-02-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-nat.c: Update copyright year.
+	(amd64_supply_native_gregset, amd64_collect_native_gregset): Use
+	architecture from REGCACHE.
+
 	* x86-64-linux-nat.c (x86_64_linux_gregset32_reg_offset): Use
 	symbolic constants from <sys/reg.h> instead of hard-coded numbers.
 
