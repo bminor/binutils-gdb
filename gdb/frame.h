@@ -23,6 +23,123 @@
 #if !defined (FRAME_H)
 #define FRAME_H 1
 
+/* The frame object.  */
+
+struct frame_info;
+
+/* The frame object's ID.  This provides a per-frame unique identifier
+   that can be used to relocate a `struct frame_info' after a target
+   resume or a frame cache destruct (assuming the target hasn't
+   unwound the stack past that frame - a problem handled elsewhere).  */
+
+struct frame_id
+{
+  /* The frame's address.  This should be constant through out the
+     lifetime of a frame.  */
+  /* NOTE: cagney/2002-11-16: The ia64 has two stacks and hence two
+     frame bases.  This will need to be expanded to accomodate that.  */
+  CORE_ADDR base;
+  /* The frame's current PC.  While the PC within the function may
+     change, the function that contains the PC does not.  Should this
+     instead be the frame's function?  */
+  CORE_ADDR pc;
+};
+
+/* For every stopped thread, GDB tracks two frames: current and
+   selected.  Current frame is the inner most frame of the selected
+   thread.  Selected frame is the frame currently being examined via
+   the GDB CLI (selected using `up', `down', ...).  The frames are
+   created on-demand (via get_prev_frame()) and then held in a frame
+   cache.  Provide mechanims for controlling these frames.  */
+/* FIXME: cagney/2002-11-14: At any time, only one thread's selected
+   and current frame can be active.  Switching threads causes gdb to
+   discard all that cached frame information.  Ulgh!  Instead, current
+   and selected frame should be bound to a thread.  */
+
+extern struct frame_info *selected_frame;
+extern void select_frame (struct frame_info *);
+extern void set_current_frame (struct frame_info *);
+extern struct frame_info *get_current_frame (void);
+
+/* Invalidates the frame cache.  */
+extern void flush_cached_frames (void);
+
+/* Flushes the frame cache and then selects the inner most (aka
+   current) frame - it changes selected frame.  */
+/* FIXME: cagney/2002-11-14: Should this re-select the selected frame
+   from before the flush?  */
+extern void reinit_frame_cache (void);
+
+/* Given a FRAME, return the next (more inner, younger) or previous
+   (more outer, older) frame.  */
+extern struct frame_info *get_prev_frame (struct frame_info *);
+extern struct frame_info *get_next_frame (struct frame_info *);
+
+/* Given a frame's ID, relocate the frame.  Returns NULL if the frame
+   is not found.  */
+extern struct frame_info *frame_find_by_id (struct frame_id id);
+
+/* Base attributes of a frame: */
+
+/* The frame's `resume' address.  Where the program will resume in
+   this frame.  */
+extern CORE_ADDR get_frame_pc (struct frame_info *);
+
+/* Return the per-frame unique identifer.  Can be used to relocate a
+   frame after a frame cache flush (and other similar operations).  */
+extern void get_frame_id (struct frame_info *fi, struct frame_id *id);
+
+/* The frame's level: 0 for innermost, 1 for its caller, ...; or -1
+   for an invalid frame).  */
+extern int frame_relative_level (struct frame_info *fi);
+
+/* Unwind the stack frame so that the value of REGNUM, in the previous
+   (up, older) frame is returned.  If VALUEP is NULL, don't
+   fetch/compute the value.  Instead just return the location of the
+   value.  */
+extern void frame_register_unwind (struct frame_info *frame, int regnum,
+				   int *optimizedp, enum lval_type *lvalp,
+				   CORE_ADDR *addrp, int *realnump,
+				   void *valuep);
+
+/* More convenient interface to frame_register_unwind().  */
+/* NOTE: cagney/2002-09-13: Return void as one day these functions may
+   be changed to return an indication that the read succeeded.  */
+
+extern void frame_unwind_signed_register (struct frame_info *frame,
+					  int regnum, LONGEST *val);
+
+extern void frame_unwind_unsigned_register (struct frame_info *frame,
+					    int regnum, ULONGEST *val);
+
+/* Get the value of the register that belongs to this FRAME.  This
+   function is a wrapper to the call sequence ``frame_unwind_register
+   (get_next_frame (FRAME))''.  As per frame_register_unwind(), if
+   VALUEP is NULL, the registers value is not fetched/computed.  */
+
+extern void frame_register (struct frame_info *frame, int regnum,
+			    int *optimizedp, enum lval_type *lvalp,
+			    CORE_ADDR *addrp, int *realnump,
+			    void *valuep);
+
+/* More convenient interface to frame_register().  */
+/* NOTE: cagney/2002-09-13: Return void as one day these functions may
+   be changed to return an indication that the read succeeded.  */
+
+extern void frame_read_signed_register (struct frame_info *frame,
+					int regnum, LONGEST *val);
+
+extern void frame_read_unsigned_register (struct frame_info *frame,
+					  int regnum, ULONGEST *val);
+
+/* Map between a frame register number and its name.  A frame register
+   space is a superset of the cooked register space --- it also
+   includes builtin registers.  */
+
+extern int frame_map_name_to_regnum (const char *name, int strlen);
+extern const char *frame_map_regnum_to_name (int regnum);
+
+
 /* Return the location (and possibly value) of REGNUM for the previous
    (older, up) frame.  All parameters except VALUEP can be assumed to
    be non NULL.  When VALUEP is NULL, just the location of the
@@ -189,11 +306,6 @@ extern void frame_saved_regs_zalloc (struct frame_info *);
 
 #define FRAME_FP(fi) ((fi)->frame)
 
-/* Level of the frame: 0 for innermost, 1 for its caller, ...; or -1
-   for an invalid frame.  */
-
-extern int frame_relative_level (struct frame_info *fi);
-
 /* Define a default FRAME_CHAIN_VALID, in the form that is suitable for most
    targets.  If FRAME_CHAIN_VALID returns zero it means that the given frame
    is the outermost one and has no caller.
@@ -209,20 +321,7 @@ extern int generic_file_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern int generic_func_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
 
-/* The stack frame that the user has specified for commands to act on.
-   Note that one cannot assume this is the address of valid data.  */
-
-extern struct frame_info *selected_frame;
-
-/* Level of the selected frame:
-   0 for innermost, 1 for its caller, ...
-   or -1 for frame specified by address with no defined level.  */
-
 extern struct frame_info *create_new_frame (CORE_ADDR, CORE_ADDR);
-
-extern void flush_cached_frames (void);
-
-extern void reinit_frame_cache (void);
 
 
 #ifdef FRAME_FIND_SAVED_REGS
@@ -232,14 +331,6 @@ extern void get_frame_saved_regs (struct frame_info *,
 				  struct frame_saved_regs *);
 #endif
 
-extern void set_current_frame (struct frame_info *);
-
-extern struct frame_info *get_prev_frame (struct frame_info *);
-
-extern struct frame_info *get_current_frame (void);
-
-extern struct frame_info *get_next_frame (struct frame_info *);
-
 extern struct block *get_frame_block (struct frame_info *,
                                       CORE_ADDR *addr_in_block);
 
@@ -248,8 +339,6 @@ extern struct block *get_current_block (CORE_ADDR *addr_in_block);
 extern struct block *get_selected_block (CORE_ADDR *addr_in_block);
 
 extern struct symbol *get_frame_function (struct frame_info *);
-
-extern CORE_ADDR get_frame_pc (struct frame_info *);
 
 extern CORE_ADDR frame_address_in_block (struct frame_info *);
 
@@ -274,24 +363,6 @@ extern void print_stack_frame (struct frame_info *, int, int);
 extern void print_only_stack_frame (struct frame_info *, int, int);
 
 extern void show_stack_frame (struct frame_info *);
-
-extern void select_frame (struct frame_info *);
-
-/* Return an ID that can be used to re-find a frame.  */
-
-struct frame_id
-{
-  /* The frame's address.  This should be constant through out the
-     lifetime of a frame.  */
-  CORE_ADDR base;
-  /* The frame's current PC.  While this changes, the function that
-     the PC falls into, does not.  */
-  CORE_ADDR pc;
-};
-
-extern void get_frame_id (struct frame_info *fi, struct frame_id *id);
-
-extern struct frame_info *frame_find_by_id (struct frame_id id);
 
 extern void print_frame_info (struct frame_info *, int, int, int);
 
@@ -342,34 +413,6 @@ extern void generic_unwind_get_saved_register (char *raw_buffer,
 					       int regnum,
 					       enum lval_type *lval);
 
-/* Unwind the stack frame so that the value of REGNUM, in the previous
-   frame is returned.  If VALUEP is NULL, don't fetch/compute the
-   value.  Instead just return the location of the value.  */
-
-extern void frame_register_unwind (struct frame_info *frame, int regnum,
-				   int *optimizedp, enum lval_type *lvalp,
-				   CORE_ADDR *addrp, int *realnump,
-				   void *valuep);
-
-/* Return the value of the register in this FRAME.  Convenience
-   function that is equivalent to frame_register_unwind
-   (get_next_frame (FRAME), ...).  If VALUEP is NULL, don't
-   fetch/compute the value.  */
-
-extern void frame_register (struct frame_info *frame, int regnum,
-			    int *optimizedp, enum lval_type *lvalp,
-			    CORE_ADDR *addrp, int *realnump,
-			    void *valuep);
-
-/* Unwind FRAME so that the value of register REGNUM, in the previous
-   frame is returned.  Simplified versions of frame_register_unwind.  */
-/* NOTE: cagney/2002-09-13: Return void as one day these functions may
-   be changed to return an indication that the read succeeded.  */
-extern void frame_unwind_signed_register (struct frame_info *frame,
-					  int regnum, LONGEST *val);
-extern void frame_unwind_unsigned_register (struct frame_info *frame,
-					    int regnum, ULONGEST *val);
-
 extern void generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi);
 
 extern void get_saved_register (char *raw_buffer, int *optimized,
@@ -377,27 +420,8 @@ extern void get_saved_register (char *raw_buffer, int *optimized,
 				struct frame_info *frame,
 				int regnum, enum lval_type *lval);
 
-/* Return the register as found on the FRAME.  Return zero if the
-   register could not be found.  */
 extern int frame_register_read (struct frame_info *frame, int regnum,
 				void *buf);
-
-/* Return the value of register REGNUM that belongs to FRAME.  The
-   value is obtained by unwinding the register from the next / more
-   inner frame.  */
-/* NOTE: cagney/2002-09-13: Return void as one day these functions may
-   be changed to return an indication that the read succeeded.  */
-extern void frame_read_signed_register (struct frame_info *frame,
-					int regnum, LONGEST *val);
-extern void frame_read_unsigned_register (struct frame_info *frame,
-					  int regnum, ULONGEST *val);
-
-/* Map between a frame register number and its name.  A frame register
-   space is a superset of the cooked register space --- it also
-   includes builtin registers.  */
-
-extern int frame_map_name_to_regnum (const char *name, int strlen);
-extern const char *frame_map_regnum_to_name (int regnum);
 
 /* From stack.c.  */
 extern void args_info (char *, int);

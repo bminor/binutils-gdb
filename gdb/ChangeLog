@@ -1,5 +1,10 @@
 2002-11-14  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.h: Move the most relevant interface functions to the start
+	of the file.
+
+2002-11-14  Andrew Cagney  <ac131313@redhat.com>
+
 	* regcache.h (deprecated_registers): Rename registers.
 	* a68v-nat.c, alpha-nat.c, arch-utils.c, core-sol2.c: Update.
 	* hp300ux-nat.c, hppab-nat.c, hppah-nat.c: Update.
