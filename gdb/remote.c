@@ -25,7 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	$ <data> # CSUM1 CSUM2
 
 	<data> must be ASCII alphanumeric and cannot include characters
-	'$' or '#'
+	'$' or '#'.  If <data> starts with two characters followed by
+	':', then the existing stubs interpret this as a sequence number.
 
 	CSUM1 and CSUM2 are ascii hex representation of an 8-bit 
 	checksum of <data>, the most significant nibble is sent first.
@@ -54,7 +55,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	reply		OK		for success
 			ENN		for an error
 
-        write reg	Pn...:r...	Write register n... with value r...,
+        write reg	Pn...=r...	Write register n... with value r...,
 					which contains two hex digits for each
 					byte in the register (target byte
 					order).
@@ -712,7 +713,7 @@ remote_store_registers (regno)
       /* Try storing a single register.  */
       char *regp;
 
-      sprintf (buf, "P%x:", regno);
+      sprintf (buf, "P%x=", regno);
       p = buf + strlen (buf);
       regp = &registers[REGISTER_BYTE (regno)];
       for (i = 0; i < REGISTER_RAW_SIZE (regno); ++i)
@@ -1186,9 +1187,9 @@ getpkt (retbuf, forever)
 	{
 	  if (forever)
 	    continue;
-	  if (++retries >= MAX_RETRIES)
-	    if (remote_debug) puts_filtered ("Timed out.\n");
-	  goto out;
+	  if (remote_debug)
+	    puts_filtered ("Timed out.\n");
+	  goto whole;
 	}
 
       if (c == SERIAL_EOF)

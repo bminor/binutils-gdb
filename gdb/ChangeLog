@@ -1,6 +1,14 @@
+Tue Mar 29 19:41:34 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.c (getpkt): If we get a timeout, actually retry rather
+	than just giving up the first time it happens.
+	* remote.c: Document sequence numbers.
+	(remote_store_registers): Change syntax of 'P' request so that it
+	never looks like a sequence number.
+
 Tue Mar 29 16:06:01 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
-	* os9kread.c (record_minmal_symbol): add section_offset to
+	* os9kread.c (record_minimal_symbol): add section_offset to
 	relocate minimal symbol table.
 	* os9kread.c (read_minimal_symbols): ditto.
 	* os9kread.c (os9k_symfile_init): increase size of dbg and stb
