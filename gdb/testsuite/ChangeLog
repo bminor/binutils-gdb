@@ -1,3 +1,8 @@
+Mon Apr 13 22:32:51 1998 Frank Ch. Eigler <fche@cygnus.com>
+
+	* gdb.c++/virtfunc.cc: Make extern "C" printf declaration pass
+	more rigorous EGCS C++ error checking.
+
 Fri Apr 10 22:38:12 1998 Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
         * gdb.base/help.exp:  Clean up `help set args' and `help show args'
