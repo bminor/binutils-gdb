@@ -167,12 +167,10 @@ static void macro_build PARAMS ((int *counter, expressionS * ep,
 				 ...));
 static void macro_build_lui PARAMS ((int *counter, expressionS * ep,
 				     int regnum));
-static void set_at PARAMS ((int *counter, int reg));
-static void set_at_unsigned PARAMS ((int *counter, int reg));
+static void set_at PARAMS ((int *counter, int reg, int unsignedp));
 static void check_absolute_expr PARAMS ((struct mips_cl_insn * ip,
 					 expressionS *));
 static void load_register PARAMS ((int *counter,
-				   struct mips_cl_insn * ip,
 				   int reg, expressionS * ep));
 static void macro PARAMS ((struct mips_cl_insn * ip));
 static void mips_ip PARAMS ((char *str, struct mips_cl_insn * ip));
@@ -723,7 +721,9 @@ append_insn (ip, address_expr, reloc_type)
 			 | INSN_COPROC_MEMORY_DELAY)))
 	      /* We can not swap with a branch instruction.  */
 	      || (prev_insn.insn_mo->pinfo
-		  & (INSN_UNCOND_BRANCH_DELAY | INSN_COND_BRANCH_DELAY))
+		  & (INSN_UNCOND_BRANCH_DELAY
+		     | INSN_COND_BRANCH_DELAY
+		     | INSN_COND_BRANCH_LIKELY))
 	      /* If the branch reads a register that the previous
 		 instruction sets, we can not swap.  */
 	      || ((prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_T)
@@ -1060,6 +1060,12 @@ macro_build (counter, ep, name, fmt, va_alist)
 	  r = BFD_RELOC_LO16;
 	  continue;
 
+	case 'u':
+	  assert (ep != NULL && ep->X_op == O_constant);
+	  insn.insn_opcode |= (ep->X_add_number >> 16) & 0xffff;
+	  ep = NULL;
+	  continue;
+
 	case 'p':
 	  assert (ep != NULL);
 	  /*
@@ -1153,59 +1159,25 @@ macro_build_lui (counter, ep, regnum)
  * if reg is less than the immediate expression.
  */
 static void
-set_at (counter, reg)
+set_at (counter, reg, unsignedp)
      int *counter;
      int reg;
+     int unsignedp;
 {
-
-  switch (imm_expr.X_add_number & 0xffff8000)
+  if (imm_expr.X_add_number >= -0x8000 && imm_expr.X_add_number < 0x8000)
+    macro_build (counter, &imm_expr,
+		 unsignedp ? "sltiu" : "slti",
+		 "t,r,j", AT, reg);
+  else
     {
-    case 0:
-    case 0xffff8000:
-      macro_build (counter, &imm_expr, "slti", "t,r,j", AT, reg);
-      return;
-
-    case 0x8000:
-      macro_build (counter, &imm_expr, "ori", "t,r,i", AT, 0);
-      break;
-
-    default:
-      macro_build_lui (counter, &imm_expr, AT);
-      if (imm_expr.X_add_number & 0xffff)
-	macro_build (counter, &imm_expr, "addiu", "t,r,j", AT, AT);
+      load_register (counter, AT, &imm_expr);
+      macro_build (counter, NULL,
+		   unsignedp ? "sltu" : "slt",
+		   "d,v,t", AT, reg, AT);
     }
-  macro_build (counter, NULL, "slt", "d,v,t", AT, reg, AT);
 }
 
-/*			set_at_unsigned()
- * Generates code to set the $at register to true (one)
- * if reg is less than the immediate expression.
- * Unsigned comparison is perfomed.
- */
-static void
-set_at_unsigned (counter, reg)
-     int *counter;
-     int reg;
-{
-
-  switch (imm_expr.X_add_number & 0xffff8000)
-    {
-    case 0:
-    case 0xffff8000:
-      macro_build (counter, &imm_expr, "sltiu", "t,r,j", AT, reg);
-      return;
-
-    case 0x8000:
-      macro_build (counter, &imm_expr, "ori", "t,r,i", AT, 0);
-      break;
-
-    default:
-      macro_build_lui (counter, &imm_expr, AT);
-      if (imm_expr.X_add_number & 0xffff)
-	macro_build (counter, &imm_expr, "addiu", "t,r,j", AT, AT);
-    }
-  macro_build (counter, NULL, "sltu", "d,v,t", AT, reg, AT);
-}
+/* Warn if an expression is not a constant.  */
 
 static void
 check_absolute_expr (ip, ex)
@@ -1221,30 +1193,61 @@ check_absolute_expr (ip, ex)
  *  an absolute expression value into a register.
  */
 static void
-load_register (counter, ip, reg, ep)
+load_register (counter, reg, ep)
      int *counter;
-     struct mips_cl_insn *ip;
      int reg;
      expressionS *ep;
 {
-  switch (ep->X_add_number & 0xffff8000)
+  assert (ep->X_op == O_constant);
+  if (ep->X_add_number >= -0x8000 && ep->X_add_number < 0x8000)
+    macro_build (counter, ep,
+		 mips_isa < 3 ? "addiu" : "daddiu",
+		 "t,r,j", reg, 0);
+  else if (ep->X_add_number >= 0 && ep->X_add_number < 0x10000)
+    macro_build (counter, ep, "ori", "t,r,i", reg, 0);
+  else if ((ep->X_add_number &~ (offsetT) 0x7fffffff) == 0
+	   || ((ep->X_add_number &~ (offsetT) 0x7fffffff)
+	       == ~ (offsetT) 0x7fffffff))
     {
-    case 0:
-    case 0xffff8000:
+      macro_build (counter, ep, "lui", "t,u", reg);
+      if ((ep->X_add_number & 0xffff) != 0)
+	macro_build (counter, ep, "ori", "t,r,i", reg, reg);
+    }
+  else if (mips_isa < 3)
+    {
+      as_bad ("Number larger than 32 bits");
       macro_build (counter, ep, "addiu", "t,r,j", reg, 0);
-      break;
+    }
+  else
+    {
+      int shift;
+      expressionS hi32, lo32;
 
-    case 0x8000:
-      macro_build (counter, ep, "ori", "t,r,i", reg, 0);
-      break;
+      hi32 = *ep;
+      shift = 32;
+      hi32.X_add_number >>= shift;
+      hi32.X_add_number &= 0xffffffff;
+      if ((hi32.X_add_number & 0x80000000) != 0)
+	hi32.X_add_number |= ~ (offsetT) 0xffffffff;
+      load_register (counter, reg, &hi32);
+      lo32 = *ep;
+      lo32.X_add_number &= 0xffffffff;
+      if ((lo32.X_add_number & 0xffff0000) == 0)
+	macro_build (counter, NULL, "dsll32", "d,w,<", reg, reg, 0);
+      else
+	{
+	  expressionS mid16;
 
-    default:
-      macro_build_lui (counter, ep, reg);
-      if (ep->X_add_number & 0xffff)
-	macro_build (counter, ep, "addiu", "t,r,j", reg, reg);
+	  macro_build (counter, NULL, "dsll", "d,w,<", reg, reg, 16);
+	  mid16 = lo32;
+	  mid16.X_add_number >>= 16;
+	  macro_build (counter, &mid16, "ori", "t,r,i", reg, reg);
+	  macro_build (counter, NULL, "dsll", "d,w,<", reg, reg, 16);
+	}
+      if ((lo32.X_add_number & 0xffff) != 0)
+	macro_build (counter, &lo32, "ori", "t,r,i", reg, reg);
     }
 }
-
 
 /*
  *			Build macros
@@ -1280,6 +1283,7 @@ macro (ip)
   int likely = 0;
   int dbl = 0;
   int coproc = 0;
+  offsetT maxnum;
 
   treg = (ip->insn_opcode >> 16) & 0x1f;
   dreg = (ip->insn_opcode >> 11) & 0x1f;
@@ -1293,24 +1297,26 @@ macro (ip)
 
   switch (mask)
     {
+    case M_DABS:
+      dbl = 1;
     case M_ABS:
-    case M_ABSU:
-      /*
-	Note: mips algorithm requires the move in the delay slot.
-	<main>:		bgez $a0,0x4001bc <main+12>
-	<main+4>:	move v0,$a0
-	<main+8>:	sub v0,$zero,$a0
-	<main+12>:	nop
-	*/
+      /* bgez $a0,.+12
+	 move v0,$a0
+	 sub v0,$zero,$a0
+	 */
 
       mips_emit_delays ();
       ++mips_noreorder;
 
       expr1.X_add_number = 8;
       macro_build (&icnt, &expr1, "bgez", "s,p", sreg);
-      macro_build (&icnt, NULL, "move", "d,s", dreg, sreg, 0);
-      macro_build (&icnt, NULL, mask == M_ABS ? "sub" : "subu", "d,v,t",
-		   dreg, 0, sreg);
+      if (dreg == sreg)
+	macro_build (&icnt, NULL, "nop", "", 0);
+      else
+	macro_build (&icnt, NULL, "move", "d,s", dreg, sreg, 0);
+      macro_build (&icnt, NULL,
+		   dbl ? "dsub" : "sub",
+		   "d,v,t", dreg, 0, sreg);
 
       --mips_noreorder;
       return;
@@ -1324,86 +1330,54 @@ macro (ip)
       s2 = "addu";
       goto do_addi;
     case M_DADD_I:
+      dbl = 1;
       s = "daddi";
       s2 = "dadd";
       goto do_addi;
     case M_DADDU_I:
+      dbl = 1;
       s = "daddiu";
       s2 = "daddu";
     do_addi:
-      switch (imm_expr.X_add_number & 0xffff8000)
+      if (imm_expr.X_add_number >= -0x8000 && imm_expr.X_add_number < 0x8000)
 	{
-	case 0:
-	case 0xffff8000:
 	  macro_build (&icnt, &imm_expr, s, "t,r,j", treg, sreg);
 	  return;
-
-	case 0x8000:
-	  macro_build (&icnt, &imm_expr, "ori", "t,r,i", AT, 0);
-	  break;
-
-	default:
-	  macro_build_lui (&icnt, &imm_expr, AT);
-	  if (imm_expr.X_add_number & 0xffff)
-	    macro_build (&icnt, &imm_expr, "addiu", "t,r,j", AT, AT);
-	  break;
 	}
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, NULL, s2, "d,v,t", treg, sreg, AT);
       break;
 
     case M_AND_I:
+      s = "andi";
+      s2 = "and";
+      goto do_bit;
     case M_OR_I:
+      s = "ori";
+      s2 = "or";
+      goto do_bit;
     case M_NOR_I:
+      s = "";
+      s2 = "nor";
+      goto do_bit;
     case M_XOR_I:
-      switch (imm_expr.X_add_number & 0xffff8000)
+      s = "xori";
+      s2 = "xor";
+    do_bit:
+      if (imm_expr.X_add_number >= 0 && imm_expr.X_add_number < 0x10000)
 	{
-	case 0:
-	case 0x8000:
-	  switch (mask)
+	  if (mask != M_NOR_I)
+	    macro_build (&icnt, &imm_expr, s, "t,r,i", treg, sreg);
+	  else
 	    {
-	    case M_AND_I:
-	      macro_build (&icnt, &imm_expr, "andi", "t,r,i", treg, sreg);
-	      return;
-	    case M_OR_I:
-	      macro_build (&icnt, &imm_expr, "ori", "t,r,i", treg, sreg);
-	      return;
-	    case M_NOR_I:
 	      macro_build (&icnt, &imm_expr, "ori", "t,r,i", treg, sreg);
 	      macro_build (&icnt, &imm_expr, "nor", "d,v,t", treg, treg, 0);
-	      return;
-	    case M_XOR_I:
-	      macro_build (&icnt, &imm_expr, "xori", "t,r,i", treg, sreg);
-	      return;
-	    default:
-	      internalError ();
 	    }
-
-	case 0xffff8000:
-	  macro_build (&icnt, &imm_expr, "addiu", "t,r,j", AT, 0);
-	  break;
-
-	default:
-	  macro_build_lui (&icnt, &imm_expr, AT);
-	  if (imm_expr.X_add_number & 0xffff)
-	    macro_build (&icnt, &imm_expr, "addiu", "t,r,j", AT, AT);
+	  return;
 	}
-      switch (mask)
-	{
-	case M_AND_I:
-	  macro_build (&icnt, NULL, "and", "d,v,t", treg, sreg, AT);
-	  break;
-	case M_OR_I:
-	  macro_build (&icnt, NULL, "or", "d,v,t", treg, sreg, AT);
-	  break;
-	case M_NOR_I:
-	  macro_build (&icnt, NULL, "nor", "d,v,t", treg, sreg, AT);
-	  break;
-	case M_XOR_I:
-	  macro_build (&icnt, NULL, "xor", "d,v,t", treg, sreg, AT);
-	  break;
-	default:
-	  internalError ();
-	}
+
+      load_register (&icnt, AT, &imm_expr);
+      macro_build (&icnt, NULL, s2, "d,v,t", treg, sreg, AT);
       break;
 
     case M_BEQ_I:
@@ -1425,7 +1399,7 @@ macro (ip)
 	  macro_build (&icnt, &offset_expr, s, "s,t,p", sreg, 0);
 	  return;
 	}
-      load_register (&icnt, ip, AT, &imm_expr);
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, &offset_expr, s, "s,t,p", sreg, AT);
       break;
 
@@ -1456,7 +1430,15 @@ macro (ip)
       likely = 1;
     case M_BGT_I:
       /* check for > max integer */
-      if (imm_expr.X_add_number == 0x7fffffff)
+      maxnum = 0x7fffffff;
+      if (mips_isa >= 3)
+	{
+	  maxnum <<= 16;
+	  maxnum |= 0xffff;
+	  maxnum <<= 16;
+	  maxnum |= 0xffff;
+	}
+      if (imm_expr.X_add_number >= maxnum)
 	{
 	do_false:
 	  /* result is always false */
@@ -1492,7 +1474,16 @@ macro (ip)
 		       "s,p", sreg);
 	  return;
 	}
-      if (imm_expr.X_add_number == 0x80000000)
+      maxnum = 0x7fffffff;
+      if (mips_isa >= 3)
+	{
+	  maxnum <<= 16;
+	  maxnum |= 0xffff;
+	  maxnum <<= 16;
+	  maxnum |= 0xffff;
+	}
+      maxnum = - maxnum - 1;
+      if (imm_expr.X_add_number <= maxnum)
 	{
 	do_true:
 	  /* result is always true */
@@ -1500,7 +1491,7 @@ macro (ip)
 	  macro_build (&icnt, &offset_expr, "b", "p");
 	  return;
 	}
-      set_at (&icnt, sreg);
+      set_at (&icnt, sreg, 0);
       macro_build (&icnt, &offset_expr,
 		   likely ? "beql" : "beq",
 		   "s,t,p", AT, 0);
@@ -1527,7 +1518,7 @@ macro (ip)
     case M_BGTUL_I:
       likely = 1;
     case M_BGTU_I:
-      if (sreg == 0 || imm_expr.X_add_number == 0xffffffff)
+      if (sreg == 0 || imm_expr.X_add_number == -1)
 	goto do_false;
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
@@ -1544,7 +1535,7 @@ macro (ip)
 		       "s,t,p", sreg, 0);
 	  return;
 	}
-      set_at_unsigned (&icnt, sreg);
+      set_at (&icnt, sreg, 1);
       macro_build (&icnt, &offset_expr,
 		   likely ? "beql" : "beq",
 		   "s,t,p", AT, 0);
@@ -1617,7 +1608,15 @@ macro (ip)
     case M_BLEL_I:
       likely = 1;
     case M_BLE_I:
-      if (imm_expr.X_add_number == 0x7fffffff)
+      maxnum = 0x7fffffff;
+      if (mips_isa >= 3)
+	{
+	  maxnum <<= 16;
+	  maxnum |= 0xffff;
+	  maxnum <<= 16;
+	  maxnum |= 0xffff;
+	}
+      if (imm_expr.X_add_number >= maxnum)
 	goto do_true;
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
@@ -1639,7 +1638,7 @@ macro (ip)
 		       "s,p", sreg);
 	  return;
 	}
-      set_at (&icnt, sreg);
+      set_at (&icnt, sreg, 0);
       macro_build (&icnt, &offset_expr,
 		   likely ? "bnel" : "bne",
 		   "s,t,p", AT, 0);
@@ -1666,7 +1665,7 @@ macro (ip)
     case M_BLEUL_I:
       likely = 1;
     case M_BLEU_I:
-      if (sreg == 0 || imm_expr.X_add_number == 0xffffffff)
+      if (sreg == 0 || imm_expr.X_add_number == -1)
 	goto do_true;
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
@@ -1683,7 +1682,7 @@ macro (ip)
 		       "s,t,p", sreg, 0);
 	  return;
 	}
-      set_at_unsigned (&icnt, sreg);
+      set_at (&icnt, sreg, 1);
       macro_build (&icnt, &offset_expr,
 		   likely ? "bnel" : "bne",
 		   "s,t,p", AT, 0);
@@ -1771,7 +1770,7 @@ macro (ip)
       else
 	{
 	  expr1.X_add_number = 0x80000000;
-	  macro_build_lui (&icnt, &expr1, AT);
+	  macro_build (&icnt, &expr1, "lui", "t,u", AT);
 	}
       expr1.X_add_number = 8;
       macro_build (&icnt, &expr1, "bne", "s,t,p", sreg, AT);
@@ -1779,7 +1778,6 @@ macro (ip)
       macro_build (&icnt, NULL, "break", "c", 6);
       --mips_noreorder;
       macro_build (&icnt, NULL, s, "d", dreg);
-      /* with reorder on there will be two implicit nop instructions here. */
       break;
 
     case M_DIV_3I:
@@ -1847,10 +1845,9 @@ macro (ip)
 	  return;
 	}
 
-      load_register (&icnt, ip, AT, &imm_expr);
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, NULL, s, "s,t", sreg, AT);
       macro_build (&icnt, NULL, s2, "d", dreg);
-      /* two implicit nop's required for mflo or mfhi */
       break;
 
     case M_DIVU_3:
@@ -1878,34 +1875,43 @@ macro (ip)
       macro_build (&icnt, NULL, "break", "c", 7);
       --mips_noreorder;
       macro_build (&icnt, NULL, s2, "d", dreg);
-      /* with reorder on there will be two implicit nop instructions here. */
       return;
 
     case M_LA:
       if (offset_expr.X_op == O_constant)
 	{
-	  load_register (&icnt, ip, treg, &offset_expr);
+	  load_register (&icnt, treg, &offset_expr);
 	  return;
 	}
       if (gp_reference (&offset_expr))
-	macro_build (&icnt, &offset_expr, "addiu", "t,r,j", treg, GP);
+	macro_build (&icnt, &offset_expr,
+		     mips_isa < 3 ? "addiu" : "daddiu",
+		     "t,r,j", treg, GP);
       else
 	{
+	  /* FIXME: This won't work for a 64 bit address.  */
 	  macro_build_lui (&icnt, &offset_expr, treg);
-	  macro_build (&icnt, &offset_expr, "addiu", "t,r,j", treg, treg);
+	  macro_build (&icnt, &offset_expr,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", treg, treg);
 	}
       return;
 
     case M_LA_AB:
       tempreg = (breg == treg) ? AT : treg;
       if (offset_expr.X_op == O_constant)
-	load_register (&icnt, ip, tempreg, &offset_expr);
+	load_register (&icnt, tempreg, &offset_expr);
       else if (gp_reference (&offset_expr))
-	macro_build (&icnt, &offset_expr, "addiu", "t,r,j", tempreg, GP);
+	macro_build (&icnt, &offset_expr,
+		     mips_isa < 3 ? "addiu" : "daddiu",
+		     "t,r,j", tempreg, GP);
       else
 	{
+	  /* FIXME: This won't work for a 64 bit address.  */
 	  macro_build_lui (&icnt, &offset_expr, tempreg);
-	  macro_build (&icnt, &offset_expr, "addiu", "t,r,j", tempreg, tempreg);
+	  macro_build (&icnt, &offset_expr,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", tempreg, tempreg);
 	}
       if (breg != 0)
 	macro_build (&icnt, NULL, "addu", "d,v,t", treg, tempreg, breg);
@@ -2064,14 +2070,18 @@ macro (ip)
 	      macro_build (&icnt, &offset_expr, s, fmt, treg, GP);
 	      return;
 	    }
-	  macro_build (&icnt, (expressionS *) NULL, "addu", "d,v,t",
-		       tempreg, breg, GP);
+	  macro_build (&icnt, (expressionS *) NULL,
+		       mips_isa < 3 ? "addu" : "daddu",
+		       "d,v,t", tempreg, breg, GP);
 	}
       else
 	{
+	  /* FIXME: This won't work for a 64 bit address.  */
 	  macro_build_lui (&icnt, &offset_expr, tempreg);
 	  if (breg != 0)
-	    macro_build (&icnt, NULL, "addu", "d,v,t", tempreg, tempreg, breg);
+	    macro_build (&icnt, NULL,
+			 mips_isa < 3 ? "addu" : "daddu",
+			 "d,v,t", tempreg, tempreg, breg);
 	}
       macro_build (&icnt, &offset_expr, s, fmt, treg, tempreg);
       if (used_at)
@@ -2080,7 +2090,7 @@ macro (ip)
 
     case M_LI:
     case M_LI_S:
-      load_register (&icnt, ip, treg, &imm_expr);
+      load_register (&icnt, treg, &imm_expr);
       return;
 
     case M_LI_D:
@@ -2091,6 +2101,7 @@ macro (ip)
 	 foo:
 	  .double 3.133435
 	 */
+      /* FIXME: This won't work for a 64 bit address.  */
       macro_build_lui (&icnt, &offset_expr, AT);
       if (mips_isa >= 3)
 	macro_build (&icnt, &offset_expr, "ld", "t,o(b)", treg, AT);
@@ -2142,15 +2153,20 @@ macro (ip)
 	    tempreg = GP;
 	  else
 	    {
-	      macro_build (&icnt, &offset_expr, "addu", "d,v,t", AT, breg, GP);
+	      macro_build (&icnt, &offset_expr,
+			   mips_isa < 3 ? "addu" : "daddu",
+			   "d,v,t", AT, breg, GP);
 	      tempreg = AT;
 	    }
 	}
       else
 	{
+	  /* FIXME: This won't work for a 64 bit address.  */
 	  macro_build_lui (&icnt, &offset_expr, AT);
 	  if (breg != 0)
-	    macro_build (&icnt, NULL, "addu", "d,v,t", AT, AT, breg);
+	    macro_build (&icnt, NULL,
+			 mips_isa < 3 ? "addu" : "daddu",
+			 "d,v,t", AT, AT, breg);
 	  tempreg = AT;
 	}
       if (mips_isa >= 2)
@@ -2211,14 +2227,18 @@ macro (ip)
 	      used_at = 0;
 	    }
 	  else
-	    macro_build (&icnt, (expressionS *) NULL, "addu", "d,v,t",
-			 tempreg, breg, GP);
+	    macro_build (&icnt, (expressionS *) NULL,
+			 mips_isa < 3 ? "addu" : "daddu",
+			 "d,v,t", tempreg, breg, GP);
 	}
       else
 	{
+	  /* FIXME: This won't work for a 64 bit address.  */
 	  macro_build_lui (&icnt, &offset_expr, tempreg);
 	  if (breg != 0)
-	    macro_build (&icnt, NULL, "addu", "d,v,t", tempreg, tempreg, breg);
+	    macro_build (&icnt, NULL,
+			 mips_isa < 3 ? "addu" : "daddu",
+			 "d,v,t", tempreg, tempreg, breg);
 	}
       if (mips_isa >= 3)
 	macro_build (&icnt, &offset_expr, s2, "t,o(b)", treg, tempreg);
@@ -2239,7 +2259,6 @@ macro (ip)
 		   dbl ? "dmultu" : "multu",
 		   "s,t", sreg, treg);
       macro_build (&icnt, NULL, "mflo", "d", dreg);
-      /* two implicit nop's required for mflo */
       return;
 
     case M_DMUL_I:
@@ -2248,12 +2267,11 @@ macro (ip)
       /* The MIPS assembler some times generates shifts and adds.  I'm
 	 not trying to be that fancy. GCC should do this for us
 	 anyway.  */
-      load_register (&icnt, ip, AT, &imm_expr);
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, NULL,
 		   dbl ? "dmult" : "mult",
 		   "s,t", sreg, AT);
       macro_build (&icnt, NULL, "mflo", "d", dreg);
-      /* two implicit nop's required for mflo */
       break;
 
     case M_DMULO:
@@ -2344,16 +2362,20 @@ macro (ip)
 	    tempreg = GP;
 	  else
 	    {
-	      macro_build (&icnt, (expressionS *) NULL, "addu", "d,v,t",
-			   AT, breg, GP);
+	      macro_build (&icnt, (expressionS *) NULL,
+			   mips_isa < 3 ? "addu" : "daddu",
+			   "d,v,t", AT, breg, GP);
 	      tempreg = AT;
 	    }
 	}
       else
 	{
+	  /* FIXME: This won't work for a 64 bit address.  */
 	  macro_build_lui (&icnt, &offset_expr, AT);
 	  if (breg != 0)
-	    macro_build (&icnt, NULL, "addu", "d,v,t", AT, AT, breg);
+	    macro_build (&icnt, NULL,
+			 mips_isa < 3 ? "addu" : "daddu",
+			 "d,v,t", AT, AT, breg);
 	  tempreg = AT;
 	}
       if (mips_isa >= 2)
@@ -2395,32 +2417,26 @@ macro (ip)
       if (sreg == 0)
 	{
 	  as_warn ("Instruction %s: result is always false",
-	    ip->insn_mo->name);
+		   ip->insn_mo->name);
 	  macro_build (&icnt, NULL, "move", "d,s", dreg, 0);
 	  return;
 	}
-      switch (imm_expr.X_add_number & 0xffff8000)
+      if (imm_expr.X_add_number >= 0 && imm_expr.X_add_number < 0x10000)
 	{
-	case 0:
-	case 0x8000:
 	  macro_build (&icnt, &imm_expr, "xori", "t,r,i", dreg, sreg);
 	  used_at = 0;
-	  break;
-
-	case 0xffff8000:
-	  if (imm_expr.X_add_number != -32768)
-	    {
-	      imm_expr.X_add_number = -imm_expr.X_add_number;
-	      macro_build (&icnt, &imm_expr, "addiu", "t,r,j", dreg, sreg);
-	      used_at = 0;
-	      break;
-	    }
-	  /* FALLTHROUGH */
-
-	default:
-	  macro_build_lui (&icnt, &imm_expr, AT);
-	  if (imm_expr.X_add_number & 0xffff)
-	    macro_build (&icnt, &imm_expr, "addiu", "t,r,j", AT, AT);
+	}
+      else if (imm_expr.X_add_number > -0x8000 && imm_expr.X_add_number < 0)
+	{
+	  imm_expr.X_add_number = -imm_expr.X_add_number;
+	  macro_build (&icnt, &imm_expr,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", dreg, sreg);
+	  used_at = 0;
+	}
+      else
+	{
+	  load_register (&icnt, AT, &imm_expr);
 	  macro_build (&icnt, NULL, "xor", "d,v,t", dreg, sreg, AT);
 	  used_at = 1;
 	}
@@ -2441,17 +2457,19 @@ macro (ip)
 
     case M_SGE_I:		/* sreg >= I <==> not (sreg < I) */
     case M_SGEU_I:
-      if (imm_expr.X_add_number < 32768 && imm_expr.X_add_number > -32769)
+      if (imm_expr.X_add_number >= -0x8000 && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build (&icnt, &expr1,
-		   mask == M_SGE_I ? "slti" : "sltiu", "t,r,j", dreg, sreg);
+		       mask == M_SGE_I ? "slti" : "sltiu",
+		       "t,r,j", dreg, sreg);
 	  used_at = 0;
 	}
       else
 	{
-	  load_register (&icnt, ip, AT, &imm_expr);
+	  load_register (&icnt, AT, &imm_expr);
 	  macro_build (&icnt, NULL,
-		 mask == M_SGE_I ? "slt" : "sltu", "d,v,t", dreg, sreg, AT);
+		       mask == M_SGE_I ? "slt" : "sltu",
+		       "d,v,t", dreg, sreg, AT);
 	  used_at = 1;
 	}
       macro_build (&icnt, &expr1, "xori", "t,r,i", dreg, dreg);
@@ -2474,7 +2492,7 @@ macro (ip)
     case M_SGTU_I:
       s = "sltu";
     sgti:
-      load_register (&icnt, ip, AT, &imm_expr);
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, NULL, s, "d,v,t", dreg, AT, sreg);
       break;
 
@@ -2494,28 +2512,28 @@ macro (ip)
     case M_SLEU_I:
       s = "sltu";
     slei:
-      load_register (&icnt, ip, AT, &imm_expr);
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, NULL, s, "d,v,t", dreg, AT, sreg);
       macro_build (&icnt, &expr1, "xori", "t,r,i", dreg, dreg);
       break;
 
     case M_SLT_I:
-      if (imm_expr.X_add_number < 32768 && imm_expr.X_add_number > -32769)
+      if (imm_expr.X_add_number >= -0x8000 && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build (&icnt, &imm_expr, "slti", "t,r,j", dreg, sreg);
 	  return;
 	}
-      load_register (&icnt, ip, AT, &imm_expr);
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, NULL, "slt", "d,v,t", dreg, sreg, AT);
       break;
 
     case M_SLTU_I:
-      if (imm_expr.X_add_number < 32768 && imm_expr.X_add_number > -32769)
+      if (imm_expr.X_add_number >= -0x8000 && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build (&icnt, &imm_expr, "sltiu", "t,r,j", dreg, sreg);
 	  return;
 	}
-      load_register (&icnt, ip, AT, &imm_expr);
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, NULL, "sltu", "d,v,t", dreg, sreg, AT);
       break;
 
@@ -2540,32 +2558,28 @@ macro (ip)
       if (sreg == 0)
 	{
 	  as_warn ("Instruction %s: result is always true",
-	    ip->insn_mo->name);
-	  macro_build (&icnt, &expr1, "addiu", "t,r,j", dreg, 0);
+		   ip->insn_mo->name);
+	  macro_build (&icnt, &expr1,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", dreg, 0);
 	  return;
 	}
-      switch (imm_expr.X_add_number & 0xffff8000)
+      if (imm_expr.X_add_number >= 0 && imm_expr.X_add_number < 0x10000)
 	{
-	case 0:
-	case 0x8000:
 	  macro_build (&icnt, &imm_expr, "xori", "t,r,i", dreg, sreg);
 	  used_at = 0;
-	  break;
-
-	case 0xffff8000:
-	  if (imm_expr.X_add_number != -32768)
-	    {
-	      imm_expr.X_add_number = -imm_expr.X_add_number;
-	      macro_build (&icnt, &imm_expr, "addiu", "t,r,j", dreg, sreg);
-	      used_at = 0;
-	      break;
-	    }
-	  /* FALLTHROUGH */
-
-	default:
-	  macro_build_lui (&icnt, &imm_expr, AT);
-	  if (imm_expr.X_add_number & 0xffff)
-	    macro_build (&icnt, &imm_expr, "addiu", "t,r,j", AT, AT);
+	}
+      else if (imm_expr.X_add_number > -0x8000 && imm_expr.X_add_number < 0)
+	{
+	  imm_expr.X_add_number = -imm_expr.X_add_number;
+	  macro_build (&icnt, &imm_expr,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", dreg, sreg);
+	  used_at = 0;
+	}
+      else
+	{
+	  load_register (&icnt, AT, &imm_expr);
 	  macro_build (&icnt, NULL, "xor", "d,v,t", dreg, sreg, AT);
 	  used_at = 1;
 	}
@@ -2577,7 +2591,7 @@ macro (ip)
     case M_DSUB_I:
       dbl = 1;
     case M_SUB_I:
-      if (imm_expr.X_add_number < 32768 && imm_expr.X_add_number > -32768)
+      if (imm_expr.X_add_number > -0x8000 && imm_expr.X_add_number <= 0x8000)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build (&icnt, &imm_expr,
@@ -2585,7 +2599,7 @@ macro (ip)
 		       "t,r,j", dreg, sreg);
 	  return;
 	}
-      load_register (&icnt, ip, AT, &imm_expr);
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, NULL,
 		   dbl ? "dsub" : "sub",
 		   "d,v,t", dreg, sreg, AT);
@@ -2594,7 +2608,7 @@ macro (ip)
     case M_DSUBU_I:
       dbl = 1;
     case M_SUBU_I:
-      if (imm_expr.X_add_number < 32768 && imm_expr.X_add_number > -32768)
+      if (imm_expr.X_add_number > -0x8000 && imm_expr.X_add_number <= 0x8000)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build (&icnt, &imm_expr,
@@ -2602,7 +2616,7 @@ macro (ip)
 		       "t,r,j", dreg, sreg);
 	  return;
 	}
-      load_register (&icnt, ip, AT, &imm_expr);
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, NULL,
 		   dbl ? "dsubu" : "subu",
 		   "d,v,t", dreg, sreg, AT);
@@ -2626,7 +2640,7 @@ macro (ip)
     case M_TNE_I:
       s = "tne";
     trap:
-      load_register (&icnt, ip, AT, &imm_expr);
+      load_register (&icnt, AT, &imm_expr);
       macro_build (&icnt, NULL, s, "s,t", sreg, AT);
       break;
 
@@ -2685,13 +2699,18 @@ macro (ip)
     case M_ULHU_A:
     case M_ULW_A:
       if (offset_expr.X_op == O_constant)
-	load_register (&icnt, ip, AT, &offset_expr);
+	load_register (&icnt, AT, &offset_expr);
       else if (gp_reference (&offset_expr))
-	macro_build (&icnt, &offset_expr, "addiu", "t,r,j", AT, GP);
+	macro_build (&icnt, &offset_expr,
+		     mips_isa < 3 ? "addiu" : "daddiu",
+		     "t,r,j", AT, GP);
       else
 	{
+	  /* FIXME: This won't work for a 64 bit address.  */
 	  macro_build_lui (&icnt, &offset_expr, AT);
-	  macro_build (&icnt, &offset_expr, "addiu", "t,r,j", AT, AT);
+	  macro_build (&icnt, &offset_expr,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", AT, AT);
 	}
       if (mask == M_ULW_A)
 	{
@@ -2728,13 +2747,18 @@ macro (ip)
     case M_USH_A:
     case M_USW_A:
       if (offset_expr.X_op == O_constant)
-	load_register (&icnt, ip, AT, &offset_expr);
+	load_register (&icnt, AT, &offset_expr);
       else if (gp_reference (&offset_expr))
-	macro_build (&icnt, &offset_expr, "addiu", "t,r,j", AT, GP);
+	macro_build (&icnt, &offset_expr,
+		     mips_isa < 3 ? "addiu" : "daddiu",
+		     "t,r,j", AT, GP);
       else
 	{
+	  /* FIXME: This won't work for a 64 bit address.  */
 	  macro_build_lui (&icnt, &offset_expr, AT);
-	  macro_build (&icnt, &offset_expr, "addiu", "t,r,j", AT, AT);
+	  macro_build (&icnt, &offset_expr,
+		       mips_isa < 3 ? "addiu" : "daddiu",
+		       "t,r,j", AT, AT);
 	}
       if (mask == M_USW_A)
 	{
@@ -3213,7 +3237,7 @@ mips_ip (str, ip)
 		      as_bad ("Can't use floating point insn in this section");
 
 		    /* Set the argument to the current address in the
-		       .rdata section.  */
+		       section.  */
 		    offset_expr.X_op = O_symbol;
 		    offset_expr.X_add_symbol =
 		      symbol_new ("L0\001", now_seg,
@@ -3251,7 +3275,8 @@ mips_ip (str, ip)
 		check_absolute_expr (ip, &imm_expr);
 	      if (*args == 'i')
 		{
-		  if ((unsigned long) imm_expr.X_add_number > 65535)
+		  if (imm_expr.X_add_number < 0
+		      || imm_expr.X_add_number >= 0x10000)
 		    {
 		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
 			  !strcmp (insn->name, insn[1].name))
@@ -3261,8 +3286,8 @@ mips_ip (str, ip)
 		}
 	      else
 		{
-		  if (imm_expr.X_add_number < -32768 ||
-		      imm_expr.X_add_number > 32767)
+		  if (imm_expr.X_add_number < -0x8000 ||
+		      imm_expr.X_add_number >= 0x8000)
 		    {
 		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
 			  !strcmp (insn->name, insn[1].name))
@@ -3280,17 +3305,18 @@ mips_ip (str, ip)
 	       * go find a macro that will generate the 32 bit offset
 	       * code pattern.
 	       */
-	      if ((offset_expr.X_add_symbol
-		   && offset_expr.X_op != O_constant)
-		  || offset_expr.X_op_symbol
-		  || offset_expr.X_add_number > 32767
-		  || offset_expr.X_add_number < -32768)
+	      if (offset_expr.X_op != O_constant
+		  || offset_expr.X_add_number >= 0x8000
+		  || offset_expr.X_add_number < -0x8000)
 		break;
 
 	      offset_reloc = BFD_RELOC_LO16;
 	      if (c == 'h' || c == 'H')
-		offset_expr.X_add_number =
-		  (offset_expr.X_add_number >> 16) & 0xffff;
+		{
+		  assert (offset_expr.X_op == O_constant);
+		  offset_expr.X_add_number =
+		    (offset_expr.X_add_number >> 16) & 0xffff;
+		}
 	      s = expr_end;
 	      continue;
 
@@ -3302,7 +3328,9 @@ mips_ip (str, ip)
 
 	    case 'u':		/* upper 16 bits */
 	      c = my_getSmallExpression (&imm_expr, s);
-	      if ((unsigned long) imm_expr.X_add_number > 65535)
+	      if (imm_expr.X_op != O_constant
+		  || imm_expr.X_add_number < 0
+		  || imm_expr.X_add_number >= 0x10000)
 		as_bad ("lui expression not in range 0..65535");
 	      imm_reloc = BFD_RELOC_LO16;
 	      if (c)
@@ -3518,18 +3546,26 @@ md_number_to_chars (buf, val, n)
     case LITTLE_ENDIAN:
       switch (n)
 	{
+	case 8:
+	  *buf++ = val;
+	  val >>= 8;
+	  *buf++ = val;
+	  val >>= 8;
+	  *buf++ = val;
+	  val >>= 8;
+	  *buf++ = val;
+	  val >>= 8;
+	  /* FALLTHROUGH */
 	case 4:
 	  *buf++ = val;
-	  *buf++ = val >> 8;
-	  *buf++ = val >> 16;
-	  *buf = val >> 24;
-	  return;
-
+	  val >>= 8;
+	  *buf++ = val;
+	  val >>= 8;
+	  /* FALLTHROUGH */
 	case 2:
 	  *buf++ = val;
-	  *buf = val >> 8;
-	  return;
-
+	  val >>= 8;
+	  /* FALLTHROUGH */
 	case 1:
 	  *buf = val;
 	  return;
@@ -3541,11 +3577,24 @@ md_number_to_chars (buf, val, n)
     case BIG_ENDIAN:
       switch (n)
 	{
+	case 8:
+	  {
+	    valueT hi;
+
+	    hi = val;
+	    hi >>= 16;
+	    hi >>= 16;
+	    md_number_to_chars (buf, hi, 4);
+	    buf += 4;
+	  }
+	  /* FALLTHROUGH */
 	case 4:
 	  *buf++ = val >> 24;
 	  *buf++ = val >> 16;
+	  /* FALLTHROUGH */
 	case 2:
 	  *buf++ = val >> 8;
+	  /* FALLTHROUGH */
 	case 1:
 	  *buf = val;
 	  return;

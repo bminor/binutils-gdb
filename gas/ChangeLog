@@ -1,3 +1,17 @@
+Mon Aug 23 12:47:58 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (set_at): Added unsignedp argument.  Use
+	load_register.
+	(set_at_unsigned): Removed; changed callers to use set_at.
+	(load_register): Removed unused ip argument.  Changed callers.
+	(append_insn): Don't swap branch and branch likely.
+	(macro_build): Handle 'u'.
+	(load_register): Handle 64 bit constants.
+	(macro): Added M_DABS, removed M_ABSU.  Numerous changes to
+	support 64 bit constants.
+	(mips_ip): Use hex constants in range checks for clarity.
+	(md_number_to_chars): Support 8 byte values.
+
 Fri Aug 20 16:50:59 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* config/tc-m88k.h: updated copyrights.
