@@ -1,3 +1,14 @@
+Thu Mar 26 23:07:18 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (md_assemble): Swap template arguments to
+	CONSISTENT_REGISTER_MATCH macro in reverse direction test.
+	This macro is currently symmetric, so passing them the wrong
+	way didn't cause any problem, but may if the macro is changed
+	in the future.
+	After copying template to i.tm, use i.tm. rather than t-> to
+	access fields, and make t a const*
+	Move i.tm.operand_types[] swap to immediately after the copy.
+
 start-sanitize-sky
 Thu Mar 26 13:29:59 1998  Doug Evans  <devans@canuck.cygnus.com>
 

@@ -834,8 +834,8 @@ void
 md_assemble (line)
      char *line;
 {
-  /* Holds template once we've found it. */
-  template *t;
+  /* Points to template once we've found it. */
+  const template *t;
 
   /* Count the size of the instruction generated.  */
   int insn_size = 0;
@@ -853,7 +853,7 @@ md_assemble (line)
   memset (im_expressions, '\0', sizeof (im_expressions));
   save_stack_p = save_stack;	/* reset stack pointer */
 
-  /* Fist parse an opcode & call i386_operand for the operands.
+  /* First parse an opcode & call i386_operand for the operands.
      We assume that the scrubber has arranged it so that line[0] is the valid
      start of a (possibly prefixed) opcode. */
   {
@@ -1132,8 +1132,8 @@ md_assemble (line)
 		if (!MATCH (overlap0, i.types[0]) ||
 		    !MATCH (overlap1, i.types[1]) ||
 		    !CONSISTENT_REGISTER_MATCH (overlap0, overlap1,
-						t->operand_types[0],
-						t->operand_types[1]))
+						t->operand_types[1],
+						t->operand_types[0]))
 		  {
 		    /* does not match either direction */
 		    continue;
@@ -1168,18 +1168,23 @@ md_assemble (line)
 
     /* Copy the template we found (we may change it!). */
     i.tm = *t;
-    t = &i.tm;			/* alter new copy of template */
+
+    if (found_reverse_match)
+      {
+	i.tm.operand_types[0] = t->operand_types[1];
+	i.tm.operand_types[1] = t->operand_types[0];
+      }
 
     /* If the matched instruction specifies an explicit opcode suffix,
        use it - and make sure none has already been specified.  */
-    if (t->opcode_modifier & (Data16|Data32))
+    if (i.tm.opcode_modifier & (Data16|Data32))
       {
 	if (i.suffix)
 	  {
 	    as_bad ("extraneous opcode suffix given");
 	    return;
 	  }
-	if (t->opcode_modifier & Data16)
+	if (i.tm.opcode_modifier & Data16)
 	  i.suffix = WORD_OPCODE_SUFFIX;
 	else
 	  i.suffix = DWORD_OPCODE_SUFFIX;
@@ -1276,19 +1281,11 @@ md_assemble (line)
     if (overlap0 & Imm1)
       i.imm_operands = 0;	/* kludge for shift insns */
 
-    if (found_reverse_match)
-      {
-	unsigned int save;
-	save = t->operand_types[0];
-	t->operand_types[0] = t->operand_types[1];
-	t->operand_types[1] = save;
-      }
-
     /* Finalize opcode.  First, we change the opcode based on the operand
        size given by i.suffix: we never have to change things for byte insns,
        or when no opcode suffix is need to size the operands. */
 
-    if (!i.suffix && (t->opcode_modifier & W))
+    if (!i.suffix && (i.tm.opcode_modifier & W))
       {
 	as_bad ("no opcode suffix given and no register operands; can't size instruction");
 	return;
@@ -1297,15 +1294,15 @@ md_assemble (line)
     if (i.suffix && i.suffix != BYTE_OPCODE_SUFFIX)
       {
 	/* Select between byte and word/dword operations. */
-	if (t->opcode_modifier & W)
-	  t->base_opcode |= W;
+	if (i.tm.opcode_modifier & W)
+	  i.tm.base_opcode |= W;
 	/* Now select between word & dword operations via the
 				   operand size prefix. */
 	if ((i.suffix == WORD_OPCODE_SUFFIX) ^ flag_16bit_code)
 	  {
 	    if (i.prefixes == MAX_PREFIXES)
 	      {
-		as_bad ("%d prefixes given and 'w' opcode suffix gives too many prefixes",
+		as_bad ("%d prefixes given and data size prefix gives too many prefixes",
 			MAX_PREFIXES);
 		return;
 	      }
@@ -1332,12 +1329,12 @@ md_assemble (line)
 
 	if (found_reverse_match)
 	  {
-	    t->base_opcode |= found_reverse_match;
+	    i.tm.base_opcode |= found_reverse_match;
 	  }
 
 	/* The imul $imm, %reg instruction is converted into
 	   imul $imm, %reg, %reg. */
-	if (t->opcode_modifier & imulKludge)
+	if (i.tm.opcode_modifier & imulKludge)
 	  {
 	    /* Pretend we saw the 3 operand case. */
 	    i.regs[2] = i.regs[1];
@@ -1345,7 +1342,7 @@ md_assemble (line)
 	  }
 
 	/* The clr %reg instruction is converted into xor %reg, %reg.  */
-	if (t->opcode_modifier & iclrKludge)
+	if (i.tm.opcode_modifier & iclrKludge)
 	  {
 	    i.regs[1] = i.regs[0];
 	    i.reg_operands = 2;
@@ -1356,7 +1353,7 @@ md_assemble (line)
 	   instructions, if the source operand is a register, we must reverse
 	   the i.rm.reg and i.rm.regmem fields.  We accomplish this by faking
 	   that the two register operands were given in the reverse order. */
-	if ((t->opcode_modifier & ReverseRegRegmem) && i.reg_operands == 2)
+	if ((i.tm.opcode_modifier & ReverseRegRegmem) && i.reg_operands == 2)
 	  {
 	    unsigned int first_reg_operand = (i.types[0] & Reg) ? 0 : 1;
 	    unsigned int second_reg_operand = first_reg_operand + 1;
@@ -1365,40 +1362,40 @@ md_assemble (line)
 	    i.regs[second_reg_operand] = tmp;
 	  }
 
-	if (t->opcode_modifier & ShortForm)
+	if (i.tm.opcode_modifier & ShortForm)
 	  {
 	    /* The register or float register operand is in operand 0 or 1. */
 	    unsigned int op = (i.types[0] & (Reg | FloatReg)) ? 0 : 1;
 	    /* Register goes in low 3 bits of opcode. */
-	    t->base_opcode |= i.regs[op]->reg_num;
+	    i.tm.base_opcode |= i.regs[op]->reg_num;
 	  }
-	else if (t->opcode_modifier & ShortFormW)
+	else if (i.tm.opcode_modifier & ShortFormW)
 	  {
 	    /* Short form with 0x8 width bit.  Register is always dest. operand */
-	    t->base_opcode |= i.regs[1]->reg_num;
+	    i.tm.base_opcode |= i.regs[1]->reg_num;
 	    if (i.suffix == WORD_OPCODE_SUFFIX ||
 		i.suffix == DWORD_OPCODE_SUFFIX)
-	      t->base_opcode |= 0x8;
+	      i.tm.base_opcode |= 0x8;
 	  }
-	else if (t->opcode_modifier & Seg2ShortForm)
+	else if (i.tm.opcode_modifier & Seg2ShortForm)
 	  {
-	    if (t->base_opcode == POP_SEG_SHORT && i.regs[0]->reg_num == 1)
+	    if (i.tm.base_opcode == POP_SEG_SHORT && i.regs[0]->reg_num == 1)
 	      {
 		as_bad ("you can't 'pop cs' on the 386.");
 		return;
 	      }
-	    t->base_opcode |= (i.regs[0]->reg_num << 3);
+	    i.tm.base_opcode |= (i.regs[0]->reg_num << 3);
 	  }
-	else if (t->opcode_modifier & Seg3ShortForm)
+	else if (i.tm.opcode_modifier & Seg3ShortForm)
 	  {
 	    /* 'push %fs' is 0x0fa0; 'pop %fs' is 0x0fa1.
 	       'push %gs' is 0x0fa8; 'pop %fs' is 0x0fa9.
 	       So, only if i.regs[0]->reg_num == 5 (%gs) do we need
 	       to change the opcode. */
 	    if (i.regs[0]->reg_num == 5)
-	      t->base_opcode |= 0x08;
+	      i.tm.base_opcode |= 0x08;
 	  }
-	else if ((t->base_opcode & ~DW) == MOV_AX_DISP32)
+	else if ((i.tm.base_opcode & ~DW) == MOV_AX_DISP32)
 	  {
 	    /* This is a special non-modrm instruction
 	       that addresses memory with a 32-bit displacement mode anyway,
@@ -1406,12 +1403,12 @@ md_assemble (line)
 	    uses_mem_addrmode = 1;
 	    default_seg = &ds;
 	  }
-	else if (t->opcode_modifier & Modrm)
+	else if (i.tm.opcode_modifier & Modrm)
 	  {
-	    /* The opcode is completed (modulo t->extension_opcode which must
-	       be put into the modrm byte.
-	       Now, we make the modrm & index base bytes based on all the info
-	       we've collected. */
+	    /* The opcode is completed (modulo i.tm.extension_opcode which
+	       must be put into the modrm byte).
+	       Now, we make the modrm & index base bytes based on all the
+	       info we've collected. */
 
 	    /* i.reg_operands MUST be the number of real register operands;
 	       implicit registers do not count. */
@@ -1564,10 +1561,10 @@ md_assemble (line)
 		  }
 
 		/* Fill in i.rm.reg or i.rm.regmem field with register
-		   operand (if any) based on
-		   t->extension_opcode. Again, we must be careful to
-		   make sure that segment/control/debug/test/MMX
-		   registers are coded into the i.rm.reg field. */
+		   operand (if any) based on i.tm.extension_opcode.
+		   Again, we must be careful to make sure that
+		   segment/control/debug/test/MMX registers are coded
+		   into the i.rm.reg field. */
 		if (i.reg_operands)
 		  {
 		    unsigned int op =
@@ -1582,7 +1579,7 @@ md_assemble (line)
 			  : 2));
 		    /* If there is an extension opcode to put here, the
 		       register number must be put into the regmem field. */
-		    if (t->extension_opcode != None)
+		    if (i.tm.extension_opcode != None)
 		      i.rm.regmem = i.regs[op]->reg_num;
 		    else
 		      i.rm.reg = i.regs[op]->reg_num;
@@ -1595,8 +1592,8 @@ md_assemble (line)
 		  }
 
 		/* Fill in i.rm.reg field with extension opcode (if any). */
-		if (t->extension_opcode != None)
-		  i.rm.reg = t->extension_opcode;
+		if (i.tm.extension_opcode != None)
+		  i.rm.reg = i.tm.extension_opcode;
 	      }
 
 	    if (i.rm.mode != 3)
@@ -1637,9 +1634,9 @@ md_assemble (line)
   }
 
   /* Handle conversion of 'int $3' --> special int3 insn. */
-  if (t->base_opcode == INT_OPCODE && i.imms[0]->X_add_number == 3)
+  if (i.tm.base_opcode == INT_OPCODE && i.imms[0]->X_add_number == 3)
     {
-      t->base_opcode = INT3_OPCODE;
+      i.tm.base_opcode = INT3_OPCODE;
       i.imm_operands = 0;
     }
 
@@ -1648,7 +1645,7 @@ md_assemble (line)
     register char *p;
 
     /* Output jumps. */
-    if (t->opcode_modifier & Jump)
+    if (i.tm.opcode_modifier & Jump)
       {
 	unsigned long n = i.disps[0]->X_add_number;
 
@@ -1658,7 +1655,7 @@ md_assemble (line)
 	      {
 		p = frag_more (2);
 		insn_size += 2;
-		p[0] = t->base_opcode;
+		p[0] = i.tm.base_opcode;
 		p[1] = n;
 	      }
 	    else
@@ -1675,7 +1672,7 @@ md_assemble (line)
 		    return;
 		  }
 
-		if (t->base_opcode == JUMP_PC_RELATIVE)
+		if (i.tm.base_opcode == JUMP_PC_RELATIVE)
 		  {		/* pace */
 		    /* unconditional jump */
 		    p = frag_more (1 + jmp_size);
@@ -1689,7 +1686,7 @@ md_assemble (line)
 		    p = frag_more (2 + jmp_size);
 		    insn_size += 2 + jmp_size;
 		    p[0] = TWO_BYTE_OPCODE_ESCAPE;
-		    p[1] = t->base_opcode + 0x10;
+		    p[1] = i.tm.base_opcode + 0x10;
 		    md_number_to_chars (&p[2], (valueT) n, jmp_size);
 		  }
 	      }
@@ -1708,7 +1705,7 @@ md_assemble (line)
 	    frag_grow (7);
 	    p = frag_more (1);
 	    insn_size += 1;
-	    p[0] = t->base_opcode;
+	    p[0] = i.tm.base_opcode;
 	    frag_var (rs_machine_dependent,
 		      6,	/* 2 opcode/prefix + 4 displacement */
 		      1,
@@ -1719,9 +1716,9 @@ md_assemble (line)
 		      (offsetT) n, p);
 	  }
       }
-    else if (t->opcode_modifier & (JumpByte | JumpDword))
+    else if (i.tm.opcode_modifier & (JumpByte | JumpDword))
       {
-	int size = (t->opcode_modifier & JumpByte) ? 1 : 4;
+	int size = (i.tm.opcode_modifier & JumpByte) ? 1 : 4;
 	unsigned long n = i.disps[0]->X_add_number;
 	unsigned char *q;
 
@@ -1748,8 +1745,8 @@ md_assemble (line)
 		   want to emit WORD_PREFIX_OPCODE, but I am keeping
 		   the old behaviour for safety.  */
 
-		if (IS_JUMP_ON_CX_ZERO (t->base_opcode)
-		    || IS_LOOP_ECX_TIMES (t->base_opcode))
+		if (IS_JUMP_ON_CX_ZERO (i.tm.base_opcode)
+		    || IS_LOOP_ECX_TIMES (i.tm.base_opcode))
 		  FRAG_APPEND_1_CHAR (ADDR_PREFIX_OPCODE);
 		else
 		  FRAG_APPEND_1_CHAR (WORD_PREFIX_OPCODE);
@@ -1764,9 +1761,9 @@ md_assemble (line)
 	    insn_size += 1;
 	  }
 
-	if (fits_in_unsigned_byte (t->base_opcode))
+	if (fits_in_unsigned_byte (i.tm.base_opcode))
 	  {
-	    FRAG_APPEND_1_CHAR (t->base_opcode);
+	    FRAG_APPEND_1_CHAR (i.tm.base_opcode);
 	    insn_size += 1;
 	  }
 	else
@@ -1774,8 +1771,8 @@ md_assemble (line)
 	    p = frag_more (2);	/* opcode can be at most two bytes */
 	    insn_size += 2;
 	    /* put out high byte first: can't use md_number_to_chars! */
-	    *p++ = (t->base_opcode >> 8) & 0xff;
-	    *p = t->base_opcode & 0xff;
+	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
+	    *p = i.tm.base_opcode & 0xff;
 	  }
 
 	p = frag_more (size);
@@ -1796,7 +1793,7 @@ md_assemble (line)
 
 	  }
       }
-    else if (t->opcode_modifier & JumpInterSegment)
+    else if (i.tm.opcode_modifier & JumpInterSegment)
       {
 	if (flag_16bit_code)
 	  {
@@ -1806,7 +1803,7 @@ md_assemble (line)
 
 	p = frag_more (1 + 2 + 4);	/* 1 opcode; 2 segment; 4 offset */
 	insn_size += 1 + 2 + 4;
-	p[0] = t->base_opcode;
+	p[0] = i.tm.base_opcode;
 	if (i.imms[1]->X_op == O_constant)
 	  md_number_to_chars (p + 1, (valueT) i.imms[1]->X_add_number, 4);
 	else
@@ -1830,39 +1827,39 @@ md_assemble (line)
 	  }
 
 	/* Now the opcode; be careful about word order here! */
-	if (fits_in_unsigned_byte (t->base_opcode))
+	if (fits_in_unsigned_byte (i.tm.base_opcode))
 	  {
-	    FRAG_APPEND_1_CHAR (t->base_opcode);
+	    FRAG_APPEND_1_CHAR (i.tm.base_opcode);
 	    insn_size += 1;
 	  }
-	else if (fits_in_unsigned_word (t->base_opcode))
+	else if (fits_in_unsigned_word (i.tm.base_opcode))
 	  {
 	    p = frag_more (2);
 	    insn_size += 2;
 	    /* put out high byte first: can't use md_number_to_chars! */
-	    *p++ = (t->base_opcode >> 8) & 0xff;
-	    *p = t->base_opcode & 0xff;
+	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
+	    *p = i.tm.base_opcode & 0xff;
 	  }
 	else
 	  {			/* opcode is either 3 or 4 bytes */
-	    if (t->base_opcode & 0xff000000)
+	    if (i.tm.base_opcode & 0xff000000)
 	      {
 		p = frag_more (4);
 		insn_size += 4;
-		*p++ = (t->base_opcode >> 24) & 0xff;
+		*p++ = (i.tm.base_opcode >> 24) & 0xff;
 	      }
 	    else
 	      {
 		p = frag_more (3);
 		insn_size += 3;
 	      }
-	    *p++ = (t->base_opcode >> 16) & 0xff;
-	    *p++ = (t->base_opcode >> 8) & 0xff;
-	    *p = (t->base_opcode) & 0xff;
+	    *p++ = (i.tm.base_opcode >> 16) & 0xff;
+	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
+	    *p = (i.tm.base_opcode) & 0xff;
 	  }
 
 	/* Now the modrm byte and base index byte (if present). */
-	if (t->opcode_modifier & Modrm)
+	if (i.tm.opcode_modifier & Modrm)
 	  {
 	    p = frag_more (1);
 	    insn_size += 1;
@@ -2193,7 +2190,7 @@ i386_operand (operand_string)
       i.mem_operands++;
 
       /* Determine type of memory operand from opcode_suffix;
-		   no opcode suffix implies general memory references. */
+	 no opcode suffix implies general memory references. */
       switch (i.suffix)
 	{
 	case BYTE_OPCODE_SUFFIX:
