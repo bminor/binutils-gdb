@@ -1,5 +1,6 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright 1993, 94-98, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
