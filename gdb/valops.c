@@ -64,6 +64,23 @@ static struct value *search_struct_method (char *, struct value **,
 				       struct value **,
 				       int, int *, struct type *);
 
+enum oload_classification { STANDARD, NON_STANDARD, INCOMPATIBLE };
+
+static int find_oload_champ (struct type **arg_types, int nargs, int method,
+			     int num_fns,
+			     struct fn_field *fns_ptr,
+			     struct symbol **oload_syms,
+			     struct badness_vector **oload_champ_bv);
+
+static int oload_method_static (int method, struct fn_field *fns_ptr,
+				int index);
+
+static enum
+oload_classification classify_oload_match (struct badness_vector
+					   * oload_champ_bv,
+					   int nargs,
+					   int static_offset);
+
 static int check_field_in (struct type *, const char *);
 
 static struct value *value_struct_elt_for_reference (struct type *domain,
@@ -2748,11 +2765,14 @@ value_find_oload_method_list (struct value **argp, char *method, int offset,
 
 /* Given an array of argument types (ARGTYPES) (which includes an
    entry for "this" in the case of C++ methods), the number of
-   arguments NARGS, the NAME of a function whether it's a method or
+   arguments NARGS, the NAME of a function, whether it's a method or
    not (METHOD), and the degree of laxness (LAX) in conforming to
    overload resolution rules in ANSI C++, find the best function that
    matches on the argument types according to the overload resolution
    rules.
+
+   CURRENT_BLOCK is the context in which the evaluation is occurring;
+   this is used to get namespace info.
 
    In the case of class methods, the parameter OBJ is an object value
    in which to search for overloaded methods.
@@ -2777,21 +2797,17 @@ value_find_oload_method_list (struct value **argp, char *method, int offset,
 int
 find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 		     int lax, struct value **objp, struct symbol *fsym,
+		     const struct block *current_block,
 		     struct value **valp, struct symbol **symp, int *staticp)
 {
-  int nparms;
-  struct type **parm_types;
-  int champ_nparms = 0;
   struct value *obj = (objp ? *objp : NULL);
 
-  short oload_champ = -1;	/* Index of best overloaded function */
+  int oload_champ;		/* Index of best overloaded function */
+#if 0
   short oload_ambiguous = 0;	/* Current ambiguity state for overload resolution */
   /* 0 => no ambiguity, 1 => two good funcs, 2 => incomparable funcs */
-  short oload_ambig_champ = -1;	/* 2nd contender for best match */
-  short oload_non_standard = 0;	/* did we have to use non-standard conversions? */
-  short oload_incompatible = 0;	/* are args supplied incompatible with any function? */
+#endif
 
-  struct badness_vector *bv;	/* A measure of how good an overloaded instance is */
   struct badness_vector *oload_champ_bv = NULL;		/* The measure for the current best match */
 
   struct value *temp = obj;
@@ -2800,13 +2816,13 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   int num_fns = 0;		/* Number of overloaded instances being considered */
   struct type *basetype = NULL;
   int boffset;
-  register int jj;
   register int ix;
   int static_offset;
   struct cleanup *cleanups = NULL;
 
   const char *obj_type_name = NULL;
   char *func_name = NULL;
+  enum oload_classification match_quality;
 
   /* Get the list of overloaded methods or functions */
   if (method)
@@ -2852,77 +2868,9 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	error ("Couldn't find function %s", func_name);
     }
 
-  oload_champ_bv = NULL;
+  oload_champ = find_oload_champ(arg_types, nargs, method, num_fns, fns_ptr,
+				 oload_syms, &oload_champ_bv);
 
-  /* Consider each candidate in turn */
-  for (ix = 0; ix < num_fns; ix++)
-    {
-      static_offset = 0;
-      if (method)
-	{
-	  if (TYPE_FN_FIELD_STATIC_P (fns_ptr, ix))
-	    static_offset = 1;
-	  nparms = TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (fns_ptr, ix));
-	}
-      else
-	{
-	  /* If it's not a method, this is the proper place */
-	  nparms=TYPE_NFIELDS(SYMBOL_TYPE(oload_syms[ix]));
-	}
-
-      /* Prepare array of parameter types */
-      parm_types = (struct type **) xmalloc (nparms * (sizeof (struct type *)));
-      for (jj = 0; jj < nparms; jj++)
-	parm_types[jj] = (method
-			  ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj].type)
-			  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), jj));
-
-      /* Compare parameter types to supplied argument types.  Skip THIS for
-         static methods.  */
-      bv = rank_function (parm_types, nparms, arg_types + static_offset,
-			  nargs - static_offset);
-
-      if (!oload_champ_bv)
-	{
-	  oload_champ_bv = bv;
-	  oload_champ = 0;
-	  champ_nparms = nparms;
-	}
-      else
-	/* See whether current candidate is better or worse than previous best */
-	switch (compare_badness (bv, oload_champ_bv))
-	  {
-	  case 0:
-	    oload_ambiguous = 1;	/* top two contenders are equally good */
-	    oload_ambig_champ = ix;
-	    break;
-	  case 1:
-	    oload_ambiguous = 2;	/* incomparable top contenders */
-	    oload_ambig_champ = ix;
-	    break;
-	  case 2:
-	    oload_champ_bv = bv;	/* new champion, record details */
-	    oload_ambiguous = 0;
-	    oload_champ = ix;
-	    oload_ambig_champ = -1;
-	    champ_nparms = nparms;
-	    break;
-	  case 3:
-	  default:
-	    break;
-	  }
-      xfree (parm_types);
-      if (overload_debug)
-	{
-	  if (method)
-	    fprintf_filtered (gdb_stderr,"Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
-	  else
-	    fprintf_filtered (gdb_stderr,"Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
-	  for (jj = 0; jj < nargs - static_offset; jj++)
-	    fprintf_filtered (gdb_stderr,"...Badness @ %d : %d\n", jj, bv->rank[jj]);
-	  fprintf_filtered (gdb_stderr,"Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
-	}
-    }				/* end loop over all candidates */
   /* NOTE: dan/2000-03-10: Seems to be a better idea to just pick one
      if they have the exact same goodness. This is because there is no
      way to differentiate based on return type, which we need to in
@@ -2942,18 +2890,13 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 #endif
 
   /* Check how bad the best match is.  */
-  static_offset = 0;
-  if (method && TYPE_FN_FIELD_STATIC_P (fns_ptr, oload_champ))
-    static_offset = 1;
-  for (ix = 1; ix <= nargs - static_offset; ix++)
-    {
-      if (oload_champ_bv->rank[ix] >= 100)
-	oload_incompatible = 1;	/* truly mismatched types */
 
-      else if (oload_champ_bv->rank[ix] >= 10)
-	oload_non_standard = 1;	/* non-standard type conversions needed */
-    }
-  if (oload_incompatible)
+  match_quality
+    = classify_oload_match (oload_champ_bv, nargs,
+			    oload_method_static (method, fns_ptr,
+						 oload_champ));
+
+  if (match_quality == INCOMPATIBLE)
     {
       if (method)
 	error ("Cannot resolve method %s%s%s to any overloaded instance",
@@ -2964,7 +2907,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	error ("Cannot resolve function %s to any overloaded instance",
 	       func_name);
     }
-  else if (oload_non_standard)
+  else if (match_quality == NON_STANDARD)
     {
       if (method)
 	warning ("Using non-standard conversion to match method %s%s%s to supplied arguments",
@@ -2978,10 +2921,8 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 
   if (method)
     {
-      if (staticp && TYPE_FN_FIELD_STATIC_P (fns_ptr, oload_champ))
-	*staticp = 1;
-      else if (staticp)
-	*staticp = 0;
+      if (staticp != NULL)
+	*staticp = oload_method_static (method, fns_ptr, oload_champ);
       if (TYPE_FN_FIELD_VIRTUAL_P (fns_ptr, oload_champ))
 	*valp = value_virtual_fn_field (&temp, fns_ptr, oload_champ, basetype, boffset);
       else
@@ -3005,7 +2946,138 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   if (cleanups != NULL)
     do_cleanups (cleanups);
 
-  return oload_incompatible ? 100 : (oload_non_standard ? 10 : 0);
+  switch (match_quality)
+    {
+    case INCOMPATIBLE:
+      return 100;
+    case NON_STANDARD:
+      return 10;
+    default:				/* STANDARD */
+      return 0;
+    }
+}
+
+/* Look for a function to take NARGS args of types ARG_TYPES.  Find
+   the best match from among the overloaded methods or functions
+   (depending on METHOD) given by FNS_PTR or OLOAD_SYMS, respectively.
+   The number of methods/functions in the list is given by NUM_FNS.
+   Return the index of the best match; store an indication of the
+   quality of the match in OLOAD_CHAMP_BV.  */
+
+static int
+find_oload_champ (struct type **arg_types, int nargs, int method,
+		  int num_fns, struct fn_field *fns_ptr,
+		  struct symbol **oload_syms,
+		  struct badness_vector **oload_champ_bv)
+{
+  int ix;
+  struct badness_vector *bv;	/* A measure of how good an overloaded instance is */
+  int oload_champ = -1;		/* Index of best overloaded function */
+  int oload_ambiguous = 0;	/* Current ambiguity state for overload resolution */
+  /* 0 => no ambiguity, 1 => two good funcs, 2 => incomparable funcs */
+
+  *oload_champ_bv = NULL;
+
+  /* Consider each candidate in turn */
+  for (ix = 0; ix < num_fns; ix++)
+    {
+      int jj;
+      int static_offset = oload_method_static (method, fns_ptr, ix);
+      int nparms;
+      struct type **parm_types;
+
+      if (method)
+	{
+	  nparms = TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (fns_ptr, ix));
+	}
+      else
+	{
+	  /* If it's not a method, this is the proper place */
+	  nparms=TYPE_NFIELDS(SYMBOL_TYPE(oload_syms[ix]));
+	}
+
+      /* Prepare array of parameter types */
+      parm_types = (struct type **) xmalloc (nparms * (sizeof (struct type *)));
+      for (jj = 0; jj < nparms; jj++)
+	parm_types[jj] = (method
+			  ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj].type)
+			  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), jj));
+
+      /* Compare parameter types to supplied argument types.  Skip THIS for
+         static methods.  */
+      bv = rank_function (parm_types, nparms, arg_types + static_offset,
+			  nargs - static_offset);
+
+      if (!*oload_champ_bv)
+	{
+	  *oload_champ_bv = bv;
+	  oload_champ = 0;
+	}
+      else
+	/* See whether current candidate is better or worse than previous best */
+	switch (compare_badness (bv, *oload_champ_bv))
+	  {
+	  case 0:
+	    oload_ambiguous = 1;	/* top two contenders are equally good */
+	    break;
+	  case 1:
+	    oload_ambiguous = 2;	/* incomparable top contenders */
+	    break;
+	  case 2:
+	    *oload_champ_bv = bv;	/* new champion, record details */
+	    oload_ambiguous = 0;
+	    oload_champ = ix;
+	    break;
+	  case 3:
+	  default:
+	    break;
+	  }
+      xfree (parm_types);
+      if (overload_debug)
+	{
+	  if (method)
+	    fprintf_filtered (gdb_stderr,"Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
+	  else
+	    fprintf_filtered (gdb_stderr,"Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
+	  for (jj = 0; jj < nargs - static_offset; jj++)
+	    fprintf_filtered (gdb_stderr,"...Badness @ %d : %d\n", jj, bv->rank[jj]);
+	  fprintf_filtered (gdb_stderr,"Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
+	}
+    }
+
+  return oload_champ;
+}
+
+/* Return 1 if we're looking at a static method, 0 if we're looking at
+   a non-static method or a function that isn't a method.  */
+
+static int
+oload_method_static (int method, struct fn_field *fns_ptr, int index)
+{
+  if (method && TYPE_FN_FIELD_STATIC_P (fns_ptr, index))
+    return 1;
+  else
+    return 0;
+}
+
+/* Check how good an overload match OLOAD_CHAMP_BV represents.  */
+
+static enum oload_classification
+classify_oload_match (struct badness_vector *oload_champ_bv,
+		      int nargs,
+		      int static_offset)
+{
+  int ix;
+
+  for (ix = 1; ix <= nargs - static_offset; ix++)
+    {
+      if (oload_champ_bv->rank[ix] >= 100)
+	return INCOMPATIBLE;	/* truly mismatched types */
+      else if (oload_champ_bv->rank[ix] >= 10)
+	return NON_STANDARD;	/* non-standard type conversions needed */
+    }
+
+  return STANDARD;		/* Only standard conversions needed.  */
 }
 
 /* C++: return 1 is NAME is a legitimate name for the destructor

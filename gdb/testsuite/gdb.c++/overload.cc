@@ -48,6 +48,31 @@ int overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
 void marker1()
 {}
 
+// Now test how overloading and namespaces interact.
+
+class dummyClass {};
+
+dummyClass dummyInstance;
+
+int overloadNamespace(int i)
+{
+  return 1;
+}
+
+int overloadNamespace(dummyClass d)
+{
+  return 2;
+}
+
+namespace XXX {
+  int overloadNamespace (char c)
+  {
+    return 3;
+  }
+
+  void marker2() {}
+}
+
 int main () 
 {
     char arg2 = 2;
@@ -74,6 +99,7 @@ int main ()
 
 
     marker1();
+    XXX::marker2();
     return 0; 
 }
 

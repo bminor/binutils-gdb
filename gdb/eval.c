@@ -392,6 +392,7 @@ evaluate_subexp_standard (struct type *expect_type,
   long mem_offset;
   struct type **arg_types;
   int save_pos1;
+  const struct block *current_block;
 
   pc = (*pos)++;
   op = exp->elts[pc].opcode;
@@ -667,6 +668,8 @@ evaluate_subexp_standard (struct type *expect_type,
       (*pos) += 3;
       op = exp->elts[*pos].opcode;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
+      current_block = exp->elts[pc + 2].block;
+
       /* Allocate arg vector, including space for the function to be
          called in argvec[0] and a terminating NULL */
       argvec = (struct value **) alloca (sizeof (struct value *) * (nargs + 3));
@@ -834,10 +837,12 @@ evaluate_subexp_standard (struct type *expect_type,
 	      for (ix = 1; ix <= nargs; ix++)
 		arg_types[ix - 1] = VALUE_TYPE (argvec[ix]);
 
-	      (void) find_overload_match (arg_types, nargs, tstr,
-				     1 /* method */ , 0 /* strict match */ ,
-					  &arg2 /* the object */ , NULL,
-					  &valp, NULL, &static_memfuncp);
+	      find_overload_match (arg_types, nargs, tstr,
+				   1 /* method */,
+				   0 /* strict match */ ,
+				   &arg2 /* the object */, NULL,
+				   current_block,
+				   &valp, NULL, &static_memfuncp);
 
 
 	      argvec[1] = arg2;	/* the ``this'' pointer */
@@ -889,10 +894,14 @@ evaluate_subexp_standard (struct type *expect_type,
 	      for (ix = 1; ix <= nargs; ix++)
 		arg_types[ix - 1] = VALUE_TYPE (argvec[ix]);
 
-	      (void) find_overload_match (arg_types, nargs, NULL /* no need for name */ ,
-				 0 /* not method */ , 0 /* strict match */ ,
-		      NULL, exp->elts[save_pos1+2].symbol /* the function */ ,
-					  NULL, &symp, NULL);
+	      find_overload_match (arg_types, nargs,
+				   NULL /* no need for name */ ,
+				   0 /* not method */,
+				   0 /* strict match */ ,
+				   NULL,
+				   exp->elts[save_pos1+2].symbol /* the function */ ,
+				   current_block,
+				   NULL, &symp, NULL);
 
 	      /* Now fix the expression being evaluated */
 	      exp->elts[save_pos1+2].symbol = symp;

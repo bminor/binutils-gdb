@@ -382,6 +382,7 @@ extern struct fn_field *value_find_oload_method_list (struct value **, char *,
 extern int find_overload_match (struct type **arg_types, int nargs,
 				char *name, int method, int lax,
 				struct value **objp, struct symbol *fsym,
+				const struct block *current_block,
 				struct value **valp, struct symbol **symp,
 				int *staticp);
 

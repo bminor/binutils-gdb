@@ -1,3 +1,17 @@
+2003-01-24  David Carlton  <carlton@math.stanford.edu>
+
+	* valops.c (find_oload_champ): New function.
+	(find_overload_match): Separate code into find_oload_champ and
+	oload_method_static.
+	(find_oload_champ): Call oload_method_static.
+	(oload_method_static): New function.
+	(find_overload_match): Call classify_oload_match.
+	(classify_oload_match): New function.
+	* value.h: Update declaration of find_overload_match.
+	* eval.c (evaluate_subexp_standard): Pass current block to
+	find_overload_match.
+	* valops.c (find_overload_match): Add CURRENT_BLOCK arg.
+
 2003-01-20  David Carlton  <carlton@math.stanford.edu>
 
 	* p-exp.y: Add block to OP_FUNCALL.

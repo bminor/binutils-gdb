@@ -1,3 +1,10 @@
+2003-01-24  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/overload.exp: Add tests involving overloadNamespace.
+	Delete comment about GDB crashing.
+	* gdb.c++/overload.cc: Add dummyClass, dummyInstance,
+	overloadNamespace, and XXX.
+
 2003-01-10  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/templates.exp (do_tests): Update some of the regexps to
