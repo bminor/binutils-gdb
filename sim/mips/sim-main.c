@@ -1,26 +1,27 @@
-/* Simulator for the MIPS architecture.
+/*  Copyright (C) 1998, Cygnus Solutions
 
-   This file is part of the MIPS sim
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 
-		THIS SOFTWARE IS NOT COPYRIGHTED
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-   Cygnus offers the following for use in the public domain.  Cygnus
-   makes no warranty with regard to the software or it's performance
-   and the user accepts the software "AS IS" with all faults.
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-   CYGNUS DISCLAIMS ANY WARRANTIES, EXPRESS OR IMPLIED, WITH REGARD TO
-   THIS SOFTWARE INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+    */
 
-   $Revision$
-   $Date$             
-
-   */
 
 #ifndef SIM_MAIN_C
 #define SIM_MAIN_C
 
 #include "sim-main.h"
+#include "sim-assert.h"
 
 #if !(WITH_IGEN)
 #define SIM_MANIFESTS
@@ -32,6 +33,280 @@
 /*---------------------------------------------------------------------------*/
 /*-- simulator engine -------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
+
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+
+/* Description from page A-22 of the "MIPS IV Instruction Set" manual
+   (revision 3.1) */
+
+/* Translate a virtual address to a physical address and cache
+   coherence algorithm describing the mechanism used to resolve the
+   memory reference. Given the virtual address vAddr, and whether the
+   reference is to Instructions ot Data (IorD), find the corresponding
+   physical address (pAddr) and the cache coherence algorithm (CCA)
+   used to resolve the reference. If the virtual address is in one of
+   the unmapped address spaces the physical address and the CCA are
+   determined directly by the virtual address. If the virtual address
+   is in one of the mapped address spaces then the TLB is used to
+   determine the physical address and access type; if the required
+   translation is not present in the TLB or the desired access is not
+   permitted the function fails and an exception is taken.
+
+   NOTE: Normally (RAW == 0), when address translation fails, this
+   function raises an exception and does not return. */
+
+/* This implementation is for the MIPS R4000 family.  See MIPS RISC 
+   Architecture, Kane & Heinrich, Chapter 4.  It is no good for any
+   of the 2000, 3000, or 6000 family. 
+
+   One possible error in the K&H book of note.  K&H has the PFN entry 
+   in the TLB as being 24 bits.  The high-order 4 bits would seem to be 
+   unused, as the PFN is only 20-bits long.  The 5900 manual shows
+   this as a 20-bit field.  At any rate, the high order 4 bits are
+   unused. 
+*/
+
+
+
+/* A place to remember the last cache hit.  */
+static r4000_tlb_entry_t *last_hit = 0;
+
+/* Try to match a single TLB entry.  Three possibilities.
+   1.  No match, returns 0
+   2.  Match w/o exception, pAddr and CCA set, returns 1
+   3.  Match w/ exception, in which case tlb_try_match does not return.
+*/
+INLINE_SIM_MAIN (int)
+tlb_try_match (SIM_DESC SD, sim_cpu *CPU, address_word cia, r4000_tlb_entry_t * entry, unsigned32 asid, unsigned32 vAddr, address_word * pAddr, int *CCA, int LorS)
+{
+  unsigned32 page_mask, vpn2_mask;
+  page_mask = (entry->mask & 0x01ffe000);
+  vpn2_mask = ~(page_mask | 0x00001fff);
+
+  if ((vAddr & vpn2_mask) == (entry->hi & vpn2_mask)
+      && ((entry->hi & TLB_HI_ASID_MASK) == asid
+	  || (entry->hi & TLB_HI_G_MASK) != 0))
+    {
+      /* OK.  Now, do we match lo0, or lo1? */
+      unsigned32 offset_mask, vpn_lo_mask, vpn_mask, lo;
+
+      offset_mask = (page_mask >> 1) | 0xfff;
+      vpn_lo_mask = offset_mask + 1;
+      vpn_mask = ~(offset_mask);
+
+      ASSERT(vpn_lo_mask == (-vpn2_mask) >> 1);
+      ASSERT(vpn_mask ^ vpn_lo_mask == vpn2_mask);
+
+      if ((vAddr & vpn_lo_mask) == 0)
+	{
+	  lo = entry->lo0;
+	}
+      else
+	{
+	  lo = entry->lo1;
+	}
+
+      /* Warn upon attempted use of scratchpad RAM */
+      if(entry->lo0 & TLB_LO_S_MASK)
+	{
+	  sim_io_printf(SD,
+			"Warning: no scratchpad RAM: virtual 0x%08x maps to physical 0x%08x.\n", 
+			vAddr, (vAddr & offset_mask));
+
+	  /* act as if this is a valid, read/write page. */ 
+	  lo = TLB_LO_V_MASK | TLB_LO_D_MASK;
+
+	  /* alternately, act as if this TLB entry is not a match */
+	  /* return 0; */
+	}
+
+      if ((lo & TLB_LO_V_MASK) == 0)
+	{
+          COP0_BADVADDR = vAddr;
+   	  COP0_CONTEXT_set_BADVPN2((vAddr & 0xffffe) >> 19);	/* Top 19 bits */
+	  COP0_ENTRYHI = (vAddr & 0xffffe) | asid;
+  	  COP0_RANDOM = rand()%(TLB_SIZE - COP0_WIRED) + COP0_WIRED;
+	  if (LorS == isLOAD)
+	    SignalExceptionTLBInvalidLoad ();
+	  else
+	    SignalExceptionTLBInvalidStore ();
+	  ASSERT(0);	/* Signal should never return.  */
+	}
+
+      if ((lo & TLB_LO_D_MASK) == 0 && (LorS == isSTORE))
+	{
+          COP0_BADVADDR = vAddr;
+   	  COP0_CONTEXT_set_BADVPN2((vAddr & 0xffffe) >> 19);	/* Top 19 bits */
+	  COP0_ENTRYHI = (vAddr & 0xffffe) | asid;
+  	  COP0_RANDOM = rand()%(TLB_SIZE - COP0_WIRED) + COP0_WIRED;
+	  SignalExceptionTLBModification ();	
+	  ASSERT(0);	/* Signal should never return.  */
+	}
+
+      /* Ignore lo.C rule for Cache access */
+
+      *pAddr = (((lo & 0x03ffffc0) << 6) & (~offset_mask)) + (vAddr & offset_mask);
+      *CCA = Uncached;		/* FOR NOW, no CCA support. */
+
+      last_hit = entry;		/* Remember last hit. */
+
+      return 1;			/* Match */
+    }
+
+  return 0;			/* No Match */
+}
+
+static void 
+dump_tlb(SIM_DESC SD, sim_cpu *CPU, address_word cia) {
+
+  int i;
+  /* Now linear search for a match.  */
+
+  for (i = 0; i < TLB_SIZE; i++)
+    {
+      sim_io_eprintf(SD, "%2d: %08x %08x %08x %08x\n", i, TLB[i].mask, TLB[i].hi,
+		TLB[i].lo0, TLB[i].lo1);
+    }
+}
+
+
+INLINE_SIM_MAIN (void)
+tlb_lookup (SIM_DESC SD, sim_cpu * CPU, address_word cia, unsigned32 vAddr, address_word * pAddr, int *CCA, int LorS)
+{
+  r4000_tlb_entry_t *p;
+  unsigned32 asid;
+  int rc;
+
+  asid = COP0_ENTRYHI & 0x000000ff;
+
+  /* Test last hit first.  More code, but probably faster on average. */
+  if (last_hit)
+    {
+      if (tlb_try_match (SD, CPU, cia, last_hit, asid, vAddr, pAddr, CCA, LorS))
+	return;
+    }
+
+  /* Now linear search for a match.  */
+  for (p = &TLB[0]; p < &TLB[TLB_SIZE]; p++)
+    {
+      if (tlb_try_match (SD, CPU, cia, p, asid, vAddr, pAddr, CCA, LorS))
+	return;
+    }
+
+  /* No match, raise a TLB refill exception. */
+  COP0_BADVADDR = vAddr;
+  COP0_CONTEXT_set_BADVPN2((vAddr & 0xffffe) >> 19);	/* Top 19 bits */
+  COP0_ENTRYHI = (vAddr & 0xffffe) | asid;
+  COP0_RANDOM = rand()%(TLB_SIZE - COP0_WIRED) + COP0_WIRED;
+
+#if 0
+sim_io_eprintf(SD, "TLB Refill exception at address 0x%0x\n", vAddr);
+dump_tlb(SD, CPU, cia);
+#endif
+
+  if (LorS == isLOAD)
+    SignalExceptionTLBRefillLoad ();
+  else
+    SignalExceptionTLBRefillStore ();
+  ASSERT(0);	/* Signal should never return.  */
+}
+
+
+INLINE_SIM_MAIN (int)
+address_translation (SIM_DESC SD,
+		     sim_cpu * CPU,
+		     address_word cia,
+		     address_word vAddr,
+		     int IorD,
+		     int LorS,
+		     address_word * pAddr,
+		     int *CCA,
+		     int raw)
+{
+  unsigned32 operating_mode;
+  unsigned32 asid, vpn, offset, offset_bits;
+
+#ifdef DEBUG
+  sim_io_printf (sd, "AddressTranslation(0x%s,%s,%s,...);\n", pr_addr (vAddr), (IorD ? "isDATA" : "isINSTRUCTION"), (LorS ? "iSTORE" : "isLOAD"));
+#endif
+
+  vAddr &= 0xFFFFFFFF;
+
+  /* Determine operating mode.  */
+  operating_mode = SR_KSU;
+  if (SR & status_ERL || SR & status_EXL)
+    operating_mode = ksu_kernel;
+
+  switch (operating_mode)
+    {
+    case ksu_unknown:
+      sim_io_eprintf (SD, "Invalid operating mode SR.KSU == 0x3.  Treated as 0x0.\n");
+      operating_mode = ksu_kernel;
+      /* Fall-through */
+    case ksu_kernel:
+      /* Map and return for kseg0 and kseg1. */
+      if ((vAddr & 0xc0000000) == 0x80000000)
+	{
+	  ASSERT (0x80000000 <= vAddr && vAddr < 0xc0000000);
+	  if (vAddr < 0xa0000000)
+	    {
+	      /* kseg0: Unmapped, Cached */
+	      *pAddr = vAddr - 0x80000000;
+	      *CCA = Uncached;	/* For now, until cache model is supported. */
+	      return -1;
+	    }
+	  else
+	    {
+	      /* kseg1: Unmapped, Uncached */
+	      *pAddr = vAddr - 0xa0000000;
+	      *CCA = Uncached;
+	      return -1;
+	    }
+	}
+      break;
+
+    case ksu_supervisor:
+      {
+	/* Address error for 0x80000000->0xbfffffff and 0xe00000000->0xffffffff.  */
+	unsigned32 top_three = vAddr & 0xe0000000;
+	if (top_three != 0x00000000 && top_three != 0xc0000000)
+	  {
+	    if (LorS == isLOAD)
+	      SignalExceptionAddressLoad ();
+	    else
+	      SignalExceptionAddressStore ();
+	    ASSERT(0);	/* Signal should never return.  */
+	  }
+      }
+      break;
+
+    case ksu_user:
+      {
+	if (vAddr & 0x80000000)
+	  {
+	    if (LorS == isLOAD)
+	      SignalExceptionAddressLoad ();
+	    else
+	      SignalExceptionAddressStore ();
+	    ASSERT(0);  /* Signal should never return.  */
+	  }
+      }
+      break;
+
+    default:
+      ASSERT(0);
+    }
+
+  /* OK.  If we got this far, we're ready to use the normal virtual->physical memory mapping.  */
+  tlb_lookup (SD, CPU, cia, vAddr, pAddr, CCA, LorS);
+
+  /* If the preceding call returns, a match was found, and CCA and pAddr have been set.  */
+  return -1;
+}
+
+#else /* TARGET_SKY */
+/* end-sanitize-sky */
 
 /* Description from page A-22 of the "MIPS IV Instruction Set" manual
    (revision 3.1) */
@@ -51,21 +326,22 @@
    NOTE: Normally (RAW == 0), when address translation fails, this
    function raises an exception and does not return. */
 
-INLINE_SIM_MAIN (int)
+INLINE_SIM_MAIN
+(int)
 address_translation (SIM_DESC sd,
-		     sim_cpu *cpu,
+		     sim_cpu * cpu,
 		     address_word cia,
 		     address_word vAddr,
 		     int IorD,
 		     int LorS,
-		     address_word *pAddr,
+		     address_word * pAddr,
 		     int *CCA,
 		     int raw)
 {
-  int res = -1; /* TRUE : Assume good return */
+  int res = -1;			/* TRUE : Assume good return */
 
 #ifdef DEBUG
-  sim_io_printf(sd,"AddressTranslation(0x%s,%s,%s,...);\n",pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "iSTORE" : "isLOAD"));
+  sim_io_printf (sd, "AddressTranslation(0x%s,%s,%s,...);\n", pr_addr (vAddr), (IorD ? "isDATA" : "isINSTRUCTION"), (LorS ? "iSTORE" : "isLOAD"));
 #endif
 
   /* Check that the address is valid for this memory model */
@@ -74,28 +350,16 @@ address_translation (SIM_DESC sd,
      addressess through (mostly) unchanged. */
   vAddr &= 0xFFFFFFFF;
 
-  *pAddr = vAddr; /* default for isTARGET */
+  *pAddr = vAddr;		/* default for isTARGET */
+  *CCA = Uncached;		/* not used for isHOST */
+
+  return (res);
+}
 
 /* start-sanitize-sky */
-#ifdef TARGET_SKY
-  if (vAddr >= 0x80000000)
-    {
-      if (vAddr < 0xa0000000)
-        {
-	  *pAddr = vAddr - 0x80000000;
-	}
-      else if (vAddr < 0xc0000000)
-	{
-	  *pAddr = vAddr - 0xa0000000;
-        }
-    }
-#endif
+#endif /* !TARGET_SKY */
 /* end-sanitize-sky */
 
-  *CCA = Uncached; /* not used for isHOST */
-
-  return(res);
-}
 
 /* Description from page A-23 of the "MIPS IV Instruction Set" manual
    (revision 3.1) */
