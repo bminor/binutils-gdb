@@ -1,3 +1,8 @@
+Fri Sep 20 15:00:57 1991  Per Bothner  (bothner at cygnus.com)
+
+	* mcheck.c: Add __ONEFILE kludge to allow compilation by non-ANSI
+	compilers (which may lack stddef.h).
+
 Fri Sep 20 13:29:42 1991  John Gilmore  (gnu at cygnus.com)
 
 	* dbxread.c (read_dbx_symtab, process_one_symbol):  N_FN and
