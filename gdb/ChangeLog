@@ -1,3 +1,11 @@
+2003-01-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* arm-tdep.c (prologue_cache): Change to a pointer.
+	(_initialize_arm_tdep): Allocate prologue_cache.
+	(check_prologue_cache): Update.
+	(save_prologue_cache): Update.
+	(arm_gdbarch_init): Update.
+
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* stabsread.c (update_method_name_from_physname): Call complaint()

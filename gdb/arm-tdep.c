@@ -658,20 +658,20 @@ thumb_scan_prologue (struct frame_info *fi)
    in a row (once to get the frame chain, and once to fill in the
    extra frame information).  */
 
-static struct frame_info prologue_cache;
+static struct frame_info *prologue_cache;
 
 static int
 check_prologue_cache (struct frame_info *fi)
 {
   int i;
 
-  if (get_frame_pc (fi) == get_frame_pc (&prologue_cache))
+  if (get_frame_pc (fi) == get_frame_pc (prologue_cache))
     {
-      fi->extra_info->framereg = prologue_cache.extra_info->framereg;
-      fi->extra_info->framesize = prologue_cache.extra_info->framesize;
-      fi->extra_info->frameoffset = prologue_cache.extra_info->frameoffset;
+      fi->extra_info->framereg = prologue_cache->extra_info->framereg;
+      fi->extra_info->framesize = prologue_cache->extra_info->framesize;
+      fi->extra_info->frameoffset = prologue_cache->extra_info->frameoffset;
       for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-	get_frame_saved_regs (fi)[i] = get_frame_saved_regs (&prologue_cache)[i];
+	get_frame_saved_regs (fi)[i] = get_frame_saved_regs (prologue_cache)[i];
       return 1;
     }
   else
@@ -686,13 +686,13 @@ save_prologue_cache (struct frame_info *fi)
 {
   int i;
 
-  deprecated_update_frame_pc_hack (&prologue_cache, get_frame_pc (fi));
-  prologue_cache.extra_info->framereg = fi->extra_info->framereg;
-  prologue_cache.extra_info->framesize = fi->extra_info->framesize;
-  prologue_cache.extra_info->frameoffset = fi->extra_info->frameoffset;
+  deprecated_update_frame_pc_hack (prologue_cache, get_frame_pc (fi));
+  prologue_cache->extra_info->framereg = fi->extra_info->framereg;
+  prologue_cache->extra_info->framesize = fi->extra_info->framesize;
+  prologue_cache->extra_info->frameoffset = fi->extra_info->frameoffset;
 
   for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-    get_frame_saved_regs (&prologue_cache)[i] = get_frame_saved_regs (fi)[i];
+    get_frame_saved_regs (prologue_cache)[i] = get_frame_saved_regs (fi)[i];
 }
 
 
@@ -3024,13 +3024,13 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* We can't use SIZEOF_FRAME_SAVED_REGS here, since that still
      references the old architecture vector, not the one we are
      building here.  */
-  if (get_frame_saved_regs (&prologue_cache) != NULL)
-    xfree (get_frame_saved_regs (&prologue_cache));
+  if (get_frame_saved_regs (prologue_cache) != NULL)
+    xfree (get_frame_saved_regs (prologue_cache));
 
   /* We can't use NUM_REGS nor NUM_PSEUDO_REGS here, since that still
      references the old architecture vector, not the one we are
      building here.  */
-  prologue_cache.saved_regs = (CORE_ADDR *)
+  prologue_cache->saved_regs = (CORE_ADDR *)
     xcalloc (1, (sizeof (CORE_ADDR)
 		 * (gdbarch_num_regs (gdbarch)
 		    + gdbarch_num_pseudo_regs (gdbarch))));
@@ -3158,10 +3158,9 @@ The valid values are:\n");
   add_com ("othernames", class_obscure, arm_othernames,
 	   "Switch to the next set of register names.");
 
-  /* Fill in the prologue_cache fields.  */
-  prologue_cache.saved_regs = NULL;
-  prologue_cache.extra_info = (struct frame_extra_info *)
-    xcalloc (1, sizeof (struct frame_extra_info));
+  /* Allocate the prologue_cache.  */
+  prologue_cache = deprecated_frame_xmalloc ();
+  deprecated_set_frame_extra_info_hack (prologue_cache, xcalloc (1, sizeof (struct frame_extra_info)));
 
   /* Debugging flag.  */
   add_show_from_set (add_set_cmd ("arm", class_maintenance, var_zinteger,
