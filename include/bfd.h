@@ -143,9 +143,12 @@ typedef int symtype;		/* Who knows, yet? */
 #define bfd_get_section(x) ((x)->section)
 #define bfd_get_output_section(x) ((x)->section->output_section)
 #define bfd_set_section(x,y) ((x)->section) = (y)
-#define bfd_asymbol_base(x) ((x)->section?((x)->section->vma):0)
+#define bfd_asymbol_base(x) ((x)->section->vma)
 #define bfd_asymbol_value(x) (bfd_asymbol_base(x) + x->value)
 #define bfd_asymbol_name(x) ((x)->name)
+/*Perhaps future: #define bfd_asymbol_bfd(x) ((x)->section->owner)*/
+#define bfd_asymbol_bfd(x) ((x)->the_bfd)
+#define bfd_asymbol_flavour(x) (bfd_asymbol_bfd(x)->xvec->flavour)
 
 /* This is a type pun with struct ranlib on purpose! */
 typedef struct carsym {
@@ -982,9 +985,14 @@ typedef struct symbol_cache_entry
 	 /* A pointer to the BFD which owns the symbol. This information
 	   is necessary so that a back end can work out what additional
    	   information (invisible to the application writer) is carried
-	   with the symbol.  */
+	   with the symbol.
 
-  struct _bfd *the_bfd;
+	   This field is *almost* redundant, since you can use section->owner
+	   instead, except that some symbols point to the global sections
+	   bfd_{abs,com,und}_section.  This could be fixed by making
+	   these globals be per-bfd (or per-target-flavor).  FIXME. */
+
+  struct _bfd *the_bfd;  /* Use bfd_asymbol_bfd(sym) to access this field. */
 
 	 /* The text of the symbol. The name is left alone, and not copied - the
 	   application may not alter it. */
@@ -1028,7 +1036,7 @@ typedef struct symbol_cache_entry
 	   meaning. */
 #define BSF_DEBUGGING	0x40
 
-	 /* Used by the linker.  Should be part of app_data now. */
+	 /* Used by the linker. */
 #define BSF_KEEP        0x10000
 #define BSF_KEEP_G      0x80000
 
