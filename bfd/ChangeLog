@@ -4,6 +4,9 @@ Sat Nov 22 16:06:56 1997  Klaus Kaempf  <kkaempf@progis.de>
 
 Sat Nov 22 12:29:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* sunos.c (sunos_add_one_symbol): When overriding a defined
+	symbol, set it to undefined, not new.
+
 	* elf32-sh.c (sh_elf_relax_delete_bytes): Don't kill LABEL
 	relocs.
 
