@@ -1,3 +1,14 @@
+Sat Oct 17 00:59:23 1992  Fred Fish  (fnf@cygnus.com)
+
+	Native support cleanup and corefile fixes for i386 SVR4 systems.
+
+	* i386-tdep.c (supply_gregset, fill_gregset, supply_fpregset,
+	  fill_fpregset): Moved to i386v4-nat.c
+	* i386v4-nat.c, nm-i386v4.h, :  New files.
+	* i386sol2.mh, i386v4.mh, ncr3000.mh (NAT_FILE):  Use nm-i386v4.h.
+	* i386sol2.mh, i386v4.mh, ncr3000.mh (NATDEPFILES):  Add corelow.o,
+	  change i386v-nat.o to i386v4-nat.o.
+
 Fri Oct 16 13:06:08 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Miscellaneous 386 configs updated.

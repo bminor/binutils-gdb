@@ -108,6 +108,7 @@ i386-tdep.c
 i386b-nat.c
 i386mach-nat.c
 i386v-nat.c
+i386v4-nat.c
 i387-tdep.c
 i960-pinsn.c
 i960-tdep.c
@@ -147,6 +148,7 @@ nm-delta88.h
 nm-i386bsd.h
 nm-i386mach.h
 nm-i386v.h
+nm-i386v4.h
 nm-irix3.h
 nm-irix4.h
 nm-linux.h
