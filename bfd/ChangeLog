@@ -1,3 +1,9 @@
+Thu Jan 29 15:55:35 1998  J.J. van der Heijden  <J.J.vanderHeijden@student.utwente.nl>
+
+	* config.bfd (i[3456]-*-mingw32*): New target.
+	* acinclude.m4 (BFD_BINARY_OPEN): Check for mingw32.
+	* aclocal.m4, configure: Rebuild.
+
 start-sanitize-sky
 Mon Dec 22 15:14:28 1997  Doug Evans  <devans@canuck.cygnus.com>
 

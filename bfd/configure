@@ -1997,7 +1997,7 @@ done
 
 
 case "${host}" in
-i[345]86-*-msdos* | i[345]86-*-go32* | *-*-cygwin32 | *-*-windows)
+i[345]86-*-msdos* | i[345]86-*-go32* | i[345]86-*-mingw32* | *-*-cygwin32* | *-*-windows)
   cat >> confdefs.h <<\EOF
 #define USE_BINARY_FOPEN 1
 EOF
