@@ -205,7 +205,7 @@ main (argc, argv)
 	  config.map_file = fopen (config.map_filename, FOPEN_WT);
 	  if (config.map_file == (FILE *) NULL)
 	    {
-	      einfo ("%P%F: can't open map file %s\n",
+	      einfo ("%P%F: can't open map file %s, %E\n",
 		     config.map_filename);
 	    }
 	}

@@ -1,3 +1,8 @@
+Wed Jul 14 21:42:53 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldfile.c (ldlang_open_file, ldfile_open_command_file),
+	main.c (main): Print the errno string in the error message.
+
 Tue Jul 13 20:00:30 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* configure.in: Accept h8300h for target cpu.

@@ -18,52 +18,54 @@ along with GLD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
-   $Id$ 
-*/
-
-/*
  ldfile.c
 
  look after all the file stuff
 
  */
 
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 
 #include "ldmisc.h"
 #include "ldlang.h"
 #include "ldfile.h"
-
+#include <ctype.h>
 /* EXPORT */
 char *ldfile_input_filename;
 CONST char * ldfile_output_machine_name ="";
 unsigned long ldfile_output_machine;
 enum bfd_architecture ldfile_output_architecture;
-boolean had_script;
 
 /* IMPORT */
 
+extern boolean had_script;
 extern boolean option_v;
 
 
+#ifdef VMS
+char *slash = "";
+#else
+char *slash = "/";
+#endif
 
 
 
-/* LOACL */
-typedef struct search_dirs_struct 
+
+/* LOCAL */
+typedef struct search_dirs 
 {
   char *name;
-  struct search_dirs_struct *next;
+  struct search_dirs *next;
 } search_dirs_type;
 
 static search_dirs_type *search_head;
 static search_dirs_type **search_tail_ptr = &search_head;
 
-typedef struct search_arch_struct 
+typedef struct search_arch 
 {
   char *name; 
-  struct search_arch_struct *next;
+  struct search_arch *next;
 } search_arch_type;
 
 static search_arch_type *search_arch_head;
@@ -76,7 +78,7 @@ ldfile_add_library_path(name)
 char *name;
 {
   search_dirs_type *new =
-    (search_dirs_type *)ldmalloc(sizeof(search_dirs_type));
+    (search_dirs_type *)ldmalloc((bfd_size_type)(sizeof(search_dirs_type)));
   new->name = name;
   new->next = (search_dirs_type*)NULL;
   *search_tail_ptr = new;
@@ -114,8 +116,9 @@ char *suffix;
       char *string;
       if (entry->is_archive == true) {
 	sprintf(buffer,
-		"%s/%s%s%s%s",
+		"%s%s%s%s%s%s",
 		search->name,
+		slash,
 		lib,
 		entry->filename, arch, suffix);
       }
@@ -123,7 +126,7 @@ char *suffix;
 	if (entry->filename[0] == '/' || entry->filename[0] == '.') {
 	  strcpy(buffer, entry->filename);
 	} else {
-	  sprintf(buffer,"%s/%s",search->name, entry->filename);
+	  sprintf(buffer,"%s%s%s",search->name, slash, entry->filename);
 	} 
       }
       string = buystring(buffer);      
@@ -160,12 +163,14 @@ lang_input_statement_type *entry;
       for (arch = search_arch_head;
 	   arch != (search_arch_type *)NULL;
 	   arch = arch->next) {
-	if (open_a(arch->name,entry,"","") != (bfd *)NULL) {
-	  return;
-	}
 	if (open_a(arch->name,entry,"lib",".a") != (bfd *)NULL) {
 	  return;
 	}
+#ifdef VMS
+	if (open_a(arch->name,entry,":lib",".a") != (bfd *)NULL) {
+	  return;
+	}
+#endif
 
       }
 
@@ -175,14 +180,12 @@ lang_input_statement_type *entry;
     entry->the_bfd = cached_bfd_openr (entry->filename, entry);
 
   }
-  if (!entry->the_bfd)  info("%F%P: %E %I\n", entry);
+  if (!entry->the_bfd)  einfo("%F%P: Can't open %s, %E\n", entry->filename);
 
 }
 
 
-
-
-
+/* Try to open NAME; if that fails, try NAME with EXTEN appended to it.  */
 
 static FILE *
 try_open(name, exten)
@@ -191,26 +194,34 @@ char *exten;
 {
   FILE *result;
   char buff[1000];
+
   result = fopen(name, "r");
   if (option_v == true) {
     if (result == (FILE *)NULL) {
       info("can't find ");
     }
     info("%s\n",name);
-    
+  }
+  if (result != (FILE *)NULL) {
     return result;
   }
-  sprintf(buff, "%s%s", name, exten);
-  result = fopen(buff, "r");
 
-  if (option_v == true) {
-    if (result == (FILE *)NULL) {
-      info("can't find ");
+  if (*exten) {
+    sprintf(buff, "%s%s", name, exten);
+    result = fopen(buff, "r");
+    if (option_v == true) {
+      if (result == (FILE *)NULL) {
+	info("can't find ");
+      }
+      info("%s\n", buff);
     }
-    info("%s\n", buff);
   }
   return result;
 }
+
+/* Try to open NAME; if that fails, look for it in any directories
+   specified with -L, without and with EXTEND apppended.  */
+
 static FILE *
 find_a_name(name, extend)
 char *name;
@@ -219,6 +230,7 @@ char *extend;
   search_dirs_type *search;
   FILE *result;
   char buffer[1000];
+
   /* First try raw name */
   result = try_open(name,"");
   if (result == (FILE *)NULL) {
@@ -234,15 +246,18 @@ char *extend;
   return result;
 }
 
-void ldfile_open_command_file(name)
+void
+ldfile_open_command_file(name)
 char *name;
 {
-  extern FILE *ldlex_input_stack;
-  ldlex_input_stack = find_a_name(name, ".ld");
+  FILE *ldlex_input_stack;
+  ldlex_input_stack = find_a_name(name, "");
 
   if (ldlex_input_stack == (FILE *)NULL) {
-    info("%P%F cannot open load script file %s\n",name);
+    einfo("%P%F cannot open load script file %s, %E\n",name);
   }
+  lex_push_file(ldlex_input_stack, name);
+  
   ldfile_input_filename = name;
   had_script = true;
 }
@@ -279,7 +294,7 @@ char *name;
   }
 
   if ( tp->cmd_switch == NULL ){
-    info("%P%F: unknown architecture: %s\n",name);
+    einfo("%P%F: unknown architecture: %s\n",name);
   }
   return tp->arch;
 }
@@ -291,12 +306,12 @@ ldfile_add_arch(name)
 char *name;
 {
   search_arch_type *new =
-    (search_arch_type *)ldmalloc(sizeof(search_arch_type));
+    (search_arch_type *)ldmalloc((bfd_size_type)(sizeof(search_arch_type)));
 
 
   if (*name != '\0') {
     if (ldfile_output_machine_name[0] != '\0') {
-      info("%P%F: target architecture respecified\n");
+      einfo("%P%F: target architecture respecified\n");
       return;
     }
     ldfile_output_machine_name = name;
@@ -313,12 +328,12 @@ char *name;
 
 
 void
-DEFUN(ldfile_add_arch,(in_name),
-      CONST char * in_name)
+ldfile_add_arch (in_name)
+     CONST char * in_name;
 {
   char *name = buystring(in_name);
   search_arch_type *new =
-    (search_arch_type *)ldmalloc(sizeof(search_arch_type));
+    (search_arch_type *)ldmalloc((bfd_size_type)(sizeof(search_arch_type)));
 
   ldfile_output_machine_name = in_name;
 
@@ -336,17 +351,17 @@ DEFUN(ldfile_add_arch,(in_name),
 
 /* Set the output architecture */
 void
-DEFUN(ldfile_set_output_arch,(string),
-CONST char *string)
+ldfile_set_output_arch (string)
+     CONST char *string;
 {
-  enum bfd_architecture arch;
-  unsigned long machine;
-  if (bfd_scan_arch_mach(string, &arch, &machine) == true) {
-    ldfile_output_architecture = arch;
-    ldfile_output_machine = machine;
-    ldfile_output_machine_name = string;
+  bfd_arch_info_type *arch = bfd_scan_arch(string);
+
+  if (arch) {
+    ldfile_output_architecture = arch->arch;
+    ldfile_output_machine = arch->mach;
+    ldfile_output_machine_name = arch->printable_name;
   }
   else {
-    info("%P%F: Can't represent machine `%s'\n", string);
+    einfo("%P%F: Can't represent machine `%s'\n", string);
   }
 }
