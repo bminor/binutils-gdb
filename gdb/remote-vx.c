@@ -30,7 +30,7 @@
 #include "complaints.h"
 #include "gdbcmd.h"
 #include "bfd.h"		/* Required by objfiles.h.  */
-#include "symfile.h"		/* Required by objfiles.h.  */
+#include "symfile.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
 
@@ -1039,7 +1039,7 @@ vx_wait (int pid_to_wait_for, struct target_waitstatus *status)
 static int
 symbol_stub (char *arg)
 {
-  symbol_file_command (arg, 0);
+  symbol_file_add_main (arg, 0);
   return 1;
 }
 

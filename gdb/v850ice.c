@@ -794,11 +794,11 @@ ice_file (char *arg)
   /* Must supress from_tty, otherwise we could start asking if the
      user really wants to load a new symbol table, etc... */
   printf_unfiltered ("Reading symbols from %s...", arg);
-  exec_file_command (arg, 0);
-  symbol_file_command (arg, 0);
+  exec_open (arg, 0);
+  symbol_file_add_main (arg, 0);
   printf_unfiltered ("done\n");
 
-  /* exec_file_command will kill our target, so reinstall the ICE as
+  /* exec_open will kill our target, so reinstall the ICE as
      the target. */
   v850ice_open (NULL, 0);
 

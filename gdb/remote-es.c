@@ -106,6 +106,7 @@
 #include "target.h"
 #include "gdb_wait.h"
 #include "command.h"
+#include "symfile.h"
 #include "remote-utils.h"
 #include "gdbcore.h"
 #include "serial.h"
@@ -1318,7 +1319,7 @@ es1800_load (char *filename, int from_tty)
       system (buf);
     }
 
-  symbol_file_command (filename, from_tty);	/* reading symbol table */
+  symbol_file_add_main (filename, from_tty);	/* reading symbol table */
   immediate_quit--;
 }
 

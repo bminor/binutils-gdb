@@ -98,9 +98,11 @@ extern int write_files;
 
 extern void core_file_command (char *filename, int from_tty);
 
+extern void exec_open (char *filename, int from_tty);
+
 extern void exec_file_attach (char *filename, int from_tty);
 
-extern void exec_file_command (char *filename, int from_tty);
+extern void exec_file_clear (int from_tty);
 
 extern void validate_files (void);
 

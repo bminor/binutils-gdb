@@ -1,3 +1,56 @@
+2001-01-26  Fernando Nasser  <fnasser@redhat.com>
+
+	Fix double parsing of filenames passed as command line arguments
+	to GDB (causes weird handling of escape characters).
+	Also, remove dependencies on the CLI from libgdb.
+	* call-cmds.h: Remove declaration of exec_file_command().
+	* gdbcore.h: Remove declaration of exec_file_command().
+	Add declarations for exec_open() and exec_file_clear().
+	* symfile.h: Add declarations for symbol_file_add_main() and
+	symbol_file_clear().
+	* exec.c (exec_open): New function. Implements to_open for exec
+	targets.
+	(exec_file_clear): New function. Makes GDB forget about a previously
+	specified executable file.
+	(exec_file_attach): Move parsing of arguments from here ...
+	(exec_file_command): ... to here.
+	(init_exec_ops): Use exec_open(), not exec_file_command() to
+	implement to_open for exec targets.
+	* symfile.c (symbol_file_add_main): New function. Call symbol_file_add()
+	with default values.  Used when the file name has already been parsed.
+	(symbol_file_clear): New function. Makes GDB forget about previously
+	read symbols.
+	(symbol_file_command): Call the above function instead of inline code.
+	* main.c: Include "symfile.h" and "gdbcore.h" instead of the deprecated
+	"call-cmds.h".
+	(captured_main): Call exec_file_attach() and symbol_file_add_main()
+	instead of exec_file_command() and symbol_file_command().
+	(captured_main): Add comment.
+	* corefile.c: Include "symfile.h".
+	(core_file_command): Call symbol_file_add_main() instead of
+	symbol_file_command().
+	(reopen_exec_file): Call exec_open() instead of exec_file_command().
+	* infcmd.c: Include "symfile.h".
+	(attach_command): Call symbol_file_add_main() instead of 
+        symbol_file_command().
+	* infrun.c: Remove comment about the inclusion of "symfile.h",
+	not any longer appropriate.
+	(follow_exec): Call symbol_file_add_main() instead of 
+        symbol_file_command().
+	* remote-es.c: Include "symfile.h".
+	(es1800_load): Call symbol_file_add_main() instead of 
+        symbol_file_command().
+	* remote-vx.c: Remove comment about the inclusion of "symfile.h",
+        not any longer appropriate.
+	(vx-wait): Call symbol_file_add_main() instead of 
+        symbol_file_command().
+	* solib-svr4.c (open_symbol_file_object): Call symbol_file_add_main()
+	instead of symbol_file_command().
+	* v850ice.c (ice_file): Call exec_open(), exec_file_attach() and
+	symbol_file_add_main() instead of exec_file_command() and
+	symbol_file_command().
+	* Makefile.in: Update dependencies.
+
 2001-01-26  Jeff Holcomb  <jeffh@redhat.com>
 
 	* remote-udi.c (udi_open): Change strdup to xstrdup.

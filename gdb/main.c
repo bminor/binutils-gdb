@@ -22,7 +22,8 @@
 #include "top.h"
 #include "target.h"
 #include "inferior.h"
-#include "call-cmds.h"
+#include "symfile.h"
+#include "gdbcore.h"
 
 #include "getopt.h"
 
@@ -474,6 +475,7 @@ extern int gdbtk_test (char *);
 	  execarg = argv[optind];
 	  break;
 	case 2:
+	  /* FIXME: The documentation says this can be a "ProcID". as well. */
 	  corearg = argv[optind];
 	  break;
 	case 3:
@@ -592,15 +594,15 @@ extern int gdbtk_test (char *);
       /* The exec file and the symbol-file are the same.  If we can't
          open it, better only print one error message.
          catch_command_errors returns non-zero on success! */
-      if (catch_command_errors (exec_file_command, execarg, !batch, RETURN_MASK_ALL))
-	catch_command_errors (symbol_file_command, symarg, 0, RETURN_MASK_ALL);
+      if (catch_command_errors (exec_file_attach, execarg, !batch, RETURN_MASK_ALL))
+	catch_command_errors (symbol_file_add_main, symarg, 0, RETURN_MASK_ALL);
     }
   else
     {
       if (execarg != NULL)
-	catch_command_errors (exec_file_command, execarg, !batch, RETURN_MASK_ALL);
+	catch_command_errors (exec_file_attach, execarg, !batch, RETURN_MASK_ALL);
       if (symarg != NULL)
-	catch_command_errors (symbol_file_command, symarg, 0, RETURN_MASK_ALL);
+	catch_command_errors (symbol_file_add_main, symarg, 0, RETURN_MASK_ALL);
     }
 
   /* After the symbol file has been read, print a newline to get us

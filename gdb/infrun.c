@@ -31,7 +31,7 @@
 #include "target.h"
 #include "gdbthread.h"
 #include "annotate.h"
-#include "symfile.h"		/* for overlay functions */
+#include "symfile.h"
 #include "top.h"
 #include <signal.h>
 #include "inf-loop.h"
@@ -650,6 +650,8 @@ follow_vfork (int parent_pid, int child_pid)
     }
 }
 
+/* EXECD_PATHNAME is assumed to be non-NULL. */
+
 static void
 follow_exec (int pid, char *execd_pathname)
 {
@@ -727,7 +729,7 @@ follow_exec (int pid, char *execd_pathname)
   exec_file_attach (execd_pathname, 0);
 
   /* And also is where symbols can be found. */
-  symbol_file_command (execd_pathname, 0);
+  symbol_file_add_main (execd_pathname, 0);
 
   /* Reset the shared library package.  This ensures that we get
      a shlib event when the child reaches "_start", at which point

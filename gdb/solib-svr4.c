@@ -940,7 +940,7 @@ open_symbol_file_object (void *from_ttyp)
 
   make_cleanup (xfree, filename);
   /* Have a pathname: read the symbol file.  */
-  symbol_file_command (filename, from_tty);
+  symbol_file_add_main (filename, from_tty);
 
   return 1;
 }

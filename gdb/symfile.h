@@ -273,6 +273,12 @@ extern CORE_ADDR overlay_unmapped_address (CORE_ADDR, asection *);
 /* convert an address in an overlay section (force into VMA range) */
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 
+/* Load symbols from a file. */
+extern void symbol_file_add_main (char *args, int from_tty);
+
+/* Clear GDB symbol tables. */
+extern void symbol_file_clear (int from_tty);
+
 /* From dwarfread.c */
 
 extern void

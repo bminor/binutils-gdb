@@ -897,6 +897,41 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
   return (objfile);
 }
 
+/* Just call the above with default values.
+   Used when the file is supplied in the gdb command line. */
+   
+void
+symbol_file_add_main (char *args, int from_tty)
+{
+  symbol_file_add (args, from_tty, NULL, 1, 0);
+}
+
+void
+symbol_file_clear (int from_tty)
+{
+  if ((have_full_symbols () || have_partial_symbols ())
+      && from_tty
+      && !query ("Discard symbol table from `%s'? ",
+		 symfile_objfile->name))
+    error ("Not confirmed.");
+    free_all_objfiles ();
+
+    /* solib descriptors may have handles to objfiles.  Since their
+       storage has just been released, we'd better wipe the solib
+       descriptors as well.
+     */
+#if defined(SOLIB_RESTART)
+    SOLIB_RESTART ();
+#endif
+
+    symfile_objfile = NULL;
+    if (from_tty)
+      printf_unfiltered ("No symbol file now.\n");
+#ifdef HPUXHPPA
+    RESET_HP_UX_GLOBALS ();
+#endif
+}
+
 /* This is the symbol-file command.  Read the file, analyze its
    symbols, and add a struct symtab to a symtab list.  The syntax of
    the command is rather bizarre--(1) buildargv implements various
@@ -923,27 +958,7 @@ symbol_file_command (char *args, int from_tty)
 
   if (args == NULL)
     {
-      if ((have_full_symbols () || have_partial_symbols ())
-	  && from_tty
-	  && !query ("Discard symbol table from `%s'? ",
-		     symfile_objfile->name))
-	error ("Not confirmed.");
-      free_all_objfiles ();
-
-      /* solib descriptors may have handles to objfiles.  Since their
-         storage has just been released, we'd better wipe the solib
-         descriptors as well.
-       */
-#if defined(SOLIB_RESTART)
-      SOLIB_RESTART ();
-#endif
-
-      symfile_objfile = NULL;
-      if (from_tty)
-	  printf_unfiltered ("No symbol file now.\n");
-#ifdef HPUXHPPA
-      RESET_HP_UX_GLOBALS ();
-#endif
+      symbol_file_clear (from_tty);
     }
   else
     {

@@ -29,6 +29,7 @@
 #include "symtab.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "symfile.h"
 #include "bfd.h"
 #include "target.h"
 #include "gdbcore.h"
@@ -92,7 +93,7 @@ core_file_command (char *filename, int from_tty)
 		char *symfile_copy = xstrdup (symfile);
 
 		make_cleanup (xfree, symfile_copy);
-		symbol_file_command (symfile_copy, from_tty);
+		symbol_file_add_main (symfile_copy, from_tty);
 	      }
 	    else
 	      warning ("Unknown symbols for '%s'; use the 'symbol-file' command.", filename);
@@ -188,7 +189,9 @@ reopen_exec_file (void)
   res = stat (filename, &st);
 
   if (mtime && mtime != st.st_mtime)
-    exec_file_command (filename, 0);
+    {
+      exec_open (filename, 0);
+    }
 #endif
 }
 

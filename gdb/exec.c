@@ -94,6 +94,13 @@ CORE_ADDR text_end = 0;
 
 struct vmap *vmap;
 
+void
+exec_open (char *args, int from_tty)
+{
+  target_preopen (from_tty);
+  exec_file_attach (args, from_tty);
+}
+
 /* ARGSUSED */
 static void
 exec_close (int quitting)
@@ -150,6 +157,16 @@ exec_close (int quitting)
     }
 }
 
+void
+exec_file_clear (int from_tty)
+{
+  /* Remove exec file.  */
+  unpush_target (&exec_ops);
+
+  if (from_tty)
+    printf_unfiltered ("No executable file now.\n");
+}
+
 /*  Process the first arg in ARGS as the new exec file.
 
    This function is intended to be behave essentially the same
@@ -165,41 +182,27 @@ exec_close (int quitting)
    given a pid but not a exec pathname, and the attach command could
    figure out the pathname from the pid.  (In this case, we shouldn't
    ask the user whether the current target should be shut down --
-   we're supplying the exec pathname late for good reason.) */
+   we're supplying the exec pathname late for good reason.)
+   
+   ARGS is assumed to be the filename. */
 
 void
-exec_file_attach (char *args, int from_tty)
+exec_file_attach (char *filename, int from_tty)
 {
-  char **argv;
-  char *filename;
-
   /* Remove any previous exec file.  */
   unpush_target (&exec_ops);
 
   /* Now open and digest the file the user requested, if any.  */
 
-  if (args)
+  if (!filename)
+    {
+      if (from_tty)
+        printf_unfiltered ("No executable file now.\n");
+    }
+  else
     {
       char *scratch_pathname;
       int scratch_chan;
-
-      /* Scan through the args and pick up the first non option arg
-         as the filename.  */
-
-      argv = buildargv (args);
-      if (argv == NULL)
-	nomem (0);
-
-      make_cleanup_freeargv (argv);
-
-      for (; (*argv != NULL) && (**argv == '-'); argv++)
-	{;
-	}
-      if (*argv == NULL)
-	error ("No executable file name was specified");
-
-      filename = tilde_expand (*argv);
-      make_cleanup (xfree, filename);
 
       scratch_chan = openp (getenv ("PATH"), 1, filename,
 		   write_files ? O_RDWR | O_BINARY : O_RDONLY | O_BINARY, 0,
@@ -298,21 +301,47 @@ exec_file_attach (char *args, int from_tty)
       if (exec_file_display_hook)
 	(*exec_file_display_hook) (filename);
     }
-  else if (from_tty)
-    printf_unfiltered ("No executable file now.\n");
 }
 
 /*  Process the first arg in ARGS as the new exec file.
 
    Note that we have to explicitly ignore additional args, since we can
    be called from file_command(), which also calls symbol_file_command()
-   which can take multiple args. */
+   which can take multiple args.
+   
+   If ARGS is NULL, we just want to close the exec file. */
 
-void
+static void
 exec_file_command (char *args, int from_tty)
 {
+  char **argv;
+  char *filename;
+  
   target_preopen (from_tty);
-  exec_file_attach (args, from_tty);
+
+  if (args)
+    {
+      /* Scan through the args and pick up the first non option arg
+         as the filename.  */
+
+      argv = buildargv (args);
+      if (argv == NULL)
+        nomem (0);
+
+      make_cleanup_freeargv (argv);
+
+      for (; (*argv != NULL) && (**argv == '-'); argv++)
+        {;
+        }
+      if (*argv == NULL)
+        error ("No executable file name was specified");
+
+      filename = tilde_expand (*argv);
+      make_cleanup (xfree, filename);
+      exec_file_attach (filename, from_tty);
+    }
+  else
+    exec_file_attach (NULL, from_tty);
 }
 
 /* Set both the exec file and the symbol file, in one command.  
@@ -666,7 +695,7 @@ init_exec_ops (void)
   exec_ops.to_longname = "Local exec file";
   exec_ops.to_doc = "Use an executable file as a target.\n\
 Specify the filename of the executable file.";
-  exec_ops.to_open = exec_file_command;
+  exec_ops.to_open = exec_open;
   exec_ops.to_close = exec_close;
   exec_ops.to_attach = find_default_attach;
   exec_ops.to_require_attach = find_default_require_attach;
