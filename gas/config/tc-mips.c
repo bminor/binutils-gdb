@@ -1858,8 +1858,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      if ((address_expr->X_add_number & 3) != 0)
 		as_bad (_("jump to misaligned address (0x%lx)"),
 			(unsigned long) address_expr->X_add_number);
-	      if (address_expr->X_add_number & ~0xfffffff
-		  || address_expr->X_add_number > 0x7fffffc)
+	      if (address_expr->X_add_number & ~0xfffffff)
 		as_bad (_("jump address range overflow (0x%lx)"),
 			(unsigned long) address_expr->X_add_number);
 	      ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0x3ffffff;
@@ -1869,8 +1868,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      if ((address_expr->X_add_number & 3) != 0)
 		as_bad (_("jump to misaligned address (0x%lx)"),
 			(unsigned long) address_expr->X_add_number);
-	      if (address_expr->X_add_number & ~0xfffffff
-		  || address_expr->X_add_number > 0x7fffffc)
+	      if (address_expr->X_add_number & ~0xfffffff)
 		as_bad (_("jump address range overflow (0x%lx)"),
 			(unsigned long) address_expr->X_add_number);
 	      ip->insn_opcode |=
