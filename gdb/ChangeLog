@@ -1,3 +1,9 @@
+Wed Feb  7 07:34:24 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/i386/linux.mh (XM_CLIBS, GDBSERVER_LIBS):  Remove.  These
+	apparently aren't needed in any reasonably recent version of
+	linux.
+
 Tue Feb  6 21:37:03 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* stabsread.c (read_range_type):  If !self-subrange and language
