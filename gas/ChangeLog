@@ -1,3 +1,12 @@
+Mon Sep 25 16:08:43 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Lower case reloc before
+	testing.
+	(md_assemble): Be more robust in terms of relocations.
+	(md_apply_fix3): Allow 14 bit relocs to be emitted for external
+	symbols in addition to 26 bit relocs.  Properly insert 26/14 bit
+	reloc value fields into the instruction stream.	
+
 Mon Sep 25 00:23:16 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-arm.c (md_atof): Output little endian constants in

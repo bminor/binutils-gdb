@@ -560,26 +560,21 @@ ppc_elf_suffix (str_p)
     bfd_reloc_code_real_type reloc;
   };
 
+  char ident[20];
   char *str = *str_p;
+  char *str2;
   int ch;
+  int len;
   struct map_bfd *ptr;
 
   static struct map_bfd mapping[] = {
-    { "GOT",		3,	BFD_RELOC_PPC_TOC16 },
     { "got",		3,	BFD_RELOC_PPC_TOC16 },
-    { "L",		1,	BFD_RELOC_LO16 },
     { "l",		1,	BFD_RELOC_LO16 },
-    { "HA",		2,	BFD_RELOC_HI16_S },
     { "ha",		2,	BFD_RELOC_HI16_S },
-    { "H",		1,	BFD_RELOC_HI16 },
     { "h",		1,	BFD_RELOC_HI16 },
-    { "SDAREL",		6,	BFD_RELOC_GPREL16 },
     { "sdarel",		6,	BFD_RELOC_GPREL16 },
-    { "FIXUP",		5,	BFD_RELOC_CTOR },	/* synonym for BFD_RELOC_32 that doesn't get */
     { "fixup",		5,	BFD_RELOC_CTOR },	/* warnings with -mrelocatable */
-    { "BRTAKEN",	7,	BFD_RELOC_PPC_B16_BRTAKEN },
     { "brtaken",	7,	BFD_RELOC_PPC_B16_BRTAKEN },
-    { "BRNTAKEN",	8,	BFD_RELOC_PPC_B16_BRNTAKEN },
     { "brntaken",	8,	BFD_RELOC_PPC_B16_BRNTAKEN },
     { (char *)0,	0,	BFD_RELOC_UNUSED }
   };
@@ -587,11 +582,17 @@ ppc_elf_suffix (str_p)
   if (*str++ != '@')
     return BFD_RELOC_UNUSED;
 
-  ch = *str;
+  for (ch = *str, str2 = ident; str2 < ident + sizeof(ident) - 1 && isalpha (ch); ch = *++str)
+    *str2++ = (islower (ch)) ? ch : tolower (ch);
+
+  *str2 = '\0';
+  len = str2 - ident;
+
+  ch = ident[0];
   for (ptr = &mapping[0]; ptr->length > 0; ptr++)
-    if (ch == ptr->string[0] && strncmp (str, ptr->string, ptr->length) == 0)
+    if (ch == ptr->string[0] && len == ptr->length && memcmp (ident, ptr->string, ptr->length) == 0)
       {
-	*str_p = str + ptr->length;
+	*str_p = str;
 	return ptr->reloc;
       }
 
@@ -935,15 +936,21 @@ md_assemble (str)
       if (fixups[i].reloc != BFD_RELOC_UNUSED)
 	{
 	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
-	  int size = (!reloc_howto) ? 0 : bfd_get_reloc_size (reloc_howto);
-	  int offset = target_big_endian ? (4 - size) : 0;
+	  int size;
+	  int offset;
 	  fixS *fixP;
 
-	  if (size > 4)
+	  if (!reloc_howto)
+	    abort ();
+
+	  size = bfd_get_reloc_size (reloc_howto);
+	  offset = target_big_endian ? (4 - size) : 0;
+
+	  if (size < 1 || size > 4)
 	    abort();
 
 	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
-			      &fixups[i].exp, (reloc_howto && reloc_howto->pc_relative),
+			      &fixups[i].exp, reloc_howto->pc_relative,
 			      fixups[i].reloc);
 
 	  /* Turn off complaints that the addend is too large for things like
@@ -2642,6 +2649,9 @@ md_apply_fix3 (fixp, valuep, seg)
      segT seg;
 {
   valueT value;
+  char *where;
+  unsigned long insn;
+  unsigned long mask;
 
   /* FIXME FIXME FIXME: The value we are passed in *valuep includes
      the symbol values.  Since we are using BFD_ASSEMBLER, if we are
@@ -2681,8 +2691,6 @@ md_apply_fix3 (fixp, valuep, seg)
     {
       int opindex;
       const struct powerpc_operand *operand;
-      char *where;
-      unsigned long insn;
 
       opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
 
@@ -2735,17 +2743,24 @@ md_apply_fix3 (fixp, valuep, seg)
 	 We are only prepared to turn a few of the operands into
 	 relocs.
 	 FIXME: We need to handle the DS field at the very least.
-	 FIXME: Handling 16 bit branches would also be reasonable.
 	 FIXME: Selecting the reloc type is a bit haphazard; perhaps
 	 there should be a new field in the operand table.  */
       if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
 	  && operand->bits == 26
 	  && operand->shift == 0)
 	fixp->fx_r_type = BFD_RELOC_PPC_B26;
+      else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
+	  && operand->bits == 16
+	  && operand->shift == 0)
+	fixp->fx_r_type = BFD_RELOC_PPC_B16;
       else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
 	       && operand->bits == 26
 	       && operand->shift == 0)
 	fixp->fx_r_type = BFD_RELOC_PPC_BA26;
+      else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
+	       && operand->bits == 26
+	       && operand->shift == 0)
+	fixp->fx_r_type = BFD_RELOC_PPC_BA16;
       else if ((operand->flags & PPC_OPERAND_PARENS) != 0
 	       && operand->bits == 16
 	       && operand->shift == 0
@@ -2771,6 +2786,7 @@ md_apply_fix3 (fixp, valuep, seg)
 #ifdef OBJ_ELF
       ppc_elf_validate_fix (fixp, seg);
 #endif
+      mask = 0;
       switch (fixp->fx_r_type)
 	{
 	case BFD_RELOC_32:
@@ -2795,24 +2811,52 @@ md_apply_fix3 (fixp, valuep, seg)
 	  if (fixp->fx_pcrel)
 	    abort ();
 
-	case BFD_RELOC_PPC_B16_BRTAKEN:
-	case BFD_RELOC_PPC_B16_BRNTAKEN:
-	  value <<= 2;
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
-			      value, 2);
+	  mask = 0xffff;
 	  break;
 
 	case BFD_RELOC_8:
 	  if (fixp->fx_pcrel)
 	    abort ();
 
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
-			      value, 1);
+	  mask = 0xff;
+	  break;
+
+	case BFD_RELOC_PPC_B16:
+	case BFD_RELOC_PPC_B16_BRTAKEN:
+	case BFD_RELOC_PPC_B16_BRNTAKEN:
+	case BFD_RELOC_PPC_BA16:
+	case BFD_RELOC_PPC_BA16_BRTAKEN:
+	case BFD_RELOC_PPC_BA16_BRNTAKEN:
+	  mask = 0xfffc;
+	  break;
+
+	case BFD_RELOC_PPC_B26:
+	case BFD_RELOC_PPC_BA26:
+	  mask = 0x3fffffc;
 	  break;
 
 	default:
 	  abort ();
 	}
+
+	  /* Fetch the instruction, insert the fully resolved operand
+	     value, and stuff the instruction back again.  */
+      if (mask != 0)
+	{
+	  where = fixp->fx_frag->fr_literal + fixp->fx_where;
+	  if (target_big_endian)
+	    insn = bfd_getb32 ((unsigned char *) where);
+	  else
+	    insn = bfd_getl32 ((unsigned char *) where);
+
+	  insn = (insn & ~mask) | (value & mask);
+
+	  if (target_big_endian)
+	    bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+	  else
+	    bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+	}
+
     }
 
 #ifdef OBJ_ELF
