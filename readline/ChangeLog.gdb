@@ -76,7 +76,8 @@
 
 2002-12-06  Elena Zannoni  <ezannoni@redhat.com>
 
-        Import of readline 4.3:
+        Import of readline 4.3. NB: This import includes those gdb
+        local changes that aren't in the official readline sources.
 
         * compat.c, mbutil.c, misc.c, rlmbutil.h, rltypedefs.h,
         text.c, doc/history.0, doc/history.3, support/wcwidth.c,
