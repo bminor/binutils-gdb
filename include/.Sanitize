@@ -52,6 +52,7 @@ oasys.h
 obstack.h
 os9k.h
 opcode
+progress.h
 wait.h
 
 Things-to-lose:
