@@ -19,6 +19,13 @@ gould-pinsn.c\
 gould-xdep.c\
 h8300-tdep.c\
 hp300ux-xdep.c\
+hppa-coredep.c\
+hppa-pinsn.c\
+hppabsd-core.c\
+hppabsd-tdep.c\
+hppabsd-xdep.c\
+hppahpux-tdep.c\
+hppahpux-xdep.c\
 i386-pinsn.c\
 i386-tdep.c\
 i386-xdep.c\
@@ -44,11 +51,10 @@ pyr-tdep.c\
 pyr-xdep.c\
 remote-adapt.c\
 remote-eb.c\
+remote-es1800.c\
 remote-hms.c\
 remote-mm.c\
 remote-nindy.c\
-remote-st2000.c\
-remote-udi.c\
 remote-vx.c\
 rs6000-pinsn.c\
 rs6000-tdep.c\
@@ -72,17 +78,13 @@ xcoffsolib.c
 
 ALLDEPFILES_SUBDIR=\
 nindy-share/Onindy.c\
-29k-share/dfe/mini2udi.c\
 nindy-share/nindy.c\
 nindy-share/ttybreak.c\
 nindy-share/ttyflush.c\
-29k-share/udi/udip2soc.c\
-29k-share/udi/udr.c\
 vx-share/xdr_ld.c\
 vx-share/xdr_ptrace.c\
 vx-share/xdr_rdb.c\
-vx-share/xdr_regs.c\
-29k-share/dfe/yank.c
+vx-share/xdr_regs.c
 
 ALLPARAM=\
 tm-29k.h\
@@ -94,14 +96,18 @@ tm-arm.h\
 tm-bigmips.h\
 tm-convex.h\
 tm-delta88.h\
+tm-es1800.h\
 tm-h8300.h\
 tm-hp300bsd.h\
 tm-hp300hpux.h\
+tm-hppabsd.h\
+tm-hppahpux.h\
 tm-i386v-g.h\
 tm-i386v.h\
 tm-i386v4.h\
 tm-irix3.h\
 tm-isi.h\
+tm-linux.h\
 tm-m88k.h\
 tm-merlin.h\
 tm-mips.h\
@@ -113,7 +119,6 @@ tm-pn.h\
 tm-pyr.h\
 tm-rs6000.h\
 tm-sparc.h\
-tm-st2000.h\
 tm-stratus.h\
 tm-sun2.h\
 tm-sun2os4.h\
@@ -121,7 +126,7 @@ tm-sun3.h\
 tm-sun386.h\
 tm-sun3os4.h\
 tm-sun4os4.h\
-tm-sun4os5.h\
+tm-sun4sol2.h\
 tm-symmetry.h\
 tm-tahoe.h\
 tm-ultra3.h\
@@ -140,6 +145,8 @@ xm-delta88.h\
 xm-go32.h\
 xm-hp300bsd.h\
 xm-hp300hpux.h\
+xm-hppabsd.h\
+xm-hppahpux.h\
 xm-i386mach.h\
 xm-i386sco.h\
 xm-i386v.h\
@@ -148,6 +155,7 @@ xm-i386v4.h\
 xm-irix3.h\
 xm-irix4.h\
 xm-isi.h\
+xm-linux.h\
 xm-m88k.h\
 xm-merlin.h\
 xm-mips.h\
@@ -165,7 +173,7 @@ xm-sun3.h\
 xm-sun386.h\
 xm-sun3os4.h\
 xm-sun4os4.h\
-xm-sun4os5.h\
+xm-sun4sol2.h\
 xm-symmetry.h\
 xm-tahoe.h\
 xm-ultra3.h\
@@ -177,7 +185,6 @@ ALLCONFIG=\
 ./config/3b1.mh\
 ./config/3b1.mt\
 ./config/a29k-kern.mt\
-./config/a29k-udi.mt\
 ./config/a29k.mt\
 ./config/altos.mh\
 ./config/altos.mt\
@@ -196,6 +203,7 @@ ALLCONFIG=\
 ./config/decstation.mt\
 ./config/delta88.mh\
 ./config/delta88.mt\
+./config/es1800.mt\
 ./config/go32.mh\
 ./config/go32.mt\
 ./config/h8300hms.mt\
@@ -203,6 +211,10 @@ ALLCONFIG=\
 ./config/hp300bsd.mt\
 ./config/hp300hpux.mh\
 ./config/hp300hpux.mt\
+./config/hppabsd.mh\
+./config/hppabsd.mt\
+./config/hppahpux.mh\
+./config/hppahpux.mt\
 ./config/i386aout.mt\
 ./config/i386mach.mh\
 ./config/i386sco.mh\
@@ -223,6 +235,8 @@ ALLCONFIG=\
 ./config/irix4.mh\
 ./config/isi.mh\
 ./config/isi.mt\
+./config/linux.mh\
+./config/linux.mt\
 ./config/littlemips.mh\
 ./config/littlemips.mt\
 ./config/m88k.mh\
@@ -248,7 +262,6 @@ ALLCONFIG=\
 ./config/rs6000.mh\
 ./config/rs6000.mt\
 ./config/rtbsd.mh\
-./config/st2000.mt\
 ./config/stratus.mh\
 ./config/stratus.mt\
 ./config/sun2os3.mh\
@@ -269,8 +282,8 @@ ALLCONFIG=\
 ./config/sun4os3.mt\
 ./config/sun4os4.mh\
 ./config/sun4os4.mt\
-./config/sun4os5.mh\
-./config/sun4os5.mt\
+./config/sun4sol2.mh\
+./config/sun4sol2.mt\
 ./config/symmetry.mh\
 ./config/symmetry.mt\
 ./config/tahoe.mh\
