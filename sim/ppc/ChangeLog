@@ -1,3 +1,16 @@
+Tue Mar 25 12:13:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* emul_bugapi.c (emul_bugapi_create): Guard against NULL images.
+
+	* configure.in (enable-sim-endain): Correct typo in usage (from
+ 	Erik Landry <landry@ENGR.ORST.EDU>).
+	* configure: Re-generate.
+
+Fri Mar 14 18:23:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* Makefile.in (targ-vals.def): Re-do rule so that it works with
+ 	FreeBSD's make.  Didn't like $<.
+
 Thu Mar 13 12:55:48 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim_calls.c (sim_open): New SIM_DESC result.  Argument is now
