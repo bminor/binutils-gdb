@@ -21,7 +21,7 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "as.h"
 #include "obstack.h"
-
+#include "aout/stab_gnu.h"
 const short /* in: segT   out: N_TYPE bits */
 seg_N_TYPE[] = {
   N_ABS,
@@ -291,6 +291,27 @@ int what;
 		pseudo_set(symbolP);
 		symbolP->sy_symbol.n_type = saved_type;
 	}
+#ifndef NO_LISTING
+{
+  extern int listing;
+  
+  if (listing && !goof) 
+  {
+    if (symbolP->sy_symbol.n_type == N_SLINE) 
+    {
+      
+      listing_source_line(symbolP->sy_symbol.n_desc);
+    }
+    else if (symbolP->sy_symbol.n_type == N_SO
+	     || symbolP->sy_symbol.n_type == N_SOL) 
+    {
+      listing_source_file(string);
+    }			  
+  }
+}
+
+#endif  
+  
 	if (goof)
 		ignore_rest_of_line ();
 	else
