@@ -502,6 +502,9 @@ case "${host}" in
      configdirs="bfd libiberty opcodes readline sim gdb"
      target_configdirs=
     ;;
+  *-*-netbsd*)
+    noconfigdirs="rcs"
+    ;;
   ppc*-*-pe)
      noconfigdirs="patch diff make tk tcl expect dejagnu cvssrc autoconf automake texinfo bison send-pr gprof rcs guile perl apache inet itcl tix db sn gnuserv"
 # start-sanitize-ide
