@@ -69,3 +69,10 @@ ni++;
 
 SAVE_INTERPRETER_STATE();
 }
+
+  
+sim_info()
+{
+  int cycles = saved_state.reg[CYCLES];
+  printf("cycles (v approximate) %10d\n", cycles);
+}
