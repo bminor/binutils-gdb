@@ -22,13 +22,6 @@ else
         lose_these_too="${r5900_files} ${lose_these_too}"
 fi
 
-sky_files="sky"
-if ( echo $* | grep keep\-sky > /dev/null ) ; then
-        keep_these_too="${sky_files} ${keep_these_too}"
-else
-        lose_these_too="${sky_files} ${lose_these_too}"
-fi
-
 v850e_files="v850e-elf"
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	keep_these_too="${v850e_files} ${keep_these_too}"
@@ -54,6 +47,7 @@ d10v-elf
 d30v-elf
 lib
 m32r-elf
+mips64el-elf
 sim
 
 Things-to-lose:
