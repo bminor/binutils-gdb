@@ -1,3 +1,27 @@
+2004-07-06  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Add sh-symbian-elf target.
+	* configure.in: Add bfd_elf32_shl_symbian_vec.
+	* configure: Regenerate.
+	* elf-bfd.h (struct elf_backend_data): Add new field
+	'check_directives'.
+        * elflink.c (elf_link_add_object_symbols): Invoke the
+	check_directives function, if defined.
+        * elfxx-target.h: Provide a default, NULL definition for
+	check_directives.
+        * targets.c: Add bfd_elf32_shl_symbian_vec.
+        * elf32-sh.c (sh_elf_swap_insns): Protect against unnecessary
+	definition.
+        (elf32_shlin_grok_prstatus, elf32_shlib_grok_psinfo,
+	* sh_elf_get_flags_from_mach, sh_elf_find_flags): Likewise.
+        (TARGET_BIG_SYM, TARGET_LITTLE_SYM): Only define if they have
+	not already been defined.
+        * elf32-sh64.c: Use SH_TARGET_ALREADY_DEFINED.
+        * sh-symbian.c: New file.  Provide functions to support the
+	* sh-symbian-elf target.
+	* Makefile.am: Add elf32-sh-symbian.c
+	* Makefile.in: Regenerate.
+        
 2004-07-05  Andrew Stubbs <andrew.stubbs@superh.com>
 
 	* elf32-sh.c: Include ../opcodes/sh-opc.h .

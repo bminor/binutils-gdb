@@ -1,5 +1,12 @@
 2004-07-06  Nick Clifton  <nickc@redhat.com>
 
+	* config.in: Undefine TARGET_SYMBIAN by default.
+        * configure.in:
+        * configure: Regenerate. Add sh-symbian-elf target.  If
+        selected define TARGET_SYMBIAN.
+        * config/tc-sh.h (TARGET_FORMAT): Select a Symbian target
+        format if TARGET_SYMBIAN has been defined.
+                
 	* output-file.c (output_file_create): Report the target format
 	chosen when bfd_openw reports that it is invalid.
 

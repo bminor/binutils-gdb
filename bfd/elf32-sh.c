@@ -50,8 +50,10 @@ static bfd_boolean sh_elf_relax_delete_bytes
   (bfd *, asection *, bfd_vma, int);
 static bfd_boolean sh_elf_align_loads
   (bfd *, asection *, Elf_Internal_Rela *, bfd_byte *, bfd_boolean *);
+#ifndef SH64_ELF
 static bfd_boolean sh_elf_swap_insns
   (bfd *, asection *, void *, bfd_byte *, bfd_vma);
+#endif
 static bfd_boolean sh_elf_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
@@ -107,10 +109,12 @@ static enum elf_reloc_type_class sh_elf_reloc_type_class
 #ifdef INCLUDE_SHMEDIA
 inline static void movi_shori_putval (bfd *, unsigned long, char *);
 #endif
+#if !defined SH_TARGET_ALREADY_DEFINED
 static bfd_boolean elf32_shlin_grok_prstatus
   (bfd *abfd, Elf_Internal_Note *note);
 static bfd_boolean elf32_shlin_grok_psinfo
   (bfd *abfd, Elf_Internal_Note *note);
+#endif
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -3090,6 +3094,7 @@ sh_elf_align_loads (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
   return FALSE;
 }
 
+#ifndef SH64_ELF
 /* Swap two SH instructions.  This is like sh_swap_insns in coff-sh.c.  */
 
 static bfd_boolean
@@ -3218,6 +3223,7 @@ sh_elf_swap_insns (bfd *abfd, asection *sec, void *relocs,
 
   return TRUE;
 }
+#endif /* defined SH64_ELF */
 
 #ifdef INCLUDE_SHMEDIA
 
@@ -6827,6 +6833,7 @@ sh_elf_set_mach_from_flags (bfd *abfd)
    return the equivalent ELF flags from the table.
    Return -1 if no match is found.  */
 
+#ifndef SH_TARGET_ALREADY_DEFINED
 int
 sh_elf_get_flags_from_mach (unsigned long mach)
 {
@@ -6841,6 +6848,7 @@ sh_elf_get_flags_from_mach (unsigned long mach)
 
   return -1;
 }
+#endif
 #endif /* not sh_elf_set_mach_from_flags */
 
 #ifndef sh_elf_set_private_flags
@@ -6876,14 +6884,17 @@ sh_elf_copy_private_data (bfd * ibfd, bfd * obfd)
 
 /* This function returns the ELF architecture number that
    corresponds to the given arch_sh* flags.  */
+
+#ifndef SH_TARGET_ALREADY_DEFINED
 int
 sh_find_elf_flags (unsigned int arch_set)
 {
+  extern unsigned long sh_get_bfd_mach_from_arch_set (unsigned int);
   unsigned long bfd_mach = sh_get_bfd_mach_from_arch_set (arch_set);
 
   return sh_elf_get_flags_from_mach (bfd_mach);
 }
-
+#endif
 
 /* This routine initialises the elf flags when required and
    calls sh_merge_bfd_arch() to check dsp/fpu compatibility.  */
@@ -6891,6 +6902,8 @@ sh_find_elf_flags (unsigned int arch_set)
 static bfd_boolean
 sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 {
+  extern bfd_boolean sh_merge_bfd_arch (bfd *, bfd *);
+
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
@@ -6903,7 +6916,7 @@ sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
       sh_elf_set_mach_from_flags (obfd);
     }
 
-  if ( ! sh_merge_bfd_arch (ibfd, obfd) )
+  if (! sh_merge_bfd_arch (ibfd, obfd))
     return FALSE;
 
   elf_elfheader (obfd)->e_flags =
@@ -7383,7 +7396,9 @@ sh_elf_reloc_type_class (const Elf_Internal_Rela *rela)
     }
 }
 
+#if !defined SH_TARGET_ALREADY_DEFINED
 /* Support for Linux core dump NOTE sections.  */
+
 static bfd_boolean
 elf32_shlin_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
@@ -7443,6 +7458,7 @@ elf32_shlin_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 
   return TRUE;
 }
+#endif /* not SH_TARGET_ALREADY_DEFINED */
 
  
 /* Return address for Ith PLT stub in section PLT, for relocation REL
@@ -7455,10 +7471,13 @@ sh_elf_plt_sym_val (bfd_vma i, const asection *plt,
   return plt->vma + (i + 1) * PLT_ENTRY_SIZE;
 }
 
+#if !defined SH_TARGET_ALREADY_DEFINED
 #define TARGET_BIG_SYM		bfd_elf32_sh_vec
 #define TARGET_BIG_NAME		"elf32-sh"
 #define TARGET_LITTLE_SYM	bfd_elf32_shl_vec
 #define TARGET_LITTLE_NAME	"elf32-shl"
+#endif
+
 #define ELF_ARCH		bfd_arch_sh
 #define ELF_MACHINE_CODE	EM_SH
 #ifdef __QNXTARGET__
@@ -7511,7 +7530,7 @@ sh_elf_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
 
-#ifndef INCLUDE_SHMEDIA
+#if !defined INCLUDE_SHMEDIA && !defined SH_TARGET_ALREADY_DEFINED
 
 #include "elf32-target.h"
 
@@ -7553,4 +7572,4 @@ sh_elf_plt_sym_val (bfd_vma i, const asection *plt,
 
 #include "elf32-target.h"
 
-#endif /* INCLUDE_SHMEDIA */
+#endif /* neither INCLUDE_SHMEDIA nor SH_TARGET_ALREADY_DEFINED */

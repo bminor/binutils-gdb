@@ -253,6 +253,7 @@ BFD32_BACKENDS = \
 	elf32-ppc.lo \
 	elf32-s390.lo \
 	elf32-sh.lo \
+	elf32-sh-symbian.lo \
 	elf32-sh64.lo \
 	elf32-sh64-com.lo \
 	elf32-sparc.lo \
@@ -421,6 +422,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-sh64-com.c \
 	elf32-s390.c \
 	elf32-sh.c \
+	elf32-sh-symbian.c \
 	elf32-sparc.c \
 	elf32-v850.c \
 	elf32-vax.c \
@@ -1310,6 +1312,11 @@ elf32-sh.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/libiberty.h $(srcdir)/../opcodes/sh-opc.h \
   elf32-target.h
+elf32-sh-symbian.lo: elf32-sh-symbian.c elf32-sh.c $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/libiberty.h \
+  $(srcdir)/../opcodes/sh-opc.h elf32-target.h
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sparc.h \

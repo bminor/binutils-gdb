@@ -665,6 +665,13 @@ struct elf_backend_data
     (bfd *abfd, struct bfd_link_info *info, asection *o,
      const Elf_Internal_Rela *relocs);
 
+  /* The CHECK_DIRECTIVES function is called once per input file by
+     the add_symbols phase of the ELF backend linker.  The function
+     must inspect the bfd and create any additional symbols according
+     to any custom directives in the bfd.  */
+  bfd_boolean (*check_directives)
+    (bfd *abfd, struct bfd_link_info *info);
+
   /* The ADJUST_DYNAMIC_SYMBOL function is called by the ELF backend
      linker for every symbol which is defined by a dynamic object and
      referenced by a regular object.  This is called after all the

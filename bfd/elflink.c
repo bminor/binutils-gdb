@@ -2904,6 +2904,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      const char **, flagword *, asection **, bfd_vma *);
   bfd_boolean (*check_relocs)
     (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
+  bfd_boolean (*check_directives)
+    (bfd *, struct bfd_link_info *);
   bfd_boolean collect;
   Elf_Internal_Shdr *hdr;
   bfd_size_type symcount;
@@ -4052,6 +4054,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
       free (sorted_sym_hash);
     }
+
+  check_directives = get_elf_backend_data (abfd)->check_directives;
+  if (check_directives)
+    check_directives (abfd, info);
 
   /* If this object is the same format as the output object, and it is
      not a shared library, then let the backend look through the

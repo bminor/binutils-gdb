@@ -275,6 +275,9 @@
 /* Define if default target is PowerPC Solaris. */
 #undef TARGET_SOLARIS_COMMENT
 
+/* Define if target is Symbian OS. */
+#undef TARGET_SYMBIAN
+
 /* Target vendor. */
 #undef TARGET_VENDOR
 

@@ -329,6 +329,9 @@ sh*-*-netbsdelf*)
 			targ_emul=shelf_nbsd
 			targ_extra_emuls=shlelf_nbsd
 			;;
+sh*-symbian-elf*)
+			targ_emul=shlsymbian
+			;;
 shle*-*-elf* | sh[1234]*le*-*-elf | shle*-*-kaos*)
 			targ_emul=shlelf
 			targ_extra_emuls="shelf shl sh"

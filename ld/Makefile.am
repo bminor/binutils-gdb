@@ -334,6 +334,7 @@ ALL_EMULATIONS = \
 	eshlelf_nto.o \
 	eshl.o \
 	eshlelf.o \
+	eshlsymbian.o \
 	eshpe.o \
 	esparcaout.o \
 	esparclinux.o \
@@ -1340,6 +1341,10 @@ eshlelf.c: $(srcdir)/emulparams/shlelf.sh \
   $(srcdir)/emulparams/shelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf "$(tdir_shlelf)"
+eshlsymbian.c: $(srcdir)/emulparams/shlsymbian.sh \
+  $(srcdir)/emulparams/shelf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf32sh-symbian.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shlsymbian "$(tdir_shlelf)"
 eshlelf32.c: $(srcdir)/emulparams/shlelf32.sh \
   $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h $(srcdir)/emulparams/shelf32.sh \
   $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \

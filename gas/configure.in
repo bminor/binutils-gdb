@@ -448,6 +448,9 @@ changequote([,])dnl
       sh5*-*-netbsd*)			fmt=elf em=nbsd ;;
       sh64*-*-netbsd*)			fmt=elf em=nbsd ;;
       sh*-*-netbsdelf*)			fmt=elf em=nbsd ;;
+      sh*-symbian-elf*)			fmt=elf endian=little
+		AC_DEFINE(TARGET_SYMBIAN, 1, [Define if target is Symbian OS.])
+		;;
       sh-*-elf*)			fmt=elf ;;
       sh-*-coff*)			fmt=coff ;;
       sh-*-nto*)			fmt=elf ;;

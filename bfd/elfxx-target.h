@@ -330,6 +330,9 @@
 #ifndef elf_backend_check_relocs
 #define elf_backend_check_relocs	0
 #endif
+#ifndef elf_backend_check_directives
+#define elf_backend_check_directives	0
+#endif
 #ifndef elf_backend_adjust_dynamic_symbol
 #define elf_backend_adjust_dynamic_symbol 0
 #endif
@@ -510,6 +513,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_create_dynamic_sections,
   elf_backend_omit_section_dynsym,
   elf_backend_check_relocs,
+  elf_backend_check_directives,
   elf_backend_adjust_dynamic_symbol,
   elf_backend_always_size_sections,
   elf_backend_size_dynamic_sections,

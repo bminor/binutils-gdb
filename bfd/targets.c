@@ -589,6 +589,7 @@ extern const bfd_target bfd_elf32_sh64nbsd_vec;
 extern const bfd_target bfd_elf32_sh_vec;
 extern const bfd_target bfd_elf32_shblin_vec;
 extern const bfd_target bfd_elf32_shl_vec;
+extern const bfd_target bfd_elf32_shl_symbian_vec;
 extern const bfd_target bfd_elf32_shlin_vec;
 extern const bfd_target bfd_elf32_shlnbsd_vec;
 extern const bfd_target bfd_elf32_shnbsd_vec;
@@ -880,6 +881,7 @@ static const bfd_target * const _bfd_target_vector[] = {
         &bfd_elf32_sh_vec,
         &bfd_elf32_shblin_vec,
         &bfd_elf32_shl_vec,
+        &bfd_elf32_shl_symbian_vec,
         &bfd_elf32_shlin_vec,
 	&bfd_elf32_shlnbsd_vec,
 	&bfd_elf32_shnbsd_vec,

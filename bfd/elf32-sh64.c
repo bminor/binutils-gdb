@@ -106,6 +106,7 @@ static void sh64_find_section_for_address
 
 #define GOT_BIAS (-((long)-32768))
 #define INCLUDE_SHMEDIA
+#define SH_TARGET_ALREADY_DEFINED
 #include "elf32-sh.c"
 
 /* Tack some extra info on struct bfd_elf_section_data.  */
