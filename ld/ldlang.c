@@ -1429,7 +1429,7 @@ DEFUN (size_input_section, (this_ptr, output_section_statement, fill,
          needed for the output stage. Only remember the size of sections
          which we will actually allocate  */
       if (((i->flags &
-	    (SEC_HAS_CONTENTS | SEC_LOAD)) == (SEC_HAS_CONTENTS | SEC_LOAD))
+	    (SEC_HAS_CONTENTS | SEC_ALLOC)) == (SEC_HAS_CONTENTS | SEC_ALLOC))
 	  && (bfd_get_section_size_before_reloc (i) > largest_section))
 	{
 	  largest_section = bfd_get_section_size_before_reloc (i);

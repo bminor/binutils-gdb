@@ -1,3 +1,8 @@
+Thu Oct 15 15:20:26 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldlang.c (size_input_section): count the sizes of all sections
+        we allocate.
+
 Thu Oct  8 09:05:25 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldmisc.c (demangle,vfinfo): use the new underscore in bfd to 
