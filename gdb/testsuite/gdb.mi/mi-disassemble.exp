@@ -93,28 +93,17 @@ proc test_disassembly_only {} {
 
     # Test disassembly more only for the current function.
     # Tests:
-    # -data-disassembly $pc 0 0 -1
-    # -data-disassembly main 0 0 -1
-    # -data-disassembly $pc $pc+8 0 -1
-    # -data-disassembly callee2 0 0 -1
+    # -data-disassemble -s $pc -e "$pc+8" -- 0
+    # -data-disassembly -f basics.c -l 32 -- 0
 
     mi_gdb_test "print/x \$pc" "" ""
-    mi_gdb_test "111-data-disassemble \$pc 0 0 -1" \
-	    "111\\^done,asm_insns=\{\{address=\"$hex <main>\",inst=\".*\"\},\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\},\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\},.*\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}\}" \
-             "data-disassemble from pc assembly only"
+    mi_gdb_test "111-data-disassemble -s \$pc -e \"\$pc + 12\" -- 0" \
+	    "111\\^done,asm_insns=\{\{address=\"$hex\",func-name=\"main\",offset=\"4\",inst=\".*\"\},\{address=\"$hex\",func-name=\"main\",offset=\"8\",inst=\".*\"\},\{address=\"$hex\",func-name=\"main\",offset=\"12\",inst=\".*\"\}\}" \
+             "data-disassemble from pc to pc+12 assembly only"
 
-    mi_gdb_test "222-data-disassemble main 0 0 -1" \
-	    "222\\^done,asm_insns=\{\{address=\"$hex <main>\",inst=\".*\"\},\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}\}" \
-              "data-disassemble main assembly only"
-
-    mi_gdb_test "333-data-disassemble \$pc \$pc+8 0 -1" \
-	    "333\\^done,asm_insns=\{\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\},\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}\}" \
-             "data-disassemble range assembly only"
-
-    mi_gdb_test "444-data-disassemble callee2 0 0 -1" \
-	    "444\\^done,asm_insns=\{\{address=\"$hex <callee2\[0-9\]*>\",inst=\".*\"\},.*\{address=\"$hex <callee2\\+\[0-9\]*>\",inst=\".*\"\}\}" \
-             "data-disassemble callee2 assembly only"
-
+    mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -- 0" \
+	    "222\\^done,asm_insns=\{\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"100\",inst=\".*\"\}\}" \
+              "data-disassemble file & line, assembly only"
 }
 
 proc test_disassembly_lines_limit {} {
@@ -123,33 +112,24 @@ proc test_disassembly_lines_limit {} {
 
     # Test disassembly more only for the current function.
     # Tests:
-    # -data-disassembly $pc 0 0 2
-    # -data-disassembly main 0 0 1
-    # -data-disassembly main 0 0 0
-    # -data-disassembly $pc $pc+8 0 99
-    # -data-disassembly $pc $pc+12 0 2
+    # -data-disassembly -f basics.c -l 32 -n 20 -- 0
+    # -data-disassembly -f basics.c -l 32 -n 0 -- 0
+    # -data-disassembly -f basics.c -l 32 -n 50 -- 0
 
     mi_gdb_test "print/x \$pc" "" ""
-    mi_gdb_test "100-data-disassemble \$pc 0 0 2" \
-	    "100\\^done,asm_insns=\{\{address=\"$hex <main\[0-9\]*>\",inst=\".*\"\},\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}\}" \
-             "data-disassemble from pc two lines - assembly only"
+    mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 20 -- 0" \
+	    "222\\^done,asm_insns=\{\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"76\",inst=\".*\"\}\}" \
+              "data-disassemble file, line, number assembly only"
 
-    mi_gdb_test "200-data-disassemble main 0 0 1" \
-	    "200\\^done,asm_insns=\{\{address=\"$hex <main\[0-9\]*>\",inst=\".*\"\}\}" \
-	    "data-disassemble main 1 line - assembly only"
+    mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 0 -- 0" \
+	    "222\\^done,asm_insns=\{\}" \
+              "data-disassemble file, line, number (zero lines) assembly only"
 
-    mi_gdb_test "300-data-disassemble main 0 0 0" \
-             "300\\^done,asm_insns=\{\}" \
-             "data-disassemble main zero lines - assembly only"
-
-    mi_gdb_test "400-data-disassemble \$pc \$pc+8 0 99" \
-	    "400\\^done,asm_insns=\{\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\},\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}\}" \
-             "data-disassemble lines bigger than range - assembly only"
-
-    mi_gdb_test "500-data-disassemble \$pc \$pc+12 0 2" \
-	    "500\\^done,asm_insns=\{\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\},\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}\}" \
-             "data-disassemble lines less than range - assembly only"
+    mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 50 -- 0" \
+	    "222\\^done,asm_insns=\{\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"100\",inst=\".*\"\}\}" \
+              "data-disassemble file, line, number (more than main lines) assembly only"
 }
+
 
 proc test_disassembly_mixed {} {
     global mi_gdb_prompt
@@ -158,26 +138,21 @@ proc test_disassembly_mixed {} {
 
     # Test disassembly more only for the current function.
     # Tests:
-    # -data-disassembly main 0 1 -1
-    # -data-disassembly $pc $pc+8 1 -1
-    # -data-disassembly callee2 0 1 -1
+    # -data-disassembly -f basics.c -l 21 -- 1
+    # -data-disassembly -s $pc -e "$pc+8" -- 1
 
-    mi_gdb_test "002-data-disassemble callee2 0 1 -1" \
-	    "002\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex <callee2\[0-9\]*>\",inst=\".*\"\}\}\},src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{.*\{address=\"$hex <callee2\\+\[0-9\]*>\",inst=\".*\"\}\}\}\}" \
-             "data-disassemble callee2 assembly mixed"
+    mi_gdb_test "002-data-disassemble -f basics.c -l 21 -- 1" \
+	    "002\\^done,asm_insns=\{src_and_asm_line=\{line=\"21\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex\",func-name=\"callee2\",offset=\"0\",inst=\".*\"\}.*\}\},.*,src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{.*\{address=\"$hex\",func-name=\"callee2\",offset=\"$decimal\",inst=\".*\"\}\}\}\}" \
+             "data-disassemble file, line assembly mixed"
 
     #
     # In mixed mode, the lowest level of granularity is the source line.
     # So we are going to get the disassembly for the source line at
-    # which we are now.
+    # which we are now, even if we have specified that the range is only 2 insns.
     #
-    mi_gdb_test "003-data-disassemble \$pc \$pc+8 1 -1" \
-	    "003\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}.*\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}\}\}\}" \
+    mi_gdb_test "003-data-disassemble -s \$pc -e \"\$pc+4\" -- 1" \
+	    "003\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex\",func-name=\"main\",offset=\"4\",inst=\".*\"\}.*\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\}\}\}" \
              "data-disassemble range assembly mixed"
-
-    mi_gdb_test "004-data-disassemble callee2 0 1 -1" \
-	    "004\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex <callee2\[0-9\]*>\",inst=\".*\"\}\}\},.*src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{.*\{address=\"$hex <callee2\\+\[0-9\]*>\",inst=\".*\"\}\}\}\}" \
-             "data-disassemble callee2 assembly mixed"
 }
 
 proc test_disassembly_mixed_lines_limit {} {
@@ -187,32 +162,22 @@ proc test_disassembly_mixed_lines_limit {} {
 
     # Test disassembly more only for the current function.
     # Tests:
-    # -data-disassembly $pc 0 1 2
-    # -data-disassembly main 0 1 1
-    # -data-disassembly main 0 1 0
-    # -data-disassembly $pc $pc+4 1 99
-    # -data-disassembly $pc $pc+12 1 2
+    # -data-disassembly -f basics.c -l 32 -n 20 -- 0
+    # -data-disassembly -f basics.c -l 32 -n 0 -- 0
+    # -data-disassembly -f basics.c -l 32 -n 50 -- 0
 
     mi_gdb_test "print/x \$pc" "" ""
-    mi_gdb_test "100-data-disassemble \$pc 0 1 2" \
-	    "100\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex <main\[0-9\]*>\",inst=\".*\"\}\}\},src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}\}\}\}" \
-             "data-disassemble from pc two lines - assembly mixed"
+    mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 20 -- 1" \
+	    "222\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\}" \
+              "data-disassemble file, line, number assembly mixed"
 
-    mi_gdb_test "200-data-disassemble main 0 1 1" \
-	    "200\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex <main\[0-9\]*>\",inst=\".*\"\}\}\}\}" \
-	    "data-disassemble main 1 line - assembly mixed"
+    mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 0 -- 1" \
+	    "222\\^done,asm_insns=\{src_and_asm_line=\{line=\"31\",file=\".*basics.c\",line_asm_insn=\{\}\}\}" \
+              "data-disassemble file, line, number (zero lines) assembly mixed"
 
-    mi_gdb_test "300-data-disassemble main 0 1 0" \
-	    "300\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\}\}\}" \
-             "data-disassemble main zero lines - assembly mixed"
-
-    mi_gdb_test "400-data-disassemble \$pc \$pc+4 1 99" \
-	    "400\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}.*\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}\}\}\}" \
-             "data-disassemble lines bigger than range - assembly mixed"
-
-    mi_gdb_test "500-data-disassemble \$pc \$pc+12 1 2" \
-	    "500\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\},\{address=\"$hex <main\\+\[0-9\]*>\",inst=\".*\"\}\}\}\}" \
-             "data-disassemble lines less than range - assembly mixed"
+    mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 50 -- 1" \
+	    "222\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\}" \
+              "data-disassemble file, line, number (more than main lines) assembly mixed"
 }
 
 proc test_disassembly_bogus_args {} {
@@ -221,60 +186,26 @@ proc test_disassembly_bogus_args {} {
 
     # Test that bogus input to disassembly command is rejected.
     # Tests:
-    # -data-disassembly 0 0 0 0
-    # -data-disassembly 0 0 0
-    # -data-disassembly 0 0 
-    # -data-disassembly 0
+    # -data-disassembly -f foo -l abc -n 0 -- 0
+    # -data-disassembly -s foo -e bar -- 0
+    # -data-disassembly -s $pc -f basics.c -- 0
+    # -data-disassembly -f basics.c -l 32 -- 9
 
-    mi_gdb_test "123-data-disassemble 0 0 0 0" \
-             ".*123\\^error,msg=\"No function contains specified address\"" \
-             "data-disassemble bogus arguments"
+    mi_gdb_test "123-data-disassemble -f foo -l abc -n 0 -- 0" \
+             ".*123\\^error,msg=\"mi_cmd_disassemble: Invalid filename.\"" \
+             "data-disassemble bogus filename"
 
-    mi_gdb_test "321-data-disassemble 0 0 0" \
-             "321\\^error,msg=\"mi_cmd_disassemble: Usage: start_address end_address mixed_mode num_of_lines.\"" \
-             "data-disassemble wrong num of args (3)"
+    mi_gdb_test "321-data-disassemble -s foo -e bar -- 0" \
+             "321\\^error,msg=\"No symbol \\\\\"foo\\\\\" in current context.\"" \
+             "data-disassemble bogus address"
 
-    mi_gdb_test "456-data-disassemble 0 0" \
-             "456\\^error,msg=\"mi_cmd_disassemble: Usage: start_address end_address mixed_mode num_of_lines.\"" \
-             "data-disassemble wrong num of args (2)"
+    mi_gdb_test "456-data-disassemble -s \$pc -f basics.c -- 0" \
+             "456\\^error,msg=\"mi_cmd_disassemble: Usage: \\( .-f filename -l linenum .-n howmany.. | .-s startaddr -e endaddr.\\) .--. mixed_mode.\"" \
+             "data-disassemble mix different args"
 
-    mi_gdb_test "789-data-disassemble 0" \
-             "789\\^error,msg=\"mi_cmd_disassemble: Usage: start_address end_address mixed_mode num_of_lines.\"" \
-             "data-disassemble wrong num of args (1)"
-
-}
-
-proc test_disassembly_mixed_from_pc {} {
-    global mi_gdb_prompt
-    global hex
-    global decimal
-
-    # Test disassembly more only for the current function.
-    # Tests:
-    # -data-disassembly $pc 0 1 -1
-
-    mi_gdb_test "200-break-insert callee2" \
-             "200\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee2\",file=\".*basics.c\",line=\"22\",times=\"0\"\}" \
-             "break-insert operation for mixed"
-
-    send_gdb "123-exec-continue\n"
-    gdb_expect {
-      -re "123\\^running\r\n$mi_gdb_prompt" {
-	  gdb_expect {
-	      -re "\[\r\n\]*123\\*stopped,reason=\"breakpoint-hit\",bkptno=\"2\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee2\",args=\{.*\},file=\".*basics.c\",line=\"22\"\}\r\n$mi_gdb_prompt$" {
-		  pass "run to callee2"
-	      }
-	      -re ".*$mi_gdb_prompt$" {fail "run to callee2 (2)"}
-	      timeout {fail "run to callee2 (timeout 2)"}
-	  }
-      }
-      -re ".*$mi_gdb_prompt$" {fail "continue to callee2 (1)"}
-      timeout {fail "continue to callee2 (timeout 1)"}
-    }
-
-    mi_gdb_test "001-data-disassemble \$pc 0 1 -1" \
-	    "001\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex <callee2\[0-9\]*>\",inst=\".*\"\}\}\},src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{.*\{address=\"$hex <callee2\\+\[0-9\]*>\",inst=\".*\"\}\}\}\}" \
-             "data-disassemble from pc assembly mixed"
+    mi_gdb_test "789-data-disassemble -f basics.c -l 32 -- 9" \
+             "789\\^error,msg=\"mi_cmd_disassemble: Mixed_mode argument must be 0 or 1.\"" \
+             "data-disassemble wrong mode arg"
 
 }
 
@@ -285,7 +216,6 @@ test_disassembly_mixed
 test_disassembly_bogus_args
 test_disassembly_lines_limit
 test_disassembly_mixed_lines_limit
-test_disassembly_mixed_from_pc
 
 mi_gdb_exit
 return 0
