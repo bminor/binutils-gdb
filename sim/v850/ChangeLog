@@ -1,3 +1,13 @@
+Fri Sep 27 18:34:09 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* gencode.c (write_opcodes):  Output hex values for opcode mask
+	and patterns.
+	* interp.c (sim_resume):  Save and restore PC from the appropriate
+	register.
+	* (sim_fetch_register sim_store_register):  Fix byte-order problem
+	with reading and writing registers.
+	* simops.c (OP_FFFF):  Implement pseudo-breakpoint insn.
+
 Fri Sep 27 17:42:37 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c (trace_input): Fix thinko. 

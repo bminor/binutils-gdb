@@ -94,7 +94,7 @@ write_opcodes ()
   
   for (opcode = (struct v850_opcode *)v850_opcodes; opcode->name; opcode++)
     {
-      printf ("  { %ld,%ld,OP_%X,",
+      printf ("  { 0x%x,0x%x,OP_%X,",
 	      opcode->opcode, opcode->mask, opcode->opcode);
       
       Opcodes[curop++] = opcode->opcode;

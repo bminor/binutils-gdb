@@ -287,10 +287,10 @@ sim_open (args)
     {
 #ifdef DEBUG
       if (strcmp (args, "-t") == 0)
-	d10v_debug = DEBUG;
+	v850_debug = DEBUG;
       else
 #endif
-	(*d10v_callback->printf_filtered) (d10v_callback, "ERROR: unsupported option(s): %s\n",args);
+	(*v850_callback->printf_filtered) (v850_callback, "ERROR: unsupported option(s): %s\n",args);
     }
 
   /* put all the opcodes in the hash table */
@@ -341,6 +341,8 @@ sim_resume (step, siggnal)
 {
   uint32 inst, opcode;
   reg_t oldpc;
+
+  PC = State.sregs[0];
 
  if (step)
    State.exception = SIGTRAP;
@@ -399,6 +401,8 @@ sim_resume (step, siggnal)
        }
    } 
  while (!State.exception);
+
+  State.sregs[0] = PC;
 }
 
 int
@@ -462,7 +466,7 @@ sim_fetch_register (rn, memory)
      int rn;
      unsigned char *memory;
 {
-  *(uint32 *)memory = State.regs[rn];
+  put_word (memory, State.regs[rn]);
 }
  
 void
@@ -470,7 +474,7 @@ sim_store_register (rn, memory)
      int rn;
      unsigned char *memory;
 {
-  State.regs[rn]= *(uint32 *)memory;
+  State.regs[rn] = get_word (memory);
 }
 
 int

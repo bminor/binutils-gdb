@@ -1898,6 +1898,14 @@ OP_C7C0 ()
   trace_output (OP_BIT);
 }
 
+/* breakpoint */
+void
+OP_FFFF ()
+{
+  State.exception = SIGTRAP;
+  PC -= 4;
+}
+
 /* di */
 void
 OP_16007E0 ()
