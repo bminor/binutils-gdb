@@ -1,3 +1,7 @@
+Sat Feb  3 10:42:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (all-target-winsup): All all-target-libiberty.
+
 Fri Feb  2 17:58:56 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (noconfigdirs): Add missing # in front of comment.
