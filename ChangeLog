@@ -1,3 +1,12 @@
+Tue Nov  9 15:54:01 1993  Mark Eichin  (eichin@cygnus.com)
+
+	* Makefile.in (BASE_FLAGS_TO_PASS): pass SHELL.
+
+Fri Nov  5 08:07:27 1993  D. V. Henkel-Wallace  (gumby@blues.cygnus.com)
+
+	* config.sub: accept unixware as an alias for svr4.2.
+	Fix some inconsistancies with the gcc version.
+
 Fri Nov  5 15:14:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (DISTDOCDIRS):  Add gdb.
