@@ -1,4 +1,14 @@
 start-sanitize-v850
+Mon Aug 25 11:21:48 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (md_assemble): Restore input_line_pointer upon
+	exit. 
+	
+start-sanitize-v850e
+	* config/tc-v850.c (parse_register_list): Support constant
+	expressions as register lists.
+start-sanitize-v850e
+
 Mon Aug 25 10:19:34 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/c-v850.texi: Change the major node to v850 Machine

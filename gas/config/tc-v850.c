@@ -439,8 +439,23 @@ skip_white_space (void)
  * out: True if the parse completed successfully, False otherwise.
  *      If the parse completes the correct bit fields in the
  *      instruction will be filled in.
+ *
+ * Parses register lists with the syntax:
+ *
+ *   { rX }
+ *   { rX, rY }
+ *   { rX - rY }
+ *   { rX - rY, rZ }
+ *   etc
+ *
+ * and also parses constant epxressions whoes bits indicate the
+ * registers in the lists.  The LSB in the expression refers to
+ * the lowest numbered permissable register in the register list,
+ * and so on upwards.  System registers are considered to be very
+ * high numbers.
+ * 
  */
-static boolean
+static char *
 parse_register_list
 (
   unsigned long *             insn,
@@ -453,6 +468,8 @@ parse_register_list
   static int  type3_regs[ 32 ] = {  3,  2,  1,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 15, 13, 12,  7,  6,  5,  4, 11, 10,  9,  8 };
 /* end-sanitize-v850eq */
   int *       regs;
+  expressionS exp;
+
 
   /* Select a register array to parse. */
   switch (operand->shift)
@@ -464,15 +481,80 @@ parse_register_list
 /* end-sanitize-v850eq */
     default:
       as_bad ("unknown operand shift: %x\n", operand->shift );		    
-      return false;
+      return "internal failure in parse_register_list";
     }
 
   skip_white_space();
 
+  /* If the expression starts with a curly brace it is a register list.
+     Otherwise it is a constant expression ,whoes bits indicate which
+     registers are to be included in the list.  */
+  
   if (* input_line_pointer != '{')
     {
-      as_bad ("no opening curly brace at start of register list\n");
-      return false;
+      int bits;
+      int reg;
+      int i;
+		
+      expression (& exp);
+      
+      if (exp.X_op != O_constant)
+	return "constant expression or register list expected";
+
+/* start-sanitize-v850eq */
+      if (regs == type1_regs)
+/* end-sanitize-v850eq */
+	{
+	  if (exp.X_add_number & 0xFFFFF000)
+	    return "high bits set in register list expression";
+	  
+	  for (reg = 20; reg < 32; reg ++)
+	    if (exp.X_add_number & (1 << (reg - 20)))
+	      {
+		for (i = 0; i < 32; i++)
+		  if (regs[i] == reg)
+		    * insn |= (1 << i);
+	      }
+	}
+/* start-sanitize-v850eq */
+      else if (regs == type2_regs)
+	{
+	  if (exp.X_add_number & 0xFFFE0000)
+	    return "high bits set in register list expression";
+	  
+	  for (reg = 1; reg < 16; reg ++)
+	    if (exp.X_add_number & (1 << (reg - 1)))
+	      {
+		for (i = 0; i < 32; i++)
+		  if (regs[i] == reg)
+		    * insn |= (1 << i);
+	      }
+
+	  if (exp.X_add_number & (1 << 15))
+	    * insn |= (1 << 3);
+	  
+	  if (exp.X_add_number & (1 << 16))
+	    * insn |= (1 << 19);
+	}
+      else /* regs == type3_regs */
+	{
+	  if (exp.X_add_number & 0xFFFE0000)
+	    return "high bits set in register list expression";
+	  
+	  for (reg = 16; reg < 32; reg ++)
+	    if (exp.X_add_number & (1 << (reg - 16)))
+	      {
+		for (i = 0; i < 32; i++)
+		  if (regs[i] == reg)
+		    * insn |= (1 << i);
+	      }
+
+	  if (exp.X_add_number & (1 << 16))
+	    * insn |= (1 << 19);
+	}
+/* end-sanitize-v850eq */
+
+      return NULL;
     }
 
   input_line_pointer ++;
@@ -480,8 +562,6 @@ parse_register_list
   /* Parse the register list until a terminator (closing curly brace or new-line) is found.  */
   for (;;)
     {
-      expressionS exp;
-
       if (register_name (& exp))
 	{
 	  int  i;
@@ -498,21 +578,19 @@ parse_register_list
 
 	  if (i == 32)
 	    {
-	      as_bad( "it is illegal to include register r%d in list\n", exp.X_add_number );
-	      return false;
+	      return "illegal register included in list";
 	    }
 	}
       else if (system_register_name (& exp, true))
 	{
 	  if (regs == type1_regs)
 	    {
-	      as_bad ("system registers cannot be included in this register list" );
-	      return false;
+	      return "system registers cannot be included in list";
 	    }
 	  else if (exp.X_add_number == 5)
 	    {
 	      if (regs == type2_regs)
-		as_bad ("PSW cannot be included in this register list" );
+		return "PSW cannot be included in list";
 	      else
 		* insn |= 0x8;
 	    }
@@ -541,7 +619,7 @@ parse_register_list
 	  /* Get the second register in the range.  */
 	  if (! register_name (& exp2))
 	    {
-	      as_bad ("second register should follow dash in register list\n");
+	      return "second register should follow dash in register list";
 	      exp2.X_add_number = exp.X_add_number;
 	    }
 
@@ -562,8 +640,7 @@ parse_register_list
 
 	      if (i == 32)
 		{
-		  as_bad( "it is illegal to include register r%d in list\n", j );
-		  return false;
+		  return "illegal register included in list";
 		}
 	    }
 	}
@@ -575,7 +652,7 @@ parse_register_list
       skip_white_space();
     }
 
-  return true;
+  return NULL;
 }
 /* end-sanitize-v850e */
 
@@ -820,6 +897,7 @@ md_assemble (str)
   boolean                   extra_data_after_insn = false;
   unsigned                  extra_data_len;
   unsigned long             extra_data;
+  char *		    saved_input_line_pointer;
   
 
   /* Get the opcode.  */
@@ -839,11 +917,13 @@ md_assemble (str)
     }
 
   str = s;
-  while (isspace (*str))
-    ++str;
+  while (isspace (* str))
+    ++ str;
 
   start_of_operands = str;
 
+  saved_input_line_pointer = input_line_pointer;
+  
   for (;;)
     {
       const char * errmsg = NULL;
@@ -998,10 +1078,7 @@ md_assemble (str)
 		}
 	      else if (operand->flags & V850E_PUSH_POP) 
 		{
-		  if (! parse_register_list (& insn, operand))
-		    {
-		      errmsg = "invalid register list";
-		    }
+		  errmsg = parse_register_list (& insn, operand);
 		  
 		  /* The parse_register_list() function has already done everything, so fake a dummy expression.  */
 		  ex.X_op         = O_constant;
@@ -1133,6 +1210,7 @@ md_assemble (str)
 	  
 	  as_bad ("%s", errmsg);
 	  ignore_rest_of_line ();
+	  input_line_pointer = saved_input_line_pointer;
 	  return;
         }
       break;
@@ -1241,6 +1319,8 @@ md_assemble (str)
 			(fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
 	}
     }
+  
+  input_line_pointer = saved_input_line_pointer;
 }
 
 
