@@ -3657,6 +3657,11 @@ breakpoint_1 (int bnum, int allflag)
 	  print_one_breakpoint (b, &last_addr);
       }
   
+
+#ifdef UI_OUT
+  ui_out_table_end (uiout);
+#endif /* UI_OUT */
+
   if (nr_printable_breakpoints == 0)
     {
 #ifdef UI_OUT
@@ -3680,9 +3685,6 @@ breakpoint_1 (int bnum, int allflag)
 	set_next_address (last_addr);
     }
 
-#ifdef UI_OUT
-  ui_out_table_end (uiout);
-#endif /* UI_OUT */
   /* FIXME? Should this be moved up so that it is only called when
      there have been breakpoints? */
   annotate_breakpoints_table_end ();

@@ -24,6 +24,7 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #include "gdb_string.h"
+#include "gdb_assert.h"
 
 /* Convenience macro for allocting typesafe memory. */
 
@@ -34,6 +35,7 @@
 struct ui_out_data
   {
     struct ui_file *stream;
+    int suppress_output;
   };
 
 /* These are the CLI output functions */
@@ -111,6 +113,13 @@ cli_table_begin (struct ui_out *uiout, int nbrofcols,
 		 int nr_rows,
 		 const char *tblid)
 {
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (nr_rows == 0)
+    data->suppress_output = 1;
+  else
+    /* Only the table suppresses the output and, fortunatly, a table
+       is not a recursive data structure. */
+    gdb_assert (data->suppress_output == 0);
 }
 
 /* Mark beginning of a table body */
@@ -118,6 +127,9 @@ cli_table_begin (struct ui_out *uiout, int nbrofcols,
 void
 cli_table_body (struct ui_out *uiout)
 {
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   /* first, close the table header line */
   cli_text (uiout, "\n");
 }
@@ -127,6 +139,8 @@ cli_table_body (struct ui_out *uiout)
 void
 cli_table_end (struct ui_out *uiout)
 {
+  struct ui_out_data *data = ui_out_data (uiout);
+  data->suppress_output = 0;
 }
 
 /* Specify table header */
@@ -135,6 +149,9 @@ void
 cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		  const char *colhdr)
 {
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   cli_field_string (uiout, 0, width, alignment, 0, colhdr);
 }
 
@@ -146,6 +163,9 @@ cli_begin (struct ui_out *uiout,
 	   int level,
 	   const char *id)
 {
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
 }
 
 /* Mark end of a list */
@@ -155,6 +175,9 @@ cli_end (struct ui_out *uiout,
 	 enum ui_out_type type,
 	 int level)
 {
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
 }
 
 /* output an int field */
@@ -166,6 +189,9 @@ cli_field_int (struct ui_out *uiout, int fldno, int width,
 {
   char buffer[20];		/* FIXME: how many chars long a %d can become? */
 
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   sprintf (buffer, "%d", value);
   cli_field_string (uiout, fldno, width, alignment, fldname, buffer);
 }
@@ -177,6 +203,9 @@ cli_field_skip (struct ui_out *uiout, int fldno, int width,
 		enum ui_align alignment,
 		const char *fldname)
 {
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   cli_field_string (uiout, fldno, width, alignment, fldname, "");
 }
 
@@ -193,6 +222,10 @@ cli_field_string (struct ui_out *uiout,
 {
   int before = 0;
   int after = 0;
+
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
 
   if ((align != ui_noalign) && string)
     {
@@ -238,6 +271,9 @@ cli_field_fmt (struct ui_out *uiout, int fldno,
 	       va_list args)
 {
   struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
+
   vfprintf_filtered (data->stream, format, args);
 
   if (align != ui_noalign)
@@ -248,6 +284,8 @@ void
 cli_spaces (struct ui_out *uiout, int numspaces)
 {
   struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   print_spaces_filtered (numspaces, data->stream);
 }
 
@@ -255,6 +293,8 @@ void
 cli_text (struct ui_out *uiout, const char *string)
 {
   struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   fputs_filtered (string, data->stream);
 }
 
@@ -263,6 +303,8 @@ cli_message (struct ui_out *uiout, int verbosity,
 	     const char *format, va_list args)
 {
   struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   if (ui_out_get_verblvl (uiout) >= verbosity)
     vfprintf_unfiltered (data->stream, format, args);
 }
@@ -270,6 +312,9 @@ cli_message (struct ui_out *uiout, int verbosity,
 void
 cli_wrap_hint (struct ui_out *uiout, char *identstring)
 {
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   wrap_here (identstring);
 }
 

@@ -1,3 +1,17 @@
+2001-06-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* cli-out.c: Include "gdb_assert.h'.
+	(struct ui_out_data): Add field ``suppress_output.
+	(cli_table_begin): When NR_ROWS is zero, suppress_output.
+	(cli_table_end): Clear suppress_output.
+	(cli_table_body): Check suppress_output.
+	(cli_table_header, cli_begin): Ditto.
+	(cli_end, cli_field_int, cli_field_skip): Ditto.
+	(cli_field_string, cli_field_fmt, cli_spaces): Ditto.
+	(cli_text, cli_message, cli_wrap_hint): Ditto.
+	* breakpoint.c (breakpoint_1): Close the ui_out table before
+	printing the breakpoint not found message.
+
 2001-06-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* ui-out.c (ui_out_table_begin): Add parameter ``nr_rows''.
