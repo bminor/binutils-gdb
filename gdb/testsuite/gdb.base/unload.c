@@ -28,7 +28,7 @@ int main()
   void *handle;
   int (*unloadshr) (int);
   int y;
-  char *msg;
+  const char *msg;
 
   handle = dlopen (SHLIB_NAME, RTLD_LAZY);
   msg = dlerror ();
