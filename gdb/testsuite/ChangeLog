@@ -1,5 +1,9 @@
 2002-05-23  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.base/all-bin.exp: Revise previous patch by just reducing 
+	the precision of the floating point test results.
+	* gdb.base/call-rt-st.exp: Ditto.
+
 	* gdb.base/all-bin.exp: Allow for reduced floating point precision.
 	* gdb.base/call-rt-st.exp: Ditto.
 
