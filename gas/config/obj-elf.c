@@ -1401,7 +1401,7 @@ obj_elf_size (ignore)
 }
 
 /* Handle the ELF .type pseudo-op.  This sets the type of a symbol.
-   There are four syntaxes:
+   There are five syntaxes:
 
    The first (used on Solaris) is
        .type SYM,#function
@@ -1411,6 +1411,8 @@ obj_elf_size (ignore)
        .type SYM STT_FUNC
    The fourth (used on NetBSD/Arm and Linux/ARM) is
        .type SYM,%function
+   The fifth (used on SVR4/860) is
+       .type SYM,"function"
    */
 
 static void
@@ -1435,6 +1437,7 @@ obj_elf_type (ignore)
   SKIP_WHITESPACE ();
   if (   *input_line_pointer == '#'
       || *input_line_pointer == '@'
+      || *input_line_pointer == '"'
       || *input_line_pointer == '%')
     ++input_line_pointer;
 
@@ -1452,6 +1455,9 @@ obj_elf_type (ignore)
     as_bad (_("ignoring unrecognized symbol type \"%s\""), typename);
 
   *input_line_pointer = c;
+
+  if (*input_line_pointer == '"')
+    ++input_line_pointer;
 
   symbol_get_bfdsym (sym)->flags |= type;
 

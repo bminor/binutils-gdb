@@ -265,6 +265,9 @@ changequote([,])dnl
       i386-*-mingw32*)      fmt=coff em=pe bfd_gas=yes ;;
       i386-*-*nt*)          fmt=coff em=pe bfd_gas=yes ;;
       i386-*-vxworks*)      fmt=aout ;;
+      i860-stardent-sysv4* | i860-stardent-elf*)
+			    fmt=elf bfd_gas=yes endian=little
+			    AC_MSG_WARN(GAS support for ${generic_target} is preliminary and a work in progress) ;;
       i960-*-bout)          fmt=bout ;;
       i960-*-coff)          fmt=coff em=ic960 ;;
       i960-*-rtems*)        fmt=coff em=ic960 ;;
