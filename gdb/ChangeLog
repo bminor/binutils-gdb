@@ -1,5 +1,18 @@
 Sat Jul 16 14:43:17 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* inferior.h (ARCH_NUM_REGS): New macro, actual number of
+	registers in use by the inferior.
+	* coredep.c (fetch_core_registers, register_addr): Use it.
+	* findvar.c (registers_changed, registers_fetched,
+	read_register_bytes): Ditto.
+	* infcmd.c (do_registers_info, registers_info): Ditto.
+	* infptrace.c (fetch_inferior_registers,
+	store_inferior_registers): Ditto.
+	* stack.c (frame_info): Ditto.
+
+	* coredep.c (CORE_REGISTER_ADDR): New macro.
+	(fetch_core_registers): Use it.
+
 	* breakpoint.c (ignore, condition): Add usage notes to help strings.
 	* symfile.c (add-symbol-file): Add usage note to help string.
 	(add_shared_symbol_files_command): New command.
