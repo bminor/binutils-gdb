@@ -1,3 +1,8 @@
+Wed Mar 15 12:22:35 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* nlm/gdbserve.c (main): Add support for processing BOARD=
+	  argument, deprecate NODE=.
+
 Wed Mar 15 10:58:26 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* c-exp.y (yylex): Make an empty character constant an error.

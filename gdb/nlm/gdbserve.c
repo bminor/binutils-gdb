@@ -862,6 +862,18 @@ main (argc, argv)
 	      exit (1);
 	    }
 	}
+      else if (strnicmp(*argv, "BOARD=", 6) == 0) 
+        {
+	  bp = *argv + 6;
+	  board = strtol (bp, &ep, 0);
+	  if (ep == bp || *ep != '\0') 
+	    {
+	      fprintf (stderr, "%s: %s: expected integer argument\n", 
+		       progname, bp);
+	      exit(1);
+	    }
+	}
+#if 1				/* FIXME: this option has been depricated */
       else if (strnicmp(*argv, "NODE=", 5) == 0)
 	{
 	  bp = *argv + 5;
@@ -873,6 +885,7 @@ main (argc, argv)
 	      exit(1);
 	    }
 	}
+#endif
       else if (strnicmp(*argv, "PORT=", 5) == 0)
 	{
 	  bp = *argv + 5;
