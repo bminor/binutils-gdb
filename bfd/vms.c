@@ -95,7 +95,7 @@ static int vms_generic_stat_arch_elt
   PARAMS ((bfd *, struct stat *));
 static long vms_get_symtab_upper_bound
   PARAMS ((bfd *abfd));
-static long vms_get_symtab
+static long vms_canonicalize_symtab
   PARAMS ((bfd *abfd, asymbol **symbols));
 static void vms_print_symbol
   PARAMS ((bfd *abfd, PTR file, asymbol *symbol, bfd_print_symbol_type how));
@@ -1065,7 +1065,7 @@ vms_get_symtab_upper_bound (abfd)
 
 /* Copy symbols from hash table to symbol vector
 
-   called from bfd_hash_traverse in vms_get_symtab
+   called from bfd_hash_traverse in vms_canonicalize_symtab
    init counter to 0 if entry == 0  */
 
 static bfd_boolean
@@ -1089,12 +1089,12 @@ copy_symbols (entry, arg)
    return # of symbols read  */
 
 static long
-vms_get_symtab (abfd, symbols)
+vms_canonicalize_symtab (abfd, symbols)
      bfd *abfd;
      asymbol **symbols;
 {
 #if VMS_DEBUG
-  vms_debug (1, "vms_get_symtab(%p, <ret>)\n", abfd);
+  vms_debug (1, "vms_canonicalize_symtab(%p, <ret>)\n", abfd);
 #endif
 
 	/* init counter */

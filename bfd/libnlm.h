@@ -61,7 +61,7 @@ extern void nlmNAME(get_symbol_info)
   PARAMS ((bfd *, asymbol *, symbol_info *));
 extern long nlmNAME(get_symtab_upper_bound)
   PARAMS ((bfd *));
-extern long nlmNAME(get_symtab)
+extern long nlmNAME(canonicalize_symtab)
   PARAMS ((bfd *, asymbol **));
 extern asymbol *nlmNAME(make_empty_symbol)
   PARAMS ((bfd *));

@@ -80,7 +80,7 @@ static bfd_boolean ieee_slurp_symbol_table
   PARAMS ((bfd *));
 static long ieee_get_symtab_upper_bound
   PARAMS ((bfd *));
-static long ieee_get_symtab
+static long ieee_canonicalize_symtab
   PARAMS ((bfd *, asymbol **));
 static asection *get_section_entry
   PARAMS ((bfd *, ieee_data_type *i, unsigned int));
@@ -1145,7 +1145,7 @@ ieee_get_symtab_upper_bound (abfd)
 extern const bfd_target ieee_vec;
 
 static long
-ieee_get_symtab (abfd, location)
+ieee_canonicalize_symtab (abfd, location)
      bfd *abfd;
      asymbol **location;
 {
@@ -4097,10 +4097,11 @@ const bfd_target ieee_vec =
      ieee_update_armap_timestamp  */
   BFD_JUMP_TABLE_ARCHIVE (ieee),
 
-  /* ieee_get_symtab_upper_bound, ieee_get_symtab, ieee_make_empty_symbol,
-     ieee_print_symbol, ieee_get_symbol_info, ieee_bfd_is_local_label_name,
-     ieee_get_lineno, ieee_find_nearest_line, ieee_bfd_make_debug_symbol,
-     ieee_read_minisymbols, ieee_minisymbol_to_symbol  */
+  /* ieee_get_symtab_upper_bound, ieee_canonicalize_symtab,
+     ieee_make_empty_symbol, ieee_print_symbol, ieee_get_symbol_info,
+     ieee_bfd_is_local_label_name, ieee_get_lineno,
+     ieee_find_nearest_line, ieee_bfd_make_debug_symbol,
+     ieee_read_minisymbols, ieee_minisymbol_to_symbol */
   BFD_JUMP_TABLE_SYMBOLS (ieee),
 
   /* ieee_get_reloc_upper_bound, ieee_canonicalize_reloc,

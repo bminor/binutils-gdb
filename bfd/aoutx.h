@@ -2026,7 +2026,7 @@ error_return:
 }
 
 long
-NAME(aout,get_symtab) (abfd, location)
+NAME(aout,canonicalize_symtab) (abfd, location)
      bfd *abfd;
      asymbol **location;
 {

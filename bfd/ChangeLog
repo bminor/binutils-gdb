@@ -1,3 +1,49 @@
+2003-10-15  Andrew Cagney  <cagney@redhat.com>
+
+	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Replace NAME##_get_symtab
+	with NAME##_canonicalize_symtab.
+	* libcoff-in.h (coff_canonicalize_symtab): Update.
+	* xsym.h (bfd_sym_canonicalize_symtab): Update.
+	* elf-bfd.h (_bfd_elf_canonicalize_symtab): Update.
+	* coffgen.c (coff_canonicalize_symtab): Update.
+	* libbfd-in.h (_bfd_nosymbols_canonicalize_symtab): Update.
+	* libnlm.h (nlmNAME(canonicalize_symtab)): Update.
+	* ieee.c (ieee_vec): Update comment.
+	* libecoff.h (_bfd_ecoff_canonicalize_symtab): Update.
+	* mmo.c (mmo_canonicalize_symtab): Update.
+	* nlm-target.h (nlm_canonicalize_symtab): Update.
+	* nlmcode.h (nlm_canonicalize_symtab): Update.
+	* i386msdos.c (msdos_canonicalize_symtab): Update.
+	* hp300hpux.c (MY (canonicalize_symtab)): Update.
+	* oasys.c (oasys_canonicalize_symtab): Update.
+	* som.c (som_canonicalize_symtab): Update.
+	* pef.c (bfd_pef_canonicalize_symtab): Update.
+	* nlmcode.h (nlm_canonicalize_symtab): Update.
+	* xsym.c (bfd_sym_canonicalize_symtab): Update.
+	* vms.c (vms_canonicalize_symtab): Update.
+	* versados.c (versados_canonicalize_symtab): Update.
+	* mach-o.c (bfd_mach_o_canonicalize_symtab): Update.
+	* ieee.c (ieee_canonicalize_symtab): Update.
+	* pdp11.c (NAME(aout,canonicalize_symtab)): Update.
+	* reloc.c: Update comment.
+	* libaout.h (NAME(aout,canonicalize_symtab)): Update.
+	* coff64-rs6000.c (aix5coff64_vec): Update.
+	* coff64-rs6000.c (bfd_xcoff_aix5_backend_data): Update.
+	* coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): Update.
+	* aoutx.h (NAME(aout,canonicalize_symtab)): Update.
+	* elfxx-target.h (bfd_elfNN_canonicalize_symtab): Update.
+	* hp300hpux.c (MY_canonicalize_symtab): Update.
+	* ecoff.c (_bfd_ecoff_canonicalize_symtab): Update.
+	* aout-tic30.c (MY_canonicalize_symtab): Update.
+	* aout-target.h (MY_canonicalize_symtab): Update.
+	* ppcboot.c (ppcboot_canonicalize_symtab): Update.
+	* elf.c (_bfd_elf_canonicalize_symtab): Update.
+	* elfcode.h (elf_canonicalize_symtab): Update.
+	* ihex.c (ihex_canonicalize_symtab): Update.
+	* tekhex.c (tekhex_canonicalize_symtab): Update.
+	* binary.c (binary_canonicalize_symtab): Update.
+	* srec.c (srec_canonicalize_symtab): Update.
+
 2003-10-15  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* elf32-h8300.c (elf_reloc_map): Fix a comment typo.

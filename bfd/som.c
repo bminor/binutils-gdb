@@ -175,7 +175,7 @@ static unsigned int som_set_reloc_info
 	   asymbol **, bfd_boolean));
 static bfd_boolean som_slurp_reloc_table
   PARAMS ((bfd *, asection *, asymbol **, bfd_boolean));
-static long som_get_symtab
+static long som_canonicalize_symtab
   PARAMS ((bfd *, asymbol **));
 static asymbol * som_make_empty_symbol
   PARAMS ((bfd *));
@@ -4520,7 +4520,7 @@ som_slurp_symbol_table (abfd)
    in the symbol table.  */
 
 static long
-som_get_symtab (abfd, location)
+som_canonicalize_symtab (abfd, location)
      bfd *abfd;
      asymbol **location;
 {

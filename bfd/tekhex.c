@@ -120,7 +120,7 @@ static void move_section_contents
 static const bfd_target *tekhex_object_p PARAMS ((bfd *));
 static bfd_boolean tekhex_mkobject PARAMS ((bfd *));
 static long tekhex_get_symtab_upper_bound PARAMS ((bfd *));
-static long tekhex_get_symtab PARAMS ((bfd *, asymbol **));
+static long tekhex_canonicalize_symtab PARAMS ((bfd *, asymbol **));
 static void pass_over PARAMS ((bfd *, void (*) (bfd*, int, char *)));
 static void first_phase PARAMS ((bfd *, int, char *));
 static void insert_byte PARAMS ((bfd *, int, bfd_vma));
@@ -522,7 +522,7 @@ pass_over (abfd, func)
 }
 
 static long
-tekhex_get_symtab (abfd, table)
+tekhex_canonicalize_symtab (abfd, table)
      bfd *abfd;
      asymbol **table;
 {

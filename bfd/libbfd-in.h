@@ -286,7 +286,7 @@ extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
    support.  Use BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols).  */
 
 #define _bfd_nosymbols_get_symtab_upper_bound _bfd_n1
-#define _bfd_nosymbols_get_symtab \
+#define _bfd_nosymbols_canonicalize_symtab \
   ((long (*) (bfd *, asymbol **)) _bfd_n1)
 #define _bfd_nosymbols_make_empty_symbol _bfd_generic_make_empty_symbol
 #define _bfd_nosymbols_print_symbol \

@@ -1359,7 +1359,7 @@ extern bfd_boolean _bfd_elf_set_section_contents
   (bfd *, sec_ptr, void *, file_ptr, bfd_size_type);
 extern long _bfd_elf_get_symtab_upper_bound
   (bfd *);
-extern long _bfd_elf_get_symtab
+extern long _bfd_elf_canonicalize_symtab
   (bfd *, asymbol **);
 extern long _bfd_elf_get_dynamic_symtab_upper_bound
   (bfd *);

@@ -470,8 +470,8 @@ MY_bfd_final_link (abfd, info)
 #ifndef MY_get_symtab_upper_bound
 #define MY_get_symtab_upper_bound NAME(aout,get_symtab_upper_bound)
 #endif
-#ifndef MY_get_symtab
-#define MY_get_symtab NAME(aout,get_symtab)
+#ifndef MY_canonicalize_symtab
+#define MY_canonicalize_symtab NAME(aout,canonicalize_symtab)
 #endif
 #ifndef MY_get_reloc_upper_bound
 #define MY_get_reloc_upper_bound NAME(aout,get_reloc_upper_bound)

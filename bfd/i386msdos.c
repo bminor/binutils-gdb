@@ -186,7 +186,7 @@ msdos_set_section_contents (abfd, section, location, offset, count)
 #define msdos_set_arch_mach _bfd_generic_set_arch_mach
 
 #define msdos_get_symtab_upper_bound _bfd_nosymbols_get_symtab_upper_bound
-#define msdos_get_symtab _bfd_nosymbols_get_symtab
+#define msdos_canonicalize_symtab _bfd_nosymbols_canonicalize_symtab
 #define msdos_print_symbol _bfd_nosymbols_print_symbol
 #define msdos_get_symbol_info _bfd_nosymbols_get_symbol_info
 #define msdos_find_nearest_line _bfd_nosymbols_find_nearest_line

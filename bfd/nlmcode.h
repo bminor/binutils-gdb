@@ -42,7 +42,7 @@
 
 #define nlm_symbol_type			nlmNAME(symbol_type)
 #define nlm_get_symtab_upper_bound	nlmNAME(get_symtab_upper_bound)
-#define nlm_get_symtab			nlmNAME(get_symtab)
+#define nlm_canonicalize_symtab		nlmNAME(canonicalize_symtab)
 #define nlm_make_empty_symbol		nlmNAME(make_empty_symbol)
 #define nlm_print_symbol		nlmNAME(print_symbol)
 #define nlm_get_symbol_info		nlmNAME(get_symbol_info)
@@ -918,7 +918,7 @@ nlm_get_symtab_upper_bound (abfd)
    symbol table fails.  */
 
 long
-nlm_get_symtab (abfd, alocation)
+nlm_canonicalize_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {

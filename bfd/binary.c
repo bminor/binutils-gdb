@@ -47,7 +47,7 @@ static bfd_boolean binary_get_section_contents
   PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
 static long binary_get_symtab_upper_bound PARAMS ((bfd *));
 static char *mangle_name PARAMS ((bfd *, char *));
-static long binary_get_symtab PARAMS ((bfd *, asymbol **));
+static long binary_canonicalize_symtab PARAMS ((bfd *, asymbol **));
 static void binary_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 static bfd_boolean binary_set_section_contents
   PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
@@ -174,7 +174,7 @@ mangle_name (abfd, suffix)
 /* Return the symbol table.  */
 
 static long
-binary_get_symtab (abfd, alocation)
+binary_canonicalize_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {

@@ -401,7 +401,7 @@ static bfd_boolean mmo_get_section_contents
   PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
 static long mmo_get_symtab_upper_bound
   PARAMS ((bfd *));
-static long mmo_get_symtab
+static long mmo_canonicalize_symtab
   PARAMS ((bfd *, asymbol **));
 static void mmo_get_symbol_info
   PARAMS ((bfd *, asymbol *, symbol_info *));
@@ -2200,7 +2200,7 @@ mmo_sort_mmo_symbols (arg1, arg2)
 /* Translate the symbol table.  */
 
 static long
-mmo_get_symtab (abfd, alocation)
+mmo_canonicalize_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {

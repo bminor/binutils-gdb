@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define nlm_core_file_p _bfd_dummy_target
 
 #define nlm_get_symtab_upper_bound nlmNAME(get_symtab_upper_bound)
-#define nlm_get_symtab nlmNAME(get_symtab)
+#define nlm_canonicalize_symtab nlmNAME(canonicalize_symtab)
 #define nlm_make_empty_symbol nlmNAME(make_empty_symbol)
 #define nlm_print_symbol nlmNAME(print_symbol)
 #define nlm_get_symbol_info nlmNAME(get_symbol_info)

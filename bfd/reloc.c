@@ -122,15 +122,16 @@ DESCRIPTION
         o <<sym_ptr_ptr>>
 
         The symbol table pointer points to a pointer to the symbol
-        associated with the relocation request.  It is
-        the pointer into the table returned by the back end's
-        <<get_symtab>> action. @xref{Symbols}. The symbol is referenced
-        through a pointer to a pointer so that tools like the linker
-        can fix up all the symbols of the same name by modifying only
-        one pointer. The relocation routine looks in the symbol and
-        uses the base of the section the symbol is attached to and the
-        value of the symbol as the initial relocation offset. If the
-        symbol pointer is zero, then the section provided is looked up.
+        associated with the relocation request.  It is the pointer
+        into the table returned by the back end's
+        <<canonicalize_symtab>> action. @xref{Symbols}. The symbol is
+        referenced through a pointer to a pointer so that tools like
+        the linker can fix up all the symbols of the same name by
+        modifying only one pointer. The relocation routine looks in
+        the symbol and uses the base of the section the symbol is
+        attached to and the value of the symbol as the initial
+        relocation offset. If the symbol pointer is zero, then the
+        section provided is looked up.
 
         o <<address>>
 

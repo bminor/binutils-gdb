@@ -83,7 +83,7 @@ static int oasys_generic_stat_arch_elt
 static int oasys_sizeof_headers
   PARAMS ((bfd *, bfd_boolean));
 
-long oasys_get_symtab
+long oasys_canonicalize_symtab
   PARAMS ((bfd *, asymbol **));
 long oasys_canonicalize_reloc
   PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
@@ -271,7 +271,7 @@ oasys_get_symtab_upper_bound (abfd)
 extern const bfd_target oasys_vec;
 
 long
-oasys_get_symtab (abfd, location)
+oasys_canonicalize_symtab (abfd, location)
      bfd *abfd;
      asymbol **location;
 {

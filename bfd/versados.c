@@ -58,7 +58,7 @@ static bfd_boolean versados_set_section_contents
   PARAMS ((bfd *, sec_ptr, void *, file_ptr, bfd_size_type));
 static int versados_sizeof_headers PARAMS ((bfd *, bfd_boolean));
 static long int versados_get_symtab_upper_bound PARAMS ((bfd *));
-static long int versados_get_symtab PARAMS ((bfd *, asymbol **));
+static long int versados_canonicalize_symtab PARAMS ((bfd *, asymbol **));
 static void versados_get_symbol_info
   PARAMS ((bfd *, asymbol *, symbol_info *));
 static void versados_print_symbol
@@ -740,7 +740,7 @@ versados_get_symtab_upper_bound (abfd)
 /* Return the symbol table.  */
 
 static long
-versados_get_symtab (abfd, alocation)
+versados_canonicalize_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {

@@ -365,7 +365,7 @@ coff_get_symtab_upper_bound (abfd)
 /* Canonicalize a COFF symbol table.  */
 
 long
-coff_get_symtab (abfd, alocation)
+coff_canonicalize_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {

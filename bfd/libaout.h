@@ -534,7 +534,7 @@ extern void NAME(aout,reclaim_symbol_table)
 extern long NAME(aout,get_symtab_upper_bound)
   PARAMS ((bfd *));
 
-extern long NAME(aout,get_symtab)
+extern long NAME(aout,canonicalize_symtab)
   PARAMS ((bfd *, asymbol **));
 
 extern void NAME(aout,swap_ext_reloc_in)

@@ -5591,7 +5591,7 @@ _bfd_elf_canonicalize_reloc (bfd *abfd,
 }
 
 long
-_bfd_elf_get_symtab (bfd *abfd, asymbol **allocation)
+_bfd_elf_canonicalize_symtab (bfd *abfd, asymbol **allocation)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   long symcount = bed->s->slurp_symbol_table (abfd, allocation, FALSE);

@@ -76,7 +76,7 @@ static int bfd_pef_parse_function_stubs        PARAMS ((bfd *, asection *, unsig
 static long bfd_pef_parse_symbols              PARAMS ((bfd *, asymbol **));
 static long bfd_pef_count_symbols              PARAMS ((bfd *));
 static long bfd_pef_get_symtab_upper_bound     PARAMS ((bfd *));
-static long bfd_pef_get_symtab                 PARAMS ((bfd *, asymbol **));
+static long bfd_pef_canonicalize_symtab        PARAMS ((bfd *, asymbol **));
 static asymbol *bfd_pef_make_empty_symbol      PARAMS ((bfd *));
 static void bfd_pef_get_symbol_info            PARAMS ((bfd *, asymbol *, symbol_info *));
 static int bfd_pef_sizeof_headers              PARAMS ((bfd *, bfd_boolean));
@@ -1027,7 +1027,7 @@ bfd_pef_get_symtab_upper_bound (abfd)
 }
 
 static long
-bfd_pef_get_symtab (abfd, alocation)
+bfd_pef_canonicalize_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {

@@ -966,7 +966,7 @@ ihex_sizeof_headers (abfd, exec)
   _bfd_generic_get_section_contents_in_window
 
 #define ihex_get_symtab_upper_bound bfd_0l
-#define ihex_get_symtab \
+#define ihex_canonicalize_symtab \
   ((long (*) PARAMS ((bfd *, asymbol **))) bfd_0l)
 #define ihex_make_empty_symbol _bfd_generic_make_empty_symbol
 #define ihex_print_symbol _bfd_nosymbols_print_symbol

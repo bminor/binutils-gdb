@@ -1062,7 +1062,7 @@ _bfd_ecoff_get_symtab_upper_bound (abfd)
 /* Get the canonical symbols.  */
 
 long
-_bfd_ecoff_get_symtab (abfd, alocation)
+_bfd_ecoff_canonicalize_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {

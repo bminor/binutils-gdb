@@ -299,7 +299,7 @@ extern bfd_boolean _bfd_ecoff_write_armap
 #define _bfd_ecoff_update_armap_timestamp bfd_true
 
 extern long _bfd_ecoff_get_symtab_upper_bound PARAMS ((bfd *abfd));
-extern long _bfd_ecoff_get_symtab PARAMS ((bfd *abfd, asymbol **alocation));
+extern long _bfd_ecoff_canonicalize_symtab PARAMS ((bfd *abfd, asymbol **alocation));
 extern asymbol *_bfd_ecoff_make_empty_symbol PARAMS ((bfd *abfd));
 extern void _bfd_ecoff_print_symbol
   PARAMS ((bfd *, PTR filep, asymbol *, bfd_print_symbol_type));

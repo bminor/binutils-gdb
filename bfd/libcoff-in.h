@@ -305,7 +305,7 @@ extern struct sec *coff_section_from_bfd_index
   PARAMS ((bfd *, int));
 extern long coff_get_symtab_upper_bound
   PARAMS ((bfd *));
-extern long coff_get_symtab
+extern long coff_canonicalize_symtab
   PARAMS ((bfd *, asymbol **));
 extern int coff_count_linenumbers
   PARAMS ((bfd *));

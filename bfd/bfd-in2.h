@@ -4213,7 +4213,7 @@ typedef struct bfd_target
   /* Entry points used for symbols.  */
 #define BFD_JUMP_TABLE_SYMBOLS(NAME) \
   NAME##_get_symtab_upper_bound, \
-  NAME##_get_symtab, \
+  NAME##_canonicalize_symtab, \
   NAME##_make_empty_symbol, \
   NAME##_print_symbol, \
   NAME##_get_symbol_info, \
