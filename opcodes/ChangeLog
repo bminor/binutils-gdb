@@ -1,3 +1,9 @@
+start-sanitize-sky
+Fri May 22 11:44:10 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-opc.c (parse_dotdest): Missing dest -> xyzw.
+
+end-sanitize-sky
 start-sanitize-r5900
 Wed May 20 00:22:27 1998  Jeffrey A Law  (law@cygnus.com)
 
