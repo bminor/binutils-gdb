@@ -1,3 +1,11 @@
+2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.tgt: Configure gdbserver only for known working
+	targets.  Set ${build_gdbserver} instead of modifying ${configdirs}.
+	* configure.in: Check ${build_gdbserver}.  Put gdbserver/ into
+	SUBDIRS if it is configured.  Update comment for ${nativefile}.
+	* configure: Regenerated.
+
 2002-02-13  Michael Snyder  <msnyder@redhat.com>
 
 	* gcore.c (gcore_command): Use gcore_default_target instead of NULL.

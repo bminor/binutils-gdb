@@ -1237,16 +1237,12 @@ GDB_MULTI_ARCH=`sed -n '
 s/GDB_MULTI_ARCH[ 	]*=[ 	]*\([^ 	]*\)[ 	]*/\1/p
 ' ${target_makefile_frag}`
 
-# these really aren't orthogonal true/false values of the same condition,
-# but shells are slow enough that I like to reuse the test conditions
-# whenever possible
 if test "${target}" = "${host}"; then
+# We pick this up from the host configuration file (.mh) because we
+# do not have a native configuration Makefile fragment.
 nativefile=`sed -n '
 s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${host_makefile_frag}`
-# else
-# GDBserver is only useful in a "native" environment
-# configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
 changequote([,])
 
@@ -1277,10 +1273,21 @@ case "${GDB_MULTI_ARCH}" in
     *)  AC_MSG_ERROR("GDB: Unknown GDB_MULTI_ARCH value ${GDB_MULTI_ARCH}");;
 esac
 
-
 SUBDIRS="doc testsuite nlm"
 if test "${enable_multi_ice}" = "yes"; then
   SUBDIRS="${SUBDIRS} multi-ice"
+fi
+
+# ``gdbserver'' can only be built in a native configuration.
+if test x"${target}" = x"${host}"; then
+    AC_MSG_CHECKING(whether gdbserver is supported on this host)
+    if test x"${build_gdbserver}" = xyes ; then
+	configdirs="${configdirs} gdbserver"
+	SUBDIRS="${SUBDIRS} gdbserver"
+	AC_MSG_RESULT(yes)
+    else
+	AC_MSG_RESULT(no)
+    fi
 fi
 
 AC_SUBST(SUBDIRS)
