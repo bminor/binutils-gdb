@@ -1003,14 +1003,18 @@ print_it_noop (bs)
   return -1;
 }
 
+/* Get a bpstat associated with having just stopped at address *PC
+   and frame address FRAME_ADDRESS.  Update *PC to point at the
+   breakpoint (if we hit a breakpoint).  NOT_A_BREAKPOINT is nonzero
+   if this is known to not be a real breakpoint (it could still be a
+   watchpoint, though).  */
+
 /* Determine whether we stopped at a breakpoint, etc, or whether we
    don't understand this stop.  Result is a chain of bpstat's such that:
 
 	if we don't understand the stop, the result is a null pointer.
 
-	if we understand why we stopped, the result is not null, and
-	the first element of the chain contains summary "stop" and
-	"print" flags for the whole chain.
+	if we understand why we stopped, the result is not null.
 
 	Each element of the chain refers to a particular breakpoint or
 	watchpoint at which we have stopped.  (We may have stopped for
@@ -1021,11 +1025,11 @@ print_it_noop (bs)
 
  */
 
-	
 bpstat
-bpstat_stop_status (pc, frame_address)
+bpstat_stop_status (pc, frame_address, not_a_breakpoint)
      CORE_ADDR *pc;
      FRAME_ADDR frame_address;
+     int not_a_breakpoint;
 {
   register struct breakpoint *b;
   CORE_ADDR bp_addr;
@@ -1047,6 +1051,9 @@ bpstat_stop_status (pc, frame_address)
 	continue;
 
       if (b->type != bp_watchpoint && b->address != bp_addr)
+	continue;
+
+      if (b->type != bp_watchpoint && not_a_breakpoint)
 	continue;
 
       /* Come here if it's a watchpoint, or if the break address matches */

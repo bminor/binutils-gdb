@@ -481,6 +481,13 @@ wait_for_inferior ()
   sal = find_pc_line(prev_pc, 0);
   current_line = sal.line;
 
+  /* Are we stepping?  */
+#define CURRENTLY_STEPPING() ((step_resume_breakpoint == NULL \
+			       && !handling_longjmp \
+			       && (step_range_end \
+				   || trap_expected)) \
+			      || bpstat_should_step ())
+
   while (1)
     {
       /* Clean up saved state that will become invalid.  */
@@ -696,25 +703,24 @@ wait_for_inferior ()
 	  else
 	    {
 	      /* See if there is a breakpoint at the current PC.  */
+	      stop_bpstat = bpstat_stop_status
+		(&stop_pc, stop_frame_address,
 #if DECR_PC_AFTER_BREAK
-	      /* Notice the case of stepping through a jump
-		 that lands just after a breakpoint.
-		 Don't confuse that with hitting the breakpoint.
-		 What we check for is that 1) stepping is going on
-		 and 2) the pc before the last insn does not match
-		 the address of the breakpoint before the current pc.  */
-	      if (prev_pc == stop_pc - DECR_PC_AFTER_BREAK
-		  || !step_range_end
-		  || step_resume_breakpoint != NULL
-		  || handling_longjmp /* FIXME */)
-#endif /* DECR_PC_AFTER_BREAK not zero */
-		{
-		  stop_bpstat =
-		    bpstat_stop_status (&stop_pc, stop_frame_address);
-		  /* Following in case break condition called a
-		     function.  */
-		  stop_print_frame = 1;
-		}
+		 /* Notice the case of stepping through a jump
+		    that lands just after a breakpoint.
+		    Don't confuse that with hitting the breakpoint.
+		    What we check for is that 1) stepping is going on
+		    and 2) the pc before the last insn does not match
+		    the address of the breakpoint before the current pc.  */
+		 (prev_pc != stop_pc - DECR_PC_AFTER_BREAK
+		  && CURRENTLY_STEPPING ())
+#else /* DECR_PC_AFTER_BREAK zero */
+		 0
+#endif /* DECR_PC_AFTER_BREAK zero */
+		 );
+	      /* Following in case break condition called a
+		 function.  */
+	      stop_print_frame = 1;
 	    }
 
 	  if (stop_signal == SIGTRAP)
@@ -1207,10 +1213,7 @@ step_into_function:
 	  /* We took a signal (which we are supposed to pass through to
 	     the inferior, else we'd have done a break above) and we
 	     haven't yet gotten our trap.  Simply continue.  */
-	  resume ((step_range_end && step_resume_breakpoint == NULL)
-		  || (trap_expected && step_resume_breakpoint == NULL)
-		  || bpstat_should_step (),
-		  stop_signal);
+	  resume (CURRENTLY_STEPPING (), stop_signal);
 	}
       else
 	{
@@ -1267,12 +1270,7 @@ step_into_function:
             }
 #endif /* SHIFT_INST_REGS */
 
-	  resume ((step_resume_breakpoint == NULL
-		   && !handling_longjmp
-		   && (step_range_end
-		       || trap_expected))
-		  || bpstat_should_step (),
-		  stop_signal);
+	  resume (CURRENTLY_STEPPING (), stop_signal);
 	}
     }
 

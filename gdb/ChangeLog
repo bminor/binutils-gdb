@@ -1,8 +1,16 @@
+Tue Sep 21 17:48:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.h, breakpoint.c (bpstat_stop_status): Add new argument
+	not_a_breakpoint.
+	* infrun.c (wait_for_inferior): Pass it.  Also consolidate the
+	test of whether we are stepping into a CURRENTLY_STEPPING macro.
+
 Tue Sep 21 17:22:34 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* breakpoint.c (bpstat_stop_status),
 	  infcmd.c (step_1),
-	  infrun.c (wait_for_inferior): collapse SHIFT_INST_REGS ifdef and insert macro.
+	  infrun.c (wait_for_inferior): collapse SHIFT_INST_REGS ifdef
+	  and insert macro.
 
 	* m88k-tdep.c: include ieee-float.h.  new global target_is_m88110.
 	  new const struct ext_format_m88110 for float format.
