@@ -250,7 +250,11 @@ include/remote-sim.h, remote-sim.c
 sds protocol		(vacant)
 rdi/adp protocol	(vacant)
 documentation		Eli Zaretskii		eliz@gnu.org
-testsuite		(Global Maintainers)
+testsuite		Michael Chastain	mec.gnu@mindspring.com
+			(Global Maintainers)			
+  lib/, config/, gdb.base/, ...
+			Michael Chastain	mec.gnu@mindspring.com
+			(Global Maintainers)			
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
   c++ (gdb.cp) 		Michael Chastain	mec.gnu@mindspring.com
 			David Carlton		carlton@bactrian.org
