@@ -278,7 +278,7 @@ sparc86x-*-*)		gdb_target=sparclite ;;
 # deleted though presumably it should be eventually.
 #sparc64-*-solaris2*)	gdb_target=sp64sol2 ;;
 sparc64-*-linux*)	gdb_target=sp64linux ;;
-sparc64-*-*)		gdb_target=sp64 ;;
+sparcv9-*-* | sparc64-*-*) gdb_target=sp64 ;;
 
 xstormy16-*-*)          gdb_target=xstormy16 ;;
 

@@ -1,3 +1,8 @@
+2002-01-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.host: Accept sparcv9 as alias for sparc64.
+	* configure.tgt: Likewise.
+
 2002-01-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-aix5.c (build_so_list_from_mapfile)

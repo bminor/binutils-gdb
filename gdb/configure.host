@@ -18,7 +18,7 @@ m68*)			gdb_host_cpu=m68k ;;
 m88*)			gdb_host_cpu=m88k ;;
 mips*)			gdb_host_cpu=mips ;;
 powerpc*)		gdb_host_cpu=powerpc ;;
-sparc64)		gdb_host_cpu=sparc ;;
+sparcv9 | sparc64)	gdb_host_cpu=sparc ;;
 s390*)			gdb_host_cpu=s390 ;;
 x86_64*)		gdb_host_cpu=i386 ;;
 *)			gdb_host_cpu=$host_cpu ;;
@@ -145,7 +145,7 @@ sparc-*-sunos4*)	gdb_host=sun4os4 ;;
 sparc-*-sunos5*)	gdb_host=sun4sol2 ;;
 sparc-*-*)		gdb_host=sun4os4 ;;
 sparc64-*-linux*)	gdb_host=linux ;;
-sparc64-*-*)		gdb_host=sun4sol2 ;;
+sparcv9-*-* | sparc64-*-*) gdb_host=sun4sol2 ;;
 
 strongarm-*-*)		gdb_host=arm ;;
 xscale-*-*)		gdb_host=arm ;;
