@@ -1,3 +1,8 @@
+2004-06-29  Jim Blandy  <jimb@redhat.com>
+
+	* Makefile.in (gdb_callback_h): Renamed from callback_h to the
+	name actually used in the dependency lists.
+
 2004-06-29  Randolph Chung  <tausq@debian.org>
 
 	* NEWS (New native configurations): Mention GNU/Linux/hppa.
