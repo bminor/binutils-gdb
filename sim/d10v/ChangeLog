@@ -1,3 +1,8 @@
+Thu Sep 19 10:30:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (run): Add dependencies on libbfd.a and
+	libiberity.a.
+
 Wed Sep 18 09:13:25 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* d10v_sim.h (DEBUG_INSTRUCTION): New debug value to include line
