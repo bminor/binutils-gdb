@@ -49,15 +49,20 @@
 #define END_LABEL_PREFIX ".L.end."
 /* Label to use for unique labels.  */
 #define UNIQUE_LABEL_PREFIX ".L.dvptmp."
+/* Prefix for mips version of labels defined in vu code.
+   Note that symbols that begin with '$' are local symbols
+   on mips targets, so we can't begin it with '$'.  */
+#define VU_LABEL_PREFIX "._."
 
 static long parse_float PARAMS ((char **, const char **));
 static symbolS * create_label PARAMS ((const char *, const char *));
 static symbolS * create_colon_label PARAMS ((int, const char *, const char *));
 static char * unique_name PARAMS ((const char *));
+static symbolS * compute_mpgloc PARAMS ((symbolS *, symbolS *, symbolS *));
 static int compute_nloop PARAMS ((gif_type, int, int));
 static void check_nloop PARAMS ((gif_type, int, int, int,
 				 char *, unsigned int));
-static long eval_expr PARAMS ((int, int, const char *, ...));
+static long eval_expr PARAMS ((dvp_cpu, int, int, const char *, ...));
 static long parse_dma_addr_autocount ();
 static void inline_dma_data PARAMS ((int, DVP_INSN *));
 static void setup_dma_autocount PARAMS ((const char *, DVP_INSN *, int));
@@ -114,6 +119,10 @@ static int cur_state_index;
 static void push_asm_state PARAMS ((asm_state));
 static void pop_asm_state PARAMS ((int));
 static void set_asm_state PARAMS ((asm_state));
+
+/* Set to non-zero if any non-vu insn seen.
+   Used to control type of relocations emitted.  */
+static int non_vu_insn_seen_p = 0;
 
 /* Current cpu (machine variant) type state.
    We copy the mips16 way of recording what the current machine type is in
@@ -139,7 +148,7 @@ static symbolS *vif_data_start;
 /* Label at end of insn's data.  */
 static symbolS *vif_data_end;
 
-/* Special symbol $.mpgloc.  */
+/* Special symbol $.mpgloc.  The value is in bytes.  */
 static symbolS *mpgloc_sym;
 /* Special symbol $.unpackloc.  */
 static symbolS *unpackloc_sym;
@@ -175,6 +184,17 @@ static const dvp_operand *cur_operand;
 
 /* Options for the `caller' argument to s_endmpg.  */
 typedef enum { ENDMPG_USER, ENDMPG_INTERNAL, ENDMPG_MIDDLE } endmpg_caller;
+
+/* Relaxation support.  */
+#define RELAX_MPG 1
+#define RELAX_DIRECT 2
+/* vu insns aren't relaxed, but they use machine dependent frags so we
+   must handle them during relaxation */
+#define RELAX_VU 3
+#define RELAX_ENCODE(type, growth) (10 + (growth))
+#define RELAX_GROWTH(state) ((state) - 10)
+/* Return non-zero if STATE represents a relaxed state.  */
+#define RELAX_DONE_P(state) ((state) >= 10)
 
 const char *md_shortopts = "";
 
@@ -219,10 +239,6 @@ DVP options:\n\
 -no-dma-vif		do not include DMA or VIF instructions in the output\n\
 ");
 } 
-
-/* Set by md_assemble for use by dvp_fill_insn.  */
-static subsegT prev_subseg;
-static segT prev_seg;
 
 static void s_dmadata PARAMS ((int));
 static void s_enddmadata PARAMS ((int));
@@ -280,6 +296,8 @@ md_begin ()
 
 struct dvp_fixup
 {
+  /* the cpu this fixup is associated with */
+  dvp_cpu cpu;
   /* index into `dvp_operands' */
   int opindex;
   /* byte offset from beginning of instruction */
@@ -315,6 +333,7 @@ static const dvp_opcode * assemble_vu_insn PARAMS ((dvp_cpu,
 static const dvp_opcode * assemble_one_insn PARAMS ((dvp_cpu,
 						     const dvp_opcode *,
 						     const dvp_operand *,
+						     int, int,
 						     char **, DVP_INSN *));
 
 /* Main entry point for assembling an instruction.  */
@@ -356,9 +375,13 @@ md_assemble (str)
 	assemble_gif (str);
       else
 	assemble_vif (str);
+      non_vu_insn_seen_p = 1;
     }
   else if (CUR_ASM_STATE == ASM_DIRECT)
-    assemble_gif (str);
+    {
+      assemble_gif (str);
+      non_vu_insn_seen_p = 1;
+    }
   else if (CUR_ASM_STATE == ASM_VU
 	   || CUR_ASM_STATE == ASM_MPG)
     assemble_vu (str);
@@ -398,7 +421,7 @@ assemble_dma (str)
 
   opcode = assemble_one_insn (DVP_DMA,
 			      dma_opcode_lookup_asm (str), dma_operands,
-			      &str, insn_buf);
+			      0, 0, &str, insn_buf);
   if (opcode == NULL)
     return;
   if (!output_dma)
@@ -499,7 +522,7 @@ assemble_vif (str)
 
   opcode = assemble_one_insn (DVP_VIF,
 			      vif_opcode_lookup_asm (str), vif_operands,
-			      &str, insn_buf);
+			      0, 0, &str, insn_buf);
   if (opcode == NULL)
     return;
 
@@ -539,6 +562,7 @@ assemble_vif (str)
 		    unique_name ("varlen"));
 	  vif_data_end = symbol_new (name, now_seg, 0, 0);
 	  symbol_table_insert (vif_data_end);
+	  fixups[fixup_count].cpu = DVP_VIF;
 	  fixups[fixup_count].exp.X_op = O_symbol;
 	  fixups[fixup_count].exp.X_add_symbol = vif_data_end;
 	  fixups[fixup_count].exp.X_add_number = 0;
@@ -574,8 +598,14 @@ assemble_vif (str)
 	  frag_wane (frag_now);
 	  frag_new (0);
 
-	  /* This dance with frag_grow is to ensure the variable part and
-	     fixed part are in the same fragment.  */
+	  /* One could combine the previous two lines with the following.
+	     They're not for clarity: keep separate the actions being
+	     performed.  */
+
+	  /* This dance with frag_grow is so we can record frag_now in
+	     insn_frag.  frag_var always changes frag_now.  We must allocate
+	     the maximal amount of space we need so there's room to move
+	     the insn in the frag during relaxation.  */
 	  frag_grow (8);
 	  /* Allocate space for the fixed part.  */
 	  f = frag_more (4);
@@ -583,8 +613,8 @@ assemble_vif (str)
 
 	  frag_var (rs_machine_dependent,
 		    4, /* max chars */
-		    0, /* variable part already allocated */
-		    1, /* subtype */
+		    0, /* variable part is empty at present */
+		    RELAX_MPG, /* subtype */
 		    NULL, /* no symbol */
 		    0, /* offset */
 		    f); /* opcode */
@@ -599,13 +629,15 @@ assemble_vif (str)
 					       unique_name ("mpg"));
 	  insn_frag->fr_symbol = vif_data_start;
 
-	  /* Get the value of mpgloc.  If it wasn't '*' update $.mpgloc.  */
+	  /* Get the value of mpgloc.  If it wasn't '*'
+	     then update $.mpgloc.  */
 	  {
 	    int mpgloc = vif_get_mpgloc ();
 	    if (mpgloc != -1)
 	      {
 		mpgloc_sym->sy_value.X_op = O_constant;
-		mpgloc_sym->sy_value.X_add_number = mpgloc;
+		/* The value is recorded in bytes.  */
+		mpgloc_sym->sy_value.X_add_number = mpgloc * 8;
 		mpgloc_sym->sy_value.X_unsigned = 1;
 	      }
 	  }
@@ -624,8 +656,14 @@ assemble_vif (str)
 	  frag_wane (frag_now);
 	  frag_new (0);
 
-	  /* This dance with frag_grow is to ensure the variable part and
-	     fixed part are in the same fragment.  */
+	  /* One could combine the previous two lines with the following.
+	     They're not for clarity: keep separate the actions being
+	     performed.  */
+
+	  /* This dance with frag_grow is so we can record frag_now in
+	     insn_frag.  frag_var always changes frag_now.  We must allocate
+	     the maximal amount of space we need so there's room to move
+	     the insn in the frag during relaxation.  */
 	  frag_grow (16);
 	  /* Allocate space for the fixed part.  */
 	  f = frag_more (4);
@@ -633,8 +671,8 @@ assemble_vif (str)
 
 	  frag_var (rs_machine_dependent,
 		    12, /* max chars */
-		    0, /* variable part already allocated */
-		    2, /* subtype */
+		    0, /* variable part is empty at present */
+		    RELAX_DIRECT, /* subtype */
 		    NULL, /* no symbol */
 		    0, /* offset */
 		    f); /* opcode */
@@ -797,7 +835,7 @@ assemble_gif (str)
 
   opcode = assemble_one_insn (DVP_GIF,
 			      gif_opcode_lookup_asm (str), gif_operands,
-			      &str, insn_buf);
+			      0, 0, &str, insn_buf);
   if (opcode == NULL)
     return;
 
@@ -840,8 +878,13 @@ static void
 assemble_vu (str)
      char *str;
 {
+  int i;
   char *f;
   const dvp_opcode *opcode;
+  /* The lower instruction has the lower address so insns[0] = lower insn,
+     insns[1] = upper insn.  */
+  DVP_INSN insns[2];
+  fragS * insn_frag;
 
   /* Handle automatic mpg insertion if enabled.  */
   if (CUR_ASM_STATE == ASM_MPG
@@ -854,11 +897,6 @@ assemble_vu (str)
 
   record_mach (DVP_VUUP, 0);
 
-  /* The lower instruction has the lower address.
-     Handle this by grabbing 8 bytes now, and then filling each word
-     as appropriate.  */
-  f = frag_more (8);
-
 #ifdef VERTICAL_BAR_SEPARATOR
   char *p = strchr (str, '|');
 
@@ -869,61 +907,78 @@ assemble_vu (str)
     }
 
   *p = 0;
-  opcode = assemble_vu_insn (DVP_VUUP,
-			     vu_upper_opcode_lookup_asm (str), vu_operands,
-			     &str, f + 4);
+  opcode = assemble_one_insn (DVP_VUUP,
+			      vu_upper_opcode_lookup_asm (str), vu_operands,
+			      0, 4, &str, &insns[1]);
   *p = '|';
   str = p + 1;
 #else
-  opcode = assemble_vu_insn (DVP_VUUP,
+  opcode = assemble_one_insn (DVP_VUUP,
 			     vu_upper_opcode_lookup_asm (str), vu_operands,
-			     &str, f + 4);
+			     0, 4, &str, &insns[1]);
 #endif
 
   /* Don't assemble next one if we couldn't assemble the first.  */
   if (opcode == NULL)
     return;
-  opcode = assemble_vu_insn (DVP_VULO,
-			     vu_lower_opcode_lookup_asm (str), vu_operands,
-			     &str, f);
-  /* If this was the "loi" pseudo-insn, we need to set the `i' bit.  */
-  if (opcode != NULL)
-    {
-      if (strcmp (opcode->mnemonic, "loi") == 0)
-	f[7] |= 0x80;
-    }
 
-  /* Increment the vu insn counter.
-     If get reach 256 we need to insert an `mpg'.  */
-  ++vu_count;
-}
-
-static const dvp_opcode *
-assemble_vu_insn (cpu, opcode, operand_table, pstr, buf)
-     dvp_cpu cpu;
-     const dvp_opcode *opcode;
-     const dvp_operand *operand_table;
-     char **pstr;
-     char *buf;
-{
-  int i;
-  DVP_INSN insn;
-
-  opcode = assemble_one_insn (cpu, opcode, operand_table, pstr, &insn);
+  /* Assemble the lower insn.
+     Pass `fixup_count' for `init_fixup_count' so that we don't clobber
+     any fixups the upper insn had.  */
+  opcode = assemble_one_insn (DVP_VULO,
+			      vu_lower_opcode_lookup_asm (str), vu_operands,
+			      fixup_count, 0, &str, &insns[0]);
   if (opcode == NULL)
-    return NULL;
+    return;
 
-  /* Write out the instruction.
+  /* If there were fixups and we're inside mpg, create a machine dependent
+     fragment so that we can record the current value of $.mpgloc in fr_symbol.
      Reminder: it is important to fetch enough space in one call to
      `frag_more'.  We use (f - frag_now->fr_literal) to compute where
      we are and we don't want frag_now to change between calls.  */
-  md_number_to_chars (buf, insn, 4);
+  if (fixup_count != 0
+      && CUR_ASM_STATE == ASM_MPG)
+    {
+      symbolS * cur_mpgloc;
+
+      /* Ensure we get a new frag.  */
+      frag_wane (frag_now);
+      frag_new (0);
+
+      /* Compute the current $.mpgloc.  */
+      cur_mpgloc = compute_mpgloc (mpgloc_sym, vif_data_start,
+				   expr_build_dot ());
+
+      /* We need to use frag_now afterwards, so we can't just call frag_var.
+	 Instead we use frag_more and save the value of frag_now in
+	 insn_frag.  */
+      f = frag_more (8);
+      insn_frag = frag_now;
+      /* Turn the frag into a machine dependent frag.  */
+      frag_variant (rs_machine_dependent,
+		    0, /* max chars */
+		    0, /* no variable part */
+		    RELAX_VU, /* subtype */
+		    cur_mpgloc, /* $.mpgloc */
+		    0, /* offset */
+		    NULL); /* opcode */
+    }
+  else
+    {
+      f = frag_more (8);
+      insn_frag = frag_now;
+    }
+
+  /* Write out the instructions.  */
+  md_number_to_chars (f, insns[0], 4);
+  md_number_to_chars (f + 4, insns[1], 4);
 
   /* Create any fixups.  */
   for (i = 0; i < fixup_count; ++i)
     {
       int op_type, reloc_type;
       const dvp_operand *operand;
+      dvp_cpu cpu;
 
       /* Create a fixup for this operand.
 	 At this point we do not use a bfd_reloc_code_real_type for
@@ -932,24 +987,53 @@ assemble_vu_insn (cpu, opcode, operand_table, pstr, buf)
 	 operand type, although that is admittedly not a very exciting
 	 feature.  We pick a BFD reloc type in md_apply_fix.  */
 
+      cpu = fixups[i].cpu;
       op_type = fixups[i].opindex;
       reloc_type = encode_fixup_reloc_type (cpu, op_type);
       operand = &vu_operands[op_type];
-      fix_new_exp (frag_now, buf - frag_now->fr_literal, 4,
+
+      /* Branch operands inside mpg have to be handled specially.
+	 We want a pc relative relocation in a section different from our own.
+	 See the br-2.s dejagnu testcase for a good example.  */
+      if (CUR_ASM_STATE == ASM_MPG
+	  && (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0)
+	{
+	  symbolS *e1,*e2,*diff_expr;
+
+	  /* For "br foo" we want "foo - (. + 8)".  */
+	  e1 = expr_build_binary (O_add, insn_frag->fr_symbol,
+				  expr_build_uconstant (8));
+	  e2 = make_expr_symbol (&fixups[i].exp);
+	  diff_expr = expr_build_binary (O_subtract, e2, e1);
+	  fixups[i].exp.X_op = O_symbol; 
+	  fixups[i].exp.X_add_symbol = diff_expr;
+	  fixups[i].exp.X_add_number = 0;
+	}
+
+      fix_new_exp (insn_frag, f + fixups[i].offset - insn_frag->fr_literal, 4,
 		   &fixups[i].exp,
-		   (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
+		   CUR_ASM_STATE == ASM_MPG /* pcrel */
+		   ? 0
+		   : (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
 		   (bfd_reloc_code_real_type) reloc_type);
     }
 
-  /* All done.  */
-  return opcode;
+  /* If this was the "loi" pseudo-insn, we need to set the `i' bit.  */
+  if (strcmp (opcode->mnemonic, "loi") == 0)
+    f[7] |= 0x80;
+
+  /* Increment the vu insn counter.
+     If get reach 256 we need to insert an `mpg'.  */
+  ++vu_count;
 }
 
 /* Assemble one instruction at *PSTR.
    CPU indicates what component we're assembling for.
    The assembled instruction is stored in INSN_BUF.
    OPCODE is a pointer to the head of the hash chain.
-
+   INIT_FIXUP_COUNT is the initial value for `fixup_count'.
+   It exists to allow the fixups for multiple calls to this insn to be
+   queued up before actually emitting them.
    *PSTR is updated to point passed the parsed instruction.
 
    If the insn is successfully parsed the result is a pointer to the opcode
@@ -959,10 +1043,13 @@ assemble_vu_insn (cpu, opcode, operand_table, pstr, buf)
    the error occured).  */
 
 static const dvp_opcode *
-assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
+assemble_one_insn (cpu, opcode, operand_table, init_fixup_count, fixup_offset,
+		   pstr, insn_buf)
      dvp_cpu cpu;
      const dvp_opcode *opcode;
      const dvp_operand *operand_table;
+     int init_fixup_count;
+     int fixup_offset;
      char **pstr;
      DVP_INSN *insn_buf;
 {
@@ -987,7 +1074,7 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 
       dvp_opcode_init_parse ();
       insn_buf[opcode->opcode_word] = opcode->value;
-      fixup_count = 0;
+      fixup_count = init_fixup_count;
       past_opcode_p = 0;
       num_suffixes = 0;
 
@@ -1174,6 +1261,7 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		      /* We need to generate a fixup for this expression.  */
 		      if (fixup_count >= MAX_FIXUPS)
 			as_fatal ("internal error: too many fixups");
+		      fixups[fixup_count].cpu = cpu;
 		      fixups[fixup_count].exp = exp;
 		      fixups[fixup_count].opindex = index;
 		      /* FIXME: Revisit.  Do we really need operand->word?
@@ -1181,10 +1269,11 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 			 twisted.  How about defining word 0 as the word with
 			 the lowest address and basing operand-shift off that.
 			 operand->word could then be deleted.  */
+		      fixups[fixup_count].offset = fixup_offset;
 		      if (operand->word != 0)
-			fixups[fixup_count].offset = operand->word * 4;
+			fixups[fixup_count].offset += operand->word * 4;
 		      else
-			fixups[fixup_count].offset = (operand->shift / 32) * 4;
+			fixups[fixup_count].offset += (operand->shift / 32) * 4;
 		      ++fixup_count;
 		      value = 0;
 		    }
@@ -1400,18 +1489,41 @@ dvp_after_pass_hook ()
 #endif
 }
 
-/* Called when a label is defined via tc_frob_label.  */
+/* Called via tc_frob_label when a label is defined.  */
 
 void
 dvp_frob_label (sym)
      symbolS *sym;
 {
+  const char * name = S_GET_NAME (sym);
+
   /* All labels in vu code must be specially marked for the disassembler.
      The disassembler ignores all previous information at each new label
      (that has a higher address than the last one).  */
   if (CUR_ASM_STATE == ASM_MPG
       || CUR_ASM_STATE == ASM_VU)
     S_SET_OTHER (sym, STO_DVP_VU);
+
+  /* If inside an mpg, move vu space labels to their own section and create
+     the corresponding ._. version in normal space.  */
+
+  if (CUR_ASM_STATE == ASM_MPG
+      /* Only do this special processing for user specified symbols.
+	 Not sure how we can distinguish them other than by some prefix.  */
+      && *name != '.'
+      /* Check for recursive invocation creating the ._.name.  */
+      && strncmp (name, VU_LABEL_PREFIX, sizeof (VU_LABEL_PREFIX) - 1) != 0)
+    {
+      /* Move this symbol to vu space.  */
+      symbolS * cur_mpgloc = compute_mpgloc (mpgloc_sym, vif_data_start,
+					     expr_build_dot ());
+      S_SET_SEGMENT (sym, expr_section);
+      sym->sy_value = cur_mpgloc->sy_value;
+      sym->sy_frag = &zero_address_frag;
+
+      /* Create the ._. symbol in normal space.  */
+      create_colon_label (STO_DVP_VU, VU_LABEL_PREFIX, name);
+    }
 }
 
 /* mpg/direct alignment is handled via relaxation */
@@ -1438,7 +1550,9 @@ md_estimate_size_before_relax (fragP, segment)
 
 /* Perform the relaxation.
    All we have to do is figure out how many bytes we need to insert to
-   get to the recorded symbol (which is at the required alignment).  */
+   get to the recorded symbol (which is at the required alignment).
+   This function is also called for machine dependent vu insn frags.
+   In this case the growth is always 0.  */
 
 long
 dvp_relax_frag (fragP, stretch)
@@ -1450,30 +1564,37 @@ dvp_relax_frag (fragP, stretch)
   /* Symbol marking start of data.  */
   symbolS * symbolP = fragP->fr_symbol;
   /* Address of the symbol.  */
-  long target = S_GET_VALUE (symbolP) + symbolP->sy_frag->fr_address;
+  long target;
   long growth;
 
   /* subtype >= 10 means "done" */
-  if (fragP->fr_subtype >= 10)
+  if (RELAX_DONE_P (fragP->fr_subtype))
     return 0;
 
-  /* subtype 1 = mpg */
-  if (fragP->fr_subtype == 1)
+  /* vu insn? */
+  if (fragP->fr_subtype == RELAX_VU)
+    {
+      fragP->fr_subtype = RELAX_ENCODE (RELAX_VU, 0);
+      return 0;
+    }
+
+  target = S_GET_VALUE (symbolP) + symbolP->sy_frag->fr_address;
+
+  if (fragP->fr_subtype == RELAX_MPG)
     {
       growth = target - address;
       if (growth < 0)
 	as_fatal ("internal error: bad mpg alignment handling");
-      fragP->fr_subtype = 10 + growth;
+      fragP->fr_subtype = RELAX_ENCODE (RELAX_MPG, growth);
       return growth;
     }
 
-  /* subtype 2 = direct */
-  if (fragP->fr_subtype == 2)
+  if (fragP->fr_subtype == RELAX_DIRECT)
     {
       growth = target - address;
       if (growth < 0)
 	as_fatal ("internal error: bad direct alignment handling");
-      fragP->fr_subtype = 10 + growth;
+      fragP->fr_subtype = RELAX_ENCODE (RELAX_DIRECT, growth);
       return growth;
     }
 
@@ -1493,7 +1614,7 @@ md_convert_frag (abfd, sec, fragP)
   segT sec;
   fragS * fragP;
 {
-  int growth = fragP->fr_subtype - 10;
+  int growth = RELAX_GROWTH (fragP->fr_subtype);
 
   fragP->fr_fix += growth;
 
@@ -1554,8 +1675,6 @@ decode_fixup_reloc_type (fixup_reloc, cpuP, operandP)
     default : as_fatal ("internal error: bad fixup encoding");
     }
 }
-
-/* Given a fixup reloc type, return a pointer to the operand 
 
 /* The location from which a PC relative jump should be calculated,
    given a PC relative reloc.  */
@@ -1733,12 +1852,36 @@ md_apply_fix3 (fixP, valueP, seg)
 
       /* Determine a BFD reloc value based on the operand information.
 	 We are only prepared to turn a few of the operands into relocs.  */
-      /* FIXME: This test is a hack.  */
       if ((operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0)
 	{
 	  assert (operand->bits == 11
 		  && operand->shift == 0);
-	  fixP->fx_r_type = BFD_RELOC_MIPS_DVP_11_PCREL;
+
+	  /* The fixup isn't recorded as a pc relative branch to some label.
+	     Instead a complicated expression is used to compute the desired
+	     value.  Well, that didn't work and we have to emit a reloc.
+	     Things are tricky because the result we want is the difference
+	     of two addresses in a section potentially different from the one
+	     the reloc is in.  Ugh.
+	     The solution is to emit two relocs, one that adds the target
+	     address and one that subtracts the source address + 8 (the
+	     linker will perform the byte->dword conversion).
+	     This is rather complicated and rather than risk breaking
+	     existing code we fall back on the old way if the file only
+	     contains vu code.  In this case the file is intended to
+	     be fully linked with other vu code and thus we have a normal
+	     situation where the relocation directly corresponds to the
+	     branch insn.  */
+
+	  if (non_vu_insn_seen_p)
+	    {
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    "can't handle mpg loaded vu code with branch relocations");
+	    }
+	  else
+	    {
+	      fixP->fx_r_type = BFD_RELOC_MIPS_DVP_11_PCREL;
+	    }
 	}
       else if ((operand->flags & DVP_OPERAND_DMA_ADDR) != 0
 	       || (operand->flags & DVP_OPERAND_DMA_NEXT) != 0)
@@ -1929,9 +2072,10 @@ scan_symbol (sym)
 
 static long
 #ifdef USE_STDARG
-eval_expr (int opindex, int offset, const char *fmt, ...)
+eval_expr (dvp_cpu cpu, int opindex, int offset, const char *fmt, ...)
 #else
-eval_expr (opindex, offset, fmt, va_alist)
+eval_expr (cpu, opindex, offset, fmt, va_alist)
+     dvp_cpu cpu;
      int opindex,offset;
      const char *fmt;
      va_dcl
@@ -1961,6 +2105,7 @@ eval_expr (opindex, offset, fmt, va_alist)
     {
       if (opindex != 0)
 	{
+	  fixups[fixup_count].cpu = cpu;
 	  fixups[fixup_count].exp = exp;
 	  fixups[fixup_count].opindex = opindex;
 	  fixups[fixup_count].offset = offset;
@@ -2037,6 +2182,23 @@ unique_name (prefix)
   ++counter;
   return result;
 }
+
+/* Compute a value for $.mpgloc given a symbol at the start of a chunk
+   of code, the $.mpgloc value for the start, and a symbol at the end
+   of the chunk of code.  */
+
+static symbolS *
+compute_mpgloc (startloc, startsym, endsym)
+     symbolS * startloc;
+     symbolS * startsym;
+     symbolS * endsym;
+{
+  symbolS *s;
+
+  s = expr_build_binary (O_subtract, endsym, startsym);
+  s = expr_build_binary (O_add, startloc, s);
+  return s;
+}
 
 /* Compute a value for nloop.  */
 
@@ -2099,14 +2261,14 @@ setup_dma_autocount (name, insn_buf, inline_p)
     {
       /* -1: The count is the number of following quadwords, so skip the one
 	 containing the dma tag.  */
-      count = eval_expr (dma_operand_count, 0,
+      count = eval_expr (DVP_DMA, dma_operand_count, 0,
 			 "((%s%s - %s) >> 4) - 1", END_LABEL_PREFIX, name, name);
     }
   else
     {
       /* We don't want to subtract 1 here as the begin and end labels
 	 properly surround the data we want to compute the length of.  */
-      count = eval_expr (dma_operand_count, 0,
+      count = eval_expr (DVP_DMA, dma_operand_count, 0,
 			 "(%s%s - %s) >> 4", END_LABEL_PREFIX, name, name);
     }
 
@@ -2175,7 +2337,7 @@ parse_dma_addr_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
   label2 = create_label ("_$", name);
   endlabel = create_label (END_LABEL_PREFIX, name);
 
-  retval = eval_expr (dma_operand_addr, 4, name);
+  retval = eval_expr (DVP_DMA, dma_operand_addr, 4, name);
 
   setup_dma_autocount (name, insn_buf, 0);
 
@@ -2422,6 +2584,7 @@ insert_operand_final (cpu, operand, mods, insn_buf, val, file, line)
     {
       offsetT min, max, test;
 
+      /* ??? This test belongs more properly in the insert handler.  */
       if ((operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0)
 	{
 	  if ((val & 7) != 0)
@@ -2430,6 +2593,18 @@ insert_operand_final (cpu, operand, mods, insn_buf, val, file, line)
 		as_warn ("branch to misaligned address");
 	      else
 		as_warn_where (file, line, "branch to misaligned address");
+	    }
+	  val >>= 3;
+	}
+      /* ??? This test belongs more properly in the insert handler.  */
+      else if ((operand->flags & DVP_OPERAND_VU_ADDRESS) != 0)
+	{
+	  if ((val & 7) != 0)
+	    {
+	      if (file == (char *) NULL)
+		as_warn ("misaligned vu address");
+	      else
+		as_warn_where (file, line, "misaligned vu address");
 	    }
 	  val >>= 3;
 	}
@@ -2618,14 +2793,10 @@ s_endmpg (caller)
 
   /* Update $.mpgloc.
      We have to leave the old value alone as it may be used in fixups
-     already recorded.  The new value is the old value plus the number of
+     already recorded.  Since compute_mpgloc allocates a new symbol for the
+     result we're ok.  The new value is the old value plus the number of
      double words in this chunk.  */
-  {
-    symbolS *s;
-    s = expr_build_binary (O_subtract, vif_data_end, vif_data_start);
-    s = expr_build_binary (O_divide, s, expr_build_uconstant (8));
-    mpgloc_sym = expr_build_binary (O_add, mpgloc_sym, s);
-  }
+  mpgloc_sym = compute_mpgloc (mpgloc_sym, vif_data_start, vif_data_end);
 
   set_asm_state (ASM_INIT);
 
@@ -2720,7 +2891,7 @@ s_endgif (ignore)
      when they're in different fragments but the difference is constant.
      Not sure how much of a slowdown that will introduce though.  */
   fixup_count = 0;
-  bytes = eval_expr (gif_operand_nloop, 0, ". - %s - 16", gif_data_name);
+  bytes = eval_expr (DVP_GIF, gif_operand_nloop, 0, ". - %s - 16", gif_data_name);
 
   /* Compute a value for nloop if we can.  */
 
@@ -2787,9 +2958,22 @@ s_state (state)
 {
   /* If in MPG state and the user requests to change to VU state,
      leave the state as MPG.  This happens when we see an mpg followed
-     by a .include that has .vu.  */
+     by a .include that has .vu.  Note that no attempt is made to support
+     an include depth > 1 for this case.  */
   if (CUR_ASM_STATE == ASM_MPG && state == ASM_VU)
     return;
+
+  /* If changing to the VU state, we need to set up things for $.mpgloc
+     calculations.  */
+  if (state == ASM_VU)
+    {
+      /* FIXME: May need to check that we're not clobbering currently
+	 in use versions of these.  Also need to worry about which section
+	 the .vu is issued in.  On the other hand, ".vu" isn't intended
+	 to be supported everywhere.  */
+      mpgloc_sym = expr_build_uconstant (0);
+      vif_data_start = expr_build_dot ();
+    }
 
   set_asm_state (state);
 

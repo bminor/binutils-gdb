@@ -4,6 +4,32 @@ Thu Apr  9 10:29:42 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(print_symbol_value_1): Use it.
 	* expr.h (expr_build_dot): Declare.
 	* expr.c (expr_build_dot): New function.
+start-sanitize-sky
+	* config/tc-dvp.c (VU_LABEL_PREFIX): New macro.
+	(compute_mpgloc): New function.
+	(eval_expr): New arg `cpu'.  All callers updated.
+	(non_vu_insn_seen_p): New static global.
+	(RELAX_{MPG,DIRECT,VU,ENCODE,GROWTH,DONE_}): New macros.
+	(struct dvp_fixup): New member `cpu'.
+	(assemble_one_insn): New args init_fixup_count, fixup_offset.
+	All callers updated.
+	(md_assemble): Set non_vu_insn_seen_p as appropriate.
+	(assemble_vif): Set `cpu' field of fixup.
+	Clean up calls to frag_var.  Recorded mpgloc is now in bytes.
+	(assemble_vu_insn): Delete, contents moved into ...
+	(assemble_vu): ... here.  Don't record fixups until after parsing
+	both upper and lower insns.  If branch insn inside mpg, properly
+	compute target address.
+	(dvp_frob_label): Create copies of vu labels inside mpg's.
+	(dvp_relax_frag): Clean up.
+	(md_convert_frag): Ditto.
+	(md_apply_fix3): Signal error if mpg embedded vu code has branch
+	to undefined label (not currently supported).
+	(eval_expr): New arg `cpu'.  All callers updated.
+	(insert_operand_final): Convert mpgloc from bytes to dwords.
+	(s_endmpg): Use compute_mpgloc to update $.mpgloc.
+	(s_state): If switching to vu state, initialize $.mpgloc.
+end-sanitize-sky
 
 Wed Apr  8 16:16:11 1998  Doug Evans  <devans@canuck.cygnus.com>
 
