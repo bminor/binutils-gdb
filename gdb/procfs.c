@@ -3545,24 +3545,29 @@ procfs_attach (char *args, int from_tty)
 static void
 procfs_detach (char *args, int from_tty)
 {
-  char *exec_file;
-  int   signo = 0;
+  int sig = 0;
+
+  if (args)
+    sig = atoi (args);
 
   if (from_tty)
     {
-      exec_file = get_exec_file (0);
-      if (exec_file == 0)
-	exec_file = "";
-      printf_filtered ("Detaching from program: %s %s\n",
-	      exec_file, target_pid_to_str (inferior_ptid));
-      fflush (stdout);
-    }
-  if (args)
-    signo = atoi (args);
+      int pid = PIDGET (inferior_ptid);
+      char *exec_file;
 
-  do_detach (signo);
+      exec_file = get_exec_file (0);
+      if (exec_file == NULL)
+	exec_file = "";
+
+      printf_filtered ("Detaching from program: %s, %s\n", exec_file,
+		       target_pid_to_str (pid_to_ptid (pid)));
+      gdb_flush (gdb_stdout);
+    }
+
+  do_detach (sig);
+
   inferior_ptid = null_ptid;
-  unpush_target (&procfs_ops);		/* Pop out of handling an inferior */
+  unpush_target (&procfs_ops);
 }
 
 static ptid_t
