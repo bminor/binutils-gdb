@@ -5,6 +5,7 @@ start-sanitize-gdbtk
 	(sparc64-*-solaris2* host): Link statically if GCC used.
 end-sanitize-gdbtk
 	(sparc64-*-solaris2*): Add target configuration.
+	* configure: Regenerated.
 	* sparc/sp64sol2.mt: New file.
 
 Wed Jan 24 22:31:37 1996  Doug Evans  <dje@charmed.cygnus.com>
