@@ -1,3 +1,10 @@
+2004-05-15  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.h (hppa_frame_prev_register_helper): Pass save_regs
+	as pointer instead of array reference since HPUX compiler does
+	not accept unsized array arguments.
+	* somsolib.c (dld_flags_buffer): Use constant array size.
+
 2004-05-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64obsd-tdep.c (amd64obsd_sigtramp_p): Replace hexadecimal

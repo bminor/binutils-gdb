@@ -194,7 +194,7 @@ int hppa_sign_extend (unsigned int, unsigned int);
 
 void
 hppa_frame_prev_register_helper (struct frame_info *next_frame,
-			         struct trad_frame_saved_reg saved_regs[],
+			         struct trad_frame_saved_reg *saved_regs,
 				 int regnum, int *optimizedp,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
 				 int *realnump, void *valuep);

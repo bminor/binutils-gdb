@@ -1064,7 +1064,7 @@ som_solib_remove_inferior_hook (int pid)
   CORE_ADDR addr;
   struct minimal_symbol *msymbol;
   int status;
-  char dld_flags_buffer[TARGET_INT_BIT / TARGET_CHAR_BIT];
+  char dld_flags_buffer[4];
   unsigned int dld_flags_value;
   struct cleanup *old_cleanups = save_inferior_ptid ();
 
