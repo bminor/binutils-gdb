@@ -6969,7 +6969,7 @@ rather than current ones.
 @end table
 
 All file-specifying commands allow both absolute and relative file names
-as arguments.  @value{GDBN} always converts the file name to an absolute path
+as arguments.  @value{GDBN} always converts the file name to an absolute file
 name and remembers it that way.
 
 @ifclear BARETARGET
@@ -8000,7 +8000,7 @@ environment's @code{PATH} variable, so the @value{GDBN} input and output
 session proceeds normally; but Emacs does not get enough information
 back from @value{GDBN} to locate the source files in this situation.  To
 avoid this problem, either start @value{GDBN} mode from the directory where
-your program resides, or specify a full path name when prompted for the
+your program resides, or specify an absolute file name when prompted for the
 @kbd{M-x gdb} argument.
 
 A similar confusion can result if you use the @value{GDBN} @code{file} command to
@@ -8753,7 +8753,7 @@ called @code{configure} (or one of its subdirectories).
 The @code{Makefile} that @code{configure} generates in each source
 directory also runs recursively.  If you type @code{make} in a source
 directory such as @file{gdb-@value{GDBVN}} (or in a separate configured
-directory configured with @samp{--srcdir=@var{path}/gdb-@value{GDBVN}}), you
+directory configured with @samp{--srcdir=@var{dirname}/gdb-@value{GDBVN}}), you
 will build all the required libraries, and then build GDB.
 
 When you have multiple hosts or targets configured in separate
@@ -8816,7 +8816,7 @@ Does,,configure.info}, for a full explanation of @code{configure}.
 @example
 configure @r{[}--help@r{]}
           @r{[}--prefix=@var{dir}@r{]}
-          @r{[}--srcdir=@var{path}@r{]}
+          @r{[}--srcdir=@var{dirname}@r{]}
           @r{[}--norecursion@r{]} @r{[}--rm@r{]}
           @r{[}--target=@var{target}@r{]} @var{host}
 @end example
@@ -8836,7 +8836,7 @@ Configure the source to install programs and files under directory
 
 @c avoid splitting the warning from the explanation:
 @need 2000
-@item --srcdir=@var{path}
+@item --srcdir=@var{dirname}
 @strong{Warning: using this option requires GNU @code{make}, or another
 @code{make} that implements the @code{VPATH} feature.}@*
 Use this option to make configurations in directories separate from the
@@ -8844,9 +8844,9 @@ GDB source directories.  Among other things, you can use this to
 build (or maintain) several configurations simultaneously, in separate
 directories.  @code{configure} writes configuration specific files in
 the current directory, but arranges for them to use the source in the
-directory @var{path}.  @code{configure} creates directories under
+directory @var{dirname}.  @code{configure} creates directories under
 the working directory in parallel to the source directories below
-@var{path}.
+@var{dirname}.
 
 @item --norecursion
 Configure only the directory level where @code{configure} is executed; do not
