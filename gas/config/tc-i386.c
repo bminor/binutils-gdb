@@ -1225,6 +1225,12 @@ tc_i386_fix_adjustable (fixP)
       && fixP->fx_pcrel)
     return 0;
 
+  /* The x86_64 GOTPCREL are represented as 32bit PCrel relocations
+     and changed later by validate_fix.  */
+  if (GOT_symbol && fixP->fx_subsy == GOT_symbol
+      && fixP->fx_r_type == BFD_RELOC_32_PCREL)
+    return 0;
+
   /* adjust_reloc_syms doesn't know about the GOT.  */
   if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_386_PLT32
