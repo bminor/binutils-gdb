@@ -36,6 +36,7 @@ plabelbug.s
 reloc.exp
 relocreduce.s
 relocreduce2.s
+r_no_relocbug.s
 roundmode.s
 selectorbug.s
 

@@ -1,3 +1,11 @@
+Mon Sep 12 22:19:11 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/r_no_relocbug.s: New test.
+	* gas/hppa/reloc/reloc.exp: Run it.
+
+	* gas/hppa/reloc/reloc.exp (do_function_reloc_bug): Update
+	expected output.
+
 Sun Sep 04 17:58:10 1994	Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
 	* gas/arm/*: New subtree.  Add ARM tests.
