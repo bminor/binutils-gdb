@@ -1482,6 +1482,7 @@ read_file_scope (die, objfile)
   memset (ftypes, 0, FT_NUM_MEMBERS * sizeof (struct type *));
 
   start_symtab (name, comp_dir, lowpc);
+  record_debugformat ("DWARF 2");
 
   /* Decode line number information if present.  */
   attr = dwarf_attr (die, DW_AT_stmt_list);

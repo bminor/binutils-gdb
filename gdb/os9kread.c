@@ -1570,6 +1570,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		start_stabs ();
 		os9k_stabs = 1;
 		start_symtab (n, dirn, valu);
+		record_debugformat ("OS9");
 	      } else {
 		push_subfile();
 		start_subfile (n, dirn!=NULL ? dirn : current_subfile->dirname);

@@ -807,6 +807,13 @@ struct symtab
 
     enum language language;
 
+    /* String that identifies the format of the debugging information, such
+       as "stabs", "dwarf 1", "dwarf 2", "coff", etc.  This is mostly useful
+       for automated testing of gdb but may also be information that is
+       useful to the user. */
+
+    char *debugformat;
+
     /* String of version information.  May be zero.  */
 
     char *version;

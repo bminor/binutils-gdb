@@ -1,3 +1,38 @@
+Fri Jun 27 23:03:53 1997  Fred Fish  <fnf@ninemoons.com>
+
+	* buildsym.h (struct subfile): Add debugformat member.
+	(record_debugformat): Declare global function.
+	* buildsym.c (start_subfile): Initialize debugformat member
+	to NULL.
+	(record_debugformat): New function to record the format.
+	(end_symtab): Copy format into symtab debugformat member.
+	(end_symtab): Free subfile debugformat member.
+	* symmisc.c (free_symtab): Free debugformat when freeing
+	symtab.
+	* symfile.c (allocate_symtab): Initialize the new debugformat
+	member for new symtabs.
+	* symtab.h (struct symtab): Add debugformat member.
+	* source.c (source_info): Print the debug format.
+
+	* os9kread.c (os9k_process_one_symbol): Call record_debugformat
+	with "OS9".
+	* hpread.c (hpread_expand_symtab): Call record_debugformat
+	with "HP".
+	(hpread_process_one_debug_symbol): Ditto.
+	* dbxread.c (process_one_symbol): Call record_debugformat
+	with "stabs".
+	* coffread.c (coff_start_symtab): Call record_debugformat
+	with "COFF".
+	* xcoffread.c (read_xcoff_symtab): Call record_debugformat
+	with "XCOFF".
+	* dwarfread.c (read_file_scope): Call record_debugformat
+	with "DWARF 1".
+	* dwarf2read.c (read_file_scope): Call record_debugformat
+	with "DWARF 2".
+	* dstread.c (dst_end_symtab): Set debugformat to be
+	"Apollo DST".
+	* mdebugread.c (new_symtab): Set debugformat to be "ECOFF".
+
 Fri Jun 27 21:05:45 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* mips-tdep.c (mips_push_arguments): handle alignment of

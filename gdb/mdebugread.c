@@ -4009,7 +4009,8 @@ new_symtab (name, maxsyms, maxlines, objfile)
     BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
 
   s->free_code = free_linetable;
-
+  s->debugformat = obsavestring ("ECOFF", 5,
+				 &objfile -> symbol_obstack);
   return (s);
 }
 

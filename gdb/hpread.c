@@ -1095,7 +1095,10 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   dn_bufp = hpread_get_lntt (sym_index, objfile);
   if (!((dn_bufp->dblock.kind == (unsigned char) DNTT_TYPE_SRCFILE) ||
 	(dn_bufp->dblock.kind == (unsigned char) DNTT_TYPE_MODULE)))
-    start_symtab ("globals", NULL, 0);
+    {
+      start_symtab ("globals", NULL, 0);
+      record_debugformat ("HP");
+    }
 
   max_symnum = sym_size / sizeof (struct dntt_type_block);
 
@@ -1825,6 +1828,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
       if (!last_source_file)
 	{
 	  start_symtab (name, NULL, valu);
+	  record_debugformat ("HP");
 	  SL_INDEX (objfile) = dn_bufp->dsfile.address;
 	}
       else

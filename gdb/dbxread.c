@@ -415,29 +415,35 @@ record_minimal_symbol (name, address, type, objfile)
 {
   enum minimal_symbol_type ms_type;
   int section;
+  asection *bfd_section;
 
   switch (type)
     {
     case N_TEXT | N_EXT:
       ms_type = mst_text;
       section = SECT_OFF_TEXT;
+      bfd_section = DBX_TEXT_SECTION (objfile);
       break;
     case N_DATA | N_EXT:
       ms_type = mst_data;
       section = SECT_OFF_DATA;
+      bfd_section = DBX_DATA_SECTION (objfile);
       break;
     case N_BSS | N_EXT:
       ms_type = mst_bss;
       section = SECT_OFF_BSS;
+      bfd_section = DBX_BSS_SECTION (objfile);
       break;
     case N_ABS | N_EXT:
       ms_type = mst_abs;
       section = -1;
+      bfd_section = NULL;
       break;
 #ifdef N_SETV
     case N_SETV | N_EXT:
       ms_type = mst_data;
       section = SECT_OFF_DATA;
+      bfd_section = DBX_DATA_SECTION (objfile);
       break;
     case N_SETV:
       /* I don't think this type actually exists; since a N_SETV is the result
@@ -445,6 +451,7 @@ record_minimal_symbol (name, address, type, objfile)
 	 file local.  */
       ms_type = mst_file_data;
       section = SECT_OFF_DATA;
+      bfd_section = DBX_DATA_SECTION (objfile);
       break;
 #endif
     case N_TEXT:
@@ -453,6 +460,7 @@ record_minimal_symbol (name, address, type, objfile)
     case N_FN_SEQ:
       ms_type = mst_file_text;
       section = SECT_OFF_TEXT;
+      bfd_section = DBX_TEXT_SECTION (objfile);
       break;
     case N_DATA:
       ms_type = mst_file_data;
@@ -473,14 +481,17 @@ record_minimal_symbol (name, address, type, objfile)
 	  ms_type = mst_data;
       }
       section = SECT_OFF_DATA;
+      bfd_section = DBX_DATA_SECTION (objfile);
       break;
     case N_BSS:
       ms_type = mst_file_bss;
       section = SECT_OFF_BSS;
+      bfd_section = DBX_BSS_SECTION (objfile);
       break;
     default:
       ms_type = mst_unknown;
       section = -1;
+      bfd_section = NULL;
       break;
   }
 
@@ -489,7 +500,7 @@ record_minimal_symbol (name, address, type, objfile)
     lowest_text_address = address;
 
   prim_record_minimal_symbol_and_info
-    (name, address, ms_type, NULL, section, objfile);
+    (name, address, ms_type, NULL, section, bfd_section, objfile);
 }
 
 /* Scan and build partial symbols for a symbol file.
@@ -613,6 +624,11 @@ dbx_symfile_init (objfile)
   /* Allocate struct to keep track of the symfile */
   objfile->sym_stab_info = (PTR)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
+  memset ((PTR) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
+
+  DBX_TEXT_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
+  DBX_DATA_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".data");
+  DBX_BSS_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".bss");
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
 #define	STRING_TABLE_OFFSET	(sym_bfd->origin + obj_str_filepos (sym_bfd))
@@ -727,6 +743,7 @@ dbx_symfile_finish (objfile)
 	  while (--i >= 0)
 	    {
 	      free (hfiles [i].name);
+	      free (hfiles [i].vector);
 	    }
 	  free ((PTR) hfiles);
 	}
@@ -939,6 +956,8 @@ add_bincl_to_list (pst, name, instance)
       bincl_list = (struct header_file_location *)
 	xmrealloc (pst->objfile->md, (char *)bincl_list,
 		  bincls_allocated * sizeof (struct header_file_location));
+      if (bincl_list == NULL)
+	fatal ("virtual memory exhausted in add_bincl_to_list ();");
       next_bincl = bincl_list + offset;
     }
   next_bincl->pst = pst;
@@ -1850,7 +1869,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
 	  /* Make a block for the local symbols within.  */
 	  finish_block (new->name, &local_symbols, new->old_blocks,
-			function_start_offset, function_start_offset + valu,
+			new->start_addr, new->start_addr + valu,
 			objfile);
 	  break;
 	}
@@ -2017,6 +2036,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
       start_stabs ();
       start_symtab (name, NULL, valu);
+      record_debugformat ("stabs");
       break;
 
     case N_SOL:
@@ -2366,7 +2386,7 @@ coffstab_build_psymtabs (objfile, section_offsets, mainline,
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the coff symtab to help us.  */
-  info = (struct dbx_symfile_info *) objfile->sym_stab_info;
+  info = objfile->sym_stab_info;
 
   DBX_TEXT_ADDR (objfile) = textaddr;
   DBX_TEXT_SIZE (objfile) = textsize;
@@ -2467,7 +2487,7 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the ELF symtab to help us.  */
-  info = (struct dbx_symfile_info *) objfile->sym_stab_info;
+  info = objfile->sym_stab_info;
 
   text_sect = bfd_get_section_by_name (sym_bfd, ".text");
   if (!text_sect)
@@ -2555,7 +2575,7 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
 	   stab_name, stabstr_name);
 
   objfile->sym_stab_info = (PTR) xmalloc (sizeof (struct dbx_symfile_info));
-  memset (DBX_SYMFILE_INFO (objfile), 0, sizeof (struct dbx_symfile_info));
+  memset (objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
 
   text_sect = bfd_get_section_by_name (sym_bfd, text_name);
   if (!text_sect)

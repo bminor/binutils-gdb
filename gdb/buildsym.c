@@ -566,6 +566,10 @@ start_subfile (name, dirname)
       subfile->language = subfile->next->language;
     }
 
+  /* Initialize the debug format string to NULL.  We may supply it
+     later via a call to record_debugformat. */
+  subfile->debugformat = NULL;
+
   /* cfront output is a C program, so in most ways it looks like a C
      program.  But to demangle we need to set the language to C++.  We
      can distinguish cfront code by the fact that it has #line
@@ -968,6 +972,14 @@ end_symtab (end_addr, objfile, section)
 	     language it is from things we found in the symbols. */
 	  symtab->language = subfile->language;
 
+	  /* Save the debug format string (if any) in the symtab */
+	  if (subfile -> debugformat != NULL)
+	    {
+	      symtab->debugformat = obsavestring (subfile->debugformat,
+						  strlen (subfile->debugformat),
+						  &objfile -> symbol_obstack);
+	    }
+
 	  /* All symtabs for the main file and the subfiles share a
 	     blockvector, so we need to clear primary for everything but
 	     the main file.  */
@@ -985,6 +997,10 @@ end_symtab (end_addr, objfile, section)
       if (subfile->line_vector != NULL)
 	{
 	  free ((PTR) subfile->line_vector);
+	}
+      if (subfile->debugformat != NULL)
+	{
+	  free ((PTR) subfile->debugformat);
 	}
 
       nextsub = subfile->next;
@@ -1063,6 +1079,14 @@ hashname (name)
       total += (1000 << 6);
     }
   return (total % HASHSIZE);
+}
+
+
+void
+record_debugformat (format)
+     char *format;
+{
+  current_subfile -> debugformat = savestring (format, strlen (format));
 }
 
 

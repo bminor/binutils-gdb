@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -25,17 +25,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "gdbcmd.h"
 #include "frame.h"
+#include "value.h"
 
 #include <sys/types.h>
 #include "gdb_string.h"
-#include <sys/param.h>
 #include "gdb_stat.h"
 #include <fcntl.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include "gdbcore.h"
-#include "regex.h"
+#include "gnu-regex.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "annotate.h"
@@ -306,9 +306,12 @@ mod_path (dirname, which_path)
 	  }
       }
 
+#ifndef WIN32 
+      /* On win32 h:\ is different to h: */
       if (SLASH_P (p[-1]))
 	/* Sigh. "foo/" => "foo" */
 	--p;
+#endif
       *p = '\0';
 
       while (p[-1] == '.')
@@ -341,7 +344,7 @@ mod_path (dirname, which_path)
 
       if (name[0] == '~')
 	name = tilde_expand (name);
-      else if (!SLASH_P (name[0]) && name[0] != '$') 
+      else if (!ROOTED_P (name) && name[0] != '$') 
 	  name = concat (current_directory, SLASH_STRING, name, NULL);
       else
 	name = savestring (name, p - name);
@@ -446,7 +449,8 @@ source_info (ignore, from_tty)
     printf_filtered ("Contains %d line%s.\n", s->nlines,
 		     s->nlines == 1 ? "" : "s");
 
-  printf_filtered("Source language is %s.\n", language_str (s->language));
+  printf_filtered ("Source language is %s.\n", language_str (s->language));
+  printf_filtered ("Compiled with %s debugging format.\n", s->debugformat);
 }
 
 
@@ -489,6 +493,10 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
   if (!path)
     path = ".";
 
+#ifdef WIN32
+  mode |= O_BINARY;
+#endif
+
   if (try_cwd_first || SLASH_P (string[0]))
     {
       int i;
@@ -497,8 +505,8 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
       if (fd >= 0)
 	goto done;
       for (i = 0; string[i]; i++)
-	if (SLASH_P(string[0]))
-	goto done;
+	if (SLASH_P (string[i]))
+	  goto done;
     }
 
   /* ./foo => foo */
@@ -517,7 +525,7 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
 	len = strlen (p);
 
       if (len == 4 && p[0] == '$' && p[1] == 'c'
-	           && p[2] == 'w' && p[3] == 'd') {
+	  && p[2] == 'w' && p[3] == 'd') {
 	/* Name is $cwd -- insert current directory name instead.  */
 	int newlen;
 
@@ -537,7 +545,7 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
 
       /* Remove trailing slashes */
       while (len > 0 && SLASH_P (filename[len-1]))
-       filename[--len] = 0;
+	filename[--len] = 0;
 
       strcat (filename+len, SLASH_STRING);
       strcat (filename, string);
@@ -707,7 +715,7 @@ find_source_lines (s, desc)
   int nlines = 0;
   int lines_allocated = 1000;
   int *line_charpos;
-  long exec_mtime;
+  long mtime;
   int size;
 
   line_charpos = (int *) xmmalloc (s -> objfile -> md,
@@ -715,10 +723,16 @@ find_source_lines (s, desc)
   if (fstat (desc, &st) < 0)
     perror_with_name (s->filename);
 
-  if (exec_bfd)
+  if (s && s->objfile && s->objfile->obfd)
     {
-      exec_mtime = bfd_get_mtime(exec_bfd);
-      if (exec_mtime && exec_mtime < st.st_mtime)
+      mtime = bfd_get_mtime(s->objfile->obfd);
+      if (mtime && mtime < st.st_mtime)
+	printf_filtered ("Source file is more recent than executable.\n");
+    }
+  else if (exec_bfd)
+    {
+      mtime = bfd_get_mtime(exec_bfd);
+      if (mtime && mtime < st.st_mtime)
 	printf_filtered ("Source file is more recent than executable.\n");
     }
 
@@ -728,7 +742,7 @@ find_source_lines (s, desc)
 
     /* Have to read it byte by byte to find out where the chars live */
 
-    line_charpos[0] = tell(desc);
+    line_charpos[0] = lseek (desc, 0, SEEK_CUR);
     nlines = 1;
     while (myread(desc, &c, 1)>0) 
       {
@@ -741,7 +755,7 @@ find_source_lines (s, desc)
 		  (int *) xmrealloc (s -> objfile -> md, (char *) line_charpos,
 				     sizeof (int) * lines_allocated);
 	      }
-	    line_charpos[nlines++] = tell(desc);
+	    line_charpos[nlines++] = lseek (desc, 0, SEEK_CUR);
 	  }
       }
   }
@@ -758,7 +772,9 @@ find_source_lines (s, desc)
     data = (char *) xmalloc (size);
     old_cleanups = make_cleanup (free, data);
 
-    if (myread (desc, data, size) < 0)
+    /* Reassign `size' to result of read for systems where \r\n -> \n.  */
+    size = myread (desc, data, size);
+    if (size < 0)
       perror_with_name (s->filename);
     end = data + size;
     p = data;
@@ -1164,11 +1180,12 @@ line_info (arg, from_tty)
   CORE_ADDR start_pc, end_pc;
   int i;
 
+  INIT_SAL (&sal);	/* initialize to zeroes */
+
   if (arg == 0)
     {
       sal.symtab = current_source_symtab;
       sal.line = last_line_listed;
-      sal.pc = 0;
       sals.nelts = 1;
       sals.sals = (struct symtab_and_line *)
 	xmalloc (sizeof (struct symtab_and_line));

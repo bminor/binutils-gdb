@@ -177,6 +177,8 @@ dst_end_symtab (objfile)
   symtab->free_ptr = 0;
   symtab->filename = last_source_file;
   symtab->dirname = NULL;
+  symtab->debugformat = obsavestring ("Apollo DST", 10,
+				      &objfile -> symbol_obstack);
   lv = line_vector;
   lv->nitems = line_vector_index;
   symtab->linetable = (struct linetable *)

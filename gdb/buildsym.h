@@ -60,6 +60,7 @@ struct subfile
   struct linetable *line_vector;
   int line_vector_length;
   enum language language;
+  char *debugformat;
 };
 
 EXTERN struct subfile *subfiles;
@@ -263,6 +264,9 @@ make_blockvector PARAMS ((struct objfile *));
 extern void
 record_pending_block PARAMS ((struct objfile *, struct block *,
 			      struct pending_block *));
+
+extern void
+record_debugformat PARAMS ((char *));
 
 #undef EXTERN
 

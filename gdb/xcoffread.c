@@ -997,6 +997,7 @@ read_xcoff_symtab (pst)
 
   start_stabs ();
   start_symtab (filestring, (char *)NULL, file_start_addr);
+  record_debugformat ("XCOFF");
   symnum = ((struct symloc *)pst->read_symtab_private)->first_symnum;
   max_symnum =
     symnum + ((struct symloc *)pst->read_symtab_private)->numsyms;
@@ -1090,6 +1091,7 @@ read_xcoff_symtab (pst)
 
 	  start_stabs ();
 	  start_symtab ("_globals_", (char *)NULL, (CORE_ADDR)0);
+	  record_debugformat ("XCOFF");
 	  cur_src_end_addr = first_object_file_end;
 	  /* done with all files, everything from here on is globals */
 	}
@@ -1154,6 +1156,7 @@ read_xcoff_symtab (pst)
 			  /* Give all csects for this source file the same
 			     name.  */
 			  start_symtab (filestring, NULL, (CORE_ADDR)0);
+			  record_debugformat ("XCOFF");
 			}
 
 		      /* If this is the very first csect seen,
@@ -1282,6 +1285,7 @@ read_xcoff_symtab (pst)
 
 	  start_stabs ();
 	  start_symtab (filestring, (char *)NULL, (CORE_ADDR)0);
+	  record_debugformat ("XCOFF");
 	  last_csect_name = 0;
 
 	  /* reset file start and end addresses. A compilation unit with no text

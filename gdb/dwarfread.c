@@ -1975,6 +1975,7 @@ read_file_scope (dip, thisdie, enddie, objfile)
   memset (utypes, 0, numutypes * sizeof (struct type *));
   memset (ftypes, 0, FT_NUM_MEMBERS * sizeof (struct type *));
   start_symtab (dip -> at_name, dip -> at_comp_dir, dip -> at_low_pc);
+  record_debugformat ("DWARF 1");
   decode_line_numbers (lnbase);
   process_dies (thisdie + dip -> die_length, enddie, objfile);
 
