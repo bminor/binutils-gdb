@@ -1,3 +1,12 @@
+Fri Feb 11 17:36:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (lookup_name): Take new argument, force_load.  If true,
+	reload the file even if it is already loaded.
+	(wild): Call lookup_name with force_load argument of 0.
+	(open_input_bfds): Call lookup_name with force_load argument of 1.
+	(print_symbol): Remove declaration of non-existent function.
+	(print_one_symbol): Return true rather than falling off end.
+
 Thu Feb 10 11:52:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldmain.c (main): Use %ld when printing long values.
