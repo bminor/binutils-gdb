@@ -1,3 +1,8 @@
+2001-02-23  David Mosberger  <davidm@hpl.hp.com>
+
+	* ia64-opc-a.c: Add missing pseudo-ops for "cmp" and "cmp4".
+	* ia64-asmtab.c: Regenerate.
+
 2001-02-21  David Mosberger  <davidm@hpl.hp.com>
 
 	* ia64-opc-d.c (ia64_opcodes_d): Break the "add" pattern into two
