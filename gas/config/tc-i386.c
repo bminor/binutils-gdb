@@ -3869,10 +3869,10 @@ md_apply_fix3 (fixP, valp, seg)
 	}
     }
 
-  /*
-   * This is a hack.  There should be a better way to
-   * handle this.
-   */
+  /* This is a hack.  There should be a better way to handle this.
+     This covers for the fact that bfd_install_relocation will
+     subtract the current location (for partial_inplace, PC relative
+     relocations); see more below.  */
   if ((fixP->fx_r_type == BFD_RELOC_32_PCREL
        || fixP->fx_r_type == BFD_RELOC_16_PCREL
        || fixP->fx_r_type == BFD_RELOC_8_PCREL)
