@@ -1,5 +1,10 @@
 Thu Oct 14 16:51:00 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* app.c (do_scrub_next_char): Always accept 'x' and 'X' as escape
+	characters in state 6.
+	* read.c (next_char_of_string): Accept \Xh* and \xh* where h* are
+	hexidecimal digits.
+
 	* config/tc-i386.c (md_apply_fix_1): Make cross segment calls work
 	for ELF by hacking around bizarre bfd_perform_relocation behaviour
 	that I don't dare change.
