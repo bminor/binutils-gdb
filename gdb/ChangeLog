@@ -1,3 +1,8 @@
+Tue Jun 29 09:11:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symtab.h (struct symtab, line_charpos): Fix comment.
+	* source.c (identify_source_line): Fix off by one bug with line.
+
 Mon Jun 28 10:09:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c (makeva*): New interface, for making a va_list.

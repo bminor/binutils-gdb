@@ -27,7 +27,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define obstack_chunk_free free
 
 /* Define a structure for the information that is common to all symbol types,
-   including minimal symbols, partial symbols, and full symbols. */
+   including minimal symbols, partial symbols, and full symbols.  In a
+   multilanguage environment, some language specific information may need to
+   be recorded along with each symbol. */
 
 struct general_symbol_info
 {
@@ -59,39 +61,33 @@ struct general_symbol_info
     }
   value;
 
-  /* In a multilanguage environment, some language specific information may
-     need to be recorded along with each symbol. */
+  /* Record the source code language that applies to this symbol.
+     This is used to select one of the fields from the language specific
+     union below. */
 
-  struct language_dependent_info
+  enum language language;
+
+  /* Since one and only one language can apply, wrap the language specific
+     information inside a union. */
+
+  union
     {
-
-      /* Record the language that this information applies to. */
-
-      enum language language;
-
-      /* Since one and only one language can apply, wrap the information inside
-	 a union. */
-
-      union lang_specific
+      struct cplus_specific      /* For C++ */
 	{
-	  /* For C++ */
-	  struct cplus_specific
-	    {
-	      char *demangled_name;
-	    } cplus_specific;
-	  /* For Chill */
-	  struct chill_specific
-	    {
-	      char *demangled_name;
-	    } chill_specific;
-	} lang_u;
-    } lang_specific;
+	  char *demangled_name;
+	} cplus_specific;
+      struct chill_specific      /* For Chill */
+	{
+	  char *demangled_name;
+	} chill_specific;
+    } language_specific;
 
   /* Which section is this symbol in?  This is an index into
      section_offsets for this objfile.  Negative means that the symbol
-     does not get relocated relative to a section.  */
-  /* Disclaimer: currently this is just used for xcoff, so don't expect
+     does not get relocated relative to a section.
+     Disclaimer: currently this is just used for xcoff, so don't expect
      all symbol-reading code to set it correctly.  */
+
   int section;
 };
 
@@ -101,11 +97,11 @@ struct general_symbol_info
 #define SYMBOL_VALUE_BYTES(symbol)	(symbol)->ginfo.value.bytes
 #define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->ginfo.value.block
 #define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->ginfo.value.chain
-#define SYMBOL_LANGUAGE(symbol)		(symbol)->ginfo.lang_specific.language
+#define SYMBOL_LANGUAGE(symbol)		(symbol)->ginfo.language
 #define SYMBOL_SECTION(symbol)		(symbol)->ginfo.section
 
 #define SYMBOL_CPLUS_DEMANGLED_NAME(symbol)	\
-  (symbol)->ginfo.lang_specific.lang_u.cplus_specific.demangled_name
+  (symbol)->ginfo.language_specific.cplus_specific.demangled_name
 
 
 extern int demangle;	/* We reference it, so go ahead and declare it. */
@@ -126,8 +122,8 @@ extern int demangle;	/* We reference it, so go ahead and declare it. */
       }									\
     else								\
       {									\
-	memset (&(symbol)->ginfo.lang_specific.lang_u, 0,		\
-		sizeof ((symbol)->ginfo.lang_specific.lang_u));		\
+	memset (&(symbol)->ginfo.language_specific, 0,			\
+		sizeof ((symbol)->ginfo.language_specific));		\
       }									\
   } while (0)
 
@@ -195,7 +191,7 @@ extern int demangle;	/* We reference it, so go ahead and declare it. */
       : NULL))
 
 #define SYMBOL_CHILL_DEMANGLED_NAME(symbol)				\
-  (symbol)->ginfo.lang_specific.lang_u.chill_specific.demangled_name
+  (symbol)->ginfo.language_specific.chill_specific.demangled_name
 
 /* Macro that returns the "natural source name" of a symbol.  In C++ this is
    the "demangled" form of the name if demangle is on and the "mangled" form
@@ -726,7 +722,10 @@ struct symtab
 
     int nlines;
 
-    /* Array mapping line number to character position.  */
+    /* The Nth element of this array is the position of the
+       (N-1)th line of the source file.  "position" means something
+       we can lseek() to; it is not guaranteed to be useful any other
+       way.  */
 
     int *line_charpos;
 
@@ -800,7 +799,11 @@ struct partial_symtab
   /* Array of pointers to all of the partial_symtab's which this one
      depends on.  Since this array can only be set to previous or
      the current (?) psymtab, this dependency tree is guaranteed not
-     to have any loops. */
+     to have any loops.  "depends on" means that symbols must be read
+     for the dependencies before being read for this psymtab; this is
+     for type references in stabs, where if foo.c includes foo.h, declarations
+     in foo.h may use type numbers defined in foo.c.  For other debugging
+     formats there may be no need to use dependencies.  */
 
   struct partial_symtab **dependencies;
 
@@ -1073,8 +1076,7 @@ forget_cached_source_info PARAMS ((void));
 extern void
 select_source_symtab PARAMS ((struct symtab *));
 
-extern char **
-make_symbol_completion_list PARAMS ((char *));
+extern char **make_symbol_completion_list PARAMS ((char *, char *));
 
 /* symtab.c */
 
