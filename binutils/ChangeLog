@@ -1,6 +1,18 @@
+Tue Aug 29 13:25:21 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c (rva): Deleted.
+	(rvaafter, rva_before): Use new assembler pseudo.
+	(flush_page, gen_exp_file, gen_lib_file): Use new way of RVAing.
+	(gen_exp_file): Don't generate .edata if no need.
+	(gen_lib_file): Don't make timestamp.
+	(workout_prefix): Fix memory initialization bug.
+	(usage): Tidy up, delete many single char options.
+	(main): rva option is gone.
+
 Mon Aug 21 18:41:28 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c (options): image-base is a synonym for rva.
+	(gen_lib_file): Put dll name into ibase$7.
 
 Sun Aug 20 09:59:00 1995  steve chamberlain  <sac@slash.cygnus.com>
 
