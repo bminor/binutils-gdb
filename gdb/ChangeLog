@@ -1,3 +1,16 @@
+Tue Feb  9 00:19:28 1993  John Gilmore  (gnu@cygnus.com)
+
+	* stabsread.c (define_symbol):  Complain about unrecognized names
+	that begin with CPLUS_MARKER (often '$'), but don't die.  Fix
+	suggested by gb@cs.purdue.edu (Gerald Baumgartner).
+	(read_cpp_abbrev):  Don't use the class name as part of the
+	vtable pointer member name (_vptr$) in $vf abbrevs or unrecognized
+	abbrevs.  Inspired by Mike Tiemann.
+	(read_tilde_fields):  Comment.  Remove ancient dead code.
+	Remove erroneous but non-dead code.  Simplify.  Add complaints.
+	(in general):  Remove extraneous (parentheses) in return
+	statements.
+
 Fri Feb  5 14:01:22 1993  John Gilmore  (gnu@cygnus.com)
 
 	* coffread.c (coff_lookup_type):  Fix fencepost error reported

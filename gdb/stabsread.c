@@ -1,5 +1,5 @@
 /* Support routines for decoding "stabs" debugging information format.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -176,6 +176,12 @@ struct complaint range_type_base_complaint =
 
 struct complaint reg_value_complaint =
   {"register number too large in symbol %s", 0, 0};
+
+struct complaint vtbl_notfound_complaint =
+  {"virtual function table pointer not found when defining class `%s'", 0, 0};
+
+struct complaint unrecognized_cplus_name_complaint =
+  {"Unknown C++ symbol name `%s'", 0, 0};
 
 struct complaint stabs_general_complaint =
   {"%s", 0, 0};
@@ -486,7 +492,8 @@ define_symbol (valu, string, desc, type, objfile)
 	    goto normal;
 
 	  default:
-	    abort ();
+	    complain (unrecognized_cplus_name_complaint, string);
+	    goto normal;		/* Do *something* with it */
 	}
     }
   else
@@ -1449,7 +1456,7 @@ read_member_functions (fip, pp, type, objfile)
 	      if (**pp != ':')
 		{
 		  /* Invalid symtab info for member function.  */
-		  return (0);
+		  return 0;
 		}
 	    }
 	  else
@@ -1552,7 +1559,7 @@ read_member_functions (fip, pp, type, objfile)
 			new_sublist -> fn_field.fcontext = look_ahead_type;
 			if (**pp != ';')
 			  {
-			    return (0);
+			    return 0;
 			  }
 			else
 			  {
@@ -1623,7 +1630,7 @@ read_member_functions (fip, pp, type, objfile)
       TYPE_NFN_FIELDS_TOTAL (type) = total_length;
     }
 
-  return (1);
+  return 1;
 }
 
 /* Special GNU C++ name.
@@ -1639,25 +1646,15 @@ read_cpp_abbrev (fip, pp, type, objfile)
   register char *p;
   const char *prefix;
   char *name;
+  char cpp_abbrev;
   struct type *context;
 
   p = *pp;
   if (*++p == 'v')
     {
       name = NULL;
-      switch (*++p)
-	{
-	  case 'f':
-	    prefix = vptr_name;
-	    break;
-	  case 'b':
-	    prefix = vb_name;
-	    break;
-	  default:
-	    complain (&invalid_cpp_abbrev_complaint, *pp);
-	    prefix = "INVALID_C++_ABBREV";
-	    break;
-	}
+      cpp_abbrev = *++p;
+
       *pp = p + 1;
 
       /* At this point, *pp points to something like "22:23=*22...",
@@ -1666,14 +1663,32 @@ read_cpp_abbrev (fip, pp, type, objfile)
 	 type, find it's name, and construct the field name. */
 
       context = read_type (pp, objfile);
-      name = type_name_no_tag (context);
-      if (name == NULL)
+
+      switch (cpp_abbrev)
 	{
-	  complain (&invalid_cpp_type_complaint, symnum);
-	  name = "FOO";
+	  case 'f':		/* $vf -- a virtual function table pointer */
+	    fip->list->field.name =
+	      obconcat (&objfile->type_obstack, vptr_name, "", "");
+	    break;
+
+	  case 'b':		/* $vb -- a virtual bsomethingorother */
+	    name = type_name_no_tag (context);
+	    if (name == NULL)
+	      {
+		complain (&invalid_cpp_type_complaint, symnum);
+		name = "FOO";
+	      }
+	    fip->list->field.name =
+	      obconcat (&objfile->type_obstack, vb_name, name, "");
+	    break;
+
+	  default:
+	    complain (&invalid_cpp_abbrev_complaint, *pp);
+	    fip->list->field.name =
+	      obconcat (&objfile->type_obstack,
+			"INVALID_CPLUSPLUS_ABBREV", "", "");
+	    break;
 	}
-      fip -> list -> field.name =
-	obconcat (&objfile -> type_obstack, prefix, name, "");
 
       /* At this point, *pp points to the ':'.  Skip it and read the
 	 field type. */
@@ -1683,12 +1698,12 @@ read_cpp_abbrev (fip, pp, type, objfile)
 	{
 	  complain (&invalid_cpp_abbrev_complaint, *pp);
 	}
-      fip -> list -> field.type = read_type (pp, objfile);
+      fip->list->field.type = read_type (pp, objfile);
       (*pp)++;			/* Skip the comma.  */
-      fip -> list -> field.bitpos = read_number (pp, ';');
+      fip->list->field.bitpos = read_number (pp, ';');
       /* This field is unpacked.  */
-      fip -> list -> field.bitsize = 0;
-      fip -> list -> visibility = VISIBILITY_PRIVATE;
+      fip->list->field.bitsize = 0;
+      fip->list->visibility = VISIBILITY_PRIVATE;
     }
   else if (*p == '_')
     {
@@ -1910,7 +1925,7 @@ read_struct_fields (fip, pp, type, objfile)
 	 partially constructed entry which we now scrub. */
       fip -> list = fip -> list -> next;
     }
-  return (1);
+  return 1;
 }
 
 /* The stabs for C++ derived classes contain baseclass information which
@@ -1948,7 +1963,7 @@ read_baseclasses (fip, pp, type, objfile)
 
   if (**pp != '!')
     {
-      return (1);
+      return 1;
     }
   else
     {
@@ -1996,7 +2011,7 @@ read_baseclasses (fip, pp, type, objfile)
 	    break;
 	  default:
 	    /* Bad visibility format.  */
-	    return (0);
+	    return 0;
 	}
 
       new -> visibility = *(*pp)++;
@@ -2008,7 +2023,7 @@ read_baseclasses (fip, pp, type, objfile)
 	    break;
 	  default:
 	    /* Bad visibility format.  */
-	    return (0);
+	    return 0;
 	}
 
       /* The remaining value is the bit offset of the portion of the object
@@ -2026,8 +2041,16 @@ read_baseclasses (fip, pp, type, objfile)
       /* skip trailing ';' and bump count of number of fields seen */
       (*pp)++;
     }
-  return (1);
+  return 1;
 }
+
+/* The tail end of stabs for C++ classes that contain a virtual function
+   pointer contains a tilde, a %, and a type number.
+   The type number refers to the base class (possibly this class itself) which
+   contains the vtable pointer for the current class.
+
+   This function is called when we have parsed all the method declarations,
+   so we can look for the vptr base class info.  */
 
 static int
 read_tilde_fields (fip, pp, type, objfile)
@@ -2060,52 +2083,14 @@ read_tilde_fields (fip, pp, type, objfile)
       /* Read either a '%' or the final ';'.  */
       if (*(*pp)++ == '%')
 	{
-	  /* We'd like to be able to derive the vtable pointer field
-	     from the type information, but when it's inherited, that's
-	     hard.  A reason it's hard is because we may read in the
-	     info about a derived class before we read in info about
-	     the base class that provides the vtable pointer field.
-	     Once the base info has been read, we could fill in the info
-	     for the derived classes, but for the fact that by then,
-	     we don't remember who needs what.  */
-
-#if 0
-	  int predicted_fieldno = -1;
-#endif
-
-	  /* Now we must record the virtual function table pointer's
-	     field information.  */
+	  /* The next number is the type number of the base class
+	     (possibly our own class) which supplies the vtable for
+	     this class.  Parse it out, and search that class to find
+	     its vtable pointer, and install those into TYPE_VPTR_BASETYPE
+	     and TYPE_VPTR_FIELDNO.  */
 
 	  struct type *t;
 	  int i;
-
-#if 0
-	  {
-	    /* In version 2, we derive the vfield ourselves.  */
-	    for (n = 0; n < TYPE_NFIELDS (type); n++)
-	      {
-		if (! strncmp (TYPE_FIELD_NAME (type, n), vptr_name, 
-			       sizeof (vptr_name) - 1))
-		  {
-		    predicted_fieldno = n;
-		    break;
-		  }
-	      }
-	    if (predicted_fieldno < 0)
-	      {
-		for (n = 0; n < TYPE_N_BASECLASSES (type); n++)
-		  {
-		    if (! TYPE_FIELD_VIRTUAL (type, n)
-			&& TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, n)) >= 0)
-		      {
-			predicted_fieldno =
-			  TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, n));
-			break;
-		      }
-		  }
-	      }
-	  }
-#endif
 
 	  t = read_type (pp, objfile);
 	  p = (*pp)++;
@@ -2116,57 +2101,37 @@ read_tilde_fields (fip, pp, type, objfile)
 	  if (*p == '\0')
 	    {
 	      /* Premature end of symbol.  */
-	      return (0);
+	      return 0;
 	    }
 	  
 	  TYPE_VPTR_BASETYPE (type) = t;
-	  if (type == t)
+	  if (type == t)		/* Our own class provides vtbl ptr */
 	    {
-	      if (TYPE_FIELD_NAME (t, TYPE_N_BASECLASSES (t)) == 0)
+	      for (i = TYPE_NFIELDS (t) - 1;
+		   i >= TYPE_N_BASECLASSES (t);
+		   --i)
 		{
-		  /* FIXME-tiemann: what's this?  */
-#if 0
-		  TYPE_VPTR_FIELDNO (type) = i = TYPE_N_BASECLASSES (t);
-#else
-		  error_type (pp);
-#endif
-		}
-	      else
-		{
-		  for (i = TYPE_NFIELDS (t) - 1;
-		       i >= TYPE_N_BASECLASSES (t);
-		       --i)
+		  if (! strncmp (TYPE_FIELD_NAME (t, i), vptr_name, 
+				 sizeof (vptr_name) - 1))
 		    {
-		      if (! strncmp (TYPE_FIELD_NAME (t, i), vptr_name, 
-				     sizeof (vptr_name) - 1))
-			{
-			  TYPE_VPTR_FIELDNO (type) = i;
-			  break;
-			}
+		      TYPE_VPTR_FIELDNO (type) = i;
+		      goto gotit;
 		    }
 		}
-	      if (i < 0)
-		{
-		  /* Virtual function table field not found.  */
-		  return (0);
-		}
+	      /* Virtual function table field not found.  */
+	      complain (vtbl_notfound_complaint, TYPE_NAME (type));
+	      return 0;
 	    }
 	  else
 	    {
 	      TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (t);
 	    }
 
-#if 0
-	  if (TYPE_VPTR_FIELDNO (type) != predicted_fieldno)
-	    {
-	      error ("TYPE_VPTR_FIELDNO miscalculated");
-	    }
-#endif
-
+    gotit:
 	  *pp = p + 1;
 	}
     }
-  return (1);
+  return 1;
 }
 
 static int
@@ -2181,7 +2146,7 @@ attach_fn_fields_to_type (fip, type)
       if (TYPE_CODE (TYPE_BASECLASS (type, n)) == TYPE_CODE_UNDEF)
 	{
 	  /* @@ Memory leak on objfile -> type_obstack?  */
-	  return (0);
+	  return 0;
 	}
       TYPE_NFN_FIELDS_TOTAL (type) +=
 	TYPE_NFN_FIELDS_TOTAL (TYPE_BASECLASS (type, n));
@@ -2194,7 +2159,7 @@ attach_fn_fields_to_type (fip, type)
       --n;                      /* Circumvent Sun3 compiler bug */
       TYPE_FN_FIELDLISTS (type)[n] = fip -> fnlist -> fn_fieldlist;
     }
-  return (1);
+  return 1;
 }
 
 /* Create the vector of fields, and record how big it is.
@@ -2273,7 +2238,7 @@ attach_fields_to_type (fip, type, objfile)
 	}
       fip -> list = fip -> list -> next;
     }
-  return (1);
+  return 1;
 }
 
 /* Read the description of a structure (or union type) and return an object
