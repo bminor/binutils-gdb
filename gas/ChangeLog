@@ -1,3 +1,16 @@
+Tue Sep 22 17:49:16 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (write_2_short): Implement EITHER_BUT_PREFER_MU
+	execution unit class.
+
+	(reg_name_search): If a name matches a register and a symbol,
+	prefer the register.
+	(find_format): Disallow flag registers when a general purpose
+	register is required.
+	If a number is required, but a register has been given, check to
+	see if a symbol with the same name as the register exists, and if
+	so, use that symbol.
+
 Tue Sep 22 16:40:52 1998  Jim Wilson  <wilson@cygnus.com>
 
 	* config/obj-elf.h (ECOFF_DEBUGGING): Add missing parens.

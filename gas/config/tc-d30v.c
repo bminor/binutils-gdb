@@ -71,7 +71,7 @@ typedef struct _fixups
 static Fixups FixUps[2];
 static Fixups *fixups;
 
-/* Whether current and previous instruction is a word multiply.  */
+/* Whether current and previous instruction are word multiply insns.  */
 static int cur_mul32_p = 0;
 static int prev_mul32_p = 0;
 
@@ -98,7 +98,7 @@ static segT d30v_current_align_seg;
 static symbolS *d30v_last_label;
 
 /* Two nops */
-#define NOP_LEFT ((long long)NOP << 32)
+#define NOP_LEFT  ((long long)NOP << 32)
 #define NOP_RIGHT ((long long)NOP)
 #define NOP2 (FM00 | NOP_LEFT | NOP_RIGHT)
 
@@ -718,10 +718,10 @@ write_1_short (opcode, insn, fx, use_sequential)
       /* According to 4.3.1: for FM=00, sub-instructions performed
 	 only by IU cannot be encoded in L-container. */
       
-  if (opcode->op->unit == IU)
-    insn |= FM00 | NOP_LEFT;			/* right container */
-  else
-    insn = FM00 | (insn << 32) | NOP_RIGHT;	/* left container */
+      if (opcode->op->unit == IU)
+	insn |= FM00 | NOP_LEFT;		/* right container */
+      else
+	insn = FM00 | (insn << 32) | NOP_RIGHT;	/* left container */
     }
 
   d30v_number_to_chars (f, insn, 8);
@@ -742,8 +742,8 @@ write_1_short (opcode, insn, fx, use_sequential)
   fx->fc = 0;
 }
 
-/* write out a short form instruction if possible */
-/* return number of instructions not written out */
+/* Write out a short form instruction if possible; */
+/* return number of instructions not written out. */
 static int
 write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx) 
      struct d30v_insn *opcode1, *opcode2;
@@ -767,13 +767,20 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   switch (exec_type) 
     {
     case EXEC_UNKNOWN:	/* order not specified */
-      if (Optimizing && parallel_ok (opcode1, insn1, opcode2, insn2, exec_type))
+      if (Optimizing
+	  && parallel_ok (opcode1, insn1, opcode2, insn2, exec_type)
+	  && ! (   (opcode1->op->unit == EITHER_BUT_PREFER_MU
+		 || opcode1->op->unit == MU)
+		&&
+		(   opcode2->op->unit == EITHER_BUT_PREFER_MU
+		 || opcode2->op->unit == MU)))
 	{
 	  /* parallel */
 	  exec_type = EXEC_PARALLEL;
-	  if (opcode1->op->unit == IU)
-	    insn = FM00 | (insn2 << 32) | insn1;
-	  else if (opcode2->op->unit == MU)
+	  
+	  if (opcode1->op->unit == IU
+	      || opcode2->op->unit == MU
+	      || opcode2->op->unit == EITHER_BUT_PREFER_MU)
 	    insn = FM00 | (insn2 << 32) | insn1;
 	  else
 	    {
@@ -781,7 +788,9 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	      fx = fx->next;
 	    }
 	}
-      else if (opcode1->op->unit == IU)
+      else if (opcode1->op->unit == IU
+	       || (opcode1->op->unit == EITHER
+		   && opcode2->op->unit == EITHER_BUT_PREFER_MU))
 	{
 	  /* reverse sequential */
 	  insn = FM10 | (insn2 << 32) | insn1;
@@ -811,11 +820,16 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	{
 	  if (opcode1->op->unit == MU)
 	    as_fatal (_("Two MU instructions may not be executed in parallel"));
+	  else if (opcode1->op->unit == EITHER_BUT_PREFER_MU)
+	    as_warn (_("Executing %s in IU may not work", opcode1->op->name));
 	  as_warn (_("Swapping instruction order"));
 	  insn = FM00 | (insn2 << 32) | insn1;
 	}
       else
 	{
+	  if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
+	    as_warn ("Executing %s in IU may not work", opcode2->op->name);
+	  
 	  insn = FM00 | (insn1 << 32) | insn2;  
 	  fx = fx->next;
 	}
@@ -829,6 +843,8 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	as_warn (_("special left instruction `%s' kills instruction "
 		   "`%s' in right container"),
 		 opcode1->op->name, opcode2->op->name);
+      if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
+	as_warn (_("Executing %s in IU may not work"), opcode2->op->name);
       insn = FM01 | (insn1 << 32) | insn2;  
       fx = fx->next;
       break;
@@ -836,6 +852,8 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
     case EXEC_REVSEQ:	/* reverse sequential */
       if (opcode2->op->unit == MU)
 	as_fatal (_("MU instruction may not be in the right container"));
+      if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
+	as_warn (_("Executing %s in IU may not work"), opcode2->op->name);
       insn = FM10 | (insn1 << 32) | insn2;  
       fx = fx->next;
       break;
@@ -870,10 +888,12 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 			   fx->fix[i].reloc);
 	    }
 	}
+      
       fx->fc = 0;
       fx = fx->next;
     }
-  return (0);
+  
+  return 0;
 }
 
 
@@ -1114,7 +1134,6 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 }
 
 
-
 /* This is the main entry point for the machine-dependent assembler.  str points to a
    machine-dependent instruction.  This function is supposed to emit the frags/bytes 
    it assembles to.  For the D30V, it mostly handles the special VLIW parsing and packing
@@ -1177,7 +1196,7 @@ md_assemble (str)
 	     then first write it out */
 	  d30v_cleanup (false);
 	  
-	  /* assemble first instruction and save it */
+	  /* Assemble first instruction and save it.  */
 	  prev_insn = do_assemble (str, &prev_opcode, 1, 0);
 	  if (prev_insn == -1)
 	    as_fatal (_("Cannot assemble instruction"));
@@ -1284,13 +1303,14 @@ md_assemble (str)
   if (opcode.form->form >= LONG) 
     {
       if (extype != EXEC_UNKNOWN) 
-	as_fatal (_("Unable to mix instructions as specified"));
+	as_fatal (_("Instruction uses long version, so it cannot be mixed as specified"));
       d30v_cleanup (false);
-      write_long (&opcode, insn, fixups);
+      write_long (& opcode, insn, fixups);
       prev_insn = -1;
     }
   else if ((prev_insn != -1) && 
-      (write_2_short (&prev_opcode, (long)prev_insn, &opcode, (long)insn, extype, fixups) == 0)) 
+      (write_2_short
+       (& prev_opcode, (long) prev_insn, & opcode, (long) insn, extype, fixups) == 0)) 
     {
       /* No instructions saved.  */
       prev_insn = -1;
@@ -1306,6 +1326,7 @@ md_assemble (str)
       prev_seg = now_seg;
       prev_subseg = now_subseg;
       fixups = fixups->next;
+      prev_mul32_p = cur_mul32_p;
     }
 }
 
@@ -1352,13 +1373,13 @@ do_assemble (str, opcode, shortp, is_parallel)
   if (*op_end == '/')
     {
       int i = 0;
-      while ( (i < ECC_MAX) && strncasecmp (d30v_ecc_names[i],op_end+1,2))
+      while ( (i < ECC_MAX) && strncasecmp (d30v_ecc_names[i], op_end + 1, 2))
 	i++;
       
       if (i == ECC_MAX)
 	{
 	  char tmp[4];
-	  strncpy (tmp,op_end+1,2);
+	  strncpy (tmp, op_end + 1, 2);
 	  tmp[2] = 0;
 	  as_fatal (_("unknown condition code: %s"),tmp);
 	  return -1;
@@ -1372,7 +1393,7 @@ do_assemble (str, opcode, shortp, is_parallel)
   
 
   /* CMP and CMPU change their name based on condition codes */
-  if (!strncmp (name,"cmp",3))
+  if (!strncmp (name, "cmp", 3))
     {
       int p,i;
       char **str = (char **)d30v_cc_names;
@@ -1381,7 +1402,7 @@ do_assemble (str, opcode, shortp, is_parallel)
       else
 	p = 3;
 
-      for (i=1; *str && strncmp (*str,&name[p],2); i++, str++)
+      for (i=1; *str && strncmp (*str, & name[p], 2); i++, str++)
 	;
 
       /* cmpu only supports some condition codes */
@@ -1433,7 +1454,7 @@ do_assemble (str, opcode, shortp, is_parallel)
   while (!(opcode->form = find_format (opcode->op, myops, fsize, cmp_hack)))
     {
       opcode->op++;
-      if (strcmp (opcode->op->name,name))
+      if (strcmp (opcode->op->name, name))
 	as_fatal (_("operands for opcode `%s' do not match any valid format"), name);
     }
   input_line_pointer = save;
@@ -1491,7 +1512,7 @@ do_assemble (str, opcode, shortp, is_parallel)
     }
 
 
-  return (insn);
+  return insn;
 }
 
 
@@ -1965,7 +1986,7 @@ d30v_align (n, pfill, label)
      this alignement request.  The alignment of the current frag
      can be changed under our feet, for example by a .ascii
      directive in the source code.  cf testsuite/gas/d30v/reloc.s  */
-
+  
   d30v_cleanup (false);
 
   if (pfill == NULL)
