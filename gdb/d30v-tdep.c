@@ -63,6 +63,7 @@ static void print_flags_command PARAMS ((char *, int));
 #define OP_ADD_SP_IMM		0x080bffc0 /* add sp,sp,imm */
 #define OP_ADD_R22_SP_IMM	0x08096fc0 /* add r22,sp,imm */
 #define OP_STW_FP_SP_IMM	0x054bdfc0 /* stw fp,@(sp,imm) */
+#define OP_OR_SP_R0_IMM		0x03abf000 /* or sp,r0,imm */
 
 /* no mask */
 #define OP_OR_FP_R0_SP		0x03a3d03f /* or fp,r0,sp */
@@ -293,6 +294,8 @@ d30v_skip_prologue (pc)
   return pc;
 }
 
+static int end_of_stack;
+
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
@@ -305,6 +308,9 @@ d30v_frame_chain (frame)
   struct frame_saved_regs fsr;
 
   d30v_frame_find_saved_regs (frame, &fsr);
+
+  if (end_of_stack)
+    return (CORE_ADDR)0;
 
   if (frame->return_pc == IMEM_START)
     return (CORE_ADDR)0;
@@ -463,6 +469,13 @@ prologue_find_regs (op, fsr, addr)
       return 1;
     }
 
+  /* stw fp,@(sp,imm) -- observed */
+  if ((op & OP_MASK_ALL_BUT_IMM) == OP_STW_FP_SP_IMM)
+    {
+      offset = EXTRACT_IMM6(op);
+      fsr->regs[FP_REGNUM] = (offset - frame_size);
+      return 1;
+    }
   return 0;
 }
 
@@ -486,6 +499,7 @@ d30v_frame_find_saved_regs (fi, fsr)
   memset (fsr, 0, sizeof (*fsr));
   next_addr = 0;
   frame_size = 0;
+  end_of_stack = 0;
 
   pc = get_pc_function_start (fi->pc);
 
@@ -531,6 +545,10 @@ d30v_frame_find_saved_regs (fi, fsr)
 	      fsr->regs[n] = (offset - frame_size);
 	      fsr->regs[n+1] = (offset - frame_size) + 4;
 	    }
+	  else if ((opl & OP_MASK_ALL_BUT_IMM) == OP_OR_SP_R0_IMM)
+	    {
+	      end_of_stack = 1;
+	    }
 	  else
 	    break;
 	}
@@ -554,10 +572,11 @@ d30v_frame_find_saved_regs (fi, fsr)
     }
   
   fi->size = frame_size;
-  if (!fp || !uses_frame)
 #if 0
-    fp = read_register(SP_REGNUM) | DMEM_START;
+  if (!fp || !uses_frame)
+    fp = read_register(SP_REGNUM);
 #else
+  if (!fp)
     fp = read_register(SP_REGNUM);
 #endif
   for (i=0; i<NUM_REGS-1; i++)

@@ -1,3 +1,11 @@
+start-sanitize-d30v
+Fri Dec 19 09:49:49 1997  David Taylor  <taylor@texas.cygnus.com>
+
+	* d30v-tdep.c (d30v_frame_chain): test end_of_stack
+	(d30v_frame_find_saved_regs): set it.
+	* config/d30v/tm-d30v.h: improved FRAME_CHAIN_VALID
+
+end-sanitize-d30v
 Thu Dec 18 12:34:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Gavin Koch <gavin@cygnus.com>: mips-tdep.c

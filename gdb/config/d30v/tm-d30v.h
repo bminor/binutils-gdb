@@ -218,16 +218,11 @@ extern void d30v_init_extra_frame_info PARAMS (( int fromleaf, struct frame_info
 
 #define FRAME_CHAIN(FRAME)       d30v_frame_chain(FRAME)
 #if 0
-#define FRAME_CHAIN_VALID(chain,frame)	\
-      ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START)
-#else
-#if 0
-#define FRAME_CHAIN_VALID(chain,fi)	\
-      ((chain) != 0 && (fi) != 0 && (fi)->frame <= STACK_START)
-#else
 #define FRAME_CHAIN_VALID(chain,fi)	\
       ((chain) != 0 && (fi) != 0 && (fi)->return_pc != 0)
-#endif
+#else
+#define FRAME_CHAIN_VALID(chain,fi)	\
+      ((chain) != 0 && (fi) != 0 && (fi)->frame <= chain)
 #endif
 #define FRAME_SAVED_PC(FRAME)    ((FRAME)->return_pc)   
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
