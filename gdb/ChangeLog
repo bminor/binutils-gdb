@@ -1,5 +1,13 @@
+Fri Apr 10 22:41:03 1992  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in:  Recognize new ncr3000 config.
+	* config/ncr3000.mh:  New config file.
+
 Fri Apr 10 08:30:58 1992  Stu Grossman  (grossman at cygnus.com)
 
+	GDB-4.5 release!
+
+	* README:  Update for release.
 	* Makefile.in:  Update version to 4.5.
 	* WHATS.NEW:  The obvious.
 
