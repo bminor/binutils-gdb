@@ -505,7 +505,7 @@ case "${host}" in
      noconfigdirs="expect dejagnu cvs autoconf automake send-pr gprof rcs guile perl texinfo apache inet"
 	;;
   *-*-cygwin32)
-     noconfigdirs="expect dejagnu cvssrc autoconf automake send-pr gprof rcs guile perl texinfo apache inet"
+     noconfigdirs="autoconf automake send-pr gprof rcs guile perl texinfo apache inet"
     ;;
   *-*-windows*)
 # This is only used to build WinGDB...
