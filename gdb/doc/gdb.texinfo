@@ -14339,6 +14339,30 @@ Shared library events.
 
 @end table
 
+@kindex maint internal-error
+@kindex maint internal-warning
+@item maint internal-error
+@itemx maint internal-warning
+Cause @value{GDBN} to call the internal function @code{internal_error}
+or @code{internal_warning} and hence behave as though an internal error
+or internal warning has been detected.  In addition to reporting the
+internal problem, these functions give the user the opportunity to
+either quit @value{GDBN} or create a core file of the current
+@value{GDBN} session.
+
+@smallexample
+(gdb) @kbd{maint internal-error testing, 1, 2}
+@dots{}/maint.c:121: internal-error: testing, 1, 2
+A problem internal to GDB has been detected.  Further
+debugging may prove unreliable.
+Quit this debugging session? (y or n) @kbd{n}
+Create a core file? (y or n) @kbd{n}
+(gdb) 
+@end smallexample
+
+Takes an optional parameter that is used as the text of the error or
+warning message.
+
 @kindex maint print registers
 @kindex maint print raw-registers
 @kindex maint print cooked-registers

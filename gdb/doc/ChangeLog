@@ -1,5 +1,8 @@
 2002-09-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdb.texinfo (Maintenance Commands): Document ``maint
+	internal-error'' and ``maint internal-warning''.
+
 	* gdbint.texinfo (Target Architecture Definition): Revise
 	description of STACK_ALIGN.  Add description of FRAME_ALIGN.
 
