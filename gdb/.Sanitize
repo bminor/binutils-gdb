@@ -31,7 +31,7 @@ fi
 
 gm_files="mpw-xconfig.in mpw-init.c ChangeLog.gm"
 
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
+if ( echo $* | grep keep\-gm > /dev/null ) ; then
 	keep_these_too="${gm_files} ${keep_these_too}"
 	if [ -n "${verbose}" ] ; then
 		echo Keeping ${gm_files}
