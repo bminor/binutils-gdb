@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 SECTION
@@ -105,7 +105,7 @@ CODE_FRAGMENT
 .  bfd_vma addend;
 .
 .       {* Pointer to how to perform the required relocation *}
-.  const struct reloc_howto_struct *howto;
+.  reloc_howto_type *howto;
 .
 .} arelent;
 
@@ -285,9 +285,6 @@ SUBSUBSECTION
 
 CODE_FRAGMENT
 .struct symbol_cache_entry;		{* Forward declaration *}
-.
-.typedef unsigned char bfd_byte;
-.typedef const struct reloc_howto_struct reloc_howto_type;
 .
 .struct reloc_howto_struct
 .{
@@ -719,16 +716,14 @@ space consuming.  For each target:
      machine word.
      FIXME: We should also do overflow checking on the result after
      adding in the value contained in the object file.  */
-  if (howto->complain_on_overflow != complain_overflow_dont)
+  if (howto->complain_on_overflow != complain_overflow_dont
+      && flag == bfd_reloc_ok)
     {
       bfd_vma check;
 
       /* Get the value that will be used for the relocation, but
 	 starting at bit position zero.  */
-      if (howto->rightshift > howto->bitpos)
-	check = relocation >> (howto->rightshift - howto->bitpos);
-      else
-	check = relocation << (howto->bitpos - howto->rightshift);
+      check = relocation >> howto->rightshift;
       switch (howto->complain_on_overflow)
 	{
 	case complain_overflow_signed:
@@ -739,11 +734,11 @@ space consuming.  For each target:
 
 	    /* The above right shift is incorrect for a signed value.
 	       Fix it up by forcing on the upper bits.  */
-	    if (howto->rightshift > howto->bitpos
+	    if (howto->rightshift > 0
 		&& (bfd_signed_vma) relocation < 0)
 	      check |= ((bfd_vma) - 1
 			& ~((bfd_vma) - 1
-			    >> (howto->rightshift - howto->bitpos)));
+			    >> howto->rightshift));
 	    if ((bfd_signed_vma) check > reloc_signed_max
 		|| (bfd_signed_vma) check < reloc_signed_min)
 	      flag = bfd_reloc_overflow;
@@ -774,12 +769,12 @@ space consuming.  For each target:
 		/* The above right shift is incorrect for a signed
 		   value.  See if turning on the upper bits fixes the
 		   overflow.  */
-		if (howto->rightshift > howto->bitpos
+		if (howto->rightshift > 0
 		    && (bfd_signed_vma) relocation < 0)
 		  {
 		    check |= ((bfd_vma) - 1
 			      & ~((bfd_vma) - 1
-				  >> (howto->rightshift - howto->bitpos)));
+				  >> howto->rightshift));
 		    if (((bfd_vma) check & ~reloc_bits) != (-1 & ~reloc_bits))
 		      flag = bfd_reloc_overflow;
 		  }
@@ -896,6 +891,15 @@ space consuming.  For each target:
 	relocation = -relocation;
 	DOIT (x);
 	bfd_put_32 (abfd, x, (bfd_byte *) data + addr);
+      }
+      break;
+
+    case -1:
+      {
+	long x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
+	relocation = -relocation;
+	DOIT (x);
+	bfd_put_16 (abfd, x, (bfd_byte *) data + addr);
       }
       break;
 
@@ -1176,10 +1180,7 @@ space consuming.  For each target:
 
       /* Get the value that will be used for the relocation, but
 	 starting at bit position zero.  */
-      if (howto->rightshift > howto->bitpos)
-	check = relocation >> (howto->rightshift - howto->bitpos);
-      else
-	check = relocation << (howto->bitpos - howto->rightshift);
+      check = relocation >> howto->rightshift;
       switch (howto->complain_on_overflow)
 	{
 	case complain_overflow_signed:
@@ -1190,11 +1191,11 @@ space consuming.  For each target:
 
 	    /* The above right shift is incorrect for a signed value.
 	       Fix it up by forcing on the upper bits.  */
-	    if (howto->rightshift > howto->bitpos
+	    if (howto->rightshift > 0
 		&& (bfd_signed_vma) relocation < 0)
 	      check |= ((bfd_vma) - 1
 			& ~((bfd_vma) - 1
-			    >> (howto->rightshift - howto->bitpos)));
+			    >> howto->rightshift));
 	    if ((bfd_signed_vma) check > reloc_signed_max
 		|| (bfd_signed_vma) check < reloc_signed_min)
 	      flag = bfd_reloc_overflow;
@@ -1225,12 +1226,12 @@ space consuming.  For each target:
 		/* The above right shift is incorrect for a signed
 		   value.  See if turning on the upper bits fixes the
 		   overflow.  */
-		if (howto->rightshift > howto->bitpos
+		if (howto->rightshift > 0
 		    && (bfd_signed_vma) relocation < 0)
 		  {
 		    check |= ((bfd_vma) - 1
 			      & ~((bfd_vma) - 1
-				  >> (howto->rightshift - howto->bitpos)));
+				  >> howto->rightshift));
 		    if (((bfd_vma) check & ~reloc_bits) != (-1 & ~reloc_bits))
 		      flag = bfd_reloc_overflow;
 		  }
@@ -1693,11 +1694,69 @@ the section containing the relocation.  It depends on the specific target.
 The 24-bit relocation is used in some Intel 960 configurations.
 
 ENUM
+  BFD_RELOC_32_GOT_PCREL
+ENUMX
+  BFD_RELOC_16_GOT_PCREL
+ENUMX
+  BFD_RELOC_8_GOT_PCREL
+ENUMX
+  BFD_RELOC_32_GOTOFF
+ENUMX
+  BFD_RELOC_16_GOTOFF
+ENUMX
+  BFD_RELOC_LO16_GOTOFF
+ENUMX
+  BFD_RELOC_HI16_GOTOFF
+ENUMX
+  BFD_RELOC_HI16_S_GOTOFF
+ENUMX
+  BFD_RELOC_8_GOTOFF
+ENUMX
+  BFD_RELOC_32_PLT_PCREL
+ENUMX
+  BFD_RELOC_24_PLT_PCREL
+ENUMX
+  BFD_RELOC_16_PLT_PCREL
+ENUMX
+  BFD_RELOC_8_PLT_PCREL
+ENUMX
+  BFD_RELOC_32_PLTOFF
+ENUMX
+  BFD_RELOC_16_PLTOFF
+ENUMX
+  BFD_RELOC_LO16_PLTOFF
+ENUMX
+  BFD_RELOC_HI16_PLTOFF
+ENUMX
+  BFD_RELOC_HI16_S_PLTOFF
+ENUMX
+  BFD_RELOC_8_PLTOFF
+ENUMDOC
+  For ELF.
+
+ENUM
+  BFD_RELOC_68K_GLOB_DAT
+ENUMX
+  BFD_RELOC_68K_JMP_SLOT
+ENUMX
+  BFD_RELOC_68K_RELATIVE
+ENUMDOC
+  Relocations used by 68K ELF.
+
+ENUM
   BFD_RELOC_32_BASEREL
 ENUMX
   BFD_RELOC_16_BASEREL
 ENUMX
+  BFD_RELOC_LO16_BASEREL
+ENUMX
+  BFD_RELOC_HI16_BASEREL
+ENUMX
+  BFD_RELOC_HI16_S_BASEREL
+ENUMX
   BFD_RELOC_8_BASEREL
+ENUMX
+  BFD_RELOC_RVA
 ENUMDOC
   Linkage-table relative.
 
@@ -1813,7 +1872,11 @@ ENUMX
 ENUMX
   BFD_RELOC_SPARC_GLOB_JMP
 ENUMX
-  BFD_RELOC_SPARC_LO7
+  BFD_RELOC_SPARC_7
+ENUMX
+  BFD_RELOC_SPARC_6
+ENUMX
+  BFD_RELOC_SPARC_5
 ENUMDOC
   Some relocations we're using for SPARC V9 -- subject to change.
 
@@ -1914,6 +1977,10 @@ ENUMX
 ENUMEQX
   BFD_RELOC_MIPS_GPREL32
   BFD_RELOC_GPREL32
+ENUMX
+  BFD_RELOC_MIPS_GOT_HI16
+ENUMX
+  BFD_RELOC_MIPS_GOT_LO16
 ENUMDOC
   MIPS ELF relocations.
 
@@ -1965,18 +2032,66 @@ ENUMDOC
 
 ENUM
   BFD_RELOC_PPC_B26
-ENUMDOC
-  PowerPC/POWER (RS/6000) relocs.
-  26 bit relative branch.  Low two bits must be zero.  High 24
-     bits installed in bits 6 through 29 of instruction.
-ENUM
+ENUMX
   BFD_RELOC_PPC_BA26
-ENUMDOC
-  26 bit absolute branch, like BFD_RELOC_PPC_B26 but absolute.
-ENUM
+ENUMX
   BFD_RELOC_PPC_TOC16
+ENUMX
+  BFD_RELOC_PPC_B16
+ENUMX
+  BFD_RELOC_PPC_B16_BRTAKEN
+ENUMX
+  BFD_RELOC_PPC_B16_BRNTAKEN
+ENUMX
+  BFD_RELOC_PPC_BA16
+ENUMX
+  BFD_RELOC_PPC_BA16_BRTAKEN
+ENUMX
+  BFD_RELOC_PPC_BA16_BRNTAKEN
+ENUMX
+  BFD_RELOC_PPC_COPY
+ENUMX
+  BFD_RELOC_PPC_GLOB_DAT
+ENUMX
+  BFD_RELOC_PPC_JMP_SLOT
+ENUMX
+  BFD_RELOC_PPC_RELATIVE
+ENUMX
+  BFD_RELOC_PPC_LOCAL24PC
+ENUMX
+  BFD_RELOC_PPC_EMB_NADDR32
+ENUMX
+  BFD_RELOC_PPC_EMB_NADDR16
+ENUMX
+  BFD_RELOC_PPC_EMB_NADDR16_LO
+ENUMX
+  BFD_RELOC_PPC_EMB_NADDR16_HI
+ENUMX
+  BFD_RELOC_PPC_EMB_NADDR16_HA
+ENUMX
+  BFD_RELOC_PPC_EMB_SDAI16
+ENUMX
+  BFD_RELOC_PPC_EMB_SDA2I16
+ENUMX
+  BFD_RELOC_PPC_EMB_SDA2REL
+ENUMX
+  BFD_RELOC_PPC_EMB_SDA21
+ENUMX
+  BFD_RELOC_PPC_EMB_MRKREF
+ENUMX
+  BFD_RELOC_PPC_EMB_RELSEC16
+ENUMX
+  BFD_RELOC_PPC_EMB_RELST_LO
+ENUMX
+  BFD_RELOC_PPC_EMB_RELST_HI
+ENUMX
+  BFD_RELOC_PPC_EMB_RELST_HA
+ENUMX
+  BFD_RELOC_PPC_EMB_BIT_FLD
+ENUMX
+  BFD_RELOC_PPC_EMB_RELSDA
 ENUMDOC
-  16 bit TOC relative reference.
+  Power(rs6000) and PowerPC relocations.
 
 ENUM
   BFD_RELOC_CTOR
@@ -2002,6 +2117,14 @@ ENUMX
   BFD_RELOC_ARM_MULTI
 ENUMX
   BFD_RELOC_ARM_CP_OFF_IMM
+ENUMX
+  BFD_RELOC_ARM_ADR_IMM
+ENUMX
+  BFD_RELOC_ARM_LDR_IMM
+ENUMX
+  BFD_RELOC_ARM_LITERAL
+ENUMX
+  BFD_RELOC_ARM_IN_POOL
 ENUMDOC
   These relocs are only used within the ARM assembler.  They are not
   (at present) written to any object files.
@@ -2013,14 +2136,18 @@ ENUM
 ENUMDOC
   Argonaut RISC Core (ARC) relocs.
   ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are
-  not stored in the instruction.  High 20 bits installed in bits 7 through 26
-  of instruction.
+  not stored in the instruction.  The high 20 bits are installed in bits 26
+  through 7 of the instruction.
+ENUM
+  BFD_RELOC_ARC_B26
+ENUMDOC
+  ARC 26 bit absolute branch.  The lowest two bits must be zero and are not
+  stored in the instruction.  The high 24 bits are installed in bits 23
+  through 0.
 COMMENT
 {* end-sanitize-arc *}
-
 ENDSENUM
   BFD_RELOC_UNUSED
-
 CODE_FRAGMENT
 .
 .typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
@@ -2032,7 +2159,7 @@ FUNCTION
 	bfd_reloc_type_lookup
 
 SYNOPSIS
-	const struct reloc_howto_struct *
+	reloc_howto_type *
 	bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code);
 
 DESCRIPTION
@@ -2043,7 +2170,7 @@ DESCRIPTION
 */
 
 
-const struct reloc_howto_struct *
+reloc_howto_type *
 bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -2060,7 +2187,7 @@ INTERNAL_FUNCTION
 	bfd_default_reloc_type_lookup
 
 SYNOPSIS
-	const struct reloc_howto_struct *bfd_default_reloc_type_lookup
+	reloc_howto_type *bfd_default_reloc_type_lookup
 	(bfd *abfd, bfd_reloc_code_real_type  code);
 
 DESCRIPTION
@@ -2069,7 +2196,7 @@ DESCRIPTION
 
 */
 
-const struct reloc_howto_struct *
+reloc_howto_type *
 bfd_default_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -2093,7 +2220,7 @@ bfd_default_reloc_type_lookup (abfd, code)
     default:
       BFD_FAIL ();
     }
-  return (const struct reloc_howto_struct *) NULL;
+  return (reloc_howto_type *) NULL;
 }
 
 /*
@@ -2185,12 +2312,9 @@ bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
   if (reloc_size < 0)
     goto error_return;
 
-  reloc_vector = (arelent **) malloc (reloc_size);
+  reloc_vector = (arelent **) bfd_malloc ((size_t) reloc_size);
   if (reloc_vector == NULL && reloc_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   /* read in the section */
   if (!bfd_get_section_contents (input_bfd,

@@ -1523,7 +1523,9 @@ relocation types already defined. */
   BFD_RELOC_SPARC_WDISP16,
   BFD_RELOC_SPARC_WDISP19,
   BFD_RELOC_SPARC_GLOB_JMP,
-  BFD_RELOC_SPARC_LO7,
+  BFD_RELOC_SPARC_7,
+  BFD_RELOC_SPARC_6,
+  BFD_RELOC_SPARC_5,
 
 /* Alpha ECOFF relocations.  Some of these treat the symbol or "addend"
 in some special way.
@@ -1598,6 +1600,8 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_MIPS_GOT16,
   BFD_RELOC_MIPS_CALL16,
 #define BFD_RELOC_MIPS_GPREL32 BFD_RELOC_GPREL32
+  BFD_RELOC_MIPS_GOT_HI16,
+  BFD_RELOC_MIPS_GOT_LO16,
 
 /* i386/elf relocations */
   BFD_RELOC_386_GOT32,

@@ -1250,7 +1250,9 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_MIPS_GOT16, R_MIPS_GOT16 },
   { BFD_RELOC_16_PCREL, R_MIPS_PC16 },
   { BFD_RELOC_MIPS_CALL16, R_MIPS_CALL16 },
-  { BFD_RELOC_MIPS_GPREL32, R_MIPS_GPREL32 }
+  { BFD_RELOC_MIPS_GPREL32, R_MIPS_GPREL32 },
+  { BFD_RELOC_MIPS_GOT_HI16, R_MIPS_GOT_HI16 },
+  { BFD_RELOC_MIPS_GOT_LO16, R_MIPS_GOT_LO16 }
 };
 
 /* Given a BFD reloc type, return a howto structure.  */
@@ -3956,6 +3958,9 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      local = false;
 	      indx = r_symndx - extsymoff;
 	      h = elf_sym_hashes (input_bfd)[indx];
+	      while (h->root.type == bfd_link_hash_indirect
+		     || h->root.type == bfd_link_hash_warning)
+		h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	      if (strcmp (h->root.root.string, "_gp_disp") == 0)
 		{
 		  if (elf_gp (output_bfd) == 0)
@@ -4350,6 +4355,7 @@ mips_elf_create_dynamic_sections (abfd, info)
 		  get_elf_backend_data (abfd)->collect,
 		  (struct bfd_link_hash_entry **) &h)))
 	    return false;
+	  h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_SECTION;
 
@@ -4388,6 +4394,7 @@ mips_elf_create_dynamic_sections (abfd, info)
 	      get_elf_backend_data (abfd)->collect,
 	      (struct bfd_link_hash_entry **) &h)))
 	return false;
+      h->elf_link_hash_flags ^=~ ELF_LINK_NON_ELF;
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_SECTION;
 
@@ -4458,6 +4465,7 @@ mips_elf_create_got_section (abfd, info)
 	  get_elf_backend_data (abfd)->collect,
 	  (struct bfd_link_hash_entry **) &h)))
     return false;
+  h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
 
@@ -5832,6 +5840,5 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
 					mips_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
 					mips_elf_finish_dynamic_sections
-#define elf_backend_want_hdr_in_seg	1
 
 #include "elf32-target.h"
