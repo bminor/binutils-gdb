@@ -118,11 +118,6 @@ CHILL_FOR_TARGET = ` \
     fi; \
   fi`
 
-## This is ugly, but I don't want GNU make to put these variables in
-## the environment.  Older makes will see this as a set of targets
-## with no dependencies and no actions.
-unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
-
 $(end-sanitize-chill)
 
 CXX_FOR_TARGET = ` \
@@ -296,6 +291,13 @@ all:	$(ALL)
 .PHONY: do-clean do-mostlyclean do-distclean do-realclean
 .NOEXPORT:
 MAKEOVERRIDES=
+
+$(start-sanitize-chill)
+## This is ugly, but I don't want GNU make to put these variables in
+## the environment.  Older makes will see this as a set of targets
+## with no dependencies and no actions.
+unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
+$(end-sanitize-chill)
 
 # Do a target for all the subdirectories.  A ``make do-X'' will do a
 # ``make X'' in all subdirectories (because, in general, there is a
