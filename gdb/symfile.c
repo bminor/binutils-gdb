@@ -162,11 +162,15 @@ void
 sort_symtab_syms (s)
      register struct symtab *s;
 {
-  register struct blockvector *bv = BLOCKVECTOR (s);
-  int nbl = BLOCKVECTOR_NBLOCKS (bv);
+  register struct blockvector *bv;
+  int nbl;
   int i;
   register struct block *b;
 
+  if (s == 0)
+    return;
+  bv = BLOCKVECTOR (s);
+  nbl = BLOCKVECTOR_NBLOCKS (bv);
   for (i = 0; i < nbl; i++)
     {
       b = BLOCKVECTOR_BLOCK (bv, i);
@@ -652,7 +656,8 @@ symfile_init (sym_bfd)
 	  return sf2;
 	}
     }
-  error ("I'm sorry, Dave, I can't do that.  Symbol format unknown.");
+  error ("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown.",
+	 bfd_get_target (sym_bfd));
   return 0; /* Appease lint.  */
 }
 
@@ -1005,8 +1010,8 @@ again2:
 	 contain the pathname of the object file.  (This problem
 	 has been fixed in GDB 3.9x).  */
 
-      bv = BLOCKLIST (s);
-      if (BLOCKLIST_NBLOCKS (bv) > 2
+      bv = BLOCKVECTOR (s);
+      if (BLOCKVECTOR_NBLOCKS (bv) > 2
 	  || BLOCK_NSYMS (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK))
 	  || BLOCK_NSYMS (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)))
 	{

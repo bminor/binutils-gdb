@@ -1,3 +1,15 @@
+Fri Nov  1 11:05:47 1991  John Gilmore  (gnu at cygnus.com)
+
+	* mipsread.c (read_mips_symtab, read_the_mips_symtab):  Use real
+	filename with error messages.
+	* stack.c (frame_select_command):  Rename to select_frame_command
+	to avoid "fr" and "fra" having nonunique completions.
+	* symfile.c (sort_symtab_syms):  Ignore sort of zero symtab *.
+	(symfile_init):  Print file format name when unable to handle it.
+	(free_named_symtabs):  Use BLOCKVECTOR rather than obsolete BLOCKLIST.
+	* symmisc.c (free_symtab):  Only free linetable if nonzero.
+	* symtab.h:  Remove obsolete BLOCKLIST macros.
+
 Thu Oct 31 18:12:43 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* infrun.c (wait_for_inferior):  another stepi/nexti fix.  Ensure

@@ -381,7 +381,7 @@ read_the_mips_symtab(abfd, fsym, end_of_text_segp)
 
 	return;
 readerr:
-	error("Short read on %s", symfile);
+	error("Short read on %s", bfd_get_filename (abfd));
 }
 
 
@@ -563,8 +563,11 @@ read_mips_symtab (abfd, desc)
 	 */
 	if (compare_glevel(max_glevel, GLEVEL_2) < 0) {
 		if (max_gdbinfo == 0)
-			printf("\n%s not compiled with -g, debugging support is limited.", symfile);
-		printf("\nYou should compile with -g2 or -g3 for best debugging support.\n");
+			printf (
+"\n%s not compiled with -g, debugging support is limited.\n",
+				bfd_get_filename (abfd));
+		printf(
+"You should compile with -g2 or -g3 for best debugging support.\n");
 		fflush(stdout);
 	}
 }
