@@ -20,6 +20,7 @@
 #define SCM_VELTS(x) ((SCM *)SCM_CDR(x))
 #define SCM_CLOSCAR(x) (SCM_CAR(x)-scm_tc3_closure)
 #define SCM_CODE(x) SCM_CAR(SCM_CLOSCAR (x))
+#define SCM_MAKINUM(x) (((x)<<2)+2L)
 
 #ifdef __STDC__		/* Forward decls for prototypes */
 struct value;
@@ -40,5 +41,8 @@ extern int is_scmvalue_type PARAMS ((struct type*));
 
 extern void scm_printchar PARAMS ((int, GDB_FILE*));
 
-struct type *SCM_TYPE;
+extern struct value * scm_evaluate_string PARAMS ((char*, int));
 
+extern struct type *builtin_type_scm;
+
+extern int scm_parse ();

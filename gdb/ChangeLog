@@ -1,3 +1,18 @@
+Wed Oct  4 18:41:34 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* expression.h (enum exp_code):  Added OP_NAME.
+	* expprint.c (print_subexp):  Add OP_NAME support.
+	* parse.c (length_of_subexp, prefixify_subexp):  Likewise.
+	* scm-lang.c (scm_unpack, in_eval_c, scm_lookup_name):  new function.
+	* scm-lang.h:  Declare builtin_type_scm;  other minor tweaks.
+	* values.c (unpack_long):  If type is SCM, call scm_unpack.
+	* scm-valprint.c (scm_val_print):  Use extract_signed_integer,
+	instead unpack_long
+	* scm-lang.c: More Scheme expression parsing from here ...
+	* scm-exp.c:  ... to here.  New file.
+	Also, provide for gdb to evaluate simple constants and names..	
+	* Makefile.in:  Note new scm-exp.{c,o}.
+	
 Wed Oct  4 17:23:03 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* gdbtypes.c (get_discrete_bounds):  New function.

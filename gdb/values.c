@@ -630,6 +630,10 @@ unpack_long (type, valaddr)
   register int len = TYPE_LENGTH (type);
   register int nosign = TYPE_UNSIGNED (type);
 
+  if (current_language->la_language == language_scm
+      && is_scmvalue_type (type))
+    return scm_unpack (type, valaddr, TYPE_CODE_INT);
+
   switch (code)
     {
     case TYPE_CODE_ENUM:

@@ -32,253 +32,7 @@ extern struct type ** const (c_builtin_types[]);
 extern value_ptr value_allocate_space_in_inferior PARAMS ((int));
 extern value_ptr find_function_in_inferior PARAMS ((char*));
 
-static void scm_lreadr ();
-
-struct type *SCM_TYPE = NULL;
-
-static void
-scm_read_token (c, weird)
-     int c;
-     int weird;
-{
-  while (1)
-    {
-      c = *lexptr++;
-      switch (c)
-	{
-	case '[':
-	case ']':
-	case '(':
-	case ')':
-	case '\"':
-	case ';':
-	case ' ':  case '\t':  case '\r':  case '\f':
-	case '\n':
-	  if (weird)
-	    goto default_case;
-	case '\0':  /* End of line */
-	eof_case:
-	  --lexptr;
-	  return;
-	case '\\':
-	  if (!weird)
-	    goto default_case;
-	  else
-	    {
-	      c = *lexptr++;
-	      if (c == '\0')
-		goto eof_case;
-	      else
-		goto default_case;
-	    }
-	case '}':
-	  if (!weird)
-	    goto default_case;
-
-	  c = *lexptr++;
-	  if (c == '#')
-	    return;
-	  else
-	    {
-	      --lexptr;
-	      c = '}';
-	      goto default_case;
-	    }
-
-	default:
-	default_case:
-	  ;
-	}
-    }
-}
-
-static int 
-scm_skip_ws ()
-{
-  register int c;
-  while (1)
-    switch ((c = *lexptr++))
-      {
-      case '\0':
-      goteof:
-	return c;
-      case ';':
-      lp:
-	switch ((c = *lexptr++))
-	  {
-	  case '\0':
-	    goto goteof;
-	  default:
-	    goto lp;
-	  case '\n':
-	    break;
-	  }
-      case ' ':  case '\t':  case '\r':  case '\f':  case '\n':
-	break;
-      default:
-	return c;
-      }
-}
-
-static void
-scm_lreadparen ()
-{
-  for (;;)
-    {
-      int c = scm_skip_ws ();
-      if (')' == c || ']' == c)
-	return;
-      --lexptr;
-      if (c == '\0')
-	error ("missing close paren");
-      scm_lreadr ();
-    }
-}
-
-static void
-scm_lreadr ()
-{
-  int c, j;
- tryagain:
-  c = *lexptr++;
-  switch (c)
-    {
-    case '\0':
-      lexptr--;
-      return;
-    case '[':
-    case '(':
-      scm_lreadparen ();
-      return;
-    case ']':
-    case ')':
-      error ("unexpected #\\%c", c);
-      goto tryagain;
-    case '\'':
-    case '`':
-      scm_lreadr ();
-      return;
-    case ',':
-      c = *lexptr++;
-      if ('@' != c)
-	lexptr--;
-      scm_lreadr ();
-      return;
-    case '#':
-      c = *lexptr++;
-      switch (c)
-	{
-	case '[':
-	case '(':
-	  scm_lreadparen ();
-	  return;
-	case 't':  case 'T':
-	case 'f':  case 'F':
-	  return;
-	case 'b':  case 'B':
-	case 'o':  case 'O':
-	case 'd':  case 'D':
-	case 'x':  case 'X':
-	case 'i':  case 'I':
-	case 'e':  case 'E':
-	  lexptr--;
-	  c = '#';
-	  goto num;
-	case '*': /* bitvector */
-	  scm_read_token (c, 0);
-	  return;
-	case '{':
-	  scm_read_token (c, 1);
-	  return;
-	case '\\': /* character */
-	  c = *lexptr++;
-	  scm_read_token (c, 0);
-	  return;
-	case '|':
-	  j = 1;		/* here j is the comment nesting depth */
-	lp:
-	  c = *lexptr++;
-	lpc:
-	  switch (c)
-	    {
-	    case '\0':
-	      error ("unbalanced comment");
-	    default:
-	      goto lp;
-	    case '|':
-	      if ('#' != (c = *lexptr++))
-		goto lpc;
-	      if (--j)
-		goto lp;
-	      break;
-	    case '#':
-	      if ('|' != (c = *lexptr++))
-		goto lpc;
-	      ++j;
-	      goto lp;
-	    }
-	  goto tryagain;
-	case '.':
-	default:
-	callshrp:
-	  scm_lreadr ();
-	  return;
-	}
-    case '\"':
-      while ('\"' != (c = *lexptr++))
-	{
-	  if (c == '\\')
-	    switch (c = *lexptr++)
-	      {
-	      case '\0':
-		error ("non-terminated string literal");
-	      case '\n':
-		continue;
-	      case '0':
-	      case 'f':
-	      case 'n':
-	      case 'r':
-	      case 't':
-	      case 'a':
-	      case 'v':
-		break;
-	      }
-	}
-      return;
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-    case '.':
-    case '-':
-    case '+':
-    num:
-      scm_read_token (c, 0);
-      return;
-    case ':':
-      scm_read_token ('-', 0);
-      return;
-    default:
-      scm_read_token (c, 0);
-    tok:
-      return;
-    }
-}
-
-int
-scm_parse ()
-{
-  char* start;
-  struct stoken str;
-  while (*lexptr == ' ')
-    lexptr++;
-  start = lexptr;
-  scm_lreadr ();
-  str.length = lexptr - start;
-  str.ptr = start;
-  write_exp_elt_opcode (OP_EXPRSTRING);
-  write_exp_string (str);
-  write_exp_elt_opcode (OP_EXPRSTRING);
-  return 0;
-}
+struct type *builtin_type_scm;
 
 void
 scm_printchar (c, stream)
@@ -305,7 +59,6 @@ is_scmvalue_type (type)
   if (TYPE_CODE (type) == TYPE_CODE_INT
       && TYPE_NAME (type) && strcmp (TYPE_NAME (type), "SCM") == 0)
     {
-      SCM_TYPE = type;
       return 1;
     }
   return 0;
@@ -321,11 +74,127 @@ scm_get_field (svalue, index)
 {
   value_ptr val;
   char buffer[20];
-  if (SCM_TYPE == NULL)
-    error ("internal error - no SCM type");
-  read_memory (SCM2PTR (svalue) + index * TYPE_LENGTH (SCM_TYPE),
-	       buffer, TYPE_LENGTH (SCM_TYPE));
-  return unpack_long (SCM_TYPE, buffer);
+  read_memory (SCM2PTR (svalue) + index * TYPE_LENGTH (builtin_type_scm),
+	       buffer, TYPE_LENGTH (builtin_type_scm));
+  return extract_signed_integer (buffer, TYPE_LENGTH (builtin_type_scm));
+}
+
+/* Unpack a value of type TYPE in buffer VALADDR as an integer
+   (if CONTEXT == TYPE_CODE_IN), a pointer (CONTEXT == TYPE_CODE_PTR),
+   or Boolean (CONTEXT == TYPE_CODE_BOOL).  */
+
+LONGEST
+scm_unpack (type, valaddr, context)
+     struct type *type;
+     char *valaddr;
+     enum type_code context;
+{
+  if (is_scmvalue_type (type))
+    {
+      LONGEST svalue = extract_signed_integer (valaddr, TYPE_LENGTH (type));
+      if (context == TYPE_CODE_BOOL)
+	{
+	  if (svalue == SCM_BOOL_F)
+	    return 0;
+	  else
+	    return 1;
+	}
+      switch (7 & svalue)
+	{
+	case 2:  case 6: /* fixnum */
+	  return svalue >> 2;
+	case 4: /* other immediate value */
+	  if (SCM_ICHRP (svalue)) /* character */
+	    return SCM_ICHR (svalue);
+	  else if (SCM_IFLAGP (svalue))
+	    {
+	      switch (svalue)
+		{
+#ifndef SICP
+		case SCM_EOL:
+#endif
+		case SCM_BOOL_F:
+		  return 0;
+		case SCM_BOOL_T:
+		  return 1;
+		}
+	    }
+	  error ("Value can't be converted to integer.");
+	default:
+	  return svalue;
+	}
+    }
+  else
+    return unpack_long (type, valaddr);
+}
+
+/* True if we're correctly in Guile's eval.c (the evaluator and apply). */
+
+static int
+in_eval_c ()
+{
+  if (current_source_symtab && current_source_symtab->filename)
+    {
+      char *filename = current_source_symtab->filename;
+      int len = strlen (filename);
+      if (len >= 6 && strcmp (filename + len - 6, "eval.c") == 0)
+	return 1;
+    }
+  return 0;
+}
+
+/* Lookup a value for the variable named STR.
+   First lookup in Scheme context (using the scm_lookup_cstr inferior
+   function), then try lookup_symbol for compiled variables. */
+
+value_ptr
+scm_lookup_name (str)
+     char *str;
+{
+  value_ptr args[3];
+  int len = strlen (str);
+  value_ptr symval, func, val;
+  struct symbol *sym;
+  args[0] = value_allocate_space_in_inferior (len);
+  args[1] = value_from_longest (builtin_type_int, len);
+  write_memory (value_as_long (args[0]), str, len);
+
+  if (in_eval_c ()
+      && (sym = lookup_symbol ("env",
+			       expression_context_block,
+			       VAR_NAMESPACE, (int *) NULL,
+			       (struct symtab **) NULL)) != NULL)
+    args[2] = value_of_variable (sym, expression_context_block);
+  else
+    /* FIXME in this case, we should try lookup_symbol first */
+    args[2] = value_from_longest (builtin_type_scm, SCM_EOL);
+
+  func = find_function_in_inferior ("scm_lookup_cstr");
+  val = call_function_by_hand (func, 3, args);
+  if (!value_logical_not (val))
+    return value_ind (val);
+
+  sym = lookup_symbol (str,
+		       expression_context_block,
+		       VAR_NAMESPACE, (int *) NULL,
+		       (struct symtab **) NULL);
+  if (sym)
+    return value_of_variable (sym, NULL);
+  error ("No symbol \"%s\" in current context.");
+}
+
+value_ptr
+scm_evaluate_string (str, len)
+     char *str; int len;
+{
+  value_ptr func;
+  value_ptr addr = value_allocate_space_in_inferior (len + 1);
+  LONGEST iaddr = value_as_long (addr);
+  write_memory (iaddr, str, len);
+  /* FIXME - should find and pass env */
+  write_memory (iaddr + len, "", 1);
+  func = find_function_in_inferior ("scm_evstr");
+  return call_function_by_hand (func, 1, &addr);
 }
 
 static value_ptr
@@ -336,21 +205,25 @@ evaluate_subexp_scm (expect_type, exp, pos, noside)
      enum noside noside;
 {
   enum exp_opcode op = exp->elts[*pos].opcode;
-  value_ptr func, addr;
   int len, pc;  char *str;
   switch (op)
     {
+    case OP_NAME:
+      pc = (*pos)++;
+      len = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (len + 1);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      str = &exp->elts[pc + 2].string;
+      return scm_lookup_name (str);
     case OP_EXPRSTRING:
       pc = (*pos)++;
       len = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (len + 1);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      str = &exp->elts[ + 2].string;
-      addr = value_allocate_space_in_inferior (len);
-      write_memory (value_as_long (addr), str, len);
-      func = find_function_in_inferior ("scm_evstr");
-      return call_function_by_hand (func, 1, &addr);
+      str = &exp->elts[pc + 2].string;
+      return scm_evaluate_string (str, len);
     default: ;
     }
   return evaluate_subexp_standard (expect_type, exp, pos, noside);
@@ -388,4 +261,7 @@ void
 _initialize_scheme_language ()
 {
   add_language (&scm_language_defn);
+  builtin_type_scm = init_type (TYPE_CODE_INT,
+				TARGET_LONG_BIT / TARGET_CHAR_BIT,
+				0, "SCM", (struct objfile *) NULL);
 }

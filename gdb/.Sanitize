@@ -286,6 +286,7 @@ rs6000-nat.c
 rs6000-tdep.c
 rom68k-rom.c
 saber.suppress
+scm-exp.c
 scm-lang.c
 scm-lang.h
 scm-tags.h

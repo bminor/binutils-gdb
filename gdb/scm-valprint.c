@@ -128,7 +128,7 @@ scm_ipruk (hdr, ptr, stream)
      GDB_FILE *stream;
 {
   fprintf_filtered (stream, "#<unknown-%s", hdr);
-#define SCM_SIZE (SCM_TYPE ? TYPE_LENGTH (SCM_TYPE) : sizeof (void*))
+#define SCM_SIZE TYPE_LENGTH (builtin_type_scm)
   if (SCM_CELLP (ptr))
     fprintf_filtered (stream, " (0x%lx . 0x%lx) @",
 		      (long) SCM_CAR (ptr), (long) SCM_CDR (ptr));
@@ -372,7 +372,7 @@ scm_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 {
   if (is_scmvalue_type (type))
     {
-      LONGEST svalue = unpack_long (type, valaddr);
+      LONGEST svalue = extract_signed_integer (valaddr, TYPE_LENGTH (type));
       if (scm_inferior_print (svalue, stream, format,
 			      deref_ref, recurse, pretty) >= 0)
 	{
