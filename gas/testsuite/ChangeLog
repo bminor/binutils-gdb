@@ -1,3 +1,8 @@
+2004-07-13  Nick Clifton  <nickc@redhat.com>
+
+	* gas/vtable: Delete directory.  These tests are no longer needed
+	as the VTABLE_ reloc support is obsolete.
+
 2004-07-08  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* gas/m32r/pic.exp: Add New Test case for @GOTOFF, @GOT, @PLT.
