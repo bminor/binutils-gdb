@@ -68,8 +68,8 @@ extern void clear_complaints (struct complaints **complaints,
      msg_complaint (addr);
 
    Yes, the typo is intentional.  The motivation behind this interface
-   change is to eliminate all possability of this problem re-occuring
-   (it has occured in the past and no one is sure that it isn't
+   change is to eliminate all possibility of this problem re-occurring
+   (it has occurred in the past and no one is sure that it isn't
    present now).
 
    Support for complaining about things in the symbol file that aren't

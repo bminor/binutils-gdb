@@ -2,6 +2,7 @@
 
 	* complaints.h: Add comment explaining how to eliminate a
 	deprecated_complain call.
+	* complaints.h: Fix spelling errors.
 
 2002-11-15  David Carlton  <carlton@math.stanford.edu>
 
