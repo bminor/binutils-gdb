@@ -1,3 +1,7 @@
+Thu Jul  4 11:42:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* alpha-opc.c: Correct second case of "mov" to use OPRL.
+
 Wed Jul  3 16:03:47 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* sparc-dis.c (print_insn_sparclite):  New routine to print
