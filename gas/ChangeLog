@@ -1,5 +1,13 @@
 Sun Dec  5 17:05:29 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/obj-som.c (obj_som_version): Pass version string to
+	SOM BFD backend.
+	(obj_som_copyright): New function.  Much like obj_som_version.
+
+	* config/tc-hppa.c (obj_copyright): Define as appropriate for
+	SOM and ELF.  
+	(pa_copyright): Just a stub now.
+
 	* config/obj-som.c (obj_read_begin_hook): Delete unused function.
 	* config/obj-som.h (obj_read_begin_hook): Provide dummy definition.
 	(TARGET_SYMBOL_FIELDS): Delete.  SOM isn't making use of them.

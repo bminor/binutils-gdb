@@ -32,24 +32,84 @@ const pseudo_typeS obj_pseudo_table[] =
   {NULL}
 };
 
-/* Handle a .version directive.  FIXME.  We just parse the .version
-   directive and throw away the results!.  */
+static int version_seen = 0;
+static int copyright_seen = 0;
+
+/* Handle a .version directive.  */
 
 void
 obj_som_version (unused)
      int unused;
 {
+  char *version, c;
+
+  if (version_seen)
+    {
+      as_bad ("Only one .version pseudo-op per file!");
+      ignore_rest_of_line ();
+      return;
+    }
+
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '\"')
     {
+      version = input_line_pointer;
       ++input_line_pointer;
       while (is_a_char (next_char_of_string ()))
 	;
+      c = *input_line_pointer;
+      *input_line_pointer = '\000';
     }
   else
     {
       as_bad ("Expected quoted string");
+      ignore_rest_of_line ();
+      return;
     }
+
+  version_seen = 1;
+  bfd_som_attach_aux_hdr (stdoutput, VERSION_AUX_ID, version);
+  *input_line_pointer = c;
+  demand_empty_rest_of_line ();
+}
+
+/* Handle a .copyright directive.   This probably isn't complete, but
+   it's of dubious value anyway and (IMHO) not worth the time to finish.
+   If you care about copyright strings that much, you fix it.  */
+
+void
+obj_som_copyright (unused)
+     int unused;
+{
+  char *copyright, c;
+
+  if (copyright_seen)
+    {
+      as_bad ("Only one .copyright pseudo-op per file!");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == '\"')
+    {
+      copyright = input_line_pointer;
+      ++input_line_pointer;
+      while (is_a_char (next_char_of_string ()))
+	;
+      c = *input_line_pointer;
+      *input_line_pointer = '\000';
+    }
+  else
+    {
+      as_bad ("Expected quoted string");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  copyright_seen = 1;
+  bfd_som_attach_aux_hdr (stdoutput, COPYRIGHT_AUX_ID, copyright);
+  *input_line_pointer = c;
   demand_empty_rest_of_line ();
 }
 

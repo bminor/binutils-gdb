@@ -52,8 +52,10 @@ typedef elf_symbol_type obj_symbol_type;
 /* How to generate a relocation.  */
 #define hppa_gen_reloc_type hppa_elf_gen_reloc_type
 
-/* Who knows.  */
+/* ELF objects can have versions, but apparently do not have anywhere
+   to store a copyright string.  */
 #define obj_version obj_elf_version
+#define obj_copyright obj_elf_version
 
 /* Use space aliases.  */
 #define USE_ALIASES 1
@@ -73,8 +75,9 @@ static void hppa_tc_make_symextn_section PARAMS ((void));
 /* Object file formats specify relocation types.  */
 typedef int reloc_type;
 
-/* Who knows.  */
+/* SOM objects can have both a version string and a copyright string.  */
 #define obj_version obj_som_version
+#define obj_copyright obj_som_copyright
 
 /* Do not use space aliases.  */
 #define USE_ALIASES 0
@@ -4459,39 +4462,6 @@ pa_comm (unused)
   demand_empty_rest_of_line ();
 }
 
-/* Process a .COPYRIGHT pseudo-op.  */
-
-static void
-pa_copyright (unused)
-     int unused;
-{
-  char *name;
-  char c;
-
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer == '\"')
-    {
-      ++input_line_pointer;
-      name = input_line_pointer;
-      while ((c = next_char_of_string ()) >= 0)
-	;
-      c = *input_line_pointer;
-      *input_line_pointer = '\0';
-      *(input_line_pointer - 1) = '\0';
-      {
-	/* FIXME.  Not supported */
-	abort ();
-      }
-      *input_line_pointer = c;
-    }
-  else
-    {
-      as_bad ("Expected \"-ed string");
-    }
-  pa_undefine_label ();
-  demand_empty_rest_of_line ();
-}
-
 /* Process a .END pseudo-op.  */
 
 static void
@@ -6173,6 +6143,16 @@ pa_version (unused)
      int unused;
 {
   obj_version (0);
+  pa_undefine_label ();
+}
+
+/* Handle a .COPYRIGHT pseudo-op.  */
+
+static void
+pa_copyright (unused)
+     int unused;
+{
+  obj_copyright (0);
   pa_undefine_label ();
 }
 
