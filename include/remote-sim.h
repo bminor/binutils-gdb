@@ -38,6 +38,18 @@ typedef CORE_ADDR_TYPE SIM_ADDR;
 
 typedef struct sim_state *SIM_DESC;
 
+/* Values for `kind' arg to sim_open.  */
+typedef enum {
+  SIM_OPEN_STANDALONE, /* simulator used standalone (run.c) */
+  SIM_OPEN_DEBUG       /* simulator used by debugger (gdb) */
+} SIM_OPEN_KIND;
+
+/* Return codes from various functions.  */
+typedef enum {
+  SIM_RC_FAIL = 0,
+  SIM_RC_OK = 1
+} SIM_RC;
+
 /* Main simulator entry points.  */
 
 /* Initialize the simulator.  This function is called when the simulator
@@ -48,7 +60,7 @@ typedef struct sim_state *SIM_DESC;
    The result is a descriptor that must be passed back to the other sim_foo
    functions.  */
 
-SIM_DESC sim_open PARAMS ((char **argv));
+SIM_DESC sim_open PARAMS ((SIM_OPEN_KIND kind, char **argv));
 
 /* Terminate usage of the simulator.  This may involve freeing target memory
    and closing any open files and mmap'd areas.  You cannot assume sim_kill
