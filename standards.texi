@@ -57,6 +57,12 @@ by Free Software Foundation.
 @end titlepage
 
 @ifinfo
+@format
+START-INFO-DIR-ENTRY
+* standards: (standards.info).	The GNU coding standards.
+END-INFO-DIR-ENTRY
+@end format
+
 @node Top, Reading Non-Free Code, (dir), (dir)
 @top Version
 

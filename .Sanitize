@@ -63,6 +63,7 @@ patch
 rcs
 readline
 send_pr
+standards.texi
 texinfo
 
 # The lines between the "Do-last:" line and the end of the file
