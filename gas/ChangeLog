@@ -1,5 +1,9 @@
 Thu Oct  5 20:17:30 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* doc/as.texinfo: Split out the NS32k family documentation,
+	despite its being commented out for now.
+	* doc/c-ns32k.texi: New file.
+
 	* sb.c, macro.c: Include string.h.
 
 	* Makefile.in (comparison): Only check *.o; we don't care if
