@@ -1,6 +1,8 @@
+start-sanitize-v8plus
 Sat Jan 20 08:36:10 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* elf32-sparc.c (ELF_MACHINE_ALT1): Define.
+end-sanitize-v8plus
 
 Thu Jan 18 18:25:34 1996  Kim Knuttila  <krk@cygnus.com>
 

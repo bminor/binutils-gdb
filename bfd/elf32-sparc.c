@@ -1484,7 +1484,9 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
 #define TARGET_BIG_NAME	"elf32-sparc"
 #define ELF_ARCH	bfd_arch_sparc
 #define ELF_MACHINE_CODE EM_SPARC
+/* start-sanitize-v8plus */
 #define ELF_MACHINE_ALT1 EM_SPARC32PLUS
+/* end-sanitize-v8plus */
 #define ELF_MAXPAGESIZE 0x10000
 #define elf_backend_create_dynamic_sections \
 					_bfd_elf_create_dynamic_sections
