@@ -1755,7 +1755,8 @@ ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h sysdep.h config.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h $(INCDIR)/demangle.h \
   ld.h $(INCDIR)/bin-bugs.h ldmisc.h ldexp.h ldlang.h \
-  ldgram.h ldlex.h ldmain.h ldfile.h
+  ldgram.h ldlex.h ldmain.h ldfile.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
 ldver.o: ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h ../bfd/bfdver.h sysdep.h config.h \
   $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h ldver.h \

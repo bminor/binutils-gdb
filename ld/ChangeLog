@@ -1,8 +1,17 @@
+2004-09-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+	* po/ld.pot: Regenerate.
+
 2004-09-16  Tomer Levi  <Tomer.Levi@nsc.com>
 
-        * scripttempl/elf32crx.sc (.init): Add KEEP for section's *personality*.
-        (.fini): Likewise.
-        (.jcr): Likewise.
+	* scripttempl/elf32crx.sc (.init): Add KEEP for section's *personality*.
+	(.fini): Likewise.
+	(.jcr): Likewise.
 
 2004-09-16  Alan Modra  <amodra@bigpond.net.au>
 
@@ -49,7 +58,7 @@
 2004-08-27  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/pe.em (after_open): Do not assume that either bfd is
-	an archive. 
+	an archive.
 
 2004-08-26  Alan Modra  <amodra@bigpond.net.au>
 
