@@ -35,8 +35,28 @@ mpw_files="mpw-README mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw"
 
 if ( echo $* | grep keep\-mpw > /dev/null) ; then
 	keep_these_too="${keep_these_too} ${mpw_files}"
+	if [ -n "${verbose}" ] ; then
+		echo Keeping ${mpw_files}
+	fi
 else
 	lose_these_too="${lose_these_too} ${mpw_files}"
+	if [ -n "${verbose}" ] ; then
+		echo Deleting ${mpw_files}
+	fi
+fi
+
+gdbtk_files="tcl tk"
+
+if ( echo $* | grep lose\-gdbtk > /dev/null) ; then
+	lose_these_too="${lose_these_too} ${gdbtk_files}"
+	if [ -n "${verbose}" ] ; then
+		echo Deleting ${gdbtk_files}
+	fi
+else
+	keep_these_too="${keep_these_too} ${gdbtk_files}"
+	if [ -n "${verbose}" ] ; then
+		echo Keeping ${gdbtk_files}
+	fi
 fi
 
 # This top-level directory is special.  We often check out only subsets
