@@ -39,7 +39,6 @@ aoutf1.h
 aoutx.h
 archive.c
 archures.c
-archures.h
 bfd.c
 bfd.texinfo
 bout.c
@@ -106,7 +105,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.9  1991/07/31 17:37:00  gnu
+# Revision 1.10  1991/07/31 22:28:30  gnu
+# Remove archures.h
+#
+# Revision 1.9  1991/07/31  17:37:00  gnu
 # Remove amdcoff.c (and its name from Makefile.in) by default, because
 # its copyright is not yet assigned to FSF.
 #
