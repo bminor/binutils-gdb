@@ -4901,7 +4901,7 @@ else
 #line 4902 "configure"
 #include "confdefs.h"
 
-#ifdef __CYGWIN__
+#ifdef __CYGWIN32__
 lose
 #endif
 EOF
@@ -5986,7 +5986,7 @@ else
 #include "confdefs.h"
 
 int main() {
-return __CYGWIN__;
+return __CYGWIN32__;
 ; return 0; }
 EOF
 if { (eval echo configure:5993: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
