@@ -1,3 +1,9 @@
+2004-04-21  Philip Blundell  <pb@nexus.co.uk>
+
+	* elf32-arm.h (elf32_arm_check_relocs): Don't output REL32
+	relocs for locally defined symbols during -shared final link.
+	(elf32_arm_final_link_relocate): Likewise.
+
 2004-04-22  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-x86-64.c (elf64_x86_64_copy_indirect_symbol): Copy also
