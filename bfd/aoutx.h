@@ -1606,7 +1606,7 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
   case bfd_print_symbol_all:
     {
    CONST char *section_name = symbol->section == (asection *)NULL ?
-	"*abs" : symbol->section->name;
+	(CONST char *)"*abs" : symbol->section->name;
 
       bfd_print_symbol_vandf((PTR)file,symbol);
 

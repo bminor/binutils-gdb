@@ -322,6 +322,22 @@ $} bfd_target;
 *---
 
 */
+
+/* The default is to define a target_vector containing just the
+   DEFAULT_TARGET.  (This is to save space in the executables.)
+   You can override this by giving an explicit target_vector using
+   the SELECT_VECTOR macro.
+   Or define ALL_TARGETS macro to get all of the available targets. */
+   
+
+#if MINIMIZE && defined(DEFAULT_VECTOR) && !defined(SELECT_VECS)
+#ifdef TRAD_CORE
+#define SELECT_VECS &DEFAULT_VECTOR,&trad_core_vec
+#else
+#define SELECT_VECS &DEFAULT_VECTOR
+#endif
+#endif
+
 extern bfd_target ecoff_little_vec;
 extern bfd_target ecoff_big_vec;
 extern bfd_target sunos_big_vec;
@@ -335,13 +351,17 @@ extern bfd_target elf_little_vec;
 extern bfd_target elf_big_vec;
 extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
-extern bfd_target m88k_bcs_vec;
+extern bfd_target m88kbcs_vec;
 extern bfd_target m68kcoff_vec;
 extern bfd_target i386coff_vec;
 extern bfd_target i386aout_vec;
 extern bfd_target a29kcoff_big_vec;
 extern bfd_target trad_core_vec;
 extern bfd_target rs6000coff_vec;
+
+#ifdef DEFAULT_VECTOR
+extern bfd_target DEFAULT_VECTOR;
+#endif
 
 #ifdef SELECT_VECS
 
@@ -351,9 +371,6 @@ SELECT_VECS,
 
 };
 #else
-#ifdef DEFAULT_VECTOR
-extern bfd_target DEFAULT_VECTOR;
-#endif
 
 #ifdef GNU960
 #define ICOFF_LITTLE_VEC        icoff_little_vec
@@ -382,7 +399,7 @@ extern bfd_target DEFAULT_VECTOR;
 #endif
 
 #define IEEE_VEC                ieee_vec
-#define M88K_BCS_VEC            m88k_bcs_vec
+#define M88KBCS_VEC            m88kbcs_vec
 #define SREC_VEC                srec_vec
 #define M68KCOFF_VEC            m68kcoff_vec
 #define I386COFF_VEC            i386coff_vec
@@ -431,8 +448,8 @@ bfd_target *target_vector[] = {
 #endif
 #endif
 
-#ifdef M88K_BCS_VEC
-        &M88K_BCS_VEC,
+#ifdef M88KBCS_VEC
+        &M88KBCS_VEC,
 #endif
 
 #ifdef SREC_VEC
@@ -518,7 +535,8 @@ DEFUN(bfd_find_target,(target_name, abfd),
 {
   bfd_target **target;
   extern char *getenv ();
-  CONST char *targname = (target_name ? target_name : getenv ("GNUTARGET"));
+  CONST char *targname = (target_name ? target_name : 
+			  (CONST char *) getenv ("GNUTARGET"));
 
   /* This is safe; the vector cannot be null */
   if (targname == NULL || !strcmp (targname, "default")) {

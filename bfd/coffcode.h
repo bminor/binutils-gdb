@@ -1747,8 +1747,8 @@ DEFUN(coff_print_symbol,(ignore_abfd, filep, symbol, how),
   case bfd_print_symbol_nm:
   case bfd_print_symbol_all:
       {
-	CONST char           *section_name = symbol->section == (asection *) NULL ?
-	  "*abs" : symbol->section->name;
+	CONST char *section_name = symbol->section == (asection *) NULL ?
+	  (CONST char *)"*abs" : symbol->section->name;
 	bfd_print_symbol_vandf((PTR) file, symbol);
 
 	fprintf(file, " %-5s %s %s %s",

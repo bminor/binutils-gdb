@@ -166,7 +166,7 @@ $};
 extern char *strerror();
 
 
-short _bfd_host_big_endian = 0x0100;
+CONST short _bfd_host_big_endian = 0x0100;
         /* Accessing the above as (*(char*)&_bfd_host_big_endian), will
            return 1 if the host is big-endian, 0 otherwise.
            (assuming that a short is two bytes long!!!  FIXME)
@@ -279,18 +279,17 @@ get_reloc_upper_bound (abfd, asect)
 }
 
 unsigned int
-bfd_canonicalize_reloc (abfd, asect, location, symbols)
-     bfd *abfd;
-     sec_ptr asect;
-     arelent **location;
-     asymbol **symbols;
+DEFUN(bfd_canonicalize_reloc,(abfd, asect, location, symbols),
+     bfd *abfd AND
+     sec_ptr asect AND
+     arelent **location AND
+     asymbol **symbols)
 {
-  if (abfd->format != bfd_object) {
-    bfd_error = invalid_operation;
-    return 0;
-  }
-
-  return BFD_SEND (abfd, _bfd_canonicalize_reloc, (abfd, asect, location, symbols));
+    if (abfd->format != bfd_object) {
+	bfd_error = invalid_operation;
+	return 0;
+    }
+    return BFD_SEND (abfd, _bfd_canonicalize_reloc, (abfd, asect, location, symbols));
 }
 
 

@@ -1,5 +1,6 @@
 Fri Nov 22 08:11:42 1991  John Gilmore  (gnu at cygnus.com)
 
+	* aoutx.h, bfd.c, coffcode.h, ieee.c, oasys.c, targets.c: CONST lint.
 	* libbfd-in.h, libbfd.h, aoutx.h, coffcode.h, elf.c, libaout.h:
 	Rename ALIGN to BFD_ALIGN to avoid conflict with BSD <sys/param.h>.
 	* libbfd.c:  Lint.
