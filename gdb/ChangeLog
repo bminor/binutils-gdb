@@ -1,3 +1,15 @@
+2002-09-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* h8300-tdep.c: Multiarch.  Drop `set machine' command in favor of
+	`set architecture'.  Unify naming convention of functions.
+	(h8300_skip_prologue): Improve prologue analysis.
+	(h8300_push_arguments): Rewritten to more closely match GCC's
+	bizarre argument-passing behavior, along with the comment describing
+	said behavior.
+	* remote-hms.c (hms_regnames): Don't use NUM_REGS in definition.
+	* config/h8300/tm-h8300.h: Multiarch.  Just keep stuff needed by
+	sim, remote-e7000.c, remote-hms.c and remote.c
+
 2002-09-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (gdb_print_insn_i386): Removed.
