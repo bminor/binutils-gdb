@@ -1,8 +1,11 @@
 Tue Jun  3 16:15:13 1997  Nick Clifton  <nickc@cygnus.com>
 
-	* config/tc-arm.h: Merged in changes from armT-970328-branch.
+	* config/tc-arm.c (md_parse_option): Merge in changes from
+	armT-970328-branch.
 
-	* configure.in (emulations): Added Thumb architecture support from
+	* config/tc-arm.h: Merge in changes from armT-970328-branch.
+
+	* configure.in (emulations): Add Thumb architecture support from
 	armT-9703-28-branch.
 
 Mon Jun  2 16:25:07 1997  Nick Clifton  <nickc@cygnus.com>

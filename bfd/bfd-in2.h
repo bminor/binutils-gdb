@@ -309,6 +309,7 @@ typedef struct sec *sec_ptr;
 #define bfd_section_name(bfd, ptr) ((ptr)->name)
 #define bfd_section_size(bfd, ptr) (bfd_get_section_size_before_reloc(ptr))
 #define bfd_section_vma(bfd, ptr) ((ptr)->vma)
+#define bfd_section_lma(bfd, ptr) ((ptr)->lma)
 #define bfd_section_alignment(bfd, ptr) ((ptr)->alignment_power)
 #define bfd_get_section_flags(bfd, ptr) ((ptr)->flags + 0)
 #define bfd_get_section_userdata(bfd, ptr) ((ptr)->userdata)
@@ -632,6 +633,8 @@ extern boolean bfd_i386linux_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_m68klinux_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_sparclinux_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 /* mmap hacks */
 
@@ -699,7 +702,7 @@ bfd *
 bfd_fdopenr PARAMS ((CONST char *filename, CONST char *target, int fd));
 
 bfd *
-bfd_openstreamr PARAMS (());
+bfd_openstreamr PARAMS ((const char *, const char *, PTR));
 
 bfd *
 bfd_openw PARAMS ((CONST char *filename, CONST char *target));
@@ -1221,6 +1224,12 @@ enum bfd_architecture
   bfd_arch_sh,         /* Hitachi SH */
   bfd_arch_alpha,      /* Dec Alpha */
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
+#define bfd_mach_arm_2		1
+#define bfd_mach_arm_2a		2
+#define bfd_mach_arm_3		3
+#define bfd_mach_arm_3M 	4
+#define bfd_mach_arm_4 		5
+#define bfd_mach_arm_4T 	6
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   bfd_arch_w65,        /* WDC 65816 */
   /* start-sanitize-tic80 */
@@ -1236,9 +1245,7 @@ enum bfd_architecture
 #define bfd_mach_arc_graphics 2
 #define bfd_mach_arc_audio 3
   /* end-sanitize-arc */
-  /* start-sanitize-m32r */
-  bfd_arch_m32r,       /* Mitsubishi M32R */
-  /* end-sanitize-m32r */
+  bfd_arch_m32r,       /* Mitsubishi M32R/D */
   bfd_arch_mn10200,    /* Matsushita MN10200 */
   bfd_arch_mn10300,    /* Matsushita MN10300 */
   bfd_arch_last
@@ -1839,6 +1846,11 @@ through 0. */
   BFD_RELOC_ARC_B26,
 /* end-sanitize-arc */
 
+/* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
+   be zero and is not stored in the instruction. */
+  BFD_RELOC_THUMB_PCREL_BRANCH9,
+  BFD_RELOC_THUMB_PCREL_BRANCH12,
+  BFD_RELOC_THUMB_PCREL_BRANCH23,
 
 /* Mitsubishi D10V relocs.
 This is a 10-bit reloc with the right 2 bits
@@ -1891,7 +1903,6 @@ the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_32_PCREL,
 /* end-sanitize-d30v */
 
-/* start-sanitize-m32r */
 
 /* Mitsubishi M32R relocs.
 This is a 24 bit absolute address. */
@@ -1920,8 +1931,6 @@ used when the lower 16 bits are treated as signed. */
 /* This is a 16-bit reloc containing the small data area offset for use in
 add3, load, and store instructions. */
   BFD_RELOC_M32R_SDA16,
-/* end-sanitize-m32r */
-
 /* start-sanitize-v850 */
 
 /* This is a 9-bit reloc */

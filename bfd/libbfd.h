@@ -435,6 +435,12 @@ extern boolean _bfd_write_section_stabs
 
 extern boolean _bfd_write_stab_strings PARAMS ((bfd *, PTR *));
 
+/* Find an offset within a .stab section when linking stabs in
+   sections.  */
+
+extern bfd_vma _bfd_stab_section_offset
+  PARAMS ((bfd *, PTR *, asection *, PTR *, bfd_vma));
+
 /* Create a string table.  */
 extern struct bfd_strtab_hash *_bfd_stringtab_init PARAMS ((void));
 
@@ -739,6 +745,10 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARC_B26",
 /* end-sanitize-arc */
 
+  "BFD_RELOC_THUMB_PCREL_BRANCH9",
+  "BFD_RELOC_THUMB_PCREL_BRANCH12",
+  "BFD_RELOC_THUMB_PCREL_BRANCH23",
+							 
   "BFD_RELOC_D10V_10_PCREL_R",
   "BFD_RELOC_D10V_10_PCREL_L",
   "BFD_RELOC_D10V_18",
