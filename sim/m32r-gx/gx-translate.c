@@ -435,7 +435,11 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
 
   ASSERT(f != NULL);
 
-  /* fprintf(f, "      printf(\"0x%06x\\n\");\n", pc); */
+  /* force PC trace by environment variable */
+#ifdef HAVE_GETENV
+  if(getenv("GX_TRACE"))
+    fprintf(f, "      printf(\"0x%06x\\n\");\n", pc);
+#endif
 
   if(op1 == 0x8 && op2 == 0x4 && r1 == 0)
     {
@@ -836,7 +840,11 @@ m32r_emit_short_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
 
   ASSERT(f != NULL);
 
-  /* fprintf(f, "      printf(\"0x%06x\\n\");\n", pc); */
+  /* force PC trace by environment variable */
+#ifdef HAVE_GETENV
+  if(getenv("GX_TRACE"))
+    fprintf(f, "      printf(\"0x%06x\\n\");\n", pc);
+#endif
 
   if(0)
     ; /* place holder */

@@ -14,7 +14,11 @@ typedef struct _sim_cpu SIM_CPU;
 
 #include "ansidecl.h"
 #include "symcat.h"
+
 #include "cgen-types.h"
+#undef SIM_HAVE_MODEL
+#undef SIM_HAVE_ADDR_RANGE
+
 #include "arch.h"
 #include "sim-basics.h"
 
