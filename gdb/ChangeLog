@@ -1,3 +1,9 @@
+Sun Sep 10 09:00:28 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* sparc-tdep.c (fill_fpregset):  Fix incorrect FP_MAX_REGNUM
+	substitution.
+	(supply_fpregset):  Use FP_MAX_REGNUM.
+
 Sat Sep  9 08:21:52 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* stabsread.c (read_enum_type):  Exit loop for putting pending
