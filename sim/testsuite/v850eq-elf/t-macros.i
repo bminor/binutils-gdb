@@ -16,10 +16,22 @@ _start:
 	trap 31
 	.endm
 
-	.macro load32 reg val
+	.macro load reg val
 	jr 1f
 	.align 2
 1:	jarl 2f, \reg 
 	.long \val
 2:	ld.w 0[\reg], \reg
+	.endm
+
+	.macro check1 reg val
+	jr 1f
+	.align 2
+1:	jarl 2f, r1
+	.long \val
+2:	ld.w 0[r1], r1
+	cmp r1, \reg
+	be 1f
+	exit47
+1:	
 	.endm

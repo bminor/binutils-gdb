@@ -1,19 +1,101 @@
-AS_FOR_TARGET=v850-elf-as
-LD_FOR_TARGET=v850-elf-ld
-RUN_FOR_TARGET=~/build/test-sim/v850-elf/sim/v850/run
-srcdir=.
+# Makefile for regression testing the GNU debugger.
+# Copyright (C) 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+
+# This file is part of GDB.
+
+# GDB is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# GDB is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+VPATH = @srcdir@
+srcdir = @srcdir@
+srcroot = $(srcdir)/..
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+host_alias = @host_alias@
+target_alias = @target_alias@
+program_transform_name = @program_transform_name@
+build_canonical = @build@
+host_canonical = @host@
+target_canonical = @target@
+target_cpu = @target_cpu@
+
+
+SHELL = /bin/sh
+SUBDIRS = @subdirs@
+RPATH_ENVVAR = @RPATH_ENVVAR@
+
+EXPECT = `if [ -f $${rootme}/../../expect/expect ] ; then \
+          echo $${rootme}/../../expect/expect ; \
+          else echo expect ; fi`
+
+RUNTEST = $(RUNTEST_FOR_TARGET)
+
+RUNTESTFLAGS =
+
+RUNTEST_FOR_TARGET = `\
+  if [ -f $${srcdir}/../../../dejagnu/runtest ]; then \
+    echo $${srcdir}/../../../dejagnu/runtest; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ]; then \
+      echo runtest; \
+    else \
+      t='$(program_transform_name)'; echo runtest | sed -e '' $$t; \
+    fi; \
+  fi`
+
+
+AS_FOR_TARGET = `\
+  if [ -x ../../../gas/as.new ]; then \
+    echo ../../../gas/as.new ; \
+  else \
+    echo $(target_alias)-as ; \
+  fi`
+
+LD_FOR_TARGET = `\
+  if [ -x ../../../ld/ld.new ]; then \
+    echo ../../../ld/ld.new ; \
+  else \
+    echo $(target_alias)-ld ; \
+  fi`
+
+RUN_FOR_TARGET = `\
+  if [ -x ../../../sim/v850/run ]; then \
+    echo ../../../sim/v850/run ; \
+  else \
+    echo $(target_alias)-run ; \
+  fi`
+
 
 TESTS= \
 	hello.hi \
 	exit47.ko \
 	\
-	t-ldsr.ok
+	t-bsh.ok \
+	t-bsw.ok \
+	t-ldsr.ok \
+	t-sxb.ok \
+	t-sxh.ok \
+	t-zxb.ok \
+	t-zxh.ok \
 
 check: sanity $(TESTS)
 sanity:
-	@eval echo AS_FOR_TARGET = $(AS_FOR_TARGET)
-	@eval echo LD_FOR_TARGET = $(LD_FOR_TARGET)
-	@eval echo RUN_FOR_TARGET = $(RUN_FOR_TARGET)
+	@eval echo AS_FOR_TARGET=$(AS_FOR_TARGET)
+	@eval echo LD_FOR_TARGET=$(LD_FOR_TARGET)
+	@eval echo RUN_FOR_TARGET=$(RUN_FOR_TARGET)
 
 # Rules for running the tests
 
@@ -54,7 +136,7 @@ sanity:
 .o.run:
 	$(LD_FOR_TARGET) $(LDFLAGS_FOR_TARGET) -o $*.run $*.o
 .s.o:
-	$(AS_FOR_TARGET) $(ASFLAGS_FOR_TARGET) $(srcdir)/$*.s -o $*.o
+	$(AS_FOR_TARGET) $(ASFLAGS_FOR_TARGET) -I$(srcdir) $(srcdir)/$*.s -o $*.o
 .S.o:
-	$(AS_FOR_TARGET) $(ASFLAGS_FOR_TARGET) $(srcdir)/$*.S -o $*.o
+	$(AS_FOR_TARGET) $(ASFLAGS_FOR_TARGET) -I$(srcdir) $(srcdir)/$*.S -o $*.o
 # NNN

@@ -1,3 +1,16 @@
+Wed Sep 17 10:21:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* common/bits-gen.c (gen_bit): Pass in the full name of the macro.
+	(gen_mask): Ditto.
+
+	* common/bits-tst.c (main): Add tests for LSSEXT, MSSEXT.
+	(calc): Add support for 8 bit version of macros.
+	(main): Add tests for 8 bit versions of macros.
+	(check_sext): Check SEXT of zero clears bits.
+
+	* common/bits-gen.c (main): Generate tests for 8 bit versions of
+ 	macros.
+
 Thu Sep 11 13:04:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* common/Make-common.in: New file, provide generic rules for
