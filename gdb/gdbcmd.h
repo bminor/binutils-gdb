@@ -38,35 +38,35 @@ extern struct cmd_list_element *cmdlist;
 
 extern struct cmd_list_element *infolist;
 
-/* Chain containing all defined enable subcommands. */
+/* Chain containing all defined enable subcommands.  */
 
 extern struct cmd_list_element *enablelist;
 
-/* Chain containing all defined disable subcommands. */
+/* Chain containing all defined disable subcommands.  */
 
 extern struct cmd_list_element *disablelist;
 
-/* Chain containing all defined delete subcommands. */
+/* Chain containing all defined delete subcommands.  */
 
 extern struct cmd_list_element *deletelist;
 
-/* Chain containing all defined toggle subcommands. */
+/* Chain containing all defined toggle subcommands.  */
 
 extern struct cmd_list_element *togglelist;
 
-/* Chain containing all defined stop subcommands. */
+/* Chain containing all defined stop subcommands.  */
 
 extern struct cmd_list_element *stoplist;
 
-/* Chain containing all defined "enable breakpoint" subcommands. */
+/* Chain containing all defined "enable breakpoint" subcommands.  */
 
 extern struct cmd_list_element *enablebreaklist;
 
-/* Chain containing all defined set subcommands */
+/* Chain containing all defined set subcommands.  */
 
 extern struct cmd_list_element *setlist;
 
-/* Chain containing all defined unset subcommands */
+/* Chain containing all defined unset subcommands.  */
 
 extern struct cmd_list_element *unsetlist;
 
@@ -86,23 +86,23 @@ extern struct cmd_list_element *showhistlist;
 
 extern struct cmd_list_element *unsethistlist;
 
-/* Chain containing all defined maintenance subcommands. */
+/* Chain containing all defined maintenance subcommands.  */
 
 extern struct cmd_list_element *maintenancelist;
 
-/* Chain containing all defined "maintenance info" subcommands. */
+/* Chain containing all defined "maintenance info" subcommands.  */
 
 extern struct cmd_list_element *maintenanceinfolist;
 
-/* Chain containing all defined "maintenance print" subcommands. */
+/* Chain containing all defined "maintenance print" subcommands.  */
 
 extern struct cmd_list_element *maintenanceprintlist;
 
-/* Chain containing all defined "maintenance set" subcommands. */
+/* Chain containing all defined "maintenance set" subcommands.  */
 
 extern struct cmd_list_element *maintenance_set_cmdlist;
 
-/* Chain containing all defined "maintenance show" subcommands. */
+/* Chain containing all defined "maintenance show" subcommands.  */
 
 extern struct cmd_list_element *maintenance_show_cmdlist;
 
