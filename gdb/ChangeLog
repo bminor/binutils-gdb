@@ -1,3 +1,11 @@
+Thu Sep  1 11:01:40 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* config/tm-nbsd.h: New file, support for all NetBSD targets.
+	* config/sparc/{nm,tm,xm}-nbsd.h: New files, renamed from
+	  {nm,tm,xm}-sparcnbsd.h to conform to prefered file naming
+	  conventions.
+	* configure.in: (sparc-*-netbsd): use config/sparc/nbsd.m[ht].
+
 Wed Aug 31 14:40:33 1994  Jason Molenda (crash@phydeaux.cygnus.com)
 
 	* remote-udi.c (udi_read_inferior_memory,udi_write_inferior_memory): 
