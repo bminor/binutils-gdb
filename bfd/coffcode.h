@@ -1768,7 +1768,8 @@ coff_write_object_contents (abfd)
       if (!coff_renumber_symbols (abfd))
 	return false;
       coff_mangle_symbols (abfd);
-      coff_write_symbols (abfd);
+      if (! coff_write_symbols (abfd))
+	return false;
       if (!coff_write_linenumbers (abfd))
 	return false;
       coff_write_relocs (abfd);

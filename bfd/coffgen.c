@@ -41,6 +41,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
+static boolean coff_write_symbol PARAMS ((bfd *, asymbol *,
+					  combined_entry_type *,
+					  unsigned int *));
+static boolean coff_write_alien_symbol PARAMS ((bfd *, asymbol *,
+						unsigned int *));
+static boolean coff_write_native_symbol PARAMS ((bfd *, coff_symbol_type *,
+						 unsigned int *));
+
 static asection bfd_debug_section = { "*DEBUG*" };
 
 /* Take a section header read from a coff file (in HOST byte order),
@@ -645,56 +653,62 @@ coff_fix_symbol_name (abfd, symbol, native)
     }
 }
 
-#define	set_index(symbol, idx)	((symbol)->udata =(PTR) (idx))
+/* We need to keep track of the symbol index so that when we write out
+   the relocs we can get the index for a symbol.  This method is a
+   hack.  FIXME.  */
 
-static unsigned int
+#define set_index(symbol, idx)	((symbol)->udata = (PTR) (idx))
+
+/* Write a symbol out to a COFF file.  */
+
+static boolean
 coff_write_symbol (abfd, symbol, native, written)
      bfd *abfd;
      asymbol *symbol;
      combined_entry_type *native;
-     unsigned int written;
+     unsigned int *written;
 {
-  unsigned int    numaux = native->u.syment.n_numaux;
-  int             type = native->u.syment.n_type;
-  int             class =  native->u.syment.n_sclass;
+  unsigned int numaux = native->u.syment.n_numaux;
+  int type = native->u.syment.n_type;
+  int class =  native->u.syment.n_sclass;
   PTR buf;
   bfd_size_type symesz;
 
-  /* @@ bfd_debug_section isn't accessible outside this file, but we know
-     that C_FILE symbols belong there.  So move them.  */
+  /* @@ bfd_debug_section isn't accessible outside this file, but we
+     know that C_FILE symbols belong there.  So move them.  */
   if (native->u.syment.n_sclass == C_FILE)
     symbol->section = &bfd_debug_section;
 
   if (symbol->section == &bfd_abs_section) 
-  {
-    native->u.syment.n_scnum = N_ABS;
-  }
+    {
+      native->u.syment.n_scnum = N_ABS;
+    }
   else if (symbol->section == &bfd_debug_section) 
-  {
-    native->u.syment.n_scnum = N_DEBUG;
-  }
+    {
+      native->u.syment.n_scnum = N_DEBUG;
+    }
   else if (symbol->section == &bfd_und_section)   
-  {
-    native->u.syment.n_scnum = N_UNDEF;
-  }
+    {
+      native->u.syment.n_scnum = N_UNDEF;
+    }
   else 
-  {
-    native->u.syment.n_scnum =
-     symbol->section->output_section->target_index;
-  }
+    {
+      native->u.syment.n_scnum =
+	symbol->section->output_section->target_index;
+    }
   
-  
-  coff_fix_symbol_name(abfd, symbol, native);
+  coff_fix_symbol_name (abfd, symbol, native);
 
   symesz = bfd_coff_symesz (abfd);
   buf = bfd_alloc (abfd, symesz);
   if (!buf)
     {
       bfd_set_error (bfd_error_no_memory);
-      abort();			/* FIXME */
+      return false;
     }
-  bfd_coff_swap_sym_out(abfd, &native->u.syment, buf);
-  bfd_write(buf, 1, symesz, abfd);
+  bfd_coff_swap_sym_out (abfd, &native->u.syment, buf);
+  if (bfd_write (buf, 1, symesz, abfd) != symesz)
+    return false;
   bfd_release (abfd, buf);
 
   if (native->u.syment.n_numaux > 0)
@@ -707,227 +721,270 @@ coff_write_symbol (abfd, symbol, native, written)
       if (!buf)
 	{
 	  bfd_set_error (bfd_error_no_memory);
-	  abort();		/* FIXME */
+	  return false;
 	}
       for (j = 0; j < native->u.syment.n_numaux;  j++)
 	{
-	  bfd_coff_swap_aux_out(abfd,
-				&((native + j + 1)->u.auxent),
-				type,
-				class,
-				j,
-				native->u.syment.n_numaux,
-				buf);
-	  bfd_write(buf, 1, auxesz, abfd);
+	  bfd_coff_swap_aux_out (abfd,
+				 &((native + j + 1)->u.auxent),
+				 type,
+				 class,
+				 j,
+				 native->u.syment.n_numaux,
+				 buf);
+	  if (bfd_write (buf, 1, auxesz, abfd)!= auxesz)
+	    return false;
 	}
       bfd_release (abfd, buf);
     }
-  /*
-    Reuse somewhere in the symbol to keep the index
-    */
-  set_index(symbol, written);
-  return   written + 1 + numaux;
+
+  /* Store the index for use when we write out the relocs.  */
+  set_index (symbol, *written);
+
+  *written += numaux + 1;
+  return true;
 }
 
+/* Write out a symbol to a COFF file that does not come from a COFF
+   file originally.  This symbol may have been created by the linker,
+   or we may be linking a non COFF file to a COFF file.  */
 
-static unsigned int
+static boolean
 coff_write_alien_symbol (abfd, symbol, written)
      bfd *abfd;
      asymbol *symbol;
-     unsigned int written;
+     unsigned int *written;
 {
-  /*
-    This symbol has been created by the loader, or come from a non
-    coff format. It  has no native element to inherit, make our
-    own
-    */
   combined_entry_type *native;
   combined_entry_type dummy;
+
   native = &dummy;
   native->u.syment.n_type =  T_NULL;
   native->u.syment.n_flags =  0;
   if (symbol->section == &bfd_und_section) 
-  {
-      native->u.syment.n_scnum =  N_UNDEF;
-      native->u.syment.n_value =  symbol->value;
+    {
+      native->u.syment.n_scnum = N_UNDEF;
+      native->u.syment.n_value = symbol->value;
     }
   else if (bfd_is_com_section (symbol->section))
-  {
-      native->u.syment.n_scnum =  N_UNDEF;
-      native->u.syment.n_value =  symbol->value;
-
-  }
-  
-  else if (symbol->flags & BSF_DEBUGGING) {
-      /*
-	remove name so it doesn't take up any space
-	*/
+    {
+      native->u.syment.n_scnum = N_UNDEF;
+      native->u.syment.n_value = symbol->value;
+    }
+  else if (symbol->flags & BSF_DEBUGGING)
+    {
+      /* Remove the symbol name so that it does not take up any space.
+	 COFF won't know what to do with it anyhow.  */
       symbol->name = "";
     }
-  else {
-      native->u.syment.n_scnum  =   symbol->section->output_section->target_index;
-      native->u.syment.n_value =   symbol->value +
-       symbol->section->output_section->vma +
-	symbol->section->output_offset;
-      /* Copy the any flags from the the file hdr into the symbol  */
-    {
-      coff_symbol_type *c = coff_symbol_from(abfd, symbol);
-      if (c != (coff_symbol_type *)NULL) {
-	  native->u.syment.n_flags =   bfd_asymbol_bfd(&c->symbol)->flags;
-	}
-    }
-    }
-
-  native->u.syment.n_type =  0;
-  if (symbol->flags & BSF_LOCAL)
-   native->u.syment.n_sclass =  C_STAT;
   else
-   native->u.syment.n_sclass =  C_EXT;
-  native->u.syment.n_numaux =  0;
+    {
+      native->u.syment.n_scnum =
+	symbol->section->output_section->target_index;
+      native->u.syment.n_value = (symbol->value
+				  + symbol->section->output_section->vma
+				  + symbol->section->output_offset);
 
-  return   coff_write_symbol(abfd, symbol, native, written);
+      /* Copy the any flags from the the file header into the symbol.
+	 FIXME: Why?  */
+      {
+	coff_symbol_type *c = coff_symbol_from (abfd, symbol);
+	if (c != (coff_symbol_type *) NULL)
+	  native->u.syment.n_flags = bfd_asymbol_bfd (&c->symbol)->flags;
+      }
+    }
+
+  native->u.syment.n_type = 0;
+  if (symbol->flags & BSF_LOCAL)
+    native->u.syment.n_sclass = C_STAT;
+  else
+    native->u.syment.n_sclass = C_EXT;
+  native->u.syment.n_numaux = 0;
+
+  return coff_write_symbol (abfd, symbol, native, written);
 }
 
-static unsigned int
+/* Write a native symbol to a COFF file.  */
+
+static boolean
 coff_write_native_symbol (abfd, symbol, written)
      bfd *abfd;
      coff_symbol_type *symbol;
-     unsigned int written;
+     unsigned int *written;
 {
-  /*
-    Does this symbol have an ascociated line number - if so then
-    make it remember this symbol index. Also tag the auxent of
-    this symbol to point to the right place in the lineno table
-    */
   combined_entry_type *native = symbol->native;
+  alent *lineno = symbol->lineno;
 
-  alent          *lineno = symbol->lineno;
+  /* If this symbol has an associated line number, we must store the
+     symbol index in the line number field.  We also tag the auxent to
+     point to the right place in the lineno table.  */
+  if (lineno && !symbol->done_lineno)
+    {
+      unsigned int count = 0;
+      lineno[count].u.offset = *written;
+      if (native->u.syment.n_numaux)
+	{
+	  union internal_auxent  *a = &((native+1)->u.auxent);
 
-  if (lineno && !symbol->done_lineno) {
-    unsigned int    count = 0;
-    lineno[count].u.offset = written;
-    if (native->u.syment.n_numaux) {
-      union internal_auxent  *a = &((native+1)->u.auxent);
+	  a->x_sym.x_fcnary.x_fcn.x_lnnoptr =
+	    symbol->symbol.section->output_section->moving_line_filepos;
+	}
 
-      a->x_sym.x_fcnary.x_fcn.x_lnnoptr =
-	symbol->symbol.section->output_section->moving_line_filepos;
-    }
-    /*
-      And count and relocate all other linenumbers
-      */
-
-    count++;
-    while (lineno[count].line_number) {
-#if 0
-/* 13 april 92. sac 
-I've been told this, but still need proof:
-> The second bug is also in `bfd/coffcode.h'.  This bug causes the linker to screw
-> up the pc-relocations for all the line numbers in COFF code.  This bug isn't
-> only specific to A29K implementations, but affects all systems using COFF
-> format binaries.  Note that in COFF object files, the line number core offsets
-> output by the assembler are relative to the start of each procedure, not
-> to the start of the .text section.  This patch relocates the line numbers
-> relative to the `native->u.syment.n_value' instead of the section virtual
-> address.  modular!olson@cs.arizona.edu (Jon Olson)
-*/
-       lineno[count].u.offset += native->u.syment.n_value;
-
-#else
-      lineno[count].u.offset +=
-	symbol->symbol.section->output_section->vma +
-	  symbol->symbol.section->output_offset;
-#endif
+      /* Count and relocate all other linenumbers.  */
       count++;
-    }
-    symbol->done_lineno = true;
+      while (lineno[count].line_number != 0)
+	{
+#if 0
+	  /* 13 april 92. sac 
+	     I've been told this, but still need proof:
+	     > The second bug is also in `bfd/coffcode.h'.  This bug
+	     > causes the linker to screw up the pc-relocations for
+	     > all the line numbers in COFF code.  This bug isn't only
+	     > specific to A29K implementations, but affects all
+	     > systems using COFF format binaries.  Note that in COFF
+	     > object files, the line number core offsets output by
+	     > the assembler are relative to the start of each
+	     > procedure, not to the start of the .text section.  This
+	     > patch relocates the line numbers relative to the
+	     > `native->u.syment.n_value' instead of the section
+	     > virtual address.
+	     > modular!olson@cs.arizona.edu (Jon Olson)
+	     */
+	  lineno[count].u.offset += native->u.syment.n_value;
+#else
+	  lineno[count].u.offset +=
+	    (symbol->symbol.section->output_section->vma
+	     + symbol->symbol.section->output_offset);
+#endif
+	  count++;
+	}
+      symbol->done_lineno = true;
     
-    symbol->symbol.section->output_section->moving_line_filepos +=
-      count * bfd_coff_linesz (abfd);
-  }
-  return coff_write_symbol(abfd, &( symbol->symbol), native,written);
+      symbol->symbol.section->output_section->moving_line_filepos +=
+	count * bfd_coff_linesz (abfd);
+    }
+
+  return coff_write_symbol (abfd, &(symbol->symbol), native, written);
 }
 
-void
-coff_write_symbols (abfd)
-     bfd            *abfd;
-{
-  unsigned int    i;
-  unsigned int    limit = bfd_get_symcount(abfd);
-  unsigned int    written = 0;
+/* Write out the COFF symbols.  */
 
-  asymbol       **p;
+boolean
+coff_write_symbols (abfd)
+     bfd *abfd;
+{
+  unsigned int i;
+  unsigned int limit = bfd_get_symcount(abfd);
+  unsigned int written = 0;
+  asymbol **p;
 
   string_size = 0;
   debug_string_size = 0;
 
   /* Seek to the right place */
-  bfd_seek(abfd, obj_sym_filepos(abfd), SEEK_SET);
+  if (bfd_seek (abfd, obj_sym_filepos(abfd), SEEK_SET) != 0)
+    return false;
 
   /* Output all the symbols we have */
 
   written = 0;
   for (p = abfd->outsymbols, i = 0; i < limit; i++, p++)
-      {
-	asymbol        *symbol = *p;
-	coff_symbol_type *c_symbol = coff_symbol_from(abfd, symbol);
+    {
+      asymbol *symbol = *p;
+      coff_symbol_type *c_symbol = coff_symbol_from (abfd, symbol);
 
-	if (c_symbol == (coff_symbol_type *) NULL ||
-	    c_symbol->native == (combined_entry_type *)NULL)
-	    {
-	      written = coff_write_alien_symbol(abfd, symbol, written);
-	    }
-	else
-	    {
-	      written = coff_write_native_symbol(abfd, c_symbol, written);
-	    }
+      if (c_symbol == (coff_symbol_type *) NULL
+	  || c_symbol->native == (combined_entry_type *)NULL)
+	{
+	  if (! coff_write_alien_symbol (abfd, symbol, &written))
+	    return false;
+	}
+      else
+	{
+	  if (! coff_write_native_symbol (abfd, c_symbol, &written))
+	    return false;
+	}
+    }
 
-      }
-
-  bfd_get_symcount(abfd) = written;
+  bfd_get_symcount (abfd) = written;
 
   /* Now write out strings */
 
   if (string_size != 0)
    {
-     unsigned int    size = string_size + 4;
+     unsigned int size = string_size + 4;
      bfd_byte buffer[4];
 
-     bfd_h_put_32(abfd, size, buffer);
-     bfd_write((PTR) buffer, 1, sizeof(buffer), abfd);
+     bfd_h_put_32 (abfd, size, buffer);
+     bfd_write ((PTR) buffer, 1, sizeof (buffer), abfd);
      for (p = abfd->outsymbols, i = 0;
 	  i < limit;
 	  i++, p++)
-	 {
-	   asymbol        *q = *p;
-	   size_t          name_length = strlen(q->name);
-	   int maxlen;
-	   coff_symbol_type*	   c_symbol = coff_symbol_from(abfd, q);
-	   maxlen = ((c_symbol != NULL && c_symbol->native != NULL) &&
-		     (c_symbol->native->u.syment.n_sclass == C_FILE)) ?
-	     FILNMLEN : SYMNMLEN;
+       {
+	 asymbol *q = *p;
+	 size_t name_length = strlen (q->name);
+	 coff_symbol_type *c_symbol = coff_symbol_from (abfd, q);
+	 size_t maxlen;
 
-	   if (name_length > maxlen
-	       && ! bfd_coff_symname_in_debug (abfd,
-					       &c_symbol->native->u.syment))
-	     bfd_write((PTR) (q->name), 1, name_length + 1, abfd);
-	 }
+	 /* Figure out whether the symbol name should go in the string
+	    table.  Symbol names that are short enough are stored
+	    directly in the syment structure.  File names permit a
+	    different, longer, length in the syment structure.  On
+	    XCOFF, some symbol names are stored in the .debug section
+	    rather than in the string table.  */
+
+	 if (c_symbol == NULL
+	     || c_symbol->native == NULL)
+	   {
+	     /* This is not a COFF symbol, so it certainly is not a
+		file name, nor does it go in the .debug section.  */
+	     maxlen = SYMNMLEN;
+	   }
+	 else if (bfd_coff_symname_in_debug (abfd,
+					     &c_symbol->native->u.syment))
+	   {
+	     /* This symbol name is in the XCOFF .debug section.
+		Don't write it into the string table.  */
+	     maxlen = name_length;
+	   }
+	 else if (c_symbol->native->u.syment.n_sclass == C_FILE)
+	   maxlen = FILNMLEN;
+	 else
+	   maxlen = SYMNMLEN;
+
+	 if (name_length > maxlen)
+	   {
+	     if (bfd_write ((PTR) (q->name), 1, name_length + 1, abfd)
+		 != name_length + 1)
+	       return false;
+	   }
+       }
    }
-  else {
-    /* We would normally not write anything here, but we'll write
-       out 4 so that any stupid coff reader which tries to read
-       the string table even when there isn't one won't croak.  */
-    unsigned int size = 4;
-    bfd_byte buffer[4];
+  else
+    {
+      /* We would normally not write anything here, but we'll write
+	 out 4 so that any stupid coff reader which tries to read the
+	 string table even when there isn't one won't croak.  */
+      unsigned int size = 4;
+      bfd_byte buffer[4];
 
-    bfd_h_put_32 (abfd, size, buffer);
-    bfd_write((PTR) buffer, 1, sizeof (buffer), abfd);
-  }
+      bfd_h_put_32 (abfd, size, buffer);
+      if (bfd_write ((PTR) buffer, 1, 4, abfd) != 4)
+	return false;
+    }
 
+  /* Make sure the .debug section was created to be the correct size.
+     We should create it ourselves on the fly, but we don't because
+     BFD won't let us write to any section until we know how large all
+     the sections are.  We could still do it by making another pass
+     over the symbols.  FIXME.  */
   BFD_ASSERT (debug_string_size == 0
 	      || (debug_string_section != (asection *) NULL
 		  && (BFD_ALIGN (debug_string_size,
 				 1 << debug_string_section->alignment_power)
 		      == bfd_section_size (abfd, debug_string_section))));
+
+  return true;
 }
 
 boolean
