@@ -49,6 +49,7 @@ case "${targ}" in
 # end-sanitize-v9
   sparc*-*-aout)	ld_target=sun4 ;;
   sparc*-*-elf)		ld_target=sun4sol2 ;;
+  sparc*-*-lynxos*)	ld_target=sparc-lynx ;;
   sparc*-*-solaris2*)	ld_target=sun4sol2 ;;
   i960-wrs-vxworks*)    ld_target=i960 ;;
   i960-intel-nindy)	ld_target=i960 ;;
@@ -90,12 +91,12 @@ case "${targ}" in
 			exit 1 ;;
   hppa*-hp-osf)		ld_target=hppaosf ;;
   vax-dec-ultrix* | vax-dec-bsd*) ld_target=vax ;;
-  mips-dec-ultrix*)	ld_target=mips-lit ;;
-  mips-sgi-irix*)	ld_target=mips-big ;;
-  mips-idt-ecoffl*)	ld_target=mips-idtl ;;
-  mips-idt-ecoff*)	ld_target=mips-idt ;;
-  mips-dec-bsd*)	ld_target=mipsbsd ;;
-  mips-*-elf*)		ld_target=mipsb-elf32 ;;
+  mips*-dec-ultrix*)	ld_target=mips-lit ;;
+  mips*-sgi-irix*)	ld_target=mips-big ;;
+  mips*el-idt-ecoff*)	ld_target=mips-idtl ;;
+  mips*-idt-ecoff*)	ld_target=mips-idt ;;
+  mips*-dec-bsd*)	ld_target=mipsbsd ;;
+  mips*-*-elf*)		ld_target=mipsb-elf32 ;;
   alpha-*-osf*)		ld_target=alpha ;;
   z8k-*-sim | z8k-*-coff) ld_target=z8ksim ;;
   *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;

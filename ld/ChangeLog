@@ -1,3 +1,12 @@
+Thu Oct 28 19:08:42 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* configure.in (sparc*-*-lynxos*): New target.
+	* Makefile.in: Add rule for em_sparclynx.c.
+	(ALL_EMULATIONS): Add Lynx emulations.
+	* config/sparc-lynx.mt: New file.
+	* emulparams/sparclynx.sh: New file.
+	* scripttempl/sparccoff.sc: New file.
+
 Thu Oct 28 13:50:25 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in: Add dependency for $(EMULATION_OFILES).

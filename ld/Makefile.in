@@ -172,6 +172,7 @@ ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
 	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
 	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500.o \
 	em_hppaosf.o em_mipsidtl.o em_sh.o em_elf_i386.o em_alpha.o \
+	em_i386lynx.o em_m68klynx.o em_sparclynx.o \
 	$(OTHER_EMULATIONS)
 
 # This is now set by configure.in.
@@ -331,6 +332,9 @@ em_i386coff.c: $(srcdir)/emulparams/i386coff.sh \
 em_i386lynx.c: $(srcdir)/emulparams/i386lynx.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386coff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386lynx
+em_sparclynx.c: $(srcdir)/emulparams/sparclynx.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} sparclynx
 em_mipslit.c:  $(srcdir)/emulparams/mipslit.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipslit
