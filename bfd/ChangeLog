@@ -1,3 +1,8 @@
+Fri Apr 30 17:34:11 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elf32-hppa.c: Don't include a.out.h.  Apparently not even the
+	GNU version is needed.
+
 Fri Apr 30 09:38:59 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* coffcode.h: use dummy_reloc16_extra_cases rather than casting abort.
