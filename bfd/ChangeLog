@@ -1,3 +1,14 @@
+2002-01-08  Michael Snyder  <msnyder@redhat.com>
+
+	Add capability to write corefile note sections, for gdb.
+	* elf.c (elfcore_write_note): New function.
+	(elfcore_write_prpsinfo): New function.
+	(elfcore_write_prstatus): New function.
+	(elfcore_write_pstatus): New function.
+	(elfcore_write_prfpreg): New function.
+	(elfcore_write_prxfpreg): New function.
+	* elf-bfd.c: Add prototypes for above functions.
+
 2002-01-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf.c (elf_fake_sections): Propagate errors from

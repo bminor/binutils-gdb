@@ -6488,6 +6488,142 @@ elfcore_grok_netbsd_note (abfd, note)
     /* NOTREACHED */
 }
 
+/* Function: elfcore_write_note
+
+   Inputs: 
+     buffer to hold note
+     name of note
+     type of note
+     data for note
+     size of data for note
+
+   Return:
+   End of buffer containing note.  */
+
+char *
+elfcore_write_note (abfd, buf, bufsiz, name, type, input, size)
+     bfd  *abfd;
+     char *buf;
+     int  *bufsiz;
+     char *name;
+     int  type;
+     void *input;
+     int  size;
+{
+  Elf_External_Note *xnp;
+  int namesz = strlen (name);
+  int newspace = BFD_ALIGN (sizeof (Elf_External_Note) + size + namesz - 1, 4);
+  char *p, *dest;
+
+  p = realloc (buf, *bufsiz + newspace);
+  dest = p + *bufsiz;
+  *bufsiz += newspace;
+  xnp = (Elf_External_Note *) dest;
+  H_PUT_32 (abfd, namesz, xnp->namesz);
+  H_PUT_32 (abfd, size, xnp->descsz);
+  H_PUT_32 (abfd, type, xnp->type);
+  strcpy (xnp->name, name);
+  memcpy (xnp->name + BFD_ALIGN (namesz, 4), input, size);
+  return p;
+}
+
+#if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
+char *
+elfcore_write_prpsinfo (abfd, buf, bufsiz, fname, psargs)
+     bfd  *abfd;
+     char *buf;
+     int  *bufsiz;
+     char *fname; 
+     char *psargs;
+{
+  int note_type;
+  char *note_name = "CORE";
+
+#if defined (HAVE_PSINFO_T)
+  psinfo_t  data;
+  note_type = NT_PSINFO;
+#else
+  prpsinfo_t data;
+  note_type = NT_PRPSINFO;
+#endif
+
+  memset (&data, 0, sizeof (data));
+  strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
+  strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
+  return elfcore_write_note (abfd, buf, bufsiz, 
+			     note_name, note_type, &data, sizeof (data));
+}
+#endif	/* PSINFO_T or PRPSINFO_T */
+
+#if defined (HAVE_PRSTATUS_T)
+char *
+elfcore_write_prstatus (abfd, buf, bufsiz, pid, cursig, gregs)
+     bfd *abfd;
+     char *buf;
+     int *bufsiz;
+     pid_t pid;
+     int cursig;
+     void *gregs;
+{
+  prstatus_t prstat;
+  char *note_name = "CORE";
+
+  memset (&prstat, 0, sizeof (prstat));
+  prstat.pr_pid = pid;
+  prstat.pr_cursig = cursig;
+  memcpy (prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
+  return elfcore_write_note (abfd, buf, bufsiz, 
+			     note_name, NT_PRSTATUS, &prstat, sizeof (prstat));
+}
+#endif /* HAVE_PRSTATUS_T */
+
+#if defined (HAVE_PSTATUS_T)
+char *
+elfcore_write_pstatus (abfd, buf, bufsiz, pid, cursig, gregs)
+     bfd *abfd;
+     char *buf;
+     int *bufsiz;
+     pid_t pid;
+     int cursig;
+     void *gregs;
+{
+  pstatus_t pstat;
+  char *note_name = "CORE";
+
+  memset (&pstat, 0, sizeof (prstat));
+  pstat.pr_pid = pid;
+  memcpy (pstat.pr_reg, gregs, sizeof (pstat.pr_reg));
+  return elfcore_write_note (abfd, buf, bufsiz, 
+			     note_name, NT_PSTATUS, &pstat, sizeof (pstat));
+}
+#endif /* HAVE_PSTATUS_T */
+
+char *
+elfcore_write_prfpreg (abfd, buf, bufsiz, fpregs, size)
+     bfd  *abfd;
+     char *buf;
+     int  *bufsiz;
+     void *fpregs;
+     int size;
+{
+  char *note_name = "CORE";
+  return elfcore_write_note (abfd, buf, bufsiz, 
+			     note_name, NT_FPREGSET, fpregs, size);
+}
+
+char *
+elfcore_write_prxfpreg (abfd, buf, bufsiz, xfpregs, size)
+     bfd  *abfd;
+     char *buf;
+     int  *bufsiz;
+     void *xfpregs;
+     int size;
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz, 
+			     note_name, NT_PRXFPREG, xfpregs, size);
+}
+
 static boolean
 elfcore_read_notes (abfd, offset, size)
      bfd *abfd;

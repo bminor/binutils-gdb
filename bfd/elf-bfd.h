@@ -1518,6 +1518,20 @@ extern boolean _bfd_elf32_reloc_symbol_deleted_p
 extern boolean _bfd_elf64_reloc_symbol_deleted_p
   PARAMS ((bfd_vma, PTR));
 
+/* Exported interface for writing elf corefile notes. */
+extern char *elfcore_write_note 
+  PARAMS ((bfd *, char *, int *, char *, int, void *, int));
+extern char *elfcore_write_prpsinfo 
+  PARAMS ((bfd *, char *, int *, char *, char *));
+extern char *elfcore_write_prstatus 
+  PARAMS ((bfd *, char *, int *, pid_t, int, void *));
+extern char * elfcore_write_pstatus 
+  PARAMS ((bfd *, char *, int *, pid_t, int, void *));
+extern char *elfcore_write_prfpreg 
+  PARAMS ((bfd *, char *, int *, void *, int));
+extern char *elfcore_write_prxfpreg 
+  PARAMS ((bfd *, char *, int *, void *, int));
+
 /* MIPS ELF specific routines.  */
 
 extern boolean _bfd_mips_elf_object_p
