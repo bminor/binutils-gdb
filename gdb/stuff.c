@@ -94,9 +94,7 @@ main (argc, argv)
 /* Read symbol table from file and returns the offset into the file
  * where symbol sym_name is located.  If error, print message and
  * exit. */
-get_offset (file, sym_name)
-     char *file;
-     char *sym_name;
+get_offset (char *file, char *sym_name)
 {
   int f;
   struct exec file_hdr;
@@ -139,11 +137,8 @@ get_offset (file, sym_name)
   return (N_TXTOFF (file_hdr) + core_addr - origin);
 }
 
-find_symbol (sym_name, symbol_table, length, strings)
-     char *sym_name;
-     struct nlist *symbol_table;
-     int length;
-     char *strings;
+find_symbol (char *sym_name, struct nlist *symbol_table, int length,
+	     char *strings)
 {
   register struct nlist *sym;
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -16,8 +16,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
-
-#define TARGET_BYTE_ORDER_SELECTABLE_P 1
 
 #include "mips/tm-bigmips.h"
 

@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+#include "elf/d30v.h"
 
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
@@ -45,24 +46,6 @@ static bfd_reloc_status_type bfd_elf_d30v_reloc_21 PARAMS ((
      asection *input_section,
      bfd *output_bfd,
      char **error_message));
-
-enum reloc_type
-{
-  R_D30V_NONE = 0,
-  R_D30V_6,
-  R_D30V_9_PCREL,
-  R_D30V_9_PCREL_R,
-  R_D30V_15,
-  R_D30V_15_PCREL,
-  R_D30V_15_PCREL_R,
-  R_D30V_21,
-  R_D30V_21_PCREL,
-  R_D30V_21_PCREL_R,
-  R_D30V_32,
-  R_D30V_32_PCREL,
-  R_D30V_32_NORMAL,
-  R_D30V_max
-};
 
 static reloc_howto_type elf_d30v_howto_table[] =
 {
@@ -297,7 +280,7 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
   r = bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
                              input_section, output_bfd, error_message);
   if (r != bfd_reloc_continue)
-    return r; 
+    return r;
 
   /* a hacked-up version of bfd_perform_reloc() follows */
  if (bfd_is_und_section (symbol->section)
@@ -332,11 +315,11 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
 
   if (howto->pc_relative == true)
     {
-      tmp_addr = input_section->output_section->vma + input_section->output_offset 
+      tmp_addr = input_section->output_section->vma + input_section->output_offset
 	+ reloc_entry->address;
       relocation -= tmp_addr;
     }
-  
+
   in1 = bfd_get_32 (abfd, (bfd_byte *) data + addr);
   in2 = bfd_get_32 (abfd, (bfd_byte *) data + addr + 4);
 
@@ -346,7 +329,7 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
 	 | ((in1 & 0x3F) << 26));
   in1 &= 0xFFFFFFC0;
   in2 = 0x80000000;
-  
+
   relocation += num;
 
   if (howto->pc_relative == true && howto->bitsize == 32)
@@ -360,11 +343,11 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
 	  make_absolute = 1;
 	}
     }
-  
+
   in1 |= (relocation >> 26) & 0x3F;	/* top 6 bits */
-  in2 |= ((relocation & 0x03FC0000) << 2);  /* next 8 bits */ 
+  in2 |= ((relocation & 0x03FC0000) << 2);  /* next 8 bits */
   in2 |= relocation & 0x0003FFFF;		/* bottom 18 bits */
-  
+
   /* change a PC-relative instruction to its absolute equivalent */
   /* with this simple hack */
   if (make_absolute)
@@ -372,10 +355,9 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
 
   bfd_put_32 (abfd, in1, (bfd_byte *) data + addr);
   bfd_put_32 (abfd, in2, (bfd_byte *) data + addr + 4);
-  
-  return flag;
-}   
 
+  return flag;
+}
 
 static bfd_reloc_status_type
 bfd_elf_d30v_reloc_21 (abfd, reloc_entry, symbol, data, input_section, output_bfd, error_message)
@@ -403,11 +385,11 @@ bfd_elf_d30v_reloc_21 (abfd, reloc_entry, symbol, data, input_section, output_bf
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;
     }
-  
+
   r = bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
                              input_section, output_bfd, error_message);
   if (r != bfd_reloc_continue)
-    return r; 
+    return r;
 
   /* a hacked-up version of bfd_perform_reloc() follows */
  if (bfd_is_und_section (symbol->section)
@@ -479,16 +461,16 @@ bfd_elf_d30v_reloc_21 (abfd, reloc_entry, symbol, data, input_section, output_bf
       if ((int)relocation > max)
 	flag = bfd_reloc_overflow;
     }
-  relocation >>= 3; 
+  relocation >>= 3;
   if (howto->bitsize == 6)
     in1 |= ((relocation & (mask >> 12)) << 12);
   else
     in1 |= relocation & mask;
 
   bfd_put_32 (abfd, in1, (bfd_byte *) data + addr);
-  
+
   return flag;
-}   
+}
 
 /* Map BFD reloc types to D30V ELF reloc types.  */
 
@@ -497,7 +479,6 @@ struct d30v_reloc_map
   bfd_reloc_code_real_type bfd_reloc_val;
   unsigned char elf_reloc_val;
 };
-
 
 static const struct d30v_reloc_map d30v_reloc_map[] =
 {

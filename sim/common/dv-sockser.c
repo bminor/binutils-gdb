@@ -74,7 +74,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif /* ! defined (FNBLOCK) */
 #endif /* ! defined (O_NONBLOCK) */
 
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 /* Compromise between eating cpu and properly busy-waiting.
    One could have an option to set this but for now that seems
@@ -148,7 +147,9 @@ dv_sockser_init (SIM_DESC sd)
 		      sockser_addr);
       return SIM_RC_FAIL;
     }
-  tmp = MIN (port_str - sockser_addr, (int) sizeof hostname - 1);
+  tmp = port_str - sockser_addr;
+  if (tmp >= sizeof hostname)
+    tmp = sizeof (hostname) - 1;
   strncpy (hostname, sockser_addr, tmp);
   hostname[tmp] = '\000';
   port = atoi (port_str + 1);

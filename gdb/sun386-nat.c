@@ -45,9 +45,7 @@
 
 
 void
-core_file_command (filename, from_tty)
-     char *filename;
-     int from_tty;
+core_file_command (char *filename, int from_tty)
 {
   int val;
 
@@ -55,7 +53,7 @@ core_file_command (filename, from_tty)
      and mark data and stack spaces as empty.  */
 
   if (corefile)
-    free (corefile);
+    xfree (corefile);
   corefile = 0;
 
   if (corechan >= 0)
@@ -72,7 +70,7 @@ core_file_command (filename, from_tty)
   if (filename)
     {
       filename = tilde_expand (filename);
-      make_cleanup (free, filename);
+      make_cleanup (xfree, filename);
 
       if (have_inferior_p ())
 	error ("To look at a core file, you must kill the program with \"kill\".");
@@ -137,9 +135,7 @@ core_file_command (filename, from_tty)
     printf_unfiltered ("No core file now.\n");
 }
 
-i387_to_double (from, to)
-     char *from;
-     char *to;
+i387_to_double (char *from, char *to)
 {
   long *lp;
   /* push extended mode on 387 stack, then pop in double mode
@@ -167,9 +163,7 @@ i387_to_double (from, to)
   asm ("popl %eax");		/* flush saved copy */
 }
 
-double_to_i387 (from, to)
-     char *from;
-     char *to;
+double_to_i387 (char *from, char *to)
 {
   /* push double mode on 387 stack, then pop in extended mode
    * no errors are possible because every 64-bit pattern
@@ -184,8 +178,7 @@ double_to_i387 (from, to)
 }
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_state inferior_fp_registers;
@@ -211,8 +204,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_state inferior_fp_registers;

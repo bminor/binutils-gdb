@@ -108,10 +108,7 @@ static void elf_locate_sections (bfd *, asection *, void *);
    -kingdon).  */
 
 static void
-elf_locate_sections (ignore_abfd, sectp, eip)
-     bfd *ignore_abfd;
-     asection *sectp;
-     PTR eip;
+elf_locate_sections (bfd *ignore_abfd, asection *sectp, PTR eip)
 {
   register struct elfinfo *ei;
 
@@ -143,8 +140,7 @@ elf_locate_sections (ignore_abfd, sectp, eip)
 #if 0				/* Currently unused */
 
 char *
-elf_interpreter (abfd)
-     bfd *abfd;
+elf_interpreter (bfd *abfd)
 {
   sec_ptr interp_sec;
   unsigned size;
@@ -171,41 +167,17 @@ elf_interpreter (abfd)
 #endif
 
 static struct minimal_symbol *
-record_minimal_symbol_and_info (name, address, ms_type, info, bfd_section,
-				objfile)
-     char *name;
-     CORE_ADDR address;
-     enum minimal_symbol_type ms_type;
-     char *info;		/* FIXME, is this really char *? */
-     asection *bfd_section;
-     struct objfile *objfile;
+record_minimal_symbol_and_info (char *name, CORE_ADDR address,
+				enum minimal_symbol_type ms_type, char *info,	/* FIXME, is this really char *? */
+				asection *bfd_section, struct objfile *objfile)
 {
-  int section;
-
-  /* Guess the section from the type.  This is likely to be wrong in
-     some cases.  */
-  switch (ms_type)
-    {
-    case mst_text:
-    case mst_file_text:
-      section = bfd_section->index;
 #ifdef SMASH_TEXT_ADDRESS
-      SMASH_TEXT_ADDRESS (address);
+  if (ms_type == mst_text || ms_type == mst_file_text)
+    SMASH_TEXT_ADDRESS (address);
 #endif
-      break;
-    case mst_data:
-    case mst_file_data:
-    case mst_bss:
-    case mst_file_bss:
-      section = bfd_section->index;
-      break;
-    default:
-      section = -1;
-      break;
-    }
 
   return prim_record_minimal_symbol_and_info
-    (name, address, ms_type, info, section, bfd_section, objfile);
+    (name, address, ms_type, info, bfd_section->index, bfd_section, objfile);
 }
 
 /*
@@ -233,9 +205,7 @@ record_minimal_symbol_and_info (name, address, ms_type, info, bfd_section,
  */
 
 static void
-elf_symtab_read (objfile, dynamic)
-     struct objfile *objfile;
-     int dynamic;
+elf_symtab_read (struct objfile *objfile, int dynamic)
 {
   long storage_needed;
   asymbol *sym;
@@ -279,7 +249,7 @@ elf_symtab_read (objfile, dynamic)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, symbol_table);
+      back_to = make_cleanup (xfree, symbol_table);
       if (dynamic)
 	number_of_symbols = bfd_canonicalize_dynamic_symtab (objfile->obfd,
 							     symbol_table);
@@ -434,7 +404,7 @@ elf_symtab_read (objfile, dynamic)
 		}
 	      else if (sym->section->flags & SEC_ALLOC)
 		{
-		  if (sym->flags & BSF_GLOBAL)
+		  if (sym->flags & (BSF_GLOBAL | BSF_WEAK))
 		    {
 		      if (sym->section->flags & SEC_LOAD)
 			{
@@ -485,11 +455,16 @@ elf_symtab_read (objfile, dynamic)
 				    (char *) filesym->name;
 				}
 			    }
-			  if (sectinfo->sections[index] != 0)
-			    {
-			      complain (&section_info_dup_complaint,
-					sectinfo->filename);
+			  if (index != -1)
+			    { 
+			      if (sectinfo->sections[index] != 0)
+				{
+				  complain (&section_info_dup_complaint,
+					    sectinfo->filename);
+				}
 			    }
+			  else
+			    internal_error ("Section index uninitialized.");
 			  /* Bfd symbols are section relative. */
 			  symaddr = sym->value + sym->section->vma;
 			  /* Relocate non-absolute symbols by the section offset. */
@@ -497,7 +472,10 @@ elf_symtab_read (objfile, dynamic)
 			    {
 			      symaddr += offset;
 			    }
-			  sectinfo->sections[index] = symaddr;
+			  if (index != -1)
+			    sectinfo->sections[index] = symaddr;
+			  else
+			    internal_error ("Section index uninitialized.");
 			  /* The special local symbols don't go in the
 			     minimal symbol table, so ignore this one. */
 			  continue;
@@ -578,9 +556,7 @@ elf_symtab_read (objfile, dynamic)
    capability even for files compiled without -g.  */
 
 static void
-elf_symfile_read (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;
+elf_symfile_read (struct objfile *objfile, int mainline)
 {
   bfd *abfd = objfile->obfd;
   struct elfinfo ei;
@@ -688,8 +664,7 @@ elf_symfile_read (objfile, mainline)
    stab_section_info's, that might be dangling from it.  */
 
 static void
-free_elfinfo (objp)
-     PTR objp;
+free_elfinfo (PTR objp)
 {
   struct objfile *objfile = (struct objfile *) objp;
   struct dbx_symfile_info *dbxinfo = objfile->sym_stab_info;
@@ -714,8 +689,7 @@ free_elfinfo (objp)
    We reinitialize buildsym, since we may be reading stabs from an ELF file.  */
 
 static void
-elf_new_init (ignore)
-     struct objfile *ignore;
+elf_new_init (struct objfile *ignore)
 {
   stabsread_new_init ();
   buildsym_new_init ();
@@ -727,8 +701,7 @@ elf_new_init (ignore)
    objfile struct from the global list of known objfiles. */
 
 static void
-elf_symfile_finish (objfile)
-     struct objfile *objfile;
+elf_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_stab_info != NULL)
     {
@@ -746,8 +719,7 @@ elf_symfile_finish (objfile)
    just a stub. */
 
 static void
-elf_symfile_init (objfile)
-     struct objfile *objfile;
+elf_symfile_init (struct objfile *objfile)
 {
   /* ELF objects may be reordered, so set OBJF_REORDERED.  If we
      find this causes a significant slowdown in gdb then we could
@@ -764,9 +736,7 @@ elf_symfile_init (objfile)
    with wierd names.  Go get 'em when needed.  */
 
 void
-elfstab_offset_sections (objfile, pst)
-     struct objfile *objfile;
-     struct partial_symtab *pst;
+elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
 {
   char *filename = pst->filename;
   struct dbx_symfile_info *dbx = objfile->sym_stab_info;
@@ -809,7 +779,7 @@ elfstab_offset_sections (objfile, pst)
       pst->section_offsets = (struct section_offsets *)
 	obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
       for (i = 0; i < SECT_OFF_MAX; i++)
-	ANOFFSET (pst->section_offsets, i) = maybe->sections[i];
+	(pst->section_offsets)->offsets[i] = maybe->sections[i];
       return;
     }
 
@@ -832,7 +802,7 @@ static struct sym_fns elf_sym_fns =
 };
 
 void
-_initialize_elfread ()
+_initialize_elfread (void)
 {
   add_symtab_fns (&elf_sym_fns);
 }

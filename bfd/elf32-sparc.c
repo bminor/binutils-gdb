@@ -129,7 +129,6 @@ static reloc_howto_type elf32_sparc_vtinherit_howto =
 static reloc_howto_type elf32_sparc_vtentry_howto =
   HOWTO (R_SPARC_GNU_VTENTRY, 0,2,0,false,0,complain_overflow_dont, _bfd_elf_rel_vtable_reloc_fn,"R_SPARC_GNU_VTENTRY", false,0,0, false);
 
-
 struct elf_reloc_map {
   bfd_reloc_code_real_type bfd_reloc_val;
   unsigned char elf_reloc_val;
@@ -188,7 +187,7 @@ elf32_sparc_reloc_type_lookup (abfd, code)
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
-  
+
   switch (code)
     {
     case BFD_RELOC_VTABLE_INHERIT:
@@ -1019,7 +1018,12 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	}
 
       /* Allocate memory for the section contents.  */
-      s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
+      /* FIXME: This should be a call to bfd_alloc not bfd_zalloc.
+	 Unused entries should be reclaimed before the section's contents
+	 are written out, but at the moment this does not happen.  Thus in
+	 order to prevent writing out garbage, we initialise the section's
+	 contents to zero.  */
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
       if (s->contents == NULL && s->_raw_size != 0)
 	return false;
     }
@@ -1056,17 +1060,16 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	{
 	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
+	  info->flags |= DF_TEXTREL;
 	}
     }
 
   return true;
 }
 
-
 #define SET_SEC_DO_RELAX(section) do { elf_section_data(section)->tdata = (void *)1; } while (0)
 #define SEC_DO_RELAX(section) (elf_section_data(section)->tdata == (void *)1)
 
-/*ARGSUSED*/
 static boolean
 elf32_sparc_relax_section (abfd, section, link_info, again)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -1133,7 +1136,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_type = ELF32_R_TYPE (rel->r_info);
 
-      if (r_type == R_SPARC_GNU_VTINHERIT 
+      if (r_type == R_SPARC_GNU_VTINHERIT
           || r_type == R_SPARC_GNU_VTENTRY)
         continue;
 
@@ -1615,7 +1618,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || ((reloc | 0x7fffff) == ~(bfd_vma)0)))
 		    {
 		      reloc >>= 2;
-		
+
 		      /* Check whether it fits into simm19 on v9.  */
 		      if (((reloc & 0x3c0000) == 0
 			   || (reloc & 0x3c0000) == 0x3c0000)
@@ -1664,7 +1667,6 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				      contents, rel->r_offset,
 				      relocation, rel->r_addend);
-
 
       if (r != bfd_reloc_ok)
 	{
@@ -1953,33 +1955,6 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
 
   error = false;
 
-#if 0
-  /* ??? The native linker doesn't do this so we can't (otherwise gcc would
-     have to know which linker is being used).  Instead, the native linker
-     bumps up the architecture level when it has to.  However, I still think
-     warnings like these are good, so it would be nice to have them turned on
-     by some option.  */
-
-  /* If the output machine is normal sparc, we can't allow v9 input files.  */
-  if (bfd_get_mach (obfd) == bfd_mach_sparc
-      && (bfd_get_mach (ibfd) == bfd_mach_sparc_v8plus
-	  || bfd_get_mach (ibfd) == bfd_mach_sparc_v8plusa))
-    {
-      error = true;
-      (*_bfd_error_handler)
-	(_("%s: compiled for a v8plus system and target is v8"),
-	 bfd_get_filename (ibfd));
-    }
-  /* If the output machine is v9, we can't allow v9+vis input files.  */
-  if (bfd_get_mach (obfd) == bfd_mach_sparc_v8plus
-      && bfd_get_mach (ibfd) == bfd_mach_sparc_v8plusa)
-    {
-      error = true;
-      (*_bfd_error_handler)
-	(_("%s: compiled for a v8plusa system and target is v8plus"),
-	 bfd_get_filename (ibfd));
-    }
-#else
   if (bfd_get_mach (ibfd) >= bfd_mach_sparc_v9)
     {
       error = true;
@@ -1992,7 +1967,6 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
       if (bfd_get_mach (obfd) < bfd_get_mach (ibfd))
 	bfd_set_arch_mach (obfd, bfd_arch_sparc, bfd_get_mach (ibfd));
     }
-#endif
 
   if (((elf_elfheader (ibfd)->e_flags & EF_SPARC_LEDATA)
        != previous_ibfd_e_flags)
@@ -2022,7 +1996,10 @@ elf32_sparc_object_p (abfd)
 {
   if (elf_elfheader (abfd)->e_machine == EM_SPARC32PLUS)
     {
-      if (elf_elfheader (abfd)->e_flags & EF_SPARC_SUN_US1)
+      if (elf_elfheader (abfd)->e_flags & EF_SPARC_SUN_US3)
+	return bfd_default_set_arch_mach (abfd, bfd_arch_sparc,
+					  bfd_mach_sparc_v8plusb);
+      else if (elf_elfheader (abfd)->e_flags & EF_SPARC_SUN_US1)
 	return bfd_default_set_arch_mach (abfd, bfd_arch_sparc,
 					  bfd_mach_sparc_v8plusa);
       else if (elf_elfheader (abfd)->e_flags & EF_SPARC_32PLUS)
@@ -2059,6 +2036,12 @@ elf32_sparc_final_write_processing (abfd, linker)
       elf_elfheader (abfd)->e_machine = EM_SPARC32PLUS;
       elf_elfheader (abfd)->e_flags &=~ EF_SPARC_32PLUS_MASK;
       elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS | EF_SPARC_SUN_US1;
+      break;
+    case bfd_mach_sparc_v8plusb :
+      elf_elfheader (abfd)->e_machine = EM_SPARC32PLUS;
+      elf_elfheader (abfd)->e_flags &=~ EF_SPARC_32PLUS_MASK;
+      elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS | EF_SPARC_SUN_US1
+				       | EF_SPARC_SUN_US3;
       break;
     case bfd_mach_sparc_sparclite_le :
       elf_elfheader (abfd)->e_machine = EM_SPARC;

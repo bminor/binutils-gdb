@@ -269,10 +269,7 @@ static struct trans pr_flag_table[] =
 };
 
 void
-proc_prettyfprint_flags (file, flags, verbose)
-     FILE         *file;
-     unsigned long flags;
-     int           verbose;
+proc_prettyfprint_flags (FILE *file, unsigned long flags, int verbose)
 {
   int i;
 
@@ -288,9 +285,7 @@ proc_prettyfprint_flags (file, flags, verbose)
 }
 
 void
-proc_prettyprint_flags (flags, verbose)
-     unsigned long flags;
-     int           verbose;
+proc_prettyprint_flags (unsigned long flags, int verbose)
 {
   proc_prettyfprint_flags (stdout, flags, verbose);
 }

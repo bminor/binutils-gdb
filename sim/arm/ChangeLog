@@ -1,3 +1,157 @@
+2000-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (ARMul_Emulate26): Fix test for StoreDouble
+	instruction.
+
+2000-12-10  Nick Clifton  <nickc@redhat.com>
+
+	* armos.c (ARMul_OSHandleSWI): Add 0x91 as an FPE SWI.
+
+2000-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (ARMul_Emulate26): Detect double word load and
+	store instructions and call emulation routines.
+	(Handle_Load_Double): Emulate a double word load instruction.
+	(Handle_Store_Double): Emulate a double word store
+	instruction.
+
+2000-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* armos.c: Fix formatting.
+	(ARMul_OSHandleSWI): Suppress support of DEMON SWIs when in xscale
+	mode.
+
+2000-11-29  Nick Clifton  <nickc@redhat.com>
+
+	* armdefs.h (State): Add 'v5e' and 'xscale' fields.
+	(ARM_v5e_Prop): Define.
+	(ARM_XScale_Prop): Define.
+	
+	* wrapper.c (sim_create_inferior): Select processor based on
+	machine number.
+	(SWI_vector_installed): New boolean.  Set to true if the SWI
+	vector address is written to by the executable.
+	
+	* arminit.c (ARMul_NewState): Switch default to 32 bit mode.
+	(ARMul_SelectProcessor): Initialise v5e and xscale signals.
+	(ARMul_Abort): Fix calculation of LR address.
+
+	* armos.c (ARMul_OSHandleSWI): If a SWI vector has been installed
+	and a SWI is not handled by the simulator, pass the SWI off to the
+	vector, otherwise issue a warning message and continue.
+
+	* armsupp.c (ARMul_CPSRAltered): Set S bit aswell.
+	
+	* thumbemu.c: Add v5 instruction simulation.
+	* armemu.c: Add v5, XScale and El Segundo instruction simulation.
+
+	* armcopro.c: Add XScale co-processor emulation.
+	* armemu.h: Add exported XScale co-processor functions.
+	
+2000-09-15  Nick Clifton  <nickc@redhat.com>
+
+	* armdefs.h: Rename StrongARM property to v4_ARM and add v5 ARM
+	property.  Delete unnecessary processor names.
+	(ARM_Strong_Prop): Delete.
+	(STRONGARM): Delete.
+	(ARM_v4_Prop): Add.
+	(ARM_v5_Prop): Add
+	(State): Delete is_StrongARM boolean.  Add is_v4 and is_v5
+	booleans.
+
+	* armemu.h (BUSUSEDINCPCS): Use is_v4 boolean.
+	(BUSUSEDINCPCN): Use is_v4 boolean.
+
+	* arminit.c (ARMul_NewState): Initialise is_v4 and is_v5 fields.
+	(ARMul_SelectProcessor): Change second parameter from 'processor'
+	to 'properties'.  Set is_v4 and is_v5 booleans in State.
+
+	* armrdi.c: Remove use of ARM processor names.  Replace with ARM
+	processor properties.
+
+	* wrapper.c (sim_create_inferior): Choose properties passed to
+	ARMul_SelectProcessor based on machine number.
+
+2000-08-14  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (LHPOSTDOWN): Compute write back value before
+	performing load in case the offset register is overwritten.
+	(LHPOSTUP): Ditto.
+
+2000-07-14  Fernando Nasser <fnasser@cygnus.com>
+
+	* wrapper.c (sim_create_inferior): Fix typo in the previous patch.
+
+2000-07-14  Fernando Nasser <fnasser@cygnus.com>
+
+	* wrapper.c (sim_create_inferior): Reset mode to ARM when creating a
+	new inferior.
+
+2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* armvirt.c (ABORTS): Do not define.
+
+	* armdefs.h (struct ARMul_State): Add is_StrongARM.
+	(ARM_Strong_Prop, STRONGARM): Define.
+	* arminit.c (ARMul_NewState): Reset is_StrongARM.
+	(ARMul_SelectProcessor): Set is_StrongARM.
+	* wrapper.c (sim_create_inferior): Use bfd machine type to
+	determine processor type to emulate.
+	* armemu.h (BUSUSEDINCPCS, BUSUSEDINCPCN): Don't increment PC
+	when emulating StrongARM.
+
+	* armemu.c (ARMul_Emulate, t_undefined): Proceed to next insn.
+
+	* armemu.h (INSN_SIZE): New macro.
+	(SET_ABORT): Save CPSR in SPSR and set LR.
+	* armemu.c (ARMul_Emulate, isize): Set to INSN_SIZE.
+	(WriteR15, WriteSR15): Do not discard bit 1 in Thumb mode.
+	* arminit.c (ARMul_Abort): Use new SETABORT and INSN_SIZE.
+
+	* armemu.c (LoadSMult): Use WriteR15() to discard the least
+	significant bits of PC.
+
+	* armemu.h (WRITEDESTB): New macro.
+	* armemu.c (ARMul_Emulate26, bl): Use WriteR15Branch() to
+	modify PC.  Moved the existing logic...
+	(WriteR15Branch): ... here.  New function.
+	(WriteR15, WriteSR15): Drop the two least significant bits.
+	(LoadSMult): Use WriteR15Branch() to modify PC.
+	(LoadMult): Use WRITEDESTB() instead of WRITEDEST().
+
+	* armemu.h (GETSPSR): Call ARMul_GetSPSR().
+	* armsupp.c (ARMul_CPSRAltered): Zero out bits as they're
+	extracted from state->Cpsr, but preserve the unused bits.
+	(ARMul_GetCPSR): Get bits preserved in state->Cpsr.
+	(ARMul_GetSPSR, ARMul_FixCPSR): Use ARMul_GetCPSR() to
+	get the full CPSR word.
+
+	* armemu.h (PSR_FBITS, PSR_SBITS, PSR_XBITS, PSR_CBITS): New.
+	(SETPSR_F, SETPSR_S, SETPSR_X, SETPSR_C): New macros.
+	(SETPSR, SET_INTMODE, SETCC): Removed.
+	* armsupp.c (ARMul_FixCPSR, ARMul_FixSPSR): Do not test bit
+	mask.  Use SETPSR_* to modify PSR.
+	(ARMul_SetCPSR): Load all bits from value.
+	* armemu.c (ARMul_Emulate, msr): Do not test bit mask.
+
+	* armemu.c (ARMul_Emulate): Compute writeback value before
+	loading, since the offset register may be the destination
+	register.
+
+	* armdefs.h (SYSTEMBANK): Define as USERBANK.
+	* armsupp.c (ARMul_SwitchMode): Remove SYSTEMBANK cases.
+
+2000-06-22  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* armemu.c (Multiply64): Fix computation of flag N.
+
+	* armemu.c (MultiplyAdd64): Fix computation of flag N.
+
+2000-06-20  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* armemu.h (NEGBRANCH): Do not overwrite the two most significant
+	bits of the offset.
+
 2000-05-25  Nick Clifton  <nickc@cygnus.com>
 
 	* armcopro.c (MMUMCR): Only indicate mode change if a singal has
@@ -84,7 +238,6 @@ Wed Mar 22 15:24:21 2000  glen mccready  <gkm@pobox.com>
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
-
 
 1999-05-08  Felix Lee  <flee@cygnus.com>
 

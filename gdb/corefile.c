@@ -37,6 +37,7 @@
 #include "gdb_stat.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "completer.h"
 
 /* Local function declarations.  */
 
@@ -65,9 +66,7 @@ bfd *core_bfd = NULL;
 /* Backward compatability with old way of specifying core files.  */
 
 void
-core_file_command (filename, from_tty)
-     char *filename;
-     int from_tty;
+core_file_command (char *filename, int from_tty)
 {
   struct target_ops *t;
 
@@ -92,7 +91,7 @@ core_file_command (filename, from_tty)
 	      {
 		char *symfile_copy = xstrdup (symfile);
 
-		make_cleanup (free, symfile_copy);
+		make_cleanup (xfree, symfile_copy);
 		symbol_file_command (symfile_copy, from_tty);
 	      }
 	    else
@@ -110,8 +109,7 @@ core_file_command (filename, from_tty)
  * this function will call all of the hook functions. */
 
 static void
-call_extra_exec_file_hooks (filename)
-     char *filename;
+call_extra_exec_file_hooks (char *filename)
 {
   int i;
 
@@ -123,8 +121,7 @@ call_extra_exec_file_hooks (filename)
    This is called from the x-window display code.  */
 
 void
-specify_exec_file_hook (hook)
-     void (*hook) (char *);
+specify_exec_file_hook (void (*hook) (char *))
 {
   hook_type *new_array;
 
@@ -160,7 +157,7 @@ specify_exec_file_hook (hook)
    be reopened.  */
 
 void
-close_exec_file ()
+close_exec_file (void)
 {
 #if 0				/* FIXME */
   if (exec_bfd)
@@ -169,7 +166,7 @@ close_exec_file ()
 }
 
 void
-reopen_exec_file ()
+reopen_exec_file (void)
 {
 #if 0				/* FIXME */
   if (exec_bfd)
@@ -186,7 +183,7 @@ reopen_exec_file ()
 
   /* If the timestamp of the exec file has changed, reopen it. */
   filename = xstrdup (bfd_get_filename (exec_bfd));
-  make_cleanup (free, filename);
+  make_cleanup (xfree, filename);
   mtime = bfd_get_mtime (exec_bfd);
   res = stat (filename, &st);
 
@@ -199,7 +196,7 @@ reopen_exec_file ()
    print a warning if they don't go together.  */
 
 void
-validate_files ()
+validate_files (void)
 {
   if (exec_bfd && core_bfd)
     {
@@ -215,8 +212,7 @@ validate_files ()
    otherwise return 0 in that case.  */
 
 char *
-get_exec_file (err)
-     int err;
+get_exec_file (int err)
 {
   if (exec_bfd)
     return bfd_get_filename (exec_bfd);
@@ -232,9 +228,7 @@ Use the \"file\" or \"exec-file\" command.");
 /* Report a memory error with error().  */
 
 void
-memory_error (status, memaddr)
-     int status;
-     CORE_ADDR memaddr;
+memory_error (int status, CORE_ADDR memaddr)
 {
   struct ui_file *tmp_stream = mem_fileopen ();
   make_cleanup_ui_file_delete (tmp_stream);
@@ -259,10 +253,7 @@ memory_error (status, memaddr)
 
 /* Same as target_read_memory, but report an error if can't read.  */
 void
-read_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int status;
   status = target_read_memory (memaddr, myaddr, len);
@@ -272,40 +263,29 @@ read_memory (memaddr, myaddr, len)
 
 /* Like target_read_memory, but slightly different parameters.  */
 int
-dis_asm_read_memory (memaddr, myaddr, len, info)
-     bfd_vma memaddr;
-     bfd_byte *myaddr;
-     unsigned int len;
-     disassemble_info *info;
+dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr, unsigned int len,
+		     disassemble_info *info)
 {
   return target_read_memory (memaddr, (char *) myaddr, len);
 }
 
 /* Like memory_error with slightly different parameters.  */
 void
-dis_asm_memory_error (status, memaddr, info)
-     int status;
-     bfd_vma memaddr;
-     disassemble_info *info;
+dis_asm_memory_error (int status, bfd_vma memaddr, disassemble_info *info)
 {
   memory_error (status, memaddr);
 }
 
 /* Like print_address with slightly different parameters.  */
 void
-dis_asm_print_address (addr, info)
-     bfd_vma addr;
-     struct disassemble_info *info;
+dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
 {
   print_address (addr, info->stream);
 }
 
 /* Same as target_write_memory, but report an error if can't write.  */
 void
-write_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int status;
 
@@ -317,9 +297,7 @@ write_memory (memaddr, myaddr, len)
 /* Read an integer from debugged memory, given address and number of bytes.  */
 
 LONGEST
-read_memory_integer (memaddr, len)
-     CORE_ADDR memaddr;
-     int len;
+read_memory_integer (CORE_ADDR memaddr, int len)
 {
   char buf[sizeof (LONGEST)];
 
@@ -328,9 +306,7 @@ read_memory_integer (memaddr, len)
 }
 
 ULONGEST
-read_memory_unsigned_integer (memaddr, len)
-     CORE_ADDR memaddr;
-     int len;
+read_memory_unsigned_integer (CORE_ADDR memaddr, int len)
 {
   char buf[sizeof (ULONGEST)];
 
@@ -339,10 +315,7 @@ read_memory_unsigned_integer (memaddr, len)
 }
 
 void
-read_memory_string (memaddr, buffer, max_len)
-     CORE_ADDR memaddr;
-     char *buffer;
-     int max_len;
+read_memory_string (CORE_ADDR memaddr, char *buffer, int max_len)
 {
   register char *cp;
   register int i;
@@ -376,17 +349,9 @@ read_memory_string (memaddr, buffer, max_len)
    if the protocol has a less general search function, they can call this
    in the cases it can't handle.  */
 void
-generic_search (len, data, mask, startaddr, increment, lorange, hirange
-		addr_found, data_found)
-     int len;
-     char *data;
-     char *mask;
-     CORE_ADDR startaddr;
-     int increment;
-     CORE_ADDR lorange;
-     CORE_ADDR hirange;
-     CORE_ADDR *addr_found;
-     char *data_found;
+generic_search (int len, char *data, char *mask, CORE_ADDR startaddr,
+		int increment, CORE_ADDR lorange, CORE_ADDR hirange,
+		CORE_ADDR *addr_found, char *data_found)
 {
   int i;
   CORE_ADDR curaddr = startaddr;
@@ -419,10 +384,7 @@ static char *gnutarget_string;
 static void set_gnutarget_command (char *, int, struct cmd_list_element *);
 
 static void
-set_gnutarget_command (ignore, from_tty, c)
-     char *ignore;
-     int from_tty;
-     struct cmd_list_element *c;
+set_gnutarget_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
   if (STREQ (gnutarget_string, "auto"))
     gnutarget = NULL;
@@ -432,17 +394,16 @@ set_gnutarget_command (ignore, from_tty, c)
 
 /* Set the gnutarget.  */
 void
-set_gnutarget (newtarget)
-     char *newtarget;
+set_gnutarget (char *newtarget)
 {
   if (gnutarget_string != NULL)
-    free (gnutarget_string);
+    xfree (gnutarget_string);
   gnutarget_string = savestring (newtarget, strlen (newtarget));
   set_gnutarget_command (NULL, 0, NULL);
 }
 
 void
-_initialize_core ()
+_initialize_core (void)
 {
   struct cmd_list_element *c;
   c = add_cmd ("core-file", class_files, core_file_command,

@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "dis-asm.h"
 #include "bfd.h"
 #include "sim-main.h"
+#include "sim-fpu.h"
 
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -53,10 +54,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SIZE_TRACE_BUF
 #define SIZE_TRACE_BUF 1024
 #endif
-
-static void
-disassemble_insn (SIM_CPU *, const CGEN_INSN *,
-		  const struct argbuf *, IADDR, char *);
 
 /* Text is queued in TRACE_BUF because we want to output the insn's cycle
    count first but that isn't known until after the insn has executed.
@@ -239,6 +236,19 @@ trace_result (SIM_CPU *cpu, char *name, int type, ...)
     default :
       cgen_trace_printf (cpu, "%s <- 0x%x", name, va_arg (args, int));
       break;
+    case 'f':
+      {
+	DI di;
+	sim_fpu f;
+
+	/* this is separated from previous line for sunos cc */
+	di = va_arg (args, DI);
+	sim_fpu_64to (&f, di);
+
+	cgen_trace_printf (cpu, "%s <- ", name);
+	sim_fpu_printn_fpu (&f, (sim_fpu_print_func *) cgen_trace_printf, 4, cpu);
+	break;
+      }
     case 'D' :
       {
 	DI di;
@@ -354,6 +364,7 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
 			   const ARGBUF *abuf, IADDR pc, char *buf)
 {
   unsigned int length;
+  unsigned int base_length;
   unsigned long insn_value;
   struct disassemble_info disasm_info;
   SFILE sfile;
@@ -380,7 +391,18 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
   length = sim_core_read_buffer (sd, cpu, read_map, &insn_buf, pc,
 				 insn_length);
 
-  switch (min (cd->base_insn_bitsize, insn_bit_length))
+  if (length != insn_length)
+  {
+    sim_io_error (sd, "unable to read address %x", pc);
+  }
+
+  /* If the entire insn will fit into an integer, then do it. Otherwise, just
+     use the bits of the base_insn.  */
+  if (insn_bit_length <= 32)
+    base_length = insn_bit_length;
+  else
+    base_length = min (cd->base_insn_bitsize, insn_bit_length);
+  switch (base_length)
     {
     case 0 : return; /* fake insn, typically "compile" (aka "invalid") */
     case 8 : insn_value = insn_buf.bytes[0]; break;

@@ -98,10 +98,7 @@ static void f_emit_char (int c, struct ui_file * stream, int quoter);
    be replaced with a true F77 version.  */
 
 static void
-f_emit_char (c, stream, quoter)
-     register int c;
-     struct ui_file *stream;
-     int quoter;
+f_emit_char (register int c, struct ui_file *stream, int quoter)
 {
   c &= 0xFF;			/* Avoid sign bit follies */
 
@@ -147,9 +144,7 @@ f_emit_char (c, stream, quoter)
    be replaced with a true F77version. */
 
 static void
-f_printchar (c, stream)
-     int c;
-     struct ui_file *stream;
+f_printchar (int c, struct ui_file *stream)
 {
   fputs_filtered ("'", stream);
   LA_EMIT_CHAR (c, stream, '\'');
@@ -164,12 +159,8 @@ f_printchar (c, stream)
    be replaced with a true F77 version. */
 
 static void
-f_printstr (stream, string, length, width, force_ellipses)
-     struct ui_file *stream;
-     char *string;
-     unsigned int length;
-     int width;
-     int force_ellipses;
+f_printstr (struct ui_file *stream, char *string, unsigned int length,
+	    int width, int force_ellipses)
 {
   register unsigned int i;
   unsigned int things_printed = 0;
@@ -256,9 +247,7 @@ f_printstr (stream, string, length, width, force_ellipses)
    by an experienced F77 programmer. */
 
 static struct type *
-f_create_fundamental_type (objfile, typeid)
-     struct objfile *objfile;
-     int typeid;
+f_create_fundamental_type (struct objfile *objfile, int typeid)
 {
   register struct type *type = NULL;
 
@@ -471,6 +460,7 @@ const struct language_defn f_language_defn =
   f_builtin_types,
   range_check_on,
   type_check_on,
+  case_sensitive_off,
   f_parse,			/* parser */
   f_error,			/* parser error function */
   evaluate_subexp_standard,
@@ -493,7 +483,7 @@ const struct language_defn f_language_defn =
 };
 
 void
-_initialize_f_language ()
+_initialize_f_language (void)
 {
   builtin_type_f_void =
     init_type (TYPE_CODE_VOID, 1,
@@ -576,7 +566,7 @@ _initialize_f_language ()
 
 #if 0
 static SAVED_BF_PTR
-allocate_saved_bf_node ()
+allocate_saved_bf_node (void)
 {
   SAVED_BF_PTR new;
 
@@ -585,7 +575,7 @@ allocate_saved_bf_node ()
 }
 
 static SAVED_FUNCTION *
-allocate_saved_function_node ()
+allocate_saved_function_node (void)
 {
   SAVED_FUNCTION *new;
 
@@ -594,7 +584,7 @@ allocate_saved_function_node ()
 }
 
 static SAVED_F77_COMMON_PTR
-allocate_saved_f77_common_node ()
+allocate_saved_f77_common_node (void)
 {
   SAVED_F77_COMMON_PTR new;
 
@@ -603,7 +593,7 @@ allocate_saved_f77_common_node ()
 }
 
 static COMMON_ENTRY_PTR
-allocate_common_entry_node ()
+allocate_common_entry_node (void)
 {
   COMMON_ENTRY_PTR new;
 
@@ -630,11 +620,7 @@ static SAVED_BF_PTR tmp_bf_ptr;	/* Generic temporary for use
    the global common block chain */
 
 static void
-add_common_block (name, offset, secnum, func_stab)
-     char *name;
-     CORE_ADDR offset;
-     int secnum;
-     char *func_stab;
+add_common_block (char *name, CORE_ADDR offset, int secnum, char *func_stab)
 {
   SAVED_F77_COMMON_PTR tmp;
   char *c, *local_copy_func_stab;
@@ -649,7 +635,7 @@ add_common_block (name, offset, secnum, func_stab)
       STREQ (name, BLANK_COMMON_NAME_MF77))
     {
 
-      free (name);
+      xfree (name);
       name = alloca (strlen (BLANK_COMMON_NAME_LOCAL) + 1);
       strcpy (name, BLANK_COMMON_NAME_LOCAL);
     }
@@ -703,8 +689,7 @@ add_common_block (name, offset, secnum, func_stab)
 
 #if 0
 static void
-add_common_entry (entry_sym_ptr)
-     struct symbol *entry_sym_ptr;
+add_common_entry (struct symbol *entry_sym_ptr)
 {
   COMMON_ENTRY_PTR tmp;
 
@@ -741,8 +726,7 @@ add_common_entry (entry_sym_ptr)
 
 #if 0
 static SAVED_F77_COMMON_PTR
-find_first_common_named (name)
-     char *name;
+find_first_common_named (char *name)
 {
 
   SAVED_F77_COMMON_PTR tmp;
@@ -764,9 +748,7 @@ find_first_common_named (name)
    that belongs to function funcname */
 
 SAVED_F77_COMMON_PTR
-find_common_for_function (name, funcname)
-     char *name;
-     char *funcname;
+find_common_for_function (char *name, char *funcname)
 {
 
   SAVED_F77_COMMON_PTR tmp;
@@ -791,10 +773,7 @@ find_common_for_function (name, funcname)
    "name."  */
 
 static void
-patch_common_entries (blk, offset, secnum)
-     SAVED_F77_COMMON_PTR blk;
-     CORE_ADDR offset;
-     int secnum;
+patch_common_entries (SAVED_F77_COMMON_PTR blk, CORE_ADDR offset, int secnum)
 {
   COMMON_ENTRY_PTR entry;
 
@@ -819,10 +798,7 @@ patch_common_entries (blk, offset, secnum)
    (which is where common data lives). */
 
 static void
-patch_all_commons_by_name (name, offset, secnum)
-     char *name;
-     CORE_ADDR offset;
-     int secnum;
+patch_all_commons_by_name (char *name, CORE_ADDR offset, int secnum)
 {
 
   SAVED_F77_COMMON_PTR tmp;
@@ -833,7 +809,7 @@ patch_all_commons_by_name (name, offset, secnum)
   if ((STREQ (name, BLANK_COMMON_NAME_ORIGINAL)) ||
       (STREQ (name, BLANK_COMMON_NAME_MF77)))
     {
-      free (name);
+      xfree (name);
       name = alloca (strlen (BLANK_COMMON_NAME_LOCAL) + 1);
       strcpy (name, BLANK_COMMON_NAME_LOCAL);
     }
@@ -890,7 +866,7 @@ else \
 
 #if 0
 static void
-clear_bf_list ()
+clear_bf_list (void)
 {
 
   SAVED_BF_PTR tmp = saved_bf_list;
@@ -899,7 +875,7 @@ clear_bf_list ()
   while (tmp != NULL)
     {
       next = tmp->next;
-      free (tmp);
+      xfree (tmp);
       tmp = next;
     }
   saved_bf_list = NULL;
@@ -911,8 +887,7 @@ int global_remote_debug;
 #if 0
 
 static long
-get_bf_for_fcn (the_function)
-     long the_function;
+get_bf_for_fcn (long the_function)
 {
   SAVED_BF_PTR tmp;
   int nprobes = 0;
@@ -963,7 +938,7 @@ static SAVED_FUNCTION_PTR saved_function_list = NULL;
 static SAVED_FUNCTION_PTR saved_function_list_end = NULL;
 
 static void
-clear_function_list ()
+clear_function_list (void)
 {
   SAVED_FUNCTION_PTR tmp = saved_function_list;
   SAVED_FUNCTION_PTR next = NULL;
@@ -971,7 +946,7 @@ clear_function_list ()
   while (tmp != NULL)
     {
       next = tmp->next;
-      free (tmp);
+      xfree (tmp);
       tmp = next;
     }
 

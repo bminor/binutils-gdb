@@ -45,8 +45,7 @@ int target_is_m88110 = 0;
    of an instruction.  Shrug.  */
 
 CORE_ADDR
-m88k_addr_bits_remove (addr)
-     CORE_ADDR addr;
+m88k_addr_bits_remove (CORE_ADDR addr)
 {
   return ((addr) & ~3);
 }
@@ -60,8 +59,7 @@ m88k_addr_bits_remove (addr)
    the function prologue to determine the caller's sp value, and return it.  */
 
 CORE_ADDR
-frame_chain (thisframe)
-     struct frame_info *thisframe;
+frame_chain (struct frame_info *thisframe)
 {
 
   frame_find_saved_regs (thisframe, (struct frame_saved_regs *) 0);
@@ -75,8 +73,7 @@ frame_chain (thisframe)
 }
 
 int
-frameless_function_invocation (frame)
-     struct frame_info *frame;
+frameless_function_invocation (struct frame_info *frame)
 {
 
   frame_find_saved_regs (frame, (struct frame_saved_regs *) 0);
@@ -90,9 +87,7 @@ frameless_function_invocation (frame)
 }
 
 void
-init_extra_frame_info (fromleaf, frame)
-     int fromleaf;
-     struct frame_info *frame;
+init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   frame->fsr = 0;		/* Not yet allocated */
   frame->args_pointer = 0;	/* Unknown */
@@ -212,9 +207,7 @@ struct prologue_insns prologue_insn_tbl[] =
    is stored at 'pword1'.  */
 
 CORE_ADDR
-next_insn (memaddr, pword1)
-     unsigned long *pword1;
-     CORE_ADDR memaddr;
+next_insn (CORE_ADDR memaddr, unsigned long *pword1)
 {
   *pword1 = read_memory_integer (memaddr, BYTES_PER_88K_INSN);
   return memaddr + BYTES_PER_88K_INSN;
@@ -223,9 +216,7 @@ next_insn (memaddr, pword1)
 /* Read a register from frames called by us (or from the hardware regs).  */
 
 static int
-read_next_frame_reg (frame, regno)
-     struct frame_info *frame;
-     int regno;
+read_next_frame_reg (struct frame_info *frame, int regno)
 {
   for (; frame; frame = frame->next)
     {
@@ -247,12 +238,9 @@ read_next_frame_reg (frame, regno)
    to reflect the offsets of the arg pointer and the locals pointer.  */
 
 static CORE_ADDR
-examine_prologue (ip, limit, frame_sp, fsr, fi)
-     register CORE_ADDR ip;
-     register CORE_ADDR limit;
-     CORE_ADDR frame_sp;
-     struct frame_saved_regs *fsr;
-     struct frame_info *fi;
+examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
+		  CORE_ADDR frame_sp, struct frame_saved_regs *fsr,
+		  struct frame_info *fi)
 {
   register CORE_ADDR next_ip;
   register int src;
@@ -413,8 +401,7 @@ end_of_prologue_found:
    prologue.  */
 
 CORE_ADDR
-m88k_skip_prologue (ip)
-CORE_ADDR (ip);
+m88k_skip_prologue (CORE_ADDR ip)
 {
   struct frame_saved_regs saved_regs_dummy;
   struct symtab_and_line sal;
@@ -437,9 +424,7 @@ CORE_ADDR (ip);
    fairly expensive.  */
 
 void
-frame_find_saved_regs (fi, fsr)
-     struct frame_info *fi;
-     struct frame_saved_regs *fsr;
+frame_find_saved_regs (struct frame_info *fi, struct frame_saved_regs *fsr)
 {
   register struct frame_saved_regs *cache_fsr;
   CORE_ADDR ip;
@@ -487,8 +472,7 @@ frame_find_saved_regs (fi, fsr)
    argument pointer, so this is the same as frame_args_address().  */
 
 CORE_ADDR
-frame_locals_address (fi)
-     struct frame_info *fi;
+frame_locals_address (struct frame_info *fi)
 {
   struct frame_saved_regs fsr;
 
@@ -506,8 +490,7 @@ frame_locals_address (fi)
    described by FI.  Returns 0 if the address is unknown.  */
 
 CORE_ADDR
-frame_args_address (fi)
-     struct frame_info *fi;
+frame_args_address (struct frame_info *fi)
 {
   struct frame_saved_regs fsr;
 
@@ -527,8 +510,7 @@ frame_args_address (fi)
    just use the register SRP_REGNUM itself.  */
 
 CORE_ADDR
-frame_saved_pc (frame)
-     struct frame_info *frame;
+frame_saved_pc (struct frame_info *frame)
 {
   return read_next_frame_reg (frame, SRP_REGNUM);
 }
@@ -537,9 +519,7 @@ frame_saved_pc (frame)
 #define DUMMY_FRAME_SIZE 192
 
 static void
-write_word (sp, word)
-     CORE_ADDR sp;
-     ULONGEST word;
+write_word (CORE_ADDR sp, ULONGEST word)
 {
   register int len = REGISTER_SIZE;
   char buffer[MAX_REGISTER_RAW_SIZE];
@@ -549,7 +529,7 @@ write_word (sp, word)
 }
 
 void
-m88k_push_dummy_frame ()
+m88k_push_dummy_frame (void)
 {
   register CORE_ADDR sp = read_register (SP_REGNUM);
   register int rn;
@@ -583,7 +563,7 @@ m88k_push_dummy_frame ()
 }
 
 void
-pop_frame ()
+pop_frame (void)
 {
   register struct frame_info *frame = get_current_frame ();
   register CORE_ADDR fp;
@@ -635,7 +615,7 @@ pop_frame ()
 }
 
 void
-_initialize_m88k_tdep ()
+_initialize_m88k_tdep (void)
 {
   tm_print_insn = print_insn_m88k;
 }

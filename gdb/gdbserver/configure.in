@@ -84,11 +84,6 @@ rm -f nm.h
 if test "${nativefile}" != ""; then
 	files="${files} ../config/${gdb_host_cpu}/${nativefile}"
 	links="${links} nm.h"
-# temporary scaffolding until all hosts have the host/target/native
-# split in place.
-else
-	files="${files} ../config/nm-empty.h"
-	links="${links} nm.h"
 fi
 AC_LINK_FILES($files, $links)
 

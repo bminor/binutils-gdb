@@ -54,9 +54,14 @@ gdb_load ${binfile}
 
 if [runto middle] then {
     # PR 3016
+    #   warning: Hit heuristic-fence-post without finding
+    #   warning: enclosing function for pc 0x1006ead0
     if {$gcc_compiled} then { 
-	setup_xfail "hppa*-*-*" "mips*-sgi-irix4*" "mips64*-*-elf"
+	setup_xfail "mips*-sgi-irix4*" "mips64*-*-elf"
     }
-    gdb_test "backtrace" "#0.*middle.*#1.*top.*#2.*main.*"
+    # The call chain is main -> top -> middle.  But gcc can optimize a tail
+    # call to a jump, so the stack may contain either main -> top -> middle
+    # or main -> middle.
+    gdb_test "backtrace" "#0.*middle.*#\[12\].*main.*"
 }
 return 0

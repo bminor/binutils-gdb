@@ -78,9 +78,7 @@ static void usage (char *, char *);
 static void sr_com (char *, int);
 
 static void
-usage (proto, junk)
-     char *proto;
-     char *junk;
+usage (char *proto, char *junk)
 {
   if (junk != NULL)
     fprintf_unfiltered (gdb_stderr, "Unrecognized arguments: `%s'.\n", junk);
@@ -103,9 +101,7 @@ where DEVICE is the name of a device or HOST:PORT", proto, proto);
 }
 
 void
-sr_scan_args (proto, args)
-     char *proto;
-     char *args;
+sr_scan_args (char *proto, char *args)
 {
   int n;
   char *p, *q;
@@ -149,25 +145,20 @@ sr_scan_args (proto, args)
 }
 
 void
-gr_generic_checkin ()
+gr_generic_checkin (void)
 {
   sr_write_cr ("");
   gr_expect_prompt ();
 }
 
 void
-gr_open (args, from_tty, gr)
-     char *args;
-     int from_tty;
-     struct gr_settings *gr;
+gr_open (char *args, int from_tty, struct gr_settings *gr)
 {
   target_preopen (from_tty);
   sr_scan_args (gr->ops->to_shortname, args);
   unpush_target (gr->ops);
 
   gr_settings = gr;
-
-  gr_set_dcache (dcache_init (gr->readfunc, gr->writefunc));
 
   if (sr_get_desc () != NULL)
     gr_close (0);
@@ -225,7 +216,7 @@ gr_open (args, from_tty, gr)
    and doing all the fancy timeout stuff.  */
 
 int
-sr_readchar ()
+sr_readchar (void)
 {
   int buf;
 
@@ -241,7 +232,7 @@ sr_readchar ()
 }
 
 int
-sr_pollchar ()
+sr_pollchar (void)
 {
   int buf;
 
@@ -262,12 +253,11 @@ sr_pollchar ()
 /* Keep discarding input from the remote system, until STRING is found.
    Let the user break out immediately.  */
 void
-sr_expect (string)
-     char *string;
+sr_expect (char *string)
 {
   char *p = string;
 
-  immediate_quit = 1;
+  immediate_quit++;
   while (1)
     {
       if (sr_readchar () == *p)
@@ -275,7 +265,7 @@ sr_expect (string)
 	  p++;
 	  if (*p == '\0')
 	    {
-	      immediate_quit = 0;
+	      immediate_quit--;
 	      return;
 	    }
 	}
@@ -285,9 +275,7 @@ sr_expect (string)
 }
 
 void
-sr_write (a, l)
-     char *a;
-     int l;
+sr_write (char *a, int l)
 {
   int i;
 
@@ -302,8 +290,7 @@ sr_write (a, l)
 }
 
 void
-sr_write_cr (s)
-     char *s;
+sr_write_cr (char *s)
 {
   sr_write (s, strlen (s));
   sr_write ("\r", 1);
@@ -311,9 +298,7 @@ sr_write_cr (s)
 }
 
 int
-sr_timed_read (buf, n)
-     char *buf;
-     int n;
+sr_timed_read (char *buf, int n)
 {
   int i;
   char c;
@@ -336,8 +321,7 @@ sr_timed_read (buf, n)
    ignore_space is nonzero, ignore spaces (not newline, tab, etc).  */
 
 int
-sr_get_hex_digit (ignore_space)
-     int ignore_space;
+sr_get_hex_digit (int ignore_space)
 {
   int ch;
 
@@ -361,8 +345,7 @@ sr_get_hex_digit (ignore_space)
 /* Get a byte from the remote and put it in *BYT.  Accept any number
    leading spaces.  */
 void
-sr_get_hex_byte (byt)
-     char *byt;
+sr_get_hex_byte (char *byt)
 {
   int val;
 
@@ -373,7 +356,7 @@ sr_get_hex_byte (byt)
 
 /* Read a 32-bit hex word from the remote, preceded by a space  */
 long
-sr_get_hex_word ()
+sr_get_hex_word (void)
 {
   long val;
   int j;
@@ -391,9 +374,7 @@ sr_get_hex_word ()
    FIXME: Can't handle commands that take input.  */
 
 static void
-sr_com (args, fromtty)
-     char *args;
-     int fromtty;
+sr_com (char *args, int fromtty)
 {
   sr_check_open ();
 
@@ -409,8 +390,7 @@ sr_com (args, fromtty)
 }
 
 void
-gr_close (quitting)
-     int quitting;
+gr_close (int quitting)
 {
   gr_clear_all_breakpoints ();
 
@@ -432,9 +412,7 @@ gr_close (quitting)
    with your gdb.  */
 
 void
-gr_detach (args, from_tty)
-     char *args;
-     int from_tty;
+gr_detach (char *args, int from_tty)
 {
   if (args)
     error ("Argument given to \"detach\" when remotely debugging.");
@@ -450,8 +428,7 @@ gr_detach (args, from_tty)
 }
 
 void
-gr_files_info (ops)
-     struct target_ops *ops;
+gr_files_info (struct target_ops *ops)
 {
 #ifdef __GO32__
   printf_filtered ("\tAttached to DOS asynctsr\n");
@@ -471,7 +448,7 @@ gr_files_info (ops)
 }
 
 void
-gr_mourn ()
+gr_mourn (void)
 {
   gr_clear_all_breakpoints ();
   unpush_target (gr_get_ops ());
@@ -479,7 +456,7 @@ gr_mourn ()
 }
 
 void
-gr_kill ()
+gr_kill (void)
 {
   return;
 }
@@ -487,10 +464,7 @@ gr_kill ()
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 void
-gr_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
+gr_create_inferior (char *execfile, char *args, char **env)
 {
   int entry_pt;
 
@@ -521,9 +495,7 @@ gr_create_inferior (execfile, args, env)
    pass non-matching data on.  */
 
 int
-gr_multi_scan (list, passthrough)
-     char *list[];
-     int passthrough;
+gr_multi_scan (char *list[], int passthrough)
 {
   char *swallowed = NULL;	/* holding area */
   char *swallowed_p = swallowed;	/* Current position in swallowed.  */
@@ -613,34 +585,13 @@ gr_multi_scan (list, passthrough)
    debugged.  */
 
 void
-gr_prepare_to_store ()
+gr_prepare_to_store (void)
 {
   /* Do nothing, since we assume we can store individual regs */
 }
 
-/* Read a word from remote address ADDR and return it.
- * This goes through the data cache.
- */
-int
-gr_fetch_word (addr)
-     CORE_ADDR addr;
-{
-  return dcache_fetch (gr_get_dcache (), addr);
-}
-
-/* Write a word WORD into remote address ADDR.
-   This goes through the data cache.  */
-
 void
-gr_store_word (addr, word)
-     CORE_ADDR addr;
-     int word;
-{
-  dcache_poke (gr_get_dcache (), addr, word);
-}
-
-void
-_initialize_sr_support ()
+_initialize_sr_support (void)
 {
 /* FIXME-now: if target is open... */
   add_show_from_set (add_set_cmd ("remotedevice", no_class,

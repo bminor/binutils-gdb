@@ -170,6 +170,8 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 #define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack)			\
   do {									\
     char *demangled = NULL;						\
+    if (SYMBOL_LANGUAGE (symbol) == language_unknown)                 \
+          SYMBOL_LANGUAGE (symbol) = language_auto;                    \
     if (SYMBOL_LANGUAGE (symbol) == language_cplus			\
 	|| SYMBOL_LANGUAGE (symbol) == language_auto)			\
       {									\
@@ -221,10 +223,6 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 	  {								\
 	    SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL;		\
 	  }								\
-      }									\
-    if (SYMBOL_LANGUAGE (symbol) == language_auto)			\
-      {									\
-	SYMBOL_LANGUAGE (symbol) = language_unknown;			\
       }									\
   } while (0)
 
@@ -763,7 +761,7 @@ struct partial_symbol
 
 
 /* Source-file information.  This describes the relation between source files,
-   ine numbers and addresses in the program text.  */
+   line numbers and addresses in the program text.  */
 
 struct sourcevector
   {
@@ -829,7 +827,9 @@ struct section_offsets
     CORE_ADDR offsets[1];	/* As many as needed. */
   };
 
-#define	ANOFFSET(secoff, whichone)	(secoff->offsets[whichone])
+#define	ANOFFSET(secoff, whichone) \
+   ((whichone == -1) ? \
+    (internal_error ("Section index is uninitialized"), -1) : secoff->offsets[whichone])
 
 /* The maximum possible size of a section_offsets table.  */
 
@@ -1045,13 +1045,9 @@ struct partial_symtab
 #define VTBL_FNADDR_OFFSET 2
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ operator
-   names.  If you leave out the parenthesis here you will lose!
-   Currently 'o' 'p' CPLUS_MARKER is used for both the symbol in the
-   symbol-file and the names in gdb's symbol table.
-   Note that this macro is g++ specific (FIXME). */
-
+   names.  If you leave out the parenthesis here you will lose!  */
 #define OPNAME_PREFIX_P(NAME) \
-  ((NAME)[0] == 'o' && (NAME)[1] == 'p' && is_cplus_marker ((NAME)[2]))
+  (!strncmp (NAME, "operator", 8))
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ vtbl
    names.  Note that this macro is g++ specific (FIXME).
@@ -1349,8 +1345,10 @@ extern struct symtabs_and_lines decode_line_spec (char *, int);
 
 extern struct symtabs_and_lines decode_line_spec_1 (char *, int);
 
-extern struct symtabs_and_lines
-decode_line_1 (char **, int, struct symtab *, int, char ***);
+/* From linespec.c */
+
+extern struct symtabs_and_lines decode_line_1 (char **,
+                                          int, struct symtab *, int, char ***);
 
 /* Symmisc.c */
 
@@ -1394,6 +1392,10 @@ extern struct symbol **make_symbol_overload_list (struct symbol *);
 
 extern struct partial_symtab *find_main_psymtab (void);
 
+extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
+
+extern struct symtab_and_line find_function_start_sal (struct symbol *sym, int);
+
 /* blockframe.c */
 
 extern struct blockvector *blockvector_for_pc (CORE_ADDR, int *);
@@ -1414,10 +1416,14 @@ extern int in_prologue (CORE_ADDR pc, CORE_ADDR func_start);
 extern struct symbol *fixup_symbol_section (struct symbol *,
 					    struct objfile *);
 
+extern struct partial_symbol *fixup_psymbol_section (struct partial_symbol
+						     *psym,
+						     struct objfile *objfile);
+
 /* Symbol searching */
 
 /* When using search_symbols, a list of the following structs is returned.
-   Callers must free the search list using free_symbol_search! */
+   Callers must free the search list using free_search_symbols! */
 struct symbol_search
   {
     /* The block in which the match was found. Could be, for example,

@@ -34,6 +34,6 @@ const bfd_arch_info_type bfd_tic54x_arch =
   1,
   true,				/* the one and only */
   bfd_default_compatible,
-  bfd_default_scan,             
+  bfd_default_scan,
   0,
 };

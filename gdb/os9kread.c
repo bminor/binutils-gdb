@@ -186,11 +186,8 @@ static void record_minimal_symbol (char *, CORE_ADDR, int, struct objfile *);
 #define N_ABS 6
 
 static void
-record_minimal_symbol (name, address, type, objfile)
-     char *name;
-     CORE_ADDR address;
-     int type;
-     struct objfile *objfile;
+record_minimal_symbol (char *name, CORE_ADDR address, int type,
+		       struct objfile *objfile)
 {
   enum minimal_symbol_type ms_type;
 
@@ -244,8 +241,7 @@ struct stbsymbol
 #define STBSYMSIZE 10
 
 static void
-read_minimal_symbols (objfile)
-     struct objfile *objfile;
+read_minimal_symbols (struct objfile *objfile)
 {
   FILE *fp;
   bfd *abfd;
@@ -316,9 +312,7 @@ read_minimal_symbols (objfile)
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 static void
-os9k_symfile_read (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;		/* FIXME comments above */
+os9k_symfile_read (struct objfile *objfile, int mainline)
 {
   bfd *sym_bfd;
   struct cleanup *back_to;
@@ -349,8 +343,7 @@ os9k_symfile_read (objfile, mainline)
    file, e.g. a shared library).  */
 
 static void
-os9k_new_init (ignore)
-     struct objfile *ignore;
+os9k_new_init (struct objfile *ignore)
 {
   stabsread_new_init ();
   buildsym_new_init ();
@@ -371,8 +364,7 @@ os9k_new_init (ignore)
    FIXME, there should be a cleaner peephole into the BFD environment here.  */
 
 static void
-os9k_symfile_init (objfile)
-     struct objfile *objfile;
+os9k_symfile_init (struct objfile *objfile)
 {
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
@@ -420,8 +412,7 @@ os9k_symfile_init (objfile)
    objfile struct from the global list of known objfiles. */
 
 static void
-os9k_symfile_finish (objfile)
-     struct objfile *objfile;
+os9k_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_stab_info != NULL)
     {
@@ -476,9 +467,7 @@ static short cmplrid;
 #define VER_ULTRAC	((short)5)
 
 static int
-fill_sym (dbg_file, abfd)
-     FILE *dbg_file;
-     bfd *abfd;
+fill_sym (FILE *dbg_file, bfd *abfd)
 {
   short si, nmask;
   long li;
@@ -552,10 +541,7 @@ fill_sym (dbg_file, abfd)
    SYMFILE_NAME is the name of the file we are reading from. */
 
 static void
-read_os9k_psymtab (objfile, text_addr, text_size)
-     struct objfile *objfile;
-     CORE_ADDR text_addr;
-     int text_size;
+read_os9k_psymtab (struct objfile *objfile, CORE_ADDR text_addr, int text_size)
 {
   register struct internal_symstruct *bufp = 0;		/* =0 avoids gcc -Wall glitch */
   register char *namestring;
@@ -973,15 +959,10 @@ read_os9k_psymtab (objfile, text_addr, text_size)
 
 
 static struct partial_symtab *
-os9k_start_psymtab (objfile,
-	    filename, textlow, ldsymoff, ldsymcnt, global_syms, static_syms)
-     struct objfile *objfile;
-     char *filename;
-     CORE_ADDR textlow;
-     int ldsymoff;
-     int ldsymcnt;
-     struct partial_symbol **global_syms;
-     struct partial_symbol **static_syms;
+os9k_start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
+		    int ldsymoff, int ldsymcnt,
+		    struct partial_symbol **global_syms,
+		    struct partial_symbol **static_syms)
 {
   struct partial_symtab *result =
   start_psymtab_common (objfile, objfile->section_offsets,
@@ -1004,16 +985,11 @@ os9k_start_psymtab (objfile,
    FIXME:  List variables and peculiarities of same.  */
 
 static struct partial_symtab *
-os9k_end_psymtab (pst, include_list, num_includes, capping_symbol_cnt,
-		  capping_text, dependency_list, number_dependencies)
-     struct partial_symtab *pst;
-     char **include_list;
-     int num_includes;
-     int capping_symbol_cnt;
-     CORE_ADDR capping_text;
-     struct partial_symtab **dependency_list;
-     int number_dependencies;
-     /* struct partial_symbol *capping_global, *capping_static; */
+os9k_end_psymtab (struct partial_symtab *pst, char **include_list,
+		  int num_includes, int capping_symbol_cnt,
+		  CORE_ADDR capping_text,
+		  struct partial_symtab **dependency_list,
+		  int number_dependencies)
 {
   int i;
   struct partial_symtab *p1;
@@ -1188,8 +1164,7 @@ os9k_end_psymtab (pst, include_list, num_includes, capping_symbol_cnt,
 }
 
 static void
-os9k_psymtab_to_symtab_1 (pst)
-     struct partial_symtab *pst;
+os9k_psymtab_to_symtab_1 (struct partial_symtab *pst)
 {
   struct cleanup *old_chain;
   int i;
@@ -1242,8 +1217,7 @@ os9k_psymtab_to_symtab_1 (pst)
    Be verbose about it if the user wants that.  */
 
 static void
-os9k_psymtab_to_symtab (pst)
-     struct partial_symtab *pst;
+os9k_psymtab_to_symtab (struct partial_symtab *pst)
 {
   bfd *sym_bfd;
 
@@ -1282,8 +1256,7 @@ os9k_psymtab_to_symtab (pst)
 
 /* Read in a defined section of a specific object file's symbols. */
 static void
-os9k_read_ofile_symtab (pst)
-     struct partial_symtab *pst;
+os9k_read_ofile_symtab (struct partial_symtab *pst)
 {
   register struct internal_symstruct *bufp;
   unsigned char type;
@@ -1433,12 +1406,9 @@ os9k_read_ofile_symtab (pst)
    It is used in end_symtab.  */
 
 static void
-os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
-     int type, desc;
-     CORE_ADDR valu;
-     char *name;
-     struct section_offsets *section_offsets;
-     struct objfile *objfile;
+os9k_process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
+			 struct section_offsets *section_offsets,
+			 struct objfile *objfile)
 {
   register struct context_stack *new;
   /* The stab type used for the definition of the last function.
@@ -1645,7 +1615,7 @@ static struct sym_fns os9k_sym_fns =
 };
 
 void
-_initialize_os9kread ()
+_initialize_os9kread (void)
 {
   add_symtab_fns (&os9k_sym_fns);
 }

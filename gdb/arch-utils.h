@@ -67,4 +67,38 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern const struct floatformat *default_float_format (struct gdbarch *gdbarch);
 extern const struct floatformat *default_double_format (struct gdbarch *gdbarch);
 
+/* Helper function for targets that don't know how my arguments are
+   being passed */
+extern int frame_num_args_unknown (struct frame_info *fi);
+
+
+/* The following DEPRECATED interfaces are for pre- multi-arch legacy
+   targets. */
+
+/* DEPRECATED pre- multi-arch interface.  Explicitly set the dynamic
+   target-system-dependent parameters based on bfd_architecture and
+   machine.  This function is deprecated, use
+   set_gdbarch_from_arch_machine(). */
+
+extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned long);
+
+/* DEPRECATED pre- multi-arch interface.  Notify the target dependent
+   backend of a change to the selected architecture. A zero return
+   status indicates that the target did not like the change. */
+
+extern int (*target_architecture_hook) (const struct bfd_arch_info *);
+
+
+/* Default raw->sim register re-numbering - does nothing. */
+
+extern int default_register_sim_regno (int reg_nr);
+
+/* Default conversion of function pointer address - returns address.  */
+
+extern CORE_ADDR default_convert_from_func_ptr_addr (CORE_ADDR addr);
+
+/* No-op conversion of reg to regnum. */
+
+extern int no_op_reg_to_regnum (int reg);
+
 #endif

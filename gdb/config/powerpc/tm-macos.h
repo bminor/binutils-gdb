@@ -22,6 +22,3 @@
 #include "rs6000/tm-rs6000.h"
 
 #define GDB_TARGET_POWERPC
-
-/* This is no use to us.  */
-#undef PC_LOAD_SEGMENT

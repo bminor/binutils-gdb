@@ -110,11 +110,7 @@
 #include <sys/procfs.h>
 #endif
 
-#if defined (HAVE_PROC_SERVICE_H)
-#include <proc_service.h>	/* defines incoming API (ps_* callbacks) */
-#else
 #include "gdb_proc_service.h"
-#endif
 
 #if defined HAVE_STDINT_H	/* Pre-5.2 systems don't have this header */
 #if defined (HAVE_THREAD_DB_H)
@@ -171,16 +167,6 @@ typedef struct ps_prochandle *gdb_ps_prochandle_t;
 typedef void *gdb_ps_read_buf_t;
 typedef const void *gdb_ps_write_buf_t;
 typedef size_t gdb_ps_size_t;
-#endif
-
-/* Unfortunately glibc 2.1.3 was released with a broken prfpregset_t
-   type.  We let configure check for this lossage, and make
-   appropriate typedefs here.  */
-
-#ifdef PRFPREGSET_T_BROKEN
-typedef elf_fpregset_t gdb_prfpregset_t;
-#else
-typedef prfpregset_t gdb_prfpregset_t;
 #endif
 
 /* 
@@ -320,10 +306,6 @@ static struct cleanup *save_inferior_pid    (void);
 static void            restore_inferior_pid (void *saved_pid);
 static char *thr_err_string   (td_err_e);
 static char *thr_state_string (td_thr_state_e);
-
-struct ps_prochandle {
-  int pid;
-};
 
 struct ps_prochandle main_prochandle;
 td_thragent_t *      main_threadagent;
@@ -555,7 +537,7 @@ static td_err_e (*p_td_ta_map_lwp2thr)    (const td_thragent_t *ta_p,
  */
 
 static int
-init_thread_db_library ()
+init_thread_db_library (void)
 {
   void *dlhandle;
   td_err_e ret;
@@ -683,7 +665,7 @@ restore_inferior_pid (void *arg)
 {
   int *saved_pid_ptr = arg;
   inferior_pid = *saved_pid_ptr;
-  free (arg);
+  xfree (arg);
 }
 
 /*
@@ -704,8 +686,7 @@ restore_inferior_pid (void *arg)
  */
 
 static char *
-thr_err_string (errcode)
-     td_err_e errcode;
+thr_err_string (td_err_e errcode)
 {
   static char buf[50];
 
@@ -755,8 +736,7 @@ thr_err_string (errcode)
  */
 
 static char *
-thr_state_string (statecode)
-     td_thr_state_e statecode;
+thr_state_string (td_thr_state_e statecode)
 {
   static char buf[50];
 
@@ -794,11 +774,7 @@ int threadlist_top = 0;		/* number of threads now in table */
 #define THREADLIST_ALLOC 100	/* chunk size by which to expand table */
 
 static threadinfo *
-insert_thread (tid, lid, state, type)
-     int            tid;
-     int            lid;
-     td_thr_state_e state;
-     td_thr_type_e  type;
+insert_thread (int tid, int lid, td_thr_state_e state, td_thr_type_e type)
 {
   if (threadlist_top >= threadlist_max)
     {
@@ -819,13 +795,13 @@ insert_thread (tid, lid, state, type)
 }
 
 static void
-empty_threadlist ()
+empty_threadlist (void)
 {
   threadlist_top = 0;
 }
 
 static threadinfo *
-next_pending_event ()
+next_pending_event (void)
 {
   int i;
 
@@ -837,11 +813,8 @@ next_pending_event ()
 }
 
 static void
-threadlist_iter (func, data, state, type)
-     int (*func) ();
-     void *data;
-     td_thr_state_e state;
-     td_thr_type_e  type;
+threadlist_iter (int (*func) (), void *data, td_thr_state_e state,
+		 td_thr_type_e type)
 {
   int i;
 
@@ -910,8 +883,7 @@ static CORE_ADDR thread_death_bkpt_address;
    The thread-specific enabling is handled per-thread elsewhere.  */
 
 static void
-enable_thread_event_reporting (ta)
-     td_thragent_t *ta;
+enable_thread_event_reporting (td_thragent_t *ta)
 {
   td_thr_events_t events;
   td_notify_t     notify;
@@ -970,8 +942,7 @@ enable_thread_event_reporting (ta)
    The thread-specific enabling is handled per-thread elsewhere.  */
 
 static void
-disable_thread_event_reporting (ta)
-     td_thragent_t *ta;
+disable_thread_event_reporting (td_thragent_t *ta)
 {
   td_thr_events_t events;
 
@@ -1133,8 +1104,7 @@ quit:
  */
 
 static int
-thread_db_alive (pid)
-     int pid;
+thread_db_alive (int pid)
 {
   if (is_thread (pid))		/* user-space (non-kernel) thread */
     {
@@ -1159,8 +1129,7 @@ thread_db_alive (pid)
  */
 
 static int	/* lwpid_t or pid_t */
-get_lwp_from_thread_handle (th)
-     td_thrhandle_t *th;
+get_lwp_from_thread_handle (td_thrhandle_t *th)
 {
   td_thrinfo_t ti;
   td_err_e     ret;
@@ -1177,8 +1146,7 @@ get_lwp_from_thread_handle (th)
  */
 
 static int	/* lwpid_t or pid_t */
-get_lwp_from_thread_id (tid)
-     int tid;	/* thread_t? */
+get_lwp_from_thread_id (int tid	/* thread_t? */)
 {
   td_thrhandle_t th;
   td_err_e       ret;
@@ -1246,12 +1214,8 @@ thread_db_files_info (struct target_ops *tgt_vector)
  */
 
 static int
-thread_db_xfer_memory (memaddr, myaddr, len, dowrite, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int dowrite;
-     struct target_ops *target;	/* ignored */
+thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
+		       struct target_ops *target)
 {
   struct cleanup *old_chain;
   int ret;
@@ -1279,8 +1243,7 @@ thread_db_xfer_memory (memaddr, myaddr, len, dowrite, target)
  */
 
 static void
-thread_db_fetch_registers (regno)
-     int regno;
+thread_db_fetch_registers (int regno)
 {
   td_thrhandle_t thandle;
   gdb_prfpregset_t fpregset;
@@ -1330,8 +1293,7 @@ thread_db_fetch_registers (regno)
  */
 
 static void
-thread_db_store_registers (regno)
-     int regno;
+thread_db_store_registers (int regno)
 {
   td_thrhandle_t thandle;
   gdb_prfpregset_t fpregset;
@@ -1382,10 +1344,9 @@ thread_db_store_registers (regno)
 }
 
 static void
-handle_new_thread (tid, lid, verbose)
-     int tid;	/* user thread id */
-     int lid;	/* kernel thread id */
-     int verbose;
+handle_new_thread (int tid,	/* user thread id */
+		   int lid,	/* kernel thread id */
+		   int verbose)
 {
   int gdb_pid = BUILD_THREAD (tid, main_prochandle.pid);
   int wait_pid, wait_status;
@@ -1405,10 +1366,7 @@ handle_new_thread (tid, lid, verbose)
 }
 
 static void
-test_for_new_thread (tid, lid, verbose)
-     int tid;
-     int lid;
-     int verbose;
+test_for_new_thread (int tid, int lid, int verbose)
 {
   if (!in_thread_list (BUILD_THREAD (tid, main_prochandle.pid)))
     handle_new_thread (tid, lid, verbose);
@@ -1420,9 +1378,7 @@ test_for_new_thread (tid, lid, verbose)
  */
 
 static int
-find_new_threads_callback (th, ignored)
-     const td_thrhandle_t *th;
-     void *ignored;
+find_new_threads_callback (const td_thrhandle_t *th, void *ignored)
 {
   td_thrinfo_t ti;
   td_err_e     ret;
@@ -1448,7 +1404,7 @@ find_new_threads_callback (th, ignored)
  */
 
 static void
-thread_db_find_new_threads ()
+thread_db_find_new_threads (void)
 {
   if (inferior_pid == -1)	/* FIXME: still necessary? */
     {
@@ -1487,9 +1443,7 @@ thread_db_find_new_threads ()
  */
 
 static int
-resume_thread_callback (th, data)
-     const td_thrhandle_t *th;
-     void *data;
+resume_thread_callback (const td_thrhandle_t *th, void *data)
 {
   td_thrinfo_t ti;
   td_err_e     ret;
@@ -1517,9 +1471,7 @@ resume_thread_callback (th, data)
 }
 
 static int
-new_resume_thread_callback (thread, data)
-     threadinfo *thread;
-     void *data;
+new_resume_thread_callback (threadinfo *thread, void *data)
 {
   if (thread->lid != event_pid &&
       thread->lid != main_prochandle.pid)
@@ -1536,10 +1488,7 @@ static int last_resume_step;
 static int last_resume_signo;
 
 static void
-thread_db_resume (pid, step, signo)
-     int pid;
-     int step;
-     enum target_signal signo;
+thread_db_resume (int pid, int step, enum target_signal signo)
 {
   last_resume_pid   = pid;
   last_resume_step  = step;
@@ -1632,8 +1581,7 @@ stop_or_attach_thread_callback (const td_thrhandle_t *th, void *data)
  */
 
 static void
-wait_for_stop (pid)
-     int pid;
+wait_for_stop (int pid)
 {
   int i;
   int retpid;
@@ -1763,9 +1711,7 @@ wait_thread_callback (const td_thrhandle_t *th, void *data)
 }
 
 static int
-new_wait_thread_callback (thread, data)
-     threadinfo *thread;
-     void *data;
+new_wait_thread_callback (threadinfo *thread, void *data)
 {
   /* don't wait on the event thread -- it's already stopped and waited.  
      Ditto the main thread.  */
@@ -1898,9 +1844,7 @@ thread_db_wait (int pid, struct target_waitstatus *ourstatus)
  */
 
 static int
-kill_thread_callback (th, data)
-     td_thrhandle_t *th;
-     void *data;
+kill_thread_callback (td_thrhandle_t *th, void *data)
 {
   td_thrinfo_t ti;
   td_err_e     ret;
@@ -1990,9 +1934,7 @@ static void thread_db_mourn_inferior (void)
  */
 
 static int
-detach_thread_callback (th, data)
-     td_thrhandle_t *th;
-     void *data;
+detach_thread_callback (td_thrhandle_t *th, void *data)
 {
   /* Called once per thread.  */
   td_thrinfo_t ti;
@@ -2075,10 +2017,7 @@ thread_db_detach (char *args, int from_tty)
  */
 
 static void
-thread_db_create_inferior (exec_file, allargs, env)
-     char *exec_file;
-     char *allargs;
-     char **env;
+thread_db_create_inferior (char *exec_file, char *allargs, char **env)
 {
   thread_db_unpush_target ();
   find_default_create_inferior (exec_file, allargs, env);
@@ -2089,7 +2028,7 @@ thread_db_create_inferior (exec_file, allargs, env)
  */
 
 void
-init_thread_db_ops ()
+init_thread_db_ops (void)
 {
   thread_db_ops.to_shortname        = "multi-thread";
   thread_db_ops.to_longname         = "multi-threaded child process.";
@@ -2122,7 +2061,7 @@ init_thread_db_ops ()
 
 
 void
-_initialize_thread_db ()
+_initialize_thread_db (void)
 {
 #ifdef HAVE_STDINT_H	/* stub out entire module, leave initializer empty */
   if (init_thread_db_library ())

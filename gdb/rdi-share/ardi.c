@@ -396,6 +396,7 @@ static void (*old_handler)();
 
 static bool boot_interrupted = FALSE;
 static volatile bool interrupt_request = FALSE;
+static volatile bool stop_request = FALSE;
 
 static void ardi_sigint_handler(int sig) {
 #ifdef DEBUG
@@ -1343,10 +1344,16 @@ static void interrupt_target( void )
                                     Packet *packet );
 #endif
 
+void angel_RDI_stop_request(void)
+{
+  stop_request = 1;
+}
+
 /* Core functionality for execute and step */
 static int angel_RDI_ExecuteOrStep(PointHandle *handle, word type, 
                                    unsigned ninstr)
 {
+  extern int (*ui_loop_hook) (int);
   int err;
   adp_stopped_struct stopped_info;
   void* stateptr = (void *)&stopped_info;
@@ -1401,15 +1408,22 @@ static int angel_RDI_ExecuteOrStep(PointHandle *handle, word type,
   angel_DebugPrint("Waiting for program to finish...\n");
 #endif
 
+  interrupt_request = FALSE;
+  stop_request = FALSE;
+  
   signal(SIGINT, ardi_sigint_handler);
   while( executing )
   {
-      if (interrupt_request)
+    if (ui_loop_hook)
+      ui_loop_hook(0);
+    
+    if (interrupt_request || stop_request)
       {
         interrupt_target();
         interrupt_request = FALSE;
+        stop_request = FALSE;
       }
-      Adp_AsynchronousProcessing( async_block_on_nothing );
+    Adp_AsynchronousProcessing( async_block_on_nothing );
   }
   signal(SIGINT, SIG_IGN);
 

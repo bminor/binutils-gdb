@@ -164,6 +164,10 @@ typedef signed64 signed_word;
 typedef unsigned32 unsigned_word;
 typedef signed32 signed_word;
 #endif
+#if (WITH_TARGET_WORD_BITSIZE == 16)
+typedef unsigned16 unsigned_word;
+typedef signed16 signed_word;
+#endif
 
 
 /* Other instructions */
@@ -174,6 +178,10 @@ typedef signed64 signed_address;
 #if (WITH_TARGET_ADDRESS_BITSIZE == 32)
 typedef unsigned32 unsigned_address;
 typedef signed32 signed_address;
+#endif
+#if (WITH_TARGET_ADDRESS_BITSIZE == 16)
+typedef unsigned16 unsigned_address;
+typedef signed16 signed_address;
 #endif
 typedef unsigned_address address_word;
 

@@ -1,5 +1,5 @@
 /* run front end support for arm
-   Copyright (C) 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997, 2000 Free Software Foundation, Inc.
 
 This file is part of ARM SIM.
 
@@ -114,6 +114,8 @@ ARMul_Debug (ARMul_State * state ATTRIBUTE_UNUSED, ARMword pc ATTRIBUTE_UNUSED, 
   return 0;
 }
 
+int SWI_vector_installed = FALSE;
+
 int
 sim_write (sd, addr, buffer, size)
      SIM_DESC sd ATTRIBUTE_UNUSED;
@@ -122,11 +124,15 @@ sim_write (sd, addr, buffer, size)
      int size;
 {
   int i;
+
   init ();
+
+  if ((addr <= 0x8) && ((addr + size) >= 0x8))
+    SWI_vector_installed = TRUE;
+
   for (i = 0; i < size; i++)
-    {
-      ARMul_WriteByte (state, addr + i, buffer[i]);
-    }
+    ARMul_WriteByte (state, addr + i, buffer[i]);
+
   return size;
 }
 
@@ -198,6 +204,7 @@ sim_create_inferior (sd, abfd, argv, env)
      char **env;
 {
   int argvlen = 0;
+  int mach;
   char **arg;
 
   if (abfd != NULL)
@@ -205,12 +212,56 @@ sim_create_inferior (sd, abfd, argv, env)
   else
     ARMul_SetPC (state, 0);	/* ??? */
 
-  /* We explicitly select a processor capable of supporting the ARM
-     32bit mode.  JGS  */
-  ARMul_SelectProcessor (state, ARM600);
-  /* And then we force the simulated CPU into the 32bit User mode.  */
-  ARMul_SetCPSR (state, USER32MODE);
+  mach = bfd_get_mach (abfd);
 
+  switch (mach)
+    {
+    default:
+      (*sim_callback->printf_filtered) (sim_callback,
+					"Unknown machine type; please update sim_create_inferior.\n");
+      /* fall through */
+
+    case 0:
+      /* We wouldn't set the machine type with earlier toolchains, so we
+	 explicitly select a processor capable of supporting all ARMs in
+	 32bit mode.  */
+    case bfd_mach_arm_5:
+    case bfd_mach_arm_5T:
+      ARMul_SelectProcessor (state, ARM_v5_Prop);
+      break;
+
+    case bfd_mach_arm_5TE:
+      ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop);
+      break;
+
+    case bfd_mach_arm_XScale:
+      ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop);
+      break;
+
+    case bfd_mach_arm_4:
+    case bfd_mach_arm_4T:
+      ARMul_SelectProcessor (state, ARM_v4_Prop);
+      break;
+
+    case bfd_mach_arm_3:
+    case bfd_mach_arm_3M:
+      ARMul_SelectProcessor (state, ARM_Lock_Prop);
+      break;
+
+    case bfd_mach_arm_2:
+    case bfd_mach_arm_2a:
+      ARMul_SelectProcessor (state, ARM_Fix26_Prop);
+      break;
+    }
+
+  if (mach > 3)
+    {
+      /* Reset mode to ARM.  A gdb user may rerun a program that had entered
+	 THUMB mode from the start and cause the ARM-mode startup code to be
+	 executed in THUMB mode. */
+      ARMul_SetCPSR (state, USER32MODE);
+    }
+  
   if (argv != NULL)
     {
       /*
@@ -318,6 +369,7 @@ sim_store_register (sd, rn, memory, length)
      int length ATTRIBUTE_UNUSED;
 {
   init ();
+
   if (rn == 25)
     {
       state->Cpsr = frommem (state, memory);
@@ -338,6 +390,7 @@ sim_fetch_register (sd, rn, memory, length)
   ARMword regval;
 
   init ();
+
   if (rn < 16)
     regval = ARMul_GetReg (state, state->Mode, rn);
   else if (rn == 25)		/* FIXME: use PS_REGNUM from gdb/config/arm/tm-arm.h */

@@ -65,6 +65,26 @@
 /* For BFD64 and bfd_vma.  */
 #include "bfd.h"
 
+
+/* The target is partially multi-arched.  Both "tm.h" and the
+   multi-arch vector provide definitions.  "tm.h" normally overrides
+   the multi-arch vector (but there are a few exceptions).  */
+
+#define GDB_MULTI_ARCH_PARTIAL 1
+
+/* The target is multi-arched.  The MULTI-ARCH vector provides all
+   definitions.  "tm.h" is included and may provide definitions of
+   non- multi-arch macros..  */
+
+#define GDB_MULTI_ARCH_TM 2
+
+/* The target is pure multi-arch.  The MULTI-ARCH vector provides all
+   definitions.  "tm.h" is linked to an empty file. */
+
+#define GDB_MULTI_ARCH_PURE 3
+
+
+
 /* An address in the program being debugged.  Host byte order.  Rather
    than duplicate all the logic in BFD which figures out what type
    this is (long, long long, etc.) and whether it needs to be 64
@@ -196,7 +216,8 @@ enum language
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
-    language_scm		/* Scheme / Guile */
+    language_scm,    		/* Scheme / Guile */
+    language_pascal		/* Pascal */
   };
 
 enum precision_type
@@ -306,13 +327,6 @@ extern void discard_final_cleanups (struct cleanup *);
 extern void discard_exec_error_cleanups (struct cleanup *);
 extern void discard_my_cleanups (struct cleanup **, struct cleanup *);
 
-/* DEPRECATED: cagney/2000-03-04: Do not use this typedef to cast
-   function pointers so that they match the argument to the various
-   cleanup functions.  Post GDB 5.0, this typedef will be
-   deleted. [Editors note: cagney was the person that added most of
-   those type casts] */
-typedef void (*make_cleanup_func) (void *);
-
 /* NOTE: cagney/2000-03-04: This typedef is strictly for the
    make_cleanup function declarations below. Do not use this typedef
    as a cast when passing functions into the make_cleanup() code.
@@ -352,6 +366,8 @@ extern void restore_my_cleanups (struct cleanup **, struct cleanup *);
 extern void free_current_contents (void *);
 
 extern void null_cleanup (void *);
+
+extern void xfree (void *);
 
 extern int myread (int, char *, int);
 
@@ -593,11 +609,6 @@ enum lval_type
 
 struct frame_info;
 
-void default_get_saved_register (char *raw_buffer, int *optimized,
-				 CORE_ADDR * addrp,
-				 struct frame_info *frame, int regnum,
-				 enum lval_type *lval);
-
 /* From readline (but not in any readline .h files).  */
 
 extern char *tilde_expand (char *);
@@ -701,20 +712,40 @@ enum val_prettyprint
   };
 
 
-/* Host machine definition.  This will be a symlink to one of the
-   xm-*.h files, built by the `configure' script.  */
+/* Optional host machine definition.  Pure autoconf targets will not
+   need a "xm.h" file.  This will be a symlink to one of the xm-*.h
+   files, built by the `configure' script.  */
 
+#ifdef GDB_XM_FILE
 #include "xm.h"
+#endif
 
-/* Native machine support.  This will be a symlink to one of the
-   nm-*.h files, built by the `configure' script.  */
+/* Optional native machine support.  Non-native (and possibly pure
+   multi-arch) targets do not need a "nm.h" file.  This will be a
+   symlink to one of the nm-*.h files, built by the `configure'
+   script.  */
 
+#ifdef GDB_NM_FILE
 #include "nm.h"
+#endif
 
-/* Target machine definition.  This will be a symlink to one of the
+/* Optional target machine definition.  Pure multi-arch configurations
+   do not need a "tm.h" file.  This will be a symlink to one of the
    tm-*.h files, built by the `configure' script.  */
 
+#ifdef GDB_TM_FILE
 #include "tm.h"
+#endif
+
+/* GDB_MULTI_ARCH is normally set by configure.in using information
+   from configure.tgt or the config/%/%.mt Makefile fragment.  Since
+   some targets have defined it in their "tm.h" file, delay providing
+   a default definition until after "tm.h" has been included.. */
+
+#ifndef GDB_MULTI_ARCH
+#define GDB_MULTI_ARCH 0
+#endif
+
 
 /* If the xm.h file did not define the mode string used to open the
    files, assume that binary files are opened the same way as text
@@ -772,10 +803,10 @@ enum val_prettyprint
 #endif
 
 #if !defined (ULONGEST_MAX)
-#define	ULONGEST_MAX (~(ULONGEST)0)        /* 0xFFFFFFFFFFFFFFFF for 32-bits */
+#define	ULONGEST_MAX (~(ULONGEST)0)        /* 0xFFFFFFFFFFFFFFFF for 64-bits */
 #endif
 
-#if !defined (LONGEST_MAX)                 /* 0x7FFFFFFFFFFFFFFF for 32-bits */
+#if !defined (LONGEST_MAX)                 /* 0x7FFFFFFFFFFFFFFF for 64-bits */
 #define	LONGEST_MAX ((LONGEST)(ULONGEST_MAX >> 1))
 #endif
 
@@ -805,6 +836,11 @@ extern PTR xmrealloc (PTR, PTR, size_t);
 extern PTR xmmalloc (PTR, long);
 extern PTR xmrealloc (PTR, PTR, long);
 #endif
+
+/* Like asprintf/vasprintf but get an internal_error if the call
+   fails. */
+extern void xasprintf (char **ret, const char *format, ...) ATTR_FORMAT (printf, 2, 3);
+extern void xvasprintf (char **ret, const char *format, va_list ap);
 
 extern int parse_escape (char **);
 
@@ -994,51 +1030,6 @@ extern char *alloca ();
    Just like CHAR_BIT in <limits.h> but describes the target machine.  */
 #if !defined (TARGET_CHAR_BIT)
 #define TARGET_CHAR_BIT 8
-#endif
-
-/* Number of bits in a short or unsigned short for the target machine. */
-#if !defined (TARGET_SHORT_BIT)
-#define TARGET_SHORT_BIT (2 * TARGET_CHAR_BIT)
-#endif
-
-/* Number of bits in an int or unsigned int for the target machine. */
-#if !defined (TARGET_INT_BIT)
-#define TARGET_INT_BIT (4 * TARGET_CHAR_BIT)
-#endif
-
-/* Number of bits in a long or unsigned long for the target machine. */
-#if !defined (TARGET_LONG_BIT)
-#define TARGET_LONG_BIT (4 * TARGET_CHAR_BIT)
-#endif
-
-/* Number of bits in a long long or unsigned long long for the target machine. */
-#if !defined (TARGET_LONG_LONG_BIT)
-#define TARGET_LONG_LONG_BIT (2 * TARGET_LONG_BIT)
-#endif
-
-/* Number of bits in a float for the target machine. */
-#if !defined (TARGET_FLOAT_BIT)
-#define TARGET_FLOAT_BIT (4 * TARGET_CHAR_BIT)
-#endif
-
-/* Number of bits in a double for the target machine. */
-#if !defined (TARGET_DOUBLE_BIT)
-#define TARGET_DOUBLE_BIT (8 * TARGET_CHAR_BIT)
-#endif
-
-/* Number of bits in a long double for the target machine.  */
-#if !defined (TARGET_LONG_DOUBLE_BIT)
-#define TARGET_LONG_DOUBLE_BIT (2 * TARGET_DOUBLE_BIT)
-#endif
-
-/* Number of bits in a pointer for the target machine */
-#if !defined (TARGET_PTR_BIT)
-#define TARGET_PTR_BIT TARGET_INT_BIT
-#endif
-
-/* Number of bits in a BFD_VMA for the target object file format. */
-#if !defined (TARGET_BFD_VMA_BIT)
-#define TARGET_BFD_VMA_BIT TARGET_PTR_BIT
 #endif
 
 /* If we picked up a copy of CHAR_BIT from a configuration file

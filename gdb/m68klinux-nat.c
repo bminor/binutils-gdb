@@ -60,9 +60,7 @@ static const int regmap[] =
    is stored.  */
 
 int
-m68k_linux_register_u_addr (blockend, regnum)
-     int blockend;
-     int regnum;
+m68k_linux_register_u_addr (int blockend, int regnum)
 {
   return (blockend + 4 * regmap[regnum]);
 }
@@ -86,8 +84,7 @@ m68k_linux_register_u_addr (blockend, regnum)
 #include "gregset.h"
 
 void
-supply_gregset (gregsetp)
-     gregset_t *gregsetp;
+supply_gregset (gregset_t *gregsetp)
 {
   int regi;
 
@@ -102,8 +99,7 @@ supply_gregset (gregsetp)
    idea of the current floating point register values. */
 
 void
-supply_fpregset (fpregsetp)
-     fpregset_t *fpregsetp;
+supply_fpregset (fpregset_t *fpregsetp)
 {
   int regi;
 
@@ -118,7 +114,7 @@ supply_fpregset (fpregsetp)
 
 
 int
-kernel_u_size ()
+kernel_u_size (void)
 {
   return (sizeof (struct user));
 }
@@ -126,8 +122,7 @@ kernel_u_size ()
 /* Return non-zero if PC points into the signal trampoline.  */
 
 int
-in_sigtramp (pc)
-     CORE_ADDR pc;
+in_sigtramp (CORE_ADDR pc)
 {
   CORE_ADDR sp;
   char buf[TARGET_SHORT_BIT / TARGET_CHAR_BIT];

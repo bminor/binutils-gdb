@@ -1,5 +1,5 @@
 /* Native-dependent code for the i387.
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,13 +25,26 @@
    in *FSAVE.  This function masks off any of the reserved
    bits in *FSAVE.  */
 
-void i387_supply_fsave (char *fsave);
+extern void i387_supply_fsave (char *fsave);
 
 /* Fill register REGNO (if it is a floating-point register) in *FSAVE
    with the value in GDB's register array.  If REGNO is -1, do this
    for all registers.  This function doesn't touch any of the reserved
    bits in *FSAVE.  */
 
-void i387_fill_fsave (char *fsave, int regno);
+extern void i387_fill_fsave (char *fsave, int regno);
+
+/* Fill GDB's register array with the floating-point and SSE register
+   values in *FXSAVE.  This function masks off any of the reserved
+   bits in *FXSAVE.  */
+
+extern void i387_supply_fxsave (char *fxsave);
+
+/* Fill register REGNO (if it is a floating-point or SSE register) in
+   *FXSAVE with the value in GDB's register array.  If REGNO is -1, do
+   this for all registers.  This function doesn't touch any of the
+   reserved bits in *FXSAVE.  */
+
+extern void i387_fill_fxsave (char *fxsave, int regno);
 
 #endif /* i387-nat.h */

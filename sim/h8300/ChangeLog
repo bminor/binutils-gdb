@@ -1,3 +1,26 @@
+2000-08-10  Kazu Hirata  <kazu@hxi.com>
+
+	* compile.c (decode): Clean up the code.
+
+2000-06-15  Kazu Hirata  <kazu@hxi.com>
+
+	* compile.c (decode): Distinguish inc/dec.[wl] and adds/subs
+	correctly.
+
+2000-06-20  Frank Ch. Eigler  <fche@redhat.com>
+
+	* compile.c: Don't include "wait.h".
+	(sim_resume): Use local SIM_WIFEXITED and SIM_WIFSIGNALED macros
+	instead of WIF* from host.
+
+2000-06-13  Frank Ch. Eigler  <fche@redhat.com>
+
+	* compile.c, writecode.c: Correct typo.
+
+2000-06-13  Kazu Hirata  <kazu@hxi.com>
+
+	* compile.c: Fix formatting.
+
 Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

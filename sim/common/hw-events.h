@@ -58,4 +58,8 @@ void hw_event_queue_deschedule
 signed64 hw_event_queue_time
 (struct hw *me);
 
+/* Returns the time that remains before the event is raised. */
+signed64 hw_event_remain_time
+(struct hw *me, struct hw_event *event);
+
 #endif

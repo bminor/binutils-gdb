@@ -40,7 +40,6 @@ extern void simplified_command_loop (char *(*read_input_func) (char *),
 extern int quit_confirm (void);
 extern void quit_force (char *, int);
 extern void quit_command (char *, int);
-extern void command_loop_marker (void *);
 extern int quit_cover (PTR);
 extern void execute_command (char *, int);
 

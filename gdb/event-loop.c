@@ -23,9 +23,15 @@
 #include "top.h"
 #include "event-loop.h"
 #include "event-top.h"
+
 #ifdef HAVE_POLL
+#if defined (HAVE_POLL_H)
 #include <poll.h>
+#elif defined (HAVE_SYS_POLL_H)
+#include <sys/poll.h>
 #endif
+#endif
+
 #include <sys/types.h>
 #include <string.h>
 #include <errno.h>
@@ -90,7 +96,7 @@ typedef void (event_handler_func) (int);
    ready. The procedure PROC associated with each event is always the
    same (handle_file_event).  Its duty is to invoke the handler
    associated with the file descriptor whose state change generated
-   the event, plus doing other cleanups adn such. */
+   the event, plus doing other cleanups and such. */
 
 struct gdb_event
   {
@@ -242,7 +248,7 @@ static struct
   }
 sighandler_list;
 
-/* Is any of the handlers ready?  Check this variable using
+/* Are any of the handlers ready?  Check this variable using
    check_async_ready. This is used by process_event, to determine
    whether or not to invoke the invoke_async_signal_handler
    function. */
@@ -371,7 +377,7 @@ process_event (void)
 	  if (event_ptr->next_event == NULL)
 	    event_queue.last_event = prev_ptr;
 	}
-      free ((char *) event_ptr);
+      xfree (event_ptr);
 
       /* Now call the procedure associated with the event. */
       (*proc) (fd);
@@ -386,7 +392,7 @@ process_event (void)
    wait for something to happen (via gdb_wait_for_event), then process
    it.  Returns >0 if something was done otherwise returns <0 (this
    can happen if there are no event sources to wait for).  If an error
-   occures catch_errors() which calls this function returns zero. */
+   occurs catch_errors() which calls this function returns zero. */
 
 static int
 gdb_do_one_event (void *data)
@@ -614,7 +620,7 @@ delete_file_handler (int fd)
 	      j++;
 	    }
 	}
-      free (gdb_notifier.poll_fds);
+      xfree (gdb_notifier.poll_fds);
       gdb_notifier.poll_fds = new_poll_fds;
       gdb_notifier.num_fds--;
 #else
@@ -662,7 +668,7 @@ delete_file_handler (int fd)
 	;
       prev_ptr->next_file = file_ptr->next_file;
     }
-  free ((char *) file_ptr);
+  xfree (file_ptr);
 }
 
 /* Handle the given event by calling the procedure associated to the
@@ -967,7 +973,7 @@ delete_async_signal_handler (async_signal_handler ** async_handler_ptr)
       if (sighandler_list.last_handler == (*async_handler_ptr))
 	sighandler_list.last_handler = prev_ptr;
     }
-  free ((char *) (*async_handler_ptr));
+  xfree ((*async_handler_ptr));
   (*async_handler_ptr) = NULL;
 }
 
@@ -1074,7 +1080,7 @@ delete_timer (int id)
 	;
       prev_timer->next = timer_ptr->next;
     }
-  free ((char *) timer_ptr);
+  xfree (timer_ptr);
 
   gdb_notifier.timeout_valid = 0;
 }
@@ -1105,7 +1111,7 @@ handle_timer_event (int dummy)
       timer_ptr = timer_ptr->next;
       /* Call the procedure associated with that timer. */
       (*saved_timer->proc) (saved_timer->client_data);
-      free (saved_timer);
+      xfree (saved_timer);
     }
 
   gdb_notifier.timeout_valid = 0;

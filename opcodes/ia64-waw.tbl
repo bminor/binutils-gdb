@@ -82,12 +82,15 @@ PKR#;	IC:mov-to-IND-PKR+3;	IC:mov-to-IND-PKR+3;	impliedF
 PMC#;	IC:mov-to-IND-PMC+3;	IC:mov-to-IND-PMC+3;	impliedF
 PMD#;	IC:mov-to-IND-PMD+3;	IC:mov-to-IND-PMD+3;	impliedF
 PR0;	IC:pr-writers+1;	IC:pr-writers+1;	none
-PR%, % in 1 - 62;	IC:pr-and-writers+1;	IC:pr-and-writers+1;	none
-PR%, % in 1 - 62;	IC:pr-or-writers+1;	IC:pr-or-writers+1;	none
-PR%, % in 1 - 62;	IC:pr-unc-writers-fp+1, IC:pr-unc-writers-int+1, IC:pr-norm-writers-fp+1, IC:pr-norm-writers-int+1, IC:pr-and-writers+1, IC:mov-to-PR+7;	IC:pr-unc-writers-fp+1, IC:pr-unc-writers-int+1, IC:pr-norm-writers-fp+1, IC:pr-norm-writers-int+1, IC:pr-or-writers+1, IC:mov-to-PR+7;	impliedF
+PR%, % in 1 - 15;	IC:pr-and-writers+1;	IC:pr-and-writers+1;	none
+PR%, % in 1 - 15;	IC:pr-or-writers+1;	IC:pr-or-writers+1;	none
+PR%, % in 1 - 15;	IC:pr-unc-writers-fp+1, IC:pr-unc-writers-int+1, IC:pr-norm-writers-fp+1, IC:pr-norm-writers-int+1, IC:pr-and-writers+1, IC:mov-to-PR-allreg+7;	IC:pr-unc-writers-fp+1, IC:pr-unc-writers-int+1, IC:pr-norm-writers-fp+1, IC:pr-norm-writers-int+1, IC:pr-or-writers+1, IC:mov-to-PR-allreg+7;	impliedF
+PR%, % in 16 - 62;	IC:pr-and-writers+1;	IC:pr-and-writers+1;	none
+PR%, % in 16 - 62;	IC:pr-or-writers+1;	IC:pr-or-writers+1;	none
+PR%, % in 16 - 62;	IC:pr-unc-writers-fp+1, IC:pr-unc-writers-int+1, IC:pr-norm-writers-fp+1, IC:pr-norm-writers-int+1, IC:pr-and-writers+1, IC:mov-to-PR-allreg+7, IC:mov-to-PR-rotreg;	IC:pr-unc-writers-fp+1, IC:pr-unc-writers-int+1, IC:pr-norm-writers-fp+1, IC:pr-norm-writers-int+1, IC:pr-or-writers+1, IC:mov-to-PR-allreg+7, IC:mov-to-PR-rotreg;	impliedF
 PR63;	IC:pr-and-writers+1;	IC:pr-and-writers+1;	none
 PR63;	IC:pr-or-writers+1;	IC:pr-or-writers+1;	none
-PR63;	IC:mod-sched-brs, IC:pr-unc-writers-fp+1, IC:pr-unc-writers-int+1, IC:pr-norm-writers-fp+1, IC:pr-norm-writers-int+1, IC:pr-and-writers+1, IC:mov-to-PR+7;	IC:mod-sched-brs, IC:pr-unc-writers-fp+1, IC:pr-unc-writers-int+1, IC:pr-norm-writers-fp+1, IC:pr-norm-writers-int+1, IC:pr-or-writers+1, IC:mov-to-PR+7;	impliedF
+PR63;	IC:mod-sched-brs, IC:pr-unc-writers-fp+1, IC:pr-unc-writers-int+1, IC:pr-norm-writers-fp+1, IC:pr-norm-writers-int+1, IC:pr-and-writers+1, IC:mov-to-PR-allreg+7, IC:mov-to-PR-rotreg;	IC:mod-sched-brs, IC:pr-unc-writers-fp+1, IC:pr-unc-writers-int+1, IC:pr-norm-writers-fp+1, IC:pr-norm-writers-int+1, IC:pr-or-writers+1, IC:mov-to-PR-allreg+7, IC:mov-to-PR-rotreg;	impliedF
 PSR.ac;	IC:user-mask-writers-partial+7, IC:mov-to-PSR-um, IC:sys-mask-writers-partial+7, IC:mov-to-PSR-l, rfi;	IC:user-mask-writers-partial+7, IC:mov-to-PSR-um, IC:sys-mask-writers-partial+7, IC:mov-to-PSR-l, rfi;	impliedF
 PSR.be;	IC:user-mask-writers-partial+7, IC:mov-to-PSR-um, IC:sys-mask-writers-partial+7, IC:mov-to-PSR-l, rfi;	IC:user-mask-writers-partial+7, IC:mov-to-PSR-um, IC:sys-mask-writers-partial+7, IC:mov-to-PSR-l, rfi;	impliedF
 PSR.bn;	bsw, rfi;	bsw, rfi;	impliedF

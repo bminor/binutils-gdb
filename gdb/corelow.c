@@ -33,6 +33,10 @@
 #include "gdbcore.h"
 #include "gdbthread.h"
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 /* List of all available core_fns.  On gdb startup, each core file register
    reader calls add_core_fns() to register information on each core format it
    is prepared to read. */
@@ -84,8 +88,7 @@ struct target_ops core_ops;
    handle. */
 
 void
-add_core_fns (cf)
-     struct core_fns *cf;
+add_core_fns (struct core_fns *cf)
 {
   cf->next = core_file_fns;
   core_file_fns = cf;
@@ -96,9 +99,7 @@ add_core_fns (cf)
    reading the core file. */
 
 int
-default_core_sniffer (our_fns, abfd)
-     struct core_fns *our_fns;
-     bfd *abfd;
+default_core_sniffer (struct core_fns *our_fns, bfd *abfd)
 {
   int result;
 
@@ -108,12 +109,11 @@ default_core_sniffer (our_fns, abfd)
 
 /* Walk through the list of core functions to find a set that can
    handle the core file open on ABFD.  Default to the first one in the
-   list of nothing matches.  Returns pointer to set that is
+   list if nothing matches.  Returns pointer to set that is
    selected. */
 
 static struct core_fns *
-sniff_core_bfd (abfd)
-     bfd *abfd;
+sniff_core_bfd (bfd *abfd)
 {
   struct core_fns *cf;
   struct core_fns *yummy = NULL;
@@ -149,8 +149,7 @@ sniff_core_bfd (abfd)
    core file handler that recognizes it. */
 
 int
-default_check_format (abfd)
-     bfd *abfd;
+default_check_format (bfd *abfd)
 {
   return (0);
 }
@@ -158,8 +157,7 @@ default_check_format (abfd)
 /* Attempt to recognize core file formats that BFD rejects. */
 
 static boolean 
-gdb_check_format (abfd)
-     bfd *abfd;
+gdb_check_format (bfd *abfd)
 {
   struct core_fns *cf;
 
@@ -178,8 +176,7 @@ gdb_check_format (abfd)
 
 /* ARGSUSED */
 static void
-core_close (quitting)
-     int quitting;
+core_close (int quitting)
 {
   char *name;
 
@@ -197,11 +194,11 @@ core_close (quitting)
       if (!bfd_close (core_bfd))
 	warning ("cannot close \"%s\": %s",
 		 name, bfd_errmsg (bfd_get_error ()));
-      free (name);
+      xfree (name);
       core_bfd = NULL;
       if (core_ops.to_sections)
 	{
-	  free ((PTR) core_ops.to_sections);
+	  xfree (core_ops.to_sections);
 	  core_ops.to_sections = NULL;
 	  core_ops.to_sections_end = NULL;
 	}
@@ -220,8 +217,7 @@ core_close_cleanup (void *ignore)
    is really an int * which points to from_tty.  */
 
 static int
-solib_add_stub (from_ttyp)
-     PTR from_ttyp;
+solib_add_stub (PTR from_ttyp)
 {
   SOLIB_ADD (NULL, *(int *) from_ttyp, &current_target);
   re_enable_breakpoints_in_shlibs ();
@@ -233,10 +229,7 @@ solib_add_stub (from_ttyp)
    list of threads in a core file.  */
 
 static void
-add_to_thread_list (abfd, asect, reg_sect_arg)
-     bfd *abfd;
-     asection *asect;
-     PTR reg_sect_arg;
+add_to_thread_list (bfd *abfd, asection *asect, PTR reg_sect_arg)
 {
   int thread_id;
   asection *reg_sect = (asection *) reg_sect_arg;
@@ -258,9 +251,7 @@ add_to_thread_list (abfd, asect, reg_sect_arg)
 /* This routine opens and sets up the core file bfd.  */
 
 static void
-core_open (filename, from_tty)
-     char *filename;
-     int from_tty;
+core_open (char *filename, int from_tty)
 {
   const char *p;
   int siggy;
@@ -282,13 +273,13 @@ core_open (filename, from_tty)
   if (filename[0] != '/')
     {
       temp = concat (current_directory, "/", filename, NULL);
-      free (filename);
+      xfree (filename);
       filename = temp;
     }
 
-  old_chain = make_cleanup (free, filename);
+  old_chain = make_cleanup (xfree, filename);
 
-  scratch_chan = open (filename, write_files ? O_RDWR : O_RDONLY, 0);
+  scratch_chan = open (filename, O_BINARY | ( write_files ? O_RDWR : O_RDONLY ), 0);
   if (scratch_chan < 0)
     perror_with_name (filename);
 
@@ -338,7 +329,7 @@ core_open (filename, from_tty)
   siggy = bfd_core_file_failing_signal (core_bfd);
   if (siggy > 0)
     /* NOTE: target_signal_from_host() converts a target signal value
-       into gdb's internal signal value.  Unfortunatly gdb's internal
+       into gdb's internal signal value.  Unfortunately gdb's internal
        value is called ``target_signal'' and this function got the
        name ..._from_host(). */
     printf_filtered ("Program terminated with signal %d, %s.\n", siggy,
@@ -375,9 +366,7 @@ your %s; do ``info files''", target_longname);
 }
 
 static void
-core_detach (args, from_tty)
-     char *args;
-     int from_tty;
+core_detach (char *args, int from_tty)
 {
   if (args)
     error ("Too many arguments");
@@ -451,8 +440,7 @@ get_core_register_section (char *name,
 
 /* ARGSUSED */
 static void
-get_core_registers (regno)
-     int regno;
+get_core_registers (int regno)
 {
   int status;
 
@@ -472,8 +460,7 @@ get_core_registers (regno)
 }
 
 static char *
-core_file_to_sym_file (core)
-     char *core;
+core_file_to_sym_file (char *core)
 {
   CONST char *failing_command;
   char *p;
@@ -535,8 +522,7 @@ core_file_to_sym_file (core)
 }
 
 static void
-core_files_info (t)
-     struct target_ops *t;
+core_files_info (struct target_ops *t)
 {
   print_section_info (t, core_bfd);
 }
@@ -545,9 +531,7 @@ core_files_info (t)
    `gdb internal error' (since generic_mourn calls breakpoint_init_inferior).  */
 
 static int
-ignore (addr, contents)
-     CORE_ADDR addr;
-     char *contents;
+ignore (CORE_ADDR addr, char *contents)
 {
   return 0;
 }
@@ -560,8 +544,7 @@ ignore (addr, contents)
    behaviour.
  */
 static int
-core_file_thread_alive (tid)
-     int tid;
+core_file_thread_alive (int tid)
 {
   return 1;
 }
@@ -569,7 +552,7 @@ core_file_thread_alive (tid)
 /* Fill in core_ops with its defined operations and properties.  */
 
 static void
-init_core_ops ()
+init_core_ops (void)
 {
   core_ops.to_shortname = "core";
   core_ops.to_longname = "Local core dump file";
@@ -606,7 +589,7 @@ init_core_ops ()
 int coreops_suppress_target;
 
 void
-_initialize_corelow ()
+_initialize_corelow (void)
 {
   init_core_ops ();
 

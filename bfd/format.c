@@ -125,20 +125,20 @@ bfd_check_format_matches (abfd, format, matching)
 
   if (!bfd_read_p (abfd) ||
       ((int)(abfd->format) < (int)bfd_unknown) ||
-      ((int)(abfd->format) >= (int)bfd_type_end)) {
-    bfd_set_error (bfd_error_invalid_operation);
-    return false;
-  }
+      ((int)(abfd->format) >= (int)bfd_type_end))
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
 
   if (abfd->format != bfd_unknown)
     return (abfd->format == format)? true: false;
 
-
   /* Since the target type was defaulted, check them 
      all in the hope that one will be uniquely recognized.  */
-
   save_targ = abfd->xvec;
   match_count = 0;
+  
   if (matching)
     {
       matching_vector =
@@ -149,119 +149,147 @@ bfd_check_format_matches (abfd, format, matching)
       matching_vector[0] = NULL;
       *matching = matching_vector;
     }
+  
   right_targ = 0;
 
-
-  /* presume the answer is yes */
+  /* Presume the answer is yes.  */
   abfd->format = format;
 
   /* If the target type was explicitly specified, just check that target.  */
+  if (!abfd->target_defaulted)
+    {
+      if (bfd_seek (abfd, (file_ptr)0, SEEK_SET) != 0)	/* rewind! */
+	return false;
+      
+      right_targ = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
+      
+      if (right_targ)
+	{
+	  abfd->xvec = right_targ;	/* Set the target as returned.  */
+	  
+	  if (matching)
+	    free (matching_vector);
+	  
+	  return true;			/* File position has moved, BTW.  */
+	}
 
-  if (!abfd->target_defaulted) {
-    if (bfd_seek (abfd, (file_ptr)0, SEEK_SET) != 0)	/* rewind! */
-      return false;
-    right_targ = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
-    if (right_targ) {
-      abfd->xvec = right_targ;		/* Set the target as returned */
-      if (matching)
-	free (matching_vector);
-      return true;			/* File position has moved, BTW */
+      /* For a long time the code has dropped through to check all
+	 targets if the specified target was wrong.  I don't know why,
+	 and I'm reluctant to change it.  However, in the case of an
+	 archive, it can cause problems.  If the specified target does
+	 not permit archives (e.g., the binary target), then we should
+	 not allow some other target to recognize it as an archive, but
+	 should instead allow the specified target to recognize it as an
+	 object.  When I first made this change, it broke the PE target,
+	 because the specified pei-i386 target did not recognize the
+	 actual pe-i386 archive.  Since there may be other problems of
+	 this sort, I changed this test to check only for the binary
+	 target.  */
+      if (format == bfd_archive && save_targ == &binary_vec)
+	{
+	  abfd->xvec = save_targ;
+	  abfd->format = bfd_unknown;
+	  
+	  if (matching)
+	    free (matching_vector);
+	  
+	  bfd_set_error (bfd_error_file_not_recognized);
+	  
+	  return false;
+	}
     }
 
-    /* For a long time the code has dropped through to check all
-       targets if the specified target was wrong.  I don't know why,
-       and I'm reluctant to change it.  However, in the case of an
-       archive, it can cause problems.  If the specified target does
-       not permit archives (e.g., the binary target), then we should
-       not allow some other target to recognize it as an archive, but
-       should instead allow the specified target to recognize it as an
-       object.  When I first made this change, it broke the PE target,
-       because the specified pei-i386 target did not recognize the
-       actual pe-i386 archive.  Since there may be other problems of
-       this sort, I changed this test to check only for the binary
-       target.  */
-
-    if (format == bfd_archive && save_targ == &binary_vec)
-      {
-	abfd->xvec = save_targ;
-	abfd->format = bfd_unknown;
-	if (matching)
-	  free (matching_vector);
-	bfd_set_error (bfd_error_file_not_recognized);
+  for (target = bfd_target_vector; *target != NULL; target++)
+    {
+      const bfd_target *temp;
+      
+      if (*target == &binary_vec)
+	continue;
+      
+      abfd->xvec = *target;	/* Change BFD's target temporarily */
+      
+      if (bfd_seek (abfd, (file_ptr)0, SEEK_SET) != 0)
 	return false;
-      }
-  }
+      
+      /* If _bfd_check_format neglects to set bfd_error, assume
+	 bfd_error_wrong_format.  We didn't used to even pay any
+	 attention to bfd_error, so I suspect that some
+	 _bfd_check_format might have this problem.  */
+      bfd_set_error (bfd_error_wrong_format);
 
-  for (target = bfd_target_vector; *target != NULL; target++) {
-    const bfd_target *temp;
-
-    if (*target == &binary_vec)
-      continue;
-
-    abfd->xvec = *target;	/* Change BFD's target temporarily */
-    if (bfd_seek (abfd, (file_ptr)0, SEEK_SET) != 0)
-      return false;
-    /* If _bfd_check_format neglects to set bfd_error, assume bfd_error_wrong_format.
-       We didn't used to even pay any attention to bfd_error, so I suspect
-       that some _bfd_check_format might have this problem.  */
-    bfd_set_error (bfd_error_wrong_format);
-    temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
-    if (temp) {				/* This format checks out as ok! */
-      right_targ = temp;
-      if (matching)
-	{
-	  matching_vector[match_count] = temp->name;
-	  matching_vector[match_count + 1] = NULL;
-	}
-      match_count++;
-      /* If this is the default target, accept it, even if other targets
-	 might match.  People who want those other targets have to set 
-	 the GNUTARGET variable.  */
-      if (temp == bfd_default_vector[0])
-	{
+      temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
+      
+      if (temp)
+	{		/* This format checks out as ok!  */
+	  right_targ = temp;
+	  
 	  if (matching)
 	    {
-	      matching_vector[0] = temp->name;
-	      matching_vector[1] = NULL;
+	      matching_vector[match_count] = temp->name;
+	      matching_vector[match_count + 1] = NULL;
 	    }
-	  match_count = 1;
-	  break;
-	}
+	  
+	  match_count++;
+	  
+	  /* If this is the default target, accept it, even if other
+	     targets might match.  People who want those other targets
+	     have to set the GNUTARGET variable.  */
+	  if (temp == bfd_default_vector[0])
+	    {
+	      if (matching)
+		{
+		  matching_vector[0] = temp->name;
+		  matching_vector[1] = NULL;
+		}
+	      match_count = 1;
+	      break;
+	    }
 #ifdef GNU960
-      /* Big- and little-endian b.out archives look the same, but it doesn't
-       * matter: there is no difference in their headers, and member file byte
-       * orders will (I hope) be handled appropriately by bfd.  Ditto for big
-       * and little coff archives.  And the 4 coff/b.out object formats are
-       * unambiguous.  So accept the first match we find.
-       */
-      break;
+	  /* Big- and little-endian b.out archives look the same, but it
+	     doesn't matter: there is no difference in their headers, and
+	     member file byte orders will (I hope) be handled appropriately
+	     by bfd.  Ditto for big and little coff archives.  And the 4
+	     coff/b.out object formats are unambiguous.  So accept the
+	     first match we find.  */
+	  break;
 #endif
-    } else if (bfd_get_error () != bfd_error_wrong_format) {
-      abfd->xvec = save_targ;
-      abfd->format = bfd_unknown;
-      if (matching && bfd_get_error () != bfd_error_file_ambiguously_recognized)
-	free (matching_vector);
-      return false;
+	}
+      else if (bfd_get_error () != bfd_error_wrong_format)
+	{
+	  abfd->xvec = save_targ;
+	  abfd->format = bfd_unknown;
+	  
+	  if (matching && bfd_get_error ()
+	      != bfd_error_file_ambiguously_recognized)
+	    free (matching_vector);
+	  
+	  return false;
+	}
     }
-  }
+  
+  if (match_count == 1)
+    {
+      abfd->xvec = right_targ;		/* Change BFD's target permanently.  */
+      
+      if (matching)
+	free (matching_vector);
+      
+      return true;			/* File position has moved, BTW.  */
+    }
 
-  if (match_count == 1) {
-    abfd->xvec = right_targ;		/* Change BFD's target permanently */
-    if (matching)
-      free (matching_vector);
-    return true;			/* File position has moved, BTW */
-  }
-
-  abfd->xvec = save_targ;		/* Restore original target type */
-  abfd->format = bfd_unknown;		/* Restore original format */
+  abfd->xvec = save_targ;		/* Restore original target type.  */
+  abfd->format = bfd_unknown;		/* Restore original format.  */
+  
   if (match_count == 0)
     {
       bfd_set_error (bfd_error_file_not_recognized);
+      
       if (matching)
 	free (matching_vector);
     }
   else
     bfd_set_error (bfd_error_file_ambiguously_recognized);
+  
   return false;
 }
 
@@ -277,7 +305,6 @@ DESCRIPTION
 	format @var{format}. If the target set in the BFD does not
 	support the format requested, the format is invalid, or the BFD
 	is not open for writing, then an error occurs.
-
 */
 
 boolean
@@ -285,24 +312,25 @@ bfd_set_format (abfd, format)
      bfd *abfd;
      bfd_format format;
 {
-
   if (bfd_read_p (abfd) ||
       ((int)abfd->format < (int)bfd_unknown) ||
-      ((int)abfd->format >= (int)bfd_type_end)) {
-    bfd_set_error (bfd_error_invalid_operation);
-    return false;
-  }
+      ((int)abfd->format >= (int)bfd_type_end))
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
 
   if (abfd->format != bfd_unknown)
-    return (abfd->format == format) ? true:false;
+    return (abfd->format == format) ? true : false;
 
-  /* presume the answer is yes */
+  /* Presume the answer is yes.  */
   abfd->format = format;
 
-  if (!BFD_SEND_FMT (abfd, _bfd_set_format, (abfd))) {
-    abfd->format = bfd_unknown;
-    return false;
-  }
+  if (!BFD_SEND_FMT (abfd, _bfd_set_format, (abfd)))
+    {
+      abfd->format = bfd_unknown;
+      return false;
+    }
 
   return true;
 }
@@ -329,14 +357,15 @@ bfd_format_string (format)
       || ((int)format >=(int) bfd_type_end)) 
     return "invalid";
   
-  switch (format) {
-  case bfd_object:
-    return "object";		/* linker/assember/compiler output */
-  case bfd_archive: 
-    return "archive";		/* object archive file */
-  case bfd_core: 
-    return "core";		/* core dump */
-  default: 
-    return "unknown";
-  }
+  switch (format)
+    {
+    case bfd_object:
+      return "object";		/* Linker/assember/compiler output.  */
+    case bfd_archive: 
+      return "archive";		/* Object archive file.  */
+    case bfd_core: 
+      return "core";		/* Core dump.  */
+    default: 
+      return "unknown";
+    }
 }

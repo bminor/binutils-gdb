@@ -29,6 +29,10 @@
 
 #define FETCH_INFERIOR_REGISTERS
 
+/* Override child_xfer_memory in infptrace.c. */
+
+#define CHILD_XFER_MEMORY
+
 /* When a child process is just starting, we sneak in and relocate
    the symbol table (and other stuff) after the dynamic linker has
    figured out where they go.  */
@@ -52,6 +56,11 @@
 extern void xcoff_relocate_symtab (unsigned int);
 struct target_ops;
 extern void xcoff_relocate_core (struct target_ops *);
+
+/* Load segment of a given pc value. */
+
+#define	PC_LOAD_SEGMENT(PC)	pc_load_segment_name(PC)
+extern char *pc_load_segment_name (CORE_ADDR);
 
 /* Return sizeof user struct to callers in less machine dependent routines */
 

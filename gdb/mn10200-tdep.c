@@ -32,9 +32,7 @@
 
 /* Should call_function allocate stack space for a struct return?  */
 int
-mn10200_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
+mn10200_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_NFIELDS (type) > 1 || TYPE_LENGTH (type) > 8);
 }
@@ -112,9 +110,7 @@ mn10200_use_struct_convention (gcc_p, type)
 #define NO_MORE_FRAMES 0x8
 
 static CORE_ADDR
-mn10200_analyze_prologue (fi, pc)
-     struct frame_info *fi;
-     CORE_ADDR pc;
+mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end, addr, stop;
   CORE_ADDR stack_size;
@@ -609,8 +605,7 @@ mn10200_analyze_prologue (fi, pc)
    stack pointer that was in use at the time the function call was made?  */
 
 CORE_ADDR
-mn10200_frame_chain (fi)
-     struct frame_info *fi;
+mn10200_frame_chain (struct frame_info *fi)
 {
   struct frame_info dummy_frame;
 
@@ -674,8 +669,7 @@ mn10200_frame_chain (fi)
    Return the address of the first inst past the prologue of the function.  */
 
 CORE_ADDR
-mn10200_skip_prologue (pc)
-     CORE_ADDR pc;
+mn10200_skip_prologue (CORE_ADDR pc)
 {
   /* We used to check the debug symbols, but that can lose if
      we have a null prologue.  */
@@ -687,8 +681,7 @@ mn10200_skip_prologue (pc)
    command, or the call dummy breakpoint gets hit.  */
 
 void
-mn10200_pop_frame (frame)
-     struct frame_info *frame;
+mn10200_pop_frame (struct frame_info *frame)
 {
   int regnum;
 
@@ -724,12 +717,8 @@ mn10200_pop_frame (frame)
    order on the stack.  */
 
 CORE_ADDR
-mn10200_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     unsigned char struct_return;
-     CORE_ADDR struct_addr;
+mn10200_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+			unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int argnum = 0;
   int len = 0;
@@ -833,9 +822,7 @@ mn10200_push_arguments (nargs, args, sp, struct_return, struct_addr)
    Needed for targets where we don't actually execute a JSR/BSR instruction */
 
 CORE_ADDR
-mn10200_push_return_address (pc, sp)
-     CORE_ADDR pc;
-     CORE_ADDR sp;
+mn10200_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[4];
 
@@ -849,9 +836,7 @@ mn10200_push_return_address (pc, sp)
    call.  */
 
 CORE_ADDR
-mn10200_store_struct_return (addr, sp)
-     CORE_ADDR addr;
-     CORE_ADDR sp;
+mn10200_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* The structure return address is passed as the first argument.  */
   write_register (0, addr);
@@ -866,8 +851,7 @@ mn10200_store_struct_return (addr, sp)
    will be found.  */
 
 CORE_ADDR
-mn10200_frame_saved_pc (fi)
-     struct frame_info *fi;
+mn10200_frame_saved_pc (struct frame_info *fi)
 {
   /* The saved PC will always be at the base of the current frame.  */
   return (read_memory_integer (fi->frame, REGISTER_SIZE) & 0xffffff);
@@ -888,8 +872,7 @@ mn10200_frame_saved_pc (fi)
    pointer just prior to calling the target function (see run_stack_dummy).  */
 
 void
-mn10200_init_extra_frame_info (fi)
-     struct frame_info *fi;
+mn10200_init_extra_frame_info (struct frame_info *fi)
 {
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
@@ -902,7 +885,7 @@ mn10200_init_extra_frame_info (fi)
 }
 
 void
-_initialize_mn10200_tdep ()
+_initialize_mn10200_tdep (void)
 {
   tm_print_insn = print_insn_mn10200;
 }

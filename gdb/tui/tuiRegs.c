@@ -586,7 +586,7 @@ tuiToggleFloatRegs ()
 
 
 void
-_initialize_tuiRegs ()
+_initialize_tuiRegs (void)
 {
   if (tui_version && xdb_commands)
     {

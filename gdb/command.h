@@ -1,3 +1,10 @@
+/* ***DEPRECATED***  The gdblib files must not be calling/using things in any
+   of the possible command languages.  If necessary, a hook (that may be
+   present or not) must be used and set to the appropriate routine by any
+   command language that cares about it.  If you are having to include this
+   file you are possibly doing things the old way.  This file will disapear.
+   2000-12-01 fnasser@redhat.com    */
+
 /* Header file for command-reading library command.c.
    Copyright (C) 1986, 1989, 1990, 2000 Free Software Foundation, Inc.
 
@@ -47,12 +54,28 @@ typedef enum cmd_types
   }
 cmd_types;
 
+/* Reasonable values for an AUTO_BOOLEAN variable. */
+enum cmd_auto_boolean
+{
+  CMD_AUTO_BOOLEAN_TRUE,
+  CMD_AUTO_BOOLEAN_FALSE,
+  CMD_AUTO_BOOLEAN_AUTO
+};
+
 /* Types of "set" or "show" command.  */
 typedef enum var_types
   {
     /* "on" or "off".  *VAR is an integer which is nonzero for on,
        zero for off.  */
     var_boolean,
+
+    /* "on" / "true" / "enable" or "off" / "false" / "disable" or
+       "auto.  *VAR is an ``enum cmd_auto_boolean''.  NOTE: In general
+       a custom show command will need to be implemented - one that
+       for "auto" prints both the "auto" and the current auto-selected
+       value. */
+    var_auto_boolean,
+
     /* Unsigned Integer.  *VAR is an unsigned int.  The user can type 0
        to mean "unlimited", which is stored in *VAR as UINT_MAX.  */
     var_uinteger,
@@ -115,7 +138,7 @@ struct cmd_list_element
 	void (*sfunc) (char *args, int from_tty, struct cmd_list_element * c);
       }
     function;
-#define NO_FUNCTION ((void (*) PARAMS((char *args, int from_tty))) 0)
+#define NO_FUNCTION ((void (*) (char *args, int from_tty)) 0)
 
     /* Documentation of this command (or help topic).
        First line is brief documentation; remaining lines form, with it,
@@ -149,7 +172,14 @@ struct cmd_list_element
     char *replacement;
 
     /* Hook for another command to be executed before this command.  */
-    struct cmd_list_element *hook;
+    struct cmd_list_element *hook_pre;
+
+    /* Hook for another command to be executed after this command.  */
+    struct cmd_list_element *hook_post;
+
+    /* Flag that specifies if this command is already running it's hook. */
+    /* Prevents the possibility of hook recursion. */
+    int hook_in;
 
     /* Nonzero identifies a prefix command.  For them, the address
        of the variable containing the list of subcommands.  */
@@ -199,14 +229,18 @@ struct cmd_list_element
     var_types var_type;
 
     /* Pointer to NULL terminated list of enumerated values (like argv).  */
-    char **enums;
+    const char **enums;
 
     /* Pointer to command strings of user-defined commands */
     struct command_line *user_commands;
 
-    /* Pointer to command that is hooked by this one,
+    /* Pointer to command that is hooked by this one, (by hook_pre)
        so the hook can be removed when this one is deleted.  */
-    struct cmd_list_element *hookee;
+    struct cmd_list_element *hookee_pre;
+
+    /* Pointer to command that is hooked by this one, (by hook_post)
+       so the hook can be removed when this one is deleted.  */
+    struct cmd_list_element *hookee_post;
 
     /* Pointer to command that is aliased by this one, so the
        aliased command can be located in case it has been hooked.  */
@@ -274,7 +308,7 @@ extern struct cmd_list_element *add_info_alias (char *, char *, int);
 
 extern char **complete_on_cmdlist (struct cmd_list_element *, char *, char *);
 
-extern char **complete_on_enum (char **enumlist, char *, char *);
+extern char **complete_on_enum (const char *enumlist[], char *, char *);
 
 extern void delete_cmd (char *, struct cmd_list_element **);
 
@@ -294,10 +328,16 @@ extern struct cmd_list_element *add_set_cmd (char *name, enum
 
 extern struct cmd_list_element *add_set_enum_cmd (char *name,
 						  enum command_class class,
-						  char *enumlist[],
-						  char **var,
+						  const char *enumlist[],
+						  const char **var,
 						  char *doc,
 						  struct cmd_list_element **list);
+
+extern struct cmd_list_element *add_set_auto_boolean_cmd (char *name,
+							  enum command_class class,
+							  enum cmd_auto_boolean *var,
+							  char *doc,
+							  struct cmd_list_element **list);
 
 extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
 						   struct cmd_list_element
@@ -314,7 +354,7 @@ extern void do_setshow_command (char *, int, struct cmd_list_element *);
 
 extern void cmd_show_list (struct cmd_list_element *, int, char *);
 
-extern void error_no_arg (char *);
+extern NORETURN void error_no_arg (char *) ATTR_NORETURN;
 
 extern void dont_repeat (void);
 

@@ -542,13 +542,13 @@ proc test_print_int_arrays {} {
 
     gdb_test "set print elements 24" ""
 
-    gdb_test "p int1dim" \
+    gdb_test_escape_braces "p int1dim" \
 	" = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}"
-    gdb_test "p int2dim" \
+    gdb_test_escape_braces "p int2dim" \
 	" = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}}"
-    gdb_test "p int3dim" \
+    gdb_test_escape_braces "p int3dim" \
 	" = {{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}}"
-    gdb_test "p int4dim" \
+    gdb_test_escape_braces "p int4dim" \
 	" = {{{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}}}"
 }
 
@@ -557,7 +557,7 @@ proc test_print_typedef_arrays {} {
 
     gdb_test "set print elements 24" ""
 
-    gdb_test "p a1" \
+    gdb_test_escape_braces "p a1" \
 	" = {2, 4, 6, 8, 10, 12, 14, 16, 18, 20}"
     gdb_test "p a1\[0\]" " = 2"
     gdb_test "p a1\[9\]" " = 20"
@@ -570,11 +570,11 @@ proc test_print_typedef_arrays {} {
 
 proc test_artificial_arrays {} {
     # Send \026@ instead of just @ in case the kill character is @.
-    gdb_test "p int1dim\[0\]\026@2" " = {0, 1}" {p int1dim[0]@2}
-    gdb_test "p int1dim\[0\]\026@2\026@3" \
+    gdb_test_escape_braces "p int1dim\[0\]\026@2" " = {0, 1}" {p int1dim[0]@2}
+    gdb_test_escape_braces "p int1dim\[0\]\026@2\026@3" \
 	"({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot.*)" \
 	{p int1dim[0]@2@3}
-    gdb_test {p/x (short [])0x12345678} \
+    gdb_test_escape_braces {p/x (short [])0x12345678} \
 	" = ({0x1234, 0x5678}|{0x5678, 0x1234})"
 }
 
@@ -655,11 +655,11 @@ proc test_print_array_constants {} {
     setup_xfail "a29k-*-udi" 2416
     gdb_test "print {'a','b','c'}"	" = \"abc\""
     setup_xfail "a29k-*-udi" 2416
-    gdb_test "print {0,1,2}"		" = {0, 1, 2}"
+    gdb_test_escape_braces "print {0,1,2}"    " = {0, 1, 2}"
     setup_xfail "a29k-*-udi" 2416
-    gdb_test "print {(long)0,(long)1,(long)2}"	" = {0, 1, 2}"
+    gdb_test_escape_braces "print {(long)0,(long)1,(long)2}"  " = {0, 1, 2}"
     setup_xfail "a29k-*-udi" 2416
-    gdb_test "print {{0,1,2},{3,4,5}}"  " = {{0, 1, 2}, {3, 4, 5}}"
+    gdb_test_escape_braces "print {{0,1,2},{3,4,5}}"  " = {{0, 1, 2}, {3, 4, 5}}"
     setup_xfail "a29k-*-udi" 2416
     gdb_test "print {4,5,6}\[2\]"	" = 6"
     setup_xfail "a29k-*-udi" 2416
@@ -678,6 +678,15 @@ proc test_printf {} {
     gdb_test "printf \"x=%d,y=%f,z=%d\\n\", 5, 6.0, 7" "x=5,y=6\.0+,z=7"
     gdb_test "printf \"%x %f, %c %x, %x, %f\\n\", 0xbad, -99.541, 'z',\
 0xfeedface, 0xdeadbeef, 5.0" "bad -99.54\[0-9\]+, z feedface, deadbeef, 5.0+"
+}
+
+# Escape a left curly brace to prevent it from being interpreted as 
+# the beginning of a bound
+proc gdb_test_escape_braces { args } {
+
+    set pattern [lindex $args 1]
+    regsub -all {\{[0-9]} $pattern {\\&} esc_pattern
+    gdb_test [lindex $args 0] $esc_pattern [lindex $args 2]
 }
 
 # Start with a fresh gdb.

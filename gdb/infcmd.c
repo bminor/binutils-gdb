@@ -72,10 +72,6 @@ static void detach_command (char *, int);
 
 static void interrupt_target_command (char *args, int from_tty);
 
-#if !defined (DO_REGISTERS_INFO)
-static void do_registers_info (int, int);
-#endif
-
 static void unset_environment_command (char *, int);
 
 static void set_environment_command (char *, int);
@@ -182,11 +178,7 @@ CORE_ADDR step_frame_address;
 
 CORE_ADDR step_sp;
 
-/* 1 means step over all subroutine calls.
-   0 means don't step over calls (used by stepi).
-   -1 means step over calls to undebuggable functions.  */
-
-int step_over_calls;
+enum step_over_calls_kind step_over_calls;
 
 /* If stepping, nonzero means step count is > 1
    so don't print frame next time inferior stops
@@ -205,8 +197,7 @@ struct environ *inferior_environ;
    of a command. If it has, it removes it and returns 1. Otherwise it
    does nothing and returns 0. */
 static int
-strip_bg_char (args)
-     char **args;
+strip_bg_char (char **args)
 {
   char *p = NULL;
 
@@ -233,9 +224,7 @@ strip_bg_char (args)
 
 /* ARGSUSED */
 void
-tty_command (file, from_tty)
-     char *file;
-     int from_tty;
+tty_command (char *file, int from_tty)
 {
   if (file == 0)
     error_no_arg ("terminal name for running target process");
@@ -244,9 +233,7 @@ tty_command (file, from_tty)
 }
 
 static void
-run_command (args, from_tty)
-     char *args;
-     int from_tty;
+run_command (char *args, int from_tty)
 {
   char *exec_file;
 
@@ -313,7 +300,7 @@ Start it from the beginning? "))
       if (args)
 	{
 	  cmd = concat ("set args ", args, NULL);
-	  make_cleanup (free, cmd);
+	  make_cleanup (xfree, cmd);
 	  execute_command (cmd, from_tty);
 	}
     }
@@ -346,9 +333,7 @@ Start it from the beginning? "))
 
 
 static void
-run_no_args_command (args, from_tty)
-     char *args;
-     int from_tty;
+run_no_args_command (char *args, int from_tty)
 {
   execute_command ("set args", from_tty);
   run_command ((char *) NULL, from_tty);
@@ -356,9 +341,7 @@ run_no_args_command (args, from_tty)
 
 
 void
-continue_command (proc_count_exp, from_tty)
-     char *proc_count_exp;
-     int from_tty;
+continue_command (char *proc_count_exp, int from_tty)
 {
   int async_exec = 0;
   ERROR_NO_INFERIOR;
@@ -394,7 +377,7 @@ continue_command (proc_count_exp, from_tty)
       while (num != 0)
 	{
 	  set_ignore_count (num,
-			    parse_and_eval_address (proc_count_exp) - 1,
+			    parse_and_eval_long (proc_count_exp) - 1,
 			    from_tty);
 	  /* set_ignore_count prints a message ending with a period.
 	     So print two spaces before "Continuing.".  */
@@ -416,9 +399,7 @@ continue_command (proc_count_exp, from_tty)
 
 /* ARGSUSED */
 static void
-step_command (count_string, from_tty)
-     char *count_string;
-     int from_tty;
+step_command (char *count_string, int from_tty)
 {
   step_1 (0, 0, count_string);
 }
@@ -427,9 +408,7 @@ step_command (count_string, from_tty)
 
 /* ARGSUSED */
 static void
-next_command (count_string, from_tty)
-     char *count_string;
-     int from_tty;
+next_command (char *count_string, int from_tty)
 {
   step_1 (1, 0, count_string);
 }
@@ -438,18 +417,14 @@ next_command (count_string, from_tty)
 
 /* ARGSUSED */
 void
-stepi_command (count_string, from_tty)
-     char *count_string;
-     int from_tty;
+stepi_command (char *count_string, int from_tty)
 {
   step_1 (0, 1, count_string);
 }
 
 /* ARGSUSED */
 void
-nexti_command (count_string, from_tty)
-     char *count_string;
-     int from_tty;
+nexti_command (char *count_string, int from_tty)
 {
   step_1 (1, 1, count_string);
 }
@@ -461,10 +436,7 @@ disable_longjmp_breakpoint_cleanup (void *ignore)
 }
 
 static void
-step_1 (skip_subroutines, single_inst, count_string)
-     int skip_subroutines;
-     int single_inst;
-     char *count_string;
+step_1 (int skip_subroutines, int single_inst, char *count_string)
 {
   register int count = 1;
   struct frame_info *frame;
@@ -489,7 +461,7 @@ step_1 (skip_subroutines, single_inst, count_string)
       async_disable_stdin ();
     }
 
-  count = count_string ? parse_and_eval_address (count_string) : 1;
+  count = count_string ? parse_and_eval_long (count_string) : 1;
 
   if (!single_inst || skip_subroutines)		/* leave si command alone */
     {
@@ -537,11 +509,11 @@ which has no line number information.\n", name);
 		/* It is stepi.
 		   Don't step over function calls, not even to functions lacking
 		   line numbers.  */
-		step_over_calls = 0;
+		step_over_calls = STEP_OVER_NONE;
 	    }
 
 	  if (skip_subroutines)
-	    step_over_calls = 1;
+	    step_over_calls = STEP_OVER_ALL;
 
 	  step_multi = (count > 1);
 	  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
@@ -578,8 +550,7 @@ which has no line number information.\n", name);
    proceed(), via step_once(). Basically it is like step_once and
    step_1_continuation are co-recursive. */
 static void
-step_1_continuation (arg)
-     struct continuation_arg *arg;
+step_1_continuation (struct continuation_arg *arg)
 {
   int count;
   int skip_subroutines;
@@ -632,7 +603,13 @@ step_once (int skip_subroutines, int single_inst, int count)
       if (!single_inst)
 	{
 	  find_pc_line_pc_range (stop_pc, &step_range_start, &step_range_end);
-	  if (step_range_end == 0)
+
+	  /* If we have no line info, switch to stepi mode.  */
+	  if (step_range_end == 0 && step_stop_if_no_debug)
+	    {
+	      step_range_start = step_range_end = 1;
+	    }
+	  else if (step_range_end == 0)
 	    {
 	      char *name;
 	      if (find_pc_partial_function (stop_pc, &name, &step_range_start,
@@ -653,11 +630,11 @@ which has no line number information.\n", name);
 	    /* It is stepi.
 	       Don't step over function calls, not even to functions lacking
 	       line numbers.  */
-	    step_over_calls = 0;
+	    step_over_calls = STEP_OVER_NONE;
 	}
 
       if (skip_subroutines)
-	step_over_calls = 1;
+	step_over_calls = STEP_OVER_ALL;
 
       step_multi = (count > 1);
       arg1 =
@@ -681,9 +658,7 @@ which has no line number information.\n", name);
 /* Continue program at specified address.  */
 
 static void
-jump_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+jump_command (char *arg, int from_tty)
 {
   register CORE_ADDR addr;
   struct symtabs_and_lines sals;
@@ -721,7 +696,7 @@ jump_command (arg, from_tty)
     }
 
   sal = sals.sals[0];
-  free ((PTR) sals.sals);
+  xfree (sals.sals);
 
   if (sal.symtab == 0 && sal.pc == 0)
     error ("No source file has been specified.");
@@ -771,9 +746,7 @@ jump_command (arg, from_tty)
 
 /* Go to line or address in current procedure */
 static void
-go_command (line_no, from_tty)
-     char *line_no;
-     int from_tty;
+go_command (char *line_no, int from_tty)
 {
   if (line_no == (char *) NULL || !*line_no)
     printf_filtered (GO_USAGE);
@@ -788,9 +761,7 @@ go_command (line_no, from_tty)
 /* Continue program giving it specified signal.  */
 
 static void
-signal_command (signum_exp, from_tty)
-     char *signum_exp;
-     int from_tty;
+signal_command (char *signum_exp, int from_tty)
 {
   enum target_signal oursig;
 
@@ -808,7 +779,7 @@ signal_command (signum_exp, from_tty)
   if (oursig == TARGET_SIGNAL_UNKNOWN)
     {
       /* No, try numeric.  */
-      int num = parse_and_eval_address (signum_exp);
+      int num = parse_and_eval_long (signum_exp);
 
       if (num == 0)
 	oursig = TARGET_SIGNAL_0;
@@ -837,8 +808,7 @@ signal_command (signum_exp, from_tty)
    pointed to by arg (which is really a bpstat *).  */
 
 static void
-breakpoint_auto_delete_contents (arg)
-     PTR arg;
+breakpoint_auto_delete_contents (PTR arg)
 {
   breakpoint_auto_delete (*(bpstat *) arg);
 }
@@ -866,9 +836,7 @@ breakpoint_auto_delete_contents (arg)
    will eventually be popped when we do hit the dummy end breakpoint).  */
 
 int
-run_stack_dummy (addr, buffer)
-     CORE_ADDR addr;
-     char *buffer;
+run_stack_dummy (CORE_ADDR addr, char *buffer)
 {
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
   int saved_async = 0;
@@ -956,8 +924,7 @@ run_stack_dummy (addr, buffer)
 
 /* ARGSUSED */
 static void
-until_next_command (from_tty)
-     int from_tty;
+until_next_command (int from_tty)
 {
   struct frame_info *frame;
   CORE_ADDR pc;
@@ -993,7 +960,7 @@ until_next_command (from_tty)
       step_range_end = sal.end;
     }
 
-  step_over_calls = 1;
+  step_over_calls = STEP_OVER_ALL;
   step_frame_address = FRAME_FP (frame);
   step_sp = read_sp ();
 
@@ -1003,9 +970,7 @@ until_next_command (from_tty)
 }
 
 static void
-until_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+until_command (char *arg, int from_tty)
 {
   int async_exec = 0;
 
@@ -1104,10 +1069,9 @@ print_return_value (int structure_return, struct type *value_type)
    only chance we have to complete this command is in
    fetch_inferior_event, which is called by the event loop as soon as it
    detects that the target has stopped. This function is called via the
-   cmd_continaution pointer. */
+   cmd_continuation pointer. */
 void
-finish_command_continuation (arg)
-     struct continuation_arg *arg;
+finish_command_continuation (struct continuation_arg *arg)
 {
   register struct symbol *function;
   struct breakpoint *breakpoint;
@@ -1150,9 +1114,7 @@ finish_command_continuation (arg)
    the selected frame will return to, then continue.  */
 
 static void
-finish_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+finish_command (char *arg, int from_tty)
 {
   struct symtab_and_line sal;
   register struct frame_info *frame;
@@ -1277,9 +1239,7 @@ finish_command (arg, from_tty)
 
 /* ARGSUSED */
 static void
-program_info (args, from_tty)
-     char *args;
-     int from_tty;
+program_info (char *args, int from_tty)
 {
   bpstat bs = stop_bpstat;
   int num = bpstat_num (&bs);
@@ -1326,9 +1286,7 @@ program_info (args, from_tty)
 }
 
 static void
-environment_info (var, from_tty)
-     char *var;
-     int from_tty;
+environment_info (char *var, int from_tty)
 {
   if (var)
     {
@@ -1359,9 +1317,7 @@ environment_info (var, from_tty)
 }
 
 static void
-set_environment_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+set_environment_command (char *arg, int from_tty)
 {
   register char *p, *val, *var;
   int nullset = 0;
@@ -1419,13 +1375,11 @@ set_environment_command (arg, from_tty)
     }
   else
     set_in_environ (inferior_environ, var, val);
-  free (var);
+  xfree (var);
 }
 
 static void
-unset_environment_command (var, from_tty)
-     char *var;
-     int from_tty;
+unset_environment_command (char *var, int from_tty)
 {
   if (var == 0)
     {
@@ -1447,9 +1401,7 @@ static const char path_var_name[] = "PATH";
 
 /* ARGSUSED */
 static void
-path_info (args, from_tty)
-     char *args;
-     int from_tty;
+path_info (char *args, int from_tty)
 {
   puts_filtered ("Executable and object file path: ");
   puts_filtered (get_in_environ (inferior_environ, path_var_name));
@@ -1459,9 +1411,7 @@ path_info (args, from_tty)
 /* Add zero or more directories to the front of the execution path.  */
 
 static void
-path_command (dirname, from_tty)
-     char *dirname;
-     int from_tty;
+path_command (char *dirname, int from_tty)
 {
   char *exec_path;
   char *env;
@@ -1473,7 +1423,7 @@ path_command (dirname, from_tty)
   exec_path = strsave (env);
   mod_path (dirname, &exec_path);
   set_in_environ (inferior_environ, path_var_name, exec_path);
-  free (exec_path);
+  xfree (exec_path);
   if (from_tty)
     path_info ((char *) NULL, from_tty);
 }
@@ -1493,14 +1443,8 @@ char *gdb_register_names[] = REGISTER_NAMES;
    all the registers, define the macro DO_REGISTERS_INFO(regnum, fp)
    to provide that format.  */
 
-#if !defined (DO_REGISTERS_INFO)
-
-#define DO_REGISTERS_INFO(regnum, fp) do_registers_info(regnum, fp)
-
-static void
-do_registers_info (regnum, fpregs)
-     int regnum;
-     int fpregs;
+void
+do_registers_info (int regnum, int fpregs)
 {
   register int i;
   int numregs = ARCH_NUM_REGS;
@@ -1602,12 +1546,9 @@ do_registers_info (regnum, fpregs)
       printf_filtered ("\n");
     }
 }
-#endif /* no DO_REGISTERS_INFO.  */
 
 void
-registers_info (addr_exp, fpregs)
-     char *addr_exp;
-     int fpregs;
+registers_info (char *addr_exp, int fpregs)
 {
   int regnum, numregs;
   register char *end;
@@ -1654,17 +1595,13 @@ registers_info (addr_exp, fpregs)
 }
 
 void
-all_registers_info (addr_exp, from_tty)
-     char *addr_exp;
-     int from_tty;
+all_registers_info (char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 1);
 }
 
 void
-nofp_registers_info (addr_exp, from_tty)
-     char *addr_exp;
-     int from_tty;
+nofp_registers_info (char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 0);
 }
@@ -1687,9 +1624,7 @@ nofp_registers_info (addr_exp, from_tty)
    and wait for the trace-trap that results from attaching.  */
 
 void
-attach_command (args, from_tty)
-     char *args;
-     int from_tty;
+attach_command (char *args, int from_tty)
 {
 #ifdef SOLIB_ADD
   extern int auto_solib_add;
@@ -1721,11 +1656,11 @@ attach_command (args, from_tty)
      wait_for_inferior as soon as the target reports a stop.  */
   init_wait_for_inferior ();
   clear_proceed_status ();
-  stop_soon_quietly = 1;
 
   /* No traps are generated when attaching to inferior under Mach 3
      or GNU hurd.  */
 #ifndef ATTACH_NO_WAIT
+  stop_soon_quietly = 1;
   wait_for_inferior ();
 #endif
 
@@ -1786,9 +1721,7 @@ attach_command (args, from_tty)
  */
 
 static void
-detach_command (args, from_tty)
-     char *args;
-     int from_tty;
+detach_command (char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart */
   target_detach (args, from_tty);
@@ -1803,17 +1736,13 @@ detach_command (args, from_tty)
    the backgound. */
 #ifdef UI_OUT
 void
-interrupt_target_command_wrapper (args, from_tty)
-     char *args;
-     int from_tty;
+interrupt_target_command_wrapper (char *args, int from_tty)
 {
   interrupt_target_command (args, from_tty);
 }
 #endif
 static void
-interrupt_target_command (args, from_tty)
-     char *args;
-     int from_tty;
+interrupt_target_command (char *args, int from_tty)
 {
   if (event_loop_p && target_can_async_p ())
     {
@@ -1824,9 +1753,7 @@ interrupt_target_command (args, from_tty)
 
 /* ARGSUSED */
 static void
-float_info (addr_exp, from_tty)
-     char *addr_exp;
-     int from_tty;
+float_info (char *addr_exp, int from_tty)
 {
 #ifdef FLOAT_INFO
   FLOAT_INFO;
@@ -1837,9 +1764,7 @@ float_info (addr_exp, from_tty)
 
 /* ARGSUSED */
 static void
-unset_command (args, from_tty)
-     char *args;
-     int from_tty;
+unset_command (char *args, int from_tty)
 {
   printf_filtered ("\"unset\" must be followed by the name of ");
   printf_filtered ("an unset subcommand.\n");
@@ -1847,7 +1772,7 @@ unset_command (args, from_tty)
 }
 
 void
-_initialize_infcmd ()
+_initialize_infcmd (void)
 {
   struct cmd_list_element *c;
 

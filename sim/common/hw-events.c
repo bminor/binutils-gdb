@@ -51,8 +51,9 @@ create_hw_event_data (struct hw *me)
 void
 delete_hw_event_data (struct hw *me)
 {
-  if (me->events_of_hw != NULL)
-    hw_abort (me, "stray events");
+  /* Remove the scheduled event.  */
+  while (me->events_of_hw)
+    hw_event_queue_deschedule (me, &me->events_of_hw->event);
 }
 
 
@@ -164,6 +165,15 @@ hw_event_queue_time (struct hw *me)
   return sim_events_time (hw_system (me));
 }
 
+/* Returns the time that remains before the event is raised. */
+signed64
+hw_event_remain_time (struct hw *me, struct hw_event *event)
+{
+  signed64 t;
+
+  t = sim_events_remain_time (hw_system (me), event->real);
+  return t;
+}
 
 /* Only worry about this compling on ANSI systems.
    Build with `make test-hw-events' in sim/<cpu> directory*/

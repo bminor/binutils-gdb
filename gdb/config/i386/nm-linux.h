@@ -1,5 +1,5 @@
-/* Native support for GNU/Linux, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1992, 1996, 1998, 2000
+/* Native support for Linux/x86.
+   Copyright 1986, 1987, 1989, 1992, 1996, 1998, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -65,12 +65,14 @@ extern int kernel_u_size (void);
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
 
-/* Nevertheless, define CANNOT_{FETCH,STORE}_REGISTER, because we fall
+/* Nevertheless, define CANNOT_{FETCH,STORE}_REGISTER, because we might fall
    back on the code `infptrace.c' (well a copy of that code in
    `i386-linux-nat.c' for now) and we can access only the
    general-purpose registers in that way.  */
-#define CANNOT_FETCH_REGISTER(regno) ((regno) >= NUM_GREGS)
-#define CANNOT_STORE_REGISTER(regno) CANNOT_FETCH_REGISTER (regno)
+extern int cannot_fetch_register (int regno);
+extern int cannot_store_register (int regno);
+#define CANNOT_FETCH_REGISTER(regno) cannot_store_register (regno)
+#define CANNOT_STORE_REGISTER(regno) cannot_fetch_register (regno)
 
 /* Override child_resume in `infptrace.c'.  */
 #define CHILD_RESUME
@@ -79,4 +81,20 @@ extern CORE_ADDR i386_stopped_by_watchpoint (int);
 extern int i386_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw);
 extern int i386_remove_watchpoint (int pid, CORE_ADDR addr, int len);
 
-#endif /* #ifndef NM_LINUX_H */
+/* FIXME: kettenis/2000-09-03: This should be moved to ../nm-linux.h
+   once we have converted all Linux targets to use the new threads
+   stuff (without the #undef of course).  */
+
+extern int lin_lwp_prepare_to_proceed (void);
+#undef PREPARE_TO_PROCEED
+#define PREPARE_TO_PROCEED(select_it) lin_lwp_prepare_to_proceed ()
+
+extern void lin_lwp_attach_lwp (int pid, int verbose);
+#define ATTACH_LWP(pid, verbose) lin_lwp_attach_lwp ((pid), (verbose))
+
+#include <signal.h>
+
+extern void lin_thread_get_thread_signals (sigset_t *mask);
+#define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)
+
+#endif /* nm_linux.h */

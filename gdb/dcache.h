@@ -23,30 +23,21 @@
 #ifndef DCACHE_H
 #define DCACHE_H
 
-typedef int (*memxferfunc) (CORE_ADDR memaddr, char *myaddr, int len);
-
 typedef struct dcache_struct DCACHE;
 
-/* Using the data cache DCACHE return the contents of the word at
-   address ADDR in the remote machine.  */
-int dcache_fetch (DCACHE * dcache, CORE_ADDR addr);
-
-/* Flush DCACHE. */
-void dcache_flush (DCACHE * dcache);
+/* Invalidate DCACHE. */
+void dcache_invalidate (DCACHE *dcache);
 
 /* Initialize DCACHE. */
-DCACHE *dcache_init (memxferfunc reading, memxferfunc writing);
+DCACHE *dcache_init (void);
 
-/* Write the word at ADDR both in the data cache and in the remote machine.  */
-int dcache_poke (DCACHE * dcache, CORE_ADDR addr, int data);
+/* Free a DCACHE */
+void dcache_free (DCACHE *);
 
 /* Simple to call from <remote>_xfer_memory */
 
-int dcache_xfer_memory (DCACHE * cache, CORE_ADDR mem, char *my, int len,
+int dcache_xfer_memory (DCACHE *cache, CORE_ADDR mem, char *my, int len,
 			int should_write);
-
-/* Write the bytes at ADDR into the data cache and the remote machine. */
-int dcache_poke_block (DCACHE * cache, CORE_ADDR mem, char *my, int len);
 
 /* Turn dcache state on or off */
 void set_dcache_state (int);

@@ -105,12 +105,12 @@ proc test_template_breakpoints {} {
     gdb_expect {
 	-re "0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2. T5<int>::T5\\(int\\) at .*\[\r\n\]*.3. T5<int>::T5\\(T5<int> const &\\) at .*\[\r\n\]*> $" {
 	    gdb_test "0" \
-		"cancelled" \
+		"canceled" \
 		"constructor breakpoint (obsolete format!)"
 	}
 	-re ".0. cancel\[\r\n\]*.1. all\[\r\n\]*.2. T5<int>::T5\\(T5<int> const &\\) at .*templates.cc:.*\[\r\n\]*.3. T5<int>::T5\\(int\\) at .*templates.cc:.*\[\r\n\]*> $" {
 	    gdb_test "0" \
-		"cancelled" \
+		"canceled" \
 		"constructor breakpoint"
 	}
 	-re ".*$gdb_prompt $" { fail "constructor breakpoint" }

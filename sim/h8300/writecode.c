@@ -882,7 +882,7 @@ owrite (i)
 	  printf ("case 0x%03x:\n", i);
 	}
 
-      /* Dont need any if's this is the only one */
+      /* Don't need any if's this is the only one */
       edo (*p);
     }
   else

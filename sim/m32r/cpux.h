@@ -50,21 +50,21 @@ typedef struct {
 #define SET_H_CR(index, x) \
 do { \
 m32rxf_h_cr_set_handler (current_cpu, (index), (x));\
-} while (0)
+;} while (0)
   /* accumulator */
   DI h_accum;
 #define GET_H_ACCUM() m32rxf_h_accum_get_handler (current_cpu)
 #define SET_H_ACCUM(x) \
 do { \
 m32rxf_h_accum_set_handler (current_cpu, (x));\
-} while (0)
+;} while (0)
   /* accumulators */
   DI h_accums[2];
 #define GET_H_ACCUMS(index) m32rxf_h_accums_get_handler (current_cpu, index)
 #define SET_H_ACCUMS(index, x) \
 do { \
 m32rxf_h_accums_set_handler (current_cpu, (index), (x));\
-} while (0)
+;} while (0)
   /* condition bit */
   BI h_cond;
 #define GET_H_COND() CPU (h_cond)
@@ -75,7 +75,7 @@ m32rxf_h_accums_set_handler (current_cpu, (index), (x));\
 #define SET_H_PSW(x) \
 do { \
 m32rxf_h_psw_set_handler (current_cpu, (x));\
-} while (0)
+;} while (0)
   /* backup psw */
   UQI h_bpsw;
 #define GET_H_BPSW() CPU (h_bpsw)
@@ -140,47 +140,43 @@ union sem_fields {
     unsigned char out_h_gr_14;
   } sfmt_bl8;
   struct { /*  */
-    SI* i_dr;
-    UINT f_hi16;
-    unsigned char out_dr;
-  } sfmt_seth;
-  struct { /*  */
     SI f_imm1;
     UINT f_accd;
     UINT f_accs;
   } sfmt_rac_dsi;
   struct { /*  */
-    SI* i_sr;
+    SI* i_dr;
+    UINT f_hi16;
     UINT f_r1;
-    unsigned char in_sr;
-  } sfmt_mvtc;
+    unsigned char out_dr;
+  } sfmt_seth;
   struct { /*  */
     SI* i_src1;
     UINT f_accs;
+    UINT f_r1;
     unsigned char in_src1;
   } sfmt_mvtachi_a;
   struct { /*  */
     SI* i_dr;
-    UINT f_r2;
-    unsigned char out_dr;
-  } sfmt_mvfc;
-  struct { /*  */
-    SI* i_dr;
     UINT f_accs;
+    UINT f_r1;
     unsigned char out_dr;
   } sfmt_mvfachi_a;
   struct { /*  */
     ADDR i_uimm24;
     SI* i_dr;
+    UINT f_r1;
     unsigned char out_dr;
   } sfmt_ld24;
   struct { /*  */
     SI* i_sr;
+    UINT f_r2;
     unsigned char in_sr;
     unsigned char out_h_gr_14;
   } sfmt_jl;
   struct { /*  */
     SI* i_dr;
+    UINT f_r1;
     UINT f_uimm5;
     unsigned char in_dr;
     unsigned char out_dr;
@@ -188,12 +184,15 @@ union sem_fields {
   struct { /*  */
     SI* i_dr;
     INT f_simm8;
+    UINT f_r1;
     unsigned char in_dr;
     unsigned char out_dr;
   } sfmt_addi;
   struct { /*  */
     SI* i_src1;
     SI* i_src2;
+    UINT f_r1;
+    UINT f_r2;
     unsigned char in_src1;
     unsigned char in_src2;
     unsigned char out_src2;
@@ -202,6 +201,8 @@ union sem_fields {
     SI* i_src1;
     SI* i_src2;
     INT f_simm16;
+    UINT f_r1;
+    UINT f_r2;
     unsigned char in_src1;
     unsigned char in_src2;
   } sfmt_st_d;
@@ -209,12 +210,16 @@ union sem_fields {
     SI* i_src1;
     SI* i_src2;
     UINT f_acc;
+    UINT f_r1;
+    UINT f_r2;
     unsigned char in_src1;
     unsigned char in_src2;
   } sfmt_machi_a;
   struct { /*  */
     SI* i_dr;
     SI* i_sr;
+    UINT f_r1;
+    UINT f_r2;
     unsigned char in_sr;
     unsigned char out_dr;
     unsigned char out_sr;
@@ -223,12 +228,16 @@ union sem_fields {
     IADDR i_disp16;
     SI* i_src1;
     SI* i_src2;
+    UINT f_r1;
+    UINT f_r2;
     unsigned char in_src1;
     unsigned char in_src2;
   } sfmt_beq;
   struct { /*  */
     SI* i_dr;
     SI* i_sr;
+    UINT f_r1;
+    UINT f_r2;
     UINT f_uimm16;
     unsigned char in_sr;
     unsigned char out_dr;
@@ -237,12 +246,16 @@ union sem_fields {
     SI* i_dr;
     SI* i_sr;
     INT f_simm16;
+    UINT f_r1;
+    UINT f_r2;
     unsigned char in_sr;
     unsigned char out_dr;
   } sfmt_add3;
   struct { /*  */
     SI* i_dr;
     SI* i_sr;
+    UINT f_r1;
+    UINT f_r2;
     unsigned char in_dr;
     unsigned char in_sr;
     unsigned char out_dr;

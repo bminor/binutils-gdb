@@ -41,9 +41,7 @@ typedef struct
   char *code;
   char *stuff[MAX_NR_STUFF];
   int index;
-}
-
-op;
+} op;
 
 
 op tab[] =
@@ -1321,7 +1319,7 @@ op ppi_tab[] =
     "  res = Sz << i;",
     "else if (i >= 128 - 16)",
     "  res = Sz >> 128 - i;",
-    "else"
+    "else",
     "  {",
     "    RAISE_EXCEPTION (SIGILL);",
     "    return;",
@@ -1336,7 +1334,7 @@ op ppi_tab[] =
     "",
     "if (i < 32)",
     "  {",
-    "    if (i == 32)"
+    "    if (i == 32)",
     "      {",
     "        res = 0;",
     "        res_grd = Sz;",
@@ -1352,7 +1350,7 @@ op ppi_tab[] =
     "else if (i >= 96)",
     "  {",
     "    i = 128 - i;",
-    "    if (i == 32)"
+    "    if (i == 32)",
     "      {",
     "        res_grd = SIGN32 (Sz_grd);",
     "        res = Sz_grd;",
@@ -1364,7 +1362,7 @@ op ppi_tab[] =
     "      }",
     "    carry = Sz >> (i - 1) & 1;",
     "  }",
-    "else"
+    "else",
     "  {",
     "    RAISE_EXCEPTION (SIGILL);",
     "    return;",
@@ -1540,7 +1538,7 @@ op ppi_tab[] =
     "  res = Sx << Sy;",
     "else if (Sy >= 128 - 16)",
     "  res = Sx >> 128 - Sy;",
-    "else"
+    "else",
     "  {",
     "    RAISE_EXCEPTION (SIGILL);",
     "    return;",
@@ -1554,7 +1552,7 @@ op ppi_tab[] =
     "",
     "if (Sy < 32)",
     "  {",
-    "    if (Sy == 32)"
+    "    if (Sy == 32)",
     "      {",
     "        res = 0;",
     "        res_grd = Sx;",
@@ -1570,7 +1568,7 @@ op ppi_tab[] =
     "else if (Sy >= 96)",
     "  {",
     "    Sy = 128 - Sy;",
-    "    if (Sy == 32)"
+    "    if (Sy == 32)",
     "      {",
     "        res_grd = SIGN32 (Sx_grd);",
     "        res = Sx_grd;",
@@ -1582,7 +1580,7 @@ op ppi_tab[] =
     "      }",
     "    carry = Sx >> (Sy - 1) & 1;",
     "  }",
-    "else"
+    "else",
     "  {",
     "    RAISE_EXCEPTION (SIGILL);",
     "    return;",
@@ -1694,7 +1692,7 @@ op ppi_tab[] =
   { "","", "(if cc) pdmsb Sx,Dz",	"100111ccxx..zzzz",
     "unsigned Sx = DSP_R (x);",
     "int Sx_grd = GET_DSP_GRD (x);",
-    "int i = 16;"
+    "int i = 16;",
     "",
     "if (Sx_grd < 0)",
     "  {",
@@ -1710,7 +1708,7 @@ op ppi_tab[] =
     "  res = 30;",
     "else",
     "  res = 31;",
-    "do"
+    "do",
     "  {",
     "    if (Sx & ~0 << i)",
     "      {",
@@ -1727,13 +1725,13 @@ op ppi_tab[] =
   },
   { "","", "(if cc) pdmsb Sy,Dz",	"101111cc..yyzzzz",
     "unsigned Sy = DSP_R (y);",
-    "int i;"
+    "int i;",
     "",
     "if (Sy < 0)",
     "  Sy = ~Sy;",
     "Sy <<= 1;",
     "res = 31;",
-    "do"
+    "do",
     "  {",
     "    if (Sy & ~0 << i)",
     "      {",

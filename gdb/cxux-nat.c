@@ -66,8 +66,7 @@ extern jmp_buf stack_jmp;
 extern int errno;
 
 void
-fetch_inferior_registers (regno)
-     int regno;			/* Original value discarded */
+fetch_inferior_registers (int regno)
 {
   register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];
@@ -139,8 +138,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   register unsigned int regaddr;
   char buf[80];
@@ -249,8 +247,7 @@ store_inferior_registers (regno)
 
 /* blockend is the address of the end of the user structure */
 
-m88k_register_u_addr (blockend, regnum)
-     int blockend, regnum;
+m88k_register_u_addr (int blockend, int regnum)
 {
   struct USER u;
   int ustart = blockend - sizeof (struct USER);
@@ -289,8 +286,7 @@ m88k_register_u_addr (blockend, regnum)
    register values. */
 
 void
-supply_gregset (gregsetp)
-     gregset_t *gregsetp;
+supply_gregset (gregset_t *gregsetp)
 {
   register int regi;
   register greg_t *regp = (greg_t *) gregsetp;
@@ -307,9 +303,7 @@ supply_gregset (gregsetp)
 }
 
 void
-fill_gregset (gregsetp, regno)
-     gregset_t *gregsetp;
-     int regno;
+fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
   register greg_t *regp = (greg_t *) gregsetp;
@@ -357,7 +351,7 @@ struct link_map
 #endif
 
 void
-add_shared_symbol_files ()
+add_shared_symbol_files (void)
 {
   void *desc;
   struct link_map *ld_map, *lm, lms;
@@ -392,7 +386,7 @@ add_shared_symbol_files ()
 	      section_addrs.other[0].addr = lms.l_addr;
               section_addrs.other[0].name = ".text";
 	      symbol_file_add (path_name, 1, &section_addrs, 0, 0);
-	      free (path_name);
+	      xfree (path_name);
 	    }
 	}
       /* traverse links in reverse order so that we get the
@@ -410,8 +404,7 @@ add_shared_symbol_files ()
 #include <sys/regset.h>
 
 unsigned int
-m88k_harris_core_register_addr (regno, reg_ptr)
-     int regno, reg_ptr;
+m88k_harris_core_register_addr (int regno, int reg_ptr)
 {
   unsigned int word_offset;
 
@@ -447,7 +440,7 @@ m88k_harris_core_register_addr (regno, reg_ptr)
 #endif /* _ES_MP */
 
 void
-_initialize_m88k_nat ()
+_initialize_m88k_nat (void)
 {
 #ifdef _ES_MP
   /* Enable 88110 support, as we don't support the 88100 under ES/MP.  */
@@ -465,8 +458,7 @@ _initialize_m88k_nat ()
    register values. */
 
 void
-supply_gregset (gregsetp)
-     gregset_t *gregsetp;
+supply_gregset (gregset_t *gregsetp)
 {
   register int regi;
   register greg_t *regp = (greg_t *) gregsetp;
@@ -488,8 +480,7 @@ supply_gregset (gregsetp)
    idea of the current floating point register values.  */
 
 void
-supply_fpregset (fpregsetp)
-     fpregset_t *fpregsetp;
+supply_fpregset (fpregset_t *fpregsetp)
 {
   register int regi;
   char *from;

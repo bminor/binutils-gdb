@@ -1,5 +1,5 @@
 /* Target-specific definition for the Mitsubishi D10V
-   Copyright (C) 1996,1999 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,8 +21,5 @@
 /* Contributed by Martin Hunt, hunt@cygnus.com */
 
 #define GDB_MULTI_ARCH 1
-
-extern int d10v_register_sim_regno (int reg);
-#define REGISTER_SIM_REGNO(NR) d10v_register_sim_regno((NR))
 
 #define NO_EXTRA_ALIGNMENT_NEEDED 1

@@ -18,12 +18,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/*
-Most of this hacked by  Steve Chamberlain,
-			sac@cygnus.com
+/* Most of this hacked by Steve Chamberlain <sac@cygnus.com>.
 
-PE/PEI rearrangement (and code added): Donn Terry
-				       Softway Systems, Inc.
+   PE/PEI rearrangement (and code added): Donn Terry
+					  Softway Systems, Inc.
 */
 
 /* Hey look, some documentation [and in a place you expect to find it]!
@@ -91,30 +89,35 @@ _bfd_pei_swap_sym_in (abfd, ext1, in1)
      PTR ext1;
      PTR in1;
 {
-  SYMENT *ext = (SYMENT *)ext1;
-  struct internal_syment      *in = (struct internal_syment *)in1;
+  SYMENT *ext = (SYMENT *) ext1;
+  struct internal_syment *in = (struct internal_syment *) in1;
 
-  if( ext->e.e_name[0] == 0) {
-    in->_n._n_n._n_zeroes = 0;
-    in->_n._n_n._n_offset = bfd_h_get_32(abfd, (bfd_byte *) ext->e.e.e_offset);
-  }
-  else {
-    memcpy(in->_n._n_name, ext->e.e_name, SYMNMLEN);
-  }
+  if (ext->e.e_name[0] == 0)
+    {
+      in->_n._n_n._n_zeroes = 0;
+      in->_n._n_n._n_offset =
+	bfd_h_get_32 (abfd, (bfd_byte *) ext->e.e.e_offset);
+    }
+  else
+    {
+      memcpy (in->_n._n_name, ext->e.e_name, SYMNMLEN);
+    }
 
-  in->n_value = bfd_h_get_32(abfd, (bfd_byte *) ext->e_value);
-  in->n_scnum = bfd_h_get_16(abfd, (bfd_byte *) ext->e_scnum);
-  if (sizeof(ext->e_type) == 2){
-    in->n_type = bfd_h_get_16(abfd, (bfd_byte *) ext->e_type);
-  }
-  else {
-    in->n_type = bfd_h_get_32(abfd, (bfd_byte *) ext->e_type);
-  }
-  in->n_sclass = bfd_h_get_8(abfd, ext->e_sclass);
-  in->n_numaux = bfd_h_get_8(abfd, ext->e_numaux);
+  in->n_value = bfd_h_get_32 (abfd, (bfd_byte *) ext->e_value);
+  in->n_scnum = bfd_h_get_16 (abfd, (bfd_byte *) ext->e_scnum);
+  if (sizeof (ext->e_type) == 2)
+    {
+      in->n_type = bfd_h_get_16 (abfd, (bfd_byte *) ext->e_type);
+    }
+  else
+    {
+      in->n_type = bfd_h_get_32 (abfd, (bfd_byte *) ext->e_type);
+    }
+  in->n_sclass = bfd_h_get_8 (abfd, ext->e_sclass);
+  in->n_numaux = bfd_h_get_8 (abfd, ext->e_numaux);
 
 #ifndef STRICT_PE_FORMAT
-  /* This is for Gnu-created DLLs */
+  /* This is for Gnu-created DLLs.  */
 
   /* The section symbols for the .idata$ sections have class 0x68
      (C_SECTION), which MS documentation indicates is a section
@@ -136,17 +139,19 @@ _bfd_pei_swap_sym_in (abfd, ext1, in1)
       /* I have tried setting the class to 3 and using the following
 	 to set the section number.  This will put the address of the
 	 pointer to the string kernel32.dll at addresses 0 and 0x10
-	 off start of idata section which is not correct */
-      /*    if (strcmp (in->_n._n_name, ".idata$4") == 0) */
-      /*      in->n_scnum = 3; */
-      /*    else */
-      /*      in->n_scnum = 2; */
+	 off start of idata section which is not correct.  */
+#if 0
+      if (strcmp (in->_n._n_name, ".idata$4") == 0)
+	in->n_scnum = 3;
+      else
+	in->n_scnum = 2;
+#endif
 #else
       /* Create synthetic empty sections as needed.  DJ */
       if (in->n_scnum == 0)
 	{
 	  asection *sec;
-	  for (sec=abfd->sections; sec; sec=sec->next)
+	  for (sec = abfd->sections; sec; sec = sec->next)
 	    {
 	      if (strcmp (sec->name, in->n_name) == 0)
 		{
@@ -160,9 +165,9 @@ _bfd_pei_swap_sym_in (abfd, ext1, in1)
 	  int unused_section_number = 0;
 	  asection *sec;
 	  char *name;
-	  for (sec=abfd->sections; sec; sec=sec->next)
+	  for (sec = abfd->sections; sec; sec = sec->next)
 	    if (unused_section_number <= sec->target_index)
-	      unused_section_number = sec->target_index+1;
+	      unused_section_number = sec->target_index + 1;
 
 	  name = bfd_alloc (abfd, strlen (in->n_name) + 10);
 	  if (name == NULL)
@@ -196,8 +201,8 @@ _bfd_pei_swap_sym_in (abfd, ext1, in1)
 
 #ifdef coff_swap_sym_in_hook
   /* This won't work in peigen.c, but since it's for PPC PE, it's not
-     worth fixing. */
-  coff_swap_sym_in_hook(abfd, ext1, in1);
+     worth fixing.  */
+  coff_swap_sym_in_hook (abfd, ext1, in1);
 #endif
 }
 
@@ -207,28 +212,30 @@ _bfd_pei_swap_sym_out (abfd, inp, extp)
      PTR	inp;
      PTR	extp;
 {
-  struct internal_syment *in = (struct internal_syment *)inp;
-  SYMENT *ext =(SYMENT *)extp;
-  if(in->_n._n_name[0] == 0) {
-    bfd_h_put_32(abfd, 0, (bfd_byte *) ext->e.e.e_zeroes);
-    bfd_h_put_32(abfd, in->_n._n_n._n_offset, (bfd_byte *)  ext->e.e.e_offset);
-  }
-  else {
-    memcpy(ext->e.e_name, in->_n._n_name, SYMNMLEN);
-  }
-
-  bfd_h_put_32(abfd,  in->n_value , (bfd_byte *) ext->e_value);
-  bfd_h_put_16(abfd,  in->n_scnum , (bfd_byte *) ext->e_scnum);
-  if (sizeof(ext->e_type) == 2)
+  struct internal_syment *in = (struct internal_syment *) inp;
+  SYMENT *ext = (SYMENT *) extp;
+  if (in->_n._n_name[0] == 0)
     {
-      bfd_h_put_16(abfd,  in->n_type , (bfd_byte *) ext->e_type);
+      bfd_h_put_32 (abfd, 0, (bfd_byte *) ext->e.e.e_zeroes);
+      bfd_h_put_32 (abfd, in->_n._n_n._n_offset, (bfd_byte *) ext->e.e.e_offset);
     }
   else
     {
-      bfd_h_put_32(abfd,  in->n_type , (bfd_byte *) ext->e_type);
+      memcpy (ext->e.e_name, in->_n._n_name, SYMNMLEN);
     }
-  bfd_h_put_8(abfd,  in->n_sclass , ext->e_sclass);
-  bfd_h_put_8(abfd,  in->n_numaux , ext->e_numaux);
+
+  bfd_h_put_32 (abfd, in->n_value, (bfd_byte *) ext->e_value);
+  bfd_h_put_16 (abfd, in->n_scnum, (bfd_byte *) ext->e_scnum);
+  if (sizeof (ext->e_type) == 2)
+    {
+      bfd_h_put_16 (abfd, in->n_type, (bfd_byte *) ext->e_type);
+    }
+  else
+    {
+      bfd_h_put_32 (abfd, in->n_type, (bfd_byte *) ext->e_type);
+    }
+  bfd_h_put_8 (abfd, in->n_sclass, ext->e_sclass);
+  bfd_h_put_8 (abfd, in->n_numaux, ext->e_numaux);
 
   return SYMESZ;
 }
@@ -243,41 +250,45 @@ _bfd_pei_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
      int	     numaux ATTRIBUTE_UNUSED;
      PTR 	     in1;
 {
-  AUXENT    *ext = (AUXENT *)ext1;
-  union internal_auxent *in = (union internal_auxent *)in1;
+  AUXENT *ext = (AUXENT *) ext1;
+  union internal_auxent *in = (union internal_auxent *) in1;
 
-  switch (class) {
-  case C_FILE:
-    if (ext->x_file.x_fname[0] == 0) {
-      in->x_file.x_n.x_zeroes = 0;
-      in->x_file.x_n.x_offset =
-	bfd_h_get_32(abfd, (bfd_byte *) ext->x_file.x_n.x_offset);
-    } else {
-      memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
-    }
-    return;
-
-
-  case C_STAT:
-  case C_LEAFSTAT:
-  case C_HIDDEN:
-    if (type == T_NULL) {
-      in->x_scn.x_scnlen = GET_SCN_SCNLEN(abfd, ext);
-      in->x_scn.x_nreloc = GET_SCN_NRELOC(abfd, ext);
-      in->x_scn.x_nlinno = GET_SCN_NLINNO(abfd, ext);
-      in->x_scn.x_checksum = bfd_h_get_32 (abfd,
-					   (bfd_byte *) ext->x_scn.x_checksum);
-      in->x_scn.x_associated =
-	bfd_h_get_16 (abfd, (bfd_byte *) ext->x_scn.x_associated);
-      in->x_scn.x_comdat = bfd_h_get_8 (abfd,
-					(bfd_byte *) ext->x_scn.x_comdat);
+  switch (class)
+    {
+    case C_FILE:
+      if (ext->x_file.x_fname[0] == 0)
+	{
+	  in->x_file.x_n.x_zeroes = 0;
+	  in->x_file.x_n.x_offset =
+	    bfd_h_get_32 (abfd, (bfd_byte *) ext->x_file.x_n.x_offset);
+	}
+      else
+	{
+	  memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
+	}
       return;
-    }
-    break;
-  }
 
-  in->x_sym.x_tagndx.l = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_tagndx);
-  in->x_sym.x_tvndx = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_tvndx);
+    case C_STAT:
+    case C_LEAFSTAT:
+    case C_HIDDEN:
+      if (type == T_NULL)
+	{
+	  in->x_scn.x_scnlen = GET_SCN_SCNLEN (abfd, ext);
+	  in->x_scn.x_nreloc = GET_SCN_NRELOC (abfd, ext);
+	  in->x_scn.x_nlinno = GET_SCN_NLINNO (abfd, ext);
+	  in->x_scn.x_checksum =
+	    bfd_h_get_32 (abfd, (bfd_byte *) ext->x_scn.x_checksum);
+	  in->x_scn.x_associated =
+	    bfd_h_get_16 (abfd, (bfd_byte *) ext->x_scn.x_associated);
+	  in->x_scn.x_comdat =
+	    bfd_h_get_8 (abfd, (bfd_byte *) ext->x_scn.x_comdat);
+	  return;
+	}
+      break;
+    }
+
+  in->x_sym.x_tagndx.l = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_sym.x_tagndx);
+  in->x_sym.x_tvndx = bfd_h_get_16 (abfd, (bfd_byte *) ext->x_sym.x_tvndx);
 
   if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
     {
@@ -296,13 +307,16 @@ _bfd_pei_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
 	bfd_h_get_16 (abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
     }
 
-  if (ISFCN(type)) {
-    in->x_sym.x_misc.x_fsize = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_misc.x_fsize);
-  }
-  else {
-    in->x_sym.x_misc.x_lnsz.x_lnno = GET_LNSZ_LNNO(abfd, ext);
-    in->x_sym.x_misc.x_lnsz.x_size = GET_LNSZ_SIZE(abfd, ext);
-  }
+  if (ISFCN (type))
+    {
+      in->x_sym.x_misc.x_fsize =
+	bfd_h_get_32 (abfd, (bfd_byte *) ext->x_sym.x_misc.x_fsize);
+    }
+  else
+    {
+      in->x_sym.x_misc.x_lnsz.x_lnno = GET_LNSZ_LNNO (abfd, ext);
+      in->x_sym.x_misc.x_lnsz.x_size = GET_LNSZ_SIZE (abfd, ext);
+    }
 }
 
 unsigned int
@@ -315,49 +329,52 @@ _bfd_pei_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
      int   numaux ATTRIBUTE_UNUSED;
      PTR   extp;
 {
-  union internal_auxent *in = (union internal_auxent *)inp;
-  AUXENT *ext = (AUXENT *)extp;
+  union internal_auxent *in = (union internal_auxent *) inp;
+  AUXENT *ext = (AUXENT *) extp;
 
-  memset((PTR)ext, 0, AUXESZ);
-  switch (class) {
-  case C_FILE:
-    if (in->x_file.x_fname[0] == 0) {
-      bfd_h_put_32(abfd, 0, (bfd_byte *) ext->x_file.x_n.x_zeroes);
-      bfd_h_put_32(abfd,
-	      in->x_file.x_n.x_offset,
-	      (bfd_byte *) ext->x_file.x_n.x_offset);
-    }
-    else {
-      memcpy (ext->x_file.x_fname, in->x_file.x_fname, FILNMLEN);
-    }
-    return AUXESZ;
-
-
-  case C_STAT:
-  case C_LEAFSTAT:
-  case C_HIDDEN:
-    if (type == T_NULL) {
-      PUT_SCN_SCNLEN(abfd, in->x_scn.x_scnlen, ext);
-      PUT_SCN_NRELOC(abfd, in->x_scn.x_nreloc, ext);
-      PUT_SCN_NLINNO(abfd, in->x_scn.x_nlinno, ext);
-      bfd_h_put_32 (abfd, in->x_scn.x_checksum,
-		    (bfd_byte *) ext->x_scn.x_checksum);
-      bfd_h_put_16 (abfd, in->x_scn.x_associated,
-		    (bfd_byte *) ext->x_scn.x_associated);
-      bfd_h_put_8 (abfd, in->x_scn.x_comdat,
-		   (bfd_byte *) ext->x_scn.x_comdat);
+  memset ((PTR) ext, 0, AUXESZ);
+  switch (class)
+    {
+    case C_FILE:
+      if (in->x_file.x_fname[0] == 0)
+	{
+	  bfd_h_put_32 (abfd, 0, (bfd_byte *) ext->x_file.x_n.x_zeroes);
+	  bfd_h_put_32 (abfd,
+			in->x_file.x_n.x_offset,
+			(bfd_byte *) ext->x_file.x_n.x_offset);
+	}
+      else
+	{
+	  memcpy (ext->x_file.x_fname, in->x_file.x_fname, FILNMLEN);
+	}
       return AUXESZ;
-    }
-    break;
-  }
 
-  bfd_h_put_32(abfd, in->x_sym.x_tagndx.l, (bfd_byte *) ext->x_sym.x_tagndx);
-  bfd_h_put_16(abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
+    case C_STAT:
+    case C_LEAFSTAT:
+    case C_HIDDEN:
+      if (type == T_NULL)
+	{
+	  PUT_SCN_SCNLEN (abfd, in->x_scn.x_scnlen, ext);
+	  PUT_SCN_NRELOC (abfd, in->x_scn.x_nreloc, ext);
+	  PUT_SCN_NLINNO (abfd, in->x_scn.x_nlinno, ext);
+	  bfd_h_put_32 (abfd, in->x_scn.x_checksum,
+			(bfd_byte *) ext->x_scn.x_checksum);
+	  bfd_h_put_16 (abfd, in->x_scn.x_associated,
+			(bfd_byte *) ext->x_scn.x_associated);
+	  bfd_h_put_8 (abfd, in->x_scn.x_comdat,
+		       (bfd_byte *) ext->x_scn.x_comdat);
+	  return AUXESZ;
+	}
+      break;
+    }
+
+  bfd_h_put_32 (abfd, in->x_sym.x_tagndx.l, (bfd_byte *) ext->x_sym.x_tagndx);
+  bfd_h_put_16 (abfd, in->x_sym.x_tvndx, (bfd_byte *) ext->x_sym.x_tvndx);
 
   if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
     {
-      PUT_FCN_LNNOPTR(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, ext);
-      PUT_FCN_ENDNDX(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
+      PUT_FCN_LNNOPTR (abfd, in->x_sym.x_fcnary.x_fcn.x_lnnoptr,  ext);
+      PUT_FCN_ENDNDX  (abfd, in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
     }
   else
     {
@@ -373,7 +390,7 @@ _bfd_pei_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
 
   if (ISFCN (type))
     bfd_h_put_32 (abfd, in->x_sym.x_misc.x_fsize,
-	     (bfd_byte *)  ext->x_sym.x_misc.x_fsize);
+		  (bfd_byte *) ext->x_sym.x_misc.x_fsize);
   else
     {
       PUT_LNSZ_LNNO (abfd, in->x_sym.x_misc.x_lnsz.x_lnno, ext);
@@ -389,11 +406,11 @@ _bfd_pei_swap_lineno_in (abfd, ext1, in1)
      PTR ext1;
      PTR in1;
 {
-  LINENO *ext = (LINENO *)ext1;
-  struct internal_lineno      *in = (struct internal_lineno *)in1;
+  LINENO *ext = (LINENO *) ext1;
+  struct internal_lineno *in = (struct internal_lineno *) in1;
 
-  in->l_addr.l_symndx = bfd_h_get_32(abfd, (bfd_byte *) ext->l_addr.l_symndx);
-  in->l_lnno = GET_LINENO_LNNO(abfd, ext);
+  in->l_addr.l_symndx = bfd_h_get_32 (abfd, (bfd_byte *) ext->l_addr.l_symndx);
+  in->l_lnno = GET_LINENO_LNNO (abfd, ext);
 }
 
 unsigned int
@@ -402,9 +419,9 @@ _bfd_pei_swap_lineno_out (abfd, inp, outp)
      PTR	inp;
      PTR	outp;
 {
-  struct internal_lineno *in = (struct internal_lineno *)inp;
-  struct external_lineno *ext = (struct external_lineno *)outp;
-  bfd_h_put_32(abfd, in->l_addr.l_symndx, (bfd_byte *)
+  struct internal_lineno *in = (struct internal_lineno *) inp;
+  struct external_lineno *ext = (struct external_lineno *) outp;
+  bfd_h_put_32 (abfd, in->l_addr.l_symndx, (bfd_byte *)
 	  ext->l_addr.l_symndx);
 
   PUT_LINENO_LNNO (abfd, in->l_lnno, ext);
@@ -418,12 +435,12 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
      PTR aouthdr_int1;
 {
   struct internal_extra_pe_aouthdr *a;
-  PEAOUTHDR *src = (PEAOUTHDR *)(aouthdr_ext1);
+  PEAOUTHDR *src = (PEAOUTHDR *) (aouthdr_ext1);
   AOUTHDR        *aouthdr_ext = (AOUTHDR *) aouthdr_ext1;
   struct internal_aouthdr *aouthdr_int = (struct internal_aouthdr *)aouthdr_int1;
 
-  aouthdr_int->magic = bfd_h_get_16(abfd, (bfd_byte *) aouthdr_ext->magic);
-  aouthdr_int->vstamp = bfd_h_get_16(abfd, (bfd_byte *) aouthdr_ext->vstamp);
+  aouthdr_int->magic = bfd_h_get_16 (abfd, (bfd_byte *) aouthdr_ext->magic);
+  aouthdr_int->vstamp = bfd_h_get_16 (abfd, (bfd_byte *) aouthdr_ext->vstamp);
   aouthdr_int->tsize =
     GET_AOUTHDR_TSIZE (abfd, (bfd_byte *) aouthdr_ext->tsize);
   aouthdr_int->dsize =
@@ -441,38 +458,46 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
 #endif
 
   a = &aouthdr_int->pe;
-  a->ImageBase = GET_OPTHDR_IMAGE_BASE (abfd, (bfd_byte *)src->ImageBase);
-  a->SectionAlignment = bfd_h_get_32 (abfd, (bfd_byte *)src->SectionAlignment);
-  a->FileAlignment = bfd_h_get_32 (abfd, (bfd_byte *)src->FileAlignment);
+  a->ImageBase = GET_OPTHDR_IMAGE_BASE (abfd, (bfd_byte *) src->ImageBase);
+  a->SectionAlignment = bfd_h_get_32 (abfd, (bfd_byte *) src->SectionAlignment);
+  a->FileAlignment = bfd_h_get_32 (abfd, (bfd_byte *) src->FileAlignment);
   a->MajorOperatingSystemVersion =
-    bfd_h_get_16 (abfd, (bfd_byte *)src->MajorOperatingSystemVersion);
+    bfd_h_get_16 (abfd, (bfd_byte *) src->MajorOperatingSystemVersion);
   a->MinorOperatingSystemVersion =
-    bfd_h_get_16 (abfd, (bfd_byte *)src->MinorOperatingSystemVersion);
-  a->MajorImageVersion = bfd_h_get_16 (abfd, (bfd_byte *)src->MajorImageVersion);
-  a->MinorImageVersion = bfd_h_get_16 (abfd, (bfd_byte *)src->MinorImageVersion);
-  a->MajorSubsystemVersion = bfd_h_get_16 (abfd, (bfd_byte *)src->MajorSubsystemVersion);
-  a->MinorSubsystemVersion = bfd_h_get_16 (abfd, (bfd_byte *)src->MinorSubsystemVersion);
-  a->Reserved1 = bfd_h_get_32 (abfd, (bfd_byte *)src->Reserved1);
-  a->SizeOfImage = bfd_h_get_32 (abfd, (bfd_byte *)src->SizeOfImage);
-  a->SizeOfHeaders = bfd_h_get_32 (abfd, (bfd_byte *)src->SizeOfHeaders);
-  a->CheckSum = bfd_h_get_32 (abfd, (bfd_byte *)src->CheckSum);
-  a->Subsystem = bfd_h_get_16 (abfd, (bfd_byte *)src->Subsystem);
-  a->DllCharacteristics = bfd_h_get_16 (abfd, (bfd_byte *)src->DllCharacteristics);
-  a->SizeOfStackReserve = GET_OPTHDR_SIZE_OF_STACK_RESERVE (abfd, (bfd_byte *)src->SizeOfStackReserve);
-  a->SizeOfStackCommit = GET_OPTHDR_SIZE_OF_STACK_COMMIT (abfd, (bfd_byte *)src->SizeOfStackCommit);
-  a->SizeOfHeapReserve = GET_OPTHDR_SIZE_OF_HEAP_RESERVE (abfd, (bfd_byte *)src->SizeOfHeapReserve);
-  a->SizeOfHeapCommit = GET_OPTHDR_SIZE_OF_HEAP_COMMIT (abfd, (bfd_byte *)src->SizeOfHeapCommit);
-  a->LoaderFlags = bfd_h_get_32 (abfd, (bfd_byte *)src->LoaderFlags);
-  a->NumberOfRvaAndSizes = bfd_h_get_32 (abfd, (bfd_byte *)src->NumberOfRvaAndSizes);
+    bfd_h_get_16 (abfd, (bfd_byte *) src->MinorOperatingSystemVersion);
+  a->MajorImageVersion = bfd_h_get_16 (abfd, (bfd_byte *) src->MajorImageVersion);
+  a->MinorImageVersion = bfd_h_get_16 (abfd, (bfd_byte *) src->MinorImageVersion);
+  a->MajorSubsystemVersion = bfd_h_get_16 (abfd, (bfd_byte *) src->MajorSubsystemVersion);
+  a->MinorSubsystemVersion = bfd_h_get_16 (abfd, (bfd_byte *) src->MinorSubsystemVersion);
+  a->Reserved1 = bfd_h_get_32 (abfd, (bfd_byte *) src->Reserved1);
+  a->SizeOfImage = bfd_h_get_32 (abfd, (bfd_byte *) src->SizeOfImage);
+  a->SizeOfHeaders = bfd_h_get_32 (abfd, (bfd_byte *) src->SizeOfHeaders);
+  a->CheckSum = bfd_h_get_32 (abfd, (bfd_byte *) src->CheckSum);
+  a->Subsystem = bfd_h_get_16 (abfd, (bfd_byte *) src->Subsystem);
+  a->DllCharacteristics = bfd_h_get_16 (abfd, (bfd_byte *) src->DllCharacteristics);
+  a->SizeOfStackReserve = GET_OPTHDR_SIZE_OF_STACK_RESERVE (abfd, (bfd_byte *) src->SizeOfStackReserve);
+  a->SizeOfStackCommit = GET_OPTHDR_SIZE_OF_STACK_COMMIT (abfd, (bfd_byte *) src->SizeOfStackCommit);
+  a->SizeOfHeapReserve = GET_OPTHDR_SIZE_OF_HEAP_RESERVE (abfd, (bfd_byte *) src->SizeOfHeapReserve);
+  a->SizeOfHeapCommit = GET_OPTHDR_SIZE_OF_HEAP_COMMIT (abfd, (bfd_byte *) src->SizeOfHeapCommit);
+  a->LoaderFlags = bfd_h_get_32 (abfd, (bfd_byte *) src->LoaderFlags);
+  a->NumberOfRvaAndSizes = bfd_h_get_32 (abfd, (bfd_byte *) src->NumberOfRvaAndSizes);
 
   {
     int idx;
-    for (idx=0; idx < 16; idx++)
+    for (idx = 0; idx < 16; idx++)
       {
-	a->DataDirectory[idx].VirtualAddress =
-	  bfd_h_get_32 (abfd, (bfd_byte *)src->DataDirectory[idx][0]);
-	a->DataDirectory[idx].Size =
-	  bfd_h_get_32 (abfd, (bfd_byte *)src->DataDirectory[idx][1]);
+        /* If data directory is empty, rva also should be 0.  */
+	int size =
+	  bfd_h_get_32 (abfd, (bfd_byte *) src->DataDirectory[idx][1]);
+	a->DataDirectory[idx].Size = size;
+
+	if (size)
+	  {
+	    a->DataDirectory[idx].VirtualAddress =
+	      bfd_h_get_32 (abfd, (bfd_byte *) src->DataDirectory[idx][0]);
+	  }
+	else
+	  a->DataDirectory[idx].VirtualAddress = 0;
       }
   }
 
@@ -483,7 +508,7 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
       aouthdr_int->entry &= 0xffffffff;
 #endif
     }
-  if (aouthdr_int->tsize) 
+  if (aouthdr_int->tsize)
     {
       aouthdr_int->text_start += a->ImageBase;
 #ifndef COFF_WITH_PEP64
@@ -492,7 +517,7 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
     }
 #ifndef COFF_WITH_PEP64
   /* PE32+ does not have data_start member! */
-  if (aouthdr_int->dsize) 
+  if (aouthdr_int->dsize)
     {
       aouthdr_int->data_start += a->ImageBase;
       aouthdr_int->data_start &= 0xffffffff;
@@ -503,7 +528,7 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
   /* These three fields are normally set up by ppc_relocate_section.
      In the case of reading a file in, we can pick them up from the
      DataDirectory.  */
-  first_thunk_address = a->DataDirectory[12].VirtualAddress ;
+  first_thunk_address = a->DataDirectory[12].VirtualAddress;
   thunk_size = a->DataDirectory[12].Size;
   import_table_size = a->DataDirectory[1].Size;
 #endif
@@ -527,9 +552,16 @@ add_data_entry (abfd, aout, idx, name, base)
       && (coff_section_data (abfd, sec) != NULL)
       && (pei_section_data (abfd, sec) != NULL))
     {
-      aout->DataDirectory[idx].VirtualAddress = (sec->vma - base) & 0xffffffff;
-      aout->DataDirectory[idx].Size = pei_section_data (abfd, sec)->virt_size;
-      sec->flags |= SEC_DATA;
+      /* If data directory is empty, rva also should be 0 */
+      int size = pei_section_data (abfd, sec)->virt_size;
+      aout->DataDirectory[idx].Size = size;
+
+      if (size)
+	{
+	  aout->DataDirectory[idx].VirtualAddress =
+	    (sec->vma - base) & 0xffffffff;
+	  sec->flags |= SEC_DATA;
+	}
     }
 }
 
@@ -539,9 +571,9 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
      PTR	in;
      PTR	out;
 {
-  struct internal_aouthdr *aouthdr_in = (struct internal_aouthdr *)in;
+  struct internal_aouthdr *aouthdr_in = (struct internal_aouthdr *) in;
   struct internal_extra_pe_aouthdr *extra = &pe_data (abfd)->pe_opthdr;
-  PEAOUTHDR *aouthdr_out = (PEAOUTHDR *)out;
+  PEAOUTHDR *aouthdr_out = (PEAOUTHDR *) out;
   bfd_vma sa, fa, ib;
 
   /* The following definitely is required for EFI applications.
@@ -565,33 +597,32 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
   fa = extra->FileAlignment;
   ib = extra->ImageBase;
 
-  if (aouthdr_in->tsize) 
+  if (aouthdr_in->tsize)
     {
       aouthdr_in->text_start -= ib;
       aouthdr_in->text_start &= 0xffffffff;
     }
-  if (aouthdr_in->dsize) 
+  if (aouthdr_in->dsize)
     {
       aouthdr_in->data_start -= ib;
       aouthdr_in->data_start &= 0xffffffff;
     }
-  if (aouthdr_in->entry) 
+  if (aouthdr_in->entry)
     {
       aouthdr_in->entry -= ib;
       aouthdr_in->entry &= 0xffffffff;
     }
 
-#define FA(x)  (((x) + fa -1 ) & (- fa))
-#define SA(x)  (((x) + sa -1 ) & (- sa))
+#define FA(x) (((x) + fa -1 ) & (- fa))
+#define SA(x) (((x) + sa -1 ) & (- sa))
 
-  /* We like to have the sizes aligned */
+  /* We like to have the sizes aligned.  */
 
   aouthdr_in->bsize = FA (aouthdr_in->bsize);
 
-
   extra->NumberOfRvaAndSizes = IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
 
-  /* first null out all data directory entries .. */
+  /* first null out all data directory entries ..  */
   memset (extra->DataDirectory, sizeof (extra->DataDirectory), 0);
 
   add_data_entry (abfd, extra, 0, ".edata", ib);
@@ -602,9 +633,9 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
 
   /* However, until other .idata fixes are made (pending patch), the
      entry for .idata is needed for backwards compatability.  FIXME.  */
-  add_data_entry (abfd, extra, 1, ".idata" , ib);
+  add_data_entry (abfd, extra, 1, ".idata", ib);
 
-  add_data_entry (abfd, extra, 2, ".rsrc" , ib);
+  add_data_entry (abfd, extra, 2, ".rsrc", ib);
 
   add_data_entry (abfd, extra, 3, ".pdata", ib);
 
@@ -618,9 +649,9 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
 
   {
     asection *sec;
-    bfd_vma dsize= 0;
+    bfd_vma dsize = 0;
     bfd_vma isize = SA(abfd->sections->filepos);
-    bfd_vma tsize= 0;
+    bfd_vma tsize = 0;
 
     for (sec = abfd->sections; sec; sec = sec->next)
       {
@@ -644,7 +675,7 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
   }
 
   extra->SizeOfHeaders = abfd->sections->filepos;
-  bfd_h_put_16(abfd, aouthdr_in->magic, (bfd_byte *) aouthdr_out->standard.magic);
+  bfd_h_put_16 (abfd, aouthdr_in->magic, (bfd_byte *) aouthdr_out->standard.magic);
 
 #define LINKER_VERSION 256 /* That is, 2.56 */
 
@@ -711,7 +742,7 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
 		(bfd_byte *) aouthdr_out->NumberOfRvaAndSizes);
   {
     int idx;
-    for (idx=0; idx < 16; idx++)
+    for (idx = 0; idx < 16; idx++)
       {
 	bfd_h_put_32 (abfd, extra->DataDirectory[idx].VirtualAddress,
 		      (bfd_byte *) aouthdr_out->DataDirectory[idx][0]);
@@ -730,8 +761,8 @@ _bfd_pei_only_swap_filehdr_out (abfd, in, out)
      PTR	out;
 {
   int idx;
-  struct internal_filehdr *filehdr_in = (struct internal_filehdr *)in;
-  struct external_PEI_filehdr *filehdr_out = (struct external_PEI_filehdr *)out;
+  struct internal_filehdr *filehdr_in = (struct internal_filehdr *) in;
+  struct external_PEI_filehdr *filehdr_out = (struct external_PEI_filehdr *) out;
 
   if (pe_data (abfd)->has_reloc_section)
     filehdr_in->f_flags &= ~F_RELFLG;
@@ -754,19 +785,19 @@ _bfd_pei_only_swap_filehdr_out (abfd, in, out)
   filehdr_in->pe.e_lfarlc   = 0x40;
   filehdr_in->pe.e_ovno     = 0x0;
 
-  for (idx=0; idx < 4; idx++)
+  for (idx = 0; idx < 4; idx++)
     filehdr_in->pe.e_res[idx] = 0x0;
 
   filehdr_in->pe.e_oemid   = 0x0;
   filehdr_in->pe.e_oeminfo = 0x0;
 
-  for (idx=0; idx < 10; idx++)
+  for (idx = 0; idx < 10; idx++)
     filehdr_in->pe.e_res2[idx] = 0x0;
 
   filehdr_in->pe.e_lfanew = 0x80;
 
-  /* this next collection of data are mostly just characters.  It appears
-     to be constant within the headers put on NT exes */
+  /* This next collection of data are mostly just characters.  It
+     appears to be constant within the headers put on NT exes.  */
   filehdr_in->pe.dos_message[0]  = 0x0eba1f0e;
   filehdr_in->pe.dos_message[1]  = 0xcd09b400;
   filehdr_in->pe.dos_message[2]  = 0x4c01b821;
@@ -785,68 +816,63 @@ _bfd_pei_only_swap_filehdr_out (abfd, in, out)
   filehdr_in->pe.dos_message[15] = 0x0;
   filehdr_in->pe.nt_signature = NT_SIGNATURE;
 
+  bfd_h_put_16 (abfd, filehdr_in->f_magic, (bfd_byte *) filehdr_out->f_magic);
+  bfd_h_put_16 (abfd, filehdr_in->f_nscns, (bfd_byte *) filehdr_out->f_nscns);
 
-
-  bfd_h_put_16(abfd, filehdr_in->f_magic, (bfd_byte *) filehdr_out->f_magic);
-  bfd_h_put_16(abfd, filehdr_in->f_nscns, (bfd_byte *) filehdr_out->f_nscns);
-
-  bfd_h_put_32(abfd, time (0), (bfd_byte *) filehdr_out->f_timdat);
+  bfd_h_put_32 (abfd, time (0), (bfd_byte *) filehdr_out->f_timdat);
   PUT_FILEHDR_SYMPTR (abfd, (bfd_vma) filehdr_in->f_symptr,
 		      (bfd_byte *) filehdr_out->f_symptr);
-  bfd_h_put_32(abfd, filehdr_in->f_nsyms, (bfd_byte *) filehdr_out->f_nsyms);
-  bfd_h_put_16(abfd, filehdr_in->f_opthdr, (bfd_byte *) filehdr_out->f_opthdr);
-  bfd_h_put_16(abfd, filehdr_in->f_flags, (bfd_byte *) filehdr_out->f_flags);
+  bfd_h_put_32 (abfd, filehdr_in->f_nsyms, (bfd_byte *) filehdr_out->f_nsyms);
+  bfd_h_put_16 (abfd, filehdr_in->f_opthdr, (bfd_byte *) filehdr_out->f_opthdr);
+  bfd_h_put_16 (abfd, filehdr_in->f_flags, (bfd_byte *) filehdr_out->f_flags);
 
   /* put in extra dos header stuff.  This data remains essentially
      constant, it just has to be tacked on to the beginning of all exes
      for NT */
-  bfd_h_put_16(abfd, filehdr_in->pe.e_magic, (bfd_byte *) filehdr_out->e_magic);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_cblp, (bfd_byte *) filehdr_out->e_cblp);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_cp, (bfd_byte *) filehdr_out->e_cp);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_crlc, (bfd_byte *) filehdr_out->e_crlc);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_cparhdr,
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_magic, (bfd_byte *) filehdr_out->e_magic);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_cblp, (bfd_byte *) filehdr_out->e_cblp);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_cp, (bfd_byte *) filehdr_out->e_cp);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_crlc, (bfd_byte *) filehdr_out->e_crlc);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_cparhdr,
 	       (bfd_byte *) filehdr_out->e_cparhdr);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_minalloc,
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_minalloc,
 	       (bfd_byte *) filehdr_out->e_minalloc);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_maxalloc,
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_maxalloc,
 	       (bfd_byte *) filehdr_out->e_maxalloc);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_ss, (bfd_byte *) filehdr_out->e_ss);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_sp, (bfd_byte *) filehdr_out->e_sp);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_csum, (bfd_byte *) filehdr_out->e_csum);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_ip, (bfd_byte *) filehdr_out->e_ip);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_cs, (bfd_byte *) filehdr_out->e_cs);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_lfarlc, (bfd_byte *) filehdr_out->e_lfarlc);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_ovno, (bfd_byte *) filehdr_out->e_ovno);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_ss, (bfd_byte *) filehdr_out->e_ss);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_sp, (bfd_byte *) filehdr_out->e_sp);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_csum, (bfd_byte *) filehdr_out->e_csum);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_ip, (bfd_byte *) filehdr_out->e_ip);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_cs, (bfd_byte *) filehdr_out->e_cs);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_lfarlc, (bfd_byte *) filehdr_out->e_lfarlc);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_ovno, (bfd_byte *) filehdr_out->e_ovno);
   {
     int idx;
-    for (idx=0; idx < 4; idx++)
-      bfd_h_put_16(abfd, filehdr_in->pe.e_res[idx],
-		   (bfd_byte *) filehdr_out->e_res[idx]);
+    for (idx = 0; idx < 4; idx++)
+      bfd_h_put_16 (abfd, filehdr_in->pe.e_res[idx],
+		    (bfd_byte *) filehdr_out->e_res[idx]);
   }
-  bfd_h_put_16(abfd, filehdr_in->pe.e_oemid, (bfd_byte *) filehdr_out->e_oemid);
-  bfd_h_put_16(abfd, filehdr_in->pe.e_oeminfo,
-	       (bfd_byte *) filehdr_out->e_oeminfo);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_oemid, (bfd_byte *) filehdr_out->e_oemid);
+  bfd_h_put_16 (abfd, filehdr_in->pe.e_oeminfo,
+		(bfd_byte *) filehdr_out->e_oeminfo);
   {
     int idx;
-    for (idx=0; idx < 10; idx++)
-      bfd_h_put_16(abfd, filehdr_in->pe.e_res2[idx],
-		   (bfd_byte *) filehdr_out->e_res2[idx]);
+    for (idx = 0; idx < 10; idx++)
+      bfd_h_put_16 (abfd, filehdr_in->pe.e_res2[idx],
+		    (bfd_byte *) filehdr_out->e_res2[idx]);
   }
-  bfd_h_put_32(abfd, filehdr_in->pe.e_lfanew, (bfd_byte *) filehdr_out->e_lfanew);
+  bfd_h_put_32 (abfd, filehdr_in->pe.e_lfanew, (bfd_byte *) filehdr_out->e_lfanew);
 
   {
     int idx;
-    for (idx=0; idx < 16; idx++)
-      bfd_h_put_32(abfd, filehdr_in->pe.dos_message[idx],
-		   (bfd_byte *) filehdr_out->dos_message[idx]);
+    for (idx = 0; idx < 16; idx++)
+      bfd_h_put_32 (abfd, filehdr_in->pe.dos_message[idx],
+		    (bfd_byte *) filehdr_out->dos_message[idx]);
   }
 
-  /* also put in the NT signature */
-  bfd_h_put_32(abfd, filehdr_in->pe.nt_signature,
-	       (bfd_byte *) filehdr_out->nt_signature);
-
-
-
+  /* Also put in the NT signature.  */
+  bfd_h_put_32 (abfd, filehdr_in->pe.nt_signature,
+		(bfd_byte *) filehdr_out->nt_signature);
 
   return FILHSZ;
 }
@@ -857,17 +883,17 @@ _bfd_pe_only_swap_filehdr_out (abfd, in, out)
      PTR	in;
      PTR	out;
 {
-  struct internal_filehdr *filehdr_in = (struct internal_filehdr *)in;
-  FILHDR *filehdr_out = (FILHDR *)out;
+  struct internal_filehdr *filehdr_in = (struct internal_filehdr *) in;
+  FILHDR *filehdr_out = (FILHDR *) out;
 
-  bfd_h_put_16(abfd, filehdr_in->f_magic, (bfd_byte *) filehdr_out->f_magic);
-  bfd_h_put_16(abfd, filehdr_in->f_nscns, (bfd_byte *) filehdr_out->f_nscns);
-  bfd_h_put_32(abfd, filehdr_in->f_timdat, (bfd_byte *) filehdr_out->f_timdat);
+  bfd_h_put_16 (abfd, filehdr_in->f_magic, (bfd_byte *) filehdr_out->f_magic);
+  bfd_h_put_16 (abfd, filehdr_in->f_nscns, (bfd_byte *) filehdr_out->f_nscns);
+  bfd_h_put_32 (abfd, filehdr_in->f_timdat, (bfd_byte *) filehdr_out->f_timdat);
   PUT_FILEHDR_SYMPTR (abfd, (bfd_vma) filehdr_in->f_symptr,
 		      (bfd_byte *) filehdr_out->f_symptr);
-  bfd_h_put_32(abfd, filehdr_in->f_nsyms, (bfd_byte *) filehdr_out->f_nsyms);
-  bfd_h_put_16(abfd, filehdr_in->f_opthdr, (bfd_byte *) filehdr_out->f_opthdr);
-  bfd_h_put_16(abfd, filehdr_in->f_flags, (bfd_byte *) filehdr_out->f_flags);
+  bfd_h_put_32 (abfd, filehdr_in->f_nsyms, (bfd_byte *) filehdr_out->f_nsyms);
+  bfd_h_put_16 (abfd, filehdr_in->f_opthdr, (bfd_byte *) filehdr_out->f_opthdr);
+  bfd_h_put_16 (abfd, filehdr_in->f_flags, (bfd_byte *) filehdr_out->f_flags);
 
   return FILHSZ;
 }
@@ -878,17 +904,17 @@ _bfd_pei_swap_scnhdr_out (abfd, in, out)
      PTR	in;
      PTR	out;
 {
-  struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *)in;
-  SCNHDR *scnhdr_ext = (SCNHDR *)out;
+  struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *) in;
+  SCNHDR *scnhdr_ext = (SCNHDR *) out;
   unsigned int ret = SCNHSZ;
   bfd_vma ps;
   bfd_vma ss;
 
-  memcpy(scnhdr_ext->s_name, scnhdr_int->s_name, sizeof(scnhdr_int->s_name));
+  memcpy (scnhdr_ext->s_name, scnhdr_int->s_name, sizeof (scnhdr_int->s_name));
 
   PUT_SCNHDR_VADDR (abfd,
-		    ((scnhdr_int->s_vaddr 
-		      - pe_data(abfd)->pe_opthdr.ImageBase)
+		    ((scnhdr_int->s_vaddr
+		      - pe_data (abfd)->pe_opthdr.ImageBase)
 		     & 0xffffffff),
 		    (bfd_byte *) scnhdr_ext->s_vaddr);
 
@@ -909,7 +935,6 @@ _bfd_pei_swap_scnhdr_out (abfd, in, out)
 
   PUT_SCNHDR_SIZE (abfd, ss,
 		   (bfd_byte *) scnhdr_ext->s_size);
-
 
   /* s_paddr in PE is really the virtual size.  */
   PUT_SCNHDR_PADDR (abfd, ps, (bfd_byte *) scnhdr_ext->s_paddr);
@@ -937,7 +962,7 @@ _bfd_pei_swap_scnhdr_out (abfd, in, out)
 
   {
     int flags = scnhdr_int->s_flags;
-    bfd_h_put_32(abfd, flags, (bfd_byte *) scnhdr_ext->s_flags);
+    bfd_h_put_32 (abfd, flags, (bfd_byte *) scnhdr_ext->s_flags);
   }
 
   if (coff_data (abfd)->link_info
@@ -977,35 +1002,41 @@ _bfd_pei_swap_scnhdr_out (abfd, in, out)
 		      (bfd_byte *) scnhdr_ext->s_nreloc);
       else
 	{
-	  (*_bfd_error_handler) (_("%s: reloc overflow: 0x%lx > 0xffff"),
+	  /* PE can deal with large #s of relocs, but not here */
+	  bfd_h_put_16 (abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nreloc);
+	  scnhdr_int->s_flags |= IMAGE_SCN_LNK_NRELOC_OVFL;
+	  bfd_h_put_32 (abfd, scnhdr_int->s_flags,
+			(bfd_byte *) scnhdr_ext->s_flags);
+#if 0
+	  (*_bfd_error_handler) (_("%s: reloc overflow 1: 0x%lx > 0xffff"),
 				 bfd_get_filename (abfd),
 				 scnhdr_int->s_nreloc);
 	  bfd_set_error (bfd_error_file_truncated);
 	  bfd_h_put_16 (abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nreloc);
 	  ret = 0;
+#endif
 	}
     }
   return ret;
 }
 
-static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
-{
-  N_ ("Export Directory [.edata (or where ever we found it)]"),
-  N_ ("Import Directory [parts of .idata]"),
-  N_ ("Resource Directory [.rsrc]"),
-  N_ ("Exception Directory [.pdata]"),
-  N_ ("Security Directory"),
-  N_ ("Base Relocation Directory [.reloc]"),
-  N_ ("Debug Directory"),
-  N_ ("Description Directory"),
-  N_ ("Special Directory"),
-  N_ ("Thread Storage Directory [.tls]"),
-  N_ ("Load Configuration Directory"),
-  N_ ("Bound Import Directory"),
-  N_ ("Import Address Table Directory"),
-  N_ ("Delay Import Directory"),
-  N_ ("Reserved"),
-  N_ ("Reserved")
+static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] = {
+  N_("Export Directory [.edata (or where ever we found it)]"),
+  N_("Import Directory [parts of .idata]"),
+  N_("Resource Directory [.rsrc]"),
+  N_("Exception Directory [.pdata]"),
+  N_("Security Directory"),
+  N_("Base Relocation Directory [.reloc]"),
+  N_("Debug Directory"),
+  N_("Description Directory"),
+  N_("Special Directory"),
+  N_("Thread Storage Directory [.tls]"),
+  N_("Load Configuration Directory"),
+  N_("Bound Import Directory"),
+  N_("Import Address Table Directory"),
+  N_("Delay Import Directory"),
+  N_("Reserved"),
+  N_("Reserved")
 };
 
 /**********************************************************************/
@@ -1112,27 +1143,27 @@ pe_print_idata (abfd, vfile)
       loadable_toc_address = bfd_get_32 (abfd, data + offset + 4);
       toc_address = loadable_toc_address - 32768;
 
-      fprintf(file,
-	      _("\nFunction descriptor located at the start address: %04lx\n"),
-	      (unsigned long int) (abfd->start_address));
+      fprintf (file,
+	       _("\nFunction descriptor located at the start address: %04lx\n"),
+	       (unsigned long int) (abfd->start_address));
       fprintf (file,
 	       _("\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"),
 	       start_address, loadable_toc_address, toc_address);
     }
   else
     {
-      fprintf(file,
-	      _("\nNo reldata section! Function descriptor not decoded.\n"));
+      fprintf (file,
+	       _("\nNo reldata section! Function descriptor not decoded.\n"));
     }
 #endif
 
-  fprintf(file,
-	  _("\nThe Import Tables (interpreted %s section contents)\n"),
-	  section->name);
-  fprintf(file,
-	  _(" vma:            Hint    Time      Forward  DLL       First\n"));
-  fprintf(file,
-	  _("                 Table   Stamp     Chain    Name      Thunk\n"));
+  fprintf (file,
+	   _("\nThe Import Tables (interpreted %s section contents)\n"),
+	   section->name);
+  fprintf (file,
+	   _(" vma:            Hint    Time      Forward  DLL       First\n"));
+  fprintf (file,
+	   _("                 Table   Stamp     Chain    Name      Thunk\n"));
 
   data = (bfd_byte *) bfd_malloc (dataoff + datasize);
   if (data == NULL)
@@ -1161,7 +1192,7 @@ pe_print_idata (abfd, vfile)
 
       if (i + 20 > datasize)
 	{
-	  /* check stuff */
+	  /* Check stuff.  */
 	  ;
 	}
 
@@ -1182,7 +1213,7 @@ pe_print_idata (abfd, vfile)
 	break;
 
       dll = (char *) data + dll_name - adj;
-      fprintf(file, _("\n\tDLL Name: %s\n"), dll);
+      fprintf (file, _("\n\tDLL Name: %s\n"), dll);
 
       if (hint_addr != 0)
 	{
@@ -1249,19 +1280,19 @@ pe_print_idata (abfd, vfile)
 		    {
 		      fprintf (file,
 			       _("\tThe Import Address Table (difference found)\n"));
-		      fprintf(file, _("\tvma:  Hint/Ord Member-Name\n"));
+		      fprintf (file, _("\tvma:  Hint/Ord Member-Name\n"));
 		      differ = 1;
 		    }
 		  if (iat_member == 0)
 		    {
-		      fprintf(file,
+		      fprintf (file,
 			      _("\t>>> Ran out of IAT members!\n"));
 		    }
 		  else
 		    {
 		      ordinal = bfd_get_16 (abfd, data + iat_member - adj);
 		      member_name = (char *) data + iat_member - adj + 2;
-		      fprintf(file, "\t%04lx\t %4d  %s\n",
+		      fprintf (file, "\t%04lx\t %4d  %s\n",
 			      (unsigned long) iat_member,
 			      ordinal,
 			      member_name);
@@ -1273,12 +1304,12 @@ pe_print_idata (abfd, vfile)
 	    }
 	  if (differ == 0)
 	    {
-	      fprintf(file,
+	      fprintf (file,
 		      _("\tThe Import Address Table is identical\n"));
 	    }
 	}
 
-      fprintf(file, "\n");
+      fprintf (file, "\n");
 
     }
 
@@ -1301,20 +1332,19 @@ pe_print_edata (abfd, vfile)
   bfd_size_type i;
 
   bfd_signed_vma adj;
-  struct EDT_type
-    {
-      long export_flags;             /* reserved - should be zero */
-      long time_stamp;
-      short major_ver;
-      short minor_ver;
-      bfd_vma name;                  /* rva - relative to image base */
-      long base;                     /* ordinal base */
-      unsigned long num_functions;   /* Number in the export address table */
-      unsigned long num_names;       /* Number in the name pointer table */
-      bfd_vma eat_addr;    /* rva to the export address table */
-      bfd_vma npt_addr;        /* rva to the Export Name Pointer Table */
-      bfd_vma ot_addr; /* rva to the Ordinal Table */
-    } edt;
+  struct EDT_type {
+    long export_flags;             /* reserved - should be zero */
+    long time_stamp;
+    short major_ver;
+    short minor_ver;
+    bfd_vma name;                  /* rva - relative to image base */
+    long base;                     /* ordinal base */
+    unsigned long num_functions;   /* Number in the export address table */
+    unsigned long num_names;       /* Number in the name pointer table */
+    bfd_vma eat_addr;    /* rva to the export address table */
+    bfd_vma npt_addr;        /* rva to the Export Name Pointer Table */
+    bfd_vma ot_addr; /* rva to the Ordinal Table */
+  } edt;
 
   pe_data_type *pe = pe_data (abfd);
   struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
@@ -1367,34 +1397,34 @@ pe_print_edata (abfd, vfile)
 				  datasize))
     return false;
 
-  /* Go get Export Directory Table */
-  edt.export_flags   = bfd_get_32(abfd, data+0);
-  edt.time_stamp     = bfd_get_32(abfd, data+4);
-  edt.major_ver      = bfd_get_16(abfd, data+8);
-  edt.minor_ver      = bfd_get_16(abfd, data+10);
-  edt.name           = bfd_get_32(abfd, data+12);
-  edt.base           = bfd_get_32(abfd, data+16);
-  edt.num_functions  = bfd_get_32(abfd, data+20);
-  edt.num_names      = bfd_get_32(abfd, data+24);
-  edt.eat_addr       = bfd_get_32(abfd, data+28);
-  edt.npt_addr       = bfd_get_32(abfd, data+32);
-  edt.ot_addr        = bfd_get_32(abfd, data+36);
+  /* Go get Export Directory Table.  */
+  edt.export_flags   = bfd_get_32 (abfd, data +  0);
+  edt.time_stamp     = bfd_get_32 (abfd, data +  4);
+  edt.major_ver      = bfd_get_16 (abfd, data +  8);
+  edt.minor_ver      = bfd_get_16 (abfd, data + 10);
+  edt.name           = bfd_get_32 (abfd, data + 12);
+  edt.base           = bfd_get_32 (abfd, data + 16);
+  edt.num_functions  = bfd_get_32 (abfd, data + 20);
+  edt.num_names      = bfd_get_32 (abfd, data + 24);
+  edt.eat_addr       = bfd_get_32 (abfd, data + 28);
+  edt.npt_addr       = bfd_get_32 (abfd, data + 32);
+  edt.ot_addr        = bfd_get_32 (abfd, data + 36);
 
   adj = section->vma - extra->ImageBase + dataoff;
 
   /* Dump the EDT first first */
-  fprintf(file,
-	  _("\nThe Export Tables (interpreted %s section contents)\n\n"),
-	  section->name);
+  fprintf (file,
+	   _("\nThe Export Tables (interpreted %s section contents)\n\n"),
+	   section->name);
 
-  fprintf(file,
-	  _("Export Flags \t\t\t%lx\n"), (unsigned long) edt.export_flags);
+  fprintf (file,
+	   _("Export Flags \t\t\t%lx\n"), (unsigned long) edt.export_flags);
 
-  fprintf(file,
-	  _("Time/Date stamp \t\t%lx\n"), (unsigned long) edt.time_stamp);
+  fprintf (file,
+	   _("Time/Date stamp \t\t%lx\n"), (unsigned long) edt.time_stamp);
 
-  fprintf(file,
-	  _("Major/Minor \t\t\t%d/%d\n"), edt.major_ver, edt.minor_ver);
+  fprintf (file,
+	   _("Major/Minor \t\t\t%d/%d\n"), edt.major_ver, edt.minor_ver);
 
   fprintf (file,
 	   _("Name \t\t\t\t"));
@@ -1402,21 +1432,21 @@ pe_print_edata (abfd, vfile)
   fprintf (file,
 	   " %s\n", data + edt.name - adj);
 
-  fprintf(file,
-	  _("Ordinal Base \t\t\t%ld\n"), edt.base);
+  fprintf (file,
+	   _("Ordinal Base \t\t\t%ld\n"), edt.base);
 
-  fprintf(file,
-	  _("Number in:\n"));
+  fprintf (file,
+	   _("Number in:\n"));
 
-  fprintf(file,
-	  _("\tExport Address Table \t\t%08lx\n"),
-	  edt.num_functions);
+  fprintf (file,
+	   _("\tExport Address Table \t\t%08lx\n"),
+	   edt.num_functions);
 
-  fprintf(file,
-	  _("\t[Name Pointer/Ordinal] Table\t%08lx\n"), edt.num_names);
+  fprintf (file,
+	   _("\t[Name Pointer/Ordinal] Table\t%08lx\n"), edt.num_names);
 
-  fprintf(file,
-	  _("Table Addresses\n"));
+  fprintf (file,
+	   _("Table Addresses\n"));
 
   fprintf (file,
 	   _("\tExport Address Table \t\t"));
@@ -1424,7 +1454,7 @@ pe_print_edata (abfd, vfile)
   fprintf (file, "\n");
 
   fprintf (file,
-	  _("\tName Pointer Table \t\t"));
+	   _("\tName Pointer Table \t\t"));
   fprintf_vma (file, edt.npt_addr);
   fprintf (file, "\n");
 
@@ -1433,18 +1463,16 @@ pe_print_edata (abfd, vfile)
   fprintf_vma (file, edt.ot_addr);
   fprintf (file, "\n");
 
-  
   /* The next table to find is the Export Address Table. It's basically
      a list of pointers that either locate a function in this dll, or
      forward the call to another dll. Something like:
-      typedef union
-      {
+      typedef union {
         long export_rva;
         long forwarder_rva;
       } export_address_table_entry;
   */
 
-  fprintf(file,
+  fprintf (file,
 	  _("\nExport Address Table -- Ordinal Base %ld\n"),
 	  edt.base);
 
@@ -1458,7 +1486,7 @@ pe_print_edata (abfd, vfile)
       if (eat_member - adj <= datasize)
 	{
 	  /* This rva is to a name (forwarding function) in our section.  */
-	  /* Should locate a function descriptor */
+	  /* Should locate a function descriptor.  */
 	  fprintf (file,
 		   "\t[%4ld] +base[%4ld] %04lx %s -- %s\n",
 		   (long) i,
@@ -1469,7 +1497,7 @@ pe_print_edata (abfd, vfile)
 	}
       else
 	{
-	  /* Should locate a function descriptor in the reldata section */
+	  /* Should locate a function descriptor in the reldata section.  */
 	  fprintf (file,
 		   "\t[%4ld] +base[%4ld] %04lx %s\n",
 		   (long) i,
@@ -1479,27 +1507,26 @@ pe_print_edata (abfd, vfile)
 	}
     }
 
-  /* The Export Name Pointer Table is paired with the Export Ordinal Table */
-  /* Dump them in parallel for clarity */
-  fprintf(file,
-	  _("\n[Ordinal/Name Pointer] Table\n"));
+  /* The Export Name Pointer Table is paired with the Export Ordinal Table.  */
+  /* Dump them in parallel for clarity.  */
+  fprintf (file,
+	   _("\n[Ordinal/Name Pointer] Table\n"));
 
   for (i = 0; i < edt.num_names; ++i)
     {
-      bfd_vma name_ptr = bfd_get_32(abfd,
+      bfd_vma name_ptr = bfd_get_32 (abfd,
 				    data +
 				    edt.npt_addr
 				    + (i*4) - adj);
-      
+
       char *name = (char *) data + name_ptr - adj;
 
-      bfd_vma ord = bfd_get_16(abfd,
+      bfd_vma ord = bfd_get_16 (abfd,
 				    data +
 				    edt.ot_addr
 				    + (i*2) - adj);
-      fprintf(file,
+      fprintf (file,
 	      "\t[%4ld] %s\n", (long) ord, name);
-
     }
 
   free (data);
@@ -1511,9 +1538,10 @@ pe_print_edata (abfd, vfile)
    consists of three dwords containing relative virtual addresses that
    specify the start and end address of the code range the entry
    covers and the address of the corresponding unwind info data.  */
+
 static boolean
 pe_print_pdata (abfd, vfile)
-     bfd  *abfd;
+     bfd *abfd;
      PTR vfile;
 {
 #ifdef COFF_WITH_PEP64
@@ -1532,18 +1560,19 @@ pe_print_pdata (abfd, vfile)
   if (section == NULL
       || coff_section_data (abfd, section) == NULL
       || pei_section_data (abfd, section) == NULL)
-     return true;
+    return true;
 
   stop = pei_section_data (abfd, section)->virt_size;
   if ((stop % onaline) != 0)
-    fprintf (file, _("Warning, .pdata section size (%ld) is not a multiple of %d\n"),
-	     (long)stop, onaline);
+    fprintf (file,
+	     _("Warning, .pdata section size (%ld) is not a multiple of %d\n"),
+	     (long) stop, onaline);
 
   fprintf (file,
 	   _("\nThe Function Table (interpreted .pdata section contents)\n"));
 #ifdef COFF_WITH_PEP64
-  fprintf(file,
-	  _(" vma:\t\t\tBegin Address    End Address      Unwind Info\n"));
+  fprintf (file,
+	   _(" vma:\t\t\tBegin Address    End Address      Unwind Info\n"));
 #else
   fprintf (file,
 	   _(" vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"));
@@ -1578,12 +1607,12 @@ pe_print_pdata (abfd, vfile)
       if (i + PDATA_ROW_SIZE > stop)
 	break;
 
-      begin_addr = GET_PDATA_ENTRY(abfd, data+i);
-      end_addr = GET_PDATA_ENTRY(abfd, data+i+4);
-      eh_handler = GET_PDATA_ENTRY(abfd, data+i+8);
-      eh_data = GET_PDATA_ENTRY(abfd, data+i+12);
-      prolog_end_addr = GET_PDATA_ENTRY(abfd, data+i+16);
-      
+      begin_addr      = GET_PDATA_ENTRY (abfd, data + i     );
+      end_addr        = GET_PDATA_ENTRY (abfd, data + i +  4);
+      eh_handler      = GET_PDATA_ENTRY (abfd, data + i +  8);
+      eh_data         = GET_PDATA_ENTRY (abfd, data + i + 12);
+      prolog_end_addr = GET_PDATA_ENTRY (abfd, data + i + 16);
+
       if (begin_addr == 0 && end_addr == 0 && eh_handler == 0
 	  && eh_data == 0 && prolog_end_addr == 0)
 	{
@@ -1592,8 +1621,8 @@ pe_print_pdata (abfd, vfile)
 	}
 
       em_data = ((eh_handler & 0x1) << 2) | (prolog_end_addr & 0x3);
-      eh_handler &= ~ (bfd_vma) 0x3;
-      prolog_end_addr &= ~ (bfd_vma) 0x3;
+      eh_handler &= ~(bfd_vma) 0x3;
+      prolog_end_addr &= ~(bfd_vma) 0x3;
 
       fputc (' ', file);
       fprintf_vma (file, i + section->vma); fputc ('\t', file);
@@ -1610,9 +1639,8 @@ pe_print_pdata (abfd, vfile)
 #ifdef POWERPC_LE_PE
       if (eh_handler == 0 && eh_data != 0)
 	{
-	  /* Special bits here, although the meaning may */
-	  /* be a little mysterious. The only one I know */
-	  /* for sure is 0x03.                           */
+	  /* Special bits here, although the meaning may be a little
+	     mysterious. The only one I know for sure is 0x03.  */
 	  /* Code Significance                           */
 	  /* 0x00 None                                   */
 	  /* 0x01 Register Save Millicode                */
@@ -1621,20 +1649,20 @@ pe_print_pdata (abfd, vfile)
 	  switch (eh_data)
 	    {
 	    case 0x01:
-	      fprintf(file, _(" Register save millicode"));
+	      fprintf (file, _(" Register save millicode"));
 	      break;
 	    case 0x02:
-	      fprintf(file, _(" Register restore millicode"));
+	      fprintf (file, _(" Register restore millicode"));
 	      break;
 	    case 0x03:
-	      fprintf(file, _(" Glue code sequence"));
+	      fprintf (file, _(" Glue code sequence"));
 	      break;
 	    default:
 	      break;
 	    }
 	}
 #endif
-      fprintf(file, "\n");
+      fprintf (file, "\n");
     }
 
   free (data);
@@ -1643,21 +1671,20 @@ pe_print_pdata (abfd, vfile)
 }
 
 #define IMAGE_REL_BASED_HIGHADJ 4
-static const char * const tbl[] =
-{
-"ABSOLUTE",
-"HIGH",
-"LOW",
-"HIGHLOW",
-"HIGHADJ",
-"MIPS_JMPADDR",
-"SECTION",
-"REL32",
-"RESERVED1",
-"MIPS_JMPADDR16",
-"DIR64",
-"HIGH3ADJ"
-"UNKNOWN",   /* MUST be last */
+static const char * const tbl[] = {
+  "ABSOLUTE",
+  "HIGH",
+  "LOW",
+  "HIGHLOW",
+  "HIGHADJ",
+  "MIPS_JMPADDR",
+  "SECTION",
+  "REL32",
+  "RESERVED1",
+  "MIPS_JMPADDR16",
+  "DIR64",
+  "HIGH3ADJ"
+  "UNKNOWN",   /* MUST be last */
 };
 
 static boolean
@@ -1704,8 +1731,8 @@ pe_print_reloc (abfd, vfile)
       /* The .reloc section is a sequence of blocks, with a header consisting
 	 of two 32 bit quantities, followed by a number of 16 bit entries */
 
-      virtual_address = bfd_get_32(abfd, data+i);
-      size = bfd_get_32(abfd, data+i+4);
+      virtual_address = bfd_get_32 (abfd, data+i);
+      size = bfd_get_32 (abfd, data+i+4);
       number = (size - 8) / 2;
 
       if (size == 0)
@@ -1731,15 +1758,15 @@ pe_print_reloc (abfd, vfile)
 		   j, off, (long) (off + virtual_address), tbl[t]);
 
 	  /* HIGHADJ takes an argument, - the next record *is* the
-	     low 16 bits of addend.  */ 
+	     low 16 bits of addend.  */
 	  if (t == IMAGE_REL_BASED_HIGHADJ)
 	    {
-	       fprintf (file, " (%4x)",
-			((unsigned int)
-			 bfd_get_16 (abfd, data + i + 8 + j * 2 + 2)));
-	       j++;
+	      fprintf (file, " (%4x)",
+		       ((unsigned int)
+			bfd_get_16 (abfd, data + i + 8 + j * 2 + 2)));
+	      j++;
 	    }
-	  
+
 	  fprintf (file, "\n");
 	}
       i += size;
@@ -1768,7 +1795,7 @@ _bfd_pe_print_private_bfd_data_common (abfd, vfile)
      emulate it here.  */
   fprintf (file, _("\nCharacteristics 0x%x\n"), pe->real_flags);
 #undef PF
-#define PF(x, y)    if (pe->real_flags & x) { fprintf (file, "\t%s\n", y); }
+#define PF(x, y) if (pe->real_flags & x) { fprintf (file, "\t%s\n", y); }
   PF (F_RELFLG, "relocations stripped");
   PF (F_EXEC, "executable");
   PF (F_LNNO, "line numbers stripped");
@@ -1783,22 +1810,22 @@ _bfd_pe_print_private_bfd_data_common (abfd, vfile)
 
   /* ctime implies '\n'.  */
   fprintf (file, "\nTime/Date\t\t%s", ctime (&pe->coff.timestamp));
-  fprintf (file,"\nImageBase\t\t");
+  fprintf (file, "\nImageBase\t\t");
   fprintf_vma (file, i->ImageBase);
-  fprintf (file,"\nSectionAlignment\t");
+  fprintf (file, "\nSectionAlignment\t");
   fprintf_vma (file, i->SectionAlignment);
-  fprintf (file,"\nFileAlignment\t\t");
+  fprintf (file, "\nFileAlignment\t\t");
   fprintf_vma (file, i->FileAlignment);
-  fprintf (file,"\nMajorOSystemVersion\t%d\n", i->MajorOperatingSystemVersion);
-  fprintf (file,"MinorOSystemVersion\t%d\n", i->MinorOperatingSystemVersion);
-  fprintf (file,"MajorImageVersion\t%d\n", i->MajorImageVersion);
-  fprintf (file,"MinorImageVersion\t%d\n", i->MinorImageVersion);
-  fprintf (file,"MajorSubsystemVersion\t%d\n", i->MajorSubsystemVersion);
-  fprintf (file,"MinorSubsystemVersion\t%d\n", i->MinorSubsystemVersion);
-  fprintf (file,"Win32Version\t\t%08lx\n", i->Reserved1);
-  fprintf (file,"SizeOfImage\t\t%08lx\n", i->SizeOfImage);
-  fprintf (file,"SizeOfHeaders\t\t%08lx\n", i->SizeOfHeaders);
-  fprintf (file,"CheckSum\t\t%08lx\n", i->CheckSum);
+  fprintf (file, "\nMajorOSystemVersion\t%d\n", i->MajorOperatingSystemVersion);
+  fprintf (file, "MinorOSystemVersion\t%d\n", i->MinorOperatingSystemVersion);
+  fprintf (file, "MajorImageVersion\t%d\n", i->MajorImageVersion);
+  fprintf (file, "MinorImageVersion\t%d\n", i->MinorImageVersion);
+  fprintf (file, "MajorSubsystemVersion\t%d\n", i->MajorSubsystemVersion);
+  fprintf (file, "MinorSubsystemVersion\t%d\n", i->MinorSubsystemVersion);
+  fprintf (file, "Win32Version\t\t%08lx\n", i->Reserved1);
+  fprintf (file, "SizeOfImage\t\t%08lx\n", i->SizeOfImage);
+  fprintf (file, "SizeOfHeaders\t\t%08lx\n", i->SizeOfHeaders);
+  fprintf (file, "CheckSum\t\t%08lx\n", i->CheckSum);
   switch (i->Subsystem)
     {
     case IMAGE_SUBSYSTEM_UNKNOWN:
@@ -1826,25 +1853,25 @@ _bfd_pe_print_private_bfd_data_common (abfd, vfile)
       subsystem_name = "EFI boot service driver";
       break;
     case IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER:
-      subsystem_name = "EFI runtime driver"; 
+      subsystem_name = "EFI runtime driver";
       break;
     }
-  fprintf (file,"Subsystem\t\t%08x", i->Subsystem);
+  fprintf (file, "Subsystem\t\t%08x", i->Subsystem);
   if (subsystem_name)
     fprintf (file, "\t(%s)", subsystem_name);
-  fprintf (file,"\nDllCharacteristics\t%08x\n", i->DllCharacteristics);
-  fprintf (file,"SizeOfStackReserve\t");
+  fprintf (file, "\nDllCharacteristics\t%08x\n", i->DllCharacteristics);
+  fprintf (file, "SizeOfStackReserve\t");
   fprintf_vma (file, i->SizeOfStackReserve);
-  fprintf (file,"\nSizeOfStackCommit\t");
+  fprintf (file, "\nSizeOfStackCommit\t");
   fprintf_vma (file, i->SizeOfStackCommit);
-  fprintf (file,"\nSizeOfHeapReserve\t");
+  fprintf (file, "\nSizeOfHeapReserve\t");
   fprintf_vma (file, i->SizeOfHeapReserve);
-  fprintf (file,"\nSizeOfHeapCommit\t");
+  fprintf (file, "\nSizeOfHeapCommit\t");
   fprintf_vma (file, i->SizeOfHeapCommit);
-  fprintf (file,"\nLoaderFlags\t\t%08lx\n", i->LoaderFlags);
-  fprintf (file,"NumberOfRvaAndSizes\t%08lx\n", i->NumberOfRvaAndSizes);
+  fprintf (file, "\nLoaderFlags\t\t%08lx\n", i->LoaderFlags);
+  fprintf (file, "NumberOfRvaAndSizes\t%08lx\n", i->NumberOfRvaAndSizes);
 
-  fprintf (file,"\nThe Data Directory\n");
+  fprintf (file, "\nThe Data Directory\n");
   for (j = 0; j < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; j++)
     {
       fprintf (file, "Entry %1x ", j);
@@ -1880,13 +1907,13 @@ _bfd_pe_bfd_copy_private_bfd_data_common (ibfd, obfd)
      if we don't remove this entry as well.  */
   if (! pe_data (obfd)->has_reloc_section)
     {
-      pe_data(obfd)->pe_opthdr.DataDirectory[5].VirtualAddress = 0;
-      pe_data(obfd)->pe_opthdr.DataDirectory[5].Size = 0;
+      pe_data (obfd)->pe_opthdr.DataDirectory[5].VirtualAddress = 0;
+      pe_data (obfd)->pe_opthdr.DataDirectory[5].Size = 0;
     }
   return true;
 }
 
-/* Copy private section data. */
+/* Copy private section data.  */
 boolean
 _bfd_pe_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
      bfd *ibfd;
@@ -1918,7 +1945,7 @@ _bfd_pe_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
       pei_section_data (obfd, osec)->virt_size =
 	pei_section_data (ibfd, isec)->virt_size;
       pei_section_data (obfd, osec)->pe_flags =
-        pei_section_data (ibfd, isec)->pe_flags;
+	pei_section_data (ibfd, isec)->pe_flags;
     }
 
   return true;
@@ -1962,7 +1989,7 @@ _bfd_pei_final_link_postscript (abfd, pfinfo)
 			      ".idata$2", false, false, true);
   if (h1 != NULL)
     {
-      pe_data(abfd)->pe_opthdr.DataDirectory[1].VirtualAddress =
+      pe_data (abfd)->pe_opthdr.DataDirectory[1].VirtualAddress =
 	(h1->root.u.def.value
 	 + h1->root.u.def.section->output_section->vma
 	 + h1->root.u.def.section->output_offset);
@@ -1972,7 +1999,7 @@ _bfd_pei_final_link_postscript (abfd, pfinfo)
 	((h1->root.u.def.value
 	  + h1->root.u.def.section->output_section->vma
 	  + h1->root.u.def.section->output_offset)
-	 - pe_data(abfd)->pe_opthdr.DataDirectory[1].VirtualAddress);
+	 - pe_data (abfd)->pe_opthdr.DataDirectory[1].VirtualAddress);
 
       /* The import address table.  This is the size/address of
          .idata$5.  */
@@ -1988,7 +2015,7 @@ _bfd_pei_final_link_postscript (abfd, pfinfo)
 	((h1->root.u.def.value
 	  + h1->root.u.def.section->output_section->vma
 	  + h1->root.u.def.section->output_offset)
-	 - pe_data(abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);
+	 - pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);
     }
 
   /* If we couldn't find idata$2, we either have an excessively

@@ -41,7 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdlib.h>
 #endif
 #include <ctype.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 
 struct sim_hw {
@@ -101,6 +101,7 @@ enum {
   OPTION_HW_INFO = OPTION_START,
   OPTION_HW_TRACE,
   OPTION_HW_DEVICE,
+  OPTION_HW_LIST,
   OPTION_HW_FILE,
 };
 
@@ -124,6 +125,10 @@ static const OPTION hw_options[] =
 
   { {"hw-device", required_argument, NULL, OPTION_HW_DEVICE },
       '\0', "DEVICE", "Add the specified device",
+      hw_option_handler },
+
+  { {"hw-list", no_argument, NULL, OPTION_HW_LIST },
+      '\0', NULL, "List the device tree",
       hw_option_handler },
 
   { {"hw-file", required_argument, NULL, OPTION_HW_FILE },
@@ -257,6 +262,12 @@ hw_option_handler (struct sim_state *sd, sim_cpu *cpu, int opt,
 	return SIM_RC_OK;
       }
 
+    case OPTION_HW_LIST:
+      {
+	sim_hw_print (sd, sim_io_vprintf);
+	return SIM_RC_OK;
+      }
+  
     case OPTION_HW_FILE:
       {
 	return merge_device_file (sd, arg);

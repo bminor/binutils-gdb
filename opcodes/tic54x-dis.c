@@ -558,7 +558,7 @@ sprint_mmr (info, buf, mmr)
         }
       ++reg;
     }
-  sprintf (buf, "MMR(%d)", mmr); // FIXME -- different targets
+  sprintf (buf, "MMR(%d)", mmr); /* FIXME -- different targets.  */
   return 0;
 }
 

@@ -189,15 +189,13 @@ make_exec_error_cleanup (make_cleanup_ftype *function, void *arg)
 }
 
 static void
-do_freeargv (arg)
-     void *arg;
+do_freeargv (void *arg)
 {
   freeargv ((char **) arg);
 }
 
 struct cleanup *
-make_cleanup_freeargv (arg)
-     char **arg;
+make_cleanup_freeargv (char **arg)
 {
   return make_my_cleanup (&cleanup_chain, do_freeargv, arg);
 }
@@ -259,51 +257,45 @@ make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
    until we get back to the point OLD_CHAIN in the cleanup_chain.  */
 
 void
-do_cleanups (old_chain)
-     register struct cleanup *old_chain;
+do_cleanups (register struct cleanup *old_chain)
 {
   do_my_cleanups (&cleanup_chain, old_chain);
 }
 
 void
-do_final_cleanups (old_chain)
-     register struct cleanup *old_chain;
+do_final_cleanups (register struct cleanup *old_chain)
 {
   do_my_cleanups (&final_cleanup_chain, old_chain);
 }
 
 void
-do_run_cleanups (old_chain)
-     register struct cleanup *old_chain;
+do_run_cleanups (register struct cleanup *old_chain)
 {
   do_my_cleanups (&run_cleanup_chain, old_chain);
 }
 
 void
-do_exec_cleanups (old_chain)
-     register struct cleanup *old_chain;
+do_exec_cleanups (register struct cleanup *old_chain)
 {
   do_my_cleanups (&exec_cleanup_chain, old_chain);
 }
 
 void
-do_exec_error_cleanups (old_chain)
-     register struct cleanup *old_chain;
+do_exec_error_cleanups (register struct cleanup *old_chain)
 {
   do_my_cleanups (&exec_error_cleanup_chain, old_chain);
 }
 
 void
-do_my_cleanups (pmy_chain, old_chain)
-     register struct cleanup **pmy_chain;
-     register struct cleanup *old_chain;
+do_my_cleanups (register struct cleanup **pmy_chain,
+		register struct cleanup *old_chain)
 {
   register struct cleanup *ptr;
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;	/* Do this first incase recursion */
       (*ptr->function) (ptr->arg);
-      free (ptr);
+      xfree (ptr);
     }
 }
 
@@ -311,55 +303,50 @@ do_my_cleanups (pmy_chain, old_chain)
    until we get back to the point OLD_CHAIN in the cleanup_chain.  */
 
 void
-discard_cleanups (old_chain)
-     register struct cleanup *old_chain;
+discard_cleanups (register struct cleanup *old_chain)
 {
   discard_my_cleanups (&cleanup_chain, old_chain);
 }
 
 void
-discard_final_cleanups (old_chain)
-     register struct cleanup *old_chain;
+discard_final_cleanups (register struct cleanup *old_chain)
 {
   discard_my_cleanups (&final_cleanup_chain, old_chain);
 }
 
 void
-discard_exec_error_cleanups (old_chain)
-     register struct cleanup *old_chain;
+discard_exec_error_cleanups (register struct cleanup *old_chain)
 {
   discard_my_cleanups (&exec_error_cleanup_chain, old_chain);
 }
 
 void
-discard_my_cleanups (pmy_chain, old_chain)
-     register struct cleanup **pmy_chain;
-     register struct cleanup *old_chain;
+discard_my_cleanups (register struct cleanup **pmy_chain,
+		     register struct cleanup *old_chain)
 {
   register struct cleanup *ptr;
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;
-      free (ptr);
+      xfree (ptr);
     }
 }
 
 /* Set the cleanup_chain to 0, and return the old cleanup chain.  */
 struct cleanup *
-save_cleanups ()
+save_cleanups (void)
 {
   return save_my_cleanups (&cleanup_chain);
 }
 
 struct cleanup *
-save_final_cleanups ()
+save_final_cleanups (void)
 {
   return save_my_cleanups (&final_cleanup_chain);
 }
 
 struct cleanup *
-save_my_cleanups (pmy_chain)
-     struct cleanup **pmy_chain;
+save_my_cleanups (struct cleanup **pmy_chain)
 {
   struct cleanup *old_chain = *pmy_chain;
 
@@ -369,23 +356,19 @@ save_my_cleanups (pmy_chain)
 
 /* Restore the cleanup chain from a previously saved chain.  */
 void
-restore_cleanups (chain)
-     struct cleanup *chain;
+restore_cleanups (struct cleanup *chain)
 {
   restore_my_cleanups (&cleanup_chain, chain);
 }
 
 void
-restore_final_cleanups (chain)
-     struct cleanup *chain;
+restore_final_cleanups (struct cleanup *chain)
 {
   restore_my_cleanups (&final_cleanup_chain, chain);
 }
 
 void
-restore_my_cleanups (pmy_chain, chain)
-     struct cleanup **pmy_chain;
-     struct cleanup *chain;
+restore_my_cleanups (struct cleanup **pmy_chain, struct cleanup *chain)
 {
   *pmy_chain = chain;
 }
@@ -406,7 +389,7 @@ free_current_contents (void *ptr)
     internal_error ("free_current_contents: NULL pointer");
   if (*location != NULL)
     {
-      free (*location);
+      xfree (*location);
       *location = NULL;
     }
 }
@@ -424,12 +407,11 @@ null_cleanup (void *arg)
 {
 }
 
-/* Add a continuation to the continuation list, the gloabl list
+/* Add a continuation to the continuation list, the global list
    cmd_continuation. The new continuation will be added at the front.*/
 void
-add_continuation (continuation_hook, arg_list)
-     void (*continuation_hook) (struct continuation_arg *);
-     struct continuation_arg *arg_list;
+add_continuation (void (*continuation_hook) (struct continuation_arg *),
+		  struct continuation_arg *arg_list)
 {
   struct continuation *continuation_ptr;
 
@@ -449,7 +431,7 @@ add_continuation (continuation_hook, arg_list)
    and do the continuations from there on, instead of using the
    global beginning of list as our iteration pointer.*/
 void
-do_all_continuations ()
+do_all_continuations (void)
 {
   struct continuation *continuation_ptr;
   struct continuation *saved_continuation;
@@ -467,14 +449,14 @@ do_all_continuations ()
        (continuation_ptr->continuation_hook) (continuation_ptr->arg_list);
        saved_continuation = continuation_ptr;
        continuation_ptr = continuation_ptr->next;
-       free (saved_continuation);
+       xfree (saved_continuation);
      }
 }
 
 /* Walk down the cmd_continuation list, and get rid of all the
    continuations. */
 void
-discard_all_continuations ()
+discard_all_continuations (void)
 {
   struct continuation *continuation_ptr;
 
@@ -482,16 +464,16 @@ discard_all_continuations ()
     {
       continuation_ptr = cmd_continuation;
       cmd_continuation = continuation_ptr->next;
-      free (continuation_ptr);
+      xfree (continuation_ptr);
     }
 }
 
 /* Add a continuation to the continuation list, the global list
    intermediate_continuation. The new continuation will be added at the front.*/
 void
-add_intermediate_continuation (continuation_hook, arg_list)
-     void (*continuation_hook) (struct continuation_arg *);
-     struct continuation_arg *arg_list;
+add_intermediate_continuation (void (*continuation_hook)
+			       (struct continuation_arg *),
+			       struct continuation_arg *arg_list)
 {
   struct continuation *continuation_ptr;
 
@@ -511,7 +493,7 @@ add_intermediate_continuation (continuation_hook, arg_list)
    and do the continuations from there on, instead of using the
    global beginning of list as our iteration pointer.*/
 void
-do_all_intermediate_continuations ()
+do_all_intermediate_continuations (void)
 {
   struct continuation *continuation_ptr;
   struct continuation *saved_continuation;
@@ -529,14 +511,14 @@ do_all_intermediate_continuations ()
        (continuation_ptr->continuation_hook) (continuation_ptr->arg_list);
        saved_continuation = continuation_ptr;
        continuation_ptr = continuation_ptr->next;
-       free (saved_continuation);
+       xfree (saved_continuation);
      }
 }
 
 /* Walk down the cmd_continuation list, and get rid of all the
    continuations. */
 void
-discard_all_intermediate_continuations ()
+discard_all_intermediate_continuations (void)
 {
   struct continuation *continuation_ptr;
 
@@ -544,7 +526,7 @@ discard_all_intermediate_continuations ()
     {
       continuation_ptr = intermediate_continuation;
       intermediate_continuation = continuation_ptr->next;
-      free (continuation_ptr);
+      xfree (continuation_ptr);
     }
 }
 
@@ -560,7 +542,7 @@ discard_all_intermediate_continuations ()
    Is this anything other than a historical accident?  */
 
 void
-warning_begin ()
+warning_begin (void)
 {
   target_terminal_ours ();
   wrap_here ("");		/* Force out any buffered output */
@@ -599,7 +581,7 @@ warning (const char *string,...)
    that the error message can be formatted with a single printf call,
    but this is more general.  */
 void
-error_begin ()
+error_begin (void)
 {
   if (error_begin_hook)
     error_begin_hook ();
@@ -624,7 +606,7 @@ verror (const char *string, va_list args)
   char *err_string;
   struct cleanup *err_string_cleanup;
   /* FIXME: cagney/1999-11-10: All error calls should come here.
-     Unfortunatly some code uses the sequence: error_begin(); print
+     Unfortunately some code uses the sequence: error_begin(); print
      error message; return_to_top_level.  That code should be
      flushed. */
   error_begin ();
@@ -639,7 +621,7 @@ verror (const char *string, va_list args)
   vfprintf_filtered (gdb_lasterr, string, args);
   /* Retrieve the last error and print it to gdb_stderr */
   err_string = error_last_message ();
-  err_string_cleanup = make_cleanup (free, err_string);
+  err_string_cleanup = make_cleanup (xfree, err_string);
   fputs_filtered (err_string, gdb_stderr);
   fprintf_filtered (gdb_stderr, "\n");
   do_cleanups (err_string_cleanup);
@@ -660,7 +642,7 @@ error_stream (struct ui_file *stream)
 {
   long size;
   char *msg = ui_file_xstrdup (stream, &size);
-  make_cleanup (free, msg);
+  make_cleanup (xfree, msg);
   error ("%s", msg);
 }
 
@@ -717,7 +699,7 @@ internal_verror (const char *fmt, va_list ap)
   /* Default (no case) is to quit GDB.  When in batch mode this
      lessens the likelhood of GDB going into an infinate loop. */
   continue_p = query ("\
-An internal GDB error was detected.  This may make make further\n\
+An internal GDB error was detected.  This may make further\n\
 debugging unreliable.  Continue this debugging session? ");
 
   /* Default (no case) is to not dump core.  Lessen the chance of GDB
@@ -760,8 +742,7 @@ internal_error (char *string, ...)
    printable string. */
 
 char *
-safe_strerror (errnum)
-     int errnum;
+safe_strerror (int errnum)
 {
   char *msg;
   static char buf[32];
@@ -779,8 +760,7 @@ safe_strerror (errnum)
    Then return to command level.  */
 
 NORETURN void
-perror_with_name (string)
-     char *string;
+perror_with_name (char *string)
 {
   char *err;
   char *combined;
@@ -804,9 +784,7 @@ perror_with_name (string)
    as the file name for which the error was encountered.  */
 
 void
-print_sys_errmsg (string, errcode)
-     char *string;
-     int errcode;
+print_sys_errmsg (char *string, int errcode)
 {
   char *err;
   char *combined;
@@ -826,7 +804,7 @@ print_sys_errmsg (string, errcode)
 /* Control C eventually causes this to be called, at a convenient time.  */
 
 void
-quit ()
+quit (void)
 {
   serial_t gdb_stdout_serial = serial_fdopen (1);
 
@@ -881,7 +859,7 @@ quit ()
  */
 
 void
-notice_quit ()
+notice_quit (void)
 {
   int k = win32pollquit ();
   if (k == 1)
@@ -893,7 +871,7 @@ notice_quit ()
 #else /* !defined(_MSC_VER) */
 
 void
-notice_quit ()
+notice_quit (void)
 {
   /* Done by signals */
 }
@@ -902,8 +880,7 @@ notice_quit ()
 
 /* Control C comes here */
 void
-request_quit (signo)
-     int signo;
+request_quit (int signo)
 {
   quit_flag = 1;
   /* Restore the signal handler.  Harmless with BSD-style signals, needed
@@ -938,18 +915,13 @@ mcalloc (PTR md, size_t number, size_t size)
 }
 
 PTR
-mmalloc (md, size)
-     PTR md;
-     size_t size;
+mmalloc (PTR md, size_t size)
 {
   return malloc (size);
 }
 
 PTR
-mrealloc (md, ptr, size)
-     PTR md;
-     PTR ptr;
-     size_t size;
+mrealloc (PTR md, PTR ptr, size_t size)
 {
   if (ptr == 0)			/* Guard against old realloc's */
     return malloc (size);
@@ -958,11 +930,9 @@ mrealloc (md, ptr, size)
 }
 
 void
-mfree (md, ptr)
-     PTR md;
-     PTR ptr;
+mfree (PTR md, PTR ptr)
 {
-  free (ptr);
+  xfree (ptr);
 }
 
 #endif /* USE_MMALLOC */
@@ -977,7 +947,7 @@ init_malloc (void *md)
 #else /* Have mmalloc and want corruption checking */
 
 static void
-malloc_botch ()
+malloc_botch (void)
 {
   fprintf_unfiltered (gdb_stderr, "Memory corruption\n");
   abort ();
@@ -1025,8 +995,7 @@ init_malloc (void *md)
    memory requested in SIZE. */
 
 NORETURN void
-nomem (size)
-     long size;
+nomem (long size)
 {
   if (size > 0)
     {
@@ -1044,9 +1013,7 @@ nomem (size)
    byte of zero'd storage, is a religious issue. */
 
 PTR
-xmmalloc (md, size)
-     PTR md;
-     long size;
+xmmalloc (PTR md, long size)
 {
   register PTR val;
 
@@ -1064,10 +1031,7 @@ xmmalloc (md, size)
 /* Like mrealloc but get error if no storage available.  */
 
 PTR
-xmrealloc (md, ptr, size)
-     PTR md;
-     PTR ptr;
-     long size;
+xmrealloc (PTR md, PTR ptr, long size)
 {
   register PTR val;
 
@@ -1090,8 +1054,7 @@ xmrealloc (md, ptr, size)
    the caller wanting to allocate zero bytes.  */
 
 PTR
-xmalloc (size)
-     size_t size;
+xmalloc (size_t size)
 {
   return (xmmalloc ((PTR) NULL, size));
 }
@@ -1110,22 +1073,56 @@ xcalloc (size_t number, size_t size)
 /* Like mrealloc but get error if no storage available.  */
 
 PTR
-xrealloc (ptr, size)
-     PTR ptr;
-     size_t size;
+xrealloc (PTR ptr, size_t size)
 {
   return (xmrealloc ((PTR) NULL, ptr, size));
 }
+
+/* Free up space allocated by one of xmalloc(), xcalloc(), or
+   xrealloc().  */
+
+void
+xfree (void *ptr)
+{
+  if (ptr != NULL)
+    free (ptr);
+}
 
+
+/* Like asprintf/vasprintf but get an internal_error if the call
+   fails. */
+
+void
+xasprintf (char **ret, const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  xvasprintf (ret, format, args);
+  va_end (args);
+}
+
+void
+xvasprintf (char **ret, const char *format, va_list ap)
+{
+  int status = vasprintf (ret, format, ap);
+  /* NULL could be returned due to a memory allocation problem; a
+     badly format string; or something else. */
+  if ((*ret) == NULL)
+    internal_error ("%s:%d: vasprintf returned NULL buffer (errno %d)",
+		    __FILE__, __LINE__, errno);
+  /* A negative status with a non-NULL buffer shouldn't never
+     happen. But to be sure. */
+  if (status < 0)
+    internal_error ("%s:%d: vasprintf call failed (errno %d)",
+		    __FILE__, __LINE__, errno);
+}
+
 
 /* My replacement for the read system call.
    Used like `read' but keeps going if `read' returns too soon.  */
 
 int
-myread (desc, addr, len)
-     int desc;
-     char *addr;
-     int len;
+myread (int desc, char *addr, int len)
 {
   register int val;
   int orglen = len;
@@ -1148,9 +1145,7 @@ myread (desc, addr, len)
    Uses malloc to get the space.  Returns the address of the copy.  */
 
 char *
-savestring (ptr, size)
-     const char *ptr;
-     int size;
+savestring (const char *ptr, int size)
 {
   register char *p = (char *) xmalloc (size + 1);
   memcpy (p, ptr, size);
@@ -1171,8 +1166,7 @@ msavestring (void *md, const char *ptr, int size)
    in <string.h>.  FIXME: This should be named "xstrsave", shouldn't it?
    Doesn't real strsave return NULL if out of memory?  */
 char *
-strsave (ptr)
-     const char *ptr;
+strsave (const char *ptr)
 {
   return savestring (ptr, strlen (ptr));
 }
@@ -1184,9 +1178,7 @@ mstrsave (void *md, const char *ptr)
 }
 
 void
-print_spaces (n, file)
-     register int n;
-     register struct ui_file *file;
+print_spaces (register int n, register struct ui_file *file)
 {
   fputs_unfiltered (n_spaces (n), file);
 }
@@ -1327,8 +1319,7 @@ query (char *ctlstr,...)
    after the zeros.  A value of 0 does not mean end of string.  */
 
 int
-parse_escape (string_ptr)
-     char **string_ptr;
+parse_escape (char **string_ptr)
 {
   register int c = *(*string_ptr)++;
   switch (c)
@@ -1398,15 +1389,10 @@ parse_escape (string_ptr)
    be call for printing things which are independent of the language
    of the program being debugged. */
 
-static void printchar (int c, void (*do_fputs) (const char *, struct ui_file*), void (*do_fprintf) (struct ui_file*, const char *, ...), struct ui_file *stream, int quoter);
-
 static void
-printchar (c, do_fputs, do_fprintf, stream, quoter)
-     int c;
-     void (*do_fputs) (const char *, struct ui_file *);
-     void (*do_fprintf) (struct ui_file *, const char *, ...);
-     struct ui_file *stream;
-     int quoter;
+printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
+	   void (*do_fprintf) (struct ui_file *, const char *, ...),
+	   struct ui_file *stream, int quoter)
 {
 
   c &= 0xFF;			/* Avoid sign bit follies */
@@ -1457,31 +1443,21 @@ printchar (c, do_fputs, do_fprintf, stream, quoter)
    the language of the program being debugged. */
 
 void
-fputstr_filtered (str, quoter, stream)
-     const char *str;
-     int quoter;
-     struct ui_file *stream;
+fputstr_filtered (const char *str, int quoter, struct ui_file *stream)
 {
   while (*str)
     printchar (*str++, fputs_filtered, fprintf_filtered, stream, quoter);
 }
 
 void
-fputstr_unfiltered (str, quoter, stream)
-     const char *str;
-     int quoter;
-     struct ui_file *stream;
+fputstr_unfiltered (const char *str, int quoter, struct ui_file *stream)
 {
   while (*str)
     printchar (*str++, fputs_unfiltered, fprintf_unfiltered, stream, quoter);
 }
 
 void
-fputstrn_unfiltered (str, n, quoter, stream)
-     const char *str;
-     int n;
-     int quoter;
-     struct ui_file *stream;
+fputstrn_unfiltered (const char *str, int n, int quoter, struct ui_file *stream)
 {
   int i;
   for (i = 0; i < n; i++)
@@ -1492,7 +1468,7 @@ fputstrn_unfiltered (str, n, quoter, stream)
 
 /* Number of lines per page or UINT_MAX if paging is disabled.  */
 static unsigned int lines_per_page;
-/* Number of chars per line or UNIT_MAX if line folding is disabled.  */
+/* Number of chars per line or UINT_MAX if line folding is disabled.  */
 static unsigned int chars_per_line;
 /* Current count of lines printed on this page, chars on this line.  */
 static unsigned int lines_printed, chars_printed;
@@ -1524,7 +1500,7 @@ static int wrap_column;
 
 /* Inialize the lines and chars per page */
 void
-init_page_info ()
+init_page_info (void)
 {
 #if defined(TUI)
   if (tui_version && m_winPtrNotNull (cmdWin))
@@ -1598,7 +1574,7 @@ init_page_info ()
 }
 
 static void
-set_width ()
+set_width (void)
 {
   if (chars_per_line == 0)
     init_page_info ();
@@ -1615,10 +1591,7 @@ set_width ()
 
 /* ARGSUSED */
 static void
-set_width_command (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_width_command (char *args, int from_tty, struct cmd_list_element *c)
 {
   set_width ();
 }
@@ -1627,7 +1600,7 @@ set_width_command (args, from_tty, c)
    to continue by pressing RETURN.  */
 
 static void
-prompt_for_continue ()
+prompt_for_continue (void)
 {
   char *ignore;
   char cont_prompt[120];
@@ -1673,7 +1646,7 @@ prompt_for_continue ()
 	  else
 	    async_request_quit (0);
 	}
-      free (ignore);
+      xfree (ignore);
     }
   immediate_quit--;
 
@@ -1687,7 +1660,7 @@ prompt_for_continue ()
 /* Reinitialize filter; ie. tell it to reset to original values.  */
 
 void
-reinitialize_more_filter ()
+reinitialize_more_filter (void)
 {
   lines_printed = 0;
   chars_printed = 0;
@@ -1715,8 +1688,7 @@ reinitialize_more_filter ()
    used to force out output from the wrap_buffer.  */
 
 void
-wrap_here (indent)
-     char *indent;
+wrap_here (char *indent)
 {
   /* This should have been allocated, but be paranoid anyway. */
   if (!wrap_buffer)
@@ -1756,7 +1728,7 @@ wrap_here (indent)
    line.  Otherwise do nothing. */
 
 void
-begin_line ()
+begin_line (void)
 {
   if (chars_printed > 0)
     {
@@ -1779,10 +1751,8 @@ begin_line ()
    routine should not be called when cleanups are not in place.  */
 
 static void
-fputs_maybe_filtered (linebuffer, stream, filter)
-     const char *linebuffer;
-     struct ui_file *stream;
-     int filter;
+fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
+		      int filter)
 {
   const char *lineptr;
 
@@ -1883,16 +1853,13 @@ fputs_maybe_filtered (linebuffer, stream, filter)
 }
 
 void
-fputs_filtered (linebuffer, stream)
-     const char *linebuffer;
-     struct ui_file *stream;
+fputs_filtered (const char *linebuffer, struct ui_file *stream)
 {
   fputs_maybe_filtered (linebuffer, stream, 1);
 }
 
 int
-putchar_unfiltered (c)
-     int c;
+putchar_unfiltered (int c)
 {
   char buf = c;
   ui_file_write (gdb_stdout, &buf, 1);
@@ -1900,9 +1867,7 @@ putchar_unfiltered (c)
 }
 
 int
-fputc_unfiltered (c, stream)
-     int c;
-     struct ui_file *stream;
+fputc_unfiltered (int c, struct ui_file *stream)
 {
   char buf = c;
   ui_file_write (stream, &buf, 1);
@@ -1910,9 +1875,7 @@ fputc_unfiltered (c, stream)
 }
 
 int
-fputc_filtered (c, stream)
-     int c;
-     struct ui_file *stream;
+fputc_filtered (int c, struct ui_file *stream)
 {
   char buf[2];
 
@@ -1926,10 +1889,7 @@ fputc_filtered (c, stream)
    characters in printable fashion.  */
 
 void
-puts_debug (prefix, string, suffix)
-     char *prefix;
-     char *string;
-     char *suffix;
+puts_debug (char *prefix, char *string, char *suffix)
 {
   int ch;
 
@@ -2025,68 +1985,45 @@ puts_debug (prefix, string, suffix)
    called when cleanups are not in place.  */
 
 static void
-vfprintf_maybe_filtered (stream, format, args, filter)
-     struct ui_file *stream;
-     const char *format;
-     va_list args;
-     int filter;
+vfprintf_maybe_filtered (struct ui_file *stream, const char *format,
+			 va_list args, int filter)
 {
   char *linebuffer;
   struct cleanup *old_cleanups;
 
-  vasprintf (&linebuffer, format, args);
-  if (linebuffer == NULL)
-    {
-      fputs_unfiltered ("\ngdb: virtual memory exhausted.\n", gdb_stderr);
-      exit (1);
-    }
-  old_cleanups = make_cleanup (free, linebuffer);
+  xvasprintf (&linebuffer, format, args);
+  old_cleanups = make_cleanup (xfree, linebuffer);
   fputs_maybe_filtered (linebuffer, stream, filter);
   do_cleanups (old_cleanups);
 }
 
 
 void
-vfprintf_filtered (stream, format, args)
-     struct ui_file *stream;
-     const char *format;
-     va_list args;
+vfprintf_filtered (struct ui_file *stream, const char *format, va_list args)
 {
   vfprintf_maybe_filtered (stream, format, args, 1);
 }
 
 void
-vfprintf_unfiltered (stream, format, args)
-     struct ui_file *stream;
-     const char *format;
-     va_list args;
+vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
 {
   char *linebuffer;
   struct cleanup *old_cleanups;
 
-  vasprintf (&linebuffer, format, args);
-  if (linebuffer == NULL)
-    {
-      fputs_unfiltered ("\ngdb: virtual memory exhausted.\n", gdb_stderr);
-      exit (1);
-    }
-  old_cleanups = make_cleanup (free, linebuffer);
+  xvasprintf (&linebuffer, format, args);
+  old_cleanups = make_cleanup (xfree, linebuffer);
   fputs_unfiltered (linebuffer, stream);
   do_cleanups (old_cleanups);
 }
 
 void
-vprintf_filtered (format, args)
-     const char *format;
-     va_list args;
+vprintf_filtered (const char *format, va_list args)
 {
   vfprintf_maybe_filtered (gdb_stdout, format, args, 1);
 }
 
 void
-vprintf_unfiltered (format, args)
-     const char *format;
-     va_list args;
+vprintf_unfiltered (const char *format, va_list args)
 {
   vfprintf_unfiltered (gdb_stdout, format, args);
 }
@@ -2162,15 +2099,13 @@ printfi_filtered (int spaces, const char *format,...)
    This one doesn't, and had better not!  */
 
 void
-puts_filtered (string)
-     const char *string;
+puts_filtered (const char *string)
 {
   fputs_filtered (string, gdb_stdout);
 }
 
 void
-puts_unfiltered (string)
-     const char *string;
+puts_unfiltered (const char *string)
 {
   fputs_unfiltered (string, gdb_stdout);
 }
@@ -2178,8 +2113,7 @@ puts_unfiltered (string)
 /* Return a pointer to N spaces and a null.  The pointer is good
    until the next call to here.  */
 char *
-n_spaces (n)
-     int n;
+n_spaces (int n)
 {
   char *t;
   static char *spaces = 0;
@@ -2188,7 +2122,7 @@ n_spaces (n)
   if (n > max_spaces)
     {
       if (spaces)
-	free (spaces);
+	xfree (spaces);
       spaces = (char *) xmalloc (n + 1);
       for (t = spaces + n; t != spaces;)
 	*--t = ' ';
@@ -2201,9 +2135,7 @@ n_spaces (n)
 
 /* Print N spaces.  */
 void
-print_spaces_filtered (n, stream)
-     int n;
-     struct ui_file *stream;
+print_spaces_filtered (int n, struct ui_file *stream)
 {
   fputs_filtered (n_spaces (n), stream);
 }
@@ -2216,11 +2148,8 @@ print_spaces_filtered (n, stream)
    demangling is off, the name is printed in its "raw" form. */
 
 void
-fprintf_symbol_filtered (stream, name, lang, arg_mode)
-     struct ui_file *stream;
-     char *name;
-     enum language lang;
-     int arg_mode;
+fprintf_symbol_filtered (struct ui_file *stream, char *name, enum language lang,
+			 int arg_mode)
 {
   char *demangled;
 
@@ -2251,7 +2180,7 @@ fprintf_symbol_filtered (stream, name, lang, arg_mode)
 	  fputs_filtered (demangled ? demangled : name, stream);
 	  if (demangled != NULL)
 	    {
-	      free (demangled);
+	      xfree (demangled);
 	    }
 	}
     }
@@ -2267,9 +2196,7 @@ fprintf_symbol_filtered (stream, name, lang, arg_mode)
    function). */
 
 int
-strcmp_iw (string1, string2)
-     const char *string1;
-     const char *string2;
+strcmp_iw (const char *string1, const char *string2)
 {
   while ((*string1 != '\0') && (*string2 != '\0'))
     {
@@ -2302,9 +2229,7 @@ strcmp_iw (string1, string2)
    **    at index 0.
  */
 int
-subset_compare (string_to_compare, template_string)
-     char *string_to_compare;
-     char *template_string;
+subset_compare (char *string_to_compare, char *template_string)
 {
   int match;
   if (template_string != (char *) NULL && string_to_compare != (char *) NULL &&
@@ -2320,25 +2245,21 @@ subset_compare (string_to_compare, template_string)
 
 static void pagination_on_command (char *arg, int from_tty);
 static void
-pagination_on_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+pagination_on_command (char *arg, int from_tty)
 {
   pagination_enabled = 1;
 }
 
 static void pagination_on_command (char *arg, int from_tty);
 static void
-pagination_off_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+pagination_off_command (char *arg, int from_tty)
 {
   pagination_enabled = 0;
 }
 
 
 void
-initialize_utils ()
+initialize_utils (void)
 {
   struct cmd_list_element *c;
 
@@ -2426,12 +2347,8 @@ static unsigned long get_field (unsigned char *,
 /* Extract a field which starts at START and is LEN bytes long.  DATA and
    TOTAL_LEN are the thing we are extracting it from, in byteorder ORDER.  */
 static unsigned long
-get_field (data, order, total_len, start, len)
-     unsigned char *data;
-     enum floatformat_byteorders order;
-     unsigned int total_len;
-     unsigned int start;
-     unsigned int len;
+get_field (unsigned char *data, enum floatformat_byteorders order,
+	   unsigned int total_len, unsigned int start, unsigned int len)
 {
   unsigned long result;
   unsigned int cur_byte;
@@ -2490,10 +2407,8 @@ get_field (data, order, total_len, start, len)
    Store the DOUBLEST in *TO.  */
 
 void
-floatformat_to_doublest (fmt, from, to)
-     const struct floatformat *fmt;
-     char *from;
-     DOUBLEST *to;
+floatformat_to_doublest (const struct floatformat *fmt, char *from,
+			 DOUBLEST *to)
 {
   unsigned char *ufrom = (unsigned char *) from;
   DOUBLEST dto;
@@ -2604,13 +2519,9 @@ static void put_field (unsigned char *, enum floatformat_byteorders,
 /* Set a field which starts at START and is LEN bytes long.  DATA and
    TOTAL_LEN are the thing we are extracting it from, in byteorder ORDER.  */
 static void
-put_field (data, order, total_len, start, len, stuff_to_put)
-     unsigned char *data;
-     enum floatformat_byteorders order;
-     unsigned int total_len;
-     unsigned int start;
-     unsigned int len;
-     unsigned long stuff_to_put;
+put_field (unsigned char *data, enum floatformat_byteorders order,
+	   unsigned int total_len, unsigned int start, unsigned int len,
+	   unsigned long stuff_to_put)
 {
   unsigned int cur_byte;
   int cur_bitshift;
@@ -2673,9 +2584,7 @@ put_field (data, order, total_len, start, len, stuff_to_put)
 static long double ldfrexp (long double value, int *eptr);
 
 static long double
-ldfrexp (value, eptr)
-     long double value;
-     int *eptr;
+ldfrexp (long double value, int *eptr)
 {
   long double tmp;
   int exp;
@@ -2718,10 +2627,8 @@ ldfrexp (value, eptr)
    restrictions.  */
 
 void
-floatformat_from_doublest (fmt, from, to)
-     CONST struct floatformat *fmt;
-     DOUBLEST *from;
-     char *to;
+floatformat_from_doublest (CONST struct floatformat *fmt, DOUBLEST *from,
+			   char *to)
 {
   DOUBLEST dfrom;
   int exponent;
@@ -2830,7 +2737,7 @@ floatformat_from_doublest (fmt, from, to)
 #define NUMCELLS 16
 #define CELLSIZE 32
 static char *
-get_cell ()
+get_cell (void)
 {
   static char buf[NUMCELLS][CELLSIZE];
   static int cell = 0;
@@ -2842,19 +2749,19 @@ get_cell ()
 int
 strlen_paddr (void)
 {
-  return (TARGET_PTR_BIT / 8 * 2);
+  return (TARGET_ADDR_BIT / 8 * 2);
 }
 
 char *
 paddr (CORE_ADDR addr)
 {
-  return phex (addr, TARGET_PTR_BIT / 8);
+  return phex (addr, TARGET_ADDR_BIT / 8);
 }
 
 char *
 paddr_nz (CORE_ADDR addr)
 {
-  return phex_nz (addr, TARGET_PTR_BIT / 8);
+  return phex_nz (addr, TARGET_ADDR_BIT / 8);
 }
 
 static void

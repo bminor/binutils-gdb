@@ -64,7 +64,11 @@ pipe_open (serial_t scb, const char *name)
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
     return -1;
 
+#ifdef HAVE_VFORK
   pid = vfork ();
+#else
+  pid = fork ();
+#endif
   
   /* Error. */
   if (pid == -1)
@@ -120,7 +124,7 @@ pipe_close (serial_t scb)
       int pid = state->pid;
       close (scb->fd);
       scb->fd = -1;
-      free (state);
+      xfree (state);
       scb->state = NULL;
       kill (pid, SIGTERM);
       /* Might be useful to check that the child does die. */

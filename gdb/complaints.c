@@ -83,30 +83,45 @@ complain (struct complaint *complaint,...)
 
       /* Isolated messages, must be self-explanatory.  */
     case 0:
-      begin_line ();
-      fputs_filtered ("During symbol reading, ", gdb_stderr);
-      wrap_here ("");
-      vfprintf_filtered (gdb_stderr, complaint->message, args);
-      fputs_filtered (".\n", gdb_stderr);
+      if (warning_hook)
+        (*warning_hook) (complaint->message, args);
+      else
+        {
+          begin_line ();
+          fputs_filtered ("During symbol reading, ", gdb_stderr);
+          wrap_here ("");
+          vfprintf_filtered (gdb_stderr, complaint->message, args);
+          fputs_filtered (".\n", gdb_stderr);
+        }
       break;
 
       /* First of a series, without `set verbose'.  */
     case 1:
-      begin_line ();
-      fputs_filtered ("During symbol reading...", gdb_stderr);
-      vfprintf_filtered (gdb_stderr, complaint->message, args);
-      fputs_filtered ("...", gdb_stderr);
-      wrap_here ("");
-      complaint_series++;
+      if (warning_hook)
+        (*warning_hook) (complaint->message, args);
+      else
+        {
+          begin_line ();
+          fputs_filtered ("During symbol reading...", gdb_stderr);
+          vfprintf_filtered (gdb_stderr, complaint->message, args);
+          fputs_filtered ("...", gdb_stderr);
+          wrap_here ("");
+          complaint_series++;
+        }
       break;
 
       /* Subsequent messages of a series, or messages under `set verbose'.
          (We'll already have produced a "Reading in symbols for XXX..."
          message and will clean up at the end with a newline.)  */
     default:
-      vfprintf_filtered (gdb_stderr, complaint->message, args);
-      fputs_filtered ("...", gdb_stderr);
-      wrap_here ("");
+      if (warning_hook)
+        (*warning_hook) (complaint->message, args);
+      else
+        {
+          vfprintf_filtered (gdb_stderr, complaint->message, args);
+          fputs_filtered ("...", gdb_stderr);
+          wrap_here ("");
+        }
     }
   /* If GDB dumps core, we'd like to see the complaints first.  Presumably
      GDB will not be sending so many complaints that this becomes a
@@ -124,9 +139,7 @@ complain (struct complaint *complaint,...)
    context for the user to figure it out.  */
 
 void
-clear_complaints (sym_reading, noisy)
-     int sym_reading;
-     int noisy;
+clear_complaints (int sym_reading, int noisy)
 {
   struct complaint *p;
 
@@ -135,7 +148,7 @@ clear_complaints (sym_reading, noisy)
       p->counter = 0;
     }
 
-  if (!sym_reading && !noisy && complaint_series > 1)
+  if (!sym_reading && !noisy && complaint_series > 1 && !warning_hook)
     {
       /* Terminate previous series, since caller won't.  */
       puts_filtered ("\n");
@@ -145,7 +158,7 @@ clear_complaints (sym_reading, noisy)
 }
 
 void
-_initialize_complaints ()
+_initialize_complaints (void)
 {
   add_show_from_set
     (add_set_cmd ("complaints", class_support, var_zinteger,

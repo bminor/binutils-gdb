@@ -55,6 +55,7 @@ extern ARMword isize;
 #define ZBIT (1L << 30)
 #define CBIT (1L << 29)
 #define VBIT (1L << 28)
+#define SBIT (1L << 27)
 #define IBIT (1L << 7)
 #define FBIT (1L << 6)
 #define IFBITS (3L << 6)
@@ -73,6 +74,9 @@ extern ARMword isize;
 #define SETT state->TFlag = 1
 #define CLEART state->TFlag = 0
 #define ASSIGNT(res) state->TFlag = res
+#define INSN_SIZE (TFLAG ? 2 : 4)
+#else
+#define INSN_SIZE 4
 #endif
 
 #define NFLAG state->NFlag
@@ -95,6 +99,10 @@ extern ARMword isize;
 #define CLEARV state->VFlag = 0
 #define ASSIGNV(res) state->VFlag = res
 
+#define SFLAG state->SFlag
+#define SETS state->SFlag = 1
+#define CLEARS state->SFlag = 0
+#define ASSIGNS(res) state->SFlag = res
 
 #define IFLAG (state->IFFlags >> 1)
 #define FFLAG (state->IFFlags & 1)
@@ -102,7 +110,17 @@ extern ARMword isize;
 #define ASSIGNINT(res) state->IFFlags = (((res) >> 6) & 3)
 #define ASSIGNR15INT(res) state->IFFlags = (((res) >> 26) & 3) ;
 
+#define PSR_FBITS (0xff000000L)
+#define PSR_SBITS (0x00ff0000L)
+#define PSR_XBITS (0x0000ff00L)
+#define PSR_CBITS (0x000000ffL)
+
+#if defined MODE32 || defined MODET
+#define CCBITS (0xf8000000L)
+#else
 #define CCBITS (0xf0000000L)
+#endif
+
 #define INTBITS (0xc0L)
 
 #if defined MODET && defined MODE32
@@ -141,7 +159,7 @@ extern ARMword isize;
 #define R15PCMODE (state->Reg[15] & (R15PCBITS | R15MODEBITS))
 #define R15MODE (state->Reg[15] & R15MODEBITS)
 
-#define ECC ((NFLAG << 31) | (ZFLAG << 30) | (CFLAG << 29) | (VFLAG << 28))
+#define ECC ((NFLAG << 31) | (ZFLAG << 30) | (CFLAG << 29) | (VFLAG << 28) | (SFLAG << 27))
 #define EINT (IFFLAGS << 6)
 #define ER15INT (IFFLAGS << 26)
 #define EMODE (state->Mode)
@@ -158,10 +176,11 @@ extern ARMword isize;
 #define PATCHR15 state->Reg[15] = ECC | ER15INT | EMODE | R15PC
 #endif
 
-#define GETSPSR(bank) bank>0?state->Spsr[bank]:ECC | EINT | EMODE ;
-#define SETPSR(d,s) d = (s) & (ARMword)(CCBITS | INTBITS | MODEBITS)
-#define SETINTMODE(d,s) d = ((d) & CCBITS) | ((s) & (INTBITS | MODEBITS))
-#define SETCC(d,s) d = ((d) & (INTBITS | MODEBITS)) | ((s) & CCBITS)
+#define GETSPSR(bank) (ARMul_GetSPSR (state, EMODE))
+#define SETPSR_F(d,s) d = ((d) & ~PSR_FBITS) | ((s) & PSR_FBITS)
+#define SETPSR_S(d,s) d = ((d) & ~PSR_SBITS) | ((s) & PSR_SBITS)
+#define SETPSR_X(d,s) d = ((d) & ~PSR_XBITS) | ((s) & PSR_XBITS)
+#define SETPSR_C(d,s) d = ((d) & ~PSR_CBITS) | ((s) & PSR_CBITS)
 #define SETR15PSR(s) if (state->Mode == USER26MODE) { \
                         state->Reg[15] = ((s) & CCBITS) | R15PC | ER15INT | EMODE ; \
                         ASSIGNN((state->Reg[15] & NBIT) != 0) ; \
@@ -173,7 +192,13 @@ extern ARMword isize;
                         state->Reg[15] = R15PC | ((s) & (CCBITS | R15INTBITS | R15MODEBITS)) ; \
                         ARMul_R15Altered (state) ; \
                         }
-#define SETABORT(i,m) state->Cpsr = ECC | EINT | (i) | (m)
+#define SETABORT(i,m,d) do { \
+  int SETABORT_mode = (m); \
+  ARMul_SetSPSR (state, SETABORT_mode, ARMul_GetCPSR (state)); \
+  ARMul_SetCPSR (state, ((ARMul_GetCPSR (state) & ~(EMODE | TBIT)) \
+			 | (i) | SETABORT_mode)); \
+  state->Reg[14] = temp - (d); \
+} while (0)
 
 #ifndef MODE32
 #define VECTORS 0x20
@@ -215,11 +240,29 @@ extern ARMword isize;
 #define RESUME 8
 
 #define NORMALCYCLE state->NextInstr = 0
-#define BUSUSEDN state->NextInstr |= 1	/* the next fetch will be an N cycle */
-#define BUSUSEDINCPCS state->Reg[15] += isize ; /* a standard PC inc and an S cycle */ \
-                      state->NextInstr = (state->NextInstr & 0xff) | 2
-#define BUSUSEDINCPCN state->Reg[15] += isize ; /* a standard PC inc and an N cycle */ \
-                      state->NextInstr |= 3
+#define BUSUSEDN    state->NextInstr |= 1  /* The next fetch will be an N cycle.  */
+#define BUSUSEDINCPCS								\
+  do										\
+    {										\
+      if (! state->is_v4)							\
+        { 									\
+	  state->Reg[15] += isize ; /* A standard PC inc and an S cycle.  */ 	\
+	  state->NextInstr = (state->NextInstr & 0xff) | 2; 			\
+	}									\
+    }										\
+  while (0)
+#define BUSUSEDINCPCN								\
+  do										\
+    {										\
+      if (state->is_v4)								\
+	BUSUSEDN;								\
+      else									\
+	{ 									\
+	  state->Reg[15] += isize ; /* A standard PC inc and an N cycle.  */	\
+	  state->NextInstr |= 3;						\
+	}									\
+    }										\
+  while (0)
 #define INCPC state->Reg[15] += isize ; /* a standard PC inc */ \
               state->NextInstr |= 2
 #define FLUSHPIPE state->NextInstr |= PRIMEPIPE
@@ -326,6 +369,11 @@ extern ARMword isize;
                          ARMul_NegZero(state, d) ; \
                          }
 
+#define WRITEDESTB(d) if (DESTReg == 15) \
+                        WriteR15Branch(state, d) ; \
+                     else \
+                          DEST = d
+
 #define BYTETOBUS(data) ((data & 0xff) | \
                         ((data & 0xff) << 8) | \
                         ((data & 0xff) << 16) | \
@@ -342,7 +390,7 @@ extern ARMword isize;
 #define STORESMULT(instr,address,wb) StoreSMult(state,instr,address,wb)
 
 #define POSBRANCH ((instr & 0x7fffff) << 2)
-#define NEGBRANCH (0xff000000 | ((instr & 0xffffff) << 2))
+#define NEGBRANCH (0xfc000000 | ((instr & 0xffffff) << 2))
 
 /***************************************************************************\
 *                          Values for Emulate                               *
@@ -434,3 +482,14 @@ extern tdstate ARMul_ThumbDecode (ARMul_State * state, ARMword pc,
 #define UNDEF_IllegalMode
 #define UNDEF_Prog32SigChange
 #define UNDEF_Data32SigChange
+
+/* Coprocessor support functions.  */
+extern unsigned ARMul_CoProInit (ARMul_State *);
+extern void     ARMul_CoProExit (ARMul_State *);
+extern void     ARMul_CoProAttach (ARMul_State *, unsigned, ARMul_CPInits *, ARMul_CPExits *,
+				   ARMul_LDCs *, ARMul_STCs *, ARMul_MRCs *, ARMul_MCRs *,
+				   ARMul_CDPs *, ARMul_CPReads *, ARMul_CPWrites *);
+extern void     ARMul_CoProDetach (ARMul_State *, unsigned);
+extern void     write_cp15_reg (unsigned, unsigned, unsigned, ARMword);
+extern void     write_cp14_reg (unsigned, ARMword);
+extern ARMword  read_cp14_reg  (unsigned);

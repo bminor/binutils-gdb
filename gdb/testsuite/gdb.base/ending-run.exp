@@ -129,7 +129,13 @@ gdb_expect {
 # is output from the program.
 #
 gdb_test "cont" ".*Breakpoint.*31.*"
-gdb_test "next" ".*1 2 7 14 23 34 47 62 79  Goodbye!.*32.*" "Step to return"
+
+if ![gdb_skip_stdio_test "Step to return"] {
+    gdb_test "next" ".*1 2 7 14 23 34 47 62 79  Goodbye!.*32.*" \
+	    "Step to return"
+} else {
+    gdb_test "next" "" ""
+}
 
 set old_timeout $timeout
 set timeout 50

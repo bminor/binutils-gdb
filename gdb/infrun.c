@@ -84,6 +84,11 @@ void _initialize_infrun (void);
 int inferior_ignoring_startup_exec_events = 0;
 int inferior_ignoring_leading_exec_events = 0;
 
+/* When set, stop the 'step' command if we enter a function which has
+   no line number information.  The normal behavior is that we step
+   over such function.  */
+int step_stop_if_no_debug = 0;
+
 /* In asynchronous mode, but simulating synchronous execution. */
 
 int sync_execution = 0;
@@ -434,17 +439,25 @@ pending_follow;
    follow-fork-mode.) */
 static int follow_vfork_when_exec;
 
-static char *follow_fork_mode_kind_names[] =
+static const char follow_fork_mode_ask[] = "ask";
+static const char follow_fork_mode_both[] = "both";
+static const char follow_fork_mode_child[] = "child";
+static const char follow_fork_mode_parent[] = "parent";
+
+static const char *follow_fork_mode_kind_names[] =
 {
+  follow_fork_mode_ask,
   /* ??rehrauer: The "both" option is broken, by what may be a 10.20
      kernel problem.  It's also not terribly useful without a GUI to
      help the user drive two debuggers.  So for now, I'm disabling the
      "both" option. */
-  /* "parent", "child", "both", "ask" */
-  "parent", "child", "ask", NULL
+  /* follow_fork_mode_both, */
+  follow_fork_mode_child,
+  follow_fork_mode_parent,
+  NULL
 };
 
-static char *follow_fork_mode_string = NULL;
+static const char *follow_fork_mode_string = follow_fork_mode_parent;
 
 
 static void
@@ -455,23 +468,19 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
   int followed_child = 0;
 
   /* Which process did the user want us to follow? */
-  char *follow_mode =
-    savestring (follow_fork_mode_string, strlen (follow_fork_mode_string));
+  const char *follow_mode = follow_fork_mode_string;
 
   /* Or, did the user not know, and want us to ask? */
-  if (STREQ (follow_fork_mode_string, "ask"))
+  if (follow_fork_mode_string == follow_fork_mode_ask)
     {
-      char requested_mode[100];
-
-      free (follow_mode);
-      error ("\"ask\" mode NYI");
-      follow_mode = savestring (requested_mode, strlen (requested_mode));
+      internal_error ("follow_inferior_fork: \"ask\" mode not implemented");
+      /* follow_mode = follow_fork_mode_...; */
     }
 
   /* If we're to be following the parent, then detach from child_pid.
      We're already following the parent, so need do nothing explicit
      for it. */
-  if (STREQ (follow_mode, "parent"))
+  if (follow_mode == follow_fork_mode_parent)
     {
       followed_parent = 1;
 
@@ -496,7 +505,7 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
 
   /* If we're to be following the child, then attach to it, detach
      from inferior_pid, and set inferior_pid to child_pid. */
-  else if (STREQ (follow_mode, "child"))
+  else if (follow_mode == follow_fork_mode_child)
     {
       char child_pid_spelling[100];	/* Arbitrary length. */
 
@@ -558,7 +567,7 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
 
   /* If we're to be following both parent and child, then fork ourselves,
      and attach the debugger clone to the child. */
-  else if (STREQ (follow_mode, "both"))
+  else if (follow_mode == follow_fork_mode_both)
     {
       char pid_suffix[100];	/* Arbitrary length. */
 
@@ -614,8 +623,6 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
 
   pending_follow.fork_event.saw_parent_fork = 0;
   pending_follow.fork_event.saw_child_fork = 0;
-
-  free (follow_mode);
 }
 
 static void
@@ -639,7 +646,7 @@ follow_vfork (int parent_pid, int child_pid)
       pending_follow.fork_event.saw_child_exec = 0;
       pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
       follow_exec (inferior_pid, pending_follow.execd_pathname);
-      free (pending_follow.execd_pathname);
+      xfree (pending_follow.execd_pathname);
     }
 }
 
@@ -757,11 +764,11 @@ resume_cleanups (void *ignore)
   normal_stop ();
 }
 
-static char schedlock_off[] = "off";
-static char schedlock_on[] = "on";
-static char schedlock_step[] = "step";
-static char *scheduler_mode = schedlock_off;
-static char *scheduler_enums[] =
+static const char schedlock_off[] = "off";
+static const char schedlock_on[] = "on";
+static const char schedlock_step[] = "step";
+static const char *scheduler_mode = schedlock_off;
+static const char *scheduler_enums[] =
 {
   schedlock_off,
   schedlock_on,
@@ -938,7 +945,7 @@ clear_proceed_status (void)
   step_range_start = 0;
   step_range_end = 0;
   step_frame_address = 0;
-  step_over_calls = -1;
+  step_over_calls = STEP_OVER_UNDEBUGGABLE;
   stop_after_trap = 0;
   stop_soon_quietly = 0;
   proceed_to_finish = 0;
@@ -1106,7 +1113,7 @@ start_remote (void)
 
   /* Always go on waiting for the target, regardless of the mode. */
   /* FIXME: cagney/1999-09-23: At present it isn't possible to
-     indicate th wait_for_inferior that a target should timeout if
+     indicate to wait_for_inferior that a target should timeout if
      nothing is returned (instead of just blocking).  Because of this,
      targets expecting an immediate response need to, internally, set
      things up so that the target_wait() is forced to eventually
@@ -1307,8 +1314,7 @@ struct execution_control_state async_ecss;
 struct execution_control_state *async_ecs;
 
 void
-fetch_inferior_event (client_data)
-     void *client_data;
+fetch_inferior_event (void *client_data)
 {
   static struct cleanup *old_cleanups;
 
@@ -1430,7 +1436,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	insert_breakpoints ();
 
 	/* We need to restart all the threads now,
-	 * unles we're running in scheduler-locked mode. 
+	 * unless we're running in scheduler-locked mode. 
 	 * FIXME: shouldn't we look at currently_stepping ()?
 	 */
 	if (scheduler_mode == schedlock_on)
@@ -1709,7 +1715,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* This causes the eventpoints and symbol table to be reset.  Must
 	   do this now, before trying to determine whether to stop. */
 	follow_exec (inferior_pid, pending_follow.execd_pathname);
-	free (pending_follow.execd_pathname);
+	xfree (pending_follow.execd_pathname);
 
 	stop_pc = read_pc_pid (ecs->pid);
 	ecs->saved_inferior_pid = inferior_pid;
@@ -2611,7 +2617,7 @@ handle_inferior_event (struct execution_control_state *ecs)
        loader dynamic symbol resolution code, we keep on single stepping
        until we exit the run time loader code and reach the callee's
        address.  */
-    if (step_over_calls < 0 && IN_SOLIB_DYNSYM_RESOLVE_CODE (stop_pc))
+    if (step_over_calls == STEP_OVER_UNDEBUGGABLE && IN_SOLIB_DYNSYM_RESOLVE_CODE (stop_pc))
       {
 	CORE_ADDR pc_after_resolver = SKIP_SOLIB_RESOLVER (stop_pc);
 
@@ -2732,7 +2738,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       {
 	/* It's a subroutine call.  */
 
-	if (step_over_calls == 0)
+	if (step_over_calls == STEP_OVER_NONE)
 	  {
 	    /* I presume that step_over_calls is only 0 when we're
 	       supposed to be stepping at the assembly language level
@@ -2743,7 +2749,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    return;
 	  }
 
-	if (step_over_calls > 0 || IGNORE_HELPER_CALL (stop_pc))
+	if (step_over_calls == STEP_OVER_ALL || IGNORE_HELPER_CALL (stop_pc))
 	  {
 	    /* We're doing a "next".  */
 
@@ -2809,6 +2815,18 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      return;
 	    }
 	}
+
+	/* If we have no line number and the step-stop-if-no-debug
+	   is set, we stop the step so that the user has a chance to
+	   switch in assembly mode.  */
+	if (step_over_calls == STEP_OVER_UNDEBUGGABLE && step_stop_if_no_debug)
+	  {
+	    stop_step = 1;
+	    print_stop_reason (END_STEPPING_RANGE, 0);
+	    stop_stepping (ecs);
+	    return;
+	  }
+
 	step_over_function (ecs);
 	keep_going (ecs);
 	return;
@@ -3445,9 +3463,9 @@ and/or watchpoints.\n");
 
   /* Look up the hook_stop and run it if it exists.  */
 
-  if (stop_command && stop_command->hook)
+  if (stop_command && stop_command->hook_pre)
     {
-      catch_errors (hook_stop_stub, stop_command->hook,
+      catch_errors (hook_stop_stub, stop_command->hook_pre,
 		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
     }
 
@@ -3873,7 +3891,7 @@ xdb_handle_command (char *args, int from_tty)
 	  else
 	    printf_filtered ("Invalid signal handling flag.\n");
 	  if (argBuf)
-	    free (argBuf);
+	    xfree (argBuf);
 	}
     }
   do_cleanups (old_chain);
@@ -3898,7 +3916,7 @@ signals_info (char *signum_exp, int from_tty)
 	{
 	  /* No, try numeric.  */
 	  oursig =
-	    target_signal_from_command (parse_and_eval_address (signum_exp));
+	    target_signal_from_command (parse_and_eval_long (signum_exp));
 	}
       sig_print_info (oursig);
       return;
@@ -3933,7 +3951,7 @@ struct inferior_status
   CORE_ADDR step_range_start;
   CORE_ADDR step_range_end;
   CORE_ADDR step_frame_address;
-  int step_over_calls;
+  enum step_over_calls_kind step_over_calls;
   CORE_ADDR step_resume_break_address;
   int stop_after_trap;
   int stop_soon_quietly;
@@ -3964,9 +3982,9 @@ xmalloc_inferior_status (void)
 static void
 free_inferior_status (struct inferior_status *inf_status)
 {
-  free (inf_status->registers);
-  free (inf_status->stop_registers);
-  free (inf_status);
+  xfree (inf_status->registers);
+  xfree (inf_status->stop_registers);
+  xfree (inf_status);
 }
 
 void
@@ -4133,20 +4151,6 @@ discard_inferior_status (struct inferior_status *inf_status)
   free_inferior_status (inf_status);
 }
 
-static void
-set_follow_fork_mode_command (char *arg, int from_tty,
-			      struct cmd_list_element *c)
-{
-  if (!STREQ (arg, "parent") &&
-      !STREQ (arg, "child") &&
-      !STREQ (arg, "both") &&
-      !STREQ (arg, "ask"))
-    error ("follow-fork-mode must be one of \"parent\", \"child\", \"both\" or \"ask\".");
-
-  if (follow_fork_mode_string != NULL)
-    free (follow_fork_mode_string);
-  follow_fork_mode_string = savestring (arg, strlen (arg));
-}
 
 static void
 build_infrun (void)
@@ -4309,8 +4313,6 @@ By default, the debugger will follow the parent process.",
 /*  c->function.sfunc = ; */
   add_show_from_set (c, &showlist);
 
-  set_follow_fork_mode_command ("parent", 0, NULL);
-
   c = add_set_enum_cmd ("scheduler-locking", class_run,
 			scheduler_enums,	/* array of string names */
 			&scheduler_mode,	/* current mode  */
@@ -4323,5 +4325,14 @@ step == scheduler locked during every single-step operation.\n\
 			&setlist);
 
   c->function.sfunc = set_schedlock_func;	/* traps on target vector */
+  add_show_from_set (c, &showlist);
+
+  c = add_set_cmd ("step-mode", class_run,
+		   var_boolean, (char*) &step_stop_if_no_debug,
+"Set mode of the step operation. When set, doing a step over a\n\
+function without debug line information will stop at the first\n\
+instruction of that function. Otherwise, the function is skipped and\n\
+the step command stops at a different source line.",
+			&setlist);
   add_show_from_set (c, &showlist);
 }

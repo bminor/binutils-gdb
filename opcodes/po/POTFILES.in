@@ -9,6 +9,8 @@ avr-dis.c
 cgen-asm.c
 cgen-dis.c
 cgen-opc.c
+cris-dis.c
+cris-opc.c
 d10v-dis.c
 d10v-opc.c
 d30v-dis.c
@@ -29,6 +31,7 @@ hppa-dis.c
 i370-dis.c
 i370-opc.c
 i386-dis.c
+i860-dis.c
 i960-dis.c
 ia64-asmtab.c
 ia64-asmtab.h
@@ -54,6 +57,8 @@ m32r-ibld.c
 m32r-opc.c
 m32r-opc.h
 m32r-opinst.c
+m68hc11-dis.c
+m68hc11-opc.c
 m68k-dis.c
 m68k-opc.c
 m88k-dis.c

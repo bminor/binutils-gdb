@@ -29,7 +29,7 @@ static const unsigned short imsk[] =
     /* O0  */ 0xFFFF,
     /* OT  */ 0xFFFC,
     /* O1  */ 0xFFF0,
-    /* OC  */ 0xFFE0,
+    /* OC  */ 0xFE00,
     /* O2  */ 0xFF00,
     /* X1  */ 0xFFF0,
     /* OI  */ 0xFE00,

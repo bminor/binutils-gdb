@@ -36,9 +36,7 @@ static int blknum;		/* XMODEM block number */
 static int crcflag;		/* Sez we are using CRC's instead of cksums */
 
 static int
-readchar (desc, timeout)
-     serial_t desc;
-     int timeout;
+readchar (serial_t desc, int timeout)
 {
   int c;
 
@@ -63,7 +61,7 @@ static unsigned short *crctab;
 /* Call this to init the fast CRC-16 calculation table.  */
 
 static void
-crcinit ()
+crcinit (void)
 {
   static int crctab_inited = 0;
   int val;
@@ -97,9 +95,7 @@ crcinit ()
 /* Calculate a CRC-16 for the LEN byte message pointed at by P.  */
 
 static unsigned short
-docrc (p, len)
-     unsigned char *p;
-     int len;
+docrc (unsigned char *p, int len)
 {
   unsigned short crc = 0;
 
@@ -113,8 +109,7 @@ docrc (p, len)
    send NAK or CRC request.  */
 
 int
-xmodem_init_xfer (desc)
-     serial_t desc;
+xmodem_init_xfer (serial_t desc)
 {
   int c;
   int i;
@@ -165,11 +160,7 @@ xmodem_init_xfer (desc)
  */
 
 void
-xmodem_send_packet (desc, packet, len, hashmark)
-     serial_t desc;
-     unsigned char *packet;
-     int len;
-     int hashmark;
+xmodem_send_packet (serial_t desc, unsigned char *packet, int len, int hashmark)
 {
   int i;
   int retries;
@@ -255,8 +246,7 @@ xmodem_send_packet (desc, packet, len, hashmark)
 /* Finish off the transfer.  Send out the EOT, and wait for an ACK.  */
 
 void
-xmodem_finish_xfer (desc)
-     serial_t desc;
+xmodem_finish_xfer (serial_t desc)
 {
   int retries;
 

@@ -513,4 +513,11 @@ extern int coff_sym_is_thumb (int val);
 /* The first 0x20 bytes are the trap vectors.  */
 #define LOWEST_PC	0x20
 
+/* Function to determine whether MEMADDR is in a Thumb function.  */
+extern int arm_pc_is_thumb (bfd_vma memaddr);
+
+/* Function to determine whether MEMADDR is in a call dummy called from
+   a Thumb function.  */
+extern int arm_pc_is_thumb_dummy (bfd_vma memaddr);
+
 #endif /* TM_ARM_H */

@@ -1378,7 +1378,7 @@ freeWindow (winInfo)
       winInfo->generic.handle = (WINDOW *) NULL;
       freeWinContent (&winInfo->generic);
     }
-  free (winInfo);
+  xfree (winInfo);
 
   return;
 }				/* freeWindow */

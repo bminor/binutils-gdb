@@ -41,8 +41,7 @@ static int remote_desc;
    Then return to command level.  */
 
 void
-perror_with_name (string)
-     char *string;
+perror_with_name (char *string)
 {
 #ifndef STDC_HEADERS
   extern int sys_nerr;
@@ -63,11 +62,7 @@ perror_with_name (string)
 }
 
 static void
-sync_error (fp, desc, expect, got)
-     FILE *fp;
-     char *desc;
-     int expect;
-     int got;
+sync_error (FILE *fp, char *desc, int expect, int got)
 {
   fprintf (stderr, "\n%s\n", desc);
   fprintf (stderr, "At logfile offset %ld, expected '0x%x' got '0x%x'\n",
@@ -77,7 +72,7 @@ sync_error (fp, desc, expect, got)
 }
 
 void
-remote_close ()
+remote_close (void)
 {
   close (remote_desc);
 }
@@ -86,8 +81,7 @@ remote_close ()
    NAME is the filename used for communication.  */
 
 void
-remote_open (name)
-     char *name;
+remote_open (char *name)
 {
   extern char *strchr ();
 
@@ -159,8 +153,7 @@ remote_open (name)
 }
 
 static int
-tohex (ch)
-     int ch;
+tohex (int ch)
 {
   if (ch >= '0' && ch <= '9')
     {
@@ -180,8 +173,7 @@ tohex (ch)
 }
 
 static int
-logchar (fp)
-     FILE *fp;
+logchar (FILE *fp)
 {
   int ch;
   int ch2;
@@ -244,8 +236,7 @@ logchar (fp)
    blank) up until a \n is read from fp (which is not matched) */
 
 void
-expect (fp)
-     FILE *fp;
+expect (FILE *fp)
 {
   int fromlog;
   unsigned char fromgdb;
@@ -276,8 +267,7 @@ expect (fp)
    \n is read from fp (which is discarded and not sent to gdb). */
 
 void
-play (fp)
-     FILE *fp;
+play (FILE *fp)
 {
   int fromlog;
   char ch;
@@ -295,9 +285,7 @@ play (fp)
 }
 
 int
-main (argc, argv)
-     int argc;
-     char *argv[];
+main (int argc, char *argv[])
 {
   FILE *fp;
   int ch;

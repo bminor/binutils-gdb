@@ -29,6 +29,7 @@
 #include "symtab.h"
 #include "gdbcmd.h"
 #include "command.h"
+#include "arch-utils.h"
 
 static long i386_get_frame_setup (CORE_ADDR);
 
@@ -74,15 +75,15 @@ int i386_register_virtual_size[MAX_NUM_REGS];
 
 /* This is the variable the is set with "set disassembly-flavor",
    and its legitimate values. */
-static char att_flavor[] = "att";
-static char intel_flavor[] = "intel";
-static char *valid_flavors[] =
+static const char att_flavor[] = "att";
+static const char intel_flavor[] = "intel";
+static const char *valid_flavors[] =
 {
   att_flavor,
   intel_flavor,
   NULL
 };
-static char *disassembly_flavor = att_flavor;
+static const char *disassembly_flavor = att_flavor;
 
 static void i386_print_register (char *, int, int);
 
@@ -122,8 +123,7 @@ static int codestream_cnt;
 			 codestream_fill(0) : codestream_buf[codestream_off++])
 
 static unsigned char
-codestream_fill (peek_flag)
-     int peek_flag;
+codestream_fill (int peek_flag)
 {
   codestream_addr = codestream_next_addr;
   codestream_next_addr += CODESTREAM_BUFSIZ;
@@ -138,8 +138,7 @@ codestream_fill (peek_flag)
 }
 
 static void
-codestream_seek (place)
-     CORE_ADDR place;
+codestream_seek (CORE_ADDR place)
 {
   codestream_next_addr = place / CODESTREAM_BUFSIZ;
   codestream_next_addr *= CODESTREAM_BUFSIZ;
@@ -150,9 +149,7 @@ codestream_seek (place)
 }
 
 static void
-codestream_read (buf, count)
-     unsigned char *buf;
-     int count;
+codestream_read (unsigned char *buf, int count)
 {
   unsigned char *p;
   int i;
@@ -164,7 +161,7 @@ codestream_read (buf, count)
 /* next instruction is a jump, move to target */
 
 static void
-i386_follow_jump ()
+i386_follow_jump (void)
 {
   unsigned char buf[4];
   long delta;
@@ -222,8 +219,7 @@ i386_follow_jump ()
  */
 
 static long
-i386_get_frame_setup (pc)
-     CORE_ADDR pc;
+i386_get_frame_setup (CORE_ADDR pc)
 {
   unsigned char op;
 
@@ -374,8 +370,7 @@ i386_get_frame_setup (pc)
    Can return -1, meaning no way to tell.  */
 
 int
-i386_frame_num_args (fi)
-     struct frame_info *fi;
+i386_frame_num_args (struct frame_info *fi)
 {
 #if 1
   return -1;
@@ -476,8 +471,7 @@ i386_frame_num_args (fi)
  */
 
 void
-i386_frame_init_saved_regs (fip)
-     struct frame_info *fip;
+i386_frame_init_saved_regs (struct frame_info *fip)
 {
   long locals = -1;
   unsigned char op;
@@ -538,8 +532,7 @@ i386_frame_init_saved_regs (fip)
 /* return pc of first real instruction */
 
 int
-i386_skip_prologue (pc)
-     int pc;
+i386_skip_prologue (int pc)
 {
   unsigned char op;
   int i;
@@ -620,7 +613,7 @@ i386_skip_prologue (pc)
 }
 
 void
-i386_push_dummy_frame ()
+i386_push_dummy_frame (void)
 {
   CORE_ADDR sp = read_register (SP_REGNUM);
   int regnum;
@@ -637,8 +630,28 @@ i386_push_dummy_frame ()
   write_register (SP_REGNUM, sp);
 }
 
+/* Insert the (relative) function address into the call sequence
+   stored at DYMMY.  */
+
 void
-i386_pop_frame ()
+i386_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
+		     value_ptr *args, struct type *type, int gcc_p)
+{
+  int from, to, delta, loc;
+
+  loc = (int)(read_register (SP_REGNUM) - CALL_DUMMY_LENGTH);
+  from = loc + 5;
+  to = (int)(fun);
+  delta = to - from;
+
+  *((char *)(dummy) + 1) = (delta & 0xff);
+  *((char *)(dummy) + 2) = ((delta >> 8) & 0xff);
+  *((char *)(dummy) + 3) = ((delta >> 16) & 0xff);
+  *((char *)(dummy) + 4) = ((delta >> 24) & 0xff);
+}
+
+void
+i386_pop_frame (void)
 {
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR fp;
@@ -673,8 +686,7 @@ i386_pop_frame ()
    This routine returns true on success. */
 
 int
-get_longjmp_target (pc)
-     CORE_ADDR *pc;
+get_longjmp_target (CORE_ADDR *pc)
 {
   char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
   CORE_ADDR sp, jb_addr;
@@ -701,7 +713,7 @@ get_longjmp_target (pc)
 
 /* These registers are used for returning integers (and on some
    targets also for returning `struct' and `union' values when their
-   size and alignment match an integer type.  */
+   size and alignment match an integer type).  */
 #define LOW_RETURN_REGNUM 0	/* %eax */
 #define HIGH_RETURN_REGNUM 2	/* %edx */
 
@@ -720,6 +732,7 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	{
 	  warning ("Cannot find floating-point return value.");
 	  memset (valbuf, 0, len);
+	  return;
 	}
 
       /* Floating-point return values can be found in %st(0).  */
@@ -762,6 +775,64 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
     }
 }
 
+/* Write into the appropriate registers a function return value stored
+   in VALBUF of type TYPE, given in virtual format.  */
+
+void
+i386_store_return_value (struct type *type, char *valbuf)
+{
+  int len = TYPE_LENGTH (type);
+
+  if (TYPE_CODE_FLT == TYPE_CODE (type))
+    {
+      if (NUM_FREGS == 0)
+	{
+	  warning ("Cannot set floating-point return value.");
+	  return;
+	}
+
+      /* Floating-point return values can be found in %st(0).  */
+      if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT
+	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
+	{
+	  /* Copy straight over.  */
+	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM), valbuf,
+				FPU_REG_RAW_SIZE);
+	}
+      else
+	{
+	  char buf[FPU_REG_RAW_SIZE];
+	  DOUBLEST val;
+
+	  /* Convert the value found in VALBUF to the extended
+             floating point format used by the FPU.  This is probably
+             not exactly how it would happen on the target itself, but
+             it is the best we can do.  */
+	  val = extract_floating (valbuf, TYPE_LENGTH (type));
+	  floatformat_from_doublest (&floatformat_i387_ext, &val, buf);
+	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM), buf,
+				FPU_REG_RAW_SIZE);
+	}
+    }
+  else
+    {
+      int low_size = REGISTER_RAW_SIZE (LOW_RETURN_REGNUM);
+      int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
+
+      if (len <= low_size)
+	write_register_bytes (REGISTER_BYTE (LOW_RETURN_REGNUM), valbuf, len);
+      else if (len <= (low_size + high_size))
+	{
+	  write_register_bytes (REGISTER_BYTE (LOW_RETURN_REGNUM),
+				valbuf, low_size);
+	  write_register_bytes (REGISTER_BYTE (HIGH_RETURN_REGNUM),
+				valbuf + low_size, len - low_size);
+	}
+      else
+	internal_error ("Cannot store return value of %d bytes long.", len);
+    }
+}
+
 /* Convert data from raw format for register REGNUM in buffer FROM to
    virtual format with type TYPE in buffer TO.  In principle both
    formats are identical except that the virtual format has two extra
@@ -793,8 +864,7 @@ i386_register_convert_to_raw (struct type *type, int regnum,
    for all three variants of SVR4 sigtramps.  */
 
 CORE_ADDR
-i386v4_sigtramp_saved_pc (frame)
-     struct frame_info *frame;
+i386v4_sigtramp_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR saved_pc_offset = 4;
   char *name = NULL;
@@ -822,8 +892,7 @@ i386v4_sigtramp_saved_pc (frame)
    it is done for C too.  */
 
 char *
-sunpro_static_transform_name (name)
-     char *name;
+sunpro_static_transform_name (char *name)
 {
   char *p;
   if (IS_STATIC_TRANSFORM_NAME (name))
@@ -848,9 +917,7 @@ sunpro_static_transform_name (name)
 /* Stuff for WIN32 PE style DLL's but is pretty generic really. */
 
 CORE_ADDR
-skip_trampoline_code (pc, name)
-     CORE_ADDR pc;
-     char *name;
+skip_trampoline_code (CORE_ADDR pc, char *name)
 {
   if (pc && read_memory_unsigned_integer (pc, 2) == 0x25ff)	/* jmp *(dest) */
     {
@@ -870,9 +937,7 @@ skip_trampoline_code (pc, name)
 }
 
 static int
-gdb_print_insn_i386 (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
+gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
 {
   if (disassembly_flavor == att_flavor)
     return print_insn_i386_att (memaddr, info);
@@ -888,16 +953,14 @@ gdb_print_insn_i386 (memaddr, info)
    command, and does that.  */
 
 static void
-set_disassembly_flavor_sfunc (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_disassembly_flavor_sfunc (char *args, int from_tty,
+			      struct cmd_list_element *c)
 {
   set_disassembly_flavor ();
 }
 
 static void
-set_disassembly_flavor ()
+set_disassembly_flavor (void)
 {
   if (disassembly_flavor == att_flavor)
     set_architecture_from_arch_mach (bfd_arch_i386, bfd_mach_i386_i386);
@@ -907,7 +970,7 @@ set_disassembly_flavor ()
 
 
 void
-_initialize_i386_tdep ()
+_initialize_i386_tdep (void)
 {
   /* Initialize the table saying where each register starts in the
      register file.  */

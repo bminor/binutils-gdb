@@ -1,3 +1,23 @@
+2000-11-18  Greg McGary  <greg@mcgary.org>
+
+	* Makefile.in: remove `@true' commands for rules that have
+	$(CGEN_MAINT) as a prerequisite.
+
+2000-10-06  Dave Brolley  <brolley@redhat.com>
+
+	* sem.c: Regenerated.
+	* sem-switch.c: Regenerated.
+
+2000-08-28  Dave Brolley  <brolley@redhat.com>
+
+	* cpu.h: Regenerated.
+	* decode.c: Regenerated.
+
+2000-08-21  Frank Ch. Eigler  <fche@redhat.com>
+
+	* Makefile.in (fr30-clean): Add stamp-arch, stamp-cpu.
+	(stamp-arch, stamp-cpu): New targets.
+
 Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

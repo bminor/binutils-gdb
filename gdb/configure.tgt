@@ -17,6 +17,7 @@ arm*)			gdb_target_cpu=arm ;;
 # OBSOLETE c[12])		gdb_target_cpu=convex ;;
 hppa*)			gdb_target_cpu=pa ;;
 i[3456]86*)		gdb_target_cpu=i386 ;;
+m68hc11*|m6811*)	gdb_target_cpu=m68hc11 ;;
 m68*)			gdb_target_cpu=m68k ;;
 m88*)			gdb_target_cpu=m88k ;;
 mips*)			gdb_target_cpu=mips ;;
@@ -25,6 +26,7 @@ powerpc*)		gdb_target_cpu=powerpc ;;
 sparc*)			gdb_target_cpu=sparc ;;
 thumb*)			gdb_target_cpu=arm ;;
 strongarm*)		gdb_target_cpu=arm ;;
+xscale*)		gdb_target_cpu=arm ;;
 v850*)			gdb_target_cpu=v850 ;;
 *)			gdb_target_cpu=$target_cpu ;;
 
@@ -58,6 +60,9 @@ arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed
                         configdirs="$configdirs rdi-share"
                         ;;
+xscale-*-*)		gdb_target=embed
+                        configdirs="$configdirs rdi-share"
+                        ;;
 # OBSOLETE c1-*-*)		gdb_target=convex ;;
 # OBSOLETE c2-*-*)		gdb_target=convex ;;
 
@@ -71,12 +76,14 @@ h8500-*-*)		gdb_target=h8500 ;;
 fr30-*-elf*)		gdb_target=fr30 ;;
 
 
-hppa*-*-bsd*)		gdb_target=hppabsd ;;
+hppa*-*-bsd*)		gdb_target=hppabsd
+		configdirs="${configdirs} gdbserver" ;;
 hppa*-*-pro*)		gdb_target=hppapro ;;
-hppa2.0w-*-hpux11*)	gdb_target=hppa64 ;;
+hppa*64*-*-hpux11*)	gdb_target=hppa64 ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-hiux*)		gdb_target=hppahpux ;;
-hppa*-*-osf*)		gdb_target=hppaosf ;;
+hppa*-*-osf*)		gdb_target=hppaosf
+		configdirs="${configdirs} gdbserver" ;;
 
 i[3456]86-sequent-bsd*)	gdb_target=symmetry ;;
 i[3456]86-sequent-sysv4*) gdb_target=ptx4 ;;
@@ -133,6 +140,8 @@ ia64-*-linux*)		gdb_target=linux ;;
 
 m32r-*-elf*)		gdb_target=m32r ;;
 
+m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;
+
 m68000-*-sunos3*)	gdb_target=sun2os3 ;;
 m68000-*-sunos4*)	gdb_target=sun2os4 ;;
 
@@ -160,10 +169,12 @@ m68*-*-linux*)		gdb_target=linux
 		configdirs="${configdirs} gdbserver" ;;
 m68*-*-lynxos*)		gdb_target=m68klynx
 		configdirs="${configdirs} gdbserver" ;;
-m68*-*-netbsd*)		gdb_target=nbsd ;;
+m68*-*-netbsd*)		gdb_target=nbsd
+		configdirs="${configdirs} gdbserver" ;;
 m68*-*-os68k*)		gdb_target=os68k ;;
 m68*-*-sunos3*)		gdb_target=sun3os3 ;;
-m68*-*-sunos4*)		gdb_target=sun3os4 ;;
+m68*-*-sunos4*)		gdb_target=sun3os4
+		configdirs="${configdirs} gdbserver" ;;
 m68*-*-sysv4*)		gdb_target=m68kv4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
@@ -215,7 +226,8 @@ mn10300-*-*)		gdb_target=mn10300 ;;
 none-*-*)		gdb_target=none ;;
 
 ns32k-*-mach3*)		gdb_target=ns32km3 ;;
-ns32k-*-netbsd*)	gdb_target=nbsd ;;
+ns32k-*-netbsd*)	gdb_target=nbsd
+		configdirs="${configdirs} gdbserver" ;;
 ns32k-utek-sysv*)	gdb_target=merlin ;;
 ns32k-utek-*)		gdb_target=umax ;;
 
@@ -245,7 +257,8 @@ powerpc-*-vxworks*)	gdb_target=vxworks ;;
 
 # OBSOLETE pyramid-*-*)		gdb_target=pyramid ;;
 
-rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
+rs6000-*-lynxos*)	gdb_target=rs6000lynx
+		configdirs="${configdirs} gdbserver" ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 
@@ -260,7 +273,8 @@ sparc-*-lynxos*)	gdb_target=sparclynx
 		configdirs="${configdirs} gdbserver" ;;
 sparc-*-netbsd*)	gdb_target=nbsd ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
-sparc-*-sunos4*)	gdb_target=sun4os4 ;;
+sparc-*-sunos4*)	gdb_target=sun4os4
+		configdirs="${configdirs} gdbserver" ;;
 sparc-*-sunos5*)	gdb_target=sun4sol2 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
@@ -299,3 +313,9 @@ z8k-*-coff*)		gdb_target=z8k ;;
 
 esac
 
+
+# map GDB target onto multi-arch support
+
+case "${gdb_target}" in
+m68hc11)	gdb_multi_arch=yes ;;
+esac

@@ -319,11 +319,11 @@ static struct partial_symtab *start_psymtab (struct objfile *, char *,
 /* Free up old header file tables */
 
 static void
-free_header_files ()
+free_header_files (void)
 {
   if (this_object_header_files)
     {
-      free ((PTR) this_object_header_files);
+      xfree (this_object_header_files);
       this_object_header_files = NULL;
     }
   n_allocated_this_object_header_files = 0;
@@ -332,7 +332,7 @@ free_header_files ()
 /* Allocate new header file tables */
 
 static void
-init_header_files ()
+init_header_files (void)
 {
   n_allocated_this_object_header_files = 10;
   this_object_header_files = (int *) xmalloc (10 * sizeof (int));
@@ -342,8 +342,7 @@ init_header_files ()
    at the next successive FILENUM.  */
 
 static void
-add_this_object_header_file (i)
-     int i;
+add_this_object_header_file (int i)
 {
   if (n_this_object_header_files == n_allocated_this_object_header_files)
     {
@@ -362,9 +361,7 @@ add_this_object_header_file (i)
    symbol tables for the same header file.  */
 
 static void
-add_old_header_file (name, instance)
-     char *name;
-     int instance;
+add_old_header_file (char *name, int instance)
 {
   register struct header_file *p = HEADER_FILES (current_objfile);
   register int i;
@@ -390,9 +387,7 @@ add_old_header_file (name, instance)
    so we record the file when its "begin" is seen and ignore the "end".  */
 
 static void
-add_new_header_file (name, instance)
-     char *name;
-     int instance;
+add_new_header_file (char *name, int instance)
 {
   register int i;
   register struct header_file *hfile;
@@ -435,8 +430,7 @@ add_new_header_file (name, instance)
 
 #if 0
 static struct type **
-explicit_lookup_type (real_filenum, index)
-     int real_filenum, index;
+explicit_lookup_type (int real_filenum, int index)
 {
   register struct header_file *f = &HEADER_FILES (current_objfile)[real_filenum];
 
@@ -453,11 +447,8 @@ explicit_lookup_type (real_filenum, index)
 #endif
 
 static void
-record_minimal_symbol (name, address, type, objfile)
-     char *name;
-     CORE_ADDR address;
-     int type;
-     struct objfile *objfile;
+record_minimal_symbol (char *name, CORE_ADDR address, int type,
+		       struct objfile *objfile)
 {
   enum minimal_symbol_type ms_type;
   int section;
@@ -558,9 +549,7 @@ record_minimal_symbol (name, address, type, objfile)
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 static void
-dbx_symfile_read (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;		/* FIXME comments above */
+dbx_symfile_read (struct objfile *objfile, int mainline)
 {
   bfd *sym_bfd;
   int val;
@@ -626,8 +615,7 @@ dbx_symfile_read (objfile, mainline)
    file, e.g. a shared library).  */
 
 static void
-dbx_new_init (ignore)
-     struct objfile *ignore;
+dbx_new_init (struct objfile *ignore)
 {
   stabsread_new_init ();
   buildsym_new_init ();
@@ -651,8 +639,7 @@ dbx_new_init (ignore)
 #define DBX_STRINGTAB_SIZE_SIZE sizeof(long)	/* FIXME */
 
 static void
-dbx_symfile_init (objfile)
-     struct objfile *objfile;
+dbx_symfile_init (struct objfile *objfile)
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
@@ -769,8 +756,7 @@ dbx_symfile_init (objfile)
    objfile struct from the global list of known objfiles. */
 
 static void
-dbx_symfile_finish (objfile)
-     struct objfile *objfile;
+dbx_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_stab_info != NULL)
     {
@@ -781,10 +767,10 @@ dbx_symfile_finish (objfile)
 
 	  while (--i >= 0)
 	    {
-	      free (hfiles[i].name);
-	      free (hfiles[i].vector);
+	      xfree (hfiles[i].name);
+	      xfree (hfiles[i].vector);
 	    }
-	  free ((PTR) hfiles);
+	  xfree (hfiles);
 	}
       mfree (objfile->md, objfile->sym_stab_info);
     }
@@ -802,15 +788,15 @@ static int symbuf_end;
    completed after all the stabs are read.  */
 struct cont_elem
   {
-    /* sym and stabsstring for continuing information in cfront */
+    /* sym and stabstring for continuing information in cfront */
     struct symbol *sym;
     char *stabs;
-    /* state dependancies (statics that must be preserved) */
+    /* state dependencies (statics that must be preserved) */
     int sym_idx;
     int sym_end;
     int symnum;
     int (*func) (struct objfile *, struct symbol *, char *);
-    /* other state dependancies include:
+    /* other state dependencies include:
        (assumption is that these will not change since process_now FIXME!!)
        stringtab_global
        n_stabs
@@ -825,10 +811,8 @@ static int cont_count = 0;
 /* Arrange for function F to be called with arguments SYM and P later
    in the stabs reading process.  */
 void
-process_later (sym, p, f)
-     struct symbol *sym;
-     char *p;
-     int (*f) (struct objfile *, struct symbol *, char *);
+process_later (struct symbol *sym, char *p,
+	       int (*f) (struct objfile *, struct symbol *, char *))
 {
 
   /* Allocate more space for the deferred list.  */
@@ -857,8 +841,7 @@ process_later (sym, p, f)
 /* Call deferred funtions in CONT_LIST.  */
 
 static void
-process_now (objfile)
-     struct objfile *objfile;
+process_now (struct objfile *objfile)
 {
   int i;
   int save_symbuf_idx;
@@ -927,8 +910,7 @@ static unsigned int symbuf_read;
    (into the string table) but this does no harm.  */
 
 static void
-fill_symbuf (sym_bfd)
-     bfd *sym_bfd;
+fill_symbuf (bfd *sym_bfd)
 {
   unsigned int count;
   int nbytes;
@@ -991,8 +973,7 @@ fill_symbuf (sym_bfd)
    call this function to get the continuation.  */
 
 static char *
-dbx_next_symbol_text (objfile)
-     struct objfile *objfile;
+dbx_next_symbol_text (struct objfile *objfile)
 {
   struct internal_nlist nlist;
 
@@ -1012,9 +993,7 @@ dbx_next_symbol_text (objfile)
    allocated.  */
 
 static void
-init_bincl_list (number, objfile)
-     int number;
-     struct objfile *objfile;
+init_bincl_list (int number, struct objfile *objfile)
 {
   bincls_allocated = number;
   next_bincl = bincl_list = (struct header_file_location *)
@@ -1024,10 +1003,7 @@ init_bincl_list (number, objfile)
 /* Add a bincl to the list.  */
 
 static void
-add_bincl_to_list (pst, name, instance)
-     struct partial_symtab *pst;
-     char *name;
-     int instance;
+add_bincl_to_list (struct partial_symtab *pst, char *name, int instance)
 {
   if (next_bincl >= bincl_list + bincls_allocated)
     {
@@ -1048,9 +1024,7 @@ add_bincl_to_list (pst, name, instance)
    with that header_file_location.  */
 
 static struct partial_symtab *
-find_corresponding_bincl_psymtab (name, instance)
-     char *name;
-     int instance;
+find_corresponding_bincl_psymtab (char *name, int instance)
 {
   struct header_file_location *bincl;
 
@@ -1066,8 +1040,7 @@ find_corresponding_bincl_psymtab (name, instance)
 /* Free the storage allocated for the bincl list.  */
 
 static void
-free_bincl_list (objfile)
-     struct objfile *objfile;
+free_bincl_list (struct objfile *objfile)
 {
   mfree (objfile->md, (PTR) bincl_list);
   bincls_allocated = 0;
@@ -1089,8 +1062,7 @@ make_cleanup_free_bincl_list (struct objfile *objfile)
    add them to the minimal symbol table.  */
 
 static void
-read_dbx_dynamic_symtab (objfile)
-     struct objfile *objfile;
+read_dbx_dynamic_symtab (struct objfile *objfile)
 {
   bfd *abfd = objfile->obfd;
   struct cleanup *back_to;
@@ -1121,7 +1093,7 @@ read_dbx_dynamic_symtab (objfile)
     return;
 
   dynsyms = (asymbol **) xmalloc (dynsym_size);
-  back_to = make_cleanup (free, dynsyms);
+  back_to = make_cleanup (xfree, dynsyms);
 
   dynsym_count = bfd_canonicalize_dynamic_symtab (abfd, dynsyms);
   if (dynsym_count < 0)
@@ -1184,7 +1156,7 @@ read_dbx_dynamic_symtab (objfile)
     }
 
   dynrels = (arelent **) xmalloc (dynrel_size);
-  make_cleanup (free, dynrels);
+  make_cleanup (xfree, dynrels);
 
   dynrel_count = bfd_canonicalize_dynamic_reloc (abfd, dynrels, dynsyms);
   if (dynrel_count < 0)
@@ -1232,8 +1204,7 @@ read_dbx_dynamic_symtab (objfile)
    debugging information is available. */
 
 static void
-read_dbx_symtab (objfile)
-     struct objfile *objfile;
+read_dbx_symtab (struct objfile *objfile)
 {
   register struct external_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch */
   struct internal_nlist nlist;
@@ -1395,13 +1366,9 @@ read_dbx_symtab (objfile)
 
 
 static struct partial_symtab *
-start_psymtab (objfile, filename, textlow, ldsymoff, global_syms, static_syms)
-     struct objfile *objfile;
-     char *filename;
-     CORE_ADDR textlow;
-     int ldsymoff;
-     struct partial_symbol **global_syms;
-     struct partial_symbol **static_syms;
+start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
+	       int ldsymoff, struct partial_symbol **global_syms,
+	       struct partial_symbol **static_syms)
 {
   struct partial_symtab *result =
   start_psymtab_common (objfile, objfile->section_offsets,
@@ -1434,16 +1401,10 @@ start_psymtab (objfile, filename, textlow, ldsymoff, global_syms, static_syms)
    FIXME:  List variables and peculiarities of same.  */
 
 struct partial_symtab *
-end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
-	capping_text, dependency_list, number_dependencies, textlow_not_set)
-     struct partial_symtab *pst;
-     char **include_list;
-     int num_includes;
-     int capping_symbol_offset;
-     CORE_ADDR capping_text;
-     struct partial_symtab **dependency_list;
-     int number_dependencies;
-     int textlow_not_set;
+end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
+	     int capping_symbol_offset, CORE_ADDR capping_text,
+	     struct partial_symtab **dependency_list, int number_dependencies,
+	     int textlow_not_set)
 {
   int i;
   struct objfile *objfile = pst->objfile;
@@ -1607,8 +1568,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 }
 
 static void
-dbx_psymtab_to_symtab_1 (pst)
-     struct partial_symtab *pst;
+dbx_psymtab_to_symtab_1 (struct partial_symtab *pst)
 {
   struct cleanup *old_chain;
   int i;
@@ -1665,8 +1625,7 @@ dbx_psymtab_to_symtab_1 (pst)
    Be verbose about it if the user wants that.  */
 
 static void
-dbx_psymtab_to_symtab (pst)
-     struct partial_symtab *pst;
+dbx_psymtab_to_symtab (struct partial_symtab *pst)
 {
   bfd *sym_bfd;
 
@@ -1709,8 +1668,7 @@ dbx_psymtab_to_symtab (pst)
 /* Read in a defined section of a specific object file's symbols. */
 
 static void
-read_ofile_symtab (pst)
-     struct partial_symtab *pst;
+read_ofile_symtab (struct partial_symtab *pst)
 {
   register char *namestring;
   register struct external_nlist *bufp;
@@ -1878,7 +1836,7 @@ read_ofile_symtab (pst)
 
   pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
 
-  /* Process items which we had to "process_later" due to dependancies 
+  /* Process items which we had to "process_later" due to dependencies 
      on other stabs.  */
   process_now (objfile);
 
@@ -1903,12 +1861,9 @@ read_ofile_symtab (pst)
    It is used in end_symtab.  */
 
 void
-process_one_symbol (type, desc, valu, name, section_offsets, objfile)
-     int type, desc;
-     CORE_ADDR valu;
-     char *name;
-     struct section_offsets *section_offsets;
-     struct objfile *objfile;
+process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
+		    struct section_offsets *section_offsets,
+		    struct objfile *objfile)
 {
 #ifdef SUN_FIXED_LBRAC_BUG
   /* If SUN_FIXED_LBRAC_BUG is defined, then it tells us whether we need
@@ -2491,16 +2446,10 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
    adjusted for coff details. */
 
 void
-coffstab_build_psymtabs (objfile, mainline,
-			 textaddr, textsize, stabsects,
-			 stabstroffset, stabstrsize)
-     struct objfile *objfile;
-     int mainline;
-     CORE_ADDR textaddr;
-     unsigned int textsize;
-     struct stab_section_list *stabsects;
-     file_ptr stabstroffset;
-     unsigned int stabstrsize;
+coffstab_build_psymtabs (struct objfile *objfile, int mainline,
+			 CORE_ADDR textaddr, unsigned int textsize,
+			 struct stab_section_list *stabsects,
+			 file_ptr stabstroffset, unsigned int stabstrsize)
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
@@ -2592,15 +2541,9 @@ coffstab_build_psymtabs (objfile, mainline,
    adjusted for elf details. */
 
 void
-elfstab_build_psymtabs (objfile, mainline,
-			staboffset, stabsize,
-			stabstroffset, stabstrsize)
-     struct objfile *objfile;
-     int mainline;
-     file_ptr staboffset;
-     unsigned int stabsize;
-     file_ptr stabstroffset;
-     unsigned int stabstrsize;
+elfstab_build_psymtabs (struct objfile *objfile, int mainline,
+			file_ptr staboffset, unsigned int stabsize,
+			file_ptr stabstroffset, unsigned int stabstrsize)
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
@@ -2668,13 +2611,8 @@ elfstab_build_psymtabs (objfile, mainline,
    This routine is mostly copied from dbx_symfile_init and dbx_symfile_read. */
 
 void
-stabsect_build_psymtabs (objfile, mainline, stab_name,
-			 stabstr_name, text_name)
-     struct objfile *objfile;
-     int mainline;
-     char *stab_name;
-     char *stabstr_name;
-     char *text_name;
+stabsect_build_psymtabs (struct objfile *objfile, int mainline, char *stab_name,
+			 char *stabstr_name, char *text_name)
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
@@ -2750,7 +2688,7 @@ static struct sym_fns aout_sym_fns =
 };
 
 void
-_initialize_dbxread ()
+_initialize_dbxread (void)
 {
   add_symtab_fns (&aout_sym_fns);
 }

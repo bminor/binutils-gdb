@@ -1,4 +1,4 @@
-/* Copyright (C) 1998 Free Software Foundation, Inc.
+/* Copyright (C) 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -16,10 +16,5 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
-
-#define GDB_MULTI_ARCH 1
-#define MIPS_DEFAULT_FPU_TYPE MIPS_FPU_DOUBLE
-#define TARGET_BYTE_ORDER_SELECTABLE_P 1
-#define TARGET_MONITOR_PROMPT "<RISQ> "
 
 #include "mips/tm-bigmips64.h"

@@ -127,7 +127,7 @@ extern char *getenv ();
 #ifdef ENABLE_NLS
 #include <libintl.h>
 /* Note the use of dgetext() and PACKAGE here, rather than gettext().
-   
+
    This is because the code in this directory is used to build a library which
    will be linked with code in other directories to form programs.  We want to
    maintain a seperate translation file for this directory however, rather

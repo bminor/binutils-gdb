@@ -36,8 +36,7 @@
 	memcpy(&dst, &registers[REGISTER_BYTE(src)], sizeof(dst))
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   struct reg inferior_registers;
   struct fpreg inferior_fpregisters;
@@ -74,8 +73,7 @@ fetch_inferior_registers (regno)
 }
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct reg inferior_registers;
   struct fpreg inferior_fpregisters;
@@ -118,13 +116,10 @@ struct coreregs
   struct fpreg freg;
 };
 
-/* Get registers from a core file. */
+/* Get registers from a core file.  REG_ADDR is unused.  */
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     unsigned int reg_addr;	/* Unused in this version */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+		      unsigned int reg_addr)
 {
   struct coreregs *core_reg;
 
@@ -183,7 +178,7 @@ static struct core_fns nat_core_fns =
 };
 
 void
-_initialize_ns32knbsd_nat ()
+_initialize_ns32knbsd_nat (void)
 {
   add_core_fns (&nat_core_fns);
 }
@@ -200,8 +195,7 @@ _initialize_ns32knbsd_nat ()
  * Called by kcore-nbsd.c:get_kcore_registers().
  */
 void
-fetch_kcore_registers (pcb)
-     struct pcb *pcb;
+fetch_kcore_registers (struct pcb *pcb)
 {
   struct switchframe sf;
   struct reg intreg;
@@ -246,7 +240,7 @@ fetch_kcore_registers (pcb)
 #endif /* FETCH_KCORE_REGISTERS */
 
 void
-clear_regs ()
+clear_regs (void)
 {
   double zero = 0.0;
   int null = 0;
@@ -283,8 +277,7 @@ clear_regs ()
    Can return -1, meaning no way to tell. */
 
 int
-frame_num_args (fi)
-     struct frame_info *fi;
+frame_num_args (struct frame_info *fi)
 {
   CORE_ADDR enter_addr;
   CORE_ADDR argp;

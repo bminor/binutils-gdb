@@ -117,8 +117,6 @@ static SIM_RC
 scache_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 		       char *arg, int is_command)
 {
-  int n;
-
   switch (opt)
     {
     case 'c' :

@@ -29,8 +29,7 @@
    Then return to command level.  */
 
 void
-perror_with_name (string)
-     char *string;
+perror_with_name (char *string)
 {
 #ifndef STDC_HEADERS
   extern int sys_nerr;
@@ -57,33 +56,14 @@ perror_with_name (string)
    STRING is the error message, used as a fprintf string,
    and ARG is passed as an argument to it.  */
 
-#ifdef ANSI_PROTOTYPES
 NORETURN void
 error (const char *string,...)
-#else
-void
-error (va_alist)
-     va_dcl
-#endif
 {
   extern jmp_buf toplevel;
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, string);
-#else
-  va_start (args);
-#endif
   fflush (stdout);
-#ifdef ANSI_PROTOTYPES
   vfprintf (stderr, string, args);
-#else
-  {
-    char *string1;
-
-    string1 = va_arg (args, char *);
-    vfprintf (stderr, string1, args);
-  }
-#endif
   fprintf (stderr, "\n");
   longjmp (toplevel, 1);
 }
@@ -94,21 +74,10 @@ error (va_alist)
 
 /* VARARGS */
 NORETURN void
-#ifdef ANSI_PROTOTYPES
 fatal (char *string,...)
-#else
-fatal (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, string);
-#else
-  char *string;
-  va_start (args);
-  string = va_arg (args, char *);
-#endif
   fprintf (stderr, "gdb: ");
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");

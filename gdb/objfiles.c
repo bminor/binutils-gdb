@@ -76,10 +76,7 @@ int mapped_symbol_files;	/* Try to use mapped symbol files */
    the end of the table (objfile->sections_end). */
 
 static void
-add_to_objfile_sections (abfd, asect, objfile_p_char)
-     bfd *abfd;
-     sec_ptr asect;
-     PTR objfile_p_char;
+add_to_objfile_sections (bfd *abfd, sec_ptr asect, PTR objfile_p_char)
 {
   struct objfile *objfile = (struct objfile *) objfile_p_char;
   struct obj_section section;
@@ -119,8 +116,7 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
    we are building the table, we're pretty much hosed. */
 
 int
-build_objfile_section_table (objfile)
-     struct objfile *objfile;
+build_objfile_section_table (struct objfile *objfile)
 {
   /* objfile->sections can be already set when reading a mapped symbol
      file.  I believe that we do need to rebuild the section table in
@@ -148,9 +144,7 @@ build_objfile_section_table (objfile)
    member. */
 
 struct objfile *
-allocate_objfile (abfd, flags)
-     bfd *abfd;
-     int flags;
+allocate_objfile (bfd *abfd, int flags)
 {
   struct objfile *objfile = NULL;
   struct objfile *last_one = NULL;
@@ -268,13 +262,13 @@ allocate_objfile (abfd, flags)
       memset (objfile, 0, sizeof (struct objfile));
       objfile->md = NULL;
       obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
-				  xmalloc, free);
+				  xmalloc, xfree);
       obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
-				  free);
+				  xfree);
       obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
-				  free);
+				  xfree);
       obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
-				  free);
+				  xfree);
       flags &= ~OBJF_MAPPED;
     }
 
@@ -331,8 +325,7 @@ allocate_objfile (abfd, flags)
 /* Put OBJFILE at the front of the list.  */
 
 void
-objfile_to_front (objfile)
-     struct objfile *objfile;
+objfile_to_front (struct objfile *objfile)
 {
   struct objfile **objp;
   for (objp = &object_files; *objp != NULL; objp = &((*objp)->next))
@@ -363,8 +356,7 @@ objfile_to_front (objfile)
    between the OBJFILE and the list. */
 
 void
-unlink_objfile (objfile)
-     struct objfile *objfile;
+unlink_objfile (struct objfile *objfile)
 {
   struct objfile **objpp;
 
@@ -399,8 +391,7 @@ unlink_objfile (objfile)
    we free objects in the reusable area. */
 
 void
-free_objfile (objfile)
-     struct objfile *objfile;
+free_objfile (struct objfile *objfile)
 {
   /* First do any symbol file specific actions required when we are
      finished with a particular symbol file.  Note that if the objfile
@@ -422,7 +413,7 @@ free_objfile (objfile)
       if (!bfd_close (objfile->obfd))
 	warning ("cannot close \"%s\": %s",
 		 name, bfd_errmsg (bfd_get_error ()));
-      free (name);
+      xfree (name);
     }
 
   /* Remove it from the chain of all objfiles. */
@@ -505,7 +496,7 @@ make_cleanup_free_objfile (struct objfile *obj)
 /* Free all the object files at once and clean up their users.  */
 
 void
-free_all_objfiles ()
+free_all_objfiles (void)
 {
   struct objfile *objfile, *temp;
 
@@ -519,9 +510,7 @@ free_all_objfiles ()
 /* Relocate OBJFILE to NEW_OFFSETS.  There should be OBJFILE->NUM_SECTIONS
    entries in new_offsets.  */
 void
-objfile_relocate (objfile, new_offsets)
-     struct objfile *objfile;
-     struct section_offsets *new_offsets;
+objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 {
   struct section_offsets *delta =
     (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
@@ -531,7 +520,7 @@ objfile_relocate (objfile, new_offsets)
     int something_changed = 0;
     for (i = 0; i < objfile->num_sections; ++i)
       {
-	ANOFFSET (delta, i) =
+	delta->offsets[i] =
 	  ANOFFSET (new_offsets, i) - ANOFFSET (objfile->section_offsets, i);
 	if (ANOFFSET (delta, i) != 0)
 	  something_changed = 1;
@@ -575,6 +564,9 @@ objfile_relocate (objfile, new_offsets)
 	  for (j = 0; j < BLOCK_NSYMS (b); ++j)
 	    {
 	      struct symbol *sym = BLOCK_SYM (b, j);
+
+	      fixup_symbol_section (sym, objfile);
+
 	      /* The RS6000 code from which this was taken skipped
 	         any symbols in STRUCT_NAMESPACE or UNDEF_NAMESPACE.
 	         But I'm leaving out that test, on the theory that
@@ -617,15 +609,21 @@ objfile_relocate (objfile, new_offsets)
     for (psym = objfile->global_psymbols.list;
 	 psym < objfile->global_psymbols.next;
 	 psym++)
-      if (SYMBOL_SECTION (*psym) >= 0)
-	SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta,
-						  SYMBOL_SECTION (*psym));
+      {
+	fixup_psymbol_section (*psym, objfile);
+	if (SYMBOL_SECTION (*psym) >= 0)
+	  SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta,
+						    SYMBOL_SECTION (*psym));
+      }
     for (psym = objfile->static_psymbols.list;
 	 psym < objfile->static_psymbols.next;
 	 psym++)
-      if (SYMBOL_SECTION (*psym) >= 0)
-	SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta,
-						  SYMBOL_SECTION (*psym));
+      {
+	fixup_psymbol_section (*psym, objfile);
+	if (SYMBOL_SECTION (*psym) >= 0)
+	  SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta,
+						    SYMBOL_SECTION (*psym));
+      }
   }
 
   {
@@ -641,8 +639,20 @@ objfile_relocate (objfile, new_offsets)
   {
     int i;
     for (i = 0; i < objfile->num_sections; ++i)
-      ANOFFSET (objfile->section_offsets, i) = ANOFFSET (new_offsets, i);
+      (objfile->section_offsets)->offsets[i] = ANOFFSET (new_offsets, i);
   }
+
+  if (objfile->ei.entry_point != ~(CORE_ADDR) 0)
+    {
+      /* Relocate ei.entry_point with its section offset, use SECT_OFF_TEXT
+	 only as a fallback.  */
+      struct obj_section *s;
+      s = find_pc_section (objfile->ei.entry_point);
+      if (s)
+        objfile->ei.entry_point += ANOFFSET (delta, s->the_bfd_section->index);
+      else
+        objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+    }
 
   {
     struct obj_section *s;
@@ -652,30 +662,12 @@ objfile_relocate (objfile, new_offsets)
 
     ALL_OBJFILE_OSECTIONS (objfile, s)
       {
-	flagword flags;
-
-	flags = bfd_get_section_flags (abfd, s->the_bfd_section);
-
-	if (flags & SEC_CODE)
-	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-	    s->endaddr += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-	  }
-	else if (flags & (SEC_DATA | SEC_LOAD))
-	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_DATA (objfile));
-	    s->endaddr += ANOFFSET (delta, SECT_OFF_DATA (objfile));
-	  }
-	else if (flags & SEC_ALLOC)
-	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_BSS (objfile));
-	    s->endaddr += ANOFFSET (delta, SECT_OFF_BSS (objfile));
-	  }
+      	int idx = s->the_bfd_section->index;
+	
+	s->addr += ANOFFSET (delta, idx);
+	s->endaddr += ANOFFSET (delta, idx);
       }
   }
-
-  if (objfile->ei.entry_point != ~(CORE_ADDR) 0)
-    objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
 
   if (objfile->ei.entry_func_lowpc != INVALID_ENTRY_LOWPC)
     {
@@ -704,7 +696,7 @@ objfile_relocate (objfile, new_offsets)
    available, nonzero otherwise. */
 
 int
-have_partial_symbols ()
+have_partial_symbols (void)
 {
   struct objfile *ofp;
 
@@ -723,7 +715,7 @@ have_partial_symbols ()
    available, nonzero otherwise. */
 
 int
-have_full_symbols ()
+have_full_symbols (void)
 {
   struct objfile *ofp;
 
@@ -743,7 +735,7 @@ have_full_symbols ()
    command.
  */
 void
-objfile_purge_solibs ()
+objfile_purge_solibs (void)
 {
   struct objfile *objf;
   struct objfile *temp;
@@ -764,7 +756,7 @@ objfile_purge_solibs ()
    available, nonzero otherwise. */
 
 int
-have_minimal_symbols ()
+have_minimal_symbols (void)
 {
   struct objfile *ofp;
 
@@ -800,10 +792,7 @@ have_minimal_symbols ()
    Otherwise, returns the open file descriptor.  */
 
 static int
-open_existing_mapped_file (symsfilename, mtime, flags)
-     char *symsfilename;
-     long mtime;
-     int flags;
+open_existing_mapped_file (char *symsfilename, long mtime, int flags)
 {
   int fd = -1;
   struct stat sbuf;
@@ -855,10 +844,7 @@ open_existing_mapped_file (symsfilename, mtime, flags)
    /bin for example).  */
 
 static int
-open_mapped_file (filename, mtime, flags)
-     char *filename;
-     long mtime;
-     int flags;
+open_mapped_file (char *filename, long mtime, int flags)
 {
   int fd;
   char *symsfilename;
@@ -869,7 +855,7 @@ open_mapped_file (filename, mtime, flags)
   symsfilename = concat ("./", basename (filename), ".syms", (char *) NULL);
   if ((fd = open_existing_mapped_file (symsfilename, mtime, flags)) < 0)
     {
-      free (symsfilename);
+      xfree (symsfilename);
       symsfilename = concat (filename, ".syms", (char *) NULL);
       fd = open_existing_mapped_file (symsfilename, mtime, flags);
     }
@@ -885,7 +871,7 @@ open_mapped_file (filename, mtime, flags)
 
   if ((fd < 0) && (flags & OBJF_MAPPED))
     {
-      free (symsfilename);
+      xfree (symsfilename);
       symsfilename = concat ("./", basename (filename), ".syms",
 			     (char *) NULL);
       if ((fd = open (symsfilename, O_RDWR | O_CREAT | O_TRUNC, 0666)) < 0)
@@ -898,13 +884,12 @@ open_mapped_file (filename, mtime, flags)
 	}
     }
 
-  free (symsfilename);
+  xfree (symsfilename);
   return (fd);
 }
 
 static PTR
-map_to_file (fd)
-     int fd;
+map_to_file (int fd)
 {
   PTR md;
   CORE_ADDR mapto;
@@ -954,9 +939,7 @@ map_to_file (fd)
    contains a pointer to the bfd struct sec section.  */
 
 struct obj_section *
-find_pc_sect_section (pc, section)
-     CORE_ADDR pc;
-     struct sec *section;
+find_pc_sect_section (CORE_ADDR pc, struct sec *section)
 {
   struct obj_section *s;
   struct objfile *objfile;
@@ -973,8 +956,7 @@ find_pc_sect_section (pc, section)
    Backward compatibility, no section.  */
 
 struct obj_section *
-find_pc_section (pc)
-     CORE_ADDR pc;
+find_pc_section (CORE_ADDR pc)
 {
   return find_pc_sect_section (pc, find_pc_mapped_section (pc));
 }
@@ -985,9 +967,7 @@ find_pc_section (pc)
    a trampoline.  */
 
 int
-in_plt_section (pc, name)
-     CORE_ADDR pc;
-     char *name;
+in_plt_section (CORE_ADDR pc, char *name)
 {
   struct obj_section *s;
   int retval = 0;
@@ -1004,9 +984,7 @@ in_plt_section (pc, name)
    return zero.  */
 
 int
-is_in_import_list (name, objfile)
-     char *name;
-     struct objfile *objfile;
+is_in_import_list (char *name, struct objfile *objfile)
 {
   register int i;
 

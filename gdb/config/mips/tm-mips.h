@@ -24,6 +24,8 @@
 #ifndef TM_MIPS_H
 #define TM_MIPS_H 1
 
+#define GDB_MULTI_ARCH 1
+
 struct frame_info;
 struct symbol;
 struct type;
@@ -33,20 +35,8 @@ struct value;
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"
 
-#if !defined (TARGET_BYTE_ORDER_DEFAULT)
-#define TARGET_BYTE_ORDER_DEFAULT LITTLE_ENDIAN
-#endif
-
-#if !defined (GDB_TARGET_IS_MIPS64)
-#define GDB_TARGET_IS_MIPS64 0
-#endif
-
 #if !defined (MIPS_EABI)
 #define MIPS_EABI 0
-#endif
-
-#if !defined (TARGET_MONITOR_PROMPT)
-#define TARGET_MONITOR_PROMPT "<IDT>"
 #endif
 
 /* PC should be masked to remove possible MIPS16 flag */
@@ -56,9 +46,6 @@ struct value;
 #if !defined (GDB_TARGET_UNMASK_DISAS_PC)
 #define GDB_TARGET_UNMASK_DISAS_PC(addr) MAKE_MIPS16_ADDR(addr)
 #endif
-
-/* Floating point is IEEE compliant */
-#define IEEE_FLOAT (1)
 
 /* The name of the usual type of MIPS processor that is in the target
    system.  */
@@ -79,49 +66,16 @@ CORE_ADDR mips_addr_bits_remove (CORE_ADDR addr);
 
 #define FUNCTION_START_OFFSET 0
 
-/* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  */
-
-#define SKIP_PROLOGUE(pc) (mips_skip_prologue (pc, 0))
-extern CORE_ADDR mips_skip_prologue (CORE_ADDR addr, int lenient);
-
 /* Return non-zero if PC points to an instruction which will cause a step
    to execute both the instruction at PC and an instruction at PC+4.  */
 extern int mips_step_skips_delay (CORE_ADDR);
 #define STEP_SKIPS_DELAY_P (1)
 #define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
 
-/* Immediately after a function call, return the saved pc.
-   Can't always go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
-#define SAVED_PC_AFTER_CALL(frame)	read_register(RA_REGNUM)
-
 /* Are we currently handling a signal */
 
 extern int in_sigtramp (CORE_ADDR, char *);
 #define IN_SIGTRAMP(pc, name)	in_sigtramp(pc, name)
-
-/* Stack grows downward.  */
-
-#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
-
-/* BREAKPOINT_FROM_PC uses the program counter value to determine whether a
-   16- or 32-bit breakpoint should be used.  It returns a pointer
-   to a string of bytes that encode a breakpoint instruction, stores
-   the length of the string to *lenptr, and adjusts the pc (if necessary) to
-   point to the actual memory location where the breakpoint should be
-   inserted.  */
-
-extern breakpoint_from_pc_fn mips_breakpoint_from_pc;
-#define BREAKPOINT_FROM_PC(pcptr, lenptr) mips_breakpoint_from_pc(pcptr, lenptr)
-
-/* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT
-   but not always.  */
-
-#define DECR_PC_AFTER_BREAK 0
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
@@ -136,11 +90,6 @@ extern breakpoint_from_pc_fn mips_breakpoint_from_pc;
 #ifndef MIPS_REGSIZE
 #define MIPS_REGSIZE 4
 #endif
-
-/* The sizes of floating point registers.  */
-
-#define MIPS_FPU_SINGLE_REGSIZE 4
-#define MIPS_FPU_DOUBLE_REGSIZE 8
 
 /* Number of machine registers */
 
@@ -420,10 +369,6 @@ extern void mips_push_dummy_frame (void);
 #define POP_FRAME		mips_pop_frame()
 extern void mips_pop_frame (void);
 
-#if !GDB_MULTI_ARCH
-#define CALL_DUMMY { 0 }
-#endif
-
 #define CALL_DUMMY_START_OFFSET (0)
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
@@ -487,34 +432,10 @@ extern void mips_print_extra_frame_info (struct frame_info *frame);
    multiple functions with the same SP.  But on the MIPS we can't do
    that since the PC is not stored in the same part of the frame every
    time.  This does not seem to be a very clever way to set up frames,
-   but there is nothing we can do about that).  */
+   but there is nothing we can do about that.  */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
 extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
-
-/* Convert a dbx stab register number (from `r' declaration) to a gdb REGNUM */
-
-#define STAB_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-38)
-
-/* Convert a ecoff register number to a gdb REGNUM */
-
-#define ECOFF_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)
-
-#if !GDB_MULTI_ARCH
-/* If the current gcc for for this target does not produce correct debugging
-   information for float parameters, both prototyped and unprototyped, then
-   define this macro.  This forces gdb to  always assume that floats are
-   passed as doubles and then converted in the callee.
-
-   For the mips chip, it appears that the debug info marks the parameters as
-   floats regardless of whether the function is prototyped, but the actual
-   values are passed as doubles for the non-prototyped case and floats for
-   the prototyped case.  Thus we choose to make the non-prototyped case work
-   for C and break the prototyped case, since the non-prototyped case is
-   probably much more common.  (FIXME). */
-
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (current_language -> la_language == language_c)
-#endif
 
 /* Select the default mips disassembler */
 

@@ -45,6 +45,8 @@ CFILES = \
 	cgen-asm.c \
 	cgen-dis.c \
 	cgen-opc.c \
+	cris-dis.c \
+	cris-opc.c \
 	d10v-dis.c \
 	d10v-opc.c \
 	d30v-dis.c \
@@ -62,6 +64,7 @@ CFILES = \
 	i370-dis.c \
 	i370-opc.c \
 	i386-dis.c \
+	i860-dis.c \
 	i960-dis.c \
 	ia64-dis.c \
 	ia64-opc-a.c \
@@ -79,6 +82,8 @@ CFILES = \
 	m32r-ibld.c \
 	m32r-opc.c \
 	m32r-opinst.c \
+	m68hc11-dis.c \
+	m68hc11-opc.c \
 	m68k-dis.c \
 	m68k-opc.c \
 	m88k-dis.c \
@@ -121,6 +126,8 @@ ALL_MACHINES = \
 	cgen-asm.lo \
 	cgen-dis.lo \
 	cgen-opc.lo \
+	cris-dis.lo \
+	cris-opc.lo \
 	d10v-dis.lo \
 	d10v-opc.lo \
 	d30v-dis.lo \
@@ -136,6 +143,7 @@ ALL_MACHINES = \
 	i386-dis.lo \
 	i370-dis.lo \
 	i370-opc.lo \
+	i860-dis.lo \
 	i960-dis.lo \
 	ia64-dis.lo \
 	ia64-opc.lo \
@@ -145,6 +153,8 @@ ALL_MACHINES = \
 	m32r-ibld.lo \
 	m32r-opc.lo \
 	m32r-opinst.lo \
+	m68hc11-dis.lo \
+	m68hc11-opc.lo \
 	m68k-dis.lo \
 	m68k-opc.lo \
 	m88k-dis.lo \
@@ -215,12 +225,46 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
 CLEANFILES = \
-	libopcodes.a stamp-lib dep.sed DEP DEP1 DEP2
+	stamp-m32r stamp-fr30 \
+	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 
+CGENDIR = @cgendir@
+CGEN = `if test -f ../guile/libguile/guile ; then echo ../guile/libguile/guile; else echo guile ; fi`
+CGENFLAGS = -v
 
-# The start marker is written this way to pass through automake unscathed.
+CGENDEPS = ../cgen/stamp-cgen \
+	$(CGENDIR)/desc.scm $(CGENDIR)/desc-cpu.scm \
+	$(CGENDIR)/opcodes.scm $(CGENDIR)/opc-asmdis.scm \
+	$(CGENDIR)/opc-ibld.scm $(CGENDIR)/opc-itab.scm \
+	$(CGENDIR)/opc-opinst.scm \
+	cgen-asm.in cgen-dis.in cgen-ibld.in
 
+if CGEN_MAINT
+M32R_DEPS = stamp-m32r
+FR30_DEPS = stamp-fr30
+else
+M32R_DEPS =
+FR30_DEPS =
+endif
+
+run-cgen:
+	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) \
+	  $(CGENDIR) "$(CGENFLAGS)" $(arch) $(prefix) \
+	  "$(options)" $(extrafiles)
+	touch stamp-${prefix}
+.PHONY: run-cgen
+
+# For now, require developers to configure with --enable-cgen-maint.
+$(srcdir)/m32r-desc.h $(srcdir)/m32r-desc.c $(srcdir)/m32r-opc.h $(srcdir)/m32r-opc.c $(srcdir)/m32r-ibld.c $(srcdir)/m32r-opinst.c $(srcdir)/m32r-asm.c $(srcdir)/m32r-dis.c: $(M32R_DEPS)
+	@true
+stamp-m32r: $(CGENDEPS) $(CGENDIR)/m32r.cpu $(CGENDIR)/m32r.opc
+	$(MAKE) run-cgen arch=m32r prefix=m32r options=opinst extrafiles=opinst
+
+$(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-opc.c $(srcdir)/fr30-ibld.c $(srcdir)/fr30-asm.c $(srcdir)/fr30-dis.c: $(FR30_DEPS)
+	@true
+stamp-fr30: $(CGENDEPS) $(CGENDIR)/fr30.cpu $(CGENDIR)/fr30.opc
+	$(MAKE) run-cgen arch=fr30 prefix=fr30 options= extrafiles=
 
 
 ia64-ic.tbl: $(srcdir)/ia64-ic.tbl
@@ -246,8 +290,13 @@ ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.t
 DEP: dep.sed $(CFILES) $(HFILES) config.h
 	rm -f DEP1
 	$(MAKE) MKDEP="$(MKDEP)" DEP1
-	sed -f dep.sed < DEP1 > $@
-	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@
+	sed -f dep.sed < DEP1 > DEPA
+	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> DEPA
+	if grep ' /' DEPA > /dev/null 2> /dev/null; then \
+	  echo 'make DEP failed!'; exit 1; \
+	else \
+	  mv -f DEPA $@; \
+	fi
 
 DEP1: $(CFILES)
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
@@ -302,7 +351,7 @@ arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
 avr-dis.lo: avr-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) opintl.h
+  $(INCDIR)/dis-asm.h $(BFD_H) opintl.h $(INCDIR)/opcode/avr.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h \
   opintl.h
@@ -310,6 +359,10 @@ cgen-dis.lo: cgen-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h
 cgen-opc.lo: cgen-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h
+cris-dis.lo: cris-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h sysdep.h config.h $(INCDIR)/opcode/cris.h \
+  $(INCDIR)/libiberty.h
+cris-opc.lo: cris-opc.c $(INCDIR)/opcode/cris.h
 d10v-dis.lo: d10v-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/d10v.h $(INCDIR)/dis-asm.h $(BFD_H)
 d10v-opc.lo: d10v-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
@@ -351,6 +404,8 @@ i370-opc.lo: i370-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/i370.h
 i386-dis.lo: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h sysdep.h config.h opintl.h
+i860-dis.lo: i860-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/i860.h
 i960-dis.lo: i960-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
 ia64-dis.lo: ia64-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
@@ -387,6 +442,10 @@ m32r-opc.lo: m32r-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 m32r-opinst.lo: m32r-opinst.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-desc.h $(INCDIR)/opcode/cgen.h \
   m32r-opc.h
+m68hc11-dis.lo: m68hc11-dis.c $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/m68hc11.h $(INCDIR)/dis-asm.h $(BFD_H)
+m68hc11-opc.lo: m68hc11-opc.c $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/m68hc11.h
 m68k-dis.lo: m68k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/floatformat.h \
   opintl.h $(INCDIR)/opcode/m68k.h
@@ -436,10 +495,11 @@ sparc-opc.lo: sparc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/sparc.h
 tic30-dis.lo: tic30-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/tic30.h
-tic54x-dis.lo: tic54x-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic54x.h $(INCDIR)/coff/tic54x.h \
-  $(INCDIR)/coff/ti.h
-tic54x-opc.lo: tic54x-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic54x.h
+tic54x-dis.lo: tic54x-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/tic54x.h \
+  $(INCDIR)/coff/tic54x.h $(INCDIR)/coff/ti.h
+tic54x-opc.lo: tic54x-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/tic54x.h
 tic80-dis.lo: tic80-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/tic80.h $(INCDIR)/dis-asm.h $(BFD_H)
 tic80-opc.lo: tic80-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \

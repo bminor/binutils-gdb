@@ -115,11 +115,7 @@
 #include "serial.h"
 #include "nindy-share/env.h"
 #include "nindy-share/stop.h"
-
-#include "dcache.h"
 #include "remote-utils.h"
-
-static DCACHE *nindy_dcache;
 
 extern int unlink ();
 extern char *getenv ();
@@ -158,15 +154,14 @@ static void nindy_store_registers (int);
 static char *savename;
 
 static void
-nindy_close (quitting)
-     int quitting;
+nindy_close (int quitting)
 {
   if (nindy_serial != NULL)
     SERIAL_CLOSE (nindy_serial);
   nindy_serial = NULL;
 
   if (savename)
-    free (savename);
+    xfree (savename);
   savename = 0;
 }
 
@@ -175,9 +170,8 @@ nindy_close (quitting)
    now specified with gdb command-line options (old_protocol,
    and initial_brk).  */
 void
-nindy_open (name, from_tty)
-     char *name;		/* "/dev/ttyXX", "ttyXX", or "XX": tty to be opened */
-     int from_tty;
+nindy_open (char *name,		/* "/dev/ttyXX", "ttyXX", or "XX": tty to be opened */
+	    int from_tty)
 {
   char baudrate[1024];
 
@@ -189,7 +183,6 @@ nindy_open (name, from_tty)
   nindy_close (0);
 
   have_regs = regs_changed = 0;
-  nindy_dcache = dcache_init (ninMemGet, ninMemPut);
 
   /* Allow user to interrupt the following -- we could hang if there's
      no NINDY at the other end of the remote tty.  */
@@ -221,9 +214,7 @@ nindy_open (name, from_tty)
 /* User-initiated quit of nindy operations.  */
 
 static void
-nindy_detach (name, from_tty)
-     char *name;
-     int from_tty;
+nindy_detach (char *name, int from_tty)
 {
   if (name)
     error ("Too many arguments");
@@ -231,7 +222,7 @@ nindy_detach (name, from_tty)
 }
 
 static void
-nindy_files_info ()
+nindy_files_info (void)
 {
   /* FIXME: this lies about the baud rate if we autobauded.  */
   printf_unfiltered ("\tAttached to %s at %d bits per second%s%s.\n", savename,
@@ -240,14 +231,13 @@ nindy_files_info ()
 		     nindy_initial_brk ? " with initial break" : "");
 }
 
-/* Return the number of characters in the buffer before
-   the first DLE character.  */
+/* Return the number of characters in the buffer BUF before
+   the first DLE character.  N is maximum number of characters to
+   consider.  */
 
 static
 int
-non_dle (buf, n)
-     char *buf;			/* Character buffer; NOT '\0'-terminated */
-     int n;			/* Number of characters in buffer */
+non_dle (char *buf, int n)
 {
   int i;
 
@@ -264,14 +254,11 @@ non_dle (buf, n)
 /* Tell the remote machine to resume.  */
 
 void
-nindy_resume (pid, step, siggnal)
-     int pid, step;
-     enum target_signal siggnal;
+nindy_resume (int pid, int step, enum target_signal siggnal)
 {
   if (siggnal != TARGET_SIGNAL_0 && siggnal != stop_signal)
     warning ("Can't send signals to remote NINDY targets.");
 
-  dcache_flush (nindy_dcache);
   if (regs_changed)
     {
       nindy_store_registers (-1);
@@ -294,12 +281,11 @@ struct clean_up_tty_args
 static struct clean_up_tty_args tty_args;
 
 static void
-clean_up_tty (ptrarg)
-     PTR ptrarg;
+clean_up_tty (PTR ptrarg)
 {
   struct clean_up_tty_args *args = (struct clean_up_tty_args *) ptrarg;
   SERIAL_SET_TTY_STATE (args->serial, args->state);
-  free (args->state);
+  xfree (args->state);
   warning ("\n\nYou may need to reset the 80960 and/or reload your program.\n");
 }
 
@@ -310,10 +296,10 @@ static void (*old_ctrlz) ();
 #endif
 
 static void
-clean_up_int ()
+clean_up_int (void)
 {
   SERIAL_SET_TTY_STATE (tty_args.serial, tty_args.state);
-  free (tty_args.state);
+  xfree (tty_args.state);
 
   signal (SIGINT, old_ctrlc);
 #ifdef SIGTSTP
@@ -330,9 +316,7 @@ clean_up_int ()
  */
 
 static int
-nindy_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+nindy_wait (int pid, struct target_waitstatus *status)
 {
   fd_set fds;
   int c;
@@ -408,7 +392,7 @@ nindy_wait (pid, status)
     }
 
   SERIAL_SET_TTY_STATE (tty_args.serial, tty_args.state);
-  free (tty_args.state);
+  xfree (tty_args.state);
   discard_cleanups (old_cleanups);
 
   if (stop_exit)
@@ -441,8 +425,7 @@ struct nindy_regs
 };
 
 static void
-nindy_fetch_registers (regno)
-     int regno;
+nindy_fetch_registers (int regno)
 {
   struct nindy_regs nindy_regs;
   int regnum;
@@ -462,15 +445,14 @@ nindy_fetch_registers (regno)
 }
 
 static void
-nindy_prepare_to_store ()
+nindy_prepare_to_store (void)
 {
   /* Fetch all regs if they aren't already here.  */
   read_register_bytes (0, NULL, REGISTER_BYTES);
 }
 
 static void
-nindy_store_registers (regno)
-     int regno;
+nindy_store_registers (int regno)
 {
   struct nindy_regs nindy_regs;
   int regnum;
@@ -487,105 +469,30 @@ nindy_store_registers (regno)
   immediate_quit--;
 }
 
-/* Read a word from remote address ADDR and return it.
- * This goes through the data cache.
- */
-int
-nindy_fetch_word (addr)
-     CORE_ADDR addr;
-{
-  return dcache_fetch (nindy_dcache, addr);
-}
-
-/* Write a word WORD into remote address ADDR.
-   This goes through the data cache.  */
-
-void
-nindy_store_word (addr, word)
-     CORE_ADDR addr;
-     int word;
-{
-  dcache_poke (nindy_dcache, addr, word);
-}
-
 /* Copy LEN bytes to or from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.   Copy to inferior if
-   WRITE is nonzero.  Returns the length copied.
-
-   This is stolen almost directly from infptrace.c's child_xfer_memory,
-   which also deals with a word-oriented memory interface.  Sometime,
-   FIXME, rewrite this to not use the word-oriented routines.  */
+   SHOULD_WRITE is nonzero.  Returns the length copied.  TARGET is
+   unused.  */
 
 int
-nindy_xfer_inferior_memory (memaddr, myaddr, len, should_write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int should_write;
-     struct target_ops *target;	/* ignored */
+nindy_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
+			    int should_write, struct target_ops *target)
 {
-  register int i;
-  /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & -sizeof (int);
-  /* Round ending address up; get number of longwords that makes.  */
-  register int count
-  = (((memaddr + len) - addr) + sizeof (int) - 1) / sizeof (int);
-  /* Allocate buffer of that many longwords.  */
-  register int *buffer = (int *) alloca (count * sizeof (int));
+  int res;
+
+  if (len <= 0)
+    return 0;
 
   if (should_write)
-    {
-      /* Fill start and end extra bytes of buffer with existing memory data.  */
-
-      if (addr != memaddr || len < (int) sizeof (int))
-	{
-	  /* Need part of initial word -- fetch it.  */
-	  buffer[0] = nindy_fetch_word (addr);
-	}
-
-      if (count > 1)		/* FIXME, avoid if even boundary */
-	{
-	  buffer[count - 1]
-	    = nindy_fetch_word (addr + (count - 1) * sizeof (int));
-	}
-
-      /* Copy data to be written over corresponding part of buffer */
-
-      memcpy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
-
-      /* Write the entire buffer.  */
-
-      for (i = 0; i < count; i++, addr += sizeof (int))
-	{
-	  errno = 0;
-	  nindy_store_word (addr, buffer[i]);
-	  if (errno)
-	    return 0;
-	}
-    }
+    res = ninMemPut (memaddr, myaddr, len);
   else
-    {
-      /* Read all the longwords */
-      for (i = 0; i < count; i++, addr += sizeof (int))
-	{
-	  errno = 0;
-	  buffer[i] = nindy_fetch_word (addr);
-	  if (errno)
-	    return 0;
-	  QUIT;
-	}
+    res = ninMemGet (memaddr, myaddr, len);
 
-      /* Copy appropriate bytes out of the buffer.  */
-      memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
-    }
-  return len;
+  return res;
 }
 
 static void
-nindy_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
+nindy_create_inferior (char *execfile, char *args, char **env)
 {
   int entry_pt;
   int pid;
@@ -623,9 +530,7 @@ nindy_create_inferior (execfile, args, env)
 }
 
 static void
-reset_command (args, from_tty)
-     char *args;
-     int from_tty;
+reset_command (char *args, int from_tty)
 {
   if (nindy_serial == NULL)
     {
@@ -639,9 +544,7 @@ reset_command (args, from_tty)
 }
 
 void
-nindy_kill (args, from_tty)
-     char *args;
-     int from_tty;
+nindy_kill (char *args, int from_tty)
 {
   return;			/* Ignore attempts to kill target system */
 }
@@ -653,7 +556,7 @@ nindy_kill (args, from_tty)
    instructions.  */
 
 void
-nindy_mourn_inferior ()
+nindy_mourn_inferior (void)
 {
   remove_breakpoints ();
   unpush_target (&nindy_ops);
@@ -662,17 +565,14 @@ nindy_mourn_inferior ()
 
 /* Pass the args the way catch_errors wants them.  */
 static int
-nindy_open_stub (arg)
-     char *arg;
+nindy_open_stub (char *arg)
 {
   nindy_open (arg, 1);
   return 1;
 }
 
 static void
-nindy_load (filename, from_tty)
-     char *filename;
-     int from_tty;
+nindy_load (char *filename, int from_tty)
 {
   asection *s;
   /* Can't do unix style forking on a VMS system, so we'll use bfd to do
@@ -703,15 +603,14 @@ nindy_load (filename, from_tty)
 		  s->_raw_size,
 		  s->vma);
 	  ninMemPut (s->vma, buffer, s->_raw_size);
-	  free (buffer);
+	  xfree (buffer);
 	}
     }
   bfd_close (file);
 }
 
 static int
-load_stub (arg)
-     char *arg;
+load_stub (char *arg)
 {
   target_load (arg, 1);
   return 1;
@@ -726,7 +625,7 @@ load_stub (arg)
    an i960 object file on the host system.  */
 
 void
-nindy_before_main_loop ()
+nindy_before_main_loop (void)
 {
   char ttyname[100];
   char *p, *p2;
@@ -850,7 +749,7 @@ specified when you started GDB.";
 }
 
 void
-_initialize_nindy ()
+_initialize_nindy (void)
 {
   init_nindy_ops ();
   add_target (&nindy_ops);

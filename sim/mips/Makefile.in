@@ -289,5 +289,5 @@ clean-extra:
 	rm -f $(BUILT_SRC_FROM_IGEN)
 	rm -f $(BUILT_SRC_FROM_M16)
 	rm -f tmp-*
-	rm -f m16* m32* itable*
+	rm -f m16*.o m32*.o itable*.o
 

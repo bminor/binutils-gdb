@@ -1,5 +1,5 @@
 /* Interface for functions using gregset and fpregset types.
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,6 +18,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef GREGSET_H
+#define GREGSET_H
+
 #ifndef GDB_GREGSET_T
 #define GDB_GREGSET_T gregset_t
 #endif
@@ -26,7 +29,7 @@
 #define GDB_FPREGSET_T fpregset_t
 #endif
 
-typedef GDB_GREGSET_T  gdb_gregset_t;
+typedef GDB_GREGSET_T gdb_gregset_t;
 typedef GDB_FPREGSET_T gdb_fpregset_t;
 
 /* A gregset is a data structure supplied by the native OS containing
@@ -36,15 +39,17 @@ typedef GDB_FPREGSET_T gdb_fpregset_t;
    structures were originally a part of the /proc interface, but have
    been borrowed or copied by other GDB targets, eg. Linux.  */
 
-/* Copy register values from the native target gregset / fpregset
+/* Copy register values from the native target gregset/fpregset
    into GDB's internal register cache.  */
 
-extern void supply_gregset  (gdb_gregset_t *gregs);
+extern void supply_gregset (gdb_gregset_t *gregs);
 extern void supply_fpregset (gdb_fpregset_t *fpregs);
 
 /* Copy register values from GDB's register cache into
-   the native target gregset / fpregset.  If regno is -1, 
+   the native target gregset/fpregset.  If regno is -1, 
    copy all the registers.  */
 
-extern void fill_gregset    (gdb_gregset_t *gregs, int regno);
-extern void fill_fpregset   (gdb_fpregset_t *fpregs, int regno);
+extern void fill_gregset (gdb_gregset_t *gregs, int regno);
+extern void fill_fpregset (gdb_fpregset_t *fpregs, int regno);
+
+#endif

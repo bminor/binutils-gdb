@@ -63,8 +63,7 @@ read_alphacoff_dynamic_symtab (struct section_offsets *,
 extern CORE_ADDR sigtramp_address;
 
 static void
-mipscoff_new_init (ignore)
-     struct objfile *ignore;
+mipscoff_new_init (struct objfile *ignore)
 {
   sigtramp_address = 0;
   stabsread_new_init ();
@@ -74,17 +73,14 @@ mipscoff_new_init (ignore)
 /* Initialize to read a symbol file (nothing to do).  */
 
 static void
-mipscoff_symfile_init (objfile)
-     struct objfile *objfile;
+mipscoff_symfile_init (struct objfile *objfile)
 {
 }
 
 /* Read a symbol file from a file.  */
 
 static void
-mipscoff_symfile_read (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;
+mipscoff_symfile_read (struct objfile *objfile, int mainline)
 {
   bfd *abfd = objfile->obfd;
   struct cleanup *back_to;
@@ -136,8 +132,7 @@ mipscoff_symfile_read (objfile, mainline)
    particular objfile.  */
 
 static void
-mipscoff_symfile_finish (objfile)
-     struct objfile *objfile;
+mipscoff_symfile_finish (struct objfile *objfile)
 {
 }
 
@@ -198,10 +193,7 @@ static void alphacoff_locate_sections (bfd *, asection *, void *);
    if so, stash away some access information for the section.  */
 
 static void
-alphacoff_locate_sections (ignore_abfd, sectp, sip)
-     bfd *ignore_abfd;
-     asection *sectp;
-     PTR sip;
+alphacoff_locate_sections (bfd *ignore_abfd, asection *sectp, PTR sip)
 {
   register struct alphacoff_dynsecinfo *si;
 
@@ -229,9 +221,8 @@ alphacoff_locate_sections (ignore_abfd, sectp, sip)
    add them to the minimal symbol table.  */
 
 static void
-read_alphacoff_dynamic_symtab (section_offsets, objfile)
-     struct section_offsets *section_offsets;
-     struct objfile *objfile;
+read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
+			       struct objfile *objfile)
 {
   bfd *abfd = objfile->obfd;
   struct alphacoff_dynsecinfo si;
@@ -443,7 +434,7 @@ static struct sym_fns ecoff_sym_fns =
 };
 
 void
-_initialize_mipsread ()
+_initialize_mipsread (void)
 {
   add_symtab_fns (&ecoff_sym_fns);
 }

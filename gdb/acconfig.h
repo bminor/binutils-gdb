@@ -31,6 +31,15 @@
 /* Define if <sys/procfs.h> has psaddr_t. */
 #undef HAVE_PSADDR_T
 
+/* Define if <sys/procfs.h> has prgregset32_t. */
+#undef HAVE_PRGREGSET32_T
+
+/* Define if <sys/procfs.h> has prfpregset32_t. */
+#undef HAVE_PRFPREGSET32_T
+
+/* Define if <sys/link.h> has struct link_map32 */
+#undef HAVE_STRUCT_LINK_MAP32
+
 /* Define if the prfpregset_t type is broken. */
 #undef PRFPREGSET_T_BROKEN
 
@@ -110,8 +119,26 @@
 /* Define if <sys/ptrace.h> defines the PTRACE_GETREGS request.  */
 #undef HAVE_PTRACE_GETREGS
 
-/* Define if <sys/ptrace.h> defines the PTRACE_GETXFPREGS request.  */
-#undef HAVE_PTRACE_GETXFPREGS
+/* Define if <sys/ptrace.h> defines the PTRACE_GETFPXREGS request.  */
+#undef HAVE_PTRACE_GETFPXREGS
 
 /* Define if gnu-regex.c included with GDB should be used. */
 #undef USE_INCLUDED_REGEX
+
+/* BFD's default architecture. */
+#undef DEFAULT_BFD_ARCH
+
+/* BFD's default target vector. */
+#undef DEFAULT_BFD_VEC
+
+/* Multi-arch enabled. */
+#undef GDB_MULTI_ARCH
+
+/* hostfile */
+#undef GDB_XM_FILE
+
+/* targetfile */
+#undef GDB_TM_FILE
+
+/* nativefile */
+#undef GDB_NM_FILE

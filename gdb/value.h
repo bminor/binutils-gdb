@@ -97,7 +97,18 @@ struct value
     /* If zero, contents of this value are in the contents field.
        If nonzero, contents are in inferior memory at address
        in the location.address field plus the offset field
-       (and the lval field should be lval_memory).  */
+       (and the lval field should be lval_memory).
+
+       WARNING: This field is used by the code which handles
+       watchpoints (see breakpoint.c) to decide whether a particular
+       value can be watched by hardware watchpoints.  If the lazy flag
+       is set for some member of a value chain, it is assumed that
+       this member of the chain doesn't need to be watched as part of
+       watching the value itself.  This is how GDB avoids watching the
+       entire struct or array when the user wants to watch a single
+       struct member or array element.  If you ever change the way
+       lazy flag is set and reset, be sure to consider this use as
+       well!  */
     char lazy;
     /* If nonzero, this is the value of a variable which does not
        actually exist in the program.  */
@@ -399,6 +410,8 @@ extern CORE_ADDR parse_and_eval_address (char *exp);
 
 extern CORE_ADDR parse_and_eval_address_1 (char **expptr);
 
+extern LONGEST parse_and_eval_long (char *exp);
+
 extern value_ptr access_value_history (int num);
 
 extern value_ptr value_of_internalvar (struct internalvar *var);
@@ -461,15 +474,25 @@ extern void read_register_gen (int regno, char *myaddr);
 
 extern void write_register_gen (int regno, char *myaddr);
 
-extern CORE_ADDR read_register (int regno);
+/* Rename to read_unsigned_register()? */
+extern ULONGEST read_register (int regno);
 
-extern CORE_ADDR read_register_pid (int regno, int pid);
+extern LONGEST read_signed_register (int regno);
+
+/* Rename to read_unsigned_register_pid()? */
+extern ULONGEST read_register_pid (int regno, int pid);
+
+extern LONGEST read_signed_register_pid (int regno, int pid);
 
 extern void write_register (int regno, LONGEST val);
 
 extern void write_register_pid (int regno, CORE_ADDR val, int pid);
 
 extern void supply_register (int regno, char *val);
+
+extern int register_cached (int regno);
+
+extern void register_changed (int regnum);
 
 extern void get_saved_register (char *raw_buffer, int *optimized,
 				CORE_ADDR * addrp,
@@ -515,7 +538,7 @@ extern void print_variable_value (struct symbol * var,
 
 extern int check_field (value_ptr, const char *);
 
-extern void c_typedef_print (struct type * type, struct symbol * news,
+extern void typedef_print (struct type * type, struct symbol * news,
 			     struct ui_file * stream);
 
 extern char *internalvar_name (struct internalvar *var);

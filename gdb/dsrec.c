@@ -44,14 +44,8 @@ static int make_srec (char *srec, CORE_ADDR targ_addr, bfd * abfd,
    and returns non-zero if the ack is read correctly.  */
 
 void
-load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
-     serial_t desc;
-     const char *file;
-     bfd_vma load_offset;
-     int maxrecsize;
-     int flags;
-     int hashmark;
-     int (*waitack) (void);
+load_srec (serial_t desc, const char *file, bfd_vma load_offset, int maxrecsize,
+	   int flags, int hashmark, int (*waitack) (void))
 {
   bfd *abfd;
   asection *s;
@@ -218,14 +212,8 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
  */
 
 static int
-make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
-     char *srec;
-     CORE_ADDR targ_addr;
-     bfd *abfd;
-     asection *sect;
-     int sectoff;
-     int *maxrecsize;
-     int flags;
+make_srec (char *srec, CORE_ADDR targ_addr, bfd *abfd, asection *sect,
+	   int sectoff, int *maxrecsize, int flags)
 {
   unsigned char checksum;
   int tmp;

@@ -50,8 +50,7 @@ static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
    marking them as valid so we won't fetch them again.  */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
@@ -144,8 +143,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
@@ -250,13 +248,21 @@ store_inferior_registers (regno)
     }
 }
 
+/* Provide registers to GDB from a core file.
+
+   CORE_REG_SECT points to an array of bytes, which are the contents
+   of a `note' from a core file which BFD thinks might contain
+   register contents.  CORE_REG_SIZE is its size.
+
+   WHICH says which register set corelow suspects this is:
+     0 --- the general-purpose register set
+     2 --- the floating-point register set
+
+   IGNORE is unused.  */
 
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR ignore;		/* reg addr, unused in this version */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+		      int which, CORE_ADDR ignore)
 {
 
   if (which == 0)
@@ -313,7 +319,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
 }
 
 int
-kernel_u_size ()
+kernel_u_size (void)
 {
   return (sizeof (struct user));
 }
@@ -332,7 +338,7 @@ static struct core_fns sparc_core_fns =
 };
 
 void
-_initialize_core_sparc ()
+_initialize_core_sparc (void)
 {
   add_core_fns (&sparc_core_fns);
 }

@@ -50,8 +50,7 @@
 /* Fetch one register.  */
 
 static void
-fetch_register (regno)
-     int regno;
+fetch_register (int regno)
 {
   register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];
@@ -87,8 +86,7 @@ error_exit:;
 /* Fetch all registers, or just one, from the child process.  */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   if (regno == -1)
     for (regno = 0; regno < NUM_REGS; regno++)
@@ -102,8 +100,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   register unsigned int regaddr;
   char buf[80];
@@ -185,13 +182,12 @@ store_inferior_registers (regno)
 
    This call may fail if the given addresses are not valid in the inferior
    process.  This most often happens when restarting a program which
-   as watchpoints inserted on heap or stack memory.  */
+   has watchpoints inserted on heap or stack memory.  */
 
 #define PT_PROT 21
 
 int
-hppa_set_watchpoint (addr, len, flag)
-     int addr, len, flag;
+hppa_set_watchpoint (int addr, int len, int flag)
 {
   int pt_args[3];
   pt_args[0] = addr;

@@ -68,6 +68,9 @@
 /* Define if your struct reg has r_gs.  */
 #undef HAVE_STRUCT_REG_R_GS
 
+/* Define if <sys/link.h> has struct link_map32 */
+#undef HAVE_STRUCT_LINK_MAP32
+
 /* Define if the prfpregset_t type is broken. */
 #undef PRFPREGSET_T_BROKEN
 
@@ -129,11 +132,29 @@
 /* Define if <sys/ptrace.h> defines the PTRACE_GETREGS request.  */
 #undef HAVE_PTRACE_GETREGS
 
-/* Define if <sys/ptrace.h> defines the PTRACE_GETXFPREGS request.  */
-#undef HAVE_PTRACE_GETXFPREGS
+/* Define if <sys/ptrace.h> defines the PTRACE_GETFPXREGS request.  */
+#undef HAVE_PTRACE_GETFPXREGS
 
 /* Define if gnu-regex.c included with GDB should be used. */
 #undef USE_INCLUDED_REGEX
+
+/* BFD's default architecture. */
+#undef DEFAULT_BFD_ARCH
+
+/* BFD's default target vector. */
+#undef DEFAULT_BFD_VEC
+
+/* Multi-arch enabled. */
+#undef GDB_MULTI_ARCH
+
+/* hostfile */
+#undef GDB_XM_FILE
+
+/* targetfile */
+#undef GDB_TM_FILE
+
+/* nativefile */
+#undef GDB_NM_FILE
 
 /* Define if you have the __argz_count function.  */
 #undef HAVE___ARGZ_COUNT
@@ -204,6 +225,9 @@
 /* Define if you have the strchr function.  */
 #undef HAVE_STRCHR
 
+/* Define if you have the vfork function.  */
+#undef HAVE_VFORK
+
 /* Define if you have the <argz.h> header file.  */
 #undef HAVE_ARGZ_H
 
@@ -249,6 +273,9 @@
 /* Define if you have the <objlist.h> header file.  */
 #undef HAVE_OBJLIST_H
 
+/* Define if you have the <poll.h> header file.  */
+#undef HAVE_POLL_H
+
 /* Define if you have the <proc_service.h> header file.  */
 #undef HAVE_PROC_SERVICE_H
 
@@ -284,6 +311,9 @@
 
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H
+
+/* Define if you have the <sys/poll.h> header file.  */
+#undef HAVE_SYS_POLL_H
 
 /* Define if you have the <sys/procfs.h> header file.  */
 #undef HAVE_SYS_PROCFS_H
@@ -392,6 +422,12 @@
 
 /* Define if <sys/procfs.h> has prfpregset_t. */
 #undef HAVE_PRFPREGSET_T
+
+/* Define if <sys/procfs.h> has prgregset32_t. */
+#undef HAVE_PRGREGSET32_T
+
+/* Define if <sys/procfs.h> has prfpregset32_t. */
+#undef HAVE_PRFPREGSET32_T
 
 /* Define if <sys/procfs.h> has lwpid_t. */
 #undef HAVE_LWPID_T

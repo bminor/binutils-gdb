@@ -205,7 +205,7 @@
 /* OBSOLETE      and mark data and stack spaces as empty.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE   if (corefile) */
-/* OBSOLETE     free (corefile); */
+/* OBSOLETE     xfree (corefile); */
 /* OBSOLETE   corefile = 0; */
 /* OBSOLETE  */
 /* OBSOLETE   if (corechan >= 0) */
@@ -227,7 +227,7 @@
 /* OBSOLETE   if (filename) */
 /* OBSOLETE     { */
 /* OBSOLETE       filename = tilde_expand (filename); */
-/* OBSOLETE       make_cleanup (free, filename); */
+/* OBSOLETE       make_cleanup (xfree, filename); */
 /* OBSOLETE        */
 /* OBSOLETE       if (have_inferior_p ()) */
 /* OBSOLETE     error ("To look at a core file, you must kill the program with \"kill\"."); */

@@ -30,7 +30,8 @@ set prototypes 1
 
 set testfile1 "reread1"
 set srcfile1 ${testfile1}.c
-set binfile1 ${objdir}/${subdir}/${testfile1}
+# Cygwin needs $EXEEXT.
+set binfile1 ${objdir}/${subdir}/${testfile1}$EXEEXT
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile1}" executable {debug additional_flags=-w}] != "" } {
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
@@ -40,7 +41,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile1}" executable {d
 
 set testfile2 "reread2"
 set srcfile2 ${testfile2}.c
-set binfile2 ${objdir}/${subdir}/${testfile2}
+set binfile2 ${objdir}/${subdir}/${testfile2}$EXEEXT
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {debug additional_flags=-w}] != "" } {
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
@@ -49,7 +50,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {d
 # Start with a fresh gdb.
 
 set testfile "reread"
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/${testfile}$EXEEXT
 
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir

@@ -17,8 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
-/* Tweak coffcode.h based on this being a PowerMac instead of RS/6000. */
+/* Tweak coffcode.h based on this being a PowerMac instead of RS/6000.  */
 
 #define POWERMAC
 
@@ -32,5 +31,4 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/rs6000.h"
 #include "libcoff.h"
 #include "xcoff-target.h"
-
 

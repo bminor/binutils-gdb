@@ -97,20 +97,13 @@ static char *sparclet_regnames[] = {
    actually do anything, GDB will request the registers individually.  */
 
 static void
-sparclet_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
+sparclet_supply_register (char *regname, int regnamelen, char *val, int vallen)
 {
   return;
 }
 
 static void
-sparclet_load (desc, file, hashmark)
-     serial_t desc;
-     char *file;
-     int hashmark;
+sparclet_load (serial_t desc, char *file, int hashmark)
 {
   bfd *abfd;
   asection *s;
@@ -286,15 +279,13 @@ init_sparclet_cmds (void)
 };
 
 static void
-sparclet_open (args, from_tty)
-     char *args;
-     int from_tty;
+sparclet_open (char *args, int from_tty)
 {
   monitor_open (args, &sparclet_cmds, from_tty);
 }
 
 void
-_initialize_sparclet ()
+_initialize_sparclet (void)
 {
   int i;
   init_sparclet_cmds ();

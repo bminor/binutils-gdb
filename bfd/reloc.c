@@ -728,9 +728,6 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
 
 	  /* WTF?? */
 	  if (abfd->xvec->flavour == bfd_target_coff_flavour
-	      && strcmp (abfd->xvec->name, "aixcoff-rs6000") != 0
-	      && strcmp (abfd->xvec->name, "aixcoff64-rs6000") != 0
-	      && strcmp (abfd->xvec->name, "xcoff-powermac") != 0
 	      && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
 	      && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
 	    {
@@ -1125,9 +1122,6 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
 
       /* WTF?? */
       if (abfd->xvec->flavour == bfd_target_coff_flavour
-	  && strcmp (abfd->xvec->name, "aixcoff-rs6000") != 0
-	  && strcmp (abfd->xvec->name, "aixcoff64-rs6000") != 0
-	  && strcmp (abfd->xvec->name, "xcoff-powermac") != 0
 	  && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
 	  && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
 	{
@@ -2084,6 +2078,25 @@ ENUMDOC
   i386/elf relocations
 
 ENUM
+  BFD_RELOC_X86_64_GOT32
+ENUMX
+  BFD_RELOC_X86_64_PLT32
+ENUMX
+  BFD_RELOC_X86_64_COPY
+ENUMX
+  BFD_RELOC_X86_64_GLOB_DAT
+ENUMX
+  BFD_RELOC_X86_64_JUMP_SLOT
+ENUMX
+  BFD_RELOC_X86_64_RELATIVE
+ENUMX
+  BFD_RELOC_X86_64_GOTPCREL
+ENUMX
+  BFD_RELOC_X86_64_32S
+ENUMDOC
+  x86-64/elf relocations
+
+ENUM
   BFD_RELOC_NS32K_IMM_8
 ENUMX
   BFD_RELOC_NS32K_IMM_16
@@ -2313,6 +2326,16 @@ ENUMX
   BFD_RELOC_SH_LOOP_START
 ENUMX
   BFD_RELOC_SH_LOOP_END
+ENUMX
+  BFD_RELOC_SH_COPY
+ENUMX
+  BFD_RELOC_SH_GLOB_DAT
+ENUMX
+  BFD_RELOC_SH_JMP_SLOT
+ENUMX
+  BFD_RELOC_SH_RELATIVE
+ENUMX
+  BFD_RELOC_SH_GOTPC
 ENUMDOC
   Hitachi SH relocs.  Not all of these appear in object files.
 
@@ -2830,8 +2853,6 @@ ENUMX
 ENUMX
   BFD_RELOC_IA64_LTOFF_FPTR64LSB
 ENUMX
-  BFD_RELOC_IA64_SEGBASE
-ENUMX
   BFD_RELOC_IA64_SEGREL32MSB
 ENUMX
   BFD_RELOC_IA64_SEGREL32LSB
@@ -2868,10 +2889,6 @@ ENUMX
 ENUMX
   BFD_RELOC_IA64_IPLTLSB
 ENUMX
-  BFD_RELOC_IA64_EPLTMSB
-ENUMX
-  BFD_RELOC_IA64_EPLTLSB
-ENUMX
   BFD_RELOC_IA64_COPY
 ENUMX
   BFD_RELOC_IA64_TPREL22
@@ -2887,6 +2904,104 @@ ENUMX
   BFD_RELOC_IA64_LDXMOV
 ENUMDOC
   Intel IA64 Relocations.
+
+ENUM
+  BFD_RELOC_M68HC11_HI8
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is the 8 bits high part of an absolute address.
+ENUM
+  BFD_RELOC_M68HC11_LO8
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is the 8 bits low part of an absolute address.
+ENUM
+  BFD_RELOC_M68HC11_3B
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is the 3 bits of a value.
+
+ENUM
+  BFD_RELOC_CRIS_BDISP8
+ENUMX
+  BFD_RELOC_CRIS_UNSIGNED_5
+ENUMX
+  BFD_RELOC_CRIS_SIGNED_6
+ENUMX
+  BFD_RELOC_CRIS_UNSIGNED_6
+ENUMX
+  BFD_RELOC_CRIS_UNSIGNED_4
+ENUMDOC
+  These relocs are only used within the CRIS assembler.  They are not
+  (at present) written to any object files.
+
+ENUM
+  BFD_RELOC_860_COPY
+ENUMX
+  BFD_RELOC_860_GLOB_DAT
+ENUMX
+  BFD_RELOC_860_JUMP_SLOT
+ENUMX
+  BFD_RELOC_860_RELATIVE
+ENUMX
+  BFD_RELOC_860_PC26
+ENUMX
+  BFD_RELOC_860_PLT26
+ENUMX
+  BFD_RELOC_860_PC16
+ENUMX
+  BFD_RELOC_860_LOW0
+ENUMX
+  BFD_RELOC_860_SPLIT0
+ENUMX
+  BFD_RELOC_860_LOW1
+ENUMX
+  BFD_RELOC_860_SPLIT1
+ENUMX
+  BFD_RELOC_860_LOW2
+ENUMX
+  BFD_RELOC_860_SPLIT2
+ENUMX
+  BFD_RELOC_860_LOW3
+ENUMX
+  BFD_RELOC_860_LOGOT0
+ENUMX
+  BFD_RELOC_860_SPGOT0
+ENUMX
+  BFD_RELOC_860_LOGOT1
+ENUMX
+  BFD_RELOC_860_SPGOT1
+ENUMX
+  BFD_RELOC_860_LOGOTOFF0
+ENUMX
+  BFD_RELOC_860_SPGOTOFF0
+ENUMX
+  BFD_RELOC_860_LOGOTOFF1
+ENUMX
+  BFD_RELOC_860_SPGOTOFF1
+ENUMX
+  BFD_RELOC_860_LOGOTOFF2
+ENUMX
+  BFD_RELOC_860_LOGOTOFF3
+ENUMX
+  BFD_RELOC_860_LOPC
+ENUMX
+  BFD_RELOC_860_HIGHADJ
+ENUMX
+  BFD_RELOC_860_HAGOT
+ENUMX
+  BFD_RELOC_860_HAGOTOFF
+ENUMX
+  BFD_RELOC_860_HAPC
+ENUMX
+  BFD_RELOC_860_HIGH
+ENUMX
+  BFD_RELOC_860_HIGOT
+ENUMX
+  BFD_RELOC_860_HIGOTOFF
+ENUMDOC
+  Intel i860 Relocations.
+
 ENDSENUM
   BFD_RELOC_UNUSED
 CODE_FRAGMENT

@@ -16,7 +16,60 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 load_lib gdb.exp
-puts "***** DID USE MONITOR ******"
+# puts "***** DID USE MONITOR ******"
+
+#
+# gdb_target_cmd
+# Send gdb the "target" command
+#
+proc gdb_target_cmd { targetname serialport } {
+    global gdb_prompt
+
+    for {set i 1} {$i <= 3} {incr i} {
+	send_gdb "target $targetname $serialport\n"
+	gdb_expect 60 {
+	    -re "A program is being debugged already.*ill it.*y or n. $" {
+		send_gdb "y\n";
+		exp_continue;
+	    }
+	    -re "Couldn't establish connection to remote.*$gdb_prompt" {
+		verbose "Connection failed";
+	    }
+	    -re "Remote MIPS debugging.*$gdb_prompt" {
+		verbose "Set target to $targetname";
+		return 0;
+	    }
+	    -re "Remote debugging using .*$serialport.*$gdb_prompt" {
+		verbose "Set target to $targetname";
+		return 0;
+	    }
+	    -re "Remote target $targetname connected to.*$gdb_prompt" {
+		verbose "Set target to $targetname";
+		return 0;
+	    }
+	    -re "Connected to.*$gdb_prompt" { 
+		verbose "Set target to $targetname";
+		return 0;
+	    }
+	    -re "Ending remote.*$gdb_prompt" { }
+	    -re "Connection refused.*$gdb_prompt" {
+		verbose "Connection refused by remote target.  Pausing, and trying again."
+		sleep 30
+		continue
+	    }
+	    -re "Timeout reading from remote system.*$gdb_prompt" {
+		verbose "Got timeout error from gdb.";
+	    }
+	    timeout {
+		send_gdb "";
+		break
+	    }
+	}
+    }
+}
+
+
+
 #
 # gdb_target_monitor
 # Set gdb to target the monitor
@@ -55,47 +108,7 @@ proc gdb_target_monitor { exec_file } {
     for {set j 1} {$j <= 2} {incr j} {
 	if [gdb_file_cmd $exec_file] { return -1; }
 
-	for {set i 1} {$i <= 3} {incr i} {
-    	    send_gdb "target $targetname $serialport\n"
-	    gdb_expect 60 {
-		-re "A program is being debugged already.*ill it.*y or n. $" {
-		    send_gdb "y\n";
-		    exp_continue;
-		}
-		-re "Couldn't establish connection to remote.*$gdb_prompt" {
-		    verbose "Connection failed";
-		}
-		-re "Remote MIPS debugging.*$gdb_prompt" {
-		    verbose "Set target to $targetname";
-		    return 0;
-		}
-		-re "Remote debugging using .*$serialport.*$gdb_prompt" {
-		    verbose "Set target to $targetname";
-		    return 0;
-		}
-		-re "Remote target $targetname connected to.*$gdb_prompt" {
-		    verbose "Set target to $targetname";
-		    return 0;
-		}
-		-re "Connected to.*$gdb_prompt" { 
-		    verbose "Set target to $targetname";
-		    return 0;
-		}
-		-re "Ending remote.*$gdb_prompt" { }
-		-re "Connection refused.*$gdb_prompt" {
-		    verbose "Connection refused by remote target.  Pausing, and trying again."
-		    sleep 30
-		    continue
-		}
-		-re "Timeout reading from remote system.*$gdb_prompt" {
-		    verbose "Got timeout error from gdb.";
-		}
-		timeout {
-		    send_gdb "";
-		    break
-		}
-	    }
-	}
+	gdb_target_cmd $targetname $serialport;
 
 	gdb_target_exec;
 

@@ -114,8 +114,7 @@ static int codestream_cnt;
    : codestream_buf[codestream_off++])
 
 static unsigned int
-codestream_fill (peek_flag)
-     int peek_flag;
+codestream_fill (int peek_flag)
 {
   codestream_addr = codestream_next_addr;
   codestream_next_addr += CODESTREAM_BUFSIZ * sizeof (codestream_buf[0]);
@@ -142,8 +141,7 @@ codestream_fill (peek_flag)
 }
 
 static void
-codestream_seek (place)
-     CORE_ADDR place;
+codestream_seek (CORE_ADDR place)
 {
   codestream_next_addr = place / CODESTREAM_BUFSIZ;
   codestream_next_addr *= CODESTREAM_BUFSIZ;
@@ -156,9 +154,7 @@ codestream_seek (place)
 /* This function is currently unused but leave in for now.  */
 
 static void
-codestream_read (buf, count)
-     unsigned int *buf;
-     int count;
+codestream_read (unsigned int *buf, int count)
 {
   unsigned int *p;
   int i;
@@ -170,8 +166,7 @@ codestream_read (buf, count)
 /* Set up prologue scanning and return the first insn.  */
 
 static unsigned int
-setup_prologue_scan (pc)
-     CORE_ADDR pc;
+setup_prologue_scan (CORE_ADDR pc)
 {
   unsigned int insn;
 
@@ -189,8 +184,7 @@ setup_prologue_scan (pc)
  */
 
 static long
-arc_get_frame_setup (pc)
-     CORE_ADDR pc;
+arc_get_frame_setup (CORE_ADDR pc)
 {
   unsigned int insn;
   /* Size of frame or -1 if unrecognizable prologue.  */
@@ -277,9 +271,7 @@ arc_get_frame_setup (pc)
    This allows a quicker answer.  */
 
 CORE_ADDR
-arc_skip_prologue (pc, frameless_p)
-     CORE_ADDR pc;
-     int frameless_p;
+arc_skip_prologue (CORE_ADDR pc, int frameless_p)
 {
   unsigned int insn;
   int i, frame_size;
@@ -310,8 +302,7 @@ arc_skip_prologue (pc, frameless_p)
    This is taken from frameless_look_for_prologue.  */
 
 CORE_ADDR
-arc_frame_saved_pc (frame)
-     struct frame_info *frame;
+arc_frame_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR func_start;
   unsigned int insn;
@@ -357,9 +348,7 @@ arc_frame_saved_pc (frame)
  */
 
 void
-frame_find_saved_regs (fip, fsrp)
-     struct frame_info *fip;
-     struct frame_saved_regs *fsrp;
+frame_find_saved_regs (struct frame_info *fip, struct frame_saved_regs *fsrp)
 {
   long locals;
   unsigned int insn;
@@ -472,9 +461,7 @@ insn_type;
 /* ??? Need to verify all cases are properly handled.  */
 
 static insn_type
-get_insn_type (insn, pc, target)
-     unsigned long insn;
-     CORE_ADDR pc, *target;
+get_insn_type (unsigned long insn, CORE_ADDR pc, CORE_ADDR *target)
 {
   unsigned long limm;
 
@@ -535,9 +522,8 @@ get_insn_type (insn, pc, target)
    set up a simulated single-step, we undo our damage.  */
 
 void
-arc_software_single_step (ignore, insert_breakpoints_p)
-     enum target_signal ignore;	/* sig but we don't need it */
-     int insert_breakpoints_p;
+arc_software_single_step (enum target_signal ignore,	/* sig but we don't need it */
+			  int insert_breakpoints_p)
 {
   static CORE_ADDR next_pc, target;
   static int brktrg_p;
@@ -593,8 +579,7 @@ arc_software_single_step (ignore, insert_breakpoints_p)
    This routine returns true on success. */
 
 int
-get_longjmp_target (pc)
-     CORE_ADDR *pc;
+get_longjmp_target (CORE_ADDR *pc)
 {
   char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
   CORE_ADDR sp, jb_addr;
@@ -621,9 +606,7 @@ get_longjmp_target (pc)
 /* Disassemble one instruction.  */
 
 static int
-arc_print_insn (vma, info)
-     bfd_vma vma;
-     disassemble_info *info;
+arc_print_insn (bfd_vma vma, disassemble_info *info)
 {
   static int current_mach;
   static int current_endian;
@@ -670,9 +653,7 @@ arc_set_cpu_type_command (char *args, int from_tty)
 }
 
 static void
-arc_show_cpu_type_command (args, from_tty)
-     char *args;
-     int from_tty;
+arc_show_cpu_type_command (char *args, int from_tty)
 {
 }
 
@@ -680,8 +661,7 @@ arc_show_cpu_type_command (args, from_tty)
    Result is a boolean indicating success.  */
 
 static int
-arc_set_cpu_type (str)
-     char *str;
+arc_set_cpu_type (char *str)
 {
   int i, j;
 
@@ -702,7 +682,7 @@ arc_set_cpu_type (str)
 }
 
 void
-_initialize_arc_tdep ()
+_initialize_arc_tdep (void)
 {
   struct cmd_list_element *c;
 

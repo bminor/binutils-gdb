@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_arc
 #define ARCH_arm
 #define ARCH_avr
+#define ARCH_cris
 #define ARCH_d10v
 #define ARCH_d30v
 #define ARCH_h8300
@@ -32,11 +33,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_hppa
 #define ARCH_i370
 #define ARCH_i386
+#define ARCH_i860
 #define ARCH_i960
 #define ARCH_ia64
 #define ARCH_fr30
 #define ARCH_m32r
 #define ARCH_m68k
+#define ARCH_m68hc11
+#define ARCH_m68hc12
 #define ARCH_m88k
 #define ARCH_mcore
 #define ARCH_mips
@@ -101,6 +105,11 @@ disassembler (abfd)
       disassemble = print_insn_avr;
       break;
 #endif
+#ifdef ARCH_cris
+    case bfd_arch_cris:
+      disassemble = cris_get_disassembler (abfd);
+      break;
+#endif
 #ifdef ARCH_d10v
     case bfd_arch_d10v:
       disassemble = print_insn_d10v;
@@ -144,6 +153,11 @@ disassembler (abfd)
         disassemble = print_insn_i386_att;
       break;
 #endif
+#ifdef ARCH_i860
+    case bfd_arch_i860:
+      disassemble = print_insn_i860;
+      break;
+#endif
 #ifdef ARCH_i960
     case bfd_arch_i960:
       disassemble = print_insn_i960;
@@ -162,6 +176,14 @@ disassembler (abfd)
 #ifdef ARCH_m32r
     case bfd_arch_m32r:
       disassemble = print_insn_m32r;
+      break;
+#endif
+#if defined(ARCH_m68hc11) || defined(ARCH_m68hc12)
+    case bfd_arch_m68hc11:
+      disassemble = print_insn_m68hc11;
+      break;
+    case bfd_arch_m68hc12:
+      disassemble = print_insn_m68hc12;
       break;
 #endif
 #ifdef ARCH_m68k
@@ -217,7 +239,7 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_rs6000
     case bfd_arch_rs6000:
-      if (bfd_get_mach (abfd) == 620)
+      if (bfd_get_mach (abfd) == bfd_mach_ppc_620)
 	disassemble = print_insn_big_powerpc;
       else
 	disassemble = print_insn_rs6000;

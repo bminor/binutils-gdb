@@ -1,7 +1,5 @@
-/* Caching code.  Typically used by remote back ends for
-   caching remote memory.
-
-   Copyright 1992-1993, 1995, 1998-1999 Free Software Foundation, Inc.
+/* Caching code.
+   Copyright 1992-1993, 1995, 1998-1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +23,7 @@
 #include "gdbcmd.h"
 #include "gdb_string.h"
 #include "gdbcore.h"
+#include "target.h"
 
 /* 
    The data cache could lead to incorrect results because it doesn't know
@@ -126,12 +125,6 @@ struct dcache_block
 
 struct dcache_struct
   {
-    /* Function to actually read the target memory. */
-    memxferfunc read_memory;
-
-    /* Function to actually write the target memory */
-    memxferfunc write_memory;
-
     /* free list */
     struct dcache_block *free_head;
     struct dcache_block *free_tail;
@@ -149,17 +142,19 @@ struct dcache_struct
     int cache_has_stuff;
   };
 
-static int dcache_poke_byte (DCACHE * dcache, CORE_ADDR addr, char *ptr);
+static int dcache_poke_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr);
 
-static int dcache_peek_byte (DCACHE * dcache, CORE_ADDR addr, char *ptr);
+static int dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr);
 
-static struct dcache_block *dcache_hit (DCACHE * dcache, CORE_ADDR addr);
+static struct dcache_block *dcache_hit (DCACHE *dcache, CORE_ADDR addr);
 
-static int dcache_write_line (DCACHE * dcache, struct dcache_block *db);
+static int dcache_write_line (DCACHE *dcache, struct dcache_block *db);
 
-static struct dcache_block *dcache_alloc (DCACHE * dcache);
+static int dcache_read_line (DCACHE *dcache, struct dcache_block *db);
 
-static int dcache_writeback (DCACHE * dcache);
+static struct dcache_block *dcache_alloc (DCACHE *dcache, CORE_ADDR addr);
+
+static int dcache_writeback (DCACHE *dcache);
 
 static void dcache_info (char *exp, int tty);
 
@@ -173,8 +168,7 @@ DCACHE *last_cache;		/* Used by info dcache */
 /* Free all the data cache blocks, thus discarding all cached data.  */
 
 void
-dcache_flush (dcache)
-     DCACHE *dcache;
+dcache_invalidate (DCACHE *dcache)
 {
   int i;
   dcache->valid_head = 0;
@@ -204,9 +198,7 @@ dcache_flush (dcache)
    containing it. */
 
 static struct dcache_block *
-dcache_hit (dcache, addr)
-     DCACHE *dcache;
-     CORE_ADDR addr;
+dcache_hit (DCACHE *dcache, CORE_ADDR addr)
 {
   register struct dcache_block *db;
 
@@ -230,13 +222,11 @@ dcache_hit (dcache, addr)
    be written is. */
 
 static int
-dcache_write_line (dcache, db)
-     DCACHE *dcache;
-     register struct dcache_block *db;
+dcache_write_line (DCACHE *dcache, register struct dcache_block *db)
 {
   int s;
   int e;
-  s = 0;
+
   if (db->anydirty)
     {
       for (s = 0; s < LINE_SIZE; s++)
@@ -253,10 +243,10 @@ dcache_write_line (dcache, db)
 		int done = 0;
 		while (done < len)
 		  {
-		    int t = dcache->write_memory (db->addr + s + done,
-						  db->data + s + done,
-						  len - done);
-		    if (t == 0)
+		    int t = do_xfer_memory (db->addr + s + done,
+					    db->data + s + done,
+					    len - done, 1);
+		    if (t <= 0)
 		      return 0;
 		    done += t;
 		  }
@@ -270,18 +260,49 @@ dcache_write_line (dcache, db)
   return 1;
 }
 
+/* Read cache line */
+static int
+dcache_read_line (DCACHE *dcache, struct dcache_block *db)
+{
+  CORE_ADDR memaddr;
+  char *myaddr;
+  int len;
+  int res;
+
+  /* If there are any dirty bytes in the line, it must be written
+     before a new line can be read */
+  if (db->anydirty)
+    {
+      if (!dcache_write_line (dcache, db))
+	return 0;
+    }
+  
+  len = LINE_SIZE;
+  memaddr = db->addr;
+  myaddr  = db->data;
+
+  while (len > 0)
+    {
+      res = do_xfer_memory (memaddr, myaddr, len, 0);
+      if (res <= 0)
+	return 0;
+
+      memaddr += res;
+      myaddr  += res;
+      len     -= res;
+    }
+
+  memset (db->state, ENTRY_OK, sizeof (db->data));
+  db->anydirty = 0;
+  
+  return 1;
+}
 
 /* Get a free cache block, put or keep it on the valid list,
-   and return its address.  The caller should store into the block
-   the address and data that it describes, then remque it from the
-   free list and insert it into the valid list.  This procedure
-   prevents errors from creeping in if a memory retrieval is
-   interrupted (which used to put garbage blocks in the valid
-   list...).  */
+   and return its address.  */
 
 static struct dcache_block *
-dcache_alloc (dcache)
-     DCACHE *dcache;
+dcache_alloc (DCACHE *dcache, CORE_ADDR addr)
 {
   register struct dcache_block *db;
 
@@ -298,10 +319,17 @@ dcache_alloc (dcache)
     {
       /* Nothing left on free list, so grab one from the valid list */
       db = dcache->valid_head;
-      dcache->valid_head = db->p;
 
-      dcache_write_line (dcache, db);
+      if (!dcache_write_line (dcache, db))
+	return NULL;
+      
+      dcache->valid_head = db->p;
     }
+
+  db->addr = MASK(addr);
+  db->refs = 0;
+  db->anydirty = 0;
+  memset (db->state, ENTRY_BAD, sizeof (db->data));
 
   /* append this line to end of valid list */
   if (!dcache->valid_head)
@@ -314,55 +342,9 @@ dcache_alloc (dcache)
   return db;
 }
 
-/* Using the data cache DCACHE return the contents of the byte at
-   address ADDR in the remote machine.  
-
-   Returns 0 on error. */
-
-static int
-dcache_peek_byte (dcache, addr, ptr)
-     DCACHE *dcache;
-     CORE_ADDR addr;
-     char *ptr;
-{
-  register struct dcache_block *db = dcache_hit (dcache, addr);
-  int ok = 1;
-  int done = 0;
-  if (db == 0
-      || db->state[XFORM (addr)] == ENTRY_BAD)
-    {
-      if (db)
-	{
-	  dcache_write_line (dcache, db);
-	}
-      else
-	db = dcache_alloc (dcache);
-      immediate_quit++;
-      db->addr = MASK (addr);
-      while (done < LINE_SIZE)
-	{
-	  int try =
-	  (*dcache->read_memory)
-	  (db->addr + done,
-	   db->data + done,
-	   LINE_SIZE - done);
-	  if (try == 0)
-	    return 0;
-	  done += try;
-	}
-      immediate_quit--;
-
-      memset (db->state, ENTRY_OK, sizeof (db->data));
-      db->anydirty = 0;
-    }
-  *ptr = db->data[XFORM (addr)];
-  return ok;
-}
-
 /* Writeback any dirty lines to the remote. */
 static int
-dcache_writeback (dcache)
-     DCACHE *dcache;
+dcache_writeback (DCACHE *dcache)
 {
   struct dcache_block *db;
 
@@ -378,19 +360,31 @@ dcache_writeback (dcache)
 }
 
 
-/* Using the data cache DCACHE return the contents of the word at
-   address ADDR in the remote machine.  */
-int
-dcache_fetch (dcache, addr)
-     DCACHE *dcache;
-     CORE_ADDR addr;
+/* Using the data cache DCACHE return the contents of the byte at
+   address ADDR in the remote machine.  
+
+   Returns 0 on error. */
+
+static int
+dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
 {
-  int res;
+  register struct dcache_block *db = dcache_hit (dcache, addr);
 
-  if (dcache_xfer_memory (dcache, addr, (char *) &res, sizeof res, 0) != sizeof res)
-    memory_error (EIO, addr);
+  if (!db)
+    {
+      db = dcache_alloc (dcache, addr);
+      if (!db)
+	return 0;
+    }
+  
+  if (db->state[XFORM (addr)] == ENTRY_BAD)
+    {
+      if (!dcache_read_line(dcache, db))
+         return 0;
+    }
 
-  return res;
+  *ptr = db->data[XFORM (addr)];
+  return 1;
 }
 
 
@@ -399,18 +393,15 @@ dcache_fetch (dcache, addr)
  */
 
 static int
-dcache_poke_byte (dcache, addr, ptr)
-     DCACHE *dcache;
-     CORE_ADDR addr;
-     char *ptr;
+dcache_poke_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
 {
   register struct dcache_block *db = dcache_hit (dcache, addr);
 
   if (!db)
     {
-      db = dcache_alloc (dcache);
-      db->addr = MASK (addr);
-      memset (db->state, ENTRY_BAD, sizeof (db->data));
+      db = dcache_alloc (dcache, addr);
+      if (!db)
+	return 0;
     }
 
   db->data[XFORM (addr)] = *ptr;
@@ -419,43 +410,33 @@ dcache_poke_byte (dcache, addr, ptr)
   return 1;
 }
 
-/* Write the word at ADDR both in the data cache and in the remote machine.  
-   Return zero on write error.
- */
-
-int
-dcache_poke (dcache, addr, data)
-     DCACHE *dcache;
-     CORE_ADDR addr;
-     int data;
-{
-  if (dcache_xfer_memory (dcache, addr, (char *) &data, sizeof data, 1) != sizeof data)
-    return 0;
-
-  return dcache_writeback (dcache);
-}
-
-
 /* Initialize the data cache.  */
 DCACHE *
-dcache_init (reading, writing)
-     memxferfunc reading;
-     memxferfunc writing;
+dcache_init (void)
 {
   int csize = sizeof (struct dcache_block) * DCACHE_SIZE;
   DCACHE *dcache;
 
   dcache = (DCACHE *) xmalloc (sizeof (*dcache));
-  dcache->read_memory = reading;
-  dcache->write_memory = writing;
 
   dcache->the_cache = (struct dcache_block *) xmalloc (csize);
   memset (dcache->the_cache, 0, csize);
 
-  dcache_flush (dcache);
+  dcache_invalidate (dcache);
 
   last_cache = dcache;
   return dcache;
+}
+
+/* Free a data cache */
+void
+dcache_free (DCACHE *dcache)
+{
+  if (last_cache == dcache)
+    last_cache = NULL;
+
+  xfree (dcache->the_cache);
+  xfree (dcache);
 }
 
 /* Read or write LEN bytes from inferior memory at MEMADDR, transferring
@@ -467,18 +448,14 @@ dcache_init (reading, writing)
    This routine is indended to be called by remote_xfer_ functions. */
 
 int
-dcache_xfer_memory (dcache, memaddr, myaddr, len, should_write)
-     DCACHE *dcache;
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int should_write;
+dcache_xfer_memory (DCACHE *dcache, CORE_ADDR memaddr, char *myaddr, int len,
+		    int should_write)
 {
   int i;
 
   if (dcache_enabled_p)
     {
-      int (*xfunc) (DCACHE * dcache, CORE_ADDR addr, char *ptr);
+      int (*xfunc) (DCACHE *dcache, CORE_ADDR addr, char *ptr);
       xfunc = should_write ? dcache_poke_byte : dcache_peek_byte;
 
       for (i = 0; i < len; i++)
@@ -486,26 +463,24 @@ dcache_xfer_memory (dcache, memaddr, myaddr, len, should_write)
 	  if (!xfunc (dcache, memaddr + i, myaddr + i))
 	    return 0;
 	}
+
+      if (should_write)
+	dcache_writeback (dcache);
+
       dcache->cache_has_stuff = 1;
-      dcache_writeback (dcache);
     }
   else
     {
-      memxferfunc xfunc;
-      xfunc = should_write ? dcache->write_memory : dcache->read_memory;
-
       if (dcache->cache_has_stuff)
-	dcache_flush (dcache);
+	dcache_invalidate (dcache);
 
-      len = xfunc (memaddr, myaddr, len);
+      len = do_xfer_memory(memaddr, myaddr, len, should_write);
     }
   return len;
 }
 
 static void
-dcache_info (exp, tty)
-     char *exp;
-     int tty;
+dcache_info (char *exp, int tty)
 {
   struct dcache_block *p;
 
@@ -517,21 +492,24 @@ dcache_info (exp, tty)
   printf_filtered ("Dcache enabled, line width %d, depth %d\n",
 		   LINE_SIZE, DCACHE_SIZE);
 
-  printf_filtered ("Cache state:\n");
-
-  for (p = last_cache->valid_head; p; p = p->p)
+  if (last_cache)
     {
-      int j;
-      printf_filtered ("Line at %s, referenced %d times\n",
-		       paddr (p->addr), p->refs);
+      printf_filtered ("Cache state:\n");
 
-      for (j = 0; j < LINE_SIZE; j++)
-	printf_filtered ("%02x", p->data[j] & 0xFF);
-      printf_filtered ("\n");
+      for (p = last_cache->valid_head; p; p = p->p)
+	{
+	  int j;
+	  printf_filtered ("Line at %s, referenced %d times\n",
+			   paddr (p->addr), p->refs);
 
-      for (j = 0; j < LINE_SIZE; j++)
-	printf_filtered (" %2x", p->state[j]);
-      printf_filtered ("\n");
+	  for (j = 0; j < LINE_SIZE; j++)
+	    printf_filtered ("%02x", p->data[j] & 0xFF);
+	  printf_filtered ("\n");
+
+	  for (j = 0; j < LINE_SIZE; j++)
+	    printf_filtered ("%2x", p->state[j]);
+	  printf_filtered ("\n");
+	}
     }
 }
 
@@ -543,7 +521,7 @@ set_dcache_state (int what)
 }
 
 void
-_initialize_dcache ()
+_initialize_dcache (void)
 {
   add_show_from_set
     (add_set_cmd ("remotecache", class_support, var_boolean,

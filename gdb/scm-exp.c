@@ -39,10 +39,7 @@ static LONGEST scm_istr2int (char *, int, int);
 static void scm_lreadr (int);
 
 static LONGEST
-scm_istr2int (str, len, radix)
-     char *str;
-     int len;
-     int radix;
+scm_istr2int (char *str, int len, int radix)
 {
   int i = 0;
   LONGEST inum = 0;
@@ -107,10 +104,7 @@ scm_istr2int (str, len, radix)
 }
 
 static LONGEST
-scm_istring2number (str, len, radix)
-     char *str;
-     int len;
-     int radix;
+scm_istring2number (char *str, int len, int radix)
 {
   int i = 0;
   char ex = 0;
@@ -184,9 +178,7 @@ scm_istring2number (str, len, radix)
 }
 
 static void
-scm_read_token (c, weird)
-     int c;
-     int weird;
+scm_read_token (int c, int weird)
 {
   while (1)
     {
@@ -243,7 +235,7 @@ scm_read_token (c, weird)
 }
 
 static int
-scm_skip_ws ()
+scm_skip_ws (void)
 {
   register int c;
   while (1)
@@ -275,8 +267,7 @@ scm_skip_ws ()
 }
 
 static void
-scm_lreadparen (skipping)
-     int skipping;
+scm_lreadparen (int skipping)
 {
   for (;;)
     {
@@ -291,8 +282,7 @@ scm_lreadparen (skipping)
 }
 
 static void
-scm_lreadr (skipping)
-     int skipping;
+scm_lreadr (int skipping)
 {
   int c, j;
   struct stoken str;
@@ -487,7 +477,7 @@ handle_immediate:
 }
 
 int
-scm_parse ()
+scm_parse (void)
 {
   char *start;
   while (*lexptr == ' ')

@@ -82,9 +82,7 @@ int watchdog = 0;
  */
 
 static void
-maintenance_command (args, from_tty)
-     char *args;
-     int from_tty;
+maintenance_command (char *args, int from_tty)
 {
   printf_unfiltered ("\"maintenance\" must be followed by the name of a maintenance command.\n");
   help_list (maintenancelist, "maintenance ", -1, gdb_stdout);
@@ -93,9 +91,7 @@ maintenance_command (args, from_tty)
 #ifndef _WIN32
 /* ARGSUSED */
 static void
-maintenance_dump_me (args, from_tty)
-     char *args;
-     int from_tty;
+maintenance_dump_me (char *args, int from_tty)
 {
   if (query ("Should GDB dump core? "))
     {
@@ -131,9 +127,7 @@ maintenance_internal_error (char *args, int from_tty)
    demangle and print what it points to, etc.  (FIXME) */
 
 static void
-maintenance_demangle (args, from_tty)
-     char *args;
-     int from_tty;
+maintenance_demangle (char *args, int from_tty)
 {
   char *demangled;
 
@@ -147,7 +141,7 @@ maintenance_demangle (args, from_tty)
       if (demangled != NULL)
 	{
 	  printf_unfiltered ("%s\n", demangled);
-	  free (demangled);
+	  xfree (demangled);
 	}
       else
 	{
@@ -157,9 +151,7 @@ maintenance_demangle (args, from_tty)
 }
 
 static void
-maintenance_time_display (args, from_tty)
-     char *args;
-     int from_tty;
+maintenance_time_display (char *args, int from_tty)
 {
   extern int display_time;
 
@@ -170,9 +162,7 @@ maintenance_time_display (args, from_tty)
 }
 
 static void
-maintenance_space_display (args, from_tty)
-     char *args;
-     int from_tty;
+maintenance_space_display (char *args, int from_tty)
 {
   extern int display_space;
 
@@ -188,19 +178,14 @@ maintenance_space_display (args, from_tty)
 
 /* ARGSUSED */
 static void
-maintenance_info_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+maintenance_info_command (char *arg, int from_tty)
 {
   printf_unfiltered ("\"maintenance info\" must be followed by the name of an info command.\n");
   help_list (maintenanceinfolist, "maintenance info ", -1, gdb_stdout);
 }
 
 static void
-print_section_table (abfd, asect, ignore)
-     bfd *abfd;
-     asection *asect;
-     PTR ignore;
+print_section_table (bfd *abfd, asection *asect, PTR ignore)
 {
   flagword flags;
 
@@ -250,9 +235,7 @@ print_section_table (abfd, asect, ignore)
 
 /* ARGSUSED */
 static void
-maintenance_info_sections (arg, from_tty)
-     char *arg;
-     int from_tty;
+maintenance_info_sections (char *arg, int from_tty)
 {
   if (exec_bfd)
     {
@@ -275,12 +258,25 @@ maintenance_info_sections (arg, from_tty)
 
 /* ARGSUSED */
 void
-maintenance_print_statistics (args, from_tty)
-     char *args;
-     int from_tty;
+maintenance_print_statistics (char *args, int from_tty)
 {
   print_objfile_statistics ();
   print_symbol_bcache_statistics ();
+}
+
+void
+maintenance_print_architecture (char *args, int from_tty)
+{
+  if (args == NULL)
+    gdbarch_dump (current_gdbarch, gdb_stdout);
+  else
+    {
+      struct ui_file *file = gdb_fopen (args, "w");
+      if (file == NULL)
+	perror_with_name ("maintenance print architecture");
+      gdbarch_dump (current_gdbarch, file);    
+      ui_file_delete (file);
+    }
 }
 
 /* The "maintenance print" command is defined as a prefix, with
@@ -289,9 +285,7 @@ maintenance_print_statistics (args, from_tty)
 
 /* ARGSUSED */
 static void
-maintenance_print_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+maintenance_print_command (char *arg, int from_tty)
 {
   printf_unfiltered ("\"maintenance print\" must be followed by the name of a print command.\n");
   help_list (maintenanceprintlist, "maintenance print ", -1, gdb_stdout);
@@ -304,9 +298,7 @@ maintenance_print_command (arg, from_tty)
  */
 
 static void
-maintenance_translate_address (arg, from_tty)
-     char *arg;
-     int from_tty;
+maintenance_translate_address (char *arg, int from_tty)
 {
   CORE_ADDR address;
   asection *sect;
@@ -452,7 +444,7 @@ maintenance_do_deprecate (char *text, int deprecate)
     {
 
       if (alias->flags & MALLOCED_REPLACEMENT)
-	free (alias->replacement);
+	xfree (alias->replacement);
 
       if (deprecate)
 	alias->flags |= (DEPRECATED_WARN_USER | CMD_DEPRECATED);
@@ -465,7 +457,7 @@ maintenance_do_deprecate (char *text, int deprecate)
   else if (cmd)
     {
       if (cmd->flags & MALLOCED_REPLACEMENT)
-	free (cmd->replacement);
+	xfree (cmd->replacement);
 
       if (deprecate)
 	cmd->flags |= (DEPRECATED_WARN_USER | CMD_DEPRECATED);
@@ -479,7 +471,7 @@ maintenance_do_deprecate (char *text, int deprecate)
 
 
 void
-_initialize_maint_cmds ()
+_initialize_maint_cmds (void)
 {
   add_prefix_cmd ("maintenance", class_maintenance, maintenance_command,
 		  "Commands for use by GDB maintainers.\n\
@@ -567,6 +559,11 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
 
   add_cmd ("statistics", class_maintenance, maintenance_print_statistics,
 	   "Print statistics about internal gdb state.",
+	   &maintenanceprintlist);
+
+  add_cmd ("architecture", class_maintenance, maintenance_print_architecture,
+	   "Print the internal architecture configuration.\
+Takes an optional file parameter.",
 	   &maintenanceprintlist);
 
   add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,

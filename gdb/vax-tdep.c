@@ -21,6 +21,9 @@
 #include "defs.h"
 #include "symtab.h"
 #include "opcode/vax.h"
+#include "gdbcore.h"
+#include "frame.h"
+#include "value.h"
 
 /* Vax instructions are never longer than this.  */
 #define MAXLEN 62
@@ -34,8 +37,7 @@ static unsigned char *print_insn_arg ();
    to reach some "real" code.  */
 
 CORE_ADDR
-vax_skip_prologue (pc)
-     CORE_ADDR pc;
+vax_skip_prologue (CORE_ADDR pc)
 {
   register int op = (unsigned char) read_memory_integer (pc, 1);
   if (op == 0x11)
@@ -64,8 +66,7 @@ vax_skip_prologue (pc)
    Can return -1, meaning no way to tell.  */
 
 int
-vax_frame_num_args (fi)
-     struct frame_info *fi;
+vax_frame_num_args (struct frame_info *fi)
 {
   return (0xff & read_memory_integer (FRAME_ARGS_ADDRESS (fi), 1));
 }
@@ -77,14 +78,12 @@ vax_frame_num_args (fi)
    Returns length of the instruction, in bytes.  */
 
 static int
-vax_print_insn (memaddr, info)
-     CORE_ADDR memaddr;
-     disassemble_info *info;
+vax_print_insn (CORE_ADDR memaddr, disassemble_info *info)
 {
   unsigned char buffer[MAXLEN];
   register int i;
   register unsigned char *p;
-  register char *d;
+  const char *d;
 
   int status = (*info->read_memory_func) (memaddr, buffer, MAXLEN, info);
   if (status != 0)
@@ -126,11 +125,8 @@ vax_print_insn (memaddr, info)
 }
 
 static unsigned char *
-print_insn_arg (d, p, addr, info)
-     char *d;
-     register char *p;
-     CORE_ADDR addr;
-     disassemble_info *info;
+print_insn_arg (char *d, register char *p, CORE_ADDR addr,
+		disassemble_info *info)
 {
   register int regnum = *p & 0xf;
   float floatlitbuf;
@@ -300,7 +296,7 @@ print_insn_arg (d, p, addr, info)
 }
 
 void
-_initialize_vax_tdep ()
+_initialize_vax_tdep (void)
 {
   tm_print_insn = vax_print_insn;
 }

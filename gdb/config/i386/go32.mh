@@ -12,7 +12,6 @@ NATDEPFILES= go32-nat.o
 
 TERMCAP= 
 HOST_IPC=
-SER_HARDWIRE= ser-go32.o
 CC= gcc
 XM_CLIBS= -ldbg
 

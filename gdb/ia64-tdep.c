@@ -30,6 +30,19 @@
 #include "elf/common.h"		/* for DT_PLTGOT value */
 #include "elf-bfd.h"
 
+/* Hook for determining the global pointer when calling functions in
+   the inferior under AIX.  The initialization code in ia64-aix-nat.c
+   sets this hook to the address of a function which will find the
+   global pointer for a given address.  
+   
+   The generic code which uses the dynamic section in the inferior for
+   finding the global pointer is not of much use on AIX since the
+   values obtained from the inferior have not been relocated.  */
+
+CORE_ADDR (*native_find_global_pointer) (CORE_ADDR) = 0;
+
+/* An enumeration of the different IA-64 instruction types.  */
+
 typedef enum instruction_type
 {
   A,			/* Integer ALU ;    I-unit or M-unit */
@@ -213,15 +226,19 @@ struct frame_extra_info
 struct gdbarch_tdep
   {
     int os_ident;	/* From the ELF header, one of the ELFOSABI_
-                           constants: ELFOSABI_LINUX, ELFOSABI_MONTEREY,
+                           constants: ELFOSABI_LINUX, ELFOSABI_AIX,
 			   etc. */
     CORE_ADDR (*sigcontext_register_address) (CORE_ADDR, int);
     			/* OS specific function which, given a frame address
 			   and register number, returns the offset to the
 			   given register from the start of the frame. */
+    CORE_ADDR (*find_global_pointer) (CORE_ADDR);
   };
 
-#define SIGCONTEXT_REGISTER_ADDRESS (gdbarch_tdep (current_gdbarch)->sigcontext_register_address)
+#define SIGCONTEXT_REGISTER_ADDRESS \
+  (gdbarch_tdep (current_gdbarch)->sigcontext_register_address)
+#define FIND_GLOBAL_POINTER \
+  (gdbarch_tdep (current_gdbarch)->find_global_pointer)
 
 static char *
 ia64_register_name (int reg)
@@ -564,9 +581,7 @@ ia64_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 /* We don't really want to use this, but remote.c needs to call it in order
    to figure out if Z-packets are supported or not.  Oh, well. */
 unsigned char *
-ia64_breakpoint_from_pc (pcptr, lenptr)
-     CORE_ADDR *pcptr;
-     int *lenptr;
+ia64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] =
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -986,6 +1001,13 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
   if (do_fsr_stuff) {
     int i;
     CORE_ADDR addr;
+    int sor, rrb_gr;
+    
+    /* Extract the size of the rotating portion of the stack
+       frame and the register rename base from the current
+       frame marker. */
+    sor = ((frame->extra_info->cfm >> 14) & 0xf) * 8;
+    rrb_gr = (frame->extra_info->cfm >> 18) & 0x7f;
 
     for (i = 0, addr = frame->extra_info->bsp;
 	 i < frame->extra_info->sof;
@@ -995,7 +1017,11 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	  {
 	    addr += 8;
 	  }
-	frame->saved_regs[IA64_GR32_REGNUM + i] = addr;
+	if (i < sor)
+	  frame->saved_regs[IA64_GR32_REGNUM + ((i + (sor - rrb_gr)) % sor)] 
+	    = addr;
+	else
+	  frame->saved_regs[IA64_GR32_REGNUM + i] = addr;
 
 	if (i+32 == cfm_reg)
 	  frame->saved_regs[IA64_CFM_REGNUM] = addr;
@@ -1127,6 +1153,16 @@ ia64_get_saved_register (char *raw_buffer,
       int prN_val;
       ia64_get_saved_register (pr_raw_buffer, &pr_optim, &pr_addr,
                                frame, IA64_PR_REGNUM, &pr_lval);
+      if (IA64_PR16_REGNUM <= regnum && regnum <= IA64_PR63_REGNUM)
+	{
+	  /* Fetch predicate register rename base from current frame
+	     marker for this frame. */
+	  int rrb_pr = (frame->extra_info->cfm >> 32) & 0x3f;
+
+	  /* Adjust the register number to account for register rotation. */
+	  regnum = IA64_PR16_REGNUM 
+	         + ((regnum - IA64_PR16_REGNUM) + rrb_pr) % 48;
+	}
       prN_val = extract_bit_field ((unsigned char *) pr_raw_buffer,
                                    regnum - IA64_PR0_REGNUM, 1);
       store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), prN_val);
@@ -1217,6 +1253,18 @@ ia64_get_saved_register (char *raw_buffer,
     }
   else
     {
+      if (IA64_FR32_REGNUM <= regnum && regnum <= IA64_FR127_REGNUM)
+	{
+	  /* Fetch floating point register rename base from current
+	     frame marker for this frame. */
+	  int rrb_fr = (frame->extra_info->cfm >> 25) & 0x7f;
+
+	  /* Adjust the floating point register number to account for
+	     register rotation. */
+	  regnum = IA64_FR32_REGNUM
+	         + ((regnum - IA64_FR32_REGNUM) + rrb_fr) % 96;
+	}
+
       generic_get_saved_register (raw_buffer, optimized, addrp, frame,
                                   regnum, lval);
     }
@@ -1439,7 +1487,7 @@ is_float_or_hfa_type (struct type *t)
    d_un.d_ptr value is the global pointer.  */
 
 static CORE_ADDR
-find_global_pointer (CORE_ADDR faddr)
+generic_elf_find_global_pointer (CORE_ADDR faddr)
 {
   struct obj_section *faddr_sect;
      
@@ -1560,7 +1608,7 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
       fdesc = *fdaptr;
       *fdaptr += 16;
 
-      global_pointer = find_global_pointer (faddr);
+      global_pointer = FIND_GLOBAL_POINTER (faddr);
 
       if (global_pointer == 0)
 	global_pointer = read_register (IA64_GR1_REGNUM);
@@ -1741,7 +1789,7 @@ ia64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 CORE_ADDR
 ia64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  CORE_ADDR global_pointer = find_global_pointer (pc);
+  CORE_ADDR global_pointer = FIND_GLOBAL_POINTER (pc);
 
   if (global_pointer != 0)
     write_register (IA64_GR1_REGNUM, global_pointer);
@@ -1867,14 +1915,12 @@ process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	    case 0 :
 	      *os_ident_ptr = ELFOSABI_LINUX;
 	      break;
-#if 0	/* FIXME: Enable after internal repository is synced with sourceware */
 	    case 1 :
 	      *os_ident_ptr = ELFOSABI_HURD;
 	      break;
 	    case 2 :
 	      *os_ident_ptr = ELFOSABI_SOLARIS;
 	      break;
-#endif
 	    default :
 	      internal_error (
 		"process_note_abi_sections: unknown OS number %d", os_number);
@@ -1928,6 +1974,19 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     tdep->sigcontext_register_address = 0;
 
+  /* We know that Linux won't have to resort to the native_find_global_pointer
+     hackery.  But that's the only one we know about so far, so if
+     native_find_global_pointer is set to something non-zero, then use
+     it.  Otherwise fall back to using generic_elf_find_global_pointer.  
+     This arrangement should (in theory) allow us to cross debug Linux
+     binaries from an AIX machine.  */
+  if (os_ident == ELFOSABI_LINUX)
+    tdep->find_global_pointer = generic_elf_find_global_pointer;
+  else if (native_find_global_pointer != 0)
+    tdep->find_global_pointer = native_find_global_pointer;
+  else
+    tdep->find_global_pointer = generic_elf_find_global_pointer;
+
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
   set_gdbarch_long_bit (gdbarch, 64);
@@ -1941,6 +2000,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, sp_regnum);
   set_gdbarch_fp_regnum (gdbarch, fp_regnum);
   set_gdbarch_pc_regnum (gdbarch, pc_regnum);
+  set_gdbarch_fp0_regnum (gdbarch, IA64_FR0_REGNUM);
 
   set_gdbarch_register_name (gdbarch, ia64_register_name);
   set_gdbarch_register_size (gdbarch, 8);

@@ -29,11 +29,7 @@
 static void cpu32bug_open (char *args, int from_tty);
 
 static void
-cpu32bug_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
+cpu32bug_supply_register (char *regname, int regnamelen, char *val, int vallen)
 {
   int regno;
 
@@ -146,15 +142,13 @@ init_cpu32bug_cmds (void)
 };				/* init_cpu32bug_cmds */
 
 static void
-cpu32bug_open (args, from_tty)
-     char *args;
-     int from_tty;
+cpu32bug_open (char *args, int from_tty)
 {
   monitor_open (args, &cpu32bug_cmds, from_tty);
 }
 
 void
-_initialize_cpu32bug_rom ()
+_initialize_cpu32bug_rom (void)
 {
   init_cpu32bug_cmds ();
   init_monitor_ops (&cpu32bug_ops);

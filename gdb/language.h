@@ -30,12 +30,13 @@ struct expression;
 /* enum exp_opcode;     ANSI's `wisdom' didn't include forward enum decls. */
 
 /* This used to be included to configure GDB for one or more specific
-   languages.  Now it is shortcutted to configure for all of them.  FIXME.  */
+   languages.  Now it is left out to configure for all of them.  FIXME.  */
 /* #include "lang_def.h" */
 #define	_LANG_c
 #define	_LANG_m2
 #define	_LANG_chill
-#define _LANG_fortran
+#define  _LANG_fortran
+#define  _LANG_pascal
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims */
 
@@ -80,6 +81,26 @@ extern enum type_check
     type_check_off, type_check_warn, type_check_on
   }
 type_check;
+
+/* case_mode ==
+   case_mode_auto:   case_sensitivity set upon selection of scope 
+   case_mode_manual: case_sensitivity set only by user.  */
+
+extern enum case_mode
+  {
+    case_mode_auto, case_mode_manual
+  }
+case_mode;
+
+/* case_sensitivity ==
+   case_sensitive_on:   Case sensitivity in name matching is used
+   case_sensitive_off:  Case sensitivity in name matching is not used  */
+
+extern enum case_sensitivity
+  {
+    case_sensitive_on, case_sensitive_off
+  }
+case_sensitivity;
 
 /* Information for doing language dependent formatting of printed values. */
 
@@ -138,6 +159,9 @@ struct language_defn
     /* Default type checking */
 
     enum type_check la_type_check;
+
+    /* Default case sensitivity */
+    enum case_sensitivity la_case_sensitivity;
 
     /* Parser function. */
 
@@ -231,7 +255,7 @@ struct language_defn
    its own language and we should keep track of that regardless of the
    language when symbols are read.  If we want some manual setting for
    the language of symbol files (e.g. detecting when ".c" files are
-   C++), it should be a seprate setting from the current_language.  */
+   C++), it should be a separate setting from the current_language.  */
 
 extern const struct language_defn *current_language;
 

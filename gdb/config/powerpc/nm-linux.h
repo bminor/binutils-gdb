@@ -28,9 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define KERNEL_U_SIZE kernel_u_size()
 extern int kernel_u_size (void);
 
-/* Tell gdb that we can attach and detach other processes */
-#define ATTACH_DETACH
-
 #define U_REGS_OFFSET 0
 
 #define REGISTER_U_ADDR(addr, blockend, regno) \
@@ -40,25 +37,20 @@ extern int kernel_u_size (void);
 
 #define NO_SYS_REG_H
 
-#ifdef HAVE_LINK_H
-#include "solib.h"             /* Support for shared libraries. */
-#define SVR4_SHARED_LIBS
-#endif
+/* FIXME: kettenis/2000-09-03: This should be moved to ../nm-linux.h
+   once we have converted all Linux targets to use the new threads
+   stuff (without the #undef of course).  */
 
-/* Support for Linuxthreads. */
+extern int lin_lwp_prepare_to_proceed (void);
+#undef PREPARE_TO_PROCEED
+#define PREPARE_TO_PROCEED(select_it) lin_lwp_prepare_to_proceed ()
 
-#ifdef __STDC__
-struct objfile;
-#endif
+extern void lin_lwp_attach_lwp (int pid, int verbose);
+#define ATTACH_LWP(pid, verbose) lin_lwp_attach_lwp ((pid), (verbose))
 
-extern void linuxthreads_new_objfile (struct objfile *objfile);
-#define target_new_objfile(OBJFILE) linuxthreads_new_objfile (OBJFILE)
+#include <signal.h>
 
-extern char *linuxthreads_pid_to_str (int pid);
-#define target_pid_to_str(PID) linuxthreads_pid_to_str (PID)
-
-extern int linuxthreads_prepare_to_proceed (int step);
-#define PREPARE_TO_PROCEED(select_it) linuxthreads_prepare_to_proceed (1)
-
+extern void lin_thread_get_thread_signals (sigset_t *mask);
+#define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)
 
 #endif /* #ifndef NM_LINUX_H */

@@ -69,7 +69,6 @@ static boolean (*pe_saved_coff_bfd_print_private_bfd_data)
 static boolean pe_print_private_bfd_data PARAMS ((bfd *, PTR));
 #define coff_bfd_print_private_bfd_data pe_print_private_bfd_data
 
-
 static boolean (*pe_saved_coff_bfd_copy_private_bfd_data)
     PARAMS ((bfd *, bfd *)) =
 #ifndef coff_bfd_copy_private_bfd_data
@@ -138,7 +137,7 @@ static asection_ptr       pe_ILF_make_a_section   PARAMS ((pe_ILF_vars *, const 
 static void               pe_ILF_make_a_reloc     PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type, asection_ptr));
 static void               pe_ILF_make_a_symbol    PARAMS ((pe_ILF_vars *, const char *, const char *, asection_ptr, flagword));
 static void               pe_ILF_save_relocs      PARAMS ((pe_ILF_vars *, asection_ptr));
-static void		  pe_ILF_make_a_symbol_reloc  PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type,	   struct symbol_cache_entry **, unsigned int));
+static void		  pe_ILF_make_a_symbol_reloc  PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type, struct symbol_cache_entry **, unsigned int));
 static boolean            pe_ILF_build_a_bfd      PARAMS ((bfd *, unsigned short, bfd_byte *, bfd_byte *, unsigned int, unsigned int));
 static const bfd_target * pe_ILF_object_p         PARAMS ((bfd *));
 static const bfd_target * pe_bfd_object_p 	  PARAMS ((bfd *));
@@ -221,8 +220,13 @@ coff_swap_filehdr_in (abfd, src, dst)
      correctly for a PEI file, check the e_magic number here, and, if
      it doesn't match, clobber the f_magic number so that we don't get
      a false match.  */
+#if 0
+  /* We can't assume that the PE header is at offset 0x80.  When it
+     isn't, the DOS header isn't read correctly, so we can't assume
+     e_magic is set even for valid PE files. */
   if (bfd_h_get_16 (abfd, (bfd_byte *) filehdr_src->e_magic) != DOSMAGIC)
     filehdr_dst->f_magic = -1;
+#endif
 #endif
 
   /* Other people's tools sometimes generate headers with an nsyms but
@@ -242,7 +246,6 @@ coff_swap_filehdr_in (abfd, src, dst)
 #else
 #define coff_swap_filehdr_out _bfd_pe_only_swap_filehdr_out
 #endif
-
 
 static void
 coff_swap_scnhdr_in (abfd, ext, in)
@@ -986,10 +989,10 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       if (magic == MIPS_ARCH_MAGIC_WINCE)
 	{
 	  pe_ILF_make_a_symbol_reloc (& vars, 0, BFD_RELOC_HI16_S,
-				      (asection **) imp_sym, imp_index);
+				      (struct symbol_cache_entry **) imp_sym, imp_index);
 	  pe_ILF_make_a_reloc (& vars, 0, BFD_RELOC_LO16, text);
 	  pe_ILF_make_a_symbol_reloc (& vars, 4, BFD_RELOC_LO16,
-				      (asection **) imp_sym, imp_index);
+				      (struct symbol_cache_entry **) imp_sym, imp_index);
 	}
       else
 #endif
@@ -1166,9 +1169,9 @@ pe_ILF_object_p (bfd * abfd)
     case IMAGE_FILE_MACHINE_THUMB:
 #ifdef THUMBPEMAGIC
       {
-	extern bfd_target armpei_little_vec;
+	extern const bfd_target TARGET_LITTLE_SYM;
 	
-	if (abfd->xvec == & armpei_little_vec)
+	if (abfd->xvec == & TARGET_LITTLE_SYM)
 	  magic = THUMBPEMAGIC;
       }
 #endif      

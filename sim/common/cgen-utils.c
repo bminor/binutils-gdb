@@ -321,6 +321,74 @@ CONVDISI (val)
 
 #endif /* DI_FN_SUPPORT */
 
+QI
+RORQI (val, shift)
+     QI  val;
+     int shift;
+{
+  if (shift != 0)
+    {
+      int remain = 8 - shift;
+      int mask = (1 << shift) - 1;
+      QI result = (val & mask) << remain;
+      mask = (1 << remain) - 1;
+      result |= (val >> shift) & mask;
+      return result;
+    }
+  return val;
+}
+
+QI
+ROLQI (val, shift)
+     QI  val;
+     int shift;
+{
+  if (shift != 0)
+    {
+      int remain = 8 - shift;
+      int mask = (1 << remain) - 1;
+      QI result = (val & mask) << shift;
+      mask = (1 << shift) - 1;
+      result |= (val >> remain) & mask;
+      return result;
+    }
+  return val;
+}
+
+HI
+RORHI (val, shift)
+     HI  val;
+     int shift;
+{
+  if (shift != 0)
+    {
+      int remain = 16 - shift;
+      int mask = (1 << shift) - 1;
+      HI result = (val & mask) << remain;
+      mask = (1 << remain) - 1;
+      result |= (val >> shift) & mask;
+      return result;
+    }
+  return val;
+}
+
+HI
+ROLHI (val, shift)
+     HI  val;
+     int shift;
+{
+  if (shift != 0)
+    {
+      int remain = 16 - shift;
+      int mask = (1 << remain) - 1;
+      HI result = (val & mask) << shift;
+      mask = (1 << shift) - 1;
+      result |= (val >> remain) & mask;
+      return result;
+    }
+  return val;
+}
+
 SI
 RORSI (val, shift)
      SI  val;
@@ -354,4 +422,17 @@ ROLSI (val, shift)
     }
 
   return val;
+}
+
+/* Emit an error message from CGEN RTL.  */
+
+void
+cgen_rtx_error (SIM_CPU *cpu, const char * msg)
+{
+  SIM_DESC sd = CPU_STATE (cpu);
+
+  sim_io_printf (sd, msg);
+  sim_io_printf (sd, "\n");
+
+  sim_engine_halt (sd, cpu, NULL, CIA_GET (cpu), sim_stopped, SIM_SIGTRAP);
 }

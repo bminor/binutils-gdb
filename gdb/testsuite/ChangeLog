@@ -1,3 +1,250 @@
+2000-12-21  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* gdb.base/finish.exp: Accept '1' instead of \001 from char_func.
+	Add a RE to accept a non-ascii char if one is ever presented.
+
+2000-12-20  Fernando Nasser  <fnasser@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_start): Test for MI_OUT, not UI_OUT.
+
+2000-12-18  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* gdb.base/setvar.exp: Use double '\\' to quote curly braces 
+	in regexp.  One '\' does not suffice on Linux.
+
+2000-12-09  Michael Chastain  <chastain@redhat.com>
+
+	* gdb.base/break.exp (test_clear_command): Use a marker function
+	rather than 'main' for the test function.  Also move this
+	test to an execution point where the marker function names are
+	guaranteed to be bound to functions.  (Executing tests after a
+	'finish' from main runs into name conflicts with local names
+	in __libc_start_main).
+
+2000-12-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/finish.exp: New test for gdb's "finish" command.
+	* gdb.base/return2.exp: New test for gdb's "return" command.
+	* gdb.base/return2.c: New source file for above.
+
+2000-12-05  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* gdb.base/constvars.exp: Add a "pass" message if "up" succeeds.
+	* gdb.base/miscexprs.exp: Ditto.
+	* gdb.base/pointers.exp:  Ditto.
+	* gdb.c++/derivation.exp: Ditto.
+	* gdb.c++/local.exp:      Ditto.
+	* gdb.c++/namespace.exp:  Ditto.
+	* gdb.c++/overload.exp:   Ditto.
+	* gdb.c++/ref-types.exp:  Ditto.
+
+2000-12-05  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* gdb.base/constvars.exp: Test result of "up" command.
+	* gdb.base/miscexprs.exp: Ditto.
+	* gdb.base/pointers.exp:  Ditto.
+	* gdb.base/scope.exp:     Ditto.
+	* gdb.c++/derivation.exp: Ditto.
+	* gdb.c++/local.exp:      Ditto.
+	* gdb.c++/namespace.exp:  Ditto.
+	* gdb.c++/overload.exp:   Ditto.
+	* gdb.c++/ref-types.exp:  Ditto.
+
+2000-11-22  Michael Chastain  <chastain@redhat.com>
+
+	* mips_pro.exp: Accept either "middle -> top -> main" or
+	"middle -> main" in the backtrace, because gcc can optimize
+	tail calls to jumps.  Remove setup_xfail for the hppa case.
+	Add a comment with the original warning messages from PR 3016,
+	which was filed in 1993, to preserve them for posterity.
+
+2000-11-17  Nick Duffek  <nsd@redhat.com>
+
+	* lib/gdb.exp (gdb_test): Override timeout with board info.
+
+2000-11-17  Nick Duffek  <nsd@redhat.com>
+
+	* gdb.base/display.exp: Don't kill running stub.  Add "again" to
+	the second kill and detach messages.
+
+2000-11-17  Nick Duffek  <nsd@redhat.com>
+
+	* configure.in: Add AC_EXEEXT.
+	* configure: Regenerate.
+	* Makefile.in (just-check): Export EXEEXT.
+	* lib/gdb.exp ($EXEEXT): Import from environment.
+	* gdb.base/maint.exp: Expect $EXEEXT in executable name.  Don't
+	expect "maint dump-me" on Cygwin.
+	* gdb.base/reread.exp ($binfile, $binfile1, $binfile2): Append
+	$EXEEXT.
+
+2000-11-17  Nick Duffek  <nsd@redhat.com>
+
+	* gdb.base/break.exp: Test backtrace and finish from called
+	function on all platforms, not just HP-UX.
+
+2000-11-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/monitor.exp (gdb_target_cmd): Abstracts some of the
+	code from gdb_target_monitor, so it can be used independantly
+	for gdbserver.  Also comment out an unnecessary PUTS.
+	
+2000-11-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/a2-run.exp: Use gdb_skip_stdio_test.
+	* gdb.base/corefile.exp: Expect the message "Program is being
+	debugged already" when we send the "corefile" command, since
+	the preceeding gdb_load may have connected gdb to a remote target.
+	* gdb.base/display.exp: Disable hardware watchpoints if new
+	board info variable "no_hardware_watchpoints" is true.
+	Replace single-letter commands with more readable ones.
+	* gdb.base/recurse.exp (recurse_tests): Disable hardware watchpoints
+	if new board info variable "no_hardware_watchpoints" is true.
+	* gdb.base/restore.exp (restore_tests): Call gdb_skip_stdio_tests
+	to see if stdio (printf) testing is possible.
+	* gdb.base/watchpoint.exp: Disable hardware watchpoints if new
+	board info variable "no_hardware_watchpoints" is true.  Use new
+	proc "gdb_skip_stdio_tests" to see if printf tests are possible.
+
+2000-11-13  Fernando Nasser  <fnasser@redhat.com>
+
+	From Orjan Friberg  <orjanf@axis.com>:
+	* gdb.base/printcmds.exp: Escape curly braces followed by a number
+	in array print pattern match.
+
+2000-11-09  Fernando Nasser  <fnasser@redhat.com>
+
+	* gdb.c++/templates.exp (test_template_breakpoints): Change Britsh
+	spelling "cancelled" to U.S. spelling "canceled" to match changes
+	made to gdb.
+	* gdb.c++/ovldbreak.exp: Ditto.
+
+2000-11-06  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* gdb.base/callfuncs.c (main):  Moved to end of file, call
+	t_double_values to initialize the FPU before inferior calls are made.
+	* gdb.base/callfuncs.exp:  Test for register preservation after calling
+	inferior functions.  Add tests for continuining, finishing and
+	returning from a stop in a call dummy.
+
+2000-10-24  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/commands.exp: Break up long lines, and re-indent.
+
+2000-10-19  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/gdbserver.exp:  Rewritten from the ground up, to make it
+	compatible with the current dejagnu tree, and to make it work with
+	the new "gdbserver" in libremote.
+
+2000-10-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/sizeof.exp (check_sizeof): Skip if no printf support.
+	* gdb.base/varargs.exp: Skip entire test if no printf support.
+	* gdb.base/ending-run.exp (Step to return): Skip if no printf supt.
+	* gdb.base/shlib-call.exp: Skip several tests if no printf support.
+
+2000-10-13  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* lib/gdb.exp (gdb_skip_float_test): New proc.  Skip test if
+	no floating point support.
+	(gdb_skip_stdio_test): New proc.  Skip test if no stdio support.
+	* gdb.base/call-ar-st.exp: Use above procs to skip tests.
+	* gdb.base/call-rt-st.exp: Ditto.
+	* gdb.base/call-strs.exp: Ditto.
+
+2000-08-02  Jimmy Guo  <guo@hpcleara.cup.hp.com>
+
+	* gdb.base/sizeof.c: include <stdio.h>.
+
+	* gdb.c++/classes.exp: Use gdb_test instead of send_gdb to
+        'finish', otherwise uncaptured gdb_prompt would potentially
+        throw remaining test points out of sync.
+
+2000-07-26  Scott Bambrough <scottb@netwinder.org>
+
+	* gdb.base/recurse.exp: Run tests for all targets.
+	* gdb.base/so-impl-ld.exp: Added wildcard to handle the
+	gnu-oldld case on ARM.
+	* gdb.base/watchpoint.exp (test_stepping): Clear xfail
+	for ARM targets.
+ 
+Mon Jul 24 07:46:02 CDT 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* gdb.java/configure.in (AC_INIT): Use jmisc.exp.
+	* gdb.java/configure: Rebuild.
+
+Sun Jul 23 21:42:34 2000  Anthony Green  <green@redhat.com>
+
+	* gdb.java/jv-exp.exp: New file.
+
+Sun Jul 23 21:02:42 2000  Anthony Green  <green@redhat.com>
+
+	* configure: Rebuilt.
+	* configure.in (configdirs): Add gdb.java.
+	* gdb.java/jmisc.java: New file.
+	* gdb.java/jmisc.exp: New file.
+	* gdb.java/Makefile.in: New file.
+	* gdb.java/configure: Rebuilt.
+	* gdb.java/configure.in: New file.
+	* lib/java.exp: New file.
+
+Wed Jul 12 18:14:29 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/exprs.exp: Test casts to a pointer including over and
+ 	underflow.
+
+Thu Jul 13 11:52:53 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/sizeof.exp, gdb.base/sizeof.c: New files.  Compare GDB
+ 	and the compilers sizes.
+
+2000-07-09  Nick Duffek  <nsd@redhat.com>
+
+	* gdb.c++/misc.cc (class ClassParam, class_param): Define.
+	(use_methods): New function.
+	(main): Call use_methods().
+	* gdb.c++/classes.exp (test_method_param_class): New procedure.
+	(do_tests): Call test_method_param_class.
+
+2000-07-09  Nick Duffek  <nsd@redhat.com>
+
+	* gdb.c++/classes.exp (test_nonexistant_members): Fix name
+	spelling.
+	(test_enums): New procedure.  Move enum tests from end of script
+	to here.  Set breakpoint on function name instead of line number.
+	* gdb.c++/misc.cc (ClassWithEnum): Move past Foo definitions.
+	(enums2): New marker function.
+	(enums1): New function.
+	(main): Call enums1().  Move enum tests to enums1().
+
+Tue Jul  4 03:43:49 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.asm/asm-source.exp: Use raw AS/LD instead of CC to
+ 	compile/link program.  Update line numbers.
+	* gdb.asm/d10v.inc: Define ``startup''.
+	* gdb.asm/asmsrc1.s: Add definition of _start.
+	
+Fri Jun 23 17:45:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/call-ar-st.exp: More rewrites of multi-line patterns.
+
+2000-06-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/maint.exp: Add 'maint print architecture' item to output
+ 	of 'help maint print' command.
+
+Fri Jun 16 18:22:05 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/call-ar-st.exp: Rewrite all multi-line patterns so that
+ 	they use gdb_expect_list.
+
+Wed Jun  7 13:02:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/commands.exp: Use ``set remote
+ 	memory-read-packet-size'' instead of ``set endian big'' to test
+ 	long commands.
+
 2000-06-03  Daniel Berlin  <dan@cgsoftware.com>
 
 	* gdb.c++/templates.exp (do_tests): Make all of these work under
@@ -6,8 +253,19 @@
 	* gdb.c++/namespace.exp: Move from gdb.hp/gdb.aCC to here, make it
 	work under g++.
 
-	* gdb.c++/misc.cc: Fix ambiguous initialization with correct initialization.
-	
+	* gdb.c++/misc.cc: Fix ambiguous initialization with correct 
+	initialization.
+
+2000-06-02  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.base/annota1.exp (run until main breakpoint): Loosen up
+	the regular expression: accept an (almost) arbitrary sequence of
+	"frames-invalid" and "breakpoints-invalid" messages both before
+	and after the "starting" message.
+
+2000-06-02  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.c++/local.exp: This test has never been known to work with g++.
 
 2000-05-18  Michael Snyder  <msnyder@seadog.cygnus.com>
 

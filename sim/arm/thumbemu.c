@@ -209,11 +209,19 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	      *ainstr = 0xE12FFF10	/* base */
 		| ((tinstr & 0x0078) >> 3);	/* Rd */
 	      break;
+	    case 0xE:		/* UNDEFINED */
+	    case 0xF:		/* UNDEFINED */
+	      if (state->is_v5)
+		{
+		  /* BLX Rs; BLX Hs */
+		  *ainstr = 0xE12FFF30	/* base */
+		    | ((tinstr & 0x0078) >> 3);	/* Rd */
+		  break;
+		}
+	      /* Drop through.  */
 	    case 0x0:		/* UNDEFINED */
 	    case 0x4:		/* UNDEFINED */
 	    case 0x8:		/* UNDEFINED */
-	    case 0xE:		/* UNDEFINED */
-	    case 0xF:		/* UNDEFINED */
 	      valid = t_undefined;
 	      break;
 	    }
@@ -322,30 +330,48 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
       break;
     case 22:
     case 23:
-      if ((tinstr & 0x0F00) == 0x0000)
+      switch (tinstr & 0x0F00)
 	{
+	case 0x0000:
 	  /* Format 13 */
 	  /* NOTE: The instruction contains a shift left of 2
-	     equivalent (implemented as ROR #30): */
+	     equivalent (implemented as ROR #30):  */
 	  *ainstr = ((tinstr & (1 << 7))	/* base */
 		     ? 0xE24DDF00	/* SUB */
 		     : 0xE28DDF00)	/* ADD */
 	    | (tinstr & 0x007F);	/* off7 */
-	}
-      else if ((tinstr & 0x0F00) == 0x0e00)
-	*ainstr = 0xEF000000 | SWI_Breakpoint;
-      else
-	{
-	  /* Format 14 */
-	  ARMword subset[4] = {
-	    0xE92D0000,		/* STMDB sp!,{rlist}    */
-	    0xE92D4000,		/* STMDB sp!,{rlist,lr} */
-	    0xE8BD0000,		/* LDMIA sp!,{rlist}    */
-	    0xE8BD8000		/* LDMIA sp!,{rlist,pc} */
-	  };
-	  *ainstr = subset[((tinstr & (1 << 11)) >> 10)
-			   | ((tinstr & (1 << 8)) >> 8)]	/* base */
-	    | (tinstr & 0x00FF);	/* mask8 */
+	  break;
+	case 0x0400:
+	  /* Format 14 - Push */
+	  * ainstr = 0xE92D0000 | (tinstr & 0x00FF);
+	  break;
+	case 0x0500:
+	  /* Format 14 - Push + LR */
+	  * ainstr = 0xE92D4000 | (tinstr & 0x00FF);
+	  break;
+	case 0x0c00:
+	  /* Format 14 - Pop */
+	  * ainstr = 0xE8BD0000 | (tinstr & 0x00FF);
+	  break;
+	case 0x0d00:
+	  /* Format 14 - Pop + PC */
+	  * ainstr = 0xE8BD8000 | (tinstr & 0x00FF);
+	  break;
+	case 0x0e00:
+	  if (state->is_v5)
+	    {
+	      /* This is normally an undefined instruction.  The v5t architecture 
+		 defines this particular pattern as a BKPT instruction, for
+		 hardware assisted debugging.  We map onto the arm BKPT
+		 instruction.  */
+	      * ainstr = 0xE1200070 | ((tinstr & 0xf0) << 4) | (tinstr & 0xf);
+	      break;
+	    }
+	  /* Drop through.  */
+	default:
+	  /* Everything else is an undefined instruction.  */
+	  valid = t_undefined;
+	  break;
 	}
       break;
     case 24:			/* STMIA */
@@ -446,6 +472,34 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
       valid = t_branch;
       break;
     case 29:			/* UNDEFINED */
+      if (state->is_v5)
+	{
+	  if (tinstr & 1)
+	    {
+	      valid = t_undefined;
+	      break;
+	    }
+	  /* Drop through.  */
+	  
+	do_blx2:			/* BLX instruction 2 */
+	  /* Format 19 */
+	  /* There is no single ARM instruction equivalent for this
+	     instruction. Also, it should only ever be matched with the
+	     fmt19 "BL/BLX instruction 1" instruction.  However, we do
+	     allow the simulation of it on its own, with undefined results
+	     if r14 is not suitably initialised.  */
+	  {
+	    ARMword tmp = (pc + 2);
+	    
+	    state->Reg[15] = ((state->Reg[14] + ((tinstr & 0x07FF) << 1))
+			      & 0xFFFFFFFC);
+	    CLEART;
+	    state->Reg[14] = (tmp | 1);
+	    valid = t_branch;
+	    FLUSHPIPE;
+	    break;
+	  }
+	}
       valid = t_undefined;
       break;
     case 30:			/* BL instruction 1 */
@@ -461,7 +515,14 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
       valid = t_branch;		/* in-case we don't have the 2nd half */
       tinstr = next_instr;	/* move the instruction down */
       if (((tinstr & 0xF800) >> 11) != 31)
-	break;			/* exit, since not correct instruction */
+	{
+	  if (((tinstr & 0xF800) >> 11) == 29)
+	    {
+	      pc += 2;
+	      goto do_blx2;
+	    }
+	  break;		/* exit, since not correct instruction */
+	}
       /* else we fall through to process the second half of the BL */
       pc += 2;			/* point the pc at the 2nd half */
     case 31:			/* BL instruction 2 */

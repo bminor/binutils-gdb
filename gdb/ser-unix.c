@@ -435,37 +435,37 @@ static int
 wait_for (serial_t scb, int timeout)
 {
 #ifdef HAVE_SGTTY
-  {
-    struct timeval tv;
-    fd_set readfds;
+  while (1)
+    {
+      struct timeval tv;
+      fd_set readfds;
+      int numfds;
 
-    FD_ZERO (&readfds);
+      /* NOTE: Some OS's can scramble the READFDS when the select()
+         call fails (ex the kernel with Red Hat 5.2).  Initialize all
+         arguments before each call. */
 
-    tv.tv_sec = timeout;
-    tv.tv_usec = 0;
+      tv.tv_sec = timeout;
+      tv.tv_usec = 0;
 
-    FD_SET (scb->fd, &readfds);
+      FD_ZERO (&readfds);
+      FD_SET (scb->fd, &readfds);
 
-    while (1)
-      {
-	int numfds;
+      if (timeout >= 0)
+	numfds = select (scb->fd + 1, &readfds, 0, 0, &tv);
+      else
+	numfds = select (scb->fd + 1, &readfds, 0, 0, 0);
 
-	if (timeout >= 0)
-	  numfds = select (scb->fd + 1, &readfds, 0, 0, &tv);
+      if (numfds <= 0)
+	if (numfds == 0)
+	  return SERIAL_TIMEOUT;
+	else if (errno == EINTR)
+	  continue;
 	else
-	  numfds = select (scb->fd + 1, &readfds, 0, 0, 0);
+	  return SERIAL_ERROR;	/* Got an error from select or poll */
 
-	if (numfds <= 0)
-	  if (numfds == 0)
-	    return SERIAL_TIMEOUT;
-	  else if (errno == EINTR)
-	    continue;
-	  else
-	    return SERIAL_ERROR;	/* Got an error from select or poll */
-
-	return 0;
-      }
-  }
+      return 0;
+    }
 #endif /* HAVE_SGTTY */
 
 #if defined HAVE_TERMIO || defined HAVE_TERMIOS
@@ -778,9 +778,7 @@ hardwire_setbaudrate (serial_t scb, int rate)
 }
 
 static int
-hardwire_setstopbits (scb, num)
-     serial_t scb;
-     int num;
+hardwire_setstopbits (serial_t scb, int num)
 {
   struct hardwire_ttystate state;
   int newbit;
@@ -860,21 +858,24 @@ ser_unix_nop_raw (serial_t scb)
 int
 ser_unix_wait_for (serial_t scb, int timeout)
 {
-  int numfds;
-  struct timeval tv;
-  fd_set readfds, exceptfds;
-
-  FD_ZERO (&readfds);
-  FD_ZERO (&exceptfds);
-
-  tv.tv_sec = timeout;
-  tv.tv_usec = 0;
-
-  FD_SET (scb->fd, &readfds);
-  FD_SET (scb->fd, &exceptfds);
-
   while (1)
     {
+      int numfds;
+      struct timeval tv;
+      fd_set readfds, exceptfds;
+
+      /* NOTE: Some OS's can scramble the READFDS when the select()
+         call fails (ex the kernel with Red Hat 5.2).  Initialize all
+         arguments before each call. */
+
+      tv.tv_sec = timeout;
+      tv.tv_usec = 0;
+
+      FD_ZERO (&readfds);
+      FD_ZERO (&exceptfds);
+      FD_SET (scb->fd, &readfds);
+      FD_SET (scb->fd, &exceptfds);
+
       if (timeout >= 0)
 	numfds = select (scb->fd + 1, &readfds, 0, &exceptfds, &tv);
       else
@@ -910,9 +911,9 @@ do_unix_readchar (serial_t scb, int timeout)
      each time through the loop.
 
      Also, timeout = 0 means to poll, so we just set the delta to 0, so we
-     will only go through the loop once. timeout < 0 means to wait forever. */
+     will only go through the loop once. */
 
-  delta = (timeout <= 0 ? 0 : 1);
+  delta = (timeout == 0 ? 0 : 1);
   while (1)
     {
 
@@ -928,38 +929,52 @@ do_unix_readchar (serial_t scb, int timeout)
 	    return SERIAL_TIMEOUT;
 	}
 
-      status = ser_unix_wait_for (scb, timeout < 0 ? timeout : delta);
-      timeout -= delta;
+      status = ser_unix_wait_for (scb, delta);
+      if (timeout > 0)
+        timeout -= delta;
 
-      /* If we got an error back from wait_for, then we can return */
+      /* If we got a character or an error back from wait_for, then we can 
+         break from the loop before the timeout is completed. */
 
-      if (status == SERIAL_ERROR)
-        return status;
-
-      status = read (scb->fd, scb->buf, BUFSIZ);
-
-      if (status <= 0)
-        {
-          if (status == 0)
-            {
-              if (timeout != 0)
-                continue;
-              else
-                return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
-					   distinguish between EOF & timeouts
-					   someday] */
-            }
-	  else if (errno == EINTR)
-            continue;
-          else
-	    return SERIAL_ERROR;	/* Got an error from read */
+      if (status != SERIAL_TIMEOUT)
+	{
+	  break;
 	}
 
-      scb->bufcnt = status;
-      scb->bufcnt--;
-      scb->bufp = scb->buf;
-      return *scb->bufp++;
+      /* If we have exhausted the original timeout, then generate
+         a SERIAL_TIMEOUT, and pass it out of the loop. */
+
+      else if (timeout == 0)
+	{
+	  status = SERIAL_TIMEOUT;
+	  break;
+	}
     }
+
+  if (status < 0)
+    return status;
+
+  while (1)
+    {
+      status = read (scb->fd, scb->buf, BUFSIZ);
+      if (status != -1 || errno != EINTR)
+	break;
+    }
+
+  if (status <= 0)
+    {
+      if (status == 0)
+	return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
+				   distinguish between EOF & timeouts
+				   someday] */
+      else
+	return SERIAL_ERROR;	/* Got an error from read */
+    }
+
+  scb->bufcnt = status;
+  scb->bufcnt--;
+  scb->bufp = scb->buf;
+  return *scb->bufp++;
 }
 
 /* Perform operations common to both old and new readchar. */
@@ -1265,7 +1280,7 @@ ser_unix_async (serial_t scb,
       if (SERIAL_DEBUG_P (scb))
 	fprintf_unfiltered (gdb_stdlog, "[fd%d->synchronous]\n",
 			    scb->fd);
-      /* De-schedule what ever tasks are currently scheduled. */
+      /* De-schedule whatever tasks are currently scheduled. */
       switch (scb->async_state)
 	{
 	case FD_SCHEDULED:

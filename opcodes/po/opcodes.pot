@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-05-30 11:33-0700\n"
+"POT-Creation-Date: 2000-12-16 13:55-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,8 @@ msgstr ""
 msgid "jump hint unaligned"
 msgstr ""
 
-#: arc-dis.c:232
+#. Default text to print if an instruction isn't recognized.
+#: arc-dis.c:232 fr30-dis.c:39 m32r-dis.c:39
 msgid "*unknown*"
 msgstr ""
 
@@ -48,32 +49,45 @@ msgstr ""
 msgid "branch address not on 4 byte boundary"
 msgstr ""
 
-#: arm-dis.c:476
+#: arm-dis.c:489
 msgid "<illegal precision>"
 msgstr ""
 
-#: arm-dis.c:888
+#: arm-dis.c:904
 #, c-format
 msgid "Unrecognised register name set: %s\n"
 msgstr ""
 
-#: arm-dis.c:895
+#: arm-dis.c:911
 #, c-format
 msgid "Unrecognised disassembler option: %s\n"
 msgstr ""
 
-#: arm-dis.c:1059
+#: arm-dis.c:1075
 msgid ""
 "\n"
 "The following ARM specific disassembler options are supported for use with\n"
 "the -M switch:\n"
 msgstr ""
 
+#: avr-dis.c:118 avr-dis.c:128
+msgid "undefined"
+msgstr ""
+
+#: avr-dis.c:180
+msgid "Internal disassembler error"
+msgstr ""
+
+#: avr-dis.c:228
+#, c-format
+msgid "unknown constraint `%c'"
+msgstr ""
+
 #: cgen-asm.c:224
 msgid "unrecognized keyword/register name"
 msgstr ""
 
-#: cgen-asm.c:332 fr30-ibld.c:223 m32r-ibld.c:227
+#: cgen-asm.c:332 fr30-ibld.c:232 m32r-ibld.c:232
 #, c-format
 msgid "operand out of range (%ld not between %ld and %ld)"
 msgstr ""
@@ -105,28 +119,26 @@ msgid "Unrecognized field %d while parsing.\n"
 msgstr ""
 
 #. We couldn't parse it.
-#: fr30-asm.c:369 fr30-asm.c:373 fr30-asm.c:447 m32r-asm.c:377 m32r-asm.c:381
-#: m32r-asm.c:455
+#: fr30-asm.c:369 fr30-asm.c:373 fr30-asm.c:449 m32r-asm.c:377 m32r-asm.c:381
+#: m32r-asm.c:457
 msgid "unrecognized instruction"
 msgstr ""
 
-#. Syntax char didn't match.  Can't be this insn.
-#. FIXME: would like to return something like
-#. "expected char `c'"
 #: fr30-asm.c:415 m32r-asm.c:423
-msgid "syntax error"
+#, c-format
+msgid "syntax error (expected char `%c', found `%c')"
 msgstr ""
 
-#: fr30-asm.c:441 m32r-asm.c:449
+#: fr30-asm.c:443 m32r-asm.c:451
 msgid "junk at end of line"
 msgstr ""
 
-#: fr30-asm.c:534 m32r-asm.c:552
+#: fr30-asm.c:551 m32r-asm.c:559
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr ""
 
-#: fr30-asm.c:537 m32r-asm.c:555
+#: fr30-asm.c:554 m32r-asm.c:562
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr ""
@@ -136,60 +148,64 @@ msgstr ""
 msgid "Unrecognized field %d while printing insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:210 m32r-ibld.c:211
+#: fr30-ibld.c:216 m32r-ibld.c:216
 #, c-format
 msgid "operand out of range (%lu not between 0 and %lu)"
 msgstr ""
 
-#: fr30-ibld.c:745 m32r-ibld.c:679
+#: fr30-ibld.c:790 m32r-ibld.c:719
 #, c-format
 msgid "Unrecognized field %d while building insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:947 m32r-ibld.c:809
+#: fr30-ibld.c:994 m32r-ibld.c:849
 #, c-format
 msgid "Unrecognized field %d while decoding insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:1091 m32r-ibld.c:914
+#: fr30-ibld.c:1138 m32r-ibld.c:954
 #, c-format
 msgid "Unrecognized field %d while getting int operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1220 m32r-ibld.c:1004
+#: fr30-ibld.c:1267 m32r-ibld.c:1044
 #, c-format
 msgid "Unrecognized field %d while getting vma operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1349 m32r-ibld.c:1097
+#: fr30-ibld.c:1396 m32r-ibld.c:1137
 #, c-format
 msgid "Unrecognized field %d while setting int operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1471 m32r-ibld.c:1183
+#: fr30-ibld.c:1518 m32r-ibld.c:1223
 #, c-format
 msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr ""
 
-#: h8300-dis.c:405
+#: h8300-dis.c:380
 #, c-format
 msgid "Hmmmm %x"
 msgstr ""
 
-#: h8300-dis.c:417
+#: h8300-dis.c:391
 #, c-format
 msgid "Don't understand %x \n"
 msgstr ""
 
-#: h8500-dis.c:140
+#: h8500-dis.c:141
 #, c-format
 msgid "can't cope with insert %d\n"
 msgstr ""
 
-#. Couldn't understand anything
-#: h8500-dis.c:345
+#. Couldn't understand anything.
+#: h8500-dis.c:348
 #, c-format
 msgid "%02x\t\t*unknown*"
+msgstr ""
+
+#: i386-dis.c:1949
+msgid "<internal disassembler error>"
 msgstr ""
 
 #: m10200-dis.c:199
@@ -222,7 +238,7 @@ msgstr ""
 msgid "# <dis error: %08x>"
 msgstr ""
 
-#: mips-dis.c:242
+#: mips-dis.c:273
 #, c-format
 msgid "# internal error, undefined modifier(%c)"
 msgstr ""
@@ -266,21 +282,21 @@ msgid "invalid register operand when updating"
 msgstr ""
 
 #. Mark as non-valid instruction
-#: sparc-dis.c:743
+#: sparc-dis.c:748
 msgid "unknown"
 msgstr ""
 
-#: sparc-dis.c:815
+#: sparc-dis.c:823
 #, c-format
 msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr ""
 
-#: sparc-dis.c:826
+#: sparc-dis.c:834
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr ""
 
-#: sparc-dis.c:875
+#: sparc-dis.c:883
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
 msgstr ""

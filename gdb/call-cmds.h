@@ -1,3 +1,10 @@
+/* ***DEPRECATED***  The gdblib files must not be calling/using things in any
+   of the possible command languages.  If necessary, a hook (that may be
+   present or not) must be used and set to the appropriate routine by any
+   command language that cares about it.  If you are having to include this
+   file you are possibly doing things the old way.  This file will disapear.
+   2000-12-01 fnasser@redhat.com    */
+
 /* Prototypes for GDB commands that are called internally by other functions.
    Copyright 1992 Free Software Foundation, Inc.
 

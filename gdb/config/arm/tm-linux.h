@@ -135,4 +135,26 @@ extern CORE_ADDR in_svr4_dynsym_resolve_code (CORE_ADDR pc, char *name);
 #define IN_SOLIB_DYNSYM_RESOLVE_CODE  in_svr4_dynsym_resolve_code */
 #endif
 
+/* When the ARM Linux kernel invokes a signal handler, the return
+   address points at a special instruction which'll trap back into
+   the kernel.  These definitions are used to identify this bit of
+   code as a signal trampoline in order to support backtracing
+   through calls to signal handlers. */
+
+int arm_linux_in_sigtramp (CORE_ADDR pc, char *name);
+#define IN_SIGTRAMP(pc, name) arm_linux_in_sigtramp (pc, name)
+
+/* Each OS has different mechanisms for accessing the various
+   registers stored in the sigcontext structure.  These definitions
+   provide a mechanism by which the generic code in arm-tdep.c can
+   find the addresses at which various registers are saved at in the
+   sigcontext structure.  If SIGCONTEXT_REGISTER_ADDRESS is not
+   defined, arm-tdep.c will define it to be 0.  (See ia64-tdep.c and
+   ia64-linux-tdep.c to see what a similar mechanism looks like when
+   multi-arched.) */
+
+extern CORE_ADDR arm_linux_sigcontext_register_address (CORE_ADDR, CORE_ADDR,
+                                                        int);
+#define SIGCONTEXT_REGISTER_ADDRESS arm_linux_sigcontext_register_address
+
 #endif /* TM_ARMLINUX_H */

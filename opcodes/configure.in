@@ -88,6 +88,24 @@ AC_PROG_INSTALL
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h)
 
+cgen_maint=no
+cgendir='$(srcdir)/../cgen'
+
+AC_ARG_ENABLE(cgen-maint,
+[  --enable-cgen-maint[=dir]    build cgen generated files],
+[case "${enableval}" in
+  yes)	cgen_maint=yes ;;
+  no)	cgen_maint=no ;;
+  *)
+	# argument is cgen install directory (not implemented yet).
+	# Having a `share' directory might be more appropriate for the .scm,
+	# .cpu, etc. files.
+	cgen_maint=yes
+	cgendir=${cgen_maint}/lib/cgen
+	;;
+esac])dnl
+AM_CONDITIONAL(CGEN_MAINT, test x${cgen_maint} = xyes)
+AC_SUBST(cgendir)
 
 using_cgen=no
 
@@ -156,6 +174,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_arm_arch)		ta="$ta arm-dis.lo" ;;
 	bfd_avr_arch)		ta="$ta avr-dis.lo" ;;
 	bfd_convex_arch)	;;
+	bfd_cris_arch)		ta="$ta cris-dis.lo cris-opc.lo" ;;
 	bfd_d10v_arch)		ta="$ta d10v-dis.lo d10v-opc.lo" ;;
 	bfd_d30v_arch)		ta="$ta d30v-dis.lo d30v-opc.lo" ;;
 	bfd_fr30_arch)          ta="$ta fr30-asm.lo fr30-desc.lo fr30-dis.lo fr30-ibld.lo fr30-opc.lo" using_cgen=yes ;;
@@ -164,10 +183,12 @@ if test x${all_targets} = xfalse ; then
 	bfd_hppa_arch)		ta="$ta hppa-dis.lo" ;;
 	bfd_i370_arch)		ta="$ta i370-dis.lo i370-opc.lo" ;;
 	bfd_i386_arch)		ta="$ta i386-dis.lo" ;;
-	bfd_i860_arch)		;;
+	bfd_i860_arch)		ta="$ta i860-dis.lo" ;;
 	bfd_i960_arch)		ta="$ta i960-dis.lo" ;;
 	bfd_ia64_arch)		ta="$ta ia64-dis.lo ia64-opc.lo" ;;
 	bfd_m32r_arch)		ta="$ta m32r-asm.lo m32r-desc.lo m32r-dis.lo m32r-ibld.lo m32r-opc.lo m32r-opinst.lo" using_cgen=yes ;;
+	bfd_m68hc11_arch)	ta="$ta m68hc11-dis.lo m68hc11-opc.lo" ;;
+	bfd_m68hc12_arch)	ta="$ta m68hc11-dis.lo m68hc11-opc.lo" ;;
 	bfd_m68k_arch)		ta="$ta m68k-dis.lo m68k-opc.lo" ;;
 	bfd_m88k_arch)		ta="$ta m88k-dis.lo" ;;
 	bfd_mcore_arch)		ta="$ta mcore-dis.lo" ;;
@@ -181,7 +202,8 @@ if test x${all_targets} = xfalse ; then
 	bfd_romp_arch)		;;
 	bfd_rs6000_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
 	bfd_powerpc_64_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
-	bfd_sh_arch)		ta="$ta sh-dis.lo" ;;
+	bfd_sh_arch)
+				ta="$ta sh-dis.lo" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;
 	bfd_tahoe_arch)		;;
 	bfd_tic30_arch)		ta="$ta tic30-dis.lo" ;;

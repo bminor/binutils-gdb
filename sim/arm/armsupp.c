@@ -183,7 +183,7 @@ ARMul_SetR15 (ARMul_State * state, ARMword value)
 ARMword
 ARMul_GetCPSR (ARMul_State * state)
 {
-  return (CPSR);
+  return (CPSR | state->Cpsr);
 }
 
 /***************************************************************************\
@@ -193,8 +193,7 @@ ARMul_GetCPSR (ARMul_State * state)
 void
 ARMul_SetCPSR (ARMul_State * state, ARMword value)
 {
-  state->Cpsr = CPSR;
-  SETPSR (state->Cpsr, value);
+  state->Cpsr = value;
   ARMul_CPSRAltered (state);
 }
 
@@ -206,23 +205,18 @@ ARMul_SetCPSR (ARMul_State * state, ARMword value)
 void
 ARMul_FixCPSR (ARMul_State * state, ARMword instr, ARMword rhs)
 {
-  state->Cpsr = CPSR;
-  if (state->Bank == USERBANK)
-    {				/* Only write flags in user mode */
-      if (BIT (19))
-	{
-	  SETCC (state->Cpsr, rhs);
-	}
+  state->Cpsr = ARMul_GetCPSR (state);
+  if (state->Bank != USERBANK)
+    {				/* In user mode, only write flags */
+      if (BIT (16))
+	SETPSR_C (state->Cpsr, rhs);
+      if (BIT (17))
+	SETPSR_X (state->Cpsr, rhs);
+      if (BIT (18))
+	SETPSR_S (state->Cpsr, rhs);
     }
-  else
-    {				/* Not a user mode */
-      if (BITS (16, 19) == 9)
-	SETPSR (state->Cpsr, rhs);
-      else if (BIT (16))
-	SETINTMODE (state->Cpsr, rhs);
-      else if (BIT (19))
-	SETCC (state->Cpsr, rhs);
-    }
+  if (BIT (19))
+    SETPSR_F (state->Cpsr, rhs);
   ARMul_CPSRAltered (state);
 }
 
@@ -236,7 +230,7 @@ ARMul_GetSPSR (ARMul_State * state, ARMword mode)
   ARMword bank = ModeToBank (mode & MODEBITS);
 
   if (! BANK_CAN_ACCESS_SPSR (bank))
-    return CPSR;
+    return ARMul_GetCPSR (state);
 
   return state->Spsr[bank];
 }
@@ -263,12 +257,14 @@ ARMul_FixSPSR (ARMul_State * state, ARMword instr, ARMword rhs)
 {
   if (BANK_CAN_ACCESS_SPSR (state->Bank))
     {
-      if (BITS (16, 19) == 9)
-	SETPSR (state->Spsr[state->Bank], rhs);
-      else if (BIT (16))
-	SETINTMODE (state->Spsr[state->Bank], rhs);
-      else if (BIT (19))
-	SETCC (state->Spsr[state->Bank], rhs);
+      if (BIT (16))
+	SETPSR_C (state->Spsr[state->Bank], rhs);
+      if (BIT (17))
+	SETPSR_X (state->Spsr[state->Bank], rhs);
+      if (BIT (18))
+	SETPSR_S (state->Spsr[state->Bank], rhs);
+      if (BIT (19))
+	SETPSR_F (state->Spsr[state->Bank], rhs);
     }
 }
 
@@ -294,14 +290,23 @@ ARMul_CPSRAltered (ARMul_State * state)
       
       state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
     }
+  state->Cpsr &= ~MODEBITS;
 
   ASSIGNINT (state->Cpsr & INTBITS);
+  state->Cpsr &= ~INTBITS;
   ASSIGNN ((state->Cpsr & NBIT) != 0);
+  state->Cpsr &= ~NBIT;
   ASSIGNZ ((state->Cpsr & ZBIT) != 0);
+  state->Cpsr &= ~ZBIT;
   ASSIGNC ((state->Cpsr & CBIT) != 0);
+  state->Cpsr &= ~CBIT;
   ASSIGNV ((state->Cpsr & VBIT) != 0);
+  state->Cpsr &= ~VBIT;
+  ASSIGNS ((state->Cpsr & SBIT) != 0);
+  state->Cpsr &= ~SBIT;
 #ifdef MODET
   ASSIGNT ((state->Cpsr & TBIT) != 0);
+  state->Cpsr &= ~TBIT;
 #endif
 
   if (oldmode > SVC26MODE)
@@ -369,10 +374,6 @@ ARMul_SwitchMode (ARMul_State * state, ARMword oldmode, ARMword newmode)
     {				/* really need to do it */
       switch (oldbank)
 	{			/* save away the old registers */
-	case SYSTEMBANK:
-	  /* The System mode uses the USER bank.  */
-	  oldbank = USERBANK;
-	  /* Fall through.  */
 	case USERBANK:
 	case IRQBANK:
 	case SVCBANK:
@@ -398,9 +399,6 @@ ARMul_SwitchMode (ARMul_State * state, ARMword oldmode, ARMword newmode)
       
       switch (newbank)
 	{			/* restore the new registers */
-	case SYSTEMBANK:
-	  newbank = USERBANK;
-	  /* Fall through.  */
 	case USERBANK:
 	case IRQBANK:
 	case SVCBANK:

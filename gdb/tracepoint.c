@@ -31,6 +31,7 @@
 #include "inferior.h"
 #include "tracepoint.h"
 #include "remote.h"
+#include "linespec.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -164,7 +165,7 @@ extern void _initialize_tracepoint (void);
 
 /* Utility: returns true if "target remote" */
 static int
-target_is_remote ()
+target_is_remote (void)
 {
   if (current_target.to_shortname &&
       strcmp (current_target.to_shortname, "remote") == 0)
@@ -175,8 +176,7 @@ target_is_remote ()
 
 /* Utility: generate error from an incoming stub packet.  */
 static void
-trace_error (buf)
-     char *buf;
+trace_error (char *buf)
 {
   if (*buf++ != 'E')
     return;			/* not an error msg */
@@ -219,8 +219,7 @@ remote_get_noisy_reply (char *buf,
 
 /* Set tracepoint count to NUM.  */
 static void
-set_tracepoint_count (num)
-     int num;
+set_tracepoint_count (int num)
 {
   tracepoint_count = num;
   set_internalvar (lookup_internalvar ("tpnum"),
@@ -229,8 +228,7 @@ set_tracepoint_count (num)
 
 /* Set traceframe number to NUM.  */
 static void
-set_traceframe_num (num)
-     int num;
+set_traceframe_num (int num)
 {
   traceframe_number = num;
   set_internalvar (lookup_internalvar ("trace_frame"),
@@ -239,8 +237,7 @@ set_traceframe_num (num)
 
 /* Set tracepoint number to NUM.  */
 static void
-set_tracepoint_num (num)
-     int num;
+set_tracepoint_num (int num)
 {
   tracepoint_number = num;
   set_internalvar (lookup_internalvar ("tracepoint"),
@@ -251,8 +248,7 @@ set_tracepoint_num (num)
    the traceframe context (line, function, file) */
 
 static void
-set_traceframe_context (trace_pc)
-     CORE_ADDR trace_pc;
+set_traceframe_context (CORE_ADDR trace_pc)
 {
   static struct type *func_string, *file_string;
   static struct type *func_range, *file_range;
@@ -339,14 +335,13 @@ set_traceframe_context (trace_pc)
    your arguments BEFORE calling this routine!  */
 
 static struct tracepoint *
-set_raw_tracepoint (sal)
-     struct symtab_and_line sal;
+set_raw_tracepoint (struct symtab_and_line sal)
 {
   register struct tracepoint *t, *tc;
   struct cleanup *old_chain;
 
   t = (struct tracepoint *) xmalloc (sizeof (struct tracepoint));
-  old_chain = make_cleanup (free, t);
+  old_chain = make_cleanup (xfree, t);
   memset (t, 0, sizeof (*t));
   t->address = sal.pc;
   if (sal.symtab == NULL)
@@ -384,9 +379,7 @@ set_raw_tracepoint (sal)
 
 /* Set a tracepoint according to ARG (function, linenum or *address) */
 static void
-trace_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+trace_command (char *arg, int from_tty)
 {
   char **canonical = (char **) NULL;
   struct symtabs_and_lines sals;
@@ -444,8 +437,7 @@ trace_command (arg, from_tty)
 /* Tell the user we have just set a tracepoint TP. */
 
 static void
-trace_mention (tp)
-     struct tracepoint *tp;
+trace_mention (struct tracepoint *tp)
 {
   printf_filtered ("Tracepoint %d", tp->number);
 
@@ -464,9 +456,7 @@ trace_mention (tp)
 /* Print information on tracepoint number TPNUM_EXP, or all if omitted.  */
 
 static void
-tracepoints_info (tpnum_exp, from_tty)
-     char *tpnum_exp;
-     int from_tty;
+tracepoints_info (char *tpnum_exp, int from_tty)
 {
   struct tracepoint *t;
   struct action_line *action;
@@ -476,7 +466,7 @@ tracepoints_info (tpnum_exp, from_tty)
   int tpnum = -1;
 
   if (tpnum_exp)
-    tpnum = parse_and_eval_address (tpnum_exp);
+    tpnum = parse_and_eval_long (tpnum_exp);
 
   ALL_TRACEPOINTS (t)
     if (tpnum == -1 || tpnum == t->number)
@@ -550,10 +540,8 @@ enum tracepoint_opcode
 
 /* This function implements enable, disable and delete commands. */
 static void
-tracepoint_operation (t, from_tty, opcode)
-     struct tracepoint *t;
-     int from_tty;
-     enum tracepoint_opcode opcode;
+tracepoint_operation (struct tracepoint *t, int from_tty,
+		      enum tracepoint_opcode opcode)
 {
   struct tracepoint *t2;
 
@@ -588,13 +576,13 @@ tracepoint_operation (t, from_tty, opcode)
 	delete_tracepoint_hook (t);
 
       if (t->addr_string)
-	free (t->addr_string);
+	xfree (t->addr_string);
       if (t->source_file)
-	free (t->source_file);
+	xfree (t->source_file);
       if (t->actions)
 	free_actions (t);
 
-      free (t);
+      xfree (t);
       break;
     }
 }
@@ -604,9 +592,7 @@ tracepoint_operation (t, from_tty, opcode)
    if OPTIONAL_P is true, then if the argument is missing, the most
    recent tracepoint (tracepoint_count) is returned.  */
 struct tracepoint *
-get_tracepoint_by_number (arg, multi_p, optional_p)
-     char **arg;
-     int multi_p, optional_p;
+get_tracepoint_by_number (char **arg, int multi_p, int optional_p)
 {
   struct tracepoint *t;
   int tpnum;
@@ -646,10 +632,8 @@ get_tracepoint_by_number (arg, multi_p, optional_p)
 
 /* Utility: parse a list of tracepoint numbers, and call a func for each. */
 static void
-map_args_over_tracepoints (args, from_tty, opcode)
-     char *args;
-     int from_tty;
-     enum tracepoint_opcode opcode;
+map_args_over_tracepoints (char *args, int from_tty,
+			   enum tracepoint_opcode opcode)
 {
   struct tracepoint *t, *tmp;
 
@@ -669,9 +653,7 @@ map_args_over_tracepoints (args, from_tty, opcode)
 
 /* The 'enable trace' command enables tracepoints.  Not supported by all targets.  */
 static void
-enable_trace_command (args, from_tty)
-     char *args;
-     int from_tty;
+enable_trace_command (char *args, int from_tty)
 {
   dont_repeat ();
   map_args_over_tracepoints (args, from_tty, enable_op);
@@ -679,9 +661,7 @@ enable_trace_command (args, from_tty)
 
 /* The 'disable trace' command enables tracepoints.  Not supported by all targets.  */
 static void
-disable_trace_command (args, from_tty)
-     char *args;
-     int from_tty;
+disable_trace_command (char *args, int from_tty)
 {
   dont_repeat ();
   map_args_over_tracepoints (args, from_tty, disable_op);
@@ -689,9 +669,7 @@ disable_trace_command (args, from_tty)
 
 /* Remove a tracepoint (or all if no argument) */
 static void
-delete_trace_command (args, from_tty)
-     char *args;
-     int from_tty;
+delete_trace_command (char *args, int from_tty)
 {
   dont_repeat ();
   if (!args || !*args)		/* No args implies all tracepoints; */
@@ -710,9 +688,7 @@ delete_trace_command (args, from_tty)
    Also accepts special argument "all".  */
 
 static void
-trace_pass_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_pass_command (char *args, int from_tty)
 {
   struct tracepoint *t1 = (struct tracepoint *) -1, *t2;
   unsigned int count;
@@ -772,34 +748,26 @@ static void read_actions (struct tracepoint *);
    which is always an error.  */
 
 static void
-end_actions_pseudocommand (args, from_tty)
-     char *args;
-     int from_tty;
+end_actions_pseudocommand (char *args, int from_tty)
 {
   error ("This command cannot be used at the top level.");
 }
 
 static void
-while_stepping_pseudocommand (args, from_tty)
-     char *args;
-     int from_tty;
+while_stepping_pseudocommand (char *args, int from_tty)
 {
   error ("This command can only be used in a tracepoint actions list.");
 }
 
 static void
-collect_pseudocommand (args, from_tty)
-     char *args;
-     int from_tty;
+collect_pseudocommand (char *args, int from_tty)
 {
   error ("This command can only be used in a tracepoint actions list.");
 }
 
 /* Enter a list of actions for a tracepoint.  */
 static void
-trace_actions_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_actions_command (char *args, int from_tty)
 {
   struct tracepoint *t;
   char tmpbuf[128];
@@ -832,8 +800,7 @@ trace_actions_command (args, from_tty)
 
 /* worker function */
 static void
-read_actions (t)
-     struct tracepoint *t;
+read_actions (struct tracepoint *t)
 {
   char *line;
   char *prompt1 = "> ", *prompt2 = "  > ";
@@ -923,15 +890,13 @@ read_actions (t)
   if (job_control)
     signal (STOP_SIGNAL, SIG_DFL);
 #endif
-  immediate_quit = 0;
+  immediate_quit--;
   discard_cleanups (old_chain);
 }
 
 /* worker function */
 enum actionline_type
-validate_actionline (line, t)
-     char **line;
-     struct tracepoint *t;
+validate_actionline (char **line, struct tracepoint *t)
 {
   struct cmd_list_element *c;
   struct expression *exp = NULL;
@@ -1006,7 +971,7 @@ validate_actionline (line, t)
 	    error ("expression too complicated, try simplifying");
 
 	  ax_reqs (aexpr, &areqs);
-	  (void) make_cleanup (free, areqs.reg_mask);
+	  (void) make_cleanup (xfree, areqs.reg_mask);
 
 	  if (areqs.flaw != agent_flaw_none)
 	    error ("malformed expression");
@@ -1049,8 +1014,7 @@ validate_actionline (line, t)
 
 /* worker function */
 void
-free_actions (t)
-     struct tracepoint *t;
+free_actions (struct tracepoint *t)
 {
   struct action_line *line, *next;
 
@@ -1058,8 +1022,8 @@ free_actions (t)
     {
       next = line->next;
       if (line->action)
-	free (line->action);
-      free (line);
+	xfree (line->action);
+      xfree (line);
     }
   t->actions = NULL;
 }
@@ -1102,9 +1066,7 @@ static int memrange_cmp (const void *, const void *);
 
 /* compare memranges for qsort */
 static int
-memrange_cmp (va, vb)
-     const void *va;
-     const void *vb;
+memrange_cmp (const void *va, const void *vb)
 {
   const struct memrange *a = va, *b = vb;
 
@@ -1131,8 +1093,7 @@ memrange_cmp (va, vb)
 
 /* Sort the memrange list using qsort, and merge adjacent memranges */
 static void
-memrange_sortmerge (memranges)
-     struct collection_list *memranges;
+memrange_sortmerge (struct collection_list *memranges)
 {
   int a, b;
 
@@ -1162,9 +1123,7 @@ memrange_sortmerge (memranges)
 
 /* Add a register to a collection list */
 static void
-add_register (collection, regno)
-     struct collection_list *collection;
-     unsigned int regno;
+add_register (struct collection_list *collection, unsigned int regno)
 {
   if (info_verbose)
     printf_filtered ("collect register %d\n", regno);
@@ -1176,11 +1135,8 @@ add_register (collection, regno)
 
 /* Add a memrange to a collection list */
 static void
-add_memrange (memranges, type, base, len)
-     struct collection_list *memranges;
-     int type;
-     bfd_signed_vma base;
-     unsigned long len;
+add_memrange (struct collection_list *memranges, int type, bfd_signed_vma base,
+	      unsigned long len)
 {
   if (info_verbose)
     {
@@ -1209,11 +1165,8 @@ add_memrange (memranges, type, base, len)
 
 /* Add a symbol to a collection list */
 static void
-collect_symbol (collect, sym, frame_regno, frame_offset)
-     struct collection_list *collect;
-     struct symbol *sym;
-     long frame_regno;
-     long frame_offset;
+collect_symbol (struct collection_list *collect, struct symbol *sym,
+		long frame_regno, long frame_offset)
 {
   unsigned long len;
   unsigned int reg;
@@ -1313,7 +1266,7 @@ collect_symbol (collect, sym, frame_regno, frame_offset)
       printf_filtered ("Don't know LOC_UNRESOLVED %s\n", SYMBOL_NAME (sym));
       break;
     case LOC_OPTIMIZED_OUT:
-      printf_filtered ("%s has been optimized out of existance.\n",
+      printf_filtered ("%s has been optimized out of existence.\n",
 		       SYMBOL_NAME (sym));
       break;
     }
@@ -1321,12 +1274,8 @@ collect_symbol (collect, sym, frame_regno, frame_offset)
 
 /* Add all locals (or args) symbols to collection list */
 static void
-add_local_symbols (collect, pc, frame_regno, frame_offset, type)
-     struct collection_list *collect;
-     CORE_ADDR pc;
-     long frame_regno;
-     long frame_offset;
-     int type;
+add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
+		   long frame_regno, long frame_offset, int type)
 {
   struct symbol *sym;
   struct block *block;
@@ -1379,8 +1328,7 @@ add_local_symbols (collect, pc, frame_regno, frame_offset, type)
 
 /* worker function */
 static void
-clear_collection_list (list)
-     struct collection_list *list;
+clear_collection_list (struct collection_list *list)
 {
   int ndx;
 
@@ -1396,9 +1344,7 @@ clear_collection_list (list)
 
 /* reduce a collection list to string form (for gdb protocol) */
 static char **
-stringify_collection_list (list, string)
-     struct collection_list *list;
-     char *string;
+stringify_collection_list (struct collection_list *list, char *string)
 {
   char temp_buf[2048];
   char tmp2[40];
@@ -1497,15 +1443,13 @@ stringify_collection_list (list, string)
 }
 
 static void
-free_actions_list_cleanup_wrapper (al)
-     void *al;
+free_actions_list_cleanup_wrapper (void *al)
 {
   free_actions_list (al);
 }
 
 static void
-free_actions_list (actions_list)
-     char **actions_list;
+free_actions_list (char **actions_list)
 {
   int ndx;
 
@@ -1513,17 +1457,15 @@ free_actions_list (actions_list)
     return;
 
   for (ndx = 0; actions_list[ndx]; ndx++)
-    free (actions_list[ndx]);
+    xfree (actions_list[ndx]);
 
-  free (actions_list);
+  xfree (actions_list);
 }
 
 /* render all actions into gdb protocol */
 static void
-encode_actions (t, tdp_actions, stepping_actions)
-     struct tracepoint *t;
-     char ***tdp_actions;
-     char ***stepping_actions;
+encode_actions (struct tracepoint *t, char ***tdp_actions,
+		char ***stepping_actions)
 {
   static char tdp_buff[2048], step_buff[2048];
   char *action_exp;
@@ -1684,14 +1626,12 @@ encode_actions (t, tdp_actions, stepping_actions)
   memrange_sortmerge (&tracepoint_list);
   memrange_sortmerge (&stepping_list);
 
-  *tdp_actions = stringify_collection_list (&tracepoint_list, &tdp_buff);
-  *stepping_actions = stringify_collection_list (&stepping_list, &step_buff);
+  *tdp_actions = stringify_collection_list (&tracepoint_list, tdp_buff);
+  *stepping_actions = stringify_collection_list (&stepping_list, step_buff);
 }
 
 static void
-add_aexpr (collect, aexpr)
-     struct collection_list *collect;
-     struct agent_expr *aexpr;
+add_aexpr (struct collection_list *collect, struct agent_expr *aexpr)
 {
   if (collect->next_aexpr_elt >= collect->aexpr_listsize)
     {
@@ -1758,9 +1698,7 @@ remote_set_transparent_ranges (void)
    Tell target to start a new trace experiment.  */
 
 static void
-trace_start_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_start_command (char *args, int from_tty)
 {				/* STUB_COMM MOSTLY_IMPLEMENTED */
   struct tracepoint *t;
   char buf[2048];
@@ -1860,9 +1798,7 @@ trace_start_command (args, from_tty)
 
 /* tstop command */
 static void
-trace_stop_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_stop_command (char *args, int from_tty)
 {				/* STUB_COMM IS_IMPLEMENTED */
   if (target_is_remote ())
     {
@@ -1882,9 +1818,7 @@ unsigned long trace_running_p;
 
 /* tstatus command */
 static void
-trace_status_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_status_command (char *args, int from_tty)
 {				/* STUB_COMM IS_IMPLEMENTED */
   if (target_is_remote ())
     {
@@ -2026,9 +1960,7 @@ finish_tfind_command (char *msg,
 
 /* tfind command */
 static void
-trace_find_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_find_command (char *args, int from_tty)
 {				/* STUB_COMM PART_IMPLEMENTED */
   /* this should only be called with a numeric argument */
   int frameno = -1;
@@ -2055,7 +1987,7 @@ trace_find_command (args, from_tty)
 	  frameno = traceframe_number - 1;
 	}
       else
-	frameno = parse_and_eval_address (args);
+	frameno = parse_and_eval_long (args);
 
       if (frameno < -1)
 	error ("invalid input (%d is less than zero)", frameno);
@@ -2069,36 +2001,28 @@ trace_find_command (args, from_tty)
 
 /* tfind end */
 static void
-trace_find_end_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_find_end_command (char *args, int from_tty)
 {
   trace_find_command ("-1", from_tty);
 }
 
 /* tfind none */
 static void
-trace_find_none_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_find_none_command (char *args, int from_tty)
 {
   trace_find_command ("-1", from_tty);
 }
 
 /* tfind start */
 static void
-trace_find_start_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_find_start_command (char *args, int from_tty)
 {
   trace_find_command ("0", from_tty);
 }
 
 /* tfind pc command */
 static void
-trace_find_pc_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_find_pc_command (char *args, int from_tty)
 {				/* STUB_COMM PART_IMPLEMENTED */
   CORE_ADDR pc;
   char tmp[40];
@@ -2120,9 +2044,7 @@ trace_find_pc_command (args, from_tty)
 
 /* tfind tracepoint command */
 static void
-trace_find_tracepoint_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_find_tracepoint_command (char *args, int from_tty)
 {				/* STUB_COMM PART_IMPLEMENTED */
   int tdp;
 
@@ -2134,7 +2056,7 @@ trace_find_tracepoint_command (args, from_tty)
 	else
 	  tdp = tracepoint_number;	/* default is current TDP */
       else
-	tdp = parse_and_eval_address (args);
+	tdp = parse_and_eval_long (args);
 
       sprintf (target_buf, "QTFrame:tdp:%x", tdp);
       finish_tfind_command (target_buf, sizeof (target_buf), from_tty);
@@ -2152,9 +2074,7 @@ trace_find_tracepoint_command (args, from_tty)
    corresponding to a source line OTHER THAN THE CURRENT ONE.  */
 
 static void
-trace_find_line_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_find_line_command (char *args, int from_tty)
 {				/* STUB_COMM PART_IMPLEMENTED */
   static CORE_ADDR start_pc, end_pc;
   struct symtabs_and_lines sals;
@@ -2178,7 +2098,7 @@ trace_find_line_command (args, from_tty)
 	  sal = sals.sals[0];
 	}
 
-      old_chain = make_cleanup (free, sals.sals);
+      old_chain = make_cleanup (xfree, sals.sals);
       if (sal.symtab == 0)
 	{
 	  printf_filtered ("TFIND: No line number information available");
@@ -2242,9 +2162,7 @@ trace_find_line_command (args, from_tty)
 
 /* tfind range command */
 static void
-trace_find_range_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_find_range_command (char *args, int from_tty)
 {
   static CORE_ADDR start, stop;
   char start_str[40], stop_str[40];
@@ -2283,9 +2201,7 @@ trace_find_range_command (args, from_tty)
 
 /* tfind outside command */
 static void
-trace_find_outside_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_find_outside_command (char *args, int from_tty)
 {
   CORE_ADDR start, stop;
   char start_str[40], stop_str[40];
@@ -2324,9 +2240,7 @@ trace_find_outside_command (args, from_tty)
 
 /* save-tracepoints command */
 static void
-tracepoint_save_command (args, from_tty)
-     char *args;
-     int from_tty;
+tracepoint_save_command (char *args, int from_tty)
 {
   struct tracepoint *tp;
   struct action_line *line;
@@ -2395,9 +2309,7 @@ tracepoint_save_command (args, from_tty)
 
 /* info scope command: list the locals for a scope.  */
 static void
-scope_info (args, from_tty)
-     char *args;
-     int from_tty;
+scope_info (char *args, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symbol *sym;
@@ -2534,17 +2446,15 @@ scope_info (args, from_tty)
 
 /* worker function (cleanup) */
 static void
-replace_comma (comma)
-     char *comma;
+replace_comma (void *data)
 {
+  char *comma = data;
   *comma = ',';
 }
 
 /* tdump command */
 static void
-trace_dump_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_dump_command (char *args, int from_tty)
 {
   struct tracepoint *t;
   struct action_line *action;
@@ -2662,10 +2572,7 @@ trace_dump_command (args, from_tty)
 static const char hexchars[] = "0123456789abcdef";
 
 static unsigned char *
-mem2hex (mem, buf, count)
-     unsigned char *mem;
-     unsigned char *buf;
-     int count;
+mem2hex (unsigned char *mem, unsigned char *buf, int count)
 {
   unsigned char ch;
 
@@ -2683,7 +2590,7 @@ mem2hex (mem, buf, count)
 }
 
 int
-get_traceframe_number ()
+get_traceframe_number (void)
 {
   return traceframe_number;
 }
@@ -2691,7 +2598,7 @@ get_traceframe_number ()
 
 /* module initialization */
 void
-_initialize_tracepoint ()
+_initialize_tracepoint (void)
 {
   tracepoint_chain = 0;
   tracepoint_count = 0;

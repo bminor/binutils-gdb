@@ -120,12 +120,12 @@ TEHandle console_text;
 Rect console_text_rect;
 
 /* This will go away eventually. */
-gdb_has_a_terminal ()
+gdb_has_a_terminal (void)
 {
   return 1;
 }
 
-mac_init ()
+mac_init (void)
 {
   SysEnvRec se;
   int eventloopdone = 0;
@@ -203,7 +203,7 @@ mac_init ()
   new_console_window ();
 }
 
-new_console_window ()
+new_console_window (void)
 {
   /* Create the main window we're going to play in. */
   if (has_color_qd)
@@ -234,7 +234,7 @@ new_console_window ()
   SelectWindow (console_window);
 }
 
-mac_command_loop ()
+mac_command_loop (void)
 {
   SysEnvRec se;
   int eventloopdone = 0;
@@ -294,8 +294,7 @@ mac_command_loop ()
 
 /* Collect the global coordinates of the mouse pointer.  */
 
-get_global_mouse (mouse)
-     Point *mouse;
+get_global_mouse (Point *mouse)
 {
   EventRecord evt;
 
@@ -306,16 +305,13 @@ get_global_mouse (mouse)
 /* Change the cursor's appearance to be appropriate for the given mouse
    location.  */
 
-adjust_cursor (mouse, region)
-     Point mouse;
-     RgnHandle region;
+adjust_cursor (Point mouse, RgnHandle region)
 {
 }
 
 /* Decipher an event, maybe do something with it.  */
 
-do_event (evt)
-     EventRecord *evt;
+do_event (EventRecord *evt)
 {
   short part, err, rslt = 0;
   WindowPtr win;
@@ -430,14 +426,12 @@ do_event (evt)
 
 /* Do any idle-time activities. */
 
-do_idle ()
+do_idle (void)
 {
   TEIdle (console_text);
 }
 
-grow_window (win, where)
-     WindowPtr win;
-     Point where;
+grow_window (WindowPtr win, Point where)
 {
   long winsize;
   int h, v;
@@ -461,10 +455,7 @@ grow_window (win, where)
     }
 }
 
-zoom_window (win, where, part)
-     WindowPtr win;
-     Point where;
-     short part;
+zoom_window (WindowPtr win, Point where, short part)
 {
   ZoomWindow (win, part, (win == FrontWindow ()));
   if (win == console_window)
@@ -473,7 +464,7 @@ zoom_window (win, where, part)
     }
 }
 
-resize_console_window ()
+resize_console_window (void)
 {
   adjust_console_sizes ();
   adjust_console_scrollbars ();
@@ -481,8 +472,7 @@ resize_console_window ()
   InvalRect (&console_window->portRect);
 }
 
-close_window (win)
-     WindowPtr win;
+close_window (WindowPtr win)
 {
 }
 
@@ -565,14 +555,11 @@ do_mouse_down (WindowPtr win, EventRecord * event)
     }
 }
 
-scroll_text (hlines, vlines)
-     int hlines, vlines;
+scroll_text (int hlines, int vlines)
 {
 }
 
-activate_window (win, activate)
-     WindowPtr win;
-     int activate;
+activate_window (WindowPtr win, int activate)
 {
   Rect grow_rect;
 
@@ -603,8 +590,7 @@ activate_window (win, activate)
     }
 }
 
-update_window (win)
-     WindowPtr win;
+update_window (WindowPtr win)
 {
   int controls = 1, growbox = 0;
   GrafPtr oldport;
@@ -628,12 +614,11 @@ update_window (win)
   SetPort (oldport);
 }
 
-adjust_menus ()
+adjust_menus (void)
 {
 }
 
-do_menu_command (which)
-     long which;
+do_menu_command (long which)
 {
   short menuid, menuitem;
   short itemHit;
@@ -736,8 +721,7 @@ do_menu_command (which)
 
 char commandbuf[1000];
 
-do_keyboard_command (key)
-     int key;
+do_keyboard_command (int key)
 {
   int startpos, endpos, i, len;
   char *last_newline;
@@ -798,7 +782,7 @@ do_keyboard_command (key)
 
 /* Draw all graphical stuff in the console window.  */
 
-draw_console ()
+draw_console (void)
 {
   SetPort (console_window);
   TEUpdate (&(console_window->portRect), console_text);
@@ -806,8 +790,7 @@ draw_console ()
 
 /* Cause an update of a given window's entire contents.  */
 
-force_update (win)
-     WindowPtr win;
+force_update (WindowPtr win)
 {
   GrafPtr oldport;
 
@@ -820,7 +803,7 @@ force_update (win)
   SetPort (oldport);
 }
 
-adjust_console_sizes ()
+adjust_console_sizes (void)
 {
   Rect tmprect;
 
@@ -841,7 +824,7 @@ adjust_console_sizes ()
   (*console_text)->viewRect = tmprect;
 }
 
-adjust_console_scrollbars ()
+adjust_console_scrollbars (void)
 {
   int lines, newmax, value;
 
@@ -862,7 +845,7 @@ adjust_console_scrollbars ()
 
 /* Scroll the TE record so that it is consistent with the scrollbar(s). */
 
-adjust_console_text ()
+adjust_console_text (void)
 {
   TEScroll (((*console_text)->viewRect.left
 	     - (*console_text)->destRect.left)
@@ -907,7 +890,7 @@ stifle_history (int n)
 }
 
 int
-unstifle_history ()
+unstifle_history (void)
 {
 }
 

@@ -33,34 +33,22 @@
 #include <fcntl.h>
 
 /***************Begin MY defs*********************/
-int quit_flag = 0;
 static char my_registers[REGISTER_BYTES];
 char *registers = my_registers;
-
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-
-char buf2[MAX_REGISTER_RAW_SIZE];
 /***************End MY defs*********************/
 
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
-extern char **environ;
 extern int errno;
 extern int inferior_pid;
-void quit (), perror_with_name ();
-int query ();
+void perror_with_name ();
 
 /* Start an inferior process and returns its pid.
-   ALLARGS is a vector of program-name and args.
-   ENV is the environment vector to pass.  */
+   ALLARGS is a vector of program-name and args. */
 
 int
-create_inferior (program, allargs)
-     char *program;
-     char **allargs;
+create_inferior (char *program, char **allargs)
 {
   int pid;
 
@@ -86,7 +74,7 @@ create_inferior (program, allargs)
 /* Kill the inferior process.  Make us have no inferior.  */
 
 void
-kill_inferior ()
+kill_inferior (void)
 {
   if (inferior_pid == 0)
     return;
@@ -97,8 +85,7 @@ kill_inferior ()
 
 /* Return nonzero if the given thread is still alive.  */
 int
-mythread_alive (pid)
-     int pid;
+mythread_alive (int pid)
 {
   return 1;
 }
@@ -106,8 +93,7 @@ mythread_alive (pid)
 /* Wait for process, returns status */
 
 unsigned char
-mywait (status)
-     char *status;
+mywait (char *status)
 {
   int pid;
   union wait w;
@@ -140,9 +126,7 @@ mywait (status)
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-myresume (step, signal)
-     int step;
-     int signal;
+myresume (int step, int signal)
 {
   errno = 0;
   ptrace (step ? PT_STEP : PT_CONTINUE, inferior_pid, 1, signal, 0);
@@ -164,9 +148,7 @@ myresume (step, signal)
 #endif
 
 CORE_ADDR
-register_addr (regno, blockend)
-     int regno;
-     CORE_ADDR blockend;
+register_addr (int regno, CORE_ADDR blockend)
 {
   CORE_ADDR addr;
 
@@ -181,8 +163,7 @@ register_addr (regno, blockend)
 /* Fetch one register.  */
 
 static void
-fetch_register (regno)
-     int regno;
+fetch_register (int regno)
 {
   register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];
@@ -217,8 +198,7 @@ error_exit:;
 /* Fetch all registers, or just one, from the child process.  */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   if (regno == -1 || regno == 0)
     for (regno = 0; regno < NUM_REGS; regno++)
@@ -232,8 +212,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   register unsigned int regaddr;
   char buf[80];
@@ -295,10 +274,7 @@ store_inferior_registers (regno)
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
 
-read_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -325,10 +301,7 @@ read_inferior_memory (memaddr, myaddr, len)
    returns the value of errno.  */
 
 int
-write_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -369,6 +342,6 @@ write_inferior_memory (memaddr, myaddr, len)
 }
 
 void
-initialize_low ()
+initialize_low (void)
 {
 }

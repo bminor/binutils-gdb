@@ -40,9 +40,7 @@
    for inserting the breakpoint.  */
 
 unsigned char *
-memory_breakpoint_from_pc (pcptr, lenptr)
-     CORE_ADDR *pcptr;
-     int *lenptr;
+memory_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   /* {BIG_,LITTLE_}BREAKPOINT is the sequence of bytes we insert for a
      breakpoint.  On some machines, breakpoints are handled by the
@@ -84,9 +82,7 @@ memory_breakpoint_from_pc (pcptr, lenptr)
    is accomplished via BREAKPOINT_MAX).  */
 
 int
-default_memory_insert_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+default_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   int val;
   unsigned char *bp;
@@ -109,9 +105,7 @@ default_memory_insert_breakpoint (addr, contents_cache)
 
 
 int
-default_memory_remove_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+default_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   unsigned char *bp;
   int bplen;
@@ -126,17 +120,13 @@ default_memory_remove_breakpoint (addr, contents_cache)
 
 
 int
-memory_insert_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   return MEMORY_INSERT_BREAKPOINT(addr, contents_cache);
 }
 
 int
-memory_remove_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   return MEMORY_REMOVE_BREAKPOINT(addr, contents_cache);
 }

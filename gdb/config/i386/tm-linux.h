@@ -1,5 +1,5 @@
 /* Definitions to target GDB to GNU/Linux on 386.
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,12 +23,16 @@
 
 #define I386_GNULINUX_TARGET
 #define HAVE_I387_REGS
-#ifdef HAVE_PTRACE_GETXFPREGS
+#ifdef HAVE_PTRACE_GETFPXREGS
 #define HAVE_SSE_REGS
 #endif
 
 #include "i386/tm-i386.h"
 #include "tm-linux.h"
+
+/* Use target_specific function to define link map offsets.  */
+extern struct link_map_offsets *i386_linux_svr4_fetch_link_map_offsets (void);
+#define SVR4_FETCH_LINK_MAP_OFFSETS() i386_linux_svr4_fetch_link_map_offsets ()
 
 /* FIXME: kettenis/2000-03-26: We should get rid of this last piece of
    Linux-specific `long double'-support code, probably by adding code
@@ -136,5 +140,22 @@ extern CORE_ADDR i386_linux_skip_solib_resolver (CORE_ADDR pc);
 /* N_FUN symbols in shared libaries have 0 for their values and need
    to be relocated. */
 #define SOFUN_ADDRESS_MAYBE_MISSING
+
+
+/* Support for longjmp.  */
+
+/* Details about jmp_buf.  It's supposed to be an array of integers.  */
+
+#define JB_ELEMENT_SIZE 4	/* Size of elements in jmp_buf.  */
+#define JB_PC		5	/* Array index of saved PC.  */
+
+/* Figure out where the longjmp will land.  Slurp the args out of the
+   stack.  We expect the first arg to be a pointer to the jmp_buf
+   structure from which we extract the pc (JB_PC) that we will land
+   at.  The pc is copied into ADDR.  This routine returns true on
+   success.  */
+
+#define GET_LONGJMP_TARGET(addr) get_longjmp_target (addr)
+extern int get_longjmp_target (CORE_ADDR *addr);
 
 #endif /* #ifndef TM_LINUX_H */

@@ -36,6 +36,7 @@
 #include <signal.h>
 #include "serial.h"
 #include "ocd.h"
+#include "ppc-tdep.h"
 
 static void bdm_ppc_open (char *name, int from_tty);
 
@@ -77,9 +78,7 @@ char nowatchdog[4] =
    NAME is the filename used for communication.  */
 
 static void
-bdm_ppc_open (name, from_tty)
-     char *name;
-     int from_tty;
+bdm_ppc_open (char *name, int from_tty)
 {
   CORE_ADDR watchdogaddr = 0xff000004;
 
@@ -99,9 +98,7 @@ bdm_ppc_open (name, from_tty)
    means in the case of this target).  */
 
 static int
-bdm_ppc_wait (pid, target_status)
-     int pid;
-     struct target_waitstatus *target_status;
+bdm_ppc_wait (int pid, struct target_waitstatus *target_status)
 {
   int stop_reason;
 
@@ -153,8 +150,7 @@ static int bdm_regmap[] =
  */
 
 static void
-bdm_ppc_fetch_registers (regno)
-     int regno;
+bdm_ppc_fetch_registers (int regno)
 {
   int i;
   unsigned char *regs, *beginregs, *endregs, *almostregs;
@@ -203,7 +199,7 @@ bdm_ppc_fetch_registers (regno)
 /*      printf("Asking for register %d\n", first_regno); */
 
       /* if asking for an invalid register */
-      if ((first_regno == MQ_REGNUM) ||
+      if ((first_regno == PPC_MQ_REGNUM) ||
 	  ((first_regno >= FP0_REGNUM) && (first_regno <= FPLAST_REGNUM)))
 	{
 /*          printf("invalid reg request!\n"); */
@@ -258,8 +254,7 @@ bdm_ppc_fetch_registers (regno)
    of REGISTERS.  FIXME: ignores errors.  */
 
 static void
-bdm_ppc_store_registers (regno)
-     int regno;
+bdm_ppc_store_registers (int regno)
 {
   int i;
   int first_regno, last_regno;
@@ -293,14 +288,14 @@ bdm_ppc_store_registers (regno)
 
       /* only attempt to write if it's a valid ppc 8xx register */
       /* (need to avoid FP regs and MQ reg) */
-      if ((i != MQ_REGNUM) && ((i < FP0_REGNUM) || (i > FPLAST_REGNUM)))
+      if ((i != PPC_MQ_REGNUM) && ((i < FP0_REGNUM) || (i > FPLAST_REGNUM)))
 	{
 /*          printf("write valid reg %d\n", bdm_regno); */
 	  ocd_write_bdm_registers (bdm_regno, registers + REGISTER_BYTE (i), 4);
 	}
 /*
-   else if (i == MQ_REGNUM)
-   printf("don't write invalid reg %d (MQ_REGNUM)\n", bdm_regno);
+   else if (i == PPC_MQ_REGNUM)
+   printf("don't write invalid reg %d (PPC_MQ_REGNUM)\n", bdm_regno);
    else
    printf("don't write invalid reg %d\n", bdm_regno);
  */
@@ -383,7 +378,7 @@ a wiggler, specify wiggler and then the port it is connected to\n\
 }				/* init_bdm_ppc_ops */
 
 void
-_initialize_bdm_ppc ()
+_initialize_bdm_ppc (void)
 {
   init_bdm_ppc_ops ();
   add_target (&bdm_ppc_ops);

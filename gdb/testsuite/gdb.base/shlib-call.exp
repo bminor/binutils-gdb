@@ -139,13 +139,19 @@ gdb_expect {
 
 
 #step -over
-    send_gdb "next\n"
-    gdb_expect {
-        -re ".*address of sgs is $hex.*g = shr2\\(g\\).*$gdb_prompt $" {
-             pass "next over shr1" }
-        -re ".*$gdb_prompt $" { fail "next over shr1" }
-        timeout { fail "next over shr1 (timeout)" }
-    }
+  if ![gdb_skip_stdio_test "next over shr1"] {
+      send_gdb "next\n"
+      gdb_expect {
+	  -re ".*address of sgs is $hex.*g = shr2\\(g\\).*$gdb_prompt $" {
+	      pass "next over shr1" 
+	  }
+	  -re ".*$gdb_prompt $" { fail "next over shr1" }
+	  timeout { fail "next over shr1 (timeout)" }
+      }
+  } else {
+      gdb_test "next" "" ""
+  }
+
 
 #print g
 send_gdb "print g\n"
@@ -157,21 +163,27 @@ gdb_expect {
   }
 
 #print shr1(1)
-send_gdb "print shr1(1)\n"
-gdb_expect {
-    -re ".*address of sgs is $hex.*\[0-9\]* = 2.*$gdb_prompt $" {
-        pass "print shr1(1)" }
-    -re ".*$gdb_prompt $" { fail "print  shr1(1)" }
-    timeout           { fail "(timeout) print shr1(1)" }
+  if ![gdb_skip_stdio_test "print shr1(1)"] {
+      send_gdb "print shr1(1)\n"
+      gdb_expect {
+	  -re ".*address of sgs is $hex.*\[0-9\]* = 2.*$gdb_prompt $" {
+	      pass "print shr1(1)" 
+	  }
+	  -re ".*$gdb_prompt $" { fail "print shr1(1)" }
+	  timeout               { fail "(timeout) print shr1(1)" }
+      }
   }
 
 #print shr1(g)
-send_gdb "print shr1(g)\n"
-gdb_expect {
-    -re ".*address of sgs is $hex.*\[0-9\]* = 4.*$gdb_prompt $" {
-        pass "print shr1(g)" }
-    -re ".*$gdb_prompt $" { fail "print  shr1(g)" }
-    timeout           { fail "(timeout) print shr1(g)" }
+  if ![gdb_skip_stdio_test "print shr1(g)"] {
+      send_gdb "print shr1(g)\n"
+      gdb_expect {
+	  -re ".*address of sgs is $hex.*\[0-9\]* = 4.*$gdb_prompt $" {
+	      pass "print shr1(g)" 
+	  }
+	  -re ".*$gdb_prompt $" { fail "print shr1(g)" }
+	  timeout               { fail "(timeout) print shr1(g)" }
+      }
   }
 
 #break shr2
@@ -180,19 +192,22 @@ gdb_test "break shr2" \
     "Breakpoint.*file.*shr2.c, line.*" \
     "breakpoint function shr2"
 
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, shr2 \\(.*\\) at.*shr2\\.c:7.*7.*return 2.x;" \
-"run until breakpoint set at a function"
+gdb_test "continue" \
+	"Continuing\\..*Breakpoint \[0-9\]+, shr2 \\(.*\\) at.*shr2\\.c:7.*7.*return 2.x;" \
+	"run until breakpoint set at a function"
 
 
 #print shr1(1)
-send_gdb "print shr1(1)\n"
-gdb_expect {
-    -re ".*address of sgs is $hex.*\[0-9\]* = 2.*$gdb_prompt $" {
-        pass "print shr1(1)"
-      }
-    -re ".*$gdb_prompt $" { fail "print  shr1(1)" }
-    timeout           { fail "(timeout) print shr1(1)" }
-  }
+if ![gdb_skip_stdio_test "print shr1(1) 2nd time"] {
+    send_gdb "print shr1(1)\n"
+    gdb_expect {
+	-re ".*address of sgs is $hex.*\[0-9\]* = 2.*$gdb_prompt $" {
+	    pass "print shr1(1) 2nd time"
+	}
+	-re ".*$gdb_prompt $" { fail "print shr1(1) 2nd time" }
+	timeout               { fail "(timeout) print shr1(1) 2nd time" }
+    }
+}
 
 #print mainshr1(1)
 send_gdb "print mainshr1(1)\n"
@@ -250,9 +265,17 @@ send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
 # PR's 16495, 18213
 # test that we can re-set breakpoints in shared libraries
 gdb_test "break shr1" "Breakpoint 1.*" "set bp in shared library"
-gdb_test "run" "Starting program:.*Breakpoint 1,.*" "run to bp in shared library"
+
+# FIXME: should not send "run" explicitly.  Non-portable.
+
+gdb_test "run" "Starting program:.*Breakpoint 1,.*" \
+	"run to bp in shared library"
+
 gdb_test "cont" ".*Program exited normally..*"
-gdb_test "run" "Starting program:.*Breakpoint 1,.*" "re-run to bp in shared library (PR's 16495, 18213)"
+
+gdb_test "run" "Starting program:.*Breakpoint 1,.*" \
+	"re-run to bp in shared library (PR's 16495, 18213)"
+
 gdb_test "cont" ".*Program exited normally..*"
 
 return 0

@@ -1,5 +1,6 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright 1993, 94-98, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -56,35 +57,66 @@ static boolean elf_i386_finish_dynamic_sections
 
 static reloc_howto_type elf_howto_table[]=
 {
-  HOWTO(R_386_NONE,	 0,0, 0,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_NONE",	    true,0x00000000,0x00000000,false),
-  HOWTO(R_386_32,	 0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_32",	    true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_PC32,	 0,2,32,true, 0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PC32",	    true,0xffffffff,0xffffffff,true),
-  HOWTO(R_386_GOT32,	 0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOT32",    true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_PLT32,	 0,2,32,true,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PLT32",    true,0xffffffff,0xffffffff,true),
-  HOWTO(R_386_COPY,      0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_COPY",	    true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_GLOB_DAT,  0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GLOB_DAT", true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_JUMP_SLOT, 0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_JUMP_SLOT",true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_RELATIVE,  0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_RELATIVE", true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_GOTOFF,    0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTOFF",   true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_GOTPC,     0,2,32,true,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTPC",    true,0xffffffff,0xffffffff,true),
-  EMPTY_HOWTO (11),
-  EMPTY_HOWTO (12),
-  EMPTY_HOWTO (13),
-  EMPTY_HOWTO (14),
-  EMPTY_HOWTO (15),
-  EMPTY_HOWTO (16),
-  EMPTY_HOWTO (17),
-  EMPTY_HOWTO (18),
-  EMPTY_HOWTO (19),
+  HOWTO(R_386_NONE, 0, 0, 0, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_NONE",
+	true, 0x00000000, 0x00000000, false),
+  HOWTO(R_386_32, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_32",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_PC32, 0, 2, 32, true, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_PC32",
+	true, 0xffffffff, 0xffffffff, true),
+  HOWTO(R_386_GOT32, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_GOT32",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_PLT32, 0, 2, 32, true, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_PLT32",
+	true, 0xffffffff, 0xffffffff, true),
+  HOWTO(R_386_COPY, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_COPY",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_GLOB_DAT, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_GLOB_DAT",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_JUMP_SLOT, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_JUMP_SLOT",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_RELATIVE, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_RELATIVE",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_GOTOFF, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_GOTOFF",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_GOTPC, 0, 2, 32, true, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_GOTPC",
+	true, 0xffffffff, 0xffffffff, true),
+
+  /* We have a gap in the reloc numbers here.
+     R_386_standard counts the number up to this point, and
+     R_386_ext_offset is the value to subtract from a reloc type of
+     R_386_16 thru R_386_PC8 to form an index into this table.  */
+#define R_386_standard ((unsigned int) R_386_GOTPC + 1)
+#define R_386_ext_offset ((unsigned int) R_386_16 - R_386_standard)
+
   /* The remaining relocs are a GNU extension.  */
-  HOWTO(R_386_16,	 0,1,16,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_16",	    true,0xffff,0xffff,false),
-  HOWTO(R_386_PC16,	 0,1,16,true, 0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PC16",	    true,0xffff,0xffff,true),
-  HOWTO(R_386_8,	 0,0,8,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_8",	    true,0xff,0xff,false),
-  HOWTO(R_386_PC8,	 0,0,8,true, 0,complain_overflow_signed, bfd_elf_generic_reloc,"R_386_PC8",	    true,0xff,0xff,true),
-};
+  HOWTO(R_386_16, 0, 1, 16, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_16",
+	true, 0xffff, 0xffff, false),
+  HOWTO(R_386_PC16, 0, 1, 16, true, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_PC16",
+	true, 0xffff, 0xffff, true),
+  HOWTO(R_386_8, 0, 0, 8, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_8",
+	true, 0xff, 0xff, false),
+  HOWTO(R_386_PC8, 0, 0, 8, true, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_386_PC8",
+	true, 0xff, 0xff, true),
+
+  /* Another gap.  */
+#define R_386_ext ((unsigned int) R_386_PC8 + 1 - R_386_ext_offset)
+#define R_386_vt_offset ((unsigned int) R_386_GNU_VTINHERIT - R_386_ext)
 
 /* GNU extension to record C++ vtable hierarchy.  */
-static reloc_howto_type elf32_i386_vtinherit_howto =
   HOWTO (R_386_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -97,10 +129,9 @@ static reloc_howto_type elf32_i386_vtinherit_howto =
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false);
+	 false),
 
 /* GNU extension to record C++ vtable member usage.  */
-static reloc_howto_type elf32_i386_vtentry_howto =
   HOWTO (R_386_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -113,7 +144,11 @@ static reloc_howto_type elf32_i386_vtentry_howto =
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false);
+	 false)
+
+#define R_386_vt ((unsigned int) R_386_GNU_VTENTRY + 1 - R_386_vt_offset)
+
+};
 
 #ifdef DEBUG_GEN_RELOC
 #define TRACE(str) fprintf (stderr, "i386 bfd reloc lookup %d (%s)\n", code, str)
@@ -130,76 +165,78 @@ elf_i386_reloc_type_lookup (abfd, code)
     {
     case BFD_RELOC_NONE:
       TRACE ("BFD_RELOC_NONE");
-      return &elf_howto_table[ (int)R_386_NONE ];
+      return &elf_howto_table[(unsigned int) R_386_NONE ];
 
     case BFD_RELOC_32:
       TRACE ("BFD_RELOC_32");
-      return &elf_howto_table[ (int)R_386_32 ];
+      return &elf_howto_table[(unsigned int) R_386_32 ];
 
     case BFD_RELOC_CTOR:
       TRACE ("BFD_RELOC_CTOR");
-      return &elf_howto_table[ (int)R_386_32 ];
+      return &elf_howto_table[(unsigned int) R_386_32 ];
 
     case BFD_RELOC_32_PCREL:
       TRACE ("BFD_RELOC_PC32");
-      return &elf_howto_table[ (int)R_386_PC32 ];
+      return &elf_howto_table[(unsigned int) R_386_PC32 ];
 
     case BFD_RELOC_386_GOT32:
       TRACE ("BFD_RELOC_386_GOT32");
-      return &elf_howto_table[ (int)R_386_GOT32 ];
+      return &elf_howto_table[(unsigned int) R_386_GOT32 ];
 
     case BFD_RELOC_386_PLT32:
       TRACE ("BFD_RELOC_386_PLT32");
-      return &elf_howto_table[ (int)R_386_PLT32 ];
+      return &elf_howto_table[(unsigned int) R_386_PLT32 ];
 
     case BFD_RELOC_386_COPY:
       TRACE ("BFD_RELOC_386_COPY");
-      return &elf_howto_table[ (int)R_386_COPY ];
+      return &elf_howto_table[(unsigned int) R_386_COPY ];
 
     case BFD_RELOC_386_GLOB_DAT:
       TRACE ("BFD_RELOC_386_GLOB_DAT");
-      return &elf_howto_table[ (int)R_386_GLOB_DAT ];
+      return &elf_howto_table[(unsigned int) R_386_GLOB_DAT ];
 
     case BFD_RELOC_386_JUMP_SLOT:
       TRACE ("BFD_RELOC_386_JUMP_SLOT");
-      return &elf_howto_table[ (int)R_386_JUMP_SLOT ];
+      return &elf_howto_table[(unsigned int) R_386_JUMP_SLOT ];
 
     case BFD_RELOC_386_RELATIVE:
       TRACE ("BFD_RELOC_386_RELATIVE");
-      return &elf_howto_table[ (int)R_386_RELATIVE ];
+      return &elf_howto_table[(unsigned int) R_386_RELATIVE ];
 
     case BFD_RELOC_386_GOTOFF:
       TRACE ("BFD_RELOC_386_GOTOFF");
-      return &elf_howto_table[ (int)R_386_GOTOFF ];
+      return &elf_howto_table[(unsigned int) R_386_GOTOFF ];
 
     case BFD_RELOC_386_GOTPC:
       TRACE ("BFD_RELOC_386_GOTPC");
-      return &elf_howto_table[ (int)R_386_GOTPC ];
+      return &elf_howto_table[(unsigned int) R_386_GOTPC ];
 
       /* The remaining relocs are a GNU extension.  */
     case BFD_RELOC_16:
       TRACE ("BFD_RELOC_16");
-      return &elf_howto_table[(int) R_386_16];
+      return &elf_howto_table[(unsigned int) R_386_16 - R_386_ext_offset];
 
     case BFD_RELOC_16_PCREL:
       TRACE ("BFD_RELOC_16_PCREL");
-      return &elf_howto_table[(int) R_386_PC16];
+      return &elf_howto_table[(unsigned int) R_386_PC16 - R_386_ext_offset];
 
     case BFD_RELOC_8:
       TRACE ("BFD_RELOC_8");
-      return &elf_howto_table[(int) R_386_8];
+      return &elf_howto_table[(unsigned int) R_386_8 - R_386_ext_offset];
 
     case BFD_RELOC_8_PCREL:
       TRACE ("BFD_RELOC_8_PCREL");
-      return &elf_howto_table[(int) R_386_PC8];
+      return &elf_howto_table[(unsigned int) R_386_PC8 - R_386_ext_offset];
 
     case BFD_RELOC_VTABLE_INHERIT:
       TRACE ("BFD_RELOC_VTABLE_INHERIT");
-      return &elf32_i386_vtinherit_howto;
+      return &elf_howto_table[(unsigned int) R_386_GNU_VTINHERIT
+			     - R_386_vt_offset];
 
     case BFD_RELOC_VTABLE_ENTRY:
       TRACE ("BFD_RELOC_VTABLE_ENTRY");
-      return &elf32_i386_vtentry_howto;
+      return &elf_howto_table[(unsigned int) R_386_GNU_VTENTRY
+			     - R_386_vt_offset];
 
     default:
       break;
@@ -224,22 +261,20 @@ elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
      arelent *cache_ptr;
      Elf32_Internal_Rel *dst;
 {
-  enum elf_i386_reloc_type type;
+  unsigned int r_type = ELF32_R_TYPE (dst->r_info);
+  unsigned int indx;
 
-  type = (enum elf_i386_reloc_type) ELF32_R_TYPE (dst->r_info);
-  if (type == R_386_GNU_VTINHERIT)
-    cache_ptr->howto = &elf32_i386_vtinherit_howto;
-  else if (type == R_386_GNU_VTENTRY)
-    cache_ptr->howto = &elf32_i386_vtentry_howto;
-  else if (type < R_386_max
-	   && (type < FIRST_INVALID_RELOC || type > LAST_INVALID_RELOC))
-    cache_ptr->howto = &elf_howto_table[(int) type];
-  else
+  if ((indx = r_type) >= R_386_standard
+      && ((indx = r_type - R_386_ext_offset) - R_386_standard
+	  >= R_386_ext - R_386_standard)
+      && ((indx = r_type - R_386_vt_offset) - R_386_ext
+	  >= R_386_vt - R_386_ext))
     {
       (*_bfd_error_handler) (_("%s: invalid relocation type %d"),
-			     bfd_get_filename (abfd), (int) type);
-      cache_ptr->howto = &elf_howto_table[(int) R_386_NONE];
+			     bfd_get_filename (abfd), (int) r_type);
+      indx = (unsigned int) R_386_NONE;
     }
+  cache_ptr->howto = &elf_howto_table[indx];
 }
 
 /* Return whether a symbol name implies a local label.  The UnixWare
@@ -600,17 +635,19 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
 
 	  /* If we are creating a shared library, and this is a reloc
-             against a global symbol, or a non PC relative reloc
-             against a local symbol, then we need to copy the reloc
-             into the shared library.  However, if we are linking with
-             -Bsymbolic, we do not need to copy a reloc against a
-             global symbol which is defined in an object we are
-             including in the link (i.e., DEF_REGULAR is set).  At
-             this point we have not seen all the input files, so it is
-             possible that DEF_REGULAR is not set now but will be set
-             later (it is never cleared).  We account for that
-             possibility below by storing information in the
-             pcrel_relocs_copied field of the hash table entry.  */
+	     against a global symbol, or a non PC relative reloc
+	     against a local symbol, then we need to copy the reloc
+	     into the shared library.  However, if we are linking with
+	     -Bsymbolic, we do not need to copy a reloc against a
+	     global symbol which is defined in an object we are
+	     including in the link (i.e., DEF_REGULAR is set).  At
+	     this point we have not seen all the input files, so it is
+	     possible that DEF_REGULAR is not set now but will be set
+	     later (it is never cleared).  We account for that
+	     possibility below by storing information in the
+	     pcrel_relocs_copied field of the hash table entry.
+	     A similar situation occurs when creating shared libraries
+	     and symbol visibility changes render the symbol local.  */
 	  if (info->shared
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (ELF32_R_TYPE (rel->r_info) != R_386_PC32
@@ -620,8 +657,8 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	    {
 	      /* When creating a shared object, we must copy these
-                 reloc types into the output file.  We create a reloc
-                 section in dynobj and make room for this reloc.  */
+		 reloc types into the output file.  We create a reloc
+		 section in dynobj and make room for this reloc.  */
 	      if (sreloc == NULL)
 		{
 		  const char *name;
@@ -656,15 +693,13 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rel);
 
-	      /* If we are linking with -Bsymbolic, and this is a
-                 global symbol, we count the number of PC relative
-                 relocations we have entered for this symbol, so that
-                 we can discard them again if the symbol is later
-                 defined by a regular object.  Note that this function
-                 is only called if we are using an elf_i386 linker
-                 hash table, which means that h is really a pointer to
-                 an elf_i386_link_hash_entry.  */
-	      if (h != NULL && info->symbolic
+	      /* If this is a global symbol, we count the number of PC
+		 relative relocations we have entered for this symbol,
+		 so that we can discard them later as necessary.  Note
+		 that this function is only called if we are using an
+		 elf_i386 linker hash table, which means that h is
+		 really a pointer to an elf_i386_link_hash_entry.  */
+	      if (h != NULL
 		  && ELF32_R_TYPE (rel->r_info) == R_386_PC32)
 		{
 		  struct elf_i386_link_hash_entry *eh;
@@ -1064,10 +1099,10 @@ elf_i386_size_dynamic_sections (output_bfd, info)
      PC relative relocs against symbols defined in a regular object.
      We allocated space for them in the check_relocs routine, but we
      will not fill them in in the relocate_section routine.  */
-  if (info->shared && info->symbolic)
+  if (info->shared)
     elf_i386_link_hash_traverse (elf_i386_hash_table (info),
 				 elf_i386_discard_copies,
-				 (PTR) NULL);
+				 (PTR) info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -1161,8 +1196,12 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	  continue;
 	}
 
-      /* Allocate memory for the section contents.  */
-      s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
+      /* Allocate memory for the section contents.  We use bfd_zalloc
+	 here in case unused entries are not reclaimed before the
+	 section's contents are written out.  This should not happen,
+	 but this way if it does, we get a R_386_NONE reloc instead
+	 of garbage.  */
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
       if (s->contents == NULL && s->_raw_size != 0)
 	return false;
     }
@@ -1202,6 +1241,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	{
 	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
+	  info->flags |= DF_TEXTREL;
 	}
     }
 
@@ -1209,26 +1249,32 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 }
 
 /* This function is called via elf_i386_link_hash_traverse if we are
-   creating a shared object with -Bsymbolic.  It discards the space
-   allocated to copy PC relative relocs against symbols which are
-   defined in regular objects.  We allocated space for them in the
+   creating a shared object.  In the -Bsymbolic case, it discards the
+   space allocated to copy PC relative relocs against symbols which
+   are defined in regular objects.  For the normal non-symbolic case,
+   we also discard space for relocs that have become local due to
+   symbol visibility changes.  We allocated space for them in the
    check_relocs routine, but we won't fill them in in the
    relocate_section routine.  */
 
-/*ARGSUSED*/
 static boolean
-elf_i386_discard_copies (h, ignore)
+elf_i386_discard_copies (h, inf)
      struct elf_i386_link_hash_entry *h;
-     PTR ignore ATTRIBUTE_UNUSED;
+     PTR inf;
 {
   struct elf_i386_pcrel_relocs_copied *s;
+  struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
-  /* We only discard relocs for symbols defined in a regular object.  */
-  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-    return true;
-
-  for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
-    s->section->_raw_size -= s->count * sizeof (Elf32_External_Rel);
+  /* If a symbol has been forced local or we have found a regular
+     definition for the symbolic link case, then we won't be needing
+     any relocs.  */
+  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+      && ((h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
+	  || info->symbolic))
+    {
+      for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
+	s->section->_raw_size -= s->count * sizeof (Elf32_External_Rel);
+    }
 
   return true;
 }
@@ -1283,20 +1329,21 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       asection *sec;
       bfd_vma relocation;
       bfd_reloc_status_type r;
+      unsigned int indx;
 
       r_type = ELF32_R_TYPE (rel->r_info);
-      if (r_type == R_386_GNU_VTINHERIT
-	  || r_type == R_386_GNU_VTENTRY)
+      if (r_type == (int) R_386_GNU_VTINHERIT
+	  || r_type == (int) R_386_GNU_VTENTRY)
 	continue;
-      if (r_type < 0
-	  || r_type >= (int) R_386_max
-	  || (r_type >= (int) FIRST_INVALID_RELOC
-	      && r_type <= (int) LAST_INVALID_RELOC))
+
+      if ((indx = (unsigned) r_type) >= R_386_standard
+	  && ((indx = (unsigned) r_type - R_386_ext_offset) - R_386_standard
+	      >= R_386_ext - R_386_standard))
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
-      howto = elf_howto_table + r_type;
+      howto = elf_howto_table + indx;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 

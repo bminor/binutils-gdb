@@ -68,8 +68,7 @@ static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 /* Get all registers from the inferior */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];
@@ -99,8 +98,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   register unsigned int regaddr;
   char buf[80];
@@ -136,12 +134,12 @@ store_inferior_registers (regno)
    This routine returns true on success. */
 
 int
-get_longjmp_target (pc)
-     CORE_ADDR *pc;
+get_longjmp_target (CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
-  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
+  char *buf;
 
+  buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
   jb_addr = read_register (A0_REGNUM);
 
   if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
@@ -167,11 +165,8 @@ get_longjmp_target (pc)
  */
 
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR reg_addr;
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+		      CORE_ADDR reg_addr)
 {
   register int regno;
   register unsigned int addr;
@@ -217,9 +212,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
    BLOCKEND is the address of the end of the user structure.  */
 
 CORE_ADDR
-register_addr (regno, blockend)
-     int regno;
-     CORE_ADDR blockend;
+register_addr (int regno, CORE_ADDR blockend)
 {
   CORE_ADDR addr;
 
@@ -245,7 +238,7 @@ static struct core_fns mips_core_fns =
 };
 
 void
-_initialize_core_mips ()
+_initialize_core_mips (void)
 {
   add_core_fns (&mips_core_fns);
 }

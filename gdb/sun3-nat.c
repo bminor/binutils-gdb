@@ -29,8 +29,7 @@
 static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
@@ -63,8 +62,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
@@ -92,14 +90,22 @@ store_inferior_registers (regno)
 
 
 /* All of this stuff is only relevant if both host and target are sun3.  */
-/* Machine-dependent code for pulling registers out of a Sun-3 core file. */
+
+/* Provide registers to GDB from a core file.
+
+   CORE_REG_SECT points to an array of bytes, which were obtained from
+   a core file which BFD thinks might contain register contents. 
+   CORE_REG_SIZE is its size.
+
+   WHICH says which register set corelow suspects this is:
+     0 --- the general-purpose register set
+     2 --- the floating-point register set
+
+   REG_ADDR isn't used.  */
 
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR reg_addr;	/* Unused in this version */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+		      int which, CORE_ADDR reg_addr)
 {
   struct regs *regs = (struct regs *) core_reg_sect;
 
@@ -151,7 +157,7 @@ static struct core_fns sun3_core_fns =
 };
 
 void
-_initialize_core_sun3 ()
+_initialize_core_sun3 (void)
 {
   add_core_fns (&sun3_core_fns);
 }

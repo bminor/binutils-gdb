@@ -52,7 +52,8 @@ extern void write_inferior_status_register (struct inferior_status
 
 /* This macro gives the number of registers actually in use by the
    inferior.  This may be less than the total number of registers,
-   perhaps depending on the actual CPU in use or program being run.  */
+   perhaps depending on the actual CPU in use or program being run.  
+   FIXME: This could be replaced by the new MULTI_ARCH capability.  */
 
 #ifndef ARCH_NUM_REGS
 #define ARCH_NUM_REGS NUM_REGS
@@ -124,6 +125,11 @@ extern void clear_proceed_status (void);
 
 extern void proceed (CORE_ADDR, enum target_signal, int);
 
+/* When set, stop the 'step' command if we enter a function which has
+   no line number information.  The normal behavior is that we step
+   over such function.  */
+extern int step_stop_if_no_debug;
+
 extern void kill_inferior (void);
 
 extern void generic_mourn_inferior (void);
@@ -184,6 +190,8 @@ extern void reopen_exec_file (void);
 extern void resume (int, enum target_signal);
 
 /* From misc files */
+
+extern void do_registers_info (int, int);
 
 extern void store_inferior_registers (int);
 
@@ -332,7 +340,12 @@ extern CORE_ADDR step_sp;
 /* 1 means step over all subroutine calls.
    -1 means step over calls to undebuggable functions.  */
 
-extern int step_over_calls;
+enum step_over_calls_kind
+  {
+    STEP_OVER_NONE,
+    STEP_OVER_ALL,
+    STEP_OVER_UNDEBUGGABLE,
+  } step_over_calls;
 
 /* If stepping, nonzero means step count is > 1
    so don't print frame next time inferior stops

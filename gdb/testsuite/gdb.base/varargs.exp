@@ -69,6 +69,10 @@ send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
 send_gdb "set print address off\n" ; gdb_expect -re "$gdb_prompt $"
 send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
 
+if [gdb_skip_stdio_test "varargs.exp"] {
+    # Nothing in this module is testable without printf.
+    return;
+}
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"

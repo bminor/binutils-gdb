@@ -21,9 +21,10 @@
 #ifndef TM_I386_H
 #define TM_I386_H 1
 
-/* Forward decl's for prototypes */
+/* Forward declarations for prototypes.  */
 struct frame_info;
 struct frame_saved_regs;
+struct value;
 struct type;
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
@@ -68,7 +69,8 @@ extern int i386_skip_prologue (int);
    through the frames for this because on some machines the new frame is not
    set up until the new function executes some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(frame) (read_memory_integer (read_register (SP_REGNUM), 4))
+#define SAVED_PC_AFTER_CALL(frame) \
+     (read_memory_unsigned_integer (read_register (SP_REGNUM), 4))
 
 /* Stack grows downward.  */
 
@@ -294,17 +296,11 @@ extern void i387_float_info (void);
 extern void i386_extract_return_value (struct type *type, char *regbuf,
 				       char *valbuf);
 
-/* Write into appropriate registers a function return value of type TYPE, given
-   in virtual format.  */
-
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  {    	       	       	       	       	       	       	       	       	     \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				     \
-      write_register_bytes (REGISTER_BYTE (FP0_REGNUM), (VALBUF),	     \
-			    TYPE_LENGTH (TYPE));			     \
-    else								     \
-      write_register_bytes (0, (VALBUF), TYPE_LENGTH (TYPE));  		     \
-  }
+/* Write into the appropriate registers a function return value stored
+   in VALBUF of type TYPE, given in virtual format.  */
+#define STORE_RETURN_VALUE(type, valbuf) \
+  i386_store_return_value ((type), (valbuf))
+extern void i386_store_return_value (struct type *type, char *valbuf);
 
 /* Extract from an array REGBUF containing the (raw) register state the address
    in which a function should return its structure value, as a CORE_ADDR (or an
@@ -326,7 +322,7 @@ extern void i386_extract_return_value (struct type *type, char *regbuf,
   ((thisframe)->signal_handler_caller \
    ? (thisframe)->frame \
    : (!inside_entry_file ((thisframe)->pc) \
-      ? read_memory_integer ((thisframe)->frame, 4) \
+      ? read_memory_unsigned_integer ((thisframe)->frame, 4) \
       : 0))
 
 /* A macro that tells us whether the function invocation represented
@@ -341,7 +337,7 @@ extern void i386_extract_return_value (struct type *type, char *regbuf,
 #define FRAME_SAVED_PC(FRAME) \
   (((FRAME)->signal_handler_caller \
     ? sigtramp_saved_pc (FRAME) \
-    : read_memory_integer ((FRAME)->frame + 4, 4)) \
+    : read_memory_unsigned_integer ((FRAME)->frame + 4, 4)) \
    )
 
 extern CORE_ADDR sigtramp_saved_pc (struct frame_info *);
@@ -408,19 +404,13 @@ extern void i386_pop_frame (void);
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   \
-{ \
-	int from, to, delta, loc; \
-	loc = (int)(read_register (SP_REGNUM) - CALL_DUMMY_LENGTH); \
-	from = loc + 5; \
-	to = (int)(fun); \
-	delta = to - from; \
-	*((char *)(dummyname) + 1) = (delta & 0xff); \
-	*((char *)(dummyname) + 2) = ((delta >> 8) & 0xff); \
-	*((char *)(dummyname) + 3) = ((delta >> 16) & 0xff); \
-	*((char *)(dummyname) + 4) = ((delta >> 24) & 0xff); \
-}
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
+  i386_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
+extern void i386_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
+				 int nargs, struct value **args,
+				 struct type *type, int gcc_p);
 
+/* FIXME: kettenis/2000-06-12: These do not belong here.  */
 extern void print_387_control_word (unsigned int);
 extern void print_387_status_word (unsigned int);
 

@@ -42,8 +42,6 @@ create_hw_alloc_data (struct hw *me)
 void
 delete_hw_alloc_data (struct hw *me)
 {
-  if (me->alloc_of_hw != NULL)
-    hw_abort (me, "hw-alloc botch");
   while (me->alloc_of_hw != NULL)
     {
       hw_free (me, me->alloc_of_hw->alloc);

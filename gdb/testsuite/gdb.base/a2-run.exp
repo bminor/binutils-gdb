@@ -26,8 +26,8 @@ if [target_info exists noargs] then {
     return
 }
 
-if [target_info exists gdb,noinferiorio] {
-    verbose "Skipping a2-run.exp because of noinferiorio."
+# Can't do this test without stdio support.
+if [gdb_skip_stdio_test "a2run.exp"] {
     return
 }
 

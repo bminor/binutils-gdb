@@ -3034,8 +3034,8 @@
 	{
 	  if (STATE_VERBOSE_P(SD))
 	    sim_io_eprintf (SD, 
-	      "Warning: PC 0x%x: semantic_DMxC1_COP1Sa 32-bit use of odd FPR number\n",
-	      CIA);
+	      "Warning: PC 0x%lx: semantic_DMxC1_COP1Sa 32-bit use of odd FPR number\n",
+	      (long) CIA);
 	  PENDING_FILL(RT,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);
 	}
     }
@@ -3209,7 +3209,8 @@
 	{
 	  if (STATE_VERBOSE_P(SD))
 	    sim_io_eprintf (SD, 
-	      "Warning:  PC 0x%x: MTC1 not DMTC1 with 64 bit regs\n", CIA);
+			    "Warning:  PC 0x%lx: MTC1 not DMTC1 with 64 bit regs\n",
+			    (long) CIA);
 	  PENDING_FILL ((FS + FGRIDX), (SET64HI(0xDEADC0DE) | VL4_8(GPR[RT])));
 	}
       else
@@ -3282,16 +3283,14 @@
 
 
 010001,10,3.FMT,5.RT,5.FS,5.FD,010011:COP1:32::MOVN.fmt
+"movn.%s<FMT> f<FD>, f<FS>, r<RT>"
 *mipsIV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
-  {
-    StoreFPR(destreg,format,ValueFPR(fs,format));
-  }
+  if (GPR[RT] != 0)
+    StoreFPR (FD, FMT, ValueFPR (FS, FMT));
+  else
+    StoreFPR (FD, FMT, ValueFPR (FD, FMT));
 }
 
 
@@ -3307,13 +3306,10 @@
 *mipsIV:
 *vr5000:
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
-  {
-   StoreFPR(destreg,format,ValueFPR(fs,format));
-  }
+  if (GPR[RT] == 0)
+    StoreFPR (FD, FMT, ValueFPR (FS, FMT));
+  else
+    StoreFPR (FD, FMT, ValueFPR (FD, FMT));
 }
 
 

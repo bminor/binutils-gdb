@@ -118,7 +118,7 @@ struct frame_extra_info
 /* The base of the current frame is in a frame pointer register.
    This register is noted in frame_extra_info->fp_regnum.
 
-   Note that the existance of an FP might also indicate that the
+   Note that the existence of an FP might also indicate that the
    function has called alloca. */
 #define MY_FRAME_IN_FP 0x2
 
@@ -217,7 +217,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
   return dummy;
 }
 
-/* Function prologues on the Motorol MCore processors consist of:
+/* Function prologues on the Motorola MCore processors consist of:
 
    - adjustments to the stack pointer (r1 used as scratch register)
    - store word/multiples that use r0 as the base address
@@ -336,7 +336,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
       if (IS_SUBI0 (insn))
 	{
 	  int offset = 1 + ((insn >> 4) & 0x1f);
-	  mcore_insn_debug (("MCORE: got subi r0,%d; contnuing\n", offset));
+	  mcore_insn_debug (("MCORE: got subi r0,%d; continuing\n", offset));
 	  framesize += offset;
 	  continue;
 	}
@@ -615,7 +615,7 @@ mcore_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line sal;
 
   /* If we have line debugging information, then the end of the
-     prologue should the first assembly instruction of  the first
+     prologue should be the first assembly instruction of the first
      source line */
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
@@ -978,7 +978,7 @@ get_insn (CORE_ADDR pc)
 }
 
 void
-_initialize_mcore_tdep ()
+_initialize_mcore_tdep (void)
 {
   extern int print_insn_mcore (bfd_vma, disassemble_info *);
   tm_print_insn = print_insn_mcore;

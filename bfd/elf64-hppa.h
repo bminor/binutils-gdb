@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/hppa.h"
 
 extern elf_hppa_reloc_type ** _bfd_elf64_hppa_gen_reloc_type
-  PARAMS ((bfd *, elf_hppa_reloc_type, int, int, int, asymbol *));
+  PARAMS ((bfd *, elf_hppa_reloc_type, int, unsigned int, int, asymbol *));
 
 /* Define groups of basic relocations.  FIXME:  These should
    be the only basic relocations created by GAS.  The rest

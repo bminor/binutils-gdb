@@ -318,12 +318,16 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
 
   {
 #if WITH_SCACHE_PBB_M32RBF
-#ifdef DEFINE_SWITCH
+#if defined DEFINE_SWITCH || defined FAST_P
     /* In the switch case FAST_P is a constant, allowing several optimizations
        in any called inline functions.  */
     vpc = m32rbf_pbb_begin (current_cpu, FAST_P);
 #else
+#if 0 /* cgen engine can't handle dynamic fast/full switching yet.  */
     vpc = m32rbf_pbb_begin (current_cpu, STATE_RUN_FAST_P (CPU_STATE (current_cpu)));
+#else
+    vpc = m32rbf_pbb_begin (current_cpu, 0);
+#endif
 #endif
 #endif
   }
@@ -1191,7 +1195,7 @@ if (NESI (* FLD (i_sr), 0)) {
 {
   SEM_ARG sem_arg = SEM_SEM_ARG (vpc, sc);
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-#define FLD(f) abuf->fields.sfmt_mvtc.f
+#define FLD(f) abuf->fields.sfmt_jl.f
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_BRANCH_INIT
@@ -1761,7 +1765,7 @@ if (NESI (* FLD (i_sr), 0)) {
 {
   SEM_ARG sem_arg = SEM_SEM_ARG (vpc, sc);
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-#define FLD(f) abuf->fields.sfmt_mvfc.f
+#define FLD(f) abuf->fields.sfmt_ld_plus.f
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
@@ -1818,7 +1822,7 @@ if (NESI (* FLD (i_sr), 0)) {
 {
   SEM_ARG sem_arg = SEM_SEM_ARG (vpc, sc);
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-#define FLD(f) abuf->fields.sfmt_mvtc.f
+#define FLD(f) abuf->fields.sfmt_ld_plus.f
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);

@@ -111,7 +111,7 @@ static boolean
 
 /* This macro is used, because I cannot assume the endianess of the
    host system */
-#define _H(index) (bfd_h_get_16(abfd, (bfd_byte *)(header+index*2)))
+#define _H(index) (bfd_h_get_16(abfd, (bfd_byte *) (header+index*2)))
 
 /* These bytes are a 2048-byte DOS executable, which loads the COFF
    image into memory and then runs it. It is called 'stub' */

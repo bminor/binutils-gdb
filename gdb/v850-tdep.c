@@ -1,5 +1,5 @@
 /* Target-dependent code for the NEC V850 for GDB, the GNU debugger.
-   Copyright 1996, Free Software Foundation, Inc.
+   Copyright 1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "gdb_string.h"
 #include "gdbcore.h"
 #include "symfile.h"
+#include "arch-utils.h"
 
 
 static char *v850_generic_reg_names[] = REGISTER_NAMES;
@@ -94,9 +95,7 @@ static CORE_ADDR v850_scan_prologue (CORE_ADDR pc, struct prologue_info *fs);
 
 /* Should call_function allocate stack space for a struct return?  */
 int
-v850_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
+v850_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_NFIELDS (type) > 1 || TYPE_LENGTH (type) > 4);
 }
@@ -115,7 +114,6 @@ struct reg_list
 static void
 handle_prepare (int insn, int insn2, CORE_ADDR * current_pc_ptr,
 		struct prologue_info *pi, struct pifsr **pifsr_ptr)
-
 {
   CORE_ADDR current_pc = *current_pc_ptr;
   struct pifsr *pifsr = *pifsr_ptr;
@@ -192,7 +190,6 @@ handle_prepare (int insn, int insn2, CORE_ADDR * current_pc_ptr,
 static void
 handle_pushm (int insn, int insn2, struct prologue_info *pi,
 	      struct pifsr **pifsr_ptr)
-
 {
   struct pifsr *pifsr = *pifsr_ptr;
   long list12 = ((insn & 0x0f) << 16) + (insn2 & 0xfff0);
@@ -295,9 +292,7 @@ handle_pushm (int insn, int insn2, struct prologue_info *pi,
    be determined till after we have scanned the prologue.  */
 
 static CORE_ADDR
-v850_scan_prologue (pc, pi)
-     CORE_ADDR pc;
-     struct prologue_info *pi;
+v850_scan_prologue (CORE_ADDR pc, struct prologue_info *pi)
 {
   CORE_ADDR func_addr, prologue_end, current_pc;
   struct pifsr *pifsr, *pifsr_tmp;
@@ -553,8 +548,7 @@ v850_scan_prologue (pc, pi)
    pointer just prior to calling the target function (see run_stack_dummy).  */
 
 void
-v850_init_extra_frame_info (fi)
-     struct frame_info *fi;
+v850_init_extra_frame_info (struct frame_info *fi)
 {
   struct prologue_info pi;
   struct pifsr pifsrs[NUM_REGS + 1], *pifsr;
@@ -593,8 +587,7 @@ v850_init_extra_frame_info (fi)
    function call was made.  */
 
 CORE_ADDR
-v850_frame_chain (fi)
-     struct frame_info *fi;
+v850_frame_chain (struct frame_info *fi)
 {
   struct prologue_info pi;
   CORE_ADDR callers_pc, fp;
@@ -630,9 +623,7 @@ v850_frame_chain (fi)
    frame.  */
 
 CORE_ADDR
-v850_find_callers_reg (fi, regnum)
-     struct frame_info *fi;
-     int regnum;
+v850_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
@@ -648,8 +639,7 @@ v850_find_callers_reg (fi, regnum)
    Return the address of the first code past the prologue of the function.  */
 
 CORE_ADDR
-v850_skip_prologue (pc)
-     CORE_ADDR pc;
+v850_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
 
@@ -679,8 +669,7 @@ v850_skip_prologue (pc)
    command, or the call dummy breakpoint gets hit.  */
 
 void
-v850_pop_frame (frame)
-     struct frame_info *frame;
+v850_pop_frame (struct frame_info *frame)
 {
   int regnum;
 
@@ -714,12 +703,8 @@ v850_pop_frame (frame)
  */
 
 CORE_ADDR
-v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     unsigned char struct_return;
-     CORE_ADDR struct_addr;
+v850_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		     unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int argreg;
   int argnum;
@@ -798,9 +783,7 @@ v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
    Needed for targets where we don't actually execute a JSR/BSR instruction */
 
 CORE_ADDR
-v850_push_return_address (pc, sp)
-     CORE_ADDR pc;
-     CORE_ADDR sp;
+v850_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (RP_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
@@ -814,8 +797,7 @@ v850_push_return_address (pc, sp)
    will be found.  */
 
 CORE_ADDR
-v850_frame_saved_pc (fi)
-     struct frame_info *fi;
+v850_frame_saved_pc (struct frame_info *fi)
 {
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
@@ -832,14 +814,8 @@ v850_frame_saved_pc (fi)
  */
 
 int
-v850_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
-     char *dummy;
-     CORE_ADDR sp;
-     CORE_ADDR fun;
-     int nargs;
-     value_ptr *args;
-     struct type *type;
-     int gcc_p;
+v850_fix_call_dummy (char *dummy, CORE_ADDR sp, CORE_ADDR fun, int nargs,
+		     value_ptr *args, struct type *type, int gcc_p)
 {
   long offset24;
 
@@ -855,8 +831,7 @@ v850_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
 /* Change the register names based on the current machine type. */
 
 static int
-v850_target_architecture_hook (ap)
-     const bfd_arch_info_type *ap;
+v850_target_architecture_hook (const bfd_arch_info_type *ap)
 {
   int i, j;
 
@@ -873,11 +848,11 @@ v850_target_architecture_hook (ap)
 	}
     }
 
-  internal_error ("Architecture `%s' unreconized", ap->printable_name);
+  internal_error ("Architecture `%s' unrecognized", ap->printable_name);
 }
 
 void
-_initialize_v850_tdep ()
+_initialize_v850_tdep (void)
 {
   tm_print_insn = print_insn_v850;
   target_architecture_hook = v850_target_architecture_hook;

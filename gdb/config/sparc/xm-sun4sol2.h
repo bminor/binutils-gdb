@@ -39,5 +39,5 @@
 
 /* On sol2.7, <curses.h> emits a bunch of 'macro redefined'
    warnings, which makes autoconf think curses.h doesn't
-   exist.  Compensate fot that here. */
+   exist.  Compensate for that here. */
 #define HAVE_CURSES_H 1

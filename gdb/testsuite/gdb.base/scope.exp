@@ -452,7 +452,7 @@ proc test_at_autovars {} {
 	gdb_suppress_tests;
     }
 
-    if [gdb_test "up" ".*" "" ] { 
+    if [gdb_test "up" ".*autovars.*" "up from marker1 in scope.exp" ] { 
 	gdb_suppress_tests ; 
     }
 
@@ -484,7 +484,7 @@ proc test_at_localscopes {} {
     if [gdb_test "cont" "Break.* marker2 \\(\\) at .*:$decimal.*" "continue to marker2"] {
 	gdb_suppress_tests;
     }
-    if [gdb_test "up" ".*" "" ] { 
+    if [gdb_test "up" ".*localscopes.*" "up from marker2 in scopes.exp" ] { 
 	gdb_suppress_tests ; 
     }
 
@@ -499,7 +499,9 @@ proc test_at_localscopes {} {
 
     if [gdb_test "cont" "Break.* marker3 \\(\\) at .*:$decimal.*" \
 	"continue to marker3 in scope.exp"] then { gdb_suppress_tests }
-    if [gdb_test "up" "" "up from marker3 in scope.exp"] then { gdb_suppress_tests }
+    if [gdb_test "up" ".*localscopes.*" "up from marker3 in scope.exp"] { 
+	gdb_suppress_tests 
+    }
 
     # Should be at next (first nested) scope.  Check values.
 
@@ -515,7 +517,9 @@ proc test_at_localscopes {} {
     setup_xfail "a29k-*-udi" 2423
     if [gdb_test "cont" "Break.* marker4.*at .*:$decimal.*" \
 	"continue to marker4 in scope.exp"] then { gdb_suppress_tests }
-    if [gdb_test "up" "" "up from marker4 in scope.exp"] then { gdb_suppress_tests }
+    if [gdb_test "up" ".*localscopes.*" "up from marker4 in scope.exp"] {
+	gdb_suppress_tests 
+    }
 
     gdb_test "print localval" " = 30" "print localval, innermost scope"
     gdb_test "print localval1" " = 11" "print localval1, innermost scope"

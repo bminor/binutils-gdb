@@ -90,13 +90,13 @@ cisco_kod_open (kod_display_callback_ftype *display_func,
 
 /* Close the connection.  */
 void
-cisco_kod_close ()
+cisco_kod_close (void)
 {
 }
 
 /* Print a "bad packet" message.  */
 static void
-bad_packet ()
+bad_packet (void)
 {
   (*gdb_kod_display) ("Remote target returned malformed packet.\n");
 }
@@ -112,7 +112,7 @@ cisco_kod_request (char *arg, int from_tty)
   int done = 0, i;
   int fail = 0;
 
-  char **sync_ids;
+  char **sync_ids = NULL;
   int sync_len = 0;
   int sync_next = 0;
   char *prev_id = NULL;
@@ -216,12 +216,8 @@ cisco_kod_request (char *arg, int from_tty)
       buffer[off + 8] = '\0';
       off += 9;
 
-      if (sync_len == 0)
-	sync_ids = (char **) xmalloc (count * sizeof (char *));
-      else
-	sync_ids = (char **) xrealloc (sync_ids,
-				       (sync_len + count) * sizeof (char *));
       sync_len += count;
+      sync_ids = (char **) xrealloc (sync_ids, sync_len * sizeof (char *));
 
       for (i = 0; i < count; ++i)
 	{
@@ -316,6 +312,6 @@ cisco_kod_request (char *arg, int from_tty)
 
   /* Free memory.  */
   for (i = 0; i < sync_next; ++i)
-    free (sync_ids[i]);
-  free (sync_ids);
+    xfree (sync_ids[i]);
+  xfree (sync_ids);
 }

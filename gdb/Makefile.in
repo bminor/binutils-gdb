@@ -1,5 +1,5 @@
-# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
-# Free Software Foundation, Inc.
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+# 1998, 1999, 2000 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -106,6 +106,9 @@ LIBIBERTY = ../libiberty/libiberty.a
 MMALLOC = @MMALLOC@
 MMALLOC_CFLAGS = @MMALLOC_CFLAGS@
 
+# Configured by the --with-uiout option to configure.
+UIOUT_CFLAGS = @UIOUT_CFLAGS@
+
 # We are using our own version of REGEX now to be consistent across
 # machines.
 REGEX = @REGEX@
@@ -135,6 +138,22 @@ INTL_SRC = $(srcdir)/$(INTL_DIR)
 INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 
 #
+# CLI sub directory definitons
+#
+SUBDIR_CLI_OBS = \
+	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o
+SUBDIR_CLI_SRCS = \
+	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c cli/cli-setshow.c
+SUBDIR_CLI_DEPS =
+SUBDIR_CLI_INITS =
+SUBDIR_CLI_LDFLAGS=
+SUBDIR_CLI_CFLAGS=
+SUBDIR_CLI_ALL=
+SUBDIR_CLI_CLEAN=
+SUBDIR_CLI_INSTALL=
+SUBDIR_CLI_UNINSTALL=
+
+#
 # MI sub directory definitons
 #
 SUBDIR_MI_OBS = \
@@ -150,10 +169,10 @@ SUBDIR_MI_SRCS = \
 	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
 SUBDIR_MI_DEPS =
 SUBDIR_MI_INITS = \
-	mi/mi-cmds.c mi/mi-parse.c mi/mi-main.c
+	mi/mi-cmds.c mi/mi-parse.c mi/mi-main.c mi/mi-out.c
 SUBDIR_MI_LDFLAGS=
 SUBDIR_MI_CFLAGS= \
-	-DUI_OUT=1
+	-DMI_OUT=1
 SUBDIR_MI_ALL=
 SUBDIR_MI_CLEAN=
 SUBDIR_MI_INSTALL=
@@ -243,12 +262,25 @@ WIN32LDAPP = @WIN32LDAPP@
 LIBGUI = @LIBGUI@
 GUI_CFLAGS_X = @GUI_CFLAGS_X@
 IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
+
+SUBDIR_GDBTK_OBS = \
+	gdbtk.o gdbtk-cmds.o gdbtk-hooks.o gdbtk-varobj.o gdbtk-wrapper.o
+SUBDIR_GDBTK_SRCS = \
+	gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-cmds.c \
+	gdbtk/generic/gdbtk-hooks.c gdbtk/generic/gdbtk-varobj.c \
+	gdbtk/generic/gdbtk-wrapper.c
+SUBDIR_GDBTK_DEPS = \
+	$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)
+SUBDIR_GDBTK_INITS = gdbtk/generic/gdbtk.c
+SUBDIR_GDBTK_LDFLAGS=
+SUBDIR_GDBTK_CFLAGS= -DGDBTK
 SUBDIR_GDBTK_ALL= all-gdbtk
 SUBDIR_GDBTK_CLEAN= clean-gdbtk
 SUBDIR_GDBTK_INSTALL= install-gdbtk
 SUBDIR_GDBTK_UNINSTALL= 
 
 CONFIG_OBS= @CONFIG_OBS@
+CONFIG_LIB_OBS= @CONFIG_LIB_OBS@
 CONFIG_SRCS= @CONFIG_SRCS@
 CONFIG_DEPS= @CONFIG_DEPS@
 CONFIG_INITS= @CONFIG_INITS@
@@ -289,7 +321,7 @@ INTERNAL_WARN_CFLAGS = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS) $(ENABLE_CFLAGS) \
+	$(INTL_CFLAGS) $(ENABLE_CFLAGS) $(UIOUT_CFLAGS) \
 	$(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
@@ -299,7 +331,7 @@ INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 # Profiling options need to go here to work.
 # I think it's perfectly reasonable for a user to set -pg in CFLAGS
 # and have it work; that's why CFLAGS is here.
-INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS) @HLDFLAGS@
+INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS) @HLDFLAGS@
 HLDENV = @HLDENV@
 
 # If your system is missing alloca(), or, more likely, it's there but
@@ -342,7 +374,7 @@ RUNTESTFLAGS=
 # part of libiberty) a POSIX interface.  But at least for now the
 # host-dependent makefile fragment might need to use something else
 # besides ser-unix.o
-SER_HARDWIRE = ser-unix.o ser-pipe.o
+SER_HARDWIRE = @SER_HARDWIRE@
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
@@ -368,6 +400,7 @@ ANNOTATE_OBS = annotate.o
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
+	"infodir=$(infodir)" \
 	"against=$(against)" \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
@@ -476,21 +509,22 @@ TARGET_FLAGS_TO_PASS = \
 SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	buildsym.c c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	ch-exp.c ch-lang.c ch-typeprint.c ch-valprint.c coffread.c \
-	command.c complaints.c corefile.c cp-valprint.c dbxread.c \
+	complaints.c completer.c corefile.c cp-valprint.c dbxread.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
 	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
-	findvar.c gdbarch.c arch-utils.c gdbtypes.c \
+	findvar.c regcache.c gdbarch.c arch-utils.c gdbtypes.c \
 	inf-loop.c infcmd.c inflow.c infrun.c language.c \
 	kod.c kod-cisco.c \
 	ui-out.c cli-out.c \
 	varobj.c wrapper.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
-	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
+	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c \
+	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c \
 	printcmd.c remote.c remote-nrom.c scm-exp.c scm-lang.c \
 	scm-valprint.c source.c stabsread.c stack.c symfile.c \
-	symmisc.c symtab.c target.c thread.c top.c tracepoint.c \
+	symmisc.c symtab.c linespec.c target.c thread.c top.c tracepoint.c \
 	typeprint.c utils.c valarith.c valops.c valprint.c values.c \
 	serial.c ser-unix.c mdebugread.c os9kread.c \
 	tui/tui.c tui/tui.h tui/tuiCommand.c tui/tuiCommand.h \
@@ -546,9 +580,12 @@ breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
 
 command_h =	command.h
 gdbcmd_h =	gdbcmd.h $(command_h)
-
 call_cmds_h =	call-cmds.h
-defs_h =	defs.h xm.h tm.h nm.h config.status config.h gdbarch.h ui-file.h
+
+xm_h =		@xm_h@
+tm_h =		@tm_h@
+nm_h =		@nm_h@
+defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h gdbarch.h ui-file.h
 
 top_h =		top.h
 inferior_h =	inferior.h $(breakpoint_h)
@@ -563,6 +600,11 @@ ui_out_h =      ui-out.h
 cli_out_h =	cli-out.h
 arch_utils_h = arch-utils.h
 
+cli_decode_h =	$(srcdir)/cli/cli-decode.h
+cli_cmds_h =	$(srcdir)/cli/cli-cmds.h
+cli_script_h =	$(srcdir)/cli/cli-script.h
+cli_setshow_h =	$(srcdir)/cli/cli-setshow.h
+
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
 # so that each .h file is listed exactly once (M-x tags-search works
@@ -576,7 +618,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
 	c-lang.h ch-lang.h f-lang.h \
 	jv-lang.h \
-	m2-lang.h \
+	m2-lang.h  p-lang.h \
 	complaints.h valprint.h \
 	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
 	nindy-share/block_io.h nindy-share/coff.h \
@@ -605,7 +647,7 @@ POSSLIBS = gnu-regex.c gnu-regex.h
 # Makefile.in
 
 DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
-	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_OBS)
+	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_LIB_OBS)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
@@ -614,11 +656,11 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 	$(POSSLIBS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
-COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
+COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
-	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
-	expprint.o environ.o \
-	event-loop.o event-top.o inf-loop.o \
+	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o \
+	expprint.o environ.o stack.o thread.o \
+	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	kod.o kod-cisco.o \
@@ -630,7 +672,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	ui-out.o cli-out.o \
 	varobj.o wrapper.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \
-	m2-lang.o \
+	m2-lang.o p-lang.o p-typeprint.o p-valprint.o \
 	scm-exp.o scm-lang.o scm-valprint.o complaints.o typeprint.o \
 	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
@@ -650,10 +692,10 @@ SUBDIRS = @SUBDIRS@
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c \
 	jv-exp.tab.c \
-	f-exp.tab.c m2-exp.tab.c
+	f-exp.tab.c m2-exp.tab.c p-exp.tab.c
 YYOBJ = c-exp.tab.o \
 	jv-exp.tab.o \
-	f-exp.tab.o m2-exp.tab.o
+	f-exp.tab.o m2-exp.tab.o p-exp.tab.o
 
 # Things which need to be built when making a distribution.
 
@@ -737,7 +779,7 @@ uninstall: force $(CONFIG_UNINSTALL)
 # tui-file.c.
 #
 
-INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_INITS)
+INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_OBS) $(CONFIG_INITS)
 init.c: $(INIT_FILES)
 	@echo Making init.c
 	@rm -f init.c-tmp init.l-tmp
@@ -778,9 +820,11 @@ init.c: $(INIT_FILES)
 init.o: init.c $(defs_h) $(call_cmds_h)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb$(EXEEXT): main.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
+gdb$(EXEEXT): main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	rm -f gdb$(EXEEXT)
-	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb$(EXEEXT) main.o libgdb.a $(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
+	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb$(EXEEXT) \
+	main.o libgdb.a $(CONFIG_OBS) $(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS)\
+	$(LOADLIBES)
 
 nlm:	force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
@@ -801,11 +845,13 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#unload $(srcdir)/c-exp.y
 	#unload $(srcdir)/jv-exp.y
 	#unload $(srcdir)/m2-exp.y
+	#unload $(srcdir)/p-exp.y
 	#unload vx-share/*.h
 	#unload nindy-share/[A-Z]*
 	#load c-exp.tab.c
 	#load jv-exp.tab.c
 	#load m2-exp.tab.c
+	#load p-exp.tab.c
 	#load copying.c version.c
 	#load ../opcodes/libopcodes.a
 	#load ../libiberty/libiberty.a
@@ -847,9 +893,9 @@ tm-sun4os4.h: tm-sparc.h
 xm-vaxult.h: xm-vax.h
 xm-vaxbsd.h: xm-vax.h
 
-kdb:	$(NTSSTART) $(OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
-	ld -o kdb $(NTSSTART) $(OBS) $(NTSOBS) init.o $(ADD_FILES) \
-	  -lc $(CLIBS)
+kdb:	$(NTSSTART) $(OBS) $(CONFIG_OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
+	ld -o kdb $(NTSSTART) $(OBS) $(CONFIG_OBS) $(NTSOBS) init.o \
+	 $(ADD_FILES) -lc $(CLIBS)
 
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.  (FIXME: those
@@ -898,7 +944,7 @@ local-maintainer-clean:
 	@echo "it deletes files that may require special tools to rebuild."
 	rm -f c-exp.tab.c \
 		jv-exp.tab \
-		f-exp.tab.c m2-exp.tab.c
+		f-exp.tab.c m2-exp.tab.c p-exp.tab.c
 	rm -f TAGS $(INFOFILES)
 	rm -f $(YYFILES)
 	rm -f nm.h tm.h xm.h config.status
@@ -1032,9 +1078,27 @@ m2-exp.tab.c: m2-exp.y
 	-rm m2-exp.tmp
 	mv m2-exp.new ./m2-exp.tab.c
 
+# p-exp.tab.c is generated in objdir from p-exp.y if it doesn't exist
+# in srcdir, then compiled in objdir to p-exp.tab.o.
+# Remove bogus decls for malloc/realloc/free which conflict with everything
+# else.
+p-exp.tab.o: p-exp.tab.c
+p-exp.tab.c: p-exp.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/p-exp.y  y.tab.c p-exp.tmp -- $(YFLAGS)
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     -e '/^#line.*y.tab.c/d' \
+	  < p-exp.tmp > p-exp.new
+	-rm p-exp.tmp
+	mv p-exp.new ./p-exp.tab.c
+
 # These files are updated atomically, so make never has to remove them
 .PRECIOUS: m2-exp.tab.c f-exp.tab.c c-exp.tab.c
-.PRECIOUS: jv-exp.tab.c
+.PRECIOUS: jv-exp.tab.c p-exp.tab.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
@@ -1123,7 +1187,7 @@ a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) $(symtab_h) $(dis-asm.h) gdb_string.h
+	$(inferior_h) $(symtab_h) $(dis-asm.h) gdb_string.h linespec.h
 
 # OBSOLETE altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
@@ -1145,7 +1209,7 @@ blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 
 breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) language.h target.h gdbthread.h gdb_string.h \
-	gdb-events.h
+	gdb-events.h linespec.h
 
 buildsym.o: buildsym.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	objfiles.h symfile.h $(symtab_h) gdb_string.h
@@ -1189,8 +1253,8 @@ coffread.o: coffread.c $(bfd_h) $(breakpoint_h) buildsym.h \
 	symfile.h $(symtab_h) gdb-stabs.h stabsread.h target.h \
 	gdb_string.h
 
-command.o: command.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h gdb_wait.h
+# OBSOLETE command.o: command.c $(defs_h) $(expression_h) $(gdbcmd_h) \
+# OBSOLETE 	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h gdb_wait.h
 
 complaints.o: complaints.c complaints.h $(defs_h) $(gdbcmd_h)
 
@@ -1213,7 +1277,7 @@ core-regset.o: core-regset.c $(command_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h gdb_string.h
 
 corefile.o: corefile.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h language.h gdb_string.h
+	$(inferior_h) target.h language.h gdb_string.h completer.h
 
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h gdbthread.h gdb_string.h
@@ -1267,13 +1331,15 @@ inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(inf_loop_h) $(event_loop_h) \
 	 $(event_top_h)
 
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
-	target.h language.h gdb_string.h
+	target.h language.h gdb_string.h completer.h
 
 expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h) $(value_h)
 
 findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 	gdb_string.h
+
+regcache.o: regcache.c $(defs_h) $(inferior_h) target.h 
 
 fork-child.o: fork-child.c gdb_wait.h $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h
@@ -1363,9 +1429,13 @@ v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/v850ice.c
 
+v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(obstack_h) \
+	$(target_h) $(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) \
+	$(symfile_h) $(arch_utils_h)
+
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
-	language.h gdb_string.h $(readline_headers) $(remote_h)
+	language.h gdb_string.h $(readline_headers) $(remote_h) linespec.h
 
 gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
 
@@ -1401,7 +1471,7 @@ i386gnu-nat.o: gnu-nat.h
 
 i386-tdep.o: i386-tdep.c $(defs_h) gdb_string.h $(frame_h)	\
 	$(inferior_h) $(gdbcore_h) target.h $(floatformat_h)	\
-	$(symtab_h) $(gdbcmd_h) $(command_h)
+	$(symtab_h) $(gdbcmd_h) $(command_h) $(arch_utils_h)
 
 i386aix-nat.o: i386aix-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	language.h $(gdbcore_h) $(floatformat_h) target.h
@@ -1499,6 +1569,16 @@ m2-valprint.o: m2-valprint.c $(defs_h) $(gdbtypes_h) $(symtab_h) \
 
 m3-nat.o: m3-nat.c $(defs_h) $(inferior_h) $(value_h) language.h target.h \
 	gdb_wait.h $(gdbcmd_h) $(gdbcore_h)
+
+p-lang.o: p-lang.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
+	language.h parser-defs.h $(symtab_h) gdb_string.h
+
+p-typeprint.o: p-typeprint.c p-lang.h $(defs_h) $(expression_h) \
+	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) \
+	target.h typeprint.h $(value_h) gdb_string.h
+
+p-valprint.o: p-valprint.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
+	language.h $(symtab_h) valprint.h $(value_h) gdb_string.h
 
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
 	$(gdbcore_h) gdb_string.h
@@ -1611,7 +1691,7 @@ hp-symtab-read.o: hp-symtab-read.c hpread.h $(bfd_h) buildsym.h complaints.h \
 
 parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
-	gdb_string.h
+	gdb_string.h linespec.h
 
 ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) gdb_string.h $(frame_h) \
 	$(inferior_h) $(bfd_h) symfile.h target.h gdb_wait.h $(gdbcmd_h) \
@@ -1621,7 +1701,7 @@ ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(inferior_h) target.h
 
 ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	target.h
+	target.h ppc-tdep.h
 
 ppcbug-rom.o: ppcbug-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
@@ -1760,10 +1840,10 @@ rom68k-rom.o: rom68k-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
 
 rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h \
-	xcoffsolib.h
+	$(gdbcore_h) xcoffsolib.h symfile.h objfiles.h gdb-stabs.h
 
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	target.h xcoffsolib.h
+	target.h ppc-tdep.h
 
 scm-exp.o: $(defs_h) $(value_h) parser-defs.h language.h c-lang.h \
 	scm-lang.h scm-tags.h
@@ -1790,20 +1870,24 @@ serial.o: serial.c $(defs_h) serial.h gdb_string.h
 
 sh-tdep.o: sh-tdep.c $(bfd_h) $(dis-asm_h) \
 	$(srcdir)/../opcodes/sh-opc.h $(defs_h) $(expression_h) $(frame_h) \
-	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h)
+	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(arch_utils_h)
 
 sh3-rom.o: sh3-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) target.h serial.h terminal.h
+	$(inferior_h) target.h serial.h terminal.h $(arch_utils_h)
 
 mon960-rom.o: mon960-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
 
 solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	objfiles.h gnu-regex.h symfile.h target.h gdb_string.h
+	objfiles.h gnu-regex.h symfile.h target.h gdb_string.h solist.h
+
+solib-svr4.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
+	objfiles.h gnu-regex.h symfile.h target.h gdb_string.h solist.h \
+	solib-svr4.h
 
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) language.h objfiles.h gnu-regex.h symfile.h $(symtab_h) \
-	gdb_string.h source.h
+	gdb_string.h source.h completer.h linespec.h
 
 sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 	target.h
@@ -1837,9 +1921,9 @@ sun3-nat.o: sun3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 sun386-nat.o: sun386-nat.c $(defs_h) $(inferior_h) $(gdbcore_h)
 
 symfile.o: symfile.c $(breakpoint_h) complaints.h $(defs_h) \
-	$(expression_h) $(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) \
-	language.h objfiles.h symfile.h $(symtab_h) target.h \
-	gdb_string.h
+	$(expression_h) gdb-stabs.h $(gdbcmd_h) $(gdbcore_h) \
+	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) \
+	target.h gdb_string.h completer.h
 
 symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
@@ -1852,7 +1936,11 @@ symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
 symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h \
 	gnu-regex.h symfile.h $(symtab_h) target.h $(value_h) \
-	gdb_string.h
+	gdb_string.h linespec.h
+
+linespec.o: linespec.c linespec.h $(defs_h) $(frame_h) $(value_h) \
+	objfiles.h symfile.h completer.h $(symtab_h) \
+	$(INCLUDE_DIR)/demangle.h command.h
 
 # OBSOLETE tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 # OBSOLETE	$(symtab_h)
@@ -1864,9 +1952,13 @@ target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 
 thread.o: thread.c $(defs_h) gdbthread.h $(gdbcmd_h) target.h
 
+completer.o: completer.c completer.h $(gdbtypes_h) $(symtab_h) \
+	$(defs_h) $(gdbcmd_h) $(expression_h) $(readline_headers)
+
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
-	$(remote_utils_h) gdb_string.h $(event_loop_h) $(event_top_h) $(version_h)
+	$(remote_utils_h) gdb_string.h $(event_loop_h) $(event_top_h) \
+	completer.h $(version_h)
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
@@ -1922,7 +2014,8 @@ xcoffread.o: xcoffread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	complaints.h $(defs_h) $(gdbtypes_h) objfiles.h stabsread.h symfile.h \
 	$(symtab_h) partial-stab.h gdb_string.h
 
-xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) xcoffsolib.h
+xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) xcoffsolib.h $(inferior_h) \
+	$(gdbcmd_h) symfile.h $(frame_h) gnu-regex.h
 
 # FIXME: z8k-tdep.c calls _initialize_gdbtypes().  Since that isn't
 # declared -Wimplicit fails. It should be using the GDBARCH framework.
@@ -1946,14 +2039,45 @@ m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h m2-lang.h parser-defs.h $(symtab_h) $(value_h) \
 	$(bfd_h) objfiles.h symfile.h
 
+p-exp.tab.o: p-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
+	language.h p-lang.h parser-defs.h $(symtab_h) $(value_h) \
+	$(bfd_h) objfiles.h symfile.h
+
 gdb-events.o: gdb-events.c gdb-events.h $(defs_h) $(gdbcmd_h)
 
 ui-out.o: ui-out.c $(defs_h) $(ui_out_h) expression.h language.h
 cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h)
+
 varobj.o: varobj.c $(defs_h) $(frame_h) $(value_h) \
 	$(language_h) valprint.h varobj.h wrapper.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
+
 wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) wrapper.h
+
+#
+# CLI dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the cli directory.
+
+cli-decode.o: $(srcdir)/cli/cli-decode.c $(cli_decode_h) \
+		$(cli_cmds_h) $(defs_h) $(ui_out_h) \
+		$(symtab_h) gnu-regex.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-decode.c
+
+cli-cmds.o: $(srcdir)/cli/cli-cmds.c  $(cli_cmds_h) $(cli_decode_h) \
+		$(cli_script_h) $(cli_setshow_h) top.h completer.h $(defs_h) \
+		$(target_h) gdb_wait.h gnu-regex.h $(ui_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-cmds.c
+
+cli-setshow.o: $(srcdir)/cli/cli-setshow.c $(cli_setshow_h) \
+		$(cli_decode_h) $(cli_cmds_h) $(defs_h) \
+		$(value_h) $(ui_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-setshow.c
+
+cli-script.o: $(srcdir)/cli/cli-script.c $(cli_script_h) \
+		$(cli_cmds_h) $(cli_decode_h) top.h \
+		$(defs_h) $(value_h) language.h $(ui_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-script.c
 
 #
 # MI dependencies

@@ -1,3 +1,20 @@
+2000-12-12  Geoffrey Keating  <geoffk@redhat.com>
+
+	* sim-endian.h: Don't have parameters on macro definitions which
+	are simply renaming functions, to permit use of XCONCAT2 in both
+	the macro name and the arguments in a use of such a definition.
+
+2000-11-15  Jim Blandy  <jimb@redhat.com>
+
+	* sim_calls.c: Doc fix.
+	(sim_fetch_register, sim_store_register): Call
+	gdbarch_register_name directly, instead of going through
+	REGISTER_NAME macro.
+
+2000-10-24  Geoff Keating  <geoffk@cygnus.com>
+
+	* ppc-instructions (lfsux): Correct XO field of lfsux instruction.
+
 Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

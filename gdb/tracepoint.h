@@ -107,7 +107,7 @@ enum actionline_type
   };
 
 
-/* The tracepont chain of all tracepoints */
+/* The tracepoint chain of all tracepoints */
 
 extern struct tracepoint *tracepoint_chain;
 

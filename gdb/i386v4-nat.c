@@ -112,8 +112,7 @@ void fill_fpregset (fpregset_t *, int);
    register values. */
 
 void
-supply_gregset (gregsetp)
-     gregset_t *gregsetp;
+supply_gregset (gregset_t *gregsetp)
 {
   register int regi;
   register greg_t *regp = (greg_t *) gregsetp;
@@ -126,9 +125,7 @@ supply_gregset (gregsetp)
 }
 
 void
-fill_gregset (gregsetp, regno)
-     gregset_t *gregsetp;
-     int regno;
+fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
   register greg_t *regp = (greg_t *) gregsetp;
@@ -176,8 +173,7 @@ static const int freg_offset_map[] =
 };
 
 void
-supply_fpregset (fpregsetp)
-     fpregset_t *fpregsetp;
+supply_fpregset (fpregset_t *fpregsetp)
 {
   int regi;
   
@@ -212,9 +208,7 @@ supply_fpregset (fpregsetp)
    them all. */
 
 void
-fill_fpregset (fpregsetp, regno)
-     fpregset_t *fpregsetp;
-     int regno;
+fill_fpregset (fpregset_t *fpregsetp, int regno)
 {
   int regi;
 

@@ -34,17 +34,13 @@ void i387_to_double (char *from, char *to);
 void double_to_i387 (char *from, char *to);
 
 void
-i387_to_double (from, to)
-     char *from;
-     char *to;
+i387_to_double (char *from, char *to)
 {
   floatformat_to_double (&floatformat_i387_ext, from, (double *) to);
 }
 
 void
-double_to_i387 (from, to)
-     char *from;
-     char *to;
+double_to_i387 (char *from, char *to)
 {
   floatformat_from_double (&floatformat_i387_ext, (double *) from, to);
 }
@@ -60,8 +56,7 @@ static void print_387_control_bits (unsigned int control);
 static void print_387_status_bits (unsigned int status);
 
 static void
-print_387_control_bits (control)
-     unsigned int control;
+print_387_control_bits (unsigned int control)
 {
   switch ((control >> 8) & 3)
     {
@@ -117,8 +112,7 @@ print_387_control_bits (control)
 }
 
 void
-print_387_control_word (control)
-     unsigned int control;
+print_387_control_word (unsigned int control)
 {
   printf_filtered ("control %s:", local_hex_string(control & 0xffff));
   print_387_control_bits (control);
@@ -126,8 +120,7 @@ print_387_control_word (control)
 }
 
 static void
-print_387_status_bits (status)
-     unsigned int status;
+print_387_status_bits (unsigned int status)
 {
   printf_unfiltered (" flags %d%d%d%d; ",
 		     (status & 0x4000) != 0,
@@ -149,8 +142,7 @@ print_387_status_bits (status)
 }
 
 void
-print_387_status_word (status)
-     unsigned int status;
+print_387_status_word (unsigned int status)
 {
   printf_filtered ("status %s:", local_hex_string (status & 0xffff));
   print_387_status_bits (status);

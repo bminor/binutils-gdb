@@ -54,7 +54,6 @@
 #include "gdbcmd.h"
 #include <sys/param.h>
 #include "wince-stub.h"
-#include "dcache.h"
 #include <time.h>
 
 /* The ui's event loop. */
@@ -88,8 +87,6 @@ extern int (*ui_loop_hook) (int signo);
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf x
 
 static int connection_initialized = 0;	/* True if we've initialized a RAPI session. */
-
-static DCACHE *remote_dcache;
 
 /* The directory where the stub and executable files are uploaded. */
 static const char *remote_directory = "\\gdb";
@@ -786,7 +783,7 @@ close_handle (HANDLE h)
    to terminate.
  */
 static void
-stop_stub ()
+stop_stub (void)
 {
   if (s < 0)
     return;
@@ -1067,7 +1064,7 @@ child_add_thread (DWORD id, HANDLE h)
 /* Clear out any old thread list and reintialize it to a
    pristine state. */
 static void
-child_init_thread_list ()
+child_init_thread_list (void)
 {
   thread_info *th = &thread_head;
 
@@ -1078,7 +1075,7 @@ child_init_thread_list ()
       thread_info *here = th->next;
       th->next = here->next;
       (void) close_handle (here->h);
-      free (here);
+      xfree (here);
     }
 }
 
@@ -1102,7 +1099,7 @@ child_delete_thread (DWORD id)
       thread_info *here = th->next;
       th->next = here->next;
       close_handle (here->h);
-      free (here);
+      xfree (here);
     }
 }
 
@@ -1515,8 +1512,7 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
 /* Print status information about what we're accessing.  */
 
 static void
-child_files_info (ignore)
-     struct target_ops *ignore;
+child_files_info (struct target_ops *ignore)
 {
   printf_unfiltered ("\tUsing the running image of child %s.\n",
 		     target_pid_to_str (inferior_pid));
@@ -1524,9 +1520,7 @@ child_files_info (ignore)
 
 /* ARGSUSED */
 static void
-child_open (arg, from_tty)
-     char *arg;
-     int from_tty;
+child_open (char *arg, int from_tty)
 {
   error ("Use the \"run\" command to start a child process.");
 }
@@ -1645,7 +1639,7 @@ upload_to_device (const char *to, const char *from)
 
 /* Initialize the connection to the remote device. */
 static void
-wince_initialize ()
+wince_initialize (void)
 {
   int tmp;
   char args[256];
@@ -1732,10 +1726,6 @@ child_create_inferior (char *exec_file, char *args, char **env)
   flags = DEBUG_PROCESS;
 
   wince_initialize ();		/* Make sure we've got a connection. */
-  if (!remote_dcache)
-    remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
-  else
-    dcache_flush (remote_dcache);
 
   exec_file = upload_to_device (exec_file, exec_file);
 
@@ -1784,7 +1774,7 @@ child_create_inferior (char *exec_file, char *args, char **env)
 
 /* Chile has gone bye-bye. */
 static void
-child_mourn_inferior ()
+child_mourn_inferior (void)
 {
   (void) child_continue (DBG_CONTINUE, -1);
   unpush_target (&child_ops);
@@ -1801,7 +1791,13 @@ child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
 {
   if (len <= 0)
     return 0;
-  return dcache_xfer_memory (remote_dcache, memaddr, our, len, write);
+
+  if (write)
+    res = remote_write_bytes (memaddr, our, len);
+  else
+    res = remote_read_bytes (memaddr, our, len);
+
+  return res;
 }
 
 /* Terminate the process and wait for child to tell us it has completed. */
@@ -1845,8 +1841,6 @@ child_resume (int pid, int step, enum target_signal sig)
       th->context.ContextFlags = 0;
     }
 
-  dcache_flush (remote_dcache);
-
   /* Allow continuing with the same signal that interrupted us.
      Otherwise complain. */
   if (sig && sig != last_sig)
@@ -1857,19 +1851,19 @@ child_resume (int pid, int step, enum target_signal sig)
 }
 
 static void
-child_prepare_to_store ()
+child_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 static int
-child_can_run ()
+child_can_run (void)
 {
   return 1;
 }
 
 static void
-child_close ()
+child_close (void)
 {
   DEBUG_EVENTS (("gdb: child_close, inferior_pid=%d\n", inferior_pid));
 }
@@ -1961,7 +1955,7 @@ set_upload_type (char *ignore, int from_tty)
 }
 
 void
-_initialize_inftarg ()
+_initialize_inftarg (void)
 {
   struct cmd_list_element *set;
   init_child_ops ();

@@ -41,6 +41,7 @@
 #include "language.h"
 #include "target.h"
 #include "parser-defs.h"
+#include "jv-lang.h"
 
 extern void _initialize_language (void);
 
@@ -56,6 +57,12 @@ static void show_range_command (char *, int);
 
 static void set_range_command (char *, int);
 
+static void show_case_command (char *, int);
+
+static void set_case_command (char *, int);
+
+static void set_case_str (void);
+
 static void set_range_str (void);
 
 static void set_type_str (void);
@@ -70,7 +77,7 @@ static void show_check (char *, int);
 
 static void set_check (char *, int);
 
-static void set_type_range (void);
+static void set_type_range_case (void);
 
 static void unk_lang_emit_char (int c, struct ui_file *stream, int quoter);
 
@@ -104,6 +111,8 @@ enum range_mode range_mode = range_mode_auto;
 enum range_check range_check = range_check_off;
 enum type_mode type_mode = type_mode_auto;
 enum type_check type_check = type_check_off;
+enum case_mode case_mode = case_mode_auto;
+enum case_sensitivity case_sensitivity = case_sensitive_on;
 
 /* The current language and language_mode (see language.h) */
 
@@ -131,6 +140,7 @@ static unsigned languages_allocsize;
 static char *language;
 static char *type;
 static char *range;
+static char *case_sensitive;
 
 /* Warning issued when current_language and the language of the current
    frame do not match. */
@@ -144,9 +154,7 @@ char lang_frame_mismatch_warn[] =
 /* Show command.  Display a warning if the language set
    does not match the frame. */
 static void
-show_language_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+show_language_command (char *ignore, int from_tty)
 {
   enum language flang;		/* The language of the current frame */
 
@@ -159,9 +167,7 @@ show_language_command (ignore, from_tty)
 
 /* Set command.  Change the current working language. */
 static void
-set_language_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+set_language_command (char *ignore, int from_tty)
 {
   int i;
   enum language flang;
@@ -214,7 +220,7 @@ set_language_command (ignore, from_tty)
 	      /* Enter manual mode.  Set the specified language.  */
 	      language_mode = language_mode_manual;
 	      current_language = languages[i];
-	      set_type_range ();
+	      set_type_range_case ();
 	      set_lang_str ();
 	      expected_language = current_language;
 	      return;
@@ -225,7 +231,7 @@ set_language_command (ignore, from_tty)
   /* Reset the language (esp. the global string "language") to the 
      correct values. */
   err_lang = savestring (language, strlen (language));
-  make_cleanup (free, err_lang);	/* Free it after error */
+  make_cleanup (xfree, err_lang);	/* Free it after error */
   set_language (current_language->la_language);
   error ("Unknown language `%s'.", err_lang);
 }
@@ -233,9 +239,7 @@ set_language_command (ignore, from_tty)
 /* Show command.  Display a warning if the type setting does
    not match the current language. */
 static void
-show_type_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+show_type_command (char *ignore, int from_tty)
 {
   if (type_check != current_language->la_type_check)
     printf_unfiltered (
@@ -244,9 +248,7 @@ show_type_command (ignore, from_tty)
 
 /* Set command.  Change the setting for type checking. */
 static void
-set_type_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+set_type_command (char *ignore, int from_tty)
 {
   if (STREQ (type, "on"))
     {
@@ -266,9 +268,9 @@ set_type_command (ignore, from_tty)
   else if (STREQ (type, "auto"))
     {
       type_mode = type_mode_auto;
-      set_type_range ();
+      set_type_range_case ();
       /* Avoid hitting the set_type_str call below.  We
-         did it in set_type_range. */
+         did it in set_type_range_case. */
       return;
     }
   else
@@ -282,9 +284,7 @@ set_type_command (ignore, from_tty)
 /* Show command.  Display a warning if the range setting does
    not match the current language. */
 static void
-show_range_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+show_range_command (char *ignore, int from_tty)
 {
 
   if (range_check != current_language->la_range_check)
@@ -294,9 +294,7 @@ show_range_command (ignore, from_tty)
 
 /* Set command.  Change the setting for range checking. */
 static void
-set_range_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+set_range_command (char *ignore, int from_tty)
 {
   if (STREQ (range, "on"))
     {
@@ -316,9 +314,9 @@ set_range_command (ignore, from_tty)
   else if (STREQ (range, "auto"))
     {
       range_mode = range_mode_auto;
-      set_type_range ();
+      set_type_range_case ();
       /* Avoid hitting the set_range_str call below.  We
-         did it in set_type_range. */
+         did it in set_type_range_case. */
       return;
     }
   else
@@ -329,12 +327,52 @@ set_range_command (ignore, from_tty)
   show_range_command ((char *) 0, from_tty);
 }
 
-/* Set the status of range and type checking based on
+/* Show command.  Display a warning if the case sensitivity setting does
+   not match the current language. */
+static void
+show_case_command (char *ignore, int from_tty)
+{
+   if (case_sensitivity != current_language->la_case_sensitivity)
+      printf_unfiltered(
+"Warning: the current case sensitivity setting does not match the language.\n");
+}
+
+/* Set command.  Change the setting for case sensitivity. */
+static void
+set_case_command (char *ignore, int from_tty)
+{
+   if (STREQ (case_sensitive, "on"))
+   {
+      case_sensitivity = case_sensitive_on;
+      case_mode = case_mode_manual;
+   }
+   else if (STREQ (case_sensitive, "off"))
+   {
+      case_sensitivity = case_sensitive_off;
+      case_mode = case_mode_manual;
+   }
+   else if (STREQ (case_sensitive, "auto"))
+   {
+      case_mode = case_mode_auto;
+      set_type_range_case ();
+      /* Avoid hitting the set_case_str call below.  We
+         did it in set_type_range_case. */
+      return;
+   }
+   else
+   {
+      warning ("Unrecognized case-sensitive setting: \"%s\"", case_sensitive);
+   }
+   set_case_str();
+   show_case_command ((char *) NULL, from_tty);
+}
+
+/* Set the status of range and type checking and case sensitivity based on
    the current modes and the current language.
    If SHOW is non-zero, then print out the current language,
    type and range checking status. */
 static void
-set_type_range ()
+set_type_range_case (void)
 {
 
   if (range_mode == range_mode_auto)
@@ -343,15 +381,18 @@ set_type_range ()
   if (type_mode == type_mode_auto)
     type_check = current_language->la_type_check;
 
+  if (case_mode == case_mode_auto)
+    case_sensitivity = current_language->la_case_sensitivity;
+
   set_type_str ();
   set_range_str ();
+  set_case_str ();
 }
 
 /* Set current language to (enum language) LANG.  Returns previous language. */
 
 enum language
-set_language (lang)
-     enum language lang;
+set_language (enum language lang)
 {
   int i;
   enum language prev_language;
@@ -363,7 +404,7 @@ set_language (lang)
       if (languages[i]->la_language == lang)
 	{
 	  current_language = languages[i];
-	  set_type_range ();
+	  set_type_range_case ();
 	  set_lang_str ();
 	  break;
 	}
@@ -375,12 +416,12 @@ set_language (lang)
 /* This page contains functions that update the global vars
    language, type and range. */
 static void
-set_lang_str ()
+set_lang_str (void)
 {
   char *prefix = "";
 
   if (language)
-    free (language);
+    xfree (language);
   if (language_mode == language_mode_auto)
     prefix = "auto; currently ";
 
@@ -388,12 +429,12 @@ set_lang_str ()
 }
 
 static void
-set_type_str ()
+set_type_str (void)
 {
   char *tmp = NULL, *prefix = "";
 
   if (type)
-    free (type);
+    xfree (type);
   if (type_mode == type_mode_auto)
     prefix = "auto; currently ";
 
@@ -416,7 +457,7 @@ set_type_str ()
 }
 
 static void
-set_range_str ()
+set_range_str (void)
 {
   char *tmp, *pref = "";
 
@@ -439,17 +480,39 @@ set_range_str ()
     }
 
   if (range)
-    free (range);
+    xfree (range);
   range = concat (pref, tmp, NULL);
 }
 
+static void
+set_case_str()
+{
+   char *tmp = NULL, *prefix = "";
+
+   if (case_mode==case_mode_auto)
+      prefix = "auto; currently ";
+
+   switch (case_sensitivity)
+   {
+   case case_sensitive_on:
+     tmp = "on";
+     break;
+   case case_sensitive_off:
+     tmp = "off";
+     break;
+   default:
+     error ("Unrecognized case-sensitive setting.");
+   }
+
+   xfree (case_sensitive);
+   case_sensitive = concat (prefix, tmp, NULL);
+}
 
 /* Print out the current language settings: language, range and
    type checking.  If QUIETLY, print only what has changed.  */
 
 void
-language_info (quietly)
-     int quietly;
+language_info (int quietly)
 {
   if (quietly && expected_language == current_language)
     return;
@@ -464,6 +527,8 @@ language_info (quietly)
       show_type_command ((char *) 0, 1);
       printf_unfiltered ("Range checking:    %s\n", range);
       show_range_command ((char *) 0, 1);
+      printf_unfiltered ("Case sensitivity:  %s\n", case_sensitive);
+      show_case_command ((char *) 0, 1);
     }
 }
 
@@ -472,8 +537,7 @@ language_info (quietly)
 #if 0				/* Currently unused */
 
 struct type *
-binop_result_type (v1, v2)
-     value_ptr v1, v2;
+binop_result_type (value_ptr v1, value_ptr v2)
 {
   int size, uns;
   struct type *t1 = check_typedef (VALUE_TYPE (v1));
@@ -520,8 +584,7 @@ binop_result_type (v1, v2)
 /* Returns the appropriate printf format for hexadecimal
    numbers. */
 char *
-local_hex_format_custom (pre)
-     char *pre;
+local_hex_format_custom (char *pre)
 {
   static char form[50];
 
@@ -542,8 +605,7 @@ local_hex_format_custom (pre)
    static string.  Returns a pointer to this string. */
 
 char *
-longest_raw_hex_string (num)
-     LONGEST num;
+longest_raw_hex_string (LONGEST num)
 {
   static char res_longest_raw_hex_string[50];
   long long ll = num;		/* MERGEBUG ?? see below */
@@ -560,8 +622,7 @@ longest_raw_hex_string (num)
 /* Converts a number to hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
 char *
-local_hex_string (num)
-     unsigned long num;
+local_hex_string (unsigned long num)
 {
   static char res[50];
 
@@ -572,8 +633,7 @@ local_hex_string (num)
 /* Converts a LONGEST number to hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
 char *
-longest_local_hex_string (num)
-     LONGEST num;
+longest_local_hex_string (LONGEST num)
 {
   return longest_local_hex_string_custom (num, "l");
 }
@@ -581,9 +641,7 @@ longest_local_hex_string (num)
 /* Converts a number to custom hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
 char *
-local_hex_string_custom (num, pre)
-     unsigned long num;
-     char *pre;
+local_hex_string_custom (unsigned long num, char *pre)
 {
   static char res[50];
 
@@ -596,9 +654,7 @@ local_hex_string_custom (num, pre)
    should end with "l", e.g. "08l" as with calls to local_hex_string_custom */
 
 char *
-longest_local_hex_string_custom (num, width)
-     LONGEST num;
-     char *width;
+longest_local_hex_string_custom (LONGEST num, char *width)
 {
 #define RESULT_BUF_LEN 50
   static char res2[RESULT_BUF_LEN];
@@ -693,8 +749,7 @@ longest_local_hex_string_custom (num, width)
 /* Returns the appropriate printf format for octal
    numbers. */
 char *
-local_octal_format_custom (pre)
-     char *pre;
+local_octal_format_custom (char *pre)
 {
   static char form[50];
 
@@ -708,8 +763,7 @@ local_octal_format_custom (pre)
 
 /* Returns the appropriate printf format for decimal numbers. */
 char *
-local_decimal_format_custom (pre)
-     char *pre;
+local_decimal_format_custom (char *pre)
 {
   static char form[50];
 
@@ -740,8 +794,7 @@ local_decimal_format_custom (pre)
    both Modula-2 and for C.  In the C case, TYPE_CODE_CHAR will never occur,
    and thus will never cause the failure of the test. */
 int
-simple_type (type)
-     struct type *type;
+simple_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
@@ -764,8 +817,7 @@ simple_type (type)
    properties of "greater than", "less than", etc, or for which the
    operations "increment" or "decrement" make sense. */
 int
-ordered_type (type)
-     struct type *type;
+ordered_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
@@ -784,8 +836,7 @@ ordered_type (type)
 
 /* Returns non-zero if the two types are the same */
 int
-same_type (arg1, arg2)
-     struct type *arg1, *arg2;
+same_type (struct type *arg1, struct type *arg2)
 {
   CHECK_TYPEDEF (type);
   if (structured_type (arg1) ? !structured_type (arg2) : structured_type (arg2))
@@ -803,8 +854,7 @@ same_type (arg1, arg2)
 
 /* Returns non-zero if the type is integral */
 int
-integral_type (type)
-     struct type *type;
+integral_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
@@ -814,6 +864,7 @@ integral_type (type)
       return (TYPE_CODE (type) != TYPE_CODE_INT) &&
 	(TYPE_CODE (type) != TYPE_CODE_ENUM) ? 0 : 1;
     case language_m2:
+    case language_pascal:
       return TYPE_CODE (type) != TYPE_CODE_INT ? 0 : 1;
     case language_chill:
       error ("Missing Chill support in function integral_type.");	/*FIXME */
@@ -824,8 +875,7 @@ integral_type (type)
 
 /* Returns non-zero if the value is numeric */
 int
-numeric_type (type)
-     struct type *type;
+numeric_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
@@ -841,14 +891,14 @@ numeric_type (type)
 
 /* Returns non-zero if the value is a character type */
 int
-character_type (type)
-     struct type *type;
+character_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
     {
     case language_chill:
     case language_m2:
+    case language_pascal:
       return TYPE_CODE (type) != TYPE_CODE_CHAR ? 0 : 1;
 
     case language_c:
@@ -863,14 +913,14 @@ character_type (type)
 
 /* Returns non-zero if the value is a string type */
 int
-string_type (type)
-     struct type *type;
+string_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
     {
     case language_chill:
     case language_m2:
+    case language_pascal:
       return TYPE_CODE (type) != TYPE_CODE_STRING ? 0 : 1;
 
     case language_c:
@@ -884,8 +934,7 @@ string_type (type)
 
 /* Returns non-zero if the value is a boolean type */
 int
-boolean_type (type)
-     struct type *type;
+boolean_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   if (TYPE_CODE (type) == TYPE_CODE_BOOL)
@@ -906,8 +955,7 @@ boolean_type (type)
 
 /* Returns non-zero if the value is a floating-point type */
 int
-float_type (type)
-     struct type *type;
+float_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   return TYPE_CODE (type) == TYPE_CODE_FLT;
@@ -915,8 +963,7 @@ float_type (type)
 
 /* Returns non-zero if the value is a pointer type */
 int
-pointer_type (type)
-     struct type *type;
+pointer_type (struct type *type)
 {
   return TYPE_CODE (type) == TYPE_CODE_PTR ||
     TYPE_CODE (type) == TYPE_CODE_REF;
@@ -924,8 +971,7 @@ pointer_type (type)
 
 /* Returns non-zero if the value is a structured type */
 int
-structured_type (type)
-     struct type *type;
+structured_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
@@ -935,6 +981,11 @@ structured_type (type)
       return (TYPE_CODE (type) == TYPE_CODE_STRUCT) ||
 	(TYPE_CODE (type) == TYPE_CODE_UNION) ||
 	(TYPE_CODE (type) == TYPE_CODE_ARRAY);
+   case language_pascal:
+      return (TYPE_CODE(type) == TYPE_CODE_STRUCT) ||
+	 (TYPE_CODE(type) == TYPE_CODE_UNION) ||
+	 (TYPE_CODE(type) == TYPE_CODE_SET) ||
+	    (TYPE_CODE(type) == TYPE_CODE_ARRAY);
     case language_m2:
       return (TYPE_CODE (type) == TYPE_CODE_STRUCT) ||
 	(TYPE_CODE (type) == TYPE_CODE_SET) ||
@@ -948,7 +999,7 @@ structured_type (type)
 #endif
 
 struct type *
-lang_bool_type ()
+lang_bool_type (void)
 {
   struct symbol *sym;
   struct type *type;
@@ -966,7 +1017,11 @@ lang_bool_type ()
 	}
       return builtin_type_f_logical_s2;
     case language_cplus:
-      sym = lookup_symbol ("bool", NULL, VAR_NAMESPACE, NULL, NULL);
+    case language_pascal:
+      if (current_language->la_language==language_cplus)
+        {sym = lookup_symbol ("bool", NULL, VAR_NAMESPACE, NULL, NULL);}
+      else
+        {sym = lookup_symbol ("boolean", NULL, VAR_NAMESPACE, NULL, NULL);}
       if (sym)
 	{
 	  type = SYMBOL_TYPE (sym);
@@ -974,6 +1029,15 @@ lang_bool_type ()
 	    return type;
 	}
       return builtin_type_bool;
+    case language_java:
+      sym = lookup_symbol ("boolean", NULL, VAR_NAMESPACE, NULL, NULL);
+      if (sym)
+	{
+	  type = SYMBOL_TYPE (sym);
+	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
+	    return type;
+	}
+      return java_boolean_type;
     default:
       return builtin_type_int;
     }
@@ -984,8 +1048,7 @@ lang_bool_type ()
 
 /* Returns non-zero if the value VAL represents a true value. */
 int
-value_true (val)
-     value_ptr val;
+value_true (value_ptr val)
 {
   /* It is possible that we should have some sort of error if a non-boolean
      value is used in this context.  Possibly dependent on some kind of
@@ -1002,9 +1065,7 @@ value_true (val)
 #if 0				/* Currently unused */
 
 void
-binop_type_check (arg1, arg2, op)
-     value_ptr arg1, arg2;
-     int op;
+binop_type_check (value_ptr arg1, value_ptr arg2, int op)
 {
   struct type *t1, *t2;
 
@@ -1160,6 +1221,21 @@ binop_type_check (arg1, arg2, op)
 	    }
 #endif
 
+#ifdef _LANG_pascal
+      case language_pascal:
+	 switch(op)
+	 {
+	 case BINOP_DIV:
+	    if (!float_type(t1) && !float_type(t2))
+	       type_op_error ("Arguments to %s must be floating point numbers.",op);
+	    break;
+	 case BINOP_INTDIV:
+	    if (!integral_type(t1) || !integral_type(t2))
+	       type_op_error ("Arguments to %s must be of integral type.",op);
+	    break;
+	 }
+#endif
+
 #ifdef _LANG_chill
 	case language_chill:
 	  error ("Missing Chill support in function binop_type_check.");	/*FIXME */
@@ -1181,10 +1257,7 @@ binop_type_check (arg1, arg2, op)
    this is an error and error () is called.  Otherwise, it is
    a warning and printf() is called. */
 void
-op_error (fmt, op, fatal)
-     char *fmt;
-     enum exp_opcode op;
-     int fatal;
+op_error (char *fmt, enum exp_opcode op, int fatal)
 {
   if (fatal)
     error (fmt, op_string (op));
@@ -1243,8 +1316,7 @@ range_error (char *string,...)
 /* Return the language enum for a given language string. */
 
 enum language
-language_enum (str)
-     char *str;
+language_enum (char *str)
 {
   int i;
 
@@ -1258,8 +1330,7 @@ language_enum (str)
 /* Return the language struct for a given language enum. */
 
 const struct language_defn *
-language_def (lang)
-     enum language lang;
+language_def (enum language lang)
 {
   int i;
 
@@ -1275,8 +1346,7 @@ language_def (lang)
 
 /* Return the language as a string */
 char *
-language_str (lang)
-     enum language lang;
+language_str (enum language lang)
 {
   int i;
 
@@ -1291,9 +1361,7 @@ language_str (lang)
 }
 
 static void
-set_check (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+set_check (char *ignore, int from_tty)
 {
   printf_unfiltered (
      "\"set check\" must be followed by the name of a check subcommand.\n");
@@ -1301,9 +1369,7 @@ set_check (ignore, from_tty)
 }
 
 static void
-show_check (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+show_check (char *ignore, int from_tty)
 {
   cmd_show_list (showchecklist, from_tty, "");
 }
@@ -1311,8 +1377,7 @@ show_check (ignore, from_tty)
 /* Add a language to the set of known languages.  */
 
 void
-add_language (lang)
-     const struct language_defn *lang;
+add_language (const struct language_defn *lang)
 {
   if (lang->la_magic != LANG_MAGIC)
     {
@@ -1339,87 +1404,60 @@ add_language (lang)
 /* Define the language that is no language.  */
 
 static int
-unk_lang_parser ()
+unk_lang_parser (void)
 {
   return 1;
 }
 
 static void
-unk_lang_error (msg)
-     char *msg;
+unk_lang_error (char *msg)
 {
   error ("Attempted to parse an expression with unknown language");
 }
 
 static void
-unk_lang_emit_char (c, stream, quoter)
-     register int c;
-     struct ui_file *stream;
-     int quoter;
+unk_lang_emit_char (register int c, struct ui_file *stream, int quoter)
 {
   error ("internal error - unimplemented function unk_lang_emit_char called.");
 }
 
 static void
-unk_lang_printchar (c, stream)
-     register int c;
-     struct ui_file *stream;
+unk_lang_printchar (register int c, struct ui_file *stream)
 {
   error ("internal error - unimplemented function unk_lang_printchar called.");
 }
 
 static void
-unk_lang_printstr (stream, string, length, width, force_ellipses)
-     struct ui_file *stream;
-     char *string;
-     unsigned int length;
-     int width;
-     int force_ellipses;
+unk_lang_printstr (struct ui_file *stream, char *string, unsigned int length,
+		   int width, int force_ellipses)
 {
   error ("internal error - unimplemented function unk_lang_printstr called.");
 }
 
 static struct type *
-unk_lang_create_fundamental_type (objfile, typeid)
-     struct objfile *objfile;
-     int typeid;
+unk_lang_create_fundamental_type (struct objfile *objfile, int typeid)
 {
   error ("internal error - unimplemented function unk_lang_create_fundamental_type called.");
 }
 
 static void
-unk_lang_print_type (type, varstring, stream, show, level)
-     struct type *type;
-     char *varstring;
-     struct ui_file *stream;
-     int show;
-     int level;
+unk_lang_print_type (struct type *type, char *varstring, struct ui_file *stream,
+		     int show, int level)
 {
   error ("internal error - unimplemented function unk_lang_print_type called.");
 }
 
 static int
-unk_lang_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
-		    recurse, pretty)
-     struct type *type;
-     char *valaddr;
-     int embedded_offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+unk_lang_val_print (struct type *type, char *valaddr, int embedded_offset,
+		    CORE_ADDR address, struct ui_file *stream, int format,
+		    int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   error ("internal error - unimplemented function unk_lang_val_print called.");
 }
 
 static int
-unk_lang_value_print (val, stream, format, pretty)
-     value_ptr val;
-     struct ui_file *stream;
-     int format;
-     enum val_prettyprint pretty;
+unk_lang_value_print (value_ptr val, struct ui_file *stream, int format,
+		      enum val_prettyprint pretty)
 {
   error ("internal error - unimplemented function unk_lang_value_print called.");
 }
@@ -1440,6 +1478,7 @@ const struct language_defn unknown_language_defn =
   &unknown_builtin_types[0],
   range_check_off,
   type_check_off,
+  case_sensitive_on,
   unk_lang_parser,
   unk_lang_error,
   evaluate_subexp_standard,
@@ -1469,6 +1508,7 @@ const struct language_defn auto_language_defn =
   &unknown_builtin_types[0],
   range_check_off,
   type_check_off,
+  case_sensitive_on,
   unk_lang_parser,
   unk_lang_error,
   evaluate_subexp_standard,
@@ -1497,6 +1537,7 @@ const struct language_defn local_language_defn =
   &unknown_builtin_types[0],
   range_check_off,
   type_check_off,
+  case_sensitive_on,
   unk_lang_parser,
   unk_lang_error,
   evaluate_subexp_standard,
@@ -1521,7 +1562,7 @@ const struct language_defn local_language_defn =
 /* Initialize the language routines */
 
 void
-_initialize_language ()
+_initialize_language (void)
 {
   struct cmd_list_element *set, *show;
 
@@ -1563,16 +1604,24 @@ _initialize_language ()
   set->function.cfunc = set_range_command;
   show->function.cfunc = show_range_command;
 
+  set = add_set_cmd ("case-sensitive", class_support, var_string_noescape,
+                     (char *) &case_sensitive,
+                     "Set case sensitivity in name search.  (on/off/auto)\n\
+For Fortran the default is off; for other languages the default is on.",
+                     &setlist);
+  show = add_show_from_set (set, &showlist);
+  set->function.cfunc = set_case_command;
+  show->function.cfunc = show_case_command;
+
   add_language (&unknown_language_defn);
   add_language (&local_language_defn);
   add_language (&auto_language_defn);
 
   language = savestring ("auto", strlen ("auto"));
-  set_language_command (language, 0);
-
   type = savestring ("auto", strlen ("auto"));
-  set_type_command (NULL, 0);
-
   range = savestring ("auto", strlen ("auto"));
-  set_range_command (NULL, 0);
+  case_sensitive = savestring ("auto",strlen ("auto"));
+
+  /* Have the above take effect */
+  set_language (language_auto);
 }

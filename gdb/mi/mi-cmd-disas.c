@@ -428,9 +428,9 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 		  ui_out_field_int (uiout, "offset", offset);
 		}
 	      if (filename != NULL)
-		free (filename);
+		xfree (filename);
 	      if (name != NULL)
-		free (name);
+		xfree (name);
 
 	      ui_file_rewind (stb->stream);
 	      pc += (*tm_print_insn) (pc, &di);
@@ -476,9 +476,9 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	      ui_out_field_int (uiout, "offset", offset);
 	    }
 	  if (filename != NULL)
-	    free (filename);
+	    xfree (filename);
 	  if (name != NULL)
-	    free (name);
+	    xfree (name);
 
 	  ui_file_rewind (stb->stream);
 	  pc += (*tm_print_insn) (pc, &di);

@@ -37,8 +37,7 @@
  */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   kern_return_t ret;
   thread_state_data_t state;
@@ -76,8 +75,7 @@ fetch_inferior_registers (regno)
  * On mach3 all registers are always saved in one call.
  */
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   kern_return_t ret;
   thread_state_data_t state;

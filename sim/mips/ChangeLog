@@ -1,3 +1,26 @@
+2000-10-19  Frank Ch. Eigler  <fche@redhat.com>
+
+	On advice from Chris G. Demetriou <cgd@sibyte.com>:
+	* sim-main.h (GPR_CLEAR): Remove unused alternative macro.
+
+Thu Jul 27 22:02:05 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Maciej W. Rozycki <macro@ds2.pg.gda.pl>:
+	* Makefile.in: Don't delete *.igen when cleaning directory.
+
+Wed Jul 19 18:50:51 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* m16.igen (break): Call SignalException not sim_engine_halt.
+
+Mon Jul  3 11:13:20 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Jason Eckhardt:
+	* mips.igen (MOVZ.fmt, MOVN.fmt): Move conditional on GPR[RT].
+
+Tue Jun 13 20:52:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen (MxC1, DMxC1): Fix printf formatting.
+
 2000-05-24  Michael Hayes  <mhayes@cygnus.com>
 
 	* mips.igen (do_dmultx): Fix typo.

@@ -46,11 +46,7 @@ extern char **environ;
  * the four arguments "a", "b", "c", "d".
  */
 static void
-breakup_args (
-	       scratch,
-	       argv)
-     char *scratch;
-     char **argv;
+breakup_args (char *scratch, char **argv)
 {
   char *cp = scratch;
 
@@ -98,15 +94,9 @@ breakup_args (
    or NULL if we should pick one.  Errors reported with error().  */
 
 void
-fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
-	       pre_trace_fun, shell_file)
-     char *exec_file;
-     char *allargs;
-     char **env;
-     void (*traceme_fun) (void);
-     void (*init_trace_fun) (int);
-     void (*pre_trace_fun) (void);
-     char *shell_file;
+fork_inferior (char *exec_file, char *allargs, char **env,
+	       void (*traceme_fun) (void), void (*init_trace_fun) (int),
+	       void (*pre_trace_fun) (void), char *shell_file)
 {
   int pid;
   char *shell_command;
@@ -254,13 +244,13 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
   if (pre_trace_fun != NULL)
     (*pre_trace_fun) ();
 
-#if defined(USG) && !defined(HAVE_VFORK)
-  pid = fork ();
-#else
+#ifdef HAVE_VFORK
   if (debug_fork)
     pid = fork ();
   else
     pid = vfork ();
+#else
+  pid = fork ();
 #endif
 
   if (pid < 0)
@@ -368,7 +358,7 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
      correct program, and are poised at the first instruction of the
      new program.  */
 
-  /* Allow target dependant code to play with the new process.  This might be
+  /* Allow target dependent code to play with the new process.  This might be
      used to have target-specific code initialize a variable in the new process
      prior to executing the first instruction.  */
   TARGET_CREATE_INFERIOR_HOOK (pid);
@@ -388,9 +378,7 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
    clone will set it TRUE.
  */
 void
-clone_and_follow_inferior (child_pid, followed_child)
-     int child_pid;
-     int *followed_child;
+clone_and_follow_inferior (int child_pid, int *followed_child)
 {
   extern int auto_solib_add;
 
@@ -428,13 +416,13 @@ clone_and_follow_inferior (child_pid, followed_child)
     error ("error getting pipe for handoff semaphore");
 
   /* Clone the debugger. */
-#if defined(USG) && !defined(HAVE_VFORK)
-  debugger_pid = fork ();
-#else
+#ifdef HAVE_VFORK
   if (debug_fork)
     debugger_pid = fork ();
   else
     debugger_pid = vfork ();
+#else
+  debugger_pid = fork ();
 #endif
 
   if (debugger_pid < 0)
@@ -512,8 +500,7 @@ clone_and_follow_inferior (child_pid, followed_child)
 /* Accept NTRAPS traps from the inferior.  */
 
 void
-startup_inferior (ntraps)
-     int ntraps;
+startup_inferior (int ntraps)
 {
   int pending_execs = ntraps;
   int terminal_initted;

@@ -23,6 +23,12 @@
 #include "frame.h"
 #include "value.h"
 
+/* For i386_linux_skip_solib_resolver.  */
+#include "symtab.h"
+#include "symfile.h"
+#include "objfiles.h"
+#include "solib-svr4.h"	/* for struct link_map_offsets */
+
 
 /* Recognizing signal handler frames.  */
 
@@ -279,3 +285,133 @@ i386_linux_saved_pc_after_call (struct frame_info *frame)
 
   return read_memory_integer (read_register (SP_REGNUM), 4);
 }
+
+
+
+/* Calling functions in shared libraries.  */
+/* Find the minimal symbol named NAME, and return both the minsym
+   struct and its objfile.  This probably ought to be in minsym.c, but
+   everything there is trying to deal with things like C++ and
+   SOFUN_ADDRESS_MAYBE_TURQUOISE, ...  Since this is so simple, it may
+   be considered too special-purpose for general consumption.  */
+
+static struct minimal_symbol *
+find_minsym_and_objfile (char *name, struct objfile **objfile_p)
+{
+  struct objfile *objfile;
+
+  ALL_OBJFILES (objfile)
+    {
+      struct minimal_symbol *msym;
+
+      ALL_OBJFILE_MSYMBOLS (objfile, msym)
+	{
+	  if (SYMBOL_NAME (msym)
+	      && STREQ (SYMBOL_NAME (msym), name))
+	    {
+	      *objfile_p = objfile;
+	      return msym;
+	    }
+	}
+    }
+
+  return 0;
+}
+
+static CORE_ADDR
+skip_hurd_resolver (CORE_ADDR pc)
+{
+  /* The HURD dynamic linker is part of the GNU C library, so many
+     GNU/Linux distributions use it.  (All ELF versions, as far as I
+     know.)  An unresolved PLT entry points to "_dl_runtime_resolve",
+     which calls "fixup" to patch the PLT, and then passes control to
+     the function.
+
+     We look for the symbol `_dl_runtime_resolve', and find `fixup' in
+     the same objfile.  If we are at the entry point of `fixup', then
+     we set a breakpoint at the return address (at the top of the
+     stack), and continue.
+  
+     It's kind of gross to do all these checks every time we're
+     called, since they don't change once the executable has gotten
+     started.  But this is only a temporary hack --- upcoming versions
+     of Linux will provide a portable, efficient interface for
+     debugging programs that use shared libraries.  */
+
+  struct objfile *objfile;
+  struct minimal_symbol *resolver 
+    = find_minsym_and_objfile ("_dl_runtime_resolve", &objfile);
+
+  if (resolver)
+    {
+      struct minimal_symbol *fixup
+	= lookup_minimal_symbol ("fixup", 0, objfile);
+
+      if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
+	return (SAVED_PC_AFTER_CALL (get_current_frame ()));
+    }
+
+  return 0;
+}      
+
+/* See the comments for SKIP_SOLIB_RESOLVER at the top of infrun.c.
+   This function:
+   1) decides whether a PLT has sent us into the linker to resolve
+      a function reference, and 
+   2) if so, tells us where to set a temporary breakpoint that will
+      trigger when the dynamic linker is done.  */
+
+CORE_ADDR
+i386_linux_skip_solib_resolver (CORE_ADDR pc)
+{
+  CORE_ADDR result;
+
+  /* Plug in functions for other kinds of resolvers here.  */
+  result = skip_hurd_resolver (pc);
+  if (result)
+    return result;
+
+  return 0;
+}
+
+/* Fetch (and possibly build) an appropriate link_map_offsets structure
+   for native i386 linux targets using the struct offsets defined in
+   link.h (but without actual reference to that file).
+
+   This makes it possible to access i386-linux shared libraries from
+   a gdb that was not built on an i386-linux host (for cross debugging).
+   */
+
+struct link_map_offsets *
+i386_linux_svr4_fetch_link_map_offsets (void)
+{
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = 0;
+
+  if (lmp == 0)
+    {
+      lmp = &lmo;
+
+      lmo.r_debug_size = 8;	/* 20 not actual size but all we need */
+
+      lmo.r_map_offset = 4;
+      lmo.r_map_size   = 4;
+
+      lmo.link_map_size = 20;	/* 552 not actual size but all we need */
+
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 4;
+
+      lmo.l_name_offset = 4;
+      lmo.l_name_size   = 4;
+
+      lmo.l_next_offset = 12;
+      lmo.l_next_size   = 4;
+
+      lmo.l_prev_offset = 16;
+      lmo.l_prev_size   = 4;
+    }
+
+    return lmp;
+}
+

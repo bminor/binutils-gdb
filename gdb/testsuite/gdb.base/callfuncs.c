@@ -172,21 +172,6 @@ cmp10 (i0, i1, i2, i3, i4, i5, i6, i7, i8, i9)
     (i5 == 5) && (i6 == 6) && (i7 == 7) && (i8 == 8) && (i9 == 9);
 }
 
-
-/* Gotta have a main to be able to generate a linked, runnable
-   executable, and also provide a useful place to set a breakpoint. */
-extern void * malloc() ;
-int main ()
-{
-#ifdef usestubs
-  set_debug_traps();
-  breakpoint();
-#endif
-  malloc(1);
-  t_structs_c(struct_val1);
-  return 0 ;
-}
-
 /* Functions that expect specific values to be passed and return 
    either 0 or 1, depending upon whether the values were
    passed incorrectly or correctly, respectively. */
@@ -356,4 +341,20 @@ int a, b;
 #endif
 {
   return ((*func_arg1)(a, b));
+}
+
+
+/* Gotta have a main to be able to generate a linked, runnable
+   executable, and also provide a useful place to set a breakpoint. */
+extern void * malloc() ;
+int main ()
+{
+#ifdef usestubs
+  set_debug_traps();
+  breakpoint();
+#endif
+  malloc(1);
+  t_double_values(double_val1, double_val2);
+  t_structs_c(struct_val1);
+  return 0 ;
 }

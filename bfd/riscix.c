@@ -1,5 +1,6 @@
 /* BFD back-end for RISC iX (Acorn, arm) binaries.
-   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
    
 This file is part of BFD, the Binary File Descriptor library.
@@ -238,9 +239,9 @@ riscix_fix_pcrel_26 (abfd, reloc_entry, symbol, data, input_section,
 }
 
 reloc_howto_type *
-DEFUN(riscix_reloc_type_lookup,(abfd,code),
-      bfd *abfd AND
-      bfd_reloc_code_real_type code)
+riscix_reloc_type_lookup (abfd, code)
+     bfd *abfd;
+     bfd_reloc_code_real_type code;
 {
 #define ASTD(i,j)       case i: return &riscix_std_reloc_howto[j]
   if (code == BFD_RELOC_CTOR)

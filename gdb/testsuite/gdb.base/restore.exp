@@ -87,17 +87,22 @@ proc restore_tests { } {
         }
     }
 
-    send_gdb "continue\n"
+    if ![gdb_skip_stdio_test "run to completion"] {
+	send_gdb "continue\n"
 
-    gdb_expect {
-        -re "exiting" {
-             pass "run to completion"
-        }
-        timeout { 
-             fail "(timeout) run to completion"
-        }
+	gdb_expect {
+	    -re "exiting" {
+		pass "run to completion"
+	    }
+	    timeout { 
+		fail "(timeout) run to completion"
+	    }
+	}
+    } else {
+	gdb_test "continue" "" ""
     }
 }
+
 
 
 # Start with a fresh gdb.

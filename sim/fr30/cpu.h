@@ -54,14 +54,14 @@ typedef struct {
 #define SET_H_DR(index, x) \
 do { \
 fr30bf_h_dr_set_handler (current_cpu, (index), (x));\
-} while (0)
+;} while (0)
   /* processor status */
   USI h_ps;
 #define GET_H_PS() fr30bf_h_ps_get_handler (current_cpu)
 #define SET_H_PS(x) \
 do { \
 fr30bf_h_ps_set_handler (current_cpu, (x));\
-} while (0)
+;} while (0)
   /* General Register 13 explicitly required */
   SI h_r13;
 #define GET_H_R13() CPU (h_r13)
@@ -100,7 +100,7 @@ fr30bf_h_ps_set_handler (current_cpu, (x));\
 #define SET_H_SBIT(x) \
 do { \
 fr30bf_h_sbit_set_handler (current_cpu, (x));\
-} while (0)
+;} while (0)
   /* trace trap       bit */
   BI h_tbit;
 #define GET_H_TBIT() CPU (h_tbit)
@@ -119,21 +119,21 @@ fr30bf_h_sbit_set_handler (current_cpu, (x));\
 #define SET_H_CCR(x) \
 do { \
 fr30bf_h_ccr_set_handler (current_cpu, (x));\
-} while (0)
+;} while (0)
   /* system condition bits */
   UQI h_scr;
 #define GET_H_SCR() fr30bf_h_scr_get_handler (current_cpu)
 #define SET_H_SCR(x) \
 do { \
 fr30bf_h_scr_set_handler (current_cpu, (x));\
-} while (0)
+;} while (0)
   /* interrupt level mask */
   UQI h_ilm;
 #define GET_H_ILM() fr30bf_h_ilm_get_handler (current_cpu)
 #define SET_H_ILM(x) \
 do { \
 fr30bf_h_ilm_set_handler (current_cpu, (x));\
-} while (0)
+;} while (0)
   } hardware;
 #define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
 } FR30BF_CPU_DATA;
@@ -230,101 +230,40 @@ union sem_fields {
     unsigned char out_h_gr_13;
   } sfmt_dmovr13pi;
   struct { /*  */
-    SI* i_Ri;
-    UINT f_Rs1;
-    unsigned char in_Ri;
-  } sfmt_mov2dr;
-  struct { /*  */
-    SI* i_Ri;
-    UINT f_Rs1;
-    unsigned char out_Ri;
-  } sfmt_movdr;
-  struct { /*  */
     UINT f_Rs2;
     unsigned char in_h_gr_15;
     unsigned char out_h_gr_15;
   } sfmt_ldr15dr;
   struct { /*  */
     SI* i_Ri;
+    UINT f_Ri;
+    UINT f_Rs1;
+    unsigned char in_Ri;
+  } sfmt_mov2dr;
+  struct { /*  */
+    SI* i_Ri;
+    UINT f_Ri;
+    UINT f_Rs1;
+    unsigned char out_Ri;
+  } sfmt_movdr;
+  struct { /*  */
+    SI* i_Ri;
+    UINT f_Ri;
     UINT f_i32;
     unsigned char out_Ri;
   } sfmt_ldi32;
   struct { /*  */
     SI* i_Ri;
+    UINT f_Ri;
     UINT f_i20;
     unsigned char out_Ri;
   } sfmt_ldi20;
   struct { /*  */
     SI* i_Ri;
+    UINT f_Ri;
     UINT f_i8;
     unsigned char out_Ri;
   } sfmt_ldi8;
-  struct { /*  */
-    SI* i_Ri;
-    unsigned char in_Ri;
-    unsigned char in_h_gr_15;
-    unsigned char out_h_gr_15;
-  } sfmt_str15gr;
-  struct { /*  */
-    SI* i_Ri;
-    USI f_udisp6;
-    unsigned char in_Ri;
-    unsigned char in_h_gr_15;
-  } sfmt_str15;
-  struct { /*  */
-    SI* i_Ri;
-    INT f_disp8;
-    unsigned char in_Ri;
-    unsigned char in_h_gr_14;
-  } sfmt_str14b;
-  struct { /*  */
-    SI* i_Ri;
-    SI f_disp9;
-    unsigned char in_Ri;
-    unsigned char in_h_gr_14;
-  } sfmt_str14h;
-  struct { /*  */
-    SI* i_Ri;
-    SI f_disp10;
-    unsigned char in_Ri;
-    unsigned char in_h_gr_14;
-  } sfmt_str14;
-  struct { /*  */
-    SI* i_Ri;
-    USI f_udisp6;
-    unsigned char in_h_gr_15;
-    unsigned char out_Ri;
-  } sfmt_ldr15;
-  struct { /*  */
-    SI* i_Ri;
-    INT f_disp8;
-    unsigned char in_h_gr_14;
-    unsigned char out_Ri;
-  } sfmt_ldr14ub;
-  struct { /*  */
-    SI* i_Ri;
-    SI f_disp9;
-    unsigned char in_h_gr_14;
-    unsigned char out_Ri;
-  } sfmt_ldr14uh;
-  struct { /*  */
-    SI* i_Ri;
-    SI f_disp10;
-    unsigned char in_h_gr_14;
-    unsigned char out_Ri;
-  } sfmt_ldr14;
-  struct { /*  */
-    SI* i_Ri;
-    SI f_m4;
-    unsigned char in_Ri;
-    unsigned char out_Ri;
-  } sfmt_add2;
-  struct { /*  */
-    SI* i_Ri;
-    UINT f_u4;
-    unsigned char in_Ri;
-    unsigned char out_Ri;
-  } sfmt_addi;
   struct { /*  */
     USI f_u10;
     unsigned char in_h_gr_14;
@@ -334,11 +273,39 @@ union sem_fields {
   } sfmt_enter;
   struct { /*  */
     SI* i_Ri;
-    SI* i_Rj;
+    UINT f_Ri;
     unsigned char in_Ri;
-    unsigned char in_Rj;
-    unsigned char in_h_gr_13;
-  } sfmt_str13;
+    unsigned char in_h_gr_15;
+    unsigned char out_h_gr_15;
+  } sfmt_str15gr;
+  struct { /*  */
+    SI* i_Ri;
+    UINT f_Ri;
+    USI f_udisp6;
+    unsigned char in_Ri;
+    unsigned char in_h_gr_15;
+  } sfmt_str15;
+  struct { /*  */
+    SI* i_Ri;
+    INT f_disp8;
+    UINT f_Ri;
+    unsigned char in_Ri;
+    unsigned char in_h_gr_14;
+  } sfmt_str14b;
+  struct { /*  */
+    SI* i_Ri;
+    SI f_disp9;
+    UINT f_Ri;
+    unsigned char in_Ri;
+    unsigned char in_h_gr_14;
+  } sfmt_str14h;
+  struct { /*  */
+    SI* i_Ri;
+    SI f_disp10;
+    UINT f_Ri;
+    unsigned char in_Ri;
+    unsigned char in_h_gr_14;
+  } sfmt_str14;
   struct { /*  */
     SI* i_Ri;
     UINT f_Ri;
@@ -348,7 +315,60 @@ union sem_fields {
   } sfmt_ldr15gr;
   struct { /*  */
     SI* i_Ri;
+    UINT f_Ri;
+    USI f_udisp6;
+    unsigned char in_h_gr_15;
+    unsigned char out_Ri;
+  } sfmt_ldr15;
+  struct { /*  */
+    SI* i_Ri;
+    INT f_disp8;
+    UINT f_Ri;
+    unsigned char in_h_gr_14;
+    unsigned char out_Ri;
+  } sfmt_ldr14ub;
+  struct { /*  */
+    SI* i_Ri;
+    SI f_disp9;
+    UINT f_Ri;
+    unsigned char in_h_gr_14;
+    unsigned char out_Ri;
+  } sfmt_ldr14uh;
+  struct { /*  */
+    SI* i_Ri;
+    SI f_disp10;
+    UINT f_Ri;
+    unsigned char in_h_gr_14;
+    unsigned char out_Ri;
+  } sfmt_ldr14;
+  struct { /*  */
+    SI* i_Ri;
+    SI f_m4;
+    UINT f_Ri;
+    unsigned char in_Ri;
+    unsigned char out_Ri;
+  } sfmt_add2;
+  struct { /*  */
+    SI* i_Ri;
+    UINT f_Ri;
+    UINT f_u4;
+    unsigned char in_Ri;
+    unsigned char out_Ri;
+  } sfmt_addi;
+  struct { /*  */
+    SI* i_Ri;
     SI* i_Rj;
+    UINT f_Ri;
+    UINT f_Rj;
+    unsigned char in_Ri;
+    unsigned char in_Rj;
+    unsigned char in_h_gr_13;
+  } sfmt_str13;
+  struct { /*  */
+    SI* i_Ri;
+    SI* i_Rj;
+    UINT f_Ri;
+    UINT f_Rj;
     unsigned char in_Rj;
     unsigned char in_h_gr_13;
     unsigned char out_Ri;
@@ -356,6 +376,8 @@ union sem_fields {
   struct { /*  */
     SI* i_Ri;
     SI* i_Rj;
+    UINT f_Ri;
+    UINT f_Rj;
     unsigned char in_Ri;
     unsigned char in_Rj;
     unsigned char out_Ri;

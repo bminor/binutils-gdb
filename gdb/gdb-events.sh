@@ -34,7 +34,7 @@
 # here with respect to annotate.  We might need to accomodate a hook
 # stack that allows several ui blocks to install their own events.
 
-# Each of the variable events (as currently generated) is converteded
+# Each of the variable events (as currently generated) is converted
 # to either a straight function call or a function call with a
 # predicate.
 

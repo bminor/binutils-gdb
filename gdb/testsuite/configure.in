@@ -16,6 +16,7 @@ AC_CANONICAL_SYSTEM
 configdirs="gdb.asm \
             gdb.base \
             gdb.c++ \
+            gdb.java \
             gdb.disasm \
             gdb.chill \
             gdb.mi \
@@ -104,6 +105,9 @@ if test "${enable_gdbtk}" = "yes"; then
     configdirs="${configdirs} gdb.gdbtk"
 fi
 # End stuff to support --enable-shared
+
+dnl Check for exe extension set on certain hosts (e.g. Win32)
+AC_EXEEXT
 
 # configure the subdirectories too
 AC_CONFIG_SUBDIRS($configdirs)

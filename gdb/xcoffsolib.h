@@ -56,6 +56,5 @@ struct vmap_and_bfd
 
 extern struct vmap *vmap;
 
-/* Hook for symbol table relocation at runtime. */
-
-extern void (*xcoff_relocate_symtab_hook) (unsigned int);
+/* Add symbols for a vmap.  */
+extern int vmap_add_symbols (struct vmap *vp);

@@ -691,11 +691,31 @@ bfd_seek (abfd, position, direction)
       
       if ((bfd_size_type) abfd->where > bim->size)
 	{
-	  abfd->where = bim->size;
-	  bfd_set_error (bfd_error_file_truncated);
-	  return -1;
+	  if ((abfd->direction == write_direction) || 
+	      (abfd->direction == both_direction))
+	    {
+	      long newsize, oldsize = (bim->size + 127) & ~127;
+	      bim->size = abfd->where;
+	      /* Round up to cut down on memory fragmentation */
+	      newsize = (bim->size + 127) & ~127;
+	      if (newsize > oldsize)
+	        {
+		  bim->buffer = bfd_realloc (bim->buffer, newsize);
+		  if (bim->buffer == 0)
+		    {
+		      bim->size = 0;
+		      bfd_set_error (bfd_error_no_memory);
+		      return -1;
+		    }
+	        }
+	    }
+	  else
+	    {
+	      abfd->where = bim->size;
+	      bfd_set_error (bfd_error_file_truncated);
+	      return -1;
+	    }   
 	}
-      
       return 0;
     }
 
@@ -1169,6 +1189,54 @@ bfd_putl64 (data, addr)
 #else
   BFD_FAIL();
 #endif
+}
+
+void
+bfd_put_bits (data, addr, bits, big_p)
+     bfd_vma data;
+     bfd_byte *addr;
+     int bits;
+     boolean big_p;
+{
+  int i;
+  int bytes;
+
+  if (bits % 8 != 0)
+    abort ();
+
+  bytes = bits / 8;
+  for (i = 0; i < bytes; i++)
+    {
+      int index = big_p ? bytes - i - 1 : i;
+
+      addr[index] = (bfd_byte) data;
+      data >>= 8;
+    }
+}
+
+bfd_vma
+bfd_get_bits (addr, bits, big_p)
+     bfd_byte *addr;
+     int bits;
+     boolean big_p;
+{
+  bfd_vma data;
+  int i;
+  int bytes;
+
+  if (bits % 8 != 0)
+    abort ();
+
+  data = 0;
+  bytes = bits / 8;
+  for (i = 0; i < bytes; i++)
+    {
+      int index = big_p ? i : bytes - i - 1;
+      
+      data = (data << 8) | addr[index];
+    }
+
+  return data;
 }
 
 /* Default implementation */

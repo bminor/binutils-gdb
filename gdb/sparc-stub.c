@@ -269,8 +269,7 @@ recursive_trap:
 /* Convert ch from a hex digit to an int */
 
 static int
-hex(ch)
-     unsigned char ch;
+hex (unsigned char ch)
 {
   if (ch >= 'a' && ch <= 'f')
     return ch-'a'+10;
@@ -287,7 +286,7 @@ static char remcomOutBuffer[BUFMAX];
 /* scan for the sequence $<data>#<checksum>     */
 
 unsigned char *
-getpacket ()
+getpacket (void)
 {
   unsigned char *buffer = &remcomInBuffer[0];
   unsigned char checksum;
@@ -353,8 +352,7 @@ retry:
 /* send the packet in buffer.  */
 
 static void
-putpacket(buffer)
-     unsigned char *buffer;
+putpacket (unsigned char *buffer)
 {
   unsigned char checksum;
   int count;
@@ -394,11 +392,7 @@ static volatile int mem_err = 0;
  */
 
 static unsigned char *
-mem2hex(mem, buf, count, may_fault)
-     unsigned char *mem;
-     unsigned char *buf;
-     int count;
-     int may_fault;
+mem2hex (unsigned char *mem, unsigned char *buf, int count, int may_fault)
 {
   unsigned char ch;
 
@@ -424,11 +418,7 @@ mem2hex(mem, buf, count, may_fault)
  * return a pointer to the character AFTER the last byte written */
 
 static char *
-hex2mem(buf, mem, count, may_fault)
-     unsigned char *buf;
-     unsigned char *mem;
-     int count;
-     int may_fault;
+hex2mem (unsigned char *buf, unsigned char *mem, int count, int may_fault)
 {
   int i;
   unsigned char ch;
@@ -473,7 +463,7 @@ static struct hard_trap_info
 /* Set up exception handlers for tracing and breakpoints */
 
 void
-set_debug_traps()
+set_debug_traps (void)
 {
   struct hard_trap_info *ht;
 
@@ -500,8 +490,7 @@ _fltr_set_mem_err:
 ");
 
 static void
-set_mem_fault_trap(enable)
-     int enable;
+set_mem_fault_trap (int enable)
 {
   extern void fltr_set_mem_err();
   mem_err = 0;
@@ -515,8 +504,7 @@ set_mem_fault_trap(enable)
 /* Convert the SPARC hardware trap type code to a unix signal number. */
 
 static int
-computeSignal(tt)
-     int tt;
+computeSignal (int tt)
 {
   struct hard_trap_info *ht;
 
@@ -564,8 +552,7 @@ hexToInt(char **ptr, int *intValue)
 extern void breakinst();
 
 static void
-handle_exception (registers)
-     unsigned long *registers;
+handle_exception (unsigned long *registers)
 {
   int tt;			/* Trap type */
   int sigval;
@@ -779,7 +766,7 @@ handle_exception (registers)
    the debugger. */
 
 void
-breakpoint()
+breakpoint (void)
 {
   if (!initialized)
     return;

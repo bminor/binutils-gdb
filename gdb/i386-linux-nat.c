@@ -1,5 +1,5 @@
-/* Native-dependent code for Linux running on i386's, for GDB.
-   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+/* Native-dependent code for Linux/x86.
+   Copyright 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,11 +22,6 @@
 #include "inferior.h"
 #include "gdbcore.h"
 
-/* For i386_linux_skip_solib_resolver.  */
-#include "symtab.h"
-#include "symfile.h"
-#include "objfiles.h"
-
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/procfs.h>
@@ -35,8 +30,14 @@
 #include <sys/reg.h>
 #endif
 
-/* Prototypes for supply_gregset etc. */
+/* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
+
+/* Prototypes for i387_supply_fsave etc.  */
+#include "i387-nat.h"
+
+/* Prototypes for local functions.  */
+static void dummy_sse_values (void);
 
 /* On Linux, threads are implemented as pseudo-processes, in which
    case we may be tracing more than one process at a time.  In that
@@ -49,7 +50,7 @@
 #define PIDGET(PID)	PID
 #define TIDGET(PID)	0
 #endif
-
+
 
 /* The register sets used in Linux ELF core-dumps are identical to the
    register sets in `struct user' that is used for a.out core-dumps,
@@ -79,7 +80,7 @@ static int regmap[] =
   (0 <= (regno) && (regno) <= 15)
 #define GETFPREGS_SUPPLIES(regno) \
   (FP0_REGNUM <= (regno) && (regno) <= LAST_FPU_CTRL_REGNUM)
-#define GETXFPREGS_SUPPLIES(regno) \
+#define GETFPXREGS_SUPPLIES(regno) \
   (FP0_REGNUM <= (regno) && (regno) <= MXCSR_REGNUM)
 
 /* Does the current host support the GETREGS request?  */
@@ -91,30 +92,23 @@ int have_ptrace_getregs =
 #endif
 ;
 
-/* Does the current host support the GETXFPREGS request?  The header
+/* Does the current host support the GETFPXREGS request?  The header
    file may or may not define it, and even if it is defined, the
    kernel will return EIO if it's running on a pre-SSE processor.
-
-   PTRACE_GETXFPREGS is a Cygnus invention, since we wrote our own
-   Linux kernel patch for SSE support.  That patch may or may not
-   actually make it into the official distribution.  If you find that
-   years have gone by since this stuff was added, and Linux isn't
-   using PTRACE_GETXFPREGS, that means that our patch didn't make it,
-   and you can delete this, and the related code.
 
    My instinct is to attach this to some architecture- or
    target-specific data structure, but really, a particular GDB
    process can only run on top of one kernel at a time.  So it's okay
    for this to be a simple variable.  */
-int have_ptrace_getxfpregs =
-#ifdef HAVE_PTRACE_GETXFPREGS
+int have_ptrace_getfpxregs =
+#ifdef HAVE_PTRACE_GETFPXREGS
   1
 #else
   0
 #endif
 ;
-
 
+
 /* Fetching registers directly from the U area, one at a time.  */
 
 /* FIXME: kettenis/2000-03-05: This duplicates code from `inptrace.c'.
@@ -139,15 +133,12 @@ int have_ptrace_getxfpregs =
 #endif
 
 /* Registers we shouldn't try to fetch.  */
-#if !defined (CANNOT_FETCH_REGISTER)
-#define CANNOT_FETCH_REGISTER(regno) 0
-#endif
+#define OLD_CANNOT_FETCH_REGISTER(regno) ((regno) >= NUM_GREGS)
 
 /* Fetch one register.  */
 
 static void
-fetch_register (regno)
-     int regno;
+fetch_register (int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
@@ -157,7 +148,7 @@ fetch_register (regno)
   char buf[MAX_REGISTER_RAW_SIZE];
   int tid;
 
-  if (CANNOT_FETCH_REGISTER (regno))
+  if (OLD_CANNOT_FETCH_REGISTER (regno))
     {
       memset (buf, '\0', REGISTER_RAW_SIZE (regno));	/* Supply zeroes */
       supply_register (regno, buf);
@@ -192,8 +183,7 @@ fetch_register (regno)
    Otherwise, REGNO specifies which register (so we can save time). */
 
 void
-old_fetch_inferior_registers (regno)
-     int regno;
+old_fetch_inferior_registers (int regno)
 {
   if (regno >= 0)
     {
@@ -209,15 +199,12 @@ old_fetch_inferior_registers (regno)
 }
 
 /* Registers we shouldn't try to store.  */
-#if !defined (CANNOT_STORE_REGISTER)
-#define CANNOT_STORE_REGISTER(regno) 0
-#endif
+#define OLD_CANNOT_STORE_REGISTER(regno) ((regno) >= NUM_GREGS)
 
 /* Store one register. */
 
 static void
-store_register (regno)
-     int regno;
+store_register (int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
@@ -226,7 +213,7 @@ store_register (regno)
   unsigned int offset;		/* Offset of registers within the u area.  */
   int tid;
 
-  if (CANNOT_STORE_REGISTER (regno))
+  if (OLD_CANNOT_STORE_REGISTER (regno))
     {
       return;
     }
@@ -258,8 +245,7 @@ store_register (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-old_store_inferior_registers (regno)
-     int regno;
+old_store_inferior_registers (int regno)
 {
   if (regno >= 0)
     {
@@ -273,8 +259,8 @@ old_store_inferior_registers (regno)
 	}
     }
 }
-
 
+
 /* Transfering the general-purpose registers between GDB, inferiors
    and core files.  */
 
@@ -285,49 +271,25 @@ void
 supply_gregset (elf_gregset_t *gregsetp)
 {
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
-  int regi;
+  int i;
 
-  for (regi = 0; regi < NUM_GREGS; regi++)
-    supply_register (regi, (char *) (regp + regmap[regi]));
-}
-
-/* Convert the valid general-purpose register values in GDB's register
-   array to `struct user' format and store them in *GREGSETP.  The
-   array VALID indicates which register values are valid.  If VALID is
-   NULL, all registers are assumed to be valid.  */
-
-static void
-convert_to_gregset (elf_gregset_t *gregsetp, signed char *valid)
-{
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
-  int regi;
-
-  for (regi = 0; regi < NUM_GREGS; regi++)
-    if (! valid || valid[regi])
-      *(regp + regmap[regi]) = * (int *) &registers[REGISTER_BYTE (regi)];
+  for (i = 0; i < NUM_GREGS; i++)
+    supply_register (i, (char *) (regp + regmap[i]));
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
    *GREGSETPS with the value in GDB's register array.  If REGNO is -1,
    do this for all registers.  */
+
 void
 fill_gregset (elf_gregset_t *gregsetp, int regno)
 {
-  if (regno == -1)
-    {
-      convert_to_gregset (gregsetp, NULL);
-      return;
-    }
+  elf_greg_t *regp = (elf_greg_t *) gregsetp;
+  int i;
 
-  if (GETREGS_SUPPLIES (regno))
-    {
-      signed char valid[NUM_GREGS];
-
-      memset (valid, 0, sizeof (valid));
-      valid[regno] = 1;
-
-      convert_to_gregset (gregsetp, valid);
-    }
+  for (i = 0; i < NUM_GREGS; i++)
+    if ((regno == -1 || regno == i))
+      *(regp + regmap[i]) = *(elf_greg_t *) &registers[REGISTER_BYTE (i)];
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -339,10 +301,8 @@ static void
 fetch_regs (int tid)
 {
   elf_gregset_t regs;
-  int ret;
 
-  ret = ptrace (PTRACE_GETREGS, tid, 0, (int) &regs);
-  if (ret < 0)
+  if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
     {
       if (errno == EIO)
 	{
@@ -352,8 +312,7 @@ fetch_regs (int tid)
 	  return;
 	}
 
-      warning ("Couldn't get registers.");
-      return;
+      perror_with_name ("Couldn't get registers");
     }
 
   supply_gregset (&regs);
@@ -363,40 +322,28 @@ fetch_regs (int tid)
    into the process/thread specified by TID.  */
 
 static void
-store_regs (int tid)
+store_regs (int tid, int regno)
 {
   elf_gregset_t regs;
-  int ret;
 
-  ret = ptrace (PTRACE_GETREGS, tid, 0, (int) &regs);
-  if (ret < 0)
-    {
-      warning ("Couldn't get registers.");
-      return;
-    }
+  if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
+    perror_with_name ("Couldn't get registers");
 
-  convert_to_gregset (&regs, register_valid);
-
-  ret = ptrace (PTRACE_SETREGS, tid, 0, (int) &regs);
-  if (ret < 0)
-    {
-      warning ("Couldn't write registers.");
-      return;
-    }
+  fill_gregset (&regs, regno);
+  
+  if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
+    perror_with_name ("Couldn't write registers");
 }
 
 #else
 
 static void fetch_regs (int tid) {}
-static void store_regs (int tid) {}
+static void store_regs (int tid, int regno) {}
 
 #endif
-
 
-/* Transfering floating-point registers between GDB, inferiors and cores.  */
 
-/* What is the address of st(N) within the floating-point register set F?  */
-#define FPREG_ADDR(f, n) ((char *) &(f)->st_space + (n) * 10)
+/* Transfering floating-point registers between GDB, inferiors and cores.  */
 
 /* Fill GDB's register array with the floating-point register values in
    *FPREGSETP.  */
@@ -404,86 +351,8 @@ static void store_regs (int tid) {}
 void 
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  int reg;
-  long l;
-
-  /* Supply the floating-point registers.  */
-  for (reg = 0; reg < 8; reg++)
-    supply_register (FP0_REGNUM + reg, FPREG_ADDR (fpregsetp, reg));
-
-  /* We have to mask off the reserved bits in *FPREGSETP before
-     storing the values in GDB's register file.  */
-#define supply(REGNO, MEMBER)                                           \
-  l = fpregsetp->MEMBER & 0xffff;                                       \
-  supply_register (REGNO, (char *) &l)
-
-  supply (FCTRL_REGNUM, cwd);
-  supply (FSTAT_REGNUM, swd);
-  supply (FTAG_REGNUM, twd);
-  supply_register (FCOFF_REGNUM, (char *) &fpregsetp->fip);
-  supply (FDS_REGNUM, fos);
-  supply_register (FDOFF_REGNUM, (char *) &fpregsetp->foo);
-
-#undef supply
-
-  /* Extract the code segment and opcode from the  "fcs" member.  */
-  l = fpregsetp->fcs & 0xffff;
-  supply_register (FCS_REGNUM, (char *) &l);
-
-  l = (fpregsetp->fcs >> 16) & ((1 << 11) - 1);
-  supply_register (FOP_REGNUM, (char *) &l);
-}
-
-/* Convert the valid floating-point register values in GDB's register
-   array to `struct user' format and store them in *FPREGSETP.  The
-   array VALID indicates which register values are valid.  If VALID is
-   NULL, all registers are assumed to be valid.  */
-
-static void
-convert_to_fpregset (elf_fpregset_t *fpregsetp, signed char *valid)
-{
-  int reg;
-
-  /* Fill in the floating-point registers.  */
-  for (reg = 0; reg < 8; reg++)
-    if (!valid || valid[reg])
-      memcpy (FPREG_ADDR (fpregsetp, reg),
-	      &registers[REGISTER_BYTE (FP0_REGNUM + reg)],
-	      REGISTER_RAW_SIZE(FP0_REGNUM + reg));
-
-  /* We're not supposed to touch the reserved bits in *FPREGSETP.  */
-
-#define fill(MEMBER, REGNO)						\
-  if (! valid || valid[(REGNO)])					\
-    fpregsetp->MEMBER                                                   \
-      = ((fpregsetp->MEMBER & ~0xffff)                                  \
-         | (* (int *) &registers[REGISTER_BYTE (REGNO)] & 0xffff))
-
-#define fill_register(MEMBER, REGNO)                                    \
-  if (! valid || valid[(REGNO)])                                        \
-    memcpy (&fpregsetp->MEMBER, &registers[REGISTER_BYTE (REGNO)],      \
-            sizeof (fpregsetp->MEMBER))
-
-  fill (cwd, FCTRL_REGNUM);
-  fill (swd, FSTAT_REGNUM);
-  fill (twd, FTAG_REGNUM);
-  fill_register (fip, FCOFF_REGNUM);
-  fill (foo, FDOFF_REGNUM);
-  fill_register (fos, FDS_REGNUM);
-
-#undef fill
-#undef fill_register
-
-  if (! valid || valid[FCS_REGNUM])
-    fpregsetp->fcs
-      = ((fpregsetp->fcs & ~0xffff)
-	 | (* (int *) &registers[REGISTER_BYTE (FCS_REGNUM)] & 0xffff));
-
-  if (! valid || valid[FOP_REGNUM])
-    fpregsetp->fcs
-      = ((fpregsetp->fcs & 0xffff)
-	 | ((*(int *) &registers[REGISTER_BYTE (FOP_REGNUM)] & ((1 << 11) - 1))
-	    << 16));
+  i387_supply_fsave ((char *) fpregsetp);
+  dummy_sse_values ();
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -493,21 +362,7 @@ convert_to_fpregset (elf_fpregset_t *fpregsetp, signed char *valid)
 void
 fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
 {
-  if (regno == -1)
-    {
-      convert_to_fpregset (fpregsetp, NULL);
-      return;
-    }
-
-  if (GETFPREGS_SUPPLIES(regno))
-    {
-      signed char valid[MAX_NUM_REGS];
-      
-      memset (valid, 0, sizeof (valid));
-      valid[regno] = 1;
-	      
-      convert_to_fpregset (fpregsetp, valid);
-    }
+  i387_fill_fsave ((char *) fpregsetp, regno);
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -519,14 +374,9 @@ static void
 fetch_fpregs (int tid)
 {
   elf_fpregset_t fpregs;
-  int ret;
 
-  ret = ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs);
-  if (ret < 0)
-    {
-      warning ("Couldn't get floating point status.");
-      return;
-    }
+  if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
+    perror_with_name ("Couldn't get floating point status");
 
   supply_fpregset (&fpregs);
 }
@@ -535,199 +385,104 @@ fetch_fpregs (int tid)
    into the process/thread specified by TID.  */
 
 static void
-store_fpregs (int tid)
+store_fpregs (int tid, int regno)
 {
   elf_fpregset_t fpregs;
-  int ret;
 
-  ret = ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs);
-  if (ret < 0)
-    {
-      warning ("Couldn't get floating point status.");
-      return;
-    }
+  if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
+    perror_with_name ("Couldn't get floating point status");
 
-  convert_to_fpregset (&fpregs, register_valid);
+  fill_fpregset (&fpregs, regno);
 
-  ret = ptrace (PTRACE_SETFPREGS, tid, 0, (int) &fpregs);
-  if (ret < 0)
-    {
-      warning ("Couldn't write floating point status.");
-      return;
-    }
+  if (ptrace (PTRACE_SETFPREGS, tid, 0, (int) &fpregs) < 0)
+    perror_with_name ("Couldn't write floating point status");
 }
 
 #else
 
 static void fetch_fpregs (int tid) {}
-static void store_fpregs (int tid) {}
+static void store_fpregs (int tid, int regno) {}
 
 #endif
-
 
+
 /* Transfering floating-point and SSE registers to and from GDB.  */
 
-/* PTRACE_GETXFPREGS is a Cygnus invention, since we wrote our own
-   Linux kernel patch for SSE support.  That patch may or may not
-   actually make it into the official distribution.  If you find that
-   years have gone by since this code was added, and Linux isn't using
-   PTRACE_GETXFPREGS, that means that our patch didn't make it, and
-   you can delete this code.  */
-
-#ifdef HAVE_PTRACE_GETXFPREGS
+#ifdef HAVE_PTRACE_GETFPXREGS
 
 /* Fill GDB's register array with the floating-point and SSE register
-   values in *XFPREGS.  */
+   values in *FPXREGSETP.  */
 
 static void
-supply_xfpregset (struct user_xfpregs_struct *xfpregs)
+supply_fpxregset (elf_fpxregset_t *fpxregsetp)
 {
-  int reg;
-
-  /* Supply the floating-point registers.  */
-  for (reg = 0; reg < 8; reg++)
-    supply_register (FP0_REGNUM + reg, (char *) &xfpregs->st_space[reg]);
-
-  {
-    supply_register (FCTRL_REGNUM, (char *) &xfpregs->cwd);
-    supply_register (FSTAT_REGNUM, (char *) &xfpregs->swd);
-    supply_register (FTAG_REGNUM,  (char *) &xfpregs->twd);
-    supply_register (FCOFF_REGNUM, (char *) &xfpregs->fip);
-    supply_register (FDS_REGNUM,   (char *) &xfpregs->fos);
-    supply_register (FDOFF_REGNUM, (char *) &xfpregs->foo);
-  
-    /* Extract the code segment and opcode from the  "fcs" member.  */
-    {
-      long l;
-      
-      l = xfpregs->fcs & 0xffff;
-      supply_register (FCS_REGNUM, (char *) &l);
-
-      l = (xfpregs->fcs >> 16) & ((1 << 11) - 1);
-      supply_register (FOP_REGNUM, (char *) &l);
-    }
-  }
-
-  /* Supply the SSE registers.  */
-  for (reg = 0; reg < 8; reg++)
-    supply_register (XMM0_REGNUM + reg, (char *) &xfpregs->xmm_space[reg]);
-  supply_register (MXCSR_REGNUM, (char *) &xfpregs->mxcsr);
+  i387_supply_fxsave ((char *) fpxregsetp);
 }
 
-/* Convert the valid floating-point and SSE registers in GDB's
-   register array to `struct user' format and store them in *XFPREGS.
-   The array VALID indicates which registers are valid.  If VALID is
-   NULL, all registers are assumed to be valid.  */
+/* Fill register REGNO (if it is a floating-point or SSE register) in
+   *FPXREGSETP with the value in GDB's register array.  If REGNO is
+   -1, do this for all registers.  */
 
 static void
-convert_to_xfpregset (struct user_xfpregs_struct *xfpregs,
-		      signed char *valid)
+fill_fpxregset (elf_fpxregset_t *fpxregsetp, int regno)
 {
-  int reg;
-
-  /* Fill in the floating-point registers.  */
-  for (reg = 0; reg < 8; reg++)
-    if (!valid || valid[reg])
-      memcpy (&xfpregs->st_space[reg],
-	      &registers[REGISTER_BYTE (FP0_REGNUM + reg)],
-	      REGISTER_RAW_SIZE(FP0_REGNUM + reg));
-
-#define fill(MEMBER, REGNO)						\
-  if (! valid || valid[(REGNO)])					\
-    memcpy (&xfpregs->MEMBER, &registers[REGISTER_BYTE (REGNO)],	\
-	    sizeof (xfpregs->MEMBER))
-
-  fill (cwd, FCTRL_REGNUM);
-  fill (swd, FSTAT_REGNUM);
-  fill (twd, FTAG_REGNUM);
-  fill (fip, FCOFF_REGNUM);
-  fill (foo, FDOFF_REGNUM);
-  fill (fos, FDS_REGNUM);
-
-#undef fill
-
-  if (! valid || valid[FCS_REGNUM])
-    xfpregs->fcs
-      = ((xfpregs->fcs & ~0xffff)
-	 | (* (int *) &registers[REGISTER_BYTE (FCS_REGNUM)] & 0xffff));
-
-  if (! valid || valid[FOP_REGNUM])
-    xfpregs->fcs
-      = ((xfpregs->fcs & 0xffff)
-	 | ((*(int *) &registers[REGISTER_BYTE (FOP_REGNUM)] & ((1 << 11) - 1))
-	    << 16));
-
-  /* Fill in the XMM registers.  */
-  for (reg = 0; reg < 8; reg++)
-    if (! valid || valid[reg])
-      memcpy (&xfpregs->xmm_space[reg],
-	      &registers[REGISTER_BYTE (XMM0_REGNUM + reg)],
-	      REGISTER_RAW_SIZE (XMM0_REGNUM + reg));
+  i387_fill_fxsave ((char *) fpxregsetp, regno);
 }
 
-/* Fetch all registers covered by the PTRACE_SETXFPREGS request from
+/* Fetch all registers covered by the PTRACE_GETFPXREGS request from
    process/thread TID and store their values in GDB's register array.
    Return non-zero if successful, zero otherwise.  */
 
 static int
-fetch_xfpregs (int tid)
+fetch_fpxregs (int tid)
 {
-  struct user_xfpregs_struct xfpregs;
-  int ret;
+  elf_fpxregset_t fpxregs;
 
-  if (! have_ptrace_getxfpregs) 
+  if (! have_ptrace_getfpxregs)
     return 0;
 
-  ret = ptrace (PTRACE_GETXFPREGS, tid, 0, &xfpregs);
-  if (ret == -1)
+  if (ptrace (PTRACE_GETFPXREGS, tid, 0, (int) &fpxregs) < 0)
     {
       if (errno == EIO)
 	{
-	  have_ptrace_getxfpregs = 0;
+	  have_ptrace_getfpxregs = 0;
 	  return 0;
 	}
 
-      warning ("Couldn't read floating-point and SSE registers.");
-      return 0;
+      perror_with_name ("Couldn't read floating-point and SSE registers");
     }
 
-  supply_xfpregset (&xfpregs);
+  supply_fpxregset (&fpxregs);
   return 1;
 }
 
 /* Store all valid registers in GDB's register array covered by the
-   PTRACE_SETXFPREGS request into the process/thread specified by TID.
+   PTRACE_SETFPXREGS request into the process/thread specified by TID.
    Return non-zero if successful, zero otherwise.  */
 
 static int
-store_xfpregs (int tid)
+store_fpxregs (int tid, int regno)
 {
-  struct user_xfpregs_struct xfpregs;
-  int ret;
+  elf_fpxregset_t fpxregs;
 
-  if (! have_ptrace_getxfpregs)
+  if (! have_ptrace_getfpxregs)
     return 0;
-
-  ret = ptrace (PTRACE_GETXFPREGS, tid, 0, &xfpregs);
-  if (ret == -1)
+  
+  if (ptrace (PTRACE_GETFPXREGS, tid, 0, &fpxregs) == -1)
     {
       if (errno == EIO)
 	{
-	  have_ptrace_getxfpregs = 0;
+	  have_ptrace_getfpxregs = 0;
 	  return 0;
 	}
 
-      warning ("Couldn't read floating-point and SSE registers.");
-      return 0;
+      perror_with_name ("Couldn't read floating-point and SSE registers");
     }
 
-  convert_to_xfpregset (&xfpregs, register_valid);
+  fill_fpxregset (&fpxregs, regno);
 
-  if (ptrace (PTRACE_SETXFPREGS, tid, 0, &xfpregs) < 0)
-    {
-      warning ("Couldn't write floating-point and SSE registers.");
-      return 0;
-    }
+  if (ptrace (PTRACE_SETFPXREGS, tid, 0, &fpxregs) == -1)
+    perror_with_name ("Couldn't write floating-point and SSE registers");
 
   return 1;
 }
@@ -753,16 +508,34 @@ dummy_sse_values (void)
 
 #else
 
-/* Stub versions of the above routines, for systems that don't have
-   PTRACE_GETXFPREGS.  */
-static int store_xfpregs (int tid) { return 0; }
-static int fetch_xfpregs (int tid) { return 0; }
+static int fetch_fpxregs (int tid) { return 0; }
+static int store_fpxregs (int tid, int regno) { return 0; }
 static void dummy_sse_values (void) {}
 
-#endif
-
+#endif /* HAVE_PTRACE_GETFPXREGS */
 
+
 /* Transferring arbitrary registers between GDB and inferior.  */
+
+/* Check if register REGNO in the child process is accessible.
+   If we are accessing registers directly via the U area, only the
+   general-purpose registers are available.
+   All registers should be accessible if we have GETREGS support.  */
+   
+int
+cannot_fetch_register (int regno)
+{
+  if (! have_ptrace_getregs)
+    return OLD_CANNOT_FETCH_REGISTER (regno);
+  return 0;
+}
+int
+cannot_store_register (int regno)
+{
+  if (! have_ptrace_getregs)
+    return OLD_CANNOT_STORE_REGISTER (regno);
+  return 0;
+}
 
 /* Fetch register REGNO from the child process.  If REGNO is -1, do
    this for all registers (including the floating point and SSE
@@ -785,9 +558,9 @@ fetch_inferior_registers (int regno)
   if ((tid = TIDGET (inferior_pid)) == 0)
     tid = inferior_pid;		/* Not a threaded program.  */
 
-  /* Use the PTRACE_GETXFPREGS request whenever possible, since it
+  /* Use the PTRACE_GETFPXREGS request whenever possible, since it
      transfers more registers in one system call, and we'll cache the
-     results.  But remember that fetch_xfpregs can fail, and return
+     results.  But remember that fetch_fpxregs can fail, and return
      zero.  */
   if (regno == -1)
     {
@@ -800,7 +573,7 @@ fetch_inferior_registers (int regno)
 	  return;
 	}
 
-      if (fetch_xfpregs (tid))
+      if (fetch_fpxregs (tid))
 	return;
       fetch_fpregs (tid);
       return;
@@ -812,9 +585,9 @@ fetch_inferior_registers (int regno)
       return;
     }
 
-  if (GETXFPREGS_SUPPLIES (regno))
+  if (GETFPXREGS_SUPPLIES (regno))
     {
-      if (fetch_xfpregs (tid))
+      if (fetch_fpxregs (tid))
 	return;
 
       /* Either our processor or our kernel doesn't support the SSE
@@ -824,12 +597,10 @@ fetch_inferior_registers (int regno)
 	 gdbarch.  Until then, this will at least make things work
 	 plausibly.  */
       fetch_fpregs (tid);
-      dummy_sse_values ();
       return;
     }
 
-  internal_error ("i386-linux-nat.c (fetch_inferior_registers): "
-		  "got request for bad register number %d", regno);
+  internal_error ("Got request for bad register number %d.", regno);
 }
 
 /* Store register REGNO back into the child process.  If REGNO is -1,
@@ -852,40 +623,40 @@ store_inferior_registers (int regno)
   if ((tid = TIDGET (inferior_pid)) == 0)
     tid = inferior_pid;		/* Not a threaded program.  */
 
-  /* Use the PTRACE_SETXFPREGS requests whenever possibl, since it
+  /* Use the PTRACE_SETFPXREGS requests whenever possible, since it
      transfers more registers in one system call.  But remember that
-     store_xfpregs can fail, and return zero.  */
+     store_fpxregs can fail, and return zero.  */
   if (regno == -1)
     {
-      store_regs (tid);
-      if (store_xfpregs (tid))
+      store_regs (tid, regno);
+      if (store_fpxregs (tid, regno))
 	return;
-      store_fpregs (tid);
+      store_fpregs (tid, regno);
       return;
     }
 
   if (GETREGS_SUPPLIES (regno))
     {
-      store_regs (tid);
+      store_regs (tid, regno);
       return;
     }
 
-  if (GETXFPREGS_SUPPLIES (regno))
+  if (GETFPXREGS_SUPPLIES (regno))
     {
-      if (store_xfpregs (tid))
+      if (store_fpxregs (tid, regno))
 	return;
 
       /* Either our processor or our kernel doesn't support the SSE
 	 registers, so just write the FP registers in the traditional
 	 way.  */
-      store_fpregs (tid);
+      store_fpregs (tid, regno);
       return;
     }
 
   internal_error ("Got request to store bad register number %d.", regno);
 }
-
 
+
 /* Interpreting register set info found in core files.  */
 
 /* Provide registers to GDB from a core file.
@@ -893,7 +664,7 @@ store_inferior_registers (int regno)
    (We can't use the generic version of this function in
    core-regset.c, because Linux has *three* different kinds of
    register set notes.  core-regset.c would have to call
-   supply_xfpregset, which most platforms don't have.)
+   supply_fpxregset, which most platforms don't have.)
 
    CORE_REG_SECT points to an array of bytes, which are the contents
    of a `note' from a core file which BFD thinks might contain
@@ -902,8 +673,7 @@ store_inferior_registers (int regno)
    WHICH says which register set corelow suspects this is:
      0 --- the general-purpose register set, in elf_gregset_t format
      2 --- the floating-point register set, in elf_fpregset_t format
-     3 --- the extended floating-point register set, in struct
-           user_xfpregs_struct format
+     3 --- the extended floating-point register set, in elf_fpxregset_t format
 
    REG_ADDR isn't used on Linux.  */
 
@@ -936,17 +706,17 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	}
       break;
 
-#ifdef HAVE_PTRACE_GETXFPREGS
+#ifdef HAVE_PTRACE_GETFPXREGS
       {
-	struct user_xfpregs_struct xfpregset;
+	elf_fpxregset_t fpxregset;
 
       case 3:
-	if (core_reg_size != sizeof (xfpregset))
-	  warning ("Wrong size user_xfpregs_struct in core file.");
+	if (core_reg_size != sizeof (fpxregset))
+	  warning ("Wrong size fpxregset in core file.");
 	else
 	  {
-	    memcpy (&xfpregset, core_reg_sect, sizeof (xfpregset));
-	    supply_xfpregset (&xfpregset);
+	    memcpy (&fpxregset, core_reg_sect, sizeof (fpxregset));
+	    supply_fpxregset (&fpxregset);
 	  }
 	break;
       }
@@ -959,8 +729,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       break;
     }
 }
-
 
+
 /* The instruction for a Linux system call is:
        int $0x80
    or 0xcd 0x80.  */
@@ -1044,101 +814,8 @@ child_resume (int pid, int step, enum target_signal signal)
   if (ptrace (request, pid, 0, target_signal_to_host (signal)) == -1)
     perror_with_name ("ptrace");
 }
-
 
-/* Calling functions in shared libraries.  */
-/* FIXME: kettenis/2000-03-05: Doesn't this belong in a
-   target-dependent file?  The function
-   `i386_linux_skip_solib_resolver' is mentioned in
-   `config/i386/tm-linux.h'.  */
 
-/* Find the minimal symbol named NAME, and return both the minsym
-   struct and its objfile.  This probably ought to be in minsym.c, but
-   everything there is trying to deal with things like C++ and
-   SOFUN_ADDRESS_MAYBE_TURQUOISE, ...  Since this is so simple, it may
-   be considered too special-purpose for general consumption.  */
-
-static struct minimal_symbol *
-find_minsym_and_objfile (char *name, struct objfile **objfile_p)
-{
-  struct objfile *objfile;
-
-  ALL_OBJFILES (objfile)
-    {
-      struct minimal_symbol *msym;
-
-      ALL_OBJFILE_MSYMBOLS (objfile, msym)
-	{
-	  if (SYMBOL_NAME (msym)
-	      && STREQ (SYMBOL_NAME (msym), name))
-	    {
-	      *objfile_p = objfile;
-	      return msym;
-	    }
-	}
-    }
-
-  return 0;
-}
-
-
-static CORE_ADDR
-skip_hurd_resolver (CORE_ADDR pc)
-{
-  /* The HURD dynamic linker is part of the GNU C library, so many
-     GNU/Linux distributions use it.  (All ELF versions, as far as I
-     know.)  An unresolved PLT entry points to "_dl_runtime_resolve",
-     which calls "fixup" to patch the PLT, and then passes control to
-     the function.
-
-     We look for the symbol `_dl_runtime_resolve', and find `fixup' in
-     the same objfile.  If we are at the entry point of `fixup', then
-     we set a breakpoint at the return address (at the top of the
-     stack), and continue.
-  
-     It's kind of gross to do all these checks every time we're
-     called, since they don't change once the executable has gotten
-     started.  But this is only a temporary hack --- upcoming versions
-     of Linux will provide a portable, efficient interface for
-     debugging programs that use shared libraries.  */
-
-  struct objfile *objfile;
-  struct minimal_symbol *resolver 
-    = find_minsym_and_objfile ("_dl_runtime_resolve", &objfile);
-
-  if (resolver)
-    {
-      struct minimal_symbol *fixup
-	= lookup_minimal_symbol ("fixup", 0, objfile);
-
-      if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
-	return (SAVED_PC_AFTER_CALL (get_current_frame ()));
-    }
-
-  return 0;
-}      
-
-/* See the comments for SKIP_SOLIB_RESOLVER at the top of infrun.c.
-   This function:
-   1) decides whether a PLT has sent us into the linker to resolve
-      a function reference, and 
-   2) if so, tells us where to set a temporary breakpoint that will
-      trigger when the dynamic linker is done.  */
-
-CORE_ADDR
-i386_linux_skip_solib_resolver (CORE_ADDR pc)
-{
-  CORE_ADDR result;
-
-  /* Plug in functions for other kinds of resolvers here.  */
-  result = skip_hurd_resolver (pc);
-  if (result)
-    return result;
-
-  return 0;
-}
-
-
 /* Register that we are able to handle Linux ELF core file formats.  */
 
 static struct core_fns linux_elf_core_fns =
@@ -1151,7 +828,7 @@ static struct core_fns linux_elf_core_fns =
 };
 
 void
-_initialize_i386_linux_nat ()
+_initialize_i386_linux_nat (void)
 {
   add_core_fns (&linux_elf_core_fns);
 }

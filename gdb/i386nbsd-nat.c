@@ -51,8 +51,7 @@ struct env387
   };
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   struct reg inferior_registers;
   struct env387 inferior_fpregisters;
@@ -101,8 +100,7 @@ fetch_inferior_registers (regno)
 }
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct reg inferior_registers;
   struct env387 inferior_fpregisters;
@@ -149,15 +147,6 @@ store_inferior_registers (regno)
 	  (PTRACE_ARG3_TYPE) &inferior_fpregisters, 0);
 }
 
-int
-i386nbsd_use_struct_convention (int gcc_p, struct type *type)
-{
-  return !(TYPE_LENGTH (type) == 1
-	   || TYPE_LENGTH (type) == 2
-	   || TYPE_LENGTH (type) == 4
-	   || TYPE_LENGTH (type) == 8);
-}
-
 struct md_core
 {
   struct reg intreg;
@@ -165,11 +154,8 @@ struct md_core
 };
 
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR ignore;
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+		      CORE_ADDR ignore)
 {
   struct md_core *core_reg = (struct md_core *) core_reg_sect;
 
@@ -212,7 +198,7 @@ static struct core_fns i386nbsd_core_fns =
 };
 
 void
-_initialize_i386nbsd_nat ()
+_initialize_i386nbsd_nat (void)
 {
   add_core_fns (&i386nbsd_core_fns);
 }

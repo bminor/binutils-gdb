@@ -46,8 +46,7 @@ static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
  */
 
 void
-supply_gregset (gregsetp)
-     gregset_t *gregsetp;
+supply_gregset (gregset_t *gregsetp)
 {
   register int regi;
   register greg_t *regp = (greg_t *) (gregsetp->gp_regs);
@@ -69,9 +68,7 @@ supply_gregset (gregsetp)
 }
 
 void
-fill_gregset (gregsetp, regno)
-     gregset_t *gregsetp;
-     int regno;
+fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
   register greg_t *regp = (greg_t *) (gregsetp->gp_regs);
@@ -103,8 +100,7 @@ fill_gregset (gregsetp, regno)
  */
 
 void
-supply_fpregset (fpregsetp)
-     fpregset_t *fpregsetp;
+supply_fpregset (fpregset_t *fpregsetp)
 {
   register int regi;
   static char zerobuf[MAX_REGISTER_RAW_SIZE] =
@@ -121,9 +117,7 @@ supply_fpregset (fpregsetp)
 }
 
 void
-fill_fpregset (fpregsetp, regno)
-     fpregset_t *fpregsetp;
-     int regno;
+fill_fpregset (fpregset_t *fpregsetp, int regno)
 {
   int regi;
   char *from, *to;
@@ -149,12 +143,12 @@ fill_fpregset (fpregsetp, regno)
    This routine returns true on success. */
 
 int
-get_longjmp_target (pc)
-     CORE_ADDR *pc;
+get_longjmp_target (CORE_ADDR *pc)
 {
-  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
+  char *buf;
   CORE_ADDR jb_addr;
 
+  buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
   jb_addr = read_register (A0_REGNUM);
 
   if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
@@ -166,12 +160,22 @@ get_longjmp_target (pc)
   return 1;
 }
 
+/* Provide registers to GDB from a core file.
+
+   CORE_REG_SECT points to an array of bytes, which were obtained from
+   a core file which BFD thinks might contain register contents. 
+   CORE_REG_SIZE is its size.
+
+   Normally, WHICH says which register set corelow suspects this is:
+     0 --- the general-purpose register set
+     2 --- the floating-point register set
+   However, for Irix 4, WHICH isn't used.
+
+   REG_ADDR is also unused.  */
+
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;			/* Unused */
-     CORE_ADDR reg_addr;	/* Unused */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+		      int which, CORE_ADDR reg_addr)
 {
   if (core_reg_size != REGISTER_BYTES)
     {
@@ -196,7 +200,7 @@ static struct core_fns irix4_core_fns =
 };
 
 void
-_initialize_core_irix4 ()
+_initialize_core_irix4 (void)
 {
   add_core_fns (&irix4_core_fns);
 }

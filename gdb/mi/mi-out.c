@@ -99,10 +99,7 @@ static void out_field_fmt (struct ui_out *uiout, int fldno, char *fldname,
 /* Mark beginning of a table */
 
 void
-mi_table_begin (uiout, nbrofcols, tblid)
-     struct ui_out *uiout;
-     int nbrofcols;
-     char *tblid;
+mi_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   field_separator (uiout);
@@ -116,8 +113,7 @@ mi_table_begin (uiout, nbrofcols, tblid)
 /* Mark beginning of a table body */
 
 void
-mi_table_body (uiout)
-     struct ui_out *uiout;
+mi_table_body (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   /* close the table header line if there were any headers */
@@ -128,8 +124,7 @@ mi_table_body (uiout)
 /* Mark end of a table */
 
 void
-mi_table_end (uiout)
-     struct ui_out *uiout;
+mi_table_end (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   list_close (uiout);
@@ -140,11 +135,7 @@ mi_table_end (uiout)
 /* Specify table header */
 
 void
-mi_table_header (uiout, width, alignment, colhdr)
-     struct ui_out *uiout;
-     int width;
-     int alignment;
-     char *colhdr;
+mi_table_header (struct ui_out *uiout, int width, int alignment, char *colhdr)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   if (!data->first_header++)
@@ -158,10 +149,7 @@ mi_table_header (uiout, width, alignment, colhdr)
 /* Mark beginning of a list */
 
 void
-mi_list_begin (uiout, list_flag, lstid)
-     struct ui_out *uiout;
-     int list_flag;
-     char *lstid;
+mi_list_begin (struct ui_out *uiout, int list_flag, char *lstid)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   field_separator (uiout);
@@ -174,9 +162,7 @@ mi_list_begin (uiout, list_flag, lstid)
 /* Mark end of a list */
 
 void
-mi_list_end (uiout, list_flag)
-     struct ui_out *uiout;
-     int list_flag;
+mi_list_end (struct ui_out *uiout, int list_flag)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   list_close (uiout);
@@ -187,13 +173,8 @@ mi_list_end (uiout, list_flag)
 /* output an int field */
 
 void
-mi_field_int (uiout, fldno, width, alignment, fldname, value)
-     struct ui_out *uiout;
-     int fldno;
-     int width;
-     int alignment;
-     char *fldname;
-     int value;
+mi_field_int (struct ui_out *uiout, int fldno, int width, int alignment,
+	      char *fldname, int value)
 {
   char buffer[20];		/* FIXME: how many chars long a %d can become? */
 
@@ -204,12 +185,8 @@ mi_field_int (uiout, fldno, width, alignment, fldname, value)
 /* used to ommit a field */
 
 void
-mi_field_skip (uiout, fldno, width, alignment, fldname)
-     struct ui_out *uiout;
-     int fldno;
-     int width;
-     int alignment;
-     char *fldname;
+mi_field_skip (struct ui_out *uiout, int fldno, int width, int alignment,
+	       char *fldname)
 {
   mi_field_string (uiout, fldno, width, alignment, fldname, "");
 }
@@ -253,16 +230,12 @@ mi_field_fmt (struct ui_out *uiout, int fldno,
 }
 
 void
-mi_spaces (uiout, numspaces)
-     struct ui_out *uiout;
-     int numspaces;
+mi_spaces (struct ui_out *uiout, int numspaces)
 {
 }
 
 void
-mi_text (uiout, string)
-     struct ui_out *uiout;
-     char *string;
+mi_text (struct ui_out *uiout, char *string)
 {
 }
 
@@ -272,16 +245,13 @@ mi_message (struct ui_out *uiout, int verbosity, char *format, va_list args)
 }
 
 void
-mi_wrap_hint (uiout, identstring)
-     struct ui_out *uiout;
-     char *identstring;
+mi_wrap_hint (struct ui_out *uiout, char *identstring)
 {
   wrap_here (identstring);
 }
 
 void
-mi_flush (uiout)
-     struct ui_out *uiout;
+mi_flush (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   gdb_flush (data->buffer);
@@ -391,7 +361,7 @@ mi_out_new (void)
 
 /* standard gdb initialization hook */
 void
-_initialize_mi_out ()
+_initialize_mi_out (void)
 {
   /* nothing happens here */
 }

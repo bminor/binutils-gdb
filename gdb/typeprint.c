@@ -49,6 +49,61 @@ static void whatis_command (char *, int);
 
 static void whatis_exp (char *, int);
 
+/* Print a description of a type in the format of a 
+   typedef for the current language.
+   NEW is the new name for a type TYPE. */
+
+void
+typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
+{
+  CHECK_TYPEDEF (type);
+  switch (current_language->la_language)
+    {
+#ifdef _LANG_c
+    case language_c:
+    case language_cplus:
+      fprintf_filtered (stream, "typedef ");
+      type_print (type, "", stream, 0);
+      if (TYPE_NAME ((SYMBOL_TYPE (new))) == 0
+	  || !STREQ (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_NAME (new)))
+	fprintf_filtered (stream, " %s", SYMBOL_SOURCE_NAME (new));
+      break;
+#endif
+#ifdef _LANG_m2
+    case language_m2:
+      fprintf_filtered (stream, "TYPE ");
+      if (!TYPE_NAME (SYMBOL_TYPE (new)) ||
+	  !STREQ (TYPE_NAME (SYMBOL_TYPE (new)), SYMBOL_NAME (new)))
+	fprintf_filtered (stream, "%s = ", SYMBOL_SOURCE_NAME (new));
+      else
+	fprintf_filtered (stream, "<builtin> = ");
+      type_print (type, "", stream, 0);
+      break;
+#endif
+#ifdef _LANG_pascal
+    case language_pascal:
+      fprintf_filtered (stream, "type ");
+      fprintf_filtered (stream, "%s = ", SYMBOL_SOURCE_NAME (new));
+      type_print (type, "", stream, 0);
+      break;
+#endif
+#ifdef _LANG_chill
+    case language_chill:
+      fprintf_filtered (stream, "SYNMODE ");
+      if (!TYPE_NAME (SYMBOL_TYPE (new)) ||
+	  !STREQ (TYPE_NAME (SYMBOL_TYPE (new)), SYMBOL_NAME (new)))
+	fprintf_filtered (stream, "%s = ", SYMBOL_SOURCE_NAME (new));
+      else
+	fprintf_filtered (stream, "<builtin> = ");
+      type_print (type, "", stream, 0);
+      break;
+#endif
+    default:
+      error ("Language not supported.");
+    }
+  fprintf_filtered (stream, ";\n");
+}
+
 /* Print a description of a type TYPE in the form of a declaration of a
    variable named VARSTRING.  (VARSTRING is demangled if necessary.)
    Output goes to STREAM (via stdio).
@@ -57,11 +112,8 @@ static void whatis_exp (char *, int);
    If SHOW is negative, we never show the details of elements' types.  */
 
 void
-type_print (type, varstring, stream, show)
-     struct type *type;
-     char *varstring;
-     struct ui_file *stream;
-     int show;
+type_print (struct type *type, char *varstring, struct ui_file *stream,
+	    int show)
 {
   LA_PRINT_TYPE (type, varstring, stream, show, 0);
 }
@@ -70,9 +122,7 @@ type_print (type, varstring, stream, show)
    show is passed to type_print.  */
 
 static void
-whatis_exp (exp, show)
-     char *exp;
-     int show;
+whatis_exp (char *exp, int show)
 {
   struct expression *expr;
   register value_ptr val;
@@ -134,9 +184,7 @@ whatis_exp (exp, show)
 
 /* ARGSUSED */
 static void
-whatis_command (exp, from_tty)
-     char *exp;
-     int from_tty;
+whatis_command (char *exp, int from_tty)
 {
   /* Most of the time users do not want to see all the fields
      in a structure.  If they do they can use the "ptype" command.
@@ -147,8 +195,7 @@ whatis_command (exp, from_tty)
 /* Simple subroutine for ptype_command.  */
 
 static struct type *
-ptype_eval (exp)
-     struct expression *exp;
+ptype_eval (struct expression *exp)
 {
   if (exp->elts[0].opcode == OP_TYPE)
     {
@@ -164,9 +211,7 @@ ptype_eval (exp)
 
 /* ARGSUSED */
 static void
-ptype_command (typename, from_tty)
-     char *typename;
-     int from_tty;
+ptype_command (char *typename, int from_tty)
 {
   register struct type *type;
   struct expression *expr;
@@ -212,10 +257,7 @@ ptype_command (typename, from_tty)
    that come from the inferior in target byte order and target size. */
 
 void
-print_type_scalar (type, val, stream)
-     struct type *type;
-     LONGEST val;
-     struct ui_file *stream;
+print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 {
   unsigned int i;
   unsigned len;
@@ -288,9 +330,7 @@ print_type_scalar (type, val, stream)
    and whatis_command(). */
 
 void
-maintenance_print_type (typename, from_tty)
-     char *typename;
-     int from_tty;
+maintenance_print_type (char *typename, int from_tty)
 {
   register value_ptr val;
   register struct type *type;
@@ -323,7 +363,7 @@ maintenance_print_type (typename, from_tty)
 
 
 void
-_initialize_typeprint ()
+_initialize_typeprint (void)
 {
 
   add_com ("ptype", class_vars, ptype_command,

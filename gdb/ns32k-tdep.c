@@ -22,7 +22,7 @@
 #include "defs.h"
 
 void
-_initialize_ns32k_tdep ()
+_initialize_ns32k_tdep (void)
 {
   tm_print_insn = print_insn_ns32k;
 }
@@ -31,8 +31,7 @@ _initialize_ns32k_tdep ()
    to reach some "real" code.  */
 
 CORE_ADDR
-merlin_skip_prologue (pc)
-     CORE_ADDR pc;
+merlin_skip_prologue (CORE_ADDR pc)
 {
   register int op = read_memory_integer (pc, 1);
   if (op == 0x82)
@@ -49,8 +48,7 @@ merlin_skip_prologue (pc)
 }
 
 CORE_ADDR
-umax_skip_prologue (pc)
-     CORE_ADDR pc;
+umax_skip_prologue (CORE_ADDR pc)
 {
   register unsigned char op = read_memory_integer (pc, 1);
   if (op == 0x82)
@@ -70,8 +68,7 @@ umax_skip_prologue (pc)
    Can return -1, meaning no way to tell.  */
 
 int
-merlin_frame_num_args (fi)
-     struct frame_info *fi;
+merlin_frame_num_args (struct frame_info *fi)
 {
   int numargs;
   CORE_ADDR pc;
@@ -109,8 +106,7 @@ merlin_frame_num_args (fi)
    so this will often not work properly.  If the arg names
    are known, it's likely most of them will be printed. */
 int
-umax_frame_num_args (fi)
-     struct frame_info *fi;
+umax_frame_num_args (struct frame_info *fi)
 {
   int numargs;
   CORE_ADDR pc;
@@ -148,7 +144,7 @@ umax_frame_num_args (fi)
 }
 
 
-sign_extend (value, bits)
+sign_extend (int value, int bits)
 {
   value = value & ((1 << bits) - 1);
   return (value & (1 << (bits - 1))
@@ -157,9 +153,7 @@ sign_extend (value, bits)
 }
 
 void
-flip_bytes (ptr, count)
-     char *ptr;
-     int count;
+flip_bytes (char *ptr, int count)
 {
   char tmp;
 
@@ -178,8 +172,7 @@ flip_bytes (ptr, count)
    FRAME_FIND_SAVED_REGS.  */
 
 int
-ns32k_localcount (enter_pc)
-     CORE_ADDR enter_pc;
+ns32k_localcount (CORE_ADDR enter_pc)
 {
   unsigned char localtype;
   int localcount;
@@ -202,8 +195,7 @@ ns32k_localcount (enter_pc)
 /* Nonzero if instruction at PC is a return instruction.  */
 
 static int
-ns32k_about_to_return (pc)
-     CORE_ADDR pc;
+ns32k_about_to_return (CORE_ADDR pc)
 {
   return (read_memory_integer (pc, 1) == 0x12);
 }
@@ -218,8 +210,7 @@ ns32k_about_to_return (pc)
  */
 
 CORE_ADDR
-ns32k_get_enter_addr (pc)
-     CORE_ADDR pc;
+ns32k_get_enter_addr (CORE_ADDR pc)
 {
   CORE_ADDR enter_addr;
   unsigned char op;

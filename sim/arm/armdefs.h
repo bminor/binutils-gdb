@@ -30,6 +30,7 @@ typedef char *VoidStar;
 #endif
 
 typedef unsigned long ARMword;	/* must be 32 bits wide */
+typedef unsigned long long ARMdword;	/* Must be at least 64 bits wide.  */
 typedef struct ARMul_State ARMul_State;
 
 typedef unsigned ARMul_CPInits (ARMul_State * state);
@@ -56,9 +57,13 @@ struct ARMul_State
   unsigned ErrorCode;		/* type of illegal instruction */
   ARMword Reg[16];		/* the current register file */
   ARMword RegBank[7][16];	/* all the registers */
+  /* 40 bit accumulator.  We always keep this 64 bits wide,
+     and move only 40 bits out of it in an MRA insn.  */
+  ARMdword Accumulator;
   ARMword Cpsr;			/* the current psr */
   ARMword Spsr[7];		/* the exception psr's */
   ARMword NFlag, ZFlag, CFlag, VFlag, IFFlags;	/* dummy flags for speed */
+  ARMword SFlag;
 #ifdef MODET
   ARMword TFlag;		/* Thumb state */
 #endif
@@ -123,7 +128,11 @@ struct ARMul_State
 
   const struct Dbg_HostosInterface *hostif;
 
-  int verbose;			/* non-zero means print various messages like the banner */
+  unsigned is_v4;		/* Are we emulating a v4 architecture (or higher) ?  */
+  unsigned is_v5;		/* Are we emulating a v5 architecture ?  */
+  unsigned is_v5e;		/* Are we emulating a v5e architecture ?  */
+  unsigned is_XScale;		/* Are we emulating an XScale architecture ?  */
+  unsigned verbose;		/* Print various messages like the banner */
 };
 
 #define ResetPin NresetSig
@@ -137,7 +146,7 @@ struct ARMul_State
 #define LateAbortPin lateabtSig
 
 /***************************************************************************\
-*                        Types of ARM we know about                         *
+*                        Properties of ARM we know about                    *
 \***************************************************************************/
 
 /* The bitflags */
@@ -146,24 +155,10 @@ struct ARMul_State
 #define ARM_Debug_Prop   0x10
 #define ARM_Isync_Prop   ARM_Debug_Prop
 #define ARM_Lock_Prop    0x20
-
-/* ARM2 family */
-#define ARM2    (ARM_Fix26_Prop)
-#define ARM2as  ARM2
-#define ARM61   ARM2
-#define ARM3    ARM2
-
-#ifdef ARM60			/* previous definition in armopts.h */
-#undef ARM60
-#endif
-
-/* ARM6 family */
-#define ARM6    (ARM_Lock_Prop)
-#define ARM60   ARM6
-#define ARM600  ARM6
-#define ARM610  ARM6
-#define ARM620  ARM6
-
+#define ARM_v4_Prop      0x40
+#define ARM_v5_Prop      0x80
+#define ARM_v5e_Prop     0x100
+#define ARM_XScale_Prop  0x200
 
 /***************************************************************************\
 *                   Macros to extract instruction fields                    *
@@ -226,7 +221,7 @@ struct ARMul_State
 #define ABORTBANK 4
 #define UNDEFBANK 5
 #define DUMMYBANK 6
-#define SYSTEMBANK 7
+#define SYSTEMBANK USERBANK
 
 #define BANK_CAN_ACCESS_SPSR(bank)  \
   ((bank) != USERBANK && (bank) != SYSTEMBANK && (bank) != DUMMYBANK)

@@ -157,7 +157,7 @@ struct readline_input_state
 readline_input_state;
 
 
-/* Wrapper function foe calling into the readline library. The event
+/* Wrapper function for calling into the readline library. The event
    loop expects the callback function to have a paramter, while readline 
    expects none. */
 static void
@@ -393,13 +393,13 @@ pop_prompt (void)
        in effect, until the user does another 'set prompt'. */
     if (strcmp (PROMPT (0), PROMPT (-1)))
       {
-	free (PROMPT (-1));
+	xfree (PROMPT (-1));
 	PROMPT (-1) = savestring (PROMPT (0), strlen (PROMPT (0)));
       }
 
-  free (PREFIX (0));
-  free (PROMPT (0));
-  free (SUFFIX (0));
+  xfree (PREFIX (0));
+  xfree (PROMPT (0));
+  xfree (SUFFIX (0));
   the_prompts.top--;
 }
 
@@ -487,7 +487,7 @@ command_handler (char *command)
   quit_flag = 0;
   if (instream == stdin && stdin_is_tty)
     reinitialize_more_filter ();
-  old_chain = make_cleanup (command_loop_marker, 0);
+  old_chain = make_cleanup (null_cleanup, 0);
 
 #if defined(TUI)
   insert_mode = 0;
@@ -515,7 +515,7 @@ command_handler (char *command)
   execute_command (command, instream == stdin);
 
   /* Set things up for this function to be compete later, once the
-     executin has completed, if we are doing an execution command,
+     execution has completed, if we are doing an execution command,
      otherwise, just go ahead and finish. */
   if (target_can_async_p () && target_executing)
     {
@@ -643,7 +643,7 @@ command_line_handler (char *rl)
     {
       strcpy (linebuffer, readline_input_state.linebuffer);
       p = readline_input_state.linebuffer_ptr;
-      free (readline_input_state.linebuffer);
+      xfree (readline_input_state.linebuffer);
       more_to_come = 0;
       pop_prompt ();
     }
@@ -690,7 +690,7 @@ command_line_handler (char *rl)
   while (*p1)
     *p++ = *p1++;
 
-  free (rl);			/* Allocated in readline.  */
+  xfree (rl);			/* Allocated in readline.  */
 
   if (*(p - 1) == '\\')
     {
@@ -749,7 +749,7 @@ command_line_handler (char *rl)
 	  /* If there was an error, call this function again.  */
 	  if (expanded < 0)
 	    {
-	      free (history_value);
+	      xfree (history_value);
 	      return;
 	    }
 	  if (strlen (history_value) > linelength)
@@ -759,7 +759,7 @@ command_line_handler (char *rl)
 	    }
 	  strcpy (linebuffer, history_value);
 	  p = linebuffer + strlen (linebuffer);
-	  free (history_value);
+	  xfree (history_value);
 	}
     }
 
@@ -868,7 +868,7 @@ gdb_readline2 (gdb_client_data client_data)
 	       if we are called again fgetc will still return EOF and
 	       we'll return NULL then.  */
 	    break;
-	  free (result);
+	  xfree (result);
 	  (*input_handler) (0);
 	}
 
@@ -1016,8 +1016,7 @@ async_do_nothing (gdb_client_data arg)
 /* Tell the event loop what to do if SIGHUP is received. 
    See event-signal.c. */
 static void
-handle_sighup (sig)
-     int sig;
+handle_sighup (int sig)
 {
   mark_async_signal_handler_wrapper (sighup_token);
   signal (sig, handle_sighup);

@@ -50,12 +50,12 @@ static struct ui_file *serial_logfp = NULL;
 
 static struct serial_ops *serial_interface_lookup (char *);
 static void serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout);
-static char logbase_hex[] = "hex";
-static char logbase_octal[] = "octal";
-static char logbase_ascii[] = "ascii";
-static char *logbase_enums[] =
+static const char logbase_hex[] = "hex";
+static const char logbase_octal[] = "octal";
+static const char logbase_ascii[] = "ascii";
+static const char *logbase_enums[] =
 {logbase_hex, logbase_octal, logbase_ascii, NULL};
-static char *serial_logbase = logbase_ascii;
+static const char *serial_logbase = logbase_ascii;
 
 
 
@@ -209,7 +209,7 @@ serial_open (const char *name)
 
   if (scb->ops->open (scb, open_name))
     {
-      free (scb);
+      xfree (scb);
       return NULL;
     }
 
@@ -310,7 +310,7 @@ do_serial_close (serial_t scb, int really_close)
     scb->ops->close (scb);
 
   if (scb->name)
-    free (scb->name);
+    xfree (scb->name);
 
   if (scb_base == scb)
     scb_base = scb_base->next;
@@ -324,7 +324,7 @@ do_serial_close (serial_t scb, int really_close)
 	break;
       }
 
-  free (scb);
+  xfree (scb);
 }
 
 void
@@ -394,10 +394,10 @@ serial_printf (serial_t desc, const char *format,...)
   char *buf;
   va_start (args, format);
 
-  vasprintf (&buf, format, args);
+  xvasprintf (&buf, format, args);
   SERIAL_WRITE (desc, buf, strlen (buf));
 
-  free (buf);
+  xfree (buf);
   va_end (args);
 }
 
@@ -551,7 +551,7 @@ cleanup_tty (serial_ttystate ttystate)
 {
   printf_unfiltered ("\r\n[Exiting connect mode]\r\n");
   SERIAL_SET_TTY_STATE (tty_desc, ttystate);
-  free (ttystate);
+  xfree (ttystate);
   SERIAL_CLOSE (tty_desc);
 }
 

@@ -260,8 +260,7 @@ static int regmap[] =
    It also handles knows where to find the I & L regs on the stack.  */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   int whatregs = 0;
 
@@ -361,8 +360,7 @@ fetch_inferior_registers (regno)
    this point.  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   int whatregs = 0;
 
@@ -469,8 +467,7 @@ store_inferior_registers (regno)
    saved context block.  */
 
 static unsigned long
-registers_addr (pid)
-     int pid;
+registers_addr (int pid)
 {
   CORE_ADDR stblock;
   int ecpoff = offsetof (st_t, ecp);
@@ -495,8 +492,7 @@ registers_addr (pid)
    marking them as valid so we won't fetch them again.  */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   int reglo, reghi;
   int i;
@@ -547,8 +543,7 @@ fetch_inferior_registers (regno)
 #endif
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   int reglo, reghi;
   int i;
@@ -595,9 +590,7 @@ store_inferior_registers (regno)
    of error; store status through argument pointer OURSTATUS.  */
 
 int
-child_wait (pid, ourstatus)
-     int pid;
-     struct target_waitstatus *ourstatus;
+child_wait (int pid, struct target_waitstatus *ourstatus)
 {
   int save_errno;
   int thread;
@@ -716,8 +709,7 @@ child_wait (pid, ourstatus)
 
 /* Return nonzero if the given thread is still alive.  */
 int
-child_thread_alive (pid)
-     int pid;
+child_thread_alive (int pid)
 {
   /* Arggh.  Apparently pthread_kill only works for threads within
      the process that calls pthread_kill.
@@ -736,10 +728,7 @@ child_thread_alive (pid)
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-child_resume (pid, step, signal)
-     int pid;
-     int step;
-     enum target_signal signal;
+child_resume (int pid, int step, enum target_signal signal)
 {
   int func;
 
@@ -775,8 +764,7 @@ child_resume (pid, step, signal)
    buffer.  */
 
 char *
-child_pid_to_str (pid)
-     int pid;
+child_pid_to_str (int pid)
 {
   static char buf[40];
 
@@ -799,11 +787,8 @@ child_pid_to_str (pid)
  */
 
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR reg_addr;
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+		      CORE_ADDR reg_addr)
 {
   struct st_entry s;
   unsigned int regno;
@@ -835,7 +820,7 @@ static struct core_fns lynx_core_fns =
 };
 
 void
-_initialize_core_lynx ()
+_initialize_core_lynx (void)
 {
   add_core_fns (&lynx_core_fns);
 }

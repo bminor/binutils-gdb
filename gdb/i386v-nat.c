@@ -87,9 +87,7 @@ static int regmap[] =
  */
 
 int
-i386_register_u_addr (blockend, regnum)
-     int blockend;
-     int regnum;
+i386_register_u_addr (int blockend, int regnum)
 {
   struct user u;
   int fpstate;
@@ -116,7 +114,7 @@ i386_register_u_addr (blockend, regnum)
 }
 
 int
-kernel_u_size ()
+kernel_u_size (void)
 {
   return (sizeof (struct user));
 }
@@ -142,22 +140,14 @@ i386_insert_nonaligned_watchpoint (int, CORE_ADDR, CORE_ADDR, int, int);
 /* Insert a watchpoint.  */
 
 int
-i386_insert_watchpoint (pid, addr, len, rw)
-     int pid;
-     CORE_ADDR addr;
-     int len;
-     int rw;
+i386_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw)
 {
   return i386_insert_aligned_watchpoint (pid, addr, addr, len, rw);
 }
 
 static int
-i386_insert_aligned_watchpoint (pid, waddr, addr, len, rw)
-     int pid;
-     CORE_ADDR waddr;
-     CORE_ADDR addr;
-     int len;
-     int rw;
+i386_insert_aligned_watchpoint (int pid, CORE_ADDR waddr, CORE_ADDR addr,
+				int len, int rw)
 {
   int i;
   int read_write_bits, len_bits;
@@ -216,12 +206,8 @@ i386_insert_aligned_watchpoint (pid, waddr, addr, len, rw)
 }
 
 static int
-i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw)
-     int pid;
-     CORE_ADDR waddr;
-     CORE_ADDR addr;
-     int len;
-     int rw;
+i386_insert_nonaligned_watchpoint (int pid, CORE_ADDR waddr, CORE_ADDR addr,
+				   int len, int rw)
 {
   int align;
   int size;
@@ -257,10 +243,7 @@ i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw)
 /* Remove a watchpoint.  */
 
 int
-i386_remove_watchpoint (pid, addr, len)
-     int pid;
-     CORE_ADDR addr;
-     int len;
+i386_remove_watchpoint (int pid, CORE_ADDR addr, int len)
 {
   int i;
   int register_number;
@@ -285,8 +268,7 @@ i386_remove_watchpoint (pid, addr, len)
 /* Check if stopped by a watchpoint.  */
 
 CORE_ADDR
-i386_stopped_by_watchpoint (pid)
-     int pid;
+i386_stopped_by_watchpoint (int pid)
 {
   int i;
   int status;

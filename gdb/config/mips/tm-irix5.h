@@ -18,17 +18,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* If we're being built for n32, enable multi-arch. */
-/* FIXME: cagney/2000-04-04: Testing the _MIPS_SIM_NABI32 and
-   _MIPS_SIM in a tm-*.h file is simply wrong!  Those are
-   host-dependant macros (provided by /usr/include) and stop any
-   chance of the target being cross compiled */
-#if 0 && defined (_MIPS_SIM_NABI32) && _MIPS_SIM == _MIPS_SIM_NABI32
-/* FIXME: Don't enable multi-arch for IRIX/n32.  The test
-   ``gdb.base/corefile.exp: up in corefile.exp'' fails.  */
-#define GDB_MULTI_ARCH 1
-#endif
-
 #include "mips/tm-irix3.h"
 
 /* FIXME: cagney/2000-04-04: Testing the _MIPS_SIM_NABI32 and

@@ -105,7 +105,7 @@ captured_command_loop (void *data)
   /* FIXME: cagney/1999-11-05: A correct command_loop() implementaton
      would clean things up (restoring the cleanup chain) to the state
      they were just prior to the call.  Technically, this means that
-     the do_cleanups() below is redundant.  Unfortunatly, many FUNC's
+     the do_cleanups() below is redundant.  Unfortunately, many FUNCs
      are not that well behaved.  do_cleanups should either be replaced
      with a do_cleanups call (to cover the problem) or an assertion
      check to detect bad FUNCs code. */
@@ -583,7 +583,7 @@ extern int gdbtk_test (char *);
 
   for (i = 0; i < ndir; i++)
     catch_command_errors (directory_command, dirarg[i], 0, RETURN_MASK_ALL);
-  free ((PTR) dirarg);
+  xfree (dirarg);
 
   if (execarg != NULL
       && symarg != NULL
@@ -665,7 +665,7 @@ extern int gdbtk_test (char *);
 #endif
       catch_command_errors (source_command, cmdarg[i], !batch, RETURN_MASK_ALL);
     }
-  free ((PTR) cmdarg);
+  xfree (cmdarg);
 
   /* Read in the old history after all the command files have been read. */
   init_history ();
