@@ -1726,9 +1726,103 @@ uwin, pw, etc.  For instance, cygwin DLLs typically use
 
 @kindex --enable-auto-import
 @item --enable-auto-import
-Do sophisticalted linking of @code{_symbol} to @code{__imp__symbol} for 
+Do sophisticated linking of @code{_symbol} to @code{__imp__symbol} for 
 DATA imports from DLLs, and create the necessary thunking symbols when 
-building the DLLs with those DATA exports.
+building the DLLs with those DATA exports.  This generally will 'just 
+work' -- but sometimes you may see this message:
+
+"variable '<var>' can't be auto-imported. Please read the 
+documentation for ld's @code{--enable-auto-import} for details."
+
+This message occurs when some (sub)expression accesses an address 
+ultimately given by the sum of two constants (Win32 import tables only 
+allow one).  Instances where this may occur include accesses to member 
+fields of struct variables imported from a DLL, as well as using a 
+constant index into an array variable imported from a DLL.  There are
+several ways to address this difficulty.
+
+One solution is to force one of the 'constants' to be a variable -- 
+that is, unknown and un-optimizable at compile time.  For arrays, 
+there are two possibilities: a) make the indexee (the array's address) 
+a variable, or b) make the 'constant' index a variable.  Thus:
+
+@example
+extern type extern_array[];
+extern_array[1] --> 
+   @{ volatile type *t=extern_array; t[1] @}
+@end example
+
+or
+
+@example
+extern type extern_array[];
+extern_array[1] --> 
+   @{ volatile int t=1; extern_array[t] @}
+@end example
+
+For structs, the only option is to make the struct itself variable:
+
+@example
+extern struct s extern_struct;
+extern_struct.field --> 
+   @{ volatile struct s *t=&extern_struct; t->field @}
+@end example
+
+A second method of dealing with this difficulty is to abandon
+'auto-import' for the offending symbol and mark it with 
+@code{__declspec(dllimport)}.  However, in practice that
+requires using compile-time #defines to indicate whether you are
+building a DLL, building client code that will link to the DLL, or 
+merely building/linking to a static library.   In making the choice 
+between the various methods of resolving the 'direct address with 
+constant offset' problem, you should consider typical real-world usage:
+
+Original:
+@example
+--foo.h
+extern int arr[];
+--foo.c
+#include "foo.h"
+void main(int argc, char **argv)@{
+  printf("%d\n",arr[1]);
+@}
+@end example
+
+Solution 1:
+@example
+--foo.h
+extern int arr[];
+--foo.c
+#include "foo.h"
+void main(int argc, char **argv)@{
+  /* This workaround is for win32 and cygwin; do not "optimize" */
+  volatile int *parr = arr;
+  printf("%d\n",parr[1]);
+@}
+@end example
+
+Solution 2:
+@example
+--foo.h
+/* Note: auto-export is assumed (no __declspec(dllexport)) */
+#if (defined(_WIN32) || defined(__CYGWIN__)) && \
+  !(defined(FOO_BUILD_DLL) || defined(FOO_STATIC))
+#define FOO_IMPORT __declspec(dllimport)
+#else
+#define FOO_IMPORT
+#endif
+extern FOO_IMPORT int arr[];
+--foo.c
+#include "foo.h"
+void main(int argc, char **argv)@{
+  printf("%d\n",arr[1]);
+@}
+@end example
+
+A third way to avoid this problem is to re-code your 
+library to use a functional interface rather than a data interface
+for the offending variables (e.g. set_foo() and get_foo() accessor
+functions).
 
 @kindex --disable-auto-import
 @item --disable-auto-import

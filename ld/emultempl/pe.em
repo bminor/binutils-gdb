@@ -127,7 +127,7 @@ static void set_pe_stack_heap PARAMS ((char *, char *));
 static boolean pe_undef_cdecl_match
   PARAMS ((struct bfd_link_hash_entry *, PTR));
 static void pe_fixup_stdcalls PARAMS ((void));
-static int make_import_fixup PARAMS ((arelent *));
+static int make_import_fixup PARAMS ((arelent *, asection *));
 static void pe_find_data_imports PARAMS ((void));
 #endif
 
@@ -845,20 +845,36 @@ pe_fixup_stdcalls ()
 }
 
 static int
-make_import_fixup (rel)
+make_import_fixup (rel, s)
   arelent *rel;
+  asection *s;
 {
   struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
-/*
-  bfd *b;
-*/
 
   if (pe_dll_extra_pe_debug)
     {
       printf ("arelent: %s@%#x: add=%li\n", sym->name,
               (int) rel->address, rel->addend);
     }
-  pe_create_import_fixup (rel);
+
+  {
+    int addend = 0;
+    if (!bfd_get_section_contents(s->owner, s, &addend, rel->address, sizeof(addend)))
+      {
+        einfo (_("%C: Cannot get section contents - auto-import exception\n"),
+               s->owner, s, rel->address);
+      }
+
+    if (addend == 0)
+      pe_create_import_fixup (rel);
+    else
+      {
+        einfo (_("%C: variable '%T' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"),
+               s->owner, s, rel->address, sym->name);
+        einfo ("%X");
+      }
+  }
+
   return 1;
 }
 

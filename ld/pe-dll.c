@@ -982,10 +982,10 @@ void
 pe_walk_relocs_of_symbol (info, name, cb)
      struct bfd_link_info *info;
      CONST char *name;
-     int (*cb) (arelent *);
+     int (*cb) (arelent *, asection *);
 {
   bfd *b;
-  struct sec *s;
+  asection *s;
 
   for (b = info->input_bfds; b; b = b->link_next)
     {
@@ -1003,7 +1003,7 @@ pe_walk_relocs_of_symbol (info, name, cb)
 	      && s->output_section == bfd_abs_section_ptr)
 	    continue;
 
-	  current_sec=s;
+	  current_sec = s;
 
 	  symsize = bfd_get_symtab_upper_bound (b);
 	  symbols = (asymbol **) xmalloc (symsize);
@@ -1016,7 +1016,7 @@ pe_walk_relocs_of_symbol (info, name, cb)
 	  for (i = 0; i < nrelocs; i++)
 	    {
 	      struct symbol_cache_entry *sym = *relocs[i]->sym_ptr_ptr;
-	      if (!strcmp(name,sym->name)) cb(relocs[i]);
+	      if (!strcmp(name,sym->name)) cb(relocs[i], s);
 	    }
 	  free (relocs);
 	  /* Warning: the allocated symbols are remembered in BFD and reused
@@ -1908,7 +1908,7 @@ make_import_fixup_mark (rel)
   /* we convert reloc to symbol, for later reference */
   static int counter;
   static char *fixup_name = NULL;
-  static int buffer_len = 0;
+  static unsigned int buffer_len = 0;
   
   struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
   

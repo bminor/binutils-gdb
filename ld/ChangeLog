@@ -1,3 +1,22 @@
+2001-09-12  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
+
+	* emultempl/pe.em(make_import_fixup): change signature to
+	take asection as well as arelec; we need this for proper
+	error reporting.  Only call pe_create_import_fixup() if 
+	there is no attempt to add a constant addend to the reloc;
+	otherwise, report error condition.
+	* pe-dll.c(pe_walk_relocs_of_symbol): change signature,
+	since final argument is a pointer to make_import_fixup().
+	Change call to cb() to match make_import_fixup() signature.
+	(make_import_fixup_mark): make buffer_len unsigned.
+	* pe-dll.h: change signature of pe_walk_relocs_of_symbol.
+
+2001-09-12  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* ld.texinfo: add verbose documentation for auto-import
+	direct-addressing workaround, to compliment the terse 
+	error message.
+
 2001-09-12  Andrew MacLeod  <amacleod@redhat.com>
 
      * scripttempl/v850.sc: Add gcc_except_table sections.
