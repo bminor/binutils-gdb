@@ -1,4 +1,10 @@
+Thu Jul 29 12:09:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hppa-tdep.c (pc_in_linker_stub): Fix unclosed comments.
+
 Wed Jul 28 13:19:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/mips/xm-mips.h: Define HAVE_TERMIOS.
 
 	* dbxread.c (record_minimal_symbol): Don't put gcc_compiled or
 	__gnu_compiled* symbols into the minimal symbols.

@@ -325,7 +325,7 @@ pc_in_linker_stub (pc)
      from the given PC, then backward.  */
   for (i = 0; i < 4; i++)
     {
-      /* If we hit something with an unwind, stop searching this direction.  
+      /* If we hit something with an unwind, stop searching this direction.  */
 
       if (find_unwind_entry (pc + i * 4) != 0)
 	break;
@@ -347,7 +347,7 @@ pc_in_linker_stub (pc)
   /* Now look backward.  */
   for (i = 0; i < 4; i++)
     {
-      /* If we hit something with an unwind, stop searching this direction.  
+      /* If we hit something with an unwind, stop searching this direction.  */
 
       if (find_unwind_entry (pc - i * 4) != 0)
 	break;
