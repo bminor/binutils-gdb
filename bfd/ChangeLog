@@ -1,3 +1,7 @@
+Mon Jun  5 02:15:20 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* config.bfd (i[345]86-*-gnu*): Use ELF configuration.
+
 Fri Jun  2 18:54:59 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* versados.c: New file.
