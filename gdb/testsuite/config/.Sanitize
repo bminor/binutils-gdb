@@ -63,6 +63,7 @@ udi.exp
 unix.exp
 unknown.exp
 vx.exp
+vxworks.exp
 vxworks29k.exp
 
 Things-to-lose:
