@@ -343,7 +343,7 @@ case "${target}" in
   *-*-netware)
     noconfigdirs="$noconfigdirs libg++ libstdc++ librx newlib xiberty"
     ;;
-  a29k-*-vxworks5.1)
+  *-*-vxworks5.1)
     noconfigdirs="$noconfigdirs newlib"
     ;;
   alpha-dec-osf*)
@@ -439,9 +439,6 @@ case "${target}" in
     ;;
   m68k-apollo-*)
     noconfigdirs="$noconfigdirs ld binutils gprof"
-    ;;
-  m68k-*-vxworks5.1)
-    noconfigdirs="$noconfigdirs newlib"
     ;;
   mips*-*-irix5*)
     # The GNU linker does not support shared libraries.

@@ -1,3 +1,7 @@
+Thu Jul 27 11:28:17 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in: Don't build newlib for *-*-vxworks5.1.
+
 Thu Jul 27 11:18:47 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* configure.in: Don't build newlib for a29k-*-vxworks5.1.
