@@ -4,6 +4,10 @@
 
 2005-03-03  Nick Clifton  <nickc@redhat.com>
 
+	* gas/macros/macros.exp (and.s): Expect this test to fail for the
+	tic4x-coff target because it uses the '&' character as a line
+	separator.
+
 	* gas/sh/basic.exp: Add an sh-hms version of the pcrel test.
 	* gas/sh/pcrel-hms.d: New file.  Adjusted form of pcrel-coff.d for
 	the sh-hms target.

@@ -32,6 +32,11 @@ if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] } {
 
 gas_test_error "err.s" "" "macro infinite recursion"
 
+# The tic4x-coff target fails the next test because it defines '&'
+# as its line separator character, so the expression "(0 & TFLAG_C)"
+# becomes divided up into two lines and the parser complains about
+# a missing closing parenthesis for the first line.
+setup_xfail "tic4x*-*"
 gas_test "and.s" "" "" "logical and in macro definition"
 
 case $target_triplet in {
