@@ -1,4 +1,13 @@
 start-sanitize-v850
+Tue Sep  3 12:05:25 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-dis.c (disassemble): Make static.  Provide prototype.
+
+Sun Sep  1 22:30:40 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (insert_d9, insert_d22): Fix boundary case
+	in range checks.
+
 Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* v850-dis.c (disassemble): Handle insertion of ',', '[' and
