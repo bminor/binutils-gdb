@@ -4967,7 +4967,7 @@ $  for m in gdb insight dejagnu; do
 done
 @end example
 
-@subheading Do another @kpd{CVS update} to see what the damage is.
+@subheading Do another @kbd{CVS update} to see what the damage is.
 
 @example
 $ ( cd gdb/src && cvs -q update )
