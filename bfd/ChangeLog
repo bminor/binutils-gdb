@@ -1,3 +1,13 @@
+Sat Mar 18 01:54:45 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elfcode.h (elf_bfd_link_add_symbols): An empty archive is OK.
+
+Fri Mar 17 16:29:02 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_bfd_copy_private_section_data): Just return true when
+	either the input or output section isn't attached to a SOM BFD.
+	(som_bfd_copy_private_bfd_data): Similarly for BFD private data.
+
 Fri Mar 17 11:50:34 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elfcode.h (elf_link_add_object_symbols): Check whether a dynamic
