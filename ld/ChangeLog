@@ -1,3 +1,42 @@
+Mon Aug  5 16:26:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlex.l: Recognize OVERLAY.
+	* ldgram.y: Add section_phdr field to %union.
+	(section): Handle phdr_opt result.  Add OVERLAY case.
+	(opt_exp_without_type): New nonterminal.
+	(phdr_opt): Return list of phdrs.
+	(overlay_section): New nonterminal.
+	* ldlang.c: Include <ctype.h>.
+	(lang_leave_output_section_statement): Add phdrs parameter.
+	Change all callers.
+	(lang_section_in_phdr): Remove.
+	(overlay_vma, overlay_lmn, overlay_max): New static variables.
+	(struct overlay_list): Define.
+	(overlay_list): New static variable.
+	(lang_enter_overlay, lang_enter_overlay_section): New functions.
+	(lang_leave_overlay_section, lang_leave_overlay): New functions.
+	* ldlang.h (lang_leave_output_section_statement): Update
+	declaration for new parameter.
+	(lang_section_in_phdr): Don't declare.
+	(lang_enter_overlay, lang_enter_overlay_section): Declare.
+	(lang_leave_overlay_section, lang_leave_overlay): Declare.
+	* ld.texinfo (Overlays): New node under SECTIONS, documenting
+	overlays.
+
+	* ldlex.l: Recognize MAX and MIN.
+	* ldgram.y (MAX, MIN): New terminals.
+	(exp): Recognize MAX and MIN.
+	* ldexp.c (fold_binary): Handle MAX and MIN.
+	* ld.texinfo (Arithmetic Functions): Document MAX and MIN.
+
+	* ld.texinfo (PHDRS): Use @cindex, not @kindex, for program header
+	index entries.
+
+	* ldgram.y (SIZEOF, ADDR): Do not specify type.
+
+	* ldcref.c (check_nocrossref): Skip symbols with no output
+	sections.
+
 Fri Aug  2 14:57:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldgram.y (LOADADDR): New terminal.

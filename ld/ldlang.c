@@ -14,8 +14,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GLD; see the file COPYING.  If not, write to
-the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+along with GLD; see the file COPYING.  If not, write to the Free
+Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -33,6 +34,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 #include "ldctor.h"
 #include "ldfile.h"
 #include "fnmatch.h"
+
+#include <ctype.h>
 
 /* FORWARDS */
 static lang_statement_union_type *new_statement PARAMS ((enum statement_enum,
@@ -3338,12 +3341,14 @@ lang_float (maybe)
 }
 
 void
-lang_leave_output_section_statement (fill, memspec)
+lang_leave_output_section_statement (fill, memspec, phdrs)
      bfd_vma fill;
-     CONST char *memspec;
+     const char *memspec;
+     struct lang_output_section_phdr_list *phdrs;
 {
   current_section->fill = fill;
   current_section->region = lang_memory_region_lookup (memspec);
+  current_section->phdrs = phdrs;
   stat_ptr = &statement_list;
 }
 
@@ -3501,22 +3506,6 @@ lang_new_phdr (name, type, filehdr, phdrs, at, flags)
   *pp = n;
 }
 
-/* Record that a section should be placed in a phdr.  */
-
-void
-lang_section_in_phdr (name)
-     const char *name;
-{
-  struct lang_output_section_phdr_list *n;
-
-  n = ((struct lang_output_section_phdr_list *)
-       stat_alloc (sizeof (struct lang_output_section_phdr_list)));
-  n->name = name;
-  n->used = false;
-  n->next = current_section->phdrs;
-  current_section->phdrs = n;
-}
-
 /* Record the program header information in the output BFD.  FIXME: We
    should not be calling an ELF specific function here.  */
 
@@ -3635,4 +3624,179 @@ lang_add_nocrossref (l)
 
   /* Set notice_all so that we get informed about all symbols.  */
   link_info.notice_all = true;
+}
+
+/* Overlay handling.  We handle overlays with some static variables.  */
+
+/* The overlay virtual address.  */
+static etree_type *overlay_vma;
+
+/* The overlay load address.  */
+static etree_type *overlay_lma;
+
+/* An expression for the maximum section size seen so far.  */
+static etree_type *overlay_max;
+
+/* A list of all the sections in this overlay.  */
+
+struct overlay_list
+{
+  struct overlay_list *next;
+  lang_output_section_statement_type *os;
+};
+
+static struct overlay_list *overlay_list;
+
+/* Start handling an overlay.  */
+
+void
+lang_enter_overlay (vma_expr, lma_expr)
+     etree_type *vma_expr;
+     etree_type *lma_expr;
+{
+  /* The grammar should prevent nested overlays from occurring.  */
+  ASSERT (overlay_vma == NULL
+	  && overlay_lma == NULL
+	  && overlay_list == NULL
+	  && overlay_max == NULL);
+
+  overlay_vma = vma_expr;
+  overlay_lma = lma_expr;
+}
+
+/* Start a section in an overlay.  We handle this by calling
+   lang_enter_output_section_statement with the correct VMA and LMA.  */
+
+void
+lang_enter_overlay_section (name)
+     const char *name;
+{
+  struct overlay_list *n;
+  etree_type *size;
+
+  lang_enter_output_section_statement (name, overlay_vma, normal_section,
+				       0, 0, 0, overlay_lma);
+
+  /* If this is the first section, then base the VMA and LMA of future
+     sections on this one.  This will work correctly even if `.' is
+     used in the addresses.  */
+  if (overlay_list == NULL)
+    {
+      overlay_vma = exp_nameop (ADDR, name);
+      overlay_lma = exp_nameop (LOADADDR, name);
+    }
+
+  /* Remember the section.  */
+  n = (struct overlay_list *) xmalloc (sizeof *n);
+  n->os = current_section;
+  n->next = overlay_list;
+  overlay_list = n;
+
+  size = exp_nameop (SIZEOF, name);
+
+  /* Adjust the LMA for the next section.  */
+  overlay_lma = exp_binop ('+', overlay_lma, size);
+
+  /* Arrange to work out the maximum section end address.  */
+  if (overlay_max == NULL)
+    overlay_max = size;
+  else
+    overlay_max = exp_binop (MAX, overlay_max, size);
+}
+
+/* Finish a section in an overlay.  There isn't any special to do
+   here.  */
+
+void
+lang_leave_overlay_section (fill, phdrs)
+     bfd_vma fill;
+     struct lang_output_section_phdr_list *phdrs;
+{
+  const char *name;
+  char *clean, *s2;
+  const char *s1;
+  char *buf;
+
+  name = current_section->name;
+
+  lang_leave_output_section_statement (fill, "*default*", phdrs);
+
+  /* Define the magic symbols.  */
+
+  clean = xmalloc (strlen (name) + 1);
+  s2 = clean;
+  for (s1 = name; *s1 != '\0'; s1++)
+    if (isalnum (*s1) || *s1 == '_')
+      *s2++ = *s1;
+  *s2 = '\0';
+
+  buf = xmalloc (strlen (clean) + sizeof "__load_start_");
+  sprintf (buf, "__load_start_%s", clean);
+  lang_add_assignment (exp_assop ('=', buf,
+				  exp_nameop (LOADADDR, name)));
+
+  buf = xmalloc (strlen (clean) + sizeof "__load_stop_");
+  sprintf (buf, "__load_stop_%s", clean);
+  lang_add_assignment (exp_assop ('=', buf,
+				  exp_binop ('+',
+					     exp_nameop (LOADADDR, name),
+					     exp_nameop (SIZEOF, name))));
+
+  free (clean);
+}
+
+/* Finish an overlay.  If there are any overlay wide settings, this
+   looks through all the sections in the overlay and sets them.  */
+
+void
+lang_leave_overlay (fill, memspec, phdrs)
+     bfd_vma fill;
+     const char *memspec;
+     struct lang_output_section_phdr_list *phdrs;
+{
+  lang_memory_region_type *region;
+  struct overlay_list *l;
+  struct lang_nocrossref *nocrossref;
+
+  if (memspec == NULL)
+    region = NULL;
+  else
+    region = lang_memory_region_lookup (memspec);
+
+  nocrossref = NULL;
+
+  l = overlay_list;
+  while (l != NULL)
+    {
+      struct lang_nocrossref *nc;
+      struct overlay_list *next;
+
+      if (fill != 0 && l->os->fill == 0)
+	l->os->fill = fill;
+      if (region != NULL && l->os->region == NULL)
+	l->os->region = region;
+      if (phdrs != NULL && l->os->phdrs == NULL)
+	l->os->phdrs = phdrs;
+
+      nc = (struct lang_nocrossref *) xmalloc (sizeof *nc);
+      nc->name = l->os->name;
+      nc->next = nocrossref;
+      nocrossref = nc;
+
+      next = l->next;
+      free (l);
+      l = next;
+    }
+
+  if (nocrossref != NULL)
+    lang_add_nocrossref (nocrossref);
+
+  /* Update . for the end of the overlay.  */
+  lang_add_assignment (exp_assop ('=', ".",
+				  exp_binop ('+', overlay_vma, overlay_max)));
+
+  overlay_vma = NULL;
+  overlay_lma = NULL;
+  overlay_list = NULL;
+  overlay_max = NULL;
 }
