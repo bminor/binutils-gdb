@@ -1551,8 +1551,10 @@ ia64_frame_this_id (struct frame_info *next_frame, void **this_cache,
   (*this_id) = frame_id_build_special (cache->base, cache->pc, cache->bsp);
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"regular frame id: code %lx, stack %lx, special %lx, next_frame %p\n",
-			this_id->code_addr, this_id->stack_addr, cache->bsp, next_frame);
+			"regular frame id: code 0x%s, stack 0x%s, special 0x%s, next_frame %p\n",
+			paddr_nz (this_id->code_addr), 
+			paddr_nz (this_id->stack_addr), 
+			paddr_nz (cache->bsp), next_frame);
 }
 
 static void
@@ -1847,9 +1849,10 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"regular prev register <%d> <%s> is %lx\n", regnum, 
+			"regular prev register <%d> <%s> is 0x%s\n", regnum, 
 			(((unsigned) regnum <= IA64_NAT127_REGNUM)
-			 ? ia64_register_names[regnum] : "r??"), extract_unsigned_integer (valuep, 8));
+			 ? ia64_register_names[regnum] : "r??"), 
+			paddr_nz (extract_unsigned_integer (valuep, 8)));
 }
  
 static const struct frame_unwind ia64_frame_unwind =
@@ -1947,8 +1950,10 @@ ia64_sigtramp_frame_this_id (struct frame_info *next_frame,
   (*this_id) = frame_id_build_special (cache->base, frame_pc_unwind (next_frame), cache->bsp);
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"sigtramp frame id: code %lx, stack %lx, special %lx, next_frame %p\n",
-			this_id->code_addr, this_id->stack_addr, cache->bsp, next_frame);
+			"sigtramp frame id: code 0x%s, stack 0x%s, special 0x%s, next_frame %p\n",
+			paddr_nz (this_id->code_addr), 
+			paddr_nz (this_id->stack_addr), 
+			paddr_nz (cache->bsp), next_frame);
 }
 
 static void
@@ -2024,9 +2029,10 @@ ia64_sigtramp_frame_prev_register (struct frame_info *next_frame,
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"sigtramp prev register <%s> is %lx\n",
+			"sigtramp prev register <%s> is 0x%s\n",
 			(((unsigned) regnum <= IA64_NAT127_REGNUM)
-			 ? ia64_register_names[regnum] : "r??"), extract_unsigned_integer (valuep, 8));
+			 ? ia64_register_names[regnum] : "r??"), 
+			paddr_nz (extract_unsigned_integer (valuep, 8)));
 }
 
 static const struct frame_unwind ia64_sigtramp_frame_unwind =
@@ -2225,9 +2231,10 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
 	}
       if (gdbarch_debug >= 1)
 	fprintf_unfiltered (gdb_stdlog, 
-			    "  access_reg: to cache: %4s=%016lx\n",
+			    "  access_reg: to cache: %4s=0x%s\n",
 			    (((unsigned) regnum <= IA64_NAT127_REGNUM)
-			     ? ia64_register_names[regnum] : "r??"), *val);
+			     ? ia64_register_names[regnum] : "r??"), 
+			    paddr_nz (*val));
     }
   else
     {
@@ -2271,9 +2278,10 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
       
       if (gdbarch_debug >= 1)
 	fprintf_unfiltered (gdb_stdlog, 
-			    "  access_reg: from cache: %4s=%016lx\n",
+			    "  access_reg: from cache: %4s=0x%s\n",
 			    (((unsigned) regnum <= IA64_NAT127_REGNUM)
-			     ? ia64_register_names[regnum] : "r??"), *val);
+			     ? ia64_register_names[regnum] : "r??"), 
+			    paddr_nz (*val));
     }
   return 0;
 }
@@ -2357,9 +2365,11 @@ get_kernel_table (unw_word_t ip, unw_dyn_info_t *di)
   
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog, "get_kernel_table: found table `%s': "
-			"segbase=%lx, length=%lu, gp=%lx\n",
-			(char *) di->u.ti.name_ptr, di->u.ti.segbase, 
-			di->u.ti.table_len, di->gp);
+			"segbase=0x%s, length=%s, gp=0x%s\n",
+			(char *) di->u.ti.name_ptr, 
+			paddr_nz (di->u.ti.segbase), 
+			paddr_u (di->u.ti.table_len), 
+			paddr_nz (di->gp));
   return 0;
 }
 
@@ -2441,12 +2451,15 @@ ia64_find_proc_info_x (unw_addr_space_t as, unw_word_t ip, unw_proc_info_t *pi,
 	return -UNW_ENOINFO;
 
       if (gdbarch_debug >= 1)
-	fprintf_unfiltered (gdb_stdlog, "ia64_find_proc_info_x: %lx -> "
-			    "(name=`%s',segbase=%lx,start=%lx,end=%lx,gp=%lx,"
-			    "length=%lu,data=%p)\n",
-			    ip, (char *)di.u.ti.name_ptr,
-			    di.u.ti.segbase, di.start_ip, di.end_ip,
-			    di.gp, di.u.ti.table_len, di.u.ti.table_data);
+	fprintf_unfiltered (gdb_stdlog, "ia64_find_proc_info_x: 0x%s -> "
+			    "(name=`%s',segbase=0x%s,start=0x%s,end=0x%s,gp=0x%s,"
+			    "length=%s,data=0x%s)\n",
+			    paddr_nz (ip), (char *)di.u.ti.name_ptr,
+			    paddr_nz (di.u.ti.segbase), 
+			    paddr_nz (di.start_ip), paddr_nz (di.end_ip),
+			    paddr_nz (di.gp), 
+			    paddr_u (di.u.ti.table_len), 
+			    paddr_nz ((CORE_ADDR)di.u.ti.table_data));
     }
   else
     {
@@ -2455,12 +2468,15 @@ ia64_find_proc_info_x (unw_addr_space_t as, unw_word_t ip, unw_proc_info_t *pi,
 	return ret;
 
       if (gdbarch_debug >= 1)
-	fprintf_unfiltered (gdb_stdlog, "ia64_find_proc_info_x: %lx -> "
-			    "(name=`%s',segbase=%lx,start=%lx,end=%lx,gp=%lx,"
-			    "length=%lu,data=%lx)\n",
-			    ip, (char *)di.u.rti.name_ptr,
-			    di.u.rti.segbase, di.start_ip, di.end_ip,
-			    di.gp, di.u.rti.table_len, di.u.rti.table_data);
+	fprintf_unfiltered (gdb_stdlog, "ia64_find_proc_info_x: 0x%s -> "
+			    "(name=`%s',segbase=0x%s,start=0x%s,end=0x%s,gp=0x%s,"
+			    "length=%s,data=0x%s)\n",
+			    paddr_nz (ip), (char *)di.u.rti.name_ptr,
+			    paddr_nz (di.u.rti.segbase), 
+			    paddr_nz (di.start_ip), paddr_nz (di.end_ip),
+			    paddr_nz (di.gp), 
+			    paddr_u (di.u.rti.table_len), 
+			    paddr_nz (di.u.rti.table_data));
     }
 
   ret = libunwind_search_unwind_table (&as, ip, &di, pi, need_unwind_info,
@@ -2513,9 +2529,9 @@ ia64_get_dyn_info_list (unw_addr_space_t as,
 	      if (gdbarch_debug >= 1)
 		fprintf_unfiltered (gdb_stdlog,
 				    "dynamic unwind table in objfile %s "
-				    "at %lx (gp=%lx)\n",
+				    "at 0x%s (gp=0x%s)\n",
 				    bfd_get_filename (objfile->obfd),
-				    addr, di.gp);
+				    paddr_nz (addr), paddr_nz (di.gp));
 	      *dilap = addr;
 	      return 0;
 	    }
@@ -2545,8 +2561,9 @@ ia64_libunwind_frame_this_id (struct frame_info *next_frame, void **this_cache,
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"libunwind frame id: code %lx, stack %lx, special %lx, next_frame %p\n",
-			id.code_addr, id.stack_addr, bsp, next_frame);
+			"libunwind frame id: code 0x%s, stack 0x%s, special 0x%s, next_frame %p\n",
+			paddr_nz (id.code_addr), paddr_nz (id.stack_addr), 
+			paddr_nz (bsp), next_frame);
 }
 
 static void
@@ -2625,9 +2642,10 @@ ia64_libunwind_frame_prev_register (struct frame_info *next_frame,
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"libunwind prev register <%s> is %lx\n",
+			"libunwind prev register <%s> is 0x%s\n",
 			(((unsigned) regnum <= IA64_NAT127_REGNUM)
-			 ? ia64_register_names[regnum] : "r??"), extract_unsigned_integer (valuep, 8));
+			 ? ia64_register_names[regnum] : "r??"), 
+			paddr_nz (extract_unsigned_integer (valuep, 8)));
 }
 
 static const struct frame_unwind ia64_libunwind_frame_unwind =
@@ -3172,8 +3190,9 @@ ia64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"dummy frame id: code %lx, stack %lx, special %lx\n",
-			frame_pc_unwind (next_frame), sp, bsp);
+			"dummy frame id: code 0x%s, stack 0x%s, special 0x%s\n",
+			paddr_nz (frame_pc_unwind (next_frame)), 
+			paddr_nz (sp), paddr_nz (bsp));
 
   return frame_id_build_special (sp, frame_pc_unwind (next_frame), bsp);
 }

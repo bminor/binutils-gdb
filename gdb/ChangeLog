@@ -1,3 +1,13 @@
+2004-02-10  Jeff Johnston  <jjohnstn@redhat.com>
+	
+	* ia64-tdep.c (ia64_frame_this_id): Fix tracing print statement
+	to use paddr functions to format ia64 addresses and long values.
+	(ia64_frame_prev_register, ia64_sigtramp_frame_this_id): Ditto.
+	(ia64_sigtramp_frame_prev_register, ia64_access_reg): Ditto.
+	(get_kernel_table, ia64_find_proc_info_x): Ditto.
+	(ia64_get_dyn_info_list, ia64_libunwind_this_frame_id): Ditto.
+	(ia64_libunwind_frame_prev_register, ia64_unwind_dummy_id): Ditto.
+
 2004-02-10  Andrew Cagney  <cagney@redhat.com>
 
 	* defs.h: Do not include "tui.h".
@@ -44,6 +54,7 @@
 	* symfile.c (reread_symbols): Ditto.
 	* gdb_obstack.h: Add comment.
 
+>>>>>>> 1.5354
 2004-02-09  Elena Zannoni  <ezannoni@redhat.com>
 
 	* linespec.c (decode_line_1, locate_first_half)
