@@ -2014,6 +2014,12 @@ extern void set_gdbarch_stack_align (struct gdbarch *gdbarch, gdbarch_stack_alig
 #endif
 #endif
 
+extern int gdbarch_frame_align_p (struct gdbarch *gdbarch);
+
+typedef CORE_ADDR (gdbarch_frame_align_ftype) (struct gdbarch *gdbarch, CORE_ADDR address);
+extern CORE_ADDR gdbarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR address);
+extern void set_gdbarch_frame_align (struct gdbarch *gdbarch, gdbarch_frame_align_ftype *frame_align);
+
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (EXTRA_STACK_ALIGNMENT_NEEDED)
 #define EXTRA_STACK_ALIGNMENT_NEEDED (1)

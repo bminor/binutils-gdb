@@ -2584,6 +2584,14 @@ mips_type_needs_double_align (struct type *type)
 #define ROUND_DOWN(n,a) ((n) & ~((a)-1))
 #define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
 
+/* Adjust the address downward (direction of stack growth) so that it
+   is correctly aligned for a new stack frame.  */
+static CORE_ADDR
+mips_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  return ROUND_DOWN (addr, 16);
+}
+
 static CORE_ADDR
 mips_eabi_push_arguments (int nargs,
 			  struct value **args,
@@ -5963,6 +5971,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
+  set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_register_convertible (gdbarch, mips_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, 
 					   mips_register_convert_to_virtual);

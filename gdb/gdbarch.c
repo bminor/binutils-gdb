@@ -244,6 +244,7 @@ struct gdbarch
   gdbarch_saved_pc_after_call_ftype *saved_pc_after_call;
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_stack_align_ftype *stack_align;
+  gdbarch_frame_align_ftype *frame_align;
   int extra_stack_alignment_needed;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
   gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos;
@@ -330,6 +331,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   default_print_registers_info,
+  0,
   0,
   0,
   0,
@@ -775,6 +777,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->frame_num_args == 0))
     fprintf_unfiltered (log, "\n\tframe_num_args");
   /* Skip verify of stack_align, has predicate */
+  /* Skip verify of frame_align, has predicate */
   /* Skip verify of extra_stack_alignment_needed, invalid_p == 0 */
   /* Skip verify of reg_struct_has_addr, has predicate */
   /* Skip verify of save_dummy_frame_tos, has predicate */
@@ -825,6 +828,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\n",
                       GDB_MULTI_ARCH);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: frame_align = 0x%08lx\n",
+                        (long) current_gdbarch->frame_align);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: in_function_epilogue_p = 0x%08lx\n",
@@ -4507,6 +4514,32 @@ set_gdbarch_stack_align (struct gdbarch *gdbarch,
                          gdbarch_stack_align_ftype stack_align)
 {
   gdbarch->stack_align = stack_align;
+}
+
+int
+gdbarch_frame_align_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->frame_align != 0;
+}
+
+CORE_ADDR
+gdbarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR address)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->frame_align == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_frame_align invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_align called\n");
+  return gdbarch->frame_align (gdbarch, address);
+}
+
+void
+set_gdbarch_frame_align (struct gdbarch *gdbarch,
+                         gdbarch_frame_align_ftype frame_align)
+{
+  gdbarch->frame_align = frame_align;
 }
 
 int

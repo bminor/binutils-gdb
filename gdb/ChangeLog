@@ -1,3 +1,14 @@
+2002-09-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* valops.c (hand_function_call): Align the initial stack pointer
+	and STRUCT_ADDR using frame_align.  When STRUCT_RETURN and
+	FRAME_ALIGN_P, use STRUCT_ADDR to obtain the called function's
+	return value.
+	* mips-tdep.c (mips_frame_align): New function.
+	(mips_gdbarch_init): Set frame_align.
+	* gdbarch.sh (FRAME_ALIGN): New method.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2002-09-18  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-nat.c (x86_64_regmap): Added CS and SS
