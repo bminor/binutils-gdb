@@ -1309,13 +1309,6 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
    bits of these pointers (instead of just the 16-bits of the segment
    selector).  */
 
-/* The 64-bit FXSAVE format differs from the 32-bit format in the
-   sense that the instruction pointer and data pointer are simply
-   64-bit offsets into the code segment and the data segment instead
-   of a selector offset pair.  The functions below store the upper 32
-   bits of these pointers (instead of just the 16-bits of the segment
-   selector).  */
-
 /* Fill register REGNUM in REGCACHE with the appropriate
    floating-point or SSE register value from *FXSAVE.  If REGNUM is
    -1, do this for all registers.  This function masks off any of the
