@@ -1,3 +1,8 @@
+1999-06-10  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/readelf.wi: Update to match latest output.
+	* binutils-all/readelf.h: Update to match latest output.
+
 Wed Jun  9 11:59:22 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* binutils-all/objdump.exp: Tighten regexp to match `objdump -i'
