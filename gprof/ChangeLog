@@ -1,3 +1,9 @@
+2002-12-02  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (LINGUAS): Add pt_BR.
+	* configure: Regenerate.
+	* po/pt_BR: New Brazillian Portugese translation.
+
 2002-11-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* basic_blocks.c, basic_blocks.h, cg_arcs.c, cg_dfn.c, cg_print.c,
