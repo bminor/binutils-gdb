@@ -44,6 +44,9 @@ AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
 
+# Check for common headers.
+AC_CHECK_HEADERS(stdlib.h string.h strings.h unistd.h)
+
 . ${srcdir}/../../bfd/configure.host
 
 dnl Standard (and optional) simulator options.
@@ -87,9 +90,9 @@ dnl the allowable values are work-in-progress
 AC_ARG_ENABLE(sim-debug,
 [  --enable-sim-debug=opts		Enable debugging flags],
 [case "${enableval}" in
-  yes)	sim_debug="-DDEBUG=7";;
-  no)	sim_debug="-DDEBUG=0";;
-  *)	sim_debug="-DDEBUG='(${enableval})'";;
+  yes) sim_debug="-DDEBUG=7 -DWITH_DEBUG=7";;
+  no)  sim_debug="-DDEBUG=0 -DWITH_DEBUG=0";;
+  *)   sim_debug="-DDEBUG='(${enableval})' -DWITH_DEBUG='(${enableval})'";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_debug" != x""; then
   echo "Setting sim debug = $sim_debug" 6>&1
