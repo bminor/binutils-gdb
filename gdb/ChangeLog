@@ -1,5 +1,9 @@
 2002-11-24  Andrew Cagney  <ac131313@redhat.com>
 
+	* arm-tdep.c (arm_gdbarch_init): Do not set get_saved_register.
+
+2002-11-24  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.c (set_unwind_by_pc): Revert change below, use
 	PC_IN_CALL_DUMMY.
 	(get_prev_frame): Ditto.
