@@ -1,3 +1,7 @@
+Wed Oct 21 08:44:30 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* 29k-share/udi/udip2soc.c: Replace sys_errlist with strerror().
+
 Thu Oct 22 09:56:55 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/rs6000/aix4.mh (NATDEPFILES): Move xcoffread.o from here.

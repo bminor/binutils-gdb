@@ -53,7 +53,7 @@ static  char udip2soc_c_AMD[]="@(#)udip2soc.c	2.8, AMD";
 
 extern	int		errno;
 extern	int		sys_nerr;
-extern	char*		sys_errlist[];
+/*extern	char*		sys_errlist[];*/
 extern	int		udr_errno;
 extern	char*		getenv();
 
@@ -193,7 +193,7 @@ UDIConnect(Config, Session)
 	if (!fd)
 	  {
 	    sprintf(dfe_errmsg, "UDIConnect, can't open udi_soc file:\n%s ",
-		    sys_errlist[errno]);
+		    strerror(errno));
 	    dfe_errno = UDIErrorCantOpenConfigFile;
 	    goto tip_failure;
 	  }
