@@ -196,7 +196,7 @@ void (*init_ui_hook) (char *argv0);
 int (*ui_loop_hook) (int);
 
 /* Called instead of command_loop at top level.  Can be invoked via
-   return_to_top_level.  */
+   throw_exception().  */
 
 void (*command_loop_hook) (void);
 
@@ -298,13 +298,13 @@ NORETURN void (*error_hook) (void) ATTR_NORETURN;
 #define SIGLONGJMP(buf,val)	longjmp((buf), (val))
 #endif
 
-/* Where to go for return_to_top_level.  */
+/* Where to go for throw_exception().  */
 static SIGJMP_BUF *catch_return;
 
 /* Return for reason REASON to the nearest containing catch_errors().  */
 
 NORETURN void
-return_to_top_level (enum return_reason reason)
+throw_exception (enum return_reason reason)
 {
   quit_flag = 0;
   immediate_quit = 0;
@@ -340,7 +340,7 @@ return_to_top_level (enum return_reason reason)
 
 /* Call FUNC() with args FUNC_UIOUT and FUNC_ARGS, catching any
    errors.  Set FUNC_CAUGHT to an ``enum return_reason'' if the
-   function is aborted (using return_to_top_level() or zero if the
+   function is aborted (using throw_exception() or zero if the
    function returns normally.  Set FUNC_VAL to the value returned by
    the function or 0 if the function was aborted.
 
@@ -458,7 +458,7 @@ catcher (catch_exceptions_ftype *func,
   /* The caller didn't request that the event be caught, relay the
      event to the next containing catch_errors(). */
 
-  return_to_top_level (caught);
+  throw_exception (caught);
 }
 
 int

@@ -1,6 +1,7 @@
 /* Remote target glue for the SPARC Sparclet ROM monitor.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -204,7 +205,7 @@ sparclet_load (struct serial *desc, char *file, int hashmark)
   pop_target ();
   push_remote_target (monitor_get_dev_name (), 1);
 
-  return_to_top_level (RETURN_QUIT);
+  throw_exception (RETURN_QUIT);
 }
 
 /* Define the monitor command strings. Since these are passed directly

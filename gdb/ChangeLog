@@ -1,5 +1,22 @@
 2002-02-09  Andrew Cagney  <ac131313@redhat.com>
 
+	* defs.h (throw_exception): Rename return_to_top_level.  Update
+	comments.
+	* utils.c (error_stream, internal_verror, quit): Ditto.
+	* top.c (throw_exception, catcher): Ditto.
+	* sparclet-rom.c (sparclet_load): Ditto.
+	* remote.c (interrupt_query, minitelnet): Ditto.
+	* remote-sds.c (interrupt_query): Ditto.
+	* remote-mips.c (mips_error, mips_kill): Ditto.
+	* ocd.c (interrupt_query): Ditto.
+	* monitor.c (monitor_interrupt_query): Ditto.
+	* m3-nat.c (suspend_all_threads, thread_resume_command): Ditto.
+	* target.h: Update comment.
+	
+	* m3-nat.c, ocd.c, sparclet-rom.c: Update copyright.
+	
+2002-02-09  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (TARGET_LONG_DOUBLE_FORMAT): Default to
 	default_double_format.
 	* gdbarch.h, gdbarch.c: Re-generate.

@@ -1,8 +1,8 @@
 /* Interface GDB to Mach 3.0 operating systems.
    (Most) Mach 3.0 related routines live in this file.
 
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
+   2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2939,7 +2939,7 @@ suspend_all_threads (int from_tty)
     {
       warning ("Could not suspend inferior threads.");
       m3_kill_inferior ();
-      return_to_top_level (RETURN_ERROR);
+      throw_exception (RETURN_ERROR);
     }
 
   for (index = 0; index < thread_count; index++)
@@ -3108,7 +3108,7 @@ thread_resume_command (char *args, int from_tty)
     {
       if (current_thread)
 	current_thread = saved_thread;
-      return_to_top_level (RETURN_ERROR);
+      throw_exception (RETURN_ERROR);
     }
 
   ret = thread_info (current_thread,

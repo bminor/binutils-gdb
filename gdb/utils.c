@@ -645,7 +645,7 @@ error_stream (struct ui_file *stream)
   ui_file_put (stream, do_write, gdb_stderr);
   fprintf_filtered (gdb_stderr, "\n");
 
-  return_to_top_level (RETURN_ERROR);
+  throw_exception (RETURN_ERROR);
 }
 
 /* Get the last error message issued by gdb */
@@ -728,7 +728,7 @@ Create a core file containing the current state of GDB? ");
     }
 
   dejavu = 0;
-  return_to_top_level (RETURN_ERROR);
+  throw_exception (RETURN_ERROR);
 }
 
 NORETURN void
@@ -850,7 +850,7 @@ quit (void)
     fprintf_unfiltered (gdb_stderr,
 	       "Quit (expect signal SIGINT when the program is resumed)\n");
 #endif
-  return_to_top_level (RETURN_QUIT);
+  throw_exception (RETURN_QUIT);
 }
 
 /* Control C comes here */

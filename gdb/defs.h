@@ -1082,7 +1082,7 @@ extern NORETURN void internal_error (const char *file, int line,
 
 extern NORETURN void nomem (long) ATTR_NORETURN;
 
-/* Reasons for calling return_to_top_level.  NOTE: all reason values
+/* Reasons for calling throw_exception().  NOTE: all reason values
    must be less than zero.  enum value 0 is reserved for internal use
    as the return value from an initial setjmp().  The function
    catch_exceptions() reserves values >= 0 as legal results from its
@@ -1105,25 +1105,20 @@ enum return_reason
 typedef int return_mask;
 
 /* Throw an exception of type RETURN_REASON.  Will execute a LONG JUMP
-   to the inner most containing exception handler (established using
-   catch_exceptions() or the legacy catch_errors()).
+   to the inner most containing exception handler established using
+   catch_exceptions() (or the legacy catch_errors()).
 
-   Useful when a section of code that caught an exception finds it
-   needs to repropagate that exception up the call chain.
+   Code normally throws an exception using error() et.al.  For various
+   reaons, GDB also contains code that throws an exception directly.
+   For instance, the remote*.c targets contain CNTRL-C signal handlers
+   that propogate the QUIT event up the exception chain.  ``This could
+   be a good thing or a dangerous thing.'' -- the Existential Wombat.  */
 
-   The name return_to_top_level() dates back to a time when GDB had
-   only one exception handler installed at the top level.  This really
-   did return to the top level.  The name should probably be changed.
-
-   NOTE: Some sections of code are using error_begin() in conjunction
-   with return_to_top_level() to throw the initial exception.  That
-   code should, instead, use either error() or error_string().  */
-
-extern NORETURN void return_to_top_level (enum return_reason) ATTR_NORETURN;
+extern NORETURN void throw_exception (enum return_reason) ATTR_NORETURN;
 
 /* Call FUNC(UIOUT, FUNC_ARGS) but wrapped within an exception
    handler.  If an exception (enum return_reason) is thrown using
-   return_to_top_level() than all cleanups installed since
+   throw_exception() than all cleanups installed since
    catch_exceptions() was entered are invoked, the (-ve) exception
    value is then returned by catch_exceptions.  If FUNC() returns
    normally (with a postive or zero return value) then that value is

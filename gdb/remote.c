@@ -2877,7 +2877,7 @@ interrupt_query (void)
 Give up (and stop debugging it)? "))
     {
       target_mourn_inferior ();
-      return_to_top_level (RETURN_QUIT);
+      throw_exception (RETURN_QUIT);
     }
 
   target_terminal_inferior ();
@@ -5717,7 +5717,7 @@ minitelnet (void)
 	      if (query ("Interrupt GDB? "))
 		{
 		  printf_filtered ("Interrupted by user.\n");
-		  return_to_top_level (RETURN_QUIT);
+		  throw_exception (RETURN_QUIT);
 		}
 	      quit_count = 0;
 	    }
