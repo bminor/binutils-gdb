@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -247,7 +247,8 @@ static const char *       get_elf_class               PARAMS ((unsigned int));
 static const char *       get_data_encoding           PARAMS ((unsigned int));
 static const char *       get_osabi_name              PARAMS ((unsigned int));
 static int		  guess_is_rela               PARAMS ((unsigned long));
-static char *		  get_note_type		         PARAMS ((unsigned int));
+static const char *	  get_note_type		         PARAMS ((unsigned int));
+static const char *	  get_netbsd_elfcore_note_type   PARAMS ((unsigned int));
 static int		  process_note		         PARAMS ((Elf32_Internal_Note *));
 static int		  process_corefile_note_segment  PARAMS ((FILE *, bfd_vma, bfd_vma));
 static int		  process_corefile_note_segments PARAMS ((FILE *));
@@ -9055,7 +9056,7 @@ process_mips_specific (file)
   return 1;
 }
 
-static char *
+static const char *
 get_note_type (e_type)
      unsigned e_type;
 {
@@ -9080,6 +9081,64 @@ get_note_type (e_type)
     }
 }
 
+static const char *
+get_netbsd_elfcore_note_type (e_type)
+     unsigned e_type;
+{
+  static char buff[64];
+
+  if (e_type == 1)
+    {
+      /* NetBSD core "procinfo" structure.  */
+      return _("NetBSD procinfo structure");
+    }
+
+  /* As of Jan 2002 there are no other machine-independent notes
+     defined for NetBSD core files.  If the note type is less
+     than the start of the machine-dependent note types, we don't
+     understand it.  */
+
+  if (e_type < 32)
+    {
+      sprintf (buff, _("Unknown note type: (0x%08x)"), e_type);
+      return buff;
+    }
+
+  switch (elf_header.e_machine)
+    {
+    /* On the Alpha, SPARC (32-bit and 64-bit), PT_GETREGS == mach+0
+       and PT_GETFPREGS == mach+2.  */
+
+    case EM_OLD_ALPHA:
+    case EM_ALPHA:
+    case EM_SPARC:
+    case EM_SPARC32PLUS:
+    case EM_SPARCV9:
+      switch (e_type)
+	{
+	case 32+0:	return _("PT_GETREGS (reg structure)");
+	case 32+2:	return _("PT_GETFPREGS (fpreg structure)");
+	default:
+	  break;
+	}
+      break;
+
+    /* On all other arch's, PT_GETREGS == mach+1 and
+       PT_GETFPREGS == mach+3.  */
+    default:
+      switch (e_type)
+	{
+	case 32+1:	return _("PT_GETREGS (reg structure)");
+	case 32+3:	return _("PT_GETFPREGS (fpreg structure)");
+	default:
+	  break;
+	}
+    }
+
+  sprintf (buff, _("PT_FIRSTMACH+%d"), e_type - 32);
+  return buff;
+}
+
 /* Note that by the ELF standard, the name field is already null byte
    terminated, and namesz includes the terminating null byte.
    I.E. the value of namesz for the name "FSF" is 4.
@@ -9089,9 +9148,29 @@ static int
 process_note (pnote)
   Elf32_Internal_Note * pnote;
 {
+  const char *nt;
+
+  if (pnote->namesz == 0)
+    {
+      /* If there is no note name, then use the default set of
+	 note type strings.  */
+      nt = get_note_type (pnote->type);
+    }
+  else if (strncmp (pnote->namedata, "NetBSD-CORE", 11) == 0)
+    {
+      /* NetBSD-specific core file notes.  */
+      nt = get_netbsd_elfcore_note_type (pnote->type);
+    }
+  else
+    {
+      /* Don't recognize this note name; just use the default set of
+	 note type strings.  */
+      nt = get_note_type (pnote->type);
+    }
+
   printf ("  %s\t\t0x%08lx\t%s\n",
 	  pnote->namesz ? pnote->namedata : "(NONE)",
-	  pnote->descsz, get_note_type (pnote->type));
+	  pnote->descsz, nt);
   return 1;
 }
 

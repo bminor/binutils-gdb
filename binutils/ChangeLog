@@ -1,3 +1,11 @@
+2002-01-09  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* readelf.c: Update copyright years.
+	(get_note_type): Return a const char *.
+	(get_netbsd_elfcore_note_type): New function.
+	(process_note): Use get_netbsd_elfcore_note_type to get
+	the note type string for NetBSD ELF core files.
+
 2002-01-06  Steve Ellcey  <sje@cup.hp.com>
 
 	* readelf.c (get_ia64_segment_type): Add support for macros.
