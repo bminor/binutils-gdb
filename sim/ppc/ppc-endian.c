@@ -41,6 +41,61 @@ typedef union {
   unsigned_8 val_8[1];
 } endian_map;
 
+#define SWAP_N(RAW,BYTE_SIZE) \
+    endian_map in; \
+    endian_map out; \
+    int byte_nr; \
+    in.val_##BYTE_SIZE[0] = RAW; \
+    for (byte_nr = 0; byte_nr < BYTE_SIZE; byte_nr++) { \
+      out.val_1[BYTE_SIZE-1-byte_nr] = in.val_1[byte_nr]; \
+    } \
+    return out.val_##BYTE_SIZE[0]; \
+
+#if (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN) && WITH_NTOH
+#define SWAP_2(RAW) return htons (RAW)
+#endif
+
+#ifndef	SWAP_2
+#define SWAP_2(RAW) return (((RAW) >> 8) | ((RAW) << 8))
+#endif
+
+#if !defined(SWAP_4) && (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN) && WITH_NTOH
+#define SWAP_4(RAW) return htonl (RAW)
+#endif
+
+#ifndef SWAP_4
+#define	SWAP_4(RAW) return (((RAW) << 24) | (((RAW) & 0xff00) << 8) | (((RAW) & 0xff0000) >> 8) | ((RAW) >> 24))
+#endif
+
+#ifndef SWAP_8
+#define	SWAP_8(RAW) SWAP_N(RAW,4)
+#endif
+
+/* no need to swap */
+#if (WITH_HOST_BYTE_ORDER \
+     && WITH_TARGET_BYTE_ORDER \
+     && WITH_HOST_BYTE_ORDER == WITH_TARGET_BYTE_ORDER )
+#define ENDIAN_N(NAME,BYTE_SIZE) \
+unsigned_##BYTE_SIZE \
+endian_##NAME##_##BYTE_SIZE(unsigned_##BYTE_SIZE raw_in) \
+{ \
+  return raw_in; \
+}
+#endif
+
+/* always need to swap */
+#if (WITH_HOST_BYTE_ORDER \
+     && WITH_TARGET_BYTE_ORDER \
+     && WITH_HOST_BYTE_ORDER != WITH_TARGET_BYTE_ORDER )
+#define ENDIAN_N(NAME,BYTE_SIZE) \
+unsigned_##BYTE_SIZE \
+endian_##NAME##_##BYTE_SIZE(unsigned_##BYTE_SIZE raw_in) \
+{ \
+  SWAP_##BYTE_SIZE(raw_in); \
+}
+#endif
+
+#ifndef ENDIAN_N
 #define ENDIAN_N(NAME,BYTE_SIZE) \
 unsigned_##BYTE_SIZE \
 endian_##NAME##_##BYTE_SIZE(unsigned_##BYTE_SIZE raw_in) \
@@ -49,17 +104,10 @@ endian_##NAME##_##BYTE_SIZE(unsigned_##BYTE_SIZE raw_in) \
     return raw_in; \
   } \
   else { \
-    endian_map in; \
-    endian_map out; \
-    int byte_nr; \
-    in.val_##BYTE_SIZE[0] = raw_in; \
-    for (byte_nr = 0; byte_nr < BYTE_SIZE; byte_nr++) { \
-      out.val_1[BYTE_SIZE-1-byte_nr] = in.val_1[byte_nr]; \
-    } \
-    return out.val_##BYTE_SIZE[0]; \
+    SWAP_##BYTE_SIZE(raw_in); \
   } \
 }
-
+#endif
 
 ENDIAN_N(h2t, 2)
 ENDIAN_N(h2t, 4)

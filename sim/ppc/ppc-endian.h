@@ -199,7 +199,6 @@ do { \
    Returns the value swapped according to the host/target byte order */
 
 /* no need to swap */
-#if 0
 #if (WITH_HOST_BYTE_ORDER \
      && WITH_TARGET_BYTE_ORDER \
      && WITH_HOST_BYTE_ORDER == WITH_TARGET_BYTE_ORDER )
@@ -227,6 +226,13 @@ do { \
 #define T2H_1(X) (X)
 #endif
 
+#if (defined (__i486__) || defined (__i586__)) && defined(__GNUC__) && WITH_BSWAP && WITH_NTOH
+#undef  htonl
+#undef  ntohl
+#define htonl(IN) __extension__ ({ int _out; __asm__ ("bswap %0" : "=r" (_out) : "0" (IN)); _out; })
+#define ntohl(IN) __extension__ ({ int _out; __asm__ ("bswap %0" : "=r" (_out) : "0" (IN)); _out; })
+#endif
+
 /* have ntoh, little host and unknown target */
 #if (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN \
      && WITH_TARGET_BYTE_ORDER == 0 \
@@ -239,7 +245,6 @@ do { \
 #define T2H_4(X) (CURRENT_TARGET_BYTE_ORDER == CURRENT_HOST_BYTE_ORDER ? (X) : htonl(X))
 #define T2H_2(X) (CURRENT_TARGET_BYTE_ORDER == CURRENT_HOST_BYTE_ORDER ? (X) : htons(X))
 #define T2H_1(X) (CURRENT_TARGET_BYTE_ORDER == CURRENT_HOST_BYTE_ORDER ? (X) : (X))
-#endif
 #endif
 
 /* if all else fails use software */

@@ -1,5 +1,20 @@
 Thu Oct 12 11:35:53 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* ppc-endian.c (SWAP_n): New macros to speed up byte swapping for
+	2, 4, and 8 bytes.
+	(ENDIAN_N): If both target and host byte orders are known, don't
+	bother testing CURRENT_{TARGET,HOST}_BYTE_ORDER.
+
+	* ppc-endian.h (target specific H2T_n/T2H_n macros): Remove #if 0
+	to allow target specific H2T_n/T2H_n macros to be used.
+	(htonl, ntohl): If compiled on a 486 by GCC and WITH_BSWAP is
+	non-zero, redefine the htonl/ntohl macros to use the BSWAP instead
+	of the 3 instruction sequence that runs on 386s.
+
+	* std-config.h (WITH_{HOST,TARGET}_BYTE_ORDER): Don't override if
+	specified on the compile line.
+	(WITH_BSWAP): If not defined, define as 0.
+
 	* Makefile.in (INLINE_CFLAGS): Add -DDEFAULT_INLINE=2 to add
 	default inline support.  Pass INLINE_CFLAGS when compiling.
 
