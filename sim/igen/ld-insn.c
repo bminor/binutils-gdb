@@ -116,7 +116,7 @@ parse_insn_word (line_ref *line,
 	chp = skip_spaces (chp);
       }
     if (strlen_val == 0)
-      error (line, "Empty value field");
+      error (line, "Empty value field\n");
     
     /* break out any conditional fields - { "!" <value> } */
     while (*chp == '!')
@@ -502,6 +502,7 @@ typedef enum {
   model_filter_option,
   multi_sim_option,
   format_names_option,
+  gen_delayed_branch,
   unknown_option,
 } option_names;
 
@@ -513,6 +514,7 @@ static const name_map option_map[] = {
   { "model-filter", model_filter_option },
   { "multi-sim", multi_sim_option },
   { "format-names", format_names_option },
+  { "gen-delayed-branch", gen_delayed_branch },
   { NULL, unknown_option },
 };
 
@@ -577,6 +579,11 @@ parse_option_record (table *file,
 	case format_names_option:
 	  {
 	    filter_parse (&options.format_name_filter, value);
+	    break;
+	  }
+	case gen_delayed_branch:
+	  {
+	    options.gen.delayed_branch = a2i (value);
 	    break;
 	  }
 	case unknown_option:
@@ -701,8 +708,11 @@ parse_insn_mnemonic_record (table *file,
   insn_mnemonic_entry *new_insn_mnemonic = ZALLOC (insn_mnemonic_entry);
   /* parse it */
   new_insn_mnemonic->line = record->line;
-  if (record->nr_fields > insn_mnemonic_format_field)
-    new_insn_mnemonic->format = record->field[insn_mnemonic_format_field];
+  ASSERT (record->nr_fields > insn_mnemonic_format_field);
+  new_insn_mnemonic->format = record->field[insn_mnemonic_format_field];
+  ASSERT (new_insn_mnemonic->format[0] == '"');
+  if (new_insn_mnemonic->format[strlen (new_insn_mnemonic->format) - 1] != '"')
+    error (new_insn_mnemonic->line, "Missing closing double quote in mnemonic field\n");
   if (record->nr_fields > insn_mnemonic_condition_field)
     new_insn_mnemonic->condition = record->field[insn_mnemonic_condition_field];
   new_insn_mnemonic->insn = insn;

@@ -338,12 +338,12 @@ print_itrace_prefix (lf *file,
 {
   const char *prefix = "trace_one_insn (";
   int indent = strlen (prefix);
-  lf_printf (file, "%sSD, CPU, %s, TRACE_LINENUM_P (CPU),\n",
+  lf_printf (file, "%sSD, CPU, %s, TRACE_LINENUM_P (CPU), \\\n",
 	     prefix, (options.gen.delayed_branch ? "cia.ip" : "cia"));
   lf_indent (file, +indent);
-  lf_printf (file, "%sitable[MY_INDEX].file,\n", options.prefix.itable.name);
-  lf_printf (file, "%sitable[MY_INDEX].line_nr,\n", options.prefix.itable.name);
-  lf_printf (file, "\"%s\",\n", phase_lc);
+  lf_printf (file, "%sitable[MY_INDEX].file, \\\n", options.prefix.itable.name);
+  lf_printf (file, "%sitable[MY_INDEX].line_nr, \\\n", options.prefix.itable.name);
+  lf_printf (file, "\"%s\", \\\n", phase_lc);
   lf_printf (file, "\"%%-18s - ");
   return indent;
 }
@@ -363,7 +363,7 @@ print_itrace_format (lf *file,
       /* prefix the format with the insn `name' */
       if (pass == 2)
 	{
-	  lf_printf (file, ",\n");
+	  lf_printf (file, ", \\\n");
 	  lf_printf (file, "%sitable[MY_INDEX].name", options.prefix.itable.name);
 	}
       /* write out the format/args */
@@ -409,7 +409,7 @@ print_itrace_format (lf *file,
 	      chp++;
 	      /* now process it */
 	      if (pass == 2)
-		lf_printf (file, ",\n");
+		lf_printf (file, ", \\\n");
 	      if (strncmp (fmt, "<", 1) == 0)
 		/* implicit long int format */
 		{
@@ -485,6 +485,10 @@ print_itrace (lf *file,
 	      insn_entry *insn,
 	      int idecode)
 {
+  /* NB: Here we escape each eoln. This is so that the the compiler
+     treats a trace function call as a single line.  Consequently any
+     errors in the line are refered back to the same igen assembler
+     source line */
   const char *phase = (idecode) ? "DECODE" : "INSN";
   const char *phase_lc = (idecode) ? "decode" : "insn";
   lf_printf (file, "\n");
@@ -492,12 +496,12 @@ print_itrace (lf *file,
   lf_printf (file, "#if defined (WITH_TRACE)\n");
   lf_printf (file, "/* trace the instructions execution if enabled */\n");
   lf_printf (file, "if (TRACE_%s_P (CPU))\n", phase);
-  lf_printf (file, "  {\n");
-  lf_indent (file, +4);
   if (insn->mnemonics != NULL)
     {
       insn_mnemonic_entry *assembler = insn->mnemonics;
       int is_first = 1;
+      lf_printf (file, "  {\n");
+      lf_indent (file, +4);
       do
 	{
 	  if (assembler->condition != NULL)
@@ -507,8 +511,10 @@ print_itrace (lf *file,
 			 is_first ? "" : "else ",
 			 assembler->condition);
 	      lf_indent (file, +2);
+	      lf_print__line_ref (file, assembler->line);
 	      indent = print_itrace_prefix (file, phase_lc);
 	      print_itrace_format (file, assembler);
+	      lf_print__internal_ref (file);
 	      lf_indent (file, -indent);
 	      lf_indent (file, -2);
 	      if (assembler->next == NULL)
@@ -522,8 +528,10 @@ print_itrace (lf *file,
 		  lf_printf (file, "else\n");
 		  lf_indent (file, +2);
 		}
+	      lf_print__line_ref (file, assembler->line);
 	      indent = print_itrace_prefix (file, phase_lc);
 	      print_itrace_format (file, assembler);
+	      lf_print__internal_ref (file);
 	      lf_indent (file, -indent);
 	      if (!is_first)
 		lf_indent (file, -2);
@@ -534,16 +542,21 @@ print_itrace (lf *file,
 	  assembler = assembler->next;
 	}
       while (assembler != NULL);
+      lf_indent (file, -4);
+      lf_printf (file, "  }\n");
     }
   else
     {
-      int indent = print_itrace_prefix (file, phase_lc);
-      lf_printf (file, "?\",\n");
+      int indent;
+      lf_indent (file, +2);
+      lf_print__line_ref (file, insn->line);
+      indent = print_itrace_prefix (file, phase_lc);
+      lf_printf (file, "?\", \\\n");
       lf_printf (file, "itable[MY_INDEX].name);\n");
+      lf_print__internal_ref (file);
       lf_indent (file, -indent);
+      lf_indent (file, -2);
     }
-  lf_indent (file, -4);
-  lf_printf (file, "  }\n");
   lf_indent_suppress (file);
   lf_printf (file, "#endif\n");
 }

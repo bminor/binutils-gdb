@@ -1,3 +1,19 @@
+Tue Oct 14 11:13:27 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c (print_itrace): Output line-ref to igen source file when
+ 	generating trace statements.
+	(print_itrace_prefix, print_itrace_format): Escape newline at end
+ 	of each line of generated call to trace function.
+
+Mon Oct 13 11:27:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-support.c (gen_support_h): Generate #define NIA. Definition
+ 	dependant on gen-delayed-branch mode.
+
+	* ld-insn.c (parse_insn_mnemonic_record): Check for opening and
+ 	closing double quote in mnemonic field.
+	(parse_option_record): Add gen-delayed-branch option.
+
 Wed Oct  8 13:10:16 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen.c (insn_list_insert): Missing \n in warning.
