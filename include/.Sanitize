@@ -41,6 +41,7 @@ bcs88kcoff.h
 bfd.h
 bout.h
 coff-a29k.h
+coff-h8300.h
 coff-i386.h
 coff-i960.h
 coff-mips.h
@@ -102,7 +103,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.21  1991/11/21 04:06:22  gnu
+# Revision 1.22  1991/11/27 22:25:34  sac
+# Added coff-h8300.h
+#
+# Revision 1.21  1991/11/21  04:06:22  gnu
 # Bring in HP a.out remnants from GDB.  Eliminate obsolete a.out.gnu.h.
 #
 # Revision 1.20  1991/10/25  10:21:10  gnu
