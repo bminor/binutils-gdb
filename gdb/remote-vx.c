@@ -1379,6 +1379,8 @@ vx_open (args, from_tty)
   if (!args)
     error_no_arg ("target machine name");
 
+  target_preopen (from_tty);
+  
   unpush_target (&vx_ops);
   printf ("Attaching remote machine across net...\n");
   fflush (stdout);
@@ -1722,11 +1724,22 @@ vx_close (quitting)
   vx_host = 0;
 }
 
+/* A vxprocess target should be started via "run" not "target".  */
+/*ARGSUSED*/
+static void
+vx_proc_open (name, from_tty)
+     char *name;
+     int from_tty;
+{
+  error ("Use the \"run\" command to start a VxWorks process.");
+}
 
 /* Target ops structure for accessing memory and such over the net */
 
 struct target_ops vx_ops = {
 	"vxworks", "VxWorks target memory via RPC over TCP/IP",
+	"Use VxWorks target memory.  \n\
+Specify the name of the machine to connect to.",
 	vx_open, vx_close, vx_attach, 0, /* vx_detach, */
 	0, 0, /* resume, wait */
 	0, 0, /* read_reg, write_reg */
@@ -1748,7 +1761,8 @@ struct target_ops vx_ops = {
 
 struct target_ops vx_run_ops = {
 	"vxprocess", "VxWorks process",
-	vx_open, vx_proc_close, 0, vx_detach, /* vx_attach */
+	"VxWorks process, started by the \"run\" command.",
+	vx_proc_open, vx_proc_close, 0, vx_detach, /* vx_attach */
 	vx_resume, vx_wait,
 	vx_read_register, vx_write_register,
 	vx_prepare_to_store, vx_convert_to_virtual, vx_convert_from_virtual,

@@ -153,9 +153,18 @@ child_files_info ()
 	  attach_flag? "attached": "child", inferior_pid);
 }
 
+static void
+child_open (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  error ("Use the \"run\" command to start a Unix child process.");
+}
+
 struct target_ops child_ops = {
 	"child", "Unix child process",
-	0, 0,  /* open, close */
+	"Unix child process (started by the \"run\" command).",
+	child_open, 0,  /* open, close */
 	child_attach, child_detach, 
 	child_resume,
 	child_wait,
