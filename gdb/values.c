@@ -1215,7 +1215,7 @@ baseclass_addr (type, index, valaddr, valuep, errp)
       char *vbase_name, *type_name = type_name_no_tag (basetype);
 
       vbase_name = (char *)alloca (strlen (type_name) + 8);
-      sprintf (vbase_name, "_vb$%s", type_name);
+      sprintf (vbase_name, "_vb%c%s", CPLUS_MARKER, type_name);
       /* First look for the virtual baseclass pointer
 	 in the fields.  */
       for (i = n_baseclasses; i < len; i++)

@@ -1,3 +1,12 @@
+Mon Nov 30 12:00:25 1992  Fred Fish  (fnf@cygnus.com)
+
+	* tm-sun4sol2.h:  Add CPLUS_MARKER.  Solaris 2.0 requires '.'
+	rather than '$'.  This particular piece of braindamage is
+	spreading like ooze. It's now infected libiberty, deja-gnu,
+	gdb, and gcc.
+	* values.c (baseclass_addr):  Use CPLUS_MARKER rather than
+	hardwired '$' character.
+
 Sun Nov 29 15:22:42 1992  Fred Fish  (fnf@cygnus.com)
 
 	(Changes to break incredibly ugly, unmaintainable 750 line
