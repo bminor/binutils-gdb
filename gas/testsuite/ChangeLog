@@ -1,3 +1,7 @@
+2004-11-29  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* gas/crx/br_insn.d: Fix error in expected disassembly.
+
 2004-11-29  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
 
 	* testsuite/gas/m32r/rela-1.s: New test.
