@@ -1,3 +1,7 @@
+2002-07-09  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/libdso-1.d: Tweak for change in size of dynamic sections.
+
 2002-07-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* lib/ld-lib.exp (default_ld_nm): Run nm with LC_ALL=C to ensure
