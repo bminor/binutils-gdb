@@ -17,22 +17,20 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* This is a hack.  This is only a hack.  Were this a common source file,
-   rather than a config file specific to BSD on HP m68k's, you would have
-   been instructed to clean this up.  As it is, clean it up if FSF's 
-   HP's-running-ancient-BSD ever go away.  */
+/* Detect whether this is 4.3 or 4.4.  */
 
 #include <errno.h>
 #ifdef	EPROCUNAVAIL
-  /* BSD 4.4 alpha or better */
 
-  /* We can attach to processes using ptrace.  */
+/* BSD 4.4 alpha or better */
+
+/* We can attach to processes using ptrace.  */
 
 #define	ATTACH_DETACH
 #define	PTRACE_ATTACH	10
 #define	PTRACE_DETACH	11
 
-  /* The third argument of ptrace is declared as this type.  */
+/* The third argument of ptrace is declared as this type.  */
 
 #define	PTRACE_ARG3_TYPE	caddr_t
 
@@ -44,32 +42,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	   (offsetof (struct user, u_kproc.kp_proc.p_md.md_regs)), 0) \
     - USRSTACK
 
-  /* This is a piece of magic that is given a register number REGNO
-     and as BLOCKEND the address in the system of the end of the user structure
-     and stores in ADDR the address in the kernel or core dump
-     of that register.  */
+/* No user structure in 4.4, registers are relative to kernel stack
+   which is fixed.  */
+#define KERNEL_U_ADDR	0xFFF00000
 
-#define REGISTER_U_ADDR(addr, blockend, regno)				\
-{									\
-  if (regno < PS_REGNUM)						\
-    addr = (int) &((struct frame *)(blockend))->f_regs[regno];		\
-  else if (regno == PS_REGNUM)						\
-    addr = (int) &((struct frame *)(blockend))->f_stackadj;		\
-  else if (regno == PC_REGNUM)						\
-    addr = (int) &((struct frame *)(blockend))->f_pc;			\
-  else if (regno < FPC_REGNUM)						\
-    addr = (int)							\
-      &((struct user *)0)->u_pcb.pcb_fpregs.fpf_regs[((regno)-FP0_REGNUM)*3];\
-  else if (regno == FPC_REGNUM)						\
-    addr = (int) &((struct user *)0)->u_pcb.pcb_fpregs.fpf_fpcr;	\
-  else if (regno == FPS_REGNUM)						\
-    addr = (int) &((struct user *)0)->u_pcb.pcb_fpregs.fpf_fpsr;	\
-  else									\
-    addr = (int) &((struct user *)0)->u_pcb.pcb_fpregs.fpf_fpiar;	\
-}
+/* FIXME: Is ONE_PROCESS_WRITETEXT still true now that the kernel has
+   copy-on-write?  It not, move it to the 4.3-specific section below
+   (now it is in xm-hp300bsd.h).  */
+
 #else
 
-/* THIS IS BSD 4.3 or something like it.  */
+/* This is BSD 4.3 or something like it.  */
+
+/* Get kernel u area address at run-time using BSD style nlist ().  */
+#define KERNEL_U_ADDR_BSD
+
+#endif
+
+/* This was once broken for 4.4, but probably because we had the wrong
+   KERNEL_U_ADDR.  */
 
 /* This is a piece of magic that is given a register number REGNO
    and as BLOCKEND the address in the system of the end of the user structure
@@ -94,4 +85,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   else									\
     addr = (int) &((struct user *)0)->u_pcb.pcb_fpregs.fpf_fpiar;	\
 }
-#endif

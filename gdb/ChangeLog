@@ -1,5 +1,10 @@
 Fri Aug 20 14:01:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Move KERNEL_U_ADDR from xm-hp300bsd.h to nm-hp300bsd.h and make
+	it conditionalized on 4.3 vs. 4.4.
+	* config/m68k/nm-hp300bsd.h: Move REGISTER_U_ADDR out of 4.3 and
+	4.4 sections; it was identical and now works for 4.4.
+
 	* mips-tdep.c (is_delayed): Use INSN*BRANCH* not ANY_DELAY.
 
 	* printcmd.c (MAKEVA_END): Update this version to use "aligner".

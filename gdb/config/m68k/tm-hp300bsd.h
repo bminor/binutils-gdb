@@ -17,11 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*
- * Configuration file for HP9000/300 series machine running
- * University of Utah's 4.3bsd port.  This is NOT for HP-UX.
- * Problems to hpbsd-bugs@cs.utah.edu
- */
+/* Configuration file for HP9000/300 series machine running BSD,
+   including Utah, Mt. Xinu or Berkeley variants.  This is NOT for HP-UX.
+   Problems to hpbsd-bugs@cs.utah.edu.  */
 
 #define HAVE_68881
 
@@ -31,6 +29,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BPT_VECTOR 0x2
 
 #define TARGET_NBPG 4096
+
+/* For 4.4 this would be 2, but it is OK for us to detect an area a
+   bit bigger than necessary.  This way the same gdb binary can target
+   either 4.3 or 4.4.  */
+
 #define TARGET_UPAGES 3
 
 /* On the HP300, sigtramp is in the u area.  Gak!  User struct is not
@@ -38,7 +41,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    (hence STACK_END_ADDR as opposed to KERNEL_U_ADDR).  This tests
    for the whole u area, since we don't necessarily have hp300bsd
    include files around.  */
-#define SIGTRAMP_START STACK_END_ADDR
+
+/* For 4.4, it is actually right 20 bytes *before* STACK_END_ADDR, so
+   include that in the area we test for.  */
+
+#define SIGTRAMP_START (STACK_END_ADDR - 20)
 #define SIGTRAMP_END (STACK_END_ADDR + TARGET_UPAGES * TARGET_NBPG)
 
 /* Address of end of stack space.  */

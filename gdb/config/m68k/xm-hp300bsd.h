@@ -32,9 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define SET_STACK_LIMIT_HUGE
 
-/* Get kernel u area address at run-time using BSD style nlist ().  */
-#define KERNEL_U_ADDR_BSD
-
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT
 
