@@ -270,7 +270,7 @@ ALL_EMULATIONS = \
 	eelf_i386.o \
 	eelf_i386_be.o \
 	eelf_i386_chaos.o \
-        eelf_i386_ldso.o \
+	eelf_i386_ldso.o \
 	eelf_s390.o \
 	egld960.o \
 	egld960coff.o \
@@ -370,7 +370,8 @@ ALL_64_EMULATIONS = \
 	eelf64bmip.o \
 	eelf64btsmip.o \
 	eelf64ltsmip.o \
-	eelf64hppa.o
+	eelf64hppa.o \
+	eaixppc64.o
 
 
 ALL_EMUL_EXTRA_OFILES = \
@@ -387,7 +388,6 @@ HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
 	ldwrite.h mri.h deffile.h pe-dll.h
 
-ALL_64_EMULATIONS =  	eaixppc64.o 	eelf64_aix.o 	eelf64_ia64.o 	eelf_x86_64.o 	eelf64_s390.o 	eelf64_sparc.o 	eelf64alpha.o 	eelf64bmip.o 	eelf64btsmip.o 	eelf64ltsmip.o 	eelf64hppa.o
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
@@ -475,7 +475,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1122,13 +1122,13 @@ ecrisaout.c: $(srcdir)/emulparams/crisaout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/crisaout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} crisaout "$(tdir_cris)"
 ecriself.c: $(srcdir)/emulparams/criself.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} criself "$(tdir_cris)"
 ecrislinux.c: $(srcdir)/emulparams/crislinux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} crislinux "$(tdir_cris)"
 ed10velf.c: $(srcdir)/emulparams/d10velf.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd10v.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfd10v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d10velf "$(tdir_d10v)"
 ed30velf.c: $(srcdir)/emulparams/d30velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
@@ -1331,7 +1331,7 @@ ei386mach.c: $(srcdir)/emulparams/i386mach.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386mach "$(tdir_i386mach)"
 ei386moss.c: $(srcdir)/emulparams/i386moss.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386moss "$(tdir_i386moss)"
 ei386msdos.c: $(srcdir)/emulparams/i386msdos.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386msdos.sc ${GEN_DEPENDS}

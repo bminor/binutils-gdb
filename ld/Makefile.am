@@ -408,13 +408,13 @@ ecrisaout.c: $(srcdir)/emulparams/crisaout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/crisaout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} crisaout "$(tdir_cris)"
 ecriself.c: $(srcdir)/emulparams/criself.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} criself "$(tdir_cris)"
 ecrislinux.c: $(srcdir)/emulparams/crislinux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} crislinux "$(tdir_cris)"
 ed10velf.c: $(srcdir)/emulparams/d10velf.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd10v.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfd10v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d10velf "$(tdir_d10v)"
 ed30velf.c: $(srcdir)/emulparams/d30velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
@@ -617,7 +617,7 @@ ei386mach.c: $(srcdir)/emulparams/i386mach.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386mach "$(tdir_i386mach)"
 ei386moss.c: $(srcdir)/emulparams/i386moss.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386moss "$(tdir_i386moss)"
 ei386msdos.c: $(srcdir)/emulparams/i386msdos.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386msdos.sc ${GEN_DEPENDS}
