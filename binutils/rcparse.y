@@ -319,6 +319,8 @@ dialog:
 	      dialog.height = $8;
 	      dialog.style = WS_POPUP | WS_BORDER | WS_SYSMENU;
 	      dialog.exstyle = $4;
+	      dialog.menu.named = 1;
+	      dialog.class.named = 1;
 	      dialog.font = NULL;
 	      dialog.ex = NULL;
 	      dialog.controls = NULL;
@@ -338,6 +340,8 @@ dialog:
 	      dialog.height = $8;
 	      dialog.style = WS_POPUP | WS_BORDER | WS_SYSMENU;
 	      dialog.exstyle = $4;
+	      dialog.menu.named = 1;
+	      dialog.class.named = 1;
 	      dialog.font = NULL;
 	      dialog.ex = ((struct dialog_ex *)
 			   res_alloc (sizeof (struct dialog_ex)));
@@ -359,6 +363,8 @@ dialog:
 	      dialog.height = $8;
 	      dialog.style = WS_POPUP | WS_BORDER | WS_SYSMENU;
 	      dialog.exstyle = $4;
+	      dialog.menu.named = 1;
+	      dialog.class.named = 1;
 	      dialog.font = NULL;
 	      dialog.ex = ((struct dialog_ex *)
 			   res_alloc (sizeof (struct dialog_ex)));
@@ -406,11 +412,13 @@ styles:
 	  }
 	| styles FONT numexpr ',' QUOTEDSTRING
 	  {
+	    dialog.style |= DS_SETFONT;
 	    dialog.pointsize = $3;
 	    unicode_from_ascii ((int *) NULL, &dialog.font, $5);
 	  }
 	| styles FONT numexpr ',' QUOTEDSTRING cnumexpr cnumexpr
 	  {
+	    dialog.style |= DS_SETFONT;
 	    dialog.pointsize = $3;
 	    unicode_from_ascii ((int *) NULL, &dialog.font, $5);
 	    if (dialog.ex == NULL)

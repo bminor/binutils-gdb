@@ -1,3 +1,11 @@
+Thu Jul 31 11:51:35 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Ton van Overbeek <tvoverbe@wk.estec.esa.nl>:
+	* rcparse.y (dialog): Default menu and class to be named.
+	(styles): If FONT is seen, set DS_SETFONT in dialog style.
+	* resbin.c (res_to_bin_dialog): Correct computation of font
+	information length.
+
 Wed Jul 30 11:21:06 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Ton van Overbeek <tvoverbe@wk.estec.esa.nl>:
