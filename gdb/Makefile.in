@@ -174,7 +174,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.10.2
+VERSION = 4.10.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -849,7 +849,7 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/i386/nm-sun386.h config/i386/nm-symmetry.h \
 	config/i386/tm-i386aix.h config/i386/tm-i386bsd.h \
 	config/i386/tm-i386lynx.h config/i386/tm-i386m3.h \
-	config/i386/tm-i386mk.hconfig/i386/tm-i386nw.h \
+	config/i386/tm-i386mk.h config/i386/tm-i386nw.h \
 	config/i386/tm-i386v.h \
 	config/i386/tm-i386v4.h config/i386/tm-linux.h \
 	config/i386/tm-sun386.h \

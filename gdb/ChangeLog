@@ -1,3 +1,16 @@
+Sun Oct 17 13:04:49 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.10.3.
+
+Sun Oct 17 09:18:57 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (wait_for_inferior): Clean up comments which were at
+	the top of the file, making them more concise and moving them with
+	the code (Sorry, Randy, but these stream-of-consciousness comments
+	really have to go).  Switch the order of the "&&", which makes
+	things clearer and turns out to be an improvement with respect to
+	side effects and speed.
+
 Sun Oct 17 02:06:01 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* procfs.c:  Handle process exits more elegantly by trapping on
