@@ -1345,7 +1345,7 @@ yes)
 	;;
 esac
 
-configdirs="${sim_target}"
+configdirs="common ${sim_target}"
 subdirs="$configdirs"
 
 

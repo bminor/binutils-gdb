@@ -1,3 +1,9 @@
+Tue Feb  4 13:19:39 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (autoconf-common): New target.
+	* configure.in: Do configure common.
+	* configure: Regenerated.
+
 Thu Jan 23 13:59:52 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* configure configure.in:  Don't configure common anymore.  Files

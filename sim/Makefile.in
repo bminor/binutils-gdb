@@ -20,7 +20,6 @@
 
 VPATH = @srcdir@
 srcdir = @srcdir@
-srcroot = $(srcdir)/..
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -28,12 +27,12 @@ exec_prefix = @exec_prefix@
 host_alias = @host_alias@
 target_alias = @target_alias@
 program_transform_name = @program_transform_name@
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
+bindir = @bindir@
+libdir = @libdir@
 tooldir = $(libdir)/$(target_alias)
 
-datadir = $(prefix)/lib
-mandir = $(prefix)/man
+datadir = @datadir@
+mandir = @mandir@
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -43,18 +42,14 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
-includedir = $(prefix)/include
-docdir = $(datadir)/doc
+infodir = @infodir@
+includedir = @includedir@
 
 SHELL = /bin/sh
 
-# FIXME: Use autoconf's AC_PROG_INSTALL
-INSTALL = $${srcroot}/../install.sh -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
-INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
-INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 
 AR = @AR@
 AR_FLAGS = rc
@@ -99,7 +94,6 @@ FLAGS_TO_PASS = \
 
 all:
 	@rootme=`pwd` ; export rootme ; \
-	srcroot=`cd $(srcdir); pwd`; export srcroot; \
 	for dir in . ${SUBDIRS}; do \
 		if [ "$$dir" = "." ]; then \
 			true; \
@@ -110,7 +104,6 @@ all:
 
 clean mostlyclean: 
 	@rootme=`pwd` ; export rootme ; \
-	srcroot=`cd $(srcdir); pwd`; export srcroot; \
 	for dir in . ${SUBDIRS}; do \
 		if [ "$$dir" = "." ]; then \
 			true; \
@@ -121,7 +114,6 @@ clean mostlyclean:
 
 distclean maintainer-clean realclean:
 	@rootme=`pwd` ; export rootme ; \
-	srcroot=`cd $(srcdir); pwd`; export srcroot; \
 	for dir in . ${SUBDIRS}; do \
 		if [ "$$dir" = "." ]; then \
 			true; \
@@ -133,10 +125,9 @@ distclean maintainer-clean realclean:
 
 install:
 	@rootme=`pwd` ; export rootme ; \
-	srcroot=`cd $(srcdir); pwd`; export srcroot; \
 	for dir in . ${SUBDIRS}; do \
 		if [ "$$dir" = "." ]; then \
-			true;
+			true; \
 		elif [ -d $$dir ]; then \
 			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install); \
 		else true; fi; \
@@ -162,3 +153,20 @@ Makefile: Makefile.in config.status
 
 config.status: configure
 	$(SHELL) ./config.status --recheck
+
+# Utility to run autoconf in each directory that uses the common framework.
+# This is intended to be invoked in $srcdir as
+# "make -f Makefile.in autoconf-common".
+.PHONY: autoconf-common
+autoconf-common:
+	for d in * ; \
+	do \
+	    if [ -d $$d -a -f $$d/configure.in ] ; \
+	    then \
+		if grep SIM_AC_COMMON $$d/configure.in >/dev/null ; \
+		then \
+		    echo "Running autoconf in $$d ..." ; \
+		    (cd $$d && autoconf) ; \
+		fi ; \
+	    fi ; \
+	done
