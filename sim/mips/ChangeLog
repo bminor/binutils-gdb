@@ -1,3 +1,17 @@
+start-sanitize-r5900
+Thu Nov  5 19:40:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* r5900.igen (DIV): Do not clear clear SO/SU when already set.
+
+	* r5900.igen (RSQRT.S): Do not compute 1/srqt(abs(T)) when T
+ 	negative, compute S/sqrt(abs(T)) instead.  Correctly set FCSR
+ 	bits.
+
+	* r5900.igen (RSQRT.S): Handle overflow/underflow better. Check
+ 	sign of FT not FS.
+	(r59fp_store): Clarify "bad value" abort messages.
+
+end-sanitize-r5900
 start-sanitize-tx3904
 Sat Oct 30 09:49:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 

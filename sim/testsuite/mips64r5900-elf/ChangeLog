@@ -1,3 +1,7 @@
+Thu Nov  5 20:22:21 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* f-rsqrt.s: Add tests for 0/sqrt(0) etc.
+
 Thu Oct 29 12:07:06 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* t-psrlvw.s (test_psrlvw): Add test for sign-extension in insn.
