@@ -1,3 +1,8 @@
+2005-02-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/start/dummy.adb: New file.
+	* gdb.ada/start.exp: New testcase.
+
 2005-02-09  Corinna Vinschen  <vinschen@redhat.com>
 
 	* maint.exp: Raise timeout to give Cygwin targeted GDBs more time
