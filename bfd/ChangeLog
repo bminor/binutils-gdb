@@ -1,5 +1,13 @@
 Mon Feb  7 15:02:06 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* archures.c (enum bfd_architecture): Added bfd_arch_powerpc.
+	(archures_init_table): If SELECT_ARCHITECTURES is not defined,
+	added bfd_powerpc_arch.
+	* bfd-in2.h: Rebuilt.
+	* cpu-powerpc.c: New file.
+	* Makefile.in (ALL_MACHINES, CFILES): Added cpu-powerpc.c.
+	Rebuilt dependencies.
+
 	* elfcode.h (bfd_section_from_shdr): Get vma and alignment_power
 	of an SHT_STRTAB section from sh_addr and sh_addralign, rather
 	than just setting them to zero.
