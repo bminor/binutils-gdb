@@ -1,3 +1,35 @@
+2000-04-20  Scott Bambrough <scottb@netwinder.org>
+
+	* arm-linux-nat.c (PIDGET, TIDGET): New.
+	(get_thread_id, GET_THREAD_ID): New.
+	(fetch_nwfpe_register, store_nwfpe_register): New.
+	(fetch_register, store_register): New.
+	(fetch_fpregister, store_fpregister): New.
+	(fill_gregset, supply_gregset): New.
+	(fill_fpregset, supply_fpregset): New.
+	(fetch_fpregs): Modified to use thread id's.
+	(store_fpregs): Modified to use thread id's and
+	fetch_nwfpe_register.
+	(fetch_regs): Modified to use thread id's.
+	(store_regs): Modified to use thread id's.
+	(fetch_inferior_registers): Modified to handle single register
+	fetches.
+	(store_inferior_registers): Modified to handle single register
+	stores.
+	(arm_linux_register_u_addr): Removed.
+
+	* configure.tgt: Added gdbserver to configdirs for arm*-*-linux*.
+
+	* config/arm/linux.mh
+	(NATDEPFILES): Removed core-aout.o.  Added core-regset.o.
+	(LOADLIBES): Define.
+
+	* config/arm/nm-linux.h: Include config/nm-linux.h.
+	(ATTACH_DETACH): Removed.  Defined in config/nm-linux.h.
+	(REGISTER_U_ADDR): Removed.
+	(SVR4_SHARED_LIBS): Removed.  Defined in config/nm-linux.h.
+	(#include "solib.h"): Removed.  Included via config/nm-linux.h.
+
 Thu Apr 20 18:54:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Daniel Berlin <dan@cgsoftware.com> and Tim Mooney

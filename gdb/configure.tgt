@@ -52,7 +52,9 @@ alpha*-*-linux*)	gdb_target=alpha-linux ;;
 arc-*-*)		gdb_target=arc ;;
 
 arm*-wince-pe)		gdb_target=wince ;;
-arm*-*-linux*)		gdb_target=linux ;;
+arm*-*-linux*)		gdb_target=linux 
+			configdirs="$configdirs gdbserver"
+			;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed
                         configdirs="$configdirs rdi-share"
