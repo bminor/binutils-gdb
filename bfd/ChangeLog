@@ -1,3 +1,46 @@
+Thu Sep 26 11:24:24 1991  Per Bothner  (bothner at cygnus.com)
+
+	* reloc.c (bfd_perform_relocation): Fix pc-relative relocation
+	to use correct segment.
+
+Mon Sep 23 18:24:34 1991  Per Bothner  (bothner at cygnus.com)
+
+	* aoutx.h (print_symbol):  Handle missing symbol->name.
+
+Fri Sep 20 12:26:01 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* aoutf1.h (swapcore_sparc):  Change name of USRSTACK, fix comment
+	at top of routine.
+
+Tue Sep 17 17:23:49 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* oasys.c, configure.in, config/h-irix3, config/t-irix3:
+	add sgi/irix support.
+
+Thu Sep 12 14:29:09 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Changes for the AMD 29000 Ultracomputer port from David Wood.
+	(wood@nyu.edu).
+
+	* opncls.c (bfd_fdopenr):  Handle NO_FCNTL.
+
+	* Makefile.in:  Make subdirs work by using $(INCDIR) in the
+	crude dependencies.
+
+	* coffcode.h (coff_real_object_p):  Pass information about the
+	current file's coff symbol format to BFD via the coff_data struct.
+	(coff_find_nearest_line):  obj_icof => coff_data.
+	(coff_swap_sym_{in,out}):  Check that SYMNMLEN == E_SYMNMLEN.
+	(coff_swap_aux_{in,out}):  Check that FILNMLEN == E_FILNMLEN
+	and DIMNUM == E_DIMNUM.
+	* configure.in:  Handle a29k-*-* hosts, and targets 
+	a29k-*-coff, a29k-*-aout, and a29k-*-sym1.
+	* libcoff-in.h:  Add local_n_btmask, local_n_btshft,
+	local_n_tmask, local_n_tshift, local_symesz, local_auxesz,
+	local_linesz to `coff_data' (tdata) struct.	
+	(coff_data, coff_data_type, coff_tdata):  Rename struct icofdata.
+	* config/h-ultra3:  Handle a29k-*-* hosts as Ultracomputers.
+
 Thu Sep 12 14:07:22 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* Makefile.in: $(MAKE) for make, $(docdir) for doc

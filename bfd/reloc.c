@@ -84,7 +84,7 @@ The symbol to relocate against was undefined.
 
 $  bfd_reloc_undefined,
 
-The relocaction was performed, but may not be ok - presently generated
+The relocation was performed, but may not be ok - presently generated
 only when linking i960 coff files with i960 b.out symbols.
 
 $  bfd_reloc_dangerous
@@ -131,7 +131,7 @@ $} arelent;
 @table @code
 @item sym_ptr_ptr
 The symbol table pointer points to a pointer to the symbol ascociated with the
-relocation request. This would naturaly be the pointer into the table
+relocation request. This would naturally be the pointer into the table
 returned by the back end's get_symtab action. @xref{Symbols}. The
 symbol is referenced through a pointer to a pointer so that tools like
 the linker can fixup all the symbols of the same name by modifying
@@ -148,7 +148,7 @@ two bytes of a four byte word would not touch the first byte pointed
 to in a big endian world.
 @item addend
 The addend is a value provided by the back end to be added (!) to the
-relocation offset. It's interpretation is dependent upon the howto.
+relocation offset. Its interpretation is dependent upon the howto.
 For example, on the 68k the code:
 
 *+
@@ -513,7 +513,7 @@ DEFUN(bfd_perform_relocation,(abfd,
 
         
         relocation -= 
-          output_base +   input_section->output_offset;
+          input_section->output_section->vma + input_section->output_offset;
 
         if (howto->pcrel_offset == true) {
           relocation -= reloc_entry->address;
