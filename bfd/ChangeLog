@@ -14,6 +14,8 @@ Mon Aug  1 12:04:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 	entry.  Set type to STT_OBJECT.
 	(elf_link_output_extsym): Don't set type of weak defined symbol to
 	STB_WEAK if symbol was referenced.
+	(map_program_segments): Check DYNAMIC as well as EXEC_P.
+	(assign_file_positions_except_relocs): Likewise.
 	* elf32-i386.c (elf_i386_create_dynamic_sections): Set type of
 	_GLOBAL_OFFSET_TABLE to STT_OBJECT.
 	(elf_i386_check_relocs): Ignore local PLT32 relocs.
