@@ -109,10 +109,10 @@ unsigned char
 mywait (char *status)
 {
   int pid;
-  union wait w;
+  int w;
 
   enable_async_io ();
-  pid = waitpid (inferior_pid, (int *)&w, 0);
+  pid = waitpid (inferior_pid, &w, 0);
   disable_async_io ();
   if (pid != inferior_pid)
     perror_with_name ("wait");

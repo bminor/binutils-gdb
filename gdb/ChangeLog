@@ -1,5 +1,10 @@
 2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/linux-low.c (mywait): Change argument to waitpid
+	to be an integer instead of a `union wait'.
+
+2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
+
 	* mips-linux-nat.c: Call the operating system GNU/Linux.
 	* mips-linux-tdep.c: Likewise.
 	* mips-tdep.c: Likewise.
