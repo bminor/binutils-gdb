@@ -23,12 +23,13 @@ typedef PTR ttystate;
 
 struct _serial_t
 {
-  int fd;
-  struct serial_ops *ops;
-  ttystate ttystate;
-  int bufcnt;
-  unsigned char *bufp;
-  unsigned char buf[BUFSIZ];
+  int fd;			/* File descriptor */
+  struct serial_ops *ops;	/* Function vector */
+  ttystate ttystate;		/* Not used (yet) */
+  int bufcnt;			/* Amount of data in receive buffer */
+  unsigned char *bufp;		/* Current byte */
+  unsigned char buf[BUFSIZ];	/* Da buffer itself */
+  int current_timeout;		/* (termio{s} only), last value of VTIME */
 };
 
 typedef struct _serial_t *serial_t;
