@@ -1,5 +1,8 @@
 Tue Feb  8 16:00:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* ecoff.c (ecoff_build_debug): Fix "/*" in comment to silence
+	complaint from "gcc -Wall".
+
 	* configure.in (alpha-*-netware*): New target, like alpha-*-osf*.
 
 	* config/tc-alpha.c (GP_ADJUSTMENT): Move definition to start of
