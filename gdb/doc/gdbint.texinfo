@@ -2386,6 +2386,14 @@ NetBSD using the ELF executable format
 @item GDB_OSABI_WINCE
 Windows CE
 
+@findex GDB_OSABI_GO32
+@item GDB_OSABI_GO32
+DJGPP
+
+@findex GDB_OSABI_NETWARE
+@item GDB_OSABI_NETWARE
+Novell NetWare
+
 @findex GDB_OSABI_ARM_EABI_V1
 @item GDB_OSABI_ARM_EABI_V1
 ARM Embedded ABI version 1

@@ -40,6 +40,8 @@ static const char * const gdb_osabi_names[] =
   "NetBSD a.out",
   "NetBSD ELF",
   "Windows CE",
+  "DJGPP",
+  "NetWare",
 
   "ARM EABI v1",
   "ARM EABI v2",

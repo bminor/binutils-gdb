@@ -1,3 +1,8 @@
+2002-06-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* osabi.h (gdb_osabi): Add GDB_OSABI_GO32 and GDB_OSABI_NETWARE.
+	* osabi.c (gdb_osabi_names): Add "DJGPP" and "NetWare".
+
 2002-06-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* sparcl-tdep.c: Use __CYGWIN__ instead of __CYGWIN32__.
