@@ -1,3 +1,8 @@
+2002-04-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* arm-tdep.c (arm_breakpoint_from_pc): Make static.  Make return
+	type const.
+
 2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* alphafbsd-tdep.c: Update copyright years.  Include

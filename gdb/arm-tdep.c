@@ -2111,7 +2111,7 @@ static const char arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
    memory.  It is nice that this is the same size as a handle -
    otherwise remote-rdp will have to change. */
 
-unsigned char *
+static const unsigned char *
 arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
