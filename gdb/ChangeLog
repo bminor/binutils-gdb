@@ -1,3 +1,7 @@
+2003-04-17  Richard Henderson  <rth@redhat.com>
+
+	* remote.c (minitelnet): Don't redeclare escape_count, echo_check.
+
 2003-04-17  Michael Snyder  <msnyder@redhat.com>
 	    Karen Bennet  <bennet@redhat.com>
 
