@@ -60,8 +60,6 @@ struct _sim_cpu {
   M32RBF_CPU_DATA cpu_data;
 #elif defined (WANT_CPU_M32RXF)
   M32RXF_CPU_DATA cpu_data;
-#elif defined (WANT_CPU_M32R2F)
-  M32R2F_CPU_DATA cpu_data;
 #endif
 };
 

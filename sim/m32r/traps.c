@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-main.h"
 #include "targ-vals.h"
 
-#define TRAP_FLUSH_CACHE 12
 /* The semantic code invokes this for invalid (unrecognized) instructions.
    CIA is the address with the invalid insn.
    VPC is the virtual pc of the following insn.  */
@@ -69,17 +68,11 @@ m32r_core_signal (SIM_DESC sd, SIM_CPU *current_cpu, sim_cia cia,
 	  /* sm not changed */
 	  m32rbf_h_psw_set (current_cpu, m32rbf_h_psw_get (current_cpu) & 0x80);
 	}
-      else if (MACH_NUM (CPU_MACH (current_cpu)) == MACH_M32RX)
+      else
 	{
 	  m32rxf_h_bpsw_set (current_cpu, m32rxf_h_psw_get (current_cpu));
 	  /* sm not changed */
 	  m32rxf_h_psw_set (current_cpu, m32rxf_h_psw_get (current_cpu) & 0x80);
-	}
-      else
-	{
-	  m32r2f_h_bpsw_set (current_cpu, m32r2f_h_psw_get (current_cpu));
-	  /* sm not changed */
-	  m32r2f_h_psw_set (current_cpu, m32r2f_h_psw_get (current_cpu) & 0x80);
 	}
       a_m32r_h_cr_set (current_cpu, H_CR_BPC, cia);
 
@@ -138,10 +131,8 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
   if (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT)
     {
       /* The new pc is the trap vector entry.
-	 We assume there's a branch there to some handler.
-         Use cr5 as EVB (EIT Vector Base) register.  */
-      /* USI new_pc = EIT_TRAP_BASE_ADDR + num * 4; */
-      USI new_pc = a_m32r_h_cr_get (current_cpu, 5) + 0x40 + num * 4;
+	 We assume there's a branch there to some handler.  */
+      USI new_pc = EIT_TRAP_BASE_ADDR + num * 4;
       return new_pc;
     }
 
@@ -178,15 +169,9 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 		       sim_stopped, SIM_SIGTRAP);
       break;
 
-    case TRAP_FLUSH_CACHE:
-      /* Do nothing.  */
-      break;
-
     default :
       {
-	/* USI new_pc = EIT_TRAP_BASE_ADDR + num * 4; */
-        /* Use cr5 as EVB (EIT Vector Base) register.  */
-        USI new_pc = a_m32r_h_cr_get (current_cpu, 5) + 0x40 + num * 4;
+	USI new_pc = EIT_TRAP_BASE_ADDR + num * 4;
 	return new_pc;
       }
     }

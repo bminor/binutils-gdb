@@ -1,15 +1,3 @@
-2003-12-02  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
-
-        * Makefile.in : Add new machine m32r2.
-        * m32r2.c : New file for m32r2.
-	* mloop2.in : Ditto
-	* model2.c : Ditto
-	* sem2-switch.c : Ditto
-        * m32r-sim.h : Add EVB register.
-        * sim-if.h : Ditto
-        * sim-main.h : Ditto
-        * traps.c : Ditto
-
 2003-09-08  Dave Brolley  <brolley@redhat.com>
 
 	On behalf of Doug Evans <dje@sebabeach.org>

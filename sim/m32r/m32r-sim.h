@@ -34,7 +34,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ACC1H_REGNUM	25
 #define BBPSW_REGNUM	26
 #define BBPC_REGNUM	27
-#define EVB_REGNUM	28
 
 extern int m32r_decode_gdb_ctrl_regnum (int);
 
