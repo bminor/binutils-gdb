@@ -1,3 +1,7 @@
+Mon Nov 24 14:57:58 1997  Doug Evans  <devans@seba.cygnus.com>
+
+	* cpu.h (TRACE_COND_BR): Use TRACE_BRANCH_P, not TRACE_ALU_P.
+
 Sat Nov 22 21:42:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (engine_step): Replace SIGTRAP with SIM_SIGTRAP.

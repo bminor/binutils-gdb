@@ -283,7 +283,7 @@ do {									\
 
 #define TRACE_UCOND_BR(indx, target)					\
 do {									\
-  if (TRACE_ALU_P (CPU)) {						\
+  if (TRACE_BRANCH_P (CPU)) {						\
     trace_one_insn (SD, CPU, cia.ip, 1, itable[indx].file,		\
 		    itable[indx].line_nr, "branch",			\
 		    tic80_trace_ucond_br (indx, target));		\
