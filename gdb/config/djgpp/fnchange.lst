@@ -264,6 +264,13 @@
 @V@/sim/testsuite/sim/arm/misaligned1.ms @V@/sim/testsuite/sim/arm/mis1.ms
 @V@/sim/testsuite/sim/arm/misaligned2.ms @V@/sim/testsuite/sim/arm/mis2.ms
 @V@/sim/testsuite/sim/arm/misaligned3.ms @V@/sim/testsuite/sim/arm/mis3.ms
+@V@/sim/testsuite/sim/frv/interrupts/Ipipe-fr400.cgs @V@/sim/testsuite/sim/frv/interrupts/Ip-fr400.cgs
+@V@/sim/testsuite/sim/frv/interrupts/Ipipe-fr500.cgs @V@/sim/testsuite/sim/frv/interrupts/Ip-fr500.cgs
+@V@/sim/testsuite/sim/frv/interrupts/badalign-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-badalign.cgs
+@V@/sim/testsuite/sim/frv/interrupts/compound-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-compound.cgs
+@V@/sim/testsuite/sim/frv/interrupts/data_store_error-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-data_store_error.cgs
+@V@/sim/testsuite/sim/frv/interrupts/fp_exception-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-fp_exception.cgs
+@V@/sim/testsuite/sim/frv/interrupts/insn_access_error-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-insn_access_error.cgs
 @V@/tcl/cygwin/tclConfig.sh.in @V@/tcl/cygwin/tclConfig.sh-in
 @V@/tcl/doc/ExprLongObj.3 @V@/tcl/doc/ExprLObj.3
 @V@/tcl/mac/tclMacBOAAppInit.c @V@/tcl/mac/tclBOAAppInit.c

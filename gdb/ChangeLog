@@ -1,3 +1,14 @@
+2003-10-20  Michael Chastain  <mec@shout.net>
+
+	* config/djgpp/fnchange.lst: Add lines for:
+	sim/testsuite/sim/frv/interrupts/Ipipe-fr400.cgs,
+	sim/testsuite/sim/frv/interrupts/Ipipe-fr500.cgs,
+	sim/testsuite/sim/frv/interrupts/badalign-fr550.cgs,
+	sim/testsuite/sim/frv/interrupts/compound-fr550.cgs,
+	sim/testsuite/sim/frv/interrupts/data_store_error-fr550.cgs,
+	sim/testsuite/sim/frv/interrupts/fp_exception-fr550.cgs,
+	sim/testsuite/sim/frv/interrupts/insn_access_error-fr550.cgs.
+
 2003-10-20  Andrew Cagney  <cagney@redhat.com>
 
 	* values.c (register_value_being_returned): Update comments.  Use
