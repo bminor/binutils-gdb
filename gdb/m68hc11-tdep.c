@@ -896,7 +896,7 @@ m68hc11_frame_this_id (struct frame_info *next_frame,
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (inside_entry_file (func))
+  if (deprecated_inside_entry_file (func))
     return;
 
   /* Hopefully the prologue analysis either correctly determined the

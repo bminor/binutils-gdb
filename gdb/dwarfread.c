@@ -1868,8 +1868,8 @@ read_file_scope (struct dieinfo *dip, char *thisdie, char *enddie,
   if (objfile->ei.entry_point >= dip->at_low_pc &&
       objfile->ei.entry_point < dip->at_high_pc)
     {
-      objfile->ei.entry_file_lowpc = dip->at_low_pc;
-      objfile->ei.entry_file_highpc = dip->at_high_pc;
+      objfile->ei.deprecated_entry_file_lowpc = dip->at_low_pc;
+      objfile->ei.deprecated_entry_file_highpc = dip->at_high_pc;
     }
   set_cu_language (dip);
   if (dip->at_producer != NULL)

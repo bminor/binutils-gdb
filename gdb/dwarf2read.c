@@ -2039,8 +2039,8 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
   if (objfile->ei.entry_point >= lowpc &&
       objfile->ei.entry_point < highpc)
     {
-      objfile->ei.entry_file_lowpc = lowpc;
-      objfile->ei.entry_file_highpc = highpc;
+      objfile->ei.deprecated_entry_file_lowpc = lowpc;
+      objfile->ei.deprecated_entry_file_highpc = highpc;
     }
 
   attr = dwarf_attr (die, DW_AT_language);

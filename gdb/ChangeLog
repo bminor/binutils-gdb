@@ -1,3 +1,38 @@
+2003-09-12  Andrew Cagney  <cagney@redhat.com>
+
+	* objfiles.h (struct entry_info): Deprecate "entry_file_lowpc" and
+	"entry_file_highpc".  Update comments.
+	* defs.h (deprecated_inside_entry_file): Rename
+	"inside_entry_file".
+	* blockframe.c (deprecated_inside_entry_file): Rename
+	"inside_entry_file".
+	* frame.c (get_prev_frame): Update.  Use if 0 instead of #if 0.
+	* vax-tdep.c (vax_frame_chain): Update.
+	* sh64-tdep.c (sh64_frame_chain): Update.
+	* sh-tdep.c (sh_frame_chain): Update.
+	* rs6000-tdep.c (rs6000_frame_chain): Update.
+	* ns32k-tdep.c (ns32k_frame_chain): Update.
+	* mips-tdep.c (mips_frame_chain): Update.
+	* m68hc11-tdep.c (m68hc11_frame_this_id): Update.
+	* m32r-tdep.c (m32r_frame_this_id): Update.
+	* i386-interix-tdep.c (i386_interix_frame_chain_valid): Update.
+	* frv-tdep.c (frv_frame_this_id): Update.
+	* d10v-tdep.c (d10v_frame_this_id): Update.
+	* cris-tdep.c (cris_frame_chain): Update.
+	* blockframe.c (legacy_frame_chain_valid): Update.
+	* avr-tdep.c (avr_frame_this_id): Update.
+	* arm-tdep.c (arm_prologue_this_id): Update.
+	* alpha-tdep.c (alpha_heuristic_frame_this_id): Update.
+	* objfiles.c (objfile_relocate): Update.
+	* mipsread.c (mipscoff_symfile_read): Update.
+	(mipscoff_symfile_read): Update.
+	* mdebugread.c (parse_partial_symbols): Update.
+	* dwarfread.c (read_file_scope): Update.
+	* dwarf2read.c (read_file_scope): Update.
+	* dbxread.c (read_dbx_symtab): Update.
+	(read_dbx_symtab): Update.
+	* coffread.c (complete_symtab): Update.
+
 2003-09-12  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* top.c (quit_target): New static helper function.

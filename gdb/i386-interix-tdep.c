@@ -128,8 +128,8 @@ i386_interix_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
      it'll make the correct test.  */
   return ((get_frame_type (thisframe) == SIGTRAMP_FRAME)
           || (chain != 0
-              && !inside_entry_file (read_memory_integer
-                                     (thisframe->frame + 4, 4))));
+              && !deprecated_inside_entry_file (read_memory_integer
+						(thisframe->frame + 4, 4))));
 }
 
 /* We want to find the previous frame, which on Interix is tricky when

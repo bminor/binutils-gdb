@@ -487,7 +487,8 @@ sh_frame_chain (struct frame_info *frame)
 				   get_frame_base (frame),
 				   get_frame_base (frame)))
     return get_frame_base (frame);	/* dummy frame same as caller's frame */
-  if (get_frame_pc (frame) && !inside_entry_file (get_frame_pc (frame)))
+  if (get_frame_pc (frame)
+      && !deprecated_inside_entry_file (get_frame_pc (frame)))
     return read_memory_integer (get_frame_base (frame)
 				+ get_frame_extra_info (frame)->f_offset, 4);
   else

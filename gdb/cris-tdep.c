@@ -1248,7 +1248,7 @@ cris_frame_chain (struct frame_info *fi)
     {
       return get_frame_base (fi);
     }
-  else if (!inside_entry_file (get_frame_pc (fi)))
+  else if (!deprecated_inside_entry_file (get_frame_pc (fi)))
     {
       return read_memory_unsigned_integer (get_frame_base (fi), 4);
     }

@@ -787,10 +787,10 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
       objfile->ei.entry_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
     }
 
-  if (objfile->ei.entry_file_lowpc != INVALID_ENTRY_LOWPC)
+  if (objfile->ei.deprecated_entry_file_lowpc != INVALID_ENTRY_LOWPC)
     {
-      objfile->ei.entry_file_lowpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-      objfile->ei.entry_file_highpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+      objfile->ei.deprecated_entry_file_lowpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+      objfile->ei.deprecated_entry_file_highpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
     }
 
   if (objfile->ei.main_func_lowpc != INVALID_ENTRY_LOWPC)

@@ -53,7 +53,7 @@ void _initialize_blockframe (void);
    A PC of zero is always considered to be the bottom of the stack. */
 
 int
-inside_entry_file (CORE_ADDR addr)
+deprecated_inside_entry_file (CORE_ADDR addr)
 {
   if (addr == 0)
     return 1;
@@ -68,8 +68,8 @@ inside_entry_file (CORE_ADDR addr)
       if (DEPRECATED_PC_IN_CALL_DUMMY (addr, 0, 0))
 	return 0;
     }
-  return (addr >= symfile_objfile->ei.entry_file_lowpc &&
-	  addr < symfile_objfile->ei.entry_file_highpc);
+  return (addr >= symfile_objfile->ei.deprecated_entry_file_lowpc &&
+	  addr < symfile_objfile->ei.deprecated_entry_file_highpc);
 }
 
 /* Test a specified PC value to see if it is in the range of addresses
@@ -611,7 +611,7 @@ legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
   /* NOTE/drow 2002-12-25: should there be a way to disable this check?  It
      assumes a single small entry file, and the way some debug readers (e.g.
      dbxread) figure out which object is the entry file is somewhat hokey.  */
-  if (inside_entry_file (frame_pc_unwind (fi)))
+  if (deprecated_inside_entry_file (frame_pc_unwind (fi)))
       return 0;
 
   return 1;

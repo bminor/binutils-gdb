@@ -1803,7 +1803,7 @@ rs6000_frame_chain (struct frame_info *thisframe)
        frame.  */
     return read_memory_addr (get_frame_base (thisframe), wordsize);
 
-  if (inside_entry_file (get_frame_pc (thisframe))
+  if (deprecated_inside_entry_file (get_frame_pc (thisframe))
       || get_frame_pc (thisframe) == entry_point_address ())
     return 0;
 

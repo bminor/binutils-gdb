@@ -1138,7 +1138,7 @@ alpha_heuristic_frame_this_id (struct frame_info *next_frame,
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (inside_entry_file (info->start_pc))
+  if (deprecated_inside_entry_file (info->start_pc))
     return;
 
   *this_id = frame_id_build (info->vfp, info->start_pc);

@@ -327,8 +327,8 @@ init_entry_point_info (struct objfile *objfile)
       /* Examination of non-executable.o files.  Short-circuit this stuff.  */
       objfile->ei.entry_point = INVALID_ENTRY_POINT;
     }
-  objfile->ei.entry_file_lowpc = INVALID_ENTRY_LOWPC;
-  objfile->ei.entry_file_highpc = INVALID_ENTRY_HIGHPC;
+  objfile->ei.deprecated_entry_file_lowpc = INVALID_ENTRY_LOWPC;
+  objfile->ei.deprecated_entry_file_highpc = INVALID_ENTRY_HIGHPC;
   objfile->ei.entry_func_lowpc = INVALID_ENTRY_LOWPC;
   objfile->ei.entry_func_highpc = INVALID_ENTRY_HIGHPC;
   objfile->ei.main_func_lowpc = INVALID_ENTRY_LOWPC;

@@ -303,7 +303,7 @@ struct breakpoint;
 
 extern int inside_entry_func (CORE_ADDR);
 
-extern int inside_entry_file (CORE_ADDR addr);
+extern int deprecated_inside_entry_file (CORE_ADDR addr);
 
 extern int inside_main_func (CORE_ADDR pc);
 

@@ -391,8 +391,8 @@ complete_symtab (char *name, CORE_ADDR start_addr, unsigned int size)
   if (current_objfile->ei.entry_point >= current_source_start_addr &&
       current_objfile->ei.entry_point < current_source_end_addr)
     {
-      current_objfile->ei.entry_file_lowpc = current_source_start_addr;
-      current_objfile->ei.entry_file_highpc = current_source_end_addr;
+      current_objfile->ei.deprecated_entry_file_lowpc = current_source_start_addr;
+      current_objfile->ei.deprecated_entry_file_highpc = current_source_end_addr;
     }
 }
 

@@ -3627,8 +3627,8 @@ parse_partial_symbols (struct objfile *objfile)
       if (objfile->ei.entry_point >= save_pst->textlow &&
 	  objfile->ei.entry_point < save_pst->texthigh)
 	{
-	  objfile->ei.entry_file_lowpc = save_pst->textlow;
-	  objfile->ei.entry_file_highpc = save_pst->texthigh;
+	  objfile->ei.deprecated_entry_file_lowpc = save_pst->textlow;
+	  objfile->ei.deprecated_entry_file_highpc = save_pst->texthigh;
 	}
 
       /* The objfile has its functions reordered if this partial symbol

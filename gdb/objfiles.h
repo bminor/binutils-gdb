@@ -43,14 +43,28 @@ struct symtab;
    to the user executable's recorded entry point, as if the call had been made
    directly by the kernel.
 
-   The traditional gdb method of using this info is to use the recorded entry
-   point to set the variables entry_file_lowpc and entry_file_highpc from
-   the debugging information, where these values are the starting address
-   (inclusive) and ending address (exclusive) of the instruction space in the
-   executable which correspond to the "startup file", I.E. crt0.o in most
-   cases.  This file is assumed to be a startup file and frames with pc's
-   inside it are treated as nonexistent.  Setting these variables is necessary
-   so that backtraces do not fly off the bottom of the stack.
+   The traditional gdb method of using this info is to use the
+   recorded entry point to set the variables
+   deprecated_entry_file_lowpc and deprecated_entry_file_highpc from
+   the debugging information, where these values are the starting
+   address (inclusive) and ending address (exclusive) of the
+   instruction space in the executable which correspond to the
+   "startup file", I.E. crt0.o in most cases.  This file is assumed to
+   be a startup file and frames with pc's inside it are treated as
+   nonexistent.  Setting these variables is necessary so that
+   backtraces do not fly off the bottom of the stack.
+
+   NOTE: cagney/2003-09-09: It turns out that this "traditional"
+   method doesn't work.  Corinna writes: ``It turns out that the call
+   to deprecated_inside_entry_file destroys a meaningful backtrace
+   under some conditions.  E. g. the backtrace tests in the asm-source
+   testcase are broken for some targets.  In this test the functions
+   are all implemented as part of one file and the testcase is not
+   necessarily linked with a start file (depending on the target).
+   What happens is, that the first frame is printed normaly and
+   following frames are treated as being inside the enttry file then.
+   This way, only the #0 frame is printed in the backtrace output.''
+   Ref "frame.c" "NOTE: vinschen/2003-04-01".
 
    Gdb also supports an alternate method to avoid running off the bottom
    of the stack.
@@ -116,8 +130,8 @@ struct entry_info
     /* Start (inclusive) and end (exclusive) of object file containing the
        entry point. */
 
-    CORE_ADDR entry_file_lowpc;
-    CORE_ADDR entry_file_highpc;
+    CORE_ADDR deprecated_entry_file_lowpc;
+    CORE_ADDR deprecated_entry_file_highpc;
 
     /* Start (inclusive) and end (exclusive) of the user code main() function. */
 

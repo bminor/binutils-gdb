@@ -1844,8 +1844,9 @@ get_prev_frame (struct frame_info *this_frame)
      checking for "main" in the minimal symbols.  With that fixed
      asm-source tests now stop in "main" instead of halting the
      backtrace in wierd and wonderful ways somewhere inside the entry
-     file.  Suspect that inside_entry_file and inside_entry_func tests
-     were added to work around that (now fixed) case.  */
+     file.  Suspect that deprecated_inside_entry_file and
+     inside_entry_func tests were added to work around that (now
+     fixed) case.  */
   /* NOTE: cagney/2003-07-15: danielj (if I'm reading it right)
      suggested having the inside_entry_func test use the
      inside_main_func msymbol trick (along with entry_point_address I
@@ -1884,7 +1885,6 @@ get_prev_frame (struct frame_info *this_frame)
     }
   this_frame->prev_p = 1;
 
-#if 0
   /* If we're inside the entry file, it isn't valid.  Don't apply this
      test to a dummy frame - dummy frame PC's typically land in the
      entry file.  Don't apply this test to the sentinel frame.
@@ -1896,17 +1896,19 @@ get_prev_frame (struct frame_info *this_frame)
   /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
      then it should probably be moved to before the ->prev_p test,
      above.  */
-  /* NOTE: vinschen/2003-04-01: Disabled.  It turns out that the call to
-     inside_entry_file destroys a meaningful backtrace under some
-     conditions.  E. g. the backtrace tests in the asm-source testcase
-     are broken for some targets.  In this test the functions are all
-     implemented as part of one file and the testcase is not necessarily
-     linked with a start file (depending on the target).  What happens is,
-     that the first frame is printed normaly and following frames are
-     treated as being inside the enttry file then.  This way, only the
-     #0 frame is printed in the backtrace output.  */
-  if (this_frame->type != DUMMY_FRAME && this_frame->level >= 0
-      && inside_entry_file (get_frame_pc (this_frame)))
+  /* NOTE: vinschen/2003-04-01: Disabled.  It turns out that the call
+     to deprecated_inside_entry_file destroys a meaningful backtrace
+     under some conditions.  E. g. the backtrace tests in the
+     asm-source testcase are broken for some targets.  In this test
+     the functions are all implemented as part of one file and the
+     testcase is not necessarily linked with a start file (depending
+     on the target).  What happens is, that the first frame is printed
+     normaly and following frames are treated as being inside the
+     enttry file then.  This way, only the #0 frame is printed in the
+     backtrace output.  */
+  if (0
+      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
+      && deprecated_inside_entry_file (get_frame_pc (this_frame)))
     {
       if (frame_debug)
 	{
@@ -1916,7 +1918,6 @@ get_prev_frame (struct frame_info *this_frame)
 	}
       return NULL;
     }
-#endif
 
   /* If any of the old frame initialization methods are around, use
      the legacy get_prev_frame method.  */
