@@ -25,7 +25,7 @@ Things-to-keep:
 
 cdtest-foo.cc
 cdtest-foo.h
-cdtest-func.cc
+cdtest-bar.cc
 cdtest-main.cc
 cdtest.dat
 cdtest.exp

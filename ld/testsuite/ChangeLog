@@ -1,0 +1,33 @@
+Wed May 11 16:47:46 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* ld.cdtest/cdtest-bar.cc: Renamed from cdtest-func.cc.
+	* ld.cdtest/cdtest.exp: Adjusted.
+
+Fri Jan 28 13:25:41 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* lib/ld.exp (simple_diff): Indicate failure if files have
+	different numbers of lines.  Don't muck with $differences to avoid
+	indicating a pass, just return.
+
+	* testsuite/ld.cdtest/{cdtest-foo.h,cdtest-foo.cc,cdtest-main.cc}:
+	Fix test case to be valid ANSI C++.  Don't require use of header
+	files, so "../gcc/xgcc -B../gcc/" can be used for CXX.
+	* testsuite/ld.cdtest/cdtest.exp: Combine "rm" lines.  Add some
+	commentary on things that are still broken with this test case.
+
+Fri Sep 10 09:58:23 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* testsuite/ld.cdtest/cdtest.exp: Added CXXFLAGS to compile stage.
+
+Thu Aug 12 16:05:37 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* testsuite/lib/ld.exp: add compiler and linker support
+	* testsuite/config/unix-ld.exp: add compiler and linker support
+	* testsuite/ld.bootstrap/bootstrap.exp: fixed to do partial links
+	* testsuite/ld.cdtest/cdtest.exp: constructor/destructor testscase
+
+Wed Aug  4 21:00:18 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* testsuite/lib/ld.exp: new file
+	* testsuite/config/unix-ld.exp: new file
+	* testsuite/ld.bootstrap/bootstrap.exp: new file

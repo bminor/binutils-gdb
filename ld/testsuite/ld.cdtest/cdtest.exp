@@ -35,14 +35,14 @@ if $tracelevel then {
 set tmpdir /tmp
 set ld $objdir/ld.new
 
-set objects "$tmpdir/cdtest-main.o $tmpdir/cdtest-func.o $tmpdir/cdtest-foo.o"
+set objects "$tmpdir/cdtest-main.o $tmpdir/cdtest-bar.o $tmpdir/cdtest-foo.o"
 
 # compile the dependant objects
 
 verbose "### Compiling dependant objects\n"
 
 ld_compile "$CXX $CXXFLAGS" $srcdir/$subdir/cdtest-foo.cc $tmpdir/cdtest-foo.o
-ld_compile "$CXX $CXXFLAGS" $srcdir/$subdir/cdtest-func.cc $tmpdir/cdtest-func.o
+ld_compile "$CXX $CXXFLAGS" $srcdir/$subdir/cdtest-bar.cc $tmpdir/cdtest-bar.o
 ld_compile "$CXX $CXXFLAGS" $srcdir/$subdir/cdtest-main.cc $tmpdir/cdtest-main.o
 
 #
