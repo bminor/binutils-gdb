@@ -1,3 +1,9 @@
+2002-09-17  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/obj-elf.c (obj_elf_change_section): Move prototype to
+	obj-elf.h
+	* config/obj-elf.h (obj_elf_change_section): Likewise.
+
 2002-09-16  Elias Athanasopoulos  <eathan@otenet.gr>
 
 	* dwarf2dbg.c (out_debug_abbrev): Add support for the DW_AT_name field.
