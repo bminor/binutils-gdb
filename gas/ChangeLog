@@ -1,3 +1,20 @@
+2004-10-27  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* config/tc-crx.c: Remove global variable 'post_inc_mode'.
+	(get_flags): New function.
+	(get_number_of_bits): Edit comments, update numeric values to supported 
+	sizes.
+	(process_label_constant): Don't support the colon format (SYMBOL:[s|m|l]).
+	(set_cons_rparams): Support argument type 'arg_rbase'.
+	(get_operandtype): Bug fix in 'rbase' operand type parsing.
+	(handle_LoadStor): Bug fix, first handle post-increment mode.
+	(getreg_image): Remove redundant code, update according to latest CRX spec.
+	(print_constant): Bug fix relate to 3-word instructions.
+	(assemble_insn): Bug fix, when matching instructions, verify also 
+	instruction type (not only mnemonic).
+	Add various error checking.
+	(preprocess_reglist): Support HI/LO and user registers.
+
 2004-10-25  David Mosberger-Tang  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (fixup_unw_records): Don't let the "t" value 
