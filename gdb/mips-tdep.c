@@ -434,8 +434,7 @@ static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
 static mips_extra_func_info_t find_proc_desc (CORE_ADDR pc,
 					      struct frame_info *next_frame);
 
-static CORE_ADDR after_prologue (CORE_ADDR pc,
-				 mips_extra_func_info_t proc_desc);
+static CORE_ADDR after_prologue (CORE_ADDR pc);
 
 static struct type *mips_float_register_type (void);
 static struct type *mips_double_register_type (void);
@@ -884,8 +883,9 @@ mips_write_pc (CORE_ADDR pc, ptid_t ptid)
    find the prologue, then return 0.  */
 
 static CORE_ADDR
-after_prologue (CORE_ADDR pc, mips_extra_func_info_t proc_desc)
+after_prologue (CORE_ADDR pc)
 {
+  mips_extra_func_info_t proc_desc;
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
 
@@ -894,8 +894,7 @@ after_prologue (CORE_ADDR pc, mips_extra_func_info_t proc_desc)
      the current machine state has nothing to do with the information
      we need from the proc_desc; and the process may or may not exist
      right now.  */
-  if (!proc_desc)
-    proc_desc = find_proc_desc (pc, NULL);
+  proc_desc = find_proc_desc (pc, NULL);
 
   if (proc_desc)
     {
@@ -5439,7 +5438,7 @@ mips_skip_prologue (CORE_ADDR pc)
      If so, then return either PC, or the PC after the prologue, whichever
      is greater.  */
 
-  CORE_ADDR post_prologue_pc = after_prologue (pc, NULL);
+  CORE_ADDR post_prologue_pc = after_prologue (pc);
 
   if (post_prologue_pc != 0)
     return max (pc, post_prologue_pc);

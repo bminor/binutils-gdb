@@ -1,8 +1,13 @@
 2004-09-03  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (after_prologue): Replace proc_desc parameter with
+	local variable.
+	(mips_skip_prologue): Update.
+
 	* mips-tdep.c (find_proc_desc, heuristic_proc_desc): Delete
 	"cur_frame" parameter.
-	(after_prologue, mips_mdebug_frame_cache, mips_insn16_frame_cache): 
+	(after_prologue, mips_mdebug_frame_cache, mips_insn16_frame_cache):
+	(mips_insn32_frame_cache, find_proc_desc): Update
 
 	* config/vax/nm-obsd.h: Delete file.
 	* config/vax/obsd.mh (NAT_FILE): Set to config/nm-bsd.h.
