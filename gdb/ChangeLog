@@ -1,3 +1,8 @@
+2002-02-21  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (register_loaded_dll): Just use raw name when we can't
+	find the complete path to a loaded DLL.
+
 2002-02-21  Fred Fish  <fnf@redhat.com>
 
 	* dbxread.c (process_one_symbol): When finding an N_FUN symbol
