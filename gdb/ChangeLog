@@ -1,3 +1,20 @@
+2005-03-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.c (sparc_frame_cache): Adjust cached frame base
+	address for 64-bit code.
+	(sparc_unwind_dummy_id): Likewise.
+	* sparc64-tdep.c (sparc64_frame_prev_register): Adjust for new
+	frame base address convention.
+	(sparc64_push_dummy_call): Likewise.
+	* sparc64nbsd-tdep.c: Update copyright year.
+	(sparc64nbsd_sigcontext_frame_cache): Adjust cached frame base
+	address for 64-bit code.
+	(sparc64nbsd_init_abi): Tweak comment.
+	* sparc64obsd-tdep.c: Update copyright year.
+	(sparc64obsd_frame_cache): Adjust cached frame base address for
+	64-bit code.
+	(sparc64obsd_init_abi): Tweak comment.
+
 2005-03-09  Corinna Vinschen  <vinschen@redhat.com>
 
 	* exceptions.h (TRY_CATCH): Define setjmp/sigsetjmp macro safe.

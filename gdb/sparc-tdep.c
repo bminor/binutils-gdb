@@ -673,6 +673,9 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
 	frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
     }
 
+  if (cache->base & 1)
+    cache->base += BIAS;
+
   return cache;
 }
 
@@ -859,6 +862,8 @@ sparc_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
   CORE_ADDR sp;
 
   sp = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+  if (sp & 1)
+    sp += BIAS;
   return frame_id_build (sp, frame_pc_unwind (next_frame));
 }
 

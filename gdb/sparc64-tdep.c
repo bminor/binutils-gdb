@@ -526,7 +526,7 @@ sparc64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
     {
       *optimizedp = 0;
       *lvalp = lval_memory;
-      *addrp = cache->base + BIAS + (regnum - SPARC_L0_REGNUM) * 8;
+      *addrp = cache->base + (regnum - SPARC_L0_REGNUM) * 8;
       *realnump = -1;
       if (valuep)
 	{
@@ -572,7 +572,7 @@ sparc64_frame_base_address (struct frame_info *next_frame, void **this_cache)
   struct sparc_frame_cache *cache =
     sparc64_frame_cache (next_frame, this_cache);
 
-  return cache->base + BIAS;
+  return cache->base;
 }
 
 static const struct frame_base sparc64_frame_base =
@@ -973,7 +973,7 @@ sparc64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Finally, update the stack pointer.  */
   regcache_cooked_write_unsigned (regcache, SPARC_SP_REGNUM, sp);
 
-  return sp;
+  return sp + BIAS;
 }
 
 

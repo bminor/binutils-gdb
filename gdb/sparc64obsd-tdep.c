@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/sparc64.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -133,12 +133,14 @@ sparc64obsd_frame_cache (struct frame_info *next_frame, void **this_cache)
          initialized under the assumption that we're frameless.  */
       cache->frameless_p = 0;
       addr = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
+      if (addr & 1)
+	addr += BIAS;
       cache->base = addr;
     }
 
   /* We find the appropriate instance of `struct sigcontext' at a
      fixed offset in the signal frame.  */
-  addr = cache->base + BIAS + 128 + 16;
+  addr = cache->base + 128 + 16;
   cache->saved_regs = sparc64nbsd_sigcontext_saved_regs (addr, next_frame);
 
   return cache;
@@ -201,13 +203,13 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   sparc64_init_abi (info, gdbarch);
 
-  /* OpenBSD/sparc64 has SVR4-style shared libraries...  */
+  /* OpenBSD/sparc64 has SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
-
 
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_sparc64obsd_tdep (void);
 
