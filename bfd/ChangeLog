@@ -1,3 +1,12 @@
+Sat Nov  9 03:04:26 1991  John Gilmore  (gnu at cygnus.com)
+
+	* coff-rs6000.c, config/mh-rs6000:  Make it work on archive and
+	core files, when compiling native.
+	* hosts/h-rs6000.h:  Define FASCIST_FDOPEN for bfd_fdopenr.
+
+	FIXME:  The aoutf1.h change below needs to be reversed back
+	to the way it was.
+
 Thu Nov  7 11:03:55 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* coffcode.h: Defined new macros [PUT|GET]LINENO_LNNO for
@@ -35,20 +44,20 @@ Sat Nov  2 14:26:03 1991  Steve Chamberlain  (steve at cygnus.com)
 	* coffcode.h: removed a load of #if 0ed code.
 	(coff_compute_file_section_positions): now works out the section
 	alignment and size correctly in all cases.
-	(coff_get_symtab): looks for contructor symbols and calls the
+	(coff_get_symtab): looks for constructor symbols and calls the
 	right function when they're found. (coff_canonicalize_reloc):
-	knows when a section is full of contructors and does the right
+	knows when a section is full of constructors and does the right
 	thing. 
 	* cpu-m88k.c: Added default_reloc_type lookup to the architecture
 	description.
 	* libbfd-in.h: (bfd_default_reloc_type_lookup) defun  added.
 	* libcoff.h: removed #if 0ed code
 	* reloc.c: (bfd_reloc_code_real_type) added BFD_RELOC_CTOR for
-	arch independent contructtor relocation type.
+	arch independent constructor relocation type.
 	(bfd_reloc_type_lookup): removed the comment "this will go away"
 	since it won't. (bfd_howto_32): stolen from 88k, this is a 32bit
 	reloc which is used when BFD_RELOC_CTOR falls through to give a
-	default 32bit reloc for contructors.
+	default 32bit reloc for constructors.
 	(bfd_default_reloc_type_lookup): added.
 	* aoutf1.h: fixed SEGMENT_SIZE typo.
 
