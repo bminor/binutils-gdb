@@ -867,17 +867,24 @@ new_symfile_objfile (struct objfile *objfile, int mainline, int verbo)
 
    NAME is the file name (which will be tilde-expanded and made
    absolute herein) (but we don't free or modify NAME itself).
-   FROM_TTY says how verbose to be.  MAINLINE specifies whether this
-   is the main symbol file, or whether it's an extra symbol file such
-   as dynamically loaded code.  If !mainline, ADDR is the address
-   where the text segment was loaded.
+
+   FROM_TTY says how verbose to be.
+
+   MAINLINE specifies whether this is the main symbol file, or whether
+   it's an extra symbol file such as dynamically loaded code.
+
+   ADDRS, OFFSETS, and NUM_OFFSETS are as described for
+   syms_from_objfile, above.  ADDRS is ignored when MAINLINE is
+   non-zero.
 
    Upon success, returns a pointer to the objfile that was added.
    Upon failure, jumps back to command level (never returns). */
-
-struct objfile *
-symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
-		 int mainline, int flags)
+static struct objfile *
+symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
+                                       struct section_addr_info *addrs,
+                                       struct section_offsets *offsets,
+                                       int num_offsets,
+                                       int mainline, int flags)
 {
   struct objfile *objfile;
   struct partial_symtab *psymtab;
@@ -930,7 +937,8 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
 	      gdb_flush (gdb_stdout);
 	    }
 	}
-      syms_from_objfile (objfile, addrs, 0, 0, mainline, from_tty);
+      syms_from_objfile (objfile, addrs, offsets, num_offsets,
+                         mainline, from_tty);
     }
 
   /* We now have at least a partial symbol table.  Check to see if the
@@ -980,6 +988,19 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
 
   return (objfile);
 }
+
+
+/* Process a symbol file, as either the main file or as a dynamically
+   loaded file.  See symbol_file_add_with_addrs_or_offsets's comments
+   for details.  */
+struct objfile *
+symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
+		 int mainline, int flags)
+{
+  return symbol_file_add_with_addrs_or_offsets (name, from_tty, addrs, 0, 0, 
+                                                mainline, flags);
+}
+
 
 /* Call symbol_file_add() with default values and update whatever is
    affected by the loading of a new main().
