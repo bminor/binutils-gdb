@@ -574,12 +574,19 @@ struct bfd_elf_section_data
   /* If there is a second reloc section associated with this section,
      as can happen on Irix 6, this field points to the header.  */
   Elf_Internal_Shdr *rel_hdr2;
+  /* The number of relocations currently assigned to REL_HDR.  */
+  unsigned int rel_count;
+  /* The number of relocations currently assigned to REL_HDR2.  */
+  unsigned int rel_count2;
   /* The ELF section number of this section.  Only used for an output
      file.  */
   int this_idx;
-  /* The ELF section number of the reloc section associated with this
-     section, if any.  Only used for an output file.  */
+  /* The ELF section number of the reloc section indicated by
+     REL_HDR if any.  Only used for an output file.  */
   int rel_idx;
+  /* The ELF section number of the reloc section indicated by
+     REL_HDR2 if any.  Only used for an output file.  */
+  int rel_idx2;
   /* Used by the backend linker to store the symbol hash table entries
      associated with relocs against global symbols.  */
   struct elf_link_hash_entry **rel_hashes;
@@ -897,6 +904,8 @@ extern boolean _bfd_elf_find_nearest_line PARAMS ((bfd *, asection *,
 #define _bfd_elf_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 extern int _bfd_elf_sizeof_headers PARAMS ((bfd *, boolean));
 extern boolean _bfd_elf_new_section_hook PARAMS ((bfd *, asection *));
+extern boolean _bfd_elf_init_reloc_shdr 
+  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *, boolean));
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void _bfd_elf_no_info_to_howto PARAMS ((bfd *, arelent *,

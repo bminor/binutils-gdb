@@ -1,3 +1,22 @@
+1999-07-01  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf-bfd.h (bfd_elf_section_data): Add rel_count and rel_count2
+	fields.
+	(_bfd_elf_init_reloc_shdr): New function.
+	* elf.c (_bfd_elf_new_section_hook): Use bfd_zalloc, rather than
+	bfd_alloc followed by memset.
+	(_bfd_elf_init_reloc_shdr): New function, split out from ...
+	(elf_fake_sections): Here.
+	(assign_section_numbers): Assign section numbers for the second
+	relocation section, if required.
+	* elflink.h (elf_link_output_relocs): New function.
+	(elf_link_size_reloc_section): Likewise.
+	(elf_bfd_final_link): Use elf_link_size_reloc_section.
+	(elf_link_input_bfd): Use elf_link_output_relocs.
+	
+	* elf32-mips.c (_bfd_mips_elf_fake_sections): Use
+	_bfd_elf_init_reloc_shdr to initialize rel_hdr2.
+
 Thu Jul  1 13:58:48 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Handle R_PCREL_CALL

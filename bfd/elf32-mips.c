@@ -2788,6 +2788,23 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       hdr->sh_entsize = 8;
     }
 
+  /* The generic elf_fake_sections will set up REL_HDR using the
+     default kind of relocations.  But, we may actually need both
+     kinds of relocations, so we set up the second header here.  */
+  if ((sec->flags & SEC_RELOC) != 0)
+    {
+      struct bfd_elf_section_data *esd;
+
+      esd = elf_section_data (sec);
+      BFD_ASSERT (esd->rel_hdr2 == NULL);
+      esd->rel_hdr2 
+	= (Elf_Internal_Shdr *) bfd_zalloc (abfd, sizeof (Elf_Internal_Shdr));
+      if (!esd->rel_hdr2)
+	return false;
+      _bfd_elf_init_reloc_shdr (abfd, esd->rel_hdr2, sec,
+				!elf_section_data (sec)->use_rela_p);
+    }
+
   return true;
 }
 

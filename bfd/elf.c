@@ -1337,11 +1337,10 @@ _bfd_elf_new_section_hook (abfd, sec)
 {
   struct bfd_elf_section_data *sdata;
 
-  sdata = (struct bfd_elf_section_data *) bfd_alloc (abfd, sizeof (*sdata));
+  sdata = (struct bfd_elf_section_data *) bfd_zalloc (abfd, sizeof (*sdata));
   if (!sdata)
     return false;
   sec->used_by_bfd = (PTR) sdata;
-  memset (sdata, 0, sizeof (*sdata));
 
   /* Indicate whether or not this section should use RELA relocations.  */
   sdata->use_rela_p 
@@ -1437,6 +1436,43 @@ bfd_section_from_phdr (abfd, hdr, index)
       if (!(hdr->p_flags & PF_W))
 	newsect->flags |= SEC_READONLY;
     }
+
+  return true;
+}
+
+/* Initialize REL_HDR, the section-header for new section, containing
+   relocations against ASECT.  If USE_RELA_P is true, we use RELA
+   relocations; otherwise, we use REL relocations.  */
+
+boolean
+_bfd_elf_init_reloc_shdr (abfd, rel_hdr, asect, use_rela_p)
+     bfd *abfd;
+     Elf_Internal_Shdr *rel_hdr;
+     asection *asect;
+     boolean use_rela_p;
+{
+  char *name;
+  struct elf_backend_data *bed;
+
+  bed = get_elf_backend_data (abfd);
+  name = bfd_alloc (abfd, sizeof ".rela" + strlen (asect->name));
+  if (name == NULL)
+    return false;
+  sprintf (name, "%s%s", use_rela_p ? ".rela" : ".rel", asect->name);
+  rel_hdr->sh_name =
+    (unsigned int) _bfd_stringtab_add (elf_shstrtab (abfd), name,
+				       true, false);
+  if (rel_hdr->sh_name == (unsigned int) -1)
+    return false;
+  rel_hdr->sh_type = use_rela_p ? SHT_RELA : SHT_REL;
+  rel_hdr->sh_entsize = (use_rela_p
+			 ? bed->s->sizeof_rela
+			 : bed->s->sizeof_rel);
+  rel_hdr->sh_addralign = bed->s->file_align;
+  rel_hdr->sh_flags = 0;
+  rel_hdr->sh_addr = 0;
+  rel_hdr->sh_size = 0;
+  rel_hdr->sh_offset = 0;
 
   return true;
 }
@@ -1580,39 +1616,15 @@ elf_fake_sections (abfd, asect, failedptrarg)
     (*bed->elf_backend_fake_sections) (abfd, this_hdr, asect);
 
   /* If the section has relocs, set up a section header for the
-     SHT_REL[A] section.  */
-  if ((asect->flags & SEC_RELOC) != 0)
-    {
-      Elf_Internal_Shdr *rela_hdr;
-      int use_rela_p = elf_section_data (asect)->use_rela_p;
-      char *name;
-
-      rela_hdr = &elf_section_data (asect)->rel_hdr;
-      name = bfd_alloc (abfd, sizeof ".rela" + strlen (asect->name));
-      if (name == NULL)
-	{
-	  *failedptr = true;
-	  return;
-	}
-      sprintf (name, "%s%s", use_rela_p ? ".rela" : ".rel", asect->name);
-      rela_hdr->sh_name =
-	(unsigned int) _bfd_stringtab_add (elf_shstrtab (abfd), name,
-					   true, false);
-      if (rela_hdr->sh_name == (unsigned int) -1)
-	{
-	  *failedptr = true;
-	  return;
-	}
-      rela_hdr->sh_type = use_rela_p ? SHT_RELA : SHT_REL;
-      rela_hdr->sh_entsize = (use_rela_p
-			      ? bed->s->sizeof_rela
-			      : bed->s->sizeof_rel);
-      rela_hdr->sh_addralign = bed->s->file_align;
-      rela_hdr->sh_flags = 0;
-      rela_hdr->sh_addr = 0;
-      rela_hdr->sh_size = 0;
-      rela_hdr->sh_offset = 0;
-    }
+     SHT_REL[A] section.  If two relocation sections are required for
+     this section, it is up to the processor-specific back-end to
+     create the other.  */ 
+  if ((asect->flags & SEC_RELOC) != 0
+      && !_bfd_elf_init_reloc_shdr (abfd, 
+				    &elf_section_data (asect)->rel_hdr,
+				    asect, 
+				    elf_section_data (asect)->use_rela_p))
+    *failedptr = true;
 }
 
 /* Assign all ELF section numbers.  The dummy first section is handled here
@@ -1640,6 +1652,11 @@ assign_section_numbers (abfd)
 	d->rel_idx = 0;
       else
 	d->rel_idx = section_number++;
+
+      if (d->rel_hdr2)
+	d->rel_idx2 = section_number++;
+      else
+	d->rel_idx2 = 0;
     }
 
   t->shstrtab_section = section_number++;
@@ -1688,6 +1705,8 @@ assign_section_numbers (abfd)
       i_shdrp[d->this_idx] = &d->this_hdr;
       if (d->rel_idx != 0)
 	i_shdrp[d->rel_idx] = &d->rel_hdr;
+      if (d->rel_idx2 != 0)
+	i_shdrp[d->rel_idx2] = d->rel_hdr2;
 
       /* Fill in the sh_link and sh_info fields while we're at it.  */
 
@@ -1698,6 +1717,11 @@ assign_section_numbers (abfd)
 	{
 	  d->rel_hdr.sh_link = t->symtab_section;
 	  d->rel_hdr.sh_info = d->this_idx;
+	}
+      if (d->rel_idx2 != 0)
+	{
+	  d->rel_hdr2->sh_link = t->symtab_section;
+	  d->rel_hdr2->sh_info = d->this_idx;
 	}
 
       switch (d->this_hdr.sh_type)

@@ -56,6 +56,10 @@ static boolean elf_link_read_relocs_from_section
   PARAMS ((bfd *, Elf_Internal_Shdr *, PTR, Elf_Internal_Rela *));
 static void elf_link_remove_section_and_adjust_dynindices 
   PARAMS ((struct bfd_link_info *, asection *));
+static void elf_link_output_relocs
+  PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *));
+static boolean elf_link_size_reloc_section
+  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 
 /* Given an ELF BFD, add symbols to the global hash table as
    appropriate.  */
@@ -2063,12 +2067,15 @@ elf_link_read_relocs_from_section (abfd, shdr, external_relocs,
   return true;
 }
 
-/* Read and swap the relocs for a section.  They may have been cached.
-   If the EXTERNAL_RELOCS and INTERNAL_RELOCS arguments are not NULL,
-   they are used as buffers to read into.  They are known to be large
-   enough.  If the INTERNAL_RELOCS relocs argument is NULL, the return
-   value is allocated using either malloc or bfd_alloc, according to
-   the KEEP_MEMORY argument.  */
+/* Read and swap the relocs for a section O.  They may have been
+   cached.  If the EXTERNAL_RELOCS and INTERNAL_RELOCS arguments are
+   not NULL, they are used as buffers to read into.  They are known to
+   be large enough.  If the INTERNAL_RELOCS relocs argument is NULL,
+   the return value is allocated using either malloc or bfd_alloc,
+   according to the KEEP_MEMORY argument.  If O has two relocation
+   sections (both REL and RELA relocations), then the REL_HDR
+   relocations will appear first in INTERNAL_RELOCS, followed by the
+   REL_HDR2 relocations.  */
 
 Elf_Internal_Rela *
 NAME(_bfd_elf,link_read_relocs) (abfd, o, external_relocs, internal_relocs,
@@ -3669,6 +3676,48 @@ struct elf_outext_info
   struct elf_final_link_info *finfo;
 };
 
+/* Compute the size of, and allocate space for, REL_HDR which is the
+   section header for a section containing relocations for O.  */
+
+static boolean
+elf_link_size_reloc_section (abfd, rel_hdr, o)
+     bfd *abfd;
+     Elf_Internal_Shdr *rel_hdr;
+     asection *o;
+{
+  register struct elf_link_hash_entry **p, **pend;
+
+  /* We are overestimating the size required for the relocation
+     sections, in the case that we are using both REL and RELA
+     relocations for a single section.  In that case, RELOC_COUNT will
+     be the total number of relocations required, and we allocate
+     space for that many REL relocations as well as that many RELA
+     relocations.  This approximation is wasteful of disk space.
+     However, until we keep track of how many of each kind of
+     relocation is required, it's difficult to calculate the right
+     value.  */
+  rel_hdr->sh_size = rel_hdr->sh_entsize * o->reloc_count;
+
+  /* The contents field must last into write_object_contents, so we
+     allocate it with bfd_alloc rather than malloc.  */
+  rel_hdr->contents = (PTR) bfd_alloc (abfd, rel_hdr->sh_size);
+  if (rel_hdr->contents == NULL && rel_hdr->sh_size != 0)
+    return false;
+
+  p = ((struct elf_link_hash_entry **)
+       bfd_malloc (o->reloc_count
+		   * sizeof (struct elf_link_hash_entry *)));
+  if (p == NULL && o->reloc_count != 0)
+    return false;
+
+  elf_section_data (o)->rel_hashes = p;
+  pend = p + o->reloc_count;
+  for (; p < pend; p++)
+    *p = NULL;
+
+  return true;
+}
+
 /* Do the final step of an ELF link.  */
 
 boolean
@@ -3830,32 +3879,16 @@ elf_bfd_final_link (abfd, info)
     {
       if ((o->flags & SEC_RELOC) != 0)
 	{
-	  Elf_Internal_Shdr *rel_hdr;
-	  register struct elf_link_hash_entry **p, **pend;
-
-	  rel_hdr = &elf_section_data (o)->rel_hdr;
-
-	  rel_hdr->sh_size = rel_hdr->sh_entsize * o->reloc_count;
-
-	  /* The contents field must last into write_object_contents,
-	     so we allocate it with bfd_alloc rather than malloc.  */
-	  rel_hdr->contents = (PTR) bfd_alloc (abfd, rel_hdr->sh_size);
-	  if (rel_hdr->contents == NULL && rel_hdr->sh_size != 0)
+	  if (!elf_link_size_reloc_section (abfd,
+					    &elf_section_data (o)->rel_hdr,
+					    o))
 	    goto error_return;
 
-	  p = ((struct elf_link_hash_entry **)
-	       bfd_malloc (o->reloc_count
-			   * sizeof (struct elf_link_hash_entry *)));
-	  if (p == NULL && o->reloc_count != 0)
+	  if (elf_section_data (o)->rel_hdr2
+	      && !elf_link_size_reloc_section (abfd,
+					       elf_section_data (o)->rel_hdr2,
+					       o))
 	    goto error_return;
-	  elf_section_data (o)->rel_hashes = p;
-	  pend = p + o->reloc_count;
-	  for (; p < pend; p++)
-	    *p = NULL;
-
-	  /* Use the reloc_count field as an index when outputting the
-	     relocs.  */
-	  o->reloc_count = 0;
 	}
     }
 
@@ -4717,6 +4750,76 @@ elf_link_output_extsym (h, data)
   return true;
 }
 
+/* Copy the relocations indicated by the INTERNAL_RELOCS (which
+   originated from the section given by INPUT_REL_HDR) to the
+   OUTPUT_BFD.  */
+
+static void
+elf_link_output_relocs (output_bfd, input_section, input_rel_hdr, 
+			internal_relocs)
+     bfd *output_bfd;
+     asection *input_section;
+     Elf_Internal_Shdr *input_rel_hdr;
+     Elf_Internal_Rela *internal_relocs;
+{
+  Elf_Internal_Rela *irela;
+  Elf_Internal_Rela *irelaend;
+  Elf_Internal_Shdr *output_rel_hdr;
+  asection *output_section;
+  unsigned int *rel_countp;
+
+  output_section = input_section->output_section;
+  output_rel_hdr = NULL;
+
+  if (elf_section_data (output_section)->rel_hdr.sh_entsize 
+      == input_rel_hdr->sh_entsize)
+    {
+      output_rel_hdr = &elf_section_data (output_section)->rel_hdr;
+      rel_countp = &elf_section_data (output_section)->rel_count;
+    }
+  else if (elf_section_data (output_section)->rel_hdr2
+	   && (elf_section_data (output_section)->rel_hdr2->sh_entsize
+	       == input_rel_hdr->sh_entsize))
+    {
+      output_rel_hdr = elf_section_data (output_section)->rel_hdr2;
+      rel_countp = &elf_section_data (output_section)->rel_count2;
+    }
+
+  BFD_ASSERT (output_rel_hdr != NULL);
+  
+  irela = internal_relocs;
+  irelaend = irela + input_rel_hdr->sh_size / input_rel_hdr->sh_entsize;
+  if (input_rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
+    {
+      Elf_External_Rel *erel;
+
+      erel = ((Elf_External_Rel *) output_rel_hdr->contents + *rel_countp);
+      for (; irela < irelaend; irela++, erel++)
+	{
+	  Elf_Internal_Rel irel;
+
+	  irel.r_offset = irela->r_offset;
+	  irel.r_info = irela->r_info;
+	  BFD_ASSERT (irela->r_addend == 0);
+	  elf_swap_reloc_out (output_bfd, &irel, erel);
+	}
+    }
+  else
+    {
+      Elf_External_Rela *erela;
+
+      BFD_ASSERT (input_rel_hdr->sh_entsize
+		  == sizeof (Elf_External_Rela));
+      erela = ((Elf_External_Rela *) output_rel_hdr->contents + *rel_countp);
+      for (; irela < irelaend; irela++, erela++)
+	elf_swap_reloca_out (output_bfd, irela, erela);
+    }
+
+  /* Bump the counter, so that we know where to add the next set of
+     relocations.  */
+  *rel_countp += input_rel_hdr->sh_size / input_rel_hdr->sh_entsize;
+}
+
 /* Link an input file into the linker output file.  This function
    handles all the sections and relocations of the input file at once.
    This is so that we only have to read the local symbols once, and
@@ -4978,7 +5081,6 @@ elf_link_input_bfd (finfo, input_bfd)
 	      Elf_Internal_Rela *irelaend;
 	      struct elf_link_hash_entry **rel_hash;
 	      Elf_Internal_Shdr *input_rel_hdr;
-	      Elf_Internal_Shdr *output_rel_hdr;
 
 	      /* Adjust the reloc addresses and symbol indices.  */
 
@@ -5109,40 +5211,16 @@ elf_link_input_bfd (finfo, input_bfd)
 
 	      /* Swap out the relocs.  */
 	      input_rel_hdr = &elf_section_data (o)->rel_hdr;
-	      output_rel_hdr = &elf_section_data (o->output_section)->rel_hdr;
-	      BFD_ASSERT (output_rel_hdr->sh_entsize
-			  == input_rel_hdr->sh_entsize);
-	      irela = internal_relocs;
-	      irelaend = irela + o->reloc_count;
-	      if (input_rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
-		{
-		  Elf_External_Rel *erel;
-
-		  erel = ((Elf_External_Rel *) output_rel_hdr->contents
-			  + o->output_section->reloc_count);
-		  for (; irela < irelaend; irela++, erel++)
-		    {
-		      Elf_Internal_Rel irel;
-
-		      irel.r_offset = irela->r_offset;
-		      irel.r_info = irela->r_info;
-		      BFD_ASSERT (irela->r_addend == 0);
-		      elf_swap_reloc_out (output_bfd, &irel, erel);
-		    }
-		}
-	      else
-		{
-		  Elf_External_Rela *erela;
-
-		  BFD_ASSERT (input_rel_hdr->sh_entsize
-			      == sizeof (Elf_External_Rela));
-		  erela = ((Elf_External_Rela *) output_rel_hdr->contents
-			   + o->output_section->reloc_count);
-		  for (; irela < irelaend; irela++, erela++)
-		    elf_swap_reloca_out (output_bfd, irela, erela);
-		}
-
-	      o->output_section->reloc_count += o->reloc_count;
+	      elf_link_output_relocs (output_bfd, o, 
+				      input_rel_hdr,
+				      internal_relocs);
+	      internal_relocs 
+		+= input_rel_hdr->sh_size / input_rel_hdr->sh_entsize;
+	      input_rel_hdr = elf_section_data (o)->rel_hdr2;
+	      if (input_rel_hdr)
+		elf_link_output_relocs (output_bfd, o, 
+					input_rel_hdr,
+					internal_relocs);
 	    }
 	}
 
