@@ -2361,7 +2361,7 @@ gdb_loc (clientData, interp, objc, objv)
   char *filename;
   struct symtab_and_line sal;
   struct symbol *sym;
-  char *fname;
+  char *funcname, *fname;
   CORE_ADDR pc;
 
   if (objc == 1)
@@ -2372,8 +2372,8 @@ gdb_loc (clientData, interp, objc, objv)
           /* For a graphical debugger we really want to highlight the */
           /* assembly line that called the next function on the stack. */
           /* Many architectures have the next instruction saved as the */
-          /* pc on the stack, so what happens is the next instruction is hughlighted. */
-          /* FIXME */
+          /* pc on the stack, so what happens is the next instruction */
+	  /* is highlighted. FIXME */
           pc = selected_frame->pc;
           sal = find_pc_line (selected_frame->pc,
                               selected_frame->next != NULL
@@ -2432,19 +2432,44 @@ gdb_loc (clientData, interp, objc, objv)
     }
   else
     {
-      Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
-                                Tcl_NewStringObj ("", -1));
+      /* find_pc_function will fail if there are only minimal symbols */
+      /* so do this instead... */
+      find_pc_partial_function (pc, &funcname, NULL, NULL);
+      /* we try cplus demangling; a guess really */
+      fname = cplus_demangle (funcname, 0);
+      if (fname)
+	{
+	  Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
+				    Tcl_NewStringObj (fname, -1));
+	  free (fname);
+	}
+      else
+	Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
+				  Tcl_NewStringObj (funcname, -1));
     }
-
+  
   filename = symtab_to_filename (sal.symtab);
   if (filename == NULL)
     filename = "";
 
+  /* file name */
   Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
 			    Tcl_NewStringObj (filename, -1));
-  Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr, Tcl_NewIntObj(sal.line)); /* line number */
-  sprintf_append_element_to_obj (result_ptr->obj_ptr, "0x%s", paddr_nz(pc)); /* PC in current frame */
-  sprintf_append_element_to_obj (result_ptr->obj_ptr, "0x%s", paddr_nz(stop_pc)); /* Real PC */
+  /* line number */
+  Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr, Tcl_NewIntObj(sal.line));
+ /* PC in current frame */
+  sprintf_append_element_to_obj (result_ptr->obj_ptr, "0x%s", paddr_nz(pc));
+ /* Real PC */
+  sprintf_append_element_to_obj (result_ptr->obj_ptr, "0x%s", paddr_nz(stop_pc));
+
+  /* shared library */
+#ifdef PC_SOLIB
+  Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
+			    Tcl_NewStringObj (PC_SOLIB(pc), -1));
+#else
+  Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
+			    Tcl_NewStringObj ("", -1));
+#endif
   return TCL_OK;
 }
 

@@ -493,6 +493,10 @@ gdbtk_init ( argv0 )
   /* Path conversion functions.  */
   if (ide_create_cygwin_path_command (gdbtk_interp) != TCL_OK)
     error ("cygwin path command initialization failed");
+#else
+  /* for now, this testing function is Unix only */
+  if (cyg_create_warp_pointer_command (gdbtk_interp) != TCL_OK)
+    error ("warp_pointer command initialization failed");
 #endif
 
   /*

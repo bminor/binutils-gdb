@@ -25,7 +25,24 @@ if {![gdbtk_read_defs]} {
   break
 }
 
-global objdir test_ran
+global objdir srcdir
+
+
+# move the pointer to the center of the bbox relative to $win
+proc move_mouse_to {win bbox} {
+  set x [expr [lindex $bbox 0] + [lindex $bbox 2] / 2]
+  set y [expr [lindex $bbox 1] + [lindex $bbox 3] / 2]
+  warp_pointer . [winfo rootx $win] [winfo rooty $win]
+
+  set nx 0
+  set ny 0
+
+  while {$nx != $x || $ny != $y} {
+    if {$nx < $x} {incr nx}
+    if {$ny < $y} {incr ny}    
+    warp_pointer $win $x $y
+  }
+}
 
 
 #####                 #####
@@ -437,8 +454,8 @@ gdbtk_test srcwin-2.10 "step" {
 
   # check that a new file is displayed
   set twin [$stw test_get twin]
-  set a [$twin get 1.0 end]
-  if {![string compare $file1(source) $a]} {set r -3}
+  set file3(source) [$twin get 1.0 end]
+  if {![string compare $file1(source) $file3(source)]} {set r -3}
 
   # check for PC_TAG on correct line
   if {$r == 0} {
@@ -847,12 +864,256 @@ gdbtk_test srcwin-3.8 "stack down when at bottom" {
 } {1}
 
 # 4.1 bp, multiple, balloon, etc
-# 5.1 balloon variables
 
+# Test: srcwin-4.1
+# Desc: Set BP in another file. Tests bp and cache functions
+gdbtk_test srcwin-4.1 "set BP in another file" {
+  gdb_immediate "break foo" 1
+  $srcwin goto_func "" foo
+  set r 0
+  set name [$statbar.name get]
+  set func [$statbar.func get]
+
+  # check contents of name and function comboboxes
+  if {$name != "list0.h"} {set r -1}
+  if {$func != "foo"} {set r -2}
+
+  set twin [$stw test_get twin]
+  
+  # check for BROWSE_TAG and BP image on correct line
+  if {$r == 0} {
+    if {![catch {set z [$twin dump 1.0 end]}]} {
+      foreach {k v i} $z {
+	if {$k == "tagon"} {
+	  if {$v == "BROWSE_TAG"} {
+	    if {$i == "8.2"} {
+	      incr r
+	    } else {
+	      incr r 5
+	    }
+	  }
+	  if {$v == "STACK_TAG"} {incr r 10}
+	  if {$v == "PC_TAG"} {incr r 100}
+	} elseif {$k == "image"} {
+	  if {$i == "8.0"} {
+	    incr r
+	  } else {
+	    set r -200
+	  }
+	}
+      }
+    } else {
+      set r -4
+    }
+  }
+  
+  if {$r == 2} {
+    # clear BP and compare with previous contents. This should succeed,
+    gdb_immediate "clear foo" 1
+    set a [$twin get 1.0 end]
+    if {[string compare $file3(source) $a]} {set r -3}
+  }
+  
+  set r
+} {2}
+
+# Test: srcwin-4.2
+# Desc: Test temporary BP
+gdbtk_test srcwin-4.2 "temporary BP" {
+  set r 0
+  if {[catch {gdb_immediate "tbreak foo" 1} msg]} {
+    set r -500
+  }
+  set name [$statbar.name get]
+  set func [$statbar.func get]
+  
+  # check contents of name and function comboboxes
+  if {$name != "list0.h"} {set r -1}
+  if {$func != "foo"} {set r -2}
+
+  set twin [$stw test_get twin]
+  
+  # check for BROWSE_TAG and BP image on correct line
+  if {$r == 0} {
+    if {![catch {set z [$twin dump 1.0 end]}]} {
+      foreach {k v i} $z {
+	if {$k == "tagon"} {
+	  if {$v == "BROWSE_TAG"} {
+	    if {$i == "8.2"} {
+	      incr r
+	    } else {
+	      incr r 5
+	    }
+	  }
+	  if {$v == "STACK_TAG"} {incr r 10}
+	  if {$v == "PC_TAG"} {incr r 100}
+	} elseif {$k == "image"} {
+	  if {$i == "8.0"} {
+	    incr r
+	  } else {
+	    set r -200
+	  }
+	}
+      }
+    } else {
+      set r -4
+    }
+  }
+  
+  gdb_immediate "continue" 1
+  
+  # now check for PC_TAG and no image
+  if {$r == 2} {
+    if {![catch {set z [$twin dump 1.0 end]}]} {
+      foreach {k v i} $z {
+	if {$k == "tagon"} {
+	  if {$v == "PC_TAG"} {
+	    if {$i == "8.2"} {
+	      incr r
+	    } else {
+	      incr r 5
+	    }
+	  }
+	  if {$v == "STACK_TAG"} {incr r 10}
+	  if {$v == "BROWSE_TAG"} {incr r 100}
+	} elseif {$k == "image"} {
+	  set r -200
+	}
+      }
+    } else {
+      set r -4
+    }
+  }
+  
+  set r
+} {3}
+
+# Test: srcwin-4.3
+# Desc: Test BP balloons
+gdbtk_test srcwin-4.3 "BP Balloons" {
+  # move pointer out of the way
+  warp_pointer . 0 0 
+  set r 0
+  gdb_immediate "break 10" 1
+  gdb_immediate "tbreak 10" 1
+
+  set twin [$stw test_get twin]
+  
+  # check for BROWSE_TAG and BP image on correct line
+  if {$r == 0} {
+    if {![catch {set z [$twin dump 1.0 end]}]} {
+      foreach {k v i} $z {
+	if {$k == "tagon"} {
+	  if {$v == "PC_TAG"} {
+	    if {$i == "8.2"} {
+	      incr r
+	    } else {
+	      incr r 5
+	    }
+	  }
+	  if {$v == "STACK_TAG"} {incr r 10}
+	  if {$v == "BROWSE_TAG"} {incr r 100}
+	} elseif {$k == "image"} {
+	  if {$i == "10.0"} {
+	    incr r
+	    # we found the bp image, now we will test the bp balloon messages
+	    set balloon [winfo toplevel [namespace tail $srcwin]].__balloon
+	    # shouldn't be mapped yet
+	    if {[winfo ismapped $balloon]} {
+	      set r -3000
+	      break
+	    }
+	    move_mouse_to $twin [$twin bbox $i]
+	    #wait a second for the balloon message to appear
+	    sleep 1
+	    if {![winfo ismapped $balloon]} {
+	      set r -4000
+	      break
+	    }
+	    # read the contents of the balloon and parse it into lines
+	    set a [split [$balloon.label cget -text] \n]
+	    set i 0
+	    # foreach line parse it and check the type and make sure it is enabled
+	    foreach line $a {
+	      if {[lindex $line 0] == "breakpoint"} {continue}
+	      incr i
+	      set enabled [lindex $line 0]
+	      set bptype [lindex $line 2]
+	      switch $i {
+		1 {
+		  if {$bptype != "donttouch"} {set r -1000}
+		}
+		2 {
+		  if {$bptype != "delete"} {set r -2000}
+		}
+	      }
+	    }
+	  } else {
+	    set r -200
+	  }
+	}
+      }
+    } else {
+      set r -4
+    }
+  }
+  set r
+} {2}
+
+# 5.1 balloon variables
+# Test: srcwin-5.1
+# Desc: variable balloon test
+gdbtk_test srcwin-5.1 "variable balloon test" {
+  # move pointer out of the way
+  warp_pointer . 0 0 
+  set r 0
+  set twin [$stw test_get twin]
+
+  # move pointer to variable "x" and check balloon
+  set index [string first "x++" [$twin get 10.0 10.end]]
+  move_mouse_to $twin [$twin bbox 10.$index]
+  sleep 1
+  if {[winfo ismapped $balloon]} {
+    if {![string compare "x=2" [$balloon.label cget -text]]} {incr r}
+    gdb_immediate "continue" 1
+    if {![string compare "x=4" [$balloon.label cget -text]]} {incr r}
+  } else {
+    set r -1
+  }
+
+  set r
+} {2}
+
+# 6.1 mixed mode disassembly of include file
+# Test: srcwin-6.1
+# Desc: Some versions of GDBtk can't do mixed-mode disassembly of a function
+# that is in an include file.
+gdbtk_test srcwin-6.1 "mixed mode disassembly of include file" {
+  set r 0
+  $srcwin mode "" MIXED
+
+  # check contents of name and function comboboxes
+  set name [$statbar.name get]
+  set func [$statbar.func get]
+  if {$name != "list0.h"} {set r -1}
+  if {$func != "foo"} {set r -2}
+  
+  # check contents of source window
+  set twin [$stw test_get twin]
+  set text [$twin get 1.0 end]
+  # Is it correct? I don't know.  Guess we look for some pieces of source...
+  if {[string first "static void" $text] != -1 &&
+      [string first "foo (x)" $text] != -1 &&
+      [string first "bar (x++);" $text] != -1} {
+    set r 1
+  }
+  
+  set r
+} {1}
 
 gdbtk_test_done
 
-
 # Local variables:
 # mode: tcl
+# change-log-default-name: "ChangeLog-gdbtk"
 # End:

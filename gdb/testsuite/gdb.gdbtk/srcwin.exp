@@ -26,7 +26,22 @@ if {![info exists ::env(DISPLAY)]} {
   gdb_exit
   set results [gdbtk_start [file join $srcdir $subdir srcwin.test]]
   set results [split $results \n]
+  # Analyze results
+  gdbtk_analyze_results $results
 
+  # move file with "main" out of the way
+  file rename $srcdir/gdb.base/list0.c $srcdir/gdb.base/list0.c.save
+  # run slightly different set of tests
+  gdb_exit
+  set results [gdbtk_start [file join $srcdir $subdir srcwin2.test]]
+  set results [split $results \n]
+  #restore file
+  file rename $srcdir/gdb.base/list0.c.save $srcdir/gdb.base/list0.c
   # Analyze results
   gdbtk_analyze_results $results
 }
+
+# Local variables:
+# mode: tcl
+# change-log-default-name: "ChangeLog-gdbtk"
+# End:

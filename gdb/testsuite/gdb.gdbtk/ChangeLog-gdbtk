@@ -1,0 +1,19 @@
+1999-01-29  Martin Hunt  <hunt@cygnus.com>
+
+	* srcwin.exp: Add srcwin2.test, which are basically the same
+	tests as srcwin.test, but run with a missing source file.
+
+	* srcwin2.test: New file.
+
+	* srcwin.test: Add tests for setting breakpoints in the source window,
+	testing BP balloons, variable balloons, and mixed-mode disassembly
+	of include files.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+End:
+	

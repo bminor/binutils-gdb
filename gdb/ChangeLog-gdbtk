@@ -1,3 +1,12 @@
+1999-01-29  Martin Hunt  <hunt@cygnus.com>
+
+        * gdbtk.c (gdbtk_init): Create tcl warp_pointer command
+        for use with testing.
+
+        * gdbtk-cmds.c (gdb_loc): Fix for case where there are only
+        minimal symbols.  Also make gdb_loc return the shared library
+        the location is in, if it is in one.
+
 1999-01-27  James Ingham  <jingham@cygnus.com>
 
 	* gdbtk-wrapper.c: Missed a couple of places where FILE->GDB_FILE
