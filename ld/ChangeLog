@@ -1,3 +1,12 @@
+Mon Jan 29 12:29:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo, ld.1: Document -export-dynamic.
+
+Fri Jan 26 11:11:55 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* emultempl/sunos.em: Check for native compile by comparing
+	${target} and ${host}.
+
 Thu Jan 25 16:46:58 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* emulparams/{elf32b4300.sh, elf32l4300.sh}: Changed

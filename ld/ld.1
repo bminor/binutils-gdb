@@ -45,6 +45,7 @@ ld \- the GNU linker
 .I entry\c
 \&\|] 
 .RB "[\|" \-embedded\-relocs "\|]"
+.RB "[\|" \-export\-dynamic "\|]"
 .RB "[\|" \-F "\|]" 
 .RB "[\|" "\-F\ "\c
 .I format\c
@@ -458,6 +459,13 @@ was statically initialized to pointer values.  See the code in
 testsuite/ld-empic for details.
 
 .TP
+.B \-export\-dynamic
+When creating an ELF file, add all symbols to the dynamic symbol table.
+Normally, the dynamic symbol table contains only symbols which are used
+by a dynamic object.  This option is needed for some uses of
+.I dlopen.
+
+.TP
 .B \-F
 .TP
 .BI "-F" "format"
@@ -722,8 +730,9 @@ option may also be used on SunOS.  By default, on SunOS, the linker
 will form a runtime search patch out of all the
 .B \-L
 options it is given.  If a
-.B \-rpath option is used, the runtime search path
-will be formed exclusively using the
+.B \-rpath
+option is used, the runtime search path will be formed exclusively
+using the
 .B \-rpath
 options, ignoring
 the
