@@ -1,5 +1,8 @@
 Mon Aug 14 11:39:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (NAME(aout,machine_type)): Handle a machine of
+	bfd_mach_sparc or bfd_mach_sparc64.
+
 	* elflink.h (elf_link_add_object_symbols): If a symbol is a weak
 	definition, add it to the dynamic symbol table if any dynamic
 	object mentions it.  If we do add it, make sure we add the
