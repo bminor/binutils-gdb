@@ -1,7 +1,7 @@
-Mon Mar  1 16:40:10 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
+Tue Mar  2 08:35:24 1993  Ian Lance Taylor  (ian@cygnus.com)
 
-	* Makefile.in (all-prms, install-prms): Changed to gnats.
-	* configure.in (host_tools): Changed prms to gnats.
+	* configure (makesrcdir): If ${srcdir} is relative and not ".",
+	and ${subdir} is not ".", set makesrcdir based on ${invsubdir}.
 
 Tue Feb 23 14:18:28 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 
