@@ -1,3 +1,8 @@
+Tue Apr  8 16:37:57 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (md_convert_frag): Create fixup at the
+	right address for call label:32,regs,imm.
+
 Mon Apr  7 14:58:22 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_subspace_start): If OBJ_ELF, then always return
