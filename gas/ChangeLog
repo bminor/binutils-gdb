@@ -1,3 +1,11 @@
+start-sanitize-d30v
+Tue Feb 17 17:02:15 1998  Fred Fish  <fnf@cygnus.com>
+
+	* config/tc-d30v.c (parallel_ok): For the explicitly parallel
+ 	case, allow the parallel instructions to modify the same flag
+ 	bits.
+
+end-sanitize-d30v
 Thu Feb 19 16:08:15 1998  Richard Henderson  <rth@cygnus.com>
 
 	* listing.c (list_symbol_table): Categorize symbols by

@@ -1,6 +1,6 @@
 /* tc-d30v.c -- Assembler code for the Mitsubishi D30V
 
-   Copyright (C) 1997 Free Software Foundation.
+   Copyright (C) 1997, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -44,9 +44,9 @@ static int Optimizing = 0;
 typedef enum _exec_type
 {
   EXEC_UNKNOWN,			/* no order specified */
-  EXEC_PARALLEL,		/* done in parallel */
-  EXEC_SEQ,			/* sequential */
-  EXEC_REVSEQ			/* reverse sequential */
+  EXEC_PARALLEL,		/* done in parallel (FM=00) */
+  EXEC_SEQ,			/* sequential (FM=01) */
+  EXEC_REVSEQ			/* reverse sequential (FM=10) */
 } exec_type_enum;
 
 /* fixups */
@@ -73,6 +73,15 @@ static Fixups *fixups;
 /* Whether current and previous instruction is a word multiply.  */
 int cur_mul32_p = 0;
 int prev_mul32_p = 0;
+
+/*  The flag_explicitly_parallel is true iff the instruction being assembled
+    has been explicitly written as a parallel short-instruction pair by the
+    human programmer.  It is used in parallel_ok() to distinguish between
+    those dangerous parallelizations attempted by the human, which are to be
+    allowed, and those attempted by the assembler, which are not.  It is set
+    from md_assemble().  */
+static int flag_explicitly_parallel = 0; 
+static int flag_xp_state = 0;
 
 /* Two nops */
 #define NOP_LEFT ((long long)NOP << 32)
@@ -709,6 +718,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       break;
 
     case EXEC_PARALLEL:	/* parallel */
+      flag_explicitly_parallel = flag_xp_state;
       if (! parallel_ok (opcode1, insn1, opcode2, insn2, exec_type))
 	as_fatal ("Instructions may not be executed in parallel");
       else if (opcode1->op->unit == IU)
@@ -730,6 +740,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	  insn = FM00 | (insn1 << 32) | insn2;  
 	  fx = fx->next;
 	}
+      flag_explicitly_parallel = 0;
       break;
 
     case EXEC_SEQ:	/* sequential */
@@ -1000,8 +1011,20 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
       /* If the second instruction depends on the first, we obviously
 	 cannot parallelize.  Note, the mod flag implies use, so
 	 check that as well.  */
-      if ((mod_reg[0][j] & (mod_reg[1][j] | used_reg[1][j])) != 0)
-	return 0;
+      /* If flag_explicitly_parallel is set, then the case of the 
+	 second instruction using a register the first instruction
+	 modifies is assumed to be okay; we trust the human.  We
+	 don't trust the human if both instructions modify the same
+	 register but we do trust the human if they modify the same
+	 flags. */
+      if (flag_explicitly_parallel)
+	{
+	  if ((j < 2) && (mod_reg[0][j] & mod_reg[1][j]) != 0)
+	    return 0;
+	}
+      else
+        if ((mod_reg[0][j] & (mod_reg[1][j] | used_reg[1][j])) != 0)
+	  return 0;
     }
 
   return 1;
@@ -1032,12 +1055,17 @@ md_assemble (str)
   if ( (prev_insn != -1) && prev_seg && ((prev_seg != now_seg) || (prev_subseg != now_subseg)))
     d30v_cleanup();
 
+  flag_explicitly_parallel = 0;
+  flag_xp_state = 0;
   if (etype == EXEC_UNKNOWN)
     {
       /* look for the special multiple instruction separators */
       str2 = strstr (str, "||");
       if (str2) 
-	extype = EXEC_PARALLEL;
+	{
+	  extype = EXEC_PARALLEL;
+	  flag_xp_state = 1;
+	}
       else
 	{
 	  str2 = strstr (str, "->");
@@ -1262,7 +1290,7 @@ do_assemble (str, opcode)
 	  break;
 	case 'l':
 	  fsize = FORCE_LONG;
-	default:
+	  break;
 	}
       name[nlen-2] = 0;
     }
