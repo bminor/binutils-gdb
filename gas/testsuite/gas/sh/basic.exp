@@ -88,12 +88,19 @@ proc do_fp {} {
 if [istarget sh*-*-*] then {
     # Test the basic instruction parser.
     do_fp
-    # Test DSP instructions
-    run_dump_test "dsp"
+
+    # coff is missing information about the machine type, so everything is
+    # dumped as sh4.
+    if {[istarget sh*-*coff] || [istarget sh*-hms]} then {
+	run_dump_test "pcrel-coff"
+    } else {
+	# Test DSP instructions
+	run_dump_test "dsp"
+
+	run_dump_test "pcrel"
+    }
 
     if {[istarget sh*-*elf] || [istarget sh*-linux*]} then {
 	run_dump_test "pic"
     }
-
-    run_dump_test "pcrel"
 }
