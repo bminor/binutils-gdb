@@ -1,3 +1,12 @@
+2001-05-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* gnu-nat.c: Include <ctype.h>.
+	(gnu_pid_to_exec_file): Add PID parameter.
+	(set_sig_thread_cmd): Use PIDGET on return value from
+	thread_id_to_pid.
+	(proc_string): Use MERGEPID to construct argument to
+	pid_to_thread_id.
+
 2001-05-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* breakpoint.c (breakpoint_address_is_meaningful): New function.

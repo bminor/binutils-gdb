@@ -24,6 +24,7 @@
    Boston, MA 02111-1307, USA.
  */
 
+#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 #include <setjmp.h>
@@ -2222,7 +2223,7 @@ gnu_stop (void)
 }
 
 static char *
-gnu_pid_to_exec_file (void)
+gnu_pid_to_exec_file (int pid)
 {
   error ("to_pid_to_exec_file target function not implemented");
   return NULL;
@@ -2476,7 +2477,7 @@ proc_string (struct proc *proc)
     sprintf (tid_str, "process %d", proc->inf->pid);
   else
     sprintf (tid_str, "thread %d.%d",
-	     proc->inf->pid, pid_to_thread_id (proc->tid));
+	     proc->inf->pid, pid_to_thread_id (MERGEPID (proc->tid, 0)));
   return tid_str;
 }
 
@@ -2836,7 +2837,7 @@ set_sig_thread_cmd (char *args, int from_tty)
     inf->signal_thread = 0;
   else
     {
-      int tid = thread_id_to_pid (atoi (args));
+      int tid = PIDGET (thread_id_to_pid (atoi (args)));
       if (tid < 0)
 	error ("Thread ID %s not known.  Use the \"info threads\" command to\n"
 	       "see the IDs of currently known threads.", args);
