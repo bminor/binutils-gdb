@@ -1,3 +1,7 @@
+2003-05-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlex.l: Accept C style comments in version scripts.
+
 2003-04-28  H.J. Lu <hjl@gnu.org>
 
 	* ldlang.c (lang_process): Add the relax finalize pass.
