@@ -983,6 +983,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
   if (howto->special_function)
     {
       bfd_reloc_status_type cont;
+  
       /* XXX - The special_function calls haven't been fixed up to deal
 	 with creating new relocations and section contents.  */
       cont = howto->special_function (abfd, reloc_entry, symbol,
@@ -1006,7 +1007,6 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
     relocation = 0;
   else
     relocation = symbol->value;
-
 
   reloc_target_output_section = symbol->section->output_section;
 
@@ -2356,21 +2356,62 @@ ENUM
 ENUMDOC
   This is a 9-bit reloc
 ENUM
+  BFD_RELOC_V850_16_PCREL
+ENUMDOC
+  This is a 16-bit reloc
+ENUM
   BFD_RELOC_V850_22_PCREL
 ENUMDOC
   This is a 22-bit reloc
+
 ENUM
-  BFD_RELOC_V850_SDA_OFFSET
+  BFD_RELOC_V850_SDA_16_16_OFFSET,
 ENUMDOC
-  This is an offset from the short data area pointer..
+  This is a 16 bit offset from the short data area pointer..
 ENUM
-  BFD_RELOC_V850_ZDA_OFFSET
+  BFD_RELOC_V850_SDA_15_16_OFFSET, 		
 ENUMDOC
-  This is an offset from the zero data area pointer..
+  This is a 16 bit offset (of which only 15 bits are used) from the short data area pointer..
 ENUM
-  BFD_RELOC_V850_TDA_OFFSET
+  BFD_RELOC_V850_ZDA_16_16_OFFSET, 		
 ENUMDOC
-  This is an offset from the tiny data area pointer..
+  This is a 16 bit offset from the zero data area pointer..
+ENUM
+  BFD_RELOC_V850_ZDA_15_16_OFFSET,
+ENUMDOC
+  This is a 16 bit offset (of which only 15 bits are used) from the zero data area pointer..
+ENUM
+  BFD_RELOC_V850_TDA_6_8_OFFSET,
+ENUMDOC
+  This is an 8 bit offset (of which only 6 bits are used) from the tiny data area pointer..
+ENUM
+  BFD_RELOC_V850_TDA_7_8_OFFSET,
+ENUMDOC
+  This is an 8bit offset (of which only 7 bits are used) from the tiny data area pointer..
+ENUM
+  BFD_RELOC_V850_TDA_7_7_OFFSET,
+ENUMDOC
+  This is a 7 bit offset from the tiny data area pointer..
+COMMENT
+{* start-sanitize-v850e *}
+ENUM
+  BFD_RELOC_V850_TDA_4_5_OFFSET,
+ENUMDOC
+  This is a 5 bit offset (of which only 4 bits are used) from the tiny data area pointer..
+ENUM
+  BFD_RELOC_V850_TDA_4_4_OFFSET,
+ENUMDOC
+  This is a 4 bit offset from the tiny data area pointer..
+ENUM
+  BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET,
+ENUMDOC
+  This is a 16 bit offset from the short data area pointer, with the bits placed non-contigously in the instruction..
+ENUM
+  BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET,
+ENUMDOC
+  This is a 16 bit offset from the zero data area pointer, with the bits placed non-contigously in the instruction..
+COMMENT
+{* end-santize-v850e *}
 COMMENT
 {* end-sanitize-v850 *}
 

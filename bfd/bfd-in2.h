@@ -1948,14 +1948,19 @@ add3, load, and store instructions. */
 /* This is a 22-bit reloc */
   BFD_RELOC_V850_22_PCREL,
 
-/* This is an offset from the short data area pointer.. */
-  BFD_RELOC_V850_SDA_OFFSET,
-
-/* This is an offset from the zero data area pointer.. */
-  BFD_RELOC_V850_ZDA_OFFSET,
-
-/* This is an offset from the tiny data area pointer.. */
-  BFD_RELOC_V850_TDA_OFFSET,
+  BFD_RELOC_V850_SDA_16_16_OFFSET, 		/* A 16 bit reloc in the small data area.  */
+  BFD_RELOC_V850_SDA_15_16_OFFSET, 		/* A 16 bit reloc (of which only 15 bits are used) in the small data area.  */
+  BFD_RELOC_V850_ZDA_16_16_OFFSET, 		/* A 16 bit reloc in the zero data area.  */
+  BFD_RELOC_V850_ZDA_15_16_OFFSET, 		/* A 16 bit reloc (of which only 15 bits are used) in the zero data area.  */
+  BFD_RELOC_V850_TDA_6_8_OFFSET, 		/* An 8 bit reloc (of which only 6 bits are used) in the tiny data area.  */
+  BFD_RELOC_V850_TDA_7_8_OFFSET, 		/* An 8 bit reloc (of which only 7 bits are used) in the tiny data area.  */
+  BFD_RELOC_V850_TDA_7_7_OFFSET, 		/* A  7 bit reloc in the tiny data area.  */
+/* start-sanitize-v850e */
+  BFD_RELOC_V850_TDA_4_5_OFFSET, 		/* A  5 bit reloc (of which only 4 bits are used) in the tiny data area.  */
+  BFD_RELOC_V850_TDA_4_4_OFFSET, 		/* A  4 bit reloc in the tiny data area.  */
+  BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET, 	/* A 16 bit reloc (but the bits are not contiguous) in the small data area.  */
+  BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET, 	/* A 16 bit reloc (but the bits are not contiguous) in the zero data area.  */
+/* end-santize-v850e */
 /* end-sanitize-v850 */
 
 

@@ -1,3 +1,12 @@
+Tue Sep  2 15:45:45 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* cpu-v850.c: Use a macro to construct bfd_arch_info_type
+	entries. 
+
+	* reloc.c, libbfd.h, bfd-in2.h, elf32-v850.c: Replace
+	BFD_RELOC_V850_{SDA/TDA/ZDA}_OFFSET relocs with new bit pattern
+	specific versions: BFD_RELOC_V850_{area}_{bits}_OFFSET. 
+
 Thu Aug 28 17:01:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* cpu-v850.c: Remove "plain" from v850 printable name.

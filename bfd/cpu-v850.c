@@ -83,55 +83,18 @@ scan (info, string)
   return true;
 }
 
+#define N(number, print, default, next)  \
+{  32, 32, 8, bfd_arch_v850, number, "v850", print, 2, default, bfd_default_compatible, scan, next }
 
 static const bfd_arch_info_type arch_info_struct[2] = 
 {
 /* start-sanitize-v850e */
-  {
-    32,	/* 32 bits in a word */
-    32,	/* 32 bits in an address */
-    8,	/* 8 bits in a byte */
-    bfd_arch_v850,
-    bfd_mach_v850e,
-    "v850",
-    "v850e",
-    2,
-    false,
-    bfd_default_compatible, 
-    scan,
-    & arch_info_struct[ 1 ],
-  },
+  N( bfd_mach_v850e, "v850e", false, & arch_info_struct[1] ),
 /* end-sanitize-v850e */
 /* start-sanitize-v850eq */
-  {
-    32,	/* 32 bits in a word */
-    32,	/* 32 bits in an address */
-    8,	/* 8 bits in a byte */
-    bfd_arch_v850,
-    bfd_mach_v850eq,
-    "v850",
-    "v850eq",
-    2,
-    false,
-    bfd_default_compatible, 
-    scan,
-    0,
-  }
+  N( bfd_mach_v850eq, "v850eq", false, NULL ),
 /* end-sanitize-v850eq */
 };
 
 const bfd_arch_info_type bfd_v850_arch =
-  {
-    32, /* 32 bits in a word */
-    32, /* 32 bits in an address */
-    8,  /* 8 bits in a byte */
-    bfd_arch_v850,
-    bfd_mach_v850,
-    "v850",
-    "v850",
-    2,
-    true, /* the default */
-    bfd_default_compatible,
-    scan ,
-    & arch_info_struct[ 0 ],
-  };
+  N( bfd_mach_v850, "v850", true, & arch_info_struct[0] );
