@@ -158,6 +158,8 @@ static boolean som_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static boolean som_bfd_is_local_label PARAMS ((bfd *, asymbol *));
 static boolean som_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
 						 file_ptr, bfd_size_type));
+static boolean som_get_section_contents PARAMS ((bfd *, sec_ptr, PTR,
+						 file_ptr, bfd_size_type));
 static boolean som_set_arch_mach PARAMS ((bfd *, enum bfd_architecture,
 					  unsigned long));
 static boolean som_find_nearest_line PARAMS ((bfd *, asection *,
@@ -4442,6 +4444,23 @@ bfd_som_attach_aux_hdr (abfd, type, string)
 }
 
 static boolean
+som_get_section_contents (abfd, section, location, offset, count)
+     bfd *abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
+{
+  if (count == 0 || ((section->flags & (SEC_LOAD | SEC_DEBUGGING)) == 0))
+    return true;
+  if ((bfd_size_type)(offset+count) > section->_raw_size
+      || bfd_seek (abfd, (file_ptr)(section->filepos + offset), SEEK_SET) == -1
+      || bfd_read (location, (bfd_size_type)1, count, abfd) != count)
+    return (false); /* on error */
+  return (true);
+}
+
+static boolean
 som_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
@@ -5427,7 +5446,6 @@ som_write_armap (abfd)
 
 #define som_get_lineno                   (struct lineno_cache_entry *(*)())bfd_nullvoidptr
 #define	som_close_and_cleanup	           bfd_generic_close_and_cleanup
-#define som_get_section_contents          bfd_generic_get_section_contents
 
 #define som_bfd_get_relocated_section_contents \
  bfd_generic_get_relocated_section_contents

@@ -1,5 +1,9 @@
 Sat Mar 26 10:25:43 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_get_section_contents): New function.  Do not try
+	to actually read data from a section that doesn't have either
+	SEC_LOAD or SEC_DEBUGGING set (eg $BSS$) just return true.
+
         * libbfd.c (bfd_read): Set bfd_error as appropriate for a short
 	read. (bfd_error_system_call or bfd_error_file_truncated).
 
