@@ -7,6 +7,10 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* libpei.h (_bfd_pe_bfd_get_symbol_info): Declare.
+	* peigen.c (_bfd_pe_bfd_get_symbol_info): New function.
+	* peicode.h (coff_get_symbol_info): Define.
+
 	* config.bfd (i[3456]86-*-interix*): Set targ_cflags to
 	-DSTRICT_PE_FORMAT.
 	* coffcode.h (styp_to_sec_flags): Check STRICT_PE_FORMAT rather

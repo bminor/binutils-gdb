@@ -347,3 +347,5 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
 
 #define coff_bfd_copy_private_section_data \
   _bfd_pe_bfd_copy_private_section_data
+
+#define coff_get_symbol_info _bfd_pe_get_symbol_info

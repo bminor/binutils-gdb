@@ -234,7 +234,9 @@ unsigned int _bfd_pei_swap_scnhdr_out PARAMS ((bfd *, PTR, PTR));
 
 boolean _bfd_pe_print_private_bfd_data_common PARAMS ((bfd *, PTR));
 
-boolean _bfd_pe_bfd_copy_private_bfd_data_common PARAMS ((bfd*, bfd*));
+boolean _bfd_pe_bfd_copy_private_bfd_data_common PARAMS ((bfd *, bfd *));
+
+void _bfd_pe_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 
 /* The following are needed only for ONE of pe or pei, but don't
    otherwise vary; peicode.h fixes up ifdefs but we provide the
