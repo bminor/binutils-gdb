@@ -127,6 +127,7 @@ unsigned int		num_dump_sects = 0;
 #define DEBUG_DUMP	(1 << 2)
 
 /* Forward declarations for dumb compilers.  */
+static void		  print_vma		      PARAMS ((bfd_vma, print_mode));
 static bfd_vma (*         byte_get)                   PARAMS ((unsigned char *, int));
 static bfd_vma            byte_get_little_endian      PARAMS ((unsigned char *, int));
 static bfd_vma            byte_get_big_endian         PARAMS ((unsigned char *, int));
@@ -390,8 +391,6 @@ typedef enum print_mode
   LONG_HEX
 }
 print_mode;
-
-static void print_vma PARAMS ((bfd_vma, print_mode));
 
 static void
 print_vma (vma, mode)
@@ -1165,7 +1164,7 @@ get_machine_name (e_machine)
     case EM_H8_300H:		return "Hitachi H8/300H";
     case EM_H8S:		return "Hitachi H8S";
     case EM_H8_500:		return "Hitachi H8/500";
-    case EM_IA_64:		return "Intel Merced";
+    case EM_IA_64:		return "Intel IA-64";
     case EM_MIPS_X:		return "Stanford MIPS-X";
     case EM_COLDFIRE:		return "Motorola Coldfire";
     case EM_68HC12:		return "Motorola M68HC12";
@@ -1320,7 +1319,8 @@ get_machine_flags (e_flags, e_machine)
 	    strcat (buf, ", no kabp");
 	  if (e_flags & EF_PARISC_LAZYSWAP)
 	    strcat (buf, ", lazyswap");
-
+	  break;
+	  
 	case EM_PJ:
 	  if ((e_flags & EF_PICOJAVA_NEWCALLS) == EF_PICOJAVA_NEWCALLS)
 	    strcat (buf, ", new calling convention");
@@ -2768,13 +2768,13 @@ dynamic_segment_parisc_val (entry)
 
 	for (cnt = 0; cnt < sizeof (flags) / sizeof (flags[0]); ++cnt)
 	  if (val & flags[cnt].bit)
-           {
-             if (! first)
-               putchar (' ');
-             fputs (flags[cnt].str, stdout);
-             first = 0;
-             val ^= flags[cnt].bit;
-           }
+	    {
+	      if (! first)
+		putchar (' ');
+	      fputs (flags[cnt].str, stdout);
+	      first = 0;
+	      val ^= flags[cnt].bit;
+	    }
 	
 	if (val != 0 || first)
 	  {
@@ -2784,7 +2784,7 @@ dynamic_segment_parisc_val (entry)
 	  }
       }
       break;
-
+      
     default:
       print_vma (entry->d_un.d_ptr, PREFIX_HEX);
       break;
@@ -4298,7 +4298,7 @@ process_symbol_table (file)
 	}
 
       for (hn = 0; hn < nbuckets; ++hn)
-	++counts[lengths [hn]];
+	++ counts [lengths [hn]];
 
       if (nbuckets > 0)
 	{
@@ -6492,17 +6492,18 @@ process_mips_specific (file)
 	    {
 	      static const struct
 	      {
-		const char *name;
+		const char * name;
 		int bit;
-	      } l_flags_vals[] =
-		{
-		  { " EXACT_MATCH", LL_EXACT_MATCH },
-		  { " IGNORE_INT_VER", LL_IGNORE_INT_VER },
-		  { " REQUIRE_MINOR", LL_REQUIRE_MINOR },
-		  { " EXPORTS", LL_EXPORTS },
-		  { " DELAY_LOAD", LL_DELAY_LOAD },
-		  { " DELTA", LL_DELTA }
-		};
+	      }
+	      l_flags_vals[] =
+	      {
+		{ " EXACT_MATCH", LL_EXACT_MATCH },
+		{ " IGNORE_INT_VER", LL_IGNORE_INT_VER },
+		{ " REQUIRE_MINOR", LL_REQUIRE_MINOR },
+		{ " EXPORTS", LL_EXPORTS },
+		{ " DELAY_LOAD", LL_DELAY_LOAD },
+		{ " DELTA", LL_DELTA }
+	      };
 	      int flags = liblist.l_flags;
 	      size_t fcnt;
 
@@ -6917,8 +6918,8 @@ process_corefile_note_segments (file)
     {
       if (segment->p_type == PT_NOTE)
 	res &= process_corefile_note_segment (file,
-					      (bfd_vma)segment->p_offset,
-					      (bfd_vma)segment->p_filesz);
+					      (bfd_vma) segment->p_offset,
+					      (bfd_vma) segment->p_filesz);
     }
 
   free (program_headers);
