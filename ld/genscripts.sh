@@ -150,7 +150,7 @@ if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
   DATA_ALIGNMENT=${DATA_ALIGNMENT_c-${DATA_ALIGNMENT_}}
   LD_FLAG=c
   COMBRELOC=ldscripts/${EMULATION_NAME}.xc.tmp
-  ( echo "'/* Script for -z combreloc: combine and sort reloc sections */"
+  ( echo "/* Script for -z combreloc: combine and sort reloc sections */"
     . ${srcdir}/emulparams/${EMULATION_NAME}.sh
     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
   ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xc

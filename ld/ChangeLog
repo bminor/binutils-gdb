@@ -1,3 +1,7 @@
+2001-10-05  H.J. Lu  <hjl@gnu.org>
+
+	* genscripts.sh: Fix a typo in the last change.
+
 2001-10-05  Jakub Jelinek  <jakub@redhat.com>
 
 	* emultempl/elf32.em (gld_*_list_options): Include -z combreloc and
