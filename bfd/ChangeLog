@@ -1,3 +1,15 @@
+Mon Aug 17 11:55:07 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* archures.c, cpu-m68k.c, cpu-sparc.c: Undo 16 June changes.
+	* libaout.h (struct aout_backend_data): New callback "set_sizes".
+	* aout-target.h (callback): Don't set page/seg sizes.
+	(mkobject): Ditto.
+	(set_sizes): New routine.
+	(backend_data): Point to it.
+	* aoutf1.h (sunos4_set_sizes): Heed architecture when setting sizes.
+	(sunos4_aout_backend): Point to it.
+	* aoutx.h (set_arch_mach): Call set_sizes callback.
+
 Fri Aug 14 19:22:18 1992  Per Bothner  (bothner@cygnus.com)
 
 	* aout-target.h:  Make _bfd_slurp_extended_name_table be
