@@ -1,0 +1,2 @@
+@include ../../readline/inc-readline.texinfo
+@include ../../readline/inc-history.texinfo
