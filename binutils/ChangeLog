@@ -1,3 +1,14 @@
+2000-11-27  DJ Delorie  <dj@redhat.com>
+
+	* readelf.c (usage): Add -wf (--debug-dump=frames) option.
+	(parse_args): Support -wf option.
+	(process_section_headers): Ditto.
+	(debug_displays): Ditto.
+	(display_debug_frames): New, dump *_frame sections.
+	(frame_need_space): Support for above.
+	(frame_display_row): Ditto.
+	* binutils.texi: Document it.
+
 2000-11-24  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Announce support for v5t, v5te and XScale.

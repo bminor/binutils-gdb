@@ -113,6 +113,7 @@ int                     do_debug_abbrevs;
 int                     do_debug_lines;
 int                     do_debug_pubnames;
 int                     do_debug_aranges;
+int                     do_debug_frames;
 int                     do_arch;
 int                     do_notes;
 int			is_32bit_elf;
@@ -197,6 +198,7 @@ static int                display_debug_not_supported PARAMS ((Elf32_Internal_Sh
 static int                display_debug_lines         PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_abbrev        PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_aranges       PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
+static int                display_debug_frames        PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static unsigned char *    process_abbrev_section      PARAMS ((unsigned char *, unsigned char *));
 static unsigned long      read_leb128                 PARAMS ((unsigned char *, int *, int));
 static int                process_extended_line_op    PARAMS ((unsigned char *, int, int));
@@ -1844,7 +1846,7 @@ usage ()
   fprintf (stdout, _("  -D or --use-dynamic       Use the dynamic section info when displaying symbols\n"));
   fprintf (stdout, _("  -x <number> or --hex-dump=<number>\n"));
   fprintf (stdout, _("                            Dump the contents of section <number>\n"));
-  fprintf (stdout, _("  -w[liapr] or --debug-dump[=line,=info,=abbrev,=pubnames,=ranges]\n"));
+  fprintf (stdout, _("  -w[liaprf] or --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=frames]\n"));
   fprintf (stdout, _("                            Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stdout, _("  -i <number> or --instruction-dump=<number>\n"));
@@ -2002,6 +2004,11 @@ parse_args (argc, argv)
 		case 'r':
 		case 'R':
 		  do_debug_aranges = 1;
+		  break;
+
+		case 'f':
+		case 'F':
+		  do_debug_frames = 1;
 		  break;
 
 		default:
@@ -2732,7 +2739,7 @@ process_section_headers (file)
 			  dynamic_strings, char *, "dynamic strings");
 	}
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
-		|| do_debug_lines || do_debug_pubnames || do_debug_aranges)
+		|| do_debug_lines || do_debug_pubnames || do_debug_aranges || do_debug_frames)
 	       && strncmp (name, ".debug_", 7) == 0)
 	{
 	  name += 7;
@@ -2743,9 +2750,12 @@ process_section_headers (file)
 	      || (do_debug_lines    && (strcmp (name, "line") == 0))
 	      || (do_debug_pubnames && (strcmp (name, "pubnames") == 0))
 	      || (do_debug_aranges  && (strcmp (name, "aranges") == 0))
+	      || (do_debug_frames   && (strcmp (name, "frame") == 0))
 	      )
 	    request_dump (i, DEBUG_DUMP);
 	}
+      else if (do_debug_frames && strcmp (name, ".eh_frame") == 0)
+	request_dump (i, DEBUG_DUMP);
     }
 
   if (! do_sections)
@@ -6471,6 +6481,479 @@ display_debug_aranges (section, start, file)
   return 1;
 }
 
+typedef struct Frame_Chunk
+{
+  struct Frame_Chunk *next;
+  unsigned char *chunk_start;
+  int ncols;
+  /* DW_CFA_{undefined,same_value,offset,register}  */
+  unsigned char *col_type;
+  int *col_offset;
+  char *augmentation;
+  unsigned int code_factor;
+  unsigned int data_factor;
+  unsigned long pc_begin;
+  unsigned long pc_range;
+  int cfa_reg;
+  int cfa_offset
+  int ra;
+}
+Frame_Chunk;
+
+static void
+frame_need_space (fc, reg)
+     Frame_Chunk *fc;
+     int reg;
+{
+  int prev = fc->ncols;
+
+  if (reg < fc->ncols)
+    return;
+  fc->ncols = reg + 1;
+  fc->col_type = (unsigned char *) xrealloc (fc->col_type,
+					     fc->ncols * sizeof (unsigned char));
+  fc->col_offset = (int *) xrealloc (fc->col_offset,
+				     fc->ncols * sizeof (int));
+
+  while (prev < fc->ncols)
+    {
+      fc->col_type[prev] = DW_CFA_undefined;
+      fc->col_offset[prev] = 0;
+      prev++;
+    }
+}
+
+static void
+frame_display_row (fc, need_col_headers, max_regs)
+     Frame_Chunk *fc;
+     int *need_col_headers;
+     int *max_regs;
+{
+  int r;
+  char tmp[100];
+
+  if (*max_regs < fc->ncols)
+    *max_regs = fc->ncols;
+  if (*need_col_headers)
+    {
+      *need_col_headers = 0;
+      printf ("   LOC   CFA      ");
+      for (r=0; r<*max_regs; r++)
+	if (r == fc->ra)
+	  printf ("ra   ");
+	else
+	  printf ("r%-4d", r);
+      printf ("\n");
+    }
+  printf ("%08x ", (unsigned int) fc->pc_begin);
+  sprintf (tmp, "r%d%+d", fc->cfa_reg, fc->cfa_offset);
+  printf ("%-8s ", tmp);
+  for (r=0; r<fc->ncols; r++)
+    {
+      switch (fc->col_type[r])
+	{
+	case DW_CFA_undefined:
+	  strcpy (tmp, "u");
+	  break;
+	case DW_CFA_same_value:
+	  strcpy (tmp, "u");
+	  break;
+	case DW_CFA_offset:
+	  sprintf (tmp, "c%+d", fc->col_offset[r]);
+	  break;
+	case DW_CFA_register:
+	  sprintf (tmp, "r%d", fc->col_offset[r]);
+	  break;
+	default:
+	  strcpy (tmp, "n/a");
+	  break;
+	}
+      printf ("%-5s", tmp);
+    }
+  printf ("\n");
+}
+
+#define GET(N)	byte_get (start, N); start += N
+#define LEB()	read_leb128 (start, &length_return, 0); start += length_return
+#define SLEB()	read_leb128 (start, &length_return, 1); start += length_return
+
+static int
+display_debug_frames (section, start, file)
+     Elf32_Internal_Shdr * section;
+     unsigned char *       start;
+     FILE *                file ATTRIBUTE_UNUSED;
+{
+  unsigned char * end = start + section->sh_size;
+  unsigned char *section_start = start;
+  Frame_Chunk *chunks = 0;
+  Frame_Chunk *remembered_state = 0, *rs;
+  int is_eh = (strcmp (SECTION_NAME (section), ".eh_frame") == 0);
+  int length_return;
+  int max_regs = 0;
+
+  printf (_("The section %s contains:\n"), SECTION_NAME (section));
+
+  while (start < end)
+    {
+      unsigned char *saved_start, *block_end;
+      unsigned long length, cie_id;
+      Frame_Chunk *fc, *cie;
+      int need_col_headers = 1;
+
+      saved_start = start;
+      length = byte_get (start, 4); start += 4;
+
+      if (length == 0)
+	return 1;
+
+      block_end = saved_start + length + 4;
+      cie_id = byte_get (start, 4); start += 4;
+
+      printf ("\n%08x %08lx %08lx ", saved_start - section_start, length, cie_id);
+
+      if (is_eh ? (cie_id == 0) : (cie_id == DW_CIE_ID))
+	{
+	  fc = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
+	  memset (fc, 0, sizeof (Frame_Chunk));
+
+	  fc->next = chunks;
+	  chunks = fc;
+	  fc->chunk_start = saved_start;
+	  fc->ncols = 0;
+	  fc->col_type = (unsigned char *) xmalloc (sizeof (unsigned char));
+	  fc->col_offset = (int *) xmalloc (sizeof (int));
+	  frame_need_space (fc, max_regs-1);
+
+	  start ++; /* version */
+	  fc->augmentation = start;
+	  while (*start) start++; start++; /* skip past NUL */
+	  if (fc->augmentation[0] == 'z')
+	    {
+	      int xtra;
+	      fc->code_factor = LEB ();
+	      fc->data_factor = SLEB ();
+	      fc->ra = byte_get (start, 1); start += 1;
+	      xtra = LEB ();
+	      printf ("skipping %d extra bytes\n", xtra);
+	      start += xtra;
+	    }
+	  else if (strcmp (fc->augmentation, "eh") == 0)
+	    {
+	      start += 4;
+	      fc->code_factor = LEB ();
+	      fc->data_factor = SLEB ();
+	      fc->ra = byte_get (start, 1); start += 1;
+	    }
+	  else
+	    {
+	      fc->code_factor = LEB ();
+	      fc->data_factor = SLEB ();
+	      fc->ra = byte_get (start, 1); start += 1;
+	    }
+	  cie = fc;
+	  printf ("CIE \"%s\" cf=%d df=%d ra=%d\n",
+		  fc->augmentation, fc->code_factor, fc->data_factor, fc->ra);
+
+	  frame_need_space (fc, fc->ra);
+	}
+      else
+	{
+	  unsigned char *look_for;
+	  static Frame_Chunk fde_fc;
+	  fc = &fde_fc;
+	  memset (fc, 0, sizeof (Frame_Chunk));
+
+	  look_for = is_eh ? start-4-cie_id : (unsigned char *) cie_id;
+
+	  fc->pc_begin = byte_get (start, 4); start += 4;
+	  fc->pc_range = byte_get (start, 4); start += 4;
+
+	  for (cie=chunks; cie && (cie->chunk_start != look_for); cie = cie->next);
+	  if (!cie)
+	    {
+	      warn ("Invalid CIE pointer %08x in FDE at %08x\n", cie_id, saved_start);
+	      start = block_end;
+	      fc->ncols = 0;
+	      fc->col_type = (unsigned char *) xmalloc (sizeof (unsigned char));
+	      fc->col_offset = (int *) xmalloc (sizeof (int));
+	      frame_need_space (fc, max_regs-1);
+	      cie = fc;
+	      fc->augmentation = "";
+	    }
+	  else
+	    {
+	      fc->ncols = cie->ncols;
+	      fc->col_type = (unsigned char *) xmalloc (fc->ncols * sizeof (unsigned char));
+	      fc->col_offset = (int *) xmalloc (fc->ncols * sizeof (int));
+	      memcpy (fc->col_type, cie->col_type, fc->ncols);
+	      memcpy (fc->col_offset, cie->col_offset, fc->ncols * sizeof (int));
+	      fc->augmentation = cie->augmentation;
+	      fc->code_factor = cie->code_factor;
+	      fc->data_factor = cie->data_factor;
+	      fc->cfa_reg = cie->cfa_reg;
+	      fc->cfa_offset = cie->cfa_offset;
+	      fc->ra = cie->ra;
+	      frame_need_space (fc, max_regs-1);
+	    }
+
+	  if (cie->augmentation[0] == 'z')
+	    {
+	      unsigned long l = LEB ();
+	      start += l;
+	    }
+
+	  printf ("FDE cie=%08x pc=%08lx..%08lx\n",
+		  cie->chunk_start-section_start, fc->pc_begin,
+		  fc->pc_begin + fc->pc_range);
+	}
+
+      /* At this point, fc is the current chunk, cie (if any) is set, and we're
+	 about to interpret instructions for the chunk.  */
+
+      /* This exists for readelf maintainers.  */
+#define FDEBUG 0
+
+      while (start < block_end)
+	{
+	  unsigned op, opa;
+	  unsigned long ul, reg, roffs;
+	  long l, ofs;
+	  bfd_vma vma;
+
+	  op = * start ++;
+	  opa = op & 0x3f;
+	  if (op & 0xc0)
+	    op &= 0xc0;
+
+	  switch (op)
+	    {
+	    case DW_CFA_advance_loc:
+	      frame_display_row (fc, &need_col_headers, &max_regs);
+#if FDEBUG
+	      printf ("  DW_CFA_advance_loc: %08x = %08x + %d*%d\n",
+		      fc->pc_begin + opa * fc->code_factor, fc->pc_begin, opa, fc->code_factor);
+#endif
+	      fc->pc_begin += opa * fc->code_factor;
+	      break;
+
+	    case DW_CFA_offset:
+	      frame_need_space (fc, opa);
+	      roffs = LEB ();
+#if FDEBUG
+	      printf ("  DW_CFA_offset: r%d = cfa[%d*%d]\n", opa, roffs, fc->data_factor);
+#endif
+	      fc->col_type[opa] = DW_CFA_offset;
+	      fc->col_offset[opa] = roffs * fc->data_factor;
+	      break;
+
+	    case DW_CFA_restore:
+	      frame_need_space (fc, opa);
+#if FDEBUG
+	      printf ("  DW_CFA_restore: r%d\n", opa);
+#endif
+	      fc->col_type[opa] = cie->col_type[opa];
+	      fc->col_offset[opa] = cie->col_offset[opa];
+	      break;
+
+	    case DW_CFA_set_loc:
+	      frame_display_row (fc, &need_col_headers, &max_regs);
+	      vma = byte_get (start, sizeof (vma)); start += sizeof (vma);
+#if FDEBUG
+	      printf ("  DW_CFA_set_loc: %08x\n", vma);
+#endif
+	      fc->pc_begin = vma;
+	      break;
+
+	    case DW_CFA_advance_loc1:
+	      frame_display_row (fc, &need_col_headers, &max_regs);
+	      ofs = byte_get (start, 1); start += 1;
+#if FDEBUG
+	      printf ("  DW_CFA_advance_loc1: %08x = %08x + %d*%d\n",
+		      fc->pc_begin + ofs * fc->code_factor, fc->pc_begin, ofs, fc->code_factor);
+#endif
+	      fc->pc_begin += ofs * fc->code_factor;
+	      break;
+
+	    case DW_CFA_advance_loc2:
+	      frame_display_row (fc, &need_col_headers, &max_regs);
+	      ofs = byte_get (start, 2); start += 2;
+#if FDEBUG
+	      printf ("  DW_CFA_advance_loc2: %08x = %08x + %d*%d\n",
+		      fc->pc_begin + ofs * fc->code_factor, fc->pc_begin, ofs, fc->code_factor);
+#endif
+	      fc->pc_begin += ofs * fc->code_factor;
+	      break;
+
+	    case DW_CFA_advance_loc4:
+	      frame_display_row (fc, &need_col_headers, &max_regs);
+	      ofs = byte_get (start, 4); start += 4;
+#if FDEBUG
+	      printf ("  DW_CFA_advance_loc4: %08x = %08x + %d*%d\n",
+		      fc->pc_begin + ofs * fc->code_factor, fc->pc_begin, ofs, fc->code_factor);
+#endif
+	      fc->pc_begin += ofs * fc->code_factor;
+	      break;
+
+	    case DW_CFA_offset_extended:
+	      reg = LEB ();
+	      roffs = LEB ();
+	      frame_need_space (fc, reg);
+#if FDEBUG
+	      printf ("  DW_CFA_offset_extended: r%d = cfa[%d*%d]\n", reg, roffs, fc->data_factor);
+#endif
+	      fc->col_type[reg] = DW_CFA_offset;
+	      fc->col_offset[reg] = roffs * fc->data_factor;
+	      break;
+
+	    case DW_CFA_restore_extended:
+	      reg = LEB ();
+	      frame_need_space (fc, reg);
+#if FDEBUG
+	      printf ("  DW_CFA_restore_extended: r%d\n", reg);
+#endif
+	      fc->col_type[reg] = cie->col_type[reg];
+	      fc->col_offset[reg] = cie->col_offset[reg];
+	      break;
+
+	    case DW_CFA_undefined:
+	      reg = LEB ();
+	      frame_need_space (fc, reg);
+#if FDEBUG
+	      printf ("  DW_CFA_undefined: r%d\n", reg);
+#endif
+	      fc->col_type[reg] = DW_CFA_undefined;
+	      fc->col_offset[reg] = 0;
+	      break;
+
+	    case DW_CFA_same_value:
+	      reg = LEB ();
+	      frame_need_space (fc, reg);
+#if FDEBUG
+	      printf ("  DW_CFA_same_value: r%d\n", reg);
+#endif
+	      fc->col_type[reg] = DW_CFA_same_value;
+	      fc->col_offset[reg] = 0;
+	      break;
+
+	    case DW_CFA_register:
+	      reg = LEB ();
+	      roffs = LEB ();
+	      frame_need_space (fc, reg);
+#if FDEBUG
+	      printf ("  DW_CFA_ame_value: r%d\n", reg);
+#endif
+	      fc->col_type[reg] = DW_CFA_register;
+	      fc->col_offset[reg] = roffs;
+	      break;
+
+	    case DW_CFA_remember_state:
+#if FDEBUG
+	      printf ("  DW_CFA_remember_state\n");
+#endif
+	      rs = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
+	      rs->ncols = fc->ncols;
+	      rs->col_type = (unsigned char *) xmalloc (rs->ncols);
+	      rs->col_offset = (int *) xmalloc (rs->ncols * sizeof (int));
+	      memcpy (rs->col_type, fc->col_type, rs->ncols);
+	      memcpy (rs->col_offset, fc->col_offset, rs->ncols * sizeof (int));
+	      rs->next = remembered_state;
+	      remembered_state = rs;
+	      break;
+
+	    case DW_CFA_restore_state:
+#if FDEBUG
+	      printf ("  DW_CFA_restore_state\n");
+#endif
+	      rs = remembered_state;
+	      remembered_state = rs->next;
+	      frame_need_space (fc, rs->ncols-1);
+	      memcpy (fc->col_type, rs->col_type, rs->ncols);
+	      memcpy (fc->col_offset, rs->col_offset, rs->ncols * sizeof (int));
+	      free (rs->col_type);
+	      free (rs->col_offset);
+	      free (rs);
+	      break;
+
+	    case DW_CFA_def_cfa:
+	      fc->cfa_reg = LEB ();
+	      fc->cfa_offset = LEB ();
+#if FDEBUG
+	      printf ("  DW_CFA_def_cfa: reg %d ofs %d\n", fc->cfa_reg, fc->cfa_offset);
+#endif
+	      break;
+
+	    case DW_CFA_def_cfa_register:
+	      fc->cfa_reg = LEB ();
+#if FDEBUG
+	      printf ("  DW_CFA_def_cfa_reg: %d\n", fc->cfa_reg);
+#endif
+	      break;
+
+	    case DW_CFA_def_cfa_offset:
+	      fc->cfa_offset = LEB ();
+#if FDEBUG
+	      printf ("  DW_CFA_def_cfa_offset: %d\n", fc->cfa_offset);
+#endif
+	      break;
+
+	    case DW_CFA_nop:
+#if FDEBUG
+	      printf ("  DW_CFA_nop\n");
+#endif
+	      break;
+
+#ifndef DW_CFA_GNU_window_save
+#define DW_CFA_GNU_window_save 0x2d
+#endif
+	    case DW_CFA_GNU_window_save:
+#if FDEBUG
+	      printf ("  DW_CFA_GNU_window_save\n");
+#endif
+	      break;
+
+#ifndef DW_CFA_GNU_args_size
+#define DW_CFA_GNU_args_size 0x2e
+#endif
+	    case DW_CFA_GNU_args_size:
+	      ul = LEB ();
+#if FDEBUG
+	      printf ("  DW_CFA_GNU_args_size: %d\n", ul);
+#endif
+	      break;
+
+#ifndef DW_CFA_GNU_negative_offset_extended
+#define DW_CFA_GNU_negative_offset_extended 0x2f
+#endif
+	    case DW_CFA_GNU_negative_offset_extended:
+	      reg = LEB ();
+	      l = - LEB ();
+	      frame_need_space (fc, reg);
+#if FDEBUG
+	      printf ("  DW_CFA_GNU_negative_offset_extended: r%d = cfa[%d*%d]\n", reg, l, fc->data_factor);
+#endif
+	      fc->col_type[reg] = DW_CFA_offset;
+	      fc->col_offset[reg] = l * fc->data_factor;
+	      break;
+
+	    default:
+	      fprintf (stderr, "unsupported or unknown DW_CFA_%d\n", op);
+	      start = block_end;
+	    }
+	}
+
+      frame_display_row (fc, &need_col_headers, &max_regs);
+
+      start = block_end;
+    }
+
+  printf ("\n");
+
+  return 1;
+}
+
+#undef GET
+#undef LEB
+#undef SLEB
 
 static int
 display_debug_not_supported (section, start, file)
@@ -6518,6 +7001,8 @@ debug_displays[] =
   { ".debug_line",        display_debug_lines, NULL },
   { ".debug_aranges",     display_debug_aranges, NULL },
   { ".debug_pubnames",    display_debug_pubnames, NULL },
+  { ".debug_frame",       display_debug_frames, NULL },
+  { ".eh_frame",          display_debug_frames, NULL },
   { ".debug_macinfo",     display_debug_not_supported, NULL },
   { ".debug_frame",       display_debug_not_supported, NULL },
   { ".debug_str",         display_debug_not_supported, NULL },
