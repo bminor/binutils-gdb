@@ -551,9 +551,26 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 
       if ((op & 0xfc1fffff) == 0x7c0802a6)
 	{			/* mflr Rx */
-	  lr_reg = (op & 0x03e00000);
-	  continue;
+	  /* Since shared library / PIC code, which needs to get its
+	     address at runtime, can appear to save more than one link
+	     register vis:
 
+	     *INDENT-OFF*
+	     stwu r1,-304(r1)
+	     mflr r3
+	     bl 0xff570d0 (blrl)
+	     stw r30,296(r1)
+	     mflr r30
+	     stw r31,300(r1)
+	     stw r3,308(r1);
+	     ...
+	     *INDENT-ON*
+
+	     remember just the first one, but skip over additional
+	     ones.  */
+	  if (lr_reg < 0)
+	    lr_reg = (op & 0x03e00000);
+	  continue;
 	}
       else if ((op & 0xfc1fffff) == 0x7c000026)
 	{			/* mfcr Rx */
