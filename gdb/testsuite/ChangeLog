@@ -1,3 +1,8 @@
+2004-01-11  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/scope.exp: Remove obsolete setup_xfail for
+	hp_cc_compiler.
+
 2004-01-10  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/classes.exp: Remove old "(obsolescent gcc or gdb)"
