@@ -1406,7 +1406,9 @@ push_expression_name (name)
    into a freshly malloc'ed struct expression.  Its language_defn is set
    to null.  */
 static struct expression *
-copy_exp (struct expression *expr, int endpos)
+copy_exp (expr, endpos)
+     struct expression *expr;
+     int endpos;
 {
   int len = length_of_subexp (expr, endpos);
   struct expression *new
@@ -1420,8 +1422,9 @@ copy_exp (struct expression *expr, int endpos)
 
 /* Insert the expression NEW into the current expression (expout) at POS.  */
 static void
-insert_exp (int pos,
-	    struct expression *new)
+insert_exp (pos, new)
+     int pos;
+     struct expression *new;
 {
   int newlen = new->nelts;
 

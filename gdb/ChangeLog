@@ -1,3 +1,20 @@
+Fri Nov 14 13:04:34 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* jv-exp.y (copy_exp, insert_exp): Avoid ANSI prototypes.
+
+Thu Nov 13 09:47:35 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* d30v-tdep.c (d30v_print_flags): Function to print the d30v flags
+	in a human readable format.
+	(print_flags_command): Command wrapper to call d30v_print_flags.
+	(d30v_do_registers_info): When printing out all of the registers,
+	print out the flag values in a human readable fashion.
+	(_initialize_d30v_tdep): Add info flags command to print the
+	flags.
+
+	* config/d30v/tm-d30v.h (PSW_*): Add macros for each of the PSW
+	bits that are defined.
+
 Mon Nov 10 15:13:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* valprint.c (print_longest): The b, h, w, and g format specifiers
