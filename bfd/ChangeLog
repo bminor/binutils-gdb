@@ -1,3 +1,9 @@
+Tue Jul 20 14:36:27 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* Rename for DOS uniqueness: coff-m68k-un.c -> coff-u68k.c
+	config/m68k-coffun.mt -> u68k-coff.mt.
+	* Makefile.in, configure.in: Corresponding changes.
+
 Tue Jul 20 16:21:52 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* elf32-sparc.c (elf_sparc_howto_table): Don't use "^&" before

@@ -55,13 +55,13 @@ coff-h8300.c
 coff-h8500.c
 coff-i386.c
 coff-i960.c
-coff-m68k-un.c
 coff-m68k.c
 coff-m88k.c
 coff-mips.c
 coff-msym.c
 coff-rs6000.c
 coff-sh.c
+coff-u68k.c
 coff-we32k.c
 coff-z8k.c
 coffcode.h
