@@ -1,5 +1,7 @@
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* po/SRC-POTFILES.in: Regenerate.
+
 	* elflink.h (elf_link_input_bfd): Complain about all relocs
 	against local syms from discarded sections.  K&R fixes.
 	(elf_reloc_symbol_deleted_p): Don't try to swap in external syms.
