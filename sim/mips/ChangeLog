@@ -1,3 +1,28 @@
+Wed May  6 19:42:19 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-main.h (INSN_NAME): New arg `cpu'.
+
+start-sanitize-sky
+Thu Apr 30 18:51:26 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sky-libvpe.c (FMAdd, FMSub): Replace r59fp_op3 call with
+ 	r59fp_mula.
+
+end-sanitize-sky
+start-sanitize-r5900
+Wed Apr 29 22:54:45 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (R5900_FP_MAX, R5900_FP_MIN): Define.
+	* r5900.igen (r59fp_overflow): Use.
+
+	* r5900.igen (r59fp_op3): Rename to
+	(r59fp_mula): This, delete opm argument.
+	(MADD.S, MADDA.S, MSUB.S, MSUBS.S): Update.
+	(r59fp_mula): Overflowing product propogates through to result.
+	(r59fp_mula): ACC to the MAX propogates to result.
+	(r59fp_mula): Underflow during multiply only sets SU.
+
+end-sanitize-r5900
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -1,5 +1,5 @@
 /* MIPS Simulator definition.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -41,7 +41,7 @@ typedef address_word sim_cia;
    of doing this.  */
 #include "itable.h"
 #define MAX_INSNS (nr_itable_entries)
-#define INSN_NAME(i) itable[(i)].name
+#define INSN_NAME(cpu,i) itable[(i)].name
 #endif
 
 #include "sim-base.h"
@@ -246,6 +246,12 @@ enum {
   R5900_EXPMAX = 128,
   R5900_EXPMIN = -127,
   R5900_EXPBIAS = 127,
+};
+
+/* MAX and MIN FP values */
+enum {
+  R5900_FPMAX = LSMASK32 (30, 0),
+  R5900_FPMIN = LSMASK32 (31, 0),
 };
 
 
