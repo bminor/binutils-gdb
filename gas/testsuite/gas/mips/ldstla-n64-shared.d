@@ -1,5 +1,5 @@
 #objdump: -d
-#as: -KPIC -n64
+#as: -KPIC -64
 #name: MIPS ld-st-la constants (ABI n64, shared)
 #source: ldstla-n64.s
 

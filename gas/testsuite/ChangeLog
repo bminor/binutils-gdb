@@ -1,3 +1,8 @@
+2004-01-08  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* gas/mips/ldstla-n64.d: Pass -64 to assembler, not -n64.
+	* gas/mips/ldstla-n64-shared.d: Likewise.
+
 2004-01-07  Nick Clifton  <nickc@redhat.com>
 
 	* gas/cris/rd-dw2-1.d: Expect a pointer size from readelf.
