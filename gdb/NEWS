@@ -14,6 +14,15 @@ M68K Linux					m68*-*-linux*
 Fujitsu FR30					fr30-*-elf*
 Mitsubishi D30V					d30v-*-*
 
+* OBSOLETE configurations
+
+Gould PowerNode, NP1				np1-*-*, pn-*-*
+
+Configurations that have been declared obsolete will be commented out,
+but the code will be left in place.  If there is no activity to revive
+these configurations before the next release of GDB, the sources will
+be permanently REMOVED.
+
 * Readline 2.2
 
 GDB now uses readline 2.2.

@@ -1259,10 +1259,10 @@ gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
 
 go32-xdep.o: go32-xdep.c
 
-gould-tdep.o: gould-tdep.c $(OP_INCLUDE)/np1.h $(defs_h) $(frame_h) \
-	$(gdbcore_h) $(symtab_h)
+# OBSOLETE gould-tdep.o: gould-tdep.c $(OP_INCLUDE)/np1.h $(defs_h) $(frame_h) \
+# OBSOLETE	$(gdbcore_h) $(symtab_h)
 
-gould-xdep.o: gould-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
+# OBSOLETE gould-xdep.o: gould-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h)
 

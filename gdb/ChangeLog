@@ -1,3 +1,11 @@
+Wed Feb 10 13:17:21 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	Declare Gould configuration obsolete:
+	* configure.host, configure.tgt: Comment out Gould configs.
+	* Makefile.in: Comment out Gould-related actions.
+	* gould-xdep.c, gould-tdep.c, config/gould/*: Comment out.
+	* NEWS: Mention obsolete status.
+
 1999-02-09  DJ Delorie  <dj@cygnus.com>
 
 	* sparcl-tdep.c: UDP download works in cygwin

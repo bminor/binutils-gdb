@@ -1,310 +1,310 @@
-/* GOULD RISC target-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
-
-This file is part of GDB.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
-
-#include "defs.h"
-#include "symtab.h"
-#include "frame.h"
-#include "gdbcore.h"
-#if defined GOULD_PN
-#include "opcode/pn.h"
-#else
-#include "opcode/np1.h"
-#endif
-
-/* GOULD RISC instructions are never longer than this many bytes.  */
-#define MAXLEN 4
-
-/* Number of elements in the opcode table.  */
-#define NOPCODES (sizeof gld_opcodes / sizeof gld_opcodes[0])
-
-int
-gould_frame_chain_valid (chain, fi)
-     CORE_ADDR chain;
-     struct frame_info *fi;      /* not used here */
-{
-  return (chain != 0 && chain != (thisframe)->frame);
-}
-
-/* Both gcc and cc return small structs in registers (i.e. in GDB
-   terminology, small structs don't use the struct return convention).  */
-int
-gould_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
-{
-  return (TYPE_LENGTH(type) > 8);
-}
-
-
-
-/* Print the GOULD instruction at address MEMADDR in debugged memory,
-   on STREAM.  Returns length of the instruction, in bytes.  */
-
-int
-gould_print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     FILE *stream;
-{
-	unsigned char buffer[MAXLEN];
-	register int i;
-	register char *d;
-	register int bestmask;
-	unsigned best;
-	int temp, index, bestlen;
-
-	read_memory (memaddr, buffer, MAXLEN);
-
-	bestmask = 0;
-	index = -1;
-	best = 0xffffffff;
-	for (i = 0; i < NOPCODES; i++)
-	{
-		register unsigned int opcode = gld_opcodes[i].opcode;
-		register unsigned int mask = gld_opcodes[i].mask;
-		register unsigned int len = gld_opcodes[i].length;
-		register unsigned int test;
-
-		/* Get possible opcode bytes into integer */
-		test = buffer[0] << 24;
-		test |= buffer[1] << 16;
-		test |= buffer[2] << 8;
-		test |= buffer[3];
-
-		/* Mask with opcode and see if match */
-		if ((opcode & mask) == (test & mask))
-		{
-			/* See if second or third match */
-			if (index >= 0)
-			{
-				/* Take new one if it looks good */
-				if (bestlen == MAXLEN && len == MAXLEN)
-				{
-					/* See if lower bits matched */
-					if (((bestmask & 3) == 0) &&
-					    ((mask & 3) != 0))
-					{
-						bestmask = mask;
-						bestlen = len;
-						best = test;
-						index = i;
-					}
-				}
-			}
-			else
-			{
-				/* First match, save it */
-				bestmask = mask;
-				bestlen = len;
-				best = test;
-				index = i;
-			}
-		}
-	}
-
-	/* Handle undefined instructions.  */
-	if (index < 0)
-	{
-		fprintf (stream, "undefined   0%o",(buffer[0]<<8)+buffer[1]);
-		return 2;
-	}
-
-	/* Print instruction name */
-	fprintf (stream, "%-12s", gld_opcodes[index].name);
-
-	/* Adjust if short instruction */
-	if (gld_opcodes[index].length < 4)
-	{
-		best >>= 16;
-		i = 0;
-	}
-	else
-	{
-		i = 16;
-	}
-
-	/* Dump out instruction arguments */
-  	for (d = gld_opcodes[index].args; *d; ++d)
-	{
-	    switch (*d)
-	    {
-		case 'f':
-		    fprintf (stream, "%d",  (best >> (7 + i)) & 7);
-		    break;
-		case 'r':
-		    fprintf (stream, "r%d", (best >> (7 + i)) & 7);
-		    break;
-		case 'R':
-		    fprintf (stream, "r%d", (best >> (4 + i)) & 7);
-		    break;
-		case 'b':
-		    fprintf (stream, "b%d", (best >> (7 + i)) & 7);
-		    break;
-		case 'B':
-		    fprintf (stream, "b%d", (best >> (4 + i)) & 7);
-		    break;
-		case 'v':
-		    fprintf (stream, "b%d", (best >> (7 + i)) & 7);
-		    break;
-		case 'V':
-		    fprintf (stream, "b%d", (best >> (4 + i)) & 7);
-		    break;
-		case 'X':
-		    temp = (best >> 20) & 7;
-		    if (temp)
-			fprintf (stream, "r%d", temp);
-		    else
-			putc ('0', stream);
-		    break;
-		case 'A':
-		    temp = (best >> 16) & 7;
-		    if (temp)
-			fprintf (stream, "(b%d)", temp);
-		    break;
-		case 'S':
-		    fprintf (stream, "#%d", best & 0x1f);
-		    break;
-		case 'I':
-		    fprintf (stream, "#%x", best & 0xffff);
-		    break;
-		case 'O':
-		    fprintf (stream, "%x", best & 0xffff);
-		    break;
-		case 'h':
-		    fprintf (stream, "%d", best & 0xfffe);
-		    break;
-		case 'd':
-		    fprintf (stream, "%d", best & 0xfffc);
-		    break;
-		case 'T':
-		    fprintf (stream, "%d", (best >> 8) & 0xff);
-		    break;
-		case 'N':
-		    fprintf (stream, "%d", best & 0xff);
-		    break;
-		default:
-		    putc (*d, stream);
-		    break;
-	    }
-	}
-
-	/* Return length of instruction */
-  	return (gld_opcodes[index].length);
-}
-
-/*
- * Find the number of arguments to a function.
- */
-findarg(frame)
-	struct frame_info *frame;
-{
-	register struct symbol *func;
-	register unsigned pc;
-
-#ifdef notdef
-	/* find starting address of frame function */
-	pc = get_pc_function_start (frame->pc);
-
-	/* find function symbol info */
-	func = find_pc_function (pc);
-
-	/* call blockframe code to look for match */
-	if (func != NULL)
-                return (func->value.block->nsyms / sizeof(int));
-#endif
-
-        return (-1);
-} 
-
-/*
- * In the case of the NPL, the frame's norminal address is Br2 and the 
- * previous routines frame is up the stack X bytes.  Finding out what
- * 'X' is can be tricky.
- *
- *    1.) stored in the code function header xA(Br1).
- *    2.) must be careful of recurssion.
- */
-CORE_ADDR
-findframe(thisframe)
-    struct frame_info *thisframe;
-{
-    register CORE_ADDR pointer;
-    CORE_ADDR framechain();
-#if 0    
-    struct frame_info *frame;
-
-    /* Setup toplevel frame structure */
-    frame->pc = read_pc();
-    frame->next_frame = 0;
-    frame->frame = read_register (SP_REGNUM);	/* Br2 */
-
-    /* Search for this frame (start at current Br2) */
-    do
-    {
-	pointer = framechain(frame);
-	frame->next_frame = frame->frame;
-	frame->frame = pointer;
-	frame->pc = FRAME_SAVED_PC(frame);
-    }
-    while (frame->next_frame != thisframe);
-#endif
-
-    pointer = framechain (thisframe);
-
-    /* stop gap for now, end at __base3 */
-    if (thisframe->pc == 0)
-	return 0;
-
-    return pointer;
-}
-
-/*
- * Gdb front-end and internal framechain routine.
- * Go back up stack one level.  Tricky...
- */
-CORE_ADDR
-framechain(frame)
-    register struct frame_info *frame;
-{
-    register CORE_ADDR func, prevsp;
-    register unsigned value;
-
-    /* Get real function start address from internal frame address */
-    func = get_pc_function_start(frame->pc);
-
-    /* If no stack given, read register Br1 "(sp)" */
-    if (!frame->frame)
-	prevsp = read_register (SP_REGNUM);
-    else
-	prevsp = frame->frame;
-
-    /* Check function header, case #2 */
-    value = read_memory_integer (func, 4);
-    if (value)
-    {
-	/* 32bit call push value stored in function header */
-	prevsp += value;
-    }
-    else
-    {
-	/* read half-word from suabr at start of function */
-	prevsp += read_memory_integer (func + 10, 2);
-    }
-
-    return (prevsp);
-}
+/* OBSOLETE /* GOULD RISC target-dependent code for GDB, the GNU debugger. */
+/* OBSOLETE    Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc. */
+/* OBSOLETE  */
+/* OBSOLETE This file is part of GDB. */
+/* OBSOLETE  */
+/* OBSOLETE This program is free software; you can redistribute it and/or modify */
+/* OBSOLETE it under the terms of the GNU General Public License as published by */
+/* OBSOLETE the Free Software Foundation; either version 2 of the License, or */
+/* OBSOLETE (at your option) any later version. */
+/* OBSOLETE  */
+/* OBSOLETE This program is distributed in the hope that it will be useful, */
+/* OBSOLETE but WITHOUT ANY WARRANTY; without even the implied warranty of */
+/* OBSOLETE MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
+/* OBSOLETE GNU General Public License for more details. */
+/* OBSOLETE  */
+/* OBSOLETE You should have received a copy of the GNU General Public License */
+/* OBSOLETE along with this program; if not, write to the Free Software */
+/* OBSOLETE Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *x/ */
+/* OBSOLETE  */
+/* OBSOLETE #include "defs.h" */
+/* OBSOLETE #include "symtab.h" */
+/* OBSOLETE #include "frame.h" */
+/* OBSOLETE #include "gdbcore.h" */
+/* OBSOLETE #if defined GOULD_PN */
+/* OBSOLETE #include "opcode/pn.h" */
+/* OBSOLETE #else */
+/* OBSOLETE #include "opcode/np1.h" */
+/* OBSOLETE #endif */
+/* OBSOLETE  */
+/* OBSOLETE /* GOULD RISC instructions are never longer than this many bytes.  *x/ */
+/* OBSOLETE #define MAXLEN 4 */
+/* OBSOLETE  */
+/* OBSOLETE /* Number of elements in the opcode table.  *x/ */
+/* OBSOLETE #define NOPCODES (sizeof gld_opcodes / sizeof gld_opcodes[0]) */
+/* OBSOLETE  */
+/* OBSOLETE int */
+/* OBSOLETE gould_frame_chain_valid (chain, fi) */
+/* OBSOLETE      CORE_ADDR chain; */
+/* OBSOLETE      struct frame_info *fi;      /* not used here *x/ */
+/* OBSOLETE { */
+/* OBSOLETE   return (chain != 0 && chain != (thisframe)->frame); */
+/* OBSOLETE } */
+/* OBSOLETE  */
+/* OBSOLETE /* Both gcc and cc return small structs in registers (i.e. in GDB */
+/* OBSOLETE    terminology, small structs don't use the struct return convention).  *x/ */
+/* OBSOLETE int */
+/* OBSOLETE gould_use_struct_convention (gcc_p, type) */
+/* OBSOLETE      int gcc_p; */
+/* OBSOLETE      struct type *type; */
+/* OBSOLETE { */
+/* OBSOLETE   return (TYPE_LENGTH(type) > 8); */
+/* OBSOLETE } */
+/* OBSOLETE  */
+/* OBSOLETE  */
+/* OBSOLETE  */
+/* OBSOLETE /* Print the GOULD instruction at address MEMADDR in debugged memory, */
+/* OBSOLETE    on STREAM.  Returns length of the instruction, in bytes.  *x/ */
+/* OBSOLETE  */
+/* OBSOLETE int */
+/* OBSOLETE gould_print_insn (memaddr, stream) */
+/* OBSOLETE      CORE_ADDR memaddr; */
+/* OBSOLETE      FILE *stream; */
+/* OBSOLETE { */
+/* OBSOLETE 	unsigned char buffer[MAXLEN]; */
+/* OBSOLETE 	register int i; */
+/* OBSOLETE 	register char *d; */
+/* OBSOLETE 	register int bestmask; */
+/* OBSOLETE 	unsigned best; */
+/* OBSOLETE 	int temp, index, bestlen; */
+/* OBSOLETE  */
+/* OBSOLETE 	read_memory (memaddr, buffer, MAXLEN); */
+/* OBSOLETE  */
+/* OBSOLETE 	bestmask = 0; */
+/* OBSOLETE 	index = -1; */
+/* OBSOLETE 	best = 0xffffffff; */
+/* OBSOLETE 	for (i = 0; i < NOPCODES; i++) */
+/* OBSOLETE 	{ */
+/* OBSOLETE 		register unsigned int opcode = gld_opcodes[i].opcode; */
+/* OBSOLETE 		register unsigned int mask = gld_opcodes[i].mask; */
+/* OBSOLETE 		register unsigned int len = gld_opcodes[i].length; */
+/* OBSOLETE 		register unsigned int test; */
+/* OBSOLETE  */
+/* OBSOLETE 		/* Get possible opcode bytes into integer *x/ */
+/* OBSOLETE 		test = buffer[0] << 24; */
+/* OBSOLETE 		test |= buffer[1] << 16; */
+/* OBSOLETE 		test |= buffer[2] << 8; */
+/* OBSOLETE 		test |= buffer[3]; */
+/* OBSOLETE  */
+/* OBSOLETE 		/* Mask with opcode and see if match *x/ */
+/* OBSOLETE 		if ((opcode & mask) == (test & mask)) */
+/* OBSOLETE 		{ */
+/* OBSOLETE 			/* See if second or third match *x/ */
+/* OBSOLETE 			if (index >= 0) */
+/* OBSOLETE 			{ */
+/* OBSOLETE 				/* Take new one if it looks good *x/ */
+/* OBSOLETE 				if (bestlen == MAXLEN && len == MAXLEN) */
+/* OBSOLETE 				{ */
+/* OBSOLETE 					/* See if lower bits matched *x/ */
+/* OBSOLETE 					if (((bestmask & 3) == 0) && */
+/* OBSOLETE 					    ((mask & 3) != 0)) */
+/* OBSOLETE 					{ */
+/* OBSOLETE 						bestmask = mask; */
+/* OBSOLETE 						bestlen = len; */
+/* OBSOLETE 						best = test; */
+/* OBSOLETE 						index = i; */
+/* OBSOLETE 					} */
+/* OBSOLETE 				} */
+/* OBSOLETE 			} */
+/* OBSOLETE 			else */
+/* OBSOLETE 			{ */
+/* OBSOLETE 				/* First match, save it *x/ */
+/* OBSOLETE 				bestmask = mask; */
+/* OBSOLETE 				bestlen = len; */
+/* OBSOLETE 				best = test; */
+/* OBSOLETE 				index = i; */
+/* OBSOLETE 			} */
+/* OBSOLETE 		} */
+/* OBSOLETE 	} */
+/* OBSOLETE  */
+/* OBSOLETE 	/* Handle undefined instructions.  *x/ */
+/* OBSOLETE 	if (index < 0) */
+/* OBSOLETE 	{ */
+/* OBSOLETE 		fprintf (stream, "undefined   0%o",(buffer[0]<<8)+buffer[1]); */
+/* OBSOLETE 		return 2; */
+/* OBSOLETE 	} */
+/* OBSOLETE  */
+/* OBSOLETE 	/* Print instruction name *x/ */
+/* OBSOLETE 	fprintf (stream, "%-12s", gld_opcodes[index].name); */
+/* OBSOLETE  */
+/* OBSOLETE 	/* Adjust if short instruction *x/ */
+/* OBSOLETE 	if (gld_opcodes[index].length < 4) */
+/* OBSOLETE 	{ */
+/* OBSOLETE 		best >>= 16; */
+/* OBSOLETE 		i = 0; */
+/* OBSOLETE 	} */
+/* OBSOLETE 	else */
+/* OBSOLETE 	{ */
+/* OBSOLETE 		i = 16; */
+/* OBSOLETE 	} */
+/* OBSOLETE  */
+/* OBSOLETE 	/* Dump out instruction arguments *x/ */
+/* OBSOLETE   	for (d = gld_opcodes[index].args; *d; ++d) */
+/* OBSOLETE 	{ */
+/* OBSOLETE 	    switch (*d) */
+/* OBSOLETE 	    { */
+/* OBSOLETE 		case 'f': */
+/* OBSOLETE 		    fprintf (stream, "%d",  (best >> (7 + i)) & 7); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'r': */
+/* OBSOLETE 		    fprintf (stream, "r%d", (best >> (7 + i)) & 7); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'R': */
+/* OBSOLETE 		    fprintf (stream, "r%d", (best >> (4 + i)) & 7); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'b': */
+/* OBSOLETE 		    fprintf (stream, "b%d", (best >> (7 + i)) & 7); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'B': */
+/* OBSOLETE 		    fprintf (stream, "b%d", (best >> (4 + i)) & 7); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'v': */
+/* OBSOLETE 		    fprintf (stream, "b%d", (best >> (7 + i)) & 7); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'V': */
+/* OBSOLETE 		    fprintf (stream, "b%d", (best >> (4 + i)) & 7); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'X': */
+/* OBSOLETE 		    temp = (best >> 20) & 7; */
+/* OBSOLETE 		    if (temp) */
+/* OBSOLETE 			fprintf (stream, "r%d", temp); */
+/* OBSOLETE 		    else */
+/* OBSOLETE 			putc ('0', stream); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'A': */
+/* OBSOLETE 		    temp = (best >> 16) & 7; */
+/* OBSOLETE 		    if (temp) */
+/* OBSOLETE 			fprintf (stream, "(b%d)", temp); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'S': */
+/* OBSOLETE 		    fprintf (stream, "#%d", best & 0x1f); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'I': */
+/* OBSOLETE 		    fprintf (stream, "#%x", best & 0xffff); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'O': */
+/* OBSOLETE 		    fprintf (stream, "%x", best & 0xffff); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'h': */
+/* OBSOLETE 		    fprintf (stream, "%d", best & 0xfffe); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'd': */
+/* OBSOLETE 		    fprintf (stream, "%d", best & 0xfffc); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'T': */
+/* OBSOLETE 		    fprintf (stream, "%d", (best >> 8) & 0xff); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		case 'N': */
+/* OBSOLETE 		    fprintf (stream, "%d", best & 0xff); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 		default: */
+/* OBSOLETE 		    putc (*d, stream); */
+/* OBSOLETE 		    break; */
+/* OBSOLETE 	    } */
+/* OBSOLETE 	} */
+/* OBSOLETE  */
+/* OBSOLETE 	/* Return length of instruction *x/ */
+/* OBSOLETE   	return (gld_opcodes[index].length); */
+/* OBSOLETE } */
+/* OBSOLETE  */
+/* OBSOLETE /* */
+/* OBSOLETE  * Find the number of arguments to a function. */
+/* OBSOLETE  *x/ */
+/* OBSOLETE findarg(frame) */
+/* OBSOLETE 	struct frame_info *frame; */
+/* OBSOLETE { */
+/* OBSOLETE 	register struct symbol *func; */
+/* OBSOLETE 	register unsigned pc; */
+/* OBSOLETE  */
+/* OBSOLETE #ifdef notdef */
+/* OBSOLETE 	/* find starting address of frame function *x/ */
+/* OBSOLETE 	pc = get_pc_function_start (frame->pc); */
+/* OBSOLETE  */
+/* OBSOLETE 	/* find function symbol info *x/ */
+/* OBSOLETE 	func = find_pc_function (pc); */
+/* OBSOLETE  */
+/* OBSOLETE 	/* call blockframe code to look for match *x/ */
+/* OBSOLETE 	if (func != NULL) */
+/* OBSOLETE                 return (func->value.block->nsyms / sizeof(int)); */
+/* OBSOLETE #endif */
+/* OBSOLETE  */
+/* OBSOLETE         return (-1); */
+/* OBSOLETE }  */
+/* OBSOLETE  */
+/* OBSOLETE /* */
+/* OBSOLETE  * In the case of the NPL, the frame's norminal address is Br2 and the  */
+/* OBSOLETE  * previous routines frame is up the stack X bytes.  Finding out what */
+/* OBSOLETE  * 'X' is can be tricky. */
+/* OBSOLETE  * */
+/* OBSOLETE  *    1.) stored in the code function header xA(Br1). */
+/* OBSOLETE  *    2.) must be careful of recurssion. */
+/* OBSOLETE  *x/ */
+/* OBSOLETE CORE_ADDR */
+/* OBSOLETE findframe(thisframe) */
+/* OBSOLETE     struct frame_info *thisframe; */
+/* OBSOLETE { */
+/* OBSOLETE     register CORE_ADDR pointer; */
+/* OBSOLETE     CORE_ADDR framechain(); */
+/* OBSOLETE #if 0     */
+/* OBSOLETE     struct frame_info *frame; */
+/* OBSOLETE  */
+/* OBSOLETE     /* Setup toplevel frame structure *x/ */
+/* OBSOLETE     frame->pc = read_pc(); */
+/* OBSOLETE     frame->next_frame = 0; */
+/* OBSOLETE     frame->frame = read_register (SP_REGNUM);	/* Br2 *x/ */
+/* OBSOLETE  */
+/* OBSOLETE     /* Search for this frame (start at current Br2) *x/ */
+/* OBSOLETE     do */
+/* OBSOLETE     { */
+/* OBSOLETE 	pointer = framechain(frame); */
+/* OBSOLETE 	frame->next_frame = frame->frame; */
+/* OBSOLETE 	frame->frame = pointer; */
+/* OBSOLETE 	frame->pc = FRAME_SAVED_PC(frame); */
+/* OBSOLETE     } */
+/* OBSOLETE     while (frame->next_frame != thisframe); */
+/* OBSOLETE #endif */
+/* OBSOLETE  */
+/* OBSOLETE     pointer = framechain (thisframe); */
+/* OBSOLETE  */
+/* OBSOLETE     /* stop gap for now, end at __base3 *x/ */
+/* OBSOLETE     if (thisframe->pc == 0) */
+/* OBSOLETE 	return 0; */
+/* OBSOLETE  */
+/* OBSOLETE     return pointer; */
+/* OBSOLETE } */
+/* OBSOLETE  */
+/* OBSOLETE /* */
+/* OBSOLETE  * Gdb front-end and internal framechain routine. */
+/* OBSOLETE  * Go back up stack one level.  Tricky... */
+/* OBSOLETE  *x/ */
+/* OBSOLETE CORE_ADDR */
+/* OBSOLETE framechain(frame) */
+/* OBSOLETE     register struct frame_info *frame; */
+/* OBSOLETE { */
+/* OBSOLETE     register CORE_ADDR func, prevsp; */
+/* OBSOLETE     register unsigned value; */
+/* OBSOLETE  */
+/* OBSOLETE     /* Get real function start address from internal frame address *x/ */
+/* OBSOLETE     func = get_pc_function_start(frame->pc); */
+/* OBSOLETE  */
+/* OBSOLETE     /* If no stack given, read register Br1 "(sp)" *x/ */
+/* OBSOLETE     if (!frame->frame) */
+/* OBSOLETE 	prevsp = read_register (SP_REGNUM); */
+/* OBSOLETE     else */
+/* OBSOLETE 	prevsp = frame->frame; */
+/* OBSOLETE  */
+/* OBSOLETE     /* Check function header, case #2 *x/ */
+/* OBSOLETE     value = read_memory_integer (func, 4); */
+/* OBSOLETE     if (value) */
+/* OBSOLETE     { */
+/* OBSOLETE 	/* 32bit call push value stored in function header *x/ */
+/* OBSOLETE 	prevsp += value; */
+/* OBSOLETE     } */
+/* OBSOLETE     else */
+/* OBSOLETE     { */
+/* OBSOLETE 	/* read half-word from suabr at start of function *x/ */
+/* OBSOLETE 	prevsp += read_memory_integer (func + 10, 2); */
+/* OBSOLETE     } */
+/* OBSOLETE  */
+/* OBSOLETE     return (prevsp); */
+/* OBSOLETE } */
