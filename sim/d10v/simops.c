@@ -1,3 +1,4 @@
+#include <signal.h>
 #include "d10v_sim.h"
 #include "simops.h"
 
@@ -29,7 +30,9 @@ OP_5607 ()
 #ifdef DEBUG
   printf("   abs\ta%d\n",OP[0]);
 #endif
-  State.F1 = State.F0;  
+  State.F1 = State.F0;
+  State.a[OP[0]] = SEXT40(State.a[OP[0]]);
+
   if (State.a[OP[0]] < 0 )
     {
       tmp = -State.a[OP[0]];
@@ -40,10 +43,10 @@ OP_5607 ()
 	  else if (tmp < MIN32)
 	    State.a[OP[0]] = MIN32;
 	  else
-	    State.a[OP[0]] = tmp;
+	    State.a[OP[0]] = tmp & MASK40;
 	}
       else
-	State.a[OP[0]] = tmp;
+	State.a[OP[0]] = tmp & MASK40;
       State.F0 = 1;
     }
   else
@@ -73,7 +76,7 @@ OP_1201 ()
 #ifdef DEBUG
   printf("   add\ta%d,r%d\n",OP[0],OP[1]);
 #endif
-  tmp = State.a[OP[0]] + (SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1]);
+  tmp = SEXT40(State.a[OP[0]]) + (SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1]);
   if (State.ST)
     {
       if ( tmp > MAX32)
@@ -81,10 +84,10 @@ OP_1201 ()
       else if ( tmp < MIN32)
 	State.a[OP[0]] = MIN32;
       else
-	State.a[OP[0]] = tmp;
+	State.a[OP[0]] = tmp & MASK40;
     }
   else
-    State.a[OP[0]] = tmp;
+    State.a[OP[0]] = tmp & MASK40;
 }
 
 /* add */
@@ -95,7 +98,7 @@ OP_1203 ()
 #ifdef DEBUG
   printf("   add\ta%d,a%d\n",OP[0],OP[1]);
 #endif
-  tmp = State.a[OP[0]] + State.a[OP[1]];
+  tmp = SEXT40(State.a[OP[0]]) + SEXT40(State.a[OP[1]]);
   if (State.ST)
     {
       if (tmp > MAX32)
@@ -103,10 +106,10 @@ OP_1203 ()
       else if ( tmp < MIN32)
 	State.a[OP[0]] = MIN32;
       else
-	State.a[OP[0]] = tmp;
+	State.a[OP[0]] = tmp & MASK40;
     }
   else
-    State.a[OP[0]] = tmp;
+    State.a[OP[0]] = tmp & MASK40;
 }
 
 /* add2w */
@@ -151,7 +154,7 @@ OP_17000200 ()
 #ifdef DEBUG
   printf("   addac3\tr%d,r%d,a%d\n",OP[0],OP[1],OP[2]);
 #endif
-  tmp = State.a[OP[2]] + (SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1]);
+  tmp = SEXT40(State.a[OP[2]]) + SEXT40 ((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]);
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
 }
@@ -164,7 +167,7 @@ OP_17000202 ()
 #ifdef DEBUG
   printf("   addac3\tr%d,a%d,a%d\n",OP[0],OP[1],OP[2]);
 #endif
-  tmp = State.a[OP[1]] + State.a[OP[2]];
+  tmp = SEXT40(State.a[OP[1]]) + SEXT40(State.a[OP[2]]);
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
 }
@@ -178,7 +181,7 @@ OP_17001200 ()
   printf("   addac3s\tr%d,r%d,a%d\n",OP[0],OP[1],OP[2]);
 #endif
   State.F1 = State.F0;
-  tmp = State.a[OP[2]] + (SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1]);
+  tmp = SEXT40(State.a[OP[2]]) + SEXT40 ((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]);
   if ( tmp > MAX32)
     {
       State.regs[OP[0]] = 0x7fff;
@@ -208,7 +211,7 @@ OP_17001202 ()
   printf("   addac3s\tr%d,a%d,a%d\n",OP[0],OP[1],OP[2]);
 #endif
   State.F1 = State.F0;
-  tmp = State.a[OP[1]] + State.a[OP[2]];
+  tmp = SEXT40(State.a[OP[1]]) + SEXT40(State.a[OP[2]]);
   if ( tmp > MAX32)
     {
       State.regs[OP[0]] = 0x7fff;
@@ -233,6 +236,8 @@ OP_17001202 ()
 void
 OP_201 ()
 {
+  if (OP[1] == 0)
+    OP[1] = 16;
 #ifdef DEBUG
   printf("   addi\tr%d,0x%x\n",OP[0],OP[1]);
 #endif
@@ -415,7 +420,7 @@ OP_1603 ()
   printf("   cmp\ta%d,a%d\n",OP[0],OP[1]);
 #endif
   State.F1 = State.F0;
-  State.F0 = (State.a[OP[0]] < State.a[OP[1]]) ? 1 : 0;
+  State.F0 = (SEXT40(State.a[OP[0]]) < SEXT40(State.a[OP[1]])) ? 1 : 0;
 }
 
 /* cmpeq */
@@ -534,7 +539,8 @@ OP_4E09 ()
 void
 OP_5F20 ()
 {
-  printf("   dbt - NOT IMPLEMENTED\n");
+  printf("***** DBT *****  PC=%x\n",PC);
+  State.exception = SIGTRAP;
 }
 
 /* divs */
@@ -669,7 +675,7 @@ OP_15002A02 ()
 #ifdef DEBUG
   printf("   exp\tr%d,a%d\n",OP[0],OP[1]);
 #endif
-  if (State.a[OP[1]] >= 0)
+  if (SEXT40(State.a[OP[1]]) >= 0)
     tmp = State.a[OP[1]];
   else
     tmp = ~(State.a[OP[1]]);
@@ -726,7 +732,7 @@ OP_6401 ()
   printf("   ld\tr%d,@r%d-\n",OP[0],OP[1]);
 #endif
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
-  State.regs[OP[1]] -= 2;
+  INC_ADDR(State.regs[OP[1]],-2);
 }
 
 /* ld */
@@ -737,7 +743,7 @@ OP_6001 ()
   printf("   ld\tr%d,@r%d+\n",OP[0],OP[1]);
 #endif
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
-  State.regs[OP[1]] += 2;
+  INC_ADDR(State.regs[OP[1]],2);
 }
 
 /* ld */
@@ -770,7 +776,7 @@ OP_6601 ()
 #endif
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
   State.regs[OP[0]+1] = RW (State.regs[OP[1]]+2);
-  State.regs[OP[1]] -= 4;
+  INC_ADDR(State.regs[OP[1]],-4);
 }
 
 /* ld2w */
@@ -782,7 +788,7 @@ OP_6201 ()
 #endif
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
   State.regs[OP[0]+1] = RW (State.regs[OP[1]]+2);
-  State.regs[OP[1]] += 4;
+  INC_ADDR(State.regs[OP[1]],4);
 }
 
 /* ld2w */
@@ -866,15 +872,15 @@ OP_2A00 ()
 #ifdef DEBUG
   printf("   mac\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
 #endif
-  tmp = (int16)(State.regs[OP[1]]) * (int16)(State.regs[OP[2]]);
+  tmp = SEXT40 ((int16)(State.regs[OP[1]]) * (int16)(State.regs[OP[2]]));
 
   if (State.FX)
-    tmp <<= 1;
+    tmp = SEXT40( (tmp << 1) & MASK40);
 
   if (State.ST && tmp > MAX32)
     tmp = MAX32;
 
-  tmp += State.a[OP[0]];
+  tmp += SEXT40(State.a[OP[0]]);
   if (State.ST)
     {
       if (tmp > MAX32)
@@ -882,28 +888,39 @@ OP_2A00 ()
       else if (tmp < MIN32)
 	State.a[OP[0]] = MIN32;
       else
-	State.a[OP[0]] = tmp;
+	State.a[OP[0]] = tmp & MASK40;
     }
   else
-    State.a[OP[0]] = tmp;
+    State.a[OP[0]] = tmp & MASK40;
 }
 
 /* macsu */
 void
 OP_1A00 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   macsu\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   macsu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
 #endif
+  tmp = SEXT40 ((int16)State.regs[OP[1]] * State.regs[OP[2]]);
+  if (State.FX)
+    tmp = SEXT40( (tmp << 1) & MASK40);
+
+  State.a[OP[0]] = (SEXT40 (State.a[OP[0]]) + tmp) & MASK40;
 }
 
 /* macu */
 void
 OP_3A00 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   macu\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   macu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
 #endif
+  tmp = SEXT40 (State.regs[OP[1]] * State.regs[OP[2]]);
+  if (State.FX)
+    tmp = SEXT40( (tmp << 1) & MASK40);
+  State.a[OP[0]] = (SEXT40 (State.a[OP[0]]) + tmp) & MASK40;
 }
 
 /* max */
@@ -927,9 +944,19 @@ OP_2600 ()
 void
 OP_3600 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   max\t%x,%x\n",OP[0],OP[1]);
+  printf("   max\ta%d,r%d\n",OP[0],OP[1]);
 #endif
+  State.F1 = State.F0;
+  tmp = SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1];
+  if (tmp > SEXT40(State.a[OP[0]]))
+    {
+      State.a[OP[0]] = tmp & MASK40;
+      State.F0 = 1;
+    }
+  else
+    State.F0 = 0;
 }
 
 /* max */
@@ -937,9 +964,18 @@ void
 OP_3602 ()
 {
 #ifdef DEBUG
-printf("   max\t%x,%x\n",OP[0],OP[1]);
+  printf("   max\ta%d,a%d\n",OP[0],OP[1]);
 #endif
+  State.F1 = State.F0;
+  if (SEXT40(State.a[OP[1]]) > SEXT40(State.a[OP[0]]))
+    {
+      State.a[OP[0]] = State.a[OP[1]];
+      State.F0 = 1;
+    }
+  else
+    State.F0 = 0;
 }
+
 
 /* min */
 void
@@ -962,9 +998,19 @@ OP_2601 ()
 void
 OP_3601 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   min\t%x,%x\n",OP[0],OP[1]);
+  printf("   min\ta%d,r%d\n",OP[0],OP[1]);
 #endif
+  State.F1 = State.F0;
+  tmp = SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1];
+  if (tmp < SEXT40(State.a[OP[0]]))
+    {
+      State.a[OP[0]] = tmp & MASK40;
+      State.F0 = 1;
+    }
+  else
+    State.F0 = 0;
 }
 
 /* min */
@@ -972,35 +1018,76 @@ void
 OP_3603 ()
 {
 #ifdef DEBUG
-printf("   min\t%x,%x\n",OP[0],OP[1]);
+  printf("   min\ta%d,a%d\n",OP[0],OP[1]);
 #endif
+  State.F1 = State.F0;
+  if (SEXT40(State.a[OP[1]]) < SEXT40(State.a[OP[0]]))
+    {
+      State.a[OP[0]] = State.a[OP[1]];
+      State.F0 = 1;
+    }
+  else
+    State.F0 = 0;
 }
 
 /* msb */
 void
 OP_2800 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   msb\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   msb\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
 #endif
+  tmp = SEXT40 ((int16)(State.regs[OP[1]]) * (int16)(State.regs[OP[2]]));
+
+  if (State.FX)
+    tmp = SEXT40 ((tmp << 1) & MASK40);
+
+  if (State.ST && tmp > MAX32)
+    tmp = MAX32;
+
+  tmp = SEXT40(State.a[OP[0]]) - tmp;
+  if (State.ST)
+    {
+      if (tmp > MAX32)
+	State.a[OP[0]] = MAX32;
+      else if (tmp < MIN32)
+	State.a[OP[0]] = MIN32;
+      else
+	State.a[OP[0]] = tmp & MASK40;
+    }
+  else
+    State.a[OP[0]] = tmp & MASK40;
 }
 
 /* msbsu */
 void
 OP_1800 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   msbsu\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   msbsu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
 #endif
+  tmp = SEXT40 ((int16)State.regs[OP[1]] * State.regs[OP[2]]);
+  if (State.FX)
+    tmp = SEXT40( (tmp << 1) & MASK40);
+
+  State.a[OP[0]] = (SEXT40 (State.a[OP[0]]) - tmp) & MASK40;
 }
 
 /* msbu */
 void
 OP_3800 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   msbu\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   msbu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
 #endif
+  tmp = SEXT40 (State.regs[OP[1]] * State.regs[OP[2]]);
+  if (State.FX)
+    tmp = SEXT40( (tmp << 1) & MASK40);
+
+  State.a[OP[0]] = (SEXT40 (State.a[OP[0]]) - tmp) & MASK40;
 }
 
 /* mul */
@@ -1017,27 +1104,51 @@ OP_2E00 ()
 void
 OP_2C00 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   mulx\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   mulx\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
 #endif
+  tmp = SEXT40 ((int16)(State.regs[OP[1]]) * (int16)(State.regs[OP[2]]));
+
+  if (State.FX)
+    tmp = SEXT40 ((tmp << 1) & MASK40);
+
+  if (State.ST && tmp > MAX32)
+    State.a[OP[0]] = MAX32;
+  else
+    State.a[OP[0]] = tmp & MASK40;
 }
 
 /* mulxsu */
 void
 OP_1C00 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   mulxsu\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   mulxsu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
 #endif
+  tmp = SEXT40 ((int16)(State.regs[OP[1]]) * State.regs[OP[2]]);
+
+  if (State.FX)
+    tmp <<= 1;
+
+  State.a[OP[0]] = tmp & MASK40;
 }
 
 /* mulxu */
 void
 OP_3C00 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   mulxu\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   mulxu\ta%d,r%d,r%d\n",OP[0],OP[1],OP[2]);
 #endif
+  tmp = SEXT40 (State.regs[OP[1]] * State.regs[OP[2]]);
+
+  if (State.FX)
+    tmp <<= 1;
+
+  State.a[OP[0]] = tmp & MASK40;
 }
 
 /* mv */
@@ -1079,7 +1190,7 @@ OP_3E01 ()
 #ifdef DEBUG
   printf("   mv2wtac\tr%d,a%d\n",OP[0],OP[1]);
 #endif
-  State.a[OP[1]] = SEXT16 (State.regs[OP[0]]) << 16 | State.regs[OP[0]+1];
+  State.a[OP[1]] = (SEXT16 (State.regs[OP[0]]) << 16 | State.regs[OP[0]+1]) & MASK40;
 }
 
 /* mvac */
@@ -1200,8 +1311,7 @@ OP_1E01 ()
   printf("   mvtachi\tr%d,a%d\n",OP[0],OP[1]);
 #endif
   tmp = State.a[OP[1]] & 0xffff;
-  State.a[OP[1]] = SEXT16 (State.regs[OP[0]]) << 16 | tmp;
-  printf("put 0x%llx\n",State.a[OP[1]]);
+  State.a[OP[1]] = (SEXT16 (State.regs[OP[0]]) << 16 | tmp) & MASK40;
 }
 
 /* mvtaclo */
@@ -1211,7 +1321,7 @@ OP_1E21 ()
 #ifdef DEBUG
   printf("   mvtaclo\tr%d,a%d\n",OP[0],OP[1]);
 #endif
-  State.a[OP[1]] = SEXT16 (State.regs[OP[0]]);
+  State.a[OP[1]] = (SEXT16 (State.regs[OP[0]])) & MASK40;
 }
 
 /* mvtc */
@@ -1239,7 +1349,7 @@ OP_5600 ()
       if (State.ST && !State.FX)
 	{
 	  fprintf (stderr,"ERROR at PC 0x%x: ST can only be set when FX is set.\n",PC<<2);
-	  exit (1);
+	  State.exception = SIGILL;
 	}
     }
 }
@@ -1272,7 +1382,7 @@ OP_5605 ()
 #ifdef DEBUG
   printf("   neg\ta%d\n",OP[0]);
 #endif
-  tmp = -State.a[OP[0]];
+  tmp = -SEXT40(State.a[OP[0]]);
   if (State.ST)
     {
       if ( tmp > MAX32)
@@ -1280,10 +1390,10 @@ OP_5605 ()
       else if (tmp < MIN32)
 	State.a[OP[0]] = MIN32;
       else
-	State.a[OP[0]] = tmp;
+	State.a[OP[0]] = tmp & MASK40;
     }
   else
-    State.a[OP[0]] = tmp;
+    State.a[OP[0]] = tmp & MASK40;
 }
 
 
@@ -1405,12 +1515,12 @@ OP_27000000 ()
   if (RPT_C == 0)
     {
       fprintf (stderr, "ERROR: rep with count=0 is illegal.\n");
-      exit(1);
+      State.exception = SIGILL;
     }
   if (OP[1] < 4)
     {
       fprintf (stderr, "ERROR: rep must include at least 4 instructions.\n");
-      exit(1);
+      State.exception = SIGILL;
     }
 }
 
@@ -1428,12 +1538,12 @@ OP_2F000000 ()
   if (RPT_C == 0)
     {
       fprintf (stderr, "ERROR: repi with count=0 is illegal.\n");
-      exit(1);
+      State.exception = SIGILL;
     }
   if (OP[1] < 4)
     {
       fprintf (stderr, "ERROR: repi must include at least 4 instructions.\n");
-      exit(1);
+      State.exception = SIGILL;
     }
 }
 
@@ -1463,7 +1573,7 @@ OP_1223 ()
 #ifdef DEBUG
   printf("   sadd\ta%d,a%d\n",OP[0],OP[1]);
 #endif
-  tmp = State.a[OP[0]] + (State.a[OP[1]] >> 16);
+  tmp = SEXT40(State.a[OP[0]]) + (SEXT40(State.a[OP[1]]) >> 16);
   if (State.ST)
     {
       if (tmp > MAX32)
@@ -1471,10 +1581,10 @@ OP_1223 ()
       else if (tmp < MIN32)
 	State.a[OP[0]] = MIN32;
       else
-	State.a[OP[0]] = tmp;
+	State.a[OP[0]] = tmp & MASK40;
     }
   else
-    State.a[OP[0]] = tmp;
+    State.a[OP[0]] = tmp & MASK40;
 }
 
 /* setf0f */
@@ -1556,13 +1666,14 @@ void
 OP_3201 ()
 {
   int64 tmp;
+
+  if (OP[1] == 0)
+    OP[1] = 16;
 #ifdef DEBUG
   printf("   slli\ta%d,%d\n",OP[0],OP[1]);
 #endif
-  if (OP[1] == 0)
-    tmp = SEXT40(State.a[OP[0]]) << 16;
-  else
-    tmp = SEXT40(State.a[OP[0]]) << OP[2];
+
+  tmp = SEXT40(State.a[OP[0]]) << OP[1];
 
   if (State.ST)
     {
@@ -1623,12 +1734,11 @@ OP_2401 ()
 void
 OP_3401 ()
 {
+  if (OP[1] == 0)
+    OP[1] = 16;
 #ifdef DEBUG
   printf("   srai\ta%d,%d\n",OP[0],OP[1]);
 #endif
-  if (OP[1] == 0)
-    State.a[OP[0]] >>= 16;
-  else
     State.a[OP[0]] >>= OP[1];
 }
 
@@ -1667,12 +1777,11 @@ printf("   srli\tr%d,%d\n",OP[0],OP[1]);
 void
 OP_3001 ()
 {
+  if (OP[1] == 0)
+    OP[1] = 16;
 #ifdef DEBUG
   printf("   srli\ta%d,%d\n",OP[0],OP[1]);
 #endif
-  if (OP[1] == 0)
-    State.a[OP[0]] >>= 16;
-  else
     State.a[OP[0]] >>= OP[1];
 }
 
@@ -1718,7 +1827,8 @@ OP_6C1F ()
   if ( OP[1] != 15 )
     {
       fprintf (stderr,"ERROR: cannot pre-decrement any registers but r15 (SP).\n");
-      exit(1);
+      State.exception = SIGILL;
+      return;
     }
   State.regs[OP[1]] -= 2;
   SW (State.regs[OP[1]], State.regs[OP[0]]);
@@ -1732,7 +1842,7 @@ OP_6801 ()
   printf("   st\tr%d,@r%d+\n",OP[0],OP[1]);
 #endif
   SW (State.regs[OP[1]], State.regs[OP[0]]);
-  State.regs[OP[1]] += 2;
+  INC_ADDR (State.regs[OP[1]],2);
 }
 
 /* st */
@@ -1743,7 +1853,7 @@ OP_6C01 ()
   printf("   st\tr%d,@r%d-\n",OP[0],OP[1]);
 #endif
   SW (State.regs[OP[1]], State.regs[OP[0]]);
-  State.regs[OP[1]] -= 2;
+  INC_ADDR (State.regs[OP[1]],-2);
 }
 
 /* st2w */
@@ -1753,8 +1863,8 @@ OP_35000000 ()
 #ifdef DEBUG
   printf("   st2w\tr%d,@(0x%x,r%d)\n",OP[0],OP[1],OP[2]);
 #endif
-  SW (State.regs[OP[1]]+OP[2], State.regs[OP[0]]);
-  SW (State.regs[OP[1]]+OP[2]+2, State.regs[OP[0]+1]);
+  SW (State.regs[OP[2]]+OP[1], State.regs[OP[0]]);
+  SW (State.regs[OP[2]]+OP[1]+2, State.regs[OP[0]+1]);
 }
 
 /* st2w */
@@ -1778,7 +1888,8 @@ OP_6E1F ()
   if ( OP[1] != 15 )
     {
       fprintf (stderr,"ERROR: cannot pre-decrement any registers but r15 (SP).\n");
-      exit(1);
+      State.exception = SIGILL;
+      return;
     }
   State.regs[OP[1]] -= 4;
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
@@ -1794,7 +1905,7 @@ OP_6A01 ()
 #endif
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
-  State.regs[OP[1]] += 4;
+  INC_ADDR (State.regs[OP[1]],4);
 }
 
 /* st2w */
@@ -1806,7 +1917,7 @@ OP_6E01 ()
 #endif
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
-  State.regs[OP[1]] -= 4;
+  INC_ADDR (State.regs[OP[1]],-4);
 }
 
 /* stb */
@@ -1816,7 +1927,7 @@ OP_3C000000 ()
 #ifdef DEBUG
   printf("   stb\tr%d,@(0x%x,r%d)\n",OP[0],OP[1],OP[2]);
 #endif
-  SB (State.regs[OP[1]]+OP[2], State.regs[OP[0]]);
+  SB (State.regs[OP[2]]+OP[1], State.regs[OP[0]]);
 }
 
 /* stb */
@@ -1836,7 +1947,7 @@ OP_5FE0 ()
 #ifdef DEBUG
   printf("   stop\n");
 #endif
-  exit(1);
+  State.exception = SIGQUIT;
 }
 
 /* sub */
@@ -1856,9 +1967,22 @@ OP_0 ()
 void
 OP_1001 ()
 {
+  int64 tmp;
 #ifdef DEBUG
   printf("   sub\ta%d,r%d\n",OP[0],OP[1]);
 #endif
+  tmp = SEXT40(State.a[OP[0]]) - (SEXT16 (State.regs[OP[1]]) << 16 | State.regs[OP[1]+1]);
+  if (State.ST)
+    {
+      if ( tmp > MAX32)
+	State.a[OP[0]] = MAX32;
+      else if ( tmp < MIN32)
+	State.a[OP[0]] = MIN32;
+      else
+	State.a[OP[0]] = tmp & MASK40;
+    }
+  else
+    State.a[OP[0]] = tmp & MASK40;
 }
 
 /* sub */
@@ -1866,10 +1990,22 @@ OP_1001 ()
 void
 OP_1003 ()
 {
+  int64 tmp;
 #ifdef DEBUG
   printf("   sub\ta%d,a%d\n",OP[0],OP[1]);
 #endif
-
+  tmp = SEXT40(State.a[OP[0]]) - SEXT40(State.a[OP[1]]);
+  if (State.ST)
+    {
+      if (tmp > MAX32)
+	State.a[OP[0]] = MAX32;
+      else if ( tmp < MIN32)
+	State.a[OP[0]] = MIN32;
+      else
+	State.a[OP[0]] = tmp & MASK40;
+    }
+  else
+    State.a[OP[0]] = tmp & MASK40;
 }
 
 /* sub2w */
@@ -1894,36 +2030,86 @@ OP_1000 ()
 void
 OP_17000000 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   subac3\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   subac3\tr%d,r%d,a%d\n",OP[0],OP[1],OP[2]);
 #endif
+  tmp =  SEXT40 ((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]) - SEXT40 (State.a[OP[2]]);
+  State.regs[OP[0]] = (tmp >> 16) & 0xffff;
+  State.regs[OP[0]+1] = tmp & 0xffff;
 }
 
 /* subac3 */
 void
 OP_17000002 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   subac3\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   subac3\tr%d,a%d,a%d\n",OP[0],OP[1],OP[2]);
 #endif
+  tmp = SEXT40(State.a[OP[1]]) - SEXT40(State.a[OP[2]]);
+  State.regs[OP[0]] = (tmp >> 16) & 0xffff;
+  State.regs[OP[0]+1] = tmp & 0xffff;
 }
 
 /* subac3s */
 void
 OP_17001000 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   subac3s\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   subac3s\tr%d,r%d,a%d\n",OP[0],OP[1],OP[2]);
 #endif
+  State.F1 = State.F0;
+  tmp = SEXT40 ((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]) - SEXT40(State.a[OP[2]]);
+  if ( tmp > MAX32)
+    {
+      State.regs[OP[0]] = 0x7fff;
+      State.regs[OP[0]+1] = 0xffff;
+      State.F0 = 1;
+    }      
+  else if (tmp < MIN32)
+    {
+      State.regs[OP[0]] = 0x8000;
+      State.regs[OP[0]+1] = 0;
+      State.F0 = 1;
+    }      
+  else
+    {
+      State.regs[OP[0]] = (tmp >> 16) & 0xffff;
+      State.regs[OP[0]+1] = tmp & 0xffff;
+      State.F0 = 0;
+    }      
 }
 
 /* subac3s */
 void
 OP_17001002 ()
 {
+  int64 tmp;
 #ifdef DEBUG
-printf("   subac3s\t%x,%x,%x\n",OP[0],OP[1],OP[2]);
+  printf("   subac3s\tr%d,a%d,a%d\n",OP[0],OP[1],OP[2]);
 #endif
+  State.F1 = State.F0;
+  tmp = SEXT40(State.a[OP[1]]) - SEXT40(State.a[OP[2]]);
+  if ( tmp > MAX32)
+    {
+      State.regs[OP[0]] = 0x7fff;
+      State.regs[OP[0]+1] = 0xffff;
+      State.F0 = 1;
+    }      
+  else if (tmp < MIN32)
+    {
+      State.regs[OP[0]] = 0x8000;
+      State.regs[OP[0]+1] = 0;
+      State.F0 = 1;
+    }      
+  else
+    {
+      State.regs[OP[0]] = (tmp >> 16) & 0xffff;
+      State.regs[OP[0]+1] = tmp & 0xffff;
+      State.F0 = 0;
+    }      
 }
 
 /* subi */
@@ -1931,11 +2117,11 @@ void
 OP_1 ()
 {
   int32 tmp;
+  if (OP[1] == 0)
+    OP[1] = 16;
 #ifdef DEBUG
   printf("   subi\tr%d,%d\n",OP[0],OP[1]);
 #endif
-  if (OP[1] == 0)
-    OP[1] = 16;
   tmp = (int16)State.regs[OP[0]] - OP[1];
   State.C = (tmp & 0xffff0000) ? 1 : 0;
   State.regs[OP[0]] = tmp & 0xffff;  
@@ -1949,7 +2135,7 @@ OP_5F00 ()
   printf("   trap\t%d\n",OP[0]);
 #endif
   
-  /* for now, trap 0 is used for simulating IO */
+  /* for now, trap  is used for simulating IO */
 
   if (OP[0] == 0)
     {
@@ -1971,7 +2157,7 @@ OP_7000000 ()
   printf("   tst0i\tr%d,0x%x\n",OP[0],OP[1]);
 #endif
   State.F1 = State.F0;
-  State.F0 = (State.regs[OP[0]] & OP[2]) ? 1 : 0;
+  State.F0 = (State.regs[OP[0]] & OP[1]) ? 1 : 0;
 }
 
 /* tst1i */
@@ -1982,7 +2168,7 @@ OP_F000000 ()
   printf("   tst1i\tr%d,0x%x\n",OP[0],OP[1]);
 #endif
   State.F1 = State.F0;
-  State.F0 = (~(State.regs[OP[0]]) & OP[2]) ? 1 : 0;
+  State.F0 = (~(State.regs[OP[0]]) & OP[1]) ? 1 : 0;
 }
 
 /* wait */

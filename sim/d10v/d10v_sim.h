@@ -31,7 +31,7 @@ struct simops
 struct _state
 {
   reg_t regs[16];		/* general-purpose registers */
-  reg_t cregs[15];	/* control registers */
+  reg_t cregs[16];	/* control registers */
   int64 a[2];	/* accumulators */
   uint8 SM;
   uint8 EA;
@@ -47,6 +47,7 @@ struct _state
   uint8 exe;
   uint8 *imem;
   uint8 *dmem;
+  int   exception;
 } State;
 
 extern uint16 OP[4];
@@ -74,6 +75,9 @@ extern struct simops Simops[];
 /* sign-extend a 16-bit number */
 #define SEXT16(x)	((((x)&0xffff)^(~0x7fff))+0x8000)
 
+/* sign-extend a 32-bit number */
+#define SEXT32(x)	((((x)&0xffffffffLL)^(~0x7fffffffLL))+0x80000000LL)
+
 /* sign extend a 40 bit number */
 #define SEXT40(x)	((((x)&0xffffffffffLL)^(~0x7fffffffffLL))+0x8000000000LL)
 
@@ -81,6 +85,8 @@ extern struct simops Simops[];
 #define MIN32	0xff80000000LL
 #define MASK32	0xffffffffLL
 #define MASK40	0xffffffffffLL
+
+#define INC_ADDR(x,i)	x = ((State.MD && x == MOD_E) ? MOD_S : (x)+(i))
 
 #define	RB(x)	(*((uint8 *)((x)+State.imem)))
 #define SB(addr,data)	( RB(addr) = (data & 0xff))
@@ -96,7 +102,6 @@ extern struct simops Simops[];
 uint32 get_longword_swap PARAMS ((uint16 x));
 uint16 get_word_swap PARAMS ((uint16 x));
 void write_word_swap PARAMS ((uint16 addr, uint16 data));
-
 #define SW(addr,data)	write_word_swap(addr,data)
 #define RW(x)	get_word_swap(x)
 #define RLW(x)	get_longword_swap(x)
