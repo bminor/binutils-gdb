@@ -1,6 +1,7 @@
 /* PPC GNU/Linux native support.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002,
+   2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,7 +32,7 @@
 #include <signal.h>
 #include <sys/user.h>
 #include <sys/ioctl.h>
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #include <fcntl.h>
 #include <sys/procfs.h>
 #include <sys/ptrace.h>

@@ -1,6 +1,7 @@
 /* Native-dependent code for LynxOS.
-   Copyright 1993, 1994, 1995, 1996, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1996, 1999, 2000, 2001, 2003 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +28,7 @@
 #include "regcache.h"
 
 #include <sys/ptrace.h>
-#include <sys/wait.h>
+#Include "gdb_wait.h"
 #include <sys/fpp.h>
 
 static unsigned long registers_addr (int pid);

@@ -1,7 +1,8 @@
 /* Functions specific to running gdb native on IA-64 running
    GNU/Linux.
 
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -29,7 +30,7 @@
 
 #include <signal.h>
 #include <sys/ptrace.h>
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif

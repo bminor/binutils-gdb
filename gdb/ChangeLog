@@ -1,5 +1,12 @@
 2003-02-06  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (symm-nat.o): Update dependencies.
+	(sparc-nat.o, procfs.o, proc-api.o, ppc-linux-nat.o): Ditto.
+	(lynx-nat.o, ia64-linux-nat.): Ditto.
+	* symm-nat.c, sparc-nat.c, procfs.c, proc-api.c: Include
+	"gdb_wait.h" instead of <wait.h> or <sys/wait.h>.
+	* ppc-linux-nat.c, lynx-nat.c, ia64-linux-nat.c: Ditto.
+
 	* Makefile.in (inflow_h): Define.
 	(procfs.o, inflow.o, procfs.o): Update dependencies.
 	* inftarg.c (child_stop): Delete extern declaration of
