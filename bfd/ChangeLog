@@ -1,7 +1,10 @@
-Sat Sep 19 23:51:47 1998  Ian Lance Taylor  <ian@cygnus.com>
+Sun Sep 20 00:09:25 1998  Chris Torek  <torek@bsdi.com>
+
+	* libbfd.c (bfd_getb32): Rewrite expression to get better code.
+	(bfd_getl32, bfd_getb_signed_32, bfd_getl_signed_32): Likewise.
 
 	* libbfd.c (bfd_log2): Cast to bfd_vma before shifting, not
-	after.  From Chris Torek <torek@bsdi.com>.
+	after.
 
 Sat Sep 19 22:42:23 1998  Doug Rabson  <dfr@nlsystems.com>
 
