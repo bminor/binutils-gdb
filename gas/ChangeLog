@@ -1,3 +1,10 @@
+2000-06-24  DJ Delorie  <dj@cygnus.com>
+
+	* config/tc-i386.c (md_estimate_size_before_relax): Revert
+	more changes from Sept 1999
+	(tc_i386_fix_adjustable): ditto
+	(md_apply_fix3): ditto
+
 2000-06-24  Frank Ch. Eigler  <fche@redhat.com>
  
 	* cgen.c (expr_jmp_buf_p): New validity flag for expr_jmp_buf.
