@@ -1,5 +1,8 @@
 Fri Oct  9 14:20:08 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in (HFILES):  Add all nm-irix3.h, nm-irix4.h,
+	nm-sun2.h, nm-mips.h.
+
 	* config/irix3.mh (NATDEPFILES):  nat-mips.o => mips-nat.o.
 
 	* Makefile.in (alldeps.mak):  Add = sign after NATDEPFILES.
