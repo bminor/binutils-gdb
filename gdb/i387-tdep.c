@@ -390,9 +390,11 @@ i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 
   gdb_assert (tdep->st0_regnum >= I386_ST0_REGNUM);
 
-  /* Define I387_ST0_REGNUM such that we use the proper definitions
-     for REGCACHE's architecture.  */
+  /* Define I387_ST0_REGNUM and I387_NUM_XMM_REGS such that we use the
+     proper definitions for REGCACHE's architecture.  */
+
 #define I387_ST0_REGNUM tdep->st0_regnum
+#define I387_NUM_XMM_REGS tdep->num_xmm_regs
 
   for (i = I387_ST0_REGNUM; i < I387_XMM0_REGNUM; i++)
     if (regnum == -1 || regnum == i)
@@ -419,7 +421,21 @@ i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 	else
 	  regcache_raw_supply (regcache, i, FSAVE_ADDR (regs, i));
       }
+
+  /* Provide dummy values for the SSE registers.  */
+  for (i = I387_XMM0_REGNUM; i < I387_MXCSR_REGNUM; i++)
+    if (regnum == -1 || regnum == i)
+      regcache_raw_supply (regcache, i, NULL);
+  if (regnum == -1 || regnum == I387_MXCSR_REGNUM)
+    {
+      char buf[4];
+
+      store_unsigned_integer (buf, 4, 0x1f80);
+      regcache_raw_supply (regcache, I387_MXCSR_REGNUM, buf);
+    }
+
 #undef I387_ST0_REGNUM
+#undef I387_NUM_XMM_REGS
 }
 
 /* Fill register REGNUM (if it is a floating-point register) in *FSAVE

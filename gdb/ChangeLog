@@ -1,5 +1,8 @@
 2004-08-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i387-tdep.c (i387_supply_fsave): Provide summy values for the
+	SSE registers.
+
 	* Makefile.in: Remove embedded page breaks.
 
 2004-08-04  Jim Blandy  <jimb@redhat.com>
