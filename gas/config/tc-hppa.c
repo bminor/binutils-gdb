@@ -790,101 +790,101 @@ static const struct pd_reg pre_defined_registers[] =
   {"%eiem", 15},
   {"%eirr", 23},
   {"%fr0", 0},
-  {"%fr0L", 0},
-  {"%fr0R", 0},
+  {"%fr0l", 0},
+  {"%fr0r", 0},
   {"%fr1", 1},
   {"%fr10", 10},
-  {"%fr10L", 10},
-  {"%fr10R", 10},
+  {"%fr10l", 10},
+  {"%fr10r", 10},
   {"%fr11", 11},
-  {"%fr11L", 11},
-  {"%fr11R", 11},
+  {"%fr11l", 11},
+  {"%fr11r", 11},
   {"%fr12", 12},
-  {"%fr12L", 12},
-  {"%fr12R", 12},
+  {"%fr12l", 12},
+  {"%fr12r", 12},
   {"%fr13", 13},
-  {"%fr13L", 13},
-  {"%fr13R", 13},
+  {"%fr13l", 13},
+  {"%fr13r", 13},
   {"%fr14", 14},
-  {"%fr14L", 14},
-  {"%fr14R", 14},
+  {"%fr14l", 14},
+  {"%fr14r", 14},
   {"%fr15", 15},
-  {"%fr15L", 15},
-  {"%fr15R", 15},
+  {"%fr15l", 15},
+  {"%fr15r", 15},
   {"%fr16", 16},
-  {"%fr16L", 16},
-  {"%fr16R", 16},
+  {"%fr16l", 16},
+  {"%fr16r", 16},
   {"%fr17", 17},
-  {"%fr17L", 17},
-  {"%fr17R", 17},
+  {"%fr17l", 17},
+  {"%fr17r", 17},
   {"%fr18", 18},
-  {"%fr18L", 18},
-  {"%fr18R", 18},
+  {"%fr18l", 18},
+  {"%fr18r", 18},
   {"%fr19", 19},
-  {"%fr19L", 19},
-  {"%fr19R", 19},
-  {"%fr1L", 1},
-  {"%fr1R", 1},
+  {"%fr19l", 19},
+  {"%fr19r", 19},
+  {"%fr1l", 1},
+  {"%fr1r", 1},
   {"%fr2", 2},
   {"%fr20", 20},
-  {"%fr20L", 20},
-  {"%fr20R", 20},
+  {"%fr20l", 20},
+  {"%fr20r", 20},
   {"%fr21", 21},
-  {"%fr21L", 21},
-  {"%fr21R", 21},
+  {"%fr21l", 21},
+  {"%fr21r", 21},
   {"%fr22", 22},
-  {"%fr22L", 22},
-  {"%fr22R", 22},
+  {"%fr22l", 22},
+  {"%fr22r", 22},
   {"%fr23", 23},
-  {"%fr23L", 23},
-  {"%fr23R", 23},
+  {"%fr23l", 23},
+  {"%fr23r", 23},
   {"%fr24", 24},
-  {"%fr24L", 24},
-  {"%fr24R", 24},
+  {"%fr24l", 24},
+  {"%fr24r", 24},
   {"%fr25", 25},
-  {"%fr25L", 25},
-  {"%fr25R", 25},
+  {"%fr25l", 25},
+  {"%fr25r", 25},
   {"%fr26", 26},
-  {"%fr26L", 26},
-  {"%fr26R", 26},
+  {"%fr26l", 26},
+  {"%fr26r", 26},
   {"%fr27", 27},
-  {"%fr27L", 27},
-  {"%fr27R", 27},
+  {"%fr27l", 27},
+  {"%fr27r", 27},
   {"%fr28", 28},
-  {"%fr28L", 28},
-  {"%fr28R", 28},
+  {"%fr28l", 28},
+  {"%fr28r", 28},
   {"%fr29", 29},
-  {"%fr29L", 29},
-  {"%fr29R", 29},
-  {"%fr2L", 2},
-  {"%fr2R", 2},
+  {"%fr29l", 29},
+  {"%fr29r", 29},
+  {"%fr2l", 2},
+  {"%fr2r", 2},
   {"%fr3", 3},
   {"%fr30", 30},
-  {"%fr30L", 30},
-  {"%fr30R", 30},
+  {"%fr30l", 30},
+  {"%fr30r", 30},
   {"%fr31", 31},
-  {"%fr31L", 31},
-  {"%fr31R", 31},
-  {"%fr3L", 3},
-  {"%fr3R", 3},
+  {"%fr31l", 31},
+  {"%fr31r", 31},
+  {"%fr3l", 3},
+  {"%fr3r", 3},
   {"%fr4", 4},
-  {"%fr4L", 4},
-  {"%fr4R", 4},
+  {"%fr4l", 4},
+  {"%fr4r", 4},
   {"%fr5", 5},
-  {"%fr5L", 5},
-  {"%fr5R", 5},
+  {"%fr5l", 5},
+  {"%fr5r", 5},
   {"%fr6", 6},
-  {"%fr6L", 6},
-  {"%fr6R", 6},
+  {"%fr6l", 6},
+  {"%fr6r", 6},
   {"%fr7", 7},
-  {"%fr7L", 7},
-  {"%fr7R", 7},
+  {"%fr7l", 7},
+  {"%fr7r", 7},
   {"%fr8", 8},
-  {"%fr8L", 8},
-  {"%fr8R", 8},
+  {"%fr8l", 8},
+  {"%fr8r", 8},
   {"%fr9", 9},
-  {"%fr9L", 9},
-  {"%fr9R", 9},
+  {"%fr9l", 9},
+  {"%fr9r", 9},
   {"%hta", 25},
   {"%iir", 19},
   {"%ior", 21},
@@ -926,23 +926,11 @@ static const struct pd_reg pre_defined_registers[] =
   {"%r30", 30},
   {"%r31", 31},
   {"%r4", 4},
-  {"%r4L", 4},
-  {"%r4R", 4},
   {"%r5", 5},
-  {"%r5L", 5},
-  {"%r5R", 5},
   {"%r6", 6},
-  {"%r6L", 6},
-  {"%r6R", 6},
   {"%r7", 7},
-  {"%r7L", 7},
-  {"%r7R", 7},
   {"%r8", 8},
-  {"%r8L", 8},
-  {"%r8R", 8},
   {"%r9", 9},
-  {"%r9L", 9},
-  {"%r9R", 9},
   {"%rctr", 0},
   {"%ret0", 28},
   {"%ret1", 29},
@@ -1008,37 +996,21 @@ static const struct fp_cond_map fp_cond_map[] =
 
 static const struct selector_entry selector_table[] =
 {
-  {"F'", e_fsel},
-  {"F%", e_fsel},
-  {"LS'", e_lssel},
-  {"LS%", e_lssel},
-  {"RS'", e_rssel},
-  {"RS%", e_rssel},
-  {"L'", e_lsel},
-  {"L%", e_lsel},
-  {"R'", e_rsel},
-  {"R%", e_rsel},
-  {"LD'", e_ldsel},
-  {"LD%", e_ldsel},
-  {"RD'", e_rdsel},
-  {"RD%", e_rdsel},
-  {"LR'", e_lrsel},
-  {"LR%", e_lrsel},
-  {"RR'", e_rrsel},
-  {"RR%", e_rrsel},
-  {"P'", e_psel},
-  {"P%", e_psel},
-  {"RP'", e_rpsel},
-  {"RP%", e_rpsel},
-  {"LP'", e_lpsel},
-  {"LP%", e_lpsel},
-  {"T'", e_tsel},
-  {"T%", e_tsel},
-  {"RT'", e_rtsel},
-  {"RT%", e_rtsel},
-  {"LT'", e_ltsel},
-  {"LT%", e_ltsel},
-  {NULL, e_fsel}
+  {"f", e_fsel},
+  {"l", e_lsel},
+  {"ld", e_ldsel},
+  {"lp", e_lpsel},
+  {"lr", e_lrsel},
+  {"ls", e_lssel},
+  {"lt", e_ltsel},
+  {"p", e_psel},
+  {"r", e_rsel},
+  {"rd", e_rdsel},
+  {"rp", e_rpsel},
+  {"rr", e_rrsel},
+  {"rs", e_rssel},
+  {"rt", e_rtsel},
+  {"t", e_tsel},
 };
 
 /* default space and subspace dictionaries */
@@ -1280,20 +1252,20 @@ cons_fix_new_hppa (frag, where, size, exp)
      int size;
      expressionS *exp;
 {
-  unsigned int reloc_type;
+  unsigned int rel_type;
 
   if (is_DP_relative (*exp))
-    reloc_type = R_HPPA_GOTOFF;
+    rel_type = R_HPPA_GOTOFF;
   else if (is_complex (*exp))
-    reloc_type = R_HPPA_COMPLEX;
+    rel_type = R_HPPA_COMPLEX;
   else
-    reloc_type = R_HPPA;
+    rel_type = R_HPPA;
 
   if (hppa_field_selector != e_psel && hppa_field_selector != e_fsel)
     as_warn ("Invalid field selector.  Assuming F%%.");
 
   fix_new_hppa (frag, where, size,
-		(symbolS *) NULL, (offsetT) 0, exp, 0, reloc_type,
+		(symbolS *) NULL, (offsetT) 0, exp, 0, rel_type,
 		hppa_field_selector, 32, 0, (char *) 0);
 
   /* Reset field selector to its default state.  */
@@ -1370,6 +1342,27 @@ md_assemble (str)
   /* The had better be something to assemble.  */
   assert (str);
 
+  /* If we are within a procedure definition, make sure we've
+     defined a label for the procedure; handle case where the
+     label was defined after the .PROC directive.  */
+  if (within_procedure && last_call_info->start_symbol == NULL)
+    {
+      label_symbol_struct *label_symbol = pa_get_label ();
+
+      if (label_symbol)
+	{
+	  if (label_symbol->lss_label)
+	    {
+	      last_call_info->start_symbol = label_symbol->lss_label;
+	      label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+	    }
+	  else
+	    as_bad ("Missing function name for .PROC (corrupted label chain)");
+	}
+      else
+	as_bad ("Missing function name for .PROC");
+    }
+
   /* Assemble the instruction.  Results are saved into "the_insn".  */
   pa_ip (str);
 
@@ -1385,7 +1378,6 @@ md_assemble (str)
 		  (offsetT) 0, &the_insn.exp, the_insn.pcrel,
 		  the_insn.reloc, the_insn.field_selector,
 		  the_insn.format, the_insn.arg_reloc, NULL);
-
 }
 
 /* Do the real work for assembling a single instruction.  Store results
@@ -1754,17 +1746,17 @@ pa_ip (str)
 		      cmpltr = 0;
 		      flag = 1;
 		    }
-		  else if (strcasecmp (name, "<>") == 0)
+		  else if (strcmp (name, "<>") == 0)
 		    {
 		      cmpltr = 1;
 		      flag = 1;
 		    }
-		  else if (strcasecmp (name, ">=") == 0)
+		  else if (strcmp (name, ">=") == 0)
 		    {
 		      cmpltr = 2;
 		      flag = 1;
 		    }
-		  else if (strcasecmp (name, ">") == 0)
+		  else if (strcmp (name, ">") == 0)
 		    {
 		      cmpltr = 3;
 		      flag = 1;
@@ -2805,7 +2797,6 @@ md_section_align (segment, size)
   int align2 = (1 << align) - 1;
 
   return (size + align2) & ~align2;
-
 }
 
 /* Create a short jump from FROM_ADDR to TO_ADDR.  Not used on the PA.  */
@@ -3297,6 +3288,7 @@ reg_name_search (name)
      char *name;
 {
   int middle, low, high;
+  int cmp;
 
   low = 0;
   high = REG_NAME_CNT - 1;
@@ -3304,18 +3296,17 @@ reg_name_search (name)
   do
     {
       middle = (low + high) / 2;
-      if (strcasecmp (name, pre_defined_registers[middle].name) < 0)
+      cmp = strcasecmp (name, pre_defined_registers[middle].name);
+      if (cmp < 0)
 	high = middle - 1;
-      else
+      else if (cmp > 0)
 	low = middle + 1;
+      else
+	return pre_defined_registers[middle].value;
     }
-  while (!((strcasecmp (name, pre_defined_registers[middle].name) == 0) ||
-	   (low > high)));
+  while (low <= high);
 
-  if (strcasecmp (name, pre_defined_registers[middle].name) == 0)
-    return (pre_defined_registers[middle].value);
-  else
-    return (-1);
+  return -1;
 }
 
 
@@ -3405,28 +3396,45 @@ static int
 pa_chk_field_selector (str)
      char **str;
 {
-  int selector;
-  const struct selector_entry *tablep;
-
-  selector = e_fsel;
+  int middle, low, high;
+  int cmp;
+  char name[3];
 
   /* Read past any whitespace.  */
+  /* FIXME: should we read past newlines and formfeeds??? */
   while (**str == ' ' || **str == '\t' || **str == '\n' || **str == '\f')
     *str = *str + 1;
 
-  /* Yuk.  Looks like a linear search through the table.  With the
-     frequence of some selectors it might make sense to sort the
-     table by usage.  */
-  for (tablep = selector_table; tablep->prefix; tablep++)
+  if ((*str)[1] == '\'' || (*str)[1] == '%')
+    name[0] = tolower ((*str)[0]),
+    name[1] = 0;
+  else if ((*str)[2] == '\'' || (*str)[2] == '%')
+    name[0] = tolower ((*str)[0]),
+    name[1] = tolower ((*str)[1]),
+    name[2] = 0;
+  else
+    return e_fsel;
+
+  low = 0;
+  high = sizeof (selector_table) / sizeof (struct selector_entry) - 1;
+
+  do
     {
-      if (strncasecmp (tablep->prefix, *str, strlen (tablep->prefix)) == 0)
+      middle = (low + high) / 2;
+      cmp = strcmp (name, selector_table[middle].prefix);
+      if (cmp < 0)
+	high = middle - 1;
+      else if (cmp > 0)
+	low = middle + 1;
+      else
 	{
-	  *str += strlen (tablep->prefix);
-	  selector = tablep->field_selector;
-	  break;
+	  *str += strlen (name) + 1;
+	  return selector_table[middle].field_selector;
 	}
     }
-  return selector;
+  while (low <= high);
+
+  return e_fsel;
 }
 
 /* Mark (via expr_end) the end of an expression (I think).  FIXME.  */
@@ -3895,11 +3903,11 @@ pa_parse_neg_add_cmpltr (s, isbranch)
 	{
 	  cmpltr = 3;
 	}
-      else if (strcmp (name, "uv") == 0)
+      else if (strcasecmp (name, "uv") == 0)
 	{
 	  cmpltr = 4;
 	}
-      else if (strcmp (name, "vnz") == 0)
+      else if (strcasecmp (name, "vnz") == 0)
 	{
 	  cmpltr = 5;
 	}
@@ -4433,7 +4441,6 @@ process_exit ()
 		last_call_info->start_symbol, (offsetT) 0,
 		NULL, 0, R_HPPA_EXIT, e_fsel, 0, 0, NULL);
 #endif
-
 }
 
 /* Process a .EXIT pseudo-op.  */
@@ -4823,10 +4830,10 @@ pa_proc (unused)
 	    label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
 	  }
 	else
-	  as_bad ("Missing function name for .PROC (corrupted label)");
+	  as_bad ("Missing function name for .PROC (corrupted label chain)");
       }
     else
-      as_bad ("Missing function name for .PROC");
+      last_call_info->start_symbol = NULL;
   }
 
   demand_empty_rest_of_line ();
@@ -4880,12 +4887,12 @@ pa_parse_space_stmt (space_name, create_flag)
   loadable = TRUE;
   defined = TRUE;
   private = FALSE;
-  if (strcasecmp (space_name, "$TEXT$") == 0)
+  if (strcmp (space_name, "$TEXT$") == 0)
     {
       seg = pa_def_spaces[0].segment;
       sort = pa_def_spaces[0].sort;
     }
-  else if (strcasecmp (space_name, "$PRIVATE$") == 0)
+  else if (strcmp (space_name, "$PRIVATE$") == 0)
     {
       seg = pa_def_spaces[1].segment;
       sort = pa_def_spaces[1].sort;
@@ -4907,29 +4914,29 @@ pa_parse_space_stmt (space_name, create_flag)
 	      input_line_pointer++;
 	      name = input_line_pointer;
 	      c = get_symbol_end ();
-	      if ((strncasecmp (name, "SPNUM", 5) == 0))
+	      if ((strncasecmp (name, "spnum", 5) == 0))
 		{
 		  *input_line_pointer = c;
 		  input_line_pointer++;
 		  spnum = get_absolute_expression ();
 		}
-	      else if ((strncasecmp (name, "SORT", 4) == 0))
+	      else if ((strncasecmp (name, "sort", 4) == 0))
 		{
 		  *input_line_pointer = c;
 		  input_line_pointer++;
 		  sort = get_absolute_expression ();
 		}
-	      else if ((strncasecmp (name, "UNLOADABLE", 10) == 0))
+	      else if ((strncasecmp (name, "unloadable", 10) == 0))
 		{
 		  *input_line_pointer = c;
 		  loadable = FALSE;
 		}
-	      else if ((strncasecmp (name, "NOTDEFINED", 10) == 0))
+	      else if ((strncasecmp (name, "notdefined", 10) == 0))
 		{
 		  *input_line_pointer = c;
 		  defined = FALSE;
 		}
-	      else if ((strncasecmp (name, "PRIVATE", 7) == 0))
+	      else if ((strncasecmp (name, "private", 7) == 0))
 		{
 		  *input_line_pointer = c;
 		  private = TRUE;
@@ -4993,7 +5000,9 @@ pa_space (unused)
       /* Check for some of the predefined spaces.   FIXME: most of the code
          below is repeated several times, can we extract the common parts
          and place them into a subroutine or something similar?  */
-      if (strncasecmp (input_line_pointer, "$text$", 6) == 0)
+      /* FIXME Is this (and the next IF stmt) really right?
+	 What if INPUT_LINE_POINTER points to "$TEXT$FOO"?  */
+      if (strncmp (input_line_pointer, "$TEXT$", 6) == 0)
 	{
 	  input_line_pointer += 6;
 	  sd_chain = is_defined_space ("$TEXT$");
@@ -5010,7 +5019,7 @@ pa_space (unused)
 	  demand_empty_rest_of_line ();
 	  return;
 	}
-      if (strncasecmp (input_line_pointer, "$private$", 9) == 0)
+      if (strncmp (input_line_pointer, "$PRIVATE$", 9) == 0)
 	{
 	  input_line_pointer += 9;
 	  sd_chain = is_defined_space ("$PRIVATE$");
@@ -5225,13 +5234,13 @@ pa_subspace (unused)
 	    {
 	      name = input_line_pointer;
 	      c = get_symbol_end ();
-	      if ((strncasecmp (name, "QUAD", 4) == 0))
+	      if ((strncasecmp (name, "quad", 4) == 0))
 		{
 		  *input_line_pointer = c;
 		  input_line_pointer++;
 		  quadrant = get_absolute_expression ();
 		}
-	      else if ((strncasecmp (name, "ALIGN", 5) == 0))
+	      else if ((strncasecmp (name, "align", 5) == 0))
 		{
 		  *input_line_pointer = c;
 		  input_line_pointer++;
@@ -5242,44 +5251,44 @@ pa_subspace (unused)
 		      alignment = 1;
 		    }
 		}
-	      else if ((strncasecmp (name, "ACCESS", 6) == 0))
+	      else if ((strncasecmp (name, "access", 6) == 0))
 		{
 		  *input_line_pointer = c;
 		  input_line_pointer++;
 		  access = get_absolute_expression ();
 		}
-	      else if ((strncasecmp (name, "SORT", 4) == 0))
+	      else if ((strncasecmp (name, "sort", 4) == 0))
 		{
 		  *input_line_pointer = c;
 		  input_line_pointer++;
 		  sort = get_absolute_expression ();
 		}
-	      else if ((strncasecmp (name, "CODE_ONLY", 9) == 0))
+	      else if ((strncasecmp (name, "code_only", 9) == 0))
 		{
 		  *input_line_pointer = c;
 		  code_only = 1;
 		}
-	      else if ((strncasecmp (name, "UNLOADABLE", 10) == 0))
+	      else if ((strncasecmp (name, "unloadable", 10) == 0))
 		{
 		  *input_line_pointer = c;
 		  loadable = 0;
 		}
-	      else if ((strncasecmp (name, "COMMON", 6) == 0))
+	      else if ((strncasecmp (name, "common", 6) == 0))
 		{
 		  *input_line_pointer = c;
 		  common = 1;
 		}
-	      else if ((strncasecmp (name, "DUP_COMM", 8) == 0))
+	      else if ((strncasecmp (name, "dup_comm", 8) == 0))
 		{
 		  *input_line_pointer = c;
 		  dup_common = 1;
 		}
-	      else if ((strncasecmp (name, "ZERO", 4) == 0))
+	      else if ((strncasecmp (name, "zero", 4) == 0))
 		{
 		  *input_line_pointer = c;
 		  zero = 1;
 		}
-	      else if ((strncasecmp (name, "FIRST", 5) == 0))
+	      else if ((strncasecmp (name, "first", 5) == 0))
 		as_bad ("FIRST not supported as a .SUBSPACE argument");
 	      else
 		as_bad ("Invalid .SUBSPACE argument");
@@ -5626,7 +5635,6 @@ create_new_subspace (space, name, loadable, code_only, common,
 #endif
 
   return chain_entry;
-
 }
 
 /* Update the information for the given subspace based upon the
@@ -5659,7 +5667,6 @@ update_subspace (space, name, loadable, code_only, common, dup_common, sort,
 #endif
 
   return chain_entry;
-
 }
 
 /* Return the space chain entry for the space with the name NAME or
@@ -5808,7 +5815,7 @@ pa_subspace_start (space, quadrant)
 {
   /* FIXME.  Assumes everyone puts read/write data at 0x4000000, this
      is not correct for the PA OSF1 port.  */
-  if ((strcasecmp (SPACE_NAME (space), "$PRIVATE$") == 0) && quadrant == 1)
+  if ((strcmp (SPACE_NAME (space), "$PRIVATE$") == 0) && quadrant == 1)
     return 0x40000000;
   else if (space->sd_seg == data_section && quadrant == 1)
     return 0x40000000;
@@ -6278,7 +6285,6 @@ pa_build_symextn_section ()
 			 | SEC_ALLOC | SEC_LOAD);
 
   subseg_set (save_seg, save_subseg);
-
 }
 
 /* For ELF, this function serves one purpose:  to setup the st_size

@@ -1,3 +1,10 @@
+Mon Jan 10 09:52:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_ip): Put check for missing label on .PROC
+	here.  Handle case where label may be defined after the .PROC.
+	(pa_proc): It is not an error if the procedure's label isn't
+	defined before the .PROC directive.
+
 Fri Jan  7 17:38:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c (ecoff_stab): Don't clobber the ECOFF symbol information
