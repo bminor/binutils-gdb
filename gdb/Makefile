@@ -49,6 +49,9 @@ i960-tdep.c\
 infptrace.c\
 m68k-pinsn.c\
 m68k-tdep.c\
+m88k-pinsn.c\
+m88k-tdep.c\
+m88k-xdep.c\
 mips-pinsn.c\
 mips-tdep.c\
 mips-xdep.c\
@@ -164,6 +167,7 @@ ALLCONFIG=\
 ./tconfig/isi\
 ./tconfig/littlemips\
 ./tconfig/m88k\
+./tconfig/m88k.orig\
 ./tconfig/merlin\
 ./tconfig/news\
 ./tconfig/news1000\
@@ -202,6 +206,7 @@ ALLCONFIG=\
 ./xconfig/isi\
 ./xconfig/littlemips\
 ./xconfig/m88k\
+./xconfig/m88k.orig\
 ./xconfig/merlin\
 ./xconfig/news\
 ./xconfig/news1000\
@@ -285,7 +290,8 @@ MALLOC_CFLAGS =
 INCLUDE_DIR =  ${srcdir}/../include
 INCLUDE_DEP = $$(INCLUDE_DIR)
 
-# Where is the BFD library?  Traditionally ../bfd or ./bfd
+# Where is the source dir for the BFD library?  Traditionally ../bfd or ./bfd
+# (When we want the binary library built from it, we use ${BFD_DIR}${subdir}.)
 BFD_DIR =  ${srcdir}/../bfd
 BFD_DEP = $$(BFD_DIR)
 
@@ -305,7 +311,7 @@ CFLAGS = ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MALLOC_CFLAGS} ${INCLUDE_CFLAGS}
 LDFLAGS = $(CFLAGS)
 
 # Where is the "-liberty" library, containing getopt and obstack?
-LIBIBERTY =  ${srcdir}/../libiberty/libiberty.a
+LIBIBERTY =  ${srcdir}/../libiberty${subdir}/libiberty.a
 
 # Flags that describe where you can find the termcap library.
 # You may need to make other arrangements for USG.
@@ -318,7 +324,7 @@ TERMCAP = -ltermcap
 # {X,T}M_CLIBS, if defined, has system-dependent libs
 # For example, -lPW for System V to get alloca().
 # FIXME STOPGAP FOR BFD LIBRARY: BFD stuff
-CLIBS = ${TERMCAP} $(XM_CLIBS) ${TM_CLIBS} ${BFD_DIR}/libbfd.a \
+CLIBS = ${TERMCAP} $(XM_CLIBS) ${TM_CLIBS} ${BFD_DIR}${subdir}/libbfd.a \
 	${LIBIBERTY}
 CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_DIR}/libbfd.a \
 	${LIBIBERTY}
@@ -326,7 +332,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_DIR}/libbfd.a \
 ADD_FILES = ${REGEX} ${ALLOCA} ${GNU_MALLOC}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC}
 
-VERSION = 3.94.3
+VERSION = 3.95
 DIST=gdb-$(VERSION)
 
 LINT=/usr/5bin/lint
@@ -471,8 +477,11 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#load ${srcdir}/expread.tab.c readline/libreadline.a
 	#load copying.c version.c
 	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
-	#load ${BFD_DIR}/libbfd.a -ltermcap 
+	#load ${LIBIBERTY}/*.c
+	#load ${BFD_DIR}/*.c
+	#load -ltermcap 
 	##void mcheck(a) void (*a)(); { }
+	##void mtrace(a) void (*a)(); { }
 
 
 

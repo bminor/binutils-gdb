@@ -246,19 +246,7 @@ suppress 529 in do_registers_info
 /* Statement not reached */
 suppress 529 in value_from_register 
 /* Statement not reached */
-suppress 530 "../environ.c":69 
-/* Empty body of statement */
-suppress 530 "../remote-eb.c":333 
-/* Empty body of statement */
-suppress 530 "../remote-eb.c":331 
-/* Empty body of statement */
-suppress 530 "../remote-eb.c":324 
-/* Empty body of statement */
-suppress 530 "../dbxread.c":792 
-/* Empty body of statement */
 suppress 530 
-/* Empty body of statement */
-suppress 530 "../dbxread.c":796 
 /* Empty body of statement */
 suppress 546 in net_quit 
 /* Function exits through bottom */
@@ -370,10 +358,36 @@ suppress 594 in bpstat_stop_status
 /* Set but not used */
 suppress 595 in coffstrip 
 /* Used before set */
-suppress 652 ../bfd.h 
+suppress 652 ../include/bfd.h 
 /* Declaration has no effect */
 suppress 652 /usr/include/machine/reg.h 
 /* Declaration has no effect */
+suppress 652 /usr/include/sun4/reg.h 
+/* Declaration has no effect */
+suppress 68 on complain
+/* Benign type mismatch */
+suppress 3 in read_range_type
+/* Over/underflow unary minus */
+suppress 594 ../expread.tab.c
+/* Set but not used */
+suppress 593 ../expread.tab.c
+/* Label not used */
+suppress 590 ../expread.tab.c
+/* Formal param not used */
+suppress 442 ../../bfd/archive.c
+/* \0 in string */
+suppress 558 ../../bfd/b.out.c
+/* Conditional if always true */
+suppress 558 ../../bfd/coffswap.c
+/* Conditional if always true -- bfd_h_put_x */
+suppress 529 ../../bfd/coffswap.c
+/* Stmt unreach -- bfd_h_put_x */
+suppress 590 ../../bfd/ecoff.c
+/* Formal parameter not used */
+suppress 590 on ignore
+/* Formal param not used */
+suppress 590 on ignore_newsect
+/* Formal param not used */
 
 /* Signals caught and ignored */
 catch HUP

@@ -142,12 +142,14 @@ core_open (filename, from_tty)
   if (ontop) {
     /* Fetch all registers from core file */
     target_fetch_registers (-1);
-    set_current_frame ( create_new_frame (read_register (FP_REGNUM),
-					  read_pc ()));
-    select_frame (get_current_frame (), 0);
+    /* Add symbols for any shared libraries that were in use */
 #ifdef SOLIB_ADD
     SOLIB_ADD (NULL, from_tty);
 #endif
+    /* Now, set up the frame cache, and print the top of stack */
+    set_current_frame ( create_new_frame (read_register (FP_REGNUM),
+					  read_pc ()));
+    select_frame (get_current_frame (), 0);
     print_sel_frame (0);	/* Print the top frame and source line */
   } else {
     printf (
@@ -393,7 +395,7 @@ core_xfer_memory (memaddr, myaddr, len, write)
 
 /* We just get all the registers, so we don't use regno.  */
 /* ARGSUSED */
-static int
+static void
 get_core_registers (regno)
      int regno;
 {
@@ -432,7 +434,6 @@ get_core_registers (regno)
       }
   }
   registers_fetched();
-  return 0;  /* FIXME, what result goes here?  */
 }
 
 struct target_ops core_ops = {

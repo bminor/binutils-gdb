@@ -299,7 +299,7 @@ remote_wait (status)
 
 /* Currently we just read all the registers, so we don't use regno.  */
 /* ARGSUSED */
-int
+void
 remote_fetch_registers (regno)
      int regno;
 {
@@ -325,7 +325,6 @@ remote_fetch_registers (regno)
     }
   for (i = 0; i < NUM_REGS; i++)
     supply_register (i, &regs[REGISTER_BYTE(i)]);
-  return 0;
 }
 
 /* Prepare to store registers.  Since we send them all, we have to

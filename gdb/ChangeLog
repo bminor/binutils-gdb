@@ -1,3 +1,15 @@
+Sat May  4 11:11:07 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* Makefile.dist:  Roll VERSION to 3.95.
+	Fix up "saber_gdb" to work again.
+	* saber.suppress:  Update.
+
+	* coffread.c, exec.c, infptrace.c, inftarg.c, remote.c, solib.c,
+	symtab.h, target.c, target.h:  Lint.
+	* core.c:  setup and select frame after reading shared libs,
+	else reading shared libs will clobber them.  Lint.
+	* utils.c (error):  Force out any buffered wrap text.
+
 Fri May  3 22:01:56 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* remote.c:  Remove decls of memory_insert_breakpoint

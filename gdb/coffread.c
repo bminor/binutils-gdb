@@ -1358,7 +1358,7 @@ enter_linenos (file_offset, first_line, last_line)
 
   if (file_offset < linetab_offset)
     {
-      complain (lineno_complaint, file_offset);
+      complain (&lineno_complaint, file_offset);
       if (file_offset > linetab_size)	/* Too big to be an offset? */
 	return;
       file_offset += linetab_offset;  /* Try reading at that linetab offset */

@@ -23,6 +23,9 @@ i960-tdep.c\
 infptrace.c\
 m68k-pinsn.c\
 m68k-tdep.c\
+m88k-pinsn.c\
+m88k-tdep.c\
+m88k-xdep.c\
 mips-pinsn.c\
 mips-tdep.c\
 mips-xdep.c\
@@ -138,6 +141,7 @@ ALLCONFIG=\
 ./tconfig/isi\
 ./tconfig/littlemips\
 ./tconfig/m88k\
+./tconfig/m88k.orig\
 ./tconfig/merlin\
 ./tconfig/news\
 ./tconfig/news1000\
@@ -176,6 +180,7 @@ ALLCONFIG=\
 ./xconfig/isi\
 ./xconfig/littlemips\
 ./xconfig/m88k\
+./xconfig/m88k.orig\
 ./xconfig/merlin\
 ./xconfig/news\
 ./xconfig/news1000\

@@ -27,6 +27,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "symfile.h"
 #include "gdbcmd.h"
+#include "regex.h"
 
 #include <obstack.h>
 #include <assert.h>
@@ -229,8 +230,9 @@ check_stub_type(type)
 	  complain (&stub_noname_complaint, 0);
 	  return;
 	}
-      if (sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, 
-			       (struct symtab **)NULL) )
+      sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, 
+			   (struct symtab **)NULL);
+      if (sym)
 	bcopy (SYMBOL_TYPE(sym), type, sizeof (struct type));
     }
 }

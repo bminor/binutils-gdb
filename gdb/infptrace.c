@@ -234,10 +234,9 @@ fetch_register (regno)
   supply_register (regno, buf);
 }
 
-/* Fetch all registers, or just one, from the child process.
-   We should check for errors, but we don't.  FIXME.  */
+/* Fetch all registers, or just one, from the child process.  */
 
-int
+void
 fetch_inferior_registers (regno)
      int regno;
 {
