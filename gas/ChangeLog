@@ -1,7 +1,7 @@
 Tue Aug 16 01:48:20 1994  Jeff Law  (law@snake.cs.utah.edu)
 
-	* config/tc-hppa.c (pa_comm): Set sy_resolved for the common
-	symbol.
+	* gas/config/tc-hppa.c (pa_comm): Set sy_frag for the common
+	symbol to the zero address frag.
 
 Fri Aug 12 17:51:48 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
