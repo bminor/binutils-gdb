@@ -719,10 +719,6 @@ f:2:IN_SOLIB_CALL_TRAMPOLINE:int:in_solib_call_trampoline:CORE_ADDR pc, char *na
 # Some systems also have trampoline code for returning from shared libs.
 f:2:IN_SOLIB_RETURN_TRAMPOLINE:int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name:::generic_in_solib_return_trampoline::0
 
-# NOTE: cagney/2004-03-23: DEPRECATED_PC_IN_SIGTRAMP have all been
-# superseeded by signal trampoline frame sniffers.
-F::DEPRECATED_PC_IN_SIGTRAMP:int:deprecated_pc_in_sigtramp:CORE_ADDR pc, char *name:pc, name:::legacy_pc_in_sigtramp
-
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
 # as the first action in a funtion's epilogue.  in_function_epilogue_p()

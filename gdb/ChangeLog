@@ -1,5 +1,17 @@
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_PC_IN_SIGTRAMP): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* shnbsd-tdep.c (shnbsd_init_abi): Do not set pc_in_sigtramp.
+	(shnbsd_pc_in_sigtramp): Delete.
+	* i386-interix-tdep.c (i386_interix_init_abi): Do not set
+	pc_in_sigtramp.
+	* hppa-hpux-tdep.c (hppa_hpux_init_abi): Do not set
+	pc_in_sigtramp.
+	* frame.h: Update comments.
+	* ppc-linux-tdep.c: Update comments.
+	* breakpoint.c (bpstat_what): Update comments.
+
 	* Makefile.in (m68klinux-tdep.o, m68klinux-nat.o): Fix
 	m68klinux-tdep.o's dependencies, were previously added to
 	m68klinux-nat.o.

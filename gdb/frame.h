@@ -361,7 +361,6 @@ extern enum frame_type get_frame_type (struct frame_info *);
 
 /* FIXME: cagney/2002-11-10: Some targets want to directly mark a
    frame as being of a specific type.  This shouldn't be necessary.
-   DEPRECATED_PC_IN_SIGTRAMP() indicates a SIGTRAMP_FRAME and
    DEPRECATED_PC_IN_CALL_DUMMY() indicates a DUMMY_FRAME.  I suspect
    the real problem here is that get_prev_frame() only sets
    initialized after DEPRECATED_INIT_EXTRA_FRAME_INFO as been called.

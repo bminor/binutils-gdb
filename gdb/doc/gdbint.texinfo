@@ -3626,18 +3626,6 @@ them.
 @findex PCC_SOL_BROKEN
 (Used only in the Convex target.)
 
-@item DEPRECATED_PC_IN_SIGTRAMP (@var{pc}, @var{name})
-@findex DEPRECATED_PC_IN_SIGTRAMP
-@cindex sigtramp
-The @dfn{sigtramp} is a routine that the kernel calls (which then calls
-the signal handler).  On most machines it is a library routine that is
-linked into the executable.
-
-This function, given a program counter value in @var{pc} and the
-(possibly NULL) name of the function in which that @var{pc} resides,
-returns nonzero if the @var{pc} and/or @var{name} show that we are in
-sigtramp.
-
 @item PC_LOAD_SEGMENT
 @findex PC_LOAD_SEGMENT
 If defined, print information about the load segment for the program

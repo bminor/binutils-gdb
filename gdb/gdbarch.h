@@ -2064,34 +2064,6 @@ extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdb
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) (gdbarch_in_solib_return_trampoline (current_gdbarch, pc, name))
 #endif
 
-/* NOTE: cagney/2004-03-23: DEPRECATED_PC_IN_SIGTRAMP have all been
-   superseeded by signal trampoline frame sniffers. */
-
-#if defined (DEPRECATED_PC_IN_SIGTRAMP)
-/* Legacy for systems yet to multi-arch DEPRECATED_PC_IN_SIGTRAMP */
-#if !defined (DEPRECATED_PC_IN_SIGTRAMP_P)
-#define DEPRECATED_PC_IN_SIGTRAMP_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_pc_in_sigtramp_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_SIGTRAMP_P)
-#error "Non multi-arch definition of DEPRECATED_PC_IN_SIGTRAMP"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PC_IN_SIGTRAMP_P)
-#define DEPRECATED_PC_IN_SIGTRAMP_P() (gdbarch_deprecated_pc_in_sigtramp_p (current_gdbarch))
-#endif
-
-typedef int (gdbarch_deprecated_pc_in_sigtramp_ftype) (CORE_ADDR pc, char *name);
-extern int gdbarch_deprecated_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
-extern void set_gdbarch_deprecated_pc_in_sigtramp (struct gdbarch *gdbarch, gdbarch_deprecated_pc_in_sigtramp_ftype *deprecated_pc_in_sigtramp);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_SIGTRAMP)
-#error "Non multi-arch definition of DEPRECATED_PC_IN_SIGTRAMP"
-#endif
-#if !defined (DEPRECATED_PC_IN_SIGTRAMP)
-#define DEPRECATED_PC_IN_SIGTRAMP(pc, name) (gdbarch_deprecated_pc_in_sigtramp (current_gdbarch, pc, name))
-#endif
-
 /* A target might have problems with watchpoints as soon as the stack
    frame of the current function has been destroyed.  This mostly happens
    as the first action in a funtion's epilogue.  in_function_epilogue_p()

@@ -1227,8 +1227,6 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, hppa_hpux_pc_in_sigtramp);
-
   if (tdep->bytes_per_address == 4)
     set_gdbarch_in_solib_call_trampoline (gdbarch, 
 					  hppa32_hpux_in_solib_call_trampoline);
