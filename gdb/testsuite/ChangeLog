@@ -1,3 +1,11 @@
+Sat Jul 29 14:22:33 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/Makefile.in (clean):  Remove callf-info.exp.
+
+Fri Jul 28 13:36:11 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* config/vxworks29k.exp: New file, sources vxworks.exp.
+
 Fri Jul 28 00:28:36 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* config/gdbremote.exp: New file.  Testing framework using

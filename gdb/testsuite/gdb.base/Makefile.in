@@ -251,6 +251,14 @@ mips_pro: mips_pro.o
 printcmds: printcmds.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o printcmds printcmds.o $(LIBS)
 
+# Try compiling this with prototypes, if that fails maybe the compiler
+# is a pre-ANSI compiler, in which case don't use prototypes.
+callfuncs.o: callfuncs.c
+	(echo set prototypes 1 > callf-info.exp; \
+	  $(CC) -c $(CFLAGS) $(srcdir)/callfuncs.c 2>/dev/null) \
+	|| (echo set prototypes 0 > callf-info.exp; \
+	  $(CC) -c $(CFLAGS) -DNO_PROTOTYPES $(srcdir)/callfuncs.c)
+
 callfuncs: callfuncs.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o callfuncs callfuncs.o $(LIBS)
 
@@ -302,7 +310,7 @@ just-check:
 	$(RUNTEST) $(RUNTESTFLAGS) --tool gdb --srcdir $(srcdir)
 
 clean mostlyclean:
-	-rm -f *~ *.o a.out xgdb *.x $(EXECUTABLES)
+	-rm -f *~ *.o a.out xgdb *.x $(EXECUTABLES) callf-info.exp
 	-rm -f core core.coremaker coremaker.core corefile
 
 distclean realclean: clean
