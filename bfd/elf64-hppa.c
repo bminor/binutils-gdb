@@ -195,6 +195,9 @@ static boolean elf64_hppa_create_dynamic_sections
 static boolean elf64_hppa_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 
+static boolean elf64_hppa_mark_milli_and_exported_functions
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+
 static boolean elf64_hppa_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
@@ -644,12 +647,12 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 
       /* Read in the local symbols.  */
       if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-          || bfd_bread (ext_syms, amt, abfd) != amt)
-        {
+	  || bfd_bread (ext_syms, amt, abfd) != amt)
+	{
 	  free (ext_syms);
 	  free (local_syms);
 	  return false;
-        }
+	}
 
       shndx_buf = NULL;
       shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
@@ -1073,7 +1076,7 @@ allocate_global_data_dlt (dyn_h, data)
 	     table since we might need to create a dynamic relocation
 	     against it.  */
 	  if (! h
-	      || (h && h->dynindx == -1))
+	      || (h->dynindx == -1 && h->type != STT_PARISC_MILLI))
 	    {
 	      bfd *owner;
 	      owner = (h ? h->root.u.def.section->owner : dyn_h->owner);
@@ -1168,7 +1171,7 @@ allocate_global_data_opd (dyn_h, data)
 	 we have to create an opd descriptor.  */
       else if (x->info->shared
 	       || h == NULL
-	       || h->dynindx == -1
+	       || (h->dynindx == -1 && h->type != STT_PARISC_MILLI)
 	       || (h->root.type == bfd_link_hash_defined
 		   || h->root.type == bfd_link_hash_defweak))
 	{
@@ -1542,7 +1545,8 @@ allocate_dynrel_entries (dyn_h, data)
       /* Make sure this symbol gets into the dynamic symbol table if it is
 	 not already recorded.  ?!? This should not be in the loop since
 	 the symbol need only be added once.  */
-      if (dyn_h->h == 0 || dyn_h->h->dynindx == -1)
+      if (dyn_h->h == 0
+	  || (dyn_h->h->dynindx == -1 && dyn_h->h->type != STT_PARISC_MILLI))
 	if (!_bfd_elf64_link_record_local_dynamic_symbol
 	    (x->info, rent->sec->owner, dyn_h->sym_indx))
 	  return false;
@@ -1610,6 +1614,36 @@ elf64_hppa_adjust_dynamic_symbol (info, h)
   return true;
 }
 
+/* This function is called via elf_link_hash_traverse to mark millicode
+   symbols with a dynindx of -1 and to remove the string table reference
+   from the dynamic symbol table.  If the symbol is not a millicode symbol,
+   elf64_hppa_mark_exported_functions is called.  */
+
+static boolean
+elf64_hppa_mark_milli_and_exported_functions (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct bfd_link_info *info = (struct bfd_link_info *)data;
+  struct elf_link_hash_entry *elf = h;
+
+  if (elf->root.type == bfd_link_hash_warning)
+    elf = (struct elf_link_hash_entry *) elf->root.u.i.link;
+
+  if (elf->type == STT_PARISC_MILLI)
+    {
+      if (elf->dynindx != -1)
+	{
+	  elf->dynindx = -1;
+	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+				  elf->dynstr_index);
+	}
+      return true;
+    }
+
+  return elf64_hppa_mark_exported_functions (h, data);
+}
+
 /* Set the final sizes of the dynamic sections and allocate memory for
    the contents of our special sections.  */
 
@@ -1630,6 +1664,19 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
+
+  /* Mark each function this program exports so that we will allocate
+     space in the .opd section for each function's FPTR.  If we are
+     creating dynamic sections, change the dynamic index of millicode
+     symbols to -1 and remove them from the string table for .dynstr.
+
+     We have to traverse the main linker hash table since we have to
+     find functions which may not have been mentioned in any relocs.  */
+  elf_link_hash_traverse (elf_hash_table (info),
+			  (elf_hash_table (info)->dynamic_sections_created
+			   ? elf64_hppa_mark_milli_and_exported_functions
+			   : elf64_hppa_mark_exported_functions),
+			  info);
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -1674,15 +1721,6 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 				    allocate_global_data_stub, &data);
       hppa_info->stub_sec->_raw_size = data.ofs;
     }
-
-  /* Mark each function this program exports so that we will allocate
-     space in the .opd section for each function's FPTR.
-
-     We have to traverse the main linker hash table since we have to
-     find functions which may not have been mentioned in any relocs.  */
-  elf_link_hash_traverse (elf_hash_table (info),
-			  elf64_hppa_mark_exported_functions,
-			  info);
 
   /* Allocate space for entries in the .opd section.  */
   if (elf64_hppa_hash_table (info)->opd_sec)
@@ -2098,11 +2136,6 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_put_32 (stub->owner, (bfd_vma) insn,
 		  stub->contents + dyn_h->stub_offset + 8);
     }
-
-  /* Millicode symbols should not be put in the dynamic
-     symbol table under any circumstances.  */
-  if (ELF_ST_TYPE (sym->st_info) == STT_PARISC_MILLI)
-    h->dynindx = -1;
 
   return true;
 }

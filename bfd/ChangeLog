@@ -1,3 +1,15 @@
+2002-06-23  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* elf64-hppa.c (elf64_hppa_mark_milli_and_exported_functions): New
+	function.
+	(allocate_global_data_dlt):  Don't add millicode symbols to dynamic
+	symbol table.
+	(allocate_global_data_opd, allocate_dynrel_entries): Likewise.
+	(elf64_hppa_size_dynamic_sections): Revise to use
+	elf64_hppa_mark_milli_and_exported_functions.
+	(elf64_hppa_finish_dynamic_symbol): Remove code to keep millicode
+	symbols out of dynamic symbol table.
+
 2002-06-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
