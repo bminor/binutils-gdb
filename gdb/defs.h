@@ -382,6 +382,9 @@ extern void *address_to_host_pointer (CORE_ADDR addr);
 extern char *gdb_realpath (const char *);
 extern char *xfullpath (const char *);
 
+extern unsigned long calc_crc32 (unsigned long crc,
+                                 unsigned char *buf, size_t len);
+
 /* From demangle.c */
 
 extern void set_demangling_style (char *);

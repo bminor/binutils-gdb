@@ -237,6 +237,14 @@ fi
 AC_CHECK_LIB(socket, socketpair)
 AC_CHECK_FUNCS(socketpair)
 
+debugdir=${libdir}/debug
+	 
+AC_ARG_WITH(separate-debug-dir,
+[  --with-separate-debug-dir=path   Look for global separate debug info in this path [LIBDIR/debug]],
+[debugdir="${withval}"])
+	
+AC_DEFINE_DIR(DEBUGDIR, debugdir)
+#AC_DEFINE_UNQUOTED(DEBUGDIR, "$debugdir"),
 
 BFD_NEED_DECLARATION(malloc)
 BFD_NEED_DECLARATION(realloc)

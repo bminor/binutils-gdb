@@ -1,4 +1,35 @@
-2002-11-25  Jim Blandy  <jimb@redhat.com>
+2002-11-25  Alexander Larsson <alexl@redhat.com>
+	    Jim Blandy  <jimb@redhat.com>
+
+	Add support for executables whose debug info has been separated
+	out into a separate file, leaving only a link behind.
+	* objfiles.h (struct objfile): New fields: separate_debug_objfile
+	and separate_debug_objfile_backlink.
+	(put_objfile_before): New declaration.
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): If this
+	objfile has its debug info in a separate file, read that,
+	too. Save the addrs argument, so we can use it again to read the
+	separated debug info; syms_from_objfile modifies the table we pass
+	it.
+	(reread_symbols): After re-reading an objfile, call
+	reread_separate_symbols to refresh its separate debug info
+	objfile, if it has one.
+	(reread_separate_symbols, find_separate_debug_file,
+	get_debug_link_info, separate_debug_file_exists): New functions.
+	(debug_file_directory): New global var.
+	(_initialize_symfile): Initialize debug_file_directory, and
+	provide the new `set debug-file-directory' command to let the user
+	change it.
+	* objfiles.c (free_objfile): If this objfile has its debug info in
+	a separate objfile, free that one too.  If this is itself a
+	separate debug info objfile, clear our parent's backlink.
+	(put_objfile_before): New function.
+	* utils.c (calc_crc32): New function.
+	* defs.h (calc_crc32): New declaration.
+	* configure.in: Handle --with-separate-debug-dir config option.
+	* acinclude.m4 (AC_DEFINE_DIR): New macro.
+	* acconfig.h (DEBUGDIR): New macro.
+	* configure, aclocal.m4, config.in: Regenerated.
 
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): New function,
 	like the old symbol_file_add, but taking new arguments: you can
