@@ -10,7 +10,7 @@
 
 2004-09-01  Manoj Iyer  <manjo@austin.ibm.com>
 
-	* gdb.gdb/complaints.exp (setup_test): use new gdb.exp functionality
+	* gdb.gdb/complaints.exp (setup_test): Use new gdb.exp functionality
 	to check for nodebug in executable.
 	* gdb.gdb/observer.exp (setup_test): Likewise.
 	* gdb.gdb/selftest.exp (test_with_self): Likewise.
