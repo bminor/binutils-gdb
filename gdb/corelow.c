@@ -1,5 +1,5 @@
 /* Core dump and executable file functions below target vector, for GDB.
-   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -337,8 +337,12 @@ core_open (filename, from_tty)
 
   siggy = bfd_core_file_failing_signal (core_bfd);
   if (siggy > 0)
+    /* NOTE: target_signal_from_host() converts a target signal value
+       into gdb's internal signal value.  Unfortunatly gdb's internal
+       value is called ``target_signal'' and this function got the
+       name ..._from_host(). */
     printf_filtered ("Program terminated with signal %d, %s.\n", siggy,
-		     safe_strsignal (siggy));
+		     target_signal_to_string (target_signal_from_host (siggy)));
 
   /* Build up thread list from BFD sections. */
 

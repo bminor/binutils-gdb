@@ -56,9 +56,6 @@
 
 #include "libiberty.h"
 
-/* libiberty.h can't declare this one, but evidently we can.  */
-extern char *strsignal (int);
-
 #include "progress.h"
 
 #ifdef USE_MMALLOC
@@ -292,8 +289,6 @@ extern int strcmp_iw (const char *, const char *);
 extern int subset_compare (char *, char *);
 
 extern char *safe_strerror (int);
-
-extern char *safe_strsignal (int);
 
 extern void init_malloc (void *);
 

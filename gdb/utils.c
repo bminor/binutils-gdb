@@ -772,26 +772,6 @@ safe_strerror (errnum)
   return (msg);
 }
 
-/* The strsignal() function can return NULL for signal values that are
-   out of range.  Provide a "safe" version that always returns a
-   printable string. */
-
-char *
-safe_strsignal (signo)
-     int signo;
-{
-  char *msg;
-  static char buf[32];
-
-  if ((msg = strsignal (signo)) == NULL)
-    {
-      sprintf (buf, "(undocumented signal %d)", signo);
-      msg = buf;
-    }
-  return (msg);
-}
-
-
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.
    Then return to command level.  */

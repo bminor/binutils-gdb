@@ -874,6 +874,15 @@ wrong.  It involves the use of add_set_enum_cmd().
 
 --
 
+Fix target_signal_from_host() etc.
+
+The name is wrong for starters.  ``target_signal'' should probably be
+``gdb_signal''.  ``from_host'' should be ``from_target_signal''.
+After that it needs to be multi-arched and made independant of any
+host signal numbering.
+
+--
+
 Update ALPHA so that it uses ``struct frame_extra_info'' instead of
 EXTRA_FRAME_INFO.
 
