@@ -107,28 +107,6 @@ set_my_stack_size (struct frame_info *fi, CORE_ADDR size)
 }
 
 
-/* Fix fi->frame if it's bogus at this point.  This is a helper
-   function for mn10300_analyze_prologue.
-
-   MVS: This later became frame_base_hack, and probably now
-   could just be trad_frame_set_this_base.
-*/
-
-static void
-fix_frame_pointer (struct frame_info *fi, int stack_size)
-{
-#if 0
-  if (fi && get_next_frame (fi) == NULL)
-    {
-      if (is_my_frame_in_sp (fi))
-	deprecated_update_frame_base_hack (fi, read_sp () - stack_size);
-      else if (is_my_frame_in_fp (fi))
-	deprecated_update_frame_base_hack (fi, read_register (E_A3_REGNUM));
-    }
-#endif
-}
-
-
 /* Set offsets of registers saved by movm instruction.
    This is a helper function for mn10300_analyze_prologue.  */
 
@@ -141,7 +119,7 @@ set_movm_offsets (struct frame_info *fi,
   int offset = 0;
   CORE_ADDR base;
 
-  if (cache == NULL || fi == NULL || movm_args == 0)
+  if (cache == NULL || fi == NULL)
     return;
 
   cache = mn10300_frame_unwind_cache (fi, this_cache);
@@ -329,13 +307,21 @@ mn10300_analyze_prologue (struct frame_info *fi,
 	pc = (fi ? get_frame_pc (fi) : pc);
      But this is (now) badly broken when called from analyze_dummy_frame().
   */
-  pc = (pc ? pc : get_frame_pc (fi));
+  if (fi)
+    {
+      pc = (pc ? pc : get_frame_pc (fi));
+      /* At the start of a function our frame is in the stack pointer.  */
+      my_frame_is_in_sp (fi, this_cache);
+    }
 
   /* Find the start of this function.  */
   status = find_pc_partial_function (pc, &name, &func_addr, &func_end);
 
-  /* Do nothing if we couldn't find the start of this function or if we're
-     stopped at the first instruction in the prologue.  */
+  /* Do nothing if we couldn't find the start of this function 
+
+     MVS: comment went on to say "or if we're stopped at the first
+     instruction in the prologue" -- but code doesn't reflect that, 
+     and I don't want to do that anyway.  */
   if (status == 0)
     {
       return pc;
@@ -348,10 +334,6 @@ mn10300_analyze_prologue (struct frame_info *fi,
 	my_frame_is_last (fi);
       return pc;
     }
-
-  /* At the start of a function our frame is in the stack pointer.  */
-  if (fi)
-    my_frame_is_in_sp (fi, this_cache);
 
 #if 0
   /* Get the next two bytes into buf, we need two because rets is a two
@@ -384,6 +366,10 @@ mn10300_analyze_prologue (struct frame_info *fi,
     }
 #endif
 
+  /* NOTE: from here on, we don't want to return without jumping to
+     finish_prologue.  */
+
+
   /* Figure out where to stop scanning.  */
   stop = fi ? pc : func_end;
 
@@ -396,10 +382,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
   /* Suck in two bytes.  */
   if (addr + 2 >= stop
       || (status = deprecated_read_memory_nobpt (addr, buf, 2)) != 0)
-    {
-      fix_frame_pointer (fi, 0);
-      return addr;
-    }
+    goto finish_prologue;
 
   /* First see if this insn sets the stack pointer from a register; if
      so, it's probably the initialization of the stack pointer in _start,
@@ -408,7 +391,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
     {
       if (fi)
 	my_frame_is_last (fi);
-      return addr;
+      goto finish_prologue;
     }
 
   /* Now look for movm [regs],sp, which saves the callee saved registers.
@@ -425,28 +408,12 @@ mn10300_analyze_prologue (struct frame_info *fi,
 
       /* Quit now if we're beyond the stop point.  */
       if (addr >= stop)
-	{
-	  /* Fix fi->frame since it's bogus at this point.  */
-	  if (fi && get_next_frame (fi) == NULL)
-	    deprecated_update_frame_base_hack (fi, read_sp ());
-
-	  /* Note if/where callee saved registers were saved.  */
-	  set_movm_offsets (fi, this_cache, movm_args);
-	  return addr;
-	}
+	goto finish_prologue;
 
       /* Get the next two bytes so the prologue scan can continue.  */
       status = deprecated_read_memory_nobpt (addr, buf, 2);
       if (status != 0)
-	{
-	  /* Fix fi->frame since it's bogus at this point.  */
-	  if (fi && get_next_frame (fi) == NULL)
-	    deprecated_update_frame_base_hack (fi, read_sp ());
-
-	  /* Note if/where callee saved registers were saved.  */
-	  set_movm_offsets (fi, this_cache, movm_args);
-	  return addr;
-	}
+	goto finish_prologue;
     }
 
   /* Now see if we set up a frame pointer via "mov sp,a3" */
@@ -462,26 +429,12 @@ mn10300_analyze_prologue (struct frame_info *fi,
 
       /* Quit now if we're beyond the stop point.  */
       if (addr >= stop)
-	{
-	  /* Fix fi->frame if it's bogus at this point.  */
-	  fix_frame_pointer (fi, 0);
-
-	  /* Note if/where callee saved registers were saved.  */
-	  set_movm_offsets (fi, this_cache, movm_args);
-	  return addr;
-	}
+	goto finish_prologue;
 
       /* Get two more bytes so scanning can continue.  */
       status = deprecated_read_memory_nobpt (addr, buf, 2);
       if (status != 0)
-	{
-	  /* Fix fi->frame if it's bogus at this point.  */
-	  fix_frame_pointer (fi, 0);
-
-	  /* Note if/where callee saved registers were saved.  */
-	  set_movm_offsets (fi, this_cache, movm_args);
-	  return addr;
-	}
+	goto finish_prologue;
     }
 
   /* Next we should allocate the local frame.  No more prologue insns
@@ -508,14 +461,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
          current frame.  */
       status = deprecated_read_memory_nobpt (addr + 2, buf, imm_size);
       if (status != 0)
-	{
-	  /* Fix fi->frame if it's bogus at this point.  */
-	  fix_frame_pointer (fi, 0);
-
-	  /* Note if/where callee saved registers were saved.  */
-	  set_movm_offsets (fi, this_cache, movm_args);
-	  return addr;
-	}
+	goto finish_prologue;
 
       /* Note the size of the stack in the frame info structure.  */
       stack_size = extract_signed_integer (buf, imm_size);
@@ -526,21 +472,13 @@ mn10300_analyze_prologue (struct frame_info *fi,
       addr += 2 + imm_size;
 
       /* No more prologue insns follow, so begin preparation to return.  */
-      /* Fix fi->frame if it's bogus at this point.  */
-      fix_frame_pointer (fi, stack_size);
-
-      /* Note if/where callee saved registers were saved.  */
-      set_movm_offsets (fi, this_cache, movm_args);
-      return addr;
+      goto finish_prologue;
     }
-
-  /* We never found an insn which allocates local stack space, regardless
-     this is the end of the prologue.  */
-  /* Fix fi->frame if it's bogus at this point.  */
-  fix_frame_pointer (fi, 0);
-
+  /* Do the essentials and get out of here.  */
+ finish_prologue:
   /* Note if/where callee saved registers were saved.  */
-  set_movm_offsets (fi, this_cache, movm_args);
+  if (fi)
+    set_movm_offsets (fi, this_cache, movm_args);
   return addr;
 }
 

@@ -1,3 +1,11 @@
+2005-03-21  Michael Snyder  <msnyder@redhat.com>
+
+	* mn10300-prologue.c (fix_frame_pointer): Delete.
+	(set_movm_offsets) Don't return just because movm_args is
+	zero -- still need to save pc and sp in saved_regs.
+	(mn10300_analyze_prologue): Don't return prematurely without
+	calling set_movm_offsets (for pc and sp at minimum).
+
 2005-03-21  Mark Mitchell  <mark@codesourcery.com>
 
 	* configure.ac (stat.st_blksize): Check for it.
