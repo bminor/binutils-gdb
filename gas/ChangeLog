@@ -1,3 +1,8 @@
+2001-11-04  Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in (mips-*-netbsd*): Add support for target.
+	* configure: Regenerate.
+
 2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add 'fr'.

@@ -1,3 +1,8 @@
+2001-11-04  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/mips.exp (svr4pic): Set if target is *-*-netbsd*.
+	(aout): Don't set if *-*-netbsd*.
+	
 2001-11-02  NIIBE Yutaka  <gniibe@m17n.org>
 
 	* gas/sh/basic.exp: For Linux, add "-big" option for the

@@ -1,3 +1,8 @@
+2001-11-04  Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.tgt (mips*el-*-netbsd*, mips*-*-netbsd*):
+	Add support for targets.
+	
 2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add "fr" and "sv"

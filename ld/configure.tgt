@@ -287,7 +287,13 @@ mips*-sgi-irix*)	targ_emul=mipsbig ;;
 mips*el-*-ecoff*)	targ_emul=mipsidtl ;;
 mips*-*-ecoff*)		targ_emul=mipsidt ;;
 mips*-dec-bsd*)		targ_emul=mipsbsd ;;
-mips*-dec-netbsd*)	targ_emul=elf32lmip ;;
+mips*-dec-netbsd* | mips*el-*-netbsd*)
+			targ_emul=elf32lmip
+			targ_extra_emuls="elf32bmip"
+			;;
+mips*-*-netbsd*)	targ_emul=elf32bmip
+			targ_extra_emuls="elf32lmip"
+			;;
 mips*-*-bsd*)		targ_emul=mipsbig ;;
 mips*vr4300el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4300-*-elf*)	targ_emul=elf32b4300 ;;
