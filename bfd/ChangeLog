@@ -1,3 +1,9 @@
+Fri Apr 24 12:09:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* syms.c (struct indexentry): Change directory_name, file_name,
+	and function_name fields to char *.
+	(struct stab_find_info): Change cached_file_name field to char *.
+
 Thu Apr 23 08:13:04 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* peicode.h (dir_names): Add missing N_() macros to dir_names array.
