@@ -33,6 +33,7 @@ gdbserve.mt
 linux.mh
 macos.mh
 macos.mt
+linux.mh
 nm-aix.h
 nm-macos.h
 nm-solaris.h
