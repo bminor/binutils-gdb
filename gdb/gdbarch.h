@@ -2138,15 +2138,9 @@ extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_s
    evaluates non-zero, this is the address where the debugger will place
    a step-resume breakpoint to get us past the dynamic linker. */
 
-typedef CORE_ADDR (gdbarch_skip_solib_resolver_ftype) (CORE_ADDR pc);
+typedef CORE_ADDR (gdbarch_skip_solib_resolver_ftype) (struct gdbarch *gdbarch, CORE_ADDR pc);
 extern CORE_ADDR gdbarch_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc);
 extern void set_gdbarch_skip_solib_resolver (struct gdbarch *gdbarch, gdbarch_skip_solib_resolver_ftype *skip_solib_resolver);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SKIP_SOLIB_RESOLVER)
-#error "Non multi-arch definition of SKIP_SOLIB_RESOLVER"
-#endif
-#if !defined (SKIP_SOLIB_RESOLVER)
-#define SKIP_SOLIB_RESOLVER(pc) (gdbarch_skip_solib_resolver (current_gdbarch, pc))
-#endif
 
 /* For SVR4 shared libraries, each call goes through a small piece of
    trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates

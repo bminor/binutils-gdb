@@ -420,7 +420,7 @@ struct gdbarch startup_gdbarch =
   0,  /* software_single_step */
   0,  /* print_insn */
   0,  /* skip_trampoline_code */
-  0,  /* skip_solib_resolver */
+  generic_skip_solib_resolver,  /* skip_solib_resolver */
   0,  /* in_solib_call_trampoline */
   0,  /* in_solib_return_trampoline */
   0,  /* pc_in_sigtramp */
@@ -2217,16 +2217,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       (long) current_gdbarch->skip_prologue
                       /*SKIP_PROLOGUE ()*/);
 #endif
-#ifdef SKIP_SOLIB_RESOLVER
   fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SKIP_SOLIB_RESOLVER(pc)",
-                      XSTRING (SKIP_SOLIB_RESOLVER (pc)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SKIP_SOLIB_RESOLVER = <0x%08lx>\n",
-                      (long) current_gdbarch->skip_solib_resolver
-                      /*SKIP_SOLIB_RESOLVER ()*/);
-#endif
+                      "gdbarch_dump: skip_solib_resolver = 0x%08lx\n",
+                      (long) current_gdbarch->skip_solib_resolver);
 #ifdef SKIP_TRAMPOLINE_CODE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -5220,7 +5213,7 @@ gdbarch_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
   gdb_assert (gdbarch->skip_solib_resolver != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_skip_solib_resolver called\n");
-  return gdbarch->skip_solib_resolver (pc);
+  return gdbarch->skip_solib_resolver (gdbarch, pc);
 }
 
 void

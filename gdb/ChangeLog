@@ -1,3 +1,15 @@
+2003-11-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbarch.sh (skip_solib_resolver): Change into a multi-arch
+	function.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* infrun.c (handle_inferior_event): Call
+	gdbarch_skip_solib_resolver instead of SKIP_SOLIB_RESOLVER.
+	* arch-utils.c (generic_in_solib_call_trampoline): Adjust function
+	definition.
+	* arch-utils.h (generic_in_solib_call_trampoline): Adjust function
+	prototype.
+
 2003-11-14  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* libunwind-frame.c: New file.

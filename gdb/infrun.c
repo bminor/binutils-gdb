@@ -2331,7 +2331,8 @@ process_event_stop_test:
   if (step_over_calls == STEP_OVER_UNDEBUGGABLE
       && IN_SOLIB_DYNSYM_RESOLVE_CODE (stop_pc))
     {
-      CORE_ADDR pc_after_resolver = SKIP_SOLIB_RESOLVER (stop_pc);
+      CORE_ADDR pc_after_resolver =
+	gdbarch_skip_solib_resolver (current_gdbarch, stop_pc);
 
       if (pc_after_resolver)
 	{

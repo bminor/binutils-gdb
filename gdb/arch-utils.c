@@ -103,7 +103,7 @@ generic_skip_trampoline_code (CORE_ADDR pc)
 }
 
 CORE_ADDR
-generic_skip_solib_resolver (CORE_ADDR pc)
+generic_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   return 0;
 }
