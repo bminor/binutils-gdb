@@ -212,11 +212,11 @@ static int mips_4100 = -1;
 static int mips_4320 = -1;
 
 /* end-sanitize-vr4320 */
-/* start-sanitize-vr5400 */
+/* start-sanitize-cygnus */
 /* Whether NEC vr5400 instructions are permitted. */
 static int mips_5400 = -1;
 
-/* end-sanitize-vr5400 */
+/* end-sanitize-cygnus */
 /* start-sanitize-r5900 */
 /* Whether Toshiba r5900 instructions are permitted. */
 static int mips_5900 = -1;
@@ -264,10 +264,10 @@ static int mips_4900 = -1;
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs, and thus does not require nops to be inserted.  */
 #define gpr_interlocks (mips_opts.isa >= 2 || mips_3900)
-/* start-sanitize-vr5400 */
+/* start-sanitize-cygnus */
 #undef gpr_interlocks
 #define gpr_interlocks (mips_opts.isa >= 2 || mips_3900 || mips_5400)
-/* end-sanitize-vr5400 */
+/* end-sanitize-cygnus */
 
 
 /* As with other "interlocks" this is used by hardware that has FP
@@ -277,9 +277,9 @@ static int mips_4900 = -1;
 			/* start-sanitize-vr4320 */		    \
 			|| mips_cpu == 4320			    \
 			/* end-sanitize-vr4320 */		    \
-			/* start-sanitize-vr5400 */		    \
+			/* start-sanitize-cygnus */		    \
 			|| mips_cpu == 5400			    \
-			/* end-sanitize-vr5400 */		    \
+			/* end-sanitize-cygnus */		    \
 			)
 
 /* MIPS PIC level.  */
@@ -943,11 +943,11 @@ md_begin ()
 	       || strcmp (cpu, "mips64vr5000") == 0)
         mips_cpu = 5000;
 
-      /* start-sanitize-vr5400 */
+      /* start-sanitize-cygnus */
       else if (strcmp (cpu, "r5400") == 0
 	       || strcmp (cpu, "mips64vr5400") == 0)
 	mips_cpu = 5400;
-      /* end-sanitize-vr5400 */
+      /* end-sanitize-cygnus */
 
       /* start-sanitize-r5900 */
       else if (strcmp (cpu, "r5900") == 0
@@ -997,9 +997,9 @@ md_begin ()
         mips_opts.isa = 3;
 
       else if (mips_cpu == 5000
-               /* start-sanitize-vr5400 */
+               /* start-sanitize-cygnus */
                || mips_cpu == 5400
-               /* end-sanitize-vr5400 */
+               /* end-sanitize-cygnus */
                || mips_cpu == 8000
                || mips_cpu == 10000)
         mips_opts.isa = 4;
@@ -1030,10 +1030,10 @@ md_begin ()
     mips_4320 = (mips_cpu == 4320);
 
   /* end-sanitize-vr4320 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
   if (mips_5400 < 0)
     mips_5400 = (mips_cpu == 5400);
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 
   /* start-sanitize-r5900 */
   if (mips_5900 < 0)
@@ -2572,10 +2572,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	      || (mips_5900
 		  && (insn.insn_mo->membership & INSN_5900) != 0)
 	      /* end-sanitize-r5900 */
-	      /* start-sanitize-vr5400 */
+	      /* start-sanitize-cygnus */
 	      || (mips_5400
 		  && (insn.insn_mo->membership & INSN_5400) != 0)
-	      /* end-sanitize-vr5400 */
+	      /* end-sanitize-cygnus */
 	      || (mips_3900
 		  && (insn.insn_mo->membership & INSN_3900) != 0))
 	  /* start-sanitize-r5900 */
@@ -6294,7 +6294,7 @@ macro2 (ip)
 	  && imm_expr.X_add_number >= -0x8000
 	  && imm_expr.X_add_number < 0x8000)
 	{
-	  macro_build ((char *) NULL, &icnt, &expr1,
+	  macro_build ((char *) NULL, &icnt, &imm_expr,
 		       mask == M_SGE_I ? "slti" : "sltiu",
 		       "t,r,j", dreg, sreg, (int) BFD_RELOC_LO16);
 	  used_at = 0;
@@ -7111,12 +7111,12 @@ validate_mips_insn (opc)
       case '-': break;
       case '+': break;
 	/* end-sanitize-r5900 */
-	/* start-sanitize-vr5400 */
+	/* start-sanitize-cygnus */
       case 'e': USE_BITS (OP_MASK_VECBYTE,	OP_SH_VECBYTE);	break;
       case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
       case '[': break;
       case ']': break;
-	/* end-sanitize-vr5400 */
+	/* end-sanitize-cygnus */
       default:
 	as_bad (_("internal: bad mips opcode (unknown operand type `%c'): %s %s"),
 		c, opc->name, opc->args);
@@ -7238,9 +7238,9 @@ mips_ip (str, ip)
 	       /* start-sanitize-r5900 */
 	       || (mips_5900 && (insn->membership & INSN_5900) != 0)
 	       /* end-sanitize-r5900 */
-	       /* start-sanitize-vr5400 */
+	       /* start-sanitize-cygnus */
 	       || (mips_5400 && (insn->membership & INSN_5400) != 0)
-	       /* end-sanitize-vr5400 */
+	       /* end-sanitize-cygnus */
 	       || (mips_3900 && (insn->membership & INSN_3900) != 0))
 	ok = true;
       else
@@ -7324,10 +7324,10 @@ mips_ip (str, ip)
 		return;
 
 	    case ')':		/* these must match exactly */
-	      /* start-sanitize-vr5400 */
+	      /* start-sanitize-cygnus */
 	    case '[':
 	    case ']':
-	      /* end-sanitize-vr5400 */
+	      /* end-sanitize-cygnus */
 	      /* start-sanitize-r5900 */
 	    case '-':
 	    case '+':
@@ -8199,6 +8199,8 @@ mips_ip (str, ip)
 		      else
 			imm_reloc = BFD_RELOC_HI16;
 		    }
+		  else if (imm_expr.X_op == O_constant)
+		    imm_expr.X_add_number &= 0xffff;
 		}
 	      if (*args == 'i')
 		{
@@ -8302,10 +8304,6 @@ mips_ip (str, ip)
 
 	    case 'u':		/* upper 16 bits */
 	      c = my_getSmallExpression (&imm_expr, s);
-	      if (imm_expr.X_op == O_constant
-		  && (imm_expr.X_add_number < 0
-		      || imm_expr.X_add_number >= 0x10000))
-		as_bad (_("lui expression not in range 0..65535"));
 	      imm_reloc = BFD_RELOC_LO16;
 	      if (c)
 		{
@@ -8322,7 +8320,13 @@ mips_ip (str, ip)
 		      else
 			imm_reloc = BFD_RELOC_HI16;
 		    }
+		  else if (imm_expr.X_op == O_constant)
+		    imm_expr.X_add_number &= 0xffff;
 		}
+	      if (imm_expr.X_op == O_constant
+		  && (imm_expr.X_add_number < 0
+		      || imm_expr.X_add_number >= 0x10000))
+		as_bad (_("lui expression not in range 0..65535"));
 	      s = expr_end;
 	      continue;
 
@@ -8353,7 +8357,7 @@ mips_ip (str, ip)
 		ip->insn_opcode |= regno << OP_SH_CCC;
               continue;
 
-	      /* start-sanitize-vr5400 */
+	      /* start-sanitize-cygnus */
 	    case 'e':		/* must be at least one digit */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
@@ -8382,7 +8386,7 @@ mips_ip (str, ip)
 	      s = expr_end;
 	      continue;
 
-	      /* end-sanitize-vr5400 */
+	      /* end-sanitize-cygnus */
 	    default:
 	      as_bad (_("bad char = '%c'\n"), *args);
 	      internalError ();
@@ -9358,13 +9362,13 @@ struct option md_longopts[] = {
   {"no-m1900", no_argument, NULL, OPTION_NO_M3900},
   /* end-sanitize-tx19 */
 
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 #define OPTION_M5400 (OPTION_MD_BASE + 28)
   {"m5400", no_argument, NULL, OPTION_M5400},
 #define OPTION_NO_M5400 (OPTION_MD_BASE + 29)
   {"no-m5400", no_argument, NULL, OPTION_NO_M5400},
 
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-tx49 */
 #define OPTION_M4900 (OPTION_MD_BASE + 30)
   {"m4900", no_argument, NULL, OPTION_M4900},
@@ -9547,10 +9551,10 @@ md_parse_option (c, arg)
 		    || strcmp (p, "5k") == 0
 		    || strcmp (p, "5K") == 0)
 		  mips_cpu = 5000;
-                /* start-sanitize-vr5400 */
+                /* start-sanitize-cygnus */
                 else if (strcmp (p, "5400") == 0)
                   mips_cpu = 5400;
-                /* end-sanitize-vr5400 */
+                /* end-sanitize-cygnus */
                 /* start-sanitize-r5900 */
                 else if (strcmp (p, "5900") == 0)
                   mips_cpu = 5900;
@@ -9583,9 +9587,9 @@ md_parse_option (c, arg)
 		    /* start-sanitize-vr4320 */
 		    && mips_cpu != 4320
 		    /* end-sanitize-vr4320 */
-		    /* start-sanitize-vr5400 */
+		    /* start-sanitize-cygnus */
 		    && mips_cpu != 5400
-		    /* end-sanitize-vr5400 */
+		    /* end-sanitize-cygnus */
 		    && mips_cpu != 5000))
 	      {
 		as_bad (_("ignoring invalid leading 'v' in -mcpu=%s switch"), arg);
@@ -9645,7 +9649,7 @@ md_parse_option (c, arg)
       break;
 
       /* end-sanitize-vr4320 */
-      /* start-sanitize-vr5400 */
+      /* start-sanitize-cygnus */
     case OPTION_M5400:
       mips_5400 = 1;
       break;
@@ -9654,7 +9658,7 @@ md_parse_option (c, arg)
       mips_5400 = 0;
       break;
 
-      /* end-sanitize-vr5400 */
+      /* end-sanitize-cygnus */
     case OPTION_M3900:
       mips_3900 = 1;
       break;
@@ -12178,6 +12182,9 @@ s_ent (aent)
       else
 	proc_rootP = procP;
       proc_lastP = procP;
+
+      symbolP->bsym->flags |= BSF_FUNCTION;
+
       numprocs++;
     }
   demand_empty_rest_of_line ();

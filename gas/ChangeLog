@@ -1,3 +1,9 @@
+Thu Aug 13 15:08:42 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (macro): Correct M_SGE_I/M_SGEUI_I case for a
+	small immediate constant to use the constant itself rather than
+	always using 1.
+
 Wed Aug 12 18:47:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-hppa.c (pa_enter): Call as_bad rather than abort.
