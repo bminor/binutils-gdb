@@ -1,5 +1,10 @@
 Wed Oct  6 13:01:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-mips.c (cons_fix_new_mips): New function.  Turn
+	BFD_RELOC_64 into BFD_RELOC_32.
+	* config/tc-mips.h (TC_CONS_FIX_NEW): Define.
+	(cons_fix_new_mips): Declare.
+
 	Changes to let cons handle bignums like general expressions.
 	* expr.h (expressionS): New field X_unsigned.
 	* expr.c (operand): Initialize X_unsigned to 1.  Set it to 0 for

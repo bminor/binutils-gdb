@@ -279,6 +279,9 @@ static expressionS offset_expr;
 static bfd_reloc_code_real_type imm_reloc;
 static bfd_reloc_code_real_type offset_reloc;
 
+/* FIXME: This should be handled in a different way.  */
+extern int target_big_endian;
+
 /*
  * This function is called once, at assembler startup time.  It should
  * set up all the tables, etc. that the MD part of the assembler will need.
@@ -329,7 +332,7 @@ md_begin ()
       const char *name = mips_opcodes[i].name;
 
       retval = hash_insert (op_hash, name, (PTR) &mips_opcodes[i]);
-      if (retval != NULL && *retval != '\0')
+      if (retval != NULL)
 	{
 	  fprintf (stderr, "internal error: can't hash `%s': %s\n",
 		   mips_opcodes[i].name, retval);
@@ -354,6 +357,9 @@ md_begin ()
 
   /* set the default alignment for the text section (2**2) */
   record_alignment (text_section, 2);
+
+  /* FIXME: This should be handled in a different way.  */
+  target_big_endian = byte_order == BIG_ENDIAN;
 
 #ifdef OBJ_ECOFF
   bfd_set_gp_size (stdoutput, g_switch_value);
@@ -742,8 +748,9 @@ append_insn (ip, address_expr, reloc_type)
 		  & (INSN_UNCOND_BRANCH_DELAY
 		     | INSN_COND_BRANCH_DELAY
 		     | INSN_COND_BRANCH_LIKELY))
-	      /* We can not swap with a trap instruction, since it
-		 might change the PC.  */
+	      /* We do not swap with a trap instruction, since it
+		 complicates trap handlers to have the trap
+		 instruction be in a delay slot.  */
 	      || (prev_insn.insn_mo->pinfo & INSN_TRAP)
 	      /* If the branch reads a register that the previous
 		 instruction sets, we can not swap.  */
@@ -3803,6 +3810,35 @@ md_pcrel_from (fixP)
 {
   /* return the address of the delay slot */
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
+}
+
+/* This is called by emit_expr via TC_CONS_FIX_NEW when creating a
+   reloc for a cons.  We could use the definition there, except that
+   we want to handle 64 bit relocs specially.  */
+
+void
+cons_fix_new_mips (frag, where, nbytes, exp)
+     fragS *frag;
+     int where;
+     unsigned int nbytes;
+     expressionS *exp;
+{
+  /* If we are assembling in 32 bit mode, turn an 8 byte reloc into a
+     4 byte reloc.  
+     FIXME: There is no way to select anything but 32 bit mode right
+     now.  */
+  if (nbytes == 8)
+    {
+      if (byte_order == BIG_ENDIAN)
+	where += 4;
+      nbytes = 4;
+    }
+
+  if (nbytes != 2 && nbytes != 4)
+    as_bad ("Unsupported reloc size %d", nbytes);
+
+  fix_new_exp (frag_now, where, (int) nbytes, exp, 0,
+	       nbytes == 2 ? BFD_RELOC_16 : BFD_RELOC_32);
 }
 
 int

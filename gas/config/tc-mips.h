@@ -82,3 +82,9 @@ struct mips_cl_insn {
 #endif
 
 extern int tc_get_register PARAMS ((void));
+
+#define tc_frob_label(sym) mips_define_label (sym)
+extern void mips_define_label PARAMS ((struct symbol *));
+
+#define TC_CONS_FIX_NEW cons_fix_new_mips
+extern void cons_fix_new_mips ();
