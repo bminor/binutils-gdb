@@ -994,13 +994,13 @@ void sky_sim_engine_halt PARAMS ((SIM_DESC sd, sim_cpu *last, sim_cia cia));
 #ifndef TM_TXVU_H /* In case GDB hasn't been configured yet */
 enum txvu_cpu_context
 {
-  TXVU_CPU_AUTO = -1,	/* context-sensitive context */
-  TXVU_CPU_MASTER,	/* R5900 core */
-  TXVU_CPU_VU0,		/* Vector units */
-  TXVU_CPU_VU1,
-  TXVU_CPU_VIF0,	/* FIFO's */
-  TXVU_CPU_VIF1,
-  TXVU_CPU_LAST		/* Count of context types */
+  TXVU_CPU_AUTO		= -1,	/* context-sensitive context */
+  TXVU_CPU_MASTER	= 0,	/* R5900 core */
+  TXVU_CPU_VU0		= 1,	/* Vector units */
+  TXVU_CPU_VU1		= 2,
+  TXVU_CPU_VIF0		= 3,	/* FIFO's */
+  TXVU_CPU_VIF1		= 4,
+  TXVU_CPU_LAST			/* Count of context types */
 };
 
 /* memory segment for communication with GDB */
