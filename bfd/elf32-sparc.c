@@ -695,7 +695,7 @@ elf32_sparc_link_hash_table_create (abfd)
   struct elf32_sparc_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf32_sparc_link_hash_table);
 
-  ret = (struct elf32_sparc_link_hash_table *) bfd_malloc (amt);
+  ret = (struct elf32_sparc_link_hash_table *) bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -704,15 +704,6 @@ elf32_sparc_link_hash_table_create (abfd)
       free (ret);
       return NULL;
     }
-
-  ret->sgot = NULL;
-  ret->srelgot = NULL;
-  ret->splt = NULL;
-  ret->srelplt = NULL;
-  ret->sdynbss = NULL;
-  ret->srelbss = NULL;
-  ret->tls_ldm_got.refcount = 0;
-  ret->sym_sec.abfd = NULL;
 
   return &ret->elf.root;
 }
@@ -732,15 +723,16 @@ create_got_section (dynobj, info)
 
   htab = elf32_sparc_hash_table (info);
   htab->sgot = bfd_get_section_by_name (dynobj, ".got");
-  if (!htab->sgot)
-    abort ();
+  BFD_ASSERT (htab->sgot != NULL);
 
   htab->srelgot = bfd_make_section (dynobj, ".rela.got");
   if (htab->srelgot == NULL
-      || ! bfd_set_section_flags (dynobj, htab->srelgot,
-				  (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-				   | SEC_IN_MEMORY | SEC_LINKER_CREATED
-				   | SEC_READONLY))
+      || ! bfd_set_section_flags (dynobj, htab->srelgot, SEC_ALLOC
+							 | SEC_LOAD
+							 | SEC_HAS_CONTENTS
+							 | SEC_IN_MEMORY
+							 | SEC_LINKER_CREATED
+							 | SEC_READONLY)
       || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
     return FALSE;
   return TRUE;

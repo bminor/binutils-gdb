@@ -1,5 +1,8 @@
 2005-01-09  Eric Botcazou  <ebotcazou@libertysurf.fr>
 
+	* elf32-sparc.c (elf32_sparc_link_hash_table_create): Use bfd_zmalloc
+	to zero the structure.
+	(create_got_section): Use BFD_ASSERT instead of abort.
 	* elf64-sparc.c (struct sparc64_elf_link_hash_table): New 'sgot' and
 	'srelgot' fields.
 	(create_got_section): New function.
