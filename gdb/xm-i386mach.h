@@ -45,3 +45,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* <errno.h> only defines this if __STDC__!!! */
 extern int errno;
+
+extern char *strdup();
