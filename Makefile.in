@@ -1487,8 +1487,8 @@ all-ash:
 all-autoconf: all-m4 all-texinfo
 all-automake:
 all-bash:
-all-bfd: all-libiberty
-all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc
+all-bfd: all-libiberty all-intl
+all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc all-intl
 all-bison: all-texinfo
 all-target-boehm-gc:
 all-byacc:
@@ -1508,7 +1508,7 @@ all-fileutils: all-libiberty
 all-findutils:
 all-find:
 all-flex: all-libiberty all-bison all-byacc
-all-gas: all-libiberty all-opcodes all-bfd
+all-gas: all-libiberty all-opcodes all-bfd all-intl
 all-gash: all-tcl
 all-gawk:
 ALL_GCC = all-gcc
@@ -1523,7 +1523,7 @@ all-gettext:
 all-gnuserv:
 configure-target-gperf: $(ALL_GCC)
 all-target-gperf: configure-target-gperf all-target-libiberty all-target-libstdc++
-all-gprof: all-libiberty all-bfd all-opcodes
+all-gprof: all-libiberty all-bfd all-opcodes all-intl
 all-grep: all-libiberty
 all-grez: all-libiberty all-bfd all-opcodes
 all-gui: all-gdb all-libproc all-target-librx
@@ -1541,7 +1541,7 @@ all-itcl: all-tcl all-tk
 # start-sanitize-ide
 all-jstools: all-tcl all-tk all-tix all-libgui all-libide all-libidetcl
 # end-sanitize-ide
-all-ld: all-libiberty all-bfd all-opcodes all-bison all-byacc all-flex
+all-ld: all-libiberty all-bfd all-opcodes all-bison all-byacc all-flex all-intl
 configure-target-libg++: $(ALL_GCC) configure-target-librx
 all-target-libg++: configure-target-libg++ all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio all-target-librx all-target-libstdc++
 configure-target-libgloss: $(ALL_GCC)

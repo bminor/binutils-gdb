@@ -1,3 +1,11 @@
+Tue Apr 21 23:06:54 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (all-bfd): Depend on all-intl.
+	(all-binutils): Likewise.
+	(all-gas): Likewise.
+	(all-gprof): Likewise.
+	(all-ld): Likewise.
+
 Mon Apr 20 14:26:26 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* Makefile.in (ALL_TARGET_MODULES): Added libjava, boehm-gc.
