@@ -80,15 +80,19 @@ elf_bfd_link_add_symbols (abfd, info)
     }
 }
 
-/* Return true iff this is a non-common definition of a symbol.  */
+/* Return true iff this is a non-common, definition of a non-function symbol.  */
 static boolean
-is_global_symbol_definition (abfd, sym)
+is_global_data_symbol_definition (abfd, sym)
      bfd * abfd ATTRIBUTE_UNUSED;
      Elf_Internal_Sym * sym;
 {
   /* Local symbols do not count, but target specific ones might.  */
   if (ELF_ST_BIND (sym->st_info) != STB_GLOBAL
       && ELF_ST_BIND (sym->st_info) < STB_LOOS)
+    return false;
+
+  /* Function symbols do not count.  */
+  if (ELF_ST_TYPE (sym->st_info) == STT_FUNC)
     return false;
 
   /* If the section is undefined, then so is the symbol.  */
@@ -116,7 +120,7 @@ is_global_symbol_definition (abfd, sym)
 }
 
 /* Search the symbol table of the archive element of the archive ABFD
-   whoes archove map contains a mention of SYMDEF, and determine if
+   whoes archive map contains a mention of SYMDEF, and determine if
    the symbol is defined in this element.  */
 static boolean
 elf_link_is_defined_archive_symbol (abfd, symdef)
@@ -201,7 +205,7 @@ elf_link_is_defined_archive_symbol (abfd, symdef)
 
       if (strcmp (name, symdef->name) == 0)
 	{
-	  result = is_global_symbol_definition (abfd, & sym);
+	  result = is_global_data_symbol_definition (abfd, & sym);
 	  break;
 	}
     }

@@ -1,3 +1,10 @@
+2001-02-07  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.h (is_global_symbol_definition): Rename to
+	is_global_data_symbol_definition and have it reject function
+	symbols.
+	(elf_link_is_defined_archive_symbol): Use renamed function.
+
 2001-02-07  Todd Vierling  <tv@wasabisystems.com>
 
 	* libbfd-in.h (bfd_target_vector): Change extern array to pointer.
