@@ -1,3 +1,12 @@
+Wed Jan  5 14:22:22 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/tc-mips.h (TARGET_FORMAT) [OBJ_AOUT]: Fix for new names
+	in bfd.
+
+	* subsegs.c (subseg_get): New function.  Creates segment if
+	needed, returns pointer, but doesn't change current segment.
+	(subseg_new): Use it.
+
 Tue Jan  4 15:12:43 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* Makefile.in (INCLUDES): Add $(srcdir)/.. to places to search.
