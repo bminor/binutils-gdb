@@ -1,3 +1,8 @@
+Thu Feb 13 16:30:02 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200-opc.c (IMM16_PCREL): This is a signed operand.
+	(IMM24_PCREL): Likewise.
+
 Thu Feb 13 13:28:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-dis.c (print_mips16_insn_arg): Use memaddr - 2 as the base

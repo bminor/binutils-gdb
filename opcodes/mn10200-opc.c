@@ -68,7 +68,7 @@ const struct mn10200_operand mn10200_operands[] = {
 /* 16 bit pc-relative immediate which may promote to a 16bit
    pc-relative immediate.  */
 #define IMM16_PCREL    (IMM16+1)
-  {16, 0, MN10200_OPERAND_PCREL | MN10200_OPERAND_RELAX},
+  {16, 0, MN10200_OPERAND_PCREL | MN10200_OPERAND_RELAX | MN10200_OPERAND_SIGNED},
 
 /* 16bit unsigned dispacement in a memory operation which
    may promote to a 32bit displacement.  */
@@ -83,7 +83,7 @@ const struct mn10200_operand mn10200_operands[] = {
 
 /* 32bit pc-relative offset.  */
 #define IMM24_PCREL    (IMM24+1)
-  {24, 0, MN10200_OPERAND_EXTENDED | MN10200_OPERAND_PCREL},
+  {24, 0, MN10200_OPERAND_EXTENDED | MN10200_OPERAND_PCREL | MN10200_OPERAND_SIGNED},
 
 /* 32bit memory offset.  */
 #define IMM24_MEM    (IMM24_PCREL+1)
