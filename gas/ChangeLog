@@ -1,5 +1,7 @@
 Tue Feb  8 16:00:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* configure.in (alpha-*-netware*): New target, like alpha-*-osf*.
+
 	* config/tc-alpha.c (GP_ADJUSTMENT): Move definition to start of
 	file.
 	(tc_gen_reloc): Remove uninitialized variable `code', and code
