@@ -23,6 +23,9 @@ arm-*-pe)		targ_emul=armpe ;
 arc-*-elf*)		targ_emul=arcelf ;;
 avr-*-*)		targ_emul=avr85xx
 			targ_extra_emuls="avr1200 avr23xx avr44x4 avr4433 avrmega603 avrmega103 avrmega161" ;;
+cris-*-*)		targ_emul=crisaout
+			targ_extra_emuls="criself crislinux"
+			targ_extra_libpath=$targ_extra_emuls ;;
 d10v-*-*)		targ_emul=d10velf ;;
 d30v-*-*ext*)		targ_emul=d30v_e; targ_extra_emuls="d30velf d30v_o" ;;
 d30v-*-*onchip*)	targ_emul=d30v_o; targ_extra_emuls="d30velf d30v_e" ;;

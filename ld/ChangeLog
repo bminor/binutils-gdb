@@ -1,3 +1,15 @@
+2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add ecrisaout.o, ecriself.o,
+	ecrislinux.o.
+	(ecrisaout.c, ecriself.c, ecrislinux.c): New rules.
+	Regenerate dependencies.
+	* Makefile.in: Rebuild.
+	* configure.tgt (cris-*-*): New target.
+	* emulparams/crisaout.sh, emulparams/criself.sh,
+	emulparams/crislinux.sh, scripttempl/crisaout.sc: New files.
+	* po/POTFILES.in, po/ld.pot: Regenerate.
+
 2000-07-20  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/elf32.em (gld_${EMULATION_NAME}_list_options):

@@ -226,6 +226,9 @@ ALL_EMULATIONS = \
 	eavrmega161.o \
 	eavrmega603.o \
 	ecoff_sparc.o \
+	ecrisaout.o \
+	ecriself.o \
+	ecrislinux.o \
 	ed10velf.o \
 	ed30v_e.o \
 	ed30v_o.o \
@@ -1079,6 +1082,15 @@ eavrmega161.c: $(srcdir)/emulparams/avrmega161.sh \
 ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} coff_sparc "$(tdir_coff_sparc)"
+ecrisaout.c: $(srcdir)/emulparams/crisaout.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/crisaout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} crisaout "$(tdir_cris)"
+ecriself.c: $(srcdir)/emulparams/criself.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} criself "$(tdir_cris)"
+ecrislinux.c: $(srcdir)/emulparams/crislinux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} crislinux "$(tdir_cris)"
 ed10velf.c: $(srcdir)/emulparams/d10velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd10v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d10velf "$(tdir_d10v)"
@@ -1624,7 +1636,7 @@ ldctor.o: ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldgram.h ldmain.h ldctor.h
 ldemul.o: ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
-  ldemul.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h \
+  ldmisc.h ldexp.h ldlang.h ldfile.h ldemul.h ldmain.h \
   ldemul-list.h
 ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
@@ -1637,13 +1649,13 @@ ldfile.o: ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   $(INCDIR)/obstack.h $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h \
-  ldmain.h ldgram.h ldexp.h ldlang.h ldemul.h ldlex.h \
-  ldmisc.h ldctor.h ldfile.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h
+  ldmain.h ldgram.h ldexp.h ldlang.h ldlex.h ldmisc.h \
+  ldctor.h ldfile.h ldemul.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h
 ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   $(INCDIR)/progress.h $(INCDIR)/bfdlink.h $(INCDIR)/filenames.h \
   ld.h $(INCDIR)/bin-bugs.h ldmain.h ldmisc.h ldwrite.h \
-  ldgram.h ldexp.h ldlang.h ldemul.h ldlex.h ldfile.h \
+  ldgram.h ldexp.h ldlang.h ldlex.h ldfile.h ldemul.h \
   ldctor.h
 ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
@@ -1651,16 +1663,16 @@ ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldexp.h ldlang.h ldgram.h ldlex.h ldmain.h ldfile.h
 ldver.o: ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
-  ldver.h ldemul.h ldmain.h
+  ldver.h ldexp.h ldlang.h ldfile.h ldemul.h ldmain.h
 ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/libiberty.h ld.h $(INCDIR)/bin-bugs.h ldexp.h \
   ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h
 lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \
-  ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldfile.h \
-  ldver.h ldemul.h
+  $(INCDIR)/getopt.h $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h \
+  ldmain.h ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h \
+  ldfile.h ldver.h ldemul.h
 mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
   ldexp.h ldlang.h ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h
@@ -1671,13 +1683,13 @@ ldcref.o: ldcref.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 pe-dll.o: pe-dll.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/libiberty.h ld.h $(INCDIR)/bin-bugs.h ldexp.h \
-  ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h ldemul.h \
-  $(INCDIR)/coff/internal.h ../bfd/libcoff.h deffile.h \
-  pe-dll.h
+  ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h ldfile.h \
+  ldemul.h $(INCDIR)/coff/internal.h ../bfd/libcoff.h \
+  deffile.h pe-dll.h
 ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
   ld.h $(INCDIR)/bin-bugs.h ldexp.h ldver.h ldlang.h \
-  ldemul.h ldfile.h ldmisc.h ldmain.h mri.h ldctor.h \
+  ldfile.h ldemul.h ldmisc.h ldmain.h mri.h ldctor.h \
   ldlex.h
 ldlex.o: ldlex.c ../bfd/bfd.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   ld.h $(INCDIR)/bin-bugs.h ldgram.h ldmisc.h ldexp.h \
