@@ -167,9 +167,6 @@ allocate_objfile (bfd *abfd, int flags)
       objfile->macro_cache = bcache_xmalloc ();
       obstack_specify_allocation (&objfile->objfile_obstack, 0, 0, xmalloc,
 				  xfree);
-      obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
-				  xfree);
-
       terminate_minimal_symbol_table (objfile);
     }
 
@@ -236,14 +233,14 @@ allocate_objfile (bfd *abfd, int flags)
 
 /* Create the terminating entry of OBJFILE's minimal symbol table.
    If OBJFILE->msymbols is zero, allocate a single entry from
-   OBJFILE->symbol_obstack; otherwise, just initialize
+   OBJFILE->objfile_obstack; otherwise, just initialize
    OBJFILE->msymbols[OBJFILE->minimal_symbol_count].  */
 void
 terminate_minimal_symbol_table (struct objfile *objfile)
 {
   if (! objfile->msymbols)
     objfile->msymbols = ((struct minimal_symbol *)
-                         obstack_alloc (&objfile->symbol_obstack,
+                         obstack_alloc (&objfile->objfile_obstack,
                                         sizeof (objfile->msymbols[0])));
 
   {
@@ -339,8 +336,8 @@ unlink_objfile (struct objfile *objfile)
 
 
 /* Destroy an objfile and all the symtabs and psymtabs under it.  Note
-   that as much as possible is allocated on the symbol_obstack and
-   objfile_obstack, so that the memory can be efficiently freed.
+   that as much as possible is allocated on the objfile_obstack 
+   so that the memory can be efficiently freed.
 
    Things which we do NOT free because they are not in malloc'd memory
    or not in memory specific to the objfile include:
@@ -430,8 +427,6 @@ free_objfile (struct objfile *objfile)
   if (objfile->demangled_names_hash)
     htab_delete (objfile->demangled_names_hash);
   obstack_free (&objfile->objfile_obstack, 0);
-  obstack_free (&objfile->symbol_obstack, 0);
-
   xmfree (objfile->md, objfile);
   objfile = NULL;
 }

@@ -104,19 +104,19 @@ get_java_class_symtab (void)
       class_symtab = allocate_symtab ("<java-classes>", objfile);
       class_symtab->language = language_java;
       bv = (struct blockvector *)
-	obstack_alloc (&objfile->symbol_obstack,
+	obstack_alloc (&objfile->objfile_obstack,
 		       sizeof (struct blockvector) + sizeof (struct block *));
       BLOCKVECTOR_NBLOCKS (bv) = 1;
       BLOCKVECTOR (class_symtab) = bv;
 
       /* Allocate dummy STATIC_BLOCK. */
-      bl = allocate_block (&objfile->symbol_obstack);
-      BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
+      bl = allocate_block (&objfile->objfile_obstack);
+      BLOCK_DICT (bl) = dict_create_linear (&objfile->objfile_obstack,
 					    NULL);
       BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
 
       /* Allocate GLOBAL_BLOCK.  */
-      bl = allocate_block (&objfile->symbol_obstack);
+      bl = allocate_block (&objfile->objfile_obstack);
       BLOCK_DICT (bl) = dict_create_hashed_expandable ();
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
       class_symtab->free_func = free_class_block;
@@ -139,7 +139,7 @@ add_class_symbol (struct type *type, CORE_ADDR addr)
 {
   struct symbol *sym;
   sym = (struct symbol *)
-    obstack_alloc (&dynamics_objfile->symbol_obstack, sizeof (struct symbol));
+    obstack_alloc (&dynamics_objfile->objfile_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
   SYMBOL_LANGUAGE (sym) = language_java;
   DEPRECATED_SYMBOL_NAME (sym) = TYPE_TAG_NAME (type);
@@ -488,7 +488,7 @@ java_link_class_type (struct type *type, struct value *clas)
   TYPE_NFN_FIELDS_TOTAL (type) = nmethods;
   j = nmethods * sizeof (struct fn_field);
   fn_fields = (struct fn_field *)
-    obstack_alloc (&dynamics_objfile->symbol_obstack, j);
+    obstack_alloc (&dynamics_objfile->objfile_obstack, j);
   memset (fn_fields, 0, j);
   fn_fieldlists = (struct fn_fieldlist *)
     alloca (nmethods * sizeof (struct fn_fieldlist));
@@ -559,7 +559,7 @@ java_link_class_type (struct type *type, struct value *clas)
 
   j = TYPE_NFN_FIELDS (type) * sizeof (struct fn_fieldlist);
   TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
-    obstack_alloc (&dynamics_objfile->symbol_obstack, j);
+    obstack_alloc (&dynamics_objfile->objfile_obstack, j);
   memcpy (TYPE_FN_FIELDLISTS (type), fn_fieldlists, j);
 
   return type;

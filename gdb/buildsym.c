@@ -1,6 +1,6 @@
 /* Support routines for building symbol tables in GDB's internal format.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -202,7 +202,7 @@ void
 free_pending_blocks (void)
 {
 #if 0				/* Now we make the links in the
-				   symbol_obstack, so don't free
+				   objfile_obstack, so don't free
 				   them.  */
   struct pending_block *bnext, *bnext1;
 
@@ -230,16 +230,16 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   struct pending_block *pblock;
   struct pending_block *opblock;
 
-  block = allocate_block (&objfile->symbol_obstack);
+  block = allocate_block (&objfile->objfile_obstack);
 
   if (symbol)
     {
-      BLOCK_DICT (block) = dict_create_linear (&objfile->symbol_obstack,
+      BLOCK_DICT (block) = dict_create_linear (&objfile->objfile_obstack,
 					       *listhead);
     }
   else
     {
-      BLOCK_DICT (block) = dict_create_hashed (&objfile->symbol_obstack,
+      BLOCK_DICT (block) = dict_create_hashed (&objfile->objfile_obstack,
 					       *listhead);
     }
 
@@ -347,7 +347,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
       /* If we're in the C++ case, set the block's scope.  */
       if (SYMBOL_LANGUAGE (symbol) == language_cplus)
 	{
-	  cp_set_block_scope (symbol, block, &objfile->symbol_obstack);
+	  cp_set_block_scope (symbol, block, &objfile->objfile_obstack);
 	}
     }
   else
@@ -439,7 +439,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
    OPBLOCK, or at the beginning if opblock is NULL.  This puts the
    block in the list after all its subblocks.
 
-   Allocate the pending block struct in the symbol_obstack to save
+   Allocate the pending block struct in the objfile_obstack to save
    time.  This wastes a little space.  FIXME: Is it worth it?  */
 
 void
@@ -449,7 +449,7 @@ record_pending_block (struct objfile *objfile, struct block *block,
   struct pending_block *pblock;
 
   pblock = (struct pending_block *)
-    obstack_alloc (&objfile->symbol_obstack, sizeof (struct pending_block));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct pending_block));
   pblock->block = block;
   if (opblock)
     {
@@ -477,7 +477,7 @@ make_blockvector (struct objfile *objfile)
     }
 
   blockvector = (struct blockvector *)
-    obstack_alloc (&objfile->symbol_obstack,
+    obstack_alloc (&objfile->objfile_obstack,
 		   (sizeof (struct blockvector)
 		    + (i - 1) * sizeof (struct block *)));
 
@@ -909,7 +909,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 		    objfile);
       blockvector = make_blockvector (objfile);
       cp_finalize_namespace (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK),
-			     &objfile->symbol_obstack);
+			     &objfile->objfile_obstack);
     }
 
 #ifndef PROCESS_LINENUMBER_HOOK
@@ -961,7 +961,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	    {
 	      /* Reallocate the line table on the symbol obstack */
 	      symtab->linetable = (struct linetable *)
-		obstack_alloc (&objfile->symbol_obstack, linetablesize);
+		obstack_alloc (&objfile->objfile_obstack, linetablesize);
 	      memcpy (symtab->linetable, subfile->line_vector, linetablesize);
 	    }
 	  else
@@ -973,7 +973,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	    {
 	      /* Reallocate the dirname on the symbol obstack */
 	      symtab->dirname = (char *)
-		obstack_alloc (&objfile->symbol_obstack,
+		obstack_alloc (&objfile->objfile_obstack,
 			       strlen (subfile->dirname) + 1);
 	      strcpy (symtab->dirname, subfile->dirname);
 	    }
@@ -997,7 +997,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	    {
 	      symtab->debugformat = obsavestring (subfile->debugformat,
 					      strlen (subfile->debugformat),
-						  &objfile->symbol_obstack);
+						  &objfile->objfile_obstack);
 	    }
 
 	  /* All symtabs for the main file and the subfiles share a

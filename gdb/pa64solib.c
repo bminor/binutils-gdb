@@ -1161,7 +1161,7 @@ add_to_solist (int from_tty, char *dll_path, int readsyms,
   new_so->pa64_solib_desc_addr = load_module_desc_addr;
   new_so->loaded = 1;
   new_so->name = obsavestring (dll_path, strlen(dll_path),
-			       &symfile_objfile->symbol_obstack);
+			       &symfile_objfile->objfile_obstack);
 
   /* If we are not going to load the library, tell the user if we
      haven't already and return.  */

@@ -1912,7 +1912,6 @@ reread_symbols (void)
 		  objfile->demangled_names_hash = NULL;
 		}
 	      obstack_free (&objfile->objfile_obstack, 0);
-	      obstack_free (&objfile->symbol_obstack, 0);
 	      objfile->sections = NULL;
 	      objfile->symtabs = NULL;
 	      objfile->psymtabs = NULL;
@@ -1939,8 +1938,6 @@ reread_symbols (void)
 	      objfile->psymbol_cache = bcache_xmalloc ();
 	      objfile->macro_cache = bcache_xmalloc ();
 	      obstack_specify_allocation (&objfile->objfile_obstack, 0, 0,
-					  xmalloc, xfree);
-	      obstack_specify_allocation (&objfile->symbol_obstack, 0, 0,
 					  xmalloc, xfree);
 	      if (build_objfile_section_table (objfile))
 		{
@@ -2238,14 +2235,14 @@ allocate_symtab (char *filename, struct objfile *objfile)
   struct symtab *symtab;
 
   symtab = (struct symtab *)
-    obstack_alloc (&objfile->symbol_obstack, sizeof (struct symtab));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symtab));
   memset (symtab, 0, sizeof (*symtab));
   symtab->filename = obsavestring (filename, strlen (filename),
-				   &objfile->symbol_obstack);
+				   &objfile->objfile_obstack);
   symtab->fullname = NULL;
   symtab->language = deduce_language_from_filename (filename);
   symtab->debugformat = obsavestring ("unknown", 7,
-				      &objfile->symbol_obstack);
+				      &objfile->objfile_obstack);
 
   /* Hook it to the objfile it comes from */
 

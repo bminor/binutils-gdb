@@ -1,3 +1,53 @@
+2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* buildsym.c (free_pending_blocks, finish_block)
+	(record_pending_block, make_blockvector, end_symtab): Replace
+	symbol_obstack with objfile_obstack.
+	* coffread.c (process_coff_symbol, coff_read_struct_type) 
+	(coff_read_enum_type): Ditto.
+	* cp-namespace.c (initialize_namespace_symtab) 
+	(check_one_possible_namespace_symbol): Ditto.
+	* dwarf2read.c (new_symbol, dwarf2_const_value, macro_start_file) 
+	(dwarf2_symbol_mark_computed): Ditto.
+	* dwarfread.c (enum_type, new_symbol, synthesize_typedef): Ditto.
+	* elfread.c (elf_symtab_read): Ditto.
+	* hpread.c (hpread_symfile_init, hpread_symfile_init)
+	(hpread_read_enum_type, hpread_read_function_type)
+	(hpread_read_doc_function_type, hpread_process_one_debug_symbol):
+	Ditto.
+	* jv-lang.c (get_java_class_symtab, add_class_symbol) 
+	(java_link_class_type): Ditto.
+	* mdebugread.c (parse_symbol, psymtab_to_symtab_1, new_symtab) 
+	(new_symbol): Ditto.
+	* minsyms.c (install_minimal_symbols): Ditto.
+	* objfiles.c (allocate_objfile): Remove init of symbol_obstack.
+	(terminate_minimal_symbol_table): Replace symbol_obstack with
+	objfile_obstack.
+	(free_objfile): Remove freeing of symbol_obstack.
+	* objfiles.h: Remove symbol_obstack field.
+	* pa64solib.c (add_to_solist): Replace symbol_obstack with
+	objfile_obstack.
+	* solib-sunos.c (allocate_rt_common_objfile): Remove init of
+	symbol_obstack.
+	(solib_add_common_symbols): Replace symbol_obstack with
+	objfile_obstack.
+	* somsolib.c (som_solib_add): Ditto.
+	* stabsread.c (patch_block_stabs, define_symbol, read_enum_type)
+	(common_block_start, common_block_end): Ditto.
+	* symfile.c (reread_symbols): Remove freeing and init of
+	symbol_obstack.
+	(allocate_symtab): Rename symbol_obstack to objfile_obstack.
+	* symfile.h: Update comment.
+	* symmisc.c (print_objfile_statistics): Remove symbol_obstack
+	stats printing.
+	* symtab.c (symbol_set_names): Replace symbol_obstack with
+	objfile_obstack.
+	* symtab.h (struct general_symbol_info, struct minimal_symbol):
+	Update comments.
+	* xcoffread.c (read_xcoff_symtab, SYMBOL_DUP, SYMNAME_ALLOC)
+	(init_stringtab, xcoff_initial_scan): Replace symbol_obstack with
+	objfile_obstack.
+
 2004-02-07  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui.h: Do not include <stdarg.h>, <string.h>, and

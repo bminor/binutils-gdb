@@ -159,8 +159,8 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
      seen any section info for it yet.  */
   asymbol *filesym = 0;
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
-  /* Name of filesym, as saved on the symbol_obstack.  */
-  char *filesymname = obsavestring ("", 0, &objfile->symbol_obstack);
+  /* Name of filesym, as saved on the objfile_obstack.  */
+  char *filesymname = obsavestring ("", 0, &objfile->objfile_obstack);
 #endif
   struct dbx_symfile_info *dbx = objfile->sym_stab_info;
   int stripped = (bfd_get_symcount (objfile->obfd) == 0);
@@ -251,7 +251,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	      filesymname =
 		obsavestring ((char *) filesym->name, strlen (filesym->name),
-			      &objfile->symbol_obstack);
+			      &objfile->objfile_obstack);
 #endif
 	    }
 	  else if (sym->flags & (BSF_GLOBAL | BSF_LOCAL | BSF_WEAK))

@@ -988,7 +988,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	    if (cs->c_name[E_SYMNMLEN - 1] != '\0')
 	      {
 		char *p;
-		p = obstack_alloc (&objfile->symbol_obstack, E_SYMNMLEN + 1);
+		p = obstack_alloc (&objfile->objfile_obstack, E_SYMNMLEN + 1);
 		strncpy (p, cs->c_name, E_SYMNMLEN);
 		p[E_SYMNMLEN] = '\0';
 		cs->c_name = p;
@@ -1422,12 +1422,12 @@ read_xcoff_symtab (struct partial_symtab *pst)
 
 #define	SYMBOL_DUP(SYMBOL1, SYMBOL2)	\
   (SYMBOL2) = (struct symbol *)		\
-  	obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol)); \
+  	obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol)); \
   *(SYMBOL2) = *(SYMBOL1);
 
 
 #define	SYMNAME_ALLOC(NAME, ALLOCED)	\
-  (ALLOCED) ? (NAME) : obsavestring ((NAME), strlen (NAME), &objfile->symbol_obstack);
+  (ALLOCED) ? (NAME) : obsavestring ((NAME), strlen (NAME), &objfile->objfile_obstack);
 
 
 static struct type *func_symbol_type;
@@ -1894,10 +1894,10 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
   if (val != sizeof lengthbuf || length < sizeof lengthbuf)
     return;
 
-  /* Allocate string table from symbol_obstack. We will need this table
+  /* Allocate string table from objfile_obstack. We will need this table
      as long as we have its symbol table around. */
 
-  strtbl = (char *) obstack_alloc (&objfile->symbol_obstack, length);
+  strtbl = (char *) obstack_alloc (&objfile->objfile_obstack, length);
   ((struct coff_symfile_info *) objfile->sym_private)->strtbl = strtbl;
 
   /* Copy length buffer, the first byte is usually zero and is
@@ -2890,7 +2890,7 @@ xcoff_initial_scan (struct objfile *objfile, int mainline)
 	    if (length)
 	      {
 		debugsec =
-		  (char *) obstack_alloc (&objfile->symbol_obstack, length);
+		  (char *) obstack_alloc (&objfile->objfile_obstack, length);
 
 		if (!bfd_get_section_contents (abfd, secp, debugsec,
 					       (file_ptr) 0, length))
@@ -2913,7 +2913,7 @@ xcoff_initial_scan (struct objfile *objfile, int mainline)
 	   name, bfd_errmsg (bfd_get_error ()));
   size = coff_data (abfd)->local_symesz * num_symbols;
   ((struct coff_symfile_info *) objfile->sym_private)->symtbl =
-    obstack_alloc (&objfile->symbol_obstack, size);
+    obstack_alloc (&objfile->objfile_obstack, size);
   ((struct coff_symfile_info *) objfile->sym_private)->symtbl_num_syms =
     num_symbols;
 

@@ -284,17 +284,7 @@ struct objfile
     /* Obstack to hold objects that should be freed when we load a new symbol
        table from this object file. */
 
-    /* Note ezannoni 2004-02-05: this obstack will become the only
-       obstack per objfile instead of having 3 separate ones with the
-       same lifetime.  I am in the process of gradually migrating the
-       old obstacks to this one, so that it can be used more
-       freely. */
-
     struct obstack objfile_obstack; 
-
-    /* Obstacks to hold objects that should be freed when we load a new symbol
-       table from this object file. */
-    struct obstack symbol_obstack;	/* Full symbols */
 
     /* A byte cache where we can stash arbitrary "chunks" of bytes that
        will not change. */
@@ -322,7 +312,7 @@ struct objfile
        when passed a pointer to somewhere in the middle of it.  There is also
        a count of the number of symbols, which does not include the terminating
        null symbol.  The array itself, as well as all the data that it points
-       to, should be allocated on the symbol_obstack for this file. */
+       to, should be allocated on the objfile_obstack for this file. */
 
     struct minimal_symbol *msymbols;
     int minimal_symbol_count;

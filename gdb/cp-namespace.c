@@ -655,7 +655,7 @@ initialize_namespace_symtab (struct objfile *objfile)
   namespace_symtab->free_code = free_nothing;
   namespace_symtab->dirname = NULL;
 
-  bv = obstack_alloc (&objfile->symbol_obstack,
+  bv = obstack_alloc (&objfile->objfile_obstack,
 		      sizeof (struct blockvector)
 		      + FIRST_LOCAL_BLOCK * sizeof (struct block *));
   BLOCKVECTOR_NBLOCKS (bv) = FIRST_LOCAL_BLOCK + 1;
@@ -663,12 +663,12 @@ initialize_namespace_symtab (struct objfile *objfile)
   
   /* Allocate empty GLOBAL_BLOCK and STATIC_BLOCK. */
 
-  bl = allocate_block (&objfile->symbol_obstack);
-  BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
+  bl = allocate_block (&objfile->objfile_obstack);
+  BLOCK_DICT (bl) = dict_create_linear (&objfile->objfile_obstack,
 					NULL);
   BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
-  bl = allocate_block (&objfile->symbol_obstack);
-  BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
+  bl = allocate_block (&objfile->objfile_obstack);
+  BLOCK_DICT (bl) = dict_create_linear (&objfile->objfile_obstack,
 					NULL);
   BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
 
@@ -686,7 +686,7 @@ initialize_namespace_symtab (struct objfile *objfile)
      having a symtab/block for this purpose seems like the best
      solution for now.  */
 
-  bl = allocate_block (&objfile->symbol_obstack);
+  bl = allocate_block (&objfile->objfile_obstack);
   BLOCK_DICT (bl) = dict_create_hashed_expandable ();
   BLOCKVECTOR_BLOCK (bv, FIRST_LOCAL_BLOCK) = bl;
 
@@ -783,7 +783,7 @@ check_one_possible_namespace_symbol (const char *name, int len,
 				     struct objfile *objfile)
 {
   struct block *block = get_possible_namespace_block (objfile);
-  char *name_copy = obsavestring (name, len, &objfile->symbol_obstack);
+  char *name_copy = obsavestring (name, len, &objfile->objfile_obstack);
   struct symbol *sym = lookup_block_symbol (block, name_copy, NULL,
 					    VAR_DOMAIN);
 
@@ -793,7 +793,7 @@ check_one_possible_namespace_symbol (const char *name, int len,
 				     name_copy, objfile);
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
-      sym = obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+      sym = obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_LANGUAGE (sym) = language_cplus;
       SYMBOL_SET_NAMES (sym, name_copy, len, objfile);
@@ -807,7 +807,7 @@ check_one_possible_namespace_symbol (const char *name, int len,
     }
   else
     {
-      obstack_free (&objfile->symbol_obstack, name_copy);
+      obstack_free (&objfile->objfile_obstack, name_copy);
 
       return 1;
     }

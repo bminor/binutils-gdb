@@ -485,7 +485,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 
 /* Set both the mangled and demangled (if any) names for GSYMBOL based
    on LINKAGE_NAME and LEN.  The hash table corresponding to OBJFILE
-   is used, and the memory comes from that objfile's symbol_obstack.
+   is used, and the memory comes from that objfile's objfile_obstack.
    LINKAGE_NAME is copied, so the pointer can be discarded after
    calling this function.  */
 
@@ -572,7 +572,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       /* If there is a demangled name, place it right after the mangled name.
 	 Otherwise, just place a second zero byte after the end of the mangled
 	 name.  */
-      *slot = obstack_alloc (&objfile->symbol_obstack,
+      *slot = obstack_alloc (&objfile->objfile_obstack,
 			     lookup_len + demangled_len + 2);
       memcpy (*slot, lookup_name, lookup_len + 1);
       if (demangled_name != NULL)

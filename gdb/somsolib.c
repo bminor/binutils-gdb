@@ -643,7 +643,7 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
 	}
 
       name = obsavestring (name, name_len - 1,
-			   &symfile_objfile->symbol_obstack);
+			   &symfile_objfile->objfile_obstack);
 
       status = target_read_memory (addr + 8, buf, 4);
       if (status != 0)

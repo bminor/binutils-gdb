@@ -88,10 +88,10 @@ struct agent_expr;
 struct general_symbol_info
 {
   /* Name of the symbol.  This is a required field.  Storage for the
-     name is allocated on the objfile_obstack or symbol_obstack for
-     the associated objfile.  For languages like C++ that make a
-     distinction between the mangled name and demangled name, this is
-     the mangled name.  */
+     name is allocated on the objfile_obstack for the associated
+     objfile.  For languages like C++ that make a distinction between
+     the mangled name and demangled name, this is the mangled
+     name.  */
 
   char *name;
 
@@ -311,12 +311,13 @@ struct minimal_symbol
 
   struct general_symbol_info ginfo;
 
-  /* The info field is available for caching machine-specific information
-     so it doesn't have to rederive the info constantly (over a serial line).
-     It is initialized to zero and stays that way until target-dependent code
-     sets it.  Storage for any data pointed to by this field should be allo-
-     cated on the symbol_obstack for the associated objfile.  
-     The type would be "void *" except for reasons of compatibility with older
+  /* The info field is available for caching machine-specific
+     information so it doesn't have to rederive the info constantly
+     (over a serial line).  It is initialized to zero and stays that
+     way until target-dependent code sets it.  Storage for any data
+     pointed to by this field should be allocated on the
+     objfile_obstack for the associated objfile.  The type would be
+     "void *" except for reasons of compatibility with older
      compilers.  This field is optional.
 
      Currently, the AMD 29000 tdep.c uses it to remember things it has decoded

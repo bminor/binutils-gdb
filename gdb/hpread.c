@@ -1680,7 +1680,7 @@ hpread_symfile_init (struct objfile *objfile)
     return;
 
   GNTT (objfile)
-    = obstack_alloc (&objfile->symbol_obstack,
+    = obstack_alloc (&objfile->objfile_obstack,
 		     bfd_section_size (objfile->obfd, gntt_section));
 
   bfd_get_section_contents (objfile->obfd, gntt_section, GNTT (objfile),
@@ -1702,7 +1702,7 @@ hpread_symfile_init (struct objfile *objfile)
     return;
 
   LNTT (objfile)
-    = obstack_alloc (&objfile->symbol_obstack,
+    = obstack_alloc (&objfile->objfile_obstack,
 		     bfd_section_size (objfile->obfd, lntt_section));
 
   bfd_get_section_contents (objfile->obfd, lntt_section, LNTT (objfile),
@@ -1719,7 +1719,7 @@ hpread_symfile_init (struct objfile *objfile)
     return;
 
   SLT (objfile) =
-    obstack_alloc (&objfile->symbol_obstack,
+    obstack_alloc (&objfile->objfile_obstack,
 		   bfd_section_size (objfile->obfd, slt_section));
 
   bfd_get_section_contents (objfile->obfd, slt_section, SLT (objfile),
@@ -1734,7 +1734,7 @@ hpread_symfile_init (struct objfile *objfile)
   VT_SIZE (objfile) = bfd_section_size (objfile->obfd, vt_section);
 
   VT (objfile) =
-    (char *) obstack_alloc (&objfile->symbol_obstack,
+    (char *) obstack_alloc (&objfile->objfile_obstack,
 			    VT_SIZE (objfile));
 
   bfd_get_section_contents (objfile->obfd, vt_section, VT (objfile),
@@ -3127,11 +3127,11 @@ hpread_read_enum_type (dnttpointer hp_type, union dnttentry *dn_bufp,
       memp = hpread_get_lntt (mem.dnttp.index, objfile);
 
       name = VT (objfile) + memp->dmember.name;
-      sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+      sym = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
 					     sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       DEPRECATED_SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
-					&objfile->symbol_obstack);
+					&objfile->objfile_obstack);
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_VALUE (sym) = memp->dmember.value;
@@ -3235,11 +3235,11 @@ hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 
       /* Get the name.  */
       name = VT (objfile) + paramp->dfparam.name;
-      sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+      sym = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
 					     sizeof (struct symbol));
       (void) memset (sym, 0, sizeof (struct symbol));
       DEPRECATED_SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
-					&objfile->symbol_obstack);
+					&objfile->objfile_obstack);
 
       /* Figure out where it lives.  */
       if (paramp->dfparam.regparam)
@@ -3415,7 +3415,7 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 
       /* Get the name.  */
       name = VT (objfile) + paramp->dfparam.name;
-      sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+      sym = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
 					     sizeof (struct symbol));
       (void) memset (sym, 0, sizeof (struct symbol));
       DEPRECATED_SYMBOL_NAME (sym) = name;
@@ -5098,10 +5098,10 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
   char *class_scope_name;
 
   /* Allocate one GDB debug symbol and fill in some default values. */
-  sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+  sym = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
 					 sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
-  DEPRECATED_SYMBOL_NAME (sym) = obsavestring (name, strlen (name), &objfile->symbol_obstack);
+  DEPRECATED_SYMBOL_NAME (sym) = obsavestring (name, strlen (name), &objfile->objfile_obstack);
   SYMBOL_LANGUAGE (sym) = language_auto;
   SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
   SYMBOL_LINE (sym) = 0;
@@ -5304,7 +5304,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	   * some things broke, so I'm leaving it in here, and
 	   * working around the issue in stack.c. - RT
 	   */
-	  SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+	  SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->objfile_obstack);
 	  if ((DEPRECATED_SYMBOL_NAME (sym) == VT (objfile) + dn_bufp->dfunc.alias) &&
 	      (!SYMBOL_CPLUS_DEMANGLED_NAME (sym)))
 	    {
@@ -5420,7 +5420,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	   * some things broke, so I'm leaving it in here, and
 	   * working around the issue in stack.c. - RT 
 	   */
-	  SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+	  SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->objfile_obstack);
 
 	  if ((DEPRECATED_SYMBOL_NAME (sym) == VT (objfile) + dn_bufp->ddocfunc.alias) &&
 	      (!SYMBOL_CPLUS_DEMANGLED_NAME (sym)))
@@ -5886,7 +5886,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	  {
 	    struct symbol *newsym;
 
-	    newsym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+	    newsym = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
 						    sizeof (struct symbol));
 	    memset (newsym, 0, sizeof (struct symbol));
 	    DEPRECATED_SYMBOL_NAME (newsym) = name;

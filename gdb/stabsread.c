@@ -379,14 +379,14 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	         ld will remove it from the executable.  There is then
 	         a N_GSYM stab for it, but no regular (C_EXT) symbol.  */
 	      sym = (struct symbol *)
-		obstack_alloc (&objfile->symbol_obstack,
+		obstack_alloc (&objfile->objfile_obstack,
 			       sizeof (struct symbol));
 
 	      memset (sym, 0, sizeof (struct symbol));
 	      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
 	      DEPRECATED_SYMBOL_NAME (sym) =
-		obsavestring (name, pp - name, &objfile->symbol_obstack);
+		obsavestring (name, pp - name, &objfile->objfile_obstack);
 	      pp += 2;
 	      if (*(pp - 1) == 'F' || *(pp - 1) == 'f')
 		{
@@ -612,7 +612,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
   nameless = (p == string || ((string[0] == ' ') && (string[1] == ':')));
 
   current_symbol = sym = (struct symbol *)
-    obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
 
   switch (type & N_TYPE)
@@ -646,7 +646,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	{
 	case 't':
 	  DEPRECATED_SYMBOL_NAME (sym) = obsavestring ("this", strlen ("this"),
-					    &objfile->symbol_obstack);
+					    &objfile->objfile_obstack);
 	  break;
 
 	case 'v':		/* $vtbl_ptr_type */
@@ -655,7 +655,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
 	case 'e':
 	  DEPRECATED_SYMBOL_NAME (sym) = obsavestring ("eh_throw", strlen ("eh_throw"),
-					    &objfile->symbol_obstack);
+					    &objfile->objfile_obstack);
 	  break;
 
 	case '_':
@@ -738,7 +738,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    SYMBOL_TYPE (sym) = lookup_fundamental_type (objfile,
 							 FT_DBL_PREC_FLOAT);
 	    dbl_valu = (char *)
-	      obstack_alloc (&objfile->symbol_obstack,
+	      obstack_alloc (&objfile->objfile_obstack,
 			     TYPE_LENGTH (SYMBOL_TYPE (sym)));
 	    store_typed_floating (dbl_valu, SYMBOL_TYPE (sym), d);
 	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
@@ -1258,7 +1258,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	{
 	  /* Clone the sym and then modify it. */
 	  struct symbol *typedef_sym = (struct symbol *)
-	  obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+	  obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
 	  *typedef_sym = *sym;
 	  SYMBOL_CLASS (typedef_sym) = LOC_TYPEDEF;
 	  SYMBOL_VALUE (typedef_sym) = valu;
@@ -3484,14 +3484,14 @@ read_enum_type (char **pp, struct type *type,
       p = *pp;
       while (*p != ':')
 	p++;
-      name = obsavestring (*pp, p - *pp, &objfile->symbol_obstack);
+      name = obsavestring (*pp, p - *pp, &objfile->objfile_obstack);
       *pp = p + 1;
       n = read_huge_number (pp, ',', &nbits);
       if (nbits != 0)
 	return error_type (pp, objfile);
 
       sym = (struct symbol *)
-	obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+	obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       DEPRECATED_SYMBOL_NAME (sym) = name;
       SYMBOL_LANGUAGE (sym) = current_subfile->language;
@@ -4039,7 +4039,7 @@ common_block_start (char *name, struct objfile *objfile)
   common_block = local_symbols;
   common_block_i = local_symbols ? local_symbols->nsyms : 0;
   common_block_name = obsavestring (name, strlen (name),
-				    &objfile->symbol_obstack);
+				    &objfile->objfile_obstack);
 }
 
 /* Process a N_ECOMM symbol.  */
@@ -4065,9 +4065,9 @@ common_block_end (struct objfile *objfile)
     }
 
   sym = (struct symbol *)
-    obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
-  /* Note: common_block_name already saved on symbol_obstack */
+  /* Note: common_block_name already saved on objfile_obstack */
   DEPRECATED_SYMBOL_NAME (sym) = common_block_name;
   SYMBOL_CLASS (sym) = LOC_BLOCK;
 

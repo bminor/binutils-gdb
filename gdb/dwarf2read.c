@@ -5544,7 +5544,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
   if (name)
     {
-      sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+      sym = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
 					     sizeof (struct symbol));
       OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
@@ -5682,7 +5682,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 		  SYMBOL_LINKAGE_NAME (sym)
 		    = obsavestring (TYPE_TAG_NAME (type),
 				    strlen (TYPE_TAG_NAME (type)),
-				    &objfile->symbol_obstack);
+				    &objfile->objfile_obstack);
 		}
 	    }
 
@@ -5709,7 +5709,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    if (cu->language == language_cplus)
 	      {
 		struct symbol *typedef_sym = (struct symbol *)
-		  obstack_alloc (&objfile->symbol_obstack,
+		  obstack_alloc (&objfile->objfile_obstack,
 				 sizeof (struct symbol));
 		*typedef_sym = *sym;
 		SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
@@ -5726,7 +5726,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  if (processing_has_namespace_info
 	      && processing_current_prefix[0] != '\0')
 	    {
-	      SYMBOL_LINKAGE_NAME (sym) = obconcat (&objfile->symbol_obstack,
+	      SYMBOL_LINKAGE_NAME (sym) = obconcat (&objfile->objfile_obstack,
 						    processing_current_prefix,
 						    "::",
 						    name);
@@ -5745,7 +5745,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  if (processing_has_namespace_info
 	      && processing_current_prefix[0] != '\0')
 	    {
-	      SYMBOL_LINKAGE_NAME (sym) = obconcat (&objfile->symbol_obstack,
+	      SYMBOL_LINKAGE_NAME (sym) = obconcat (&objfile->objfile_obstack,
 						    processing_current_prefix,
 						    "::",
 						    name);
@@ -5804,7 +5804,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
 						      TYPE_LENGTH (SYMBOL_TYPE
 								   (sym)));
       SYMBOL_VALUE_BYTES (sym) = (char *)
-	obstack_alloc (&objfile->symbol_obstack, cu_header->addr_size);
+	obstack_alloc (&objfile->objfile_obstack, cu_header->addr_size);
       /* NOTE: cagney/2003-05-09: In-lined store_address call with
          it's body - store_unsigned_integer.  */
       store_unsigned_integer (SYMBOL_VALUE_BYTES (sym), cu_header->addr_size,
@@ -5822,7 +5822,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
 						      TYPE_LENGTH (SYMBOL_TYPE
 								   (sym)));
       SYMBOL_VALUE_BYTES (sym) = (char *)
-	obstack_alloc (&objfile->symbol_obstack, blk->size);
+	obstack_alloc (&objfile->objfile_obstack, blk->size);
       memcpy (SYMBOL_VALUE_BYTES (sym), blk->data, blk->size);
       SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
       break;
@@ -7658,7 +7658,7 @@ macro_start_file (int file, int line,
   /* We don't create a macro table for this compilation unit
      at all until we actually get a filename.  */
   if (! pending_macros)
-    pending_macros = new_macro_table (&objfile->symbol_obstack,
+    pending_macros = new_macro_table (&objfile->objfile_obstack,
                                       objfile->macro_cache);
 
   if (! current_file)
@@ -8001,7 +8001,7 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
     {
       struct dwarf2_loclist_baton *baton;
 
-      baton = obstack_alloc (&cu->objfile->symbol_obstack,
+      baton = obstack_alloc (&cu->objfile->objfile_obstack,
 			     sizeof (struct dwarf2_loclist_baton));
       baton->objfile = cu->objfile;
 
@@ -8021,7 +8021,7 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
     {
       struct dwarf2_locexpr_baton *baton;
 
-      baton = obstack_alloc (&cu->objfile->symbol_obstack,
+      baton = obstack_alloc (&cu->objfile->objfile_obstack,
 			     sizeof (struct dwarf2_locexpr_baton));
       baton->objfile = cu->objfile;
 
