@@ -1,3 +1,7 @@
+Tue Jul 26 14:15:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* target.c (push_target): Cast result from xmalloc.
+
 Tue Jul 26 18:20:46 1994  Paul Flinders  (ptf@smee)
 
 	* elfread.c (elf_symtab_read): Discard compiler labels generated

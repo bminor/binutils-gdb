@@ -420,7 +420,8 @@ push_target (t)
 
   /* We have removed all targets in our stratum, now add the new one.  */
 
-  tmp = xmalloc (sizeof (struct target_stack_item));
+  tmp = (struct target_stack_item *)
+    xmalloc (sizeof (struct target_stack_item));
   tmp->next = cur;
   tmp->target_ops = t;
 
