@@ -43,8 +43,8 @@ readline.c
 readline.h
 sysdep-aix.h
 sysdep-irix.h
-sysdep-newsos.h
 sysdep-norm.h
+sysdep-oldbsd.h
 sysdep-sco.h
 vi_keymap.c
 vi_mode.c
