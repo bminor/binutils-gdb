@@ -230,9 +230,9 @@ gdb_expect  {
         timeout         { fail "(timeout) maint print psymbols w/o args" }
         }
 
-send_gdb "maint print psymbols psymbols_output\n"
+send_gdb "maint print psymbols psymbols_output ${srcdir}/${subdir}/${srcfile}\n"
 gdb_expect  {
-        -re "^maint print psymbols psymbols_output\r\n$gdb_prompt $"\
+        -re "^maint print psymbols psymbols_output \[^\n\]*\r\n$gdb_prompt $"\
          {
           send_gdb "shell ls psymbols_output\n"
           gdb_expect {
@@ -272,9 +272,9 @@ gdb_expect  {
         timeout         { fail "(timeout) maint print msymbols w/o args" }
         }
 
-send_gdb "maint print msymbols msymbols_output\n"
+send_gdb "maint print msymbols msymbols_output ${binfile}\n"
 gdb_expect  {
-        -re "^maint print msymbols msymbols_output\r\n$gdb_prompt $"\
+        -re "^maint print msymbols msymbols_output \[^\n\]*\r\n$gdb_prompt $"\
          {
           send_gdb "shell ls msymbols_output\n"
           gdb_expect {
@@ -307,16 +307,13 @@ gdb_expect  {
         timeout         { fail "(timeout) maint print symbols w/o args" }
         }
 
-# This command can legitimately take many minutes to execute.  If the
-# executable is dynamically linked, then you get all the debugging
-# info for the entire library --- 89Mb on my system.  -jimb
+# Request symbols for one particular source file so that we don't try to
+# dump the symbol information for the entire C library - over 500MB nowadays
+# for GNU libc.
 
-set old_timeout $timeout
-set timeout 600
-
-send_gdb "maint print symbols symbols_output\n"
+send_gdb "maint print symbols symbols_output ${srcdir}/${subdir}/${srcfile}\n"
 gdb_expect  {
-        -re "^maint print symbols symbols_output\r\n$gdb_prompt $"\
+        -re "^maint print symbols symbols_output \[^\n\]*\r\n$gdb_prompt $"\
          {
           send_gdb "shell ls symbols_output\n"
           gdb_expect {
@@ -340,8 +337,6 @@ gdb_expect  {
         -re ".*$gdb_prompt $"       { fail "maint print symbols" }
         timeout         { fail "(timeout) maint print symbols" }
         }
-
-set timeout $old_timeout
 
 send_gdb "maint print type argc\n"
 gdb_expect  {

@@ -1,5 +1,10 @@
 2002-12-03  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.base/maint.exp: Only dump symbols from one source file
+	or objfile.
+
+2002-12-03  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/step-test.exp: Allow MIPS to return to the line of a
 	function call.
 
