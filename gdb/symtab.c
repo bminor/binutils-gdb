@@ -93,6 +93,9 @@ lookup_symtab_1 PARAMS ((char *));
 static void
 cplusplus_hint PARAMS ((char *));
 
+static struct symbol *
+find_active_alias PARAMS ((struct symbol *sym, CORE_ADDR addr));
+
 /* */
 
 /* The single non-language-specific builtin type */
@@ -1025,7 +1028,7 @@ lookup_block_symbol (block, name, namespace)
 		 ?!? Is checking the current pc correct?  Is this routine
 		 ever called to look up a symbol from another context?  */
               if (SYMBOL_ALIASES (sym))
-                sym = ref_search_val (sym, read_pc ());
+                sym = find_active_alias (sym, read_pc ());
 
 	      sym_found = sym;
 	      if (SYMBOL_CLASS (sym) != LOC_ARG &&
@@ -1042,6 +1045,39 @@ lookup_block_symbol (block, name, namespace)
 	}
     }
   return (sym_found);		/* Will be NULL if not found. */
+}
+
+/* Given a main symbol SYM and ADDR, search through the alias
+   list to determine if an alias is active at ADDR and return
+   the active alias.
+
+   If no alias is active, then return SYM.  */
+
+static struct symbol *
+find_active_alias (sym, addr)
+  struct symbol *sym;
+  CORE_ADDR addr;
+{
+  struct range_list *r;
+  struct alias_list *aliases;
+
+  /* If we have aliases, check them first.  */
+  aliases = SYMBOL_ALIASES (sym);
+
+  while (aliases)
+    {
+      if (!SYMBOL_RANGES (aliases->sym))
+        return aliases->sym;
+      for (r = SYMBOL_RANGES (aliases->sym); r; r = r->next)
+	{
+	  if (r->start <= addr && r->end > addr)
+	    return aliases->sym;
+	}
+      aliases = aliases->next;
+    }
+
+  /* Nothing found, return the main symbol.  */
+  return sym;
 }
 
 
@@ -3512,7 +3548,7 @@ are listed.");
   add_info ("sources", sources_info,
 	    "Source files in the program.");
 
-  add_com ("rbreak", no_class, rbreak_command,
+  add_com ("rbreak", class_breakpoint, rbreak_command,
 	    "Set a breakpoint for all functions matching REGEXP.");
 
   /* Initialize the one built-in type that isn't language dependent... */
