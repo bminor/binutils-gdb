@@ -1,3 +1,25 @@
+2003-08-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-tdep.h (I386_LINUX_NUM_REGS): New define.
+	* x86-64-linux-nat.c: Include "i386-linux-tdep.h" and "amd64.h".
+	Change "register array" to "register cache" in comments.
+	(x86_64_linux_gregset64_reg_offset): New variable.
+	(GETREGS_SUPPLIES): Remove macro.
+	(supply_gregset): Call amd64_supply_native_gregset instead of
+	x86_64_linux_supply_gregset.
+	(fill_gregset): Rename `regno' to `regnum'.  Call
+	amd64_collect_native_gregset instead of x86_64_linux_fill_gregset.
+	(store_regs): Rename `regno' to `regnum'.
+	(store_fpregs): Rename `regno' to `regnum'.
+	(fetch_inferior_registers): Rename `regno' to `regnum'.  Use
+	amd64_native_gregset_supplies_p instead of GREGSET_SUPPLIES.
+	Reorganize function a bit.
+	(store_inferior_registers): Rename `regno' to `regnum'.  Use
+	amd64_native_gregset_supplies_p instead of GREGSET_SUPPLIES.
+	Reorganize function a bit.
+	(_initialize_x86_64_linux_nat): New function.
+	* config/i386/x86-64linux.mh.
+
 2003-08-29  Andrew Cagney  <cagney@redhat.com>
 
 	* config/mips/tm-embed.h (STOPPED_BY_WATCHPOINT): Delete macro.
