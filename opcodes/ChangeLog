@@ -1,5 +1,9 @@
 2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
 
+	* ppc-opc.c (powerpc_opcodes): Move mfmcsrr0 before mfdc_dat.
+
+2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
+
 	* ppc-opc.c (powerpc_opcodes): Add m*ivor35.
 
 2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
