@@ -1,3 +1,7 @@
+2004-01-27  Michael Snyder  <msnyder@redhat.com>
+
+	* sh-opc.h (sh_table): "fsrra", not "fssra".
+
 2004-01-23  Andrew Over <andrew.over@cs.anu.edu.au>
 
 	* sparc-opc.c (fdtox, fstox, fqtox, fxtod, fxtos, fxtoq): Tighten
