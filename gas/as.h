@@ -1,5 +1,6 @@
 /* as.h - global header file
-   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 1996
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -144,9 +145,11 @@ extern char *strdup (/* const char * */);
 #include <progress.h>
 
 /* This doesn't get taken care of anywhere.  */
+#ifndef __MWERKS__  /* Metrowerks C chokes on the "defined (inline)" */
 #if !defined (__GNUC__) && !defined (inline)
 #define inline
 #endif
+#endif /* !__MWERKS__ */
 
 /* Other stuff from config.h.  */
 #ifdef NEED_DECLARATION_MALLOC
@@ -201,10 +204,6 @@ extern PTR bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t sz));
 #define volatile
 #endif
 #endif /* ! __STDC__ */
-
-#if !defined (__GNUC__) && !defined (inline)
-#define inline
-#endif
 
 #ifndef FOPEN_WB
 #ifdef GO32
@@ -488,8 +487,11 @@ COMMON unsigned char flag_warn_displacement; /* -K */
 /* True if local symbols should be retained.  */
 COMMON int flag_keep_locals; /* -L */
 
-/* True if we are assembling using MRI syntax.  */
+/* True if we are assembling in MRI mode.  */
 COMMON int flag_mri;
+
+/* True if we are assembling in m68k MRI mode.  */
+COMMON int flag_m68k_mri;
 
 /* Should the data section be made read-only and appended to the text
    section?  */
@@ -521,6 +523,10 @@ extern int listing;
 
 /* Maximum level of macro nesting.  */
 extern int max_macro_nest;
+
+/* Obstack chunk size.  Keep large for efficient space use, make small to
+   increase malloc calls for monitoring memory allocation.  */
+extern int chunksize;
 
 struct _pseudo_type
   {
@@ -589,13 +595,11 @@ char *input_scrub_new_file PARAMS ((char *filename));
 char *input_scrub_next_buffer PARAMS ((char **bufp));
 PTR xmalloc PARAMS ((unsigned long size));
 PTR xrealloc PARAMS ((PTR ptr, unsigned long n));
-int do_scrub_next_char PARAMS ((int (*get) (void), void (*unget) (int)));
+int do_scrub_chars PARAMS ((int (*get) (char **), char *to, int tolen));
 int gen_to_words PARAMS ((LITTLENUM_TYPE * words, int precision,
 			  long exponent_bits));
 int had_err PARAMS ((void));
 int ignore_input PARAMS ((void));
-int scrub_from_file PARAMS ((void));
-int scrub_from_string PARAMS ((void));
 int seen_at_least_1_file PARAMS ((void));
 void app_pop PARAMS ((char *arg));
 void as_howmuch PARAMS ((FILE * stream));
@@ -607,8 +611,6 @@ void input_scrub_begin PARAMS ((void));
 void input_scrub_close PARAMS ((void));
 void input_scrub_end PARAMS ((void));
 void new_logical_line PARAMS ((char *fname, int line_number));
-void scrub_to_file PARAMS ((int ch));
-void scrub_to_string PARAMS ((int ch));
 void subsegs_begin PARAMS ((void));
 void subseg_change PARAMS ((segT seg, int subseg));
 segT subseg_new PARAMS ((const char *name, subsegT subseg));

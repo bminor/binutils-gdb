@@ -1,5 +1,6 @@
 # Makefile for GNU Assembler
-#   Copyright (C) 1987-1992, 1993 Free Software Foundation, Inc.
+#   Copyright (C) 1987, 88, 89, 90, 91, 92, 93, 94, 95, 1996
+#   Free Software Foundation, Inc.
 
 # This file is part of GNU GAS.
 
@@ -59,7 +60,7 @@ SHELL = /bin/sh
 INSTALL = $${srcroot}/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
-INSTALL_XFORM = $(INSTALL) -t='-e $(program_transform_name)'
+INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
 DISTSTUFF= make-gas.com m68k-parse.c
@@ -73,6 +74,8 @@ TEXI2DVI = texi2dvi
 RANLIB = ranlib
 CC = @CC@
 CFLAGS = -g
+LDFLAGS =
+HLDFLAGS = @HLDFLAGS@
 
 MAKEOVERRIDES=
 
@@ -98,8 +101,8 @@ FLAGS_TO_PASS = \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
-RUNTEST = `if [ -f ${srcdir}/../dejagnu/runtest ] ; then \
-		echo ${srcdir}/../dejagnu/runtest ; else echo runtest; \
+RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
+		echo $${srcdir}/../dejagnu/runtest ; else echo runtest; \
 	   fi`
 RUNTESTFLAGS=
 
@@ -228,6 +231,7 @@ ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
 # How to link with both our special library facilities
 # and the system's installed libraries.
 
+LIBDEPS = @OPCODES_DEP@ @BFDDEP@ $(LOCAL_LOADLIBES) ../libiberty/libiberty.a
 LIBS = @OPCODES_LIB@ @BFDLIB@ $(LOCAL_LOADLIBES) ../libiberty/libiberty.a
 
 # Specify the directories to be searched for header files.
@@ -249,8 +253,8 @@ STAGESTUFF = *.o as.new gasp.new
 
 $(OBJS): @ALL_OBJ_DEPS@
 
-as.new: $(OBJS) $(LIBS)
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
+as.new: $(OBJS) $(LIBDEPS)
+	$(CC) $(HLDFLAGS) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
 $(OBJS): config.h as.h targ-env.h obj-format.h targ-cpu.h flonum.h expr.h \
 	struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h obj.h \
@@ -298,6 +302,8 @@ check:  site.exp
 	cp site.exp testsuite/site.exp
 	rootme=`pwd`; export rootme; \
 	srcdir=`cd ${srcdir}; pwd` ; export srcdir ; \
+	LD_LIBRARY_PATH=$$rootme/../bfd:$$rootme/../opcodes:$$LD_LIBRARY_PATH; \
+	export LD_LIBRARY_PATH; \
 	cd testsuite; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
 	if [ -f $${rootme}/../expect/expect ] ; then  \
@@ -426,16 +432,21 @@ clean mostlyclean: clean-here
 	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@
 
 # Like clean but also delete the links made to configure gas.
+
+DISTCLEAN_HERE = config.status Makefile targ-env.h targ-cpu.h \
+	targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
+	config-stamp config.h conf config.log config.cache .gdbinit \
+	testsuite/Makefile testsuite/config.status
+
 distclean: clean-here
 	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@
-	-rm -f config.status Makefile targ-env.h targ-cpu.h \
-		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
-		config-stamp config.h conf config.log config.cache .gdbinit \
-		testsuite/Makefile testsuite/config.status
-maintainer-clean realclean: clean distclean clean-info
+	-rm -f $(DISTCLEAN_HERE)
+
+maintainer-clean realclean: clean-here
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	-rm -rf $(DISTSTUFF)
+	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@
+	-rm -rf $(DISTCLEAN_HERE) $(DISTSTUFF)
 
 # Entry points `install', `includes' and `uninstall'.
 
