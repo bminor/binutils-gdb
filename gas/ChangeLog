@@ -1,3 +1,13 @@
+2001-10-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c: Standardize error/warning messages - don't
+	capitalise, no final period or newline, don't say "ignoring" for
+	as_bad messages.  In some cases, change the wording to that used
+	elsewhere for similar messages.
+	(obj_elf_section_name): New function, split out from ..
+	(obj_elf_section): .. here.  Correctly mask off SHF_MERGE if
+	entsize not specified.
+
 2001-10-05  Jakub Jelinek  <jakub@redhat.com>
 
 	* doc/as.texinfo: Document M and S ELF section flags.
