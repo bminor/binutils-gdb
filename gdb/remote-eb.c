@@ -1,5 +1,5 @@
 /* Remote debugging interface for AMD 29000 EBMON on IBM PC, for GDB.
-   Copyright 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon for Cygnus.
 
 This file is part of GDB.
@@ -27,9 +27,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <string.h>
+
 #define	 TM_FILE_OVERRIDE
 #include "defs.h"
 #include "tm-29k.h"
+
 #include "inferior.h"
 #include "wait.h"
 #include "value.h"
@@ -39,6 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <errno.h>
 #include "terminal.h"
 #include "target.h"
+#include "gdbcore.h"
 
 extern struct value *call_function_by_hand();
 
@@ -51,7 +54,7 @@ static void eb_close();
 FILE *log_file;
 #endif
 
-static int timeout = 5;
+static int timeout = 24;
 
 /* Descriptor for I/O to remote machine.  Initialize it to -1 so that
    eb_open knows that we don't have a file open when the program
@@ -237,24 +240,60 @@ static int need_artificial_trap = 0;
 
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
-void
-eb_start (inferior_args)
-char *inferior_args;
+static void
+eb_create_inferior (execfile, args, env)
+     char *execfile;
+     char *args;
+     char **env;
 {
-  /* OK, now read in the file.  Y=read, C=COFF, D=no symbols
-     0=start address, %s=filename.  */
+  int entry_pt;
 
-  fprintf (eb_stream, "YC D,0:%s", prog_name);
+  if (args && *args)
+    error ("Can't pass arguments to remote EBMON process");
 
-  if (inferior_args != NULL)
-      fprintf(eb_stream, " %s", inferior_args);
+  if (execfile == 0 || exec_bfd == 0)
+    error ("No exec file specified");
 
-  fprintf (eb_stream, "\n");
-  fflush (eb_stream);
+  entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-  expect_prompt ();
+#ifdef CREATE_INFERIOR_HOOK
+  CREATE_INFERIOR_HOOK (0);		/* No process-ID */
+#endif  
 
-  need_gi = 1;
+  {
+    /* OK, now read in the file.  Y=read, C=COFF, D=no symbols
+       0=start address, %s=filename.  */
+
+    fprintf (eb_stream, "YC D,0:%s", prog_name);
+
+    if (args != NULL)
+	fprintf(eb_stream, " %s", args);
+
+    fprintf (eb_stream, "\n");
+    fflush (eb_stream);
+
+    expect_prompt ();
+
+    need_gi = 1;
+  }
+
+/* The "process" (board) is already stopped awaiting our commands, and
+   the program is already downloaded.  We just set its PC and go.  */
+
+  clear_proceed_status ();
+
+  /* Tell wait_for_inferior that we've started a new process.  */
+  init_wait_for_inferior ();
+
+  /* Set up the "saved terminal modes" of the inferior
+     based on what modes we are starting it with.  */
+  target_terminal_init ();
+
+  /* Install inferior's terminal modes.  */
+  target_terminal_inferior ();
+
+  /* insert_step_breakpoint ();  FIXME, do we need this?  */
+  proceed ((CORE_ADDR)entry_pt, -1, 0);		/* Let 'er rip... */
 }
 
 /* Translate baud rates from integers to damn B_codes.  Unix should
@@ -420,10 +459,12 @@ eb_close (quitting)
   eb_desc = -1;
 
 #if defined (LOG_FILE)
-  if (ferror (log_file))
-    printf ("Error writing log file.\n");
-  if (fclose (log_file) != 0)
-    printf ("Error closing log file.\n");
+  if (log_file) {
+    if (ferror (log_file))
+      printf ("Error writing log file.\n");
+    if (fclose (log_file) != 0)
+      printf ("Error closing log file.\n");
+  }
 #endif
 }
 
@@ -788,7 +829,8 @@ eb_prepare_to_store ()
   /* Do nothing, since we can store individual regs */
 }
 
-/* FIXME!  Merge these two.  */
+
+/* FIXME-someday!  Merge these two.  */
 int
 eb_xfer_inferior_memory (memaddr, myaddr, len, write, target)
      CORE_ADDR memaddr;
@@ -800,7 +842,7 @@ eb_xfer_inferior_memory (memaddr, myaddr, len, write, target)
   if (write)
     return eb_write_inferior_memory (memaddr, myaddr, len);
   else
-    return eb_write_inferior_memory (memaddr, myaddr, len);
+    return eb_read_inferior_memory (memaddr, myaddr, len);
 }
 
 void
@@ -811,7 +853,7 @@ eb_files_info ()
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
-   to inferior's memory at MEMADDR.  Returns errno value.  */
+   to inferior's memory at MEMADDR.  Returns length moved.  */
 int
 eb_write_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
@@ -832,11 +874,11 @@ eb_write_inferior_memory (memaddr, myaddr, len)
       else
 	fprintf (eb_stream, "%x,", ((unsigned char *)myaddr)[i]);
     }
-  return 0;
+  return len;
 }
 
 /* Read LEN bytes from inferior memory at MEMADDR.  Put the result
-   at debugger address MYADDR.  Returns errno value.  */
+   at debugger address MYADDR.  Returns length moved.  */
 int
 eb_read_inferior_memory(memaddr, myaddr, len)
      CORE_ADDR memaddr;
@@ -863,8 +905,10 @@ eb_read_inferior_memory(memaddr, myaddr, len)
      eb_read_bytes (CORE_ADDR_MAX - 3, foo, 4)
      doesn't need to work.  Detect it and give up if there's an attempt
      to do that.  */
-  if (((memaddr - 1) + len) < memaddr)
-    return EIO;
+  if (((memaddr - 1) + len) < memaddr) {
+    errno = EIO;
+    return 0;
+  }
   
   startaddr = memaddr;
   count = 0;
@@ -904,9 +948,29 @@ eb_read_inferior_memory(memaddr, myaddr, len)
 
       startaddr += len_this_pass;
     }
-  return 0;
+  return len;
 }
 
+static void
+eb_kill (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  return;		/* Ignore attempts to kill target system */
+}
+
+/* Clean up when a program exits.
+
+   The program actually lives on in the remote processor's RAM, and may be
+   run again without a download.  Don't leave it full of breakpoint
+   instructions.  */
+
+void
+eb_mourn_inferior ()
+{
+  remove_breakpoints ();
+  generic_mourn_inferior ();	/* Do all the proper things now */
+}
 /* Define the target subroutine names */
 
 struct target_ops eb_ops = {
@@ -923,12 +987,12 @@ executable as it exists on the remote computer.  For example,\n\
 	eb_xfer_inferior_memory, eb_files_info,
 	0, 0,	/* Breakpoints */
 	0, 0, 0, 0, 0,	/* Terminal handling */
-	0, 	/* FIXME, kill */
+	eb_kill,
 	0,	/* load */
 	call_function_by_hand,
 	0, /* lookup_symbol */
-	0, /* create_inferior FIXME, eb_start here or something? */
-	0, /* mourn_inferior FIXME */
+	eb_create_inferior,
+	eb_mourn_inferior,
 	process_stratum, 0, /* next */
 	1, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
 	0, 0,			/* Section pointers */

@@ -222,10 +222,6 @@ vx_create_inferior (exec_file, args, env)
   push_target (&vx_run_ops);
   inferior_pid = taskStart.pid;
 
-#if defined (START_INFERIOR_HOOK)
-  START_INFERIOR_HOOK ();
-#endif
-
   /* We will get a trace trap after one instruction.
      Insert breakpoints and continue.  */
 
@@ -238,8 +234,6 @@ vx_create_inferior (exec_file, args, env)
   /* Install inferior's terminal modes.  */
   target_terminal_inferior ();
 
-  /* remote_start(args); */
-  /* trap_expected = 0; */
   stop_soon_quietly = 1;
   wait_for_inferior ();		/* Get the task spawn event */
   stop_soon_quietly = 0;
@@ -1196,10 +1190,6 @@ vx_attach (args, from_tty)
   push_target (&vx_run_ops);
   inferior_pid = pid;
   vx_running = 0;
-
-#if defined (START_INFERIOR_HOOK)
-  START_INFERIOR_HOOK ();
-#endif
 
   mark_breakpoints_out ();
 

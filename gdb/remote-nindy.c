@@ -828,10 +828,6 @@ nindy_create_inferior (execfile, args, env)
 
   clear_proceed_status ();
 
-#if defined (START_INFERIOR_HOOK)
-  START_INFERIOR_HOOK ();
-#endif
-
   /* Tell wait_for_inferior that we've started a new process.  */
   init_wait_for_inferior ();
 
@@ -842,8 +838,6 @@ nindy_create_inferior (execfile, args, env)
   /* Install inferior's terminal modes.  */
   target_terminal_inferior ();
 
-  /* remote_start(args); */
-  /* trap_expected = 0; */
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
   proceed ((CORE_ADDR)entry_pt, -1, 0);		/* Let 'er rip... */
 }
