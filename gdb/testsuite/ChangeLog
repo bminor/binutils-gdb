@@ -1,5 +1,8 @@
 Tue Apr  8 19:33:20 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* gdb.base/watchpoint.exp(test_watchpoint_triggered_in_syscall):
+ 	Don't call gdb_test when the command doesn't return to a gdb prompt.
+
 	* lib/gdb.exp(gdb_stop_suppressing_tests): Don't print gratuitous
  	"Tests restarted" messages.
 

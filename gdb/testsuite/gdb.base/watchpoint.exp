@@ -394,8 +394,15 @@ proc test_watchpoint_triggered_in_syscall {} {
 	# If we send_gdb "123\n" before gdb has switched the tty, then it goes
 	# to gdb, not the inferior, and we lose.  So that is why we have
 	# watchpoint.c prompt us, so we can wait for that prompt.
-	if [gdb_test "continue" "Continuing\\.\r\ntype stuff for buf now:" "continue to read" ] { 
-	  return ; 
+	send_gdb "continue\n";
+	gdb_expect {
+	    -re "Continuing\\.\r\ntype stuff for buf now:" {
+		pass "continue to read"
+	    }
+	    default {
+		fail "continue to read";
+		return ;
+	    }
 	}
 
 	send_gdb "123\n"
