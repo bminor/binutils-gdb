@@ -149,6 +149,9 @@ info_command PARAMS ((char *, int));
 static void
 do_nothing PARAMS ((int));
 
+static int
+quit_cover PARAMS ((char *));
+
 static void
 disconnect PARAMS ((int));
 
@@ -381,9 +384,21 @@ static void
 disconnect (signo)
 int signo;
 {
-  kill_inferior_fast ();
-  signal (signo, SIG_DFL);
+  catch_errors (quit_cover, NULL, "Could not kill inferior process");
+  signal (SIGHUP, SIG_DFL);
   kill (getpid (), SIGHUP);
+}
+
+/* Just a little helper function for disconnect().  */
+
+static int
+quit_cover (s)
+char *s;
+{
+  caution = 0;		/* Throw caution to the wind -- we're exiting.
+			   This prevents asking the user dumb questions.  */
+  quit_command((char *)0, 0);
+  return 0;
 }
 
 /* Clean up on error during a "source" command (or execution of a
@@ -596,7 +611,7 @@ main (argc, argv)
 	  ADDITIONAL_OPTION_CASES
 #endif
 	  case '?':
-	    fprintf_filtered (stderr,
+	    fprintf (stderr,
 		     "Use `%s +help' for a complete list of options.\n",
 		     argv[0]);
 	    exit (1);
@@ -653,7 +668,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 	  corearg = argv[optind];
 	  break;
 	case 3:
-	  fprintf_filtered (stderr,
+	  fprintf (stderr,
 		   "Excess command line arguments ignored. (%s%s)\n",
 		   argv[optind], (optind == argc - 1) ? "" : " ...");
 	  break;
@@ -1302,7 +1317,7 @@ int signo;
 #else
   signal (STOP_SIGNAL, stop_sig);
 #endif
-  printf_filtered ("%s", prompt);
+  printf ("%s", prompt);
   fflush (stdout);
 
   /* Forget about any previous command -- null line now will do nothing.  */
@@ -1448,7 +1463,7 @@ command_line_input (prrompt, repeat)
       if (expanded)
 	{
 	  /* Print the changes.  */
-	  printf_filtered ("%s\n", history_value);
+	  printf ("%s\n", history_value);
 
 	  /* If there was an error, call this function again.  */
 	  if (expanded < 0)
@@ -1646,7 +1661,7 @@ info_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  printf_filtered ("\"info\" must be followed by the name of an info command.\n");
+  printf ("\"info\" must be followed by the name of an info command.\n");
   help_list (infolist, "info ", -1, stdout);
 }
 
@@ -1762,7 +1777,7 @@ define_command (comname, from_tty)
 
   if (from_tty)
     {
-      printf_filtered ("Type commands for definition of \"%s\".\n\
+      printf ("Type commands for definition of \"%s\".\n\
 End with a line saying just \"end\".\n", comname);
       fflush (stdout);
     }
@@ -1795,7 +1810,7 @@ document_command (comname, from_tty)
     error ("Command \"%s\" is built-in.", comname);
 
   if (from_tty)
-    printf_filtered ("Type documentation for \"%s\".\n\
+    printf ("Type documentation for \"%s\".\n\
 End with a line saying just \"end\".\n", comname);
 
   doclines = read_command_lines ();
@@ -1826,7 +1841,7 @@ End with a line saying just \"end\".\n", comname);
 static void
 print_gnu_advertisement()
 {
-    printf_filtered ("\
+    printf ("\
 GDB is free software and you are welcome to distribute copies of it\n\
  under certain conditions; type \"show copying\" to see the conditions.\n\
 There is absolutely no warranty for GDB; type \"show warranty\" for details.\n\
@@ -1859,7 +1874,7 @@ show_version (args, from_tty)
 void
 print_prompt ()
 {
-  printf_filtered ("%s", prompt);
+  printf ("%s", prompt);
   fflush (stdout);
 }
 
@@ -1872,7 +1887,10 @@ quit_command (args, from_tty)
     {
       if (query ("The program is running.  Quit anyway? "))
 	{
-	  target_kill ();
+	  if (attach_flag)
+	    target_detach (args, from_tty);
+	  else
+	    target_kill ();
 	}
       else
 	error ("Not confirmed.");
@@ -1902,10 +1920,10 @@ pwd_command (args, from_tty)
   getcwd (dirbuf, sizeof (dirbuf));
 
   if (strcmp (dirbuf, current_directory))
-    printf_filtered ("Working directory %s\n (canonically %s).\n",
+    printf ("Working directory %s\n (canonically %s).\n",
 	    current_directory, dirbuf);
   else
-    printf_filtered ("Working directory %s.\n", current_directory);
+    printf ("Working directory %s.\n", current_directory);
 }
 
 static void
@@ -2142,7 +2160,7 @@ set_history (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf_filtered ("\"set history\" must be followed by the name of a history subcommand.\n");
+  printf ("\"set history\" must be followed by the name of a history subcommand.\n");
   help_list (sethistlist, "set history ", -1, stdout);
 }
 

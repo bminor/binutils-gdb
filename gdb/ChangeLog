@@ -1,3 +1,9 @@
+Mon Sep 28 22:03:41 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* breakpoint.c, exec.c, language.c, main.c, printcmd.c, symfile.c,
+	target.c, valprint.c:  Use unfiltered forms of f/printf, et. al.
+	until we can figure out a better way to do paging.
+
 Sat Sep 26 02:07:31 1992  John Gilmore  (gnu@cygnus.com)
 
 	* findvar.c (supply_register):  Add CLEAN_UP_REGISTER_VALUE hook.

@@ -58,10 +58,17 @@ tcomplain PARAMS ((void));
 static int
 nomemory PARAMS ((CORE_ADDR, char *, int, int));
 
+static int
+return_zero PARAMS ((void));
+
 static void
 ignore PARAMS ((void));
+
 static void
 target_command PARAMS ((char *, int));
+
+static struct target_ops *
+find_default_run_target PARAMS ((char *));
 
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the 
@@ -76,7 +83,8 @@ unsigned target_struct_allocsize;
    current target.  */
 
 struct target_ops dummy_target = {"None", "None", "",
-    0, 0, 0, 0,		/* open, close, attach, detach */
+    0, 0, 		/* open, close */
+    find_default_attach, 0,  /* attach, detach */
     0, 0,		/* resume, wait */
     0, 0, 0,		/* registers */
     0, 0, 		/* memory */
@@ -84,7 +92,9 @@ struct target_ops dummy_target = {"None", "None", "",
     0, 0, 0, 0, 0, 	/* terminal */
     0, 0, 		/* kill, load */
     0, 			/* lookup_symbol */
-    0, 0,		/* create_inferior, mourn_inferior */
+    find_default_create_inferior, /* create_inferior */
+    0,			/* mourn_inferior */
+    0,			/* can_run */
     dummy_stratum, 0,	/* stratum, next */
     0, 0, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
     0, 0,		/* section pointers */
@@ -112,7 +122,8 @@ target_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  fputs_filtered ("Argument required (target name).\n", stdout);
+  fputs_filtered ("Argument required (target name).  Try `help target'\n",
+		  stdout);
 }
 
 /* Add a possible target architecture to the list.  */
@@ -123,7 +134,7 @@ add_target (t)
 {
   if (t->to_magic != OPS_MAGIC)
     {
-      fprintf_filtered(stderr, "Magic number of %s target struct wrong\n", 
+      fprintf(stderr, "Magic number of %s target struct wrong\n", 
 	t->to_shortname);
       abort();
     }
@@ -202,7 +213,7 @@ default_terminal_info (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf_filtered("No saved terminal information.\n");
+  printf("No saved terminal information.\n");
 }
 
 #if 0
@@ -245,7 +256,7 @@ kill_or_be_killed (from_tty)
 {
   if (target_has_execution)
     {
-      printf_filtered ("You are already running a program:\n");
+      printf ("You are already running a program:\n");
       target_files_info ();
       if (query ("Kill it? ")) {
 	target_kill ();
@@ -290,7 +301,7 @@ cleanup_target (t)
      the struct definition, but not all the places that initialize one.  */
   if (t->to_magic != OPS_MAGIC)
     {
-      fprintf_filtered(stderr, "Magic number of %s target struct wrong\n", 
+      fprintf(stderr, "Magic number of %s target struct wrong\n", 
 	t->to_shortname);
       abort();
     }
@@ -323,6 +334,7 @@ cleanup_target (t)
   de_fault (to_lookup_symbol,		nosymbol);
   de_fault (to_create_inferior,		maybe_kill_then_create_inferior);
   de_fault (to_mourn_inferior,		(void (*)())noprocess);
+  de_fault (to_can_run,			return_zero);
   de_fault (to_next,			0);
   de_fault (to_has_all_memory,		0);
   de_fault (to_has_memory,		0);
@@ -545,7 +557,7 @@ target_info (args, from_tty)
   int has_all_mem = 0;
   
   if (symfile_objfile != NULL)
-    printf_filtered ("Symbols from \"%s\".\n", symfile_objfile->name);
+    printf ("Symbols from \"%s\".\n", symfile_objfile->name);
 
 #ifdef FILES_INFO_HOOK
   if (FILES_INFO_HOOK ())
@@ -559,8 +571,8 @@ target_info (args, from_tty)
       if ((int)(t->to_stratum) <= (int)dummy_stratum)
 	continue;
       if (has_all_mem)
-	printf_filtered("\tWhile running this, gdb does not access memory from...\n");
-      printf_filtered("%s:\n", t->to_longname);
+	printf("\tWhile running this, gdb does not access memory from...\n");
+      printf("%s:\n", t->to_longname);
       (t->to_files_info)(t);
       has_all_mem = t->to_has_all_memory;
     }
@@ -582,6 +594,69 @@ target_preopen (from_tty)
       else
         error ("Program not killed.");
     }
+}
+
+/* Look through the list of possible targets for a target that can
+   execute a run or attach command without any other data.  This is
+   used to locate the default process stratum.
+
+   Result is always valid (error() is called for errors).  */
+
+static struct target_ops *
+find_default_run_target (do_mesg)
+     char *do_mesg;
+{
+  struct target_ops **t;
+  struct target_ops *runable;
+  int count;
+
+  count = 0;
+
+  for (t = target_structs; t < target_structs + target_struct_size;
+       ++t)
+    {
+      if (target_can_run(*t))
+	{
+	  runable = *t;
+	  ++count;
+	}
+    }
+
+  if (count != 1)
+    error ("Don't know how to %s.  Try \"help target\".", do_mesg);
+
+  return runable;
+}
+
+void
+find_default_attach (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  struct target_ops *t;
+
+  t = find_default_run_target("attach");
+  (t->to_attach) (args, from_tty);
+  return;
+}
+
+void
+find_default_create_inferior (exec_file, allargs, env)
+     char *exec_file;
+     char *allargs;
+     char **env;
+{
+  struct target_ops *t;
+
+  t = find_default_run_target("run");
+  (t->to_create_inferior) (exec_file, allargs, env);
+  return;
+}
+
+static int
+return_zero ()
+{
+  return 0;
 }
 
 static char targ_desc[] = 
