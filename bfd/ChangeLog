@@ -1,3 +1,10 @@
+2004-10-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-rs6000.c (rs6000coff_vec): Add initializer for
+	bfd_is_target_special_symbol.
+	* coff64-rs6000.c (rs6000coff64_vec): Likewise.
+	* som.c (som_bfd_is_target_special_symbol): Define.
+
 2004-10-08  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: (AM_INIT_AUTOMAKE): Set version to 2.15.93.
@@ -5,7 +12,7 @@
 	* bfd-in2.h: Regenerate.
 	* syms.c (bfd_is_target_special_symbol): New interface function.
 	Returns true when a symbol should be considered to be special.
-	* targets.h (bfd_target): Include bfd_is_target_special_symbol in
+	* targets.c (bfd_target): Include bfd_is_target_special_symbol in
 	the symbol jump table.
 	* elf32-arm.h (elf32_arm_is_target_special_symbol): New function.
 	Return true iff the symbol is a mapping symbol.

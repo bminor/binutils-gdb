@@ -6402,6 +6402,8 @@ som_bfd_link_split_section (abfd, sec)
 #define som_update_armap_timestamp	bfd_true
 #define som_bfd_print_private_bfd_data  _bfd_generic_bfd_print_private_bfd_data
 
+#define som_bfd_is_target_special_symbol \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define som_get_lineno			_bfd_nosymbols_get_lineno
 #define som_bfd_make_debug_symbol	_bfd_nosymbols_bfd_make_debug_symbol
 #define som_read_minisymbols		_bfd_generic_read_minisymbols
