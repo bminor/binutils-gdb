@@ -1,3 +1,7 @@
+2004-10-28  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* gas/crx/cop_insn.d: Regenerate (after a bug fix in Assembler).
+
 2004-10-27  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* gas/crx/cop_insn.s: Test new Co-Processor instruction 'cpi'.

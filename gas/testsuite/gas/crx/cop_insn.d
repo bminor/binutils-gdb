@@ -12,28 +12,28 @@ Disassembly of section .text:
    8:	21 43 
 
 0000000a <mtcr>:
-   a:	1f 30 10 30 	mtcr	\$0xf, r1, c0
+   a:	1f 30 1e 30 	mtcr	\$0xf, r1, c14
 
 0000000e <mfcr>:
-   e:	13 30 02 31 	mfcr	\$0x3, c0, r2
+   e:	13 30 72 31 	mfcr	\$0x3, c7, r2
 
 00000012 <mtcsr>:
-  12:	12 30 50 32 	mtcsr	\$0x2, r5, cs0
+  12:	12 30 51 32 	mtcsr	\$0x2, r5, cs1
 
 00000016 <mfcsr>:
-  16:	11 30 0e 33 	mfcsr	\$0x1, cs0, r14
+  16:	11 30 ce 33 	mfcsr	\$0x1, cs12, r14
 
 0000001a <ldcr>:
-  1a:	11 30 30 34 	ldcr	\$0x1, r3, c0
+  1a:	11 30 38 34 	ldcr	\$0x1, r3, c8
 
 0000001e <stcr>:
-  1e:	12 30 04 35 	stcr	\$0x2, c0, r4
+  1e:	12 30 4b 35 	stcr	\$0x2, c11, r4
 
 00000022 <ldcsr>:
-  22:	14 30 60 36 	ldcsr	\$0x4, r6, cs0
+  22:	14 30 6c 36 	ldcsr	\$0x4, r6, cs12
 
 00000026 <stcsr>:
-  26:	17 30 0d 37 	stcsr	\$0x7, cs0, r13
+  26:	17 30 da 37 	stcsr	\$0x7, cs10, r13
 
 0000002a <loadmcr>:
   2a:	13 31 01 30 	loadmcr	\$0x3, r1, {c0,c12,c13}
