@@ -694,7 +694,8 @@ if [ "${build}" != "${host}" ]; then
   # are not the same, we set reasonable default values for the tools.
 
   tools="AR AR_FOR_TARGET AS AS_FOR_TARGET BISON CC_FOR_BUILD"
-  tools="${tools} CC_FOR_TARGET CXX_FOR_TARGET HOST_PREFIX"
+  tools="${tools} CC_FOR_TARGET CXX_FOR_TARGET"
+  tools="${tools} DLLTOOL DLLTOOL_FOR_TARGET HOST_PREFIX"
   tools="${tools} HOST_PREFIX_1 LD LD_FOR_TARGET LEX MAKEINFO NM"
   tools="${tools} NM_FOR_TARGET RANLIB RANLIB_FOR_TARGET"
 
@@ -723,6 +724,8 @@ s/\\\n//g
   CC_FOR_BUILD=${CC_FOR_BUILD-gcc}
   CC_FOR_TARGET=${CC_FOR_TARGET-${target_alias}-gcc}
   CXX_FOR_TARGET=${CXX_FOR_TARGET-${target_alias}-gcc}
+  DLLTOOL=${DLLTOOL-${host_alias}-dlltool}
+  DLLTOOL_FOR_TARGET=${DLLTOOL_FOR_TARGET-${target_alias}-dlltool}
   HOST_PREFIX=${build_alias}-
   HOST_PREFIX_1=${build_alias}-
   LD=${LD-${host_alias}-ld}
@@ -775,6 +778,7 @@ s/\\\n//g
   export AS
   export AR
   export CC_FOR_BUILD
+  export DLLTOOL
   export LD
   export NM
   export RANLIB
