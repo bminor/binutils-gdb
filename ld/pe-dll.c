@@ -26,7 +26,6 @@
 #include "libiberty.h"
 #include "safe-ctype.h"
 
-#include <stdint.h>
 #include <time.h>
 
 #include "ld.h"
@@ -918,9 +917,9 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   int s, hint;
   unsigned char *edirectory;
-  uint32_t *eaddresses;
-  uint32_t *enameptrs;
-  unsigned short *eordinals;
+  unsigned char *eaddresses;
+  unsigned char *enameptrs;
+  unsigned char *eordinals;
   unsigned char *enamestr;
   time_t now;
 
@@ -930,10 +929,10 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 
   /* Note use of array pointer math here.  */
   edirectory = edata_d;
-  eaddresses = (uint32_t *) (edata_d + 40);
-  enameptrs = eaddresses + export_table_size;
-  eordinals = (unsigned short *) (enameptrs + count_exported_byname);
-  enamestr = (char *) (eordinals + count_exported_byname);
+  eaddresses = edata_d + 40;
+  enameptrs = eaddresses + 4 * export_table_size;
+  eordinals = enameptrs + 4 * count_exported_byname;
+  enamestr = eordinals + 2 * count_exported_byname;
 
 #define ERVA(ptr) (((unsigned char *)(ptr) - edata_d) \
 		   + edata_s->output_section->vma - image_base)
@@ -976,18 +975,18 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 	  int ord = pe_def_file->exports[s].ordinal;
 
 	  bfd_put_32 (abfd, srva - image_base,
-		      (void *) (eaddresses + ord - min_ordinal));
+		      eaddresses + 4 * (ord - min_ordinal));
 
 	  if (!pe_def_file->exports[s].flag_noname)
 	    {
 	      char *ename = pe_def_file->exports[s].name;
 
-	      bfd_put_32 (abfd, ERVA (enamestr), (void *) enameptrs);
-	      enameptrs++;
+	      bfd_put_32 (abfd, ERVA (enamestr), enameptrs);
+	      enameptrs += 4;
 	      strcpy (enamestr, ename);
 	      enamestr += strlen (enamestr) + 1;
-	      bfd_put_16 (abfd, ord - min_ordinal, (void *) eordinals);
-	      eordinals++;
+	      bfd_put_16 (abfd, ord - min_ordinal, eordinals);
+	      eordinals += 2;
 	      pe_def_file->exports[s].hint = hint++;
 	    }
 	}
