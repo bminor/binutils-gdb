@@ -1,3 +1,16 @@
+2005-02-10  Julian Brown  <julian@codesourcery.com>
+
+	* config/tc-arm.c (do_t_ldmstm): Change BFD_RELOC_NONE to
+	BFD_RELOC_UNUSED.
+	(do_t_push_pop): Likewise.
+	(md_assemble): Likewise.
+	(md_apply_fix3): Handle BFD_RELOC_NONE correctly, make
+	BFD_RELOC_UNUSED same as previous meaning of BFD_RELOC_NONE.
+	(create_unwind_entry): Output dependency on the required personality
+	routines.
+	testsuite/gas/arm/unwind.d: Alter expected output to include
+	dependency on __aeabi_unwind_cpp_pr[01].
+
 2005-02-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* as.h (seg_not_empty_p): Return int, not bfd_boolean.

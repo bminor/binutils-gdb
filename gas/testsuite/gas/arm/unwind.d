@@ -5,7 +5,10 @@
 
 RELOCATION RECORDS FOR \[.ARM.extab\]:
 OFFSET   TYPE              VALUE 
+00000000 R_ARM_NONE        __aeabi_unwind_cpp_pr1
 0000000c R_ARM_PREL31      .text
+0000000c R_ARM_NONE        __aeabi_unwind_cpp_pr0
+0000001c R_ARM_NONE        __aeabi_unwind_cpp_pr1
 
 
 RELOCATION RECORDS FOR \[.ARM.exidx\]:

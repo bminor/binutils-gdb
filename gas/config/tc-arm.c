@@ -9369,10 +9369,10 @@ do_t_ldmstm (char * str)
       return;
     }
 
-  if (inst.reloc.type != BFD_RELOC_NONE)
+  if (inst.reloc.type != BFD_RELOC_UNUSED)
     {
       /* This really doesn't seem worth it.  */
-      inst.reloc.type = BFD_RELOC_NONE;
+      inst.reloc.type = BFD_RELOC_UNUSED;
       inst.error = _("expression too complex");
       return;
     }
@@ -9461,10 +9461,10 @@ do_t_push_pop (char * str)
       return;
     }
 
-  if (inst.reloc.type != BFD_RELOC_NONE)
+  if (inst.reloc.type != BFD_RELOC_UNUSED)
     {
       /* This really doesn't seem worth it.  */
-      inst.reloc.type = BFD_RELOC_NONE;
+      inst.reloc.type = BFD_RELOC_UNUSED;
       inst.error = _("expression too complex");
       return;
     }
@@ -11361,7 +11361,7 @@ md_apply_fix3 (fixS *   fixP,
   char *         buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   arm_fix_data * arm_data = (arm_fix_data *) fixP->tc_fix_data;
 
-  assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
+  assert (fixP->fx_r_type <= BFD_RELOC_UNUSED);
 
   /* Note whether this will delete the relocation.  */
   if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
@@ -11383,6 +11383,11 @@ md_apply_fix3 (fixS *   fixP,
 
   switch (fixP->fx_r_type)
     {
+    case BFD_RELOC_NONE:
+      /* This will need to go in the object file.  */
+      fixP->fx_done = 0;
+      break;
+  
     case BFD_RELOC_ARM_IMMEDIATE:
       /* We claim that this fixup has been processed here,
 	 even if in fact we generate an error because we do
@@ -12050,7 +12055,7 @@ md_apply_fix3 (fixS *   fixP,
       fixP->fx_done = 0;
       return;
 
-    case BFD_RELOC_NONE:
+    case BFD_RELOC_UNUSED:
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    _("bad relocation fixup type (%d)"), fixP->fx_r_type);
@@ -12106,6 +12111,7 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED,
 	  break;
 	}
 
+    case BFD_RELOC_NONE:
     case BFD_RELOC_ARM_PCREL_BRANCH:
     case BFD_RELOC_ARM_PCREL_BLX:
     case BFD_RELOC_RVA:
@@ -12170,6 +12176,7 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED,
 
 	switch (fixp->fx_r_type)
 	  {
+	  case BFD_RELOC_NONE:		   type = "NONE";         break;
 	  case BFD_RELOC_ARM_OFFSET_IMM8:  type = "OFFSET_IMM8";  break;
 	  case BFD_RELOC_ARM_SHIFT_IMM:    type = "SHIFT_IMM";    break;
 	  case BFD_RELOC_ARM_SMI:          type = "SMI";          break;
@@ -12293,7 +12300,7 @@ output_inst (const char * str)
   else
     md_number_to_chars (to, inst.instruction, inst.size);
 
-  if (inst.reloc.type != BFD_RELOC_NONE)
+  if (inst.reloc.type != BFD_RELOC_UNUSED)
     fix_new_arm (frag_now, to - frag_now->fr_literal,
 		 inst.size, & inst.reloc.exp, inst.reloc.pc_rel,
 		 inst.reloc.type);
@@ -12319,7 +12326,7 @@ md_assemble (char * str)
     }
 
   memset (&inst, '\0', sizeof (inst));
-  inst.reloc.type = BFD_RELOC_NONE;
+  inst.reloc.type = BFD_RELOC_UNUSED;
 
   skip_whitespace (str);
 
@@ -13893,6 +13900,14 @@ create_unwind_entry (int have_data)
       /* Custom personality routine.  */
       fix_new (frag_now, where, 4, unwind.personality_routine, 0, 1,
 	       BFD_RELOC_ARM_PREL31);
+
+      /* Indicate dependency to linker.  */
+        {
+          char *name = "__aeabi_unwind_cpp_pr0";
+	  symbolS *pr = symbol_find_or_make (name);
+	  fix_new (frag_now, where, 4, pr, 0, 1, BFD_RELOC_NONE);
+	}
+
       where += 4;
       ptr += 4;
 
@@ -13902,18 +13917,28 @@ create_unwind_entry (int have_data)
       break;
 
     /* ABI defined personality routines.  */
-    /* TODO: Emit R_ARM_NONE to the personality routine.  */
     case 0:
       /* Three opcodes bytes are packed into the first word.  */
       data = 0x80;
       n = 3;
-      break;
+      goto emit_reloc;
 
     case 1:
     case 2:
       /* The size and first two opcode bytes go in the first word.  */
       data = ((0x80 + unwind.personality_index) << 8) | size;
       n = 2;
+      goto emit_reloc;
+
+    emit_reloc:
+      {
+	/* Indicate dependency to linker.  */
+	char *name[] = { "__aeabi_unwind_cpp_pr0",
+	                 "__aeabi_unwind_cpp_pr1",
+			 "__aeabi_unwind_cpp_pr2" };
+	symbolS *pr = symbol_find_or_make (name[unwind.personality_index]);
+	fix_new (frag_now, where, 4, pr, 0, 1, BFD_RELOC_NONE);
+      }
       break;
 
     default:
