@@ -25,6 +25,7 @@
 #include "event-top.h"
 #include "event-loop.h"
 #include "ui-out.h"
+#include "cli-out.h"
 #include "tui/tuiData.h"
 #include "readline/readline.h"
 #include "tui/tuiWin.h"
@@ -63,7 +64,23 @@ tui_init (void)
 static int
 tui_resume (void *data)
 {
+  struct ui_file *stream;
+
+  /* gdb_setup_readline will change gdb_stdout.  If the TUI was previously
+     writing to gdb_stdout, then set it to the new gdb_stdout afterwards.  */
+
+  stream = cli_out_set_stream (tui_old_uiout, gdb_stdout);
+  if (stream != gdb_stdout)
+    {
+      cli_out_set_stream (tui_old_uiout, stream);
+      stream = NULL;
+    }
+
   gdb_setup_readline ();
+
+  if (stream != NULL)
+    cli_out_set_stream (tui_old_uiout, gdb_stdout);
+
   if (tui_start_enabled)
     tui_enable ();
   return 1;
