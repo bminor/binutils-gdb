@@ -50,7 +50,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	VAX_BSD_SYS 14
 #define	TAHOE_BSD_SYS 15
 #define RTBSD_SYS 16  /* IBM RT/PC running bsd Unix */
-#define HP300BSD_SYS 17
+#define IRIX3_SYS 17		/* SGI Iris running irix 3.x */
+#define IRIX4_SYS 18		/* SGI Iris running cypress */
+#define HP300BSD_SYS 19
 
 #include <ansidecl.h>
 
@@ -132,8 +134,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/h-rtbsd.h>
 #endif
 
+#if HOST_SYS == IRIX3_SYS	
+#include <sys/h-irix3.h>
+#endif
+
+#if HOST_SYS == IRIX4_SYS	
+#include <sys/h-irix4.h>
+#endif
+
 #if HOST_SYS == HP300BSD_SYS
 #include <sys/h-hp300bsd.h>
 #endif
 
-#endif 
+#endif /* _SYSDEP_H */
