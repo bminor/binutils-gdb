@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <string.h>
@@ -30,6 +30,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
+extern int addressprint;	/* Whether to print hex addresses in HLL " */
 
 extern struct block *get_current_block ();
 
@@ -446,16 +447,18 @@ set_next_address (addr)
 		   value_from_long (builtin_type_int, (LONGEST) addr));
 }
 
-/* Optionally print address ADDR symbolically as <SYMBOL+OFFSET> on STREAM.
+/* Optionally print address ADDR symbolically as <SYMBOL+OFFSET> on STREAM,
+   after LEADIN.  Print nothing if no symbolic name is found nearby.
    DO_DEMANGLE controls whether to print a symbol in its native "raw" form,
    or to interpret it as a possible C++ name and convert it back to source
    form. */
 
 void
-print_address_symbolic (addr, stream, do_demangle)
+print_address_symbolic (addr, stream, do_demangle, leadin)
      CORE_ADDR addr;
      FILE *stream;
      int do_demangle;
+     char *leadin;
 {
   int name_location;
   register int i = find_pc_misc_function (addr);
@@ -465,7 +468,8 @@ print_address_symbolic (addr, stream, do_demangle)
   if (i < 0)
     return;
 
-  fputs_filtered (" <", stream);
+  fputs_filtered (leadin, stream);
+  fputs_filtered ("<", stream);
   if (do_demangle)
     fputs_demangled (misc_function_vector[i].name, stream, 1);
   else
@@ -487,11 +491,13 @@ print_address (addr, stream)
      FILE *stream;
 {
   fprintf_filtered (stream, "0x%x", addr);
-  print_address_symbolic (addr, stream, asm_demangle);
+  print_address_symbolic (addr, stream, asm_demangle, " ");
 }
 
 /* Print address ADDR symbolically on STREAM.  Parameter DEMANGLE
-   controls whether to print the symbolic name "raw" or demangled.  */
+   controls whether to print the symbolic name "raw" or demangled.
+   Global setting "addressprint" controls whether to print hex address
+   or not.  */
 
 void
 print_address_demangle (addr, stream, do_demangle)
@@ -499,10 +505,15 @@ print_address_demangle (addr, stream, do_demangle)
      FILE *stream;
      int do_demangle;
 {
-  fprintf_filtered (stream, "0x%x", addr);
-  print_address_symbolic (addr, stream, do_demangle);
+  if (addr == 0) {
+    fprintf_filtered (stream, "0");
+  } else if (addressprint) {
+    fprintf_filtered (stream, "0x%x", addr);
+    print_address_symbolic (addr, stream, do_demangle, " ");
+  } else {
+    print_address_symbolic (addr, stream, do_demangle, "");
+  }
 }
-
 
 
 /* Examine data at address ADDR in format FMT.

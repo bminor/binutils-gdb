@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -390,10 +390,13 @@ read_var_value (var, frame)
       return v;
 
     case LOC_CONST_BYTES:
-      addr = SYMBOL_VALUE_ADDRESS (var);
-      bcopy (addr, VALUE_CONTENTS_RAW (v), len);
-      VALUE_LVAL (v) = not_lval;
-      return v;
+      {
+	char *bytes_addr;
+	bytes_addr = SYMBOL_VALUE_BYTES (var);
+	bcopy (bytes_addr, VALUE_CONTENTS_RAW (v), len);
+	VALUE_LVAL (v) = not_lval;
+	return v;
+      }
 
     case LOC_STATIC:
     case LOC_EXTERNAL:
@@ -631,9 +634,10 @@ value_from_register (type, regnum, frame)
   return v;
 }
 
-/* Given a struct symbol for a variable,
+/* Given a struct symbol for a variable or function,
    and a stack frame id, 
-   return a (pointer to a) struct value containing the variable's address.  */
+   return a (pointer to a) struct value containing the properly typed
+   address.  */
 
 value
 locate_var_value (var, frame)
@@ -652,7 +656,8 @@ locate_var_value (var, frame)
   if (lazy_value == 0)
     error ("Address of \"%s\" is unknown.", SYMBOL_NAME (var));
 
-  if (VALUE_LAZY (lazy_value))
+  if (VALUE_LAZY (lazy_value)
+      || TYPE_CODE (type) == TYPE_CODE_FUNC)
     {
       addr = VALUE_ADDRESS (lazy_value);
 
@@ -668,6 +673,7 @@ locate_var_value (var, frame)
 	}
 
       /* Address of an array is of the type of address of it's elements.  */
+	/* FIXME, this is probably wrong now for ANSI C. */
       result_type =
 	lookup_pointer_type (TYPE_CODE (type) == TYPE_CODE_ARRAY ?
 			     TYPE_TARGET_TYPE (type) : type);

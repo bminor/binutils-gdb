@@ -316,9 +316,16 @@ struct with a field name that matches the superclass name.  This can
 happen when the struct was defined before the superclass (before the
 name became a typedef).
 
-For "float point[15];":
+Handling of "&" address-of operator needs some serious overhaul
+for ANSI C and consistency on arrays and functions.
+  For "float point[15];":
 ptype &point[4]   ==> Attempt to take address of non-lvalue.
 p     &point[4]   ==> Dereferences point[4] rather than giving you point+4.
+  For "char *malloc();":
+ptype malloc	  ==> "char *()";  should be same as
+ptype &malloc     ==> "char *(*)()"
+call printf ("%x\n", malloc)   ==> wierd value, should be same as
+call printf ("%x\n", &malloc)  ==> correct value
 
 Fix symbol reading in the presence of interrupts.  It currently leaves a
 cleanup to blow away the entire symbol table when a QUIT occurs.

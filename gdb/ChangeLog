@@ -1,3 +1,15 @@
+Sun Jul 14 00:42:53 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* findvar.c (find_var_value):  Handle &function better.
+	* TODO:  Document work needed on &fn and &array.
+	* printcmd.c (print_address_symbolic):  New arg is the prefix
+	to print if a name is printed.
+	(print_address_demangle):  Honor "set print address" now.
+	Use new arg above to improve spacing of output.
+	* valprint.c (val_print):  When printing function pointers,
+	print symbolic form too.
+	* breakpoint.c (breakpoint_1):  Use new print_address_symbolic.
+
 Mon Jul  8 19:02:46 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* core.c (memory_error):  Reword error msg to mislead less.

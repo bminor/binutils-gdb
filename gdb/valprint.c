@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <string.h>
@@ -1087,11 +1087,13 @@ val_print (type, valaddr, address, stream, format,
 	  print_scalar_formatted (valaddr, type, format, 0, stream);
 	  break;
 	}
+      /* FIXME, we should consider, at least for ANSI C language, eliminating
+	 the distinction made between FUNCs and POINTERs to FUNCs.  */
       fprintf_filtered (stream, "{");
       type_print (type, "", stream, -1);
       fprintf_filtered (stream, "} ");
-      if (addressprint)
-	fprintf_filtered (stream, "0x%x", address);
+      /* Try to print what function it points to, and its address.  */
+      print_address_demangle (address, stream, demangle);
       break;
 
     case TYPE_CODE_INT:
@@ -1884,9 +1886,14 @@ _initialize_valprint ()
   add_prefix_cmd ("print", no_class, set_print,
 		  "Generic command for setting how things print.",
 		  &setprintlist, "set print ", 0, &setlist);
+  add_alias_cmd ("p", "print", no_class, 1, &setlist); 
+  add_alias_cmd ("pr", "print", no_class, 1, &setlist); /* prefer set print
+														   to     set prompt */
   add_prefix_cmd ("print", no_class, show_print,
 		  "Generic command for showing print settings.",
 		  &showprintlist, "show print ", 0, &showlist);
+  add_alias_cmd ("p", "print", no_class, 1, &showlist); 
+  add_alias_cmd ("pr", "print", no_class, 1, &showlist); 
 
   add_show_from_set
     (add_set_cmd ("elements", no_class, var_uinteger, (char *)&print_max,
