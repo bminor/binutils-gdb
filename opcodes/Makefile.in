@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the opcodes library.
-#    Copyright (C) 1990, 91, 92, 93, 94, 95, 1996
+#    Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
 #    Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
@@ -210,33 +210,38 @@ disassemble.o: disassemble.c $(INCDIR)/dis-asm.h
 	else true; fi
 	$(CC) -c @archdefs@ $(ALL_CFLAGS) $(srcdir)/disassemble.c
 
-a29k-dis.o: a29k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/a29k.h
-dis-buf.o: dis-buf.c $(INCDIR)/dis-asm.h
-h8500-dis.o: h8500-dis.c h8500-opc.h $(INCDIR)/dis-asm.h
-h8300-dis.o: h8300-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/h8300.h
-i386-dis.o: i386-dis.c $(INCDIR)/dis-asm.h
-i960-dis.o: i960-dis.c $(INCDIR)/dis-asm.h
+a29k-dis.o: a29k-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h $(INCDIR)/opcode/a29k.h
+dis-buf.o: dis-buf.c $(INCDIR)/dis-asm.h ../bfd/bfd.h
+h8500-dis.o: h8500-dis.c h8500-opc.h $(INCDIR)/dis-asm.h ../bfd/bfd.h
+h8300-dis.o: h8300-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
+	$(INCDIR)/opcode/h8300.h
+i386-dis.o: i386-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h
+i960-dis.o: i960-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h
 w65-dis.o: w65-dis.c
-m68k-dis.o: m68k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/floatformat.h \
-	$(INCDIR)/opcode/m68k.h
+m68k-dis.o: m68k-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
+	$(INCDIR)/floatformat.h $(INCDIR)/opcode/m68k.h
 m68k-opc.o: m68k-opc.c $(INCDIR)/opcode/m68k.h
-mips-dis.o: mips-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/mips.h
+mips-dis.o: mips-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h $(INCDIR)/opcode/mips.h
 mips-opc.o: mips-opc.c $(INCDIR)/opcode/mips.h
 mips16-opc.o: mips16-opc.c $(INCDIR)/opcode/mips.h
-ppc-dis.o: ppc-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ppc.h
+ppc-dis.o: ppc-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h $(INCDIR)/opcode/ppc.h
 ppc-opc.o: ppc-opc.c $(INCDIR)/opcode/ppc.h
-sparc-dis.o: sparc-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/sparc.h
+sparc-dis.o: sparc-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
+	$(INCDIR)/opcode/sparc.h
 sparc-opc.o: sparc-opc.c $(INCDIR)/opcode/sparc.h
-z8k-dis.o: z8k-dis.c z8k-opc.h $(INCDIR)/dis-asm.h
-ns32k-dis.o: ns32k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ns32k.h
-sh-dis.o: sh-dis.c sh-opc.h $(INCDIR)/dis-asm.h
-alpha-dis.o: alpha-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/alpha.h
-alpha-opc.o: alpha-opc.c $(INCDIR)/opcode/alpha.h
-hppa-dis.o: hppa-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/hppa.h
-m88k-dis.o: m88k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/m88k.h
-arm-dis.o: arm-dis.c arm-opc.h $(INCDIR)/dis-asm.h
+z8k-dis.o: z8k-dis.c z8k-opc.h $(INCDIR)/dis-asm.h ../bfd/bfd.h
+ns32k-dis.o: ns32k-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
+	$(INCDIR)/opcode/ns32k.h
+sh-dis.o: sh-dis.c sh-opc.h $(INCDIR)/dis-asm.h ../bfd/bfd.h
+alpha-dis.o: alpha-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
+	$(INCDIR)/opcode/alpha.h
+alpha-opc.o: alpha-opc.c $(INCDIR)/opcode/alpha.h ../bfd/bfd.h
+hppa-dis.o: hppa-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h $(INCDIR)/opcode/hppa.h
+m88k-dis.o: m88k-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h $(INCDIR)/opcode/m88k.h
+arm-dis.o: arm-dis.c arm-opc.h $(INCDIR)/dis-asm.h ../bfd/bfd.h
 # start-sanitize-tic80
-tic80-dis.o: tic80-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/tic80.h
+tic80-dis.o: tic80-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
+	$(INCDIR)/opcode/tic80.h
 tic80-opc.o: tic80-opc.c $(INCDIR)/opcode/tic80.h
 # end-sanitize-tic80
 
