@@ -26,11 +26,11 @@ prefix = @prefix@
 
 program_transform_name = @program_transform_name@
 exec_prefix = @exec_prefix@
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
+bindir = @bindir@
+libdir = @libdir@
 
-datadir = $(prefix)/lib
-mandir = $(prefix)/man
+datadir = @datadir@
+mandir = @mandir@
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -40,8 +40,8 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
-includedir = $(prefix)/include
+infodir = @infodir@
+includedir = @includedir@
 oldincludedir =
 docdir = doc
 
@@ -116,6 +116,9 @@ ALL_MACHINES = \
 	cpu-arc.o \
 	$(end-sanitize-arc) \
 	cpu-arm.o \
+	$(start-sanitize-d10v) \
+	cpu-d10v.o \
+	$(end-sanitize-d10v) \
 	cpu-h8300.o \
 	cpu-h8500.o \
 	cpu-hppa.o \
@@ -127,9 +130,6 @@ ALL_MACHINES = \
 	cpu-mips.o \
 	cpu-ns32k.o \
 	cpu-powerpc.o \
-	$(start-sanitize-rce) \
-	cpu-rce.o \
-	$(end-sanitize-rce) \
 	cpu-rs6000.o \
 	cpu-sh.o \
 	cpu-sparc.o \
@@ -166,9 +166,6 @@ ALL_MACHINES_CFILES = \
 BFD32_BACKENDS = \
 	aout-adobe.o \
 	aout-ns32k.o \
-	$(start-sanitize-rce) \
-	aout-rce.o \
-	$(end-sanitize-rce) \
 	aout0.o \
 	aout32.o \
 	bout.o \
@@ -202,6 +199,9 @@ BFD32_BACKENDS = \
 	$(start-sanitize-arc) \
 	elf32-arc.o \
 	$(end-sanitize-arc) \
+	$(start-sanitize-d10v) \
+	elf32-d10v.o \
+	$(end-sanitize-d10v) \
 	elf32-gen.o \
 	elf32-hppa.o \
 	elf32-i386.o \
@@ -245,6 +245,7 @@ BFD32_BACKENDS = \
 	pei-i386.o \
 	pe-ppc.o \
 	pei-ppc.o \
+	ppcboot.o \
 	reloc16.o \
 	sparclynx.o \
 	sparcnetbsd.o \
@@ -329,6 +330,7 @@ BFD32_BACKENDS_CFILES = \
 	pei-i386.c \
 	pe-ppc.c \
 	pei-ppc.c \
+	ppcboot.c \
 	reloc16.c \
 	sparclynx.c \
 	sparcnetbsd.c \
@@ -344,10 +346,16 @@ BFD64_BACKENDS = \
 	aout64.o \
 	coff-alpha.o \
 	demo64.o \
+	elf64-alpha.o \
 	elf64-gen.o \
 	elf64-mips.o \
 	elf64-sparc.o \
 	elf64.o \
+	evax-alpha.o \
+	evax-egsd.o \
+	evax-etir.o \
+	evax-emh.o \
+	evax-misc.o \
 	nlm32-alpha.o \
 	nlm64.o
 
@@ -355,10 +363,16 @@ BFD64_BACKENDS_CFILES = \
 	aout64.c \
 	coff-alpha.c \
 	demo64.c \
+	elf64-alpha.c \
 	elf64-gen.c \
 	elf64-mips.c \
 	elf64-sparc.c \
 	elf64.c \
+	evax-alpha.c \
+	evax-egsd.c \
+	evax-etir.c \
+	evax-emh.c \
+	evax-misc.c \
 	nlm32-alpha.c \
 	nlm64.c
 
@@ -428,7 +442,7 @@ CFILES = \
 
 HFILES = aout-target.h aoutf1.h aoutx.h coffcode.h \
 	 coffswap.h ecoffswap.h elf32-hppa.h elf32-target.h elf64-target.h \
-	 elfcode.h hppa_stubs.h libaout.h libbfd.h \
+	 elfcode.h evax.h hppa_stubs.h libaout.h libbfd.h \
 	 libcoff.h libecoff.h elf-bfd.h libhppa.h libieee.h libnlm.h \
 	 liboasys.h nlm-target.h nlmcode.h som.h genlink.h netbsd.h ns32k.h
 
@@ -788,6 +802,12 @@ elf32-arc.o: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/arc.h elf32-target.h
 end-sanitize-arc:
 
+start-sanitize-d10v:
+elf32-d10v.o: elf32-d10v.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/d10v.h elf32-target.h
+end-sanitize-d10v:
+
 $(OFILES): stamp-picdir
 
 stamp-picdir:
@@ -1055,6 +1075,7 @@ pe-ppc.o: pe-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
 pei-ppc.o: pei-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h
+ppcboot.o: ppcboot.c
 reloc16.o: reloc16.c $(INCDIR)/bfdlink.h genlink.h \
   $(INCDIR)/coff/internal.h libcoff.h
 sparclynx.o: sparclynx.c $(INCDIR)/aout/sun4.h libaout.h \
@@ -1079,18 +1100,32 @@ coff-alpha.o: coff-alpha.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
 demo64.o: demo64.c aoutf1.h $(INCDIR)/aout/sun4.h libaout.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aout-target.h
+elf64-alpha.o: elf64-alpha.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/alpha.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/alpha.h \
+  $(INCDIR)/aout/ar.h libcoff.h libecoff.h ecoffswap.h \
+  elf64-target.h
 elf64-gen.o: elf64-gen.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf64-target.h
 elf64-mips.o: elf64-mips.c $(INCDIR)/bfdlink.h genlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/elf/mips.h elf64-target.h
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/mips.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/symconst.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/alpha.h ecoffswap.h \
+  elf64-target.h
 elf64-sparc.o: elf64-sparc.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/sparc.h elf64-target.h
 elf64.o: elf64.c elfcode.h $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elfcore.h elflink.h
+evax-alpha.o: evax-alpha.c $(INCDIR)/bfdlink.h evax.h
+evax-egsd.o: evax-egsd.c $(INCDIR)/bfdlink.h evax.h
+evax-etir.o: evax-etir.c $(INCDIR)/bfdlink.h evax.h
+evax-emh.o: evax-emh.c $(INCDIR)/bfdlink.h evax.h
+evax-misc.o: evax-misc.c $(INCDIR)/bfdlink.h evax.h
 nlm32-alpha.o: nlm32-alpha.c $(INCDIR)/nlm/alpha-ext.h \
   libnlm.h $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
   $(INCDIR)/nlm/external.h nlmswap.h nlm-target.h

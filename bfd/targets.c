@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -149,7 +149,8 @@ DESCRIPTION
 .  bfd_target_som_flavour,
 .  bfd_target_os9k_flavour,
 .  bfd_target_versados_flavour,
-.  bfd_target_msdos_flavour
+.  bfd_target_msdos_flavour,
+.  bfd_target_evax_flavour
 .};
 .
 .enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
@@ -480,17 +481,23 @@ extern const bfd_target armpei_little_vec;
 extern const bfd_target armpei_big_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
+extern const bfd_target bfd_elf64_alpha_vec;
 /* start-sanitize-arc */
 extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_littlearc_vec;
 /* end-sanitize-arc */
 extern const bfd_target bfd_elf32_big_generic_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
+extern const bfd_target bfd_elf64_bigmips_vec;
+/* start-sanitize-d10v */
+extern const bfd_target bfd_elf32_d10v_vec;
+/* end-sanitize-d10v */
 extern const bfd_target bfd_elf32_hppa_vec;
 extern const bfd_target bfd_elf32_i386_vec;
 extern const bfd_target bfd_elf32_i860_vec;
 extern const bfd_target bfd_elf32_little_generic_vec;
 extern const bfd_target bfd_elf32_littlemips_vec;
+extern const bfd_target bfd_elf64_littlemips_vec;
 extern const bfd_target bfd_elf32_m68k_vec;
 extern const bfd_target bfd_elf32_m88k_vec;
 extern const bfd_target bfd_elf32_powerpc_vec;
@@ -503,6 +510,7 @@ extern const bfd_target demo_64_vec;
 extern const bfd_target ecoff_big_vec;
 extern const bfd_target ecoff_little_vec;
 extern const bfd_target ecoffalpha_little_vec;
+extern const bfd_target evax_alpha_vec;
 extern const bfd_target h8300coff_vec;
 extern const bfd_target h8500coff_vec;
 extern const bfd_target host_aout_vec;
@@ -532,8 +540,10 @@ extern const bfd_target i860coff_vec;
 extern const bfd_target icoff_big_vec;
 extern const bfd_target icoff_little_vec;
 extern const bfd_target ieee_vec;
+extern const bfd_target m68kaux_coff_vec;
 extern const bfd_target m68kcoff_vec;
 extern const bfd_target m68kcoffun_vec;
+extern const bfd_target m68klinux_vec;
 extern const bfd_target m68klynx_aout_vec;
 extern const bfd_target m68klynx_coff_vec;
 extern const bfd_target m68knetbsd_vec;
@@ -548,13 +558,11 @@ extern const bfd_target nlm32_powerpc_vec;
 extern const bfd_target pc532netbsd_vec;
 extern const bfd_target oasys_vec;
 extern const bfd_target pc532machaout_vec;
+extern const bfd_target ppcboot_vec;
 extern const bfd_target riscix_vec;
 extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target rs6000coff_vec;
 extern const bfd_target shcoff_vec;
-/* start-sanitize-rce */
-extern bfd_target rce_aout_vec;
-/* end-sanitize-rce */
 extern const bfd_target shlcoff_vec;
 extern const bfd_target sparclynx_aout_vec;
 extern const bfd_target sparclynx_coff_vec;
@@ -619,10 +627,19 @@ const bfd_target * const bfd_target_vector[] = {
 	   --enable-targets=all, objdump or gdb should be able to examine
 	   the file even if we don't recognize the machine type.  */
 	&bfd_elf32_big_generic_vec,
+#ifdef BFD64
+	&bfd_elf64_alpha_vec,
+#endif
 /* start-sanitize-arc */
 	&bfd_elf32_bigarc_vec,
 /* end-sanitize-arc */
 	&bfd_elf32_bigmips_vec,
+#ifdef BFD64
+	&bfd_elf64_bigmips_vec,
+#endif
+/* start-sanitize-d10v */
+	&bfd_elf32_d10v_vec,
+/* end-sanitize-d10v */
 	&bfd_elf32_hppa_vec,
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_i860_vec,
@@ -631,6 +648,9 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_elf32_littlearc_vec,
 /* end-sanitize-arc */
 	&bfd_elf32_littlemips_vec,
+#ifdef BFD64
+	&bfd_elf64_littlemips_vec,
+#endif
 	&bfd_elf32_m68k_vec,
 	&bfd_elf32_m88k_vec,
 	&bfd_elf32_sparc_vec,
@@ -650,8 +670,9 @@ const bfd_target * const bfd_target_vector[] = {
 #endif
 	&ecoff_big_vec,
 	&ecoff_little_vec,
-#if 0
+#ifdef BFD64
 	&ecoffalpha_little_vec,
+	&evax_alpha_vec,
 #endif
 	&h8300coff_vec,
 	&h8500coff_vec,
@@ -704,6 +725,11 @@ const bfd_target * const bfd_target_vector[] = {
 	&ieee_vec,
 	&m68kcoff_vec,
 	&m68kcoffun_vec,
+#if 0
+	/* Since a.out files lack decent magic numbers, no way to recognize
+	   which kind of a.out file it is.  */
+	&m68klinux_vec,
+#endif
 	&m68klynx_aout_vec,
 	&m68klynx_coff_vec,
 	&m68knetbsd_vec,
@@ -736,11 +762,9 @@ const bfd_target * const bfd_target_vector[] = {
 	&pmac_xcoff_vec,
 #endif
 	&rs6000coff_vec,
+	&ppcboot_vec,
 	&shcoff_vec,
 	&shlcoff_vec,
-/* start-sanitize-rce */
-	&rce_aout_vec,
-/* end-sanitize-rce */
 	&sparclynx_aout_vec,
 	&sparclynx_coff_vec,
 	&sparcnetbsd_vec,

@@ -1,3 +1,22 @@
+start-sanitize-d10v
+	Wed Jul 17 14:51:52 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* Makefile.in (ALL_MACHINES): Add cpu-d10v.o
+	(BFD32_BACKENDS) Add elf32-d10v.o
+	* archures.c: Add bfd_d10v_arch.
+	* bfd-in2.h: Add bfd_d10v_arch.
+	* config.bfd (d10v-*-*): New target.
+	* configure: (bfd_elf32_d10v_vec) New vector.
+	* configure.in: (bfd_elf32_d10v_vec) New vector.
+	* cpu-d10v.c: New file.
+	* elf.c (prep_headers): Added case bfd_arch_d10v.
+	* elf32-d10v.c: New file.
+	* libbfd.h: Rebuild.
+	* reloc.c (BFD_RELOC_D10V_10_PCREL_R, BFD_RELOC_D10V_10_PCREL_L, BFD_RELOC_D10V_18,
+	  BFD_RELOC_D10V_18_PCREL): Define.
+	* targets.c (bfd_elf32_d10v_vec): New vector.
+end-sanitize-d10v
+	
 Wed Jul 17 10:58:55 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* coff-ppc.c (coff_ppc_relocate_section): Removed bogus fprintf

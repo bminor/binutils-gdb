@@ -849,6 +849,27 @@ else
 fi
 
 
+echo $ac_n "checking for POSIXized ISC""... $ac_c" 1>&6
+if test -d /etc/conf/kconfig.d &&
+  grep _POSIX_VERSION /usr/include/sys/unistd.h >/dev/null 2>&1
+then
+  echo "$ac_t""yes" 1>&6
+  ISC=yes # If later tests want to check for ISC.
+  cat >> confdefs.h <<\EOF
+#define _POSIX_SOURCE 1
+EOF
+
+  if test "$GCC" = yes; then
+    CC="$CC -posix"
+  else
+    CC="$CC -Xp"
+  fi
+else
+  echo "$ac_t""no" 1>&6
+  ISC=
+fi
+
+
 # Permit host specific settings.
 . ${srcdir}/configure.host
 
@@ -1053,11 +1074,11 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1057 "configure"
+#line 1078 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
-{ (eval echo configure:1061: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:1082: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   ac_cv_c_cross=no
 else
@@ -1095,13 +1116,13 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1099 "configure"
+#line 1120 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1105: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1126: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1110,13 +1131,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1114 "configure"
+#line 1135 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1120: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1141: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1144,12 +1165,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1148 "configure"
+#line 1169 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1153: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1174: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1181,12 +1202,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1185 "configure"
+#line 1206 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1190: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1211: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1215,7 +1236,7 @@ if eval "test \"`echo '$''{'ac_cv_header_time'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1219 "configure"
+#line 1240 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/time.h>
@@ -1225,7 +1246,7 @@ int t() {
 struct tm *tp;
 ; return 0; }
 EOF
-if { (eval echo configure:1229: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1250: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_header_time=yes
 else
@@ -1244,14 +1265,14 @@ EOF
 
 fi
 
-for ac_func in fcntl getpagesize
+for ac_func in fcntl getpagesize setitimer sysconf
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1255 "configure"
+#line 1276 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1275,7 +1296,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1279: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1300: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -1312,7 +1333,7 @@ if eval "test \"`echo '$''{'bfd_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1316 "configure"
+#line 1337 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -1327,7 +1348,7 @@ int t() {
 char *(*pfn) = (char *(*)) malloc
 ; return 0; }
 EOF
-if { (eval echo configure:1331: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1352: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_malloc=no
 else
@@ -1352,7 +1373,7 @@ if eval "test \"`echo '$''{'bfd_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1356 "configure"
+#line 1377 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -1367,7 +1388,7 @@ int t() {
 char *(*pfn) = (char *(*)) free
 ; return 0; }
 EOF
-if { (eval echo configure:1371: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1392: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_free=no
 else
@@ -1639,7 +1660,7 @@ EOF
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1643 "configure"
+#line 1664 "configure"
 #include "confdefs.h"
 #include <sys/procfs.h>
 int main() { return 0; }
@@ -1647,7 +1668,7 @@ int t() {
 prstatus_t t;
 ; return 0; }
 EOF
-if { (eval echo configure:1651: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1672: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_header_sys_procfs_h=yes
 else
@@ -1760,6 +1781,8 @@ do
     apollocoff_vec)		tb="$tb coff-apollo.o" ;;
     b_out_vec_big_host)		tb="$tb bout.o aout32.o" ;;
     b_out_vec_little_host)	tb="$tb bout.o aout32.o" ;;
+    bfd_elf64_alpha_vec)	tb="$tb elf64-alpha.o elf64.o $elf"
+				target64=true ;;
 # start-sanitize-arc
     bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.o elf32.o $elf" ;;
     bfd_elf32_bigarc_vec)	tb="$tb elf32-arc.o elf32.o $elf" ;;
@@ -1768,6 +1791,9 @@ do
     bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.o elf32.o $elf ecofflink.o" ;;
     bfd_elf64_bigmips_vec) 	tb="$tb elf64-mips.o elf64.o elf32-mips.o elf32.o $elf ecofflink.o"
 				target64=true ;;
+# start-sanitize-d10v
+    bfd_elf32_d10v_vec)		tb="$tb elf32-d10v.o elf32.o $elf" ;;
+# end-sanitize-d10v
     bfd_elf32_hppa_vec)		tb="$tb elf32-hppa.o elf32.o $elf" ;;
     bfd_elf32_i386_vec)		tb="$tb elf32-i386.o elf32.o $elf" ;;
     bfd_elf32_i860_vec)		tb="$tb elf32-i860.o elf32.o $elf" ;;
@@ -1793,6 +1819,8 @@ do
     ecoff_little_vec)		tb="$tb coff-mips.o ecoff.o ecofflink.o" ;;
     ecoffalpha_little_vec)	tb="$tb coff-alpha.o ecoff.o ecofflink.o"
 				target64=true ;;
+    evax_alpha_vec)		tb="$tb evax-alpha.o evax-emh.o evax-egsd.o evax-etir.o evax-misc.o"
+ 				target64=true ;;
     h8300coff_vec)		tb="$tb coff-h8300.o reloc16.o" ;;
     h8500coff_vec)		tb="$tb coff-h8500.o reloc16.o" ;;
     host_aout_vec)		tb="$tb host-aout.o aout32.o" ;;
@@ -1842,9 +1870,6 @@ do
     bfd_powerpcle_pei_vec)      tb="$tb pei-ppc.o cofflink.o" ;;
     ppcboot_vec)		tb="$tb ppcboot.o" ;;
     shcoff_vec)			tb="$tb coff-sh.o cofflink.o" ;;
-# start-sanitize-rce
-    rce_aout_vec)		tb="$tb aout-rce.o aout32.o" ;;
-# end-sanitize-rce
     shlcoff_vec)		tb="$tb coff-sh.o cofflink.o" ;;
     som_vec)			tb="$tb som.o" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o" ;;
@@ -1907,6 +1932,10 @@ case ${host64}-${target64}-${want64} in
   *true*)
     wordsize=64
     all_backends='$(BFD64_BACKENDS) $(BFD32_BACKENDS)'
+    if test -z "$GCC" && test "$HOST_64BIT_LONG" = "0"; then
+      echo "configure: warning: You have requested a 64 bit BFD configuration, but" 1>&2
+      echo "configure: warning: your compiler may not have a 64 bit integral type" 1>&2
+    fi
     ;;
   false-false-false)
     wordsize=32
@@ -1932,7 +1961,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1936 "configure"
+#line 1962 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1956,7 +1985,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1960: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1986: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -1986,7 +2015,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1990 "configure"
+#line 2016 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -2055,7 +2084,7 @@ main()
 }
 
 EOF
-{ (eval echo configure:2059: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:2085: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   ac_cv_func_mmap=yes
 else
@@ -2080,7 +2109,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2084 "configure"
+#line 2110 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -2104,7 +2133,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2108: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2134: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else

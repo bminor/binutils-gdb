@@ -1039,7 +1039,8 @@ elf_fake_sections (abfd, asect, failedptrarg)
 
   this_hdr->sh_flags = 0;
 
-  if ((asect->flags & SEC_ALLOC) != 0)
+  if ((asect->flags & SEC_ALLOC) != 0
+      || asect->user_set_vma)
     this_hdr->sh_addr = asect->vma;
   else
     this_hdr->sh_addr = 0;
@@ -1758,10 +1759,11 @@ map_sections_to_segments (abfd)
       /* See if this section and the last one will fit in the same
          segment.  Don't put a loadable section after a non-loadable
          section.  If we are building a dynamic executable, don't put
-         a writable section in a read only segment (we don't do this
-         for a non-dynamic executable because some people prefer to
-         have only one program segment; anybody can use PHDRS in their
-         linker script to control what happens anyhow).  */
+         a writable section in a read only segment, unless they're on
+         the same page anyhow (we don't do this for a non-dynamic
+         executable because some people prefer to have only one
+         program segment; anybody can use PHDRS in their linker script
+         to control what happens anyhow).  */
       if (last_hdr == NULL
 	  || ((BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
 	       >= hdr->lma)
@@ -1769,8 +1771,14 @@ map_sections_to_segments (abfd)
 		  || (hdr->flags & SEC_LOAD) == 0)
 	      && (dynsec == NULL
 		  || writable
-		  || (hdr->flags & SEC_READONLY) != 0)))
+		  || (hdr->flags & SEC_READONLY) != 0
+		  || (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size,
+				 maxpagesize)
+		      > hdr->lma))))
+		      
 	{
+	  if ((hdr->flags & SEC_READONLY) == 0)
+	    writable = true;
 	  last_hdr = hdr;
 	  continue;
 	}
@@ -1788,6 +1796,8 @@ map_sections_to_segments (abfd)
 
       if ((hdr->flags & SEC_READONLY) == 0)
 	writable = true;
+      else
+	writable = false;
 
       last_hdr = hdr;
       phdr_index = i;
@@ -2406,6 +2416,14 @@ prep_headers (abfd)
     case bfd_arch_powerpc:
       i_ehdrp->e_machine = EM_PPC;
       break;
+    case bfd_arch_alpha:
+      i_ehdrp->e_machine = EM_ALPHA;
+      break;
+/* start-sanitize-d10v */
+    case bfd_arch_d10v:
+      i_ehdrp->e_machine = EM_CYGNUS_D10V;
+      break;
+/* end-sanitize-d10v */
 /* start-sanitize-arc */
     case bfd_arch_arc:
       i_ehdrp->e_machine = EM_CYGNUS_ARC;

@@ -425,6 +425,20 @@ extern bfd_reloc_status_type _bfd_final_link_relocate
 extern bfd_reloc_status_type _bfd_relocate_contents
   PARAMS ((reloc_howto_type *, bfd *, bfd_vma, bfd_byte *));
 
+/* Link stabs in sections in the first pass.  */
+
+extern boolean _bfd_link_section_stabs
+  PARAMS ((bfd *, PTR *, asection *, asection *, PTR *));
+
+/* Write out the .stab section when linking stabs in sections.  */
+
+extern boolean _bfd_write_section_stabs
+  PARAMS ((bfd *, asection *, PTR *, bfd_byte *));
+
+/* Write out the .stabstr string table when linking stabs in sections.  */
+
+extern boolean _bfd_write_stab_strings PARAMS ((bfd *, PTR *));
+
 /* Create a string table.  */
 extern struct bfd_strtab_hash *_bfd_stringtab_init PARAMS ((void));
 
@@ -468,15 +482,6 @@ void	bfd_assert PARAMS ((const char*,int));
 FILE *	bfd_cache_lookup_worker PARAMS ((bfd *));
 
 extern bfd *bfd_last_cache;
-    
-/* Now Steve, what's the story here? */
-#ifdef lint
-#define itos(x) "l"
-#define stoi(x) 1
-#else
-#define itos(x) ((char*)(x))
-#define stoi(x) ((int)(x))
-#endif
 
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */
@@ -581,6 +586,8 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_LO10",
   "BFD_RELOC_GPREL16",
   "BFD_RELOC_GPREL32",
+  "BFD_RELOC_SWREL32",
+  "BFD_RELOC_SWREL64",
   "BFD_RELOC_I960_CALLJ",
   "BFD_RELOC_NONE",
   "BFD_RELOC_SPARC_WDISP22",
@@ -616,9 +623,12 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_SPARC_5",
   "BFD_RELOC_ALPHA_GPDISP_HI16",
   "BFD_RELOC_ALPHA_GPDISP_LO16",
+  "BFD_RELOC_ALPHA_GPDISP",
   "BFD_RELOC_ALPHA_LITERAL",
   "BFD_RELOC_ALPHA_LITUSE",
   "BFD_RELOC_ALPHA_HINT",
+  "BFD_RELOC_ALPHA_LINKAGE",
+  "BFD_RELOC_ALPHA_BASEREG",
   "BFD_RELOC_MIPS_JMP",
   "BFD_RELOC_HI16",
   "BFD_RELOC_HI16_S",
@@ -698,6 +708,14 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARC_B22_PCREL",
   "BFD_RELOC_ARC_B26",
 /* end-sanitize-arc */
+
+/* start-sanitize-d10v */
+  "BFD_RELOC_D10V_10_PCREL_L",
+  "BFD_RELOC_D10V_10_PCREL_R",
+  "BFD_RELOC_D10V_18",
+  "BFD_RELOC_D10V_18_PCREL",
+/* end-sanitize-d10v */
+
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif

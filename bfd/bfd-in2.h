@@ -1198,6 +1198,9 @@ enum bfd_architecture
   bfd_arch_powerpc,    /* PowerPC */
   bfd_arch_rs6000,     /* IBM RS/6000 */
   bfd_arch_hppa,       /* HP PA RISC */
+/* start-sanitize-d10v */
+  bfd_arch_d10v,       /* Mitsubishi D10V */
+/* end-sanitize-d10v */
   bfd_arch_z8k,        /* Zilog Z8000 */
 #define bfd_mach_z8001		1
 #define bfd_mach_z8002		2
@@ -1775,6 +1778,24 @@ stored in the instruction.  The high 24 bits are installed in bits 23
 through 0. */
   BFD_RELOC_ARC_B26,
 /* end-sanitize-arc */
+
+/* start-sanitize-d10v */
+
+/* Mitsubishi D10V relocs.
+This is a 10-bit reloc with the right 2 bits
+assumed to be 0. */
+  BFD_RELOC_D10V_10_PCREL_L,
+  BFD_RELOC_D10V_10_PCREL_R,
+
+/* This is an 18-bit reloc with the right 2 bits
+assumed to be 0. */
+  BFD_RELOC_D10V_18,
+
+/* This is an 18-bit reloc with the right 2 bits
+assumed to be 0. */
+  BFD_RELOC_D10V_18_PCREL,
+/* end-sanitize-d10v */
+
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *
