@@ -1,3 +1,19 @@
+Tue Nov 26 10:53:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Add support for mips16 (16 bit MIPS implementation):
+	* mips16-opc.c: New file.
+	* mips-dis.c: Include "elf-bfd.h" and "elf/mips.h".
+	(mips16_reg_names): New static array.
+	(print_insn_big_mips): Use print_insn_mips16 in 16 bit mode or
+	after seeing a 16 bit symbol.
+	(print_insn_little_mips): Likewise.
+	(print_insn_mips16): New static function.
+	(print_mips16_insn_arg): New static function.
+	* mips-opc.c: Add jalx instruction.
+	* Makefile.in (mips16-opc.o): New target.
+	* configure.in: Use mips16-opc.o for bfd_mips_arch.
+	* configure: Rebuild.
+
 Mon Nov 25 16:15:17 1996  J.T. Conklin  <jtc@cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Simplify table by using < and >

@@ -1,8 +1,8 @@
 /* Print mips instructions for GDB, the GNU debugger, or for objdump.
-   Copyright 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1989, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
-This file is part of GDB.
+This file is part of GDB, GAS, and the GNU binutils.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,8 +23,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dis-asm.h"
 #include "opcode/mips.h"
 
+/* FIXME: These are needed to figure out if this is a mips16 symbol or
+   not.  It would be better to think of a cleaner way to do this.  */
+#include "elf-bfd.h"
+#include "elf/mips.h"
+
+static int print_insn_mips16 PARAMS ((bfd_vma, struct disassemble_info *));
+static void print_mips16_insn_arg
+  PARAMS ((int, const struct mips_opcode *, int, boolean, int, bfd_vma,
+	   struct disassemble_info *));
+
 /* Mips instructions are never longer than this many bytes.  */
 #define MAXLEN 4
+
+static void print_insn_arg PARAMS ((const char *, unsigned long, bfd_vma,
+				    struct disassemble_info *));
+static int _print_insn_mips PARAMS ((bfd_vma, unsigned long int,
+				     struct disassemble_info *));
+
 
 /* FIXME: This should be shared with gdb somehow.  */
 #define REGISTER_NAMES 	\
@@ -42,6 +58,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
     }
 
 static CONST char * CONST reg_names[] = REGISTER_NAMES;
+
+/* The mips16 register names.  */
+static const char * const mips16_reg_names[] =
+{
+  "s0", "s1", "v0", "v1", "a0", "a1", "a2", "a3"
+};
 
 /* subroutine */
 static void
@@ -204,8 +226,8 @@ print_insn_arg (d, l, pc, info)
 static int
 _print_insn_mips (memaddr, word, info)
      bfd_vma memaddr;
-     struct disassemble_info *info;
      unsigned long int word;
+     struct disassemble_info *info;
 {
   register const struct mips_opcode *op;
   static boolean init = 0;
@@ -245,9 +267,9 @@ _print_insn_mips (memaddr, word, info)
 	      (*info->fprintf_func) (info->stream, "%s", op->name);
 
 	      d = op->args;
-	      if (d != NULL)
+	      if (d != NULL && *d != '\0')
 		{
-		  (*info->fprintf_func) (info->stream, " ");
+		  (*info->fprintf_func) (info->stream, "\t");
 		  for (; *d != '\0'; d++)
 		    print_insn_arg (d, word, memaddr, info);
 		}
@@ -268,9 +290,19 @@ print_insn_big_mips (memaddr, info)
      struct disassemble_info *info;
 {
   bfd_byte buffer[4];
-  int status = (*info->read_memory_func) (memaddr, buffer, 4, info);
+  int status;
+
+  if (info->mach == 16
+      || (info->flavour == bfd_target_elf_flavour
+	  && info->symbol != NULL
+	  && (((elf_symbol_type *) info->symbol)->internal_elf_sym.st_other
+	      == STO_MIPS16)))
+    return print_insn_mips16 (memaddr, info);
+
+  status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status == 0)
-    return _print_insn_mips (memaddr, (unsigned long) bfd_getb32 (buffer), info);
+    return _print_insn_mips (memaddr, (unsigned long) bfd_getb32 (buffer),
+			     info);
   else
     {
       (*info->memory_error_func) (status, memaddr, info);
@@ -284,12 +316,472 @@ print_insn_little_mips (memaddr, info)
      struct disassemble_info *info;
 {
   bfd_byte buffer[4];
-  int status = (*info->read_memory_func) (memaddr, buffer, 4, info);
+  int status;
+
+  if (info->mach == 16
+      || (info->flavour == bfd_target_elf_flavour
+	  && info->symbol != NULL
+	  && (((elf_symbol_type *) info->symbol)->internal_elf_sym.st_other
+	      == STO_MIPS16)))
+    return print_insn_mips16 (memaddr, info);
+
+  status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status == 0)
-    return _print_insn_mips (memaddr, (unsigned long) bfd_getl32 (buffer), info);
+    return _print_insn_mips (memaddr, (unsigned long) bfd_getl32 (buffer),
+			     info);
   else
     {
       (*info->memory_error_func) (status, memaddr, info);
       return -1;
+    }
+}
+
+/* Disassemble mips16 instructions.  */
+
+static int
+print_insn_mips16 (memaddr, info)
+     bfd_vma memaddr;
+     struct disassemble_info *info;
+{
+  int status;
+  bfd_byte buffer[2];
+  int length;
+  int insn;
+  boolean use_extend;
+  int extend;
+  const struct mips_opcode *op, *opend;
+
+  status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+  if (status != 0)
+    {
+      (*info->memory_error_func) (status, memaddr, info);
+      return -1;
+    }
+
+  length = 2;
+
+  if (info->endian == BFD_ENDIAN_BIG)
+    insn = bfd_getb16 (buffer);
+  else
+    insn = bfd_getl16 (buffer);
+
+  /* Handle the extend opcode specially.  */
+  use_extend = false;
+  if ((insn & 0xf800) == 0xf000)
+    {
+      use_extend = true;
+      extend = insn & 0x7ff;
+
+      memaddr += 2;
+
+      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+      if (status != 0)
+	{
+	  (*info->fprintf_func) (info->stream, "extend 0x%x",
+				 (unsigned int) extend);
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+
+      length += 2;
+
+      if (info->endian == BFD_ENDIAN_BIG)
+	insn = bfd_getb16 (buffer);
+      else
+	insn = bfd_getl16 (buffer);
+    }
+
+  /* FIXME: Should probably use a hash table on the major opcode here.  */
+
+  opend = mips16_opcodes + bfd_mips16_num_opcodes;
+  for (op = mips16_opcodes; op < opend; op++)
+    {
+      if (op->pinfo != INSN_MACRO && (insn & op->mask) == op->match)
+	{
+	  const char *s;
+
+	  if (strchr (op->args, 'a') != NULL)
+	    {
+	      if (use_extend)
+		(*info->fprintf_func) (info->stream, "extend 0x%x",
+				       (unsigned int) extend);
+	      use_extend = false;
+
+	      memaddr += 2;
+
+	      status = (*info->read_memory_func) (memaddr, buffer, 2,
+						  info);
+	      if (status == 0)
+		{
+		  use_extend = true;
+		  if (info->endian == BFD_ENDIAN_BIG)
+		    extend = bfd_getb16 (buffer);
+		  else
+		    extend = bfd_getl16 (buffer);
+		  length += 2;
+		}
+	    }
+
+	  (*info->fprintf_func) (info->stream, "%s ", op->name);
+
+	  for (s = op->args; *s != '\0'; s++)
+	    {
+	      if (*s == ','
+		  && s[1] == 'w'
+		  && (((insn >> MIPS16OP_SH_RX) & MIPS16OP_MASK_RX)
+		      == ((insn >> MIPS16OP_SH_RY) & MIPS16OP_MASK_RY)))
+		{
+		  /* Skip the register and the comma.  */
+		  ++s;
+		  continue;
+		}
+	      if (*s == ','
+		  && s[1] == 'v'
+		  && (((insn >> MIPS16OP_SH_RZ) & MIPS16OP_MASK_RZ)
+		      == ((insn >> MIPS16OP_SH_RX) & MIPS16OP_MASK_RX)))
+		{
+		  /* Skip the register and the comma.  */
+		  ++s;
+		  continue;
+		}
+	      print_mips16_insn_arg (*s, op, insn, use_extend, extend, memaddr,
+				     info);
+	    }
+
+	  return length;
+	}
+    }
+
+  if (use_extend)
+    (*info->fprintf_func) (info->stream, "0x%x", extend | 0xf000);
+  (*info->fprintf_func) (info->stream, "0x%x", insn);
+
+  return length;
+}
+
+/* Disassemble an operand for a mips16 instruction.  */
+
+static void
+print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
+     int type;
+     const struct mips_opcode *op;
+     int l;
+     boolean use_extend;
+     int extend;
+     bfd_vma memaddr;
+     struct disassemble_info *info;
+{
+  switch (type)
+    {
+    case ',':
+    case '(':
+    case ')':
+      (*info->fprintf_func) (info->stream, "%c", type);
+      break;
+
+    case 'y':
+    case 'w':
+      (*info->fprintf_func) (info->stream, "$%s",
+			     mips16_reg_names[((l >> MIPS16OP_SH_RY)
+					       & MIPS16OP_MASK_RY)]);
+      break;
+
+    case 'x':
+    case 'v':
+      (*info->fprintf_func) (info->stream, "$%s",
+			     mips16_reg_names[((l >> MIPS16OP_SH_RX)
+					       & MIPS16OP_MASK_RX)]);
+      break;
+
+    case 'z':
+      (*info->fprintf_func) (info->stream, "$%s",
+			     mips16_reg_names[((l >> MIPS16OP_SH_RZ)
+					       & MIPS16OP_MASK_RZ)]);
+      break;
+
+    case 'Z':
+      (*info->fprintf_func) (info->stream, "$%s",
+			     mips16_reg_names[((l >> MIPS16OP_SH_MOVE32Z)
+					       & MIPS16OP_MASK_MOVE32Z)]);
+      break;
+
+    case '0':
+      (*info->fprintf_func) (info->stream, "$%s", reg_names[0]);
+      break;
+
+    case 'S':
+      (*info->fprintf_func) (info->stream, "$%s", reg_names[29]);
+      break;
+
+    case 'P':
+      (*info->fprintf_func) (info->stream, "$pc");
+      break;
+
+    case 'R':
+      (*info->fprintf_func) (info->stream, "$%s", reg_names[31]);
+      break;
+
+    case 'X':
+      (*info->fprintf_func) (info->stream, "$%s",
+			     reg_names[((l >> MIPS16OP_SH_REGR32)
+					& MIPS16OP_MASK_REGR32)]);
+      break;
+
+    case 'Y':
+      (*info->fprintf_func) (info->stream, "$%s",
+			     reg_names[MIPS16OP_EXTRACT_REG32R (l)]);
+      break;
+
+    case '<':
+    case '>':
+    case '[':
+    case ']':
+    case '4':
+    case '5':
+    case 'H':
+    case 'W':
+    case 'D':
+    case 'j':
+    case '6':
+    case '8':
+    case 'V':
+    case 'C':
+    case 'U':
+    case 'k':
+    case 'K':
+    case 'p':
+    case 'q':
+    case 'A':
+    case 'B':
+    case 'E':
+      {
+	int immed, nbits, shift, signedp, extbits, pcrel, extu, branch;
+
+	shift = 0;
+	signedp = 0;
+	extbits = 16;
+	pcrel = 0;
+	extu = 0;
+	branch = 0;
+	switch (type)
+	  {
+	  case '<':
+	    nbits = 3;
+	    immed = (l >> MIPS16OP_SH_RZ) & MIPS16OP_MASK_RZ;
+	    extbits = 5;
+	    extu = 1;
+	    break;
+	  case '>':
+	    nbits = 3;
+	    immed = (l >> MIPS16OP_SH_RX) & MIPS16OP_MASK_RX;
+	    extbits = 5;
+	    extu = 1;
+	    break;
+	  case '[':
+	    nbits = 3;
+	    immed = (l >> MIPS16OP_SH_RZ) & MIPS16OP_MASK_RZ;
+	    extbits = 6;
+	    extu = 1;
+	    break;
+	  case ']':
+	    nbits = 3;
+	    immed = (l >> MIPS16OP_SH_RX) & MIPS16OP_MASK_RX;
+	    extbits = 6;
+	    extu = 1;
+	    break;
+	  case '4':
+	    nbits = 4;
+	    immed = (l >> MIPS16OP_SH_IMM4) & MIPS16OP_MASK_IMM4;
+	    signedp = 1;
+	    extbits = 15;
+	    break;
+	  case '5':
+	    nbits = 5;
+	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    break;
+	  case 'H':
+	    nbits = 5;
+	    shift = 1;
+	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    break;
+	  case 'W':
+	    nbits = 5;
+	    shift = 2;
+	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    break;
+	  case 'D':
+	    nbits = 5;
+	    shift = 3;
+	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    break;
+	  case 'j':
+	    nbits = 5;
+	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    signedp = 1;
+	    break;
+	  case '6':
+	    nbits = 6;
+	    immed = (l >> MIPS16OP_SH_IMM6) & MIPS16OP_MASK_IMM6;
+	    break;
+	  case '8':
+	    nbits = 8;
+	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
+	    break;
+	  case 'V':
+	    nbits = 8;
+	    shift = 2;
+	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
+	    break;
+	  case 'C':
+	    nbits = 8;
+	    shift = 3;
+	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
+	    break;
+	  case 'U':
+	    nbits = 8;
+	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
+	    extu = 1;
+	    break;
+	  case 'k':
+	    nbits = 8;
+	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
+	    signedp = 1;
+	    break;
+	  case 'K':
+	    nbits = 8;
+	    shift = 3;
+	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
+	    signedp = 1;
+	    break;
+	  case 'p':
+	    nbits = 8;
+	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
+	    signedp = 1;
+	    pcrel = 1;
+	    branch = 1;
+	    break;
+	  case 'q':
+	    nbits = 11;
+	    immed = (l >> MIPS16OP_SH_IMM11) & MIPS16OP_MASK_IMM11;
+	    signedp = 1;
+	    pcrel = 1;
+	    branch = 1;
+	    break;
+	  case 'A':
+	    nbits = 8;
+	    shift = 2;
+	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
+	    pcrel = 1;
+	    break;
+	  case 'B':
+	    nbits = 5;
+	    shift = 3;
+	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    pcrel = 1;
+	    break;
+	  case 'E':
+	    nbits = 5;
+	    shift = 2;
+	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    pcrel = 1;
+	    break;
+	  default:
+	    abort ();
+	  }
+
+	if (! use_extend)
+	  {
+	    if (signedp && immed >= (1 << (nbits - 1)))
+	      immed -= 1 << nbits;
+	    immed <<= shift;
+	    if ((type == '<' || type == '>' || type == '[' || type == '[')
+		&& immed == 0)
+	      immed = 8;
+	  }
+	else
+	  {
+	    if (extbits == 16)
+	      immed |= ((extend & 0x1f) << 11) | (extend & 0x7e0);
+	    else if (extbits == 15)
+	      immed |= ((extend & 0xf) << 11) | (extend & 0x7f0);
+	    else
+	      immed = ((extend >> 6) & 0x1f) | (extend & 0x20);
+	    immed &= (1 << extbits) - 1;
+	    if (! extu && immed >= (1 << (extbits - 1)))
+	      immed -= 1 << extbits;
+	  }
+
+	if (! pcrel)
+	  (*info->fprintf_func) (info->stream, "%d", immed);
+	else
+	  {
+	    bfd_vma val;
+
+	    if (branch)
+	      immed *= 2;
+	    val = ((memaddr + 2) & ~ ((1 << shift) - 1)) + immed;
+	    (*info->print_address_func) (val, info);
+	  }
+      }
+      break;
+
+    case 'a':
+      if (! use_extend)
+	extend = 0;
+      l = ((l & 0x1f) << 23) | ((l & 0x3e0) << 13) | (extend << 2);
+      (*info->print_address_func) ((memaddr & 0xf0000000) | l, info);
+      break;
+
+    case 'l':
+    case 'L':
+      {
+	int need_comma, amask, smask;
+
+	need_comma = 0;
+
+	l = (l >> MIPS16OP_SH_IMM6) & MIPS16OP_MASK_IMM6;
+
+	amask = (l >> 3) & 7;
+	if (amask == 5 || amask == 6)
+	  {
+	    (*info->fprintf_func) (info->stream, "??");
+	    need_comma = 1;
+	  }
+	else if (amask > 0 && amask < 7)
+	  {
+	    (*info->fprintf_func) (info->stream, "%s", reg_names[4]);
+	    if (amask > 1)
+	      (*info->fprintf_func) (info->stream, "-%s",
+				     reg_names[amask + 3]);
+	    need_comma = 1;
+	  }
+
+	smask = (l >> 1) & 3;
+	if (smask == 3)
+	  {
+	    (*info->fprintf_func) (info->stream, "%s??",
+				   need_comma ? "," : "");
+	    need_comma = 1;
+	  }
+	else if (smask > 0)
+	  {
+	    (*info->fprintf_func) (info->stream, "%s%s",
+				   need_comma ? "," : "",
+				   reg_names[16]);
+	    if (smask > 1)
+	      (*info->fprintf_func) (info->stream, "-%s",
+				     reg_names[smask + 15]);
+	    need_comma = 1;
+	  }
+
+	if (l & 1)
+	  (*info->fprintf_func) (info->stream, "%s%s",
+				 need_comma ? "," : "",
+				 reg_names[31]);
+      }
+      break;
+
+    default:
+      abort ();
     }
 }
