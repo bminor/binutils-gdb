@@ -1,4 +1,4 @@
-#ifndef hosts_std_host_H
+#ifndef	hosts_std_host_H
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -8,13 +8,13 @@
 #include <string.h>
 #include <sys/file.h>
 
-#ifndef O_ACCMODE
+#ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
-#ifndef SEEK_SET
+#ifndef	SEEK_SET
 #define SEEK_SET 0
 #endif
-#ifndef SEEK_CUR
+#ifndef	SEEK_CUR
 #define SEEK_CUR 1
 #endif
 #ifdef STDC_HEADERS
@@ -46,12 +46,12 @@ extern int   getuid ();
 extern int   getgid ();
 extern int   rename ();
 extern void  perror ();
-#ifndef DONTDECLARE_MALLOC
+#ifndef	DONTDECLARE_MALLOC
 extern PTR   malloc ();
 extern PTR   realloc ();
 #endif
 
-#ifndef __GNUC__
+#ifndef	__GNUC__
 extern PTR   memcpy ();
 #else
 /* char * memcpy (); */
@@ -85,15 +85,23 @@ extern int fputc();
 extern int unlink();
 #endif /* STDC_HEADERS */
 
-#ifndef BYTES_IN_PRINTF_INT
+#ifndef	BYTES_IN_PRINTF_INT
 #define BYTES_IN_PRINTF_INT 4
 #endif
 
 /* From ANSI C <stddef.h>, which we can't depend upon the existence of */
-#ifndef offsetof
+#ifndef	offsetof
 #define	offsetof(type,memb)	((size_t)&(((type *)0)->memb))
 #endif
 
 #include "fopen-same.h"
 #define hosts_std_host_H
 #endif
+
+#ifdef	STDC_HEADERS
+#include <stddef.h>
+#else
+#ifndef	offsetof
+#define	offsetof(type,memb)	((size_t)&(((type *)0)->memb))
+#endif
+#endif /* STDC_HEADERS */

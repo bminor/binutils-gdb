@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -20,4 +21,5 @@ typedef  long int64_type;
 
 #define uint64_typeLOW(x) (((x) & 0xffffffff))
 #define uint64_typeHIGH(x) (((x) >> 32) & 0xffffffff)
+
 #include "fopen-same.h"

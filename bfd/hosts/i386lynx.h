@@ -1,6 +1,6 @@
 /* Intel 386 running any BSD Unix */
 
-#ifndef hosts_i386bsd_H
+#ifndef	hosts_i386bsd_H
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -11,7 +11,7 @@
 #include <string.h>
 #include <sys/file.h>
 
-#ifndef O_ACCMODE
+#ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
 
@@ -27,4 +27,9 @@
 #include "fopen-same.h"
 #define hosts_i386bsd_H
 #undef I386			/* Lynx defines this for some reason */
+#endif
+
+/* From ANSI C <stddef.h>, which we can't depend upon the existence of */
+#ifndef	offsetof
+#define	offsetof(type,memb)	((size_t)&(((type *)0)->memb))
 #endif

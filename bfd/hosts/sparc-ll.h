@@ -1,5 +1,6 @@
 /* Host definition file for Sun-4 running with gcc, using "long long"
    for addresses, to handle 64-bit target systems. */
+#include <stddef.h>
 #include <ansidecl.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -10,7 +11,7 @@
 #include <string.h>
 #include <sys/file.h>
 #include <alloca.h>
-#ifndef O_ACCMODE
+#ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
 #define SEEK_SET 0
@@ -32,12 +33,12 @@ extern void	bcopy	PARAMS ((char*, char*, int));
 extern int	bcmp	PARAMS ((char *, char *, int));
 extern void	bzero	PARAMS ((char *, int));
 extern PTR	memset	PARAMS ((PTR, int, unsigned int));
-#ifndef DONTDECLARE_MALLOC
+#ifndef	DONTDECLARE_MALLOC
 extern PTR	malloc	PARAMS ((unsigned));
 extern PTR	realloc	PARAMS ((PTR, unsigned));
 #endif
 
-#ifndef __GNUC__
+#ifndef	__GNUC__
  PTR		memcpy	PARAMS ((PTR, CONST PTR, unsigned int));
 #else
 /* char *	memcpy	PARAMS ((char *, CONST char *, unsigned int)); */
@@ -99,7 +100,7 @@ typedef struct {
 #endif
 
 #define BYTES_IN_PRINTF_INT 4
-#ifndef __GNUC__
+#ifndef	__GNUC__
 #define uint64_typeLOW(x) (unsigned long)(((x).low))
 #define uint64_typeHIGH(x) (unsigned long)(((x).high))
 #else

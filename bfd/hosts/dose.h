@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -6,7 +7,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/file.h>
-#ifndef O_ACCMODE
+#ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
 #define SEEK_SET 0

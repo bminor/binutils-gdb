@@ -1,6 +1,7 @@
-#ifndef _HPPAHPUX_H
+#ifndef	_HPPAHPUX_H
 #define _HPPAHPUX_H
 
+#include <stddef.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -16,13 +17,13 @@
 
 void free();
 
-#ifndef O_ACCMODE
+#ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
-#ifndef __STDC__
+#ifndef	__STDC__
 #define NATIVE_HPPAHPUX_COMPILER
 #endif
 

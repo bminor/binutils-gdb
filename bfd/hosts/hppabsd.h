@@ -1,6 +1,7 @@
-#ifndef _HPPABSD_H
+#ifndef	_HPPABSD_H
 #define _HPPABSD_H
 
+#include <stddef.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -14,7 +15,7 @@
 
 #define HOST_HPPABSD
 
-#ifndef O_ACCMODE
+#ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
 
