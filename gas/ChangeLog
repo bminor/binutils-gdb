@@ -4,6 +4,11 @@ Mon Oct  4 15:37:57 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	have pc-relative fixup.
 	(md_parse_option): Move "-k" case down near "-pic" case.
 
+	* configure.in: Alphabetize list of cpu type alternatives.  Enable
+	OS values of "linux*elf*" and "linux*coff*" to select those
+	formats, with linux emulation.  Don't bother checking for upper-
+	or mixed-case versions of "ose".
+
 Thu Sep 30 11:05:35 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* config/z8k.c (md_pseudo_table): add "unseg".
