@@ -1,3 +1,7 @@
+2000-08-21  H.J. Lu <hjl@gnu.org>
+
+	* gas/all/cofftag.d: Support the strict COFF.
+
 2000-08-16  Jim Wilson  <wilson@cygnus.com>
 
 	* gas/ia64/dv-raw-err.s: Add new tests for addl and postinc.
