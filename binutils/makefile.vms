@@ -12,45 +12,56 @@ CC=gcc
 ifeq ($(CC),gcc)
 CFLAGS=/include=([],[-.include],[-.bfd])$(DEFS)
 DEFS=/define=("unlink=remove")
-GCCLIBS=,GNU_CC:[000000]LIBGCC2/lib,GNU_CC:[000000]LIBGCCLIB/lib,sys$$disk:[-]vprintf.obj,sys$$library:vaxcrtl.olb/lib,GNU_CC:[000000]crt0.obj
+LIBS=,GNU_CC:[000000]LIBGCC2/lib,GNU_CC:[000000]LIBGCCLIB/lib,sys$$library:vaxcrtl.olb/lib,GNU_CC:[000000]crt0.obj
 else
-CFLAGS=/noopt/debug/include=([],[-.include],[-.bfd])$(DEFS)
-DEFS=/define=(\
+CFLAGS=/noopt/debug/include=([],[-.include],[-.bfd])$(DEFS)/warnings=disable=(missingreturn,implicitfunc)
+DEFS=/define=("const=","unlink=remove",\
 "_bfd_generic_get_section_contents_in_window"="_bfd_generic_get_win_section_cont",\
 "_bfd_elf_section_from_bfd_section"="_bfd_elf_sec_from_bfd_sec")
-GCCLIBS=
+LIBS=,sys$$library:vaxcrtl.olb/lib
 endif
 
-LIBBFD = [-.bfd]libbfd.olb
-LIBIBERTY = [-.libiberty]libiberty.olb
-LIBOPCODES = [-.opcodes]libopcodes.olb
+BFDLIB = [-.bfd]libbfd.olb/lib
+BFDLIB_DEP = [-.bfd]libbfd.olb
+LIBIBERTY_DEP = [-.libiberty]libiberty.olb
+LIBIBERTY = [-.libiberty]libiberty.olb/lib
+OPCODES_DEP = [-.opcodes]libopcodes.olb
+OPCODES = [-.opcodes]libopcodes.olb/lib
 
-LIBS = $(LIBBFD) $(LIBOPCODES) $(LIBIBERTY)
+DEBUG_OBJS = rddbg.obj,debug.obj,stabs.obj,ieee.obj,rdcoff.obj
 
-DEBUG_OBJS = rddbg.obj,debug.obj,stabs.obj,ieee.obj,prdbg.obj
+WRITE_DEBUG_OBJS = $(DEBUG_OBJS),wrstabs.obj
 
-SIZEOBJS = bucomm.obj,version.obj,filemode.obj,size.obj
+BULIBS = []bucomm.obj,version.obj,filemode.obj
 
-OBJDUMPOBJS = bucomm.obj,version.obj,filemode.obj,objdump.obj
+ADDL_DEPS = $(BULIBS),$(BFDLIB_DEP),$(LIBIBERTY_DEP)
+ADDL_LIBS = $(BULIBS),$(BFDLIB),$(LIBIBERTY)
 
-NMOBJS = bucomm.obj,version.obj,filemode.obj,nm.obj
+SIZEOBJS = $(ADDL_DEPS),size.obj
 
-all: config.h size.exe objdump.exe nm.exe
+STRINGSOBJS = $(ADDL_DEPS),strings.obj
 
-size.exe: $(SIZEOBJS) $(LIBS)
-	link/exe=$@ $(SIZEOBJS),$(LIBBFD)/lib,$(LIBOPCODES)/lib,$(LIBIBERTY)/lib$(GCCLIBS)
+NMOBJS = $(ADDL_DEPS),nm.obj
 
-objdump.exe: $(DEBUG_OBJS) $(OBJDUMPOBJS) $(LIBS)
-	link/exe=$@ $(OBJDUMPOBJS),$(DEBUG_OBJS),$(LIBBFD)/lib,$(LIBOPCODES)/lib,$(LIBIBERTY)/lib$(GCCLIBS)
+OBJDUMPOBJS = $(ADDL_DEPS),objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(OPCODES_DEP)
 
-nm.exe: $(NMOBJS) $(LIBS)
-	link/exe=$@ $(NMOBJS),$(LIBBFD)/lib,$(LIBOPCODES)/lib,$(LIBIBERTY)/lib$(GCCLIBS)
+all: config.h size.exe strings.exe objdump.exe nm.exe
+
+size.exe: $(SIZEOBJS)
+	link/exe=$@ size.obj,$(ADDL_LIBS)$(LIBS)
+
+strings.exe: $(STRINGSOBJS)
+	link/exe=$@ strings.obj,$(ADDL_LIBS)$(LIBS)
+
+nm.exe: $(NMOBJS)
+	link/exe=$@ nm.obj,$(ADDL_LIBS)$(LIBS)
+
+objdump.exe: $(OBJDUMPOBJS)
+	link/exe=$@ objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(BFDLIB),$(OPCODES),$(ADDL_LIBS)$(LIBS)
+
 
 version.obj: version.c
-	$(CC) $(CFLAGS)/define=(VERSION="""960408""") $<
-
-objdump.obj: objdump.c
-	$(CC) $(CFLAGS) $<
+	$(CC) $(CFLAGS)/define=(VERSION="""960723""") $<
 
 config.h: config.h-vms
 	$(CP) $< $@
