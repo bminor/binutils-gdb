@@ -1569,6 +1569,25 @@ pa_ip (str)
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
 
+	    /* Handle %sar or %cr11.  No bits get set, we just verify that it
+	       is there.  */
+	    case '!':
+	      /* Skip whitespace before register.  */
+	      while (*s == ' ' || *s == '\t')
+		s = s + 1;
+
+	      if (!strncasecmp(s, "%sar", 4))
+	        {
+		  s += 4;
+		  continue;
+		}
+	      else if (!strncasecmp(s, "%cr11", 5))
+	        {
+		  s += 5;
+		  continue;
+		}
+	      break;
+
 	    /* Handle a 5 bit register field at 15.  */
 	    case 'x':
 	      num = pa_parse_number (&s, 0);
@@ -2436,12 +2455,28 @@ pa_ip (str)
 		  continue;
 		}
 
+	    /* Handle a 2 bit shift count at 25.  */
+	    case '.':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 3, 1, 0);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
+
 	    /* Handle a 5 bit shift count at 26.  */
 	    case 'p':
 	      num = pa_get_absolute_expression (&the_insn, &s);
 	      s = expr_end;
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, 31 - num, 5);
+
+	    /* Handle a 6 bit shift count at 20,22:26.  */
+	    case '~':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 63, 0, 0);
+	      num = 63 - num;
+	      opcode |= (num & 0x20) << 6;
+	      INSERT_FIELD_AND_CONTINUE (opcode, num & 0x1f, 5);
 
 	    /* Handle a 5 bit bit position at 26.  */
 	    case 'P':
@@ -2460,6 +2495,13 @@ pa_ip (str)
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
 
+	    /* Handle a 9 bit immediate at 28.  */
+	    case '$':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 511, 1, 0);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 3);
+  
 	    /* Handle a 13 bit immediate at 18.  */
 	    case 'A':
 	      num = pa_get_absolute_expression (&the_insn, &s);
