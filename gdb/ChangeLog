@@ -47,6 +47,11 @@
 	(gnu-regex.o): Remove rule.
 	* gnu-regex.c, gnu-regex.h: Remove files.
 
+2001-08-31  Jason Molenda  (jmolenda@apple.com)
+
+	* c-valprint.c (c_val_print):  Second call to check_typedef ()
+	is no longer necessary.
+
 2001-08-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-tdep.c (examine_prologue): Don't let a branch unit nop
@@ -6532,7 +6537,7 @@ Tue Jan 30 15:14:26 2001  Andrew Cagney  <cagney@skil>
 
 2001-01-29  Michael Chastain  <chastain@redhat.com>
 
-	* symtab.c (block_lookup_symbol): Use 'namespace' parameter in
+	* symtab.c (lookup_block_symbol): Use 'namespace' parameter in
 	symbol comparisons in binary search.
 
 2001-01-27  Christopher Faylor  <cgf@cygnus.com>
