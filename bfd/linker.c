@@ -1121,27 +1121,27 @@ generic_link_check_archive_element (abfd, info, pneeded, collect)
 	     attached to symbfd to ensure that it is in a BFD which
 	     will be linked in.  */
 	  h->type = bfd_link_hash_common;
+	  h->u.c.p =
+	    ((struct bfd_link_hash_common_entry *)
+	     bfd_hash_allocate (&info->hash->table,
+				sizeof (struct bfd_link_hash_common_entry)));
+	  if (h->u.c.p == NULL)
+	    return false;
 
 	  size = bfd_asymbol_value (p);
 	  h->u.c.size = size;
-	  if (h->u.c.size != size)
-	    {
-	      /* The size did not fit in the bitfield.  */
-	      bfd_set_error (bfd_error_bad_value);
-	      return false;
-	    }
 
 	  power = bfd_log2 (size);
 	  if (power > 4)
 	    power = 4;
-	  h->u.c.alignment_power = power;
+	  h->u.c.p->alignment_power = power;
 
 	  if (p->section == bfd_com_section_ptr)
-	    h->u.c.section = bfd_make_section_old_way (symbfd, "COMMON");
+	    h->u.c.p->section = bfd_make_section_old_way (symbfd, "COMMON");
 	  else
-	    h->u.c.section = bfd_make_section_old_way (symbfd,
-						       p->section->name);
-	  h->u.c.section->flags = SEC_ALLOC;
+	    h->u.c.p->section = bfd_make_section_old_way (symbfd,
+							  p->section->name);
+	  h->u.c.p->section->flags = SEC_ALLOC;
 	}
       else
 	{
@@ -1216,6 +1216,17 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols, collect)
 		  p->value, string, false, collect,
 		  (struct bfd_link_hash_entry **) &h)))
 	    return false;
+
+	  /* If this is a constructor symbol, and the linker didn't do
+             anything with it, then we want to just pass the symbol
+             through to the output file.  This will happen when
+             linking with -r.  */
+	  if ((p->flags & BSF_CONSTRUCTOR) != 0
+	      && (h == NULL || h->root.type == bfd_link_hash_new))
+	    {
+	      p->udata.p = NULL;
+	      continue;
+	    }
 
 	  /* Save the BFD symbol so that we don't lose any backend
 	     specific information that may be attached to it.  We only
@@ -1311,7 +1322,7 @@ static const enum link_action link_action[8][8] =
 {
   /* current\prev    new    undef  undefw def    defw   com    indr   warn  */
   /* UNDEF_ROW 	*/  {UND,   NOACT, NOACT, REF,   REF,   NOACT, REFC,  WARNC },
-  /* UNDEFW_ROW	*/  {WEAK,  WEAK,  NOACT, REF,   REF,   NOACT, REFC,  WARNC },
+  /* UNDEFW_ROW	*/  {WEAK,  NOACT, NOACT, REF,   REF,   NOACT, REFC,  WARNC },
   /* DEF_ROW 	*/  {DEF,   DEF,   DEF,   MDEF,  DEF,   CDEF,  MDEF,  CYCLE },
   /* DEFW_ROW 	*/  {DEFW,  DEFW,  DEFW,  NOACT, NOACT, NOACT, NOACT, CYCLE },
   /* COMMON_ROW	*/  {COM,   COM,   COM,   CREF,  CREF,  BIG,   CREF,  WARNC },
@@ -1461,7 +1472,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
 	  if (! ((*info->callbacks->multiple_common)
 		 (info, name,
-		  h->u.c.section->owner, bfd_link_hash_common, h->u.c.size,
+		  h->u.c.p->section->owner, bfd_link_hash_common, h->u.c.size,
 		  abfd, bfd_link_hash_defined, (bfd_vma) 0)))
 	    return false;
 	  /* Fall through.  */
@@ -1537,13 +1548,14 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  if (h->type == bfd_link_hash_new)
 	    bfd_link_add_undef (info->hash, h);
 	  h->type = bfd_link_hash_common;
+	  h->u.c.p =
+	    ((struct bfd_link_hash_common_entry *)
+	     bfd_hash_allocate (&info->hash->table,
+				sizeof (struct bfd_link_hash_common_entry)));
+	  if (h->u.c.p == NULL)
+	    return false;
+
 	  h->u.c.size = value;
-	  if (h->u.c.size != value)
-	    {
-	      /* The size did not fit in the bitfield.  */
-	      bfd_set_error (bfd_error_bad_value);
-	      return false;
-	    }
 
 	  /* Select a default alignment based on the size.  This may
              be overridden by the caller.  */
@@ -1553,7 +1565,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	    power = bfd_log2 (value);
 	    if (power > 4)
 	      power = 4;
-	    h->u.c.alignment_power = power;
+	    h->u.c.p->alignment_power = power;
 	  }
 
 	  /* The section of a common symbol is only used if the common
@@ -1568,16 +1580,17 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
              handling.  */
 	  if (section == bfd_com_section_ptr)
 	    {
-	      h->u.c.section = bfd_make_section_old_way (abfd, "COMMON");
-	      h->u.c.section->flags = SEC_ALLOC;
+	      h->u.c.p->section = bfd_make_section_old_way (abfd, "COMMON");
+	      h->u.c.p->section->flags = SEC_ALLOC;
 	    }
 	  else if (section->owner != abfd)
 	    {
-	      h->u.c.section = bfd_make_section_old_way (abfd, section->name);
-	      h->u.c.section->flags = SEC_ALLOC;
+	      h->u.c.p->section = bfd_make_section_old_way (abfd,
+							    section->name);
+	      h->u.c.p->section->flags = SEC_ALLOC;
 	    }
 	  else
-	    h->u.c.section = section;
+	    h->u.c.p->section = section;
 	  break;
 
 	case REF:
@@ -1593,7 +1606,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
 	  if (! ((*info->callbacks->multiple_common)
 		 (info, name,
-		  h->u.c.section->owner, bfd_link_hash_common, h->u.c.size,
+		  h->u.c.p->section->owner, bfd_link_hash_common, h->u.c.size,
 		  abfd, bfd_link_hash_common, value)))
 	    return false;
 	  if (value > h->u.c.size)
@@ -1607,7 +1620,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	      power = bfd_log2 (value);
 	      if (power > 4)
 		power = 4;
-	      h->u.c.alignment_power = power;
+	      h->u.c.p->alignment_power = power;
 	    }
 	  break;
 
@@ -1677,7 +1690,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
 	  if (! ((*info->callbacks->multiple_common)
 		 (info, name,
-		  h->u.c.section->owner, bfd_link_hash_common, h->u.c.size,
+		  h->u.c.p->section->owner, bfd_link_hash_common, h->u.c.size,
 		  abfd, bfd_link_hash_indirect, (bfd_vma) 0)))
 	    return false;
 	  /* Fall through.  */
@@ -2029,9 +2042,25 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 	  || bfd_is_com_section (bfd_get_section (sym))
 	  || bfd_is_ind_section (bfd_get_section (sym)))
 	{
-	  h = _bfd_generic_link_hash_lookup (_bfd_generic_hash_table (info),
-					     bfd_asymbol_name (sym),
-					     false, false, true);
+	  if (sym->udata.p != NULL)
+	    h = (struct generic_link_hash_entry *) sym->udata.p;
+	  else if ((sym->flags & BSF_CONSTRUCTOR) != 0)
+	    {
+	      /* This case normally means that the main linker code
+                 deliberately ignored this constructor symbol.  We
+                 should just pass it through.  This will screw up if
+                 the constructor symbol is from a different,
+                 non-generic, object file format, but the case will
+                 only arise when linking with -r, which will probably
+                 fail anyhow, since there will be no way to represent
+                 the relocs in the output format being used.  */
+	      h = NULL;
+	    }
+	  else
+	    h = _bfd_generic_link_hash_lookup (_bfd_generic_hash_table (info),
+					       bfd_asymbol_name (sym),
+					       false, false, true);
+
 	  if (h != (struct generic_link_hash_entry *) NULL)
 	    {
 	      /* Force all references to this symbol to point to
@@ -2055,13 +2084,18 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 		case bfd_link_hash_undefweak:
 		  sym->flags |= BSF_WEAK;
 		  break;
+		case bfd_link_hash_indirect:
+		  h = (struct generic_link_hash_entry *) h->root.u.i.link;
+		  /* fall through */
 		case bfd_link_hash_defined:
 		  sym->flags |= BSF_GLOBAL;
+		  sym->flags &=~ BSF_CONSTRUCTOR;
 		  sym->value = h->root.u.def.value;
 		  sym->section = h->root.u.def.section;
 		  break;
 		case bfd_link_hash_defweak:
 		  sym->flags |= BSF_WEAK;
+		  sym->flags &=~ BSF_CONSTRUCTOR;
 		  sym->value = h->root.u.def.value;
 		  sym->section = h->root.u.def.section;
 		  break;
@@ -2074,7 +2108,7 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 		      sym->section = bfd_com_section_ptr;
 		    }
 		  /* We do not set the section of the symbol to
-		     h->root.u.c.section.  That value was saved so
+		     h->root.u.c.p->section.  That value was saved so
 		     that we would know where to allocate the symbol
 		     if it was defined.  In this case the type is
 		     still bfd_link_hash_common, so we did not define
@@ -2611,4 +2645,31 @@ _bfd_count_link_order_relocs (link_order)
     }
 
   return c;
+}
+
+/*
+FUNCTION
+	bfd_link_split_section
+
+SYNOPSIS
+        boolean bfd_link_split_section(bfd *abfd, asection *sec);
+
+DESCRIPTION
+	Return nonzero if @var{sec} should be split during a
+	reloceatable or final link.
+
+.#define bfd_link_split_section(abfd, sec) \
+.       BFD_SEND (abfd, _bfd_link_split_section, (abfd, sec))
+.
+
+*/
+
+
+
+boolean
+_bfd_generic_link_split_section (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  return false;
 }
