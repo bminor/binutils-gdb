@@ -1,5 +1,14 @@
 2005-01-28  Hans-Peter Nilsson  <hp@axis.com>
 
+	* syscall.c (cb_syscall) <case CB_SYS_pipe>: New case.
+	* callback.c [HAVE_LIMITS_H]: Include limits.h.
+  	Include libiberty.h.
+	(os_close, os_read, os_write, os_fstat, os_ftruncate): Support fd
+	being either end of a pipe.
+	(os_pipe, os_pipe_empty, os_pipe_nonempty): New functions.
+	(os_shutdown): Clear pipe state.
+	(default_callback): Initialize new members.
+
 	* callback.c (default_callback): Initialize target_endian.
 	(cb_store_target_endian): Renamed from store, new first parameter
 	host_callback *cb, drop last parameter big_p.  Take endianness

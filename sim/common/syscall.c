@@ -572,6 +572,33 @@ cb_syscall (cb, sc)
       }
       break;
 
+    case CB_SYS_pipe :
+      {
+	int p[2];
+	char *target_p = xcalloc (1, cb->target_sizeof_int * 2);
+
+	result = (*cb->pipe) (cb, p);
+	if (result != 0)
+	  goto ErrorFinish;
+
+	cb_store_target_endian (cb, target_p, cb->target_sizeof_int, p[0]);
+	cb_store_target_endian (cb, target_p + cb->target_sizeof_int,
+				cb->target_sizeof_int, p[1]);
+	if ((*sc->write_mem) (cb, sc, sc->arg1, target_p,
+			      cb->target_sizeof_int * 2)
+	    != cb->target_sizeof_int * 2)
+	  {
+	    /* Close the pipe fd:s.  */
+	    (*cb->close) (cb, p[0]);
+	    (*cb->close) (cb, p[1]);
+	    errcode = EFAULT;
+	    result = -1;
+	  }
+
+	free (target_p);
+      }
+      break;
+
     case CB_SYS_time :
       {
 	/* FIXME: May wish to change CB_SYS_time to something else.
