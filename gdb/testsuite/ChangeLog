@@ -1,5 +1,10 @@
 2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.base/constvars.exp: Remove most xfails for GCC 3.x.
+	* gdb.base/volatile.exp: Likewise.
+
+2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.threads/print-threads.exp (test_all_threads): Add kfail for
 	gdb/1265.
 
