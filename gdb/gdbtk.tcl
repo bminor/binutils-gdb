@@ -3094,6 +3094,68 @@ proc create_copyright_window {} {
   center_window .c
 }
 
+# Begin support primarily for debugging the tcl/tk portion of gdbtk.  You can
+# start gdbtk, and then issue the command "tk tclsh" and a window will pop up
+# giving you direct access to the tcl interpreter.  With this, it is very easy
+# to examine the values of global variables, directly invoke routines that are
+# part of the gdbtk interface, replace existing proc's with new ones, etc.
+# This code was inspired from example 11-3 in Brent Welch's "Practical
+# Programming in Tcl and Tk"
+
+set tcl_prompt "tcl> "
+
+# Get the current command that user has typed, from cmdstart to end of text
+# widget.  Evaluate it, insert result back into text widget, issue a new
+# prompt, update text widget and update command start mark.
+
+proc evaluate_tcl_command { twidget } {
+    global tcl_prompt
+
+    set command [$twidget get cmdstart end]
+    if [info complete $command] {
+	set err [catch {uplevel #0 $command} result]
+	$twidget insert insert \n$result\n
+	$twidget insert insert $tcl_prompt
+	$twidget see insert
+	$twidget mark set cmdstart insert
+	return
+    }
+}
+
+# Create the evaluation window and set up the keybindings to evaluate the
+# last single line entered by the user.  FIXME: allow multiple lines?
+
+proc tclsh {} {
+    global tcl_prompt
+
+    # Create top level frame with scrollbar and text widget.
+    toplevel .eval
+    wm title .eval "Tcl Evaluation"
+    wm iconname .eval "Tcl"
+    text .eval.text -width 80 -height 20 -setgrid true -cursor hand2 \
+	    -yscrollcommand {.eval.scroll set}
+    scrollbar .eval.scroll -command {.eval.text yview}
+    pack .eval.scroll -side left -fill y
+    pack .eval.text -side right -fill both -expand true
+
+    # Insert the tcl_prompt and initialize the cmdstart mark
+    .eval.text insert insert $tcl_prompt
+    .eval.text mark set cmdstart insert
+    .eval.text mark gravity cmdstart left
+
+    # Make this window the current one for input.
+    focus .eval.text
+
+    # Keybindings that limit input and evaluate things
+    bind .eval.text <Return> { evaluate_tcl_command .eval.text ; break }
+    bind .eval.text <Any-Key> {
+	if [%W compare insert < cmdstart] {
+	    %W mark set insert end
+	}
+    }
+    bindtags .eval.text {.eval.text Text all}
+}
+
 # FIXME need to handle mono here.  In Tk4 that is more complicated.
 set highlight "-background red2 -borderwidth 2 -relief sunken"
 

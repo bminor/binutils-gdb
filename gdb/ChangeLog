@@ -1,4 +1,9 @@
 start-sanitize-gdbtk
+Thu May 16 16:16:35 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (evaluate_tcl_command, tclsh):  New functions that
+	implement a tcl evaluation window for gdbtk maintainers to use.
+
 Thu May 16 11:42:58 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* gdbtk.tcl (files_command): Correctly insert list of files into
