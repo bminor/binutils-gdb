@@ -1,5 +1,9 @@
 Mon Sep 11 11:44:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gas/mri/empty.s: New file.
+	* gas/mri/mri.exp: Test assembling empty.s.
+	* gas/mri/comment.s: Add a couple more comment variants.
+
 	* gas/mri/mri.exp: Add xfail for the expr test for all hppa
 	targets.
 
