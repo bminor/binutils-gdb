@@ -80,7 +80,7 @@ ALL_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 BFD32_BACKENDS = \
 	elf.o \
 	elf32.o elf32-sparc.o elf32-i386.o elf32-i860.o elf32-m68k.o \
-	elf32-hppa.o elf32-mips.o elf32-m88k.o elf32-generic.o \
+	elf32-hppa.o elf32-mips.o elf32-m88k.o elf32-gen.o \
 	aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
 	i386aout.o i386bsd.o i386linux.o i386lynx.o \
 	hp300hpux.o bout.o \
@@ -92,7 +92,7 @@ BFD32_BACKENDS = \
 	stab-syms.o
 
 BFD64_BACKENDS = \
-	elf64.o elf64-generic.o \
+	elf64.o elf64-gen.o \
 	aout64.o demo64.o
 
 OPTIONAL_BACKENDS = trad-core.o
@@ -142,8 +142,8 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 cpu-rs6000.c coff-h8300.c hppa.c cpu-hppa.c cpu-we32k.c reloc16.c \
 	 mipsbsd.c cpu-sh.c \
 	 elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
-	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-generic.c \
-	 elf64.c \
+	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c \
+	 elf64.c elf64-gen.c \
 	 coff-alpha.c cpu-alpha.c \
 	 hp300hpux.c i386lynx.c
 
@@ -482,11 +482,11 @@ elf32-m88k.o : elf32-m88k.c libelf.h libbfd.h \
   $(BFD_H) $(INCDIR)/obstack.h
 elf32-mips.o : elf32-mips.c libelf.h libbfd.h \
   $(BFD_H) $(INCDIR)/obstack.h
-elf32-generic.o : elf32-generic.c libelf.h libbfd.h \
+elf32-gen.o : elf32-gen.c libelf.h libbfd.h \
   $(BFD_H) $(INCDIR)/obstack.h
 elf64.o : elf64.c elfcode.h libelf.h libbfd.h $(BFD_H) \
   $(INCDIR)/obstack.h
-elf64-generic.o : elf64-generic.c libelf.h libbfd.h \
+elf64-gen.o : elf64-gen.c libelf.h libbfd.h \
   $(BFD_H) $(INCDIR)/obstack.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
