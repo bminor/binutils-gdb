@@ -3557,7 +3557,13 @@ decode_coproc(sd,instruction)
 
 /*-- instruction simulation -------------------------------------------------*/
 
-#if defined (WITH_IGEN)
+/* When the IGEN simulator is being built, the function below is be
+   replaced by a generated version.  However, WITH_IGEN == 2 indicates
+   that the fubction below should be compiled but under a different
+   name (to allow backward compatibility) */
+
+#if (WITH_IGEN != 1)
+#if (WITH_IGEN > 1)
 void old_engine_run PARAMS ((SIM_DESC sd, int next_cpu_nr, int siggnal));
 void
 old_engine_run (sd, next_cpu_nr, siggnal)
@@ -3838,6 +3844,8 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
 #endif /* FASTSIM */
   }
 }
+#endif
+
 
 /* This code copied from gdb's utils.c.  Would like to share this code,
    but don't know of a common place where both could get to it. */

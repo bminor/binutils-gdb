@@ -54,6 +54,10 @@ SIM_OBJS = \
 # List of flags to always pass to $(CC).
 SIM_SUBTARGET=@SIM_SUBTARGET@
 
+SIM_NO_CFLAGS = -DWITH_IGEN=0
+SIM_IGEN_CFLAGS = -DWITH_IGEN=1
+SIM_M16_CFLAGS = -DWITH_IGEN=1
+
 # FIXME: Hack to find syscall.h?  Better support for syscall.h
 # is in progress.
 SIM_EXTRA_CFLAGS = \
@@ -98,7 +102,6 @@ IGEN_INSN=$(srcdir)/mips.igen
 IGEN_DC=$(srcdir)/mips.dc
 
 
-SIM_IGEN_CFLAGS = -DWITH_IGEN
 SIM_IGEN_ALL = tmp-igen
 
 BUILT_SRC_FROM_IGEN = \
@@ -132,8 +135,7 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		-F 32,64,f \
-		-M mipsIV \
+		@sim_igen_flags@ \
 		-G gen-direct-access \
 		-i $(IGEN_INSN) \
 		-o $(IGEN_DC) \
@@ -172,7 +174,6 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 
 
 
-SIM_M16_CFLAGS = -DWITH_IGEN
 SIM_M16_ALL = tmp-igen $(SIM_M16_ALL) 
 
 BUILT_SRC_FROM_M16 = \

@@ -1772,15 +1772,25 @@ fi
 # Select the sim generator & architecture
 #
 sim_gen=NO
+sim_igen_flags="-F 32,64,f -M mipsIV"
+sim_m16_flags="-F 16 -M mips16"
+
 case "${target}" in
 # start-sanitize-tx19
-  mipstx19*-*-*)	sim_gen=M16 ;;
+# mipstx19*-*-*)	 sim_gen=M16
+#			 sim_igen_flags="-F 32,64,f -M tx19"
+#			 sim_m16_flags="-F 16 -M tx19"
+#			 ;;
 # end-sanitize-tx19
 # start-sanitize-r5900
-#  mips64r59*-*-*)       sim_gen=IGEN ;;
+#  mips64r59*-*-*)       sim_gen=IGEN
+#			 sim_igen_flags="-F 32,64,f -M r5900"
+#			 ;;
 # end-sanitize-r5900
 # start-sanitize-vr5400
-  mips64vr54*-*-*)	sim_gen=IGEN ;;
+  mips64vr54*-*-*)	 sim_gen=IGEN
+			 sim_igen_flags="-F 32,64,f -M vr5400"
+			 ;;
 # end-sanitize-vr5400
 #  mips16*-*-*)          sim_gen=M16 ;;
   *)                     sim_gen=NO ;;
@@ -1788,21 +1798,23 @@ esac
 
 
 
+
+
 for ac_hdr in string.h strings.h stdlib.h stdlib.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1796: checking for $ac_hdr" >&5
+echo "configure:1808: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1801 "configure"
+#line 1813 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1806: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1818: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1829,7 +1841,7 @@ fi
 done
 
 echo $ac_n "checking for fabs in -lm""... $ac_c" 1>&6
-echo "configure:1833: checking for fabs in -lm" >&5
+echo "configure:1845: checking for fabs in -lm" >&5
 ac_lib_var=`echo m'_'fabs | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1837,7 +1849,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lm  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1841 "configure"
+#line 1853 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1848,7 +1860,7 @@ int main() {
 fabs()
 ; return 0; }
 EOF
-if { (eval echo configure:1852: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1864: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1878,12 +1890,12 @@ fi
 for ac_func in aint anint sqrt
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:1882: checking for $ac_func" >&5
+echo "configure:1894: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1887 "configure"
+#line 1899 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1906,7 +1918,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1910: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1922: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -2113,6 +2125,8 @@ s%@sim_profile@%$sim_profile%g
 s%@SIMCONF@%$SIMCONF%g
 s%@SIM_SUBTARGET@%$SIM_SUBTARGET%g
 s%@sim_gen@%$sim_gen%g
+s%@sim_igen_flags@%$sim_igen_flags%g
+s%@sim_m16_flags@%$sim_m16_flags%g
 
 CEOF
 EOF

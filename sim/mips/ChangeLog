@@ -1,3 +1,26 @@
+Mon Oct 27 17:53:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SIM_NO_CFLAGS): Define.  Define WITH_IGEN=0.
+	
+	interp.c (sim_engine_run): Do not compile function sim_engine_run
+ 	when WITH_IGEN == 1.
+
+	* configure.in (sim_igen_flags, sim_m16_flags): Set according to
+ 	target architecture.
+
+	Makefile.in (tmp-igen, tmp-m16): Drop -F and -M options to
+ 	igen. Replace with configuration variables sim_igen_flags /
+ 	sim_m16_flags.
+
+	end-sanitize-v5900
+	* r5900.igen: New file. Copy v5900 insns here.
+	start-sanitize-r5900
+	end-sanitize-v5400
+	* vr5400.igen: New file. 
+	start-sanitize-vr5400
+	* m16.igen: New file.  Copy mips16 insns here.
+	* mips.igen: From here.
+
 Mon Oct 27 13:53:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	start-sanitize-vr5400

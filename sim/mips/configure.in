@@ -95,20 +95,32 @@ SIM_AC_OPTION_FLOAT($mips_fpu)
 # Select the sim generator & architecture
 #
 sim_gen=NO
+sim_igen_flags="-F 32,64,f -M mipsIV"
+sim_m16_flags="-F 16 -M mips16"
+
 case "${target}" in
 # start-sanitize-tx19
-  mipstx19*-*-*)	sim_gen=M16 ;;
+# mipstx19*-*-*)	 sim_gen=M16
+#			 sim_igen_flags="-F 32,64,f -M tx19"
+#			 sim_m16_flags="-F 16 -M tx19"
+#			 ;;
 # end-sanitize-tx19
 # start-sanitize-r5900
-#  mips64r59*-*-*)       sim_gen=IGEN ;;
+#  mips64r59*-*-*)       sim_gen=IGEN
+#			 sim_igen_flags="-F 32,64,f -M r5900"
+#			 ;;
 # end-sanitize-r5900
 # start-sanitize-vr5400
-  mips64vr54*-*-*)	sim_gen=IGEN ;;
+  mips64vr54*-*-*)	 sim_gen=IGEN
+			 sim_igen_flags="-F 32,64,f -M vr5400"
+			 ;;
 # end-sanitize-vr5400
 #  mips16*-*-*)          sim_gen=M16 ;;
   *)                     sim_gen=NO ;;
 esac
 AC_SUBST(sim_gen)
+AC_SUBST(sim_igen_flags)
+AC_SUBST(sim_m16_flags)
 
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h)

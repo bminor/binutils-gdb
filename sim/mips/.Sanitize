@@ -17,6 +17,20 @@
 
 Do-first:
 
+r5900_files="r5900.igen"
+if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
+        keep_these_too="${r5900_files} ${keep_these_too}"
+else
+        lose_these_too="${r5900_files} ${lose_these_too}"
+fi
+
+vr5400_files="vr5400.igen"
+if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
+        keep_these_too="${vr5400_files} ${keep_these_too}"
+else
+        lose_these_too="${vr5400_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -37,6 +51,7 @@ sim-main.h
 support.h
 tconfig.in
 mips.igen
+m16.igen
 mips.dc
 
 Things-to-lose:
@@ -44,7 +59,7 @@ Things-to-lose:
 
 Do-last:
 
-r5900_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc"
+r5900_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc m16.igen r5900.igen"
 
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
@@ -74,7 +89,7 @@ else
 fi
 
 
-tx19_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc"
+tx19_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc m16.igen"
 
 if ( echo $* | grep keep\-tx19 > /dev/null ) ; then
 	for i in $tx19_files ; do
@@ -104,7 +119,7 @@ else
 fi
 
 
-vr5400_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc"
+vr5400_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc m16.igen vr5400.igen"
 
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
 	for i in $vr5400_files ; do
