@@ -1,3 +1,8 @@
+Mon Mar  2 17:44:13 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* breakpoint.c (_initialize_breakpoint): Make "en" an alias
+	for "enable" (so that it doesn't conflict with "end").
+
 Mon Mar  2 17:04:25 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* Makefile (VERSION): Bump to 4.17.1.
