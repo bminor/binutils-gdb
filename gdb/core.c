@@ -81,6 +81,7 @@ core_open (filename, from_tty)
   bfd *temp_bfd;
   int ontop;
 
+  target_preopen (from_tty);
   if (!filename)
     {
       error (core_bfd? 
@@ -421,6 +422,7 @@ get_core_registers (regno)
 
 struct target_ops core_ops = {
 	"core", "Local core dump file",
+	"Use a core file as a target.  Specify the filename of the core file.",
 	core_open, core_close,
 	child_attach, core_detach, 0, 0, /* resume, wait */
 	get_core_registers, 

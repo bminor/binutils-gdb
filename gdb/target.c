@@ -47,7 +47,7 @@ unsigned target_struct_allocsize;
 /* The initial current target, so that there is always a semi-valid
    current target.  */
 
-struct target_ops dummy_target = {"None", "None",
+struct target_ops dummy_target = {"None", "None", "",
     0, 0, 0, 0,		/* open, close, attach, detach */
     0, 0,		/* resume, wait */
     0, 0, 0, 0, 0,	/* registers */
@@ -72,6 +72,23 @@ struct target_ops *current_target;
 
 struct target_ops **current_target_stack;
 
+/* Command list for target.  */
+
+static struct cmd_list_element *targetlist = NULL;
+
+/* Docstring for target (as in "help target").  */
+
+static char *target_doc = NULL;
+
+/* The user just typed 'target' without the name of a target.  */
+
+static void
+target_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  fputs_filtered ("Argument required (target name).", stdout);
+}
 
 /* Add a possible target architecture to the list.  */
 
@@ -100,6 +117,16 @@ add_target (t)
     }
   target_structs[target_struct_size++] = t;
   cleanup_target (t);
+
+  if (targetlist == NULL)
+    add_prefix_cmd ("target", class_run, target_command,
+		    "Connect to a target machine or process.\n\
+The first argument is the type or protocol of the target machine.\n\
+Remaining arguments are interpreted by the target protocol.  For more\n\
+information on the arguments for a particular protocol, type\n\
+`help target ' followed by the protocol name.",
+		    &targetlist, "target ", 0, &cmdlist);
+  add_cmd (t->to_shortname, no_class, t->to_open, t->to_doc, &targetlist);
 }
 
 /* Stub functions */
@@ -363,20 +390,6 @@ pop_target ()
     push_target (&dummy_target);
 }
 
-/* Print things about the whole set of targets and about the
-   current target stack.  */
-static void
-targets_info ()
-{
-  int i;
-
-  printf("Possible targets:\n\n");
-  for (i = 0; i < target_struct_size; i++)
-    printf ("%-15s %s\n",
-      target_structs[i]->to_shortname, 
-      target_structs[i]->to_longname);
-}
-
 /* Move memory to or from the targets.  Iterate until all of it has
    been moved, if necessary.  The top target gets priority; anything
    it doesn't want, is offered to the next one down, etc.  Note the
@@ -484,24 +497,14 @@ target_info (args, from_tty)
     }
 }
 
-/* The target command selects a target and calls its open routine.
-   The open routine takes the rest of the parameters from the command,
-   and (if successful) pushes a new target onto the stack.  */
+/* This is to be called by the open routine before it does
+   anything.  */
 
-static void
-target_command (args, from_tty)
-     char *args;
+void
+target_preopen (from_tty)
      int from_tty;
 {
-  int i, possible;
-  char *rest;
-  char *argend;
-
   dont_repeat();
-
-  if (!args)
-    error (
-     "Argument required (target name).  `info targets' lists possible targets");
 
   if (target_has_execution)
     {   
@@ -510,39 +513,6 @@ target_command (args, from_tty)
       else
         error ("Program not killed.");
     }
-        
-  /* Skip to first space, or end of args */
-  for (rest = args; *rest && !isspace(*rest); rest++) ;
-  argend = rest;
-  if (*rest == '\0')
-    rest = 0;		/* Only one word in args */
-  else
-    {
-      for (rest++; isspace (*rest); rest++) ;
-      if (*rest == '\0')	/* Only one word w/trailing blanks */
-	rest = 0;
-    }
-
-  /* Search target list for a match */
-
-  possible = -1;
-  for (i = 0; i < target_struct_size; i++)
-    {
-      if (!strncmp (args, target_structs[i]->to_shortname, argend - args)) {
-	/* If we have an exact match, it's time to quit.  */
-	if (target_structs[i]->to_shortname[args-argend] == '\0') {
-	  possible = i;
-	  break;
-	}
-	if (possible > 0)
-	  error ("Ambiguous target.  `info targets' will list all targets");
-	possible = i;
-      }
-    }
-  if (possible < 0)
-    error ("No such target.  `info targets' will list all targets");
-
-  (*target_structs[possible]->to_open) (rest, from_tty);
 }
 
 static char targ_desc[] = 
@@ -556,20 +526,6 @@ _initialize_targets ()
   current_target = &dummy_target;
   cleanup_target (current_target);
 
-  add_info ("targets", targets_info,
-    "Names of all possible targets.\n\
-A target is typically a protocol for talking to debugging facilities;\n\
-for example, `child' for Unix child processes, or `vxworks' for a\n\
-TCP/IP link to a VxWorks system.");
-
   add_info ("target", target_info, targ_desc);
   add_info ("files", target_info, targ_desc);
-
-  add_com ("target", class_run, target_command,
-"Connect to a target machine or process.\n\
-The first argument is the type or protocol of the target machine.  Remaining\n\
-arguments are interpreted by the target protocol, but typically include\n\
-things like device names or host names to connect with, process numbers,\n\
-baud rates, etc.  You can list all possible targets with the `info targets'\n\
-command.");
 }

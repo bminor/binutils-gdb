@@ -73,6 +73,7 @@ exec_file_command (filename, from_tty)
      char *filename;
      int from_tty;
 {
+  target_preopen (from_tty);
 
   /* Remove any previous exec file.  */
   unpush_target (&exec_ops);
@@ -312,8 +313,49 @@ exec_files_info ()
 	bfd_section_name (exec_bfd, p->sec_ptr));
 }
 
+static void
+set_section_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  struct section_table *p;
+  char *secname;
+  unsigned seclen;
+  unsigned long secaddr;
+  char secprint[100];
+  long offset;
+
+  if (args == 0)
+    error ("Must specify section name and its virtual address");
+
+  /* Parse out section name */
+  for (secname = args; !isspace(*args); args++) ;
+  seclen = args - secname;
+
+  /* Parse out new virtual address */
+  secaddr = parse_and_eval_address (args);
+
+  for (p = exec_sections; p < exec_sections_end; p++) {
+    if (!strncmp (secname, bfd_section_name (exec_bfd, p->sec_ptr), seclen)
+	&& bfd_section_name (exec_bfd, p->sec_ptr)[seclen] == '\0') {
+      offset = secaddr - p->addr;
+      p->addr += offset;
+      p->endaddr += offset;
+      exec_files_info();
+      return;
+    }
+  } 
+  if (seclen >= sizeof (secprint))
+    seclen = sizeof (secprint) - 1;
+  strncpy (secprint, secname, seclen);
+  secprint[seclen] = '\0';
+  error ("Section %s not found", secprint);
+}
+
 struct target_ops exec_ops = {
 	"exec", "Local exec file",
+	"Use an executable file as a target.\n\
+Specify the filename of the executable file.",
 	exec_file_command, exec_close, /* open, close */
 	child_attach, 0, 0, 0, /* attach, detach, resume, wait, */
 	0, 0, /* fetch_registers, store_registers, */
@@ -348,6 +390,13 @@ No arg means to have no executable file and no symbols.");
 If FILE cannot be found as specified, your execution directory path\n\
 is searched for a command of that name.\n\
 No arg means have no executable file.");
+
+  add_com ("section", class_files, set_section_command,
+   "Change the base address of section SECTION of the exec file to ADDR.\n\
+This can be used if the exec file does not contain section addresses,\n\
+(such as in the a.out format), or when the addresses specified in the\n\
+file itself are wrong.  Each section must be changed separately.  The\n\
+``info files'' command lists all the sections and their addresses.");
 
   add_target (&exec_ops);
 }

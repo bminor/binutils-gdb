@@ -162,6 +162,8 @@ remote_open (name, from_tty)
 "To open a remote debug connection, you need to specify what serial\n\
 device is attached to the remote system (e.g. /dev/ttya).");
 
+  target_preopen (from_tty);
+
   remote_close (0);
 
 #if 0
@@ -805,6 +807,8 @@ dcache_init ()
 
 struct target_ops remote_ops = {
 	"remote", "Remote serial target in gdb-specific protocol",
+	"Use a remote computer via a serial line, using a gdb-specific protocol.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).",
 	remote_open, remote_close,
 	0, remote_detach, remote_resume, remote_wait,  /* attach */
 	remote_fetch_registers, remote_store_registers,

@@ -220,6 +220,8 @@ nindy_open (name, from_tty)
   if (!name)
     error_no_arg ("serial port device name");
 
+  target_preopen (from_tty);
+  
   nindy_close (0);
 
 	have_regs = regs_changed = 0;
@@ -932,6 +934,11 @@ nindy_before_main_loop ()
 
 struct target_ops nindy_ops = {
 	"nindy", "Remote serial target in i960 NINDY-specific protocol",
+	"Use a remote i960 system running NINDY connected by a serial line.\n\
+Specify the name of the device the serial line is connected to.\n\
+The speed (baud rate), whether to use the old NINDY protocol,\n\
+and whether to send a break on startup, are controlled by options\n\
+specified when you started GDB.",
 	nindy_open, nindy_close,
 	0, nindy_detach, nindy_resume, nindy_wait,
 	nindy_fetch_registers, nindy_store_registers,

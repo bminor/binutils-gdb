@@ -312,6 +312,8 @@ eb_open (name, from_tty)
 
   char *p;
 
+  target_preopen (from_tty);
+  
   /* Find the first whitespace character, it separates dev_name from
      prog_name.  */
   if (name == 0)
@@ -907,6 +909,11 @@ eb_read_inferior_memory(memaddr, myaddr, len)
 
 struct target_ops eb_ops = {
 	"amd-eb", "Remote serial AMD EBMON target",
+	"Use a remote computer running EBMON connected by a serial line.\n\
+Arguments are the name of the device for the serial line,\n\
+the speed to connect at in bits per second, and the filename of the\n\
+executable as it exists on the remote computer.  For example,\n\
+        target amd-eb /dev/ttya 9600 demo",
 	eb_open, eb_close, 
 	0, eb_detach, eb_resume, eb_wait,
 	eb_fetch_register, eb_store_register,
