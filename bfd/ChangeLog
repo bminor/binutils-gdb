@@ -1,3 +1,10 @@
+Sun Aug  2 03:19:23 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Init sgot to NULL.  Create the
+	.got if any relocation referrs to _GLOBAL_OFFSET_TABLE_.
+	(ppc_elf_relocate_section): Pull sgot and splt search to the start
+	of the function.  Recognize no .plt as static linking.
+
 1998-08-01  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf32-mips.c (_bfd_mips_elf_section_from_shdr): Don't pass
