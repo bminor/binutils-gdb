@@ -3078,7 +3078,7 @@ show_endian (args, from_tty)
     (target_byte_order_auto
      ? "The target endianness is set automatically (currently %s endian)\n"
      : "The target is assumed to be %s endian\n");
-  printf_unfiltered (msg, TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
+  printf_unfiltered ((char *) msg, TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
 }
 
 #endif /* defined (TARGET_BYTE_ORDER_SELECTABLE) */

@@ -1,3 +1,8 @@
+Thu Jul 20 15:04:57 1995  Fred Fish  <fnf@cygnus.com>
+
+	* top.c (show_endian): Cast first arg of printf_unfiltered to
+	correct type of "char *".
+
 Thu Jul 20 14:18:51 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* lynx-nat.c (child_wait): A thread_id of zero from wait apparently
