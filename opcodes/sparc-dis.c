@@ -340,55 +340,56 @@ print_insn_sparc (memaddr, info)
 
 
 		  case 'k':
-		    print_address ((bfd_vma)
-				   (memaddr
-				    + (((int) insn.disp14 << 18) >> 18) * 4),
-				   stream);
+		    (*info->print_address_func)
+		      ((bfd_vma) (memaddr
+				  + (((int) insn.disp14 << 18) >> 18) * 4),
+		       info);
 		    break;
 
 		  case 'G':
-		    print_address ((bfd_vma)
-				   (memaddr
-				    /* We use only 19 of the 21 bits.  */
-				    + (((int) insn.disp21 << 13) >> 13) * 4),
-				   stream);
+		    (*info->print_address_func)
+		      ((bfd_vma) (memaddr
+				  /* We use only 19 of the 21 bits.  */
+				  + (((int) insn.disp21 << 13) >> 13) * 4),
+		       info);
 		    break;
 
 		  case '6':
 		  case '7':
 		  case '8':
 		  case '9':
-		    fprintf (stream, "fcc%c", *s - '6' + '0');
+		    (*info->fprintf_func) (stream, "fcc%c", *s - '6' + '0');
 		    break;
 
 		  case 'z':
-		    fputs ("icc", stream);
+		    (*info->fprintf_func) (stream, "icc");
 		    break;
 
 		  case 'Z':
-		    fputs ("xcc", stream);
+		    (*info->fprintf_func) (stream, "xcc");
 		    break;
 
 		  case 'E':
-		    fputs ("%ccr", stream);
+		    (*info->fprintf_func) (stream, "%%ccr");
 		    break;
 
 		  case 's':
-		    fputs ("%fprs", stream);
+		    (*info->fprintf_func) (stream, "%%fprs");
 		    break;
 #endif				/* NO_V9 */
 
 		  case 'M':
-		    fprintf(stream, "%%asr%d", insn.rs1);
+		    (*info->fprintf_func) (stream, "%%asr%d", insn.rs1);
 		    break;
 		    
 		  case 'm':
-		    fprintf(stream, "%%asr%d", insn.rd);
+		    (*info->fprintf_func) (stream, "%%asr%d", insn.rd);
 		    break;
 		    
 		  case 'L':
-		    print_address ((bfd_vma) memaddr + insn.disp30 * 4,
-				   stream);
+		    (*info->print_address_func)
+		     ((bfd_vma) memaddr + insn.disp30 * 4,
+		      info);
 		    break;
 
 		  case 'l':
@@ -401,10 +402,10 @@ print_insn_sparc (memaddr, info)
 		    else
 		      /* We cannot trust the compiler to sign-extend
 			 when extracting the bitfield, hence the shifts.  */
-		      print_address ((bfd_vma)
-				     (memaddr
-				      + (((int) insn.disp22 << 10) >> 10) * 4),
-				     stream);
+		      (*info->print_address_func)
+			((bfd_vma) (memaddr
+				    + (((int) insn.disp22 << 10) >> 10) * 4),
+			 info);
 		    break;
 
 		  case 'A':
@@ -412,35 +413,35 @@ print_insn_sparc (memaddr, info)
 		    break;
 
 		  case 'C':
-		    (*info->fprintf_func) (stream, "%csr");
+		    (*info->fprintf_func) (stream, "%%csr");
 		    break;
 
 		  case 'F':
-		    (*info->fprintf_func) (stream, "%fsr");
+		    (*info->fprintf_func) (stream, "%%fsr");
 		    break;
 
 		  case 'p':
-		    (*info->fprintf_func) (stream, "%psr");
+		    (*info->fprintf_func) (stream, "%%psr");
 		    break;
 
 		  case 'q':
-		    (*info->fprintf_func) (stream, "%fq");
+		    (*info->fprintf_func) (stream, "%%fq");
 		    break;
 
 		  case 'Q':
-		    (*info->fprintf_func) (stream, "%cq");
+		    (*info->fprintf_func) (stream, "%%cq");
 		    break;
 
 		  case 't':
-		    (*info->fprintf_func) (stream, "%tbr");
+		    (*info->fprintf_func) (stream, "%%tbr");
 		    break;
 
 		  case 'w':
-		    (*info->fprintf_func) (stream, "%wim");
+		    (*info->fprintf_func) (stream, "%%wim");
 		    break;
 
 		  case 'y':
-		    (*info->fprintf_func) (stream, "%y");
+		    (*info->fprintf_func) (stream, "%%y");
 		    break;
 		  }
 	      }
@@ -490,8 +491,10 @@ print_insn_sparc (memaddr, info)
 		      (*info->fprintf_func) (stream, "\t! ");
 		      /* We cannot trust the compiler to sign-extend
 			 when extracting the bitfield, hence the shifts.  */
-		      print_address (((int) prev_insn.imm22 << 10)
-				     | (insn.imm13 << 19) >> 19, stream);
+		      (*info->print_address_func)
+			(((int) prev_insn.imm22 << 10)
+			 | (insn.imm13 << 19) >> 19,
+			 info);
 		    }
 		}
 	    }
