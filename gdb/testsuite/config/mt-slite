@@ -1,6 +1,7 @@
+CFLAGS = -g -Dusestubs
 LDFLAGS = ` \
   if [ -f $${rootme}/../../newlib/Makefile ]; then \
-    echo -L$${rootsrc}/../../newlib/stub/ex93x -L$${rootme}/../../newlib/stub/ex93x -Tex93x.ld -nostartfiles -N; \
+    echo -L$${rootsrc}/../../libgloss/ex93x -L$${rootme}/../../libgloss/ex93x -Tex93x.ld -nostartfiles -N; \
   else \
     echo -Tex93x.ld -nostartfiles -N; \
   fi`
