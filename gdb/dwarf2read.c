@@ -1002,6 +1002,7 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
     {
       dwarf_ranges_offset = sectp->filepos;
       dwarf_ranges_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf_ranges_section = sectp;
     }
 }
 
