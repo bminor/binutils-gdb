@@ -3039,7 +3039,7 @@ md_apply_fix (fixP, valp)
 	  && fmt != 32
 #endif
 	  )
-	new_val = ((fmt == 12 || fmt == 17) ? 8 : 0);
+	new_val = ((fmt == 12 || fmt == 17 || fmt == 22) ? 8 : 0);
 #ifdef OBJ_SOM
       /* These field selectors imply that we do not want an addend.  */
       else if (hppa_fixP->fx_r_field == e_psel
@@ -3048,7 +3048,7 @@ md_apply_fix (fixP, valp)
 	       || hppa_fixP->fx_r_field == e_tsel
 	       || hppa_fixP->fx_r_field == e_rtsel
 	       || hppa_fixP->fx_r_field == e_ltsel)
-	new_val = ((fmt == 12 || fmt == 17) ? 8 : 0);
+	new_val = ((fmt == 12 || fmt == 17 || fmt == 22) ? 8 : 0);
       /* This is truely disgusting.  The machine independent code blindly
 	 adds in the value of the symbol being relocated against.  Damn!  */
       else if (fmt == 32
@@ -3063,13 +3063,13 @@ md_apply_fix (fixP, valp)
       /* Handle pc-relative exceptions from above.  */
 #define arg_reloc_stub_needed(CALLER, CALLEE) \
   ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
-      if ((fmt == 12 || fmt == 17)
+      if ((fmt == 12 || fmt == 17 || fmt == 22)
 	  && fixP->fx_addsy
 	  && fixP->fx_pcrel
 	  && !arg_reloc_stub_needed ((long) ((obj_symbol_type *)
 			fixP->fx_addsy->bsym)->tc_data.ap.hppa_arg_reloc,
 				    hppa_fixP->fx_arg_reloc)
-	  && ((int)(*valp) > -262144 && (int)(*valp) < 262143)
+	  && (((int)(*valp) > -262144 && (int)(*valp) < 262143) && fmt != 22)
 	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
 	  && !(fixP->fx_subsy
 	       && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
