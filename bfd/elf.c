@@ -103,32 +103,25 @@ typedef struct
 } elf_symbol_type;
 
 /* Some private data is stashed away for future use using the tdata pointer
-   in the bfd structure.  This information is different for ELF core files
-   and other ELF files. */
+   in the bfd structure.  */
 
-typedef struct elf_core_tdata_struct
+struct elf_obj_tdata
 {
-  void *prstatus;		/* The raw /proc prstatus structure */
-  void *prpsinfo;		/* The raw /proc prpsinfo structure */
-} elf_core_tdata;
-
-#define core_prpsinfo(bfd) (((bfd)->tdata.elf_core_data) -> prpsinfo)
-#define core_prstatus(bfd) (((bfd)->tdata.elf_core_data) -> prstatus)
-
-
-typedef struct elf_obj_tdata_struct
-{
-  Elf_Internal_Ehdr *elf_header;
+  Elf_Internal_Ehdr elf_header[1];	/* Actual data, but ref like ptr */
   Elf_Internal_Shdr *elf_sect_ptr;
   struct strtab     *strtab_ptr;
   int		    symtab_section;
-} elf_obj_tdata;
+  void 		    *prstatus;		/* The raw /proc prstatus structure */
+  void 		    *prpsinfo;		/* The raw /proc prpsinfo structure */
+};
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
 #define elf_elfheader(bfd)	(elf_tdata(bfd) -> elf_header)
 #define elf_elfsections(bfd)	(elf_tdata(bfd) -> elf_sect_ptr)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
+#define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)
+#define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
 
 /* Translate an ELF symbol in external format into an ELF symbol in internal
    format. */
@@ -332,7 +325,27 @@ static struct sec * EXFUN(section_from_elf_index, (bfd *, int));
 static int EXFUN(elf_section_from_bfd_section, (bfd *, struct sec *));
 static boolean EXFUN(elf_slurp_symbol_table, (bfd *, Elf_Internal_Shdr*));
 static void EXFUN(elf_info_to_howto, (bfd *, arelent *, Elf_Internal_Rela *));
+static char *EXFUN(elf_get_str_section, (bfd *, unsigned int));
      
+/* Helper functions for GDB to locate the string tables.  */
+
+Elf_Internal_Shdr *
+DEFUN(bfd_elf_find_section, (abfd, name),	/* .stabstr offset */
+      bfd		*abfd AND
+      char		*name)
+{
+  Elf_Internal_Shdr *i_shdrp = elf_elfsections (abfd);
+  char *shstrtab = elf_get_str_section (abfd, elf_elfheader (abfd)->e_shstrndx);
+  unsigned int max = elf_elfheader (abfd)->e_shnum;
+  unsigned int i;
+
+  for (i = 1; i < max; i++)
+    if (!strcmp (&shstrtab[i_shdrp[i].sh_name], name))
+      return &i_shdrp[i];
+  return 0;
+}
+
+/* End of GDB support.  */
 
 static char *
 DEFUN(elf_get_str_section, (abfd, shindex),
@@ -342,14 +355,19 @@ DEFUN(elf_get_str_section, (abfd, shindex),
   Elf_Internal_Shdr *i_shdrp = elf_elfsections (abfd);
   unsigned int shstrtabsize = i_shdrp[shindex].sh_size;
   unsigned int offset = i_shdrp[shindex].sh_offset;
-  char *shstrtab;
+  char *shstrtab = i_shdrp[shindex].rawdata;
+
+  if (shstrtab)
+    return shstrtab;
+
   if ((shstrtab = elf_read (abfd, offset, shstrtabsize)) == NULL)
     {
       return (NULL);
     }
   i_shdrp[shindex].rawdata = (void*)shstrtab;
-
+  return shstrtab;
 }
+
 static char *
 DEFUN(elf_string_from_elf_section, (abfd, shindex, strindex),
       bfd		*abfd AND
@@ -358,6 +376,7 @@ DEFUN(elf_string_from_elf_section, (abfd, shindex, strindex),
 {
   Elf_Internal_Shdr *i_shdrp = elf_elfsections (abfd);
   Elf_Internal_Shdr *hdr = i_shdrp + shindex;
+
   if (! hdr->rawdata)
     {
       if (elf_get_str_section (abfd, shindex) == NULL)
@@ -462,8 +481,10 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
       target_sect->flags |= SEC_RELOC;
       target_sect->relocation = 0;
       target_sect->rel_filepos = hdr->sh_offset;
+#if 0
       fprintf(stderr, "ELF>> section %s reading %d relocs\n",
 	      target_sect->name, target_sect->reloc_count);
+#endif
       return true;
 
     }
@@ -471,16 +492,23 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
   case SHT_HASH:
   case SHT_DYNAMIC:
   case SHT_DYNSYM:		/* could treat this like symtab... */
+#if 0
     fprintf(stderr, "Dynamic Linking sections not yet supported.\n");
     abort ();
+#endif
     break;
   case SHT_NOTE:
+#if 0
     fprintf(stderr, "Note Sections not yet supported.\n");
     abort ();
+#endif
     break;
   case SHT_SHLIB:
+#if 0
     fprintf(stderr, "SHLIB Sections not supported (and non conforming.)\n");
+#endif
     return true;
+
   default:
     break;
   }
@@ -1001,7 +1029,7 @@ static bfd_target *
 DEFUN (elf_object_p, (abfd), bfd *abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
-  Elf_Internal_Ehdr i_ehdr;	/* Elf file header, internal form */
+  Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
   Elf_External_Shdr x_shdr;	/* Section header table entry, external form */
   Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   int shindex;
@@ -1065,27 +1093,27 @@ wrong:
   /* Allocate an instance of the elf_obj_tdata structure and hook it up to
      the tdata pointer in the bfd. */
 
-  if ((abfd -> tdata.elf_obj_data = 
-       (elf_obj_tdata*) bfd_zalloc (abfd, sizeof (elf_obj_tdata))) 
-      == NULL)
+  if (NULL == (elf_tdata (abfd) = (struct elf_obj_tdata *)
+               bfd_zalloc (abfd, sizeof (struct elf_obj_tdata))))
     {
       bfd_error = no_memory;
       return (NULL);
     }
 
+  /* FIXME:  Any `wrong' exits below here will leak memory (tdata).  */
+
   /* Now that we know the byte order, swap in the rest of the header */
-  elf_swap_ehdr_in (abfd, &x_ehdr, &i_ehdr);
-  /* FIXME: should be alloc'ed */
-  elf_elfheader (abfd) = &i_ehdr;
+  i_ehdrp = elf_elfheader (abfd);
+  elf_swap_ehdr_in (abfd, &x_ehdr, i_ehdrp);
   
   /* If there is no section header table, we're hosed. */
-  if (i_ehdr.e_shoff == 0)
+  if (i_ehdrp->e_shoff == 0)
     goto wrong;
 
-  if (i_ehdr.e_type == ET_EXEC || i_ehdr.e_type == ET_DYN)
+  if (i_ehdrp->e_type == ET_EXEC || i_ehdrp->e_type == ET_DYN)
     abfd -> flags |= EXEC_P;
 
-  switch (i_ehdr.e_machine)
+  switch (i_ehdrp->e_machine)
     {
     case EM_NONE:
     case EM_M32:		/* or should this be bfd_arch_obscure? */
@@ -1119,21 +1147,21 @@ wrong:
      check, verify that the what BFD thinks is the size of each section
      header table entry actually matches the size recorded in the file. */
 
-  if (i_ehdr.e_shentsize != sizeof (x_shdr))
+  if (i_ehdrp->e_shentsize != sizeof (x_shdr))
     goto wrong;
   i_shdrp = (Elf_Internal_Shdr *)
-    bfd_alloc (abfd, sizeof (*i_shdrp) * i_ehdr.e_shnum);
+    bfd_alloc (abfd, sizeof (*i_shdrp) * i_ehdrp->e_shnum);
   if (! i_shdrp)
     {
       bfd_error = no_memory;
       return (NULL);
     }
-  if (bfd_seek (abfd, i_ehdr.e_shoff, SEEK_SET) == -1)
+  if (bfd_seek (abfd, i_ehdrp->e_shoff, SEEK_SET) == -1)
     {
       bfd_error = system_call_error;
       return (NULL);
     }
-  for (shindex = 0; shindex < i_ehdr.e_shnum; shindex++)
+  for (shindex = 0; shindex < i_ehdrp->e_shnum; shindex++)
     {
       if (bfd_read ((PTR) &x_shdr, sizeof x_shdr, 1, abfd)
 	  != sizeof (x_shdr))
@@ -1152,7 +1180,7 @@ wrong:
      bfd_section_from_shdr with it (since this particular strtab is
      used to find all of the ELF section names.) */
 
-  shstrtab = elf_get_str_section (abfd, i_ehdr.e_shstrndx);
+  shstrtab = elf_get_str_section (abfd, i_ehdrp->e_shstrndx);
   if (! shstrtab)
     return (NULL);
   
@@ -1164,14 +1192,14 @@ wrong:
      offset and section size for both the symbol table section and the
      associated string table section. */
 
-  for (shindex = 1; shindex < i_ehdr.e_shnum; shindex++)
+  for (shindex = 1; shindex < i_ehdrp->e_shnum; shindex++)
     {
       bfd_section_from_shdr (abfd, shindex);
     }
 
   /* Remember the entry point specified in the ELF file header. */
 
-  bfd_get_start_address (abfd) = i_ehdr.e_entry;
+  bfd_get_start_address (abfd) = i_ehdrp->e_entry;
 
   return (abfd->xvec);
 }
@@ -1193,7 +1221,7 @@ static bfd_target *
 DEFUN (elf_core_file_p, (abfd), bfd *abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
-  Elf_Internal_Ehdr i_ehdr;	/* Elf file header, internal form */
+  Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
   Elf_External_Phdr x_phdr;	/* Program header table entry, external form */
   Elf_Internal_Phdr *i_phdrp;	/* Program header table, internal form */
   unsigned int phindex;
@@ -1250,46 +1278,49 @@ wrong:
       goto wrong;
     }
   
-  /* Now that we know the byte order, swap in the rest of the header */
-  elf_swap_ehdr_in (abfd, &x_ehdr, &i_ehdr);
-
-  /* If there is no program header, or the type is not a core file, then
-     we are hosed. */
-  if (i_ehdr.e_phoff == 0 || i_ehdr.e_type != ET_CORE)
-    goto wrong;
-
-  /* Allocate an instance of the elf_core_tdata structure and hook it up to
+  /* Allocate an instance of the elf_obj_tdata structure and hook it up to
      the tdata pointer in the bfd. */
 
-  abfd->tdata.elf_core_data =
-    (elf_core_tdata *) bfd_zalloc (abfd, sizeof (elf_core_tdata));
-  if (abfd->tdata.elf_core_data == NULL)
+  elf_tdata (abfd) =
+    (struct elf_obj_tdata *) bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
+  if (elf_tdata (abfd) == NULL)
     {
       bfd_error = no_memory;
       return (NULL);
     }
 
+  /* FIXME, `wrong' returns from this point onward, leak memory.  */
+
+  /* Now that we know the byte order, swap in the rest of the header */
+  i_ehdrp = elf_elfheader (abfd);
+  elf_swap_ehdr_in (abfd, &x_ehdr, i_ehdrp);
+
+  /* If there is no program header, or the type is not a core file, then
+     we are hosed. */
+  if (i_ehdrp->e_phoff == 0 || i_ehdrp->e_type != ET_CORE)
+    goto wrong;
+
   /* Allocate space for a copy of the program header table in 
-      internal form, seek to the program header table in the file,
+     internal form, seek to the program header table in the file,
      read it in, and convert it to internal form.  As a simple sanity
      check, verify that the what BFD thinks is the size of each program
      header table entry actually matches the size recorded in the file. */
 
-  if (i_ehdr.e_phentsize != sizeof (x_phdr))
+  if (i_ehdrp->e_phentsize != sizeof (x_phdr))
     goto wrong;
   i_phdrp = (Elf_Internal_Phdr *)
-    bfd_alloc (abfd, sizeof (*i_phdrp) * i_ehdr.e_phnum);
+    bfd_alloc (abfd, sizeof (*i_phdrp) * i_ehdrp->e_phnum);
   if (! i_phdrp)
     {
       bfd_error = no_memory;
       return (NULL);
     }
-  if (bfd_seek (abfd, i_ehdr.e_phoff, SEEK_SET) == -1)
+  if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) == -1)
     {
       bfd_error = system_call_error;
       return (NULL);
     }
-  for (phindex = 0; phindex < i_ehdr.e_phnum; phindex++)
+  for (phindex = 0; phindex < i_ehdrp->e_phnum; phindex++)
     {
       if (bfd_read ((PTR) &x_phdr, sizeof (x_phdr), 1, abfd)
 	  != sizeof (x_phdr))
@@ -1303,7 +1334,7 @@ wrong:
   /* Once all of the program headers have been read and converted, we
      can start processing them. */
 
-  for (phindex = 0; phindex < i_ehdr.e_phnum; phindex++)
+  for (phindex = 0; phindex < i_ehdrp->e_phnum; phindex++)
     {
       bfd_section_from_phdr (abfd, i_phdrp + phindex, phindex);
       if ((i_phdrp + phindex) -> p_type == PT_NOTE)
@@ -1314,7 +1345,7 @@ wrong:
 
   /* Remember the entry point specified in the ELF file header. */
 
-  bfd_get_start_address (abfd) = i_ehdr.e_entry;
+  bfd_get_start_address (abfd) = i_ehdrp->e_entry;
 
   return (abfd->xvec);
 }
@@ -1324,8 +1355,8 @@ DEFUN (elf_mkobject, (abfd), bfd *abfd)
 {
   /* this just does initialization */
   /* coff_mkobject zalloc's space for tdata.coff_obj_data ... */
-  elf_tdata(abfd) = (elf_obj_tdata *)
-    bfd_zalloc (abfd, sizeof(elf_obj_tdata));
+  elf_tdata(abfd) = (struct elf_obj_tdata *)
+    bfd_zalloc (abfd, sizeof(struct elf_obj_tdata));
   if (elf_tdata(abfd) == 0) {
     bfd_error = no_memory;
     return false;
@@ -1526,103 +1557,101 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd *abfd)
   elf_sect_thunk est;
 
   if (! elf_shstrtab (abfd)) {
-  i_ehdrp = (Elf_Internal_Ehdr *)
-    bfd_alloc (abfd, sizeof (*i_ehdrp));
-  shstrtab = bfd_new_strtab(abfd);
-  
-  i_ehdrp->e_ident[EI_MAG0] = ELFMAG0;
-  i_ehdrp->e_ident[EI_MAG1] = ELFMAG1;
-  i_ehdrp->e_ident[EI_MAG2] = ELFMAG2;
-  i_ehdrp->e_ident[EI_MAG3] = ELFMAG3;
-
-  i_ehdrp->e_ident[EI_CLASS] = ELFCLASS32; /* FIXME: find out from bfd */
-  i_ehdrp->e_ident[EI_DATA] =
-    abfd->xvec->byteorder_big_p ? ELFDATA2MSB : ELFDATA2LSB;
-  i_ehdrp->e_ident[EI_VERSION] = EV_CURRENT;
-
-  for(count = EI_PAD; count < EI_NIDENT; count ++)
-    i_ehdrp->e_ident[count] = 0;
+    i_ehdrp = elf_elfheader (abfd);	/* build new header in tdata memory */
+    shstrtab = bfd_new_strtab(abfd);
     
-  i_ehdrp->e_type = (abfd->flags & EXEC_P)? ET_EXEC : ET_REL;
-  switch(bfd_get_arch(abfd))
-    {
-    case bfd_arch_unknown:
-      i_ehdrp->e_machine = EM_NONE;
-      break;
-    case bfd_arch_sparc:
-      i_ehdrp->e_machine = EM_SPARC;
-      break;
-    case bfd_arch_i386:
-      i_ehdrp->e_machine = EM_386;
-      break;
-    case bfd_arch_m68k:
-      i_ehdrp->e_machine = EM_68K;
-      break;
-    case bfd_arch_m88k:
-      i_ehdrp->e_machine = EM_88K;
-      break;
-    case bfd_arch_i860:
-      i_ehdrp->e_machine = EM_860;
-      break;
-    case bfd_arch_mips:		  /* MIPS Rxxxx */
-      i_ehdrp->e_machine = EM_MIPS; /* only MIPS R3000 */
-      break;
-      /* also note that EM_M32, AT&T WE32100 is unknown to bfd */
-    default:
-      i_ehdrp->e_machine = EM_NONE;
-    }
-  i_ehdrp->e_version = EV_CURRENT;
-  i_ehdrp->e_ehsize = sizeof(Elf_External_Ehdr);
-  
-  /* no program header, for now. */
-  i_ehdrp->e_phoff = 0;
-  i_ehdrp->e_phentsize = 0;
-  i_ehdrp->e_phnum = 0;
+    i_ehdrp->e_ident[EI_MAG0] = ELFMAG0;
+    i_ehdrp->e_ident[EI_MAG1] = ELFMAG1;
+    i_ehdrp->e_ident[EI_MAG2] = ELFMAG2;
+    i_ehdrp->e_ident[EI_MAG3] = ELFMAG3;
 
-  /* each bfd section is section header entry */
-  i_ehdrp->e_entry = bfd_get_start_address (abfd);
-  i_ehdrp->e_shentsize = sizeof (Elf_External_Shdr);
+    i_ehdrp->e_ident[EI_CLASS] = ELFCLASS32; /* FIXME: find out from bfd */
+    i_ehdrp->e_ident[EI_DATA] =
+      abfd->xvec->byteorder_big_p ? ELFDATA2MSB : ELFDATA2LSB;
+    i_ehdrp->e_ident[EI_VERSION] = EV_CURRENT;
 
-  /* can't do this: we'll need many more... */
-  /* i_ehdr.e_shnum = bfd_count_sections(abfd)+1; /* include 0th, shstrtab */
-  /* figure at most each section can have a rel, strtab, symtab */
-  maxsections = 4*bfd_count_sections(abfd)+2;
+    for(count = EI_PAD; count < EI_NIDENT; count ++)
+      i_ehdrp->e_ident[count] = 0;
+      
+    i_ehdrp->e_type = (abfd->flags & EXEC_P)? ET_EXEC : ET_REL;
+    switch(bfd_get_arch(abfd))
+      {
+      case bfd_arch_unknown:
+	i_ehdrp->e_machine = EM_NONE;
+	break;
+      case bfd_arch_sparc:
+	i_ehdrp->e_machine = EM_SPARC;
+	break;
+      case bfd_arch_i386:
+	i_ehdrp->e_machine = EM_386;
+	break;
+      case bfd_arch_m68k:
+	i_ehdrp->e_machine = EM_68K;
+	break;
+      case bfd_arch_m88k:
+	i_ehdrp->e_machine = EM_88K;
+	break;
+      case bfd_arch_i860:
+	i_ehdrp->e_machine = EM_860;
+	break;
+      case bfd_arch_mips:		  /* MIPS Rxxxx */
+	i_ehdrp->e_machine = EM_MIPS; /* only MIPS R3000 */
+	break;
+	/* also note that EM_M32, AT&T WE32100 is unknown to bfd */
+      default:
+	i_ehdrp->e_machine = EM_NONE;
+      }
+    i_ehdrp->e_version = EV_CURRENT;
+    i_ehdrp->e_ehsize = sizeof(Elf_External_Ehdr);
+    
+    /* no program header, for now. */
+    i_ehdrp->e_phoff = 0;
+    i_ehdrp->e_phentsize = 0;
+    i_ehdrp->e_phnum = 0;
 
-  i_ehdrp->e_shoff = i_ehdrp->e_ehsize;
+    /* each bfd section is section header entry */
+    i_ehdrp->e_entry = bfd_get_start_address (abfd);
+    i_ehdrp->e_shentsize = sizeof (Elf_External_Shdr);
 
-  /* and we'll just have to fix up the offsets later. */
-  /* outbase += i_ehdr.e_shentsize * i_ehdr.e_shnum; */
-  
-  i_shdrp = (Elf_Internal_Shdr *)
-    bfd_alloc (abfd, sizeof (*i_shdrp) * maxsections);
-  if (! i_shdrp)
-    {
-      bfd_error = no_memory;
-      return (false);
-    }
-  for (count=0; count < maxsections; count++) 
-    {
-      i_shdrp[count].rawdata = 0;
-      i_shdrp[count].contents = 0;
-    }
-  
-  
-  i_shdrp[0].sh_name = 0;
-  i_shdrp[0].sh_type = SHT_NULL;
-  i_shdrp[0].sh_flags = 0;
-  i_shdrp[0].sh_addr = 0;
-  i_shdrp[0].sh_offset = 0;
-  i_shdrp[0].sh_size = 0;
-  i_shdrp[0].sh_link = SHN_UNDEF;
-  i_shdrp[0].sh_info = 0;
-  i_shdrp[0].sh_addralign = 0;
-  i_shdrp[0].sh_entsize = 0;
+    /* can't do this: we'll need many more... */
+    /* i_ehdr.e_shnum = bfd_count_sections(abfd)+1; /* include 0th, shstrtab */
+    /* figure at most each section can have a rel, strtab, symtab */
+    maxsections = 4*bfd_count_sections(abfd)+2;
 
-  i_ehdrp->e_shnum = 1;
+    i_ehdrp->e_shoff = i_ehdrp->e_ehsize;
 
-  elf_elfheader (abfd) = i_ehdrp;
-  elf_elfsections (abfd) = i_shdrp;
-  elf_shstrtab (abfd) = shstrtab;
+    /* and we'll just have to fix up the offsets later. */
+    /* outbase += i_ehdr.e_shentsize * i_ehdr.e_shnum; */
+    
+    i_shdrp = (Elf_Internal_Shdr *)
+      bfd_alloc (abfd, sizeof (*i_shdrp) * maxsections);
+    if (! i_shdrp)
+      {
+	bfd_error = no_memory;
+	return (false);
+      }
+    for (count=0; count < maxsections; count++) 
+      {
+	i_shdrp[count].rawdata = 0;
+	i_shdrp[count].contents = 0;
+      }
+    
+    
+    i_shdrp[0].sh_name = 0;
+    i_shdrp[0].sh_type = SHT_NULL;
+    i_shdrp[0].sh_flags = 0;
+    i_shdrp[0].sh_addr = 0;
+    i_shdrp[0].sh_offset = 0;
+    i_shdrp[0].sh_size = 0;
+    i_shdrp[0].sh_link = SHN_UNDEF;
+    i_shdrp[0].sh_info = 0;
+    i_shdrp[0].sh_addralign = 0;
+    i_shdrp[0].sh_entsize = 0;
+
+    i_ehdrp->e_shnum = 1;
+
+    elf_elfsections (abfd) = i_shdrp;
+    elf_shstrtab (abfd) = shstrtab;
   }
   est.i_ehdr = elf_elfheader(abfd);
   est.i_shdrp = elf_elfsections(abfd);
@@ -1921,6 +1950,12 @@ DEFUN (elf_slurp_symbol_table, (abfd, hdr),
 	  sym -> name = elf_string_from_elf_section(abfd, hdr->sh_link,
 						    i_sym.st_name);
 	  sym -> value = i_sym.st_value;
+/* FIXME -- this is almost certainly bogus.  It's from Pace Willisson's
+   hasty Solaris support, to pass the sizes of object files or functions
+   down into GDB via the back door, to circumvent some other kludge in
+   how Sun hacked stabs.  */
+	  sym -> udata = (PTR)i_sym.st_size;
+/* FIXME -- end of bogosity.  */
 	  if (i_sym.st_shndx > 0 && i_sym.st_shndx < SHN_LORESERV)
 	    {
 	      sym -> section = section_from_elf_index (abfd, i_sym.st_shndx);

@@ -1,3 +1,17 @@
+Thu Jun 11 00:52:03 1992  John Gilmore  (gnu at cygnus.com)
+
+	* elf.c (elf_obj_tdata):  Merge elf_obj_tdata_struct and
+	elf_core_tdata_struct into a single common struct.  Core files
+	wouldn't have worked at all without this.
+	(bfd_elf_find_section):  New function for GDB's undercover use
+	to find string sections that BFD hides from it.
+	(elf_get_str_section):  Avoid multiple alloc&reads for same data;
+	lint.
+	(elf_object_p, elf_core_file_p):  Allocate internal file header
+	storage dynamically.
+	* bfd.c (union {...} tdata):  Remove elf_core_tdata_struct.
+	* demo64.c:  Prevent "empty translation unit" warnings from idiots.
+
 Tue Jun  9 17:15:26 1992  Fred Fish  (fnf at cygnus.com)
 
 	* config/{i386v4.mh, ncr3000.mh}:  Update RANLIB, add INSTALL.
