@@ -204,27 +204,58 @@ OP_600 ()
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
-/* sub reg1, reg2
-
-   XXX condition codes  */
+/* sub reg1, reg2 */
 void
 OP_1A0 ()
 {
-  State.regs[OP[1]] -= State.regs[OP[0]];
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op1 - op0;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < -op0);
+  ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
+	&& (op1 & 0x80000000) != (result & 0x80000000));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
+  State.regs[OP[1]] = State.regs[OP[0]];
 }
 
-/* subr reg1, reg2
-
-   XXX condition codes */
+/* subr reg1, reg2 */
 void
 OP_180 ()
 {
-  State.regs[OP[1]] = State.regs[OP[0]] - State.regs[OP[1]];
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op0 - op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < -op1);
+  ov = ((op0 & 0x80000000) != (op1 & 0x80000000)
+	&& (op0 & 0x80000000) != (result & 0x80000000));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
-/* mulh reg1, reg2
-
-   XXX condition codes */
+/* mulh reg1, reg2 */
 void
 OP_E0 ()
 {
@@ -245,9 +276,7 @@ OP_2E0 ()
   State.regs[OP[1]] = (State.regs[OP[1]] & 0xffff) * value;
 }
 
-/* mulhi imm16, reg1, reg2
-
-   XXX condition codes */
+/* mulhi imm16, reg1, reg2 */
 void
 OP_6E0 ()
 {
@@ -258,14 +287,41 @@ OP_6E0 ()
   State.regs[OP[2]] = (State.regs[OP[1]] & 0xffff) * value;
 }
 
-/* divh reg1, reg2
-
-   XXX condition codes.
-   XXX Is this signed or unsigned?  */
+/* divh reg1, reg2 */
 void
 OP_40 ()
 {
-  State.regs[OP[1]] /= (State.regs[OP[0]] & 0xffff);
+  unsigned int op0, op1, result, z, s, cy, ov;
+  int temp;
+
+  /* Compute the result.  */
+  temp = State.regs[OP[0]] & 0xffff;
+  temp = (temp << 16) >> 16;
+  op0 = temp;
+  op1 = State.regs[OP[1]];
+
+  if (op0 == 0xffffffff && op1 == 0x80000000)
+    {
+      result = 0x80000000;
+      ov = 1;
+    }
+  else if (op0 != 0)
+    {
+      result = op1 / op0;
+      ov = 0;
+    }
+  else
+    ov = 1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (ov ? PSW_OV : 0));
 }
 
 void
