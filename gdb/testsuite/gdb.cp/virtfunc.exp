@@ -734,7 +734,6 @@ proc test_virtual_calls {} {
     global gdb_prompt
     global GDB
     global nl
-    global gcc_compiled
 
     if [target_info exists gdb,cannot_call_functions] {
 	setup_xfail "*-*-*" 2416

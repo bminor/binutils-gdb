@@ -1,4 +1,15 @@
-2003-11-23  Michael Chastain  <mec@shout.net>
+2003-11-23  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.cp/ambiguous.exp: Replace reference to gcc_compiled with
+	call to test_compiler_info.
+	* gdb.cp/ctti.exp: Likewise.
+	* gdb.cp/derivation.exp: Likewise.
+	* gdb.cp/member-ptr.exp: Likewise.
+	* gdb.cp/virtfunc.exp (test_virtual_calls): Remove unused
+	reference to gcc_compiled.
+
+2003-11-23  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Fix PR testsuite/1463.
 	* gdb.base/structs.exp (start_structs_test): Call
