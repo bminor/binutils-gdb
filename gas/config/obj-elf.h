@@ -51,6 +51,10 @@
 #define S_SET_SIZE(S,V) \
   (elf_symbol((S)->bsym)->internal_elf_sym.st_size = (V))
 
+#define S_GET_ALIGN(S) (elf_symbol ((S)->bsym)->internal_elf_sym.st_value)
+#define S_SET_ALIGN(S,V) \
+  (elf_symbol ((S)->bsym)->internal_elf_sym.st_value = (V))
+
 extern asection *gdb_section;
 
 /* Copy over the function bit and size of a forwarded symbol.  */
@@ -67,6 +71,10 @@ extern void elf_file_symbol PARAMS ((char *));
 extern void obj_elf_section PARAMS ((int));
 extern void obj_elf_previous PARAMS ((int));
 extern void obj_elf_version PARAMS ((int));
+
+/* BFD wants to write the udata field, which is a no-no for the
+   globally defined sections.  */
+#define obj_sec_sym_ok_for_reloc(SEC)	((SEC)->owner != 0)
 
 /* Stabs go in a separate section.  */
 #define SEPARATE_STAB_SECTIONS
@@ -90,7 +98,7 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
   ELF_TARGET_SYMBOL_FIELDS \
   struct efdr *ecoff_file; \
   struct localsym *ecoff_symbol; \
-  char ecoff_undefined;
+  valueT ecoff_extern_size;
 
 /* We smuggle stabs in ECOFF rather than using a separate section.
    The Irix linker can not handle a separate stabs section.  */
@@ -98,6 +106,9 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
 #undef INIT_STAB_SECTION
 #define OBJ_PROCESS_STAB(what, string, type, other, desc) \
   ecoff_stab ((what), (string), (type), (other), (desc))
+
+#define OBJ_GENERATE_ASM_LINE_STAB(lineno) \
+  ecoff_generate_asm_line_stab ((lineno))
 
 /* ECOFF requires that we call the ecoff_frob_symbol hook.  */
 #define obj_frob_symbol(symp, punt) ecoff_frob_symbol (symp)

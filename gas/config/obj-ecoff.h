@@ -36,7 +36,7 @@
 #define TARGET_SYMBOL_FIELDS \
   struct efdr *ecoff_file; \
   struct localsym *ecoff_symbol; \
-  char ecoff_undefined;
+  valueT ecoff_extern_size;
 
 /* Modify the ECOFF symbol.  */
 #define obj_frob_symbol(symp, punt) ecoff_frob_symbol (symp)
@@ -54,4 +54,8 @@ extern void ecoff_frob_file PARAMS ((void));
 #define OBJ_PROCESS_STAB(what, string, type, other, desc) \
   ecoff_stab ((what), (string), (type), (other), (desc))
 
+#define OBJ_GENERATE_ASM_LINE_STAB(lineno) \
+  ecoff_generate_asm_line_stab ((lineno))
+
 #define EMIT_SECTION_SYMBOLS		0
+#define obj_sec_sym_ok_for_reloc(SEC)	1
