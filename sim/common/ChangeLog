@@ -1,3 +1,13 @@
+Sun Mar 22 16:45:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-base.h, hw-base.c (do_hw_attach_regs): Copy function from
+ 	../ppc/device_table.c.
+
+	* dv-pal.c (hw_pal_finish): Attach PAL device to parent bus.
+
+	* hw-tree.c (print_properties): Supress path when printing
+ 	properties of root node.
+
 Sun Mar 22 16:21:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-device.h (HW_TRACE): Define.
@@ -32,6 +42,8 @@ Sun Mar 22 15:23:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(hw_create): Allocate the base type using HW_ZALLOC before setting
  	any methods.
 
+	* hw-tree.h, hw-tree.c (hw_tree_delete): New function.
+	
 	* hw-properties.c: Replace zalloc/zfree with hw_zalloc/hw_free.
 	
 	* hw-ports.c: Replace zalloc/zfree with hw_zalloc/hw_free.

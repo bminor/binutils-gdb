@@ -385,6 +385,8 @@ hw_pal_finish (struct hw *hw)
   set_hw_io_read_buffer (hw, hw_pal_io_read_buffer);
   set_hw_io_write_buffer (hw, hw_pal_io_write_buffer);
   set_hw_ports (hw, hw_pal_ports);
+  /* attach ourselves */
+  do_hw_attach_regs (me);
 }
 
 

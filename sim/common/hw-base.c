@@ -442,10 +442,6 @@ hw_create (SIM_DESC sd,
       }
   }
 
-  /* Fill in the (hopefully) defined trace variable */
-  if (hw_find_property (hw, "trace?") != NULL)
-    hw->trace_of_hw_p = hw_find_boolean_property (hw, "trace?");
-
   /* Attach dummy ports */
   set_hw_ports (hw, empty_hw_ports);
   set_hw_port_event (hw, panic_hw_port_event);
@@ -477,6 +473,10 @@ hw_finish (struct hw *me)
       hw_find_integer_property (me, "#size-cells");
   else
     me->nr_size_cells_of_hw_unit = 1;
+
+  /* Fill in the (hopefully) defined trace variable */
+  if (hw_find_property (hw, "trace?") != NULL)
+    hw->trace_of_hw_p = hw_find_boolean_property (hw, "trace?");
 
   /* Allow the real device to override any methods */
   me->base_of_hw->descriptor->to_finish (me);
@@ -522,4 +522,60 @@ hw_delete (struct hw *me)
   /* finally */
   zfree (me->base_of_hw);
   zfree (me);
+}
+
+
+/* Go through the devices various reg properties for those that
+   specify attach addresses */
+
+
+void
+do_hw_attach_regs (struct hw *hw)
+{
+  static const char *(reg_property_names[]) = {
+    "attach-addresses",
+    "assigned-addresses",
+    "reg",
+    "alternate-reg" ,
+    NULL
+  };
+  const char **reg_property_name;
+  int nr_valid_reg_properties = 0;
+  for (reg_property_name = reg_property_names;
+       *reg_property_name != NULL;
+       reg_property_name++)
+    {
+      if (hw_find_property (hw, *reg_property_name) != NULL)
+	{
+	  reg_property_spec reg;
+	  int reg_entry;
+	  for (reg_entry = 0;
+	       hw_find_reg_array_property (hw, *reg_property_name, reg_entry,
+					   &reg);
+	       reg_entry++)
+	    {
+	      unsigned_word attach_address;
+	      int attach_space;
+	      unsigned attach_size;
+	      if (!hw_unit_address_to_attach_address (hw_parent (hw),
+						      &reg.address,
+						      &attach_space,
+						      &attach_address,
+						      hw))
+		continue;
+	      if (!hw_unit_size_to_attach_size (hw_parent (hw),
+						&reg.size,
+						&attach_size, hw))
+		continue;
+	      hw_attach_address (hw_parent (hw),
+				 0,
+				 attach_space, attach_address, attach_size,
+				 hw);
+	      nr_valid_reg_properties++;
+	    }
+	  /* if first option matches don't try for any others */
+	  if (reg_property_name == reg_property_names)
+	    break;
+	}
+    }
 }
