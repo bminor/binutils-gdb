@@ -1,3 +1,7 @@
+2000-05-23  Philip Blundell  <pb@futuretv.com>
+
+	* configure.in: Set version to 2.10.
+
 Sat Jul  3 10:35:19 CDT 1999 Joel Sherrill <joel@OARcorp.com>
 
 	* config.bfd (sparc-rtemself): Added.
