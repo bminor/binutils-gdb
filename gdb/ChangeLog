@@ -1,3 +1,7 @@
+Sat Oct 17 17:39:23 1998  Felix Lee  <flee@cygnus.com>
+
+	* core-sol2.c: #include <sys/types.h>, for sol2.7 weirdness.
+
 Fri Oct 16 15:31:38 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* m32r-tdep.c (decode_prologue): Return failure if we reach 

@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef fpregset_t
 
 #include <time.h>
+#include <sys/types.h>
 #include <sys/regset.h>
 #include <sys/procfs.h>
 #include <fcntl.h>
