@@ -1,3 +1,8 @@
+2002-09-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR gdb/709
+	* values.c (value_static_field): Call read_var_value.
+
 2002-09-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* valops.c (hand_function_call): Align the initial stack pointer
