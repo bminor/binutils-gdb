@@ -95,10 +95,13 @@ breakup_args (char *scratch, char **argv)
    ENV is the environment vector to pass.  SHELL_FILE is the shell file,
    or NULL if we should pick one.  Errors reported with error().  */
 
+/* This function is NOT-REENTRANT.  Some of the variables have been
+   made static to ensure that they survive the vfork() call.  */
+
 void
-fork_inferior (char *exec_file, char *allargs, char **env,
+fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	       void (*traceme_fun) (void), void (*init_trace_fun) (int),
-	       void (*pre_trace_fun) (void), char *shell_file)
+	       void (*pre_trace_fun) (void), char *shell_file_arg)
 {
   int pid;
   char *shell_command;
@@ -109,12 +112,15 @@ fork_inferior (char *exec_file, char *allargs, char **env,
   /* This is set to the result of setpgrp, which if vforked, will be visible
      to you in the parent process.  It's only used by humans for debugging.  */
   static int debug_setpgrp = 657473;
+  static char *shell_file;
+  static char *exec_file;
   char **save_our_env;
   int shell = 0;
-  char **argv;
+  static char **argv;
 
   /* If no exec file handed to us, get it from the exec-file command -- with
      a good, common error message if none is specified.  */
+  exec_file = exec_file_arg;
   if (exec_file == 0)
     exec_file = get_exec_file (1);
 
@@ -122,6 +128,7 @@ fork_inferior (char *exec_file, char *allargs, char **env,
    * If 0, we'll just do a fork/exec, no shell, so don't
    * bother figuring out what shell.
    */
+  shell_file = shell_file_arg;
   if (STARTUP_WITH_SHELL)
     {
       /* Figure out what shell to start up the user program under. */

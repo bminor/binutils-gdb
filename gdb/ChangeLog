@@ -1,3 +1,13 @@
+2001-03-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* fork-child.c (fork_inferior): Make ``argv'', ``exec_file'' and
+	``shell_file'' static locals.
+
+	* jv-lang.c (java_link_class_type): Initialize ``field'' and
+	``method''.
+	
+	* jv-valprint.c (java_value_print): Initialize ``next_element''.
+
 2001-03-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-i386.h: Fix formatting and change reference to

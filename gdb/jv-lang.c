@@ -346,7 +346,9 @@ java_link_class_type (struct type *type, value_ptr clas)
   int type_is_object = 0;
   struct fn_field *fn_fields;
   struct fn_fieldlist *fn_fieldlists;
-  value_ptr fields, field, method, methods;
+  value_ptr fields, methods;
+  struct value *method = NULL;
+  struct value *field = NULL;
   int i, j;
   struct objfile *objfile = get_dynamics_objfile ();
   struct type *tsuper;

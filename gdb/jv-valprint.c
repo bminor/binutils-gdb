@@ -90,7 +90,8 @@ java_value_print (value_ptr val, struct ui_file *stream, int format,
 
       if (el_type == NULL)
 	{
-	  CORE_ADDR element, next_element;
+	  CORE_ADDR element;
+	  CORE_ADDR next_element = -1; /* dummy initial value */
 
 	  address += JAVA_OBJECT_SIZE + 4;	/* Skip object header and length. */
 
