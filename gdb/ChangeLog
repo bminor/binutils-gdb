@@ -1,3 +1,32 @@
+2004-09-28  Andrew Cagney  <cagney@gnu.org>
+
+	* linux-proc.c: Delete file.
+	* Makefile.in: Update.
+	* config/sparc/linux64.mh (NATDEPFILES): 
+	* config/sparc/linux.mh (NATDEPFILES): Update.
+	* config/s390/s390.mh (NATDEPFILES): Update.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Update.
+	* config/powerpc/linux.mh (NATDEPFILES): Update.
+	* config/pa/linux.mh (NATDEPFILES): Update.
+	* config/mips/linux.mh (NATDEPFILES): Update.
+	* config/m68k/linux.mh (NATDEPFILES): Update.
+	* config/ia64/linux.mh (NATDEPFILES): Update.
+	* config/i386/linux64.mh (NATDEPFILES): Update.
+	* config/i386/linux.mh (NATDEPFILES): Update.
+	* config/arm/linux.mh (NATDEPFILES): Update.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Update.
+	* linux-nat.c: Update copyright.  Include <sys/param.h>,
+	<sys/procfs.h>, "elf-bfd.h", "gregset.h", <ctype.h>,
+	"gdbthread.h", "gdb_stat.h", <fcntl.h>.
+	(O_LARGEFILE): Possibly define.
+	(_initialize_linux_nat, linux_proc_pending_signals)
+	(add_line_to_sigset, linux_proc_xfer_memory)
+	(linux_nat_info_proc_cmd, linux_nat_make_corefile_notes)
+	(linux_nat_do_registers, linux_nat_corefile_thread_callback)
+	(struct linux_corefile_thread_data)
+	(linux_nat_do_thread_registers, linux_nat_find_memory_regions)
+	(child_pid_to_exec_file): Insert code previously in linux-proc.c.
+
 2004-09-16  Andrew Cagney  <cagney@gnu.org>
 
 	* lin-lwp.c: Delete file.

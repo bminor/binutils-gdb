@@ -3,7 +3,7 @@
 XM_CLIBS=
 
 NAT_FILE= nm-linux.h
-NATDEPFILES= infptrace.o inftarg.o fork-child.o linux-proc.o \
+NATDEPFILES= infptrace.o inftarg.o fork-child.o \
 	ppc-linux-nat.o proc-service.o thread-db.o \
 	gcore.o linux-nat.o
 
