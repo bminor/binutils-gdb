@@ -1,3 +1,7 @@
+Mon Jun 28 10:09:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* xcoffread.c: Remove obsolete NO_TYPEDEFS comment.
+
 Sun Jun 27 08:54:55 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* valprint.c (val_print_type_code_int):  Fix off by one error with

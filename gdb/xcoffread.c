@@ -56,12 +56,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* For interface with stabsread.c.  */
 #include "aout/stab_gnu.h"
 
-/* Define this if you want gdb to ignore typdef stabs. This was needed for
-   one of Transarc, to reduce the size of the symbol table. Types won't be
-   recognized, but tag names will be. */
-
-/* #define	NO_TYPEDEFS  1 */
-
 /* Simplified internal version of coff symbol table information */
 
 struct coff_symbol {
