@@ -1,3 +1,12 @@
+Mon May 24 10:07:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (FRAME_NUM_ARGS): Update definition.  Parameter
+ 	numargs was dropped.
+
+Thu May 20 12:26:59 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (FRAMELESS_FUNCTION_INVOCATION): Update.
+
 Tue Apr 27 19:14:20 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (SKIP_PROLOGUE, SKIP_PROLOGUE_FRAMELESS_P):

@@ -44,8 +44,18 @@ struct type *java_float_type;
 struct type *java_double_type;
 struct type *java_void_type;
 
+/* Local functions */
+
+extern void _initialize_java_language PARAMS ((void));
+
 static int java_demangled_signature_length PARAMS ((char*));
 static void java_demangled_signature_copy PARAMS ((char*, char*));
+
+static struct symtab *get_java_class_symtab PARAMS ((void));
+static char *get_java_utf8_name PARAMS ((struct obstack *obstack, value_ptr name));
+static int java_class_is_primitive PARAMS ((value_ptr clas));
+static struct type *java_lookup_type PARAMS ((char *signature));
+static value_ptr java_value_string PARAMS ((char *ptr, int len));
 
 static void java_emit_char PARAMS ((int c, GDB_FILE *stream, int quoter));
 
@@ -76,7 +86,7 @@ static struct symtab *class_symtab = NULL;
 
 static int class_symtab_space;
 
-struct symtab *
+static struct symtab *
 get_java_class_symtab ()
 {
   if (class_symtab == NULL)
@@ -234,7 +244,7 @@ java_class_from_object (obj_val)
 }
 
 /* Check if CLASS_IS_PRIMITIVE(value of clas): */
-int
+static int
 java_class_is_primitive (clas)
      value_ptr clas;
 {
@@ -800,7 +810,7 @@ java_array_type (type, dims)
 
 /* Create a Java string in the inferior from a (Utf8) literal. */
 
-value_ptr
+static value_ptr
 java_value_string (ptr, len)
      char *ptr;
      int len;
@@ -1071,7 +1081,9 @@ _initialize_java_language ()
    We should use make_run_cleanup to have this be called.
    But will that mess up values in value histry?  FIXME */
 
-void java_rerun_cleanup ()
+extern void java_rerun_cleanup PARAMS ((void));
+void
+java_rerun_cleanup ()
 {
   if (class_symtab != NULL)
     {

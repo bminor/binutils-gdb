@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "complaints.h"
 #include "gdbcmd.h"
 
+extern void _initialize_complaints PARAMS ((void));
+
 /* Structure to manage complaints about symbol file contents.  */
 
 struct complaint complaint_root[1] = {

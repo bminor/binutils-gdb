@@ -68,9 +68,6 @@ extern int quit_confirm PARAMS ((void));
 extern void quit_force PARAMS ((char *, int));
 extern void quit_command PARAMS ((char *, int));
 
-extern void setup_event_loop PARAMS ((void));
-extern void async_init_signals PARAMS ((void));
-
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt. */
 extern char *get_prompt PARAMS((void));
@@ -83,3 +80,6 @@ extern void set_prompt PARAMS ((char *));
 extern int mapped_symbol_files;
 extern int readnow_symbol_files;
 #define	ALL_CLEANUPS	((struct cleanup *)0)
+
+/* Perform _initialize initialization */
+extern void gdb_init PARAMS ((char *));

@@ -38,6 +38,9 @@ static void command_line_handler PARAMS ((char *));
 static void gdb_readline2 PARAMS ((void));
 static void pop_prompt PARAMS ((void));
 static void push_prompt PARAMS ((char *, char *, char *));
+static void change_line_handler PARAMS ((void));
+static void change_annotation_level PARAMS ((void));
+static void command_handler PARAMS ((char *));
 
 /* Signal handlers. */
 void handle_sigint PARAMS ((int));
@@ -104,7 +107,7 @@ void (*call_readline) PARAMS ((void));
 /* This is used to determine if GDB is using the readline library or
    its own simplified form of readline. It is used by the asynchronous
    form of the set editing command. 
-   ezannoni: as of 4/29/99 I expect that this
+   ezannoni: as of 1999-04-29 I expect that this
    variable will not be used after gdb is changed to use the event
    loop as default engine, and event-top.c is merged into top.c. */
 int async_command_editing_p;
@@ -219,7 +222,7 @@ setup_event_loop ()
    itself, via gdb_readline2. Also it is used in the opposite case in
    which the user sets editing on again, by restoring readline
    handling of the input. */
-void
+static void
 change_line_handler ()
 {
   if (async_command_editing_p)
@@ -308,7 +311,7 @@ display_gdb_prompt (new_prompt)
    of the prompt stack, if the annotation level desired is 2, otherwise
    it pops the top of the prompt stack when we want the annotation level
    to be the normal ones (1 or 2). */
-void
+static void
 change_annotation_level ()
 {
   char *prefix, *suffix;
@@ -389,10 +392,10 @@ pop_prompt ()
 /* Handles a gdb command. This function is called by
    command_line_handler, which has processed one or more input lines
    into COMMAND. */
-/* NOTE: 4/30/99 This is the asynchronous version of the command_loop
+/* NOTE: 1999-04-30 This is the asynchronous version of the command_loop
    function.  The command_loop function will be obsolete when we
    switch to use the event loop at every execution of gdb. */
-void
+static void
 command_handler (command)
      char *command;
 {
@@ -471,7 +474,7 @@ command_handler (command)
    mechanism within the readline library.  Deal with incomplete commands
    as well, by saving the partial input in a global buffer.  */
 
-/* NOTE: 4/30/99 This is the asynchronous version of the
+/* NOTE: 1999-04-30 This is the asynchronous version of the
    command_line_input function. command_line_input will become
    obsolete once we use the event loop as the default mechanism in
    GDB. */
@@ -689,7 +692,7 @@ command_line_handler (rl)
 /* Does reading of input from terminal w/o the editing features
    provided by the readline library. */
 
-/* NOTE: 4/30/99 Asynchronous version of gdb_readline. gdb_readline
+/* NOTE: 1999-04-30 Asynchronous version of gdb_readline. gdb_readline
    will become obsolete when the event loop is made the default
    execution for gdb. */
 static void
@@ -759,7 +762,7 @@ gdb_readline2 ()
    procedures are the old signal handlers. The event loop will take
    care of invoking the queued procedures to perform the usual tasks
    associated with the reception of the signal. */
-/* NOTE: 4/30/99 This is the asynchronous version of init_signals.
+/* NOTE: 1999-04-30 This is the asynchronous version of init_signals.
    init_signals will become obsolete as we move to have to event loop
    as the default for gdb. */
 void

@@ -59,6 +59,8 @@ static void
 handle_sigio PARAMS ((int));
 #endif
 
+extern void _initialize_inflow PARAMS ((void));
+
 static void
 pass_signal PARAMS ((int));
 

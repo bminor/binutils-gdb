@@ -59,7 +59,7 @@ event_queue;
    basically a description of what kind of events gdb is interested
    in, for each fd. */
 
-/* As of 4/30/99 only the input file descriptor is registered with the
+/* As of 1999-04-30 only the input file descriptor is registered with the
    event loop. */
 
 #ifdef HAVE_POLL
@@ -124,7 +124,6 @@ static int async_handler_ready = 0;
 static void invoke_async_signal_handler PARAMS ((void));
 static int gdb_wait_for_event PARAMS ((void));
 static int check_async_ready PARAMS ((void));
-extern display_gdb_prompt PARAMS ((char *));
 
 
 /* Insert an event object into the gdb event queue at 

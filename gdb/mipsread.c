@@ -41,6 +41,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/common.h"
 #include "elf/mips.h"
 
+extern void _initialize_mipsread PARAMS ((void));
+
 static void
 mipscoff_new_init PARAMS ((struct objfile *));
 

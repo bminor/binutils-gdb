@@ -192,30 +192,8 @@ extern CORE_ADDR merlin_skip_prologue PARAMS ((CORE_ADDR));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(numargs, fi)			\
-{ CORE_ADDR pc;						\
-  int insn;						\
-  int addr_mode;					\
-  int width;						\
-							\
-  pc = FRAME_SAVED_PC (fi);				\
-  insn = read_memory_integer (pc,2);			\
-  addr_mode = (insn >> 11) & 0x1f;			\
-  insn = insn & 0x7ff;					\
-  if ((insn & 0x7fc) == 0x57c				\
-      && addr_mode == 0x14) /* immediate */		\
-    { if (insn == 0x57c) /* adjspb */			\
-	width = 1;					\
-      else if (insn == 0x57d) /* adjspw */		\
-	width = 2;					\
-      else if (insn == 0x57f) /* adjspd */		\
-	width = 4;					\
-      numargs = read_memory_integer (pc+2,width);	\
-      if (width > 1)					\
-	flip_bytes (&numargs, width);			\
-      numargs = - sign_extend (numargs, width*8) / 4; }	\
-  else numargs = -1;					\
-}
+extern int merlin_frame_num_args PARAMS ((struct frame_info *fi));
+#define FRAME_NUM_ARGS (merlin_frame_num_args ((fi)))
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

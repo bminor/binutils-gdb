@@ -132,7 +132,7 @@ extern CORE_ADDR v850_skip_prologue PARAMS ((CORE_ADDR pc));
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
-#define FRAME_NUM_ARGS(val, fi) ((val) = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 extern void v850_pop_frame PARAMS ((struct frame_info *frame));
 #define POP_FRAME v850_pop_frame (get_current_frame ())
@@ -155,7 +155,7 @@ v850_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
 			     unsigned char struct_return,
 			     CORE_ADDR struct_addr));
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
-  (SP) = v850_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+  (v850_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 
 #define STORE_STRUCT_RETURN(STRUCT_ADDR, SP)
 

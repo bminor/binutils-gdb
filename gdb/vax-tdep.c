@@ -59,6 +59,18 @@ vax_skip_prologue (pc)
   return pc;
 }
 
+/* Return number of args passed to a frame.
+   Can return -1, meaning no way to tell.  */
+
+int
+vax_frame_num_args (fi)
+     struct frame_info *fi;
+{
+  return (0xff & read_memory_integer (FRAME_ARGS_ADDRESS (fi), 1));
+}
+
+
+
 /* Print the vax instruction at address MEMADDR in debugged memory,
    from disassembler info INFO.
    Returns length of the instruction, in bytes.  */

@@ -362,8 +362,8 @@ extern CORE_ADDR sparc_frame_chain PARAMS ((struct frame_info *));
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  (FRAMELESS) = frameless_look_for_prologue(FI)
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+  (frameless_look_for_prologue(FI))
 
 /* The location of I0 w.r.t SP.  This is actually dependent on how the system's
    window overflow/underflow routines are written.  Most vendors save the L regs
@@ -390,7 +390,7 @@ extern CORE_ADDR sparc_frame_saved_pc PARAMS ((struct frame_info *));
 
 /* We can't tell how many args there are
    now that the C compiler delays popping them.  */
-#define FRAME_NUM_ARGS(val,fi) (val = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -583,6 +583,6 @@ extern int deferred_stores;
    function calls.  */
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-    sp = sparc_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
+  (sparc_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR
 sparc_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));

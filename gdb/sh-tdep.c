@@ -88,7 +88,6 @@ static char *sh3e_reg_names[] = {
 
 char **sh_register_names = sh_generic_reg_names;
 
-
 struct {
   char **regnames;
   int mach;

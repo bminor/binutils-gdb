@@ -212,8 +212,8 @@ extern void d30v_init_extra_frame_info PARAMS (( int fromleaf, struct frame_info
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
 
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  (FRAMELESS) = frameless_look_for_prologue(FI)
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+  (frameless_look_for_prologue (FI))
 
 #define FRAME_CHAIN(FRAME)       d30v_frame_chain(FRAME)
 extern int d30v_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
@@ -235,7 +235,7 @@ extern int d30v_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
    Can set VAL to -1, meaning no way to tell.  */
 /* We can't tell how many args there are */
 
-#define FRAME_NUM_ARGS(val,fi) (val = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -283,7 +283,7 @@ extern CORE_ADDR d30v_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR,
 					   int, struct value **,
 					   struct type *, int));
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-    sp = d30v_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
+  (d30v_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR d30v_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
 
 

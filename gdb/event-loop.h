@@ -241,3 +241,13 @@ extern void mark_async_signal_handler PARAMS ((async_signal_handler *));
 extern async_signal_handler *
   create_async_signal_handler PARAMS ((async_handler_func *, gdb_client_data));
 
+extern void delete_async_signal_handler PARAMS ((async_signal_handler *async_handler_ptr));
+extern void display_gdb_prompt PARAMS ((char*));
+
+extern void setup_event_loop PARAMS ((void));
+extern void async_init_signals PARAMS ((void));
+
+extern void set_async_editing_command PARAMS ((char *, int, struct cmd_list_element *));
+extern void set_async_annotation_level PARAMS ((char *, int, struct cmd_list_element *));
+extern void set_async_prompt PARAMS ((char *, int, struct cmd_list_element *));
+

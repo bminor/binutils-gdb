@@ -173,7 +173,7 @@ extern CORE_ADDR vax_skip_prologue PARAMS ((CORE_ADDR));
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
 /* On the vax, all functions have frames.  */
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS)  {(FRAMELESS) = 0;}
+#define FRAMELESS_FUNCTION_INVOCATION(FI)  (0)
 
 /* Saved Pc.  Get it from sigcontext if within sigtramp.  */
 
@@ -213,8 +213,8 @@ extern CORE_ADDR vax_skip_prologue PARAMS ((CORE_ADDR));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(numargs, fi)  \
-{ numargs = (0xff & read_memory_integer (FRAME_ARGS_ADDRESS (fi), 1)); }
+extern int vax_frame_num_args PARAMS ((struct frame_info *fi));
+#define FRAME_NUM_ARGS(fi) (vax_frame_num_args ((fi)))
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

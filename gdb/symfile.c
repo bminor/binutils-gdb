@@ -142,6 +142,14 @@ static int simple_read_overlay_table PARAMS ((void));
 
 static int simple_overlay_update_1 PARAMS ((struct obj_section *));
 
+static void add_filename_language PARAMS ((char *ext, enum language lang));
+
+static void set_ext_lang_command PARAMS ((char *args, int from_tty));
+
+static void info_ext_lang_command PARAMS ((char *args, int from_tty));
+
+static void init_filename_language_table PARAMS ((void));
+
 void _initialize_symfile PARAMS ((void));
 
 /* List of all available sym_fns.  On gdb startup, each object file reader

@@ -219,7 +219,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990519
+VERSION = 19990525
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1255,7 +1255,7 @@ m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 mac-nat.o: mac-nat.c $(defs_h) gdb_string.h
 
-main.o: main.c top.h $(defs_h) gdb_string.h
+main.o: main.c top.h $(defs_h) gdb_string.h $(event_loop_h)
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 	$(expression_h) objfiles.h symfile.h

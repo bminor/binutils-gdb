@@ -59,6 +59,10 @@ static CORE_ADDR after_prologue PARAMS ((CORE_ADDR pc,
 static int alpha_in_prologue PARAMS ((CORE_ADDR pc,
 				alpha_extra_func_info_t proc_desc));
 
+static int alpha_about_to_return PARAMS ((CORE_ADDR pc));
+
+void _initialize_alpha_tdep PARAMS ((void));
+
 /* Heuristic_proc_start may hunt through the text section for a long
    time across a 2400 baud serial line.  Allows the user to limit this
    search.  */
@@ -1395,7 +1399,6 @@ alpha_call_dummy_address ()
     return SYMBOL_VALUE_ADDRESS (sym) + 4;
 }
 
-void _initialize_alpha_tdep PARAMS ((void));
 void
 _initialize_alpha_tdep ()
 {

@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "complaints.h"
 #include "demangle.h"
 
+extern void _initialize_elfread PARAMS ((void));
+
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the complation of psymtab-reading.
    It's local to elf_symfile_read.  */

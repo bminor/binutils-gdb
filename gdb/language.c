@@ -41,6 +41,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include "parser-defs.h"
 
+extern void _initialize_language PARAMS ((void));
+
 static void
 show_language_command PARAMS ((char *, int));
 

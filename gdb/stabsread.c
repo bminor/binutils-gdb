@@ -49,6 +49,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "stabsread.h"		/* Our own declarations */
 #undef	EXTERN
 
+extern void _initialize_stabsread PARAMS ((void));
+
 /* The routines that read and process a complete stabs for a C struct or 
    C++ class pass lists of data member fields and lists of member function
    fields in an instance of a field_info structure, as defined below.

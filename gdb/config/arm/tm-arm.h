@@ -313,18 +313,10 @@ extern int arm_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 
 /* Define other aspects of the stack frame.  */
 
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-{							\
-  CORE_ADDR func_start, after_prologue;			\
-  func_start = (get_pc_function_start ((FI)->pc) +	\
-		FUNCTION_START_OFFSET);			\
-  after_prologue = func_start;				\
-  SKIP_PROLOGUE (after_prologue);			\
-  (FRAMELESS) = (after_prologue == func_start);		\
-}
+/* An expression that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it. */
+extern int arm_frameless_function_invocation PARAMS ((struct frame_info *frame));
+#define FRAMELESS_FUNCTION_INVOCATION(FI) (arm_frameless_function_invocation (FI))
 
 /* Saved Pc.  */
 
@@ -338,7 +330,7 @@ extern CORE_ADDR arm_frame_saved_pc PARAMS ((struct frame_info *));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(numargs, fi) (numargs = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -362,9 +354,8 @@ void frame_find_saved_regs PARAMS((struct frame_info *fi,
 /* Things needed for making the inferior call functions.  */
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-    sp = arm_push_arguments ((nargs), (args), (sp), (struct_return), (struct_addr))
-extern CORE_ADDR
-arm_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
+  (arm_push_arguments ((nargs), (args), (sp), (struct_return), (struct_addr)))
+extern CORE_ADDR arm_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 

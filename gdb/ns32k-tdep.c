@@ -64,6 +64,80 @@ umax_skip_prologue (pc)
   return pc;
 }
 
+/* Return number of args passed to a frame.
+   Can return -1, meaning no way to tell.  */
+
+int
+merlin_frame_num_args (fi)
+     struct frame_info *fi;
+{
+  int numargs;
+  CORE_ADDR pc;
+  int insn;
+  int addr_mode;
+  int width;
+
+  pc = FRAME_SAVED_PC (fi);
+  insn = read_memory_integer (pc,2);
+  addr_mode = (insn >> 11) & 0x1f;
+  insn = insn & 0x7ff;
+  if ((insn & 0x7fc) == 0x57c
+      && addr_mode == 0x14) /* immediate */
+    {
+      if (insn == 0x57c) /* adjspb */
+	width = 1;
+      else if (insn == 0x57d) /* adjspw */
+	width = 2;
+      else if (insn == 0x57f) /* adjspd */
+	width = 4;
+      numargs = read_memory_integer (pc+2,width);
+      if (width > 1)
+	flip_bytes (&numargs, width);
+      numargs = - sign_extend (numargs, width*8) / 4;
+    }
+  else
+    numargs = -1;
+  return numargs;
+}
+
+int
+umax_frame_num_args (fi)
+     struct frame_info *fi;
+{
+  int numargs;
+  CORE_ADDR pc;
+  CORE_ADDR enter_addr;
+  unsigned int insn;
+  unsigned int addr_mode;
+  int width;
+
+  numargs = -1;
+  enter_addr = ns32k_get_enter_addr ((fi)->pc);
+  if (enter_addr > 0)
+    {
+      pc = ((enter_addr == 1)
+	    ? SAVED_PC_AFTER_CALL (fi)
+	    : FRAME_SAVED_PC (fi));
+      insn = read_memory_integer (pc,2);
+      addr_mode = (insn >> 11) & 0x1f;
+      insn = insn & 0x7ff;
+      if ((insn & 0x7fc) == 0x57c
+	  && addr_mode == 0x14) /* immediate */
+	{
+	  if (insn == 0x57c) /* adjspb */
+	    width = 1;
+	  else if (insn == 0x57d) /* adjspw */
+	    width = 2;
+	  else if (insn == 0x57f) /* adjspd */
+	    width = 4;
+	  numargs = read_memory_integer (pc+2,width);
+	  if (width > 1)
+	    flip_bytes (&numargs, width);
+	  numargs = - sign_extend (numargs, width*8) / 4;
+	}
+    }
+  return numargs;
+}
 
 
 sign_extend (value, bits)

@@ -44,6 +44,8 @@ int static_field_print;	/* Controls printing of static fields. */
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;
 
+extern void _initialize_cp_valprint PARAMS ((void));
+
 static void
 cp_print_static_field PARAMS ((struct type *, value_ptr, GDB_FILE *, int, int,
 			       enum val_prettyprint));

@@ -96,6 +96,7 @@ static void thread_apply_command PARAMS ((char *, int));
 static void restore_current_thread PARAMS ((int));
 static void switch_to_thread PARAMS ((int pid));
 static void prune_threads PARAMS ((void));
+static int local_find_new_threads PARAMS ((void));
 
 /* If the host has threads, the host machine definition may set this
    macro. But, for remote thread debugging, it gets more complex and

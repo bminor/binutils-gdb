@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "top.h"
+#include "event-loop.h"
 #include "target.h"
 #include "inferior.h"
 #include "call-cmds.h"
@@ -65,7 +66,6 @@ GDB_FILE *gdb_stderr;
 extern int write_files;
 
 static void print_gdb_help PARAMS ((GDB_FILE *));
-extern void gdb_init PARAMS ((char *));
 
 /* These two are used to set the external editor commands when gdb is farming
    out files to be edited by another program. */
@@ -571,7 +571,7 @@ main (argc, argv)
 	{
 	  /* NOTE: I am commenting this out, because it is not clear
 	     where this feature is used. It is very old and
-	     undocumented. ezannoni: 5/4/99*/
+	     undocumented. ezannoni: 1999-05-04*/
 #if 0
 	  if (cmdarg[i][0] == '-' && cmdarg[i][1] == '\0')
 	    read_command_file (stdin);
@@ -715,17 +715,6 @@ Report bugs to \"bug-gdb@prep.ai.mit.edu\".\
 }
 
 
-void
-init_proc ()
-{
-}
-
-void
-proc_remove_foreign (pid)
-     int pid;
-{
-}
-
 /* All I/O sent to the *_filtered and *_unfiltered functions eventually ends up
    here.  The fputs_unfiltered_hook is primarily used by GUIs to collect all
    output and send it to the GUI, instead of the controlling terminal.  Only

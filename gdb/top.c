@@ -51,8 +51,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_stat.h"
 #include <ctype.h>
 
-extern void initialize_utils PARAMS ((void));
-
 /* Prototypes for local functions */
 
 static void dont_repeat_command PARAMS ((char *, int));
@@ -71,16 +69,10 @@ static char * line_completion_function PARAMS ((char *, int, char *, int));
 
 static char * readline_line_completion_function PARAMS ((char *, int));
 
-/* NOTE 4/29/99: this function will be static again, after we make the
+/* NOTE 1999-04-29: this function will be static again, after we make the
    event loop be the default command loop for gdb, and we merge
    event-top.c into this file, top.c */
 /* static */ void command_loop_marker PARAMS ((int));
-
-extern void set_async_editing_command PARAMS ((char *, int, struct cmd_list_element *));
- 
-extern void set_async_annotation_level PARAMS ((char *, int, struct cmd_list_element *));
-
-extern void set_async_prompt PARAMS ((char *, int, struct cmd_list_element *));
 
 static void while_command PARAMS ((char *, int));
 
@@ -149,7 +141,7 @@ static void complete_command PARAMS ((char *, int));
 static void do_nothing PARAMS ((int));
 
 #ifdef SIGHUP
-/* NOTE 4/29/99: This function will be static again, once we modify
+/* NOTE 1999-04-29: This function will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ int quit_cover PARAMS ((PTR));
@@ -599,7 +591,7 @@ int signo;
 
 /* Just a little helper function for disconnect().  */
 
-/* NOTE 4/29/99: This function will be static again, once we modify
+/* NOTE 1999-04-29: This function will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ int
@@ -614,20 +606,20 @@ quit_cover (s)
 #endif /* defined SIGHUP */
 
 /* Line number we are currently in in a file which is being sourced.  */
-/* NOTE 4/29/99: This variable will be static again, once we modify
+/* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ int source_line_number;
 
 /* Name of the file we are sourcing.  */
-/* NOTE 4/29/99: This variable will be static again, once we modify
+/* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ char *source_file_name;
 
 /* Buffer containing the error_pre_print used by the source stuff.
    Malloc'd.  */
-/* NOTE 4/29/99: This variable will be static again, once we modify
+/* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ char *source_error;
@@ -635,7 +627,7 @@ static int source_error_allocated;
 
 /* Something to glom on to the start of error_pre_print if source_file_name
    is set.  */
-/* NOTE 4/29/99: This variable will be static again, once we modify
+/* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ char *source_pre_error;
@@ -694,8 +686,6 @@ gdb_init (argv0)
     async_init_signals ();
   else
     init_signals ();
-
-  init_proc ();
 
   /* We need a default language for parsing expressions, so simple things like
      "set width 0" won't fail if no language is explicitly set in a config file
@@ -1330,7 +1320,7 @@ execute_command (p, from_tty)
 }
 
 /* ARGSUSED */
-/* NOTE 4/29/99: This function will be static again, once we modify
+/* NOTE 1999-04-29: This function will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ void
@@ -1427,6 +1417,7 @@ command_loop ()
 	}
     }
 }
+
 
 /* Commands call this if they do not want to be repeated by null lines.  */
 
@@ -1519,7 +1510,7 @@ gdb_readline (prrompt)
    substitution.  These variables are given default values at the end
    of this file.  */
 static int command_editing_p;
-/* NOTE 4/29/99: This variable will be static again, once we modify
+/* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ int history_expansion_p;

@@ -260,19 +260,13 @@ extern struct value *value_of_trapped_internalvar ();
 
 #define	NEED_TEXT_START_END 1
 
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.
+/* An expression that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.
    On convex, check at the return address for `callq' -- if so, frameless,
    otherwise, not.  */
 
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-{ 									\
-  extern CORE_ADDR text_start, text_end;				\
-  CORE_ADDR call_addr = SAVED_PC_AFTER_CALL (FI);			\
-  (FRAMELESS) = (call_addr >= text_start && call_addr < text_end	\
-		 && read_memory_integer (call_addr - 6, 1) == 0x22);	\
-}
+extern int convex_frameless_function_invocation PARAMS ((struct frame_info *fi));
+#define FRAMELESS_FUNCTION_INVOCATION(FI) (convex_frameless_function_invocatio (FI))
 
 #define FRAME_SAVED_PC(fi) (read_memory_integer ((fi)->frame, 4))
 
@@ -283,9 +277,8 @@ extern struct value *value_of_trapped_internalvar ();
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(numargs, fi)  \
-{ numargs = read_memory_integer (FRAME_ARGS_ADDRESS (fi) - 4, 4); \
-  if (numargs < 0 || numargs >= 256) numargs = -1;}
+extern int convex_frame_num_args PARAMS ((struct frame_info *fi));
+#define FRAME_NUM_ARGS(fi) (convex_frame_num_args ((fi)))
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

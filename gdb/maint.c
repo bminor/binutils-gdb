@@ -38,6 +38,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #endif
 
+extern void _initialize_maint_cmds PARAMS ((void));
+
 static void maintenance_command PARAMS ((char *, int));
 
 static void maintenance_dump_me PARAMS ((char *, int));

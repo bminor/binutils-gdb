@@ -595,21 +595,18 @@ value_of_register (regnum)
 
   /* Convert raw data to virtual format if necessary.  */
 
-#ifdef REGISTER_CONVERTIBLE
   if (REGISTER_CONVERTIBLE (regnum))
     {
       REGISTER_CONVERT_TO_VIRTUAL (regnum, REGISTER_VIRTUAL_TYPE (regnum),
 				   raw_buffer, VALUE_CONTENTS_RAW (reg_val));
     }
+  else if (REGISTER_RAW_SIZE (regnum) == REGISTER_VIRTUAL_SIZE (regnum))
+    memcpy (VALUE_CONTENTS_RAW (reg_val), raw_buffer,
+	    REGISTER_RAW_SIZE (regnum));
   else
-#endif
-    if (REGISTER_RAW_SIZE (regnum) == REGISTER_VIRTUAL_SIZE (regnum))
-      memcpy (VALUE_CONTENTS_RAW (reg_val), raw_buffer,
-	      REGISTER_RAW_SIZE (regnum));
-    else
-      fatal ("Register \"%s\" (%d) has conflicting raw (%d) and virtual (%d) size",
-	     REGISTER_NAME (regnum), regnum,
-	     REGISTER_RAW_SIZE (regnum), REGISTER_VIRTUAL_SIZE (regnum));
+    fatal ("Register \"%s\" (%d) has conflicting raw (%d) and virtual (%d) size",
+	   REGISTER_NAME (regnum), regnum,
+	   REGISTER_RAW_SIZE (regnum), REGISTER_VIRTUAL_SIZE (regnum));
   VALUE_LVAL (reg_val) = lval;
   VALUE_ADDRESS (reg_val) = addr;
   VALUE_REGNO (reg_val) = regnum;
@@ -1553,14 +1550,12 @@ value_from_register (type, regnum, frame)
 
   /* Convert raw data to virtual format if necessary.  */
   
-#ifdef REGISTER_CONVERTIBLE
   if (REGISTER_CONVERTIBLE (regnum))
     {
       REGISTER_CONVERT_TO_VIRTUAL (regnum, type,
 				   raw_buffer, VALUE_CONTENTS_RAW (v));
     }
   else
-#endif
     {
       /* Raw and virtual formats are the same for this register.  */
 

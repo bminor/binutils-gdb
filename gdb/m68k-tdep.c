@@ -72,6 +72,77 @@ isi_skip_prologue (pc)
   return pc;
 }
 
+/* Return number of args passed to a frame.
+   Can return -1, meaning no way to tell.  */
+
+int
+isi_frame_num_args (fi)
+     struct frame_info *fi;
+{
+  int val;
+  CORE_ADDR pc = FRAME_SAVED_PC (fi);
+  int insn = 0177777 & read_memory_integer (pc, 2);
+  val = 0;
+  if (insn == 0047757 || insn == 0157374)  /* lea W(sp),sp or addaw #W,sp */
+    val = read_memory_integer (pc + 2, 2);
+  else if ((insn & 0170777) == 0050217 /* addql #N, sp */
+	   || (insn & 0170777) == 0050117)  /* addqw */
+    {
+      val = (insn >> 9) & 7;
+      if (val == 0)
+	val = 8;
+    }
+  else if (insn == 0157774) /* addal #WW, sp */
+    val = read_memory_integer (pc + 2, 4);
+  val >>= 2;
+  return val;
+}
+
+int
+delta68_frame_num_args (fi)
+     struct frame_info *fi;
+{
+  int val;
+  CORE_ADDR pc = FRAME_SAVED_PC (fi);
+  int insn = 0177777 & read_memory_integer (pc, 2);
+  val = 0;
+  if (insn == 0047757 || insn == 0157374)  /* lea W(sp),sp or addaw #W,sp */
+    val = read_memory_integer (pc + 2, 2);
+  else if ((insn & 0170777) == 0050217 /* addql #N, sp */
+	   || (insn & 0170777) == 0050117)  /* addqw */
+    {
+      val = (insn >> 9) & 7;
+      if (val == 0)
+	val = 8;
+    }
+  else if (insn == 0157774) /* addal #WW, sp */
+    val = read_memory_integer (pc + 2, 4);
+  val >>= 2;
+  return val;
+}
+
+int
+news_frame_num_args (fi)
+     struct frame_info *fi;
+{
+  int val;
+  CORE_ADDR pc = FRAME_SAVED_PC (fi);
+  int insn = 0177777 & read_memory_integer (pc, 2);
+  val = 0;
+  if (insn == 0047757 || insn == 0157374)  /* lea W(sp),sp or addaw #W,sp */
+    val = read_memory_integer (pc + 2, 2);
+  else if ((insn & 0170777) == 0050217 /* addql #N, sp */
+	   || (insn & 0170777) == 0050117)  /* addqw */
+    {
+      val = (insn >> 9) & 7;
+      if (val == 0)
+	val = 8;
+    }
+  else if (insn == 0157774) /* addal #WW, sp */
+    val = read_memory_integer (pc + 2, 4);
+  val >>= 2;
+  return val;
+}
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 

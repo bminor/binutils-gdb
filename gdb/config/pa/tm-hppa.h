@@ -437,8 +437,8 @@ extern int hppa_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  (FRAMELESS) = frameless_function_invocation(FI)
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+  (frameless_function_invocation (FI))
 extern int frameless_function_invocation PARAMS ((struct frame_info *));
 
 extern CORE_ADDR hppa_frame_saved_pc PARAMS ((struct frame_info *frame));
@@ -452,7 +452,7 @@ extern CORE_ADDR hppa_frame_saved_pc PARAMS ((struct frame_info *frame));
 
 /* We can't tell how many args there are
    now that the C compiler delays popping them.  */
-#define FRAME_NUM_ARGS(val,fi) (val = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -624,7 +624,7 @@ hppa_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR, int,
 			     struct value **, struct type *, int));
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-    sp = hppa_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
+  (hppa_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR
 hppa_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int,
 			     CORE_ADDR));

@@ -156,9 +156,8 @@ extern void aix_process_linenos PARAMS ((void));
    handle it. */
 
 #define	PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-  sp = push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
-extern CORE_ADDR push_arguments PARAMS ((int, struct value **, CORE_ADDR,
-					 int, CORE_ADDR));
+  (rs6000_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
+extern CORE_ADDR rs6000_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
 
 /* BREAKPOINT_FROM_PC uses the program counter value to determine the
    breakpoint that should be used */
@@ -378,8 +377,8 @@ CORE_ADDR rs6000_frame_chain PARAMS ((struct frame_info *));
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
 
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  FRAMELESS = frameless_function_invocation (FI)
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+  (frameless_function_invocation (FI))
 
 extern int frameless_function_invocation PARAMS((struct frame_info *));
 
@@ -421,7 +420,7 @@ extern CORE_ADDR rs6000_frame_args_address PARAMS ((struct frame_info *));
 /* We can't tell how many args there are
    now that the C compiler delays popping them.  */
 
-#define FRAME_NUM_ARGS(val,fi) (val = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

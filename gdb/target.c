@@ -82,6 +82,10 @@ find_default_run_target PARAMS ((char *));
 static void
 update_current_target PARAMS ((void));
 
+static void nosupport_runtime PARAMS ((void));
+
+static void normal_target_post_startup_inferior PARAMS ((int pid));
+
 /* Transfer LEN bytes between target address MEMADDR and GDB address MYADDR.
    Returns 0 for success, errno code for failure (which includes partial
    transfers--if you want a more useful response to partial transfers, try
@@ -302,7 +306,7 @@ nosymbol (name, addrp)
 }
 
 /* ARGSUSED */
-void
+static void
 nosupport_runtime ()
 {
   if (!inferior_pid)
@@ -1782,7 +1786,7 @@ normal_pid_to_str (pid)
    notification of forks, etc at inferior creation time; e.g., in
    target_acknowledge_forked_child.
    */
-void
+static void
 normal_target_post_startup_inferior (pid)
   int  pid;
 {

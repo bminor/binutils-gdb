@@ -61,6 +61,15 @@ tahoe_skip_prologue (pc)
   return pc;
 }
 
+/* Return number of args passed to a frame.
+   Can return -1, meaning no way to tell.  */
+
+int
+tahoe_frame_num_args (fi)
+     struct frame_info *fi;
+{
+  return (((0xffff & read_memory_integer(((fi)->frame-4),4)) - 4) >> 2);
+}
 
 /* Print the Tahoe instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes.  */

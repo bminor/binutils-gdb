@@ -28,6 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "buildsym.h"
 #include "stabsread.h"
 
+extern void _initialize_nlmread PARAMS ((void));
+
 static void
 nlm_new_init PARAMS ((struct objfile *));
 

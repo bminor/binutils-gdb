@@ -137,6 +137,19 @@ arm_saved_pc_after_call (frame)
   return ADDR_BITS_REMOVE (read_register (LR_REGNUM));
 }
 
+int
+arm_frameless_function_invocation (fi)
+     struct frame_info *fi;
+{
+  int frameless;
+  CORE_ADDR func_start, after_prologue;
+  func_start = (get_pc_function_start ((fi)->pc) + FUNCTION_START_OFFSET);
+  after_prologue = func_start;
+  SKIP_PROLOGUE (after_prologue);
+  frameless = (after_prologue == func_start);
+  return frameless;
+}
+
 /* A typical Thumb prologue looks like this:
         push    {r7, lr}
         add     sp, sp, #-28

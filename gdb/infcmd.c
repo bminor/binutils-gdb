@@ -90,6 +90,10 @@ static void step_command PARAMS ((char *, int));
 
 static void run_command PARAMS ((char *, int));
 
+static void run_no_args_command PARAMS ((char *args, int from_tty));
+
+static void go_command PARAMS ((char *line_no, int from_tty));
+
 void _initialize_infcmd PARAMS ((void));
 
 #define GO_USAGE   "Usage: go <location>\n"
@@ -1098,16 +1102,16 @@ do_registers_info (regnum, fpregs)
 	}
 
       /* Convert raw data to virtual format if necessary.  */
-#ifdef REGISTER_CONVERTIBLE
       if (REGISTER_CONVERTIBLE (i))
 	{
 	  REGISTER_CONVERT_TO_VIRTUAL (i, REGISTER_VIRTUAL_TYPE (i),
 				       raw_buffer, virtual_buffer);
 	}
       else
-#endif
-	memcpy (virtual_buffer, raw_buffer,
-		REGISTER_VIRTUAL_SIZE (i));
+	{
+	  memcpy (virtual_buffer, raw_buffer,
+		  REGISTER_VIRTUAL_SIZE (i));
+	}
 
       /* If virtual format is floating, print it that way, and in raw hex.  */
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
@@ -1163,8 +1167,6 @@ do_registers_info (regnum, fpregs)
     }
 }
 #endif /* no DO_REGISTERS_INFO.  */
-
-extern int target_map_name_to_register PARAMS ((char *, int));
 
 void
 registers_info (addr_exp, fpregs)

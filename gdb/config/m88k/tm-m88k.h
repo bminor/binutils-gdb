@@ -445,8 +445,8 @@ extern int frameless_function_invocation ();
 #define FRAME_CHAIN(thisframe) \
 	frame_chain (thisframe)
 
-#define	FRAMELESS_FUNCTION_INVOCATION(frame, fromleaf)	\
-	fromleaf = frameless_function_invocation (frame)
+#define	FRAMELESS_FUNCTION_INVOCATION(frame)	\
+	(frameless_function_invocation (frame))
 
 /* Define other aspects of the stack frame.  */
 
@@ -465,7 +465,7 @@ extern CORE_ADDR frame_locals_address ();
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(numargs, fi)  ((numargs) = -1)
+#define FRAME_NUM_ARGS(fi)  (-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

@@ -51,6 +51,12 @@ static int parse_binary_operation PARAMS ((char *));
 
 static void print_doc_line PARAMS ((GDB_FILE *, char *));
 
+static struct cmd_list_element *find_cmd PARAMS ((char *command,
+						  int len,
+						  struct cmd_list_element *clist,
+						  int ignore_help_classes,
+						  int *nfound));
+
 void _initialize_command PARAMS ((void));
 
 /* Add element named NAME.
@@ -568,6 +574,7 @@ help_cmd_list (list, class, prefix, recurse, stream)
 static struct cmd_list_element *
 find_cmd(command, len, clist, ignore_help_classes, nfound)
      char *command;
+     int len;
      struct cmd_list_element *clist;
      int ignore_help_classes;
      int *nfound;

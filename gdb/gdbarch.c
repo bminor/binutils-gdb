@@ -197,7 +197,7 @@ int (*target_architecture_hook) PARAMS ((const struct bfd_arch_info *ap));
 
 /* Do the real work of changing the current architecture */
 
-static int arch_valid PARAMS ((const struct bfd_arch_info *arch));
+static int arch_ok PARAMS ((const struct bfd_arch_info *arch));
 static int
 arch_ok (arch)
      const struct bfd_arch_info *arch;
@@ -211,6 +211,7 @@ arch_ok (arch)
 
 enum set_arch { set_arch_auto, set_arch_manual };
 
+static void set_arch PARAMS ((const struct bfd_arch_info *arch, enum set_arch type));
 static void
 set_arch (arch, type)
      const struct bfd_arch_info *arch;

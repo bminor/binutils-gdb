@@ -471,11 +471,10 @@ void init_frame_pc ();
 
 /* Define other aspects of the stack frame.  */
 
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  (FRAMELESS) = frameless_look_for_prologue(FI)
+/* An expression that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it. */
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+  (frameless_look_for_prologue (FI))
 
 /* Saved pc (i.e. return address).  */
 #define FRAME_SAVED_PC(fraim) \
@@ -494,7 +493,7 @@ extern CORE_ADDR frame_locals_address ();
    the argcount field from it, to support debugging assembler code.
    Problem was, the "argcount" field never did hold the argument
    count.  */
-#define	FRAME_NUM_ARGS(numargs, fi) ((numargs) = -1)
+#define	FRAME_NUM_ARGS(fi) (-1)
 
 #define FRAME_ARGS_ADDRESS(fi) FRAME_LOCALS_ADDRESS (fi)
 

@@ -88,6 +88,7 @@ typedef struct mips_extra_func_info {
 #include "expression.h"
 #include "language.h"		/* Needed inside partial-stab.h */
 
+extern void _initialize_mdebugread PARAMS ((void));
 
 /* Provide a default mapping from a ecoff register number to a gdb REGNUM.  */
 #ifndef ECOFF_REG_TO_REGNUM

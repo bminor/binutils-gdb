@@ -28,6 +28,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "typeprint.h"
 #include "c-lang.h"
 
+/* Local functions */
+
+static void java_type_print_base PARAMS ((struct type *type, GDB_FILE *stream, int show, int level));
+
 static void
 java_type_print_derivation_info (stream, type)
      GDB_FILE *stream;
@@ -76,7 +80,7 @@ java_type_print_derivation_info (stream, type)
    LEVEL is the number of spaces to indent by.
    We increase it for some recursive calls.  */
 
-void
+static void
 java_type_print_base (type, stream, show, level)
      struct type *type;
      GDB_FILE *stream;

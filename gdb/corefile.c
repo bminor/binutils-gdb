@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Local function declarations.  */
 
+extern void _initialize_core PARAMS ((void));
 static void call_extra_exec_file_hooks PARAMS ((char *filename));
 
 /* You can have any number of hooks for `exec_file_command' command to call.

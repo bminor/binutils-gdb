@@ -207,13 +207,8 @@ extern void i386_extract_return_value PARAMS ((struct type *, char [], char *));
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
 
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  do { \
-    if ((FI)->signal_handler_caller) \
-      (FRAMELESS) = 0; \
-    else \
-      (FRAMELESS) = frameless_look_for_prologue(FI); \
-  } while (0)
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+     (((FI)->signal_handler_caller) ? 0 : frameless_look_for_prologue(FI))
 
 /* Saved Pc.  Get it from sigcontext if within sigtramp.  */
 
@@ -232,7 +227,7 @@ extern CORE_ADDR sigtramp_saved_pc PARAMS ((struct frame_info *));
 /* Return number of args passed to a frame.  Can return -1, meaning no way
    to tell, which is typical now that the C compiler delays popping them.  */
 
-#define FRAME_NUM_ARGS(numargs, fi) (numargs) = i386_frame_num_args(fi)
+#define FRAME_NUM_ARGS(fi) (i386_frame_num_args(fi))
 
 extern int i386_frame_num_args PARAMS ((struct frame_info *));
 

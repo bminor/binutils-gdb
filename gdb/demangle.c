@@ -40,6 +40,8 @@
 #define DEFAULT_DEMANGLING_STYLE AUTO_DEMANGLING_STYLE_STRING
 #endif
 
+extern void _initialize_demangler PARAMS ((void));
+
 /* String name for the current demangling style.  Set by the
    "set demangle-style" command, printed as part of the output by the
    "show demangle-style" command. */

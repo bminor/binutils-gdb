@@ -186,8 +186,8 @@ extern struct type *h8500_register_virtual_type PARAMS ((int regno));
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
 
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  (FRAMELESS) = frameless_look_for_prologue(FI)
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+  (frameless_look_for_prologue (FI))
 
 /* Any function with a frame looks like this
    SECOND ARG
@@ -221,7 +221,7 @@ extern CORE_ADDR frame_saved_pc PARAMS ((struct frame_info *frame));
 /* We can't tell how many args there are
    now that the C compiler delays popping them.  */
 
-#define FRAME_NUM_ARGS(val,fi) (val = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

@@ -41,6 +41,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Flag indicating target was compiled by HP compiler */
 extern int hp_som_som_object_present;
 
+static void cp_type_print_method_args PARAMS ((struct type **args, char *prefix, char *varstring, int staticp, GDB_FILE *stream));
+
 static void
 c_type_print_args PARAMS ((struct type *, GDB_FILE *));
 
@@ -203,7 +205,7 @@ cp_type_print_derivation_info (stream, type)
 }
 /* Print the C++ method arguments ARGS to the file STREAM.  */
  
-void
+static void
 cp_type_print_method_args (args, prefix, varstring, staticp, stream)
      struct type **args;
      char *prefix;

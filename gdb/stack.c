@@ -318,7 +318,7 @@ print_args_stub (args)
   int numargs;
   struct print_args_args *p = (struct print_args_args *)args;
 
-  FRAME_NUM_ARGS (numargs, (p->fi));
+  numargs = FRAME_NUM_ARGS (p->fi);
   print_frame_args (p->func, p->fi, numargs, gdb_stdout);
   return 0;
 }
@@ -838,10 +838,8 @@ frame_info (addr_exp, from_tty)
   printf_filtered ("\n");
 
   {
-    int frameless = 0;
-#ifdef FRAMELESS_FUNCTION_INVOCATION
-    FRAMELESS_FUNCTION_INVOCATION (fi, frameless);
-#endif
+    int frameless;
+    frameless = FRAMELESS_FUNCTION_INVOCATION (fi);
     if (frameless)
       printf_filtered (" (FRAMELESS),");
   }
@@ -882,7 +880,7 @@ frame_info (addr_exp, from_tty)
 	print_address_numeric (arg_list, 1, gdb_stdout);
 	printf_filtered (",");
 
-	FRAME_NUM_ARGS (numargs, fi);
+	numargs = FRAME_NUM_ARGS (fi);
 	if (numargs < 0)
 	  puts_filtered (" args: ");
 	else if (numargs == 0)

@@ -195,4 +195,10 @@ struct op_print
   int right_assoc;
 };
 
+/* The generic method for targets to specify how their registers are
+   named.  The mapping can be derived from three sources:
+   REGISTER_NAME; std_regs; or a target specific alias hook. */
+
+extern int target_map_name_to_register PARAMS ((char *, int));
+
 #endif	/* PARSER_DEFS_H */

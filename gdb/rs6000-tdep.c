@@ -812,7 +812,7 @@ rs6000_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
    starting from r4. */
 
 CORE_ADDR
-push_arguments (nargs, args, sp, struct_return, struct_addr)
+rs6000_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int nargs;
      value_ptr *args;
      CORE_ADDR sp;

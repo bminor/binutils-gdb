@@ -38,6 +38,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 extern int objectprint;		/* Controls looking up an object's derived type
 				   using what we find in its vtables.  */
 
+extern void _initialize_typeprint PARAMS ((void));
+
 static void
 ptype_command PARAMS ((char *, int));
 

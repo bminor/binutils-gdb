@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static int there_is_a_visible_common_named PARAMS ((char *));
 #endif
 
+extern void _initialize_f_valprint PARAMS ((void));
 static void info_common_command PARAMS ((char *, int));
 static void list_all_visible_commons PARAMS ((char *));
 static void f77_print_array PARAMS ((struct type *, char *, CORE_ADDR,

@@ -339,7 +339,7 @@ extern CORE_ADDR mips_frame_chain PARAMS ((struct frame_info *));
    does not, FRAMELESS is set to 1, else 0.  */
 /* We handle this differently for mips, and maybe we should not */
 
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS)  {(FRAMELESS) = 0;}
+#define FRAMELESS_FUNCTION_INVOCATION(FI)  (0)
 
 /* Saved Pc.  */
 
@@ -353,7 +353,7 @@ extern CORE_ADDR mips_frame_saved_pc PARAMS ((struct frame_info *));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(num, fi)	(num = mips_frame_num_args(fi))
+#define FRAME_NUM_ARGS(fi)	(mips_frame_num_args(fi))
 extern int mips_frame_num_args PARAMS ((struct frame_info *));
 
 /* Return number of bytes at start of arglist that are not really args.  */
@@ -382,7 +382,7 @@ extern void mips_find_saved_regs PARAMS ((struct frame_info *));
    handle it. */
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-    sp = mips_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
+  (mips_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR
 mips_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
 

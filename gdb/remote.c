@@ -2347,31 +2347,32 @@ remote_read_bytes (memaddr, myaddr, len)
 }
 
 /* Read or write LEN bytes from inferior memory at MEMADDR,
-   transferring to or from debugger address MYADDR.  Write to inferior
-   if SHOULD_WRITE is nonzero.  Returns length of data written or
-   read; 0 for error.  */
+   transferring to or from debugger address BUFFER.  Write to inferior if
+   SHOULD_WRITE is nonzero.  Returns length of data written or read; 0
+   for error.  */
+
+#ifndef REMOTE_TRANSLATE_XFER_ADDRESS
+#define REMOTE_TRANSLATE_XFER_ADDRESS(MEM_ADDR, MEM_LEN, TARG_ADDR, TARG_LEN) \
+   (*(TARG_ADDR) = (MEM_ADDR), *(TARG_LEN) = (MEM_LEN))
+#endif
 
 /* ARGSUSED */
 static int
-remote_xfer_memory (memaddr, myaddr, len, should_write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+remote_xfer_memory (mem_addr, buffer, mem_len, should_write, target)
+     CORE_ADDR mem_addr;
+     char *buffer;
+     int mem_len;
      int should_write;
      struct target_ops *target;			/* ignored */
 {
-#ifdef REMOTE_TRANSLATE_XFER_ADDRESS
-  CORE_ADDR targaddr;
-  int targlen;
-  REMOTE_TRANSLATE_XFER_ADDRESS (memaddr, len, targaddr, targlen);
-  if (targlen == 0)
+  CORE_ADDR targ_addr;
+  int targ_len;
+  REMOTE_TRANSLATE_XFER_ADDRESS (mem_addr, mem_len, &targ_addr, &targ_len);
+  if (targ_len <= 0)
     return 0;
-  memaddr = targaddr;
-  len = targlen;
-#endif
 
-  return dcache_xfer_memory (remote_dcache, memaddr, myaddr,
-			     len, should_write);
+  return dcache_xfer_memory (remote_dcache, targ_addr, buffer,
+			     targ_len, should_write);
 }
 
    
@@ -3384,7 +3385,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_ops.to_load = generic_load;		
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_thread_alive = remote_thread_alive;
-  remote_ops.to_find_new_threads = remote_find_new_threads;
+  remote_ops.to_find_new_threads = (void*) remote_find_new_threads;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_query = remote_query;
   remote_ops.to_stratum = process_stratum;

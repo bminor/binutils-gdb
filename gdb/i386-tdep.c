@@ -365,7 +365,7 @@ i386_frame_num_args (fi)
 
   int frameless;
 
-  FRAMELESS_FUNCTION_INVOCATION (fi, frameless);
+  frameless = FRAMELESS_FUNCTION_INVOCATION (fi);
   if (frameless)
     /* In the absence of a frame pointer, GDB doesn't get correct values
        for nameless arguments.  Return -1, so it doesn't print any

@@ -332,7 +332,7 @@ do {								\
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(val, fi)  (val = -1)
+#define FRAME_NUM_ARGS(fi)  (-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

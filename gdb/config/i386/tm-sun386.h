@@ -186,8 +186,8 @@ double_to_i387 PARAMS ((char *, char *));
    does not, FRAMELESS is set to 1, else 0.  */
 
 #undef  FRAMELESS_FUNCTION_INVOCATION
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-{ (FRAMELESS) = frameless_look_for_prologue (FI); }
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+     (frameless_look_for_prologue (FI))
 
 #undef  FRAME_SAVED_PC
 #define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))

@@ -165,7 +165,7 @@ extern CORE_ADDR m32r_skip_prologue PARAMS ((CORE_ADDR pc));
 /* mvs_no_check  FRAME_LOCALS_ADDRESS */
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 /* mvs_no_check  FRAME_NUM_ARGS */
-#define FRAME_NUM_ARGS(val, fi) ((val) = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 #define COERCE_FLOAT_TO_DOUBLE 1
 
@@ -216,7 +216,7 @@ extern CORE_ADDR m32r_push_arguments PARAMS ((int nargs,
 
 /* mvs_no_check  PUSH_ARGUMENTS */
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
-  (SP) = m32r_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+  (m32r_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 
 #define PUSH_RETURN_ADDRESS(PC, SP)      m32r_push_return_address (PC, SP)
 

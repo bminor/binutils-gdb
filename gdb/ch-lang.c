@@ -26,6 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "ch-lang.h"
 
+extern void _initialize_chill_language PARAMS ((void));
+
 static value_ptr
 evaluate_subexp_chill PARAMS ((struct type *, struct expression *, int *, enum noside));
 

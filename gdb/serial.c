@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include "gdbcmd.h"
 
+extern void _initialize_serial PARAMS ((void));
+
 /* Linked list of serial I/O handlers */
 
 static struct serial_ops *serial_ops_list = NULL;

@@ -140,8 +140,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    does not, FRAMELESS is set to 1, else 0.  */
 
 #undef  FRAMELESS_FUNCTION_INVOCATION
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  (FRAMELESS) = frameless_look_for_prologue(FI)
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+  (frameless_look_for_prologue (FI))
 
 #undef  FRAME_SAVED_PC
 #define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
@@ -150,7 +150,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    Can return -1, meaning no way to tell.  */
 
 #undef  FRAME_NUM_ARGS
-#define FRAME_NUM_ARGS(numargs, fi) (numargs) = -1
+#define FRAME_NUM_ARGS(fi) (-1)
 
 #ifdef __STDC__		/* Forward decl's for prototypes */
 struct frame_info;

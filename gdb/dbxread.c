@@ -261,6 +261,8 @@ static int bincls_allocated;
 
 /* Local function prototypes */
 
+extern void _initialize_dbxread PARAMS ((void));
+
 static void 
 process_now PARAMS ((struct objfile *));
 

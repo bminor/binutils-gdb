@@ -1002,6 +1002,9 @@ sim_resume (sd, step, siggnal)
 	      break;
 	    case 0xC:					/* jmp */
 	      pc = cpu.gr[RD];
+	      if (tracing && RD == 15)
+		fprintf (stderr, "Func return, r2 = %x, r3 = %x\n",
+			 cpu.gr[2], cpu.gr[3]);
 	      bonus_cycles++;
 	      needfetch = 1;
 	      break;
@@ -1127,6 +1130,9 @@ sim_resume (sd, step, siggnal)
 	    bonus_cycles += ticks;
 	  }
 	  bonus_cycles += 2;  /* min. is 3, so add 2, plus ticks above */
+	  if (tracing)
+	    fprintf (stderr, "  mult %x by %x to give %x",
+		     cpu.gr[RD], cpu.gr[RS], cpu.gr[RD] * cpu.gr[RS]);
 	  cpu.gr[RD] = cpu.gr[RD] * cpu.gr[RS];
 	  break;
 	case 0x04:					/* loopt */
@@ -1205,6 +1211,8 @@ sim_resume (sd, step, siggnal)
 
 	case 0x12:					/* mov */
 	  cpu.gr[RD] = cpu.gr[RS];
+	  if (tracing)
+	    fprintf (stderr, "MOV %x into reg %d", cpu.gr[RD], RD);
 	  break;
 
 	case 0x13:					/* bgenr */
@@ -1513,6 +1521,9 @@ sim_resume (sd, step, siggnal)
 	  break;
 	case 0x7F:					/* jsri */
 	  cpu.gr[15] = pc;
+	  if (tracing)
+	    fprintf (stderr, "func call: r2 = %x r3 = %x r4 = %x r5 = %x r6 = %x r7 = %x\n",
+		     cpu.gr[2], cpu.gr[3], cpu.gr[4], cpu.gr[5], cpu.gr[6], cpu.gr[7]);
 	case 0x70:					/* jmpi */
 	  pc = rlat ((pc + ((inst & 0xFF) << 2)) & 0xFFFFFFFC);
 	  memops++;

@@ -274,13 +274,8 @@ do									\
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  do { \
-    if ((FI)->signal_handler_caller) \
-      (FRAMELESS) = 0; \
-    else \
-      (FRAMELESS) = frameless_look_for_prologue(FI); \
-  } while (0)
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+     (((FI)->signal_handler_caller) ? 0 : frameless_look_for_prologue(FI))
 
 /* This was determined by experimentation on hp300 BSD 4.3.  Perhaps
    it corresponds to some offset in /usr/include/sys/user.h or
@@ -311,7 +306,7 @@ do									\
 /* We can't tell how many args there are
    now that the C compiler delays popping them.  */
 #if !defined (FRAME_NUM_ARGS)
-#define FRAME_NUM_ARGS(val,fi) (val = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 #endif
 
 /* Return number of bytes at start of arglist that are not really args.  */

@@ -59,17 +59,7 @@ Here is an m-news.h file for gdb.  It supports the 68881 registers.
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(val, fi)  \
-{ register CORE_ADDR pc = FRAME_SAVED_PC (fi);			\
-  register int insn = 0177777 & read_memory_integer (pc, 2);	\
-  val = 0;							\
-  if (insn == 0047757 || insn == 0157374)  /* lea W(sp),sp or addaw #W,sp */ \
-    val = read_memory_integer (pc + 2, 2);			\
-  else if ((insn & 0170777) == 0050217 /* addql #N, sp */	\
-	   || (insn & 0170777) == 0050117)  /* addqw */		\
-    { val = (insn >> 9) & 7; if (val == 0) val = 8; }		\
-  else if (insn == 0157774) /* addal #WW, sp */			\
-    val = read_memory_integer (pc + 2, 4);			\
-  val >>= 2; }
+extern int news_frame_num_args PARAMS ((struct frame_info *fi));
+#define FRAME_NUM_ARGS (news_frame_num_args ((fi)))
 
 #include "m68k/tm-m68k.h"

@@ -336,7 +336,7 @@
 /* OBSOLETE  */
 /* OBSOLETE /* We can check the stab info to see how */
 /* OBSOLETE    many arg we have.  No info in stack will tell us *x/ */
-/* OBSOLETE #define FRAME_NUM_ARGS(val,fi)		(val = findarg(fi)) */
+/* OBSOLETE #define FRAME_NUM_ARGS(fi)		(findarg(fi)) */
 /* OBSOLETE  */
 /* OBSOLETE /* Return number of bytes at start of arglist that are not really args.  *x/ */
 /* OBSOLETE #define FRAME_ARGS_SKIP			8 */

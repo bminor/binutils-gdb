@@ -80,6 +80,27 @@ convex_skip_prologue (pc)
   return pc;
 }
 
+int
+convex_frameless_function_invocation (fi)
+     struct frame_info *fi;
+{
+  int frameless;
+  extern CORE_ADDR text_start, text_end;
+  CORE_ADDR call_addr = SAVED_PC_AFTER_CALL (FI);
+  frameless = (call_addr >= text_start && call_addr < text_end
+	       && read_memory_integer (call_addr - 6, 1) == 0x22);
+  return frameless;
+}
+
+int
+convex_frame_num_args (fi)
+     struct frame_info *fi;
+{
+  int numargs = read_memory_integer (FRAME_ARGS_ADDRESS (fi) - 4, 4);
+  if (numargs < 0 || numargs >= 256)
+    numargs = -1;
+  return numargs;
+}
 
 exec_file_command (filename, from_tty)
      char *filename;

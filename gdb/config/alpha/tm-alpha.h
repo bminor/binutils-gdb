@@ -252,12 +252,11 @@ extern CORE_ADDR alpha_frame_chain PARAMS ((struct frame_info *));
 /* Define other aspects of the stack frame.  */
 
 
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
+/* An expression that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it. */
 /* We handle this differently for alpha, and maybe we should not */
 
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS)  {(FRAMELESS) = 0;}
+#define FRAMELESS_FUNCTION_INVOCATION(FI)  (0)
 
 /* Saved Pc.  */
 
@@ -287,7 +286,7 @@ alpha_frame_saved_pc PARAMS ((struct frame_info *));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(num, fi)	((num) = -1)
+#define FRAME_NUM_ARGS(fi)	(-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -312,7 +311,7 @@ extern void alpha_find_saved_regs PARAMS ((struct frame_info *));
 /* Things needed for making the inferior call functions.  */
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-    sp = alpha_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
+  (alpha_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR
 alpha_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
 

@@ -136,7 +136,7 @@ extern struct frame_info *tic80_pop_frame PARAMS ((struct frame_info *frame));
    Can set VAL to -1, meaning no way to tell.  */
 /* We can't tell how many args there are */
 
-#define FRAME_NUM_ARGS(val,fi) (val = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 #define FRAME_ARGS_SKIP 0
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
@@ -229,7 +229,7 @@ extern CORE_ADDR tic80_push_arguments PARAMS ((int nargs,
 					       CORE_ADDR struct_addr));
 
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
-  (SP) = tic80_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+  (tic80_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 
 /* PUSH_RETURN_ADDRESS */
 extern CORE_ADDR tic80_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));

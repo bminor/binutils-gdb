@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include "gdbcore.h"
 
+extern void _initialize_scheme_language PARAMS ((void));
 static value_ptr evaluate_subexp_scm PARAMS ((struct type *, struct expression *,
 					      int *, enum noside));
 static value_ptr scm_lookup_name PARAMS ((char *));

@@ -44,6 +44,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes for local functions */
 
+extern void _initialize_remote_d10v PARAMS ((void));
+
 static void remote_d10v_open PARAMS ((char *name, int from_tty));
 
 /* Define the target subroutine names */
@@ -65,11 +67,12 @@ remote_d10v_open (name, from_tty)
 /* Translate a GDB virtual ADDR/LEN into a format the remote target
    understands.  Returns number of bytes that can be transfered
    starting at taddr, ZERO if no bytes can be transfered. */
-int
-remote_d10v_translate_xfer_address (memaddr, nr_bytes, taddr)
+void
+remote_d10v_translate_xfer_address (memaddr, nr_bytes, targ_addr, targ_len)
      CORE_ADDR memaddr;
      int nr_bytes;
-     CORE_ADDR *taddr;
+     CORE_ADDR *targ_addr;
+     int *targ_len;
 {
   CORE_ADDR phys;
   CORE_ADDR seg;
@@ -141,7 +144,8 @@ remote_d10v_translate_xfer_address (memaddr, nr_bytes, taddr)
 	  else
 	    {
 	      /* Logical address out side of data segments, not supported */
-	      return (0);
+	      *targ_len = 0;
+	      return;
 	    }
 	  break;
 	}
@@ -162,7 +166,8 @@ remote_d10v_translate_xfer_address (memaddr, nr_bytes, taddr)
 	    {
 	      /* Logical address outside of IMAP[01] segment, not
 		 supported */
-	      return (0);
+	      *targ_len = 0;
+	      return;
 	    }
 	  if ((off & 0x1ffff) + nr_bytes > 0x1ffffL)
 	    {
@@ -179,8 +184,11 @@ remote_d10v_translate_xfer_address (memaddr, nr_bytes, taddr)
 	    {
 	      phys = ((map & 0x7fL) << 17) + (off & 0x1ffffL);
 	      if (phys > 0xffffffL)
-		/* Address outside of unified address segment */
-		return (0);
+		{
+		  /* Address outside of unified address segment */
+		  *targ_len = 0;
+		  return;
+		}
 	      phys |= targ_unified;
 	      to = "unified";
 	    }
@@ -206,12 +214,13 @@ remote_d10v_translate_xfer_address (memaddr, nr_bytes, taddr)
 	break;
 
       default:
-	return (0);
+	*targ_len = 0;
+	return;
       }
 
 
-  *taddr = phys;
-  return nr_bytes;
+  *targ_addr = phys;
+  *targ_len = nr_bytes;
 }
 
 

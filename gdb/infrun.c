@@ -104,6 +104,32 @@ static int thread_step_needed = 0;
 
 static int use_thread_step_needed = USE_THREAD_STEP_NEEDED;
 
+static void follow_inferior_fork PARAMS ((int parent_pid,
+					  int child_pid,
+					  int has_forked,
+					  int has_vforked));
+
+static void follow_fork PARAMS ((int parent_pid, int child_pid));
+
+static void follow_vfork PARAMS ((int parent_pid, int child_pid));
+
+static void set_schedlock_func PARAMS ((char *args, int from_tty,
+					struct cmd_list_element *c));
+
+static int is_internal_shlib_eventpoint PARAMS ((struct breakpoint *ep));
+
+static int stopped_for_internal_shlib_event PARAMS ((bpstat bs));
+
+static int stopped_for_shlib_catchpoint PARAMS ((bpstat bs,
+						 struct breakpoint **cp_p));
+
+#if __STDC__
+struct execution_control_state;
+#endif
+static int currently_stepping PARAMS ((struct execution_control_state *ecs));
+
+static void xdb_handle_command PARAMS ((char *args, int from_tty));
+
 void _initialize_infrun PARAMS ((void));
 
 /* GET_LONGJMP_TARGET returns the PC at which longjmp() will resume the
@@ -2907,7 +2933,7 @@ stop_stepping:
 
 /* Are we in the middle of stepping?  */
 
-int
+static int
 currently_stepping (ecs)
      struct execution_control_state *ecs;
 {

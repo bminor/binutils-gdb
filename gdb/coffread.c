@@ -42,6 +42,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "complaints.h"
 #include "target.h"
 
+extern void _initialize_coffread PARAMS ((void));
+
 struct coff_symfile_info {
   file_ptr min_lineno_offset;		/* Where in file lowest line#s are */
   file_ptr max_lineno_offset;		/* 1+last byte of line#s in file */

@@ -75,18 +75,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(val, fi)  \
-{ register CORE_ADDR pc = FRAME_SAVED_PC (fi);			\
-  register int insn = 0177777 & read_memory_integer (pc, 2);	\
-  val = 0;							\
-  if (insn == 0047757 || insn == 0157374)  /* lea W(sp),sp or addaw #W,sp */ \
-    val = read_memory_integer (pc + 2, 2);			\
-  else if ((insn & 0170777) == 0050217 /* addql #N, sp */	\
-	   || (insn & 0170777) == 0050117)  /* addqw */		\
-    { val = (insn >> 9) & 7; if (val == 0) val = 8; }		\
-  else if (insn == 0157774) /* addal #WW, sp */			\
-    val = read_memory_integer (pc + 2, 4);			\
-  val >>= 2; }
+extern int delta68_frame_num_args PARAMS ((struct frame_info *fi));
+#define FRAME_NUM_ARGS (delta68_frame_num_args ((fi)))
 
 /* On M68040 versions of sysV68 R3V7.1, ptrace(PT_WRITE_I) does not clear
    the processor's instruction cache as it should.  */

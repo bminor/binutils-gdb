@@ -55,9 +55,7 @@ static CORE_ADDR find_function_addr PARAMS ((value_ptr, struct type **));
 static value_ptr value_arg_coerce PARAMS ((value_ptr, struct type *, int));
 
 
-#ifndef PUSH_ARGUMENTS
 static CORE_ADDR value_push PARAMS ((CORE_ADDR, value_ptr));
-#endif
 
 static value_ptr search_struct_field PARAMS ((char *, value_ptr, int,
 					      struct type *, int));
@@ -577,7 +575,6 @@ value_assign (toval, fromval)
      convert FROMVAL's contents now, with result in `raw_buffer',
      and set USE_BUFFER to the number of bytes to write.  */
 
-#ifdef REGISTER_CONVERTIBLE
   if (VALUE_REGNO (toval) >= 0
       && REGISTER_CONVERTIBLE (VALUE_REGNO (toval)))
     {
@@ -590,7 +587,6 @@ value_assign (toval, fromval)
 	  use_buffer = REGISTER_RAW_SIZE (regno);
 	}
     }
-#endif
 
   switch (VALUE_LVAL (toval))
     {
@@ -1072,8 +1068,6 @@ push_bytes (sp, buffer, len)
 
 /* Push onto the stack the specified value VALUE.  */
 
-#ifndef PUSH_ARGUMENTS
-
 static CORE_ADDR
 value_push (sp, arg)
      register CORE_ADDR sp;
@@ -1097,7 +1091,25 @@ value_push (sp, arg)
   return sp;
 }
 
-#endif	/* !PUSH_ARGUMENTS */
+#ifndef PUSH_ARGUMENTS
+#define PUSH_ARGUMENTS default_push_arguments
+#endif
+
+CORE_ADDR
+default_push_arguments (nargs, args, struct_return, sp, struct_addr)
+     int nargs;
+     value_ptr *args;
+     int struct_return;
+     CORE_ADDR sp;
+     CORE_ADDR struct_addr;
+{
+  /* ASSERT ( !struct_return); */
+  int i;
+  for (i = nargs - 1; i >= 0; i--)
+    sp = value_push (sp, args[i]);
+  return sp;
+}
+
 
 /* Perform the standard coercions that are specified
    for arguments to be passed to C functions.
@@ -1370,7 +1382,7 @@ hand_function_call (function, nargs, args)
       /* Convex Unix prohibits executing in the stack segment. */
       /* Hope there is empty room at the top of the text segment. */
       extern CORE_ADDR text_end;
-      static checked = 0;
+      static int checked = 0;
       if (!checked)
 	for (start_sp = text_end - sizeof_dummy1; start_sp < text_end; ++start_sp)
 	  if (read_memory_integer (start_sp, 1) != 0)
@@ -1569,12 +1581,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 #endif /* STACK_ALIGN */
 #endif /* NO_EXTRA_ALIGNMENT_NEEDED */
 
-#ifdef PUSH_ARGUMENTS
-  PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr);
-#else /* !PUSH_ARGUMENTS */
-  for (i = nargs - 1; i >= 0; i--)
-    sp = value_push (sp, args[i]);
-#endif /* !PUSH_ARGUMENTS */
+  sp = PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr);
 
 #ifdef PUSH_RETURN_ADDRESS	/* for targets that use no CALL_DUMMY */
   /* There are a number of targets now which actually don't write any

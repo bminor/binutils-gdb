@@ -135,7 +135,7 @@ extern void fr30_pop_frame PARAMS ((void));
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
-#define FRAME_NUM_ARGS(numargs, fi) (numargs = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 #ifdef __STDC__		/* Forward decls for prototypes */
 struct frame_info;
@@ -190,18 +190,10 @@ extern void fr30_store_return_value PARAMS ((struct type *type, char *valbuf));
 
 /* Define other aspects of the stack frame.  */
 
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-{							\
-  CORE_ADDR func_start, after_prologue;			\
-  func_start = (get_pc_function_start ((FI)->pc) +	\
-		FUNCTION_START_OFFSET);			\
-  after_prologue = func_start;				\
-  after_prologue = SKIP_PROLOGUE (after_prologue);	\
-  (FRAMELESS) = (after_prologue == func_start);		\
-}
+/* An expression that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  */
+extern int fr30_frameless_function_invocation PARAMS ((struct frame_info *frame));
+#define FRAMELESS_FUNCTION_INVOCATION(FI) (fr30_frameless_function_invocation (FI));
 
 extern void fr30_init_extra_frame_info PARAMS ((struct frame_info *fi));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) fr30_init_extra_frame_info (fi)
@@ -213,7 +205,7 @@ fr30_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
 			     int struct_return,
 			     CORE_ADDR struct_addr));
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
-  (SP) = fr30_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+  (fr30_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 

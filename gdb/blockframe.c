@@ -381,17 +381,16 @@ get_prev_frame (next_frame)
      define this macro to take two args; a frameinfo pointer
      identifying a frame and a variable to set or clear if it is
      or isn't leafless.  */
-#ifdef FRAMELESS_FUNCTION_INVOCATION
+
   /* Still don't want to worry about this except on the innermost
      frame.  This macro will set FROMLEAF if NEXT_FRAME is a
      frameless function invocation.  */
   if (!(next_frame->next))
     {
-      FRAMELESS_FUNCTION_INVOCATION (next_frame, fromleaf);
+      fromleaf = FRAMELESS_FUNCTION_INVOCATION (next_frame);
       if (fromleaf)
 	address = FRAME_FP (next_frame);
     }
-#endif
 
   if (!fromleaf)
     {

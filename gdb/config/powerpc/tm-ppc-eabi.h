@@ -56,11 +56,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 extern struct frame_info *rs6000_pop_frame PARAMS ((struct frame_info *frame));
 
 extern CORE_ADDR ppc_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
-extern CORE_ADDR rs6000_push_arguments PARAMS ((int nargs, 
-					      struct value **args, 
-					      CORE_ADDR sp,
-					      unsigned char struct_return,
-					      CORE_ADDR struct_addr));
 
 #undef PUSH_DUMMY_FRAME
 #define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()

@@ -159,8 +159,8 @@ extern CORE_ADDR w65_skip_prologue ();
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
 
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  (FRAMELESS) = frameless_look_for_prologue(FI)
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+  (frameless_look_for_prologue (FI))
 
 #define FRAME_CHAIN(FRAME)       w65_frame_chain(FRAME)
 #define FRAME_SAVED_PC(FRAME)    (w65_frame_saved_pc(FRAME))
@@ -172,7 +172,7 @@ extern CORE_ADDR w65_skip_prologue ();
 
 /* We can't tell how many args there are */
 
-#define FRAME_NUM_ARGS(val,fi) (val = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

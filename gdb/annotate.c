@@ -27,6 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes for local functions. */
 
+extern void _initialize_annotate PARAMS ((void));
+
 static void print_value_flags PARAMS ((struct type *));
 
 static void breakpoint_changed PARAMS ((struct breakpoint *));

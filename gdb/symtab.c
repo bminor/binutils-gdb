@@ -108,6 +108,9 @@ static void print_msymbol_info PARAMS ((struct minimal_symbol *));
 
 static void symtab_symbol_info PARAMS ((char *, namespace_enum, int));
 
+static void overload_list_add_symbol PARAMS ((struct symbol *sym,
+					      char *oload_name));
+
 void _initialize_symtab PARAMS ((void));
 
 /* */

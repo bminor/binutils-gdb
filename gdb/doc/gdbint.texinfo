@@ -1330,10 +1330,10 @@ the processor's floating point unit.
 @item FP_REGNUM
 The number of the frame pointer register.
 
-@item FRAMELESS_FUNCTION_INVOCATION(fi, frameless)
-Define this to set the variable @var{frameless} to 1 if the function
-invocation represented by @var{fi} does not have a stack frame
-associated with it.  Otherwise set it to 0.
+@item FRAMELESS_FUNCTION_INVOCATION(fi)
+Define this to an expression that returns 1 if the function invocation
+represented by @var{fi} does not have a stack frame associated with it.
+Otherwise return 0.
 
 @item FRAME_ARGS_ADDRESS_CORRECT
 stack.c
@@ -1366,9 +1366,10 @@ current stack frame storing each in @code{frame->saved_regs}.  Space for
 
 @var{FRAME_FIND_SAVED_REGS} and @var{EXTRA_FRAME_INFO} are deprecated.
 
-@item FRAME_NUM_ARGS (val, fi)
-For the frame described by @var{fi}, set @var{val} to the number of arguments
-that are being passed.
+@item FRAME_NUM_ARGS (fi)
+For the frame described by @var{fi} return the number of arguments that
+are being passed.  If the number of arguments is not known, return
+@code{-1}.
 
 @item FRAME_SAVED_PC(frame)
 Given @var{frame}, return the pc saved there.  That is, the return
@@ -1529,7 +1530,8 @@ Used in @samp{call_function_by_hand} to remove an artificial stack
 frame.
 
 @item PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr)
-Define this to push arguments onto the stack for inferior function call.
+Define this to push arguments onto the stack for inferior function
+call. Return the updated stack pointer value.
 
 @item PUSH_DUMMY_FRAME
 Used in @samp{call_function_by_hand} to create an artificial stack frame.

@@ -139,9 +139,16 @@ static void trace_dump_command            PARAMS ((char *, int));
 /* support routines */
 static void trace_mention                 PARAMS ((struct tracepoint *));
 
+#if __STDC__
 struct collection_list;
+#endif
 static void add_aexpr PARAMS ((struct collection_list *, struct agent_expr *));
 static unsigned char *mem2hex(unsigned char *, unsigned char *, int);
+static void add_register PARAMS ((struct collection_list *collection, unsigned long regno));
+static void free_actions_list PARAMS ((char **actions_list));
+static void free_actions_list_cleanup_wrapper PARAMS ((void*));
+
+extern void _initialize_tracepoint PARAMS ((void));
 
 /* Utility: returns true if "target remote" */
 static int
@@ -1122,7 +1129,7 @@ memrange_sortmerge (memranges)
 }
 
 /* Add a register to a collection list */
-void
+static void
 add_register (collection, regno)
      struct collection_list *collection;
      unsigned long regno;
@@ -1431,7 +1438,14 @@ stringify_collection_list (list, string)
     return *str_list;
 }
 
-void
+static void
+free_actions_list_cleanup_wrapper (al)
+     void *al;
+{
+  free_actions_list (al);
+}
+
+static void
 free_actions_list(actions_list)
      char **actions_list;
 {
@@ -1724,8 +1738,10 @@ trace_start_command (args, from_tty)
 	  if (t->actions)
 	    {
 	      encode_actions (t, &tdp_actions, &stepping_actions);
-	      old_chain = make_cleanup (free_actions_list, tdp_actions);
-	      (void) make_cleanup (free_actions_list, stepping_actions);
+	      old_chain = make_cleanup (free_actions_list_cleanup_wrapper,
+					tdp_actions);
+	      (void) make_cleanup (free_actions_list_cleanup_wrapper,
+				   stepping_actions);
 
 	      /* do_single_steps (t); */
 	      if (tdp_actions)

@@ -28,6 +28,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 
+/* An expression that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  */
+int
+fr30_frameless_function_invocation (fi)
+     struct frame_info *fi;
+{
+  int frameless;
+  CORE_ADDR func_start, after_prologue;
+  func_start = (get_pc_function_start ((fi)->pc) +
+		FUNCTION_START_OFFSET);
+  after_prologue = func_start;
+  after_prologue = SKIP_PROLOGUE (after_prologue);
+  frameless = (after_prologue == func_start);
+  return frameless;
+}
+
 /* Function: pop_frame
    This routine gets called when either the user uses the `return'
    command, or the call dummy breakpoint gets hit.  */

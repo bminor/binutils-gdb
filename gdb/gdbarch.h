@@ -111,7 +111,22 @@ extern disassemble_info tm_print_insn_info;
 #endif
 
 
+/* Fallback definition of FRAMELESS_FUNCTION_INVOCATION */
+#ifndef FRAMELESS_FUNCTION_INVOCATION
+#define FRAMELESS_FUNCTION_INVOCATION(FI) (0)
+#endif
 
+
+/* Fallback definition of REGISTER_CONVERTIBLE etc */
+#ifndef REGISTER_CONVERTIBLE
+#define REGISTER_CONVERTIBLE(x) (0)
+#endif
+#ifndef REGISTER_CONVERT_TO_VIRTUAL
+#define REGISTER_CONVERT_TO_VIRTUAL(x, y, z, a)
+#endif
+#ifndef REGISTER_CONVERT_TO_RAW
+#define REGISTER_CONVERT_TO_RAW(x, y, z, a)
+#endif
 
 
 /* Set the dynamic target-system-dependant parameters (architecture,

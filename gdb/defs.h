@@ -74,6 +74,10 @@ extern char *strsignal PARAMS ((int));
 
 typedef bfd_vma CORE_ADDR;
 
+extern int core_addr_lessthan PARAMS ((CORE_ADDR lhs, CORE_ADDR rhs));
+extern int core_addr_greaterthan PARAMS ((CORE_ADDR lhs, CORE_ADDR rhs));
+
+
 #ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #endif
@@ -248,6 +252,8 @@ extern char *chill_demangle PARAMS ((const char *));
 
 /* From utils.c */
 
+extern void initialize_utils PARAMS ((void));
+
 extern void notice_quit PARAMS ((void));
 
 extern int strcmp_iw PARAMS ((const char *, const char *));
@@ -306,6 +312,8 @@ extern PTR mmalloc PARAMS ((PTR, size_t));
 extern PTR mrealloc PARAMS ((PTR, PTR, size_t));
 extern void mfree PARAMS ((PTR, PTR));
 #endif
+
+extern void init_page_info PARAMS ((void));
 
 /* From demangle.c */
 
@@ -506,6 +514,15 @@ extern char *symtab_to_filename PARAMS ((struct symtab *));
 /* From findvar.c */
 
 extern int read_relative_register_raw_bytes PARAMS ((int, char *));
+
+#if __STDC__
+enum lval_type;
+struct frame_info;
+#endif
+void default_get_saved_register PARAMS ((char *raw_buffer, int *optimized,
+					 CORE_ADDR *addrp,
+					 struct frame_info *frame, int regnum,
+					 enum lval_type *lval));
 
 /* From readline (but not in any readline .h files).  */
 

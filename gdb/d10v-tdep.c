@@ -33,8 +33,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
-void d10v_frame_find_saved_regs PARAMS ((struct frame_info *fi,
-					 struct frame_saved_regs *fsr));
+/* Local functions */
+
+extern void _initialize_d10v_tdep PARAMS ((void));
+
+static void d10v_eva_prepare_to_trace PARAMS ((void));
+
+static void d10v_eva_get_trace_data PARAMS ((void));
 
 int
 d10v_frame_chain_valid (chain, frame)
@@ -60,6 +65,228 @@ d10v_use_struct_convention (gcc_p, type)
   return (TYPE_LENGTH (type) > 8);
 }
 
+
+unsigned char *
+d10v_breakpoint_from_pc (pcptr, lenptr)
+     CORE_ADDR *pcptr;
+     int *lenptr;
+{
+  static unsigned char breakpoint [] = {0x2f, 0x90, 0x5e, 0x00};
+  *lenptr = sizeof (breakpoint);
+  return breakpoint;
+}
+
+char *
+d10v_register_name (reg_nr)
+     int reg_nr;
+{
+  static char *register_names[] = {
+    "r0", "r1", "r2", "r3", "r4", "r5",  "r6", "r7",
+    "r8", "r9", "r10","r11","r12", "r13", "r14","r15",
+    "psw","bpsw","pc","bpc", "cr4", "cr5", "cr6", "rpt_c",
+    "rpt_s","rpt_e", "mod_s", "mod_e", "cr12", "cr13", "iba", "cr15",
+    "imap0","imap1","dmap","a0", "a1"
+  };
+  if (reg_nr < 0)
+    return NULL;
+  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+    return NULL;
+  return register_names [reg_nr];
+}
+
+
+/* Index within `registers' of the first byte of the space for
+   register REG_NR.  */
+
+int
+d10v_register_byte (reg_nr)
+     int reg_nr;
+{
+  if (reg_nr > A0_REGNUM)
+    return ((reg_nr - A0_REGNUM) * 8 + (A0_REGNUM * 2));
+  else
+    return (reg_nr * 2);
+}
+
+/* Number of bytes of storage in the actual machine representation for
+   register REG_NR.  */
+
+int
+d10v_register_raw_size (reg_nr)
+     int reg_nr;
+{
+  if (reg_nr >= A0_REGNUM)
+    return 8;
+  else
+    return 2;
+}
+
+/* Number of bytes of storage in the program's representation
+   for register N.  */
+
+int
+d10v_register_virtual_size (reg_nr)
+     int reg_nr;
+{
+  if (reg_nr >= A0_REGNUM)
+    return 8;
+  else if (reg_nr == PC_REGNUM || reg_nr == SP_REGNUM)
+    return 4;
+  else
+    return 2;
+}
+
+/* Return the GDB type object for the "standard" data type
+   of data in register N.  */
+
+struct type *
+d10v_register_virtual_type (reg_nr)
+     int reg_nr;
+{
+  if (reg_nr >= A0_REGNUM)
+    return builtin_type_long_long;
+  else if (reg_nr == PC_REGNUM || reg_nr == SP_REGNUM)
+    return builtin_type_long;
+  else
+    return builtin_type_short;
+}
+
+#if 0
+/* convert $pc and $sp to/from virtual addresses */
+#define REGISTER_CONVERTIBLE(N) ((N) == PC_REGNUM || (N) == SP_REGNUM)
+#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
+{ \
+    ULONGEST x = extract_unsigned_integer ((FROM), REGISTER_RAW_SIZE (REGNUM)); \
+    if (REGNUM == PC_REGNUM) x = (x << 2) | IMEM_START; \
+    else x |= DMEM_START; \
+    store_unsigned_integer ((TO), TYPE_LENGTH(TYPE), x); \
+}
+#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
+{ \
+    ULONGEST x = extract_unsigned_integer ((FROM), TYPE_LENGTH(TYPE)); \
+    x &= 0x3ffff; \
+    if (REGNUM == PC_REGNUM) x >>= 2; \
+    store_unsigned_integer ((TO), 2, x); \
+}
+#endif
+
+CORE_ADDR
+d10v_make_daddr (x)
+     CORE_ADDR x;
+{
+  return ((x) | DMEM_START);
+}
+
+CORE_ADDR
+d10v_make_iaddr (x)
+     CORE_ADDR x;
+{
+  return (((x) << 2) | IMEM_START);
+}
+
+int
+d10v_daddr_p (x)
+     CORE_ADDR x;
+{
+  return (((x) & 0x3000000) == DMEM_START);
+}
+
+int
+d10v_iaddr_p (x)
+     CORE_ADDR x;
+{
+  return (((x) & 0x3000000) == IMEM_START);
+}
+
+
+CORE_ADDR
+d10v_convert_iaddr_to_raw (x)
+     CORE_ADDR x;
+{
+  return (((x) >> 2) & 0xffff);
+}
+
+CORE_ADDR
+d10v_convert_daddr_to_raw(x)
+     CORE_ADDR x;
+{
+  return ((x) & 0xffff);
+}
+
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function. 
+
+   We store structs through a pointer passed in the first Argument
+   register. */
+
+void
+d10v_store_struct_return (addr, sp)
+     CORE_ADDR addr;
+     CORE_ADDR sp;
+{
+  write_register (ARG1_REGNUM, (addr));
+}
+
+/* Write into appropriate registers a function return value
+   of type TYPE, given in virtual format.  
+
+   Things always get returned in RET1_REGNUM, RET2_REGNUM, ... */
+
+void
+d10v_store_return_value (type,valbuf)
+     struct type *type;
+     char *valbuf;
+{
+  write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
+			valbuf,
+			TYPE_LENGTH (type));
+}
+
+/* Extract from an array REGBUF containing the (raw) register state
+   the address in which a function should return its structure value,
+   as a CORE_ADDR (or an expression that can be used as one).  */
+
+CORE_ADDR
+d10v_extract_struct_value_address (regbuf)
+     char *regbuf;
+{
+  return (extract_address ((regbuf) + REGISTER_BYTE (ARG1_REGNUM),
+			   REGISTER_RAW_SIZE (ARG1_REGNUM))
+	  | DMEM_START);
+}
+
+CORE_ADDR
+d10v_frame_saved_pc (frame)
+     struct frame_info *frame;
+{
+  return ((frame)->return_pc);
+}
+
+CORE_ADDR
+d10v_frame_args_address (fi)
+     struct frame_info *fi;
+{
+  return (fi)->frame;
+}
+
+CORE_ADDR
+d10v_frame_locals_address (fi)
+     struct frame_info *fi;
+{
+  return (fi)->frame;
+}
+
+/* Immediately after a function call, return the saved pc.  We can't
+   use frame->return_pc beause that is determined by reading R13 off
+   the stack and that may not be written yet. */
+
+CORE_ADDR
+d10v_saved_pc_after_call (frame)
+     struct frame_info *frame;
+{
+  return ((read_register(LR_REGNUM) << 2)
+	  | IMEM_START);
+}
 
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
@@ -869,7 +1096,7 @@ print_insn (memaddr, stream)
   return (*tm_print_insn) (memaddr, &tm_print_insn_info);
 }
 
-void
+static void
 d10v_eva_prepare_to_trace ()
 {
   if (!tracing)
@@ -881,7 +1108,7 @@ d10v_eva_prepare_to_trace ()
 /* Collect trace data from the target board and format it into a form
    more useful for display.  */
 
-void
+static void
 d10v_eva_get_trace_data ()
 {
   int count, i, j, oldsize;

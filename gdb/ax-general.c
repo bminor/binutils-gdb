@@ -27,6 +27,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "value.h"
 
+static void grow_expr PARAMS ((struct agent_expr *x, int n));
+
+static void append_const PARAMS ((struct agent_expr *x, LONGEST val, int n));
+
+static LONGEST read_const PARAMS ((struct agent_expr *x, int o, int n));
+
+static void generic_ext PARAMS ((struct agent_expr *x, enum agent_op op, int n));
 
 /* Functions for building expressions.  */
 

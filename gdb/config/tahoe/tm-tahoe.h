@@ -189,8 +189,8 @@ extern CORE_ADDR tahoe_skip_prologue PARAMS ((CORE_ADDR));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(numargs, fi)  \
-{ numargs = ((0xffff & read_memory_integer(((fi)->frame-4),4)) - 4) >> 2; }
+extern int tahoe_frame_num_args PARAMS ((struct frame_info *fi));
+#define FRAME_NUM_ARGS(fi) (tahoe_frame_num_args ((fi)))
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

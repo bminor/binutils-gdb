@@ -716,14 +716,6 @@ void notice_quit()
 
 #endif /* !defined(__GO32__) && !defined(_MSC_VER) */
 
-void
-pollquit()
-{
-  notice_quit ();
-  if (quit_flag || immediate_quit)
-    quit ();
-}
-
 /* Control C comes here */
 
 void
@@ -1003,21 +995,7 @@ print_spaces (n, file)
      register int n;
      register GDB_FILE *file;
 {
-  if (file->ts_streamtype == astring)
-    {
-      char *p;
-
-      gdb_file_adjust_strbuf (n, file);
-      p = file->ts_strbuf + strlen (file->ts_strbuf);
-
-      memset (p, ' ', n);
-      p[n] = '\000';
-    }
-  else
-    {
-      while (n-- > 0)
-	fputc (' ', file->ts_filestream);
-    }
+  fputs_unfiltered (n_spaces (n), file);
 }
 
 /* Print a host address.  */
@@ -1286,36 +1264,6 @@ gdb_printchar (c, stream, quoter)
       fputs_filtered ("\\", stream);
     fprintf_filtered (stream, "%c", c);
   }
-}
-
-
-
-
-static char * hexlate = "0123456789abcdef" ;
-int fmthex(inbuf,outbuff,length,linelength)
-     unsigned char * inbuf ;
-     unsigned char * outbuff;
-     int length;
-     int linelength;
-{
-  unsigned char byte , nib ;
-  int outlength = 0 ;
-
-  while (length)
-    {
-      if (outlength >= linelength) break ;
-      byte = *inbuf ;
-      inbuf++ ;
-      nib = byte >> 4 ;
-      *outbuff++ = hexlate[nib] ;
-      nib = byte &0x0f ;
-      *outbuff++ = hexlate[nib] ;
-      *outbuff++ = ' ' ;
-      length-- ;
-      outlength += 3 ;
-    }
-  *outbuff = '\0' ; /* null terminate our output line */
-  return outlength ;
 }
 
 
@@ -1651,14 +1599,24 @@ gdb_file_adjust_strbuf (n, stream)
      GDB_FILE *stream;
 {
   int non_null_chars;
+
+  if (stream->ts_streamtype != astring)
+    return;
   
-  non_null_chars = strlen(stream->ts_strbuf);
- 
-  if (n > (stream->ts_buflen - non_null_chars - 1)) 
+  if (stream->ts_strbuf)
     {
-      stream->ts_buflen = n + non_null_chars + 1;
-      stream->ts_strbuf = xrealloc (stream->ts_strbuf, stream->ts_buflen);
+      /* There is already a buffer allocated */
+      non_null_chars = strlen(stream->ts_strbuf);
+ 
+      if (n > (stream->ts_buflen - non_null_chars - 1)) 
+        {
+          stream->ts_buflen = n + non_null_chars + 1;
+          stream->ts_strbuf = xrealloc (stream->ts_strbuf, stream->ts_buflen);
+        }  
     }  
+  else
+    /* No buffer yet, so allocate one of the desired size */
+    stream->ts_strbuf = xmalloc ((n + 1) * sizeof (char));
 } 
 
 GDB_FILE *
@@ -2201,9 +2159,9 @@ char *
 n_spaces (n)
      int n;
 {
-  register char *t;
-  static char *spaces;
-  static int max_spaces;
+  char *t;
+  static char *spaces = 0;
+  static int max_spaces = -1;
 
   if (n > max_spaces)
     {
@@ -2946,3 +2904,22 @@ preg_nz(reg)
     }
   return preg_str;
 }
+
+/* Helper functions for INNER_THAN */
+int
+core_addr_lessthan (lhs, rhs)
+     CORE_ADDR lhs;
+     CORE_ADDR rhs;
+{
+  return (lhs < rhs);
+}
+
+int
+core_addr_greaterthan (lhs, rhs)
+     CORE_ADDR lhs;
+     CORE_ADDR rhs;
+{
+  return (lhs > rhs);
+}
+
+

@@ -2713,6 +2713,7 @@ breakpoint_1 (bnum, allflag)
   static char bpenables[] = "nyn";
   char wrap_indent[80];
 
+
   ALL_BREAKPOINTS (b)
     if (bnum == -1
 	|| bnum == b->number)

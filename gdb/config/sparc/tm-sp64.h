@@ -369,7 +369,7 @@ extern void sparc64_write_fp PARAMS ((CORE_ADDR));
 
 CORE_ADDR sp64_push_arguments PARAMS ((int, struct value **, CORE_ADDR, unsigned char, CORE_ADDR));
 #undef PUSH_ARGUMENTS
-#define PUSH_ARGUMENTS(A,B,C,D,E) (sp = sp64_push_arguments ((A), (B), (C), (D), (E)))
+#define PUSH_ARGUMENTS(A,B,C,D,E) (sp64_push_arguments ((A), (B), (C), (D), (E)))
 
 #undef EXTRACT_RETURN_VALUE
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \

@@ -804,11 +804,7 @@ child_has_exited (pid, wait_status, exit_status)
 static void
 child_mourn_inferior ()
 {
-  /* FIXME: Should be in a header file */
-  extern void proc_remove_foreign PARAMS ((int));
-
   unpush_target (&child_ops);
-  proc_remove_foreign (inferior_pid);
   generic_mourn_inferior ();
 }
 

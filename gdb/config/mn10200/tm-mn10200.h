@@ -172,7 +172,7 @@ extern CORE_ADDR mn10200_skip_prologue PARAMS ((CORE_ADDR));
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
-#define FRAME_NUM_ARGS(val, fi) ((val) = -1)
+#define FRAME_NUM_ARGS(fi) (-1)
 
 extern void mn10200_pop_frame PARAMS ((struct frame_info *));
 #define POP_FRAME mn10200_pop_frame (get_current_frame ())
@@ -194,7 +194,7 @@ extern CORE_ADDR
 mn10200_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
 			     unsigned char, CORE_ADDR));
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
-  (SP) = mn10200_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+  (mn10200_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 

@@ -30,6 +30,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "c-lang.h"
 #include "annotate.h"
 
+/* Local functions */
+
+static void java_print_value_fields PARAMS ((struct type *type, char *valaddr, CORE_ADDR address, GDB_FILE *stream, int format, int recurse, enum val_prettyprint pretty));
+
+
 int
 java_value_print (val, stream, format, pretty)
      value_ptr val;
@@ -230,7 +235,7 @@ java_value_print (val, stream, format, pretty)
    DONT_PRINT is an array of baseclass types that we
    should not print, or zero if called from top level.  */
 
-void
+static void
 java_print_value_fields (type, valaddr, address, stream,
 			 format, recurse, pretty)
      struct type *type;

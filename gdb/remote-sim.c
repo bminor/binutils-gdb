@@ -39,6 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes */
 
+extern void _initialize_remote_sim PARAMS ((void));
+
 extern int (*ui_loop_hook) PARAMS ((int signo));
 
 static void dump_mem PARAMS ((char *buf, int len));

@@ -70,6 +70,8 @@ prefixify_expression PARAMS ((struct expression *));
 static void
 prefixify_subexp PARAMS ((struct expression *, struct expression *, int, int));
 
+void _initialize_parse PARAMS ((void));
+
 /* Data structure for saving values of arglist_len for function calls whose
    arguments contain other function calls.  */
 

@@ -1,3 +1,256 @@
+1999-05-25  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* utils.c (gdb_file_adjust_strbuf): Take into account the
+	possibility that the buffer has not been allocated yet.
+
+Tue May 25 16:05:11 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h (REGISTER_CONVERTIBLE, REGISTER_CONVERT_TO_VIRTUAL,
+ 	REGISTER_CONVERT_TO_RAW): Provide default definition.
+
+	* valops.c (value_assign), infcmd.c (do_registers_info), findvar.c
+ 	(value_from_register, value_of_register): Remove #ifdef
+ 	REGISTER_CONVERTIBLE.  Assume REGISTER_CONVERTIBLE etc defined.
+
+Tue May 25 16:18:25 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* remote-d10v.c (d10v_eva_prepare_to_trace,
+ 	d10v_eva_get_trace_data), remote-sim.c (_initialize_remote_sim):
+ 	Add declaraton.  Make static.
+
+	* remote-d10v.c (_initialize_remote_d10v), d10v-tdep.c
+ 	(_initialize_d10v_tdep): Add declaration.
+	* config/d10v/tm-d10v.h (d10v_frame_chain): Add declaration.
+
+Tue May 25 15:20:58 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* main.c (init_proc, proc_remove_foreign): Delete function.
+	* inftarg.c (child_mourn_inferior): Update. Delete call to
+ 	proc_remove_foreign().
+	* top.c (gdb_init): Update. Delete call to init_proc().
+
+	* utils.c (pollquit, fmthex, hexlate): Delete function.
+
+Tue May 25 13:01:43 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* main.c (gdb_init): Move declaration from here.
+	* top.h: To here.
+	
+	* defs.h (init_page_info): Add declaration.
+
+	* top.c (initialize_utils): Move declaration from here.
+	* defs.h: To here.
+
+	* infcmd.c (target_map_name_to_register): Move declaration from
+ 	here.
+	* parser-defs.h: To here.
+
+	* c-typeprint.c (cp_type_print_method_args), target.c
+ 	(nosupport_runtime, normal_target_post_startup_inferior): Add
+ 	declaration.  Make static.
+
+Tue May 25 13:53:23 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* main.c: Include "event-loop.h".
+	* Makefile.in (main.o): Add dependency.
+
+	* top.h (setup_event_loop, async_init_signals), top.c
+ 	(set_async_editing_command, set_async_annotation_level,
+ 	set_async_prompt), event-loop.c (display_gdb_prompt): Move
+ 	declarations from here.
+	* event-loop.h: To here.
+	
+	* event-loop.h (delete_async_signal_handler): Add function
+ 	declaration.
+
+	* event-top.c (change_annotation_level, command_handler): Add
+ 	declaration.  Make static.
+
+Tue May 25 12:44:58 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* tracepoint.c (free_actions_list, add_register): Add declaration.
+  	Make static.
+	(free_actions_list_cleanup_wrapper): New function.  Wraps
+ 	free_actions_list for make_cleanup.
+	(trace_start_command): Pass free_actions_list_cleanup_wrapper
+ 	instead of free_actions_list to make_cleanup.
+	(_initialize_tracepoint): Add extern declaration.
+
+Tue May 25 12:23:39 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* jv-typeprint.c (java_type_print_base, jv-valprint.c
+ 	(java_print_value_fields): Add static declaration.
+
+	* jv-lang.c (java_lookup_type, get_java_utf8_name,
+ 	java_lookup_type): Add static declaration.
+	(get_java_class_symtab, java_class_is_primitive,
+ 	java_value_string): Add declaration. Make static.
+	(java_rerun_cleanup): Add extern declaration for this stub
+ 	function.
+	
+Mon May 24 16:16:29 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* inflow.c (_initialize_inflow), annotate.c
+ 	(_initialize_annotate), os9kread.c (_initialize_os9kread),
+ 	serial.c (_initialize_serial), nlmread.c (_initialize_nlmread),
+ 	f-valprint.c (_initialize_f_valprint), cp-valprint.c
+ 	(_initialize_cp_valprint), typeprint.c (_initialize_typeprint),
+ 	complaints.c (_initialize_complaints), scm-lang.c
+ 	(_initialize_scheme_language), m2-lang.c
+ 	(_initialize_m2_language), dbxread.c (_initialize_dbxread),
+ 	f-lang.c (_initialize_f_language), ch-lang.c
+ 	(_initialize_chill_language), c-lang.c (_initialize_c_language),
+ 	corefile.c (_initialize_core), stabsread.c
+ 	(_initialize_stabsread), mipsread.c (_initialize_mipsread),
+ 	elfread.c (_initialize_elfread), coffread.c
+ 	(_initialize_coffread), maint.c (_initialize_maint_cmds),
+ 	demangle.c (_initialize_demangler), maint.c
+ 	(_initialize_maint_cmds), language.c (_initialize_language): Add
+ 	external declaration.
+
+Mon May 24 10:04:56 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/z8k/tm-z8k.h, config/w65/tm-w65.h, config/v850/tm-v850.h,
+ 	config/tic80/tm-tic80.h, config/tahoe/tm-tahoe.h,
+ 	config/rs6000/tm-rs6000.h, config/sparc/tm-sparc.h,
+ 	config/sh/tm-sh.h, config/pyr/tm-pyr.h, config/pa/tm-hppa.h,
+ 	config/ns32k/tm-merlin.h, config/mn10300/tm-mn10300.h,
+ 	config/mn10200/tm-mn10200.h, config/mips/tm-mips.h,
+ 	config/m88k/tm-m88k.h, config/m68k/tm-news.h,
+ 	config/m68k/tm-delta68.h, config/m68k/tm-isi.h,
+ 	config/m68k/tm-m68k.h, config/m32r/tm-m32r.h,
+ 	config/i960/tm-i960.h, config/i386/tm-i386v.h,
+ 	config/i386/tm-i386.h, config/h8500/tm-h8500.h,
+ 	config/h8300/tm-h8300.h, config/fr30/tm-fr30.h,
+ 	config/d30v/tm-d30v.h, config/d10v/tm-d10v.h,
+ 	config/convex/tm-convex.h, config/arc/tm-arc.h,
+ 	config/arm/tm-arm.h, config/alpha/tm-alpha.h,
+ 	config/a29k/tm-a29k.h: Re-write definition of FRAME_NUM_ARGS so
+ 	that it returns NUM_ARGS as a result instead of setting a variable
+ 	as a side effect.
+
+	* ns32k-tdep.c (merlin_frame_num_args), tahoe-tdep.c
+ 	(tahoe_frame_num_args), vax-tdep.c (vax_frame_num_args),
+ 	m68k-tdep.c (news_frame_num_args, delta68_frame_num_args,
+ 	isi_frame_num_args), convex-tdep.c (convex_frame_num_args): New
+ 	functions.
+
+	* stack.c (print_args_stub): Update use of FRAME_NUM_ARGS.
+
+Mon May 24 11:57:04 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (remote_xfer_memory): Re-write with assumption that
+ 	REMOTE_TRANSLATE_XFER_ADDRESS is defined.  Pass targ_addr and
+ 	targ_len by reference.
+	(REMOTE_TRANSLATE_XFER_ADDRESS): Provide default definition.
+	
+	* remote-d10v.c (remote_d10v_translate_xfer_address): Update.
+	* config/d10v/tm-d10v.h (REMOTE_TRANSLATE_XFER_ADDRESS): Update.
+
+Mon May 24 12:10:58 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* value.h (default_push_arguments): Add function declaration.
+
+	* alpha-tdep.c (alpha_about_to_return), gdbarch.c (verify_gdbarch,
+ 	arch_ok, set_arch), command.c (find_cmd), infrun.c
+ 	(follow_inferior_fork, follow_fork, follow_vfork,
+ 	set_schedlock_func, is_internal_shlib_eventpoint,
+ 	stopped_for_internal_shlib_event, stopped_for_shlib_catchpoint,
+ 	xdb_handle_command), infcmd.c (run_no_args_command, go_command),
+ 	symfile.c (add_filename_language, set_ext_lang_command,
+ 	info_ext_lang_command, init_filename_language_table), symtab.c
+ 	(overload_list_add_symbol), defs.h (default_get_saved_register),
+ 	ax-general.c (grow_expr, append_const, read_const, generic_ext):
+ 	Ditto.
+
+	* infrun.c (currently_stepping): Ditto.  Make static.
+
+	* valops.c (hand_function_call): Explictly type static variable
+ 	``checked''.
+
+Mon May 24 08:36:18 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (d10v_breakpoint_from_pc, d10v_register_name,
+ 	d10v_register_byte, d10v_register_raw_size,
+ 	d10v_register_virtual_size, d10v_register_virtual_type,
+ 	d10v_make_daddr, d10v_make_iaddr, d10v_daddr_p, d10v_iaddr_p,
+ 	d10v_convert_iaddr_to_raw, d10v_convert_daddr_to_raw,
+ 	d10v_store_struct_return, d10v_store_return_value,
+ 	d10v_extract_struct_value_address, d10v_frame_saved_pc,
+ 	d10v_frame_args_address, d10v_frame_locals_address,
+ 	d10v_saved_pc_after_call): New functions.
+	
+	* config/d10v/tm-d10v.h (REGISTER_BYTE, REGISTER_RAW_SIZE,
+ 	REGISTER_VIRTUAL_SIZE, REGISTER_VIRTUAL_TYPE, STORE_STRUCT_RETURN,
+ 	D10V_MAKE_DADDR, D10V_MAKE_IADDR, D10V_DADDR_P, D10V_IADDR_P,
+ 	D10V_CONVERT_DADDR_TO_RAW, D10V_CONVERT_IADDR_TO_RAW,
+ 	STORE_STRUCT_RETURN, STORE_RETURN_VALUE,
+ 	EXTRACT_STRUCT_VALUE_ADDRESS, SAVED_PC_AFTER_CALL, FRAME_SAVED_PC,
+ 	FRAME_ARGS_ADDRESS): Re-define using new functions.
+
+	* config/d10v/tm-d10v.h (BREAKPOINT_FROM_PC): Replace BREAKPOINT.
+	(REGISTER_NAME): Replace REGISTER_NAMES.
+
+	* utils.c (core_addr_lessthan, core_addr_greaterthan): New
+ 	functions.
+	* defs.h (core_addr_lessthan, core_addr_greaterthan): Declare.
+	
+Sat May 22 16:44:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* utils.c (n_spaces): Handle case where first call has N equal to
+ 	zero.
+	(print_spaces): Use n_spaces.
+
+Fri May 21 11:23:54 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* valops.c (value_push): Remove conditional definition based on
+ 	absense of macro PUSH_ARGUMENTS.  Pass SP and STRUCT_ADDR by
+ 	reference.
+	(default_push_arguments): New function.
+
+	* config/v850/tm-v850.h, config/tic80/tm-tic80.h,
+ 	config/sparc/tm-sparc.h, config/sparc/tm-sp64.h,
+ 	config/sh/tm-sh.h, config/rs6000/tm-rs6000.h, config/pa/tm-hppa.h,
+ 	config/mn10300/tm-mn10300.h, config/mn10200/tm-mn10200.h,
+ 	config/mips/tm-mips.h, config/m32r/tm-m32r.h,
+ 	config/h8300/tm-h8300.h, config/fr30/tm-fr30.h,
+ 	config/d30v/tm-d30v.h, config/d10v/tm-d10v.h, config/arm/tm-arm.h,
+ 	config/alpha/tm-alpha.h: Update definition of PUSH_ARGUMENTS.
+  	Return updated SP.
+
+	* rs6000-tdep.c (rs6000_push_arguments): Rename push_arguments.
+
+Thu May 20 12:18:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* blockframe.c (get_prev_frame): Remove #ifdef around test for
+ 	FRAMELESS_FUNCTION_INVOCATION.
+  	(get_prev_frame): Change FRAMELESS_FUNCTION_INVOCATION call to a
+ 	function invocation.
+	* i386-tdep.c (i386_frame_num_args), stack.c (frame_info): Ditto.
+	* config/z8k/tm-z8k.h, config/w65/tm-w65.h, config/vax/tm-vax.h,
+ 	config/sparc/tm-sparc.h, config/sh/tm-sh.h,
+ 	config/rs6000/tm-rs6000.h, config/pa/tm-hppa.h,
+ 	config/mips/tm-mips.h, config/m88k/tm-m88k.h,
+ 	config/m68k/tm-m68k.h, config/i960/tm-i960.h,
+ 	config/i386/tm-sun386.h, config/i386/tm-i386v.h,
+ 	config/i386/tm-i386.h, config/h8500/tm-h8500.h,
+ 	config/h8300/tm-h8300.h, config/fr30/tm-fr30.h,
+ 	config/d30v/tm-d30v.h, config/d10v/tm-d10v.h,
+ 	config/convex/tm-convex.h, config/arm/tm-arm.h,
+ 	config/arc/tm-arc.h, config/alpha/tm-alpha.h,
+ 	config/a29k/tm-a29k.h: Update FRAMELESS_FUNCTION_INVOCATION.
+	* fr30-tdep.c (fr30_frameless_function_invocation), convex-tdep.c
+ 	(convex_frameless_function_invocation), arm-tdep.c
+ 	(arm_frameless_function_invocation): New functions.
+
+1999-05-20  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* top.c: Change dates in comments to ISO format.
+
+	* event-top.c: Ditto.
+	* event-loop.c: Ditto.
+	* main.c: Ditto.
+	
 1999-05-19  Keith Seitz  <keiths@cygnus.com>
 
 	* monitor.c (monitor_open): Only assume we have eight
@@ -22,10 +275,10 @@
 	
 1999-05-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
-	* top.c (print_command_line): added the missing stream argument.
-	* gdbcmd.h: added argument to prototype.
-	* command.c: fixed call to include extra argument.
-	* breakpoint.c: same.
+	* top.c (print_command_line): Added the missing stream argument.
+	* gdbcmd.h: Added argument to prototype.
+	* command.c: Fixed call to include extra argument.
+	* breakpoint.c: Same.
 
 1999-05-14  Jim Blandy  <jimb@zwingli.cygnus.com>
 

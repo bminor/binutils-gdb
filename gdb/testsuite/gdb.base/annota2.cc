@@ -18,6 +18,7 @@ int main()
 {
   A a;
 
+  a.x = 0;
   a.x = 1;
   a.y = 2;
 

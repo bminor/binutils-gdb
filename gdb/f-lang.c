@@ -66,6 +66,7 @@ typedef struct saved_bf_symnum     SAVED_BF, *SAVED_BF_PTR;
 
 /* Local functions */
 
+extern void _initialize_f_language PARAMS ((void));
 #if 0
 static void clear_function_list PARAMS ((void));
 static long get_bf_for_fcn PARAMS ((long));
