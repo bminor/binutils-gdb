@@ -1,5 +1,9 @@
 2004-02-07  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.h (sparc_fetch_wcookie): New prototype.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_saved_regs): Handle
+	StackGhost.
+
 	* sparc-tdep.c (sparc32_frame_prev_register): Rename local
 	variable `i6' to `i7'.
 	(sparc_supply_rwindow, sparc_collect_rwindow): Likewise.

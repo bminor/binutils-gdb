@@ -141,6 +141,20 @@ sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame)
        regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
     saved_regs[regnum].addr = addr;
 
+  /* Handle StackGhost.  */
+  {
+    ULONGEST wcookie = sparc_fetch_wcookie ();
+
+    if (wcookie != 0)
+      {
+	ULONGEST i7;
+
+	addr = saved_regs[SPARC_I7_REGNUM].addr;
+	i7 = get_frame_memory_unsigned (next_frame, addr, 4);
+	trad_frame_set_value (saved_regs, SPARC_I7_REGNUM, i7 ^ wcookie);
+      }
+  }
+
   /* The floating-point registers are only saved if the EF bit in %prs
      has been set.  */
 
