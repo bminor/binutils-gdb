@@ -1,19 +1,6 @@
-1999-04-29  Nick Clifton  <nickc@cygnus.com>
-
-	* emulparams/elf32mcore.sh (OTHER_BSS_SYMBOLS): Define.
-	(OTHER_BSS_END_SYMBOLS): Define.
-
-	* scripttempl/mcorepe.sc: New file: Duplicte of pe.sc with stack
-	section added.
-
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Updated for new version of libtool.
-
-1999-04-22  Nick Clifton  <nickc@cygnus.com>
-
-	* emulparams/elf32mcore.sh (OTHER_RELOCATING_SECTIONS): Define to
-	generate _stack section.
 
 1999-04-12  Philip Blundell  <pb@nexus.co.uk>
 
@@ -56,17 +43,6 @@
 
 	* ldmain.c (main): Init link_info.no_undefined.
 	* lexsup.c: Add command-line option --no-undefined.
-
-1999-04-08  Nick Clifton  <nickc@cygnus.com>
-
-	* configure.tgt: Add support for MCore targets.
-	* Makefile.am: Add support for MCore targets.
-	* Makefile.in: Regenerate.
-	
-	* emulparams/elf32mcore.sh: New file:  Definitions for mcore-elf
-	target. 
-	* emulparams/mcorepe.sh: New file:  Definitions for mcore-pe
-	target.  
 
 1999-04-06  Ian Lance Taylor  <ian@zembu.com>
 
