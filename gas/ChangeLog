@@ -1,3 +1,51 @@
+Fri Aug 30 18:12:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Add SH ELF support.
+	* configure.in (sh-*-elf*): New target.
+	* config/tc-sh.h (TARGET_ARCH): Define.
+	(WORKING_DOT_WORD): Define.
+ 	(TC_COFF_FIX2RTYPE): Only define if OBJ_COFF.
+	(BFD_ARCH, COFF_MAGIC, TC_COUNT_RELOC): Likewise.
+	(TC_RELOC_MANGLE, tc_coff_symbol_emit_hook): Likewise.
+	(DO_NOT_STRIP, NEED_FX_R_TYPE, TC_KEEP_FX_OFFSET): Likewise.
+	(TC_COFF_SIZEMACHDEP, tc_frob_file): Likewise.
+	(SUB_SEGMENT_ALIGN): Likewise.
+	(RELOC_32): Don't define.
+	(tc_frob_file_before_adjust): Define if BFD_ASSEMBLER.
+	(target_big_endian): Declare if OBJ_ELF.
+	(TARGET_FORMAT): Define if OBJ_ELF.
+	* config/tc-sh.c: Use BFD reloc codes instead of SH COFF reloc
+	numbers throughout.
+	(tc_crawl_symbol_chain): Only define if OBJ_COFF.
+	(tc_headers_hook, tc_coff_sizemachdep): Likewise.
+	(struct sh_count_relocs): Define.
+	(sh_count_relocs): New static function, broken out of
+	sh_frob_file.  Add BFD_ASSEMBLER code.
+	(sh_frob_section): Likewise.
+	(sh_frob_file): Call sh_frob_section.
+	(md_convert_frag): If BFD_ASSEMBLER, change type of headers, and
+	call section_symbol rather than seg_info (seg)->dot.
+	(md_section_align): Add OBJ_ELF version.
+	(SWITCH_TABLE_CONS): Define.
+	(SWITCH_TABLE): Use SWITCH_TABLE_CONS.
+	(md_apply_fix): Change parameter types if BFD_ASSEMBLER.  Only
+	handle fx_r_type == 0 if not BFD_ASSEMBLER.  Return 0 if
+	BFD_ASSEMBLER.
+	(struct reloc_map): Define if not BFD_ASSEMBLER.
+	(coff_reloc_map): Likewise.
+	(sh_coff_reloc_mangle): Use coff_reloc_map to convert fx_r_type.
+	(tc_gen_reloc): New function if BFD_ASSEMBLER.
+	* write.c (write_relocs): Ifdef out fx_where test which triggers
+	inappropriately for SH ELF.
+	(write_object_file): Call tc_frob_file_before_adjust and
+	obj_frob_file_before_adjust if they are defined.
+
+	* write.c (write_object_file): Use BFD_RELOC_16, not
+	BFD_RELOC_NONE, when calling fix_new_exp for a broken word.
+
+	* read.c (emit_expr): Fix conversion of byte count to BFD reloc
+	code.
+
 start-sanitize-d10v
 Fri Aug 30 14:47:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
