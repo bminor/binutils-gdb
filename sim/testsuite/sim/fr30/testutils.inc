@@ -45,6 +45,12 @@ _start:
 	ldi32 \val,\reg
 	.endm
 
+; Load an immediate value into a dedicated register
+	.macro mvi_h_dr val reg
+	ldi32 \val,r0
+	mov r0,\reg
+	.endm
+
 ; Load a general register into another general register
 	.macro mvr_h_gr src targ
 	mov \src,\targ
@@ -167,4 +173,26 @@ testr_gr\@:
 fail\@:
 	fail
 test_cc\@:
+	.endm
+
+; Set the division bits
+	.macro set_dbits val
+	mvr_h_gr ps,r5
+	mvi_h_gr 0xfffff8ff,r4
+	and r4,r5
+	mvi_h_gr \val,r0
+	mvi_h_gr 3,r4
+	and r4,r0
+	lsl 9,r0
+	or r0,r5
+	mvr_h_gr r5,ps
+	.endm
+
+; Test the division bits
+	.macro test_dbits val
+	mvr_h_gr ps,r0
+	lsr 9,r0
+	mvi_h_gr 3,r4
+	and r4,r0
+	test_h_gr \val,r0
 	.endm

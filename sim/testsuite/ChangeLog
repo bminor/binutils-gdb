@@ -1,3 +1,13 @@
+Thu Dec 10 18:46:25 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/div0s.cgs: New testcase.
+	* sim/fr30/div0u.cgs: New testcase.
+	* sim/fr30/div1.cgs: New testcase.
+	* sim/fr30/div2.cgs: New testcase.
+	* sim/fr30/div3.cgs: New testcase.
+	* sim/fr30/div4s.cgs: New testcase.
+	* sim/fr30/testutils.inc (mvi_h_dr,set_dbits,test_dbits): New Macros.
+
 Tue Dec  8 13:16:53 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* sim/fr30/testutils.inc (set_s_user): Correct Mask.
