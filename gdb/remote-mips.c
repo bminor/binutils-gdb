@@ -278,6 +278,9 @@ static int mips_need_reply = 0;
 /* This can be set to get debugging with ``set remotedebug''.  */
 static int mips_debug = 0;
 
+/* Handle used to access serial I/O stream.  */
+static serial_t mips_desc;
+
 /* Read a character from the remote, aborting on error.  Returns -2 on
    timeout (since that's what serial_readchar returns).  FIXME: If we
    see the string "<IDT>" from the board, then we are debugging on the
@@ -299,14 +302,14 @@ mips_readchar (timeout)
   static int state = 0;
   static char nextstate[5] = { '<', 'I', 'D', 'T', '>' };
 
-  ch = serial_readchar (timeout);
-  if (ch == EOF)
+  ch = SERIAL_READCHAR (mips_desc, timeout);
+  if (ch == SERIAL_EOF)
     error ("End of file from remote");
-  if (ch == -3)
+  if (ch == SERIAL_ERROR)
     error ("Error reading from remote: %s", safe_strerror (errno));
   if (mips_debug > 1)
     {
-      if (ch != -2)
+      if (ch != SERIAL_TIMEOUT)
 	printf_filtered ("Read '%c' %d 0x%x\n", ch, ch, ch);
       else
 	printf_filtered ("Timed out in read\n");
@@ -317,13 +320,13 @@ mips_readchar (timeout)
      described above.  The first character in a packet after the SYN
      (which is not echoed) is always an @ unless the packet is more
      than 64 characters long, which ours never are.  */
-  if ((ch == -2 || ch == '@')
+  if ((ch == SERIAL_TIMEOUT || ch == '@')
       && state == 5
       && ! mips_initializing)
     {
       if (mips_debug > 0)
 	printf_filtered ("Reinitializing MIPS debugging mode\n");
-      serial_write ("\rdb tty0\r", sizeof "\rdb tty0\r" - 1);
+      SERIAL_WRITE (mips_desc, "\rdb tty0\r", sizeof "\rdb tty0\r" - 1);
       sleep (1);
 
       mips_need_reply = 0;
@@ -514,7 +517,7 @@ mips_send_packet (s, get_ack)
 	  printf_filtered ("Writing \"%s\"\n", packet + 1);
 	}
 
-      if (serial_write (packet, HDR_LENGTH + len + TRLR_LENGTH) == 0)
+      if (SERIAL_WRITE (mips_desc, packet, HDR_LENGTH + len + TRLR_LENGTH))
 	error ("write to target failed: %s", safe_strerror (errno));
 
       garbage = 0;
@@ -701,7 +704,7 @@ mips_receive_packet (buff)
 			   ack + 1);
 	}
 
-      if (serial_write (ack, HDR_LENGTH + TRLR_LENGTH) == 0)
+      if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH))
 	error ("write to target failed: %s", safe_strerror (errno));
     }
 
@@ -732,7 +735,7 @@ mips_receive_packet (buff)
 		       ack + 1);
     }
 
-  if (serial_write (ack, HDR_LENGTH + TRLR_LENGTH) == 0)
+  if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH))
     error ("write to target failed: %s", safe_strerror (errno));
 
   return len;
@@ -844,7 +847,7 @@ mips_initialize ()
      it means.  The packet seems to be triggered by a carriage return
      character, although perhaps any character would do.  */
   cr = '\r';
-  serial_write (&cr, 1);
+  SERIAL_WRITE (mip_desc, &cr, 1);
 
   hold_wait = mips_receive_wait;
   mips_receive_wait = 3;
@@ -862,12 +865,12 @@ mips_initialize ()
 	 board and trying again.  */
       printf_filtered ("Failed to initialize; trying to reset board\n");
       cc = '\003';
-      serial_write (&cc, 1);
+      SERIAL_WRITE (mips_desc, &cc, 1);
       sleep (2);
-      serial_write ("\rdb tty0\r", sizeof "\rdb tty0\r" - 1);
+      SERIAL_WRITE (mips_desc, "\rdb tty0\r", sizeof "\rdb tty0\r" - 1);
       sleep (1);
       cr = '\r';
-      serial_write (&cr, 1);
+      SERIAL_WRITE (mips_desc, &cr, 1);
     }
 
   mips_receive_wait = hold_wait;
@@ -895,8 +898,12 @@ device is attached to the target board (e.g., /dev/ttya).");
   if (mips_is_open)
     unpush_target (&mips_ops);
 
-  if (serial_open (name) == 0)
+  mips_desc = SERIAL_OPEN (name);
+
+  if (!mips_desc)
     perror_with_name (name);
+
+  SERIAL_RAW (mips_desc);
 
   mips_is_open = 1;
 
@@ -924,7 +931,7 @@ mips_close (quitting)
       /* Get the board out of remote debugging mode.  */
       mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err);
 
-      serial_close ();
+      SERIAL_CLOSE (mips_desc);
     }
 }
 
@@ -1217,7 +1224,7 @@ mips_kill ()
 
       /* Send a ^C.  */
       cc = '\003';
-      serial_write (&cc, 1);
+      SERIAL_WRITE (mips_desc, &cc, 1);
       sleep (1);
       target_mourn_inferior ();
     }

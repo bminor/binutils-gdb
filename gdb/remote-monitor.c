@@ -83,7 +83,7 @@ static int timeout = 24;
 /* Descriptor for I/O to remote machine.  Initialize it to -1 so that
    monitor_open knows that we don't have a file open when the program
    starts.  */
-int monitor_desc = -1;
+static serial_t monitor_desc;
 
 /* Send data to monitor.  Works just like printf. */
 
@@ -102,8 +102,8 @@ printf_monitor(va_alist)
 
   vsprintf(buf, pattern, args);
 
-  if (!serial_write(buf, strlen(buf)))
-    fprintf(stderr, "serial_write failed: %s\n", safe_strerror(errno));
+  if (SERIAL_WRITE(monitor_desc, buf, strlen(buf)))
+    fprintf(stderr, "SERIAL_WRITE failed: %s\n", safe_strerror(errno));
 }
 
 /* Read a character from the remote system, doing all the fancy
@@ -114,7 +114,7 @@ readchar(timeout)
 {
   int c;
 
-  c = serial_readchar(timeout);
+  c = SERIAL_READCHAR(monitor_desc, timeout);
 
   if (kiodebug)
     putchar(c & 0x7f);
@@ -127,7 +127,7 @@ readchar(timeout)
   if (c >= 0)
     return c & 0x7f;
 
-  if (c == -2)
+  if (c == SERIAL_TIMEOUT)
     {
       if (timeout == 0)
 	return c;		/* Polls shouldn't generate timeout errors */
@@ -318,34 +318,32 @@ static int baudrate = 9600;
 static char dev_name[100];
 
 static void
-rom68k_open(args, from_tty)
+general_open(args, name, from_tty)
      char *args;
+     char *name;
      int from_tty;
 {
   int n;
   char junk[100];
-  TERMINAL sg;
 
   target_preopen(from_tty);
   
   n = sscanf(args, " %s %d %s", dev_name, &baudrate, junk);
 
   if (n != 2)
-    error("Bad arguments.  Usage: target rom68k <device> <speed>\n\
-or target monitor <host> <port>\n");
+    error("Bad arguments.  Usage: target %s <device> <speed>\n\
+or target monitor <host> <port>\n", name);
 
   monitor_close(0);
 
-  monitor_desc = serial_open(dev_name);
+  monitor_desc = SERIAL_OPEN(dev_name);
 
-  serial_setbaudrate(baudrate);
+  if (!monitor_desc)
+    perror_with_name(dev_name);
 
-  ioctl (monitor_desc, TIOCGETP, &sg);
-  sg.sg_flags = O_CRDELAY | O_NLDELAY | ~(RAW);
-  ioctl (monitor_desc, TIOCSETN, &sg);
+  SERIAL_SETBAUDRATE(monitor_desc, baudrate);
 
-  push_target(&rom68k_ops);
-  push_monitor (&rom68k_cmds);
+  SERIAL_RAW(monitor_desc);
 
 #if defined (LOG_FILE)
   log_file = fopen (LOG_FILE, "w");
@@ -354,13 +352,24 @@ or target monitor <host> <port>\n");
 #endif
 
   /* Hello?  Are you there?  */
-  printf_monitor("\n");	/* CR wakes up monitor */
+  printf_monitor("\r");	/* CR wakes up monitor */
   
   expect_prompt(1);
 
   if (from_tty)
     printf("Remote %s connected to %s\n", target_shortname,
 	   dev_name);
+}
+
+static void
+rom68k_open(args, from_tty)
+     char *args;
+     int from_tty;
+{
+  push_target(&rom68k_ops);
+  push_monitor (&rom68k_cmds);
+
+  general_open (args, "rom68k", from_tty);
 }
 
 static void
@@ -368,40 +377,10 @@ mon68_open(args, from_tty)
      char *args;
      int from_tty;
 {
-  int n;
-  char junk[100];
-
-  target_preopen(from_tty);
-  
-  n = sscanf(args, " %s %d %s", dev_name, &baudrate, junk);
-
-  if (n != 2)
-    error("Bad arguments.  Usage: target mon68 <device> <speed>\n\
-or target monitor <host> <port>\n");
-
-  monitor_close(0);
-
-  monitor_desc = serial_open(dev_name);
-
-  serial_setbaudrate(baudrate);
-
   push_target(&mon68_ops);
   push_monitor (&mon68_cmds);
 
-#if defined (LOG_FILE)
-  log_file = fopen (LOG_FILE, "w");
-  if (log_file == NULL)
-    perror_with_name (LOG_FILE);
-#endif
-
-  /* Hello?  Are you there?  */
-  printf_monitor("\n");	/* CR wakes up dbug */
-  
-  expect_prompt(1);
-
-  if (from_tty)
-    printf("Remote %s connected to %s\n", target_shortname,
-	   dev_name);
+  general_open (args, "mon68", from_tty);
 }
 
 static void
@@ -409,50 +388,21 @@ bug_open(args, from_tty)
      char *args;
      int from_tty;
 {
-  int n;
-  char junk[100];
-
-  target_preopen(from_tty);
-  
-  n = sscanf(args, " %s %d %s", dev_name, &baudrate, junk);
-
-  if (n != 2)
-    error("Bad arguments.  Usage: target bug <device> <speed>\n\
-or target monitor <host> <port>\n");
-
-  monitor_close(0);
-
-  monitor_desc = serial_open(dev_name);
-
-  serial_setbaudrate(baudrate);
-
   push_target(&bug_ops);
   push_monitor (&bug_cmds);
 
-#if defined (LOG_FILE)
-  log_file = fopen (LOG_FILE, "w");
-  if (log_file == NULL)
-    perror_with_name (LOG_FILE);
-#endif
-
-  /* Hello?  Are you there?  */
-  printf_monitor("\r");	/* CR wakes up dbug */
-  
-  expect_prompt(1);
-
-  if (from_tty)
-    printf("Remote %s connected to %s\n", target_shortname,
-	   dev_name);
+  general_open (args, "bug", from_tty);
 }
 
 /*
  * _close -- Close out all files and local state before this target loses control.
  */
+
 static void
 monitor_close (quitting)
      int quitting;
 {
-  serial_close();
+  SERIAL_CLOSE(monitor_desc);
 
 #if defined (LOG_FILE)
   if (log_file) {
@@ -896,8 +846,8 @@ monitor_load (arg)
 	  fflush (stdout);
 	}
 
-      if (!serial_write(buf, bytes_read)) {
-	fprintf(stderr, "serial_write failed: (while downloading) %s\n", safe_strerror(errno));
+      if (SERIAL_WRITE(monitor_desc, buf, bytes_read)) {
+	fprintf(stderr, "SERIAL_WRITE failed: (while downloading) %s\n", safe_strerror(errno));
 	break;
       }
       i = 0;
@@ -940,6 +890,8 @@ monitor_command (args, fromtty)
   expect_prompt(0);
 }
 
+#if 0
+
 /* Connect the user directly to MONITOR.  This command acts just like the
    'cu' or 'tip' command.  Use <CR>~. or <CR>~^D to break out.  */
 
@@ -948,7 +900,7 @@ static struct ttystate ttystate;
 static void
 cleanup_tty()
 {  printf("\r\n[Exiting connect mode]\r\n");
-  serial_restore(0, &ttystate);
+  /*SERIAL_RESTORE(0, &ttystate);*/
 }
 
 static void
@@ -1030,6 +982,7 @@ connect_command (args, fromtty)
 	}
     }
 }
+#endif
 
 /*
  * Define the monitor command strings. Since these are passed directly

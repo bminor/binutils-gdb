@@ -60,7 +60,8 @@ static int timeout = 24;
 /* Descriptor for I/O to remote machine.  Initialize it to -1 so that
    st2000_open knows that we don't have a file open when the program
    starts.  */
-int st2000_desc = -1;
+
+static serial_t st2000_desc;
 
 /* Send data to stdebug.  Works just like printf. */
 
@@ -77,19 +78,20 @@ printf_stdebug(va_alist)
   pattern = va_arg(args, char *);
 
   vsprintf(buf, pattern, args);
-  if (!serial_write(buf, strlen(buf)))
-    fprintf(stderr, "serial_write failed: %s\n", safe_strerror(errno));
+  if (SERIAL_WRITE(st2000_desc, buf, strlen(buf)))
+    fprintf(stderr, "SERIAL_WRITE failed: %s\n", safe_strerror(errno));
 }
 
-/* Read a character from the remote system, doing all the fancy
-   timeout stuff.  */
+/* Read a character from the remote system, doing all the fancy timeout
+   stuff.  */
+
 static int
 readchar(timeout)
      int timeout;
 {
   int c;
 
-  c = serial_readchar(timeout);
+  c = SERIAL_READCHAR(st2000_desc, timeout);
 
 #ifdef LOG_FILE
   putc(c & 0x7f, log_file);
@@ -98,7 +100,7 @@ readchar(timeout)
   if (c >= 0)
     return c & 0x7f;
 
-  if (c == -2)
+  if (c == SERIAL_TIMEOUT)
     {
       if (timeout == 0)
 	return c;		/* Polls shouldn't generate timeout errors */
@@ -296,9 +298,14 @@ or target st2000 <host> <port>\n");
 
   st2000_close(0);
 
-  st2000_desc = serial_open(dev_name);
+  st2000_desc = SERIAL_OPEN(dev_name);
 
-  serial_setbaudrate(baudrate);
+  if (!st2000_desc)
+    perror_with_name(dev_name);
+
+  SERIAL_SETBAUDRATE(st2000_desc, baudrate);
+
+  SERIAL_RAW(st2000_desc);
 
   push_target(&st2000_ops);
 
@@ -324,7 +331,7 @@ static void
 st2000_close (quitting)
      int quitting;
 {
-  serial_close();
+  SERIAL_CLOSE(st2000_desc);
 
 #if defined (LOG_FILE)
   if (log_file) {
@@ -661,7 +668,7 @@ st2000_command (args, fromtty)
      char	*args;
      int	fromtty;
 {
-  if (st2000_desc < 0)
+  if (!st2000_desc)
     error("st2000 target not open.");
   
   if (!args)
@@ -674,14 +681,17 @@ st2000_command (args, fromtty)
 /* Connect the user directly to STDBUG.  This command acts just like the
    'cu' or 'tip' command.  Use <CR>~. or <CR>~^D to break out.  */
 
-static struct ttystate ttystate;
+/*static struct ttystate ttystate;*/
 
 static void
 cleanup_tty()
 {
   printf("\r\n[Exiting connect mode]\r\n");
-  serial_restore(0, &ttystate);
+/*  SERIAL_RESTORE(0, &ttystate);*/
 }
+
+#if 0
+/* This all should now be in serial.c */
 
 static void
 connect_command (args, fromtty)
@@ -762,6 +772,7 @@ connect_command (args, fromtty)
 	}
     }
 }
+#endif /* 0 */
 
 /* Define the target subroutine names */
 
