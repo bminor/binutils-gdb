@@ -40,6 +40,7 @@ arsup.h
 binutils.texi
 bucomm.c
 bucomm.h
+budbg.h
 coffdump.c
 coffgrok.c
 coffgrok.h
@@ -49,6 +50,9 @@ configure.bat
 configure.in
 cxxfilt.man
 dlltool.c
+debug.c
+debug.h
+dep-in.sed
 defparse.y
 deflex.l
 filemode.c
@@ -72,12 +76,15 @@ objcopy.1
 objcopy.c
 objdump.1
 objdump.c
+prdbg.c
 ranlib.1
 ranlib.sh
+rddbg.c
 sanity.sh
 size.1
 size.c
 srconv.c
+stabs.c
 strings.1
 strings.c
 strip.1

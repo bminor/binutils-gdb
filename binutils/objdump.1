@@ -21,6 +21,7 @@ objdump \- display information from object files.
 .RB " | " "\-\-target="\c
 .I bfdname\c
 \&\|] 
+.RB "[\|" \-\-debugging "\|]" 
 .RB "[\|" \-d | \-\-disassemble "\|]" 
 .RB "[\|" \-D | \-\-disassemble-all "\|]" 
 .RB "[\|" \-f | \-\-file\-headers "\|]"
@@ -124,6 +125,12 @@ file in the format produced by Oasys compilers.  You can list the
 formats available with the `\|\c
 .B \-i\c
 \|' option.
+
+.TP
+.B \-\-debugging
+Display debugging information.  This attempts to parse debugging
+information stored in the file and print it out using a C like syntax.
+Only certain types of debugging information have been implemented.
 
 .TP
 .B \-d

@@ -955,7 +955,7 @@ Show a summary of the options to @code{objcopy}.
 
 @smallexample
 objdump [ -a | --archive-headers ] 
-        [ -b @var{bfdname} | --target=@var{bfdname} ]
+        [ -b @var{bfdname} | --target=@var{bfdname} ] [ --debugging ]
         [ -d | --disassemble ]  [ -D | --disassemble-all ] 
         [ -f | --file-headers ]
         [ -h | --section-headers | --headers ]  [ -i | --info ]
@@ -1009,6 +1009,11 @@ displays summary information from the section headers (@samp{-h}) of
 file in the format produced by Oasys compilers.  You can list the
 formats available with the @samp{-i} option.
 @xref{Target Selection}, for more information.
+
+@item --debugging
+Display debugging information.  This attempts to parse debugging
+information stored in the file and print it out using a C like syntax.
+Only certain types of debugging information have been implemented.
 
 @item -d
 @itemx --disassemble

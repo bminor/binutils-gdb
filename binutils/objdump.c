@@ -21,11 +21,11 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "getopt.h"
 #include "progress.h"
 #include "bucomm.h"
-#include <sys/types.h>
-#include <stdio.h>
 #include <ctype.h>
 #include "dis-asm.h"
 #include "libiberty.h"
+#include "debug.h"
+#include "budbg.h"
 
 /* Internal headers for the ELF .stab-dump code - sorry.  */
 #define	BYTES_IN_WORD	32
@@ -60,6 +60,7 @@ char *only;			/* -j secname */
 int wide_output;		/* -w */
 bfd_vma start_address = (bfd_vma) -1; /* --start-address */
 bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
+int dump_debugging;		/* --debugging */
 
 /* Extra info to pass to the disassembler address printing function.  */
 struct objdump_disasm_info {
@@ -120,6 +121,9 @@ objdump_print_address PARAMS ((bfd_vma, struct disassemble_info *));
 
 static void
 show_line PARAMS ((bfd *, asection *, bfd_vma));
+
+static const char *
+endian_string PARAMS ((enum bfd_endian));
 
 void
 usage (stream, status)
@@ -128,7 +132,7 @@ usage (stream, status)
 {
   fprintf (stream, "\
 Usage: %s [-ahifdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
-       [--archive-headers] [--target=bfdname] [--disassemble]\n\
+       [--archive-headers] [--target=bfdname] [--debugging] [--disassemble]\n\
        [--disassemble-all] [--file-headers] [--section-headers] [--headers]\n\
        [--info] [--section=section-name] [--line-numbers] [--source]\n",
 	   program_name);
@@ -153,6 +157,7 @@ static struct option long_options[]=
   {"private-headers", no_argument, NULL, 'p'},
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
+  {"debugging", no_argument, &dump_debugging, 1},
   {"disassemble", no_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
   {"dynamic-reloc", no_argument, NULL, 'R'},
@@ -321,7 +326,7 @@ remove_useless_symbols (symbols, count)
   return out_ptr - symbols;
 }
 
-/* Sort symbols into value order. */
+/* Sort symbols into value order.  */
 
 static int 
 compare_symbols (ap, bp)
@@ -333,6 +338,7 @@ compare_symbols (ap, bp)
   const char *an, *bn;
   size_t anl, bnl;
   boolean af, bf;
+  flagword aflags, bflags;
 
   if (bfd_asymbol_value (a) > bfd_asymbol_value (b))
     return 1;
@@ -380,6 +386,27 @@ compare_symbols (ap, bp)
     return 1;
   if (! af && bf)
     return -1;
+
+  /* Finally, try to sort global symbols before local symbols before
+     debugging symbols.  */
+
+  aflags = a->flags;
+  bflags = b->flags;
+
+  if ((aflags & BSF_DEBUGGING) != (bflags & BSF_DEBUGGING))
+    {
+      if ((aflags & BSF_DEBUGGING) != 0)
+	return 1;
+      else
+	return -1;
+    }
+  if ((aflags & BSF_LOCAL) != (bflags & BSF_LOCAL))
+    {
+      if ((aflags & BSF_LOCAL) != 0)
+	return 1;
+      else
+	return -1;
+    }
 
   return 0;
 }
@@ -432,9 +459,6 @@ objdump_print_address (vma, info)
      bfd_vma vma;
      struct disassemble_info *info;
 {
-  /* @@ For relocateable files, should filter out symbols belonging to
-     the wrong section.  Unfortunately, not enough information is supplied
-     to this routine to determine the correct section in all cases.  */
   /* @@ Would it speed things up to cache the last two symbols returned,
      and maybe their address ranges?  For many processors, only one memory
      operand can be present at a time, so the 2-entry cache wouldn't be
@@ -471,43 +495,14 @@ objdump_print_address (vma, info)
     }
 
   /* The symbol we want is now in min, the low end of the range we
-     were searching.  */
+     were searching.  If there are several symbols with the same
+     value, we want the first one.  */
   thisplace = min;
   while (thisplace > 0
 	 && (bfd_asymbol_value (sorted_syms[thisplace])
 	     == bfd_asymbol_value (sorted_syms[thisplace - 1])))
     --thisplace;
 
-  {
-    /* If this symbol isn't global, search for one with the same value
-       that is.  */
-    bfd_vma val = bfd_asymbol_value (sorted_syms[thisplace]);
-    long i;
-    if (sorted_syms[thisplace]->flags & (BSF_LOCAL|BSF_DEBUGGING))
-      for (i = thisplace - 1; i >= 0; i--)
-	{
-	  if (bfd_asymbol_value (sorted_syms[i]) == val
-	      && (!(sorted_syms[i]->flags & (BSF_LOCAL|BSF_DEBUGGING))
-		  || ((sorted_syms[thisplace]->flags & BSF_DEBUGGING)
-		      && !(sorted_syms[i]->flags & BSF_DEBUGGING))))
-	    {
-	      thisplace = i;
-	      break;
-	    }
-	}
-    if (sorted_syms[thisplace]->flags & (BSF_LOCAL|BSF_DEBUGGING))
-      for (i = thisplace + 1; i < sorted_symcount; i++)
-	{
-	  if (bfd_asymbol_value (sorted_syms[i]) == val
-	      && (!(sorted_syms[i]->flags & (BSF_LOCAL|BSF_DEBUGGING))
-		  || ((sorted_syms[thisplace]->flags & BSF_DEBUGGING)
-		      && !(sorted_syms[i]->flags & BSF_DEBUGGING))))
-	    {
-	      thisplace = i;
-	      break;
-	    }
-	}
-  }
   {
     /* If the file is relocateable, and the symbol could be from this
        section, prefer a symbol from this section over symbols from
@@ -1321,6 +1316,18 @@ display_bfd (abfd)
     dump_data (abfd);
   if (disassemble)
     disassemble_data (abfd);
+  if (dump_debugging)
+    {
+      PTR dhandle;
+
+      dhandle = read_debugging_info (abfd);
+      if (dhandle != NULL)
+	{
+	  if (! print_debugging_info (stdout, dhandle))
+	    fprintf (stderr, "%s: printing debugging information failed\n",
+		     bfd_get_filename (abfd));
+	}
+    }
   if (syms)
     {
       free (syms);
@@ -1678,6 +1685,18 @@ dump_reloc_set (abfd, relpp, relcount)
 #define L_tmpnam 25
 #endif
 
+static const char *
+endian_string (endian)
+     enum bfd_endian endian;
+{
+  if (endian == BFD_ENDIAN_BIG)
+    return "big endian";
+  else if (endian == BFD_ENDIAN_LITTLE)
+    return "little endian";
+  else
+    return "endianness unknown";
+}
+
 /* List the targets that BFD is configured to support, each followed
    by its endianness and the architectures it supports.  */
 
@@ -1698,8 +1717,8 @@ display_target_list ()
       int a;
 
       printf ("%s\n (header %s, data %s)\n", p->name,
-	      p->header_byteorder_big_p ? "big endian" : "little endian",
-	      p->byteorder_big_p ? "big endian" : "little endian");
+	      endian_string (p->header_byteorder),
+	      endian_string (p->byteorder));
 
       if (abfd == NULL)
 	{
