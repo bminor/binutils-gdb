@@ -116,7 +116,7 @@ coff_solib_add (char *arg_string, int from_tty, struct target_ops *target, int r
 
    SYNOPSIS
 
-   void coff_solib_create_inferior_hook()
+   void coff_solib_create_inferior_hook ()
 
    DESCRIPTION
 
