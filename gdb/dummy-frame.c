@@ -137,25 +137,31 @@ dummy_frame_sniffer (const struct frame_unwind *self,
      entry point, or some random address on the stack.  Trying to use
      that PC to apply standard frame ID unwind techniques is just
      asking for trouble.  */
-  /* Use an architecture specific method to extract the prev's dummy
-     ID from the next frame.  Note that this method uses
-     frame_register_unwind to obtain the register values needed to
-     determine the dummy frame's ID.  */
-  this_id = gdbarch_unwind_dummy_id (get_frame_arch (next_frame), next_frame);
-
-  /* Use that ID to find the corresponding cache entry.  */
-  for (dummyframe = dummy_frame_stack;
-       dummyframe != NULL;
-       dummyframe = dummyframe->next)
+  
+  /* Don't bother unles there is at least one dummy frame.  */
+  if (dummy_frame_stack != NULL)
     {
-      if (frame_id_eq (dummyframe->id, this_id))
+      /* Use an architecture specific method to extract the prev's
+	 dummy ID from the next frame.  Note that this method uses
+	 frame_register_unwind to obtain the register values needed to
+	 determine the dummy frame's ID.  */
+      this_id = gdbarch_unwind_dummy_id (get_frame_arch (next_frame), 
+					 next_frame);
+
+      /* Use that ID to find the corresponding cache entry.  */
+      for (dummyframe = dummy_frame_stack;
+	   dummyframe != NULL;
+	   dummyframe = dummyframe->next)
 	{
-	  struct dummy_frame_cache *cache;
-	  cache = FRAME_OBSTACK_ZALLOC (struct dummy_frame_cache);
-	  cache->prev_regcache = dummyframe->regcache;
-	  cache->this_id = this_id;
-	  (*this_prologue_cache) = cache;
-	  return 1;
+	  if (frame_id_eq (dummyframe->id, this_id))
+	    {
+	      struct dummy_frame_cache *cache;
+	      cache = FRAME_OBSTACK_ZALLOC (struct dummy_frame_cache);
+	      cache->prev_regcache = dummyframe->regcache;
+	      cache->this_id = this_id;
+	      (*this_prologue_cache) = cache;
+	      return 1;
+	    }
 	}
     }
   return 0;

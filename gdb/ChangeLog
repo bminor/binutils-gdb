@@ -1,5 +1,8 @@
 2005-04-01  Michael Snyder  <msnyder@redhat.com>
 
+	* dummy-frame.c (dummy_frame_sniffer): Optimization: don't bother
+	computing this_id if there are no dummy frames on the stack.
+	
 	* mn10300-tdep.c (mn10300_frame_unwind_cache): Use 
 	find_partial_func instead of unwind_pc to identify frame.
 	(mn10300_push_dummy_call): Handle struct args, struct_return.
