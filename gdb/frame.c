@@ -67,10 +67,10 @@ struct frame_info
   int level;
 
   /* The frame's type.  */
-  /* FIXME: cagney/2003-04-02: Should instead be returning
-     ->unwind->type.  Unfortunately, legacy code is still explicitly
-     setting the type using the method deprecated_set_frame_type.
-     Eliminate that method and this field can be eliminated.  */
+  /* FIXME: cagney/2004-05-01: Should instead just use ->unwind->type.
+     Unfortunately, legacy_get_prev_frame is still explicitly setting
+     the type.  Eliminate that method and this field can be
+     eliminated.  */
   enum frame_type type;
 
   /* For each register, address of where it was saved on entry to the
@@ -233,11 +233,10 @@ get_frame_id (struct frame_info *fi)
 	{
 	  fi->unwind = frame_unwind_find_by_frame (fi->next,
 						   &fi->prologue_cache);
-	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
-	     type in the frame, the unwinder's type should be returned
-	     directly.  Unfortunately legacy code, called by
-	     legacy_get_prev_frame(), explicitly sets the frame's type
-	     using the method deprecated_set_frame_type().  */
+	  /* FIXME: cagney/2004-05-01: Should instead just use
+	     ->unwind->type.  Unfortunately, legacy_get_prev_frame is
+	     still explicitly setting the type.  Eliminate that method
+	     and this field can be eliminated.  */
 	  fi->type = fi->unwind->type;
 	}
       /* Find THIS frame's ID.  */
@@ -548,11 +547,10 @@ frame_register_unwind (struct frame_info *frame, int regnum,
     {
       frame->unwind = frame_unwind_find_by_frame (frame->next,
 						  &frame->prologue_cache);
-      /* FIXME: cagney/2003-04-02: Rather than storing the frame's
-	 type in the frame, the unwinder's type should be returned
-	 directly.  Unfortunately, legacy code, called by
-	 legacy_get_prev_frame(), explicitly set the frames type using
-	 the method deprecated_set_frame_type().  */
+      /* FIXME: cagney/2004-05-01: Should instead just use ->unwind->type.
+	 Unfortunately, legacy_get_prev_frame is still explicitly setting
+	 the type.  Eliminate that method and this field can be
+	 eliminated.  */
       frame->type = frame->unwind->type;
     }
 
@@ -1507,11 +1505,10 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	  /* Find PREV frame's unwinder.  */
 	  prev->unwind = frame_unwind_find_by_frame (this_frame,
 						     &prev->prologue_cache);
-	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
-	     type in the frame, the unwinder's type should be returned
-	     directly.  Unfortunately, legacy code, called by
-	     legacy_get_prev_frame(), explicitly set the frames type
-	     using the method deprecated_set_frame_type().  */
+	  /* FIXME: cagney/2004-05-01: Should instead just use
+	     ->unwind->type.  Unfortunately, legacy_get_prev_frame is
+	     still explicitly setting the type.  Eliminate that method
+	     and this field can be eliminated.  */
 	  prev->type = prev->unwind->type;
 	  /* Find PREV frame's ID.  */
 	  prev->unwind->this_id (this_frame,
@@ -2105,24 +2102,16 @@ get_frame_type (struct frame_info *frame)
          provides the frame's type.  */
       frame->unwind = frame_unwind_find_by_frame (frame->next, 
 						  &frame->prologue_cache);
-      /* FIXME: cagney/2003-04-02: Rather than storing the frame's
-	 type in the frame, the unwinder's type should be returned
-	 directly.  Unfortunately, legacy code, called by
-	 legacy_get_prev_frame(), explicitly set the frames type using
-	 the method deprecated_set_frame_type().  */
+      /* FIXME: cagney/2004-05-01: Should instead just use
+	 ->unwind->type.  Unfortunately, legacy_get_prev_frame is
+	 still explicitly setting the type.  Eliminate that method and
+	 this field can be eliminated.  */
       frame->type = frame->unwind->type;
     }
   if (frame->type == UNKNOWN_FRAME)
     return NORMAL_FRAME;
   else
     return frame->type;
-}
-
-void
-deprecated_set_frame_type (struct frame_info *frame, enum frame_type type)
-{
-  /* Arrrg!  See comment in "frame.h".  */
-  frame->type = type;
 }
 
 struct frame_extra_info *

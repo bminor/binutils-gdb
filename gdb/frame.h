@@ -343,9 +343,9 @@ extern int frame_relative_level (struct frame_info *fi);
 enum frame_type
 {
   /* The frame's type hasn't yet been defined.  This is a catch-all
-     for legacy code that uses really strange technicques, such as
-     deprecated_set_frame_type, to set the frame's type.  New code
-     should not use this value.  */
+     for legacy_get_prev_frame that uses really strange techniques to
+     determine the frame's type.  New code should not use this
+     value.  */
   UNKNOWN_FRAME,
   /* A true stack frame, created by the target program during normal
      execution.  */
@@ -358,18 +358,6 @@ enum frame_type
   SIGTRAMP_FRAME
 };
 extern enum frame_type get_frame_type (struct frame_info *);
-
-/* FIXME: cagney/2002-11-10: Some targets want to directly mark a
-   frame as being of a specific type.  This shouldn't be necessary.
-   DEPRECATED_PC_IN_CALL_DUMMY() indicates a DUMMY_FRAME.  I suspect
-   the real problem here is that get_prev_frame() only sets
-   initialized after DEPRECATED_INIT_EXTRA_FRAME_INFO as been called.
-   Consequently, some targets found that the frame's type was wrong
-   and tried to fix it.  The correct fix is to modify get_prev_frame()
-   so that it initializes the frame's type before calling any other
-   functions.  */
-extern void deprecated_set_frame_type (struct frame_info *,
-				       enum frame_type type);
 
 /* Unwind the stack frame so that the value of REGNUM, in the previous
    (up, older) frame is returned.  If VALUEP is NULL, don't

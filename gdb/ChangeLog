@@ -1,5 +1,9 @@
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (deprecated_set_frame_type): Delete declaration.
+	* frame.c (deprecated_set_frame_type): Delete function, update
+	comments.
+
 	* gdbarch.sh (DEPRECATED_PC_IN_SIGTRAMP): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* shnbsd-tdep.c (shnbsd_init_abi): Do not set pc_in_sigtramp.
