@@ -15,13 +15,6 @@
 
 Do-first:
 
-#m32rx_files="..."
-#if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
-#        keep_these_too="${m32rx_files} ${keep_these_too}"
-#else
-#        lose_these_too="${m32rx_files} ${lose_these_too}"
-#fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -41,33 +34,5 @@ loop.s
 Things-to-lose:
 
 Do-last:
-
-m32rx_files="ChangeLog Makefile.in"
-if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
-        for i in $m32rx_files ; do
-                if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Keeping m32rx stuff in $i
-                        fi
-                fi
-        done
-else
-        for i in $m32rx_files ; do
-                if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Removing traces of \"m32rx\" from $i...
-                        fi
-                        cp $i new
-                        sed '/start\-sanitize\-m32rx/,/end-\sanitize\-m32rx/d' < $i > new
-                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-                                if [ -n "${verbose}" ] ; then
-                                        echo Caching $i in .Recover...
-                                fi
-                                mv $i .Recover
-                        fi
-                        mv new $i
-                fi
-        done
-fi
 
 # End of file.

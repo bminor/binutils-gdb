@@ -15,7 +15,7 @@
 
 Do-first:
 
-m32rx_files="
+cygnus_files="
 bcl24.cgs
 bcl8.cgs
 bncl24.cgs
@@ -54,10 +54,10 @@ sath.cgs
 sc.cgs
 snc.cgs"
 
-if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
-	keep_these_too="${m32rx_files} ${keep_these_too}"
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+	keep_these_too="${cygnus_files} ${keep_these_too}"
 else
-	lose_these_too="${m32rx_files} ${lose_these_too}"
+	lose_these_too="${cygnus_files} ${lose_these_too}"
 fi
 
 Things-to-keep:
@@ -177,23 +177,23 @@ Things-to-lose:
 
 Do-last:
 
-m32rx_files="allinsn.exp misc.exp testutils.inc"
-if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
-	for i in $m32rx_files ; do
-		if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
+cygnus_files="allinsn.exp misc.exp testutils.inc"
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+	for i in $cygnus_files ; do
+		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Keeping m32rx stuff in $i
+				echo Keeping cygnus stuff in $i
 			fi
 		fi
 	done
 else
-	for i in $m32rx_files ; do
-		if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
+	for i in $cygnus_files ; do
+		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"m32rx\" from $i...
+				echo Removing traces of \"cygnus\" from $i...
 			fi
 			cp $i new
-			sed '/start\-sanitize\-m32rx/,/end-\sanitize\-m32rx/d' < $i > new
+			sed '/start\-sanitize\-cygnus/,/end-\sanitize\-cygnus/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
@@ -203,13 +203,13 @@ else
 			mv new $i
 		fi
 	done
-	# Remove m32rx from `mach'.
+	# Remove cygnus from `mach'.
 	for i in *.cgs ; do
 		if [ -n "${verbose}" ] ; then
-			echo Removing traces of \"m32rx\" from $i...
+			echo Removing traces of \"cygnus\" from $i...
 		fi
 		cp $i new
-		sed -e 's/m32rx//' < $i > new
+		sed -e 's/cygnus//' < $i > new
 		if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 			if [ -n "${verbose}" ] ; then
 				echo Caching $i in .Recover...
