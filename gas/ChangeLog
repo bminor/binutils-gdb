@@ -1,3 +1,24 @@
+Mon Jul  7 22:53:08 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Change ifndef
+	OBJ_AOUT to ifdef OBJ_ELF.
+	(md_apply_fix3): When mangling 32 bit PC relative reloc for
+	BFD_ASSEMBLER, handle one ELF case for COFF as well, and add a PE
+	case.
+	* write.c (fixup_segment): Change special case for i386-coff to
+ 	not apply for i386-pe.
+	* config/obj-coff.c (coff_adjust_section_syms): Only count fixups
+	which were not done.
+	(coff_frob_file_after_relocs): Rename from coff_frob_file.
+	(coff_format_ops): Initialize frob_file_after_relocs field rather
+	than frob_file field.
+	* config/obj-coff.h (coff_frob_file): Don't declare.
+	(coff_frob_file_after_relocs): Declare.
+	(obj_frob_file): Don't define.
+	(obj_frob_file_after_relocs): Define.
+	* configure.in: Set bfd_gas to yes for i386-*-cygwin32.
+	* configure: Rebuild.
+
 Wed Jul  2 12:05:00 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (fixup_segment): Never subtract section

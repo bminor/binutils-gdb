@@ -802,7 +802,7 @@ int
 tc_i386_fix_adjustable(fixP)
      fixS * fixP;
 {
-#ifndef OBJ_AOUT
+#ifdef OBJ_ELF
   /* Prevent all adjustments to global symbols. */
   if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
@@ -2705,7 +2705,8 @@ md_apply_fix3 (fixP, valp, seg)
   if (fixP->fx_r_type == BFD_RELOC_32_PCREL && fixP->fx_addsy)
     {
 #ifndef OBJ_AOUT
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour
+	  || OUTPUT_FLAVOR == bfd_target_coff_flavour)
 	value += fixP->fx_where + fixP->fx_frag->fr_address;
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
@@ -2719,6 +2720,12 @@ md_apply_fix3 (fixP, valp, seg)
 	     it.  FIXME.  */
 	  value += fixP->fx_where + fixP->fx_frag->fr_address;
 	}
+#endif
+#if defined (OBJ_COFF) && defined (TE_PE)
+      /* For some reason, the PE format does not store a section
+         address offset for a PC relative symbol.  */
+      if (S_GET_SEGMENT (fixP->fx_addsy) != seg)
+	value += md_pcrel_from (fixP);
 #endif
     }
 
