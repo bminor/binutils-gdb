@@ -1,3 +1,17 @@
+Wed Mar  8 03:13:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* m68k.h (enum m68k_architecture): Deleted.
+	(struct m68k_opcode_alias): New type.
+	(m68k_opcodes): Now const.  Deleted opcode aliases with exactly
+	matching constraints, values and flags.  As a side effect of this,
+	the MOTOROLA_SYNTAX_ONLY and MIT_SYNTAX_ONLY macros, which so far
+	as I know were never used, now may need re-examining.
+	(numopcodes): Now const.
+	(m68k_opcode_aliases, numaliases): New variables.
+	(endop): Deleted.
+	[DONT_DEFINE_TABLE]: Declare numopcodes, numaliases, and
+	m68k_opcode_aliases; update declaration of m68k_opcodes.
+
 start-sanitize-arc
 Tue Mar  7 21:03:26 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
