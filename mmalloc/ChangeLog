@@ -1,3 +1,37 @@
+Tue Oct 24 13:17:44 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mmprivate.h: Remove declarations (PTR, etc) that are already
+	provided by ansidecl.h, include mmalloc.h earlier in file.
+
+Tue Oct 10 11:04:47 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (BISON):  Remove macro.
+
+Wed Sep 20 12:51:13 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New target, synonym for
+	realclean.  Add GNU standard maintainer-clean echos.
+
+Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Update all FSF addresses except those in COPYING* files
+	and shar archive of original FSF files.
+
+Mon Jun 12 12:11:57 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (distclean, realclean): Remove config.cache and
+	  config.log.
+
+Wed May 17 17:47:44 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (Makefile): Added config.status to dependency list.
+	  (config.status): New target.
+
+Fri May  5 15:17:53 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* mmap-sup.c: Removed munmap prototype.  Some systems have a
+	  slightly different prototype.
+
 Wed May  3 17:18:13 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* Makefile.in, configure.in: Converted to use autoconf.
