@@ -1,5 +1,7 @@
-/* TK interface routines.
-   Copyright 1994 Free Software Foundation, Inc.
+/* Tcl/Tk interface routines.
+   Copyright 1994, 1995 Free Software Foundation, Inc.
+
+   Written by Stu Grossman <grossman@cygnus.com> of Cygnus Support.
 
 This file is part of GDB.
 

@@ -1,4 +1,24 @@
-# GDB GUI setup
+# GDB GUI setup for GDB, the GNU debugger.
+# Copyright 1994, 1995
+# Free Software Foundation, Inc.
+
+# Written by Stu Grossman <grossman@cygnus.com> of Cygnus Support.
+
+# This file is part of GDB.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 set cfile Blank
 set wins($cfile) .src.text
@@ -1696,6 +1716,18 @@ proc files_command {} {
 
 button .files -text Files -command files_command
 
+proc apply_filespec {label default command} {
+    set filename [FSBox $label $default]
+    if {$filename != ""} {
+	if [catch {gdb_cmd "$command $filename"} retval] {
+	    tk_dialog .filespec_error "gdb : $label error" \
+			"Error in command \"$command $filename\"" {} 0 Dismiss
+	    return
+	}
+    update_ptr
+    }
+}
+
 # Setup command window
 
 proc build_framework {win {title GDBtk} {label {}}} {
@@ -1712,36 +1744,21 @@ proc build_framework {win {title GDBtk} {label {}}} {
 
 	menu ${win}.menubar.file.menu
 	${win}.menubar.file.menu add command -label File... \
-		-command {
-		  set filename [FSBox "File" "a.out"]
-		  gdb_cmd "file $filename"
-		  update_ptr
-	      }
+		-command {apply_filespec File a.out file}
 	${win}.menubar.file.menu add command -label Target... \
 		-command { not_implemented_yet "target" }
 	${win}.menubar.file.menu add command -label Edit \
 		-command {exec $editor +[expr ($screen_top + $screen_bot)/2] $cfile &}
 	${win}.menubar.file.menu add separator
 	${win}.menubar.file.menu add command -label "Exec File..." \
-		-command {
-		  set filename [FSBox "Exec File" "a.out"]
-		  gdb_cmd "exec-file $filename"
-		  update_ptr
-	      }
+		-command {apply_filespec {Exec File} a.out exec-file}
 	${win}.menubar.file.menu add command -label "Symbol File..." \
-		-command {
-		  set filename [FSBox "Symbol File" "a.out"]
-		  gdb_cmd "symbol-file $filename"
-		  update_ptr
-	      }
+		-command {apply_filespec {Symbol File} a.out symbol-file}
 	${win}.menubar.file.menu add command -label "Add Symbol File..." \
 		-command { not_implemented_yet "menu item, add symbol file" }
 	${win}.menubar.file.menu add command -label "Core File..." \
-		-command {
-		  set filename [FSBox "Core File" "core"]
-		  gdb_cmd "core-file $filename"
-		  update_ptr
-	      }
+		-command {apply_filespec {Core File} core core-file}
+
 	${win}.menubar.file.menu add separator
 	${win}.menubar.file.menu add command -label Close \
 		-command "destroy ${win}"
@@ -1943,7 +1960,13 @@ proc create_command_window {} {
 		%W insert end "(gdb) "
 		%W yview -pickplace end
 		}
+	bind .cmd.text <Button-2> {
+		global command_line
 
+		%W insert end [selection get]
+		%W yview -pickplace end
+		append command_line [selection get]
+	}
 	proc delete_char {win} {
 		global command_line
 
@@ -1952,7 +1975,6 @@ proc create_command_window {} {
 		set tmp [expr [string length $command_line] - 2]
 		set command_line [string range $command_line 0 $tmp]
 	}
-
 	proc delete_line {win} {
 		global command_line
 
@@ -2154,6 +2176,7 @@ proc fileselect.ok {} {
 proc fileselect.cancel.cmd {w} {
     global fileselect
     set fileselect(result) {}
+    destroy $w
 }
 
 proc fileselect.list.cmd {w {state normal}} {
@@ -2228,6 +2251,7 @@ proc fileselect.ok.cmd {w cmd errorHandler} {
     } else {
 	set fileselect(result) $selected
     }
+    destroy $w
 }
 
 proc fileselect.getfiles { dir {pat *} {state normal} } {
@@ -2314,6 +2338,7 @@ OK to overwrite it?"
     grab $w
     tkwait variable fileExists(ok)
     grab release $w
+    destroy $w
     return $fileExists(ok)
 }
 proc FileExistsCancel {} {

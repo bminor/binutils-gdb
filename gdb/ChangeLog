@@ -1,3 +1,10 @@
+Thu Jan 12 15:02:40 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c gdbtk.tcl:  Update/add copyright.
+	* gdbtk.tcl (build_framework):  Several fixes for filespec widget,
+	including dismiss button, and better error handling.
+	* (create_command_win):  Bind button 2 to retrieve selection.
+
 Thu Jan 12 09:33:24 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* README:  Add note about SPARCworks cc release 3.0 and higher.
