@@ -1,5 +1,10 @@
 2004-03-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-linux-nat.c (GETFPREGS_SUPPLIES): Remove macro.
+	(fetch_regs, fetch_fpregs, store_regs, store_fpregs): Remove
+	functions.
+	(fetch_inferior_registers, store_inferior_registers): Rewrite.
+
 	* amd64-tdep.h (amd64_fill_fxsave): Remove prototype.
 	* amd64-tdep.c (amd64_fill_fxsave): Remove function.
 
