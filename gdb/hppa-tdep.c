@@ -866,7 +866,22 @@ restart:
      will return to.  */
   u = find_unwind_entry (pc);
   if (u && u->stub_type != 0)
-    goto restart;
+    {
+      unsigned int insn;
+
+      /* If this is a dynamic executable, and we're in a signal handler,
+	 then the call chain will eventually point us into the stub for
+	 _sigreturn.  Unlike most cases, we'll be pointed to the branch
+	 to the real sigreturn rather than the code after the real branch!. 
+
+	 Else, try to dig the address the stub will return to in the normal
+	 fashion.  */
+      insn = read_memory_integer (pc, 4);
+      if ((insn & 0xfc00e000) == 0xe8000000)
+	return (pc + extract_17 (insn) + 8) & ~0x3;
+      else
+	goto restart;
+    }
 
   return pc;
 }

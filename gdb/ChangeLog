@@ -1,3 +1,8 @@
+Wed Jun  7 12:41:42 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (frame_saved_pc): Handle backtracing through signal
+	handler in dynamically linked executables.
+
 Tue Jun  6 10:44:25 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	From Andrew Cagney <cagney@highland.com.au>
