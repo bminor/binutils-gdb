@@ -1,5 +1,6 @@
-/* BFD back-end for m68k binaries under LynxOS.
-   Copyright (C) 1990, 1991, 1992 Free Software Foundation, Inc.
+/* BFD back-end for Motorola M68K COFF LynxOS files.
+   Copyright 1993 Free Software Foundation, Inc.
+   Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -17,23 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define BYTES_IN_WORD 4
-#define ARCH 32
-#define N_SHARED_LIB(x) 0
+#define TARGET_SYM	m68klynx_coff_vec
+#define TARGET_NAME	"coff-m68k-lynx"
 
-#define TEXT_START_ADDR 0
-#define PAGE_SIZE 4096
-#define SEGMENT_SIZE PAGE_SIZE
-#define DEFAULT_ARCH bfd_arch_m68k
-
-#define MY(OP) CAT(m68klynx_aout_,OP)
-#define TARGETNAME "a.out-m68k-lynx"
-
-#include "bfd.h"
-#include "sysdep.h"
-#include "libbfd.h"
-
-#include "libaout.h"
-#include "aout/aout64.h"
-
-#include "aout-target.h"
+#include "coff-m68k.c"
