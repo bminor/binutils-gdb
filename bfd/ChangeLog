@@ -1,5 +1,12 @@
 2003-07-04  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf32-s390.c (elf_howto_table): Change R_390_GOT12 to
+	complain_overflow_bitfield.
+	* elf64-s390.c (elf_howto_table): Change R_390_GOT12 to
+	complain_overflow_bitfield.
+
+2003-07-04  Jakub Jelinek  <jakub@redhat.com>
+
 	* elf-bfd.h (SYMBOL_REFERENCES_LOCAL, SYMBOL_CALLS_LOCAL): Return
 	true even if -pie.
 

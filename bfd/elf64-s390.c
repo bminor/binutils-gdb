@@ -122,7 +122,7 @@ static reloc_howto_type elf_howto_table[] =
 	bfd_elf_generic_reloc, "R_390_32",       FALSE, 0,0xffffffff, FALSE),
   HOWTO(R_390_PC32,	 0, 2, 32,  TRUE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_PC32",     FALSE, 0,0xffffffff, TRUE),
-  HOWTO(R_390_GOT12,	 0, 1, 12, FALSE, 0, complain_overflow_dont,
+  HOWTO(R_390_GOT12,	 0, 1, 12, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOT12",    FALSE, 0,0x00000fff, FALSE),
   HOWTO(R_390_GOT32,	 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_GOT32",    FALSE, 0,0xffffffff, FALSE),
