@@ -1,3 +1,9 @@
+1999-08-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* Makefile.am: Rename .dep* files to DEP*.  Change DEP variable to
+	MKDEP.  Rebuild dependencies.
+	* Makefile.in: Rebuild.
+
 1999-08-08  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* configure.host (sparc-*-linux-gnu*): New host.
