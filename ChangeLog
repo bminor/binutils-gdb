@@ -1,3 +1,8 @@
+Fri Aug 26 13:42:20 1994  Ken Raeburn  (raeburn@kr-laptop.cygnus.com)
+
+	* configure: Accept and ignore --cache*, for compatibility with
+	new autoconf.
+
 Fri Aug 26 13:05:27 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* (config.guess):  Merge from FSF:

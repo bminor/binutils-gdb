@@ -141,7 +141,7 @@ do
 		;;
 # These options have mandatory values.  Since we didn't find an = sign,
 # the value must be in the next argument
-	--b* | --ex* | --ho* | --pre* | --program-p* | --program-s* | --program-t* | --si* | --sr* | --ta* | --tm* | --x-*)
+	--b* | --cache* | --ex* | --ho* | --pre* | --program-p* | --program-s* | --program-t* | --si* | --sr* | --ta* | --tm* | --x-*)
 		optarg=$1
 		shift
 		;;
@@ -157,6 +157,9 @@ do
 		   fatal=yes
 		   ;;
 		esac
+		;;
+# Accepted for compatibility with new autoconf; ignored.
+	--cache*)
 		;;
 	--disable-*)
 		enableopt=`echo ${option} | sed 's:^--disable-:enable_:;s:-:_:g'`
@@ -390,13 +393,13 @@ if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
 	echo ' --srcdir=DIR		 find the sources in DIR [. or ..]'
 	echo ' --target=TARGET	 configure for TARGET [TARGET=HOST]'
 	echo ' --tmpdir=TMPDIR	 create temporary files in TMPDIR [/tmp]'
-	echo ' --nfp			 configure for soft floating point [hard float]'
+	echo ' --nfp			 configure for software floating point [hard float]'
 	echo ' --with-FOO, --with-FOO=BAR package FOO is available (parameter BAR)'
 	echo ' --without-FOO		 package FOO is NOT available'
 	echo ' --enable-FOO, --enable-FOO=BAR include feature FOO (parameter BAR)'
 	echo ' --disable-FOO		 do not include feature FOO'
 	echo
-	echo 'Where HOST and TARGET are something like "sparc-sunos", "mips-ultrix", etc.'
+	echo 'Where HOST and TARGET are something like "sparc-sunos", "mips-sgi-irix5", etc.'
 	echo
 	if [ -r config.status ] ; then
 		cat config.status
