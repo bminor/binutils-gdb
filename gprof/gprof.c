@@ -668,14 +668,12 @@ funcsymbol( symp )
   if (!symp->section)
     return FALSE;
 
-#if 0
   if (!aflag && (symp->flags&BSF_LOCAL)) {
 #if defined(DEBUG)
     fprintf (stderr, "%s(%d):  %s:  not a function\n", __FILE__, __LINE__, symp->name);
 #endif
     return FALSE;
   }
-#endif	/* 0 */
   /*
    *	can't have any `funny' characters in name,
    *	where `funny' includes	`.', .o file names
