@@ -1,4 +1,18 @@
+Tue Aug 15 17:35:35 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/script.exp: Split script verification into a proc.
+	Add simple test of MRI script.
+	* ld-scripts/scriptm.t: New file.
+
+Wed Jul 26 11:38:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-sh/sh.exp: Mark `SH confirm relaxing' test unresolved when
+	appropriate.
+
 Mon Jul 24 15:34:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/default.exp: Define objcopy if it is not defined.
+	* ld-sh/*: New tests for SH relaxing.
 
 	* ld-empic/empic.exp: If $CC does not exist, call untested rather
 	than unresolved.

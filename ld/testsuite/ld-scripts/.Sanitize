@@ -29,6 +29,7 @@ defined.t
 script.exp
 script.s
 script.t
+scriptm.t
 sizeof.exp
 sizeof.s
 sizeof.t
