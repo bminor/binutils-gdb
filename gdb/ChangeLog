@@ -1,5 +1,11 @@
 2001-04-27  Don Howard  <dhoward@redhat.com>
 
+	(Changes from Kevin Buettner, with minor update by Don Howard.)
+	
+	* i387-nat.c (i387_supply_fxsave, i387_fill_fxsave, i387_tag): Fix
+	typos in which hexadecimal constants were really intended to be
+	binary constants.
+	(i387_tag): Swap logic regarding zero vs non-zero exponents.
 	* MAINTAINERS (Misc): Added myself to the write-after-approval
 	list.
 

@@ -210,17 +210,19 @@ i387_supply_fxsave (char *fxsave)
 	      int top;
 
 	      fstat = *(unsigned short *) (FXSAVE_ADDR (fxsave, FSTAT_REGNUM));
-	      top = ((fstat >> 11) & 0x111);
+	      top = ((fstat >> 11) & 0x7);
 
 	      for (fpreg = 7; fpreg >= 0; fpreg--)
 		{
-		  int tag = 0x11;
+		  int tag;
 
 		  if (val & (1 << fpreg))
 		    {
 		      int regnum = (fpreg + 8 - top) % 8 + FP0_REGNUM;
 		      tag = i387_tag (FXSAVE_ADDR (fxsave, regnum));
 		    }
+		  else
+		    tag = 3;		/* Empty */
 
 		  ftag |= tag << (2 * fpreg);
 		}
@@ -275,10 +277,10 @@ i387_fill_fxsave (char *fxsave, int regnum)
 
 		for (fpreg = 7; fpreg >= 0; fpreg--)
 		  {
-		    int tag = (ftag >> (fpreg * 2)) & 0x11;
+		    int tag = (ftag >> (fpreg * 2)) & 3;
 
-		    if (tag != 0x11)
-		      val |= (1 << fpreg);
+		    if (tag != 3)
+		      val |= (1 << (fpreg * 2));
 		  }
 
 		memcpy (FXSAVE_ADDR (fxsave, i), &val, 2);
@@ -312,32 +314,32 @@ i387_tag (unsigned char *raw)
   if (exponent == 0x7fff)
     {
       /* Special.  */
-      return (0x10);
+      return (2);
     }
   else if (exponent == 0x0000)
-    {
-      if (integer)
-	{
-	  /* Valid.  */
-	  return (0x00);
-	}
-      else
-	{
-	  /* Special.  */
-	  return (0x10);
-	}
-    }
-  else
     {
       if (fraction[0] == 0x0000 && fraction[1] == 0x0000 && !integer)
 	{
 	  /* Zero.  */
-	  return (0x01);
+	  return (1);
 	}
       else
 	{
 	  /* Special.  */
-	  return (0x10);
+	  return (2);
+	}
+    }
+  else
+    {
+      if (integer)
+	{
+	  /* Valid.  */
+	  return (0);
+	}
+      else
+	{
+	  /* Special.  */
+	  return (2);
 	}
     }
 }
