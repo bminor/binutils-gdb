@@ -1,3 +1,9 @@
+2000-04-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	K&R compiler fixes.
+	* dwarf2.c (concat_filename): Avoid string literal concatenation.
+	* ieee.c (ieee_get_symtab): Don't initialise union in struct.
+
 2000-04-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* dep-in.sed: Match space before file name, not after.
