@@ -693,9 +693,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->extract_return_value == 0))
     fprintf_unfiltered (log, "\n\textract_return_value");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->push_arguments == 0))
-    fprintf_unfiltered (log, "\n\tpush_arguments");
+  if (gdbarch->push_arguments == 0)
+    gdbarch->push_arguments = default_push_arguments;
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->push_dummy_frame == 0))
     fprintf_unfiltered (log, "\n\tpush_dummy_frame");

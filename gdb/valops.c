@@ -1078,10 +1078,6 @@ value_push (register CORE_ADDR sp, struct value *arg)
   return sp;
 }
 
-#ifndef PUSH_ARGUMENTS
-#define PUSH_ARGUMENTS default_push_arguments
-#endif
-
 CORE_ADDR
 default_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
