@@ -1,4 +1,4 @@
-# Copyright (C) 1992 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -156,10 +156,6 @@ if [istarget "mips-idt-*"] then {
     gdb_start
 }
 gdb_reinitialize_dir $srcdir/$subdir
-if [istarget "a29k-*-udi"] then {
-    # FIXME: If PR 2415 is fixed, this is not needed.
-    gdb_target_udi
-}
 gdb_load $objdir/$subdir/$binfile
 
 # Set breakpoint on main, where struct foo is incomplete.
@@ -175,9 +171,9 @@ expect {
 # Run until break at main.  Struct foo is opaque in the file containing
 # main().
 
-send "run\n"
+gdb_run_cmd
 expect {
-	-re "Starting program:.*Breakpoint 1.*$prompt $" {}
+	-re "Breakpoint 1.*$prompt $" {}
 	-re ".*$prompt $"	{ fail "run until main()" }
 	timeout			{ fail "(timeout) run until main()" }
 }
@@ -258,10 +254,6 @@ $prompt $" { pass "ptype on opaque struct tagname (dynamically)" }
 # have learned reading the symbols during the previous tests.
 
 gdb_reinitialize_dir $srcdir/$subdir
-if [istarget "a29k-*-udi"] then {
-    # FIXME: If PR 2415 is fixed, this is not needed.
-    gdb_target_udi
-}
 gdb_load $objdir/$subdir/$binfile
 
 # Disable the breakoint on main().
@@ -285,9 +277,9 @@ expect {
 # Run until break at getfoo().  Struct foo is defined here.
 # Retry all the tests we we tried at main() where struct foo was opaque.
 
-send "run\n"
+gdb_run_cmd
 expect {
-	-re "Starting program:.*Breakpoint.*$prompt $" {}
+	-re "Breakpoint.*$prompt $" {}
 	-re ".*$prompt $"	{ fail "run until getfoo()" }
 	timeout			{ fail "(timeout) run until getfoo()" }
 }
@@ -359,9 +351,4 @@ type = struct foo \{\r
 $prompt $" { pass "ptype on opaque struct tagname (dynamically)" }
 	-re ".*$prompt $"	{ fail "ptype on opaque struct" }
 	timeout 		{ fail "(timeout) ptype on opaque struct" }
-}
-
-if [istarget "a29k-*-udi"] then {
-    # FIXME: If PR 2415 is fixed, this is not needed.
-    gdb_target_udi
 }
