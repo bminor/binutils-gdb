@@ -24,12 +24,13 @@ Do-first:
 
 Things-to-keep:
 
-abug-nm.exp
-aout-nm.exp
-coff-nm.exp
-udi-nm.exp
-unix-nm.exp
-vx-nm.exp
+abug.exp
+aout.exp
+coff.exp
+nind.exp
+udi.exp
+unix.exp
+vx.exp
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
