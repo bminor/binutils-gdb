@@ -1,3 +1,7 @@
+Wed Nov  8 11:33:00 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* arsup.c (ar_open): Cast malloc return value.
+
 Tue Nov  7 09:01:26 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* configure.in, configure (DLLTOOL_DEFS): Added ppc target.
