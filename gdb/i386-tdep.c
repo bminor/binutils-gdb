@@ -1058,7 +1058,7 @@ i386_register_virtual_type (int regnum)
     return builtin_type_i387_ext;
 
   if (IS_SSE_REGNUM (regnum))
-    return builtin_type_v4sf;
+    return builtin_type_vec128i;
 
   return builtin_type_int;
 }

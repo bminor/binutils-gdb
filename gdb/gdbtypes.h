@@ -963,6 +963,7 @@ extern struct type *builtin_type_v2si;
 
 /* Type for 128 bit vectors. */
 extern struct type *builtin_type_vec128;
+extern struct type *builtin_type_vec128i;
 
 /* Explicit floating-point formats.  See "floatformat.h".  */
 extern struct type *builtin_type_ieee_single_big;

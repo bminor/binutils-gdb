@@ -1,3 +1,16 @@
+2002-05-27  Martin M. Hunt  <hunt@redhat.com>
+
+	* i386-tdep.c (i386_register_virtual_type): Return 
+	builtin_type_vec128i for SSE registers.
+
+	* gdbtypes.h (builtin_type_vec128i): Declare.
+
+	* gdbtypes.c (build_builtin_type_vec128i): New function.
+	(builtin_type_v2_double, builtin_type_v4_int64): New types.
+	(builtin_type_vec128i): New type for SSE2 128-bit registers.
+	(build_gdbtypes): Initialize new builtin vector types.
+	(_initialize_gdbtypes): Register new vector types with gdbarch.
+
 2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* MAINTAINERS: ns32k is not longer an obsolete candidate,
@@ -94,6 +107,7 @@
 	* config/ns32k/tm-umax.h (REGISTER_NAMES): Remove.
 	(REGISTER_NAME): Define as ns32k_register_name_32082.
 
+>>>>>>> 1.2703
 2002-05-24  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (free_line_header): Use xfree, not free.
@@ -148,6 +162,7 @@
 	(d10v_init_extra_frame_info): Get fi->pc from callee's return_pc
 	if possible (so that PC_IN_CALL_DUMMY will work).
 
+>>>>>>> 1.2696
 2002-05-22  Corinna Vinschen  <vinschen@redhat.com>
 
 	* MAINTAINERS: Remove status `OBSOLETE' from v850.
@@ -247,6 +262,7 @@
 	* config/sparc/tm-nbsd.h: Don't include config/tm-nbsd.h.
 	* config/sparc/tm-nbsdaout.h: New file.
 
+>>>>>>> 1.2687
 2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.in (ALLDEPFILES): Add mipsnbsd-nat.c and
@@ -332,11 +348,13 @@
 
 	* h8300-tdep.c: Fix formatting.
 
+>>>>>>> 1.2680
 2002-05-20  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (rs6000_do_registers_info): Simplify code for
 	printing vector registers.
 
+>>>>>>> 1.2675
 2002-05-19  Andrew Cagney  <ac131313@redhat.com>
 
 	From Fernando Nasser:
@@ -377,6 +395,7 @@
 	* h8300-tdep.c: Add support of EXR register
 	* config/h8300/tm-h8300.h: Ditto. 
 	
+>>>>>>> 1.2674
 2002-05-17  Andrey Volkov <avolkov@transas.com>
 
 	* h8300-tdep.c: Add additional CCR flags (I,UI,H,U) 

@@ -73,7 +73,9 @@ struct type *builtin_type_uint128;
 struct type *builtin_type_bool;
 
 /* 128 bit long vector types */
+struct type *builtin_type_v2_double;
 struct type *builtin_type_v4_float;
+struct type *builtin_type_v2_int64;
 struct type *builtin_type_v4_int32;
 struct type *builtin_type_v8_int16;
 struct type *builtin_type_v16_int8;
@@ -91,6 +93,7 @@ struct type *builtin_type_v8hi;
 struct type *builtin_type_v4hi;
 struct type *builtin_type_v2si;
 struct type *builtin_type_vec128;
+struct type *builtin_type_vec128i;
 struct type *builtin_type_ieee_single_big;
 struct type *builtin_type_ieee_single_little;
 struct type *builtin_type_ieee_double_big;
@@ -840,6 +843,24 @@ build_builtin_type_vec128 (void)
   append_composite_type_field (t, "v4_int32", builtin_type_v4_int32);
   append_composite_type_field (t, "v8_int16", builtin_type_v8_int16);
   append_composite_type_field (t, "v16_int8", builtin_type_v16_int8);
+
+  return t;
+}
+
+static struct type *
+build_builtin_type_vec128i (void)
+{
+  /* 128-bit Intel SIMD registers */
+  struct type *t;
+
+  t = init_composite_type ("__gdb_builtin_type_vec128i", TYPE_CODE_UNION);
+  append_composite_type_field (t, "v4_float", builtin_type_v4_float);
+  append_composite_type_field (t, "v2_double", builtin_type_v2_double);
+  append_composite_type_field (t, "v16_int8", builtin_type_v16_int8);
+  append_composite_type_field (t, "v8_int16", builtin_type_v8_int16);
+  append_composite_type_field (t, "v4_int32", builtin_type_v4_int32);
+  append_composite_type_field (t, "v2_int64", builtin_type_v2_int64);
+  append_composite_type_field (t, "uint128", builtin_type_int128);
 
   return t;
 }
@@ -3300,7 +3321,9 @@ build_gdbtypes (void)
     = init_simd_type ("__builtin_v2si", builtin_type_int32, "f", 2);
 
   /* 128 bit vectors.  */
+  builtin_type_v2_double = init_vector_type (builtin_type_double, 2);
   builtin_type_v4_float = init_vector_type (builtin_type_float, 4);
+  builtin_type_v2_int64 = init_vector_type (builtin_type_int64, 2);
   builtin_type_v4_int32 = init_vector_type (builtin_type_int32, 4);
   builtin_type_v8_int16 = init_vector_type (builtin_type_int16, 8);
   builtin_type_v16_int8 = init_vector_type (builtin_type_int8, 16);
@@ -3312,6 +3335,7 @@ build_gdbtypes (void)
 
   /* Vector types. */
   builtin_type_vec128 = build_builtin_type_vec128 ();
+  builtin_type_vec128i = build_builtin_type_vec128i ();
 
   /* Pointer/Address types. */
 
@@ -3400,7 +3424,9 @@ _initialize_gdbtypes (void)
   register_gdbarch_swap (&builtin_type_v8hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v2si, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v2_double, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4_float, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v2_int64, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4_int32, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v8_int16, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v16_int8, sizeof (struct type *), NULL);
@@ -3409,6 +3435,7 @@ _initialize_gdbtypes (void)
   register_gdbarch_swap (&builtin_type_v8_int8, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4_int16, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_vec128, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_vec128i, sizeof (struct type *), NULL);
   REGISTER_GDBARCH_SWAP (builtin_type_void_data_ptr);
   REGISTER_GDBARCH_SWAP (builtin_type_void_func_ptr);
   REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);
