@@ -104,7 +104,7 @@ mipsidtl.sh
 mipslit.sh
 news.sh
 ns32knbsd.sh
-pc532machaout.sh
+pc532macha.sh
 ppcmacos.sh
 ppcnw.sh
 ppcpe.sh

@@ -262,7 +262,7 @@ ALL_EMULATIONS = \
 	emipslit.o \
 	enews.o \
 	ens32knbsd.o \
-	epc532machaout.o \
+	epc532macha.o \
 	eppcmacos.o \
 	eppcnw.o \
 	eppcpe.o \
@@ -549,9 +549,9 @@ enews.c: $(srcdir)/emulparams/news.sh \
 ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ns32knbsd "$(tdir_ns32knbsd)"
-epc532machaout.c: $(srcdir)/emulparams/pc532machaout.sh \
+epc532macha.c: $(srcdir)/emulparams/pc532macha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} pc532machaout "$(tdir_pc532machaout)"
+	${GENSCRIPTS} pc532macha "$(tdir_pc532macha)"
 eppcmacos.c:	$(srcdir)/emulparams/ppcmacos.sh \
   $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ppcmacos "$(tdir_ppcmacos)"
@@ -873,7 +873,7 @@ diststuff: $(LDDISTSTUFF) info
 mostlyclean:
 	-rm -f $(STAGESTUFF) ld.?? ld.??? ldlex.[qp] config.log
 	-rm -f ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out cdtest.tmp
-	-rm -f cdtest-ur cdtest-ur.out cdtest-ur.tmp
+	-rm -f cdtest-ur cdtest-ur.out cdtest-ur.tmp crtbegin.o crtend.o
 	-rm -f ldemul-list.h
 	-rm -fr tmpdir
 clean: mostlyclean

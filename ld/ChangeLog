@@ -2,6 +2,14 @@ Thu Jul  4 12:01:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Released binutils 2.7.
 
+	* emulparams/pc532macha.sh: Rename from pc532machaout.sh to avoid
+	System V file name limitations.
+	* configure.tgt (nc32k-pc532-mach*, ns32k-pc532-ux*): Use
+	pc532macha rather than pc532machaout.
+	* Makefile.in (ALL_EMULATIONS): Change epc532machaout.o to
+	epc532macha.o.
+	(epc532macha.c): Rename target from epc532machaout.c.
+
 Wed Jul  3 11:40:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (print_padding_statement): Use %u, not %x, to print
