@@ -1,6 +1,6 @@
 /* Target-dependent code for Hitachi Super-H, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 2000 Free Software
-   Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -59,6 +59,7 @@ static gdbarch_saved_pc_after_call_ftype sh_saved_pc_after_call;
 
 /* Function call related functions. */
 static gdbarch_extract_return_value_ftype sh_extract_return_value;
+static gdbarch_extract_return_value_ftype sh3e_sh4_extract_return_value;
 static gdbarch_extract_struct_value_address_ftype sh_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype sh_use_struct_convention;
 static gdbarch_store_struct_return_ftype sh_store_struct_return;
@@ -1042,11 +1043,70 @@ static void
 sh_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
-
+  int return_register = R0_REGNUM;
+  int offset;
+  
   if (len <= 4)
-    memcpy (valbuf, ((char *) regbuf) + 4 - len, len);
+    {
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	offset = REGISTER_BYTE (return_register) + 4 - len;
+      else
+	offset = REGISTER_BYTE (return_register);
+      memcpy (valbuf, regbuf + offset, len);
+    }
   else if (len <= 8)
-    memcpy (valbuf, ((char *) regbuf) + 8 - len, len);
+    {
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	offset = REGISTER_BYTE (return_register) + 8 - len;
+      else
+	offset = REGISTER_BYTE (return_register);
+      memcpy (valbuf, regbuf + offset, len);
+    }
+  else
+    error ("bad size for return value");
+}
+
+static void
+sh3e_sh4_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+{
+  int return_register;
+  int offset;
+  int len = TYPE_LENGTH (type);
+
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    return_register = FP0_REGNUM;
+  else
+    return_register = R0_REGNUM;
+  
+  if (len == 8 && TYPE_CODE (type) == TYPE_CODE_FLT)
+    {
+      DOUBLEST val;
+      if (TARGET_BYTE_ORDER == LITTLE_ENDIAN)
+	floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword,
+				 (char *) regbuf + REGISTER_BYTE (return_register),
+				 &val);
+      else
+	floatformat_to_doublest (&floatformat_ieee_double_big,
+				 (char *) regbuf + REGISTER_BYTE (return_register),
+				 &val);
+      store_floating (valbuf, len, val);
+    }
+  else if (len <= 4)
+    {
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	offset = REGISTER_BYTE (return_register) + 4 - len;
+      else
+	offset = REGISTER_BYTE (return_register);
+      memcpy (valbuf, regbuf + offset, len);
+    }
+  else if (len <= 8)
+    {
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	offset = REGISTER_BYTE (return_register) + 8 - len;
+      else
+	offset = REGISTER_BYTE (return_register);
+      memcpy (valbuf, regbuf + offset, len);
+    }
   else
     error ("bad size for return value");
 }
@@ -1917,6 +1977,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_store_pseudo_register (gdbarch, sh_store_pseudo_register);
   set_gdbarch_do_registers_info (gdbarch, sh_do_registers_info);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
+  set_gdbarch_extract_return_value (gdbarch, sh_extract_return_value);
   print_sh_insn = gdb_print_insn_sh;
 
   switch (info.bfd_arch_info->mach)
@@ -1982,6 +2043,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_show_regs = sh3e_show_regs;
       sh_store_return_value = sh3e_sh4_store_return_value;
       sh_register_virtual_type = sh_sh3e_register_virtual_type;
+      set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
       set_gdbarch_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
       set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
@@ -2024,6 +2086,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       sh_show_regs = sh4_show_regs;
       sh_store_return_value = sh3e_sh4_store_return_value;
       sh_register_virtual_type = sh_sh4_register_virtual_type;
+      set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
       set_gdbarch_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_register_raw_size (gdbarch, sh_sh4_register_raw_size);
@@ -2092,7 +2155,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_coerce_float_to_double (gdbarch, 
 				      sh_coerce_float_to_double);
 
-  set_gdbarch_extract_return_value (gdbarch, sh_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, sh_push_arguments);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, sh_push_return_address);

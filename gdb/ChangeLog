@@ -1,3 +1,11 @@
+2001-02-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* sh-tdep.c: Update copyright.
+	(sh_extract_return_value): Rewrite.
+	(sh3e_sh4_extract_return_value): New function.
+	(sh_gdbarch_init): Initialize gdbarch_extract-return_value to new
+ 	version of the function for sh3e and sh4 CPUs.
+
 2001-02-05  Michael Chastain  <chastain@redhat.com>
 
 	* hppah-nat.c (child_xfer_memory): Add parameter 'struct mem_attrib *'
@@ -575,8 +583,8 @@ Fri Jan 12 18:29:46 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2001-01-02  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
-	* sh-tdep.c (sh_extract_return_value):  Allow for small return type.
-	(sh_sh4_extract_return_value): Call sh_extract_return_value for
+	* sh-tdep.c (sh_default_store_return_value):  Allow for small return type.
+	(sh3e_sh4_store_return_value): Call sh_default_store_return_value for
 	non-float types.
 	* sparc-tdep.c (sparc_frame_chain): Fix typo in comment.
 	Update copyright notice.
