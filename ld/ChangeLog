@@ -1,3 +1,7 @@
+Tue Mar 19 16:44:20 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.host (sparc*-*-solaris2* host): Accept any sparc variant.
+
 Wed Mar 13 17:47:31 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* scripttempl/h8300.sc: Change name of page zero memory
