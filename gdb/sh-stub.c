@@ -895,13 +895,13 @@ doSStep (void)
   *instrMem = SSTEP_INSTR;
 }
 
+
+/* Undo the effect of a previous doSStep.  If we single stepped,
+   restore the old instruction. */
+
 void
 undoSStep (void)
 {
-  /*
-    If we single stepped,
- restore the old instruction!
-*/
   if (stepped)
     {  short *instrMem;
       instrMem = instrBuffer.memAddr;

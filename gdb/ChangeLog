@@ -1,3 +1,12 @@
+Mon Aug 24 14:39:08 1998  Mark Alexander  <marka@cygnus.com>
+
+	* sh-stub.c (undoSStep): Improve comment.
+	* sparc-tdep.c (sparc_extract_struct_value_address): Simplify to use
+	same method on both 32-bit and 64-bit machines.
+	* sparcl-tdep.c (sparclite_check_watch_resources): Simulator doesn't
+	support hardware breakpoints.
+	* config/sparc/tm-sparc.h (CALL_DUMMY): Improve comments.
+
 1998-08-20  Jason Molenda  (jsm@bugshack.cygnus.com)
 
         * rdi-share/Makefile.am (INCLUDES): Fix typeo.

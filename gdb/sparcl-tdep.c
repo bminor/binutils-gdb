@@ -83,7 +83,7 @@ static void sparclite_download PARAMS ((char *filename, int from_tty));
 #define DDA1_ENABLE 		0x80
 #define DIA2_ENABLE 		0x40
 #define DIA1_ENABLE 		0x20
-#define DSINGLE_STEP 		0x10
+#define DSINGLE_STEP 		0x10		/* not used */
 #define DDV_TYPE_MASK 		0xc
 #define DDV_TYPE_LOAD 		0x0
 #define DDV_TYPE_STORE 		0x4
@@ -232,6 +232,10 @@ sparclite_check_watch_resources (type, cnt, ot)
      int cnt;
      int ot;
 {
+  /* Watchpoints not supported on simulator.  */
+  if (strcmp (target_shortname, "sim") == 0)
+    return 0;
+
   if (type == bp_hardware_breakpoint)
     {
       if (TARGET_HW_BREAK_LIMIT == 0)

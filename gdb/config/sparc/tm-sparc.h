@@ -471,20 +471,20 @@ void sparc_push_dummy_frame PARAMS ((void)), sparc_pop_frame PARAMS ((void));
 #ifndef CALL_DUMMY
 /* This sequence of words is the instructions
 
- 0:	mov	%g1, %fp
- 4:	save	%sp, %g0, %sp
- 8:	mov	%g2, %fp
-12:	mov	%g3, %i7
-16:	ld	[%sp+0x58],%o5
-20:	ld	[%sp+0x54],%o4
-24:	ld	[%sp+0x50],%o3
-28:	ld	[%sp+0x4c],%o2
-32:	ld	[%sp+0x48],%o1
-36:	call 0x00000000
-40:	ld	[%sp+0x44],%o0
-44:	nop
-48:	ta 1
-52:	nop
+   0:   bc 10 00 01     mov  %g1, %fp
+   4:   9d e3 80 00     save  %sp, %g0, %sp
+   8:   bc 10 00 02     mov  %g2, %fp
+   c:   be 10 00 03     mov  %g3, %i7
+  10:   da 03 a0 58     ld  [ %sp + 0x58 ], %o5
+  14:   d8 03 a0 54     ld  [ %sp + 0x54 ], %o4
+  18:   d6 03 a0 50     ld  [ %sp + 0x50 ], %o3
+  1c:   d4 03 a0 4c     ld  [ %sp + 0x4c ], %o2
+  20:   d2 03 a0 48     ld  [ %sp + 0x48 ], %o1
+  24:   40 00 00 00     call  <fun>
+  28:   d0 03 a0 44     ld  [ %sp + 0x44 ], %o0
+  2c:   01 00 00 00     nop 
+  30:   91 d0 20 01     ta  1
+  34:   01 00 00 00     nop
 
    NOTES:
 	* the first four instructions are necessary only on the simulator.
@@ -502,7 +502,7 @@ void sparc_push_dummy_frame PARAMS ((void)), sparc_pop_frame PARAMS ((void));
 
 /* Size of the call dummy in bytes. */
 
-#define CALL_DUMMY_LENGTH 56
+#define CALL_DUMMY_LENGTH 0x38
 
 /* Offset within call dummy of first instruction to execute. */
 
@@ -510,11 +510,11 @@ void sparc_push_dummy_frame PARAMS ((void)), sparc_pop_frame PARAMS ((void));
 
 /* Offset within CALL_DUMMY of the 'call' instruction. */
 
-#define CALL_DUMMY_CALL_OFFSET (CALL_DUMMY_START_OFFSET + 36)
+#define CALL_DUMMY_CALL_OFFSET (CALL_DUMMY_START_OFFSET + 0x24)
 
 /* Offset within CALL_DUMMY of the 'ta 1' instruction. */
 
-#define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + 48)
+#define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + 0x30)
 
 #define CALL_DUMMY_STACK_ADJUST 68
 
