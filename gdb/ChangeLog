@@ -1,3 +1,7 @@
+2003-07-17  Michael Snyder  <msnyder@redhat.com>
+
+	* remote-sim.c: Comment typo fix.
+
 2003-07-17  Andrew Cagney  <cagney@redhat.com>
 
 	* defs.h (GDB_MULTI_ARCH): Delete conditional define.  Handled by
