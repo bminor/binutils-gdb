@@ -1,7 +1,7 @@
 Sat Mar 14 16:38:47 1992  Fred Fish  (fnf@cygnus.com)
 
 	* gmalloc.c, gmalloc.h mcheck.c mmap-alloc.c mmap-sbrk.c mtrace.c,
-	state.c, state.h:  Removed.
+	mtrace.awk, state.c, state.h:  Removed.
 	* .gdbinit: Add ../malloc, ../libiberty, and ../bfd to list of
 	directories searched for source files.
 	* Makefile.in (GNU_MALLOC, MALLOC_CFLAGS, MALLOCSRC): Removed

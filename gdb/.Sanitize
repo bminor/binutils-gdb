@@ -87,8 +87,6 @@ gdbcmd.h
 gdbcore.h
 gdbtypes.c
 gdbtypes.h
-gmalloc.c
-gmalloc.h
 gould-pinsn.c
 gould-xdep.c
 h8300-tdep.c
@@ -120,7 +118,6 @@ m88k-tdep.c
 m88k-xdep.c
 mach386-xdep.c
 main.c
-mcheck.c
 mem-break.c
 minimon.h
 minsyms.c
@@ -128,10 +125,6 @@ mips-pinsn.c
 mips-tdep.c
 mips-xdep.c
 mipsread.c
-mmap-alloc.c
-mmap-sbrk.c
-mtrace.awk
-mtrace.c
 munch
 news-xdep.c
 nindy-share
