@@ -1423,8 +1423,14 @@ elf_link_add_object_symbols (abfd, info)
 			{
 			  h->elf_link_hash_flags &=~ ELF_LINK_HASH_DEF_DYNAMIC;
 			  hi->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
-			  if (! _bfd_elf_link_record_dynamic_symbol (info, hi))
-			    goto error_return;
+			  if (hi->elf_link_hash_flags
+			      & (ELF_LINK_HASH_REF_REGULAR
+				 | ELF_LINK_HASH_DEF_REGULAR))
+			    {
+			      if (! _bfd_elf_link_record_dynamic_symbol (info,
+									 hi))
+				goto error_return;
+			    }
 			}
 
 		      /* Now set HI to H, so that the following code

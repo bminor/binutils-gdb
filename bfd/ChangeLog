@@ -8,6 +8,11 @@ Sun Oct  4 20:38:29 1998  Jeffrey A Law  (law@cygnus.com)
 
 Sun Oct  4 21:19:09 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elflink.h (elf_link_add_object_symbols): When a versioned symbol
+	has a base which is already defined, only add the referenced
+	symbol to the dynamic symbol table if it is defined or referenced
+	by a regular file.
+
 	* elf32-i386.c (elf_i386_info_to_howto_rel): Handle vtable relocs
 	correctly.
 
