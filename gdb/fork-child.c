@@ -60,8 +60,6 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
   char *shell_file;
   static char default_shell_file[] = SHELL_FILE;
   int len;
-  int pending_execs;
-  int terminal_initted;
   /* Set debug_fork then attach to the child while it sleeps, to debug. */
   static int debug_fork = 0;
   /* This is set to the result of setpgrp, which if vforked, will be visible
@@ -241,27 +239,34 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
 
   init_thread_list();
 
+  inferior_pid = pid;		/* Needed for wait_for_inferior stuff below */
+
   /* Now that we have a child process, make it our target, and
      initialize anything target-vector-specific that needs initializing.  */
   (*init_trace_fun)(pid);
+
+  /* We are now in the child process of interest, having exec'd the
+     correct program, and are poised at the first instruction of the
+     new program.  */
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
+  SOLIB_CREATE_INFERIOR_HOOK (pid);
+#endif
+}
+
+/* Accept NTRAPS traps from the inferior.  */
+
+void
+startup_inferior (ntraps)
+     int ntraps;
+{
+  int pending_execs = ntraps;
+  int terminal_initted;
 
   /* The process was started by the fork that created it,
      but it will have stopped one instruction after execing the shell.
      Here we must get it up to actual execution of the real program.  */
 
-  inferior_pid = pid;		/* Needed for wait_for_inferior stuff below */
-
   clear_proceed_status ();
-
-  /* We will get a trace trap after one instruction.
-     Continue it automatically.  Eventually (after shell does an exec)
-     it will get another trace trap.  Then insert breakpoints and continue.  */
-
-#ifdef START_INFERIOR_TRAPS_EXPECTED
-  pending_execs = START_INFERIOR_TRAPS_EXPECTED;
-#else
-  pending_execs = 2;
-#endif
 
   init_wait_for_inferior ();
 
@@ -301,11 +306,4 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
 	}
     }
   stop_soon_quietly = 0;
-
-  /* We are now in the child process of interest, having exec'd the
-     correct program, and are poised at the first instruction of the
-     new program.  */
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-  SOLIB_CREATE_INFERIOR_HOOK (pid);
-#endif
 }

@@ -1523,6 +1523,9 @@ procfs_init_inferior (pid)
 
   create_procinfo (pid);
   add_thread (pid);		/* Setup initial thread */
+
+  /* One trap to exec the shell, one to exec the program being debugged.  */
+  startup_inferior (2);
 }
 
 /*

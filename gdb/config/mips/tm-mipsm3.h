@@ -56,14 +56,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "mips/tm-mips.h"
 
-/*
- * On Mach 3.0 this is the number of exec() system calls before
- * the task contains the debugged program. It is always 2 when
- * using the shell to start up the program.
- */
-#undef  START_INFERIOR_TRAPS_EXPECTED
-#define START_INFERIOR_TRAPS_EXPECTED 2
-
 /* Address of end of user stack space.
  * for MACH, see <machine/vmparam.h>
  */

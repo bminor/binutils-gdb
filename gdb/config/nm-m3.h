@@ -39,10 +39,6 @@ extern thread_t current_thread;
  */
 extern int must_suspend_thread;
 
-/* Startup the inferior task and suspend it after the correct code is loaded */
-
-#define STARTUP_INFERIOR(x)	intercept_exec_calls(x)
-
 #define PREPARE_TO_PROCEED(select_it) mach3_prepare_to_proceed(select_it)
 
 /* Try to get the privileged host port for authentication to machid

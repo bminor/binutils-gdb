@@ -40,17 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* we can do it */
 #define ATTACH_DETACH 1
 
-/* number of traps that happen between exec'ing the shell 
- * to run an inferior, and when we finally get to 
- * the inferior code.  This is 2 on most implementations.
- *
- * On Mach 3.0 it is the number of exec() system calls before
- * the task contains the debugged program. It is always 2 when
- * using the shell to start up the program.
- */
-#undef  START_INFERIOR_TRAPS_EXPECTED
-#define START_INFERIOR_TRAPS_EXPECTED 2
-
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 

@@ -1143,6 +1143,9 @@ m3_trace_him (pid)
   setup_exception_port ();
 
   xx_debug ("Now the debugged task is created\n");
+
+  /* One trap to exec the shell, one to exec the program being debugged.  */
+  intercept_exec_calls (2);
 }
 
 setup_exception_port ()
