@@ -1,3 +1,8 @@
+Wed Sep 18 12:11:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (obj_coff_endef): Both versions: Move C_STAT
+	symbols to the position of the debugging information.
+
 Mon Sep 16 11:41:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* expr.c (expr): Always use unsigned right shifts for >>.

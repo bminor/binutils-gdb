@@ -278,7 +278,6 @@ c_symbol_merge (debug, normal)
   SF_SET_DEBUG_FIELD (normal, SF_GET_DEBUG_FIELD (debug));
 }
 
-static symbolS *previous_file_symbol;
 void
 c_dot_file_symbol (filename)
      char *filename;
@@ -302,21 +301,11 @@ c_dot_file_symbol (filename)
   }
 #endif
 
-  S_SET_VALUE (symbolP, (long) previous_file_symbol);
-
-  previous_file_symbol = symbolP;
-
   /* Make sure that the symbol is first on the symbol chain */
   if (symbol_rootP != symbolP)
     {
-      if (symbolP == symbol_lastP)
-	{
-	  symbol_lastP = symbol_lastP->sy_previous;
-	}			/* if it was the last thing on the list */
-
       symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
       symbol_insert (symbolP, symbol_rootP, &symbol_rootP, &symbol_lastP);
-      symbol_rootP = symbolP;
     }				/* if not first on the list */
 }
 
@@ -631,11 +620,12 @@ obj_coff_endef (ignore)
       def_symbol_in_progress = symbolP;
 
       if (SF_GET_FUNCTION (def_symbol_in_progress)
-	  || SF_GET_TAG (def_symbol_in_progress))
+	  || SF_GET_TAG (def_symbol_in_progress)
+	  || S_GET_STORAGE_CLASS (def_symbol_in_progress) == C_STAT)
 	{
-	  /* For functions, and tags, the symbol *must* be where the
-	     debug symbol appears.  Move the existing symbol to the
-	     current place. */
+	  /* For functions, and tags, and static symbols, the symbol
+	     *must* be where the debug symbol appears.  Move the
+	     existing symbol to the current place. */
 	  /* If it already is at the end of the symbol list, do nothing */
 	  if (def_symbol_in_progress != symbol_lastP)
 	    {
@@ -995,14 +985,6 @@ coff_frob_symbol (symp, punt)
     last_tagP = symp;
   else if (S_GET_STORAGE_CLASS (symp) == C_EOS)
     next_set_end = last_tagP;
-  else if (S_GET_STORAGE_CLASS (symp) == C_FILE)
-    {
-      if (S_GET_VALUE (symp))
-	{
-	  S_SET_VALUE ((symbolS *) S_GET_VALUE (symp), 0xdeadbeef);
-	  S_SET_VALUE (symp, 0);
-	}
-    }
 
 #ifdef OBJ_XCOFF
   /* This is pretty horrible, but we have to set *punt correctly in
@@ -1220,10 +1202,7 @@ coff_adjust_symtab ()
 {
   if (symbol_rootP == NULL
       || S_GET_STORAGE_CLASS (symbol_rootP) != C_FILE)
-    {
-      assert (previous_file_symbol == 0);
-      c_dot_file_symbol ("fake");
-    }
+    c_dot_file_symbol ("fake");
 }
 
 void
@@ -1675,6 +1654,18 @@ do_relocs_for (abfd, h, file_cursor)
 		      /* Turn the segment of the symbol into an offset.  */
 		      if (symbol_ptr)
 			{
+			  if (! symbol_ptr->sy_resolved)
+			    {
+			      char *file;
+			      unsigned int line;
+
+			      if (expr_symbol_where (symbol_ptr, &file, &line))
+				as_bad_where (file, line,
+					      "unresolved relocation");
+			      else
+				as_bad ("bad relocation: symbol `%s' not in symbol table",
+					S_GET_NAME (symbol_ptr));
+			    }
 			  dot = segment_info[S_GET_SEGMENT (symbol_ptr)].dot;
 			  if (dot)
 			    {
@@ -2239,11 +2230,12 @@ obj_coff_endef (ignore)
       def_symbol_in_progress = symbolP;
 
       if (SF_GET_FUNCTION (def_symbol_in_progress)
-	  || SF_GET_TAG (def_symbol_in_progress))
+	  || SF_GET_TAG (def_symbol_in_progress)
+	  || S_GET_STORAGE_CLASS (def_symbol_in_progress) == C_STAT)
 	{
-	  /* For functions, and tags, the symbol *must* be where the
-	     debug symbol appears.  Move the existing symbol to the
-	     current place. */
+	  /* For functions, and tags, and static symbols, the symbol
+	     *must* be where the debug symbol appears.  Move the
+	     existing symbol to the current place. */
 	  /* If it already is at the end of the symbol list, do nothing */
 	  if (def_symbol_in_progress != symbol_lastP)
 	    {
@@ -3979,9 +3971,15 @@ fixup_segment (segP, this_segment_type)
 
 	      add_number += S_GET_VALUE (add_symbolP);
 	      add_number -= md_pcrel_from (fixP);
-#if defined (TC_I386) || defined (TE_LYNX)
-	      /* On the 386 we must adjust by the segment
-		 vaddr as well.  Ian Taylor.  */
+#if defined (TC_I386) || defined (TE_LYNX) || defined (TC_I960)
+	      /* On the 386 we must adjust by the segment vaddr as
+		 well.  Ian Taylor.  I changed the i960 to work this
+		 way as well.  This is compatible with the current GNU
+		 linker behaviour.  I do not know what other i960 COFF
+		 assemblers do.  This is not a common case: normally,
+		 only assembler code will contain a PC relative reloc,
+		 and only branches which do not originate in the .text
+		 section will have a non-zero address.  */
 	      add_number -= segP->scnhdr.s_vaddr;
 #endif
 	      pcrel = 0;	/* Lie. Don't want further pcrel processing. */
@@ -4063,9 +4061,10 @@ fixup_segment (segP, this_segment_type)
 	    {
 	      fixP->fx_addsy = &abs_symbol;
 	    }			/* if there's an add_symbol */
-#if defined (TC_I386) || defined (TE_LYNX)
-	  /* On the 386 we must adjust by the segment vaddr
-	     as well.  Ian Taylor.  */
+#if defined (TC_I386) || defined (TE_LYNX) || defined (TC_I960)
+	  /* On the 386 we must adjust by the segment vaddr as well.
+	     Ian Taylor.  As noted above, I made the i960 work this
+	     way as well.  */
 	  add_number -= segP->scnhdr.s_vaddr;
 #endif
 	}			/* if pcrel */
