@@ -1227,7 +1227,8 @@ execute_stack_op (struct objfile *objfile,
 	      case DW_OP_ne:
 		result = (LONGEST) first != (LONGEST) second;
 		break;
-	      default:		/* This label is here just to avoid warning.  */
+	      default:
+		error ("execute_stack_op: Unknown DW_OP_ value");
 		break;
 	      }
 	  }
@@ -1271,7 +1272,7 @@ static void
 update_context (struct context *context, struct frame_state *fs, int chain)
 {
   struct context *orig_context;
-  CORE_ADDR cfa;
+  CORE_ADDR cfa = 0;
   long i;
 
   unwind_tmp_obstack_init ();

@@ -1,3 +1,8 @@
+2002-07-17  Michal Ludvig  <michal@suse.cz>
+
+	* dwarf2cfi.c (execute_stack_op): Complain on unknown DW_OP_ value.
+	(update_context): Initialise cfa variable.
+
 2002-07-17  Michael Snyder  <msnyder@redhat.com>
 
 	* aix-thread.c: Shorten some long lines.  
