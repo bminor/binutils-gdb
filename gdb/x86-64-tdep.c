@@ -112,7 +112,7 @@ static struct register_info x86_64_register_info_table[] = {
    numbering to GDB's one. Dwarf-2 numbering is 
    defined in x86-64 ABI, section 3.6.  */
 static int x86_64_dwarf2gdb_regno_map[] = {
-  0, 1, 2, 3,			/* RAX - RDX */
+  0, 3, 2, 1,			/* RAX, RDX, RCX, RBX */
   4, 5, 6, 7,			/* RSI, RDI, RBP, RSP */
   8, 9, 10, 11,			/* R8 - R11 */
   12, 13, 14, 15,		/* R12 - R15 */
