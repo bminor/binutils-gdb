@@ -4108,7 +4108,6 @@ elf_link_size_reloc_section (abfd, rel_hdr, o)
      Elf_Internal_Shdr *rel_hdr;
      asection *o;
 {
-  register struct elf_link_hash_entry **p, **pend;
   unsigned reloc_count;
 
   /* Figure out how many relocations there will be.  */
@@ -4132,16 +4131,15 @@ elf_link_size_reloc_section (abfd, rel_hdr, o)
      first time we are called.  */
   if (elf_section_data (o)->rel_hashes == NULL)
     {
+      struct elf_link_hash_entry **p;
+
       p = ((struct elf_link_hash_entry **)
-	   bfd_malloc (o->reloc_count
-		       * sizeof (struct elf_link_hash_entry *)));
+	   bfd_zmalloc (o->reloc_count
+			* sizeof (struct elf_link_hash_entry *)));
       if (p == NULL && o->reloc_count != 0)
 	return false;
 
       elf_section_data (o)->rel_hashes = p;
-      pend = p + o->reloc_count;
-      for (; p < pend; p++)
-	*p = NULL;
     }
 
   return true;
@@ -4161,6 +4159,24 @@ elf_link_adjust_relocs (abfd, rel_hdr, count, rel_hash)
 {
   unsigned int i;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  Elf_Internal_Rel *irel;
+  Elf_Internal_Rela *irela;
+
+  irel = (Elf_Internal_Rel *) bfd_zmalloc (sizeof (Elf_Internal_Rel)
+					   * bed->s->int_rels_per_ext_rel);
+  if (irel == NULL)
+    {
+      (*_bfd_error_handler) (_("Error: out of memory"));
+      abort ();
+    }
+
+  irela = (Elf_Internal_Rela *) bfd_zmalloc (sizeof (Elf_Internal_Rela)
+					     * bed->s->int_rels_per_ext_rel);
+  if (irela == NULL)
+    {
+      (*_bfd_error_handler) (_("Error: out of memory"));
+      abort ();
+    }
 
   for (i = 0; i < count; i++, rel_hash++)
     {
@@ -4172,41 +4188,50 @@ elf_link_adjust_relocs (abfd, rel_hdr, count, rel_hash)
       if (rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
 	{
 	  Elf_External_Rel *erel;
-	  Elf_Internal_Rel irel;
+	  unsigned int j;
 
 	  erel = (Elf_External_Rel *) rel_hdr->contents + i;
 	  if (bed->s->swap_reloc_in)
-	    (*bed->s->swap_reloc_in) (abfd, (bfd_byte *) erel, &irel);
+	    (*bed->s->swap_reloc_in) (abfd, (bfd_byte *) erel, irel);
 	  else
-	    elf_swap_reloc_in (abfd, erel, &irel);
-	  irel.r_info = ELF_R_INFO ((*rel_hash)->indx,
-				    ELF_R_TYPE (irel.r_info));
+	    elf_swap_reloc_in (abfd, erel, irel);
+
+	  for (j = 0; j < bed->s->int_rels_per_ext_rel; j++)
+	    irel[j].r_info = ELF_R_INFO ((*rel_hash)->indx,
+					 ELF_R_TYPE (irel[j].r_info));
+
 	  if (bed->s->swap_reloc_out)
-	    (*bed->s->swap_reloc_out) (abfd, &irel, (bfd_byte *) erel);
+	    (*bed->s->swap_reloc_out) (abfd, irel, (bfd_byte *) erel);
 	  else
-	    elf_swap_reloc_out (abfd, &irel, erel);
+	    elf_swap_reloc_out (abfd, irel, erel);
 	}
       else
 	{
 	  Elf_External_Rela *erela;
-	  Elf_Internal_Rela irela;
+	  unsigned int j;
 
 	  BFD_ASSERT (rel_hdr->sh_entsize
 		      == sizeof (Elf_External_Rela));
 
 	  erela = (Elf_External_Rela *) rel_hdr->contents + i;
 	  if (bed->s->swap_reloca_in)
-	    (*bed->s->swap_reloca_in) (abfd, (bfd_byte *) erela, &irela);
+	    (*bed->s->swap_reloca_in) (abfd, (bfd_byte *) erela, irela);
 	  else
-	    elf_swap_reloca_in (abfd, erela, &irela);
-	  irela.r_info = ELF_R_INFO ((*rel_hash)->indx,
-				     ELF_R_TYPE (irela.r_info));
+	    elf_swap_reloca_in (abfd, erela, irela);
+
+	  for (j = 0; j < bed->s->int_rels_per_ext_rel; j++)
+	    irela[j].r_info = ELF_R_INFO ((*rel_hash)->indx,
+				       ELF_R_TYPE (irela[j].r_info));
+
 	  if (bed->s->swap_reloca_out)
-	    (*bed->s->swap_reloca_out) (abfd, &irela, (bfd_byte *) erela);
+	    (*bed->s->swap_reloca_out) (abfd, irela, (bfd_byte *) erela);
 	  else
-	    elf_swap_reloca_out (abfd, &irela, erela);
+	    elf_swap_reloca_out (abfd, irela, erela);
 	}
     }
+
+  free (irel);
+  free (irela);
 }
 
 /* Do the final step of an ELF link.  */
@@ -5440,33 +5465,50 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
 
   bed = get_elf_backend_data (output_bfd);
   irela = internal_relocs;
-  irelaend = irela + NUM_SHDR_ENTRIES (input_rel_hdr);
+  irelaend = irela + NUM_SHDR_ENTRIES (input_rel_hdr)
+		     * bed->s->int_rels_per_ext_rel;
+
   if (input_rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
     {
       Elf_External_Rel *erel;
+      Elf_Internal_Rel *irel;
+      
+      irel = (Elf_Internal_Rel *) bfd_zmalloc (bed->s->int_rels_per_ext_rel
+					       * sizeof (Elf_Internal_Rel));
+      if (irel == NULL)
+	{
+	  (*_bfd_error_handler) (_("Error: out of memory"));
+	  abort ();
+	}
 
       erel = ((Elf_External_Rel *) output_rel_hdr->contents + *rel_countp);
-      for (; irela < irelaend; irela++, erel++)
+      for (; irela < irelaend; irela += bed->s->int_rels_per_ext_rel, erel++)
 	{
-	  Elf_Internal_Rel irel;
+	  unsigned char i;
+	  
+	  for (i = 0; i < bed->s->int_rels_per_ext_rel; i++)
+	    {
+	      irel[i].r_offset = irela[i].r_offset;
+	      irel[i].r_info = irela[i].r_info;
+	      BFD_ASSERT (irela[i].r_addend == 0);
+	    }
 
-	  irel.r_offset = irela->r_offset;
-	  irel.r_info = irela->r_info;
-	  BFD_ASSERT (irela->r_addend == 0);
 	  if (bed->s->swap_reloc_out)
-	    (*bed->s->swap_reloc_out) (output_bfd, &irel, (PTR) erel);
+	    (*bed->s->swap_reloc_out) (output_bfd, irel, (PTR) erel);
 	  else
-	    elf_swap_reloc_out (output_bfd, &irel, erel);
+	    elf_swap_reloc_out (output_bfd, irel, erel);
 	}
+
+      free (irel);
     }
   else
     {
       Elf_External_Rela *erela;
 
-      BFD_ASSERT (input_rel_hdr->sh_entsize
-		  == sizeof (Elf_External_Rela));
+      BFD_ASSERT (input_rel_hdr->sh_entsize == sizeof (Elf_External_Rela));
+
       erela = ((Elf_External_Rela *) output_rel_hdr->contents + *rel_countp);
-      for (; irela < irelaend; irela++, erela++)
+      for (; irela < irelaend; irela += bed->s->int_rels_per_ext_rel, erela++)
 	if (bed->s->swap_reloca_out)
 	  (*bed->s->swap_reloca_out) (output_bfd, irela, (PTR) erela);
 	else
@@ -5798,20 +5840,27 @@ elf_link_input_bfd (finfo, input_bfd)
 	      Elf_Internal_Rela *irelaend;
 	      struct elf_link_hash_entry **rel_hash;
 	      Elf_Internal_Shdr *input_rel_hdr;
+	      unsigned char next_erel;
 
 	      /* Adjust the reloc addresses and symbol indices.  */
 
 	      irela = internal_relocs;
-	      irelaend =
-		irela + o->reloc_count * bed->s->int_rels_per_ext_rel;
+	      irelaend = irela
+		         + o->reloc_count * bed->s->int_rels_per_ext_rel;
 	      rel_hash = (elf_section_data (o->output_section)->rel_hashes
 			  + elf_section_data (o->output_section)->rel_count
 			  + elf_section_data (o->output_section)->rel_count2);
-	      for (; irela < irelaend; irela++, rel_hash++)
+	      for (next_erel = 0; irela < irelaend; irela++, next_erel++)
 		{
 		  unsigned long r_symndx;
 		  Elf_Internal_Sym *isym;
 		  asection *sec;
+
+		  if (next_erel == bed->s->int_rels_per_ext_rel)
+		    {
+		      rel_hash++;
+		      next_erel = 0;
+		    }
 
 		  irela->r_offset += o->output_offset;
 
@@ -5829,7 +5878,7 @@ elf_link_input_bfd (finfo, input_bfd)
 			  && finfo->sections[r_symndx] == NULL))
 		    {
 		      struct elf_link_hash_entry *rh;
-		      long indx;
+		      unsigned long indx;
 
 		      /* This is a reloc against a global symbol.  We
 			 have not yet output all the local symbols, so
@@ -5937,7 +5986,8 @@ elf_link_input_bfd (finfo, input_bfd)
 	      elf_link_output_relocs (output_bfd, o,
 				      input_rel_hdr,
 				      internal_relocs);
-	      internal_relocs += NUM_SHDR_ENTRIES (input_rel_hdr);
+	      internal_relocs += NUM_SHDR_ENTRIES (input_rel_hdr)
+				 * bed->s->int_rels_per_ext_rel;
 	      input_rel_hdr = elf_section_data (o)->rel_hdr2;
 	      if (input_rel_hdr)
 		elf_link_output_relocs (output_bfd, o,
@@ -6110,32 +6160,52 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
 
   if (rel_hdr->sh_type == SHT_REL)
     {
-      Elf_Internal_Rel irel;
+      Elf_Internal_Rel *irel;
       Elf_External_Rel *erel;
+      unsigned char i;
+      
+      irel = (Elf_Internal_Rel *) bfd_zmalloc (bed->s->int_rels_per_ext_rel
+					       * sizeof (Elf_Internal_Rel));
+      if (irel == NULL)
+	return false;
+      
+      for (i = 0; i < bed->s->int_rels_per_ext_rel; i++)
+	irel[i].r_offset = offset;
+      irel[0].r_info = ELF_R_INFO (indx, howto->type);
 
-      irel.r_offset = offset;
-      irel.r_info = ELF_R_INFO (indx, howto->type);
       erel = ((Elf_External_Rel *) rel_hdr->contents
 	      + elf_section_data (output_section)->rel_count);
+
       if (bed->s->swap_reloc_out)
-	(*bed->s->swap_reloc_out) (output_bfd, &irel, (bfd_byte *) erel);
+	(*bed->s->swap_reloc_out) (output_bfd, irel, (bfd_byte *) erel);
       else
-	elf_swap_reloc_out (output_bfd, &irel, erel);
+	elf_swap_reloc_out (output_bfd, irel, erel);
+
+      free (irel);
     }
   else
     {
-      Elf_Internal_Rela irela;
+      Elf_Internal_Rela *irela;
       Elf_External_Rela *erela;
+      unsigned char i;
+      
+      irela = (Elf_Internal_Rela *) bfd_zmalloc (bed->s->int_rels_per_ext_rel
+						 * sizeof (Elf_Internal_Rela));
+      if (irela == NULL)
+	return false;
 
-      irela.r_offset = offset;
-      irela.r_info = ELF_R_INFO (indx, howto->type);
-      irela.r_addend = addend;
+      for (i = 0; i < bed->s->int_rels_per_ext_rel; i++)
+	irela[i].r_offset = offset;
+      irela[0].r_info = ELF_R_INFO (indx, howto->type);
+      irela[0].r_addend = addend;
+
       erela = ((Elf_External_Rela *) rel_hdr->contents
 	       + elf_section_data (output_section)->rel_count);
+
       if (bed->s->swap_reloca_out)
-	(*bed->s->swap_reloca_out) (output_bfd, &irela, (bfd_byte *) erela);
+	(*bed->s->swap_reloca_out) (output_bfd, irela, (bfd_byte *) erela);
       else
-	elf_swap_reloca_out (output_bfd, &irela, erela);
+	elf_swap_reloca_out (output_bfd, irela, erela);
     }
 
   ++elf_section_data (output_section)->rel_count;
@@ -6272,7 +6342,7 @@ elf_create_pointer_linker_section (abfd, info, lsect, h, rel)
 #define bfd_put_ptr(BFD,VAL,ADDR) bfd_put_32 (BFD, VAL, ADDR)
 #endif
 
-/* Fill in the address for a pointer generated in alinker section.  */
+/* Fill in the address for a pointer generated in a linker section.  */
 
 bfd_vma
 elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h, relocation, rel, relative_reloc)
@@ -6339,7 +6409,17 @@ elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h, reloca
 	  if (info->shared)
 	    {
 	      asection *srel = lsect->rel_section;
-	      Elf_Internal_Rela outrel;
+	      Elf_Internal_Rela *outrel;
+	      struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
+	      unsigned int i;
+
+	      outrel = (Elf_Internal_Rela *) bfd_zmalloc (sizeof (Elf_Internal_Rela)
+							  * bed->s->int_rels_per_ext_rel);
+	      if (outrel == NULL)
+		{
+		  (*_bfd_error_handler) (_("Error: out of memory"));
+		  return 0;
+		}
 
 	      /* We need to generate a relative reloc for the dynamic linker.  */
 	      if (!srel)
@@ -6348,16 +6428,19 @@ elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h, reloca
 
 	      BFD_ASSERT (srel != NULL);
 
-	      outrel.r_offset = (lsect->section->output_section->vma
-				 + lsect->section->output_offset
-				 + linker_section_ptr->offset);
-	      outrel.r_info = ELF_R_INFO (0, relative_reloc);
-	      outrel.r_addend = 0;
-	      elf_swap_reloca_out (output_bfd, &outrel,
+	      for (i = 0; i < bed->s->int_rels_per_ext_rel; i++)
+		outrel[i].r_offset = (lsect->section->output_section->vma
+				      + lsect->section->output_offset
+				      + linker_section_ptr->offset);
+	      outrel[0].r_info = ELF_R_INFO (0, relative_reloc);
+	      outrel[0].r_addend = 0;
+	      elf_swap_reloca_out (output_bfd, outrel,
 				   (((Elf_External_Rela *)
 				     lsect->section->contents)
 				    + elf_section_data (lsect->section)->rel_count));
 	      ++elf_section_data (lsect->section)->rel_count;
+	      
+	      free (outrel);
 	    }
 	}
     }

@@ -1,3 +1,14 @@
+2001-05-28  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	src/bfd/ChangeLog
+	* elflink.h (elf_link_size_reloc_section): Use bfd_zmalloc instead of
+	a zeroing loop.
+	(elf_link_output_relocs): Handle MIPS ELF64 relocations correctly.
+	(elf_link_input_bfd): Likewise.
+	(elf_reloc_link_order): Likewise.
+	(elf_finish_pointer_linker_section): Typo. Handle MIPS ELF64
+	relocations correctly.
+
 2001-05-28  Nicolas Pitre <nico@cam.org>
 
 	* elf32-arm.h: fix PLT generation for big endian ARM
