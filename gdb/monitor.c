@@ -327,7 +327,7 @@ debuglogs(va_alist)
   *p = '\0';					/* terminate the string */
 
   if (sr_get_debug() > level)
-    puts (newbuf);
+    printf_unfiltered ("%s\n", newbuf);
 
 #ifdef LOG_FILE					/* write to the monitor log */
   if (log_file != 0x0) {
@@ -402,9 +402,12 @@ expect (string, discard)
       }
     } else {
       if (!discard) {
+	putc_unfiltered (c);
+#if 0
 	fwrite(string, 1, (p - 1) - string, stdout);
 	putchar((char)c);
 	fflush(stdout);
+#endif
       }
       p = string;
     }
@@ -622,18 +625,19 @@ monitor_open(args, name, from_tty)
   
   SERIAL_RAW(monitor_desc);
 
-#if !defined(__GO32__) && !defined(GDB_TARGET_IS_PA_ELF)
   /* some systems only work with 2 stop bits */
+#if !defined(__GO32__) && !defined(GDB_TARGET_IS_PA_ELF)
   if (STOPBITS == 2) {
-    temptempio = (TERMINAL *)SERIAL_GET_TTY_STATE(monitor_desc);
+    if (!strchr (dev_name, ':')) {	/* don't set for a tcp connection */
+      temptempio = (TERMINAL *)SERIAL_GET_TTY_STATE(monitor_desc);
 #ifdef HAVE_SGTTY
-    temptempio->sg_cflag |= baud_rate | CSTOPB;
+      temptempio->sg_cflag |= baud_rate | CSTOPB;
 #else
-    temptempio->c_cflag |= baud_rate | CSTOPB;
-/***    temptempio->c_lflag |= ~0x00000008; turn off echo ***/
+      temptempio->c_cflag |= baud_rate | CSTOPB;
 #endif
-    SERIAL_SET_TTY_STATE(monitor_desc, temptempio);
-    debuglogs (4, "Set serial port to 2 stop bits");
+      SERIAL_SET_TTY_STATE(monitor_desc, temptempio);
+      debuglogs (4, "Set serial port to 2 stop bits");
+    }
   }
 #endif	/* __GO32__ */
 
@@ -1026,14 +1030,8 @@ monitor_write_inferior_memory (memaddr, myaddr, len)
     *p++ = num[7];
     *p++ = ':';				/* add the colon delimeter */
     for (j = 0; j < len; j++) {		/* copy the data in after converting it */
-#if 0
-      hexword2ascii (num, myaddr[j]);
-#endif
       *p++ = tohex ((myaddr[j] >> 4) & 0xf);
       *p++ = tohex  (myaddr[j] & 0xf);
-#if 0
-      strcpy ((buf+14)+(j * 2), num+6);
-#endif
     }
 
     make_gdb_packet (packet, buf);
@@ -1472,8 +1470,10 @@ monitor_load_srec (args, protocol)
 	      if (GETACK)			/* ACKnowledged, get next data chunk */
 		break;
 	    } else {				/* assume we got an ACK */
-	      if (hashmark)
-		printf_filtered ("#");
+	      if (hashmark) {
+		putc_unfiltered ('#');
+		fflush (gdb_stdout);
+	      }
 	      debuglogs (3, "Got an ACK, sending next packet");
 	      break;
 	    }
@@ -1485,10 +1485,12 @@ monitor_load_srec (args, protocol)
 	} else {				/* no protocols at all */
 	  printf_monitor ("%s\n", srec);
 	}
-	if (hashmark)
-	  printf_filtered ("#");
+	if (hashmark) {
+	  putc_unfiltered ('#');
+	  fflush (gdb_stdout);
+	}
 	type = 3;				/* switch to a 4 byte address record */
-	fflush (stdout);
+	fflush (gdb_stdout);
       }
       free (buffer);
     } else {
@@ -1496,7 +1498,7 @@ monitor_load_srec (args, protocol)
     }
     s = s->next;
   }
-  printf_filtered ("\n");
+  putc_unfiltered ('\n');
   
   /*
      write a type 7 terminator record. no data for a type 7,
@@ -1517,7 +1519,7 @@ monitor_load_srec (args, protocol)
   }
 
   if (hashmark) 
-    putchar ('\n');
+    putc_unfiltered ('\n');
   
   expect_prompt ();
 }
