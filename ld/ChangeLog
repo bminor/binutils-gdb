@@ -1,3 +1,7 @@
+2000-11-15  Richard Henderson  <rth@redhat.com>
+
+	* emulparams/elf64alpha.sh (MAXPAGESIZE): Typo -- 64k, not 1M.
+
 2000-11-14  Kazu Hirata  <kazu@hxi.com>
 
 	* scripttempl/h8300.sc: Fix formatting.
