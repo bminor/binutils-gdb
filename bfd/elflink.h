@@ -899,19 +899,19 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 
 /* This function is called to create an indirect symbol from the
    default for the symbol with the default version if needed. The
-   symbol is described by H, NAME, SYM, SEC, VALUE, and OVERRIDE.  We
+   symbol is described by H, NAME, SYM, PSEC, VALUE, and OVERRIDE.  We
    set DYNSYM if the new indirect symbol is dynamic. DT_NEEDED
    indicates if it comes from a DT_NEEDED entry of a shared object.  */
 
 static boolean
-elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
+elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
 			dynsym, override, dt_needed)
      bfd *abfd;
      struct bfd_link_info *info;
      struct elf_link_hash_entry *h;
      const char *name;
      Elf_Internal_Sym *sym;
-     asection **sec;
+     asection **psec;
      bfd_vma *value;
      boolean *dynsym;
      boolean override;
@@ -926,6 +926,7 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
   boolean dynamic;
   char *p;
   size_t len, shortlen;
+  asection *sec;
 
   /* If this symbol has a version, and it is the default version, we
      create an indirect symbol from the default name to the fully
@@ -970,7 +971,8 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
      actually going to define an indirect symbol.  */
   type_change_ok = false;
   size_change_ok = false;
-  if (! elf_merge_symbol (abfd, info, shortname, sym, sec, value,
+  sec = *psec;
+  if (! elf_merge_symbol (abfd, info, shortname, sym, &sec, value,
 			  &hi, &override, &type_change_ok,
 			  &size_change_ok, dt_needed))
     return false;
@@ -1077,7 +1079,8 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
   /* Once again, merge with any existing symbol.  */
   type_change_ok = false;
   size_change_ok = false;
-  if (! elf_merge_symbol (abfd, info, shortname, sym, sec, value,
+  sec = *psec;
+  if (! elf_merge_symbol (abfd, info, shortname, sym, &sec, value,
 			  &hi, &override, &type_change_ok,
 			  &size_change_ok, dt_needed))
     return false;
