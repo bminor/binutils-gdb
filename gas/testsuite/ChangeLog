@@ -1,3 +1,7 @@
+2002-01-09   Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/float.s: Don't use VFP register names in fpa instructions.
+
 2002-01-08  H.J. Lu <hjl@gnu.org>
 
 	* gas/mips/elf-rel.s: New tests for nested ().
