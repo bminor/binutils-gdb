@@ -1,3 +1,9 @@
+Mon Jun  8 16:08:10 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* objfiles.c (add_to_objfile_sections): All targets to define
+	  TARGET_KEEP_SECTION to permit them to retain bfd sections that
+	  GDB would otherwise have discarded.
+
 Fri Jun  5 13:56:19 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dbxread.c (read_dbx_symtab): Don't lower texthigh for last psymtab.

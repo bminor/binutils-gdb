@@ -67,6 +67,10 @@ int mapped_symbol_files;		/* Try to use mapped symbol files */
    objfile_p_char is a char * to get it through
    bfd_map_over_sections; we cast it back to its proper type.  */
 
+#ifndef TARGET_KEEP_SECTION
+#define TARGET_KEEP_SECTION(ASECT)	0
+#endif
+
 static void
 add_to_objfile_sections (abfd, asect, objfile_p_char)
      bfd *abfd;
@@ -78,8 +82,10 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
   flagword aflag;
 
   aflag = bfd_get_section_flags (abfd, asect);
-  if (!(aflag & SEC_ALLOC))
+
+  if (!(aflag & SEC_ALLOC) && !(TARGET_KEEP_SECTION(asect)))
     return;
+
   if (0 == bfd_section_size (abfd, asect))
     return;
   section.offset = 0;
