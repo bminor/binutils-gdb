@@ -1,3 +1,9 @@
+Mon Mar 24 11:12:26 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (.c.o): Define TARGET_$(MY_TARGET) when compiling.
+  	* gmon.h: Use bytes counts rather than sizeof in struct raw_phdr
+ 	and struct raw_arc.
+
 Mon Mar 17 10:54:47 1997  David Mosberger-Tang  <davidm@azstarnet.com>
 
 	* cg_arcs.c (arc_add): memset() newly alloced arc to ensure

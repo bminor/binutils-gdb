@@ -37,10 +37,13 @@
 
 struct raw_phdr
   {
-    /* FIXME: This is wrong; bfd_vma need not correspond any
-       particular size on the target.  */
-    char low_pc[sizeof (bfd_vma)];	/* base pc address of sample buffer */
-    char high_pc[sizeof (bfd_vma)];	/* max pc address of sampled buffer */
+#ifdef TARGET_alpha
+    char low_pc[8];		/* base pc address of sample buffer */
+    char high_pc[8];		/* max pc address of sampled buffer */
+#else
+    char low_pc[4];		/* base pc address of sample buffer */
+    char high_pc[4];		/* max pc address of sampled buffer */
+#endif
     char ncnt[4];		/* size of sample buffer (plus this header) */
 
 #if defined (__alpha__) && defined (__osf__)
@@ -113,9 +116,15 @@ struct tostruct
  */
 struct raw_arc
   {
-    char from_pc[sizeof (bfd_vma)];
-    char self_pc[sizeof (bfd_vma)];
-    char count[sizeof (long)];
+#ifdef TARGET_alpha
+    char from_pc[8];
+    char self_pc[8];
+    char count[8];
+#else
+    char from_pc[4];
+    char self_pc[4];
+    char count[4];
+#endif
   };
 
 /*

@@ -56,7 +56,7 @@ LDFLAGS=
 HLDFLAGS = @HLDFLAGS@
 HLDENV = @HLDENV@
 .c.o:
-	$(CC) -c -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd @DEFS@ -DMACHINE_H=\"$(MY_TARGET).h\" $(TCFLAGS) $(HCFLAGS) $(CFLAGS) $<
+	$(CC) -c -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd @DEFS@ -DTARGET_$(MY_TARGET) -DMACHINE_H=\"$(MY_TARGET).h\" $(TCFLAGS) $(HCFLAGS) $(CFLAGS) $<
 
 all:	$(GEN_FILES) $(PROG)
 
