@@ -1,3 +1,9 @@
+Thu May 19 09:29:12 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* Makefile.in (INSTALL_LAST): Change operation so it works
+	on more flavors of make.
+	* configure.in (go32): Don't build libg++ or libio.
+
 Fri May 13 13:28:34 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* Makefile.in (Move HOST_PREFIX_1 and friends up so

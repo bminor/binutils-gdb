@@ -50,6 +50,10 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 
+INSTALL_LAST_FAKE = install_last_fake
+INSTALL_LAST_REAL = install_last_real
+INSTALL_LAST = $(INSTALL_LAST_FAKE)
+
 AS = as
 AR = ar
 AR_FLAGS = rc
@@ -218,6 +222,7 @@ NM_FOR_TARGET = ` \
        t='$(program_transform_name)'; echo nm | sed -e 's/brokensed/brokensed/' $$t ; \
     fi; \
   fi`
+
 
 #### host and target specific makefile fragments come in here.
 ###
@@ -837,8 +842,8 @@ install-gcc:
 # EXPERIMENTAL STUFF
 # This rule is used to install the modules which use FLAGS_TO_PASS.
 # To build a target install-X means to cd to X and make install.
-.PHONY: $(INSTALL_LAST)
-$(INSTALL_LAST): install-dirs
+.PHONY: $(INSTALL_LAST_REAL)
+$(INSTALL_LAST_REAL): install-dirs
 	@dir=`echo $@ | sed -e 's/install-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
@@ -847,6 +852,8 @@ $(INSTALL_LAST): install-dirs
 	else \
 	  true; \
 	fi
+
+install_last_fake:
 
 
 # This is a list of inter-dependencies among modules.

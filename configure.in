@@ -222,7 +222,7 @@ case "${target}" in
     # add the go32 support tools to the list
     # but don't build gdb
     configdirs=`echo go32 ${configdirs}`
-    noconfigdirs="$noconfigdirs gdb"
+    noconfigdirs="$noconfigdirs gdb libg++ libio"
     ;;
   i[34]86-*-sco*)
     noconfigdirs="$noconfigdirs gprof"
