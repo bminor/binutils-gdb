@@ -31,6 +31,8 @@
 
 #include "obstack.h"
 
+static void floating_constant PARAMS ((expressionS * expressionP));
+static void integer_constant PARAMS ((int radix, expressionS * expressionP));
 static void clean_up_expression PARAMS ((expressionS * expressionP));
 static symbolS *make_expr_symbol PARAMS ((expressionS * expressionP));
 
@@ -49,11 +51,8 @@ make_expr_symbol (expressionP)
 
   /* FIXME: This should be something which decode_local_label_name
      will handle.  */
-#ifdef DOT_LABEL_PREFIX
-  fake = ".L0\001";
-#else
-  fake = "L0\001";
-#endif
+  fake = FAKE_LABEL_NAME;
+
   /* Putting constant symbols in absolute_section rather than
      expr_section is convenient for the old a.out code, for which
      S_GET_SEGMENT does not always retrieve the value put in by
@@ -89,7 +88,7 @@ FLONUM_TYPE generic_floating_point_number =
 /* If nonzero, we've been asked to assemble nan, +inf or -inf */
 int generic_floating_point_magic;
 
-void
+static void
 floating_constant (expressionP)
      expressionS *expressionP;
 {
@@ -118,7 +117,7 @@ floating_constant (expressionP)
   expressionP->X_add_number = -1;
 }
 
-void
+static void
 integer_constant (radix, expressionP)
      int radix;
      expressionS *expressionP;
@@ -230,10 +229,8 @@ integer_constant (radix, expressionP)
 	}
       /* again, c is char after number, */
       /* input_line_pointer->after c. */
-      know (sizeof (int) * 8 == 32);
       know (LITTLENUM_NUMBER_OF_BITS == 16);
-      /* hence the constant "2" in the next line. */
-      if (leader < generic_bignum + 2)
+      if (leader < generic_bignum + sizeof (valueT) / 2)
 	{			/* will fit into 32 bits. */
 	  number =
 	    ((generic_bignum[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
@@ -331,15 +328,15 @@ integer_constant (radix, expressionP)
 	       then this is a fresh instantiation of that number, so create
 	       it.  */
 
-	    if (dollar_label_defined (number))
+	    if (dollar_label_defined ((long) number))
 	      {
-		name = dollar_label_name (number, 0);
+		name = dollar_label_name ((long) number, 0);
 		symbolP = symbol_find (name);
 		know (symbolP != NULL);
 	      }
 	    else
 	      {
-		name = dollar_label_name (number, 1);
+		name = dollar_label_name ((long) number, 1);
 		symbolP = symbol_find_or_make (name);
 	      }
 
@@ -371,7 +368,7 @@ integer_constant (radix, expressionP)
       expressionP->X_add_number = number;
       input_line_pointer--;	/*->char following number. */
     }
-}				/* integer_constant() */
+}
 
 
 /*
@@ -393,6 +390,14 @@ operand (expressionP)
   symbolS *symbolP;	/* points to symbol */
   char *name;		/* points to name of symbol */
   segT segment;
+
+  /* All integers are regarded as unsigned unless they are negated.
+     This is because the only thing which cares whether a number is
+     unsigned is the code in emit_expr which extends constants into
+     bignums.  It should only sign extend negative numbers, so that
+     something like ``.quad 0x80000000'' is not sign extended even
+     though it appears negative if valueT is 32 bits.  */
+  expressionP->X_unsigned = 1;
 
   /* digits, assume it is a bignum. */
 
@@ -562,6 +567,7 @@ operand (expressionP)
 		expressionP->X_add_number = - expressionP->X_add_number;
 		/* Notice: '-' may overflow: no warning is given. This is
 		   compatible with other people's assemblers. Sigh.  */
+		expressionP->X_unsigned = 0;
 	      }
 	    else
 	      expressionP->X_add_number = ~ expressionP->X_add_number;
@@ -589,11 +595,7 @@ operand (expressionP)
 
 	  /* JF: '.' is pseudo symbol with value of current location
 	     in current segment.  */
-#ifdef DOT_LABEL_PREFIX
-	  fake = ".L0\001";
-#else
-	  fake = "L0\001";
-#endif
+	  fake = FAKE_LABEL_NAME;
 	  symbolP = symbol_new (fake,
 				now_seg,
 				(valueT) frag_now_fix (),
@@ -852,8 +854,8 @@ expr (rank, resultP)
 	  as_warn ("missing operand; zero assumed");
 	  right.X_op = O_constant;
 	  right.X_add_number = 0;
-	  resultP->X_add_symbol = NULL;
-	  resultP->X_op_symbol = NULL;
+	  right.X_add_symbol = NULL;
+	  right.X_op_symbol = NULL;
 	}
 
       know (*input_line_pointer != ' ');
@@ -866,7 +868,11 @@ expr (rank, resultP)
       else if (! SEG_NORMAL (retval))
 	retval = rightseg;
       else if (SEG_NORMAL (rightseg)
-	       && retval != rightseg)
+	       && retval != rightseg
+#ifdef DIFF_EXPR_OK
+	       && op_left != O_subtract
+#endif
+	       )
 	as_bad ("operation combines symbols in different segments");
 
       c_right = *input_line_pointer;
@@ -968,6 +974,7 @@ expr (rank, resultP)
 	  resultP->X_op_symbol = make_expr_symbol (&right);
 	  resultP->X_op = op_left;
 	  resultP->X_add_number = 0;
+	  resultP->X_unsigned = 1;
 	}
 	  
       op_left = op_right;

@@ -50,6 +50,15 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "aout/stab_gnu.h"
 
+/* Allow backends to override the names used for the stab sections.  */
+#ifndef STAB_SECTION_NAME
+#define STAB_SECTION_NAME ".stab"
+#endif
+
+#ifndef STAB_STRING_SECTION_NAME
+#define STAB_STRING_SECTION_NAME ".stabstr"
+#endif
+
 #ifndef TC_START_LABEL
 #define TC_START_LABEL(x,y) (x==':')
 #endif
@@ -449,6 +458,19 @@ read_a_source_file (name)
 
 		  pop = NULL;
 
+#define IGNORE_OPCODE_CASE
+#ifdef IGNORE_OPCODE_CASE
+		  {
+		    char *s2 = s;
+		    while (*s2)
+		      {
+			if (isupper (*s2))
+			  *s2 = tolower (*s2);
+			s2++;
+		      }
+		  }
+#endif
+
 #ifdef NO_PSEUDO_DOT
 		  /* The m88k uses pseudo-ops without a period.  */
 		  pop = (pseudo_typeS *) hash_find (po_hash, s);
@@ -484,9 +506,7 @@ read_a_source_file (name)
 			 A well shaped space is sometimes all that separates
 			 keyword from operands. */
 		      if (c == ' ' || c == '\t')
-			{
-			  input_line_pointer++;
-			}	/* Skip seperator after keyword. */
+			input_line_pointer++;
 		      /*
 		       * Input_line is restored.
 		       * Input_line_pointer->1st non-blank char
@@ -498,9 +518,7 @@ read_a_source_file (name)
 			  break;
 			}
 		      else
-			{
-			  (*pop->poc_handler) (pop->poc_val);
-			}	/* if we have one */
+			(*pop->poc_handler) (pop->poc_val);
 		    }
 		  else
 #endif
@@ -524,23 +542,22 @@ read_a_source_file (name)
 
 		      *input_line_pointer++ = c;
 
-		      /* We resume loop AFTER the end-of-line from this instruction */
+		      /* We resume loop AFTER the end-of-line from
+			 this instruction. */
 		    }		/* if (*s=='.') */
-
 		}		/* if c==':' */
 	      continue;
 	    }			/* if (is_name_beginner(c) */
 
 
+	  /* Empty statement?  */
 	  if (is_end_of_line[(unsigned char) c])
-	    {
-	      continue;
-	    }			/* empty statement */
-
+	    continue;
 
 #if defined(LOCAL_LABELS_DOLLAR) || defined(LOCAL_LABELS_FB)
 	  if (isdigit (c))
-	    {			/* local label  ("4:") */
+	    {
+	      /* local label  ("4:") */
 	      char *backup = input_line_pointer;
 
 	      HANDLE_CONDITIONAL_ASSEMBLY ();
@@ -2274,14 +2291,37 @@ next_char_of_string ()
 	case '9':
 	  {
 	    long number;
+	    int i;
 
-	    for (number = 0; isdigit (c); c = *input_line_pointer++)
+	    for (i = 0, number = 0; isdigit (c) && i < 3; c = *input_line_pointer++, i++)
 	      {
 		number = number * 8 + c - '0';
 	      }
 	    c = number & 0xff;
 	  }
 	  --input_line_pointer;
+	  break;
+
+	case 'x':
+	case 'X':
+	  {
+	    long number;
+
+	    number = 0;
+	    c = *input_line_pointer++;
+	    while (isxdigit (c))
+	      {
+		if (isdigit (c))
+		  number = number * 16 + c - '0';
+		else if (isupper (c))
+		  number = number * 16 + c - 'A' + 10;
+		else
+		  number = number * 16 + c - 'a' + 10;
+		c = *input_line_pointer++;
+	      }
+	    c = number & 0xff;
+	    --input_line_pointer;
+	  }
 	  break;
 
 	case '\n':
@@ -2598,9 +2638,9 @@ s_ignore (arg)
 #ifdef SEPARATE_STAB_SECTIONS
 
 unsigned int
-get_stab_string_offset (string, secname)
+get_stab_string_offset (string, stabstr_secname)
      const char *string;
-     const char *secname;
+     const char *stabstr_secname;
 {
   unsigned int length;
   unsigned int retval;
@@ -2620,9 +2660,8 @@ get_stab_string_offset (string, secname)
       save_subseg = now_subseg;
 
       /* Create the stab string section.  */
-      newsecname = xmalloc ((unsigned long) (strlen (secname) + 4));
-      strcpy (newsecname, secname);
-      strcat (newsecname, "str");
+      newsecname = xmalloc ((unsigned long) (strlen (stabstr_secname) + 1));
+      strcpy (newsecname, stabstr_secname);
 
       seg = subseg_new (newsecname, 0);
 
@@ -2659,9 +2698,10 @@ get_stab_string_offset (string, secname)
    kinds of stab sections. */
 
 static void 
-s_stab_generic (what, secname)
+s_stab_generic (what, stab_secname, stabstr_secname)
      int what;
-     char *secname;
+     char *stab_secname;
+     char *stabstr_secname;
 {
   long longint;
   char *string;
@@ -2742,7 +2782,7 @@ s_stab_generic (what, secname)
     
     dot = frag_now_fix ();
 
-    seg = subseg_new (secname, 0);
+    seg = subseg_new (stab_secname, 0);
 
     if (! seg_info (seg)->hadone)
       {
@@ -2755,7 +2795,7 @@ s_stab_generic (what, secname)
 	seg_info (seg)->hadone = 1;
       }
 
-    stroff = get_stab_string_offset (string, secname);
+    stroff = get_stab_string_offset (string, stabstr_secname);
 
     /* At least for now, stabs in a special stab section are always
        output as 12 byte blocks of information.  */
@@ -2778,11 +2818,7 @@ s_stab_generic (what, secname)
 	expressionS exp;
 
 	/* Arrange for a value representing the current location.  */
-#ifdef DOT_LABEL_PREFIX
-	fake = ".L0\001";
-#else
-	fake = "L0\001";
-#endif
+	fake = FAKE_LABEL_NAME;
 	symbol = symbol_new (fake, saved_seg, dot, saved_frag);
 
 	exp.X_op = O_symbol;
@@ -2854,7 +2890,7 @@ void
 s_stab (what)
      int what;
 {
-  s_stab_generic (what, ".stab");
+  s_stab_generic (what, STAB_SECTION_NAME, STAB_STRING_SECTION_NAME);
 }
 
 /* "Extended stabs", used in Solaris only now. */
@@ -2864,9 +2900,9 @@ s_xstab (what)
      int what;
 {
   int length;
-  char *secname;
+  char *stab_secname, *stabstr_secname;
 
-  secname = demand_copy_C_string (&length);
+  stab_secname = demand_copy_C_string (&length);
   SKIP_WHITESPACE ();
   if (*input_line_pointer == ',')
     input_line_pointer++;
@@ -2876,7 +2912,13 @@ s_xstab (what)
       ignore_rest_of_line ();
       return;
     }
-  s_stab_generic (what, secname);
+
+  /* To get the name of the stab string section, simply .str to
+     the stab section name.  */
+  stabstr_secname = alloca (strlen (stab_secname) + 4);
+  strcpy (stabstr_secname, stab_secname);
+  strcat (stabstr_secname, "str");
+  s_stab_generic (what, stab_secname, stabstr_secname);
 }
 
 #ifdef S_SET_DESC
