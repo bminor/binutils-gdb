@@ -165,6 +165,7 @@ _trap_low:
 	srl	%l3, 1, %g1		! Rotate wim right
 	tst	%g1
 	bg	good_wim		! Branch if new wim is non-zero
+	nop
 
 ! At this point, we need to bring a 1 into the high order bit of the wim.
 ! Since we don't want to make any assumptions about the number of register

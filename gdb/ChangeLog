@@ -1,3 +1,8 @@
+Tue Mar 21 17:03:17 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* sparc-stub.c: add nop after 'bg good_wim'.
+	* sparcl-stub.c: ditto.
+
 Tue Mar 21 13:34:12 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infrun.c (handle_command): Don't print TARGET_SIGNAL_0,
