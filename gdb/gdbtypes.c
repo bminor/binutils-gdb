@@ -1165,7 +1165,6 @@ check_typedef (register struct type *type)
 }
 
 /* New code added to support parsing of Cfront stabs strings */
-#include <ctype.h>
 #define INIT_EXTRA { pextras->len=0; pextras->str[0]='\0'; }
 #define ADD_EXTRA(c) { pextras->str[pextras->len++]=c; }
 

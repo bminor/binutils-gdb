@@ -821,9 +821,9 @@ extern int longest_to_int (LONGEST);
 /* Assorted functions we can declare, now that const and volatile are 
    defined.  */
 
-extern char *savestring (const char *, int);
+extern char *savestring (const char *, size_t);
 
-extern char *msavestring (void *, const char *, int);
+extern char *msavestring (void *, const char *, size_t);
 
 extern char *mstrsave (void *, const char *);
 

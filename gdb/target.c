@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include <errno.h>
-#include <ctype.h>
 #include "gdb_string.h"
 #include "target.h"
 #include "gdbcmd.h"

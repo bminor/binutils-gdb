@@ -28,7 +28,6 @@
 #include "expression.h"
 #include "target.h"
 #include "frame.h"
-#include "demangle.h"
 #include "language.h"		/* For CAST_IS_CONVERSION */
 #include "f-lang.h"		/* for array bound stuff */
 

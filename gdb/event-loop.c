@@ -35,7 +35,6 @@
 #include <sys/types.h>
 #include "gdb_string.h"
 #include <errno.h>
-#include <setjmp.h>
 #include <sys/time.h>
 
 /* Type of the mask arguments to select. */

@@ -20,7 +20,6 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "obstack.h"
 #include "bfd.h"		/* Binary File Description */
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -31,10 +30,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "language.h"
-#include "demangle.h"
 #include "m2-lang.h"
-
-#include "gdb_string.h"
 #include <errno.h>
 
 void

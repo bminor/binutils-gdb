@@ -27,7 +27,6 @@
 /* Just include everything in sight so that the every old definition
    of macro is visible. */
 #include "gdb_string.h"
-#include <ctype.h>
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"

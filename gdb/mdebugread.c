@@ -79,8 +79,6 @@ typedef struct mips_extra_func_info
 #include "gdb_stat.h"
 #include "gdb_string.h"
 
-#include "gdb-stabs.h"
-
 #include "bfd.h"
 
 #include "coff/ecoff.h"		/* COFF-like aspects of ecoff files */

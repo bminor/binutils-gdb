@@ -33,7 +33,6 @@
 #include "objfiles.h"
 #include "buildsym.h"
 #include "stabsread.h"
-#include "gdb-stabs.h"
 
 #include "coff/sym.h"
 #include "coff/internal.h"

@@ -46,7 +46,6 @@
 
 #include "obstack.h"
 #include "gdb_stat.h"
-#include <ctype.h>
 #include "symtab.h"
 #include "breakpoint.h"
 #include "command.h"

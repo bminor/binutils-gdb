@@ -39,7 +39,6 @@
 #include "obstack.h"
 #include "completer.h"
 
-#include <assert.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include "gdb_string.h"

@@ -47,7 +47,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "demangle.h"
-#include "gdb-stabs.h"
 
 /* Accumulate the minimal symbols for each objfile in bunches of BUNCH_SIZE.
    At the end, copy them all into one newly allocated location on an objfile's

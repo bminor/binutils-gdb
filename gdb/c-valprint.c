@@ -25,7 +25,6 @@
 #include "gdbtypes.h"
 #include "expression.h"
 #include "value.h"
-#include "demangle.h"
 #include "valprint.h"
 #include "language.h"
 #include "c-lang.h"

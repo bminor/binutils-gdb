@@ -21,12 +21,10 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "gdb_string.h"
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "gdb-stabs.h"
 #include "buildsym.h"
 #include "stabsread.h"
 

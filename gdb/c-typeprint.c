@@ -38,7 +38,6 @@
 
 #include "gdb_string.h"
 #include <errno.h>
-#include <ctype.h>
 
 /* Flag indicating target was compiled by HP compiler */
 extern int hp_som_som_object_present;

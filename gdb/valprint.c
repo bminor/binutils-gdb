@@ -30,7 +30,6 @@
 #include "target.h"
 #include "obstack.h"
 #include "language.h"
-#include "demangle.h"
 #include "annotate.h"
 #include "valprint.h"
 

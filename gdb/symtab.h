@@ -1347,11 +1347,6 @@ extern struct symtabs_and_lines decode_line_spec (char *, int);
 
 extern struct symtabs_and_lines decode_line_spec_1 (char *, int);
 
-/* From linespec.c */
-
-extern struct symtabs_and_lines decode_line_1 (char **,
-                                          int, struct symtab *, int, char ***);
-
 /* Symmisc.c */
 
 void maintenance_print_symbols (char *, int);

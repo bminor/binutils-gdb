@@ -361,7 +361,9 @@ VERSION = 5.0
 DIST=gdb
 
 LINT=/usr/5bin/lint
-LINTFLAGS= $(BFD_CFLAGS)
+LINTFLAGS= $(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
+	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
+	$(INTL_CFLAGS)
 
 RUNTEST = `if [ -f $${rootsrc}/../dejagnu/runtest ] ; then \
 		echo $${rootsrc}/../dejagnu/runtest ; else echo runtest; \
@@ -1109,6 +1111,9 @@ p-exp.tab.c: p-exp.y
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
 	   `echo $(DEPFILES) | sed 's/\.o /\.c /g'`
+
+flint:  $(filter-out %.y,$(LINTFILES)) $(DEPFILES:.c=.o)
+	flint co.lnt $(LINTFLAGS) $^
 
 gdb.cxref: $(SFILES)
 	cxref -I. $(SFILES) >gdb.cxref

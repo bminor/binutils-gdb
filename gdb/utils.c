@@ -1155,7 +1155,7 @@ myread (int desc, char *addr, int len)
    Uses malloc to get the space.  Returns the address of the copy.  */
 
 char *
-savestring (const char *ptr, int size)
+savestring (const char *ptr, size_t size)
 {
   register char *p = (char *) xmalloc (size + 1);
   memcpy (p, ptr, size);
@@ -1164,7 +1164,7 @@ savestring (const char *ptr, int size)
 }
 
 char *
-msavestring (void *md, const char *ptr, int size)
+msavestring (void *md, const char *ptr, size_t size)
 {
   register char *p = (char *) xmmalloc (md, size + 1);
   memcpy (p, ptr, size);

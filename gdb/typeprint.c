@@ -31,7 +31,6 @@
 #include "gdbcmd.h"
 #include "target.h"
 #include "language.h"
-#include "demangle.h"
 
 #include "gdb_string.h"
 #include <errno.h>

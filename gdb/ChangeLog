@@ -1,3 +1,40 @@
+2001-03-06  J.T. Conklin  <jtc@redback.com>
+
+	* symtab.h (decode_line_1): Removed declaration.
+
+	* symfile.c (#include <assert.h>): Removed.
+
+	* arch-utils.c (#include <ctype.h>): Removed.
+	* c-typeprint.c: Likewise.
+	* dbxread.c: Likewise.
+	* gdbtypes.c: Likewise.
+	* target.c: Likewise.
+	* os9kread.c: Likewise.
+
+	* c-valprint.c (#include "demangle.h"): Removed.
+	* ch-typeprint.c: Likewise.
+	* eval.c: Likewise.
+	* f-typeprint.c: Likewise.
+	* f-valprint.c: Likewise.
+	* m2-typeprint.c: Likewise.
+	* typeprint.c: Likewise.
+	* p-typeprint.c: Likewise.
+	* valarith.c: Likewise.
+	* valprint.c: Likewise.
+
+	* m2-typeprint.c (#include "gdb_string.h"): Removed.
+	* nlmread.c: Likewise.
+
+	* mdebugread.c (#include "gdb-stabs.h"): Removed.
+	* minsyms.c: Likewise.
+	* mipsread.c: Likewise.
+	* nlmread.c: Likewise.
+
+	* m2-typeprint.c (#include "obstack.h"): Removed.
+	* m2-valprint.c: Likewise.
+
+	* event-loop.c (#include <setjmp.h>): Removed.
+
 2001-03-06  Stan Shebs  <shebs@apple.com>
 
 	* MAINTAINERS: Remove self from specific maintenance domains

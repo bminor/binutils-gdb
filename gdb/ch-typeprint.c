@@ -31,7 +31,6 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "language.h"
-#include "demangle.h"
 #include "ch-lang.h"
 #include "typeprint.h"
 
