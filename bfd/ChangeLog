@@ -1,5 +1,18 @@
 Mon Jan  3 11:41:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* bfd-in.h (bfd_get{b,l}[_signed_]{16,32,64}): Declare argument to
+	be a const pointer.
+	* bfd-in2.h: Rebuilt.
+	* libbfd.c (bfd_get{b,l}[_signed_]{16,32,64}): Declare argument to
+	be a const pointer.
+	* targets.c (bfd_target): Change swap function pointers
+	accordingly.
+	* archive.c (do_slurp_coff_armap): Change swap accordingly.
+	* aix386-core.c: Change NO_GET and NO_GETS accordingly.
+	* hppabsd-core.c, hpux-core.c, irix-core.c, osf-core.c,
+	ptrace-core.c, trad-core.c: Change NO_GET and NO_SIGNED_GET
+	accordingly.
+
 	* libbfd-in.h (struct artdata): Added tdata field.
 	(_bfd_add_bfd_to_archive_cache): Declare.
 	(_bfd_get_elt_at_filepos): Declare.
