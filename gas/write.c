@@ -1365,7 +1365,7 @@ set_symtab ()
   asymbol **asympp;
   symbolS *symp;
   boolean result;
-  extern PTR bfd_alloc PARAMS ((bfd *, size_t));
+  extern PTR bfd_alloc PARAMS ((bfd *, bfd_size_type));
 
   /* Count symbols.  We can't rely on a count made by the loop in
      write_object_file, because *_frob_file may add a new symbol or
@@ -1377,9 +1377,9 @@ set_symtab ()
   if (nsyms)
     {
       int i;
+      bfd_size_type amt = (bfd_size_type) nsyms * sizeof (asymbol *);
 
-      asympp = (asymbol **) bfd_alloc (stdoutput,
-				       nsyms * sizeof (asymbol *));
+      asympp = (asymbol **) bfd_alloc (stdoutput, amt);
       symp = symbol_rootP;
       for (i = 0; i < nsyms; i++, symp = symbol_next (symp))
 	{
@@ -1880,8 +1880,8 @@ write_object_file ()
       obj_emit_strings (&next_object_file_charP);
 
 #ifdef BFD_HEADERS
-    bfd_seek (stdoutput, 0, 0);
-    bfd_write (the_object_file, 1, object_file_size, stdoutput);
+    bfd_seek (stdoutput, (file_ptr) 0, 0);
+    bfd_bwrite (the_object_file, (bfd_size_type) object_file_size, stdoutput);
 #else
 
     /* Write the data to the file.  */

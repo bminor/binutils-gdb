@@ -721,7 +721,7 @@ obj_elf_change_section (name, type, attr, entsize, push)
 	  & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
 	     | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS))
 	as_warn (_("Ignoring changed section attributes for %s"), name);
-      else if ((flags & SEC_MERGE) && old_sec->entsize != entsize)
+      else if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	as_warn (_("Ignoring changed section entity size for %s"), name);
     }
 

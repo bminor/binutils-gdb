@@ -345,7 +345,7 @@ dwarf2_directive_file (dummy)
       return;
     }
 
-  if (num < files_in_use && files[num].filename != 0)
+  if (num < (int) files_in_use && files[num].filename != 0)
     {
       as_bad (_("file number %ld already allocated"), (long) num);
       return;

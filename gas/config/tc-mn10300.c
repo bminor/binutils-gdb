@@ -92,7 +92,7 @@ static int reg_name_search PARAMS ((const struct reg_name *, int, const char *))
 static boolean data_register_name PARAMS ((expressionS *expressionP));
 static boolean address_register_name PARAMS ((expressionS *expressionP));
 static boolean other_register_name PARAMS ((expressionS *expressionP));
-static void set_arch_mach PARAMS ((int));
+static void set_arch_mach PARAMS ((unsigned int));
 
 /*  Set linkrelax here to avoid fixups in most sections.  */
 int linkrelax = 1;
@@ -2130,7 +2130,7 @@ check_operand (insn, operand, val)
 
 static void
 set_arch_mach (mach)
-     int mach;
+     unsigned int mach;
 {
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_mn10300, mach))
     as_warn (_("could not set architecture and machine"));

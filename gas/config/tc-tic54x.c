@@ -1,5 +1,5 @@
 /* tc-tic54x.c -- Assembly code for the Texas Instruments TMS320C54X
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
    This file is part of GAS, the GNU Assembler.
@@ -2388,7 +2388,7 @@ tic54x_mlib (ignore)
       FILE *ftmp;
 
       /* We're not sure how big it is, but it will be smaller than "size".  */
-      bfd_read (buf, size, 1, mbfd);
+      bfd_bread (buf, size, mbfd);
 
       /* Write to a temporary file, then use s_include to include it
 	 a bit of a hack.  */

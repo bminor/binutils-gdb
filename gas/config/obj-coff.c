@@ -2059,8 +2059,8 @@ do_relocs_for (abfd, h, file_cursor)
 #endif
 
 	      /* Write out the reloc table */
-	      bfd_write ((PTR) external_reloc_vec, 1, external_reloc_size,
-			 abfd);
+	      bfd_bwrite ((PTR) external_reloc_vec,
+			  (bfd_size_type) external_reloc_size, abfd);
 	      free (external_reloc_vec);
 
 	      /* Fill in section header info.  */
@@ -2202,7 +2202,7 @@ fill_section (abfd, h, file_cursor)
 	    {
 	      if (s->s_scnptr != 0)
 		{
-		  bfd_write (buffer, s->s_size, 1, abfd);
+		  bfd_bwrite (buffer, s->s_size, abfd);
 		  *file_cursor += s->s_size;
 		}
 	      free (buffer);
@@ -2226,7 +2226,7 @@ coff_header_append (abfd, h)
   unsigned long string_size = 4;
 #endif
 
-  bfd_seek (abfd, 0, 0);
+  bfd_seek (abfd, (file_ptr) 0, 0);
 
 #ifndef OBJ_COFF_OMIT_OPTIONAL_HEADER
   H_SET_MAGIC_NUMBER (h, COFF_MAGIC);
@@ -2242,8 +2242,8 @@ coff_header_append (abfd, h)
 
   i = bfd_coff_swap_filehdr_out (abfd, &h->filehdr, buffer);
 
-  bfd_write (buffer, i, 1, abfd);
-  bfd_write (buffero, H_GET_SIZEOF_OPTIONAL_HEADER (h), 1, abfd);
+  bfd_bwrite (buffer, (bfd_size_type) i, abfd);
+  bfd_bwrite (buffero, (bfd_size_type) H_GET_SIZEOF_OPTIONAL_HEADER (h), abfd);
 
   for (i = SEG_E0; i < SEG_LAST; i++)
     {
@@ -2268,7 +2268,7 @@ coff_header_append (abfd, h)
 					   buffer);
 	  if (size == 0)
 	    as_bad (_("bfd_coff_swap_scnhdr_out failed"));
-	  bfd_write (buffer, size, 1, abfd);
+	  bfd_bwrite (buffer, (bfd_size_type) size, abfd);
 	}
     }
 }
@@ -3395,7 +3395,7 @@ do_linenos_for (abfd, h, file_cursor)
 
 	  s->scnhdr.s_lnnoptr = *file_cursor;
 
-	  bfd_write (buffer, 1, s->scnhdr.s_nlnno * LINESZ, abfd);
+	  bfd_bwrite (buffer, (bfd_size_type) s->scnhdr.s_nlnno * LINESZ, abfd);
 	  free (buffer);
 
 	  *file_cursor += s->scnhdr.s_nlnno * LINESZ;
@@ -3618,7 +3618,8 @@ write_object_file ()
     w_symbols (abfd, buffer1, symbol_rootP);
     if (string_byte_count > 0)
       w_strings (buffer1 + symtable_size);
-    bfd_write (buffer1, 1, symtable_size + string_byte_count, abfd);
+    bfd_bwrite (buffer1, (bfd_size_type) symtable_size + string_byte_count,
+		abfd);
     free (buffer1);
   }
 

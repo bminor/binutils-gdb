@@ -1,3 +1,23 @@
+2001-09-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2dbg.c (dwarf2_directive_file): Avoid signed/unsigned warning.
+
+	* write.c (set_symtab): Update bfd_alloc declaration.  Use a temp
+	var to ensure bfd_alloc arg is the right type.
+	(write_object_file): Cast args of bfd_seek.  Replace bfd_write with
+	bfd_bwrite.
+
+	* config/obj-coff.c: Replace calls to bfd_write with calls to
+	bfd_bwrite.  Cast args of bfd_seek.
+
+	* config/obj-elf.c (obj_elf_change_section): Avoid signed/unsigned
+	warning.
+
+	* config/tc-mn10300.c (set_arch_mach): Make param unsigned.
+
+	* config/tc-tic54x.c (tic54x_mlib): Replace bfd_read call with
+	call to bfd_bread.
+
 2001-09-15  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-sh.h (sh_force_relocation): Prototype.
