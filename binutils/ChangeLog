@@ -1,3 +1,20 @@
+Thu Aug 22 17:08:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Substitute HLDENV.
+	* configure: Rebuild.
+	* Makefile.in (HLDENV): New variable.  Use it whenever linking a
+	program.
+
+Thu Aug 15 19:30:41 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Add symbolic doublequotes around the version
+	number.
+
+Thu Aug  8 12:27:52 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	* makefile.vms: Add better support for DEC C compilation.
+	Add new macros as in Makefile.in.
+
 Wed Aug  7 14:27:33 1996  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* configure.in: Call BFD_NEED_DECLARATION on strstr and sbrk.
