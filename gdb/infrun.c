@@ -2675,7 +2675,44 @@ step_over_function (struct execution_control_state *ecs)
   struct symtab_and_line sr_sal;
 
   init_sal (&sr_sal);		/* initialize to zeros */
-  sr_sal.pc = ADDR_BITS_REMOVE (SAVED_PC_AFTER_CALL (get_current_frame ()));
+
+  /* NOTE: cagney/2003-04-06:
+
+     At this point the equality get_frame_pc() == get_frame_func()
+     should hold.  This may make it possible for this code to tell the
+     frame where it's function is, instead of the reverse.  This would
+     avoid the need to search for the frame's function, which can get
+     very messy when there is no debug info available (look at the
+     heuristic find pc start code found in targets like the MIPS).  */
+
+  /* NOTE: cagney/2003-04-06: Deprecate SAVED_PC_AFTER_CALL?
+
+     The intent of SAVED_PC_AFTER_CALL was to:
+
+     - provide a very light weight equivalent to frame_unwind_pc()
+     (nee FRAME_SAVED_PC) that avoids the prologue analyzer
+
+     - avoid handling the case where the PC hasn't been saved in the
+     prologue analyzer
+
+     Unfortunatly, not five lines further down, is a call to
+     get_frame_id() and that is guarenteed to trigger the prologue
+     analyzer.
+     
+     The `correct fix' is for the prologe analyzer to handle the case
+     where the prologue is incomplete (PC in prologue) and,
+     consequently, the return pc has not yet been saved.  It should be
+     noted that the prologue analyzer needs to handle this case
+     anyway: frameless leaf functions that don't save the return PC;
+     single stepping through a prologue.
+
+     The d10v handles all this by bailing out of the prologue analsis
+     when it reaches the current instruction.  */
+
+  if (SAVED_PC_AFTER_CALL_P ())
+    sr_sal.pc = ADDR_BITS_REMOVE (SAVED_PC_AFTER_CALL (get_current_frame ()));
+  else
+    sr_sal.pc = ADDR_BITS_REMOVE (frame_pc_unwind (get_current_frame ()));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
   check_for_old_step_resume_breakpoint ();

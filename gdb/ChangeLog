@@ -1,3 +1,15 @@
+2003-04-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (SAVED_PC_AFTER_CALL): Add a predicate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* d10v-tdep.c (d10v_saved_pc_after_call): Delete function.
+	(d10v_gdbarch_init): Do not set saved_pc_after_call.
+	* infrun.c (step_over_function): Call SAVED_PC_AFTER_CALL_P
+	conditionally, use frame_pc_unwind as an alternative.  Add
+	comments.
+	* arch-utils.c (init_frame_pc_default): Only call
+	SAVED_PC_AFTER_CALL when available.
+
 2003-04-08  Elena Zannoni  <ezannoni@redhat.com>
 
         * infrun.c (stop_soon): Rename from stop_soon_quietly.

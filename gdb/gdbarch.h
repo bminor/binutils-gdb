@@ -2385,6 +2385,31 @@ extern void set_gdbarch_frame_locals_address (struct gdbarch *gdbarch, gdbarch_f
 #endif
 #endif
 
+#if defined (SAVED_PC_AFTER_CALL)
+/* Legacy for systems yet to multi-arch SAVED_PC_AFTER_CALL */
+#if !defined (SAVED_PC_AFTER_CALL_P)
+#define SAVED_PC_AFTER_CALL_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (SAVED_PC_AFTER_CALL_P)
+#define SAVED_PC_AFTER_CALL_P() (0)
+#endif
+
+extern int gdbarch_saved_pc_after_call_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SAVED_PC_AFTER_CALL_P)
+#error "Non multi-arch definition of SAVED_PC_AFTER_CALL"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SAVED_PC_AFTER_CALL_P)
+#define SAVED_PC_AFTER_CALL_P() (gdbarch_saved_pc_after_call_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (SAVED_PC_AFTER_CALL)
+#define SAVED_PC_AFTER_CALL(frame) (internal_error (__FILE__, __LINE__, "SAVED_PC_AFTER_CALL"), 0)
+#endif
+
 typedef CORE_ADDR (gdbarch_saved_pc_after_call_ftype) (struct frame_info *frame);
 extern CORE_ADDR gdbarch_saved_pc_after_call (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_saved_pc_after_call (struct gdbarch *gdbarch, gdbarch_saved_pc_after_call_ftype *saved_pc_after_call);
