@@ -1,3 +1,8 @@
+2002-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-sol2-tdep.c (i386_sol2_osabi_sniffer): New function.
+	(_initialize_i386_sol2_tdep): Register i386_sol2_osabi_sniffer.
+
 2002-06-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* defs.h (auto_boolean): Declare enum.

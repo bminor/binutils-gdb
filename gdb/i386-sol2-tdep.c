@@ -48,12 +48,27 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
+static enum gdb_osabi
+i386_sol2_osabi_sniffer (bfd *abfd)
+{
+  /* If we have a section named .SUNW_version, then it is almost
+     certainly Solaris 2.  */
+  if (bfd_get_section_by_name (abfd, ".SUNW_version"))
+    return GDB_OSABI_SOLARIS;
+
+  return GDB_OSABI_UNKNOWN;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_i386_sol2_tdep (void);
 
 void
 _initialize_i386_sol2_tdep (void)
 {
+  /* Register and ELF OS ABI sniffer for Solaris 2 binaries.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
+				  i386_sol2_osabi_sniffer);
+
   gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_SOLARIS,
 			  i386_sol2_init_abi);
 }
