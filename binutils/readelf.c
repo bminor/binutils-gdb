@@ -93,6 +93,7 @@ int 			do_using_dynamic;
 int 			do_header;
 int 			do_dump;
 int 			do_version;
+int			do_histogram;
 
 static unsigned long int (* byte_get) PARAMS ((unsigned char *, int));
 
@@ -1017,6 +1018,7 @@ struct option options [] =
   {"file-header", no_argument, 0, 'h'},
   {"program-headers", no_argument, 0, 'l'},
   {"headers", no_argument, 0, 'e'},
+  {"histogram", no_argument, &do_histogram, 1},
   {"segments", no_argument, 0, 'l'},
   {"sections", no_argument, 0, 'S'},
   {"section-headers", no_argument, 0, 'S'},
@@ -1042,7 +1044,7 @@ usage ()
 {
   fprintf (stdout, _("Usage: readelf {options} elf-file(s)\n"));
   fprintf (stdout, _("  Options are:\n"));
-  fprintf (stdout, _("  -a or --all               Equivalent to: -h -l -S -s -r -d -V\n"));
+  fprintf (stdout, _("  -a or --all               Equivalent to: -h -l -S -s -r -d -V --histogram\n"));
   fprintf (stdout, _("  -h or --file-header       Display the ELF file header\n"));
   fprintf (stdout, _("  -l or --program-headers or --segments\n"));
   fprintf (stdout, _("                            Display the program headers\n"));
@@ -1060,6 +1062,7 @@ usage ()
   fprintf (stdout, _("  -i <number> or --instruction-dump=<number>\n"));
   fprintf (stdout, _("                            Disassemble the contents of section <number>\n"));
 #endif
+  fprintf (stdout, _("        --histogram         Display histogram of bucket list lengths\n"));
   fprintf (stdout, _("  -v or --version           Display the version number of readelf\n"));
   fprintf (stdout, _("  -H or --help              Display this information\n"));
   fprintf (stdout, _("Report bugs to bug-gnu-utils@gnu.org\n"));
@@ -1085,6 +1088,9 @@ parse_args (argc, argv)
 
       switch (c)
 	{
+	case 0:
+	  /* Long options.  */
+	  break;
 	case 'H':
 	  usage ();
 	  break;
@@ -1097,6 +1103,7 @@ parse_args (argc, argv)
 	  do_sections ++;
 	  do_segments ++;
 	  do_version ++;
+	  do_histogram ++;
 	  break;
 	case 'e':
 	  do_header ++;
@@ -1161,7 +1168,8 @@ parse_args (argc, argv)
     }
 
   if (!do_dynamic && !do_syms && !do_reloc && !do_sections
-      && !do_segments && !do_header && !do_dump && !do_version)
+      && !do_segments && !do_header && !do_dump && !do_version
+      && !do_histogram)
     usage ();
   else if (argc < 3)
     {
@@ -2091,7 +2099,8 @@ process_dynamic_segment (file)
 	case DT_VERNEEDNUM:
 	case DT_RELACOUNT:
 	case DT_RELCOUNT:
-	  printf ("%ld\n", entry->d_un.d_val);
+	  if (do_dynamic)
+	    printf ("%ld\n", entry->d_un.d_val);
 	  break;
 
 	case DT_SYMINSZ	:
@@ -2766,21 +2775,19 @@ process_symbol_table (file)
      FILE * file;
 {
   Elf32_Internal_Shdr *   section;
+  char   nb [4];
+  char   nc [4];
+  int    nbuckets;
+  int    nchains;
+  int *  buckets = NULL;
+  int *  chains = NULL;
 
-  if (! do_syms)
+  if (! do_syms && !do_histogram)
     return 1;
 
-  if (dynamic_info[DT_HASH] && do_using_dynamic && dynamic_strings != NULL)
+  if (dynamic_info[DT_HASH] && ((do_using_dynamic && dynamic_strings != NULL)
+				|| do_histogram))
     {
-      char   nb [4];
-      char   nc [4];
-      int    nbuckets;
-      int    nchains;
-      int *  buckets;
-      int *  chains;
-      int    hn;
-      int    si;
-
       if (fseek (file, dynamic_info[DT_HASH] - loadaddr, SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information"));
@@ -2807,6 +2814,13 @@ process_symbol_table (file)
 
       if (buckets == NULL || chains == NULL)
 	return 0;
+    }
+
+  if (do_syms
+      && dynamic_info[DT_HASH] && do_using_dynamic && dynamic_strings != NULL)
+    {
+      int    hn;
+      int    si;
 
       printf (_("\nSymbol table for image:\n"));
       printf (_("  Num Buc:    Value  Size   Type   Bind Ot Ndx Name\n"));
@@ -2835,11 +2849,8 @@ process_symbol_table (file)
 	      printf (" %s\n", dynamic_strings + psym->st_name);
 	    }
 	}
-
-      free (buckets);
-      free (chains);
     }
-  else if (!do_using_dynamic)
+  else if (do_syms && !do_using_dynamic)
     {
       unsigned int     i;
 
@@ -3036,9 +3047,61 @@ process_symbol_table (file)
 	    free (strtab);
 	}
     }
-  else
+  else if (do_syms)
     printf
       (_("\nDynamic symbol information is not available for displaying symbols.\n"));
+
+  if (do_histogram)
+    {
+      int *lengths;
+      int *counts;
+      int hn;
+      int si;
+      int maxlength = 0;
+
+      printf (_("\nHistogram for bucket list length (total of %d buckets):\n"),
+	      nbuckets);
+      printf (_(" Length  Number\n"));
+
+      lengths = (int *) calloc (nbuckets, sizeof (int));
+      if (lengths == NULL)
+	{
+	  error (_("Out of memory"));
+	  return 0;
+	}
+      for (hn = 0; hn < nbuckets; ++hn)
+	{
+	  if (! buckets [hn])
+	    continue;
+
+	  for (si = buckets[hn]; si; si = chains[si])
+	    if (maxlength < ++lengths[hn])
+	      maxlength = lengths[hn];
+	}
+
+      counts = (int *) calloc (maxlength + 1, sizeof (int));
+      if (counts == NULL)
+	{
+	  error (_("Out of memory"));
+	  return 0;
+	}
+
+      for (hn = 0; hn < nbuckets; ++hn)
+	++counts[lengths[hn]];
+
+      for (si = 0; si <= maxlength; ++si)
+	printf ("%7d  %-10d (%5.1f%%)\n",
+		si, counts[si], (counts[si] * 100.0) / nbuckets);
+
+      free (counts);
+      free (lengths);
+    }
+
+  if (buckets != NULL)
+    {
+      free (buckets);
+      free (chains);
+    }
 
   return 1;
 }

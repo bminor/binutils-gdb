@@ -1,3 +1,16 @@
+1998-09-02 14:50  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf/readelf.c (process_dynamic_segment): Print DT_* value only if
+	do_dynamic.
+	(do_histogram): New variable.
+	(options): New long option histogram.  Set do_histogram if this
+	option is used.
+	(usage): Document --histogram.
+	(parse_args): Handle 0 return value from getopt_long.  Enable
+	do_histogram for -a.
+	(process_symbol_table): Read hash table also if only do_histogram.
+	Add code to print hash table histogram.
+
 1998-08-25 16:45  Ulrich Drepper  <drepper@cygnus.com>
 
 	* readelf.c (process_dynamic_segment): Read syminfo section if
