@@ -118,15 +118,6 @@ struct symloc {
 #define GCC2_COMPILED_FLAG_SYMBOL "gcc2_compiled."
 #endif
 
-/* Define this as 1 if a pcc declaration of a char or short argument
-   gives the correct address.  Otherwise assume pcc gives the
-   address of the corresponding int, which is not the same on a
-   big-endian machine.  */
-
-#ifndef BELIEVE_PCC_PROMOTION
-#define BELIEVE_PCC_PROMOTION 0
-#endif
-
 /* Remember what we deduced to be the source language of this psymtab. */
 
 static enum language psymtab_language = language_unknown;

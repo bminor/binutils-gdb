@@ -4,6 +4,8 @@ Wed Nov 10 09:31:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* config/m68k/{tm-hp300bsd.h,tm-hp300hpux.h,tm-m68k-em.h,
 	tm-monitor.h,tm-sun3.h,tm-vx68.h}, config/sparc/tm-sparc.h:
 	Define BELIEVE_PCC_PROMOTION.
+	* dbxread.c: Remove BELIEVE_PCC_PROMOTION define.  The code which
+	used this was moved to stabsread.c a long time ago.
 
 	* dstread.c (dst_sym_fns): Update for flavours.
 	* symfile.c (find_sym_fns): Add kludge for apollo like for rs/6000.
