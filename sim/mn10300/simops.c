@@ -2833,6 +2833,13 @@ void OP_F0FD (insn, extension)
 void OP_F0FE (insn, extension)
      unsigned long insn, extension;
 {
+  abort ();
+}
+
+/* syscall */
+void OP_F0FF (insn, extension)
+     unsigned long insn, extension;
+{
   /* We use this for simulated system calls; we may need to change
      it to a reserved instruction if we conflict with uses at
      Matsushita.  */
