@@ -1,3 +1,14 @@
+Thu Jun 24 16:55:05 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t11/list.exp:  For SVR4 xfails, match "*-*-sysv4*", not
+	"*-*-sysv4.*".
+
+Tue Jun 22 21:17:26 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t01/run.exp:  Start with a fresh gdb.
+	* gdb.t11/list.exp:  For SVR4 xfails, match on all versions of
+	SVR4.x.
+
 Mon Jun 21 15:23:22 1993  Fred Fish  (fnf@cygnus.com)
 
 	* {gdb.t01, gdb.t02, gdb.t03, gdb.t04, gdb.t05, gdb.t06, gdb.t07,
