@@ -1,3 +1,8 @@
+1998-08-01  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf32-mips.c (_bfd_mips_elf_section_from_shdr): Don't pass
+	".liblist" string through gettext.
+
 start-sanitize-armelf
 Fri Jul 31 16:38:14 1998  Catherine Moore  <clm@cygnus.com>
 
