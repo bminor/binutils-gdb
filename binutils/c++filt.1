@@ -1,0 +1,88 @@
+.\" Copyright (c) 1991 Free Software Foundation
+.\" See section COPYING for conditions for redistribution
+.TH c++filt 1 "June 1993" "cygnus support" "GNU Development Tools"
+.de BP
+.sp
+.ti \-.2i
+\(**
+..
+
+.SH NAME
+c++filt\(em\&demangles C++ symbols
+
+.SH SYNOPSIS
+.B c++filt
+[
+.B -_
+]
+
+.SH DESCRIPTION
+The C++ language provides function overloading, which means that you can
+write many functions with the same name (providing each takes parameters
+of different types).  All C++ function names are encoded into a
+low-level assembly label (in some circles this is described as
+@dfn{mangling}). The 
+.B c++filt
+program does the inverse mapping: it decodes (\fIdemangles\fR)
+low-level names into user-level names so that the linker can keep
+these overloaded functions from clashing.
+
+Every alphanumeric word (consisting of letters, digits, underscores,
+dollars, or periods) seen in the input is a potential label.  If the
+label decodes into a C++ name, the C++ name replaces the low-level
+name in the output.
+
+A typical use of 
+.B c++filt
+is to pipe the output of 
+.B nm
+though it, using 
+.B c++filt
+as a filter:
+.RS
+.B nm \fIobjfile\fB | c++filt
+.RE
+
+You can also use
+.B c++filt
+to decipher individual symbols by specifying these symbols on the
+command line.
+
+All results are printed on the standard output.
+
+Note that on some systems, both the C and C++ compilers put an
+underscore in front of every name.  (I.e. the C name 
+.B foo
+gets the low-level name 
+.BR _foo .)
+To remove the leading underscore, specify the option
+.B -_
+on the command line.
+
+.SH "SEE ALSO"
+.RB "`\|" binutils "\|'" 
+entry in 
+.B
+info\c
+\&; 
+.I
+The GNU Binary Utilities\c
+\&, Roland H. Pesch (June 1993).
+
+.SH COPYING
+Copyright (c) 1993 Free Software Foundation, Inc.
+.PP
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+.PP
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the
+entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+.PP
+Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions, except that this permission notice may be included in
+translations approved by the Free Software Foundation instead of in
+the original English.

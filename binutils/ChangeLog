@@ -1,3 +1,15 @@
+Wed Jun  2 18:30:24 1993  Jeffrey Osier  (jeffrey@cygnus.com)
+
+	* c++filt.1, objcopy.1:  new man pages
+
+Fri May 28 15:01:24 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in (install):  Also install ar and ranlib in
+	$(tooldir)/bin;  needed for building libgcc.a.
+	* objdump.c (objdump_print_address):  Fix the check
+	"coincidental" label matches by dis-allowing undefined
+	or com symbols.
+
 Thu May 27 16:58:31 1993  Jeffrey Osier  (jeffrey@cygnus.com)
 
         * biutils.texi:  revised c++filt chapter
