@@ -45,10 +45,10 @@ budbg.h
 coffdump.c
 coffgrok.c
 coffgrok.h
-config.h-vms
 config.in
 configure
 configure.bat
+configure.com
 configure.in
 cxxfilt.man
 dlltool.c
