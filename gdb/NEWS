@@ -5,12 +5,42 @@
 
 * New native configurations
 
+HP-UX 10.20					hppa*-*-hpux10.20
+HP-UX 11.x					hppa*-*-hpux11.0*
 M68K Linux					m68*-*-linux*
 
 * New targets
 
 Fujitsu FR30					fr30-*-elf*
 Mitsubishi D30V					d30v-*-*
+
+* Readline 2.2
+
+GDB now uses readline 2.2.
+
+* HP-UX Support
+
+Thanks to a major code donation from HP, GDB now has much more
+extensive support for HP-UX.  Added features include shared library
+support, kernel threads and hardware watchpoints for 11.00, support
+for HP's ANSI C and C++ compilers, and compatibility mode for xdb
+commands.
+
+* Catchpoints
+
+HP's donation includes the new concept of catchpoints, which is a
+generalization of the old catch command.  On HP-UX, it is now possible
+to catch exec, fork, and vfork, as well as library loading.
+
+* Debugging Across Forks
+
+On HP-UX, you can choose which process to debug when a fork() happens
+in the inferior.
+
+* TUI
+
+HP has donated a curses-based terminal user interface (TUI).  To get
+it, build with --enable-tui.
 
 * GDB Remote protocol
 
