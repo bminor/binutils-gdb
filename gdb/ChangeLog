@@ -1,11 +1,20 @@
 2001-12-17  Fernando Nasser  <fnasser@redhat.com>
 
 	From Richard Earnshaw <rearnsha@arm.com>:
-        * config/arm/nbsd.mh, config/arm/nbsd.mt, config/arm/tm-nbsd.h,
-        config/arm/nm-nbsd.h, config/arm/xm-nbsd.h: New files.
-        * armbsd-nat.c: New file.
-        * Makefile.in: Build it.
-        * configure.host, configure.tgt: Support NetBSD/arm.
+	* arm-tdep.c (arm_software_single_step): New function. Implements
+	software single-stepping for ARM targets.
+	(arm_get_next_pc, thumb_get_next_pc, bitcount, shifted_reg_val): Only
+	needed for software single-stepping.
+	* config/arm/tm-arm.h: Activate SOFTWARE_SINGLE_STEP_P.
+
+2001-12-17  Fernando Nasser  <fnasser@redhat.com>
+
+	From Richard Earnshaw <rearnsha@arm.com>:
+	* config/arm/nbsd.mh, config/arm/nbsd.mt, config/arm/tm-nbsd.h,
+	config/arm/nm-nbsd.h, config/arm/xm-nbsd.h: New files.
+	* armbsd-nat.c: New file.
+	* Makefile.in: Build it.
+	* configure.host, configure.tgt: Support NetBSD/arm.
 
 2001-12-17  Corinna Vinschen  <vinschen@redhat.com>
 
