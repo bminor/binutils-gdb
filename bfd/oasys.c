@@ -1484,6 +1484,7 @@ oasys_sizeof_headers (abfd, exec)
   ((boolean (*) \
     PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int))) \
    bfd_true)
+#define oasys_read_ar_hdr bfd_nullvoidptr
 #define oasys_update_armap_timestamp bfd_true
 
 #define oasys_bfd_is_local_label bfd_generic_is_local_label
@@ -1495,6 +1496,9 @@ oasys_sizeof_headers (abfd, exec)
 #define oasys_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
 
 #define oasys_set_arch_mach bfd_default_set_arch_mach
+
+#define oasys_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
 
 #define oasys_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
@@ -1519,7 +1523,6 @@ const bfd_target oasys_vec =
   0,				/* leading underscore */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  1,				/* minimum alignment */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */

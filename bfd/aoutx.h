@@ -497,7 +497,9 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   obj_symbol_entry_size (abfd) = EXTERNAL_NLIST_SIZE;
 
   obj_aout_external_syms (abfd) = NULL;
+  bfd_init_window (&obj_aout_sym_window (abfd));
   obj_aout_external_strings (abfd) = NULL;
+  bfd_init_window (&obj_aout_string_window (abfd));
   obj_aout_sym_hashes (abfd) = NULL;
 
   if (! NAME(aout,make_sections) (abfd))
@@ -1226,24 +1228,11 @@ aout_get_external_symbols (abfd)
 
       count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
 
-      /* We allocate using malloc to make the values easy to free
-	 later on.  If we put them on the obstack it might not be
-	 possible to free them.  */
-      syms = ((struct external_nlist *)
-	      malloc ((size_t) count * EXTERNAL_NLIST_SIZE));
-      if (syms == (struct external_nlist *) NULL && count != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
-
-      if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-	  || (bfd_read (syms, 1, exec_hdr (abfd)->a_syms, abfd)
-	      != exec_hdr (abfd)->a_syms))
-	{
-	  free (syms);
-	  return false;
-	}
+      if (bfd_get_file_window (abfd,
+			       obj_sym_filepos (abfd), exec_hdr (abfd)->a_syms,
+			       &obj_aout_sym_window (abfd), 1) == false)
+	return false;
+      syms = (struct external_nlist *) obj_aout_sym_window (abfd).data;
 
       obj_aout_external_syms (abfd) = syms;
       obj_aout_external_sym_count (abfd) = count;
@@ -1263,28 +1252,25 @@ aout_get_external_symbols (abfd)
 	return false;
       stringsize = GET_WORD (abfd, string_chars);
 
-      strings = (char *) malloc ((size_t) stringsize + 1);
-      if (strings == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
-
-      /* Skip space for the string count in the buffer for convenience
-	 when using indexes.  */
-      if (bfd_read (strings + BYTES_IN_WORD, 1, stringsize - BYTES_IN_WORD,
-		    abfd)
-	  != stringsize - BYTES_IN_WORD)
-	{
-	  free (strings);
-	  return false;
-	}
+      if (bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize,
+			       &obj_aout_string_window (abfd), 1) == false)
+	return false;
+      strings = (char *) obj_aout_string_window (abfd).data;
 
       /* Ensure that a zero index yields an empty string.  */
       strings[0] = '\0';
 
-      /* Sanity preservation.  */
-      strings[stringsize] = '\0';
+      /* Using the "window" interface, we don't know that there's
+	 writeable storage after the last byte of the string table.
+	 Besides, every string in the string table should be null
+	 terminated.  Check it here so the application doesn't crash,
+	 but don't expend huge effort trying to correct a broken
+	 object file.  */
+      if (stringsize > BYTES_IN_WORD && strings[stringsize - 1] != 0)
+	{
+	  fprintf (stderr, "string table missing ending null\n");
+	  strings[stringsize - 1] = 0;
+	}
 
       obj_aout_external_strings (abfd) = strings;
       obj_aout_external_string_size (abfd) = stringsize;
@@ -1755,7 +1741,7 @@ NAME(aout,slurp_symbol_table) (abfd)
   if (old_external_syms == (struct external_nlist *) NULL
       && obj_aout_external_syms (abfd) != (struct external_nlist *) NULL)
     {
-      free (obj_aout_external_syms (abfd));
+      bfd_free_window (&obj_aout_sym_window (abfd));
       obj_aout_external_syms (abfd) = NULL;
     }
 
@@ -2784,8 +2770,10 @@ NAME(aout,bfd_free_cached_info) (abfd)
 
 #define BFCI_FREE(x) if (x != NULL) { free (x); x = NULL; }
   BFCI_FREE (obj_aout_symbols (abfd));
-  BFCI_FREE (obj_aout_external_syms (abfd));
-  BFCI_FREE (obj_aout_external_strings (abfd));
+  obj_aout_external_syms (abfd) = 0;
+  bfd_free_window (&obj_aout_sym_window (abfd));
+  bfd_free_window (&obj_aout_string_window (abfd));
+  obj_aout_external_strings (abfd) = 0;
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     BFCI_FREE (o->relocation);
 #undef BFCI_FREE
@@ -2957,12 +2945,12 @@ aout_link_free_symbols (abfd)
 {
   if (obj_aout_external_syms (abfd) != (struct external_nlist *) NULL)
     {
-      free ((PTR) obj_aout_external_syms (abfd));
+      bfd_free_window (&obj_aout_sym_window (abfd));
       obj_aout_external_syms (abfd) = (struct external_nlist *) NULL;
     }
   if (obj_aout_external_strings (abfd) != (char *) NULL)
     {
-      free ((PTR) obj_aout_external_strings (abfd));
+      bfd_free_window (&obj_aout_string_window (abfd));
       obj_aout_external_strings (abfd) = (char *) NULL;
     }
   return true;

@@ -8,6 +8,40 @@ Sun Nov  5 21:44:13 1995  Ken Raeburn  <raeburn@cygnus.com>
 	* ecoff.c (_bfd_ecoff_slurp_armap): Cast _bfd_read_ar_hdr return
 	value.
 
+	Permit use of mmap when available:
+
+	* configure.in: Check for mmap, madvise, mprotect.
+	* config.in, configure: Regenerated.
+
+	* libbfd.c (struct _bfd_window_internal): Define type.
+	(bfd_init_window, bfd_free_window, bfd_get_file_window): New
+	functions.
+	(ok_to_map): New static variable for debugging.
+	(_bfd_generic_get_section_contents_in_window): New function.
+	* bfd-in.h (bfd_window_internal): Declare type.
+	(bfd_window): Define type.
+	(bfd_init_window, bfd_free_window, bfd_get_file_window): Declare.
+	* libbfd-in.h (_bfd_generic_get_section_contents_in_window):
+	Declare.
+
+	* libaout.h (struct aoutdata): Add two window fields.
+	(obj_aout_sym_window, obj_aout_string_window): New macros.
+	* aoutx.h (some_aout_object_p): Initialize windows.
+	(aout_get_external_symbols): Get symbol data and strings in
+	windows instead of explicitly allocated buffers.
+	(slurp_symbol_table): Free window instead of memory.
+	(bfd_free_cached_info): Release windows instead of freeing storage
+	directly.
+	(aout_link_free_symbols): Ditto.
+
+	* targets.c (bfd_target): Add new field for
+	get_section_contents_in_window.
+	(BFD_JUMP_TABLE_GENERIC): Updated.
+	* aout-adobe.c, aout-target.h, binary.c, bout.c, coff-alpha.c,
+	coff-mips.c, elfxx-target.h, i386msdos.c, i386os9k.c, ieee.c,
+	libcoff-in.h, oasys.c, srec.c, tekhex.c, versados.c: Added new
+	macros for get_section_contents_in_window field.
+
 Sat Nov  4 12:23:26 1995  Fred Fish  <fnf@cygnus.com>
 
 	* core.c: Renamed to corefile.c

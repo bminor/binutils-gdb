@@ -246,7 +246,9 @@ The general target vector.
 .CAT(NAME,_close_and_cleanup),\
 .CAT(NAME,_bfd_free_cached_info),\
 .CAT(NAME,_new_section_hook),\
-.CAT(NAME,_get_section_contents)
+.CAT(NAME,_get_section_contents),\
+.CAT(NAME,_get_section_contents_in_window)
+.
 .  {* Called when the BFD is being closed to do any necessary cleanup.  *}
 .  boolean       (*_close_and_cleanup) PARAMS ((bfd *));
 .  {* Ask the BFD to free all cached information.  *}
@@ -256,6 +258,9 @@ The general target vector.
 .  {* Read the contents of a section.  *}
 .  boolean       (*_bfd_get_section_contents) PARAMS ((bfd *, sec_ptr, PTR, 
 .                                            file_ptr, bfd_size_type));
+.  boolean       (*_bfd_get_section_contents_in_window)
+.                          PARAMS ((bfd *, sec_ptr, bfd_window *,
+.                                   file_ptr, bfd_size_type));
 .
 .  {* Entry points to copy private data.  *}
 .#define BFD_JUMP_TABLE_COPY(NAME)\
@@ -315,7 +320,7 @@ The general target vector.
 .                              struct orl *map,
 .                              unsigned int orl_count, 
 .                              int stridx));
-.  PTR (*_bfd_read_ar_hdr) PARAMS ((bfd *));
+.  PTR (*_bfd_read_ar_hdr_fn) PARAMS ((bfd *));
 .  bfd *    (*openr_next_archived_file) PARAMS ((bfd *arch, bfd *prev));
 .  int      (*_bfd_stat_arch_elt) PARAMS ((bfd *, struct stat *));
 .  boolean  (*_bfd_update_armap_timestamp) PARAMS ((bfd *));

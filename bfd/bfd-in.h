@@ -600,6 +600,28 @@ extern boolean bfd_sunos_size_dynamic_sections
 extern boolean bfd_linux_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
+/* mmap hacks */
+
+struct _bfd_window_internal;
+typedef struct _bfd_window_internal bfd_window_internal;
+
+typedef struct _bfd_window {
+  /* What the user asked for.  */
+  PTR data;
+  bfd_size_type size;
+  /* The actual window used by BFD.  Small user-requested read-only
+     regions sharing a page may share a single window into the object
+     file.  Read-write versions shouldn't until I've fixed things to
+     keep track of which portions have been claimed by the
+     application; don't want to give the same region back when the
+     application wants two writable copies!  */
+  struct _bfd_window_internal *i;
+} bfd_window;
+
+void bfd_init_window PARAMS ((bfd_window *));
+void bfd_free_window PARAMS ((bfd_window *));
+int bfd_get_file_window PARAMS ((bfd *, file_ptr, bfd_size_type, bfd_window *, int));
+
 /* XCOFF support routines for the linker.  */
 
 extern boolean bfd_xcoff_link_record_set

@@ -528,6 +528,10 @@ test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"
 test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selarchs}'"
 AC_SUBST(tdefaults)
 
+dnl AC_CHECK_HEADERS(sys/mman.h)
+AC_FUNC_MMAP
+AC_CHECK_FUNCS(madvise mprotect)
+
 rm -f doc/config.status
 AC_OUTPUT(Makefile doc/Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])

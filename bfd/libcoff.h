@@ -314,6 +314,9 @@ extern boolean _bfd_coff_generic_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
 
+#define coff_get_section_contents_in_window \
+  _bfd_generic_get_section_contents_in_window
+
 /* Functions in xcofflink.c.  */
 
 extern struct bfd_link_hash_table *_bfd_xcoff_bfd_link_hash_table_create
