@@ -1,3 +1,16 @@
+Fri Feb 17 12:43:47 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (md_pseudo_table): Don't redefine byte under
+	ELF.
+	(ppc_elf_cons): Don't support @pcrel any more, since DIFF_EXPR_OK
+	allows the normal expressions to generate it.
+	(md_apply_fix): Convert BFD_RELOC_32 with pcrel bit set into
+	BFD_RELOC_32_PCREL.  Abort if either BFD_RELOC_16 or BFD_RELOC_8
+	need PC relative relocations.
+
+	* config/tc-ppc.h (DIFF_EXPR_OK): Define to allow PC relative
+	expressions to be handled.
+
 Thu Feb 16 14:30:13 1995  Doug Evans  <dje@cygnus.com>
 
 	* expr.c (operand): Move md_operand handling to default case
