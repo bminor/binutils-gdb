@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This module provides three functions: dbx_symfile_init,
    which initializes to read a symbol file; dbx_new_init, which 
@@ -65,10 +65,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
 
-#if !defined (SEEK_SET)
-#define SEEK_SET 0
-#define SEEK_CUR 1
-#endif
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
@@ -546,6 +542,7 @@ dbx_symfile_read (objfile, section_offsets, mainline)
     ((0 == strncmp (bfd_get_target (objfile->obfd), "elf", 3))
      || (0 == strncmp (bfd_get_target (objfile->obfd), "som", 3))
      || (0 == strncmp (bfd_get_target (objfile->obfd), "coff", 4))
+     || (0 == strncmp (bfd_get_target (objfile->obfd), "pe", 2))
      || (0 == strncmp (bfd_get_target (objfile->obfd), "nlm", 3)));
 
   sym_bfd = objfile->obfd;

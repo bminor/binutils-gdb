@@ -1,3 +1,8 @@
+Tue Nov 28 15:25:28 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* dbxread.c (dbx_symfile_read): Set block_address_function_relative
+	for `pe' format files.
+
 Tue Nov 28 11:17:47 1995  Fred Fish  <fnf@cygnus.com>
 
 	* magic.h:  Renamed to gmagic.h to avoid <magic.h> conflict.
