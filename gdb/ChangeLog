@@ -1,3 +1,11 @@
+2002-11-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (FRAME_ARGS_ADDRESS, FRAME_LOCALS_ADDRESS): Change
+	default to get_frame_base.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* arch-utils.c (default_frame_address): Delete function.
+	* arch-utils.h (default_frame_address): Delete declaration
+
 2002-11-24  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* varobj.c (find_frame_addr_in_frame_chain):

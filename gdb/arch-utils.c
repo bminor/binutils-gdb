@@ -313,13 +313,6 @@ no_op_reg_to_regnum (int reg)
   return reg;
 }
 
-/* For use by frame_args_address and frame_locals_address.  */
-CORE_ADDR
-default_frame_address (struct frame_info *fi)
-{
-  return fi->frame;
-}
-
 /* Default prepare_to_procced().  */
 int
 default_prepare_to_proceed (int select_it)
