@@ -1,3 +1,9 @@
+Mon Jan 29 00:05:01 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* builtins.ch, builtins.exp: Enhance test case.
+
+	* extstruct.ch, extstruct-grt.ch, extstruct.exp: New test case.
+
 Tue Jan 23 16:57:13 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* enum.ch, enum.exp:  New test case (covers PRs 8869 and 8870).

@@ -16,6 +16,10 @@ DCL v_set m_set INIT := e3;
 SYNMODE m_set_range = m_set(e2:e5);
 DCL v_set_range m_set_range INIT := e3;
 
+SYNMODE m_numbered_set = SET (n1 = 25, n2 = 22, n3 = 35, n4 = 33,
+			      n5 = 45, n6 = 43);
+DCL v_numbered_set m_numbered_set INIT := n3;
+
 SYNMODE m_char_range = CHAR('A':'Z');
 DCL v_char_range m_char_range INIT := 'G';
 
@@ -50,6 +54,9 @@ DCL v_int_arr ARRAY (INT) BYTE;
 
 SYNMODE m_set_arr = ARRAY (m_set) BYTE;
 DCL v_set_arr ARRAY (m_set) BYTE;
+
+SYNMODE m_numbered_set_arr = ARRAY (m_numbered_set) BYTE;
+DCL v_numbered_set_arr ARRAY (m_numbered_set) BYTE;
 
 SYNMODE m_char_range_arr = ARRAY (m_char_range) BYTE;
 DCL v_char_range_arr ARRAY (m_char_range) BYTE;

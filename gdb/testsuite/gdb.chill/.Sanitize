@@ -36,6 +36,9 @@ configure
 configure.in
 enum.ch
 enum.exp
+extstruct.ch
+extstruct-grt.ch
+extstruct.exp
 func1.ch
 misc.ch
 misc.exp
