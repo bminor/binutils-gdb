@@ -41,26 +41,19 @@ i386bsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
   return (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end);
 }
 
-/* Assuming FRAME is for a BSD sigtramp routine, return the address of
-   the associated sigcontext structure.
+/* Assuming NEXT_FRAME is for a frame following a BSD sigtramp
+   routine, return the address of the associated sigcontext structure.  */
 
-   Note: This function is used for Solaris 2 too, so don't make it
-   static.  */
-
-CORE_ADDR
-i386bsd_sigcontext_addr (struct frame_info *frame)
+static CORE_ADDR
+i386bsd_sigcontext_addr (struct frame_info *next_frame)
 {
-  struct frame_info *next_frame = get_next_frame (frame);
+  char buf[4];
+  CORE_ADDR sp;
 
-  if (next_frame)
-    /* If this isn't the top frame, the next frame must be for the
-       signal handler itself.  A pointer to the sigcontext structure
-       is passed as the third argument to the signal handler.  */
-    return read_memory_unsigned_integer (get_frame_base (next_frame) + 16, 4);
+  frame_unwind_register (next_frame, SP_REGNUM, buf);
+  sp = extract_address (buf, 4);
 
-  /* This is the top frame.  We'll have to find the address of the
-     sigcontext structure by looking at the stack pointer.  */
-  return read_memory_unsigned_integer (read_register (SP_REGNUM) + 8, 4);
+  return read_memory_unsigned_integer (sp + 8, 4);
 }
 
 /* Return the start address of the sigtramp routine.  */

@@ -23,6 +23,8 @@
 #include "defs.h"
 #include "gdb_string.h"
 #include "frame.h"
+#include "frame-base.h"
+#include "frame-unwind.h"
 #include "inferior.h"
 #include "gdbcore.h"
 #include "objfiles.h"
@@ -43,6 +45,16 @@
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
+
+/* Register numbers of various important registers.  */
+
+#define I386_EAX_REGNUM		0 /* %eax */
+#define I386_EDX_REGNUM		2 /* %edx */
+#define I386_ESP_REGNUM		4 /* %esp */
+#define I386_EBP_REGNUM		5 /* %ebp */
+#define I386_EIP_REGNUM		8 /* %eip */
+#define I386_EFLAGS_REGNUM	9 /* %eflags */
+#define I386_ST0_REGNUM		16 /* %st(0) */
 
 /* Names of the registers.  The first 10 registers match the register
    numbering scheme used by GCC for stabs and DWARF.  */
@@ -140,7 +152,7 @@ i386_stab_reg_to_regnum (int reg)
   /* This implements what GCC calls the "default" register map.  */
   if (reg >= 0 && reg <= 7)
     {
-      /* General registers.  */
+      /* General-purpose registers.  */
       return reg;
     }
   else if (reg >= 12 && reg <= 19)
@@ -173,7 +185,7 @@ i386_dwarf_reg_to_regnum (int reg)
      numbers the floating point registers differently.  */
   if (reg >= 0 && reg <= 9)
     {
-      /* General registers.  */
+      /* General-purpose registers.  */
       return reg;
     }
   else if (reg >= 11 && reg <= 18)
@@ -203,336 +215,10 @@ static const char *valid_flavors[] =
   NULL
 };
 static const char *disassembly_flavor = att_flavor;
-
-/* Stdio style buffering was used to minimize calls to ptrace, but
-   this buffering did not take into account that the code section
-   being accessed may not be an even number of buffers long (even if
-   the buffer is only sizeof(int) long).  In cases where the code
-   section size happened to be a non-integral number of buffers long,
-   attempting to read the last buffer would fail.  Simply using
-   target_read_memory and ignoring errors, rather than read_memory, is
-   not the correct solution, since legitimate access errors would then
-   be totally ignored.  To properly handle this situation and continue
-   to use buffering would require that this code be able to determine
-   the minimum code section size granularity (not the alignment of the
-   section itself, since the actual failing case that pointed out this
-   problem had a section alignment of 4 but was not a multiple of 4
-   bytes long), on a target by target basis, and then adjust it's
-   buffer size accordingly.  This is messy, but potentially feasible.
-   It probably needs the bfd library's help and support.  For now, the
-   buffer size is set to 1.  (FIXME -fnf) */
-
-#define CODESTREAM_BUFSIZ 1	/* Was sizeof(int), see note above.  */
-static CORE_ADDR codestream_next_addr;
-static CORE_ADDR codestream_addr;
-static unsigned char codestream_buf[CODESTREAM_BUFSIZ];
-static int codestream_off;
-static int codestream_cnt;
-
-#define codestream_tell() (codestream_addr + codestream_off)
-#define codestream_peek() \
-  (codestream_cnt == 0 ? \
-   codestream_fill(1) : codestream_buf[codestream_off])
-#define codestream_get() \
-  (codestream_cnt-- == 0 ? \
-   codestream_fill(0) : codestream_buf[codestream_off++])
-
-static unsigned char
-codestream_fill (int peek_flag)
-{
-  codestream_addr = codestream_next_addr;
-  codestream_next_addr += CODESTREAM_BUFSIZ;
-  codestream_off = 0;
-  codestream_cnt = CODESTREAM_BUFSIZ;
-  read_memory (codestream_addr, (char *) codestream_buf, CODESTREAM_BUFSIZ);
-
-  if (peek_flag)
-    return (codestream_peek ());
-  else
-    return (codestream_get ());
-}
-
-static void
-codestream_seek (CORE_ADDR place)
-{
-  codestream_next_addr = place / CODESTREAM_BUFSIZ;
-  codestream_next_addr *= CODESTREAM_BUFSIZ;
-  codestream_cnt = 0;
-  codestream_fill (1);
-  while (codestream_tell () != place)
-    codestream_get ();
-}
-
-static void
-codestream_read (unsigned char *buf, int count)
-{
-  unsigned char *p;
-  int i;
-  p = buf;
-  for (i = 0; i < count; i++)
-    *p++ = codestream_get ();
-}
 
 
-/* If the next instruction is a jump, move to its target.  */
-
-static void
-i386_follow_jump (void)
-{
-  unsigned char buf[4];
-  long delta;
-
-  int data16;
-  CORE_ADDR pos;
-
-  pos = codestream_tell ();
-
-  data16 = 0;
-  if (codestream_peek () == 0x66)
-    {
-      codestream_get ();
-      data16 = 1;
-    }
-
-  switch (codestream_get ())
-    {
-    case 0xe9:
-      /* Relative jump: if data16 == 0, disp32, else disp16.  */
-      if (data16)
-	{
-	  codestream_read (buf, 2);
-	  delta = extract_signed_integer (buf, 2);
-
-	  /* Include the size of the jmp instruction (including the
-             0x66 prefix).  */
-	  pos += delta + 4;
-	}
-      else
-	{
-	  codestream_read (buf, 4);
-	  delta = extract_signed_integer (buf, 4);
-
-	  pos += delta + 5;
-	}
-      break;
-    case 0xeb:
-      /* Relative jump, disp8 (ignore data16).  */
-      codestream_read (buf, 1);
-      /* Sign-extend it.  */
-      delta = extract_signed_integer (buf, 1);
-
-      pos += delta + 2;
-      break;
-    }
-  codestream_seek (pos);
-}
-
-/* Find & return the amount a local space allocated, and advance the
-   codestream to the first register push (if any).
-
-   If the entry sequence doesn't make sense, return -1, and leave
-   codestream pointer at a random spot.  */
-
-static long
-i386_get_frame_setup (CORE_ADDR pc)
-{
-  unsigned char op;
-
-  codestream_seek (pc);
-
-  i386_follow_jump ();
-
-  op = codestream_get ();
-
-  if (op == 0x58)		/* popl %eax */
-    {
-      /* This function must start with
-
-	    popl %eax             0x58
-            xchgl %eax, (%esp)    0x87 0x04 0x24
-         or xchgl %eax, 0(%esp)   0x87 0x44 0x24 0x00
-
-	 (the System V compiler puts out the second `xchg'
-	 instruction, and the assembler doesn't try to optimize it, so
-	 the 'sib' form gets generated).  This sequence is used to get
-	 the address of the return buffer for a function that returns
-	 a structure.  */
-      int pos;
-      unsigned char buf[4];
-      static unsigned char proto1[3] = { 0x87, 0x04, 0x24 };
-      static unsigned char proto2[4] = { 0x87, 0x44, 0x24, 0x00 };
-
-      pos = codestream_tell ();
-      codestream_read (buf, 4);
-      if (memcmp (buf, proto1, 3) == 0)
-	pos += 3;
-      else if (memcmp (buf, proto2, 4) == 0)
-	pos += 4;
-
-      codestream_seek (pos);
-      op = codestream_get ();	/* Update next opcode.  */
-    }
-
-  if (op == 0x68 || op == 0x6a)
-    {
-      /* This function may start with
-
-            pushl constant
-            call _probe
-	    addl $4, %esp
-	   
-	 followed by
-
-            pushl %ebp
-
-	 etc.  */
-      int pos;
-      unsigned char buf[8];
-
-      /* Skip past the `pushl' instruction; it has either a one-byte 
-         or a four-byte operand, depending on the opcode.  */
-      pos = codestream_tell ();
-      if (op == 0x68)
-	pos += 4;
-      else
-	pos += 1;
-      codestream_seek (pos);
-
-      /* Read the following 8 bytes, which should be "call _probe" (6
-         bytes) followed by "addl $4,%esp" (2 bytes).  */
-      codestream_read (buf, sizeof (buf));
-      if (buf[0] == 0xe8 && buf[6] == 0xc4 && buf[7] == 0x4)
-	pos += sizeof (buf);
-      codestream_seek (pos);
-      op = codestream_get ();	/* Update next opcode.  */
-    }
-
-  if (op == 0x55)		/* pushl %ebp */
-    {
-      /* Check for "movl %esp, %ebp" -- can be written in two ways.  */
-      switch (codestream_get ())
-	{
-	case 0x8b:
-	  if (codestream_get () != 0xec)
-	    return -1;
-	  break;
-	case 0x89:
-	  if (codestream_get () != 0xe5)
-	    return -1;
-	  break;
-	default:
-	  return -1;
-	}
-      /* Check for stack adjustment 
-
-           subl $XXX, %esp
-
-	 NOTE: You can't subtract a 16 bit immediate from a 32 bit
-	 reg, so we don't have to worry about a data16 prefix.  */
-      op = codestream_peek ();
-      if (op == 0x83)
-	{
-	  /* `subl' with 8 bit immediate.  */
-	  codestream_get ();
-	  if (codestream_get () != 0xec)
-	    /* Some instruction starting with 0x83 other than `subl'.  */
-	    {
-	      codestream_seek (codestream_tell () - 2);
-	      return 0;
-	    }
-	  /* `subl' with signed byte immediate (though it wouldn't
-	     make sense to be negative).  */
-	  return (codestream_get ());
-	}
-      else if (op == 0x81)
-	{
-	  char buf[4];
-	  /* Maybe it is `subl' with a 32 bit immedediate.  */
-	  codestream_get ();
-	  if (codestream_get () != 0xec)
-	    /* Some instruction starting with 0x81 other than `subl'.  */
-	    {
-	      codestream_seek (codestream_tell () - 2);
-	      return 0;
-	    }
-	  /* It is `subl' with a 32 bit immediate.  */
-	  codestream_read ((unsigned char *) buf, 4);
-	  return extract_signed_integer (buf, 4);
-	}
-      else
-	{
-	  return 0;
-	}
-    }
-  else if (op == 0xc8)
-    {
-      char buf[2];
-      /* `enter' with 16 bit unsigned immediate.  */
-      codestream_read ((unsigned char *) buf, 2);
-      codestream_get ();	/* Flush final byte of enter instruction.  */
-      return extract_unsigned_integer (buf, 2);
-    }
-  return (-1);
-}
-
-/* Signal trampolines don't have a meaningful frame.  The frame
-   pointer value we use is actually the frame pointer of the calling
-   frame -- that is, the frame which was in progress when the signal
-   trampoline was entered.  GDB mostly treats this frame pointer value
-   as a magic cookie.  We detect the case of a signal trampoline by
-   testing for get_frame_type() == SIGTRAMP_FRAME, which is set based
-   on PC_IN_SIGTRAMP.
-
-   When a signal trampoline is invoked from a frameless function, we
-   essentially have two frameless functions in a row.  In this case,
-   we use the same magic cookie for three frames in a row.  We detect
-   this case by seeing whether the next frame is a SIGTRAMP_FRAME,
-   and, if it does, checking whether the current frame is actually
-   frameless.  In this case, we need to get the PC by looking at the
-   SP register value stored in the signal context.
-
-   This should work in most cases except in horrible situations where
-   a signal occurs just as we enter a function but before the frame
-   has been set up.  Incidentally, that's just what happens when we
-   call a function from GDB with a signal pending (there's a test in
-   the testsuite that makes this happen).  Therefore we pretend that
-   we have a frameless function if we're stopped at the start of a
-   function.  */
-
-/* Return non-zero if we're dealing with a frameless signal, that is,
-   a signal trampoline invoked from a frameless function.  */
-
-int
-i386_frameless_signal_p (struct frame_info *frame)
-{
-  return (get_next_frame (frame)
-	  && get_frame_type (get_next_frame (frame)) == SIGTRAMP_FRAME
-	  && (frameless_look_for_prologue (frame)
-	      || get_frame_pc (frame) == get_frame_func (frame)));
-}
-
-/* Return the chain-pointer for FRAME.  In the case of the i386, the
-   frame's nominal address is the address of a 4-byte word containing
-   the calling frame's address.  */
-
-static CORE_ADDR
-i386_frame_chain (struct frame_info *frame)
-{
-  if (pc_in_dummy_frame (get_frame_pc (frame)))
-    return get_frame_base (frame);
-
-  if (get_frame_type (frame) == SIGTRAMP_FRAME
-      || i386_frameless_signal_p (frame))
-    return get_frame_base (frame);
-
-  if (! inside_entry_file (get_frame_pc (frame)))
-    return read_memory_unsigned_integer (get_frame_base (frame), 4);
-
-  return 0;
-}
-
 /* Determine whether the function invocation represented by FRAME does
-   not have a from on the stack associated with it.  If it does not,
+   not have a frame on the stack associated with it.  If it does not,
    return non-zero, otherwise return zero.  */
 
 static int
@@ -544,71 +230,358 @@ i386_frameless_function_invocation (struct frame_info *frame)
   return frameless_look_for_prologue (frame);
 }
 
-/* Assuming FRAME is for a sigtramp routine, return the saved program
-   counter.  */
+/* Use the program counter to determine the contents and size of a
+   breakpoint instruction.  Return a pointer to a string of bytes that
+   encode a breakpoint instruction, store the length of the string in
+   *LEN and optionally adjust *PC to point to the correct memory
+   location for inserting the breakpoint.
 
-static CORE_ADDR
-i386_sigtramp_saved_pc (struct frame_info *frame)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  CORE_ADDR addr;
+   On the i386 we have a single breakpoint that fits in a single byte
+   and can be inserted anywhere.
 
-  addr = tdep->sigcontext_addr (frame);
-  return read_memory_unsigned_integer (addr + tdep->sc_pc_offset, 4);
-}
-
-/* Assuming FRAME is for a sigtramp routine, return the saved stack
-   pointer.  */
-
-static CORE_ADDR
-i386_sigtramp_saved_sp (struct frame_info *frame)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  CORE_ADDR addr;
-
-  addr = tdep->sigcontext_addr (frame);
-  return read_memory_unsigned_integer (addr + tdep->sc_sp_offset, 4);
-}
-
-/* Return the saved program counter for FRAME.  */
-
-static CORE_ADDR
-i386_frame_saved_pc (struct frame_info *frame)
-{
-  if (pc_in_dummy_frame (get_frame_pc (frame)))
-    {
-      ULONGEST pc;
-
-      frame_unwind_unsigned_register (frame, PC_REGNUM, &pc);
-      return pc;
-    }
-
-  if (get_frame_type (frame) == SIGTRAMP_FRAME)
-    return i386_sigtramp_saved_pc (frame);
-
-  if (i386_frameless_signal_p (frame))
-    {
-      CORE_ADDR sp = i386_sigtramp_saved_sp (get_next_frame (frame));
-      return read_memory_unsigned_integer (sp, 4);
-    }
-
-  return read_memory_unsigned_integer (get_frame_base (frame) + 4, 4);
-}
-
-/* Immediately after a function call, return the saved pc.  */
-
-static CORE_ADDR
-i386_saved_pc_after_call (struct frame_info *frame)
-{
-  if (get_frame_type (frame) == SIGTRAMP_FRAME)
-    return i386_sigtramp_saved_pc (frame);
-
-  return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
-}
-
-/* Parse the first few instructions the function to see what registers
-   were stored.
+   This function is 64-bit safe.  */
    
+static const unsigned char *
+i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static unsigned char break_insn[] = { 0xcc };	/* int 3 */
+  
+  *len = sizeof (break_insn);
+  return break_insn;
+}
+
+#ifdef I386_REGNO_TO_SYMMETRY
+#error "The Sequent Symmetry is no longer supported."
+#endif
+
+/* According to the System V ABI, the registers %ebp, %ebx, %edi, %esi
+   and %esp "belong" to the calling function.  Therefore these
+   registers should be saved if they're going to be modified.  */
+
+/* The maximum number of saved registers.  This should include all
+   registers mentioned above, and %eip.  */
+#define I386_NUM_SAVED_REGS	9
+
+struct i386_frame_cache
+{
+  /* Base address.  */
+  CORE_ADDR base;
+  CORE_ADDR sp_offset;
+  CORE_ADDR pc;
+
+  /* Saved registers.  */
+  CORE_ADDR saved_regs[I386_NUM_SAVED_REGS];
+  CORE_ADDR saved_sp;
+  int pc_in_eax;
+
+  /* Stack space reserved for local variables.  */
+  long locals;
+};
+
+/* Allocate and initialize a frame cache.  */
+
+static struct i386_frame_cache *
+i386_alloc_frame_cache (void)
+{
+  struct i386_frame_cache *cache;
+  int i;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct i386_frame_cache);
+
+  /* Base address.  */
+  cache->base = 0;
+  cache->sp_offset = -4;
+  cache->pc = 0;
+
+  /* Saved registers.  We initialize these to -1 since zero is a valid
+     offset (that's where %ebp is supposed to be stored).  */
+  for (i = 0; i < I386_NUM_SAVED_REGS; i++)
+    cache->saved_regs[i] = -1;
+  cache->saved_sp = 0;
+  cache->pc_in_eax = 0;
+
+  /* Frameless until proven otherwise.  */
+  cache->locals = -1;
+
+  return cache;
+}
+
+/* If the instruction at PC is a jump, return the address of its
+   target.  Otherwise, return PC.  */
+
+static CORE_ADDR
+i386_follow_jump (CORE_ADDR pc)
+{
+  unsigned char op;
+  long delta = 0;
+  int data16 = 0;
+
+  op = read_memory_unsigned_integer (pc, 1);
+  if (op == 0x66)
+    {
+      data16 = 1;
+      op = read_memory_unsigned_integer (pc + 1, 1);
+    }
+
+  switch (op)
+    {
+    case 0xe9:
+      /* Relative jump: if data16 == 0, disp32, else disp16.  */
+      if (data16)
+	{
+	  delta = read_memory_integer (pc + 2, 2);
+
+	  /* Include the size of the jmp instruction (including the
+             0x66 prefix).  */
+	  delta += 4;
+	}
+      else
+	{
+	  delta = read_memory_integer (pc + 1, 4);
+
+	  /* Include the size of the jmp instruction.  */
+	  delta += 5;
+	}
+      break;
+    case 0xeb:
+      /* Relative jump, disp8 (ignore data16).  */
+      delta = read_memory_integer (pc + data16 + 1, 1);
+
+      delta += data16 + 2;
+      break;
+    }
+
+  return pc + delta;
+}
+
+/* Check whether PC points at a prologue for a function returning a
+   structure or union.  If so, it updates CACHE and returns the
+   address of the first instruction after the code sequence that
+   removes the "hidden" argument from the stack or CURRENT_PC,
+   whichever is smaller.  Otherwise, return PC.  */
+
+static CORE_ADDR
+i386_analyze_struct_return (CORE_ADDR pc, CORE_ADDR current_pc,
+			    struct i386_frame_cache *cache)
+{
+  /* Functions that return a structure or union start with:
+
+         popl %eax             0x58
+         xchgl %eax, (%esp)    0x87 0x04 0x24
+      or xchgl %eax, 0(%esp)   0x87 0x44 0x24 0x00
+
+      (the System V compiler puts out the second `xchg'
+      instruction, and the assembler doesn't try to optimize it, so
+      the 'sib' form gets generated).  This sequence is used to get
+      the address of the return buffer for a function that returns
+      a structure.  */
+  static unsigned char proto1[3] = { 0x87, 0x04, 0x24 };
+  static unsigned char proto2[4] = { 0x87, 0x44, 0x24, 0x00 };
+  unsigned char buf[4];
+  unsigned char op;
+
+  if (current_pc <= pc)
+    return pc;
+
+  op = read_memory_unsigned_integer (pc, 1);
+
+  if (op != 0x58)		/* popl %eax */
+    return pc;
+
+  read_memory (pc + 1, buf, 4);
+  if (memcmp (buf, proto1, 3) != 0 && memcmp (buf, proto2, 4) != 0)
+    return pc;
+
+  if (current_pc == pc)
+    {
+      cache->sp_offset += 4;
+      return current_pc;
+    }
+
+  if (current_pc == pc + 1)
+    {
+      cache->pc_in_eax = 1;
+      return current_pc;
+    }
+  
+  if (buf[1] == proto1[1])
+    return pc + 4;
+  else
+    return pc + 5;
+}
+
+static CORE_ADDR
+i386_skip_probe (CORE_ADDR pc)
+{
+  /* A function may start with
+
+        pushl constant
+        call _probe
+	addl $4, %esp
+	   
+     followed by
+
+        pushl %ebp
+
+     etc.  */
+  unsigned char buf[8];
+  unsigned char op;
+
+  op = read_memory_unsigned_integer (pc, 1);
+
+  if (op == 0x68 || op == 0x6a)
+    {
+      int delta;
+
+      /* Skip past the `pushl' instruction; it has either a one-byte or a
+	 four-byte operand, depending on the opcode.  */
+      if (op == 0x68)
+	delta = 5;
+      else
+	delta = 2;
+
+      /* Read the following 8 bytes, which should be `call _probe' (6
+	 bytes) followed by `addl $4,%esp' (2 bytes).  */
+      read_memory (pc + delta, buf, sizeof (buf));
+      if (buf[0] == 0xe8 && buf[6] == 0xc4 && buf[7] == 0x4)
+	pc += delta + sizeof (buf);
+    }
+
+  return pc;
+}
+
+/* Check whether PC points at a code that sets up a new stack frame.
+   If so, it updates CACHE and returns the address of the first
+   instruction after the sequence that sets removes the "hidden"
+   argument from the stack or CURRENT_PC, whichever is smaller.
+   Otherwise, return PC.  */
+
+static CORE_ADDR
+i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
+			  struct i386_frame_cache *cache)
+{
+  unsigned char op;
+
+  if (current_pc <= pc)
+    return current_pc;
+
+  op = read_memory_unsigned_integer (pc, 1);
+
+  if (op == 0x55)		/* pushl %ebp */
+    {
+      /* Take into account that we've executed the `pushl %ebp' that
+	 starts this instruction sequence.  */
+      cache->saved_regs[FP_REGNUM] = 0;
+      cache->sp_offset += 4;
+
+      /* If that's all, return now.  */
+      if (current_pc <= pc + 1)
+	return current_pc;
+
+      /* Check for `movl %esp, %ebp' -- can be written in two ways.  */
+      op = read_memory_unsigned_integer (pc + 1, 1);
+      switch (op)
+	{
+	case 0x8b:
+	  if (read_memory_unsigned_integer (pc + 2, 1) != 0xec)
+	    return pc;
+	  break;
+	case 0x89:
+	  if (read_memory_unsigned_integer (pc + 2, 1) != 0xe5)
+	    return pc;
+	  break;
+	default:
+	  return pc;
+	}
+
+      /* OK, we actually have a frame.  We just don't know how large it is
+	 yet.  Set its size to zero.  We'll adjust it if necessary.  */
+      cache->locals = 0;
+
+      /* If that's all, return now.  */
+      if (current_pc <= pc + 3)
+	return current_pc;
+
+      /* Check for stack adjustment 
+
+	    subl $XXX, %esp
+
+	 NOTE: You can't subtract a 16 bit immediate from a 32 bit
+	 reg, so we don't have to worry about a data16 prefix.  */
+      op = read_memory_unsigned_integer (pc + 3, 1);
+      if (op == 0x83)
+	{
+	  /* `subl' with 8 bit immediate.  */
+	  if (read_memory_unsigned_integer (pc + 4, 1) != 0xec)
+	    /* Some instruction starting with 0x83 other than `subl'.  */
+	    return pc + 3;
+
+	  /* `subl' with signed byte immediate (though it wouldn't make
+	     sense to be negative).  */
+	  cache->locals = read_memory_integer (pc + 5, 1);
+	  return pc + 6;
+	}
+      else if (op == 0x81)
+	{
+	  /* Maybe it is `subl' with a 32 bit immedediate.  */
+	  if (read_memory_unsigned_integer (pc + 4, 1) != 0xec)
+	    /* Some instruction starting with 0x81 other than `subl'.  */
+	    return pc + 3;
+
+	  /* It is `subl' with a 32 bit immediate.  */
+	  cache->locals = read_memory_integer (pc + 5, 4);
+	  return pc + 9;
+	}
+      else
+	{
+	  /* Some instruction other than `subl'.  */
+	  return pc + 3;
+	}
+    }
+  else if (op == 0xc8)		/* enter $XXX */
+    {
+      cache->locals = read_memory_unsigned_integer (pc + 1, 2);
+      return pc + 4;
+    }
+
+  return pc;
+}
+
+/* Check whether PC points at code that saves registers on the stack.
+   If so, it updates CACHE and returns the address of the first
+   instruction after the register saves or CURRENT_PC, whichever is
+   smaller.  Otherwise, return PC.  */
+
+static CORE_ADDR
+i386_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
+			     struct i386_frame_cache *cache)
+{
+  if (cache->locals >= 0)
+    {
+      CORE_ADDR offset;
+      unsigned char op;
+      int i;
+
+      offset = - 4 - cache->locals;
+      for (i = 0; i < 8 && pc < current_pc; i++)
+	{
+	  op = read_memory_unsigned_integer (pc, 1);
+	  if (op < 0x50 || op > 0x57)
+	    break;
+
+	  cache->saved_regs[op - 0x50] = offset;
+	  offset -= 4;
+	  pc++;
+	}
+    }
+
+  return pc;
+}
+
+/* Do a full analysis of the prologue at PC and update CACHE
+   accordingly.  Bail out early if CURRENT_PC is reached.  Return the
+   address where the analysis stopped.
+
    We handle these cases:
 
    The startup sequence can be at the start of the function, or the
@@ -632,79 +605,43 @@ i386_saved_pc_after_call (struct frame_info *frame)
    If the setup sequence is at the end of the function, then the next
    instruction will be a branch back to the start.  */
 
-static void
-i386_frame_init_saved_regs (struct frame_info *fip)
+static CORE_ADDR
+i386_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
+		       struct i386_frame_cache *cache)
 {
-  long locals = -1;
-  unsigned char op;
-  CORE_ADDR addr;
-  CORE_ADDR pc;
-  int i;
-
-  if (get_frame_saved_regs (fip))
-    return;
-
-  frame_saved_regs_zalloc (fip);
-
-  pc = get_frame_func (fip);
-  if (pc != 0)
-    locals = i386_get_frame_setup (pc);
-
-  if (locals >= 0)
-    {
-      addr = get_frame_base (fip) - 4 - locals;
-      for (i = 0; i < 8; i++)
-	{
-	  op = codestream_get ();
-	  if (op < 0x50 || op > 0x57)
-	    break;
-#ifdef I386_REGNO_TO_SYMMETRY
-	  /* Dynix uses different internal numbering.  Ick.  */
-	  get_frame_saved_regs (fip)[I386_REGNO_TO_SYMMETRY (op - 0x50)] = addr;
-#else
-	  get_frame_saved_regs (fip)[op - 0x50] = addr;
-#endif
-	  addr -= 4;
-	}
-    }
-
-  get_frame_saved_regs (fip)[PC_REGNUM] = get_frame_base (fip) + 4;
-  get_frame_saved_regs (fip)[FP_REGNUM] = get_frame_base (fip);
+  pc = i386_follow_jump (pc);
+  pc = i386_analyze_struct_return (pc, current_pc, cache);
+  pc = i386_skip_probe (pc);
+  pc = i386_analyze_frame_setup (pc, current_pc, cache);
+  return i386_analyze_register_saves (pc, current_pc, cache);
 }
 
 /* Return PC of first real instruction.  */
 
 static CORE_ADDR
-i386_skip_prologue (CORE_ADDR pc)
+i386_skip_prologue (CORE_ADDR start_pc)
 {
+  static unsigned char pic_pat[6] =
+  {
+    0xe8, 0, 0, 0, 0,		/* call 0x0 */
+    0x5b,			/* popl %ebx */
+  };
+  struct i386_frame_cache cache;
+  CORE_ADDR pc;
   unsigned char op;
   int i;
-  static unsigned char pic_pat[6] =
-  { 0xe8, 0, 0, 0, 0,		/* call   0x0 */
-    0x5b,			/* popl   %ebx */
-  };
-  CORE_ADDR pos;
 
-  if (i386_get_frame_setup (pc) < 0)
-    return (pc);
+  cache.locals = -1;
+  pc = i386_analyze_prologue (start_pc, 0xffffffff, &cache);
+  if (cache.locals < 0)
+    return start_pc;
 
-  /* Found valid frame setup -- codestream now points to start of push
-     instructions for saving registers.  */
-
-  /* Skip over register saves.  */
-  for (i = 0; i < 8; i++)
-    {
-      op = codestream_peek ();
-      /* Break if not `pushl' instrunction.  */
-      if (op < 0x50 || op > 0x57)
-	break;
-      codestream_get ();
-    }
+  /* Found valid frame setup.  */
 
   /* The native cc on SVR4 in -K PIC mode inserts the following code
      to get the address of the global offset table (GOT) into register
      %ebx
-     
+
         call	0x0
 	popl    %ebx
         movl    %ebx,x(%ebp)    (optional)
@@ -714,110 +651,354 @@ i386_skip_prologue (CORE_ADDR pc)
      function), so we have to skip it to get to the first real
      instruction at the start of the function.  */
 
-  pos = codestream_tell ();
   for (i = 0; i < 6; i++)
     {
-      op = codestream_get ();
+      op = read_memory_unsigned_integer (pc + i, 1);
       if (pic_pat[i] != op)
 	break;
     }
   if (i == 6)
     {
-      unsigned char buf[4];
-      long delta = 6;
+      int delta = 6;
 
-      op = codestream_get ();
+      op = read_memory_unsigned_integer (pc + delta, 1);
+
       if (op == 0x89)		/* movl %ebx, x(%ebp) */
 	{
-	  op = codestream_get ();
+	  op = read_memory_unsigned_integer (pc + delta + 1, 1);
+
 	  if (op == 0x5d)	/* One byte offset from %ebp.  */
-	    {
-	      delta += 3;
-	      codestream_read (buf, 1);
-	    }
+	    delta += 3;
 	  else if (op == 0x9d)	/* Four byte offset from %ebp.  */
-	    {
-	      delta += 6;
-	      codestream_read (buf, 4);
-	    }
+	    delta += 6;
 	  else			/* Unexpected instruction.  */
-	    delta = -1;
-	  op = codestream_get ();
+	    delta = 0;
+
+	  op = read_memory_unsigned_integer (pc + delta, 1);
 	}
+
       /* addl y,%ebx */
-      if (delta > 0 && op == 0x81 && codestream_get () == 0xc3)
+      if (delta > 0 && op == 0x81
+	  && read_memory_unsigned_integer (pc + delta + 1, 1) == 0xc3);
 	{
-	  pos += delta + 6;
+	  pc += delta + 6;
 	}
     }
-  codestream_seek (pos);
 
-  i386_follow_jump ();
-
-  return (codestream_tell ());
+  return i386_follow_jump (pc);
 }
 
-/* Use the program counter to determine the contents and size of a
-   breakpoint instruction.  Return a pointer to a string of bytes that
-   encode a breakpoint instruction, store the length of the string in
-   *LEN and optionally adjust *PC to point to the correct memory
-   location for inserting the breakpoint.
-
-   On the i386 we have a single breakpoint that fits in a single byte
-   and can be inserted anywhere.  */
-   
-static const unsigned char *
-i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
-{
-  static unsigned char break_insn[] = { 0xcc };	/* int 3 */
-  
-  *len = sizeof (break_insn);
-  return break_insn;
-}
-
-/* Push the return address (pointing to the call dummy) onto the stack
-   and return the new value for the stack pointer.  */
+/* This function is 64-bit safe.  */
 
 static CORE_ADDR
-i386_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
+i386_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
+  char buf[8];
+
+  frame_unwind_register (next_frame, PC_REGNUM, buf);
+  return extract_typed_address (buf, builtin_type_void_func_ptr);
+}
+
+
+/* Normal frames.  */
+
+static struct i386_frame_cache *
+i386_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct i386_frame_cache *cache;
+  char buf[4];
+  int i;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = i386_alloc_frame_cache ();
+  *this_cache = cache;
+
+/* In principle, for normal frames, %ebp holds the frame pointer,
+   which holds the base address for the current stack frame.  However,
+   for functions that don't need it, the frame pointer is optional.
+   For these "frameless" functions the frame pointer is actually the
+   frame pointer of the calling frame.  Signal trampolines are just a
+   special case of a "frameless" function.  They (usually) share their
+   frame pointer with the frame that was in progress when the signal
+   occurred.  */
+
+  frame_unwind_register (next_frame, I386_EBP_REGNUM, buf);
+  cache->base = extract_address (buf, 4);
+  if (cache->base == 0)
+    return cache;
+
+  /* For normal frames, %eip is stored at 4(%ebp).  */
+  cache->saved_regs[I386_EIP_REGNUM] = 4;
+
+  cache->pc = frame_func_unwind (next_frame);
+  if (cache->pc != 0)
+    i386_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
+
+  if (cache->locals < 0)
+    {
+      /* We didn't find a valid frame, which means that CACHE->base
+	 currently holds the frame pointer for our calling frame.  If
+	 we're at the start of a function, or somewhere half-way its
+	 prologue, the function's frame probably hasn't been fully
+	 setup yet.  Try to reconstruct the base address for the stack
+	 frame by looking at the stack pointer.  For truly "frameless"
+	 functions this might work too.  */
+
+      frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+      cache->base = extract_address (buf, 4) + cache->sp_offset;
+    }
+
+  /* Now that we have the base address for the stack frame we can
+     calculate the value of %esp in the calling frame.  */
+  cache->saved_sp = cache->base + 8;
+
+  /* Adjust all the saved registers such that they contain addresses
+     instead of offsets.  */
+  for (i = 0; i < I386_NUM_SAVED_REGS; i++)
+    if (cache->saved_regs[i] != -1)
+      cache->saved_regs[i] += cache->base;
+
+  return cache;
+}
+
+static void
+i386_frame_this_id (struct frame_info *next_frame, void **this_cache,
+		    struct frame_id *this_id)
+{
+  struct i386_frame_cache *cache = i386_frame_cache (next_frame, this_cache);
+
+  /* This marks the outermost frame.  */
+  if (cache->base == 0)
+    return;
+
+  /* This is meant to halt the backtrace at "_start".  */
+  if (inside_entry_file (cache->pc))
+    return;
+
+  (*this_id) = frame_id_build (cache->base, cache->pc);
+}
+
+static void
+i386_frame_prev_register (struct frame_info *next_frame, void **this_cache,
+			  int regnum, int *optimizedp,
+			  enum lval_type *lvalp, CORE_ADDR *addrp,
+			  int *realnump, void *valuep)
+{
+  struct i386_frame_cache *cache = i386_frame_cache (next_frame, this_cache);
+
+  gdb_assert (regnum >= 0);
+
+  /* The System V ABI says that:
+
+     "The flags register contains the system flags, such as the
+     direction flag and the carry flag.  The direction flag must be
+     set to the forward (that is, zero) direction before entry and
+     upon exit from a function.  Other user flags have no specified
+     role in the standard calling sequence and are not preserved."
+
+     To guarantee the "upon exit" part of that statement we fake a
+     saved flags register that has its direction flag cleared.
+
+     Note that GCC doesn't seem to rely on the fact that the direction
+     flag is cleared after a function return; it always explicitly
+     clears the flag before operations where it matters.
+
+     FIXME: kettenis/20030316: I'm not quite sure whether this is the
+     right thing to do.  The way we fake the flags register here makes
+     it impossible to change it.  */
+
+  if (regnum == I386_EFLAGS_REGNUM)
+    {
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+	{
+	  ULONGEST val;
+
+	  /* Clear the direction flag.  */
+	  frame_unwind_unsigned_register (next_frame, PS_REGNUM, &val);
+	  val &= ~(1 << 10);
+	  store_unsigned_integer (valuep, 4, val);
+	}
+
+      return;
+    }
+
+  if (regnum == I386_EIP_REGNUM && cache->pc_in_eax)
+    {
+      *optimizedp = 0;
+      *lvalp = lval_register;
+      *addrp = 0;
+      *realnump = I386_EAX_REGNUM; /* %eax */
+      if (valuep)
+	{
+	  /* Read the value from the register.  */
+	  frame_unwind_register (next_frame, 0, valuep);
+	}
+      return;
+    }
+
+  if (regnum == I386_ESP_REGNUM && cache->saved_sp)
+    {
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+	{
+	  /* Store the value.  */
+	  store_address (valuep, 4, cache->saved_sp);
+	}
+      return;
+    }
+
+  if (regnum < I386_NUM_SAVED_REGS && cache->saved_regs[regnum] != -1)
+    {
+      *optimizedp = 0;
+      *lvalp = lval_memory;
+      *addrp = cache->saved_regs[regnum];
+      *realnump = -1;
+      if (valuep)
+	{
+	  /* Read the value in from memory.  */
+	  read_memory (*addrp, valuep,
+		       register_size (current_gdbarch, regnum));
+	}
+      return;
+    }
+
+  frame_register_unwind (next_frame, regnum,
+			 optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind i386_frame_unwind =
+{
+  NORMAL_FRAME,
+  i386_frame_this_id,
+  i386_frame_prev_register
+};
+
+
+/* Signal trampolines.  */
+
+static struct i386_frame_cache *
+i386_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct i386_frame_cache *cache;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  CORE_ADDR addr;
   char buf[4];
 
-  store_unsigned_integer (buf, 4, CALL_DUMMY_ADDRESS ());
-  write_memory (sp - 4, buf, 4);
-  return sp - 4;
+  if (*this_cache)
+    return *this_cache;
+
+  cache = i386_alloc_frame_cache ();
+
+  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+  cache->base = extract_address (buf, 4) - 4;
+
+  addr = tdep->sigcontext_addr (next_frame);
+  cache->saved_regs[I386_EIP_REGNUM] = addr + tdep->sc_pc_offset;
+  cache->saved_regs[I386_ESP_REGNUM] = addr + tdep->sc_sp_offset;
+
+  *this_cache = cache;
+  return cache;
 }
 
 static void
-i386_do_pop_frame (struct frame_info *frame)
+i386_sigtramp_frame_this_id (struct frame_info *next_frame, void **this_cache,
+			     struct frame_id *this_id)
 {
+  struct i386_frame_cache *cache =
+    i386_sigtramp_frame_cache (next_frame, this_cache);
+
+  (*this_id) = frame_id_build (cache->base, frame_pc_unwind (next_frame));
+}
+
+static void
+i386_sigtramp_frame_prev_register (struct frame_info *next_frame,
+				   void **this_cache,
+				   int regnum, int *optimizedp,
+				   enum lval_type *lvalp, CORE_ADDR *addrp,
+				   int *realnump, void *valuep)
+{
+  /* Make sure we've initialized the cache.  */
+  i386_sigtramp_frame_cache (next_frame, this_cache);
+
+  i386_frame_prev_register (next_frame, this_cache, regnum,
+			    optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind i386_sigtramp_frame_unwind =
+{
+  SIGTRAMP_FRAME,
+  i386_sigtramp_frame_this_id,
+  i386_sigtramp_frame_prev_register
+};
+
+
+const struct frame_unwind *
+i386_frame_p (CORE_ADDR pc)
+{
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  if (PC_IN_SIGTRAMP (pc, name))
+    return &i386_sigtramp_frame_unwind;
+
+  return &i386_frame_unwind;
+}
+
+static CORE_ADDR
+i386_frame_base_address (struct frame_info *next_frame, void **this_cache)
+{
+  struct i386_frame_cache *cache = i386_frame_cache (next_frame, this_cache);
+
+  return cache->base;
+}
+
+static const struct frame_base i386_frame_base =
+{
+  &i386_frame_unwind,
+  i386_frame_base_address,
+  i386_frame_base_address,
+  i386_frame_base_address
+};
+
+/* This function is 64-bit safe.  */
+
+static struct frame_id
+i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  char buf[8];
   CORE_ADDR fp;
-  int regnum;
-  char regbuf[I386_MAX_REGISTER_SIZE];
 
-  fp = get_frame_base (frame);
-  i386_frame_init_saved_regs (frame);
+  frame_unwind_register (next_frame, FP_REGNUM, buf);
+  fp = extract_typed_address (buf, builtin_type_void_data_ptr);
 
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
-    {
-      CORE_ADDR addr;
-      addr = get_frame_saved_regs (frame)[regnum];
-      if (addr)
-	{
-	  read_memory (addr, regbuf, REGISTER_RAW_SIZE (regnum));
-	  deprecated_write_register_gen (regnum, regbuf);
-	}
-    }
-  write_register (FP_REGNUM, read_memory_integer (fp, 4));
-  write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
-  write_register (SP_REGNUM, fp + 8);
-  flush_cached_frames ();
+  return frame_id_build (fp, frame_pc_unwind (next_frame));
 }
 
+/* This function is 64-bit safe.  */
+
 static void
-i386_pop_frame (void)
+i386_save_dummy_frame_tos (CORE_ADDR sp)
 {
-  generic_pop_current_frame (i386_do_pop_frame);
+  char buf[8];
+
+  /* We can't use the saved top-of-stack to find the right dummy frame
+     when unwinding, since we can't reconstruct it properly if the
+     dummy frame is the innermost frame.  To circumvent this, we fake
+     a frame pointer here.  */
+
+  store_typed_address (buf, builtin_type_void_data_ptr, sp);
+  regcache_cooked_write (current_regcache, FP_REGNUM, buf);
+
+  generic_save_dummy_frame_tos (sp);
 }
 
 
@@ -825,7 +1006,9 @@ i386_pop_frame (void)
    stack.  We expect the first arg to be a pointer to the jmp_buf
    structure from which we extract the address that we will land at.
    This address is copied into PC.  This routine returns non-zero on
-   success.  */
+   success.
+
+   This function is 64-bit safe.  */
 
 static int
 i386_get_longjmp_target (CORE_ADDR *pc)
@@ -854,19 +1037,45 @@ i386_get_longjmp_target (CORE_ADDR *pc)
 
 
 static CORE_ADDR
-i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		     int struct_return, CORE_ADDR struct_addr)
+i386_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
+		      CORE_ADDR dummy_addr, int nargs, struct value **args,
+		      CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
 {
-  sp = legacy_push_arguments (nargs, args, sp, struct_return, struct_addr);
-  
+  char buf[4];
+  int i;
+
+  /* Push arguments in reverse order.  */
+  for (i = nargs - 1; i >= 0; i--)
+    {
+      int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
+
+      /* The System V ABI says that:
+
+	 "An argument's size is increased, if necessary, to make it a
+	 multiple of [32-bit] words.  This may require tail padding,
+	 depending on the size of the argument."
+
+	 This makes sure the stack says word-aligned.  */
+      sp -= (len + 3) & ~3;
+      write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
+    }
+
+  /* Push value address.  */
   if (struct_return)
     {
-      char buf[4];
-
       sp -= 4;
       store_address (buf, 4, struct_addr);
       write_memory (sp, buf, 4);
     }
+
+  /* Store return address.  */
+  sp -= 4;
+  store_address (buf, 4, dummy_addr);
+  write_memory (sp, buf, 4);
+
+  /* Finally, update the stack pointer.  */
+  store_address (buf, 4, sp);
+  regcache_cooked_write (regcache, I386_ESP_REGNUM, buf);
 
   return sp;
 }
@@ -874,8 +1083,8 @@ i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 /* These registers are used for returning integers (and on some
    targets also for returning `struct' and `union' values when their
    size and alignment match an integer type).  */
-#define LOW_RETURN_REGNUM 0	/* %eax */
-#define HIGH_RETURN_REGNUM 2	/* %edx */
+#define LOW_RETURN_REGNUM	I386_EAX_REGNUM /* %eax */
+#define HIGH_RETURN_REGNUM	I386_EDX_REGNUM /* %edx */
 
 /* Extract from an array REGBUF containing the (raw) register state, a
    function return value of TYPE, and copy that, in virtual format,
@@ -909,7 +1118,7 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
 	 its contents to the desired type.  This is probably not
 	 exactly how it would happen on the target itself, but it is
 	 the best we can do.  */
-      regcache_raw_read (regcache, FP0_REGNUM, buf);
+      regcache_raw_read (regcache, I386_ST0_REGNUM, buf);
       convert_typed_floating (buf, builtin_type_i387_ext, valbuf, type);
     }
   else
@@ -971,7 +1180,7 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
 	 not exactly how it would happen on the target itself, but
 	 it is the best we can do.  */
       convert_typed_floating (valbuf, type, buf, builtin_type_i387_ext);
-      regcache_raw_write (regcache, FP0_REGNUM, buf);
+      regcache_raw_write (regcache, I386_ST0_REGNUM, buf);
 
       /* Set the top of the floating-point register stack to 7.  The
          actual value doesn't really matter, but 7 is what a normal
@@ -1012,10 +1221,10 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
 static CORE_ADDR
 i386_extract_struct_value_address (struct regcache *regcache)
 {
-  ULONGEST addr;
+  char buf[4];
 
-  regcache_raw_read_unsigned (regcache, LOW_RETURN_REGNUM, &addr);
-  return addr;
+  regcache_cooked_read (regcache, I386_EAX_REGNUM, buf);
+  return extract_address (buf, 4);
 }
 
 
@@ -1057,7 +1266,8 @@ i386_use_struct_convention (int gcc_p, struct type *type)
 static struct type *
 i386_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
+  if (regnum == I386_EIP_REGNUM
+      || regnum == I386_EBP_REGNUM || regnum == I386_ESP_REGNUM)
     return lookup_pointer_type (builtin_type_void);
 
   if (i386_fp_regnum_p (regnum))
@@ -1073,7 +1283,7 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
 }
 
 /* Map a cooked register onto a raw register or memory.  For the i386,
-   the MMX registers need to be mapped onto floating-point registers.  */
+   the MMX registers need to be mapped onto floating point registers.  */
 
 static int
 i386_mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
@@ -1274,36 +1484,27 @@ i386_print_insn (bfd_vma pc, disassemble_info *info)
 static int
 i386_svr4_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
+  /* UnixWare uses _sigacthandler.  The origin of the other symbols is
+     currently unknown.  */
   return (name && (strcmp ("_sigreturn", name) == 0
 		   || strcmp ("_sigacthandler", name) == 0
 		   || strcmp ("sigvechandler", name) == 0));
 }
 
-/* Get address of the pushed ucontext (sigcontext) on the stack for
-   all three variants of SVR4 sigtramps.  */
+/* Assuming NEXT_FRAME is for a frame following a SVR4 sigtramp
+   routine, return the address of the associated sigcontext (ucontext)
+   structure.  */
 
 static CORE_ADDR
-i386_svr4_sigcontext_addr (struct frame_info *frame)
+i386_svr4_sigcontext_addr (struct frame_info *next_frame)
 {
-  int sigcontext_offset = -1;
-  char *name = NULL;
+  char buf[4];
+  CORE_ADDR sp;
 
-  find_pc_partial_function (get_frame_pc (frame), &name, NULL, NULL);
-  if (name)
-    {
-      if (strcmp (name, "_sigreturn") == 0)
-	sigcontext_offset = 132;
-      else if (strcmp (name, "_sigacthandler") == 0)
-	sigcontext_offset = 80;
-      else if (strcmp (name, "sigvechandler") == 0)
-	sigcontext_offset = 120;
-    }
+  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+  sp = extract_address (buf, 4);
 
-  gdb_assert (sigcontext_offset != -1);
-
-  if (get_next_frame (frame))
-    return get_frame_base (get_next_frame (frame)) + sigcontext_offset;
-  return read_register (SP_REGNUM) + sigcontext_offset;
+  return read_memory_unsigned_integer (sp + 8, 4);
 }
 
 
@@ -1342,8 +1543,8 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
   tdep->sigcontext_addr = i386_svr4_sigcontext_addr;
-  tdep->sc_pc_offset = 14 * 4;
-  tdep->sc_sp_offset = 7 * 4;
+  tdep->sc_pc_offset = 36 + 14 * 4;
+  tdep->sc_sp_offset = 36 + 17 * 4;
 
   tdep->jb_pc_offset = 20;
 }
@@ -1407,6 +1608,7 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   int fp_regnum_p = (i386_fp_regnum_p (regnum)
 		     || i386_fpc_regnum_p (regnum));
   int mmx_regnum_p = (i386_mmx_regnum_p (regnum));
+
   if (group == i386_mmx_reggroup)
     return mmx_regnum_p;
   if (group == i386_sse_reggroup)
@@ -1417,10 +1619,11 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return fp_regnum_p;
   if (group == general_reggroup)
     return (!fp_regnum_p && !mmx_regnum_p && !sse_regnum_p);
+
   return default_register_reggroup_p (gdbarch, regnum, group);
 }
-
 
+
 static struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -1435,10 +1638,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Allocate space for the new architecture.  */
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
-
-  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
-     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
 
   /* The i386 default settings don't include the SSE registers.
      FIXME: kettenis/20020614: They do include the FPU registers for
@@ -1464,15 +1663,20 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 96);
 
-  /* NOTE: tm-i386aix.h, tm-i386bsd.h, tm-i386os9k.h, tm-ptx.h,
-     tm-symmetry.h currently override this.  Sigh.  */
+  /* The default ABI includes general-purpose registers and
+     floating-point registers.  */
   set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
+  set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
+  set_gdbarch_register_name (gdbarch, i386_register_name);
+  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_register_type (gdbarch, i386_register_type);
 
-  set_gdbarch_sp_regnum (gdbarch, 4); /* %esp */
-  set_gdbarch_fp_regnum (gdbarch, 5); /* %ebp */
-  set_gdbarch_pc_regnum (gdbarch, 8); /* %eip */
-  set_gdbarch_ps_regnum (gdbarch, 9); /* %eflags */
-  set_gdbarch_fp0_regnum (gdbarch, 16);	/* %st(0) */
+  /* Register numbers of various important registers.  */
+  set_gdbarch_sp_regnum (gdbarch, I386_ESP_REGNUM); /* %esp */
+  set_gdbarch_fp_regnum (gdbarch, I386_EBP_REGNUM); /* %ebp */
+  set_gdbarch_pc_regnum (gdbarch, I386_EIP_REGNUM); /* %eip */
+  set_gdbarch_ps_regnum (gdbarch, I386_EFLAGS_REGNUM); /* %eflags */
+  set_gdbarch_fp0_regnum (gdbarch, I386_ST0_REGNUM); /* %st(0) */
 
   /* Use the "default" register numbering scheme for stabs and COFF.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
@@ -1485,11 +1689,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* We don't define ECOFF_REG_TO_REGNUM, since ECOFF doesn't seem to
      be in use on any of the supported i386 targets.  */
 
-  set_gdbarch_register_name (gdbarch, i386_register_name);
-  set_gdbarch_register_size (gdbarch, 4);
-  set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
-  set_gdbarch_register_type (gdbarch, i386_register_type);
-
   set_gdbarch_print_float_info (gdbarch, i387_print_float_info);
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
@@ -1497,27 +1696,19 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Call dummy code.  */
   set_gdbarch_call_dummy_words (gdbarch, NULL);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_push_dummy_call (gdbarch, i386_push_dummy_call);
 
   set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch,
 					   i386_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
-  /* "An argument's size is increased, if necessary, to make it a
-     multiple of [32-bit] words.  This may require tail padding,
-     depending on the size of the argument" -- from the x86 ABI.  */
-  set_gdbarch_parm_boundary (gdbarch, 32);
-
   set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
-  set_gdbarch_deprecated_push_arguments (gdbarch, i386_push_arguments);
-  set_gdbarch_deprecated_push_return_address (gdbarch, i386_push_return_address);
-  set_gdbarch_deprecated_pop_frame (gdbarch, i386_pop_frame);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch,
 					    i386_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
 
-  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, i386_frame_init_saved_regs);
   set_gdbarch_skip_prologue (gdbarch, i386_skip_prologue);
 
   /* Stack grows downward.  */
@@ -1527,36 +1718,33 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
   set_gdbarch_function_start_offset (gdbarch, 0);
 
-  /* The following redefines make backtracing through sigtramp work.
-     They manufacture a fake sigtramp frame and obtain the saved pc in
-     sigtramp from the sigcontext structure which is pushed by the
-     kernel on the user stack, along with a pointer to it.  */
-
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_frameless_function_invocation (gdbarch,
                                            i386_frameless_function_invocation);
-  set_gdbarch_deprecated_frame_chain (gdbarch, i386_frame_chain);
-  set_gdbarch_deprecated_frame_saved_pc (gdbarch, i386_frame_saved_pc);
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Wire in the MMX registers.  */
-  set_gdbarch_num_pseudo_regs (gdbarch, mmx_num_regs);
+  set_gdbarch_num_pseudo_regs (gdbarch, i386_num_mmx_regs);
   set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
 
   set_gdbarch_print_insn (gdbarch, i386_print_insn);
 
+  set_gdbarch_unwind_dummy_id (gdbarch, i386_unwind_dummy_id);
+  set_gdbarch_save_dummy_frame_tos (gdbarch, i386_save_dummy_frame_tos);
+
+  set_gdbarch_unwind_pc (gdbarch, i386_unwind_pc);
+
   /* Add the i386 register groups.  */
   i386_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
 
-  /* Should be using push_dummy_call.  */
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
-
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  frame_unwind_append_predicate (gdbarch, i386_frame_p);
+  frame_base_set_default (gdbarch, &i386_frame_base);
 
   return gdbarch;
 }

@@ -42,12 +42,8 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Solaris is SVR4-based.  */
   i386_svr4_init_abi (info, gdbarch);
 
-  /* Signal trampolines are different from SVR4, in fact they're
-     rather similar to BSD.  */
+  /* Signal trampolines are slightly different from SVR4.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_sol2_pc_in_sigtramp);
-  tdep->sigcontext_addr = i386bsd_sigcontext_addr;
-  tdep->sc_pc_offset = 36 + 14 * 4;
-  tdep->sc_sp_offset = 36 + 17 * 4;
 }
 
 
