@@ -1,3 +1,6 @@
+Sat Sep 16 18:31:08 PDT 1995  Angela Marie Thomas <angela@cygnus.com>
+	* config/mh-ncrsvr43: Removed AR_FLAGS
+
 Tue Sep 12 18:03:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (DO_X): Change do-realclean to do-maintainer-clean.
