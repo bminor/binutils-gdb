@@ -844,7 +844,7 @@ remote_single_step ()
   CORE_ADDR next_pc, npc4, target, pc;
   typedef enum
     {
-      Error, not_branch, bicc, bicca, ba, baa, ticc, ta,
+      Error, not_branch, bicc, bicca, ba, baa, ticc, ta
     } branch_type;
   branch_type br, isannulled();
 

@@ -103,7 +103,7 @@ enum type_code
 
   /* Modula-2 */
   TYPE_CODE_CHAR,		/* *real* character type */
-  TYPE_CODE_BOOL,		/* Builtin Modula-2 BOOLEAN */
+  TYPE_CODE_BOOL		/* Builtin Modula-2 BOOLEAN */
 };
 
 /* This appears in a type's flags word for an unsigned integer type.  */
@@ -197,7 +197,9 @@ struct type
   /* Slot to point to additional language-specific fields of this type.  */
   union type_specific
     {
+      /* ARG_TYPES is for TYPE_CODE_METHOD and TYPE_CODE_FUNCTION.  */
       struct type **arg_types;
+      /* CPLUS_STUFF is for TYPE_CODE_STRUCT.  */
       struct cplus_struct_type *cplus_stuff;
     } type_specific;
 };
@@ -244,14 +246,16 @@ struct cplus_struct_type
 	  struct type *fcontext;
 	  unsigned int is_const : 1;
 	  unsigned int is_volatile : 1;
+	  unsigned int is_private : 1;
+	  unsigned int is_protected : 1;
+	  unsigned int is_stub : 1;
+	  unsigned int dummy : 3;
+
 	  /* Index into that baseclass's virtual function table,
 	     minus 2; else if static: VOFFSET_STATIC; else: 0.  */
-	  unsigned voffset : 30;
+	  unsigned voffset : 24;
 #	  define VOFFSET_STATIC 1
 	} *fn_fields;
-
-      B_TYPE *private_fn_field_bits;
-      B_TYPE *protected_fn_field_bits;
 
     } *fn_fieldlists;
 
@@ -358,7 +362,7 @@ struct block
 
 enum namespace
 {
-  UNDEF_NAMESPACE, VAR_NAMESPACE, STRUCT_NAMESPACE, LABEL_NAMESPACE,
+  UNDEF_NAMESPACE, VAR_NAMESPACE, STRUCT_NAMESPACE, LABEL_NAMESPACE
 };
 
 /* An address-class says where to find the value of a symbol.  */
@@ -381,7 +385,7 @@ enum address_class
 			   `struct block'.  Function names have this class. */
   LOC_CONST_BYTES,	/* Value is a constant byte-sequence pointed to by
 			   SYMBOL_VALUE_ADDRESS, in target byte order.  */
-  LOC_LOCAL_ARG,	/* Value is arg at spec'd offset in stack frame.
+  LOC_LOCAL_ARG		/* Value is arg at spec'd offset in stack frame.
 			   Differs from LOC_LOCAL in that symbol is an
 			   argument; differs from LOC_ARG in that we find it
 			   in the frame (FRAME_LOCALS_ADDRESS), not in the
@@ -730,13 +734,9 @@ B_TST(TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits, (n))
 #define TYPE_FN_FIELD_STATIC_P(thisfn, n) ((thisfn)[n].voffset == VOFFSET_STATIC)
 #define TYPE_FN_FIELD_VOFFSET(thisfn, n) ((thisfn)[n].voffset-2)
 #define TYPE_FN_FIELD_FCONTEXT(thisfn, n) ((thisfn)[n].fcontext)
-
-#define TYPE_FN_PRIVATE_BITS(thisfn) (thisfn).private_fn_field_bits
-#define TYPE_FN_PROTECTED_BITS(thisfn) (thisfn).protected_fn_field_bits
-#define SET_TYPE_FN_PRIVATE(thisfn, n) B_SET ((thisfn).private_fn_field_bits, n)
-#define SET_TYPE_FN_PROTECTED(thisfn, n) B_SET ((thisfn).protected_fn_field_bits, n)
-#define TYPE_FN_PRIVATE(thisfn, n) B_TST ((thisfn).private_fn_field_bits, n)
-#define TYPE_FN_PROTECTED(thisfn, n) B_TST ((thisfn).protected_fn_field_bits, n)
+#define TYPE_FN_FIELD_STUB(thisfn, n) ((thisfn)[n].is_stub)
+#define TYPE_FN_FIELD_PRIVATE(thisfn, n) ((thisfn)[n].is_private)
+#define TYPE_FN_FIELD_PROTECTED(thisfn, n) ((thisfn)[n].is_protected)
 
 /* The virtual function table is now an array of structures
    which have the form { int16 offset, delta; void *pfn; }. 

@@ -30,59 +30,6 @@ typedef unsigned int CORE_ADDR;
    the program's identifiers (such as $this and $$vptr).  */
 #define CPLUS_MARKER '$'	/* May be overridden to '.' for SysV */
 
-/*
- * Allow things in gdb to be declared "const".  If compiling ANSI, it
- * just works.  If compiling with gcc but non-ansi, redefine to __const__.
- * If non-ansi, non-gcc, then eliminate "const" entirely, making those
- * objects be read-write rather than read-only.
- */
-#ifndef const
-#ifndef __STDC__
-# ifdef __GNUC__
-#  define const __const__
-# else
-#  define const /*nothing*/
-# endif /* GNUC */
-#endif /* STDC */
-#endif /* const */
-
-#ifndef volatile
-#ifndef __STDC__
-# ifdef __GNUC__
-#  define volatile __volatile__
-# else
-#  define volatile /*nothing*/
-# endif /* GNUC */
-#endif /* STDC */
-#endif /* volatile */
-
-extern char *savestring ();
-extern char *strsave ();
-extern char *concat ();
-#ifdef __STDC__
-extern void *xmalloc (), *xrealloc ();
-#else
-extern char *xmalloc (), *xrealloc ();
-#endif
-extern void free ();
-extern int parse_escape ();
-extern char *reg_names[];
-/* Indicate that these routines do not return to the caller.  */
-extern volatile void error(), fatal();
-extern void warning_setup(), warning();
-
-/* Various possibilities for alloca.  */
-#ifndef alloca
-# ifdef __GNUC__
-#  define alloca __builtin_alloca
-# else
-#  ifdef sparc
-#   include <alloca.h>
-#  endif
-   extern char *alloca ();
-# endif
-#endif
-
 extern int errno;			/* System call error return status */
 
 extern int quit_flag;
@@ -186,6 +133,67 @@ extern unsigned output_radix;
 /* Baud rate specified for communication with serial target systems.  */
 char *baud_rate;
 
+/* Languages represented in the symbol table and elsewhere. */
+
+enum language 
+{
+   language_unknown, 		/* Language not known */
+   language_auto,		/* Placeholder for automatic setting */
+   language_c, 			/* C */
+   language_cplus, 		/* C++ */
+   language_m2			/* Modula-2 */
+};
+
+/* Return a format string for printf that will print a number in the local
+   (language-specific) hexadecimal format.  Result is static and is
+   overwritten by the next call.  local_hex_format_custom takes printf
+   options like "08" or "l" (to produce e.g. %08x or %lx).  */
+
+#define local_hex_format() (current_language->la_hex_format)
+char *local_hex_format_custom();		/* language.c */
+
+/* Return a string that contains a number formatted in the local
+   (language-specific) hexadecimal format.  Result is static and is
+   overwritten by the next call.  local_hex_string_custom takes printf
+   options like "08" or "l".  */
+
+char *local_hex_string ();			/* language.c */
+char *local_hex_string_custom ();		/* language.c */
+
+/* Host machine definition.  This will be a symlink to one of the
+   xm-*.h files, built by the `configure' script.  */
+
+#include "xm.h"
+
+/*
+ * Allow things in gdb to be declared "const".  If compiling ANSI, it
+ * just works.  If compiling with gcc but non-ansi, redefine to __const__.
+ * If non-ansi, non-gcc, then eliminate "const" entirely, making those
+ * objects be read-write rather than read-only.
+ */
+
+#ifndef const
+#ifndef __STDC__
+# ifdef __GNUC__
+#  define const __const__
+# else
+#  define const /*nothing*/
+# endif /* GNUC */
+#endif /* STDC */
+#endif /* const */
+
+#ifndef volatile
+#ifndef __STDC__
+# ifdef __GNUC__
+#  define volatile __volatile__
+# else
+#  define volatile /*nothing*/
+# endif /* GNUC */
+#endif /* STDC */
+#endif /* volatile */
+
+/* Defaults for system-wide constants (if not defined by xm.h, we fake it).  */
+
 #if !defined (UINT_MAX)
 #define UINT_MAX 0xffffffff
 #endif
@@ -268,34 +276,46 @@ char *baud_rate;
 #endif /* No LONG_LONG.  */
 #endif /* No longest_to_int.  */
 
-/* Languages represented in the symbol table and elsewhere. */
+/* Assorted functions we can declare, now that const and volatile are 
+   defined.  */
+extern char *savestring ();
+extern char *strsave ();
+extern char *concat ();
+#ifdef __STDC__
+extern void *xmalloc (), *xrealloc ();
+#else
+extern char *xmalloc (), *xrealloc ();
+#endif
+extern void free ();
+extern int parse_escape ();
+extern char *reg_names[];
+/* Indicate that these routines do not return to the caller.  */
+extern volatile void error(), fatal();
+extern void warning_setup(), warning();
 
-enum language 
-{
-   language_unknown, 		/* Language not known */
-   language_auto,		/* Placeholder for automatic setting */
-   language_c, 			/* C */
-   language_cplus, 		/* C++ */
-   language_m2,			/* Modula-2 */
-};
+/* Various possibilities for alloca.  */
+#ifndef alloca
+# ifdef __GNUC__
+#  define alloca __builtin_alloca
+# else
+#  ifdef sparc
+#   include <alloca.h>
+#  endif
+   extern char *alloca ();
+# endif
+#endif
 
-/* Return a format string for printf that will print a number in the local
-   (language-specific) hexadecimal format.  Result is static and is
-   overwritten by the next call.  local_hex_format_custom takes printf
-   options like "08" or "l" (to produce e.g. %08x or %lx).  */
+/* TARGET_BYTE_ORDER and HOST_BYTE_ORDER should be defined to one of these.  */
 
-#define local_hex_format() (current_language->la_hex_format)
-char *local_hex_format_custom();		/* language.c */
+#if !defined (BIG_ENDIAN)
+#define BIG_ENDIAN 4321
+#endif
 
-/* Return a string that contains a number formatted in the local
-   (language-specific) hexadecimal format.  Result is static and is
-   overwritten by the next call.  local_hex_string_custom takes printf
-   options like "08" or "l".  */
+#if !defined (LITTLE_ENDIAN)
+#define LITTLE_ENDIAN 1234
+#endif
 
-char *local_hex_string ();			/* language.c */
-char *local_hex_string_custom ();		/* language.c */
-
-/* System-dependent parameters for GDB.
+/* Target-system-dependent parameters for GDB.
 
    The standard thing is to include defs.h.  However, files that are
    specific to a particular target can define TM_FILE_OVERRIDE before
@@ -306,20 +326,6 @@ char *local_hex_string_custom ();		/* language.c */
 
 #ifndef TM_FILE_OVERRIDE
 #include "tm.h"
-#endif
-
-/* Host machine definition.  This will be a symlink to one of the
-   xm-*.h files, built by the `configure' script.  */
-
-#include "xm.h"
-
-/* TARGET_BYTE_ORDER and HOST_BYTE_ORDER should be defined to one of these.  */
-#if !defined (BIG_ENDIAN)
-#define BIG_ENDIAN 4321
-#endif
-
-#if !defined (LITTLE_ENDIAN)
-#define LITTLE_ENDIAN 1234
 #endif
 
 /* The bit byte-order has to do just with numbering of bits in

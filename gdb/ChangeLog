@@ -1,3 +1,9 @@
+Wed Dec 18 17:09:06 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* command.h, defs.h, eval.h, expression.h, remote-sa.sparc.c,
+	sparc-tdep.c, symtab.h, target.h, value.h, vx-share/ptrace.h,
+	vx-share/xdr_ptrace.h, vx-share/xdr_rdb.h:  ANSIfy enums.
+
 Mon Dec 16 12:31:46 1991  Fred Fish  (fnf at cygnus.com)
 
 	* config/mt-amix, config/mt-i386v4:  Add solib.o to TDEPFILES
