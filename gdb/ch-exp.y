@@ -1883,29 +1883,29 @@ yylex ()
 
     simplename = match_simple_name_string ();
 
-    /* See if it is a reserved identifier. */
-    for (i = 0; i < sizeof (idtokentab) / sizeof (idtokentab[0]); i++)
-	{
-	    if (STREQ (simplename, idtokentab[i].operator))
-		{
-		    return (idtokentab[i].token);
-		}
-	}
-
-    /* Look for other special tokens. */
-    if (STREQ (simplename, "true"))
-	{
-	    yylval.ulval = 1;
-	    return (BOOLEAN_LITERAL);
-	}
-    if (STREQ (simplename, "false"))
-	{
-	    yylval.ulval = 0;
-	    return (BOOLEAN_LITERAL);
-	}
-
     if (simplename != NULL)
       {
+	/* See if it is a reserved identifier. */
+	for (i = 0; i < sizeof (idtokentab) / sizeof (idtokentab[0]); i++)
+	    {
+		if (STREQ (simplename, idtokentab[i].operator))
+		    {
+			return (idtokentab[i].token);
+		    }
+	    }
+
+	/* Look for other special tokens. */
+	if (STREQ (simplename, "true"))
+	    {
+		yylval.ulval = 1;
+		return (BOOLEAN_LITERAL);
+	    }
+	if (STREQ (simplename, "false"))
+	    {
+		yylval.ulval = 0;
+		return (BOOLEAN_LITERAL);
+	    }
+
 	sym = lookup_symbol (simplename, expression_context_block,
 			     VAR_NAMESPACE, (int *) NULL,
 			     (struct symtab **) NULL);
