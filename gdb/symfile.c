@@ -2898,6 +2898,7 @@ static void
 overlay_auto_command (char *args, int from_tty)
 {
   overlay_debugging = ovly_auto;
+  enable_overlay_breakpoints ();
   if (info_verbose)
     printf_filtered ("Automatic overlay debugging enabled.");
 }
@@ -2910,6 +2911,7 @@ static void
 overlay_manual_command (char *args, int from_tty)
 {
   overlay_debugging = ovly_on;
+  disable_overlay_breakpoints ();
   if (info_verbose)
     printf_filtered ("Overlay debugging enabled.");
 }
@@ -2922,6 +2924,7 @@ static void
 overlay_off_command (char *args, int from_tty)
 {
   overlay_debugging = ovly_off;
+  disable_overlay_breakpoints ();
   if (info_verbose)
     printf_filtered ("Overlay debugging disabled.");
 }

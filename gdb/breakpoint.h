@@ -107,6 +107,14 @@ enum bptype
 
     bp_thread_event,
 
+    /* On the same principal, an overlay manager can arrange to call a
+       magic location in the inferior whenever there is an interesting
+       change in overlay status.  GDB can update its overlay tables
+       and fiddle with breakpoints in overlays when this breakpoint 
+       is hit.  */
+
+    bp_overlay_event, 
+
     /* These breakpoints are used to implement the "catch load" command
        on platforms whose dynamic linkers support such functionality.  */
     bp_catch_load,
@@ -603,8 +611,9 @@ extern void update_breakpoints_after_exec (void);
 extern int detach_breakpoints (int);
 
 extern void enable_longjmp_breakpoint (void);
-
 extern void disable_longjmp_breakpoint (void);
+extern void enable_overlay_breakpoints (void);
+extern void disable_overlay_breakpoints (void);
 
 extern void set_longjmp_resume_breakpoint (CORE_ADDR, struct frame_info *);
 /* These functions respectively disable or reenable all currently

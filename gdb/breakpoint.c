@@ -117,10 +117,6 @@ static int get_number_trailer (char **, int);
 
 void set_breakpoint_count (int);
 
-#if 0
-static struct breakpoint *create_temp_exception_breakpoint (CORE_ADDR);
-#endif
-
 typedef enum
   {
     mark_inserted,
@@ -150,6 +146,8 @@ static void maintenance_info_breakpoints (char *, int);
 #ifdef GET_LONGJMP_TARGET
 static void create_longjmp_breakpoint (char *);
 #endif
+
+static void create_overlay_event_breakpoint (char *);
 
 static int hw_breakpoint_used_count (void);
 
@@ -217,8 +215,6 @@ static int can_use_hw_watchpoints;
 void _initialize_breakpoint (void);
 
 extern int addressprint;	/* Print machine addresses? */
-
-static int internal_breakpoint_number = -1;
 
 /* Are we executing breakpoint commands?  */
 static int executing_breakpoint_commands;
@@ -1107,8 +1103,9 @@ update_breakpoints_after_exec (void)
 	continue;
       }
 
-    /* Thread event breakpoints must be set anew after an exec().  */
-    if (b->type == bp_thread_event)
+    /* Thread event breakpoints must be set anew after an exec(),
+       as must overlay event breakpoints.  */
+    if (b->type == bp_thread_event || b->type == bp_overlay_event)
       {
 	delete_breakpoint (b);
 	continue;
@@ -1216,6 +1213,8 @@ update_breakpoints_after_exec (void)
        So I think this assignment could be deleted without effect.  */
     b->address = (CORE_ADDR) NULL;
   }
+  /* FIXME what about longjmp breakpoints?  Re-create them here?  */
+  create_overlay_event_breakpoint ("_ovly_debug_event");
 }
 
 int
@@ -1907,6 +1906,12 @@ print_it_typical (bpstat bs)
       /* Not sure how we will get here. 
 	 GDB should not stop for these breakpoints.  */
       printf_filtered ("Thread Event Breakpoint: gdb should not stop!\n");
+      return PRINT_NOTHING;
+      break;
+
+    case bp_overlay_event:
+      /* By analogy with the thread event, GDB should not stop for these. */
+      printf_filtered ("Overlay Event Breakpoint: gdb should not stop!\n");
       return PRINT_NOTHING;
       break;
 
@@ -2896,6 +2901,7 @@ bpstat_what (bpstat bs)
 	  bs_class = shlib_event;
 	  break;
 	case bp_thread_event:
+	case bp_overlay_event:
 	  bs_class = bp_nostop;
 	  break;
 	case bp_catch_load:
@@ -3072,6 +3078,7 @@ print_one_breakpoint (struct breakpoint *b,
     {bp_call_dummy, "call dummy"},
     {bp_shlib_event, "shlib events"},
     {bp_thread_event, "thread events"},
+    {bp_overlay_event, "overlay events"},
     {bp_catch_load, "catch load"},
     {bp_catch_unload, "catch unload"},
     {bp_catch_fork, "catch fork"},
@@ -3228,6 +3235,7 @@ print_one_breakpoint (struct breakpoint *b,
     case bp_call_dummy:
     case bp_shlib_event:
     case bp_thread_event:
+    case bp_overlay_event:
       if (addressprint)
 	{
 	  annotate_field (4);
@@ -3731,36 +3739,47 @@ make_breakpoint_permanent (struct breakpoint *b)
   b->inserted = 1;
 }
 
+static struct breakpoint *
+create_internal_breakpoint (CORE_ADDR address, enum bptype type)
+{
+  static int internal_breakpoint_number = -1;
+  struct symtab_and_line sal;
+  struct breakpoint *b;
+
+  INIT_SAL (&sal);		/* initialize to zeroes */
+
+  sal.pc = address;
+  sal.section = find_pc_overlay (sal.pc);
+
+  b = set_raw_breakpoint (sal, type);
+  b->number = internal_breakpoint_number--;
+  b->disposition = disp_donttouch;
+
+  return b;
+}
+
 #ifdef GET_LONGJMP_TARGET
 
 static void
 create_longjmp_breakpoint (char *func_name)
 {
-  struct symtab_and_line sal;
   struct breakpoint *b;
+  struct minimal_symbol *m;
 
-  INIT_SAL (&sal);		/* initialize to zeroes */
-  if (func_name != NULL)
+  if (func_name == NULL)
+    b = create_internal_breakpoint (0, bp_longjmp_resume);
+  else
     {
-      struct minimal_symbol *m;
-
-      m = lookup_minimal_symbol_text (func_name, NULL, 
-				      (struct objfile *) NULL);
-      if (m)
-	sal.pc = SYMBOL_VALUE_ADDRESS (m);
-      else
+      if ((m = lookup_minimal_symbol_text (func_name, NULL, NULL)) == NULL)
 	return;
+ 
+      b = create_internal_breakpoint (SYMBOL_VALUE_ADDRESS (m), bp_longjmp);
     }
-  sal.section = find_pc_overlay (sal.pc);
-  b = set_raw_breakpoint (sal,
-                          func_name != NULL ? bp_longjmp : bp_longjmp_resume);
 
-  b->disposition = disp_donttouch;
   b->enable_state = bp_disabled;
   b->silent = 1;
   if (func_name)
     b->addr_string = xstrdup (func_name);
-  b->number = internal_breakpoint_number--;
 }
 
 #endif /* #ifdef GET_LONGJMP_TARGET */
@@ -3796,20 +3815,59 @@ disable_longjmp_breakpoint (void)
     }
 }
 
+static void
+create_overlay_event_breakpoint (char *func_name)
+{
+  struct breakpoint *b;
+  struct minimal_symbol *m;
+
+  if ((m = lookup_minimal_symbol_text (func_name, NULL, NULL)) == NULL)
+    return;
+ 
+  b = create_internal_breakpoint (SYMBOL_VALUE_ADDRESS (m), 
+				  bp_overlay_event);
+  b->addr_string = xstrdup (func_name);
+
+  if (overlay_debugging == ovly_auto)
+    b->enable_state = bp_enabled;
+  else 
+    b->enable_state = bp_disabled;
+}
+
+void
+enable_overlay_breakpoints (void)
+{
+  register struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    if (b->type == bp_overlay_event)
+    {
+      b->enable_state = bp_enabled;
+      check_duplicates (b);
+    }
+}
+
+void
+disable_overlay_breakpoints (void)
+{
+  register struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    if (b->type == bp_overlay_event)
+    {
+      b->enable_state = bp_disabled;
+      check_duplicates (b);
+    }
+}
+
 struct breakpoint *
 create_thread_event_breakpoint (CORE_ADDR address)
 {
   struct breakpoint *b;
-  struct symtab_and_line sal;
   char addr_string[80];		/* Surely an addr can't be longer than that. */
 
-  INIT_SAL (&sal);		/* initialize to zeroes */
-  sal.pc = address;
-  sal.section = find_pc_overlay (sal.pc);
-  b = set_raw_breakpoint (sal, bp_thread_event);
+  b = create_internal_breakpoint (address, bp_thread_event);
   
-  b->number = internal_breakpoint_number--;
-  b->disposition = disp_donttouch;
   b->enable_state = bp_enabled;
   /* addr_string has to be used or breakpoint_re_set will delete me.  */
   sprintf (addr_string, "*0x%s", paddr (b->address));
@@ -3843,15 +3901,8 @@ struct breakpoint *
 create_solib_event_breakpoint (CORE_ADDR address)
 {
   struct breakpoint *b;
-  struct symtab_and_line sal;
 
-  INIT_SAL (&sal);		/* initialize to zeroes */
-  sal.pc = address;
-  sal.section = find_pc_overlay (sal.pc);
-  b = set_raw_breakpoint (sal, bp_shlib_event);
-  b->number = internal_breakpoint_number--;
-  b->disposition = disp_donttouch;
-
+  b = create_internal_breakpoint (address, bp_shlib_event);
   return b;
 }
 
@@ -4311,6 +4362,7 @@ mention (struct breakpoint *b)
     case bp_watchpoint_scope:
     case bp_shlib_event:
     case bp_thread_event:
+    case bp_overlay_event:
       break;
     }
   if (say_where)
@@ -6665,6 +6717,7 @@ delete_command (char *arg, int from_tty)
 	if (b->type != bp_call_dummy &&
 	    b->type != bp_shlib_event &&
 	    b->type != bp_thread_event &&
+	    b->type != bp_overlay_event &&
 	    b->number >= 0)
 	  breaks_to_delete = 1;
       }
@@ -6678,6 +6731,7 @@ delete_command (char *arg, int from_tty)
 	    if (b->type != bp_call_dummy &&
 		b->type != bp_shlib_event &&
 		b->type != bp_thread_event &&
+		b->type != bp_overlay_event &&
 		b->number >= 0)
 	      delete_breakpoint (b);
 	  }
@@ -6861,10 +6915,11 @@ breakpoint_re_set_one (PTR bint)
     default:
       printf_filtered ("Deleting unknown breakpoint type %d\n", b->type);
       /* fall through */
-      /* Delete longjmp breakpoints, they will be reset later by
-         breakpoint_re_set.  */
+      /* Delete longjmp and overlay event breakpoints; they will be
+         reset later by breakpoint_re_set.  */
     case bp_longjmp:
     case bp_longjmp_resume:
+    case bp_overlay_event:
       delete_breakpoint (b);
       break;
 
@@ -6919,6 +6974,8 @@ breakpoint_re_set (void)
   create_longjmp_breakpoint ("_siglongjmp");
   create_longjmp_breakpoint (NULL);
 #endif
+  
+  create_overlay_event_breakpoint ("_ovly_debug_event");
 }
 
 /* Reset the thread number of this breakpoint:
@@ -7046,6 +7103,10 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *))
       p = p1;
     }
 }
+
+/* Set ignore-count of breakpoint number BPTNUM to COUNT.
+   If from_tty is nonzero, it prints a message to that effect,
+   which ends with a period (no newline).  */
 
 void
 disable_breakpoint (struct breakpoint *bpt)

@@ -1,3 +1,30 @@
+2002-02-04  Michael Snyder  <msnyder@redhat.com>
+
+	* breakpoint.h (enum bptype): Add new overlay event bp type.
+	(enable_overlay_breakpoints, disable_overlay_breakpoints): Export.
+	
+	* breakpoint.c (create_internal_breakpoint): New function.
+	(internal_breakpoint_number): Moved into create_internal_breakpoint.
+	(create_longjmp_breakpoint): Use create_internal_breakpoint.
+	(create_thread_event_breakpoint): Ditto.
+	(create_solib_event_breakpoint): Ditto.
+	(create_overlay_event_breakpoint): New function.
+	(enable_overlay_breakpoints, disable_overlay_breakpoints): New funcs.
+	(update_breakpoints_after_exec): Delete and re-initialize
+	overlay event breakpoints after an exec.  Add FIXME comment
+	about longjmp breakpoint.
+	(print_it_typical): Ignore overlay event breakpoints.
+	(print_one_breakpoint): Ditto.
+	(mention): Ditto.
+	(bpstat_what): Do not stop for overlay event breakpoints.
+	(delete_breakpoint): Don't delete overlay event breakpoints.
+	(breakpoint_re_set_one): Delete the overlay event breakpoint.
+	(breakpoint_re_set): Re-create overlay event breakpoint.
+
+	* symfile.c (overlay_auto_command): Enable overlay breakpoints.
+	(overlay_manual_command): Disable overlay breakpoints.
+	(overlay_off_command): Disable overlay breakpoints.
+
 2002-02-06  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c: Include elf-bfd.h and coff/internal.h.
