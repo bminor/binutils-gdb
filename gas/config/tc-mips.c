@@ -1493,7 +1493,15 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       f = frag_more (2);
     }
   else
-    f = frag_more (4);
+    {
+      if (mips16
+	  && mips_noreorder
+	  && (prev_pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
+	as_warn ("extended instruction in delay slot");
+
+      f = frag_more (4);
+    }
+
   fixp = NULL;
   if (address_expr != NULL && reloc_type < BFD_RELOC_UNUSED)
     {
@@ -1980,6 +1988,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
          PC relative relocs.  */
       prev_insn = *ip;
       prev_insn_reloc_type = reloc_type;
+      prev_insn_valid = 1;
     }
 
   /* We just output an insn, so the next one doesn't have a label.  */
@@ -9968,6 +9977,12 @@ md_convert_frag (abfd, asec, fragp)
 	  if (op->shift > 0)
 	    record_alignment (asec, op->shift);
 	}
+
+      if (ext
+	  && (RELAX_MIPS16_JAL_DSLOT (fragp->fr_subtype)
+	      || RELAX_MIPS16_DSLOT (fragp->fr_subtype)))
+	as_warn_where (fragp->fr_file, fragp->fr_line,
+		       "extended instruction in delay slot");
 
       buf = (bfd_byte *) (fragp->fr_literal + fragp->fr_fix);
 

@@ -1,5 +1,11 @@
 Wed Feb 12 14:36:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (append_insn): Warn about an attempt to put an
+ 	extended instruction in a delay slot when not reordering.  Set
+ 	prev_insn_valid even if not reordering.
+	(md_convert_frag): Warn if an extended instruction appears in a
+	delay slot.
+
 	* config/tc-mips.c (mips_pseudo_table): Add "insn".
 	(s_insn): New static function.
 	* doc/c-mips.texi: Document .insn.
