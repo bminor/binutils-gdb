@@ -17,5 +17,5 @@
 # along with GDB; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-TDEPFILES= m68k-pinsn.o exec.o
+TDEPFILES= m68k-pinsn.o exec.o m68k-tdep.o
 TM_FILE= tm-news.h
