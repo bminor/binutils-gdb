@@ -1,5 +1,8 @@
 Fri Apr  5 12:24:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* linker.c (link_action): For WARN_ROW/warn, use MWARN, not CYCLE,
+	to avoid crashing in bfd_hash_replace.
+
 	* sysdep.h: Use #ifdef, not #if.
 
 Thu Apr  4 23:32:23 1996  Ian Lance Taylor  <ian@cygnus.com>
