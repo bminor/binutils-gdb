@@ -1,3 +1,17 @@
+Mon Jan 31 06:43:45 1994  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t06/break.exp:  Remove setup_xfails for
+	sparc-sun-solaris2.*, these tests now pass with latest gcc and gdb.
+	* gdb.t20/inherit.exp (test_ptype_si):  Update warning message
+	about known bug in gcc to include up through 2.5.8.
+	* gdb.t20/inherit.exp (test_ptype_vi):  Accept "_vb." as well as
+	well as "_vb$".
+	* gdb.t21/cplusfuncs.exp (test_lookup_operator_functions):
+	Remove setup_xfails for sparc-sun-solaris2.*, these tests no pass
+	with latest gcc and gdb.
+	* gdb.t22/virtfunc.exp (test_ptype_of_classes):  Accept "_vb." as
+	well as "_vb$".
+
 Sat Jan 29 23:31:26 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* configure.in (hppa*-*-*): Also configure and build stabs-only
