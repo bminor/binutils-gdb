@@ -54,10 +54,10 @@ extern CORE_ADDR d10v_skip_prologue ();
     "r8", "r9", "r10","r11","r12", "r13", "r14","sp",\
     "psw","bpsw","pc","bpc", "cr4", "cr5", "cr6", "rpt_c",\
     "rpt_s","rpt_e", "mod_s", "mod_e", "cr12", "cr13", "iba", "cr15",\
-    "a0", "a1"\
+    "imap0","imap1","dmap","a0", "a1"\
     }
 
-#define NUM_REGS 34
+#define NUM_REGS 37
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -72,7 +72,10 @@ extern CORE_ADDR d10v_skip_prologue ();
 #define FP_REGNUM	11
 #define PC_REGNUM 	18
 #define PSW_REGNUM 	16
-#define A0_REGNUM 	32
+#define IMAP0_REGNUM	32
+#define IMAP1_REGNUM	33
+#define DMAP_REGNUM	34
+#define A0_REGNUM 	35
 
 /* Say how much memory is needed to store a copy of the register set */
 #define REGISTER_BYTES    ((NUM_REGS-2)*2+16) 
@@ -237,11 +240,13 @@ d10v_extract_return_value PARAMS ((struct type *, char *, char *));
 #  define LONGEST long
 #endif 
 
-void d10v_write_register_pid PARAMS (( int regno, LONGEST val, int pid));
-CORE_ADDR d10v_read_register_pid PARAMS ((int regno, int pid));
+void d10v_write_pc PARAMS ((LONGEST val, int pid));
+CORE_ADDR d10v_read_pc PARAMS ((int pid));
 
-#define TARGET_READ_PC(pid)		d10v_read_register_pid (PC_REGNUM, pid)
-#define TARGET_WRITE_PC(val,pid)	d10v_write_register_pid (PC_REGNUM, val, pid)
+#define TARGET_READ_PC(pid)		d10v_read_pc (pid)
+#define TARGET_WRITE_PC(val,pid)	d10v_write_pc (val, pid)
+#define TARGET_READ_FP()		d10v_read_fp ()
+#define TARGET_WRITE_FP(val)		d10v_write_fp (val)
 
 /* Number of bits in the appropriate type */
 #define TARGET_INT_BIT (2 * TARGET_CHAR_BIT)
