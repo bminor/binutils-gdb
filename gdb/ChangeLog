@@ -1,5 +1,9 @@
 Thu Nov 14 19:27:30 1991  Fred Fish  (fnf at cygnus.com)
 
+	* symfile.c:  Add function compact_misc_function_vector() to
+	remove duplicate misc function vector entries.  See comments
+	in source for why this is necessary/desirable.
+
 	* dwarfread.c:  Add misc function type parameter to internal
 	record_misc_function().  Remove calls to init_misc_bunches()
 	and condense_misc_bunches(), these are now done in elfread.c.
