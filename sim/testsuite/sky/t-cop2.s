@@ -7,11 +7,29 @@ stuff:
 	.set noat
 	
 # enable COP2
+cop2:		
 	mfc0    $1,$12
 	dli	$2,0x40000000
 	or	$1,$2,$2
 	mtc0	$1,$12
-	
+
+# put some END/NOPs into VU0 uMEM
+mpg:		
+	dli	$1,0x400002ff
+	dli	$4,0x000002ff
+	dli	$2,0x8000033c
+	dli	$3,0x11000000
+	sw	$2,0($3)
+	sw	$1,4($3)
+	sw	$2,8($3)
+	sw	$4,12($3)
+	sw	$2,16($3)
+	sw	$4,20($3)
+	sw	$2,24($3)
+	sw	$4,28($3)
+	sw	$2,32($3)
+	sw	$1,36($3)
+			
 # start whacking away
 	lqc2    vf01,128($6)
 	qmfc2   $5,vf2
@@ -1571,7 +1589,18 @@ blah:
 
 end:
 7:	
+#	exit with RC=0
+	dli	$4,0x0000
 	break 1023
 	nop
 	b	7b
+	nop
+
+error:
+8:	
+#	exit with RC=16
+	dli	$4,0x0010
+	break	1023
+	nop
+	b	8b
 	nop

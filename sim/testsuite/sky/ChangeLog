@@ -1,4 +1,11 @@
+Wed Apr  8 18:07:41 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
+	* t-cop2.s (mpg): Put END/NOP VU instructions to give something to
+ 	VCALLMS to run.
+	(end,error): Store rc for exit trap explicitly in $4.
+
+	* Makefile.in: Zap ".s.run" target before update attempt.
+	
 Wed Apr  8 16:53:00 1998 Jillian Ye <jillian@cygnus.com>
 
 	* c_gen.pl: Added subroutin perform_test_read_only.

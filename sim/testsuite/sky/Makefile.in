@@ -224,6 +224,7 @@ sce%.ok: sce%.exe
 	rm -f $@
 	-env VIF1_TRACE_FILE=$@ $(RUN_FOR_TARGET) $<
 .s.run:
+	rm -f $@
 	$(AS_FOR_TARGET) -mcpu=r5900 -o $@ $<
 
 
