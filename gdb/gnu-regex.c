@@ -44,7 +44,7 @@
 #if defined STDC_HEADERS && !defined emacs
 # include <stddef.h>
 #else
-/* We need this for `regex.h', and perhaps for the Emacs include files.  */
+/* We need this for `gnu-regex.h', and perhaps for the Emacs include files.  */
 # include <sys/types.h>
 #endif
 
@@ -204,7 +204,8 @@ init_syntax_once ()
 #endif /* not emacs */
 
 /* Get the interface, including the syntax bits.  */
-#include "regex.h"
+/* CYGNUS LOCAL: call it gnu-regex.h, not regex.h, to avoid name conflicts */
+#include "gnu-regex.h"
 
 /* isalpha etc. are used for the character classes.  */
 #include <ctype.h>
@@ -978,7 +979,7 @@ reg_syntax_t re_syntax_options;
    different, incompatible syntaxes.
 
    The argument SYNTAX is a bit mask comprised of the various bits
-   defined in regex.h.  We return the old syntax.  */
+   defined in gnu-regex.h.  We return the old syntax.  */
 
 reg_syntax_t
 re_set_syntax (syntax)
@@ -1000,7 +1001,7 @@ weak_alias (__re_set_syntax, re_set_syntax)
 #endif
 
 /* This table gives an error message for each of the error codes listed
-   in regex.h.  Obviously the order here has to be same as there.
+   in gnu-regex.h.  Obviously the order here has to be same as there.
    POSIX doesn't require that we do anything for REG_NOERROR,
    but why not be nice?  */
 
@@ -1796,7 +1797,7 @@ static boolean group_in_compile_stack _RE_ARGS ((compile_stack_type
 						 regnum_t regnum));
 
 /* `regex_compile' compiles PATTERN (of length SIZE) according to SYNTAX.
-   Returns one of error codes defined in `regex.h', or zero for success.
+   Returns one of error codes defined in `gnu-regex.h', or zero for success.
 
    Assumes the `allocated' (and perhaps `buffer') and `translate'
    fields are set in BUFP on entry.
@@ -5583,7 +5584,7 @@ re_exec (s)
      routine will report only success or failure, and nothing about the
      registers.
 
-   It returns 0 if it succeeds, nonzero if it doesn't.  (See regex.h for
+   It returns 0 if it succeeds, nonzero if it doesn't.  (See gnu-regex.h for
    the return codes and their meanings.)  */
 
 int

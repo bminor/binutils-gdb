@@ -1,3 +1,7 @@
+Wed Jun 10 11:53:42 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* gnu-regex.c: Include "gnu-regex.h", not "regex.h".
+
 Wed Jun 10 11:34:07 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* gnu-regex.c, gnu-regex.h: Change LGPL license to GPL license
