@@ -1,3 +1,8 @@
+Fri Dec  9 00:22:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (powerpc_mangle_relocs): Don't switch a reloc to use
+	the section symbol if the symbol is undefined.
+
 Thu Dec  8 14:45:50 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* objcopy.c (add_strip_symbol): Cast return value of xmalloc.
