@@ -548,16 +548,24 @@ const struct v850_opcode v850_opcodes[] =
 /* load/store instructions */
 /* start-sanitize-v850eq */
 { "sld.bu",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2_NOTR0},	1, PROCESSOR_V850EQ },
-{ "sld.hu",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2_NOTR0},	1, PROCESSOR_V850EQ },
-{ "sld.b",      one (0x0060),		one (0x07f0),         	{D4,   EP,   R2}, 	1, PROCESSOR_V850EQ },
-{ "sld.h",      one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2}, 	1, PROCESSOR_V850EQ },
 /* end-sanitize-v850eq */
-{ "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1, PROCESSOR_ALL },
-{ "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1, PROCESSOR_ALL },
 /* start-sanitize-v850e */
 { "sld.bu",     one (0x0060),		one (0x07f0),         	{D4,   EP,   R2_NOTR0},	1, PROCESSOR_V850E },
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+{ "sld.hu",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2_NOTR0},	1, PROCESSOR_V850EQ },
+/* end-sanitize-v850eq */
+/* start-sanitize-v850e */
 { "sld.hu",     one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2_NOTR0},	1, PROCESSOR_V850E },
 /* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+{ "sld.b",      one (0x0060),		one (0x07f0),         	{D4,   EP,   R2}, 	1, PROCESSOR_V850EQ },
+/* end-sanitize-v850eq */
+{ "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1, PROCESSOR_ALL },
+/* start-sanitize-v850eq */
+{ "sld.h",      one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2}, 	1, PROCESSOR_V850EQ },
+/* end-sanitize-v850eq */
+{ "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1, PROCESSOR_ALL },
 { "sld.w",	one (0x0500),		one (0x0781),	      	{D8_6, EP,   R2}, 	1, PROCESSOR_ALL },
 { "sst.b",	one (0x0380),		one (0x0780),	      	{R2,   D7,   EP}, 	2, PROCESSOR_ALL },
 { "sst.h",	one (0x0480),		one (0x0780),	      	{R2,   D8_7, EP}, 	2, PROCESSOR_ALL },
