@@ -1,3 +1,9 @@
+Thu May 26 10:10:21 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_prep_headers): Do not set the system_id here, private
+	bfd data has not been copied yet.
+	(som_write_headers): Instead do it here.
+
 Tue May 24 16:17:18 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Make MIPS ELF use new ELF backend linker.  No shared library

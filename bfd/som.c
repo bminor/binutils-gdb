@@ -1959,13 +1959,6 @@ som_prep_headers (abfd)
     }
   obj_som_file_hdr (abfd) = file_hdr;
 
-  /* FIXME.  This should really be conditional based on whether or not
-     PA1.1 instructions/registers have been used.  */
-  if (abfd->flags & (EXEC_P | DYNAMIC))
-    file_hdr->system_id = obj_som_exec_data (abfd)->system_id;
-  else
-    file_hdr->system_id = CPU_PA_RISC1_0;
-
   if (abfd->flags & (EXEC_P | DYNAMIC))
     {
       if (abfd->flags & D_PAGED)
@@ -3308,6 +3301,16 @@ som_write_headers (abfd)
       /* Goto the next section.  */
       section = section->next;
     }
+
+  /* FIXME.  This should really be conditional based on whether or not
+     PA1.1 instructions/registers have been used. 
+
+     Setting of the system_id has to happen very late now that copying of
+     BFD private data happens *after* section contents are set.  */
+  if (abfd->flags & (EXEC_P | DYNAMIC))
+    obj_som_file_hdr(abfd)->system_id = obj_som_exec_data (abfd)->system_id;
+  else
+    obj_som_file_hdr(abfd)->system_id = CPU_PA_RISC1_0;
 
   /* Only thing left to do is write out the file header.  It is always
      at location zero.  Seek there and write it.  */
