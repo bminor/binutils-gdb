@@ -5,17 +5,41 @@ Wed Sep  4 11:35:17 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(_ins_type): New enumeration to specify which container an
 	instruction is in, and whether it is part of a parallel operation.
 	(_state): Add ins_type field.
-	
-	* simops.c: Change all #ifdef DEBUG code so that the input and
-	output values can be traced, along with the instruction type.
+	({,u}int{8,16,32,64}): Use limits.h to size the appropriate types.
+	(ins_type_counters): Counters for the various instruction types.
+	({left,right}_nops): Counters for the number of nops in each
+	container.
+	(d10v_debug): New variable to indicate whether debugging is turned
+	on.
+
+	* simops.c: (all functions): Change all #ifdef DEBUG code so that
+	the input and output values can be traced, along with the
+	instruction type.  Make the -t option enable tracing.
+	(all functions): Change printf calls to use the printf_filtered
+	function in the callback table.
 
 	* interp.c (_leftright): New enumeration to say whether 2 short
 	instructions are done left first or right first.
 	(do_{long,2_short,parallel}): Indicate in the machine state which
-	type of instruction this is.
+	type of instruction this is.  Count each of the types of
+	instructions executed.
 	(sim_size): Only print the memory sizes if DEBUG_MEMSIZE debug
 	flag is set.
 	(sim_resume): Pass left/right indication to do_2_short.
+	(all functions): Change printf calls to use the printf_filtered
+	function in the callback table.
+	(sim_trace): Turn on debug flag if DEBUG was defined, and call
+	sim_resume.
+	(sim_info): Print out statistics on instructions.
+	(sim_{trace,create_inferior}): Eliminate extraneous output unless
+	debugging.
+
+	* Makefile.in: Make objects depend on d10v_sim.h.
+	({,SIM_}CFLAGS): Include configure dependent switches.
+
+	* configure.in (--enable-sim-cflags): New switch to allow user to
+	set the defaults.
+	* configure: Regenerate.
 
 Wed Sep 04 04:45:34 1996  Mark Alexander  <marka@cygnus.com>
 

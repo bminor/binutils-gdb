@@ -11,11 +11,24 @@ AC_C_BIGENDIAN
 
 . ${srcdir}/../../bfd/configure.host
 
+AC_ARG_ENABLE(sim-cflags,
+[  --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator],
+[case "${enableval}" in
+  yes)	 sim_cflags="-O2";;
+  trace) sim_cflags="-O2 -DDEBUG=3";;
+  no)	 sim_cflags="";;
+  *)	 sim_cflags=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+esac
+if test x"$silent" != x"yes" && test x"$sim_cflags" != x""; then
+  echo "Setting sim cflags = $sim_cflags" 6>&1
+fi],[sim_cflags=""])dnl
+
 AC_SUBST(CFLAGS)
 AC_SUBST(HDEFINES)
 AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
+AC_SUBST(sim_cflags)
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
 AC_C_CROSS

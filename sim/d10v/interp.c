@@ -10,7 +10,10 @@
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
+int d10v_debug;
 host_callback *d10v_callback;
+long ins_type_counters[ (int)INS_MAX ];
+long left_nops, right_nops;
 
 uint16 OP[4];
 
@@ -54,7 +57,7 @@ lookup_hash (ins, size)
     {
       if (h->next == NULL)
 	{
-	  printf ("ERROR looking up hash for %x at PC %x\n",ins, PC);
+	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR looking up hash for %x at PC %x\n",ins, PC);
 	  exit(1);
 	}
       h = h->next;
@@ -145,10 +148,14 @@ do_long (ins)
      uint32 ins;
 {
   struct hash_entry *h;
-  /*  printf ("do_long %x\n",ins); */
+#ifdef DEBUG
+  if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
+    (*d10v_callback->printf_filtered) (d10v_callback, "do_long 0x%x\n", ins);
+#endif
   h = lookup_hash (ins, 1);
   get_operands (h->ops, ins);
   State.ins_type = INS_LONG;
+  ins_type_counters[ (int)State.ins_type ]++;
   (h->ops->func)();
 }
 static void
@@ -157,14 +164,21 @@ do_2_short (ins1, ins2, leftright)
      enum _leftright leftright;
 {
   struct hash_entry *h;
+#ifdef DEBUG
+  if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
+    (*d10v_callback->printf_filtered) (d10v_callback, "do_2_short 0x%x (%s) -> 0x%x\n",
+				       ins1, (leftright) ? "left" : "right", ins2);
+#endif
   /*  printf ("do_2_short %x -> %x\n",ins1,ins2); */
   h = lookup_hash (ins1, 0);
   get_operands (h->ops, ins1);
   State.ins_type = (leftright == LEFT_FIRST) ? INS_LEFT : INS_RIGHT;
+  ins_type_counters[ (int)State.ins_type ]++;
   (h->ops->func)();
   h = lookup_hash (ins2, 0);
   get_operands (h->ops, ins2);
   State.ins_type = (leftright == LEFT_FIRST) ? INS_RIGHT : INS_LEFT;
+  ins_type_counters[ (int)State.ins_type ]++;
   (h->ops->func)();
 }
 static void
@@ -172,7 +186,10 @@ do_parallel (ins1, ins2)
      uint16 ins1, ins2;
 {
   struct hash_entry *h1, *h2;
-  /* printf ("do_parallel %x || %x\n",ins1,ins2); */
+#ifdef DEBUG
+  if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
+    (*d10v_callback->printf_filtered) (d10v_callback, "do_parallel 0x%x || 0x%x\n", ins1, ins2);
+#endif
   h1 = lookup_hash (ins1, 0);
   h2 = lookup_hash (ins2, 0);
 
@@ -180,6 +197,7 @@ do_parallel (ins1, ins2)
     {
       get_operands (h1->ops, ins1);
       State.ins_type = INS_LEFT;
+      ins_type_counters[ (int)State.ins_type ]++;
       (h1->ops->func)();
       if (State.exe)
 	{
@@ -192,6 +210,7 @@ do_parallel (ins1, ins2)
     {
       get_operands (h2->ops, ins2);
       State.ins_type = INS_RIGHT;
+      ins_type_counters[ (int)State.ins_type ]++;
       (h2->ops->func)();
       if (State.exe)
 	{
@@ -204,9 +223,11 @@ do_parallel (ins1, ins2)
     {
       get_operands (h1->ops, ins1);
       State.ins_type = INS_LEFT_PARALLEL;
+      ins_type_counters[ (int)State.ins_type ]++;
       (h1->ops->func)();
       get_operands (h2->ops, ins2);
       State.ins_type = INS_RIGHT_PARALLEL;
+      ins_type_counters[ (int)State.ins_type ]++;
       (h2->ops->func)();
     }
 }
@@ -227,12 +248,16 @@ sim_size (power)
   State.dmem = (uint8 *)calloc(1,1<<DMEM_SIZE);
   if (!State.imem || !State.dmem )
     {
-      fprintf (stderr,"Memory allocation failed.\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "Memory allocation failed.\n");
       exit(1);
     }
-#if (DEBUG & DEBUG_MEMSIZE) != 0
-  printf ("Allocated %d bytes instruction memory and\n",1<<IMEM_SIZE);
-  printf ("          %d bytes data memory.\n",1<<DMEM_SIZE);
+
+#ifdef DEBUG
+  if ((d10v_debug & DEBUG_MEMSIZE) != 0)
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "Allocated %d bytes instruction memory and\n",1<<IMEM_SIZE);
+      (*d10v_callback->printf_filtered) (d10v_callback, "          %d bytes data memory.\n",          1<<DMEM_SIZE);
+    }
 #endif
 }
 
@@ -252,7 +277,7 @@ sim_write (addr, buffer, size)
   int i;
   init_system ();
 
-  /* printf ("sim_write %d bytes to 0x%x\n",size,addr); */
+  /* (*d10v_callback->printf_filtered) (d10v_callback, "sim_write %d bytes to 0x%x\n",size,addr); */
   for (i = 0; i < size; i++)
     {
       State.imem[i+addr] = buffer[i]; 
@@ -267,7 +292,7 @@ sim_open (args)
   struct simops *s;
   struct hash_entry *h, *prev;
   if (args != NULL)
-      printf ("sim_open %s\n",args);
+    (*d10v_callback->printf_filtered) (d10v_callback, "sim_open %s\n",args);
 
   /* put all the opcodes in the hash table */
   for (s = Simops; s->func; s++)
@@ -301,14 +326,14 @@ void
 sim_set_profile (n)
      int n;
 {
-  printf ("sim_set_profile %d\n",n);
+  (*d10v_callback->printf_filtered) (d10v_callback, "sim_set_profile %d\n",n);
 }
 
 void
 sim_set_profile_size (n)
      int n;
 {
-  printf ("sim_set_profile_size %d\n",n);
+  (*d10v_callback->printf_filtered) (d10v_callback, "sim_set_profile_size %d\n",n);
 }
 
 void
@@ -319,7 +344,7 @@ sim_resume (step, siggnal)
   int i;
   reg_t oldpc;
 
-/*   printf ("sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); */
+/*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); */
 
  if (step)
    State.exception = SIGTRAP;
@@ -368,15 +393,47 @@ sim_resume (step, siggnal)
 int
 sim_trace ()
 {
-  printf ("sim_trace\n");
-  return 0;
+#ifdef DEBUG
+  d10v_debug = DEBUG;
+#endif
+  sim_resume (0, 0);
+  return 1;
 }
 
 void
 sim_info (verbose)
      int verbose;
 {
-  printf ("sim_info\n");
+  char buf[40];
+  int size;
+  long total = (ins_type_counters[ (int)INS_LONG ]
+		+ ins_type_counters[ (int)INS_LEFT ]
+		+ ins_type_counters[ (int)INS_LEFT_PARALLEL ]
+		+ ins_type_counters[ (int)INS_RIGHT ]
+		+ ins_type_counters[ (int)INS_RIGHT_PARALLEL ]);
+
+  sprintf (buf, "%ld", total);
+  size = strlen (buf);
+
+  (*d10v_callback->printf_filtered) (d10v_callback,
+				     "executed %*ld instructions in the left  container, %*ld parallel, %*ld nops\n",
+				     size, ins_type_counters[ (int)INS_LEFT ] + ins_type_counters[ (int)INS_LEFT_PARALLEL ],
+				     size, ins_type_counters[ (int)INS_LEFT_PARALLEL ],
+				     size, left_nops);
+
+  (*d10v_callback->printf_filtered) (d10v_callback,
+				     "executed %*ld instructions in the right container, %*ld parallel, %*ld nops\n",
+				     size, ins_type_counters[ (int)INS_RIGHT ] + ins_type_counters[ (int)INS_RIGHT_PARALLEL ],
+				     size, ins_type_counters[ (int)INS_RIGHT_PARALLEL ],
+				     size, right_nops);
+
+  (*d10v_callback->printf_filtered) (d10v_callback,
+				     "executed %*ld long instructions\n",
+				     size, ins_type_counters[ (int)INS_LONG ]);
+
+  (*d10v_callback->printf_filtered) (d10v_callback,
+				     "executed %*ld total instructions\n",
+				     size, total);
 }
 
 void
@@ -385,7 +442,10 @@ sim_create_inferior (start_address, argv, env)
      char **argv;
      char **env;
 {
-  printf ("sim_create_inferior:  PC=0x%x\n",start_address);
+#ifdef DEBUG
+  if (d10v_debug)
+    (*d10v_callback->printf_filtered) (d10v_callback, "sim_create_inferior:  PC=0x%x\n", start_address);
+#endif
   PC = start_address >> 2;
 }
 
@@ -409,7 +469,7 @@ sim_stop_reason (reason, sigrc)
      enum sim_stop *reason;
      int *sigrc;
 {
-/*   printf ("sim_stop_reason:  PC=0x%x\n",PC<<2); */
+/*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_stop_reason:  PC=0x%x\n",PC<<2); */
 
   if (State.exception == SIGQUIT)
     {
@@ -431,12 +491,12 @@ sim_fetch_register (rn, memory)
   if (rn > 31)
     {
       WRITE_64 (memory, State.a[rn-32]);
-      /* printf ("sim_fetch_register %d 0x%llx\n",rn,State.a[rn-32]); */
+      /* (*d10v_callback->printf_filtered) (d10v_callback, "sim_fetch_register %d 0x%llx\n",rn,State.a[rn-32]); */
     }
   else
     {
       WRITE_16 (memory, State.regs[rn]);
-      /* printf ("sim_fetch_register %d 0x%x\n",rn,State.regs[rn]); */
+      /* (*d10v_callback->printf_filtered) (d10v_callback, "sim_fetch_register %d 0x%x\n",rn,State.regs[rn]); */
     }
 }
  
@@ -448,12 +508,12 @@ sim_store_register (rn, memory)
   if (rn > 31)
     {
       State.a[rn-32] =  READ_64 (memory) & MASK40;
-      /* printf ("store: a%d=0x%llx\n",rn-32,State.a[rn-32]); */
+      /* (*d10v_callback->printf_filtered) (d10v_callback, "store: a%d=0x%llx\n",rn-32,State.a[rn-32]); */
     }
   else
     {
       State.regs[rn]= READ_16 (memory);
-      /* printf ("store: r%d=0x%x\n",rn,State.regs[rn]); */
+      /* (*d10v_callback->printf_filtered) (d10v_callback, "store: r%d=0x%x\n",rn,State.regs[rn]); */
     }
 }
 
@@ -474,7 +534,7 @@ void
 sim_do_command (cmd)
      char *cmd;
 { 
-  printf("sim_do_command: %s\n",cmd);
+  (*d10v_callback->printf_filtered) (d10v_callback, "sim_do_command: %s\n",cmd);
 }
 
 int

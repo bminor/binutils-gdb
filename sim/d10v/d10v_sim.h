@@ -1,25 +1,54 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <limits.h>
 #include "ansidecl.h"
 #include "callback.h"
 #include "opcode/d10v.h"
 
-#define DEBUG_TRACE	0x00000001
-#define DEBUG_VALUES	0x00000002
-#define DEBUG_MEMSIZE	0x00000004
+#define DEBUG_TRACE		0x00000001
+#define DEBUG_VALUES		0x00000002
+#define DEBUG_MEMSIZE		0x00000004
+#define DEBUG_INSTRUCTION	0x00000008
 
-#ifndef DEBUG
-#define DEBUG 0
+extern int d10v_debug;
+
+#if UCHAR_MAX == 255
+typedef unsigned char uint8;
+typedef signed char int8;
+#else
+#error "Char is not an 8-bit type"
 #endif
 
-/* FIXME: host defines */
-typedef unsigned char uint8;
+#if SHRT_MAX == 32767
 typedef unsigned short uint16;
-typedef unsigned int uint32;
-typedef signed char int8;
 typedef signed short int16;
+#else
+#error "Short is not a 16-bit type"
+#endif
+
+#if INT_MAX == 2147483647
+typedef unsigned int uint32;
 typedef signed int int32;
+
+#elif LONG_MAX == 2147483647
+typedef unsigned long uint32;
+typedef signed long int32;
+
+#else
+#error "Neither int nor long is a 32-bit type"
+#endif
+
+#if LONG_MAX > 2147483647
+typedef unsigned long uint64;
+typedef signed long int64;
+
+#elif __GNUC__
+typedef unsigned long long uint64;
 typedef signed long long int64;
+
+#else
+#error "Can't find an appropriate 64-bit type"
+#endif
 
 /* FIXME: D10V defines */
 typedef uint16 reg_t;
@@ -44,8 +73,12 @@ enum _ins_type
   INS_RIGHT,
   INS_LEFT_PARALLEL,
   INS_RIGHT_PARALLEL,
-  INS_LONG
+  INS_LONG,
+  INS_MAX
 };
+
+extern long ins_type_counters[ (int)INS_MAX ];
+extern long left_nops, right_nops;
 
 struct _state
 {

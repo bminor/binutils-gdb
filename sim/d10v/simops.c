@@ -31,7 +31,7 @@ enum op_types {
   OP_PREDEC
 };
 
-#if (DEBUG & DEBUG_TRACE) != 0
+#ifdef DEBUG
 static void trace_input PARAMS ((char *name,
 				 enum op_types in1,
 				 enum op_types in2,
@@ -66,6 +66,9 @@ trace_input (name, in1, in2, in3)
   long tmp;
   char *type;
 
+  if ((d10v_debug & DEBUG_TRACE) == 0)
+    return;
+
   switch (State.ins_type)
     {
     default:
@@ -77,7 +80,10 @@ trace_input (name, in1, in2, in3)
     case INS_LONG:		type = " B"; break;
     }
 
-  printf ("0x%.6x %s:  %-*s", (unsigned)PC, type, SIZE_INSTRUCTION, name);
+  (*d10v_callback->printf_filtered) (d10v_callback,
+				     "0x%.6x %s:  %-*s",
+				     (unsigned)PC, type,
+				     SIZE_INSTRUCTION, name);
 
   in[0] = in1;
   in[1] = in2;
@@ -180,150 +186,164 @@ trace_input (name, in1, in2, in3)
 	}
     }
 
-#if (DEBUG & DEBUG_VALUES) == 0
-  *p++ = '\n';
-  *p = '\0';
-  fputs (buf, stdout);
-
-#else	/* DEBUG_VALUES */
-  *p = '\0';
-  printf ("%-*s", SIZE_OPERANDS, buf);
-
-  p = buf;
-  for (i = 0; i < 3; i++)
+  if ((d10v_debug & DEBUG_VALUES) == 0)
     {
-      buf[0] = '\0';
-      switch (in[i])
+      *p++ = '\n';
+      *p = '\0';
+      (*d10v_callback->printf_filtered) (d10v_callback, "%s", buf);
+    }
+  else
+    {
+      *p = '\0';
+      (*d10v_callback->printf_filtered) (d10v_callback, "%-*s", SIZE_OPERANDS, buf);
+
+      p = buf;
+      for (i = 0; i < 3; i++)
 	{
-	case OP_VOID:
-	  printf ("%*s", SIZE_VALUES, "");
-	  break;
+	  buf[0] = '\0';
+	  switch (in[i])
+	    {
+	    case OP_VOID:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s", SIZE_VALUES, "");
+	      break;
 
-	case OP_REG_OUTPUT:
-	case OP_DREG_OUTPUT:
-	case OP_CR_OUTPUT:
-	case OP_ACCUM_OUTPUT:
-	  printf ("%*s", SIZE_VALUES, "---");
-	  break;
+	    case OP_REG_OUTPUT:
+	    case OP_DREG_OUTPUT:
+	    case OP_CR_OUTPUT:
+	    case OP_ACCUM_OUTPUT:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s", SIZE_VALUES, "---");
+	      break;
 
-	case OP_REG:
-	case OP_MEMREF:
-	case OP_POSTDEC:
-	case OP_POSTINC:
-	case OP_PREDEC:
-	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)State.regs[OP[i]]);
-	  break;
+	    case OP_REG:
+	    case OP_MEMREF:
+	    case OP_POSTDEC:
+	    case OP_POSTINC:
+	    case OP_PREDEC:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)State.regs[OP[i]]);
+	      break;
 
-	case OP_DREG:
-	  tmp = (long)((((uint32) State.regs[OP[i]]) << 16) | ((uint32) State.regs[OP[i]+1]));
-	  printf ("%*s0x%.8lx", SIZE_VALUES-10, "", tmp);
-	  break;
+	    case OP_DREG:
+	      tmp = (long)((((uint32) State.regs[OP[i]]) << 16) | ((uint32) State.regs[OP[i]+1]));
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.8lx", SIZE_VALUES-10, "", tmp);
+	      break;
 
-	case OP_CR:
-	case OP_CR_REVERSE:
-	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)State.cregs[OP[i]]);
-	  break;
+	    case OP_CR:
+	    case OP_CR_REVERSE:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)State.cregs[OP[i]]);
+	      break;
 
-	case OP_ACCUM:
-	case OP_ACCUM_REVERSE:
-	  printf ("%*s0x%.2x%.8lx", SIZE_VALUES-12, "",
-		  ((int)(State.a[OP[i]] >> 32) & 0xff),
-		  ((unsigned long)State.a[OP[i]]) & 0xffffffff);
-	  break;
+	    case OP_ACCUM:
+	    case OP_ACCUM_REVERSE:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.2x%.8lx", SIZE_VALUES-12, "",
+						 ((int)(State.a[OP[i]] >> 32) & 0xff),
+						 ((unsigned long)State.a[OP[i]]) & 0xffffffff);
+	      break;
 
-	case OP_CONSTANT16:
-	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)OP[i]);
-	  break;
+	    case OP_CONSTANT16:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)OP[i]);
+	      break;
 
-	case OP_CONSTANT4:
-	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)SEXT4(OP[i]));
-	  break;
+	    case OP_CONSTANT4:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)SEXT4(OP[i]));
+	      break;
 
-	case OP_CONSTANT3:
-	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)SEXT3(OP[i]));
-	  break;
+	    case OP_CONSTANT3:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)SEXT3(OP[i]));
+	      break;
 
-	case OP_FLAG:
-	  if (OP[i] == 0)
-	    printf ("%*sF0 = %d", SIZE_VALUES-6, "", State.F0 != 0);
+	    case OP_FLAG:
+	      if (OP[i] == 0)
+		(*d10v_callback->printf_filtered) (d10v_callback, "%*sF0 = %d", SIZE_VALUES-6, "",
+						   State.F0 != 0);
 
-	  else if (OP[i] == 1)
-	    printf ("%*sF1 = %d", SIZE_VALUES-6, "", State.F1 != 0);
+	      else if (OP[i] == 1)
+		(*d10v_callback->printf_filtered) (d10v_callback, "%*sF1 = %d", SIZE_VALUES-6, "",
+						   State.F1 != 0);
 
-	  else
-	    printf ("%*sC = %d", SIZE_VALUES-5, "", State.C != 0);
+	      else
+		(*d10v_callback->printf_filtered) (d10v_callback, "%*sC = %d", SIZE_VALUES-5, "",
+						   State.C != 0);
 
-	  break;
+	      break;
 
-	case OP_MEMREF2:
-	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)OP[i]);
-	  printf ("%*s0x%.4x", SIZE_VALUES-6, "", (uint16)State.regs[OP[++i]]);
-	  break;
+	    case OP_MEMREF2:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)OP[i]);
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)State.regs[OP[++i]]);
+	      break;
+	    }
 	}
     }
-#endif
 }
 
 static void
 trace_output (result)
      enum op_types result;
 {
-#if (DEBUG & DEBUG_VALUES) != 0
-  long tmp;
-
-  switch (result)
+  if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-    default:
-      putchar ('\n');
-      break;
+      long tmp;
 
-    case OP_REG:
-    case OP_REG_OUTPUT:
-      printf (" :: %*s0x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-6, "", (uint16)State.regs[OP[0]],
-	      State.F0 != 0, State.F1 != 0, State.C != 0);
-      break;
+      switch (result)
+	{
+	default:
+	  putchar ('\n');
+	  break;
 
-    case OP_DREG:
-    case OP_DREG_OUTPUT:
-      tmp = (long)((((uint32) State.regs[OP[0]]) << 16) | ((uint32) State.regs[OP[0]+1]));
-      printf (" :: %*s0x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "", tmp,
-	      State.F0 != 0, State.F1 != 0, State.C != 0);
-      break;
+	case OP_REG:
+	case OP_REG_OUTPUT:
+	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-6, "",
+					     (uint16)State.regs[OP[0]],
+					     State.F0 != 0, State.F1 != 0, State.C != 0);
+	  break;
 
-    case OP_CR:
-    case OP_CR_OUTPUT:
-      printf (" :: %*s0x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-6, "", (uint16)State.cregs[OP[0]],
-	      State.F0 != 0, State.F1 != 0, State.C != 0);
-      break;
+	case OP_DREG:
+	case OP_DREG_OUTPUT:
+	  tmp = (long)((((uint32) State.regs[OP[0]]) << 16) | ((uint32) State.regs[OP[0]+1]));
+	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "", tmp,
+					     State.F0 != 0, State.F1 != 0, State.C != 0);
+	  break;
 
-    case OP_CR_REVERSE:
-      printf (" :: %*s0x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-6, "", (uint16)State.cregs[OP[1]],
-	      State.F0 != 0, State.F1 != 0, State.C != 0);
-      break;
+	case OP_CR:
+	case OP_CR_OUTPUT:
+	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-6, "",
+					     (uint16)State.cregs[OP[0]],
+					     State.F0 != 0, State.F1 != 0, State.C != 0);
+	  break;
 
-    case OP_ACCUM:
-    case OP_ACCUM_OUTPUT:
-      printf (" :: %*s0x%.2x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "",
-	      ((int)(State.a[OP[0]] >> 32) & 0xff),
-	      ((unsigned long)State.a[OP[0]]) & 0xffffffff,
-	      State.F0 != 0, State.F1 != 0, State.C != 0);
-      break;
+	case OP_CR_REVERSE:
+	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.4x F0=%d F1=%d C=%d\n", SIZE_VALUES-6, "",
+					     (uint16)State.cregs[OP[1]],
+					     State.F0 != 0, State.F1 != 0, State.C != 0);
+	  break;
 
-    case OP_ACCUM_REVERSE:
-      printf (" :: %*s0x%.2x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "",
-	      ((int)(State.a[OP[1]] >> 32) & 0xff),
-	      ((unsigned long)State.a[OP[1]]) & 0xffffffff,
-	      State.F0 != 0, State.F1 != 0, State.C != 0);
-      break;
+	case OP_ACCUM:
+	case OP_ACCUM_OUTPUT:
+	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.2x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "",
+					     ((int)(State.a[OP[0]] >> 32) & 0xff),
+					     ((unsigned long)State.a[OP[0]]) & 0xffffffff,
+					     State.F0 != 0, State.F1 != 0, State.C != 0);
+	  break;
 
-    case OP_FLAG:
-      printf (" :: %*s F0=%d F1=%d C=%d\n", SIZE_VALUES, "",
-	      State.F0 != 0, State.F1 != 0, State.C != 0);
-      break;
+	case OP_ACCUM_REVERSE:
+	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.2x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "",
+					     ((int)(State.a[OP[1]] >> 32) & 0xff),
+					     ((unsigned long)State.a[OP[1]]) & 0xffffffff,
+					     State.F0 != 0, State.F1 != 0, State.C != 0);
+	  break;
+
+	case OP_FLAG:
+	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s F0=%d F1=%d C=%d\n", SIZE_VALUES, "",
+					     State.F0 != 0, State.F1 != 0, State.C != 0);
+	  break;
+	}
     }
-
-  fflush (stdout);
-#endif
 }
 
 #else
@@ -836,7 +856,7 @@ OP_4E09 ()
 void
 OP_5F20 ()
 {
-  printf("***** DBT *****  PC=%x\n",PC);
+  d10v_callback->printf_filtered(d10v_callback, "***** DBT *****  PC=%x\n",PC);
   State.exception = SIGTRAP;
 }
 
@@ -1601,7 +1621,9 @@ OP_5600 ()
       State.C = PSW & 1;
       if (State.ST && !State.FX)
 	{
-	  fprintf (stderr,"ERROR at PC 0x%x: ST can only be set when FX is set.\n",PC<<2);
+	  (*d10v_callback->printf_filtered) (d10v_callback,
+					     "ERROR at PC 0x%x: ST can only be set when FX is set.\n",
+					     PC<<2);
 	  State.exception = SIGILL;
 	}
     }
@@ -1655,6 +1677,11 @@ OP_5E00 ()
 {
   trace_input ("nop", OP_VOID, OP_VOID, OP_VOID);
   trace_output (OP_VOID);
+
+  if (State.ins_type == INS_LEFT || State.ins_type == INS_LEFT_PARALLEL)
+    left_nops++;
+  else
+    right_nops++;
 }
 
 /* not */
@@ -1694,7 +1721,9 @@ OP_5201 ()
   trace_input ("rac", OP_DREG_OUTPUT, OP_ACCUM, OP_CONSTANT3);
   if (OP[1] != 0)
     {
-      fprintf (stderr,"ERROR at PC 0x%x: instruction only valid for A0\n",PC<<2);
+      (*d10v_callback->printf_filtered) (d10v_callback,
+					 "ERROR at PC 0x%x: instruction only valid for A0\n",
+					 PC<<2);
       State.exception = SIGILL;
     }
 
@@ -1769,12 +1798,12 @@ OP_27000000 ()
   State.RP = 1;
   if (RPT_C == 0)
     {
-      fprintf (stderr, "ERROR: rep with count=0 is illegal.\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: rep with count=0 is illegal.\n");
       State.exception = SIGILL;
     }
   if (OP[1] < 4)
     {
-      fprintf (stderr, "ERROR: rep must include at least 4 instructions.\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: rep must include at least 4 instructions.\n");
       State.exception = SIGILL;
     }
   trace_output (OP_VOID);
@@ -1791,12 +1820,12 @@ OP_2F000000 ()
   State.RP = 1;
   if (RPT_C == 0)
     {
-      fprintf (stderr, "ERROR: repi with count=0 is illegal.\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: repi with count=0 is illegal.\n");
       State.exception = SIGILL;
     }
   if (OP[1] < 4)
     {
-      fprintf (stderr, "ERROR: repi must include at least 4 instructions.\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: repi must include at least 4 instructions.\n");
       State.exception = SIGILL;
     }
   trace_output (OP_VOID);
@@ -1806,7 +1835,7 @@ OP_2F000000 ()
 void
 OP_5F60 ()
 {
-  fprintf(stderr, "ERROR: rtd - NOT IMPLEMENTED\n");
+  d10v_callback->printf_filtered(d10v_callback, "ERROR: rtd - NOT IMPLEMENTED\n");
   State.exception = SIGILL;
 }
 
@@ -2064,7 +2093,7 @@ OP_6C1F ()
   trace_input ("st", OP_REG, OP_PREDEC, OP_VOID);
   if ( OP[1] != 15 )
     {
-      fprintf (stderr,"ERROR: cannot pre-decrement any registers but r15 (SP).\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot pre-decrement any registers but r15 (SP).\n");
       State.exception = SIGILL;
       return;
     }
@@ -2120,7 +2149,7 @@ OP_6E1F ()
   trace_input ("st2w", OP_REG, OP_PREDEC, OP_VOID);
   if ( OP[1] != 15 )
     {
-      fprintf (stderr,"ERROR: cannot pre-decrement any registers but r15 (SP).\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot pre-decrement any registers but r15 (SP).\n");
       State.exception = SIGILL;
       return;
     }
@@ -2367,7 +2396,7 @@ OP_5F00 ()
   switch (OP[0])
     {
     default:
-      fprintf (stderr, "Unknown trap code %d\n", OP[0]);
+      (*d10v_callback->printf_filtered) (d10v_callback, "Unknown trap code %d\n", OP[0]);
       State.exception = SIGILL;
 
     case 0:
@@ -2542,7 +2571,10 @@ OP_5F00 ()
       /* Trap 2 calls printf */
       {
 	char *fstr = State.regs[2] + State.imem;
-	printf (fstr, (int16)State.regs[3], (int16)State.regs[4], (int16)State.regs[5]);
+	(*d10v_callback->printf_filtered) (d10v_callback, fstr,
+					   (int16)State.regs[3],
+					   (int16)State.regs[4],
+					   (int16)State.regs[5]);
 	break;
       }
 

@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the SH sim library.
-#    Copyright (C) 1990, 1991, 1992, 1995 Free Software Foundation, Inc.
+#    Copyright (C) 1996 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This program is free software; you can redistribute it and/or modify
@@ -56,7 +56,8 @@ INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 AR = @AR@
 AR_FLAGS = rc
 CC = @CC@
-CFLAGS = @CFLAGS@ @DEFS@
+SIM_CFLAGS = @sim_cflags@
+CFLAGS = @CFLAGS@ @DEFS@ $(SIM_CFLAGS)
 MAKEINFO = makeinfo
 RANLIB = @RANLIB@
 CC_FOR_BUILD = @CC_FOR_BUILD@
@@ -67,14 +68,15 @@ TDEFINES =
 .NOEXPORT:
 MAKEOVERRIDES=
 
-X=xstuff.o
-XL=-lX11
+#X=xstuff.o
+#XL=-lX11
 X=
 XL=
 
+INCLUDE = d10v_sim.h
 INCDIR = $(srcdir)/../../include 
 CSEARCH = -I. -I$(srcdir)  -I../../include  \
-  -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb -I$(srcdir)/../../newlib/libc/sys/sh
+  -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb -I$(srcdir)/../../newlib/libc/sys/d10v
 DEP = mkdep
 
 all:	run libsim.a
@@ -82,8 +84,9 @@ all:	run libsim.a
 run:	interp.o $(X) run.o table.o callback.o simops.o
 	$(CC) $(CFLAGS) -o run $(X) interp.o table.o callback.o simops.o run.o ../../bfd/libbfd.a ../../libiberty/libiberty.a $(XL) -lm
 
-interp.o:interp.c table.c
-run.o:run.c 
+interp.o:interp.c table.c $(INCLUDE)
+run.o:run.c $(INCLUDE)
+simops.o:simops.c $(INCLUDE)
 
 libsim.a:interp.o table.o simops.o
 	$(AR) $(ARFLAGS) libsim.a interp.o table.o simops.o
@@ -95,7 +98,7 @@ simops.h:	gencode
 table.c:	gencode simops.h
 	./gencode >$@
 
-gencode:	gencode.c ../../opcodes/libopcodes.a
+gencode:	gencode.c ../../opcodes/libopcodes.a $(INCLUDE)
 	$(CC) $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHE) -o gencode $(srcdir)/gencode.c ../../opcodes/libopcodes.a -lc
 
 .c.o:
