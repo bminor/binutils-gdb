@@ -1,3 +1,25 @@
+2001-10-12  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* config/i386/tm-cygwin.h: include tm-i386.h instead of tm-i386v.h.
+	This fixes errors in "long long" handling for 'finish' and 'return'
+	commands.
+
+2001-10-12  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (safe_symbol_file_add_stub): Avoid adding a shared
+	library if it has already been loaded.
+	(safe_symbol_file_add_cleanup): Don't mess with stderr or we won't see
+	any error messages.
+	(safe_symbol_file_add): Ditto.
+	(solib_symbols_add): Make static.  Accept 'from_tty' parameter.  Pass
+	it to safe_symbol_file_add.
+	(core_dll_symbols_add): Accomodate extra solib_symbols_add parameter.
+	(child_solib_add): Ditto.
+
+	* win32-nat.c (handle_exception): Don't print "first chance"
+	exceptions.
+	(get_child_debug_event): Continue from exceptions if !handle_exception.
+
 2001-10-10  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (get_child_debug_event): Close file handles created after
