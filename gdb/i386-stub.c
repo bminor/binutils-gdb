@@ -758,10 +758,29 @@ handle_exception (int exceptionVector)
 
   /* reply to host that an exception has occurred */
   sigval = computeSignal (exceptionVector);
-  remcomOutBuffer[0] = 'S';
-  remcomOutBuffer[1] = hexchars[sigval >> 4];
-  remcomOutBuffer[2] = hexchars[sigval % 16];
-  remcomOutBuffer[3] = 0;
+
+  ptr = remcomOutBuffer;
+
+  *ptr++ = 'T';			/* notify gdb with signo, PC, FP and SP */
+  *ptr++ = hexchars[sigval >> 4];
+  *ptr++ = hexchars[sigval & 0xf];
+
+  *ptr++ = hexchars[ESP]; 
+  *ptr++ = ':';
+  ptr = mem2hex((char *)&registers[ESP], ptr, 4, 0);	/* SP */
+  *ptr++ = ';';
+
+  *ptr++ = hexchars[EBP]; 
+  *ptr++ = ':';
+  ptr = mem2hex((char *)&registers[EBP], ptr, 4, 0); 	/* FP */
+  *ptr++ = ';';
+
+  *ptr++ = hexchars[PC]; 
+  *ptr++ = ':';
+  ptr = mem2hex((char *)&registers[PC], ptr, 4, 0); 	/* PC */
+  *ptr++ = ';';
+
+  *ptr = '\0'
 
   putpacket (remcomOutBuffer);
 

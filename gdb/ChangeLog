@@ -1,3 +1,7 @@
+2001-03-01  J.T. Conklin  <jtc@redback.com>
+
+	* i386-stub.c (handle_exception): Use 'T' response packet.
+
 2001-03-01  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
 	* m32r-tdep.c: Fix cut and paste error in comment.
