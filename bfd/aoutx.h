@@ -76,11 +76,11 @@ requires all the names from aout32.c, and produces the jump vector
 
 */
 
+
+#include "bfd.h"
 #include <sysdep.h>
 #include <ansidecl.h>
 
-
-#include "bfd.h"
 struct external_exec;
 #include "libaout.h"
 #include "libbfd.h"
@@ -100,6 +100,112 @@ a symbol index and a type field. The extended records (used on 29ks
 and sparcs) also have a full integer for an addend. 
 */
 #define CTOR_TABLE_RELOC_IDX 2
+
+/* start-sanitize-v9 */
+/* Provided the symbol, returns the value reffed */
+static  bfd_vma
+DEFUN(get_symbol_value,(symbol, input_section),
+      asymbol *symbol AND
+      asection *input_section)
+{                                             
+  bfd_vma relocation = 0;
+
+  if (symbol != (asymbol *)NULL) {              
+    if (symbol->flags & BSF_FORT_COMM) {        
+      relocation = 0;                           
+    } else {                                      
+      relocation = symbol->value;               
+    }                                           
+    if (symbol->section != (asection *)NULL) {    
+      relocation += symbol->section->output_section->vma +
+	symbol->section->output_offset;           
+    }                                             
+  }
+  else {
+    /* No symbol, so use the input section value */
+    relocation = input_section->output_section->vma + input_section->output_offset;
+  }
+  return relocation;
+}
+
+static bfd_reloc_status_enum_type
+DEFUN(reloc64,(abfd, reloc_entry, symbol_in, data, input_section),
+      bfd *abfd AND
+      arelent *reloc_entry AND
+      asymbol *symbol_in AND
+      unsigned char *data AND
+      asection *input_section)
+{
+  bfd_vma sym_value = get_symbol_value(symbol_in, input_section);
+  bfd_vma value = bfd_get_64(abfd, (bfd_byte *)data + reloc_entry->address);
+  value += sym_value + reloc_entry->addend;
+  bfd_put_64(abfd, value, (bfd_byte *)data+reloc_entry->address);
+  return bfd_reloc_ok;
+}
+
+static bfd_reloc_status_enum_type
+DEFUN(disp64,(abfd, reloc_entry, symbol_in, data, input_section),
+      bfd *abfd AND
+      arelent *reloc_entry AND
+      asymbol *symbol_in AND
+      unsigned char *data AND
+      asection *input_section)
+{
+  bfd_vma sym_value = get_symbol_value(symbol_in, input_section);
+
+/* bfd_get_64(abfd, (bfd_byte *)data + reloc_entry->address);*/
+  bfd_vma value = 0;
+  value += sym_value + reloc_entry->addend;
+
+  /* Subtract from the calculated value the pc */
+  value -= reloc_entry->address + input_section->output_section->vma;
+  bfd_put_64(abfd, value, (bfd_byte *)data+reloc_entry->address);
+  return bfd_reloc_ok;
+}
+
+static bfd_reloc_status_enum_type
+DEFUN(hhi22,(abfd, reloc_entry, symbol_in, data, input_section),
+      bfd *abfd AND
+      arelent *reloc_entry AND
+      asymbol *symbol_in AND
+      unsigned char *data AND
+      asection *input_section)
+{
+  bfd_vma sym_value = get_symbol_value(symbol_in, input_section);
+
+  bfd_vma value =   bfd_get_32(abfd, (bfd_byte *)data + reloc_entry->address);
+
+  value = (value & ~0x3fffff) | ( ((sym_value + reloc_entry->addend) >> 32+10) & 0x3fffff);
+
+  bfd_put_32(abfd, value, (bfd_byte *)data+reloc_entry->address);
+  return bfd_reloc_ok;
+}
+
+static bfd_reloc_status_enum_type
+DEFUN(hlo10,(abfd, reloc_entry, symbol_in, data, input_section),
+      bfd *abfd AND
+      arelent *reloc_entry AND
+      asymbol *symbol_in AND
+      unsigned char *data AND
+      asection *input_section)
+{
+  bfd_vma sym_value = get_symbol_value(symbol_in, input_section);
+
+  bfd_vma value =   bfd_get_32(abfd, (bfd_byte *)data + reloc_entry->address);
+
+  value = (value & ~0x3ff) | (((sym_value + reloc_entry->addend) >> 32) & 0x3ff);
+
+  bfd_put_32(abfd, value, (bfd_byte *)data+reloc_entry->address);
+  return bfd_reloc_ok;
+}
+
+static r64() 
+{
+  abort();
+}
+
+/* end-sanitize-v9 */
+
 static  reloc_howto_type howto_table_ext[] = 
 {
   HOWTO(RELOC_8,      0,  0,  	8,  false, 0, true,  true,0,"8",      false, 0,0x000000ff, false),
@@ -125,10 +231,28 @@ static  reloc_howto_type howto_table_ext[] =
   HOWTO(RELOC_SEGOFF16,0, 2,	0,  false, 0, false, true,0,"SEGOFF16",	false, 0,0x00000000, false),
   HOWTO(RELOC_GLOB_DAT,0, 2,	0,  false, 0, false, true,0,"GLOB_DAT",	false, 0,0x00000000, false),
   HOWTO(RELOC_JMP_SLOT,0, 2,	0,  false, 0, false, true,0,"JMP_SLOT",	false, 0,0x00000000, false),
-  HOWTO(RELOC_RELATIVE,0, 2,	0,  false, 0, false, true,0,"RELATIVE",	false, 0,0x00000000, false),
+  HOWTO(RELOC_RELATIVE,0, 2,	0,  false, 0, false,	true,0,"RELATIVE",	false, 0,0x00000000, false),
+
+/* start-sanitize-v9 */
+#ifdef HOST_64_BIT												
+  HOWTO(RELOC_11, 0,  2, 	21, true,  0, false, true,r64,"11",	false, 0,/*0x00000000001fffff*/0, false),
+  HOWTO(RELOC_WDISP2_14, 0, 2, 	21, true,  0, false, true,r64,"DISP2_14",false, 0,/*0x00000000001fffff*/0, false),
+  HOWTO(RELOC_WDISP19, 0,  3, 	64, true,  0, false, true,r64,"DISP19", false, 0,/*0xffffffffffffffff*/0, false),  
+  HOWTO(RELOC_HHI22,  42, 3, 	22, false, 0, false, true,hhi22,"HHI22",false, 0,/*0x003fffff00000000*/0, false),
+  HOWTO(RELOC_HLO10,  32, 3, 	10, false, 0, false, true,hlo10,"HLO10", false, 0,/*0x000003ff00000000*/0, false),
+#endif
   HOWTO(RELOC_JUMPTARG,2, 13,	16, true,  0, false, true,0,"JUMPTARG",	false, 0,0x0000ffff, false),
   HOWTO(RELOC_CONST,	0, 13,	16, false, 0, false, true,0,"CONST",	false, 0,0x0000ffff, false),
   HOWTO(RELOC_CONSTH, 16, 13,	16, false, 0, false, true,0,"CONSTH",	false, 0,0x0000ffff, false),
+
+#ifdef HOST_64_BIT
+  HOWTO(RELOC_64,     0,  3, 	64, false, 0, true,  true,reloc64,"64",     false, 0,/*0xffffffffffffffff*/0, false),
+  HOWTO(RELOC_DISP64, 0,  3, 	64, true,  0, false, true,disp64,"DISP64", false, 0,/*0xffffffffffffffff*/0, false),  
+  HOWTO(RELOC_WDISP21,2,  2, 	21, true,  0, false, true,r64,"WDISP21",false, 0,/*0x00000000001fffff*/0, false),
+  HOWTO(RELOC_DISP21, 0,  2, 	21, true,  0, false, true,r64,"DISP21",	false, 0,/*0x00000000001fffff*/0, false),
+  HOWTO(RELOC_DISP14, 0,  2, 	14, true,  0, false, true,r64,"DISP21",	false, 0,/*0x0000000000003fff*/0, false),
+#endif
+/* end-sanitize-v9 */
 };
 
 /* Convert standard reloc records to "arelent" format (incl byte swap).  */
@@ -634,10 +758,11 @@ DEFUN(translate_from_native_sym_flags,(sym_pointer, cache_ptr, abfd),
   case N_SETD:
   case N_SETB:
       {
-	asection *section = bfd_make_section(abfd,
-					     cache_ptr->symbol.name);
+	char *copy = bfd_alloc(abfd, strlen(cache_ptr->symbol.name)+1);
+	asection *section ;
 	arelent_chain *reloc = (arelent_chain *)bfd_alloc(abfd, sizeof(arelent_chain));
-	  
+	strcpy(copy, cache_ptr->symbol.name);
+	  section =  bfd_make_section(abfd,copy);
 	switch ( (cache_ptr->type  & N_TYPE) ) {
 	case N_SETA:
 	  reloc->relent.section =  (asection *)NULL;
@@ -848,13 +973,14 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
     strings =(char *) bfd_alloc(abfd, string_size + 1);
     cached = (aout_symbol_type *)
       bfd_zalloc(abfd, (bfd_size_type)(bfd_get_symcount (abfd) * sizeof(aout_symbol_type)));
-    /* Alloc this last, so we can free it if obstack is in use.  */
-    syms = (struct external_nlist *) bfd_alloc(abfd, symbol_size);
-    
+
+    /* malloc this, so we can free it if simply. The symbol caching
+       might want to allocate onto the bfd's obstack  */
+    syms = (struct external_nlist *) malloc(symbol_size);
     bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
     if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size) {
     bailout:
-      if (syms) 	bfd_release (abfd, syms);
+      if (syms) 	free (syms);
       if (cached)	bfd_release (abfd, cached);
       if (strings)bfd_release (abfd, strings);
       return false;
@@ -892,7 +1018,7 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
       }
     
     obj_aout_symbols (abfd) =  cached;
-    bfd_release (abfd, (PTR)syms);
+    free((PTR)syms);
     
     return true;
   }
