@@ -1,3 +1,9 @@
+2000-09-29  Kevin Buettner  <kevinb@redhat.com>
+
+	* procfs.c (proc_iterate_over_mappings, proc_iterate_over_threads,
+	procfs_xfer_memory): Protoize.
+	* ptx4-nat.c (proc_iterate_over_mappings): Protoize.
+
 2000-09-28  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* sol-thread.c (ps_pdmodel):  Return PR_MODEL_UNKNOWN instead of

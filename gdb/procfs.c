@@ -2509,8 +2509,7 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
    It doesn't get called that often... and if I open it
    every time, I don't need to lseek it.  */
 int
-proc_iterate_over_mappings (func)
-     int (*func) (int, CORE_ADDR);
+proc_iterate_over_mappings (int (*func) (int, CORE_ADDR))
 {
   struct prmap *map;
   procinfo *pi;
@@ -3036,10 +3035,9 @@ proc_update_threads (procinfo *pi)
  */
 
 int
-proc_iterate_over_threads (pi, func, ptr)
-     procinfo *pi;
-     int (*func) (procinfo *, procinfo *, void *);
-     void     *ptr;
+proc_iterate_over_threads (procinfo *pi,
+			   int (*func) (procinfo *, procinfo *, void *),
+			   void *ptr)
 {
   procinfo *thread, *next;
   int retval = 0;
@@ -3899,13 +3897,19 @@ wait_again:
   return retval;
 }
 
+/* Transfer LEN bytes between GDB address MYADDR and target address
+   MEMADDR.  If DOWRITE is non-zero, transfer them to the target,
+   otherwise transfer them from the target.  TARGET is unused.
+
+   The return value is 0 if an error occurred or no bytes were
+   transferred.  Otherwise, it will be a positive value which
+   indicates the number of bytes transferred between gdb and the
+   target.  (Note that the interface also makes provisions for
+   negative values, but this capability isn't implemented here.) */
+
 static int
-procfs_xfer_memory (memaddr, myaddr, len, dowrite, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int dowrite;
-     struct target_ops *target; /* ignored */
+procfs_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
+		    struct target_ops *target)
 {
   procinfo *pi;
   int nbytes = 0;
