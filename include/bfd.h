@@ -226,7 +226,7 @@ typedef struct bfd_error_vector {
   
 } bfd_error_vector_type;
 
-PROTO (char *, bfd_errmsg, ());
+PROTO (char *, bfd_errmsg, (bfd_ec error_tag));
 PROTO (void, bfd_perror, (CONST char *message));
 
 
@@ -603,7 +603,11 @@ asection *EXFUN(bfd_get_section_by_name, (bfd *abfd, CONST char *name));
 asection *EXFUN(bfd_make_section_old_way, (bfd *, CONST char *name));
 asection * EXFUN(bfd_make_section, (bfd *, CONST char *name));
 boolean EXFUN(bfd_set_section_flags, (bfd *, asection *, flagword));
-void EXFUN(bfd_map_over_sections, (bfd *abfd, void (*func)(), PTR obj));
+void EXFUN(bfd_map_over_sections, (bfd *abfd,
+    void (*func)(bfd *abfd,
+    asection *sect,
+    PTR obj),
+    PTR obj));
 boolean EXFUN(bfd_set_section_size, (bfd *, asection *, bfd_size_type val));
 boolean EXFUN(bfd_set_section_contents
     , (bfd *abfd,        
@@ -743,6 +747,7 @@ typedef struct reloc_cache_entry
   CONST struct reloc_howto_struct *howto;
 
 } arelent;
+
 typedef CONST struct reloc_howto_struct 
 { 
         /*  The type field has mainly a documetary use - the back end can
@@ -784,7 +789,12 @@ typedef CONST struct reloc_howto_struct
           called rather than the normal function. This allows really
           strange relocation methods to be accomodated (eg, i960 callj
           instructions). */
-  bfd_reloc_status_type (*special_function)();
+  bfd_reloc_status_type EXFUN ((*special_function), 
+					    (bfd *abfd,
+					     arelent *reloc_entry,
+                                            struct symbol_cache_entry *symbol,
+                                            PTR data,
+                                            asection *input_section));
 
         /* The textual name of the relocation type. */
   char *name;
@@ -1334,7 +1344,7 @@ typedef struct bfd_target
 
 } bfd_target;
 bfd_target *EXFUN(bfd_find_target, (CONST char *, bfd *));
-CONST char **EXFUN(bfd_target_list, ());
+CONST char **EXFUN(bfd_target_list, (void));
 boolean EXFUN(bfd_check_format, (bfd *abfd, bfd_format format));
 boolean EXFUN(bfd_set_format, (bfd *, bfd_format));
 CONST char *EXFUN(bfd_format_string, (bfd_format));
