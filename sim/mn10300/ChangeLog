@@ -1,3 +1,13 @@
+Wed Mar 25 15:08:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_open): Create second 1mb memory region at
+ 	0x40000000.
+	(sim_open): Create a device tree.
+	(sim-hw.h): Include.
+	(do_interrupt): Delete, needs to use dv-mn103cpu.c
+
+	* dv-mn103int.c, dv-mn103cpu.c: New files.
+
 Wed Mar 25 08:47:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mn10300_sim.h (EXTRACT_PSW_LM, INSERT_PSW_LM, PSW_IE, PSW_LM):
