@@ -12,9 +12,6 @@
 SYMBOL TABLE:
 0+ l    d  \.init	0+ (|\.init)
 0+4 l    d  \.text	0+ (|\.text)
-2000000000000000 l    d  \.sbss	0+ (|\.sbss)
-2000000000000000 l    d  \.bss	0+ (|\.bss)
-0+7f8 l    d  \.MMIX\.reg_contents	0+ (|\.MMIX\.reg_contents)
 0+ l    d  \*ABS\*	0+ (|\.shstrtab)
 0+ l    d  \*ABS\*	0+ (|\.symtab)
 0+ l    d  \*ABS\*	0+ (|\.strtab)

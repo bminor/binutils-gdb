@@ -8,8 +8,6 @@
 SYMBOL TABLE:
 0+ l    d  \.text	0+ (|\.text)
 2000000000000008 l    d  \.data	0+ (|\.data)
-2000000000000010 l    d  \.sbss	0+ (|\.sbss)
-2000000000000010 l    d  \.bss	0+ (|\.bss)
 0+ l    d  \*ABS\*	0+ (|\.shstrtab)
 0+ l    d  \*ABS\*	0+ (|\.symtab)
 0+ l    d  \*ABS\*	0+ (|\.strtab)

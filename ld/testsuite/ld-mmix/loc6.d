@@ -10,7 +10,6 @@
 SYMBOL TABLE:
 0+ l    d  \.text	0+ (|\.text)
 2000000000000200 l    d  \.data	0+ (|\.data)
-200000000000020c l    d  \.sbss	0+ (|\.sbss)
 200000000000020c l    d  \.bss	0+ (|\.bss)
 0+ l    d  \*ABS\*	0+ (|\.shstrtab)
 0+ l    d  \*ABS\*	0+ (|\.symtab)
