@@ -331,9 +331,11 @@ main (argc, argv)
 
   if (trace_file_tries)
     {
-      info_msg (_("using %s linker script:\n"),
-		saved_script_handle ? "external" : "internal");
-      info_msg ("==================================================\n");
+      if (saved_script_handle)
+	info_msg (_("using external linker script:"));
+      else
+	info_msg (_("using internal linker script:"));
+      info_msg ("\n==================================================\n");
 
       if (saved_script_handle)
 	{
