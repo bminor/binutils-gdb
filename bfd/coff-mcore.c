@@ -339,6 +339,17 @@ coff_mcore_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
   
   return howto;
 }
+
+/* Return true if this relocation should appear in the output .reloc section.
+   This function is referenced in pe_mkobject in peicode.h.  */
+static boolean
+in_reloc_p (abfd, howto)
+     bfd * abfd;
+     reloc_howto_type * howto;
+{
+  return ! howto->pc_relative && howto->type != IMAGE_REL_MCORE_RVA;
+}     
+
 
 /* The reloc processing routine for the optimized COFF linker.  */
 static boolean

@@ -1,3 +1,7 @@
+1999-05-16  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-mcore.c (in_reloc_p): Reinstate.
+
 1999-05-15  Nick Clifton  <nickc@cygnus.com>
 
 	* reloc.c (BFD_RELOC_MCORE_RVA): Define.
