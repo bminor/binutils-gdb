@@ -557,3 +557,65 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
+/* Determines if the symbol starting at START and ending in
+   a colon that was at the location pointed to by INPUT_LINE_POINTER
+   (but which has now been replaced bu a NUL) is in fact an
+   LDI:8, LDI:20 or LDI:32 instruction.  If it is, then it
+   restores the colon, adbvances INPUT_LINE_POINTER to the real end
+   of the instruction/symbol, and returns the character that really
+   terminated the symbol.  Otherwise it returns 0.  */
+char
+fr30_is_label_start (start)
+     char *  start;
+{
+  char * i_l_p = input_line_pointer;
+  char   c;
+  
+  /* Check to see if the symbol parsed so far is 'ldi'  */
+  if (   (start[0] != 'l' && start[0] != 'L')
+      || (start[1] != 'd' && start[1] != 'D')
+      || (start[2] != 'i' && start[2] != 'I')
+      || start[3] != 0)
+    return 0;
+
+  /* Check to see if the text following the colon is '8' */
+  if (i_l_p[1] == '8' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
+    {
+      /* Restore the colon, and advance input_line_pointer to
+	 the end of the new symbol.  */
+      * i_l_p = ':';
+      input_line_pointer += 2;
+      c = * input_line_pointer;
+      * input_line_pointer = 0;
+
+      return c;
+    }
+
+  /* Check to see if the text following the colon is '20' */
+  if (i_l_p[1] == '2' && i_l_p[2] =='0' && (i_l_p[3] == ' ' || i_l_p[3] == '\t'))
+    {
+      /* Restore the colon, and advance input_line_pointer to
+	 the end of the new symbol.  */
+      * i_l_p = ':';
+      input_line_pointer += 3;
+      c = * input_line_pointer;
+      * input_line_pointer = 0;
+
+      return c;
+    }
+
+  /* Check to see if the text following the colon is '32' */
+  if (i_l_p[1] == '3' && i_l_p[2] =='2' && (i_l_p[3] == ' ' || i_l_p[3] == '\t'))
+    {
+      /* Restore the colon, and advance input_line_pointer to
+	 the end of the new symbol.  */
+      * i_l_p = ':';
+      input_line_pointer += 3;
+      c = * input_line_pointer;
+      * input_line_pointer = 0;
+
+      return c;
+    }
+
+  return 0;
+}
