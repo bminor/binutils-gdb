@@ -78,8 +78,6 @@ SED_REMOVE_CONSTRUCTORS= -e /CONSTRUCTORS/d
 	< $< | ./mkscript >$*.xr
 
 # for self hosting
-GNUTARGET=a.out-sunos-big
-LDEMULATION=gld
 BFDLIB=$(unsubdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(unsubdir)/../libiberty$(subdir)/libiberty.a
 
@@ -112,6 +110,9 @@ all: Makefile $(LD_PROG)
 
 ldgram.h ldgram.c: ldgram.y
 	$(BISON) $(BISONFLAGS) -d $(VPATH)/ldgram.y -o ldgram.c
+#	These are in case BISON is really yacc (which ignores -o).
+	if [ -f y.tab.c -a ! -f ldgram.c ]; then mv y.tab.c ldgram.c; fi
+	if [ -f y.tab.h -a ! -f ldgram.h ]; then mv y.tab.h ldgram.h; fi
 
 ldlex.c: ldlex.l
 	lex -t $(VPATH)/ldlex.l >ldlex.c
