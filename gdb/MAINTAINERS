@@ -154,7 +154,7 @@ maintainer works with the native maintainer when resolving API issues.
 	s390		--target=s390-linux ,-Werror
 			(contact DJ Barrow	djbarrow@de.ibm.com)
 
-	sh		--target=sh-hms,sh-elf -w
+	sh		--target=sh-elf -w
 			Elena Zannoni		ezannoni@redhat.com
 
 	sparc		--target=sparc-elf,sparc64-elf ,-Werror

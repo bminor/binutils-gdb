@@ -245,7 +245,6 @@ s390x-*-*)		gdb_target=s390x
 			;;
 
 sh*-*-pe)		gdb_target=wince ;;
-sh-*-hms)		gdb_target=embed ;;
 sh-*-coff*)		gdb_target=embed ;;
 sh-*-elf*)		gdb_target=embed ;;
 sh-*-linux*)		gdb_target=linux
