@@ -21,14 +21,13 @@
 
 AC_PREREQ(2.13)
 AC_INIT(gdb.base)
+AC_CONFIG_HEADER(config.h:config.hin)
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
-# Directories to use in all configurations.
-AC_CONFIG_SUBDIRS(gdb.arch gdb.asm gdb.base gdb.c++ gdb.java gdb.disasm)
-AC_CONFIG_SUBDIRS(gdb.mi gdb.threads gdb.trace)
+# Directories that need to be configured in all configurations.
 configdirs=
 
 # Add HP-specific tests when appropriate.
@@ -109,7 +108,11 @@ else
 fi
 AC_SUBST(RPATH_ENVVAR)
 
+AC_CHECK_HEADERS(pthread.h)
+
 AC_EXEEXT
 
 AC_CONFIG_SUBDIRS($configdirs)
-AC_OUTPUT(Makefile)
+AC_OUTPUT([Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile \
+  gdb.c++/Makefile gdb.disasm/Makefile gdb.java/Makefile gdb.mi/Makefile \
+  gdb.threads/Makefile gdb.trace/Makefile])

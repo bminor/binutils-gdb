@@ -1,3 +1,25 @@
+2003-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Call AC_CONFIG_HEADER.  Don't call
+	AC_CONFIG_SUBDIRS on gdb.arch, gdb.asm, gdb.base gdb.c++ gdb.java,
+	gdb.disasm, gdb.mi, gdb.threads and gdb.trace.  Call
+	AC_CHECK_HEADERS on pthread.h.  Put Makefiles in the
+	aforementioned directories in the AC_OUPUT call.
+	* config.hin: New file.
+	* gdb.mi/gdb669.exp, gdb.mi/mi-pthreads.exp,
+	gdb.mi/mi1-pthreads.exp, gdb.threads/gcore-thread.exp,
+	gdb.threads/killed.exp, gdb.threads/print-threads.exp,
+	gdb.threads/pthreads.exp, gdb.threads/schedlock.exp: Make sure we
+	pass -I$objdir instead of -I$objdir/$subdir in compilation.
+	* gdb.arch/configure.in, gdb.arch/configure, gdb.asm/configure.in,
+	gdb.asm/configure, gdb.base/configure.in, gdb.base/configure,
+	gdb.c++/configure.in, gdb.c++/configure, gdb.disasm/configure.in,
+	gdb.disasm/configure, gdb.java/configure.in, gdb.java/configure,
+	gdb.mi/configure.in, gdb.mi/configure, gdb.mi/config.in,
+	gdb.threads/configure.in, gdb.threads/configure,
+	gdb.threads/config.in, gdb.trace/configure.in,
+	gdb.trace/configure: Removed.
+
 2003-01-03  Michael Chastain  <mec@shout.net>
 
 	* gdb.base/miscexprs.c: Fix PR gdb/697, "buglet in

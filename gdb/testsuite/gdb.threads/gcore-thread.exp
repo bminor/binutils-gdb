@@ -41,7 +41,7 @@ if [istarget "*-*-linux"] then {
 set why_msg "unrecognized error"
 foreach lib {-lpthreads -lpthread -lthread} {
     set options "debug"
-    lappend options "incdir=${objdir}/${subdir}"
+    lappend options "incdir=${objdir}"
     lappend options "libs=$lib"
     set ccout [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $options]
     switch -regexp -- $ccout {
