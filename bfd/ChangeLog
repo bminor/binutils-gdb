@@ -1,3 +1,7 @@
+Sun Nov 14 23:33:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* bfd-in2.h: Rebuilt.
+
 Sat Nov 13 15:27:15 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_bfd_reloc_type_lookup): Add missing prototype.  Returns
