@@ -83,9 +83,11 @@ elf_core_file_p (abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
-  Elf_Internal_Phdr *i_phdrp;	/* Elf program header, internal form */
+  Elf_Internal_Phdr *i_phdrp = NULL;	/* Elf program header, internal form */
   unsigned int phindex;
   struct elf_backend_data *ebd;
+  struct elf_obj_tdata *preserved_tdata = elf_tdata (abfd);
+  struct elf_obj_tdata *new_tdata = NULL;
 
   /* Read in the ELF header in external format.  */
   if (bfd_read ((PTR) & x_ehdr, sizeof (x_ehdr), 1, abfd) != sizeof (x_ehdr))
@@ -98,9 +100,7 @@ elf_core_file_p (abfd)
   /* Check the magic number. */
   if (elf_file_p (&x_ehdr) == false)
     {
-    wrong:
-      bfd_set_error (bfd_error_wrong_format);
-      return NULL;
+      goto wrong;
     }
 
   /* FIXME: Check EI_VERSION here ! */
@@ -125,12 +125,11 @@ elf_core_file_p (abfd)
     }
 
   /* Give abfd an elf_obj_tdata. */
-  elf_tdata (abfd) =
+  new_tdata = 
     (struct elf_obj_tdata *) bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
-  if (elf_tdata (abfd) == NULL)
+  if (new_tdata == NULL)
     return NULL;
-
-  /* FIXME: from here on down, "goto wrong" will leak memory.  */
+  elf_tdata (abfd) = new_tdata;  
 
   /* Swap in the rest of the header, now that we have the byte order. */
   i_ehdrp = elf_elfheader (abfd);
@@ -189,7 +188,7 @@ elf_core_file_p (abfd)
   i_phdrp = (Elf_Internal_Phdr *)
     bfd_alloc (abfd, sizeof (*i_phdrp) * i_ehdrp->e_phnum);
   if (!i_phdrp)
-    return NULL;
+    goto fail;
 
   elf_tdata (abfd)->phdr = i_phdrp;
 
@@ -199,7 +198,7 @@ elf_core_file_p (abfd)
       Elf_External_Phdr x_phdr;
       if (bfd_read ((PTR) &x_phdr, sizeof (x_phdr), 1, abfd)
 	  != sizeof (x_phdr))
-	return NULL;
+	goto fail;
 
       elf_swap_phdr_in (abfd, &x_phdr, i_phdrp + phindex);
     }
@@ -208,7 +207,7 @@ elf_core_file_p (abfd)
   for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex)
     {
       if (!_bfd_elfcore_section_from_phdr (abfd, i_phdrp + phindex, phindex))
-	return NULL;
+	goto fail;
     }
 
   /* Set the machine architecture. */
@@ -216,7 +215,7 @@ elf_core_file_p (abfd)
     {
       /* It's OK if this fails for the generic target.  */
       if (ebd->elf_machine_code != EM_NONE)
-	return NULL;
+	goto fail;
     }
 
   /* Save the entry point from the ELF header. */
@@ -231,4 +230,14 @@ elf_core_file_p (abfd)
     }
 
   return abfd->xvec;
+
+wrong:
+  bfd_set_error (bfd_error_wrong_format);
+fail:
+  if (i_phdrp != NULL)
+    bfd_release (abfd, i_phdrp);
+  if (new_tdata != NULL)
+    bfd_release (abfd, new_tdata);
+  elf_tdata (abfd) = preserved_tdata;
+  return NULL;
 }

@@ -1,3 +1,9 @@
+2000-04-06  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* elfcore.h (elf_core_file_p): preserve value of tdata at entry,
+	and restore it on failure.  Release newly allocated tdata on
+	failure.
+	
 Fri Apr  7 11:33:47 2000  Jim Wilson  <wilson@cygnus.com>
 
 	* dwarf2.c (struct dwarf2_debug): New field dwarf_line_size.
