@@ -98,7 +98,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  * This module defines the GDB target vector and its methods.
  */
 
-static void procfs_open              PARAMS((char *, int));
+static void procfs_open (char *, int);
 static void procfs_attach (char *, int);
 static void procfs_detach (char *, int);
 static void procfs_resume (int, int, enum target_signal);
@@ -754,9 +754,8 @@ int proc_set_traced_signals (procinfo * pi, sigset_t * sigset);
 
 int proc_update_threads (procinfo * pi);
 int proc_iterate_over_threads (procinfo * pi,
-			       int (*func) PARAMS ((procinfo *,
-						    procinfo *,
-						    void *)), void *ptr);
+			       int (*func) (procinfo *, procinfo *, void *),
+			       void *ptr);
 
 gdb_gregset_t *proc_get_gregs (procinfo * pi);
 gdb_fpregset_t *proc_get_fpregs (procinfo * pi);

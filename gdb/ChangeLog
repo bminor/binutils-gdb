@@ -1,3 +1,7 @@
+2000-06-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* procfs.c, remote.c: Eliminate use of PARAMS from these files.
+
 Mon Jun 12 10:21:24 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh (gdbarch_dump): When non multi-arch skip macros that

@@ -5162,8 +5162,7 @@ remote_cisco_close (int quitting)
 }
 
 static void
-  remote_cisco_mourn
-PARAMS ((void))
+remote_cisco_mourn (void)
 {
   remote_mourn_1 (&remote_cisco_ops);
 }
