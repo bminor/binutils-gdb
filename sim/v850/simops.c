@@ -6,36 +6,86 @@
 void
 OP_300 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  temp = OP[1];
+  temp = (temp << 25) >> 25;
+  op2 = temp;
+  result = get_byte (State.mem + State.regs[30] + op2);
+  result = (result << 24) >> 24;
+  State.regs[OP[0]] = result;
 }
 
 /* sld.h */
 void
 OP_400 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  temp = OP[1];
+  temp = (temp << 25) >> 25;
+  op2 = temp << 1;
+  result = get_half (State.mem + State.regs[30] + op2);
+  result = (result << 16) >> 16;
+  State.regs[OP[0]] = result;
 }
 
 /* sld.w */
 void
 OP_500 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  temp = OP[1];
+  temp = (temp << 25) >> 25;
+  op2 = temp << 2;
+  result = get_word (State.mem + State.regs[30] + op2);
+  State.regs[OP[0]] = result;
 }
 
 /* sst.b */
 void
 OP_380 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  temp = OP[1];
+  temp = (temp << 25) >> 25;
+  op1 = temp;
+  put_byte (State.mem + State.regs[30] + op1, op0);
 }
 
 /* sst.h */
 void
 OP_480 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  temp = OP[1];
+  temp = (temp << 25) >> 25;
+  op1 = temp << 1;
+  put_half (State.mem + State.regs[30] + op1, op0);
 }
 
 /* sst.w */
 void
 OP_501 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  temp = OP[1];
+  temp = (temp << 25) >> 25;
+  op1 = temp << 2;
+  put_word (State.mem + State.regs[30] + op1, op0);
 }
 
 /* ld.b */

@@ -154,7 +154,13 @@ static void
 do_format_4 (insn)
      uint32 insn;
 {
+  struct hash_entry *h;
   printf("format 4 0x%x\n", insn);
+
+  h = lookup_hash (insn);
+  OP[0] = (insn >> 11) & 0x1f;
+  OP[1] = (insn & 0x7f);
+  (h->ops->func) ();
 }
 
 static void

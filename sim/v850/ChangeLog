@@ -1,5 +1,10 @@
 Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* interp.c (do_format_4): Get operands correctly and
+	call the target function.
+	* simops.c: Rough cut at "sld.b", "sld.h", "sld.w", "sst.b",
+	"sst.h", and "sst.w".
+
 	* v850_sim.h: The V850 doesn't have split I&D spaces.  Change
 	accordingly.  Remove many unused definitions.
 	* interp.c: The V850 doesn't have split I&D spaces.  Change
