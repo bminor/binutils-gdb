@@ -531,7 +531,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"madd.d",  "D,R,S,T",	0x4c000021, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_D,	I4	},
 {"madd.s",  "D,R,S,T",	0x4c000020, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_S,	I4	},
 /* start-sanitize-r5900 */
-{"madd.s",  "D,R,S,T",	0x4c000020, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_S,	T5	},
+{"madd.s",  "D,S,T",	0x4600001c, 0xffe007ff, WR_D|RD_S|RD_T|FP_S,    	T5	},
   /* end-sanitize-r5900 */
 {"madd",    "s,t",	0x0000001c, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,		L1	},
 {"madd",    "s,t",	0x70000000, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	        G1	},
@@ -549,7 +549,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"adda.s",  "S,T",      0x46000018, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
 {"madda.s", "S,T",      0x4600001e, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
 {"max.s",   "D,S,T",    0x46000028, 0xffe0003f, WR_D|RD_S|RD_T|FP_S,    T5 },
-{"min.s",   "D,S,T",    0x46000030, 0xffe0003f, WR_D|RD_S|RD_T|FP_S,    T5 },
+{"min.s",   "D,S,T",    0x46000029, 0xffe0003f, WR_D|RD_S|RD_T|FP_S,    T5 },
 {"msuba.s", "S,T",      0x4600001f, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
 {"mula.s",  "S,T",      0x4600001a, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
 {"suba.s",  "S,T",      0x46000019, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
@@ -644,7 +644,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"msub.d",  "D,R,S,T",	0x4c000029, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_D,	I4	},
 {"msub.s",  "D,R,S,T",	0x4c000028, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_S,	I4	},
 /* start-sanitize-r5900 */
-{"msub.s",  "D,R,S,T",	0x4c000028, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_S,	T5	},
+{"msub.s",  "D,S,T",	0x4600001d, 0xffe007ff, WR_D|RD_S|RD_T|FP_S,	T5	},
 /* end-sanitize-r5900 */
 {"msub",    "s,t",	0x0000001e, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,L1	},
 {"msubu",   "s,t",	0x0000001f, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,L1	},
