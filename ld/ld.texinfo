@@ -1217,7 +1217,7 @@ this option overrides it.  @xref{BFD}.
 Create a position independent executable.  This is currently only supported on
 ELF platforms.  Position independent executables are similar to shared
 libraries in that they are relocated by the dynamic linker to the virtual
-address OS chooses for them (which can varry between invocations), like
+address the OS chooses for them (which can vary between invocations).  Like
 normal dynamically linked executables they can be executed and symbols
 defined in the executable cannot be overridden by shared libraries.
 
@@ -2686,7 +2686,8 @@ in the first input file.  The first section will be at address zero.
 The full description of an output section looks like this:
 @smallexample
 @group
-@var{section} [@var{address}] [(@var{type})] : [AT(@var{lma})]
+@var{section} [@var{address}] [(@var{type})] :
+  [AT(@var{lma})] [SUBALIGN(@var{subsection_align})]
   @{
     @var{output-section-command}
     @var{output-section-command}
@@ -3207,7 +3208,8 @@ We showed above that the full description of an output section looked
 like this:
 @smallexample
 @group
-@var{section} [@var{address}] [(@var{type})] : [AT(@var{lma})]
+@var{section} [@var{address}] [(@var{type})] :
+  [AT(@var{lma})] [SUBALIGN(@var{subsection_align})]
   @{
     @var{output-section-command}
     @var{output-section-command}
@@ -3222,6 +3224,7 @@ remaining section attributes.
 @menu
 * Output Section Type::		Output section type
 * Output Section LMA::		Output section LMA
+* Forced Input Alignment::	Forced Input Alignment
 * Output Section Region::	Output section region
 * Output Section Phdr::		Output section phdr
 * Output Section Fill::		Output section fill
@@ -3328,6 +3331,15 @@ for (dst = &_bstart; dst< &_bend; dst++)
   *dst = 0;
 @end group
 @end smallexample
+
+@node Forced Input Alignment
+@subsubsection Forced Input Alignment
+@kindex SUBALIGN(@var{subsection_align})
+@cindex forcing input section alignment
+@cindex input section alignment
+You can force input section alignment within an output section by using
+SUBALIGN.  The value specified overrides any alignment given by input
+sections, whether larger or smaller.
 
 @node Output Section Region
 @subsubsection Output Section Region

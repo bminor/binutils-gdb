@@ -1,6 +1,6 @@
 /* A YACC grammar to parse a superset of the AT&T linker scripting language.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
 This file is part of GNU ld.
@@ -94,7 +94,7 @@ static int error_index;
 }
 
 %type <etree> exp opt_exp_with_type mustbe_exp opt_at phdr_type phdr_val
-%type <etree> opt_exp_without_type
+%type <etree> opt_exp_without_type opt_subalign
 %type <fill> fill_opt fill_exp
 %type <name_list> exclude_name_list
 %type <wildcard_list> file_NAME_list
@@ -142,7 +142,7 @@ static int error_index;
 %token STARTUP HLL SYSLIB FLOAT NOFLOAT NOCROSSREFS
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
-%token ALIGNMOD AT PROVIDE
+%token ALIGNMOD AT SUBALIGN PROVIDE
 %type <token> assign_op atype attributes_opt
 %type <name>  filename
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD ASSERT_K
@@ -828,31 +828,37 @@ opt_at:
 	|	{ $$ = 0; }
 	;
 
+opt_subalign:
+		SUBALIGN '(' exp ')' { $$ = $3; }
+	|	{ $$ = 0; }
+	;
+
 section:	NAME 		{ ldlex_expression(); }
 		opt_exp_with_type
-		opt_at   	{ ldlex_popstate (); ldlex_script (); }
+		opt_at
+		opt_subalign	{ ldlex_popstate (); ldlex_script (); }
 		'{'
 			{
 			  lang_enter_output_section_statement($1, $3,
 							      sectype,
-							      0, 0, 0, $4);
+							      0, 0, $5, $4);
 			}
 		statement_list_opt
  		'}' { ldlex_popstate (); ldlex_expression (); }
 		memspec_opt memspec_at_opt phdr_opt fill_opt
 		{
 		  ldlex_popstate ();
-		  lang_leave_output_section_statement ($14, $11, $13, $12);
+		  lang_leave_output_section_statement ($15, $12, $14, $13);
 		}
 		opt_comma
 		{}
 	|	OVERLAY
 			{ ldlex_expression (); }
-		opt_exp_without_type opt_nocrossrefs opt_at
+		opt_exp_without_type opt_nocrossrefs opt_at opt_subalign
 			{ ldlex_popstate (); ldlex_script (); }
 		'{'
 			{
-			  lang_enter_overlay ($3);
+			  lang_enter_overlay ($3, $6);
 			}
 		overlay_section
 		'}'
@@ -861,7 +867,7 @@ section:	NAME 		{ ldlex_expression(); }
 			{
 			  ldlex_popstate ();
 			  lang_leave_overlay ($5, (int) $4,
-					      $15, $12, $14, $13);
+					      $16, $13, $15, $14);
 			}
 		opt_comma
 	|	/* The GROUP case is just enough to support the gcc

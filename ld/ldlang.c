@@ -4649,6 +4649,8 @@ lang_add_nocrossref (struct lang_nocrossref *l)
 
 /* The overlay virtual address.  */
 static etree_type *overlay_vma;
+/* And subsection alignment.  */
+static etree_type *overlay_subalign;
 
 /* An expression for the maximum section size seen so far.  */
 static etree_type *overlay_max;
@@ -4665,12 +4667,15 @@ static struct overlay_list *overlay_list;
 /* Start handling an overlay.  */
 
 void
-lang_enter_overlay (etree_type *vma_expr)
+lang_enter_overlay (etree_type *vma_expr, etree_type *subalign)
 {
   /* The grammar should prevent nested overlays from occurring.  */
-  ASSERT (overlay_vma == NULL && overlay_max == NULL);
+  ASSERT (overlay_vma == NULL
+	  && overlay_subalign == NULL
+	  && overlay_max == NULL);
 
   overlay_vma = vma_expr;
+  overlay_subalign = subalign;
 }
 
 /* Start a section in an overlay.  We handle this by calling
@@ -4684,7 +4689,7 @@ lang_enter_overlay_section (const char *name)
   etree_type *size;
 
   lang_enter_output_section_statement (name, overlay_vma, normal_section,
-				       0, 0, 0, 0);
+				       0, 0, overlay_subalign, 0);
 
   /* If this is the first section, then base the VMA of future
      sections on this one.  This will work correctly even if `.' is

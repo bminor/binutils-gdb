@@ -492,7 +492,7 @@ extern void lang_new_phdr
 extern void lang_add_nocrossref
   (struct lang_nocrossref *);
 extern void lang_enter_overlay
-  (etree_type *);
+  (etree_type *, etree_type *);
 extern void lang_enter_overlay_section
   (const char *);
 extern void lang_leave_overlay_section
