@@ -1,3 +1,21 @@
+Thu Oct 10 17:54:08 1991  John Gilmore  (gnu at cygnus.com)
+
+	* config/*:  trad-core support is HOST dependent, not target
+	dependent.  Target config files only set DEFAULT_VECTOR and/or
+	other vector elements.  Exception:  when host-aout.c is in use,
+	in which case we're forced to assume we're native (hp, vax,
+	tahoe).  Rename XDEPFILES to HDEPFILES.
+	* Makefile.in:  Rename XDEPFILES.
+	* config/h-sun*:  Don't force static linking.
+	* trad-core.c:  Document how to use it nowadays.
+	* i386aout.c, newsos3.c:  Clean up.
+	* i386coff.c:  Allow 386 coff files to be used as core files too
+	(for reading core files from embedded systems).
+
+Tue Oct  8 15:30:39 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Add i386aout.c for a.out support on the i386.
+
 Tue Oct  8 12:18:54 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* reloc.c, section.c, syms.c, targets.c: correct info-node

@@ -18,13 +18,18 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* This file does not define a particular back-end, but it defines routines
-   that can be used by other back-ends.  */
+/* To use this file on a particular host, configure the host with these
+   parameters in the config/h-HOST file:
+
+	HDEFINES=-DHOST_SYS=WHATEVER_SYS -DTRAD_CORE
+	HDEPFILES=trad-core.o
+
+ */
+
 #include <sysdep.h>
 #include "bfd.h"
 #include <stdio.h>
 #include "libbfd.h"
-
 #include "libaout.h"           /* BFD a.out internal data structures */
 
 #include <sys/types.h>
@@ -38,13 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <errno.h>
 
-/* need this cast b/c ptr is really void * */
-#define core_hdr(bfd) (((struct core_data *) (bfd->tdata))->hdr)
-#define core_datasec(bfd) (((struct core_data *) ((bfd)->tdata))->data_section)
-#define core_stacksec(bfd) (((struct core_data*)((bfd)->tdata))->stack_section)
-#define core_regsec(bfd) (((struct core_data *) ((bfd)->tdata))->reg_section)
-#define core_upage(bfd) (((struct core_data *) ((bfd)->tdata))->upage)
-
 /* These are stored in the bfd's tdata */
 struct core_data {
   struct user *upage;             /* core file header */
@@ -52,6 +50,12 @@ struct core_data {
   asection *stack_section;
   asection *reg_section;
 };
+
+#define core_hdr(bfd) (((struct core_data *) (bfd->tdata))->hdr)
+#define core_upage(bfd) (((struct core_data *) ((bfd)->tdata))->upage)
+#define core_datasec(bfd) (((struct core_data *) ((bfd)->tdata))->data_section)
+#define core_stacksec(bfd) (((struct core_data*)((bfd)->tdata))->stack_section)
+#define core_regsec(bfd) (((struct core_data *) ((bfd)->tdata))->reg_section)
 
 /* ARGSUSED */
 bfd_target *
@@ -119,9 +123,9 @@ loser2:
   core_datasec (abfd)->name = ".data";
   core_regsec (abfd)->name = ".reg";
 
-  core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD;
-  core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD;
-  core_regsec (abfd)->flags = SEC_ALLOC;
+  core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
+  core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
+  core_regsec (abfd)->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
 
   core_datasec (abfd)->size =  NBPG * u.u_dsize;
   core_stacksec (abfd)->size = NBPG * u.u_ssize;
@@ -180,3 +184,102 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 {
   return true;		/* FIXME, We have no way of telling at this point */
 }
+
+/* No archive file support via this BFD */
+#define	trad_unix_openr_next_archived_file	bfd_generic_openr_next_archived_file
+#define	trad_unix_generic_stat_arch_elt		bfd_generic_stat_arch_elt
+#define	trad_unix_slurp_armap			bfd_false
+#define	trad_unix_slurp_extended_name_table	bfd_true
+#define	trad_unix_write_armap			(PROTO (boolean, (*),	\
+     (bfd *arch, unsigned int elength, struct orl *map, int orl_count,	\
+      int stridx))) bfd_false
+#define	trad_unix_truncate_arname		bfd_dont_truncate_arname
+#define	aout_32_openr_next_archived_file	bfd_generic_openr_next_archived_file
+
+#define	trad_unix_close_and_cleanup		bfd_generic_close_and_cleanup
+#define	trad_unix_set_section_contents		(PROTO(boolean, (*),	\
+         (bfd *abfd, asection *section, PTR data, file_ptr offset,	\
+         bfd_size_type count))) bfd_false
+#define	trad_unix_get_section_contents		bfd_generic_get_section_contents
+#define	trad_unix_new_section_hook		(PROTO (boolean, (*),	\
+	(bfd *, sec_ptr))) bfd_true
+#define	trad_unix_get_symtab_upper_bound	bfd_0u
+#define	trad_unix_get_symtab			(PROTO (unsigned int, (*), \
+        (bfd *, struct symbol_cache_entry **))) bfd_0u
+#define	trad_unix_get_reloc_upper_bound		(PROTO (unsigned int, (*), \
+	(bfd *, sec_ptr))) bfd_0u
+#define	trad_unix_canonicalize_reloc		(PROTO (unsigned int, (*), \
+	(bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0u
+#define	trad_unix_make_empty_symbol		(PROTO (		\
+	struct symbol_cache_entry *, (*), (bfd *))) bfd_false
+#define	trad_unix_print_symbol			(PROTO (void, (*),	\
+	(bfd *, PTR, struct symbol_cache_entry  *,			\
+	 bfd_print_symbol_type))) bfd_false
+#define	trad_unix_get_lineno			(PROTO (alent *, (*),	\
+	(bfd *, struct symbol_cache_entry *))) bfd_nullvoidptr
+#define	trad_unix_set_arch_mach			(PROTO (boolean, (*),	\
+	(bfd *, enum bfd_architecture, unsigned long))) bfd_false
+#define	trad_unix_find_nearest_line		(PROTO (boolean, (*),	\
+        (bfd *abfd, struct sec  *section,				\
+         struct symbol_cache_entry  **symbols,bfd_vma offset,		\
+         CONST char **file, CONST char **func, unsigned int *line))) bfd_false
+#define	trad_unix_sizeof_headers		(PROTO (int, (*),	\
+	(bfd *, boolean))) bfd_0
+
+#define trad_unix_bfd_debug_info_start		bfd_void
+#define trad_unix_bfd_debug_info_end		bfd_void
+#define trad_unix_bfd_debug_info_accumulate	(PROTO (void, (*),	\
+	(bfd *, struct sec *))) bfd_void
+
+
+bfd_target trad_core_big_vec =
+  {
+    "trad-core-big",
+    bfd_target_unknown_flavour,
+    true,			/* target byte order */
+    true,			/* target headers byte order */
+    (HAS_RELOC | EXEC_P |	/* object flags */
+     HAS_LINENO | HAS_DEBUG |
+     HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+    (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+    ' ',						   /* ar_pad_char */
+    16,							   /* ar_max_namelen */
+    3,							   /* minimum alignment power */
+    _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+    _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+
+      {_bfd_dummy_target, _bfd_dummy_target,
+       _bfd_dummy_target, trad_unix_core_file_p},
+      {bfd_false, bfd_false,	/* bfd_create_object */
+       bfd_false, bfd_false},
+      {bfd_false, bfd_false,	/* bfd_write_contents */
+       bfd_false, bfd_false},
+    
+    JUMP_TABLE(trad_unix)
+};
+
+bfd_target trad_core_little_vec =
+{
+  "trad-core-little",
+  bfd_target_unknown_flavour,
+  false,			/* target byte order */
+  false,			/* target headers byte order */
+  (HAS_RELOC | EXEC_P |	/* object flags */
+   HAS_LINENO | HAS_DEBUG |
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  ' ',				/* ar_pad_char */
+  16,				/* ar_max_namelen */
+  3,				/* minimum alignment power */
+  _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putb16,
+  _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16,
+  
+  {_bfd_dummy_target, _bfd_dummy_target,
+   _bfd_dummy_target, trad_unix_core_file_p},
+  {bfd_false, bfd_false,	/* bfd_create_object */
+   bfd_false, bfd_false},
+  {bfd_false, bfd_false,	/* bfd_write_contents */
+   bfd_false, bfd_false},
+  
+  JUMP_TABLE(trad_unix)
+};
