@@ -126,6 +126,12 @@ if { [istarget mips*-*-*] } then {
 	}
 
 	if [istarget mips*el-*-*] { 
+	    run_dump_test "elfel-rel3"
+	} {
+	    run_dump_test "elf-rel3"
+	}
+
+	if [istarget mips*el-*-*] { 
 	    run_dump_test "${tmips}elempic"
 	} {
 	    run_dump_test "${tmips}empic"

@@ -1,5 +1,14 @@
 2001-06-06  H.J. Lu  <hjl@gnu.org>
 
+	* gas/mips/elf-rel3.s: New file.
+	* gas/mips/elf-rel3.d: Likewise.
+	* gas/mips/elfel-rel3.s: Likewise.
+	* gas/mips/elfel-rel3.d: Likewise.
+
+	* gas/mips/mips.exp: Run elf-rel3/elfel-rel3.
+
+2001-06-06  H.J. Lu  <hjl@gnu.org>
+
 	* gas/elf/elf.exp (run_list_test): New.
 	Run section2 with run_list_test.
 
