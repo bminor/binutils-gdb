@@ -1,5 +1,10 @@
 2003-06-26  Andrew Cagney  <cagney@redhat.com>
 
+	* utils.c (internal_vproblem): Print the problem to a reason
+	buffer and then pass to query.  Make the msg variable more local.
+
+2003-06-26  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (FRAME_ARGS_ADDRESS): Add predicate.  Deprecate.
 	(FRAME_LOCALS_ADDRESS): Add predicate.  Deprecate.
 	* gdbarch.h, gdbarch.c: Re-generate.
