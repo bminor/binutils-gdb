@@ -1,3 +1,7 @@
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
+	* gdb.base/dump.exp [alpha*-*-*]: Add -taso linker switch.
+
 2003-06-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.asm/asm-source.exp: Dissassemble from &globalvar instead
