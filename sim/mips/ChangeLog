@@ -1,3 +1,7 @@
+2002-06-12  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (X): Delete unused function.
+
 2002-06-08  Andrew Cagney  <cagney@redhat.com>
 
 	* interp.c: Include "gdb/callback.h" and "gdb/remote-sim.h".

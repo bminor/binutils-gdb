@@ -3520,16 +3520,6 @@
     }
 }
 
-:%s::::X:int x
-{
-  switch (x)
-    {
-    case 0: return "f";
-    case 1: return "t";
-    default: return "?";
-    }
-}
-
 :%s::::TF:int tf
 {
   if (tf)
