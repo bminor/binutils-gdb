@@ -34,7 +34,7 @@ PROTO(char *, memcpy,(char *,CONST char *,unsigned int));
 extern PROTO(int,getuid,());
 extern PROTO(int,getgid,());
 extern char * strchr();
-extern PROTO(void, perror,(char *));
+extern PROTO(void, perror,(CONST char *));
 extern char *getenv();
 extern char *memchr();
 extern char *strrchr();
@@ -52,7 +52,7 @@ extern PROTO(PTR ,realloc, (PTR, unsigned));
 
 extern PROTO(int, free,(PTR));
 
-PROTO (void, perror, (char *s));
+
 extern char *strrchr();
 extern char *ctime();
 extern int _flsbuf();

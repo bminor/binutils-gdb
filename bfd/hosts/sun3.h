@@ -14,7 +14,7 @@
 
 extern PROTO(int, abort,(void));
 extern PROTO(int, close,(int));
-extern PROTO(int, fcntl,(int des, int cmd));
+extern PROTO(int, fcntl,(int des, int cmd, int e));
 extern PROTO(int, fprintf,(FILE *,char *,...));
 extern PROTO(int, printf,(char *,...));
 extern PROTO(int, qsort,(void *data,int els, int siz, int func()));
