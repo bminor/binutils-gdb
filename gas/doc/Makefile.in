@@ -29,6 +29,7 @@ srcdir = .
 
 prefix = /usr/local
 
+program_transform_name =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
@@ -58,8 +59,8 @@ AR = ar
 AR_FLAGS = qv
 BISON = bison
 MAKEINFO = makeinfo
+TEXI2DVI = texi2dvi
 RANLIB = ranlib
-MAKEINFO = makeinfo
 
 # What version of the manual you want (see *.m4); "all" includes everything
 CONFIG=all
@@ -72,7 +73,7 @@ M4=m4
 srcdir=..
 
 # Where to find texinfo.tex to format docn with TeX
-TEXIDIR = $(srcdir)/../../texinfo/fsf
+TEXIDIR = $(srcdir)/../../texinfo
 
 #### host, target, and site specific Makefile frags come in here.
 ##
@@ -83,9 +84,10 @@ install:
 	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	$(INSTALL_DATA) $(srcdir)/as.1 $(man1dir)/as.1
+	$(INSTALL_DATA) $(srcdir)/as.1 $(man1dir)/`t='$(program_transform_name)'; echo as | sed -e "" $$t`.1
 
 info: as.info
+dvi: as.dvi
 
 as.info: as-${CONFIG}.texinfo
 	$(MAKEINFO) -o as.info $(srcdir)/as-${CONFIG}.texinfo
@@ -99,11 +101,8 @@ install-info: as.info
 	done
 
 as.dvi:	as-${CONFIG}.texinfo
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex as-${CONFIG}.texinfo
-	texindex as-${CONFIG}.??
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex as-${CONFIG}.texinfo
+	$(TEXI2DVI) $(srcdir)/as-$(config).texinfo
 	mv as-${CONFIG}.dvi as.dvi
-	rm as-${CONFIG}.?? as-${CONFIG}.???
 
 # ROFF doc targets as.ms, as.mm, as.me
 # (we don't use a variable because we don't trust all makes to handle
@@ -151,6 +150,9 @@ as-gen.texinfo: as.texinfo pretex.m4 none.m4 gen.m4
 
 as-h8.texinfo: as.texinfo pretex.m4 none.m4 h8.m4
 	${M4} pretex.m4 none.m4 h8.m4 as.texinfo >as-h8.texinfo
+
+as-z8000.texinfo: as.texinfo pretex.m4 none.m4 z8000.m4
+	${M4} pretex.m4 none.m4 z8000.m4 as.texinfo >as-z8000.texinfo
 
 as-i80386.texinfo: as.texinfo pretex.m4 none.m4 i80386.m4
 	${M4} pretex.m4 none.m4 i80386.m4 as.texinfo >as-i80386.texinfo
