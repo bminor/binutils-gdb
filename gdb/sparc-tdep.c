@@ -214,115 +214,6 @@ setup_arbitrary_frame (argc, argv)
   return fid;
 }
 
-/* This code was written by Gary Beihl (beihl@mcc.com).
-   It was modified by Michael Tiemann (tiemann@corto.inria.fr).  */
-
-/*
- * This routine appears to be passed a size by which to increase the
- * stack.  It then executes a save instruction in the inferior to
- * increase the stack by this amount.  Only the register window system
- * should be affected by this; the program counter & etc. will not be.
- *
- * This instructions used for this purpose are:
- *
- * 	sethi %hi(0x0),g1                    *
- * 	add g1,0x1ee0,g1                     *
- * 	save sp,g1,sp                        
- * 	sethi %hi(0x0),g1                    *
- * 	add g1,0x1ee0,g1                     *
- * 	t g0,0x1,o0
- * 	sethi %hi(0x0),g0                    (nop)
- *
- *  I presume that these set g1 to be the negative of the size, do a
- * save (putting the stack pointer at sp - size) and restore the
- * original contents of g1.  A * indicates that the actual value of
- * the instruction is modified below.
- */
-static unsigned int save_insn_opcodes[] = {
-  0x03000000, 0x82007ee0, 0x9de38001, 0x03000000,
-  0x82007ee0, 0x91d02001, 0x01000000 };
-
-/* FIXME:
-The person who wrote function calls on the SPARC didn't understand the
-SPARC stack.  There is no need to call into the inferior to run a save
-instruction and then do it again for a restore instruction.  Save and
-restore amount to add-to-SP and move-to-SP when all has been said and
-done.  You simply modify the stack in memory to look like a function
-has been called -- the same way any other architecture does it.
-
-That would fix the sparc xfail in testsuite/gdb.t06/signals.exp, make
-function calls much faster, and would clean up some very poor code.  */
-
-
-/* Neither do_save_insn or do_restore_insn save stack configuration
-   (current_frame, etc),
-   since the stack is in an indeterminate state through the call to
-   each of them.  That is the responsibility of the routine which calls them.  */
-
-static void
-do_save_insn (size)
-     int size;
-{
-  int g1 = read_register (G1_REGNUM);
-  CORE_ADDR sp = read_register (SP_REGNUM);
-  CORE_ADDR pc = read_register (PC_REGNUM);
-  CORE_ADDR npc = read_register (NPC_REGNUM);
-  CORE_ADDR fake_pc = sp - sizeof (save_insn_opcodes);
-  struct inferior_status inf_status;
-
-  save_inferior_status (&inf_status, 0); /* Don't restore stack info */
-  /*
-   * See above.
-   */
-  save_insn_opcodes[0] = 0x03000000 | ((-size >> 10) & 0x3fffff);
-  save_insn_opcodes[1] = 0x82006000 | (-size & 0x3ff);
-  save_insn_opcodes[3] = 0x03000000 | ((g1 >> 10) & 0x3fffff);
-  save_insn_opcodes[4] = 0x82006000 | (g1 & 0x3ff);
-  write_memory (fake_pc, (char *)save_insn_opcodes, sizeof (save_insn_opcodes));
-
-  clear_proceed_status ();
-  stop_after_trap = 1;
-  proceed (fake_pc, 0, 0);
-
-  write_register (PC_REGNUM, pc);
-  write_register (NPC_REGNUM, npc);
-  restore_inferior_status (&inf_status);
-}
-
-/*
- * This routine takes a program counter value.  It restores the
- * register window system to the frame above the current one.
- * THIS ROUTINE CLOBBERS PC AND NPC IN THE TARGET!
- */
-
-/*    The following insns translate to:
- 
- 	restore %g0,%g0,%g0
- 	t %g0,1
- 	sethi %hi(0),%g0	*/
-
-static unsigned int restore_insn_opcodes[] = {
-  0x81e80000, 0x91d02001, 0x01000000 };
-
-static void
-do_restore_insn ()
-{
-  CORE_ADDR sp = read_register (SP_REGNUM);
-  CORE_ADDR fake_pc = sp - sizeof (restore_insn_opcodes);
-  struct inferior_status inf_status;
-
-  save_inferior_status (&inf_status, 0); /* Don't restore stack info */
-
-  write_memory (fake_pc, (char *)restore_insn_opcodes,
-		sizeof (restore_insn_opcodes));
-
-  clear_proceed_status ();
-  stop_after_trap = 1;
-  proceed (fake_pc, 0, 0);
-
-  restore_inferior_status (&inf_status);
-}
-
 /* Given a pc value, skip it forward past the function prologue by
    disassembling instructions that appear to be a prologue.
 
@@ -545,41 +436,59 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
 
 /* Push an empty stack frame, and record in it the current PC, regs, etc.
 
-   Note that the write's are of registers in the context of the newly
-   pushed frame.  Thus the the fp*'s, the g*'s, the i*'s, and
-   the randoms, of the new frame, are being saved.  The locals and outs
+   We save the non-windowed registers and the ins.  The locals and outs
    are new; they don't need to be saved. The i's and l's of
-   the last frame were saved by the do_save_insn in the register
-   file (now on the stack, since a context switch happended imm after).
+   the last frame were already saved on the stack
 
-   The return pointer register %i7 does not have
-   the pc saved into it (return from this frame will be accomplished
-   by a POP_FRAME).  In fact, we must leave it unclobbered, since we
-   must preserve it in the calling routine except across call instructions.  */
+   The return pointer register %i7 does not have the pc saved into it
+   (return from this frame will be accomplished by a POP_FRAME).  In
+   fact, we must leave it unclobbered, since we must preserve it in
+   the calling routine except across call instructions.  I'm not sure
+   the preceding sentence is true; isn't it based on confusing the %i7
+   saved in the dummy frame versus the one saved in the frame of the
+   calling routine?  */
 
 /* Definitely see tm-sparc.h for more doc of the frame format here.  */
 
 void
 sparc_push_dummy_frame ()
 {
-  CORE_ADDR fp;
+  CORE_ADDR sp;
   char register_temp[REGISTER_BYTES];
 
-  do_save_insn (0x140); /* FIXME where does this value come from? */
-  fp = read_register (FP_REGNUM);
+  sp = read_register (SP_REGNUM);
 
-  read_register_bytes (REGISTER_BYTE (FP0_REGNUM), register_temp, 32 * 4);
-  write_memory (fp - 0x80, register_temp, 32 * 4);
+  read_register_bytes (REGISTER_BYTE (FP0_REGNUM), register_temp,
+		       REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
+  write_memory (sp - 0x80, register_temp, REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
 
-  read_register_bytes (REGISTER_BYTE (G0_REGNUM), register_temp, 8 * 4);
-  write_memory (fp - 0xa0, register_temp, 8 * 4);
+  read_register_bytes (REGISTER_BYTE (G0_REGNUM), register_temp,
+		       REGISTER_RAW_SIZE (G0_REGNUM) * 8);
+  write_memory (sp - 0xa0, register_temp, REGISTER_RAW_SIZE (G0_REGNUM) * 8);
 
-  read_register_bytes (REGISTER_BYTE (I0_REGNUM), register_temp, 8 * 4);
-  write_memory (fp - 0xc0, register_temp, 8 * 4);
+  read_register_bytes (REGISTER_BYTE (O0_REGNUM), register_temp,
+		       REGISTER_RAW_SIZE (O0_REGNUM) * 8);
+  write_memory (sp - 0xc0, register_temp, REGISTER_RAW_SIZE (O0_REGNUM) * 8);
 
   /* Y, PS, WIM, TBR, PC, NPC, FPS, CPS regs */
-  read_register_bytes (REGISTER_BYTE (Y_REGNUM), register_temp, 8 * 4);
-  write_memory (fp - 0xe0, register_temp, 8 * 4);
+  read_register_bytes (REGISTER_BYTE (Y_REGNUM), register_temp,
+		       REGISTER_RAW_SIZE (Y_REGNUM) * 8);
+  write_memory (sp - 0xe0, register_temp, REGISTER_RAW_SIZE (Y_REGNUM) * 8);
+
+  {
+    CORE_ADDR old_sp = sp;
+
+    /* Now move the stack pointer (equivalent to the add part of a save
+       instruction).  */
+    sp -= 0x140;
+    write_register (SP_REGNUM, sp);
+
+    /* Now make sure that the frame pointer we save in the new frame points
+       to the old frame (equivalent to the register window shift part of
+       a save instruction).  Need to do this after the write to the sp, or
+       else this might get written into the wrong set of saved ins&locals.  */
+    write_register (FP_REGNUM, old_sp);
+  }
 }
 
 /* Discard from the stack the innermost frame, restoring all saved registers.
@@ -607,7 +516,6 @@ sparc_pop_frame ()
 
   fi = get_frame_info (frame);
   get_frame_saved_regs (fi, &fsr);
-  do_restore_insn ();
   if (fsr.regs[FP0_REGNUM])
     {
       read_memory (fsr.regs[FP0_REGNUM], raw_buffer, 32 * 4);
@@ -620,8 +528,27 @@ sparc_pop_frame ()
     }
   if (fsr.regs[I0_REGNUM])
     {
+      CORE_ADDR sp;
+
+      char reg_temp[REGISTER_BYTES];
+
       read_memory (fsr.regs[I0_REGNUM], raw_buffer, 8 * 4);
-      write_register_bytes (REGISTER_BYTE (O0_REGNUM), raw_buffer, 8 * 4);
+
+      /* Get the ins and locals which we are about to restore.  Just
+	 moving the stack pointer is all that is really needed, except
+	 store_inferior_registers is then going to write the ins and
+	 locals from the registers array, so we need to muck with the
+	 registers array.  */
+      sp = fsr.regs[SP_REGNUM];
+      read_memory (sp, reg_temp, REGISTER_RAW_SIZE (L0_REGNUM) * 16);
+
+      /* Restore the out registers.
+	 Among other things this writes the new stack pointer.  */
+      write_register_bytes (REGISTER_BYTE (O0_REGNUM), raw_buffer,
+			    REGISTER_RAW_SIZE (O0_REGNUM) * 8);
+
+      write_register_bytes (REGISTER_BYTE (L0_REGNUM), reg_temp,
+			    REGISTER_RAW_SIZE (L0_REGNUM) * 16);
     }
   if (fsr.regs[PS_REGNUM])
     write_register (PS_REGNUM, read_memory_integer (fsr.regs[PS_REGNUM], 4));

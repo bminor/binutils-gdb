@@ -1,5 +1,10 @@
 Thu Jul  8 14:48:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* sparc-tdep.c (sparc_push_dummy_frame): Skip all the do_save_insn
+	stuff, just write the sp and fp.
+	(sparc_pop_frame): Skip the do_restore_insn; we already restore
+	the sp with the other out registers.
+
 	* hppa-tdep.c (hppa_push_arguments): Allocate enough space for
 	arguments.
 
