@@ -161,6 +161,8 @@ SUBDIR_MI_INITS = \
 SUBDIR_MI_LDFLAGS=
 SUBDIR_MI_CFLAGS= \
 	-DUI_OUT=1
+SUBDIR_MI_INSTALL=
+SUBDIR_MI_UNINSTALL=
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -220,6 +222,8 @@ ENABLE_GDBTK= @ENABLE_GDBTK@
 LIBGUI = @LIBGUI@
 GUI_CFLAGS_X = @GUI_CFLAGS_X@
 IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
+SUBDIR_GDBTK_INSTALL= install-gdbtk
+SUBDIR_GDBTK_UNINSTALL= 
 
 CONFIG_OBS= @CONFIG_OBS@
 CONFIG_SRCS= @CONFIG_SRCS@
@@ -227,6 +231,8 @@ CONFIG_DEPS= @CONFIG_DEPS@
 CONFIG_INITS= @CONFIG_INITS@
 CONFIG_LDFLAGS = @CONFIG_LDFLAGS@
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
+CONFIG_INSTALL = @CONFIG_INSTALL@
+CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 
 # -I. for config files.
 # -I$(srcdir) for gdb internal headers and possibly for gnu-regex.h also.
@@ -665,7 +671,7 @@ gdb.z:gdb.1
 # time it takes for make to check that all is up to date.
 # install-only is intended to address that need.
 install: all install-only
-install-only:
+install-only: $(CONFIG_INSTALL)
 	transformed_name=`t='$(program_transform_name)'; \
 			  echo gdb | sed -e $$t` ; \
 		if test "x$$transformed_name" = x; then \
@@ -675,21 +681,9 @@ install-only:
 		fi ; \
 		$(INSTALL_PROGRAM) gdb$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
 		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
-	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs \
-		$(datadir)/gdbtcl/images \
-		$(datadir)/gdbtcl/images2 ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl/help \
-		$(datadir)/gdbtcl/help/images \
-		$(datadir)/gdbtcl/help/trace ; \
-	cd $(srcdir)/gdbtk/library ; \
-	for i in *.tcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
-	  do \
-		$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
-	  done ;
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
-uninstall: force
+uninstall: force $(CONFIG_UNINSTALL)
 	transformed_name=`t='$(program_transform_name)'; \
 			  echo gdb | sed -e $$t` ; \
 		if test "x$$transformed_name" = x; then \
@@ -1256,6 +1250,20 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 
 fork-child.o: fork-child.c gdb_wait.h $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h
+
+install-gdbtk:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(datadir)/gdbtcl/images \
+		$(datadir)/gdbtcl/images2 ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl/help \
+		$(datadir)/gdbtcl/help/images \
+		$(datadir)/gdbtcl/help/trace ; \
+	cd $(srcdir)/gdbtk/library ; \
+	for i in *.tcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
+	  do \
+		$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
+	  done ;
 
 gdbres.o: $(srcdir)/gdbtk/gdb.rc $(srcdir)/gdbtk/gdbtool.ico
 	$(WINDRES) --include $(srcdir)/gdbtk $(srcdir)/gdbtk/gdb.rc gdbres.o

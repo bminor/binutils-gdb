@@ -1,3 +1,18 @@
+Thu Feb 24 18:42:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (CONFIG_INSTALL, CONFIG_UNINSTALL): Set to
+ 	$(SUBDIR_*_INSTALL) when so configured.
+	* configure: Regenerate.
+	
+	* Makefile.in (CONFIG_INSTALL, CONFIG_UNINSTALL): Define using
+ 	configure.
+	(install-only): Add dependency on $(CONFIG_INSTALL).  Delete code
+ 	installing GDBtk.
+	(uninstall): Add dependency on $(CONFIG_UNINSTALL).
+	(SUBDIR_MI_INSTALL, SUBDIR_MI_UNINSTALL, SUBDIR_GDBTK_UNINSTALL,
+ 	SUBDIR_GDBTK_INSTALL): Define.
+	(install-gdbtk): New target.
+
 Thu Feb 24 18:19:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (SUBDIR_MI_CFLAGS): Fix typo, wrong brace.
