@@ -17,6 +17,8 @@ Do-first:
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
 	keep_these_too="elf64-sparc.c"
+else
+	lose_these_too="elf64-sparc.c"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
