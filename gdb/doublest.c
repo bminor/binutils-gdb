@@ -532,7 +532,6 @@ floatformat_mantissa (const struct floatformat *fmt, char *val)
   return res;
 }
 
-
 
 /* Convert TO/FROM target to the hosts DOUBLEST floating-point format.
 
@@ -607,84 +606,118 @@ floatformat_from_doublest (const struct floatformat *fmt,
 }
 
 
-/* Extract/store a target floating-point number from byte-stream at
-   ADDR to/from a DOUBLEST.  The LEN is used to select between the
-   pre-defined target type FLOAT, DOUBLE or LONG_DOUBLE.  These
-   functions are used when extract/store typed floating() find that
-   the ``struct type'' did not include a FLOATFORMAT (e.g. some symbol
-   table readers and XXX-language support modules).  */
+/* Return a floating-point format for a floating-point variable of
+   length LEN.  Return NULL, if no suitable floating-point format
+   could be found.
+
+   We need this functionality since information about the
+   floating-point format of a type is not always available to GDB; the
+   debug information typically only tells us the size of a
+   floating-point type.
+
+   FIXME: kettenis/2001-10-28: In many places, particularly in
+   target-dependent code, the format of floating-point types is known,
+   but not passed on by GDB.  This should be fixed.  */
+
+static const struct floatformat *
+floatformat_from_length (int len)
+{
+  if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
+    return TARGET_FLOAT_FORMAT;
+  else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
+    return TARGET_DOUBLE_FORMAT;
+  else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
+    return TARGET_LONG_DOUBLE_FORMAT;
+
+  return NULL;
+}
+
+/* If the host doesn't define NAN, use zero instead.  */
+#ifndef NAN
+#define NAN 0.0
+#endif
+
+/* Extract a floating-point number of length LEN from a target-order
+   byte-stream at ADDR.  Returns the value as type DOUBLEST.  */
 
 DOUBLEST
 extract_floating (const void *addr, int len)
 {
-  DOUBLEST dretval;
-  if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
+  const struct floatformat *fmt = floatformat_from_length (len);
+  DOUBLEST val;
+
+  if (fmt == NULL)
     {
-      floatformat_to_doublest (TARGET_FLOAT_FORMAT, addr, &dretval);
+      warning ("Can't store a floating-point number of %d bytes.", len);
+      return NAN;
     }
-  else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
-    {
-      floatformat_to_doublest (TARGET_DOUBLE_FORMAT, addr, &dretval);
-    }
-  else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
-    {
-      floatformat_to_doublest (TARGET_LONG_DOUBLE_FORMAT, addr, &dretval);
-    }
-  else
-    {
-      error ("Can't deal with a floating point number of %d bytes.", len);
-    }
-  return dretval;
+
+  floatformat_to_doublest (fmt, addr, &val);
+  return val;
 }
+
+/* Store VAL as a floating-point number of length LEN to a
+   target-order byte-stream at ADDR.  */
 
 void
 store_floating (void *addr, int len, DOUBLEST val)
 {
-  if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
+  const struct floatformat *fmt = floatformat_from_length (len);
+
+  if (fmt == NULL)
     {
-      floatformat_from_doublest (TARGET_FLOAT_FORMAT, &val, addr);
+      warning ("Can't store a floating-point number of %d bytes.", len);
+      memset (addr, 0, len);
     }
-  else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
-    {
-      floatformat_from_doublest (TARGET_DOUBLE_FORMAT, &val, addr);
-    }
-  else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
-    {
-      floatformat_from_doublest (TARGET_LONG_DOUBLE_FORMAT, &val, addr);
-    }
-  else
-    {
-      error ("Can't deal with a floating point number of %d bytes.", len);
-    }
+
+  floatformat_from_doublest (fmt, &val, addr);
 }
 
-/* Extract/store a floating-point number of format TYPE from a
-   target-ordered byte-stream at ADDR to/from an internal DOUBLEST
-   accroding to its TYPE_FORMAT().  When GDB reads in debug
-   information, it is sometimes only provided with the type name, its
-   length and the fact that it is a float (TYPE_FORMAT() is not set).
-   For such types, the old extract/store floating() functions are
-   used. */
+/* Extract a floating-point number of type TYPE from a target-order
+   byte-stream at ADDR.  Returns the value as type DOUBLEST.  */
 
 DOUBLEST
 extract_typed_floating (const void *addr, const struct type *type)
 {
   DOUBLEST retval;
+
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+
   if (TYPE_FLOATFORMAT (type) == NULL)
-    retval = extract_floating (addr, TYPE_LENGTH (type));
-  else
-    floatformat_to_doublest (TYPE_FLOATFORMAT (type), addr, &retval);
+    return extract_floating (addr, TYPE_LENGTH (type));
+
+  floatformat_to_doublest (TYPE_FLOATFORMAT (type), addr, &retval);
   return retval;
 }
+
+/* Store VAL as a floating-point number of type TYPE to a target-order
+   byte-stream at ADDR.  */
 
 void
 store_typed_floating (void *addr, const struct type *type, DOUBLEST val)
 {
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+
+  /* FIXME: kettenis/2001-10-28: It is debatable whether we should
+     zero out any remaining bytes in the target buffer when TYPE is
+     longer than the actual underlying floating-point format.  Perhaps
+     we should store a fixed bitpattern in those remaining bytes,
+     instead of zero, or perhaps we shouldn't touch those remaining
+     bytes at all.
+
+     NOTE: cagney/2001-10-28: With the way things currently work, it
+     isn't a good idea to leave the end bits undefined.  This is
+     because GDB writes out the entire sizeof(<floating>) bits of the
+     floating-point type even though the value might only be stored
+     in, and the target processor may only refer to, the first N <
+     TYPE_LENGTH (type) bits.  If the end of the buffer wasn't
+     initialized, GDB would write undefined data to the target.  An
+     errant program, refering to that undefined data, would then
+     become non-deterministic.  */
   memset (addr, 0, TYPE_LENGTH (type));
+
   if (TYPE_FLOATFORMAT (type) == NULL)
-    store_floating (addr, TYPE_LENGTH (type), val);
-  else
-    floatformat_from_doublest (TYPE_FLOATFORMAT (type), &val, addr);
+    return store_floating (addr, TYPE_LENGTH (type), val);
+
+  floatformat_from_doublest (TYPE_FLOATFORMAT (type), &val, addr);
 }

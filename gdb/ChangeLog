@@ -1,5 +1,21 @@
 2001-10-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* doublest.c: Improve comments a bit.
+	(floatformat_from_length): New function.
+	(NAN): Define to 0.0 if not already defined.
+	(extract_floating): Rewrite to use floatformat_from_length.  Warn
+	instead of error if LEN doesn't match a known floating-point type,
+	and return NaN (or 0.0 if NaN isn't available) in that case.
+	(store_floating): Likewise, but zero out the target byte-stream if
+	LEN doesn't match a known floating-point type.
+	(extract_typed_floating): Reformat a bit.
+	(store_typed_floating): Reformat a bit.  Add comment about zeroing
+	out padding in the target buffer.
+	* doublest.h (extract_floating, store_floating): Fix comment about
+	deprecation of these functions.  Add parameter names to prototypes.
+
+2001-10-28  Mark Kettenis  <kettenis@gnu.org>
+
 	* i387-tdep.c (print_i387_value): Use extract_typed_floating to
 	convert RAW to a DOUBLEST instead of extract_floating.
 
