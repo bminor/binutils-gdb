@@ -159,6 +159,12 @@ EOF
     9000/8??:4.3bsd:*:*)
 	echo hppa1.0-hp-bsd
 	exit 0 ;;
+    hp7??:OSF1:*:* | hp8?7:OSF1:*:* )
+	echo hppa1.1-hp-osf
+	exit 0 ;;
+    hp8??:OSF1:*:*)
+	echo hppa1.0-hp-osf
+	exit 0 ;;
     C1*:ConvexOS:*:* | convex:ConvexOS:C1:*)
 	echo c1-convex-bsd
         exit 0 ;;
@@ -198,6 +204,11 @@ EOF
 	else
 		echo ${UNAME_MACHINE}-unknown-sysv32
 	fi
+	exit 0 ;;
+# ptx 4.0 does uname -s correctly, with DYNIX/ptx in there.  earlier versions
+# are messed up and put the nodename in both sysname and nodename.
+    i[34]86:DYNIX/ptx:4*:*)
+	echo i386-sequent-sysv4
 	exit 0 ;;
     mini*:CTIX:SYS*5:*)
 	# "miniframe"

@@ -1,3 +1,7 @@
+Wed Mar  2 13:28:48 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* config.guess: Check for ptx.
+
 Mon Feb 28 16:46:50 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* config.sub: Add os9k checking.
