@@ -397,7 +397,7 @@ extern int coff_n_line_nos;
 extern void coff_add_linesym PARAMS ((symbolS *));
 
 void c_dot_file_symbol PARAMS ((const char *filename));
-#define obj_app_file c_dot_file_symbol
+#define obj_app_file(name, app) c_dot_file_symbol (name)
 
 extern void coff_frob_symbol PARAMS ((symbolS *, int *));
 extern void coff_adjust_symtab PARAMS ((void));
@@ -840,7 +840,7 @@ extern segT obj_coff_add_segment PARAMS ((const char *));
 extern void obj_coff_section PARAMS ((int));
 
 extern void c_dot_file_symbol PARAMS ((char *filename));
-#define obj_app_file c_dot_file_symbol
+#define obj_app_file(name, app) c_dot_file_symbol (name)
 extern void obj_extra_stuff PARAMS ((object_headers * headers));
 
 extern segT s_get_segment PARAMS ((symbolS *ptr));

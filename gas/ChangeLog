@@ -1,3 +1,17 @@
+2004-11-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* obj.h (struct format_ops <app_file>): Add int param.
+	* read.h (s_app_file_string): Likewise.
+	* read.c (s_app_file_string): Likewise.
+	(s_app_file): Adjust s_app_file_string call.
+	* config/tc-mips.c (s_mips_file): Likewise.
+	* config/obj-coff.h (obj_app_file): Add app param.
+	* config/obj-ecoff.h (obj_app_file): Likewise.
+	* config/obj-multi.h (obj_app_file): Likewise.
+	* config/obj-elf.h (elf_file_symbol): Likewise.
+	* config/obj-elf.c (elf_file_symbol): Only emit one file symbol
+	if called for # preprocessor lines.
+
 2004-11-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 528
@@ -243,22 +257,24 @@
 
 	* config/tc-crx.c: Remove global variable 'post_inc_mode'.
 	(get_flags): New function.
-	(get_number_of_bits): Edit comments, update numeric values to supported 
-	sizes.
-	(process_label_constant): Don't support the colon format (SYMBOL:[s|m|l]).
+	(get_number_of_bits): Edit comments, update numeric values to
+	supported sizes.
+	(process_label_constant): Don't support the colon
+	format (SYMBOL:[s|m|l]).
 	(set_cons_rparams): Support argument type 'arg_rbase'.
 	(get_operandtype): Bug fix in 'rbase' operand type parsing.
 	(handle_LoadStor): Bug fix, first handle post-increment mode.
-	(getreg_image): Remove redundant code, update according to latest CRX spec.
+	(getreg_image): Remove redundant code, update according to latest
+	CRX spec.
 	(print_constant): Bug fix relate to 3-word instructions.
-	(assemble_insn): Bug fix, when matching instructions, verify also 
+	(assemble_insn): Bug fix, when matching instructions, verify also
 	instruction type (not only mnemonic).
 	Add various error checking.
 	(preprocess_reglist): Support HI/LO and user registers.
 
 2004-10-25  David Mosberger-Tang  <davidm@hpl.hp.com>
 
-	* config/tc-ia64.c (fixup_unw_records): Don't let the "t" value 
+	* config/tc-ia64.c (fixup_unw_records): Don't let the "t" value
 	in an epilogue directive go negative.
 
 2004-10-25  H.J. Lu  <hongjiu.lu@intel.com>
@@ -401,7 +417,7 @@
 	(lit4_state struct): Add lit4_seg_name and lit4_seg fields.
 	(XTENSA_PROP_*, GET_XTENSA_PROP_*, SET_XTENSA_PROP_*): Define.
 	(frag_flags struct): New.
-	(xtensa_block_info struct): Move from tc-xtensa.h.  Add flags field. 
+	(xtensa_block_info struct): Move from tc-xtensa.h.  Add flags field.
 	(subseg_map struct): Add cur_total_freq and cur_target_freq fields.
 	(bitfield, bit_is_set, set_bit, clear_bit): Define.
 	(MAX_FORMATS): Define.
@@ -450,7 +466,7 @@
 	(do_align_targets): New.
 	(get_directive): Accept dashes in directive names.  Warn about
 	[no-]generics and [no-]relax directives and treat them as
-	[no-]transform. 
+	[no-]transform.
 	(xtensa_begin_directive): Call md_flush_pending_output only for some
 	directives.  Check for directives inside instruction bundles.  Warn
 	about deprecated ".begin literal" usage.  Warn and ignore [no-]density
@@ -847,7 +863,7 @@
 2004-10-07  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* config/tc-crx.c (preprocess_reglist): Handle Co-processor
-	Special registers. 
+	Special registers.
 	(md_assemble): Add error checking for Co-Processor instructions.
 	(get_cinv_parameters): Add 'b' option to invalidate the
 	branch-target cache.
@@ -944,7 +960,7 @@
 
 2004-09-20  Tomer Levi  <Tomer.Levi@nsc.com>
 
-        * config/tc-crx.c (handle_LoadStor): New function.
+	* config/tc-crx.c (handle_LoadStor): New function.
 	Handle load/stor unique instructions before parsing.
 
 2004-09-17  Paul Brook  <paul@codesourcery.com>
@@ -1310,11 +1326,11 @@
 2004-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* config.in: Undefine TARGET_SYMBIAN by default.
-        * configure.in:
-        * configure: Regenerate. Add sh-symbian-elf target.  If
-        selected define TARGET_SYMBIAN.
-        * config/tc-sh.h (TARGET_FORMAT): Select a Symbian target
-        format if TARGET_SYMBIAN has been defined.
+	* configure.in:
+	* configure: Regenerate. Add sh-symbian-elf target.  If
+	selected define TARGET_SYMBIAN.
+	* config/tc-sh.h (TARGET_FORMAT): Select a Symbian target
+	format if TARGET_SYMBIAN has been defined.
 
 	* output-file.c (output_file_create): Report the target format
 	chosen when bfd_openw reports that it is invalid.
@@ -1798,8 +1814,8 @@
 
 2004-04-19  Eric Christopher  <echristo@redhat.com>
 
-        * config/tc-mips.c (mips_dwarf2_addr_size): Revert part
-        of previous patch for fix in gcc.
+	* config/tc-mips.c (mips_dwarf2_addr_size): Revert part
+	of previous patch for fix in gcc.
 
 2004-04-19  Jakub Jelinek  <jakub@redhat.com>
 

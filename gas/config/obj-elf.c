@@ -236,21 +236,27 @@ elf_sec_sym_ok_for_reloc (asection *sec)
 }
 
 void
-elf_file_symbol (const char *s)
+elf_file_symbol (const char *s, int appfile)
 {
-  symbolS *sym;
-
-  sym = symbol_new (s, absolute_section, 0, NULL);
-  symbol_set_frag (sym, &zero_address_frag);
-  symbol_get_bfdsym (sym)->flags |= BSF_FILE;
-
-  if (symbol_rootP != sym)
+  if (!appfile
+      || symbol_rootP == NULL
+      || symbol_rootP->bsym == NULL
+      || (symbol_rootP->bsym->flags & BSF_FILE) == 0)
     {
-      symbol_remove (sym, &symbol_rootP, &symbol_lastP);
-      symbol_insert (sym, symbol_rootP, &symbol_rootP, &symbol_lastP);
+      symbolS *sym;
+
+      sym = symbol_new (s, absolute_section, 0, NULL);
+      symbol_set_frag (sym, &zero_address_frag);
+      symbol_get_bfdsym (sym)->flags |= BSF_FILE;
+
+      if (symbol_rootP != sym)
+	{
+	  symbol_remove (sym, &symbol_rootP, &symbol_lastP);
+	  symbol_insert (sym, symbol_rootP, &symbol_rootP, &symbol_lastP);
 #ifdef DEBUG
-      verify_symbol_chain (symbol_rootP, symbol_lastP);
+	  verify_symbol_chain (symbol_rootP, symbol_lastP);
 #endif
+	}
     }
 
 #ifdef NEED_ECOFF_DEBUG

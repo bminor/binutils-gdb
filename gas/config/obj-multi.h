@@ -37,9 +37,9 @@
 	 ? (*this_format->begin) ()			\
 	 : (void) 0)
 
-#define obj_app_file(NAME)				\
+#define obj_app_file(NAME, APPFILE)			\
 	(this_format->app_file				\
-	 ? (*this_format->app_file) (NAME)		\
+	 ? (*this_format->app_file) (NAME, APPFILE)	\
 	 : (void) 0)
 
 #define obj_frob_symbol(S,P)				\

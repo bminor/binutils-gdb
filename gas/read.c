@@ -1570,7 +1570,7 @@ s_data (int ignore ATTRIBUTE_UNUSED)
    .file.  */
 
 void
-s_app_file_string (char *file)
+s_app_file_string (char *file, int appfile)
 {
 #ifdef LISTING
   if (listing)
@@ -1578,7 +1578,7 @@ s_app_file_string (char *file)
 #endif
   register_dependency (file);
 #ifdef obj_app_file
-  obj_app_file (file);
+  obj_app_file (file, appfile);
 #endif
 }
 
@@ -1606,7 +1606,7 @@ s_app_file (int appfile)
 
       demand_empty_rest_of_line ();
       if (!may_omit)
-	s_app_file_string (s);
+	s_app_file_string (s, appfile);
     }
 }
 

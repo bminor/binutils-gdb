@@ -13508,7 +13508,7 @@ s_mips_file (int x ATTRIBUTE_UNUSED)
       if (filename != NULL && ! first_file_directive)
 	{
 	  (void) new_logical_line (filename, -1);
-	  s_app_file_string (filename);
+	  s_app_file_string (filename, 0);
 	}
       first_file_directive = 1;
     }

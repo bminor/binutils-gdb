@@ -139,7 +139,7 @@ extern void bss_alloc (symbolS *, addressT, int);
 extern offsetT parse_align (int);
 extern symbolS *s_comm_internal (int, symbolS *(*) (int, symbolS *, addressT));
 extern symbolS *s_lcomm_internal (int, symbolS *, addressT);
-extern void s_app_file_string (char *);
+extern void s_app_file_string (char *, int);
 extern void s_app_file (int);
 extern void s_app_line (int);
 extern void s_bad_endr (int);

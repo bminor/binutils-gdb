@@ -63,7 +63,7 @@ extern void ecoff_frob_file PARAMS ((void));
 #define obj_symbol_new_hook ecoff_symbol_new_hook
 
 /* Record file switches in the ECOFF symbol table.  */
-#define obj_app_file(name) ecoff_new_file (name)
+#define obj_app_file(name, app) ecoff_new_file (name)
 
 /* At the moment we don't want to do any stabs processing in read.c.  */
 #define OBJ_PROCESS_STAB(seg, what, string, type, other, desc) \
