@@ -1,3 +1,7 @@
+Thu Sep 28 01:11:58 1995  Doug Evans  <dje@deneb.cygnus.com>
+
+	* config/tc-arm.h (TARGET_FORMAT): Define for arm-coff.
+
 Wed Sep 27 12:53:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* symbols.c (S_IS_LOCAL): All symbols in reg_section are local.
