@@ -1,3 +1,23 @@
+Wed Apr 12 12:40:04 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* aoutx.h (machine_type, case bfd_arch_mips): Treat R8000 like
+	R6000 and R4000 for now.
+
+Tue Apr  4 12:28:25 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: New file, MPW version of configure.in.
+	* mpw-make.in: New file, MPW version of Makefile.in.
+	* hosts/mpw.h: New file, MPW host definitions.
+	* ecoffswap.h (ecoff_swap_pdr_in, ecoff_swap_pdr_in) [MPW_C]:
+	Alternate versions without ECOFF_64 that chokes MPW C.
+	* coffswap.h (coff_swap_scnhdr_out): Add alternative version with
+	partly-expanded macros.
+
+Thu Mar 30 14:56:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* reloc.c (bfd_perform_relocation): Don't bother to check for
+	overflow if the symbol is undefined.
+
 Thu Mar 30 14:32:26 1995  H.J. Lu (hjl@nynexst.com)
 
 	* config.bfd: Change linux to default to elf.  Using
