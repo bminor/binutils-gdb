@@ -144,9 +144,8 @@ SECTIONS
   } > RAM
   ${RELOCATING+${OTHER_BSS_SECTIONS}}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
-  ${RELOCATING+__stack = .;}
-  ${RELOCATING+. = . + 4096;}
   ${RELOCATING+_end = .;}
+  ${RELOCATING+__stack = .;}
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+PROVIDE (end = .);}
 
