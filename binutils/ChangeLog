@@ -1,3 +1,8 @@
+Wed Nov  1 15:04:57 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
+
+	* Makefile.in (syslex.o): add -I$(srcdir) if compiling in a
+	separate directory.
+
 Mon Oct 30 14:24:18 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (objdump_print_value): New static function.

@@ -331,7 +331,7 @@ syslex.o: syslex.c sysinfo.h
 	if [ -r syslex.c ]; then \
 	  $(CC_FOR_BUILD) -c -I. $(CFLAGS)  syslex.c  ; \
 	else \
-	  $(CC_FOR_BUILD) -c -I. $(CFLAGS) $(srcdir)/syslex.c ;\
+	  $(CC_FOR_BUILD) -c -I. -I$(srcdir) $(CFLAGS) $(srcdir)/syslex.c ;\
 	fi
 
 sysinfo.o: sysinfo.c
