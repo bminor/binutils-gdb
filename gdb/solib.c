@@ -1194,22 +1194,22 @@ symbol_add_stub (arg)
 
 /* LOCAL FUNCTION
 
-   solib_add -- synchronize GDB's shared object list with the inferior's
+   update_solib_list --- synchronize GDB's shared object list with inferior's
 
    SYNOPSIS
 
-   void solib_add (char *pattern, int from_tty, struct target_ops *TARGET)
-
-   DESCRIPTION
+   void update_solib_list (int from_tty, struct target_ops *TARGET)
 
    Extract the list of currently loaded shared objects from the
-   inferior, and compare it with the list of shared objects for which
-   GDB has currently loaded symbolic information.  If new shared
-   objects have been loaded, or old shared objects have disappeared,
-   make the appropriate changes to GDB's tables.
+   inferior, and compare it with the list of shared objects currently
+   in GDB's so_list_head list.  Edit so_list_head to bring it in sync
+   with the inferior's new list.
 
-   If PATTERN is non-null, read symbols only for shared objects
-   whose names match PATTERN.
+   If we notice that the inferior has unloaded some shared objects,
+   free any symbolic info GDB had read about those shared objects.
+
+   Don't load symbolic info for any new shared objects; just add them
+   to the list, and leave their symbols_loaded flag clear.
 
    If FROM_TTY is non-null, feel free to print messages about what
    we're doing.
@@ -1222,7 +1222,7 @@ symbol_add_stub (arg)
    processes we've just attached to, so that's okay.  */
 
 void
-solib_add (char *pattern, int from_tty, struct target_ops *target)
+update_solib_list (int from_tty, struct target_ops *target)
 {
   struct so_list *inferior = current_sos ();
   struct so_list *gdb, **gdb_link;
@@ -1239,14 +1239,6 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
 
 #endif SVR4_SHARED_LIBS
 
-  if (pattern)
-    {
-      char *re_err = re_comp (pattern);
-
-      if (re_err)
-	error ("Invalid regexp: %s", re_err);
-    }
-
   /* Since this function might actually add some elements to the
      so_list_head list, arrange for it to be cleaned up when
      appropriate.  */
@@ -1262,16 +1254,16 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
      shared objects appear where.  There are three cases:
 
      - A shared object appears on both lists.  This means that GDB
-       knows about it already, and it's still loaded in the inferior.
-       Nothing needs to happen.
+     knows about it already, and it's still loaded in the inferior.
+     Nothing needs to happen.
 
      - A shared object appears only on GDB's list.  This means that
-       the inferior has unloaded it.  We should remove the shared
-       object from GDB's tables.
+     the inferior has unloaded it.  We should remove the shared
+     object from GDB's tables.
 
      - A shared object appears only on the inferior's list.  This
-       means that it's just been loaded.  We should add it to GDB's
-       tables.
+     means that it's just been loaded.  We should add it to GDB's
+     tables.
 
      So we walk GDB's list, checking each entry to see if it appears
      in the inferior's list too.  If it does, no action is needed, and
@@ -1374,11 +1366,43 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
 	    }
 	}
     }
+}
 
-  /* Finally, read the symbols as requested.  Walk the list of
-     currently loaded shared libraries, and read symbols for any that
-     match the pattern --- or any whose symbols aren't already loaded,
-     if no pattern was given.  */
+
+/* GLOBAL FUNCTION
+
+   solib_add -- read in symbol info for newly added shared libraries
+
+   SYNOPSIS
+
+   void solib_add (char *pattern, int from_tty, struct target_ops *TARGET)
+
+   DESCRIPTION
+
+   Read in symbolic information for any shared objects whose names
+   match PATTERN.  (If we've already read a shared object's symbol
+   info, leave it alone.)  If PATTERN is zero, read them all.
+
+   FROM_TTY and TARGET are as described for update_solib_list, above.  */
+
+void
+solib_add (char *pattern, int from_tty, struct target_ops *target)
+{
+  struct so_list *gdb;
+
+  if (pattern)
+    {
+      char *re_err = re_comp (pattern);
+
+      if (re_err)
+	error ("Invalid regexp: %s", re_err);
+    }
+
+  update_solib_list (from_tty, target);
+
+  /* Walk the list of currently loaded shared libraries, and read
+     symbols for any that match the pattern --- or any whose symbols
+     aren't already loaded, if no pattern was given.  */
   {
     int any_matches = 0;
     int loaded_any_symbols = 0;
@@ -1466,7 +1490,7 @@ info_sharedlibrary_command (ignore, from_tty)
   addr_fmt = "016l";
 #endif
 
-  solib_add (0, 0, 0);
+  update_solib_list (from_tty, 0);
 
   for (so = so_list_head; so; so = so->next)
     {
