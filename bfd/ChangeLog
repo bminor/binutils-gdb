@@ -1,5 +1,7 @@
 Tue Jun  3 16:57:45 1997  Nick Clifton  <nickc@cygnus.com>
 
+	* reloc.c: Add thumb relocations.
+
 	* bfd-in2.h: Add Thumb relocations.
 
 	* libbfd.h: Add Thumb relocations.
