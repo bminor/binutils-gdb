@@ -1,6 +1,9 @@
 2003-06-22  Andrew Cagney  <cagney@redhat.com>
 
 	GDB 6.0 branch created.
+	* README: Update.
+	* PROBLEMS: Update.  Empty.
+	* NEWS: Update.
 
 2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
 
