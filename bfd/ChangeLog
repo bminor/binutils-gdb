@@ -1,3 +1,16 @@
+2005-02-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (func_desc_adjust): Move code creating func desc sym to..
+	(make_fdh): ..here.  New function.  Don't set BSF_OBJECT for
+	undefined syms.
+	(struct add_symbol_adjust_data): New.
+	(add_symbol_adjust): Make an undefweak func desc for old ABI
+	objects to link with --as-needed shared libs.  Return fail status.
+	Don't adjust old ABI func entry sym to weak if func desc syms
+	isn't defined.
+	(ppc64_elf_check_directives): Adjust call to add_symbol_adjust,
+	and return status.
+
 2005-02-01  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cpu-cris.c (get_compatible): Rearrange disabled code and comment

@@ -3937,6 +3937,37 @@ get_fdh (struct ppc_link_hash_entry *fh, struct ppc_link_hash_table *htab)
   return fdh;
 }
 
+/* Make a fake function descriptor sym for the code sym FH.  */
+
+static struct ppc_link_hash_entry *
+make_fdh (struct bfd_link_info *info,
+	  struct ppc_link_hash_entry *fh,
+	  flagword flags)
+{
+  bfd *abfd;
+  asymbol *newsym;
+  struct bfd_link_hash_entry *bh;
+  struct ppc_link_hash_entry *fdh;
+
+  abfd = fh->elf.root.u.undef.abfd;
+  newsym = bfd_make_empty_symbol (abfd);
+  newsym->name = fh->elf.root.root.string + 1;
+  newsym->section = bfd_und_section_ptr;
+  newsym->value = 0;
+  newsym->flags = flags;
+
+  bh = NULL;
+  if (!_bfd_generic_link_add_one_symbol (info, abfd, newsym->name,
+					 newsym->flags, newsym->section,
+					 newsym->value, NULL, FALSE, FALSE,
+					 &bh))
+    return NULL;
+
+  fdh = (struct ppc_link_hash_entry *) bh;
+  fdh->elf.non_elf = 0;
+  return fdh;
+}
+
 /* Hacks to support old ABI code.
    When making function calls, old ABI code references function entry
    points (dot symbols), while new ABI code references the function
@@ -4009,10 +4040,16 @@ ppc64_elf_archive_symbol_lookup (bfd *abfd,
    most restrictive visibility of the function descriptor and the
    function entry symbol is used.  */
 
+struct add_symbol_adjust_data
+{
+  struct bfd_link_info *info;
+  bfd_boolean ok;
+};
+
 static bfd_boolean
 add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
 {
-  struct bfd_link_info *info;
+  struct add_symbol_adjust_data *data;
   struct ppc_link_hash_table *htab;
   struct ppc_link_hash_entry *eh;
   struct ppc_link_hash_entry *fdh;
@@ -4026,11 +4063,25 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
   if (h->root.root.string[0] != '.')
     return TRUE;
 
-  info = inf;
-  htab = ppc_hash_table (info);
+  data = inf;
+  htab = ppc_hash_table (data->info);
   eh = (struct ppc_link_hash_entry *) h;
   fdh = get_fdh (eh, htab);
-  if (fdh != NULL)
+  if (fdh == NULL
+      && (eh->elf.root.type == bfd_link_hash_undefined
+	  || eh->elf.root.type == bfd_link_hash_undefweak)
+      && eh->elf.ref_regular)
+    {
+      /* Make an undefweak function descriptor sym, which is enough to
+	 pull in an --as-needed shared lib, but won't cause link
+	 errors.  Archives are handled elsewhere.  */
+      fdh = make_fdh (data->info, eh, BSF_WEAK);
+      if (fdh == NULL)
+	data->ok = FALSE;
+      else
+	fdh->elf.ref_regular = 1;
+    }
+  else if (fdh != NULL)
     {
       unsigned entry_vis = ELF_ST_VISIBILITY (eh->elf.other) - 1;
       unsigned descr_vis = ELF_ST_VISIBILITY (fdh->elf.other) - 1;
@@ -4039,7 +4090,9 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
       else if (entry_vis > descr_vis)
 	eh->elf.other += descr_vis - entry_vis;
 
-      if (eh->elf.root.type == bfd_link_hash_undefined)
+      if (eh->elf.root.type == bfd_link_hash_undefined
+	  && (fdh->elf.root.type == bfd_link_hash_defined
+	      || fdh->elf.root.type == bfd_link_hash_defweak))
 	{
 	  eh->elf.root.type = bfd_link_hash_undefweak;
 	  eh->was_undefined = 1;
@@ -4055,12 +4108,15 @@ ppc64_elf_check_directives (bfd *abfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
+  struct add_symbol_adjust_data data;
 
   htab = ppc_hash_table (info);
   if (!is_ppc64_elf_target (htab->elf.root.creator))
     return TRUE;
 
-  elf_link_hash_traverse (&htab->elf, add_symbol_adjust, info);
+  data.info = info;
+  data.ok = TRUE;
+  elf_link_hash_traverse (&htab->elf, add_symbol_adjust, &data);
 
   /* We need to fix the undefs list for any syms we have twiddled to
      undef_weak.  */
@@ -4069,7 +4125,7 @@ ppc64_elf_check_directives (bfd *abfd ATTRIBUTE_UNUSED,
       bfd_link_repair_undef_list (&htab->elf.root);
       htab->twiddled_syms = 0;
     }
-  return TRUE;
+  return data.ok;
 }
 
 static bfd_boolean
@@ -5358,30 +5414,12 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
       && (fh->elf.root.type == bfd_link_hash_undefined
 	  || fh->elf.root.type == bfd_link_hash_undefweak))
     {
-      bfd *abfd;
-      asymbol *newsym;
-      struct bfd_link_hash_entry *bh;
-
-      abfd = fh->elf.root.u.undef.abfd;
-      newsym = bfd_make_empty_symbol (abfd);
-      newsym->name = fh->elf.root.root.string + 1;
-      newsym->section = bfd_und_section_ptr;
-      newsym->value = 0;
-      newsym->flags = BSF_OBJECT;
+      flagword flags = 0;
       if (fh->elf.root.type == bfd_link_hash_undefweak)
-	newsym->flags |= BSF_WEAK;
-
-      bh = &fdh->elf.root;
-      if ( !(_bfd_generic_link_add_one_symbol
-	     (info, abfd, newsym->name, newsym->flags,
-	      newsym->section, newsym->value, NULL, FALSE, FALSE, &bh)))
-	{
-	  return FALSE;
-	}
-      fdh = (struct ppc_link_hash_entry *) bh;
-      fdh->elf.non_elf = 0;
-      fdh->elf.size = 24;
-      fdh->elf.type = STT_OBJECT;
+	flags = BSF_WEAK;
+      fdh = make_fdh (info, fh, flags);
+      if (fdh == NULL)
+	return FALSE;
     }
 
   if (fdh != NULL

@@ -77,7 +77,7 @@ Symbol table '\.dynsym' contains 22 entries:
  +[0-9]+: 0+10648 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND gd
  +[0-9]+: 0+60 +0 TLS +GLOBAL DEFAULT +8 le0
- +[0-9]+: 0+ +24 OBJECT +GLOBAL DEFAULT +UND __tls_get_addr
+ +[0-9]+: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr
  +[0-9]+: 0+40 +0 TLS +GLOBAL DEFAULT +8 ld0
  +[0-9]+: 0+68 +0 TLS +GLOBAL DEFAULT +8 le1
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND ld
@@ -123,7 +123,7 @@ Symbol table '\.symtab' contains 43 entries:
  +[0-9]+: 0+10648 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND gd
  +[0-9]+: 0+60 +0 TLS +GLOBAL DEFAULT +8 le0
- +[0-9]+: 0+ +24 OBJECT +GLOBAL DEFAULT +UND __tls_get_addr
+ +[0-9]+: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr
  +[0-9]+: 0+40 +0 TLS +GLOBAL DEFAULT +8 ld0
  +[0-9]+: 0+68 +0 TLS +GLOBAL DEFAULT +8 le1
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND ld

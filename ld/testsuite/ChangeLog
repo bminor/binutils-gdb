@@ -1,3 +1,8 @@
+2005-02-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsso.r: Update.
+	* ld-powerpc/tlstocso.r: Update.
+
 2005-01-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-mips-elf/elf-rel-got-n32.d, ld-mips-elf/elf-rel-got-n64-linux.d,
