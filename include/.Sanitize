@@ -17,6 +17,7 @@
 
 Do-first:
 
+recover="aout64.h sparc-opcode.h"
 echo Sanitizing `pwd`...
 
 # All files listed between the "Things-to-keep:" line and the
@@ -103,7 +104,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.10  1991/08/29 00:34:45  gnu
+# Revision 1.11  1991/09/02 21:21:47  rich
+# Recover the editted files.
+#
+# Revision 1.10  1991/08/29  00:34:45  gnu
 # Paperwork handled for AMD Coff.
 #
 # Revision 1.9  1991/08/22  08:00:35  gnu
