@@ -1409,7 +1409,25 @@ subsegs_finish ()
          any alignment is meaningless, and, moreover, will look weird
          if we are generating a listing.  */
       if (!had_errors ())
-	alignment = SUB_SEGMENT_ALIGN (now_seg, frchainP);
+	{
+	  alignment = SUB_SEGMENT_ALIGN (now_seg, frchainP);
+#ifdef BFD_ASSEMBLER
+	  if ((bfd_get_section_flags (now_seg->owner, now_seg) & SEC_MERGE)
+	      && now_seg->entsize)
+	    {
+	      unsigned int entsize = now_seg->entsize;
+	      int entalign = 0;
+
+	      while ((entsize & 1) == 0)
+		{
+		  ++entalign;
+		  entsize >>= 1;
+		}
+	      if (entalign > alignment)
+		alignment = entalign;
+	    }
+#endif
+	}
 
       if (subseg_text_p (now_seg))
 	frag_align_code (alignment, 0);

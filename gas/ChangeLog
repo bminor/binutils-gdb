@@ -1,3 +1,8 @@
+2002-11-28  Jakub Jelinek  <jakub@redhat.com>
+
+	* write.c (subsegs_finish): For SEC_MERGE sections pad last fragment
+	to entsize.
+
 2002-11-26  DJ Delorie  <dj@redhat.com.
 
 	* dwarf2dbg.c (scale_addr_delta): New.
