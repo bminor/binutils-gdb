@@ -1,3 +1,7 @@
+2003-11-13  Jim Blandy  <jimb@redhat.com>
+
+	* cp-namespace.c: Doc fix.
+
 2003-11-12  Michael Snyder  <msnyder@redhat.com>
 
 	* sh64_tdep.c: Regularize some names.
