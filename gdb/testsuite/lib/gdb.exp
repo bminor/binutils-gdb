@@ -1,0 +1,255 @@
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# DejaGnu@cygnus.com
+
+# This file was written by Fred Fish. (fnf@cygnus.com)
+
+# Generic gdb subroutines that should work for any target.  If these
+# need to be modified for any target, it can be done with a variable
+# or by passing arguments.
+
+#
+# gdb_unload -- unload a file if one is loaded
+#
+
+proc gdb_unload {} {
+    global verbose
+    global GDB
+    global prompt
+    send "file\n"
+    expect {
+	-re "No exec file now\.\r" { continue -expect }
+	-re "No symbol file now\.\r" { continue -expect }
+	-re "A program is being debugged already..*Kill it\? \(y or n\) $"\
+	    { send "y\n"
+		if $verbose>1 then {
+		    send_user "\t\tKilling previous program being debugged\n"
+		}
+	    continue -expect
+	}
+	-re "Discard symbol table from .*\? \(y or n\) $" {
+	    send "y\n"
+	    continue -expect
+	}
+	-re "$prompt $" {}
+	timeout {
+	    error "couldn't unload file in $GDB (timed out)."
+	    alldone
+	}
+    }
+}
+
+# Many of the tests depend on setting breakpoints at various places and
+# running until that breakpoint is reached.  At times, we want to start
+# with a clean-slate with respect to breakpoints, so this utility proc 
+# lets us do this without duplicating this code everywhere.
+#
+
+proc delete_breakpoints {} {
+    global prompt
+
+    send "delete breakpoints\n"
+    expect {
+	-re "Delete all breakpoints\? \(y or n\) $" {
+	    send "y\n"
+	    continue -expect
+	}
+	-re "y\r\n$prompt $" {}
+	-re ".*$prompt $" { fail "Delete all breakpoints" ; return }
+	timeout { fail "Delete all breakpoints (timeout)" ; return }
+    }
+    send "info breakpoints\n"
+    expect {
+	-re "No breakpoints or watchpoints..*$prompt $" {}
+	-re ".*$prompt $" { fail "breakpoints not deleted" ; return }
+	timeout { fail "info breakpoints (timeout)" ; return }
+    }
+}
+
+
+#
+# Set breakpoint at function and run gdb until it breaks there.
+# Since this is the only breakpoint that will be set, if it stops
+# at a breakpoint, we will assume it is the one we want.  We can't
+# just compare to "function" because it might be a fully qualified,
+# single quoted C++ function specifier.
+#
+
+proc runto { function } {
+    global prompt
+    global decimal
+
+    send "delete\n"
+    expect {
+	-re "Delete all breakpoints\? \(y or n\) $" {
+	    send "y\n"
+	    expect {
+		-re "$prompt $" {}
+		timeout { fail "deleting breakpoints (timeout)" ; return 0 }
+	    }
+	}
+	-re ".*$prompt $" {}
+	timeout { fail "deleting breakpoints (timeout)" ; return 0 }
+    }
+
+    send "break $function\n"
+    expect {
+	-re "Break.* at .*: file .*, line $decimal.\r\n$prompt $" {}
+	-re "$prompt $" { fail "setting breakpoint at $function" ; return 0 }
+	timeout { fail "setting breakpoint at $function (timeout)" ; return 0 }
+    }
+
+    send "run\n"
+    expect {
+	-re "The program .* has been started already.* \(y or n\) $" {
+	    send "y\n"
+	    continue -expect
+	}
+	-re "Starting.*Break.*\(\) at .*:$decimal.*$prompt $" { return 1 }
+	-re "$prompt $" { fail "running to $function" ; return 0 }
+	timeout { fail "running to $function (timeout)" ; return 0 }
+    }
+}
+
+#
+# gdb_test -- send a command to gdb and test the result.
+#             Takes three parameters.
+#             Parameters:
+#                First one is the command to execute,
+#                Second one is the pattern to match for a PASS,
+#                Third one is an optional message to be printed. If this
+#                  a null string "", then the pass/fail messages are not printed.
+#             Returns:
+#                1 if the test failed,
+#                0 if the test passes,
+#               -1 if there was an internal error.
+#
+proc gdb_test { args } {
+    global verbose
+    global prompt
+    global GDB
+    global spawn_id
+
+    if [llength $args]==3 then {
+	set message [lindex $args 2]
+    } else {
+	set message [lindex $args 0]
+    }
+    set command [lindex $args 0]
+    set pattern [lindex $args 1]
+
+    if $verbose>2 then {
+	send_user "Sending \"$command\" to gdb\n"
+	send_user "Looking to match \"$pattern\"\n"
+	send_user "Message is \"$message\"\n"
+    }
+
+    set result -1
+    set errmess ""
+    # trap the send so any problems don't crash things
+    catch "send \"$command\n\"" errmess
+    if ![string match "" $errmess] then {
+	error "send \"$command\" got expect error \"$errmess\""
+	return -1
+    }
+
+    expect {
+	-re ".*Ending remote debugging.*$prompt$" {
+	    if ![isnative] then {
+		warning "Can`t communicate to remote target."
+	    }
+	    gdb_exit
+	    gdb_start
+	    set result -1
+	}
+	-re "$pattern.*$prompt $" {
+	    if ![string match "" $message] then {
+		pass "$message"
+	    }
+	    set result 0
+	}
+	-re "Undefined command:.*$prompt" {
+	    error "Undefined command \"$command\"."
+	}
+	-re "Ambiguous command.*$prompt $" {
+	    error "\"$command\" is not a unique command name."
+	}
+	-re ".*$prompt $" {
+	    if ![string match "" $message] then {
+		fail "$message"
+	    }
+	    set result 1
+	}
+	"<return>" {
+	    send "\n"
+	    error "Window too small."
+	}
+	-re "\(y or n\) " {
+	    send "n\n"
+	    error "Got interactive prompt."
+	}
+	buffer_full {
+	    error "internal buffer is full."
+	}
+	eof {
+	    error "eof -- pty is hosed."
+	}
+	timeout	{
+	    fail "(timeout) $message"
+	    set result 1
+	}
+    }
+    return $result
+}
+
+#	"virtual memory exhausted" {
+#	    error "virtual memory exhausted."
+#	}
+
+proc gdb_reinitialize_dir { subdir } {
+    global prompt
+    global verbose
+
+    send "dir\n"
+    expect {
+	-re "Reinitialize source path to empty.*" {
+	    send "y\n"
+	    expect {
+		-re "Source directories searched.*$prompt $" {
+		    send "dir $subdir\n"
+		    expect {
+			-re "Source directories searched.*$prompt $" {
+			    if $verbose>1 then {
+				send_user "Dir set to $subdir\n"
+			    }
+			}
+			-re ".*$prompt $" {
+			    error "Dir \"$subdir\" failed."
+			}
+		    }
+		}
+		-re ".*$prompt $" {
+		    error "Dir \"$subdir\" failed."
+		}
+	    }
+	}
+	-re ".*$prompt $" {
+	    error "Dir \"$subdir\" failed."
+	}
+    }
+}
