@@ -1,5 +1,11 @@
 Mon Apr 24 02:17:31 2000  Jeffrey A Law  (law@cygnus.com)
 
+	* config.bfd: Only disable elf32-hppa vectors, not all of the
+	BSD and OSF configuration support.  Provide (disabled) clauses
+	for PA64 support.
+	* configure.in: Add clause for PA64 support.
+	* configure: Rebuilt.
+
 	* targets.c (bfd_target_vector): Add bfd_elf64_hppa_vec.
 	(bfd_elf64_hppa_vec): Declare.
 

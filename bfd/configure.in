@@ -469,6 +469,8 @@ do
   				target64=true ;;
     bfd_elf64_alpha_vec)	tb="$tb elf64-alpha.lo elf64.lo $elf"
 				target64=true ;;
+    bfd_elf64_hppa_vec)		tb="$tb elf64-hppa.lo elf64.lo $elf"
+				target64=true ;;
     bfd_elf64_ia64_little_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"
 				target64=true ;;
     bfd_elf64_ia64_big_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"
