@@ -1,3 +1,8 @@
+2002-06-18  Chris Demetriou  <cgd@broadcom.com>
+
+	* ld-mips-elf/empic2-ref.s: Add a missing .end, apparently
+	turned up by recent assembler changes.
+
 2002-06-17  Tom Rix  <trix@redhat.com>
 
 	* ld-d10v/d10v.exp: New driver for d10v.
