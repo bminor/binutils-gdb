@@ -1,3 +1,9 @@
+2002-06-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (libbfd.h): Don't use "echo -n".
+	(libcoff.h, bfd.h): Likewise.
+	* Makefile.in: Regenerate.
+
 2002-06-06  Lars Brinkhoff  <lars@nocrew.org>
 
 	* bfdint.texi: Change registry@sco.com to registry@caldera.com.
