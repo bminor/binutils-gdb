@@ -390,6 +390,7 @@ objdump_print_address (vma, info)
 #define ARCH_m68k
 #define ARCH_m88k
 #define ARCH_mips
+#define ARCH_rs6000
 #define ARCH_sh
 #define ARCH_sparc
 #define ARCH_z8k
@@ -513,6 +514,11 @@ disassemble_data (abfd)
 	    disassemble = print_insn_big_mips;
 	  else
 	    disassemble = print_insn_little_mips;
+	  break;
+#endif
+#ifdef ARCH_rs6000:
+	case bfd_arch_rs6000:
+	  disassemble = print_insn_rs6000;
 	  break;
 #endif
 #ifdef ARCH_sh
