@@ -1,3 +1,9 @@
+Wed Jan 17 12:40:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cpu-powerpc.c (arch_info_struct): Change last entry to not point
+	back to first.
+	(bfd_powerpc_arch): Point at first entry in arch_info_struct.
+
 Tue Jan 16 15:10:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (assign_file_positions_for_segments): Don't increment file
