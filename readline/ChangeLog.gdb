@@ -1,7 +1,11 @@
+2002-02-24  Elena Zannoni  <ezannoni@redhat.com>
+
+        * ChangeLog.gdb: Renamed from ChangeLog.Cygnus.
+
 2002-02-24  Daniel Jacobowitz  <drow@mvista.com>
 
-	* support/config.guess: Import from master sources, rev 1.232.
-	* support/config.sub: Import from master sources, rev 1.246.
+        * support/config.guess: Import from master sources, rev 1.232.
+        * support/config.sub: Import from master sources, rev 1.246.
 
 2002-02-01  Ben Elliston  <bje@redhat.com>
 

@@ -1,3 +1,7 @@
+2002-02-24  Elena Zannoni  <ezannoni@redhat.com>
+
+        * ChangeLog.gdb: Renamed from ChangeLog.
+
 2002-01-20  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* rluser.texinfo (Sample Init File): Prevent overfull hboxes.
