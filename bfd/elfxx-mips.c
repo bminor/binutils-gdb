@@ -2263,7 +2263,7 @@ mips_elf_merge_gots (bfd2got_, p)
 	 got entries, since they're all in the master got_entries hash
 	 table anyway.  */
 
-      BFD_ASSERT (old_lcount + lcount == arg->primary->local_gotno);
+      BFD_ASSERT (old_lcount + lcount >= arg->primary->local_gotno);
       BFD_ASSERT (old_gcount + gcount >= arg->primary->global_gotno);
 
       arg->primary_count = arg->primary->local_gotno
@@ -2287,7 +2287,7 @@ mips_elf_merge_gots (bfd2got_, p)
 
       htab_delete (g->got_entries);
 
-      BFD_ASSERT (old_lcount + lcount == arg->current->local_gotno);
+      BFD_ASSERT (old_lcount + lcount >= arg->current->local_gotno);
       BFD_ASSERT (old_gcount + gcount >= arg->current->global_gotno);
 
       arg->current_count = arg->current->local_gotno

@@ -1,3 +1,8 @@
+2003-11-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elfxx-mips.c (mips_elf_merge_gots): Weaken assert for local
+	GOT entries.
+
 2003-11-13  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* elf32-s390.c (elf_s390_relocate_section): Only convert R_390_32
