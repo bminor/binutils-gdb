@@ -1,3 +1,14 @@
+2002-06-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* symbols.c: Replace CONST by const throughout.
+	(symbol_find_exact): Split out from..
+	(symbol_find_base): ..here.
+	* symbols.h: Replace CONST by const throughout.
+	(symbol_find_exact): Declare.
+	* config/obj-elf.c: #include "struc-symbol.h".
+	(elf_frob_file): If group name matches an exported symbol, use that
+	symbol for the signature and ".group" as the section name.
+
 Thu Jun  6 17:42:12 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/tc-sh.c (parse_at): @(symbol,pc) is A_DISP_PC again,

@@ -1,6 +1,6 @@
 /* symbols.c -symbol table-
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001
+   1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -569,7 +569,7 @@ symbol_find_or_make (name)
 
 symbolS *
 symbol_make (name)
-     CONST char *name;
+     const char *name;
 {
   symbolS *symbolP;
 
@@ -589,7 +589,7 @@ symbol_make (name)
 
 symbolS *
 symbol_find (name)
-     CONST char *name;
+     const char *name;
 {
 #ifdef STRIP_UNDERSCORE
   return (symbol_find_base (name, 1));
@@ -599,8 +599,25 @@ symbol_find (name)
 }
 
 symbolS *
+symbol_find_exact (name)
+     const char *name;
+{
+#ifdef BFD_ASSEMBLER
+  {
+    struct local_symbol *locsym;
+
+    locsym = (struct local_symbol *) hash_find (local_hash, name);
+    if (locsym != NULL)
+      return (symbolS *) locsym;
+  }
+#endif
+
+  return ((symbolS *) hash_find (sy_hash, name));
+}
+
+symbolS *
 symbol_find_base (name, strip_underscore)
-     CONST char *name;
+     const char *name;
      int strip_underscore;
 {
   if (strip_underscore && *name == '_')
@@ -633,17 +650,7 @@ symbol_find_base (name, strip_underscore)
       *copy = '\0';
     }
 
-#ifdef BFD_ASSEMBLER
-  {
-    struct local_symbol *locsym;
-
-    locsym = (struct local_symbol *) hash_find (local_hash, name);
-    if (locsym != NULL)
-      return (symbolS *) locsym;
-  }
-#endif
-
-  return ((symbolS *) hash_find (sy_hash, name));
+  return symbol_find_exact (name);
 }
 
 /* Once upon a time, symbols were kept in a singly linked list.  At
@@ -1816,7 +1823,7 @@ S_IS_STABD (s)
   return S_GET_NAME (s) == 0;
 }
 
-CONST char *
+const char *
 S_GET_NAME (s)
      symbolS *s;
 {

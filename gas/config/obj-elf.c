@@ -24,6 +24,7 @@
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "obstack.h"
+#include "struc-symbol.h"
 
 #ifndef ECOFF_DEBUGGING
 #define ECOFF_DEBUGGING 0
@@ -2024,8 +2025,11 @@ elf_frob_file ()
   for (i = 0; i < list.num_group; i++)
     {
       const char *group_name = elf_group_name (list.head[i]);
+      const char *sec_name;
       asection *s;
       flagword flags;
+      struct symbol *sy;
+      int has_sym;
 
       flags = SEC_READONLY | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_GROUP;
       for (s = list.head[i]; s != NULL; s = elf_next_in_group (s))
@@ -2040,7 +2044,18 @@ elf_frob_file ()
 	      }
 	  }
 
-      s = subseg_force_new (group_name, 0);
+      sec_name = group_name;
+      sy = symbol_find_exact (group_name);
+      has_sym = 0;
+      if (sy != NULL
+	  && (sy == symbol_lastP
+	      || (sy->sy_next != NULL
+		  && sy->sy_next->sy_previous == sy)))
+	{
+	  has_sym = 1;
+	  sec_name = ".group";
+	}
+      s = subseg_force_new (sec_name, 0);
       if (s == NULL
 	  || !bfd_set_section_flags (stdoutput, s, flags)
 	  || !bfd_set_section_alignment (stdoutput, s, 2))
@@ -2051,6 +2066,8 @@ elf_frob_file ()
 
       /* Pass a pointer to the first section in this group.  */
       elf_next_in_group (s) = list.head[i];
+      if (has_sym)
+	elf_group_id (s) = sy->bsym;
 
       s->_raw_size = 4 * (list.elt_count[i] + 1);
       s->contents = frag_more (s->_raw_size);
