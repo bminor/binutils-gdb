@@ -1,7 +1,23 @@
 2002-09-22  Fernando Nasser  <fnasser@redhat.com>
 
-	* source.c (get_current_source_symtab_and_line): Initialize sal.pc and
-	sal.end fields.
+	* source.c (get_current_or_default_source_symtab_and_line): Remove
+	function.
+	(set_default_source_symtab_and_line): New function. Attempts to
+	determine a source file to list lines from if one is not currently
+	defined.
+	(get_current_source_symtab_and_line): Initialize sal.pc and
+        sal.end fields.
+	(set_current_source_symtab_and_line): Mark argument as const.
+	* source.h: Update declarations and comments.
+	* linespec.c (decode_line_1): Replace call to removed routine above.
+	* stack.c (print_frame_info_base): Ditto.
+	* cli/cli-cmds.c (edit_command): Ditto.
+	(list_command): Ditto.
+
+2002-09-22  Fernando Nasser  <fnasser@redhat.com>
+
+	* source.c (get_current__or_default_source_symtab_and_line): Initialize
+	sal.pc and sal.end fields.
 	(get_current_or_default_source_symtab_and_line): Ditto.
 	* breakpoint.c (parse_breakpoint_sals): Use correct accessor function
 	so we do not cause a new source symtab to be searched for (reverting an

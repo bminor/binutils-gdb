@@ -434,7 +434,9 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
 	      print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
 	    }
 	}
-      cursal = get_current_or_default_source_symtab_and_line ();
+      /* Make sure we have at least a default source file */
+      set_default_source_symtab_and_line ();
+      cursal = get_current_source_symtab_and_line ();
       cursal.line = max (sal.line - get_lines_to_list () / 2, 1);
       set_current_source_symtab_and_line (&cursal);
     }
