@@ -1,3 +1,9 @@
+2004-11-09  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_begin_write_processing): Do not use a K&R
+	declaration.
+	(elf32_arm_symbian_modify_segment_map): Likewise.
+
 2004-11-09  Daniel Jacobowitz  <dan@debian.org>
 
 	From David Poole <daveml@mbuf.com>:

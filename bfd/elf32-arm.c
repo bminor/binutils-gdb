@@ -5624,17 +5624,10 @@ static struct bfd_elf_special_section const
   { NULL,              0,  0, 0,            0 }
 };
 
-static bfd_boolean
-elf32_arm_symbian_modify_segment_map
-  PARAMS ((bfd *, struct bfd_link_info *));
 static void
-elf32_arm_symbian_begin_write_processing
-  PARAMS ((bfd *, bfd_boolean));
-
-static void
-elf32_arm_symbian_begin_write_processing (abfd, linker)
-     bfd *abfd;
-     bfd_boolean linker;
+elf32_arm_symbian_begin_write_processing (bfd *abfd, 
+					  struct bfd_link_info *link_info
+					    ATTRIBUTE_UNUSED)
 {
   /* BPABI objects are never loaded directly by an OS kernel; they are
      processed by a postlinker first, into an OS-specific format.  If
@@ -5648,9 +5641,9 @@ elf32_arm_symbian_begin_write_processing (abfd, linker)
 }
 
 static bfd_boolean
-elf32_arm_symbian_modify_segment_map (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+elf32_arm_symbian_modify_segment_map (bfd *abfd, 
+				      struct bfd_link_info *info 
+				        ATTRIBUTE_UNUSED)
 {
   struct elf_segment_map *m;
   asection *dynsec;
