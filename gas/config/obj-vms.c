@@ -20,6 +20,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Written by David L. Kashtan */
 /* Modified by Eric Youngdale to write VMS debug records for program
    variables */
+
+/* Want all of obj-vms.h (as obj-format.h, via targ-env.h, via as.h).  */
+#define WANT_VMS_OBJ_DEFS
+
 #include "as.h"
 #include "config.h"
 #include "subsegs.h"
@@ -34,6 +38,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <xab.h>		/* Define XAB - all different types*/
 extern int sys$open(), sys$close(), sys$asctim();
 #endif
+
 /*
  *	Version string of the compiler that produced the code we are
  *	assembling.  (And this assembler, if we do not have compiler info.)
@@ -41,7 +46,7 @@ extern int sys$open(), sys$close(), sys$asctim();
 char *compiler_version_string;
 
 extern int flag_hash_long_names;	/* -+ */
-extern int flag_one;			/* -1 */
+extern int flag_one;			/* -1; compatibility with gcc 1.x */
 extern int flag_show_after_trunc;	/* -H */
 extern int flag_no_hash_mixed_case;	/* -h NUM */
 
@@ -54,7 +59,7 @@ extern int flag_no_hash_mixed_case;	/* -h NUM */
  * that case should be preserved.  */
 
 /* If the -+ switch is given, then the hash is appended to any name that is
- * longer than 31 characters, irregardless of the setting of the -h switch.
+ * longer than 31 characters, regardless of the setting of the -h switch.
  */
 
 char vms_name_mapping = 0;
@@ -67,11 +72,12 @@ static symbolS *Entry_Point_Symbol = 0;	/* Pointer to "_main" */
 struct VMS_Symbol
 {
   struct VMS_Symbol *Next;
-  struct symbol *Symbol;
+  symbolS *Symbol;
   int Size;
   int Psect_Index;
   int Psect_Offset;
 };
+
 struct VMS_Symbol *VMS_Symbols = 0;
 
 /* We need this to keep track of the various input files, so that we can
@@ -93,8 +99,6 @@ struct input_file
 
 static struct input_file *file_root = (struct input_file *) NULL;
 
-
-static struct input_file *find_file PARAMS ((symbolS *));
 
 /*
  * This enum is used to keep track of the various types of variables that
@@ -156,14 +160,13 @@ struct forward_ref
   char resolved;
 };
 
-struct forward_ref *f_ref_root =
-{(struct forward_ref *) NULL};
+struct forward_ref *f_ref_root = (struct forward_ref *) NULL;
 
 /*
  * This routine is used to compare the names of certain types to various
  * fixed types that are known by the debugger.
  */
-#define type_check(x)  !strcmp( symbol_name , x )
+#define type_check(X)  !strcmp (symbol_name, X)
 
 /*
  * This variable is used to keep track of the name of the symbol we are
@@ -331,19 +334,93 @@ const segT N_TYPE_seg[N_TYPE + 2] =
 };
 
 
+/* Local support routines which return a value.  */
+
+static struct input_file *find_file PARAMS ((symbolS *));
+static struct VMS_DBG_Symbol *find_symbol PARAMS ((int));
+static symbolS *Define_Routine PARAMS ((symbolS *,int));
+
+static char *cvt_integer PARAMS ((char *,int *));
+static char *fix_name PARAMS ((char *));
+static char *get_struct_name PARAMS ((char *));
+
+static int VMS_TBT_Source_File PARAMS ((char *,int));
+static int gen1 PARAMS ((struct VMS_DBG_Symbol *,int));
+static int forward_reference PARAMS ((char *));
+static int final_forward_reference PARAMS ((struct VMS_DBG_Symbol *));
+static int VMS_typedef_parse PARAMS ((char *));
+static int hash_string PARAMS ((const char *));
+static int VMS_Psect_Spec PARAMS ((const char *,int,const char *,
+				   struct VMS_Symbol *));
+static int VMS_Initialized_Data_Size PARAMS ((symbolS *,int));
+
+/* Local support routines which don't directly return any value.  */
+
+static void s_const PARAMS ((int));
+static void Create_VMS_Object_File PARAMS ((void));
+static void Flush_VMS_Object_Record_Buffer PARAMS ((void));
+static void Set_VMS_Object_File_Record PARAMS ((int));
+static void Close_VMS_Object_File PARAMS ((void));
+static void vms_tir_stack_psect PARAMS ((int,int,int));
+static void VMS_Store_Immediate_Data PARAMS ((const char *,int,int));
+static void VMS_Set_Data PARAMS ((int,int,int,int));
+static void VMS_Store_Struct PARAMS ((int));
+static void VMS_Def_Struct PARAMS ((int));
+static void VMS_Set_Struct PARAMS ((int));
+static void VMS_TBT_Module_Begin PARAMS ((void));
+static void VMS_TBT_Module_End PARAMS ((void));
+static void VMS_TBT_Routine_Begin PARAMS ((symbolS *,int));
+static void VMS_TBT_Routine_End PARAMS ((int,symbolS *));
+static void VMS_TBT_Block_Begin PARAMS ((symbolS *,int,char *));
+static void VMS_TBT_Block_End PARAMS ((int));
+static void VMS_TBT_Line_PC_Correlation PARAMS ((int,int,int,int));
+static void VMS_TBT_Source_Lines PARAMS ((int,int,int));
+static void fpush PARAMS ((int,int));
+static void rpush PARAMS ((int,int));
+static void array_suffix PARAMS ((struct VMS_DBG_Symbol *));
+static void new_forward_ref PARAMS ((int));
+static void generate_suffix PARAMS ((struct VMS_DBG_Symbol *,int));
+static void bitfield_suffix PARAMS ((struct VMS_DBG_Symbol *,int));
+static void setup_basic_type PARAMS ((struct VMS_DBG_Symbol *));
+static void VMS_DBG_record PARAMS ((struct VMS_DBG_Symbol *,int,int,char *));
+static void VMS_local_stab_Parse PARAMS ((symbolS *));
+static void VMS_stab_parse PARAMS ((symbolS *,int,int,int,int));
+static void VMS_GSYM_Parse PARAMS ((symbolS *,int));
+static void VMS_LCSYM_Parse PARAMS ((symbolS *,int));
+static void VMS_STSYM_Parse PARAMS ((symbolS *,int));
+static void VMS_RSYM_Parse PARAMS ((symbolS *,symbolS *,int));
+static void VMS_LSYM_Parse PARAMS ((void));
+static void Define_Local_Symbols PARAMS ((symbolS *,symbolS *));
+static void VMS_DBG_Define_Routine PARAMS ((symbolS *,symbolS *,int));
+static void Write_VMS_MHD_Records PARAMS ((void));
+static void Write_VMS_EOM_Record PARAMS ((int,int));
+static void VMS_Case_Hack_Symbol PARAMS ((const char *,char *));
+static void VMS_Modify_Psect_Attributes PARAMS ((const char *,int *));
+static void VMS_Global_Symbol_Spec PARAMS ((const char *,int,int,int));
+static void VMS_Local_Environment_Setup PARAMS ((const char *));
+static void VMS_Emit_Globalvalues PARAMS ((unsigned,unsigned,char *));
+static void VMS_Procedure_Entry_Pt PARAMS ((char *,int,int,int));
+static void VMS_Set_Psect PARAMS ((int,int,int));
+static void VMS_Store_Repeated_Data PARAMS ((int,char *,int,int));
+static void VMS_Store_PIC_Symbol_Reference PARAMS ((symbolS *,int,
+						    int,int,int,int));
+static void VMS_Fix_Indirect_Reference PARAMS ((int,int,fragS *,fragS *));
+
+
 /* The following code defines the special types of pseudo-ops that we
  *  use with VMS.
  */
 
 char const_flag = IN_DEFAULT_SECTION;
 
-void
-s_const ()
+static void
+s_const (arg)
+     int arg;	/* 3rd field from obj_pseudo_table[]; not needed here */
 {
-  register int temp;
-
-  temp = get_absolute_expression ();
-  subseg_set (SEG_DATA, (subsegT) temp);
+  /* Since we don't need `arg', use it as our scratch variable so that
+     we won't get any "not used" warnings about it.  */
+  arg = get_absolute_expression ();
+  subseg_set (SEG_DATA, (subsegT) arg);
   const_flag = 1;
   demand_empty_rest_of_line ();
 }
@@ -649,7 +726,7 @@ vms_tir_stack_psect (Psect_Index, Offset, Force)
  */
 static void
 VMS_Store_Immediate_Data (Pointer, Size, Record_Type)
-     CONST char *Pointer;
+     const char *Pointer;
      int Size;
      int Record_Type;
 {
@@ -899,7 +976,7 @@ VMS_TBT_Module_End ()
  */
 static void
 VMS_TBT_Routine_Begin (symbolP, Psect)
-     struct symbol *symbolP;
+     symbolS *symbolP;
      int Psect;
 {
   register char *cp, *cp1;
@@ -1036,7 +1113,7 @@ VMS_TBT_Routine_End (Max_Size, sp)
  */
 static void
 VMS_TBT_Block_Begin (symbolP, Psect, Name)
-     struct symbol *symbolP;
+     symbolS *symbolP;
      int Psect;
      char *Name;
 {
@@ -1879,7 +1956,7 @@ generate_suffix (spnt, dbx_type)
      struct VMS_DBG_Symbol *spnt;
      int dbx_type;
 {
-  static CONST char pvoid[6] = {
+  static const char pvoid[6] = {
 		5,		/* record.length == 5 */
 		DST_K_TYPSPEC,	/* record.type == 1 (type specification) */
 		0,		/* name.length == 0, no name follows */
@@ -2159,7 +2236,7 @@ VMS_local_stab_Parse (sp)
 static void
 VMS_stab_parse (sp, expected_type, type1, type2, Text_Psect)
      symbolS *sp;
-     char expected_type;
+     int expected_type;	/* char */
      int type1, type2, Text_Psect;
 {
   char *pnt;
@@ -2443,7 +2520,7 @@ forward_reference (pnt)
 
 static int
 final_forward_reference (spnt)
-  struct VMS_DBG_Symbol *spnt;
+     struct VMS_DBG_Symbol *spnt;
 {
   struct VMS_DBG_Symbol *spnt1;
 
@@ -3142,18 +3219,19 @@ VMS_DBG_Define_Routine (symbolP, Curr_Routine, Txt_Psect)
 }
 
 
-
-
 #ifndef VMS
 #include <sys/types.h>
 #include <time.h>
+static void get_VMS_time_on_unix PARAMS ((char *));
 
-/* Manufacure a VMS like time on a unix based system. */
+/* Manufacture a VMS-like time string on a Unix based system.  */
+static void
 get_VMS_time_on_unix (Now)
      char *Now;
 {
   char *pnt;
   time_t timeb;
+
   time (&timeb);
   pnt = ctime (&timeb);
   pnt[3] = 0;
@@ -3163,8 +3241,8 @@ get_VMS_time_on_unix (Now)
   pnt[24] = 0;
   sprintf (Now, "%2s-%3s-%s %s", pnt + 8, pnt + 4, pnt + 20, pnt + 11);
 }
-
 #endif /* not VMS */
+
 /*
  *	Write the MHD (Module Header) records
  */
@@ -3344,10 +3422,10 @@ Write_VMS_EOM_Record (Psect, Offset)
 
 static int
 hash_string (ptr)
-     unsigned char *ptr;
+     const char *ptr;
 {
-  register unsigned char *p = ptr;
-  register unsigned char *end = p + strlen (ptr);
+  register const unsigned char *p = (unsigned char *) ptr;
+  register const unsigned char *end = p + strlen (ptr);
   register unsigned char c;
   register int hash = 0;
 
@@ -3364,14 +3442,14 @@ hash_string (ptr)
  */
 static void
 VMS_Case_Hack_Symbol (In, Out)
-     register char *In;
+     register const char *In;
      register char *Out;
 {
   long int init;
   long int result;
   char *pnt = 0;
   char *new_name;
-  char *old_name;
+  const char *old_name;
   register int i;
   int destructor = 0;		/*hack to allow for case sens in a destructor*/
   int truncate = 0;
@@ -3555,11 +3633,11 @@ VMS_Case_Hack_Symbol (In, Out)
 
 static void
 VMS_Modify_Psect_Attributes (Name, Attribute_Pointer)
-     char *Name;
+     const char *Name;
      int *Attribute_Pointer;
 {
   register int i;
-  register char *cp;
+  register const char *cp;
   int Negate;
   static const struct
   {
@@ -3667,7 +3745,7 @@ VMS_Modify_Psect_Attributes (Name, Attribute_Pointer)
  */
 static void
 VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Flags)
-     char *Name;
+     const char *Name;
      int Psect_Number;
      int Psect_Offset;
      int Flags;
@@ -3777,9 +3855,9 @@ VMS_Local_Environment_Setup (Env_Name)
  */
 static int
 VMS_Psect_Spec (Name, Size, Type, vsp)
-     char *Name;
+     const char *Name;
      int Size;
-     char *Type;
+     const char *Type;
      struct VMS_Symbol *vsp;
 {
   char Local[32];
@@ -3919,10 +3997,10 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
  */
 static int
 VMS_Initialized_Data_Size (sp, End_Of_Data)
-     register struct symbol *sp;
+     register symbolS *sp;
      int End_Of_Data;
 {
-  struct symbol *sp1, *Next_Symbol;
+  symbolS *sp1, *Next_Symbol;
   /* Cache values to avoid extra lookups.  */
   valueT sp_val = S_GET_VALUE (sp), sp1_val, next_val = 0;
 
@@ -4244,7 +4322,7 @@ VMS_Store_Repeated_Data (Repeat_Count, Pointer, Size, Record_Type)
 static void
 VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
 				Psect, Psect_Offset, Record_Type)
-     struct symbol *Symbol;
+     symbolS *Symbol;
      int Offset;
      int PC_Relative;
      int Psect;
@@ -4389,7 +4467,7 @@ VMS_Fix_Indirect_Reference (Text_Psect, Offset, fragP, text_frag_root)
      int Text_Psect;
      int Offset;
      register fragS *fragP;
-     struct frag *text_frag_root;
+     fragS *text_frag_root;
 {
   /*
    *	The addressing mode byte is 1 byte before the address
@@ -4461,7 +4539,7 @@ vms_check_for_main ()
   int i;
 #endif	/* HACK_DEC_C_STARTUP */
 
-  symbolP = (struct symbol *) symbol_find ("_main");
+  symbolP = (symbolS *) symbol_find ("_main");
   if (symbolP && !S_IS_DEBUG (symbolP) &&
       S_IS_EXTERNAL (symbolP) && (S_GET_TYPE (symbolP) == N_TEXT))
     {
@@ -4660,6 +4738,9 @@ vms_check_for_main ()
     }
 }
 
+
+#define IS_GXX_VTABLE(symP) (strncmp (S_GET_NAME (symP), "__vt.", 5) == 0)
+
 /*
  *	Write a VAX/VMS object file (everything else has been done!)
  */
@@ -4669,8 +4750,8 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
      unsigned text_siz;
      unsigned data_siz;
      unsigned bss_siz;
-     struct frag *text_frag_root;
-     struct frag *data_frag_root;
+     fragS *text_frag_root;
+     fragS *data_frag_root;
 {
   register fragS *fragP;
   register symbolS *symbolP;
@@ -4727,13 +4808,12 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  i += fragP->fr_fix;
 
 	  fill_literal = fragP->fr_literal + fragP->fr_fix;
-	  fill_size = fragP->fr_var;
-	  for (count = fragP->fr_offset; count; count--)
-	    {
-	      if (fill_size)
+	  if ((fill_size = fragP->fr_var) != 0)
+	    for (count = fragP->fr_offset; count; count--)
+	      {
 		memcpy (Data_Segment + i, fill_literal, fill_size);
-	      i += fill_size;
-	    }
+		i += fill_size;
+	      }
 	}
     }
 
@@ -4769,36 +4849,17 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
    * The g++ compiler does not write out external references to vtables
    * correctly.  Check for this and holler if we see it happening.
    * If that compiler bug is ever fixed we can remove this.
+   * (Jun'95:  gcc 2.7.0's cc1plus still exhibits this behavior.)
    */
   for (sp = symbol_rootP; sp; sp = symbol_next (sp)) 
-    {
-      /*
-       *	Dispatch on symbol type
-       */
-      switch (S_GET_RAW_TYPE (sp)) {
-	/*
-	 *	Global Reference
-	 */
-      case N_UNDF:
-	/*
-	 *	Make a GSD global symbol reference
-	 *	record.
-	 */
-	if (strncmp (S_GET_NAME (sp),"__vt.",5) == 0)
-	  {
-	    S_SET_TYPE (sp, N_UNDF | N_EXT);
-	    S_SET_OTHER (sp, 1);
-	    /* Is this warning still needed?  It sounds like it describes
-	       a compiler bug.  Does it?  If not, let's dump it.  */
-	    as_warn("g++ wrote an extern reference to %s as a routine.",
-		    S_GET_NAME (sp));
-	    as_warn("I will fix it, but I hope that it was not really a routine");
-	  }
-	break;
-      default:
-	break;
+    if (S_GET_RAW_TYPE (sp) == N_UNDF && IS_GXX_VTABLE (sp))
+      {
+	S_SET_TYPE (sp, N_UNDF | N_EXT);
+	S_SET_OTHER (sp, 1);
+	as_warn ("g++ wrote an extern reference to `%s' as a routine.\n%s",
+		 S_GET_NAME (sp),
+		 "I will fix it, but I hope that it was not really a routine.");
       }
-    }
 #endif /* gxx_bug_fixed */
   /*
    *	Now scan the symbols and emit the appropriate GSD records
@@ -4828,11 +4889,10 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  /*
 	   *	Make the psect for this data
 	   */
-	  Globalref = VMS_Psect_Spec (
-				       S_GET_NAME (sp),
-				       vsp->Size,
-				       S_GET_OTHER (sp) ? "CONST" : "COMMON",
-				       vsp);
+	  Globalref = VMS_Psect_Spec (S_GET_NAME (sp),
+				      vsp->Size,
+				      S_GET_OTHER (sp) ? "CONST" : "COMMON",
+				      vsp);
 	  if (Globalref)
 	    Psect_Number--;
 
@@ -4841,7 +4901,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
    is not compatible with VAX-C usage for variables, but since vtables are
    only used internally by g++, we can get away with this hack.  */
 
-	  if(strncmp (S_GET_NAME (sp), "__vt.", 5) == 0)
+	  if (IS_GXX_VTABLE (sp))
 	    VMS_Global_Symbol_Spec (S_GET_NAME(sp),
 				    vsp->Psect_Index,
 				    0,
@@ -4904,7 +4964,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
    is not compatible with VAX-C usage for variables, but since vtables are
    only used internally by g++, we can get away with this hack.  */
 
-	  if(strncmp (S_GET_NAME (sp), "__vt.", 5) == 0)
+	  if (IS_GXX_VTABLE (sp))
 	    VMS_Global_Symbol_Spec (S_GET_NAME (sp),
 				    vsp->Psect_Index,
 				    0,
@@ -4957,6 +5017,10 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	     *	Get the entry mask
 	     */
 	    fragP = sp->sy_frag;
+	    /* First frag might be empty if we're generating listings.
+	       So skip empty rs_fill frags.  */
+	    while (fragP && fragP->fr_type == rs_fill && fragP->fr_fix == 0)
+	      fragP = fragP->fr_next;
 
 	    /* If first frag doesn't contain the data, what do we do?
 	       If it's possibly smaller than two bytes, that would
@@ -4966,18 +5030,13 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	       If you can find a test case that triggers this, report
 	       it (and tell me what the entry mask field ought to be),
 	       and I'll try to fix it.  KR */
-	    /* First frag might be empty if we're generating listings.
-	       So skip empty rs_fill frags.  */
-	    while (fragP && fragP->fr_type == rs_fill && fragP->fr_fix == 0)
-	      fragP = fragP->fr_next;
-
 	    if (fragP->fr_fix < 2)
 	      abort ();
 
 	    Entry_Mask = (fragP->fr_literal[0] & 0x00ff) |
 			 ((fragP->fr_literal[1] & 0x00ff) << 8);
 	    /*
-	     *	Define the Procedure entry pt.
+	     *	Define the procedure entry point.
 	     */
 	    VMS_Procedure_Entry_Pt (S_GET_NAME (sp),
 				    Text_Psect,
@@ -5028,7 +5087,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	   */
 	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
 	  vsp->Symbol = sp;
-	  vsp->Size = 4;
+	  vsp->Size = 4;		/* always assume 32 bits */
 	  vsp->Psect_Index = 0;
 	  vsp->Psect_Offset = S_GET_VALUE (sp);
 	  vsp->Next = VMS_Symbols;
@@ -5040,16 +5099,14 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	   */
 	default:
 	  /*
-	   *	Ignore STAB symbols
-	   *	Including .stabs emitted by g++
+	   *	Ignore STAB symbols, including .stabs emitted by g++.
 	   */
 	  if (S_IS_DEBUG (sp) || (S_GET_TYPE (sp) == 22))
 	    break;
 	  /*
-	   *	Error
+	   *	Error otherwise.
 	   */
-	  if (S_GET_TYPE (sp) != 22)
-	    as_tsktsk ("unhandled stab type %d", S_GET_TYPE (sp));
+	  as_tsktsk ("unhandled stab type %d", S_GET_TYPE (sp));
 	  break;
 	}
     }
@@ -5248,9 +5305,8 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  /*
 	   *	Store the data
 	   */
-	  VMS_Store_Immediate_Data (Data_Segment +
-				    S_GET_VALUE (vsp->Symbol) -
-				    text_siz,
+	  VMS_Store_Immediate_Data (
+			  Data_Segment + S_GET_VALUE (vsp->Symbol) - text_siz,
 				    vsp->Size,
 				    OBJ_S_C_TIR);
 	}
@@ -5379,7 +5435,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
    *	 order of ascending text segment offset)
    */
   {
-    struct symbol *Current_Routine = 0;
+    symbolS *Current_Routine = 0;
     int Current_Line_Number = 0;
     int Current_Offset = -1;
     struct input_file *Current_File = 0;
@@ -5525,6 +5581,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 		VMS_TBT_Routine_Begin (symbolP, Text_Psect);
 		Current_Routine = symbolP;
 	      }
+
 /* Output local symbols, i.e. all symbols that are associated with a specific
  * routine.  We output them now so the debugger recognizes them as local to
  * this routine.

@@ -1,3 +1,26 @@
+Wed Jul  5 22:49:31 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Mon Jul  3 19:47:53 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.h (vms_resolve_symbol_redef): Use full prototype.
+	(vms_check_for_special_label, tc_frob_label): Move them to group
+	with other prototypes.
+	[WANT_VMS_OBJ_DEFS]: Only define the many OBJ_x, DBG_x, and DST_x
+	macros when this is defined.
+	* config/obj-vms.c: Fully prototype all local functions.
+	[symbolS, fragS]: Use consistently instead of their struct tags.
+	[WANT_VMS_OBJ_DEFS]: Define this.
+	(s_const): Make definition correctly match actual usage.
+	(VMS_stab_parse): Make `expected_type' arg be int rather than char.
+	(get_VMS_time_on_unix): Define as `static void'.
+	(hash_string): Make definition match actual usage; argument is
+	`char const *' rather than `unsigned char *'.
+	(VMS_Case_Hack_Symbol, VMS_Modify_Psect_Attributes, VMS_Psect_Spec,
+	VMS_Global_Symbol_Spec): Declare string args as `const char *'.
+	[IS_GXX_VTABLE]: New macro.
+	(vms_write_object_file: GSD loop): Use it.
+	(vms_write_object_file: data segment): Reorganize `fill' loop.
+
 Wed Jul  5 12:01:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sparc.c (md_shortopts): Add "K:" if OBJ_ELF.

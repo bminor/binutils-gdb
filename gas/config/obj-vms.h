@@ -43,11 +43,6 @@ extern char const_flag;
 
 #define IN_DEFAULT_SECTION 0x80
 
-/* Compiler-generated label "__vax_g_doubles" is used to augment .stabs. */
-
-#define tc_frob_label(X) vms_check_for_special_label(X)
-extern void vms_check_for_special_label();
-
 /* These are defined in obj-vms.c. */
 extern const short seg_N_TYPE[];
 extern const segT N_TYPE_seg[];
@@ -214,11 +209,22 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 
 #define obj_symbol_new_hook(s)	{;}
 
+/* Force structure tags into scope so that their use in prototypes
+   will never be their first occurance.  */
 struct fix;
+struct symbol;
+struct frag;
+
+/* obj-vms routines visible to the rest of gas.  */
+
 extern void tc_aout_fix_to_chars PARAMS ((char *,struct fix *,relax_addressT));
 
-extern int vms_resolve_symbol_redef ();
+extern int vms_resolve_symbol_redef PARAMS ((struct symbol *));
 #define RESOLVE_SYMBOL_REDEFINITION(X)	vms_resolve_symbol_redef(X)
+
+/* Compiler-generated label "__vax_g_doubles" is used to augment .stabs. */
+extern void vms_check_for_special_label PARAMS ((struct symbol *));
+#define tc_frob_label(X) vms_check_for_special_label(X)
 
 extern void vms_check_for_main PARAMS ((void));
 
@@ -231,9 +237,11 @@ extern void vms_write_object_file PARAMS ((unsigned,unsigned,unsigned,
 #define AOUT_STABS
 
 
-/* The rest of this file contains definitions for constants used within the actual
-   VMS object file.  We do not use a $ in the symbols (as per usual VMS
-   convention) since System V gags on it.  */
+#ifdef WANT_VMS_OBJ_DEFS
+
+/* The rest of this file contains definitions for constants used within
+   the actual VMS object file.  We do not use a $ in the symbols (as per
+   usual VMS convention) since System V gags on it.  */
 
 #define	OBJ_S_C_HDR	0
 #define	OBJ_S_C_HDR_MHD	0
@@ -534,4 +542,7 @@ extern void vms_write_object_file PARAMS ((unsigned,unsigned,unsigned,
 #define DBG_S_C_POINTER			DST_K_TS_TPTR
 #define DBG_S_C_VOID			DST_K_TS_PTR
 #define DBG_S_C_COMPLEX_ARRAY		DST_K_TS_ARRAY
+
+#endif	/* WANT_VMS_OBJ_DEFS */
+
 /* end of obj-vms.h */
