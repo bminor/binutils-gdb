@@ -1,3 +1,9 @@
+2004-04-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparcnbsd-tdep.c (_initialize_sparnbsd_tdep): Specify
+	architecture when registering sparcnbsd_core_osabi_sniffer.
+	Adjust comment.
+
 2004-04-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* infcall.c (find_function_addr): Add FUNCTION_START_OFFSET to
