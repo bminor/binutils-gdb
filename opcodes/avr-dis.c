@@ -135,7 +135,8 @@ avr_operand (insn, insn2, pc, constraint, buf, comment, regs)
       break;
       
     case 'h':
-      sprintf (buf, "0x%x%x", (insn & 1) | ((insn & (0x1f << 4)) >> 3), insn2);
+      sprintf (buf, "0x%x",
+	       ((((insn & 1) | ((insn & 0x1f0) >> 3)) << 16) | insn2) * 2);
       break;
       
     case 'L':
