@@ -1,3 +1,9 @@
+Sun Dec 28 11:28:58 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in (INSTALL_TARGET): Do install-gcc first.
+	* configure (gxx_include_dir): Provide a definition for subdirs
+	which do not use autoconf.
+
 Wed Dec 24 22:46:55 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config.guess: Sync with egcs.  Picks up new alpha support,
