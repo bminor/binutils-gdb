@@ -4,6 +4,8 @@ Tue Sep 17 14:18:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 	indices, rather than crashing.
 	(coff_slurp_reloc_table): Likewise.  Check whether the howto field
 	is NULL.
+	* coff-sh.c (sh_relocate_section): Check for an illegal symbol
+	index.
 
 Mon Sep 16 12:39:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
