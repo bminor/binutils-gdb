@@ -1,5 +1,8 @@
 Tue Apr 15 12:21:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (INSTALL_XFORM): Remove.
+	(BASE_FLAGS_TO_PASS): Remove INSTALL_XFORM.
+
 	* mkinstalldirs: New file, copied from automake.
 	* Makefile.in (installdirs): Rename from install-dirs.  Use
 	mkinstalldirs.  Change all users.
