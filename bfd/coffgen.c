@@ -2427,7 +2427,8 @@ bfd_coff_set_symbol_class (abfd, symbol, class)
 struct coff_comdat_info *
 bfd_coff_get_comdat_section (bfd *abfd, struct bfd_section *sec)
 {
-  if (bfd_get_flavour (abfd) == bfd_target_coff_flavour)
+  if (bfd_get_flavour (abfd) == bfd_target_coff_flavour
+      && coff_section_data (abfd, sec) != NULL)
     return coff_section_data (abfd, sec)->comdat;
   else
     return NULL;

@@ -1,5 +1,10 @@
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* coffgen.c (bfd_coff_get_comdat_section): Check that
+	coff_section_data isn't NULL.
+
+2005-02-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd-in.h (bfd_elf_bfd_from_remote_memory): Warning fix.
 	* coff-m68k.c (bfd_m68k_coff_create_embedded_relocs): Likewise.
 	* coff-rs6000.c (xcoff_write_armap_big): Warning fixes.  Remove
@@ -43,14 +48,10 @@
 	* bfd-in2.h: Regenerate.
 	* libbfd.h: Regenerate.
 
-2005-02-18  Alan Modra  <amodra@bigpond.net.au>
-
-	* coffgen.c (coff_write_symbols): Make "written" a bfd_vma.
-
 2005-02-17  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-frv.c (elf32_frv_relocate_section): Remove warning from
-	uninitialized check_segment[1] in TLSMOFF case.  
+	uninitialized check_segment[1] in TLSMOFF case.
 	Reported by Alan Modra.
 	(elf32_frv_relocate_section): Improve errors and warnings.
 
@@ -76,7 +77,7 @@
 	Skip toc reloc adjust if reloc_count is zero.
 
 2005-02-15  Nigel Stephens  <nigel@mips.com>
-            Maciej W. Rozycki  <macro@mips.com>
+	    Maciej W. Rozycki  <macro@mips.com>
 
 	* elf32-mips.c (elf_mips16_howto_table_rel): New array for MIPS16
 	reloc howtos.  Add R_MIPS16_HI16 and R_MIPS16_LO16 relocs and
