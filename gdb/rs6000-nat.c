@@ -931,7 +931,7 @@ xcoff_relocate_symtab (unsigned int pid)
   do
     {
       size = load_segs * ldisize;
-      ldi = (void *) xrealloc (ldi, load_segs * size);
+      ldi = (void *) xrealloc (ldi, size);
 
 #if 0
       /* According to my humble theory, AIX has some timing problems and

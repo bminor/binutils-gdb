@@ -1,3 +1,10 @@
+2000-08-30  David Edelsohn  <dje@watson.ibm.com>
+
+	Patch applied by Kevin Buettner <kevinb@redhat.com>:
+
+	* rs6000-nat.c (xcoff_relocate_symtab): Pass correct size
+	to xrealloc().
+
 2000-08-29  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* valops.c (value_cast): Indentation fix-up.
