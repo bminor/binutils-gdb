@@ -38,6 +38,7 @@ alpha.sc
 armaout.sc
 armcoff.sc
 aout.sc
+delta68.sc
 ebmon29k.sc
 elf.sc
 elfppc.sc

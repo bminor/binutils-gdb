@@ -49,6 +49,7 @@ armaoutl.sh
 armcoff.sh
 armpe.sh
 coff_sparc.sh
+delta68.sh
 ebmon29k.sh
 elf32_sparc.sh
 elf32bmip.sh

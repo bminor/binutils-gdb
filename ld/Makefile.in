@@ -203,7 +203,7 @@ ALL_EMULATIONS = ea29k.o ealpha.o earmaoutl.o earmaoutb.o \
 	eriscix.o esa29200.o eshl.o esh.o esparclynx.o esparcnbsd.o \
 	est2000.o esun3.o esun4.o evanilla.o evax.o evsta.o \
 	ez8001.o ez8002.o ei386pe.o earmpe.o eelf32b4300.o eelf32l4300.o \
-	eaixppc.o eaixrs6.o
+	eaixppc.o eaixrs6.o edelta68.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -500,6 +500,9 @@ eaixppc.c: $(srcdir)/emulparams/aixppc.sh \
 eaixrs6.c: $(srcdir)/emulparams/aixrs6.sh \
   $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} aixrs6
+edelta68.c: $(srcdir)/emulparams/delta68.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} delta68
 # start-sanitize-arc
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

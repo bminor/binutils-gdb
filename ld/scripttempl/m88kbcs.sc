@@ -1,18 +1,20 @@
+# These are substituted in as variables in order to get '}' in a shell
+# conditional expansion.
+INIT='.init : { *(.init) }'
+FINI='.fini : { *(.fini) }'
 cat <<EOF
-TARGET(m88kbcs)
-OUTPUT_FORMAT(m88kbcs)
+OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 ENTRY(__start)
 ${RELOCATING+${LIB_SEARCH_DIRS}}
 
 SECTIONS 				
 { 					
-  .text ${RELOCATING+ 0x10000 + SIZEOF_HEADERS} :
+  .text ${RELOCATING+ (0x20007 + SIZEOF_HEADERS) &~ 7} :
     {
-      CREATE_OBJECT_SYMBOLS
       ${RELOCATING+ __.text.start = .};
       ${RELOCATING+ __.init.start = .};
-      ${RELOCATING+ LONG(0xf400c001)}
+      ${RELOCATING+ *(.init)}
       ${RELOCATING+ __.init.end = .};
       *(.text) 				
       ${RELOCATING+ __.tdesc_start = .};
@@ -20,14 +22,14 @@ SECTIONS
       ${RELOCATING+ __.text_end = .}	;
       ${RELOCATING+ __.initp.start = .};
       ${RELOCATING+ __.initp.end =.};
-
+      ${RELOCATING+ __.fini_start = .};
+      ${RELOCATING+ *(.fini) }
+      ${RELOCATING+ __.fini_end = .};
       ${RELOCATING+_etext =.};
     }  					
-  .data ${RELOCATING+ SIZEOF(.text) + ADDR(.text) + 0x400000} :
+  .data ${RELOCATING+ NEXT (0x400000) + ((SIZEOF(.text) + ADDR(.text)) % 0x200)} :
     { 					
       *(.data)
-      ${CONSTRUCTING+CONSTRUCTORS}
-      *(.comment)
       ${RELOCATING+_edata  =  .};
     }  					
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
@@ -36,6 +38,12 @@ SECTIONS
       *(COMMON) 	
       ${RELOCATING+ _end = .};
       ${RELOCATING+ __end = .};
-    } 					
+    }
+  ${RELOCATING- ${INIT}}
+  ${RELOCATING- ${FINI}}
+  .comment  0 ${RELOCATING+(NOLOAD)} : 
+  {
+    *(.comment)
+  }
 }
 EOF
