@@ -1,5 +1,8 @@
 Tue Oct 31 12:34:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (coff_slurp_symbol_table): Accept C_BCOMM and
+	C_ECOMM storage classes.
+
 	* xcofflink.c (xcoff_mark_symbol): New static function, broken out
 	of xcoff_mark.
 	(xcoff_mark): Call xcoff_mark_symbol.

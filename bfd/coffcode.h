@@ -2784,6 +2784,8 @@ coff_slurp_symbol_table (abfd)
 	    case C_RSYM:
 	    case C_RPSYM:
 	    case C_STSYM:
+	    case C_BCOMM:
+	    case C_ECOMM:
 	    case C_DECL:
 	    case C_ENTRY:
 	    case C_FUN:
