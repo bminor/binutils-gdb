@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
@@ -29,7 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "aout/stab_gnu.h"
 #include "libaout.h"		/* BFD a.out internal data structures */
-
 
 static int aligncode PARAMS ((bfd *abfd, asection *input_section,
 			      arelent *r, unsigned int shrink));
@@ -97,7 +95,7 @@ bout_swap_exec_header_out (abfd, execp, raw_bytes)
 {
   struct external_exec *bytes = (struct external_exec *)raw_bytes;
 
-  /* Now fill in fields in the raw data, from the fields in the exec struct. */
+  /* Now fill in fields in the raw data, from the fields in the exec struct.  */
   bfd_h_put_32 (abfd, execp->a_info  , bytes->e_info);
   PUT_WORD (abfd, execp->a_text  , bytes->e_text);
   PUT_WORD (abfd, execp->a_data  , bytes->e_data);
@@ -113,7 +111,6 @@ bout_swap_exec_header_out (abfd, execp, raw_bytes)
   bytes->e_balign[0] = execp->a_balign;
   bytes->e_relaxable[0] = execp->a_relaxable;
 }
-
 
 static const bfd_target *
 b_out_object_p (abfd)
@@ -139,7 +136,6 @@ b_out_object_p (abfd)
   bout_swap_exec_header_in (abfd, &exec_bytes, &anexec);
   return aout_32_some_aout_object_p (abfd, &anexec, b_out_callback);
 }
-
 
 /* Finish up the opening of a b.out file for reading.  Fill in all the
    fields that are not handled by common code.  */
@@ -189,8 +185,8 @@ b_out_callback (abfd)
   obj_textsec (abfd)->rel_filepos = N_TROFF(*execp);
   obj_datasec (abfd)->rel_filepos =  N_DROFF(*execp);
 
-  adata(abfd).page_size = 1;	/* Not applicable. */
-  adata(abfd).segment_size = 1; /* Not applicable. */
+  adata(abfd).page_size = 1;	/* Not applicable.  */
+  adata(abfd).segment_size = 1; /* Not applicable.  */
   adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
 
   if (execp->a_relaxable)
@@ -344,7 +340,6 @@ b_out_write_object_contents (abfd)
 #define CALL      0x09000000
 #define PCREL13_MASK 0x1fff
 
-
 #define output_addr(sec) ((sec)->output_offset+(sec)->output_section->vma)
 
 /* Magic to turn callx into calljx */
@@ -384,7 +379,6 @@ calljx_callback (abfd, link_info, reloc_entry, src, dst, input_section)
   return bfd_reloc_ok;
 }
 
-
 /* Magic to turn call into callj */
 static bfd_reloc_status_type
 callj_callback (abfd, link_info, reloc_entry,  data, srcidx, dstidx,
@@ -417,7 +411,7 @@ callj_callback (abfd, link_info, reloc_entry,  data, srcidx, dstidx,
 
       /* The next symbol should be an N_BALNAME.  */
       BFD_ASSERT(IS_BALNAME(balsym->other));
-      
+
       /* We are calling a leaf, so replace the call instruction with a
 	 bal.  */
       word = BAL | ((word
@@ -471,7 +465,6 @@ HOWTO(PCREL24, 0, 2, 24, true, 0, complain_overflow_signed,0,"pcrel24", true, 0x
 
 static reloc_howto_type howto_reloc_pcrel13 =
 HOWTO(PCREL13, 0, 2, 13, true, 0, complain_overflow_signed,0,"pcrel13", true, 0x00001fff,0x00001fff,false);
-
 
 static reloc_howto_type howto_reloc_abs32codeshrunk =
 HOWTO(ABS32CODE_SHRUNK, 0, 2, 24, true, 0, complain_overflow_signed, 0,"callx->callj", true, 0x00ffffff, 0x00ffffff,false);
@@ -576,8 +569,6 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
       free (relocs);
     return false;
   }
-
-
 
   if (bfd_header_big_endian (abfd)) {
     /* big-endian bit field allocation order */
@@ -728,16 +719,13 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     }
   }
 
-
   if (relocs != NULL)
     free (relocs);
   asect->relocation = reloc_cache;
   asect->reloc_count = count;
 
-
   return true;
 }
-
 
 static boolean
 b_out_squirt_out_relocs (abfd, section)
@@ -1008,8 +996,6 @@ b_out_sizeof_headers (ignore_abfd, ignore)
   return sizeof(struct internal_exec);
 }
 
-
-
 /************************************************************************/
 static bfd_vma
 get_value (reloc, link_info, input_section)
@@ -1124,7 +1110,6 @@ abs32code (abfd, input_section, r, shrink, link_info)
      jump we were going to */
 
   gap = value - (dot - shrink);
-
 
   if (-1<<23 < (long)gap && (long)gap < 1<<23 )
   {
@@ -1494,10 +1479,9 @@ const bfd_target b_out_vec_big_host =
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   & b_out_vec_little_host,
-  
+
   (PTR) 0,
 };
-
 
 const bfd_target b_out_vec_little_host =
 {
@@ -1537,6 +1521,6 @@ const bfd_target b_out_vec_little_host =
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   & b_out_vec_big_host,
-  
+
   (PTR) 0
 };

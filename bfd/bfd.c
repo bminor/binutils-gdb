@@ -33,10 +33,10 @@ SECTION
 
 CODE_FRAGMENT
 .
-.struct _bfd 
+.struct _bfd
 .{
 .    {* The filename the application opened the BFD with.  *}
-.    CONST char *filename;                
+.    CONST char *filename;
 .
 .    {* A pointer to the target jump table.             *}
 .    const struct bfd_target *xvec;
@@ -69,7 +69,7 @@ CODE_FRAGMENT
 .    {* When a file is closed by the caching routines, BFD retains
 .       state information on the file here: *}
 .
-.    file_ptr where;              
+.    file_ptr where;
 .
 .    {* and here: (``once'' means at least once) *}
 .
@@ -82,7 +82,7 @@ CODE_FRAGMENT
 .
 .    {* File modified time, if mtime_set is true: *}
 .
-.    long mtime;          
+.    long mtime;
 .
 .    {* Reserved for an unimplemented file locking extension.*}
 .
@@ -101,13 +101,13 @@ CODE_FRAGMENT
 .
 .    {* Format_specific flags*}
 .
-.    flagword flags;              
+.    flagword flags;
 .
 .    {* Currently my_archive is tested before adding origin to
 .       anything. I believe that this can become always an add of
 .       origin, with origin set to 0 for non archive files.   *}
 .
-.    file_ptr origin;             
+.    file_ptr origin;
 .
 .    {* Remember when output has begun, to stop strange things
 .       from happening. *}
@@ -119,7 +119,7 @@ CODE_FRAGMENT
 .    {* The number of sections *}
 .    unsigned int section_count;
 .
-.    {* Stuff only useful for object files: 
+.    {* Stuff only useful for object files:
 .       The start address. *}
 .    bfd_vma start_address;
 .
@@ -127,17 +127,17 @@ CODE_FRAGMENT
 .    unsigned int symcount;
 .
 .    {* Symbol table for output BFD (with symcount entries) *}
-.    struct symbol_cache_entry  **outsymbols;             
+.    struct symbol_cache_entry  **outsymbols;
 .
 .    {* Pointer to structure which contains architecture information*}
 .    const struct bfd_arch_info *arch_info;
 .
 .    {* Stuff only useful for archives:*}
-.    PTR arelt_data;              
+.    PTR arelt_data;
 .    struct _bfd *my_archive;     {* The containing archive BFD.  *}
 .    struct _bfd *next;           {* The next BFD in the archive.  *}
 .    struct _bfd *archive_head;   {* The first BFD in the archive.  *}
-.    boolean has_armap;           
+.    boolean has_armap;
 .
 .    {* A chain of BFD structures involved in a link.  *}
 .    struct _bfd *link_next;
@@ -148,7 +148,7 @@ CODE_FRAGMENT
 .
 .    {* Used by the back end to hold private data. *}
 .
-.    union 
+.    union
 .      {
 .      struct aout_data_struct *aout_data;
 .      struct artdata *aout_ar_data;
@@ -180,7 +180,7 @@ CODE_FRAGMENT
 .      struct netbsd_core_struct *netbsd_core_data;
 .      PTR any;
 .      } tdata;
-.  
+.
 .    {* Used by the application to hold private data*}
 .    PTR usrdata;
 .
@@ -218,7 +218,6 @@ CODE_FRAGMENT
    struct which ultimately gets passed in to the bfd.  When it arrives, copy
    it to the following struct so that the data will be available in coffcode.h
    where it is needed.  The typedef's used are defined in bfd.h */
-
 
 
 /*
@@ -376,7 +375,7 @@ bfd_perror (message)
      CONST char *message;
 {
   if (bfd_get_error () == bfd_error_system_call)
-    perror((char *)message);            /* must be system error then... */
+    perror((char *)message);            /* must be system error then...  */
   else {
     if (message == NULL || *message == '\0')
       fprintf (stderr, "%s\n", bfd_errmsg (bfd_get_error ()));
@@ -510,7 +509,6 @@ bfd_set_error_program_name (name)
   _bfd_error_program_name = name;
 }
 
-
 /*
 FUNCTION
 	bfd_get_error_handler
@@ -546,7 +544,6 @@ DESCRIPTION
 	attached to bfd @var{abfd}.  If an error occurs, return -1.
 
 */
-
 
 long
 bfd_get_reloc_upper_bound (abfd, asect)
@@ -584,7 +581,6 @@ DESCRIPTION
 	The @var{syms} table is also needed for horrible internal magic
 	reasons.
 
-
 */
 long
 bfd_canonicalize_reloc (abfd, asect, location, symbols)
@@ -615,7 +611,7 @@ DESCRIPTION
 	The argument @var{abfd} is ignored.
 
 */
-/*ARGSUSED*/
+
 void
 bfd_set_reloc (ignore_abfd, asect, location, count)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
@@ -785,7 +781,6 @@ bfd_vma vma;
   abfd->start_address = vma;
   return true;
 }
-
 
 /*
 FUNCTION
@@ -1009,7 +1004,7 @@ bfd_scan_vma (string, end, base)
       (string[0] == '0') && ((string[1] == 'x') || (string[1] == 'X')))
     string += 2;
   /* XXX should we also skip over "0b" or "0B" if base is 2? */
-    
+
 /* Speed could be improved with a table like hex_value[] in gas.  */
 #define HEX_VALUE(c) \
   (isxdigit ((unsigned char) c)					\
@@ -1037,7 +1032,7 @@ SYNOPSIS
 	boolean bfd_copy_private_bfd_data(bfd *ibfd, bfd *obfd);
 
 DESCRIPTION
-	Copy private BFD information from the BFD @var{ibfd} to the 
+	Copy private BFD information from the BFD @var{ibfd} to the
 	the BFD @var{obfd}.  Return <<true>> on success, <<false>> on error.
 	Possible error returns are:
 
@@ -1058,7 +1053,7 @@ SYNOPSIS
 	boolean bfd_merge_private_bfd_data(bfd *ibfd, bfd *obfd);
 
 DESCRIPTION
-	Merge private BFD information from the BFD @var{ibfd} to the 
+	Merge private BFD information from the BFD @var{ibfd} to the
 	the output file BFD @var{obfd} when linking.  Return <<true>>
 	on success, <<false>> on error.  Possible error returns are:
 

@@ -1,3 +1,9 @@
+2000-11-08  Kazu Hirata  <kazu@hxi.com>
+
+	* bfd.c: Fix formatting.
+	* binary.c: Likewise.
+	* bout.c: Likewise.
+
 2000-11-07  Kazu Hirata  <kazu@hxi.com>
 
 	* aix386-core.c: Fix formatting.

@@ -281,7 +281,7 @@ binary_set_section_contents (abfd, sec, data, offset, size)
 	  s->filepos = s->lma - low;
 
 	  /* Skip following warning check for sections that will not
-	     occupy file space.  */ 
+	     occupy file space.  */
 	  if ((s->flags
 	       & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_NEVER_LOAD))
 	      != (SEC_HAS_CONTENTS | SEC_ALLOC))
@@ -291,7 +291,7 @@ binary_set_section_contents (abfd, sec, data, offset, size)
 	     LMA's all over the place, huge (sparse?) binary files may
 	     result.  This condition attempts to detect this situation
 	     and print a warning.  Better heuristics would be nice to
-	     have. */
+	     have.  */
 
 	  if (s->filepos < 0)
 	    (*_bfd_error_handler)
@@ -383,6 +383,6 @@ const bfd_target binary_vec =
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   NULL,
-  
+
   NULL
 };
