@@ -74,16 +74,16 @@ extern struct simops Simops[];
 /* sign-extend a 16-bit number */
 #define SEXT16(x)	((((x)&0xffff)^(~0x7fff))+0x8000)
 
-#define BIT40	0x8000000000LL
-#define BIT44	0x80000000000LL
+/* sign extend a 40 bit number */
+#define SEXT40(x)	((((x)&0xffffffffffLL)^(~0x7fffffffffLL))+0x8000000000LL)
+
 #define MAX32	0x7fffffffLL
 #define MIN32	0xff80000000LL
 #define MASK32	0xffffffffLL
 #define MASK40	0xffffffffffLL
-#define MASK44	0xfffffffffffLL
-
 
 #define	RB(x)	(*((uint8 *)((x)+State.imem)))
+#define SB(addr,data)	( RB(addr) = (data & 0xff))
 
 #ifdef WORDS_BIGENDIAN
 
