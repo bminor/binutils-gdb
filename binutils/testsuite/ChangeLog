@@ -1,5 +1,8 @@
 2000-06-18  Nick Clifton  <nickc@redhat.com>
 
+	* binutils-all/readelf.wi: Do not assume the compilation tag to be
+	unit 1.
+
 	* binutils-all/objcopy.exp: Expect all arm variants to fail the
 	copying executable test.
 
