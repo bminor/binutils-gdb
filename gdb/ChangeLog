@@ -1,3 +1,13 @@
+2002-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386.h (FRAMELESS_FUNCTION_INVOCATION,
+	FRAME_ARGS_ADDRESS, FRAME_LOCALS_ADDRESS, FRAME_NUM_ARGS,
+	FRAME_ARGS_SKIP, FRAME_INIT_SAVED_REGS): Remove defines.
+	(i386_frameless_function_invocation, i386_frame_num_args,
+	i386_frame_init_saved_regs): Remove prototypes.
+	* i386-tdep.c (i386_gdbarch_init): Adjust for removal of the
+	macros mentioned above.
+
 2002-06-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* cli/cli-decode.c (set_cmd_cfunc): Update.

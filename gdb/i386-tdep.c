@@ -1401,15 +1401,23 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
 
+  set_gdbarch_frame_init_saved_regs (gdbarch, i386_frame_init_saved_regs);
+
   /* The following redefines make backtracing through sigtramp work.
      They manufacture a fake sigtramp frame and obtain the saved pc in
      sigtramp from the sigcontext structure which is pushed by the
      kernel on the user stack, along with a pointer to it.  */
 
+  set_gdbarch_frame_args_skip (gdbarch, 8);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+                                           i386_frameless_function_invocation);
   set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, i386_frame_saved_pc);
+  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
+  set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */

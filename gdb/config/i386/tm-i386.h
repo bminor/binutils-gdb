@@ -127,39 +127,6 @@ extern void i386_store_return_value (struct type *type, char *valbuf);
 #define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) \
   i386_extract_struct_value_address ((regbuf))
 extern CORE_ADDR i386_extract_struct_value_address (char *regbuf);
-
-/* Determine whether the function invocation represented by FRAME does
-   not have a from on the stack associated with it.  If it does not,
-   return non-zero, otherwise return zero.  */
-
-#define FRAMELESS_FUNCTION_INVOCATION(frame) \
-  i386_frameless_function_invocation (frame)
-extern int i386_frameless_function_invocation (struct frame_info *frame);
-
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
-
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
-
-/* Return number of args passed to a frame.  Can return -1, meaning no way
-   to tell, which is typical now that the C compiler delays popping them.  */
-
-#define FRAME_NUM_ARGS(fi) (i386_frame_num_args(fi))
-
-extern int i386_frame_num_args (struct frame_info *);
-
-/* Return number of bytes at start of arglist that are not really args.  */
-
-#define FRAME_ARGS_SKIP 8
-
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.  */
-
-extern void i386_frame_init_saved_regs (struct frame_info *);
-#define FRAME_INIT_SAVED_REGS(FI) i386_frame_init_saved_regs (FI)
-
 
 
 /* Things needed for making the inferior call functions.  */
