@@ -1,3 +1,7 @@
+Wed Jun 10 17:26:35 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (v850_comm): Create special sections as needed.
+
 1998-06-10  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
 	* config/tc-d10v.c (write_2_short): Addition of swapping

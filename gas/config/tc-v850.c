@@ -255,33 +255,42 @@ v850_comm (area)
 
   name = input_line_pointer;
   c = get_symbol_end ();
+  
   /* just after name is now '\0' */
   p = input_line_pointer;
   *p = c;
+  
   SKIP_WHITESPACE ();
+  
   if (*input_line_pointer != ',')
     {
       as_bad (_("Expected comma after symbol-name"));
       ignore_rest_of_line ();
       return;
     }
+  
   input_line_pointer++;		/* skip ',' */
+  
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_bad (_(".COMMon length (%d.) <0! Ignored."), temp);
+      /* xgettext:c-format */
+      as_bad (_(".COMMon length (%d.) < 0! Ignored."), temp);
       ignore_rest_of_line ();
       return;
     }
+  
   size = temp;
   *p = 0;
   symbolP = symbol_find_or_make (name);
   *p = c;
+  
   if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
       as_bad (_("Ignoring attempt to re-define symbol"));
       ignore_rest_of_line ();
       return;
     }
+  
   if (S_GET_VALUE (symbolP) != 0)
     {
       if (S_GET_VALUE (symbolP) != size)
@@ -291,7 +300,9 @@ v850_comm (area)
 		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
 	}
     }
-  know (symbolP->sy_frag == &zero_address_frag);
+  
+  know (symbolP->sy_frag == & zero_address_frag);
+  
   if (*input_line_pointer != ',')
     have_align = 0;
   else
@@ -300,6 +311,7 @@ v850_comm (area)
       input_line_pointer++;
       SKIP_WHITESPACE ();
     }
+  
   if (! have_align || *input_line_pointer != '"')
     {
       if (! have_align)
@@ -313,20 +325,65 @@ v850_comm (area)
 	      as_warn (_("Common alignment negative; 0 assumed"));
 	    }
 	}
+      
       if (symbolP->local)
 	{
 	  segT   old_sec;
 	  int    old_subsec;
 	  char * pfrag;
 	  int    align;
+	  flagword	applicable;
+      
+	  applicable = bfd_applicable_section_flags (stdoutput);
+		  
+	  applicable &= SEC_ALLOC;
+	  
+	  switch (area)
+	    {
+	    case AREA_SDA:
+	      if (sbss_section == NULL)
+		{
+		  sbss_section = subseg_new (".sbss", 0);
+	      
+		  bfd_set_section_flags (stdoutput, sbss_section, applicable);
+	      
+		  seg_info (sbss_section)->bss = 1;
+		}
+	      break;
+	  
+	    case AREA_ZDA:
+	      if (zbss_section == NULL)
+		{
+		  zbss_section = subseg_new (".zbss", 0);
+		  
+		  bfd_set_section_flags (stdoutput, sbss_section, applicable);
+	      
+		  seg_info (zbss_section)->bss = 1;
+		}
+	      break;
+	  
+	    case AREA_TDA:
+	      if (tbss_section == NULL)
+		{
+		  tbss_section = subseg_new (".tbss", 0);
+		  
+		  bfd_set_section_flags (stdoutput, tbss_section, applicable);
+		  
+		  seg_info (tbss_section)->bss = 1;
+		}
+	      break;
+	    }
 
-	/* allocate_bss: */
+	  /* allocate_bss: */
 	  old_sec = now_seg;
 	  old_subsec = now_subseg;
+	  
 	  if (temp)
 	    {
 	      /* convert to a power of 2 alignment */
-	      for (align = 0; (temp & 1) == 0; temp >>= 1, ++align);
+	      for (align = 0; (temp & 1) == 0; temp >>= 1, ++align)
+		;
+	      
 	      if (temp != 1)
 		{
 		  as_bad (_("Common alignment not a power of 2"));
@@ -336,6 +393,7 @@ v850_comm (area)
 	    }
 	  else
 	    align = 0;
+	  
 	  switch (area)
 	    {
 	    case AREA_SDA:
@@ -392,9 +450,18 @@ v850_comm (area)
 	  
 	  switch (area)
 	    {
-	    case AREA_SDA: S_SET_SEGMENT (symbolP, sbss_section); break;
-	    case AREA_ZDA: S_SET_SEGMENT (symbolP, zbss_section); break;
-	    case AREA_TDA: S_SET_SEGMENT (symbolP, tbss_section); break;
+	    case AREA_SDA:
+	      S_SET_SEGMENT (symbolP, sbss_section);
+	      break;
+	      
+	    case AREA_ZDA:
+	      S_SET_SEGMENT (symbolP, zbss_section);
+	      break;
+	      
+	    case AREA_TDA:
+	      S_SET_SEGMENT (symbolP, tbss_section);
+	      break;
+	      
 	    default:
 	      abort();
 	    }
@@ -409,12 +476,54 @@ v850_comm (area)
 	  S_SET_VALUE (symbolP, (valueT) size);
 	  S_SET_ALIGN (symbolP, temp);
 	  S_SET_EXTERNAL (symbolP);
-	  
+
 	  switch (area)
 	    {
-	    case AREA_SDA: S_SET_SEGMENT (symbolP, scommon_section); break;
-	    case AREA_ZDA: S_SET_SEGMENT (symbolP, zcommon_section); break;
-	    case AREA_TDA: S_SET_SEGMENT (symbolP, tcommon_section); break;
+	    case AREA_SDA:
+	      if (scommon_section == NULL)
+		{
+		  flagword	applicable;
+		  
+		  applicable = bfd_applicable_section_flags (stdoutput);
+		  
+		  scommon_section = subseg_new (".scommon", 0);
+		  
+		  bfd_set_section_flags (stdoutput, scommon_section, applicable
+		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
+		}
+	      S_SET_SEGMENT (symbolP, scommon_section);
+	      break;
+	      
+	    case AREA_ZDA:
+	      if (zcommon_section == NULL)
+		{
+		  flagword	applicable;
+		  
+		  applicable = bfd_applicable_section_flags (stdoutput);
+		  
+		  zcommon_section = subseg_new (".zcommon", 0);
+		  
+		  bfd_set_section_flags (stdoutput, zcommon_section, applicable
+		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
+		}
+	      S_SET_SEGMENT (symbolP, zcommon_section);
+	      break;
+	      
+	    case AREA_TDA:
+	      if (tcommon_section == NULL)
+		{
+		  flagword	applicable;
+		  
+		  applicable = bfd_applicable_section_flags (stdoutput);
+		  
+		  tcommon_section = subseg_new (".tcommon", 0);
+		  
+		  bfd_set_section_flags (stdoutput, tcommon_section, applicable
+		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
+		}
+	      S_SET_SEGMENT (symbolP, tcommon_section);
+	      break;
+	      
 	    default:
 	      abort();
 	    }
