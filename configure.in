@@ -32,7 +32,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 	    prms send-pr gprof gdbtest tgas etc expect dejagnu sim
             m4 autoconf ispell grep diff rcs cvs fileutils shellutils
 	    textutils wdiff find emacs uudecode hello tar gzip indent
-	    recode release sed utils"
+	    recode release sed utils newlib"
 
 
 # these libraries are built for the target environment, and are built after
@@ -122,6 +122,10 @@ esac
 fi
 
 # per-target:
+
+case "${target}" in
+  v810*)		target_makefile_frag=config/mt-v810 ;;
+esac
 
 gasdir=gas
 use_gnu_ld=
