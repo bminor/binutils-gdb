@@ -314,10 +314,26 @@ fetch_ppc_registers (int tid)
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  for (i = 0; i <= tdep->ppc_fpscr_regnum; i++)
-    fetch_register (tid, i);
+  for (i = 0; i < ppc_num_gprs; i++)
+    fetch_register (tid, tdep->ppc_gp0_regnum + i);
+  if (tdep->ppc_fp0_regnum >= 0)
+    for (i = 0; i < ppc_num_fprs; i++)
+      fetch_register (tid, tdep->ppc_fp0_regnum + i);
+  fetch_register (tid, PC_REGNUM);
+  if (tdep->ppc_ps_regnum != -1)
+    fetch_register (tid, tdep->ppc_ps_regnum);
+  if (tdep->ppc_cr_regnum != -1)
+    fetch_register (tid, tdep->ppc_cr_regnum);
+  if (tdep->ppc_lr_regnum != -1)
+    fetch_register (tid, tdep->ppc_lr_regnum);
+  if (tdep->ppc_ctr_regnum != -1)
+    fetch_register (tid, tdep->ppc_ctr_regnum);
+  if (tdep->ppc_xer_regnum != -1)
+    fetch_register (tid, tdep->ppc_xer_regnum);
   if (tdep->ppc_mq_regnum != -1)
     fetch_register (tid, tdep->ppc_mq_regnum);
+  if (tdep->ppc_fpscr_regnum != -1)
+    fetch_register (tid, tdep->ppc_fpscr_regnum);
   if (have_ptrace_getvrregs)
     if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
       fetch_altivec_registers (tid);
@@ -485,10 +501,26 @@ store_ppc_registers (int tid)
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
-  for (i = 0; i <= tdep->ppc_fpscr_regnum; i++)
-    store_register (tid, i);
+  for (i = 0; i < ppc_num_gprs; i++)
+    store_register (tid, tdep->ppc_gp0_regnum + i);
+  if (tdep->ppc_fp0_regnum >= 0)
+    for (i = 0; i < ppc_num_fprs; i++)
+      store_register (tid, tdep->ppc_fp0_regnum + i);
+  store_register (tid, PC_REGNUM);
+  if (tdep->ppc_ps_regnum != -1)
+    store_register (tid, tdep->ppc_ps_regnum);
+  if (tdep->ppc_cr_regnum != -1)
+    store_register (tid, tdep->ppc_cr_regnum);
+  if (tdep->ppc_lr_regnum != -1)
+    store_register (tid, tdep->ppc_lr_regnum);
+  if (tdep->ppc_ctr_regnum != -1)
+    store_register (tid, tdep->ppc_ctr_regnum);
+  if (tdep->ppc_xer_regnum != -1)
+    store_register (tid, tdep->ppc_xer_regnum);
   if (tdep->ppc_mq_regnum != -1)
     store_register (tid, tdep->ppc_mq_regnum);
+  if (tdep->ppc_fpscr_regnum != -1)
+    store_register (tid, tdep->ppc_fpscr_regnum);
   if (have_ptrace_getvrregs)
     if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
       store_altivec_registers (tid);

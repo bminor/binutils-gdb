@@ -1,5 +1,10 @@
 2004-05-04  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-linux-nat.c (fetch_ppc_registers, store_ppc_registers):
+	Don't assume that the gprs, fprs, and UISA sprs are
+	contiguous, start at register number zero, and end with fpscr.
+	Instead, use the numbers from the tdep structure.
+
 	* config/rs6000/tm-rs6000.h (FP0_REGNUM): Document that this
 	should no longer be used in code specific to the RS6000 and its
 	derivatives.
