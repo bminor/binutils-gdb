@@ -1,3 +1,10 @@
+start-sanitize-sky
+Fri Jan 23 18:39:30 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/txvu/lower-1.[sd]: New testcase.
+	* gas/txvu/txvu.exp: Run it.
+
+end-sanitize-sky
 start-sanitize-m32rx
 Fri Jan 23 10:30:29 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -10,6 +17,7 @@ Fri Jan 23 01:45:52 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* gas/txvu/br-1.[sd]: New testcase.
 	* gas/txvu/upper-1.[sd]: New testcase.
+	* gas/txvu/txvu.exp: Run them.
 
 end-sanitize-sky
 Thu Jan 22 17:29:07 1998  Nick Clifton  <nickc@cygnus.com>
