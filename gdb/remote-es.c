@@ -1151,7 +1151,7 @@ verify_break (int vec)
 	{
 	  memory_error (status, memaddress);
 	}
-      return (STRCMP (instr, buf));
+      return (strcmp (instr, buf));
     }
   return (-1);
 }

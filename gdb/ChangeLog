@@ -1,3 +1,17 @@
+Thu Jan 18 12:48:04 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (STRCMP): Delete macro.
+
+	* objfiles.c (objfile_relocate): Replace STRCMP with call to
+ 	strcmp.
+	* symtab.c (lookup_partial_symbol, lookup_block_symbol): Ditto.
+	* symfile.c (compare_symbols):  Ditto.
+	* standalone.c (open):  Ditto.
+	* remote-es.c (verify_break):  Ditto.
+	* cli/cli-decode.c (add_cmd, add_show_from_set): Ditto.
+
+	* symfile.c (compare_psymbols): Delete comment refering to STRCMP.
+
 Thu Jan 18 12:25:06 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* varobj.c (FREEIF): Delete macro.

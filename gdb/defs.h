@@ -148,7 +148,6 @@ typedef bfd_vma CORE_ADDR;
    issue is found that we spend the effort on algorithmic
    optimizations than micro-optimizing.'' J.T. */
 
-#define STRCMP(a,b) (*(a) == *(b) ? strcmp ((a), (b)) : (int)*(a) - (int)*(b))
 #define STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
 #define STREQN(a,b,c) (*(a) == *(b) ? !strncmp ((a), (b), (c)) : 0)
 

@@ -213,7 +213,7 @@ compare_symbols (const PTR s1p, const PTR s2p)
 
   s1 = (struct symbol **) s1p;
   s2 = (struct symbol **) s2p;
-  return (STRCMP (SYMBOL_SOURCE_NAME (*s1), SYMBOL_SOURCE_NAME (*s2)));
+  return (strcmp (SYMBOL_SOURCE_NAME (*s1), SYMBOL_SOURCE_NAME (*s2)));
 }
 
 /*
@@ -260,18 +260,6 @@ compare_psymbols (const PTR s1p, const PTR s2p)
     }
   else
     {
-      /* Note: I replaced the STRCMP line (commented out below)
-       * with a simpler "strcmp()" which compares the 2 strings
-       * from the beginning. (STRCMP is a macro which first compares
-       * the initial characters, then falls back on strcmp).
-       * The reason is that the STRCMP line was tickling a C compiler
-       * bug on HP-UX 10.30, which is avoided with the simpler
-       * code. The performance gain from the more complicated code
-       * is negligible, given that we have already checked the
-       * initial 2 characters above. I reported the compiler bug,
-       * and once it is fixed the original line can be put back. RT
-       */
-      /* return ( STRCMP (st1 + 2, st2 + 2)); */
       return (strcmp (st1, st2));
     }
 }

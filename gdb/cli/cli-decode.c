@@ -67,7 +67,7 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
 
   delete_cmd (name, list);
 
-  if (*list == NULL || STRCMP ((*list)->name, name) >= 0)
+  if (*list == NULL || strcmp ((*list)->name, name) >= 0)
     {
       c->next = *list;
       *list = c;
@@ -75,7 +75,7 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
   else
     {
       p = *list;
-      while (p->next && STRCMP (p->next->name, name) <= 0)
+      while (p->next && strcmp (p->next->name, name) <= 0)
 	{
 	  p = p->next;
 	}
@@ -312,7 +312,7 @@ add_show_from_set (struct cmd_list_element *setcmd,
   else
     fprintf_unfiltered (gdb_stderr, "GDB internal error: Bad docstring for set command\n");
 
-  if (*list == NULL || STRCMP ((*list)->name, showcmd->name) >= 0)
+  if (*list == NULL || strcmp ((*list)->name, showcmd->name) >= 0)
     {
       showcmd->next = *list;
       *list = showcmd;
@@ -320,7 +320,7 @@ add_show_from_set (struct cmd_list_element *setcmd,
   else
     {
       p = *list;
-      while (p->next && STRCMP (p->next->name, showcmd->name) <= 0)
+      while (p->next && strcmp (p->next->name, showcmd->name) <= 0)
 	{
 	  p = p->next;
 	}

@@ -1004,7 +1004,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (STRCMP (SYMBOL_SOURCE_NAME (*center), name) >= 0)
+	  if (strcmp (SYMBOL_SOURCE_NAME (*center), name) >= 0)
 	    {
 	      top = center;
 	    }
@@ -1237,7 +1237,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	    {
 	      top = inc;
 	    }
-	  else if (STRCMP (SYMBOL_SOURCE_NAME (sym), name) < 0)
+	  else if (strcmp (SYMBOL_SOURCE_NAME (sym), name) < 0)
 	    {
 	      bot = inc;
 	    }
