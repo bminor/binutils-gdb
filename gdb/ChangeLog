@@ -1,3 +1,10 @@
+2001-12-17  Ben Harris  <bjh21@netbsd.org>
+
+	* armbsd-nat.c: Remove file, renamed to armnbsd-nat.c.
+	* armnbsd-nat.c: New file, renamed from armbsd-nat.c.
+	* Makefile.in: Rename armbsd-nat.c to armnbsd-nat.c.
+	* config/arm/nbsd.mh: Likewise.
+
 2001-12-17  Corinna Vinschen  <vinschen@redhat.com>
 
 	* NEWS: Note new target XStormy16.
