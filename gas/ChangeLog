@@ -1,3 +1,8 @@
+Tue Jul 29 14:20:43 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-v850.c (md_assemble): Turn on fx_no_overflow for
+	LO16, HI16 and HI16_S relocs.
+
 Mon Jul 28 18:41:41 1997  Rob Savoye  <rob@chinadoll.cygnus.com>
 
         * configure.in: Use CYGWIN and EXEEXT autoconf macro to look for

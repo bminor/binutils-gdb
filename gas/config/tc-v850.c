@@ -887,6 +887,15 @@ md_assemble (str)
 			      &fixups[i].exp, 
 			      reloc_howto->pc_relative,
 			      fixups[i].reloc);
+
+	  switch (fixups[i].reloc)
+	    {
+	    case BFD_RELOC_LO16:
+	    case BFD_RELOC_HI16:
+	    case BFD_RELOC_HI16_S:
+	      fixP->fx_no_overflow = 1;
+	      break;
+	    }
 	}
       else
 	{
