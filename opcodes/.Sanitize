@@ -493,7 +493,7 @@ if [ -n "${safe}" -a ! -f po/.Recover/POTFILES.in ]; then
    mv po/POTFILES.in po/.Recover
 fi
 
-'\ls -1 *.[ch] *.in' | sed -e 's,^\./,,' > po/POTFILES.in
+ls -1 *.[ch] cg*.in 2>/dev/null | sed -e 's,^\./,,' > po/POTFILES.in
 
 if [ -n "${safe}" -a ! -f po/.Recover/opcodes.pot ]; then
    if [ -n "${verbose}" ]; then
@@ -503,6 +503,6 @@ if [ -n "${safe}" -a ! -f po/.Recover/opcodes.pot ]; then
 fi
 
 # If this fails, Sanitization must fail.
-xgettext -k_ -kN_ -C `cat po/POTFILES.in` -o po/opcodes.pot || exit 1
+xgettext -c -k_ -kN_ -f po/POTFILES.in -o po/opcodes.pot || exit 1
 
 # End of file.
