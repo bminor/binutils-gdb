@@ -91,7 +91,7 @@ compatible (in, out)
      const bfd_arch_info_type *out;
 {
   /* It's really not a good idea to mix and match modes.  */
-  if (in->mach != out->mach)
+  if (in->arch != out->arch || in->mach != out->mach)
     return 0;
   else
     return in;

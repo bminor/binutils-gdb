@@ -22,22 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
-/* Don't mix 32 bit and 64 bit files.  */
-
-static const bfd_arch_info_type *i386_compatible
-  PARAMS ((const bfd_arch_info_type *, const bfd_arch_info_type *));
-
-static const bfd_arch_info_type *
-i386_compatible (a, b)
-     const bfd_arch_info_type *a;
-     const bfd_arch_info_type *b;
-{
-  if (a->bits_per_word != b->bits_per_word)
-    return NULL;
-
-  return bfd_default_compatible (a, b);
-}
-  
 const bfd_arch_info_type bfd_i386_arch_intel_syntax =
 {
   32,	/* 32 bits in a word */
@@ -49,7 +33,7 @@ const bfd_arch_info_type bfd_i386_arch_intel_syntax =
   "i386:intel",
   3,
   true,
-  i386_compatible,
+  bfd_default_compatible,
   bfd_default_scan ,
   0,
 };
@@ -64,7 +48,7 @@ const bfd_arch_info_type bfd_x86_64_arch_intel_syntax =
   "x86-64:intel",
   3,
   true,
-  i386_compatible,
+  bfd_default_compatible,
   bfd_default_scan ,
   &bfd_i386_arch_intel_syntax,
 };
@@ -79,7 +63,7 @@ static const bfd_arch_info_type i8086_arch =
   "i8086",
   3,
   false,
-  i386_compatible,
+  bfd_default_compatible,
   bfd_default_scan ,
   &bfd_x86_64_arch_intel_syntax,
 };
@@ -95,7 +79,7 @@ const bfd_arch_info_type bfd_x86_64_arch =
   "x86-64",
   3,
   true,
-  i386_compatible,
+  bfd_default_compatible,
   bfd_default_scan ,
   &i8086_arch,
 };
@@ -111,7 +95,7 @@ const bfd_arch_info_type bfd_i386_arch =
   "i386",
   3,
   true,
-  i386_compatible,
+  bfd_default_compatible,
   bfd_default_scan ,
   &bfd_x86_64_arch
 };

@@ -722,6 +722,9 @@ bfd_default_compatible (a, b)
   if (a->arch != b->arch)
     return NULL;
 
+  if (a->bits_per_word != b->bits_per_word)
+    return NULL;
+
   if (a->mach > b->mach)
     return a;
 

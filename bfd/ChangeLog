@@ -1,5 +1,12 @@
 2002-03-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* archures.c (bfd_default_compatible): Test bits_per_word.
+	* cpu-i386.c (i386_compatible): Remove.  Replace occurrences with
+	bfd_default_compatible.
+	* cpu-i370.c (i370_compatible): Likewise.
+	* cpu-sparc.c (sparc_compatible): Likewise.
+	* cpu-h8300.c (compatible): Test in->arch == out->arch.
+
 	* elflink.h: Formatting fixes.
 	(elf_link_output_extsym): Merge undefined and undef weak cases.
 
