@@ -1,3 +1,12 @@
+2004-10-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-sol2-nat.c: New file.
+	* Makefile.in (ALLDEPFILES): Add i386-sol2-nat.c and
+	i386-sol2-tdep.c.
+	(i386-sol2-nat.o): Update dependencies.
+	* config/i386/i386sol2.mh (NATDEPFILES): Remove i386v4.o, add
+	i386-sol2-nat.o.
+
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
 	Total breakage identified by Joel Brobecker.

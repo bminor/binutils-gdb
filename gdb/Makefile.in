@@ -1379,6 +1379,7 @@ ALLDEPFILES = \
 	i386nbsd-nat.c i386nbsd-tdep.c i386obsd-nat.c i386obsd-tdep.c \
 	i387-tdep.c \
 	i386-linux-tdep.c i386-nat.c \
+	i386-sol2-nat.c i386-sol2-tdep.c \
 	i386gnu-nat.c i386gnu-tdep.c \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
 	infptrace.c inftarg.c irix4-nat.c irix5-nat.c \
@@ -2033,6 +2034,8 @@ i386obsd-tdep.o: i386obsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(regcache_h) $(regset_h) $(symtab_h) $(objfiles_h) \
 	$(osabi_h) $(target_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(i386_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
+i386-sol2-nat.o: i386-sol2-nat.c $(defs_h) $(regcache_h) $(gregset_h) \
+	i386v4-nat.c
 i386-sol2-tdep.o: i386-sol2-tdep.c $(defs_h) $(value_h) $(osabi_h) \
 	$(gdb_string_h) $(i386_tdep_h) $(solib_svr4_h)
 i386-stub.o: i386-stub.c
