@@ -122,19 +122,12 @@ tramp_frame_sniffer (const struct frame_unwind *self,
   const struct tramp_frame *tramp = self->unwind_data->tramp_frame;
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   CORE_ADDR func;
-  char *name;
   struct tramp_frame_cache *tramp_cache;
 
-  /* If the function has a valid symbol name, it isn't a
-     trampoline.  */
-  find_pc_partial_function (pc, &name, NULL, NULL);
-  if (name != NULL)
-    return 0;
-  /* If the function lives in a valid section (even without a starting
-     point) it isn't a trampoline.  */
-  if (find_pc_section (pc) != NULL)
-    return 0;
-  /* Finally, check that the trampoline matches at PC.  */
+  /* tausq/2004-12-12: We used to assume if pc has a name or is in a valid 
+     section, then this is not a trampoline.  However, this assumption is
+     false on HPUX which has a signal trampoline that has a name; it can
+     also be false when using an alternative signal stack.  */
   func = tramp_frame_start (tramp, next_frame, pc);
   if (func == 0)
     return 0;

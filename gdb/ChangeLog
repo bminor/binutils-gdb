@@ -1,3 +1,8 @@
+2004-12-13  Randolph Chung  <tausq@debian.org>
+
+	* tramp-frame.c (tramp_frame_sniffer): Allow frames with names or 
+	sections to be trampolines too.
+
 2004-12-13  Ben Elliston  <bje@au.ibm.com>
 
 	* f-exp.y (typename): Remove unused nonterminal.
