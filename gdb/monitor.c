@@ -838,16 +838,14 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   monitor_printf (current_monitor->line_term);
 
-  if (!remote_dcache)
-    {
-      if (current_monitor->flags & MO_HAS_BLOCKWRITES)
-	remote_dcache = dcache_init (monitor_read_memory, 
-				     monitor_write_memory_block);
-      else
-	remote_dcache = dcache_init (monitor_read_memory, monitor_write_memory);
-    }
+  if (remote_dcache)
+    dcache_free (remote_dcache);
+
+  if (current_monitor->flags & MO_HAS_BLOCKWRITES)
+    remote_dcache = dcache_init (monitor_read_memory, 
+				 monitor_write_memory_block);
   else
-    dcache_flush (remote_dcache);
+    remote_dcache = dcache_init (monitor_read_memory, monitor_write_memory);
 
   start_remote ();
 }
@@ -934,7 +932,7 @@ monitor_supply_register (int regno, char *valstr)
 void
 flush_monitor_dcache (void)
 {
-  dcache_flush (remote_dcache);
+  dcache_invd (remote_dcache);
 }
 
 static void
@@ -950,7 +948,7 @@ monitor_resume (int pid, int step, enum target_signal sig)
 	dump_reg_flag = 1;
       return;
     }
-  dcache_flush (remote_dcache);
+  dcache_invd (remote_dcache);
   if (step)
     monitor_printf (current_monitor->step);
   else
@@ -2147,7 +2145,7 @@ monitor_wait_srec_ack (void)
 static void
 monitor_load (char *file, int from_tty)
 {
-  dcache_flush (remote_dcache);
+  dcache_invd (remote_dcache);
   monitor_debug ("MON load\n");
 
   if (current_monitor->load_routine)

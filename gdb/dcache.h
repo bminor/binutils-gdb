@@ -27,11 +27,14 @@ typedef int (*memxferfunc) (CORE_ADDR memaddr, char *myaddr, int len);
 
 typedef struct dcache_struct DCACHE;
 
-/* Flush DCACHE. */
-void dcache_flush (DCACHE * dcache);
+/* Invalidate DCACHE. */
+void dcache_invd (DCACHE * dcache);
 
 /* Initialize DCACHE. */
 DCACHE *dcache_init (memxferfunc reading, memxferfunc writing);
+
+/* Free a DCACHE */
+void dcache_free (DCACHE *);
 
 /* Simple to call from <remote>_xfer_memory */
 

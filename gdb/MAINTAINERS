@@ -125,7 +125,7 @@ FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 hurd native		Mark Kettenis		kettenis@gnu.org
 macos host & native	Stan Shebs		shebs@apple.com
 hpux, hp pa native	Jeff Law		law@cygnus.com
-NetBSD			J.T. Conklin		jtc@redback.com
+NetBSD native & host	J.T. Conklin		jtc@redback.com
 SCO/Unixware		Nick Duffek		nsd@cygnus.com
 			Robert Lipe		rjl@sco.com
 GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
@@ -188,6 +188,7 @@ testsuite	 	Stan Shebs		shebs@apple.com
   hp tests (gdb.hp)	Jimmy Guo		guo@cup.hp.com
   Java tests (gdb.java)	Anthony Green 		green@cygnus.com
 Kernel Object Display	Fernando Nasser		fnasser@cygnus.com
+dcache.c		J.T. Conklin		jtc@redback.com
 
 
 UI: External (user) interfaces.

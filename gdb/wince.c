@@ -1732,7 +1732,7 @@ child_create_inferior (char *exec_file, char *args, char **env)
   if (!remote_dcache)
     remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
   else
-    dcache_flush (remote_dcache);
+    dcache_invd (remote_dcache);
 
   exec_file = upload_to_device (exec_file, exec_file);
 
@@ -1842,7 +1842,7 @@ child_resume (int pid, int step, enum target_signal sig)
       th->context.ContextFlags = 0;
     }
 
-  dcache_flush (remote_dcache);
+  dcache_invd (remote_dcache);
 
   /* Allow continuing with the same signal that interrupted us.
      Otherwise complain. */

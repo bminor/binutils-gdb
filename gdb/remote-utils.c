@@ -165,7 +165,7 @@ gr_open (char *args, int from_tty, struct gr_settings *gr)
   if ((dcache = gr_get_dcache()) == NULL)
     gr_set_dcache (dcache_init (gr->readfunc, gr->writefunc));
   else
-    dcache_flush (dcache);
+    dcache_invd (dcache);
 
   if (sr_get_desc () != NULL)
     gr_close (0);

@@ -173,7 +173,7 @@ DCACHE *last_cache;		/* Used by info dcache */
 /* Free all the data cache blocks, thus discarding all cached data.  */
 
 void
-dcache_flush (DCACHE *dcache)
+dcache_invd (DCACHE *dcache)
 {
   int i;
   dcache->valid_head = 0;
@@ -402,10 +402,21 @@ dcache_init (memxferfunc reading, memxferfunc writing)
   dcache->the_cache = (struct dcache_block *) xmalloc (csize);
   memset (dcache->the_cache, 0, csize);
 
-  dcache_flush (dcache);
+  dcache_invd (dcache);
 
   last_cache = dcache;
   return dcache;
+}
+
+/* Free a data cache */
+void
+dcache_free (DCACHE *dcache)
+{
+  if (last_cache == dcache)
+    last_cache = NULL;
+
+  free (dcache->the_cache);
+  free (dcache);
 }
 
 /* Read or write LEN bytes from inferior memory at MEMADDR, transferring
@@ -441,7 +452,7 @@ dcache_xfer_memory (DCACHE *dcache, CORE_ADDR memaddr, char *myaddr, int len,
       xfunc = should_write ? dcache->write_memory : dcache->read_memory;
 
       if (dcache->cache_has_stuff)
-	dcache_flush (dcache);
+	dcache_invd (dcache);
 
       len = xfunc (memaddr, myaddr, len);
     }

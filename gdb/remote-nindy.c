@@ -191,7 +191,7 @@ nindy_open (char *name,		/* "/dev/ttyXX", "ttyXX", or "XX": tty to be opened */
   if (!nindy_dcache)
     nindy_dcache = dcache_init (ninMemGet, ninMemPut);
   else
-    dcache_flush (nindy_dcache);
+    dcache_invd (nindy_dcache);
 
   /* Allow user to interrupt the following -- we could hang if there's
      no NINDY at the other end of the remote tty.  */
@@ -269,7 +269,7 @@ nindy_resume (int pid, int step, enum target_signal siggnal)
   if (siggnal != TARGET_SIGNAL_0 && siggnal != stop_signal)
     warning ("Can't send signals to remote NINDY targets.");
 
-  dcache_flush (nindy_dcache);
+  dcache_invd (nindy_dcache);
   if (regs_changed)
     {
       nindy_store_registers (-1);
@@ -614,6 +614,8 @@ nindy_load (char *filename, int from_tty)
 	}
     }
   bfd_close (file);
+
+  dcache_invd(nindy_dcache);
 }
 
 static int

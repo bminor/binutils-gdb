@@ -206,7 +206,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
   if (!sds_dcache)
     sds_dcache = dcache_init (sds_read_bytes, sds_write_bytes);
   else
-    dcache_flush (sds_dcache);
+    dcache_invd (sds_dcache);
 
   sds_desc = SERIAL_OPEN (name);
   if (!sds_desc)
@@ -358,7 +358,7 @@ sds_resume (int pid, int step, enum target_signal siggnal)
 {
   unsigned char buf[PBUFSIZ];
 
-  dcache_flush (sds_dcache);
+  dcache_invd (sds_dcache);
 
   last_sent_signal = siggnal;
   last_sent_step = step;

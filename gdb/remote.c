@@ -2060,7 +2060,7 @@ serial device is attached to the remote system\n\
   if (!remote_dcache)
     remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
   else
-    dcache_flush (remote_dcache);
+    dcache_invd (remote_dcache);
 
   remote_desc = SERIAL_OPEN (name);
   if (!remote_desc)
@@ -2309,7 +2309,7 @@ remote_resume (int pid, int step, enum target_signal siggnal)
   else
     set_thread (pid, 0);	/* run this thread */
 
-  dcache_flush (remote_dcache);
+  dcache_invd (remote_dcache);
 
   last_sent_signal = siggnal;
   last_sent_step = step;
@@ -2343,7 +2343,7 @@ remote_async_resume (int pid, int step, enum target_signal siggnal)
   else
     set_thread (pid, 0);	/* run this thread */
 
-  dcache_flush (remote_dcache);
+  dcache_invd (remote_dcache);
 
   last_sent_signal = siggnal;
   last_sent_step = step;
@@ -5040,7 +5040,7 @@ device is attached to the remote system (e.g. host:port).");
   if (!remote_dcache)
     remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
   else
-    dcache_flush (remote_dcache);
+    dcache_invd (remote_dcache);
 
   remote_desc = SERIAL_OPEN (name);
   if (!remote_desc)

@@ -1,3 +1,28 @@
+2000-08-18  J.T. Conklin  <jtc@redback.com>
+
+	* MAINTAINERS: Add myself as dcache.c maintainer.
+
+	* remote-nindy.c (nindy_load): Invalidate dcache.
+
+	* dcache.c (dcache_invd): Renamed from dcache_flush.  The term
+ 	flush with respect to caches usually implies that data will be 
+	written to memory.
+	(dcache_init, dcache_xfer_memory): Updated.
+	* monitor.c (flush_monitor_dcache, monitor_resume, monitor_load): 
+	Updated.
+	* ocd.c (ocd_open, ocd_resume, bdm_reset_command): Updated.
+	* remote-bug.c (bug_load, bug_resume): Updated.
+	* remote-nindy.c (nindy_open, nindy_resume): Updated.
+	* remote-sds.c (sds_open, sds_resume): Updated.
+	* remote-utils.c (gr_open): Updated.
+	* remote.c (remote_open_1, remote_resume, remote_async_resume,
+	remote_cisco_open): Updated.
+	* wince.c (child_create_inferior, child_resume): Updated.
+
+	* monitor.c (monitor_open): Free dcache before creating a new one.
+	* dcache.c (dcache_free): New function.
+	* dcache.h (dcache_free): New prototype.
+
 2000-08-18  Andrew Cagney  <cagney@ops1.cygnus.com>
 
 	* remote-array.c (array_fetch_register): Pass dummy parameter to

@@ -295,7 +295,7 @@ device the OCD device is attached to (e.g. /dev/ttya).");
   if (!ocd_dcache)
     ocd_dcache = dcache_init (ocd_read_bytes, ocd_write_bytes);
   else
-    dcache_flush (ocd_dcache);
+    dcache_invd (ocd_dcache);
 
   if (strncmp (name, "wiggler", 7) == 0)
     {
@@ -387,7 +387,7 @@ ocd_resume (int pid, int step, enum target_signal siggnal)
 {
   int pktlen;
 
-  dcache_flush (ocd_dcache);
+  dcache_invd (ocd_dcache);
 
   if (step)
     ocd_do_command (OCD_STEP, &last_run_status, &pktlen);
@@ -1318,7 +1318,7 @@ bdm_reset_command (char *args, int from_tty)
     error ("Not connected to OCD device.");
 
   ocd_do_command (OCD_RESET, &status, &pktlen);
-  dcache_flush (ocd_dcache);
+  dcache_invd (ocd_dcache);
   registers_changed ();
 }
 

@@ -119,7 +119,7 @@ bug_load (char *args, int fromtty)
 
   sr_check_open ();
 
-  dcache_flush (gr_get_dcache ());
+  dcache_invd (gr_get_dcache ());
   inferior_pid = 0;
   abfd = bfd_openr (args, 0);
   if (!abfd)
@@ -242,7 +242,7 @@ bug_open (char *args, int from_tty)
 void
 bug_resume (int pid, int step, enum target_signal sig)
 {
-  dcache_flush (gr_get_dcache ());
+  dcache_invd (gr_get_dcache ());
 
   if (step)
     {
