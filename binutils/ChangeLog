@@ -1,3 +1,11 @@
+2004-03-15  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* objdump.c (struct SFILE): Replace current pointer with pos
+	offset, rename size to alloc.
+	(objdump_sprintf): Avoid unnecessary copies in the common case
+	(disassemble_bytes): Keep sfile live throughout the
+	function. Adjust usage appropriately.
+
 2004-03-10  Ben Elliston  <bje@gnu.org>
 
 	* MAINTAINERS: Update my mail address.
