@@ -1,6 +1,6 @@
-2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
+2002-11-20  Alan Modra  <amodra@bigpond.net.au>
 
-	* testsuite/ld-scripts/script.exp: Setup for tic4x testcase
+	* emulparams/elf64ppc.sh (SEGMENT_SIZE): Don't define.
 
 2002-11-14  Egor Duda  <deo@logos-m.ru>
 
@@ -21,7 +21,7 @@
 2002-11-12  Earl Chew <earl_chew@agilent.com>
 
 	* ldlang.c (lang_add_section): Discard debugging sections that have
-        been marked SEC_EXCLUDE.
+	been marked SEC_EXCLUDE.
 
 2002-11-12  Nick Clifton  <nickc@redhat.com>
 
@@ -3411,8 +3411,6 @@
 	* Makefile.in: Regenerate.
 	* configure.tgt: Add ia64-*-aix* mapping.
 	* emulparams/elf64_aix.sh: Add settings for elf64 on aix5.
-	* testsuite/ld-bootstrap/bootstrap.exp: Exclude ia64 flavor from
-	AIX-specific test.
 
 2001-02-20  H.J. Lu  <hjl@gnu.org>
 
@@ -5088,8 +5086,6 @@
 	generic.em,gld960.em,gld960c.em,hppaelf.em,linux.em,lnk960.em,
 	mipsecoff.em,sunos.em,vanilla.em} (ld_emulation_xfer_struct):
 	Add missing NULL initialisers, and comments.
-
-	* testsuite/ld-srec/sr3.cc (__rethrow): New.
 
 2000-01-21  Nick Clifton  <nickc@cygnus.com>
 

@@ -1,3 +1,7 @@
+2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* ld-scripts/script.exp: Setup for tic4x testcase
+
 2002-11-15  Nick Clifton  <nickc@redhat.com>
 
 	* ld-h8300: New directory.
@@ -137,11 +141,11 @@
 
 	* ld-sh/sh64/gotplt.d, ld-sh/sh64/gotplt.map,
 	ld-sh/sh64/gotplt.s: New test.
-	
+
 2002-10-02  Stephen Clarke <stephen.clarke@superh.com>
 	* ld-sh/sh64/cmpct1.sd : Fix linked file name.
 	* ld-sh/sh64/crange3.dd: Likewise.
-	
+
 2002-10-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-i386/i386.exp: Add tlsindntpoff test.
@@ -404,7 +408,7 @@
 
 2002-07-09  Richard Sandiford  <rsandifo@redhat.com>
 
-        * ld-scripts/dynamic-sections*: New test.
+	* ld-scripts/dynamic-sections*: New test.
 
 2002-07-09  Hans-Peter Nilsson  <hp@axis.com>
 
@@ -1213,6 +1217,11 @@
 	known endianness.
 	(default_ld_simple_link): Ditto.
 
+2001-02-22  Timothy Wall  <twall@cygnus.com>
+
+	* ld-bootstrap/bootstrap.exp: Exclude ia64 flavor from
+	AIX-specific test.
+
 2001-02-14  H.J. Lu  <hjl@gnu.org>
 
 	* ld-bootstrap/bootstrap.exp: Rebuild tmpdir/ld2 with tmpdir/ld3
@@ -1232,6 +1241,10 @@
 	* ld-srec/srec.exp (run_srec_test): m6811 code has references
 	to soft registers, define them with --defsym.
 	* ld-selective/selective.exp: Likewise.
+
+2000-01-23  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* ld-srec/sr3.cc (__rethrow): New.
 
 2001-01-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
