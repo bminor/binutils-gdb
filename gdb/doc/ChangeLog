@@ -1,3 +1,8 @@
+Tue Jan 13 16:44:50 1998  Fred Fish  <fnf@cygnus.com>
+
+	* gdbint.texinfo (Host Conditionals): Document change from
+	using NO_MMALLOC to it's inverse, USE_MMALLOC.
+
 Mon Nov 24 13:55:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (Host Conditionals): Document

@@ -13,7 +13,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the internals of the GNU debugger GDB.
 
-Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 Contributed by Cygnus Support.  Written by John Gilmore.
 
 Permission is granted to make and distribute verbatim copies of
@@ -51,7 +51,7 @@ regarded as a program in the language TeX).
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright @copyright{} 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -1542,6 +1542,13 @@ different types of systems.
 
 @item CFRONT_PRODUCER
 dwarfread.c
+
+@item CRLF_SOURCE_FILES
+Define this if host files use @code{\r\n} rather than @code{\n} as a
+line terminator.  This will cause source file listings to omit @code{\r}
+characters when printing.  It must be possible to open files in binary
+mode using @code{O_BINARY} or, for fopen, @code{"rb"}.
+
 @item DBX_PARM_SYMBOL_CLASS
 stabsread.c
 
@@ -1639,14 +1646,31 @@ depending on @code{CC_HAS_LONG_LONG}.
 
 @item CC_HAS_LONG_LONG
 Define this if the host C compiler supports ``long long''.
-This will be defined automatically if GNU CC is used to compile GDB.
+This is set by the configure script.
 
 @item PRINTF_HAS_LONG_LONG
-Define this if the host can handle printing of long long integers via a
-format directive ``ll''.
+Define this if the host can handle printing of long long integers via
+the printf format directive ``ll''. This is set by the configure script.
+
+@item HAVE_LONG_DOUBLE
+Define this if the host C compiler supports ``long double''.
+This is set by the configure script.
+
+@item PRINTF_HAS_LONG_DOUBLE
+Define this if the host can handle printing of long double float-point
+numbers via the printf format directive ``Lg''. This is set by the
+configure script.
+
+@item SCANF_HAS_LONG_DOUBLE
+Define this if the host can handle the parsing of long double
+float-point numbers via the scanf format directive directive
+``Lg''. This is set by the configure script.
 
 @item LSEEK_NOT_LINEAR
-source.c
+Define this if @code{lseek (n)} does not necessarily move to byte number
+@code{n} in the file.  This is only used when reading source files.  It
+is normally faster to define @code{CRLF_SOURCE_FILES} when possible.
+
 @item L_LNNO32
 coffread.c
 
@@ -1693,17 +1717,15 @@ remote-mm.c
 @item NO_JOB_CONTROL
 signals.h
 
-@item NO_MMALLOC
+@item USE_MMALLOC
 GDB will use the @code{mmalloc} library for memory allocation for symbol
-reading, unless this symbol is defined.  Define it on systems 
-on which @code{mmalloc} does not
+reading if this symbol is defined.  Be careful defining it since there
+are systems on which @code{mmalloc} does not
 work for some reason.  One example is the DECstation, where its RPC
 library can't cope with our redefinition of @code{malloc} to call
-@code{mmalloc}.  When defining @code{NO_MMALLOC}, you will also have
-to override the setting of @code{MMALLOC_LIB} to empty, in the Makefile.
-Therefore, this define is usually set on the command line by overriding
-@code{MMALLOC_DISABLE} in @file{config/*/*.mh}, rather than by defining
-it in @file{xm-*.h}.
+@code{mmalloc}.  When defining @code{USE_MMALLOC}, you will also have
+to set @code{MMALLOC} in the Makefile, to point to the mmalloc library.
+This define is set when you configure with --with-mmalloc.
 
 @item NO_MMCHECK
 Define this if you are using @code{mmalloc}, but don't want the overhead
@@ -1719,7 +1741,8 @@ being called, but that memory is never freed so we don't have to worry
 about it triggering a memory corruption abort.  The default is 0, which
 means that @code{mmcheck} will only install the heap checking functions
 if there has not yet been any memory allocation calls, and if it fails
-to install the functions, gdb will issue a warning.
+to install the functions, gdb will issue a warning.  This is currently
+defined if you configure using --with-mmalloc.
 
 @item NO_SIGINTERRUPT
 remote-adapt.c
@@ -2150,15 +2173,15 @@ to by @var{prev}.  [By default...]
 Define this to be either @code{<} if the target's stack grows
 downward in memory, or @code{>} is the stack grows upwards.
 
-@item IN_SIGTRAMP pc name
+@item IN_SIGTRAMP (pc name)
 Define this to return true if the given pc and/or name indicates
 that the current function is a sigtramp.
 
-@item SIGTRAMP_START
-@item SIGTRAMP_END
-Define these to be the start and end address of the sigtramp.
-These will be used if defined, and @code{IN_SIGTRAMP} is not;
-otherwise the name of the sigtramp will be assumed to be @code{_sigtramp}.
+@item SIGTRAMP_START (pc)
+@item SIGTRAMP_END (pc)
+Define these to be the start and end address of the sigtramp for the given pc.
+On machines where the address is just a compile time constant, the macro
+expansion will typically just ignore the supplied pc.
 
 @item IN_SOLIB_TRAMPOLINE pc name
 Define this to evaluate to nonzero if the program is stopped in
