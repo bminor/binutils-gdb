@@ -789,6 +789,18 @@ gld${EMULATION_NAME}_find_statement_assignment (s)
 EOF
 
 if test x"$LDEMUL_BEFORE_ALLOCATION" != xgld"$EMULATION_NAME"_before_allocation; then
+  if test x"${ELF_INTERPRETER_NAME+set}" = xset; then
+    ELF_INTERPRETER_SET_DEFAULT="
+  if (sinterp != NULL)
+    {
+      sinterp->contents = ${ELF_INTERPRETER_NAME};
+      sinterp->_raw_size = strlen (sinterp->contents) + 1;
+    }
+
+"
+  else
+    ELF_INTERPRETER_SET_DEFAULT=
+  fi
 cat >>e${EMULATION_NAME}.c <<EOF
 
 /* This is called after the sections have been attached to output
@@ -816,15 +828,7 @@ gld${EMULATION_NAME}_before_allocation ()
 	  (const char * const *) command_line.auxiliary_filters,
 	  &link_info, &sinterp, lang_elf_version_info)))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
-
-${ELF_INTERPRETER_NAME+"
-  if (sinterp != NULL)
-    {
-      sinterp->contents = ${ELF_INTERPRETER_NAME};
-      sinterp->_raw_size = strlen (sinterp->contents) + 1;
-    }
-
-"}
+${ELF_INTERPRETER_SET_DEFAULT}
   /* Let the user override the dynamic linker we are using.  */
   if (command_line.interpreter != NULL
       && sinterp != NULL)

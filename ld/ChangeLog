@@ -1,3 +1,8 @@
+2001-05-23  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emultempl/elf32.em (ELF_INTERPRETER_SET_DEFAULT): Use this new
+	variable to avoid non-portable shell construct.
+
 2001-05-23  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* ldmain.c (get_emulation): Add -mips5 command line argument.
