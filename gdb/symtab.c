@@ -3719,6 +3719,49 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
 
 
 /* Begin overload resolution functions */
+
+static char *
+remove_params (const char *demangled_name)
+{
+  const char *argp;
+  char *new_name;
+  int depth;
+
+  if (demangled_name == NULL)
+    return NULL;
+
+  /* First find the end of the arg list.  */
+  argp = strrchr (demangled_name, ')');
+  if (argp == NULL)
+    return NULL;
+
+  /* Back up to the beginning.  */
+  depth = 1;
+
+  while (argp-- > demangled_name)
+    {
+      if (*argp == ')')
+	depth ++;
+      else if (*argp == '(')
+	{
+	  depth --;
+
+	  if (depth == 0)
+	    break;
+	}
+    }
+  if (depth != 0)
+    internal_error (__FILE__, __LINE__,
+		    "bad demangled name %s\n", demangled_name);
+  while (argp[-1] == ' ' && argp > demangled_name)
+    argp --;
+
+  new_name = xmalloc (argp - demangled_name + 1);
+  memcpy (new_name, demangled_name, argp - demangled_name);
+  new_name[argp - demangled_name] = '\0';
+  return new_name;
+}
+
 /* Helper routine for make_symbol_completion_list.  */
 
 static int sym_return_val_size;
@@ -3734,21 +3777,7 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
 {
   int newsize;
   int i;
-
-  /* Get the demangled name without parameters */
-  char *sym_name = cplus_demangle (SYMBOL_NAME (sym), DMGL_ARM | DMGL_ANSI);
-  if (!sym_name)
-    {
-      sym_name = (char *) xmalloc (strlen (SYMBOL_NAME (sym)) + 1);
-      strcpy (sym_name, SYMBOL_NAME (sym));
-    }
-
-  /* skip symbols that cannot match */
-  if (strcmp (sym_name, oload_name) != 0)
-    {
-      xfree (sym_name);
-      return;
-    }
+  char *sym_name;
 
   /* If there is no type information, we can't do anything, so skip */
   if (SYMBOL_TYPE (sym) == NULL)
@@ -3759,6 +3788,20 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
     if (!strcmp (SYMBOL_NAME (sym), SYMBOL_NAME (sym_return_val[i])))
       return;
 
+  /* Get the demangled name without parameters */
+  sym_name = remove_params (SYMBOL_DEMANGLED_NAME (sym));
+  if (!sym_name)
+    return;
+
+  /* skip symbols that cannot match */
+  if (strcmp (sym_name, oload_name) != 0)
+    {
+      xfree (sym_name);
+      return;
+    }
+
+  xfree (sym_name);
+
   /* We have a match for an overload instance, so add SYM to the current list
    * of overload instances */
   if (sym_return_val_index + 3 > sym_return_val_size)
@@ -3768,8 +3811,6 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
     }
   sym_return_val[sym_return_val_index++] = sym;
   sym_return_val[sym_return_val_index] = NULL;
-
-  xfree (sym_name);
 }
 
 /* Return a null-terminated list of pointers to function symbols that
@@ -3792,14 +3833,17 @@ make_symbol_overload_list (struct symbol *fsym)
   /* Length of name.  */
   int oload_name_len = 0;
 
-  /* Look for the symbol we are supposed to complete on.
-   * FIXME: This should be language-specific.  */
+  /* Look for the symbol we are supposed to complete on.  */
 
-  oload_name = cplus_demangle (SYMBOL_NAME (fsym), DMGL_ARM | DMGL_ANSI);
+  oload_name = remove_params (SYMBOL_DEMANGLED_NAME (fsym));
   if (!oload_name)
     {
-      oload_name = (char *) xmalloc (strlen (SYMBOL_NAME (fsym)) + 1);
-      strcpy (oload_name, SYMBOL_NAME (fsym));
+      sym_return_val_size = 1;
+      sym_return_val = (struct symbol **) xmalloc (2 * sizeof (struct symbol *));
+      sym_return_val[0] = fsym;
+      sym_return_val[1] = NULL;
+
+      return sym_return_val;
     }
   oload_name_len = strlen (oload_name);
 

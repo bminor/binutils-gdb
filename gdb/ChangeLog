@@ -1,3 +1,9 @@
+2002-07-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* symtab.c (remove_params): New function.
+	(make_symbol_overload_list): Use it instead of cplus_demangle.
+	(overload_list_add_symbol): Likewise.  Reorder.  Fix memory leak.
+
 2002-07-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386obsd-nat.c (_initialize_i386obsd_nat): Fix typo in prototype.
