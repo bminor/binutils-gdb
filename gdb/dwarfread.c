@@ -3019,7 +3019,7 @@ DEFUN(decode_mod_fund_type, (typedata), char *typedata)
   /* Deduct the size of the fundamental type bytes at the end of the block. */
   modcount -= sizeof (short);
   /* Skip over the two size bytes at the beginning of the block. */
-  modifiers = typedata + sizeof (short);
+  modifiers = (unsigned char *) typedata + sizeof (short);
   /* Now do the actual decoding */
   typep = decode_modified_type (modifiers, modcount, AT_mod_fund_type);
   return (typep);
@@ -3060,7 +3060,7 @@ DEFUN(decode_mod_u_d_type, (typedata), char *typedata)
   /* Deduct the size of the reference type bytes at the end of the block. */
   modcount -= sizeof (long);
   /* Skip over the two size bytes at the beginning of the block. */
-  modifiers = typedata + sizeof (short);
+  modifiers = (unsigned char *) typedata + sizeof (short);
   /* Now do the actual decoding */
   typep = decode_modified_type (modifiers, modcount, AT_mod_u_d_type);
   return (typep);
