@@ -1,3 +1,7 @@
+2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Sort bc<N> opcodes by name.
+
 2002-03-15  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips-dis.c (is_newabi): Fix ABI decoding.
