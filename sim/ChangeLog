@@ -1,10 +1,34 @@
-start-sanitize-v850eq
+start-sanitize-sky
+Wed Feb  4 13:42:40 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* configure.in: txvu-elf changed to dvp-elf.
+	* configure: Regenerated.
+
+Thu Jan 15 10:35:49 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* configure.in: Add sky support.
+	* configure: Regenerated.
+
+end-sanitize-sky
+Tue Dec  2 10:10:42 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in (extra_subdirs): Add support for thumb target.
+
+	* configure (extra_subdirs): Add support for thumb target.
+
+Wed Oct  8 12:38:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (extra_subdirs): Add IGEN directory when MIPS
+ 	target.
+	* configure: Regenerate.
+	
+start-sanitize-v850e
 Fri Sep 12 13:10:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* configure.in (extra_subdirs): v850eq needs igen.
+	* configure.in (extra_subdirs): v850ea needs igen.
 	* configure: Re-generate.
 	
-end-sanitize-v850eq
+end-sanitize-v850e
 Mon Sep  1 16:48:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (testdir): When a testsuite directory, add that to
@@ -31,13 +55,11 @@ Mon Aug 18 10:56:59 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in (extra_subdirs): Add v850e target.
 
-end-sanitize-v850e
-start-sanitize-v850eq
 Mon Aug 18 10:56:59 1997  Nick Clifton  <nickc@cygnus.com>
 
-	* configure.in (extra_subdirs): Add v850eq target.
+	* configure.in (extra_subdirs): Add v850ea target.
 
-end-sanitize-v850eq
+end-sanitize-v850e
 Fri Jul 25 11:40:47 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in (sparc*-*-*): Don't build erc32.

@@ -67,7 +67,7 @@ case "${target}" in
 	extra_subdirs="${extra_subdirs} igen"
 	;;
 # start-sanitize-sky
-  txvu-*-*)
+  dvp-*-*)
 	# The Sky simulator
 	sim_target=txvu
 	only_if_gcc=yes
