@@ -4,6 +4,13 @@
 	offsets for floating-point registers in both 32- and 64-bit
 	interfaces.
 
+	Merged from trunk:
+	
+	2003-05-29  Kevin Buettner  <kevinb@redhat.com>
+
+	From Jimi X <jimix@watson.ibm.com>:
+	* rs6000-tdep.c (skip_prologue): Improve support for 64-bit code.
+
 2003-06-05  Jim Blandy  <jimb@redhat.com>
 
 	Recognize and skip 64-bit PowerPC Linux linkage functions.
