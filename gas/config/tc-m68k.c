@@ -4542,6 +4542,13 @@ s_reg (ignore)
   S_SET_VALUE (line_label, mask);
   line_label->sy_frag = &zero_address_frag;
 
+  if (flag_mri)
+    {
+      /* Ignore the comment field.  */
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
+
   demand_empty_rest_of_line ();
 }
 

@@ -1,3 +1,7 @@
+Mon Sep 18 15:22:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (s_reg): Ignore comment field in MRI mode.
+
 Mon Sep 18 14:44:04 1995  Arne H. Juul  <arnej@pvv.unit.no>
 
 	* configure.in (mips-dec-netbsd*): New target.
