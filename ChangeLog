@@ -1,4 +1,11 @@
 start-sanitize-d30v
+Sun Feb 16 15:41:09 1997  Andrew Cagney  <cagney@critters.cygnus.com>
+
+	* configure.in (d30v-*): Remove sim directory from list of
+ 	unsupported d30v directories
+
+end-sanitize-d30v
+start-sanitize-d30v
 Tue Feb 18 17:32:42 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config.sub, configure.in: Add d30v target cpu. 
