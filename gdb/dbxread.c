@@ -626,7 +626,7 @@ dbx_lookup_type (typenums)
     {
       /* Type is defined outside of header files.
 	 Find it in this object file's type vector.  */
-      if (index >= type_vector_length)
+      while (index >= type_vector_length)
 	{
 	  type_vector_length *= 2;
 	  type_vector = (struct typevector *)

@@ -608,7 +608,7 @@ variable:	name_not_typename
 
 			  if (sym)
 			    {
-			      switch (sym->class)
+			      switch (SYMBOL_CLASS (sym))
 				{
 				case LOC_REGISTER:
 				case LOC_ARG:

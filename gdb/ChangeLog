@@ -1,5 +1,10 @@
 Thu Oct  3 09:33:26 1991  John Gilmore  (gnu at cygnus.com)
 
+	* c-exp.y:  sym->class to SYMBOL_CLASS (sym).
+
+	* dbxread.c (dbx_lookup_type):  Keep doubling size of typevector
+	until it is large enough.    
+
 	* dbxread.c (read_type):  Handle error case slightly better.
 	Make complaint message not C++-specific.
 
