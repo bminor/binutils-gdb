@@ -1,7 +1,7 @@
-#include <signal.h>
 #include "sim-main.h"
 #include "sim-options.h"
 #include "v850_sim.h"
+#include "sim-assert.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -188,6 +188,8 @@ sim_open (kind, cb, abfd, argv)
   SIM_DESC sd = sim_state_alloc (kind, cb);
   int mach;
 
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
   /* for compatibility */
   simulator = sd;
 
@@ -262,18 +264,16 @@ sim_open (kind, cb, abfd, argv)
     case bfd_mach_v850:
       /* start-sanitize-v850e */
     case bfd_mach_v850e:
-      /* end-sanitize-v850e */
       STATE_CPU (sd, 0)->psw_mask = (PSW_NP | PSW_EP | PSW_ID | PSW_SAT
 				     | PSW_CY | PSW_OV | PSW_S | PSW_Z);
       break;
-      /* start-sanitize-v850eq */
-    case bfd_mach_v850eq:
+    case bfd_mach_v850ea:
       PSW |= PSW_US;
       STATE_CPU (sd, 0)->psw_mask = (PSW_US
 				     | PSW_NP | PSW_EP | PSW_ID | PSW_SAT
 				     | PSW_CY | PSW_OV | PSW_S | PSW_Z);
       break;
-      /* end-sanitize-v850eq */
+      /* end-sanitize-v850e */
     }
 
   return sd;
@@ -295,14 +295,6 @@ sim_stop (sd)
   return 0;
 }
 
-void
-sim_info (sd, verbose)
-     SIM_DESC sd;
-     int verbose;
-{
-  profile_print (sd, STATE_VERBOSE_P (sd), NULL, NULL);
-}
-
 SIM_RC
 sim_create_inferior (sd, prog_bfd, argv, env)
      SIM_DESC sd;
@@ -313,32 +305,36 @@ sim_create_inferior (sd, prog_bfd, argv, env)
   memset (&State, 0, sizeof (State));
   if (prog_bfd != NULL)
     PC = bfd_get_start_address (prog_bfd);
-  /* start-sanitize-v850eq */
-  /* For v850eq, set PSW[US] by default */
+  /* start-sanitize-v850e */
+  /* For v850ea, set PSW[US] by default */
   if (STATE_ARCHITECTURE (sd) != NULL
       && STATE_ARCHITECTURE (sd)->arch == bfd_arch_v850
-      && STATE_ARCHITECTURE (sd)->mach == bfd_mach_v850eq)
+      && STATE_ARCHITECTURE (sd)->mach == bfd_mach_v850ea)
     PSW |= PSW_US;
-  /* end-sanitize-v850eq */
+  /* end-sanitize-v850e */
   return SIM_RC_OK;
 }
 
-void
-sim_fetch_register (sd, rn, memory)
+int
+sim_fetch_register (sd, rn, memory, length)
      SIM_DESC sd;
      int rn;
      unsigned char *memory;
+     int length;
 {
   *(unsigned32*)memory = H2T_4 (State.regs[rn]);
+  return -1;
 }
  
-void
-sim_store_register (sd, rn, memory)
+int
+sim_store_register (sd, rn, memory, length)
      SIM_DESC sd;
      int rn;
      unsigned char *memory;
+     int length;
 {
   State.regs[rn] = T2H_4 (*(unsigned32*)memory);
+  return -1;
 }
 
 void

@@ -1,3 +1,32 @@
+Fri Feb 27 13:29:13 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-profile.c (profile_info): Rename from profile_print. Drop
+ 	misc and misc_cpu callback arguments.  Use
+ 	PROFILE_INFO_CPU_CALLBACK and STATE_PROFILE_INFO_CALLBACK instead.
+	(profile_install): Install profile_info function.
+
+	* sim-profile.h (PROFILE_INFO_CPU_CALLBACK,
+ 	STATE_PROFILE_INFO_CALLBACK): Define.
+	(struct PROFILE_DATA): Add field info_cpu_callback.
+	(profile_print): Delete function.
+
+	* sim-base.h (STATE_MODULES): Define.  Replace individual
+ 	STATE_*_LIST with single struct module_list.
+
+	* sim-module.h (MODULE_INFO_FN, MODULE_INFO_LIST): Declare.
+	(struct module_list): Declare.
+	
+	* sim-module.h, sim-module.c (sim_module_add_info_fn,
+ 	sim_module_info): New functions.
+	(sim_module_install): Clean up module data structures.
+
+	* sim-info.c (sim_info): New file. New function. Call
+ 	sim_module_info.
+
+	* Make-common.in (sim-info.o): Define rule.
+	(SIM_NEW_COMMON_OBJS): Add sim-info.o.
+
+
 Fri Feb 27 18:26:16 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim-base.h (sim_cpu_base): New members name, options.

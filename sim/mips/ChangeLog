@@ -1,3 +1,11 @@
+Fri Feb 27 13:49:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (HIACCESS, LOACCESS): Always define.
+
+	* mdmx.igen (Maxi, Mini): Rename Max, Min.
+
+	* interp.c (sim_info): Delete.
+
 Fri Feb 27 18:41:01 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* interp.c (DECLARE_OPTION_HANDLER): Use it.

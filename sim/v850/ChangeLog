@@ -1,3 +1,19 @@
+Thu Feb 26 19:09:47 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_info): Delete.
+
+Wed Feb 18 10:47:32 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (TRACE_ALU_INPUT*): Delete.  Moved to sim-trace.[hc].
+
+	* simops.c (trace_result): Call trace_generic instead of
+ 	trace_one_insn.
+	(trace_module): Change variable type to integer.
+	(trace_input): Initialize trace_module with TRACE_ALU_IDX.
+
+	* sim-main.h (trace_module): Change variable decl to integer type.
+	(TRACE_BRANCH*, TRACE_LD, TRACE_ST): Update.
+	
 Tue Feb 17 12:51:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_store_register, sim_fetch_register): Pass in

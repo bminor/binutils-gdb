@@ -24,9 +24,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "libiberty.h"
 #include "bfd.h"
 #include "sim-core.h"
+#include "targ-vals.h"
 
 static SIM_RC alloc_cpu (SIM_DESC, struct _bfd *, char **);
 static void free_state (SIM_DESC);
+static void print_m32r_misc_cpu (SIM_CPU *cpu, int verbose);
 
 /* Records simulator descriptor so utilities like m32r_dump_regs can be
    called from gdb.  */
@@ -155,10 +157,15 @@ sim_open (kind, callback, abfd, argv)
   {
     int i;
 
-    /* Only needed for profiling, but the structure member is small.  */
     for (i = 0; i < MAX_NR_PROCESSORS; ++i)
-      memset (& CPU_M32R_MISC_PROFILE (STATE_CPU (sd, i)), 0,
-	      sizeof (CPU_M32R_MISC_PROFILE (STATE_CPU (sd, i))));
+      {
+	/* Only needed for profiling, but the structure member is small.  */
+	memset (& CPU_M32R_MISC_PROFILE (STATE_CPU (sd, i)), 0,
+		sizeof (CPU_M32R_MISC_PROFILE (STATE_CPU (sd, i))));
+	/* Hook in callback for reporting these stats */
+	PROFILE_INFO_CPU_CALLBACK (CPU_PROFILE_DATA (STATE_CPU (sd, i)))
+	  = print_m32r_misc_cpu;
+      }
   }
 
   /* Store in a global so things like sparc32_dump_regs can be invoked
@@ -185,14 +192,12 @@ sim_create_inferior (sd, abfd, argv, envp)
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
   SIM_ADDR addr;
-  SI taddr;
 
   if (abfd != NULL)
     addr = bfd_get_start_address (abfd);
   else
     addr = 0;
-  taddr = endian_h2t_4 (addr);
-  sim_store_register (sd, PC_REGNUM, (unsigned char *) &taddr, 4);
+  h_pc_set (current_cpu, addr);
 
 #if 0
   STATE_ARGV (sd) = sim_copy_argv (argv);
@@ -258,14 +263,6 @@ print_m32r_misc_cpu (SIM_CPU *cpu, int verbose)
 		     sim_add_commas (buf, sizeof (buf),
 				     CPU_M32R_MISC_PROFILE (cpu).fillnop_count));
     }
-}
-
-void
-sim_info (sd, verbose)
-     SIM_DESC sd;
-     int verbose;
-{
-  profile_print (sd, STATE_VERBOSE_P (sd), NULL, print_m32r_misc_cpu);
 }
 
 /* The contents of BUF are in target byte order.  */
@@ -340,4 +337,154 @@ sim_engine_illegal_insn (current_cpu, pc)
 {
   sim_engine_halt (CPU_STATE (current_cpu), current_cpu, NULL, pc,
 		   sim_stopped, SIM_SIGILL);
+}
+
+/* Utility fns to access registers, without knowing the current mach.
+   FIXME: Machine generate?  */
+
+USI
+h_pc_get (SIM_CPU *current_cpu)
+{
+  switch (STATE_ARCHITECTURE (CPU_STATE (current_cpu))->mach)
+    {
+    case bfd_mach_m32r :
+      return m32r_h_pc_get (current_cpu);
+/* start-sanitize-m32rx */
+#ifdef HAVE_CPU_M32RX
+    case bfd_mach_m32rx :
+      return m32rx_h_pc_get (current_cpu);
+#endif
+/* end-sanitize-m32rx */
+    default :
+      abort ();
+    }
+}
+
+void
+h_pc_set (SIM_CPU *current_cpu, USI newval)
+{
+  switch (STATE_ARCHITECTURE (CPU_STATE (current_cpu))->mach)
+    {
+    case bfd_mach_m32r :
+      m32r_h_pc_set (current_cpu, newval);
+      break;
+/* start-sanitize-m32rx */
+#ifdef HAVE_CPU_M32RX
+    case bfd_mach_m32rx :
+      m32rx_h_pc_set (current_cpu, newval);
+      break;
+#endif
+/* end-sanitize-m32rx */
+    default :
+      abort ();
+    }
+}
+
+SI
+h_gr_get (SIM_CPU *current_cpu, UINT regno)
+{
+  switch (STATE_ARCHITECTURE (CPU_STATE (current_cpu))->mach)
+    {
+    case bfd_mach_m32r :
+      return m32r_h_gr_get (current_cpu, regno);
+/* start-sanitize-m32rx */
+#ifdef HAVE_CPU_M32RX
+    case bfd_mach_m32rx :
+      return m32rx_h_gr_get (current_cpu, regno);
+#endif
+/* end-sanitize-m32rx */
+    default :
+      abort ();
+    }
+}
+
+void
+h_gr_set (SIM_CPU *current_cpu, UINT regno, SI newval)
+{
+  switch (STATE_ARCHITECTURE (CPU_STATE (current_cpu))->mach)
+    {
+    case bfd_mach_m32r :
+      m32r_h_gr_set (current_cpu, regno, newval);
+      break;
+/* start-sanitize-m32rx */
+#ifdef HAVE_CPU_M32RX
+    case bfd_mach_m32rx :
+      m32rx_h_gr_set (current_cpu, regno, newval);
+      break;
+#endif
+/* end-sanitize-m32rx */
+    default :
+      abort ();
+    }
+}
+
+/* Read/write functions for system call interface.  */
+
+static int
+syscall_read_mem (host_callback *cb, struct cb_syscall *sc,
+		  unsigned long taddr, char *buf, int bytes)
+{
+  SIM_DESC sd = (SIM_DESC) sc->p1;
+  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
+
+  return sim_core_read_buffer (sd, cpu, sim_core_read_map, buf, taddr, bytes);
+}
+
+static int
+syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
+		   unsigned long taddr, const char *buf, int bytes)
+{
+  SIM_DESC sd = (SIM_DESC) sc->p1;
+  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
+
+  return sim_core_write_buffer (sd, cpu, sim_core_write_map, buf, taddr, bytes);
+}
+
+/* Trap support.  */
+
+void
+do_trap (SIM_CPU *current_cpu, int num)
+{
+  SIM_DESC sd = CPU_STATE (current_cpu);
+  host_callback *cb = STATE_CALLBACK (sd);
+
+  switch (num)
+    {
+    case 0 :
+      /* Trap 0 is used for system calls.  */
+      {
+	CB_SYSCALL s;
+
+	CB_SYSCALL_INIT (&s);
+	s.func = h_gr_get (current_cpu, 0);
+	s.arg1 = h_gr_get (current_cpu, 1);
+	s.arg2 = h_gr_get (current_cpu, 2);
+	s.arg3 = h_gr_get (current_cpu, 3);
+
+	if (s.func == TARGET_SYS_exit)
+	  {
+	    sim_engine_halt (sd, current_cpu, NULL, h_pc_get (current_cpu),
+			     sim_exited, s.arg1);
+	  }
+
+	s.p1 = (PTR) sd;
+	s.p2 = (PTR) current_cpu;
+	s.read_mem = syscall_read_mem;
+	s.write_mem = syscall_write_mem;
+	cb_syscall (STATE_CALLBACK (sd), &s);
+	h_gr_set (current_cpu, 2, s.errcode);
+	h_gr_set (current_cpu, 0, s.result);
+	h_gr_set (current_cpu, 1, s.result2);
+	break;
+      }
+
+    case 1:	/* breakpoint trap */
+      sim_engine_halt (sd, current_cpu, NULL, NULL_CIA,
+		       sim_stopped, SIM_SIGTRAP);
+      break;
+
+    default :
+      /* Unless environment operating, ignore other traps.  */
+      break;
+    }
 }

@@ -829,9 +829,8 @@ profile_print_speed (sim_cpu *cpu)
    Note that results are indented two spaces to distinguish them from
    section titles.  */
 
-void
-profile_print (SIM_DESC sd, int verbose,
-	       PROFILE_CALLBACK *misc, PROFILE_CPU_CALLBACK *misc_cpu)
+static void
+profile_info (SIM_DESC sd, int verbose)
 {
   int i,c;
   int print_title_p = 0;
@@ -916,8 +915,8 @@ profile_print (SIM_DESC sd, int verbose,
 #endif
 
       /* Print cpu-specific data before the execution speed.  */
-      if (misc_cpu != NULL)
-	(*misc_cpu) (cpu, verbose);
+      if (PROFILE_INFO_CPU_CALLBACK (data) != NULL)
+	PROFILE_INFO_CPU_CALLBACK (data) (cpu, verbose);
 
       /* Always try to print execution time and speed.  */
       if (verbose
@@ -926,9 +925,9 @@ profile_print (SIM_DESC sd, int verbose,
     }
 
   /* Finally print non-cpu specific miscellaneous data.  */
+  if (STATE_PROFILE_INFO_CALLBACK (sd))
+    STATE_PROFILE_INFO_CALLBACK (sd) (sd, verbose);
 
-  if (misc != NULL)
-    (*misc) (sd, verbose);
 }
 
 /* Install profiling support in the simulator.  */
@@ -948,6 +947,7 @@ profile_install (SIM_DESC sd)
   sim_module_add_init_fn (sd, profile_pc_init);
 #endif
   sim_module_add_uninstall_fn (sd, profile_uninstall);
+  sim_module_add_info_fn (sd, profile_info);
   return SIM_RC_OK;
 }
 

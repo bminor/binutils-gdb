@@ -138,17 +138,8 @@ typedef struct {
 #endif
 
   /* List of installed module `init' handlers.  */
-  MODULE_INIT_LIST *init_list;
-#define STATE_INIT_LIST(sd) ((sd)->base.init_list)
-  /* List of installed module `uninstall' handlers.  */
-  MODULE_UNINSTALL_LIST *uninstall_list;
-#define STATE_UNINSTALL_LIST(sd) ((sd)->base.uninstall_list)
-  /* List of installed module `resume' handlers.  */
-  MODULE_RESUME_LIST *resume_list;
-#define STATE_RESUME_LIST(sd) ((sd)->base.resume_list)
-  /* List of installed module `suspend' handlers.  */
-  MODULE_SUSPEND_LIST *suspend_list;
-#define STATE_SUSPEND_LIST(sd) ((sd)->base.suspend_list)
+  struct module_list *modules;
+#define STATE_MODULES(sd) ((sd)->base.modules)
 
   /* Supported options.  */
   struct option_list *options;

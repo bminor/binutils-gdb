@@ -144,6 +144,7 @@ SIM_NEW_COMMON_OBJS = \
 	sim-events.o \
 	sim-fpu.o \
 	sim-io.o \
+	sim-info.o \
 	sim-load.o \
 	sim-memopt.o \
 	sim-module.o \
@@ -332,6 +333,11 @@ sim-hrw.o: $(srccom)/sim-hrw.c $(sim-assert_h) $(sim_core_h) \
 	  $(srcroot)/include/remote-sim.h \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-hrw.c $(ALL_CFLAGS)
+
+sim-info.o: $(srccom)/sim-info.c $(sim-assert_h) \
+	  $(srcroot)/include/remote-sim.h \
+	  $(SIM_EXTRA_DEPS)
+	$(CC) -c $(srccom)/sim-info.c $(ALL_CFLAGS)
 
 sim-inline.c: $(srccom)/sim-inline.c
 	rm -f $@ tmp-$@

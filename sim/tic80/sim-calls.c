@@ -168,12 +168,6 @@ sim_store_register (SIM_DESC sd, int regnr, unsigned char *buf, int length)
 }
 
 
-void
-sim_info (SIM_DESC sd, int verbose)
-{
-}
-
-
 SIM_RC
 sim_create_inferior (SIM_DESC sd,
 		     struct _bfd *abfd,

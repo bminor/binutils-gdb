@@ -1,3 +1,4 @@
+//  -*- C -*-
 // Media Instructions
 // ------------------
 
@@ -539,7 +540,7 @@
 
 // Vector Maximum.
 
-:function:64,f::signed:Max:int scale, signed l, signed r
+:function:64,f::signed:Maxi:int scale, signed l, signed r
 *mdmx:
 // start-sanitize-vr5400
 *vr5400:
@@ -562,16 +563,16 @@
   int scale = get_scale (SD_, SEL);
   for (i = 0; i < (8 >> scale); i++)
     store_vr (SD_, scale, VD, i,
-	      Max (SD_, scale,
-		   value_vr (SD_, scale, VS, i),
-		   select_vr (SD_, SEL, VT, i)));
+	      Maxi (SD_, scale,
+		    value_vr (SD_, scale, VS, i),
+		    select_vr (SD_, SEL, VT, i)));
 }
 
 
 
 // Vector Minimum.
 
-:function:64,f::signed:Min:int scale, signed l, signed r
+:function:64,f::signed:Mini:int scale, signed l, signed r
 *mdmx:
 // start-sanitize-vr5400
 *vr5400:
@@ -594,9 +595,9 @@
   int scale = get_scale (SD_, SEL);
   for (i = 0; i < (8 >> scale); i++)
     store_vr (SD_, scale, VD, i,
-	      Min (SD_, scale,
-		   value_vr (SD_, scale, VS, i),
-		   select_vr (SD_, SEL, VT, i)));
+	      Mini (SD_, scale,
+		    value_vr (SD_, scale, VS, i),
+		    select_vr (SD_, SEL, VT, i)));
 }
 
 

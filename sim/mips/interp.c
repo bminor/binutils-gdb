@@ -781,43 +781,6 @@ sim_fetch_register (sd,rn,memory,length)
 }
 
 
-void
-sim_info (sd,verbose)
-     SIM_DESC sd;
-     int verbose;
-{
-  /* Accessed from the GDB "info files" command: */
-  if (STATE_VERBOSE_P (sd) || verbose)
-    {
-      
-      sim_io_printf (sd, "MIPS %d-bit %s endian simulator\n",
-		     WITH_TARGET_WORD_BITSIZE,
-		     (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN ? "Big" : "Little"));
-      
-#if !defined(FASTSIM)
-      /* It would be a useful feature, if when performing multi-cycle
-	 simulations (rather than single-stepping) we keep the start and
-	 end times of the execution, so that we can give a performance
-	 figure for the simulator. */
-#endif /* !FASTSIM */
-      sim_io_printf (sd, "Number of execution cycles = %ld\n",
-		     (long) sim_events_time (sd));
-      
-      /* print information pertaining to MIPS ISA and architecture being simulated */
-      /* things that may be interesting */
-      /* instructions executed - if available */
-      /* cycles executed - if available */
-      /* pipeline stalls - if available */
-      /* virtual time taken */
-      /* profiling size */
-      /* profiling frequency */
-      /* profile minpc */
-      /* profile maxpc */
-    }
-  profile_print (sd, STATE_VERBOSE_P (sd), NULL, NULL);
-}
-
-
 SIM_RC
 sim_create_inferior (sd, abfd, argv,env)
      SIM_DESC sd;

@@ -13,14 +13,14 @@
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	support.o idecode.o semantics.o itable.o misc.o \
+	sim-engine.o \
 	sim-calls.o \
 	sim-hload.o \
 	sim-hrw.o \
-	sim-engine.o \
-	sim-run.o \
+	sim-reason.o \
 	sim-resume.o \
+	sim-run.o \
 	sim-stop.o \
-	sim-reason.o
 
 # List of extra dependencies.
 # Generally this consists of simulator specific files included by sim-main.h.

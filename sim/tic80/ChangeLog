@@ -1,3 +1,7 @@
+Thu Feb 26 19:08:37 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_info): Delete.
+
 Tue Feb 17 14:35:05 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* misc.c (tic80_trace_cond_br): Take size/code arguments, and

@@ -589,7 +589,6 @@ struct _sim_cpu {
 #define LLBIT ((CPU)->llbit)
 
 
-#if 0
 /* The HIACCESS and LOACCESS counts are used to ensure that
    corruptions caused by using the HI or LO register to close to a
    following operation are spotted. */
@@ -599,6 +598,7 @@ struct _sim_cpu {
 #define HIACCESS ((CPU)->hiaccess)
 #define LOACCESS ((CPU)->loaccess)
 
+#if 0
   unsigned_word HLPC;
   /* If either of the preceding two instructions have accessed the HI
      or LO registers, then the values they see should be
