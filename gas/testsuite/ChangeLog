@@ -1,3 +1,8 @@
+Mon Apr 24 16:35:08 2000  Jim Wilson  <wilson@cygnus.com>
+
+	* gas/ia64/opc-i.s: Regenerate.
+	* gas/ia64/opc-f.pl: Add explicit stop at end.
+	
 2000-04-22  Timothy Wall  <twall@cygnus.com>
 
 	* gas/ia64/opc-f.d: Disassemble zeroes to verify break.f.

@@ -125,6 +125,8 @@ _start:
 	mov pr = r4, 0x1ffff
 
 	mov pr.rot = 0
+// ??? This was originally 0x3ffffff, but that generates an assembler warning
+// that the testsuite infrastructure isn't set up to ignore.
 	mov pr.rot = 0x3ff0000
 	mov pr.rot = -0x4000000
 
@@ -175,209 +177,29 @@ _start:
 	tnat.nz.andcm p2, p3 = r4
 	tnat.nz.and.orcm p2, p3 = r4
 
-	mov.few.dc.dc b3 = r4, .L1
-	mov.few.dc.dc.imp b3 = r4, .L1
-	mov.few.dc.nt b3 = r4, .L1
-	mov.few.dc.nt.imp b3 = r4, .L1
-	mov.few.tk.dc b3 = r4, .L1
-	mov.few.tk.dc.imp b3 = r4, .L1
-	mov.few.tk.tk b3 = r4, .L1
-	mov.few.tk.tk.imp b3 = r4, .L1
-	mov.few.tk.nt b3 = r4, .L1
-	mov.few.tk.nt.imp b3 = r4, .L1
-	mov.few.nt.dc b3 = r4, .L1
-	mov.few.nt.dc.imp b3 = r4, .L1
-	mov.few.nt.tk b3 = r4, .L1
-	mov.few.nt.tk.imp b3 = r4, .L1
-	mov.few.nt.nt b3 = r4, .L1
-	mov.few.nt.nt.imp b3 = r4, .L1
+	mov b3 = r4, .L1
+	mov.imp b3 = r4, .L1
+.space 240
 .L1:
-	mov.many.dc.dc b3 = r4, .L2
-	mov.many.dc.dc.imp b3 = r4, .L2
-	mov.many.dc.nt b3 = r4, .L2
-	mov.many.dc.nt.imp b3 = r4, .L2
-	mov.many.tk.dc b3 = r4, .L2
-	mov.many.tk.dc.imp b3 = r4, .L2
-	mov.many.tk.tk b3 = r4, .L2
-	mov.many.tk.tk.imp b3 = r4, .L2
-	mov.many.tk.nt b3 = r4, .L2
-	mov.many.tk.nt.imp b3 = r4, .L2
-	mov.many.nt.dc b3 = r4, .L2
-	mov.many.nt.dc.imp b3 = r4, .L2
-	mov.many.nt.tk b3 = r4, .L2
-	mov.many.nt.tk.imp b3 = r4, .L2
-	mov.many.nt.nt b3 = r4, .L2
-	mov.many.nt.nt.imp b3 = r4, .L2
+	mov.sptk b3 = r4, .L2
+	mov.sptk.imp b3 = r4, .L2
+.space 240
 .L2:
-	mov.sptk.few.dc.dc b3 = r4, .L3
-	mov.sptk.few.dc.dc.imp b3 = r4, .L3
-	mov.sptk.few.dc.nt b3 = r4, .L3
-	mov.sptk.few.dc.nt.imp b3 = r4, .L3
-	mov.sptk.few.tk.dc b3 = r4, .L3
-	mov.sptk.few.tk.dc.imp b3 = r4, .L3
-	mov.sptk.few.tk.tk b3 = r4, .L3
-	mov.sptk.few.tk.tk.imp b3 = r4, .L3
-	mov.sptk.few.tk.nt b3 = r4, .L3
-	mov.sptk.few.tk.nt.imp b3 = r4, .L3
-	mov.sptk.few.nt.dc b3 = r4, .L3
-	mov.sptk.few.nt.dc.imp b3 = r4, .L3
-	mov.sptk.few.nt.tk b3 = r4, .L3
-	mov.sptk.few.nt.tk.imp b3 = r4, .L3
-	mov.sptk.few.nt.nt b3 = r4, .L3
-	mov.sptk.few.nt.nt.imp b3 = r4, .L3
+	mov.dptk b3 = r4, .L3
+	mov.dptk.imp b3 = r4, .L3
+.space 240
 .L3:
-	mov.sptk.many.dc.dc b3 = r4, .L4
-	mov.sptk.many.dc.dc.imp b3 = r4, .L4
-	mov.sptk.many.dc.nt b3 = r4, .L4
-	mov.sptk.many.dc.nt.imp b3 = r4, .L4
-	mov.sptk.many.tk.dc b3 = r4, .L4
-	mov.sptk.many.tk.dc.imp b3 = r4, .L4
-	mov.sptk.many.tk.tk b3 = r4, .L4
-	mov.sptk.many.tk.tk.imp b3 = r4, .L4
-	mov.sptk.many.tk.nt b3 = r4, .L4
-	mov.sptk.many.tk.nt.imp b3 = r4, .L4
-	mov.sptk.many.nt.dc b3 = r4, .L4
-	mov.sptk.many.nt.dc.imp b3 = r4, .L4
-	mov.sptk.many.nt.tk b3 = r4, .L4
-	mov.sptk.many.nt.tk.imp b3 = r4, .L4
-	mov.sptk.many.nt.nt b3 = r4, .L4
-	mov.sptk.many.nt.nt.imp b3 = r4, .L4
-.L4:
-	mov.dptk.few.dc.dc b3 = r4, .L5
-	mov.dptk.few.dc.dc.imp b3 = r4, .L5
-	mov.dptk.few.dc.nt b3 = r4, .L5
-	mov.dptk.few.dc.nt.imp b3 = r4, .L5
-	mov.dptk.few.tk.dc b3 = r4, .L5
-	mov.dptk.few.tk.dc.imp b3 = r4, .L5
-	mov.dptk.few.tk.tk b3 = r4, .L5
-	mov.dptk.few.tk.tk.imp b3 = r4, .L5
-	mov.dptk.few.tk.nt b3 = r4, .L5
-	mov.dptk.few.tk.nt.imp b3 = r4, .L5
-	mov.dptk.few.nt.dc b3 = r4, .L5
-	mov.dptk.few.nt.dc.imp b3 = r4, .L5
-	mov.dptk.few.nt.tk b3 = r4, .L5
-	mov.dptk.few.nt.tk.imp b3 = r4, .L5
-	mov.dptk.few.nt.nt b3 = r4, .L5
-	mov.dptk.few.nt.nt.imp b3 = r4, .L5
-.L5:
-	mov.dptk.many.dc.dc b3 = r4, .L6
-	mov.dptk.many.dc.dc.imp b3 = r4, .L6
-	mov.dptk.many.dc.nt b3 = r4, .L6
-	mov.dptk.many.dc.nt.imp b3 = r4, .L6
-	mov.dptk.many.tk.dc b3 = r4, .L6
-	mov.dptk.many.tk.dc.imp b3 = r4, .L6
-	mov.dptk.many.tk.tk b3 = r4, .L6
-	mov.dptk.many.tk.tk.imp b3 = r4, .L6
-	mov.dptk.many.tk.nt b3 = r4, .L6
-	mov.dptk.many.tk.nt.imp b3 = r4, .L6
-	mov.dptk.many.nt.dc b3 = r4, .L6
-	mov.dptk.many.nt.dc.imp b3 = r4, .L6
-	mov.dptk.many.nt.tk b3 = r4, .L6
-	mov.dptk.many.nt.tk.imp b3 = r4, .L6
-	mov.dptk.many.nt.nt b3 = r4, .L6
-	mov.dptk.many.nt.nt.imp b3 = r4, .L6
-.L6:
 
-	mov.ret.few.dc.dc b3 = r4, .L7
-	mov.ret.few.dc.dc.imp b3 = r4, .L7
-	mov.ret.few.dc.nt b3 = r4, .L7
-	mov.ret.few.dc.nt.imp b3 = r4, .L7
-	mov.ret.few.tk.dc b3 = r4, .L7
-	mov.ret.few.tk.dc.imp b3 = r4, .L7
-	mov.ret.few.tk.tk b3 = r4, .L7
-	mov.ret.few.tk.tk.imp b3 = r4, .L7
-	mov.ret.few.tk.nt b3 = r4, .L7
-	mov.ret.few.tk.nt.imp b3 = r4, .L7
-	mov.ret.few.nt.dc b3 = r4, .L7
-	mov.ret.few.nt.dc.imp b3 = r4, .L7
-	mov.ret.few.nt.tk b3 = r4, .L7
-	mov.ret.few.nt.tk.imp b3 = r4, .L7
-	mov.ret.few.nt.nt b3 = r4, .L7
-	mov.ret.few.nt.nt.imp b3 = r4, .L7
-.L7:
-	mov.ret.many.dc.dc b3 = r4, .L8
-	mov.ret.many.dc.dc.imp b3 = r4, .L8
-	mov.ret.many.dc.nt b3 = r4, .L8
-	mov.ret.many.dc.nt.imp b3 = r4, .L8
-	mov.ret.many.tk.dc b3 = r4, .L8
-	mov.ret.many.tk.dc.imp b3 = r4, .L8
-	mov.ret.many.tk.tk b3 = r4, .L8
-	mov.ret.many.tk.tk.imp b3 = r4, .L8
-	mov.ret.many.tk.nt b3 = r4, .L8
-	mov.ret.many.tk.nt.imp b3 = r4, .L8
-	mov.ret.many.nt.dc b3 = r4, .L8
-	mov.ret.many.nt.dc.imp b3 = r4, .L8
-	mov.ret.many.nt.tk b3 = r4, .L8
-	mov.ret.many.nt.tk.imp b3 = r4, .L8
-	mov.ret.many.nt.nt b3 = r4, .L8
-	mov.ret.many.nt.nt.imp b3 = r4, .L8
-.L8:
-	mov.ret.sptk.few.dc.dc b3 = r4, .L9
-	mov.ret.sptk.few.dc.dc.imp b3 = r4, .L9
-	mov.ret.sptk.few.dc.nt b3 = r4, .L9
-	mov.ret.sptk.few.dc.nt.imp b3 = r4, .L9
-	mov.ret.sptk.few.tk.dc b3 = r4, .L9
-	mov.ret.sptk.few.tk.dc.imp b3 = r4, .L9
-	mov.ret.sptk.few.tk.tk b3 = r4, .L9
-	mov.ret.sptk.few.tk.tk.imp b3 = r4, .L9
-	mov.ret.sptk.few.tk.nt b3 = r4, .L9
-	mov.ret.sptk.few.tk.nt.imp b3 = r4, .L9
-	mov.ret.sptk.few.nt.dc b3 = r4, .L9
-	mov.ret.sptk.few.nt.dc.imp b3 = r4, .L9
-	mov.ret.sptk.few.nt.tk b3 = r4, .L9
-	mov.ret.sptk.few.nt.tk.imp b3 = r4, .L9
-	mov.ret.sptk.few.nt.nt b3 = r4, .L9
-	mov.ret.sptk.few.nt.nt.imp b3 = r4, .L9
-.L9:
-	mov.ret.sptk.many.dc.dc b3 = r4, .L10
-	mov.ret.sptk.many.dc.dc.imp b3 = r4, .L10
-	mov.ret.sptk.many.dc.nt b3 = r4, .L10
-	mov.ret.sptk.many.dc.nt.imp b3 = r4, .L10
-	mov.ret.sptk.many.tk.dc b3 = r4, .L10
-	mov.ret.sptk.many.tk.dc.imp b3 = r4, .L10
-	mov.ret.sptk.many.tk.tk b3 = r4, .L10
-	mov.ret.sptk.many.tk.tk.imp b3 = r4, .L10
-	mov.ret.sptk.many.tk.nt b3 = r4, .L10
-	mov.ret.sptk.many.tk.nt.imp b3 = r4, .L10
-	mov.ret.sptk.many.nt.dc b3 = r4, .L10
-	mov.ret.sptk.many.nt.dc.imp b3 = r4, .L10
-	mov.ret.sptk.many.nt.tk b3 = r4, .L10
-	mov.ret.sptk.many.nt.tk.imp b3 = r4, .L10
-	mov.ret.sptk.many.nt.nt b3 = r4, .L10
-	mov.ret.sptk.many.nt.nt.imp b3 = r4, .L10
-.L10:
-	mov.ret.dptk.few.dc.dc b3 = r4, .L11
-	mov.ret.dptk.few.dc.dc.imp b3 = r4, .L11
-	mov.ret.dptk.few.dc.nt b3 = r4, .L11
-	mov.ret.dptk.few.dc.nt.imp b3 = r4, .L11
-	mov.ret.dptk.few.tk.dc b3 = r4, .L11
-	mov.ret.dptk.few.tk.dc.imp b3 = r4, .L11
-	mov.ret.dptk.few.tk.tk b3 = r4, .L11
-	mov.ret.dptk.few.tk.tk.imp b3 = r4, .L11
-	mov.ret.dptk.few.tk.nt b3 = r4, .L11
-	mov.ret.dptk.few.tk.nt.imp b3 = r4, .L11
-	mov.ret.dptk.few.nt.dc b3 = r4, .L11
-	mov.ret.dptk.few.nt.dc.imp b3 = r4, .L11
-	mov.ret.dptk.few.nt.tk b3 = r4, .L11
-	mov.ret.dptk.few.nt.tk.imp b3 = r4, .L11
-	mov.ret.dptk.few.nt.nt b3 = r4, .L11
-	mov.ret.dptk.few.nt.nt.imp b3 = r4, .L11
-.L11:
-	mov.ret.dptk.many.dc.dc b3 = r4, .L12
-	mov.ret.dptk.many.dc.dc.imp b3 = r4, .L12
-	mov.ret.dptk.many.dc.nt b3 = r4, .L12
-	mov.ret.dptk.many.dc.nt.imp b3 = r4, .L12
-	mov.ret.dptk.many.tk.dc b3 = r4, .L12
-	mov.ret.dptk.many.tk.dc.imp b3 = r4, .L12
-	mov.ret.dptk.many.tk.tk b3 = r4, .L12
-	mov.ret.dptk.many.tk.tk.imp b3 = r4, .L12
-	mov.ret.dptk.many.tk.nt b3 = r4, .L12
-	mov.ret.dptk.many.tk.nt.imp b3 = r4, .L12
-	mov.ret.dptk.many.nt.dc b3 = r4, .L12
-	mov.ret.dptk.many.nt.dc.imp b3 = r4, .L12
-	mov.ret.dptk.many.nt.tk b3 = r4, .L12
-	mov.ret.dptk.many.nt.tk.imp b3 = r4, .L12
-	mov.ret.dptk.many.nt.nt b3 = r4, .L12
-	mov.ret.dptk.many.nt.nt.imp b3 = r4, .L12
-.L12:
+	mov.ret b3 = r4, .L4
+	mov.ret.imp b3 = r4, .L4
+.space 240
+.L4:
+	mov.ret.sptk b3 = r4, .L5
+	mov.ret.sptk.imp b3 = r4, .L5
+.space 240
+.L5:
+	mov.ret.dptk b3 = r4, .L6
+	mov.ret.dptk.imp b3 = r4, .L6
+.space 240
+.L6:
 

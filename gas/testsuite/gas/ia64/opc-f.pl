@@ -158,6 +158,6 @@ print "\n";
 # Misc
 
 print "\tbreak.f 0\n";
-print "\tnop.f 0\n";
+print "\tnop.f 0;;\n";
 print "\n";
 
