@@ -935,7 +935,9 @@ get_bf_for_fcn (the_function)
 }
 
 static SAVED_FUNCTION_PTR saved_function_list=NULL; 
+#if 0	/* Currently unused */
 static SAVED_FUNCTION_PTR saved_function_list_end=NULL; 
+#endif
 
 void clear_function_list()
 {

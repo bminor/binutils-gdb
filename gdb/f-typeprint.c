@@ -39,7 +39,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include <errno.h>
 
+#if 0	/* Currently unused */
 static void f_type_print_args PARAMS ((struct type *, FILE *));
+#endif
 
 static void f_type_print_varspec_suffix PARAMS ((struct type *, FILE *,
 						 int, int, int));
@@ -150,6 +152,8 @@ f_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     }
 }
 
+#if 0	/* Currently unused */
+
 static void
 f_type_print_args (type, stream)
      struct type *type;
@@ -183,6 +187,8 @@ f_type_print_args (type, stream)
     }
   fprintf_filtered (stream, ")");
 }
+
+#endif	/* 0 */
 
 /* Print any array sizes, function arguments or close parentheses
    needed after the variable name (to describe its type).

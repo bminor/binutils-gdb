@@ -194,7 +194,6 @@ lookup_minimal_symbol_text (name, sfile, objf)
   struct minimal_symbol *msymbol;
   struct minimal_symbol *found_symbol = NULL;
   struct minimal_symbol *found_file_symbol = NULL;
-  struct minimal_symbol *trampoline_symbol = NULL;
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   if (sfile != NULL)
@@ -466,14 +465,14 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
       if (name[0] == 'g'
 	  && (strcmp (name, GCC_COMPILED_FLAG_SYMBOL) == 0
 	      || strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0))
-	return;
+	return (NULL);
 
       {
 	const char *tempstring = name;
 	if (tempstring[0] == get_symbol_leading_char (objfile->obfd))
 	  ++tempstring;
 	if (STREQN (tempstring, "__gnu_compiled", 14))
-	  return;
+	  return (NULL);
       }
     }
 

@@ -326,7 +326,8 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 		((char *) sym -> name, symaddr,
 		mst_solib_trampoline, NULL, objfile);
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
-	      msym->filename = filesymname;
+	      if (msym != NULL)
+		msym->filename = filesymname;
 #endif
 	      continue;
 	    }
@@ -516,7 +517,8 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 		((char *) sym -> name, symaddr,
 		 ms_type, (PTR) size, objfile);
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
-	      msym->filename = filesymname;
+	      if (msym != NULL)
+		msym->filename = filesymname;
 #endif
 	    }
 	}

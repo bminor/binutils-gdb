@@ -1425,9 +1425,6 @@ remote_mourn ()
    than other targets.  */
 static unsigned char break_insn[] = REMOTE_BREAKPOINT;
 
-/* Check that it fits in BREAKPOINT_MAX bytes.  */
-static unsigned char check_break_insn_size[BREAKPOINT_MAX] = REMOTE_BREAKPOINT;
-
 #else /* No REMOTE_BREAKPOINT.  */
 
 /* Same old breakpoint instruction.  This code does nothing different

@@ -374,7 +374,6 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   register unsigned int i = 0;		/* Number of characters printed */
   struct type *elttype;
   LONGEST val;
-  char *straddr;
   CORE_ADDR addr;
   
   switch (TYPE_CODE (type))

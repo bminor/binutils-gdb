@@ -112,7 +112,7 @@ struct dcache_block
 {
   struct dcache_block *p;	/* next in list */
   unsigned int addr;		/* Address for which data is recorded.  */
-  unsigned char data[LINE_SIZE]; /* bytes at given address */
+  char data[LINE_SIZE];		/* bytes at given address */
   unsigned char state[LINE_SIZE]; /* what state the data is in */
 
   /* whether anything in state is dirty - used to speed up the 
@@ -272,14 +272,14 @@ dcache_alloc (dcache)
     abort ();
 
   /* Take something from the free list */
-  if (db = dcache->free_head)
+  db = dcache->free_head;
+  if (db)
     {
       dcache->free_head = db->p;
     }
-
-  if (!db)
+  else
     {
-      /* Nothing left on free list, so grab on from the valid list */
+      /* Nothing left on free list, so grab one from the valid list */
       db = dcache->valid_head;
       dcache->valid_head = db->p;
 
@@ -306,7 +306,7 @@ int
 dcache_peek_byte (dcache, addr, ptr)
      DCACHE *dcache;
      CORE_ADDR addr;
-     unsigned char *ptr;
+     char *ptr;
 {
   register struct dcache_block *db = dcache_hit (dcache, addr);
   int ok=1;
@@ -327,7 +327,7 @@ dcache_peek_byte (dcache, addr, ptr)
 	  int try =
 	    (*dcache->read_memory)
 	      (db->addr + done,
-	       (unsigned char *) db->data + done,
+	       db->data + done,
 	       LINE_SIZE - done);
 	  if (try == 0)
 	    return 0;
@@ -353,7 +353,7 @@ dcache_peek (dcache, addr, data)
      CORE_ADDR addr;
      int *data;
 {
-  unsigned char *dp = (unsigned char *) data;
+  char *dp = (char *) data;
   int i;
   for (i = 0; i < sizeof (int); i++)
     {
@@ -431,7 +431,7 @@ dcache_poke (dcache, addr, data)
      CORE_ADDR addr;
      int data;
 {
-  unsigned char *dp = (unsigned char *) (&data);
+  char *dp = (char *) (&data);
   int i;
   for (i = 0; i < sizeof (int); i++)
     {
@@ -533,11 +533,11 @@ dcache_info (exp, tty)
 		       p->addr, p->refs);
 
       for (j = 0; j < LINE_SIZE; j++)
-	printf_filtered ("%02x", p->data[j]);
+	printf_filtered ("%02x", p->data[j] & 0xFF);
       printf_filtered ("\n");
 
       for (j = 0; j < LINE_SIZE; j++)
-	printf_filtered ("% 2x", p->state[j]);
+	printf_filtered (" %2x", p->state[j]);
       printf_filtered ("\n");
     }
 }

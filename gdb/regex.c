@@ -876,6 +876,11 @@ re_compile_fastmap (bufp)
 		  fastmap[j] = 1;
 	      }
 	  break;
+	case unused:
+	case syntaxspec:
+	case notsyntaxspec:
+	default:
+	  break;
 	}
 
       /* Get here means we have successfully found the possible starting characters
@@ -1528,6 +1533,14 @@ re_match_2 (pbufp, string1, size1, string2, size2, pos, regs, mstop)
 		}
 	      while (--mcnt);
 	    }
+	  break;
+	case unused:
+	case before_dot:
+	case at_dot:
+	case after_dot:
+	case syntaxspec:
+	case notsyntaxspec:
+	default:
 	  break;
 	}
       continue;    /* Successfully matched one pattern command; keep matching */

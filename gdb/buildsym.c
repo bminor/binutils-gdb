@@ -247,6 +247,22 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		case LOC_REGPARM:
 		case LOC_REGPARM_ADDR:
 		  nparams++;
+		  break;
+		case LOC_UNDEF:
+		case LOC_CONST:
+		case LOC_STATIC:
+		case LOC_REGISTER:
+		case LOC_LOCAL:
+		case LOC_TYPEDEF:
+		case LOC_LABEL:
+		case LOC_BLOCK:
+		case LOC_CONST_BYTES:
+		case LOC_LOCAL_ARG:
+		case LOC_BASEREG:
+		case LOC_BASEREG_ARG:
+		case LOC_OPTIMIZED_OUT:
+		default:
+		  break;
 		}
 	    }
 	  if (nparams > 0)
@@ -266,6 +282,22 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		    case LOC_REGPARM_ADDR:
 		      TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
 		      iparams++;
+		      break;
+		    case LOC_UNDEF:
+		    case LOC_CONST:
+		    case LOC_STATIC:
+		    case LOC_REGISTER:
+		    case LOC_LOCAL:
+		    case LOC_TYPEDEF:
+		    case LOC_LABEL:
+		    case LOC_BLOCK:
+		    case LOC_CONST_BYTES:
+		    case LOC_LOCAL_ARG:
+		    case LOC_BASEREG:
+		    case LOC_BASEREG_ARG:
+		    case LOC_OPTIMIZED_OUT:
+		    default:
+		      break;
 		    }
 		}
 	    }

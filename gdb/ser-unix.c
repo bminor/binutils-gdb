@@ -194,7 +194,9 @@ hardwire_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
      serial_ttystate old_ttystate;
 {
   struct hardwire_ttystate new_state;
+#ifdef HAVE_SGTTY
   struct hardwire_ttystate *state = (struct hardwire_ttystate *) old_ttystate;
+#endif
 
   new_state = *(struct hardwire_ttystate *)new_ttystate;
 

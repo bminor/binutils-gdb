@@ -364,8 +364,6 @@ suppress 591 in print_scalar_formatted
 /* Unused automatic variable */
 suppress 592 on rcsid 
 /* Unused static */
-suppress 592 on check_break_insn_size 
-/* Unused static */
 suppress 594 in call_function_by_hand 
 /* Set but not used */
 suppress 594 in record_latest_value 

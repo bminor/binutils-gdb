@@ -422,7 +422,7 @@ void (*call_command_hook) PARAMS ((struct cmd_list_element *c, char *cmd,
 /* Takes control from error ().  Typically used to prevent longjmps out of the
    middle of the GUI.  Usually used in conjunction with a catch routine.  */
 
-NORETURN void (*error_hook) PARAMS (());
+NORETURN void (*error_hook) PARAMS (()) ATTR_NORETURN;
 
 
 /* Where to go for return_to_top_level (RETURN_ERROR).  */

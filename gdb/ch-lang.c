@@ -305,7 +305,6 @@ type_lower_upper (op, type, result_type)
 {
   LONGEST tmp;
   *result_type = builtin_type_int;
- retry:
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_STRUCT:
@@ -342,6 +341,20 @@ type_lower_upper (op, type, result_type)
 	return op == UNOP_LOWER ? 0 : tmp - (LONGEST) 1;
       tmp = tmp >> 1;
       return op == UNOP_LOWER ? -tmp : (tmp - 1);
+    case TYPE_CODE_UNDEF:
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_VOID:
+    case TYPE_CODE_SET:
+    case TYPE_CODE_ERROR:
+    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_METHOD:
+    case TYPE_CODE_REF:
+    case TYPE_CODE_COMPLEX:
+    default:
+      break;
     }
   error ("unknown mode for LOWER/UPPER builtin");
 }

@@ -57,6 +57,29 @@ chill_print_type_scalar (type, val, stream)
 	  chill_print_type_scalar (TYPE_TARGET_TYPE (type), val, stream);
 	  return;
 	}
+      break;
+    case TYPE_CODE_UNDEF:
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_INT:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_VOID:
+    case TYPE_CODE_SET:
+    case TYPE_CODE_STRING:
+    case TYPE_CODE_BITSTRING:
+    case TYPE_CODE_ERROR:
+    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_METHOD:
+    case TYPE_CODE_REF:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_COMPLEX:
+    default:
+      break;
     }
   print_type_scalar (type, val, stream);
 }
@@ -90,7 +113,6 @@ chill_val_print_array_elements (type, valaddr, address, stream,
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
   LONGEST low_bound =  TYPE_FIELD_BITPOS (range_type, 0);
-  LONGEST high_bound = TYPE_FIELD_BITPOS (range_type, 1);
       
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = TYPE_LENGTH (elttype);
@@ -379,7 +401,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	      if (length > TYPE_LENGTH (type))
 		{
 		  fprintf_filtered (stream,
-				    "<dynamic length %d > static length %d>",
+				    "<dynamic length %ld > static length %d>",
 				    length, TYPE_LENGTH (type));
 		}
 	      LA_PRINT_STRING (stream, data_addr, length, 0);

@@ -1,3 +1,70 @@
+Mon Jul 17 21:35:18 1995  Fred Fish  <fnf@cygnus.com>
+
+	* dache.c (struct dcache_block):  Change data member from unsigned char
+	to char, since everything passed in and out of dcache is char or casted
+	to appropriate type anyway.
+	(dcache_alloc):  Move assignment of db out of test and combine separate
+	tests into if-else.
+	(dcache_peek_byte):  Change ptr from unsigned char* to char*.
+	(dcache_peek_byte):  Remove now unnecessary cast in read_memory call.
+	(dcache_peek):  Change cast of incoming data arg.
+	(dcache_poke):  Change cast of addr of incoming data arg.	
+	(dcache_info):  Mask data passed to printf_filtered to lsbyte only.
+	(dcache_info):  Change printf_filtered arg from "% 2x" to " %2x".
+	* target.c (debug_to_thread_alive): Change return type to int and
+	return zero, for type compatibility with other *_thread_alive funcs.
+	(cleanup_target): Change cast of ignore function to match type of the
+	to_thread_alive member.
+	* defs.h (error_hook): Add ATTR_NORETURN.
+	* defs.h (NORETURN, ATTR_NORETURN):  Switch from volatile to
+	__attribute__ method with gcc 2.7, to avoid gcc 2.6.3 bug.
+	* remote.c (remote_wait):  Cast first arg to strtol, strchr, and strncmp
+	to "const char *" from "unsigned char *".
+	(remote_wait):  Cast arg to putpkt and strcpy from "unsigned char *" to
+	"char *".
+	(remote_wait):  Change printf format for long arg from "%d" to "%ld".
+	(getpkt):  Remove unused variable "bp".
+	(remote_fetch_word, remote_store_word):  Ifdef out apparently unused
+	functions.
+	* breakpoint.c (watchpoint_check):  Removed unused variables
+	"saved_level" and "saved_frame".
+	* valops.c (value_arg_coerce):  Add other enum TYPE_CODE_* and
+	default cases to switch for completeness.
+	* infrun.c (wait_for_inferior):  Enclose "have_waited" label
+	in #ifdef that matches the one in which it is referenced.
+	* ser-unix.c (hardwire_noflush_set_tty_state):  Enclose otherwise
+	unused variable "state" in #ifdef that matches one in which it is
+	referenced.
+	* eval.c (evaluate_subexp_standard):  Remove unused variable "var".
+	* eval.c (evaluate_subexp_standard):  Remove unused variable "tmp_symbol".
+	* valarith.c (value_subscript):  Remove unused variable "lowerbound",
+	which is redeclared in a nested scope prior to use.
+	* printcmd.c (print_frame_nameless_args):  Use "%ld" to print long
+	arg, not "%d".
+	* {mem-break.c, remote-pa.c, remote.c, saber.suppress}:
+	Remove unused static var "check_break_insn_size".
+	* buildsym.c (finish_block):  Add other enum LOC_* and default
+	cases to switch for completeness.
+	ch-lang.c (type_lower_upper):  Removed unused label "retry".
+	Add other enum TYPE_* and default cases to switch for completeness.
+	* f-typeprint.c (f_type_print_args):  Ifdef out unused function
+	that may be used someday when Fortran support is complete.
+	* ch-valprint.c (chill_print_type_scalar):  Add other enum
+	TYPE_* and default cases to switch for completeness.
+	(chill_val_print):  Remove unused local var "high_bound" that
+	is redeclared in a nested scope prior to use.
+	(chill_var_print):  Use "%ld" to print long arg, not "%d".
+	* regex.c (re_compile_fastmap, re_match_2):  Add remaining enum types
+	and default to switches for completeness.
+	* minsyms.c (lookup_minimal_symbol_text): Delete unused variable
+	"trampoline_symbol".
+	(prim_record_minimal_symbol_and_info):  Return NULL rather than trash.
+	* elfread.c (elf_symtab_read):  Don't dereference NULL returns from
+	record_minimal_symbol_and_info.
+	* f-lang.c (saved_function_list_end):  Ifdef out unused variable
+	that may be used someday.
+	* f-valprint.c (f_val_print):  Remove unused local variable "straddr".
+	
 Mon Jul 17 13:08:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabsread.h (struct stab_section_list): Define.
