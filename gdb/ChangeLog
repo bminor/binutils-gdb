@@ -1,9 +1,8 @@
 Fri Dec  6 08:30:36 1991  Fred Fish  (fnf at cygnus.com)
 
-	* dwarfread.c (struct_type):  Fixes to improve opaque struct/union
-	handling.  Does not solve all problems, since gdb still fails to
-	find the complete definition if the file containing the complete
-	definition has not yet been read in. (FIXME)
+	* dwarfread.c (enum_type, struct_type):  Fixes for opaque and
+	anonymous enumerations, structures, and unions.  Now passes all
+	the current gdb test suite tests.
 
 Thu Dec  5 21:53:21 1991  John Gilmore  (gnu at cygnus.com)
 

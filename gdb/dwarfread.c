@@ -1020,8 +1020,17 @@ DESCRIPTION
 NOTES
 
 	Note that we need to call struct_type regardless of whether or not
-	we have a symbol, since we might have a structure or union without
-	a tag name (thus no symbol for the tagname).
+	the DIE has an at_name attribute, since it might be an anonymous
+	structure or union.  This gets the type entered into our set of
+	user defined types.
+
+	However, if the structure is incomplete (an opaque struct/union)
+	then suppress creating a symbol table entry for it since gdb only
+	wants to find the one with the complete definition.  Note that if
+	it is complete, we just call new_symbol, which does it's own
+	checking about whether the struct/union is anonymous or not (and
+	suppresses creating a symbol table entry itself).
+	
  */
 
 static void
@@ -1035,9 +1044,12 @@ DEFUN(read_structure_scope, (dip, thisdie, enddie, objfile),
   struct symbol *sym;
   
   type = struct_type (dip, thisdie, enddie, objfile);
-  if ((sym = new_symbol (dip)) != NULL)
+  if (!(TYPE_FLAGS (type) & TYPE_FLAG_STUB))
     {
-      SYMBOL_TYPE (sym) = type;
+      if ((sym = new_symbol (dip)) != NULL)
+	{
+	  SYMBOL_TYPE (sym) = type;
+	}
     }
 }
 
@@ -1368,12 +1380,13 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
   
   if ((type = lookup_utype (dip -> dieref)) == NULL)
     {
+      /* No forward references created an empty type, so install one now */
       type = alloc_utype (dip -> dieref, NULL);
     }
   TYPE_CODE (type) = TYPE_CODE_ENUM;
-  /* Some compilers try to be helpful by inventing "fake" names for anonymous
-     enums, structures, and unions, like "~0fake" or ".0fake".  Thanks, but
-     no thanks... */
+  /* Some compilers try to be helpful by inventing "fake" names for
+     anonymous enums, structures, and unions, like "~0fake" or ".0fake".
+     Thanks, but no thanks... */
   if (dip -> at_name != NULL
       && *dip -> at_name != '~'
       && *dip -> at_name != '.')
@@ -1421,18 +1434,23 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
 	  SYMBOL_VALUE (sym) = list -> field.bitpos;
 	  add_symbol_to_list (sym, &scope -> symbols);
 	}
+      /* Now create the vector of fields, and record how big it is. This is
+	 where we reverse the order, by pulling the members of the list in
+	 reverse order from how they were inserted.  If we have no fields
+	 (this is apparently possible in C++) then skip building a field
+	 vector. */
+      if (nfields > 0)
+	{
+	  TYPE_NFIELDS (type) = nfields;
+	  TYPE_FIELDS (type) = (struct field *)
+	    obstack_alloc (symbol_obstack, sizeof (struct field) * nfields);
+	  /* Copy the saved-up fields into the field vector.  */
+	  for (n = 0; (n < nfields) && (list != NULL); list = list -> next)
+	    {
+	      TYPE_FIELD (type, n++) = list -> field;
+	    }	
+	}
     }
-  /* Now create the vector of fields, and record how big it is. This is where
-     we reverse the order, by pulling the members of the list in reverse order
-     from how they were inserted. */
-  TYPE_NFIELDS (type) = nfields;
-  TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (symbol_obstack, sizeof (struct field) * nfields);
-  /* Copy the saved-up fields into the field vector.  */
-  for (n = 0; (n < nfields) && (list != NULL); list = list -> next)
-    {
-      TYPE_FIELD (type, n++) = list -> field;
-    }	
   return (type);
 }
 
