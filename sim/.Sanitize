@@ -15,33 +15,21 @@
 
 Do-first:
 
-igen_files="igen"
-
 d30v_files="d30v testsuite"
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-        keep_these_too="${d30v_files} ${igen_files} ${keep_these_too}"
-	igen_files=
+        keep_these_too="${d30v_files} ${keep_these_too}"
 else
         lose_these_too="${d30v_files} ${lose_these_too}"
 fi
 
 tic80_files="tic80"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
-        keep_these_too="${tic80_files} ${igen_files} ${keep_these_too}"
-	igen_files=
+        keep_these_too="${tic80_files} ${keep_these_too}"
 else
         lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
-v850_files="v850"
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-        keep_these_too="${v850_files} ${igen_files} ${keep_these_too}"
-	igen_files=
-else
-        lose_these_too="${v850_files} ${lose_these_too}"
-fi
-
-lose_these_too="${igen_files} ${lose_these_too}"
+lose_these_too="${lose_these_too}"
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -62,12 +50,14 @@ d10v
 erc32
 h8300
 h8500
+igen
 m32r
 mips
 mn10200
 mn10300
 ppc
 sh
+v850
 w65
 z8k
 
@@ -133,32 +123,6 @@ else
 fi
 
 v850_files="configure configure.in ChangeLog"
-if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-        for i in $v850_files ; do
-                if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Keeping v850eq stuff in $i
-                        fi
-                fi
-        done
-else
-        for i in $v850_files ; do
-                if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Removing traces of \"v850eq\" from $i...
-                        fi
-                        cp $i new
-                        sed '/start\-sanitize\-v850eq/,/end-\sanitize\-v850eq/d' < $i > new
-                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-                                if [ -n "${verbose}" ] ; then
-                                        echo Caching $i in .Recover...
-                                fi
-                                mv $i .Recover
-                        fi
-                        mv new $i
-                fi
-        done
-fi
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
         for i in $v850_files ; do
                 if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
