@@ -1,3 +1,9 @@
+1999-07-10  Ian Lance Taylor  <ian@zembu.com>
+
+	* ldfile.c: Revert patch of 1999-07-08.
+	(ldfile_try_open_bfd): If we are searching for the file, skip
+	files with an incompatible architecture.
+
 1999-07-09  Nick Clifton  <nickc@cygnus.com>
 
 	* scripttempl/armcoff.sc (OUTPUT_FORMAT): Include big endian and

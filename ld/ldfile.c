@@ -111,14 +111,40 @@ ldfile_try_open_bfd (attempt, entry)
 	info_msg (_("attempt to open %s succeeded\n"), attempt);
     }
 
-  if (entry->the_bfd != NULL)
-    return true;
-  else
+  if (entry->the_bfd == NULL)
     {
       if (bfd_get_error () == bfd_error_invalid_target)
 	einfo (_("%F%P: invalid BFD target `%s'\n"), entry->target);
       return false;
     }
+
+  /* If we are searching for this file, see if the architecture is
+     compatible with the output file.  If it isn't, keep searching.
+     If we can't open the file as an object file, stop the search
+     here.  */
+
+  if (entry->search_dirs_flag)
+    {
+      bfd *check;
+
+      if (bfd_check_format (entry->the_bfd, bfd_archive))
+	check = bfd_openr_next_archived_file (entry->the_bfd, NULL);
+      else
+	check = entry->the_bfd;
+
+      if (! bfd_check_format (check, bfd_object))
+	return true;
+      if (bfd_arch_get_compatible (check, output_bfd) == NULL)
+	{
+	  einfo (_("%P: skipping incompatible %s when searching for %s"),
+		 attempt, entry->local_sym_name);
+	  bfd_close (entry->the_bfd);
+	  entry->the_bfd = NULL;
+	  return false;
+	}
+    }
+
+  return true;
 }
 
 /* Search for and open the file specified by ENTRY.  If it is an
@@ -177,35 +203,8 @@ ldfile_open_file_search (arch, entry, lib, suffix)
 
       if (ldfile_try_open_bfd (string, entry))
 	{
-	  bfd * arfile = NULL;
-
-	  if (bfd_check_format (entry->the_bfd, bfd_archive))
-	    {
-	      /* We treat an archive as compatible if it empty
-	         or has at least one compatible object.  */
-	      arfile = bfd_openr_next_archived_file (entry->the_bfd, NULL);
-
-	      if (!arfile)
-		arfile = output_bfd;
-	      else
-		while (arfile
-		       && !(bfd_check_format (arfile, bfd_object)
-			    && bfd_arch_get_compatible (arfile, output_bfd)))
-	          arfile = bfd_openr_next_archived_file (entry->the_bfd, arfile);
-	    }
-	  else if (bfd_arch_get_compatible (entry->the_bfd, output_bfd))
-	    arfile = output_bfd;
-	    
-	  if (arfile)
-	    {
-	      entry->filename = string;
-	      return true;
-	    }
-
-	  info_msg (_("%s is for an incompatible architecture -- skipped\n"),
-		    string);
-	  bfd_close(entry->the_bfd);
-	  entry->the_bfd = NULL;
+	  entry->filename = string;
+	  return true;
 	}
 
       free (string);
