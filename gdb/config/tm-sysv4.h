@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    we cannot always find the shared library trampoline symbols
    (e.g. on Irix5).  */
 
-#define IN_SOLIB_TRAMPOLINE(pc, name) in_plt_section((pc), (name))
+#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) in_plt_section((pc), (name))
 extern int in_plt_section PARAMS ((CORE_ADDR, char *));
 
 /* If PC is in a shared library trampoline code, return the PC

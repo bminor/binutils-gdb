@@ -56,4 +56,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* How to decide if we're in a shared library function.  (Probably a wrong
    definintion inherited from the VxWorks config file).  */
-#define	IN_SOLIB_TRAMPOLINE(pc, name) (name && strcmp(name, "<end_of_program>") == 0)
+#define	IN_SOLIB_CALL_TRAMPOLINE(pc, name) (name && strcmp(name, "<end_of_program>") == 0)

@@ -56,9 +56,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-/* skip (stw rp, -20(0,sp)); copy 4,1; copy sp, 4; stwm 1,framesize(sp) 
-   for gcc, or (stw rp, -20(0,sp); stwm 1, framesize(sp) for hcc */
-
 #define SKIP_PROLOGUE(pc) pc = skip_prologue (pc)
 
 /* If PC is in some function-call trampoline code, return the PC
@@ -66,9 +63,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	SKIP_TRAMPOLINE_CODE(pc) skip_trampoline_code (pc, NULL)
 
-/* Return non-zero if we are in some sort of a trampoline. */
+/* Return non-zero if we are in an appropriate trampoline. */
 
-#define IN_SOLIB_TRAMPOLINE(pc, name) skip_trampoline_code (pc, name)
+#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
+   in_solib_call_trampoline (pc, name)
+
+#define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) \
+  in_solib_return_trampoline (pc, name)
+
+/* For some stupid reason find_pc_partial_function wants to treat
+   trampoline symbols differently.
+
+   In a nutshell, find_pc_partial_fucntion sets the low address for
+   the function to the PC value that was passed in if the PC value
+   passed in is a mst_trampoline symbol.
+
+   This causes wait_for_inferior to execute code for stepping over
+   or around a function (stop_pc == stop_func_start).  This is
+   extremely bad when we're stepping through a return from a shared
+   library back to user code (which on the PA uses trampolines).  */
+#define INHIBIT_SUNSOLIB_TRANSFER_TABLE_HACK
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -82,15 +96,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define INNER_THAN >
 
-
 /* Sequence of bytes for breakpoint instruction.  */
 
-/*#define BREAKPOINT {0x00, 0x00, 0x00, 0x00}*/
-#ifdef	KERNELDEBUG	/* XXX */
-#define BREAKPOINT {0x00, 0x00, 0xa0, 0x00}
-#else
 #define BREAKPOINT {0x00, 0x01, 0x00, 0x04}
-#endif
 
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT
@@ -103,10 +111,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* return instruction is bv r0(rp) or bv,n r0(rp)*/
 
 #define ABOUT_TO_RETURN(pc) ((read_memory_integer (pc, 4) | 0x2) == 0xE840C002)
-
-/* Return 1 if P points to an invalid floating point value.  */
-
-#define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
@@ -124,7 +128,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define REGISTER_NAMES	\
  {"flags", "r1", "rp", "r3", "r4", "r5", "r6", "r7", "r8", "r9",	\
   "r10", "r11", "r12", "r13", "r14", "r15", "r16", "r17", "r18", "r19",	\
-  "r20", "r21", "r22", "arg3", "arg2", "arg1", "arg0", "dp", "ret0", "ret1", \
+  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "dp", "ret0", "ret1", \
   "sp", "r31", "sar", "pcoqh", "pcsqh", "pcoqt", "pcsqt", \
   "eiem", "iir", "isr", "ior", "ipsw", "goto", "sr4", "sr0", "sr1", "sr2", \
   "sr3", "sr5", "sr6", "sr7", "cr0", "cr8", "cr9", "ccr", "cr12", "cr13", \
@@ -189,7 +193,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
-#define REGISTER_BYTES (NUM_REGS * REGISTER_RAW_SIZE (1))
+#define REGISTER_BYTES (NUM_REGS * 4)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
@@ -512,8 +516,16 @@ struct obj_unwind_info {
 
 #define OBJ_UNWIND_INFO(obj) ((struct obj_unwind_info *)obj->obj_private)
 
-extern CORE_ADDR target_read_pc PARAMS ((void));
-extern void target_write_pc PARAMS ((CORE_ADDR));
+extern CORE_ADDR target_read_pc PARAMS ((int));
+extern void target_write_pc PARAMS ((CORE_ADDR, int));
 
-#define TARGET_READ_PC() target_read_pc ()
-#define TARGET_WRITE_PC(v) target_write_pc (v)
+#define TARGET_READ_PC(pid) target_read_pc (pid)
+#define TARGET_WRITE_PC(v,pid) target_write_pc (v,pid)
+
+/* start-sanitize-hpread */
+/* For a number of horrible reasons we may have to adjust the location
+   of variables on the stack.  Ugh.  */
+#define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
+/* end-sanitize-hpread */
+
+extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));

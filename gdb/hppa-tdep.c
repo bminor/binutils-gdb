@@ -1574,6 +1574,86 @@ pa_print_fp_reg (i)
     }
 }
 
+/* Return one if PC is in the call path of a shared library trampoline, else
+   return zero.  */
+
+in_solib_call_trampoline (pc, name)
+     CORE_ADDR pc;
+     char *name;
+{
+  struct minimal_symbol *minsym;
+  struct unwind_table_entry *u;
+
+  /* Get the unwind descriptor corresponding to PC, return zero
+     if no unwind was found.  */
+  u = find_unwind_entry (pc);
+  if (!u)
+    return 0;
+
+  /* If this isn't a linker stub, then return now.  */
+  if (u->stub_type != IMPORT
+      && u->stub_type != EXPORT)
+    return 0;
+
+  /* The call and return path execute the same instructions within
+     an IMPORT stub!  So an IMPORT stub is both a call and return
+     trampoline.  */
+  if (u->stub_type == IMPORT)
+    return 1;
+
+  /* The linker may group many EXPORT stubs into one unwind entry.  So
+     lookup the minimal symbol and use that as the beginning of this
+     particular stub.  */
+  minsym = lookup_minimal_symbol_by_pc (pc);
+  if (minsym == NULL)
+    return 0;
+
+  /* Export stubs have distinct call and return paths.  The first
+     two instructions are the call path, following four are the
+     return path.  */
+  return (pc >= SYMBOL_VALUE (minsym) && pc < SYMBOL_VALUE (minsym) + 8);
+}
+
+/* Return one if PC is in the return path of a shared library trampoline,
+   else return zero.  */
+
+in_solib_return_trampoline (pc, name)
+     CORE_ADDR pc;
+     char *name;
+{
+  struct minimal_symbol *minsym;
+  struct unwind_table_entry *u;
+
+  /* Get the unwind descriptor corresponding to PC, return zero
+     if no unwind was found.  */
+  u = find_unwind_entry (pc);
+  if (!u)
+    return 0;
+
+  /* If this isn't a linker stub, then return now.  */
+  if (u->stub_type != IMPORT
+      && u->stub_type != EXPORT)
+    return 0;
+
+  /* The call and return path execute the same instructions within
+     an IMPORT stub!  So an IMPORT stub is both a call and return
+     trampoline.  */
+  if (u->stub_type == IMPORT)
+    return 1;
+
+  /* The linker may group many EXPORT stubs into one unwind entry.  So
+     lookup the minimal symbol and use that as the beginning of this
+     particular stub.  */
+  minsym = lookup_minimal_symbol_by_pc (pc);
+  if (minsym == NULL)
+    return 0;
+
+  /* Export stubs have distinct call and return paths.  The first
+     two instructions are the call path, following four are the
+     return path.  */
+  return (pc >= SYMBOL_VALUE (minsym) + 8 && pc < SYMBOL_VALUE (minsym) + 20);
+}
+
 /* Figure out if PC is in a trampoline, and if so find out where
    the trampoline will jump to.  If not in a trampoline, return zero.
 

@@ -1,3 +1,20 @@
+Thu Nov 24 00:39:27 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* blockframe.c (find_pc_partial_function): Inhibit mst_trampoline
+	symbol special handling when INHIBIT_SUNSOLIB_TRANSFER_TABLE_HACK
+	is defined.
+	* infrun.c (IN_SOLIB_CALL_TRAMPOLINE): Renamed from
+	IN_SOLIB_TRAMPOLINE.  All callers changed.
+	(IN_SOLIB_RETURN_TRAMPOLINE): Provide default definition.
+	(wait_for_inferior): Handle single stepping through trampolines on
+	return paths from shared libraries.
+	* config/pa/tm-hppa.h (IN_SOLIB_CALL_TRAMPOLINE): Use
+	in_solib_call_trampoline.
+	(IN_SOLIB_RETURN_TRAMPOLINE): Use in_solib_return_trampoline.
+	(INHIBIT_SUNSOLIB_TRANSFER_TABLE_HACK): Define.
+	* hppa-tdep.c (in_solib_call_trampoline): New function.
+	(in_solib_return_trampoline): New function.	
+
 Wed Nov 23 21:43:03 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* tm-h8300.h (REMOTE_BREAKPOINT): Define.

@@ -22,7 +22,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Return non-zero if we are in a shared library trampoline code stub. */
 
-#define IN_SOLIB_TRAMPOLINE(pc, name) lookup_solib_trampoline_symbol_by_pc (pc)
+#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
+  lookup_solib_trampoline_symbol_by_pc (pc)
 
 /* If PC is in a shared library trampoline code, return the PC
    where the function itself actually starts.  If not, return 0.  */
