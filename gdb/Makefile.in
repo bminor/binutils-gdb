@@ -620,9 +620,12 @@ event_top_h = 	event-top.h
 expression_h =	expression.h $(doublest_h) $(symtab_h)
 frame_h =	frame.h
 gdb_h =		gdb.h
+gdb_assert_h =	gdb_assert.h
 gdb_events_h =	gdb-events.h
 gdb_stabs_h =	gdb-stabs.h
 gdb_string_h =  gdb_string.h
+gdb_wait_h =	gdb_wait.h
+gdb_regex_h =	gdb_regex.h
 gdbcmd_h =	gdbcmd.h $(command_h) $(ui_out_h)
 gdbcore_h =	gdbcore.h $(bfd_h)
 gdbthread_h =	gdbthread.h $(breakpoint_h)
@@ -1313,7 +1316,7 @@ c-valprint.o: c-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(cp_abi_h)
 
 doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) $(gdbtypes_h) \
-	gdb_assert.h gdb_string.h
+	$(gdb_assert_h) $(gdb_string_h)
 
 f-lang.o: f-lang.c f-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h) $(gdb_string_h)
@@ -1391,7 +1394,7 @@ delta68-nat.o: delta68-nat.c $(defs_h)
 
 demangle.o: demangle.c $(defs_h) $(gdbcmd_h) $(gdb_string_h)
 
-dink32-rom.o: dink32-rom.c $(monitor_h) $(bfd_h) gdb_wait.h $(defs_h) \
+dink32-rom.o: dink32-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 	$(gdbcmd_h) $(inferior_h) $(target_h) $(serial_h) $(terminal_h) \
 	$(symfile_h) $(regcache_h)
 
@@ -1443,7 +1446,7 @@ frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 
 regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(regcache_h)
 
-fork-child.o: fork-child.c gdb_wait.h $(defs_h) $(gdbcore_h) \
+fork-child.o: fork-child.c $(gdb_wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(terminal_h) $(gdbthread_h) $(gdb_string_h)
 
 install-gdbtk:
@@ -1551,13 +1554,13 @@ tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
 
 arch-utils.o: arch-utils.c $(defs_h) $(bfd_h) $(gdbcmd_h) \
-	$(arch_utils_h) gdb_assert.h
+	$(arch_utils_h) $(gdb_assert_h)
 
 gdbtypes.o: gdbtypes.c $(bfd_h) $(complaints_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) $(language_h) $(objfiles_h) $(symfile_h) $(symtab_h) \
 	$(target_h) $(value_h) $(gdb_string_h) $(wrapper_h) $(cp_abi_h)
 
-go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) gdb_wait.h $(gdbcore_h) \
+go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) $(gdb_wait_h) $(gdbcore_h) \
 	$(command_h) $(floatformat_h) $(target_h) i387-tdep.h $(regcache_h)
 
 gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
@@ -1579,7 +1582,7 @@ hp300ux-nat.o: hp300ux-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 hpacc-abi.o: hpacc-abi.c $(defs_h) $(cp_abi_h) $(gdb_string_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h)
 
-hppa-tdep.o: hppa-tdep.c gdb_wait.h $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
+hppa-tdep.o: hppa-tdep.c $(gdb_wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(objfiles_h) $(symfile_h) $(target_h) $(regcache_h) \
 	$(completer_h)
 
@@ -1656,20 +1659,20 @@ inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
 	$(target_h) $(terminal_h) $(gdbthread_h) $(gdb_string_h)
 
 infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
-	$(gdb_string_h) gdb_wait.h $(command_h) $(regcache_h)
+	$(gdb_string_h) $(gdb_wait_h) $(command_h) $(regcache_h)
 
-infrun.o: infrun.c gdb_wait.h $(defs_h) $(gdbcmd_h) $(cli_script_h) \
+infrun.o: infrun.c $(gdb_wait_h) $(defs_h) $(gdbcmd_h) $(cli_script_h) \
 	$(gdbcore_h) $(value_h) \
 	$(inferior_h) $(target_h) $(gdbthread_h) $(gdb_string_h) $(event_loop_h) \
 	$(event_top_h) $(regcache_h)
 
-inftarg.o: inftarg.c gdb_wait.h $(defs_h) $(gdbcore_h) $(inferior_h) \
+inftarg.o: inftarg.c $(gdb_wait_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(target_h) $(terminal_h) $(command_h)
 
 irix4-nat.o: irix4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
 irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(symtab_h) $(symfile_h) $(objfiles_h) $(command_h) $(frame_h) \
-	gdb_regex.h $(language_h) $(gdb_string_h) $(regcache_h)
+	$(gdb_regex_h) $(language_h) $(gdb_string_h) $(regcache_h)
 
 jv-lang.o: jv-lang.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(symfile_h) \
@@ -1707,7 +1710,7 @@ m2-valprint.o: m2-valprint.c $(defs_h) $(gdbtypes_h) $(symtab_h) \
 	$(valprint_h) m2-lang.h
 
 m3-nat.o: m3-nat.c $(defs_h) $(inferior_h) $(value_h) $(language_h) \
-	$(target_h) gdb_wait.h $(gdbcmd_h) $(gdbcore_h) $(regcache_h)
+	$(target_h) $(gdb_wait_h) $(gdbcmd_h) $(gdbcore_h) $(regcache_h)
 
 p-lang.o: p-lang.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h) $(gdb_string_h)
@@ -1720,7 +1723,7 @@ p-valprint.o: p-valprint.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(gdb_string_h)
 
 m68hc11-tdep.o: m68hc11-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
-	$(gdbcore_h) gdb_string.h
+	$(gdbcore_h) $(gdb_string_h)
 
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
 	$(gdbcore_h) $(gdb_string_h) $(regcache_h)
@@ -1793,7 +1796,7 @@ mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 	$(regcache_h)
 
 mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
-	$(obstack_h) $(target_h) $(value_h) $(bfd_h) gdb_string.h \
+	$(obstack_h) $(target_h) $(value_h) $(bfd_h) $(gdb_string_h) \
 	$(gdbcore_h) $(symfile_h) $(regcache_h) $(arch-utils.h)
 
 monitor.o: monitor.c $(monitor_h) $(bfd_h) $(defs_h) $(gdbcmd_h) \
@@ -1802,11 +1805,11 @@ monitor.o: monitor.c $(monitor_h) $(bfd_h) $(defs_h) $(gdbcmd_h) \
 
 nbsd-tdep.o: nbsd-tdep.c $(defs_h) solib-svr4.h
 
-Onindy.o: nindy-share/Onindy.c gdb_wait.h nindy-share/block_io.h \
+Onindy.o: nindy-share/Onindy.c $(gdb_wait_h) nindy-share/block_io.h \
 	nindy-share/env.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/Onindy.c
 
-nindy.o: nindy-share/nindy.c gdb_wait.h nindy-share/block_io.h \
+nindy.o: nindy-share/nindy.c $(gdb_wait_h) nindy-share/block_io.h \
 	nindy-share/env.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/nindy.c
 
@@ -1861,7 +1864,7 @@ ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdbcore_h) $(frame_h) \
 ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(target_h) ppc-tdep.h $(regcache_h) $(value_h)
 
-ppcbug-rom.o: ppcbug-rom.c $(monitor_h) $(bfd_h) gdb_wait.h $(defs_h) \
+ppcbug-rom.o: ppcbug-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 	$(gdbcmd_h) $(inferior_h) $(target_h) $(serial_h) $(terminal_h) \
 	$(regcache_h)
 
@@ -1889,11 +1892,11 @@ sol-thread.o: sol-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 
 linux-proc.o: linux-proc.c $(defs_h)
 
-thread-db.o: thread-db.c $(defs_h) gdb_assert.h gdb_proc_service.h \
+thread-db.o: thread-db.c $(defs_h) $(gdb_assert_h) gdb_proc_service.h \
 	gdb_thread_db.h $(bfd_h) $(gdbthread_h) $(inferior_h) $(symfile_h) \
 	$(objfiles_h) $(target_h) $(regcache_h)
 
-lin-lwp.o: lin-lwp.c $(defs_h) gdb_assert.h gdb_wait.h $(gdbthread_h) \
+lin-lwp.o: lin-lwp.c $(defs_h) $(gdb_assert_h) $(gdb_wait_h) $(gdbthread_h) \
 	$(inferior_h) $(target_h) $(gdbcmd_h) $(regcache_h)
 
 proc-service.o: proc-service.c $(defs_h) $(inferior_h) gdb_proc_service.h \
@@ -1978,15 +1981,15 @@ ocd.o: ocd.c ocd.h $(gdbcore_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(remote_utils_h) $(gdb_string_h) $(regcache_h)
 
-remote.o: remote.c $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
+remote.o: remote.c $(bfd_h) $(gdb_wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) $(symfile_h) $(terminal_h) \
 	$(gdb_string_h) $(event_loop_h) $(event_top_h) $(remote_h) \
 	$(inf_loop_h) $(value_h)
 
-remote-nrom.o: remote-nrom.c $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
+remote-nrom.o: remote-nrom.c $(bfd_h) $(gdb_wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) $(symfile_h) $(terminal_h)
 
-rom68k-rom.o: rom68k-rom.c $(monitor_h) $(bfd_h) gdb_wait.h $(defs_h) \
+rom68k-rom.o: rom68k-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 	$(gdbcmd_h) $(inferior_h) $(target_h) $(serial_h) $(terminal_h) \
 	$(regcache_h) $(value_h)
 
@@ -2027,18 +2030,18 @@ sh-tdep.o: sh-tdep.c $(bfd_h) $(dis_asm_h) \
 	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(arch_utils_h) \
 	$(regcache_h) $(doublest_h)
 
-sh3-rom.o: sh3-rom.c $(monitor_h) $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
+sh3-rom.o: sh3-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(target_h) $(serial_h) $(terminal_h) $(arch_utils_h) \
 	$(regcache_h)
 
 signals.o: signals/signals.c $(defs_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $<
 
-mon960-rom.o: mon960-rom.c $(monitor_h) $(bfd_h) gdb_wait.h $(defs_h) \
+mon960-rom.o: mon960-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 	$(gdbcmd_h) $(inferior_h) $(target_h) $(serial_h) $(terminal_h)
 
 solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(objfiles_h) gdb_regex.h $(symfile_h) $(target_h) $(gdb_string_h) \
+	$(objfiles_h) $(gdb_regex_h) $(symfile_h) $(target_h) $(gdb_string_h) \
 	$(solist_h) $(completer_h)
 
 solib-sunos.o: solib-sunos.c $(defs_h) $(symfile_h) $(objfiles_h) \
@@ -2050,7 +2053,7 @@ solib-svr4.o: solib-svr4.c $(defs_h) $(gdbcore_h) $(inferior_h) $(objfiles_h) \
 solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) solib-svr4.h
 
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
-	$(gdbcore_h) $(language_h) $(objfiles_h) gdb_regex.h $(symfile_h) \
+	$(gdbcore_h) $(language_h) $(objfiles_h) $(gdb_regex_h) $(symfile_h) \
 	$(symtab_h) $(gdb_string_h) $(source_h) $(completer_h) $(linespec_h) \
 	$(ui_out_h)
 
@@ -2104,7 +2107,7 @@ symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
 
 symtab.o: symtab.c $(call_cmds_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) $(language_h) $(objfiles_h) \
-	gdb_regex.h $(symfile_h) $(symtab_h) $(target_h) $(value_h) \
+	$(gdb_regex_h) $(symfile_h) $(symtab_h) $(target_h) $(value_h) \
 	$(gdb_string_h) $(linespec_h) $(cp_abi_h)
 
 linespec.o: linespec.c $(linespec_h) $(defs_h) $(frame_h) $(value_h) \
@@ -2159,10 +2162,10 @@ x86-64-linux-tdep.o : x86-64-linux-tdep.c $(defs_h) $(inferior_h) \
 
 x86-64-tdep.o : x86-64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) $(gdbcmd_h) \
 	$(arch_utils_h) $(regcache_h) $(symfile_h) x86-64-tdep.h i386-tdep.h \
-	$(dwarf2cfi_h) gdb_assert.h
+	$(dwarf2cfi_h) $(gdb_assert_h)
 
 x86-64-linux-nat.o : x86-64-linux-nat.c $(defs_h) $(inferior_h) \
-	$(gdbcore_h) $(regcache_h) i387-tdep.h gdb_assert.h x86-64-tdep.h \
+	$(gdbcore_h) $(regcache_h) i387-tdep.h $(gdb_assert_h) x86-64-tdep.h \
 	i386-tdep.h
 
 win32-nat.o: win32-nat.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
@@ -2187,7 +2190,7 @@ xcoffread.o: xcoffread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(symfile_h) $(symtab_h) $(gdb_string_h)
 
 xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) $(xcoffsolib_h) $(inferior_h) \
-	$(gdbcmd_h) $(symfile_h) $(frame_h) gdb_regex.h
+	$(gdbcmd_h) $(symfile_h) $(frame_h) $(gdb_regex_h)
 
 # FIXME: z8k-tdep.c calls _initialize_gdbtypes().  Since that isn't
 # declared -Wimplicit fails. It should be using the GDBARCH framework.
@@ -2236,12 +2239,12 @@ wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) $(wrapper_h)
 
 cli-cmds.o: $(srcdir)/cli/cli-cmds.c  $(cli_cmds_h) $(cli_decode_h) \
 		$(cli_script_h) $(cli_setshow_h) $(top_h) $(completer_h) \
-		 $(defs_h) $(target_h) gdb_wait.h gdb_regex.h $(ui_out_h)
+		 $(defs_h) $(target_h) $(gdb_wait_h) $(gdb_regex_h) $(ui_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-cmds.c
 
 cli-decode.o: $(srcdir)/cli/cli-decode.c $(cli_decode_h) \
 		$(cli_cmds_h) $(defs_h) $(ui_out_h) \
-		$(symtab_h) gdb_regex.h
+		$(symtab_h) $(gdb_regex_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-decode.c
 
 cli-dump.o: $(srcdir)/cli/cli-dump.c $(defs_h) $(gdb_string_h) $(command_h) \
