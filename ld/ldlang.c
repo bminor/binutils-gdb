@@ -88,7 +88,8 @@ static void wild PARAMS ((lang_wild_statement_type *s,
 			  lang_output_section_statement_type *output));
 static bfd *open_output PARAMS ((const char *name));
 static void ldlang_open_output PARAMS ((lang_statement_union_type *statement));
-static void open_input_bfds PARAMS ((lang_statement_union_type *statement));
+static void open_input_bfds
+  PARAMS ((lang_statement_union_type *statement, boolean));
 static void lang_reasonable_defaults PARAMS ((void));
 static void lang_place_undefineds PARAMS ((void));
 static void map_input_to_output_sections
@@ -109,6 +110,8 @@ static void print_padding_statement PARAMS ((lang_padding_statement_type *s));
 static void print_wild_statement
   PARAMS ((lang_wild_statement_type *w,
 	   lang_output_section_statement_type *os));
+static void print_group
+  PARAMS ((lang_group_statement_type *, lang_output_section_statement_type *));
 static void print_statement PARAMS ((lang_statement_union_type *s,
 				     lang_output_section_statement_type *os));
 static void print_statements PARAMS ((void));
@@ -120,11 +123,6 @@ static bfd_vma size_input_section
   PARAMS ((lang_statement_union_type **this_ptr,
 	   lang_output_section_statement_type *output_section_statement,
 	   fill_type fill, bfd_vma dot, boolean relax));
-static bfd_vma lang_do_assignments
-  PARAMS ((lang_statement_union_type * s,
-	   lang_output_section_statement_type *output_section_statement,
-	   fill_type fill,
-	   bfd_vma dot));
 static void lang_finish PARAMS ((void));
 static void lang_check PARAMS ((void));
 static void lang_common PARAMS ((void));
@@ -221,6 +219,10 @@ lang_for_each_statement_worker (func, s)
 	  lang_for_each_statement_worker
 	    (func,
 	     s->wild_statement.children.head);
+	  break;
+	case lang_group_statement_enum:
+	  lang_for_each_statement_worker (func,
+					  s->group_statement.children.head);
 	  break;
 	case lang_data_statement_enum:
 	case lang_reloc_statement_enum:
@@ -675,32 +677,28 @@ wild_doit (ptr, section, output, file)
 
 static void
 wild_section (ptr, section, file, output)
-     lang_wild_statement_type * ptr;
-     CONST char *section;
-     lang_input_statement_type * file;
-     lang_output_section_statement_type * output;
+     lang_wild_statement_type *ptr;
+     const char *section;
+     lang_input_statement_type *file;
+     lang_output_section_statement_type *output;
 {
-  asection *s;
-
   if (file->just_syms_flag == false)
     {
-      if (section == (char *) NULL)
+      register asection *s;
+
+      for (s = file->the_bfd->sections; s != NULL; s = s->next)
 	{
-	  /* Do the creation to all sections in the file */
-	  for (s = file->the_bfd->sections; s != NULL; s = s->next)
-	    {
-	      /* except for bss */
-	      if ((s->flags & SEC_IS_COMMON)  == 0)
-		{
-		  wild_doit (&ptr->children, s, output, file);
-		}
-	    }
-	}
-      else
-	{
-	  /* Do the creation to the named section only */
-	  s = bfd_get_section_by_name (file->the_bfd, section);
-	  if (s != NULL)
+	  /* Attach all sections named SECTION.  If SECTION is NULL,
+	     then attach all sections.
+
+	     Previously, if SECTION was NULL, this code did not call
+	     wild_doit if the SEC_IS_COMMON flag was set for the
+	     section.  I did not understand that, and I took it out.
+	     --ian@cygnus.com.  */
+
+	  if (section == NULL
+	      || strcmp (bfd_get_section_name (file->the_bfd, s),
+			 section) == 0)
 	    wild_doit (&ptr->children, s, output, file);
 	}
     }
@@ -712,8 +710,7 @@ wild_section (ptr, section, file, output)
 
    Archives are pecuilar here. We may open them once, but if they do
    not define anything we need at the time, they won't have all their
-   symbols read. If we need them later, we'll have to redo it.
-   */
+   symbols read. If we need them later, we'll have to redo it.  */
 static lang_input_statement_type *
 lookup_name (name)
      CONST char *name;
@@ -898,31 +895,68 @@ ldlang_open_output (statement)
     }
 }
 
+/* Open all the input files.  */
+
 static void
-open_input_bfds (statement)
-     lang_statement_union_type * statement;
+open_input_bfds (s, force)
+     lang_statement_union_type *s;
+     boolean force;
 {
-  switch (statement->header.type)
+  for (; s != (lang_statement_union_type *) NULL; s = s->next)
     {
-      case lang_target_statement_enum:
-      current_target = statement->target_statement.target;
-      break;
-    case lang_wild_statement_enum:
-      /* Maybe we should load the file's symbols */
-      if (statement->wild_statement.filename)
+      switch (s->header.type)
 	{
-	  (void) lookup_name (statement->wild_statement.filename);
+	case lang_constructors_statement_enum:
+	  open_input_bfds (constructor_list.head, force);
+	  break;
+	case lang_output_section_statement_enum:
+	  open_input_bfds (s->output_section_statement.children.head, force);
+	  break;
+	case lang_wild_statement_enum:
+	  /* Maybe we should load the file's symbols */
+	  if (s->wild_statement.filename)
+	    (void) lookup_name (s->wild_statement.filename);
+	  open_input_bfds (s->wild_statement.children.head, force);
+	  break;
+	case lang_group_statement_enum:
+	  {
+	    struct bfd_link_hash_entry *undefs;
+
+	    /* We must continually search the entries in the group
+               until no new symbols are added to the list of undefined
+               symbols.  */
+
+	    do
+	      {
+		undefs = link_info.hash->undefs_tail;
+		open_input_bfds (s->group_statement.children.head, true);
+	      }
+	    while (undefs != link_info.hash->undefs_tail);
+	  }
+	  break;
+	case lang_target_statement_enum:
+	  current_target = s->target_statement.target;
+	  break;
+	case lang_input_statement_enum:
+	  if (s->input_statement.real == true)
+	    {
+	      s->input_statement.target = current_target;
+
+	      /* If we are being called from within a group, and this
+                 is an archive which has already been searched, then
+                 force it to be researched.  */
+	      if (force
+		  && s->input_statement.loaded
+		  && bfd_check_format (s->input_statement.the_bfd,
+				       bfd_archive))
+		s->input_statement.loaded = false;
+
+	      load_symbols (&s->input_statement);
+	    }
+	  break;
+	default:
+	  break;
 	}
-      break;
-    case lang_input_statement_enum:
-      if (statement->input_statement.real == true)
-	{
-	  statement->input_statement.target = current_target;
-	  load_symbols (&statement->input_statement);
-	}
-      break;
-    default:
-      break;
     }
 }
 
@@ -1039,6 +1073,11 @@ map_input_to_output_sections (s, target, output_section_statement)
 	  break;
 	case lang_target_statement_enum:
 	  target = s->target_statement.target;
+	  break;
+	case lang_group_statement_enum:
+	  map_input_to_output_sections (s->group_statement.children.head,
+					target,
+					output_section_statement);
 	  break;
 	case lang_fill_statement_enum:
 	case lang_input_section_enum:
@@ -1394,6 +1433,19 @@ print_wild_statement (w, os)
   print_statement (w->children.head, os);
 
 }
+
+/* Print a group statement.  */
+
+static void
+print_group (s, os)
+     lang_group_statement_type *s;
+     lang_output_section_statement_type *os;
+{
+  fprintf (config.map_file, "START GROUP\n");
+  print_statement (s->children.head, os);
+  fprintf (config.map_file, "END GROUP\n");
+}
+
 static void
 print_statement (s, os)
      lang_statement_union_type * s;
@@ -1452,6 +1504,9 @@ print_statement (s, os)
 	  break;
 	case lang_input_statement_enum:
 	  print_input_statement (&s->input_statement);
+	  break;
+	case lang_group_statement_enum:
+	  print_group (&s->group_statement, os);
 	  break;
 	case lang_afile_asection_pair_statement_enum:
 	  FAIL ();
@@ -1854,6 +1909,13 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      dot += s->padding_statement.size;
      break;
 
+     case lang_group_statement_enum:
+       dot = lang_size_sections (s->group_statement.children.head,
+				 output_section_statement,
+				 &s->group_statement.children.head,
+				 fill, dot, relax);
+       break;
+
      default:
       FAIL ();
       break;
@@ -1868,7 +1930,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
   return dot;
 }
 
-static bfd_vma
+bfd_vma
 lang_do_assignments (s, output_section_statement, fill, dot)
      lang_statement_union_type * s;
      lang_output_section_statement_type * output_section_statement;
@@ -1986,6 +2048,14 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	case lang_padding_statement_enum:
 	  dot += s->padding_statement.size;
 	  break;
+
+	case lang_group_statement_enum:
+	  dot = lang_do_assignments (s->group_statement.children.head,
+				     output_section_statement,
+				     fill, dot);
+
+	  break;
+
 	default:
 	  FAIL ();
 	  break;
@@ -2500,7 +2570,7 @@ lang_process ()
 
   /* Create a bfd for each input file */
   current_target = default_target;
-  lang_for_each_statement (open_input_bfds);
+  open_input_bfds (statement_list.head, false);
 
   /* Build all sets based on the information gathered from the input
      files.  */
@@ -2851,4 +2921,28 @@ lang_add_output_format (format, from_script)
 {
   if (output_target == NULL || !from_script)
     output_target = format;
+}
+
+/* Enter a group.  This creates a new lang_group_statement, and sets
+   stat_ptr to build new statements within the group.  */
+
+void
+lang_enter_group ()
+{
+  lang_group_statement_type *g;
+
+  g = new_stat (lang_group_statement, stat_ptr);
+  lang_list_init (&g->children);
+  stat_ptr = &g->children;
+}
+
+/* Leave a group.  This just resets stat_ptr to start writing to the
+   regular list of statements again.  Note that this will not work if
+   groups can occur inside anything else which can adjust stat_ptr,
+   but currently they can't.  */
+
+void
+lang_leave_group ()
+{
+  stat_ptr = &statement_list;
 }

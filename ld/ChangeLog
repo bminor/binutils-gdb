@@ -1,3 +1,9 @@
+Fri Jul 22 12:15:36 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ldlang.c (wild_section): Attach all section with the given name,
+	not just the first one.  If there is no name, attach all sections
+	even if the SEC_IS_COMMON flag is set.
+
 Wed Jul 20 15:49:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ld.h (args_type): Add field rpath.
