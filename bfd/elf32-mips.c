@@ -1,4 +1,4 @@
-l/* MIPS-specific support for 32-bit ELF
+/* MIPS-specific support for 32-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
