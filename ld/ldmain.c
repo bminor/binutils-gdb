@@ -23,6 +23,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include <stdio.h>
 #include "libiberty.h"
+#include "progress.h"
 #include "bfdlink.h"
 
 #include "config.h"
@@ -154,6 +155,8 @@ main (argc, argv)
 
   program_name = argv[0];
   xmalloc_set_program_name (program_name);
+
+  START_PROGRESS (program_name, 0);
 
   bfd_init ();
 
@@ -298,7 +301,7 @@ main (argc, argv)
 	}
     }
 
-  if (link_info.relocateable || link_info.shared)
+  if (link_info.relocateable)
     output_bfd->flags &= ~EXEC_P;
   else
     output_bfd->flags |= EXEC_P;
@@ -328,6 +331,8 @@ main (argc, argv)
       if (! bfd_close (output_bfd))
 	einfo ("%F%B: final close failed: %E\n", output_bfd);
     }
+
+  END_PROGRESS (program_name);
 
   if (config.stats)
     {
