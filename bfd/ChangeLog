@@ -1,3 +1,18 @@
+Thu Nov  9 04:00:38 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Added new option --with[out]-mmap.  Set USE_MMAP
+	if it is given and mmep is available.
+	* acconfig.h: Undef USE_MMAP.
+	* configure, config.in: Regenerated.
+	* aoutx.h: If USE_MMAP is not defined, do all symbol and string
+	table handling the old way.
+	(aout_get_external_symbols): Don't complain if last byte of string
+	table is nonzero.
+	* libbfd.c [HAVE_MADVISE]: Include sys/types.h and sys/mman.h.
+	(bfd_free_window) [! USE_MMAP]: Don't define.
+	(bfd_get_file_window,
+	_bfd_generic_get_section_contents_in_window) [! USE_MMAP]: Abort.
+
 Wed Nov  8 20:03:44 1995  Eric Freudenthal <freudenthal@nyu.edu>
 
 	* coff-a29k.c (SIGN_EXTEND_HWORD): Use ~0xffff rather than

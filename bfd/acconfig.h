@@ -12,3 +12,6 @@
 
 /* Define only if <sys/procfs.h> is available *and* it defines prstatus_t.  */
 #undef HAVE_SYS_PROCFS_H
+
+/* Do we really want to use mmap if it's available?  */
+#undef USE_MMAP
