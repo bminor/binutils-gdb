@@ -1,5 +1,5 @@
 /* bfd back-end for HP PA-RISC SOM objects.
-   Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -174,7 +174,7 @@ static boolean som_bfd_copy_private_section_data PARAMS ((bfd *, asection *,
 static boolean som_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 #define som_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
 #define som_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
-static boolean som_bfd_is_local_label PARAMS ((bfd *, asymbol *));
+static boolean som_bfd_is_local_label_name PARAMS ((bfd *, const char *));
 static boolean som_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
 						 file_ptr, bfd_size_type));
 static boolean som_get_section_contents PARAMS ((bfd *, sec_ptr, PTR,
@@ -1438,17 +1438,18 @@ hppa_som_reloc (abfd, reloc_entry, symbol_in, data,
    and a field selector, return one or more appropriate SOM relocations.  */
 
 int **
-hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
+hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff, sym)
      bfd *abfd;
      int base_type;
      int format;
      enum hppa_reloc_field_selector_type_alt field;
      int sym_diff;
+     asymbol *sym;
 {
   int *final_type, **final_types;
 
-  final_types = (int **) bfd_alloc_by_size_t (abfd, sizeof (int *) * 6);
-  final_type = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+  final_types = (int **) bfd_alloc (abfd, sizeof (int *) * 6);
+  final_type = (int *) bfd_alloc (abfd, sizeof (int));
   if (!final_types || !final_type)
     return NULL;
 
@@ -1472,7 +1473,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
       case e_tsel:
       case e_ltsel:
       case e_rtsel:
-	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	final_types[0] = (int *) bfd_alloc (abfd, sizeof (int));
 	if (!final_types[0])
 	  return NULL;
 	if (field == e_tsel)
@@ -1488,7 +1489,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 
       case e_lssel:
       case e_rssel:
-	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	final_types[0] = (int *) bfd_alloc (abfd, sizeof (int));
 	if (!final_types[0])
 	  return NULL;
 	*final_types[0] = R_S_MODE;
@@ -1499,7 +1500,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 
       case e_lsel:
       case e_rsel:
-	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	final_types[0] = (int *) bfd_alloc (abfd, sizeof (int));
 	if (!final_types[0])
 	  return NULL;
 	*final_types[0] = R_N_MODE;
@@ -1510,7 +1511,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 
       case e_ldsel:
       case e_rdsel:
-	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	final_types[0] = (int *) bfd_alloc (abfd, sizeof (int));
 	if (!final_types[0])
 	  return NULL;
 	*final_types[0] = R_D_MODE;
@@ -1521,7 +1522,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 
       case e_lrsel:
       case e_rrsel:
-	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	final_types[0] = (int *) bfd_alloc (abfd, sizeof (int));
 	if (!final_types[0])
 	  return NULL;
 	*final_types[0] = R_R_MODE;
@@ -1531,7 +1532,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 	break;
 
       case e_nsel:
-	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	final_types[0] = (int *) bfd_alloc (abfd, sizeof (int));
 	if (!final_types[0])
 	  return NULL;
 	*final_types[0] = R_N1SEL;
@@ -1542,11 +1543,11 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 
       case e_nlsel:
       case e_nlrsel:
-	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	final_types[0] = (int *) bfd_alloc (abfd, sizeof (int));
 	if (!final_types[0])
 	  return NULL;
 	*final_types[0] = R_N0SEL;
-	final_types[1] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	final_types[1] = (int *) bfd_alloc (abfd, sizeof (int));
 	if (!final_types[1])
 	  return NULL;
 	if (field == e_nlsel)
@@ -1565,10 +1566,10 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
       /* The difference of two symbols needs *very* special handling.  */
       if (sym_diff)
 	{
-	  final_types[0] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
-	  final_types[1] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
-	  final_types[2] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
-	  final_types[3] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
+	  final_types[0] = (int *)bfd_alloc (abfd, sizeof (int));
+	  final_types[1] = (int *)bfd_alloc (abfd, sizeof (int));
+	  final_types[2] = (int *)bfd_alloc (abfd, sizeof (int));
+	  final_types[3] = (int *)bfd_alloc (abfd, sizeof (int));
 	  if (!final_types[0] || !final_types[1] || !final_types[2])
             return NULL;
 	  if (field == e_fsel)
@@ -1581,7 +1582,10 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 	  *final_types[2] = R_COMP2;
 	  *final_types[3] = R_COMP1;
 	  final_types[4] = final_type;
-	  *final_types[4] = R_CODE_EXPR;
+	  if (format == 32)
+	    *final_types[4] = R_DATA_EXPR;
+	  else
+	    *final_types[4] = R_CODE_EXPR;
 	  final_types[5] = NULL;
 	  break;
 	}
@@ -1604,9 +1608,32 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 	*final_type = R_DLT_REL;
       /* A relocation in the data space is always a full 32bits.  */
       else if (format == 32)
-	*final_type = R_DATA_ONE_SYMBOL;
+	{
+	  *final_type = R_DATA_ONE_SYMBOL;
 
+	  /* If there's no SOM symbol type associated with this BFD
+	     symbol, then set the symbol type to ST_DATA.
+
+	     Only do this if the type is going to default later when
+	     we write the object file.
+
+	     This is done so that the linker never encounters an
+	     R_DATA_ONE_SYMBOL reloc involving an ST_CODE symbol.
+
+	     This allows the compiler to generate exception handling
+	     tables.
+
+	     Note that one day we may need to also emit BEGIN_BRTAB and
+	     END_BRTAB to prevent the linker from optimizing away insns
+	     in exception handling regions.  */
+	  if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN
+	      && (sym->flags & BSF_SECTION_SYM) == 0
+	      && (sym->flags & BSF_FUNCTION) == 0
+	      && ! bfd_is_com_section (sym->section))
+	    som_symbol_data (sym)->som_type = SYMBOL_TYPE_DATA;
+	}
       break;
+
 
     case R_HPPA_GOTOFF:
       /* More PLABEL special cases.  */
@@ -1620,10 +1647,10 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
       /* The difference of two symbols needs *very* special handling.  */
       if (sym_diff)
 	{
-	  final_types[0] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
-	  final_types[1] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
-	  final_types[2] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
-	  final_types[3] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
+	  final_types[0] = (int *)bfd_alloc (abfd, sizeof (int));
+	  final_types[1] = (int *)bfd_alloc (abfd, sizeof (int));
+	  final_types[2] = (int *)bfd_alloc (abfd, sizeof (int));
+	  final_types[3] = (int *)bfd_alloc (abfd, sizeof (int));
 	  if (!final_types[0] || !final_types[1] || !final_types[2])
             return NULL;
 	  if (field == e_fsel)
@@ -1636,7 +1663,10 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
 	  *final_types[2] = R_COMP2;
 	  *final_types[3] = R_COMP1;
 	  final_types[4] = final_type;
-	  *final_types[4] = R_CODE_EXPR;
+	  if (format == 32)
+	    *final_types[4] = R_DATA_EXPR;
+	  else
+	    *final_types[4] = R_CODE_EXPR;
 	  final_types[5] = NULL;
 	  break;
 	}
@@ -1687,7 +1717,7 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
     return 0;
 
   /* Set BFD flags based on what information is available in the SOM.  */
-  abfd->flags = NO_FLAGS;
+  abfd->flags = BFD_NO_FLAGS;
   if (file_hdrp->symbol_total)
     abfd->flags |= HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS;
 
@@ -1990,18 +2020,24 @@ setup_sections (abfd, file_hdr)
 	    goto error_return;
 	}
 
-      /* Yow! there is no subspace within the space which actually 
-         has initialized information in it; this should never happen
-         as far as I know.  */
+      /* This can happen for a .o which defines symbols in otherwise
+         empty subspaces.  */
       if (!save_subspace.file_loc_init_value)
-	goto error_return;
-
-      /* Setup the sizes for the space section based upon the info in the
-         last subspace of the space.  */
-      space_asect->_cooked_size = save_subspace.subspace_start
-	- space_asect->vma + save_subspace.subspace_length;
-      space_asect->_raw_size = save_subspace.file_loc_init_value
-	- space_asect->filepos + save_subspace.initialization_length;
+	{
+	  space_asect->_cooked_size = 0;
+	  space_asect->_raw_size = 0;
+	}
+      else
+	{
+	  /* Setup the sizes for the space section based upon the info in the
+	     last subspace of the space.  */
+	  space_asect->_cooked_size = (save_subspace.subspace_start
+				       - space_asect->vma
+				       + save_subspace.subspace_length);
+	  space_asect->_raw_size = (save_subspace.file_loc_init_value
+				    - space_asect->filepos
+				    + save_subspace.initialization_length);
+	}
     }
   /* Now that we've read in all the subspace records, we need to assign
      a target index to each subspace.  */
@@ -2834,6 +2870,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		  break;
 
 		case R_CODE_EXPR:
+		case R_DATA_EXPR:
 		  /* The only time we generate R_COMP1, R_COMP2 and 
 		     R_CODE_EXPR relocs is for the difference of two
 		     symbols.  Hence we can cheat here.  */
@@ -3729,20 +3766,16 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
 	  info->arg_reloc = som_symbol_data (sym)->tc_data.hppa_arg_reloc;
 	}
 
-      /* For unknown symbols, set their type to ST_DATA.
-
-	 We used to set the symbol type based on the section this symbol
-	 was in (ST_DATA for DATA sections, ST_CODE for CODE sections).
-	 Strictly speaking, this is the right approach.  However, the
-	 linker chokes if we have an R_DATA_ONE_SYMBOL reloc involving
-	 an ST_CODE symbol in a shared library, which happens for
-	 exception handling tables.
-
-	 I tried an alternate approach to generating exception handling
-	 tables using PUSH_SYM and DATA_EXPR relocs, but that fails to
-	 relocate exception handling tables in shared libraries.
-
-	 What a pain.  */
+      /* For unknown symbols set the symbol's type based on the symbol's
+	 section (ST_DATA for DATA sections, ST_CODE for CODE sections).  */
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN)
+	{
+	  if (sym->section->flags & SEC_CODE)
+	    info->symbol_type = ST_CODE;
+	  else
+	    info->symbol_type = ST_DATA;
+	}
+  
       else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN)
 	info->symbol_type = ST_DATA;
 
@@ -4223,11 +4256,11 @@ som_print_symbol (ignore_abfd, afile, symbol, how)
 }
 
 static boolean
-som_bfd_is_local_label (abfd, sym)
+som_bfd_is_local_label_name (abfd, name)
      bfd *abfd;
-     asymbol *sym;
+     const char *name;
 {
-  return (sym->name[0] == 'L' && sym->name[1] == '$');
+  return (name[0] == 'L' && name[1] == '$');
 }
 
 /* Count or process variable-length SOM fixup records.
@@ -5566,7 +5599,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 	return false;
       thislen = strlen (normal);
       if (thislen > maxname)
-	extended_name_length += thislen + 1;
+	extended_name_length += thislen + 2;
     }
 
   /* Make room for the archive header and the contents of the
@@ -5768,20 +5801,6 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   return false;
 }
 
-/* SOM almost uses the SVR4 style extended name support, but not
-   quite.  */
-
-static boolean
-som_construct_extended_name_table (abfd, tabloc, tablen, name)
-     bfd *abfd;
-     char **tabloc;
-     bfd_size_type *tablen;
-     const char **name;
-{
-  *name = "//";
-  return _bfd_construct_extended_name_table (abfd, false, tabloc, tablen);
-}
-
 /* Write out the LST for the archive.
 
    You'll never believe this is really how armaps are handled in SOM...  */
@@ -5958,6 +5977,8 @@ som_bfd_link_split_section (abfd, sec)
 #define som_generic_stat_arch_elt	bfd_generic_stat_arch_elt
 #define som_truncate_arname		bfd_bsd_truncate_arname
 #define som_slurp_extended_name_table	_bfd_slurp_extended_name_table
+#define som_construct_extended_name_table \
+  _bfd_archive_coff_construct_extended_name_table
 #define som_update_armap_timestamp	bfd_true
 #define som_bfd_print_private_bfd_data  _bfd_generic_bfd_print_private_bfd_data
 
