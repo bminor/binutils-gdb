@@ -7,7 +7,9 @@
 
 2000-11-08  Kazu Hirata  <kazu@hxi.com>
 
-	* bfd.c: Fix formatting.
+	* bfd-in.h: Fix formatting.
+	* bfd-in2.h: Likewise.
+	* bfd.c: Likewise.
 	* binary.c: Likewise.
 	* bout.c: Likewise.
 

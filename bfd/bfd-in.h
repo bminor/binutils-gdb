@@ -84,7 +84,7 @@ typedef struct _bfd bfd;
 /* General rules: functions which are boolean return true on success
    and false on failure (unless they're a predicate).   -- bfd.doc */
 /* I'm sure this is going to break something and someone is going to
-   force me to change it. */
+   force me to change it.  */
 /* typedef enum boolean {false, true} boolean; */
 /* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
 /* It gets worse if the host also defines a true/false enum... -sts */
@@ -93,7 +93,7 @@ typedef struct _bfd bfd;
 #define TRUE_FALSE_ALREADY_DEFINED
 #endif
 #ifdef MPW
-/* Pre-emptive strike - get the file with the enum. */
+/* Pre-emptive strike - get the file with the enum.  */
 #include <Types.h>
 #define TRUE_FALSE_ALREADY_DEFINED
 #endif /* MPW */
@@ -284,7 +284,6 @@ typedef struct carsym {
   file_ptr file_offset;		/* look here to find the file */
 } carsym;			/* to make these you call a carsymogen */
 
-
 /* Used in generating armaps (archive tables of contents).
    Perhaps just a forward definition would do? */
 struct orl {			/* output ranlib */
@@ -344,7 +343,7 @@ typedef struct _symbol_info
   char type;
   CONST char *name;            /* Symbol name.  */
   unsigned char stab_type;     /* Stab type.  */
-  char stab_other;             /* Stab other. */
+  char stab_other;             /* Stab other.  */
   short stab_desc;             /* Stab desc.  */
   CONST char *stab_name;       /* String for stab type.  */
 } symbol_info;
@@ -480,7 +479,6 @@ extern int bfd_seek PARAMS ((bfd *abfd, file_ptr fp, int direction));
 extern long bfd_tell PARAMS ((bfd *abfd));
 extern int bfd_flush PARAMS ((bfd *abfd));
 extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
-
 
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */
@@ -649,7 +647,7 @@ extern int bfd_get_elf_phdrs PARAMS ((bfd *abfd, void *phdrs));
 /* Return the arch_size field of an elf bfd, or -1 if not elf.  */
 extern int bfd_get_arch_size PARAMS ((bfd *));
 
-/* Return true if address "naturally" sign extends, or -1 if not elf. */
+/* Return true if address "naturally" sign extends, or -1 if not elf.  */
 extern int bfd_get_sign_extend_vma PARAMS ((bfd *));
 
 extern boolean bfd_m68k_elf32_create_embedded_relocs
@@ -768,7 +766,7 @@ extern boolean bfd_elf32_arm_process_before_allocation
 extern boolean bfd_elf32_arm_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
 
-/* TI COFF load page support. */
+/* TI COFF load page support.  */
 extern void bfd_ticoff_set_section_load_page
   PARAMS ((struct sec *, int));
 
