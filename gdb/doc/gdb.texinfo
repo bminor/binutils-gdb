@@ -208,12 +208,15 @@ effects of one bug and go on to learn about another.
 @end itemize
 
 @ifclear CONLY
-You can use @value{GDBN} to debug programs written in C or C++.  For
-more information, see @ref{C,,C and C++}.
-
-@ifset MOD2
+You can use @value{GDBN} to debug programs written in C or C++.
 @c "MOD2" used as a "miscellaneous languages" flag here.
 @c This is acceptable while there is no real doc for Chill and Pascal.
+@ifclear MOD2
+For more information, see @ref{Support,,Supported languages}.
+@end ifclear
+@ifset MOD2
+For more information, see @ref{C,,C and C++}.
+
 Support for Modula-2 and Chill is partial.  For information on Modula-2,
 see @ref{Modula-2,,Modula-2}.  There is no further documentation on Chill yet.
 
