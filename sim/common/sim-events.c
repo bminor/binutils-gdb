@@ -379,6 +379,19 @@ sim_events_elapsed_time (SIM_DESC sd)
 }
 
 
+/* Returns the time that remains before the event is raised. */
+INLINE_SIM_EVENTS\
+(signed64)
+sim_events_remain_time (SIM_DESC sd, sim_event *event)
+{
+  if (event == 0)
+    return 0;
+  
+  return (event->time_of_event - sim_events_time (sd));
+}
+
+
+
 STATIC_INLINE_SIM_EVENTS\
 (void)
 update_time_from_event (SIM_DESC sd)
