@@ -1,3 +1,23 @@
+Fri Aug 26 14:30:05 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.guess:  More merges from the FSF:
+
+	Add a space before function call or macro invocation.
+
+	Tue May 10 16:53:55 1994  Roland McGrath (roland@churchy.gnu.ai.mit.edu)
+
+	* config.guess: Add trap cmd to remove dummy.c and dummy when
+	interrupted.
+
+	Wed Apr 20 18:07:13 1994  Roland McGrath (roland@churchy.gnu.ai.mit.edu)
+
+	* config.guess (dummy.c): Redirect stderr for `hostinfo' command.
+	(dummy): Redirect stderr from compilation of dummy.c.
+
+	Sat Apr  9 14:59:28 1994  Christian Kranz  (kranz@sent5.uni-duisburg.de)
+
+	* config.guess: Distinguish between NeXTStep 2.1 and 3.x.
+
 Fri Aug 26 13:42:20 1994  Ken Raeburn  (raeburn@kr-laptop.cygnus.com)
 
 	* configure: Accept and ignore --cache*, for compatibility with
@@ -5,7 +25,7 @@ Fri Aug 26 13:42:20 1994  Ken Raeburn  (raeburn@kr-laptop.cygnus.com)
 
 Fri Aug 26 13:05:27 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
-	* (config.guess):  Merge from FSF:
+	* config.guess:  Merge from FSF:
 
 	Thu Aug 25 20:28:51 1994  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
 
