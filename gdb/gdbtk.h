@@ -117,7 +117,9 @@ typedef struct gdbtk_result {
 				   the result we have been accumulating, or the 
 				   error and the previous successful output
 				   will get mixed, which would be confusing. */
-				   
+#define GDBTK_ERROR_ONLY    16  /* Indicates that all incoming I/O is
+                   to be treated as if it had arrived for gdb_stderr. This is
+                   used to help error_begin in utils.c. */
 
 /* This is a pointer to the gdbtk_result struct that
    we are currently filling.  We use the C stack to make a stack of these
@@ -141,6 +143,7 @@ extern void gdbtk_ignorable_warning PARAMS ((const char *));
 extern void gdbtk_interactive PARAMS ((void));
 extern void x_event PARAMS ((int));
 extern int gdbtk_two_elem_cmd PARAMS ((char *, char *));
+extern int call_wrapper PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
 
 #ifdef _WIN32
 extern void close_bfds ();
@@ -152,3 +155,14 @@ TclDebug (const char *fmt, ...);
 #else
 TclDebug (va_alist);
 #endif
+
+/* A convenience macro for getting the demangled source names,
+   regardless of the user's mangling style. */
+#define GDBTK_SYMBOL_SOURCE_NAME(symbol) \
+      (SYMBOL_DEMANGLED_NAME (symbol) != NULL \
+       ? SYMBOL_DEMANGLED_NAME (symbol)       \
+       : SYMBOL_NAME (symbol))
+
+/* Local variables: */
+/* change-log-default-name: "ChangeLog-gdbtk" */
+/* End: */

@@ -44,13 +44,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "guitcl.h"
 #include "gdbtk.h"
 
-#ifdef IDE
 /* start-sanitize-ide */
+#ifdef IDE
 #include "event.h"
 #include "idetcl.h"
 #include "ilutk.h"
-/* end-sanitize-ide */
 #endif
+/* end-sanitize-ide */
 
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
@@ -157,12 +157,14 @@ extern int breakpoint_count;
  */
 int disassemble_from_exec = -1;
 
+extern int gdb_variable_init PARAMS ((Tcl_Interp *interp));
 
 /*
  * Declarations for routines exported from this file
  */
 
 int Gdbtk_Init (Tcl_Interp *interp);
+int call_wrapper PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
 
 /*
  * Declarations for routines used only in this file.
@@ -170,7 +172,6 @@ int Gdbtk_Init (Tcl_Interp *interp);
 
 static int compare_lines PARAMS ((const PTR, const PTR));
 static int comp_files PARAMS ((const void *, const void *));
-static int call_wrapper PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
 static int gdb_actions_command PARAMS ((ClientData, Tcl_Interp *, int,
 					Tcl_Obj *CONST objv[]));
 static int gdb_changed_register_list PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
@@ -335,6 +336,10 @@ Gdbtk_Init (interp)
   Tcl_LinkVar (interp, "gdb_context_id",
                (char *) &gdb_context,
                TCL_LINK_INT | TCL_LINK_READ_ONLY);
+
+  /* Init variable interface...*/
+  if (gdb_variable_init (interp) != TCL_OK)
+    return TCL_ERROR;
   
   /* Determine where to disassemble from */
   Tcl_LinkVar (gdbtk_interp, "disassemble-from-exec", (char *) &disassemble_from_exec,
@@ -352,7 +357,7 @@ Gdbtk_Init (interp)
    recursively, it needs to save and restore the contents of the result_ptr as
    necessary. */
 
-static int
+int
 call_wrapper (clientData, interp, objc, objv)
      ClientData clientData;
      Tcl_Interp *interp;
@@ -664,6 +669,7 @@ gdb_eval (clientData, interp, objc, objv)
  * 
  * Tcl Arguments:
  *    command - The GDB command to execute
+ *    from_tty - 1 indicates this comes to the console.  Pass this to the gdb command.
  * Tcl Result:
  *    The output from the gdb command (except for the "load" & "while"
  *    which dump their output to the console.
@@ -732,6 +738,7 @@ gdb_cmd (clientData, interp, objc, objv)
  *
  * Tcl Arguments:
  *    command - The GDB command to execute
+ *    from_tty - 1 to indicate this is from the console.
  * Tcl Result:
  *    None.
  */
@@ -744,10 +751,21 @@ gdb_immediate_command (clientData, interp, objc, objv)
      Tcl_Obj *CONST objv[];
 {
 
-  if (objc != 2)
+  int from_tty = 0;
+  
+  if (objc < 2)
     {
       Tcl_SetStringObj (result_ptr->obj_ptr, "wrong # args", -1);
       return TCL_ERROR;
+    }
+
+  if (objc == 3)
+    {
+      if (Tcl_GetBooleanFromObj (NULL, objv[2], &from_tty) != TCL_OK) {
+	Tcl_SetStringObj (result_ptr->obj_ptr, "from_tty must be a boolean.",
+			  -1);
+	return TCL_ERROR;
+      }
     }
 
   if (running_now || load_in_progress)
@@ -757,7 +775,7 @@ gdb_immediate_command (clientData, interp, objc, objv)
 
   result_ptr->flags &= ~GDBTK_TO_RESULT;  
 
-  execute_command (Tcl_GetStringFromObj (objv[1], NULL), 1);
+  execute_command (Tcl_GetStringFromObj (objv[1], NULL), from_tty);
 
   bpstat_do_actions (&stop_bpstat);
   
@@ -1499,15 +1517,19 @@ gdb_listfuncs (clientData, interp, objc, objv)
           if (SYMBOL_CLASS (sym) == LOC_BLOCK)
             {
 	      
-              char *name = cplus_demangle (SYMBOL_NAME(sym), 0);
+              char *name = SYMBOL_DEMANGLED_NAME (sym);
+
               if (name)
                 {
                   /* strip out "global constructors" and "global destructors" */
                   /* because we aren't interested in them. */
                   if (strncmp (name, "global ", 7))
                     {
+                      /* If the function is overloaded, print out the functions
+                         declaration, not just its name. */
+                      
                       funcVals[0] = Tcl_NewStringObj(name, -1);
-                      funcVals[1] = mangled;	  
+                      funcVals[1] = mangled;
                     }
                   else
                     continue;
@@ -2338,15 +2360,10 @@ gdb_loc (clientData, interp, objc, objv)
 {
   char *filename;
   struct symtab_and_line sal;
-  char *funcname, *fname;
+  struct symbol *sym;
+  char *fname;
   CORE_ADDR pc;
 
-  if (!have_full_symbols () && !have_partial_symbols ())
-    {
-      Tcl_SetStringObj (result_ptr->obj_ptr, "No symbol table is loaded", -1);
-      return TCL_ERROR;
-    }
-  
   if (objc == 1)
     {
       if (selected_frame && (selected_frame->pc != stop_pc))
@@ -2385,6 +2402,7 @@ gdb_loc (clientData, interp, objc, objv)
           Tcl_SetStringObj (result_ptr->obj_ptr, "Ambiguous line spec", -1);
           return TCL_ERROR;
         }
+      resolve_sal_pc (&sal);
       pc = sal.pc;
     }
   else
@@ -2399,18 +2417,25 @@ gdb_loc (clientData, interp, objc, objv)
   else
     Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr, Tcl_NewStringObj ("", 0));
 
-  find_pc_partial_function (pc, &funcname, NULL, NULL);
-  fname = cplus_demangle (funcname, 0);
-  if (fname)
+  sym = find_pc_function (pc);
+  if (sym != NULL)
     {
-      Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
-				Tcl_NewStringObj (fname, -1));
-      free (fname);
+      fname = SYMBOL_DEMANGLED_NAME (sym);
+      if (fname)
+        {
+          Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
+                                    Tcl_NewStringObj (fname, -1));
+        }
+      else
+        Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
+                                  Tcl_NewStringObj (SYMBOL_NAME (sym), -1));
     }
   else
-    Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
-			      Tcl_NewStringObj (funcname, -1));
-  
+    {
+      Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
+                                Tcl_NewStringObj ("", -1));
+    }
+
   filename = symtab_to_filename (sal.symtab);
   if (filename == NULL)
     filename = "";
@@ -2630,7 +2655,7 @@ gdb_loadfile (clientData, interp, objc, objv)
   long mtime = 0;
   struct stat st;
   Tcl_DString text_cmd_1, text_cmd_2, *cur_cmd;
-  char line[1024], line_num_buf[16];
+  char line[10000], line_num_buf[16];
   int prefix_len_1, prefix_len_2, cur_prefix_len, widget_len;
 
  
@@ -3355,12 +3380,12 @@ get_frame_name (interp, list, fi)
               > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
         {
           func = 0;
-          funname = SYMBOL_NAME (msymbol);
+          funname = GDBTK_SYMBOL_SOURCE_NAME (msymbol);
           funlang = SYMBOL_LANGUAGE (msymbol);
         }
       else
         {
-          funname = SYMBOL_NAME (func);
+          funname = GDBTK_SYMBOL_SOURCE_NAME (func);
           funlang = SYMBOL_LANGUAGE (func);
         }
     }
@@ -3369,7 +3394,7 @@ get_frame_name (interp, list, fi)
       struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
       if (msymbol != NULL)
         {
-          funname = SYMBOL_NAME (msymbol);
+          funname = GDBTK_SYMBOL_SOURCE_NAME (msymbol);
           funlang = SYMBOL_LANGUAGE (msymbol);
         }
     }
@@ -3378,12 +3403,7 @@ get_frame_name (interp, list, fi)
     {
       char *name = NULL;
 
-      if (funlang == language_cplus)
-        name = cplus_demangle (funname, 0);
-      if (name == NULL)
-        name = funname;
-
-      objv[0] = Tcl_NewStringObj (name, -1);
+      objv[0] = Tcl_NewStringObj (funname, -1);
       Tcl_ListObjAppendElement (interp, list, objv[0]);
     }
   else
@@ -3395,7 +3415,7 @@ get_frame_name (interp, list, fi)
           print_address_numeric (fi->pc, 1, gdb_stdout);
           printf_filtered (" in ");
         }
-      fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
+      printf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
                                DMGL_ANSI);
 #endif
       objv[0] = Tcl_NewStringObj (funname != NULL ? funname : "??", -1);
@@ -3541,3 +3561,7 @@ full_lookup_symtab(file)
     }
   return NULL;
 }
+
+/* Local variables: */
+/* change-log-default-name: "ChangeLog-gdbtk" */
+/* End: */

@@ -1,0 +1,476 @@
+#   Copyright (C) 1998 Cygnus Solutions
+#
+# This Program Is Free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# This file was written by Keith Seitz (keiths@cygnus.com)
+
+# Read in the standard defs file
+if {![gdbtk_read_defs]} {
+  break
+}
+
+global objdir test_ran
+global tcl_platform 
+
+# Load in a file
+if {$tcl_platform(platform) == "windows"} {
+  set program [file join $objdir cpp_variable.exe]
+} else {
+  set program [file join $objdir cpp_variable]
+}
+
+# This isn't a test case, since if this fails, we're hosed.
+if {[catch {gdb_cmd "file $program"} t]} {
+  # an error occured loading the file
+  gdbtk_test_error "loading \"$program\": $t"
+}
+
+# The variables that are created are stored in an array called "var".
+
+# proc to tell us which of the variables are changed/out of scope
+proc check_valueChanged {} {
+  global var
+
+  set changed {}
+  set unchanged {}
+  set out {}
+  foreach ind [array names var] {
+    set val [$var($ind) valueChanged]
+    if {$val == "VARIABLE_CHANGED"} {
+	lappend changed $ind
+    } elseif {$val == "VARIABLE_UNCHANGED"} {
+	lappend unchanged $ind
+    } elseif {$val == "VARIABLE_OUT_OF_SCOPE"} {
+	lappend out $ind
+    } else {
+	error "unknown result from valueChanged"
+    }
+  }
+
+  return [list $changed $unchanged $out]
+}
+
+
+# proc to create a variable
+proc create_variable {expr} {
+  global var
+
+  set err [catch {gdb_variable create -expr $expr} v]
+  if {!$err} {
+    set var($expr) $v
+  }
+
+  return $err
+}
+
+# proc to get the children
+# Children are stored in the global "var" as
+# PARENT.child. So for struct _foo {int a; int b} bar;,
+# the children returned are {a b} and var(bar.a) and var(bar.b)
+# map the actual objects to their names.
+proc get_children {parent} {
+  global var
+
+  set kiddies [$var($parent) children]
+  set children {}
+  foreach child $kiddies {
+    set name [lindex [split $child .] end]
+    lappend children $name
+    set var($parent.$name) $child
+  }
+
+  return $children
+}
+
+proc delete_variable {varname} {
+  global var
+
+  if {[info exists var($varname)]} {
+    # This has to be caught, since deleting a parent
+    # will erase all children.
+    $var($varname) delete
+    set vars [array names var $varname*]
+    foreach v $vars {
+      if {[info exists var($v)]} {
+	unset var($v)
+      }
+    }
+  }
+}
+
+# Compare the values of variable V in format FMT
+# with gdb's value.
+proc value {v fmt} {
+  global var
+
+  set value [$var($v) value]
+  set gdb [gdb_cmd "output/$fmt $v"]
+  if {$value == $gdb} {
+    set result ok
+  } else {
+    set result error
+  }
+
+  return $result
+}
+
+proc delete_all_variables {} {
+  global var
+
+  foreach variable [array names var] {
+    delete_variable $variable
+  }
+}
+
+#####            #####
+#                    #
+# Simple Class Tests #
+#                    #
+#####            #####
+
+# run to "do_simple_class_tests"
+gdb_cmd "break do_simple_class_tests"
+gdb_cmd "run"
+
+# Test:  cpp_variable-1.1
+# Desc:  stopped in do_simple_class_tests
+gdbtk_test cpp_variable-1.1 {stopped in main} {
+  lindex [gdb_loc] 1
+} {do_simple_class_tests}
+
+# Test: cpp_variable-1.2
+# Desc: create variable v
+gdbtk_test cpp_variable-1.2 {create variable v} {
+  create_variable v
+} {0}
+
+# Test: cpp_variable-1.3
+# Desc: number of children of v
+gdbtk_test cpp_variable-1.3 {number of children of v} {
+  $var(v) numChildren
+} {7}
+
+# Test: cpp_variable-1.4
+# Desc: children of v
+gdbtk_test cpp_variable-1.4 {children of v} {
+  get_children v
+} {VA VB VC v_pub_int v_pub_charp v_priv_int v_priv_charp}
+
+# Test: cpp_variable-1.5
+# Desc: type of v
+gdbtk_test cpp_variable-1.5 {type of v} {
+  $var(v) type
+} {V *}
+
+# Test: cpp_variable-1.6
+# Desc: format of v
+gdbtk_test cpp_variable-1.6 {format of v} {
+  $var(v) format
+} {natural}
+
+set value [$var(v) value]
+
+# Step over "V *v = new V;"
+gdb_cmd "next"
+
+# Test: cpp_variable-1.7
+# Desc: check value of v changed
+gdbtk_test cpp_variable-1.7 {check value of v changed} {
+  check_valueChanged
+} {{v.v_priv_int v.v_pub_charp v.v_pub_int v v.v_priv_charp} {v.VB v.VC v.VA} {}}
+
+# Test: cpp_variable-1.8
+# Desc: check values of v
+gdbtk_test cpp_variable-1.8 {check values of v} {
+  set new [$var(v) value]
+  expr {$new != $value}
+} {1}
+
+# Test: cpp_variable-1.9
+# Desc: v editable
+gdbtk_test cpp_variable-1.9 {v editable} {
+  $var(v) editable
+} {1}
+
+#####             #####
+#                     #
+# Children of v tests #
+#                     #
+#####             #####
+
+# Test: cpp_variable-2.1
+# Desc: type of v.v_pub_int
+gdbtk_test cpp_variable-2.1 {type of v.v_pub_int} {
+  $var(v.v_pub_int) type
+} {int}
+
+# Test: cpp_variable-2.2
+# Desc: format of v.v_pub_int
+gdbtk_test cpp_variable-2.2 {format of v.v_pub_int} {
+  $var(v.v_pub_int) format
+} {natural}
+
+gdb_cmd "set variable v.v_pub_int=2112"
+
+# Test: cpp_variable-2.3
+# Desc: value of v.v_pub_int changed
+gdbtk_test cpp_variable-2.3 {value of v.v_pub_int changed} {
+  check_valueChanged
+} {v.v_pub_int {v.v_priv_int v.VB v.v_pub_charp v.VC v v.v_priv_charp v.VA} {}}
+
+# Test: cpp_variable-2.4
+# Desc: value of v.v_pub_int
+gdbtk_test cpp_variable-2.4 {value of v.v_pub_int} {
+  $var(v.v_pub_int) value
+} {2112}
+
+# Test: cpp_variable-2.5
+# Desc: changed format of v.v_pub_int
+gdbtk_test cpp_variable-2.5 {changed format of v.v_pub_int} {
+  $var(v.v_pub_int) format octal
+  $var(v.v_pub_int) format
+} {octal}
+
+# Test: cpp_variable-2.6
+# Desc: value of v.v_pub_int with new format
+gdbtk_test cpp_variable-2.6 {value of v.v_pub_int with new format} {
+  $var(v.v_pub_int) value
+} {04100}
+
+# Test: cpp_variable-2.7
+# Desc: change value of v.v_pub_int (decimal)
+gdbtk_test cpp_variable-2.7 {change value of v.v_pub_int (decimal)} {
+  $var(v.v_pub_int) value 3
+  value v.v_pub_int o
+} {ok}
+
+# Test: cpp_variable-2.8
+# Desc: change value of v.v_pub_int (hexadecimal)
+gdbtk_test cpp_variable-2.9 {change value of v.v_pub_int (hexadecimal)} {
+  $var(v.v_pub_int) value 0x21
+  value v.v_pub_int o
+} {ok}
+
+# Test: cpp_variable-2.9
+# Desc: number of children of v_pub_int
+gdbtk_test cpp_variable-2.9 {number of children of v_pub_int} {
+  $var(v.v_pub_int) numChildren
+} {0}
+
+# Test: cpp_variable-2.10
+# Desc: children of v.v_pub_int
+gdbtk_test cpp_variable-2.10 {children of v.v_pub_int} {
+  get_children v.v_pub_int
+} {}
+
+# Test: cpp_variable-2.11
+# Desc: v.v_pub_int editable
+gdbtk_test cpp_variable-2.11 {v.v_pub_int editable} {
+  $var(v.v_pub_int) editable
+} {1}
+
+# Test: cpp_variable-2.21
+# Desc: type of v.v_priv_charp
+gdbtk_test cpp_variable-2.21 {type of v.v_priv_charp} {
+  $var(v.v_priv_charp) type
+} {char *}
+
+# Test: cpp_variable-2.22
+# Desc: format of v.v_priv_charp
+gdbtk_test cpp_variable-2.22 {format of v.v_priv_charp} {
+  $var(v.v_priv_charp) format
+} {natural}
+
+gdb_cmd "set variable v.v_priv_charp=2112"
+
+# Test: cpp_variable-2.23
+# Desc: value of v.v_priv_charp changed
+gdbtk_test cpp_variable-2.23 {value of v.v_priv_charp changed} {
+  check_valueChanged
+} {v.v_priv_charp {v.v_priv_int v.VB v.v_pub_charp v.VC v.v_pub_int v v.VA} {}}
+
+# Test: cpp_variable-2.24
+# Desc: value of v.v_priv_charp
+gdbtk_test cpp_variable-2.24 {value of v.v_priv_charp} {
+  $var(v.v_priv_charp) format hexadecimal
+  $var(v.v_priv_charp) value
+} {0x840}
+
+# Test: cpp_variable-2.25
+# Desc: changed format of v.v_priv_charp
+gdbtk_test cpp_variable-2.25 {changed format of v.v_priv_charp} {
+  $var(v.v_priv_charp) format octal
+  $var(v.v_priv_charp) format
+} {octal}
+
+# Test: cpp_variable-2.26
+# Desc: value of v.v_priv_charp with new format
+gdbtk_test cpp_variable-2.26 {value of v.v_priv_charp with new format} {
+  $var(v.v_priv_charp) value
+} {04100}
+
+# Test: cpp_variable-2.27
+# Desc: change value of v.v_priv_charp (decimal)
+gdbtk_test cpp_variable-2.27 {change value of v.v_priv_charp (decimal)} {
+  $var(v.v_priv_charp) value 3
+  value v.v_priv_charp o
+} {ok}
+
+# Test: cpp_variable-2.28
+# Desc: change value of v.v_priv_charp (hexadecimal)
+gdbtk_test cpp_variable-2.28 {change value of v.v_priv_charp (hexadecimal)} {
+  $var(v.v_priv_charp) value 0x21
+  value v.v_priv_charp o
+} {ok}
+
+# Test: cpp_variable-2.29
+# Desc: number of children of v_priv_charp
+gdbtk_test cpp_variable-2.29 {number of children of v_priv_charp} {
+  $var(v.v_priv_charp) numChildren
+} {0}
+
+# Test: cpp_variable-2.30
+# Desc: children of v.v_priv_charp
+gdbtk_test cpp_variable-2.30 {children of v.v_priv_charp} {
+  get_children v.v_priv_charp
+} {}
+
+# Test: cpp_variable-2.31
+# Desc: v.v_priv_int editable
+gdbtk_test cpp_variable-2.31 {v.v_priv_int editable} {
+  $var(v.v_priv_int) editable
+} {1}
+
+# Test: cpp_variable-2.41
+# Desc: type of v.VA
+gdbtk_test cpp_variable-2.41 {type of v.VA} {
+  $var(v.VA) type
+} {VA}
+
+# Test: cpp_variable-2.42
+# Desc: format of v.VA
+gdbtk_test cpp_variable-2.42 {format of v.VA} {
+  $var(v.VA) format
+} {natural}
+
+# Test: cpp_variable-2.43
+# Desc: value of v.VA changed
+gdbtk_test cpp_variable-2.43 {value of v.VA changed} {
+  check_valueChanged
+} {{} {v.v_priv_int v.VB v.v_pub_charp v.VC v.v_pub_int v v.v_priv_charp v.VA} {}}
+
+# Test: cpp_variable-2.44
+# Desc: value of v.VA
+gdbtk_test cpp_variable-2.44 {value of v.VA} {
+  $var(v.VA) value
+} {{...}}
+
+# Test: cpp_variable-2.45
+# Desc: changed format of v.VA
+gdbtk_test cpp_variable-2.45 {changed format of v.VA} {
+  $var(v.VA) format octal
+  $var(v.VA) format
+} {octal}
+
+# Test: cpp_variable-2.46
+# Desc: value of v.VA with new format
+gdbtk_test cpp_variable-2.46 {value of v.VA with new format} {
+  $var(v.VA) value
+} {{...}}
+
+# Test: cpp_variable-2.47
+# Desc: number of children of VA
+gdbtk_test cpp_variable-2.47 {number of children of VA} {
+  $var(v.VA) numChildren
+} {5}
+
+# Test: cpp_variable-2.48
+# Desc: children of v.VA
+gdbtk_test cpp_variable-2.48 {children of v.VA} {
+  get_children v.VA
+} {va_pub_int va_pub_charp va_priv_int va_priv_charp bar}
+
+# Test: cpp_variable-2.49
+# Desc: v.VA editable
+gdbtk_test cpp_variable-2.49 {v.VA editable} {
+  $var(v.VA) editable
+} {0}
+
+# Test: cpp_variable-2.61
+# Desc: type of v.VB
+gdbtk_test cpp_variable-2.61 {type of v.VB} {
+  $var(v.VB) type
+} {VB}
+
+# Test: cpp_variable-2.62
+# Desc: format of v.VB
+gdbtk_test cpp_variable-2.62 {format of v.VB} {
+  $var(v.VB) format
+} {natural}
+
+# Test: cpp_variable-2.63
+# Desc: value of v.VB changed
+gdbtk_test cpp_variable-2.63 {value of v.VB changed} {
+  check_valueChanged
+} {{} {v.VA.va_pub_int v.v_pub_int v.VA.va_priv_int v.VA.va_pub_charp v.v_priv_int v.v_pub_charp v.VA.va_priv_charp v.VA.bar v v.v_priv_charp v.VA v.VB v.VC} {}}
+
+# Test: cpp_variable-2.64
+ # Desc: value of v.VB
+gdbtk_test cpp_variable-2.64 {value of v.VB} {
+  $var(v.VB) value
+} {{...}}
+
+# Test: cpp_variable-2.65
+# Desc: changed format of v.VB
+gdbtk_test cpp_variable-2.65 {changed format of v.VB} {
+  $var(v.VB) format octal
+  $var(v.VB) format
+} {octal}
+
+# Test: cpp_variable-2.66
+# Desc: value of v.VB with new format
+gdbtk_test cpp_variable-2.66 {value of v.VB with new format} {
+  $var(v.VB) value
+} {{...}}
+
+# Note: The next two tests show whether or not the logic
+# concerning vptr tables is working.
+# Test: cpp_variable-2.67
+# Desc: number of children of VB
+gdbtk_test cpp_variable-2.67 {number of children of VB} {
+  $var(v.VB) numChildren
+} {3}
+
+# Test: cpp_variable-2.68
+# Desc: children of v.VB
+gdbtk_test cpp_variable-2.68 {children of v.VB} {
+  get_children v.VB
+} {vb_pub_int vb_priv_int vb_priv_charp}
+
+# Test: cpp_variable-2.69
+# Desc: v.VB editable
+gdbtk_test cpp_variable-2.69 {v.VB editable} {
+  $var(v.VB) editable
+} {0}
+
+
+#  Exit
+#
+gdbtk_test_done
+
+

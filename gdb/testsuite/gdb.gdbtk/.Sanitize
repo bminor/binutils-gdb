@@ -26,10 +26,17 @@ Things-to-keep:
 Makefile.in
 browser.exp
 browser.test
+c_variable.c
+c_variable.exp
+c_variable.test
 configure.in
 configure
 console.exp
 console.test
+cpp_variable.cc
+cpp_variable.exp
+cpp_variable.h
+cpp_variable.test
 defs
 simple.c
 stack1.c

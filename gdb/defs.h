@@ -739,8 +739,8 @@ typedef int return_mask;
 extern NORETURN void
 return_to_top_level PARAMS ((enum return_reason)) ATTR_NORETURN;
 
-extern int
-catch_errors PARAMS ((int (*) (char *), void *, char *, return_mask));
+typedef int (catch_errors_ftype) PARAMS ((PTR));
+extern int catch_errors PARAMS ((catch_errors_ftype *, PTR, char *, return_mask));
 
 extern void warning_begin PARAMS ((void));
 
@@ -1076,6 +1076,7 @@ extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 
 extern NORETURN void (*error_hook) PARAMS ((void)) ATTR_NORETURN;
 
+extern void (*error_begin_hook) PARAMS ((void));
 
 
 /* Inhibit window interface if non-zero. */

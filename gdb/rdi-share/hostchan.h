@@ -24,7 +24,7 @@
 #endif
 
 /* struct timeval */
-#if defined(__unix) || defined(__CYGWIN__)
+#if defined(__unix) || defined(__CYGWIN32__)
 #  include <sys/time.h>
 #else
 #  include "winsock.h"

@@ -64,12 +64,12 @@ AC_ARG_PROGRAM
 AC_TYPE_SIGNAL
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(ctype.h curses.h endian.h libintl.h link.h \
-                 memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
-                 string.h sys/procfs.h sys/ptrace.h sys/reg.h \
-                 term.h termio.h termios.h unistd.h wait.h sys/wait.h \
-                 wchar.h wctype.h asm/debugreg.h)
 
+AC_CHECK_HEADERS(ctype.h curses.h endian.h libintl.h link.h \
+	memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
+	string.h sys/procfs.h sys/ptrace.h sys/reg.h \
+	term.h termio.h termios.h unistd.h wait.h sys/wait.h \
+	wchar.h wctype.h asm/debugreg.h)
 AC_HEADER_STAT
 
 AC_C_CONST
@@ -633,7 +633,46 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CY_AC_PATH_TCLH
 	   CY_AC_PATH_TKH
 	   CY_AC_PATH_ITCLH
+	   CY_AC_PATH_ITKH
 	   CY_AC_PATH_TIX
+
+	   # now look for Itcl library stuff
+
+	   CY_AC_PATH_ITCLCONFIG
+           if test -z "${no_itcl}"; then
+             CY_AC_LOAD_ITCLCONFIG
+	     case "${host}" in
+	     *-*-cygwin32*)
+		itcldir=../itcl/itcl/win/
+		;;
+	     *)
+		itcldir=../itcl/itcl/unix/
+		;;
+	     esac
+ 
+
+	     ITCLLIB="${ITCL_BUILD_LIB_SPEC}"
+	     ITCL_DEPS="${itcldir}${ITCL_LIB_FILE}"
+           fi
+
+	   
+	   # now look for Itk library stuff
+	   CY_AC_PATH_ITKCONFIG
+           if test -z "${no_itcl}"; then
+             CY_AC_LOAD_ITKCONFIG
+
+	     case "${host}" in
+	       *-*-cygwin32*)
+		 itkdir=../itcl/itk/win/
+		 ;;
+	       *)
+		 itkdir=../itcl/itk/unix/
+		 ;;
+	       esac 
+
+	     ITKLIB="${ITK_BUILD_LIB_SPEC}"
+	     ITK_DEPS="${itkdir}${ITK_LIB_FILE}"
+           fi
 
 	   # now look for tix library stuff
 	   TIXVERSION=4.1.8.0
@@ -673,11 +712,11 @@ if test "${enable_gdbtk}" = "yes"; then
 
 	   # Include some libraries that Tcl and Tk want.
 	   if test "${enable_ide}" = "yes"; then	
-	      TCL_LIBS='$(LIBIDETCL) $(LIBIDE) $(LIBGUI) $(IDE) $(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	      TCL_LIBS='$(LIBIDETCL) $(LIBIDE) $(LIBGUI) $(IDE) $(ITCL) $(ITK) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
 	      CONFIG_DEPS='$(LIBIDETCL) $(LIBIDE) $(LIBGUI) $(IDE_DEPS) $(ITCL_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
 	   else
-	      TCL_LIBS='$(LIBGUI) $(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
-	      CONFIG_DEPS='$(LIBGUI) $(ITCL_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
+	      TCL_LIBS='$(LIBGUI) $(ITCL) $(ITK) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	      CONFIG_DEPS='$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
 	   fi
 	   # Yes, the ordering seems wrong here.  But it isn't.
 	   # TK_LIBS is the list of libraries that need to be linked
@@ -685,7 +724,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	   # were in LIBS then any link tests after this point would
 	   # try to include things like `$(LIBGUI)', which wouldn't work.
 	   GDBTKLIBS="${TCL_LIBS} ${TK_LIBS}"
-	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o gdbtk-cmds.o gdbtk-hooks.o"
+	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o gdbtk-cmds.o gdbtk-hooks.o gdbtk-variable.o gdbtk-wrapper.o"
 
 	   if test x$gdb_cv_os_cygwin = xyes; then
 	      WIN32LIBS="${WIN32LIBS} -lshell32 -lgdi32 -lcomdlg32 -ladvapi32"
@@ -700,6 +739,10 @@ AC_SUBST(ENABLE_GDBTK)
 AC_SUBST(X_CFLAGS)
 AC_SUBST(X_LDFLAGS)
 AC_SUBST(X_LIBS)
+AC_SUBST(ITCLLIB)
+AC_SUBST(ITCL_DEPS)
+AC_SUBST(ITKLIB)
+AC_SUBST(ITK_DEPS)
 AC_SUBST(TIXLIB)
 AC_SUBST(TIX_DEPS)
 AC_SUBST(GDBTKLIBS)

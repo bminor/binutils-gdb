@@ -77,7 +77,7 @@ extern int  (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 extern void (*pre_add_symbol_hook) PARAMS ((char *));
 extern void (*post_add_symbol_hook) PARAMS ((void));
 extern void (*selected_frame_level_changed_hook) PARAMS ((int));
-#ifdef __CYGWIN__
+#ifdef __CYGWIN32__
 extern void (*ui_loop_hook) PARAMS ((int));
 #endif
 
@@ -114,6 +114,7 @@ static void pc_changed PARAMS ((void));
 static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
 static void gdbtk_selected_frame_changed PARAMS ((int));
 static void gdbtk_context_change PARAMS ((int));
+static void gdbtk_error_begin PARAMS ((void));
 
 /*
  * gdbtk_fputs can't be static, because we need to call it in gdbtk.c.
@@ -151,7 +152,7 @@ gdbtk_add_hooks(void)
   target_wait_hook       = gdbtk_wait;
   ui_load_progress_hook  = gdbtk_load_hash;
 
-#ifdef __CYGWIN__
+#ifdef __CYGWIN32__
   ui_loop_hook = x_event;
 #endif
   pre_add_symbol_hook    = gdbtk_pre_add_symbol;
@@ -164,9 +165,12 @@ gdbtk_add_hooks(void)
   modify_tracepoint_hook = gdbtk_modify_tracepoint;
   trace_find_hook        = gdbtk_trace_find;
   trace_start_stop_hook  = gdbtk_trace_start_stop;
+
   pc_changed_hook = pc_changed;
   selected_frame_level_changed_hook = gdbtk_selected_frame_changed;
   context_hook = gdbtk_context_change;
+
+  error_begin_hook = gdbtk_error_begin;
 }
 
 /* These control where to put the gdb output which is created by
@@ -260,7 +264,7 @@ gdbtk_fputs (ptr, stream)
 	  else			         
 	    Tcl_AppendToObj (result_ptr->obj_ptr, (char *) ptr, -1);
 	}
-      else if (stream == gdb_stderr)
+      else if (stream == gdb_stderr || result_ptr->flags & GDBTK_ERROR_ONLY)
 	{
 	  if (result_ptr->flags & GDBTK_ERROR_STARTED)
 	    Tcl_AppendToObj (result_ptr->obj_ptr, (char *) ptr, -1);
@@ -369,7 +373,7 @@ x_event (signo)
 
   in_x_event = 1;
 
-#ifdef __CYGWIN__
+#ifdef __CYGWIN32__
   if (signo == -2)
     gdbtk_stop_timer ();
 #endif
@@ -768,3 +772,16 @@ gdbtk_exec_file_display (filename)
 {
   gdbtk_two_elem_cmd ("gdbtk_tcl_exec_file_display", filename);
 }
+
+/* Called from error_begin, this hook is used to warn the gui
+   about multi-line error messages */
+static void
+gdbtk_error_begin ()
+{
+  if (result_ptr != NULL)
+    result_ptr->flags |= GDBTK_ERROR_ONLY;
+}
+
+/* Local variables: */
+/* change-log-default-name: "ChangeLog-gdbtk" */
+/* End: */

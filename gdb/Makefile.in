@@ -161,10 +161,15 @@ TK = @TK_BUILD_LIB_SPEC@
 TK_CFLAGS = @TKHDIR@ @TK_BUILD_INCLUDES@
 TK_DEPS =
 
-# Where is Itcl?  Typically in ../itcl.
+# Where is Itcl?  Typically in ../itcl/itcl.
 ITCL_CFLAGS = @ITCLHDIR@
 ITCL = @ITCLLIB@
-ITCL_DEPS = $(ITCL)
+ITCL_DEPS = @ITCL_DEPS@ 
+
+# Where is Itk?  Typically in ../itcl/itk.
+ITK_CFLAGS = @ITKHDIR@
+ITK = @ITKLIB@
+ITK_DEPS = @ITK_DEPS@ 
 
 # Where is Tix?  Typically in ../tix.
 TIX_CFLAGS = @TIXHDIR@
@@ -640,7 +645,7 @@ install-only:
 		$(datadir)/gdbtcl/help/images \
 		$(datadir)/gdbtcl/help/trace ; \
 	cd $(srcdir)/gdbtcl2 ; \
-	for i in *.tcl images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html help/index.toc help/trace/*.html help/trace/index.toc help/images/*.gif; \
+	for i in *.tcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html help/index.toc help/trace/*.html help/trace/index.toc help/images/*.gif; \
 	  do \
 		$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
 	  done ;
@@ -1203,7 +1208,8 @@ gdbres.o: gdb.rc gdbtool.ico
 
 gdbtk.o: gdbtk.c gdbtk.h $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h $(tracepoint_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
+        $(ITK_CFLAGS) $(TIX_CFLAGS) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(srcdir)/gdbtk.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
 
@@ -1219,10 +1225,14 @@ gdbtk-hooks.o: gdbtk-hooks.c gdbtk.h $(defs_h) $(symtab_h) $(inferior_h) $(comma
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(srcdir)/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
 
-tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
-	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
-	language.h gdb_string.h $(readline_headers)
-# end-sanitize-gdbtk
+gdbtk-variable.o: gdbtk-variable.c gdbtk.h gdbtk-wrapper.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+		$(srcdir)/gdbtk-variable.c
+
+gdbtk-wrapper.o: gdbtk-wrapper.c gdbtk-wrapper.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) \
+		$(srcdir)/gdbtk-wrapper.c
 
 v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(frame_h) $(breakpoint_h) $(gdbcore_h) $(value_h) symfile.h \
@@ -1230,6 +1240,11 @@ v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(srcdir)/v850ice.c
+
+# end-sanitize-gdbtk
+tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
+	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
+	language.h gdb_string.h $(readline_headers)
 
 gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
 

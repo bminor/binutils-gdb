@@ -1,4 +1,145 @@
-Mon Dec 28 17:44:36 1998  David Taylor  <taylor@texas.cygnus.com>
+M1999-01-27  James Ingham  <jingham@cygnus.com>
+
+	Merging in changes from gdbtk-980810 - the Itcl3
+	gdb branch.
+
+  1999-01-12  Martin Hunt  <hunt@cygnus.com>
+
+	  * gdbtk-cmds.c (gdb_loadfile): Increase maximum line size so
+	  files with very long lines get numbered correctly.
+
+  Thu Jan  7 06:50:32 1999  Keith Seitz  <keiths@cygnus.com>
+
+	  * gdbtk-hooks.c (gdbtk_add_hooks): Add the error_begin_hook;
+	  (gdbtk_error_begin): New function.
+	  (gdbtk_fputs): If GDBTK_ERROR_ONLY is set, treat output to
+	  any stream as if it had come from gdb_stderr.
+
+	  * gdbtk.h: Define GDBTK_SYMBOL_SOURCE_NAME: does the same thing
+	  as SYMBOL_SOURCE_NAME, except that it NEVER returns a mangled name.
+	  Define GDBTK_ERROR_ONLY flag for result_ptr.
+
+	  * gdbtk-cmds.c (gdb_listfuncs): Use SYMBOL_DEMANGLED_NAME to
+	  get the symbol's fully demangled name (including class and
+	  args for overloaded funcs), not cplus_demangle.
+	  (get_frame_name): Use GDBTK_SYMBOL_SOURCE_NAME to get the name
+	  of the frame level.
+
+	  * gdbtk-wrapper.c, gdbtk-wrapper.h:
+	  (GDB_val_print): Allow caller to specify all function args to val_print.
+	  (wrap_val_print): Ditto.
+
+	  * gdbtk-variable.c (variable_value): Clear addressprint when getting
+	  value of C++ reference-type variables
+	  If we errored because a parent (struct pointer) was junk, output
+	  an error message indicating so.
+	  (call_gdb_val_print): Tell val_print to dereference C++ reference
+	  types.
+	  (number_of_children): void * also has no children.
+	  (get_call_output): Clear any error flags that may have been set
+	  as a result of error_begin.
+
+	  * utils.c (error_begin_hook): New hook.
+	  (error_begin): Call error_begin_hook so that the GUI
+	  gets notified.
+
+	  * defs.h (error_begin_hook): Declare.
+
+  Wed Jan  6 08:43:31 1999  Keith Seitz  <keiths@cygnus.com>
+
+	  * gdbtk-wrapper.c, gdbtk-wrapper.h: Add wrappers for parse_exp_1,
+	  evaluate_type, block_for_pc, block_innermost_frame, reinit_frame_cache,
+	  and find_frame_addr_in_frame_chain.
+
+	  * gdbtk-variable.c (variable_create): Check for failure when
+	  creating variables.
+	  (create_variable): Use wrapped calls for block_for_pc, parse_exp_1,
+	  and block_innermost_frame.
+	  Return NULL if parse_exp_1 fails.
+	  Attempt to prohibit creating a gdb_variable for type names.
+	  (variable_value_changed): Use wrapped calls for reinit_frame_cache and
+	  find_frame_addr_in_frame_chain.
+	  (variable_type): Use wrapped call for evaluate_type.
+	  (variable_value): Use wrapped call for parse_exp_1.
+	  (variable_editable): Use wrapped call for evaluate_type.
+
+  Tue Jan  5 11:37:17 1999  Keith Seitz  <keiths@cygnus.com>
+
+	  * gdbtk-variable.c: New variable object interface.
+	  * gdbtk-wrapper.c, gdbtk-wrapper.h: New wrappers for safely calling
+	  gdb functions without the fear of longjmp'ing.
+	  * configure.in (CONFIG_OBS): Add gdbtk-wrapper.o and gdbtk-variable.o
+	  when gdbtk is enabled.
+	  * configure: Regenerate.
+	  * Makefile.in: Add gdbtk-wrapper.o and gdbtk-variable.o
+	  * gdbtk-cmds.c (call_wrapper): Export so that other files can use.
+	  (Gdbtk_Init): Initialize new variable interface.
+	  * gdbtk.h: Add declaration for call_wrapper.
+
+  Tue Jan  5 11:19:14 1999  Keith Seitz  <keiths@cygnus.com>
+
+	  * gdbtk-cmds.c (gdb_loc): Call resolve_sal_pc to before using
+	  the sal's pc.
+
+	  * gdbtk.c (gdbtk_init): Add global array GDBStartup to interpreter
+	  which contains any startup info. Add "inhibit_prefs" (follows -nx)
+	  so that "-nx" turns preference reading/writing off.
+
+  Mon Dec 21 11:11:02 1998  Keith Seitz  <keiths@cygnus.com>
+
+	  * gdbtk-cmds.c (get_register): Call get_saved_register instead of
+	  read_relative_register_raw_bytes to fetch registers.
+
+  Thu Dec 17 09:00:56 1998  Keith Seitz  <keiths@cygnus.com>
+
+	  * gdbtk-cmds.c (gdb_search): Don't mention C++ RTTI and
+	  global constructor/destructor symbols.
+
+  Thu Nov 12 15:20:15 1998  Jim Ingham   <jingham@cygnus.com>
+	  * More bug fixes merged in from devo.
+
+	  * gdbtk-cmds.c (gdb_cmd): Added an optional second argument to the
+	  gdb_cmd, which is from_tty.  This is passed to the gdb command
+	  parser.  It is 0 by default, and the console window passes 1.
+
+	  * gdbtk-cmds.c: moved disassemble_from_exec from gdbtk.c to gdbtk-cmds.c
+	  with all the other link-var'ed variables
+
+	  * gdbtk-hooks.c (gdbtk_trace_find): Only run the hook functions if 
+	  we are called from_tty.
+
+	  * gdbtk-hooks.c (gdbtk_trace_start_stop): Set the trace buttons
+	  from a trace_start_command callback rather than doing it as a
+	  special case in gdb_cmd.
+
+	  * tracepoint.c (tstart_command, tstop_command): Add call to
+	  trace_start_stop_hook here.
+
+  1998-11-04  Martin M. Hunt  <hunt@cygnus.com>
+
+	  * gdbtk-cmds.c (gdb_set_bp_addr): For callback, send full 
+	  pathname instead of just basename.
+
+  1998-11-03  Keith Seitz  <keiths@cygnus.com>
+	  * v850ice.c (do_gdb): New function.
+	  (ice_stepi): Use do_gdb to step properly.
+	  (ice_nexti): Use do_gdb to step properly.
+	  (view_source): Correct call to src window's location for new version.
+
+  Tue Aug 25 18:13:30 1998  Jim Ingham    <jingham@cygnus.com>
+
+	  * gdbtk.c (gdbtk_init): I hadn't excised ALL the old startup code, 
+	  so it was not working correctly.  Now it does.
+
+  Fri Aug 21 14:37:40 1998  Jim Ingham	<jingham@cygnus.com>
+
+	  * gdbtk.c (gdbtk_init): Changed the startup code to use
+	  tcl_findLibrary
+
+
+
+	
+on Dec 28 17:44:36 1998  David Taylor  <taylor@texas.cygnus.com>
 
 
 	The following changes were made by Jim Blandy <jimb@cygnus.com>,

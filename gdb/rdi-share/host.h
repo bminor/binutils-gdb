@@ -51,7 +51,7 @@
 #endif
 #if defined(_WIN32)
 #  define COMPILING_ON_WIN32    1
-#  if !defined(__CYGWIN__)
+#  if !defined(__CYGWIN32__)
 #    define COMPILING_ON_WINDOWS  1
 #  endif
 #endif

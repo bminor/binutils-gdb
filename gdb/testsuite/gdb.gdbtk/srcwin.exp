@@ -1,0 +1,32 @@
+#
+# Check if we have a display
+#
+if {![info exists ::env(DISPLAY)]} {
+  warning "No DISPLAY -- skipping test"
+} else {
+  if {$tracelevel} {
+    strace $tracelevel
+  }
+
+  #
+  # test source window
+  #
+  set prms_id 0
+  set bug_id 0
+  
+  set testfile "list"
+  set binfile $objdir/$subdir/$testfile
+  set r [gdb_compile "$srcdir/gdb.base/list0.c $srcdir/gdb.base/list1.c" "$binfile" executable debug]
+  if  { $r != "" } {
+    gdb_suppress_entire_file \
+      "Testcase compile failed, so some tests in this file will automatically fail."
+  }
+  
+  # Start with a fresh gdbtk
+  gdb_exit
+  set results [gdbtk_start [file join $srcdir $subdir srcwin.test]]
+  set results [split $results \n]
+
+  # Analyze results
+  gdbtk_analyze_results $results
+}

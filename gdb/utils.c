@@ -51,6 +51,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* readline defines this.  */
 #undef savestring
 
+void (*error_begin_hook) PARAMS ((void));
+
 /* Prototypes for local functions */
 
 static void vfprintf_maybe_filtered PARAMS ((GDB_FILE *, const char *,
@@ -397,6 +399,9 @@ warning (va_alist)
 void
 error_begin ()
 {
+  if (error_begin_hook)
+    error_begin_hook ();
+
   target_terminal_ours ();
   wrap_here ("");			/* Force out any buffered output */
   gdb_flush (gdb_stdout);
@@ -984,9 +989,13 @@ print_spaces (n, file)
 {
   if (file->ts_streamtype == astring)
     {
+      char *p;
+
       gdb_file_adjust_strbuf (n, file);
-      while (n-- > 0) 
-	strcat(file->ts_strbuf, " ");
+      p = file->ts_strbuf + strlen (file->ts_strbuf);
+
+      memset (p, ' ', n);
+      p[n] = '\000';
     }
   else
     {
