@@ -908,7 +908,7 @@ process, you kill that process.  You will be asked for confirmation if you
 try to do either of these things.
 
 The @samp{attach} command is also used to debug a remote machine via a
-serial connection.  @xref{Attach}, for more info.
+serial connection.  @xref{Remote}, for more info.
 
 @node Kill Process,, Attach, Running
 @section Killing the Child Process
@@ -981,8 +981,7 @@ each kind of signal.
 Normally, GDB is set up to ignore non-erroneous signals like @code{SIGALRM}
 (so as not to interfere with their role in the functioning of the program)
 but to stop the program immediately whenever an error signal happens.
-You can change these settings with the @samp{handle} command.  You must
-specify which signal you are talking about with its number.
+You can change these settings with the @samp{handle} command.
 
 @table @code
 @item info signal
@@ -991,15 +990,12 @@ Print a table of all the kinds of signals and how GDB has been told to
 handle each one.  You can use this to see the signal numbers of all
 the defined types of signals.
 
-@item handle @var{signalnum} @var{keywords}@dots{}
+@item handle @var{signal} @var{keywords}@dots{}
 @kindex handle
-Change the way GDB handles signal @var{signalnum}.  The @var{keywords}
-say what change to make.
+Change the way GDB handles signal @var{signal}.  @var{signal} can be the
+number of a signal or its name (with or without the @samp{SIG} at the
+beginning).  The @var{keywords} say what change to make.
 @end table
-
-To use the @samp{handle} command you must know the code number of the
-signal you are concerned with.  To find the code number, type @samp{info
-signal} which prints a table of signal names and numbers.
 
 The keywords allowed by the handle command can be abbreviated.  Their full
 names are
@@ -2488,8 +2484,9 @@ The specialized command @samp{disassemble} is also provided to dump a
 range of memory as machine instructions.  The default memory range is
 the function surrounding the program counter of the selected frame.  A
 single argument to this command is a program counter value; the function
-surrounding this value will be dumped.  Two arguments specify a range of
-addresss (first inclusive, second exclusive) to be dumped.
+surrounding this value will be dumped.  Two arguments (separated by one
+or more spaces) specify a range of addresss (first inclusive, second
+exclusive) to be dumped.
 
 @node Auto Display, Value History, Memory, Data
 @section Automatic Display
@@ -2788,16 +2785,6 @@ table loaded by the @samp{symbol-file} command; it is inherent in the text
 of your program and does not change as the program executes.
 
 @table @code
-@item whatis @var{exp}
-@kindex whatis
-Print the data type of expression @var{exp}.  @var{exp} is not
-actually evaluated, and any side-effecting operations (such as
-assignments or function calls) inside it do not take place.
-@xref{Expressions}.
-
-@item whatis
-Print the data type of @code{$}, the last value in the value history.
-
 @item info address @var{symbol}
 @kindex info address
 Describe where the data for @var{symbol} is stored.  For a register
@@ -2809,12 +2796,30 @@ Note the contrast with @samp{print &@var{symbol}}, which does not work
 at all for a register variables, and for a stack local variable prints
 the exact address of the current instantiation of the variable.
 
+@item whatis @var{exp}
+@kindex whatis
+Print the data type of expression @var{exp}.  @var{exp} is not
+actually evaluated, and any side-effecting operations (such as
+assignments or function calls) inside it do not take place.
+@xref{Expressions}.
+
+@item whatis
+Print the data type of @code{$}, the last value in the value history.
+
 @item ptype @var{typename}
 @kindex ptype
 Print a description of data type @var{typename}.  @var{typename} may be
 the name of a type, or for C code it may have the form
 @samp{struct @var{struct-tag}}, @samp{union @var{union-tag}} or
 @samp{enum @var{enum-tag}}.@refill
+
+@item ptype @var{exp}
+Print a description of the type of expression @var{exp}.  This is like
+@samp{whatis} except it prints a detailed description, instead of just
+the name of the type.  For example, if the type of a variable is
+@samp{struct complex @{double real; double imag;@}}, @samp{whatis} will
+print @samp{struct complex} and @samp{ptype} will print @samp{struct
+complex @{double real; double imag;@}}
 
 @item info sources
 @kindex info sources
@@ -2842,6 +2847,8 @@ Print the names and data types of all variables (except for local
 variables) whose names contain a match for regular expression
 @var{regexp}.
 
+@ignore
+Uncomment this only if the implementation is fixed.
 @item info types
 @kindex info types
 Print all data types that are defined in the program.
@@ -2849,6 +2856,7 @@ Print all data types that are defined in the program.
 @item info types @var{regexp}
 Print all data types that are defined in the program whose names
 contain a match for regular expression @var{regexp}.
+@end ignore
 
 @ignore
 This was never implemented.
