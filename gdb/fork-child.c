@@ -421,14 +421,10 @@ clone_and_follow_inferior (int child_pid, int *followed_child)
     error ("error getting pipe for handoff semaphore");
 
   /* Clone the debugger. */
-#ifdef HAVE_VFORK
   if (debug_fork)
     debugger_pid = fork ();
   else
     debugger_pid = vfork ();
-#else
-  debugger_pid = fork ();
-#endif
 
   if (debugger_pid < 0)
     perror_with_name ("fork");
