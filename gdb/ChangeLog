@@ -1,9 +1,15 @@
+Tue Feb  2 16:11:43 1993  John Gilmore  (gnu@cygnus.com)
+
+	* tm-mips.h, tm-sparc.h:  Fix thinko in SETUP_ARBITRARY_FRAME.
+
 Tue Feb  2 15:30:33 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mipsread.c (upgrade_type): Build array types correctly, using
 	create_range_type and create_array_type.
 
 Tue Feb  2 00:19:08 1993  John Gilmore  (gnu@cygnus.com)
+
+	* remote-nindy.c:  Cleanup.
 
 	* infrun.c (wait_for_inferior):  When rolling back the PC after
 	a breakpoint, call write_pc so that NPC gets rolled back as well

@@ -552,7 +552,7 @@ extern void single_step ();
    "frame" or "info frame" command.  */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-extern FRAME setup_arbitrary_frame ();
+extern struct frame_info *setup_arbitrary_frame ();
 
 /* To print every pair of float registers as a double, we use this hook.  */
 

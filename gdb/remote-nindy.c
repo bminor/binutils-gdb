@@ -1,5 +1,5 @@
 /* Memory-access and commands for remote NINDY process, for GDB.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Intel Corporation.  Modified from remote.c by Chris Benenati.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -945,7 +945,10 @@ The speed (baud rate), whether to use the old NINDY protocol,\n\
 and whether to send a break on startup, are controlled by options\n\
 specified when you started GDB.",
 	nindy_open, nindy_close,
-	0, nindy_detach, nindy_resume, nindy_wait,
+	0,
+	nindy_detach,
+	nindy_resume,
+	nindy_wait,
 	nindy_fetch_registers, nindy_store_registers,
 	nindy_prepare_to_store,
 	nindy_xfer_inferior_memory, nindy_files_info,
