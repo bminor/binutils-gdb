@@ -1,8 +1,34 @@
-Sat Nov 30 18:58:40 1991  Steve Chamberlain  (sac at cygnus.com)
+Fri Dec  6 23:02:14 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
-	* am29k-pinsn.c m68k-pinsn.c nm.c sparc-pinsn.c: now point to where
-	the header files have moved to.
+	* Makefile.in: added standards.text support.  install using
+	  INSTALL_PROGRAM and INSTALL_DATA.
 
+	* configure.in: configure now does all of it's work from objdir so
+	  make file existence tests against ${srcdir}.
+
+Thu Dec  5 22:46:22 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: idestdir and ddestdir go away.  Added copyrights
+	  and shift gpl to v2.  Added ChangeLog if it didn't exist. docdir
+	  and mandir now keyed off datadir by default.
+
+Wed Dec  4 22:42:03 1991  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in:  Bump to version 1.93.
+	* Makefile.in:  Add make-strip.o:maybe-strip.c dependency
+	for make versions that provide half-baked VPATH-support (e.g. Sun's).
+	* size.c:  Improvements suggested by
+	"david d [zoo] zuhn" <zoo@aps1.spa.umn.edu>:
+	- Don't emit (Berkeley) headers if no files were found.
+	- Return a non-zero return code on failure.
+
+Sat Nov 30 21:34:19 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	Changes due to include file renaming:
+	* am29k-pinsn.c: a29k-opcode.h	-> opcode/a29k.h
+	* sparc-pinsn.c: sparc-opcode.h	-> opcode/sparc.h
+	* m68k-pinsn.c:	 m68k-opcode.h	-> opcode/m68k.h
+	* nm.c:		 stab.gnu.h	-> aout/stab_gnu.h
 
 Tue Nov 19 19:20:43 1991  Per Bothner  (bothner at cygnus.com)
 
