@@ -1,11 +1,10 @@
 Fri Nov 12 15:29:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
-	* som.c (som_reloc_call): New function.
+	* som.c (som_write_headers): New function.
+	(som_prep_headers): New function.
 
 	* som.c (som_sizeof_headers): Add missing prototype.
 	(som_set_arch_mach): Do not abort.
-
-	* som.c (som_prep_headers): New function.
 
 	* som.c (som_count_spaces): New function.
 	(som_count_subspaces): New function.
@@ -18,6 +17,7 @@ Fri Nov 12 15:29:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	* som.c (try_prev_fixup): New function.
 	(som_reloc_skip): New function.
 	(som_reloc_addend): New function.
+	(som_reloc_call): New function.
 
 	* som.c (som_initialize_reloc_queue): New function.
 	(som_reloc_queue_insert): Likewise.

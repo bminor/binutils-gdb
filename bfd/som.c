@@ -159,6 +159,7 @@ static int compare_syms PARAMS ((asymbol **, asymbol **));
 static unsigned long som_compute_checksum PARAMS ((bfd *));
 static boolean som_prep_headers PARAMS ((bfd *));
 static int som_sizeof_headers PARAMS ((bfd *, boolean));
+static boolean som_write_headers PARAMS ((bfd *));
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -1438,6 +1439,182 @@ compare_syms (sym1, sym2)
   else if (count1 > count2)
     return -1;
   return 0;
+}
+
+/* Finally, scribble out the various headers to the disk.  */
+
+static boolean
+som_write_headers (abfd)
+     bfd *abfd;
+{
+  int num_spaces = som_count_spaces (abfd);
+  int i;
+  int subspace_index = 0;
+  file_ptr location;
+  asection *section;
+
+  /* Subspaces are written first so that we can set up information
+     about them in their containing spaces as the subspace is written.  */
+
+  /* Seek to the start of the subspace dictionary records.  */
+  location = obj_som_file_hdr (abfd)->subspace_location;
+  bfd_seek (abfd, location, SEEK_SET);
+  section = abfd->sections;
+  /* Now for each loadable space write out records for its subspaces.  */
+  for (i = 0; i < num_spaces; i++)
+    {
+      asection *subsection;
+
+      /* Find a space.  */
+      while (som_section_data (section)->is_space == 0)
+	section = section->next;
+
+      /* Now look for all its subspaces.  */
+      for (subsection = abfd->sections;
+	   subsection != NULL;
+	   subsection = subsection->next)
+	{
+	  
+	  /* Skip any section which does not correspond to a space
+	     or subspace.  Or does not have SEC_ALLOC set (and therefore
+	     has no real bits on the disk).  */
+	  if (som_section_data (subsection)->is_subspace == 0
+	      || som_section_data (subsection)->containing_space != section
+	      || (subsection->flags & SEC_ALLOC) == 0)
+	    continue;
+
+	  /* If this is the first subspace for this space, then save
+	     the index of the subspace in its containing space.  Also
+	     set "is_loadable" in the containing space.  */
+
+	  if (som_section_data (section)->space_dict.subspace_quantity == 0)
+	    {
+	      som_section_data (section)->space_dict.is_loadable = 1;
+	      som_section_data (section)->space_dict.subspace_index
+		= subspace_index;
+	    }
+
+	  /* Increment the number of subspaces seen and the number of
+	     subspaces contained within the current space.  */
+	  subspace_index++;
+	  som_section_data (section)->space_dict.subspace_quantity++;
+
+	  /* Mark the index of the current space within the subspace's
+	     dictionary record.  */
+	  som_section_data (subsection)->subspace_dict.space_index = i;
+	  
+	  /* Dump the current subspace header.  */
+	  if (bfd_write ((PTR) &som_section_data (subsection)->subspace_dict,
+			 sizeof (struct subspace_dictionary_record), 1, abfd)
+	      != sizeof (struct subspace_dictionary_record))
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+	}
+      /* Goto the next section.  */
+      section = section->next; 
+    }
+
+  /* Now repeat the process for unloadable subspaces.  */
+  section = abfd->sections;
+  /* Now for each space write out records for its subspaces.  */
+  for (i = 0; i < num_spaces; i++)
+    {
+      asection *subsection;
+
+      /* Find a space.  */
+      while (som_section_data (section)->is_space == 0)
+	section = section->next;
+
+      /* Now look for all its subspaces.  */
+      for (subsection = abfd->sections;
+	   subsection != NULL;
+	   subsection = subsection->next)
+	{
+	  
+	  /* Skip any section which does not correspond to a space or
+	     subspace, or which SEC_ALLOC set (and therefore handled
+	     in the loadable spaces/subspaces code above.  */
+
+	  if (som_section_data (subsection)->is_subspace == 0
+	      || som_section_data (subsection)->containing_space != section
+	      || (subsection->flags & SEC_ALLOC) != 0)
+	    continue;
+
+	  /* If this is the first subspace for this space, then save
+	     the index of the subspace in its containing space.  Clear
+	     "is_loadable".  */
+
+	  if (som_section_data (section)->space_dict.subspace_quantity == 0)
+	    {
+	      som_section_data (section)->space_dict.is_loadable = 0;
+	      som_section_data (section)->space_dict.subspace_index
+		= subspace_index;
+	    }
+
+	  /* Increment the number of subspaces seen and the number of
+	     subspaces contained within the current space.  */
+	  som_section_data (section)->space_dict.subspace_quantity++;
+	  subspace_index++; 
+
+	  /* Mark the index of the current space within the subspace's
+	     dictionary record.  */
+	  som_section_data (subsection)->subspace_dict.space_index = i;
+	  
+	  /* Dump this subspace header.  */
+	  if (bfd_write ((PTR) &som_section_data (subsection)->subspace_dict,
+			 sizeof (struct subspace_dictionary_record), 1, abfd)
+	      != sizeof (struct subspace_dictionary_record))
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+	}
+      /* Goto the next section.  */
+      section = section->next; 
+    }
+
+  /* All the subspace dictiondary records are written, and all the
+     fields are set up in the space dictionary records.
+
+     Seek to the right location and start writing the space
+     dictionary records.  */
+  location = obj_som_file_hdr (abfd)->space_location;
+  bfd_seek (abfd, location, SEEK_SET);
+
+  section = abfd->sections;
+  for (i = 0; i < num_spaces; i++)
+    {
+
+      /* Find a space.  */
+      while (som_section_data (section)->is_space == 0)
+	section = section->next;
+
+      /* Dump its header  */
+      if (bfd_write ((PTR) &som_section_data (section)->space_dict,
+		     sizeof (struct space_dictionary_record), 1, abfd)
+	  != sizeof (struct space_dictionary_record))
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+
+      /* Goto the next section.  */
+      section = section->next;
+    }
+
+  /* Only thing left to do is write out the file header.  It is always
+     at location zero.  Seek there and write it.  */
+  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  if (bfd_write ((PTR) obj_som_file_hdr (abfd),
+		 sizeof (struct header), 1, abfd)
+      != sizeof (struct header))
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+  return true;
 }
 
 static unsigned long
