@@ -1,3 +1,14 @@
+2004-07-10  James E Wilson  <wilson@specifixinc.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_ldxmov): Remove abfd parameter.
+	(elfNN_ia64_install_value, elfNN_ia64_relax_brl): Likewise.
+	(elfNN_ia64_relax_section, elfNN_ia64_relocate_section,
+	elfNN_ia64_finish_dynamic_symbol, elfNN_ia64_finish_dynamic_sections):
+	Fix callers.
+	(elfNN_ia64_relax_brl): Change bfd_get_64 to bfd_getl64.  Change
+	bfd_put_64 to bfd_putl64.
+	(elfNN_ia64_relax_ldxmov, elfNN_ia64_install_value): Likewise.
+	
 2004-07-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 240

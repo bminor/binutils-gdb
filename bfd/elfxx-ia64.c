@@ -180,7 +180,7 @@ static bfd_boolean elfNN_ia64_relax_section
   PARAMS((bfd *abfd, asection *sec, struct bfd_link_info *link_info,
 	  bfd_boolean *again));
 static void elfNN_ia64_relax_ldxmov
-  PARAMS((bfd *abfd, bfd_byte *contents, bfd_vma off));
+  PARAMS((bfd_byte *contents, bfd_vma off));
 static bfd_boolean is_unwind_section_name
   PARAMS ((bfd *abfd, const char *));
 static bfd_boolean elfNN_ia64_section_from_shdr
@@ -273,7 +273,7 @@ static bfd_boolean allocate_dynrel_entries
 static bfd_boolean elfNN_ia64_size_dynamic_sections
   PARAMS ((bfd *output_bfd, struct bfd_link_info *info));
 static bfd_reloc_status_type elfNN_ia64_install_value
-  PARAMS ((bfd *abfd, bfd_byte *hit_addr, bfd_vma val, unsigned int r_type));
+  PARAMS ((bfd_byte *hit_addr, bfd_vma val, unsigned int r_type));
 static void elfNN_ia64_install_dyn_reloc
   PARAMS ((bfd *abfd, struct bfd_link_info *info, asection *sec,
 	   asection *srel, bfd_vma offset, unsigned int type,
@@ -674,7 +674,7 @@ bfd_elfNN_ia64_after_parse (int itanium)
 }
 
 static void
-elfNN_ia64_relax_brl (bfd *abfd, bfd_byte *contents, bfd_vma off)
+elfNN_ia64_relax_brl (bfd_byte *contents, bfd_vma off)
 {
   int template;
   bfd_byte *hit_addr;
@@ -682,8 +682,8 @@ elfNN_ia64_relax_brl (bfd *abfd, bfd_byte *contents, bfd_vma off)
 
   hit_addr = (bfd_byte *) (contents + off);
   hit_addr -= (long) hit_addr & 0x3;
-  t0 = bfd_get_64 (abfd, hit_addr);
-  t1 = bfd_get_64 (abfd, hit_addr + 8);
+  t0 = bfd_getl64 (hit_addr);
+  t1 = bfd_getl64 (hit_addr + 8);
 
   /* Keep the instruction in slot 0. */
   i0 = (t0 >> 5) & 0x1ffffffffffLL;
@@ -700,8 +700,8 @@ elfNN_ia64_relax_brl (bfd *abfd, bfd_byte *contents, bfd_vma off)
   t0 = (i1 << 46) | (i0 << 5) | template;
   t1 = (i2 << 23) | (i1 >> 18);
 
-  bfd_put_64 (abfd, t0, hit_addr);
-  bfd_put_64 (abfd, t1, hit_addr + 8);
+  bfd_putl64 (t0, hit_addr);
+  bfd_putl64 (t1, hit_addr + 8);
 }
 
 /* These functions do relaxation for IA-64 ELF.  */
@@ -954,7 +954,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	      /* If the 60-bit branch is in 21-bit range, optimize it. */
 	      if (r_type == R_IA64_PCREL60B)
 		{
-		  elfNN_ia64_relax_brl (abfd, contents, roff);
+		  elfNN_ia64_relax_brl (contents, roff);
 
 		  irel->r_info
 		    = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
@@ -1074,8 +1074,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	    }
 
 	  /* Fix up the existing branch to hit the trampoline.  */
-	  if (elfNN_ia64_install_value (abfd, contents + roff, offset,
-					r_type) != bfd_reloc_ok)
+	  if (elfNN_ia64_install_value (contents + roff, offset, r_type)
+	      != bfd_reloc_ok)
 	    goto error_return;
 
 	  changed_contents = TRUE;
@@ -1114,7 +1114,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	    }
 	  else
 	    {
-	      elfNN_ia64_relax_ldxmov (abfd, contents, roff);
+	      elfNN_ia64_relax_ldxmov (contents, roff);
 	      irel->r_info = ELFNN_R_INFO (0, R_IA64_NONE);
 	      changed_contents = TRUE;
 	      changed_relocs = TRUE;
@@ -1201,8 +1201,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 }
 
 static void
-elfNN_ia64_relax_ldxmov (abfd, contents, off)
-     bfd *abfd;
+elfNN_ia64_relax_ldxmov (contents, off)
      bfd_byte *contents;
      bfd_vma off;
 {
@@ -1218,7 +1217,7 @@ elfNN_ia64_relax_ldxmov (abfd, contents, off)
       abort ();
     }
 
-  dword = bfd_get_64 (abfd, contents + off);
+  dword = bfd_getl64 (contents + off);
   insn = (dword >> shift) & 0x1ffffffffffLL;
 
   r1 = (insn >> 6) & 127;
@@ -1230,7 +1229,7 @@ elfNN_ia64_relax_ldxmov (abfd, contents, off)
 
   dword &= ~(0x1ffffffffffLL << shift);
   dword |= (insn << shift);
-  bfd_put_64 (abfd, dword, contents + off);
+  bfd_putl64 (dword, contents + off);
 }
 
 /* Return TRUE if NAME is an unwind table section name.  */
@@ -3165,8 +3164,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 }
 
 static bfd_reloc_status_type
-elfNN_ia64_install_value (abfd, hit_addr, v, r_type)
-     bfd *abfd;
+elfNN_ia64_install_value (hit_addr, v, r_type)
      bfd_byte *hit_addr;
      bfd_vma v;
      unsigned int r_type;
@@ -3298,8 +3296,8 @@ elfNN_ia64_install_value (abfd, hit_addr, v, r_type)
     {
     case IA64_OPND_IMMU64:
       hit_addr -= (long) hit_addr & 0x3;
-      t0 = bfd_get_64 (abfd, hit_addr);
-      t1 = bfd_get_64 (abfd, hit_addr + 8);
+      t0 = bfd_getl64 (hit_addr);
+      t1 = bfd_getl64 (hit_addr + 8);
 
       /* tmpl/s: bits  0.. 5 in t0
 	 slot 0: bits  5..45 in t0
@@ -3321,14 +3319,14 @@ elfNN_ia64_install_value (abfd, hit_addr, v, r_type)
 	       | (((val >> 21) & 0x001) << 21)		/* ic */
 	       | (((val >> 63) & 0x001) << 36)) << 23;	/* i */
 
-      bfd_put_64 (abfd, t0, hit_addr);
-      bfd_put_64 (abfd, t1, hit_addr + 8);
+      bfd_putl64 (t0, hit_addr);
+      bfd_putl64 (t1, hit_addr + 8);
       break;
 
     case IA64_OPND_TGT64:
       hit_addr -= (long) hit_addr & 0x3;
-      t0 = bfd_get_64 (abfd, hit_addr);
-      t1 = bfd_get_64 (abfd, hit_addr + 8);
+      t0 = bfd_getl64 (hit_addr);
+      t1 = bfd_getl64 (hit_addr + 8);
 
       /* tmpl/s: bits  0.. 5 in t0
 	 slot 0: bits  5..45 in t0
@@ -3346,8 +3344,8 @@ elfNN_ia64_install_value (abfd, hit_addr, v, r_type)
       t1 |= ((((val >> 0) & 0xfffffLL) << 13)		/* imm20b */
 	      | (((val >> 59) & 0x1LL) << 36)) << 23;	/* i */
 
-      bfd_put_64 (abfd, t0, hit_addr);
-      bfd_put_64 (abfd, t1, hit_addr + 8);
+      bfd_putl64 (t0, hit_addr);
+      bfd_putl64 (t1, hit_addr + 8);
       break;
 
     default:
@@ -3358,7 +3356,7 @@ elfNN_ia64_install_value (abfd, hit_addr, v, r_type)
 	case 2: shift = 23; hit_addr += 6; break;
 	case 3: return bfd_reloc_notsupported; /* shouldn't happen...  */
 	}
-      dword = bfd_get_64 (abfd, hit_addr);
+      dword = bfd_getl64 (hit_addr);
       insn = (dword >> shift) & 0x1ffffffffffLL;
 
       op = elf64_ia64_operands + opnd;
@@ -3368,7 +3366,7 @@ elfNN_ia64_install_value (abfd, hit_addr, v, r_type)
 
       dword &= ~(0x1ffffffffffLL << shift);
       dword |= (insn << shift);
-      bfd_put_64 (abfd, dword, hit_addr);
+      bfd_putl64 (dword, hit_addr);
       break;
 
     case IA64_OPND_NIL:
@@ -4119,7 +4117,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_LTV32LSB:
 	case R_IA64_LTV64MSB:
 	case R_IA64_LTV64LSB:
-	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
 	case R_IA64_GPREL22:
@@ -4137,7 +4135,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      continue;
 	    }
 	  value -= gp_val;
-	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
 	case R_IA64_LTOFF22:
@@ -4147,7 +4145,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  value = set_got_entry (input_bfd, info, dyn_i, (h ? h->dynindx : -1),
 				 rel->r_addend, value, R_IA64_DIR64LSB);
 	  value -= gp_val;
-	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
 	case R_IA64_PLTOFF22:
@@ -4157,7 +4155,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
           dyn_i = get_dyn_sym_info (ia64_info, h, input_bfd, rel, FALSE);
 	  value = set_pltoff_entry (output_bfd, info, dyn_i, value, FALSE);
 	  value -= gp_val;
-	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
 	case R_IA64_FPTR64I:
@@ -4222,7 +4220,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 					    dynindx, addend);
 	    }
 
-	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
 	case R_IA64_LTOFF_FPTR22:
@@ -4264,7 +4262,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    value = set_got_entry (output_bfd, info, dyn_i, dynindx,
 				   rel->r_addend, value, R_IA64_FPTR64LSB);
 	    value -= gp_val;
-	    r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	    r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  }
 	  break;
 
@@ -4345,7 +4343,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  value -= (input_section->output_section->vma
 		    + input_section->output_offset
 		    + rel->r_offset) & ~ (bfd_vma) 0x3;
-	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
 	case R_IA64_SEGREL32MSB:
@@ -4389,8 +4387,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		    value -= p->p_vaddr;
 		  else
 		    value = 0;
-		  r = elfNN_ia64_install_value (output_bfd, hit_addr, value,
-						r_type);
+		  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 		}
 	      break;
 	    }
@@ -4404,7 +4401,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    value -= input_section->output_section->vma;
 	  else
 	    value = 0;
-	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
 	case R_IA64_IPLTMSB:
@@ -4445,16 +4442,15 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    r_type = R_IA64_DIR64MSB;
 	  else
 	    r_type = R_IA64_DIR64LSB;
-	  elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
-	  r = elfNN_ia64_install_value (output_bfd, hit_addr + 8, gp_val,
-					r_type);
+	  elfNN_ia64_install_value (hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (hit_addr + 8, gp_val, r_type);
 	  break;
 
 	case R_IA64_TPREL14:
 	case R_IA64_TPREL22:
 	case R_IA64_TPREL64I:
 	  value -= elfNN_ia64_tprel_base (info);
-	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
 	case R_IA64_DTPREL14:
@@ -4463,7 +4459,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_DTPREL64LSB:
 	case R_IA64_DTPREL64MSB:
 	  value -= elfNN_ia64_dtprel_base (info);
-	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
+	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
 	case R_IA64_LTOFF_TPREL22:
@@ -4505,8 +4501,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    value = set_got_entry (input_bfd, info, dyn_i, dynindx, r_addend,
 				   value, got_r_type);
 	    value -= gp_val;
-	    r = elfNN_ia64_install_value (output_bfd, hit_addr, value,
-					  r_type);
+	    r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  }
 	  break;
 
@@ -4617,9 +4612,8 @@ elfNN_ia64_finish_dynamic_symbol (output_bfd, info, h, sym)
       loc = plt_sec->contents + dyn_i->plt_offset;
 
       memcpy (loc, plt_min_entry, PLT_MIN_ENTRY_SIZE);
-      elfNN_ia64_install_value (output_bfd, loc, index, R_IA64_IMM22);
-      elfNN_ia64_install_value (output_bfd, loc+2, -dyn_i->plt_offset,
-				R_IA64_PCREL21B);
+      elfNN_ia64_install_value (loc, index, R_IA64_IMM22);
+      elfNN_ia64_install_value (loc+2, -dyn_i->plt_offset, R_IA64_PCREL21B);
 
       plt_addr = (plt_sec->output_section->vma
 		  + plt_sec->output_offset
@@ -4632,8 +4626,7 @@ elfNN_ia64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  loc = plt_sec->contents + dyn_i->plt2_offset;
 
 	  memcpy (loc, plt_full_entry, PLT_FULL_ENTRY_SIZE);
-	  elfNN_ia64_install_value (output_bfd, loc, pltoff_addr - gp_val,
-				    R_IA64_IMM22);
+	  elfNN_ia64_install_value (loc, pltoff_addr - gp_val, R_IA64_IMM22);
 
 	  /* Mark the symbol as undefined, rather than as defined in the
 	     plt section.  Leave the value alone.  */
@@ -4756,7 +4749,7 @@ elfNN_ia64_finish_dynamic_sections (abfd, info)
 		    + sgotplt->output_offset
 		    - gp_val);
 
-	  elfNN_ia64_install_value (abfd, loc+1, pltres, R_IA64_GPREL22);
+	  elfNN_ia64_install_value (loc+1, pltres, R_IA64_GPREL22);
 	}
     }
 
