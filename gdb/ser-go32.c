@@ -49,7 +49,7 @@ static void go32_restore PARAMS ((serial_t scb));
 static void go32_close PARAMS ((serial_t scb));
 static serial_ttystate go32_get_tty_state PARAMS ((serial_t scb));
 static int go32_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
-static int strncasecmp PARAMS ((char *str1, char *str2, int len));
+static int strncasecmp PARAMS ((const char *str1, const char *str2, int len));
 static char *aptr PARAMS ((short p));
 static ASYNC_STRUCT *getivec PARAMS ((int which));
 static int dos_async_init PARAMS ((int port));
@@ -78,7 +78,7 @@ static int iov;
 
 static int
 strncasecmp(str1, str2, len)
-     char *str1, *str2;
+     const char *str1, *str2;
      register int len;
 {
   unsigned char c1, c2;
@@ -143,13 +143,12 @@ dos_async_init(port)
 
   if (!async)
     {
-      error("GDB can not connect to asynctsr program, check that it is installed\n\
+      error("GDB cannot connect to asynctsr program, check that it is installed\n\
 and that serial I/O is not being redirected (perhaps by NFS)\n\n\
 example configuration:\n\
-C> mode com2:9600,n,8,1,p\n\
-C> asynctsr 2\n\
-C> gdb \n");
-
+C> mode com%d:9600,n,8,1,p\n\
+C> asynctsr %d\n\
+C> gdb \n", port, port);
     }
 
   iov = async->iov;

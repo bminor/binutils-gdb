@@ -1,3 +1,17 @@
+Fri Jun 25 17:02:45 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* remote.c:  Add arg names to prototypes, in a modest effort at
+	clarification.  Also add prototypes for some new functions.
+	* (remote_wait):  Better error reporting for 'T' responses.
+	* ser-go32.c (strncasecmp):  Make str1 & str2 be const.
+	* (dos_async_init):  Make usage message reflect requested port #.
+	* ser-tcp.c (tcp_open):  Terminate hostname properly to prevent
+	random hostname lookup failures.  Add nicer message for unknown
+	host error.  (wait_for):  Wake up in case of exceptions.  Also,
+	restart select() if we got EINTR.
+	* ser-unix.c (wait_for):  Restart select() if we got EINTR.
+	* serial.c: (serial_close):  Clean up code.
+
 Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (*.tab.c): Use ./c-exp.tab.c not just c-exp.tab.c.

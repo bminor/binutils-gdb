@@ -116,11 +116,14 @@ serial_close(scb)
 {
   last_serial_opened = NULL;
 
-  if (scb != NULL)
-    {
-      scb->ops->close(scb);
-      free(scb);
-    }
+/* This is bogus.  It's not our fault if you pass us a bad scb...!  Rob, you
+   should fix your code instead.  */
+
+  if (!scb)
+    return;
+
+  scb->ops->close(scb);
+  free(scb);
 }
 
 #if 0

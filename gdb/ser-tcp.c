@@ -64,14 +64,16 @@ tcp_open(scb, name)
   if (!port_str)
     error ("tcp_open: No colon in host name!"); /* Shouldn't ever happen */
 
-  tmp = min(port_str - name + 1, sizeof hostname);
-  strncpy (hostname, name, tmp - 1); /* Don't want colon */
+  tmp = min (port_str - name, sizeof hostname - 1);
+  strncpy (hostname, name, tmp); /* Don't want colon */
+  hostname[tmp] = '\000';	/* Tie off host name */
   port = atoi (port_str + 1);
 
   hostent = gethostbyname (hostname);
 
   if (!hostent)
     {
+      fprintf (stderr, "%s: unknown host\n", hostname);
       errno = ENOENT;
       return -1;
     }
@@ -93,9 +95,10 @@ tcp_open(scb, name)
   memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
 	  sizeof (struct in_addr));
 
-  if (connect(scb->fd, &sockaddr, sizeof(sockaddr)))
+  if (connect (scb->fd, &sockaddr, sizeof(sockaddr)))
     {
       close(scb->fd);
+      scb->fd = -1;
       return -1;
     }
 
@@ -158,27 +161,34 @@ wait_for(scb, timeout)
 {
   int numfds;
   struct timeval tv;
-  fd_set readfds;
+  fd_set readfds, exceptfds;
 
   FD_ZERO (&readfds);
+  FD_ZERO (&exceptfds);
 
   tv.tv_sec = timeout;
   tv.tv_usec = 0;
 
   FD_SET(scb->fd, &readfds);
+  FD_SET(scb->fd, &exceptfds);
 
-  if (timeout >= 0)
-    numfds = select(scb->fd+1, &readfds, 0, 0, &tv);
-  else
-    numfds = select(scb->fd+1, &readfds, 0, 0, 0);
+  while (1)
+    {
+      if (timeout >= 0)
+	numfds = select(scb->fd+1, &readfds, 0, &exceptfds, &tv);
+      else
+	numfds = select(scb->fd+1, &readfds, 0, &exceptfds, 0);
 
-  if (numfds <= 0)
-    if (numfds == 0)
-      return SERIAL_TIMEOUT;
-    else
-      return SERIAL_ERROR;	/* Got an error from select or poll */
+      if (numfds <= 0)
+	if (numfds == 0)
+	  return SERIAL_TIMEOUT;
+	else if (errno == EINTR)
+	  continue;
+	else
+	  return SERIAL_ERROR;	/* Got an error from select or poll */
 
-  return 0;
+      return 0;
+    }
 }
 
 /* Read a character with user-specified timeout.  TIMEOUT is number of seconds

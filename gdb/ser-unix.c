@@ -212,18 +212,23 @@ wait_for(scb, timeout)
 
   FD_SET(scb->fd, &readfds);
 
-  if (timeout >= 0)
-    numfds = select(scb->fd+1, &readfds, 0, 0, &tv);
-  else
-    numfds = select(scb->fd+1, &readfds, 0, 0, 0);
+  while (1)
+    {
+      if (timeout >= 0)
+	numfds = select(scb->fd+1, &readfds, 0, 0, &tv);
+      else
+	numfds = select(scb->fd+1, &readfds, 0, 0, 0);
 
-  if (numfds <= 0)
-    if (numfds == 0)
-      return SERIAL_TIMEOUT;
-    else
-      return SERIAL_ERROR;	/* Got an error from select or poll */
+      if (numfds <= 0)
+	if (numfds == 0)
+	  return SERIAL_TIMEOUT;
+	else if (errno == EINTR)
+	  continue;
+	else
+	  return SERIAL_ERROR;	/* Got an error from select or poll */
 
-  return 0;
+      return 0;
+    }
 
 #endif	/* HAVE_SGTTY */
 
