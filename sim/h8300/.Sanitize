@@ -17,8 +17,6 @@
 
 Do-first:
 
-echo Sanitizing `pwd`...
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -34,10 +32,9 @@ writecode.c
 run.c
 p1.c
 p3.c
+perifs.c
+state.h
 
 Do-last:
-
-echo Done in `pwd`.
-
 
 # End of file.
