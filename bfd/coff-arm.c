@@ -1211,7 +1211,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				      s->contents + my_offset + 8);
 
                           if (info->base_file)
-                            arm_emit_base_file_entry (info, output_bfd, s, A2T3_OFFSET);
+                            arm_emit_base_file_entry (info, output_bfd, s, 
+                                                            my_offset + A2T3_OFFSET);
 
 			}
 
@@ -1236,7 +1237,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		      
 		      bfd_put_32 (output_bfd, tmp, contents + rel->r_vaddr
 				  - input_section->vma);
-		      
 		      done = 1;
 		    }
                 }
@@ -1342,7 +1342,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 					  s->contents + my_offset + 4);
 
                               if (info->base_file)
-                                arm_emit_base_file_entry (info, output_bfd, s, T2A3_OFFSET);
+                                arm_emit_base_file_entry (info, output_bfd, s,
+                                                           my_offset + T2A3_OFFSET);
 			    }
 			}
 
