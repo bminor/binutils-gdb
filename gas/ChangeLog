@@ -1,3 +1,9 @@
+Fri Mar 15 17:10:43 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* app.c (do_scrub_chars): If whitespace is seen in state 11, and
+	LABELS_WITHOUT_COLONS is not defined, and we are not in m68k MRI
+	mode, change the state to 3 rather than 1.
+
 Thu Mar 14 18:18:25 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.h (C_REGISTER_SECTION): Change from 20 to 50, to
