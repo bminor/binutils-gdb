@@ -185,6 +185,9 @@ print_frame_info (fi, level, source, args)
   char buf[MAX_REGISTER_RAW_SIZE];
   CORE_ADDR sp;
 
+#if 0
+  /* On the 68k, this spends too much time in m68k_find_saved_regs.  */
+
   /* Get the value of SP_REGNUM relative to the frame.  */
   get_saved_register (buf, (int *)NULL, (CORE_ADDR *)NULL,
 		      FRAME_INFO_ID (fi), SP_REGNUM, (enum lval_type *)NULL);
@@ -195,6 +198,9 @@ print_frame_info (fi, level, source, args)
      will succeed even though there is no call dummy.  Probably best is
      to check for a bp_call_dummy breakpoint.  */
   if (PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
+#else
+  if (frame_in_dummy (fi))
+#endif
     {
       /* Do this regardless of SOURCE because we don't have any source
 	 to list for this frame.  */
@@ -280,7 +286,7 @@ print_frame_info (fi, level, source, args)
 	if (fi->pc != sal.pc || !sal.symtab)
 	  printf_filtered ("%s in ", local_hex_string((unsigned long) fi->pc));
       fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
-			       DMGL_NO_OPTS);
+			       DMGL_ANSI);
       wrap_here ("   ");
       fputs_filtered (" (", gdb_stdout);
       if (args)

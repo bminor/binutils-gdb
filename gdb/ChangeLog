@@ -1,3 +1,9 @@
+Thu Dec 30 10:16:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.c (breakpoint_chain): Make static.
+	* breakpoint.c, breakpoint.h (frame_in_dummy): New function.
+	* stack.c (print_frame_info): Use it.
+
 Thu Dec 30 07:41:36 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* exec.c (add_to_section_table):  Check for SEC_ALLOC instead of

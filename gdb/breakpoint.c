@@ -154,7 +154,7 @@ static int executing_breakpoint_commands;
 
 /* Chain of all breakpoints defined.  */
 
-struct breakpoint *breakpoint_chain;
+static struct breakpoint *breakpoint_chain;
 
 /* Number of last breakpoint made.  */
 
@@ -450,6 +450,7 @@ insert_breakpoints ()
 		b->enable = disabled;
 		if (!disabled_breaks)
 		  {
+		    target_terminal_ours_for_output ();
 		    fprintf_unfiltered (gdb_stderr,
 			 "Cannot insert breakpoint %d:\n", b->number);
 		    printf_filtered ("Disabling shared library breakpoints:\n");
@@ -460,6 +461,7 @@ insert_breakpoints ()
 	    else
 #endif
 	      {
+		target_terminal_ours_for_output ();
 		fprintf_unfiltered (gdb_stderr, "Cannot insert breakpoint %d:\n", b->number);
 #ifdef ONE_PROCESS_WRITETEXT
 		fprintf_unfiltered (gdb_stderr,
@@ -551,6 +553,30 @@ breakpoint_here_p (pc)
     if (b->enable != disabled && b->address == pc)
       return 1;
 
+  return 0;
+}
+
+/* Return nonzero if FRAME is a dummy frame.  We can't use PC_IN_CALL_DUMMY
+   because figuring out the saved SP would take too much time, at least using
+   get_saved_register on the 68k.  This means that for this function to
+   work right a port must use the bp_call_dummy breakpoint.  */
+
+int
+frame_in_dummy (frame)
+     FRAME frame;
+{
+  struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    {
+      /* We could also check whether fi->pc is within the call dummy, but
+	 that should not be necessary if we check the frame (note the
+	 call dummy is sizeof (dummy) / sizeof (LONGEST) * REGISTER_SIZE
+	 bytes not just sizeof (dummy) bytes).  */
+      if (b->type == bp_call_dummy
+	  && b->frame == frame->frame)
+	return 1;
+    }
   return 0;
 }
 
@@ -2619,6 +2645,7 @@ delete_breakpoint (bpt)
 	    val = target_insert_breakpoint (b->address, b->shadow_contents);
 	    if (val != 0)
 	      {
+		target_terminal_ours_for_output ();
 		fprintf_unfiltered (gdb_stderr, "Cannot insert breakpoint %d:\n", b->number);
 		memory_error (val, b->address);	/* which bombs us out */
 	      }
@@ -2640,10 +2667,14 @@ delete_breakpoint (bpt)
     free (bpt->source_file);
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
-    printf_unfiltered ("breakpoint #%d deleted\n", bpt->number);
+    {
+      target_terminal_ours_for_output ();
+      printf_unfiltered ("breakpoint #%d deleted\n", bpt->number);
+    }
 
   /* Be sure no bpstat's are pointing at it after it's been freed.  */
-  /* FIXME, how can we find all bpstat's?  We just check stop_bpstat for now. */
+  /* FIXME, how can we find all bpstat's?
+     We just check stop_bpstat for now.  */
   for (bs = stop_bpstat; bs; bs = bs->next)
     if (bs->breakpoint_at == bpt)
       bs->breakpoint_at = NULL;
