@@ -22,6 +22,7 @@
 #define  NO_RELOC 0
 #include "as.h"
 #include "obstack.h"
+#include "subsegs.h"
 
 #include "opcode/m68k.h"
 #include "m68k-parse.h"
@@ -297,6 +298,17 @@ static void s_opt PARAMS ((int));
 static void s_reg PARAMS ((int));
 static void s_restore PARAMS ((int));
 static void s_save PARAMS ((int));
+static void s_mri_if PARAMS ((int));
+static void s_mri_else PARAMS ((int));
+static void s_mri_endi PARAMS ((int));
+static void s_mri_break PARAMS ((int));
+static void s_mri_next PARAMS ((int));
+static void s_mri_for PARAMS ((int));
+static void s_mri_endf PARAMS ((int));
+static void s_mri_repeat PARAMS ((int));
+static void s_mri_until PARAMS ((int));
+static void s_mri_while PARAMS ((int));
+static void s_mri_endw PARAMS ((int));
 
 static int current_architecture;
 
@@ -431,6 +443,36 @@ CONST pseudo_typeS md_pseudo_table[] =
   {"reg", s_reg, 0},
   {"restore", s_restore, 0},
   {"save", s_save, 0},
+
+  {"if", s_mri_if, 0},
+  {"if.b", s_mri_if, 'b'},
+  {"if.w", s_mri_if, 'w'},
+  {"if.l", s_mri_if, 'l'},
+  {"else", s_mri_else, 0},
+  {"else.s", s_mri_else, 's'},
+  {"else.l", s_mri_else, 'l'},
+  {"endi", s_mri_endi, 0},
+  {"break", s_mri_break, 0},
+  {"break.s", s_mri_break, 's'},
+  {"break.l", s_mri_break, 'l'},
+  {"next", s_mri_next, 0},
+  {"next.s", s_mri_next, 's'},
+  {"next.l", s_mri_next, 'l'},
+  {"for", s_mri_for, 0},
+  {"for.b", s_mri_for, 'b'},
+  {"for.w", s_mri_for, 'w'},
+  {"for.l", s_mri_for, 'l'},
+  {"endf", s_mri_endf, 0},
+  {"repeat", s_mri_repeat, 0},
+  {"until", s_mri_until, 0},
+  {"until.b", s_mri_until, 'b'},
+  {"until.w", s_mri_until, 'w'},
+  {"until.l", s_mri_until, 'l'},
+  {"while", s_mri_while, 0},
+  {"while.b", s_mri_while, 'b'},
+  {"while.w", s_mri_while, 'w'},
+  {"while.l", s_mri_while, 'l'},
+  {"endw", s_mri_endw, 0},
 
   {0, 0, 0}
 };
@@ -1887,7 +1929,11 @@ m68k_ip (instring)
 	  switch (s[1])
 	    {
 	    case 'B':
-	      add_fix ('B', &opP->disp, 1, -1);
+	      /* The pc_fix argument winds up in fx_pcrel_adjust,
+                 which is a char, and may therefore be unsigned.  We
+                 want to pass -1, but we pass 64 instead, and convert
+                 back in md_pcrel_from.  */
+	      add_fix ('B', &opP->disp, 1, 64);
 	      break;
 	    case 'W':
 	      add_fix ('w', &opP->disp, 1, 0);
@@ -4520,6 +4566,1036 @@ s_restore (ignore)
 
   demand_empty_rest_of_line ();
 }
+
+/* Types of MRI structured control directives.  */
+
+enum mri_control_type
+{
+  mri_for,
+  mri_if,
+  mri_repeat,
+  mri_while
+};
+
+/* This structure is used to stack the MRI structured control
+   directives.  */
+
+struct mri_control_info
+{
+  /* The directive within which this one is enclosed.  */
+  struct mri_control_info *outer;
+
+  /* The type of directive.  */
+  enum mri_control_type type;
+
+  /* Whether an ELSE has been in an IF.  */
+  int else_seen;
+
+  /* The add or sub statement at the end of a FOR.  */
+  char *incr;
+
+  /* The label of the top of a FOR or REPEAT loop.  */
+  char *top;
+
+  /* The label to jump to for the next iteration, or the else
+     expression of a conditional.  */
+  char *next;
+
+  /* The label to jump to to break out of the loop, or the label past
+     the end of a conditional.  */
+  char *bottom;
+};
+
+/* The stack of MRI structured control directives.  */
+
+static struct mri_control_info *mri_control_stack;
+
+/* The current MRI structured control directive index number, used to
+   generate label names.  */
+
+static int mri_control_index;
+
+/* Some function prototypes.  */
+
+static char *mri_control_label PARAMS ((void));
+static struct mri_control_info *push_mri_control
+  PARAMS ((enum mri_control_type));
+static void pop_mri_control PARAMS ((void));
+static int parse_mri_condition PARAMS ((int *));
+static int parse_mri_control_operand
+  PARAMS ((int *, const char **, const char **, const char **, const char **));
+static int swap_mri_condition PARAMS ((int));
+static int reverse_mri_condition PARAMS ((int));
+static void build_mri_control_operand
+  PARAMS ((int, int, const char *, const char *, const char *, const char *,
+	   const char *, const char *, int));
+static void parse_mri_control_expression
+  PARAMS ((char *, int, const char *, const char *, int));
+
+/* Generate a new MRI label structured control directive label name.  */
+
+static char *
+mri_control_label ()
+{
+  char *n;
+
+  n = (char *) xmalloc (20);
+  sprintf (n, "%smc%d", FAKE_LABEL_NAME, mri_control_index);
+  ++mri_control_index;
+  return n;
+}
+
+/* Create a new MRI structured control directive.  */
+
+static struct mri_control_info *
+push_mri_control (type)
+     enum mri_control_type type;
+{
+  struct mri_control_info *n;
+
+  n = (struct mri_control_info *) xmalloc (sizeof (struct mri_control_info));
+
+  n->type = type;
+  n->else_seen = 0;
+  if (type == mri_if || type == mri_while)
+    n->top = NULL;
+  else
+    n->top = mri_control_label ();
+  n->next = mri_control_label ();
+  n->bottom = mri_control_label ();
+
+  n->outer = mri_control_stack;
+  mri_control_stack = n;
+
+  return n;
+}
+
+/* Pop off the stack of MRI structured control directives.  */
+
+static void
+pop_mri_control ()
+{
+  struct mri_control_info *n;
+
+  n = mri_control_stack;
+  mri_control_stack = n->outer;
+  if (n->top != NULL)
+    free (n->top);
+  free (n->next);
+  free (n->bottom);
+  free (n);
+}
+
+/* Recognize a condition code in an MRI structured control expression.  */
+
+static int
+parse_mri_condition (pcc)
+     int *pcc;
+{
+  char c1, c2;
+
+  know (*input_line_pointer == '<');
+
+  ++input_line_pointer;
+  c1 = *input_line_pointer++;
+  c2 = *input_line_pointer++;
+
+  if (*input_line_pointer != '>')
+    {
+      as_bad ("syntax error in structured control directive");
+      return 0;
+    }
+
+  ++input_line_pointer;
+  SKIP_WHITESPACE ();
+
+  if (isupper (c1))
+    c1 = tolower (c1);
+  if (isupper (c2))
+    c2 = tolower (c2);
+
+  *pcc = (c1 << 8) | c2;
+
+  return 1;
+}
+
+/* Parse a single operand in an MRI structured control expression.  */
+
+static int
+parse_mri_control_operand (pcc, leftstart, leftstop, rightstart, rightstop)
+     int *pcc;
+     const char **leftstart;
+     const char **leftstop;
+     const char **rightstart;
+     const char **rightstop;
+{
+  char *s;
+
+  SKIP_WHITESPACE ();
+
+  *pcc = -1;
+  *leftstart = NULL;
+  *leftstop = NULL;
+  *rightstart = NULL;
+  *rightstop = NULL;
+
+  if (*input_line_pointer == '<')
+    {
+      /* It's just a condition code.  */
+      return parse_mri_condition (pcc);
+    }
+
+  /* Look ahead for the condition code.  */
+  for (s = input_line_pointer; *s != '\0'; ++s)
+    {
+      if (*s == '<' && s[1] != '\0' && s[2] != '\0' && s[3] == '>')
+	break;
+    }
+  if (*s == '\0')
+    {
+      as_bad ("missing condition code in structured control directive");
+      return 0;
+    }
+
+  *leftstart = input_line_pointer;
+  *leftstop = s;
+
+  input_line_pointer = s;
+  if (! parse_mri_condition (pcc))
+    return 0;
+
+  /* Look ahead for AND or OR or end of line.  */
+  for (s = input_line_pointer; *s != '\0'; ++s)
+    {
+      if ((strncasecmp (s, "AND", 3) == 0
+	   && (s[3] == '.' || ! is_part_of_name (s[3])))
+	  || (strncasecmp (s, "OR", 2) == 0
+	      && (s[2] == '.' || ! is_part_of_name (s[2]))))
+	break;
+    }
+
+  *rightstart = input_line_pointer;
+  *rightstop = s;
+
+  input_line_pointer = s;
+
+  return 1;
+}
+
+#define MCC(b1, b2) (((b1) << 8) | (b2))
+
+/* Swap the sense of a condition.  This changes the condition so that
+   it generates the same result when the operands are swapped.  */
+
+static int
+swap_mri_condition (cc)
+     int cc;
+{
+  switch (cc)
+    {
+    case MCC ('h', 'i'): return MCC ('c', 's');
+    case MCC ('l', 's'): return MCC ('c', 'c');
+    case MCC ('c', 'c'): return MCC ('l', 's');
+    case MCC ('c', 's'): return MCC ('h', 'i');
+    case MCC ('p', 'l'): return MCC ('m', 'i');
+    case MCC ('m', 'i'): return MCC ('p', 'l');
+    case MCC ('g', 'e'): return MCC ('l', 'e');
+    case MCC ('l', 't'): return MCC ('g', 't');
+    case MCC ('g', 't'): return MCC ('l', 't');
+    case MCC ('l', 'e'): return MCC ('g', 'e');
+    }
+  return cc;
+}
+
+/* Reverse the sense of a condition.  */
+
+static int
+reverse_mri_condition (cc)
+     int cc;
+{
+  switch (cc)
+    {
+    case MCC ('h', 'i'): return MCC ('l', 's');
+    case MCC ('l', 's'): return MCC ('h', 'i');
+    case MCC ('c', 'c'): return MCC ('c', 's');
+    case MCC ('c', 's'): return MCC ('c', 'c');
+    case MCC ('n', 'e'): return MCC ('e', 'q');
+    case MCC ('e', 'q'): return MCC ('n', 'e');
+    case MCC ('v', 'c'): return MCC ('v', 's');
+    case MCC ('v', 's'): return MCC ('v', 'c');
+    case MCC ('p', 'l'): return MCC ('m', 'i');
+    case MCC ('m', 'i'): return MCC ('p', 'l');
+    case MCC ('g', 'e'): return MCC ('l', 't');
+    case MCC ('l', 't'): return MCC ('g', 'e');
+    case MCC ('g', 't'): return MCC ('l', 'e');
+    case MCC ('l', 'e'): return MCC ('g', 't');
+    }
+  return cc;
+}
+
+/* Build an MRI structured control expression.  This generates test
+   and branch instructions.  It goes to TRUELAB if the condition is
+   true, and to FALSELAB if the condition is false.  Exactly one of
+   TRUELAB and FALSELAB will be NULL, meaning to fall through.  QUAL
+   is the size qualifier for the expression.  EXTENT is the size to
+   use for the branch.  */
+
+static void
+build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
+			   rightstop, truelab, falselab, extent)
+     int qual;
+     int cc;
+     const char *leftstart;
+     const char *leftstop;
+     const char *rightstart;
+     const char *rightstop;
+     const char *truelab;
+     const char *falselab;
+     int extent;
+{
+  char *buf;
+  char *s;
+
+  /* The 68k can't do a general comparision with an immediate operand
+     on the right hand side.  */
+  if (rightstart != NULL && *rightstart == '#')
+    {
+      const char *temp;
+
+      cc = swap_mri_condition (cc);
+      temp = leftstart;
+      leftstart = rightstart;
+      rightstart = temp;
+      temp = leftstop;
+      leftstop = rightstop;
+      rightstop = temp;
+    }
+
+  if (truelab == NULL)
+    {
+      cc = reverse_mri_condition (cc);
+      truelab = falselab;
+    }
+      
+  if (leftstart != NULL)
+    {
+      buf = (char *) xmalloc (20
+			      + (leftstop - leftstart)
+			      + (rightstop - rightstart));
+      s = buf;
+      *s++ = 'c';
+      *s++ = 'm';
+      *s++ = 'p';
+      if (qual != '\0')
+	*s++ = qual;
+      *s++ = ' ';
+      memcpy (s, leftstart, leftstop - leftstart);
+      s += leftstop - leftstart;
+      *s++ = ',';
+      memcpy (s, rightstart, rightstop - rightstart);
+      s += rightstop - rightstart;
+      *s = '\0';
+      md_assemble (buf);
+      free (buf);
+    }
+      
+  buf = (char *) xmalloc (20 + strlen (truelab));
+  s = buf;
+  *s++ = 'b';
+  *s++ = cc >> 8;
+  *s++ = cc & 0xff;
+  if (extent != '\0')
+    *s++ = extent;
+  *s++ = ' ';
+  strcpy (s, truelab);
+  md_assemble (buf);
+  free (buf);
+}
+
+/* Parse an MRI structured control expression.  This generates test
+   and branch instructions.  STOP is where the expression ends.  It
+   goes to TRUELAB if the condition is true, and to FALSELAB if the
+   condition is false.  Exactly one of TRUELAB and FALSELAB will be
+   NULL, meaning to fall through.  QUAL is the size qualifier for the
+   expression.  EXTENT is the size to use for the branch.  */
+
+static void
+parse_mri_control_expression (stop, qual, truelab, falselab, extent)
+     char *stop;
+     int qual;
+     const char *truelab;
+     const char *falselab;
+     int extent;
+{
+  int c;
+  int cc;
+  const char *leftstart;
+  const char *leftstop;
+  const char *rightstart;
+  const char *rightstop;
+
+  c = *stop;
+  *stop = '\0';
+
+  if (! parse_mri_control_operand (&cc, &leftstart, &leftstop,
+				   &rightstart, &rightstop))
+    {
+      *stop = c;
+      return;
+    }
+
+  if (strncasecmp (input_line_pointer, "AND", 3) == 0)
+    {
+      const char *flab;
+
+      if (falselab != NULL)
+	flab = falselab;
+      else
+	flab = mri_control_label ();
+
+      build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
+				 rightstop, (const char *) NULL, flab, extent);
+
+      input_line_pointer += 3;
+      if (*input_line_pointer != '.'
+	  || input_line_pointer[1] == '\0')
+	qual = '\0';
+      else
+	{
+	  qual = input_line_pointer[1];
+	  input_line_pointer += 2;
+	}
+
+      if (! parse_mri_control_operand (&cc, &leftstart, &leftstop,
+				       &rightstart, &rightstop))
+	{
+	  *stop = c;
+	  return;
+	}
+
+      build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
+				 rightstop, truelab, falselab, extent);
+
+      if (falselab == NULL)
+	colon (flab);
+    }
+  else if (strncasecmp (input_line_pointer, "OR", 2) == 0)
+    {
+      const char *tlab;
+
+      if (truelab != NULL)
+	tlab = truelab;
+      else
+	tlab = mri_control_label ();
+
+      build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
+				 rightstop, tlab, (const char *) NULL, extent);
+
+      input_line_pointer += 2;
+      if (*input_line_pointer != '.'
+	  || input_line_pointer[1] == '\0')
+	qual = '\0';
+      else
+	{
+	  qual = input_line_pointer[1];
+	  input_line_pointer += 2;
+	}
+
+      if (! parse_mri_control_operand (&cc, &leftstart, &leftstop,
+				       &rightstart, &rightstop))
+	{
+	  *stop = c;
+	  return;
+	}
+
+      build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
+				 rightstop, truelab, falselab, extent);
+
+      if (truelab == NULL)
+	colon (tlab);
+    }
+  else
+    {
+      build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
+				 rightstop, truelab, falselab, extent);
+    }
+
+  *stop = c;
+  if (input_line_pointer != stop)
+    as_bad ("syntax error in structured control directive");
+}
+
+/* Handle the MRI IF pseudo-op.  This may be a structured control
+   directive, or it may be a regular assembler conditional, depending
+   on its operands.  */
+
+static void
+s_mri_if (qual)
+     int qual;
+{
+  char *s;
+  int c;
+  struct mri_control_info *n;
+
+  /* A structured control directive must end with THEN with an
+     optional qualifier.  */
+  s = input_line_pointer;
+  while (! is_end_of_line[(unsigned char) *s])
+    ++s;
+  --s;
+  while (s > input_line_pointer && (*s == ' ' || *s == '\t'))
+    --s;
+
+  if (s - input_line_pointer > 1
+      && s[-1] == '.')
+    s -= 2;
+
+  if (s - input_line_pointer < 3
+      || strncasecmp (s - 3, "THEN", 4) != 0)
+    {
+      if (qual != '\0')
+	{
+	  as_bad ("missing then");
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      /* It's a conditional.  */
+      s_if (O_ne);
+      return;
+    }
+
+  /* Since this might be a conditional if, this pseudo-op will be
+     called even if we are supported to be ignoring input.  Double
+     check now.  Clobber *input_line_pointer so that ignore_input
+     thinks that this is not a special pseudo-op.  */
+  c = *input_line_pointer;
+  *input_line_pointer = 0;
+  if (ignore_input ())
+    {
+      *input_line_pointer = c;
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+      demand_empty_rest_of_line ();
+      return;
+    }
+  *input_line_pointer = c;
+
+  n = push_mri_control (mri_if);
+
+  parse_mri_control_expression (s - 3, qual, (const char *) NULL,
+				n->next, s[1] == '.' ? s[2] : '\0');
+
+  if (s[1] == '.')
+    input_line_pointer = s + 3;
+  else
+    input_line_pointer = s + 1;
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI else pseudo-op.  If we are currently doing an MRI
+   structured IF, associate the ELSE with the IF.  Otherwise, assume
+   it is a conditional else.  */
+
+static void
+s_mri_else (qual)
+     int qual;
+{
+  int c;
+  char *buf;
+  char q[2];
+
+  if (qual == '\0'
+      && (mri_control_stack == NULL
+	  || mri_control_stack->type != mri_if
+	  || mri_control_stack->else_seen))
+    {
+      s_else (0);
+      return;
+    }
+
+  c = *input_line_pointer;
+  *input_line_pointer = 0;
+  if (ignore_input ())
+    {
+      *input_line_pointer = c;
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+      demand_empty_rest_of_line ();
+      return;
+    }
+  *input_line_pointer = c;
+
+  if (mri_control_stack == NULL
+      || mri_control_stack->type != mri_if
+      || mri_control_stack->else_seen)
+    {
+      as_bad ("else without matching if");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  mri_control_stack->else_seen = 1;
+
+  buf = (char *) xmalloc (20 + strlen (mri_control_stack->bottom));
+  q[0] = qual;
+  q[1] = '\0';
+  sprintf (buf, "bra%s %s", q, mri_control_stack->bottom);
+  md_assemble (buf);
+  free (buf);
+
+  colon (mri_control_stack->next);
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI ENDI pseudo-op.  */
+
+static void
+s_mri_endi (ignore)
+     int ignore;
+{
+  if (mri_control_stack == NULL
+      || mri_control_stack->type != mri_if)
+    {
+      as_bad ("endi without matching if");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* ignore_input will not return true for ENDI, so we don't need to
+     worry about checking it again here.  */
+
+  if (! mri_control_stack->else_seen)
+    colon (mri_control_stack->next);
+  colon (mri_control_stack->bottom);
+
+  pop_mri_control ();
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI BREAK pseudo-op.  */
+
+static void
+s_mri_break (extent)
+     int extent;
+{
+  struct mri_control_info *n;
+  char *buf;
+  char ex[2];
+
+  n = mri_control_stack;
+  while (n != NULL
+	 && n->type != mri_for
+	 && n->type != mri_repeat
+	 && n->type != mri_while)
+    n = n->outer;
+  if (n == NULL)
+    {
+      as_bad ("break outside of structured loop");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  buf = (char *) xmalloc (20 + strlen (n->bottom));
+  ex[0] = extent;
+  ex[1] = '\0';
+  sprintf (buf, "bra%s %s", ex, n->bottom);
+  md_assemble (buf);
+  free (buf);
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI NEXT pseudo-op.  */
+
+static void
+s_mri_next (extent)
+     int extent;
+{
+  struct mri_control_info *n;
+  char *buf;
+  char ex[2];
+
+  n = mri_control_stack;
+  while (n != NULL
+	 && n->type != mri_for
+	 && n->type != mri_repeat
+	 && n->type != mri_while)
+    n = n->outer;
+  if (n == NULL)
+    {
+      as_bad ("next outside of structured loop");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  buf = (char *) xmalloc (20 + strlen (n->next));
+  ex[0] = extent;
+  ex[1] = '\0';
+  sprintf (buf, "bra%s %s", ex, n->next);
+  md_assemble (buf);
+  free (buf);
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI FOR pseudo-op.  */
+
+static void
+s_mri_for (qual)
+     int qual;
+{
+  const char *varstart, *varstop;
+  const char *initstart, *initstop;
+  const char *endstart, *endstop;
+  const char *bystart, *bystop;
+  int up;
+  int by;
+  int extent;
+  struct mri_control_info *n;
+  char *buf;
+  char *s;
+  char ex[2];
+
+  /* The syntax is
+       FOR.q var = init { TO | DOWNTO } end [ BY by ] DO.e
+     */
+
+  varstart = input_line_pointer;
+
+  /* Look for the '='.  */
+  while (! is_end_of_line[(unsigned char) *input_line_pointer]
+	 && *input_line_pointer != '=')
+    ++input_line_pointer;
+  if (*input_line_pointer != '=')
+    {
+      as_bad ("missing =");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  varstop = input_line_pointer;
+
+  ++input_line_pointer;
+
+  initstart = input_line_pointer;
+
+  /* Look for TO or DOWNTO.  */
+  up = 1;
+  initstop = NULL;
+  while (! is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      if (strncasecmp (input_line_pointer, "TO", 2) == 0
+	  && ! is_part_of_name (input_line_pointer[2]))
+	{
+	  initstop = input_line_pointer;
+	  input_line_pointer += 2;
+	  break;
+	}
+      if (strncasecmp (input_line_pointer, "DOWNTO", 6) == 0
+	  && ! is_part_of_name (input_line_pointer[6]))
+	{
+	  initstop = input_line_pointer;
+	  up = 0;
+	  input_line_pointer += 6;
+	  break;
+	}
+      ++input_line_pointer;
+    }
+  if (initstop == NULL)
+    {
+      as_bad ("missing to or downto");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  endstart = input_line_pointer;
+
+  /* Look for BY or DO.  */
+  by = 0;
+  endstop = NULL;
+  while (! is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      if (strncasecmp (input_line_pointer, "BY", 2) == 0
+	  && ! is_part_of_name (input_line_pointer[2]))
+	{
+	  endstop = input_line_pointer;
+	  by = 1;
+	  input_line_pointer += 2;
+	  break;
+	}
+      if (strncasecmp (input_line_pointer, "DO", 2) == 0
+	  && (input_line_pointer[2] == '.'
+	      || ! is_part_of_name (input_line_pointer[2])))
+	{
+	  endstop = input_line_pointer;
+	  input_line_pointer += 2;
+	  break;
+	}
+      ++input_line_pointer;
+    }
+  if (endstop == NULL)
+    {
+      as_bad ("missing do");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if (! by)
+    {
+      bystart = "#1";
+      bystop = bystart + 2;
+    }
+  else
+    {
+      bystart = input_line_pointer;
+
+      /* Look for DO.  */
+      bystop = NULL;
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	{
+	  if (strncasecmp (input_line_pointer, "DO", 2) == 0
+	      && (input_line_pointer[2] == '.'
+		  || ! is_part_of_name (input_line_pointer[2])))
+	    {
+	      bystop = input_line_pointer;
+	      input_line_pointer += 2;
+	      break;
+	    }
+	  ++input_line_pointer;
+	}
+      if (bystop == NULL)
+	{
+	  as_bad ("missing do");
+	  ignore_rest_of_line ();
+	  return;
+	}
+    }
+
+  if (*input_line_pointer != '.')
+    extent = '\0';
+  else
+    {
+      extent = input_line_pointer[1];
+      input_line_pointer += 2;
+    }
+
+  /* We have fully parsed the FOR operands.  Now build the loop.  */
+
+  n = push_mri_control (mri_for);
+
+  buf = (char *) xmalloc (50 + (input_line_pointer - varstart));
+
+  /* move init,var */
+  s = buf;
+  *s++ = 'm';
+  *s++ = 'o';
+  *s++ = 'v';
+  *s++ = 'e';
+  if (qual != '\0')
+    *s++ = qual;
+  *s++ = ' ';
+  memcpy (s, initstart, initstop - initstart);
+  s += initstop - initstart;
+  *s++ = ',';
+  memcpy (s, varstart, varstop - varstart);
+  s += varstop - varstart;
+  *s = '\0';
+  md_assemble (buf);
+
+  colon (n->top);
+
+  /* cmp end,var */
+  s = buf;
+  *s++ = 'c';
+  *s++ = 'm';
+  *s++ = 'p';
+  if (qual != '\0')
+    *s++ = qual;
+  *s++ = ' ';
+  memcpy (s, endstart, endstop - endstart);
+  s += endstop - endstart;
+  *s++ = ',';
+  memcpy (s, varstart, varstop - varstart);
+  s += varstop - varstart;
+  *s = '\0';
+  md_assemble (buf);
+
+  /* bcc bottom */
+  ex[0] = extent;
+  ex[1] = '\0';
+  if (up)
+    sprintf (buf, "blt%s %s", ex, n->bottom);
+  else
+    sprintf (buf, "bgt%s %s", ex, n->bottom);
+  md_assemble (buf);
+
+  /* Put together the add or sub instruction used by ENDF.  */
+  s = buf;
+  if (up)
+    strcpy (s, "add");
+  else
+    strcpy (s, "sub");
+  s += 3;
+  if (qual != '\0')
+    *s++ = qual;
+  *s++ = ' ';
+  memcpy (s, bystart, bystop - bystart);
+  s += bystop - bystart;
+  *s++ = ',';
+  memcpy (s, varstart, varstop - varstart);
+  s += varstop - varstart;
+  *s = '\0';
+  n->incr = buf;
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI ENDF pseudo-op.  */
+
+static void
+s_mri_endf (ignore)
+     int ignore;
+{
+  if (mri_control_stack == NULL
+      || mri_control_stack->type != mri_for)
+    {
+      as_bad ("endf without for");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  colon (mri_control_stack->next);
+
+  md_assemble (mri_control_stack->incr);
+
+  sprintf (mri_control_stack->incr, "bra %s", mri_control_stack->top);
+  md_assemble (mri_control_stack->incr);
+
+  free (mri_control_stack->incr);
+
+  colon (mri_control_stack->bottom);
+
+  pop_mri_control ();
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI REPEAT pseudo-op.  */
+
+static void
+s_mri_repeat (ignore)
+     int ignore;
+{
+  struct mri_control_info *n;
+
+  n = push_mri_control (mri_repeat);
+  colon (n->top);
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI UNTIL pseudo-op.  */
+
+static void
+s_mri_until (qual)
+     int qual;
+{
+  char *s;
+
+  if (mri_control_stack == NULL
+      || mri_control_stack->type != mri_repeat)
+    {
+      as_bad ("until without repeat");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  colon (mri_control_stack->next);
+
+  for (s = input_line_pointer; ! is_end_of_line[(unsigned char) *s]; s++)
+    ;
+
+  parse_mri_control_expression (s, qual, (const char *) NULL,
+				mri_control_stack->top, '\0');
+
+  colon (mri_control_stack->bottom);
+
+  input_line_pointer = s;
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI WHILE pseudo-op.  */
+
+static void
+s_mri_while (qual)
+     int qual;
+{
+  char *s;
+
+  struct mri_control_info *n;
+
+  s = input_line_pointer;
+  while (! is_end_of_line[(unsigned char) *s])
+    s++;
+  --s;
+  while (*s == ' ' || *s == '\t')
+    --s;
+  if (s - input_line_pointer > 1
+      && s[-1] == '.')
+    s -= 2;
+  if (s - input_line_pointer < 2
+      || strncasecmp (s - 1, "DO", 2) != 0)
+    {
+      as_bad ("missing do");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  n = push_mri_control (mri_while);
+
+  colon (n->next);
+
+  parse_mri_control_expression (s - 1, qual, (const char *) NULL, n->bottom,
+				s[1] == '.' ? s[2] : '\0');
+
+  input_line_pointer = s + 1;
+  if (*input_line_pointer == '.')
+    input_line_pointer += 2;
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI ENDW pseudo-op.  */
+
+static void
+s_mri_endw (ignore)
+     int ignore;
+{
+  char *buf;
+
+  if (mri_control_stack == NULL
+      || mri_control_stack->type != mri_while)
+    {
+      as_bad ("endw without while");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  buf = (char *) xmalloc (20 + strlen (mri_control_stack->next));
+  sprintf (buf, "bra %s", mri_control_stack->next);
+  md_assemble (buf);
+  free (buf);
+
+  colon (mri_control_stack->bottom);
+
+  pop_mri_control ();
+
+  demand_empty_rest_of_line ();
+}
 
 /*
  * md_parse_option
@@ -4812,7 +5888,14 @@ long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
-  return (fixP->fx_where + fixP->fx_frag->fr_address - fixP->fx_pcrel_adjust);
+  int adjust;
+
+  /* Because fx_pcrel_adjust is a char, and may be unsigned, we store
+     -1 as 64.  */
+  adjust = fixP->fx_pcrel_adjust;
+  if (adjust == 64)
+    adjust = -1;
+  return fixP->fx_where + fixP->fx_frag->fr_address - adjust;
 }
 
 #ifndef BFD_ASSEMBLER

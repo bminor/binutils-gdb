@@ -1,3 +1,12 @@
+Fri Aug 18 10:58:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c: Include subsegs.h.
+	(m68k_ip): Pass 64 rather than -1 to add_Fix in 'B' 'B' case.
+	(md_pcrel_from): If fx_pcrel_adjust is 64, use -1 instead.
+
+	* config/tc-sparc.h (tc_fix_adjustable): For OBJ_AOUT case, adjust
+	BFD_RELOC_16 and BFD_RELOC_32 relocs.
+
 Wed Aug 16 14:48:44 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	* as.h (alloca): Use void* declaration on HP/UX.
@@ -545,7 +554,6 @@ Mon Jul 31 18:19:26 1995  steve chamberlain  <sac@slash.cygnus.com>
 	* gasp.c (main): Parse -I option.
 	(do_include): Look through include list.
 	* gasp.c (change_base): Don't modify numbers in strings. 
-	(pr7583)
 
 Mon Jul 31 12:16:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
