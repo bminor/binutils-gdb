@@ -85,3 +85,12 @@ typedef struct {
   unsigned char	st_other[1];		/* No defined meaning, 0 */
   unsigned char	st_shndx[2];		/* Associated section index */
 } Elf_External_Sym;
+
+/* Note segments */
+
+typedef struct {
+  unsigned char	namesz[4];		/* Size of entry's owner string */
+  unsigned char	descsz[4];		/* Size of the note descriptor */
+  unsigned char	type[4];		/* Interpretation of the descriptor */
+  char		name[1];		/* Start of the name+desc data */
+} Elf_External_Note;

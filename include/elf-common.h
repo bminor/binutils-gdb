@@ -126,3 +126,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define SHF_ALLOC	(1 << 1)	/* Occupies memory during execution */
 #define SHF_EXECINSTR	(1 << 2)	/* Executable machine instructions */
 #define SHF_MASKPROC	0xF0000000	/* Processor-specific semantics */
+
+/* Values of note segment descriptor types for core files. */
+
+#define NT_PRSTATUS	1		/* Contains copy of prstatus struct */
+#define NT_FPREGSET	2		/* Contains copy of fpregset struct */
+#define NT_PRPSINFO	3		/* Contains copy of prpsinfo struct */

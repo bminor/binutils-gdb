@@ -96,3 +96,12 @@ typedef struct {
   Elf_Char	st_other;		/* No defined meaning, 0 */
   Elf_Half	st_shndx;		/* Associated section index */
 } Elf_Internal_Sym;
+
+/* Note segments */
+
+typedef struct {
+  Elf_Word	namesz;			/* Size of entry's owner string */
+  Elf_Word	descsz;			/* Size of the note descriptor */
+  Elf_Word	type;			/* Interpretation of the descriptor */
+  char		name[1];		/* Start of the name+desc data */
+} Elf_Internal_Note;
