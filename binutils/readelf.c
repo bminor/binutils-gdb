@@ -2529,7 +2529,7 @@ parse_args (argc, argv)
     usage ();
 
   while ((c = getopt_long
-	  (argc, argv, "ersuahnldSDAIw::x:i:vVW", options, NULL)) != EOF)
+	  (argc, argv, "ersuahnldSDAIw::x:i:vVWH", options, NULL)) != EOF)
     {
       char *cp;
       int section;
