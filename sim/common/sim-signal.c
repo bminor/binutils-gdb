@@ -72,6 +72,12 @@ sim_signal_to_host (SIM_DESC sd, SIM_SIGNAL sig)
       return SIGXCPU;
 #endif
       break;
+
+    case SIM_SIGFPE:
+#ifdef SIGXCPU
+      return SIGFPE;
+#endif
+      break;
     }
 
   sim_io_eprintf (sd, "sim_signal_to_host: unknown signal: %d\n", sig);

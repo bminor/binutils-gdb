@@ -1,8 +1,12 @@
 Thu Nov 20 19:56:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* sim-main.h (Config): New register.
+	* interp.c (signal_exception): Report internal errors with SIGABRT
+ 	not SIGQUIT.
 
-	* interp.c (decode_coproc): Allow access to Config register.
+	* sim-main.h (C0_CONFIG): New register.
+	(signal.h): No longer include.
+
+	* interp.c (decode_coproc): Allow access C0_CONFIG to register.
 
 Tue Nov 18 15:33:48 1997  Doug Evans  <devans@canuck.cygnus.com>
 

@@ -1683,7 +1683,7 @@ signal_exception (SIM_DESC sd,
       else
 	PC = cia;
       sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, cia,
-		       sim_stopped, SIGTRAP);
+		       sim_stopped, SIM_SIGTRAP);
 
     default:
      /* Store exception code into current exception id variable (used
@@ -1738,25 +1738,25 @@ signal_exception (SIM_DESC sd,
 	    exception address on breakpoint operations. */
 	 PC = EPC;
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
-			  sim_stopped, SIGBUS);
+			  sim_stopped, SIM_SIGBUS);
 
        case ReservedInstruction:
        case CoProcessorUnusable:
 	 PC = EPC;
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
-			  sim_stopped, SIGILL);
+			  sim_stopped, SIM_SIGILL);
 
        case IntegerOverflow:
        case FPE:
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
-			  sim_stopped, SIGFPE);
+			  sim_stopped, SIM_SIGFPE);
 
        case Trap:
        case Watch:
        case SystemCall:
 	 PC = EPC;
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
-			  sim_stopped, SIGTRAP);
+			  sim_stopped, SIM_SIGTRAP);
 
        case BreakPoint:
 	 PC = EPC;
@@ -1766,7 +1766,7 @@ signal_exception (SIM_DESC sd,
        default : /* Unknown internal exception */
 	 PC = EPC;
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
-			  sim_stopped, SIGQUIT);
+			  sim_stopped, SIM_SIGABRT);
 
        }
 

@@ -1,3 +1,10 @@
+Thu Nov 20 20:35:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-signal.h: Start simulator signals at 64 so that host signal
+ 	numbers can be detected and reported.
+
+	* sim-signal.h (SIM_SIGFPE), sim-signal.h: Add signal.
+
 Wed Nov 19 12:02:41 1997  Doug Evans  <devans@seba.cygnus.com>
 
 	* callback.c (cb_host_to_target_stat): Fix return values.

@@ -72,16 +72,6 @@ typedef unsigned64 uword64;
 /* Check if a value will fit within a halfword: */
 #define NOTHALFWORDVALUE(v) ((((((uword64)(v)>>16) == 0) && !((v) & ((unsigned)1 << 15))) || (((((uword64)(v)>>32) == 0xFFFFFFFF) && ((((uword64)(v)>>16) & 0xFFFF) == 0xFFFF)) && ((v) & ((unsigned)1 << 15)))) ? (1 == 0) : (1 == 1))
 
-/* windows always looses */
-#include <signal.h>
-#ifndef SIGBUS
-#define SIGBUS SIGSEGV
-#endif
-#ifdef _WIN32
-#define SIGTRAP 5
-#define SIGQUIT 3
-#endif
-
 
 
 /* Floating-point operations: */
