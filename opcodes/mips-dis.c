@@ -472,7 +472,7 @@ print_insn_little_mips (memaddr, info)
   if (bfd_mach_dvp_p (info->mach)
       || (info->flavour == bfd_target_elf_flavour
 	  && info->symbol != NULL
-	  && MIPS_STO_DVP_P (((elf_symbol_type *) info->symbol)->internal_elf_sym.st_other)))
+	  && STO_DVP_P (((elf_symbol_type *) info->symbol)->internal_elf_sym.st_other)))
     return print_insn_dvp (memaddr, info);
 #endif
   /* end-sanitize-sky */
