@@ -45,33 +45,27 @@ extern void i387_register_to_value (struct frame_info *frame, int regnum,
 extern void i387_value_to_register (struct frame_info *frame, int regnum,
 				    struct type *type, const void *from);
 
-/* Fill register REGNUM in GDB's register array with the appropriate
+/* Fill register REGNUM in GDB's register cache with the appropriate
    value from *FSAVE.  This function masks off any of the reserved
    bits in *FSAVE.  */
 
-extern void i387_supply_register (int regnum, char *fsave);
-
-/* Fill GDB's register array with the floating-point register values
-   in *FSAVE.  This function masks off any of the reserved
-   bits in *FSAVE.  */
-
-extern void i387_supply_fsave (char *fsave);
+extern void i387_supply_fsave (const char *fsave, int regnum);
 
 /* Fill register REGNUM (if it is a floating-point register) in *FSAVE
-   with the value in GDB's register array.  If REGNUM is -1, do this
+   with the value in GDB's register cache.  If REGNUM is -1, do this
    for all registers.  This function doesn't touch any of the reserved
    bits in *FSAVE.  */
 
 extern void i387_fill_fsave (char *fsave, int regnum);
 
-/* Fill GDB's register array with the floating-point and SSE register
-   values in *FXSAVE.  This function masks off any of the reserved
-   bits in *FXSAVE.  */
+/* Fill register REGNUM in GDB's register cache with the appropriate
+   floating-point or SSE register value from *FXSAVE.  This function
+   masks off any of the reserved bits in *FXSAVE.  */
 
-extern void i387_supply_fxsave (char *fxsave);
+extern void i387_supply_fxsave (const char *fxsave, int regnum);
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register array.  If REGNUM is -1, do
+   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
    this for all registers.  This function doesn't touch any of the
    reserved bits in *FXSAVE.  */
 

@@ -80,7 +80,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  i387_supply_fsave ((char *) fpregsetp);
+  i387_supply_fsave ((const char *) fpregsetp, -1);
 }
 
 /* Given a pointer to a floating point register set in (fpregset_t *)

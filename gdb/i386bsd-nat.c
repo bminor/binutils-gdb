@@ -157,7 +157,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  i387_supply_fsave ((char *) fpregsetp);
+  i387_supply_fsave ((const char *) fpregsetp, -1);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -176,7 +176,6 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 void
 fetch_inferior_registers (int regno)
 {
-
   if (regno == -1 || GETREGS_SUPPLIES (regno))
     {
       gregset_t gregs;
@@ -201,7 +200,7 @@ fetch_inferior_registers (int regno)
 		    (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
-	  i387_supply_fxsave (xmmregs);
+	  i387_supply_fxsave (xmmregs, -1);
 	}
       else
 	{
@@ -209,14 +208,14 @@ fetch_inferior_registers (int regno)
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	    perror_with_name ("Couldn't get floating point status");
 
-	  supply_fpregset (&fpregs);
+	  i387_supply_fsave ((const char *) &fpregs, -1);
 	}
 #else
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
-      supply_fpregset (&fpregs);
+      i387_supply_fsave ((const char *) &fpregs, -1);
 #endif
     }
 }
@@ -227,7 +226,6 @@ fetch_inferior_registers (int regno)
 void
 store_inferior_registers (int regno)
 {
-
   if (regno == -1 || GETREGS_SUPPLIES (regno))
     {
       gregset_t gregs;
@@ -272,7 +270,7 @@ store_inferior_registers (int regno)
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	    perror_with_name ("Couldn't get floating point status");
 
-          fill_fpregset (&fpregs, regno);
+          i387_fill_fsave ((char *) &fpregs, regno);
   
           if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)

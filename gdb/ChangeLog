@@ -1,3 +1,42 @@
+2003-08-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* go32-nat.c (fetch_register): Call i387_supply_fsave instead of
+	i387_supply_register.
+	(go32_fetch_registers): Adjust call to i387_supply_fsave.
+	* i386nbsd-tdep.c (fetch_core_registers): Adjust call to
+	i387_supply_fsave.
+	(fetch_elfcore_registers): Adjust call to i387_supply_fsave and
+	i387_supply_fxsave.
+	* i386obsd-tdep.c (fetch_core_registers): Adjust call to
+	i387_supply_fsave.
+	* i386bsd-nat.c (supply_fpregset): Adjust call to
+	i387_supply_fsave.
+	(fetch_inferior_registers): Remove extraneous whitespace.  Adjust
+	call to i387_supply_fxsave.  Call i387_supply_fsave instead of
+	supply_fpregset.
+	(store_inferior_registers): Remove extraneous whitespace.  Call
+	i387_fill_fsave instead of fill_fpregset.
+	* i386gnu-nat.c (fetch_fpregs): Adjust call to i387_supply_fsave.
+	(supply_fpregset): Likewise.
+	* i386v4-nat.c (supply_fpregset): Adjust call to
+	i387_supply_fsave.
+	* i386-interix-nat.c (supply_fpregset): Adjust call to
+	i387_supply_fsave.
+	* i386-linux-nat.c (supply_fpregset): Adjust call to
+	i387_supply_fsave.
+	(supply_fpxregset): Adjust call to i387_adjust_fxsave.
+	* i386-nto-tdep.c (i386nto_supply_fpregset): Adjust calls to
+	i387supply_fsave and i387_supply_fxsave.
+	* i387-tdep.c (i387_supply_fsave): Add `regnum' argument.
+	Incorporate code from `i387_supply_register.
+	(i387_supply_register): Remove.
+	(i387_supply_fxsave): Add `regnum' argument.
+	Update comments.
+	* i387-tdep.h (i387_supply_fsave, i387_supply_fsxave): Adjust
+	prototype.
+	(i387_supply_register): remove prototype.
+	Update comments.
+	
 2003-08-22  Michael Chastain  <mec@shout.net>
 
 	* config/djgpp/fnchange.lst: Remove gdb/testsuite/gdb.c++/*.

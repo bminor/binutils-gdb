@@ -66,7 +66,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   i386obsd_supply_reg (regs, -1);
 
   /* Floating point registers.  */
-  i387_supply_fsave (fsave);
+  i387_supply_fsave (fsave, -1);
 }
 
 static struct core_fns i386obsd_core_fns =

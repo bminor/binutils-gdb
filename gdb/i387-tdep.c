@@ -361,51 +361,44 @@ static int fsave_offset[] =
 #define FSAVE_ADDR(fsave, regnum) (fsave + fsave_offset[regnum - FP0_REGNUM])
 
 
-/* Fill register REGNUM in GDB's register array with the appropriate
+/* Fill register REGNUM in GDB's register cache with the appropriate
    value from *FSAVE.  This function masks off any of the reserved
    bits in *FSAVE.  */
 
 void
-i387_supply_register (int regnum, char *fsave)
-{
-  if (fsave == NULL)
-    {
-      supply_register (regnum, NULL);
-      return;
-    }
-
-  /* Most of the FPU control registers occupy only 16 bits in
-     the fsave area.  Give those a special treatment.  */
-  if (regnum >= FPC_REGNUM
-      && regnum != FIOFF_REGNUM && regnum != FOOFF_REGNUM)
-    {
-      unsigned char val[4];
-
-      memcpy (val, FSAVE_ADDR (fsave, regnum), 2);
-      val[2] = val[3] = 0;
-      if (regnum == FOP_REGNUM)
-	val[1] &= ((1 << 3) - 1);
-      supply_register (regnum, val);
-    }
-  else
-    supply_register (regnum, FSAVE_ADDR (fsave, regnum));
-}
-
-/* Fill GDB's register array with the floating-point register values
-   in *FSAVE.  This function masks off any of the reserved
-   bits in *FSAVE.  */
-
-void
-i387_supply_fsave (char *fsave)
+i387_supply_fsave (const char *fsave, int regnum)
 {
   int i;
 
   for (i = FP0_REGNUM; i < XMM0_REGNUM; i++)
-    i387_supply_register (i, fsave);
+    if (regnum == -1 || regnum == i)
+      {
+	if (fsave == NULL)
+	  {
+	    supply_register (i, NULL);
+	    return;
+	  }
+
+	/* Most of the FPU control registers occupy only 16 bits in the
+	   fsave area.  Give those a special treatment.  */
+	if (i >= FPC_REGNUM
+	    && i != FIOFF_REGNUM && i != FOOFF_REGNUM)
+	  {
+	    unsigned char val[4];
+
+	    memcpy (val, FSAVE_ADDR (fsave, i), 2);
+	    val[2] = val[3] = 0;
+	    if (i == FOP_REGNUM)
+	      val[1] &= ((1 << 3) - 1);
+	    supply_register (i, val);
+	  }
+	else
+	  supply_register (i, FSAVE_ADDR (fsave, i));
+      }
 }
 
 /* Fill register REGNUM (if it is a floating-point register) in *FSAVE
-   with the value in GDB's register array.  If REGNUM is -1, do this
+   with the value in GDB's register cache.  If REGNUM is -1, do this
    for all registers.  This function doesn't touch any of the reserved
    bits in *FSAVE.  */
 
@@ -492,15 +485,15 @@ static int fxsave_offset[] =
   ((regnum == MXCSR_REGNUM) ? (fxsave + 24) : \
    (fxsave + fxsave_offset[regnum - FP0_REGNUM]))
 
-static int i387_tag (unsigned char *raw);
+static int i387_tag (const unsigned char *raw);
 
 
-/* Fill GDB's register array with the floating-point and SSE register
-   values in *FXSAVE.  This function masks off any of the reserved
-   bits in *FXSAVE.  */
+/* Fill register REGNUM in GDB's register cache with the appropriate
+   floating-point or SSE register value from *FXSAVE.  This function
+   masks off any of the reserved bits in *FXSAVE.  */
 
 void
-i387_supply_fxsave (char *fxsave)
+i387_supply_fxsave (const char *fxsave, int regnum)
 {
   int i, last_regnum = MXCSR_REGNUM;
 
@@ -508,62 +501,63 @@ i387_supply_fxsave (char *fxsave)
     last_regnum = FOP_REGNUM;
 
   for (i = FP0_REGNUM; i <= last_regnum; i++)
-    {
-      if (fxsave == NULL)
-	{
-	  supply_register (i, NULL);
-	  continue;
-	}
+    if (regnum == -1 || regnum == i)
+      {
+	if (fxsave == NULL)
+	  {
+	    supply_register (i, NULL);
+	    continue;
+	  }
 
-      /* Most of the FPU control registers occupy only 16 bits in
-	 the fxsave area.  Give those a special treatment.  */
-      if (i >= FPC_REGNUM && i < XMM0_REGNUM
-	  && i != FIOFF_REGNUM && i != FOOFF_REGNUM)
-	{
-	  unsigned char val[4];
+	/* Most of the FPU control registers occupy only 16 bits in
+	   the fxsave area.  Give those a special treatment.  */
+	if (i >= FPC_REGNUM && i < XMM0_REGNUM
+	    && i != FIOFF_REGNUM && i != FOOFF_REGNUM)
+	  {
+	    unsigned char val[4];
 
-	  memcpy (val, FXSAVE_ADDR (fxsave, i), 2);
-	  val[2] = val[3] = 0;
-	  if (i == FOP_REGNUM)
-	    val[1] &= ((1 << 3) - 1);
-	  else if (i== FTAG_REGNUM)
-	    {
-	      /* The fxsave area contains a simplified version of the
-                 tag word.  We have to look at the actual 80-bit FP
-                 data to recreate the traditional i387 tag word.  */
+	    memcpy (val, FXSAVE_ADDR (fxsave, i), 2);
+	    val[2] = val[3] = 0;
+	    if (i == FOP_REGNUM)
+	      val[1] &= ((1 << 3) - 1);
+	    else if (i== FTAG_REGNUM)
+	      {
+		/* The fxsave area contains a simplified version of
+		   the tag word.  We have to look at the actual 80-bit
+		   FP data to recreate the traditional i387 tag word.  */
 
-	      unsigned long ftag = 0;
-	      int fpreg;
-	      int top;
+		unsigned long ftag = 0;
+		int fpreg;
+		int top;
 
-	      top = (((FXSAVE_ADDR (fxsave, FSTAT_REGNUM))[1] >> 3) & 0x7);
+		top = (((FXSAVE_ADDR (fxsave, FSTAT_REGNUM))[1] >> 3) & 0x7);
 
-	      for (fpreg = 7; fpreg >= 0; fpreg--)
-		{
-		  int tag;
+		for (fpreg = 7; fpreg >= 0; fpreg--)
+		  {
+		    int tag;
 
-		  if (val[0] & (1 << fpreg))
-		    {
-		      int regnum = (fpreg + 8 - top) % 8 + FP0_REGNUM;
-		      tag = i387_tag (FXSAVE_ADDR (fxsave, regnum));
-		    }
-		  else
-		    tag = 3;		/* Empty */
+		    if (val[0] & (1 << fpreg))
+		      {
+			int regnum = (fpreg + 8 - top) % 8 + FP0_REGNUM;
+			tag = i387_tag (FXSAVE_ADDR (fxsave, regnum));
+		      }
+		    else
+		      tag = 3;		/* Empty */
 
-		  ftag |= tag << (2 * fpreg);
-		}
-	      val[0] = ftag & 0xff;
-	      val[1] = (ftag >> 8) & 0xff;
-	    }
-	  supply_register (i, val);
-	}
-      else
-	supply_register (i, FXSAVE_ADDR (fxsave, i));
-    }
+		    ftag |= tag << (2 * fpreg);
+		  }
+		val[0] = ftag & 0xff;
+		val[1] = (ftag >> 8) & 0xff;
+	      }
+	    supply_register (i, val);
+	  }
+	else
+	  supply_register (i, FXSAVE_ADDR (fxsave, i));
+      }
 }
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register array.  If REGNUM is -1, do
+   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
    this for all registers.  This function doesn't touch any of the
    reserved bits in *FXSAVE.  */
 
@@ -624,7 +618,7 @@ i387_fill_fxsave (char *fxsave, int regnum)
    *RAW.  */
 
 static int
-i387_tag (unsigned char *raw)
+i387_tag (const unsigned char *raw)
 {
   int integer;
   unsigned int exponent;

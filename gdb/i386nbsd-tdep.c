@@ -1,4 +1,5 @@
-/* Target-dependent code for NetBSD/i386, for GDB.
+/* Target-dependent code for NetBSD/i386.
+
    Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
@@ -88,7 +89,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   i386nbsd_supply_reg (regs, -1);
 
   /* Floating point registers.  */
-  i387_supply_fsave (fsave);
+  i387_supply_fsave (fsave, -1);
 }
 
 static void
@@ -106,9 +107,9 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
 
     case 2:  /* Floating point registers.  */
       if (core_reg_size != 108)
-	warning ("Wrong size FP register set in core file."); 
+	warning ("Wrong size FP register set in core file.");
       else
-	i387_supply_fsave (core_reg_sect);  
+	i387_supply_fsave (core_reg_sect, -1);
       break;
 
     case 3:  /* "Extended" floating point registers.  This is gdb-speak
@@ -116,7 +117,7 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size != 512)
 	warning ("Wrong size XMM register set in core file.");
       else
-	i387_supply_fxsave (core_reg_sect);
+	i387_supply_fxsave (core_reg_sect, -1);
       break;
 
     default:
