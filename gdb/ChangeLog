@@ -1,3 +1,10 @@
+Wed Sep 20 08:16:03 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* defs.h (xmalloc, xrealloc): Delete, they're declared in libiberty.h.
+	(GETENV_PROVIDED, FCLOSE_PROVIDED): New.
+	* doc/gdbint.texinfo (GETENV_PROVIDED, FCLOSE_PROVIDED): Document.
+	* remote-sim.[ch] (sim_callback_write_stdout): New.
+
 Tue Sep 19 15:28:58 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* gdbtypes.c (create_set_type):  Set TYPE_LENGTH in bytes, not bits.
