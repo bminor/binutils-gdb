@@ -1133,12 +1133,11 @@ decode_line_info (unit, stash)
 		  end_sequence = 1;
 		  add_line_info (table, address, filename, line, column,
 				 end_sequence);
-		  arange_add (unit, low_pc, high_pc);
 		  if (low_pc == 0 || address < low_pc)
 		    low_pc = address;
 		  if (address > high_pc)
 		    high_pc = address;
-		  arange_add (unit, low_pc, address);
+		  arange_add (unit, low_pc, high_pc);
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (unit, line_ptr);
