@@ -328,6 +328,7 @@ static procinfo *find_procinfo_or_die PARAMS ((int pid, int tid));
 static procinfo *find_procinfo        PARAMS ((int pid, int tid));
 static procinfo *create_procinfo      PARAMS ((int pid, int tid));
 static void      destroy_procinfo     PARAMS ((procinfo *p));
+static void do_destroy_procinfo_cleanup (void *);
 static void      dead_procinfo        PARAMS ((procinfo *p, 
 					       char *msg, int killp));
 static int       open_procinfo_files  PARAMS ((procinfo *p, int which));
@@ -681,6 +682,12 @@ destroy_procinfo (pi)
       /* Then destroy the parent.  Genocide!!!  */
       destroy_one_procinfo (&procinfo_list, pi);
     }
+}
+
+static void
+do_destroy_procinfo_cleanup (void *pi)
+{
+  destroy_procinfo (pi);
 }
 
 enum { NOKILL, KILL };
@@ -2633,7 +2640,7 @@ proc_iterate_over_mappings (func)
     proc_error (pi, "proc_iterate_over_mappings (open)", __LINE__);
 
   /* Make sure it gets closed again.  */
-  make_cleanup ((make_cleanup_func) close, (void *) map_fd);
+  make_cleanup_close (map_fd);
 
   /* Allocate space for mapping (lifetime only for this function). */
   map = alloca (sizeof (struct prmap));
@@ -2744,7 +2751,7 @@ proc_get_LDT_entry (pi, key)
       return NULL;
     }
   /* Make sure it gets closed again! */
-  old_chain = make_cleanup ((make_cleanup_func) close, (void *) fd);
+  old_chain = make_cleanup_close (fd);
 
   /* Now 'read' thru the table, find a match and return it.  */
   while (read (fd, ldt_entry, sizeof (struct ssd)) == sizeof (struct ssd))
@@ -3013,6 +3020,12 @@ proc_update_threads (pi)
 /*
  * Unixware and Solaris 6 (and later) version
  */
+static void
+do_closedir_cleanup (void *dir)
+{
+  closedir (dir);
+}
+
 int
 proc_update_threads (pi)
      procinfo *pi;
@@ -3051,7 +3064,7 @@ proc_update_threads (pi)
   if ((dirp = opendir (pathname)) == NULL)
     proc_error (pi, "update_threads, opendir", __LINE__);
 
-  old_chain = make_cleanup ((make_cleanup_func) closedir, dirp);
+  old_chain = make_cleanup (do_closedir_cleanup, dirp);
   while ((direntry = readdir (dirp)) != NULL)
     if (direntry->d_name[0] != '.')		/* skip '.' and '..' */
       {
@@ -5033,7 +5046,7 @@ info_proc_cmd (args, from_tty)
       if ((argv = buildargv (args)) == NULL)
 	nomem (0);
       else
-	make_cleanup ((make_cleanup_func) freeargv, argv);
+	make_cleanup_freeargv (argv);
     }
   while (argv != NULL && *argv != NULL)
     {
@@ -5067,7 +5080,7 @@ info_proc_cmd (args, from_tty)
 	   /* No.  So open a procinfo for it, but 
 	      remember to close it again when finished.  */
 	   process = create_procinfo (pid, 0);
-	   make_cleanup ((make_cleanup_func) destroy_procinfo, process);
+	   make_cleanup (do_destroy_procinfo_cleanup, process);
 	   if (!open_procinfo_files (process, FD_CTL))
 	     proc_error (process, "info proc, open_procinfo_files", __LINE__);
 	 }

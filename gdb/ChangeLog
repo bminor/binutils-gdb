@@ -1,3 +1,13 @@
+Mon May 22 15:49:13 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* procfs.c (info_proc_cmd): Use make_cleanup_freeargv.
+	(proc_iterate_over_mappings): Use make_cleanup_close.
+	(proc_get_LDT_entry): Ditto.
+	(do_closedir_cleanup): New function.
+	(proc_update_threads): Use.
+	(do_destroy_procinfo_cleanup): New function.
+	(info_proc_cmd): Use.
+
 Mon May 22 15:21:38 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* top.h (command_loop_marker): Change signature to match
