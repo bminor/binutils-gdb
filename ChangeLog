@@ -1,3 +1,9 @@
+Fri Mar  8 17:51:35 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in ($(CONFIGURE_TARGET_MODULES)): If there is a
+	Makefile after running symlink-tree, then run `make distclean' to
+	avoid clobbering any generated files in srcdir.
+
 Tue Mar  5 08:21:44 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* configure.in (m68k-*-netbsd*): Build everything now.
