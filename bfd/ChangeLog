@@ -1,3 +1,7 @@
+Mon Oct 16 14:43:59 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* libcoff-in.h (pe_data_type.in_reloc_p): New.
+
 Mon Oct 16 10:52:50 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_symbol_processing): Set SEC_ALLOC, not

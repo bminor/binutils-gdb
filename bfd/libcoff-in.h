@@ -93,6 +93,7 @@ typedef struct pe_tdata
   struct internal_extra_pe_aouthdr pe_opthdr;
   int dll;
   int has_reloc_section;
+  boolean (*in_reloc_p) PARAMS((bfd *, reloc_howto_type *));
 } pe_data_type;
 
 #define pe_data(bfd)		((bfd)->tdata.pe_obj_data)
@@ -115,6 +116,9 @@ struct xcoff_tdata
 
   /* modtype from optional header.  */
   short modtype;
+
+  /* cputype from optional header.  */
+  short cputype;
 
   /* maxdata from optional header.  */
   bfd_size_type maxdata;
@@ -254,6 +258,13 @@ extern void bfd_perform_slip PARAMS ((bfd *abfd, unsigned int slip,
 
 /* Functions in cofflink.c.  */
 
+extern struct bfd_hash_entry *_bfd_coff_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+extern boolean _bfd_coff_link_hash_table_init
+  PARAMS ((struct coff_link_hash_table *, bfd *,
+	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+				       struct bfd_hash_table *,
+				       const char *)));
 extern struct bfd_link_hash_table *_bfd_coff_link_hash_table_create
   PARAMS ((bfd *));
 extern const char *_bfd_coff_internal_syment_name
