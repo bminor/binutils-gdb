@@ -106,9 +106,10 @@ static const char *lex_parse_string_end = 0;
   int number;
 };
 
-%token NAME, LIBRARY, DESCRIPTION, STACKSIZE, HEAPSIZE, CODE, DATA
-%token SECTIONS, EXPORTS, IMPORTS, VERSIONK, BASE, CONSTANT, PRIVATE
-%token READ WRITE EXECUTE SHARED NONAME DIRECTIVE
+%token NAME, LIBRARY, DESCRIPTION, STACKSIZE, HEAPSIZE, CODE, DATAU, DATAL
+%token SECTIONS, EXPORTS, IMPORTS, VERSIONK, BASE, CONSTANTU, CONSTANTL
+%token PRIVATEU, PRIVATEL
+%token READ WRITE EXECUTE SHARED NONAMEU NONAMEL DIRECTIVE
 %token <id> ID
 %token <number> NUMBER
 %type  <number> opt_base opt_ordinal
@@ -128,7 +129,7 @@ command:
 	|	STACKSIZE NUMBER opt_number { def_stacksize ($2, $3);}
 	|	HEAPSIZE NUMBER opt_number { def_heapsize ($2, $3);}
 	|	CODE attr_list { def_section ("CODE", $2);}
-	|	DATA attr_list  { def_section ("DATA", $2);}
+	|	DATAU attr_list  { def_section ("DATA", $2);}
 	|	SECTIONS seclist
 	|	EXPORTS explist 
 	|	IMPORTS implist
@@ -145,18 +146,28 @@ explist:
 	;
 
 expline:
-		ID opt_equal_name opt_ordinal exp_opt_list
-			{ def_exports ($1, $2, $3, $4); }
+		/* The opt_comma is necessary to support both the usual
+		  DEF file syntax as well as .drectve syntax which
+		  mandates <expsym>,<expoptlist>.  */
+		ID opt_equal_name opt_ordinal opt_comma exp_opt_list
+			{ def_exports ($1, $2, $3, $5); }
 	;
 exp_opt_list:
-		exp_opt exp_opt_list { $$ = $1 | $2; }
+		/* The opt_comma is necessary to support both the usual
+		   DEF file syntax as well as .drectve syntax which
+		   allows for comma separated opt list.  */
+		exp_opt opt_comma exp_opt_list { $$ = $1 | $3; }
 	|	{ $$ = 0; }
 	;
 exp_opt:
-		NONAME		{ $$ = 1; }
-	|	CONSTANT	{ $$ = 2; }
-	|	DATA		{ $$ = 4; }
-	|	PRIVATE		{ $$ = 8; }
+		NONAMEU		{ $$ = 1; }
+	|	NONAMEL		{ $$ = 1; }
+	|	CONSTANTU	{ $$ = 2; }
+	|	CONSTANTL	{ $$ = 2; }
+	|	DATAU		{ $$ = 4; }
+	|	DATAL		{ $$ = 4; }
+	|	PRIVATEU	{ $$ = 8; }
+	|	PRIVATEL	{ $$ = 8; }
 	;
 implist:	
 		implist impline
@@ -827,8 +838,10 @@ tokens[] =
 {
   { "BASE", BASE },
   { "CODE", CODE },
-  { "CONSTANT", CONSTANT },
-  { "DATA", DATA },
+  { "CONSTANT", CONSTANTU },
+  { "constant", CONSTANTL },
+  { "DATA", DATAU },
+  { "data", DATAL },
   { "DESCRIPTION", DESCRIPTION },
   { "DIRECTIVE", DIRECTIVE },
   { "EXECUTE", EXECUTE },
@@ -837,8 +850,10 @@ tokens[] =
   { "IMPORTS", IMPORTS },
   { "LIBRARY", LIBRARY },
   { "NAME", NAME },
-  { "NONAME", NONAME },
-  { "PRIVATE", PRIVATE },
+  { "NONAME", NONAMEU },
+  { "noname", NONAMEL },
+  { "PRIVATE", PRIVATEU },
+  { "private", PRIVATEL },
   { "READ", READ },
   { "SECTIONS", SECTIONS },
   { "SEGMENTS", SECTIONS },

@@ -1307,7 +1307,8 @@ make_one (exp, parent)
   id5 = quick_section (abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
   id4 = quick_section (abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
   id6 = quick_section (abfd, ".idata$6", SEC_HAS_CONTENTS, 2);
-  quick_symbol (abfd, U(""), exp->internal_name, "", tx, BSF_GLOBAL, 0);
+  if (! exp->flag_data)
+    quick_symbol (abfd, U(""), exp->internal_name, "", tx, BSF_GLOBAL, 0);
   quick_symbol (abfd, U("_head_"), dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U("__imp_"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
   quick_symbol (abfd, U("_imp__"), exp->internal_name, "", id5, BSF_GLOBAL, 0);

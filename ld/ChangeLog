@@ -1,3 +1,14 @@
+1999-09-28  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* deffilep.y (tokens): Add upper and lower case versions of DATA,
+	CONSTANT, NONAME and PRIVATE tokens.
+	(command): Use DATAU.
+	(expline): Allow for drectve syntax as well.
+	(exp_opt_list): Likewise.
+	(exp_opt): Likewise.
+	* pe-dll.c (make_one): Only generate the idata entries for data
+	symbols.
+
 1999-09-28  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* scripttempl/elf.sc (.sdata): Include .gnu.linkonce.s.* sections
