@@ -1,3 +1,7 @@
+2003-04-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfxx-mips.c (_bfd_mips_elf_hide_symbol): Test for NULL dynobj.
+
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
         * Makefile.am (ALL_MACHINES): Add cpu-xtensa.lo.
