@@ -1,5 +1,11 @@
 2004-09-16  Andrew Cagney  <cagney@gnu.org>
 
+	* inf-child.c: Include "gdb_string.h".
+	(inf_child_core_file_to_sym_file): Delete.
+	(inf_child_target): Set to_fetch_registers and to_store_registers.
+	* inf-ptrace.c: Include "gdb_string.h".
+	* Makefile.in: Update all dependencies.
+
 	* Makefile.in (gnu-v3-abi.o): Add explict rule to avoid -Werror
 	problem.
 

@@ -27,6 +27,7 @@
 #include "symtab.h"
 #include "target.h"
 #include "inferior.h"
+#include "gdb_string.h"
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
@@ -188,14 +189,6 @@ inf_child_pid_to_exec_file (int pid)
   return NULL;
 }
 
-static char *
-inf_child_core_file_to_sym_file (char *core)
-{
-  /* The target stratum for a running executable need not support this
-     operation.  */
-  return NULL;
-}
-
 struct target_ops *
 inf_child_target (void)
 {
@@ -206,6 +199,8 @@ inf_child_target (void)
   t->to_open = inf_child_open;
   t->to_post_attach = inf_child_post_attach;
   t->to_post_wait = inf_child_post_wait;
+  t->to_fetch_registers = inf_child_fetch_inferior_registers;
+  t->to_store_registers = inf_child_store_inferior_registers;
   t->to_prepare_to_store = inf_child_prepare_to_store;
   t->to_insert_breakpoint = memory_insert_breakpoint;
   t->to_remove_breakpoint = memory_remove_breakpoint;
