@@ -1,3 +1,48 @@
+Thu Mar 13 12:55:48 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sim_calls.c (sim_open): New SIM_DESC result.  Argument is now
+	in argv form.
+	(other sim_*): New SIM_DESC argument.
+
+Thu Feb 13 10:35:14 1997  Andrew Cagney  <cagney@phydeaux.cygnus.com>
+
+	* ppc-opcode-simple-array, ppc-opcode-simple-goto,
+ 	ppc-opcode-simple-switch, ppc-opcode-complex-array,
+ 	ppc-opcode-complex-goto, ppc-opcode-complex-switch,
+ 	ppc-opcode-jump, ppc-opcode-goto, ppc-opcode-flat: Delete,
+ 	superseeded by --sim-decode-mechanism option.
+
+	* ppc-opcode-simple, dc-simple: Rename to be 8.3
+	* ppc-opcode-complex, dc-complex: Ditto.
+	* ppc-opcode-stupid, dc-stupid: Ditto.
+	* ppc-opcode-test-1, dc-test.01: Ditto.
+	* ppc-opcode-test-2, dc-test.02: Ditto.
+
+	* configure.in (--enable-sim-opcode): Change prefix to dc- instead
+ 	of ppc-opcode-.
+
+Wed Feb 12 19:33:45 1997  Andrew Cagney  <cagney@phydeaux.cygnus.com>
+
+	* Many of the ppc-opcode-* files are identical baring the type of
+ 	lookup table.  Instead of having multiple tables, igen can do this
+	via an additional option.
+	
+	* ld-decode.h, ld-decode.c (force_decode_gen_type): New function,
+ 	allow the type of generated table specified in the decode file to
+ 	be overridden.
+
+	* ld-decode.c (load_decode_table): Allow the table type to be
+ 	overridden.
+
+	* igen.c (main): Add -T <mechanism> option so that an overriding
+ 	instruction decode mechanism can be specified.
+
+	* configure.in: New option --sim-decode-mechanism to control
+ 	igen's new -T <mechanism> flag.
+	* Makefile.in (IGEN_FLAGS): Add IGEN_IDECODE_MECHANISM set by the
+ 	configure script.
+	* configure: Regenerate.
+	
 Tue Feb 11 13:49:10 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* events.c (event_queue_create): Don't use NULL to initialize an
