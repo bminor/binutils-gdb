@@ -296,6 +296,22 @@ gdb.mm: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texi
 	sed -e 's/---/\\(em/g' \
 	>gdb.mm 
 
+# start-sanitize-gdbtk
+# GDB GUI MANUAL: TeX dvi file
+gdbgui.dvi : gdbgui.texinfo ${SFILES_DOC}
+	$(SET_TEXINPUTS) $(TEX) gdbgui.texinfo
+	$(TEXINDEX) gdbgui.??
+	$(SET_TEXINPUTS) $(TEX) gdbgui.texinfo
+	rm -f gdbgui.?? gdbgui.aux gdbgui.cps gdbgui.fns gdbgui.kys \
+		gdbgui.log gdbgui.pgs gdbgui.toc gdbgui.tps gdbgui.vrs
+
+# GDB GUI MANUAL: info file
+gdb-gui: gdbgui.info
+
+gdbgui.info: gdbgui.texinfo ${SFILES_DOC}
+	$(MAKEINFO) -o gdbgui.info $(srcdir)/gdbgui.texinfo
+# end-sanitize-gdbtk
+
 # GDB INTERNALS MANUAL: TeX dvi file
 gdbint.dvi : gdbint.texinfo
 	$(SET_TEXINPUTS) $(TEX) gdbint.texinfo
