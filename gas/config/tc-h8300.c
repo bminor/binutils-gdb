@@ -1323,10 +1323,9 @@ md_convert_frag (headers, fragP)
   abort ();
 }
 
-valueT
-DEFUN (md_section_align, (seg, size),
-       segT seg AND
-       valueT size)
+valueT md_section_align (seg, size)
+     segT seg;
+     valueT size;
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1) & (-1 << section_alignment[(int) seg]));
 
