@@ -560,7 +560,6 @@ INSTALL_X11_MODULES = \
 
 # This is a list of the targets for all of the modules which are compiled
 # using $(TARGET_FLAGS_TO_PASS).
-# RENAME these  all-xinberty should be all-target-libiberty
 ALL_TARGET_MODULES = \
 	all-target-libio \
 	all-target-libstdc++ \
@@ -595,7 +594,6 @@ CHECK_TARGET_MODULES = \
 
 # This is a list of the install targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
-
 INSTALL_TARGET_MODULES = \
 	install-target-libio \
 	install-target-libstdc++ \
