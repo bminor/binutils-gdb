@@ -331,6 +331,9 @@ static void
 EXFUN(dwarf_read_array_type, (struct dieinfo *dip));
 
 static void
+EXFUN(read_tag_pointer_type, (struct dieinfo *dip));
+
+static void
 EXFUN(read_subroutine_type,
      (struct dieinfo *dip AND char *thisdie AND char *enddie));
 
@@ -1209,6 +1212,51 @@ DEFUN(dwarf_read_array_type, (dip), struct dieinfo *dip)
 
 LOCAL FUNCTION
 
+	read_tag_pointer_type -- read TAG_pointer_type DIE
+
+SYNOPSIS
+
+	static void read_tag_pointer_type (struct dieinfo *dip)
+
+DESCRIPTION
+
+	Extract all information from a TAG_pointer_type DIE and add to
+	the user defined type vector.
+ */
+
+static void
+DEFUN(read_tag_pointer_type, (dip), struct dieinfo *dip)
+{
+  struct type *type;
+  struct type *utype;
+  char *sub;
+  char *subend;
+  short temp;
+  
+  type = decode_die_type (dip);
+  if ((utype = lookup_utype (dip -> dieref)) == NULL)
+    {
+      utype = lookup_pointer_type (type);
+      (void) alloc_utype (dip -> dieref, utype);
+    }
+  else
+    {
+      TYPE_TARGET_TYPE (utype) = type;
+      TYPE_POINTER_TYPE (type) = utype;
+
+      /* We assume the machine has only one representation for pointers!  */
+      /* FIXME:  This confuses host<->target data representations, and is a
+	 poor assumption besides. */
+      
+      TYPE_LENGTH (utype) = sizeof (char *);
+      TYPE_CODE (utype) = TYPE_CODE_PTR;
+    }
+}
+
+/*
+
+LOCAL FUNCTION
+
 	read_subroutine_type -- process TAG_subroutine_type dies
 
 SYNOPSIS
@@ -1622,6 +1670,9 @@ DEFUN(process_dies, (thisdie, enddie, objfile),
 	      break;
 	    case TAG_array_type:
 	      dwarf_read_array_type (&di);
+	      break;
+	    case TAG_pointer_type:
+	      read_tag_pointer_type (&di);
 	      break;
 	    default:
 	      (void) new_symbol (&di);

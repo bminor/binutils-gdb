@@ -1,5 +1,8 @@
 Mon Feb 17 07:13:27 1992  Fred Fish  (fnf at cygnus.com)
 
+	* dwarfread.c (process_dies):  Add case to handle TAG_pointer_type
+	DIE's.  Add new function read_tag_pointer_type() to read them.
+
 	* dwarfread.c (dwarf_read_array_type, read_subroutine_type):
 	When creating a new user defined type, check to see if a partial
 	type already exists, and if so, bash it to fit.
