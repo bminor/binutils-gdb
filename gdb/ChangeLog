@@ -1,3 +1,8 @@
+2005-01-19  Jim Blandy  <jimb@redhat.com>
+
+	* rdi-share/configure, rdi-share/aclocal.m4: Regenerated using
+	autoconf 2.59 and automake 1.9.3.
+
 2005-01-19  Andrew Cagney  <cagney@gnu.org>
 
 	* exceptions.h (deprecated_throw_reason): Rename throw_reason.
