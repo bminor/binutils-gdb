@@ -235,7 +235,7 @@ typedef enum bfd_print_symbol
   bfd_print_symbol_name,
   bfd_print_symbol_more,
   bfd_print_symbol_all,
-  bfd_print_symbol_nm /* Pretty format suitable for nm program. */
+  bfd_print_symbol_nm, /* Pretty format suitable for nm program. */
 } bfd_print_symbol_type;
     
 
@@ -281,7 +281,8 @@ CAT(NAME,_sizeof_headers),\
 CAT(NAME,_bfd_debug_info_start),\
 CAT(NAME,_bfd_debug_info_end),\
 CAT(NAME,_bfd_debug_info_accumulate),\
-CAT(NAME,_bfd_get_relocated_section_contents)
+CAT(NAME,_bfd_get_relocated_section_contents),\
+CAT(NAME,_bfd_relax_section)
 
 #define COFF_SWAP_TABLE \
  coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in, \
@@ -1178,6 +1179,9 @@ long EXFUN(bfd_get_mtime, (bfd *));
 
 #define bfd_get_relocated_section_contents(abfd, seclet) \
 	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet))
+
+#define bfd_relax_section(abfd, section, symbols) \
+       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, symbols))
 symindex EXFUN(bfd_get_next_mapent, (bfd *, symindex previous, carsym ** sym));
 boolean EXFUN(bfd_set_archive_head, (bfd *output, bfd *new_head));
 bfd *EXFUN(bfd_get_elt_at_index, (bfd * archive, int index));
@@ -1272,6 +1276,7 @@ typedef struct bfd_target
   SDEF (void, _bfd_debug_info_end, (bfd *));
   SDEF (void, _bfd_debug_info_accumulate, (bfd *, struct sec  *));
   SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet_struct *));
+  SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **));
   SDEF(void, _bfd_coff_swap_aux_in,(
        bfd            *abfd ,
        PTR             ext,
