@@ -119,7 +119,7 @@ c-lang.h
 c-typeprint.c
 c-valprint.c
 call-cmds.h
-ch-exp.y
+ch-exp.c
 ch-lang.c
 ch-lang.h
 ch-typeprint.c
