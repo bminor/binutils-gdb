@@ -1,5 +1,13 @@
 2004-03-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* user-regs.c: Update copyright years.
+	(struct user_regs): Rename to gdb_user_regs.
+	(append_user_reg, builtin_user_regs, user_regs_init)
+	(user_reg_add, user_reg_map_name_to_regnum)
+	(usernum_to_user_reg): Update.
+
+2004-03-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* arm-tdep.c (arm_use_struct_convention): Look through typedefs.
 	* gdbtypes.c (check_typedef): Update comments.
 

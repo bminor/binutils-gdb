@@ -1,6 +1,6 @@
 /* User visible, per-frame registers, for GDB, the GNU debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -45,14 +45,20 @@ struct user_reg
   struct user_reg *next;
 };
 
-struct user_regs
+/* This structure is named gdb_user_regs instead of user_regs to avoid
+   conflicts with any "struct user_regs" in system headers.  For instance,
+   on ARM GNU/Linux native builds, nm-linux.h includes <signal.h> includes
+   <sys/ucontext.h> includes <sys/procfs.h> includes <sys/user.h>, which
+   declares "struct user_regs".  */
+
+struct gdb_user_regs
 {
   struct user_reg *first;
   struct user_reg **last;
 };
 
 static void
-append_user_reg (struct user_regs *regs, const char *name,
+append_user_reg (struct gdb_user_regs *regs, const char *name,
 		 user_reg_read_ftype *read, struct user_reg *reg)
 {
   /* The caller is responsible for allocating memory needed to store
@@ -68,7 +74,7 @@ append_user_reg (struct user_regs *regs, const char *name,
 
 /* An array of the builtin user registers.  */
 
-static struct user_regs builtin_user_regs = { NULL, &builtin_user_regs.first };
+static struct gdb_user_regs builtin_user_regs = { NULL, &builtin_user_regs.first };
 
 void
 user_reg_add_builtin (const char *name, user_reg_read_ftype *read)
@@ -86,7 +92,7 @@ static void *
 user_regs_init (struct gdbarch *gdbarch)
 {
   struct user_reg *reg;
-  struct user_regs *regs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct user_regs);
+  struct gdb_user_regs *regs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct gdb_user_regs);
   regs->last = &regs->first;
   for (reg = builtin_user_regs.first; reg != NULL; reg = reg->next)
     append_user_reg (regs, reg->name, reg->read,
@@ -98,7 +104,7 @@ void
 user_reg_add (struct gdbarch *gdbarch, const char *name,
 		 user_reg_read_ftype *read)
 {
-  struct user_regs *regs = gdbarch_data (gdbarch, user_regs_data);
+  struct gdb_user_regs *regs = gdbarch_data (gdbarch, user_regs_data);
   if (regs == NULL)
     {
       /* ULGH, called during architecture initialization.  Patch
@@ -137,7 +143,7 @@ user_reg_map_name_to_regnum (struct gdbarch *gdbarch, const char *name,
 
   /* Search the user name space.  */
   {
-    struct user_regs *regs = gdbarch_data (gdbarch, user_regs_data);
+    struct gdb_user_regs *regs = gdbarch_data (gdbarch, user_regs_data);
     struct user_reg *reg;
     int nr;
     for (nr = 0, reg = regs->first; reg != NULL; reg = reg->next, nr++)
@@ -155,7 +161,7 @@ user_reg_map_name_to_regnum (struct gdbarch *gdbarch, const char *name,
 static struct user_reg *
 usernum_to_user_reg (struct gdbarch *gdbarch, int usernum)
 {
-  struct user_regs *regs = gdbarch_data (gdbarch, user_regs_data);
+  struct gdb_user_regs *regs = gdbarch_data (gdbarch, user_regs_data);
   struct user_reg *reg;
   for (reg = regs->first; reg != NULL; reg = reg->next)
     {
