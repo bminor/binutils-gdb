@@ -40,7 +40,7 @@ Things-to-lose:
 
 Do-last:
 
-v850e_files="interp.c simops.c v850.igen v850-dc"
+v850e_files="interp.c simops.c v850.igen v850-dc ChangeLog"
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
         for i in $v850e_files ; do
                 if test -r $i && (grep sanitize-v850e $i > /dev/null) ; then
