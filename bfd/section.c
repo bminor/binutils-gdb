@@ -152,7 +152,6 @@ CODE_FRAGMENT
 .
 .    CONST char *name;
 .
-.
 .        {* Which section is it 0.nth      *}
 .
 .   int index;                      
@@ -172,36 +171,31 @@ CODE_FRAGMENT
 .        {* Tells the OS to allocate space for this section when loaded.
 .           This would clear for a section containing debug information
 .           only. *}
-.          
-.
 .#define SEC_ALLOC      0x001
+.          
 .        {* Tells the OS to load the section from the file when loading.
 .           This would be clear for a .bss section *}
-.
 .#define SEC_LOAD       0x002
+.
 .        {* The section contains data still to be relocated, so there will
 .           be some relocation information too. *}
-.
 .#define SEC_RELOC      0x004
 .
-.        {* Obsolete ? *}
-.
+.#if 0   {* Obsolete ? *}
 .#define SEC_BALIGN     0x008
+.#endif
 .
 .        {* A signal to the OS that the section contains read only
 .          data. *}
 .#define SEC_READONLY   0x010
 .
 .        {* The section contains code only. *}
-.
 .#define SEC_CODE       0x020
 .
 .        {* The section contains data only. *}
-.
-.#define SEC_DATA        0x040
+.#define SEC_DATA       0x040
 .
 .        {* The section will reside in ROM. *}
-.
 .#define SEC_ROM        0x080
 .
 .        {* The section contains constructor information. This section
@@ -214,46 +208,53 @@ CODE_FRAGMENT
 .           sections called <<__CTOR_LIST__>> and relocte the data
 .           contained within - exactly the operations it would peform on
 .           standard data. *}
-.
 .#define SEC_CONSTRUCTOR 0x100
 .
 .        {* The section is a constuctor, and should be placed at the
-.          end of the . *}
-.
+.          end of the text, data, or bss section(?). *}
 .#define SEC_CONSTRUCTOR_TEXT 0x1100
-.
 .#define SEC_CONSTRUCTOR_DATA 0x2100
-.
 .#define SEC_CONSTRUCTOR_BSS  0x3100
 .
 .        {* The section has contents - a data section could be
 .           <<SEC_ALLOC>> | <<SEC_HAS_CONTENTS>>, a debug section could be
 .           <<SEC_HAS_CONTENTS>> *}
-.
 .#define SEC_HAS_CONTENTS 0x200
 .
 .        {* An instruction to the linker not to output sections
 .          containing this flag even if they have information which
 .          would normally be written. *}
-.
 .#define SEC_NEVER_LOAD 0x400
 .
 .        {* The section is a shared library section.  The linker must leave
 .           these completely alone, as the vma and size are used when
 .           the executable is loaded. *}
-.
 .#define SEC_SHARED_LIBRARY 0x800
 .
 .        {* The section is a common section (symbols may be defined
 .           multiple times, the value of a symbol is the amount of
 .           space it requires, and the largest symbol value is the one
-.           used).  Most targets have exactly one of these (.bss), but
-.           ECOFF has two. *}
-.
+.           used).  Most targets have exactly one of these (which we
+.	    translate to bfd_com_section), but ECOFF has two. *}
 .#define SEC_IS_COMMON 0x8000
-.       
+.
+.	{*  End of section flags.  *}
+.
+.       {*  The virtual memory address of the section - where it will be
+.           at run time.  The symbols are relocated against this.  The
+.	    user_set_vma flag is maintained by bfd; if it's not set, the
+.	    backend can assign addresses (for example, in <<a.out>>, where
+.	    the default address for <<.data>> is dependent on the specific
+.	    target and various flags).  *}
+.
 .   bfd_vma vma;
 .   boolean user_set_vma;
+.
+.       {*  The load address of the section - where it would be in a
+.           rom image, really only used for writing section header
+.	    information. *}
+.
+.   bfd_vma lma;
 .
 .        {* The size of the section in bytes, as it will be output.
 .           contains a value even if the section has no contents (eg, the
@@ -298,9 +299,9 @@ CODE_FRAGMENT
 .   unsigned reloc_count;
 .
 .        {* Information below is back end specific - and not always used
-.           or updated 
+.           or updated.  *}
 .
-.           File position of section data    *}
+.        {* File position of section data    *}
 .
 .   file_ptr filepos;      
 .        
@@ -350,29 +351,33 @@ CODE_FRAGMENT
 .	 {* A symbol which points at this section only *}
 .   struct symbol_cache_entry *symbol;  
 .   struct symbol_cache_entry **symbol_ptr_ptr;
+.
 .   struct bfd_seclet *seclets_head;
 .   struct bfd_seclet *seclets_tail;
 .} asection ;
 .
 .
+.    {* These sections are global, and are managed by BFD.  The application
+.       and target back end are not permitted to change the values in
+.	these sections.  *}
 .#define BFD_ABS_SECTION_NAME "*ABS*"
 .#define BFD_UND_SECTION_NAME "*UND*"
 .#define BFD_COM_SECTION_NAME "*COM*"
 .#define BFD_IND_SECTION_NAME "*IND*"
 .
 .    {* the absolute section *}
-. extern   asection bfd_abs_section;
+.extern asection bfd_abs_section;
 .    {* Pointer to the undefined section *}
-. extern   asection bfd_und_section;
+.extern asection bfd_und_section;
 .    {* Pointer to the common section *}
-. extern asection bfd_com_section;
+.extern asection bfd_com_section;
 .    {* Pointer to the indirect section *}
-. extern asection bfd_ind_section;
+.extern asection bfd_ind_section;
 .
-. extern struct symbol_cache_entry *bfd_abs_symbol;
-. extern struct symbol_cache_entry *bfd_com_symbol;
-. extern struct symbol_cache_entry *bfd_und_symbol;
-. extern struct symbol_cache_entry *bfd_ind_symbol;
+.extern struct symbol_cache_entry *bfd_abs_symbol;
+.extern struct symbol_cache_entry *bfd_com_symbol;
+.extern struct symbol_cache_entry *bfd_und_symbol;
+.extern struct symbol_cache_entry *bfd_ind_symbol;
 .#define bfd_get_section_size_before_reloc(section) \
 .     (section->reloc_done ? (abort(),1): (section)->_raw_size)
 .#define bfd_get_section_size_after_reloc(section) \
@@ -391,7 +396,7 @@ static CONST asymbol global_syms[] = {
 
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)	\
   asymbol *SYM = (asymbol *) &global_syms[IDX]; \
-  asection SEC = { NAME, 0, 0, FLAGS, 0, (boolean) 0, 0, 0, 0, &SEC,\
+  asection SEC = { NAME, 0, 0, FLAGS, 0, 0, (boolean) 0, 0, 0, 0, &SEC,\
 		    0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, (boolean) 0, \
 		     (asymbol *) &global_syms[IDX], &SYM, }
 
@@ -757,7 +762,7 @@ DEFUN(bfd_set_section_contents,(abfd, section, location, offset, count),
         return(false);
       }
 
-  if (offset < 0 || count < 0)
+  if (offset < 0)
     {
     bad_val:
       bfd_error = bad_value;
@@ -768,6 +773,24 @@ DEFUN(bfd_set_section_contents,(abfd, section, location, offset, count),
       || count > sz
       || offset + count > sz)
     goto bad_val;
+
+  switch (abfd->direction)
+    {
+      case read_direction:
+      case no_direction:
+	bfd_error = invalid_operation;
+	return false;
+
+      case write_direction:
+	break;
+
+      case both_direction:
+	/* File is opened for update. `output_has_begun' some time ago when
+	   the file was created.  Do not recompute sections sizes or alignments
+	   in _bfd_set_section_content.  */
+	abfd->output_has_begun = true;
+	break;
+    }
 
   if (BFD_SEND (abfd, _bfd_set_section_contents,
                 (abfd, section, location, offset, count))) 
@@ -818,7 +841,7 @@ DEFUN(bfd_get_section_contents,(abfd, section, location, offset, count),
       return true;
     }
 
-  if (offset < 0 || count < 0)
+  if (offset < 0)
     {
     bad_val:
       bfd_error = bad_value;
