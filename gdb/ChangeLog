@@ -1,5 +1,10 @@
 2001-08-02  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* config/i386/xm-go32.h: Include xm-i386.h.
+	(HOST_BYTE_ORDER, HOST_LONG_DOUBLE_FORMAT): Remove definitions.
+
+2001-08-02  Eli Zaretskii  <eliz@is.elta.co.il>
+
 	The following changes avoid polluting global namespace with the
 	`enable' and `disable' identifiers, because some platforms define
 	in their system headers symbols with global scope that go by those
