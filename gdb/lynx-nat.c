@@ -53,7 +53,7 @@ static int regmap[] =
   X(fault),			/* we just substitute these two in the hopes
 				   that they are useful. */
 };
-#endif
+#endif /* I386 */
 
 #ifdef M68K
 /* Mappings from tm-m68k.h */
@@ -94,7 +94,80 @@ static int regmap[] =
   X(ssw),			/* fpcode */
   X(fault),			/* fpflags */
 };
-#endif
+#endif /* M68K */
+
+#ifdef SPARC
+/* Mappings from tm-sparc.h */
+
+#define FX(ENTRY)(offsetof(struct fcontext, ENTRY))
+
+static int regmap[] =
+{
+  -1,				/* g0 */
+  X(g1),
+  X(g2),
+  X(g3),
+  X(g4),
+  -1,				/* g5->g7 aren't saved by Lynx */
+  -1,
+  -1,
+
+  X(o[0]),
+  X(o[1]),
+  X(o[2]),
+  X(o[3]),
+  X(o[4]),
+  X(o[5]),
+  X(o[6]),			/* sp */
+  X(o[7]),			/* ra */
+
+  -1,-1,-1,-1,-1,-1,-1,-1,	/* l0 -> l7 */
+
+  -1,-1,-1,-1,-1,-1,-1,-1,	/* i0 -> i7 */
+
+  FX(f.fregs[0]),		/* f0 */
+  FX(f.fregs[1]),
+  FX(f.fregs[2]),
+  FX(f.fregs[3]),
+  FX(f.fregs[4]),
+  FX(f.fregs[5]),
+  FX(f.fregs[6]),
+  FX(f.fregs[7]),
+  FX(f.fregs[8]),
+  FX(f.fregs[9]),
+  FX(f.fregs[10]),
+  FX(f.fregs[11]),
+  FX(f.fregs[12]),
+  FX(f.fregs[13]),
+  FX(f.fregs[14]),
+  FX(f.fregs[15]),
+  FX(f.fregs[16]),
+  FX(f.fregs[17]),
+  FX(f.fregs[18]),
+  FX(f.fregs[19]),
+  FX(f.fregs[20]),
+  FX(f.fregs[21]),
+  FX(f.fregs[22]),
+  FX(f.fregs[23]),
+  FX(f.fregs[24]),
+  FX(f.fregs[25]),
+  FX(f.fregs[26]),
+  FX(f.fregs[27]),
+  FX(f.fregs[28]),
+  FX(f.fregs[29]),
+  FX(f.fregs[30]),
+  FX(f.fregs[31]),
+
+  X(y),
+  X(psr),
+  X(wim),
+  X(tbr),
+  X(pc),
+  X(npc),
+  FX(fsr),			/* fpsr */
+  -1,				/* cpsr */
+};
+#endif /* SPARC */
 
 #ifdef rs6000
 

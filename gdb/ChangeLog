@@ -1,3 +1,8 @@
+Fri Apr  8 15:35:30 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* lynx-nat.c:  Restore regmap structure for SPARC.  It's needed
+	for core files.
+
 Fri Apr  8 14:53:35 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* values.c (unpack_long): Remove obsolete comment about using a
