@@ -4092,9 +4092,12 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
   else
     {
       relocs = finfo->relocs;
-      if (bfd_seek (input_bfd, input_section->rel_filepos, SEEK_SET) != 0
-	  || bfd_read (relocs, 1, rel_size, input_bfd) != rel_size)
-	return false;
+      if (rel_size > 0)
+	{
+	  if (bfd_seek (input_bfd, input_section->rel_filepos, SEEK_SET) != 0
+	      || bfd_read (relocs, 1, rel_size, input_bfd) != rel_size)
+	    return false;
+	}
     }
 
   /* Relocate the section contents.  */
@@ -4123,7 +4126,7 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
 
   /* If we are producing relocateable output, the relocs were
      modified, and we now write them out.  */
-  if (finfo->info->relocateable)
+  if (finfo->info->relocateable && rel_size > 0)
     {
       if (bfd_seek (finfo->output_bfd, *reloff_ptr, SEEK_SET) != 0)
 	return false;
