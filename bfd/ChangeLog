@@ -1,3 +1,12 @@
+Wed Jul  5 10:31:47 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use $ac_config_sub, not $configsub.
+	* configure: Likewise.
+
+	Permit --enable-targets=ieee:
+	* config.bfd (*-*-ieee*): New target.
+	* config/ieee.mt: New file.
+
 Wed Jul  5 04:16:35 1995  Ken Raeburn  <raeburn@kr-pc.cygnus.com>
 
 	* config/i386aix.mh (HDEFINES): Remove -DFASCIST_FDOPEN.

@@ -56,7 +56,7 @@ AC_SUBST_FILE(host_makefile_frag)
 if test -n "$enable_targets" ; then
     for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
-	result=`$configsub $targ 2>/dev/null`
+	result=`$ac_config_sub $targ 2>/dev/null`
 	if test -n "$result" ; then
 	    canon_targets="$canon_targets $result"
 	else
