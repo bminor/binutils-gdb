@@ -3,7 +3,7 @@
 # appropriate for this directory.  For more information, check any
 # existing configure script.
 
-configdirs="h8300 z8k h8500 sh"
+configdirs="h8300 z8k h8500 sh w65"
 srctrigger=Makefile.in
 srcname="sim"
 target_dependent=true
@@ -22,7 +22,8 @@ case "${target}" in
   h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;
   z8k*-*-*)		sim_target=z8k ;;
-  sh*-*-*)		sim_target=sh ;;
+  sh*-*-*)		sim_target=sh ;; 
+  w65-*-*)		sim_target=w65 ;;
   *)			sim_target=none ;;
 esac
 
