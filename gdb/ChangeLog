@@ -1,3 +1,7 @@
+Mon Nov  4 00:48:37 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* mswin/recordit:  Fix problem with relative paths.
+
 Sun Nov  3 18:06:42 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* mswin/{Makefile.in configure configure.in}:  New files for
