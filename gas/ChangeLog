@@ -1,3 +1,8 @@
+2003-06-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (s_cpsetup,s_cprestore,s_cpreturn): Revert
+	2003-06-11 change.
+
 2003-06-19  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (parse_reg): Invalid registers generate an error
