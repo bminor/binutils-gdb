@@ -1259,22 +1259,31 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 		}
 	    }
 
+	  /* Perform a signed range check.  */
+	  signed_addend = value;
+	  signed_addend >>= howto->rightshift;
+	  
 	  /* It is not an error for an undefined weak reference to be
 	     out of range.  Any program that branches to such a symbol
 	     is going to crash anyway, so there is no point worrying 
 	     about getting the destination exactly right.  */	     
 	  if (! h || h->root.type != bfd_link_hash_undefweak)
 	    {
-	      /* Perform a signed range check.  */
-	      signed_addend = value;
-	      signed_addend >>= howto->rightshift;
-	      if (signed_addend > ((bfd_signed_vma)(howto->dst_mask >> 1))
+	      if (   signed_addend >   ((bfd_signed_vma)  (howto->dst_mask >> 1))
 		  || signed_addend < - ((bfd_signed_vma) ((howto->dst_mask + 1) >> 1)))
 		return bfd_reloc_overflow;
 	    }
 	      
-	  value = (signed_addend & howto->dst_mask)
-	    | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
+#ifndef OLD_ARM_ABI
+	  /* If necessary set the H bit in the BLX instruction.  */
+	  if (r_type == R_ARM_XPC25 && ((value & 2) == 2))
+	    value = (signed_addend & howto->dst_mask)
+	      | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask))
+	      | (1 << 24);
+	  else
+#endif
+	    value = (signed_addend & howto->dst_mask)
+	      | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
 	  break;
 
 	case R_ARM_ABS32:
