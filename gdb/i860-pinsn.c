@@ -1,7 +1,6 @@
 /* Print i860 instructions for GDB, the GNU debugger.
-   Copyright status of this module is unclear!!!
-   Copyright (C) 1992 Free Software Foundation, Inc.
-   SVR4 changes Contributed by Peggy Fieland (pfieland@stratus.com)
+   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Contributed by Michael Tiemann (tiemann@mcc.com)
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -19,6 +18,8 @@ notice and this notice must be preserved on all copies.
 In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding!
 */
+
+#include <stdio.h>
 
 #include "defs.h"
 #include "tm-i860.h"
@@ -655,5 +656,3 @@ ctrl_a(name, insn, memaddr, stream)
 
   print_address ((CORE_ADDR) (memaddr + 4 + offset), stream);
 }
-
-

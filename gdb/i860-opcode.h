@@ -1,7 +1,5 @@
-/* Intel i860 opcode structures for GDB, the GNU debugger.
-   Copyright status of this module is unclear!!!
-   Copyright (C) 1992 Free Software Foundation, Inc.
-   SVR4 changes Contributed by Peggy Fieland (pfieland@stratus.com)
+/* Intel I860 opcde list for GDB, the GNU debugger.
+   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -134,5 +132,3 @@ typedef enum
 {
   Error, not_branch, uncond, uncond_d, cond, cond_d
 } branch_type;
-
-
