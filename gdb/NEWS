@@ -3,6 +3,18 @@
 
 *** Changes in GDB 6.1.1:
 
+* Pending breakpoint support (also included in GDB 6.1)
+
+Support has been added to allow you to specify breakpoints in shared
+libraries that have not yet been loaded.  If a breakpoint location
+cannot be found, and the "breakpoint pending" option is set to auto,
+GDB queries you if you wish to make the breakpoint pending on a future
+shared-library load.  If and when GDB resolves the breakpoint symbol,
+the pending breakpoint is removed as one or more regular breakpoints
+are created.
+
+Pending breakpoints are very useful for GCJ Java debugging.
+
 * Fixed ISO-C build problems
 
 The files bfd/elf-bfd.h, gdb/dictionary.c and gdb/types.c contained
@@ -25,10 +37,17 @@ systems (Solaris, IRIX).  Ref: server/519.
 Older HPUX ANSI C compilers did not accept variable array sizes.  somsolib.c
 has been updated to use constant array sizes.
 
-* Bug fixes
+* Fixed a panic in the DWARF Call Frame Info code on Solaris 2.7
 
-gdb/1628: GDB now handles the DW_EH_PE_funcrel encoding in DWARF Call
-Frame Info.
+GCC 3.3.2, on Solaris 2.7, includes the DW_EH_PE_funcrel encoding in
+its generated DWARF Call Frame Info.  This encoding was causing GDB to
+panic, that panic has been fixed.  Ref: gdb/1628.
+
+* Fixed a problem when examining parameters in shared library code.
+
+When examining parameters in optimized shared library code generated
+by a mainline GCC, GDB would incorrectly report ``Variable "..." is
+not available''.  GDB now correctly displays the variable's value.
 
 *** Changes in GDB 6.1:
 
