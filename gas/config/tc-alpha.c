@@ -5494,7 +5494,7 @@ const pseudo_typeS md_pseudo_table[] = {
   {"fmask", s_alpha_mask, 1},
   {"frame", s_alpha_frame, 0},
   {"prologue", s_alpha_prologue, 0},
-  {"file", s_alpha_file, 5},
+  {"file", (void (*) PARAMS ((int))) s_alpha_file, 5},
   {"loc", s_alpha_loc, 9},
   {"stabs", s_alpha_stab, 's'},
   {"stabn", s_alpha_stab, 'n'},

@@ -1,3 +1,11 @@
+2002-10-31  David O'Brien  <obrien@FreeBSD.org>
+
+	* config/tc-ia64.c: Cast dwarf2_directive_file to int.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-alpha.c: Cast s_alpha_file to int.
+	* config/tc-alpha.h (TC_INIT_FIX_DATA): info is of type struct
+	alpha_reloc_tag.
+
 2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure.in: Update ARM CPU patterns.

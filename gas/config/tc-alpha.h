@@ -152,7 +152,7 @@ struct alpha_fix_tag
 #define TC_INIT_FIX_DATA(fixP)						\
 do {									\
   fixP->tc_fix_data.next_reloc = (struct fix *)0;			\
-  fixP->tc_fix_data.info = (struct alpha_literal_tag *)0;		\
+  fixP->tc_fix_data.info = (struct alpha_reloc_tag *)0;			\
 } while (0)
 
 /* Work with DEBUG5 to print fields in tc_fix_type.  */
