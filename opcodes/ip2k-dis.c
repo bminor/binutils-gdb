@@ -4,7 +4,7 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 - the resultant file is machine generated, cgen-dis.in isn't
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2005
 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
@@ -43,15 +43,15 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 static void print_normal
   (CGEN_CPU_DESC, void *, long, unsigned int, bfd_vma, int);
 static void print_address
-  (CGEN_CPU_DESC, void *, bfd_vma, unsigned int, bfd_vma, int);
+  (CGEN_CPU_DESC, void *, bfd_vma, unsigned int, bfd_vma, int) ATTRIBUTE_UNUSED;
 static void print_keyword
-  (CGEN_CPU_DESC, void *, CGEN_KEYWORD *, long, unsigned int);
+  (CGEN_CPU_DESC, void *, CGEN_KEYWORD *, long, unsigned int) ATTRIBUTE_UNUSED;
 static void print_insn_normal
   (CGEN_CPU_DESC, void *, const CGEN_INSN *, CGEN_FIELDS *, bfd_vma, int);
 static int print_insn
   (CGEN_CPU_DESC, bfd_vma,  disassemble_info *, char *, unsigned);
 static int default_print_insn
-  (CGEN_CPU_DESC, bfd_vma, disassemble_info *);
+  (CGEN_CPU_DESC, bfd_vma, disassemble_info *) ATTRIBUTE_UNUSED;
 static int read_insn
   (CGEN_CPU_DESC, bfd_vma, disassemble_info *, char *, int, CGEN_EXTRACT_INFO *,
    unsigned long *);
@@ -66,7 +66,6 @@ static void name PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned int, bfd_vma, int))
 PRINT_FUNC_DECL (print_fr);
 PRINT_FUNC_DECL (print_dollarhex);
 PRINT_FUNC_DECL (print_dollarhex8);
-PRINT_FUNC_DECL (print_dollarhex16);
 PRINT_FUNC_DECL (print_dollarhex_addr16h);
 PRINT_FUNC_DECL (print_dollarhex_addr16l);
 PRINT_FUNC_DECL (print_dollarhex_p);
@@ -155,20 +154,6 @@ print_dollarhex8 (cd, dis_info, value, attrs, pc, length)
   disassemble_info *info = (disassemble_info *) dis_info;
 
   (*info->fprintf_func) (info->stream, "$%02x", value);
-}
-
-static void
-print_dollarhex16 (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
-     PTR dis_info;
-     long value;
-     unsigned int attrs ATTRIBUTE_UNUSED;
-     bfd_vma pc ATTRIBUTE_UNUSED;
-     int length ATTRIBUTE_UNUSED;
-{
-  disassemble_info *info = (disassemble_info *) dis_info;
-
-  (*info->fprintf_func) (info->stream, "$%04x", value);
 }
 
 static void

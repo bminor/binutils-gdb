@@ -43,7 +43,7 @@ static const CGEN_ATTR_ENTRY bool_attr[] =
   { 0, 0 }
 };
 
-static const CGEN_ATTR_ENTRY MACH_attr[] =
+static const CGEN_ATTR_ENTRY MACH_attr[] ATTRIBUTE_UNUSED =
 {
   { "base", MACH_BASE },
   { "frv", MACH_FRV },
@@ -57,14 +57,14 @@ static const CGEN_ATTR_ENTRY MACH_attr[] =
   { 0, 0 }
 };
 
-static const CGEN_ATTR_ENTRY ISA_attr[] =
+static const CGEN_ATTR_ENTRY ISA_attr[] ATTRIBUTE_UNUSED =
 {
   { "frv", ISA_FRV },
   { "max", ISA_MAX },
   { 0, 0 }
 };
 
-static const CGEN_ATTR_ENTRY UNIT_attr[] =
+static const CGEN_ATTR_ENTRY UNIT_attr[] ATTRIBUTE_UNUSED =
 {
   { "NIL", UNIT_NIL },
   { "I0", UNIT_I0 },
@@ -97,7 +97,7 @@ static const CGEN_ATTR_ENTRY UNIT_attr[] =
   { 0, 0 }
 };
 
-static const CGEN_ATTR_ENTRY FR400_MAJOR_attr[] =
+static const CGEN_ATTR_ENTRY FR400_MAJOR_attr[] ATTRIBUTE_UNUSED =
 {
   { "NONE", FR400_MAJOR_NONE },
   { "I_1", FR400_MAJOR_I_1 },
@@ -118,7 +118,7 @@ static const CGEN_ATTR_ENTRY FR400_MAJOR_attr[] =
   { 0, 0 }
 };
 
-static const CGEN_ATTR_ENTRY FR450_MAJOR_attr[] =
+static const CGEN_ATTR_ENTRY FR450_MAJOR_attr[] ATTRIBUTE_UNUSED =
 {
   { "NONE", FR450_MAJOR_NONE },
   { "I_1", FR450_MAJOR_I_1 },
@@ -143,7 +143,7 @@ static const CGEN_ATTR_ENTRY FR450_MAJOR_attr[] =
   { 0, 0 }
 };
 
-static const CGEN_ATTR_ENTRY FR500_MAJOR_attr[] =
+static const CGEN_ATTR_ENTRY FR500_MAJOR_attr[] ATTRIBUTE_UNUSED =
 {
   { "NONE", FR500_MAJOR_NONE },
   { "I_1", FR500_MAJOR_I_1 },
@@ -179,7 +179,7 @@ static const CGEN_ATTR_ENTRY FR500_MAJOR_attr[] =
   { 0, 0 }
 };
 
-static const CGEN_ATTR_ENTRY FR550_MAJOR_attr[] =
+static const CGEN_ATTR_ENTRY FR550_MAJOR_attr[] ATTRIBUTE_UNUSED =
 {
   { "NONE", FR550_MAJOR_NONE },
   { "I_1", FR550_MAJOR_I_1 },

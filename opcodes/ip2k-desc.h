@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1996-2004 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -245,6 +245,7 @@ extern const CGEN_ATTR_TABLE ip2k_cgen_insn_attr_table[];
 /* Hardware decls.  */
 
 
+extern const CGEN_HW_ENTRY ip2k_cgen_hw_table[];
 
 
 

@@ -1,3 +1,45 @@
+2005-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* cgen-dis.in (print_address): Add an ATTRIBUTE_UNUSED to prevent
+	compile time warnings.
+	(print_keyword): Likewise.
+	(default_print_insn): Likewise.
+
+	* fr30-desc.c: Regenerated.
+	* fr30-desc.h: Regenerated.
+	* fr30-dis.c: Regenerated.
+	* fr30-opc.c: Regenerated.
+	* fr30-opc.h: Regenerated.
+	* frv-desc.c: Regenerated.
+	* frv-dis.c: Regenerated.
+	* frv-opc.c: Regenerated.
+	* ip2k-asm.c: Regenerated.
+	* ip2k-desc.c: Regenerated.
+	* ip2k-desc.h: Regenerated.
+	* ip2k-dis.c: Regenerated.
+	* ip2k-opc.c: Regenerated.
+	* ip2k-opc.h: Regenerated.
+	* iq2000-desc.c: Regenerated.
+	* iq2000-dis.c: Regenerated.
+	* iq2000-opc.c: Regenerated.
+	* m32r-asm.c: Regenerated.
+	* m32r-desc.c: Regenerated.
+	* m32r-desc.h: Regenerated.
+	* m32r-dis.c: Regenerated.
+	* m32r-opc.c: Regenerated.
+	* m32r-opc.h: Regenerated.
+	* m32r-opinst.c: Regenerated.
+	* openrisc-desc.c: Regenerated.
+	* openrisc-desc.h: Regenerated.
+	* openrisc-dis.c: Regenerated.
+	* openrisc-opc.c: Regenerated.
+	* openrisc-opc.h: Regenerated.
+	* xstormy16-desc.c: Regenerated.
+	* xstormy16-desc.h: Regenerated.
+	* xstormy16-dis.c: Regenerated.
+	* xstormy16-opc.c: Regenerated.
+	* xstormy16-opc.h: Regenerated.
+
 2005-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dis-buf.c (perror_memory): Use sprintf_vma to print out

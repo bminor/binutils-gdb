@@ -54,7 +54,6 @@ static const char *name PARAMS ((CGEN_CPU_DESC, const char **, int, long *))
 
 PARSE_FUNC_DECL (parse_fr);
 PARSE_FUNC_DECL (parse_addr16);
-PARSE_FUNC_DECL (parse_addr16_p);
 PARSE_FUNC_DECL (parse_addr16_cjp);
 PARSE_FUNC_DECL (parse_lit8);
 PARSE_FUNC_DECL (parse_bit3);
@@ -291,31 +290,6 @@ parse_addr16 (cd, strp, opindex, valuep)
     }
 
   return errmsg;
-}
-
-
-static const char *
-parse_addr16_p (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     long *valuep;
-{
-  const char *errmsg;
-  enum cgen_parse_operand_result result_type;
-  bfd_reloc_code_real_type code = BFD_RELOC_IP2K_PAGE3;
-  bfd_vma value;
- 
-  errmsg = cgen_parse_address (cd, strp, opindex, code,
-			       & result_type, & value);
-  if (errmsg == NULL)
-    {
-      if ( result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER )
-	*valuep = (value >> 13) & 0x7;
-      else if ( result_type == CGEN_PARSE_OPERAND_RESULT_QUEUED )
-	*valuep = value;
-    }
-  return errmsg; 
 }
 
 

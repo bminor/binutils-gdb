@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1996-2004 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -286,6 +286,7 @@ extern CGEN_KEYWORD xstormy16_cgen_opval_gr_Rb_names;
 extern CGEN_KEYWORD xstormy16_cgen_opval_h_branchcond;
 extern CGEN_KEYWORD xstormy16_cgen_opval_h_wordsize;
 
+extern const CGEN_HW_ENTRY xstormy16_cgen_hw_table[];
 
 
 
