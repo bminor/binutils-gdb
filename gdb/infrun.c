@@ -984,9 +984,9 @@ switch_thread:
 	    sr_sal.pc = prev_pc;
 	    sr_sal.symtab = NULL;
 	    sr_sal.line = 0;
-	    /* We perhaps could set the frame if we kept track of what
-	       the frame corresponding to prev_pc was.  But we don't,
-	       so don't.  */
+	    /* We could probably be setting the frame to
+	       prev_frame_address; the reason we don't is that it didn't used
+	       to exist.  */
 	    step_resume_breakpoint =
 	      set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
 	    if (breakpoints_inserted)
@@ -1281,8 +1281,9 @@ step_into_function:
 	     to one-proceed past a breakpoint.  */
 	  /* If we've just finished a special step resume and we don't
 	     want to hit a breakpoint, pull em out.  */
-	  if (step_resume_breakpoint == NULL &&
-	      remove_breakpoints_on_following_step)
+	  if (step_resume_breakpoint == NULL
+	      && through_sigtramp_breakpoint == NULL
+	      && remove_breakpoints_on_following_step)
 	    {
 	      remove_breakpoints_on_following_step = 0;
 	      remove_breakpoints ();
