@@ -430,7 +430,11 @@ cvt_frag_to_fill (headersP, fragP)
       fragP->fr_offset = (fragP->fr_next->fr_address
 			  - fragP->fr_address
 			  - fragP->fr_fix) / fragP->fr_var;
-      assert (fragP->fr_offset >= 0);
+      if (fragP->fr_offset < 0)
+	{
+	  as_bad ("attempt to .org/.space backwards? (%ld)",
+		  (long) fragP->fr_offset);
+	}
       fragP->fr_type = rs_fill;
       break;
 
@@ -962,7 +966,8 @@ write_contents (abfd, sec, xxx)
 		x = bfd_set_section_contents (stdoutput, sec,
 					      buf, (file_ptr) offset,
 					      (bfd_size_type) n_per_buf * fill_size);
-		assert (x == true);
+		if (x != true)
+		  as_fatal ("Cannot write to output file.");
 		offset += n_per_buf * fill_size;
 	      }
 	  }
@@ -973,7 +978,8 @@ write_contents (abfd, sec, xxx)
 	    x = bfd_set_section_contents (stdoutput, sec,
 					  fill_literal, (file_ptr) offset,
 					  (bfd_size_type) fill_size);
-	    assert (x == true);
+	    if (x != true)
+	      as_fatal ("Cannot write to output file.");
 	    offset += fill_size;
 	  }
 #endif
@@ -1463,6 +1469,7 @@ write_object_file ()
 	register char *fill_literal;
 	register long fill_size;
 
+	PROGRESS (1);
 	know (fragP->fr_type == rs_fill);
 	append (&next_object_file_charP, fragP->fr_literal, (unsigned long) fragP->fr_fix);
 	fill_literal = fragP->fr_literal + fragP->fr_fix;
@@ -1548,6 +1555,8 @@ write_object_file ()
 	  resolve_symbol_value (symp);
     }
 
+  PROGRESS (1);
+
   bfd_map_over_sections (stdoutput, adjust_reloc_syms, (char *)0);
 
   /* Set up symbol table, and write it out.  */
@@ -1558,6 +1567,17 @@ write_object_file ()
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
 	{
 	  int punt = 0;
+	  const char *name;
+
+	  name = S_GET_NAME (symp);
+	  if (name)
+	    {
+	      const char *name2 = decode_local_label_name (S_GET_NAME (symp));
+	      /* They only differ if `name' is a fb or dollar local
+		 label name.  */
+	      if (name2 != name && ! S_IS_DEFINED (symp))
+		as_bad ("local label %s is not defined", name2);
+	    }
 
 	  /* Do it again, because adjust_reloc_syms might introduce
 	     more symbols.  They'll probably only be section symbols,
@@ -1632,6 +1652,8 @@ write_object_file ()
 	  symp->bsym->value = S_GET_VALUE (symp);
 	}
     }
+
+  PROGRESS (1);
 
   /* Now do any format-specific adjustments to the symbol table, such
      as adding file symbols.  */
@@ -1896,10 +1918,15 @@ relax_segment (segment_frag_root, segment)
 
 		know (fragP->fr_next);
 		after = fragP->fr_next->fr_address;
-		growth = ((target - after) > 0) ? (target - after) : 0;
-		/* Growth may be negative, but variable part of frag
-		   cannot have fewer than 0 chars.  That is, we can't
-		   .org backwards. */
+		growth = target - after;
+		if (growth < 0)
+		  {
+		    /* Growth may be negative, but variable part of frag
+		       cannot have fewer than 0 chars.  That is, we can't
+		       .org backwards. */
+		    as_bad ("attempt to .org backwards ignored");
+		    growth = 0;
+		  }
 
 		growth -= stretch;	/* This is an absolute growth factor */
 		break;
@@ -1925,6 +1952,7 @@ relax_segment (segment_frag_root, segment)
 #ifdef md_relax_frag
 		growth = md_relax_frag (fragP, stretch);
 #else
+#ifdef TC_GENERIC_RELAX_TABLE
 		/* The default way to relax a frag is to look through
 		   md_relax_table.  */
 		{
@@ -1933,9 +1961,10 @@ relax_segment (segment_frag_root, segment)
 		  relax_substateT next_state;
 		  relax_substateT this_state;
 		  long aim;
+		  const relax_typeS *table = TC_GENERIC_RELAX_TABLE;
 
 		  this_state = fragP->fr_subtype;
-		  start_type = this_type = md_relax_table + this_state;
+		  start_type = this_type = table + this_state;
 		  target = offset;
 
 		  if (symbolP)
@@ -1991,7 +2020,7 @@ relax_segment (segment_frag_root, segment)
 			  {
 			    /* Grow to next state. */
 			    this_state = next_state;
-			    this_type = md_relax_table + this_state;
+			    this_type = table + this_state;
 			    next_state = this_type->rlx_more;
 			  }
 		    }
@@ -2008,7 +2037,7 @@ relax_segment (segment_frag_root, segment)
 			  {
 			    /* Grow to next state. */
 			    this_state = next_state;
-			    this_type = md_relax_table + this_state;
+			    this_type = table + this_state;
 			    next_state = this_type->rlx_more;
 			  }
 		    }
@@ -2017,6 +2046,7 @@ relax_segment (segment_frag_root, segment)
 		  if (growth != 0)
 		    fragP->fr_subtype = this_state;
 		}
+#endif /* TC_GENERIC_RELAX_TABLE */
 #endif
 		break;
 
@@ -2153,12 +2183,14 @@ fixup_segment (fixP, this_segment_type)
 		S_GET_VALUE (sub_symbolP);
 
 	      add_symbolP = NULL;
+	      pcrel = 0;	/* No further pcrel processing. */
 
 	      /* Let the target machine make the final determination
 		 as to whether or not a relocation will be needed to
 		 handle this fixup.  */
 	      if (!TC_FORCE_RELOCATION (fixP))
 		{
+		  fixP->fx_pcrel = 0;
 		  fixP->fx_addsy = NULL;
 		}
 	    }

@@ -1,5 +1,31 @@
 Wed Jun 21 18:07:59 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	Changes from Andreas Schwab <schwab@issan.informatik.uni-dortmund.de>:
+	* config/tc-m68k.c (insword): Increment the frag offsets.
+	(struct m68k_it): Add reloc[].pcrel_fix field to hold pc-rel
+	fixup.
+	(add_fix): Accept additional parameter, the pc-rel fixup. All
+	callers changed.  Fix offset address if width == 'b'.
+	(m68k_ip) [case AINDX]: Allow explicit size spec.  Don't make the
+	outer displacement pc-relative.
+	(md_pcrel_from): Make it relative to the first extension word of
+	the operand.
+	(opcode_ptr): Make it a macro if DO_BREAK_UP_BIG_DECL is
+	undefined.
+	(md_convert_frag_1): Don't reference fragP->fr_opcode[2..].
+	(md_estimate_size_before_relax) [case TAB (FBRANCH, SZ_UNDEF)]:
+	Turn on long bit.
+	(m68k_ip) [case 'C']: Don't set set long bit, set it in the opcode
+ 	table.
+	(md_estimate_size_before_relax) [case TAB (PCINDEX, SZ_UNDEF)]:
+	Variable part increases by four, not six.
+	* write.c (fixup_segment) [TC_M68K]: Don't do further pcrel
+	processing after converting difference of two symbols in the
+	same segment.
+
+	* write.c (fixup_segment): Don't conditionalize the pcrel fix on
+	TC_M68K.
+
 	* config/tc-sparc.c (sparc_ip, case 'A'): If ASI is not a "#"
 	value, don't shift it an extra time.
 
