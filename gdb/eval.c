@@ -1875,7 +1875,7 @@ evaluate_subexp_with_coercion (exp, pos, noside)
 	  val =
 	    locate_var_value
 	    (var, block_innermost_frame (exp->elts[pc + 1].block));
-	  return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (SYMBOL_TYPE (var))),
+	  return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (check_typedef (SYMBOL_TYPE (var)))),
 			     val);
 	}
       /* FALLTHROUGH */
