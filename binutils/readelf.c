@@ -2415,6 +2415,7 @@ process_version_sections (file)
 	break;
 	
 	default:
+	break;
 	}
     }
   
