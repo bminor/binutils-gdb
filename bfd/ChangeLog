@@ -1,3 +1,17 @@
+Thu Nov 30 19:32:26 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* coff-ppc.c: Added macros to tidy up toc cell treatment. Numerous
+	uses as well. Added a new howto to deal with TOCREL16 relocs that 
+	are TOCDEFN as well.
+	(coff_ppc_relocate_section): Expanded treatment of ADDR32NB relocs
+	to handle RVA relocs from dlltool.
+	(ppc_coff_rtype2howto): TOCDEFN reloc addition.
+	(coff_ppc_rtype_to_howto): TOCDEFN reloc addition.
+	(ppc_coff_reloc_type_lookup): TOCDEFN reloc addition.
+
+	* coffcode.h (coff_set_alignment_hook): check idata$X sections 
+	to get the right section alignment.
+
 Thu Nov 30 16:48:18 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Don't set lma based on

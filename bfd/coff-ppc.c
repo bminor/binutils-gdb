@@ -50,6 +50,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "libcoff.h"
 
+/* The toc is a set of bfd_vma fields. We use the fact that valid         */
+/* addresses are even (i.e. the bit representing "1" is off) to allow     */
+/* us to encode a little extra information in the field                   */
+/* - Unallocated addresses are intialized to 1.                           */
+/* - Allocated addresses are even numbers.                                */
+/* The first time we actually write a reference to the toc in the bfd,    */
+/* we want to record that fact in a fixup file (if it is asked for), so   */
+/* we keep track of whether or not an address has been written by marking */
+/* the low order bit with a "1" upon writing                              */
+
+#define SET_UNALLOCATED(x)  ((x) = 1)
+#define IS_UNALLOCATED(x)   ((x) == 1)
+
+#define IS_WRITTEN(x)       ((x) & 1)
+#define MARK_AS_WRITTEN(x)  ((x) |= 1)
+#define MAKE_ADDR_AGAIN(x)  ((x) &= ~1)
+
 /* In order not to add an int to every hash table item for every coff
    linker, we define our own hash table, derived from the coff one */
 
@@ -119,7 +136,7 @@ ppc_coff_link_hash_newfunc (entry, table, string)
   if (ret)
     {
       /* Initialize the local fields.  */
-      ret->toc_offset = 1;
+      SET_UNALLOCATED(ret->toc_offset);
       ret->symbol_is_glue = 0;
       ret->glue_insn = 0;
       strcpy(ret->eye_catcher, EYE);
@@ -238,6 +255,8 @@ ppc_coff_link_hash_table_create (abfd)
 #define IMAGE_REL_PPC_REFLO             0x0011
 #define IMAGE_REL_PPC_PAIR              0x0012
 
+/* This is essentially the same as tocrel16, with TOCDEFN assumed */
+#define IMAGE_REL_PPC_TOCREL16_DEFN     0x0013
 
 /*  Flag bits in IMAGE_RELOCATION.TYPE */
 
@@ -693,7 +712,25 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 true,	                /* partial_inplace */                      
 	 0xffffffff,	        /* src_mask */                             
 	 0xffffffff,        	/* dst_mask */                             
-	 false)                 /* pcrel_offset */
+	 false),                /* pcrel_offset */
+
+  /* IMAGE_REL_PPC_TOCREL16_DEFN 0x0013 */
+  /*   16-bit offset from TOC base, without causing a definition */
+  /* Used: */
+  HOWTO ( (IMAGE_REL_PPC_TOCREL16 | IMAGE_REL_PPC_TOCDEFN), /* type */ 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_dont, /* complain_on_overflow */
+	 0,                     /* special_function */                     
+	 "TOCREL16, TOCDEFN",   /* name */
+	 false,	                /* partial_inplace */                      
+	 0xffff,	        /* src_mask */                             
+	 0xffff,        	/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
 };
 
 
@@ -850,10 +887,12 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 	    return false;
 	  obj_coff_local_toc_table(abfd) = local_syms;
 	  for (i = 0; i < obj_raw_syment_count(abfd); ++i)
-	    local_syms[i] = 1;
+	    {
+	      SET_UNALLOCATED(local_syms[i]);
+	    }
 	}
 
-      if (local_syms[sym] == 1) 
+      if (IS_UNALLOCATED(local_syms[sym])) 
 	{
 	  local_syms[sym] = global_toc_size;
 	  ret_val = global_toc_size;
@@ -889,7 +928,7 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 
       /* check to see if there's a toc slot allocated. If not, do it
 	 here. It will be used in relocate_section */
-      if (h->toc_offset == 1)
+      if (IS_UNALLOCATED(h->toc_offset))
 	{
 	  h->toc_offset = global_toc_size;
 	  ret_val = global_toc_size;
@@ -975,10 +1014,12 @@ ppc_record_data_in_toc_entry(abfd, info, sec, sym, toc_kind)
 	    return false;
 	  obj_coff_local_toc_table(abfd) = local_syms;
 	  for (i = 0; i < obj_raw_syment_count(abfd); ++i)
-	    local_syms[i] = 1;
+	    {
+	      SET_UNALLOCATED(local_syms[i]);
+	    }
 	}
 
-      if (local_syms[sym] == 1) 
+      if (IS_UNALLOCATED(local_syms[sym])) 
 	{
 	  local_syms[sym] = global_toc_size;
 	  ret_val = global_toc_size;
@@ -1007,7 +1048,7 @@ ppc_record_data_in_toc_entry(abfd, info, sec, sym, toc_kind)
 
       /* check to see if there's a toc slot allocated. If not, do it
 	 here. It will be used in relocate_section */
-      if (h->toc_offset == 1)
+      if (IS_UNALLOCATED(h->toc_offset))
 	{
 #if 0
 	  h->toc_offset = global_toc_size;
@@ -1348,13 +1389,13 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		local_toc_table = obj_coff_local_toc_table(input_bfd);
 		our_toc_offset = local_toc_table[symndx];
 
-		if ((our_toc_offset & 1) != 0)
+		if (IS_WRITTEN(our_toc_offset))
 		  {
 		    /* if it has been written out, it is marked with the 
 		       1 bit. Fix up our offset, but do not write it out
 		       again.
 		     */
-		    our_toc_offset &= ~1;
+		    MAKE_ADDR_AGAIN(our_toc_offset);
 #ifdef TOC_DEBUG
 
 		    fprintf(stderr,
@@ -1381,7 +1422,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 			       val,
 			       toc_section->contents + our_toc_offset);
 
-		    local_toc_table[symndx] |= 1;
+		    MARK_AS_WRITTEN(local_toc_table[symndx]);
 		    fixit = true;
 		  }
 	      }
@@ -1392,7 +1433,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		if ((r_flags & IMAGE_REL_PPC_TOCDEFN) 
 		    == IMAGE_REL_PPC_TOCDEFN 
-		    && our_toc_offset == 1)
+		    && IS_UNALLOCATED(our_toc_offset))
 		  {
 		    /* This is unbelievable cheese. Some knowledgable asm 
 		       hacker has decided to use r2 as a base for loading 
@@ -1423,13 +1464,13 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		    record_toc(toc_section, our_toc_offset, pub, strdup(name));
 		  }
-		else if ((our_toc_offset & 1) != 0)
+		else if (IS_WRITTEN(our_toc_offset))
 		  {
 		    /* if it has been written out, it is marked with the 
 		       1 bit. Fix up our offset, but do not write it out
 		       again.
 		     */
-		    our_toc_offset &= ~1;
+		    MAKE_ADDR_AGAIN(our_toc_offset);
 #ifdef TOC_DEBUG
 		    fprintf(stderr,
 			    "Not writing out toc_offset of %d for %s\n", 
@@ -1457,7 +1498,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 			       val,
 			       toc_section->contents + our_toc_offset);
 
-		    h->toc_offset |= 1;
+		    MARK_AS_WRITTEN(h->toc_offset);
 		    /* The tricky part is that this is the address that */
 		    /* needs a .reloc entry for it */
 		    fixit = true;
@@ -1594,44 +1635,45 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		  target = "__idata4_magic__";
 		else if (strcmp(".idata$5", name) == 0)
 		  target = "__idata5_magic__";
-		else
-		  abort();
 
-		myh = 0;
-
-		myh = coff_link_hash_lookup (coff_hash_table (info),
-					     target,
-					     false, false, true);
-		if (myh == 0) 
+		if (target != 0)
 		  {
-		    fprintf(stderr, "Missing idata magic cookies, "
-			    "this cannot work anyway...\n");
-		    abort();
-		  }
+		    myh = 0;
 
-		val = myh->root.u.def.value + 
-		  sec->output_section->vma + sec->output_offset;
-		if (first_thunk_address == 0)
-		  {
-		    int idata5offset;
 		    myh = coff_link_hash_lookup (coff_hash_table (info),
-						 "__idata5_magic__",
+						 target,
 						 false, false, true);
-		    first_thunk_address = myh->root.u.def.value + 
-		      sec->output_section->vma + 
-		      sec->output_offset - 
-			pe_data(output_bfd)->pe_opthdr.ImageBase;
-
-		    idata5offset = myh->root.u.def.value;
-		    myh = coff_link_hash_lookup (coff_hash_table (info),
-						 "__idata6_magic__",
-						 false, false, true);
-
-		    thunk_size = myh->root.u.def.value - idata5offset;
-		    myh = coff_link_hash_lookup (coff_hash_table (info),
-						 "__idata4_magic__",
-						 false, false, true);
-		    import_table_size = myh->root.u.def.value;
+		    if (myh == 0) 
+		      {
+			fprintf(stderr, "Missing idata magic cookies, "
+				"this cannot work anyway...\n");
+			abort();
+		      }
+		    
+		    val = myh->root.u.def.value + 
+		      sec->output_section->vma + sec->output_offset;
+		    if (first_thunk_address == 0)
+		      {
+			int idata5offset;
+			myh = coff_link_hash_lookup (coff_hash_table (info),
+						     "__idata5_magic__",
+						     false, false, true);
+			first_thunk_address = myh->root.u.def.value + 
+			  sec->output_section->vma + 
+			    sec->output_offset - 
+			      pe_data(output_bfd)->pe_opthdr.ImageBase;
+			
+			idata5offset = myh->root.u.def.value;
+			myh = coff_link_hash_lookup (coff_hash_table (info),
+						     "__idata6_magic__",
+						     false, false, true);
+			
+			thunk_size = myh->root.u.def.value - idata5offset;
+			myh = coff_link_hash_lookup (coff_hash_table (info),
+						     "__idata4_magic__",
+						     false, false, true);
+			import_table_size = myh->root.u.def.value;
+		      }
 		  }
 	      }
 
@@ -1841,7 +1883,7 @@ ppc_process_before_allocation (abfd, info)
   asection *sec;
   struct internal_reloc *i, *rel;
 
-#if DEBUG_RELOC
+#ifdef DEBUG_RELOC
   fprintf(stderr, 
 	  "ppc_process_before_allocation: BFD %s\n", 
 	  bfd_get_filename(abfd));
@@ -2175,7 +2217,7 @@ ppc_coff_rtype2howto (relent, internal)
      For now, we just strip this stuff to find the type, and ignore it other
      than that.
   */
-
+  reloc_howto_type *howto;
   unsigned short r_type  = EXTRACT_TYPE (internal->r_type);
   unsigned short r_flags = EXTRACT_FLAGS(internal->r_type);
   unsigned short junk    = EXTRACT_JUNK (internal->r_type);
@@ -2220,26 +2262,35 @@ ppc_coff_rtype2howto (relent, internal)
     case IMAGE_REL_PPC_ADDR16:
     case IMAGE_REL_PPC_REL24:
     case IMAGE_REL_PPC_ADDR24:
-    case IMAGE_REL_PPC_TOCREL16:
     case IMAGE_REL_PPC_ADDR32:
     case IMAGE_REL_PPC_IFGLUE:
     case IMAGE_REL_PPC_ADDR32NB:
     case IMAGE_REL_PPC_SECTION:
     case IMAGE_REL_PPC_SECREL:
       DUMP_RELOC2(ppc_coff_howto_table[r_type].name, internal);
+      howto = ppc_coff_howto_table + r_type;
       break;
     case IMAGE_REL_PPC_IMGLUE:
       DUMP_RELOC2(ppc_coff_howto_table[r_type].name, internal);
+      howto = ppc_coff_howto_table + r_type;
+      break;
+    case IMAGE_REL_PPC_TOCREL16:
+      DUMP_RELOC2(ppc_coff_howto_table[r_type].name, internal);
+      if (r_flags & IMAGE_REL_PPC_TOCDEFN)
+	howto = ppc_coff_howto_table + IMAGE_REL_PPC_TOCREL16_DEFN;
+      else
+	howto = ppc_coff_howto_table + IMAGE_REL_PPC_TOCREL16;
       break;
     default:
       fprintf(stderr, 
 	      "Warning: Unsupported reloc %s [%d] used -- it may not work.\n",
 	      ppc_coff_howto_table[r_type].name,
 	      r_type);
+      howto = ppc_coff_howto_table + r_type;      
       break;
     }
   
-  relent->howto = ppc_coff_howto_table + r_type;
+  relent->howto = howto;
   
 }
 
@@ -2309,29 +2360,38 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
     case IMAGE_REL_PPC_ADDR32NB:
       DUMP_RELOC2(ppc_coff_howto_table[r_type].name, rel);
       *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
+      howto = ppc_coff_howto_table + r_type;
+      break;
+    case IMAGE_REL_PPC_TOCREL16:
+      DUMP_RELOC2(ppc_coff_howto_table[r_type].name, rel);
+      if (r_flags & IMAGE_REL_PPC_TOCDEFN)
+	howto = ppc_coff_howto_table + IMAGE_REL_PPC_TOCREL16_DEFN;
+      else
+	howto = ppc_coff_howto_table + IMAGE_REL_PPC_TOCREL16;
       break;
     case IMAGE_REL_PPC_ADDR16:
     case IMAGE_REL_PPC_REL24:
     case IMAGE_REL_PPC_ADDR24:
-    case IMAGE_REL_PPC_TOCREL16:
     case IMAGE_REL_PPC_ADDR32:
     case IMAGE_REL_PPC_IFGLUE:
     case IMAGE_REL_PPC_SECTION:
     case IMAGE_REL_PPC_SECREL:
       DUMP_RELOC2(ppc_coff_howto_table[r_type].name, rel);
+      howto = ppc_coff_howto_table + r_type;
       break;
     case IMAGE_REL_PPC_IMGLUE:
       DUMP_RELOC2(ppc_coff_howto_table[r_type].name, rel);
+      howto = ppc_coff_howto_table + r_type;
       break;
     default:
       fprintf(stderr, 
 	      "Warning: Unsupported reloc %s [%d] used -- it may not work.\n",
 	      ppc_coff_howto_table[r_type].name,
 	      r_type);
+      howto = ppc_coff_howto_table + r_type;
       break;
     }
   
-  howto = ppc_coff_howto_table + r_type;
   return howto;
 }
 
@@ -2353,19 +2413,19 @@ ppc_coff_reloc_type_lookup (abfd, code)
   fprintf(stderr, "ppc_coff_reloc_type_lookup for %s\n",
 	  bfd_get_reloc_code_name(code));
 #endif
-  
+
   switch (code)
     {
+      HOW2MAP(BFD_RELOC_32_GOTOFF,    IMAGE_REL_PPC_IMGLUE);
       HOW2MAP(BFD_RELOC_16_GOT_PCREL, IMAGE_REL_PPC_IFGLUE);
       HOW2MAP(BFD_RELOC_16,           IMAGE_REL_PPC_ADDR16);
       HOW2MAP(BFD_RELOC_PPC_B26,      IMAGE_REL_PPC_REL24);
       HOW2MAP(BFD_RELOC_PPC_BA26,     IMAGE_REL_PPC_ADDR24);
       HOW2MAP(BFD_RELOC_PPC_TOC16,    IMAGE_REL_PPC_TOCREL16);
+      HOW2MAP(BFD_RELOC_16_GOTOFF,    IMAGE_REL_PPC_TOCREL16_DEFN);
       HOW2MAP(BFD_RELOC_32,           IMAGE_REL_PPC_ADDR32);
       HOW2MAP(BFD_RELOC_RVA,          IMAGE_REL_PPC_ADDR32NB);
     default: 
-      fprintf(stderr,
-	      "\treturning NULL\n");
       return NULL;
     }
   
