@@ -1,3 +1,132 @@
+Wed Nov 17 17:23:53 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in (mips-*-irix5*): New target.  Use elf and mips-big.
+	* config/obj-elf.c: If ECOFF_DEBUGGING, include ecoff.h.
+	(obj_pseudo_table): If ECOFF_DEBUGGING, define ECOFF
+	pseudo-ops.
+	(obj_read_begin_hook): If ECOFF_DEBUGGING, call
+	ecoff_read_begin_hook.
+	(obj_symbol_new_hook): If ECOFF_DEBUGGING, call
+	ecoff_symbol_new_hook.
+	(obj_elf_init_stab_section): Cast alloca result.
+	(elf_frob_file): If ECOFF_DEBUGGING, finish up ECOFF debugging
+	information and write it out into .mdebug section.
+	* config/obj-elf.h (ELF_TARGET_SYMBOL_FIELDS): New macro.
+	(TARGET_SYMBOL_FIELDS): Use ELF_TARGET_SYMBOL_FIELDS.
+	(ECOFF_DEBUGGING): Define if TC_MIPS.
+	(TARGET_SYMBOL_FIELDS): If ECOFF_DEBUGGING, override to add
+	fields required by ECOFF.
+	* config/tc-mips.c: Check ECOFF_DEBUGGING rather than
+	OBJ_ECOFF in many cases.
+	(mips_any_noreorder): New variable.
+	(mips_cprestore_offset): Initialize to -1.
+	(mips_frame_reg): New variable.
+	(RELAX_ENCODE, RELAX_OLD, RELAX_NEW, RELAX_RELOC1,
+	RELAX_RELOC2, RELAX_RELOC3, RELAX_WARN): New macros.
+	(md_pseudo_table): Handle "gpword" and "cpadd".
+	(md_begin): Initialize ok to false.  If OBJ_ELF, set alignment
+	of text, data and bss sections to 4.  Set alignment of
+	.reginfo section to 2.  If ECOFF_DEBUGGING, create .mdebug
+	section.
+	(ALIGN_ERR, ALIGN_ERR2): Removed unused and useless alignment
+	check.
+	(append_insn, macro_build, macro_build_lui): Take place
+	argument.  Changed all callers.
+	(append_insn): If appending a nop, don't emit one.
+	(macro_build): Changed assertion for 'i', 'j', 'o' case.
+	(gp_reference): Removed.
+	(load_address): New function.
+	(macro): If mips_noreorder is used, set mips_any_noreorder.
+	Extensive changes to handle GP and PIC symbols differently.
+	Build both possible code choices using a variant frag, and
+	make a final decision at the end of assembly when all
+	information is known.  Added PIC support for all symbol
+	references.
+	(mips_ip): Don't permit anything but a number after $ for a
+	coprocessor register.  Don't use .lit4 or .lit8 sections when
+	generating PIC code.  If OBJ_ELF, set alignment of .lit4 or
+	.lit8 section to 4.
+	(md_apply_fix): Accept and ignore GOT16 and GPREL32 relocs.
+	(s_change_sec): Set alignment of ELF .rodata or .sdata section
+	to 4.
+	(s_mipsset): If .set noreorder, set mips_any_noreorder.
+	(s_cpload): Ignore .cpload if not generating PIC code.  Warn
+	if .cpload is not in noreorder section.
+	(s_cprestore): Ignore .cprestore if not generating PIC code.
+	(s_gpword, s_cpadd): New functions.
+	(tc_get_register): Added frame argument; if true, set
+	mips_frame_reg to return value.  Changed all callers.
+	(md_estimate_size_before_relax): Don't error out, but instead
+	determine how much a frag should grow.
+	(tc_gen_reloc): Return multiple relocs if appropriate, as
+	determined by md_estimate_size_before_relax.
+	(md_convert_frag): New function.
+	(mips_elf_final_processing): Set ELF header flags based on
+	mips_any_noreorder and mips_pic.
+	* config/tc-mips.h (RELOC_EXPANSION_POSSIBLE): Define.
+	(MAX_RELOC_EXPANSION): Define to be 3.
+	(md_relax_frag): Define to be 0.
+	(md_convert_frag): Don't define.
+	(tc_get_register): Changed declaration.
+
+	* ecoff.h, ecoff.c: New files pulled out of config/obj-ecoff.c to
+	support generating ECOFF debugging information for MIPS ELF
+	targets.  Compiled only if ECOFF_DEBUGGING is defined.  Changed
+	handling of external symbols: it now always generates exactly
+	those external symbols that are defined in the global symbol list.
+	* Makefile.in (REAL_SOURCES): Added ecoff.c.
+	(REAL_HEADERS): Added ecoff.h.
+	(OBJS): Added ecoff.o.
+	(ecoff.o): New target.
+	* config/obj-ecoff.c: Almost entirely moved into ecoff.c.
+	Remaining code mostly just calls ecoff.c code.
+	* config/obj-ecoff.h: Define ECOFF_DEBUGGING.
+	(TARGET_SYMBOL_FIELDS): Make ecoff_symbol a pointer to a
+	struct localsym.
+	(obj_read_begin_hook, obj_symbol_new_hook): Define to call
+	functions in ecoff.c.
+	(ecoff_stab): Don't declare (now declared in ecoff.h).
+	(obj_set_sym_index): Define.
+	(obj_ecoff_set_sym_index): Declare.
+
+	* frags.h (frag_grow): Declare.
+	* frags.c (frag_grow): Made non-static.
+
+	* write.c (is_dnrange): Do not define if md_relax_frag is defined.
+	(relax_segment): If md_relax_frag is defined, use it to handle a
+	frag of type rs_machine_dependent rather than looking through
+	md_relax_table.
+
+	* read.c (read_a_source_file): If we find a bad pseudo-op,
+	do a continue to go on to the next line rather than a break.
+	Removed duplicate bad pseudo-op code which was never executed.
+
+	* read.c (s_lcomm): Do not require a comma after the name.
+
+	* subsegs.h (segment_info_type): Changed hadone field to bitfield.
+	Added bss bitfield.
+	* as.c (perform_an_assembly_pass): Set bss flag for bss_section.
+	* read.c (s_lcomm): Set bss flag for .sbss section if used.
+	* write.c (relax_and_size_seg): Don't set SEC_HAS_CONTENTS for a
+	bss section.  Set SEC_RELOC if there are any relocations, even for
+	a zero size section.
+
+	* write.c (write_relocs): In RELOC_EXPANSION_POSSIBLE case, base
+	data offset on reloc[0]->address rather than reloc[j]->address, so
+	that multiple relocs can affect different memory locations.
+
+	* write.c (chain_frchains_together, relax_and_size_seg,
+	adjust_reloc_syms, write_relocs): Make third argument PTR, not
+	char *, to match definition of bfd_map_over_sections.
+
+	* app.c (do_scrub_next_char): Don't interpret a comment character
+	as starting a CPP line directive unless it is a '#' and is the
+	very first characters on the line (i.e., do not permit leading
+	whitespace).
+
+	* messages.c (identify): Make file argument non-const, to match
+	callers.
+
 Tue Nov 16 20:38:21 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_ip): Fix thinko in 21bit range check.
