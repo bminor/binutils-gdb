@@ -1,3 +1,10 @@
+2004-10-29  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.threads/bp_in_thread.c: New file, copied from
+	pthread_cond_wait.c.
+	* gdb.threads/bp_in_thread.c: Use bp_in_thread.c as the source
+	file, rather than reusing the .c file from another testcase.
+
 2004-10-20  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.ada/null_record.exp: Check where we stopped after

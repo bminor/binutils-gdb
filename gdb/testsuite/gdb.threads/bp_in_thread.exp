@@ -23,7 +23,7 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-set testfile "pthread_cond_wait"
+set testfile "bp_in_thread"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
