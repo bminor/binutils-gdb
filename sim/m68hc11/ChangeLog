@@ -1,5 +1,15 @@
 2000-09-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* dv-m68hc11tim.c (m68hc11tim_timer_event): Compute the overflow
+	interrupt and compare events accurately.  Take into account the
+	pending ticks not processed by the simulator yet (introduced a shift).
+	(m68hc11_port_event): Reset the timer interrupt delays.
+	(m68hc11tim_io_read_buffer): Be able to read several bytes.
+	(m68hc11tim_io_write_buffer): Likewise for write.
+	(m68hc11tim_io_write_buffer): Recompute the timer overflow interrupt.
+
+2000-09-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* dv-m68hc11spi.c (m68hc11spi_io_read_buffer): Clear the interrupts.
 	(m68hc11spi_io_write_buffer): Likewise and fix the spi frame.
 	(m68hc11spi_info): Clarify the status report
