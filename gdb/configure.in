@@ -447,7 +447,6 @@ esac])
 if test "${enable_netrom}" = "yes"; then
 	CONFIG_OBS="${CONFIG_OBS} remote-nrom.o" 
         CONFIG_SRCS="${CONFIG_SRCS} remote-nrom.c"
-	CONFIG_INITS="${CONFIG_INITS} remote-nrom.c"
 fi
 
 AC_ARG_ENABLE(build-warnings,
