@@ -1,3 +1,14 @@
+start-sanitize-d30v
+Thu Dec 11 09:00:15 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.tgt (d30v-elf-*): Rename d30velf_e to d30v_e and
+	d30velf_o to d30v_o to work in DOS environments.
+	* Makefile.{am,in}: Ditto.
+
+	* emulparams/d30v_{o,e}: Rename from d30velf_{o,e}.
+	* emulparams/d30velf_{o,e}: Deleted.
+
+end-sanitize-d30v
 Wed Dec 10 17:40:08 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* scripttempl/armcoff.sc: Add glue sections (code taken from Arm
