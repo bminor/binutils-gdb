@@ -22,7 +22,7 @@ INSTALL_DATA 	= $(INSTALL)
 ###
 
 PROG=	gprof
-SRCS=	gprof.c arcs.c dfn.c lookup.c ${MACHINE}.c hertz.c \
+SRCS=	gprof.c arcs.c dfn.c lookup.c $(MACHINE).c hertz.c \
 	printgprof.c printlist.c
 LIBS = ../bfd/libbfd.a ../libiberty/libiberty.a
 
@@ -41,8 +41,8 @@ info:
 install-info:
 
 install: all
+	$(INSTALL_PROGRAM) $(PROG) $(DESTDIR)$(bindir)
 	$(INSTALL_DATA) $(srcdir)/gprof.1 $(man1dir)/gprof.1
-	$(INSTALL_PROGRAM) $(PROG) $(bindir)
 
 $(PROG):	$(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROG) $(LIBS)
