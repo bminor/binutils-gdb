@@ -463,6 +463,13 @@ print_insn_hppa (memaddr, info)
 			fput_fp_reg (reg, info);
 			break;
 		      }
+		    case 'e':
+		      if (GET_FIELD (insn, 25, 25))
+			fput_fp_reg_r (GET_FIELD (insn, 11, 15), info);
+		      else
+			fput_fp_reg (GET_FIELD (insn, 11, 15), info);
+		      break;
+
 		    }
 		  break;
 
@@ -495,6 +502,12 @@ print_insn_hppa (memaddr, info)
 			(info->stream, "%s ",
 			 short_ldst_compl_names[(GET_FIELD (insn, 28, 28)
 						 | GET_FIELD (insn, 29, 29))]);
+		      break;
+		    case 'J':
+		      if (insn & 0x4)
+		        (*info->fprintf_func) (info->stream, ",mb ");
+		      else
+		        (*info->fprintf_func) (info->stream, ",ma ");
 		      break;
 		    case 's':
 		      (*info->fprintf_func) (info->stream, "%s ",
