@@ -1,3 +1,8 @@
+2001-11-12  Alfred M. Szmidt  <ams@kemisten.nu>
+
+	* Makefile.am (GENSCRIPTS): Quote ${exec_prefix}.
+	* Makefile.in: Regenerate.
+
 2001-11-02  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* ld.texinfo: Use @command for commands, @option for options.
