@@ -1,5 +1,7 @@
-/* Motorola m68k native support for Linux
-   Copyright 1996, 1998, 2000, 2001 Free Software Foundation, Inc.
+/* Motorola m68k native support for GNU/Linux.
+
+   Copyright 1996, 1998, 2000, 2001, 2002 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -445,7 +447,7 @@ fetch_inferior_registers (int regno)
       return;
     }
 
-  /* Linux LWP ID's are process ID's.  */
+  /* GNU/Linux LWP ID's are process ID's.  */
   if ((tid = TIDGET (inferior_ptid)) == 0)
     tid = PIDGET (inferior_ptid);		/* Not a threaded program.  */
 
@@ -500,7 +502,7 @@ store_inferior_registers (int regno)
       return;
     }
 
-  /* Linux LWP ID's are process ID's.  */
+  /* GNU/Linux LWP ID's are process ID's.  */
   if ((tid = TIDGET (inferior_ptid)) == 0)
     tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
 
@@ -546,7 +548,7 @@ store_inferior_registers (int regno)
      0 --- the general-purpose register set, in elf_gregset_t format
      2 --- the floating-point register set, in elf_fpregset_t format
 
-   REG_ADDR isn't used on Linux.  */
+   REG_ADDR isn't used on GNU/Linux.  */
 
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
@@ -627,7 +629,8 @@ in_sigtramp (CORE_ADDR pc)
 }
 
 
-/* Register that we are able to handle Linux ELF core file formats.  */
+/* Register that we are able to handle GNU/Linux ELF core file
+   formats.  */
 
 static struct core_fns linux_elf_core_fns =
 {

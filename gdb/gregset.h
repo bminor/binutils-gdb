@@ -37,7 +37,7 @@ typedef GDB_FPREGSET_T gdb_fpregset_t;
    includes integer registers and control registers.  An fpregset is a
    data structure containing the floating point registers.  These data
    structures were originally a part of the /proc interface, but have
-   been borrowed or copied by other GDB targets, eg. Linux.  */
+   been borrowed or copied by other GDB targets, eg. GNU/Linux.  */
 
 /* Copy register values from the native target gregset/fpregset
    into GDB's internal register cache.  */

@@ -39,8 +39,8 @@
 /* The following macros are defined equivalently to their definitions
    in POSIX.1.  We fail to define WNOHANG and WUNTRACED, which POSIX.1
    <sys/wait.h> defines, since our code does not use waitpid() (but
-   NOTE exception for Linux below).
-   We also fail to declare wait() and waitpid().  */   
+   NOTE exception for GNU/Linux below).  We also fail to declare
+   wait() and waitpid().  */
 
 #ifndef	WIFEXITED
 #define WIFEXITED(w)	(((w)&0377) == 0)
@@ -101,11 +101,9 @@
 # endif
 #endif
 
-/*
- * For native Linux we may use waitpid and the __WCLONE option.
- *  <GRIPE> It is of course dangerous not to use the REAL header file...
- * </GRIPE>
- */
+/* For native GNU/Linux we may use waitpid and the __WCLONE option.
+  <GRIPE> It is of course dangerous not to use the REAL header file...
+  </GRIPE>.  */
 
 /* Bits in the third argument to `waitpid'.  */
 #ifndef WNOHANG

@@ -1,4 +1,5 @@
-/* Native-dependent code for Linux/x86.
+/* Native-dependent code for GNU/Linux x86.
+
    Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -66,10 +67,10 @@ static void dummy_sse_values (void);
 
 
 
-/* The register sets used in Linux ELF core-dumps are identical to the
-   register sets in `struct user' that is used for a.out core-dumps,
-   and is also used by `ptrace'.  The corresponding types are
-   `elf_gregset_t' for the general-purpose registers (with
+/* The register sets used in GNU/Linux ELF core-dumps are identical to
+   the register sets in `struct user' that is used for a.out
+   core-dumps, and is also used by `ptrace'.  The corresponding types
+   are `elf_gregset_t' for the general-purpose registers (with
    `elf_greg_t' the type of a single GP register) and `elf_fpregset_t'
    for the floating-point registers.
 
@@ -593,7 +594,7 @@ fetch_inferior_registers (int regno)
       return;
     }
 
-  /* Linux LWP ID's are process ID's.  */
+  /* GNU/Linux LWP ID's are process ID's.  */
   if ((tid = TIDGET (inferior_ptid)) == 0)
     tid = PIDGET (inferior_ptid);		/* Not a threaded program.  */
 
@@ -659,7 +660,7 @@ store_inferior_registers (int regno)
       return;
     }
 
-  /* Linux LWP ID's are process ID's.  */
+  /* GNU/Linux LWP ID's are process ID's.  */
   if ((tid = TIDGET (inferior_ptid)) == 0)
     tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
 
@@ -778,7 +779,7 @@ i386_linux_dr_get_status (void)
 /* Provide registers to GDB from a core file.
 
    (We can't use the generic version of this function in
-   core-regset.c, because Linux has *three* different kinds of
+   core-regset.c, because GNU/Linux has *three* different kinds of
    register set notes.  core-regset.c would have to call
    supply_fpxregset, which most platforms don't have.)
 
@@ -791,7 +792,7 @@ i386_linux_dr_get_status (void)
      2 --- the floating-point register set, in elf_fpregset_t format
      3 --- the extended floating-point register set, in elf_fpxregset_t format
 
-   REG_ADDR isn't used on Linux.  */
+   REG_ADDR isn't used on GNU/Linux.  */
 
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
@@ -847,7 +848,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 }
 
 
-/* The instruction for a Linux system call is:
+/* The instruction for a GNU/Linux system call is:
        int $0x80
    or 0xcd 0x80.  */
 
@@ -935,7 +936,8 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 }
 
 
-/* Register that we are able to handle Linux ELF core file formats.  */
+/* Register that we are able to handle GNU/Linux ELF core file
+   formats.  */
 
 static struct core_fns linux_elf_core_fns =
 {

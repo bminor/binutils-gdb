@@ -1,5 +1,6 @@
-/* Native-dependent code for Linux/SPARC.
-   Copyright 2001 Free Software Foundation, Inc.
+/* Native-dependent code for GNU/Linux SPARC.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

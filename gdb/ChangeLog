@@ -1,7 +1,9 @@
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
 	* lin-lwp.c, thread-db.c, defs.h, cris-tdep.c: Replace ``Linux''
-	with either ``GNU/Linux'' or ``Linux kernel''.
+	with either ``GNU/Linux'' or ``Linux kernel''.  Update copyright.
+	* m68klinux-nat.c, sparc-linux-nat.c, x86-64-linux-nat.c: Ditto.
+	* x86-64-linux-tdep.c, gregset.h, gdb_wait.h: Ditto.
 	Fix PR gdb/378.
 	
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>

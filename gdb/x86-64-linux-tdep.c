@@ -1,6 +1,7 @@
-/* Target-dependent code for Linux running on x86-64, for GDB.
-   Copyright 2001
-   Free Software Foundation, Inc.
+/* Target-dependent code for GNU/Linux running on x86-64, for GDB.
+
+   Copyright 2001 Free Software Foundation, Inc.
+
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -71,8 +72,8 @@ x86_64_linux_sigtramp_start (CORE_ADDR pc)
 /* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
 #define LINUX_UCONTEXT_SIGCONTEXT_OFFSET (36)
 
-/* Assuming FRAME is for a Linux sigtramp routine, return the address
-   of the associated sigcontext structure.  */
+/* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
+   address of the associated sigcontext structure.  */
 CORE_ADDR
 x86_64_linux_sigcontext_addr (struct frame_info *frame)
 {
@@ -102,8 +103,8 @@ x86_64_linux_sigcontext_addr (struct frame_info *frame)
 /* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
 #define LINUX_SIGCONTEXT_PC_OFFSET (136)
 
-/* Assuming FRAME is for a Linux sigtramp routine, return the saved
-   program counter.  */
+/* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
+   saved program counter.  */
 
 CORE_ADDR
 x86_64_linux_sigtramp_saved_pc (struct frame_info *frame)

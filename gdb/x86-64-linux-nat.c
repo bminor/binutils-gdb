@@ -1,4 +1,4 @@
-/* Native-dependent code for Linux/x86-64.
+/* Native-dependent code for GNU/Linux x86-64.
 
    Copyright 2001, 2002 Free Software Foundation, Inc.
 
@@ -109,8 +109,8 @@ x86_64_linux_dr_get_status (void)
 }
 
 
-/* The register sets used in Linux ELF core-dumps are identical to the
-   register sets used by `ptrace'.  */
+/* The register sets used in GNU/Linux ELF core-dumps are identical to
+   the register sets used by `ptrace'.  */
 
 #define GETREGS_SUPPLIES(regno) \
   (0 <= (regno) && (regno) <= 17)
@@ -247,7 +247,7 @@ fetch_inferior_registers (int regno)
 {
   int tid;
 
-  /* Linux LWP ID's are process ID's.  */
+  /* GNU/Linux LWP ID's are process ID's.  */
   if ((tid = TIDGET (inferior_ptid)) == 0)
     tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
 
@@ -282,7 +282,7 @@ store_inferior_registers (int regno)
 {
   int tid;
 
-  /* Linux LWP ID's are process ID's.  */
+  /* GNU/Linux LWP ID's are process ID's.  */
   if ((tid = TIDGET (inferior_ptid)) == 0)
     tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
 
@@ -499,7 +499,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
      0 --- the general-purpose register set, in elf_gregset_t format
      2 --- the floating-point register set, in elf_fpregset_t format
 
-   REG_ADDR isn't used on Linux.  */
+   REG_ADDR isn't used on GNU/Linux.  */
 
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
@@ -537,7 +537,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
     }
 }
 
-/* Register that we are able to handle Linux ELF core file formats.  */
+/* Register that we are able to handle GNU/Linux ELF core file formats.  */
 
 static struct core_fns linux_elf_core_fns = {
   bfd_target_elf_flavour,	/* core_flavour */
