@@ -1,3 +1,7 @@
+2000-04-19  Alan Modra  <alan@linuxcare.com.au>
+
+	* dep-in.sed: Match space at start of file name, not at end.
+
 2000-04-18  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Call
