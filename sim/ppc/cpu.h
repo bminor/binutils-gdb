@@ -29,7 +29,7 @@
 #include "basics.h"
 #include "registers.h"
 #include "device_tree.h"
-#include "core.h"
+#include "corefile.h"
 #include "vm.h"
 #include "events.h"
 #include "interrupts.h"

@@ -203,7 +203,7 @@ KNOWN PROBLEMS:
 
 See the ChangeLog file looking for lines taged with the word FIXME.
 
-CORE.C: The implementation of core.c (defined by core.h) isn't the
+COREFILE.C: The implementation of corefile.c (defined by corefile.h) isn't the
 best.  It is intended to be functionaly correct rather than fast.
 
 HTAB (page) code for OEA model untested.  Some of the vm code

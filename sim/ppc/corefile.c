@@ -29,7 +29,7 @@
 
 #include "basics.h"
 #include "device_tree.h"
-#include "core.h"
+#include "corefile.h"
 
 
 typedef struct _core_mapping core_mapping;

@@ -37,8 +37,8 @@ config.make
 config.hdr
 configure
 configure.in
-core.c
-core.h
+corefile.c
+corefile.h
 core_n.h
 cpu.c
 cpu.h

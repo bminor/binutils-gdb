@@ -156,7 +156,7 @@ CPU_H = \
 	$(BASICS_H) \
 	$(REGISTERS_H) \
 	device_tree.h \
-	core.h \
+	corefile.h \
 	vm.h \
 	events.h \
 	interrupts.h \
@@ -191,7 +191,7 @@ LIB_SRC = \
 	debug.c \
 	ppc-endian.c \
 	vm.c \
-	core.c \
+	corefile.c \
 	events.c \
 	os_emul.c \
 	emul_generic.c \
@@ -220,7 +220,7 @@ LIB_OBJ = \
 	emul_netbsd.o \
 	registers.o \
 	vm.o \
-	core.o \
+	corefile.o \
 	spreg.o \
 	cpu.o \
 	interrupts.o \
@@ -276,9 +276,9 @@ idecode.o: idecode.c $(CPU_H) $(IDECODE_H) semantics.h
 # double.o: double.c dp-bit.c
 
 vm.o: vm.c vm.h vm_n.h $(BASICS_H) $(REGISTERS_H) \
-	device_tree.h core.h interrupts.h itable.h mon.h
+	device_tree.h corefile.h interrupts.h itable.h mon.h
 
-core.o: core.c core.h $(BASICS_H) device_tree.h
+corefile.o: corefile.c corefile.h $(BASICS_H) device_tree.h
 
 events.o: events.c events.h $(BASICS_H) 
 

@@ -1,3 +1,19 @@
+Sat Nov  4 12:29:45 1995  Fred Fish  <fnf@cygnus.com>
+
+	* core.c:  Rename to corefile.c
+	* core.h:  Rename to corefile.h
+	* inline.c: Include corefile.h, renamed from core.h.
+	* cpu.h: Include corefile.h, renamed from core.h
+	* vm.c: Include corefile.h, renamed from core.h
+	* corefile.c: Include corefile.h rather than core.h
+	* README.psim (KNOWN PROBLEMS): Change core.* references to corefile.*
+	references.
+	* Makefile.in (CPU_H): Change core.h to corefile.h
+	(vm.o):  Change dependency to corefile.h
+	(LIB_SRC): Change core.c to corefile.c.
+	(LIB_OBJ): Change core.o to corefile.o.
+	(corefile.o):  Change dependencies to corefile.c, corefile.h.
+
 Fri Nov  3 11:37:24 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppc-instructions (data cache instructions): Make all data cache

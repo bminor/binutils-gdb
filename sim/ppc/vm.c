@@ -32,7 +32,7 @@
 #include "registers.h"
 
 #include "device_tree.h"
-#include "core.h"
+#include "corefile.h"
 
 #include "vm.h"
 
