@@ -1,4 +1,4 @@
-/*  This file is part of the program GDB, the GU debugger.
+/*  This file is part of the program GDB, the GNU debugger.
     
     Copyright (C) 1998 Free Software Foundation, Inc.
     Contributed by Cygnus Solutions.
@@ -21,19 +21,19 @@
 
 
 #include "sim-main.h"
-#include "hw-base.h"
+#include "hw-main.h"
 
 /* DEVICE
 
    
-   mn103int - mn10300 interrupt controller
+   mn103int - mn103002 interrupt controller
 
    
    DESCRIPTION
 
    
-   Implements the mn10300 interrupt controller described in the
-   mn10300 user guide.
+   Implements the mn103002 interrupt controller described in the
+   mn103002 user guide.
 
 
    PROPERTIES
@@ -44,9 +44,9 @@
    Specify the address of the ICR (total of 25 registers), IAGR and
    EXTMD registers (within the parent bus).
 
-   The reg property value `0x34000100 0x68 0x34000200 0x8 0x3400280
+   The reg property value `0x34000100 0x7C 0x34000200 0x8 0x3400280
    0x8' locates the interrupt controller at the addresses specified in
-   the mn10300 interrupt controller user guide.
+   the mn103002 interrupt controller user guide.
 
 
    PORTS
@@ -83,8 +83,8 @@
 
    int[0..100] (input)
 
-   Level or edge triggered interrupt input port.  Each of the 25
-   groups (0..24) can have up to 4 (0..3) interrupt inputs.  The
+   Level or edge triggered interrupt input port.  Each of the 30
+   groups (0..30) can have up to 4 (0..3) interrupt inputs.  The
    interpretation of a port event/value is determined by the
    configuration of the corresponding interrupt group.
 
@@ -100,15 +100,15 @@
    edges.  Instead any input port event is considered to be an
    interrupt trigger.
 
-   For level sensative interrupts, the interrupt controller ignores
+   For level sensitive interrupts, the interrupt controller ignores
    active HIGH/LOW settings and instead always interprets a nonzero
-   port value as an interupt assertion and a zero port value as a
+   port value as an interrupt assertion and a zero port value as a
    negation.
 
    */
 
 
-/* The interrupt groups - numbered according to mn10300 convention */
+/* The interrupt groups - numbered according to mn103002 convention */
 
 enum mn103int_trigger {
   ACTIVE_LOW,
@@ -136,7 +136,7 @@ enum {
   FIRST_NMI_GROUP = 0,
   LAST_NMI_GROUP = 1,
   FIRST_LEVEL_GROUP = 2,
-  LAST_LEVEL_GROUP = 24,
+  LAST_LEVEL_GROUP = 30,
   NR_GROUPS,
 };
 
@@ -198,7 +198,13 @@ enum {
   G22_PORT = 88,
   G23_PORT = 92,
   G24_PORT = 96,
-  NR_G_PORTS = 100,
+  G25_PORT = 100,
+  G26_PORT = 104,
+  G27_PORT = 108,
+  G28_PORT = 112,
+  G29_PORT = 116,
+  G30_PORT = 120,
+  NR_G_PORTS = 124,
   ACK_PORT,
 };
 
@@ -219,62 +225,42 @@ static const struct hw_port_descriptor mn103int_ports[] = {
   { "watchdog", G0_PORT + 1, 0, input_port, },
   { "syserr", G0_PORT + 2, 0, input_port, },
 
-  { "timer-0-underflow", G2_PORT + 0, 0, input_port, },
-  { "timer-1-underflow", G2_PORT + 1, 0, input_port, },
-  { "timer-2-underflow", G2_PORT + 2, 0, input_port, },
-  { "timer-3-underflow", G2_PORT + 3, 0, input_port, },
-  { "timer-4-underflow", G3_PORT + 0, 0, input_port, },
-  { "timer-5-underflow", G3_PORT + 1, 0, input_port, },
-  { "timer-6-underflow", G3_PORT + 2, 0, input_port, },
-  { "timer-7-underflow", G3_PORT + 3, 0, input_port, },
+  { "timer-0-underflow", G2_PORT, 0, input_port, },
+  { "timer-1-underflow", G3_PORT, 0, input_port, },
+  { "timer-2-underflow", G4_PORT, 0, input_port, },
+  { "timer-3-underflow", G5_PORT, 0, input_port, },
+  { "timer-4-underflow", G6_PORT, 0, input_port, },
+  { "timer-5-underflow", G7_PORT, 0, input_port, },
+  { "timer-6-underflow", G8_PORT, 0, input_port, },
 
-  { "timer-8-underflow", G4_PORT + 0, 0, input_port, },
-  { "timer-8-compare-a", G4_PORT + 1, 0, input_port, },
-  { "timer-8-compare-b", G4_PORT + 2, 0, input_port, },
+  { "timer-6-compare-a", G9_PORT, 0, input_port, },
+  { "timer-6-compare-b", G10_PORT, 0, input_port, },
 
-  { "timer-9-underflow", G5_PORT + 0, 0, input_port, },
-  { "timer-9-compare-a", G5_PORT + 1, 0, input_port, },
-  { "timer-9-compare-b", G5_PORT + 2, 0, input_port, },
+  { "dma-0-end", G12_PORT, 0, input_port, },
+  { "dma-1-end", G13_PORT, 0, input_port, },
+  { "dma-2-end", G14_PORT, 0, input_port, },
+  { "dma-3-end", G15_PORT, 0, input_port, },
 
-  { "timer-10-underflow", G6_PORT + 0, 0, input_port, },
-  { "timer-10-compare-a", G6_PORT + 1, 0, input_port, },
-  { "timer-10-compare-b", G6_PORT + 2, 0, input_port, },
-  { "timer-10-compare-c", G6_PORT + 3, 0, input_port, },
+  { "serial-0-receive",  G16_PORT, 0, input_port, },
+  { "serial-0-transmit", G17_PORT, 0, input_port, },
 
-  { "timer-11-underflow", G7_PORT + 0, 0, input_port, },
-  { "timer-11-compare-a", G7_PORT + 1, 0, input_port, },
-  { "timer-11-compare-b", G7_PORT + 2, 0, input_port, },
-  { "timer-11-compare-c", G7_PORT + 3, 0, input_port, },
+  { "serial-1-receive",  G18_PORT, 0, input_port, },
+  { "serial-1-transmit", G19_PORT, 0, input_port, },
 
-  { "timer-12-underflow", G8_PORT + 0, 0, input_port, },
-  { "timer-12-compare-a", G8_PORT + 1, 0, input_port, },
-  { "timer-12-compare-b", G8_PORT + 2, 0, input_port, },
-  { "timer-12-compare-c", G8_PORT + 3, 0, input_port, },
+  { "serial-2-receive",  G20_PORT, 0, input_port, },
+  { "serial-2-transmit", G21_PORT, 0, input_port, },
 
-  { "timer-11-compare-d", G9_PORT + 0, 0, input_port, },
-  { "timer-12-compare-d", G9_PORT + 1, 0, input_port, },
+  { "irq-0", G23_PORT, 0, input_port, },
+  { "irq-1", G24_PORT, 0, input_port, },
+  { "irq-2", G25_PORT, 0, input_port, },
+  { "irq-3", G26_PORT, 0, input_port, },
+  { "irq-4", G27_PORT, 0, input_port, },
+  { "irq-5", G28_PORT, 0, input_port, },
+  { "irq-6", G29_PORT, 0, input_port, },
+  { "irq-7", G30_PORT, 0, input_port, },
 
-  { "dma-0-end", G10_PORT, 0, input_port, },
-  { "dma-1-end", G11_PORT, 0, input_port, },
-  { "dma-2-end", G12_PORT, 0, input_port, },
-  { "dma-3-end", G13_PORT, 0, input_port, },
+  /*   { "ad-end", G24_PORT, 0, input_port, },  a/d conversion end, not in 103002? */ 
 
-  { "serial-0-recieve", G14_PORT + 0, 0, input_port, },
-  { "serial-0-transmit", G14_PORT + 1, 0, input_port, },
-
-  { "serial-1-recieve", G15_PORT + 0, 0, input_port, },
-  { "serial-1-transmit", G15_PORT + 1, 0, input_port, },
-
-  { "irq-0", G16_PORT, 0, input_port, },
-  { "irq-1", G17_PORT, 0, input_port, },
-  { "irq-2", G18_PORT, 0, input_port, },
-  { "irq-3", G19_PORT, 0, input_port, },
-  { "irq-4", G20_PORT, 0, input_port, },
-  { "irq-5", G21_PORT, 0, input_port, },
-  { "irq-6", G22_PORT, 0, input_port, },
-  { "irq-7", G23_PORT, 0, input_port, },
-
-  { "ad-end", G24_PORT, 0, input_port, },
 
   /* interrupt inputs (as generic numbers) */
 
@@ -303,9 +289,9 @@ static const struct hw_port_descriptor mn103int_ports[] = {
 /* Finish off the partially created hw device.  Attach our local
    callbacks.  Wire up our port names etc */
 
-static hw_io_read_buffer_callback mn103int_io_read_buffer;
-static hw_io_write_buffer_callback mn103int_io_write_buffer;
-static hw_port_event_callback mn103int_port_event;
+static hw_io_read_buffer_method mn103int_io_read_buffer;
+static hw_io_write_buffer_method mn103int_io_write_buffer;
+static hw_port_event_method mn103int_port_event;
 
 static void
 attach_mn103int_regs (struct hw *me,
@@ -817,7 +803,7 @@ mn103int_io_write_buffer (struct hw *me,
 }     
 
 
-const struct hw_device_descriptor dv_mn103int_descriptor[] = {
+const struct hw_descriptor dv_mn103int_descriptor[] = {
   { "mn103int", mn103int_finish, },
   { NULL },
 };
