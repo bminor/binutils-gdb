@@ -35,6 +35,9 @@
 #define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 0
 #define CALL_DUMMY_LOCATION ON_STACK
 #define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
+/* Hack, get around problem with including "arch-utils.h".  */
+struct frame_info;
+extern CORE_ADDR init_frame_pc_default (int fromleaf, struct frame_info *prev);
 #define DEPRECATED_INIT_FRAME_PC(l,f) (init_frame_pc_default (l, f))
 
 /* Forward declarations of some types we use in prototypes */
@@ -53,28 +56,6 @@ const unsigned char *hppa_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr);
 
 extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define PC_REQUIRES_RUN_BEFORE_USE(pc) hppa_pc_requires_run_before_use (pc)
-
-/* Initializer for an array of names of registers.
-   There should be NUM_REGS strings in this initializer.
-   They are in rows of eight entries  */
-
-#define REGISTER_NAMES	\
- {"flags",  "r1",      "rp",      "r3",    "r4",     "r5",      "r6",     "r7",    \
-  "r8",     "r9",      "r10",     "r11",   "r12",    "r13",     "r14",    "r15",   \
-  "r16",    "r17",     "r18",     "r19",   "r20",    "r21",     "r22",    "r23",   \
-  "r24",    "r25",     "r26",     "dp",    "ret0",   "ret1",    "sp",     "r31",   \
-  "sar",    "pcoqh",   "pcsqh",   "pcoqt", "pcsqt",  "eiem",    "iir",    "isr",   \
-  "ior",    "ipsw",    "goto",    "sr4",   "sr0",    "sr1",     "sr2",    "sr3",   \
-  "sr5",    "sr6",     "sr7",     "cr0",   "cr8",    "cr9",     "ccr",    "cr12",  \
-  "cr13",   "cr24",    "cr25",    "cr26",  "mpsfu_high","mpsfu_low","mpsfu_ovflo","pad",\
-  "fpsr",    "fpe1",   "fpe2",    "fpe3",  "fpe4",   "fpe5",    "fpe6",   "fpe7",  \
-  "fr4",     "fr4R",   "fr5",     "fr5R",  "fr6",    "fr6R",    "fr7",    "fr7R",  \
-  "fr8",     "fr8R",   "fr9",     "fr9R",  "fr10",   "fr10R",   "fr11",   "fr11R", \
-  "fr12",    "fr12R",  "fr13",    "fr13R", "fr14",   "fr14R",   "fr15",   "fr15R", \
-  "fr16",    "fr16R",  "fr17",    "fr17R", "fr18",   "fr18R",   "fr19",   "fr19R", \
-  "fr20",    "fr20R",  "fr21",    "fr21R", "fr22",   "fr22R",   "fr23",   "fr23R", \
-  "fr24",    "fr24R",  "fr25",    "fr25R", "fr26",   "fr26R",   "fr27",   "fr27R", \
-  "fr28",    "fr28R",  "fr29",    "fr29R", "fr30",   "fr30R",   "fr31",   "fr31R"}
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,

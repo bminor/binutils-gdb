@@ -274,8 +274,8 @@ legacy_push_dummy_code (struct gdbarch *gdbarch,
      with the values.  Instead a DEPRECATED_FIX_CALL_DUMMY replacement
      (PUSH_DUMMY_BREAKPOINT?) should just do everything.  */
 #ifdef GDB_TARGET_IS_HPPA
-  real_pc = DEPRECATED_FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
-				       value_type, using_gcc);
+  (*real_pc) = DEPRECATED_FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs,
+					  args, value_type, using_gcc);
 #else
   if (DEPRECATED_FIX_CALL_DUMMY_P ())
     {

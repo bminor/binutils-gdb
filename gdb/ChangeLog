@@ -1,3 +1,26 @@
+2003-07-27  Andrew Cagney  <cagney@redhat.com>
+
+	Sync HP/UX with mainline:
+	* config/pa/tm-hppa.h (init_frame_pc_default): Declare.
+	* infcall.c (legacy_push_dummy_code) [GDB_TARGET_IS_HPPA]: Update
+	REAL_PC and not the pointer.
+	* hppa-hpux-tdep.c: Include frame.h
+	* config/pa/tm-hppa64.h (GDB_MULTI_ARCH): Set to
+	GDB_MULTI_ACH_PARTIAL.
+	* config/pa/tm-hppa64.h (FRAME_SAVED_PC_IN_SIGTRAMP): Use
+	get_frame_base.
+	(FRAME_BASE_BEFORE_SIGTRAMP): Ditto.
+	(FRAME_FIND_SAVED_REGS_IN_SIGTRAMP): Ditto.
+	(struct value): Add opaque declaration.
+	(DEPRECATED_FRAME_ARGS_ADDRESS): Delete.
+	* config/pa/tm-hppa64.h (REGISTER_NAMES): Delete macro.
+	(REGISTER_NAME): Define.
+	(hppa64_register_name): Declare.
+	* config/pa/tm-hppa.h (REGISTER_NAMES): Delete macro.
+	* hppa-tdep.c (hppa_gdbarch_init): Set hppa_register_name.
+	(hppa64_register_name): New function.
+	(hppa_register_name): New function.
+
 2003-07-26  Andrew Cagney  <cagney@redhat.com>
 
 	* m68hc11-tdep.c (m68hc11_gdbarch_init): Set non-deprecated
