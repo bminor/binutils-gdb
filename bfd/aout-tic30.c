@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C30 a.out binaries.
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -21,7 +21,6 @@
 
 #define TARGET_IS_BIG_ENDIAN_P
 #define N_HEADER_IN_TEXT(x) 1
-#define BYTES_IN_WORD 4
 #define TEXT_START_ADDR 1024
 #define TARGET_PAGE_SIZE 128
 #define SEGMENT_SIZE TARGET_PAGE_SIZE

@@ -1,5 +1,5 @@
 /* BFD back-end for linux flavored i386 a.out binaries.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 2001, 2002
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	SEGMENT_SIZE TARGET_PAGE_SIZE
 #define TEXT_START_ADDR	0x0
 #define N_SHARED_LIB(x) 0
-#define BYTES_IN_WORD 4
 
 #define MACHTYPE_OK(mtype) ((mtype) == M_386 || (mtype) == M_UNKNOWN)
 

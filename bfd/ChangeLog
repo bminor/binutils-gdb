@@ -1,3 +1,27 @@
+2003-03-13  Elias Athanasopoulos  <elathan@phys.uoa.gr>
+
+	* aout-cris.c (BYTES_IN_WORD): Don't define.
+	aout-encap.c: Likewise.
+	aout-ns32k.c: Likewise.
+	aout-tic30.c: Likewise.
+	hp300bsd.c: Likewise.
+	i386aout.c: Likewise.
+	i386dynix.c: Likewise.
+	i386linux.c: Likewise.
+	i386lynx.c: Likewise.
+	i386mach3.c: Likewise.
+	m68k4knetbsd.c: Likewise.
+	m68klinux.c: Likewise.
+	m68klynx.c: Likewise.
+	m68knetbsd.c: Likewise.
+	m88kmach3.c: Likewise.
+	mipsbsd.c: Likewise.
+	newsos3.c: Likewise.
+	sparclinux.c: Likewise.
+	sparclynx.c: Likewise.
+	sparcnetbsd.c: Likewise.
+	vaxbsd.c: Likewise. Fix comment formatting.
+
 2003-03-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* Reverted 2003-03-02's patch.
