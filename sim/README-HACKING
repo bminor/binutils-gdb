@@ -39,6 +39,7 @@ The configure.in of a simulator using the common framework should look like:
 
 --- snip ---
 dnl Process this file with autoconf to produce a configure script.
+sinclude(../common/aclocal.m4)
 AC_PREREQ(2.5)dnl
 AC_INIT(Makefile.in)
 
@@ -194,7 +195,7 @@ However, the user should be aware of the following:
 	o	An empty array (eg int a[0]) is not valid.
 
 When building with GCC it is effectivly a requirement that
---enable-sim-warnings be specified during configuration.
+--enable-build-warnings=,-Werror be specified during configuration.
 
 "dump" commands under gdb
 =========================
@@ -210,16 +211,24 @@ internal state pretty printed from gdb.
 
 FIXME: This can obviously be made more elaborate.  As needed it will be.
 
-"dump" commands under gdb
-=========================
+Rebuilding nltvals.def
+======================
 
-gdbinit.in contains the following
+Checkout a copy of the SIM and LIBGLOSS modules (Unless you've already
+got one to hand):
 
-define dump
-set sim_debug_dump ()
-end
+	$  mkdir /tmp/$$
+	$  cd /tmp/$$
+	$  cvs checkout sim-no-testsuite libgloss-no-testsuite newlib-no-testsuite
 
-Simulators that define the sim_debug_dump function can then have their
-internal state pretty printed from gdb.
+Configure things for an arbitrary simulator target (I've d10v for
+convenience):
 
-FIXME: This can obviously be made more elaborate.  As needed it will be.
+	$  mkdir /tmp/$$/build
+	$  cd /tmp/$$/build
+	$  /tmp/$$/devo/configure --target=d10v-elf
+
+In the sim/common directory rebuild the headers:
+
+	$  cd sim/common
+	$  make headers

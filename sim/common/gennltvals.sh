@@ -29,6 +29,10 @@ $shell ${srccom}/gentvals.sh "" open ${srcroot}/newlib/libc/include \
 # Note that there is a standard syscall.h file (libgloss/syscall.h) now which
 # hopefully more targets can use.
 
+dir=libgloss target=d10v
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
+
 dir=libgloss target=d30v
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
@@ -41,7 +45,7 @@ dir=libgloss target=m32r
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
 
-dir=libgloss target=sparc
+dir=libgloss target=mn10200
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
 
@@ -49,6 +53,11 @@ dir=libgloss target=mn10300
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
 
-dir=libgloss target=mn10200
+dir=libgloss target=sparc
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
+
+dir=libgloss target=v850
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
+
