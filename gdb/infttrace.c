@@ -2289,7 +2289,7 @@ call_ttrace_wait (int pid, ttwopt_t option, ttstate_t *tsp, size_t tsp_size)
      thread descriptor.
 
      This caches the state.  The implementation of queries like
-     target_has_execd can then use this cached state, rather than
+     hpux_has_execd can then use this cached state, rather than
      be forced to make an explicit ttrace call to get it.
 
      (Guard against the condition that this is the first time we've
@@ -3357,8 +3357,6 @@ child_remove_vfork_catchpoint (int tid)
 }
 #endif
 
-#if defined(CHILD_HAS_FORKED)
-
 /* Q: Do we need to map the returned process ID to a thread ID?
 
  * A: I don't think so--here we want a _real_ pid.  Any later
@@ -3366,7 +3364,7 @@ child_remove_vfork_catchpoint (int tid)
  *    start the mapping.
  */
 int
-child_has_forked (int tid, int *childpid)
+hpux_has_forked (int tid, int *childpid)
 {
   int tt_status;
   ttstate_t ttrace_state;
@@ -3403,15 +3401,11 @@ child_has_forked (int tid, int *childpid)
 
   return 0;
 }
-#endif
 
-
-#if defined(CHILD_HAS_VFORKED)
-
-/* See child_has_forked for pid discussion.
+/* See hpux_has_forked for pid discussion.
  */
 int
-child_has_vforked (int tid, int *childpid)
+hpux_has_vforked (int tid, int *childpid)
 {
   int tt_status;
   ttstate_t ttrace_state;
@@ -3446,7 +3440,6 @@ child_has_vforked (int tid, int *childpid)
 
   return 0;
 }
-#endif
 
 
 #if defined(CHILD_INSERT_EXEC_CATCHPOINT)
@@ -3475,9 +3468,8 @@ child_remove_exec_catchpoint (int tid)
 #endif
 
 
-#if defined(CHILD_HAS_EXECD)
 int
-child_has_execd (int tid, char **execd_pathname)
+hpux_has_execd (int tid, char **execd_pathname)
 {
   int tt_status;
   ttstate_t ttrace_state;
@@ -3516,12 +3508,10 @@ child_has_execd (int tid, char **execd_pathname)
 
   return 0;
 }
-#endif
 
 
-#if defined(CHILD_HAS_SYSCALL_EVENT)
 int
-child_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
+hpux_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
 {
   int tt_status;
   ttstate_t ttrace_state;
@@ -3561,7 +3551,6 @@ child_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
   *syscall_id = ttrace_state.tts_scno;
   return 1;
 }
-#endif
 
 
 

@@ -104,16 +104,6 @@ int child_suppress_run = 0;	/* Non-zero if inftarg should pretend not to
 
 #ifndef CHILD_WAIT
 
-/*## */
-/* Enable HACK for ttrace work.  In
- * infttrace.c/require_notification_of_events,
- * this is set to 0 so that the loop in child_wait
- * won't loop.
- */
-int not_same_real_pid = 1;
-/*## */
-
-
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
 
@@ -170,59 +160,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 	  return pid_to_ptid (pid);
 	}
-
-      if (target_has_forked (pid, &related_pid)
-	  && ((pid == PIDGET (inferior_ptid)) 
-	      || (related_pid == PIDGET (inferior_ptid))))
-	{
-	  ourstatus->kind = TARGET_WAITKIND_FORKED;
-	  ourstatus->value.related_pid = related_pid;
-	  return pid_to_ptid (pid);
-	}
-
-      if (target_has_vforked (pid, &related_pid)
-	  && ((pid == PIDGET (inferior_ptid))
-	      || (related_pid == PIDGET (inferior_ptid))))
-	{
-	  ourstatus->kind = TARGET_WAITKIND_VFORKED;
-	  ourstatus->value.related_pid = related_pid;
-	  return pid_to_ptid (pid);
-	}
-
-      if (target_has_execd (pid, &execd_pathname))
-	{
-	  /* Are we ignoring initial exec events?  (This is likely because
-	     we're in the process of starting up the inferior, and another
-	     (older) mechanism handles those.)  If so, we'll report this
-	     as a regular stop, not an exec.
-	   */
-	  if (inferior_ignoring_startup_exec_events)
-	    {
-	      inferior_ignoring_startup_exec_events--;
-	    }
-	  else
-	    {
-	      ourstatus->kind = TARGET_WAITKIND_EXECD;
-	      ourstatus->value.execd_pathname = execd_pathname;
-	      return pid_to_ptid (pid);
-	    }
-	}
-
-      /* All we must do with these is communicate their occurrence
-         to wait_for_inferior...
-       */
-      if (target_has_syscall_event (pid, &kind, &syscall_id))
-	{
-	  ourstatus->kind = kind;
-	  ourstatus->value.syscall_id = syscall_id;
-	  return pid_to_ptid (pid);
-	}
-
-      /*##  } while (pid != PIDGET (inferior_ptid)); ## *//* Some other child died or stopped */
-/* hack for thread testing */
-    }
-  while ((pid != PIDGET (inferior_ptid)) && not_same_real_pid);
-/*## */
+      } while (pid != PIDGET (inferior_ptid)); /* Some other child died or stopped */
 
   store_waitstatus (ourstatus, status);
   return pid_to_ptid (pid);
@@ -552,27 +490,6 @@ child_remove_vfork_catchpoint (int pid)
 }
 #endif
 
-#if !defined(CHILD_HAS_FORKED)
-int
-child_has_forked (int pid, int *child_pid)
-{
-  /* This version of Unix doesn't support notification of fork events.  */
-  return 0;
-}
-#endif
-
-
-#if !defined(CHILD_HAS_VFORKED)
-int
-child_has_vforked (int pid, int *child_pid)
-{
-  /* This version of Unix doesn't support notification of vfork events.
-   */
-  return 0;
-}
-#endif
-
-
 #if !defined(CHILD_POST_FOLLOW_VFORK)
 void
 child_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
@@ -602,17 +519,6 @@ child_remove_exec_catchpoint (int pid)
 }
 #endif
 
-#if !defined(CHILD_HAS_EXECD)
-int
-child_has_execd (int pid, char **execd_pathname)
-{
-  /* This version of Unix doesn't support notification of exec events.
-   */
-  return 0;
-}
-#endif
-
-
 #if !defined(CHILD_REPORTED_EXEC_EVENTS_PER_EXEC_CALL)
 int
 child_reported_exec_events_per_exec_call (void)
@@ -622,18 +528,6 @@ child_reported_exec_events_per_exec_call (void)
   return 1;
 }
 #endif
-
-
-#if !defined(CHILD_HAS_SYSCALL_EVENT)
-int
-child_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
-{
-  /* This version of Unix doesn't support notification of syscall events.
-   */
-  return 0;
-}
-#endif
-
 
 #if !defined(CHILD_HAS_EXITED)
 int
@@ -774,14 +668,10 @@ init_child_ops (void)
   child_ops.to_remove_fork_catchpoint = child_remove_fork_catchpoint;
   child_ops.to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
   child_ops.to_remove_vfork_catchpoint = child_remove_vfork_catchpoint;
-  child_ops.to_has_forked = child_has_forked;
-  child_ops.to_has_vforked = child_has_vforked;
   child_ops.to_post_follow_vfork = child_post_follow_vfork;
   child_ops.to_insert_exec_catchpoint = child_insert_exec_catchpoint;
   child_ops.to_remove_exec_catchpoint = child_remove_exec_catchpoint;
-  child_ops.to_has_execd = child_has_execd;
   child_ops.to_reported_exec_events_per_exec_call = child_reported_exec_events_per_exec_call;
-  child_ops.to_has_syscall_event = child_has_syscall_event;
   child_ops.to_has_exited = child_has_exited;
   child_ops.to_mourn_inferior = child_mourn_inferior;
   child_ops.to_can_run = child_can_run;

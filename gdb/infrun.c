@@ -3983,6 +3983,60 @@ discard_inferior_status (struct inferior_status *inf_status)
   xfree (inf_status);
 }
 
+int
+inferior_has_forked (int pid, int *child_pid)
+{
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+
+  get_last_target_status (&last_ptid, &last);
+
+  if (last.kind != TARGET_WAITKIND_FORKED)
+    return 0;
+
+  if (ptid_get_pid (last_ptid) != pid)
+    return 0;
+
+  *child_pid = last.value.related_pid;
+  return 1;
+}
+
+int
+inferior_has_vforked (int pid, int *child_pid)
+{
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+
+  get_last_target_status (&last_ptid, &last);
+
+  if (last.kind != TARGET_WAITKIND_VFORKED)
+    return 0;
+
+  if (ptid_get_pid (last_ptid) != pid)
+    return 0;
+
+  *child_pid = last.value.related_pid;
+  return 1;
+}
+
+int
+inferior_has_execd (int pid, char **execd_pathname)
+{
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+
+  get_last_target_status (&last_ptid, &last);
+
+  if (last.kind != TARGET_WAITKIND_EXECD)
+    return 0;
+
+  if (ptid_get_pid (last_ptid) != pid)
+    return 0;
+
+  *execd_pathname = xstrdup (last.value.execd_pathname);
+  return 1;
+}
+
 /* Oft used ptids */
 ptid_t null_ptid;
 ptid_t minus_one_ptid;

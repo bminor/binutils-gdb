@@ -81,16 +81,14 @@ extern int hppa_prepare_to_proceed (void);
 #define CHILD_REMOVE_FORK_CATCHPOINT
 #define CHILD_INSERT_VFORK_CATCHPOINT
 #define CHILD_REMOVE_VFORK_CATCHPOINT
-#define CHILD_HAS_FORKED
-#define CHILD_HAS_VFORKED
 #define CHILD_INSERT_EXEC_CATCHPOINT
 #define CHILD_REMOVE_EXEC_CATCHPOINT
-#define CHILD_HAS_EXECD
 #define CHILD_REPORTED_EXEC_EVENTS_PER_EXEC_CALL
-#define CHILD_HAS_SYSCALL_EVENT
 #define CHILD_POST_ATTACH
 #define CHILD_THREAD_ALIVE
 #define CHILD_PID_TO_STR
+#define CHILD_WAIT
+extern ptid_t child_wait (ptid_t, struct target_waitstatus *);
 
 #define REQUIRE_ATTACH(pid) hppa_require_attach(pid)
 extern int hppa_require_attach (int);

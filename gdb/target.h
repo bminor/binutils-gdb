@@ -278,14 +278,10 @@ struct target_ops
     int (*to_remove_fork_catchpoint) (int);
     int (*to_insert_vfork_catchpoint) (int);
     int (*to_remove_vfork_catchpoint) (int);
-    int (*to_has_forked) (int, int *);
-    int (*to_has_vforked) (int, int *);
     void (*to_post_follow_vfork) (int, int, int, int);
     int (*to_insert_exec_catchpoint) (int);
     int (*to_remove_exec_catchpoint) (int);
-    int (*to_has_execd) (int, char **);
     int (*to_reported_exec_events_per_exec_call) (void);
-    int (*to_has_syscall_event) (int, enum target_waitkind *, int *);
     int (*to_has_exited) (int, int, int *);
     void (*to_mourn_inferior) (void);
     int (*to_can_run) (void);
@@ -556,10 +552,6 @@ extern int child_insert_vfork_catchpoint (int);
 
 extern int child_remove_vfork_catchpoint (int);
 
-extern int child_has_forked (int, int *);
-
-extern int child_has_vforked (int, int *);
-
 extern void child_acknowledge_created_inferior (int);
 
 extern void child_post_follow_vfork (int, int, int, int);
@@ -568,15 +560,19 @@ extern int child_insert_exec_catchpoint (int);
 
 extern int child_remove_exec_catchpoint (int);
 
-extern int child_has_execd (int, char **);
-
 extern int child_reported_exec_events_per_exec_call (void);
-
-extern int child_has_syscall_event (int, enum target_waitkind *, int *);
 
 extern int child_has_exited (int, int, int *);
 
 extern int child_thread_alive (ptid_t);
+
+/* From infrun.c.  */
+
+extern int inferior_has_forked (int pid, int *child_pid);
+
+extern int inferior_has_vforked (int pid, int *child_pid);
+
+extern int inferior_has_execd (int pid, char **execd_pathname);
 
 /* From exec.c */
 
@@ -742,20 +738,6 @@ extern void target_load (char *arg, int from_tty);
 #define target_remove_vfork_catchpoint(pid) \
      (*current_target.to_remove_vfork_catchpoint) (pid)
 
-/* Returns TRUE if PID has invoked the fork() system call.  And,
-   also sets CHILD_PID to the process id of the other ("child")
-   inferior process that was created by that call.  */
-
-#define target_has_forked(pid,child_pid) \
-     (*current_target.to_has_forked) (pid,child_pid)
-
-/* Returns TRUE if PID has invoked the vfork() system call.  And, 
-   also sets CHILD_PID to the process id of the other ("child") 
-   inferior process that was created by that call.  */
-
-#define target_has_vforked(pid,child_pid) \
-     (*current_target.to_has_vforked) (pid,child_pid)
-
 /* An inferior process has been created via a vfork() system call.
    The debugger has followed the parent, the child, or both.  The
    process of setting up for that follow may have required some
@@ -777,26 +759,12 @@ extern void target_load (char *arg, int from_tty);
 #define target_remove_exec_catchpoint(pid) \
      (*current_target.to_remove_exec_catchpoint) (pid)
 
-/* Returns TRUE if PID has invoked a flavor of the exec() system call.
-   And, also sets EXECD_PATHNAME to the pathname of the executable
-   file that was passed to exec(), and is now being executed.  */
-
-#define target_has_execd(pid,execd_pathname) \
-     (*current_target.to_has_execd) (pid,execd_pathname)
-
 /* Returns the number of exec events that are reported when a process
    invokes a flavor of the exec() system call on this target, if exec
    events are being reported.  */
 
 #define target_reported_exec_events_per_exec_call() \
      (*current_target.to_reported_exec_events_per_exec_call) ()
-
-/* Returns TRUE if PID has reported a syscall event.  And, also sets
-   KIND to the appropriate TARGET_WAITKIND_, and sets SYSCALL_ID to
-   the unique integer ID of the syscall.  */
-
-#define target_has_syscall_event(pid,kind,syscall_id) \
-     (*current_target.to_has_syscall_event) (pid,kind,syscall_id)
 
 /* Returns TRUE if PID has exited.  And, also sets EXIT_STATUS to the
    exit code of PID, if any.  */

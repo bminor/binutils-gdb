@@ -35,6 +35,12 @@
 
 extern CORE_ADDR text_end;
 
+extern int hpux_has_forked (int pid, int *childpid);
+extern int hpux_has_vforked (int pid, int *childpid);
+extern int hpux_has_execd (int pid, char **execd_pathname);
+extern int hpux_has_syscall_event (int pid, enum target_waitkind *kind,
+				   int *syscall_id);
+
 static void fetch_register (int);
 
 void
@@ -469,6 +475,130 @@ hppa_tid_to_str (ptid_t ptid)
   return buf;
 }
 
+/*## */
+/* Enable HACK for ttrace work.  In
+ * infttrace.c/require_notification_of_events,
+ * this is set to 0 so that the loop in child_wait
+ * won't loop.
+ */
+int not_same_real_pid = 1;
+/*## */
+
+
+/* Wait for child to do something.  Return pid of child, or -1 in case
+   of error; store status through argument pointer OURSTATUS.  */
+
+ptid_t
+child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+{
+  int save_errno;
+  int status;
+  char *execd_pathname = NULL;
+  int exit_status;
+  int related_pid;
+  int syscall_id;
+  enum target_waitkind kind;
+  int pid;
+
+  do
+    {
+      set_sigint_trap ();	/* Causes SIGINT to be passed on to the
+				   attached process. */
+      set_sigio_trap ();
+
+      pid = ptrace_wait (inferior_ptid, &status);
+
+      save_errno = errno;
+
+      clear_sigio_trap ();
+
+      clear_sigint_trap ();
+
+      if (pid == -1)
+	{
+	  if (save_errno == EINTR)
+	    continue;
+
+	  fprintf_unfiltered (gdb_stderr, "Child process unexpectedly missing: %s.\n",
+			      safe_strerror (save_errno));
+
+	  /* Claim it exited with unknown signal.  */
+	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+	  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
+	  return pid_to_ptid (-1);
+	}
+
+      /* Did it exit?
+       */
+      if (target_has_exited (pid, status, &exit_status))
+	{
+	  /* ??rehrauer: For now, ignore this. */
+	  continue;
+	}
+
+      if (!target_thread_alive (pid_to_ptid (pid)))
+	{
+	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  return pid_to_ptid (pid);
+	}
+
+      if (hpux_has_forked (pid, &related_pid)
+	  && ((pid == PIDGET (inferior_ptid)) 
+	      || (related_pid == PIDGET (inferior_ptid))))
+	{
+	  ourstatus->kind = TARGET_WAITKIND_FORKED;
+	  ourstatus->value.related_pid = related_pid;
+	  return pid_to_ptid (pid);
+	}
+
+      if (hpux_has_vforked (pid, &related_pid)
+	  && ((pid == PIDGET (inferior_ptid))
+	      || (related_pid == PIDGET (inferior_ptid))))
+	{
+	  ourstatus->kind = TARGET_WAITKIND_VFORKED;
+	  ourstatus->value.related_pid = related_pid;
+	  return pid_to_ptid (pid);
+	}
+
+      if (hpux_has_execd (pid, &execd_pathname))
+	{
+	  /* Are we ignoring initial exec events?  (This is likely because
+	     we're in the process of starting up the inferior, and another
+	     (older) mechanism handles those.)  If so, we'll report this
+	     as a regular stop, not an exec.
+	   */
+	  if (inferior_ignoring_startup_exec_events)
+	    {
+	      inferior_ignoring_startup_exec_events--;
+	    }
+	  else
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_EXECD;
+	      ourstatus->value.execd_pathname = execd_pathname;
+	      return pid_to_ptid (pid);
+	    }
+	}
+
+      /* All we must do with these is communicate their occurrence
+         to wait_for_inferior...
+       */
+      if (hpux_has_syscall_event (pid, &kind, &syscall_id))
+	{
+	  ourstatus->kind = kind;
+	  ourstatus->value.syscall_id = syscall_id;
+	  return pid_to_ptid (pid);
+	}
+
+      /*##  } while (pid != PIDGET (inferior_ptid)); ## *//* Some other child died or stopped */
+/* hack for thread testing */
+    }
+  while ((pid != PIDGET (inferior_ptid)) && not_same_real_pid);
+/*## */
+
+  store_waitstatus (ourstatus, status);
+  return pid_to_ptid (pid);
+}
+
 #if !defined (GDB_NATIVE_HPUX_11)
 
 /* The following code is a substitute for the infttrace.c versions used
@@ -890,7 +1020,7 @@ child_remove_vfork_catchpoint (int pid)
 }
 
 int
-child_has_forked (int pid, int *childpid)
+hpux_has_forked (int pid, int *childpid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -921,7 +1051,7 @@ child_has_forked (int pid, int *childpid)
 }
 
 int
-child_has_vforked (int pid, int *childpid)
+hpux_has_vforked (int pid, int *childpid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -983,7 +1113,7 @@ child_remove_exec_catchpoint (int pid)
 }
 
 int
-child_has_execd (int pid, char **execd_pathname)
+hpux_has_execd (int pid, char **execd_pathname)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -1022,7 +1152,7 @@ child_reported_exec_events_per_exec_call (void)
 }
 
 int
-child_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
+hpux_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
 {
   /* This request is only available on HPUX 10.30 and later, via
      the ttrace interface.  */

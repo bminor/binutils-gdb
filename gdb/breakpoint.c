@@ -2570,17 +2570,17 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
       continue;
 
     if ((b->type == bp_catch_fork)
-	&& !target_has_forked (PIDGET (inferior_ptid),
-	                       &b->forked_inferior_pid))
+	&& !inferior_has_forked (PIDGET (inferior_ptid),
+				 &b->forked_inferior_pid))
       continue;
 
     if ((b->type == bp_catch_vfork)
-	&& !target_has_vforked (PIDGET (inferior_ptid),
-	                        &b->forked_inferior_pid))
+	&& !inferior_has_vforked (PIDGET (inferior_ptid),
+				  &b->forked_inferior_pid))
       continue;
 
     if ((b->type == bp_catch_exec)
-	&& !target_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
+	&& !inferior_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
       continue;
 
     if (ep_is_exception_catchpoint (b) &&

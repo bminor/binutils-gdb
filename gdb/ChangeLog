@@ -1,5 +1,54 @@
 2002-11-16  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (bpstat_stop_status): Call inferior_has_forked,
+	inferior_has_vforked, and inferior_has_execd instead of
+	target_has_forked, target_has_vforked, and target_has_execd.
+	* config/pa/nm-hppah.h (CHILD_HAS_FORKED, CHILD_HAS_VFORKED)
+	(CHILD_HAS_EXECD, CHILD_HAS_SYSCALL_EVENT): Don't define.
+	(CHILD_WAIT): Define.
+	(child_wait): Add prototype.
+	* hppah-nat.c (hpux_has_forked): Rename from child_has_forked.
+	Add prototype.
+	(hpux_has_vforked): Likewise, from child_has_vforked.
+	(hpux_has_execd): Likewise, from child_has_execd.
+	(hpux_has_syscall_event): Likewise, from child_has_syscall_event.
+	(not_same_real_pid, child_wait): New, copied from inftarg.c.
+	Call hpux_has_forked, hpux_has_vforked, hpux_has_execd,
+	and hpux_has_syscall_event instead of the target hooks.
+	* infrun.c (inferior_has_forked, inferior_has_vforked)
+	(inferior_has_execd): New functions.
+	* inftarg.c (not_same_real_pid): Remove.
+	(child_wait): Remove references to not_same_real_pid,
+	target_has_forked, target_has_vforked, target_has_execd,
+	and target_has_syscall_event.
+	(child_has_forked, child_has_vforked, child_has_execd)
+	(child_has_syscall_event): Remove.
+	(init_child_ops): Remove references to child_has_forked,
+	child_has_vforked, child_has_execd, and child_has_syscall_event.
+	* infttrace.c (hpux_has_forked): Rename from child_has_forked.
+	(hpux_has_vforked): Likewise, from child_has_vforked.
+	(hpux_has_execd): Likewise, from child_has_execd.
+	(hpux_has_syscall_event): Likewise, from child_has_syscall_event.
+	* target.c (cleanup_target): Remove references to
+	to_has_forked, to_has_vforked, to_has_execd, and
+	to_has_syscall_event.
+	(update_current_target): Likewise.
+	(setup_target_debug): Likewise.
+	(debug_to_has_forked): Remove.
+	(debug_to_has_vforked): Remove.
+	(debug_to_has_execd): Remove.
+	(debug_to_has_syscall_event): Remove.
+	* target.h (struct target_ops): Remove to_has_forked.
+	to_has_vforked, to_has_execd, and to_has_syscall_event.
+	(child_has_forked, child_has_vforked, child_has_execd)
+	(child_has_syscall_event): Remove prototypes.
+	(inferior_has_forked, inferior_has_vforked, inferior_has_execd): Add
+	prototypes.
+	(target_has_forked, target_has_vforked, target_has_execd)
+	(target_has_syscall_event): Remove macros.
+
+2002-11-16  Daniel Jacobowitz  <drow@mvista.com>
+
 	* hppah-nat.c (child_can_follow_vfork_prior_to_exec): Remove.
 	* inftarg.c (child_can_follow_vfork_prior_to_exec): Remove.
 	(init_child_ops): Don't initialize to_can_follow_vfork_prior_to_exec.

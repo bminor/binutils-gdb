@@ -486,12 +486,6 @@ cleanup_target (struct target_ops *t)
   de_fault (to_remove_vfork_catchpoint, 
 	    (int (*) (int)) 
 	    tcomplain);
-  de_fault (to_has_forked, 
-	    (int (*) (int, int *)) 
-	    return_zero);
-  de_fault (to_has_vforked, 
-	    (int (*) (int, int *)) 
-	    return_zero);
   de_fault (to_post_follow_vfork, 
 	    (void (*) (int, int, int, int)) 
 	    target_ignore);
@@ -501,15 +495,9 @@ cleanup_target (struct target_ops *t)
   de_fault (to_remove_exec_catchpoint, 
 	    (int (*) (int)) 
 	    tcomplain);
-  de_fault (to_has_execd, 
-	    (int (*) (int, char **)) 
-	    return_zero);
   de_fault (to_reported_exec_events_per_exec_call, 
 	    (int (*) (void)) 
 	    return_one);
-  de_fault (to_has_syscall_event, 
-	    (int (*) (int, enum target_waitkind *, int *)) 
-	    return_zero);
   de_fault (to_has_exited, 
 	    (int (*) (int, int, int *)) 
 	    return_zero);
@@ -624,14 +612,10 @@ update_current_target (void)
       INHERIT (to_remove_fork_catchpoint, t);
       INHERIT (to_insert_vfork_catchpoint, t);
       INHERIT (to_remove_vfork_catchpoint, t);
-      INHERIT (to_has_forked, t);
-      INHERIT (to_has_vforked, t);
       INHERIT (to_post_follow_vfork, t);
       INHERIT (to_insert_exec_catchpoint, t);
       INHERIT (to_remove_exec_catchpoint, t);
-      INHERIT (to_has_execd, t);
       INHERIT (to_reported_exec_events_per_exec_call, t);
-      INHERIT (to_has_syscall_event, t);
       INHERIT (to_has_exited, t);
       INHERIT (to_mourn_inferior, t);
       INHERIT (to_can_run, t);
@@ -2124,32 +2108,6 @@ debug_to_remove_vfork_catchpoint (int pid)
   return retval;
 }
 
-static int
-debug_to_has_forked (int pid, int *child_pid)
-{
-  int has_forked;
-
-  has_forked = debug_target.to_has_forked (pid, child_pid);
-
-  fprintf_unfiltered (gdb_stdlog, "target_has_forked (%d, %d) = %d\n",
-		      pid, *child_pid, has_forked);
-
-  return has_forked;
-}
-
-static int
-debug_to_has_vforked (int pid, int *child_pid)
-{
-  int has_vforked;
-
-  has_vforked = debug_target.to_has_vforked (pid, child_pid);
-
-  fprintf_unfiltered (gdb_stdlog, "target_has_vforked (%d, %d) = %d\n",
-		      pid, *child_pid, has_vforked);
-
-  return has_vforked;
-}
-
 static void
 debug_to_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
 			    int followed_child)
@@ -2188,20 +2146,6 @@ debug_to_remove_exec_catchpoint (int pid)
 }
 
 static int
-debug_to_has_execd (int pid, char **execd_pathname)
-{
-  int has_execd;
-
-  has_execd = debug_target.to_has_execd (pid, execd_pathname);
-
-  fprintf_unfiltered (gdb_stdlog, "target_has_execd (%d, %s) = %d\n",
-		      pid, (*execd_pathname ? *execd_pathname : "<NULL>"),
-		      has_execd);
-
-  return has_execd;
-}
-
-static int
 debug_to_reported_exec_events_per_exec_call (void)
 {
   int reported_exec_events;
@@ -2213,36 +2157,6 @@ debug_to_reported_exec_events_per_exec_call (void)
 		      reported_exec_events);
 
   return reported_exec_events;
-}
-
-static int
-debug_to_has_syscall_event (int pid, enum target_waitkind *kind,
-			    int *syscall_id)
-{
-  int has_syscall_event;
-  char *kind_spelling = "??";
-
-  has_syscall_event = debug_target.to_has_syscall_event (pid, kind, syscall_id);
-  if (has_syscall_event)
-    {
-      switch (*kind)
-	{
-	case TARGET_WAITKIND_SYSCALL_ENTRY:
-	  kind_spelling = "SYSCALL_ENTRY";
-	  break;
-	case TARGET_WAITKIND_SYSCALL_RETURN:
-	  kind_spelling = "SYSCALL_RETURN";
-	  break;
-	default:
-	  break;
-	}
-    }
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_has_syscall_event (%d, %s, %d) = %d\n",
-		      pid, kind_spelling, *syscall_id, has_syscall_event);
-
-  return has_syscall_event;
 }
 
 static int
@@ -2417,14 +2331,10 @@ setup_target_debug (void)
   current_target.to_remove_fork_catchpoint = debug_to_remove_fork_catchpoint;
   current_target.to_insert_vfork_catchpoint = debug_to_insert_vfork_catchpoint;
   current_target.to_remove_vfork_catchpoint = debug_to_remove_vfork_catchpoint;
-  current_target.to_has_forked = debug_to_has_forked;
-  current_target.to_has_vforked = debug_to_has_vforked;
   current_target.to_post_follow_vfork = debug_to_post_follow_vfork;
   current_target.to_insert_exec_catchpoint = debug_to_insert_exec_catchpoint;
   current_target.to_remove_exec_catchpoint = debug_to_remove_exec_catchpoint;
-  current_target.to_has_execd = debug_to_has_execd;
   current_target.to_reported_exec_events_per_exec_call = debug_to_reported_exec_events_per_exec_call;
-  current_target.to_has_syscall_event = debug_to_has_syscall_event;
   current_target.to_has_exited = debug_to_has_exited;
   current_target.to_mourn_inferior = debug_to_mourn_inferior;
   current_target.to_can_run = debug_to_can_run;
