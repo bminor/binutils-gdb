@@ -1,20 +1,15 @@
 o - strip
-	Make faster by using ftruncate if available (and format is suitable).
+    Make faster by using ftruncate if available (and format is suitable).
 
 o - nm, objdump
-    add option to demangle C++ names
+    Add option to demangle C++ names.
+
+o - nm, BFD
+    Print more information about the symbols for more object file formats.
+    Print the symbol size in POSIX format.
 
 o - See also ../ld/TODO and ../bfd/TODO.
 
-o - ar q is flakey: e.g. doesn't handle long file names properly.
+o - ar q is flakey: e.g., doesn't handle long file names properly.
 
 o - objdump -d:  Print relocatable addresses intelligently.
-
-OLD:
-
-o - make the long options more consistent.
-
-o - make ATT and BSD versions -- perhaps the options should be
-    controlled by an environment variable.
-
-o - Calling +help or +version should exit with a successful status (ie 0)
