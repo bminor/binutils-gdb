@@ -1,5 +1,8 @@
 Tue Nov 18 15:53:45 1997  Doug Evans  <devans@canuck.cygnus.com>
 
+	* sim-core.c (sim_core_signal): Use sim_stopped instead of
+	sim_signalled.
+
 	* sim-signal.c, sim-signal.h: New files.
 	* Make-common.in (sim-signal.o): Add rule for.
 	(SIM_NEW_COMMON_OBJS): Add sim-signal.o.
