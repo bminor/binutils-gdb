@@ -1,5 +1,9 @@
 2004-04-04  Andrew Cagney  <cagney@redhat.com>
 
+	* gnu-nat.c (gnu_wait): Use memcpy instead of bcopy.
+	* remote-vxmips.c (vx_read_register, vx_write_register): Ditto.
+	* remote-vx68.c (vx_read_register, vx_write_register): Ditto.
+
 	* config/vax/xm-vax.h (FAULT_CODE_ORIGIN, INIT_STACK): Delete.
 	* config/alpha/xm-alphaosf.h (NO_SIGINTERRUPT): Delete.
 	* config/alpha/xm-alphalinux.h (NO_SIGINTERRUPT): Delete.

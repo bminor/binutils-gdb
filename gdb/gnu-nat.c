@@ -1574,7 +1574,7 @@ rewait:
     }
 
   /* Pass back out our results.  */
-  bcopy (&inf->wait.status, status, sizeof (*status));
+  memcpy (status, &inf->wait.status, sizeof (*status));
 
   thread = inf->wait.thread;
   if (thread)
