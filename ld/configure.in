@@ -45,6 +45,8 @@ case "${targ}" in
   sparclite*-fujitsu-*) ld_target=sun4 ;;
   sparc*-*-aout)	ld_target=sun4 ;;
   sparc*-*-coff)	ld_target=coff-sparc ;;
+  sparc64-*-elf*)	ld_target=sparc64-elf ;;
+  sparc64*)		ld_target=sun4 ;;
   sparc*-*-elf)		ld_target=sun4sol2 ;;
   sparc*-*-lynxos*)	ld_target=sparc-lynx ;;
   sparc*-*-solaris2*)	ld_target=sun4sol2 ;;
