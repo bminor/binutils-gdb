@@ -255,9 +255,6 @@ static struct value *value_val_atr (struct type *, struct value *);
 static struct symbol *standard_lookup (const char *, const struct block *,
                                        domain_enum);
 
-extern void symtab_symbol_info (char *regexp, domain_enum kind,
-                                int from_tty);
-
 static struct value *ada_search_struct_field (char *, struct value *, int,
                                               struct type *);
 
@@ -5420,9 +5417,6 @@ ada_make_symbol_completion_list (const char *text0, const char *word)
 
 #ifdef GNAT_GDB
                                 /* Breakpoint-related */
-
-/* Import message from symtab.c.  */
-extern char no_symtab_msg[];
 
 /* Assuming that LINE is pointing at the beginning of an argument to
    'break', return a pointer to the delimiter for the initial segment
