@@ -803,9 +803,9 @@ any expression---and that expression can include subroutine calls and
 assignments.
 
 @smallexample
-(_GDBP__) p len_lquote=strlen(lquote)
+(_GDBP__) p @i{len_lquote=strlen(lquote)}
 $5 = 7
-(_GDBP__) p len_rquote=strlen(rquote)
+(_GDBP__) p @i{len_rquote=strlen(rquote)}
 $6 = 9
 @end smallexample
 
