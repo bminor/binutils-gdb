@@ -71,8 +71,8 @@ static Fixups FixUps[2];
 static Fixups *fixups;
 
 /* Whether current and previous instruction is a word multiply.  */
-int cur_mul32_p = 0;
-int prev_mul32_p = 0;
+static int cur_mul32_p = 0;
+static int prev_mul32_p = 0;
 
 /*  The flag_explicitly_parallel is true iff the instruction being assembled
     has been explicitly written as a parallel short-instruction pair by the
@@ -82,6 +82,14 @@ int prev_mul32_p = 0;
     from md_assemble().  */
 static int flag_explicitly_parallel = 0; 
 static int flag_xp_state = 0;
+
+/* The known current alignment of the current section.  */
+static int d30v_current_align;
+static segT d30v_current_align_seg;
+
+/* The last seen label in the current section.  This is used to auto-align
+   labels preceeding instructions.  */
+static symbolS *d30v_last_label;
 
 /* Two nops */
 #define NOP_LEFT ((long long)NOP << 32)
@@ -109,6 +117,11 @@ static int parallel_ok PARAMS ((struct d30v_insn *opcode1, unsigned long insn1,
 				exec_type_enum exec_type));
 static void d30v_number_to_chars PARAMS ((char *buf, long long value, int nbytes));
 static void check_size PARAMS ((long value, int bits, char *file, int line));
+static void d30v_align PARAMS ((int, char *, symbolS *));
+static void s_d30v_align PARAMS ((int));
+static void s_d30v_text PARAMS ((int));
+static void s_d30v_data PARAMS ((int));
+static void s_d30v_section PARAMS ((int));
 
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
@@ -121,6 +134,13 @@ const pseudo_typeS md_pseudo_table[] =
 {
   { "word", cons, 4 },
   { "hword", cons, 2 },
+  { "align", s_d30v_align, 0 },
+  { "text", s_d30v_text, 0 },
+  { "data", s_d30v_data, 0 },
+  { "section", s_d30v_section, 0 },
+  { "section.s", s_d30v_section, 0 },
+  { "sect", s_d30v_section, 0 },
+  { "sect.s", s_d30v_section, 0 },
   { NULL, NULL, 0 }
 };
 
@@ -225,10 +245,10 @@ void
 md_show_usage (stream)
   FILE *stream;
 {
-  fprintf(stream, (_("\nD30V options:\n\
+  fprintf(stream, _("\nD30V options:\n\
 -O                      Make adjacent short instructions parallel if possible.\n\
 -n                      Warn about all NOPs inserted by the assembler.\n\
--N			Warn about NOPs inserted after word multiplies.\n")));
+-N			Warn about NOPs inserted after word multiplies.\n"));
 } 
 
 int
@@ -341,6 +361,8 @@ md_begin ()
   fixups = &FixUps[0];
   FixUps[0].next = &FixUps[1];
   FixUps[1].next = &FixUps[0];
+
+  d30v_current_align_seg = now_seg;
 }
 
 
@@ -1054,8 +1076,15 @@ md_assemble (str)
   static exec_type_enum etype = EXEC_UNKNOWN;	/* saved extype.  used for multiline instructions */
   char *str2;
 
-  if ( (prev_insn != -1) && prev_seg && ((prev_seg != now_seg) || (prev_subseg != now_subseg)))
+  if ((prev_insn != -1) && prev_seg
+       && ((prev_seg != now_seg) || (prev_subseg != now_subseg)))
     d30v_cleanup();
+
+  if (d30v_current_align < 3)
+    d30v_align (3, NULL, d30v_last_label);
+  else if (d30v_current_align > 3)
+    d30v_current_align = 3;
+  d30v_last_label = NULL;
 
   flag_explicitly_parallel = 0;
   flag_xp_state = 0;
@@ -1092,7 +1121,7 @@ md_assemble (str)
 	  /* assemble first instruction and save it */
 	  prev_insn = do_assemble (str, &prev_opcode, 1);
 	  if (prev_insn == -1)
-	    as_fatal (_("cannot assemble instruction "));
+	    as_fatal (_("Cannot assemble instruction"));
 	  if (prev_opcode.form->form >= LONG)
 	    as_fatal (_("First opcode is long.  Unable to mix instructions as specified.")); 
 	  fixups = fixups->next;
@@ -1109,7 +1138,7 @@ md_assemble (str)
 	  etype = extype;
 	  return;
 	}
-      as_fatal (_("cannot assemble instruction "));
+      as_fatal (_("Cannot assemble instruction"));
     }
 
   if (etype != EXEC_UNKNOWN)
@@ -1149,7 +1178,7 @@ md_assemble (str)
 	  d30v_number_to_chars (f, NOP2, 8);
 	  if (warn_nops == NOP_ALL || warn_nops == NOP_MULTIPLY)
 	    {
-	      if ((opcode.op->flags_used & FLAG_MEM))
+	      if (opcode.op->flags_used & FLAG_MEM)
 		as_warn (_("word of NOPs added between word multiply and load"));
 	      else
 		as_warn (_("word of NOPs added between word multiply and 16-bit multiply"));
@@ -1268,7 +1297,7 @@ do_assemble (str, opcode, shortp)
 	  if (i < 3 || i > 6)
 	    {
 	      name[p+2]=0;
-	      as_fatal (_("cmpu doesn't support condition code %s"),&name[p]);      
+	      as_fatal (_("cmpu doesn't support condition code %s"),&name[p]);
 	    }
 	}
 
@@ -1312,7 +1341,7 @@ do_assemble (str, opcode, shortp)
     {
       opcode->op++;
       if (strcmp(opcode->op->name,name))
-	return -1;
+	as_fatal (_("operands for opcode `%s' do not match any valid format"), name);
     }
   input_line_pointer = save;
 
@@ -1329,9 +1358,9 @@ do_assemble (str, opcode, shortp)
 }
 
 
-/* find_format() gets a pointer to an entry in the format table.       */
-/* It must look at all formats for an opcode and use the operands */
-/* to choose the correct one.  Returns NULL on error. */
+/* find_format() gets a pointer to an entry in the format table.
+   It must look at all formats for an opcode and use the operands
+   to choose the correct one.  Returns NULL on error. */
 
 static struct d30v_format *
 find_format (opcode, myops, fsize, cmp_hack)
@@ -1343,15 +1372,15 @@ find_format (opcode, myops, fsize, cmp_hack)
   int numops, match, index, i=0, j, k;
   struct d30v_format *fm;
 
-  /* get all the operands and save them as expressions */
+  /* Get all the operands and save them as expressions.  */
   numops = get_operands (myops, cmp_hack);
 
   while ((index = opcode->format[i++]) != 0)
     {
-      if ((fsize == FORCE_SHORT) && (index >= LONG))
+      if (fsize == FORCE_SHORT && index >= LONG)
 	continue;
 
-      if ((fsize == FORCE_LONG) && (index < LONG))
+      if (fsize == FORCE_LONG && index < LONG)
 	continue;
 
       fm = (struct d30v_format *)&d30v_format_table[index];
@@ -1359,20 +1388,21 @@ find_format (opcode, myops, fsize, cmp_hack)
       while (fm->form == index)
 	{
 	  match = 1;
-	  /* now check the operands for compatibility */
+	  /* Now check the operands for compatibility.  */
 	  for (j = 0; match && fm->operands[j]; j++)
 	    {
 	      int flags = d30v_operand_table[fm->operands[j]].flags;
+	      int bits = d30v_operand_table[fm->operands[j]].bits;
 	      int X_op = myops[j].X_op;
 	      int num = myops[j].X_add_number;
 	      
-	      if ( flags & OPERAND_SPECIAL )
+	      if (flags & OPERAND_SPECIAL)
 		break;
-	      else if (X_op == 0)
+	      else if (X_op == O_illegal)
 		match = 0;
 	      else if (flags & OPERAND_REG)
 		{
-		  if ((X_op != O_register)
+		  if (X_op != O_register
 		      || ((flags & OPERAND_ACC) && !(num & OPERAND_ACC))
 		      || ((flags & OPERAND_FLAG) && !(num & OPERAND_FLAG))
 		      || ((flags & OPERAND_CONTROL)
@@ -1381,61 +1411,81 @@ find_format (opcode, myops, fsize, cmp_hack)
 		      match = 0;
 		    }
 		}
-	      else
-		if (((flags & OPERAND_MINUS) && ((X_op != O_absent) || (num != OPERAND_MINUS)))
-		    || ((flags & OPERAND_PLUS) && ((X_op != O_absent) || (num != OPERAND_PLUS)))
-		    || ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS)))
-		    || ((flags & OPERAND_ATPAR) && ((X_op != O_absent) || (num != OPERAND_ATPAR)))
-		    || ((flags & OPERAND_ATSIGN) && ((X_op != O_absent) || (num != OPERAND_ATSIGN))))
-		  {
-		    match=0;
-		  }
-		else if (flags & OPERAND_NUM)
-		  {
-		    /* a number can be a constant or symbol expression */
-		    if (fm->form >= LONG)
-		      {
-			/* If we're testing for a LONG format, either fits */
-			if (X_op != O_constant && X_op != O_symbol)
-			  match = 0;
-		      }
-		    else if ((fm->form < LONG) && (((fsize == FORCE_SHORT) && (X_op == O_symbol)) ||
-						   (fm->form == SHORT_D2 && j == 0)))
-		      match = 1;
-		    /* This is the tricky part.  Will the constant or symbol */
-		    /* fit into the space in the current format? */
-		    else if (X_op == O_constant)
-		      {
-			if (check_range (num, d30v_operand_table[fm->operands[j]].bits, flags))
-			  match = 0;
-		      }
-		    else if (X_op == O_symbol && S_IS_DEFINED(myops[j].X_add_symbol) &&
-			     (S_GET_SEGMENT(myops[j].X_add_symbol) == now_seg) &&
-			     opcode->reloc_flag == RELOC_PCREL)
-		      {
-			/* if the symbol is defined, see if the value will fit */
-			/* into the form we're considering */
-			fragS *f;
-			long value;
-			/* calculate the current address by running through the previous frags */
-			/* and adding our current offset */
-			for (value = 0, f = frchain_now->frch_root; f; f = f->fr_next)
-			  value += f->fr_fix + f->fr_offset;
-			value = S_GET_VALUE(myops[j].X_add_symbol) - value -
-			  (obstack_next_free(&frchain_now->frch_obstack) - frag_now->fr_literal);
-			if (check_range (value, d30v_operand_table[fm->operands[j]].bits, flags)) 
-			  match = 0;
-		      }
-		    else
-		      match = 0;
-		  }
+	      else if (((flags & OPERAND_MINUS)
+		        && (X_op != O_absent || num != OPERAND_MINUS))
+		       || ((flags & OPERAND_PLUS)
+			   && (X_op != O_absent || num != OPERAND_PLUS))
+		       || ((flags & OPERAND_ATMINUS)
+			   && (X_op != O_absent || num != OPERAND_ATMINUS))
+		       || ((flags & OPERAND_ATPAR)
+			   && (X_op != O_absent || num != OPERAND_ATPAR))
+		       || ((flags & OPERAND_ATSIGN)
+			   && (X_op != O_absent || num != OPERAND_ATSIGN)))
+		{
+		  match=0;
+		}
+	      else if (flags & OPERAND_NUM)
+		{
+		  /* A number can be a constant or symbol expression.  */
+
+		  /* Turn an expression into a symbol for later resolution.  */
+		  if (X_op != O_absent && X_op != O_constant
+		      && X_op != O_symbol && X_op != O_register
+		      && X_op != O_big)
+		    {
+		      symbolS *sym = make_expr_symbol (&myops[j]);
+		      myops[j].X_op = X_op = O_symbol;
+		      myops[j].X_add_symbol = sym;
+		      myops[j].X_add_number = num = 0;
+		    }
+
+		  if (fm->form >= LONG)
+		    {
+		      /* If we're testing for a LONG format, either fits. */
+		      if (X_op != O_constant && X_op != O_symbol)
+			match = 0;
+		    }
+		  else if (fm->form < LONG
+			   && ((fsize == FORCE_SHORT && X_op == O_symbol)
+			       || (fm->form == SHORT_D2 && j == 0)))
+		    match = 1;
+		  /* This is the tricky part.  Will the constant or symbol
+		     fit into the space in the current format? */
+		  else if (X_op == O_constant)
+		    {
+		      if (check_range (num, bits, flags))
+			match = 0;
+		    }
+		  else if (X_op == O_symbol
+			   && S_IS_DEFINED(myops[j].X_add_symbol)
+			   && S_GET_SEGMENT(myops[j].X_add_symbol) == now_seg
+			   && opcode->reloc_flag == RELOC_PCREL)
+		    {
+		      /* If the symbol is defined, see if the value will fit
+			 into the form we're considering. */
+		      fragS *f;
+		      long value;
+
+		      /* Calculate the current address by running through the
+			 previous frags and adding our current offset.  */
+		      value = 0;
+		      for (f = frchain_now->frch_root; f; f = f->fr_next)
+			value += f->fr_fix + f->fr_offset;
+		      value = (S_GET_VALUE(myops[j].X_add_symbol) - value
+			       - (obstack_next_free(&frchain_now->frch_obstack)
+				  - frag_now->fr_literal));
+		      if (check_range (value, bits, flags)) 
+			match = 0;
+		    }
+		  else
+		    match = 0;
+		}
 	    }
 	  /* printf("through the loop: match=%d\n",match);  */
-	  /* we're only done if the operands matched so far AND there
-	     are no more to check */
-	  if (match && myops[j].X_op==0) 
+	  /* We're only done if the operands matched so far AND there
+	     are no more to check.  */
+	  if (match && myops[j].X_op == 0) 
 	    return fm;
-	  match = 0;
 	  fm = (struct d30v_format *)&d30v_format_table[++k];
 	}
       /* printf("trying another format: i=%d\n",i); */
@@ -1636,7 +1686,6 @@ d30v_cleanup ()
   return 1;
 }
 
-
 static void                      
 d30v_number_to_chars (buf, value, n)
      char *buf;			/* Return 'nbytes' of chars here. */
@@ -1685,7 +1734,172 @@ check_size (value, bits, file, line)
   max = (1 << (bits - 1)) - 1;
 
   if (tmp > max)
-    as_bad_where (file, line,"value too large to fit in %d bits",bits);
+    as_bad_where (file, line, _("value too large to fit in %d bits"), bits);
 
   return;
+}
+
+/* d30v_frob_label() is called when after a label is recognized.  */
+
+void
+d30v_frob_label (lab)
+     symbolS *lab;
+{
+  /* Emit any pending instructions.  */
+  d30v_cleanup();
+
+  /* Update the label's address with the current output pointer.  */
+  lab->sy_frag = frag_now;
+  S_SET_VALUE (lab, (valueT) frag_now_fix ());
+
+  /* Record this label for future adjustment after we find out what
+     kind of data it references, and the required alignment therewith.  */
+  d30v_last_label = lab;
+}
+
+/* Hook into cons for capturing alignment changes.  */
+
+void
+d30v_cons_align (size)
+     int size;
+{
+  int log_size;
+
+  log_size = 0;
+  while ((size >>= 1) != 0)
+    ++log_size;
+
+  if (d30v_current_align < log_size)
+    d30v_align (log_size, (char *) NULL, NULL);
+  else if (d30v_current_align > log_size)
+    d30v_current_align = log_size;
+  d30v_last_label = NULL;
+}
+
+/* Called internally to handle all alignment needs.  This takes care
+   of eliding calls to frag_align if'n the cached current alignment
+   says we've already got it, as well as taking care of the auto-aligning
+   labels wrt code.  */
+
+static void
+d30v_align (n, pfill, label)
+     int n;
+     char *pfill;
+     symbolS *label;
+{
+  /* The front end is prone to changing segments out from under us
+     temporarily when -g is in effect.  */
+  int switched_seg_p = (d30v_current_align_seg != now_seg);
+
+  if (d30v_current_align >= n && !switched_seg_p)
+    return;
+
+  d30v_cleanup();
+
+  if (pfill == NULL)
+    {
+      if (n > 2
+	  && (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+	{
+	  static char const nop[4] = { 0x00, 0xf0, 0x00, 0x00 };
+
+	  /* First, make sure we're on a four-byte boundary, in case
+	     someone has been putting .byte values the text section.  */
+	  if (d30v_current_align < 2 || switched_seg_p)
+	    frag_align (2, 0, 0);
+	  frag_align_pattern (n, nop, sizeof nop, 0);
+	}
+      else
+	frag_align (n, 0, 0);
+    }
+  else
+    frag_align (n, *pfill, 0);
+
+  if (!switched_seg_p)
+    d30v_current_align = n;
+
+  if (label != NULL)
+    {
+      assert (S_GET_SEGMENT (label) == now_seg);
+      label->sy_frag = frag_now;
+      S_SET_VALUE (label, (valueT) frag_now_fix ());
+    }
+
+  record_alignment(now_seg, n);
+}
+
+/* Handle the .align pseudo-op.  This aligns to a power of two.  We
+   hook here to latch the current alignment.  */
+
+static void
+s_d30v_align (ignore)
+     int ignore;
+{
+  int align;
+  char fill, *pfill = NULL;
+  long max_alignment = 15;
+
+  align = get_absolute_expression ();
+  if (align > max_alignment)
+    {
+      align = max_alignment;
+      as_warn (_("Alignment too large: %d assumed"), align);
+    }
+  else if (align < 0)
+    {
+      as_warn (_("Alignment negative: 0 assumed"));
+      align = 0;
+    }
+
+  if (*input_line_pointer == ',')
+    {
+      input_line_pointer++;
+      fill = get_absolute_expression ();
+      pfill = &fill;
+    }
+
+  d30v_last_label = NULL;
+  d30v_align (align, pfill, NULL);
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the .text pseudo-op.  This is like the usual one, but it
+   clears the saved last label and resets known alignment.  */
+
+static void
+s_d30v_text (i)
+     int i;
+
+{
+  s_text (i);
+  d30v_last_label = NULL;
+  d30v_current_align = 0;
+  d30v_current_align_seg = now_seg;
+}
+
+/* Handle the .data pseudo-op.  This is like the usual one, but it
+   clears the saved last label and resets known alignment.  */
+
+static void
+s_d30v_data (i)
+     int i;
+{
+  s_data (i);
+  d30v_last_label = NULL;
+  d30v_current_align = 0;
+  d30v_current_align_seg = now_seg;
+}
+
+/* Handle the .section pseudo-op.  This is like the usual one, but it
+   clears the saved last label and resets known alignment.  */
+
+static void
+s_d30v_section (ignore)
+     int ignore;
+{
+  obj_elf_section (ignore);
+  d30v_last_label = NULL;
+  d30v_current_align = 0;
+  d30v_current_align_seg = now_seg;
 }

@@ -1,3 +1,18 @@
+Tue May 12 12:03:44 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-d30v.c (cur_mul32_p, prev_mul32_p): Make static.
+        (d30v_current_align, d30v_current_align_seg): New variables.
+        (d30v_last_label): New variable.
+        (d30v_align, s_d30v_align, s_d30v_text): New functions.
+        (s_d30v_data, s_d30v_section): Likewise.
+        (md_pseudo_table): Call them.
+        (md_begin): Initialize d30v_current_align_seg.
+        (md_assemble): Call d30v_align when needed by known current alignment.
+        (d30v_frob_label, d30v_cons_align): New functions.
+        * config/tc-d30v.h (md_do_align): Remove.
+        (tc_frob_label): Call d30v_frob_label.
+        (md_cons_align): New.
+
 start-sanitize-sky
 Mon May 11 12:48:33 1998  Doug Evans  <devans@canuck.cygnus.com>
 
