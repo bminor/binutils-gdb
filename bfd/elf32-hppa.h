@@ -35,32 +35,26 @@
 #include "libhppa.h"
 #include "elf/hppa.h"
 
-#define ELF_HOWTO_TABLE_SIZE	R_PARISC_UNIMPLEMENTED + 1
-#define N_PARISC_RELOCS		R_PARISC_UNIMPLEMENTED + 1
-
-/* Define groups of basic relocations.  FIXME:  These should
-   be the only basic relocations created by GAS.  The rest
-   should be internal to the BFD backend.  
-
-   The idea is both SOM and ELF define these basic relocation
-   types so they map into a SOM or ELF specific relocation 
-   as appropriate.  This allows GAS to share much more code
-   between the two target object formats.  */
-
-#define R_HPPA_NONE			R_PARISC_NONE
-#define	R_HPPA				R_PARISC_DIR32
-#define	R_HPPA_GOTOFF			R_PARISC_DPREL21L
-#define	R_HPPA_PCREL_CALL		R_PARISC_PCREL21L
-#define R_HPPA_ABS_CALL			R_PARISC_DIR17F
-#define R_HPPA_COMPLEX			R_PARISC_UNIMPLEMENTED
-
-elf32_hppa_reloc_type ** hppa_elf_gen_reloc_type
-  PARAMS ((bfd *, elf32_hppa_reloc_type, int, int, int, asymbol *));
-
 boolean elf32_hppa_size_stubs
   PARAMS ((bfd *, bfd *, struct bfd_link_info *));
 
 boolean elf32_hppa_build_stubs
   PARAMS ((bfd *, struct bfd_link_info *));
+
+/* Define groups of basic relocations.  FIXME:  These should
+   be the only basic relocations created by GAS.  The rest
+   should be internal to the BFD backend.
+
+   The idea is both SOM and ELF define these basic relocation
+   types so they map into a SOM or ELF specific relocation
+   as appropriate.  This allows GAS to share much more code
+   between the two target object formats.  */
+
+#define R_HPPA_NONE			R_PARISC_NONE
+#define R_HPPA				R_PARISC_DIR32
+#define R_HPPA_GOTOFF			R_PARISC_DPREL21L
+#define R_HPPA_PCREL_CALL		R_PARISC_PCREL21L
+#define R_HPPA_ABS_CALL			R_PARISC_DIR17F
+#define R_HPPA_COMPLEX			R_PARISC_UNIMPLEMENTED
 
 #endif /* _ELF32_HPPA_H */
