@@ -28,7 +28,8 @@
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "solib-svr4.h"	/* for struct link_map_offsets */
+
+#include "solib-svr4.h"		/* For struct link_map_offsets.  */
 
 
 /* Recognizing signal handler frames.  */
@@ -375,31 +376,30 @@ i386_linux_skip_solib_resolver (CORE_ADDR pc)
   return 0;
 }
 
-/* Fetch (and possibly build) an appropriate link_map_offsets structure
-   for native i386 linux targets using the struct offsets defined in
-   link.h (but without actual reference to that file).
+/* Fetch (and possibly build) an appropriate link_map_offsets
+   structure for native Linux/x86 targets using the struct offsets
+   defined in link.h (but without actual reference to that file).
 
-   This makes it possible to access i386-linux shared libraries from
-   a gdb that was not built on an i386-linux host (for cross debugging).
-   */
+   This makes it possible to access Linux/x86 shared libraries from a
+   GDB that was not built on an Linux/x86 host (for cross debugging).  */
 
 struct link_map_offsets *
 i386_linux_svr4_fetch_link_map_offsets (void)
 {
   static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = 0;
+  static struct link_map_offsets *lmp = NULL;
 
-  if (lmp == 0)
+  if (lmp == NULL)
     {
       lmp = &lmo;
 
-      lmo.r_debug_size = 8;	/* 20 not actual size but all we need */
-
+      lmo.r_debug_size = 8;	/* The actual size is 20 bytes, but
+				   this is all we need.  */
       lmo.r_map_offset = 4;
       lmo.r_map_size   = 4;
 
-      lmo.link_map_size = 20;	/* 552 not actual size but all we need */
-
+      lmo.link_map_size = 20;	/* The actual size is 552 bytes, but
+				   this is all we need.  */
       lmo.l_addr_offset = 0;
       lmo.l_addr_size   = 4;
 
@@ -413,6 +413,5 @@ i386_linux_svr4_fetch_link_map_offsets (void)
       lmo.l_prev_size   = 4;
     }
 
-    return lmp;
+  return lmp;
 }
-
