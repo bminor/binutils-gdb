@@ -32,17 +32,13 @@
 
 @c THIS MANUAL REQUIRES TEXINFO-2 macros and info-makers to format properly.
 
-@ifinfo
 @c This is a dir.info fragment to support semi-automated addition of
 @c manuals to an info tree.  zoo@cygnus.com is developing this facility.
-@format
-START-INFO-DIR-ENTRY
+@dircategory Programming & development tools.
+@direntry
 * Gdb: (gdb).                     The @sc{gnu} debugger.
-END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
-@c
-@c
+@end direntry
+
 @ifinfo
 This file documents the @sc{gnu} debugger @value{GDBN}.
 
@@ -114,7 +110,7 @@ into another language, under the above conditions for modified versions.
 @end titlepage
 @page
 
-@ifinfo
+@ifnottex
 @node Top
 @top Debugging with @value{GDBN}
 
@@ -157,7 +153,7 @@ Copyright (C) 1988-1999 Free Software Foundation, Inc.
 * Index::                       Index
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 @node Summary
 @unnumbered Summary of @value{GDBN}
@@ -226,14 +222,14 @@ you have these freedoms and that you cannot take these freedoms away
 from anyone else.
 
 @node Contributors
-@unnumberedsec Contributors to GDB
+@unnumberedsec Contributors to @value{GDBN}
 
-Richard Stallman was the original author of GDB, and of many other
-@sc{gnu} programs.  Many others have contributed to its development.
-This section attempts to credit major contributors.  One of the virtues
-of free software is that everyone is free to contribute to it; with
-regret, we cannot actually acknowledge everyone here.  The file
-@file{ChangeLog} in the @value{GDBN} distribution approximates a
+Richard Stallman was the original author of @value{GDBN}, and of many
+other @sc{gnu} programs.  Many others have contributed to its
+development.  This section attempts to credit major contributors.  One
+of the virtues of free software is that everyone is free to contribute
+to it; with regret, we cannot actually acknowledge everyone here.  The
+file @file{ChangeLog} in the @value{GDBN} distribution approximates a
 blow-by-blow account.
 
 Changes much prior to version 2.0 are lost in the mists of time.
@@ -259,10 +255,11 @@ and Randy Smith (releases 3.2, 3.1, and 3.0).
 Richard Stallman, assisted at various times by Peter TerMaat, Chris
 Hanson, and Richard Mlynarik, handled releases through 2.8.
 
-Michael Tiemann is the author of most of the @sc{gnu} C++ support in GDB,
-with significant additional contributions from Per Bothner.  James
-Clark wrote the @sc{gnu} C++ demangler.  Early work on C++ was by Peter
-TerMaat (who also did much general update work leading to release 3.0).
+Michael Tiemann is the author of most of the @sc{gnu} C++ support in
+@value{GDBN}, with significant additional contributions from Per
+Bothner.  James Clark wrote the @sc{gnu} C++ demangler.  Early work on
+C++ was by Peter TerMaat (who also did much general update work leading
+to release 3.0).
 
 @value{GDBN} 4 uses the BFD subroutine library to examine multiple
 object-file formats; BFD was a joint project of David V.
@@ -326,7 +323,7 @@ Toshiba sponsored the support for the TX39 Mips processor.
 
 Matsushita sponsored the support for the MN10200 and MN10300 processors.
 
-Fujitsu sponsored the support for SPARClite and FR30 processors
+Fujitsu sponsored the support for SPARClite and FR30 processors.
 
 Kung Hsu, Jeff Law, and Rick Sladkey added support for hardware
 watchpoints.
@@ -336,7 +333,7 @@ Michael Snyder added support for tracepoints.
 Stu Grossman wrote gdbserver.
 
 Jim Kingdon, Peter Schauer, Ian Taylor, and Stu Grossman made
-nearly innumerable bug fixes and cleanups throughout GDB.
+nearly innumerable bug fixes and cleanups throughout @value{GDBN}.
 
 The following people at the Hewlett-Packard Company contributed
 support for the PA-RISC 2.0 architecture, HP-UX 10.20, 10.30, and 11.0
@@ -346,8 +343,8 @@ John Bishop, Susan Macchia, Kathy Mann, Satish Pai, India Paul, Steve
 Rehrauer, and Elena Zannoni.  Kim Haase provided HP-specific
 information in this manual.
 
-Cygnus Solutions has sponsored GDB maintenance and much of its
-development since 1991.  Cygnus engineers who have worked on GDB
+Cygnus Solutions has sponsored @value{GDBN} maintenance and much of its
+development since 1991.  Cygnus engineers who have worked on @value{GDBN}
 fulltime include Mark Alexander, Jim Blandy, Per Bothner, Kevin
 Buettner, Edith Epstein, Chris Faylor, Fred Fish, Martin Hunt, Jim
 Ingham, John Gilmore, Stu Grossman, Kung Hsu, Jim Kingdon, John Metzler,
@@ -696,7 +693,7 @@ debugger attached to a bare board, there may not be any notion of
 ``process'', and there is often no way to get a core dump.  @value{GDBN}
 will warn you if it is unable to attach or to read core dumps.
 
-You can run @code{gdb} without printing the front material, which describes
+You can run @code{@value{GDBP}} without printing the front material, which describes
 @value{GDBN}'s non-warranty, by specifying @code{-silent}:
 
 @smallexample
@@ -807,7 +804,7 @@ If memory-mapped files are available on your system through the @code{mmap}
 system call, you can use this option 
 to have @value{GDBN} write the symbols from your
 program into a reusable file in the current directory.  If the program you are debugging is
-called @file{/tmp/fred}, the mapped symbol file is @file{./fred.syms}.
+called @file{/tmp/fred}, the mapped symbol file is @file{/tmp/fred.syms}.
 Future @value{GDBN} debugging sessions notice the presence of this file,
 and can quickly map in symbol information from it, rather than reading
 the symbol table from the executable program.
@@ -888,7 +885,7 @@ mode.
 @cindex @code{--nowindows}
 @cindex @code{-nw}
 ``No windows''.  If @value{GDBN} comes with a graphical user interface
-(GUI) built in, then this option tells GDB to only use the command-line
+(GUI) built in, then this option tells @value{GDBN} to only use the command-line
 interface.  If no GUI is available, this option has no effect.
 
 @item -windows
@@ -1025,11 +1022,13 @@ no-warranty blurb, and exit.
 @table @code
 @kindex quit @r{[}@var{expression}@r{]}
 @kindex q
-@item quit
-To exit @value{GDBN}, use the @code{quit} command (abbreviated @code{q}), or 
-type an end-of-file character (usually @kbd{C-d}).  If you do not supply 
-@var{expression}, @value{GDBN} will terminate normally; otherwise it will 
-terminate using the result of @var{expression} as the error code.
+@item quit @r{[}@var{expression}@r{]}
+@itemx q
+To exit @value{GDBN}, use the @code{quit} command (abbreviated
+@code{q}), or type an end-of-file character (usually @kbd{C-d}).  If you
+do not supply @var{expression}, @value{GDBN} will terminate normally;
+otherwise it will terminate using the result of @var{expression} as the
+error code.
 @end table
 
 @cindex interrupt
@@ -1095,7 +1094,7 @@ how long it can be.  It starts with a command name, which is followed by
 arguments whose meaning depends on the command name.  For example, the
 command @code{step} accepts an argument which is the number of times to
 step, as in @samp{step 5}.  You can also use the @code{step} command
-with no arguments.  Some command names do not allow any arguments.
+with no arguments.  Some commands do not allow any arguments.
 
 @cindex abbreviation
 @value{GDBN} command names may always be truncated if that abbreviation is
@@ -1109,7 +1108,7 @@ arguments to the @code{help} command.
 @cindex repeating commands
 @kindex RET
 A blank line as input to @value{GDBN} (typing just @key{RET}) means to
-repeat the previous command. Certain commands (for example, @code{run})
+repeat the previous command.  Certain commands (for example, @code{run})
 will not repeat this way; these are commands whose unintentional
 repetition might cause trouble and which you are unlikely to want to
 repeat.
@@ -1222,7 +1221,7 @@ consider more information than usual when you press @key{TAB} or
 @kbd{M-?} to request word completion:
 
 @example
-(@value{GDBP}) b 'bubble( @key{M-?}
+(@value{GDBP}) b 'bubble( @kbd{M-?}
 bubble(double,double)    bubble(int,int)
 (@value{GDBP}) b 'bubble(
 @end example
@@ -1278,7 +1277,8 @@ running -- Running the program
 stack -- Examining the stack
 status -- Status inquiries
 support -- Support facilities
-tracepoints -- Tracing of program execution without stopping the program
+tracepoints -- Tracing of program execution without@*
+               stopping the program
 user-defined -- User-defined commands
 
 Type "help" followed by a class name for a list of 
@@ -1288,6 +1288,7 @@ documentation.
 Command name abbreviations are allowed if unambiguous.
 (@value{GDBP})
 @end smallexample
+@c the above line break eliminates huge line overfull...
 
 @item help @var{class}
 Using one of the general help classes as an argument, you can get a
@@ -1398,7 +1399,7 @@ information in @value{GDBN} bug-reports.  If multiple versions of
 version of @value{GDBN} you are running; as @value{GDBN} evolves, new
 commands are introduced, and old ones may wither away.  Also, many
 system vendors ship variant versions of @value{GDBN}, and there are
-variant versions of @value{GDBN} in GNU/Linux distributions as well.
+variant versions of @value{GDBN} in @sc{gnu}/Linux distributions as well.
 The version number is the same as the one announced when you start
 @value{GDBN}.
 
@@ -1409,7 +1410,7 @@ Display information about permission for copying @value{GDBN}.
 @kindex show warranty
 @item show warranty
 Display the @sc{gnu} ``NO WARRANTY'' statement, or a warranty,
-if your version of @value{GDB} comes with one.
+if your version of @value{GDBN} comes with one.
 
 @end table
 
@@ -3307,6 +3308,7 @@ and hence is quicker than @code{until} without an argument.
 @kindex stepi
 @kindex si
 @item stepi
+@itemx stepi @var{arg}
 @itemx si
 Execute one machine instruction, then stop and return to the debugger.
 
@@ -3321,6 +3323,7 @@ An argument is a repeat count, as in @code{step}.
 @kindex nexti
 @kindex ni
 @item nexti
+@itemx nexti @var{arg}
 @itemx ni
 Execute one machine instruction, but if it is a function call,
 proceed until the function returns.
@@ -3362,6 +3365,7 @@ You can change these settings with the @code{handle} command.
 @table @code
 @kindex info signals
 @item info signals
+@itemx info handle
 Print a table of all the kinds of signals and how @value{GDBN} has been told to
 handle each one.  You can use this to see the signal numbers of all
 the defined types of signals.
@@ -4112,7 +4116,7 @@ the object code for the first line of function
 @c FIXME: I think this example should also show the addresses in
 @c symbolic form, as they usually would be displayed.
 @smallexample
-(@value{GDBP}) info line m4_changecom
+(@value{GDBP}) info line m4_changequote
 Line 895 of "builtin.c" starts at pc 0x634c and ends at 0x6350.
 @end smallexample
 
@@ -5483,7 +5487,7 @@ Fortran source file
 @item .ch
 @itemx .c186
 @itemx .c286
-CHILL source file.
+CHILL source file
 
 @item .mod
 Modula-2 source file
@@ -6016,8 +6020,11 @@ of the character's ordinal value; or of the form @samp{\@var{x}}, where
 @samp{\n} for newline.
 
 @item
-String constants are a sequence of character constants surrounded
-by double quotes (@code{"}).
+String constants are a sequence of character constants surrounded by
+double quotes (@code{"}).  Any valid character constant (as described
+above) may appear.  Double quotes within the string must be preceded by
+a backslash, so for instance @samp{"a\"b'c"} is a string of five
+characters.
 
 @item
 Pointer constants are an integral value.  You can also write pointers
@@ -6371,7 +6378,7 @@ Less than, greater than on integral, floating-point, or enumerated
 types.
 
 @item <=@r{, }>=
-Less than, greater than, less than or equal to, greater than or equal to
+Less than or equal to, greater than or equal to
 on integral, floating-point and enumerated types, or set inclusion on
 set types.  Same precedence as @code{<}.
 
@@ -7904,22 +7911,23 @@ the program is running.  To do this, use the @code{kill} command
 @itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
 @itemx add-symbol-file @var{filename} @var{address} @var{data_address} @var{bss_address}
 @itemx add-symbol-file @var{filename} @r{-T}@var{section} @var{address}
-The @code{add-symbol-file} command reads additional symbol table information
-from the file @var{filename}.  You would use this command when @var{filename}
-has been dynamically loaded (by some other means) into the program that
-is running.  @var{address} should be the memory address at which the
-file has been loaded; @value{GDBN} cannot figure this out for itself.
-You can specify up to three addresses, in which case they are taken to be
-the addresses of the text, data, and bss segments respectively.
-For complicated cases, you can specify an arbitrary number of @r{-T}@var{section} @var{address}
-pairs, to give an explicit section name and base address for that section.
-You can specify any @var{address} as an expression.
+The @code{add-symbol-file} command reads additional symbol table
+information from the file @var{filename}.  You would use this command
+when @var{filename} has been dynamically loaded (by some other means)
+into the program that is running.  @var{address} should be the memory
+address at which the file has been loaded; @value{GDBN} cannot figure
+this out for itself.  You can specify up to three addresses, in which
+case they are taken to be the addresses of the text, data, and bss
+segments respectively.  For complicated cases, you can specify an
+arbitrary number of @samp{@r{-T}@var{section} @var{address}} pairs, to
+give an explicit section name and base address for that section.  You
+can specify any @var{address} as an expression.
 
 The symbol table of the file @var{filename} is added to the symbol table
 originally read with the @code{symbol-file} command.  You can use the
-@code{add-symbol-file} command any number of times; the new symbol data thus
-read keeps adding to the old.  To discard all old symbol data instead,
-use the @code{symbol-file} command.
+@code{add-symbol-file} command any number of times; the new symbol data
+thus read keeps adding to the old.  To discard all old symbol data
+instead, use the @code{symbol-file} command without any arguments.
 
 @code{add-symbol-file} does not repeat if you press @key{RET} after using it.
 
@@ -9776,7 +9784,7 @@ the VxWorks shell can also be debugged.  @value{GDBN} uses code that runs on
 both the Unix host and on the VxWorks target.  The program
 @code{@value{GDBP}} is installed and executed on the Unix host.  (It may be
 installed with the name @code{vxgdb}, to distinguish it from a
-@value{GDB} for debugging programs on the host itself.)
+@value{GDBN} for debugging programs on the host itself.)
 
 @table @code
 @item VxWorks-timeout @var{args}
@@ -9805,8 +9813,8 @@ manual.
 
 Once you have included @file{rdb.a} in your VxWorks system image and set
 your Unix execution search path to find @value{GDBN}, you are ready to
-run @value{GDBN}.  From your Unix host, run @code{@value{GDBP}} (or @code{vxgdb},
-depending on your installation).
+run @value{GDBN}.  From your Unix host, run @code{@value{GDBP}} (or
+@code{vxgdb}, depending on your installation).
 
 @value{GDBN} comes up showing the prompt:
 
@@ -10041,7 +10049,7 @@ C:\> CTTY com1
 @noindent
 (Later, if you wish to return control to the DOS console, you can use
 the command @code{CTTY con}---but you must send it over the device that
-had control, in our example over the @file{COM1} serial line).
+had control, in our example over the @file{COM1} serial line.)
 
 From the Unix host, use a communications program such as @code{tip} or
 @code{cu} to communicate with the PC; for example,
@@ -10220,7 +10228,7 @@ E7000 emulator for Hitachi H8 and SH.
 @kindex target sh3@r{, with H8/300}
 @kindex target sh3e@r{, with H8/300}
 @item target sh3 @var{dev}
-@item target sh3e @var{dev}
+@itemx target sh3e @var{dev}
 Hitachi SH-3 and SH-3E target systems.
 
 @end table
@@ -10265,14 +10273,14 @@ what speed to use over the serial device.
 @c only for Unix hosts
 @kindex device
 @cindex serial device, Hitachi micros
-Use the special @code{@value{GDBP}} command @samp{device @var{port}} if you
+Use the special @code{@value{GDBN}} command @samp{device @var{port}} if you
 need to explicitly set the serial device.  The default @var{port} is the
 first available port on your host.  This is only necessary on Unix
 hosts, where it is typically something like @file{/dev/ttya}.
 
 @kindex speed
 @cindex serial line speed, Hitachi micros
-@code{@value{GDBP}} has another special command to set the communications
+@code{@value{GDBN}} has another special command to set the communications
 speed: @samp{speed @var{bps}}.  This command also is only used from Unix
 hosts; on DOS hosts, set the line speed as usual from outside @value{GDBN} with
 the DOS @code{mode} command (for instance,
@@ -10319,7 +10327,7 @@ your development board.
 @kindex target hms@r{, and serial protocol}
 Now that serial communications are set up, and the development board is
 connected, you can start up @value{GDBN}.  Call @code{@value{GDBP}} with
-the name of your program as the argument.  @code{@value{GDBP}} prompts
+the name of your program as the argument.  @code{@value{GDBN}} prompts
 you, as usual, with the prompt @samp{(@value{GDBP})}.  Use two special
 commands to begin your debugging session: @samp{target hms} to specify
 cross-debugging to the Hitachi board, and the @code{load} command to
@@ -10713,7 +10721,7 @@ is using.  Use the @code{info reg} command to see what registers
 @cindex floating point, MIPS remote
 If your target board does not support the MIPS floating point
 coprocessor, you should use the command @samp{set mipsfpu none} (if you
-need this, you may wish to put the command in your @value{GDBINIT}
+need this, you may wish to put the command in your @value{GDBN} init
 file).  This tells @value{GDBN} how to find the return value of
 functions which return floating point values.  It also allows
 @value{GDBN} to avoid saving the floating point registers when calling

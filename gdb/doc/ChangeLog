@@ -1,3 +1,9 @@
+2000-03-17  Stan Shebs  <shebs@apple.com>
+
+	* gdb.texinfo: Many minor changes from Dmitry Sivachenko
+	<dima@Chg.RU>, also clarification of allowed content for
+	string constants.
+
 2000-03-16  Eli Zaretskii <eliz@is.elta.co.il>
 
 	* gdb.texinfo (main menu): Add Annotations.
