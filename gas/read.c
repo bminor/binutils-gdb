@@ -2165,36 +2165,26 @@ float_cons (float_type)		/* Worker to do .float etc statements. */
      register int float_type;	/* 'f':.ffloat ... 'F':.float ... */
 {
   register char *p;
-  register char c;
   int length;			/* Number of chars in an object. */
   register char *err;		/* Error from scanning floating literal. */
   char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT];
 
-  /*
-   * The following awkward logic is to parse ZERO or more strings,
-   * comma seperated. Recall an expression includes its leading &
-   * trailing blanks. We fake a leading ',' if there is (supposed to
-   * be) a 1st expression, and keep demanding 1 expression for each ','.
-   */
   if (is_it_end_of_statement ())
     {
-      c = 0;			/* Skip loop. */
-      ++input_line_pointer;	/*->past termintor. */
+      demand_empty_rest_of_line ();
+      return;
     }
-  else
-    {
-      c = ',';			/* Do loop. */
-    }
-  while (c == ',')
+
+  do
     {
       /* input_line_pointer->1st char of a flonum (we hope!). */
       SKIP_WHITESPACE ();
+
       /* Skip any 0{letter} that may be present. Don't even check if the
        * letter is legal. Someone may invent a "z" format and this routine
        * has no use for such information. Lusers beware: you get
        * diagnostics if your input is ill-conditioned.
        */
-
       if (input_line_pointer[0] == '0' && isalpha (input_line_pointer[1]))
 	input_line_pointer += 2;
 
@@ -2205,23 +2195,44 @@ float_cons (float_type)		/* Worker to do .float etc statements. */
 	{
 	  as_bad ("Bad floating literal: %s", err);
 	  ignore_rest_of_line ();
-	  /* Input_line_pointer->just after end-of-line. */
-	  c = 0;		/* Break out of loop. */
+	  return;
 	}
-      else
+
+      if (!need_pass_2)
 	{
-	  if (!need_pass_2)
+	  int count;
+
+	  count = 1;
+
+#ifdef REPEAT_CONS_EXPRESSIONS
+	  if (*input_line_pointer == ':')
+	    {
+	      segT segment;
+	      expressionS count_exp;
+
+	      ++input_line_pointer;
+	      segment = expression (&count_exp);
+	      if (segment != absolute_section
+		  || count_exp.X_add_number <= 0)
+		{
+		  as_warn ("Unresolvable or nonpositive repeat count; using 1");
+		}
+	      else
+		count = count_exp.X_add_number;
+	    }
+#endif
+
+	  while (--count >= 0)
 	    {
 	      p = frag_more (length);
 	      bcopy (temp, p, length);
 	    }
-	  SKIP_WHITESPACE ();
-	  c = *input_line_pointer++;
-	  /* C contains 1st non-white character after number. */
-	  /* input_line_pointer->just after terminator (c). */
 	}
+      SKIP_WHITESPACE ();
     }
-  --input_line_pointer;		/*->terminator (is not ','). */
+  while (*input_line_pointer++ == ',');
+
+  --input_line_pointer;		/* Put terminator back into stream.  */
   demand_empty_rest_of_line ();
 }				/* float_cons() */
 

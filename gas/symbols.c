@@ -312,8 +312,9 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 
       symbol_table_insert (symbolP);
     }				/* if we have seen this symbol before */
-#ifdef TC_HPPA
-    pa_define_label(symbolP);
+
+#ifdef tc_frob_label
+  tc_frob_label (symbolP);
 #endif
 
   return;

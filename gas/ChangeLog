@@ -1,5 +1,39 @@
 Fri Jul 16 08:56:04 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* read.c (float_cons): Simplified parsing logic.  If
+	REPEAT_CONS_EXPRESSIONS is defined, accept a repeat count.
+
+	* symbols.c (colon): Rather than a special case for TC_HPPA,
+	use new macro tc_frob_label.
+	* config/tc-hppa.h (tc_frob_label): Define.
+
+	* config/tc-mips.c: Many changes to support simple assembler
+	optimization.
+	(insn_label, prev_insn, prev_prev_insn, dummy_opcode,
+	prev_insn_valid, prev_insn_frag, prev_insn_where,
+	prev_insn_fixp, prev_insn_is_delay_slot): New static
+	variables.
+	(insn_uses_reg, mips_no_prev_insn, mips_emit_delays,
+	mips_align, s_stringer, s_mips_space): New static functions.
+	(mips_define_label): New global function.
+	(md_pseudo_table): For "ascii", "asciz", "asciiz", call
+	s_stringer.  Changed argument to float_cons from 0 or 1 to 'f'
+	or 'd'.  For "space" call s_mips_space.
+	(md_begin): Call mips_no_prev_insn.
+	(append_insn): Only insert necessary NOP instructions.
+	(macro): Call mips_emit_delays before setting mips_noreorder.
+	Increment and decrement mips_noreorder rather than using
+	save_reorder_condition.  Don't bother to use noreorder in
+	M_L_DOB and M_L_DAB, since append_insn will not insert a NOP.
+	(md_atof): Handle floating point numbers correctly for both
+	big and little endian targets.
+	(s_align, s_cons): Call mips_align rather than frag_align.
+	(s_change_seg, s_cons): Call mips_emit_delays.
+	(s_float_cons): Let float_cons do the work.
+	(s_mipsset): Call mips_emit_delays when setting noreorder.
+	* config/tc-mips.h (tc_frob_label): Define to be
+	mips_define_label.
+
 	* config/obj-ecoff.c (ecoff_build_symbols, ecoff_build_procs,
 	ecoff_frob_files): Consistently use S_GET_VALUE rather than
 	bfd_asymbol_value.  Warn if taking difference of symbols in
