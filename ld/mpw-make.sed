@@ -54,8 +54,12 @@
 /ldemul-list.h/s/"{s}"ldemul-list\.h/"{o}"ldemul-list.h/g
 /ldemul-list.h/s/^ldemul-list\.h/"{o}"ldemul-list.h/
 
+# Edit pathnames to emulation files.
 /"{s}"e.*\.c/s/"{s}"e\([-_a-z0-9]*\)\.c/"{o}"e\1.c/g
 /^e.*\.c/s/^e\([-_a-z0-9]*\)\.c/"{o}"e\1.c/
+
+# We can't run genscripts, so don't try.
+/{GENSCRIPTS}/s/{GENSCRIPTS}/null-command/
 
 #/sed.*free/,/> "{o}"ldlex.c.new/c\
 #	\	Catenate "{o}"lex.yy.c >"{o}"ldlex.c.new
