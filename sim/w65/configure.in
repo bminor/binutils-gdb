@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-
+sinclude(../common/aclocal.m4)
 AC_PREREQ(2.5)dnl
 AC_INIT(Makefile.in)
 
@@ -20,7 +20,6 @@ AC_SUBST(AR)
 AC_PROG_RANLIB
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
-AC_C_CROSS
 if test "x$cross_compiling" = "xno"; then
   CC_FOR_BUILD='$(CC)'
 else
