@@ -49,7 +49,7 @@ struct expressionS;
    relocation: */
 #define MAX_GPREL_OFFSET (0x7FF4)
 
-#define md_relax_frag(fragp, stretch) mips_relax_frag(fragp, stretch)
+#define md_relax_frag(segment, fragp, stretch) mips_relax_frag(fragp, stretch)
 extern int mips_relax_frag PARAMS ((struct frag *, long));
 
 #define md_undefined_symbol(name)	(0)

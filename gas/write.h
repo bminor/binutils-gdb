@@ -181,7 +181,7 @@ extern void record_alignment PARAMS ((segT seg, int align));
 extern int get_recorded_alignment PARAMS ((segT seg));
 extern void subsegs_finish PARAMS ((void));
 extern void write_object_file PARAMS ((void));
-extern long relax_frag PARAMS ((fragS *, long));
+extern long relax_frag PARAMS ((segT, fragS *, long));
 extern void relax_segment
   PARAMS ((struct frag * seg_frag_root, segT seg_type));
 

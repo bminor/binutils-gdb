@@ -54,9 +54,9 @@ extern void m32r_prepare_relax_scan ();
 #define md_prepare_relax_scan(fragP, address, aim, this_state, this_type) \
 m32r_prepare_relax_scan (fragP, address, aim, this_state, this_type)
 #else
-extern long m32r_relax_frag PARAMS ((fragS *, long));
-#define md_relax_frag(fragP, stretch) \
-m32r_relax_frag (fragP, stretch)
+extern long m32r_relax_frag PARAMS ((segT, fragS *, long));
+#define md_relax_frag(segment, fragP, stretch) \
+m32r_relax_frag (segment, fragP, stretch)
 #endif
 /* Account for nop if 32 bit insn falls on odd halfword boundary.  */
 #define TC_CGEN_MAX_RELAX(insn, len) (6)

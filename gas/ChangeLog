@@ -1,3 +1,22 @@
+2001-02-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* write.c (is_dnrange): Stop as soon as the address becomes
+	larger.
+	(relax_frag): Add segment parameter.  Only call symbol_get_frag
+	once.  Only call is_dnrange if the symbol is in the same segment,
+	and the symbol address is larger.
+	(relax_segment): Pass segment to md_relax_frag and relax_frag.
+	* write.h (relax_frag): Update declaration.
+	* config/tc-fr30.c (fr30_relax_frag): Add segment parameter.  Pass
+	it to relax_frag.
+	* config/tc-m32r.c (m32r_relax_frag): Likewise.
+	* config/tc-m32r.h (md_relax_frag): Add segment parameter.
+	(m32r_relax_frag): Update declaration.
+	* config/tc-mips.h (md_relax_frag): Add segment parameter.
+	* config/tc-tic54x.h (md_relax_frag): Likewise.
+	* doc/internals.texi (CPU backend): Update documentation for
+	md_relax_frag.
+
 2001-02-13  Alan Modra  <alan@linuxcare.com.au>
 
 	* doc/c-i386.texi (i386-Arch): Add "jumps"/"nojumps" blurb.
