@@ -507,10 +507,24 @@ int
 find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 			  CORE_ADDR *endaddr)
 {
-  asection *section;
+  struct bfd_section *bfd_section;
 
-  section = find_pc_overlay (pc);
-  return find_pc_sect_partial_function (pc, section, name, address, endaddr);
+  /* To ensure that the symbol returned belongs to the correct setion
+     (and that the last [random] symbol from the previous section
+     isn't returned) try to find the section containing PC.  First try
+     the overlay code (which by default returns NULL); and second try
+     the normal section code (which almost always succeeds).  */
+  bfd_section = find_pc_overlay (pc);
+  if (bfd_section == NULL)
+    {
+      struct obj_section *obj_section = find_pc_section (pc);
+      if (obj_section == NULL)
+	bfd_section = NULL;
+      else
+	bfd_section = obj_section->the_bfd_section;
+    }
+  return find_pc_sect_partial_function (pc, bfd_section, name, address,
+					endaddr);
 }
 
 /* Return the innermost stack frame executing inside of BLOCK,

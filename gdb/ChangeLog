@@ -1,5 +1,14 @@
 2004-02-09  Andrew Cagney  <cagney@redhat.com>
 
+	* blockframe.c (find_pc_partial_function): If find_pc_overlay
+	fails, try find_pc_section.  Fix PR c++/1267.
+	* minsyms.c (lookup_minimal_symbol_by_pc): Use find_pc_section
+	instead of find_pc_mapped_section.
+	(lookup_minimal_symbol_by_pc_section): If the SECTION is NULL, do
+	not default to the section containing PC.  Fix PR symtab/1519.
+
+2004-02-09  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (mips-tdep.o): Update dependencies.
 	* mips-tdep.c: Include "frame-unwind.h", "frame-base.h" and
 	"trad-frame.h".

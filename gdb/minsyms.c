@@ -355,7 +355,7 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
 
 /* Search through the minimal symbol table for each objfile and find
    the symbol whose address is the largest address that is still less
-   than or equal to PC, and matches SECTION (if non-null).  Returns a
+   than or equal to PC, and matches SECTION (if non-NULL).  Returns a
    pointer to the minimal symbol if such a symbol is found, or NULL if
    PC is not in a suitable range.  Note that we need to look through
    ALL the minimal symbol tables before deciding on the symbol that
@@ -374,20 +374,23 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
   struct minimal_symbol *best_symbol = NULL;
   struct obj_section *pc_section;
 
-  /* pc has to be in a known section. This ensures that anything beyond
-     the end of the last segment doesn't appear to be part of the last
-     function in the last segment.  */
+  /* PC has to be in a known section.  This ensures that anything
+     beyond the end of the last segment doesn't appear to be part of
+     the last function in the last segment.  */
   pc_section = find_pc_section (pc);
   if (pc_section == NULL)
     return NULL;
 
-  /* If no section was specified, then just make sure that the PC is in
-     the same section as the minimal symbol we find.  */
-  if (section == NULL)
-    section = pc_section->the_bfd_section;
-
-  /* FIXME drow/2003-07-19: Should we also check that PC is in SECTION
-     if we were passed a non-NULL SECTION argument?  */
+  /* NOTE: cagney/2004-01-27: Removed code (added 2003-07-19) that was
+     trying to force the PC into a valid section as returned by
+     find_pc_section.  It broke IRIX 6.5 mdebug which relies on this
+     code returning an absolute symbol - the problem was that
+     find_pc_section wasn't returning an absolute section and hence
+     the code below would skip over absolute symbols.  Since the
+     original problem was with finding a frame's function, and that
+     uses [indirectly] lookup_minimal_symbol_by_pc, the original
+     problem has been fixed by having that function use
+     find_pc_section.  */
 
   for (objfile = object_files;
        objfile != NULL;
@@ -497,7 +500,13 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
 struct minimal_symbol *
 lookup_minimal_symbol_by_pc (CORE_ADDR pc)
 {
-  return lookup_minimal_symbol_by_pc_section (pc, find_pc_mapped_section (pc));
+  /* NOTE: cagney/2004-01-27: This was using find_pc_mapped_section to
+     force the section but that (well unless you're doing overlay
+     debugging) always returns NULL making the call somewhat useless.  */
+  struct obj_section *section = find_pc_section (pc);
+  if (section == NULL)
+    return NULL;
+  return lookup_minimal_symbol_by_pc_section (pc, section->the_bfd_section);
 }
 
 
