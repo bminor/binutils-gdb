@@ -1,3 +1,10 @@
+2003-01-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.exp (gdb_test_multiple): New function, cloned from
+	gdb_test.  Accept a list of expect arguments as the third
+	parameter.
+	(gdb_test): Use it.
+
 2003-01-20  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.arch/altivec-abi.exp: Set variable 'srcfile' differently, to
