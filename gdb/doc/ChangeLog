@@ -1,3 +1,7 @@
+Thu Apr 15 02:35:24 1993  John Gilmore  (gnu@cacophony.cygnus.com)
+
+	* stabs.texinfo:  Minor cleanup.
+
 Wed Apr 14 17:31:00 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* gdbint.texinfo: Minor xcoff stuff.

@@ -1171,7 +1171,7 @@ name:value,. The list of elements ends with a ;.
 @end table
 
 The following source code declares a structure tag and defines an
-instance of  the structure in global scope. Then a typedef equates the
+instance of the structure in global scope. Then a typedef equates the
 structure tag with a new type.  A seperate stab is generated for the
 structure tag, the structure typedef, and the structure instance.  The
 stabs for the tag and the typedef are emited when the definitions are
@@ -1323,7 +1323,7 @@ scope.
 @end smallexample
 
 The symbol descriptor, T, following the name: means that the stab
-describes an enumeration struct or type tag.  The type descriptor u,
+describes an enumeration, struct or type tag.  The type descriptor u,
 following the 23= of the type definition, narrows it down to a union
 type definition.  Following the u is the number of bytes in the union.
 After that is a list of union element descriptions.  Their format is
@@ -2521,7 +2521,7 @@ Global variable.
                        # -> G
 @end example
 
-Only the "name" field is significant.  the location of the variable is
+Only the "name" field is significant.  The location of the variable is
 obtained from the corresponding external symbol.  
 
 @node N_FNAME
@@ -2985,9 +2985,9 @@ stab type.  Types defined at procedure scope are emited after the
 N_RBRAC of the preceding function and before the code of the
 procedure in which they are defined.  This is exactly the same as
 types defined in the source file between the two procedure bodies.
-GDB overcompensates by placing all types in block #1 the block for
+GDB overcompensates by placing all types in block #1, the block for
 symbols of file scope.  This is true for default, -ansi and
--traditional compiler options. (p0001063-gcc, p0001066-gdb)
+-traditional compiler options. (Bugs gcc/1063, gdb/1066.)
 
 @item
 What ends the procedure scope?  Is it the proc block's N_RBRAC or the
