@@ -19,6 +19,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
+#include "floatformat.h"
 
 #include <stdio.h>
 
@@ -374,7 +375,7 @@ get_i387_state (fstate)
   /* Clear the target then copy thread's float state there.
      Make a copy of the status word, for some reason?
    */
-  bzero (fstate, sizeof(struct fpstate));
+  memset (fstate, 0, sizeof (struct fpstate));
 
   fstate->status = fsp->exc_status;
 

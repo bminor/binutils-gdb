@@ -1,5 +1,8 @@
 Sun Mar 13 09:45:51 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* i386m3-nat.c: Include floatformat.h.
+	(get_i387_state): Use memset not bzero.
+
 	* Version 4.12.3.
 
 	* Makefile.in: Enable commented out getopt_h, bfd_h, etc.  Change
