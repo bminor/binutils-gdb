@@ -1,3 +1,7 @@
+2000-06-13  H.J. Lu  <hjl@gnu.org>
+
+	* configure: Regenerate.
+
 Tue Jun 13 01:28:57 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* peicode.h (pe_ILF_object_p): Use TARGET_LITTLE_SYM instead of
