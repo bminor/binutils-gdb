@@ -334,12 +334,6 @@ extern CORE_ADDR frame_args_address ();		/* i960-tdep.c */
 #define FRAME_FIND_SAVED_REGS(frame_info_addr, sr) \
 	frame_find_saved_regs (frame_info_addr, &sr)
 extern void frame_find_saved_regs();		/* See i960-tdep.c */
-
-
-/* Print status when we get a random unexpected signal.  We have more
-   kinds of signals than Unix does... */
-
-#define	PRINT_RANDOM_SIGNAL(stop_signal) print_fault (stop_signal)
 
 /* Things needed for making calls to functions in the inferior process */
 
