@@ -3036,7 +3036,7 @@ ppc_stub_name (const asection *input_section,
       stub_name = bfd_malloc (len);
       if (stub_name != NULL)
 	{
-	  sprintf (stub_name, "%08x_%s+%x",
+	  sprintf (stub_name, "%08x.%s+%x",
 		   input_section->id & 0xffffffff,
 		   h->elf.root.root.string,
 		   (int) rel->r_addend & 0xffffffff);
@@ -3048,7 +3048,7 @@ ppc_stub_name (const asection *input_section,
       stub_name = bfd_malloc (len);
       if (stub_name != NULL)
 	{
-	  sprintf (stub_name, "%08x_%x:%x+%x",
+	  sprintf (stub_name, "%08x.%x:%x+%x",
 		   input_section->id & 0xffffffff,
 		   sym_sec->id & 0xffffffff,
 		   (int) ELF64_R_SYM (rel->r_info) & 0xffffffff,
@@ -4583,7 +4583,17 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
 
   if (h->plt.plist != NULL)
-    return TRUE;
+    {
+      /* We should never get here, but unfortunately there are versions
+	 of gcc out there that improperly (for this ABI) put initialized
+	 function pointers, vtable refs and suchlike in read-only
+	 sections.  Allow them to proceed, but warn that this might
+	 break at runtime.  */
+      (*_bfd_error_handler)
+	(_("copy reloc against `%s' requires lazy plt linking; "
+	   "avoid setting LD_BIND_NOW=1 or upgrade gcc"),
+	 h->root.root.string);
+    }
 
   /* This is a reference to a symbol defined by a dynamic object which
      is not a function.  */
@@ -6096,8 +6106,6 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   struct ppc_branch_hash_entry *br_entry;
   struct bfd_link_info *info;
   struct ppc_link_hash_table *htab;
-  asection *stub_sec;
-  bfd *stub_bfd;
   bfd_byte *loc;
   bfd_byte *p;
   unsigned int indx;
@@ -6110,29 +6118,10 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   info = in_arg;
 
   htab = ppc_hash_table (info);
-  stub_sec = stub_entry->stub_sec;
 
   /* Make a note of the offset within the stubs for this entry.  */
-  stub_entry->stub_offset = stub_sec->_cooked_size;
-  loc = stub_sec->contents + stub_entry->stub_offset;
-
-  if (htab->emit_stub_syms)
-    {
-      struct elf_link_hash_entry *h;
-      h = elf_link_hash_lookup (&htab->elf, stub_entry->root.string,
-				TRUE, FALSE, FALSE);
-      if (h == NULL)
-	return FALSE;
-      h->root.type = bfd_link_hash_defined;
-      h->root.u.def.section = stub_entry->stub_sec;
-      h->root.u.def.value = stub_entry->stub_offset;
-      h->elf_link_hash_flags = (ELF_LINK_HASH_REF_REGULAR
-				| ELF_LINK_HASH_DEF_REGULAR
-				| ELF_LINK_HASH_REF_REGULAR_NONWEAK
-				| ELF_LINK_FORCED_LOCAL);
-    }
-
-  stub_bfd = stub_sec->owner;
+  stub_entry->stub_offset = stub_entry->stub_sec->_cooked_size;
+  loc = stub_entry->stub_sec->contents + stub_entry->stub_offset;
 
   htab->stub_count[stub_entry->stub_type - 1] += 1;
   switch (stub_entry->stub_type)
@@ -6146,8 +6135,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       /* And this is where we are coming from.  */
       off -= (stub_entry->stub_offset
-	      + stub_sec->output_offset
-	      + stub_sec->output_section->vma);
+	      + stub_entry->stub_sec->output_offset
+	      + stub_entry->stub_sec->output_section->vma);
 
       if (stub_entry->stub_type != ppc_stub_long_branch_r2off)
 	size = 4;
@@ -6157,16 +6146,16 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
 	  r2off = (htab->stub_group[stub_entry->target_section->id].toc_off
 		   - htab->stub_group[stub_entry->id_sec->id].toc_off);
-	  bfd_put_32 (stub_bfd, STD_R2_40R1, loc);
+	  bfd_put_32 (htab->stub_bfd, STD_R2_40R1, loc);
 	  loc += 4;
-	  bfd_put_32 (stub_bfd, ADDIS_R2_R2 | PPC_HA (r2off), loc);
+	  bfd_put_32 (htab->stub_bfd, ADDIS_R2_R2 | PPC_HA (r2off), loc);
 	  loc += 4;
-	  bfd_put_32 (stub_bfd, ADDI_R2_R2 | PPC_LO (r2off), loc);
+	  bfd_put_32 (htab->stub_bfd, ADDI_R2_R2 | PPC_LO (r2off), loc);
 	  loc += 4;
 	  off -= 12;
 	  size = 16;
 	}
-      bfd_put_32 (stub_bfd, B_DOT | (off & 0x3fffffc), loc);
+      bfd_put_32 (htab->stub_bfd, B_DOT | (off & 0x3fffffc), loc);
 
       BFD_ASSERT (off + (1 << 25) < (bfd_vma) (1 << 26));
       break;
@@ -6227,9 +6216,9 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       indx = off;
       if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
 	{
-	  bfd_put_32 (stub_bfd, ADDIS_R12_R2 | PPC_HA (indx), loc);
+	  bfd_put_32 (htab->stub_bfd, ADDIS_R12_R2 | PPC_HA (indx), loc);
 	  loc += 4;
-	  bfd_put_32 (stub_bfd, LD_R11_0R12 | PPC_LO (indx), loc);
+	  bfd_put_32 (htab->stub_bfd, LD_R11_0R12 | PPC_LO (indx), loc);
 	  size = 16;
 	}
       else
@@ -6238,21 +6227,21 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
 	  r2off = (htab->stub_group[stub_entry->target_section->id].toc_off
 		   - htab->stub_group[stub_entry->id_sec->id].toc_off);
-	  bfd_put_32 (stub_bfd, STD_R2_40R1, loc);
+	  bfd_put_32 (htab->stub_bfd, STD_R2_40R1, loc);
 	  loc += 4;
-	  bfd_put_32 (stub_bfd, ADDIS_R12_R2 | PPC_HA (indx), loc);
+	  bfd_put_32 (htab->stub_bfd, ADDIS_R12_R2 | PPC_HA (indx), loc);
 	  loc += 4;
-	  bfd_put_32 (stub_bfd, LD_R11_0R12 | PPC_LO (indx), loc);
+	  bfd_put_32 (htab->stub_bfd, LD_R11_0R12 | PPC_LO (indx), loc);
 	  loc += 4;
-	  bfd_put_32 (stub_bfd, ADDIS_R2_R2 | PPC_HA (r2off), loc);
+	  bfd_put_32 (htab->stub_bfd, ADDIS_R2_R2 | PPC_HA (r2off), loc);
 	  loc += 4;
-	  bfd_put_32 (stub_bfd, ADDI_R2_R2 | PPC_LO (r2off), loc);
+	  bfd_put_32 (htab->stub_bfd, ADDI_R2_R2 | PPC_LO (r2off), loc);
 	  size = 28;
 	}
       loc += 4;
-      bfd_put_32 (stub_bfd, MTCTR_R11, loc);
+      bfd_put_32 (htab->stub_bfd, MTCTR_R11, loc);
       loc += 4;
-      bfd_put_32 (stub_bfd, BCTR, loc);
+      bfd_put_32 (htab->stub_bfd, BCTR, loc);
       break;
 
     case ppc_stub_plt_call:
@@ -6299,7 +6288,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  return FALSE;
 	}
 
-      p = build_plt_stub (stub_bfd, loc, off);
+      p = build_plt_stub (htab->stub_bfd, loc, off);
       size = p - loc;
       break;
 
@@ -6308,7 +6297,31 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       return FALSE;
     }
 
-  stub_sec->_cooked_size += size;
+  stub_entry->stub_sec->_cooked_size += size;
+
+  if (htab->emit_stub_syms
+      && !(stub_entry->stub_type == ppc_stub_plt_call
+	   && stub_entry->h->oh->root.type == bfd_link_hash_defined
+	   && stub_entry->h->oh->root.u.def.section == stub_entry->stub_sec
+	   && stub_entry->h->oh->root.u.def.value == stub_entry->stub_offset))
+    {
+      struct elf_link_hash_entry *h;
+      h = elf_link_hash_lookup (&htab->elf, stub_entry->root.string,
+				TRUE, FALSE, FALSE);
+      if (h == NULL)
+	return FALSE;
+      if (h->root.type == bfd_link_hash_new)
+	{
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.section = stub_entry->stub_sec;
+	  h->root.u.def.value = stub_entry->stub_offset;
+	  h->elf_link_hash_flags = (ELF_LINK_HASH_REF_REGULAR
+				    | ELF_LINK_HASH_DEF_REGULAR
+				    | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				    | ELF_LINK_FORCED_LOCAL);
+	}
+    }
+
   return TRUE;
 }
 
@@ -7094,6 +7107,23 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
 	  return FALSE;
 	}
 
+      if (htab->emit_stub_syms)
+	{
+	  struct elf_link_hash_entry *h;
+	  h = elf_link_hash_lookup (&htab->elf, "__glink", TRUE, FALSE, FALSE);
+	  if (h == NULL)
+	    return FALSE;
+	  if (h->root.type == bfd_link_hash_new)
+	    {
+	      h->root.type = bfd_link_hash_defined;
+	      h->root.u.def.section = htab->glink;
+	      h->root.u.def.value = 0;
+	      h->elf_link_hash_flags = (ELF_LINK_HASH_REF_REGULAR
+					| ELF_LINK_HASH_DEF_REGULAR
+					| ELF_LINK_HASH_REF_REGULAR_NONWEAK
+					| ELF_LINK_FORCED_LOCAL);
+	    }
+	}
       p = htab->glink->contents;
       bfd_put_32 (htab->glink->owner, MFCTR_R12, p);
       p += 4;

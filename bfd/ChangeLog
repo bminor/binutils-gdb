@@ -1,3 +1,14 @@
+2003-08-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc_stub_name): Tweak names for better readability.
+	(ppc64_elf_adjust_dynamic_symbol): Allow copy relocs against
+	function descriptors, but warn.
+	(ppc_build_one_stub): Remove a couple of vars.  Move code creating
+	stub syms so that we can avoid a stub sym if we already have a
+	plt sym.  Do not redefine an existing symbol.
+	(ppc64_elf_build_stubs): When --emit-stub-syms, print a symbol for
+	glink.
+
 2003-08-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
