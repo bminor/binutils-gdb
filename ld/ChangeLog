@@ -1,3 +1,9 @@
+Tue Apr  7 13:35:29 1998  H.J. Lu  <hjl@gnu.org>
+
+	* configure.in (TESTBFDLIB): New.  Defined and substituted.
+	* Makefile.am (TESTBFDLIB): Changed to @TESTBFDLIB@.
+	* configure, Makefile.in: Rebuild.
+
 Mon Apr  6 15:33:39 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (ld.info): Invoke makeinfo with -I options directly
