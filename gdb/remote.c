@@ -3192,25 +3192,36 @@ fetch_register_using_p (int regnum)
   p += hexnumstr (p, regnum);
   *p++ = '\0';
   remote_send (buf, rs->remote_packet_size);
-  if (buf[0] != 0 && buf[0] != 'E')
+
+  /* If the stub didn't recognize the packet, or if we got an error,
+     tell our caller.  */
+  if (buf[0] == '\0' || buf[0] == 'E')
+    return 0;
+
+  /* If this register is unfetchable, tell the regcache.  */
+  if (buf[0] == 'x')
     {
-      p = buf;
-      i = 0;
-      while (p[0] != 0)
-	{
-	  if (p[1] == 0)
-	    {
-	      error ("fetch_register_using_p: early buf termination");
-	      return 0;
-	    }
-	  regp[i++] = fromhex (p[0]) * 16 + fromhex (p[1]);
-	  p += 2;
-	}
-      regcache_raw_supply (current_regcache, regnum, regp);
+      regcache_raw_supply (current_regcache, regnum, NULL);
+      set_register_cached (regnum, -1);
       return 1;
     }
 
-  return 0;
+  /* Otherwise, parse and supply the value.  */
+  p = buf;
+  i = 0;
+  while (p[0] != 0)
+    {
+      if (p[1] == 0)
+        {
+          error("fetch_register_using_p: early buf termination");
+          return 0;
+        }
+
+      regp[i++] = fromhex (p[0]) * 16 + fromhex (p[1]);
+      p += 2;
+    }
+  regcache_raw_supply (current_regcache, regnum, regp);
+  return 1;
 }
 
 static void
