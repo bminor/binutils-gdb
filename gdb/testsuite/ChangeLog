@@ -1,3 +1,10 @@
+Mon Feb  3 12:09:37 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/a1-selftest.exp: Make sure we call gdb_exit before
+ 	trying to delete the copy of gdb. Catch the file delete so we
+ 	don't die if the delete fails; also, the file should be copied to
+ 	the host, not to the build.
+
 Sun Feb  2 00:55:14 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(gdb_test): Surround the result pattern with

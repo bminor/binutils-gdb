@@ -373,14 +373,12 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
 	}
     }
 
-    gdb_exit
 
     # Set the timeout back to the value it had when we were called.
     set timeout $oldtimeout
     verbose "Timeout is now $timeout seconds" 2
 
     # Restart gdb in case next test expects it to be started already.
-    gdb_start
     return 0
 }
 
@@ -414,12 +412,13 @@ proc find_gdb { arg } {
 set GDB_FULLPATH [find_gdb $GDB]
 
 # Remove any old copy lying around.
-remote_file build delete x$tool
+remote_file host delete x$tool
 
 gdb_start
-set file [remote_download build $GDB_FULLPATH x$tool]
+set file [remote_download host $GDB_FULLPATH x$tool]
 set result [test_with_self $file];
-remote_file build delete $file;
+gdb_exit;
+catch "remote_file host delete $file";
 
 if {$result <0} then {
     warning "Couldn't test self"
