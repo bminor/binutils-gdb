@@ -1,3 +1,8 @@
+Mon Apr 27 15:16:12 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.h: Change symbolS in function declaration to struct
+	symbol.
+
 Sun Apr 26 13:44:22 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sh.c (parse_reg): Add casts to avoid warnings.
