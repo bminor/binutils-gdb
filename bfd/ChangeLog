@@ -1,5 +1,8 @@
 2003-06-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_relocate_section): Do unaligned reloc
+	optimizations earlier.
+
 	* elf64-ppc.c (struct ppc_link_hash_table): Reinstate top_index.
 	Restore previous input_list type.
 	(ppc64_elf_link_hash_table_create): Undo last change.

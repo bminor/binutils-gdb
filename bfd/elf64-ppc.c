@@ -8212,6 +8212,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_boolean skip, relocate;
 	      asection *sreloc;
 	      bfd_byte *loc;
+	      bfd_vma out_off;
 
 	      /* When generating a dynamic object, these relocations
 		 are copied into the output file to be resolved at run
@@ -8220,16 +8221,27 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      skip = FALSE;
 	      relocate = FALSE;
 
-	      outrel.r_offset =
-		_bfd_elf_section_offset (output_bfd, info, input_section,
-					 rel->r_offset);
-	      if (outrel.r_offset == (bfd_vma) -1)
+	      out_off = _bfd_elf_section_offset (output_bfd, info,
+						 input_section, rel->r_offset);
+	      if (out_off == (bfd_vma) -1)
 		skip = TRUE;
-	      else if (outrel.r_offset == (bfd_vma) -2)
+	      else if (out_off == (bfd_vma) -2)
 		skip = TRUE, relocate = TRUE;
-	      outrel.r_offset += (input_section->output_section->vma
-				  + input_section->output_offset);
+	      out_off += (input_section->output_section->vma
+			  + input_section->output_offset);
+	      outrel.r_offset = out_off;
 	      outrel.r_addend = rel->r_addend;
+
+	      /* Optimize unaligned reloc use.  */
+	      if ((r_type == R_PPC64_ADDR64 && (out_off & 7) != 0)
+		  || (r_type == R_PPC64_UADDR64 && (out_off & 7) == 0))
+		r_type ^= R_PPC64_ADDR64 ^ R_PPC64_UADDR64;
+	      else if ((r_type == R_PPC64_ADDR32 && (out_off & 3) != 0)
+		       || (r_type == R_PPC64_UADDR32 && (out_off & 3) == 0))
+		r_type ^= R_PPC64_ADDR32 ^ R_PPC64_UADDR32;
+	      else if ((r_type == R_PPC64_ADDR16 && (out_off & 1) != 0)
+		       || (r_type == R_PPC64_UADDR16 && (out_off & 1) == 0))
+		r_type ^= R_PPC64_ADDR16 ^ R_PPC64_UADDR16;
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
@@ -8296,26 +8308,6 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      outrel.r_info = ELF64_R_INFO (indx, r_type);
 		    }
 		}
-
-	      /* Optimize unaligned reloc use.  */
-	      if ((ELF64_R_TYPE (outrel.r_info) == R_PPC64_ADDR64
-		   && (outrel.r_offset & 7) != 0)
-		  || (ELF64_R_TYPE (outrel.r_info) == R_PPC64_UADDR64
-		      && (outrel.r_offset & 7) == 0))
-		outrel.r_info ^= (ELF64_R_INFO (0, R_PPC64_ADDR64)
-				  ^ ELF64_R_INFO (0, R_PPC64_UADDR64));
-	      else if ((ELF64_R_TYPE (outrel.r_info) == R_PPC64_ADDR32
-			&& (outrel.r_offset & 3) != 0)
-		       || (ELF64_R_TYPE (outrel.r_info) == R_PPC64_UADDR32
-			   && (outrel.r_offset & 3) == 0))
-		outrel.r_info ^= (ELF64_R_INFO (0, R_PPC64_ADDR32)
-				  ^ ELF64_R_INFO (0, R_PPC64_UADDR32));
-	      else if ((ELF64_R_TYPE (outrel.r_info) == R_PPC64_ADDR16
-			&& (outrel.r_offset & 1) != 0)
-		       || (ELF64_R_TYPE (outrel.r_info) == R_PPC64_UADDR16
-			   && (outrel.r_offset & 1) == 0))
-		outrel.r_info ^= (ELF64_R_INFO (0, R_PPC64_ADDR16)
-				  ^ ELF64_R_INFO (0, R_PPC64_UADDR16));
 
 	      sreloc = elf_section_data (input_section)->sreloc;
 	      if (sreloc == NULL)
