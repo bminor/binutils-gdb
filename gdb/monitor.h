@@ -201,6 +201,10 @@ struct monitor_ops
 
 #define MO_ADDR_BITS_REMOVE 0x100000
 
+/* If set, then display target program output if prefixed by ^O.  */
+
+#define MO_PRINT_PROGRAM_OUTPUT 0x200000
+
 #define SREC_SIZE 160
 
 extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops,

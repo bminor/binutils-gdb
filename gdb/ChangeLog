@@ -1,3 +1,10 @@
+Mon Jan  5 20:21:59 1998  Mark Alexander  <marka@cygnus.com>
+
+	* monitor.h (MO_PRINT_PROGRAM_OUTPUT): Define.
+	* monitor.c (monitor_wait): Echo program output.
+	* dve3900-rom.c (_initialize_r3900_rom): Remove MO_HANDLE_NL flag,
+	add MO_PRINT_PROGRAM_OUTPUT flag.
+
 Fri Jan  2 18:48:58 1998  Mark Alexander  <marka@cygnus.com>
 
 	* configure.in: Double up brackets in shell case pattern.

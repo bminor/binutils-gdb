@@ -403,10 +403,10 @@ r3900_open (args, from_tty)
 void
 _initialize_r3900_rom ()
 {
-  r3900_cmds.flags = MO_HANDLE_NL |
-		     MO_NO_ECHO_ON_OPEN |
+  r3900_cmds.flags = MO_NO_ECHO_ON_OPEN |
 		     MO_ADDR_BITS_REMOVE |
-		     MO_CLR_BREAK_USES_ADDR;
+		     MO_CLR_BREAK_USES_ADDR |
+		     MO_PRINT_PROGRAM_OUTPUT;
 
   r3900_cmds.init = r3900_inits;
   r3900_cmds.cont = "g\r";

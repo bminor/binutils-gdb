@@ -798,6 +798,16 @@ monitor_wait (pid, status)
     }
   while (resp_len < 0);
 
+  /* Print any output characters that were preceded by ^O.  */
+  if (current_monitor->flags & MO_PRINT_PROGRAM_OUTPUT)
+    {
+      int i;
+
+      for (i = 0; i < resp_len - 1; i++)
+	if (buf[i] == 0x0f)
+	  putchar_unfiltered (buf[++i]);
+    }
+
   signal (SIGINT, ofunc);
 
   timeout = old_timeout;
