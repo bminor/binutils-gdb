@@ -5,7 +5,7 @@ Mon Oct 17 11:38:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 	* libbfd.h: Rebuild.
 	* libbfd.c (bfd_add_to_string_table): Remove.
 
-	* elfcode.h (elf_swap_shdr_in): Use rawdata, not bfd_section.
+	* elfcode.h (elf_swap_shdr_in): Use bfd_section, not rawdata.
 	Clear contents field.
 	(bfd_section_from_shdr): In SHT_STRTAB case, check bfd_section,
 	not rawdata.  Don't set rawdata if e_shstrndx.  Use bfd_section
