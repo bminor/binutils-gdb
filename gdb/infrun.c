@@ -963,7 +963,6 @@ struct execution_control_state
 
 void init_execution_control_state (struct execution_control_state *ecs);
 
-static void handle_step_into_function (struct execution_control_state *ecs);
 void handle_inferior_event (struct execution_control_state *ecs);
 
 static void step_into_function (struct execution_control_state *ecs);
@@ -1173,86 +1172,6 @@ context_switch (struct execution_control_state *ecs)
 			 &ecs->current_line, &ecs->current_symtab);
     }
   inferior_ptid = ecs->ptid;
-}
-
-/* Handle the inferior event in the cases when we just stepped
-   into a function.  */
-
-static void
-handle_step_into_function (struct execution_control_state *ecs)
-{
-  CORE_ADDR real_stop_pc;
-
-  if ((step_over_calls == STEP_OVER_NONE)
-      || ((step_range_end == 1)
-          && in_prologue (prev_pc, ecs->stop_func_start)))
-    {
-      /* I presume that step_over_calls is only 0 when we're
-         supposed to be stepping at the assembly language level
-         ("stepi").  Just stop.  */
-      /* Also, maybe we just did a "nexti" inside a prolog,
-         so we thought it was a subroutine call but it was not.
-         Stop as well.  FENN */
-      stop_step = 1;
-      print_stop_reason (END_STEPPING_RANGE, 0);
-      stop_stepping (ecs);
-      return;
-    }
-
-  if (step_over_calls == STEP_OVER_ALL || IGNORE_HELPER_CALL (stop_pc))
-    {
-      /* We're doing a "next", set a breakpoint at callee's return
-	 address (the address at which the caller will resume).  */
-      insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()),
-				     ecs);
-      keep_going (ecs);
-      return;
-    }
-
-  /* If we are in a function call trampoline (a stub between
-     the calling routine and the real function), locate the real
-     function.  That's what tells us (a) whether we want to step
-     into it at all, and (b) what prologue we want to run to
-     the end of, if we do step into it.  */
-  real_stop_pc = skip_language_trampoline (stop_pc);
-  if (real_stop_pc == 0)
-    real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
-  if (real_stop_pc != 0)
-    ecs->stop_func_start = real_stop_pc;
-
-  /* If we have line number information for the function we
-     are thinking of stepping into, step into it.
-
-     If there are several symtabs at that PC (e.g. with include
-     files), just want to know whether *any* of them have line
-     numbers.  find_pc_line handles this.  */
-  {
-    struct symtab_and_line tmp_sal;
-
-    tmp_sal = find_pc_line (ecs->stop_func_start, 0);
-    if (tmp_sal.line != 0)
-      {
-        step_into_function (ecs);
-        return;
-      }
-  }
-
-  /* If we have no line number and the step-stop-if-no-debug
-     is set, we stop the step so that the user has a chance to
-     switch in assembly mode.  */
-  if (step_over_calls == STEP_OVER_UNDEBUGGABLE && step_stop_if_no_debug)
-    {
-      stop_step = 1;
-      print_stop_reason (END_STEPPING_RANGE, 0);
-      stop_stepping (ecs);
-      return;
-    }
-
-  /* Set a breakpoint at callee's return address (the address at which
-     the caller will resume).  */
-  insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()), ecs);
-  keep_going (ecs);
-  return;
 }
 
 static void
@@ -2437,7 +2356,78 @@ process_event_stop_test:
       /* NOTE: cagney/2004-05-12: This test is performed after the
 	 sigtramp test as often sigtramps, while recognized by GDB,
 	 have no symbol information.  */
-      handle_step_into_function (ecs);
+      CORE_ADDR real_stop_pc;
+	
+      if ((step_over_calls == STEP_OVER_NONE)
+	  || ((step_range_end == 1)
+	      && in_prologue (prev_pc, ecs->stop_func_start)))
+	{
+	  /* I presume that step_over_calls is only 0 when we're
+	     supposed to be stepping at the assembly language level
+	     ("stepi").  Just stop.  */
+	  /* Also, maybe we just did a "nexti" inside a prolog, so we
+	     thought it was a subroutine call but it was not.  Stop as
+	     well.  FENN */
+	  stop_step = 1;
+	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  stop_stepping (ecs);
+	  return;
+	}
+	
+      if (step_over_calls == STEP_OVER_ALL || IGNORE_HELPER_CALL (stop_pc))
+	{
+	  /* We're doing a "next", set a breakpoint at callee's return
+	     address (the address at which the caller will
+	     resume).  */
+	  insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()),
+					 ecs);
+	  keep_going (ecs);
+	  return;
+	}
+      
+      /* If we are in a function call trampoline (a stub between the
+	 calling routine and the real function), locate the real
+	 function.  That's what tells us (a) whether we want to step
+	 into it at all, and (b) what prologue we want to run to the
+	 end of, if we do step into it.  */
+      real_stop_pc = skip_language_trampoline (stop_pc);
+      if (real_stop_pc == 0)
+	real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+      if (real_stop_pc != 0)
+	ecs->stop_func_start = real_stop_pc;
+      
+      /* If we have line number information for the function we are
+	 thinking of stepping into, step into it.
+
+	 If there are several symtabs at that PC (e.g. with include
+	 files), just want to know whether *any* of them have line
+	 numbers.  find_pc_line handles this.  */
+      {
+	struct symtab_and_line tmp_sal;
+	
+	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
+	if (tmp_sal.line != 0)
+	  {
+	    step_into_function (ecs);
+	    return;
+	  }
+      }
+      
+      /* If we have no line number and the step-stop-if-no-debug is
+	 set, we stop the step so that the user has a chance to switch
+	 in assembly mode.  */
+      if (step_over_calls == STEP_OVER_UNDEBUGGABLE && step_stop_if_no_debug)
+	{
+	  stop_step = 1;
+	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  stop_stepping (ecs);
+	  return;
+	}
+      
+      /* Set a breakpoint at callee's return address (the address at
+	 which the caller will resume).  */
+      insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()), ecs);
+      keep_going (ecs);
       return;
     }
 
@@ -2445,7 +2435,78 @@ process_event_stop_test:
                    step_frame_id))
     {
       /* It's a subroutine call.  */
-      handle_step_into_function (ecs);
+      CORE_ADDR real_stop_pc;
+	
+      if ((step_over_calls == STEP_OVER_NONE)
+	  || ((step_range_end == 1)
+	      && in_prologue (prev_pc, ecs->stop_func_start)))
+	{
+	  /* I presume that step_over_calls is only 0 when we're
+	     supposed to be stepping at the assembly language level
+	     ("stepi").  Just stop.  */
+	  /* Also, maybe we just did a "nexti" inside a prolog, so we
+	     thought it was a subroutine call but it was not.  Stop as
+	     well.  FENN */
+	  stop_step = 1;
+	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  stop_stepping (ecs);
+	  return;
+	}
+	
+      if (step_over_calls == STEP_OVER_ALL || IGNORE_HELPER_CALL (stop_pc))
+	{
+	  /* We're doing a "next", set a breakpoint at callee's return
+	     address (the address at which the caller will
+	     resume).  */
+	  insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()),
+					 ecs);
+	  keep_going (ecs);
+	  return;
+	}
+      
+      /* If we are in a function call trampoline (a stub between the
+	 calling routine and the real function), locate the real
+	 function.  That's what tells us (a) whether we want to step
+	 into it at all, and (b) what prologue we want to run to the
+	 end of, if we do step into it.  */
+      real_stop_pc = skip_language_trampoline (stop_pc);
+      if (real_stop_pc == 0)
+	real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+      if (real_stop_pc != 0)
+	ecs->stop_func_start = real_stop_pc;
+      
+      /* If we have line number information for the function we are
+	 thinking of stepping into, step into it.
+
+	 If there are several symtabs at that PC (e.g. with include
+	 files), just want to know whether *any* of them have line
+	 numbers.  find_pc_line handles this.  */
+      {
+	struct symtab_and_line tmp_sal;
+	
+	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
+	if (tmp_sal.line != 0)
+	  {
+	    step_into_function (ecs);
+	    return;
+	  }
+      }
+
+      /* If we have no line number and the step-stop-if-no-debug is
+	 set, we stop the step so that the user has a chance to switch
+	 in assembly mode.  */
+      if (step_over_calls == STEP_OVER_UNDEBUGGABLE && step_stop_if_no_debug)
+	{
+	  stop_step = 1;
+	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  stop_stepping (ecs);
+	  return;
+	}
+
+      /* Set a breakpoint at callee's return address (the address at
+	 which the caller will resume).  */
+      insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()), ecs);
+      keep_going (ecs);
       return;
     }
 

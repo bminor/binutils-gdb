@@ -1,3 +1,9 @@
+2004-05-14  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (handle_step_into_function): Delete function.
+	(handle_inferior_event): Inline calls to
+	handle_step_into_function.
+
 2004-05-14  Jerome Guitton  <guitton@rome.act-europe.fr>
 
 	* rs6000-nat.c: Fix a comment.
