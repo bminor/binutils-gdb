@@ -1,3 +1,9 @@
+Mon Mar 13 21:21:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (STREQ, STRCMP, STREQN): Document that these macros are
+ 	somewhat redundant.
+	(QUIT): Note that this can probably be replaced by a function.
+
 2000-03-13  James Ingham  <jingham@leda.cygnus.com>
 
 	Add support for a variable object that tries to evaluate itself in 
@@ -21,7 +27,6 @@
 	variable is one of these "current frame" variables.  Also protect
 	call to parse_exp_1 from long jumping.
 	
-
 2000-03-13  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c (struct env387): Remove declaration.

@@ -117,8 +117,23 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-/* Gdb does *lots* of string compares.  Use macros to speed them up by
-   avoiding function calls if the first characters are not the same. */
+/* Macros to do string compares.
+
+   NOTE: cagney/2000-03-14:
+
+   While old code can continue to refer to these macros, new code is
+   probably better off using strcmp() directly vis: ``strcmp() == 0''
+   and ``strcmp() != 0''.
+
+   This is because modern compilers can directly inline strcmp()
+   making the original justification for these macros - avoid function
+   call overhead by pre-testing the first characters
+   (``*X==*Y?...:0'') - redundant.
+
+   ``Even if [...] testing the first character does have a modest
+   performance improvement, I'd rather that whenever a performance
+   issue is found that we spend the effort on algorithmic
+   optimizations than micro-optimizing.'' J.T. */
 
 #define STRCMP(a,b) (*(a) == *(b) ? strcmp ((a), (b)) : (int)*(a) - (int)*(b))
 #define STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
@@ -152,6 +167,13 @@ extern int immediate_quit;
 extern int sevenbit_strings;
 
 extern void quit (void);
+
+/* FIXME: cagney/2000-03-13: It has been suggested that the peformance
+   benefits of having a ``QUIT'' macro rather than a function are
+   marginal.  If the overhead of a QUIT function call is proving
+   significant then its calling frequency should probably be reduced
+   [kingdon].  A profile analyzing the current situtation is
+   needed. */
 
 #ifdef QUIT
 /* do twice to force compiler warning */
