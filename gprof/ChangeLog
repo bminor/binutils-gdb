@@ -1,3 +1,9 @@
+Tue Apr 28 19:17:33 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* gprof.c (main): Conditionally call setlocale.
+	* gprof.h: Include <locale.h> if HAVE_LOCALE_H.
+	(LC_MESSAGES): Now can be defined even when ENABLE_NLS.
+
 Tue Apr 28 19:50:09 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* corefile.c: Rename from core.c.

@@ -169,7 +169,9 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
   Sym **cg = 0;
   int ch, user_specified = 0;
 
+#ifdef HAVE_SETLOCALE
   setlocale (LC_MESSAGES, "");
+#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
