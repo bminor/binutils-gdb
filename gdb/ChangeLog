@@ -1,3 +1,9 @@
+Fri Apr 10 23:47:37 1992  John Gilmore  (gnu at cygnus.com)
+
+	* xcoffread.c (NO_TYPEDEFS):  Fix typo in commented-out #define.
+	* sparc-tdep.c (supply_gregset, fill_gregset, supply_fpregset,
+	fill_gregset):  New functions for SVR4 /proc support.
+
 Fri Apr 10 22:41:03 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (SWAPIN,swapin):  New macro and function to call to
