@@ -1186,20 +1186,26 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 		  int k;
 		  if (bpc > 1 && info->display_endian == BFD_ENDIAN_LITTLE)
 		    {
-		      for (k=bpc-1; k >= 0; k--)
-			printf ("%02x", (unsigned) data[j+k]);
+		      for (k = bpc - 1; k >= 0; k--)
+			printf ("%02x", (unsigned) data[j + k]);
 		      putchar (' ');
 		    }
 		  else
 		    {
-		      for (k=0; k < bpc; k++)
-			printf ("%02x", (unsigned) data[j+k]);
+		      for (k = 0; k < bpc; k++)
+			printf ("%02x", (unsigned) data[j + k]);
 		      putchar (' ');
 		    }
 		}
 
-	      for (; pb < bytes_per_line; ++pb)
-		printf ("   ");
+	      for (; pb < bytes_per_line; pb += bpc)
+		{
+		  int k;
+
+		  for (k = 0; k < bpc; k++)
+		    printf ("  ");
+		  putchar (' ');
+		}
 
 	      /* Separate raw data from instruction by extra space.  */
 	      if (insns)
@@ -1230,10 +1236,22 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 		  pb += bytes_per_line;
 		  if (pb > bytes)
 		    pb = bytes;
-		  for (; j < i + pb; ++j)
+		  for (; j < i + pb; j += bpc)
 		    {
-		      printf ("%02x", (unsigned) data[j]);
-		      putchar (' ');
+		      int k;
+
+		      if (bpc > 1 && info->display_endian == BFD_ENDIAN_LITTLE)
+			{
+			  for (k = bpc - 1; k >= 0; k--)
+			    printf ("%02x", (unsigned) data[j + k]);
+			  putchar (' ');
+			}
+		      else
+			{
+			  for (k = 0; k < bpc; k++)
+			    printf ("%02x", (unsigned) data[j + k]);
+			  putchar (' ');
+			}
 		    }
 		}
 	    }
