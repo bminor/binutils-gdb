@@ -1,3 +1,11 @@
+Mon Jul 10 18:06:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_push_arguments): Always align struct_addr on a
+ 	16 byte boundary. Align allocated argument space using
+ 	MIPS_STACK_ARGSIZE.  Reserve space on stack for the struct return
+ 	and floating-point registers.  Use fp_register_arg_p to determine
+ 	if float_argreg should be aligned.
+
 2000-07-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* config/sh/tm-sh.h (STORE_RETURN_VALUE): Redefine as

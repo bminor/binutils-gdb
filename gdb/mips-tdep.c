@@ -2104,13 +2104,13 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
      On at least one MIPS variant, stack frames need to be 128-bit
      aligned, so we round to this widest known alignment. */
   sp = ROUND_DOWN (sp, 16);
-  struct_addr = ROUND_DOWN (struct_addr, MIPS_SAVED_REGSIZE);
+  struct_addr = ROUND_DOWN (struct_addr, 16);
 
   /* Now make space on the stack for the args. We allocate more
      than necessary for EABI, because the first few arguments are
      passed in registers, but that's OK. */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), MIPS_SAVED_REGSIZE);
+    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), MIPS_STACK_ARGSIZE);
   sp -= ROUND_UP (len, 16);
 
   if (mips_debug)
@@ -2126,9 +2126,11 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_push_arguments: struct_return at r%d 0x%lx\n",
+			    "mips_push_arguments: struct_return reg=%d 0x%lx\n",
 			    argreg, (long) struct_addr);
       write_register (argreg++, struct_addr);
+      if (MIPS_REGS_HAVE_HOME_P)
+	stack_offset += MIPS_STACK_ARGSIZE;
     }
 
   /* Now load as many as possible of the first arguments into
@@ -2243,6 +2245,9 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 		  argreg += FP_REGISTER_DOUBLE ? 1 : 2;
 		}
 	    }
+	  /* Reserve space for the FP register. */
+	  if (MIPS_REGS_HAVE_HOME_P)
+	    stack_offset += ROUND_UP (len, MIPS_STACK_ARGSIZE);
 	}
       else
 	{
