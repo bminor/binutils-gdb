@@ -114,8 +114,23 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 #define INNER_THAN <
 
 #define BIG_ENDIAN 4321
+
+/* Old-style breakpoint macros.  */
+
 #define BIG_BREAKPOINT {0, 0x5, 0, 0xd}
 #define LITTLE_BREAKPOINT {0xd, 0, 0x5, 0}
+#define MIPS16_BIG_BREAKPOINT {0xe8, 0xa5}
+#define MIPS16_LITTLE_BREAKPOINT {0xa5, 0xe8}
+
+/* BREAKPOINT_FROM_PC uses the program counter value to determine whether a
+   16- or 32-bit breakpoint should be used.  It returns a pointer
+   to a string of bytes that encode a breakpoint instruction, stores
+   the length of the string to *lenptr, and adjusts the pc (if necessary) to
+   point to the actual memory location where the breakpoint should be
+   inserted.  */
+
+unsigned char *mips_breakpoint_from_pc PARAMS ((CORE_ADDR *pcptr, int *lenptr));
+#define BREAKPOINT_FROM_PC(pcptr, lenptr) mips_breakpoint_from_pc(pcptr, lenptr)
 
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT
@@ -125,7 +140,8 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 /* Nonzero if instruction at PC is a return instruction. "j ra" on mips. */
 
-#define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 4) == 0x3e00008)
+int mips_about_to_return PARAMS ((CORE_ADDR pc));
+#define ABOUT_TO_RETURN(pc) mips_about_to_return (pc)
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the

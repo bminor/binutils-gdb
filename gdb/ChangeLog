@@ -1,3 +1,25 @@
+Mon Jan 27 14:31:52 1997  Mark Alexander  <marka@cygnus.com>
+
+First set of changes for mips16:
+	* config/mips/tm-mips.h (MIPS16_BIG_BREAKPOINT,
+	MIPS16_LITTLE_BREAKPOINT, BREAKPOINT_FROM_PC): Define.
+	(ABOUT_TO_RETURN): Call new function mips_about_to_return.
+	(mips_breakpoint_from_pc, mips_about_to_return): Declare.
+	* mem-break.c (memory_breakpoint_from_pc): New function.
+	(memory_insert_breakpoint, memory_remove_breakpoint): Use
+	memory_breakpoint_from_pc to determine breakpoint contents and size.
+	* target.h (memory_breakpoint_from_pc): Declare.
+	* monitor.c (monitor_insert_breakpoint): Use memory_breakpoint_from_pc
+	to determine size of breakpoint instruction.
+	* mips-tdep.c (mips32_decode_reg_save, mips16_decode_reg_save):
+	New helper functions for mips_find_saved_regs.
+	(mips_find_saved_regs): Recognize mips16 prologues.
+	(mips_addr_bits_remove): Strip off upper 32 bits of address
+	when target CPU is 32 bits but CORE_ADDR is 64 bits.
+	(mips_step_skips_delay): No branch delay slot on mips16.
+	(gdb_print_insn_mips): Disassemble mips16 code.
+	(mips_breakpoint_from_pc, mips_about_to_return): New functions.
+
 Mon Jan 27 10:34:03 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* tm-mn10200.h (NUM_REGS): Decrease to 12.

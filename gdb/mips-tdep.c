@@ -182,6 +182,9 @@ struct {
   { NULL, NULL }
 };
 
+/* Table to translate MIPS16 register field to actual register number.  */
+static int mips16_to_32_reg[8] = { 16, 17, 2, 3, 4, 5, 6, 7 };
+
 /* Heuristic_proc_start may hunt through the text section for a long
    time across a 2400 baud serial line.  Allows the user to limit this
    search.  */
@@ -244,6 +247,62 @@ after_prologue (pc, proc_desc)
      case, tell the caller to find the prologue the hard way.  */
 
   return 0;
+}
+
+/* Decode a MIPS32 instruction that saves a register in the stack, and
+   set the appropriate bit in the general register mask or float register mask
+   to indicate which register is saved.  This is a helper function
+   for mips_find_saved_regs.  */
+
+static void
+mips32_decode_reg_save (inst, gen_mask, float_mask)
+     t_inst inst;
+     unsigned long *gen_mask;
+     unsigned long *float_mask;
+{
+  int reg;
+
+  if ((inst & 0xffe00000) == 0xafa00000		/* sw reg,n($sp) */
+      || (inst & 0xffe00000) == 0xafc00000	/* sw reg,n($r30) */
+      || (inst & 0xffe00000) == 0xffa00000)	/* sd reg,n($sp) */
+    {
+      /* It might be possible to use the instruction to
+	 find the offset, rather than the code below which
+	 is based on things being in a certain order in the
+	 frame, but figuring out what the instruction's offset
+	 is relative to might be a little tricky.  */
+      reg = (inst & 0x001f0000) >> 16;
+      *gen_mask |= (1 << reg);
+    }
+  else if ((inst & 0xffe00000) == 0xe7a00000	/* swc1 freg,n($sp) */
+	   || (inst & 0xffe00000) == 0xe7c00000	/* swc1 freg,n($r30) */
+	   || (inst & 0xffe00000) == 0xf7a00000)/* sdc1 freg,n($sp) */
+
+    {
+      reg = ((inst & 0x001f0000) >> 16);
+      *float_mask |= (1 << reg);
+    }
+}
+
+/* Decode a MIPS16 instruction that saves a register in the stack, and
+   set the appropriate bit in the general register or float register mask
+   to indicate which register is saved.  This is a helper function
+   for mips_find_saved_regs.  */
+
+static void
+mips16_decode_reg_save (inst, gen_mask)
+     t_inst inst;
+     unsigned long *gen_mask;
+{
+  if ((inst & 0xf800) == 0xd000			/* sw reg,n($sp) */
+      || (inst & 0xff00) == 0xf900)		/* sd reg,n($sp) */
+    {
+      int reg = mips16_to_32_reg[(inst & 0xf00) >> 8];
+      *gen_mask |= (1 << reg);
+    }
+  else if ((inst & 0xff00) == 0x6200		/* sw $ra,n($sp) */
+	   || (inst & 0xff00) == 0xfa00)	/* sd $ra,n($sp) */
+    *gen_mask |= (1 << 31);
 }
 
 /* Guaranteed to set fci->saved_regs to some values (it never leaves it
@@ -312,11 +371,11 @@ mips_find_saved_regs (fci)
   gen_mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK(proc_desc);
   float_mask = kernel_trap ? 0xFFFFFFFF : PROC_FREG_MASK(proc_desc);
 
-  if (/* In any frame other than the innermost, we assume that all
-	 registers have been saved.  This assumes that all register
-	 saves in a function happen before the first function
-	 call.  */
-      fci->next == NULL
+  if (/* In any frame other than the innermost or a frame interrupted by
+	 a signal, we assume that all registers have been saved.
+	 This assumes that all register saves in a function happen before
+	 the first function call.  */
+      (fci->next == NULL || fci->next->signal_handler_caller)
 
       /* In a dummy frame we know exactly where things are saved.  */
       && !PROC_DESC_IS_DUMMY (proc_desc)
@@ -339,50 +398,31 @@ mips_find_saved_regs (fci)
       int status;
       char buf[MIPS_INSTLEN];
       t_inst inst;
+      int instlen;
 
       /* Bitmasks; set if we have found a save for the register.  */
       unsigned long gen_save_found = 0;
       unsigned long float_save_found = 0;
 
-      for (addr = PROC_LOW_ADDR (proc_desc);
-	   addr < fci->pc /*&& (gen_mask != gen_save_found
-			      || float_mask != float_save_found)*/;
-	   addr += MIPS_INSTLEN)
+      if ((addr = PROC_LOW_ADDR (proc_desc)) & 1)
 	{
-	  status = read_memory_nobpt (addr, buf, MIPS_INSTLEN);
+	  instlen = 2;		/* MIPS16 */
+	  addr &= ~1;
+	}
+      else
+	instlen = MIPS_INSTLEN;	/* MIPS32 */
+
+      while (addr < fci->pc)
+	{
+	  status = read_memory_nobpt (addr, buf, instlen);
 	  if (status)
 	    memory_error (status, addr);
-	  inst = extract_unsigned_integer (buf, MIPS_INSTLEN);
-	  if (/* sw reg,n($sp) */
-	      (inst & 0xffe00000) == 0xafa00000
-
-	      /* sw reg,n($r30) */
-	      || (inst & 0xffe00000) == 0xafc00000
-
-	      /* sd reg,n($sp) */
-	      || (inst & 0xffe00000) == 0xffa00000)
-	    {
-	      /* It might be possible to use the instruction to
-		 find the offset, rather than the code below which
-		 is based on things being in a certain order in the
-		 frame, but figuring out what the instruction's offset
-		 is relative to might be a little tricky.  */
-	      int reg = (inst & 0x001f0000) >> 16;
-	      gen_save_found |= (1 << reg);
-	    }
-	  else if (/* swc1 freg,n($sp) */
-		   (inst & 0xffe00000) == 0xe7a00000
-
-		   /* swc1 freg,n($r30) */
-		   || (inst & 0xffe00000) == 0xe7c00000
-
-                   /* sdc1 freg,n($sp) */
-                   || (inst & 0xffe00000) == 0xf7a00000)
-
-	    {
-	      int reg = ((inst & 0x001f0000) >> 16);
-	      float_save_found |= (1 << reg);
-	    }
+	  inst = extract_unsigned_integer (buf, instlen);
+	  if (instlen == 2)
+	    mips16_decode_reg_save (inst, &gen_save_found);
+	  else
+	    mips32_decode_reg_save (inst, &gen_save_found, &float_save_found);
+	  addr += instlen;
 	}
       gen_mask = gen_save_found;
       float_mask = float_save_found;
@@ -469,6 +509,11 @@ mips_addr_bits_remove (addr)
 	 addressing, and this masking will have to be disabled.  */
         addr &= (CORE_ADDR)0xffffffff;
     }
+#else
+  /* Even when GDB is configured for some 32-bit targets (e.g. mips-elf),
+     BFD is configured to handle 64-bit targets, so CORE_ADDR is 64 bits.
+     So we still have to mask off useless bits from addresses.  */
+  addr &= (CORE_ADDR)0xffffffff;
 #endif
 
   return addr;
@@ -1079,13 +1124,11 @@ mips_push_dummy_frame()
    *    Saved D18 (i.e. F19, F18)
    *    ...
    *    Saved D0 (i.e. F1, F0)
-   *	CALL_DUMMY (subroutine stub; see tm-mips.h)
-   *	Parameter build area (not yet implemented)
+   *	Argument build area and stack arguments written via mips_push_arguments
    *  (low memory)
    */
 
   /* Save special registers (PC, MMHI, MMLO, FPC_CSR) */
-  write_register (PUSH_FP_REGNUM, sp);
   PROC_FRAME_REG(proc_desc) = PUSH_FP_REGNUM;
   PROC_FRAME_OFFSET(proc_desc) = 0;
   mips_push_register (&sp, PC_REGNUM);
@@ -1109,9 +1152,10 @@ mips_push_dummy_frame()
     if (PROC_FREG_MASK(proc_desc) & (1 << ireg))
       mips_push_register (&sp, ireg + FP0_REGNUM);
 
-  /* Update the stack pointer.  Set the procedure's starting and ending
-     addresses to point to the place on the stack where we'll be writing the
-     dummy code (in mips_push_arguments). */
+  /* Update the frame pointer for the call dummy and the stack pointer.
+     Set the procedure's starting and ending addresses to point to the
+     call dummy address at the entry point.  */
+  write_register (PUSH_FP_REGNUM, old_sp);
   write_register (SP_REGNUM, sp);
   PROC_LOW_ADDR(proc_desc) = CALL_DUMMY_ADDRESS();
   PROC_HIGH_ADDR(proc_desc) =  CALL_DUMMY_ADDRESS() + 4;
@@ -1307,6 +1351,10 @@ mips_step_skips_delay (pc)
      CORE_ADDR pc;
 {
   char buf[MIPS_INSTLEN];
+
+  /* There is no branch delay slot on MIPS16.  */
+  if (pc & 1)
+    return 0;
 
   if (target_read_memory (pc, buf, MIPS_INSTLEN) != 0)
     /* If error reading memory, guess that it is not a delayed branch.  */
@@ -1676,11 +1724,101 @@ gdb_print_insn_mips (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;
 {
+  mips_extra_func_info_t proc_desc;
+
+  /* Search for the function containing this address.  Set the low bit
+     of the address when searching, in case we were given an even address
+     that is the start of a 16-bit function.  If we didn't do this,
+     the search would fail because the symbol table says the function
+     starts at an odd address, i.e. 1 byte past the given address.  */
+  proc_desc = find_proc_desc (memaddr | 1, NULL);
+
+  /* Make an attempt to determine if this is a 16-bit function.  If
+     the procedure descriptor exists and the address therein is odd,
+     it's definitely a 16-bit function.  Otherwise, we have to just
+     guess that if the address passed in is odd, it's 16-bits.  */
+  if (proc_desc)
+    info->mach = PROC_LOW_ADDR (proc_desc) & 1 ? 16 : 0;
+  else
+    info->mach = memaddr & 1 ? 16 : 0;
+
+  /* Round down the instruction address to the appropriate boundary.
+     Save the amount rounded down and subtract it from the returned size of
+     the instruction so that the next time through the address won't
+     look bogus.  */
+  memaddr &= (info->mach == 16 ? ~1 : ~3);
+      
+  /* Call the appropriate disassembler based on the target endian-ness.  */
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     return print_insn_big_mips (memaddr, info);
   else
     return print_insn_little_mips (memaddr, info);
 }
+
+/* This function implements the BREAKPOINT_FROM_PC macro.  It uses the program
+   counter value to determine whether a 16- or 32-bit breakpoint should be
+   used.  It returns a pointer to a string of bytes that encode a breakpoint
+   instruction, stores the length of the string to *lenptr, and adjusts pc
+   (if necessary) to point to the actual memory location where the
+   breakpoint should be inserted.  */
+
+unsigned char *mips_breakpoint_from_pc (pcptr, lenptr)
+     CORE_ADDR *pcptr;
+     int *lenptr;
+{
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    {
+      if (*pcptr & 1)
+	{
+	  static char mips16_big_breakpoint[] = MIPS16_BIG_BREAKPOINT;
+	  *pcptr &= ~1;
+	  *lenptr = sizeof(mips16_big_breakpoint);
+	  return mips16_big_breakpoint;
+	}
+      else
+	{
+	  static char big_breakpoint[] = BIG_BREAKPOINT;
+	  *lenptr = sizeof(big_breakpoint);
+	  return big_breakpoint;
+	}
+    }
+  else
+    {
+      if (*pcptr & 1)
+	{
+	  static char mips16_little_breakpoint[] = MIPS16_LITTLE_BREAKPOINT;
+	  *pcptr &= ~1;
+	  *lenptr = sizeof(mips16_little_breakpoint);
+	  return mips16_little_breakpoint;
+	}
+      else
+	{
+	  static char little_breakpoint[] = LITTLE_BREAKPOINT;
+	  *lenptr = sizeof(little_breakpoint);
+	  return little_breakpoint;
+	}
+    }
+}
+
+/* Test whether the PC points to the return instruction at the
+   end of a function.  This implements the ABOUT_TO_RETURN macro.  */
+
+int 
+mips_about_to_return (pc)
+     CORE_ADDR pc;
+{
+  if (pc & 1)
+    /* This mips16 case isn't necessarily reliable.  Sometimes the compiler
+       generates a "jr $ra"; other times it generates code to load
+       the return address from the stack to an accessible register (such
+       as $a3), then a "jr" using that register.  This second case
+       is almost impossible to distinguish from an indirect jump
+       used for switch statements, so we don't even try.  */
+    return read_memory_integer (pc & ~1, 2) == 0xe820;	/* jr $ra */
+  else
+    return read_memory_integer (pc, 4) == 0x3e00008;	/* jr $ra */
+}
+
 
 void
 _initialize_mips_tdep ()
