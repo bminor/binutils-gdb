@@ -1,4 +1,4 @@
-/* Copyright 1992, 1993, 1994, 1995, 1996, 1999
+/* Copyright 1992, 1993, 1994, 1995, 1996, 1999, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -31,6 +31,7 @@
 #endif
 
 #if HAVE_ABORT
+#include <stdlib.h>
 #define ABORT abort()
 #else
 #define ABORT {char *invalid = 0; *invalid = 0xFF;}

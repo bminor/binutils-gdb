@@ -1,5 +1,9 @@
 2004-08-04  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.base/auxv.c: Include <stdlib.h>.
+
+2004-08-04  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/auxv.c: Add copyright notice.
 
 2004-08-04  Michael Chastain  <mec.gnu@mindspring.com>
