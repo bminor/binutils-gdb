@@ -192,6 +192,11 @@ proc do_import_test {} {
 }
 
 proc do_common_test {} {
+    # linux has a different .comm syntax
+    if [istarget hppa*-*-linux*] then {
+	return;
+    }
+
     set testname "common.s: Test for bug in .comm handling (part2)"
     set x 0
 

@@ -24,6 +24,10 @@ if { ([istarget "*-*-elf*"]
       return
     }
   
+    if {[istarget "hppa*-*-*"]} then {
+      return
+    }
+  
     # not supported by D30V
     if {[istarget "d30v-*-*"]} {
       return

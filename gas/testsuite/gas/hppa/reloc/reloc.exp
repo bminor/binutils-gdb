@@ -65,7 +65,8 @@ proc do_relocation_reduction_tests {} {
     set testname "reduce.s: Test relocation reductions (part 2)"
     set x 0
 
-    if [istarget hppa*w-*-*] then {
+    if {[istarget hppa*w-*-*]
+        || [istarget hppa*-*-*elf*] || [istarget hppa*-*-linux*]} then {
       return;
     }
 
@@ -98,8 +99,6 @@ proc do_relocation_reduction_tests {} {
     set testname "reduce2.s: More relocation reduction tests (part 2)"
     set x 0
 
-    if {![istarget hppa*-*-*elf*] && ![istarget hppa*-*-linux*]} then {
-
     if [gas_test_old "reduce2.s" "" "More relocation  reductions (part1)"] then {
 	objdump_start_no_subdir "a.out" "-r"
 
@@ -128,7 +127,6 @@ proc do_relocation_reduction_tests {} {
 
     # Did we find what we were looking for?  If not, flunk it.
     if [expr $x==2] then { pass $testname } else { fail $testname }
-    }
 
     set testname "reduce3.s: Test even more relocation reductions (part 2)"
     set x 0
@@ -615,7 +613,7 @@ proc do_apply_test {} {
     set x 0
 
     # ELF (osf) doesn't really handle extra sections too well...
-    if [istarget hppa*-*-*elf*] then {
+    if {[istarget hppa*-*-*elf*] || [istarget hppa*-*-linux*]} then {
 	return;
     }
 

@@ -1,3 +1,20 @@
+2000-07-10  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/vtable/vtable.exp: Disable test for hppa.
+
+	* gas/hppa/reloc/reloc.exp (do_relocation_reduction_tests): Don't
+	run test for any elf target.
+	(applybug): Don't run test for linux.
+	* gas/hppa/unsorted/unsorted.exp (do_common_text): Likewise.
+	* gas/hppa/parse/parse.exp (linesepbug): Remove xfail
+	(labelbug): xfail for hppa-linux.
+
+	* gas/hppa/basic/{coprmem.s, fmemLRbug.s}: Add colons to labels.
+	* gas/hppa/parse/{callinfobug.s, regpopbug.s}: Likewise.
+	* gas/hppa/reloc/{applybug.s, funcrelocbug.s, longcall.s,
+	r_no_reloc.s, reduce3.s}: Likewise.
+	* gas/hppa/unsorted/common.s: Likewise.
+
 2000-07-05  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/inst.d: Fix expected results to match current assembler
@@ -5,7 +22,7 @@
 	* gas/d30v/bittest.l: Fix expected warning messages to match
 	current assembler output.
 
-2000-06-29  Kazu Hirata  <kazu@hxi.com>=0A=
+2000-06-29  Kazu Hirata  <kazu@hxi.com>
 
 	* gas/h8300/h8300.exp (do_h8300s_mac): Change the registers used
 	in ldmac and stmac.
@@ -2821,4 +2838,3 @@ Tue Mar 30 11:45:27 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 Mon Mar 29 00:00:00 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* Test suite created.
-
