@@ -19,6 +19,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
+#ifdef __STDC__
+struct frame_info;
+struct frame_saved_regs;
+struct value;
+struct type;
+#endif
+
 #define GDB_TARGET_IS_SH
 
 #define IEEE_FLOAT 1
@@ -109,13 +116,13 @@ extern CORE_ADDR sh_skip_prologue ();
    Entries beyond the first NUM_REGS are ignored.  */
 
 #define REGISTER_NAMES \
-  { "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",  \
-    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15", \
-    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr", \
+  { "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",   \
+    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",  \
+    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",           \
     "fpul", "fpscr", \
     "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",  \
     "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15", \
-    "ssr",  "spc", \
+    "ssr",  "spc",   \
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0", \
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1", \
   }
@@ -130,6 +137,9 @@ extern CORE_ADDR sh_skip_prologue ();
    passed to read_register.  */
 
 #define R0_REGNUM	0
+#define STRUCT_RETURN_REGNUM 2
+#define ARG0_REGNUM     4
+#define ARGLAST_REGNUM  7
 #define FP_REGNUM 	14
 #define SP_REGNUM 	15
 #define PC_REGNUM 	16
@@ -152,25 +162,28 @@ extern CORE_ADDR sh_skip_prologue ();
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. 
 
-   We store structs through a pointer passed in R4 */
+   We store structs through a pointer passed in R0 */
 
 #define STORE_STRUCT_RETURN(ADDR, SP) \
-    { write_register (4, (ADDR));  }
+    { write_register (STRUCT_RETURN_REGNUM, (ADDR));  }
+
+#define USE_STRUCT_CONVENTION(gcc_p, type)	(TYPE_LENGTH(type) > 1)
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
+extern void sh_extract_return_value PARAMS ((struct type *, void *, void *));
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  memcpy (VALBUF, (char *)(REGBUF), TYPE_LENGTH(TYPE))
+	sh_extract_return_value (TYPE, REGBUF, VALBUF)
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  
 
-   Things always get returned in R4/R5 */
+   Things always get returned in R0/R1 */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (REGISTER_BYTE(4), VALBUF, TYPE_LENGTH (TYPE))
+  write_register_bytes (REGISTER_BYTE(0), VALBUF, TYPE_LENGTH (TYPE))
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -189,7 +202,7 @@ extern CORE_ADDR sh_skip_prologue ();
     int f_offset;    
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
-    init_extra_frame_info(fromleaf, fi) 
+    sh_init_extra_frame_info(fromleaf, fi) 
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
@@ -198,10 +211,9 @@ extern CORE_ADDR sh_skip_prologue ();
 #define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
   (FRAMELESS) = frameless_look_for_prologue(FI)
 
-#define FRAME_CHAIN(FRAME)       sh_frame_chain(FRAME)
-#define FRAME_SAVED_PC(FRAME)    ((FRAME)->return_pc)
-#define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
-#define FRAME_LOCALS_ADDRESS(fi) (fi)->frame
+#define FRAME_SAVED_PC(FRAME)		((FRAME)->return_pc)
+#define FRAME_ARGS_ADDRESS(fi)   	((fi)->frame)
+#define FRAME_LOCALS_ADDRESS(fi) 	((fi)->frame)
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
@@ -214,6 +226,9 @@ extern CORE_ADDR sh_skip_prologue ();
 
 #define FRAME_ARGS_SKIP 0
 
+extern void sh_frame_find_saved_regs PARAMS ((struct frame_info *fi, 
+					      struct frame_saved_regs *fsr));
+
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
    This includes special registers such as pc and fp saved in special
@@ -221,20 +236,57 @@ extern CORE_ADDR sh_skip_prologue ();
    the address we return for it IS the sp for the next frame.  */
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	    \
-   frame_find_saved_regs(frame_info, &(frame_saved_regs))
+   sh_frame_find_saved_regs(frame_info, &(frame_saved_regs))
 
 #define NAMES_HAVE_UNDERSCORE
 
 typedef unsigned short INSN_WORD;
 
-#define CALL_DUMMY_LENGTH 10
+extern CORE_ADDR generic_read_register_dummy PARAMS ((struct frame_info *, 
+						      int regno));
+
+extern void generic_push_dummy_frame    PARAMS ((void));
+extern void generic_pop_dummy_frame     PARAMS ((void));
+
+extern int  generic_pc_in_call_dummy    PARAMS ((CORE_ADDR pc, 
+						 CORE_ADDR fp, 
+						 CORE_ADDR sp));
+extern char * generic_find_dummy_frame  PARAMS ((CORE_ADDR pc, 
+						 CORE_ADDR fp, 
+						 CORE_ADDR sp));
+
+extern void sh_push_return_address PARAMS ((CORE_ADDR));
+extern CORE_ADDR sh_push_arguments PARAMS ((int nargs, 
+					    struct value **args, 
+					    CORE_ADDR sp,
+					    unsigned char struct_return,
+					    CORE_ADDR struct_addr));
+extern int generic_frame_chain_valid PARAMS((CORE_ADDR, struct frame_info *));
+
+
+
+#define CALL_DUMMY                   { }
+#define CALL_DUMMY_LENGTH            (0)
+#define CALL_DUMMY_START_OFFSET      (0)
+#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
+#define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
+#define CALL_DUMMY_ADDRESS()         (entry_point_address ())
+#define PUSH_RETURN_ADDRESS(PC)      (sh_push_return_address (PC))
+#define FRAME_CHAIN(FRAME)           (sh_frame_chain(FRAME))
+#define PUSH_DUMMY_FRAME             (generic_push_dummy_frame ())
+#define FRAME_CHAIN_VALID(FP, FRAME) (generic_frame_chain_valid (FP, FRAME))
+#define PC_IN_CALL_DUMMY(PC, SP, FP) (generic_pc_in_call_dummy (PC, SP, FP))
+#define FIX_CALL_DUMMY(DUMMYNAME, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP) 
+#define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
+  (SP) = sh_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
 
-#define POP_FRAME pop_frame();
+#define POP_FRAME sh_pop_frame();
 
 #define NOP   {0x20, 0x0b}
 
 #define REGISTER_SIZE 4
 
+#define COERCE_FLOAT_TO_DOUBLE 1
