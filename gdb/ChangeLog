@@ -1,3 +1,9 @@
+2004-05-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64obsd-tdep.c (amd64obsd_sigtramp_p): Adjust for new
+	assembler in OpenBSD 3.5-current.
+	(amd64obsd_sigcontext_addr): Likewise.
+
 2004-05-28  Jim Blandy  <jimb@redhat.com>
 
 	* rs6000-tdep.c: Use the modern gdbarch methods for handling the
@@ -155,6 +161,8 @@
 	(_initialize_infcmd): Add "start" command.
 
 2004-05-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* MAINTAINERS: Undelete m88k.  Add myself as maintainer.
 
 	Add OpenBSD/m88k support.
 	* NEWS (New native configurations): Mention OpenBSD/m88k.
