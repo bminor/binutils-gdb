@@ -1,3 +1,9 @@
+Fri Feb  7 09:52:34 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10200.c (md_assemble): If a constant operand won't
+	fit into the constant field of a relaxable operand, then it does
+	not match.
+
 Thu Feb  6 20:08:12 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c (md_estimate_size_before_relax): Treat
