@@ -1,3 +1,31 @@
+Tue Mar  9 11:00:56 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t07/watchpoint.exp (test_simple_watchpoint):  Set up
+	expected fail for i486-*-* that misses the marker2 function.
+	* gdb.t10/crossload.exp (bfddefault):  Allow successful
+	recognition of a format to pass even if no symbols are found.
+	Explicitly catch failures where the format is not recognized
+	or is ambiguous, and add the reason to the fail message.
+	* gdb.t10/crossload.exp (bfdexplicit):  Catch failure where
+	the cause is and invalid target and add reason to failure message.
+	* gdb.t10/crossload.exp:  Fix bfd target names for elf32-m68k,
+	elf32-i386, elf32-sparc, and elf32-i860.
+	* gdb.t12/scope.exp (test_at_main, test_at_foo, test_at_bar):
+	Set up expected failure for 'filename'::variable scope resolution,
+	which is now apparently broken on all targets.
+	* gdb.t20/classes.exp, gdb.t20/inherit.exp, gdb.t20/misc.exp,
+	gdb.t21/cplusfuncs.exp, gdb.t22/virtfunc.exp,
+	gdb.t23/templates.exp:   Change failure for missing binfile into
+	just a warning.
+	gdb.t21/demangle.exp:  Change all cfront references to 'arm'
+	references.
+
+Mon Mar  8 19:20:28 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t00/default.exp:  Add expected output for default "source"
+	command, to match new gdb behavior.
+	* gdb.t09/corefile.exp:  Use GDBFLAGS when spawning GDB.
+
 Sun Mar  7 15:14:09 1993  Rob Savoye  (rob@cygnus.com)
 
 	* config/*-gdb.exp: returns an error, rather than exiting on
