@@ -1,5 +1,11 @@
 Tue Jun  9 07:54:54 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
+	* subsegs.c (subsegs_begin): create bss0_frchainP in the same was
+	as data0_frchainP
+
+	* write.c (write_object_file): various changes to handle data in
+	the BSS segment in much the same was as stuff in the DATA segment. 
+
 	* subsegs.c (subseg_change): allow and handle a change into SEG_BSS.
 
 Thu Jun  4 11:59:13 1992  Steve Chamberlain  (sac@thepub.cygnus.com)

@@ -36,9 +36,11 @@
 #ifndef MANY_SEGMENTS
 static struct frag *text_frag_root;
 static struct frag *data_frag_root;
+static struct frag *bss_frag_root;
 
 static struct frag *text_last_frag;	/* Last frag in segment. */
 static struct frag *data_last_frag;	/* Last frag in segment. */
+static struct frag *bss_last_frag;	/* Last frag in segment. */
 #endif
 
 static object_headers headers;
@@ -132,6 +134,26 @@ int 	r_type;	/* Relocation type */
 } /* fix_new() */
 
 #ifndef BFD
+
+void remove_subsegs(head, seg, root, last)
+frchainS *head;
+int seg;
+fragS **root;
+fragS ** last;
+{
+  fragS dummy;
+  fragS * prev_frag = &dummy;
+  *root = head->frch_root;
+  while (head && head->frch_seg == seg) 
+  {
+    prev_frag->fr_next = head->frch_root;
+
+    prev_frag = head->frch_last;
+    head = head->frch_next;
+  }
+  *last = prev_frag;
+  prev_frag->fr_next = 0;
+}
 void write_object_file() 
 {
 	register struct frchain *	frchainP; /* Track along all frchains. */
@@ -193,22 +215,10 @@ void write_object_file()
 	 * Build one frag chain for each segment. Linked thru fr_next.
 	 * We know that there is at least 1 text frchain & at least 1 data frchain.
 	 */
-	prev_fragPP = &text_frag_root;
-	for (frchainP = frchain_root; frchainP; frchainP = next_frchainP) {
-		know( frchainP->frch_root );
-		* prev_fragPP = frchainP->frch_root;
-		prev_fragPP = & frchainP->frch_last->fr_next;
-		
-		if (((next_frchainP = frchainP->frch_next) == NULL)
-		    || next_frchainP == data0_frchainP) {
-			prev_fragPP = & data_frag_root;
-			if (next_frchainP) {
-				text_last_frag = frchainP->frch_last;
-			} else {
-				data_last_frag = frchainP->frch_last;
-			}
-		}
-	} /* walk the frag chain */
+
+	remove_subsegs(frchain_root, SEG_TEXT, &text_frag_root, &text_last_frag);
+	remove_subsegs(data0_frchainP, SEG_DATA, &data_frag_root, &data_last_frag);
+	remove_subsegs(bss0_frchainP, SEG_BSS, &bss_frag_root, &bss_last_frag);
 	
 	/*
 	 * We have two segments. If user gave -R flag, then we must put the
@@ -234,6 +244,7 @@ void write_object_file()
 #endif	
 	relax_segment(text_frag_root, SEG_TEXT);
 	relax_segment(data_frag_root, SEG_DATA);
+	relax_segment(bss_frag_root, SEG_BSS);
 	/*
 	 * Now the addresses of frags are correct within the segment.
 	 */
@@ -292,9 +303,20 @@ void write_object_file()
 #else
 	bss_address_frag.fr_address = (H_GET_TEXT_SIZE(&headers) + 
 				       H_GET_DATA_SIZE(&headers));
-#endif
-	
-	H_SET_BSS_SIZE(&headers,local_bss_counter);
+
+	/* Slide all the frags */
+	if (bss_frag_root) 
+	{
+	  relax_addressT  slide = bss_address_frag.fr_address + local_bss_counter;
+
+	  for (fragP = bss_frag_root; fragP; fragP = fragP->fr_next) 
+	  {
+	    fragP->fr_address += slide;
+	  } /* for each bss frag */
+	}
+
+#endif	
+	H_SET_BSS_SIZE(&headers,local_bss_counter + bss_last_frag ?  bss_last_frag->fr_address: 0);
 	
 	/*
 	 *
@@ -641,7 +663,7 @@ segT		segment; /* SEG_DATA or SEG_TEXT */
 	/* register relax_addressT	old_address; JF unused */
 	/* register relax_addressT	new_address; JF unused */
 #ifndef MANY_SEGMENTS	
-	know(segment == SEG_DATA || segment == SEG_TEXT);
+	know(segment == SEG_DATA || segment == SEG_TEXT || segment == SEG_BSS) ;
 #endif
 	/* In case md_estimate_size_before_relax() wants to make fixSs. */
 	subseg_change(segment, 0);

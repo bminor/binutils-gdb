@@ -35,7 +35,8 @@ frchainS*	frchain_root,
 #else
 frchainS*	frchain_root,
     *	frchain_now,	/* Commented in "subsegs.h". */
-    *	data0_frchainP;
+    *	data0_frchainP,
+ * bss0_frchainP;
 
 #endif
 char * const /* in: segT   out: char* */
@@ -108,6 +109,10 @@ void
 #else
 	subseg_new (SEG_DATA, 0);	/* .data 0 */
 	data0_frchainP = frchain_now;
+
+	subseg_new (SEG_BSS, 0);
+	bss0_frchainP = frchain_now;
+
 #endif
 	
 }
