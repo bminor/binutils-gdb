@@ -596,6 +596,10 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
      bfd *       obfd;
      char **     err;
 {
+  long relocation;
+  long insn;
+
+  
   /* If there is an output BFD,
      and the symbol is not a section name (which is only defined at final link time),
      and either we are not putting the addend into the instruction
@@ -623,191 +627,196 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
     return bfd_reloc_undefined;
 
   /* We handle final linking of some relocs ourselves.  */
+
+  /* Is the address of the relocation really within the section?  */
+  if (reloc->address > isection->_cooked_size)
+    return bfd_reloc_outofrange;
+  
+  /* Work out which section the relocation is targetted at and the
+     initial relocation command value.  */
+  
+  /* Get symbol value.  (Common symbols are special.)  */
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+  
+  /* Convert input-section-relative symbol value to absolute + addend.  */
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc->addend;
+  
+  if (reloc->howto->pc_relative == true)
     {
-      long relocation, insn;
+      /* Here the variable relocation holds the final address of the
+	 symbol we are relocating against, plus any addend.  */
+      relocation -= isection->output_section->vma + isection->output_offset;
+      
+      /* Deal with pcrel_offset */
+      relocation -= reloc->address;
+    }
+  
+  /* I've got no clue... */
+  reloc->addend = 0;	
+  
+  switch (reloc->howto->type)
+    {
+    default:
+      /* fprintf (stderr, "reloc type %d not SUPPORTED\n", reloc->howto->type ); */
+      return bfd_reloc_notsupported;
+      
+    case R_V850_22_PCREL:
+      if (relocation > 0x1ffff || relocation < -0x200000)
+	return bfd_reloc_overflow;
+      
+      if ((relocation % 2) != 0)
+	return bfd_reloc_dangerous;
+      
+      insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc->address);
+      insn &= ~0xfffe003f;
+      insn |= (((relocation & 0xfffe) << 16)
+	       | ((relocation & 0x3f0000) >> 16));
+      bfd_put_32 (abfd, insn, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
+    case R_V850_9_PCREL:
+      if (relocation > 0xff || relocation < -0x100)
+	return bfd_reloc_overflow;
+      
+      if ((relocation % 2) != 0)
+	return bfd_reloc_dangerous;
+      
+      insn = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      insn &= ~ 0xf870;
+      insn |= ((relocation & 0x1f0) << 7) | ((relocation & 0x0e) << 3);
+      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
+    case R_V850_HI16_S:
+      relocation += bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      relocation = (relocation >> 16) + ((relocation & 0x8000) != 0);
+      bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
+    case R_V850_HI16:
+      relocation += bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      relocation = (relocation >> 16);
+      bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
+    case R_V850_LO16:
+      relocation += (short)bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      /* Do not complain if value has top bit set, as this has been anticipated.  */
+      if ((unsigned long)relocation > 0xffff)
+	return bfd_reloc_overflow;
+      bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
 
-      /* Is the address of the relocation really within the section?  */
-      if (reloc->address > isection->_cooked_size)
-	return bfd_reloc_outofrange;
-
-      /* Work out which section the relocation is targetted at and the
-	 initial relocation command value.  */
-
-      /* Get symbol value.  (Common symbols are special.)  */
-      if (bfd_is_com_section (symbol->section))
-	relocation = 0;
-      else
-	relocation = symbol->value;
-
-      /* Convert input-section-relative symbol value to absolute + addend.  */
-      relocation += symbol->section->output_section->vma;
-      relocation += symbol->section->output_offset;
-      relocation += reloc->addend;
-
-      if (reloc->howto->pc_relative == true)
-	{
-	  /* Here the variable relocation holds the final address of the
-	     symbol we are relocating against, plus any addend.  */
-	  relocation -= isection->output_section->vma + isection->output_offset;
-
-	  /* Deal with pcrel_offset */
-	  relocation -= reloc->address;
-	}
-
-      /* I've got no clue... */
-      reloc->addend = 0;	
-
-      switch (reloc->howto->type)
-	{
-	default:
-	  /* fprintf (stderr, "reloc type %d not SUPPORTED\n", reloc->howto->type ); */
-	  return bfd_reloc_notsupported;
-
-	case R_V850_22_PCREL:
-	  if (relocation > 0x1ffff || relocation < -0x200000)
-	    return bfd_reloc_overflow;
-
-	  if ((relocation % 2) != 0)
-	    return bfd_reloc_dangerous;
-
-	  insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc->address);
-	  insn &= ~0xfffe003f;
-	  insn |= (((relocation & 0xfffe) << 16)
-		   | ((relocation & 0x3f0000) >> 16));
-	  bfd_put_32 (abfd, insn, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-
-	case R_V850_9_PCREL:
-	  if (relocation > 0xff || relocation < -0x100)
-	    return bfd_reloc_overflow;
-
-	  if ((relocation % 2) != 0)
-	    return bfd_reloc_dangerous;
-
-	  insn = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-	  insn &= ~ 0xf870;
-	  insn |= ((relocation & 0x1f0) << 7) | ((relocation & 0x0e) << 3);
-	  bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-
-	case R_V850_HI16_S:
-	  relocation += bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-	  relocation = (relocation >> 16) + ((relocation & 0x8000) != 0);
-	  bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-
-	case R_V850_HI16:
-	  relocation += bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-	  relocation = (relocation >> 16);
-	  bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-
-	case R_V850_16:
-	case R_V850_LO16:
-	  relocation += (short)bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-	  
-	case R_V850_SDA_16_16_OFFSET:
-	case R_V850_ZDA_16_16_OFFSET:
-	  if ((long)relocation > 0x7fff || (long)relocation < -0x8000)
-	    return bfd_reloc_overflow;
-	  bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-
-	case R_V850_SDA_15_16_OFFSET:
-	case R_V850_ZDA_15_16_OFFSET:
-	  if ((long)relocation > 0x7ffe || (long)relocation < -0x8000)
-	    return bfd_reloc_overflow;
-
-	  if (relocation & 1)
-	    return bfd_reloc_dangerous;
-	    
-	  insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-	  insn &= 1;
-	  insn |= (relocation >> 1) & ~1;
-
-	  bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-
-	case R_V850_TDA_6_8_OFFSET:
-	  if ((long) relocation > 0xfc || (long) relocation < 0)
-	    return bfd_reloc_overflow;
-	
-	  if (relocation & 3)
-	    return bfd_reloc_dangerous;
-	
-	  insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-	  insn &= 0xff81;
-	  insn |= (relocation >> 1);
-
-	  bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-    
-	case R_V850_TDA_7_8_OFFSET:
-	  if ((long) relocation > 0xfe || (long) relocation < 0)
-	    return bfd_reloc_overflow;
-	
-	  if (relocation & 1)
-	    return bfd_reloc_dangerous;
-	
-	  insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-	  insn &= 0xff80;
-	  insn |= (relocation >> 1);
-
-	  bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-    
-	case R_V850_TDA_7_7_OFFSET:
-	  if ((long) relocation > 0x7f || (long) relocation < 0)
-	    return bfd_reloc_overflow;
-
-	  insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-	  insn &= 0xff80;
-	  insn |= relocation;
-
-	  bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-    
+    case R_V850_16:
+      relocation += (short)bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      /* drop through */
+      
+    case R_V850_SDA_16_16_OFFSET:
+    case R_V850_ZDA_16_16_OFFSET:
+      if ((long)relocation > 0x7fff || (long)relocation < -0x8000)
+	return bfd_reloc_overflow;
+      bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
+    case R_V850_SDA_15_16_OFFSET:
+    case R_V850_ZDA_15_16_OFFSET:
+      if ((long)relocation > 0x7ffe || (long)relocation < -0x8000)
+	return bfd_reloc_overflow;
+      
+      if (relocation & 1)
+	return bfd_reloc_dangerous;
+      
+      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      insn &= 1;
+      insn |= (relocation >> 1) & ~1;
+      
+      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
+    case R_V850_TDA_6_8_OFFSET:
+      if ((long) relocation > 0xfc || (long) relocation < 0)
+	return bfd_reloc_overflow;
+      
+      if (relocation & 3)
+	return bfd_reloc_dangerous;
+      
+      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      insn &= 0xff81;
+      insn |= (relocation >> 1);
+      
+      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
+    case R_V850_TDA_7_8_OFFSET:
+      if ((long) relocation > 0xfe || (long) relocation < 0)
+	return bfd_reloc_overflow;
+      
+      if (relocation & 1)
+	return bfd_reloc_dangerous;
+      
+      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      insn &= 0xff80;
+      insn |= (relocation >> 1);
+      
+      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
+    case R_V850_TDA_7_7_OFFSET:
+      if ((long) relocation > 0x7f || (long) relocation < 0)
+	return bfd_reloc_overflow;
+      
+      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      insn &= 0xff80;
+      insn |= relocation;
+      
+      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
 /* start-sanitize-v850e */
-	case R_V850_TDA_4_5_OFFSET:
-	  if ((long) relocation > 0x1e || (long) relocation < 0)
-	    return bfd_reloc_overflow;
-	
-	  if (relocation & 1)
-	    return bfd_reloc_dangerous;
-	  
-	  insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-	  insn &= 0xfff0;
-	  insn |= (relocation >> 1);
-
-	  bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-    
-	case R_V850_TDA_4_4_OFFSET:
-	  if ((long) relocation > 0xf || (long) relocation < 0)
-	    return bfd_reloc_overflow;
-	
-	  insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-	  insn &= 0xfff0;
-	  insn |= relocation;
-	  
-	  bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
-    
-	case R_V850_ZDA_16_16_SPLIT_OFFSET:
-	case R_V850_SDA_16_16_SPLIT_OFFSET:
-	  if ((long) relocation > 0xffff || (long) relocation < 0)
-	    return bfd_reloc_overflow;
-
-	  insn  = bfd_get_32 (abfd, (bfd_byte *) data + reloc->address);
-	  
-	  insn &= 0x0001ffdf;
-	  insn |= (relocation & 1) << 5;
-	  insn |= (relocation & ~1) << 16;
-	  
-	  bfd_put_32 (abfd, insn, (bfd_byte *)data + reloc->address);
-	  return bfd_reloc_ok;
+    case R_V850_TDA_4_5_OFFSET:
+      if ((long) relocation > 0x1e || (long) relocation < 0)
+	return bfd_reloc_overflow;
+      
+      if (relocation & 1)
+	return bfd_reloc_dangerous;
+      
+      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      insn &= 0xfff0;
+      insn |= (relocation >> 1);
+      
+      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
+    case R_V850_TDA_4_4_OFFSET:
+      if ((long) relocation > 0xf || (long) relocation < 0)
+	return bfd_reloc_overflow;
+      
+      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+      insn &= 0xfff0;
+      insn |= relocation;
+      
+      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
+      
+    case R_V850_ZDA_16_16_SPLIT_OFFSET:
+    case R_V850_SDA_16_16_SPLIT_OFFSET:
+      if ((long) relocation > 0xffff || (long) relocation < 0)
+	return bfd_reloc_overflow;
+      
+      insn  = bfd_get_32 (abfd, (bfd_byte *) data + reloc->address);
+      
+      insn &= 0x0001ffdf;
+      insn |= (relocation & 1) << 5;
+      insn |= (relocation & ~1) << 16;
+      
+      bfd_put_32 (abfd, insn, (bfd_byte *)data + reloc->address);
+      return bfd_reloc_ok;
 /* end-sanitize-v850e */
-	}
     }
 
   return bfd_reloc_continue;

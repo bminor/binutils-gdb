@@ -2,6 +2,8 @@ Tue Sep  9 10:21:56 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_print_private_bfd_data): Break after
 	decoding architecture.
+	(v850_elf_reloc): Do not complain if a R_V850_LO16 reloc has bit
+	15 set.
 
 Sun Sep  7 12:25:22 1997  H.J. Lu  (hjl@gnu.ai.mit.edu)
 
