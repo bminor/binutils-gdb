@@ -1,4 +1,29 @@
-Thu Feb 20 09:04:18 1992  John Gilmore  (gnu at cygnus.com)
+Thu Feb 20 16:43:13 1992  Fred Fish  (fnf at cygnus.com)
+
+	* environ.h, expression.h, frame.h, gdbcmd.h, gdbcore.h,
+	inferior.h, language.h, signame.h, target.h, terminal.h, 
+	tm-68k.h, tm-i386v.h, tm-sparc.h, tm-sun386.h, tm-symmetry.h,
+	xm-i386v.h, xm-sparc.h: Prototypes for all external functions.
+	Lint.
+	* core.c, exec.c, infrun.c, inftarg.c, language.c, remote.c,
+	signame.c, sparc-xdep.c: Prototypes for all static functions.
+	Lint.
+	* core.c, eval.c, exec.c, inftarg.c, remote-adapt.c, remote-eb.c,
+	remote-hms.c, remote-mm.c, remote-nindy.c, remote-vx.c, remote.c,
+	target.c, target.h, valarith.c, valops.c, value.h, xcoffexec.c:
+	Remove to_call_function and target_call_function, since it
+	always calls the same thing (call_function_by_hand).
+	* core.c, exec.c, solib.c:  Rename target_ops sections =>
+	to_sections, etc.
+	* infcmd.c, inflow.c, infptrace.c, infrun.c, main.c, target.c,
+	target.h:  target_kill takes no args.
+	* language.c (language_info):  Scaffolding to allow briefer
+	messages when the current language changes.  FIXME.
+	* xm-amix.h, xm-i386v4.h, xm-stratus.h: Define NORETURN to avoid
+	complaints about volatile functions.
+	* xm-sysv4.h (HAVE_MMAP):  Define.
+
+Thu Feb 20 09:04:18 1992  Fred Fish  (fnf at cygnus.com)
 
 	* defs.h:  Include ansidecl.h and PARAMS macro.  Use PARAMS
 	to make prototypes for all functions declared here.

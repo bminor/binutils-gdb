@@ -1,6 +1,6 @@
 /* Parameters for execution on a Sun 4, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
-   Contributed by Michael Tiemann (tiemann@mcc.com)
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Contributed by Michael Tiemann (tiemann@mcc.com).
 
 This file is part of GDB.
 
@@ -53,7 +53,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    FIXME, this does not handle remote debugging cleanly.  */
 
 extern int deferred_stores;
-extern int store_inferior_registers ();
 #define	DO_DEFERRED_STORES	\
   if (deferred_stores)		\
     store_inferior_registers (-2);

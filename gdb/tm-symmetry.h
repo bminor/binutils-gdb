@@ -1,6 +1,7 @@
-/* Definitions to make GDB run on a Sequent Symmetry under dynix 3.0,
+/* Target machine definitions for GDB on a Sequent Symmetry under dynix 3.0,
    with Weitek 1167 and i387 support.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Symmetry version by Jay Vosburgh (uunet!sequent!fubar).
 
 This file is part of GDB.
 
@@ -17,8 +18,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-/* Symmetry version by Jay Vosburgh (uunet!sequent!fubar) */
 
 /* I don't know if this will work for cross-debugging, even if you do get
    a copy of the right include file.  */
@@ -40,6 +39,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to reach some "real" code.  From m-i386.h */
 
 #define SKIP_PROLOGUE(frompc)   {(frompc) = i386_skip_prologue((frompc));}
+
+extern int
+i386_skip_prologue PARAMS ((int));
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -187,6 +189,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 (REGNUM < 14) ? i387_to_double((FROM), (TO)) : \
     bcopy ((FROM), (TO), 4))
 
+extern void
+i387_to_double PARAMS ((char *, char *));
+
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
@@ -196,6 +201,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 (REGNUM < 8) ? bcopy ((FROM), (TO), 4) : \
 (REGNUM < 14) ? double_to_i387((FROM), (TO)) : \
     bcopy ((FROM), (TO), 4))
+
+extern void
+double_to_i387 PARAMS ((char *, char *));
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -314,6 +322,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
 { i386_frame_find_saved_regs ((frame_info), &(frame_saved_regs)); }
 
+#ifdef __STDC__		/* Forward decl's for prototypes */
+struct frame_info;
+struct frame_saved_regs;
+#endif
+
+extern void
+i386_frame_find_saved_regs PARAMS ((struct frame_info *,
+				    struct frame_saved_regs *));
+
 
 /* Things needed for making the inferior call functions.  */
 
@@ -377,3 +394,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	delta = to - from; \
 	*(int *)((char *)(dummyname) + 1) = delta; \
 }
+
+extern void
+print_387_control_word PARAMS ((unsigned int));
+
+extern void
+print_387_status_word PARAMS ((unsigned int));

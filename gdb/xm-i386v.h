@@ -1,5 +1,6 @@
 /* Macro defintions for i386.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+   Changes for 80386 by Pace Willisson (pace@prep.ai.mit.edu), July 1988.
 
 This file is part of GDB.
 
@@ -16,11 +17,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-/*
- * Changes for 80386 by Pace Willisson (pace@prep.ai.mit.edu)
- * July 1988
- */
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 
@@ -42,10 +38,6 @@ on those where it does, it occurs quite reliably.  */
 
 #define HAVE_TERMIO
 
-/* Get rid of any system-imposed stack limit if possible.  */
-
-/* #define SET_STACK_LIMIT_HUGE not in sys5 */
-
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 
@@ -53,3 +45,6 @@ on those where it does, it occurs quite reliably.  */
 
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = i386_register_u_addr ((blockend),(regno));
+
+extern int
+i386_register_u_addr PARAMS ((int, int));

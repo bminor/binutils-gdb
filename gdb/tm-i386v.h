@@ -1,5 +1,5 @@
 /* Macro definitions for i386, Unix System V.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -16,6 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#if !defined (TM_I386V_H)
+#define TM_I386V_H 1
 
 /*
  * Changes for 80386 by Pace Willisson (pace@prep.ai.mit.edu)
@@ -55,6 +58,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to reach some "real" code.  */
 
 #define SKIP_PROLOGUE(frompc)   {(frompc) = i386_skip_prologue((frompc));}
+
+extern int
+i386_skip_prologue PARAMS ((int));
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -193,7 +199,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   { (SP) -= sizeof (ADDR);		\
-    write_memory ((SP), &(ADDR), sizeof (ADDR)); }
+    write_memory ((SP), (char *) &(ADDR), sizeof (ADDR)); }
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
@@ -251,6 +257,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define FRAME_NUM_ARGS(numargs, fi) (numargs) = i386_frame_num_args(fi)
 
+#ifdef __STDC__		/* Forward decl's for prototypes */
+struct frame_info;
+struct frame_saved_regs;
+#endif
+
+extern int
+i386_frame_num_args PARAMS ((struct frame_info *));
+
 /* Return number of bytes at start of arglist that are not really args.  */
 
 #define FRAME_ARGS_SKIP 8
@@ -264,6 +278,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
 { i386_frame_find_saved_regs ((frame_info), &(frame_saved_regs)); }
 
+extern void
+i386_frame_find_saved_regs PARAMS ((struct frame_info *,
+				    struct frame_saved_regs *));
+
 
 /* Things needed for making the inferior call functions.  */
 
@@ -271,9 +289,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define PUSH_DUMMY_FRAME { i386_push_dummy_frame (); }
 
+extern void
+i386_push_dummy_frame PARAMS ((void));
+
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME  { i386_pop_frame (); }
+
+extern void
+i386_pop_frame PARAMS ((void));
 
 /* this is 
  *   call 11223344 (32 bit relative)
@@ -301,3 +325,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	*((char *)(dummyname) + 3) = ((delta >> 16) & 0xff); \
 	*((char *)(dummyname) + 4) = ((delta >> 24) & 0xff); \
 }
+
+extern void
+print_387_control_word PARAMS ((unsigned int));
+
+extern void
+print_387_status_word PARAMS ((unsigned int));
+
+#endif	/* !defined (TM_I386V_H) */

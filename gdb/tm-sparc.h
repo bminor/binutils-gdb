@@ -1,5 +1,5 @@
-/* Parameters for target machine of Sun 4, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+/* Parameters for SPARC target machines, for GDB, the GNU debugger.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
 
 This file is part of GDB.
@@ -287,11 +287,9 @@ extern CORE_ADDR sparc_pc_adjust();
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   (sparc_extract_struct_value_address (REGBUF))
-CORE_ADDR sparc_extract_struct_value_address (
-#ifdef __STDC__
-					      char [REGISTER_BYTES]
-#endif
-					      );
+
+extern CORE_ADDR
+sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
 
 
 /* Describe the pointer in each stack frame to the previous stack frame

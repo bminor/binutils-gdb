@@ -1,5 +1,5 @@
 /* Source-language-related definitions for GDB.
-   Copyright 1991 Free Software Foundation, Inc.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
 
@@ -18,6 +18,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#if !defined (LANGUAGE_H)
+#define LANGUAGE_H 1
+
+#ifdef __STDC__		/* Forward defs for prototypes */
+struct value;
+enum exp_opcode;
+#endif
 
 /* This used to be included to configure GDB for one or more specific
    languages.  Now it is shortcutted to configure for all of them.  FIXME.  */
@@ -62,8 +70,8 @@ struct language_defn {
 		  *la_builtin_type_vector;  /* Its builtin types */
   enum range_check la_range_check;	/* Default range checking */
   enum type_check  la_type_check;	/* Default type checking */
-  int		 (*la_parser)();	/* Parser function */
-  void		 (*la_error)();		/* Parser error function */
+  int            (*la_parser) PARAMS((void));	/* Parser function */
+  void           (*la_error) PARAMS ((char *)); /* Parser error function */
   struct type	 **la_longest_int;	/* Longest signed integral type */
   struct type	 **la_longest_unsigned_int; /* Longest uns integral type */
   struct type	 **la_longest_float;	/* Longest floating point type */
@@ -108,8 +116,12 @@ extern enum language_mode
 /* FIXME -- should be a setting in language_defn */
 #define CAST_IS_CONVERSION (current_language->la_language == language_c)
 
-void language_info();
-void set_language();
+extern void
+language_info PARAMS ((int));
+
+extern void
+set_language PARAMS ((enum language));
+
 
 /* This page contains functions that return things that are
    specific to languages.  Each of these functions is based on
@@ -120,7 +132,6 @@ void set_language();
 #define	longest_int()		(*current_language->la_longest_int)
 #define	longest_unsigned_int()	(*current_language->la_longest_unsigned_int)
 #define	longest_float()		(*current_language->la_longest_float)
-struct type *binop_result_type();
 
 /* Hexadecimal number formatting is in defs.h because it is so common
    throughout GDB.  */
@@ -131,40 +142,81 @@ struct type *binop_result_type();
    options like "08" or "l" (to produce e.g. %08x or %lx).  */
 
 #define local_octal_format() (current_language->la_octal_format)
-char *local_octal_format_custom();
+
+extern char *
+local_octal_format_custom PARAMS ((char *));
 
 /* Type predicates */
-int simple_type();
-int ordered_type();
-int same_type();
-int integral_type();
-int numeric_type();
-int character_type();
-int boolean_type();
-int float_type();
-int pointer_type();
-int structured_type();
+
+extern int
+simple_type PARAMS ((struct type *));
+
+extern int
+ordered_type PARAMS ((struct type *));
+
+extern int
+same_type PARAMS ((struct type *, struct type *));
+
+extern int
+integral_type PARAMS ((struct type *));
+
+extern int
+numeric_type PARAMS ((struct type *));
+
+extern int
+character_type PARAMS ((struct type *));
+
+extern int
+boolean_type PARAMS ((struct type *));
+
+extern int
+float_type PARAMS ((struct type *));
+
+extern int
+pointer_type PARAMS ((struct type *));
+
+extern int
+structured_type PARAMS ((struct type *));
 
 /* Checks Binary and Unary operations for semantic type correctness */
-void binop_type_check();
+/* FIXME:  Does not appear to be used */
 #define unop_type_check(v,o) binop_type_check((v),NULL,(o))
 
+extern void
+binop_type_check PARAMS ((struct value *, struct value *, int));
+
 /* Error messages */
-void op_error();
+
+extern void
+op_error PARAMS ((char *fmt, enum exp_opcode, int));
+
 #define type_op_error(f,o) \
    op_error((f),(o),type_check==type_check_on ? 1 : 0)
 #define range_op_error(f,o) \
    op_error((f),(o),range_check==range_check_on ? 1 : 0)
-void type_error();
-void range_error();
+
+extern void
+type_error ();
+
+void
+range_error ();
 
 /* Data:  Does this value represent "truth" to the current language?  */
-int value_true();
+
+extern int
+value_true PARAMS ((struct value *));
 
 /* Misc:  The string representing a particular enum language.  */
-char *language_str();
+
+extern char *
+language_str PARAMS ((enum language));
 
 /* Add a language to the set known by GDB (at initialization time).  */
-void add_language ();		/* Arg is &language_defn */
 
-extern enum language get_frame_language ();	/* In stack.c */
+extern void
+add_language PARAMS ((const struct language_defn *));
+
+extern enum language
+get_frame_language PARAMS ((void));		/* In stack.c */
+
+#endif	/* defined (LANGUAGE_H) */
