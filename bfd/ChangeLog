@@ -1,3 +1,12 @@
+Sat Apr 25 18:29:07 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (struct alpha_relax_info): Add tsec & elfsym members.
+	(elf64_alpha_relax_section): Fill them in.
+	(elf64_alpha_relax_opt_call): Implement more than a stub.
+	(elf64_alpha_add_symbol_hook): Don't set SEC_LOAD or default 
+	alignment on .scommon.
+	(elf64_alpha_merge_gots): Merge use counts as well.
+
 Sat Apr 25 14:07:29 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_section): Use the proper section

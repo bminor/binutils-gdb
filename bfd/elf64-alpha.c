@@ -1042,6 +1042,8 @@ struct alpha_relax_info
   boolean changed_relocs;
   bfd_vma gp;
   bfd *gotobj;
+  asection *tsec;
+  Elf_Internal_Sym *elfsym;
   struct alpha_elf_link_hash_entry *h;
   struct alpha_elf_got_entry *gotent;
 };
@@ -1209,7 +1211,13 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 		urel->r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
 					     R_ALPHA_BRADDR);
 		urel->r_addend = irel->r_addend;
-		info->changed_relocs = true;
+
+		if (optdest)
+		  urel->r_addend += optdest - symval;
+		else
+		  all_optimized = false;
+
+		bfd_put_32 (info->abfd, insn, info->contents + urel->r_offset);
 
 		/* Kill any HINT reloc that might exist for this insn.  */
 		xrel = (elf64_alpha_find_reloc_at_ofs
@@ -1218,13 +1226,8 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 		if (xrel)
 		  xrel->r_info = ELF64_R_INFO (0, R_ALPHA_NONE);
 
-		if (optdest)
-		    urel->r_addend += optdest - symval;
-		else
-		  all_optimized = false;
-
-		bfd_put_32 (info->abfd, insn, info->contents + urel->r_offset);
 		info->changed_contents = true;
+		info->changed_relocs = true;
 	      }
 	    else
 	      all_optimized = false;
@@ -1275,16 +1278,60 @@ elf64_alpha_relax_opt_call (info, symval)
 {
   /* If the function has the same gp, and we can identify that the
      function does not use its function pointer, we can eliminate the
-     address load.
+     address load.  */
 
-     ??? The .prologue [0,1] information is what we need.  How do we
-     get it out of the mdebug uglyness?  What shall we do when we drop
-     that crap for dwarf2?
+  /* If the symbol is marked NOPV, we are being told the function never
+     needs its procedure value.  */
+  if (info->elfsym->st_other == STO_ALPHA_NOPV)
+    return symval;
 
-     For now, only consider the case in which there is an identifyable
-     GP load in the first two words.  We can then skip over that load. */
+  /* If the symbol is marked STD_GP, we are being told the function does
+     a normal ldgp in the first two words.  */ 
+  else if (info->elfsym->st_other == STO_ALPHA_STD_GPLOAD)
+    ;
 
-  return 0;
+  /* Otherwise, we may be able to identify a GP load in the first two
+     words, which we can then skip.  */
+  else 
+    {
+      Elf_Internal_Rela *tsec_relocs, *tsec_relend, *tsec_free, *gpdisp;
+      bfd_vma ofs;
+
+      /* Load the relocations from the section that the target symbol is in. */
+      tsec_relocs = (_bfd_elf64_link_read_relocs
+	             (info->abfd, info->tsec, (PTR) NULL,
+		     (Elf_Internal_Rela *) NULL,
+		     info->link_info->keep_memory));
+      if (tsec_relocs == NULL)
+	return 0;
+      tsec_free = (info->link_info->keep_memory ? NULL : tsec_relocs);
+      tsec_relend = tsec_relocs + info->tsec->reloc_count;
+
+      /* Recover the symbol's offset within the section.  */
+      ofs = (symval - info->tsec->output_section->vma
+	     - info->tsec->output_offset);
+  
+      /* Look for a GPDISP reloc.  */
+      gpdisp = (elf64_alpha_find_reloc_at_ofs
+		(tsec_relocs, tsec_relend, ofs, R_ALPHA_GPDISP));
+
+      if (!gpdisp || gpdisp->r_addend != 4)
+	{
+	  if (tsec_free)
+	    free (tsec_free);
+	  return 0;
+	}
+      if (tsec_free)
+        free (tsec_free);
+    }
+
+  /* We've now determined that we can skip an initial gp load.  Verify 
+     that the call and the target use the same gp.   */
+  if (info->link_info->hash->creator != info->tsec->owner->xvec
+      || info->gotobj != alpha_elf_tdata (info->tsec->owner)->gotobj)
+    return 0;
+
+  return symval + 8;
 }
 
 static boolean
@@ -1417,6 +1464,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
     {
       bfd_vma symval;
       unsigned int insn;
+      Elf_Internal_Sym isym;
 
       if (ELF64_R_TYPE (irel->r_info) != (int) R_ALPHA_LITERAL)
 	continue;
@@ -1461,29 +1509,26 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
       /* Get the value of the symbol referred to by the reloc.  */
       if (ELF64_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
-	  Elf_Internal_Sym isym;
-	  asection *lsec;
 
 	  /* A local symbol.  */
 	  bfd_elf64_swap_symbol_in (abfd,
 				    extsyms + ELF64_R_SYM (irel->r_info),
 				    &isym);
 	  if (isym.st_shndx == SHN_UNDEF)
-	    lsec = bfd_und_section_ptr;
+	    info.tsec = bfd_und_section_ptr;
 	  else if (isym.st_shndx > 0 && isym.st_shndx < SHN_LORESERVE)
-	    lsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
+	    info.tsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 	  else if (isym.st_shndx == SHN_ABS)
-	    lsec = bfd_abs_section_ptr;
+	    info.tsec = bfd_abs_section_ptr;
 	  else if (isym.st_shndx == SHN_COMMON)
-	    lsec = bfd_com_section_ptr;
+	    info.tsec = bfd_com_section_ptr;
 	  else 
 	    continue;	/* who knows. */
 
 	  info.h = NULL;
 	  info.gotent = local_got_entries[ELF64_R_SYM(irel->r_info)];
-	  symval = (isym.st_value
-		    + lsec->output_section->vma
-		    + lsec->output_offset);
+	  info.elfsym = &isym;
+	  symval = isym.st_value;
 	}
       else
 	{
@@ -1509,10 +1554,11 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 
 	  info.h = h;
 	  info.gotent = gotent;
-	  symval = (h->root.root.u.def.value
-		    + h->root.root.u.def.section->output_section->vma
-		    + h->root.root.u.def.section->output_offset);
+	  info.tsec = h->root.root.u.def.section;
+	  info.elfsym = &((elf_symbol_type *) h)->internal_elf_sym;
+	  symval = h->root.root.u.def.value;
 	}
+      symval += info.tsec->output_section->vma + info.tsec->output_offset;
       symval += irel->r_addend;
 
       BFD_ASSERT(info.gotent != NULL);
@@ -1749,15 +1795,9 @@ elf64_alpha_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	{
 	  scomm = bfd_make_section (abfd, ".scommon");
 	  if (scomm == NULL
-	      || !bfd_set_section_flags (abfd, scomm, (SEC_ALLOC | SEC_LOAD
+	      || !bfd_set_section_flags (abfd, scomm, (SEC_ALLOC
 						       | SEC_IS_COMMON
 						       | SEC_LINKER_CREATED)))
-	    return false;
-	}
-
-      if (bfd_get_section_alignment (abfd, scomm) < sym->st_value)
-	{
-	  if (!bfd_set_section_alignment (abfd, scomm, sym->st_value))
 	    return false;
 	}
 
@@ -2833,6 +2873,7 @@ elf64_alpha_merge_gots (a, b)
 	      if (ae->gotobj == a && ae->addend == be->addend)
 		{
 		  ae->flags |= be->flags;
+		  ae->use_count += be->use_count;
 		  *pbe = be->next;
 		  goto global_found;
 		}
