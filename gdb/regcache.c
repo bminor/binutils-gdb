@@ -661,6 +661,31 @@ regcache_raw_read (struct regcache *regcache, int regnum, void *buf)
 }
 
 void
+regcache_raw_read_signed (struct regcache *regcache, int regnum, LONGEST *val)
+{
+  char *buf;
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  regcache_raw_read (regcache, regnum, buf);
+  (*val) = extract_signed_integer (buf,
+				   regcache->descr->sizeof_register[regnum]);
+}
+
+void
+regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
+			    ULONGEST *val)
+{
+  char *buf;
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  regcache_raw_read (regcache, regnum, buf);
+  (*val) = extract_unsigned_integer (buf,
+				     regcache->descr->sizeof_register[regnum]);
+}
+
+void
 read_register_gen (int regnum, char *buf)
 {
   gdb_assert (current_regcache != NULL);

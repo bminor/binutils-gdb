@@ -56,6 +56,23 @@ static char *i386_register_names[] =
   "mxcsr"
 };
 
+/* MMX registers.  */
+
+static char *i386_mmx_names[] =
+{
+  "mm0", "mm1", "mm2", "mm3",
+  "mm4", "mm5", "mm6", "mm7"
+};
+static const int mmx_num_regs = (sizeof (i386_mmx_names)
+				 / sizeof (i386_mmx_names[0]));
+#define MM0_REGNUM (NUM_REGS)
+
+static int
+mmx_regnum_p (int reg)
+{
+  return (reg >= MM0_REGNUM && reg < MM0_REGNUM + mmx_num_regs);
+}
+
 /* Return the name of register REG.  */
 
 const char *
@@ -63,6 +80,8 @@ i386_register_name (int reg)
 {
   if (reg < 0)
     return NULL;
+  if (mmx_regnum_p (reg))
+    return i386_mmx_names[reg - MM0_REGNUM];
   if (reg >= sizeof (i386_register_names) / sizeof (*i386_register_names))
     return NULL;
 
@@ -1090,7 +1109,62 @@ i386_register_virtual_type (int regnum)
   if (IS_SSE_REGNUM (regnum))
     return builtin_type_vec128i;
 
+  if (mmx_regnum_p (regnum))
+    return builtin_type_vec64i;
+
   return builtin_type_int;
+}
+
+/* Map a cooked register onto a raw register or memory.  For the i386,
+   the MMX registers need to be mapped onto floating point registers.  */
+
+static int
+mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
+{
+  int mmxi;
+  ULONGEST fstat;
+  int tos;
+  int fpi;
+  mmxi = regnum - MM0_REGNUM;
+  regcache_raw_read_unsigned (regcache, FSTAT_REGNUM, &fstat);
+  tos = (fstat >> 11) & 0x7;
+  fpi = (mmxi + tos) % 8;
+  return (FP0_REGNUM + fpi);
+}
+
+static void
+i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+			   int regnum, void *buf)
+{
+  if (mmx_regnum_p (regnum))
+    {
+      char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
+      int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
+      regcache_raw_read (regcache, fpnum, mmx_buf);
+      /* Extract (always little endian).  */
+      memcpy (buf, mmx_buf, REGISTER_RAW_SIZE (regnum));
+    }
+  else
+    regcache_raw_read (regcache, regnum, buf);
+}
+
+static void
+i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
+			    int regnum, const void *buf)
+{
+  if (mmx_regnum_p (regnum))
+    {
+      char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
+      int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
+      /* Read ...  */
+      regcache_raw_read (regcache, fpnum, mmx_buf);
+      /* ... Modify ... (always little endian).  */
+      memcpy (mmx_buf, buf, REGISTER_RAW_SIZE (regnum));
+      /* ... Write.  */
+      regcache_raw_write (regcache, fpnum, mmx_buf);
+    }
+  else
+    regcache_raw_write (regcache, regnum, buf);
 }
 
 /* Return true iff register REGNUM's virtual format is different from
@@ -1485,6 +1559,11 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
+
+  /* Wire in the MMX registers.  */
+  set_gdbarch_num_pseudo_regs (gdbarch, mmx_num_regs);
+  set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);

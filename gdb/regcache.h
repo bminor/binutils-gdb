@@ -38,6 +38,10 @@ struct regcache *regcache_xmalloc (struct gdbarch *gdbarch);
 void regcache_raw_read (struct regcache *regcache, int rawnum, void *buf);
 void regcache_raw_write (struct regcache *regcache, int rawnum,
 			 const void *buf);
+extern void regcache_raw_read_signed (struct regcache *regcache,
+				      int regnum, LONGEST *val);
+extern void regcache_raw_read_unsigned (struct regcache *regcache,
+					int regnum, ULONGEST *val);
 int regcache_valid_p (struct regcache *regcache, int regnum);
 
 /* Transfer a cooked register [0..NUM_REGS+NUM_PSEUDO_REGS).  */

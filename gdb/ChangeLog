@@ -1,5 +1,20 @@
 2002-08-13  Andrew Cagney  <cagney@redhat.com>
 
+	* i386-tdep.c (i386_register_name): Handle mmx registers.
+	(mmx_regnum_p): New function.
+	(i386_mmx_names): New array.
+	(mmx_num_regs): New variable.
+	(i386_pseudo_register_read): New function.
+	(i386_pseudo_register_write): New function.
+	(mmx_regnum_to_fp_regnum): New function. Code from Fernando Nasser.
+
+	* regcache.c (regcache_raw_read_unsigned): New function.
+	(regcache_raw_read_signed): New function.
+	* regcache.h (regcache_raw_read_unsigned): Declare.
+	(regcache_raw_read_signed): Declare.
+
+2002-08-13  Andrew Cagney  <cagney@redhat.com>
+
 	* regcache.c (regcache_raw_read_as_address): Delete function.
 	(regcache_cooked_read_signed): New function.
 	(regcache_cooked_read_unsigned): New function.
