@@ -120,6 +120,12 @@ static int soft_min_addr;
 static int soft_max_addr;
 static int soft_reg_initialized = 0;
 
+/* Stack pointer correction value.  For 68hc11, the stack pointer points
+   to the next push location.  An offset of 1 must be applied to obtain
+   the address where the last value is saved.  For 68hc12, the stack
+   pointer points to the last value pushed.  No offset is necessary.  */
+static int stack_correction = 1;
+
 /* Look in the symbol table for the address of a pseudo register
    in memory.  If we don't find it, pretend the register is not used
    and not available.  */
@@ -275,7 +281,7 @@ m68hc11_saved_pc_after_call (struct frame_info *frame)
 {
   CORE_ADDR addr;
   
-  addr = read_register (HARD_SP_REGNUM) + 1;
+  addr = read_register (HARD_SP_REGNUM) + stack_correction;
   addr &= 0x0ffff;
   return read_memory_integer (addr, 2) & 0x0FFFF;
 }
@@ -618,7 +624,7 @@ m68hc11_frame_chain (struct frame_info *frame)
       return (CORE_ADDR) 0;
     }
 
-  addr = frame->frame + frame->extra_info->size + 1 - 2;
+  addr = frame->frame + frame->extra_info->size + stack_correction - 2;
   addr = read_memory_unsigned_integer (addr, 2) & 0x0FFFF;
   if (addr == 0)
     {
@@ -637,7 +643,8 @@ static void
 m68hc11_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR pc;
-
+  CORE_ADDR addr;
+  
   if (fi->saved_regs == NULL)
     frame_saved_regs_zalloc (fi);
   else
@@ -647,8 +654,9 @@ m68hc11_frame_init_saved_regs (struct frame_info *fi)
   m68hc11_guess_from_prologue (pc, fi->frame, &pc, &fi->extra_info->size,
                                fi->saved_regs);
 
-  fi->saved_regs[SOFT_FP_REGNUM] = fi->frame + fi->extra_info->size + 1 - 2;
-  fi->saved_regs[HARD_SP_REGNUM] = fi->frame + fi->extra_info->size + 1;
+  addr = fi->frame + fi->extra_info->size + stack_correction;
+  fi->saved_regs[SOFT_FP_REGNUM] = addr - 2;
+  fi->saved_regs[HARD_SP_REGNUM] = addr;
   fi->saved_regs[HARD_PC_REGNUM] = fi->saved_regs[HARD_SP_REGNUM];
 }
 
@@ -671,7 +679,7 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     }
   else
     {
-      addr = fi->frame + fi->extra_info->size + 1;
+      addr = fi->frame + fi->extra_info->size + stack_correction;
       addr = read_memory_unsigned_integer (addr, 2) & 0x0ffff;
       fi->extra_info->return_pc = addr;
 #if 0
@@ -750,7 +758,10 @@ m68hc11_push_arguments (int nargs,
   first_stack_argnum = 0;
   if (struct_return)
     {
-      write_register (HARD_D_REGNUM, struct_addr);
+      /* The struct is allocated on the stack and gdb used the stack
+         pointer for the address of that struct.  We must apply the
+         stack offset on the address.  */
+      write_register (HARD_D_REGNUM, struct_addr + stack_correction);
     }
   else if (nargs > 0)
     {
@@ -777,7 +788,7 @@ m68hc11_push_arguments (int nargs,
     }
   sp -= stack_alloc;
 
-  stack_offset = 1;
+  stack_offset = stack_correction;
   for (argnum = first_stack_argnum; argnum < nargs; argnum++)
     {
       type = VALUE_TYPE (args[argnum]);
@@ -808,7 +819,10 @@ m68hc11_register_virtual_type (int reg_nr)
 static void
 m68hc11_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
-  write_register (HARD_D_REGNUM, addr);
+  /* The struct address computed by gdb is on the stack.
+     It uses the stack pointer so we must apply the stack
+     correction offset.  */
+  write_register (HARD_D_REGNUM, addr + stack_correction);
 }
 
 static void
@@ -878,10 +892,7 @@ m68hc11_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
   pc = read_register (HARD_PC_REGNUM);
   sp -= 2;
   store_unsigned_integer (valbuf, 2, pc);
-  write_memory (sp + 1, valbuf, 2);
-#if 0
-  write_register (HARD_PC_REGNUM, CALL_DUMMY_ADDRESS ());
-#endif
+  write_memory (sp + stack_correction, valbuf, 2);
   return sp;
 }
 

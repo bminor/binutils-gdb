@@ -1,3 +1,16 @@
+2000-08-29  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* m68hc11-tdep.c (stack_correction): New variable for stack offset
+	correction (1 for 68hc11, 0 for 68hc12).
+	(m68hc11_saved_pc_after_call): Use it.
+	(m68hc11_frame_chain): Likewise.
+	(m68hc11_frame_init_saved_regs): Likewise.
+	(m68hc11_init_extra_frame_info): Likewise.
+	(m68hc11_push_return_address): Likewise.
+	(m68hc11_push_arguments): Struct address must be corrected by
+	applying the stack_correction offset.
+	(m68hc11_store_struct_return): Likewise.
+
 2000-08-28  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdbserver/utils.c (error, fatal): Protoize.
