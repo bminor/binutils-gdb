@@ -62,9 +62,9 @@ static unsigned long check_operand PARAMS ((unsigned long,
 					    const struct mn10300_operand *,
 					    offsetT));
 static int reg_name_search PARAMS ((const struct reg_name *, int, const char *));
-static boolean register_name PARAMS ((expressionS *expressionP));
-static boolean system_register_name PARAMS ((expressionS *expressionP));
-static boolean cc_name PARAMS ((expressionS *expressionP));
+static boolean data_register_name PARAMS ((expressionS *expressionP));
+static boolean address_register_name PARAMS ((expressionS *expressionP));
+static boolean other_register_name PARAMS ((expressionS *expressionP));
 
 
 /* fixups */
@@ -96,27 +96,27 @@ static struct hash_control *mn10300_hash;
 /* This table is sorted. Suitable for searching by a binary search. */
 static const struct reg_name data_registers[] =
 {
-  { "%d0", 0 },
-  { "%d1", 1 },
-  { "%d2", 2 },
-  { "%d3", 3 },
+  { "d0", 0 },
+  { "d1", 1 },
+  { "d2", 2 },
+  { "d3", 3 },
 };
 #define DATA_REG_NAME_CNT	(sizeof(data_registers) / sizeof(struct reg_name))
 
 static const struct reg_name address_registers[] =
 {
-  { "%a0", 0 },
-  { "%a1", 1 },
-  { "%a2", 2 },
-  { "%a3", 3 },
+  { "a0", 0 },
+  { "a1", 1 },
+  { "a2", 2 },
+  { "a3", 3 },
 };
 #define ADDRESS_REG_NAME_CNT	(sizeof(address_registers) / sizeof(struct reg_name))
 
 static const struct reg_name other_registers[] =
 {
-  { "%mdr", 0 },
-  { "%psw", 0 },
-  { "%sp", 0 },
+  { "mdr", 0 },
+  { "psw", 0 },
+  { "sp", 0 },
 };
 #define OTHER_REG_NAME_CNT	(sizeof(other_registers) / sizeof(struct reg_name))
 
@@ -413,11 +413,10 @@ md_assemble (str)
   struct mn10300_opcode *next_opcode;
   const unsigned char *opindex_ptr;
   int next_opindex;
-  unsigned long insn, extension, size;
+  unsigned long insn, extension, size = 0;
   char *f;
   int i;
   int match;
-  bfd_reloc_code_real_type reloc;
 
   /* Get the opcode.  */
   for (s = str; *s != '\0' && ! isspace (*s); s++)
@@ -584,27 +583,27 @@ md_assemble (str)
 		  start = input_line_pointer;
 		  c = get_symbol_end ();
 
-		  if (strcmp (start, "%d2") == 0)
+		  if (strcmp (start, "d2") == 0)
 		    {
 		      value |= 0x80;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "%d3") == 0)
+		  else if (strcmp (start, "d3") == 0)
 		    {
 		      value |= 0x40;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "%a2") == 0)
+		  else if (strcmp (start, "a2") == 0)
 		    {
 		      value |= 0x20;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "%a3") == 0)
+		  else if (strcmp (start, "a3") == 0)
 		    {
 		      value |= 0x10;
 		      *input_line_pointer = c;
 		    }
-		  else if (strcmp (start, "%other") == 0)
+		  else if (strcmp (start, "other") == 0)
 		    {
 		      value |= 0x08;
 		      *input_line_pointer = c;
@@ -660,8 +659,8 @@ md_assemble (str)
 	      errmsg = "missing operand";
 	      goto error;
 	    case O_register:
-	      if (operand->flags & (MN10300_OPERAND_DREG 
-				    | MN10300_OPERAND_AREG) == 0)
+	      if ((operand->flags
+                   & (MN10300_OPERAND_DREG | MN10300_OPERAND_AREG)) == 0)
 		{
 		  input_line_pointer = hold;
 		  str = hold;
@@ -819,6 +818,7 @@ keep_going:
 	{
 	  int reloc, pcrel, reloc_size, offset;
 
+	  reloc = BFD_RELOC_NONE;
 	  /* How big is the reloc?  Remember SPLIT relocs are
 	     implicitly 32bits.  */
 	  if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
@@ -912,7 +912,7 @@ tc_gen_reloc (seg, fixp)
                     "reloc %d not supported by object file format", (int)fixp->fx_r_type);
       return NULL;
     }
-  reloc->addend = fixp->fx_addnumber;
+  reloc->addend = fixp->fx_offset;
   /*  printf("tc_gen_reloc: addr=%x  addend=%x\n", reloc->address, reloc->addend); */
   return reloc;
 }
@@ -1002,7 +1002,7 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
 
   if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
     {
-      *insnp |= (val >> 32 - operand->bits) & ((1 << operand->bits) - 1);
+      *insnp |= (val >> (32 - operand->bits)) & ((1 << operand->bits) - 1);
       *extensionp |= ((val & ((1 << (32 - operand->bits)) - 1))
 		      << operand->shift);
     }
