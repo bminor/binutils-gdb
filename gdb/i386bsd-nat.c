@@ -400,11 +400,16 @@ _initialize_i386bsd_nat (void)
   extern int i386fbsd4_sc_sp_offset;
 #define SC_PC_OFFSET i386fbsd4_sc_pc_offset
 #define SC_SP_OFFSET i386fbsd4_sc_sp_offset
-#elif defined (NetBSD) || defined (__NetBSD_Version__) || defined (OpenBSD)
+#elif defined (NetBSD) || defined (__NetBSD_Version__)
   extern int i386nbsd_sc_pc_offset;
   extern int i386nbsd_sc_sp_offset;
 #define SC_PC_OFFSET i386nbsd_sc_pc_offset
 #define SC_SP_OFFSET i386nbsd_sc_sp_offset
+#elif defined (OpenBSD)
+  extern int i386obsd_sc_pc_offset;
+  extern int i386obsd_sc_sp_offset;
+#define SC_PC_OFFSET i386obsd_sc_pc_offset
+#define SC_SP_OFFSET i386obsd_sc_sp_offset
 #else
   extern int i386bsd_sc_pc_offset;
   extern int i386bsd_sc_sp_offset;
