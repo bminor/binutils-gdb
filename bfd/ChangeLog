@@ -1,3 +1,30 @@
+Thu Oct 23 00:25:29 1997  Richard Henderson  <rth@dot.cygnus.com>
+
+	* config.bfd (sparc64-*-linux*): New target.
+	
+	* elf-bfd.h (struct elf_backend_data): Add plt_alignment member.
+	* elflink.c (_bfd_elf_create_got_section): Set .got alignment based
+	on arch_size.
+	(_bfd_elf_create_dynamic_sections): Likewise for .rel* sections.
+	Set .plt alignment from new plt_alignment.
+	* elflink.h (elf_link_create_dynamic_sections): Set version section
+	alignment to LOG_FILE_ALIGN.
+	* elfxx-target.h (elf_backend_plt_alignment): Provide default.
+	(elfXX_bed): Init plt_alignment.
+	
+	* elf64-sparc.c (sparc64_elf_check_relocs,
+	sparc64_elf_adjust_dynamic_symbol, sparc64_elf_size_dynamic_sections,
+	sparc64_elf_adjust_dynindx, sparc64_elf_finish_dynamic_symbol,
+	sparc64_elf_finish_dynamic_sections): New functions.
+	(sparc64_elf_howto_table): Fix a few name strings.
+	(ELF_DYNAMIC_INTERPRETER): New definition.
+	(sparc64_elf_relocate_section): Handle shared libraries.
+	
+	* elf64-sparc.c (struct plt_template, plt_*_header, plt_*_entry,
+	sparc64_elf_build_plt_entry, sparc64_elf_finish_dynamic_symbol):
+	PLT definitions sparc64-linux originally choose.  These will go 
+	away soon in favour of the official abi definitions.
+	
 Wed Oct 22 16:08:45 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sh.c (coff_small_object_p): New static function.

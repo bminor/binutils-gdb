@@ -1844,7 +1844,7 @@ elf_link_create_dynamic_sections (abfd, info)
   s = bfd_make_section (abfd, ".gnu.version_d");
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
-      || ! bfd_set_section_alignment (abfd, s, 2))
+      || ! bfd_set_section_alignment (abfd, s, LOG_FILE_ALIGN))
     return false;
 
   s = bfd_make_section (abfd, ".gnu.version");
@@ -1856,7 +1856,7 @@ elf_link_create_dynamic_sections (abfd, info)
   s = bfd_make_section (abfd, ".gnu.version_r");
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
-      || ! bfd_set_section_alignment (abfd, s, 2))
+      || ! bfd_set_section_alignment (abfd, s, LOG_FILE_ALIGN))
     return false;
 
   s = bfd_make_section (abfd, ".dynsym");
