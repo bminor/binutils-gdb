@@ -1,3 +1,7 @@
+Wed Apr 14 17:31:00 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* gdbint.texinfo: Minor xcoff stuff.
+
 Wed Apr  7 14:11:07 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdbint.texinfo:  Update for new config directory structure.
