@@ -1,3 +1,8 @@
+2002-09-12  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.h: Run through gdb_indent.h.
+	Add 2002 to Copyright year list.
+
 2002-09-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* x86-64-tdep.c (_initialize_x86_64_tdep): Don't use hard-coded
