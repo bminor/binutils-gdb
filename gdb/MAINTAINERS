@@ -100,7 +100,7 @@ maintainer works with the native maintainer when resolving API issues.
 	m68hc11		--target=m68hc11-elf ,-Werror
 			Stephane Carrez		Stephane.Carrez@worldnet.fr
 
-	m68k		--target=m68k-aout,m68k-coff,m68k-elf ,-Werror
+	m68k		--target=m68k-elf ,-Werror
 			Maintenance only
 
 	m88k		--target=m88k ,-Werror

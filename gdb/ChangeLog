@@ -1,3 +1,7 @@
+2001-12-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Prune m68k targets down to just m68k-elf.
+
 2001-12-03  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (s390_get_frame_info): Don't used fextra_info to set
