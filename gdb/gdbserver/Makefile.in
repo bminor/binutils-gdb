@@ -251,12 +251,12 @@ utils.o: utils.c $(server_h)
 regcache.o: regcache.c $(server_h) $(regdef_h)
 
 linux-low.o: linux-low.c $(server_h)
-linux-low-arm.o: linux-low-arm.c $(server_h)
-linux-low-i386.o: linux-low-i386.c $(server_h)
-linux-low-ia64.o: linux-low-ia64.c $(server_h)
-linux-low-mips.o: linux-low-mips.c $(server_h)
-linux-low-ppc.o: linux-low-ppc.c $(server_h)
-linux-low-sh.o: linux-low-sh.c $(server_h)
+linux-arm-low.o: linux-arm-low.c $(server_h)
+linux-i386-low.o: linux-i386-low.c $(server_h)
+linux-ia64-low.o: linux-ia64-low.c $(server_h)
+linux-mips-low.o: linux-mips-low.c $(server_h)
+linux-ppc-low.o: linux-ppc-low.c $(server_h)
+linux-sh-low.o: linux-sh-low.c $(server_h)
 
 # OBSOLETE TARGETS
 # OBSOLETE # low-lynx.o : ${srcdir}/low-lynx.c ${srcdir}/server.h

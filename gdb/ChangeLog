@@ -1,5 +1,9 @@
 2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/Makefile.in: Fix typos in target rules.
+
+2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
+
 	Fix part of PR gdb/267.  
 	* linespec.c (find_methods): Handle constructors specially for now.
 
