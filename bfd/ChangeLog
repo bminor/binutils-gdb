@@ -1,3 +1,9 @@
+2004-10-11  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 437
+	* elflink.c (elf_link_sort_relocs): Don't bomb on unusual sections.
+	(_bfd_elf_link_omit_section_dynsym): Formatting.
+
 2004-10-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* libbfd-in.h (BFD_ASSERT, BFD_FAIL): Wrap macro body in do while.

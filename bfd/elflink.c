@@ -629,8 +629,7 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  bfd *dynobj = elf_hash_table (info)->dynobj;
 
 	  if (dynobj != NULL
-	      && (ip = bfd_get_section_by_name (dynobj, p->name))
-	      != NULL
+	      && (ip = bfd_get_section_by_name (dynobj, p->name)) != NULL
 	      && (ip->flags & SEC_LINKER_CREATED)
 	      && ip->output_section == p)
 	    return TRUE;
@@ -5712,6 +5711,14 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	bfd_byte *erel, *erelend;
 	asection *o = lo->u.indirect.section;
 
+	if (o->contents == NULL && o->size != 0)
+	  {
+	    /* This is a reloc section that is being handled as a normal
+	       section.  See bfd_section_from_shdr.  We can't combine
+	       relocs in this case.  */
+	    free (sort);
+	    return 0;
+	  }
 	erel = o->contents;
 	erelend = o->contents + o->size;
 	p = sort + o->output_offset / ext_size * sort_elt;
