@@ -1258,6 +1258,8 @@ md_assemble (str)
 		/* start-sanitize-am33 */
 		else if (opcode->format == FMT_D7)
 		  extra_shift = 8;
+		else if (opcode->format == FMT_D8 || opcode->format == FMT_D9)
+		  extra_shift = 8;
 		/* end-sanitize-am33 */
 		else
 		  extra_shift = 0;
@@ -1358,8 +1360,14 @@ keep_going:
   if (opcode->format == FMT_D6)
     size = 3;
 
-  if (opcode->format == FMT_D7)
+  if (opcode->format == FMT_D7 || opcode->format == FMT_D10)
     size = 4;
+
+  if (opcode->format == FMT_D8)
+    size = 6;
+
+  if (opcode->format == FMT_D9)
+    size = 7;
   /* end-sanitize-am33 */
 
   if (opcode->format == FMT_S4)
@@ -1448,6 +1456,7 @@ keep_going:
 	  /* start-sanitize-am33 */
 	  || opcode->format == FMT_D6
 	  || opcode->format == FMT_D7
+	  || opcode->format == FMT_D10
 	  /* end-sanitize-am33 */
 	  || opcode->format == FMT_D1)
 	{
@@ -1523,6 +1532,21 @@ keep_going:
 	  number_to_chars_littleendian (f + 2, temp, 4);
 	  number_to_chars_bigendian (f + 6, extension & 0xff, 1);
 	}
+      /* start-sanitize-am33 */
+      else if (opcode->format == FMT_D8)
+	{
+          unsigned long temp = ((insn & 0xff) << 16) | (extension & 0xffff);
+          number_to_chars_bigendian (f, (insn >> 8) & 0xffffff, 3);
+          number_to_chars_bigendian (f + 3, (temp & 0xff), 1);
+          number_to_chars_littleendian (f + 4, temp >> 8, 2);
+	}
+      else if (opcode->format == FMT_D9)
+	{
+          unsigned long temp = ((insn & 0xff) << 24) | (extension & 0xffffff);
+          number_to_chars_bigendian (f, (insn >> 8) & 0xffffff, 3);
+          number_to_chars_littleendian (f + 3, temp, 4);
+	}
+      /* end-sanitize-am33 */
 
       /* Create any fixups.  */
       for (i = 0; i < fc; i++)
@@ -1563,6 +1587,10 @@ keep_going:
 		 implicitly 32bits.  */
 	      if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
 		reloc_size = 32;
+	      /* start-sanitize-am33 */
+	      if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
+		reloc_size = 24;
+	      /* end-sanitize-am33 */
 	      else
 		reloc_size = operand->bits;
 
@@ -1767,15 +1795,22 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
     {
       long min, max;
       offsetT test;
+      int bits;
+
+      bits = operand->bits;
+      /* start-sanitize-am33 */
+      if (operand->flags & MN10300_OPERAND_24BIT)
+	bits = 24;
+      /* end-sanitize-am33 */
 
       if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
 	{
-	  max = (1 << (operand->bits - 1)) - 1;
-	  min = - (1 << (operand->bits - 1));
+	  max = (1 << (bits - 1)) - 1;
+	  min = - (1 << (bits - 1));
 	}
       else
         {
-          max = (1 << operand->bits) - 1;
+          max = (1 << bits) - 1;
           min = 0;
         }
 
@@ -1802,6 +1837,14 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
       *extensionp |= ((val & ((1 << (32 - operand->bits)) - 1))
 		      << operand->shift);
     }
+  /* start-sanitize-am33 */
+  else if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
+    {
+      *insnp |= (val >> (24 - operand->bits)) & ((1 << operand->bits) - 1);
+      *extensionp |= ((val & ((1 << (24 - operand->bits)) - 1))
+		      << operand->shift);
+    }
+  /* end-sanitize-am33 */
   else if ((operand->flags & MN10300_OPERAND_EXTENDED) == 0)
     {
       *insnp |= (((long) val & ((1 << operand->bits) - 1))
@@ -1835,15 +1878,22 @@ check_operand (insn, operand, val)
     {
       long min, max;
       offsetT test;
+      int bits;
+
+      bits = operand->bits;
+      /* start-sanitize-am33 */
+      if (operand->flags & MN10300_OPERAND_24BIT)
+	bits = 24;
+      /* end-sanitize-am33 */
 
       if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
 	{
-	  max = (1 << (operand->bits - 1)) - 1;
-	  min = - (1 << (operand->bits - 1));
+	  max = (1 << (bits - 1)) - 1;
+	  min = - (1 << (bits - 1));
 	}
       else
         {
-          max = (1 << operand->bits) - 1;
+          max = (1 << bits) - 1;
           min = 0;
         }
 
