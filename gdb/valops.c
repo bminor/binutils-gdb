@@ -2068,7 +2068,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
       {
 	char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-	if (t_field_name && STREQ (t_field_name, name))
+	if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	  {
 	    value_ptr v;
 	    if (TYPE_FIELD_STATIC (type, i))
@@ -2083,7 +2083,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 	if (t_field_name
 	    && (t_field_name[0] == '\0'
 		|| (TYPE_CODE (type) == TYPE_CODE_UNION
-		    && STREQ (t_field_name, "else"))))
+		    && (strcmp_iw (t_field_name, "else") == 0))))
 	  {
 	    struct type *field_type = TYPE_FIELD_TYPE (type, i);
 	    if (TYPE_CODE (field_type) == TYPE_CODE_UNION
@@ -2128,7 +2128,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
          is not yet filled in.  */
       int found_baseclass = (looking_for_baseclass
 			     && TYPE_BASECLASS_NAME (type, i) != NULL
-			     && STREQ (name, TYPE_BASECLASS_NAME (type, i)));
+			     && (strcmp_iw (name, TYPE_BASECLASS_NAME (type, i)) == 0));
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -2314,7 +2314,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 	  else if (cplus_demangle_opname (t_field_name, dem_opname, 0))
 	    t_field_name = dem_opname;
 	}
-      if (t_field_name && STREQ (t_field_name, name))
+      if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (type, i) - 1;
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
@@ -2570,7 +2570,7 @@ find_method_list (argp, method, offset, static_memfuncp, type, num_fns, basetype
     {
       /* pai: FIXME What about operators and type conversions? */
       char *fn_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
-      if (fn_field_name && STREQ (fn_field_name, method))
+      if (fn_field_name && (strcmp_iw (fn_field_name, method) == 0))
 	{
 	  *num_fns = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	  *basetype = type;
@@ -2740,6 +2740,9 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
   /* Get the list of overloaded methods or functions */
   if (method)
     {
+      int i;
+      int len;
+      struct type *domain;
       obj_type_name = TYPE_NAME (VALUE_TYPE (obj));
       /* Hack: evaluate_subexp_standard often passes in a pointer
          value rather than the object itself, so try again */
@@ -2756,6 +2759,26 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
 	       name);
+      domain = TYPE_DOMAIN_TYPE (fns_ptr[0].type);
+      len = TYPE_NFN_FIELDS (domain);
+      /* NOTE: dan/2000-03-10: This stuff is for STABS, which won't
+         give us the info we need directly in the types. We have to
+         use the method stub conversion to get it. Be aware that this
+         is by no means perfect, and if you use STABS, please move to
+         DWARF-2, or something like it, because trying to improve
+         overloading using STABS is really a waste of time. */
+      for (i = 0; i < len; i++)
+	{
+	  int j;
+	  struct fn_field *f = TYPE_FN_FIELDLIST1 (domain, i);
+	  int len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
+
+	  for (j = 0; j < len2; j++)
+	    {
+	      if (TYPE_FN_FIELD_STUB (f, j))
+		check_stub_method (domain, i, j);
+	    }
+	}
     }
   else
     {
@@ -2782,15 +2805,30 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
   /* Consider each candidate in turn */
   for (ix = 0; ix < num_fns; ix++)
     {
-      /* Number of parameters for current candidate */
-      nparms = method ? TYPE_NFIELDS (fns_ptr[ix].type)
-	: TYPE_NFIELDS (SYMBOL_TYPE (oload_syms[ix]));
+      if (method)
+	{
+	  /* For static member functions, we won't have a this pointer, but nothing
+	     else seems to handle them right now, so we just pretend ourselves */
+	  nparms=0;
+
+	  if (TYPE_FN_FIELD_ARGS(fns_ptr,ix))
+	    {
+	      while (TYPE_CODE(TYPE_FN_FIELD_ARGS(fns_ptr,ix)[nparms]) != TYPE_CODE_VOID)
+		nparms++;
+	    }
+	}
+      else
+	{
+	  /* If it's not a method, this is the proper place */
+	  nparms=TYPE_NFIELDS(SYMBOL_TYPE(oload_syms[ix]));
+	}
 
       /* Prepare array of parameter types */
       parm_types = (struct type **) xmalloc (nparms * (sizeof (struct type *)));
       for (jj = 0; jj < nparms; jj++)
-	parm_types[jj] = method ? TYPE_FIELD_TYPE (fns_ptr[ix].type, jj)
-	  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), jj);
+	parm_types[jj] = (method
+			  ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj])
+			  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), jj));
 
       /* Compare parameter types to supplied argument types */
       bv = rank_function (parm_types, nparms, arg_types, nargs);
@@ -2826,16 +2864,23 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 	  }
       free (parm_types);
 #ifdef DEBUG_OLOAD
+      /* FIXME: cagney/2000-03-12: Send the output to gdb_stderr.  See
+         comments above about adding a ``set debug'' command. */
       if (method)
 	printf ("Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
       else
 	printf ("Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
-      for (jj = 0; jj <= nargs; jj++)
+      for (jj = 0; jj < nargs; jj++)
 	printf ("...Badness @ %d : %d\n", jj, bv->rank[jj]);
       printf ("Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
 #endif
     }				/* end loop over all candidates */
 
+  /* NOTE: dan/2000-03-10: Seems to be a better idea to just pick one
+     if they have the exact same goodness. This is because there is no
+     way to differentiate based on return type, which we need to in
+     cases like overloads of .begin() <It's both const and non-const> */
+#if 0
   if (oload_ambiguous)
     {
       if (method)
@@ -2847,6 +2892,7 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 	error ("Cannot resolve overloaded function %s to unique instance; disambiguate by specifying function signature",
 	       func_name);
     }
+#endif
 
   /* Check how bad the best match is */
   for (ix = 1; ix <= nargs; ix++)
@@ -2943,7 +2989,7 @@ check_field_in (type, name)
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
       char *t_field_name = TYPE_FIELD_NAME (type, i);
-      if (t_field_name && STREQ (t_field_name, name))
+      if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	return 1;
     }
 
@@ -2960,7 +3006,7 @@ check_field_in (type, name)
 
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
     {
-      if (STREQ (TYPE_FN_FIELDLIST_NAME (type, i), name))
+      if (strcmp_iw (TYPE_FN_FIELDLIST_NAME (type, i), name) == 0)
 	return 1;
     }
 

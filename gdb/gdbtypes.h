@@ -1129,8 +1129,10 @@ count_virtual_fns PARAMS ((struct type *));
 #define POINTER_CONVERSION_BADNESS     2
 /* Badness of conversion of pointer to void pointer */
 #define VOID_PTR_CONVERSION_BADNESS    2
-/* Badness of convering derived to base class */
+/* Badness of converting derived to base class */
 #define BASE_CONVERSION_BADNESS        2
+/* Badness of converting from non-reference to reference */
+#define REFERENCE_CONVERSION_BADNESS   2
 
 /* Non-standard conversions allowed by the debugger */
 /* Converting a pointer to an int is usually OK */

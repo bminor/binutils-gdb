@@ -994,7 +994,7 @@ lookup_struct_elt_type (type, name, noerr)
     {
       char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-      if (t_field_name && STREQ (t_field_name, name))
+      if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
 	  return TYPE_FIELD_TYPE (type, i);
 	}
@@ -2136,8 +2136,8 @@ rank_function (parms, nparms, args, nargs)
   LENGTH_MATCH (bv) = (nargs != nparms) ? LENGTH_MISMATCH_BADNESS : 0;
 
   /* Now rank all the parameters of the candidate function */
-  for (i = 1; i <= min_len; i++)
-    bv->rank[i] = rank_one_type (parms[i - 1], args[i - 1]);
+  for (i = 1; i < min_len; i++)
+    bv->rank[i] = rank_one_type (parms[i], args[i]);
 
   /* If more arguments than parameters, add dummy entries */
   for (i = min_len + 1; i <= nargs; i++)
@@ -2178,8 +2178,21 @@ rank_one_type (parm, arg)
   if (parm == arg)
     return 0;
 
-#if 0
-  /* Debugging only */
+  /* See through references, since we can almost make non-references
+     references. */
+  if (TYPE_CODE (arg) == TYPE_CODE_REF)
+    return (rank_one_type (TYPE_TARGET_TYPE (arg), parm)
+	    + REFERENCE_CONVERSION_BADNESS);
+  if (TYPE_CODE (parm) == TYPE_CODE_REF)
+    return (rank_one_type (arg, TYPE_TARGET_TYPE (parm))
+	    + REFERENCE_CONVERSION_BADNESS);
+
+#ifdef DEBUG_OLOAD
+  /* Debugging only. */
+  /* FIXME/FYI: cagney/2000-03-13: No need to #ifdef this sort of
+     thing.  Instead add a command like ``set debug gdbtypes <int>''.
+     (A predicate to this is the addition of the ``set debug''). Also,
+     send the output to gdb_stderr and don't use printf. */
   printf ("------ Arg is %s [%d], parm is %s [%d]\n",
       TYPE_NAME (arg), TYPE_CODE (arg), TYPE_NAME (parm), TYPE_CODE (parm));
 #endif
@@ -2246,16 +2259,16 @@ rank_one_type (parm, arg)
 		{
 		  if (TYPE_UNSIGNED (arg))
 		    {
-		      if (!strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
+		      if (!strcmp_iw (TYPE_NAME (parm), TYPE_NAME (arg)))
 			return 0;	/* unsigned int -> unsigned int, or unsigned long -> unsigned long */
-		      else if (!strcmp (TYPE_NAME (arg), "int") && !strcmp (TYPE_NAME (parm), "long"))
+		      else if (!strcmp_iw (TYPE_NAME (arg), "int") && !strcmp_iw (TYPE_NAME (parm), "long"))
 			return INTEGER_PROMOTION_BADNESS;	/* unsigned int -> unsigned long */
 		      else
 			return INTEGER_COERCION_BADNESS;	/* unsigned long -> unsigned int */
 		    }
 		  else
 		    {
-		      if (!strcmp (TYPE_NAME (arg), "long") && !strcmp (TYPE_NAME (parm), "int"))
+		      if (!strcmp_iw (TYPE_NAME (arg), "long") && !strcmp_iw (TYPE_NAME (parm), "int"))
 			return INTEGER_COERCION_BADNESS;	/* signed long -> unsigned int */
 		      else
 			return INTEGER_CONVERSION_BADNESS;	/* signed int/long -> unsigned int/long */
@@ -2263,9 +2276,9 @@ rank_one_type (parm, arg)
 		}
 	      else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
 		{
-		  if (!strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
+		  if (!strcmp_iw (TYPE_NAME (parm), TYPE_NAME (arg)))
 		    return 0;
-		  else if (!strcmp (TYPE_NAME (arg), "int") && !strcmp (TYPE_NAME (parm), "long"))
+		  else if (!strcmp_iw (TYPE_NAME (arg), "int") && !strcmp_iw (TYPE_NAME (parm), "long"))
 		    return INTEGER_PROMOTION_BADNESS;
 		  else
 		    return INTEGER_COERCION_BADNESS;

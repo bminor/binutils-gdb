@@ -1,3 +1,31 @@
+Mon Mar 13 18:54:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-03-10 Daniel Berlin <dan@cgsoftware.com> Fix C++
+ 	overloading, add support for seeing through references:
+	* valops.c (find_overload_match): Handle STABS overloading for
+	C++.
+	(find_overload_match): Look in right place for function arguments
+	in the debug info.
+	(find_overload_match): Rather than giving up when we have >1
+	perfect match, just choose one, especially since the
+	recommendation GDB gives ("disambiguate it by specifying function
+	signature"), is basically impossible.
+	(check_field_in): STREQ->strcmp_iw
+	(search_struct_field): STREQ->strcmp_iw
+	(find_method_list): STREQ->strcmp_iw
+	* gdbtypes.c (rank_one_type): Add ability to see through
+	references.
+	(rank_one_type): strcmp->strcmp_iw, because the whitespace could
+	be different.
+	(rank_function): Rank function properly (was doing it wrong
+	before, comparing the wrong parts of the arrays)
+	(rank_one_type): Change #if 0 to #ifdef DEBUG_OLOAD.
+	* gdbtypes.h: Add REFERENCE_CONVERSION_BADNESS for "badness"
+	associated with converting a non-reference to a reference.
+
+	* gdbtypes.c (rank_one_type): Add comment on how to eliminate the
+ 	#ifdef DEBUG_OLOAD.
+	
 2000-03-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* gnu-nat.c: Fix the formatting where indent misinterpreted `&' as
