@@ -1051,7 +1051,7 @@ generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
      the current frame itself: otherwise, we would be getting the
      previous frame's registers which were saved by the current frame.  */
 
-  while ((frame = frame->next) != NULL)
+  while (frame && ((frame = frame->next) != NULL))
     {
       if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
 	{

@@ -1,3 +1,7 @@
+Tue Jan 28 15:54:13 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* blockframe.c: fix a null pointer ref in generic_get_saved_register
+
 Tue Jan 28 15:39:50 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* mn10200-tdep.c (mn10200_frame_chain): get basic backtracing
