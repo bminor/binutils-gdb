@@ -1,3 +1,10 @@
+2002-02-06  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/callfwmall.c, gdb.base/callfwmall.exp: Move these tests
+	from here...
+	* gdb.hp/gdb.base-hp/callfwmall.c, gdb.hp/gdb.base-hp/callfwmall.exp:
+	To here.  Disable this test on non-HP platforms.  Add big comment.
+
 2002-02-04  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/ovlymgr.c  (ovly_copy): Generalize for targets

@@ -19,10 +19,71 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-# SAME tests as in callfuncs.exp but here the inferior program does not
-# call malloc.
-
-
+# These tests are the same as those in callfuncs.exp, except that the
+# test program here does not call malloc.
+#
+# "What in the world does malloc have to do with calling functions in
+# the inferior?"  Well, nothing.  GDB's ability to invoke a function
+# in the inferior program works just fine in programs that have no
+# malloc function available.  It doesn't rely on the inferior's
+# malloc, directly or indirectly.  It just uses the inferior's stack
+# space.
+#
+# "Then what's the point of this test file?"  Well, it just so happens
+# that this file, in addition to testing inferior function calls, also
+# tests GDB's ability to evaluate string literals (like "string 1" and
+# "string 2" in the tests below).  Evaluating *those* sorts of
+# expressions does require malloc.
+#
+# (As an extension to C, GDB also has a syntax for literal arrays of
+# anything, not just characters.  For example, the expression
+# {2,3,4,5} (which appears in the tests below) evaluates to an array
+# of four ints.  So rather than talking just about string literals,
+# we'll use the broader term "array literals".)
+#
+# Now, in this file, we only evaluate array literals when we're about
+# to pass them to a function, but don't be confused --- this is a red
+# herring.  You can evaluate "abcdef" even if you're not about to pass
+# that to a function, and doing so requires malloc even if you're just
+# going to store a pointer to it in a variable, like this:
+#
+#    (gdb) ptype s
+#    type = char *
+#    (gdb) set variable s = "abcdef"
+#
+# According to C's rules for evaluating expressions, arrays are
+# converted into pointers to their first element.  This means that, in
+# order to evaluate an expression like "abcdef", GDB needs to actually
+# find some memory in the inferior we can plop the characters into;
+# then we use that memory's address as the address of our array
+# literal.  GDB finds this memory by calling the inferior's malloc
+# function, if it has one.  So, evaluating an array literal depends on
+# performing an inferior function call, but not vice versa.  (GDB
+# can't just allocate the space on the stack; the pointer may remain
+# live long after the current frame has been popped.)
+#
+# "But, if evaluating array literals requires malloc, what's the point
+# of testing that GDB can do so in a program that doesn't have malloc?
+# It can't work!"  On most systems, that's right, but HP-UX has some
+# sort of dynamic linking magic that ensures that *every* program has
+# malloc.  So on HP-UX, GDB can evaluate array literals even in
+# inferior programs that don't use malloc.  That's why this test is in
+# gdb.hp.
+# 
+# This file has, for some reason, led to well more than its fair share
+# of misunderstandings about the relationship between array literal
+# expressions and inferior function calls.  Folks talk as if you can
+# only evaluate array literals when you're about to pass them to a
+# function.  I think they're assuming that, since GDB is constructing
+# a new frame on the inferior's stack (correct), it's going to use
+# that space for the array literals (incorrect).  Remember that those
+# array literals may need to be live long after the inferior function
+# call returns; GDB can't tell.
+#
+# What makes the confusion worse is that there *is* a relationship
+# between array literals and inferior function calls --- GDB uses
+# inferior function calls to evaluate array literals.  But many people
+# jump to other, incorrect conclusions about this.
 
 if $tracelevel then {
 	strace $tracelevel
@@ -30,6 +91,8 @@ if $tracelevel then {
 
 set prms_id 0
 set bug_id 0
+
+if { [skip_hp_tests] } then { continue }
 
 set testfile "callfwmall"
 set srcfile ${testfile}.c
