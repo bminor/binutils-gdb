@@ -1,3 +1,7 @@
+Fri Apr 24 07:41:19 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* m68k-pinsn.c (print_insn_arg):  Make branch offsets be signed.
+
 Thu Apr 23 18:43:17 1992  Fred Fish  (fnf@cygnus.com)
 
 	* tm-29k.h:  Set DECR_PC_AFTER_BREAK to 0, as 29ks have nice

@@ -315,7 +315,7 @@ print_insn_arg (d, buffer, p, addr, stream)
       if (place == 'b')
 	val = NEXTBYTE (p);
       else if (place == 'B')
-	val = buffer[1];
+	val = ((char *)buffer)[1];
       else if (place == 'w' || place == 'W')
 	val = NEXTWORD (p);
       else if (place == 'l' || place == 'L')
