@@ -1,5 +1,27 @@
 2001-10-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/nm-linux.h (struct objfile): Remove forward declaration.
+	(linuxthreads_new_objfile): Remove prototype.
+	(linuxthreads_pid_to_str): Remove prototype.
+	(PREPARE_TO_PROCEED): Redefine in terms of
+	lin_lwp_prepare_to_proceed.
+	(struct target_waitstatus): Forward declaration.
+	(child_wait): New prototype.
+	(CHILD_WAIT): Define.
+	(lin_lwp_attach_lwp, ATTACH_LWP, lin_thread_get_thread_signals,
+	GET_THREAD_SIGNAL): Moved here from arch-specific files.
+	* config/alpha/nm-linux.h, config/arm/nm-linux.h,
+	config/ia64/nm-linux.h, config/mips/nm-linux.h,
+	config/powerpc/nm-linux.h: Don't include <signal.h>.
+	(lin_lwp_attach_lwp, ATTACH_LWP, lin_thread_get_thread_signals,
+	GET_THREAD_SIGNAL): Remove.
+	* config/i386/nm-linux.h: Likewise.
+	(struct target_waitstatus, child_wait, CHILD_WAIT): Remove.
+	* config/m68k/linux.mh, config/sparc/linux.mh (NATDEPFILES):
+	Remove linux-thread.o.  Add proc-service.o, thread-db.o and
+	lin-lwp.o.
+	(LOADLIBES): New variable.
+
 	* sparc-nat.c (fetch_core_registers): Remove redundant prototype.
 
 	* proc-service.c (BUILD_LWP): Redefine in terms of ptid_build.
