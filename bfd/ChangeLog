@@ -1,11 +1,19 @@
+Wed Mar 25 15:19:38 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutf1.h (sunos_set_arch_mach): Use bfd_mach_m68* rather than
+	plain numbers.
+	(sunos_write_object_contents): Likewise.
+	* aoutx.h (NAME(aout,machine_type)): Likewise.
+	* coffcode.h (coff_set_arch_mach_hook): Likewise.
+
 Wed Mar 25 13:59:24 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* archures.c (bfd_mach_m68*): Add definitions for various m68k
 	variants.
 	(bfd_default_scan): Remove m68k special cases.
 	* bfd-in2.h: Rebuild.
-	* mipsbsd.c (MY(write_object_contents)): Use bfd_mach_m680*
-	instead of plain numbers.
+	* mipsbsd.c (MY(write_object_contents)): Use bfd_mach_m68* rather
+	than plain numbers.
 	* sparclynx.c (NAME(lynx,set_arch_mach)): Likewise.
 	* cpu-m68k.c (arch_info_struct): Likewise.  Add entry for
 	m68k:68000.

@@ -1,5 +1,6 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1405,7 +1406,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
     case LYNXCOFFMAGIC:
 #endif
       arch = bfd_arch_m68k;
-      machine = 68020;
+      machine = bfd_mach_m68020;
       break;
 #endif
 #ifdef MC88MAGIC
@@ -2287,6 +2288,19 @@ coff_compute_section_file_positions (abfd)
        current != (asection *) NULL;
        current = current->next, ++count)
     {
+#ifdef COFF_IMAGE_WITH_PE
+      /* The NT loader does not want empty section headers, so we omit
+         them.  We don't actually remove the section from the BFD,
+         although we probably should.  This matches code in
+         coff_write_object_contents.  */
+      if (current->_raw_size == 0)
+	{
+	  current->target_index = -1;
+	  --count;
+	  continue;
+	}
+#endif
+
       current->target_index = count;
 
       /* Only deal with sections which have contents */
@@ -3447,7 +3461,7 @@ coff_slurp_symbol_table (abfd)
 #endif
 
 	    case C_EXT:
-#ifdef ARM
+#if defined ARM || defined COFF_WITH_PE
             case C_THUMBEXT:
             case C_THUMBEXTFUNC:
 #endif
@@ -3520,7 +3534,7 @@ coff_slurp_symbol_table (abfd)
 #ifdef I960
 	    case C_LEAFSTAT:	/* static leaf procedure        */
 #endif
-#ifdef ARM
+#if defined ARM || defined COFF_WITH_PE
             case C_THUMBSTAT:   /* Thumb static                  */
             case C_THUMBLABEL:  /* Thumb label                   */
             case C_THUMBSTATFUNC:/* Thumb static function        */
@@ -3729,11 +3743,7 @@ coff_slurp_symbol_table (abfd)
 #endif
 
 #ifdef COFFARM
-#ifdef COFF_WITH_PE
-#define OTHER_GLOBAL_CLASS C_SECTION || syment->n_sclass == C_THUMBEXT
-#else
 #define OTHER_GLOBAL_CLASS C_THUMBEXT || syment->n_sclass == C_THUMBEXTFUNC
-#endif
 #else
 #ifdef COFF_WITH_PE
 #define OTHER_GLOBAL_CLASS C_SECTION
