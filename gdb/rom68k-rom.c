@@ -23,11 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 #include "monitor.h"
-
-extern int baud_rate;
+#include "serial.h"
 
 void rom68k_open();
-void monitor_open();
 
 /*
  * this array of registers need to match the indexes used by GDB. The
@@ -35,23 +33,10 @@ void monitor_open();
  * different strings than GDB does, and doesn't support all the
  * registers either. So, typing "info reg sp" becomes a "r30".
  */
-static char *rom68k_regnames[] = {
-  "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "a0", "a1",
-  "a2", "a3", "a4", "a5", "a6", "usp", "ssp","pc",   "",   "",
-  "",   "",   "",   "",   "",   "",   "",   "",   "",   "",
-  "",   "",   "",   "",   "",   "",    "",
-  "",   "",   "",   "",   "",   "",    "",    "",  "",  "",
-  "",   "",   "",   "",   "",   "",    "",    "",  "",  "",
-  "",   "",   "",   "",   "",   "",    "",
-  "",   "",   "",   "",   "",   "",    "",    "",
-  "",   "",   "",   "",   "",   "",    "",    "",
-  "",   "",   "",   "",   "",   "",    "",    "",
-  "",   "",   "",   "",   "",   "",    "",    "",
-  "",   "",   "",   "",   "",   "",    "",    "",
-  "",   "",   "",   "",   "",   "",    "",    "",
-  "",   "",   "",   "",   "",   "",    "",    "",
-  "",   "",   "",   "",   "",   "",    "",    ""
-};
+static char *rom68k_regnames[NUM_REGS] = {
+  "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7",
+  "A0", "A1", "A2", "A3", "A4", "A5", "A6", "ISP",
+  "SR", "PC" };
 
 /*
  * Define the monitor command strings. Since these are passed directly
@@ -59,21 +44,22 @@ static char *rom68k_regnames[] = {
  * strings. We also need a CR or LF on the end.
  */
 
-struct target_ops rom68k_ops = {
+static struct target_ops rom68k_ops =
+{
   "rom68k",
   "Rom68k debug monitor for the IDP Eval board",
   "Debug on a Motorola IDP eval board running the ROM68K monitor.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).",
   rom68k_open,
   monitor_close, 
-  monitor_attach,
+  NULL,
   monitor_detach,
   monitor_resume,
   monitor_wait,
-  monitor_fetch_register,
-  monitor_store_register,
+  monitor_fetch_registers,
+  monitor_store_registers,
   monitor_prepare_to_store,
-  monitor_xfer_inferior_memory,
+  monitor_xfer_memory,
   monitor_files_info,
   monitor_insert_breakpoint,
   monitor_remove_breakpoint,	/* Breakpoints */
@@ -102,56 +88,61 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   OPS_MAGIC			/* Always the last thing */
 };
 
-struct monitor_ops rom68k_cmds = {
-  1,					/* 1 for ASCII, 0 for binary */
-  "\n",					/* monitor init string */
-  "go \n",				/* execute or usually GO command */
-  "go \n",				/* continue command */
-  "st \n",				/* single step */
-  "db %x\n",				/* set a breakpoint */
-  "cb %x\r",				/* clear a breakpoint */
-  0,					/* 0 for number, 1 for address */
+static char *rom68k_loadtypes[] = {"none", "srec", "default", NULL};
+static char *rom68k_loadprotos[] = {"none", NULL};
+
+static struct monitor_ops rom68k_cmds =
+{
+  1,				/* 1 for ASCII, 0 for binary */
+  ".\r\r",			/* monitor init string */
+  "go \r",			/* execute or usually GO command */
+  "go \r",			/* continue command */
+  "st \r",			/* single step */
+  "db %x\r",			/* set a breakpoint */
+  "cb %x\r",			/* clear a breakpoint */
+  0,				/* 0 for number, 1 for address */
   {
-    "pm %x %x\r",			/* set memory */
-    "=",				/* delimiter */
-    "",					/* the result */
+    "pm %x %x\r",		/* setmem.cmd (addr, value) */
+    NULL,			/* setreg.resp_delim */
+    NULL,			/* setreg.term */
+    NULL,			/* setreg.term_cmd */
   },
   {
-    "dm %x 1\r",			/* get memory */
-    "",				        /* delimiter */
-    "",					/* the result */
+    "dm %x 1\r",		/* getmem.cmd (addr) */
+    "  ",			/* getmem.resp_delim */
+    NULL,			/* getmem.term */
+    NULL,			/* getmem.term_cmd */
   },
   {
-    "pr %s %x\r",			/* set a register */
-    "",				        /* delimiter between registers */
-    "",					/* the result */
+    "pr %s %x\r",		/* setreg.cmd (name, value) */
+    NULL,			/* setreg.resp_delim */
+    NULL,			/* setreg.term */
+    NULL			/* setreg.term_cmd */
   },
   {
-    "pr %s\n",				/* get a register */
-    ":",				/* delimiter between registers */
-    "",					/* the result */
+    "pr %s\r",			/* getreg.cmd (name) */
+    ":  ",			/* getreg.resp_delim */
+    "= ",			/* getreg.term */
+    ".\r"			/* getreg.term_cmd */
   },
-  "dc\n",				/* download command */
-  "ROM68K :->",				/* monitor command prompt */
-  "=",					/* end-of-command delimitor */
-  ".\n",				/* optional command terminator */
-  &rom68k_ops,				/* target operations */
-  "none,srec,default",			/* load types */
-  "none",				/* load protocols */
-  "9600",				/* supported baud rates */
-  1,					/* number of stop bits */
-  rom68k_regnames			/* registers names */
-};
+  "dc\r",			/* download command */
+  "ROM68K :->",			/* monitor command prompt */
+  "=",				/* end-of-command delimitor */
+  ".\r",			/* optional command terminator */
+  &rom68k_ops,			/* target operations */
+  rom68k_loadtypes,		/* loadtypes */
+  rom68k_loadprotos,		/* loadprotos */
+  "9600",			/* supported baud rates */
+  SERIAL_1_STOPBITS,		/* number of stop bits */
+  rom68k_regnames		/* registers names */
+  };
 
 void
 rom68k_open(args, from_tty)
      char *args;
      int from_tty;
 {
-  target_preopen(from_tty);
-  push_target  (&rom68k_ops);
-  push_monitor (&rom68k_cmds);
-  monitor_open (args, "rom68k", from_tty);
+  monitor_open (args, &rom68k_cmds, from_tty);
 }
 
 void

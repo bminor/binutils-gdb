@@ -27,7 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern int baud_rate;
 
 void array_open();
-void monitor_open();
 
 /*
  * this array of registers need to match the indexes used by GDB. The
@@ -45,14 +44,15 @@ extern int mips_set_processor_type();
  * strings. We also need a CR or LF on the end.
  */
 
-struct target_ops array_ops = {
+static struct target_ops array_ops =
+{
   "array",
   "Debug using the standard GDB remote protocol for the Array Tech target.",
   "Debug using the standard GDB remote protocol for the Array Tech target.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).",
   array_open,
   monitor_close, 
-  monitor_attach,
+  NULL,
   monitor_detach,
   monitor_resume,
   monitor_wait,
@@ -89,7 +89,11 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   OPS_MAGIC,			/* Always the last thing */
 };
 
-struct monitor_ops array_cmds = {
+static char *array_loadtypes[] = {"none", "srec", "default", NULL};
+static char *array_loadprotos[] = {"none", NULL};
+
+static struct monitor_ops array_cmds =
+{
   0,					/* 1 for ASCII, 0 for binary */
   "$?#b8+\n",				/* monitor init string */
   "go %x\n",				/* execute or usually GO command */
@@ -123,10 +127,10 @@ struct monitor_ops array_cmds = {
   "",					/* end-of-command delimitor */
   "",					/* optional command terminator */
   &array_ops,				/* target operations */
-  "none,srec,default",			/* load types */
-  "none",				/* load protocols */
+  array_loadtypes,		/* loadtypes */
+  array_loadprotos,		/* loadprotos */
   "4800",				/* supported baud rates */
-  2,					/* number of stop bits */
+  SERIAL_2_STOPBITS,		/* number of stop bits */
   array_regnames			/* registers names */
 };
 
@@ -141,12 +145,7 @@ array_open(args, from_tty)
   tmp_mips_processor_type = "lsi33k";	/* change the default from r3051 */
   mips_set_processor_type_command ("lsi33k", 0);
 
-  baud_rate = 4800;			/* this is the only supported baud rate */
-
-  target_preopen(from_tty);
-  push_target  (&array_ops);
-  push_monitor (&array_cmds);
-  monitor_open (args, "array", from_tty);
+  monitor_open (args, &array_cmds, from_tty);
 }
 
 /*
@@ -156,6 +155,7 @@ void
 _initialize_array ()
 {
   add_target (&array_ops);
+  baud_rate = 4800;			/* this is the only supported baud rate */
 }
 
 

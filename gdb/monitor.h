@@ -28,6 +28,41 @@ struct rom_cmd_data {
   char *result;			/* the result */
 };
 
+/* This structure describes the strings necessary to give small command
+   sequences to the monitor, and parse the response.
+
+   CMD is the actual command typed at the monitor.  Usually this has embedded
+   sequences ala printf, which are substituted with the arguments appropriate
+   to that type of command.  Ie: to examine a register, we substitute the
+   register name for the first arg.  To modify memory, we substitute the memory
+   location and the new contents for the first and second args, etc...
+
+   RESP_DELIM used to home in on the response string, and is used to
+   disambiguate the answer within the pile of text returned by the monitor.
+   This should be a unique string that immediately precedes the answer.  Ie: if
+   your monitor prints out `PC:  00000001= ' in response to asking for the PC,
+   you should use `:  ' as the RESP_DELIM.  RESP_DELIM may be NULL if the res-
+   ponse is going to be ignored, or has no particular leading text.
+
+   TERM is the string that the monitor outputs to indicate that it is idle, and
+   waiting for input.  This is usually a prompt of some sort.  In the previous
+   example, it would be `= '.  It is important that TERM really means that the
+   monitor is idle, otherwise GDB may try to type at it when it isn't ready for
+   input.  This is a problem because many monitors cannot deal with type-ahead.
+   TERM may be NULL if the normal prompt is output.
+
+   TERM_CMD is used to quit out of the subcommand mode and get back to the main
+   prompt.  TERM_CMD may be NULL if it isn't necessary.  It will also be
+   ignored if TERM is NULL.
+*/
+
+struct cmd_resp {
+  char *cmd;			/* Command to send */
+  char *resp_delim;		/* String just prior to the desired value */
+  char *term;			/* Terminating string to search for */
+  char *term_cmd;		/* String to get out of sub-mode (if necessary) */
+};
+
 struct monitor_ops {
   int	type;			/* 1 is ascii, 0 is GDB remote protocol */
   char  *init;			/* initialize to the monitor */
@@ -37,17 +72,17 @@ struct monitor_ops {
   char	*set_break;		/* set a breakpoint */
   char	*clr_break;		/* clear a breakpoint */
   int	clr_type;		/* number or address for clearing */
-  struct rom_cmd_data setmem;	/* set memory to a value */
-  struct rom_cmd_data getmem;	/* display memory */
-  struct rom_cmd_data regset;	/* set a register */
-  struct rom_cmd_data regget;	/* read a register */
+  struct cmd_resp setmem;	/* set memory to a value */
+  struct cmd_resp getmem;	/* display memory */
+  struct cmd_resp setreg;	/* set a register */
+  struct cmd_resp getreg;	/* get a register */
   char	*load;			/* load command */
   char	*prompt;		/* monitor command prompt */
   char	*cmd_delim;		/* end-of-command delimitor */
   char	*cmd_end;		/* optional command terminator */
   struct target_ops *target;	/* target operations */
-  char	*loadtypes;		/* the load types that are supported */
-  char	*loadprotos;		/* the load protocols that are supported */
+  char	**loadtypes;		/* the load types that are supported */
+  char	**loadprotos;		/* the load protocols that are supported */
   char	*baudrates;		/* supported baud rates */
   int	stopbits;		/* number of stop bits */
   char  **regnames;		/* array of register names in ascii */
@@ -87,19 +122,15 @@ extern struct monitor_ops        *current_monitor;
 #define SREC_SIZE 160
 #define GDBPROTO		((current_monitor->type) ? 0: 1)
 
-extern void debuglogs();
-extern void monitor_open();
-extern void monitor_close();
-extern void monitor_detach();
-extern void monitor_attach();
-extern void monitor_resume();
-extern int  monitor_wait();
-extern void monitor_fetch_register();
-extern void monitor_store_register();
-extern void monitor_fetch_registers();
-extern void monitor_store_registers();
+extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops, int from_tty));
+extern void monitor_close PARAMS ((int quitting));
+extern void monitor_detach PARAMS ((char *args, int from_tty));
+extern void monitor_resume PARAMS ((int pid, int step, enum target_signal sig));
+extern int  monitor_wait PARAMS ((int pid, struct target_waitstatus *status));
+extern void monitor_fetch_registers PARAMS ((int regno));
+extern void monitor_store_registers PARAMS ((int regno));
 extern void monitor_prepare_to_store();
-extern int  monitor_xfer_inferior_memory();
+extern int  monitor_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len, int write, struct target_ops *target));
 extern void monitor_files_info();
 extern int  monitor_insert_breakpoint();
 extern int  monitor_remove_breakpoint();

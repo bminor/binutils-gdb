@@ -59,14 +59,15 @@ static char *w89k_regnames[] = {
  * strings. We also need a CR or LF on the end.
  */
 
-struct target_ops w89k_ops = {
+static struct target_ops w89k_ops =
+{
   "w89k",
   "WinBond's debug monitor for the W89k Eval board",
   "Debug on a WinBond W89K eval board.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).",
   w89k_open,
   monitor_close, 
-  monitor_attach,
+  NULL,
   monitor_detach,
   monitor_resume,
   monitor_wait,
@@ -102,7 +103,11 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   OPS_MAGIC,			/* Always the last thing */
 };
 
-struct monitor_ops w89k_cmds = {
+static char *loadtypes[] = {"none", "srec", "default", NULL};
+static char *loadprotos[] = {"none", "xmodem", NULL};
+
+static struct monitor_ops w89k_cmds =
+{
   1,					/* 1 for ASCII, 0 for binary */
   "\n",					/* monitor init string */
   "g = %x\n",				/* execute or usually GO command */
@@ -136,10 +141,10 @@ struct monitor_ops w89k_cmds = {
   "",					/* end-of-command delimitor */
   "",					/* optional command terminator */
   &w89k_ops,				/* target operations */
-  "none,srec,default",			/* load types */
-  "none,xmodem",			/* load protocols */
+  w89k_loadtypes,		/* loadtypes */
+  w89k_loadprotos,		/* loadprotos */
   "9600",				/* supported baud rates */
-  1,					/* number of stop bits */
+  SERIAL_1_STOPBITS,		/* number of stop bits */
   w89k_regnames				/* registers names */
 };
 
@@ -148,10 +153,7 @@ w89k_open(args, from_tty)
      char *args;
      int from_tty;
 {
-  target_preopen(from_tty);
-  push_target  (&w89k_ops);
-  push_monitor (&w89k_cmds);
-  monitor_open (args, "w89k", from_tty);
+  monitor_open (args, &w89k_cmds, from_tty);
 }
 
 void

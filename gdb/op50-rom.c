@@ -58,7 +58,8 @@ static char *op50n_regnames[] = {
  * strings. We also need a CR or LF on the end.
  */
 
-struct target_ops op50n_ops = {
+static struct target_ops op50n_ops =
+{
   "op50n",
   "Oki's debug monitor for the Op50n Eval board",
 
@@ -66,7 +67,7 @@ struct target_ops op50n_ops = {
 Specify the serial device it is connected to (e.g. /dev/ttya).",
   op50n_open,
   monitor_close, 
-  monitor_attach,
+  NULL,
   monitor_detach,
   monitor_resume,
   monitor_wait,
@@ -102,7 +103,11 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   OPS_MAGIC,			/* Always the last thing */
 };
 
-struct monitor_ops op50n_cmds = {
+static char *op50n_loadtype[] = {"none", "srec", "default", NULL};
+static char *op50n_loadprotos[] = {"none", NULL};
+
+static struct monitor_ops op50n_cmds =
+{
   1,					/* 1 for ASCII, 0 for binary */
   "\003.\n",				/* monitor init string */
   "g %x\n",				/* execute or usually GO command */
@@ -136,10 +141,10 @@ struct monitor_ops op50n_cmds = {
   " ",					/* end-of-command delimitor */
   ".\n",				/* optional command terminator */
   &op50n_ops,				/* target operations */
-  "none,srec,default",			/* load types */
-  "none",				/* load types */
+  op50n_loadtypes,		/* loadtypes */
+  op50n_loadprotos,		/* loadprotos */
   "2400,4800,9600,19200,exta,38400,extb", /* supported baud rates */
-  1,					/* number of stop bits */
+  SERIAL_1_STOPBITS,		/* number of stop bits */
   op50n_regnames
 };
 
@@ -148,10 +153,7 @@ op50n_open(args, from_tty)
      char *args;
      int from_tty;
 {
-  target_preopen(from_tty);
-  push_target(&op50n_ops);
-  push_monitor (&op50n_cmds);
-  monitor_open (args, "op50n", from_tty);
+  monitor_open (args, &op50n_cmds, from_tty);
 }
 
 void
