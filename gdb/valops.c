@@ -47,7 +47,9 @@ static int typecmp PARAMS ((int staticp, struct type *t1[], value_ptr t2[]));
 
 static CORE_ADDR find_function_addr PARAMS ((value_ptr, struct type **));
 
+#ifndef PUSH_ARGUMENTS
 static CORE_ADDR value_push PARAMS ((CORE_ADDR, value_ptr));
+#endif
 
 static value_ptr search_struct_field PARAMS ((char *, value_ptr, int,
 					      struct type *, int));
@@ -851,6 +853,8 @@ push_bytes (sp, buffer, len)
 
 /* Push onto the stack the specified value VALUE.  */
 
+#ifndef PUSH_ARGUMENTS
+
 static CORE_ADDR
 value_push (sp, arg)
      register CORE_ADDR sp;
@@ -868,6 +872,8 @@ value_push (sp, arg)
 
   return sp;
 }
+
+#endif	/* !PUSH_ARGUMENTS */
 
 /* Perform the standard coercions that are specified
    for arguments to be passed to C functions.

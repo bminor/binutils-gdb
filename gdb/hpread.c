@@ -136,6 +136,9 @@ extern struct complaint lbrac_mismatch_complaint;
 
 void hpread_symfile_init  PARAMS ((struct objfile *));
 
+static struct type *
+hpread_read_array_type PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+
 static struct type *hpread_alloc_type
   PARAMS ((dnttpointer, struct objfile *));
 

@@ -21,9 +21,24 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+/* Forward declarations of some types we use in prototypes */
+
+#ifdef __STDC__
+struct frame_info;
+struct frame_saved_regs;
+struct value;
+struct type;
+struct inferior_status;
+#endif
+
 /* Target system byte order. */
 
 #define	TARGET_BYTE_ORDER	BIG_ENDIAN
+
+/* By default assume we don't have to worry about software floating point.  */
+#ifndef SOFT_FLOAT
+#define SOFT_FLOAT 0
+#endif
 
 /* Get at various relevent fields of an instruction word. */
 
@@ -35,7 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* This macro gets bit fields using HP's numbering (MSB = 0) */
 
 #define GET_FIELD(X, FROM, TO) \
-  ((X) >> 31 - (TO) & (1 << ((TO) - (FROM) + 1)) - 1)
+  ((X) >> (31 - (TO)) & ((1 << ((TO) - (FROM) + 1)) - 1))
 
 /* Watch out for NaNs */
 
@@ -57,6 +72,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    to reach some "real" code.  */
 
 #define SKIP_PROLOGUE(pc) pc = skip_prologue (pc)
+extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR));
 
 /* If PC is in some function-call trampoline code, return the PC
    where the function itself actually starts.  If not, return NULL.  */
@@ -67,9 +83,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
    in_solib_call_trampoline (pc, name)
+extern int in_solib_call_trampoline PARAMS ((CORE_ADDR, char *));
 
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) \
   in_solib_return_trampoline (pc, name)
+extern int in_solib_return_trampoline PARAMS ((CORE_ADDR, char *));
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -78,6 +96,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #undef	SAVED_PC_AFTER_CALL
 #define SAVED_PC_AFTER_CALL(frame) saved_pc_after_call (frame)
+extern CORE_ADDR saved_pc_after_call PARAMS ((struct frame_info *));
 
 /* Stack grows upward */
 
@@ -198,6 +217,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    of register dumps. */
 
 #define DO_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
+extern void pa_do_registers_info PARAMS ((int, int));
 
 /* PA specific macro to see if the current instruction is nullified. */
 #ifndef INSTRUCTION_NULLIFIED
@@ -302,6 +322,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
                    ((regno) > IPSW_REGNUM && (regno) < FP4_REGNUM)
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, frame) init_extra_frame_info (fromleaf, frame)
+extern void init_extra_frame_info PARAMS ((int, struct frame_info *));
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -321,9 +342,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    address (previous FP).  */
 
 #define FRAME_CHAIN(thisframe) frame_chain (thisframe)
+extern CORE_ADDR frame_chain PARAMS ((struct frame_info *));
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
   frame_chain_valid (chain, thisframe)
+extern int frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
@@ -334,6 +357,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    does not, FRAMELESS is set to 1, else 0.  */
 #define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
   (FRAMELESS) = frameless_function_invocation(FI)
+extern int frameless_function_invocation PARAMS ((struct frame_info *));
 
 #define FRAME_SAVED_PC(FRAME) frame_saved_pc (FRAME)
 
@@ -353,6 +377,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
   hppa_frame_find_saved_regs (frame_info, &frame_saved_regs)
+extern void
+hppa_frame_find_saved_regs PARAMS ((struct frame_info *,
+				    struct frame_saved_regs *));
 
 
 /* Things needed for making the inferior call functions.  */
@@ -360,10 +387,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Push an empty stack frame, to record the current PC, etc. */
 
 #define PUSH_DUMMY_FRAME push_dummy_frame (&inf_status)
+extern void push_dummy_frame PARAMS ((struct inferior_status *));
 
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */
 #define POP_FRAME  hppa_pop_frame ()
+extern void hppa_pop_frame PARAMS ((void));
 
 #define INSTRUCTION_SIZE 4
 
@@ -500,10 +529,15 @@ call_dummy
 
 #define FIX_CALL_DUMMY hppa_fix_call_dummy
 
-CORE_ADDR hppa_fix_call_dummy();
+extern CORE_ADDR
+hppa_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR, int,
+			     struct value **, struct type *, int));
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
     sp = hppa_push_arguments(nargs, args, sp, struct_return, struct_addr)
+extern CORE_ADDR
+hppa_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int,
+			     CORE_ADDR));
 
 /* The low two bits of the PC on the PA contain the privilege level.  Some
    genius implementing a (non-GCC) compiler apparently decided this means
@@ -616,3 +650,17 @@ extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR, char *));
 #define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
 
 extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));
+
+/* If the current gcc for for this target does not produce correct debugging
+   information for float parameters, both prototyped and unprototyped, then
+   define this macro.  This forces gdb to  always assume that floats are
+   passed as doubles and then converted in the callee.
+
+   For the pa, it appears that the debug info marks the parameters as
+   floats regardless of whether the function is prototyped, but the actual
+   values are passed as doubles for the non-prototyped case and floats for
+   the prototyped case.  Thus we choose to make the non-prototyped case work
+   for C and break the prototyped case, since the non-prototyped case is
+   probably much more common.  (FIXME). */
+
+#define COERCE_FLOAT_TO_DOUBLE (current_language -> la_language == language_c)

@@ -35,6 +35,7 @@ and by Cygnus Support.  */
 #include "inferior.h"
 #include "gdb-stabs.h"
 #include "gdbcmd.h"
+#include "language.h"
 
 /* TODO:
 
@@ -95,6 +96,8 @@ struct so_list
 static struct so_list *so_list_head;
 
 static void som_sharedlibrary_info_command PARAMS ((char *, int));
+
+static void som_solib_sharedlibrary_command PARAMS ((char *, int));
 
 /* Add symbols from shared libraries into the symtab list.  */
 
@@ -497,7 +500,7 @@ som_solib_create_inferior_hook()
   struct minimal_symbol *msymbol;
   unsigned int dld_flags, status, have_endo;
   asection *shlib_info;
-  char shadow_contents[BREAKPOINT_MAX], buf[4];
+  char buf[4];
   struct objfile *objfile;
   CORE_ADDR anaddr;
 
@@ -575,7 +578,6 @@ som_solib_create_inferior_hook()
 	 export stub.  */
       ALL_OBJFILES (objfile)
 	{
-	  struct unwind_table_entry *u;
 	  extern struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR pc));
 
 	  /* What a crock.  */

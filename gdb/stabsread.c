@@ -605,9 +605,6 @@ read_cfront_baseclasses(fip, pp, type, objfile)
   char ** pp;
   struct type * type;
 {
-  static struct complaint msg_noterm = {"\
-                   Base classes not terminated while reading stabs string %s.\n",
-                                0, 0};
   static struct complaint msg_unknown = {"\
 	 Unsupported token in stabs string %s.\n",
 		  0, 0};
@@ -622,7 +619,7 @@ read_cfront_baseclasses(fip, pp, type, objfile)
   if (**pp==';')		/* no base classes; return */
     {
       ++(*pp);
-      return;
+      return 1;
     }
 
   /* first count base classes so we can allocate space before parsing */
@@ -690,7 +687,7 @@ read_cfront_baseclasses(fip, pp, type, objfile)
       if (**pp!='@')
         {
           complain (&msg_unknown, *pp);
-          return;
+          return 1;
 	}
       ++(*pp);
 
@@ -718,7 +715,7 @@ read_cfront_baseclasses(fip, pp, type, objfile)
             if (!bname || !*bname)
 	      {
 	        complain (&msg_unknown, *pp);
-		return;
+		return 1;
 	      }
 	    /* FIXME! attach base info to type */
 	    bsym = lookup_symbol (bname, 0, STRUCT_NAMESPACE, 0, 0); /*demangled_name*/
@@ -730,7 +727,7 @@ read_cfront_baseclasses(fip, pp, type, objfile)
 	    else
 	      {
 	        complain (&msg_notfound, *pp);
-		return;
+		return 1;
 	      }
 	  }
 
@@ -881,7 +878,8 @@ read_cfront_member_functions(fip, pp, type, objfile)
 	  for public, set new_sublist->fn_field.is_protected = 1) */
        
      /* Unable to distinguish const/volatile from stabs definition!
-        Assuming normal for now.  FIXME!
+        Assuming normal for now.  FIXME! */
+
      new_sublist -> fn_field.is_const = 0;
      new_sublist -> fn_field.is_volatile = 0;	/* volatile not implemented in cfront */
 	  
@@ -962,7 +960,6 @@ resolve_cfront_continuation(objfile, sym, p)
   char * sname;
   /* snarfed from read_struct_type */
   struct field_info fi;
-  struct field_info * fip = &fi;
   struct type *type;
   struct cleanup *back_to;
 
@@ -1868,7 +1865,6 @@ read_type (pp, objfile)
   register struct type *type = 0;
   struct type *type1;
   int typenums[2];
-  int xtypenums[2];
   char type_descriptor;
 
   /* Size in bits of type if specified by a type attribute, or -1 if
@@ -3350,8 +3346,6 @@ read_cfront_static_fields(fip, pp, type, objfile)
      struct type *type;
      struct objfile *objfile;
 {
-  int nfields = TYPE_NFIELDS(type);
-  int i;
   struct nextfield * new;
   struct type *stype;
   char * sname;
@@ -3360,7 +3354,7 @@ read_cfront_static_fields(fip, pp, type, objfile)
   if (**pp==';')		/* no static data; return */
     {
       ++(*pp);
-      return;
+      return 1;
     }
 
   /* Process each field in the list until we find the terminating ";" */

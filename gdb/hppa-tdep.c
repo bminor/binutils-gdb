@@ -55,6 +55,37 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
+static int extract_5_load PARAMS ((unsigned int));
+
+static unsigned extract_5R_store PARAMS ((unsigned int));
+
+static unsigned extract_5r_store PARAMS ((unsigned int));
+
+static void find_dummy_frame_regs PARAMS ((struct frame_info *,
+					   struct frame_saved_regs *));
+
+static int find_proc_framesize PARAMS ((CORE_ADDR));
+
+static int find_return_regnum PARAMS ((CORE_ADDR));
+
+struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR));
+
+static int extract_17 PARAMS ((unsigned int));
+
+static unsigned deposit_21 PARAMS ((unsigned int, unsigned int));
+
+static int extract_21 PARAMS ((unsigned));
+
+static unsigned deposit_14 PARAMS ((int, unsigned int));
+
+static int extract_14 PARAMS ((unsigned));
+
+static void unwind_command PARAMS ((char *, int));
+
+static int low_sign_extend PARAMS ((unsigned int, unsigned int));
+
+static int sign_extend PARAMS ((unsigned int, unsigned int));
+
 static int restore_pc_queue PARAMS ((struct frame_saved_regs *));
 
 static int hppa_alignof PARAMS ((struct type *));
@@ -91,22 +122,25 @@ static void pa_print_fp_reg PARAMS ((int));
 /* This assumes that no garbage lies outside of the lower bits of 
    value. */
 
-int
+static int
 sign_extend (val, bits)
      unsigned val, bits;
 {
-  return (int)(val >> bits - 1 ? (-1 << bits) | val : val);
+  return (int)(val >> (bits - 1) ? (-1 << bits) | val : val);
 }
 
 /* For many immediate values the sign bit is the low bit! */
 
-int
+static int
 low_sign_extend (val, bits)
      unsigned val, bits;
 {
   return (int)((val & 0x1 ? (-1 << (bits - 1)) : 0) | val >> 1);
 }
+
 /* extract the immediate field from a ld{bhw}s instruction */
+
+#if 0
 
 unsigned
 get_field (val, from, to)
@@ -126,17 +160,23 @@ set_field (val, from, to, new_val)
 
 /* extract a 3-bit space register number from a be, ble, mtsp or mfsp */
 
+int
 extract_3 (word)
      unsigned word;
 {
   return GET_FIELD (word, 18, 18) << 2 | GET_FIELD (word, 16, 17);
 }
-       
+
+#endif
+
+static int
 extract_5_load (word)
      unsigned word;
 {
   return low_sign_extend (word >> 16 & MASK_5, 5);
 }
+
+#if 0
 
 /* extract the immediate field from a st{bhw}s instruction */
 
@@ -147,9 +187,11 @@ extract_5_store (word)
   return low_sign_extend (word & MASK_5, 5);
 }
 
+#endif	/* 0 */
+       
 /* extract the immediate field from a break instruction */
 
-unsigned
+static unsigned
 extract_5r_store (word)
      unsigned word;
 {
@@ -158,7 +200,7 @@ extract_5r_store (word)
 
 /* extract the immediate field from a {sr}sm instruction */
 
-unsigned
+static unsigned
 extract_5R_store (word)
      unsigned word;
 {
@@ -167,6 +209,8 @@ extract_5R_store (word)
 
 /* extract an 11 bit immediate field */
 
+#if 0
+
 int
 extract_11 (word)
      unsigned word;
@@ -174,9 +218,11 @@ extract_11 (word)
   return low_sign_extend (word & MASK_11, 11);
 }
 
+#endif
+
 /* extract a 14 bit immediate field */
 
-int
+static int
 extract_14 (word)
      unsigned word;
 {
@@ -185,7 +231,7 @@ extract_14 (word)
 
 /* deposit a 14 bit constant in a word */
 
-unsigned
+static unsigned
 deposit_14 (opnd, word)
      int opnd;
      unsigned word;
@@ -197,7 +243,7 @@ deposit_14 (opnd, word)
 
 /* extract a 21 bit constant */
 
-int
+static int
 extract_21 (word)
      unsigned word;
 {
@@ -221,7 +267,7 @@ extract_21 (word)
    usually the top 21 bits of a 32 bit constant, we assume that only
    the low 21 bits of opnd are relevant */
 
-unsigned
+static unsigned
 deposit_21 (opnd, word)
      unsigned opnd, word;
 {
@@ -240,6 +286,8 @@ deposit_21 (opnd, word)
 }
 
 /* extract a 12 bit constant from branch instructions */
+
+#if 0
 
 int
 extract_12 (word)
@@ -264,10 +312,12 @@ deposit_17 (opnd, word)
   return word;
 }
 
+#endif
+
 /* extract a 17 bit constant from branch instructions, returning the
    19 bit signed value. */
 
-int
+static int
 extract_17 (word)
      unsigned word;
 {
@@ -667,7 +717,7 @@ find_return_regnum(pc)
 }
 
 /* Return size of frame, or -1 if we should use a frame pointer.  */
-int
+static int
 find_proc_framesize (pc)
      CORE_ADDR pc;
 {
@@ -1267,7 +1317,7 @@ push_dummy_frame (inf_status)
   write_register (SP_REGNUM, sp);
 }
 
-void
+static void
 find_dummy_frame_regs (frame, frame_saved_regs)
      struct frame_info *frame;
      struct frame_saved_regs *frame_saved_regs;
@@ -1275,7 +1325,7 @@ find_dummy_frame_regs (frame, frame_saved_regs)
   CORE_ADDR fp = frame->frame;
   int i;
 
-  frame_saved_regs->regs[RP_REGNUM] = fp - 20 & ~0x3;
+  frame_saved_regs->regs[RP_REGNUM] = (fp - 20) & ~0x3;
   frame_saved_regs->regs[FP_REGNUM] = fp;
   frame_saved_regs->regs[1] = fp + 8;
 
@@ -2520,8 +2570,7 @@ restart:
      but never were, mask them out and restart.
 
      This should only happen in optimized code, and should be very rare.  */
-  if (save_gr || save_fr
-      && ! (restart_fr || restart_gr))
+  if (save_gr || (save_fr && ! (restart_fr || restart_gr)))
     {
       pc = orig_pc;
       restart_gr = save_gr;

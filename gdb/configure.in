@@ -62,6 +62,36 @@ if test $gdb_cv_have_fpregset_t = yes; then
   AC_DEFINE(HAVE_FPREGSET_T)
 fi
 
+dnl See if compiler supports "long long" type.
+
+AC_MSG_CHECKING(for long long support in compiler)
+AC_CACHE_VAL(gdb_cv_c_long_long,
+[AC_TRY_COMPILE(, [long long foo;],
+gdb_cv_c_long_long=yes, gdb_cv_c_long_long=no)])
+AC_MSG_RESULT($gdb_cv_c_long_long)
+if test $gdb_cv_c_long_long = yes; then
+  AC_DEFINE(CC_HAS_LONG_LONG)
+fi
+
+dnl See if the compiler and runtime support printing long long
+
+AC_MSG_CHECKING(for long long support in printf)
+AC_CACHE_VAL(gdb_cv_printf_has_long_long,
+[AC_TRY_RUN([
+int main () {
+  char buf[16];
+  long long l = 0x12345;
+  sprintf (buf, "%llx", l);
+  return (strcmp ("12345", buf));
+}],
+gdb_cv_printf_has_long_long=yes,
+gdb_cv_printf_has_long_long=no,
+gdb_cv_printf_has_long_long=no)])
+if test $gdb_cv_printf_has_long_long = yes; then
+  AC_DEFINE(PRINTF_HAS_LONG_LONG)
+fi
+AC_MSG_RESULT($gdb_cv_printf_has_long_long)
+
 dnl See if compiler supports "long double" type.  Can't use AC_C_LONG_DOUBLE
 dnl because autoconf complains about cross-compilation issues.  However, this
 dnl code uses the same variables as the macro for compatibility.

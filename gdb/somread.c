@@ -55,6 +55,17 @@ som_symtab_read PARAMS ((bfd *, struct objfile *,
 static struct section_offsets *
 som_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
+/* FIXME: These should really be in a common header somewhere */
+
+extern void
+hpread_build_psymtabs PARAMS ((struct objfile *, struct section_offsets *, int));
+
+extern void
+hpread_symfile_finish PARAMS ((struct objfile *));
+
+extern void
+hpread_symfile_init PARAMS ((struct objfile *));
+
 /*
 
 LOCAL FUNCTION

@@ -501,7 +501,8 @@ enum val_prettyprint
 #endif /* STDC */
 #endif /* volatile */
 
-/* Defaults for system-wide constants (if not defined by xm.h, we fake it).  */
+/* Defaults for system-wide constants (if not defined by xm.h, we fake it).
+   FIXME: Assumes 2's complement arithmetic */
 
 #if !defined (UINT_MAX)
 #define	UINT_MAX ((unsigned int)(~0))		/* 0xFFFFFFFF for 32-bits */
@@ -512,7 +513,7 @@ enum val_prettyprint
 #endif
 
 #if !defined (INT_MIN)
-#define INT_MIN (-INT_MAX - 1)			/* 0x80000000 for 32-bits */
+#define INT_MIN ((int)((int) ~0 ^ INT_MAX))	/* 0x80000000 for 32-bits */
 #endif
 
 #if !defined (ULONG_MAX)
@@ -531,27 +532,8 @@ enum val_prettyprint
 
 #else /* No BFD64 */
 
-/* If all compilers for this host support "long long" and we want to
-   use it for LONGEST (the performance hit is about 10% on a testsuite
-   run based on one DECstation test), then the xm.h file can define
-   CC_HAS_LONG_LONG.
-
-   Using GCC 1.39 on BSDI with long long causes about 700 new
-   testsuite failures.  Using long long for LONGEST on the DECstation
-   causes 3 new FAILs in the testsuite and many heuristic fencepost
-   warnings.  These are not investigated, but a first guess would be
-   that the BSDI problems are GCC bugs in long long support and the
-   latter are GDB bugs.  */
-
-#ifndef CC_HAS_LONG_LONG
-#  if defined (__GNUC__) && defined (FORCE_LONG_LONG)
-#    define CC_HAS_LONG_LONG 1
-#  endif
-#endif
-
 /* LONGEST should not be a typedef, because "unsigned LONGEST" needs to work.
-   CC_HAS_LONG_LONG is defined if the host compiler supports "long long"
-   variables and we wish to make use of that support.  */
+   CC_HAS_LONG_LONG is defined if the host compiler supports "long long" */
 
 #ifndef LONGEST
 #  ifdef CC_HAS_LONG_LONG

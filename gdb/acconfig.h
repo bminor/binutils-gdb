@@ -5,6 +5,12 @@
 /* Define if gregset_t type is available. */
 #undef HAVE_GREGSET_T
 
+/* Define if the `long long' type works.  */
+#undef CC_HAS_LONG_LONG
+
+/* Define if the "ll" format works to print long long ints. */
+#undef PRINTF_HAS_LONG_LONG
+
 /* Define if the "%Lg" format works to print long doubles. */
 #undef PRINTF_HAS_LONG_DOUBLE
 

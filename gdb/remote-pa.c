@@ -160,6 +160,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Prototypes for local functions */
 
 static int
+remote_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+
+static int
+remote_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+
+static void
+remote_mourn PARAMS ((void));
+
+static void
+remote_kill PARAMS ((void));
+
+static int
+read_frame PARAMS ((char *));
+
+static void
+boot_board PARAMS ((void));
+
+static int
 remote_write_bytes PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
 
 static int
@@ -295,6 +313,8 @@ remote_close (quitting)
 
 /* Query the remote side for the text, data and bss offsets. */
 
+#if 0
+
 static void
 get_offsets ()
 {
@@ -350,6 +370,8 @@ get_offsets ()
   objfile_relocate (symfile_objfile, offs);
 }
 
+#endif	/* unused */
+
 #define INBUFSIZE 10
 
 void
@@ -390,8 +412,6 @@ static int
 remote_start_remote (dummy)
      char *dummy;
 {
-  int  timeout;
-
   immediate_quit = 1;		/* Allow user to interrupt it */
 
   /* Ack any packet which the remote side has already sent.  */
@@ -1342,7 +1362,6 @@ getpkt (buf, forever)
      char *buf;
      int forever;
 {
-  char *bp;
   int c;
   int tries;
   int timeout;

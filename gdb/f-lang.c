@@ -78,9 +78,9 @@ static SAVED_FUNCTION *allocate_saved_function_node PARAMS ((void));
 static SAVED_BF_PTR allocate_saved_bf_node PARAMS ((void));
 static COMMON_ENTRY_PTR allocate_common_entry_node PARAMS ((void));
 static SAVED_F77_COMMON_PTR allocate_saved_f77_common_node PARAMS ((void));
+static void patch_common_entries PARAMS ((SAVED_F77_COMMON_PTR, CORE_ADDR, int));
 #endif
 
-static void patch_common_entries PARAMS ((SAVED_F77_COMMON_PTR, CORE_ADDR, int));
 static struct type *f_create_fundamental_type PARAMS ((struct objfile *, int));
 static void f_printstr PARAMS ((FILE *, char *, unsigned int, int));
 static void f_printchar PARAMS ((int, FILE *));
@@ -774,12 +774,11 @@ SAVED_F77_COMMON_PTR find_common_for_function(name, funcname)
 }
 
 
-
+#if 0
 
 /* The following function is called to patch up the offsets 
    for the statics contained in the COMMON block named
    "name."  */ 
-
 
 static void
 patch_common_entries (blk, offset, secnum)
@@ -803,14 +802,12 @@ patch_common_entries (blk, offset, secnum)
   blk->secnum = secnum; 
 }
 
-
 /* Patch all commons named "name" that need patching.Since COMMON
    blocks occur with relative infrequency, we simply do a linear scan on
    the name.  Eventually, the best way to do this will be a
    hashed-lookup.  Secnum is the section number for the .bss section
    (which is where common data lives). */
 
-#if 0
 static void
 patch_all_commons_by_name (name, offset, secnum)
      char *name;

@@ -54,7 +54,9 @@ static void all_registers_info PARAMS ((char *, int));
 
 static void registers_info PARAMS ((char *, int));
 
+#if !defined (DO_REGISTERS_INFO)
 static void do_registers_info PARAMS ((int, int));
+#endif
 
 static void unset_environment_command PARAMS ((char *, int));
 
@@ -82,7 +84,9 @@ static void step_command PARAMS ((char *, int));
 
 static void run_command PARAMS ((char *, int));
 
+#ifdef CALL_DUMMY_BREAKPOINT_OFFSET
 static void breakpoint_auto_delete_contents PARAMS ((PTR));
+#endif
 
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error ("The program is not being run.");
@@ -503,12 +507,16 @@ signal_command (signum_exp, from_tty)
 /* Call breakpoint_auto_delete on the current contents of the bpstat
    pointed to by arg (which is really a bpstat *).  */
 
+#ifdef CALL_DUMMY_BREAKPOINT_OFFSET
+
 static void
 breakpoint_auto_delete_contents (arg)
      PTR arg;
 {
   breakpoint_auto_delete (*(bpstat *)arg);
 }
+
+#endif	/* CALL_DUMMY_BREAKPOINT_OFFSET */
 
 /* Execute a "stack dummy", a piece of code stored in the stack
    by the debugger to be executed in the inferior.

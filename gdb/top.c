@@ -1463,7 +1463,7 @@ filename_completer (text, word)
      char *word;
 {
   /* From readline.  */
-  extern char *filename_completion_function ();
+  extern char *filename_completion_function PARAMS ((char *, int));
   int subsequent_name;
   char **return_val;
   int return_val_used;

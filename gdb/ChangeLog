@@ -1,3 +1,126 @@
+Sat Jul 27 17:47:35 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in: Add test for "long long" support.
+	* configure: Regenerate with autoconf.
+	* acconfig.h: Add CC_HAS_LONG_LONG
+	* config.in: Regenerate with autoheader.
+	* config/mips/tm-mips64.h (FORCE_LONG_LONG): Remove
+	* config/sparc/tm-sp64.h (CC_HAS_LONG_LONG): Remove.
+	* config/mips/tm-vr4300el.h (CC_HAS_LONG_LONG): Remove.
+	* config/mips/tm-vr4300.h (CC_HAS_LONG_LONG): Remove.
+	* config/mips/xm-irix5.h (CC_HAS_LONG_LONG): Remove
+	(PRINTF_HAS_LONG_LONG): Remove.
+	(FORCE_LONG_LONG): Remove.
+	* config/powerpc/xm-aix.h (UINT_MAX): Undef and use gdb's version.
+	* config/convex/xm-convex.h (CC_HAS_LONG_LONG): Remove
+	(PRINTF_HAS_LONG_LONG): Remove.
+	* config/xm-nbsd.h (CC_HAS_LONG_LONG): Remove.
+	(PRINTF_HAS_LONG_LONG): Remove.
+	* config/pa/tm-hppa.h (GET_FIELD): Put parens around
+	subtraction inside shift.  Put parens around subtraction
+	in operand of bitwise and.
+	(struct frame_info): Forward declare
+ 	if __STDC__ defined.
+	(frame_saved_regs): Ditto.
+	(struct value): Ditto.
+	(struct type): Ditto.
+	(struct inferior_status): Ditto.	
+	(init_extra_frame_info): Add prototype.
+	(skip_prologue): Ditto.
+	(frameless_function_invocation): Ditto.
+	(frame_chain): Ditto.
+	(frame_chain_valid): Ditto.
+	(saved_pc_after_call): Ditto.
+	(hppa_fix_call_dummy): Ditto.	
+	(hppa_push_arguments): Ditto.
+	(pa_do_registers_info): Ditto.
+	(in_solib_call_trampoline): Ditto.
+	(in_solib_return_trampoline): Ditto.
+	(push_dummy_frame): Ditto.
+	* convex-tdep.c (decout): Use print_longest rather than
+	fprintf_filtered.
+	* defs.h: Remove use of FORCE_LONG_LONG and __GNUC__ to set
+	CC_HAS_LONG_LONG.
+	(INT_MIN): Fix so it works correctly when assigned to a long long.
+	* valprint.c (longest_to_int): Rewrite to remove dependence
+	on INT_MIN and INT_MAX.
+	(print_longest): Rewrite the code that falls back to synthesized
+	hex output when LONGEST value is not representable as in a long and
+ 	printf doesn't support printing long longs.
+	* ch-valprint.c (chill_val_print): Cast 2nd arg of
+	chill_print_type_scalar to LONGEST.
+	chill_print_type_scalar): Make static and add prototype.
+	* hppa-tdep.c (get_field): Ifdef out unused function.
+	(set_field): Ditto.
+	(extract_3): Ditto.
+	(extract_5_store): Ditto.
+	(extract_11): Ditto.
+	(extract_12): Ditto.
+	(deposit_17): Ditto.
+	(extract_14): Convert to static and add prototype.
+	(deposit_14): Ditto.
+	(extract_21): Ditto.
+	(deposit_21): Ditto.
+	(extract_17): Ditto.
+	(extract_5r_store): Ditto.
+	(extract_5R_store): Ditto.
+	(extract_5_load): Ditto.
+	(find_proc_framesize): Ditto.
+	(find_dummy_frame_regs): Ditto.
+	(sign_extend): Ditto.
+	(find_unwind_entry): Add prototype.
+	(find_return_regnum): Ditto.
+	(unwind_command): Ditto.
+	(find_dummy_frame_regs): Add parens around subtraction in operand
+	of bitwise-and.
+	(skip_prologue): Add parens around operands of logical-and inside
+	operand of logical-or.
+	(sign_extend): Add parens around operands of subtraction inside
+	operand of shift.
+	(low_sign_extend): Ditto.
+	* top.c (filename_completer): Convert old style decl of
+	filename_completion_function into prototype.
+	* f-lang.c (patch_common_entries): Ifdef out unused function.
+	* stabsread.c (read_cfront_baseclasses): Remove unused local
+	variable "msg_noterm".
+	(resolve_cfront_continuation): Remove unused local variable "fip".
+	(read_type): Remove unused variable xtypenums.
+	(read_cfront_static_fields): Remove unused variable "i".
+	(read_cfront_static_fields): Remove unused variable "nfields".
+	(read_cfront_member_functions): Add missing comment terminator.
+	(read_cfront_static_fields): Return 1 rather than random value.
+	(read_cfront_baseclasses): Ditto.
+	(read_cfront_baseclasses): Ditto.
+	(read_cfront_baseclasses): Ditto.
+	* somsolib.c (som_solib_create_inferior_hook): Remove unused
+	variable "u".
+	(som_solib_create_inferior_hook): Remove unused variable
+	shadow_contents.
+	(language.h): Add for needed prototypes.
+	(som_solib_sharedlibrary_command): Add prototype.
+	* hpread.c: (hpread_read_array_type): Add prototype.
+	* somread.c (hpread_build_pysmtabs): Add prototype.
+	(hpread_symfile_finish): Ditto.
+	(hpread_symfile_init): Ditto.
+	* hppah-nat.c (fetch_register): Convert old style decl
+	to prototype.
+	(gdbcore.h): Include for needed prototypes.
+	(fetch_register): Remove unused variable "mess".
+	* remote-pa.c (get_offsets): Ifdef out unused function.
+	(remote_start_remote): Remove unused variable "timeout".
+	(boot_board): Add prototype.
+	(reaad_frame): Add prototype.
+	(getpkt): Remove unused variable "bp".
+	(remote_kill): Add prototype.
+	(remote_mourn): Add prototype.
+	(remote_insert_breakpoint): Add prototype.
+	(remote_remove_breakpoint): Add prototype.
+	* valops.c (value_push): Only use if PUSH_ARGUMENTS is not defined.
+	* infcmd.c (do_registers_info): Only need prototype if
+	DO_REGISTERS_INFO is not defined.
+	(breakpoint_auto_delete_contents): Only need if
+	CALL_DUMMY_BREAKPOINT_OFFSET is defined.
+
 Sat Jul 27 08:49:49 1996  Fred Fish  <fnf@cygnus.com>
 
 	* xcoffread.c (xcoff_end_psymtab): Add textlow_not_set parameter.

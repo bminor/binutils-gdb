@@ -49,6 +49,11 @@ Mon Jun 17 10:43:41 1996  Fred Fish  <fnf@cygnus.com>
 	(gdb-internals): Delete unused target.
 	(Makefile): Depends upon config.status also.
 
+Sat Mar 30 15:46:58 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbint.texinfo (CC_HAS_LONG_LONG): Clarify when/how this is
+	set.
+
 Sat Mar 16 15:10:20 1996  Fred Fish  <fnf@cygnus.com>
 
 	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
