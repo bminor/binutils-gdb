@@ -68,50 +68,51 @@ proc test_integer_literals_accepted {} {
 
     # Test various decimal values.
 
-    test_print_accept "p 123" "123"
-    test_print_accept "p -123" "-123"
-    test_print_accept "p/d 123" "123"
+    gdb_test "p 123" " = 123"
+    gdb_test "p -123" " = -123"
+    gdb_test "p/d 123" " = 123"
 
     # Test various octal values.
 
-    test_print_accept "p 0123" "83"
-    test_print_accept "p 00123" "83"
-    test_print_accept "p -0123" "-83"
-    test_print_accept "p/o 0123" "0123"
+    gdb_test "p 0123" " = 83"
+    gdb_test "p 00123" " = 83"
+    gdb_test "p -0123" " = -83"
+    gdb_test "p/o 0123" " = 0123"
 
     # Test various hexadecimal values.
 
-    test_print_accept "p 0x123" "291"
-    test_print_accept "p -0x123" "-291"
-    test_print_accept "p 0x0123" "291"
-    test_print_accept "p -0x0123" "-291"
-    test_print_accept "p 0xABCDEF" "11259375"
-    test_print_accept "p 0xabcdef" "11259375"
-    test_print_accept "p 0xAbCdEf" "11259375"
-    test_print_accept "p/x 0x123" "0x123"
+    gdb_test "p 0x123" " = 291"
+    gdb_test "p -0x123" " = -291"
+    gdb_test "p 0x0123" " = 291"
+    gdb_test "p -0x0123" " = -291"
+    gdb_test "p 0xABCDEF" " = 11259375"
+    gdb_test "p 0xabcdef" " = 11259375"
+    gdb_test "p 0xAbCdEf" " = 11259375"
+    gdb_test "p/x 0x123" " = 0x123"
 }
 
 proc test_character_literals_accepted {} {
     global prompt
 
-    test_print_accept "p 'a'" "97 'a'"
-    test_print_accept "p/c 'a'" "97 'a'"
-    test_print_accept "p/x 'a'" "0x61"
-    test_print_accept "p/d 'a'" "97"
-    test_print_accept "p/t 'a'" "1100001"
-    test_print_accept "p '\\141'" "97 'a'"
-    test_print_accept "p/x '\\377'" "0xff"
+    gdb_test "p 'a'" " = 97 'a'"
+    gdb_test "p/c 'a'" " = 97 'a'"
+    gdb_test "p/x 'a'" " = 0x61"
+    gdb_test "p/d 'a'" " = 97"
+    gdb_test "p/t 'a'" " = 1100001"
+    gdb_test "p '\\141'" " = 97 'a'"
+    gdb_test "p/x '\\377'" " = 0xff"
     # Note "p '\''" => "= 39 '\''"
-    test_print_accept "p '''" "39 '\[\\'\]+'"
+    gdb_test "p '\\''" " = 39 '\\\\''"
     # Note "p '\\'" => "= 92 '\\'"
-    test_print_accept "p '\\\\'" "92 '\\\\\\\\'"
+    gdb_test "p '\\\\'" " = 92 '\\\\\\\\'"
 }
 
 proc test_integer_literals_rejected {} {
     global prompt
 
     test_print_reject "p 0x" 
-    test_print_reject "p ''" 
+    gdb_test "p ''" "Empty character constant\\."
+    gdb_test "p '''" "Empty character constant\\."
     test_print_reject "p '\\'"
 
     # Note that this turns into "p '\\\'" at gdb's input.
@@ -143,262 +144,262 @@ proc test_integer_literals_rejected {} {
 proc test_print_all_chars {} {
     global prompt
 
-    test_print_accept "p ctable1\[0\]"   "0 '\\\\000'"
-    test_print_accept "p ctable1\[1\]"   "1 '\\\\001'"
-    test_print_accept "p ctable1\[2\]"   "2 '\\\\002'"
-    test_print_accept "p ctable1\[3\]"   "3 '\\\\003'"
-    test_print_accept "p ctable1\[4\]"   "4 '\\\\004'"
-    test_print_accept "p ctable1\[5\]"   "5 '\\\\005'"
-    test_print_accept "p ctable1\[6\]"   "6 '\\\\006'"
-    test_print_accept "p ctable1\[7\]"   "7 '\\\\a'"
-    test_print_accept "p ctable1\[8\]"   "8 '\\\\b'"
-    test_print_accept "p ctable1\[9\]"   "9 '\\\\t'"
-    test_print_accept "p ctable1\[10\]"  "10 '\\\\n'"
-    test_print_accept "p ctable1\[11\]"  "11 '\\\\013'"
-    test_print_accept "p ctable1\[12\]"  "12 '\\\\f'"
-    test_print_accept "p ctable1\[13\]"  "13 '\\\\r'"
-    test_print_accept "p ctable1\[14\]"  "14 '\\\\016'"
-    test_print_accept "p ctable1\[15\]"  "15 '\\\\017'"
-    test_print_accept "p ctable1\[16\]"  "16 '\\\\020'"
-    test_print_accept "p ctable1\[17\]"  "17 '\\\\021'"
-    test_print_accept "p ctable1\[18\]"  "18 '\\\\022'"
-    test_print_accept "p ctable1\[19\]"  "19 '\\\\023'"
-    test_print_accept "p ctable1\[20\]"  "20 '\\\\024'"
-    test_print_accept "p ctable1\[21\]"  "21 '\\\\025'"
-    test_print_accept "p ctable1\[22\]"  "22 '\\\\026'"
-    test_print_accept "p ctable1\[23\]"  "23 '\\\\027'"
-    test_print_accept "p ctable1\[24\]"  "24 '\\\\030'"
-    test_print_accept "p ctable1\[25\]"  "25 '\\\\031'"
-    test_print_accept "p ctable1\[26\]"  "26 '\\\\032'"
-    test_print_accept "p ctable1\[27\]"  "27 '\\\\e'"
-    test_print_accept "p ctable1\[28\]"  "28 '\\\\034'"
-    test_print_accept "p ctable1\[29\]"  "29 '\\\\035'"
-    test_print_accept "p ctable1\[30\]"  "30 '\\\\036'"
-    test_print_accept "p ctable1\[31\]"  "31 '\\\\037'"
-    test_print_accept "p ctable1\[32\]"  "32 ' '"
-    test_print_accept "p ctable1\[33\]"  "33 '!'"
-    test_print_accept "p ctable1\[34\]"  "34 '\"'"
-    test_print_accept "p ctable1\[35\]"  "35 '#'"
-    test_print_accept "p ctable1\[36\]"  "36 '\\\$'"
-    test_print_accept "p ctable1\[37\]"  "37 '%'"
-    test_print_accept "p ctable1\[38\]"  "38 '&'"
-    test_print_accept "p ctable1\[39\]"  "39 '\\\\''"
-    test_print_accept "p ctable1\[40\]"  "40 '\[(\]+'"
-    test_print_accept "p ctable1\[41\]"  "41 '\[)\]+'"
-    test_print_accept "p ctable1\[42\]"  "42 '\[*\]+'"
-    test_print_accept "p ctable1\[43\]"  "43 '\[+\]+'"
-    test_print_accept "p ctable1\[44\]"  "44 ','"
-    test_print_accept "p ctable1\[45\]"  "45 '-'"
-    test_print_accept "p ctable1\[46\]"  "46 '.'"
-    test_print_accept "p ctable1\[47\]"  "47 '/'"
-    test_print_accept "p ctable1\[48\]"  "48 '0'"
-    test_print_accept "p ctable1\[49\]"  "49 '1'"
-    test_print_accept "p ctable1\[50\]"  "50 '2'"
-    test_print_accept "p ctable1\[51\]"  "51 '3'"
-    test_print_accept "p ctable1\[52\]"  "52 '4'"
-    test_print_accept "p ctable1\[53\]"  "53 '5'"
-    test_print_accept "p ctable1\[54\]"  "54 '6'"
-    test_print_accept "p ctable1\[55\]"  "55 '7'"
-    test_print_accept "p ctable1\[56\]"  "56 '8'"
-    test_print_accept "p ctable1\[57\]"  "57 '9'"
-    test_print_accept "p ctable1\[58\]"  "58 ':'"
-    test_print_accept "p ctable1\[59\]"  "59 ';'"
-    test_print_accept "p ctable1\[60\]"  "60 '<'"
-    test_print_accept "p ctable1\[61\]"  "61 '='"
-    test_print_accept "p ctable1\[62\]"  "62 '>'"
-    test_print_accept "p ctable1\[63\]"  "63 '\\?'"
-    test_print_accept "p ctable1\[64\]"  "64 '@'"
-    test_print_accept "p ctable1\[65\]"  "65 'A'"
-    test_print_accept "p ctable1\[66\]"  "66 'B'"
-    test_print_accept "p ctable1\[67\]"  "67 'C'"
-    test_print_accept "p ctable1\[68\]"  "68 'D'"
-    test_print_accept "p ctable1\[69\]"  "69 'E'"
-    test_print_accept "p ctable1\[70\]"  "70 'F'"
-    test_print_accept "p ctable1\[71\]"  "71 'G'"
-    test_print_accept "p ctable1\[72\]"  "72 'H'"
-    test_print_accept "p ctable1\[73\]"  "73 'I'"
-    test_print_accept "p ctable1\[74\]"  "74 'J'"
-    test_print_accept "p ctable1\[75\]"  "75 'K'"
-    test_print_accept "p ctable1\[76\]"  "76 'L'"
-    test_print_accept "p ctable1\[77\]"  "77 'M'"
-    test_print_accept "p ctable1\[78\]"  "78 'N'"
-    test_print_accept "p ctable1\[79\]"  "79 'O'"
-    test_print_accept "p ctable1\[80\]"  "80 'P'"
-    test_print_accept "p ctable1\[81\]"  "81 'Q'"
-    test_print_accept "p ctable1\[82\]"  "82 'R'"
-    test_print_accept "p ctable1\[83\]"  "83 'S'"
-    test_print_accept "p ctable1\[84\]"  "84 'T'"
-    test_print_accept "p ctable1\[85\]"  "85 'U'"
-    test_print_accept "p ctable1\[86\]"  "86 'V'"
-    test_print_accept "p ctable1\[87\]"  "87 'W'"
-    test_print_accept "p ctable1\[88\]"  "88 'X'"
-    test_print_accept "p ctable1\[89\]"  "89 'Y'"
-    test_print_accept "p ctable1\[90\]"  "90 'Z'"
-    test_print_accept "p ctable1\[91\]"  "91 '\\\['"
-    test_print_accept "p ctable1\[92\]"  "92 '\\\\\\\\'"
-    test_print_accept "p ctable1\[93\]"  "93 '\\\]'"
-    test_print_accept "p ctable1\[94\]"  "94 '\\^'"
-    test_print_accept "p ctable1\[95\]"  "95 '_'"
-    test_print_accept "p ctable1\[96\]"  "96 '`'"
-    test_print_accept "p ctable1\[97\]"  "97 'a'"
-    test_print_accept "p ctable1\[98\]"  "98 'b'"
-    test_print_accept "p ctable1\[99\]"  "99 'c'"
-    test_print_accept "p ctable1\[100\]" "100 'd'"
-    test_print_accept "p ctable1\[101\]" "101 'e'"
-    test_print_accept "p ctable1\[102\]" "102 'f'"
-    test_print_accept "p ctable1\[103\]" "103 'g'"
-    test_print_accept "p ctable1\[104\]" "104 'h'"
-    test_print_accept "p ctable1\[105\]" "105 'i'"
-    test_print_accept "p ctable1\[106\]" "106 'j'"
-    test_print_accept "p ctable1\[107\]" "107 'k'"
-    test_print_accept "p ctable1\[108\]" "108 'l'"
-    test_print_accept "p ctable1\[109\]" "109 'm'"
-    test_print_accept "p ctable1\[110\]" "110 'n'"
-    test_print_accept "p ctable1\[111\]" "111 'o'"
-    test_print_accept "p ctable1\[112\]" "112 'p'"
-    test_print_accept "p ctable1\[113\]" "113 'q'"
-    test_print_accept "p ctable1\[114\]" "114 'r'"
-    test_print_accept "p ctable1\[115\]" "115 's'"
-    test_print_accept "p ctable1\[116\]" "116 't'"
-    test_print_accept "p ctable1\[117\]" "117 'u'"
-    test_print_accept "p ctable1\[118\]" "118 'v'"
-    test_print_accept "p ctable1\[119\]" "119 'w'"
-    test_print_accept "p ctable1\[120\]" "120 'x'"
-    test_print_accept "p ctable1\[121\]" "121 'y'"
-    test_print_accept "p ctable1\[122\]" "122 'z'"
-    test_print_accept "p ctable1\[123\]" "123 '\[{\]+'"
-    test_print_accept "p ctable1\[124\]" "124 '\[|\]+'"
-    test_print_accept "p ctable1\[125\]" "125 '\[}\]+'"
-    test_print_accept "p ctable1\[126\]" "126 '\[~\]'"
-    test_print_accept "p ctable1\[127\]" "127 '\\\\177'"
-    test_print_accept "p ctable1\[128\]" "128 '\\\\200'"
-    test_print_accept "p ctable1\[129\]" "129 '\\\\201'"
-    test_print_accept "p ctable1\[130\]" "130 '\\\\202'"
-    test_print_accept "p ctable1\[131\]" "131 '\\\\203'"
-    test_print_accept "p ctable1\[132\]" "132 '\\\\204'"
-    test_print_accept "p ctable1\[133\]" "133 '\\\\205'"
-    test_print_accept "p ctable1\[134\]" "134 '\\\\206'"
-    test_print_accept "p ctable1\[135\]" "135 '\\\\207'"
-    test_print_accept "p ctable1\[136\]" "136 '\\\\210'"
-    test_print_accept "p ctable1\[137\]" "137 '\\\\211'"
-    test_print_accept "p ctable1\[138\]" "138 '\\\\212'"
-    test_print_accept "p ctable1\[139\]" "139 '\\\\213'"
-    test_print_accept "p ctable1\[140\]" "140 '\\\\214'"
-    test_print_accept "p ctable1\[141\]" "141 '\\\\215'"
-    test_print_accept "p ctable1\[142\]" "142 '\\\\216'"
-    test_print_accept "p ctable1\[143\]" "143 '\\\\217'"
-    test_print_accept "p ctable1\[144\]" "144 '\\\\220'"
-    test_print_accept "p ctable1\[145\]" "145 '\\\\221'"
-    test_print_accept "p ctable1\[146\]" "146 '\\\\222'"
-    test_print_accept "p ctable1\[147\]" "147 '\\\\223'"
-    test_print_accept "p ctable1\[148\]" "148 '\\\\224'"
-    test_print_accept "p ctable1\[149\]" "149 '\\\\225'"
-    test_print_accept "p ctable1\[150\]" "150 '\\\\226'"
-    test_print_accept "p ctable1\[151\]" "151 '\\\\227'"
-    test_print_accept "p ctable1\[152\]" "152 '\\\\230'"
-    test_print_accept "p ctable1\[153\]" "153 '\\\\231'"
-    test_print_accept "p ctable1\[154\]" "154 '\\\\232'"
-    test_print_accept "p ctable1\[155\]" "155 '\\\\233'"
-    test_print_accept "p ctable1\[156\]" "156 '\\\\234'"
-    test_print_accept "p ctable1\[157\]" "157 '\\\\235'"
-    test_print_accept "p ctable1\[158\]" "158 '\\\\236'"
-    test_print_accept "p ctable1\[159\]" "159 '\\\\237'"
-    test_print_accept "p ctable1\[160\]" "160 '\\\\240'"
-    test_print_accept "p ctable1\[161\]" "161 '\\\\241'"
-    test_print_accept "p ctable1\[162\]" "162 '\\\\242'"
-    test_print_accept "p ctable1\[163\]" "163 '\\\\243'"
-    test_print_accept "p ctable1\[164\]" "164 '\\\\244'"
-    test_print_accept "p ctable1\[165\]" "165 '\\\\245'"
-    test_print_accept "p ctable1\[166\]" "166 '\\\\246'"
-    test_print_accept "p ctable1\[167\]" "167 '\\\\247'"
-    test_print_accept "p ctable1\[168\]" "168 '\\\\250'"
-    test_print_accept "p ctable1\[169\]" "169 '\\\\251'"
-    test_print_accept "p ctable1\[170\]" "170 '\\\\252'"
-    test_print_accept "p ctable1\[171\]" "171 '\\\\253'"
-    test_print_accept "p ctable1\[172\]" "172 '\\\\254'"
-    test_print_accept "p ctable1\[173\]" "173 '\\\\255'"
-    test_print_accept "p ctable1\[174\]" "174 '\\\\256'"
-    test_print_accept "p ctable1\[175\]" "175 '\\\\257'"
-    test_print_accept "p ctable1\[176\]" "176 '\\\\260'"
-    test_print_accept "p ctable1\[177\]" "177 '\\\\261'"
-    test_print_accept "p ctable1\[178\]" "178 '\\\\262'"
-    test_print_accept "p ctable1\[179\]" "179 '\\\\263'"
-    test_print_accept "p ctable1\[180\]" "180 '\\\\264'"
-    test_print_accept "p ctable1\[181\]" "181 '\\\\265'"
-    test_print_accept "p ctable1\[182\]" "182 '\\\\266'"
-    test_print_accept "p ctable1\[183\]" "183 '\\\\267'"
-    test_print_accept "p ctable1\[184\]" "184 '\\\\270'"
-    test_print_accept "p ctable1\[185\]" "185 '\\\\271'"
-    test_print_accept "p ctable1\[186\]" "186 '\\\\272'"
-    test_print_accept "p ctable1\[187\]" "187 '\\\\273'"
-    test_print_accept "p ctable1\[188\]" "188 '\\\\274'"
-    test_print_accept "p ctable1\[189\]" "189 '\\\\275'"
-    test_print_accept "p ctable1\[190\]" "190 '\\\\276'"
-    test_print_accept "p ctable1\[191\]" "191 '\\\\277'"
-    test_print_accept "p ctable1\[192\]" "192 '\\\\300'"
-    test_print_accept "p ctable1\[193\]" "193 '\\\\301'"
-    test_print_accept "p ctable1\[194\]" "194 '\\\\302'"
-    test_print_accept "p ctable1\[195\]" "195 '\\\\303'"
-    test_print_accept "p ctable1\[196\]" "196 '\\\\304'"
-    test_print_accept "p ctable1\[197\]" "197 '\\\\305'"
-    test_print_accept "p ctable1\[198\]" "198 '\\\\306'"
-    test_print_accept "p ctable1\[199\]" "199 '\\\\307'"
-    test_print_accept "p ctable1\[200\]" "200 '\\\\310'"
-    test_print_accept "p ctable1\[201\]" "201 '\\\\311'"
-    test_print_accept "p ctable1\[202\]" "202 '\\\\312'"
-    test_print_accept "p ctable1\[203\]" "203 '\\\\313'"
-    test_print_accept "p ctable1\[204\]" "204 '\\\\314'"
-    test_print_accept "p ctable1\[205\]" "205 '\\\\315'"
-    test_print_accept "p ctable1\[206\]" "206 '\\\\316'"
-    test_print_accept "p ctable1\[207\]" "207 '\\\\317'"
-    test_print_accept "p ctable1\[208\]" "208 '\\\\320'"
-    test_print_accept "p ctable1\[209\]" "209 '\\\\321'"
-    test_print_accept "p ctable1\[210\]" "210 '\\\\322'"
-    test_print_accept "p ctable1\[211\]" "211 '\\\\323'"
-    test_print_accept "p ctable1\[212\]" "212 '\\\\324'"
-    test_print_accept "p ctable1\[213\]" "213 '\\\\325'"
-    test_print_accept "p ctable1\[214\]" "214 '\\\\326'"
-    test_print_accept "p ctable1\[215\]" "215 '\\\\327'"
-    test_print_accept "p ctable1\[216\]" "216 '\\\\330'"
-    test_print_accept "p ctable1\[217\]" "217 '\\\\331'"
-    test_print_accept "p ctable1\[218\]" "218 '\\\\332'"
-    test_print_accept "p ctable1\[219\]" "219 '\\\\333'"
-    test_print_accept "p ctable1\[220\]" "220 '\\\\334'"
-    test_print_accept "p ctable1\[221\]" "221 '\\\\335'"
-    test_print_accept "p ctable1\[222\]" "222 '\\\\336'"
-    test_print_accept "p ctable1\[223\]" "223 '\\\\337'"
-    test_print_accept "p ctable1\[224\]" "224 '\\\\340'"
-    test_print_accept "p ctable1\[225\]" "225 '\\\\341'"
-    test_print_accept "p ctable1\[226\]" "226 '\\\\342'"
-    test_print_accept "p ctable1\[227\]" "227 '\\\\343'"
-    test_print_accept "p ctable1\[228\]" "228 '\\\\344'"
-    test_print_accept "p ctable1\[229\]" "229 '\\\\345'"
-    test_print_accept "p ctable1\[230\]" "230 '\\\\346'"
-    test_print_accept "p ctable1\[231\]" "231 '\\\\347'"
-    test_print_accept "p ctable1\[232\]" "232 '\\\\350'"
-    test_print_accept "p ctable1\[233\]" "233 '\\\\351'"
-    test_print_accept "p ctable1\[234\]" "234 '\\\\352'"
-    test_print_accept "p ctable1\[235\]" "235 '\\\\353'"
-    test_print_accept "p ctable1\[236\]" "236 '\\\\354'"
-    test_print_accept "p ctable1\[237\]" "237 '\\\\355'"
-    test_print_accept "p ctable1\[238\]" "238 '\\\\356'"
-    test_print_accept "p ctable1\[239\]" "239 '\\\\357'"
-    test_print_accept "p ctable1\[240\]" "240 '\\\\360'"
-    test_print_accept "p ctable1\[241\]" "241 '\\\\361'"
-    test_print_accept "p ctable1\[242\]" "242 '\\\\362'"
-    test_print_accept "p ctable1\[243\]" "243 '\\\\363'"
-    test_print_accept "p ctable1\[244\]" "244 '\\\\364'"
-    test_print_accept "p ctable1\[245\]" "245 '\\\\365'"
-    test_print_accept "p ctable1\[246\]" "246 '\\\\366'"
-    test_print_accept "p ctable1\[247\]" "247 '\\\\367'"
-    test_print_accept "p ctable1\[248\]" "248 '\\\\370'"
-    test_print_accept "p ctable1\[249\]" "249 '\\\\371'"
-    test_print_accept "p ctable1\[250\]" "250 '\\\\372'"
-    test_print_accept "p ctable1\[251\]" "251 '\\\\373'"
-    test_print_accept "p ctable1\[252\]" "252 '\\\\374'"
-    test_print_accept "p ctable1\[253\]" "253 '\\\\375'"
-    test_print_accept "p ctable1\[254\]" "254 '\\\\376'"
-    test_print_accept "p ctable1\[255\]" "255 '\\\\377'"
+    gdb_test "p ctable1\[0\]"   " = 0 '\\\\000'"
+    gdb_test "p ctable1\[1\]"   " = 1 '\\\\001'"
+    gdb_test "p ctable1\[2\]"   " = 2 '\\\\002'"
+    gdb_test "p ctable1\[3\]"   " = 3 '\\\\003'"
+    gdb_test "p ctable1\[4\]"   " = 4 '\\\\004'"
+    gdb_test "p ctable1\[5\]"   " = 5 '\\\\005'"
+    gdb_test "p ctable1\[6\]"   " = 6 '\\\\006'"
+    gdb_test "p ctable1\[7\]"   " = 7 '\\\\a'"
+    gdb_test "p ctable1\[8\]"   " = 8 '\\\\b'"
+    gdb_test "p ctable1\[9\]"   " = 9 '\\\\t'"
+    gdb_test "p ctable1\[10\]"  " = 10 '\\\\n'"
+    gdb_test "p ctable1\[11\]"  " = 11 '\\\\013'"
+    gdb_test "p ctable1\[12\]"  " = 12 '\\\\f'"
+    gdb_test "p ctable1\[13\]"  " = 13 '\\\\r'"
+    gdb_test "p ctable1\[14\]"  " = 14 '\\\\016'"
+    gdb_test "p ctable1\[15\]"  " = 15 '\\\\017'"
+    gdb_test "p ctable1\[16\]"  " = 16 '\\\\020'"
+    gdb_test "p ctable1\[17\]"  " = 17 '\\\\021'"
+    gdb_test "p ctable1\[18\]"  " = 18 '\\\\022'"
+    gdb_test "p ctable1\[19\]"  " = 19 '\\\\023'"
+    gdb_test "p ctable1\[20\]"  " = 20 '\\\\024'"
+    gdb_test "p ctable1\[21\]"  " = 21 '\\\\025'"
+    gdb_test "p ctable1\[22\]"  " = 22 '\\\\026'"
+    gdb_test "p ctable1\[23\]"  " = 23 '\\\\027'"
+    gdb_test "p ctable1\[24\]"  " = 24 '\\\\030'"
+    gdb_test "p ctable1\[25\]"  " = 25 '\\\\031'"
+    gdb_test "p ctable1\[26\]"  " = 26 '\\\\032'"
+    gdb_test "p ctable1\[27\]"  " = 27 '\\\\e'"
+    gdb_test "p ctable1\[28\]"  " = 28 '\\\\034'"
+    gdb_test "p ctable1\[29\]"  " = 29 '\\\\035'"
+    gdb_test "p ctable1\[30\]"  " = 30 '\\\\036'"
+    gdb_test "p ctable1\[31\]"  " = 31 '\\\\037'"
+    gdb_test "p ctable1\[32\]"  " = 32 ' '"
+    gdb_test "p ctable1\[33\]"  " = 33 '!'"
+    gdb_test "p ctable1\[34\]"  " = 34 '\"'"
+    gdb_test "p ctable1\[35\]"  " = 35 '#'"
+    gdb_test "p ctable1\[36\]"  " = 36 '\\\$'"
+    gdb_test "p ctable1\[37\]"  " = 37 '%'"
+    gdb_test "p ctable1\[38\]"  " = 38 '&'"
+    gdb_test "p ctable1\[39\]"  " = 39 '\\\\''"
+    gdb_test "p ctable1\[40\]"  " = 40 '\\('"
+    gdb_test "p ctable1\[41\]"  " = 41 '\\)'"
+    gdb_test "p ctable1\[42\]"  " = 42 '\\*'"
+    gdb_test "p ctable1\[43\]"  " = 43 '\\+'"
+    gdb_test "p ctable1\[44\]"  " = 44 ','"
+    gdb_test "p ctable1\[45\]"  " = 45 '-'"
+    gdb_test "p ctable1\[46\]"  " = 46 '.'"
+    gdb_test "p ctable1\[47\]"  " = 47 '/'"
+    gdb_test "p ctable1\[48\]"  " = 48 '0'"
+    gdb_test "p ctable1\[49\]"  " = 49 '1'"
+    gdb_test "p ctable1\[50\]"  " = 50 '2'"
+    gdb_test "p ctable1\[51\]"  " = 51 '3'"
+    gdb_test "p ctable1\[52\]"  " = 52 '4'"
+    gdb_test "p ctable1\[53\]"  " = 53 '5'"
+    gdb_test "p ctable1\[54\]"  " = 54 '6'"
+    gdb_test "p ctable1\[55\]"  " = 55 '7'"
+    gdb_test "p ctable1\[56\]"  " = 56 '8'"
+    gdb_test "p ctable1\[57\]"  " = 57 '9'"
+    gdb_test "p ctable1\[58\]"  " = 58 ':'"
+    gdb_test "p ctable1\[59\]"  " = 59 ';'"
+    gdb_test "p ctable1\[60\]"  " = 60 '<'"
+    gdb_test "p ctable1\[61\]"  " = 61 '='"
+    gdb_test "p ctable1\[62\]"  " = 62 '>'"
+    gdb_test "p ctable1\[63\]"  " = 63 '\\?'"
+    gdb_test "p ctable1\[64\]"  " = 64 '@'"
+    gdb_test "p ctable1\[65\]"  " = 65 'A'"
+    gdb_test "p ctable1\[66\]"  " = 66 'B'"
+    gdb_test "p ctable1\[67\]"  " = 67 'C'"
+    gdb_test "p ctable1\[68\]"  " = 68 'D'"
+    gdb_test "p ctable1\[69\]"  " = 69 'E'"
+    gdb_test "p ctable1\[70\]"  " = 70 'F'"
+    gdb_test "p ctable1\[71\]"  " = 71 'G'"
+    gdb_test "p ctable1\[72\]"  " = 72 'H'"
+    gdb_test "p ctable1\[73\]"  " = 73 'I'"
+    gdb_test "p ctable1\[74\]"  " = 74 'J'"
+    gdb_test "p ctable1\[75\]"  " = 75 'K'"
+    gdb_test "p ctable1\[76\]"  " = 76 'L'"
+    gdb_test "p ctable1\[77\]"  " = 77 'M'"
+    gdb_test "p ctable1\[78\]"  " = 78 'N'"
+    gdb_test "p ctable1\[79\]"  " = 79 'O'"
+    gdb_test "p ctable1\[80\]"  " = 80 'P'"
+    gdb_test "p ctable1\[81\]"  " = 81 'Q'"
+    gdb_test "p ctable1\[82\]"  " = 82 'R'"
+    gdb_test "p ctable1\[83\]"  " = 83 'S'"
+    gdb_test "p ctable1\[84\]"  " = 84 'T'"
+    gdb_test "p ctable1\[85\]"  " = 85 'U'"
+    gdb_test "p ctable1\[86\]"  " = 86 'V'"
+    gdb_test "p ctable1\[87\]"  " = 87 'W'"
+    gdb_test "p ctable1\[88\]"  " = 88 'X'"
+    gdb_test "p ctable1\[89\]"  " = 89 'Y'"
+    gdb_test "p ctable1\[90\]"  " = 90 'Z'"
+    gdb_test "p ctable1\[91\]"  " = 91 '\\\['"
+    gdb_test "p ctable1\[92\]"  " = 92 '\\\\\\\\'"
+    gdb_test "p ctable1\[93\]"  " = 93 '\\\]'"
+    gdb_test "p ctable1\[94\]"  " = 94 '\\^'"
+    gdb_test "p ctable1\[95\]"  " = 95 '_'"
+    gdb_test "p ctable1\[96\]"  " = 96 '`'"
+    gdb_test "p ctable1\[97\]"  " = 97 'a'"
+    gdb_test "p ctable1\[98\]"  " = 98 'b'"
+    gdb_test "p ctable1\[99\]"  " = 99 'c'"
+    gdb_test "p ctable1\[100\]" " = 100 'd'"
+    gdb_test "p ctable1\[101\]" " = 101 'e'"
+    gdb_test "p ctable1\[102\]" " = 102 'f'"
+    gdb_test "p ctable1\[103\]" " = 103 'g'"
+    gdb_test "p ctable1\[104\]" " = 104 'h'"
+    gdb_test "p ctable1\[105\]" " = 105 'i'"
+    gdb_test "p ctable1\[106\]" " = 106 'j'"
+    gdb_test "p ctable1\[107\]" " = 107 'k'"
+    gdb_test "p ctable1\[108\]" " = 108 'l'"
+    gdb_test "p ctable1\[109\]" " = 109 'm'"
+    gdb_test "p ctable1\[110\]" " = 110 'n'"
+    gdb_test "p ctable1\[111\]" " = 111 'o'"
+    gdb_test "p ctable1\[112\]" " = 112 'p'"
+    gdb_test "p ctable1\[113\]" " = 113 'q'"
+    gdb_test "p ctable1\[114\]" " = 114 'r'"
+    gdb_test "p ctable1\[115\]" " = 115 's'"
+    gdb_test "p ctable1\[116\]" " = 116 't'"
+    gdb_test "p ctable1\[117\]" " = 117 'u'"
+    gdb_test "p ctable1\[118\]" " = 118 'v'"
+    gdb_test "p ctable1\[119\]" " = 119 'w'"
+    gdb_test "p ctable1\[120\]" " = 120 'x'"
+    gdb_test "p ctable1\[121\]" " = 121 'y'"
+    gdb_test "p ctable1\[122\]" " = 122 'z'"
+    gdb_test "p ctable1\[123\]" " = 123 '\[{\]+'"
+    gdb_test "p ctable1\[124\]" " = 124 '\[|\]+'"
+    gdb_test "p ctable1\[125\]" " = 125 '\[}\]+'"
+    gdb_test "p ctable1\[126\]" " = 126 '\[~\]'"
+    gdb_test "p ctable1\[127\]" " = 127 '\\\\177'"
+    gdb_test "p ctable1\[128\]" " = 128 '\\\\200'"
+    gdb_test "p ctable1\[129\]" " = 129 '\\\\201'"
+    gdb_test "p ctable1\[130\]" " = 130 '\\\\202'"
+    gdb_test "p ctable1\[131\]" " = 131 '\\\\203'"
+    gdb_test "p ctable1\[132\]" " = 132 '\\\\204'"
+    gdb_test "p ctable1\[133\]" " = 133 '\\\\205'"
+    gdb_test "p ctable1\[134\]" " = 134 '\\\\206'"
+    gdb_test "p ctable1\[135\]" " = 135 '\\\\207'"
+    gdb_test "p ctable1\[136\]" " = 136 '\\\\210'"
+    gdb_test "p ctable1\[137\]" " = 137 '\\\\211'"
+    gdb_test "p ctable1\[138\]" " = 138 '\\\\212'"
+    gdb_test "p ctable1\[139\]" " = 139 '\\\\213'"
+    gdb_test "p ctable1\[140\]" " = 140 '\\\\214'"
+    gdb_test "p ctable1\[141\]" " = 141 '\\\\215'"
+    gdb_test "p ctable1\[142\]" " = 142 '\\\\216'"
+    gdb_test "p ctable1\[143\]" " = 143 '\\\\217'"
+    gdb_test "p ctable1\[144\]" " = 144 '\\\\220'"
+    gdb_test "p ctable1\[145\]" " = 145 '\\\\221'"
+    gdb_test "p ctable1\[146\]" " = 146 '\\\\222'"
+    gdb_test "p ctable1\[147\]" " = 147 '\\\\223'"
+    gdb_test "p ctable1\[148\]" " = 148 '\\\\224'"
+    gdb_test "p ctable1\[149\]" " = 149 '\\\\225'"
+    gdb_test "p ctable1\[150\]" " = 150 '\\\\226'"
+    gdb_test "p ctable1\[151\]" " = 151 '\\\\227'"
+    gdb_test "p ctable1\[152\]" " = 152 '\\\\230'"
+    gdb_test "p ctable1\[153\]" " = 153 '\\\\231'"
+    gdb_test "p ctable1\[154\]" " = 154 '\\\\232'"
+    gdb_test "p ctable1\[155\]" " = 155 '\\\\233'"
+    gdb_test "p ctable1\[156\]" " = 156 '\\\\234'"
+    gdb_test "p ctable1\[157\]" " = 157 '\\\\235'"
+    gdb_test "p ctable1\[158\]" " = 158 '\\\\236'"
+    gdb_test "p ctable1\[159\]" " = 159 '\\\\237'"
+    gdb_test "p ctable1\[160\]" " = 160 '\\\\240'"
+    gdb_test "p ctable1\[161\]" " = 161 '\\\\241'"
+    gdb_test "p ctable1\[162\]" " = 162 '\\\\242'"
+    gdb_test "p ctable1\[163\]" " = 163 '\\\\243'"
+    gdb_test "p ctable1\[164\]" " = 164 '\\\\244'"
+    gdb_test "p ctable1\[165\]" " = 165 '\\\\245'"
+    gdb_test "p ctable1\[166\]" " = 166 '\\\\246'"
+    gdb_test "p ctable1\[167\]" " = 167 '\\\\247'"
+    gdb_test "p ctable1\[168\]" " = 168 '\\\\250'"
+    gdb_test "p ctable1\[169\]" " = 169 '\\\\251'"
+    gdb_test "p ctable1\[170\]" " = 170 '\\\\252'"
+    gdb_test "p ctable1\[171\]" " = 171 '\\\\253'"
+    gdb_test "p ctable1\[172\]" " = 172 '\\\\254'"
+    gdb_test "p ctable1\[173\]" " = 173 '\\\\255'"
+    gdb_test "p ctable1\[174\]" " = 174 '\\\\256'"
+    gdb_test "p ctable1\[175\]" " = 175 '\\\\257'"
+    gdb_test "p ctable1\[176\]" " = 176 '\\\\260'"
+    gdb_test "p ctable1\[177\]" " = 177 '\\\\261'"
+    gdb_test "p ctable1\[178\]" " = 178 '\\\\262'"
+    gdb_test "p ctable1\[179\]" " = 179 '\\\\263'"
+    gdb_test "p ctable1\[180\]" " = 180 '\\\\264'"
+    gdb_test "p ctable1\[181\]" " = 181 '\\\\265'"
+    gdb_test "p ctable1\[182\]" " = 182 '\\\\266'"
+    gdb_test "p ctable1\[183\]" " = 183 '\\\\267'"
+    gdb_test "p ctable1\[184\]" " = 184 '\\\\270'"
+    gdb_test "p ctable1\[185\]" " = 185 '\\\\271'"
+    gdb_test "p ctable1\[186\]" " = 186 '\\\\272'"
+    gdb_test "p ctable1\[187\]" " = 187 '\\\\273'"
+    gdb_test "p ctable1\[188\]" " = 188 '\\\\274'"
+    gdb_test "p ctable1\[189\]" " = 189 '\\\\275'"
+    gdb_test "p ctable1\[190\]" " = 190 '\\\\276'"
+    gdb_test "p ctable1\[191\]" " = 191 '\\\\277'"
+    gdb_test "p ctable1\[192\]" " = 192 '\\\\300'"
+    gdb_test "p ctable1\[193\]" " = 193 '\\\\301'"
+    gdb_test "p ctable1\[194\]" " = 194 '\\\\302'"
+    gdb_test "p ctable1\[195\]" " = 195 '\\\\303'"
+    gdb_test "p ctable1\[196\]" " = 196 '\\\\304'"
+    gdb_test "p ctable1\[197\]" " = 197 '\\\\305'"
+    gdb_test "p ctable1\[198\]" " = 198 '\\\\306'"
+    gdb_test "p ctable1\[199\]" " = 199 '\\\\307'"
+    gdb_test "p ctable1\[200\]" " = 200 '\\\\310'"
+    gdb_test "p ctable1\[201\]" " = 201 '\\\\311'"
+    gdb_test "p ctable1\[202\]" " = 202 '\\\\312'"
+    gdb_test "p ctable1\[203\]" " = 203 '\\\\313'"
+    gdb_test "p ctable1\[204\]" " = 204 '\\\\314'"
+    gdb_test "p ctable1\[205\]" " = 205 '\\\\315'"
+    gdb_test "p ctable1\[206\]" " = 206 '\\\\316'"
+    gdb_test "p ctable1\[207\]" " = 207 '\\\\317'"
+    gdb_test "p ctable1\[208\]" " = 208 '\\\\320'"
+    gdb_test "p ctable1\[209\]" " = 209 '\\\\321'"
+    gdb_test "p ctable1\[210\]" " = 210 '\\\\322'"
+    gdb_test "p ctable1\[211\]" " = 211 '\\\\323'"
+    gdb_test "p ctable1\[212\]" " = 212 '\\\\324'"
+    gdb_test "p ctable1\[213\]" " = 213 '\\\\325'"
+    gdb_test "p ctable1\[214\]" " = 214 '\\\\326'"
+    gdb_test "p ctable1\[215\]" " = 215 '\\\\327'"
+    gdb_test "p ctable1\[216\]" " = 216 '\\\\330'"
+    gdb_test "p ctable1\[217\]" " = 217 '\\\\331'"
+    gdb_test "p ctable1\[218\]" " = 218 '\\\\332'"
+    gdb_test "p ctable1\[219\]" " = 219 '\\\\333'"
+    gdb_test "p ctable1\[220\]" " = 220 '\\\\334'"
+    gdb_test "p ctable1\[221\]" " = 221 '\\\\335'"
+    gdb_test "p ctable1\[222\]" " = 222 '\\\\336'"
+    gdb_test "p ctable1\[223\]" " = 223 '\\\\337'"
+    gdb_test "p ctable1\[224\]" " = 224 '\\\\340'"
+    gdb_test "p ctable1\[225\]" " = 225 '\\\\341'"
+    gdb_test "p ctable1\[226\]" " = 226 '\\\\342'"
+    gdb_test "p ctable1\[227\]" " = 227 '\\\\343'"
+    gdb_test "p ctable1\[228\]" " = 228 '\\\\344'"
+    gdb_test "p ctable1\[229\]" " = 229 '\\\\345'"
+    gdb_test "p ctable1\[230\]" " = 230 '\\\\346'"
+    gdb_test "p ctable1\[231\]" " = 231 '\\\\347'"
+    gdb_test "p ctable1\[232\]" " = 232 '\\\\350'"
+    gdb_test "p ctable1\[233\]" " = 233 '\\\\351'"
+    gdb_test "p ctable1\[234\]" " = 234 '\\\\352'"
+    gdb_test "p ctable1\[235\]" " = 235 '\\\\353'"
+    gdb_test "p ctable1\[236\]" " = 236 '\\\\354'"
+    gdb_test "p ctable1\[237\]" " = 237 '\\\\355'"
+    gdb_test "p ctable1\[238\]" " = 238 '\\\\356'"
+    gdb_test "p ctable1\[239\]" " = 239 '\\\\357'"
+    gdb_test "p ctable1\[240\]" " = 240 '\\\\360'"
+    gdb_test "p ctable1\[241\]" " = 241 '\\\\361'"
+    gdb_test "p ctable1\[242\]" " = 242 '\\\\362'"
+    gdb_test "p ctable1\[243\]" " = 243 '\\\\363'"
+    gdb_test "p ctable1\[244\]" " = 244 '\\\\364'"
+    gdb_test "p ctable1\[245\]" " = 245 '\\\\365'"
+    gdb_test "p ctable1\[246\]" " = 246 '\\\\366'"
+    gdb_test "p ctable1\[247\]" " = 247 '\\\\367'"
+    gdb_test "p ctable1\[248\]" " = 248 '\\\\370'"
+    gdb_test "p ctable1\[249\]" " = 249 '\\\\371'"
+    gdb_test "p ctable1\[250\]" " = 250 '\\\\372'"
+    gdb_test "p ctable1\[251\]" " = 251 '\\\\373'"
+    gdb_test "p ctable1\[252\]" " = 252 '\\\\374'"
+    gdb_test "p ctable1\[253\]" " = 253 '\\\\375'"
+    gdb_test "p ctable1\[254\]" " = 254 '\\\\376'"
+    gdb_test "p ctable1\[255\]" " = 255 '\\\\377'"
 }
 
 # Test interaction of the number of print elements to print and the
@@ -408,388 +409,388 @@ proc test_print_repeats_10 {} {
     global prompt
 
     send "set print elements 1\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[1*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[2*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[3*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[4*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[5*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[6*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[7*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[8*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[9*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[10*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[11*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[12*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[13*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[14*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
-    test_print_accept "p &ctable2\[15*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"a\"..."
+    gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[1*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[2*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[3*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[4*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[5*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[6*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[7*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[8*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[9*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[10*16\]" " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[11*16\]" " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[12*16\]" " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[13*16\]" " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[14*16\]" " = \\(unsigned char \\*\\) \"a\"..."
+    gdb_test "p &ctable2\[15*16\]" " = \\(unsigned char \\*\\) \"a\"..."
 
     send "set print elements 2\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aX\"..."
-    test_print_accept "p &ctable2\[1*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[2*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[3*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[4*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[5*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[6*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[7*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[8*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[9*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[10*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[11*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[12*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[13*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[14*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
-    test_print_accept "p &ctable2\[15*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aa\"..."
+    gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"aX\"..."
+    gdb_test "p &ctable2\[1*16\]"  " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[2*16\]"  " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[3*16\]"  " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[4*16\]"  " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[5*16\]"  " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[6*16\]"  " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[7*16\]"  " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[8*16\]"  " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[9*16\]"  " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[10*16\]" " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[11*16\]" " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[12*16\]" " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[13*16\]" " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[14*16\]" " = \\(unsigned char \\*\\) \"aa\"..."
+    gdb_test "p &ctable2\[15*16\]" " = \\(unsigned char \\*\\) \"aa\"..."
 
     send "set print elements 3\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aXX\"..."
-    test_print_accept "p &ctable2\[1*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaX\"..."
-    test_print_accept "p &ctable2\[2*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[3*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[4*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[5*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[6*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[7*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[8*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[9*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[10*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[11*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[12*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[13*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[14*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
-    test_print_accept "p &ctable2\[15*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\"..."
+    gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"aXX\"..."
+    gdb_test "p &ctable2\[1*16\]"  " = \\(unsigned char \\*\\) \"aaX\"..."
+    gdb_test "p &ctable2\[2*16\]"  " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[3*16\]"  " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[4*16\]"  " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[5*16\]"  " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[6*16\]"  " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[7*16\]"  " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[8*16\]"  " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[9*16\]"  " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[10*16\]" " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[11*16\]" " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[12*16\]" " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[13*16\]" " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[14*16\]" " = \\(unsigned char \\*\\) \"aaa\"..."
+    gdb_test "p &ctable2\[15*16\]" " = \\(unsigned char \\*\\) \"aaa\"..."
 
     send "set print elements 4\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aXXX\"..."
-    test_print_accept "p &ctable2\[1*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaXX\"..."
-    test_print_accept "p &ctable2\[2*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaX\"..."
-    test_print_accept "p &ctable2\[3*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[4*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[5*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[6*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[7*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[8*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[9*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[10*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[11*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[12*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[13*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[14*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
-    test_print_accept "p &ctable2\[15*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\"..."
+    gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"aXXX\"..."
+    gdb_test "p &ctable2\[1*16\]"  " = \\(unsigned char \\*\\) \"aaXX\"..."
+    gdb_test "p &ctable2\[2*16\]"  " = \\(unsigned char \\*\\) \"aaaX\"..."
+    gdb_test "p &ctable2\[3*16\]"  " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[4*16\]"  " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[5*16\]"  " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[6*16\]"  " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[7*16\]"  " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[8*16\]"  " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[9*16\]"  " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[10*16\]" " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[11*16\]" " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[12*16\]" " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[13*16\]" " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[14*16\]" " = \\(unsigned char \\*\\) \"aaaa\"..."
+    gdb_test "p &ctable2\[15*16\]" " = \\(unsigned char \\*\\) \"aaaa\"..."
 
     send "set print elements 5\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aXXXX\"..."
-    test_print_accept "p &ctable2\[1*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaXXX\"..."
-    test_print_accept "p &ctable2\[2*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaXX\"..."
-    test_print_accept "p &ctable2\[3*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaX\"..."
-    test_print_accept "p &ctable2\[4*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[5*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[6*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[7*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[8*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[9*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[10*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[11*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[12*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[13*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[14*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
-    test_print_accept "p &ctable2\[15*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\"..."
+    gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"aXXXX\"..."
+    gdb_test "p &ctable2\[1*16\]"  " = \\(unsigned char \\*\\) \"aaXXX\"..."
+    gdb_test "p &ctable2\[2*16\]"  " = \\(unsigned char \\*\\) \"aaaXX\"..."
+    gdb_test "p &ctable2\[3*16\]"  " = \\(unsigned char \\*\\) \"aaaaX\"..."
+    gdb_test "p &ctable2\[4*16\]"  " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[5*16\]"  " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[6*16\]"  " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[7*16\]"  " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[8*16\]"  " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[9*16\]"  " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[10*16\]" " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[11*16\]" " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[12*16\]" " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[13*16\]" " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[14*16\]" " = \\(unsigned char \\*\\) \"aaaaa\"..."
+    gdb_test "p &ctable2\[15*16\]" " = \\(unsigned char \\*\\) \"aaaaa\"..."
 
     send "set print elements 6\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aXXXXX\"..."
-    test_print_accept "p &ctable2\[1*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaXXXX\"..."
-    test_print_accept "p &ctable2\[2*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaXXX\"..."
-    test_print_accept "p &ctable2\[3*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaXX\"..."
-    test_print_accept "p &ctable2\[4*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaX\"..."
-    test_print_accept "p &ctable2\[5*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
-    test_print_accept "p &ctable2\[6*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
-    test_print_accept "p &ctable2\[7*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
-    test_print_accept "p &ctable2\[8*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
-    test_print_accept "p &ctable2\[9*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
-    test_print_accept "p &ctable2\[10*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
-    test_print_accept "p &ctable2\[11*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
-    test_print_accept "p &ctable2\[12*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
-    test_print_accept "p &ctable2\[13*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
-    test_print_accept "p &ctable2\[14*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
-    test_print_accept "p &ctable2\[15*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaa\"..."
+    gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"aXXXXX\"..."
+    gdb_test "p &ctable2\[1*16\]"  " = \\(unsigned char \\*\\) \"aaXXXX\"..."
+    gdb_test "p &ctable2\[2*16\]"  " = \\(unsigned char \\*\\) \"aaaXXX\"..."
+    gdb_test "p &ctable2\[3*16\]"  " = \\(unsigned char \\*\\) \"aaaaXX\"..."
+    gdb_test "p &ctable2\[4*16\]"  " = \\(unsigned char \\*\\) \"aaaaaX\"..."
+    gdb_test "p &ctable2\[5*16\]"  " = \\(unsigned char \\*\\) \"aaaaaa\"..."
+    gdb_test "p &ctable2\[6*16\]"  " = \\(unsigned char \\*\\) \"aaaaaa\"..."
+    gdb_test "p &ctable2\[7*16\]"  " = \\(unsigned char \\*\\) \"aaaaaa\"..."
+    gdb_test "p &ctable2\[8*16\]"  " = \\(unsigned char \\*\\) \"aaaaaa\"..."
+    gdb_test "p &ctable2\[9*16\]"  " = \\(unsigned char \\*\\) \"aaaaaa\"..."
+    gdb_test "p &ctable2\[10*16\]" " = \\(unsigned char \\*\\) \"aaaaaa\"..."
+    gdb_test "p &ctable2\[11*16\]" " = \\(unsigned char \\*\\) \"aaaaaa\"..."
+    gdb_test "p &ctable2\[12*16\]" " = \\(unsigned char \\*\\) \"aaaaaa\"..."
+    gdb_test "p &ctable2\[13*16\]" " = \\(unsigned char \\*\\) \"aaaaaa\"..."
+    gdb_test "p &ctable2\[14*16\]" " = \\(unsigned char \\*\\) \"aaaaaa\"..."
+    gdb_test "p &ctable2\[15*16\]" " = \\(unsigned char \\*\\) \"aaaaaa\"..."
 
     send "set print elements 7\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aXXXXXX\"..."
-    test_print_accept "p &ctable2\[1*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaXXXXX\"..."
-    test_print_accept "p &ctable2\[2*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaXXXX\"..."
-    test_print_accept "p &ctable2\[3*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaXXX\"..."
-    test_print_accept "p &ctable2\[4*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaXX\"..."
-    test_print_accept "p &ctable2\[5*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaX\"..."
-    test_print_accept "p &ctable2\[6*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaa\"..."
-    test_print_accept "p &ctable2\[7*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaa\"..."
-    test_print_accept "p &ctable2\[8*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaa\"..."
-    test_print_accept "p &ctable2\[9*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaa\"..."
-    test_print_accept "p &ctable2\[10*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaa\"..."
-    test_print_accept "p &ctable2\[11*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaa\"..."
-    test_print_accept "p &ctable2\[12*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaa\"..."
-    test_print_accept "p &ctable2\[13*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaa\"..."
-    test_print_accept "p &ctable2\[14*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaa\"..."
-    test_print_accept "p &ctable2\[15*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaa\"..."
+    gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"aXXXXXX\"..."
+    gdb_test "p &ctable2\[1*16\]"  " = \\(unsigned char \\*\\) \"aaXXXXX\"..."
+    gdb_test "p &ctable2\[2*16\]"  " = \\(unsigned char \\*\\) \"aaaXXXX\"..."
+    gdb_test "p &ctable2\[3*16\]"  " = \\(unsigned char \\*\\) \"aaaaXXX\"..."
+    gdb_test "p &ctable2\[4*16\]"  " = \\(unsigned char \\*\\) \"aaaaaXX\"..."
+    gdb_test "p &ctable2\[5*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaX\"..."
+    gdb_test "p &ctable2\[6*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaa\"..."
+    gdb_test "p &ctable2\[7*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaa\"..."
+    gdb_test "p &ctable2\[8*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaa\"..."
+    gdb_test "p &ctable2\[9*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaa\"..."
+    gdb_test "p &ctable2\[10*16\]" " = \\(unsigned char \\*\\) \"aaaaaaa\"..."
+    gdb_test "p &ctable2\[11*16\]" " = \\(unsigned char \\*\\) \"aaaaaaa\"..."
+    gdb_test "p &ctable2\[12*16\]" " = \\(unsigned char \\*\\) \"aaaaaaa\"..."
+    gdb_test "p &ctable2\[13*16\]" " = \\(unsigned char \\*\\) \"aaaaaaa\"..."
+    gdb_test "p &ctable2\[14*16\]" " = \\(unsigned char \\*\\) \"aaaaaaa\"..."
+    gdb_test "p &ctable2\[15*16\]" " = \\(unsigned char \\*\\) \"aaaaaaa\"..."
 
     send "set print elements 8\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aXXXXXXX\"..."
-    test_print_accept "p &ctable2\[1*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaXXXXXX\"..."
-    test_print_accept "p &ctable2\[2*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaXXXXX\"..."
-    test_print_accept "p &ctable2\[3*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaXXXX\"..."
-    test_print_accept "p &ctable2\[4*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaXXX\"..."
-    test_print_accept "p &ctable2\[5*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaXX\"..."
-    test_print_accept "p &ctable2\[6*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaX\"..."
-    test_print_accept "p &ctable2\[7*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaa\"..."
-    test_print_accept "p &ctable2\[8*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaa\"..."
-    test_print_accept "p &ctable2\[9*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaa\"..."
-    test_print_accept "p &ctable2\[10*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaa\"..."
-    test_print_accept "p &ctable2\[11*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaa\"..."
-    test_print_accept "p &ctable2\[12*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaa\"..."
-    test_print_accept "p &ctable2\[13*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaa\"..."
-    test_print_accept "p &ctable2\[14*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaa\"..."
-    test_print_accept "p &ctable2\[15*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaa\"..."
+    gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"aXXXXXXX\"..."
+    gdb_test "p &ctable2\[1*16\]"  " = \\(unsigned char \\*\\) \"aaXXXXXX\"..."
+    gdb_test "p &ctable2\[2*16\]"  " = \\(unsigned char \\*\\) \"aaaXXXXX\"..."
+    gdb_test "p &ctable2\[3*16\]"  " = \\(unsigned char \\*\\) \"aaaaXXXX\"..."
+    gdb_test "p &ctable2\[4*16\]"  " = \\(unsigned char \\*\\) \"aaaaaXXX\"..."
+    gdb_test "p &ctable2\[5*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaXX\"..."
+    gdb_test "p &ctable2\[6*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaX\"..."
+    gdb_test "p &ctable2\[7*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaa\"..."
+    gdb_test "p &ctable2\[8*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaa\"..."
+    gdb_test "p &ctable2\[9*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaa\"..."
+    gdb_test "p &ctable2\[10*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaa\"..."
+    gdb_test "p &ctable2\[11*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaa\"..."
+    gdb_test "p &ctable2\[12*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaa\"..."
+    gdb_test "p &ctable2\[13*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaa\"..."
+    gdb_test "p &ctable2\[14*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaa\"..."
+    gdb_test "p &ctable2\[15*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaa\"..."
 
     send "set print elements 9\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[1*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaXXXXXXX\"..."
-    test_print_accept "p &ctable2\[2*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaXXXXXX\"..."
-    test_print_accept "p &ctable2\[3*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaXXXXX\"..."
-    test_print_accept "p &ctable2\[4*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaXXXX\"..."
-    test_print_accept "p &ctable2\[5*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaXXX\"..."
-    test_print_accept "p &ctable2\[6*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaXX\"..."
-    test_print_accept "p &ctable2\[7*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaX\"..."
-    test_print_accept "p &ctable2\[8*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[9*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[10*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[11*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[12*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[13*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[14*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[15*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaa\"..."
+    gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"aXXXXXXXX\"..."
+    gdb_test "p &ctable2\[1*16\]"  " = \\(unsigned char \\*\\) \"aaXXXXXXX\"..."
+    gdb_test "p &ctable2\[2*16\]"  " = \\(unsigned char \\*\\) \"aaaXXXXXX\"..."
+    gdb_test "p &ctable2\[3*16\]"  " = \\(unsigned char \\*\\) \"aaaaXXXXX\"..."
+    gdb_test "p &ctable2\[4*16\]"  " = \\(unsigned char \\*\\) \"aaaaaXXXX\"..."
+    gdb_test "p &ctable2\[5*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaXXX\"..."
+    gdb_test "p &ctable2\[6*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaXX\"..."
+    gdb_test "p &ctable2\[7*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaaX\"..."
+    gdb_test "p &ctable2\[8*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaaa\"..."
+    gdb_test "p &ctable2\[9*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaaa\"..."
+    gdb_test "p &ctable2\[10*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaa\"..."
+    gdb_test "p &ctable2\[11*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaa\"..."
+    gdb_test "p &ctable2\[12*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaa\"..."
+    gdb_test "p &ctable2\[13*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaa\"..."
+    gdb_test "p &ctable2\[14*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaa\"..."
+    gdb_test "p &ctable2\[15*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaa\"..."
 
     send "set print elements 10\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[1*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[2*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaXXXXXXX\"..."
-    test_print_accept "p &ctable2\[3*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaXXXXXX\"..."
-    test_print_accept "p &ctable2\[4*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaXXXXX\"..."
-    test_print_accept "p &ctable2\[5*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaXXXX\"..."
-    test_print_accept "p &ctable2\[6*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaXXX\"..."
-    test_print_accept "p &ctable2\[7*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaXX\"..."
-    test_print_accept "p &ctable2\[8*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaX\"..."
-    test_print_accept "p &ctable2\[9*16\]"  "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[10*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[11*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[12*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[13*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[14*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaa\"..."
-    test_print_accept "p &ctable2\[15*16\]" "\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaa\"..."
+    gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"aXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[1*16\]"  " = \\(unsigned char \\*\\) \"aaXXXXXXXX\"..."
+    gdb_test "p &ctable2\[2*16\]"  " = \\(unsigned char \\*\\) \"aaaXXXXXXX\"..."
+    gdb_test "p &ctable2\[3*16\]"  " = \\(unsigned char \\*\\) \"aaaaXXXXXX\"..."
+    gdb_test "p &ctable2\[4*16\]"  " = \\(unsigned char \\*\\) \"aaaaaXXXXX\"..."
+    gdb_test "p &ctable2\[5*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaXXXX\"..."
+    gdb_test "p &ctable2\[6*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaXXX\"..."
+    gdb_test "p &ctable2\[7*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaaXX\"..."
+    gdb_test "p &ctable2\[8*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaaaX\"..."
+    gdb_test "p &ctable2\[9*16\]"  " = \\(unsigned char \\*\\) \"aaaaaaaaaa\"..."
+    gdb_test "p &ctable2\[10*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaaa\"..."
+    gdb_test "p &ctable2\[11*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaaa\"..."
+    gdb_test "p &ctable2\[12*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaaa\"..."
+    gdb_test "p &ctable2\[13*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaaa\"..."
+    gdb_test "p &ctable2\[14*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaaa\"..."
+    gdb_test "p &ctable2\[15*16\]" " = \\(unsigned char \\*\\) \"aaaaaaaaaa\"..."
 
     send "set print elements 11\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aXXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[1*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[2*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[3*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaXXXXXXX\"..."
-    test_print_accept "p &ctable2\[4*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaXXXXXX\"..."
-    test_print_accept "p &ctable2\[5*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaXXXXX\"..."
-    test_print_accept "p &ctable2\[6*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaXXXX\"..."
-    test_print_accept "p &ctable2\[7*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaXXX\"..."
-    test_print_accept "p &ctable2\[8*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaXX\"..."
-    test_print_accept "p &ctable2\[9*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaaX\"..."
-    test_print_accept "p &ctable2\[10*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>..."
-    test_print_accept "p &ctable2\[11*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>..."
-    test_print_accept "p &ctable2\[12*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>..."
-    test_print_accept "p &ctable2\[13*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>..."
-    test_print_accept "p &ctable2\[14*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>..."
-    test_print_accept "p &ctable2\[15*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>..."
+    gdb_test "p &ctable2\[0*16\]" \
+	" = \\(unsigned char \\*\\) \"aXXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[1*16\]" \
+	" = \\(unsigned char \\*\\) \"aaXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[2*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaXXXXXXXX\"..."
+    gdb_test "p &ctable2\[3*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaXXXXXXX\"..."
+    gdb_test "p &ctable2\[4*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaXXXXXX\"..."
+    gdb_test "p &ctable2\[5*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaXXXXX\"..."
+    gdb_test "p &ctable2\[6*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaXXXX\"..."
+    gdb_test "p &ctable2\[7*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaXXX\"..."
+    gdb_test "p &ctable2\[8*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaXX\"..."
+    gdb_test "p &ctable2\[9*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaaX\"..."
+    gdb_test "p &ctable2\[10*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>..."
+    gdb_test "p &ctable2\[11*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>..."
+    gdb_test "p &ctable2\[12*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>..."
+    gdb_test "p &ctable2\[13*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>..."
+    gdb_test "p &ctable2\[14*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>..."
+    gdb_test "p &ctable2\[15*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>..."
 
     send "set print elements 12\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"a\", 'X' <repeats 11 times>..."
-    test_print_accept "p &ctable2\[1*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaXXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[2*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[3*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[4*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaXXXXXXX\"..."
-    test_print_accept "p &ctable2\[5*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaXXXXXX\"..."
-    test_print_accept "p &ctable2\[6*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaXXXXX\"..."
-    test_print_accept "p &ctable2\[7*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaXXXX\"..."
-    test_print_accept "p &ctable2\[8*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaXXX\"..."
-    test_print_accept "p &ctable2\[9*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaaXX\"..."
-    test_print_accept "p &ctable2\[10*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>, \"X\"..."
-    test_print_accept "p &ctable2\[11*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 12 times>..."
-    test_print_accept "p &ctable2\[12*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 12 times>..."
-    test_print_accept "p &ctable2\[13*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 12 times>..."
-    test_print_accept "p &ctable2\[14*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 12 times>..."
-    test_print_accept "p &ctable2\[15*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 12 times>..."
+    gdb_test "p &ctable2\[0*16\]" \
+	" = \\(unsigned char \\*\\) \"a\", 'X' <repeats 11 times>..."
+    gdb_test "p &ctable2\[1*16\]" \
+	" = \\(unsigned char \\*\\) \"aaXXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[2*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[3*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaXXXXXXXX\"..."
+    gdb_test "p &ctable2\[4*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaXXXXXXX\"..."
+    gdb_test "p &ctable2\[5*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaXXXXXX\"..."
+    gdb_test "p &ctable2\[6*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaXXXXX\"..."
+    gdb_test "p &ctable2\[7*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaXXXX\"..."
+    gdb_test "p &ctable2\[8*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaXXX\"..."
+    gdb_test "p &ctable2\[9*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaaXX\"..."
+    gdb_test "p &ctable2\[10*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>, \"X\"..."
+    gdb_test "p &ctable2\[11*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 12 times>..."
+    gdb_test "p &ctable2\[12*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 12 times>..."
+    gdb_test "p &ctable2\[13*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 12 times>..."
+    gdb_test "p &ctable2\[14*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 12 times>..."
+    gdb_test "p &ctable2\[15*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 12 times>..."
 
     send "set print elements 13\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"a\", 'X' <repeats 12 times>..."
-    test_print_accept "p &ctable2\[1*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aa\", 'X' <repeats 11 times>..."
-    test_print_accept "p &ctable2\[2*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaXXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[3*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[4*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[5*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaXXXXXXX\"..."
-    test_print_accept "p &ctable2\[6*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaXXXXXX\"..."
-    test_print_accept "p &ctable2\[7*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaXXXXX\"..."
-    test_print_accept "p &ctable2\[8*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaXXXX\"..."
-    test_print_accept "p &ctable2\[9*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaaXXX\"..."
-    test_print_accept "p &ctable2\[10*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>, \"XX\"..."
-    test_print_accept "p &ctable2\[11*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 12 times>, \"X\"..."
-    test_print_accept "p &ctable2\[12*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 13 times>..."
-    test_print_accept "p &ctable2\[13*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 13 times>..."
-    test_print_accept "p &ctable2\[14*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 13 times>..."
-    test_print_accept "p &ctable2\[15*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 13 times>..."
+    gdb_test "p &ctable2\[0*16\]" \
+	" = \\(unsigned char \\*\\) \"a\", 'X' <repeats 12 times>..."
+    gdb_test "p &ctable2\[1*16\]" \
+	" = \\(unsigned char \\*\\) \"aa\", 'X' <repeats 11 times>..."
+    gdb_test "p &ctable2\[2*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaXXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[3*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[4*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaXXXXXXXX\"..."
+    gdb_test "p &ctable2\[5*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaXXXXXXX\"..."
+    gdb_test "p &ctable2\[6*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaXXXXXX\"..."
+    gdb_test "p &ctable2\[7*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaXXXXX\"..."
+    gdb_test "p &ctable2\[8*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaXXXX\"..."
+    gdb_test "p &ctable2\[9*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaaXXX\"..."
+    gdb_test "p &ctable2\[10*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>, \"XX\"..."
+    gdb_test "p &ctable2\[11*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 12 times>, \"X\"..."
+    gdb_test "p &ctable2\[12*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 13 times>..."
+    gdb_test "p &ctable2\[13*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 13 times>..."
+    gdb_test "p &ctable2\[14*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 13 times>..."
+    gdb_test "p &ctable2\[15*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 13 times>..."
 
     send "set print elements 14\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"a\", 'X' <repeats 13 times>..."
-    test_print_accept "p &ctable2\[1*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aa\", 'X' <repeats 12 times>..."
-    test_print_accept "p &ctable2\[2*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\", 'X' <repeats 11 times>..."
-    test_print_accept "p &ctable2\[3*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaXXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[4*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[5*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[6*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaXXXXXXX\"..."
-    test_print_accept "p &ctable2\[7*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaXXXXXX\"..."
-    test_print_accept "p &ctable2\[8*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaXXXXX\"..."
-    test_print_accept "p &ctable2\[9*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaaXXXX\"..."
-    test_print_accept "p &ctable2\[10*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>, \"XXX\"..."
-    test_print_accept "p &ctable2\[11*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 12 times>, \"XX\"..."
-    test_print_accept "p &ctable2\[12*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 13 times>, \"X\"..."
-    test_print_accept "p &ctable2\[13*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 14 times>..."
-    test_print_accept "p &ctable2\[14*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 14 times>..."
-    test_print_accept "p &ctable2\[15*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 14 times>..."
+    gdb_test "p &ctable2\[0*16\]" \
+	" = \\(unsigned char \\*\\) \"a\", 'X' <repeats 13 times>..."
+    gdb_test "p &ctable2\[1*16\]" \
+	" = \\(unsigned char \\*\\) \"aa\", 'X' <repeats 12 times>..."
+    gdb_test "p &ctable2\[2*16\]" \
+	" = \\(unsigned char \\*\\) \"aaa\", 'X' <repeats 11 times>..."
+    gdb_test "p &ctable2\[3*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaXXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[4*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[5*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaXXXXXXXX\"..."
+    gdb_test "p &ctable2\[6*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaXXXXXXX\"..."
+    gdb_test "p &ctable2\[7*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaXXXXXX\"..."
+    gdb_test "p &ctable2\[8*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaXXXXX\"..."
+    gdb_test "p &ctable2\[9*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaaXXXX\"..."
+    gdb_test "p &ctable2\[10*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>, \"XXX\"..."
+    gdb_test "p &ctable2\[11*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 12 times>, \"XX\"..."
+    gdb_test "p &ctable2\[12*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 13 times>, \"X\"..."
+    gdb_test "p &ctable2\[13*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 14 times>..."
+    gdb_test "p &ctable2\[14*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 14 times>..."
+    gdb_test "p &ctable2\[15*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 14 times>..."
 
     send "set print elements 15\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"a\", 'X' <repeats 14 times>..."
-    test_print_accept "p &ctable2\[1*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aa\", 'X' <repeats 13 times>..."
-    test_print_accept "p &ctable2\[2*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\", 'X' <repeats 12 times>..."
-    test_print_accept "p &ctable2\[3*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\", 'X' <repeats 11 times>..."
-    test_print_accept "p &ctable2\[4*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaXXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[5*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[6*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[7*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaXXXXXXX\"..."
-    test_print_accept "p &ctable2\[8*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaXXXXXX\"..."
-    test_print_accept "p &ctable2\[9*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaaXXXXX\"..."
-    test_print_accept "p &ctable2\[10*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>, \"XXXX\"..."
-    test_print_accept "p &ctable2\[11*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 12 times>, \"XXX\"..."
-    test_print_accept "p &ctable2\[12*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 13 times>, \"XX\"..."
-    test_print_accept "p &ctable2\[13*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 14 times>, \"X\"..."
-    test_print_accept "p &ctable2\[14*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 15 times>..."
-    test_print_accept "p &ctable2\[15*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 15 times>..."
+    gdb_test "p &ctable2\[0*16\]" \
+	" = \\(unsigned char \\*\\) \"a\", 'X' <repeats 14 times>..."
+    gdb_test "p &ctable2\[1*16\]" \
+	" = \\(unsigned char \\*\\) \"aa\", 'X' <repeats 13 times>..."
+    gdb_test "p &ctable2\[2*16\]" \
+	" = \\(unsigned char \\*\\) \"aaa\", 'X' <repeats 12 times>..."
+    gdb_test "p &ctable2\[3*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaa\", 'X' <repeats 11 times>..."
+    gdb_test "p &ctable2\[4*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaXXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[5*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[6*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaXXXXXXXX\"..."
+    gdb_test "p &ctable2\[7*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaXXXXXXX\"..."
+    gdb_test "p &ctable2\[8*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaXXXXXX\"..."
+    gdb_test "p &ctable2\[9*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaaXXXXX\"..."
+    gdb_test "p &ctable2\[10*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>, \"XXXX\"..."
+    gdb_test "p &ctable2\[11*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 12 times>, \"XXX\"..."
+    gdb_test "p &ctable2\[12*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 13 times>, \"XX\"..."
+    gdb_test "p &ctable2\[13*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 14 times>, \"X\"..."
+    gdb_test "p &ctable2\[14*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 15 times>..."
+    gdb_test "p &ctable2\[15*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 15 times>..."
 
     send "set print elements 16\n" ; expect -re "$prompt $"
-    test_print_accept "p &ctable2\[0*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"a\", 'X' <repeats 15 times>..."
-    test_print_accept "p &ctable2\[1*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aa\", 'X' <repeats 14 times>..."
-    test_print_accept "p &ctable2\[2*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaa\", 'X' <repeats 13 times>..."
-    test_print_accept "p &ctable2\[3*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaa\", 'X' <repeats 12 times>..."
-    test_print_accept "p &ctable2\[4*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaa\", 'X' <repeats 11 times>..."
-    test_print_accept "p &ctable2\[5*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaXXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[6*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaXXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[7*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaXXXXXXXX\"..."
-    test_print_accept "p &ctable2\[8*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaXXXXXXX\"..."
-    test_print_accept "p &ctable2\[9*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"aaaaaaaaaaXXXXXX\"..."
-    test_print_accept "p &ctable2\[10*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 11 times>, \"XXXXX\"..."
-    test_print_accept "p &ctable2\[11*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 12 times>, \"XXXX\"..."
-    test_print_accept "p &ctable2\[12*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 13 times>, \"XXX\"..."
-    test_print_accept "p &ctable2\[13*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 14 times>, \"XX\"..."
-    test_print_accept "p &ctable2\[14*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 15 times>, \"X\"..."
-    test_print_accept "p &ctable2\[15*16\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ 'a' <repeats 16 times>"
+    gdb_test "p &ctable2\[0*16\]" \
+	" = \\(unsigned char \\*\\) \"a\", 'X' <repeats 15 times>..."
+    gdb_test "p &ctable2\[1*16\]" \
+	" = \\(unsigned char \\*\\) \"aa\", 'X' <repeats 14 times>..."
+    gdb_test "p &ctable2\[2*16\]" \
+	" = \\(unsigned char \\*\\) \"aaa\", 'X' <repeats 13 times>..."
+    gdb_test "p &ctable2\[3*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaa\", 'X' <repeats 12 times>..."
+    gdb_test "p &ctable2\[4*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaa\", 'X' <repeats 11 times>..."
+    gdb_test "p &ctable2\[5*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaXXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[6*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaXXXXXXXXX\"..."
+    gdb_test "p &ctable2\[7*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaXXXXXXXX\"..."
+    gdb_test "p &ctable2\[8*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaXXXXXXX\"..."
+    gdb_test "p &ctable2\[9*16\]" \
+	" = \\(unsigned char \\*\\) \"aaaaaaaaaaXXXXXX\"..."
+    gdb_test "p &ctable2\[10*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 11 times>, \"XXXXX\"..."
+    gdb_test "p &ctable2\[11*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 12 times>, \"XXXX\"..."
+    gdb_test "p &ctable2\[12*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 13 times>, \"XXX\"..."
+    gdb_test "p &ctable2\[13*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 14 times>, \"XX\"..."
+    gdb_test "p &ctable2\[14*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 15 times>, \"X\"..."
+    gdb_test "p &ctable2\[15*16\]" \
+	" = \\(unsigned char \\*\\) 'a' <repeats 16 times>"
 }
 
 proc test_print_strings {} {
@@ -818,72 +819,72 @@ proc test_print_strings {} {
 
     send "set print elements 8\n" ; expect -re "$prompt $"
 
-    test_print_accept "p &ctable1\[0\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\""
-    test_print_accept "p &ctable1\[1\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\001\\\\002\\\\003\\\\004\\\\005\\\\006\\\\a\\\\b\"..."
-    test_print_accept "p &ctable1\[1*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\b\\\\t\\\\n\\\\013\\\\f\\\\r\\\\016\\\\017\"..."
-    test_print_accept "p &ctable1\[2*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\020\\\\021\\\\022\\\\023\\\\024\\\\025\\\\026\\\\027\"..."
-    test_print_accept "p &ctable1\[3*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\030\\\\031\\\\032\\\\e\\\\034\\\\035\\\\036\\\\037\"..."
-    test_print_accept "p &ctable1\[4*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \" !\\\\\"#\\\$%&'\"..."
-    test_print_accept "p &ctable1\[5*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\[(\]+\[)\]+\[*\]+\\+,-./\"..."
-    test_print_accept "p &ctable1\[6*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"01234567\"..."
-    test_print_accept "p &ctable1\[7*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"89:;<=>\\?\"..."
-    test_print_accept "p &ctable1\[8*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"@ABCDEFG\"..."
-    test_print_accept "p &ctable1\[9*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"HIJKLMNO\"..."
-    test_print_accept "p &ctable1\[10*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"PQRSTUVW\"..."
-    test_print_accept "p &ctable1\[11*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"XYZ\\\[\\\\\\\\\\\]\\^_\"..."
-    test_print_accept "p &ctable1\[12*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"`abcdefg\"..."
-    test_print_accept "p &ctable1\[13*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"hijklmno\"..."
-    test_print_accept "p &ctable1\[14*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"pqrstuvw\"..."
-    test_print_accept "p &ctable1\[15*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"xyz\[{|}\]+\\~\\\\177\"..."
-    test_print_accept "p &ctable1\[16*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\200\\\\201\\\\202\\\\203\\\\204\\\\205\\\\206\\\\207\"..."
-    test_print_accept "p &ctable1\[17*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\210\\\\211\\\\212\\\\213\\\\214\\\\215\\\\216\\\\217\"..."
-    test_print_accept "p &ctable1\[18*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\220\\\\221\\\\222\\\\223\\\\224\\\\225\\\\226\\\\227\"..."
-    test_print_accept "p &ctable1\[19*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\230\\\\231\\\\232\\\\233\\\\234\\\\235\\\\236\\\\237\"..."
-    test_print_accept "p &ctable1\[20*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\240\\\\241\\\\242\\\\243\\\\244\\\\245\\\\246\\\\247\"..."
-    test_print_accept "p &ctable1\[21*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\250\\\\251\\\\252\\\\253\\\\254\\\\255\\\\256\\\\257\"..."
-    test_print_accept "p &ctable1\[22*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\260\\\\261\\\\262\\\\263\\\\264\\\\265\\\\266\\\\267\"..."
-    test_print_accept "p &ctable1\[23*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\270\\\\271\\\\272\\\\273\\\\274\\\\275\\\\276\\\\277\"..."
-    test_print_accept "p &ctable1\[24*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\300\\\\301\\\\302\\\\303\\\\304\\\\305\\\\306\\\\307\"..."
-    test_print_accept "p &ctable1\[25*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\310\\\\311\\\\312\\\\313\\\\314\\\\315\\\\316\\\\317\"..."
-    test_print_accept "p &ctable1\[26*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\320\\\\321\\\\322\\\\323\\\\324\\\\325\\\\326\\\\327\"..."
-    test_print_accept "p &ctable1\[27*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\330\\\\331\\\\332\\\\333\\\\334\\\\335\\\\336\\\\337\"..."
-    test_print_accept "p &ctable1\[28*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\340\\\\341\\\\342\\\\343\\\\344\\\\345\\\\346\\\\347\"..."
-    test_print_accept "p &ctable1\[29*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\350\\\\351\\\\352\\\\353\\\\354\\\\355\\\\356\\\\357\"..."
-    test_print_accept "p &ctable1\[30*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\360\\\\361\\\\362\\\\363\\\\364\\\\365\\\\366\\\\367\"..."
-    test_print_accept "p &ctable1\[31*8\]" \
-	"\[(\]+unsigned char \[*\]+\[)\]+ \"\\\\370\\\\371\\\\372\\\\373\\\\374\\\\375\\\\376\\\\377\"..."
+    gdb_test "p &ctable1\[0\]" \
+	" = \\(unsigned char \\*\\) \"\""
+    gdb_test "p &ctable1\[1\]" \
+	" = \\(unsigned char \\*\\) \"\\\\001\\\\002\\\\003\\\\004\\\\005\\\\006\\\\a\\\\b\"..."
+    gdb_test "p &ctable1\[1*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\b\\\\t\\\\n\\\\013\\\\f\\\\r\\\\016\\\\017\"..."
+    gdb_test "p &ctable1\[2*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\020\\\\021\\\\022\\\\023\\\\024\\\\025\\\\026\\\\027\"..."
+    gdb_test "p &ctable1\[3*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\030\\\\031\\\\032\\\\e\\\\034\\\\035\\\\036\\\\037\"..."
+    gdb_test "p &ctable1\[4*8\]" \
+	" = \\(unsigned char \\*\\) \" !\\\\\"#\\\$%&'\"..."
+    gdb_test "p &ctable1\[5*8\]" \
+	" = \\(unsigned char \\*\\) \"\\(\\)\\*\\+,-./\"..."
+    gdb_test "p &ctable1\[6*8\]" \
+	" = \\(unsigned char \\*\\) \"01234567\"..."
+    gdb_test "p &ctable1\[7*8\]" \
+	" = \\(unsigned char \\*\\) \"89:;<=>\\?\"..."
+    gdb_test "p &ctable1\[8*8\]" \
+	" = \\(unsigned char \\*\\) \"@ABCDEFG\"..."
+    gdb_test "p &ctable1\[9*8\]" \
+	" = \\(unsigned char \\*\\) \"HIJKLMNO\"..."
+    gdb_test "p &ctable1\[10*8\]" \
+	" = \\(unsigned char \\*\\) \"PQRSTUVW\"..."
+    gdb_test "p &ctable1\[11*8\]" \
+	" = \\(unsigned char \\*\\) \"XYZ\\\[\\\\\\\\\\\]\\^_\"..."
+    gdb_test "p &ctable1\[12*8\]" \
+	" = \\(unsigned char \\*\\) \"`abcdefg\"..."
+    gdb_test "p &ctable1\[13*8\]" \
+	" = \\(unsigned char \\*\\) \"hijklmno\"..."
+    gdb_test "p &ctable1\[14*8\]" \
+	" = \\(unsigned char \\*\\) \"pqrstuvw\"..."
+    gdb_test "p &ctable1\[15*8\]" \
+	" = \\(unsigned char \\*\\) \"xyz\[{|}\]+\\~\\\\177\"..."
+    gdb_test "p &ctable1\[16*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\200\\\\201\\\\202\\\\203\\\\204\\\\205\\\\206\\\\207\"..."
+    gdb_test "p &ctable1\[17*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\210\\\\211\\\\212\\\\213\\\\214\\\\215\\\\216\\\\217\"..."
+    gdb_test "p &ctable1\[18*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\220\\\\221\\\\222\\\\223\\\\224\\\\225\\\\226\\\\227\"..."
+    gdb_test "p &ctable1\[19*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\230\\\\231\\\\232\\\\233\\\\234\\\\235\\\\236\\\\237\"..."
+    gdb_test "p &ctable1\[20*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\240\\\\241\\\\242\\\\243\\\\244\\\\245\\\\246\\\\247\"..."
+    gdb_test "p &ctable1\[21*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\250\\\\251\\\\252\\\\253\\\\254\\\\255\\\\256\\\\257\"..."
+    gdb_test "p &ctable1\[22*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\260\\\\261\\\\262\\\\263\\\\264\\\\265\\\\266\\\\267\"..."
+    gdb_test "p &ctable1\[23*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\270\\\\271\\\\272\\\\273\\\\274\\\\275\\\\276\\\\277\"..."
+    gdb_test "p &ctable1\[24*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\300\\\\301\\\\302\\\\303\\\\304\\\\305\\\\306\\\\307\"..."
+    gdb_test "p &ctable1\[25*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\310\\\\311\\\\312\\\\313\\\\314\\\\315\\\\316\\\\317\"..."
+    gdb_test "p &ctable1\[26*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\320\\\\321\\\\322\\\\323\\\\324\\\\325\\\\326\\\\327\"..."
+    gdb_test "p &ctable1\[27*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\330\\\\331\\\\332\\\\333\\\\334\\\\335\\\\336\\\\337\"..."
+    gdb_test "p &ctable1\[28*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\340\\\\341\\\\342\\\\343\\\\344\\\\345\\\\346\\\\347\"..."
+    gdb_test "p &ctable1\[29*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\350\\\\351\\\\352\\\\353\\\\354\\\\355\\\\356\\\\357\"..."
+    gdb_test "p &ctable1\[30*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\360\\\\361\\\\362\\\\363\\\\364\\\\365\\\\366\\\\367\"..."
+    gdb_test "p &ctable1\[31*8\]" \
+	" = \\(unsigned char \\*\\) \"\\\\370\\\\371\\\\372\\\\373\\\\374\\\\375\\\\376\\\\377\"..."
 }
 
 proc test_print_int_arrays {} {
@@ -891,21 +892,24 @@ proc test_print_int_arrays {} {
 
     send "set print elements 24\n" ; expect -re "$prompt $"
 
-    test_print_accept "p int1dim" \
-	"{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}"
-    test_print_accept "p int2dim" \
-	"{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}}"
-    test_print_accept "p int3dim" \
-	"{{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}}"
-    test_print_accept "p int4dim" \
-	"{{{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}}}"
+    gdb_test "p int1dim" \
+	" = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}"
+    gdb_test "p int2dim" \
+	" = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}}"
+    gdb_test "p int3dim" \
+	" = {{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}}"
+    gdb_test "p int4dim" \
+	" = {{{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}}}"
 }
 
 proc test_artificial_arrays {} {
-    test_print_accept {p int1dim[0]@2} "{0, 1}"
-    gdb_test {p int1dim[0]@2@3} "({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot.*)"
-    test_print_accept {p/x (short [])0x12345678} \
-	"({0x1234, 0x5678}|{0x5678, 0x1234})"
+    # Send \026@ instead of just @ in case the kill character is @.
+    gdb_test "p int1dim\[0\]\026@2" " = {0, 1}" {p int1dim[0]@2}
+    gdb_test "p int1dim\[0\]\026@2\026@3" \
+	"({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot.*)" \
+	{p int1dim[0]@2@3}
+    gdb_test {p/x (short [])0x12345678} \
+	" = ({0x1234, 0x5678}|{0x5678, 0x1234})"
 }
 
 proc test_print_char_arrays {} {
@@ -915,20 +919,20 @@ proc test_print_char_arrays {} {
     send "set print elements 24\n" ; expect -re "$prompt $"
     send "set print address on\n" ; expect -re "$prompt $"
 
-    test_print_accept "p arrays" \
-	"{array1 = \"abc\", array2 = \"d\", array3 = \"e\", array4 = \"fg\", array5 = \"hij\"}"
+    gdb_test "p arrays" \
+	" = {array1 = \"abc\", array2 = \"d\", array3 = \"e\", array4 = \"fg\", array5 = \"hij\"}"
 
-    test_print_accept "p parrays"		"\[(\]+struct some_arrays \[*\]+\[)\]+ $hex"
-    test_print_accept "p parrays->array1"	"\"abc\""
-    test_print_accept "p &parrays->array1"	"\[(\]+unsigned char \[*\]+\[)\]+ $hex \"abc\""
-    test_print_accept "p parrays->array2"	"\"d\""
-    test_print_accept "p &parrays->array2"	"\[(\]+unsigned char \[*\]+\[)\]+ $hex \"defghij\""
-    test_print_accept "p parrays->array3"	"\"e\""
-    test_print_accept "p &parrays->array3"	"\[(\]+unsigned char \[*\]+\[)\]+ $hex \"efghij\""
-    test_print_accept "p parrays->array4"	"\"fg\""
-    test_print_accept "p &parrays->array4"	"\[(\]+unsigned char \[*\]+\[)\]+ $hex \"fghij\""
-    test_print_accept "p parrays->array5"	"\"hij\""
-    test_print_accept "p &parrays->array5"	"\[(\]+unsigned char \[*\]+\[)\]+ $hex \"hij\""
+    gdb_test "p parrays"		" = \\(struct some_arrays \\*\\) $hex"
+    gdb_test "p parrays->array1"	" = \"abc\""
+    gdb_test "p &parrays->array1"	" = \\(unsigned char \\*\\) $hex \"abc\""
+    gdb_test "p parrays->array2"	" = \"d\""
+    gdb_test "p &parrays->array2"	" = \\(unsigned char \\*\\) $hex \"defghij\""
+    gdb_test "p parrays->array3"	" = \"e\""
+    gdb_test "p &parrays->array3"	" = \\(unsigned char \\*\\) $hex \"efghij\""
+    gdb_test "p parrays->array4"	" = \"fg\""
+    gdb_test "p &parrays->array4"	" = \\(unsigned char \\*\\) $hex \"fghij\""
+    gdb_test "p parrays->array5"	" = \"hij\""
+    gdb_test "p &parrays->array5"	" = \\(unsigned char \\*\\) $hex \"hij\""
 
     send "set print address off\n" ; expect -re "$prompt $"
 }
@@ -943,25 +947,25 @@ proc test_print_string_constants {} {
     send "set print elements 50\n" ; expect -re "$prompt $"
 
     setup_xfail "a29k-*-udi" 2416
-    test_print_accept "p \"a string\""		"\"a string\""
+    gdb_test "p \"a string\""		" = \"a string\""
     setup_xfail "a29k-*-udi" 2416
-    test_print_accept "p \"embedded \\000 null\"" "\"embedded \\\\000 null\""
+    gdb_test "p \"embedded \\000 null\"" " = \"embedded \\\\000 null\""
     setup_xfail "a29k-*-udi" 2416
-    test_print_accept "p \"abcd\"\[2\]"	"99 'c'"
+    gdb_test "p \"abcd\"\[2\]"	" = 99 'c'"
     setup_xfail "a29k-*-udi" 2416
-    test_print_accept "p sizeof (\"abcdef\")"	"7"
+    gdb_test "p sizeof (\"abcdef\")"	" = 7"
     setup_xfail "a29k-*-udi" 2416
-    test_print_accept "ptype \"foo\""		"char \\\[4\\\]"
+    gdb_test "ptype \"foo\""		" = char \\\[4\\\]"
     setup_xfail "a29k-*-udi" 2416
-    test_print_accept "p *\"foo\""		"102 'f'"
+    gdb_test "p *\"foo\""		" = 102 'f'"
     setup_xfail "a29k-*-udi" 2416
-    test_print_accept "ptype *\"foo\""		"char"
+    gdb_test "ptype *\"foo\""		" = char"
     setup_xfail "a29k-*-udi" 2416
-    test_print_accept "p &*\"foo\""		"\"foo\""
+    gdb_test "p &*\"foo\""		" = \"foo\""
     setup_xfail "*-*-*"
-    test_print_accept "ptype &*\"foo\""	"char \[*\]+"
+    gdb_test "ptype &*\"foo\""	"type = char \\*"
     setup_xfail "a29k-*-udi" 2416
-    test_print_accept "p (char *)\"foo\""	"\"foo\""
+    gdb_test "p (char *)\"foo\""	" = \"foo\""
 
     set timeout $otimeout
 }

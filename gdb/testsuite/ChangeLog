@@ -1,5 +1,8 @@
 Tue Mar 21 12:14:12 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/printcmds.exp (test_artificial_arrays): Send ^V@
+	instead of just @.
+
 	* gdb.base/signals.exp: Add test for "handle all print".
 	* TODO: Remove "handle all print".  Also remove item about
 	checking copyright date (I don't like the idea of a spurious FAIL
