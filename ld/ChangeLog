@@ -1,3 +1,8 @@
+2001-07-13  Jakub Jelinek  <jakub@redhat.com>
+
+	* emultempl/elf32.em (output_prev_sec_find): New.
+	(place_orphan): Use it.
+
 2001-07-11  H.J. Lu  <hjl@gnu.org>
 
 	* ldmain.c (main): Fix typos in the last change.

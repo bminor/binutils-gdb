@@ -1006,6 +1006,35 @@ EOF
 if test x"$LDEMUL_PLACE_ORPHAN" != xgld"$EMULATION_NAME"_place_orphan; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
+/* Find the last output section before given output statement.
+   Used by place_orphan.  */
+
+static asection *
+output_prev_sec_find (os)
+     lang_output_section_statement_type *os;
+{
+  asection *s = (asection *) NULL;
+  lang_statement_union_type *u;
+  lang_output_section_statement_type *lookup;
+
+  for (u = lang_output_section_statement.head;
+       u != (lang_statement_union_type *) NULL;
+       u = lookup->next)
+    {
+      lookup = &u->output_section_statement;
+      if (lookup == os)
+	break;
+      if (lookup->bfd_section != NULL)
+	s = lookup->bfd_section;
+    }
+
+  if (u == NULL)
+    return NULL;
+
+  return s;
+}
+
+
 /* Place an orphan section.  We use this to put random SHF_ALLOC
    sections in the right segment.  */
 
@@ -1192,12 +1221,16 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 
   if (place != NULL)
     {
-      asection *snew, **pps;
+      asection *snew, **pps, *bfd_section;
 
       snew = os->bfd_section;
+      bfd_section = place->os->bfd_section;
+      if (place->section == NULL && bfd_section == NULL)
+	bfd_section = output_prev_sec_find (place->os);
+
       if (place->section != NULL
-	  || (place->os->bfd_section != NULL
-	      && place->os->bfd_section != snew))
+	  || (bfd_section != NULL
+	      && bfd_section != snew))
 	{
 	  /* Shuffle the section to make the output file look neater.
 	     This is really only cosmetic.  */
@@ -1206,15 +1239,15 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 #if 0
 	      /* Finding the end of the list is a little tricky.  We
 		 make a wild stab at it by comparing section flags.  */
-	      flagword first_flags = place->os->bfd_section->flags;
-	      for (pps = &place->os->bfd_section->next;
+	      flagword first_flags = bfd_section->flags;
+	      for (pps = &bfd_section->next;
 		   *pps != NULL && (*pps)->flags == first_flags;
 		   pps = &(*pps)->next)
 		;
 	      place->section = pps;
 #else
 	      /* Put orphans after the first section on the list.  */
-	      place->section = &place->os->bfd_section->next;
+	      place->section = &bfd_section->next;
 #endif
 	    }
 
