@@ -30,6 +30,7 @@
 #include "annotate.h"
 #include "ui-out.h"
 #include "gdb_assert.h"
+#include "gdb_string.h"
 
 /* One should use catch_errors rather than manipulating these
    directly.  */
@@ -43,8 +44,184 @@
 #define SIGLONGJMP(buf,val)	longjmp((buf), (val))
 #endif
 
+/* Possible catcher states.  */
+enum catcher_state {
+  /* Initial state, a new catcher has just been created.  */
+  CATCHER_CREATED,
+  /* The catch code is running.  */
+  CATCHER_RUNNING,
+  CATCHER_RUNNING_1,
+  /* The catch code threw an exception.  */
+  CATCHER_ABORTING
+};
+
+/* Possible catcher actions.  */
+enum catcher_action {
+  CATCH_ITER,
+  CATCH_ITER_1,
+  CATCH_THROWING
+};
+
+struct catcher
+{
+  enum catcher_state state;
+  /* Scratch variables used when transitioning a state.  */
+  SIGJMP_BUF buf;
+  int reason;
+  int val;
+  /* Saved/current state.  */
+  int mask;
+  char *saved_error_pre_print;
+  char *saved_quit_pre_print;
+  struct ui_out *saved_uiout;
+  struct cleanup *saved_cleanup_chain;
+  char **gdberrmsg;
+  /* Back link.  */
+  struct catcher *prev;
+};
+
 /* Where to go for throw_exception().  */
-static SIGJMP_BUF *catch_return;
+static struct catcher *current_catcher;
+
+static SIGJMP_BUF *
+catcher_init (struct ui_out *func_uiout,
+	      char *errstring,
+	      char **gdberrmsg,
+	      return_mask mask)
+{
+  struct catcher *new_catcher = XZALLOC (struct catcher);
+
+  new_catcher->gdberrmsg = gdberrmsg;
+  new_catcher->mask = mask;
+
+  /* Override error/quit messages during FUNC. */
+  new_catcher->saved_error_pre_print = error_pre_print;
+  new_catcher->saved_quit_pre_print = quit_pre_print;
+  if (mask & RETURN_MASK_ERROR)
+    error_pre_print = errstring;
+  if (mask & RETURN_MASK_QUIT)
+    quit_pre_print = errstring;
+
+  /* Override the global ``struct ui_out'' builder.  */
+  new_catcher->saved_uiout = uiout;
+  uiout = func_uiout;
+
+  /* Prevent error/quit during FUNC from calling cleanups established
+     prior to here. */
+  new_catcher->saved_cleanup_chain = save_cleanups ();
+
+  /* Push this new catcher on the top.  */
+  new_catcher->prev = current_catcher;
+  current_catcher = new_catcher;
+  new_catcher->state = CATCHER_CREATED;
+
+  return &new_catcher->buf;
+}
+
+static void
+catcher_pop (void)
+{
+  struct catcher *old_catcher = current_catcher;
+  current_catcher = old_catcher->prev;
+
+  /* Restore the cleanup chain, the error/quit messages, and the uiout
+     builder, to their original states. */
+
+  restore_cleanups (old_catcher->saved_cleanup_chain);
+
+  uiout = old_catcher->saved_uiout;
+
+  quit_pre_print = old_catcher->saved_quit_pre_print;
+  error_pre_print = old_catcher->saved_error_pre_print;
+
+  xfree (old_catcher);
+}
+
+/* Catcher state machine.  Returns non-zero if the m/c should be run
+   again, zero if it should abort.  */
+
+int
+catcher_state_machine (enum catcher_action action)
+{
+  switch (current_catcher->state)
+    {
+    case CATCHER_CREATED:
+      switch (action)
+	{
+	case CATCH_ITER:
+	  /* Allow the code to run the catcher.  */
+	  current_catcher->state = CATCHER_RUNNING;
+	  return 1;
+	default:
+	  internal_error (__FILE__, __LINE__, "bad state");
+	}
+    case CATCHER_RUNNING:
+      switch (action)
+	{
+	case CATCH_ITER:
+	  /* No error/quit has occured.  Just clean up.  */
+	  catcher_pop ();
+	  return 0;
+	case CATCH_ITER_1:
+	  current_catcher->state = CATCHER_RUNNING_1;
+	  return 1;
+	case CATCH_THROWING:
+	  current_catcher->state = CATCHER_ABORTING;
+	  /* See also throw_exception.  */
+	  return 1;
+	default:
+	  internal_error (__FILE__, __LINE__, "bad switch");
+	}
+    case CATCHER_RUNNING_1:
+      switch (action)
+	{
+	case CATCH_ITER:
+	  /* The did a "break" from the inner while loop.  */
+	  catcher_pop ();
+	  return 0;
+	case CATCH_ITER_1:
+	  current_catcher->state = CATCHER_RUNNING;
+	  return 0;
+	case CATCH_THROWING:
+	  current_catcher->state = CATCHER_ABORTING;
+	  /* See also throw_exception.  */
+	  return 1;
+	default:
+	  internal_error (__FILE__, __LINE__, "bad switch");
+	}
+    case CATCHER_ABORTING:
+      switch (action)
+	{
+	case CATCH_ITER:
+	  {
+	    int reason = current_catcher->reason;
+	    /* If caller wants a copy of the low-level error message,
+	       make one.  This is used in the case of a silent error
+	       whereby the caller may optionally want to issue the
+	       message.  */
+	    if (current_catcher->gdberrmsg != NULL)
+	      *(current_catcher->gdberrmsg) = error_last_message ();
+	    if (current_catcher->mask & RETURN_MASK (reason))
+	      {
+		/* Exit normally if this catcher can handle this
+		   exception.  The caller analyses the func return
+		   values.  */
+		catcher_pop ();
+		return 0;
+	      }
+	    /* The caller didn't request that the event be caught,
+	       relay the event to the next containing
+	       catch_errors(). */
+	    catcher_pop ();
+	    throw_exception (reason);
+	  }
+	default:
+	  internal_error (__FILE__, __LINE__, "bad state");
+	}
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
+    }
+}
 
 /* Return for reason REASON to the nearest containing catch_errors().  */
 
@@ -79,8 +256,9 @@ throw_exception (enum return_reason reason)
   /* Jump to the containing catch_errors() call, communicating REASON
      to that call via setjmp's return value.  Note that REASON can't
      be zero, by definition in defs.h. */
-
-  (NORETURN void) SIGLONGJMP (*catch_return, (int) reason);
+  catcher_state_machine (CATCH_THROWING);
+  current_catcher->reason = reason;
+  SIGLONGJMP (current_catcher->buf, current_catcher->reason);
 }
 
 /* Call FUNC() with args FUNC_UIOUT and FUNC_ARGS, catching any
@@ -115,105 +293,6 @@ throw_exception (enum return_reason reason)
    be consolidated into a single file instead of being distributed
    between utils.c and top.c? */
 
-static void
-catcher (catch_exceptions_ftype *func,
-	 struct ui_out *func_uiout,
-	 void *func_args,
-	 int *func_val,
-	 enum return_reason *func_caught,
-	 char *errstring,
-	 char **gdberrmsg,
-	 return_mask mask)
-{
-  SIGJMP_BUF *saved_catch;
-  SIGJMP_BUF catch;
-  struct cleanup *saved_cleanup_chain;
-  char *saved_error_pre_print;
-  char *saved_quit_pre_print;
-  struct ui_out *saved_uiout;
-
-  /* Return value from SIGSETJMP(): enum return_reason if error or
-     quit caught, 0 otherwise. */
-  int caught;
-
-  /* Return value from FUNC(): Hopefully non-zero. Explicitly set to
-     zero if an error quit was caught.  */
-  int val;
-
-  /* Override error/quit messages during FUNC. */
-
-  saved_error_pre_print = error_pre_print;
-  saved_quit_pre_print = quit_pre_print;
-
-  if (mask & RETURN_MASK_ERROR)
-    error_pre_print = errstring;
-  if (mask & RETURN_MASK_QUIT)
-    quit_pre_print = errstring;
-
-  /* Override the global ``struct ui_out'' builder.  */
-
-  saved_uiout = uiout;
-  uiout = func_uiout;
-
-  /* Prevent error/quit during FUNC from calling cleanups established
-     prior to here. */
-
-  saved_cleanup_chain = save_cleanups ();
-
-  /* Call FUNC, catching error/quit events. */
-
-  saved_catch = catch_return;
-  catch_return = &catch;
-  caught = SIGSETJMP (catch);
-  if (!caught)
-    val = (*func) (func_uiout, func_args);
-  else
-    {
-      val = 0;
-      /* If caller wants a copy of the low-level error message, make one.  
-         This is used in the case of a silent error whereby the caller
-         may optionally want to issue the message.  */
-      if (gdberrmsg)
-	*gdberrmsg = error_last_message ();
-    }
-  catch_return = saved_catch;
-
-  /* FIXME: cagney/1999-11-05: A correct FUNC implementation will
-     clean things up (restoring the cleanup chain) to the state they
-     were just prior to the call.  Unfortunately, many FUNC's are not
-     that well behaved.  This could be fixed by adding either a
-     do_cleanups call (to cover the problem) or an assertion check to
-     detect bad FUNCs code. */
-
-  /* Restore the cleanup chain, the error/quit messages, and the uiout
-     builder, to their original states. */
-
-  restore_cleanups (saved_cleanup_chain);
-
-  uiout = saved_uiout;
-
-  if (mask & RETURN_MASK_QUIT)
-    quit_pre_print = saved_quit_pre_print;
-  if (mask & RETURN_MASK_ERROR)
-    error_pre_print = saved_error_pre_print;
-
-  /* Return normally if no error/quit event occurred or this catcher
-     can handle this exception.  The caller analyses the func return
-     values.  */
-
-  if (!caught || (mask & RETURN_MASK (caught)))
-    {
-      *func_val = val;
-      *func_caught = caught;
-      return;
-    }
-
-  /* The caller didn't request that the event be caught, relay the
-     event to the next containing catch_errors(). */
-
-  throw_exception (caught);
-}
-
 int
 catch_exceptions (struct ui_out *uiout,
 		  catch_exceptions_ftype *func,
@@ -221,14 +300,8 @@ catch_exceptions (struct ui_out *uiout,
 		  char *errstring,
 		  return_mask mask)
 {
-  int val;
-  enum return_reason caught;
-  catcher (func, uiout, func_args, &val, &caught, errstring, NULL, mask);
-  gdb_assert (val >= 0);
-  gdb_assert (caught <= 0);
-  if (caught < 0)
-    return caught;
-  return val;
+  return catch_exceptions_with_msg (uiout, func, func_args, errstring,
+				    NULL, mask);
 }
 
 int
@@ -239,9 +312,13 @@ catch_exceptions_with_msg (struct ui_out *uiout,
 			   char **gdberrmsg,
 		  	   return_mask mask)
 {
-  int val;
+  int val = 0;
   enum return_reason caught;
-  catcher (func, uiout, func_args, &val, &caught, errstring, gdberrmsg, mask);
+  SIGJMP_BUF *catch;
+  catch = catcher_init (uiout, errstring, gdberrmsg, mask);
+  for (caught = SIGSETJMP ((*catch));
+       catcher_state_machine (CATCH_ITER);)
+    val = (*func) (uiout, func_args);
   gdb_assert (val >= 0);
   gdb_assert (caught <= 0);
   if (caught < 0)
@@ -249,30 +326,23 @@ catch_exceptions_with_msg (struct ui_out *uiout,
   return val;
 }
 
-struct catch_errors_args
-{
-  catch_errors_ftype *func;
-  void *func_args;
-};
-
-static int
-do_catch_errors (struct ui_out *uiout, void *data)
-{
-  struct catch_errors_args *args = data;
-  return args->func (args->func_args);
-}
-
 int
 catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 	      return_mask mask)
 {
-  int val;
+  int val = 0;
   enum return_reason caught;
-  struct catch_errors_args args;
-  args.func = func;
-  args.func_args = func_args;
-  catcher (do_catch_errors, uiout, &args, &val, &caught, errstring, 
-	   NULL, mask);
+  SIGJMP_BUF *catch;
+  catch = catcher_init (uiout, errstring, NULL, mask);
+  /* This illustrates how it is possible to nest the mechanism and
+     hence catch "break".  Of course this doesn't address the need to
+     also catch "return".  */
+  for (caught = SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
+    for (; catcher_state_machine (CATCH_ITER_1);)
+      {
+	val = func (func_args);
+	break;
+      }
   if (caught != 0)
     return 0;
   return val;

@@ -1,5 +1,20 @@
 2005-01-12  Andrew Cagney  <cagney@gnu.org>
 
+	* exceptions.c: Include "gdb_string.h".
+	(enum catcher_state, struct catcher): Define.
+	(current_catcher): New global, replaces catch_return;
+	(catch_return): Delete.
+	(throw_exception): Use current_catcher->buf;
+	(catcher_init, catcher_pop, catcher_state_machine): New functions.
+	(catcher): Delete.
+	(struct catch_errors_args): Delete.
+	(do_catch_errors): Delete.
+	(catch_exceptions): Replace body with call to
+	catch_exceptions_with_msg.
+	(catcher): Delete.
+	(catch_exceptions_with_msg, catch_errors): Re-implement using
+	catcher_state_machine.
+
 	* exceptions.h (enum return_reason, RETURN_MASK)
 	(RETURN_MASK_QUIT, RETURN_MASK_ERROR, RETURN_MASK_ALL)
 	(return_mask, throw_exception, catch_exceptions_ftype)
