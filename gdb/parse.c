@@ -112,7 +112,16 @@ target_map_name_to_register (str, len)
 {
   int i;
 
-  /* First search architectural register name space. */
+  /* First try target specific aliases. We try these first because on some 
+     systems standard names can be context dependent (eg. $pc on a 
+     multiprocessor can be could be any of several PCs).  */
+#ifdef REGISTER_NAME_ALIAS_HOOK
+  i =  REGISTER_NAME_ALIAS_HOOK (str, len);
+  if (i >= 0)
+    return i;
+#endif
+
+  /* Search architectural register name space. */
   for (i = 0; i < NUM_REGS; i++)
     if (reg_names[i] && len == strlen (reg_names[i])
 	&& STREQN (str, reg_names[i], len))
@@ -127,11 +136,6 @@ target_map_name_to_register (str, len)
       {
 	return std_regs[i].regnum;
       }
-
-  /* Try target specific aliases */
-#ifdef REGISTER_NAME_ALIAS_HOOK
-  return REGISTER_NAME_ALIAS_HOOK (str, len);
-#endif
 
   return -1;
 }
