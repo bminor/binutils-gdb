@@ -24,7 +24,8 @@ CXXFLAGS = -g -O
 MAKEINFOFLAGS =
 
 log	= 1>$(canonhost)-build-log 2>&1
-tlog    = 1> $(canonhost)-x-$$i-build-log 2>&1
+cyglog    = 1> $(canonhost)-x-$$i-cygnus-build-log 2>&1
+natlog    = 1> $(canonhost)-x-$$i-native-build-log 2>&1
 
 canonhost := $(shell $(TREE)/config.sub $(host))
 
@@ -216,7 +217,7 @@ all-cygnus:
 	    fi \
 	  else \
 	    echo "building $(canonhost) cross to $$i" ; \
-            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i do-cygnus $(tlog) && \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i do-cygnus $(cyglog) && \
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
@@ -241,7 +242,7 @@ build-cygnus:
 	    fi \
 	  else \
 	    echo "building $(canonhost) cross to $$i:" `date` ; \
-            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-cygnus $(tlog) && \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-cygnus $(cyglog) && \
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
@@ -253,7 +254,7 @@ all-native:
 	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG)
 	@for i in $(TARGETS) ; do \
 	    echo "building $(canonhost) cross to $$i" ; \
-            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i do-native $(tlog) && \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i do-native $(natlog) && \
 	       echo "     completed successfully" ; \
 	done
 
@@ -263,7 +264,7 @@ all-cross:
 	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG)
 	@for i in $(TARGETS) ; do \
 	    echo "building $(canonhost) cross to $$i" ; \
-            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build=$(build) do-cygnus $(tlog) && \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build=$(build) do-cygnus $(cyglog) && \
 	       echo "     completed successfully" ; \
 	done
 
@@ -275,7 +276,7 @@ config:
 	       echo "     completed successfully" ; \
 	  else \
 	    echo "config $(canonhost) cross to $$i" ; \
-            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i do-native-config $(tlog) && \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i do-native-config $(cyglog) && \
 	       echo "     completed successfully" ;  \
 	  fi ; \
 	done
@@ -288,7 +289,7 @@ build:
 	       echo "     completed successfully" ; \
 	  else \
 	    echo "building $(canonhost) cross to $$i" ; \
-            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-native $(tlog) && \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-native $(cyglog) && \
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
@@ -302,7 +303,7 @@ build:
 	       echo "     completed successfully" ; \
 	  else \
 	    echo "building $(canonhost) cross to $$i" ; \
-            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-cygnus $(tlog) && \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-cygnus $(cyglog) && \
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
