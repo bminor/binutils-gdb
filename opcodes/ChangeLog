@@ -1,4 +1,4 @@
-2003-08-06  Michael Meissner  <gnu@the-meissners.org>
+2003-08-07  Michael Meissner  <gnu@the-meissners.org>
 
 	* cgen-asm.c (hash_insn_array): Remove PARAMS macro.
 	(hash_insn_list): Ditto.
