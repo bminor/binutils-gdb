@@ -3002,8 +3002,12 @@ CAT(NAME,_canonicalize_dynamic_reloc)
    /* Read in the dynamic relocs.  */
   long  (*_bfd_canonicalize_dynamic_reloc)
     PARAMS ((bfd *, arelent **, struct symbol_cache_entry **));
-
+    
+ /* Opposite endian version of this target.  */
+ const struct bfd_target * alternative_target;
+ 
  PTR backend_data;
+ 
 } bfd_target;
 boolean 
 bfd_set_default_target  PARAMS ((const char *name));
@@ -3013,6 +3017,9 @@ bfd_find_target PARAMS ((CONST char *target_name, bfd *abfd));
 
 const char **
 bfd_target_list PARAMS ((void));
+
+const bfd_target *
+bfd_search_for_target PARAMS ((int (* search_func)(const bfd_target *, void *), void *));
 
 boolean 
 bfd_check_format PARAMS ((bfd *abfd, bfd_format format));

@@ -382,5 +382,7 @@ const bfd_target binary_vec =
   BFD_JUMP_TABLE_LINK (binary),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   NULL
 };

@@ -132,11 +132,10 @@ static boolean vms_bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 
 const bfd_target vms_alpha_vec =
 {
-
   "vms-alpha",			/* name */
   bfd_target_evax_flavour,
-  false,			/* data byte order is little */
-  false,			/* header byte order is little */
+  BFD_ENDIAN_LITTLE,		/* data byte order is little */
+  BFD_ENDIAN_LITTLE,		/* header byte order is little */
 
   (HAS_RELOC | HAS_SYMS
    | WP_TEXT | D_PAGED),	/* object flags */
@@ -170,16 +169,17 @@ const bfd_target vms_alpha_vec =
   BFD_JUMP_TABLE_LINK (vms),
   BFD_JUMP_TABLE_DYNAMIC (vms),
 
+  NULL,
+  
   (PTR) 0
 };
 
 const bfd_target vms_vax_vec =
 {
-
   "vms-vax",			/* name */
   bfd_target_ovax_flavour,
-  false,			/* data byte order is little */
-  false,			/* header byte order is little */
+  BFD_ENDIAN_LITTLE,		/* data byte order is little */
+  BFD_ENDIAN_LITTLE,		/* header byte order is little */
 
   (HAS_RELOC | HAS_SYMS 	/* object flags */
    | WP_TEXT | D_PAGED
@@ -215,6 +215,8 @@ const bfd_target vms_vax_vec =
   BFD_JUMP_TABLE_LINK (vms),
   BFD_JUMP_TABLE_DYNAMIC (vms),
 
+  NULL,
+  
   (PTR) 0
 };
 

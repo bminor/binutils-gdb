@@ -460,10 +460,21 @@ The general target vector.
 .    PARAMS ((bfd *, arelent **, struct symbol_cache_entry **));
 .
 
+A pointer to an alternative bfd_target in case the current one is not
+satisfactory.  This can happen when the target cpu supports both big
+and little endian code, and target chosen by the linker has the wrong
+endianness.  The function open_output() in ld/ldlang.c uses this field
+to find an alternative output format that is suitable.
+
+. {* Opposite endian version of this target.  *}  
+. const struct bfd_target * alternative_target;
+. 
+
 Data for use by back-end routines, which isn't generic enough to belong
 in this structure.
 
 . PTR backend_data;
+. 
 .} bfd_target;
 
 */
@@ -1078,4 +1089,33 @@ bfd_target_list ()
     *(name_ptr++) = (*target)->name;
 
   return name_list;
+}
+
+/*
+FUNCTION
+	bfd_seach_for_target
+
+SYNOPSIS
+	const bfd_target * bfd_search_for_target (int (* search_func)(const bfd_target *, void *), void *);
+
+DESCRIPTION
+	Return a pointer to the first transfer vector in the list of
+	transfer vectors maintained by BFD that produces a non-zero
+	result when passed to the function @var{search_func}.  The
+	parameter @var{data} is passed, unexamined, to the search
+	function.
+*/
+
+const bfd_target *
+bfd_search_for_target (search_func, data)
+     int (* search_func) PARAMS ((const bfd_target * target, void * data));
+     void * data;
+{
+  const bfd_target * const * target;
+
+  for (target = bfd_target_vector; * target != NULL; target ++)
+    if (search_func (* target, data))
+      return * target;
+
+  return NULL;
 }

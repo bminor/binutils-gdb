@@ -367,5 +367,7 @@ const bfd_target i386os9k_vec =
      BFD_JUMP_TABLE_LINK (os9k),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0,
 };

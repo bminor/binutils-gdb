@@ -388,6 +388,11 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_want_dynbss
 };
 
+/* Forward declaration for use when initialising alternative_target field.  */
+#ifdef TARGET_LITTLE_SYM
+extern const bfd_target TARGET_LITTLE_SYM;
+#endif
+
 #ifdef TARGET_BIG_SYM
 const bfd_target TARGET_BIG_SYM =
 {
@@ -471,8 +476,15 @@ const bfd_target TARGET_BIG_SYM =
       BFD_JUMP_TABLE_LINK (bfd_elfNN),
       BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
 
+  /* Alternative endian target.  */
+#ifdef TARGET_LITTLE_SYM
+  & TARGET_LITTLE_SYM,
+#else
+  NULL,
+#endif
+
   /* backend_data: */
-  (PTR) &elfNN_bed,
+  (PTR) &elfNN_bed
 };
 #endif
 
@@ -559,7 +571,14 @@ const bfd_target TARGET_LITTLE_SYM =
       BFD_JUMP_TABLE_LINK (bfd_elfNN),
       BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
 
+  /* Alternative endian target.  */
+#ifdef TARGET_BIG_SYM
+  & TARGET_BIG_SYM,
+#else
+  NULL,
+#endif
+  
   /* backend_data: */
-  (PTR) &elfNN_bed,
+  (PTR) &elfNN_bed
 };
 #endif

@@ -1,3 +1,71 @@
+1999-07-19  Nick Clifton  <nickc@cygnus.com>
+
+	* targets.c (alternative_target): New field in bfd_target
+	structure.
+	(bfd_search_for_target): New function:  Find a target that
+	satisifies a search function.
+	* bfd-in2.h: Regenerate.
+
+	* elfxx-target.h: Initialise the alternative_target field of
+	the bfd_target structures to point to the other target (if
+	defined).
+	* nlm-target.h: Initialise the alternative_target field of
+	the bfd_target structures to point to the other target (if
+	defined).
+	
+	* coffcode.h (CREATE_BIG_COFF_TARGET_VEC): New macro.
+	(CREATE_LITTLE_COFF_TARGET_VEC): New macro.
+	
+	* aix386-core.c: Initialise new field of bfd_target structure. 
+	* aout-adobe.c: Initialise new field of bfd_target structure. 
+	* aout-arm.c: Initialise new field of bfd_target structure. 
+	* aout-target.h: Initialise new field of bfd_target structure. 
+	* aout-tic30.c: Initialise new field of bfd_target structure. 
+	* binary.c: Initialise new field of bfd_target structure. 
+	* bout.c: Initialise new field of bfd_target structure. 
+	* cisco-core.c: Initialise new field of bfd_target structure. 
+	* coff-a29k.c: Use CREATE_BIG_COFF_TARGET_VEC.
+	* coff-alpha.c: Initialise new field of bfd_target structure. 
+	* coff-apollo.c: Use CREATE_BIG_COFF_TARGET_VEC.
+	* coff-arm.c: Use CREATE_{BIG|LITTLE}_COFF_TARGET_VEC.
+	* coff-h8300.c: Use CREATE_BIG_COFF_TARGET_VEC.
+	* coff-h8500.c: Use CREATE_BIG_COFF_TARGET_VEC.
+	* coff-i386.c: Initialise new field of bfd_target structure. 
+	* coff-i860.c: Initialise new field of bfd_target structure. 
+	* coff-i960.c: Use CREATE_LITTLE_COFF_TARGET_VEC.
+	* coff-m68k.c: Use CREATE_BIG_COFF_TARGET_VEC.
+	* coff-mcore.c: Use CREATE_{BIG|LITTLE}_COFF_TARGET_VEC.
+	* coff-mips.c: Initialise new field of bfd_target structure. 
+	* coff-ppc.c: Initialise new field of bfd_target structure. 
+	* coff-rs6000.c: Initialise new field of bfd_target structure. 
+	* coff-sh.c:  Use CREATE_{BIG|LITTLE}_COFF_TARGET_VEC.
+	* coff-sparc.c: Use CREATE_BIG_COFF_TARGET_VEC.
+	* coff-tic30.c: Initialise new field of bfd_target structure. 
+	* coff-tic80.c: Use CREATE_LITTLE_COFF_TARGET_VEC.
+	* coff-w65.c:   Use CREATE_LITTLE_COFF_TARGET_VEC.
+	* coff-we32k.c: Use CREATE_BIG_COFF_TARGET_VEC.
+	* coff-z8k.c:   Use CREATE_BIG_COFF_TARGET_VEC.
+	* hppabsd-core.c: Initialise new field of bfd_target structure. 
+	* hpux-core.c: Initialise new field of bfd_target structure. 
+	* i386msdos.c: Initialise new field of bfd_target structure. 
+	* i386os9k.c: Initialise new field of bfd_target structure. 
+	* ieee.c: Initialise new field of bfd_target structure. 
+	* ihex.c: Initialise new field of bfd_target structure. 
+	* irix-core.c: Initialise new field of bfd_target structure. 
+	* mipsbsd.c: Initialise new field of bfd_target structure. 
+	* netbsd-core.c: Initialise new field of bfd_target structure. 
+	* oasys.c: Initialise new field of bfd_target structure. 
+	* osf-core.c: Initialise new field of bfd_target structure. 
+	* ppcboot.c: Initialise new field of bfd_target structure. 
+	* ptrace-core.c: Initialise new field of bfd_target structure. 
+	* sco5-core.c: Initialise new field of bfd_target structure. 
+	* som.c: Initialise new field of bfd_target structure. 
+	* srec.c: Initialise new field of bfd_target structure. 
+	* tekhex.c: Initialise new field of bfd_target structure. 
+	* trad-core.c: Initialise new field of bfd_target structure. 
+	* versados.c: Initialise new field of bfd_target structure. 
+	* vms.c: Initialise new field of bfd_target structure. 
+
 1999-07-19  Andreas Schwab  <schwab@suse.de>
 
 	* elflink.h (elf_bfd_final_link): Remove unused variables rel_hash

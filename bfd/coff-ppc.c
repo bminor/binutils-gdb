@@ -2824,11 +2824,15 @@ ppc_bfd_coff_final_link (abfd, info)
 #endif
 
 
+/* Forward declaration for use by alternative_target field.  */
+#ifdef TARGET_BIG_SYM
+extern const bfd_target TARGET_BIG_SYM;
+#endif
+
 /* The transfer vectors that lead the outside world to all of the above. */
 
 #ifdef TARGET_LITTLE_SYM
-const bfd_target
-TARGET_LITTLE_SYM =
+const bfd_target TARGET_LITTLE_SYM =
 {
   TARGET_LITTLE_NAME,		/* name or coff-arm-little */
   bfd_target_coff_flavour,
@@ -2874,14 +2878,20 @@ TARGET_LITTLE_SYM =
   BFD_JUMP_TABLE_WRITE (coff),
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+
+  /* Alternative_target.  */
+#ifdef TARGET_BIG_SYM
+  & TARGET_BIG_SYM,
+#else
+  NULL,
+#endif
   
-  COFF_SWAP_TABLE,
+  COFF_SWAP_TABLE
 };
 #endif
 
 #ifdef TARGET_BIG_SYM
-const bfd_target
-TARGET_BIG_SYM =
+const bfd_target TARGET_BIG_SYM =
 {
   TARGET_BIG_NAME,
   bfd_target_coff_flavour,	
@@ -2928,7 +2938,15 @@ TARGET_BIG_SYM =
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  COFF_SWAP_TABLE,
+
+  /* Alternative_target.  */
+#ifdef TARGET_LITTLE_SYM
+  & TARGET_LITTLE_SYM,
+#else
+  NULL,
+#endif
+  
+  COFF_SWAP_TABLE
 };
 
 #endif

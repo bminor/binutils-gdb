@@ -645,6 +645,9 @@ const bfd_target MY(vec) =
      BFD_JUMP_TABLE_LINK (MY),
      BFD_JUMP_TABLE_DYNAMIC (MY),
 
-  (PTR) MY_backend_data,
+  /* Alternative_target */
+  NULL,
+  
+  (PTR) MY_backend_data
 };
 #endif /* MY_BFD_TARGET */

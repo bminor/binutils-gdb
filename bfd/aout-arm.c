@@ -467,6 +467,8 @@ MY_swap_std_reloc_out (abfd, g, natptr)
 
 #include "aout-target.h"
 
+extern const bfd_target aout_arm_big_vec;
+
 const bfd_target aout_arm_little_vec =
 {
   "a.out-arm-little",           /* name */
@@ -503,6 +505,8 @@ const bfd_target aout_arm_little_vec =
      BFD_JUMP_TABLE_LINK (MY),
      BFD_JUMP_TABLE_DYNAMIC (MY),
 
+  & aout_arm_big_vec,
+  
   (PTR) MY_backend_data,
 };
 
@@ -542,5 +546,7 @@ const bfd_target aout_arm_big_vec =
      BFD_JUMP_TABLE_LINK (MY),
      BFD_JUMP_TABLE_DYNAMIC (MY),
 
+  & aout_arm_little_vec,
+  
   (PTR) MY_backend_data,
 };

@@ -6257,6 +6257,8 @@ const bfd_target som_vec =
   BFD_JUMP_TABLE_LINK (som),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0
 };
 

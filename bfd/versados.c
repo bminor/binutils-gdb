@@ -919,5 +919,7 @@ const bfd_target versados_vec =
   BFD_JUMP_TABLE_LINK (versados),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0
 };

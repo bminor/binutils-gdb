@@ -2601,6 +2601,8 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 /* GC of sections is not done.  */
 #define _bfd_ecoff_bfd_gc_sections bfd_generic_gc_sections
 
+extern const bfd_target ecoff_big_vec;
+
 const bfd_target ecoff_little_vec =
 {
   "ecoff-littlemips",		/* name */
@@ -2640,6 +2642,8 @@ const bfd_target ecoff_little_vec =
      BFD_JUMP_TABLE_LINK (_bfd_ecoff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  & ecoff_big_vec,
+  
   (PTR) &mips_ecoff_backend_data
 };
 
@@ -2681,6 +2685,8 @@ const bfd_target ecoff_big_vec =
      BFD_JUMP_TABLE_LINK (_bfd_ecoff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  & ecoff_little_vec,
+  
   (PTR) &mips_ecoff_backend_data
 };
 
@@ -2723,5 +2729,7 @@ const bfd_target ecoff_biglittle_vec =
      BFD_JUMP_TABLE_LINK (_bfd_ecoff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) &mips_ecoff_backend_data
 };

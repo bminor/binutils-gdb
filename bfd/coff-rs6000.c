@@ -1415,5 +1415,7 @@ const bfd_target
      BFD_JUMP_TABLE_LINK (_bfd_xcoff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_xcoff),
 
-  COFF_SWAP_TABLE,
+  NULL,
+  
+  COFF_SWAP_TABLE
 };

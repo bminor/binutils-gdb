@@ -1062,5 +1062,7 @@ const bfd_target tekhex_vec =
   BFD_JUMP_TABLE_LINK (tekhex),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0
 };

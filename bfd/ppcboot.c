@@ -531,5 +531,7 @@ const bfd_target ppcboot_vec =
   BFD_JUMP_TABLE_LINK (ppcboot),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   NULL
 };

@@ -270,6 +270,8 @@ const bfd_target irix_core_vec =
        BFD_JUMP_TABLE_LINK (_bfd_nolink),
        BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+    NULL,
+    
     (PTR) 0			/* backend_data */
 };
 

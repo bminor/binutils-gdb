@@ -202,5 +202,7 @@ const bfd_target tic30_coff_vec =
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   COFF_SWAP_TABLE
 };

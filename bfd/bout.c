@@ -1453,6 +1453,8 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 #define aout_32_get_section_contents_in_window \
   _bfd_generic_get_section_contents_in_window
 
+extern const bfd_target b_out_vec_little_host;
+
 const bfd_target b_out_vec_big_host =
 {
   "b.out.big",			/* name */
@@ -1490,6 +1492,8 @@ const bfd_target b_out_vec_big_host =
      BFD_JUMP_TABLE_LINK (b_out),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  & b_out_vec_little_host,
+  
   (PTR) 0,
 };
 
@@ -1531,5 +1535,7 @@ const bfd_target b_out_vec_little_host =
      BFD_JUMP_TABLE_LINK (b_out),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  & b_out_vec_big_host,
+  
   (PTR) 0
 };

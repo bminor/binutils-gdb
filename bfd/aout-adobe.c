@@ -524,5 +524,7 @@ const bfd_target a_out_adobe_vec =
      BFD_JUMP_TABLE_LINK (aout_32),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0
 };

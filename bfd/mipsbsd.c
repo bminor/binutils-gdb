@@ -389,6 +389,8 @@ static CONST struct aout_backend_data MY(backend_data) = {
   0				/* finish_dynamic_link */
 };
 
+extern const bfd_target aout_mips_big_vec;
+
 const bfd_target aout_mips_little_vec =
 {
   "a.out-mips-little",		/* name */
@@ -425,7 +427,9 @@ const bfd_target aout_mips_little_vec =
      BFD_JUMP_TABLE_LINK (MY),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  (PTR) MY_backend_data,
+  & aout_mips_big_vec,
+  
+  (PTR) MY_backend_data
 };
 
 const bfd_target aout_mips_big_vec =
@@ -464,5 +468,7 @@ const bfd_target aout_mips_big_vec =
      BFD_JUMP_TABLE_LINK (MY),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  (PTR) MY_backend_data,
+  & aout_mips_little_vec,
+  
+  (PTR) MY_backend_data
 };

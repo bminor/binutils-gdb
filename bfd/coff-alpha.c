@@ -2398,5 +2398,7 @@ const bfd_target ecoffalpha_little_vec =
      BFD_JUMP_TABLE_LINK (_bfd_ecoff),
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) &alpha_ecoff_backend_data
 };

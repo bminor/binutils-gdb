@@ -1531,5 +1531,7 @@ const bfd_target oasys_vec =
   BFD_JUMP_TABLE_LINK (oasys),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0
 };

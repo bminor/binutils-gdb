@@ -239,6 +239,8 @@ const bfd_target i386msdos_vec =
   BFD_JUMP_TABLE_LINK (msdos),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0
 };
 
