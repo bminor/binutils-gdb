@@ -39,6 +39,7 @@ ld.texinfo
 ldemul.c
 ldemul.h
 ldctor.c
+ldctor.h
 ldexp.c
 ldexp.h
 ldfile.c
@@ -88,7 +89,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.23  1991/11/15 21:09:49  bothner
+# Revision 1.24  1991/12/08 01:27:59  sac
+# *** empty log message ***
+#
+# Revision 1.23  1991/11/15  21:09:49  bothner
 # Remove ldgld.c, ldgld68k.c, ldm88k.c, since these are
 # now automatically generated.
 #
