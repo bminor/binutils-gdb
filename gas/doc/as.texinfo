@@ -546,6 +546,37 @@ unit coprocessor.  The default is to assume an MMU for 68020 and up.
 @end table
 @end ifset
 
+@ifset PDP11
+
+For details about the PDP-11 machine dependent features options,
+see @ref{PDP-11-Options}.
+
+@table @code
+@item -mpic | -mno-pic
+Generate position-independent (or position-dependent) code.  The
+default is @code{-mpic}.
+
+@item -mall
+@itemx -mall-extensions
+Enable all instruction set extensions.  This is the default.
+
+@item -mno-extensions
+Disable all instruction set extensions.
+
+@item -m@var{extension} | -mno-@var{extension}
+Enable (or disable) a particular instruction set extension.
+
+@item -m@var{cpu}
+Enable the instruction set extensions supported by a particular CPU, and
+disable all other extensions.
+
+@item -m@var{machine}
+Enable the instruction set extensions supported by a particular machine
+model, and disable all other extensions.
+@end table
+
+@end ifset
+
 @ifset PJ
 The following options are available when @value{AS} is configured for
 a picoJava processor.
@@ -1666,6 +1697,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset I960
 @samp{#} on the i960;
+@end ifset
+@ifset PDP11
+@samp{;} for the PDP-11;
 @end ifset
 @ifset PJ
 @samp{;} for picoJava;
@@ -5271,6 +5305,9 @@ subject, see the hardware manufacturer's manual.
 @ifset SH
 * SH-Dependent::                Hitachi SH Dependent Features
 @end ifset
+@ifset PDP11
+* PDP-11-Dependent::            PDP-11 Dependent Features
+@end ifset
 @ifset PJ
 * PJ-Dependent::                picoJava Dependent Features
 @end ifset
@@ -5387,6 +5424,10 @@ family.
 
 @ifset NS32K
 @include c-ns32k.texi
+@end ifset
+
+@ifset PDP11
+@include c-pdp11.texi
 @end ifset
 
 @ifset PJ

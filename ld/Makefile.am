@@ -208,6 +208,7 @@ ALL_EMULATIONS = \
 	enews.o \
 	ens32knbsd.o \
 	epc532macha.o \
+	epdp11.o \
 	epjelf.o \
 	epjlelf.o \
 	eppcmacos.o \
@@ -683,6 +684,9 @@ ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
 epc532macha.c: $(srcdir)/emulparams/pc532macha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} pc532macha "$(tdir_pc532macha)"
+epdp11.c: $(srcdir)/emulparams/pdp11.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} pdp11 "$(tdir_pdp11)"
 epjelf.c: $(srcdir)/emulparams/pjelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} pjelf "$(tdir_pjelf)"

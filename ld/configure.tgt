@@ -286,6 +286,7 @@ ns32k-pc532-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
 powerpc-*-linux-gnu*)	targ_emul=elf32ppclinux;
 			targ_extra_emuls="elf32ppc elf32ppcsim";
 			targ_extra_libpath=elf32ppc ;;
+pdp11-*-*)		targ_emul=pdp11 ;;
 pjl*-*-*)	        targ_emul=pjlelf ; targ_extra_emuls="elf_i386" ;;
 pj*-*-*)	        targ_emul=pjelf ;;
 powerpc-*-elf* | powerpc-*-eabi* | powerpc-*-sysv* \

@@ -624,6 +624,7 @@ extern const bfd_target nlm32_sparc_vec;
 extern const bfd_target oasys_vec;
 extern const bfd_target pc532machaout_vec;
 extern const bfd_target pc532netbsd_vec;
+extern const bfd_target pdp11_aout_vec;
 extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target ppcboot_vec;
 extern const bfd_target riscix_vec;
@@ -884,6 +885,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&oasys_vec,
 #endif
 	&pc532machaout_vec,
+	&pdp11_aout_vec,
 #if 0
 	/* We have no way of distinguishing these from other a.out variants */
 	&aout_arm_big_vec,

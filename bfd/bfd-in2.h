@@ -1424,6 +1424,7 @@ enum bfd_architecture
 #define bfd_mach_h8300   1
 #define bfd_mach_h8300h  2
 #define bfd_mach_h8300s  3
+  bfd_arch_pdp11,     /* DEC PDP-11 */
   bfd_arch_powerpc,   /* PowerPC */
 #define bfd_mach_ppc           0
 #define bfd_mach_ppc_403       403
@@ -2087,6 +2088,10 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_NS32K_DISP_8_PCREL,
   BFD_RELOC_NS32K_DISP_16_PCREL,
   BFD_RELOC_NS32K_DISP_32_PCREL,
+
+/* PDP11 relocations */
+  BFD_RELOC_PDP11_DISP_8_PCREL,
+  BFD_RELOC_PDP11_DISP_6_PCREL,
 
 /* Picojava relocs.  Not all of these appear in object files. */
   BFD_RELOC_PJ_CODE_HI16,

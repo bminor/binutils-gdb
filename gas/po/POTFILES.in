@@ -92,6 +92,8 @@ config/tc-mn10300.c
 config/tc-mn10300.h
 config/tc-ns32k.c
 config/tc-ns32k.h
+config/tc-pdp11.c
+config/tc-pdp11.h
 config/tc-pj.c
 config/tc-pj.h
 config/tc-ppc.c

@@ -1,3 +1,9 @@
+2001-02-18  lars brinkhoff  <lars@nocrew.org>
+
+	* Makefile.am: Add PDP-11 target.
+	* configure.tgt: Likewise.
+	* emulparams/pdp11.sh: New file.
+
 2001-02-17  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.host: Add a generic FreeBSD configuration entry such that

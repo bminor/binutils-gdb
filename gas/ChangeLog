@@ -1,3 +1,14 @@
+2001-02-18  lars brinkhoff  <lars@nocrew.org>
+
+	* Makefile.am: Add PDP-11 target.
+	* configure.in: Likewise.
+	* config/tc-pdp11.c: New file.
+	* config/tc-pdp11.h: New file.
+	* doc/Makefile.am: Add PDP-11 documentation.
+	* doc/all.texi: Likewise.
+	* doc/as.texinfo: Likewise.
+	* doc/c-pdp11.texi: New file.
+
 2001-02-16  matthew green  <mrg@redhat.com>
 
  	* gas/cgen.c (gas_cgen_md_apply_fix3): Support BFD_RELOC_64.

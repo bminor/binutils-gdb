@@ -196,6 +196,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_mn10200_arch)	ta="$ta m10200-dis.lo m10200-opc.lo" ;;
 	bfd_mn10300_arch)	ta="$ta m10300-dis.lo m10300-opc.lo" ;;
 	bfd_ns32k_arch)		ta="$ta ns32k-dis.lo" ;;
+	bfd_pdp11_arch)		ta="$ta pdp11-dis.lo pdp11-opc.lo" ;;
 	bfd_pj_arch)	        ta="$ta pj-dis.lo pj-opc.lo" ;;
 	bfd_powerpc_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
 	bfd_pyramid_arch)	;;

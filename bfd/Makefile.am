@@ -69,6 +69,7 @@ ALL_MACHINES = \
 	cpu-mcore.lo \
 	cpu-mips.lo \
 	cpu-ns32k.lo \
+	cpu-pdp11.lo \
 	cpu-pj.lo \
 	cpu-powerpc.lo \
 	cpu-rs6000.lo \
@@ -112,6 +113,7 @@ ALL_MACHINES_CFILES = \
 	cpu-mcore.c \
 	cpu-mips.c \
 	cpu-ns32k.c \
+	cpu-pdp11.c \
 	cpu-pj.c \
 	cpu-powerpc.c \
 	cpu-rs6000.c \
@@ -239,6 +241,7 @@ BFD32_BACKENDS = \
 	ns32knetbsd.lo \
 	oasys.lo \
 	pc532-mach.lo \
+	pdp11.lo \
 	pe-arm.lo \
 	pei-arm.lo \
 	pe-i386.lo \
@@ -377,6 +380,7 @@ BFD32_BACKENDS_CFILES = \
 	ns32knetbsd.c \
 	oasys.c \
 	pc532-mach.c \
+	pdp11.c \
 	pe-arm.c \
 	pei-arm.c \
 	pe-i386.c \
@@ -781,6 +785,7 @@ cpu-m10300.lo: cpu-m10300.c $(INCDIR)/filenames.h
 cpu-mcore.lo: cpu-mcore.c $(INCDIR)/filenames.h
 cpu-mips.lo: cpu-mips.c $(INCDIR)/filenames.h
 cpu-ns32k.lo: cpu-ns32k.c $(INCDIR)/filenames.h ns32k.h
+cpu-pdp11.lo: cpu-pdp11.c $(INCDIR)/filenames.h
 cpu-pj.lo: cpu-pj.c $(INCDIR)/filenames.h
 cpu-powerpc.lo: cpu-powerpc.c $(INCDIR)/filenames.h
 cpu-rs6000.lo: cpu-rs6000.c $(INCDIR)/filenames.h
@@ -1161,6 +1166,9 @@ oasys.lo: oasys.c $(INCDIR)/filenames.h $(INCDIR)/oasys.h \
 pc532-mach.lo: pc532-mach.c $(INCDIR)/filenames.h libaout.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h aout-target.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+pdp11.lo: pdp11.c libaout.h $(INCDIR)/bfdlink.h \
+  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 pe-arm.lo: pe-arm.c $(INCDIR)/filenames.h coff-arm.c \
   $(INCDIR)/coff/arm.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h peicode.h \

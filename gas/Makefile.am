@@ -63,6 +63,7 @@ CPU_TYPES = \
 	mn10200 \
 	mn10300 \
 	ns32k \
+	pdp11 \
 	pj \
 	ppc \
 	s390 \
@@ -78,7 +79,7 @@ CPU_TYPES = \
 	z8k
 
 # Object format types.  This is only used for dependency information.
-# We deliberately omit som, since it does not work as a cross assembler.
+# We deliberately omit some, since it does not work as a cross assembler.
 
 OBJ_FORMATS = \
 	aout \
@@ -101,7 +102,7 @@ CPU_OBJ_VALID = \
 	case $$o in \
 	aout) \
 	  case $$c in \
-	  a29k | arm | cris | i386 | m68k | mips | ns32k | sparc | tahoe | tic30 | vax) \
+	  a29k | arm | cris | i386 | m68k | mips | ns32k | pdp11 | sparc | tahoe | tic30 | vax) \
 	    valid=yes ;; \
 	  esac ;; \
 	bout) \
@@ -245,6 +246,7 @@ TARGET_CPU_CFILES = \
 	config/tc-mn10200.c \
 	config/tc-mn10300.c \
 	config/tc-ns32k.c \
+	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
 	config/tc-s390.c \
@@ -286,6 +288,7 @@ TARGET_CPU_HFILES = \
 	config/tc-mn10200.h \
 	config/tc-mn10300.h \
 	config/tc-ns32k.h \
+	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \
 	config/tc-s390.h \
@@ -1169,6 +1172,9 @@ DEPTC_ns32k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ns32k.h $(INCDIR)/opcode/ns32k.h \
   $(INCDIR)/obstack.h
+DEPTC_pdp11_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-pdp11.h \
+  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
+  $(INCDIR)/opcode/pdp11.h
 DEPTC_pj_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-pj.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/opcode/pj.h
@@ -1500,6 +1506,9 @@ DEPOBJ_ns32k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ns32k.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_pdp11_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-pdp11.h \
+  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/obstack.h
 DEPOBJ_pj_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-pj.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/obstack.h subsegs.h
@@ -1773,6 +1782,8 @@ DEP_ns32k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ns32k.h \
 DEP_ns32k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ns32k.h
+DEP_pdp11_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-pdp11.h \
+  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_pj_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-pj.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 DEP_pj_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \

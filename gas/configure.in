@@ -384,10 +384,10 @@ changequote([,])dnl
 
       sh-*-linux*)	    fmt=elf em=linux ;;
       sh-*-elf*)	    fmt=elf ;;
-      sh-*-coff*)           fmt=coff ;;
+      sh-*-coff*)           fmt=coff bfd_gas=yes;;
       sh-*-pe*)             fmt=coff em=pe bfd_gas=yes;;
       sh-*-rtemself*)       fmt=elf ;;
-      sh-*-rtems*)	    fmt=coff ;;
+      sh-*-rtems*)	    fmt=coff bfd_gas=yes;;
 
       ns32k-pc532-mach* | ns32k-pc532-ux*)    fmt=aout em=pc532mach ;;
       ns32k-pc532-netbsd* | ns32k-pc532-lites*)  fmt=aout em=nbsd532 ;;
@@ -479,6 +479,7 @@ changequote([,])dnl
       ia64*-*)	bfd_gas=yes ;;
       mips-*)	bfd_gas=yes ;;
       ns32k-*)	bfd_gas=yes ;;
+      pdp11-*)	bfd_gas=yes ;;
       ppc-*)	bfd_gas=yes ;;
       sparc-*)	bfd_gas=yes ;;
       strongarm-*)	bfd_gas=yes ;;
@@ -648,6 +649,7 @@ fi
 # is emulated.
 case ${target_cpu} in
   vax | tahoe )	atof=${target_cpu} ;;
+  pdp11)	atof=vax ;;
   *)		atof=ieee ;;
 esac
 

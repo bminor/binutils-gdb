@@ -82,6 +82,7 @@ cpu-m88k.c
 cpu-mcore.c
 cpu-mips.c
 cpu-ns32k.c
+cpu-pdp11.c
 cpu-pj.c
 cpu-powerpc.c
 cpu-rs6000.c
@@ -213,6 +214,7 @@ oasys.c
 opncls.c
 osf-core.c
 pc532-mach.c
+pdp11.c
 pe-arm.c
 pe-i386.c
 pei-arm.c

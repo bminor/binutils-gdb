@@ -610,6 +610,7 @@ do
     nlm32_powerpc_vec)		tb="$tb nlm32-ppc.lo nlm32.lo nlm.lo" ;;
     pc532netbsd_vec)		tb="$tb ns32knetbsd.lo aout-ns32k.lo" ;;
     pc532machaout_vec)		tb="$tb pc532-mach.lo aout-ns32k.lo" ;;
+    pdp11_aout_vec)		tb="$tb pdp11.lo" ;;
     pmac_xcoff_vec)		tb="$tb coff-pmac.lo xcofflink.lo" ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.lo xcofflink.lo" ;;
     bfd_powerpc_pe_vec)         tb="$tb pe-ppc.lo peigen.lo cofflink.lo" ;;  

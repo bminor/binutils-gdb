@@ -33,22 +33,39 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #if ARCH_SIZE==64
 #define GET_WORD bfd_h_get_64
 #define GET_SWORD bfd_h_get_signed_64
+#define GET_MAGIC bfd_h_get_32
 #define PUT_WORD bfd_h_put_64
+#define PUT_MAGIC bfd_h_put_32
 #ifndef NAME
 #define NAME(x,y) CAT3(x,_64_,y)
 #endif
 #define JNAME(x) CAT(x,_64)
 #define BYTES_IN_WORD 8
+#else
+#if ARCH_SIZE==16
+#define GET_WORD bfd_h_get_16
+#define GET_SWORD bfd_h_get_signed_16
+#define GET_MAGIC bfd_h_get_16
+#define PUT_WORD bfd_h_put_16
+#define PUT_MAGIC bfd_h_put_16
+#ifndef NAME
+#define NAME(x,y) CAT3(x,_16_,y)
+#endif
+#define JNAME(x) CAT(x,_16)
+#define BYTES_IN_WORD 2
 #else /* ARCH_SIZE == 32 */
 #define GET_WORD bfd_h_get_32
 #define GET_SWORD bfd_h_get_signed_32
+#define GET_MAGIC bfd_h_get_32
 #define PUT_WORD bfd_h_put_32
+#define PUT_MAGIC bfd_h_put_32
 #ifndef NAME
 #define NAME(x,y) CAT3(x,_32_,y)
 #endif
 #define JNAME(x) CAT(x,_32)
 #define BYTES_IN_WORD 4
 #endif /* ARCH_SIZE==32 */
+#endif /* ARCH_SIZE==64 */
 
 /* Declare at file level, since used in parameter lists, which have
    weird scope.  */
@@ -566,6 +583,8 @@ boolean
 NAME(aout,bfd_free_cached_info) PARAMS ((bfd *));
 
 /* A.out uses the generic versions of these routines... */
+
+#define	aout_16_get_section_contents	_bfd_generic_get_section_contents
 
 #define	aout_32_get_section_contents	_bfd_generic_get_section_contents
 

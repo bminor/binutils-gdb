@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-02-06 18:03-0800\n"
+"POT-Creation-Date: 2001-02-18 11:47-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -373,31 +373,31 @@ msgstr ""
 msgid "%F%S: undefined symbol `%s' referenced in expression\n"
 msgstr ""
 
-#: ldexp.c:600
+#: ldexp.c:601
 msgid "%F%S can not PROVIDE assignment to location counter\n"
 msgstr ""
 
-#: ldexp.c:610
+#: ldexp.c:611
 msgid "%F%S invalid assignment to location counter\n"
 msgstr ""
 
-#: ldexp.c:614
+#: ldexp.c:615
 msgid "%F%S assignment to location counter invalid outside of SECTION\n"
 msgstr ""
 
-#: ldexp.c:624
+#: ldexp.c:625
 msgid "%F%S cannot move location counter backwards (from %V to %V)\n"
 msgstr ""
 
-#: ldexp.c:652
+#: ldexp.c:653
 msgid "%P%F:%s: hash creation failed\n"
 msgstr ""
 
-#: ldexp.c:951
+#: ldexp.c:955
 msgid "%F%S nonconstant expression for %s\n"
 msgstr ""
 
-#: ldexp.c:984
+#: ldexp.c:988
 msgid "%F%S non constant expression for %s\n"
 msgstr ""
 

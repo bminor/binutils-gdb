@@ -69,6 +69,8 @@ mips16-opc.c
 mips-dis.c
 mips-opc.c
 ns32k-dis.c
+pdp11-dis.c
+pdp11-opc.c
 pj-dis.c
 pj-opc.c
 ppc-dis.c

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-02-18 14:28-0800\n"
+"POT-Creation-Date: 2001-02-18 15:14-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1337,6 +1337,11 @@ msgstr ""
 msgid "%s: could not find output section %s for input section %s"
 msgstr ""
 
+#: elflink.h:5559
+#, c-format
+msgid "%s: invalid section symbol index 0x%x (%s) ingored"
+msgstr ""
+
 #: i386linux.c:450 m68klinux.c:454 sparclinux.c:452
 #, c-format
 msgid "Output file requires shared library `%s'\n"
@@ -1614,29 +1619,29 @@ msgstr ""
 msgid "Object module NOT error-free !\n"
 msgstr ""
 
-#: vms-misc.c:540
+#: vms-misc.c:536
 #, c-format
 msgid "Stack overflow (%d) in _bfd_vms_push"
 msgstr ""
 
-#: vms-misc.c:558
+#: vms-misc.c:554
 msgid "Stack underflow in _bfd_vms_pop"
 msgstr ""
 
-#: vms-misc.c:916
+#: vms-misc.c:910
 msgid "_bfd_vms_output_counted called with zero bytes"
 msgstr ""
 
-#: vms-misc.c:921
+#: vms-misc.c:915
 msgid "_bfd_vms_output_counted called with too many bytes"
 msgstr ""
 
-#: vms-misc.c:1052
+#: vms-misc.c:1046
 #, c-format
 msgid "Symbol %s replaced by %s\n"
 msgstr ""
 
-#: vms-misc.c:1114
+#: vms-misc.c:1108
 #, c-format
 msgid "failed to enter %s"
 msgstr ""

@@ -1,3 +1,24 @@
+2001-02-18  lars brinkhoff  <lars@nocrew.org>
+
+	* Makefile.am: Add PDP-11 a.out target.
+	* config.bfd: Likewise.
+	* configure.in: Likewise.
+	* targets.c: Likewise.
+	* archures.c: Likewise.
+	* bfd-in2.h: Likewise.  Add PDP-11 relocations.
+	* libbfd.h: Add PDP-11 relocations.
+	* reloc.c: Likewise.
+	* cpu-pdp11.c: New file.
+	* pdp11.c: New file.
+
+	* libaout.h (GET_WORD) [ARCH_SIZE==16]: Define.
+	(GET_SWORD) [ARCH_SIZE==16]: Likewise.
+	(GET_SWORD) [ARCH_SIZE==16]: Likewise.
+	(PUT_WORD) [ARCH_SIZE==16]: Likewise.
+	(GET_MAGIC): New macro.
+	(PUT_MAGIC): Likewise.
+	* aout-target.h (MY(object_p)): Use GET_MAGIC to read magic word.
+
 2001-02-18  Jim Kingdon  <jkingdon@engr.sgi.com>
 
 	* irix-core.c (irix_core_core_file_p): Set the architecture (GDB
