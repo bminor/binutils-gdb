@@ -1,3 +1,8 @@
+Thu Jan 30 13:02:41 1992  Per Bothner  (bothner at cygnus.com)
+
+	* config/mt-tahoe, config/mt-vax:  Change DEFAULT_VECTOR to
+	host_aout_vec here as well.
+
 Thu Jan 30 11:41:45 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* host-aout.c:  Change TARGETNAME to "a.out" to be compatible with
