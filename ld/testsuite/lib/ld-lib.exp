@@ -434,6 +434,12 @@ proc simple_diff { file_1 file_2 } {
 #       Link assembled files using FLAGS, in the order of the "source"
 #       directives, when using multiple files.
 #
+#   objcopy_linked_file: FLAGS
+#	Run objcopy on the linked file with the specified flags.
+#	This lets you transform the linked file using objcopy, before the
+#	result is analyzed by an analyzer program specified below (which
+#	may in turn *also* be objcopy).
+#
 #   PROG: PROGRAM-NAME
 #       The name of the program to run to analyze the .o file produced
 #       by the assembler or the linker output.  This can be omitted;
@@ -503,6 +509,7 @@ proc run_dump_test { name } {
     }
     set dumpfile tmpdir/dump.out
     set run_ld 0
+    set run_objcopy 0
     set opts(as) {}
     set opts(ld) {}
     set opts(xfail) {}
@@ -516,6 +523,7 @@ proc run_dump_test { name } {
     set opts(PROG) {}
     set opts(source) {}
     set opts(error) {}
+    set opts(objcopy_linked_file) {}
     set asflags{${file}.s} {}
 
     foreach i $opt_array {
@@ -551,6 +559,10 @@ proc run_dump_test { name } {
 		# A single "# ld:" with no options should do the right thing.
 		if { $opt_name == "ld" } {
 		    set run_ld 1
+		}
+		# Likewise objcopy_linked_file.
+		if { $opt_name == "objcopy_linked_file" } {
+		    set run_objcopy 1
 		}
 	    }
 	}
@@ -683,7 +695,7 @@ proc run_dump_test { name } {
 	    verbose -log "failed with: <$comp_output>, expected: <$opts(error)>"
 	    send_log "$comp_output\n"
 	    verbose "$comp_output" 3
-	    if { $opts(error) != "" } {
+	    if { $opts(error) != "" && $run_objcopy == 0 } {
 		if [regexp $opts(error) $comp_output] {
 		    pass $testname
 		    return
@@ -692,6 +704,33 @@ proc run_dump_test { name } {
 	    fail $testname
 	    return
 	}
+
+	if { $run_objcopy } {
+	    set infile $objfile
+	    set objfile "tmpdir/dump1"
+
+	    # Note that we don't use OBJCOPYFLAGS here; any flags must be
+	    # explicitly specified.
+	    set cmd "$OBJCOPY $opts(objcopy_linked_file) $infile $objfile"
+
+	    send_log "$cmd\n"
+	    set cmdret [catch "exec $cmd" comp_output]
+	    set comp_output [prune_warnings $comp_output]
+
+	    if { $cmdret != 0 || ![string match "" $comp_output] } then {
+		verbose -log "failed with: <$comp_output>, expected: <$opts(error)>"
+		send_log "$comp_output\n"
+		verbose "$comp_output" 3
+		if { $opts(error) != "" } {
+		    if [regexp $opts(error) $comp_output] {
+			pass $testname
+			return
+		    }
+		}
+		fail $testname
+		return
+	    }
+	}
     } else {
 	set objfile "tmpdir/dump0.o"
     }
@@ -699,6 +738,7 @@ proc run_dump_test { name } {
     # We must not have expected failure if we get here.
     if { $opts(error) != "" } {
 	fail $testname
+	return
     }
 
     if { [which $binary] == 0 } {
@@ -754,8 +794,8 @@ proc slurp_options { file } {
     set ws  {[ 	]*}
     set nws {[^ 	]*}
     # whitespace is ignored anywhere except within the options list;
-    # option names are alphabetic only
-    set pat "^#${ws}(\[a-zA-Z\]*)$ws:${ws}(.*)$ws\$"
+    # option names are alphabetic plus underscore only.
+    set pat "^#${ws}(\[a-zA-Z_\]*)$ws:${ws}(.*)$ws\$"
     while { [gets $f line] != -1 } {
 	set line [string trim $line]
 	# Whitespace here is space-tab.
