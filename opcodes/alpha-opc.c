@@ -21,7 +21,7 @@
    02111-1307, USA.  */
 
 #include <stdio.h>
-#include "ansidecl.h"
+#include "sysdep.h"
 #include "opcode/alpha.h"
 #include "bfd.h"
 #include "opintl.h"

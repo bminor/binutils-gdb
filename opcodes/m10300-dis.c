@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 
-#include "ansidecl.h"
+#include "sysdep.h"
 #include "opcode/mn10300.h" 
 #include "dis-asm.h"
 #include "opintl.h"

@@ -17,6 +17,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define DEFINE_TABLE
 
+#include "sysdep.h"
 #define h8_opcodes h8ops
 #include "opcode/h8300.h"
 #include "dis-asm.h"

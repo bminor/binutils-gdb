@@ -1,3 +1,16 @@
+2000-04-13  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* a29k-dis.c, alpha-dis.c, alpha-opc.c, arc-dis.c, arc-opc.c,
+	avr-dis.c, d10v-dis.c, d10v-opc.c, d30v-dis.c, d30v-opc.c,
+	disassemble.c, h8300-dis.c, h8500-dis.c, hppa-dis.c, i370-dis.c,
+	i370-opc.c, i960-dis.c, m10200-dis.c, m10200-opc.c, m10300-dis.c,
+	m10300-opc.c, m68k-dis.c, m68k-opc.c, m88k-dis.c, mcore-dis.c,
+	mips-dis.c, mips-opc.c, mips16-opc.c, pj-dis.c, pj-opc.c, ppc-dis.c,
+	ppc-opc.c, sh-dis.c, sparc-dis.c, sparc-opc.c, tic80-dis.c,
+	tic80-opc.c, v850-dis.c, v850-opc.c, vax-dis.c, w65-dis.c, z8k-dis.c,
+	z8kgen.c: Everyone includes sysdep.h. Remove ansidecl.h as sysdep.h
+	includes it.
+
 2000-04-20  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* m10300-dis.c (HAVE_AM30, HAVE_AM33): Define.
