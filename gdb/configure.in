@@ -590,7 +590,7 @@ UIOUT_CFLAGS=
 AC_SUBST(UIOUT_CFLAGS)
 
 AC_ARG_WITH(uiout,
-[  --with-uiout          Use new uiout functions intead of *printf's],
+[  --with-uiout          Use new uiout functions instead of *printf's],
 [case "${withval}" in
   yes)  want_uiout=true ;;
   no)   if test $enable_gdbmi = yes; then
@@ -1013,7 +1013,7 @@ AC_PATH_X
 # This code just checks for a few cases where we'd like to ignore those
 # definitions, even when they're present in the '.mt' file.  These cases
 # are when --disable-sim is specified, or if the simulator directory is
-# not part of the soruce tree.
+# not part of the source tree.
 #
 AC_ARG_ENABLE(sim,
 [  --enable-sim            Link gdb with simulator],
@@ -1159,7 +1159,7 @@ nativefile=`sed -n '
 s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${host_makefile_frag}`
 # else
-# GDBserver is only useful in a "native" enviroment
+# GDBserver is only useful in a "native" environment
 # configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
 changequote([,])
@@ -1178,14 +1178,14 @@ fi
 if test x"${GDB_MULTI_ARCH}" != x ; then
     AC_DEFINE_UNQUOTED(GDB_MULTI_ARCH, ${GDB_MULTI_ARCH})
 fi
-# Warn the user when they use an old pratice
+# Warn the user when they use an old practice
 case "${GDB_MULTI_ARCH}" in
     "" ) ;;
     0 | GDB_MULTI_ARCH_PARTIAL | 1 | GDB_MULTI_ARCH_TM | 2 )
 	AC_MSG_WARN("GDB: Target is not pure multi-arch") ;;
     GDB_MULTI_ARCH_PURE )
 	if test x"${targetfile}" != x ; then
-	    AC_MSG_WARN("GDB: Ingoring TM_FILE in ${target_makefile_frag}")
+	    AC_MSG_WARN("GDB: Ignoring TM_FILE in ${target_makefile_frag}")
 	    targetfile=""
 	fi ;;
     *)  AC_MSG_ERROR("GDB: Unknown GDB_MULTI_ARCH value ${GDB_MULTI_ARCH}");;
