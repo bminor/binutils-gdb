@@ -1,3 +1,9 @@
+Fri Dec 24 14:23:57 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (read_type): Don't fall through 'S' case (the case it
+	was falling though happened to do the thing thing ("break;") but that
+	is hardly a good thing to assume).
+
 Tue Dec 21 13:32:02 1993  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* ch-exp.y (match_dollar_tokens):  Fix off-by-one bug.

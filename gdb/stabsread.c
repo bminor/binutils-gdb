@@ -1266,8 +1266,11 @@ read_type (pp, objfile)
 		  if (type_size <= 0)
 		    type_size = -1;
 		  break;
+
 		case 'S':
 		  is_string = 1;
+		  break;
+
 		default:
 		  /* Ignore unrecognized type attributes, so future compilers
 		     can invent new ones.  */
