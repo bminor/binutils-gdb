@@ -137,9 +137,7 @@ init_callbacks ()
       gdb_callback.init (&gdb_callback);
       gdb_callback.write_stdout = gdb_os_write_stdout;
       gdb_callback.printf_filtered = gdb_os_printf_filtered;
-      /* ??? where'd error come from? */
-      /*gdb_callback.error = gdb_os_error;*/
-      gdb_callback.last_errno= gdb_os_error;
+      gdb_callback.error = gdb_os_error;
       sim_set_callbacks (&gdb_callback);
       callbacks_initialized = 1;
     }

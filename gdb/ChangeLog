@@ -1,3 +1,13 @@
+Tue Feb 18 13:06:30 1997  Mark Alexander  <marka@cygnus.com>
+
+	* remote-sim.c (init_callbacks): Undo previous change.
+
+Tue Feb 18 11:13:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* maint.c: Fix dereference of pointer.
+	* remote-sim.c: Fix reference of structure member "last_error".
+	* debugify.c: Include config.h to get ANSI definitions.
+
 Sat Feb 15 17:43:46 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* remote-vx.c (vx_attach):  Fix for PR 11356.  Remove code added
