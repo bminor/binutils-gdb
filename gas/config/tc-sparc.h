@@ -21,6 +21,27 @@
 
 #define LOCAL_LABELS_FB
 
+#ifdef BFD_ASSEMBLER
+
+#define TARGET_ARCH bfd_arch_sparc
+#ifdef OBJ_AOUT
+#define TARGET_FORMAT "a.out-sunos-big"
+#endif
+#ifdef OBJ_BOUT
+#define TARGET_FORMAT "b.out.big"
+#endif
+#ifdef OBJ_ELF
+#ifndef sparcv9
+#define TARGET_FORMAT "elf32-sparc"
+#else	/* sparcv9 */
+#define TARGET_FORMAT "elf64-sparc" /* v9 */
+#define ENV64			/* v9 */
+#endif	/* sparcv9 */
+#define LOCAL_LABEL(name)	((name)[0] == '.')
+#endif
+
+#else
+
 #ifdef OBJ_BOUT
 #define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE ((0x103 << 16) | BMAGIC)	/* Magic number for header */
 #else
@@ -31,18 +52,23 @@
 
 #define AOUT_MACHTYPE 3
 
+#define NEED_FX_R_TYPE
+
 #define tc_headers_hook(a)		{;}	/* don't need it. */
 #define tc_crawl_symbol_chain(a)	{;}	/* don't need it. */
+
+#define TC_CONS_RELOC RELOC_32
+
+#endif /* BFD_ASSEMBLER */
+
+#ifndef BFD_ASSEMBLER
+#define md_convert_frag(h,f)		{as_fatal ("sparc convert_frag\n");}
+#else
+#define md_convert_frag(b,s,f)		{as_fatal ("sparc convert_frag\n");}
+#endif
 
 void tc_aout_pre_write_hook ();
 
 #define LISTING_HEADER "SPARC GAS "
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of tc-sparc.h */
