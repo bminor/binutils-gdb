@@ -2045,7 +2045,7 @@ _initialize_command (void)
 With no arguments, run an inferior shell.");
 
   /* NOTE: cagney/2000-03-20: Being able to enter ``(gdb) !ls'' would
-     be a really useful feature.  Unfortunatly, the below wont do
+     be a really useful feature.  Unfortunately, the below wont do
      this.  Instead it adds support for the form ``(gdb) ! ls''
      (i.e. the space is required).  If the ``!'' command below is
      added the complains about no ``!'' command would be replaced by

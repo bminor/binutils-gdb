@@ -607,7 +607,7 @@ verror (const char *string, va_list args)
   char *err_string;
   struct cleanup *err_string_cleanup;
   /* FIXME: cagney/1999-11-10: All error calls should come here.
-     Unfortunatly some code uses the sequence: error_begin(); print
+     Unfortunately some code uses the sequence: error_begin(); print
      error message; return_to_top_level.  That code should be
      flushed. */
   error_begin ();

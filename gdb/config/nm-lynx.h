@@ -73,7 +73,7 @@
 extern int child_wait (int pid, struct target_waitstatus *status);
 
 /* Lynx needs a special definition of this so that we can
-   print out the pid and thread number seperatly.  */
+   print out the pid and thread number seperately.  */
 
 
 /* override child_pid_to_str in inftarg.c */

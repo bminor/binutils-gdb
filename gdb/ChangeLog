@@ -1,3 +1,11 @@
+2000-10-23 David B Anderson <davea@sgi.com>
+
+	* TODO: Correct spelling errors
+	* command.c (_initialize_command) corelow.c (core_open)
+	main.c (captured_command_loop) mips-tdep.c (mips32_next_pc)
+	remote.c serial.h top.c utils.c config/nm-lynx.h:
+	Correct spelling errors in comments
+
 2000-10-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* sparc-nat.c (fetch_core_registers): Protoize.
@@ -32,6 +40,7 @@ Fri Oct 20 19:08:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* remote-utils.c (gr_multi_scan): Protoize.
 	* remote-vx.c (vx_xfer_memory, net_get_symbols): Protoize.
 
+>>>>>>> 1.717
 2000-10-13  Fernando Nasser  <fnasser@cygnus.com>
 
 	* remote.c (putpkt_binary): Call read_frame, not getpkt. Log message.
@@ -124,6 +133,7 @@ Fri Oct 20 19:08:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* rs6000-tdep.c (skip_prologue): Add new parameter lim_pc.
 	Update all callers.
 
+>>>>>>> 1.709
 2000-10-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote-bug.c (bug_xfer_memory, bug_insert_breakpoint,

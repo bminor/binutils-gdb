@@ -71,7 +71,7 @@ Dan Nicolaescu writes:
 > stoping in weak functions. 
 > 
 > It stops in a function that is defined as weak, not in the function
-> that is actualy run... 
+> that is actually run... 
 
 --
 
@@ -314,7 +314,7 @@ determine the default isa/byte-order.
 
 --
 
-Rely on BFD_BIG_ENDIAN and BFD_LITTLE_ENDIAN instead of host dependant
+Rely on BFD_BIG_ENDIAN and BFD_LITTLE_ENDIAN instead of host dependent
 BIG_ENDIAN and LITTLE_ENDIAN.
 
 --
@@ -508,7 +508,7 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-07/msg00042.html
 Apart from the d30v, are there any sim/common simulators that make use
 of this?
 
-A brief summary of what happended is that sim/common/sim-break.c was
+A brief summary of what happened is that sim/common/sim-break.c was
 created as a good idea.  It turned out a better idea was to use
 SIM_SIGBREAK and have GDB pass back sim_resume (..., SIGBREAK).
 
@@ -604,7 +604,7 @@ Document overlay machinery.
 
 ``(gdb) catch signal SIGNAL''
 
-Overlaps with ``handle SIGNAL'' but the implied behavour is different.
+Overlaps with ``handle SIGNAL'' but the implied behavior is different.
 You can attach commands to a catch but not a handle.  A handle has a
 limited number of hardwired actions.
 
@@ -806,7 +806,7 @@ Rename read_register{,_pid}() to read_unsigned_register{,_pid}().
 
 If / when GDB starts to support the debugging of multi-processor
 (rather than multi-thread) applications the symtab code will need to
-be updated a little so that several independant symbol tables are
+be updated a little so that several independent symbol tables are
 active at a given time.
 
 The other interesting change is a clarification of the exact meaning
@@ -902,7 +902,7 @@ did have a frame pointer register.  Modern architectures typically
 construct a virtual frame-handle from the stack pointer and various
 other bits of string.
 
-Unfortunatly GDB still treats this synthetic FP register as though it
+Unfortunately GDB still treats this synthetic FP register as though it
 is real.  That in turn really confuses users (arm and ``print $fp'' VS
 ``info registers fp'').  The synthetic FP should be separated out of
 the true register set presented to the user.
@@ -956,10 +956,10 @@ How I would like the register file to work is more like:
              |
         map random cache
         bytes to target
-        dependant i-face
+        dependent i-face
             /|\
              |
-       target dependant
+       target dependent
         such as [gG] packet
         or ptrace buffer
 
@@ -990,7 +990,7 @@ The main objectives being:
 
         o       a mechanism that clearly separates the
                 gdb internal register cache from any
-                target (not architecture) dependant
+                target (not architecture) dependent
                 specifics such as [gG] packets.
 
 Of course, like anything, it sounds good in theory.  In reality, it
@@ -1075,7 +1075,7 @@ Fix target_signal_from_host() etc.
 
 The name is wrong for starters.  ``target_signal'' should probably be
 ``gdb_signal''.  ``from_host'' should be ``from_target_signal''.
-After that it needs to be multi-arched and made independant of any
+After that it needs to be multi-arched and made independent of any
 host signal numbering.
 
 --
@@ -1222,7 +1222,7 @@ The serial code already does this.
 
 --
 
-Make MI interface accessable from existing CLI.
+Make MI interface accessible from existing CLI.
 
 --
 
@@ -1337,7 +1337,7 @@ What should happen is that ``target xxxx'' should call a generic
 open an asynchronous target that may need to perform background tasks
 as part of the ``attach'' phase.
 
-Unfortunatly, due to limitations in the old/creaking command.h
+Unfortunately, due to limitations in the old/creaking command.h
 interface, that isn't possible.  The function being called isn't told
 of the ``xxx'' or any other context information.
 

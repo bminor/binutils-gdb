@@ -819,7 +819,7 @@ mips32_next_pc (CORE_ADDR pc)
 }				/* mips32_next_pc */
 
 /* Decoding the next place to set a breakpoint is irregular for the
-   mips 16 variant, but fortunatly, there fewer instructions. We have to cope
+   mips 16 variant, but fortunately, there fewer instructions. We have to cope
    ith extensions for 16 bit instructions and a pair of actual 32 bit instructions.
    We dont want to set a single step instruction on the extend instruction
    either.

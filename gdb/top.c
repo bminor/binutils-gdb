@@ -564,7 +564,7 @@ return_to_top_level (enum return_reason reason)
    code also randomly used a SET_TOP_LEVEL macro that directly
    initialize the longjmp buffers. */
 
-/* MAYBE: cagney/1999-11-05: Should the catch_erros and cleanups code
+/* MAYBE: cagney/1999-11-05: Should the catch_errors and cleanups code
    be consolidated into a single file instead of being distributed
    between utils.c and top.c? */
 
@@ -607,9 +607,9 @@ catch_errors (catch_errors_ftype *func, PTR args, char *errstring,
     val = (*func) (args);
   catch_return = saved_catch;
 
-  /* FIXME: cagney/1999-11-05: A correct FUNC implementaton will
+  /* FIXME: cagney/1999-11-05: A correct FUNC implementation will
      clean things up (restoring the cleanup chain) to the state they
-     were just prior to the call.  Unfortunatly, many FUNC's are not
+     were just prior to the call.  Unfortunately, many FUNC's are not
      that well behaved.  This could be fixed by adding either a
      do_cleanups call (to cover the problem) or an assertion check to
      detect bad FUNCs code. */
@@ -672,7 +672,7 @@ do_captured_command (void *data)
   /* FIXME: cagney/1999-11-07: Technically this do_cleanups() call
      isn't needed.  Instead an assertion check could be made that
      simply confirmed that the called function correctly cleaned up
-     after its self.  Unfortunatly, old code (prior to 1999-11-04) in
+     after itself.  Unfortunately, old code (prior to 1999-11-04) in
      main.c was calling SET_TOP_LEVEL(), calling the command function,
      and then *always* calling do_cleanups().  For the moment we
      remain ``bug compatible'' with that old code..  */

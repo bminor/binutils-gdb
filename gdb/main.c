@@ -105,7 +105,7 @@ captured_command_loop (void *data)
   /* FIXME: cagney/1999-11-05: A correct command_loop() implementaton
      would clean things up (restoring the cleanup chain) to the state
      they were just prior to the call.  Technically, this means that
-     the do_cleanups() below is redundant.  Unfortunatly, many FUNC's
+     the do_cleanups() below is redundant.  Unfortunately, many FUNCs
      are not that well behaved.  do_cleanups should either be replaced
      with a do_cleanups call (to cover the problem) or an assertion
      check to detect bad FUNCs code. */

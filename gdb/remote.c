@@ -2192,7 +2192,7 @@ serial device is attached to the remote system\n\
 
   /* FIXME: cagney/1999-09-23: During the initial connection it is
      assumed that the target is already ready and able to respond to
-     requests. Unfortunatly remote_start_remote() eventually calls
+     requests. Unfortunately remote_start_remote() eventually calls
      wait_for_inferior() with no timeout.  wait_forever_enabled_p gets
      around this. Eventually a mechanism that allows
      wait_for_inferior() to expect/get timeouts will be

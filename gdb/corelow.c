@@ -329,7 +329,7 @@ core_open (char *filename, int from_tty)
   siggy = bfd_core_file_failing_signal (core_bfd);
   if (siggy > 0)
     /* NOTE: target_signal_from_host() converts a target signal value
-       into gdb's internal signal value.  Unfortunatly gdb's internal
+       into gdb's internal signal value.  Unfortunately gdb's internal
        value is called ``target_signal'' and this function got the
        name ..._from_host(). */
     printf_filtered ("Program terminated with signal %d, %s.\n", siggy,
