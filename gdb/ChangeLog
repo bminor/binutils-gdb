@@ -1,5 +1,12 @@
 2004-01-20  Andrew Cagney  <cagney@redhat.com>
 
+	* source.c (ambiguous_line_spec): Delete never-defined function.
+	* remote-rdi.c (arm_rdi_mourn, arm_rdi_send): Ditto.
+	* gdbtypes.c (add_name, add_mangled_type): Ditto.
+	* cli/cli-cmds.c (validate_comname): Ditto.
+
+2004-01-20  Andrew Cagney  <cagney@redhat.com>
+
 	* tui/tui-disasm.h: Update copyright.  Include "tui.h" and
 	"tui-data.h".
 	(tui_set_disassem_content): Rename tuiSetDisassemContent.

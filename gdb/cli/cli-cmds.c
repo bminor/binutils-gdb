@@ -59,8 +59,6 @@ static void pwd_command (char *, int);
 
 static void show_version (char *, int);
 
-static void validate_comname (char *);
-
 static void help_command (char *, int);
 
 static void show_command (char *, int);
