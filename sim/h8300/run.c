@@ -67,48 +67,52 @@ main (ac, av)
       default:
 	usage();
       }
-  ac -= optind;
-  av += optind;
 
-  if (ac != 1)
+  if (ac - optind != 1)
     usage();
 
-  name = *av;
+  name = av[ac - 1];
 
   if (verbose)
     printf ("run %s\n", name);
 
   abfd = bfd_openr (name, "coff-h8300");
-  if (abfd) 
+  if (! abfd)
     {
-      if (bfd_check_format(abfd, bfd_object)) 
-	{
-	  if (abfd->arch_info->mach == bfd_mach_h8300h)
-	    set_h8300h (1);
-
-	  for (s = abfd->sections; s; s=s->next) 
-	    {
-	      char *buffer = malloc(bfd_section_size(abfd,s));
-	      bfd_get_section_contents(abfd, s, buffer, 0, bfd_section_size(abfd,s));
-	      sim_write(s->vma, buffer, bfd_section_size(abfd,s));
-	    }
-
-	  start_address = bfd_get_start_address(abfd);
-	  sim_create_inferior (start_address, NULL, NULL);
-	  sim_resume(0,0);
-	  if (verbose)
-	    sim_info (verbose - 1);
-	  sim_stop_reason (&reason, &sigrc);
-	  /* FIXME: this test is insufficient but we can't do much
-	     about it until sim_stop_reason is cleaned up.  */
-	  if (sigrc == SIGILL)
-	    abort ();
-	  return 0;
-	}
+      fprintf (stderr, "%s: unable to open %s\n", av[0], name);
+      exit (1);
     }
 
-  return 1;
+  if (! bfd_check_format(abfd, bfd_object)) 
+    {
+      fprintf (stderr, "%s: %s is not a valid executable\n", av[0], name);
+      exit (1);
+    }
+
+  if (abfd->arch_info->mach == bfd_mach_h8300h)
+    set_h8300h (1);
+
+  for (s = abfd->sections; s; s=s->next) 
+    {
+      char *buffer = malloc(bfd_section_size(abfd,s));
+      bfd_get_section_contents(abfd, s, buffer, 0, bfd_section_size(abfd,s));
+      sim_write(s->vma, buffer, bfd_section_size(abfd,s));
+    }
+
+  start_address = bfd_get_start_address(abfd);
+  sim_create_inferior (start_address, NULL, NULL);
+  sim_resume(0,0);
+  if (verbose)
+    sim_info (verbose - 1);
+  sim_stop_reason (&reason, &sigrc);
+  /* FIXME: this test is insufficient but we can't do much
+     about it until sim_stop_reason is cleaned up.  */
+  if (sigrc == SIGILL)
+    abort ();
+  return 0;
 }
+
+/* gdb callback used by simulator */
 
 void
 printf_filtered (va_alist)
@@ -126,6 +130,6 @@ printf_filtered (va_alist)
 void
 usage()
 {
-  fprintf (stderr, "usage: run [-tv] program\n");
+  fprintf (stderr, "usage: run [-h] [-t] [-v] [-c csize] program\n");
   exit (1);
 }
