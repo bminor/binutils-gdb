@@ -35,6 +35,7 @@ bar.c
 baz.c
 bitfields.c
 bitfields.exp
+bitops.exp
 branches.c
 break.c
 break.exp
@@ -42,7 +43,7 @@ callfuncs.c
 callfuncs.exp
 callfuncs2.c
 call-array-struct.c
-call-return-struct.c 
+call-return-struct.c
 call-strings.c
 commands.exp
 compiler.c
@@ -63,6 +64,8 @@ define.exp
 display.c
 dollar.exp
 echo.exp
+enable-disable-break.exp
+ending-run.c
 environment.exp
 eval-skip.exp
 exprs.c
@@ -91,11 +94,13 @@ list0.c
 list0.h
 list1.c
 logical.exp
+long_long.c
 m32r.ld
 m32rovly.c
 m68k-aout.u
 m68k-aout2.u
 m68k-elf.u
+maint.exp
 mips-ecoff.u
 mips_pro.c
 mips_pro.exp
@@ -111,7 +116,8 @@ ovlymgr.c
 ovlymgr.h
 pointers.c 
 pointers.exp
-pointers2.c 
+pointers2.c
+pointers2.exp
 printcmds.c
 printcmds.exp
 ptype.c
@@ -137,6 +143,7 @@ setshow.c
 setshow.exp
 setvar.c
 setvar.exp
+shlib-call2.exp
 shmain.c
 shr1.c
 shr2.c
@@ -152,6 +159,7 @@ solib_implicitly_loaded.c
 solib_indirect_call.c
 sparc-aout.u
 sparc-elf.u
+step-test.c
 structs2.c
 structs2.exp
 term.exp
