@@ -99,7 +99,7 @@ typedef struct mips_extra_func_info
 extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
 
 /* Functions for dealing with MIPS16 call and return stubs.  */
-#define IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
+#define DEPRECATED_IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
 extern int mips_ignore_helper (CORE_ADDR pc);
 
 /* Definitions and declarations used by mips-tdep.c and remote-mips.c  */

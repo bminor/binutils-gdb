@@ -5260,8 +5260,9 @@ mips_in_return_stub (CORE_ADDR pc, char *name)
 }
 
 
-/* Return non-zero if the PC is in a library helper function that should
-   be ignored.  This implements the IGNORE_HELPER_CALL macro.  */
+/* Return non-zero if the PC is in a library helper function that
+   should be ignored.  This implements the
+   DEPRECATED_IGNORE_HELPER_CALL macro.  */
 
 int
 mips_ignore_helper (CORE_ADDR pc)
@@ -5930,8 +5931,8 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: FIRST_EMBED_REGNUM = %d\n",
 		      FIRST_EMBED_REGNUM);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: IGNORE_HELPER_CALL # %s\n",
-		      XSTRING (IGNORE_HELPER_CALL (PC)));
+		      "mips_dump_tdep: DEPRECATED_IGNORE_HELPER_CALL # %s\n",
+		      XSTRING (DEPRECATED_IGNORE_HELPER_CALL (PC)));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: IN_SOLIB_CALL_TRAMPOLINE # %s\n",
 		      XSTRING (IN_SOLIB_CALL_TRAMPOLINE (PC, NAME)));

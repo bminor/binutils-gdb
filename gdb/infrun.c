@@ -161,14 +161,6 @@ static int may_follow_exec = MAY_FOLLOW_EXEC;
 #define SOLIB_IN_DYNAMIC_LINKER(pid,pc) 0
 #endif
 
-/* On MIPS16, a function that returns a floating point value may call
-   a library helper function to copy the return value to a floating point
-   register.  The IGNORE_HELPER_CALL macro returns non-zero if we
-   should ignore (i.e. step over) this function call.  */
-#ifndef IGNORE_HELPER_CALL
-#define IGNORE_HELPER_CALL(pc)	0
-#endif
-
 /* On some systems, the PC may be left pointing at an instruction that  won't
    actually be executed.  This is usually indicated by a bit in the PSW.  If
    we find ourselves in such a state, then we step the target beyond the
@@ -2341,7 +2333,19 @@ process_event_stop_test:
 	  return;
 	}
 	
-      if (step_over_calls == STEP_OVER_ALL || IGNORE_HELPER_CALL (stop_pc))
+#ifdef DEPRECATED_IGNORE_HELPER_CALL
+      /* On MIPS16, a function that returns a floating point value may
+	 call a library helper function to copy the return value to a
+	 floating point register.  The DEPRECATED_IGNORE_HELPER_CALL
+	 macro returns non-zero if we should ignore (i.e. step over)
+	 this function call.  */
+      /* FIXME: cagney/2004-07-21: These custom ``ignore frame when
+	 stepping'' function attributes (SIGTRAMP_FRAME,
+	 DEPRECATED_IGNORE_HELPER_CALL, SKIP_TRAMPOLINE_CODE,
+	 skip_language_trampoline frame, et.al.) need to be replaced
+	 with generic attributes bound to the frame's function.  */
+      if (step_over_calls == STEP_OVER_ALL
+	  || DEPRECATED_IGNORE_HELPER_CALL (stop_pc))
 	{
 	  /* We're doing a "next", set a breakpoint at callee's return
 	     address (the address at which the caller will
@@ -2351,7 +2355,8 @@ process_event_stop_test:
 	  keep_going (ecs);
 	  return;
 	}
-      
+#endif
+
       /* If we are in a function call trampoline (a stub between the
 	 calling routine and the real function), locate the real
 	 function.  That's what tells us (a) whether we want to step

@@ -1,3 +1,12 @@
+2004-07-21  Andrew Cagney  <cagney@gnu.org>
+
+	* config/mips/tm-mips.h (DEPRECATED_IGNORE_HELPER_CALL): Deprecate.
+	* mips-tdep.c (mips_dump_tdep, mips_ignore_helper): Update.
+	* infrun.c (DEPRECATED_IGNORE_HELPER_CALL): Delete macro.
+	(handle_inferior_event): Wrap call to deprecated
+	IGNORE_HELPER_CALL in #ifdef.
+	* config/mips/tm-nbsd.h: Update.
+
 2004-07-20  Jim Blandy  <jimb@redhat.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): The register set used for
