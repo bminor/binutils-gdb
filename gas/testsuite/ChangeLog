@@ -1,3 +1,11 @@
+Tue Jun 23 15:14:43 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/v850/hilo2.s: Use r1 as the destination of the movea
+	instruction, since r0 is read only.
+
+	* gas/v850/basic.exp: Fix names of special area relocations.
+	Set -mwarn-signed-overflow flag when running range.s test.
+
 start-sanitize-am33
 Mon Jun 22 13:43:43 1998  Jeffrey A Law  (law@cygnus.com)
 
