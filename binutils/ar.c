@@ -1,4 +1,22 @@
-/* ar.c - Archive modify and extract. */
+/* ar.c - Archive modify and extract.
+   Copyright (C) 1991 Free Software Foundation, Inc.
+
+This file is part of GNU Binutils.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 /*
    Bugs: should use getopt the way tar does (complete w/optional -) and
    should have long options too. GNU ar used to check file against filesystem
@@ -6,14 +24,14 @@
    when name truncated. No way to specify pos_end. Error messages should be
    more consistant.
 */
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 #include "ar.h"
 #include <stdio.h>
 #include <sys/time.h>
 #include <errno.h>
 #define BUFSIZE 8192
-/* Not great to have these here.  Should they be exported or not? */
+/* FIXME: Not great to have these here.  Should they be exported or not? */
 PROTO(size_t, bfd_read, (void *ptr, size_t size, size_t nitems, bfd * abfd));
 PROTO(size_t, bfd_write, (void *ptr, size_t size, size_t nitems, bfd * abfd));
 /* PROTO (void, open_inarch, (char *archive_filename)); */
@@ -39,6 +57,10 @@ char           *program_name = NULL;
 bfd             bogus_archive;
 bfd            *inarch;		/* The input arch we're manipulating */
 
+/* This flag distinguishes between ar and ranlib:
+   1 means this is 'ranlib'; -1 means this is 'ar'.
+   0 means if we should use argv[0] to decide. */
+extern int is_ranlib;
 /* Nonzero means don't warn about creating the archive file if necessary.  */
 int             silent_create = 0;
 /* Nonzero means describe each action performed.  */
@@ -116,6 +138,8 @@ main(argc, argv)
     char           *inarch_filename;
     char           *temp;
 
+    bfd_init();
+
 #ifdef GNU960
     check_v960( argc, argv );
     default_target = bfd_make_targ_name(BFD_COFF_FORMAT,HOST_BYTE_ORDER_BIG_P);
@@ -128,7 +152,7 @@ main(argc, argv)
 	temp = program_name;	/* shouldn't happen, but... */
     else
 	++temp;
-    if (!strcmp(temp, "ranlib")) {
+    if (is_ranlib > 0 || (is_ranlib == 0 && strcmp(temp, "ranlib") == 0)) {
 	if (argc < 2)
 	    fatal("Too few command arguments.");
 	ranlib_only(argv[1]);
@@ -654,7 +678,7 @@ write_archive()
 	strcpy(new_name, inarch->filename);
 	strcpy(new_name + namelen, ".art");
 	obfd = bfd_openw(new_name,
-			 /* violates abstraction; need a better protocol */
+		 /* FIXME: violates abstraction; need a better protocol */
 			 (inarch->xvec ? bfd_get_target(inarch) : NULL));
 
 	if (obfd == NULL)
@@ -667,6 +691,8 @@ write_archive()
 	    bfd_fatal(inarch->filename);
 
 	if (!bfd_close(obfd))
+	    bfd_fatal(inarch->filename);
+	if (unlink(inarch->filename) != 0)
 	    bfd_fatal(inarch->filename);
 	if (rename(new_name, inarch->filename) != 0)
 	    bfd_fatal(inarch->filename);
