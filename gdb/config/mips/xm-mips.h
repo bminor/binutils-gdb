@@ -63,3 +63,6 @@ extern void *memset();
 
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT
+
+/* Mips hosts need aligned va_list arguments.  */
+#include "mips/xm-makeva.h"

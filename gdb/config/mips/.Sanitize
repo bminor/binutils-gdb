@@ -43,6 +43,7 @@ tm-irix3.h
 tm-mips.h
 xm-irix3.h
 xm-irix4.h
+xm-makeva.h
 xm-mips.h
 xm-news-mips.h
 xm-riscos.h
