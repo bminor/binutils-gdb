@@ -18,6 +18,5 @@
    Boston, MA 02111-1307, USA.  */
 
 #define GDB_MULTI_ARCH 1
-#define MIPS_DEFAULT_FPU_TYPE MIPS_FPU_DOUBLE
 
 #include "mips/tm-bigmips64.h"

@@ -129,11 +129,6 @@ extern breakpoint_from_pc_fn mips_breakpoint_from_pc;
 #define MIPS_REGSIZE 4
 #endif
 
-/* The sizes of floating point registers.  */
-
-#define MIPS_FPU_SINGLE_REGSIZE 4
-#define MIPS_FPU_DOUBLE_REGSIZE 8
-
 /* Number of machine registers */
 
 #ifndef NUM_REGS

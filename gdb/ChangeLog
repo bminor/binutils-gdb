@@ -1,3 +1,16 @@
+Thu Jun  8 14:23:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/mips/tm-vr4xxxel.h, config/mips/tm-vr4xxx.h,
+ 	config/mips/tm-vr4100.h, config/mips/tm-tx39l.h,
+ 	config/mips/tm-tx39.h: Delete definition of
+ 	MIPS_DEFAULT_FPU. Enable multi-arch.
+	* mips-tdep.c: (mips_gdbarch_init): The bfd_mach_mips3900 has no
+ 	FPU.
+	
+	* config/mips/tm-mips.h (MIPS_FPU_SINGLE_REGSIZE): 
+	(MIPS_FPU_DOUBLE_REGSIZE): Move from here.
+	* mips-tdep.c: To here.  Change to an enum.
+
 Wed Jun  7 18:27:51 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC): Use config.bfd

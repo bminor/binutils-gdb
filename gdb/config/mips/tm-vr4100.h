@@ -18,7 +18,6 @@
    Boston, MA 02111-1307, USA.  */
 
 #define MIPS_EABI 1
-#define MIPS_DEFAULT_FPU_TYPE MIPS_FPU_NONE
 #define TARGET_PTR_BIT 64
 
 #include "mips/tm-bigmips64.h"

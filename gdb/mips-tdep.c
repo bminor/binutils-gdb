@@ -40,6 +40,14 @@
 #include "elf-bfd.h"
 
 
+/* The sizes of floating point registers.  */
+
+enum
+{
+  MIPS_FPU_SINGLE_REGSIZE = 4,
+  MIPS_FPU_DOUBLE_REGSIZE = 8
+};
+
 /* All the possible MIPS ABIs. */
 
 enum mips_abi
@@ -4030,6 +4038,7 @@ mips_gdbarch_init (info, arches)
 	   && info.bfd_arch_info->arch == bfd_arch_mips)
     switch (info.bfd_arch_info->mach)
       {
+      case bfd_mach_mips3900:
       case bfd_mach_mips4100:
       case bfd_mach_mips4111:
 	tdep->mips_fpu_type = MIPS_FPU_NONE;

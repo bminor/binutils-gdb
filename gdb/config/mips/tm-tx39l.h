@@ -17,8 +17,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#define GDB_MULTI_ARCH 1
 #define MIPS_EABI 1
-#define MIPS_DEFAULT_FPU_TYPE MIPS_FPU_NONE
 
 #include "mips/tm-mips.h"
 
