@@ -1,3 +1,10 @@
+2005-02-17  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (elf32_frv_relocate_section): Remove warning from
+	uninitialized check_segment[1] in TLSMOFF case.  
+	Reported by Alan Modra.
+	(elf32_frv_relocate_section): Improve errors and warnings.
+
 2005-02-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Fix warning.

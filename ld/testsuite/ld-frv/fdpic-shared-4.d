@@ -1,7 +1,6 @@
 #name: FRV uClinux PIC relocs to protected symbols, shared linking
 #source: fdpic4.s
 #objdump: -DR -j .text -j .data -j .got -j .plt
-#as: -mfdpic
 #ld: -shared
 
 .*:     file format elf.*frv.*

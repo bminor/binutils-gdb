@@ -3905,6 +3905,8 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	      check_segment[1] =
 		_frvfdpic_osec_to_segment (output_bfd, sec->output_section);
 	    }
+	  else
+	    check_segment[1] = -1;
 	  break;
 
 	case R_FRV_GOTTLSOFF12:
@@ -3962,12 +3964,18 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 		 symbols.  */
 	      && !(picrel && picrel->symndx == -1
 		   && picrel->d.h->root.type == bfd_link_hash_undefined))
-	    info->callbacks->warning
-	      (info,
-	       (info->shared || info->pie)
-	       ? _("relocations between different segments are not supported")
-	       : _("warning: relocation references a different segment"),
-	       name, input_bfd, input_section, rel->r_offset);
+	    {
+	      if (info->shared || info->pie)
+		(*_bfd_error_handler)
+		  (_("%B(%A+0x%lx): reloc against `%s': %s"),
+		   input_bfd, input_section, (long)rel->r_offset, name,
+		   _("relocation references a different segment"));
+	      else
+		info->callbacks->warning
+		  (info,
+		   _("relocation references a different segment"),
+		   name, input_bfd, input_section, rel->r_offset);
+	    }
 	  if (!silence_segment_error && (info->shared || info->pie))
 	    return FALSE;
 	  elf_elfheader (output_bfd)->e_flags |= EF_FRV_PIC;
@@ -4113,8 +4121,12 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 
 	  if (msg)
-	    r = info->callbacks->warning
-	      (info, msg, name, input_bfd, input_section, rel->r_offset);
+	    {
+	      (*_bfd_error_handler)
+		(_("%B(%A+0x%lx): reloc against `%s': %s"),
+		 input_bfd, input_section, (long)rel->r_offset, name, msg);
+	      return FALSE;
+	    }
 
 	  if (! r)
 	    return FALSE;

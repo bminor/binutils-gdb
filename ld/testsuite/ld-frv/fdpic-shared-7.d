@@ -1,7 +1,6 @@
 #name: FRV uClinux PIC relocs to local symbols with addends, shared linking
 #source: fdpic7.s
 #objdump: -DR -j .text -j .data -j .got -j .plt
-#as: -mfdpic
 #ld: -shared
 
 .*:     file format elf.*frv.*

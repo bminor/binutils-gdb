@@ -1,7 +1,6 @@
 #name: FRV uClinux PIC relocs to weak undefined symbols, pie linking
 #source: fdpic6.s
 #objdump: -DR -j .text -j .data -j .got -j .plt
-#as: -mfdpic
 #ld: -pie --defsym WD1=D6
 
 .*:     file format elf.*frv.*

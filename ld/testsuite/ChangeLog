@@ -1,3 +1,9 @@
+2005-02-17  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld-frv/fdpic-static-6.d: Update.
+	* ld-frv/fdpic*.d: Remove explicit -mfdpic from #as.  Update
+	spelling of errors and warnings.
+
 2005-02-15  Nigel Stephens  <nigel@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 
