@@ -1,4 +1,11 @@
-2001-11-01  Richard Earnshaw  <rearnsha@arm.com>
+2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add 'fr'.
+	* configure: Regernate.
+	* po/fr.po: New file.  Obtained from the translation project web
+	site.
+
+2001-11-02  Richard Earnshaw  <rearnsha@arm.com>
 
 	* tc-arm.c: Re-arrange prototypes by architecture.
 	(insns): Re-arrange instructions by archtitecture.  Pld instruction
