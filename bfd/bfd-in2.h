@@ -1103,9 +1103,7 @@ enum bfd_architecture
 #define bfd_mach_i960_mc        4
 #define bfd_mach_i960_xa        5
 #define bfd_mach_i960_ca        6
-  /* start-sanitize-i960xl */
-#define bfd_mach_i960_xl	 7
-  /* end-sanitize-i960xl */
+#define bfd_mach_i960_jx	 7
 #define bfd_mach_i960_hx        8
 
   bfd_arch_a29k,       /* AMD 29000 */
