@@ -1,5 +1,7 @@
 2004-08-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* proc-why.c (proc_prettyfprint_why): Fix format string.
+
 	* solib-osf.c (osf_current_sos): Remove unsused label.
 
 	* configure.in: Add <ncurses/ncurses.h> to the list of possible
