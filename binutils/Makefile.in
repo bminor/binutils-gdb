@@ -576,11 +576,13 @@ install: all $(DEMANGLER_PROG).1
 	-if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ]; then true; else mkdir $(tooldir)/bin; fi; \
 	  for i in $(TOOL_PROGS) ; do \
-	    j=`echo $$i | sed -e 's/.new//'`; \
-	    rm -f $(tooldir)/bin/$$j; \
-	    k=`echo $$j | sed '$(program_transform_name)'`; \
-	    ln $(bindir)/$$k $(tooldir)/bin/$$j >/dev/null 2>/dev/null \
-	     || $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$j; \
+	    if [ -f $i ]; then \
+	      j=`echo $$i | sed -e 's/.new//'`; \
+	      rm -f $(tooldir)/bin/$$j; \
+	      k=`echo $$j | sed '$(program_transform_name)'`; \
+	      ln $(bindir)/$$k $(tooldir)/bin/$$j >/dev/null 2>/dev/null \
+		|| $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$j; \
+	    fi; \
 	  done; \
 	 else true; fi
 
