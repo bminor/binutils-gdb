@@ -508,6 +508,13 @@ child_create_inferior (exec_file, allargs, env)
 
   new_tty_prefork (inferior_io_terminal);
 
+  /* It is generally good practice to flush any possible pending stdio
+     output prior to doing a fork, to avoid the possibility of both the
+     parent and child flushing the same data after the fork. */
+
+  fflush (stdout);
+  fflush (stderr);
+
 #if defined(USG) && !defined(HAVE_VFORK)
   pid = fork ();
 #else
@@ -762,6 +769,7 @@ wait_for_inferior ()
 #ifdef TDESC
   extern dc_handle_t tdesc_handle;
 #endif
+  int current_line;
 
 #if 0
   /* This no longer works now that read_register is lazy;
@@ -772,6 +780,9 @@ wait_for_inferior ()
   prev_func_start += FUNCTION_START_OFFSET;
   prev_sp = read_register (SP_REGNUM);
 #endif /* 0 */
+
+  sal = find_pc_line(prev_pc, 0);
+  current_line = sal.line;
 
   while (1)
     {
@@ -1222,11 +1233,29 @@ wait_for_inferior ()
 		  break;
 		}
 	    }
-	  /* No subroutince call; stop now.  */
+	  /* No subroutine call; stop now.  */
 	  else
 	    {
-	      stop_step = 1;
-	      break;
+	      if (step_range_end == 1) break; /* Don't do this for stepi/nexti */
+
+	      /* We've wandered out of the step range (but we haven't done a
+		 subroutine call or return (that's handled elsewhere)).  We
+		 don't really want to stop until we encounter the start of a
+		 new statement.  If so, we stop.  Otherwise, we reset
+		 step_range_start and step_range_end, and just continue. */
+	      sal = find_pc_line(stop_pc, 0);
+	      
+	      if (current_line != sal.line
+		  && stop_pc == sal.pc) {
+		stop_step = 1;
+		break;
+	      } else {
+		/* This is probably not necessary, but it probably makes
+		   stepping more efficient, as we avoid calling find_pc_line()
+		   for each instruction we step over. */
+		step_range_start = sal.pc;
+		step_range_end = sal.end;
+	      }
 	    }
 	}
 
