@@ -138,7 +138,7 @@ else
 fi
 
 # Java stuff
-java_files="boehm-gc libjava qthreads"
+java_files="boehm-gc libjava qthreads zip"
 
 if (echo $* | grep keep\-java > /dev/null); then
 	keep_these_too="${keep_these_too} ${java_files}"
