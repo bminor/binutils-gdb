@@ -323,6 +323,9 @@ pn-*-*)			gdb_target=pn ;;
 powerpc-*-netware*)	gdb_target=ppc-nw
 			configdirs="${configdirs} nlm" ;;
 
+powerpc-*-eabi*)	gdb_target=ppc-eabi
+			configdirs="${configdirs}" ;;
+
 pyramid-*-*)		gdb_target=pyramid ;;
 
 rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;

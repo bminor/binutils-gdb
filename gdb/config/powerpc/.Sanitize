@@ -24,6 +24,8 @@ Things-to-keep:
 gdbserve.mt
 ppc-nw.mt
 tm-ppc-nw.h
+tm-ppc-eabi.h
+ppc-eabi.mt
 
 Things-to-lose:
 
