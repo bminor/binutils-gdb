@@ -252,6 +252,55 @@ typedef enum type_kind_t
   tk_real
 } type_kind_t;
 
+struct demangler_engine libiberty_demanglers[] =
+{
+  {
+    AUTO_DEMANGLING_STYLE_STRING,
+      auto_demangling,
+      "Automatic selection based on executable"
+  }
+  ,
+  {
+    GNU_DEMANGLING_STYLE_STRING,
+      gnu_demangling,
+      "GNU (g++) style demangling"
+  }
+  ,
+  {
+    LUCID_DEMANGLING_STYLE_STRING,
+      lucid_demangling,
+      "Lucid (lcc) style demangling"
+  }
+  ,
+  {
+    ARM_DEMANGLING_STYLE_STRING,
+      arm_demangling,
+      "ARM style demangling"
+  }
+  ,
+  {
+    HP_DEMANGLING_STYLE_STRING,
+      hp_demangling,
+      "HP (aCC) style demangling"
+  }
+  ,
+  {
+    EDG_DEMANGLING_STYLE_STRING,
+      edg_demangling,
+      "EDG style demangling"
+  }
+  ,
+  {
+    GNU_NEW_ABI_DEMANGLING_STYLE_STRING,
+    gnu_new_abi_demangling,
+    "GNU (g++) new-ABI-style demangling"
+  }
+  ,
+  {
+    NULL, unknown_demangling, NULL
+  }
+};
+
 #define STRING_EMPTY(str)	((str) -> b == (str) -> p)
 #define PREPEND_BLANK(str)	{if (!STRING_EMPTY(str)) \
     string_prepend(str, " ");}
@@ -636,8 +685,8 @@ cplus_demangle_opname (opname, result, options)
 	}
     }
   else if (opname[0] == '_' && opname[1] == '_'
-	   && opname[2] >= 'a' && opname[2] <= 'z'
-	   && opname[3] >= 'a' && opname[3] <= 'z')
+	   && islower((unsigned char)opname[2])
+	   && islower((unsigned char)opname[3]))
     {
       if (opname[4] == '\0')
 	{
@@ -733,6 +782,7 @@ cplus_demangle_opname (opname, result, options)
   return ret;
 
 }
+
 /* Takes operator name as e.g. "++" and returns mangled
    operator name (e.g. "postincrement_expr"), or NULL if not found.
 
@@ -756,6 +806,40 @@ cplus_mangle_opname (opname, options)
 	return optable[i].in;
     }
   return (0);
+}
+
+/* Add a routine to set the demangling style to be sure it is valid and
+   allow for any demangler initialization that maybe necessary. */
+
+enum demangling_styles
+cplus_demangle_set_style (style)
+     enum demangling_styles style;
+{
+  struct demangler_engine *demangler = libiberty_demanglers; 
+
+  for (; demangler->demangling_style != unknown_demangling; ++demangler)
+    if (style == demangler->demangling_style)
+      {
+	current_demangling_style = style;
+	return current_demangling_style;
+      }
+
+  return unknown_demangling;
+}
+
+/* Do string name to style translation */
+
+enum demangling_styles
+cplus_demangle_name_to_style (name)
+     const char *name;
+{
+  struct demangler_engine *demangler = libiberty_demanglers; 
+
+  for (; demangler->demangling_style != unknown_demangling; ++demangler)
+    if (strcmp (name, demangler->demangling_style_name) == 0)
+      return demangler->demangling_style;
+
+  return unknown_demangling;
 }
 
 /* char *cplus_demangle (const char *mangled, int options)
@@ -797,6 +881,10 @@ cplus_demangle (mangled, options)
   work -> options = options;
   if ((work -> options & DMGL_STYLE_MASK) == 0)
     work -> options |= (int) current_demangling_style & DMGL_STYLE_MASK;
+
+  /* The new-ABI demangling is implemented elsewhere.  */
+  if (GNU_NEW_ABI_DEMANGLING)
+    return cplus_demangle_new_abi (mangled);
 
   ret = internal_cplus_demangle (work, mangled);
   squangle_mop_up (work);
@@ -4188,8 +4276,8 @@ demangle_function_name (work, mangled, declp, scan)
 	}
     }
   else if (declp->b[0] == '_' && declp->b[1] == '_'
-	   && declp->b[2] >= 'a' && declp->b[2] <= 'z'
-	   && declp->b[3] >= 'a' && declp->b[3] <= 'z')
+	   && islower((unsigned char)declp->b[2])
+	   && islower((unsigned char)declp->b[3]))
     {
       if (declp->b[4] == '\0')
 	{
@@ -4402,6 +4490,7 @@ static int flags = DMGL_PARAMS | DMGL_ANSI;
 static void demangle_it PARAMS ((char *));
 static void usage PARAMS ((FILE *, int)) ATTRIBUTE_NORETURN;
 static void fatal PARAMS ((const char *)) ATTRIBUTE_NORETURN;
+static void print_demangler_list PARAMS ((FILE *));
 
 static void
 demangle_it (mangled_name)
@@ -4421,16 +4510,43 @@ demangle_it (mangled_name)
     }
 }
 
+static void 
+print_demangler_list (stream)
+     FILE *stream;
+{
+  struct demangler_engine *demangler; 
+
+  fprintf (stream, "{%s", libiberty_demanglers->demangling_style_name);
+  
+  for (demangler = libiberty_demanglers + 1;
+       demangler->demangling_style != unknown_demangling;
+       ++demangler)
+    fprintf (stream, ",%s", demangler->demangling_style_name);
+
+  fprintf (stream, "}");
+}
+
 static void
 usage (stream, status)
      FILE *stream;
      int status;
 {
   fprintf (stream, "\
-Usage: %s [-_] [-n] [-s {gnu,lucid,arm,hp,edg}] [--strip-underscores]\n\
-       [--no-strip-underscores] [--format={gnu,lucid,arm,hp,edg}]\n\
-      [--help] [--version] [arg...]\n",
+Usage: %s [-_] [-n] [--strip-underscores] [--no-strip-underscores] \n",
 	   program_name);
+
+  fprintf (stream, "\
+       [-s ");
+  print_demangler_list (stream);
+  fprintf (stream, "]\n");
+
+  fprintf (stream, "\
+       [--format ");
+  print_demangler_list (stream);
+  fprintf (stream, "]\n");
+
+  fprintf (stream, "\
+       [--help] [--version] [arg...]\n");
   exit (status);
 }
 
@@ -4467,6 +4583,9 @@ standard_symbol_characters PARAMS ((void));
 
 static const char *
 hp_symbol_characters PARAMS ((void));
+
+static const char *
+gnu_new_abi_symbol_characters PARAMS ((void));
 
 /* Return the string of non-alnum characters that may occur 
    as a valid symbol component, in the standard assembler symbol
@@ -4516,6 +4635,17 @@ hp_symbol_characters ()
 }
 
 
+/* Return the string of non-alnum characters that may occur 
+   as a valid symbol component in the GNU standard C++ ABI mangling
+   scheme.  */
+
+static const char *
+gnu_new_abi_symbol_characters ()
+{
+  return "_";
+}
+
+
 extern int main PARAMS ((int, char **));
 
 int
@@ -4553,32 +4683,19 @@ main (argc, argv)
 	  flags |= DMGL_JAVA;
 	  break;
 	case 's':
-	  if (strcmp (optarg, "gnu") == 0)
-	    {
-	      current_demangling_style = gnu_demangling;
-	    }
-	  else if (strcmp (optarg, "lucid") == 0)
-	    {
-	      current_demangling_style = lucid_demangling;
-	    }
-	  else if (strcmp (optarg, "arm") == 0)
-	    {
-	      current_demangling_style = arm_demangling;
-	    }
-	  else if (strcmp (optarg, "hp") == 0)
-	    {
-	      current_demangling_style = hp_demangling;
-	    }
-          else if (strcmp (optarg, "edg") == 0)
-            {
-              current_demangling_style = edg_demangling;
-            }
-	  else
-	    {
-	      fprintf (stderr, "%s: unknown demangling style `%s'\n",
-		       program_name, optarg);
-	      return (1);
-	    }
+	  {
+	    enum demangling_styles style;
+
+	    style = cplus_demangle_name_to_style (optarg);
+	    if (style == unknown_demangling)
+	      {
+		fprintf (stderr, "%s: unknown demangling style `%s'\n",
+			 program_name, optarg);
+		return (1);
+	      }
+	    else
+	      cplus_demangle_set_style (style);
+	  }
 	  break;
 	}
     }
@@ -4602,6 +4719,9 @@ main (argc, argv)
 	  break;
 	case hp_demangling:
 	  valid_symbols = hp_symbol_characters ();
+	  break;
+	case gnu_new_abi_demangling:
+	  valid_symbols = gnu_new_abi_symbol_characters ();
 	  break;
 	default:
 	  /* Folks should explicitly indicate the appropriate alphabet for

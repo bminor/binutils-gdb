@@ -34,6 +34,8 @@
 #include "libiberty.h"
 #include "partition.h"
 
+static int elem_compare PARAMS ((const void *, const void *));
+
 /* Creates a partition of NUM_ELEMENTS elements.  Initially each
    element is in a class by itself.  */
 
@@ -128,8 +130,8 @@ elem_compare (elem1, elem2)
      const void *elem1;
      const void *elem2;
 {
-  int e1 = * (int *) elem1;
-  int e2 = * (int *) elem2;
+  int e1 = * (const int *) elem1;
+  int e2 = * (const int *) elem2;
   if (e1 < e2)
     return -1;
   else if (e1 > e2)
@@ -175,7 +177,7 @@ partition_print (part, fp)
 	  c = elements[c].next - elements;
 	}
 	/* Sort them.  */
-	qsort ((void *) class_elements, count, sizeof (int), &elem_compare);
+	qsort ((void *) class_elements, count, sizeof (int), elem_compare);
 	/* Print them.  */
 	fputc ('(', fp);
 	for (i = 0; i < count; ++i) 

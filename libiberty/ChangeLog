@@ -1,11 +1,83 @@
-2000-06-06  DJ Delorie  <dj@cygnus.com>
+2000-06-09  Zack Weinberg  <zack@wolery.cumb.org>
 
-	* Makefile.in: add EXTRA_INCS
-	* configure.in: if with-newlib, point to it for includes
-	rather than using the installed includes, for target builds.
-	If cygwin, override function list only for target builds.
-	* configure: regenerate
+	* cp-demangle.c (demangle_operator_name): Add spaces before
+	names beginning with a letter: delete, delete[], new, new[],
+	sizeof.
+	(demangle_special_name): Handle TF <type> and TJ <type>.
 
+Thu Jun  8 18:52:24 2000  Philippe De Muyter  <phdm@macqel.be>
+
+	* cp-demangle.c (template_arg_list_new): Revert previous PARAMS patch.
+
+Thu Jun  8 09:25:54 2000  Philippe De Muyter  <phdm@macqel.be>
+
+	* cp-demangle.c (stdio.h): File included unconditionaly.
+	(template_arg_list_new): Parameter list is PARAMS ((void)), not ().
+	* dyn-string.c (stdio.h): File included.
+	* partition.c (partition_print): No `&' needed to take the address of
+	a function.
+
+2000-06-07  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* configure.in (ac_libiberty_warn_cflags): Add -pedantic.
+	
+	* choose-temp.c (try, choose_temp_base, make_temp_file): Constify.
+
+	* cp-demangle.c (demangle_char): Change parameter from char to int.
+	(demangle_expression, demangle_expr_primary): Remove extra
+	semi-colon in prototype.
+
+	* dyn-string.c (dyn_string_append_char): Change parameter from
+	char to int.
+
+	* memcmp.c (memcmp): Constify.
+
+	* mkstemps.c (gcc_uint64_t): Mark GNUC `long long' case with
+	__extension__.
+
+	* partition.c (elem_compare): Prototype.  Don't cast away
+	const-ness.
+
+	* setenv.c (setenv): Use braces to avoid ambiguous `else'.
+	
+2000-06-07  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* Makefile.in (cp-demangle.o): Depend on $(INCDIR)/demangle.h.
+
+	* cp-demangle.c: Include demangle.h.
+	(template_arg_list_new): DeANSIfy.
+	(cp_demangle): Make static and add prototype.
+	(operator_code, operators): Constify.
+	(demangle_operator_name): Likewise for variables `p1', `p2' and `p'.
+
+2000-06-05  Alex Samuel  <samuel@codesourcery.com>
+
+	* cp-demangle.c (demangle_prefix): Cast argument to isdigit to
+	unsigned char.
+	(demangle_unqualified_name): Likewise.
+	(demangle_number_literally): Likewise.
+	(demangle_type): Likewise.
+	(demangle_substitution): Likewise.
+	(is_mangled_char): Likewise, for isalnum.
+
+2000-06-04  Alex Samuel  <samuel@codesourcery.com>
+
+	* Makefile.in (CFILES): Add cp-demangle.c and dyn-string.c.
+	(REQUIRED_OFILES): Add cp-demangle.o and dyn-string.o.
+	(cp-demangle.o): New dependency.
+	(dyn-string.o): Likewise.
+
+	* dyn-string.c: Move here from gcc/dyn-string.c.  Add new functions.
+
+	* cplus-dem.c (libiberty_demanglers): Add initializer for new-ABI
+	demangler.
+	(cplus_demangle): Call cplus_demangle_new_abi if in new-ABI
+	demangling mode.
+	(gnu_new_abi_symbol_characters): New function.
+	(main): Use gnu_new_abi_symbol_characters.  * cp-demangle.c: New
+	file.
+	* cp-demangle.c: New file.
+	
 Tue May 30 16:45:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* floatformat.c: Add name to each floatformat field.
@@ -16,7 +88,7 @@ Tue May 30 15:07:52 2000  Jeffrey A Law  (law@cygnus.com)
 
 2000-05-29  Zack Weinberg  <zack@wolery.cumb.org>
 
-	* hashtab.c, partition.c, xmemdup.c: Include string.h
+	* hashtab.c, partition.c, sort.c, xmemdup.c: Include string.h
 	if HAVE_STRING_H.
 	* pexecute.c, xexit.c: Include stdlib.h if HAVE_STDLIB_H.
 	* objalloc.c: Include config.h.  Include stdlib.h and don't
@@ -26,21 +98,124 @@ Tue May 30 15:07:52 2000  Jeffrey A Law  (law@cygnus.com)
 	HAVE_STRING_H, else declare memset without prototype.  Don't
 	include stddef.h.
 
-	* sort.c: Bring over from GCC.
+2000-05-23  Mike Stump  <mrs@wrs.com>
 
-2000-05-26  Alexandre Oliva  <aoliva@cygnus.com>
+	* Makefile.in (xmalloc.o): Add dependency for config.h, fixes make
+ 	-j3.
+
+2000-05-18  J. David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* xmalloc.c: Include config.h for HAVE_SBRK definition.
+
+2000-05-16  Horst von Brand <vonbrand@sleipnir.valparaiso.cl>
+
+        * hashtab.c (hash_pointer): Delete low-order bits which are
+	probably zero, also eliminate a warning on alpha.
+
+2000-05-15  David Edelsohn  <edelsohn@gnu.org>
+
+	* Makefile.in: Change "pic" to depend on $(PICFLAG), not
+	on $(enable_shared).
+
+2000-05-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* config.table: Use mh-sparcpic for sparc*-*-*.
+
+2000-05-08  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.in (CFILES): Add strncmp.c.
+	(NEEDED): Add strncmp.
+
+2000-05-04  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* cplus-dem.c (cplus_demangle_opname, demangle_function_name):
+	Cast the arguments to `islower' to `unsigned char'.
+	(print_demangler_list): Prototype.
+
+Thu May  4 17:14:41 2000  Philippe De Muyter  <phdm@macqel.be>
+
+	* sort.c (UCHAR_MAX): Provide fallback definition.
+
+2000-04-29  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* Makefile.in (maintainer-clean-subdir): Fix handling of empty
 	SUBDIRS.
+
+2000-04-28  Kenneth Block  <block@zk3.dec.com>
+	    Jason Merrill  <jason@casey.cygnus.com>
+
+        * cplus-dem.c (libiberty_demanglers): New table for demangle styles.
+        (cplus_demangle_set_style): New function for setting style.
+        (cplus_demangle_name_to_style): New function to translate name.
+
+2000-04-27  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* aclocal.m4: New file with new test libiberty_AC_FUNC_STRNCMP.
+
+	* configure.in (AC_CHECK_HEADERS): Add sys/mman.h fcntl.h.
+	(libiberty_AC_FUNC_STRNCMP): Invoke.
+
+	* strncmp.c: New file.
+
+Thu Apr 27 16:58:43 MET DST 2000  Jan Hubicka  <jh@suse.cz>
+
+	* hashtab.c (htab_expand): Add prototype.
+	(find_empty_slot_for_expand): Likewise.
+
+2000-04-24  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* hashtab.c (hash_pointer, eq_pointer): Make definition static to
+	match prototype.
+	(htab_expand): Cast the return value of xcalloc.
+
+2000-04-24  Mark Mitchell  <mark@codesourcery.com>
+
+	* hashtab.c (hash_pointer): New function.
+	(eq_pointer): Likewise.
+	(htab_hash_pointer): New variable.
+	(htab_eq_pointer): Likewise.
+
+2000-04-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* sort.c (sort_pointers): Fix endianness bugs.
+
+	* sort.c: New file.
+	* Makefile.in (CFILES): Add sort.c
+	(REQUIRED_OFILES): Add sort.o.
+	(sort.o): New target.
 
 2000-04-21  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* Makefile.in (*-subdir): Revamp slightly to avoid losing on
 	4.3BSD systems.
 
+Tue Apr 18 16:23:31 2000  Richard Kenner  <kenner@vlsi1.ultra.nyu.edu>
+
+	* hashtab.c: Various minor cleanups.
+	(htab_find_slot_with_hash): INSERT is now enum insert_option.
+	(htab_find_slot): Likewise.
+
+2000-04-16  Dave Pitts  <dpitts@cozx.com>
+
+	* cplus-dem.c (cplus_demangle_opname): Changed to use islower.
+ 
 2000-04-05  Richard Henderson  <rth@cygnus.com>
 
 	* splay-tree.c (splay_tree_remove): New.
+
+2000-03-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* hashtab.c (find_empty_slot_for_expand): Use hashval_t for hash
+	codes.
+	(htab_find_with_hash): Likewise.
+	(htab_find_slot_with_hash): Likewise.
+	
+2000-03-29  Zack Weinberg  <zack@wolery.cumb.org>
+
+	* hashtab.c (htab_find_with_hash): Avoid calculating hash2
+	unless it will be used.  Rearrange loop for better
+	optimization.
+	(higher_prime_number): Add static prototype.
 
 Thu Mar 16 01:33:58 2000  Jeffrey A Law  (law@cygnus.com)
 
