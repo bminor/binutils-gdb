@@ -835,8 +835,7 @@ end_symtab (end_addr, objfile, section)
      OBJF_REORDERED is true, then sort the pending blocks.  */
   if ((objfile->flags & OBJF_REORDERED) && pending_blocks)
     {
-      /* FIXME!  Remove this horrid bubble sort and use qsort!!!
-	 It'd be a whole lot easier if they weren't in a linked list!!! */
+      /* FIXME!  Remove this horrid bubble sort and use merge sort!!! */
       int swapped;
       do
 	{
