@@ -1046,7 +1046,13 @@ i386_register_convert_to_virtual (int regnum, struct type *type,
   DOUBLEST d;
 
   /* We only support floating-point values.  */
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      warning ("Cannot convert floating-point register value "
+	       "to non-floating-point type.");
+      memset (to, 0, TYPE_LENGTH (type));
+      return;
+    }
 
   /* First add the necessary padding.  */
   memcpy (buf, from, FPU_REG_RAW_SIZE);

@@ -1,3 +1,10 @@
+2001-07-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_register_convert_to_virtual): Replace
+	assertion with a warning if we're asked to convert towards a
+	non-floating-point type.  Zero out the the buffer where the data
+	is supposed to be stored in that case.
+
 2001-07-29  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/djgpp/djconfig.sh: Unset CDPATH.
