@@ -1,3 +1,9 @@
+2001-09-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/restore.exp: Use temporary breakpoints, to avoid
+	overflowing the limited breakpoint tables on some ROM monitors
+	(like the ROM68K).
+
 2001-09-15  Frank Ch. Eigler  <fche@redhat.com>
 
 	* lib/insight-support.exp (_gdbtk_xvfb_init): Start Xvfb with
