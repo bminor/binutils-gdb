@@ -56,7 +56,6 @@ maintainers when resolving more generic problems.
 The host maintainer ensures that gdb (including mmalloc) can be built
 as a cross debugger on their platform.
 
-hp testsuite (gdb.hp)	*Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
 djgpp native		*Eli Zaretskii		eliz@gnu.org
 			DJ Delorie		dj@cygnus.com
 MS Windows (N.T., CE, '00) host & native
@@ -90,7 +89,8 @@ tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
 breakpoint.c		Michael Snyder		msnyder@cygnus.com
 language support	David Taylor		taylor@cygnus.com
-C++ language support	Daniel Berlin		dan@cgsoftware.com
+  C++ support		Daniel Berlin		dan@cgsoftware.com
+  Java support		Anthony Green 		green@cygnus.com
 expression eval		David Taylor		taylor@cygnus.com
 defs.h			David Taylor		taylor@cygnus.com
 utils.c			David Taylor		taylor@cygnus.com
@@ -108,6 +108,8 @@ rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
 gdbserver		Stan Shebs		shebs@apple.com
 documentation	 	Stan Shebs		shebs@apple.com
 testsuite	 	Stan Shebs		shebs@apple.com
+  hp tests (gdb.hp)	*Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
+  Java tests (gdb.java)	Anthony Green 		green@cygnus.com
 Kernel Object Display	Fernando Nasser		fnasser@cygnus.com
 
 

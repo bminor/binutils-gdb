@@ -1,3 +1,9 @@
+Thu Mar  9 14:21:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* MAINTAINERS (Core): Anthony Green is the Java - including
+ 	testsuite - maintainer.  Reformat testsuite and language support
+ 	sections
+
 2000-03-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_linux_saved_pc_after_call): New function.
