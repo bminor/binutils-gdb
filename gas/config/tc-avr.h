@@ -118,3 +118,12 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 #define LEX_DOLLAR 0
 /* AVR port uses `$' as a logical line separator */
+
+#define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR) (P2VAR) = 0
+/*   An `.lcomm' directive with no explicit alignment parameter will
+     use this macro to set P2VAR to the alignment that a request for
+     SIZE bytes will have.  The alignment is expressed as a power of
+     two.  If no alignment should take place, the macro definition
+     should do nothing.  Some targets define a `.bss' directive that is
+     also affected by this macro.  The default definition will set
+     P2VAR to the truncated power of two of sizes up to eight bytes.  */
