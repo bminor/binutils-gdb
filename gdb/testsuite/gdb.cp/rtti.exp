@@ -140,5 +140,10 @@ gdb_continue_to_breakpoint "end of constructors in func"
 
 gdb_test "print *obj" "\\$\[0-9\]* = {<n2::Base2> = .*}"
 
+gdb_breakpoint [gdb_get_line_number "func3-constructs-done"]
+gdb_continue_to_breakpoint "end of constructors in func3"
+
+gdb_test "print *obj3" "\\$\[0-9\]* = {<n2::C2> = .*}"
+
 gdb_exit
 return 0

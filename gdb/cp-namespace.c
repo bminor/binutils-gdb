@@ -603,7 +603,7 @@ static struct type *
 cp_lookup_transparent_type_loop (const char *name, const char *scope,
 				 int length)
 {
-  int scope_length = cp_find_first_component (scope + length);
+  int scope_length = length + cp_find_first_component (scope + length);
   char *full_name;
 
   /* If the current scope is followed by "::", look in the next

@@ -1,3 +1,14 @@
+2004-03-05  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/rtti.exp: Add 'print *obj3' test.
+	* gdb.cp/rtti.h: Update copyright.
+	(namespace n2::n3): New.
+	* gdb.cp/rtti1.cc: (refer_to (n2::n3::C3 *)): New.
+	(n2::n3::func3): New.
+	(main): Call n2::n3::func3.
+	* gdb.cp/rtti2.cc: Update copyright.
+	(n2::create3): New.
+
 2004-03-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/openbsd.inc: Fix typo.

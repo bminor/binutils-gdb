@@ -63,15 +63,32 @@ void refer_to (n2::C2 *obj)
   // Do nothing.
 }
 
+void refer_to (n2::n3::C3 *obj)
+{
+  // Do nothing.
+}
+
 namespace n2
 {
   void func ()
   {
     C2 *obj = create2 ();
 
-    refer_to (obj);			// func-constructs-done
+    refer_to (obj);		// func-constructs-done
 
     return;
+  }
+
+  namespace n3
+  {
+    void func3 ()
+    {
+      C3 *obj3 = create3 ();
+
+      refer_to (obj3);		// func3-constructs-done
+
+      return;
+    }
   }
 }
 
@@ -84,6 +101,7 @@ int main()
     C2 *e2 = create2();
 
     n2::func();				// main-constructs-done
+    n2::n3::func3();
 
     return 0;
 }
