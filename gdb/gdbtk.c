@@ -25,20 +25,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "target.h"
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/param.h>
-#include <varargs.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/filio.h>
-#include <setjmp.h>
-#include <signal.h>
-#include <sys/errno.h>
-#include <termios.h>
-#include <string.h>
 #include <tcl.h>
 #include <tk.h>
+#include <varargs.h>
+#include <signal.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 /* Non-zero means that we're doing the gdbtk interface. */
@@ -514,10 +505,9 @@ gdbtk_init ()
   if (Tcl_EvalFile (interp, gdbtk_filename) != TCL_OK)
     error ("Failure reading %s: %s", gdbtk_filename, interp->result);
 
-  /* XXX - Get the file descriptor for the network socket.  This is not Kosher
-     as it involves looking at data private to Xlib.  */
+  /* Get the file descriptor for the X server */
 
-  x_fd = Tk_Display (mainWindow) -> fd;
+  x_fd = ConnectionNumber (Tk_Display (mainWindow));
 
   /* Setup for I/O interrupts */
 

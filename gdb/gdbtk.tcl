@@ -354,7 +354,7 @@ proc gdbtk_tcl_busy {} {
 	.next configure -state disabled
 	.continue configure -state disabled
 	.finish configure -state disabled
-	.exit configure -state disabled
+	.quit configure -state disabled
 	.up configure -state disabled
 	.down configure -state disabled
 	.bottom configure -state disabled
@@ -377,7 +377,7 @@ proc gdbtk_tcl_idle {} {
 	.next configure -state normal
 	.continue configure -state normal
 	.finish configure -state normal
-	.exit configure -state normal
+	.quit configure -state normal
 	.up configure -state normal
 	.down configure -state normal
 	.bottom configure -state normal
@@ -1337,7 +1337,7 @@ button .next -text Next -command {gdb_cmd next ; update_ptr}
 button .continue -text Continue -command {gdb_cmd continue ; update_ptr}
 button .finish -text Finish -command {gdb_cmd finish ; update_ptr}
 #button .test -text Test -command {echo [info var]}
-button .exit -text Exit -command {gdb_cmd quit}
+button .quit -text Quit -command {gdb_cmd quit}
 button .up -text Up -command {gdb_cmd up ; update_ptr}
 button .down -text Down -command {gdb_cmd down ; update_ptr}
 button .bottom -text Bottom -command {gdb_cmd {frame 0} ; update_ptr}
@@ -1367,7 +1367,7 @@ button .files -text Files -command files_command
 pack .listing -side bottom -fill both -expand yes
 #pack .test -side bottom -fill x
 pack .start .stop .step .next .continue .finish .up .down .bottom .asm_but \
-	.registers .files .exit -side left
+	.registers .files .quit -side left
 toplevel .command
 wm title .command Command
 

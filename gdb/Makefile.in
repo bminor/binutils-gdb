@@ -120,6 +120,18 @@ OPCODES = ../opcodes/libopcodes.a
 OP_INCLUDE = $(INCLUDE_DIR)/opcode
 OPCODES_CFLAGS = -I$(OP_INCLUDE)
 
+# Where is the TCL library?  Typically in ../tcl.
+TCL_DIR = ../tcl
+TCL = -L$(TCL_DIR) -ltcl
+TCL_SRC = $(srcdir)/$(TCL_DIR)
+TCL_CFLAGS = -I$(TCL_SRC)
+
+# Where is the TK library?  Typically in ../tk.
+TK_DIR = ../tk
+TK = -L$(TK_DIR) -ltk
+TK_SRC = $(srcdir)/$(TK_DIR)
+TK_CFLAGS = -I$(TK_SRC)
+
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I$(srcdir) for gdb internal headers and possibly for regex.h also.
@@ -1111,7 +1123,7 @@ fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 
 gdbtk.o: gdbtk.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/gdbtk.c \
+	$(CC) -c $(INTERNAL_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(srcdir)/gdbtk.c \
 		 -DGDBTK_FILENAME=\"$(libdir)/gdbtk.tcl\"
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
