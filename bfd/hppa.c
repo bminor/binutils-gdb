@@ -358,8 +358,8 @@ hppa_object_p (abfd)
 }
 
 static boolean
-DEFUN (hppa_mkobject, (abfd),
-       bfd * abfd)
+hppa_mkobject (abfd)
+     bfd *abfd;
 {
   fprintf (stderr, "hppa_mkobject unimplemented\n");
   fflush (stderr);
@@ -368,8 +368,8 @@ DEFUN (hppa_mkobject, (abfd),
 }
 
 boolean
-DEFUN (hppa_write_object_contents, (abfd),
-       bfd * abfd)
+hppa_write_object_contents(abfd)
+     bfd *abfd;
 {
   fprintf (stderr, "hppa_write_object_contents unimplemented\n");
   fflush (stderr);
@@ -432,15 +432,6 @@ hppa_make_empty_symbol (abfd)
   new->symbol.the_bfd = abfd;
 
   return &new->symbol;
-}
-
-static void
-hppa_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
-     asymbol *symbol;
-     symbol_info ret;
-{
-  bfd_symbol_info (symbol, ret);
 }
 
 static void
@@ -936,10 +927,10 @@ RR (Symbol, Addend)
 }
 
 unsigned long
-DEFUN (hppa_field_adjust, (value, constant_value, r_field),
-       unsigned long value AND
-       unsigned long constant_value AND
-       unsigned short r_field)
+hppa_field_adjust (value, constant_value, r_field)
+     unsigned long value;
+     unsigned long constant_value;
+     unsigned short r_field;
 {
   unsigned long init_value = value;
   value += constant_value;

@@ -1,3 +1,8 @@
+Mon Jun 14 19:04:09 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* hppa.c (hppa_get_symbol_info):  Remove redundant copy.
+	* Expurgate random DEFUNs that have crept in.
+
 Mon Jun 14 10:23:53 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c (ecoff_set_symbol_info): Constructor sections should
