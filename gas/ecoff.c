@@ -3612,8 +3612,7 @@ ecoff_stab (sec, what, string, type, other, desc)
 	    }
 	  else
 	    {
-	      as_bad (".stabs expression too complex");
-	      sym = NULL;
+	      sym = make_expr_symbol (&exp);
 	      value = 0;
 	      addend = 0;
 	    }
@@ -4165,6 +4164,11 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			  && ! ECOFF_IS_STAB (&sym_ptr->ecoff_sym.asym))
 			local = 0;
 
+		      /* This is just an external symbol if it is a
+                         common symbol.  */
+		      if (S_IS_COMMON (as_sym))
+			local = 0;
+
 		      /* If an st_end symbol has an associated gas
 			 symbol, then it is a local label created for
 			 a .bend or .end directive.  Stabs line
@@ -4231,6 +4235,12 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			  sym_ptr->ecoff_sym.asym.value =
 			    (S_GET_VALUE (as_sym)
 			     - S_GET_VALUE (begin_ptr->as_sym));
+
+			  /* If the size is odd, this is probably a
+                             mips16 function; force it to be even.  */
+			  if ((sym_ptr->ecoff_sym.asym.value & 1) != 0)
+			    ++sym_ptr->ecoff_sym.asym.value;
+
 #ifdef S_SET_SIZE
 			  S_SET_SIZE (begin_ptr->as_sym,
 				      sym_ptr->ecoff_sym.asym.value);

@@ -1,3 +1,8 @@
+Mon Jan 27 17:41:20 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (ecoff_build_symbols): Don't generate a local ECOFF
+	symbol for a common symbol.
+
 Wed Jan 22 10:39:39 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	Patch presumed to have been checked in awhile ago but wasn't.
