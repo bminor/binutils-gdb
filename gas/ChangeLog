@@ -1,3 +1,7 @@
+2001-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c: Formatting fixes.
+
 2001-07-01  Ben Elliston  <bje@redhat.com>
 
 	* config/tc-m88k.c: Back out warning fixes from 2001-06-24, as
