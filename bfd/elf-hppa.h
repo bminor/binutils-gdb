@@ -1078,11 +1078,44 @@ elf_hppa_final_link_relocate (howto, input_bfd, output_bfd,
 		    input_section->output_offset +
 		    input_section->output_section->vma);
 
-	insn = elf_hppa_relocate_insn (input_bfd, input_section, insn,
-				       offset, value, addend, r_format,
+	insn = elf_hppa_relocate_insn (output_bfd, input_section, insn,
+				       offset, value, addend, r_type,
 				       r_field, r_pcrel);
 	break;
       }
+
+    case R_PARISC_DLTREL14R:
+      {
+	bfd_vma location;
+	r_field = e_rrsel;
+
+	/* Find out where we are and where we're going.  */
+	location = (offset +
+		    input_section->output_offset +
+		    input_section->output_section->vma);
+
+	insn = elf_hppa_relocate_insn (output_bfd, input_section, insn,
+				       offset, value, addend, r_type,
+				       r_field, r_pcrel);
+	break;
+      }
+
+    case R_PARISC_DLTREL21L:
+      {
+	bfd_vma location;
+	r_field = e_lrsel;
+
+	/* Find out where we are and where we're going.  */
+	location = (offset +
+		    input_section->output_offset +
+		    input_section->output_section->vma);
+
+	insn = elf_hppa_relocate_insn (output_bfd, input_section, insn,
+				       offset, value, addend, r_type,
+				       r_field, r_pcrel);
+	break;
+      }
+
 
     /* Something we don't know how to handle.  */
     default:
@@ -1105,25 +1138,25 @@ elf_hppa_final_link_relocate (howto, input_bfd, output_bfd,
 
 static unsigned long
 elf_hppa_relocate_insn (abfd, input_sect, insn, address, sym_value,
-			r_addend, r_format, r_field, pcrel)
+			r_addend, r_type, r_field, pcrel)
      bfd *abfd;
      asection *input_sect;
      unsigned long insn;
      unsigned long address;
      long sym_value;
      long r_addend;
-     unsigned long r_format;
+     unsigned long r_type;
      unsigned long r_field;
      unsigned long pcrel;
 {
-  unsigned char opcode = get_opcode (insn);
   long constant_value;
 
-  switch (opcode)
+  switch (r_type)
     {
     /* This is any 17 or 22bit PC-relative branch.  In PA2.0 syntax it
        corresponds to the "B" instruction.  */
-    case BL:
+    case R_PARISC_PCREL22F:
+    case R_PARISC_PCREL17F:
       /* Turn SYM_VALUE into a proper PC relative address.  */
       sym_value -= (address + input_sect->output_offset
 		    + input_sect->output_section->vma);
@@ -1176,8 +1209,7 @@ elf_hppa_relocate_insn (abfd, input_sect, insn, address, sym_value,
 	}
 
     /* This corresponds to any 17 bit absolute branch.  */
-    case BE:
-    case BLE:
+    case R_PARISC_DIR17F:
       {
 	unsigned int w2, w1, w;
 
@@ -1203,6 +1235,46 @@ elf_hppa_relocate_insn (abfd, input_sect, insn, address, sym_value,
 	return insn;
       }
 
+    case R_PARISC_DLTREL21L:
+      {
+        int w;
+
+	/* Subtract out the global pointer value.  */
+	sym_value -= _bfd_get_gp_value (abfd);
+
+	/* Apply the desired field selector (R_FIELD).  */
+	sym_value = hppa_field_adjust (sym_value, r_addend, r_field);
+
+	/* Mask off bits in INSN we do not want.  */
+	insn &= 0xffe00000;
+
+	/* Turn the 21bit value into the proper format.  */
+	dis_assemble_21 (sym_value, &w);
+
+	/* And insert the proper bits into INSN.  */
+        return insn | w;
+      }
+   
+    case R_PARISC_DLTREL14R:
+      {
+        int w;
+
+	/* Subtract out the global pointer value.  */
+	sym_value -= _bfd_get_gp_value (abfd);
+
+	/* Apply the desired field selector (R_FIELD).  */
+	sym_value = hppa_field_adjust (sym_value, r_addend, r_field);
+
+	/* Mask off bits in INSN we do not want.  */
+	insn &= 0xffffc000;
+
+	/* Turn the 14bit value into the proper format.  */
+	low_sign_unext (sym_value, 14, &w);
+
+	/* And insert the proper bits into INSN.  */
+        return insn | w;
+      }
+   
     default:
       return insn;
     }

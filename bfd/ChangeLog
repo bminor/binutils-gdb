@@ -1,3 +1,12 @@
+Tue Sep  7 17:25:12 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (elf_hppa_final_link_relocate): Handle DLTREL14R and
+	DLTREL21L relocs.  Pass the output bfd to elf_hppa_relocate_insn.
+	Pass the relocate type rather than the insn format to
+	elf_hppa_relocate_insn.
+	(elf_hppa_relocate_insn): Make switch dependent on relocation type
+	rather than the opcode.  Handle DLTREL21L and DLTREL14R relocs.
+
 1999-09-07  Ian Lance Taylor  <ian@zembu.com>
 
 	* coffcode.h (bfd_coff_backend_data): Add _bfd_filnmlen field.
