@@ -202,7 +202,7 @@ if [ -n "${verbose}" ] ; then
 	echo Processing \"arc\"...
 fi
 
-arc_files="config.sub configure.in cfg-ml-com.in"
+arc_files="config.sub configure.in config-ml.in"
 
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
@@ -235,7 +235,7 @@ if [ -n "${verbose}" ] ; then
 	echo Processing \"jaguar\"...
 fi
 
-jaguar_files="config.sub configure.in cfg-ml-com.in"
+jaguar_files="config.sub configure.in config-ml.in"
 
 if ( echo $* | grep keep\-jaguar > /dev/null ) ; then
 	for i in $jaguar_files ; do
@@ -322,7 +322,7 @@ else
 	done
 fi
 
-sh3e_files="ChangeLog cfg-ml-com.in"
+sh3e_files="ChangeLog config-ml.in"
 if ( echo $* | grep keep\-sh3e > /dev/null ) ; then
 	for i in $sh3e_files ; do
 		if test ! -d $i && (grep sanitize-sh3e $i > /dev/null) ; then
