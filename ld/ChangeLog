@@ -1,5 +1,8 @@
 1999-08-06  Ian Lance Taylor  <ian@zembu.com>
 
+	* lexsup.c (is_num): Reindent.
+	(parse_args): Mention program name in error message.
+
 	* emultempl/ostring.sed: Rename from stringify.sed.
 	* emultempl/astring.sed: New file.
 	* Makefile.am (stringify.sed): New target.
@@ -18,7 +21,7 @@
 1999-08-05  Donn Terry  <donn@interix.com>
 
 	* emulparams/i386pe.sh: Define ENTRY, SUBSYSTEM, and
-	INITIAL_SYMBOL_CHAQR.
+	INITIAL_SYMBOL_CHAR.
 	* emulparams/i386pe_posix.sh: New file.
 	* Makefile.am (YACC): If bison is not in the source tree, use
 	@YACC@ rather than bison -y.

@@ -55,6 +55,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    that might disagree about consts.  */
 unsigned long strtoul ();
 
+static int is_num PARAMS ((const char *, int, int, int));
 static void set_default_dirlist PARAMS ((char *dirlist_ptr));
 static void set_section_start PARAMS ((char *sect, char *valstr));
 static void help PARAMS ((void));
@@ -371,22 +372,27 @@ static const struct ld_option ld_options[] =
 
 #define OPTION_COUNT ((int) (sizeof ld_options / sizeof ld_options[0]))
 
-/* Test "string" for containing a string of digits that form a number
-between "min" and "max".  The return value is the number or "err". */
-static
-int is_num( char *string, int min, int max, int err)
+/* Test STRING for containing a string of digits that form a number
+   between MIN and MAX.  The return value is the number or ERR.  */
+
+static int
+is_num (string, min, max, err)
+     const char *string;
+     int min;
+     int max;
+     int err;
 {
   int result = 0;
 
-  for ( ; *string; ++string)
-  {
-    if (!isdigit(*string))
+  for (; *string; ++string)
     {
-      result = err;
-      break;
+      if (! isdigit (*string))
+	{
+	  result = err;
+	  break;
+	}
+      result = result * 10 + (*string - '0');
     }
-    result = result * 10 + (*string - '0');
-  }
   if (result < min || result > max)
     result = err;
 
@@ -987,7 +993,9 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
               words = is_num (optarg, 1, 10, 0);
               if (words == 0)
                 {
-                  fprintf (stderr, _("Invalid argument to option \"mpc860c0\"\n"));
+                  fprintf (stderr,
+			   _("%s: Invalid argument to option \"mpc860c0\"\n"),
+			   program_name);
                   xexit (1);
                 }
               link_info.mpc860c0 = words * 4;   /* convert words to bytes */
