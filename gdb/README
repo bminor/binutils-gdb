@@ -452,9 +452,9 @@ Known bugs:
   * Under Ultrix 4.2 (DECstation-3100) or Alphas under OSF/1, we have
     seen problems with backtraces after interrupting the inferior out
     of a read().  The problem is caused by ptrace() returning an
-    incorrect value for the frame pointer register (15 or 30).  As far
-    as we can tell, this is a kernel problem.  Any help with this
-    would be greatly appreciated.
+    incorrect value for the frame pointer register (register 15 or
+    30).  As far as we can tell, this is a kernel problem.  Any help
+    with this would be greatly appreciated.
 
   * On the SPARC GDB reports incorrect values of struct arguments to
     functions, for the seventh and subsequent arguments.  We have been looking
@@ -478,10 +478,10 @@ Known bugs:
     dbx has the same problems with those executables.  A workaround is to
     specify -Wl,-b when linking, but that will increase the executable size
     considerably.
-    If a structure is declared as opaque in one file (e.g. "struct foo *"
+    If a structure has incomplete type in one file (e.g. "struct foo *"
     without a definition for "struct foo"), gdb will be unable to find the
-    structure definition in another file.
-    It has been reported that the Ultrix 4.3A compiler on destations has the
+    structure definition from another file.
+    It has been reported that the Ultrix 4.3A compiler on decstations has the
     same problems.
 
     If you intend to compile gdb with gcc-2.4.5, be warned that the file

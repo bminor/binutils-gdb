@@ -1,3 +1,7 @@
+Wed Oct  6 12:43:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* README: Add Alpha notes from Schauer.
+
 Tue Oct  5 15:26:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (install, uninstall): Remove $$n.1 stuff; I don't
