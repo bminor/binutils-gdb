@@ -1,3 +1,8 @@
+2002-07-20  Aidan Skinner <aidan@velvet.net>
+
+	* ada-tasks.c: Change k&r style function definitions to prototyped
+	form.
+		
 2002-07-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (x86-64-tdep.o): Add $(objfiles_h).
@@ -150,6 +155,7 @@
 	* config/d30v/d30v.mt: Ditto.
 	* config/d30v/tm-d30v.h: Ditto.
 
+>>>>>>> 1.2930
 2002-07-13  Aidan Skinner <aidan@velvet.net>
 
 	* ada-tasks.c (add_task_entry): replace calls to

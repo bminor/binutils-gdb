@@ -156,9 +156,8 @@ static int highest_task_num = 0;
 int thread_support = 0; /* 1 if the thread library in use is supported */
 static int gdbtk_task_initialization = 0;
 
-static int add_task_entry (p_task_id, index)
-     void *p_task_id;
-     int index;
+static int 
+add_task_entry (void *p_task_id, int index)
 {
   struct task_entry *new_task_entry = NULL;
   struct task_entry *pt;
@@ -182,8 +181,7 @@ static int add_task_entry (p_task_id, index)
 }
 
 int 
-get_entry_number (p_task_id)
-     void *p_task_id;
+get_entry_number (void *p_task_id)
 {
   struct task_entry *pt;
 
@@ -197,8 +195,8 @@ get_entry_number (p_task_id)
   return 0;
 }
 
-static struct task_entry *get_thread_entry_vptr (thread)
-     void *thread;
+static struct task_entry *
+get_thread_entry_vptr (void *thread)
 {
   struct task_entry *pt;
 
@@ -212,8 +210,8 @@ static struct task_entry *get_thread_entry_vptr (thread)
   return 0;
 }
 
-static struct task_entry *get_entry_vptr (p_task_num)
-     int p_task_num;
+static struct task_entry *
+get_entry_vptr (int p_task_num)
 {
   struct task_entry *pt;
 
@@ -227,7 +225,8 @@ static struct task_entry *get_entry_vptr (p_task_num)
   return NULL;
 }
 
-void init_task_list ()
+void
+init_task_list (void)
 {
   struct task_entry *pt, *old_pt;
 
@@ -242,13 +241,14 @@ void init_task_list ()
   highest_task_num = 0;
 }
 
-int valid_task_id (task)
-     int task;
+int
+valid_task_id (int task)
 {
   return get_entry_vptr (task) != NULL;
 }
 
-void *get_self_id ()
+void *
+get_self_id (void)
 {
   struct value* val;
   void *self_id;
@@ -286,9 +286,7 @@ int get_current_task ()
 /* Print detailed information about specified task */
 
 static void
-info_task (arg, from_tty)
-     char *arg;
-     int from_tty;
+info_task (char *arg, int from_tty)
 {
   void *temp_task;
   struct task_entry *pt, *pt2;
@@ -417,7 +415,7 @@ info_task (arg, from_tty)
    tasks_fields structure
  */
 
-print_align ()
+print_align (void)
 {
   struct task_fields tf;
   void *tf_base             = &(tf);
@@ -448,9 +446,7 @@ print_align ()
 /* Print information about currently known tasks */
 
 static void
-info_tasks (arg, from_tty)
-     char *arg;
-     int from_tty;
+info_tasks (char *arg, int from_tty)
 {
   struct value* val;
   int i, task_number, state;
@@ -679,7 +675,7 @@ next:
    actually print anything. */
 
 int
-gdbtk_tcl_tasks_initialize ()
+gdbtk_tcl_tasks_initialize (void)
 {
   gdbtk_task_initialization = 1;
   info_tasks ("", gdb_stdout);
@@ -688,9 +684,7 @@ gdbtk_tcl_tasks_initialize ()
 }
 
 static void
-info_tasks_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+info_tasks_command (char *arg, int from_tty)
 {
    if (arg == NULL || *arg == '\000')
       info_tasks (arg, from_tty);
@@ -702,7 +696,6 @@ info_tasks_command (arg, from_tty)
 
 static void
 switch_to_thread (ptid_t ptid)
-
 {
   if (ptid_equal (ptid, inferior_ptid))
     return;
@@ -716,8 +709,8 @@ switch_to_thread (ptid_t ptid)
 
 /* Switch to a specified task. */
 
-static int task_switch (tid, lwpid)
-     void *tid, *lwpid;
+static int
+task_switch (void *tid, void *lwpid)
 {
   int res = 0, pid;
 
@@ -745,9 +738,8 @@ static int task_switch (tid, lwpid)
   return -1;
 }
 
-static void task_command (tidstr, from_tty)
-     char *tidstr;
-     int from_tty;
+static void
+task_command (char *tidstr, int from_tty)
 {
   int num;
   struct task_entry *e;
@@ -789,7 +781,7 @@ static void task_command (tidstr, from_tty)
 }
 
 void
-_initialize_tasks ()
+_initialize_tasks (void)
 {
   static struct cmd_list_element *task_cmd_list = NULL;
   extern struct cmd_list_element *cmdlist;
