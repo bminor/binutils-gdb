@@ -382,10 +382,16 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
       for (i = 0; i < count; i++, addr += sizeof (int))
 	{
+#if 0
+/* The HP-UX kernel crashes if you use PT_WDUSER to write into the text
+   segment.  FIXME -- does it work to write into the data segment using
+   WIUSER, or do these idiots really expect us to figure out which segment
+   the address is in, so we can use a separate system call for it??!  */
 	  errno = 0;
 	  ptrace (PT_WDUSER, inferior_pid, (PTRACE_ARG3_TYPE) addr,
 		  buffer[i], 0);
 	  if (errno)
+#endif
 	    {
 	      /* Using the appropriate one (I or D) is necessary for
 		 Gould NP1, at least.  */
