@@ -1,3 +1,9 @@
+Fri Feb 16 10:02:34 1996  Fred Fish  <fnf@cygnus.com>
+
+	* dwarfread.c (free_utypes): New function.
+	(read_file_scope): Call free_utypes as cleanup,	rather than just
+ 	freeing the utypes pointer.
+
 Thu Feb 15 21:40:52 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* demangle.c (is_cplus_marker):  New function, checks if a

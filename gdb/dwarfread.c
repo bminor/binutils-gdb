@@ -898,6 +898,33 @@ alloc_utype (die_ref, utypep)
 
 LOCAL FUNCTION
 
+	free_utypes -- free the utypes array and reset pointer & count
+
+SYNOPSIS
+
+	static void free_utypes (PTR dummy)
+
+DESCRIPTION
+
+	Called via do_cleanups to free the utypes array, reset the pointer to NULL,
+	and set numutypes back to zero.  This ensures that the utypes does not get
+	referenced after being freed.
+ */
+
+static void
+free_utypes (dummy)
+     PTR dummy;
+{
+  free (utypes);
+  utypes = NULL;
+  numutypes = 0;
+}
+
+
+/*
+
+LOCAL FUNCTION
+
 	decode_die_type -- return a type for a specified die
 
 SYNOPSIS
@@ -1935,7 +1962,7 @@ read_file_scope (dip, thisdie, enddie, objfile)
     }
   numutypes = (enddie - thisdie) / 4;
   utypes = (struct type **) xmalloc (numutypes * sizeof (struct type *));
-  back_to = make_cleanup (free, utypes);
+  back_to = make_cleanup (free_utypes, NULL);
   memset (utypes, 0, numutypes * sizeof (struct type *));
   memset (ftypes, 0, FT_NUM_MEMBERS * sizeof (struct type *));
   start_symtab (dip -> at_name, dip -> at_comp_dir, dip -> at_low_pc);
@@ -1948,8 +1975,6 @@ read_file_scope (dip, thisdie, enddie, objfile)
       symtab -> language = cu_language;
     }      
   do_cleanups (back_to);
-  utypes = NULL;
-  numutypes = 0;
 }
 
 /*
