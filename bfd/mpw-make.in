@@ -22,8 +22,6 @@ s = "{srcdir}"
 
 o = :
 
-CC = C -d MPW_C -d ALMOST_STDC -w
-
 "{o}" \Option-f : "{s}"
 
 # Default rule that puts each file into separate segment.
@@ -66,7 +64,7 @@ INSTALL_DATA = {INSTALL}
 
 AR = ar
 AR_FLAGS =
-CFLAGS = -mc68020 -mc68881 -model far
+#CFLAGS =
 BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
@@ -75,7 +73,7 @@ CC_FOR_BUILD = {CC}
 
 INCDIR = "{topsrcdir}"include
 #CSEARCH = -i : -i {srcdir} -i {INCDIR}:
-CSEARCH =  -i "{INCDIR}","{INCDIR}":,"{srcdir}"
+CSEARCH =  -i "{INCDIR}","{INCDIR}":,"{topsrcdir}"extra-include:,"{srcdir}"
 DEP = mkdep
 
 SUBDIRS = doc

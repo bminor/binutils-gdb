@@ -1,17 +1,6 @@
 # Configuration fragment for BFD.
 
-DupIfChange {srcdir}hosts:mpw.h sysdep.h
+forward-include "{srcdir}"hosts:mpw.h sysdep.h
 
 StreamEdit -e '/@WORDSIZE@/ Replace /@WORDSIZE@/ "32"' {srcdir}bfd-in2.h >bfd.h-new
 MoveIfChange bfd.h-new bfd.h
-
-#DupIfChange {srcdir}mpw.bfd.h bfd.h
-
-Echo "#ifndef __va_list__" >varargs.h
-Echo "#define __va_list__" >>varargs.h
-Echo "typedef char *va_list;" >>varargs.h
-Echo "#endif" >>varargs.h
-Echo "#define va_dcl int va_alist;" >>varargs.h
-Echo "#define va_start(list) list = (char *) &va_alist" >>varargs.h
-Echo "#define va_end(list)" >>varargs.h
-Echo "#define va_arg(list,mode) ((mode *)(list += sizeof(mode)))[-1]" >>varargs.h
