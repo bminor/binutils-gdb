@@ -1,6 +1,13 @@
+Tue May  2 16:37:48 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* gas/mips/ld.d: Modified for gas delay-slot fixes.
+
 Sat Apr 29 23:35:18 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
 	* lib/gas-dg.exp: New file.
+start-sanitize-arc
+	* gas/arc/warn.{exp,s}: New testcase.
+end-sanitize-arc
 
 Tue Apr 11 13:57:52 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
