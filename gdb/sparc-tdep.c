@@ -51,8 +51,11 @@
 
 #if (GDB_MULTI_ARCH > 0)
 
-/* Does the target have Floating Point registers?  */
-#define SPARC_HAS_FPU     (gdbarch_tdep (current_gdbarch)->has_fpu)
+#if 0
+// OBSOLETE /* Does the target have Floating Point registers?  */
+// OBSOLETE #define SPARC_HAS_FPU     (gdbarch_tdep (current_gdbarch)->has_fpu)
+#endif
+#define SPARC_HAS_FPU 1
 /* Number of bytes devoted to Floating Point registers: */
 #define FP_REGISTER_BYTES (gdbarch_tdep (current_gdbarch)->fp_register_bytes)
 /* Highest numbered Floating Point register.  */

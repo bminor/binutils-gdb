@@ -1,3 +1,7 @@
+2003-04-30  Andrew Cagney  <cagney@redhat.com>
+
+	* sparc-tdep.c (SPARC_HAS_FPU): When multi-arch, define as 1.
+
 2003-04-29  Adam Fedor  <fedor@gnu.org>
 
 	* eval.c (evaluate_subexp_standard): Handle ObjC ops.
