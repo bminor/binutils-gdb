@@ -203,6 +203,7 @@ changequote([,])dnl
       i386-*-cygwin*)       fmt=coff em=pe bfd_gas=yes ;;
       i386-*-mingw32*)      fmt=coff em=pe bfd_gas=yes ;;
       i386-*-*nt*)          fmt=coff em=pe ;;
+      i386-*-vxworks*)      fmt=aout ;;
       i960-*-bout)          fmt=bout ;;
       i960-*-coff)          fmt=coff em=ic960 ;;
       i960-*-rtems*)        fmt=coff em=ic960 ;;

@@ -1,3 +1,8 @@
+1999-07-21  Brad M. Garcia  <bgarcia@fore.com>
+
+	* configure.in (i386-*-vxworks*): New target.
+	* configure: Rebuild.
+
 1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* doc/c-sparc.texi: Document .register and .nword pseudo-ops.
