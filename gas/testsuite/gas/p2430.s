@@ -1,13 +1,6 @@
-# We get:
-#
-# m68k-coff-as x.s
-# x.s:5: FATAL:failed sanity check.
-#
-# from the following .s file:
+# This differs from p2430a.s (the customer's actual source file) only
+# in whitespace and comments.  Strangely, this file gave no problems...
 
 	.sect foo
 tag:
 	bra tag
-
-# Changing the section to .text makes it work, but we need to
-# use multiple sections other than .text to link the way we want.
