@@ -1,6 +1,7 @@
 2001-01-17  J.T. Conklin  <jtc@redback.com>
 
 	* config/m68k/tm-nbsd.h (USE_STRUCT_CONVENTION): Define.
+	(BPT_VECTOR, REMOTE_BPT_VECTOR): Change to 0xf.
 	* config/m68k/nbsd.mt (TDEPFILES): Add m68knbsd-tdep.o.
 	* m68knbsd-tdep.c: New file.
 
