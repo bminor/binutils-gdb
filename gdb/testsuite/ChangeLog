@@ -1,3 +1,7 @@
+2003-09-25  David Carlton  <carlton@kealia.com>
+
+	* gdb.base/corefile.exp: Delete obsolete setup_xfail.
+
 2003-09-23  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.base/selftest.exp: Accomodate more instruction reordering 
