@@ -1,3 +1,22 @@
+2003-06-12  David Carlton  <carlton@bactrian.org>
+
+	* symtab.h: Delete declaration of make_symbol_overload_list.
+	Add declaration of lookup_partial_symbol.
+	* symtab.c (remove_params): Move to cp-support.c.
+	(overload_list_add_symbol, make_symbol_overload_list)
+	(sym_return_val_size, sym_return_val_index): Ditto.
+	(lookup_partial_symbol): Make extern.
+	* cp-support.h: Add declaration of make_symbol_overload_list.
+	* cp-support.c: Include dictionary.h, objfiles.h, frame.h,
+	symtab.h, and block.h.
+	(remove_params): Move here from symtab.c.
+	(overload_list_add_symbol, make_symbol_overload_list)
+	(sym_return_val_size, sym_return_val_index): Ditto.
+	* valops.c: Include cp-support.h.
+	* Makefile.in (cp-support.o): Depend on dictionary_h, objfiles_h,
+	frame_h, and block_h.
+	(valops.o): Depend on cp_support_h.
+
 2003-06-12  Corinna Vinschen  <vinschen@redhat.com>
 
 	* h8300-tdep.c: Add H8SX registers. Drop E_NUM_REGS entirely,

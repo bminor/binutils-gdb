@@ -1024,6 +1024,13 @@ extern struct symbol *lookup_symbol_aux_block (const char *name,
 					       const domain_enum domain,
 					       struct symtab **symtab);
 
+/* Lookup a partial symbol.  */
+
+extern struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
+						     const char *,
+						     const char *, int,
+						     domain_enum);
+
 /* lookup a symbol by name, within a specified block */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,
@@ -1285,8 +1292,6 @@ extern void select_source_symtab (struct symtab *);
 extern char **make_symbol_completion_list (char *, char *);
 
 extern char **make_file_symbol_completion_list (char *, char *, char *);
-
-extern struct symbol **make_symbol_overload_list (struct symbol *);
 
 extern char **make_source_files_completion_list (char *, char *);
 

@@ -77,11 +77,6 @@ static int find_line_common (struct linetable *, int, int *);
 
 char *operator_chars (char *p, char **end);
 
-static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
-						     const char *,
-						     const char *, int,
-						     domain_enum);
-
 static struct symbol *lookup_symbol_aux (const char *name,
 					 const char *linkage_name,
 					 const struct block *block,
@@ -135,8 +130,6 @@ static void print_symbol_info (domain_enum,
 static void print_msymbol_info (struct minimal_symbol *);
 
 static void symtab_symbol_info (char *, domain_enum, int);
-
-static void overload_list_add_symbol (struct symbol *sym, char *oload_name);
 
 void _initialize_symtab (void);
 
@@ -1392,7 +1385,7 @@ lookup_symbol_global (const char *name,
    linkage name matches it.  Check the global symbols if GLOBAL, the
    static symbols if not */
 
-static struct partial_symbol *
+struct partial_symbol *
 lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 		       const char *linkage_name, int global,
 		       domain_enum domain)
@@ -3922,211 +3915,6 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
   return func_addr <= pc && pc < sal.end;
 }
 
-
-/* Begin overload resolution functions */
-
-static char *
-remove_params (const char *demangled_name)
-{
-  const char *argp;
-  char *new_name;
-  int depth;
-
-  if (demangled_name == NULL)
-    return NULL;
-
-  /* First find the end of the arg list.  */
-  argp = strrchr (demangled_name, ')');
-  if (argp == NULL)
-    return NULL;
-
-  /* Back up to the beginning.  */
-  depth = 1;
-
-  while (argp-- > demangled_name)
-    {
-      if (*argp == ')')
-	depth ++;
-      else if (*argp == '(')
-	{
-	  depth --;
-
-	  if (depth == 0)
-	    break;
-	}
-    }
-  if (depth != 0)
-    internal_error (__FILE__, __LINE__,
-		    "bad demangled name %s\n", demangled_name);
-  while (argp[-1] == ' ' && argp > demangled_name)
-    argp --;
-
-  new_name = xmalloc (argp - demangled_name + 1);
-  memcpy (new_name, demangled_name, argp - demangled_name);
-  new_name[argp - demangled_name] = '\0';
-  return new_name;
-}
-
-/* Helper routine for make_symbol_completion_list.  */
-
-static int sym_return_val_size;
-static int sym_return_val_index;
-static struct symbol **sym_return_val;
-
-/*  Test to see if the symbol specified by SYMNAME (which is already
-   demangled for C++ symbols) matches SYM_TEXT in the first SYM_TEXT_LEN
-   characters.  If so, add it to the current completion list. */
-
-static void
-overload_list_add_symbol (struct symbol *sym, char *oload_name)
-{
-  int newsize;
-  int i;
-  char *sym_name;
-
-  /* If there is no type information, we can't do anything, so skip */
-  if (SYMBOL_TYPE (sym) == NULL)
-    return;
-
-  /* skip any symbols that we've already considered. */
-  for (i = 0; i < sym_return_val_index; ++i)
-    if (!strcmp (DEPRECATED_SYMBOL_NAME (sym), DEPRECATED_SYMBOL_NAME (sym_return_val[i])))
-      return;
-
-  /* Get the demangled name without parameters */
-  sym_name = remove_params (SYMBOL_DEMANGLED_NAME (sym));
-  if (!sym_name)
-    return;
-
-  /* skip symbols that cannot match */
-  if (strcmp (sym_name, oload_name) != 0)
-    {
-      xfree (sym_name);
-      return;
-    }
-
-  xfree (sym_name);
-
-  /* We have a match for an overload instance, so add SYM to the current list
-   * of overload instances */
-  if (sym_return_val_index + 3 > sym_return_val_size)
-    {
-      newsize = (sym_return_val_size *= 2) * sizeof (struct symbol *);
-      sym_return_val = (struct symbol **) xrealloc ((char *) sym_return_val, newsize);
-    }
-  sym_return_val[sym_return_val_index++] = sym;
-  sym_return_val[sym_return_val_index] = NULL;
-}
-
-/* Return a null-terminated list of pointers to function symbols that
- * match name of the supplied symbol FSYM.
- * This is used in finding all overloaded instances of a function name.
- * This has been modified from make_symbol_completion_list.  */
-
-
-struct symbol **
-make_symbol_overload_list (struct symbol *fsym)
-{
-  register struct symbol *sym;
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct objfile *objfile;
-  register struct block *b, *surrounding_static_block = 0;
-  struct dict_iterator iter;
-  /* The name we are completing on. */
-  char *oload_name = NULL;
-  /* Length of name.  */
-  int oload_name_len = 0;
-
-  /* Look for the symbol we are supposed to complete on.  */
-
-  oload_name = remove_params (SYMBOL_DEMANGLED_NAME (fsym));
-  if (!oload_name)
-    {
-      sym_return_val_size = 1;
-      sym_return_val = (struct symbol **) xmalloc (2 * sizeof (struct symbol *));
-      sym_return_val[0] = fsym;
-      sym_return_val[1] = NULL;
-
-      return sym_return_val;
-    }
-  oload_name_len = strlen (oload_name);
-
-  sym_return_val_size = 100;
-  sym_return_val_index = 0;
-  sym_return_val = (struct symbol **) xmalloc ((sym_return_val_size + 1) * sizeof (struct symbol *));
-  sym_return_val[0] = NULL;
-
-  /* Read in all partial symtabs containing a partial symbol named
-     OLOAD_NAME.  */
-
-  ALL_PSYMTABS (objfile, ps)
-  {
-    struct partial_symbol **psym;
-
-    /* If the psymtab's been read in we'll get it when we search
-       through the blockvector.  */
-    if (ps->readin)
-      continue;
-
-    if ((lookup_partial_symbol (ps, oload_name, NULL, 1, VAR_DOMAIN)
-	 != NULL)
-	|| (lookup_partial_symbol (ps, oload_name, NULL, 0, VAR_DOMAIN)
-	    != NULL))
-      PSYMTAB_TO_SYMTAB (ps);
-  }
-
-  /* Search upwards from currently selected frame (so that we can
-     complete on local vars.  */
-
-  for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
-    {
-      if (!BLOCK_SUPERBLOCK (b))
-	{
-	  surrounding_static_block = b;		/* For elimination of dups */
-	}
-
-      /* Also catch fields of types defined in this places which match our
-         text string.  Only complete on types visible from current context. */
-
-      ALL_BLOCK_SYMBOLS (b, iter, sym)
-	{
-	  overload_list_add_symbol (sym, oload_name);
-	}
-    }
-
-  /* Go through the symtabs and check the externs and statics for
-     symbols which match.  */
-
-  ALL_SYMTABS (objfile, s)
-  {
-    QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-    ALL_BLOCK_SYMBOLS (b, iter, sym)
-      {
-	overload_list_add_symbol (sym, oload_name);
-      }
-  }
-
-  ALL_SYMTABS (objfile, s)
-  {
-    QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-    /* Don't do this block twice.  */
-    if (b == surrounding_static_block)
-      continue;
-    ALL_BLOCK_SYMBOLS (b, iter, sym)
-      {
-	overload_list_add_symbol (sym, oload_name);
-      }
-  }
-
-  xfree (oload_name);
-
-  return (sym_return_val);
-}
-
-/* End of overload resolution functions */
 
 struct symtabs_and_lines
 decode_line_spec (char *string, int funfirstline)

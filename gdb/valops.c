@@ -36,6 +36,7 @@
 #include "block.h"
 #include "infcall.h"
 #include "dictionary.h"
+#include "cp-support.h"
 
 #include <errno.h>
 #include "gdb_string.h"

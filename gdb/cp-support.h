@@ -58,6 +58,7 @@ extern unsigned int cp_find_first_component (const char *name);
 
 extern unsigned int cp_entire_prefix_len (const char *name);
 
+extern struct symbol **make_symbol_overload_list (struct symbol *);
 
 /* Functions/variables from cp-namespace.c.  */
 
