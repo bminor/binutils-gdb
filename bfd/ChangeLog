@@ -1,5 +1,8 @@
 Thu Jan 26 09:00:12 1995  Steve Chamberlain  <sac@splat>
 
+	* srec.c (srec_set_section_contents): Fix off by
+	one end address calculation.
+
 	* config.bfd: (m68*-est-coff): New configuration.
 
 Thu Jan 26 11:39:21 1995  Ian Lance Taylor  <ian@cygnus.com>
