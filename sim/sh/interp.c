@@ -22,23 +22,18 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "remote-sim.h"
-#include <sys/syscall.h>
+
+/* This file is local - if newlib changes, then so should this.  */
+#include "syscall.h"
 
 /* start-sanitize-sh3e */
 #include <math.h>
 /* end-sanitize-sh3e */
 
-#if !defined (SYS_wait) && defined (SYS_wait4)
-#define SYS_wait SYS_wait4	/* SunOS 4.1.3 for example */
-#endif
-
-#if !defined (SYS_utime) && defined (SYS_utimes)
-#define SYS_utime SYS_utimes	/* SunOS 4.1.3 for example */
-#endif
-
 #ifndef SIGBUS
 #define SIGBUS SIGSEGV
 #endif
+
 #ifndef SIGQUIT
 #define SIGQUIT SIGTERM
 #endif
@@ -79,7 +74,6 @@ int
 fail ()
 {
   abort ();
-
 }
 
 #define BUSERROR(addr, mask) \
@@ -168,11 +162,9 @@ typedef union
     int profile;
     unsigned short *profile_hist;
     unsigned char *memory;
-
   }
   asregs;
-  int asints[28];																     
-
+  int asints[28];
 } saved_state_type;
 saved_state_type saved_state;
 
@@ -470,25 +462,7 @@ trap (i, regs, memory, maskl, maskw, little_endian)
     case 2:
       saved_state.asregs.exception = SIGQUIT;
       break;
-#if 0
-    case 8:
-      trap8 (ptr (regs[4]));
-      break;
-    case 9:
-      trap9 (ptr (regs[4]));
-      break;
-    case 10:
-      trap10 ();
-      break;
-    case 11:
-      regs[0] = trap11 ();
-      break;
-    case 12:
-      regs[0] = trap12 ();
-      break;
-#endif
-
-    case 3:		/* FIXME: for backwards compat, should be removed */
+    case 3:			/* FIXME: for backwards compat, should be removed */
     case 34:
       {
 	extern int errno;
@@ -499,18 +473,15 @@ trap (i, regs, memory, maskl, maskw, little_endian)
 	  {
 
 #if !defined(__GO32__) && !defined(WIN32)
-
 	  case SYS_fork:
 	    regs[0] = fork ();
 	    break;
 	  case SYS_execve:
 	    regs[0] = execve (ptr (regs[5]), ptr (regs[6]), ptr (regs[7]));
 	    break;
-#ifdef SYS_execv	/* May be implemented as execve(arg,arg,0) */
 	  case SYS_execv:
-	    regs[0] = execv (ptr (regs[5]), ptr (regs[6]));
+	    regs[0] = execve (ptr (regs[5]), ptr (regs[6]), 0);
 	    break;
-#endif
 	  case SYS_pipe:
 	    {
 	      char *buf;

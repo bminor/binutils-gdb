@@ -33,6 +33,7 @@ interp.c
 gencode.c
 run.1
 run.c
+syscall.h
 
 Things-to-lose:
 
