@@ -1123,6 +1123,14 @@ EOF
 
     # The first argument is the name of the installation program.
     install_prog="$nonopt"
+    install_prog_shell=""
+
+    # CYGNUS LOCAL: Handle /bin/sh at the start.
+    if test "$install_prog" = "${CONFIG_SHELL}"; then
+      install_prog_shell="$install_prog "
+      install_prog="$1"
+      shift
+    fi
 
     # We need to accept at least all the BSD install flags.
     dest=
@@ -1279,8 +1287,8 @@ EOF
 	  shift
 
 	  # Install the shared library and build the symlinks.
-	  $show "$install_prog $dir/$realname $destdir/$realname"
-	  $run eval "$install_prog $dir/$realname $destdir/$realname" || exit $?
+	  $show "$install_prog_shell$install_prog $dir/$realname $destdir/$realname"
+	  $run eval "$install_prog_shell$install_prog $dir/$realname $destdir/$realname" || exit $?
 	  test "X$dlname" = "X$realname" && dlname=
 
 	  # Support stripping libraries.
@@ -1314,8 +1322,8 @@ EOF
 
 	  if test -n "$dlname"; then
 	    # Install the dynamically-loadable library.
-	    $show "$install_prog $dir/$dlname $destdir/$dlname"
-	    $run eval "$install_prog $dir/$dlname $destdir/$dlname" || exit $?
+	    $show "$install_prog_shell$install_prog $dir/$dlname $destdir/$dlname"
+	    $run eval "$install_prog_shell$install_prog $dir/$dlname $destdir/$dlname" || exit $?
 	  fi
 
 	  # Do each command in the postinstall commands.
@@ -1332,8 +1340,8 @@ EOF
 
 	# Install the pseudo-library for information purposes.
 	name=`echo "$file" | sed 's%^.*/%%'`
-	$show "$install_prog $file $destdir/$name"
-	$run $install_prog $file $destdir/$name || exit $?
+	$show "$install_prog_shell$install_prog $file $destdir/$name"
+	$run $install_prog_shell$install_prog $file $destdir/$name || exit $?
 
 	# Maybe install the static library, too.
 	test -n "$old_library" && staticlibs="$staticlibs $dir/$old_library"
@@ -1368,8 +1376,8 @@ EOF
 
 	# Install the libtool object if requested.
 	if test -n "$destfile"; then
-	  $show "$install_prog $file $destfile"
-	  $run $install_prog $file $destfile || exit $?
+	  $show "$install_prog_shell$install_prog $file $destfile"
+	  $run $install_prog_shell$install_prog $file $destfile || exit $?
 	fi
 
 	# Install the old object if enabled.
@@ -1377,8 +1385,8 @@ EOF
 	  # Deduce the name of the old-style object file.
 	  staticobj=`echo "$file" | sed 's/\.lo$/\.o/;'`
 
-	  $show "$install_prog $staticobj $staticdest"
-	  $run $install_prog $staticobj $staticdest || exit $?
+	  $show "$install_prog_shell$install_prog $staticobj $staticdest"
+	  $run $install_prog_shell$install_prog $staticobj $staticdest || exit $?
 	fi
 	exit 0
 	;;
@@ -1449,8 +1457,8 @@ EOF
 	  fi
 	fi
 
-	$show "$install_prog$stripme $file $dest"
-	$run $install_prog$stripme $file $dest || exit $?
+	$show "$install_prog_shell$install_prog$stripme $file $dest"
+	$run $install_prog_shell$install_prog$stripme $file $dest || exit $?
 	;;
       esac
     done
@@ -1461,8 +1469,8 @@ EOF
       # Set up the ranlib parameters.
       oldlib="$destdir/$name"
 
-      $show "$install_prog $file $oldlib"
-      $run $install_prog $file $oldlib || exit $?
+      $show "$install_prog_shell$install_prog $file $oldlib"
+      $run $install_prog_shell$install_prog $file $oldlib || exit $?
 
       # Support stripping libraries.
       if test -n "$stripme"; then
@@ -1492,8 +1500,8 @@ EOF
     if test -n "$current_libdirs"; then
       # Maybe just do a dry run.
       test -n "$run" && current_libdirs=" -n$current_libdirs"
-      exec $0 --finish$current_libdirs
-      exit 1
+      ${CONFIG_SHELL} $0 --finish$current_libdirs
+      exit $?
     fi
 
     exit 0

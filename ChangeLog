@@ -1,3 +1,9 @@
+
+Wed Sep  3 12:15:24 1997  Chris Provenzano  <proven@cygnus.com>
+
+	* ltconfig: Set CONFIG_SHELL in libtool.
+	* ltmain.sh: Use CONFIG_SHELL instead of /bin/sh
+
 Tue Aug 26 16:46:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (all-sim): Depends on all-readline.
