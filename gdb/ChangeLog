@@ -1,3 +1,12 @@
+2004-08-01  Andrew Cagney  <cagney@gnu.org>
+
+	* frame.h (frame_save_as_regcache): Declare.
+	* frame.c (frame_save_as_regcache): New function.
+	(do_frame_read_register): Replace do_frame_unwind_register.
+	(frame_pop): Use frame_save_as_regcache.
+	* dummy-frame.c (generic_push_dummy_frame): Use
+	frame_save_as_regcache.
+
 2004-08-01  Joel Brobecker  <brobecker@gnat.com>
 
 	* dwarf2read.c (dwarf_decode_lines): Do not consider the current

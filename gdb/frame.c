@@ -456,10 +456,20 @@ get_frame_func (struct frame_info *fi)
 }
 
 static int
-do_frame_unwind_register (void *src, int regnum, void *buf)
+do_frame_register_read (void *src, int regnum, void *buf)
 {
-  frame_unwind_register (src, regnum, buf);
+  frame_register_read (src, regnum, buf);
   return 1;
+}
+
+struct regcache *
+frame_save_as_regcache (struct frame_info *this_frame)
+{
+  struct regcache *regcache = regcache_xmalloc (current_gdbarch);
+  struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
+  regcache_save (regcache, do_frame_register_read, this_frame);
+  discard_cleanups (cleanups);
+  return regcache;
 }
 
 void
@@ -469,9 +479,9 @@ frame_pop (struct frame_info *this_frame)
      Save them in a scratch buffer so that there isn't a race between
      trying to extract the old values from the current_regcache while
      at the same time writing new values into that same cache.  */
-  struct regcache *scratch = regcache_xmalloc (current_gdbarch);
+  struct regcache *scratch
+    = frame_save_as_regcache (get_prev_frame_1 (this_frame));
   struct cleanup *cleanups = make_cleanup_regcache_xfree (scratch);
-  regcache_save (scratch, do_frame_unwind_register, this_frame);
 
   /* FIXME: cagney/2003-03-16: It should be possible to tell the
      target's register cache that it is about to be hit with a burst

@@ -518,6 +518,9 @@ extern void *frame_obstack_zalloc (unsigned long size);
 #define FRAME_OBSTACK_ZALLOC(TYPE) ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
 #define FRAME_OBSTACK_CALLOC(NUMBER,TYPE) ((TYPE *) frame_obstack_zalloc ((NUMBER) * sizeof (TYPE)))
 
+/* Create a regcache, and copy the frame's registers into it.  */
+struct regcache *frame_save_as_regcache (struct frame_info *this_frame);
+
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
 
 extern struct block *get_frame_block (struct frame_info *,
