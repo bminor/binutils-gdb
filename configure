@@ -287,6 +287,10 @@ for host in ${hosts} ; do
 	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 	host=${host_cpu}-${host_vendor}-${host_os}
 	host_makefile_frag=config/hmake-${host}
+	if [ ! -f ${host_makefile_frag} ]
+	then
+		host_makefile_frag=config/hmake-${host_alias}
+	fi
 
 	. ${tmpfile}.hst
 
@@ -299,6 +303,10 @@ for host in ${hosts} ; do
 		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 		target=${target_cpu}-${target_vendor}-${target_os}
 		target_makefile_frag=config/tmake-${target}
+		if [ ! -f ${target_makefile_frag} ]
+		then
+			target_makefile_frag=config/tmake-${target_alias}
+		fi
 
 		. ${tmpfile}.tgt
 
@@ -484,7 +492,7 @@ for host in ${hosts} ; do
 
 			# Conditionalize the makefile for this site.
 			if [ -n "${site}" ] ; then
-				site_makefile_frag=smake-${site}
+				site_makefile_frag=config/smake-${site}
 
 				(echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" ; 
 					sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile}) > Makefile.tem
@@ -623,7 +631,10 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.60  1991/10/23 21:48:28  rich
+# Revision 1.61  1991/10/24 00:23:59  hgs
+# Allow for using tmake-sun4
+#
+# Revision 1.60  1991/10/23  21:48:28  rich
 # Makefiles should include the makefile frag names even if the makefile
 # frag doesn't exist in *this* directory.  Otherwise we inherit the
 # variable setting from our parent Makefile.
