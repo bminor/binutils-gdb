@@ -7,6 +7,9 @@ Mon Jul  3 13:55:18 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 Mon Jul  3 11:30:45 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ecoff.c (_bfd_ecoff_find_nearest_line): If we allocate
+	find_line_info, clear the fdrtab field.
+
 	* targets.c (enum bfd_flavour): Add bfd_target_msdos_flavour here,
 	rather than in bfd-in2.h.
 
