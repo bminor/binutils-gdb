@@ -79,6 +79,23 @@ static void
 pa64_relocate_section_addresses (struct so_list *so,
 				 struct section_table *sec)
 {
+  asection *asec = sec->the_bfd_section;
+  CORE_ADDR load_offset;
+
+  /* Relocate all the sections based on where they got loaded.  */
+
+  load_offset = bfd_section_vma (so->abfd, asec) - asec->filepos;
+
+  if (asec->flags & SEC_CODE)
+    {
+      sec->addr += so->lm_info->desc.text_base - load_offset;
+      sec->endaddr += so->lm_info->desc.text_base - load_offset;
+    }
+  else if (asec->flags & SEC_DATA)
+    {
+      sec->addr += so->lm_info->desc.data_base - load_offset;
+      sec->endaddr += so->lm_info->desc.data_base - load_offset;
+    }
 }
 
 static void
@@ -438,12 +455,15 @@ pa64_current_sos (void)
     	     "breakpoint in a shared library will not work until you rerun "
 	     "the program.\n");
 
-  for (dll_index = 1; ; dll_index++)
+  for (dll_index = -1; ; dll_index++)
     {
       struct load_module_desc dll_desc;
       char *dll_path;
       struct so_list *new;
       struct cleanup *old_chain;
+
+      if (dll_index == 0)
+        continue;
 
       /* Read in the load module descriptor.  */
       if (dlgetmodinfo (dll_index, &dll_desc, sizeof (dll_desc),
@@ -455,9 +475,6 @@ pa64_current_sos (void)
       dll_path = (char *)dlgetname (&dll_desc, sizeof (dll_desc),
 			    pa64_target_read_memory,
 			    0, dld_cache.load_map);
-
-      if (dll_path == NULL)
-        dll_path = "";
 
       new = (struct so_list *) xmalloc (sizeof (struct so_list));
       memset (new, 0, sizeof (struct so_list));
@@ -564,9 +581,9 @@ pa64_solib_get_got_by_pc (CORE_ADDR addr)
 	  && ((so_list->lm_info->desc.text_base
 	       + so_list->lm_info->desc.text_size)
 	      > addr))
-	{
+        {
 	  got_value = so_list->lm_info->desc.linkage_ptr;
-	  break;
+ 	  break;
 	}
       so_list = so_list->next;
     }
@@ -582,9 +599,7 @@ pa64_solib_thread_start_addr (struct so_list *so)
 
 
 /* Return the address of the handle of the shared library in which ADDR
-   belongs.  If ADDR isn't in any known shared library, return zero. 
-
-   This function is used in hppa_fix_call_dummy in hppa-tdep.c.  */
+   belongs.  If ADDR isn't in any known shared library, return zero.  */
 
 static CORE_ADDR
 pa64_solib_get_solib_by_pc (CORE_ADDR addr)
@@ -605,6 +620,22 @@ pa64_solib_get_solib_by_pc (CORE_ADDR addr)
       so_list = so_list->next;
     }
   return retval;
+}
+
+/* pa64 libraries do not seem to set the section offsets in a standard (i.e. 
+   SVr4) way; the text section offset stored in the file doesn't correspond
+   to the place where the library is actually loaded into memory.  Instead,
+   we rely on the dll descriptor to tell us where things were loaded.  */
+static CORE_ADDR
+pa64_solib_get_text_base (struct objfile *objfile)
+{
+  struct so_list *so;
+
+  for (so = master_so_list (); so; so = so->next)
+    if (so->objfile == objfile)
+      return so->lm_info->desc.text_base;
+  
+  return 0;
 }
 
 static struct target_so_ops pa64_so_ops;
@@ -633,6 +664,7 @@ void pa64_solib_select (struct gdbarch_tdep *tdep)
   tdep->solib_thread_start_addr = pa64_solib_thread_start_addr;
   tdep->solib_get_got_by_pc = pa64_solib_get_got_by_pc;
   tdep->solib_get_solib_by_pc = pa64_solib_get_solib_by_pc;
+  tdep->solib_get_text_base = pa64_solib_get_text_base;
 }
 
 #else /* PA_SOM_ONLY */

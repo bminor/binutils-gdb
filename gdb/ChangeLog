@@ -1,3 +1,13 @@
+2004-12-09  Randolph Chung  <tausq@debian.org>
+
+	* solib-pa64.c (pa64_relocate_section_addresses): Properly relocate
+	text and data sections.
+	(pa64_current_sos): Also include the dld in the list of current shared
+	objects.
+	(pa64_solib_get_solib_by_pc): Update comments.
+	(pa64_solib_get_text_base): New function.
+	(pa64_solib_select): Set solib_get_text_base method.
+
 2004-12-08  Daniel Jacobowitz  <dan@debian.org>
 
 	* linux-thread-db.c (BUILD_THREAD): Delete.
