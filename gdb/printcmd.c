@@ -951,6 +951,10 @@ address_info (exp, from_tty)
     case LOC_REGPARM:
       printf ("an argument in register %s", reg_names[val]);
       break;
+
+   case LOC_REGPARM_ADDR:
+     printf ("address of an argument in register %s", reg_names[val]);
+     break;
       
     case LOC_ARG:
       if (SYMBOL_BASEREG_VALID (sym))
@@ -1513,6 +1517,7 @@ print_frame_args (func, fi, num, stream)
       /* We care about types of symbols, but don't need to keep track of
 	 stack offsets in them.  */
       case LOC_REGPARM:
+      case LOC_REGPARM_ADDR:
       case LOC_LOCAL_ARG:
 	break;
 

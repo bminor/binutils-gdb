@@ -864,7 +864,31 @@ define_symbol (valu, string, desc, type, objfile)
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       if (within_function)
-        add_symbol_to_list (sym, &local_symbols);
+	{
+	  /* Sun cc uses a pair of symbols, one 'p' and one 'r' with the same
+	     name to represent an argument passed in a register.
+	     GCC uses 'P' for the same case.  So if we find such a symbol pair
+	     we combine it into one 'P' symbol.
+	     Note that this code illegally combines
+	       main(argc) int argc; { register int argc = 1; }
+	     but this case is considered pathological and causes a warning
+	     from a decent compiler.  */
+	  if (local_symbols
+	      && local_symbols->nsyms > 0)
+	    {
+	      struct symbol *prev_sym;
+	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
+	      if (SYMBOL_CLASS (prev_sym) == LOC_ARG
+		  && STREQ (SYMBOL_NAME (prev_sym), SYMBOL_NAME(sym)))
+		{
+		  SYMBOL_CLASS (prev_sym) = LOC_REGPARM;
+		  SYMBOL_VALUE (prev_sym) = SYMBOL_VALUE (sym);
+		  sym = prev_sym;
+		  break;
+		}
+	    }
+          add_symbol_to_list (sym, &local_symbols);
+	}
       else
         add_symbol_to_list (sym, &file_symbols);
       break;
@@ -965,6 +989,23 @@ define_symbol (valu, string, desc, type, objfile)
     default:
       error ("Invalid symbol data: unknown symbol-type code `%c' at symtab pos %d.", deftype, symnum);
     }
+
+  /* When passing structures to a function, some systems sometimes pass
+     the address in a register, not the structure itself. 
+
+     If REG_STRUCT_HAS_ADDR yields non-zero we have to convert LOC_REGPARM
+     to LOC_REGPARM_ADDR for structures and unions.  */
+
+#if !defined (REG_STRUCT_HAS_ADDR)
+#define REG_STRUCT_HAS_ADDR(gcc_p) 0
+#endif
+
+  if (SYMBOL_CLASS (sym) == LOC_REGPARM
+      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation)
+      && (   (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
+	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)))
+    SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
+
   return sym;
 }
 

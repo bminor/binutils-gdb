@@ -882,7 +882,8 @@ print_frame_arg_vars (frame, stream)
       if (SYMBOL_CLASS (sym) == LOC_ARG
 	  || SYMBOL_CLASS (sym) == LOC_LOCAL_ARG
 	  || SYMBOL_CLASS (sym) == LOC_REF_ARG
-	  || SYMBOL_CLASS (sym) == LOC_REGPARM)
+	  || SYMBOL_CLASS (sym) == LOC_REGPARM
+	  || SYMBOL_CLASS (sym) == LOC_REGPARM_ADDR)
 	{
 	  values_printed = 1;
 	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);

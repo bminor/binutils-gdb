@@ -448,10 +448,7 @@ enum address_class
 
   LOC_ARG,
 
-  /* Value address is at SYMBOL_VALUE offset in arglist.  Currently
-     this is used for C++ references (and presumably will be used for
-     Pascal VAR parameters), and is only dereferenced in certain
-     contexts.  */
+  /* Value address is at SYMBOL_VALUE offset in arglist.  */
 
   LOC_REF_ARG,
 
@@ -462,12 +459,19 @@ enum address_class
      FRAME_LOCALS_ADDRESS), and an is_argument flag.
 
      For some symbol formats (stabs, for some compilers at least),
-     gdb generates a LOC_ARG and a LOC_REGISTER rather than a LOC_REGPARM.
-     This is because that's what the compiler does, but perhaps it would
-     be better if the symbol-reading code detected this (is it possible?)
-     and generated a LOC_REGPARM.  */
+     the compiler generates two symbols, an argument and a register.
+     In some cases we combine them to a single LOC_REGPARM in symbol
+     reading, but I'm not sure whether we do for all cases (I'm thinking
+     of when it's passed on the stack and then loaded into a register).  */
 
   LOC_REGPARM,
+
+  /* Value is in specified register.  Just like LOC_REGPARM except the
+     register holds the address of the argument instead of the argument
+     itself. This is currently used for the passing of structs and unions
+     on sparc and hppa.  */
+
+  LOC_REGPARM_ADDR,
 
   /* Value is a local variable at SYMBOL_VALUE offset in stack frame.  */
 

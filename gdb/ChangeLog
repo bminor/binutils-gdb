@@ -1,3 +1,24 @@
+Thu Apr 22 14:50:05 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* symtab.h: Fix LOC_REF_ARG comment.
+
+Wed Apr 22 20:21:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+			  and Jim Kingdon (kingdon@cygnus.com)
+
+	* stabsread.c (define_symbol): Combine a 'p', 'r' arg pair to a
+	LOC_REGPARM symbol.
+	* config/sparc/tm-sparc.h (REG_STRUCT_HAS_ADDR): Revise comments.
+	symfile.c (compare_symbols): Don't check first character; STRCMP
+	does that.
+
+	* stabsread.c (define_symbol): Generate a LOC_REGPARM_ADDR for
+	structures that are passed by address in a register.
+	* symtab.h (enum address_class): Add LOC_REGPARM_ADDR.
+	* findvar.c (read_var_value),
+	printcmd.c (address_info, print_frame_args),
+	stack.c (print_frame_arg_vars), symmisc.c (print_{,partial_}symbol),
+	* symtab.c (lookup_block_symbol): Deal with it.
+
 Thu Apr 22 09:07:24 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* objfiles.h (obj_section), objfiles.c (build_objfile_section_table):
