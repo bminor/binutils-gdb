@@ -1,3 +1,14 @@
+Mon Nov 25 19:47:40 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config.in (WORDS_BIGENDIAN): Add.
+	* configure: Regenerated.
+	* d10v_sim.h: #include "config.h"
+
+Sat Nov 23 09:34:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* gencode.c (write_opcodes): Eliminate warnings when generated
+	table.c is compiled.
+
 Wed Nov 20 19:41:40 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* interp.c (sim_open): Cast result of calloc, and make sure NULL
