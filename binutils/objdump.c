@@ -106,8 +106,9 @@ bfd *abfd;
 	     section->index,
 	     section->name,
 (unsigned)     section->size);
-      printf(" vma %08lx align 2**%2u\n ",
-	     section->vma,
+      printf(" vma ");
+printf_vma(section->vma);
+printf(" align 2**%2u\n ",
 	     section->alignment_power);
       PF(SEC_ALLOC,"ALLOC");
       PF(SEC_LOAD,"LOAD");
@@ -184,15 +185,14 @@ FILE *stream;
   unsigned int oldthisplace ;
 
   int vardiff;
-  if (symcount == 0)
-    fprintf(stream,"%08lx", vma);
+  if (symcount == 0) {
+    fprintf_vma(stream, vma);
+  }
   else {
     while (true) {
       oldthisplace = thisplace;
       thisplace = (max + min )/2  ;
       if (thisplace == oldthisplace) break;
-
-
 	vardiff = syms[thisplace]->value - vma;
 
       if (vardiff) {
@@ -204,8 +204,19 @@ FILE *stream;
 	}
       }
       else {
+  	/* Totally awesome! the exact right symbol */
+ 	char *match_name = syms[thisplace]->name;
+ 	int sym_len = strlen(match_name);
+ 	/* Avoid "filename.o" as a match */
+ 	if (sym_len > 2
+ 	    && match_name[sym_len - 2] == '.'
+ 	    && match_name[sym_len - 1] == 'o'
+ 	    && thisplace + 1 < symcount
+ 	    && syms[thisplace+1]->value == vma)
+ 	    match_name = syms[thisplace+1]->name;
 	/* Totally awesome! the exact right symbol */
-	fprintf(stream,"%08lx (%s)", vma, syms[thisplace]->name);
+	fprintf_vma(stream, vma);
+	fprintf(stream," (%s)", syms[thisplace]->name);
 	return;
       }
     }
@@ -220,16 +231,17 @@ FILE *stream;
       }
     }
     
-
+      fprintf_vma(stream, vma);
     if (syms[thisplace]->value > vma) {
-      fprintf(stream,"%08lx (%s-%lx)", vma, syms[thisplace]->name,
-	      syms[thisplace]->value - vma);
+      fprintf(stream," (%s-)", syms[thisplace]->name);
+      fprintf_vma(stream,  syms[thisplace]->value - vma);
 
     }
     else {
-      fprintf(stream,"%08lx (%s+%lx)", vma, 
-	      syms[thisplace]->name,
-	      vma - syms[thisplace]->value);
+      fprintf(stream," (%s+)", syms[thisplace]->name);
+      fprintf_vma(stream, vma -  syms[thisplace]->value);
+
+
     }
   }
 }
@@ -239,8 +251,8 @@ disassemble_data(abfd)
 bfd *abfd;
 {
   bfd_byte *data = NULL;
-  unsigned int datasize = 0;
-  unsigned int i;
+  bfd_size_type datasize = 0;
+  bfd_size_type i;
   int (*print)() ;
   int print_insn_m68k();
   int print_insn_i960();
@@ -264,14 +276,14 @@ bfd *abfd;
   (void)   qsort(syms, symcount, sizeof(asymbol *), comp);
 
   /* Find the first useless symbol */
-  { unsigned int i;
-    for (i =0; i < symcount; i++) {
-      if (syms[i]->the_bfd == 0) {
-	symcount =i;
-	break;
+    { unsigned int i;
+      for (i =0; i < symcount; i++) {
+	if (syms[i]->the_bfd == 0) {
+	  symcount =i;
+	  break;
+	}
       }
     }
-  }
 
 
   if (machine!= (char *)NULL) {
@@ -325,12 +337,12 @@ bfd *abfd;
       bfd_get_section_contents (abfd, section, data, 0, section->size);
 
       i = 0;
-      while ((size_t)i <section->size) {
+      while (i <section->size) {
 	if (with_line_numbers) {
 	  static prevline;
-	  char *filename;
-	  char *functionname;
-	  int line;
+	  CONST char *filename;
+	  CONST char *functionname;
+	  unsigned int line;
 	  bfd_find_nearest_line(abfd,
 				section,
 				syms,
@@ -340,7 +352,7 @@ bfd *abfd;
 				&line);
 
 	  if (filename && functionname && line && line != prevline) {
-	    printf("%s:%d\n", filename, line);
+	    printf("%s:%u\n", filename, line);
 	    prevline = line;
 	  }
 	}
@@ -392,7 +404,8 @@ display_bfd (abfd)
     PF(DYNAMIC, "DYNAMIC");
     PF(WP_TEXT, "WP_TEXT");
     PF(D_PAGED, "D_PAGED");
-    printf("\nstart address 0x%08lx", abfd->start_address);
+    printf("\nstart address 0x");
+    printf_vma(abfd->start_address);
   }
   printf("\n");
 
@@ -459,8 +472,8 @@ dump_data (abfd)
 {
   asection *section;
   bfd_byte  *data ;
-  unsigned int datasize = 0;
-  size_t i;
+  bfd_size_type datasize = 0;
+  bfd_size_type i;
 
   for (section = abfd->sections; section != NULL; section =
        section->next) {
@@ -482,11 +495,11 @@ dump_data (abfd)
       datasize = section->size;
 
 
-      bfd_get_section_contents (abfd, section, data, 0, section->size);
+      bfd_get_section_contents (abfd, section, (PTR)data, 0, section->size);
 
       for (i= 0; i < section->size; i += onaline) {
-	size_t j;
-	printf(" %04lx ", i + section->vma);
+	bfd_size_type j;
+	printf(" %04lx ", (unsigned long int)(i + section->vma));
 	for (j = i; j < i+ onaline; j++) {
 	  if (j < section->size)
 	    printf("%02x", (unsigned)(data[j]));
@@ -562,7 +575,8 @@ bfd *abfd;
 	printf("\n");
 	printf("OFFSET   TYPE      VALUE \n");
 
-	for (p =relpp; *p != (arelent *)NULL; p++) {
+	for (p =relpp; relcount && *p != (arelent *)NULL; p++,
+	     relcount --) {
 	  arelent *q = *p;
 	  CONST char *sym_name;
 	  CONST char *section_name =	    q->section == (asection *)NULL ? "*abs" :
@@ -574,19 +588,20 @@ bfd *abfd;
 	    sym_name = 0;
 	  }
 	  if (sym_name) {
-	    printf("%08lx %-8s  %s",
-		   q->address,
+	    printf_vma(q->address);
+	    printf(" %-8s  %s",
 		   q->howto->name,
 		   sym_name);
 	  }
 	  else {
-	    printf("%08lx %-8s  [%s]",
-		   q->address,
+	    printf_vma(q->address);
+	    printf(" %-8s  [%s]",
 		   q->howto->name,
 		   section_name);
 	  }
 	  if (q->addend) {
-	    printf("+0x%lx(%ld)", q->addend, (long) q->addend);
+	    printf("+0x");
+	    printf_vma(q->addend);
 	  }
 	  printf("\n");
 	}
@@ -616,7 +631,7 @@ DEFUN_VOID(display_info)
 	       p->byteorder_big_p ? "big endian" : "little endian" );
 	  {
 	    enum	    bfd_architecture j;
-	    for (j = bfd_arch_obscure +1; j < bfd_arch_last; j++) 
+	    for (j = (int)bfd_arch_obscure +1; j <(int) bfd_arch_last; j++) 
 		{
 		  if (bfd_set_arch_mach(abfd, j, 0)) 
 		      {
@@ -633,7 +648,7 @@ DEFUN_VOID(display_info)
     printf("%s ",target_vector[i]->name);
   }
   printf("\n");
-  for (j = bfd_arch_obscure +1; j < bfd_arch_last; j++) {
+  for (j = (int)bfd_arch_obscure +1; (int)j <(int) bfd_arch_last; j++) {
     printf("%11s ", bfd_printable_arch_mach(j,0));
     for (i = 0; target_vector[i]; i++) {
 	{

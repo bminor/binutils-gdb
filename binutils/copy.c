@@ -1,6 +1,8 @@
-/*** copy.c -- copy object file from input to output, optionally massaging it */
-#include "sysdep.h"
+/*** copy.c -- copy object file from input to output, optionally
+     massaging it */
+
 #include "bfd.h"
+
 
 asymbol       **sympp;
 char           *input_target = NULL;
@@ -311,11 +313,11 @@ copy_sections(ibfd, isection, obfd)
   arelent       **relpp;
   int             relcount;
   sec_ptr         osection;
-  unsigned long   size;
+  bfd_size_type   size;
   osection = bfd_get_section_by_name(obfd,
 				     bfd_section_name(ibfd, isection));
 
-  size = bfd_section_size(ibfd, isection);
+  size = isection->size;
 
   if (size == 0)
     return;
@@ -334,12 +336,12 @@ copy_sections(ibfd, isection, obfd)
 
   if (bfd_get_section_flags(ibfd, isection) & SEC_HAS_CONTENTS) 
     {
-      unsigned char *memhunk = (unsigned char *) xmalloc(size);
+      PTR memhunk = (PTR) xmalloc((unsigned)size);
 
-      if (!bfd_get_section_contents(ibfd, isection, memhunk, 0, size))
+      if (!bfd_get_section_contents(ibfd, isection, memhunk, (file_ptr) 0, size))
 	bfd_fatal(bfd_get_filename(ibfd));
 
-      if (!bfd_set_section_contents(obfd, osection, memhunk, 0, size))
+      if (!bfd_set_section_contents(obfd, osection, memhunk, (file_ptr)0, size))
 	bfd_fatal(bfd_get_filename(obfd));
       free(memhunk);
     }

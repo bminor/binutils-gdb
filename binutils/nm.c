@@ -43,7 +43,7 @@ struct option long_options[] = {
 	{"print-armap",	    0, &print_armap,       1},
 	{"print-file-name", 0, &file_on_each_line, 1},
 	{"reverse-sort",    0, &reverse_sort,      1},
-	{"target", 	    2, NULL,	           NULL},
+	{"target", 	    2, (int *)NULL,	   0},
 	{"undefined-only",  0, &undefined_only,    1},
 	{0, 0, 0, 0}
 };
@@ -230,8 +230,8 @@ non_numeric_forward (x, y)
      char *x;
      char *y;
 {
-  char *xn = (*(asymbol **) x)->name;
-  char *yn = (*(asymbol **) y)->name;
+  CONST char *xn = (*(asymbol **) x)->name;
+  CONST char *yn = (*(asymbol **) y)->name;
 
   return ((xn == NULL) ? ((yn == NULL) ? 0 : -1) :
 	  ((yn == NULL) ? 1 : strcmp (xn, yn)));
@@ -353,11 +353,11 @@ print_symbols (abfd, syms, symcount)
       if (p->flags & BSF_GLOBAL)
 	class = toupper (class);
       
-      if (p->value || ((p->flags & BSF_UNDEFINED) !=  BSF_UNDEFINED))
-	printf ("%08lx ", (p->section ? p->value + p->section->vma : p->value));
-      else fputs ("         ", stdout);
+      if (p->value || ((p->flags & BSF_UNDEFINED) !=  BSF_UNDEFINED)) 
+	printf_vma( (p->section ? p->value + p->section->vma : p->value));
+      else fputs ("        ", stdout);
 
-      printf ("%c %s\n", class, p->name);
+      printf (" %c %s\n", class, p->name);
     }
     }
   }
