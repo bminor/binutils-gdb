@@ -1,3 +1,20 @@
+Thu Feb 27 09:38:16 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure.host (i[3456]86-*-windows):  Disable long long
+	support for WinGDB.  Add mswin to configdirs.
+	* configure.in configure:  Move calls to configure.host and
+	configure.tgt to the top of configure.in to allow them to set
+	config variables before they are referenced.
+
+Tue Feb 25 20:21:52 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.tgt (mips*-*-lnews*): New target.
+
+Mon Feb 24 16:35:00 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200-tdep.c (mn10200_analyze_prologue): Don't fix fi->frame
+	if we're not the innermost frame.  Fix minor typos.
+
 Sat Feb 22 03:39:50 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* stabsread.c (read_type):  Fix handling of template names

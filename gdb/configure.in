@@ -30,6 +30,22 @@ AC_ISC_POSIX
 
 AC_CANONICAL_SYSTEM
 
+dnl List of object files added by configure.
+
+CONFIG_OBS=
+
+configdirs="doc testsuite"
+
+dnl
+changequote(,)dnl
+
+. ${srcdir}/configure.host
+
+. ${srcdir}/configure.tgt
+
+dnl
+changequote([,])dnl
+
 AC_PROG_INSTALL
 AC_CHECK_TOOL(AR, ar)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
@@ -46,10 +62,6 @@ AC_HEADER_STAT
 AC_C_CONST
 
 AC_CHECK_FUNCS(setpgid sbrk select poll)
-
-dnl List of object files added by configuire.
-
-CONFIG_OBS=
 
 # If we are configured native on Linux, work around problems with sys/procfs.h
 if test "${target}" = "${host}"; then
@@ -361,18 +373,6 @@ if test "${host}" != "${target}"; then
     target_subdir="${target_alias}/"
 fi
 AC_SUBST(target_subdir)
-
-configdirs="doc testsuite"
-
-dnl
-changequote(,)dnl
-
-. ${srcdir}/configure.host
-
-. ${srcdir}/configure.tgt
-
-dnl
-changequote([,])dnl
 
 frags=
 host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
