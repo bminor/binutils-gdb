@@ -1,3 +1,46 @@
+2001-05-03  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* Makefile.am (TARG_ENV_HFILES): Add te-hppa64.h and te-hppalinux64.h.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* configure.in: Remove duplicate mips-*-ecoff* entry.
+	* configure: Regenerate.
+
+	* config/obj-ecoff.c (obj_pseudo_table): Fix terminating entry.
+	(n_names): Cast away type mismatch.
+	(ecoff_sec_sym_ok_for_reloc): Add unused attribute.
+	(obj_ecoff_frob_symbol): Likewise.
+	* ecoff.c: (add_file): Add unused attribute.
+	(ecoff_directive_begin): Likewise.
+	(ecoff_directive_bend): Likewise.
+	(ecoff_directive_def): Likewise.
+	(ecoff_directive_dim): Likewise.
+	(ecoff_directive_scl): Likewise.
+	(ecoff_directive_size): Likewise.
+	(ecoff_directive_type): Likewise.
+	(ecoff_directive_tag): Likewise.
+	(ecoff_directive_val): Likewise.
+	(ecoff_directive_endef): Likewise.
+	(ecoff_directive_end): Likewise.
+	(ecoff_directive_ent): Likewise.
+	(ecoff_directive_extern): Likewise.
+	(ecoff_directive_file): Likewise.
+	(ecoff_directive_fmask): Likewise.
+	(ecoff_directive_frame): Likewise.
+	(ecoff_directive_mask): Likewise.
+	(ecoff_directive_loc): Likewise.
+	(mark_stabs): Likewise.
+	(ecoff_stab):  Likewise.
+	(ecoff_frob_symbol): Cast away type mismatch.
+	(ecoff_padding_adjust): Likewise.
+	(ecoff_build_symbols): Likewise.
+	(ecoff_build_procs): Likewise.
+	(ecoff_build_aux): Likewise.
+	(ecoff_build_strings): Likewise.
+	(ecoff_build_fdr): Likewise.
+	(ecoff_build_debug): Likewise.
+	* itbl-ops.c (itbl_assemble): Variable initialization.
+
 2001-05-03  Alan Modra  <amodra@one.net.au>
 
 	* config/tc-i386.c (i386_displacement): Call as_bad for bad GOTOFF
@@ -5,14 +48,14 @@
 
 2001-05-02  Johan Rydberg  <jrydberg@opencores.org>
 
-        * config/tc-openrisc.c: New file.
-        * config/tc-openrisc.h: Likewise.
+	* config/tc-openrisc.c: New file.
+	* config/tc-openrisc.h: Likewise.
 
-        * Makefile.am: Add OpenRISC target.
-        * Makefile.in: Regenerated.
+	* Makefile.am: Add OpenRISC target.
+	* Makefile.in: Regenerated.
 
-        * configure.in (openrisc-*-*): Add target.
-        * configure: Regenerated.
+	* configure.in (openrisc-*-*): Add target.
+	* configure: Regenerated.
 
 2001-05-02  Nick Clifton  <nickc@cambridge.redhat.com>
 

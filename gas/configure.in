@@ -340,7 +340,6 @@ changequote([,])dnl
       mips-*-ultrix*)       fmt=ecoff endian=little ;;
       mips-*-osf*)          fmt=ecoff endian=little ;;
       mips-*-ecoff*)        fmt=ecoff ;;
-      mips-*-ecoff*)        fmt=ecoff ;;
       mips-*-pe*)           fmt=coff endian=little em=pe ;;
       mips-*-irix6*)	    fmt=elf ;;
       mips-*-irix5*)        fmt=elf ;;
