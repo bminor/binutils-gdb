@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -71,9 +71,11 @@ typedef enum gr_names {
 } GR_NAMES;
 
 /* Enum declaration for .  */
-typedef enum gr_rbj_names {
-  H_RBJ_R8, H_RBJ_R9
-} GR_RBJ_NAMES;
+typedef enum gr_rb_names {
+  H_RBJ_R8 = 0, H_RBJ_R9 = 1, H_RBJ_R10 = 2, H_RBJ_R11 = 3
+ , H_RBJ_R12 = 4, H_RBJ_R13 = 5, H_RBJ_R14 = 6, H_RBJ_R15 = 7
+ , H_RBJ_PSW = 6, H_RBJ_SP = 7
+} GR_RB_NAMES;
 
 /* Enum declaration for insn op enums.  */
 typedef enum insn_op1 {
@@ -214,10 +216,10 @@ typedef enum cgen_hw_attr {
 /* Enum declaration for xstormy16 hardware types.  */
 typedef enum cgen_hw_type {
   HW_H_MEMORY, HW_H_SINT, HW_H_UINT, HW_H_ADDR
- , HW_H_IADDR, HW_H_PC, HW_H_GR, HW_H_RBJ
- , HW_H_RPSW, HW_H_Z8, HW_H_Z16, HW_H_CY
- , HW_H_HC, HW_H_OV, HW_H_PT, HW_H_S
- , HW_H_BRANCHCOND, HW_H_WORDSIZE, HW_MAX
+ , HW_H_IADDR, HW_H_PC, HW_H_GR, HW_H_RB
+ , HW_H_RBJ, HW_H_RPSW, HW_H_Z8, HW_H_Z16
+ , HW_H_CY, HW_H_HC, HW_H_OV, HW_H_PT
+ , HW_H_S, HW_H_BRANCHCOND, HW_H_WORDSIZE, HW_MAX
 } CGEN_HW_TYPE;
 
 #define MAX_HW ((int) HW_MAX)
@@ -279,7 +281,8 @@ extern const CGEN_ATTR_TABLE xstormy16_cgen_insn_attr_table[];
 /* Hardware decls.  */
 
 extern CGEN_KEYWORD xstormy16_cgen_opval_gr_names;
-extern CGEN_KEYWORD xstormy16_cgen_opval_gr_Rbj_names;
+extern CGEN_KEYWORD xstormy16_cgen_opval_gr_Rb_names;
+extern CGEN_KEYWORD xstormy16_cgen_opval_gr_Rb_names;
 extern CGEN_KEYWORD xstormy16_cgen_opval_h_branchcond;
 extern CGEN_KEYWORD xstormy16_cgen_opval_h_wordsize;
 

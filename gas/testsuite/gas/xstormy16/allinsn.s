@@ -368,69 +368,69 @@ movfgripredecgr:
 	.text
 	.global movfgrgrii
 movfgrgrii:
-	movf.b r0,(r0,r0,0)
-	movf.w r7,(r7,r15,-1)
-	movf.w r4,(r4,r8,-2048)
-	movf.b r3,(r3,r7,2047)
-	movf.w r1,(r1,r1,1)
-	movf.b r7,(r7,r0,1473)
-	movf.w r2,(r0,r9,-1522)
-	movf.w r2,(r5,r1,480)
+	movf.b r0,(r8,r0,0)
+	movf.w r7,(r15,r15,-1)
+	movf.w r4,(r12,r8,-2048)
+	movf.b r3,(r11,r7,2047)
+	movf.w r1,(r9,r1,1)
+	movf.b r7,(r15,r0,1473)
+	movf.w r2,(r8,r9,-1522)
+	movf.w r2,(r13,r1,480)
 	.text
 	.global movfgrgriipostinc
 movfgrgriipostinc:
-	movf.b r0,(r0,r0++,0)
-	movf.w r7,(r7,r15++,-1)
-	movf.w r4,(r4,r8++,-2048)
-	movf.b r3,(r3,r7++,2047)
-	movf.w r1,(r1,r1++,1)
-	movf.b r1,(r0,r2++,1398)
-	movf.w r4,(r0,r9++,-778)
-	movf.w r1,(r5,r14++,1564)
+	movf.b r0,(r8,r0++,0)
+	movf.w r7,(r15,r15++,-1)
+	movf.w r4,(r12,r8++,-2048)
+	movf.b r3,(r11,r7++,2047)
+	movf.w r1,(r9,r1++,1)
+	movf.b r1,(r8,r2++,1398)
+	movf.w r4,(r8,r9++,-778)
+	movf.w r1,(r13,r14++,1564)
 	.text
 	.global movfgrgriipredec
 movfgrgriipredec:
-	movf.b r0,(r0,--r0,0)
-	movf.w r7,(r7,--r15,-1)
-	movf.w r4,(r4,--r8,-2048)
-	movf.b r3,(r3,--r7,2047)
-	movf.w r1,(r1,--r1,1)
-	movf.b r6,(r0,--r7,254)
-	movf.w r5,(r4,--r12,1673)
-	movf.b r0,(r0,--r10,-38)
+	movf.b r0,(r8,--r0,0)
+	movf.w r7,(r15,--r15,-1)
+	movf.w r4,(r12,--r8,-2048)
+	movf.b r3,(r11,--r7,2047)
+	movf.w r1,(r9,--r1,1)
+	movf.b r6,(r8,--r7,254)
+	movf.w r5,(r12,--r12,1673)
+	movf.b r0,(r8,--r10,-38)
 	.text
 	.global movfgriigr
 movfgriigr:
-	movf.b (r0,r0,0),r0
-	movf.w (r7,r15,-1),r7
-	movf.w (r4,r8,-2048),r4
-	movf.b (r3,r7,2047),r3
-	movf.w (r1,r1,1),r1
-	movf.w (r7,r2,-1636),r3
-	movf.w (r6,r12,1626),r1
-	movf.b (r3,r14,1540),r0
+	movf.b (r8,r0,0),r0
+	movf.w (r15,r15,-1),r7
+	movf.w (r12,r8,-2048),r4
+	movf.b (r11,r7,2047),r3
+	movf.w (r9,r1,1),r1
+	movf.w (r15,r2,-1636),r3
+	movf.w (r14,r12,1626),r1
+	movf.b (r11,r14,1540),r0
 	.text
 	.global movfgriipostincgr
 movfgriipostincgr:
-	movf.b (r0,r0++,0),r0
-	movf.w (r7,r15++,-1),r7
-	movf.w (r4,r8++,-2048),r4
-	movf.b (r3,r7++,2047),r3
-	movf.w (r1,r1++,1),r1
-	movf.b (r7,r13++,466),r3
-	movf.b (r3,r11++,250),r4
-	movf.b (r2,r10++,-1480),r7
+	movf.b (r8,r0++,0),r0
+	movf.w (r15,r15++,-1),r7
+	movf.w (r12,r8++,-2048),r4
+	movf.b (r11,r7++,2047),r3
+	movf.w (r9,r1++,1),r1
+	movf.b (r15,r13++,466),r3
+	movf.b (r11,r11++,250),r4
+	movf.b (r10,r10++,-1480),r7
 	.text
 	.global movfgriipredecgr
 movfgriipredecgr:
-	movf.b (r0,--r0,0),r0
-	movf.w (r7,--r15,-1),r7
-	movf.w (r4,--r8,-2048),r4
-	movf.b (r3,--r7,2047),r3
-	movf.w (r1,--r1,1),r1
-	movf.b (r5,--r10,-608),r0
-	movf.b (r1,--r11,831),r7
-	movf.w (r7,--r15,-2036),r6
+	movf.b (r8,--r0,0),r0
+	movf.w (r15,--r15,-1),r7
+	movf.w (r12,--r8,-2048),r4
+	movf.b (r11,--r7,2047),r3
+	movf.w (r9,--r1,1),r1
+	movf.b (r13,--r10,-608),r0
+	movf.b (r9,--r11,831),r7
+	movf.w (r15,--r15,-2036),r6
 	.text
 	.global maskgrgr
 maskgrgr:
@@ -1186,6 +1186,10 @@ halt:
 	.global hold
 hold:
 	hold
+	.text
+	.global holdx
+holdx:
+	holdx
 	.text
 	.global brk
 brk:

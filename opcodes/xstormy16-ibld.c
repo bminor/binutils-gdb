@@ -35,9 +35,9 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "opintl.h"
 #include "safe-ctype.h"
 
-#undef  min
+#undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
-#undef  max
+#undef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
 /* Used by the ifield rtx function.  */

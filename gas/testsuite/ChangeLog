@@ -1,3 +1,9 @@
+2002-01-10  matthew green  <mrg@redhat.com>
+
+	* gas/xstormy16/allinsn.sh (movf, jmp, call, icall): Update.
+	* gas/xstormy16/allinsn.d: Regenerate.
+	* gas/xstormy16/allinsn.s: Regenerate.
+
 2002-01-09   Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/arm/float.s: Don't use VFP register names in fpa instructions.

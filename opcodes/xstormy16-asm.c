@@ -154,10 +154,10 @@ xstormy16_cgen_parse_operand (cd, opindex, strp, fields)
   switch (opindex)
     {
     case XSTORMY16_OPERAND_RB :
-      errmsg = cgen_parse_keyword (cd, strp, & xstormy16_cgen_opval_gr_names, & fields->f_Rb);
+      errmsg = cgen_parse_keyword (cd, strp, & xstormy16_cgen_opval_gr_Rb_names, & fields->f_Rb);
       break;
     case XSTORMY16_OPERAND_RBJ :
-      errmsg = cgen_parse_keyword (cd, strp, & xstormy16_cgen_opval_gr_Rbj_names, & fields->f_Rbj);
+      errmsg = cgen_parse_keyword (cd, strp, & xstormy16_cgen_opval_gr_Rb_names, & fields->f_Rbj);
       break;
     case XSTORMY16_OPERAND_RD :
       errmsg = cgen_parse_keyword (cd, strp, & xstormy16_cgen_opval_gr_names, & fields->f_Rd);

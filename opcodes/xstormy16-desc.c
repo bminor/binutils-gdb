@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -152,16 +152,24 @@ CGEN_KEYWORD xstormy16_cgen_opval_gr_names =
   0, 0, 0, 0, ""
 };
 
-static CGEN_KEYWORD_ENTRY xstormy16_cgen_opval_gr_Rbj_names_entries[] =
+static CGEN_KEYWORD_ENTRY xstormy16_cgen_opval_gr_Rb_names_entries[] =
 {
   { "r8", 0, {0, {0}}, 0, 0 },
-  { "r9", 1, {0, {0}}, 0, 0 }
+  { "r9", 1, {0, {0}}, 0, 0 },
+  { "r10", 2, {0, {0}}, 0, 0 },
+  { "r11", 3, {0, {0}}, 0, 0 },
+  { "r12", 4, {0, {0}}, 0, 0 },
+  { "r13", 5, {0, {0}}, 0, 0 },
+  { "r14", 6, {0, {0}}, 0, 0 },
+  { "r15", 7, {0, {0}}, 0, 0 },
+  { "psw", 6, {0, {0}}, 0, 0 },
+  { "sp", 7, {0, {0}}, 0, 0 }
 };
 
-CGEN_KEYWORD xstormy16_cgen_opval_gr_Rbj_names =
+CGEN_KEYWORD xstormy16_cgen_opval_gr_Rb_names =
 {
-  & xstormy16_cgen_opval_gr_Rbj_names_entries[0],
-  2,
+  & xstormy16_cgen_opval_gr_Rb_names_entries[0],
+  10,
   0, 0, 0, 0, ""
 };
 
@@ -224,7 +232,8 @@ const CGEN_HW_ENTRY xstormy16_cgen_hw_table[] =
   { "h-iaddr", HW_H_IADDR, CGEN_ASM_NONE, 0, { 0, { (1<<MACH_BASE) } } },
   { "h-pc", HW_H_PC, CGEN_ASM_NONE, 0, { 0|A(PC), { (1<<MACH_BASE) } } },
   { "h-gr", HW_H_GR, CGEN_ASM_KEYWORD, (PTR) & xstormy16_cgen_opval_gr_names, { 0, { (1<<MACH_BASE) } } },
-  { "h-Rbj", HW_H_RBJ, CGEN_ASM_KEYWORD, (PTR) & xstormy16_cgen_opval_gr_Rbj_names, { 0|A(VIRTUAL), { (1<<MACH_BASE) } } },
+  { "h-Rb", HW_H_RB, CGEN_ASM_KEYWORD, (PTR) & xstormy16_cgen_opval_gr_Rb_names, { 0|A(VIRTUAL), { (1<<MACH_BASE) } } },
+  { "h-Rbj", HW_H_RBJ, CGEN_ASM_KEYWORD, (PTR) & xstormy16_cgen_opval_gr_Rb_names, { 0|A(VIRTUAL), { (1<<MACH_BASE) } } },
   { "h-Rpsw", HW_H_RPSW, CGEN_ASM_NONE, 0, { 0|A(VIRTUAL), { (1<<MACH_BASE) } } },
   { "h-z8", HW_H_Z8, CGEN_ASM_NONE, 0, { 0|A(VIRTUAL), { (1<<MACH_BASE) } } },
   { "h-z16", HW_H_Z16, CGEN_ASM_NONE, 0, { 0|A(VIRTUAL), { (1<<MACH_BASE) } } },
@@ -345,7 +354,7 @@ const CGEN_OPERAND xstormy16_cgen_operand_table[] =
   { "Rs", XSTORMY16_OPERAND_RS, HW_H_GR, 8, 4,
     { 0, { (1<<MACH_BASE) } }  },
 /* Rb: base register */
-  { "Rb", XSTORMY16_OPERAND_RB, HW_H_GR, 17, 3,
+  { "Rb", XSTORMY16_OPERAND_RB, HW_H_RB, 17, 3,
     { 0, { (1<<MACH_BASE) } }  },
 /* Rbj: base register for jump */
   { "Rbj", XSTORMY16_OPERAND_RBJ, HW_H_RBJ, 11, 1,
@@ -1051,6 +1060,11 @@ static const CGEN_IBASE xstormy16_cgen_insn_table[MAX_INSNS] =
     XSTORMY16_INSN_HOLD, "hold", "hold", 16,
     { 0, { (1<<MACH_BASE) } }
   },
+/* holdx */
+  {
+    XSTORMY16_INSN_HOLDX, "holdx", "holdx", 16,
+    { 0, { (1<<MACH_BASE) } }
+  },
 /* brk */
   {
     XSTORMY16_INSN_BRK, "brk", "brk", 16,
@@ -1208,8 +1222,8 @@ xstormy16_cgen_rebuild_tables (cd)
       {
 	const CGEN_ISA *isa = & xstormy16_cgen_isa_table[i];
 
-	/* Default insn sizes of all selected isas must be
-	   equal or we set the result to 0, meaning "unknown".  */
+	/* Default insn sizes of all selected isas must be equal or we set
+	   the result to 0, meaning "unknown".  */
 	if (cd->default_insn_bitsize == UNSET)
 	  cd->default_insn_bitsize = isa->default_insn_bitsize;
 	else if (isa->default_insn_bitsize == cd->default_insn_bitsize)
@@ -1217,8 +1231,8 @@ xstormy16_cgen_rebuild_tables (cd)
 	else
 	  cd->default_insn_bitsize = CGEN_SIZE_UNKNOWN;
 
-	/* Base insn sizes of all selected isas must be equal
-	   or we set the result to 0, meaning "unknown".  */
+	/* Base insn sizes of all selected isas must be equal or we set
+	   the result to 0, meaning "unknown".  */
 	if (cd->base_insn_bitsize == UNSET)
 	  cd->base_insn_bitsize = isa->base_insn_bitsize;
 	else if (isa->base_insn_bitsize == cd->base_insn_bitsize)

@@ -1,3 +1,12 @@
+2002-01-10  matthew green  <mrg@redhat.com>
+
+	* xstormy16-asm.c: Regenerate.
+	* xstormy16-desc.c: Likewise.
+	* xstormy16-desc.h: Likewise.
+	* xstormy16-dis.c: Likewise.
+	* xstormy16-opc.c: Likewise.
+	* xstormy16-opc.h: Likewise.
+
 2002-01-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/es.po: New file: Spanish translation.

@@ -337,64 +337,64 @@ Disassembly of section \.text:
  2a6:	a5 6e       	movf\.b \(--r10\),r5
 
 000002a8 <movfgrgrii>:
- 2a8:	08 74 00 00 	movf\.b r0,\(r0,r0,0\)
- 2ac:	ff 75 ff 7f 	movf\.w r7,\(r7,r15,-1\)
- 2b0:	8c 75 00 48 	movf\.w r4,\(r4,r8,-2048\)
- 2b4:	7b 74 ff 37 	movf\.b r3,\(r3,r7,2047\)
- 2b8:	19 75 01 10 	movf\.w r1,\(r1,r1,1\)
- 2bc:	0f 74 c1 75 	movf\.b r7,\(r7,r0,1473\)
- 2c0:	9a 75 0e 0a 	movf\.w r2,\(r0,r9,-1522\)
- 2c4:	1a 75 e0 51 	movf\.w r2,\(r5,r1,480\)
+ 2a8:	08 74 00 00 	movf\.b r0,\(r8,r0,0\)
+ 2ac:	ff 75 ff 7f 	movf\.w r7,\(r15,r15,-1\)
+ 2b0:	8c 75 00 48 	movf\.w r4,\(r12,r8,-2048\)
+ 2b4:	7b 74 ff 37 	movf\.b r3,\(r11,r7,2047\)
+ 2b8:	19 75 01 10 	movf\.w r1,\(r9,r1,1\)
+ 2bc:	0f 74 c1 75 	movf\.b r7,\(r15,r0,1473\)
+ 2c0:	9a 75 0e 0a 	movf\.w r2,\(r8,r9,-1522\)
+ 2c4:	1a 75 e0 51 	movf\.w r2,\(r13,r1,480\)
 
 000002c8 <movfgrgriipostinc>:
- 2c8:	08 64 00 00 	movf\.b r0,\(r0,r0\+\+,0\)
- 2cc:	ff 65 ff 7f 	movf\.w r7,\(r7,r15\+\+,-1\)
- 2d0:	8c 65 00 48 	movf\.w r4,\(r4,r8\+\+,-2048\)
- 2d4:	7b 64 ff 37 	movf\.b r3,\(r3,r7\+\+,2047\)
- 2d8:	19 65 01 10 	movf\.w r1,\(r1,r1\+\+,1\)
- 2dc:	29 64 76 05 	movf\.b r1,\(r0,r2\+\+,1398\)
- 2e0:	9c 65 f6 0c 	movf\.w r4,\(r0,r9\+\+,-778\)
- 2e4:	e9 65 1c 56 	movf\.w r1,\(r5,r14\+\+,1564\)
+ 2c8:	08 64 00 00 	movf\.b r0,\(r8,r0\+\+,0\)
+ 2cc:	ff 65 ff 7f 	movf\.w r7,\(r15,r15\+\+,-1\)
+ 2d0:	8c 65 00 48 	movf\.w r4,\(r12,r8\+\+,-2048\)
+ 2d4:	7b 64 ff 37 	movf\.b r3,\(r11,r7\+\+,2047\)
+ 2d8:	19 65 01 10 	movf\.w r1,\(r9,r1\+\+,1\)
+ 2dc:	29 64 76 05 	movf\.b r1,\(r8,r2\+\+,1398\)
+ 2e0:	9c 65 f6 0c 	movf\.w r4,\(r8,r9\+\+,-778\)
+ 2e4:	e9 65 1c 56 	movf\.w r1,\(r13,r14\+\+,1564\)
 
 000002e8 <movfgrgriipredec>:
- 2e8:	08 6c 00 00 	movf\.b r0,\(r0,--r0,0\)
- 2ec:	ff 6d ff 7f 	movf\.w r7,\(r7,--r15,-1\)
- 2f0:	8c 6d 00 48 	movf\.w r4,\(r4,--r8,-2048\)
- 2f4:	7b 6c ff 37 	movf\.b r3,\(r3,--r7,2047\)
- 2f8:	19 6d 01 10 	movf\.w r1,\(r1,--r1,1\)
- 2fc:	7e 6c fe 00 	movf\.b r6,\(r0,--r7,254\)
- 300:	cd 6d 89 46 	movf\.w r5,\(r4,--r12,1673\)
- 304:	a8 6c da 0f 	movf\.b r0,\(r0,--r10,-38\)
+ 2e8:	08 6c 00 00 	movf\.b r0,\(r8,--r0,0\)
+ 2ec:	ff 6d ff 7f 	movf\.w r7,\(r15,--r15,-1\)
+ 2f0:	8c 6d 00 48 	movf\.w r4,\(r12,--r8,-2048\)
+ 2f4:	7b 6c ff 37 	movf\.b r3,\(r11,--r7,2047\)
+ 2f8:	19 6d 01 10 	movf\.w r1,\(r9,--r1,1\)
+ 2fc:	7e 6c fe 00 	movf\.b r6,\(r8,--r7,254\)
+ 300:	cd 6d 89 46 	movf\.w r5,\(r12,--r12,1673\)
+ 304:	a8 6c da 0f 	movf\.b r0,\(r8,--r10,-38\)
 
 00000308 <movfgriigr>:
- 308:	08 76 00 00 	movf\.b \(r0,r0,0\),r0
- 30c:	ff 77 ff 7f 	movf\.w \(r7,r15,-1\),r7
- 310:	8c 77 00 48 	movf\.w \(r4,r8,-2048\),r4
- 314:	7b 76 ff 37 	movf\.b \(r3,r7,2047\),r3
- 318:	19 77 01 10 	movf\.w \(r1,r1,1\),r1
- 31c:	2b 77 9c 79 	movf\.w \(r7,r2,-1636\),r3
- 320:	c9 77 5a 66 	movf\.w \(r6,r12,1626\),r1
- 324:	e8 76 04 36 	movf\.b \(r3,r14,1540\),r0
+ 308:	08 76 00 00 	movf\.b \(r8,r0,0\),r0
+ 30c:	ff 77 ff 7f 	movf\.w \(r15,r15,-1\),r7
+ 310:	8c 77 00 48 	movf\.w \(r12,r8,-2048\),r4
+ 314:	7b 76 ff 37 	movf\.b \(r11,r7,2047\),r3
+ 318:	19 77 01 10 	movf\.w \(r9,r1,1\),r1
+ 31c:	2b 77 9c 79 	movf\.w \(r15,r2,-1636\),r3
+ 320:	c9 77 5a 66 	movf\.w \(r14,r12,1626\),r1
+ 324:	e8 76 04 36 	movf\.b \(r11,r14,1540\),r0
 
 00000328 <movfgriipostincgr>:
- 328:	08 66 00 00 	movf\.b \(r0,r0\+\+,0\),r0
- 32c:	ff 67 ff 7f 	movf\.w \(r7,r15\+\+,-1\),r7
- 330:	8c 67 00 48 	movf\.w \(r4,r8\+\+,-2048\),r4
- 334:	7b 66 ff 37 	movf\.b \(r3,r7\+\+,2047\),r3
- 338:	19 67 01 10 	movf\.w \(r1,r1\+\+,1\),r1
- 33c:	db 66 d2 71 	movf\.b \(r7,r13\+\+,466\),r3
- 340:	bc 66 fa 30 	movf\.b \(r3,r11\+\+,250\),r4
- 344:	af 66 38 2a 	movf\.b \(r2,r10\+\+,-1480\),r7
+ 328:	08 66 00 00 	movf\.b \(r8,r0\+\+,0\),r0
+ 32c:	ff 67 ff 7f 	movf\.w \(r15,r15\+\+,-1\),r7
+ 330:	8c 67 00 48 	movf\.w \(r12,r8\+\+,-2048\),r4
+ 334:	7b 66 ff 37 	movf\.b \(r11,r7\+\+,2047\),r3
+ 338:	19 67 01 10 	movf\.w \(r9,r1\+\+,1\),r1
+ 33c:	db 66 d2 71 	movf\.b \(r15,r13\+\+,466\),r3
+ 340:	bc 66 fa 30 	movf\.b \(r11,r11\+\+,250\),r4
+ 344:	af 66 38 2a 	movf\.b \(r10,r10\+\+,-1480\),r7
 
 00000348 <movfgriipredecgr>:
- 348:	08 6e 00 00 	movf\.b \(r0,--r0,0\),r0
- 34c:	ff 6f ff 7f 	movf\.w \(r7,--r15,-1\),r7
- 350:	8c 6f 00 48 	movf\.w \(r4,--r8,-2048\),r4
- 354:	7b 6e ff 37 	movf\.b \(r3,--r7,2047\),r3
- 358:	19 6f 01 10 	movf\.w \(r1,--r1,1\),r1
- 35c:	a8 6e a0 5d 	movf\.b \(r5,--r10,-608\),r0
- 360:	bf 6e 3f 13 	movf\.b \(r1,--r11,831\),r7
- 364:	fe 6f 0c 78 	movf\.w \(r7,--r15,-2036\),r6
+ 348:	08 6e 00 00 	movf\.b \(r8,--r0,0\),r0
+ 34c:	ff 6f ff 7f 	movf\.w \(r15,--r15,-1\),r7
+ 350:	8c 6f 00 48 	movf\.w \(r12,--r8,-2048\),r4
+ 354:	7b 6e ff 37 	movf\.b \(r11,--r7,2047\),r3
+ 358:	19 6f 01 10 	movf\.w \(r9,--r1,1\),r1
+ 35c:	a8 6e a0 5d 	movf\.b \(r13,--r10,-608\),r0
+ 360:	bf 6e 3f 13 	movf\.b \(r9,--r11,831\),r7
+ 364:	fe 6f 0c 78 	movf\.w \(r15,--r15,-2036\),r6
 
 00000368 <maskgrgr>:
  368:	00 33       	mask r0,r0
@@ -1078,145 +1078,148 @@ Disassembly of section \.text:
 00000834 <hold>:
  834:	0a 00       	hold
 
-00000836 <brk>:
- 836:	05 00       	brk
+00000836 <holdx>:
+ 836:	0b 00       	holdx
 
-00000838 <bccgrgr>:
- 838:	00 0d 00 00 	bge r0,r0,0x83c
- 83c:	ff 0d ff ff 	bz r15,r15,0x83f
- 840:	88 0d 00 88 	bpl r8,r8,0x44
- 844:	77 0d ff 77 	bls r7,r7,0x1047
- 848:	11 0d 01 10 	bnc r1,r1,0x84d
- 84c:	d3 0d 07 37 	bc r3,r13,0xf57
- 850:	a1 0d 1d 08 	bge r1,r10,0x71
- 854:	50 0d 94 fb 	bz r0,r5,0x3ec
+00000838 <brk>:
+ 838:	05 00       	brk
 
-00000858 <bccgrimm8>:
- 858:	00 20 00 00 	bge r0,#0x0,0x85c
- 85c:	ff 2e ff ff 	bz r7,#0xff,0x85f
- 860:	80 28 00 88 	bpl r4,#0x80,0x64
- 864:	7f 26 ff 77 	bls r3,#0x7f,0x1067
- 868:	01 22 01 10 	bnc r1,#0x1,0x86d
- 86c:	08 26 c1 15 	bnc r3,#0x8,0xe31
- 870:	cb 2a 53 c6 	bnz\.b r5,#0xcb,0xec7
- 874:	e1 2e d2 33 	bc r7,#0xe1,0xc4a
+0000083a <bccgrgr>:
+ 83a:	00 0d 00 00 	bge r0,r0,0x83e
+ 83e:	ff 0d ff ff 	bz r15,r15,0x841
+ 842:	88 0d 00 88 	bpl r8,r8,0x46
+ 846:	77 0d ff 77 	bls r7,r7,0x1049
+ 84a:	11 0d 01 10 	bnc r1,r1,0x84f
+ 84e:	d3 0d 07 37 	bc r3,r13,0xf59
+ 852:	a1 0d 1d 08 	bge r1,r10,0x73
+ 856:	50 0d 94 fb 	bz r0,r5,0x3ee
 
-00000878 <bccimm16>:
- 878:	00 c0 00 00 	bge Rx,#0x0,0x87c
- 87c:	ff cf ff ff 	bz Rx,#0xffff,0x87f
- 880:	80 c8 00 80 	bpl Rx,#0x8000,0x804
- 884:	7f c7 ff 7f 	bls Rx,#0x7fff,0x907
- 888:	01 c1 01 00 	bnc Rx,#0x1,0x88d
- 88c:	04 ce fb 77 	bz\.b Rx,#0x77fb,0x894
- 890:	f3 c9 3a f3 	bnv Rx,#0xf33a,0x887
- 894:	6c c9 32 bc 	bnv Rx,#0xbc32,0x904
+0000085a <bccgrimm8>:
+ 85a:	00 20 00 00 	bge r0,#0x0,0x85e
+ 85e:	ff 2e ff ff 	bz r7,#0xff,0x861
+ 862:	80 28 00 88 	bpl r4,#0x80,0x66
+ 866:	7f 26 ff 77 	bls r3,#0x7f,0x1069
+ 86a:	01 22 01 10 	bnc r1,#0x1,0x86f
+ 86e:	08 26 c1 15 	bnc r3,#0x8,0xe33
+ 872:	cb 2a 53 c6 	bnz\.b r5,#0xcb,0xec9
+ 876:	e1 2e d2 33 	bc r7,#0xe1,0xc4c
 
-00000898 <bngrimm4>:
- 898:	00 04 00 00 	bn r0,#0x0,0x89c
- 89c:	ff 04 ff 0f 	bn r15,#0xf,0x89f
- 8a0:	88 04 00 08 	bn r8,#0x8,0xa4
- 8a4:	77 04 ff 07 	bn r7,#0x7,0x10a7
- 8a8:	11 04 01 00 	bn r1,#0x1,0x8ad
- 8ac:	3b 04 49 08 	bn r11,#0x3,0xf9
- 8b0:	4f 04 4b 0b 	bn r15,#0x4,0x3ff
- 8b4:	8a 04 9b 06 	bn r10,#0x8,0xf53
+0000087a <bccimm16>:
+ 87a:	00 c0 00 00 	bge Rx,#0x0,0x87e
+ 87e:	ff cf ff ff 	bz Rx,#0xffff,0x881
+ 882:	80 c8 00 80 	bpl Rx,#0x8000,0x806
+ 886:	7f c7 ff 7f 	bls Rx,#0x7fff,0x909
+ 88a:	01 c1 01 00 	bnc Rx,#0x1,0x88f
+ 88e:	04 ce fb 77 	bz\.b Rx,#0x77fb,0x896
+ 892:	f3 c9 3a f3 	bnv Rx,#0xf33a,0x889
+ 896:	6c c9 32 bc 	bnv Rx,#0xbc32,0x906
 
-000008b8 <bngrgr>:
- 8b8:	00 06 00 00 	bn r0,r0,0x8bc
- 8bc:	ff 06 ff 0f 	bn r15,r15,0x8bf
- 8c0:	88 06 00 08 	bn r8,r8,0xc4
- 8c4:	77 06 ff 07 	bn r7,r7,0x10c7
- 8c8:	11 06 01 00 	bn r1,r1,0x8cd
- 8cc:	34 06 9d 04 	bn r4,r3,0xd6d
- 8d0:	25 06 4d 00 	bn r5,r2,0x921
- 8d4:	73 06 77 02 	bn r3,r7,0xb4f
+0000089a <bngrimm4>:
+ 89a:	00 04 00 00 	bn r0,#0x0,0x89e
+ 89e:	ff 04 ff 0f 	bn r15,#0xf,0x8a1
+ 8a2:	88 04 00 08 	bn r8,#0x8,0xa6
+ 8a6:	77 04 ff 07 	bn r7,#0x7,0x10a9
+ 8aa:	11 04 01 00 	bn r1,#0x1,0x8af
+ 8ae:	3b 04 49 08 	bn r11,#0x3,0xfb
+ 8b2:	4f 04 4b 0b 	bn r15,#0x4,0x401
+ 8b6:	8a 04 9b 06 	bn r10,#0x8,0xf55
 
-000008d8 <bnlmemimm>:
- 8d8:	00 7c 00 00 	bn 0x0,#0x0,0x8dc
- 8dc:	ff 7c ff 7f 	bn 0xff,#0x7,0x8df
- 8e0:	80 7c 00 48 	bn 0x80,#0x4,0xe4
- 8e4:	7f 7c ff 37 	bn 0x7f,#0x3,0x10e7
- 8e8:	01 7c 01 10 	bn 0x1,#0x1,0x8ed
- 8ec:	99 7c b1 7c 	bn 0x99,#0x7,0x5a1
- 8f0:	cc 7c a7 08 	bn 0xcc,#0x0,0x19b
- 8f4:	f2 7c 74 75 	bn 0xf2,#0x7,0xe6c
+000008ba <bngrgr>:
+ 8ba:	00 06 00 00 	bn r0,r0,0x8be
+ 8be:	ff 06 ff 0f 	bn r15,r15,0x8c1
+ 8c2:	88 06 00 08 	bn r8,r8,0xc6
+ 8c6:	77 06 ff 07 	bn r7,r7,0x10c9
+ 8ca:	11 06 01 00 	bn r1,r1,0x8cf
+ 8ce:	34 06 9d 04 	bn r4,r3,0xd6f
+ 8d2:	25 06 4d 00 	bn r5,r2,0x923
+ 8d6:	73 06 77 02 	bn r3,r7,0xb51
 
-000008f8 <bnhmemimm>:
- 8f8:	00 7e 00 00 	bn 0x7f00,#0x0,0x8fc
- 8fc:	ff 7e ff 7f 	bn 0x7fff,#0x7,0x8ff
- 900:	80 7e 00 48 	bn 0x7f80,#0x4,0x104
- 904:	7f 7e ff 37 	bn 0x7f7f,#0x3,0x1107
- 908:	01 7e 01 10 	bn 0x7f01,#0x1,0x90d
- 90c:	b9 7e 9a 3d 	bn 0x7fb9,#0x3,0x6aa
- 910:	69 7e 64 1d 	bn 0x7f69,#0x1,0x678
- 914:	4f 7e 20 75 	bn 0x7f4f,#0x7,0xe38
+000008da <bnlmemimm>:
+ 8da:	00 7c 00 00 	bn 0x0,#0x0,0x8de
+ 8de:	ff 7c ff 7f 	bn 0xff,#0x7,0x8e1
+ 8e2:	80 7c 00 48 	bn 0x80,#0x4,0xe6
+ 8e6:	7f 7c ff 37 	bn 0x7f,#0x3,0x10e9
+ 8ea:	01 7c 01 10 	bn 0x1,#0x1,0x8ef
+ 8ee:	99 7c b1 7c 	bn 0x99,#0x7,0x5a3
+ 8f2:	cc 7c a7 08 	bn 0xcc,#0x0,0x19d
+ 8f6:	f2 7c 74 75 	bn 0xf2,#0x7,0xe6e
 
-00000918 <bpgrimm4>:
- 918:	00 05 00 00 	bp r0,#0x0,0x91c
- 91c:	ff 05 ff 0f 	bp r15,#0xf,0x91f
- 920:	88 05 00 08 	bp r8,#0x8,0x124
- 924:	77 05 ff 07 	bp r7,#0x7,0x1127
- 928:	11 05 01 00 	bp r1,#0x1,0x92d
- 92c:	c0 05 33 04 	bp r0,#0xc,0xd63
- 930:	51 05 27 02 	bp r1,#0x5,0xb5b
- 934:	86 05 34 06 	bp r6,#0x8,0xf6c
+000008fa <bnhmemimm>:
+ 8fa:	00 7e 00 00 	bn 0x7f00,#0x0,0x8fe
+ 8fe:	ff 7e ff 7f 	bn 0x7fff,#0x7,0x901
+ 902:	80 7e 00 48 	bn 0x7f80,#0x4,0x106
+ 906:	7f 7e ff 37 	bn 0x7f7f,#0x3,0x1109
+ 90a:	01 7e 01 10 	bn 0x7f01,#0x1,0x90f
+ 90e:	b9 7e 9a 3d 	bn 0x7fb9,#0x3,0x6ac
+ 912:	69 7e 64 1d 	bn 0x7f69,#0x1,0x67a
+ 916:	4f 7e 20 75 	bn 0x7f4f,#0x7,0xe3a
 
-00000938 <bpgrgr>:
- 938:	00 07 00 00 	bp r0,r0,0x93c
- 93c:	ff 07 ff 0f 	bp r15,r15,0x93f
- 940:	88 07 00 08 	bp r8,r8,0x144
- 944:	77 07 ff 07 	bp r7,r7,0x1147
- 948:	11 07 01 00 	bp r1,r1,0x94d
- 94c:	94 07 9a 0d 	bp r4,r9,0x6ea
- 950:	a9 07 b0 0a 	bp r9,r10,0x404
- 954:	14 07 97 01 	bp r4,r1,0xaef
+0000091a <bpgrimm4>:
+ 91a:	00 05 00 00 	bp r0,#0x0,0x91e
+ 91e:	ff 05 ff 0f 	bp r15,#0xf,0x921
+ 922:	88 05 00 08 	bp r8,#0x8,0x126
+ 926:	77 05 ff 07 	bp r7,#0x7,0x1129
+ 92a:	11 05 01 00 	bp r1,#0x1,0x92f
+ 92e:	c0 05 33 04 	bp r0,#0xc,0xd65
+ 932:	51 05 27 02 	bp r1,#0x5,0xb5d
+ 936:	86 05 34 06 	bp r6,#0x8,0xf6e
 
-00000958 <bplmemimm>:
- 958:	00 7d 00 00 	bp 0x0,#0x0,0x95c
- 95c:	ff 7d ff 7f 	bp 0xff,#0x7,0x95f
- 960:	80 7d 00 48 	bp 0x80,#0x4,0x164
- 964:	7f 7d ff 37 	bp 0x7f,#0x3,0x1167
- 968:	01 7d 01 10 	bp 0x1,#0x1,0x96d
- 96c:	c1 7d 72 3e 	bp 0xc1,#0x3,0x7e2
- 970:	fa 7d ef 29 	bp 0xfa,#0x2,0x363
- 974:	b4 7d 43 62 	bp 0xb4,#0x6,0xbbb
+0000093a <bpgrgr>:
+ 93a:	00 07 00 00 	bp r0,r0,0x93e
+ 93e:	ff 07 ff 0f 	bp r15,r15,0x941
+ 942:	88 07 00 08 	bp r8,r8,0x146
+ 946:	77 07 ff 07 	bp r7,r7,0x1149
+ 94a:	11 07 01 00 	bp r1,r1,0x94f
+ 94e:	94 07 9a 0d 	bp r4,r9,0x6ec
+ 952:	a9 07 b0 0a 	bp r9,r10,0x406
+ 956:	14 07 97 01 	bp r4,r1,0xaf1
 
-00000978 <bphmemimm>:
- 978:	00 7f 00 00 	bp 0x7f00,#0x0,0x97c
- 97c:	ff 7f ff 7f 	bp 0x7fff,#0x7,0x97f
- 980:	80 7f 00 48 	bp 0x7f80,#0x4,0x184
- 984:	7f 7f ff 37 	bp 0x7f7f,#0x3,0x1187
- 988:	01 7f 01 10 	bp 0x7f01,#0x1,0x98d
- 98c:	c3 7f 50 1e 	bp 0x7fc3,#0x1,0x7e0
- 990:	81 7f 1c 5a 	bp 0x7f81,#0x5,0x3b0
- 994:	38 7f bb 36 	bp 0x7f38,#0x3,0x1053
+0000095a <bplmemimm>:
+ 95a:	00 7d 00 00 	bp 0x0,#0x0,0x95e
+ 95e:	ff 7d ff 7f 	bp 0xff,#0x7,0x961
+ 962:	80 7d 00 48 	bp 0x80,#0x4,0x166
+ 966:	7f 7d ff 37 	bp 0x7f,#0x3,0x1169
+ 96a:	01 7d 01 10 	bp 0x1,#0x1,0x96f
+ 96e:	c1 7d 72 3e 	bp 0xc1,#0x3,0x7e4
+ 972:	fa 7d ef 29 	bp 0xfa,#0x2,0x365
+ 976:	b4 7d 43 62 	bp 0xb4,#0x6,0xbbd
 
-00000998 <bcc>:
- 998:	00 d0       	bge 0x99a
- 99a:	ff df       	bz 0x99b
- 99c:	80 d8       	bpl 0x91e
- 99e:	7f d7       	bls 0xa1f
- 9a0:	01 d1       	bnc 0x9a3
- 9a2:	30 dc       	bnz\.b 0x9d4
- 9a4:	f9 d1       	bnc 0x99f
- 9a6:	4a dc       	bnz\.b 0x9f2
+0000097a <bphmemimm>:
+ 97a:	00 7f 00 00 	bp 0x7f00,#0x0,0x97e
+ 97e:	ff 7f ff 7f 	bp 0x7fff,#0x7,0x981
+ 982:	80 7f 00 48 	bp 0x7f80,#0x4,0x186
+ 986:	7f 7f ff 37 	bp 0x7f7f,#0x3,0x1189
+ 98a:	01 7f 01 10 	bp 0x7f01,#0x1,0x98f
+ 98e:	c3 7f 50 1e 	bp 0x7fc3,#0x1,0x7e2
+ 992:	81 7f 1c 5a 	bp 0x7f81,#0x5,0x3b2
+ 996:	38 7f bb 36 	bp 0x7f38,#0x3,0x1055
 
-000009a8 <br>:
- 9a8:	00 10       	br 0x9aa
- 9aa:	fe 1f       	br 0x9aa
- 9ac:	00 18       	br 0x1ae
- 9ae:	fe 17       	br 0x11ae
- 9b0:	00 10       	br 0x9b2
- 9b2:	c0 15       	br 0xf74
- 9b4:	52 16       	br 0x1008
- 9b6:	d2 13       	br 0xd8a
+0000099a <bcc>:
+ 99a:	00 d0       	bge 0x99c
+ 99c:	ff df       	bz 0x99d
+ 99e:	80 d8       	bpl 0x920
+ 9a0:	7f d7       	bls 0xa21
+ 9a2:	01 d1       	bnc 0x9a5
+ 9a4:	30 dc       	bnz\.b 0x9d6
+ 9a6:	f9 d1       	bnc 0x9a1
+ 9a8:	4a dc       	bnz\.b 0x9f4
 
-000009b8 <callrimm>:
- 9b8:	01 10       	callr 0x9ba
- 9ba:	ff 1f       	callr 0x9ba
- 9bc:	01 18       	callr 0x1be
- 9be:	ff 17       	callr 0x11be
- 9c0:	01 10       	callr 0x9c2
- 9c2:	c1 15       	callr 0xf84
- 9c4:	53 16       	callr 0x1018
- 9c6:	d3 13       	callr 0xd9a
+000009aa <br>:
+ 9aa:	00 10       	br 0x9ac
+ 9ac:	fe 1f       	br 0x9ac
+ 9ae:	00 18       	br 0x1b0
+ 9b0:	fe 17       	br 0x11b0
+ 9b2:	00 10       	br 0x9b4
+ 9b4:	c0 15       	br 0xf76
+ 9b6:	52 16       	br 0x100a
+ 9b8:	d2 13       	br 0xd8c
+
+000009ba <callrimm>:
+ 9ba:	01 10       	callr 0x9bc
+ 9bc:	ff 1f       	callr 0x9bc
+ 9be:	01 18       	callr 0x1c0
+ 9c0:	ff 17       	callr 0x11c0
+ 9c2:	01 10       	callr 0x9c4
+ 9c4:	c1 15       	callr 0xf86
+ 9c6:	53 16       	callr 0x101a
+ 9c8:	d3 13       	callr 0xd9c
