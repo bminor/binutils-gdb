@@ -1,3 +1,19 @@
+Mon Jun 17 09:47:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dlltool.c (make_one_lib_file): Use BFD_RELOC_RVA rather than
+	BFD_RELOC_32 in IDATA7.
+
+Wed Jun 12 11:52:06 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* nm.c (struct get_relocs_info): Define.
+	(line_numbers): New static variable.
+	(long_options): Add "line-numbers".
+	(usage): Mention -l and --line-numbers.
+	(main): Handle -l.
+	(print_symbol): Print line numbers if requested.
+	(get_relocs): New static function.
+	* binutils.texi, nm.1: Document -l/--line-numbers.
+
 Tue Jun 11 20:12:15 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (dump_reloc_set): Add sec parameter.  Change all
