@@ -90,7 +90,7 @@ install-info: gprof.info
 		$(INSTALL_DATA) $$dir/$$i $(infodir)/$$i ; \
 	done
 
-install: 
+install: all
 	$(INSTALL_XFORM) gprof $(bindir)/gprof
 	$(INSTALL_XFORM1) $(srcdir)/gprof.1 $(man1dir)/gprof.1
 	-n=`t='$(program_transform_name)'; echo gprof | sed -e "s/brokensed/brokensed/" $$t`; \

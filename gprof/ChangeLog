@@ -1,3 +1,7 @@
+Tue Apr 25 21:11:12 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (install): Depend on "all".
+
 Thu Apr 20 17:29:07 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in: Change all references to MY_MACHINE to MY_TARGET,
