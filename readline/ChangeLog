@@ -1,3 +1,8 @@
+Tue Oct  5 12:33:51 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* readline.c: Add stuff for HIUX to place where we detect termio
+	vs. sgtty (ugh, but I don't see a simple better way).
+
 Wed Sep 29 11:02:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* readline.c (parser_if): Free tname when done with it (change
