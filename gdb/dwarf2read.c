@@ -978,7 +978,7 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
     {
       dwarf_macinfo_offset = sectp->filepos;
       dwarf_macinfo_size = bfd_get_section_size_before_reloc (sectp);
-      dwarf_loc_section = sectp;
+      dwarf_macinfo_section = sectp;
     }
   else if (STREQ (sectp->name, STR_SECTION))
     {

@@ -1,3 +1,9 @@
+2003-02-04  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (dwarf2_locate_sections): When we find a macro info
+	section, let dwarf_macinfo_section point to it, not
+	dwarf_loc_section.
+
 2003-02-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	Pointed out by Anton Blanchard <anton@samba.org>.
