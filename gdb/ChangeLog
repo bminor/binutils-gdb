@@ -1,3 +1,15 @@
+Tue May 25 09:36:13 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/i386/linux.mh: Don't use \ newline; the awk scripts don't
+	support it.
+
+	* config/i386/go32.mh: Define SER_HARDWIRE.
+	* Makefile.in: Define SER_HARDWIRE.
+	(DEPFILES): Use it.
+	(alldeps.mak): Add SER_HARDWIRE.
+	Remove all references to ser-hardwire.{c,o}.
+	* configure.in: Remove all ser_hardwire and gdb_serial_driver stuff.
+
 Mon May 24 23:50:05 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* sparc-nat.c (store_inferior_registers):  Fill in all members of
