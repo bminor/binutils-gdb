@@ -1,3 +1,40 @@
+Sun Dec  8 18:22:06 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* callback.c: #include <stdlib.h>
+	(os_error): New function.
+	(default_callback): Add os_error.
+
+Mon Nov 25 19:44:35 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Make-common.in (Makefile): Set CONFIG_HEADERS="".
+	* aclocal.m4: Mark the fact that --enable-sim-bswap isn't host
+	specific.
+	(SIM_AC_OUTPUT): Don't build Makefile if CONFIG_FILES="".
+
+Wed Nov 20 01:11:04 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* run.c: #include ../common/config.h, tconfig.h.
+	(myname): New static global.
+	(main): Recognize new options -a, -c.  Also recognize -h if h8/300.
+	Only process -c ifdef SIM_HAVE_SIMCACHE.
+	Only process -p/-s ifdef SIM_HAVE_PROFILE.
+	Parse program name from argv[0] and use in error messages.
+	Pass sim_args to sim_open.  Pass prog_args to sim_create_inferior.
+	Add support for incomplete h8/300 termination indicators.
+	(usage): Make more verbose.
+	* aclocal.m4,config.in,tconfig.in,configure.in,configure: New files.
+	* Makefile.in,Make-common.in,callback.c: New files.
+	* nltvals.def,gentmap.c,gentvals.sh: New files.
+
+Tue Nov 12 13:34:00 1996  Dawn Perchik  <dawn@cygnus.com>   
+
+	* run.c: Include stdarg.h if __STDC__.
+
+Tue Oct 15 11:16:31 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* run.c (main): Don't print out anything if the signal
+	number is zero (ie no signal).
+
 Tue Oct 15 11:20:44 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* run.c (main): Print out if the program raised a signal.
