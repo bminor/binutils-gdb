@@ -22,51 +22,9 @@
 #include "obstack.h"
 #include "subsegs.h"
 
-#ifdef BFD_ASSEMBLER
-
-static symbolS *tag_find_or_make PARAMS ((char *name));
-static symbolS *tag_find PARAMS ((char *name));
-static void tag_init PARAMS ((void));
-static void tag_insert PARAMS ((const char *name, symbolS * symbolP));
 const char *s_get_name PARAMS ((symbolS * s));
-
-static void obj_coff_def PARAMS ((int));
-static void obj_coff_dim PARAMS ((int));
-static void obj_coff_endef PARAMS ((int));
-static void obj_coff_line PARAMS ((int));
-static void obj_coff_ln PARAMS ((int));
-static void obj_coff_scl PARAMS ((int));
-static void obj_coff_size PARAMS ((int));
-static void obj_coff_tag PARAMS ((int));
-static void obj_coff_type PARAMS ((int));
-static void obj_coff_val PARAMS ((int));
-
-static void SA_SET_SYM_TAGNDX PARAMS ((symbolS *, symbolS *));
-
-static struct hash_control *tag_hash;
 static symbolS *def_symbol_in_progress;
 
-const pseudo_typeS obj_pseudo_table[] =
-{
-  {"def", obj_coff_def, 0},
-  {"dim", obj_coff_dim, 0},
-  {"endef", obj_coff_endef, 0},
-  {"line", obj_coff_line, 0},
-  {"ln", obj_coff_ln, 0},
-  {"appline", obj_coff_ln, 1},
-  {"scl", obj_coff_scl, 0},
-  {"size", obj_coff_size, 0},
-  {"tag", obj_coff_tag, 0},
-  {"type", obj_coff_type, 0},
-  {"val", obj_coff_val, 0},
-  { "section", obj_coff_section, 0 },
-  {"ident", s_ignore, 0},	/* we don't yet handle this. */
-  {"optim", s_ignore, 0},	/* For sun386i cc (?) */
-  /* other stuff */
-  {"ABORT", s_abort, 0},
-
-  {NULL}			/* end sentinel */
-};				/* obj_pseudo_table */
 
 /* stack stuff */
 typedef struct
@@ -102,6 +60,8 @@ stack_init (chunk_size, element_size)
   return st;
 }
 
+#if 0
+/* Not currently used.  */
 static void
 stack_delete (st)
      stack *st;
@@ -109,6 +69,7 @@ stack_delete (st)
   free (st->data);
   free (st);
 }
+#endif
 
 static char *
 stack_push (st, element)
@@ -143,6 +104,8 @@ stack_pop (st)
  * Maintain a list of the tagnames of the structres.
  */
 
+static struct hash_control *tag_hash;
+
 static void
 tag_init ()
 {
@@ -164,6 +127,17 @@ tag_insert (name, symbolP)
 }
 
 static symbolS *
+tag_find (name)
+     char *name;
+{
+#ifdef STRIP_UNDERSCORE
+  if (*name == '_')
+    name++;
+#endif /* STRIP_UNDERSCORE */
+  return (symbolS *) hash_find (tag_hash, name);
+}
+
+static symbolS *
 tag_find_or_make (name)
      char *name;
 {
@@ -175,23 +149,20 @@ tag_find_or_make (name)
 			    0, &zero_address_frag);
 
       tag_insert (S_GET_NAME (symbolP), symbolP);
+#ifdef BFD_ASSEMBLER
       symbol_table_insert (symbolP);
+#endif
     }				/* not found */
 
   return symbolP;
 }
 
-static symbolS *
-tag_find (name)
-     char *name;
-{
-#ifdef STRIP_UNDERSCORE
-  if (*name == '_')
-    name++;
-#endif /* STRIP_UNDERSCORE */
-  return (symbolS *) hash_find (tag_hash, name);
-}
-
+
+
+#ifdef BFD_ASSEMBLER
+
+static void SA_SET_SYM_TAGNDX PARAMS ((symbolS *, symbolS *));
+
 struct line_no {
   struct line_no *next;
   fragS *frag;
@@ -970,7 +941,8 @@ coff_frob_symbol (symp, punt)
 	}
       else if (S_GET_STORAGE_CLASS (symp) == C_NULL)
 	{
-	  if (S_GET_SEGMENT (symp) == text_section)
+	  if (S_GET_SEGMENT (symp) == text_section
+	      && symp != seg_info (text_section)->sym)
 	    S_SET_STORAGE_CLASS (symp, C_LABEL);
 	  else
 	    S_SET_STORAGE_CLASS (symp, C_STAT);
@@ -1273,6 +1245,9 @@ symbol_dump ()
 #define NOP_OPCODE 0x00
 #endif
 
+/* The zeroes if symbol name is longer than 8 chars */
+#define S_SET_ZEROES(s,v)		((s)->sy_symbol.ost_entry.n_zeroes = (v))
+
 #define MIN(a,b) ((a) < (b)? (a) : (b))
 /* This vector is used to turn an internal segment into a section #
    suitable for insertion into a coff symbol table
@@ -1309,7 +1284,7 @@ static symbolS *last_line_symbol;
    negatives. This vector is used by S_GET_SEGMENT to turn a coff
    section number into a segment number
 */
-static symbolS *previous_file_symbol = NULL;
+static symbolS *previous_file_symbol;
 void c_symbol_merge ();
 static int line_base;
 
@@ -1330,14 +1305,8 @@ static void fill_section PARAMS ((bfd * abfd,
 				  unsigned long *));
 
 
-static symbolS *tag_find_or_make PARAMS ((char *name));
-static symbolS *tag_find PARAMS ((char *name));
-static void tag_init PARAMS ((void));
-static void tag_insert PARAMS ((char *name, symbolS * symbolP));
-char *s_get_name PARAMS ((symbolS * s));
-
 static int c_line_new PARAMS ((symbolS * symbol, long paddr,
-			       unsigned short line_number,
+			       int line_number,
 			       fragS * frag));
 
 
@@ -1346,20 +1315,6 @@ static void w_symbols PARAMS ((bfd * abfd, char *where,
 
 static void adjust_stab_section PARAMS ((bfd *abfd, segT seg));
 
-static struct hash_control *tag_hash;
-
-static symbolS *def_symbol_in_progress = NULL;
-
-static void obj_coff_def PARAMS ((int));
-static void obj_coff_dim PARAMS ((int));
-static void obj_coff_endef PARAMS ((int));
-static void obj_coff_line PARAMS ((int));
-static void obj_coff_ln PARAMS ((int));
-static void obj_coff_scl PARAMS ((int));
-static void obj_coff_size PARAMS ((int));
-static void obj_coff_tag PARAMS ((int));
-static void obj_coff_type PARAMS ((int));
-static void obj_coff_val PARAMS ((int));
 static void obj_coff_lcomm PARAMS ((int));
 static void obj_coff_text PARAMS ((int));
 static void obj_coff_data PARAMS ((int));
@@ -1367,158 +1322,6 @@ static void obj_coff_bss PARAMS ((int));
 static void obj_coff_ident PARAMS ((int));
 void obj_coff_section PARAMS ((int));
 
-const pseudo_typeS obj_pseudo_table[] =
-{
-  {"def", obj_coff_def, 0},
-  {"dim", obj_coff_dim, 0},
-  {"endef", obj_coff_endef, 0},
-  {"line", obj_coff_line, 0},
-  {"ln", obj_coff_ln, 0},
-  {"appline", obj_coff_ln, 1},
-  {"scl", obj_coff_scl, 0},
-  {"size", obj_coff_size, 0},
-  {"tag", obj_coff_tag, 0},
-  {"type", obj_coff_type, 0},
-  {"val", obj_coff_val, 0},
-  {"section", obj_coff_section, 0},
-  {"use", obj_coff_section, 0},
-  {"sect", obj_coff_section, 0},
-  {"text", obj_coff_text, 0},
-  {"data", obj_coff_data, 0},
-  {"bss", obj_coff_bss, 0},
-  {"ident", obj_coff_ident, 0},
-  {"ABORT", s_abort, 0},
-  {"lcomm", obj_coff_lcomm, 0},
-#ifdef TC_M88K
-  /* The m88k uses sdef instead of def.  */
-  {"sdef", obj_coff_def, 0},
-#endif
-  {NULL}			/* end sentinel */
-};				/* obj_pseudo_table */
-
-/* stack stuff */
-typedef struct
-  {
-    unsigned long chunk_size;
-    unsigned long element_size;
-    unsigned long size;
-    char *data;
-    unsigned long pointer;
-  }
-stack;
-
-static stack *
-stack_init (chunk_size, element_size)
-     unsigned long chunk_size;
-     unsigned long element_size;
-{
-  stack *st;
-
-  st = (stack *) malloc (sizeof (stack));
-  if (!st)
-    return 0;
-  st->data = malloc (chunk_size);
-  if (!st->data)
-    {
-      free (st);
-      return 0;
-    }
-  st->pointer = 0;
-  st->size = chunk_size;
-  st->chunk_size = chunk_size;
-  st->element_size = element_size;
-  return st;
-}
-
-static void
-stack_delete (st)
-     stack *st;
-{
-  free (st->data);
-  free (st);
-}
-
-static char *
-stack_push (st, element)
-     stack *st;
-     char *element;
-{
-  if (st->pointer + st->element_size >= st->size)
-    {
-      st->size += st->chunk_size;
-      if ((st->data = xrealloc (st->data, st->size)) == (char *) 0)
-	return (char *) 0;
-    }
-  memcpy (st->data + st->pointer, element, st->element_size);
-  st->pointer += st->element_size;
-  return st->data + st->pointer;
-}
-
-static char *
-stack_pop (st)
-     stack *st;
-{
-  if (st->pointer < st->element_size)
-    {
-      st->pointer = 0;
-      return (char *) 0;
-    }
-  st->pointer -= st->element_size;
-  return st->data + st->pointer;
-}
-
-/*
- * Maintain a list of the tagnames of the structres.
- */
-
-static void
-tag_init ()
-{
-  tag_hash = hash_new ();
-}
-
-static void
-tag_insert (name, symbolP)
-     char *name;
-     symbolS *symbolP;
-{
-  const char *error_string;
-
-  if ((error_string = hash_jam (tag_hash, name, (char *) symbolP)))
-    {
-      as_fatal ("Inserting \"%s\" into structure table failed: %s",
-		name, error_string);
-    }
-}
-
-static symbolS *
-tag_find_or_make (name)
-     char *name;
-{
-  symbolS *symbolP;
-
-  if ((symbolP = tag_find (name)) == NULL)
-    {
-      symbolP = symbol_new (name, undefined_section,
-			    0, &zero_address_frag);
-
-      tag_insert (S_GET_NAME (symbolP), symbolP);
-    }				/* not found */
-
-  return symbolP;
-}
-
-static symbolS *
-tag_find (name)
-     char *name;
-{
-#ifdef STRIP_UNDERSCORE
-  if (*name == '_')
-    name++;
-#endif /* STRIP_UNDERSCORE */
-  return (symbolS *) hash_find (tag_hash, name);
-}
-
 /* Section stuff
 
    We allow more than just the standard 3 sections, infact, we allow
@@ -1535,7 +1338,7 @@ typedef struct
   int i;
 } seg_info_type;
 
-seg_info_type seg_info_off_by_4[N_SEG] =
+static const seg_info_type seg_info_off_by_4[N_SEG] =
 {
  {SEG_PTV,  },
  {SEG_NTV,  },
@@ -1567,8 +1370,6 @@ seg_info_type seg_info_off_by_4[N_SEG] =
 
 
 #define SEG_INFO_FROM_SECTION_NUMBER(x) (seg_info_off_by_4[(x)+4])
-#define SEG_INFO_FROM_SEG_NUMBER(x) (seg_info_off_by_4[(x)])
-
 
 static relax_addressT
 relax_align (address, alignment)
@@ -1581,7 +1382,7 @@ relax_align (address, alignment)
   mask = ~((~0) << alignment);
   new_address = (address + mask) & (~mask);
   return (new_address - address);
-}				/* relax_align() */
+}
 
 
 segT
@@ -1608,7 +1409,7 @@ size_section (abfd, idx)
       size = frag->fr_address;
       if (frag->fr_address != size)
 	{
-	  printf ("Out of step\n");
+	  fprintf (stderr, "Out of step\n");
 	  size = frag->fr_address;
 	}
 
@@ -2541,11 +2342,11 @@ obj_read_begin_hook ()
    externals onto another chain */
 
 /* The chain of externals */
-symbolS *symbol_externP = NULL;
-symbolS *symbol_extern_lastP = NULL;
+symbolS *symbol_externP;
+symbolS *symbol_extern_lastP;
 
 stack *block_stack;
-symbolS *last_functionP = NULL;
+symbolS *last_functionP;
 symbolS *last_tagP;
 
 static unsigned int
@@ -2999,10 +2800,10 @@ write_object_file ()
        frchain_ptr != (struct frchain *) NULL;
        frchain_ptr = frchain_ptr->frch_next)
     {
-      /* Run through all the sub-segments and align them up. Also close any
-	       open frags. We tack a .fill onto the end of the frag chain so
-	       that any .align's size can be worked by looking at the next
-	       frag */
+      /* Run through all the sub-segments and align them up.  Also
+	 close any open frags.  We tack a .fill onto the end of the
+	 frag chain so that any .align's size can be worked by looking
+	 at the next frag.  */
 
       subseg_set (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
 #ifndef SUB_SEGMENT_ALIGN
@@ -3042,6 +2843,10 @@ write_object_file ()
 
       size = size_section (abfd, (unsigned int) i);
       addr += size;
+
+      /* I think the section alignment is only used on the i960; the
+	 i960 needs it, and it should do no harm on other targets.  */
+      segment_info[i].scnhdr.s_align = section_alignment[i];
 
       if (i == SEG_E0)
 	H_SET_TEXT_SIZE (&headers, size);
@@ -3096,6 +2901,9 @@ write_object_file ()
   H_SET_TIME_STAMP (&headers, (long)time((long*)0));
 #else
   H_SET_TIME_STAMP (&headers, 0);
+#endif
+#ifdef TC_COFF_SET_MACHINE
+  TC_COFF_SET_MACHINE (&headers);
 #endif
 
 #ifdef KEEP_RELOC_INFO
@@ -3327,7 +3135,7 @@ static int
 c_line_new (symbol, paddr, line_number, frag)
      symbolS * symbol;
      long paddr;
-     unsigned short line_number;
+     int line_number;
      fragS * frag;
 {
   struct lineno_list *new_line =
@@ -3604,15 +3412,16 @@ fixup_segment (segP, this_segment_type)
       size = fixP->fx_size;
       add_symbolP = fixP->fx_addsy;
 #ifdef TC_I960
-      if (fixP->fx_tcbit && TC_S_IS_CALLNAME (add_symbolP))
+      if (fixP->fx_tcbit && SF_GET_CALLNAME (add_symbolP))
 	{
 	  /* Relocation should be done via the associated 'bal' entry
 	     point symbol. */
 
-	  if (!TC_S_IS_BALNAME (tc_get_bal_of_call (add_symbolP)))
+	  if (!SF_GET_BALNAME (tc_get_bal_of_call (add_symbolP)))
 	    {
-	      as_bad ("No 'bal' entry point for leafproc %s",
-		      S_GET_NAME (add_symbolP));
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    "No 'bal' entry point for leafproc %s",
+			    S_GET_NAME (add_symbolP));
 	      continue;
 	    }
 	  fixP->fx_addsy = add_symbolP = tc_get_bal_of_call (add_symbolP);
@@ -3634,7 +3443,9 @@ fixup_segment (segP, this_segment_type)
 	      /* Its just -sym */
 	      if (S_GET_SEGMENT (sub_symbolP) != absolute_section)
 		{
-		  as_bad ("Negative of non-absolute symbol %s", S_GET_NAME (sub_symbolP));
+		  as_bad_where (fixP->fx_file, fixP->fx_line,
+				"Negative of non-absolute symbol %s",
+				S_GET_NAME (sub_symbolP));
 		}		/* not absolute */
 
 	      add_number -= S_GET_VALUE (sub_symbolP);
@@ -3655,7 +3466,8 @@ fixup_segment (segP, this_segment_type)
 	         as the target of a call instruction.  */
 	      if (fixP->fx_tcbit)
 		{
-		  as_bad ("callj to difference of 2 symbols");
+		  as_bad_where (fixP->fx_file, fixP->fx_line,
+				"callj to difference of 2 symbols");
 		}
 #endif /* TC_I960 */
 	      add_number += S_GET_VALUE (add_symbolP) -
@@ -3692,10 +3504,11 @@ fixup_segment (segP, this_segment_type)
 #endif
 	      else
 		{
-		  as_bad ("Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %ld.",
-			  segment_name (S_GET_SEGMENT (sub_symbolP)),
-			  S_GET_NAME (sub_symbolP),
-			  (long) (fragP->fr_address + where));
+		  as_bad_where (fixP->fx_file, fixP->fx_line,
+				"Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %ld.",
+				segment_name (S_GET_SEGMENT (sub_symbolP)),
+				S_GET_NAME (sub_symbolP),
+				(long) (fragP->fr_address + where));
 		}		/* if absolute */
 	    }
 	}			/* if sub_symbolP */
@@ -3763,7 +3576,8 @@ fixup_segment (segP, this_segment_type)
 		       * for local branches: flag as error, don't generate
 		       * relocation.
 		       */
-		      as_bad ("can't use COBR format with external label");
+		      as_bad_where (fixP->fx_file, fixP->fx_line,
+				    "can't use COBR format with external label");
 		      fixP->fx_addsy = NULL;
 		      fixP->fx_done = 1;
 		      continue;
@@ -3813,9 +3627,10 @@ fixup_segment (segP, this_segment_type)
 	      (size == 2 &&
 	       (add_number & ~0xFFFF) && ((add_number & ~0xFFFF) != (-1 & ~0xFFFF))))
 	    {
-	      as_bad ("Value of %ld too large for field of %d bytes at 0x%lx",
-		      (long) add_number, size,
-		      (unsigned long) (fragP->fr_address + where));
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    "Value of %ld too large for field of %d bytes at 0x%lx",
+			    (long) add_number, size,
+			    (unsigned long) (fragP->fr_address + where));
 	    }			/* generic error checking */
 #endif
 #ifdef WARN_SIGNED_OVERFLOW_WORD
@@ -3826,9 +3641,10 @@ fixup_segment (segP, this_segment_type)
 	  if (!flag_signed_overflow_ok
 	      && size == 2
 	      && add_number > 0x7fff)
-	    as_bad ("Signed .word overflow; switch may be too large; %ld at 0x%lx",
-		    (long) add_number,
-		    (unsigned long) (fragP->fr_address + where));
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  "Signed .word overflow; switch may be too large; %ld at 0x%lx",
+			  (long) add_number,
+			  (unsigned long) (fragP->fr_address + where));
 #endif
 	}			/* not a bit fix */
       /* once this fix has been applied, we don't have to output anything
@@ -3913,5 +3729,38 @@ adjust_stab_section(abfd, seg)
   bfd_h_put_32 (abfd, (bfd_vma) strsz, (bfd_byte *) p + 8);
 }
 
-
 #endif /* not BFD_ASSEMBLER */
+
+const pseudo_typeS obj_pseudo_table[] =
+{
+  {"def", obj_coff_def, 0},
+  {"dim", obj_coff_dim, 0},
+  {"endef", obj_coff_endef, 0},
+  {"line", obj_coff_line, 0},
+  {"ln", obj_coff_ln, 0},
+  {"appline", obj_coff_ln, 1},
+  {"scl", obj_coff_scl, 0},
+  {"size", obj_coff_size, 0},
+  {"tag", obj_coff_tag, 0},
+  {"type", obj_coff_type, 0},
+  {"val", obj_coff_val, 0},
+  {"section", obj_coff_section, 0},
+#ifndef BFD_ASSEMBLER
+  {"use", obj_coff_section, 0},
+  {"sect", obj_coff_section, 0},
+  {"text", obj_coff_text, 0},
+  {"data", obj_coff_data, 0},
+  {"bss", obj_coff_bss, 0},
+  {"lcomm", obj_coff_lcomm, 0},
+  {"ident", obj_coff_ident, 0},
+#else
+  {"optim", s_ignore, 0},	/* For sun386i cc (?) */
+  {"ident", s_ignore, 0},	/* we don't yet handle this. */
+#endif
+  {"ABORT", s_abort, 0},
+#ifdef TC_M88K
+  /* The m88k uses sdef instead of def.  */
+  {"sdef", obj_coff_def, 0},
+#endif
+  {NULL}			/* end sentinel */
+};				/* obj_pseudo_table */

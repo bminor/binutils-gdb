@@ -1,7 +1,13 @@
+Thu Sep  8 19:43:49 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/obj-coff.c (size_section): Do an fprintf to stderr rather
+	than a printf.
+	(fixup_segment): Use as_bad_where rather than as_bad.
+
 Wed Sep  7 17:21:12 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
-	* config/tc-{h8300,sh}.[ch] (tc_coff_symbol_emit): Function doing nothing
-	becomes macro doing nothing.
+	* config/tc-{h8300,sh}.[ch] (tc_coff_symbol_emit): Function doing
+	nothing becomes macro doing nothing.
 
 Wed Sep  7 19:10:09 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
