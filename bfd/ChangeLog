@@ -1,3 +1,8 @@
+1999-08-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* acinclude.m4 (BFD_BINARY_FOPEN): Change -windows to -windows*.
+	* aclocal.m4, configure: Rebuild.
+
 1999-08-06  Ian Lance Taylor  <ian@zembu.com>
 
 	* section.c (global_syms): Only initialize union field if
