@@ -5037,28 +5037,33 @@ elfcore_grok_prstatus (abfd, note)
 #endif /* defined (HAVE_PRSTATUS_T) */
 
 
-/* There isn't a consistent prfpregset_t across platforms,
-   but it doesn't matter, because we don't have to pick this
-   data structure apart. */
+/* Create a pseudosection containing the exact contents of NOTE.  This
+   actually creates up to two pseudosections:
+   - For the single-threaded case, a section named NAME, unless
+     such a section already exists.
+   - For the multi-threaded case, a section named "NAME/PID", where
+     PID is elfcore_make_pid (abfd).
+   Both pseudosections have identical contents: the contents of NOTE.  */
 
 static boolean
-elfcore_grok_prfpreg (abfd, note)
+elfcore_make_note_pseudosection (abfd, name, note)
      bfd* abfd;
+     char *name;
      Elf_Internal_Note* note;
 {
   char buf[100];
-  char* name;
+  char *threaded_name;
   asection* sect;
 
-  /* Make a ".reg2/999" section. */
+  /* Build the section name.  */
 
-  sprintf (buf, ".reg2/%d", elfcore_make_pid (abfd));
-  name = bfd_alloc (abfd, strlen (buf) + 1);
-  if (name == NULL)
+  sprintf (buf, "%s/%d", name, elfcore_make_pid (abfd));
+  threaded_name = bfd_alloc (abfd, strlen (buf) + 1);
+  if (threaded_name == NULL)
     return false;
-  strcpy (name, buf);
+  strcpy (threaded_name, buf);
 
-  sect = bfd_make_section (abfd, name);
+  sect = bfd_make_section (abfd, threaded_name);
   if (sect == NULL)
     return false;
   sect->_raw_size = note->descsz;
@@ -5066,11 +5071,36 @@ elfcore_grok_prfpreg (abfd, note)
   sect->flags = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
-  if (! elfcore_maybe_make_sect (abfd, ".reg2", sect))
+  if (! elfcore_maybe_make_sect (abfd, name, sect))
     return false;
 
   return true;
 }
+
+
+/* There isn't a consistent prfpregset_t across platforms,
+   but it doesn't matter, because we don't have to pick this
+   data structure apart. */
+static boolean
+elfcore_grok_prfpreg (abfd, note)
+     bfd* abfd;
+     Elf_Internal_Note* note;
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg2", note);
+}
+
+
+/* Linux dumps the Intel SSE regs in a note named "LINUX" with a note
+   type of 5 (NT_PRXFPREG).  Just include the whole note's contents
+   literally.  */
+static boolean
+elfcore_grok_prxfpreg (abfd, note)
+     bfd* abfd;
+     Elf_Internal_Note* note;
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-xfp", note);
+}
+
 
 #if defined (HAVE_PRPSINFO_T)
 # define elfcore_psinfo_t prpsinfo_t
@@ -5281,6 +5311,13 @@ elfcore_grok_note (abfd, note)
 
     case NT_FPREGSET:		/* FIXME: rename to NT_PRFPREG */
       return elfcore_grok_prfpreg (abfd, note);
+
+    case NT_PRXFPREG:		/* Linux SSE extension */
+      if (note->namesz == 5
+	  && ! strcmp (note->namedata, "LINUX"))
+	return elfcore_grok_prxfpreg (abfd, note);
+      else
+	return true;
 
 #if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
     case NT_PRPSINFO:
