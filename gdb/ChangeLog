@@ -1,3 +1,16 @@
+Mon Jun 27 09:57:23 1994  Steve Chamberlain  (sac@cirdan.cygnus.com)
+
+	* ser-go32.c: Rewrite to run under windows.
+	* ser-e7kpc.c: New file to support the E7000 with the PC ISA
+	bus interface.
+	* serial.c (serial_open): Notice device "pc".
+	* remote-e7000.c: Fix copyright date.
+	(expect): Compare \n and \r the same.
+	(e7000_open): Allow pc as a serial port
+	* sh/sh.mt: Add ser-e7kpc.
+	* h8300/h8300hms.mt: Add ser-e7kpc.
+	* main.c (proc_wait): Don't wait if using go32.
+
 Mon Jun 27 00:35:51 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* somread.c: Simplify by using stabsect_build_psymtabs.

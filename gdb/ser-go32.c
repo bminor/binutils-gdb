@@ -21,12 +21,13 @@
 #include "serial.h"
 #include <sys/dos.h>
 
-/* This is unused for now.  We just return a placeholder. */
+#define disable() asm("cli")
+#define enable() asm("sti")
+
 struct go32_ttystate
   {
     int bogus;
   };
-
 typedef struct
   {
     short jmp_op;
@@ -37,8 +38,29 @@ typedef struct
     short getp;
     short putp;
     short iov;
+    short count;
+    short overflow;
+    short buffer_size;
+    short ovflushes;
   }
 ASYNC_STRUCT;
+
+#define AOFF_JMP_OP 		0
+#define AOFF_SIGNATURE 		2
+#define AOFF_VERSION 		4
+#define AOFF_BUFFER_START 	6
+#define AOFF_BUFFER_END 	8
+#define AOFF_GETP 		10
+#define AOFF_PUTP 		12
+#define AOFF_IOV 		14
+#define AOFF_COUNT 		16
+#define AOFF_OVERFLOW 		18
+#define AOFF_BUFFER_SIZE 	20
+#define AOFF_OVFLUSHES 		22
+
+
+static ASYNC_STRUCT a;		/* Copy in our mem of the struct */
+static long aindex;		/* index into dos space of struct */
 
 static int go32_open PARAMS ((serial_t scb, const char *name));
 static void go32_raw PARAMS ((serial_t scb));
@@ -48,8 +70,8 @@ static int go32_write PARAMS ((serial_t scb, const char *str, int len));
 static void go32_close PARAMS ((serial_t scb));
 static serial_ttystate go32_get_tty_state PARAMS ((serial_t scb));
 static int go32_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
-static char *aptr PARAMS ((short p));
-static ASYNC_STRUCT *getivec PARAMS ((int which));
+static unsigned char aptr PARAMS ((short p));
+static unsigned long getivec PARAMS ((int which));
 static int dos_async_init PARAMS ((int port));
 static void dos_async_tx PARAMS ((const char c));
 static int dos_async_rx PARAMS (());
@@ -60,43 +82,60 @@ static int dosasync_write PARAMS ((int fd, const char *buf, int len));
 #define VERSION 1
 #define OFFSET 0x104
 
-#define peek(a,b) (*(unsigned short *)(0xe0000000 + (a)*16 + (b)))
+unsigned char bb;
+unsigned short sb;
+unsigned long sl;
 
-static volatile ASYNC_STRUCT *async;
-static int iov;
-#define com_rb	iov
-#define com_tb	iov
-#define com_ier	iov+1
-#define com_ifr	iov+2
-#define com_bfr	iov+3
-#define com_mcr	iov+4
-#define com_lsr	iov+5
-#define com_msr	iov+6
+#define SET_BYTE(x,y)   { char _buf = y;dosmemput(&_buf,1, x);}
+#define SET_WORD(x,y)   { short _buf = y;dosmemput(&_buf,2, x);}
+#define GET_BYTE(x)     ( dosmemget((x),1,&bb), bb)
 
-static char *
+
+#define GET_LONG(x)     ( dosmemget((x),4,&sl), sl)
+
+static
+unsigned short 
+GET_WORD (x)
+{
+  unsigned short sb;
+  dosmemget ((x), 2, &sb);
+  return sb;
+}
+
+static int iov[2];
+
+#define com_rb(n)	iov[n]
+#define com_tb(n)	iov[n]
+#define com_ier(n)	iov[n]+1
+#define com_ifr(n)	iov[n]+2
+#define com_bfr(n)	iov[n]+3
+#define com_mcr(n)	iov[n]+4
+#define com_lsr(n)	iov[n]+5
+#define com_msr(n)	iov[n]+6
+
+static unsigned char
 aptr (p)
      short p;
 {
-  return (char *) ((unsigned) async - OFFSET + p);
+  return GET_BYTE (aindex - OFFSET + p);
 }
 
-static ASYNC_STRUCT *
+static unsigned long
 getivec (int which)
 {
-  ASYNC_STRUCT *a;
+  long tryaindex;
 
-  if (peek (0, which * 4) != OFFSET)
+  if (GET_WORD (which * 4) != OFFSET)
     return 0;
 
-  a = (ASYNC_STRUCT *) (0xe0000000 + peek (0, which * 4 + 2) * 16 + peek (0, which * 4));
+  /* Find out where in memory this lives */
+  tryaindex = GET_WORD (which * 4 + 2) * 16 + GET_WORD (which * 4);
 
-  if (a->signature != SIGNATURE)
+  if (GET_WORD (tryaindex + 2) != SIGNATURE)
     return 0;
-
-  if (a->version != VERSION)
+  if (GET_WORD (tryaindex + 4) != VERSION)
     return 0;
-
-  return a;
+  return tryaindex;
 }
 
 static int
@@ -106,16 +145,16 @@ dos_async_init (port)
   switch (port)
     {
     case 1:
-      async = getivec (12);
+      aindex = getivec (12);
       break;
     case 2:
-      async = getivec (11);
+      aindex = getivec (11);
       break;
     default:
       return 0;
     }
 
-  if (!async)
+  if (!aindex)
     {
       error ("GDB cannot connect to asynctsr program, check that it is installed\n\
 and that serial I/O is not being redirected (perhaps by NFS)\n\n\
@@ -125,12 +164,10 @@ C> asynctsr %d\n\
 C> gdb \n", port, port);
     }
 
-  iov = async->iov;
-  outportb (com_ier, 0x0f);
-  outportb (com_bfr, 0x03);
-  outportb (com_mcr, 0x0b);
-  async->getp = async->putp = async->buffer_start;
-
+  iov[0] = GET_WORD (aindex + AOFF_IOV);
+  outportb (com_ier (0), 0x0f);
+  outportb (com_bfr (0), 0x03);
+  outportb (com_mcr (0), 0x0b);
   return 1;
 }
 
@@ -138,17 +175,33 @@ static void
 dos_async_tx (c)
      const char c;
 {
-  while (~inportb (com_lsr) & 0x20)
+  while (~inportb (com_lsr (0)) & 0x20)
     ;
-  outportb (com_tb, c);
+  outportb (com_tb (0), c);
 }
 
-#define dos_async_ready() (async->getp != async->putp)
+static int
+dos_async_ready ()
+{
+  int ret;
+
+  disable ();
+#if RDY_CNT
+  ret = GET_WORD (aindex + AOFF_COUNT);
+#else
+  ret = GET_WORD (aindex + AOFF_GETP) != GET_WORD (aindex + AOFF_PUTP);
+#endif
+  enable ();
+  return ret;
+
+
+}
 
 static int
 dos_async_rx ()
 {
   char rv;
+  short idx;
 
   while (!dos_async_ready ())
     {
@@ -158,12 +211,15 @@ dos_async_rx ()
 	  return 0;
 	}
     }
-
-  rv = *aptr (async->getp++);
-
-  if (async->getp >= async->buffer_end)
-    async->getp = async->buffer_start;
-
+  disable ();
+  idx = GET_WORD (aindex + AOFF_GETP);
+  idx++;
+  SET_WORD (aindex + AOFF_GETP, idx);
+  rv = aptr (idx - 1);
+  SET_WORD (aindex + AOFF_COUNT, GET_WORD (aindex + AOFF_COUNT) - 1);
+  if (GET_WORD (aindex + AOFF_GETP) > GET_WORD (aindex + AOFF_BUFFER_END))
+    SET_WORD (aindex + AOFF_GETP, GET_WORD (aindex + AOFF_BUFFER_START));
+  enable ();
   return rv;
 }
 
