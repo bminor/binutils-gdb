@@ -2576,7 +2576,7 @@ debug_write_type (info, fns, fhandle, type, name)
       if (type->u.kclass != NULL)
 	{
 	  if (info->class_mark == type->u.kclass->mark
-	      || type->u.kclass->id > info->base_id)
+	      || (tag == NULL && type->u.kclass->id > info->base_id))
 	    {
 	      /* We are currently outputting this struct, or we have
 		 already output it.  I don't know if this can happen,
@@ -2586,8 +2586,11 @@ debug_write_type (info, fns, fhandle, type, name)
 				       type->kind);
 	    }
 	  type->u.kclass->mark = info->class_mark;
-	  ++info->class_id;
-	  type->u.kclass->id = info->class_id;
+	  if (tag == NULL)
+	    {
+	      ++info->class_id;
+	      type->u.kclass->id = info->class_id;
+	    }
 	}
 
       if (! (*fns->start_struct_type) (fhandle, tag,
@@ -2748,7 +2751,7 @@ debug_write_class_type (info, fns, fhandle, type, tag)
   else
     {
       if (info->class_mark == type->u.kclass->mark
-	  || type->u.kclass->id > info->base_id)
+	  || (tag == NULL && type->u.kclass->id > info->base_id))
 	{
 	  /* We are currently outputting this class, or we have
 	     already output it.  This can happen when there are
@@ -2758,9 +2761,12 @@ debug_write_class_type (info, fns, fhandle, type, tag)
 				   type->kind);
 	}
       type->u.kclass->mark = info->class_mark;
-      ++info->class_id;
-      id = info->class_id;
-      type->u.kclass->id = id;
+      if (tag == NULL)
+	{
+	  ++info->class_id;
+	  type->u.kclass->id = info->class_id;
+	}
+      id = type->u.kclass->id;
 
       vptrbase = type->u.kclass->vptrbase;
       if (vptrbase != NULL && vptrbase != type)

@@ -1,5 +1,12 @@
 Wed Jan 24 12:06:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ieee.c (ieee_define_named_type): When creating a tag for an
+	anonymous struct, copy the name into memory.
+	(ieee_tag_type): Likewise.
+	* debug.c (debug_write_type): Only check and set id field for an
+	unnamed object.
+	(debug_write_class_type): Likewise.
+
 	* ieee.c: Various changes to write out types for functions and
 	references, and to not write out unnecessary function types.
 

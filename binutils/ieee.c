@@ -4190,6 +4190,8 @@ ieee_define_named_type (info, name, tagp, id, size, unsignedp, ppbuf)
 	{
 	  nt = (struct ieee_name_type *) xmalloc (sizeof *nt);
 	  memset (nt, 0, sizeof *nt);
+	  if (tag != name)
+	    tag = xstrdup (ab);
 	  nt->name = tag;
 	  nt->next = info->tags;
 	  info->tags = nt;
@@ -5701,6 +5703,8 @@ ieee_tag_type (p, name, id, kind)
   nt = (struct ieee_name_type *) xmalloc (sizeof *nt);
   memset (nt, 0, sizeof *nt);
 
+  if (name == ab)
+    name = xstrdup (ab);
   nt->name = name;
   nt->type.indx = info->type_indx;
   ++info->type_indx;
