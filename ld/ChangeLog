@@ -1,3 +1,8 @@
+Fri Jun 12 13:43:17 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* po/Make-in (all-yes): If maintainer mode, depend on .pot file.
+	($(PACKAGE).pot): Unconditionally depend on POTFILES.
+
 Tue Jun  9 09:36:48 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* ldlang.c (lang_finish): Add CONST type modifier to declaration

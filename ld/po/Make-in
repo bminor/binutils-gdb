@@ -26,7 +26,7 @@ subdir = po
 
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
-MKINSTALLDIRS = $(top_srcdir)/@MKINSTALLDIRS@
+MKINSTALLDIRS = @MKINSTALLDIRS@
 
 CC = @CC@
 GENCAT = @GENCAT@
@@ -79,10 +79,10 @@ INSTOBJEXT = @INSTOBJEXT@
 
 all: all-@USE_NLS@
 
-all-yes: $(CATALOGS)
+all-yes: $(CATALOGS) @MAINT@ $(PACAKAGE).pot
 all-no:
 
-$(srcdir)/$(PACKAGE).pot: @MAINT@ $(POTFILES)
+$(srcdir)/$(PACKAGE).pot: $(POTFILES)
 	$(XGETTEXT) --default-domain=$(PACKAGE) --directory=$(top_srcdir) \
 	  --add-comments --keyword=_ --keyword=N_ \
 	  --files-from=$(srcdir)/POTFILES.in
@@ -106,6 +106,7 @@ $(srcdir)/stamp-cat-id: $(PACKAGE).pot
 
 install: install-exec install-data
 install-exec:
+install-info:
 install-data: install-data-@USE_NLS@
 install-data-no: all
 install-data-yes: all

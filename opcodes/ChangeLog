@@ -1,3 +1,8 @@
+Fri Jun 12 13:40:38 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* po/Make-in (all-yes): If maintainer mode, depend on .pot file.
+	($(PACKAGE).pot): Unconditionally depend on POTFILES.
+
 Fri Jun 12 11:04:06 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	Fix problems when bfd_vma is wider than long.
