@@ -1,3 +1,8 @@
+Mon Apr 24 14:18:05 1995  Jason Molenda   (crash@phydeaux.cygnus.com>
+
+	* sh-opc.c (sh_nibble_type, sh_arg_type): remove trailing , from
+	enum list.
+
 Wed Apr 19 14:07:03 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* m68k-dis.c (opcode): Finish change made by Kung Hsu on April
