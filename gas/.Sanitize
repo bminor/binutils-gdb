@@ -125,7 +125,7 @@ else
 	done
 fi
 
-rce_files="configure.in as.c"
+rce_files="configure.in as.c configure ChangeLog"
 
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	for i in $rce_files ; do
