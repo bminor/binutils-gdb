@@ -2495,6 +2495,13 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	  abort ();
 	case bfd_reloc_ok:
 	  break;
+	case bfd_reloc_outofrange:
+	  (*_bfd_error_handler)
+	    ("%s: bad reloc address in section `%s' at address 0x%lx",
+	     bfd_get_filename (input_bfd),
+	     bfd_get_section_name (input_bfd, input_section),
+	     (unsigned long) rel->r_vaddr);
+	  return false;
 	case bfd_reloc_overflow:
 	  {
 	    const char *name;
