@@ -901,16 +901,8 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
       asym->value -= asym->section->vma;
       break;
     case scBss:
-      if (ext)
-	{
-	  asym->section = &bfd_com_section;
-	  asym->flags = 0;
-	}
-      else
-	{
-	  asym->section = bfd_make_section_old_way (abfd, ".bss");
-	  asym->value -= asym->section->vma;
-	}
+      asym->section = bfd_make_section_old_way (abfd, ".bss");
+      asym->value -= asym->section->vma;
       break;
     case scRegister:
       asym->flags = BSF_DEBUGGING;
@@ -937,8 +929,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
       break;
     case scSBss:
       asym->section = bfd_make_section_old_way (abfd, ".sbss");
-      if (! ext)
-	asym->value -= asym->section->vma;
+      asym->value -= asym->section->vma;
       break;
     case scRData:
       asym->section = bfd_make_section_old_way (abfd, ".rdata");

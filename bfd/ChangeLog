@@ -10,6 +10,9 @@ Fri Aug  6 15:13:22 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 Fri Aug  6 12:28:38 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ecoff.c (ecoff_set_symbol_info): Removed special handling for
+	scBss and scSBss symbols, since it was wrong.
+
 	* Makefile.in (coff-mips.o, coff-alpha.o): Don't depend on
 	coffcode.h.
 
