@@ -119,6 +119,8 @@ tc-mips.c
 tc-mips.h
 tc-ns32k.c
 tc-ns32k.h
+tc-ppc.c
+tc-ppc.h
 tc-sh.c
 tc-sh.h
 tc-sparc.c
