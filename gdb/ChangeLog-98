@@ -2263,7 +2263,7 @@ Thu Dec 31 16:54:30 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	* target.c: Hp merge, 4/15/98 snapshot
 	  There are new target_ops fields that pertain only
-	  to HPUX. All the changes relate to this. Fist,
+	  to HPUX. All the changes relate to this. First,
 	  new fields are added to the dummy_target target_ops
  	  vector: To_require_attach, to_require_detach.
 
