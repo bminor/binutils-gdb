@@ -1,4 +1,4 @@
-start-sanitize-syk
+start-sanitize-sky
 Mon Dec 22 14:08:27 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* configure.in: Add txvu-elf support.
