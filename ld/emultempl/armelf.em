@@ -63,6 +63,62 @@ static void gld${EMULATION_NAME}_place_section
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
+static int  gld${EMULATION_NAME}_parse_args PARAMS((int, char **));
+static void gld${EMULATION_NAME}_list_options PARAMS ((FILE *));
+
+
+static int no_pipeline_knowledge = 0;
+
+static struct option longopts[] =
+{
+  { "no-pipeline-knowledge", no_argument, NULL, 'p'},
+  { NULL, no_argument, NULL, 0 }
+};
+
+static void
+gld${EMULATION_NAME}_list_options (file)
+     FILE * file;
+{
+  fprintf (file, _("  -p --no-pipeline-knowledge  Stop the linker knowing about the pipeline length\n"));
+}
+
+static int
+gld${EMULATION_NAME}_parse_args (argc, argv)
+     int     argc;
+     char ** argv;
+{
+  int        longind;
+  int        optc;
+  int        prevoptind = optind;
+  int        prevopterr = opterr;
+  int        wanterror;
+  static int lastoptind = -1;
+
+  if (lastoptind != optind)
+    opterr = 0;
+  
+  wanterror  = opterr;
+  lastoptind = optind;
+
+  optc   = getopt_long_only (argc, argv, "-p", longopts, & longind);
+  opterr = prevopterr;
+
+  switch (optc)
+    {
+    default:
+      if (wanterror)
+	xexit (1);
+      optind =  prevoptind;
+      return 0;
+
+    case 'p':
+      no_pipeline_knowledge = 1;
+      break;
+    }
+  
+  return 1;
+}
+
 
 static void
 gld${EMULATION_NAME}_before_parse ()
@@ -1061,7 +1117,8 @@ gld${EMULATION_NAME}_before_allocation ()
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	if (!bfd_elf32_arm_process_before_allocation (is->the_bfd, &link_info))
+	if (!bfd_elf32_arm_process_before_allocation (is->the_bfd, & link_info,
+						      no_pipeline_knowledge))
 	  {
 	    /* xgettext:c-format */
 	    einfo (_("Errors encountered processing file %s"), is->filename);
@@ -1146,8 +1203,9 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_open_dynamic_archive,
   gld${EMULATION_NAME}_place_orphan,
   NULL, /* set_symbols */
-  NULL,
+  gld${EMULATION_NAME}_parse_args,
   NULL, /* unrecognised file */
-  NULL
+  gld${EMULATION_NAME}_list_options,
+  NULL /* recognized file */
 };
 EOF
