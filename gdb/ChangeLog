@@ -1,3 +1,13 @@
+2002-05-10  Jim Blandy  <jimb@redhat.com>
+
+	Properly track the size of the current objfile's .debug_line section.
+	* dwarf2read.c (struct dwarf2_pinfo): New member: dwarf_line_size.
+	(DWARF_LINE_SIZE): New macro.
+	(dwarf2_build_psymtabs_hard): Record the line section's size in
+	the partial symbol table.
+	(psymtab_to_symtab_1): Restore dwarf_line_size from the partial
+	symbol table.
+
 2002-05-10  Petr Sorfa  <petrs@caldera.com>
 
 	* ia64-tdep.c: Handle breakpoints on L instruction type
@@ -181,6 +191,14 @@
 	* solib.h: Protect against multiple inclusion.
 
 2002-05-06  Jim Blandy  <jimb@redhat.com>
+
+	Add first preprocessor macro-expansion files.
+	* macroexp.c, macroexp.h, macrotab.c, macrotab.h: New files.
+	* Makefile.in (SFILES): Add macrotab.c, macroexp.c.
+	(splay_tree_h, macroexp_h, macrotab_h): New variable.
+	(HFILES_NO_SRCDIR): Add macrotab.h, macroexp.h.
+	(COMMON_OBS): Add macrotab.o, macroexp.o.
+	(macroexp.o, macrotab.o): New rules.
 
 	Separate the job of reading the line number info statement program
 	header (...expialidocious) out into its own function.

@@ -432,6 +432,10 @@ struct dwarf2_pinfo
 
     char *dwarf_line_buffer;
 
+    /* Size of dwarf_line_buffer, in bytes.  */
+    
+    unsigned int dwarf_line_size;
+
     /* Pointer to start of dwarf string buffer for the objfile.  */
 
     char *dwarf_str_buffer;
@@ -447,6 +451,7 @@ struct dwarf2_pinfo
 #define DWARF_ABBREV_BUFFER(p) (PST_PRIVATE(p)->dwarf_abbrev_buffer)
 #define DWARF_ABBREV_SIZE(p) (PST_PRIVATE(p)->dwarf_abbrev_size)
 #define DWARF_LINE_BUFFER(p) (PST_PRIVATE(p)->dwarf_line_buffer)
+#define DWARF_LINE_SIZE(p)   (PST_PRIVATE(p)->dwarf_line_size)
 #define DWARF_STR_BUFFER(p)  (PST_PRIVATE(p)->dwarf_str_buffer)
 #define DWARF_STR_SIZE(p)    (PST_PRIVATE(p)->dwarf_str_size)
 
@@ -1166,6 +1171,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       DWARF_ABBREV_BUFFER (pst) = dwarf_abbrev_buffer;
       DWARF_ABBREV_SIZE (pst) = dwarf_abbrev_size;
       DWARF_LINE_BUFFER (pst) = dwarf_line_buffer;
+      DWARF_LINE_SIZE (pst) = dwarf_line_size;
       DWARF_STR_BUFFER (pst) = dwarf_str_buffer;
       DWARF_STR_SIZE (pst) = dwarf_str_size;
       baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -1467,6 +1473,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   dwarf_abbrev_buffer = DWARF_ABBREV_BUFFER (pst);
   dwarf_abbrev_size = DWARF_ABBREV_SIZE (pst);
   dwarf_line_buffer = DWARF_LINE_BUFFER (pst);
+  dwarf_line_size = DWARF_LINE_SIZE (pst);
   dwarf_str_buffer = DWARF_STR_BUFFER (pst);
   dwarf_str_size = DWARF_STR_SIZE (pst);
   baseaddr = ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (objfile));
