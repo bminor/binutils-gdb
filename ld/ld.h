@@ -30,6 +30,7 @@
 #define flag_is_constructor(x) ((x) & BSF_CONSTRUCTOR)
 #define flag_is_common(x) ((x) & BSF_FORT_COMM)
 #define flag_is_global(x) ((x) & (BSF_GLOBAL))
+#define flag_is_weak(x) ((x) & BSF_WEAK)
 #define flag_is_undefined(x) ((x) & BSF_UNDEFINED)
 #define flag_set(x,y) (x = y)
 #define flag_is_fort_comm(x) ((x) & BSF_FORT_COMM)
@@ -65,6 +66,9 @@ typedef  enum { DISCARD_NONE, DISCARD_ALL, DISCARD_L } discard_locals_type;
 
 /* ALIGN macro changed to ALIGN_N to avoid	*/
 /* conflict in /usr/include/machine/machparam.h */
+/* WARNING: If THIS is a 64 bit address and BOUNDARY is an unsigned int,
+   you must coerce boundary to the same type as THIS.
+   ??? Is there a portable way to avoid this.  */
 #define ALIGN_N(this, boundary)  ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
 
 typedef struct {
@@ -119,6 +123,3 @@ typedef enum {
 
 
 int yyparse();
-#define BYTE_SIZE 1
-#define SHORT_SIZE 2
-#define LONG_SIZE 4
