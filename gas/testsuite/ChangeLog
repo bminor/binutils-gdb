@@ -1,3 +1,7 @@
+2003-07-29  Nick Clifton  <nickc@redhat.com>
+
+	* gas/sparc/unalign.d: Remove empty .text disassembly line.
+
 2003-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/elf/elf.exp: Add section3 for note section.
