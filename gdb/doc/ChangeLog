@@ -1,3 +1,8 @@
+2000-11-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo (Continuing and Stepping):  Fixed markup and typos,
+	as suggested by Dmitry Sivachenko <dima@Chg.RU>.
+
 2000-11-10  Christopher Faylor <cgf@cygnus.com>
 
 	* gdb.texinfo: Document new 'set step-mode' command.
