@@ -43,27 +43,27 @@ gdb_load $objdir/$subdir/$binfile
 proc gdbvar_simple_if_test {} {
     global prompt
 
-    gdb_test "set \\\$foo = 0" "" "set foo in gdbvar_simple_if_test"
+    gdb_test "set \$foo = 0" "" "set foo in gdbvar_simple_if_test"
     # All this test should do is print 0xdeadbeef once.
-    gdb_test "if \\\$foo == 1\\np/x 0xfeedface\\nelse\\np/x 0xdeadbeef\\nend" "\\\$\[0-9\]* = 0xdeadbeef" "gdbvar_simple_if_test #1"
+    gdb_test "if \$foo == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" "\\\$\[0-9\]* = 0xdeadbeef" "gdbvar_simple_if_test #1"
     # All this test should do is print 0xfeedface once.
-    gdb_test "if \\\$foo == 0\\np/x 0xfeedface\\nelse\\np/x 0xdeadbeef\\nend" "\\\$\[0-9\]* = 0xfeedface" "gdbvar_simple_if_test #2"
+    gdb_test "if \$foo == 0\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" "\\\$\[0-9\]* = 0xfeedface" "gdbvar_simple_if_test #2"
 }
 
 proc gdbvar_simple_while_test {} {
     global prompt
 
-    gdb_test "set \\\$foo = 5" "" "set foo in gdbvar_simple_while_test"
+    gdb_test "set \$foo = 5" "" "set foo in gdbvar_simple_while_test"
     # This test should print 0xfeedface five times.
-    gdb_test "while \\\$foo > 0\\np/x 0xfeedface\\nset \\\$foo -= 1\\nend" "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "gdbvar_simple_while_test #1"
+    gdb_test "while \$foo > 0\np/x 0xfeedface\nset \$foo -= 1\nend" "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "gdbvar_simple_while_test #1"
 }
 
 proc gdbvar_complex_if_while_test {} {
     global prompt
 
-    gdb_test "set \\\$foo = 4" "" "set foo in gdbvar complex_if_while_test"
+    gdb_test "set \$foo = 4" "" "set foo in gdbvar complex_if_while_test"
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while \\\$foo > 0\\nset \\\$foo -= 1\\nif \(\\\$foo % 2\) == 1\\np/x 0xdeadbeef\\nelse\\np/x 0xfeedface\\nend\\nend" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "gdbvar_complex_if_while_test #1"
+    gdb_test "while \$foo > 0\nset \$foo -= 1\nif \(\$foo % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "gdbvar_complex_if_while_test #1"
 }
 
 proc progvar_simple_if_test {} {
@@ -72,9 +72,9 @@ proc progvar_simple_if_test {} {
     gdb_test "set args 5" "" "set args in progvar_simple_if_test"
     if { ![runto factorial] } then { return }
     # All this test should do is print 0xdeadbeef once.
-    gdb_test "if value == 1\\np/x 0xfeedface\\nelse\\np/x 0xdeadbeef\\nend" "\\\$\[0-9\]* = 0xdeadbeef" "progvar_simple_if_test #1"
+    gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" "\\\$\[0-9\]* = 0xdeadbeef" "progvar_simple_if_test #1"
     # All this test should do is print 0xfeedface once.
-    gdb_test "if value == 5\\np/x 0xfeedface\\nelse\\np/x 0xdeadbeef\\nend" "\\\$\[0-9\]* = 0xfeedface" "progvar_simple_if_test #2"
+    gdb_test "if value == 5\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" "\\\$\[0-9\]* = 0xfeedface" "progvar_simple_if_test #2"
 }
 
 proc progvar_simple_while_test {} {
@@ -83,7 +83,7 @@ proc progvar_simple_while_test {} {
     gdb_test "set args 5" "" "set args in progvar_simple_while_test"
     if { ![runto factorial] } then { return }
     # This test should print 0xfeedface five times.
-    gdb_test "while value > 0\\np/x 0xfeedface\\nset value -= 1\\nend" "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "progvar_simple_while_test #1"
+    gdb_test "while value > 0\np/x 0xfeedface\nset value -= 1\nend" "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "progvar_simple_while_test #1"
 }
 
 proc progvar_complex_if_while_test {} {
@@ -92,16 +92,14 @@ proc progvar_complex_if_while_test {} {
     gdb_test "set args 4" "" "set args in progvar_complex_if_while_test"
     if { ![runto factorial] } then { return }
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while value > 0\\nset value -= 1\\nif \(value % 2\) == 1\\np/x 0xdeadbeef\\nelse\\np/x 0xfeedface\\nend\\nend" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "progvar_complex_if_while_test #1"
+    gdb_test "while value > 0\nset value -= 1\nif \(value % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "progvar_complex_if_while_test #1"
 }
 
 proc if_while_breakpoint_command_test {} {
-    global prompt
-
     gdb_test "set args 5" "" "set args in if_while_breakpoint_command_test"
     if { ![runto factorial] } then { return }
     delete_breakpoints
-    gdb_test "break factorial" "Breakpoint.*at"
+    gdb_test "break factorial" "Breakpoint.*at.*"
 
     send "commands\n"
     expect {
@@ -113,16 +111,39 @@ proc if_while_breakpoint_command_test {} {
 	}
     }
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while value > 0\\nset value -= 1\\nif \(value % 2\) == 1\\np/x 0xdeadbeef\\nelse\\np/x 0xfeedface\\nend\\nend\\nend" "" "commands part 2 in if_while_breakpoint_command_test"
+    gdb_test "while value > 0\nset value -= 1\nif \(value % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend\nend" "" "commands part 2 in if_while_breakpoint_command_test"
     gdb_test "continue" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "if_while_breakpoint_command_test #1"
    gdb_test "info break" "while.*set.*if.*p/x.*else.*p/x.*end.*" "info break in if_while_breakpoint_command_test"
+}
+
+# Test that we can run the inferior from breakpoint commands.
+proc infrun_breakpoint_command_test {} {
+    gdb_test "set args 6" "" "set args in progvar_simple_while_test"
+    if { ![runto factorial] } then { return }
+    delete_breakpoints
+    gdb_test "break factorial if value == 5" "Breakpoint.*at.*"
+    gdb_test "commands\nstep\nstep\nstep\nstep\nbt\nend" \
+	"End with.*" "commands in infrun_breakpoint_command_test"
+    gdb_test "continue" "Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*
+\[0-9\]*\[ 	\]*if \\(value > 1\\) \{.*
+\[0-9\]*\[ 	\]*value \\*= factorial \\(value - 1\\);.*
+factorial \\(value=4\\) at.*\[0-9\]*\[ 	\]*if \\(value > 1\\) \{.*
+\[0-9\]*\[ 	\]*value \\*= factorial \\(value - 1\\);.*
+factorial \\(value=3\\) at .*
+\[0-9\]*\[ 	\]*if \\(value > 1\\) \{.*
+#0  factorial \\(value=3\\).*
+#1  \[0-9a-fx\]* in factorial \\(value=4\\).*
+#2  \[0-9a-fx\]* in factorial \\(value=5\\).*
+#3  \[0-9a-fx\]* in factorial \\(value=6\\).*
+#4  \[0-9a-fx\]* in main \\(.*\\).*" \
+	"continue in infrun_breakpoint_command_test"
 }
 
 # Test a simple user defined command (with arguments)
 proc user_defined_command_test {} {
     global prompt
 
-    gdb_test "set \\\$foo = 4" "" "set foo in user_defined_command_test"
+    gdb_test "set \$foo = 4" "" "set foo in user_defined_command_test"
 
     send "define mycommand\n"
     expect {
@@ -134,9 +155,9 @@ proc user_defined_command_test {} {
 	}
     }
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while \\\$arg0 > 0\\nset \\\$arg0 -= 1\\nif \(\\\$arg0 % 2\) == 1\\np/x 0xdeadbeef\\nelse\\np/x 0xfeedface\\nend\\nend\\nend" "" "enter commands in user_defined_command_test"
+    gdb_test "while \$arg0 > 0\nset \$arg0 -= 1\nif \(\$arg0 % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend\nend" "" "enter commands in user_defined_command_test"
 
-    gdb_test "mycommand \\\$foo" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "execute user defined command in user_defined_command_test"
+    gdb_test "mycommand \$foo" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "execute user defined command in user_defined_command_test"
    gdb_test "show user mycommand" "while.*set.*if.*p/x.*else.*p/x.*end.*" "display user command in user_defined_command_test"
 }
 
@@ -147,4 +168,5 @@ progvar_simple_if_test
 progvar_simple_while_test
 progvar_complex_if_while_test
 if_while_breakpoint_command_test
+infrun_breakpoint_command_test
 user_defined_command_test
