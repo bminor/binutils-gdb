@@ -805,10 +805,12 @@ adjust_z_magic (abfd, execp)
   abdp = aout_backend_info (abfd);
 
   /* Text.  */
-  ztih = abdp && abdp->text_includes_header;
+  ztih = (abdp != NULL
+	  && (abdp->text_includes_header
+	      || obj_aout_subformat (abfd) == q_magic_format));
   obj_textsec(abfd)->filepos = (ztih
 				? adata(abfd).exec_bytes_size
-				: adata(abfd).page_size);
+				: adata(abfd).zmagic_disk_block_size);
   if (! obj_textsec(abfd)->user_set_vma)
     /* ?? Do we really need to check for relocs here?  */
     obj_textsec(abfd)->vma = ((abfd->flags & HAS_RELOC)
@@ -820,8 +822,20 @@ adjust_z_magic (abfd, execp)
   /* Could take strange alignment of text section into account here?  */
   
   /* Find start of data.  */
-  text_end = obj_textsec(abfd)->filepos + obj_textsec(abfd)->_raw_size;
-  text_pad = BFD_ALIGN (text_end, adata(abfd).page_size) - text_end;
+  if (ztih)
+    {
+      text_end = obj_textsec (abfd)->filepos + obj_textsec (abfd)->_raw_size;
+      text_pad = BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
+    }
+  else
+    {
+      /* Note that if page_size == zmagic_disk_block_size, then
+	 filepos == page_size, and this case is the same as the ztih
+	 case.  */
+      text_end = obj_textsec (abfd)->_raw_size;
+      text_pad = BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
+      text_end += obj_textsec (abfd)->filepos;
+    }
   obj_textsec(abfd)->_raw_size += text_pad;
   text_end += text_pad;
 
