@@ -29,6 +29,22 @@ End Loop
 
 Set libsubdir "{libdir}"gcc-lib:"{target_canonical}":"{version}":
 
+Set AR_PROG ar
+Set RANLIB_PROG ranlib
+# objcopy and strip should be the same program
+Set OBJCOPY_PROG objcopy
+Set STRIP_PROG strip
+Set STRINGS_PROG strings
+# These should all be the same program too.
+Set SIZE_PROG size
+Set NM_PROG nm
+Set OBJDUMP_PROG objdump
+# This is the demangler, as a standalone program.
+Set DEMANGLER_PROG cplusfilt
+Set NLMCONV_PROG nlmconv
+
+Set PROGS "{SIZE_PROG} {OBJDUMP_PROG} {NM_PROG} {AR_PROG} {STRINGS_PROG} {STRIP_PROG} {RANLIB_PROG} {DEMANGLER_PROG} {OBJCOPY_PROG}"
+
 If "{BuildTarget}" =~ /all/
 	Echo "Set Echo 1" >all.makeout
 	Make >>all.makeout
@@ -43,7 +59,9 @@ Else If "{BuildTarget}" =~ /install/
 		NewFolder "{bindir}"
 	End If
 	# Need to copy all the tools
-	Duplicate -y :objdump "{bindir}"objdump
+	For prog in {PROGS}
+		Duplicate -y :{prog} "{bindir}"{prog}
+	End For
 Else
 	Echo {BuildTarget} not a valid build target
 End If

@@ -93,7 +93,7 @@ DIST_NAME=binutils-{VERSION}
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = "{srcdir}":texinfo
 
-MANPAGES= ar nm objdump ranlib size strings strip c++filt objcopy nlmconv
+MANPAGES= ar nm objdump ranlib size strings strip cplusfilt objcopy nlmconv
 
 #CC=gcc -Wall
 # these two are almost the same program
@@ -112,7 +112,7 @@ NM_PROG=nm
 OBJDUMP_PROG=objdump
 
 # This is the demangler, as a standalone program.
-DEMANGLER_PROG=c++filt
+DEMANGLER_PROG=cplusfilt
 
 NLMCONV_PROG=nlmconv
 
@@ -124,7 +124,7 @@ DISTSTUFF=arparse.c :arlex.c "{s}"nlmheader.c info
 BASEDIR = "{srcroot}"
 BFDDIR = {BASEDIR}bfd
 INCDIR	= {BASEDIR}include
-INCLUDES = -i "{srcroot}"extra-include -i : -i {srcdir} -i ::bfd: -i {BFDDIR} -i {INCDIR}
+INCLUDES = -i "{INCDIR}":mpw: -i ::extra-include: -i : -i {srcdir} -i ::bfd: -i {BFDDIR} -i {INCDIR}
 
 #### host and target dependant Makefile fragments come in here.
 ###
