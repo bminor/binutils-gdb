@@ -1,0 +1,3227 @@
+\input texinfo @c -*-texinfo-*-
+@tex
+\special{twoside}
+@end tex
+@setfilename as
+@settitle as
+@titlepage
+@center @titlefont{as}
+@sp 1
+@center The GNU Assembler
+@sp 2
+@center Dean Elsner, Jay Fenlason & friends
+@sp 13
+The Free Software Foundation Inc.  thanks The Nice Computer
+Company of Australia for loaning Dean Elsner to write the
+first (Vax) version of @code{as} for Project GNU.
+The proprietors, management and staff of TNCCA thank FSF for
+distracting the boss while they got some work
+done.
+@sp 3
+
+Copyright @copyright{} 1986,1987 Free Software Foundation, Inc.
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through Tex and print the
+results, provided the printed document carries copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+
+@end ignore
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the same conditions as for modified versions.
+
+@end titlepage
+@node top, Syntax, top, top
+@chapter Overview, Usage
+@menu
+* Syntax::           The (machine independent) syntax that assembly language
+                files must follow.  The machine dependent syntax
+                can be found in the machine dependent section of
+                the manual for the machine that you are using.
+* Segments::         How to use segments and subsegments, and how the
+                assembler and linker will relocate things.
+* Symbols::          How to set up and manipulate symbols.
+* Expressions::      And how the assembler deals with them.
+* PseudoOps::        The assorted machine directives that tell the
+                assembler exactly what to do with its input.
+* MachineDependent:: Information specific to each machine.
+* Maintenance::      Keeping the assembler running.
+* Retargeting::      Teaching the assembler about new machines.
+@end menu
+		
+This document describes the GNU assembler @code{as}.  This document
+does @emph{not} describe what an assembler does, or how it works.
+This document also does @emph{not} describe the opcodes, registers
+or addressing modes that @code{as} uses on any paticular computer
+that @code{as} runs on.  Consult a good book on assemblers or the
+machine's architecture if you need that information.
+
+This document describes the directives that @code{as} understands,
+and their syntax.  This document also describes some of the
+machine-dependent features of various flavors of the assembler.
+This document also describes how the assembler works internally, and
+provides some information that may be useful to people attempting to
+port the assembler to another machine.
+
+
+Throughout this document, we assume that you are running @dfn{GNU},
+the portable operating system from the @dfn{Free Software
+Foundation, Inc.}.  This restricts our attention to certain kinds of
+computer (in paticular, the kinds of computers that GNU can run on);
+once this assumption is granted examples and definitions need less
+qualification.
+
+Readers should already comprehend:
+@itemize @bullet
+@item
+Central processing unit
+@item
+registers
+@item
+memory address
+@item
+contents of memory address
+@item
+bit
+@item
+8-bit byte
+@item
+2's complement arithmetic
+@end itemize
+
+@code{as} is part of a team of programs that turn a high-level
+human-readable series of instructions into a low-level
+computer-readable series of instructions.  Different versions of
+@code{as} are used for different kinds of computer.  In paticular,
+at the moment, @code{as} only works for the DEC Vax, the Motorola
+680x0, the Intel 80386, the Sparc, and the National Semiconductor
+32032/32532.
+
+@section Notation
+GNU and @code{as} assume the computer that will run the programs it
+assembles will obey these rules.
+
+A (memory) @dfn{address} is 32 bits. The lowest address is zero.
+
+The @dfn{contents} of any memory address is one @dfn{byte} of
+exactly 8 bits.
+
+A @dfn{word} is 16 bits stored in two bytes of memory. The addresses
+of the bytes differ by exactly 1.  Notice that the interpretation of
+the bits in a word and of how to address a word depends on which
+particular computer you are assembling for.
+
+A @dfn{long word}, or @dfn{long}, is 32 bits composed of four bytes.
+It is stored in 4 bytes of memory; these bytes have contiguous
+addresses.  Again the interpretation and addressing of those bits is
+machine dependent.  National Semiconductor 32x32 computers say
+@i{double word} where we say @i{long}.
+
+Numeric quantities are usually @i{unsigned} or @i{2's complement}.
+Bytes, words and longs may store numbers.  @code{as} manipulates
+integer expressions as 32-bit numbers in 2's complement format.
+When asked to store an integer in a byte or word, the lowest order
+bits are stored.  The order of bytes in a word or long in memory is
+determined by what kind of computer will run the assembled program.
+We won't mention this important @i{caveat} again.
+
+The meaning of these terms has changed over time.  Although @i{byte}
+used to mean any length of contiguous bits, @i{byte} now pervasively
+means exactly 8 contiguous bits.  A @i{word} of 16 bits made sense
+for 16-bit computers.  Even on 32-bit computers, a @i{word} still
+means 16 bits (to machine language programmers).  To many other
+programmers of GNU a @i{word} means 32 bits, so beware.  Similarly
+@i{long} means 32 bits: from ``long word''.  National Semiconductor
+32x32 machine language calls a 32-bit number a ``double word''.
+
+@example
+
+       Names for integers of different sizes: some conventions
+
+
+length   as          vax        32x32        680x0        GNU C
+(bits)
+
+  8    byte         byte         byte         byte         char
+ 16    word         word         word         word  short (int)
+ 32    long  long(-word)  double-word  long(-word)   long (int)
+ 64    quad  quad(-word)
+128    octa    octa-word
+
+@end example
+
+@section as, the GNU Assembler
+@dfn{As} is an assembler; it is one of the team of programs that
+`compile' your programs into the binary numbers that a computer uses
+to `run' your program.  Often @code{as} reads a @i{source} program
+written by a compiler and writes an @dfn{object} program for the
+linker (sometimes referred to as a @dfn{loader}) @code{ld} to read.
+
+The source program consists of @dfn{statements} and comments.  Each
+statement might @dfn{assemble} to one (and only one) machine
+language instruction or to one very simple datum.
+
+Mostly you don't have to think about the assembler because the
+compiler invokes it as needed; in that sense the assembler is just
+another part of the compiler.  If you write your own assembly
+language program, then you must run the assembler yourself to get an
+object file suitable for linking.  You can read below how to do this.
+
+@code{as} is only intended to assemble the output of the C compiler
+@code{cc} for use by the linker @code{ld}.  @code{as} tries to
+assemble correctly everything that the standard assembler would
+assemble, with a few exceptions (described in the machine-dependent
+chapters.)  Note that this doesn't mean @code{as} will use the same
+syntax as the standard assembler.  For example, we know of several
+incompatable syntaxes for the 680x0.
+
+Each version of the assembler knows about just one kind of machine
+language, but much is common between the versions, including object
+file formats, (most) assembler directives (often called
+@dfn{pseudo-ops)} and assembler syntax.
+
+Unlike older assemblers, @code{as} tries to assemble a source program
+in one pass of the source file.  This subtly changes the meaning of
+the @kbd{.org} directive (@xref{Org}.).
+
+If you want to write assembly language programs, you must tell
+@code{as} what numbers should be in a computer's memory, and which
+addresses should contain them, so that the program may be executed
+by the computer.  Using symbols will prevent many bookkeeping
+mistakes that can occur if you use raw numbers.
+
+@section Command Line Synopsis
+@example
+as [ options @dots{} ] [ file1 @dots{} ]
+@end example
+
+After the program name @code{as}, the command line may contain
+options and file names.  Options may be in any order, and may be
+before, after, or between file names.  The order of file names is
+significant.
+
+@subsection Options
+
+Except for @samp{--} any command line argument that begins with a
+hyphen (@samp{-}) is an option.  Each option changes the behavior of
+@code{as}.  No option changes the way another option works.  An
+option is a @samp{-} followed by one ore more letters; the case of
+the letter is important.  No option (letter) should be used twice on
+the same command line.  (Nobody has decided what two copies of the
+same option should mean.)  All options are optional.
+
+Some options expect exactly one file name to follow them.  The file
+name may either immediately follow the option's letter (compatible
+with older assemblers) or it may be the next command argument (GNU
+standard).  These two command lines are equivalent:
+
+@example
+as -o my-object-file.o mumble
+as -omy-object-file.o mumble
+@end example
+
+Always, @file{--} (that's two hyphens, not one) by itself names the
+standard input file.
+
+@section Input File(s)
+
+We use the words @dfn{source program}, abbreviated @dfn{source}, to
+describe the program input to one run of @code{as}.  The program may
+be in one or more files; how the source is partitioned into files
+doesn't change the meaning of the source.
+
+The source text is a catenation of the text in each file.
+
+Each time you run @code{as} it assembles exactly one source
+program.  A source program text is made of one or more files.
+(The standard input is also a file.)
+
+You give @code{as} a command line that has zero or more input file
+names.  The input files are read (from left file name to right).  A
+command line argument (in any position) that has no special meaning
+is taken to be an input file name.  If @code{as} is given no file
+names it attempts to read one input file from @code{as}'s standard
+input.
+
+Use @file{--} if you need to explicitly name the standard input file
+in your command line.
+
+It is OK to assemble an empty source.  @code{as} will produce a
+small, empty object file.
+
+If you try to assemble no files then @code{as} will try to read
+standard input, which is normally your terminal.  You may have to
+type @key{ctl-D} to tell @code{as} there is no more program to
+assemble.
+
+@subsection Input Filenames and Line-numbers
+A line is text up to and including the next newline.  The first line
+of a file is numbered @b{1}, the next @b{2} and so on.
+
+There are two ways of locating a line in the input file(s) and both
+are used in reporting error messages.  One way refers to a line
+number in a physical file; the other refers to a line number in a
+logical file.
+
+@dfn{Physical files} are those files named in the command line given
+to @code{as}.
+
+@dfn{Logical files} are ``pretend'' files which bear no relation to
+physical files.  Logical file names help error messages reflect the
+proper source file.  Often they are used when @code{as}' source is
+itself synthesized from other files.
+
+@section Output (Object) File
+Every time you run @code{as} it produces an output file, which is
+your assembly language program translated into numbers.  This file
+is the object file; named @code{a.out} unless you tell @code{as} to
+give it another name by using the @code{-o} option.  Conventionally,
+object file names end with @file{.o}.  The default name of
+@file{a.out} is used for historical reasons.  Older assemblers were
+capable of assembling self-contained programs directly into a
+runnable program.  This may still work, but hasn't been tested.
+
+The object file is for input to the linker @code{ld}.  It contains
+assembled program code, information to help @code{ld} to integrate
+the assembled program into a runnable file and (optionally) symbolic
+information for the debugger.  The precise format of object files is
+described elsewhere.
+
+@comment link above to some info file(s) like the description of a.out.
+@comment don't forget to describe GNU info as well as Unix lossage.
+
+@section Error and Warning Messages
+
+@code{as} may write warnings and error messages to the standard
+error file (usually your terminal).  This should not happen when
+@code{as} is run automatically by a compiler.  Error messages are
+useful for those (few) people who still write in assembly language.
+
+Warnings report an assumption made so that @code{as} could keep
+assembling a flawed program.
+
+Errors report a grave problem that stops the assembly.
+
+Warning messages have the format
+@example
+file_name:line_number:Warning Message Text
+@end example
+If a logical file name has been given (@xref{File}.) it is used for
+the filename, otherwise the name of the current input file is used.
+If a logical line number was given (@xref{Line}.) then it is used to
+calculate the number printed, otherwise the actual line in the
+current source file is printed.  The message text is intended to be
+self explanatory (In the grand Unix tradition).
+
+Error messages have the format
+@example
+file_name:line_number:FATAL:Error Message Text
+@end example
+The file name and line number are derived the same as for warning
+messages.  The actual message text may be rather less explanatory
+because many of them aren't supposed to happen.
+
+@section Options
+@subsection -f Works Faster
+@samp{-f} should only be used when assembling programs written by a
+(trusted) compiler.  @samp{-f} causes the assembler to not bother
+pre-processing the input file(s) before assembling them.  Needless
+to say, if the files actually need to be pre-processed (if the
+contain comments, for example), @code{as} will not work correctly if
+@samp{-f} is used.
+
+@subsection -L Includes Local Labels
+For historical reasons, labels beginning with @samp{L} (upper case
+only) are called @dfn{local labels}.  Normally you don't see such
+labels because they are intended for the use of programs (like
+compilers) that compose assembler programs, not for your notice.
+Normally both @code{as} and @code{ld} discard such labels, so you
+don't normally debug with them.
+
+This option tells @code{as} to retain those @samp{L@dots{}} symbols
+in the object file.  Usually if you do this you also tell the linker
+@code{ld} to preserve symbols whose names begin with @samp{L}.
+
+@subsection -o Names the Object File
+There is always one object file output when you run @code{as}.  By
+default it has the name @file{a.out}.  You use this option (which
+takes exactly one filename) to give the object file a different name.
+
+Whatever the object file is called, @code{as} will overwrite any
+existing file of the same name.
+
+@subsection -R Folds Data Segment into Text Segment
+@code{-R} tells @code{as} to write the object file as if all
+data-segment data lives in the text segment.  This is only done at
+the very last moment:  your binary data are the same, but data
+segment parts are relocated differently.  The data segment part of
+your object file is zero bytes long because all it bytes are
+appended to the text segment.  (@xref{Segments}.)
+
+When you use @code{-R} it would be nice to generate shorter address
+displacements (possible because we don't have to cross segments)
+between text and data segment.  We don't do this simply for
+compatibility with older versions of @code{as}.  @code{-R} may work
+this way in future.
+
+@subsection -W Represses Warnings
+@code{as} should never give a warning or error message when
+assembling compiler output.  But programs written by people often
+cause @code{as} to give a warning that a particular assumption was
+made.  All such warnings are directed to the standard error file.
+If you use this option, any warning is repressed.  This option only
+affects warning messages: it cannot change any detail of how
+@code{as} assembles your file.  Errors, which stop the assembly, are
+still reported.
+
+@section Special Features to support Compilers
+
+In order to assemble compiler output into something that will work,
+@code{as} will occasionlly do strange things to @samp{.word}
+directives.  In particular, when @code{gas} assembles a directive of
+the form @samp{.word sym1-sym2}, and the difference between
+@code{sym1} and @code{sym2} does not fit in 16 bits, @code{as} will
+create a @dfn{secondary jump table}, immediately before the next
+label.  This @var{secondary jump table} will be preceeded by a
+short-jump to the first byte after the table.  The short-jump
+prevents the flow-of-control from accidentally falling into the
+table.  Inside the table will be a long-jump to @code{sym2}.  The
+original @samp{.word} will contain @code{sym1} minus (the address of
+the long-jump to sym2) If there were several @samp{.word sym1-sym2}
+before the secondary jump table, all of them will be adjusted.  If
+ther was a @samp{.word sym3-sym4}, that also did not fit in sixteen
+bits, a long-jump to @code{sym4} will be included in the secondary
+jump table, and the @code{.word}(s), will be adjusted to contain
+@code{sym3} minus (the address of the long-jump to sym4), etc.
+
+@emph{This feature may be disabled by compiling @code{as} with the
+@samp{-DWORKING_DOT_WORD} option.} This feature is likely to confuse
+assembly language programmers.
+
+@node Syntax, Segments, top, top
+@chapter Syntax
+This chapter informally defines the machine-independent syntax
+allowed in a source file.  @code{as} has ordinary syntax; it tries
+to be upward compatible from BSD 4.2 assembler except @code{as} does
+not assemble Vax bit-fields.
+
+@section The Pre-processor
+The preprocess phase handles several aspects of the syntax.  The
+pre-processor will be disabled by the @samp{-f} option, or if the
+first line of the source file is @code{#NO_APP}.  The option to
+disable the pre-processor was designed to make compiler output
+assemble as fast as possible.
+
+The pre-processor adjusts and removes extra whitespace.  It leaves
+one space or tab before the keywords on a line, and turns any other
+whitespace on the line into a single space.
+
+The pre-processor removes all comments, replacing them with a single
+space (for /* @dots{} */ comments), or an appropriate number of
+newlines.
+
+The pre-processor converts character constants into the appropriate
+numeric values.
+
+This means that excess whitespace, comments, and character constants
+cannot be used in the portions of the input text that are not
+pre-processed.
+
+If the first line of an input file is @code{#NO_APP} or the
+@samp{-f} option is given, the input file will not be
+pre-processed.  Within such an input file, parts of the file can be
+pre-processed by putting a line that says @code{#APP} before the
+text that should be pre-processed, and putting a line that says
+@code{#NO_APP} after them.  This feature is mainly intend to support
+asm statements in compilers whose output normally does not need to
+be pre-processed.
+
+@section Whitespace
+@dfn{Whitespace} is one or more blanks or tabs, in any order.
+Whitespace is used to separate symbols, and to make programs neater
+for people to read.  Unless within character constants
+(@xref{Characters}.), any whitespace means the same as exactly one
+space.
+
+@section Comments
+There are two ways of rendering comments to @code{as}.  In both
+cases the comment is equivalent to one space.
+
+Anything from @samp{/*} through the next @samp{*/} is a comment.
+
+@example
+/*
+  The only way to include a newline ('\n') in a comment
+  is to use this sort of comment.
+*/
+/* This sort of comment does not nest. */
+@end example
+
+Anything from the @dfn{line comment} character to the next newline
+considered a comment and is ignored.  The line comment character is
+@samp{#} on the Vax, and @samp{|} on the 680x0.
+@xref{MachineDependent}.  On some machines there are two different
+line comment characters.  One will only begin a comment if it is the
+first non-whitespace character on a line, while the other will
+always begin a comment.
+
+To be compatible with past assemblers a special interpretation is
+given to lines that begin with @samp{#}.  Following the @samp{#} an
+absolute expression (@pxref{Expressions}) is expected:  this will be
+the logical line number of the @b{next} line.  Then a string
+(@xref{Strings}.) is allowed: if present it is a new logical file
+name.  The rest of the line, if any, should be whitespace.
+
+If the first non-whitespace characters on the line are not numeric,
+the line is ignored.  (Just like a comment.)
+@example
+                          # This is an ordinary comment.
+# 42-6 "new_file_name"    # New logical file name
+                          # This is logical line # 36.
+@end example
+This feature is deprecated, and may disappear from future versions
+of @code{as}.
+
+@section Symbols
+A @dfn{symbol} is one or more characters chosen from the set of all
+letters (both upper and lower case), digits and the three characters
+@samp{_.$}.  No symbol may begin with a digit.  Case is
+significant.  There is no length limit: all characters are
+significant.  Symbols are delimited by characters not in that set,
+or by begin/end-of-file.  (@xref{Symbols}.)
+
+@section Statements
+A @dfn{statement} ends at a newline character (@samp{\n}) or at a
+semicolon (@samp{;}).  The newline or semicolon is considered part
+of the preceding statement.  Newlines and semicolons within
+character constants are an exception:  they don't end statements.
+It is an error to end any statement with end-of-file:  the last
+character of any input file should be a newline.
+
+You may write a statement on more than one line if you put a
+backslash (@kbd{\}) immediately in front of any newlines within the
+statement.  When @code{as} reads a backslashed newline both
+characters are ignored.  You can even put backslashed newlines in
+the middle of symbol names without changing the meaning of your
+source program.
+
+An empty statement is OK, and may include whitespace.  It is ignored.
+
+Statements begin with zero or more labels, followed by a @dfn{key
+symbol} which determines what kind of statement it is.  The key
+symbol determines the syntax of the rest of the statement.  If the
+symbol begins with a dot (@t{.}) then the statement is an assembler
+directive: typically valid for any computer.  If the symbol begins
+with a letter the statement is an assembly language
+@dfn{instruction}: it will assemble into a machine language
+instruction.  Different versions of @code{as} for different
+computers will recognize different instructions.  In fact, the same
+symbol may represent a different instruction in a different
+computer's assembly language.
+
+A label is usually a symbol immediately followed by a colon
+(@code{:}).  Whitespace before a label or after a colon is OK.  You
+may not have whitespace between a label's symbol and its colon.
+Labels are explained below.
+@xref{Labels}.
+
+@example
+label:     .directive    followed by something
+another$label:           # This is an empty statement.
+           instruction   operand_1, operand_2, @dots{}
+@end example
+
+@section Constants
+A constant is a number, written so that its value is known by
+inspection, without knowing any context.  Like this:
+@example
+.byte  74, 0112, 092, 0x4A, 0X4a, 'J, '\J # All the same value.
+.ascii "Ring the bell\7"                  # A string constant.
+.octa  0x123456789abcdef0123456789ABCDEF0 # A bignum.
+.float 0f-314159265358979323846264338327\
+95028841971.693993751E-40                 # - pi, a flonum.
+@end example
+
+@node Characters, Strings, , Syntax
+@subsection Character Constants
+There are two kinds of character constants.  @dfn{Characters} stand
+for one character in one byte and their values may be used in
+numeric expressions.  String constants (properly called string
+@i{literals}) are potentially many bytes and their values may not be
+used in arithmetic expressions.
+
+@node Strings, , Characters, Syntax
+@subsubsection Strings
+A @dfn{string} is written between double-quotes.  It may contain
+double-quotes or null characters.  The way to get weird characters
+into a string is to @dfn{escape} these characters: precede them with
+a backslash (@code{\}) character.  For example @samp{\\} represents
+one backslash:  the first @code{\} is an escape which tells
+@code{as} to interpret the second character literally as a backslash
+(which prevents @code{as} from recognizing the second @code{\} as an
+escape character).  The complete list of escapes follows.
+
+@table @kbd
+@item \EOF
+A @kbd{\} followed by end-of-file erroneous.  It is treated just
+like an end-of-file without a preceding backslash.
+@c	@item \a
+@c	Mnemonic for ACKnowledge; for ASCII this is octal code 007.
+@item \b
+Mnemonic for backspace; for ASCII this is octal code 010.
+@c	@item \e
+@c	Mnemonic for EOText; for ASCII this is octal code 004.
+@item \f
+Mnemonic for FormFeed; for ASCII this is octal code 014.
+@item \n
+Mnemonic for newline; for ASCII this is octal code 012.
+@c	@item \p
+@c	Mnemonic for prefix; for ASCII this is octal code 033, usually known as @code{escape}.
+@item \r
+Mnemonic for carriage-Return; for ASCII this is octal code 015.
+@c	@item \s
+@c	Mnemonic for space; for ASCII this is octal code 040.  Included for compliance with
+@c	other assemblers.
+@item \t
+Mnemonic for horizontal Tab; for ASCII this is octal code 011.
+@c	@item \v
+@c	Mnemonic for Vertical tab; for ASCII this is octal code 013.
+@c	@item \x @var{digit} @var{digit} @var{digit}
+@c	A hexadecimal character code.  The numeric code is 3 hexadecimal digits.
+@item \ @var{digit} @var{digit} @var{digit}
+An octal character code.  The numeric code is 3 octal digits.
+For compatibility with other Unix systems, 8 and 9 are legal digits
+with values 010 and 011 respectively.
+@item \\
+Represents one @samp{\} character.
+@c	@item \'
+@c	Represents one @samp{'} (accent acute) character.
+@c	This is needed in single character literals
+@c      (@xref{Characters}.) to represent
+@c	a @samp{'}.
+@item \"
+Represents one @samp{"} character.  Needed in strings to represent
+this character, because an unescaped @samp{"} would end the string.
+@item \ @var{anything-else}
+Any other character when escaped by @kbd{\} will give a warning, but
+assemble as if the @samp{\} was not present.  The idea is that if
+you used an escape sequence you clearly didn't want the literal
+interpretation of the following character.  However @code{as} has no
+other interpretation, so @code{as} knows it is giving you the wrong
+code and warns you of the fact.
+@end table
+
+Which characters are escapable, and what those escapes represent,
+varies widely among assemblers.  The current set is what we think
+BSD 4.2 @code{as} recognizes, and is a subset of what most C
+compilers recognize.  If you are in doubt, don't use an escape
+sequence.
+
+@subsubsection Characters
+A single character may be written as a single quote immediately
+followed by that character.  The same escapes apply to characters as
+to strings.  So if you want to write the character backslash, you
+must write @kbd{'\\} where the first @code{\} escapes the second
+@code{\}.  As you can see, the quote is an accent acute, not an
+accent grave.  A newline (or semicolon (@samp{;})) immediately
+following an accent acute is taken as a literal character and does
+not count as the end of a statement.  The value of a character
+constant in a numeric expression is the machine's byte-wide code for
+that character.  @code{as} assumes your character code is ASCII: @kbd{'A}
+means 65, @kbd{'B} means 66, and so on.
+
+@subsection Number Constants
+@code{as} distinguishes 3 flavors of numbers according to how they
+are stored in the target machine.  @i{Integers} are numbers that
+would fit into an @code{int} in the C language.  @i{Bignums} are
+integers, but they are stored in a more than 32 bits.  @i{Flonums}
+are floating point numbers, described below.
+
+@subsubsection Integers
+An octal integer is @samp{0} followed by zero or more of the octal
+digits (@samp{01234567}).
+
+A decimal integer starts with a non-zero digit followed by zero or
+more digits (@samp{0123456789}).
+
+A hexadecimal integer is @samp{0x} or @samp{0X} followed by one or
+more hexadecimal digits chosen from @samp{0123456789abcdefABCDEF}.
+
+Integers have the obvious values.  To denote a negative integer, use
+the unary operator @samp{-} discussed under expressions
+(@xref{Unops}.).
+
+@subsubsection Bignums
+A @dfn{bignum} has the same syntax and semantics as an integer
+except that the number (or its negative) takes more than 32 bits to
+represent in binary.  The distinction is made because in some places
+integers are permitted while bignums are not.
+
+@subsubsection Flonums
+A @dfn{flonum} represents a floating point number.  The translation
+is complex: a decimal floating point number from the text is
+converted by @code{as} to a generic binary floating point number of
+more than sufficient precision.  This generic floating point number
+is converted to the particular computer's floating point format(s)
+by a portion of @code{as} specialized to that computer.
+
+A flonum is written by writing (in order)
+@itemize @bullet
+@item
+The digit @samp{0}.
+@item
+A letter, to tell @code{as} the rest of the number is a flonum.
+@kbd{e}
+is recommended.  Case is not important.
+(Any otherwise illegal letter will work here,
+but that might be changed.  Vax BSD 4.2 assembler
+seems to allow any of @samp{defghDEFGH}.)
+@item
+An optional sign: either @samp{+} or @samp{-}.
+@item
+An optional integer part: zero or more decimal digits.
+@item
+An optional fraction part: @samp{.} followed by zero
+or more decimal digits.
+@item
+An optional exponent, consisting of:
+@itemize @bullet
+@item
+A letter; the exact significance varies according to
+the computer that executes the program.  @code{as}
+accepts any letter for now.  Case is not important.
+@item
+Optional sign: either @samp{+} or @samp{-}.
+@item
+One or more decimal digits.
+@end itemize
+@end itemize
+
+At least one of @var{integer part} or @var{fraction part} must be
+present.  The floating point number has the obvious value.
+
+The computer running @code{as} needs no floating point hardware.
+@code{as} does all processing using integers.
+
+@node Segments, Symbols, Syntax, top
+@chapter (Sub)Segments & Relocation
+Roughly, a @dfn{segment} is a range of addresses, with no gaps, with
+all data ``in'' those addresses being treated the same.  For example
+there may be a ``read only'' segment.
+
+The linker @code{ld} reads many object files (partial programs) and
+combines their contents to form a runnable program.  When @code{as}
+emits an object file, the partial program is assumed to start at
+address 0.  @code{ld} will assign the final addresses the partial
+program occupies, so that different partial programs don't overlap.
+That explanation is too simple, but it will suffice to explain how
+@code{as} works.
+
+@code{ld} moves blocks of bytes of your program to their run-time
+addresses.  These blocks slide to their run-time addresses as rigid
+units; their length does not change and neither does the order of
+bytes within them.  Such a rigid unit is called a @i{segment}.
+Assigning run-time addresses to segments is called
+@dfn{relocation}.  It includes the task of adjusting mentions of
+object-file addresses so they refer to the proper run-time addresses.
+
+An object file written by @code{as} has three segments, any of which
+may be empty.  These are named @i{text}, @i{data} and @i{bss}
+segments.  Within the object file, the text segment starts at
+address 0, the data segment follows, and the bss segment follows the
+data segment.
+
+To let @code{ld} know which data will change when the segments are
+relocated, and how to change that data, @code{as} also writes to the
+object file details of the relocation needed.  To perform relocation
+@code{ld} must know for each mention of an address in the object
+file:
+@itemize @bullet
+@item
+At what address in the object file does this mention of
+an address begin?
+@item
+How long (in bytes) is this mention?
+@item
+Which segment does the address refer to?
+What is the numeric value of (@var{address} @t{-}
+@var{start-address of segment})?
+@item
+Is the mention of an address ``Program counter relative''?
+@end itemize
+
+In fact, every address @code{as} ever thinks about is expressed as
+(@var{segment} @t{+} @var{offset into segment}).  Further, every
+expression @code{as} computes is of this segmented nature.  So
+@dfn{absolute expression} means an expression with segment
+``absolute'' (@xref{LdSegs}.).  A @dfn{pass1 expression} means an
+expression with segment ``pass1'' (@xref{MythSegs}.).  In this
+document ``(segment, offset)'' will be written as @{ segment-name
+(offset into segment) @}.
+
+Apart from text, data and bss segments you need to know about the
+@dfn{absolute} segment.  When @code{ld} mixes partial programs,
+addresses in the absolute segment remain unchanged.  That is,
+address @{absolute 0@} is ``relocated'' to run-time address 0 by
+@code{ld}.  Although two partial programs' data segments will not
+overlap addresses after linking, @b{by definition} their absolute
+segments will overlap.  Address @{absolute 239@} in one partial
+program will always be the same address when the program is running
+as address @{absolute 239@} in any other partial program.
+
+The idea of segments is extended to the @dfn{undefined} segment.
+Any address whose segment is unknown at assembly time is by
+definition rendered @{undefined (something, unknown yet)@}.  Since
+numbers are always defined, the only way to generate an undefined
+address is to mention an undefined symbol.  A reference to a named
+common block would be such a symbol: its value is unknown at assembly
+time so it has segment @i{undefined}.
+
+By analogy the word @i{segment} is to describe groups of segments in
+the linked program.  @code{ld} puts all partial program's text
+segments in contiguous addresses in the linked program.  It is
+customary to refer to the @i{text segment} of a program, meaning all
+the addresses of all partial program's text segments.  Likewise for
+data and bss segments.
+
+@section Segments
+Some segments are manipulated by @code{ld}; others are invented for
+use of @code{as} and have no meaning except during assembly.
+
+@node LdSegs, , ,
+@subsection ld segments
+@code{ld} deals with just 5 kinds of segments, summarized below.
+@table @b
+@item text segment
+@itemx data segment
+These segments hold your program bytes.  @code{as} and @code{ld}
+treat them as separate but equal segments.  Anything you can say of
+one segment is true of the other.  When the program is running
+however it is customary for the text segment to be unalterable:  it
+will contain instructions, constants and the like.  The data segment
+of a running program is usually alterable: for example, C variables
+would be stored in the data segment.
+@item bss segment
+This segment contains zeroed bytes when your program begins
+running.  It is used to hold unitialized variables or common
+storage.  The length of each partial program's bss segment is
+important, but because it starts out containing zeroed bytes there
+is no need to store explicit zero bytes in the object file.  The Bss
+segment was invented to eliminate those explicit zeros from object
+files.
+@item absolute segment
+Address 0 of this segment is always ``relocated'' to runtime address
+0.  This is useful if you want to refer to an address that @code{ld}
+must not change when relocating.  In this sense we speak of absolute
+addresses being ``unrelocatable'': they don't change during
+relocation.
+@item undefined segment
+This ``segment'' is a catch-all for address references to objects
+not in the preceding segments.  See the description of @file{a.out}
+for details.
+@end table
+An idealized example of the 3 relocatable segments follows.  Memory
+addresses are on the horizontal axis.
+
+@example
+                      +-----+----+--+
+partial program # 1:  |ttttt|dddd|00|
+                      +-----+----+--+
+
+                      text   data bss
+                      seg.   seg. seg.
+
+                      +---+---+---+
+partial program # 2:  |TTT|DDD|000|
+                      +---+---+---+
+
+                      +--+---+-----+--+----+---+-----+~~
+linked program:       |  |TTT|ttttt|  |dddd|DDD|00000|
+                      +--+---+-----+--+----+---+-----+~~
+
+    addresses:        0 @dots{}
+@end example
+
+@node MythSegs, , ,
+@subsection Mythical Segments
+These segments are invented for the internal use of @code{as}.  They
+have no meaning at run-time.  You don't need to know about these
+segments except that they might be mentioned in @code{as}' warning
+messages.  These segments are invented to permit the value of every
+expression in your assembly language program to be a segmented
+address.
+
+@table @b
+@item absent segment
+An expression was expected and none was found.
+@item goof segment
+An internal assembler logic error has been found.  This means there
+is a bug in the assembler.
+@item grand segment
+A @dfn{grand number} is a bignum or a flonum, but not an integer.
+If a number can't be written as a C @code{int} constant, it is a
+grand number.  @code{as} has to remember that a flonum or a bignum
+does not fit into 32 bits, and cannot be a primary (@xref{Primary}.)
+in an expression: this is done by making a flonum or bignum be of
+type ``grand''.  This is purely for internal @code{as} convenience;
+grand segment behaves similarly to absolute segment.
+@item pass1 segment
+The expression was impossible to evaluate in the first pass.  The
+assembler will attempt a second pass (second reading of the source)
+to evaluate the expression.  Your expression mentioned an undefined
+symbol in a way that defies the one-pass (segment + offset in
+segment) assembly process.  No compiler need emit such an expression.
+@item difference segment
+As an assist to the C compiler, expressions of the forms
+@itemize @bullet
+@item
+(undefined symbol) @t{-} (expression)
+@item
+(something) @t{-} (undefined symbol)
+@item
+(undefined symbol) @t{-} (undefined symbol)
+@end itemize
+are permitted to belong to the ``difference'' segment.  @code{as}
+re-evaluates such expressions after the source file has been read
+and the symbol table built.  If by that time there are no undefined
+symbols in the expression then the expression assumes a new segment.
+The intention is to permit statements like @samp{.word label -
+base_of_table} to be assembled in one pass where both @code{label}
+and @code{base_of_table} are undefined.  This is useful for
+compiling C and Algol switch statements, Pascal case statements,
+FORTRAN computed goto statements and the like.
+@end table
+
+@section Sub-Segments
+Assembled bytes fall into two segments: text and data.  Because you
+may have groups of text or data that you want to end up near to each
+other in the object file, @code{as}, allows you to use
+@dfn{subsegments}.  Within each segment, there can be numbered
+subsegments with values from 0 to 8192.  Objects assembled into the
+same subsegment will be grouped with other objects in the same
+subsegment when they are all put into the object file.  For example,
+a compiler might want to store constants in the text segment, but
+might not want to have them intersperced with the program being
+assembled.  In this case, the compiler could issue a @code{text 0}
+before each section of code being output, and a @code{text 1} before
+each group of constants being output.
+
+Subsegments are optional.  If you don't used subsegments, everything
+will be stored in subsegment number zero.
+
+Each subsegment is zero-padded up to a multiple of four bytes.
+(Subsegments may be padded a different amount on different flavors
+of @code{as}.)  Subsegments appear in your object file in numeric
+order, lowest numbered to highest.  (All this to be compatible with
+other people's assemblers.)  The object file, @code{ld} @i{etc.}
+have no concept of subsegments.  They just see all your text
+subsegments as a text segment, and all your data subsegments as a
+data segment.
+
+To specify which subsegment you want subsequent statements assembled
+into, use a @samp{.text @var{expression}} or a @samp{.data
+@var{expression}} statement.  @var{Expression} should be an absolute
+expression.  (@xref{Expressions}.)  If you just say @samp{.text}
+then @samp{.text 0} is assumed.  Likewise @samp{.data} means
+@samp{.data 0}.  Assembly begins in @code{text 0}.
+For instance:
+@example
+.text 0     # The default subsegment is text 0 anyway.
+.ascii "This lives in the first text subsegment. *"
+.text 1
+.ascii "But this lives in the second text subsegment."
+.data 0
+.ascii "This lives in the data segment,"
+.ascii "in the first data subsegment."
+.text 0
+.ascii "This lives in the first text segment,"
+.ascii "immediately following the asterisk (*)."
+@end example
+
+Each segment has a @dfn{location counter} incremented by one for
+every byte assembled into that segment.  Because subsegments are
+merely a convenience restricted to @code{as} there is no concept of
+a subsegment location counter.  There is no way to directly
+manipulate a location counter.  The location counter of the segment
+that statements are being assembled into is said to be the
+@dfn{active} location counter.
+
+@section Bss Segment
+The @code{bss} segment is used for local common variable storage.
+You may allocate address space in the @code{bss} segment, but you may
+not dictate data to load into it before your program executes.  When
+your program starts running, all the contents of the @code{bss}
+segment are zeroed bytes.
+
+Addresses in the bss segment are allocated with a special statement;
+you may not assemble anything directly into the bss segment.  Hence
+there are no bss subsegments.
+
+@node Symbols, Expressions, Segments, top
+@chapter Symbols
+Because the linker uses symbols to link, the debugger uses symbols
+to debug and the programmer uses symbols to name things, symbols are
+a central concept.  Symbols do not appear in the object file in the
+order they are declared.  This may break some debuggers.
+
+@node Labels, , , Symbols
+@section Labels
+A @dfn{label} is written as a symbol immediately followed by a colon
+(@samp{:}).  The symbol then represents the current value of the
+active location counter, and is, for example, a suitable instruction
+operand.  You are warned if you use the same symbol to represent two
+different locations: the first definition overrides any other
+definitions.
+
+@section Giving Symbols Other Values
+A symbol can be given an arbitrary value by writing a symbol followed
+by an equals sign (@samp{=}) followed by an expression
+(@pxref{Expressions}).  This is equivalent to using the @code{.set}
+directive.  (@xref{Set}.)
+
+@section Symbol Names
+Symbol names begin with a letter or with one of @samp{$._}.  That
+character may be followed by any string of digits, letters,
+underscores and dollar signs.  Case of letters is significant:
+@code{foo} is a different symbol name than @code{Foo}.
+
+Each symbol has exactly one name. Each name in an assembly program
+refers to exactly one symbol. You may use that symbol name any
+number of times in an assembly program.
+
+@subsection Local Symbol Names
+
+Local symbols help compilers and programmers use names temporarily.
+There are ten @dfn{local} symbol names, which are re-used throughout
+the program.  Their names are @samp{0} @samp{1} @dots{} @samp{9}.
+To define a local symbol, write a label of the form
+@var{digit}@t{:}.  To refer to the most recent previous definition
+of that symbol write @var{digit}@t{b}, using the same digit as when
+you defined the label.  To refer to the next definition of a local
+label, write @var{digit}@t{f} where @var{digit} gives you a choice
+of 10 forward references.  The @samp{b} stands for ``backwards'' and
+the @samp{f} stands for ``forwards''.
+
+Local symbols are not used by the current C compiler.
+
+There is no restriction on how you can use these labels, but
+remember that at any point in the assembly you can refer to at most
+10 prior local labels and to at most 10 forward local labels.
+
+Local symbol names are only a notation device. They are immediately
+transformed into more conventional symbol names before the assembler
+thinks about them.  The symbol names stored in the symbol table,
+appearing in error messages and optionally emitted to the object
+file have these parts:
+@table @kbd
+@item L
+All local labels begin with @samp{L}. Normally both @code{as} and
+@code{ld} forget symbols that start with @samp{L}. These labels are
+used for symbols you are never intended to see.  If you give the
+@samp{-L} option then @code{as} will retain these symbols in the
+object file. By instructing @code{ld} to also retain these symbols,
+you may use them in debugging.
+@item @i{a digit}
+If the label is written @samp{0:} then the digit is @samp{0}.
+If the label is written @samp{1:} then the digit is @samp{1}.
+And so on up through @samp{9:}.
+@item @i{control}-A
+This unusual character is included so you don't accidentally invent
+a symbol of the same name.  The character has ASCII value
+@samp{\001}.
+@item @i{an ordinal number}
+This is like a serial number to keep the labels distinct.  The first
+@samp{0:} gets the number @samp{1}; The 15th @samp{0:} gets the
+number @samp{15}; @i{etc.}.  Likewise for the other labels @samp{1:}
+through @samp{9:}.
+@end table
+For instance, the
+first @code{1:} is named @code{L1^A1}, the 44th @code{3:} is named @code{L3^A44}.
+
+@section The Special Dot Symbol
+
+The special symbol @code{.} refers to the current address that
+@code{as} is assembling into.  Thus, the expression @samp{melvin:
+.long .} will cause @var{melvin} to contain its own address.
+Assigning a value to @code{.} is treated the same as a @code{.org}
+directive.  Thus, the expression @samp{.=.+4} is the same as saying
+@samp{.space 4}.
+
+@section Symbol Attributes
+Every symbol has the attributes discussed below.  The detailed
+definitions are in <a.out.h>.
+
+If you use a symbol without defining it, @code{as} assumes zero for
+all these attributes, and probably won't warn you.  This makes the
+symbol an externally defined symbol, which is generally what you
+would want.
+
+@subsection Value
+The value of a symbol is (usually) 32 bits, the size of one C
+@code{int}.  For a symbol which labels a location in the
+@code{text}, @code{data}, @code{bss} or @code{Absolute} segments the
+value is the number of addresses from the start of that segment to
+the label.  Naturally for @code{text} @code{data} and @code{bss}
+segments the value of a symbol changes as @code{ld} changes segment
+base addresses during linking.  @code{absolute} symbols' values do
+not change during linking: that is why they are called absolute.
+
+The value of an undefined symbol is treated in a special way.  If it
+is 0 then the symbol is not defined in this assembler source
+program, and @code{ld} will try to determine its value from other
+programs it is linked with.  You make this kind of symbol simply by
+mentioning a symbol name without defining it.  A non-zero value
+represents a @code{.comm} common declaration.  The value is how much
+common storage to reserve, in bytes (@i{i.e.} addresses).  The
+symbol refers to the first address of the allocated storage.
+
+@subsection Type
+The type attribute of a symbol is 8 bits encoded in a devious way.
+We kept this coding standard for compatibility with older operating
+systems.
+
+@example
+
+        7     6     5     4     3     2     1     0     bit numbers
+     +-----+-----+-----+-----+-----+-----+-----+-----+
+     |                 |                       |     |
+     |   N_STAB bits   |      N_TYPE bits      |N_EXT|
+     |                 |                       | bit |
+     +-----+-----+-----+-----+-----+-----+-----+-----+
+
+                     n_type byte
+@end example
+
+@subsubsection N_EXT bit
+This bit is set if @code{ld} might need to use the symbol's value
+and type bits.  If this bit is re-set then @code{ld} can ignore the
+symbol while linking.  It is set in two cases.  If the symbol is
+undefined, then @code{ld} is expected to find the symbol's value
+elsewhere in another program module.  Otherwise the symbol has the
+value given, but this symbol name and value are revealed to any other
+programs linked in the same executable program.  This second use of
+the @code{N_EXT} bit is most often done by a @code{.globl} statement.
+
+@subsubsection N_TYPE bits
+These establish the symbol's ``type'', which is mainly a relocation
+concept.  Common values are detailed in the manual describing the
+executable file format.
+
+@subsubsection N_STAB bits
+Common values for these bits are described in the manual on the
+executable file format.
+
+@subsection Desc(riptor)
+This is an arbitrary 16-bit value.  You may establish a symbol's
+descriptor value by using a @code{.desc} statement (@xref{Desc}.).
+A descriptor value means nothing to @code{as}.
+
+@subsection Other
+This is an arbitrary 8-bit value.  It means nothing to @code{as}.
+
+@node Expressions, PseudoOps, Symbols, top
+@chapter Expressions
+An @dfn{expression} specifies an address or numeric value.
+Whitespace may precede and/or follow an expression.
+
+@section Empty Expressions
+An empty expression has no operands: it is just whitespace or null.
+Wherever an absolute expression is required, you may omit the
+expression and @code{as} will assume a value of (absolute) 0.  This
+is compatible with other assemblers.
+
+@section Integer Expressions
+An @dfn{integer expression} is one or more @i{primaries} delimited
+by @i{operators}.
+
+@node Primary, Unops, , Expressions
+@subsection Primaries
+@dfn{Primaries} are symbols, numbers or subexpressions.  Other
+languages might call primaries ``arithmetic operands'' but we don't
+want them confused with ``instruction operands'' of the machine
+language so we give them a different name.
+
+Symbols are evaluated to yield @{@var{segment} @var{value}@} where
+@var{segment} is one of @b{text}, @b{data}, @b{bss}, @b{absolute},
+or @b{undefined}.  @var{value} is a signed 2's complement 32 bit
+integer.
+
+Numbers are usually integers.
+
+A number can be a flonum or bignum.  In this case, you are warned
+that only the low order 32 bits are used, and @code{as} pretends
+these 32 bits are an integer.  You may write integer-manipulating
+instructions that act on exotic constants, compatible with other
+assemblers.
+
+Subexpressions are a left parenthesis (@t{(}) followed by an integer
+expression followed by a right parenthesis (@t{)}), or a unary
+operator followed by an primary.
+
+@subsection Operators
+@dfn{Operators} are arithmetic marks, like @t{+} or @t{%}.  Unary
+operators are followed by an primary.  Binary operators appear
+between primaries.  Operators may be preceded and/or followed by
+whitespace.
+
+@subsection Unary Operators
+@node Unops, , Primary, Expressions
+@code{as} has the following @dfn{unary operators}.  They each take
+one primary, which must be absolute.
+@table @t
+@item -
+Hyphen.  @dfn{Negation}.  Two's complement negation.
+@item ~
+Tilde.  @dfn{Complementation}.  Bitwise not.
+@end table
+
+@subsection Binary Operators
+@dfn{Binary operators} are infix.  Operators are prioritized, but
+equal priority operators are performed left to right.  Apart from
+@samp{+} or @samp{-}, both primaries must be absolute, and the
+result is absolute, else one primary can be either undefined or
+pass1 and the result is pass1.
+@enumerate
+@item
+Highest Priority
+@table @code
+@item *
+@dfn{Multiplication}.
+@item /
+@dfn{Division}.  Truncation is the same as the C operator @samp{/}
+of the compiler that compiled @code{as}.
+@item %
+@dfn{Remainder}.
+@item <
+@itemx <<
+@dfn{Shift Left}.  Same as the C operator @samp{<<} of
+the compiler that compiled @code{as}.
+@item >
+@itemx >>
+@dfn{Shift Right}.  Same as the C operator @samp{>>} of
+the compiler that compiled @code{as}.
+@end table
+@item
+Intermediate priority
+@table @t
+@item |
+@dfn{Bitwise Inclusive Or}.
+@item &
+@dfn{Bitwise And}.
+@item ^
+@dfn{Bitwise Exclusive Or}.
+@item !
+@dfn{Bitwise Or Not}.
+@end table
+@item
+Lowest Priority
+@table @t
+@item +
+@dfn{Addition}.  If either primary is absolute, the result
+has the segment of the other primary.
+If either primary is pass1 or undefined, result is pass1.
+Otherwise @t{+} is illegal.
+@item -
+@dfn{Subtraction}.  If the right primary is absolute, the
+result has the segment of the left primary.
+If either primary is pass1 the result is pass1.
+If either primary is undefined the result is difference segment.
+If both primaries are in the same segment, the result is absolute; provided
+that segment is one of text, data or bss.
+Otherwise @t{-} is illegal.
+@end table
+@end enumerate
+
+The sense of the rules is that you can't add or subtract quantities
+from two different segments.  If both primaries are in one of these
+segments, they must be in the same segment:  @b{text}, @b{data} or
+@b{bss}, and the operator must be @samp{-}.
+
+@node PseudoOps, MachineDependent, Expressions, top
+@chapter Assembler Directives
+@menu
+* Abort::	The Abort directive causes as to abort
+* Align::	Pad the location counter to a power of 2
+* Ascii::	Fill memory with bytes of ASCII characters
+* Asciz::	Fill memory with bytes of ASCII characters followed
+                by a null.
+* Byte::	Fill memory with 8-bit integers
+* Comm::	Reserve public space in the BSS segment
+* Data::	Change to the data segment
+* Desc::	Set the n_desc of a symbol
+* Double::	Fill memory with double-precision floating-point numbers
+* File::	Set the logical file name
+* Fill::	Fill memory with repeated values
+* Float::	Fill memory with single-precision floating-point numbers
+* Global::	Make a symbol visible to the linker
+* Int::		Fill memory with 32-bit integers
+* Lcomm::	Reserve private space in the BSS segment
+* Line::	Set the logical line number
+* Long::	Fill memory with 32-bit integers
+* Lsym::	Create a local symbol
+* Octa::	Fill memory with 128-bit integers
+* Org::		Change the location counter
+* Quad::	Fill memory with 64-bit integers
+* Set::		Set the value of a symbol
+* Short::	Fill memory with 16-bit integers
+* Space::	Fill memory with a repeated value
+* Stab::	Store debugging information
+* Text::	Change to the text segment
+* Word::	Fill memory with 16-bit integers
+@end menu
+
+All assembler directives begin with a symbol that begins with a
+period (@samp{.}).  The rest of the symbol is letters: their case
+does not matter.
+
+@node Abort, Align, PseudoOps, PseudoOps
+@section .abort
+This directive stops the assembly immediately.  It is for
+compatibility with other assemblers.  The original idea was that the
+assembler program would be piped into the assembler.  If the source
+of program wanted to quit, then this directive tells @code{as} to
+quit also.  One day @code{.abort} will not be supported.
+
+@node Align, Ascii, Abort, PseudoOps
+@section .align @var{absolute-expression} , @var{absolute-expression}
+Pad the location counter (in the current subsegment) to a word,
+longword or whatever boundary.  The first expression is the number
+of low-order zero bits the location counter will have after
+advancement.  For example @samp{.align 3} will advance the location
+counter until it a multiple of 8.  If the location counter is
+already a multiple of 8, no change is needed.
+
+The second expression gives the value to be stored in the padding
+bytes.  It (and the comma) may be omitted.  If it is omitted, the
+padding bytes are zeroed.
+
+@node Ascii, Asciz, Align, PseudoOps
+@section .ascii @var{strings}
+This expects zero or more string literals (@xref{Strings}.)
+separated by commas.  It assembles each string (with no automatic
+trailing zero byte) into consecutive addresses.
+
+@node Asciz, Byte, Ascii, PseudoOps
+@section .asciz @var{strings}
+This is just like .ascii, but each string is followed by a zero byte.
+The `z' in `.asciz' stands for `zero'.
+
+@node Byte, Comm, Asciz, PseudoOps
+@section .byte @var{expressions}
+
+This expects zero or more expressions, separated by commas.
+Each expression is assembled into the next byte.
+
+@node Comm, Data, Byte, PseudoOps
+@section .comm @var{symbol} , @var{length}
+This declares a named common area in the bss segment.  Normally
+@code{ld} reserves memory addresses for it during linking, so no
+partial program defines the location of the symbol.  Tell @code{ld}
+that it must be at least @var{length} bytes long.  @code{ld} will
+allocate space that is at least as long as the longest @code{.comm}
+request in any of the partial programs linked.  @var{length} is an
+absolute expression.
+
+@node Data, Desc, Comm, PseudoOps
+@section .data @var{subsegment}
+This tells @code{as} to assemble the following statements onto the
+end of the data subsegment numbered @var{subsegment} (which is an
+absolute expression).  If @var{subsegment} is omitted, it defaults
+to zero.
+
+@node Desc, Double, Data, PseudoOps
+@section .desc @var{symbol}, @var{absolute-expression}
+This sets @code{n_desc} of the symbol to the low 16 bits of
+@var{absolute-expression}.
+
+@node Double, File, Desc, PseudoOps
+@section .double @var{flonums}
+This expects zero or more flonums, separated by commas.  It assembles
+floating point numbers.  The exact kind of floating point numbers
+emitted depends on what computer @code{as} is assembling for.  See
+the machine-specific part of the manual for the machine the
+assembler is running on for more information.
+
+@node File, Fill, Double, PseudoOps
+@section .file @var{string}
+This tells @code{as} that we are about to start a new logical
+file.  @var{String} is the new file name.  An empty file name
+is OK, but you must still give the quotes: @code{""}.  This
+statement may go away in future: it is only recognized to
+be compatible with old @code{as} programs.
+
+@node Fill, Float, File, PseudoOps
+@section .fill @var{repeat} , @var{size} , @var{value}
+@var{result}, @var{size} and @var{value} are absolute expressions.
+This emits @var{repeat} copies of @var{size} bytes.  @var{Repeat}
+may be zero or more.  @var{Size} may be zero or more, but if it is
+more than 8, then it is deemed to have the value 8, compatible with
+other people's assemblers.  The contents of each @var{repeat} bytes
+is taken from an 8-byte number.  The highest order 4 bytes are
+zero.  The lowest order 4 bytes are @var{value} rendered in the
+byte-order of an integer on the computer @code{as} is assembling for.
+Each @var{size} bytes in a repetition is taken from the lowest order
+@var{size} bytes of this number.  Again, this bizarre behavior is
+compatible with other people's assemblers.
+
+@var{Size} and @var{value} are optional.
+If the second comma and @var{value} are absent, @var{value} is
+assumed zero.  If the first comma and following tokens are absent,
+@var{size} is assumed to be 1.
+
+@node Float, Global, Fill, PseudoOps
+@section .float @var{flonums}
+This directive assembles zero or more flonums, separated by commas.
+The exact kind of floating point numbers emitted depends on what
+computer @code{as} is assembling for.  See the machine-specific part
+of the manual for the machine the assembler is running on for more
+information.
+
+@node Global, Int, Float, PseudoOps
+@section .global @var{symbol}
+This makes the symbol visible to @code{ld}.  If you define
+@var{symbol} in your partial program, its value is made available to
+other partial programs that are linked with it.  Otherwise,
+@var{symbol} will take its attributes from a symbol of the same name
+from another partial program it is linked with.
+
+This is done by setting the @code{N_EXT} bit
+of that symbol's @code{n_type} to 1.
+
+@node Int, Lcomm, Global, PseudoOps
+@section .int @var{expressions}
+Expect zero or more @var{expressions}, of any segment, separated by
+commas.  For each expression, emit a 32-bit number that will, at run
+time, be the value of that expression.  The byte order of the
+expression depends on what kind of computer will run the program.
+
+@node Lcomm, Line, Int, PseudoOps
+@section .lcomm @var{symbol} , @var{length}
+Reserve @var{length} (an absolute expression) bytes for a local
+common and denoted by @var{symbol}, whose segment and value are
+those of the new local common.  The addresses are allocated in the
+@code{bss} segment, so at run-time the bytes will start off zeroed.
+@var{Symbol} is not declared global (@xref{Global}.), so is normally
+not visible to @code{ld}.
+
+@node Line, Long, Lcomm, PseudoOps
+@section .line @var{logical line number}
+This tells @code{as} to change the logical line number.
+@var{logical line number} is an absolute expression.  The next line
+will have that logical line number.  So any other statements on the
+current line (after a @code{;}) will be reported as on logical line
+number @var{logical line number} - 1.  One day this directive will
+be unsupported: it is used only for compatibility with existing
+assembler programs.
+
+@node Long, Lsym, Line, PseudoOps
+@section .long @var{expressions}
+This is the same as @samp{.int}, @pxref{Int}.
+
+@node Lsym, Octa, Long, PseudoOps
+@section .lsym @var{symbol}, @var{expression}
+This creates a new symbol named @var{symbol}, but do not put it in
+the hash table, ensuring it cannot be referenced by name during the
+rest of the assembly.  This sets the attributes of the symbol to be
+the same as the expression value.  @code{n_other} = @code{n_desc} =
+0.  @code{n_type} = (whatever segment the expression has); the
+@code{N_EXT} bit of @code{n_type} is zero.  @code{n_value} =
+(expression's value).
+
+@node Octa, Org, Lsym, PseudoOps
+@section .octa @var{bignums}
+This expects zero or more bignums, separated by commas.  For each
+bignum, it emits an 16-byte (@b{octa}-word) integer.
+
+@node Org, Quad, Octa, PseudoOps
+@section .org @var{new-lc} , @var{fill}
+This will advance the location counter of the current segment to
+@var{new-lc}.  @var{new-lc} is either an absolute expression or an
+expression with the same segment as the current subsegment.  That
+is, you can't use @code{.org} to cross segments.  Because @code{as}
+tries to assemble programs in one pass @var{new-lc} must be defined.
+If you really detest this restriction we eagerly await a chance to
+share your improved assembler.  To be compatible with former
+assemblers, if the segment of @var{new-lc} is absolute then we
+pretend the segment of @var{new-lc} is the same as the current
+subsegment.
+
+Beware that the origin is relative to the start of the segment, not
+to the start of the subsegment.  This is compatible with other
+people's assemblers.
+
+If the location counter (of the current subsegment) is advanced, the
+intervening bytes are filled with @var{fill} which should be an
+absolute expression.  If the comma and @var{fill} are omitted,
+@var{fill} defaults to zero.
+
+@node Quad, Set, Org, PseudoOps
+@section .quad @var{bignums}
+This expects zero or more bignums, separated by commas.  For each
+bignum, it emits an 8-byte (@b{quad}-word) integer.  If the bignum
+won't fit in a quad-word, it prints a warning message; and just
+takes the lowest order 8 bytes of the bignum.
+
+@node Set, Short, Quad, PseudoOps
+@section .set @var{symbol}, @var{expression}
+
+This sets the value of @var{symbol} to expression.  This will change
+@code{n_value} and @code{n_type} to conform to the @var{expression}.
+if @code{n_ext} is set, it remains set.
+
+It is OK to @code{.set} a symbol many times in the same assembly.
+If the expression's segment is unknowable during pass 1, a second
+pass over the source program will be forced.  The second pass is
+currently not implemented.  @code{as} will abort with an error
+message if one is required.
+
+If you @code{.set} a global symbol, the value stored in the object
+file is the last value stored into it.
+
+@node Short, Space, Set, PseudoOps
+@section .short @var{expressions}
+Except on the Sparc this is the same as @samp{.word}.  @xref{Word}.
+On the sparc, this expects zero or more @var{expressions}, and emits
+a 16 bit number for each.
+
+@node Space, Stab, Short, PseudoOps
+@section .space @var{size} , @var{fill}
+This emits @var{size} bytes, each of value @var{fill}.  Both
+@var{size} and @var{fill} are absolute expressions.  If the comma
+and @var{fill} are omitted, @var{fill} is assumed to be zero.
+
+@node Stab, Text, Space, PseudoOps
+@section .stabd, .stabn, .stabs
+There are three directives that begin @code{.stab@dots{}}.
+All emit symbols, for use by symbolic debuggers.
+The symbols are not entered in @code{as}' hash table: they
+cannot be referenced elsewhere in the source file.
+Up to five fields are required:
+@table @var
+@item string
+This is the symbol's name.  It may contain any character except @samp{\000},
+so is more general than ordinary symbol names.  Some debuggers used to
+code arbitrarily complex structures into symbol names using this technique.
+@item type
+An absolute expression.  The symbol's @code{n_type} is set to the low 8
+bits of this expression.
+Any bit pattern is permitted, but @code{ld} and debuggers will choke on
+silly bit patterns.
+@item other
+An absolute expression.
+The symbol's @code{n_other} is set to the low 8 bits of this expression.
+@item desc
+An absolute expression.
+The symbol's @code{n_desc} is set to the low 16 bits of this expression.
+@item value
+An absolute expression which becomes the symbol's @code{n_value}.
+@end table
+
+If a warning is detected while reading the @code{.stab@dots{}}
+statement the symbol has probably already been created and you will
+get a half-formed symbol in your object file.  This is compatible
+with earlier assemblers (!)
+
+.stabd @var{type} , @var{other} , @var{desc}
+
+The ``name'' of the symbol generated is not even an empty string.
+It is a null pointer, for compatibility.  Older assemblers used a
+null pointer so they didn't waste space in object files with empty
+strings.
+
+The symbol's @code{n_value} is set to the location counter,
+relocatably.  When your program is linked, the value of this symbol
+will be where the location counter was when the @code{.stabd} was
+assembled.
+
+.stabn @var{type} , @var{other} , @var{desc} , @var{value}
+
+The name of the symbol is set to the empty string @code{""}.
+
+.stabs @var{string} ,  @var{type} , @var{other} , @var{desc} , @var{value}
+
+@node Text, Word, Stab, PseudoOps
+@section .text @var{subsegment}
+Tells @code{as} to assemble the following statements onto the end of
+the text subsegment numbered @var{subsegment}, which is an absolute
+expression.  If @var{subsegment} is omitted, subsegment number zero
+is used.
+
+@node Word, , Text, PseudoOps
+@section .word @var{expressions}
+On the Sparc, this produces 32-bit numbers instead of 16-bit ones.
+This expect zero or more @var{expressions}, of any segment,
+separated by commas.  For each expression, emit a 16-bit number that
+will, at run time, be the value of that expression.  The byte order
+of the expression depends on what kind of computer will run the
+program.
+
+@section Deprecated Directives
+One day these directives won't work.
+They are included for compatibility with older assemblers.
+@table @t
+@item .abort
+@item .file
+@item .line
+@end table
+
+@node MachineDependent, Maintenance, PseudoOps, top
+@chapter Machine Dependent Features
+@section Vax
+@subsection Options
+
+The Vax version of @code{as} accepts any of the following options,
+gives a warning message that the option was ignored and proceeds.
+These options are for compatibility with scripts designed for other
+people's assemblers.
+
+@table @asis
+@item @kbd{-D} (Debug)
+@itemx @kbd{-S} (Symbol Table)
+@itemx @kbd{-T} (Token Trace)
+These are obsolete options used to debug old assemblers.
+
+@item @kbd{-d} (Displacement size for JUMPs)
+This option expects a number following the @kbd{-d}.  Like options
+that expect filenames, the number may immediately follow the
+@kbd{-d} (old standard) or constitute the whole of the command line
+argument that follows @kbd{-d} (GNU standard).
+
+@item @kbd{-V} (Virtualize Interpass Temporary File)
+Some other assemblers use a temporary file.  This option
+commanded them to keep the information in active memory rather
+than in a disk file.  @code{as} always does this, so this
+option is redundant.
+
+@item @kbd{-J} (JUMPify Longer Branches)
+Many 32-bit computers permit a variety of branch instructions
+to do the same job.  Some of these instructions are short (and
+fast) but have a limited range; others are long (and slow) but
+can branch anywhere in virtual memory.  Often there are 3
+flavors of branch: short, medium and long.  Some other
+assemblers would emit short and medium branches, unless told by
+this option to emit short and long branches.
+
+@item @kbd{-t} (Temporary File Directory)
+Some other assemblers may use a temporary file, and this option
+takes a filename being the directory to site the temporary
+file.  @code{as} does not use a temporary disk file, so this
+option makes no difference.  @kbd{-t} needs exactly one
+filename.
+@end table
+
+The Vax version of the assembler accepts two options when
+compiled for VMS.  They are @kbd{-h}, and @kbd{-+}.  The
+@kbd{-h} option prevents @code{as} from modifying the
+symbol-table entries for symbols that contain lowercase
+characters (I think).  The @kbd{-+} option causes @code{as} to
+print warning messages if the FILENAME part of the object file,
+or any symbol name is larger than 31 characters.  The @kbd{-+}
+option also insertes some code following the @samp{_main}
+symbol so that the object file will be compatable with Vax-11
+"C".
+
+@subsection Floating Point
+Conversion of flonums to floating point is correct, and
+compatible with previous assemblers.  Rounding is
+towards zero if the remainder is exactly half the least significant bit.
+
+@code{D}, @code{F}, @code{G} and @code{H} floating point formats
+are understood.
+
+Immediate floating literals (@i{e.g.} @samp{S`$6.9})
+are rendered correctly.  Again, rounding is towards zero in the
+boundary case.
+
+The @code{.float} directive produces @code{f} format numbers.
+The @code{.double} directive produces @code{d} format numbers.
+
+@subsection Machine Directives
+The Vax version of the assembler supports four directives for
+generating Vax floating point constants.  They are described in the
+table below.
+
+@table @code
+@item .dfloat
+This expects zero or more flonums, separated by commas, and
+assembles Vax @code{d} format 64-bit floating point constants.
+
+@item .ffloat
+This expects zero or more flonums, separated by commas, and
+assembles Vax @code{f} format 32-bit floating point constants.
+
+@item .gfloat
+This expects zero or more flonums, separated by commas, and
+assembles Vax @code{g} format 64-bit floating point constants.
+
+@item .hfloat
+This expects zero or more flonums, separated by commas, and
+assembles Vax @code{h} format 128-bit floating point constants.
+
+@end table
+
+@subsection Opcodes
+All DEC mnemonics are supported.  Beware that @code{case@dots{}}
+instructions have exactly 3 operands.  The dispatch table that
+follows the @code{case@dots{}} instruction should be made with
+@code{.word} statements.  This is compatible with all unix
+assemblers we know of.
+
+@subsection Branch Improvement
+Certain pseudo opcodes are permitted.  They are for branch
+instructions.  They expand to the shortest branch instruction that
+will reach the target.  Generally these mnemonics are made by
+substituting @samp{j} for @samp{b} at the start of a DEC mnemonic.
+This feature is included both for compatibility and to help
+compilers.  If you don't need this feature, don't use these
+opcodes.  Here are the mnemonics, and the code they can expand into.
+
+@table @code
+@item jbsb
+@samp{Jsb} is already an instruction mnemonic, so we chose @samp{jbsb}.
+@table @asis
+@item (byte displacement)
+@kbd{bsbb @dots{}}
+@item (word displacement)
+@kbd{bsbw @dots{}}
+@item (long displacement)
+@kbd{jsb @dots{}}
+@end table
+@item jbr
+@itemx jr
+Unconditional branch.
+@table @asis
+@item (byte displacement)
+@kbd{brb @dots{}}
+@item (word displacement)
+@kbd{brw @dots{}}
+@item (long displacement)
+@kbd{jmp @dots{}}
+@end table
+@item j@var{COND}
+@var{COND} may be any one of the conditional branches
+@code{neq nequ eql eqlu gtr geq lss gtru lequ vc vs gequ cc lssu cs}.
+@var{COND} may also be one of the bit tests
+@code{bs bc bss bcs bsc bcc bssi bcci lbs lbc}.
+@var{NOTCOND} is the opposite condition to @var{COND}.
+@table @asis
+@item (byte displacement)
+@kbd{b@var{COND} @dots{}}
+@item (word displacement)
+@kbd{b@var{UNCOND} foo ; brw @dots{} ; foo:}
+@item (long displacement)
+@kbd{b@var{UNCOND} foo ; jmp @dots{} ; foo:}
+@end table
+@item jacb@var{X}
+@var{X} may be one of @code{b d f g h l w}.
+@table @asis
+@item (word displacement)
+@kbd{@var{OPCODE} @dots{}}
+@item (long displacement)
+@kbd{@var{OPCODE} @dots{}, foo ; brb bar ; foo: jmp @dots{} ; bar:}
+@end table
+@item jaob@var{YYY}
+@var{YYY} may be one of @code{lss leq}.
+@item jsob@var{ZZZ}
+@var{ZZZ} may be one of @code{geq gtr}.
+@table @asis
+@item (byte displacement)
+@kbd{@var{OPCODE} @dots{}}
+@item (word displacement)
+@kbd{@var{OPCODE} @dots{}, foo ; brb bar ; foo: brw @var{destination} ; bar:}
+@item (long displacement)
+@kbd{@var{OPCODE} @dots{}, foo ; brb bar ; foo: jmp @var{destination} ; bar: }
+@end table
+@item aobleq
+@itemx aoblss
+@itemx sobgeq
+@itemx sobgtr
+@table @asis
+@item (byte displacement)
+@kbd{@var{OPCODE} @dots{}}
+@item (word displacement)
+@kbd{@var{OPCODE} @dots{}, foo ; brb bar ; foo: brw @var{destination} ; bar:}
+@item (long displacement)
+@kbd{@var{OPCODE} @dots{}, foo ; brb bar ; foo: jmp @var{destination} ; bar:}
+@end table
+@end table
+
+@subsection operands
+The immediate character is @samp{$} for Unix compatibility, not
+@samp{#} as DEC writes it.
+
+The indirect character is @samp{*} for Unix compatibility, not
+@samp{@@} as DEC writes it.
+
+The displacement sizing character is @samp{`} (an accent grave) for
+Unix compatibility, not @samp{^} as DEC writes it.  The letter
+preceding @samp{`} may have either case.  @samp{G} is not
+understood, but all other letters (@code{b i l s w}) are understood.
+
+Register names understood are @code{r0 r1 r2 @dots{} r15 ap fp sp
+pc}.  Any case of letters will do.
+
+For instance
+@example
+tstb *w`$4(r5)
+@end example
+
+Any expression is permitted in an operand.  Operands are comma
+separated.
+
+@c There is some bug to do with recognizing expressions
+@c in operands, but I forget what it is.  It is
+@c a syntax clash because () is used as an address mode
+@c and to encapsulate sub-expressions.
+@subsection Not Supported
+Vax bit fields can not be assembled with @code{as}.  Someone
+can add the required code if they really need it.
+
+@section 680x0
+@subsection Options
+The 680x0 version of @code{as} has two machine dependent options.
+One shortens undefined references from 32 to 16 bits, while the
+other is used to tell @code{as} what kind of machine it is
+assembling for.
+
+You can use the @kbd{-l} option to shorten the size of references to
+undefined symbols.  If the @kbd{-l} option is not given, references
+to undefined symbols will be a full long (32 bits) wide.  (Since
+@code{as} cannot know where these symbols will end up being,
+@code{as} can only allocate space for the linker to fill in later.
+Since @code{as} doesn't know how far away these symbols will be, it
+allocates as much space as it can.) If this option is given, the
+references will only be one word wide (16 bits).  This may be useful
+if you want the object file to be as small as possible, and you know
+that the relevant symbols will be less than 17 bits away.
+
+The 680x0 version of @code{as} is usually used to assemble programs
+for the Motorola MC68020 microprocessor.  Occasionally it is used to
+assemble programs for the mostly-similar-but-slightly-different
+MC68000 or MC68010 microprocessors.  You can give @code{as} the
+options @samp{-m68000}, @samp{-mc68000}, @samp{-m68010},
+@samp{-mc68010}, @samp{-m68020}, and @samp{-mc68020} to tell it what
+processor it should be assembling for.  Unfortunately, these options
+are almost entirely unused and untried.  They make work, but nobody
+has tested them much.
+
+@subsection Syntax
+
+The 680x0 version of @code{as} uses syntax similar to the Sun
+assembler.  Size modifieres are appended directly to the end of the
+opcode without an intervening period.  Thus, @samp{move.l} is
+written @samp{movl}, etc.
+
+@c   This is no longer true
+@c Explicit size modifiers for branch instructions are ignored; @code{as}
+@c automatically picks the smallest size that will reach the
+destination.
+
+If @code{as} is compiled with SUN_ASM_SYNTAX defined, it will also
+allow Sun-style local labels of the form @samp{1$} through @samp{$9}.
+
+In the following table @dfn{apc} stands for any of the address
+registers (@samp{a0} through @samp{a7}), nothing, (@samp{}), the
+Program Counter (@samp{pc}), or the zero-address relative to the
+program counter (@samp{zpc}).
+
+The following addressing modes are understood:
+@table @dfn
+@item Immediate
+@samp{#@var{digits}}
+
+@item Data Register
+@samp{d0} through @samp{d7}
+
+@item Address Register
+@samp{a0} through @samp{a7}
+
+@item Address Register Indirect
+@samp{a0@@} through @samp{a7@@}
+
+@item Address Register Postincrement
+@samp{a0@@+} through @samp{a7@@+}
+
+@item Address Register Predecrement
+@samp{a0@@-} through @samp{a7@@-}
+
+@item Indirect Plus Offset
+@samp{@var{apc}@@(@var{digits})}
+
+@item Index
+@samp{@var{apc}@@(@var{digits},@var{register}:@var{size}:@var{scale})}
+or @samp{@var{apc}@@(@var{register}:@var{size}:@var{scale})}
+
+@item Postindex
+@samp{@var{apc}@@(@var{digits})@@(@var{digits},@var{register}:@var{size}:@var{scale})}
+or @samp{@var{apc}@@(@var{digits})@@(@var{register}:@var{size}:@var{scale})}
+
+@item Preindex
+@samp{@var{apc}@@(@var{digits},@var{register}:@var{size}:@var{scale})@@(@var{digits})}
+or @samp{@var{apc}@@(@var{register}:@var{size}:@var{scale})@@(@var{digits})}
+
+@item Memory Indirect
+@samp{@var{apc}@@(@var{digits})@@(@var{digits})}
+
+@item Absolute
+@samp{@var{symbol}}, or @samp{@var{digits}}, or either of the above followed
+by @samp{:b}, @samp{:w}, or @samp{:l}.
+@end table
+
+@subsection Floating Point
+The floating point code is not too well tested, and may have
+subtle bugs in it.
+
+Packed decimal (P) format floating literals are not supported.
+Feel free to add the code yourself.
+
+The floating point formats generated by directives are these.
+@table @code
+@item .float
+@code{Single} precision floating point constants.
+@item .double
+@code{Double} precision floating point constants.
+@end table
+
+There is no directive to produce regions of memory holding
+extended precision numbers, however they can be used as
+immediate operands to floating-point instructions.  Adding a
+directive to create extended precision numbers would not be
+hard.  Nobody has felt any burning need to do it.
+
+@subsection Machine Directives
+In order to be compatible with the Sun assembler the 680x0 assembler
+understands the following directives.
+@table @code
+@item .data1
+This directive is identical to a @code{.data 1} directive.
+@item .data2
+This directive is identical to a @code{.data 2} directive.
+@item .even
+This directive is identical to a @code{.align 1} directive.
+@c Is this true?  does it work???
+@item .skip
+This directive is identical to a @code{.space} directive.
+@end table
+
+@subsection Opcodes
+Danger:  Several bugs have been found in the opcode table (and
+fixed).  More bugs may exist.  Be careful when using obscure
+instructions.
+
+The assembler automatically chooses the proper size for branch
+instructions.  However, most attempts to force a short displacement
+will be honored.  Branches that are forced to use a short
+displacement will not be adjusted if the target is out of range.
+Let The User Beware.
+
+The immediate character is @samp{#} for Sun compatibility.  The
+line-comment character is @samp{|}.  If a @samp{#} appears at the
+beginning of a line, it is treated as a comment unless it looks like
+@samp{# line file}, in which case it is treated normally.
+
+@section 32x32
+@subsection Options
+The 32x32 version of @code{as} accepts a @kbd{-m32032} option to
+specify thiat it is compiling for a 32032 processor, or a
+@kbd{-m32532} to specify that it is compiling for a 32532 option.
+The default (if neither is specified) is chosen when the assembler
+is compiled.
+
+@subsection Syntax
+I don't know anything about the 32x32 syntax assembled by
+@code{as}.  Someone who undersands the processor (I've never seen
+one) and the possible syntaxes should write this section.
+
+@subsection Floating Point
+The 32x32 uses IEEE floating point numbers, but @code{as} will only
+create single or double precision values.  I don't know if the 32x32
+understands extended precision numbers.
+
+@subsection Machine Directives
+The 32x32 has no machine dependent directives.
+
+@section Sparc
+@subsection Options
+The sparc has no machine dependent options.
+
+@subsection syntax
+I don't know anything about Sparc syntax.  Someone who does
+will have to write this section.
+
+@subsection Floating Point
+The Sparc uses ieee floating-point numbers.
+
+@subsection Machine Directives
+The Sparc version of @code{as} supports the following additional
+machine directives:
+
+@table @code
+@item .common
+This must be followed by a symbol name, a positive number, and
+@code{"bss"}.  This behaves somewhat like @code{.comm}, but the
+syntax is different.
+
+@item .global
+This is functionally identical to @code{.globl}.
+
+@item .half
+This is functionally identical to @code{.short}.
+
+@item .proc
+This directive is ignored.  Any text following it on the same
+line is also ignored.
+
+@item .reserve
+This must be followed by a symbol name, a positive number, and
+@code{"bss"}.  This behaves somewhat like @code{.lcomm}, but the
+syntax is different.
+
+@item .seg
+This must be followed by @code{"text"}, @code{"data"}, or
+@code{"data1"}.  It behaves like @code{.text}, @code{.data}, or
+@code{.data 1}.
+
+@item .skip
+This is functionally identical to the .space directive.
+
+@item .word
+On the Sparc, the .word directive produces 32 bit values,
+instead of the 16 bit values it produces on every other machine.
+
+@end table
+
+@section Intel 80386
+@subsection Options
+The 80386 has no machine dependent options.
+
+@subsection AT&T Syntax versus Intel Syntax
+In order to maintain compatibility with the output of @code{GCC},
+@code{as} supports AT&T System V/386 assembler syntax.  This is quite
+different from Intel syntax.  We mention these differences because
+almost all 80386 documents used only Intel syntax.  Notable differences
+between the two syntaxes are:
+@itemize @bullet
+@item
+AT&T immediate operands are preceded by @samp{$}; Intel immediate
+operands are undelimited (Intel @samp{push 4} is AT&T @samp{pushl $4}).
+AT&T register operands are preceded by @samp{%}; Intel register operands
+are undelimited.  AT&T absolute (as opposed to PC relative) jump/call
+operands are prefixed by @samp{*}; they are undelimited in Intel syntax.
+
+@item
+AT&T and Intel syntax use the opposite order for source and destination
+operands.  Intel @samp{add eax, 4} is @samp{addl $4, %eax}.  The
+@samp{source, dest} convention is maintained for compatibility with
+previous Unix assemblers.
+
+@item
+In AT&T syntax the size of memory operands is determined from the last
+character of the opcode name.  Opcode suffixes of @samp{b}, @samp{w},
+and @samp{l} specify byte (8-bit), word (16-bit), and long (32-bit)
+memory references.  Intel syntax accomplishes this by prefixes memory
+operands (@emph{not} the opcodes themselves) with @samp{byte ptr},
+@samp{word ptr}, and @samp{dword ptr}.  Thus, Intel @samp{mov al, byte
+ptr @var{foo}} is @samp{movb @var{foo}, %al} in AT&T syntax.
+
+@item
+Immediate form long jumps and calls are
+@samp{lcall/ljmp $@var{segment}, $@var{offset}} in AT&T syntax; the
+Intel syntax is
+@samp{call/jmp far @var{segment}:@var{offset}}.  Also, the far return
+instruction 
+is @samp{lret $@var{stack-adjust}} in AT&T syntax; Intel syntax is
+@samp{ret far @var{stack-adjust}}.
+
+@item
+The AT&T assembler does not provide support for multiple segment
+programs.  Unix style systems expect all programs to be single segments.
+@end itemize
+
+@subsection Opcode Naming
+Opcode names are suffixed with one character modifiers which specify the
+size of operands.  The letters @samp{b}, @samp{w}, and @samp{l} specify
+byte, word, and long operands.  If no suffix is specified by an
+instruction and it contains no memory operands then @code{as} tries to
+fill in the missing suffix based on the destination register operand
+(the last one by convention).  Thus, @samp{mov %ax, %bx} is equivalent
+to @samp{movw %ax, %bx}; also, @samp{mov $1, %bx} is equivalent to
+@samp{movw $1, %bx}.  Note that this is incompatible with the AT&T Unix
+assembler which assumes that a missing opcode suffix implies long
+operand size.  (This incompatibility does not affect compiler output
+since compilers always explicitly specify the opcode suffix.)
+
+Almost all opcodes have the same names in AT&T and Intel format.  There
+are a few exceptions.  The sign extend and zero extend instructions need
+two sizes to specify them.  They need a size to sign/zero extend
+@emph{from} and a size to zero extend @emph{to}.  This is accomplished
+by using two opcode suffixes in AT&T syntax.  Base names for sign extend
+and zero extend are @samp{movs@dots{}} and @samp{movz@dots{}} in AT&T
+syntax (@samp{movsx} and @samp{movzx} in Intel syntax).  The opcode
+suffixes are tacked on to this base name, the @emph{from} suffix before
+the @emph{to} suffix.  Thus, @samp{movsbl %al, %edx} is AT&T syntax for
+``move sign extend @emph{from} %al @emph{to} %edx.''  Possible suffixes,
+thus, are @samp{bl} (from byte to long), @samp{bw} (from byte to word),
+and @samp{wl} (from word to long).
+
+The Intel syntax conversion instructions
+@itemize @bullet
+@item
+@samp{cbw} --- sign-extend byte in @samp{%al} to word in @samp{%ax},
+@item
+@samp{cwde} --- sign-extend word in @samp{%ax} to long in @samp{%eax},
+@item
+@samp{cwd} --- sign-extend word in @samp{%ax} to long in @samp{%dx:%ax},
+@item
+@samp{cdq} --- sign-extend dword in @samp{%eax} to quad in @samp{%edx:%eax},
+@end itemize
+are called @samp{cbtw}, @samp{cwtl}, @samp{cwtd}, and @samp{cltd} in
+AT&T naming.  @code{as} accepts either naming for these instructions.
+
+Far call/jump instructions are @samp{lcall} and @samp{ljmp} in
+AT&T syntax, but are @samp{call far} and @samp{jump far} in Intel
+convention.  
+
+@subsection Register Naming
+Register operands are always prefixes with @samp{%}.  The 80386 registers
+consist of
+@itemize @bullet
+@item
+the 8 32-bit registers @samp{%eax} (the accumulator), @samp{%ebx},
+@samp{%ecx}, @samp{%edx}, @samp{%edi}, @samp{%esi}, @samp{%ebp} (the
+frame pointer), and @samp{%esp} (the stack pointer).
+
+@item
+the 8 16-bit low-ends of these: @samp{%ax}, @samp{%bx}, @samp{%cx},
+@samp{%dx}, @samp{%di}, @samp{%si}, @samp{%bp}, and @samp{%sp}.
+
+@item
+the 8 8-bit registers: @samp{%ah}, @samp{%al}, @samp{%bh},
+@samp{%bl}, @samp{%ch}, @samp{%cl}, @samp{%dh}, and @samp{%dl} (These
+are the high-bytes and low-bytes of @samp{%ax}, @samp{%bx},
+@samp{%cx}, and @samp{%dx})
+
+@item
+the 6 segment registers @samp{%cs} (code segment), @samp{%ds}
+(data segment), @samp{%ss} (stack segment), @samp{%es}, @samp{%fs},
+and @samp{%gs}.
+
+@item
+the 3 processor control registers @samp{%cr0}, @samp{%cr2}, and
+@samp{%cr3}.
+
+@item
+the 6 debug registers @samp{%db0}, @samp{%db1}, @samp{%db2},
+@samp{%db3}, @samp{%db6}, and @samp{%db7}.
+
+@item
+the 2 test registers @samp{%tr6} and @samp{%tr7}.
+
+@item
+the 8 floating point register stack @samp{%st} or equivalently
+@samp{%st(0)}, @samp{%st(1)}, @samp{%st(2)}, @samp{%st(3)},
+@samp{%st(4)}, @samp{%st(5)}, @samp{%st(6)}, and @samp{%st(7)}.
+@end itemize
+
+@subsection Opcode Prefixes
+Opcode prefixes are used to modify the following opcode.  They are used
+to repeat string instructions, to provide segment overrides, to perform
+bus lock operations, and to give operand and address size (16-bit
+operands are specified in an instruction by prefixing what would
+normally be 32-bit operands with a ``operand size'' opcode prefix).
+Opcode prefixes are usually given as single-line instructions with no
+operands, and must directly precede the instruction they act upon.  For
+example, the @samp{scas} (scan string) instruction is repeated with:
+@example
+	repne
+	scas
+@end example
+
+Here is a list of opcode prefixes:
+@itemize @bullet
+@item
+Segment override prefixes @samp{cs}, @samp{ds}, @samp{ss}, @samp{es},
+@samp{fs}, @samp{gs}.  These are automatically added by specifying
+using the @var{segment}:@var{memory-operand} form for memory references.
+
+@item
+Operand/Address size prefixes @samp{data16} and @samp{addr16}
+change 32-bit operands/addresses into 16-bit operands/addresses.  Note
+that 16-bit addressing modes (i.e. 8086 and 80286 addressing modes)
+are not supported (yet).
+
+@item
+The bus lock prefix @samp{lock} inhibits interrupts during
+execution of the instruction it precedes.  (This is only valid with
+certain instructions; see a 80386 manual for details).
+
+@item
+The wait for coprocessor prefix @samp{wait} waits for the
+coprocessor to complete the current instruction.  This should never be
+needed for the 80386/80387 combination.
+
+@item
+The @samp{rep}, @samp{repe}, and @samp{repne} prefixes are added
+to string instructions to make them repeat @samp{%ecx} times.
+@end itemize
+
+@subsection Memory References
+An Intel syntax indirect memory reference of the form
+@example
+@var{segment}:[@var{base} + @var{index}*@var{scale} + @var{disp}]
+@end example
+is translated into the AT&T syntax
+@example
+@var{segment}:@var{disp}(@var{base}, @var{index}, @var{scale})
+@end example
+where @var{base} and @var{index} are the optional 32-bit base and
+index registers, @var{disp} is the optional displacement, and
+@var{scale}, taking the values 1, 2, 4, and 8, multiplies @var{index}
+to calculate the address of the operand.  If no @var{scale} is
+specified, @var{scale} is taken to be 1.  @var{segment} specifies the
+optional segment register for the memory operand, and may override the
+default segment register (see a 80386 manual for segment register
+defaults). Note that segment overrides in AT&T syntax @emph{must} have
+be preceded by a @samp{%}.  If you specify a segment override which
+coincides with the default segment register, @code{as} will @emph{not}
+output any segment register override prefixes to assemble the given
+instruction.  Thus, segment overrides can be specified to emphasize which
+segment register is used for a given memory operand.
+
+Here are some examples of Intel and AT&T style memory references:
+@table @asis
+
+@item AT&T: @samp{-4(%ebp)}, Intel:  @samp{[ebp - 4]}
+@var{base} is @samp{%ebp}; @var{disp} is @samp{-4}. @var{segment} is
+missing, and the default segment is used (@samp{%ss} for addressing with
+@samp{%ebp} as the base register).  @var{index}, @var{scale} are both missing.
+
+@item AT&T: @samp{foo(,%eax,4)}, Intel: @samp{[foo + eax*4]}
+@var{index} is @samp{%eax} (scaled by a @var{scale} 4); @var{disp} is
+@samp{foo}.  All other fields are missing.  The segment register here
+defaults to @samp{%ds}.
+
+@item AT&T: @samp{foo(,1)}; Intel @samp{[foo]}
+This uses the value pointed to by @samp{foo} as a memory operand.
+Note that @var{base} and @var{index} are both missing, but there is only
+@emph{one} @samp{,}.  This is a syntactic exception.
+
+@item AT&T: @samp{%gs:foo}; Intel @samp{gs:foo}
+This selects the contents of the variable @samp{foo} with segment
+register @var{segment} being @samp{%gs}.
+	
+@end table
+
+Absolute (as opposed to PC relative) call and jump operands must be
+prefixed with @samp{*}.  If no @samp{*} is specified, @code{as} will
+always choose PC relative addressing for jump/call labels.  
+
+Any instruction that has a memory operand @emph{must} specify its size (byte,
+word, or long) with an opcode suffix (@samp{b}, @samp{w}, or @samp{l},
+respectively).
+
+@subsection Handling of Jump Instructions
+Jump instructions are always optimized to use the smallest possible
+displacements.  This is accomplished by using byte (8-bit) displacement
+jumps whenever the target is sufficiently close.  If a byte displacement
+is insufficient a long (32-bit) displacement is used.  We do not support
+word (16-bit) displacement jumps (i.e. prefixing the jump instruction
+with the @samp{addr16} opcode prefix), since the 80386 insists upon masking
+@samp{%eip} to 16 bits after the word displacement is added.
+
+Note that the @samp{jcxz}, @samp{jecxz}, @samp{loop}, @samp{loopz},
+@samp{loope}, @samp{loopnz} and @samp{loopne} instructions only come in
+byte displacements, so that it is possible that use of these
+instructions (@code{GCC} does not use them) will cause the assembler to
+print an error message (and generate incorrect code).  The AT&T 80386
+assembler tries to get around this problem by expanding @samp{jcxz foo} to
+@example
+         jcxz cx_zero
+         jmp cx_nonzero
+cx_zero: jmp foo
+cx_nonzero:
+@end example
+
+@subsection Floating Point
+All 80387 floating point types except packed BCD are supported.
+(BCD support may be added without much difficulty).  These data
+types are 16-, 32-, and 64- bit integers, and single (32-bit),
+double (64-bit), and extended (80-bit) precision floating point.
+Each supported type has an opcode suffix and a constructor
+associated with it.  Opcode suffixes specify operand's data
+types.  Constructors build these data types into memory.
+
+@itemize @bullet
+@item
+Floating point constructors are @samp{.float} or @samp{.single},
+@samp{.double}, and @samp{.tfloat} for 32-, 64-, and 80-bit formats.
+These correspond to opcode suffixes @samp{s}, @samp{l}, and @samp{t}.
+@samp{t} stands for temporary real, and that the 80387 only supports
+this format via the @samp{fldt} (load temporary real to stack top) and
+@samp{fstpt} (store temporary real and pop stack) instructions.
+
+@item
+Integer constructors are @samp{.word}, @samp{.long} or @samp{.int}, and
+@samp{.quad} for the 16-, 32-, and 64-bit integer formats.  The corresponding
+opcode suffixes are @samp{s} (single), @samp{l} (long), and @samp{q}
+(quad).  As with the temporary real format the 64-bit @samp{q} format is
+only present in the @samp{fildq} (load quad integer to stack top) and
+@samp{fistpq} (store quad integer and pop stack) instructions.
+@end itemize
+
+Register to register operations do not require opcode suffixes,
+so that @samp{fst %st, %st(1)} is equivalent to @samp{fstl %st, %st(1)}.
+
+Since the 80387 automatically synchronizes with the 80386 @samp{fwait}
+instructions are almost never needed (this is not the case for the
+80286/80287 and 8086/8087 combinations).  Therefore, @code{as} supresses
+the @samp{fwait} instruction whenever it is implicitly selected by one
+of the @samp{fn@dots{}} instructions.  For example, @samp{fsave} and
+@samp{fnsave} are treated identically.  In general, all the @samp{fn@dots{}}
+instructions are made equivalent to @samp{f@dots{}} instructions.  If
+@samp{fwait} is desired it must be explicitly coded.
+
+@subsection Notes
+There is some trickery concerning the @samp{mul} and @samp{imul}
+instructions that deserves mention.  The 16-, 32-, and 64-bit expanding
+multiplies (base opcode @samp{0xf6}; extension 4 for @samp{mul} and 5
+for @samp{imul}) can be output only in the one operand form.  Thus,
+@samp{imul %ebx, %eax} does @emph{not} select the expanding multiply;
+the expanding multiply would clobber the @samp{%edx} register, and this
+would confuse @code{GCC} output.  Use @samp{imul %ebx} to get the
+64-bit product in @samp{%edx:%eax}.
+
+We have added a two operand form of @samp{imul} when the first operand
+is an immediate mode expression and the second operand is a register.
+This is just a shorthand, so that, multiplying @samp{%eax} by 69, for
+example, can be done with @samp{imul $69, %eax} rather than @samp{imul
+$69, %eax, %eax}.
+
+@node Maintenance, Retargeting, MachineDependent, top
+@chapter Maintaining the Assembler
+[[this chapter is still being built]]
+
+@section Design
+We had these goals, in descending priority:
+@table @b
+@item Accuracy.
+For every program composed by a compiler, @code{as} should emit
+``correct'' code.  This leaves some latitude in choosing addressing
+modes, order of @code{relocation_info} structures in the object
+file, @i{etc}.
+
+@item Speed, for usual case.
+By far the most common use of @code{as} will be assembling compiler
+emissions.
+
+@item Upward compatibility for existing assembler code.
+Well @dots{} we don't support Vax bit fields but everything else
+seems to be upward compatible.
+
+@item Readability.
+The code should be maintainable with few surprises.  (JF: ha!)
+
+@end table
+
+We assumed that disk I/O was slow and expensive while memory was
+fast and access to memory was cheap.  We expect the in-memory data
+structures to be less than 10 times the size of the emitted object
+file.  (Contrast this with the C compiler where in-memory structures
+might be 100 times object file size!)
+This suggests:
+@itemize @bullet
+@item
+Try to read the source file from disk only one time.  For other
+reasons, we keep large chunks of the source file in memory during
+assembly so this is not a problem.  Also the assembly algorithm
+should only scan the source text once if the compiler composed the
+text according to a few simple rules.
+@item
+Emit the object code bytes only once.  Don't store values and then
+backpatch later.
+@item
+Build the object file in memory and do direct writes to disk of
+large buffers.
+@end itemize
+
+RMS suggested a one-pass algorithm which seems to work well.  By not
+parsing text during a second pass considerable time is saved on
+large programs (@i{e.g.} the sort of C program @code{yacc} would
+emit).
+
+It happened that the data structures needed to emit relocation
+information to the object file were neatly subsumed into the data
+structures that do backpatching of addresses after pass 1.
+
+Many of the functions began life as re-usable modules, loosely
+connected.  RMS changed this to gain speed.  For example, input
+parsing routines which used to work on pre-sanitized strings now
+must parse raw data.  Hence they have to import knowledge of the
+assemblers' comment conventions @i{etc}.
+
+@section Deprecated Feature(?)s
+We have stopped supporting some features:
+@itemize @bullet
+@item
+@code{.org} statements must have @b{defined} expressions.
+@item
+Vax Bit fields (@kbd{:} operator) are entirely unsupported.
+@end itemize
+
+It might be a good idea to not support these features in a future release:
+@itemize @bullet
+@item
+@kbd{#} should begin a comment, even in column 1.
+@item
+Why support the logical line & file concept any more?
+@item
+Subsegments are a good candidate for flushing.
+Depends on which compilers need them I guess.
+@end itemize
+
+@section Bugs, Ideas, Further Work
+Clearly the major improvement is DON'T USE A TEXT-READING
+ASSEMBLER for the back end of a compiler.  It is much faster to
+interpret binary gobbledygook from a compiler's tables than to
+ask the compiler to write out human-readable code just so the
+assembler can parse it back to binary.
+
+Assuming you use @code{as} for human written programs: here are
+some ideas:
+@itemize @bullet
+@item
+Document (here) @code{APP}.
+@item
+Take advantage of knowing no spaces except after opcode
+to speed up @code{as}.  (Modify @code{app.c} to flush useless spaces:
+only keep space/tabs at begin of line or between 2
+symbols.)
+@item
+Put pointers in this documentation to @file{a.out} documentation.
+@item
+Split the assembler into parts so it can gobble direct binary
+from @i{e.g.} @code{cc}.  It is silly for@code{cc} to compose text
+just so @code{as} can parse it back to binary.
+@item
+Rewrite hash functions: I want a more modular, faster library.
+@item
+Clean up LOTS of code.
+@item
+Include all the non-@file{.c} files in the maintenance chapter.
+@item
+Document flonums.
+@item
+Implement flonum short literals.
+@item
+Change all talk of expression operands to expression quantities,
+or perhaps to expression primaries.
+@item
+Implement pass 2.
+@item
+Whenever a @code{.text} or @code{.data} statement is seen, we close
+of the current frag with an imaginary @code{.fill 0}.  This is
+because we only have one obstack for frags, and we can't grow new
+frags for a new subsegment, then go back to the old subsegment and
+append bytes to the old frag.  All this nonsense goes away if we
+give each subsegment its own obstack.  It makes code simpler in
+about 10 places, but nobody has bothered to do it because C compiler
+output rarely changes subsegments (compared to ending frags with
+relaxable addresses, which is common).
+@end itemize
+
+@section Sources
+@c The following files in the @file{as} directory
+@c are symbolic links to other files, of
+@c the same name, in a different directory.
+@c @itemize @bullet
+@c @item
+@c @file{atof_generic.c}
+@c @item
+@c @file{atof_vax.c}
+@c @item
+@c @file{flonum_const.c}
+@c @item
+@c @file{flonum_copy.c}
+@c @item
+@c @file{flonum_get.c}
+@c @item
+@c @file{flonum_multip.c}
+@c @item
+@c @file{flonum_normal.c}
+@c @item
+@c @file{flonum_print.c}
+@c @end itemize
+
+Here is a list of the source files in the @file{as} directory.
+
+@table @file
+@item app.c
+This contains the pre-processing phase, which deletes comments,
+handles whitespace, etc.  This was recently re-written, since app
+used to be a separate program, but RMS wanted it to be inline.
+
+@item append.c
+This is a subroutine to append a string to another string returning a
+pointer just after the last @code{char} appended.  (JF:  All these
+little routines should probably all be put in one file.)
+
+@item as.c
+Here you will find the main program of the assembler @code{as}.
+
+@item expr.c
+This is a branch office of @file{read.c}.  This understands
+expressions, primaries.  Inside @code{as}, primaries are called
+(expression) @i{operands}.  This is confusing, because we also talk
+(elsewhere) about instruction @i{operands}.  Also, expression
+operands are called @i{quantities} explicitly to avoid confusion
+with instruction operands.  What a mess.
+
+@item frags.c
+This implements the @b{frag} concept.  Without frags, finding the
+right size for branch instructions would be a lot harder.
+
+@item hash.c
+This contains the symbol table, opcode table @i{etc.} hashing
+functions.
+
+@item hex_value.c
+This is a table of values of digits, for use in atoi() type
+functions.  Could probably be flushed by using calls to strtol(), or
+something similar.
+
+@item input-file.c
+This contains Operating system dependent source file reading
+routines.  Since error messages often say where we are in reading
+the source file, they live here too.  Since @code{as} is intended to
+run under GNU and Unix only, this might be worth flushing.  Anyway,
+almost all C compilers support stdio.
+
+@item input-scrub.c
+This deals with calling the pre-processor (if needed) and feeding the
+chunks back to the rest of the assembler the right way.
+
+@item messages.c
+This contains operating system independent parts of fatal and
+warning message reporting.  See @file{append.c} above.
+
+@item output-file.c
+This contains operating system dependent functions that write an
+object file for @code{as}.  See @file{input-file.c} above.
+
+@item read.c
+This implements all the directives of @code{as}.  This also deals
+with passing input lines to the machine dependent part of the
+assembler.
+
+@item strstr.c
+This is a C library function that isn't in most C libraries yet.
+See @file{append.c} above.
+
+@item subsegs.c
+This implements subsegments.
+
+@item symbols.c
+This implements symbols.
+
+@item write.c
+This contains the code to perform relaxation, and to write out
+the object file.  It is mostly operating system independent, but
+different OSes have different object file formats in any case.
+
+@item xmalloc.c
+This implements @code{malloc()} or bust.  See @file{append.c} above.
+
+@item xrealloc.c
+This implements @code{realloc()} or bust.  See @file{append.c} above.
+
+@item atof-generic.c
+The following files were taken from a machine-independent subroutine
+library for manipulating floating point numbers and very large
+integers.
+
+@file{atof-generic.c} turns a string into a flonum internal format
+floating-point number.
+
+@item flonum-const.c
+This contains some potentially useful floating point numbers in
+flonum format.
+
+@item flonum-copy.c
+This copies a flonum.
+
+@item flonum-multip.c
+This multiplies two flonums together.
+
+@item bignum-copy.c
+This copies a bignum.
+
+@end table
+
+Here is a table of all the machine-specific files (this includes
+both source and header files).  Typically, there is a
+@var{machine}.c file, a @var{machine}-opcode.h file, and an
+atof-@var{machine}.c file.  The @var{machine}-opcode.h file should
+be identical to the one used by GDB (which uses it for disassembly.)
+
+@table @file
+
+@item atof-ieee.c
+This contains code to turn a flonum into a ieee literal constant.
+This is used by tye 680x0, 32x32, sparc, and i386 versions of @code{as}.
+
+@item i386-opcode.h
+This is the opcode-table for the i386 version of the assembler.
+
+@item i386.c
+This contains all the code for the i386 version of the assembler.
+
+@item i386.h
+This defines constants and macros used by the i386 version of the assembler.
+
+@item m-generic.h
+generic 68020 header file.  To be linked to m68k.h on a
+non-sun3, non-hpux system.
+
+@item m-sun2.h
+68010 header file for Sun2 workstations.  Not well tested.  To be linked
+to m68k.h on a sun2.  (See also @samp{-DSUN_ASM_SYNTAX} in the
+@file{Makefile}.)
+
+@item m-sun3.h
+68020 header file for Sun3 workstations.  To be linked to m68k.h before
+compiling on a Sun3 system.  (See also @samp{-DSUN_ASM_SYNTAX} in the
+@file{Makefile}.)
+
+@item m-hpux.h
+68020 header file for a HPUX (system 5?) box.  Which box, which
+version of HPUX, etc?  I don't know.
+
+@item m68k.h
+A hard- or symbolic- link to one of @file{m-generic.h},
+@file{m-hpux.h} or @file{m-sun3.h} depending on which kind of
+680x0 you are assembling for.   (See also @samp{-DSUN_ASM_SYNTAX} in the
+@file{Makefile}.)
+
+@item m68k-opcode.h
+Opcode table for 68020.  This is now a link to the opcode table
+in the @code{GDB} source directory.
+
+@item m68k.c
+All the mc680x0 code, in one huge, slow-to-compile file.
+
+@item ns32k.c
+This contains the code for the ns32032/ns32532 version of the
+assembler.
+
+@item ns32k-opcode.h
+This contains the opcode table for the ns32032/ns32532 version
+of the assembler.
+
+@item vax-inst.h
+Vax specific file for describing Vax operands and other Vax-ish things.
+
+@item vax-opcode.h
+Vax opcode table.
+
+@item vax.c
+Vax specific parts of @code{as}.  Also includes the former files
+@file{vax-ins-parse.c}, @file{vax-reg-parse.c} and @file{vip-op.c}.
+
+@item atof-vax.c
+Turns a flonum into a Vax constant.
+
+@item vms.c
+This file contains the special code needed to put out a VMS
+style object file for the Vax.
+
+@end table
+
+Here is a list of the header files in the source directory.
+(Warning:  This section may not be very accurate.  I didn't
+write the header files; I just report them.)  Also note that I
+think many of these header files could be cleaned up or
+eliminated.
+
+@table @file
+
+@item a.out.h
+This describes the structures used to create the binary header data
+inside the object file.  Perhaps we should use the one in
+@file{/usr/include}?
+
+@item as.h
+This defines all the globally useful things, and pulls in <stdio.h>
+and <assert.h>.
+
+@item bignum.h
+This defines macros useful for dealing with bignums.
+
+@item expr.h
+Structure and macros for dealing with expression()
+
+@item flonum.h
+This defines the structure for dealing with floating point
+numbers.  It #includes @file{bignum.h}.
+
+@item frags.h
+This contains macro for appending a byte to the current frag.
+
+@item hash.h
+Structures and function definitions for the hashing functions.
+
+@item input-file.h
+Function headers for the input-file.c functions.
+
+@item md.h
+structures and function headers for things defined in the
+machine dependent part of the assembler.
+
+@item obstack.h
+This is the GNU systemwide include file for manipulating obstacks.
+Since nobody is running under real GNU yet, we include this file.
+
+@item read.h
+Macros and function headers for reading in source files.
+
+@item struct-symbol.h
+Structure definition and macros for dealing with the gas
+internal form of a symbol.
+
+@item subsegs.h
+structure definition for dealing with the numbered subsegments
+of the text and data segments.
+
+@item symbols.h
+Macros and function headers for dealing with symbols.
+
+@item write.h
+Structure for doing segment fixups.
+@end table
+
+@comment ~subsection Test Directory
+@comment (Note:  The test directory seems to have disappeared somewhere
+@comment along the line.  If you want it, you'll probably have to find a
+@comment REALLY OLD dump tape~dots{})
+@comment 
+@comment The ~file{test/} directory is used for regression testing.
+@comment After you modify ~code{as}, you can get a quick go/nogo
+@comment confidence test by running the new ~code{as} over the source
+@comment files in this directory.  You use a shell script ~file{test/do}.
+@comment 
+@comment The tests in this suite are evolving.  They are not comprehensive.
+@comment They have, however, caught hundreds of bugs early in the debugging
+@comment cycle of ~code{as}.  Most test statements in this suite were naturally
+@comment selected: they were used to demonstrate actual ~code{as} bugs rather
+@comment than being written ~i{a prioi}.
+@comment 
+@comment Another testing suggestion: over 30 bugs have been found simply by
+@comment running examples from this manual through ~code{as}.
+@comment Some examples in this manual are selected
+@comment to distinguish boundary conditions; they are good for testing ~code{as}.
+@comment 
+@comment ~subsubsection Regression Testing
+@comment Each regression test involves assembling a file and comparing the
+@comment actual output of ~code{as} to ``known good'' output files.  Both
+@comment the object file and the error/warning message file (stderr) are
+@comment inspected.  Optionally ~code{as}' exit status may be checked.
+@comment Discrepencies are reported.  Each discrepency means either that
+@comment you broke some part of ~code{as} or that the ``known good'' files
+@comment are now out of date and should be changed to reflect the new
+@comment definition of ``good''.
+@comment 
+@comment Each regression test lives in its own directory, in a tree
+@comment rooted in the directory ~file{test/}.  Each such directory
+@comment has a name ending in ~file{.ret}, where `ret' stands for
+@comment REgression Test.  The ~file{.ret} ending allows ~code{find
+@comment (1)} to find all regression tests in the tree, without
+@comment needing to list them explicitly.
+@comment 
+@comment Any ~file{.ret} directory must contain a file called
+@comment ~file{input} which is the source file to assemble.  During
+@comment testing an object file ~file{output} is created, as well as
+@comment a file ~file{stdouterr} which contains the output to both
+@comment stderr and stderr.  If there is a file ~file{output.good} in
+@comment the directory, and if ~file{output} contains exactly the
+@comment same data as ~file{output.good}, the file ~file{output} is
+@comment deleted.  Likewise ~file{stdouterr} is removed if it exactly
+@comment matches a file ~file{stdouterr.good}.  If file
+@comment ~file{status.good} is present, containing a decimal number
+@comment before a newline, the exit status of ~code{as} is compared
+@comment to this number.  If the status numbers are not equal, a file
+@comment ~file{status} is written to the directory, containing the
+@comment actual status as a decimal number followed by newline.
+@comment 
+@comment Should any of the ~file{*.good} files fail to match their corresponding
+@comment actual files, this is noted by a 1-line message on the screen during
+@comment the regression test, and you can use ~code{find (1)} to find any
+@comment files named ~file{status}, ~file {output} or ~file{stdouterr}.
+@comment 
+@node Retargeting, , Maintenance, top
+@chapter Teaching the Assembler about a New Machine
+
+This chapter describes the steps required in order to make the
+assembler work with another machine's assembly language.  This
+chapter is not complete, and only describes the steps in the
+broadest terms.  You should look at the source for the
+currently supported machine in order to discover some of the
+details that aren't mentioned here.
+
+You should create a new file called @file{@var{machine}.c}, and
+add the appropriate lines to the file @file{Makefile} so that
+you can compile your new version of the assembler.  This should
+be straighforward; simply add lines similar to the ones there
+for the four current versions of the assembler.
+
+If you want to be compatable with GDB, (and the current
+machine-dependent versions of the assembler), you should create
+a file called @file{@var{machine}-opcode.h} which should
+contain all the information about the names of the machine
+instructions, their opcodes, and what addressing modes they
+support.  If you do this right, the assembler and GDB can share
+this file, and you'll only have to write it once.  Note that
+while you're writing @code{as}, you may want to use an
+independent program (if you have access to one), to make sure
+that @code{as} is emitting the correct bytes.  Since @code{as}
+and @code{GDB} share the opcode table, an incorrect opcode
+table entry may make invalid bytes look OK when you disassemble
+them with @code{GDB}.
+
+@section Functions You will Have to Write
+
+Your file @file{@var{machine}.c} should contain definitions for
+the following functions and variables.  It will need to include
+some header files in order to use some of the structures
+defined in the machine-independent part of the assembler.  The
+needed header files are mentioned in the descriptions of the
+functions that will need them.
+
+@table @code
+
+@item long omagic;
+This long integer holds the value to place at the beginning of
+the @file{a.out} file.  It is usually @samp{OMAGIC}, except on
+machines that store additional information in the magic-number.
+
+@item char comment_chars[];
+This character array holds the values of the characters that
+start a comment anywhere in a line.  Comments are stripped off
+automatically by the machine independent part of the
+assembler.  Note that the @samp{/*} will always start a
+comment, and that only @samp{*/} will end a comment started by
+@samp{*/}.  
+
+@item char line_comment_chars[];
+This character array holds the values of the chars that start a
+comment only if they are the first (non-whitespace) character
+on a line.  If the character @samp{#} does not appear in this
+list, you may get unexpected results.  (Various
+machine-independent parts of the assembler treat the comments
+@samp{#APP} and @samp{#NO_APP} specially, and assume that lines
+that start with @samp{#} are comments.)
+
+@item char EXP_CHARS[];
+This character array holds the letters that can separate the
+mantissa and the exponent of a floating point number.  Typical
+values are @samp{e} and @samp{E}.
+
+@item char FLT_CHARS[];
+This character array holds the letters that--when they appear
+immediately after a leading zero--indicate that a number is a
+floating-point number.  (Sort of how 0x indicates that a
+hexadecimal number follows.)
+
+@item pseudo_typeS md_pseudo_table[];
+(@var{pseudo_typeS} is defined in @file{md.h})
+This array contains a list of the machine_dependent directives
+the assembler must support.  It contains the name of each
+pseudo op (Without the leading @samp{.}), a pointer to a
+function to be called when that directive is encountered, and
+an integer argument to be passed to that function.
+
+@item void md_begin(void)
+This function is called as part of the assembler's
+initialization.  It should do any initialization required by
+any of your other routines.
+
+@item int md_parse_option(char **optionPTR, int *argcPTR, char ***argvPTR)
+This routine is called once for each option on the command line
+that the machine-independent part of @code{as} does not
+understand.  This function should return non-zero if the option
+pointed to by @var{optionPTR} is a valid option.  If it is not
+a valid option, this routine should return zero.  The variables
+@var{argcPTR} and @var{argvPTR} are provided in case the option
+requires a filename or something similar as an argument.  If
+the option is multi-character, @var{optionPTR} should be
+advanced past the end of the option, otherwise every letter in
+the option will be treated as a separate single-character
+option.
+
+@item void md_assemble(char *string)
+This routine is called for every machine-dependent
+non-directive line in the source file.  It does all the real
+work involved in reading the opcode, parsing the operands,
+etc.  @var{string} is a pointer to a null-terminated string,
+that comprises the input line, with all excess whitespace and
+comments removed.
+
+@item void md_number_to_chars(char *outputPTR,long value,int nbytes)
+This routine is called to turn a C long int, short int, or char
+into the series of bytes that represents that number on the
+target machine.  @var{outputPTR} points to an array where the
+result should be stored; @var{value} is the value to store; and
+@var{nbytes} is the number of bytes in 'value' that should be
+stored.
+
+@item void md_number_to_imm(char *outputPTR,long value,int nbytes)
+This routine is called to turn a C long int, short int, or char
+into the series of bytes that represent an immediate value on
+the target machine.  It is identical to the function @code{md_number_to_chars},
+except on NS32K machines.@refill
+
+@item void md_number_to_disp(char *outputPTR,long value,int nbytes)
+This routine is called to turn a C long int, short int, or char
+into the series of bytes that represent an displacement value on
+the target machine.  It is identical to the function @code{md_number_to_chars},
+except on NS32K machines.@refill
+
+@item void md_number_to_field(char *outputPTR,long value,int nbytes)
+This routine is identical to @code{md_number_to_chars},
+except on NS32K machines.
+
+@item void md_ri_to_chars(struct relocation_info *riPTR,ri)
+(@code{struct relocation_info} is defined in @file{a.out.h})
+This routine emits the relocation info in @var{ri}
+in the appropriate bit-pattern for the target machine.
+The result should be stored in the location pointed
+to by @var{riPTR}.  This routine may be a no-op unless you are
+attempting to do cross-assembly.
+
+@item char *md_atof(char type,char *outputPTR,int *sizePTR)
+This routine turns a series of digits into the appropriate
+internal representation for a floating-point number.
+@var{type} is a character from @var{FLT_CHARS[]} that describes
+what kind of floating point number is wanted; @var{outputPTR}
+is a pointer to an array that the result should be stored in;
+and @var{sizePTR} is a pointer to an integer where the size (in
+bytes) of the result should be stored.  This routine should
+return an error message, or an empty string (not (char *)0) for
+success.
+
+@item int md_short_jump_size;
+This variable holds the (maximum) size in bytes of a short (16
+bit or so) jump created by @code{md_create_short_jump()}.  This
+variable is used as part of the broken-word feature, and isn't
+needed if the assembler is compiled with
+@samp{-DWORKING_DOT_WORD}.
+
+@item int md_long_jump_size;
+This variable holds the (maximum) size in bytes of a long (32
+bit or so) jump created by @code{md_create_long_jump()}.  This
+variable is used as part of the broken-word feature, and isn't
+needed if the assembler is compiled with
+@samp{-DWORKING_DOT_WORD}.
+
+@item void md_create_short_jump(char *resultPTR,long from_addr,
+@code{long to_addr,fragS *frag,symbolS *to_symbol)}
+This function emits a jump from @var{from_addr} to @var{to_addr} in
+the array of bytes pointed to by @var{resultPTR}.  If this creates a
+type of jump that must be relocated, this function should call
+@code{fix_new()} with @var{frag} and @var{to_symbol}.  The jump
+emitted by this function may be smaller than @var{md_short_jump_size},
+but it must never create a larger one.
+(If it creates a smaller jump, the extra bytes of memory will not be
+used.)  This function is used as part of the broken-word feature,
+and isn't needed if the assembler is compiled with
+@samp{-DWORKING_DOT_WORD}.@refill
+
+@item void md_create_long_jump(char *ptr,long from_addr,
+@code{long to_addr,fragS *frag,symbolS *to_symbol)}
+This function is similar to the previous function,
+@code{md_create_short_jump()}, except that it creates a long
+jump instead of a short one.  This function is used as part of
+the broken-word feature, and isn't needed if the assembler is
+compiled with @samp{-DWORKING_DOT_WORD}.
+
+@item int md_estimate_size_before_relax(fragS *fragPTR,int segment_type)
+This function does the initial setting up for relaxation.  This
+includes forcing references to still-undefined symbols to the
+appropriate addressing modes.
+
+@item relax_typeS md_relax_table[];
+(relax_typeS is defined in md.h)
+This array describes the various machine dependent states a
+frag may be in before relaxation.  You will need one group of
+entries for each type of addressing mode you intend to relax.
+
+@item void md_convert_frag(fragS *fragPTR)
+(@var{fragS} is defined in @file{as.h})
+This routine does the required cleanup after relaxation.
+Relaxation has changed the type of the frag to a type that can
+reach its destination.  This function should adjust the opcode
+of the frag to use the appropriate addressing mode.
+@var{fragPTR} points to the frag to clean up.
+
+@item void md_end(void)
+This function is called just before the assembler exits.  It
+need not free up memory unless the operating system doesn't do
+it automatically on exit.  (In which case you'll also have to
+track down all the other places where the assembler allocates
+space but never frees it.)
+
+@end table
+
+@section External Variables You will Need to Use
+
+You will need to refer to or change the following external variables
+from within the machine-dependent part of the assembler.
+
+@table @code
+@item extern char flagseen[];
+This array holds non-zero values in locations corresponding to
+the options that were on the command line.  Thus, if the
+assembler was called with @samp{-W}, @var{flagseen['W']} would
+be non-zero.
+
+@item extern fragS *frag_now;
+This pointer points to the current frag--the frag that bytes
+are currently being added to.  If nothing else, you will need
+to pass it as an argument to various machine-independent
+functions.  It is maintained automatically by the
+frag-manipulating functions; you should never have to change it
+yourself.
+
+@item extern LITTLENUM_TYPE generic_bignum[];
+(@var{LITTLENUM_TYPE} is defined in @file{bignum.h}.
+This is where @dfn{bignums}--numbers larger than 32 bits--are
+returned when they are encountered in an expression. You will
+need to use this if you need to implement directives (or
+anything else) that must deal with these large numbers.
+@code{Bignums} are of @code{segT} @code{SEG_BIG} (defined in
+@file{as.h}, and have a positive @code{X_add_number}.  The
+@code{X_add_number} of a @code{bignum} is the number of
+@code{LITTLENUMS} in @var{generic_bignum} that the number takes
+up.
+
+@item extern FLONUM_TYPE generic_floating_point_number;
+(@var{FLONUM_TYPE} is defined in @file{flonum.h}.
+The is where @dfn{flonums}--floating-point numbers within
+expressions--are returned.  @code{Flonums} are of @code{segT}
+@code{SEG_BIG}, and have a negative @code{X_add_number}.
+@code{Flonums} are returned in a generic format.  You will have
+to write a routine to turn this generic format into the
+appropriate floating-point format for your machine.
+
+@item extern int need_pass_2;
+If this variable is non-zero, the assembler has encountered an
+expression that cannot be assembled in a single pass.  Since
+the second pass isn't implemented, this flag means that the
+assembler is punting, and is only looking for additional syntax
+errors.  (Or something like that.)
+
+@item extern segT now_seg;
+This variable holds the value of the segment the assembler is
+currently assembling into.
+
+@end table
+
+@section External functions will you need
+
+You will find the following external functions useful (or
+indispensable) when you're writing the machine-dependent part
+of the assembler.
+
+@table @code
+
+@item char *frag_more(int bytes)
+This function allocates @var{bytes} more bytes in the current
+frag (or starts a new frag, if it can't expand the current frag
+any more.)  for you to store some object-file bytes in.  It
+returns a pointer to the bytes, ready for you to store data in.
+
+@item void fix_new(fragS *frag, int where, short size, symbolS *add_symbol, symbolS *sub_symbol, long offset, int pcrel)
+This function stores a relocation fixup to be acted on later.
+@var{frag} points to the frag the relocation belongs in;
+@var{where} is the location within the frag where the relocation begins;
+@var{size} is the size of the relocation, and is usually 1 (a single byte),
+  2 (sixteen bits), or 4 (a longword).
+The value @var{add_symbol} @minus{} @var{sub_symbol} + @var{offset}, is added to the byte(s)
+at @var{frag->literal[where]}.  If @var{pcrel} is non-zero, the address of the
+location is subtracted from the result.  A relocation entry is also added
+to the @file{a.out} file.  @var{add_symbol}, @var{sub_symbol}, and/or
+@var{offset} may be NULL.@refill
+
+@item char *frag_var(relax_stateT type, int max_chars, int var,
+@code{relax_substateT subtype, symbolS *symbol, char *opcode)}
+This function creates a machine-dependent frag of type @var{type}
+(usually @code{rs_machine_dependent}).
+@var{max_chars} is the maximum size in bytes that the frag may grow by;
+@var{var} is the current size of the variable end of the frag;
+@var{subtype} is the sub-type of the frag.  The sub-type is used to index into
+@var{md_relax_table[]} during @code{relaxation}.
+@var{symbol} is the symbol whose value should be used to when relax-ing this frag.
+@var{opcode} points into a byte whose value may have to be modified if the
+addressing mode used by this frag changes.  It typically points into the
+@var{fr_literal[]} of the previous frag, and is used to point to a location
+that @code{md_convert_frag()}, may have to change.@refill
+
+@item void frag_wane(fragS *fragPTR)
+This function is useful from within @code{md_convert_frag}.  It
+changes a frag to type rs_fill, and sets the variable-sized
+piece of the frag to zero.  The frag will never change in size
+again.
+
+@item segT expression(expressionS *retval)
+(@var{segT} is defined in @file{as.h}; @var{expressionS} is defined in @file{expr.h})
+This function parses the string pointed to by the external char
+pointer @var{input_line_pointer}, and returns the segment-type
+of the expression.  It also stores the results in the
+@var{expressionS} pointed to by @var{retval}.
+@var{input_line_pointer} is advanced to point past the end of
+the expression.  (@var{input_line_pointer} is used by other
+parts of the assembler.  If you modify it, be sure to restore
+it to its original value.)
+
+@item as_warn(char *message,@dots{})
+If warning messages are disabled, this function does nothing.
+Otherwise, it prints out the current file name, and the current
+line number, then uses @code{fprintf} to print the
+@var{message} and any arguments it was passed.
+
+@item as_bad(char *message,@dots{})
+This function should be called when @code{as} encounters
+conditions that are bad enough that @code{as} should not
+produce an object file, but should continue reading input and
+printing warning and bad error messages.
+
+@item as_fatal(char *message,@dots{})
+This function prints out the current file name and line number,
+prints the word @samp{FATAL:}, then uses @code{fprintf} to
+print the @var{message} and any arguments it was passed.  Then
+the assembler exits.  This function should only be used for
+serious, unrecoverable errors.
+
+@item void float_const(int float_type)
+This function reads floating-point constants from the current
+input line, and calls @code{md_atof} to assemble them.  It is
+useful as the function to call for the directives
+@samp{.single}, @samp{.double}, @samp{.float}, etc.
+@var{float_type} must be a character from @var{FLT_CHARS}.
+
+@item void demand_empty_rest_of_line(void);
+This function can be used by machine-dependent directives to
+make sure the rest of the input line is empty.  It prints a
+warning message if there are additional characters on the line.
+
+@item long int get_absolute_expression(void)
+This function can be used by machine-dependent directives to
+read an absolute number from the current input line.  It
+returns the result.  If it isn't given an absolute expression,
+it prints a warning message and returns zero.
+
+@end table
+
+
+@section The concept of Frags
+
+This assembler works to optimize the size of certain addressing
+modes.  (e.g. branch instructions) This means the size of many
+pieces of object code cannot be determined until after assembly
+is finished.  (This means that the addresses of symbols cannot be
+determined until assembly is finished.)  In order to do this,
+@code{as} stores the output bytes as @dfn{frags}.
+
+Here is the definition of a frag (from @file{as.h})
+@example
+struct frag
+@{
+        long int fr_fix;
+        long int fr_var;
+        relax_stateT fr_type;
+        relax_substateT fr_substate;
+        unsigned long fr_address;
+        long int fr_offset;
+        struct symbol *fr_symbol;
+        char *fr_opcode;
+        struct frag *fr_next;
+        char fr_literal[];
+@}
+@end example
+
+@table @var
+@item fr_fix
+is the size of the fixed-size piece of the frag.
+
+@item fr_var
+is the maximum (?) size of the variable-sized piece of the frag.
+
+@item fr_type
+is the type of the frag.
+Current types are:
+rs_fill
+rs_align
+rs_org
+rs_machine_dependent
+
+@item fr_substate
+This stores the type of machine-dependent frag this is.  (what
+kind of addressing mode is being used, and what size is being
+tried/will fit/etc.
+
+@item fr_address
+@var{fr_address} is only valid after relaxation is finished.
+Before relaxation, the only way to store an address is (pointer
+to frag containing the address) plus (offset into the frag).
+
+@item fr_offset
+This contains a number, whose meaning depends on the type of
+the frag.
+for machine_dependent frags, this contains the offset from
+fr_symbol that the frag wants to go to.  Thus, for branch
+instructions it is usually zero.  (unless the instruction was
+@samp{jba foo+12}  or something like that.)
+
+@item fr_symbol
+for machine_dependent frags, this points to the symbol the frag
+needs to reach.
+
+@item fr_opcode
+This points to the location in the frag (or in a previous frag)
+of the opcode for the instruction that caused this to be a frag.
+@var{fr_opcode} is needed if the actual opcode must be changed
+in order to use a different form of the addressing mode.
+(For example, if a conditional branch only comes in size tiny,
+a large-size branch could be implemented by reversing the sense
+of the test, and turning it into a tiny branch over a large jump.
+This would require changing the opcode.)
+
+@var{fr_literal} is a variable-size array that contains the
+actual object bytes.  A frag consists of a fixed size piece of
+object data, (which may be zero bytes long), followed by a
+piece of object data whose size may not have been determined
+yet.  Other information includes the type of the frag (which
+controls how it is relaxed), 
+
+@item fr_next
+This is the next frag in the singly-linked list.  This is
+usually only needed by the machine-independent part of
+@code{as}.
+
+@end table
+
+@c Is this really a good idea?
+@iftex
+@center [end of manual]
+@end iftex
+@summarycontents
+@contents
+@bye
