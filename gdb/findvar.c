@@ -252,24 +252,6 @@ store_unsigned_integer (void *addr, int len, ULONGEST val)
     }
 }
 
-/* Store the address VAL as a LEN-byte value in target byte order at
-   ADDR.  ADDR is a buffer in the GDB process, not in the inferior.
-
-   This function should only be used by target-specific code.  It
-   assumes that a pointer has the same representation as that thing's
-   address represented as an integer.  Some machines use word
-   addresses, or similarly munged things, for certain types of
-   pointers, so that assumption doesn't hold everywhere.
-
-   Common code should use store_typed_address instead, or something else
-   based on ADDRESS_TO_POINTER.  */
-void
-store_address (void *addr, int len, LONGEST val)
-{
-  store_unsigned_integer (addr, len, val);
-}
-
-
 /* Store the address ADDR as a pointer of type TYPE at BUF, in target
    form.  */
 void
@@ -365,7 +347,7 @@ signed_pointer_to_address (struct type *type, const void *buf)
 void
 unsigned_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
 {
-  store_address (buf, TYPE_LENGTH (type), addr);
+  store_unsigned_integer (buf, TYPE_LENGTH (type), addr);
 }
 
 void

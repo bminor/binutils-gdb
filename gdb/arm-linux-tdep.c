@@ -195,7 +195,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	{
 	  CORE_ADDR regval = extract_address (val, len);
 	  if (arm_pc_is_thumb (regval))
-	    store_address (val, len, MAKE_THUMB_ADDR (regval));
+	    store_unsigned_integer (val, len, MAKE_THUMB_ADDR (regval));
 	}
 
       /* Copy the argument to general registers or the stack in

@@ -1468,7 +1468,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
 	  if (arm_pc_is_thumb (regval))
 	    {
 	      val = alloca (len);
-	      store_address (val, len, MAKE_THUMB_ADDR (regval));
+	      store_unsigned_integer (val, len, MAKE_THUMB_ADDR (regval));
 	    }
 	}
 

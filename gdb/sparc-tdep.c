@@ -859,7 +859,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
       if (raw_buffer != NULL)
 	{
 	  /* Put it back in target format.  */
-	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), get_frame_pc (frame));
+	  store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), get_frame_pc (frame));
 	}
       if (addrp != NULL)
 	*addrp = 0;
@@ -967,7 +967,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	  if (raw_buffer != NULL)
 	    {
 	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), addr);
+	      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), addr);
 	    }
 	  if (addrp != NULL)
 	    *addrp = 0;

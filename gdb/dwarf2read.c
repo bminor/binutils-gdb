@@ -5319,8 +5319,10 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
 								   (sym)));
       SYMBOL_VALUE_BYTES (sym) = (char *)
 	obstack_alloc (&objfile->symbol_obstack, cu_header->addr_size);
-      store_address (SYMBOL_VALUE_BYTES (sym), cu_header->addr_size,
-		     DW_ADDR (attr));
+      /* NOTE: cagney/2003-05-09: In-lined store_address call with
+         it's body - store_unsigned_integer.  */
+      store_unsigned_integer (SYMBOL_VALUE_BYTES (sym), cu_header->addr_size,
+			      DW_ADDR (attr));
       SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
       break;
     case DW_FORM_block1:

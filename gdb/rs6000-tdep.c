@@ -1269,7 +1269,7 @@ ran_out_of_registers_for_arguments:
     write_register (SP_REGNUM, sp);
 
   /* set back chain properly */
-  store_address (tmp_buffer, 4, saved_sp);
+  store_unsigned_integer (tmp_buffer, 4, saved_sp);
   write_memory (sp, tmp_buffer, 4);
 
   target_store_registers (-1);

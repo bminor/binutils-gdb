@@ -294,7 +294,7 @@ hpux_thread_fetch_registers (int regno)
 	    /* Flags must be 0 to avoid bogus value for SS_INSYSCALL */
 	    memset (buf, '\000', REGISTER_RAW_SIZE (regno));
 	  else if (regno == SP_REGNUM)
-	    store_address (buf, sizeof sp, sp);
+	    store_unsigned_integer (buf, sizeof sp, sp);
 	  else if (regno == PC_REGNUM)
 	    read_memory (sp - 20, buf, REGISTER_RAW_SIZE (regno));
 	  else

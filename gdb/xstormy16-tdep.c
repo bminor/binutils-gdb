@@ -985,7 +985,7 @@ xstormy16_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
       if (addr2)
 	addr = addr2;
     }
-  store_address (buf, TYPE_LENGTH (type), addr);
+  store_unsigned_integer (buf, TYPE_LENGTH (type), addr);
 }
 
 static CORE_ADDR

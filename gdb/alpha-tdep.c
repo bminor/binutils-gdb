@@ -1146,7 +1146,9 @@ alpha_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     write_memory (sp + m_arg->offset, m_arg->contents, m_arg->len);
   if (struct_return)
     {
-      store_address (raw_buffer, sizeof (CORE_ADDR), struct_addr);
+      /* NOTE: cagney/2003-05-09: Using sizeof CORE_ADDR here is just
+         wrong.  */
+      store_unsigned_integer (raw_buffer, sizeof (CORE_ADDR), struct_addr);
       write_memory (sp, raw_buffer, sizeof (CORE_ADDR));
     }
 
@@ -1226,7 +1228,7 @@ alpha_push_dummy_frame (void)
      registers follow in ascending order.
      The PC is saved immediately below the SP.  */
   save_address = sp + PROC_REG_OFFSET (proc_desc);
-  store_address (raw_buffer, 8, read_register (ALPHA_RA_REGNUM));
+  store_unsigned_integer (raw_buffer, 8, read_register (ALPHA_RA_REGNUM));
   write_memory (save_address, raw_buffer, 8);
   save_address += 8;
   mask = PROC_REG_MASK (proc_desc) & 0xffffffffL;
@@ -1235,12 +1237,12 @@ alpha_push_dummy_frame (void)
       {
 	if (ireg == ALPHA_RA_REGNUM)
 	  continue;
-	store_address (raw_buffer, 8, read_register (ireg));
+	store_unsigned_integer (raw_buffer, 8, read_register (ireg));
 	write_memory (save_address, raw_buffer, 8);
 	save_address += 8;
       }
 
-  store_address (raw_buffer, 8, read_register (PC_REGNUM));
+  store_unsigned_integer (raw_buffer, 8, read_register (PC_REGNUM));
   write_memory (sp - 8, raw_buffer, 8);
 
   /* Save floating point registers.  */
@@ -1249,7 +1251,7 @@ alpha_push_dummy_frame (void)
   for (ireg = 0; mask; ireg++, mask >>= 1)
     if (mask & 1)
       {
-	store_address (raw_buffer, 8, read_register (ireg + FP0_REGNUM));
+	store_unsigned_integer (raw_buffer, 8, read_register (ireg + FP0_REGNUM));
 	write_memory (save_address, raw_buffer, 8);
 	save_address += 8;
       }

@@ -1,3 +1,29 @@
+2003-05-13  Andrew Cagney  <cagney@redhat.com>
+
+	* defs.h (store_address): Delete declaration.
+	findvar.c (store_address): Delete function.
+	* arm-tdep.c (arm_push_dummy_call): Replace store_address with
+	store_unsigned_integer.
+	* xstormy16-tdep.c (xstormy16_address_to_pointer): Ditto.
+	* v850-tdep.c (v850_push_arguments): Ditto.
+	* sparc-tdep.c (sparc_get_saved_register): Ditto.
+	* sh-tdep.c (sh64_get_saved_register): Ditto.
+	* rs6000-tdep.c (rs6000_push_arguments): Ditto.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_arguments): Ditto.
+	* mips-tdep.c (mips_eabi_push_arguments): Ditto.
+	(mips_get_saved_register): Ditto.
+	* ia64-tdep.c (ia64_get_saved_register): Ditto.
+	(find_func_descr, ia64_push_arguments): Ditto.
+	* i386-tdep.c (i386_push_arguments): Ditto.
+	* hpux-thread.c (hpux_thread_fetch_registers): Ditto.
+	* frv-tdep.c (frv_push_arguments): Ditto.
+	* frame.c (legacy_saved_regs_prev_register): Ditto.
+	(deprecated_generic_get_saved_register): Ditto.
+	* findvar.c (unsigned_address_to_pointer): Ditto.
+	* dwarf2read.c (dwarf2_const_value): Ditto.
+	* arm-linux-tdep.c (arm_linux_push_arguments): Ditto.
+	* alpha-tdep.c (alpha_push_arguments): Ditto.
+
 2003-05-12  J. Brobecker  <brobecker@gnat.com>
 
 	* NEWS: Mention that the hppa-hpux port has been partially
