@@ -771,7 +771,9 @@ ALL_TARGET_MODULES = \
 	all-target-gperf \
 	all-target-examples \
 	all-target-libstub \
-	all-target-cygmon
+	all-target-cygmon \
+	all-target-libjava \
+	all-target-boehm-gc
 
 # This is a list of the configure targets for all of the modules which
 # are compiled using the target tools.
@@ -787,7 +789,9 @@ CONFIGURE_TARGET_MODULES = \
 	configure-target-gperf \
 	configure-target-examples \
 	configure-target-libstub \
-	configure-target-cygmon
+	configure-target-cygmon \
+	configure-target-libjava \
+	configure-target-boehm-gc
 
 # This is a list of the check targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
@@ -798,7 +802,9 @@ CHECK_TARGET_MODULES = \
 	check-target-newlib \
 	check-target-winsup \
 	check-target-libiberty \
-	check-target-gperf
+	check-target-gperf \
+	check-target-libjava \
+	check-target-boehm-gc
 
 # This is a list of the install targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
@@ -810,7 +816,9 @@ INSTALL_TARGET_MODULES = \
 	install-target-winsup \
 	install-target-libgloss \
 	install-target-libiberty \
-	install-target-gperf
+	install-target-gperf \
+	install-target-libjava \
+	install-target-boehm-gc
 
 # This is a list of the targets for which we can do a clean-{target}.
 CLEAN_MODULES = \
@@ -902,7 +910,9 @@ CLEAN_TARGET_MODULES = \
 	clean-target-gperf \
 	clean-target-examples \
 	clean-target-libstub \
-	clean-target-cygmon
+	clean-target-cygmon \
+	clean-target-libjava \
+	clean-target-boehm-gc
 
 # All of the x11 modules that can be cleaned
 CLEAN_X11_MODULES = \
@@ -1477,9 +1487,10 @@ all-ash:
 all-autoconf: all-m4 all-texinfo
 all-automake:
 all-bash:
-all-bfd:
+all-bfd: all-libiberty
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc
 all-bison: all-texinfo
+all-target-boehm-gc:
 all-byacc:
 all-cvssrc:
 configure-target-cygmon: $(ALL_GCC)
@@ -1544,6 +1555,7 @@ all-libiberty:
 all-libide: all-ilu
 all-libidetcl: all-tcl all-tk all-itcl all-ilu all-libgui all-libide
 # end-sanitize-ide
+all-target-libjava:
 configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
 configure-target-libstdc++: $(ALL_GCC)

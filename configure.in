@@ -61,7 +61,7 @@ host_tools="${host_tools} ilu vmake jstools"
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
 #
-target_libs="target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++"
+target_libs="target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++ target-libjava target-boehm-gc"
 
 
 # these tools are built using the target libs, and are intended to run only

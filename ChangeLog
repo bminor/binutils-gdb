@@ -1,3 +1,18 @@
+Mon Apr 20 14:26:26 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (ALL_TARGET_MODULES): Added libjava, boehm-gc.
+	(CONFIGURE_TARGET_MODULES): Likewise.
+	(CHECK_TARGET_MODULES): Likewise.
+	(INSTALL_TARGET_MODULES): Likewise.
+	(CLEAN_TARGET_MODULES): Likewise.
+	(all-target-libjava): New target.
+	(all-target-boehm-gc): Likewise.
+	* configure.in (target_libs): Added libjava, boehm-gc.
+
+1998-04-19  Brendan Kehoe  <brendan@cygnus.com>
+
+	* configure.in (host_tools): Fix typo, lbtool -> libtool.
+
 Fri Apr 17 16:20:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (all-bfd): Depend upon all-libiberty.
