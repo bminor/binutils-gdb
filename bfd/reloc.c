@@ -1345,8 +1345,9 @@ space consuming.  For each target:
    bfd_perform_relocation is so hacked up it is easier to write a new
    function than to try to deal with it.
 
-   This routine does a final relocation.  It should not be used when
-   generating relocateable output.
+   This routine does a final relocation.  Whether it is useful for a
+   relocateable link depends upon how the object format defines
+   relocations.
 
    FIXME: This routine ignores any special_function in the HOWTO,
    since the existing special_function values have been written for
