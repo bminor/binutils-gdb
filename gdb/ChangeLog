@@ -1,5 +1,9 @@
 2000-02-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
+	From Rodney Brown  <RodneyBrown@pmsc.com>
+	* ui-out.c (ui_out_set_flags): Fix typo, removing warning and
+	potentially harming mistake.
+
 	* arm-tdep.c: Use header file instead of extern declarations for
 	the {get,set}_arm_regname* functions.
 

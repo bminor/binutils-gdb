@@ -492,7 +492,7 @@ ui_out_set_flags (uiout, mask)
 {
   int oldflags;
 
-  uiout->flags != mask;
+  uiout->flags |= mask;
 
   return oldflags;
 }
