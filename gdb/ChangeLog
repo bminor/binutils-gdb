@@ -1,3 +1,8 @@
+2004-01-24  Nick Roberts  <nick@nick.uklinux.net>
+
+	* mi/mi-cmd-stack.c, mi/mi-cmd-var.c, mi/mi-cmds.h: Update
+	copyright.
+
 2004-01-23  Andrew Cagney  <cagney@redhat.com>
 
 	* printcmd.c (display_command): Replace tui_set_display call with

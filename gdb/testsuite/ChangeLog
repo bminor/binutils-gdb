@@ -1,3 +1,7 @@
+2004-01-24  Nick Roberts  <nick@nick.uklinux.net>
+
+	* gdb.mi/mi-stack.exp: Update copyright.
+
 2004-01-23  David Carlton  <carlton@kealia.com>
 
 	* gdb.cp/rtti.exp: Don't include full path in ${srcfile}.  Add
