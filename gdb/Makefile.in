@@ -2532,8 +2532,8 @@ source.o: source.c $(defs_h) $(symtab_h) $(expression_h) $(language_h) \
 	$(gdb_string_h) $(gdb_stat_h) $(gdbcore_h) $(gdb_regex_h) \
 	$(symfile_h) $(objfiles_h) $(annotate_h) $(gdbtypes_h) $(linespec_h) \
 	$(filenames_h) $(completer_h) $(ui_out_h) $(readline_h)
-sparc64fbsd-nat.o: sparc64fbsd-nat.c $(defs_h) $(sparc64_tdep_h) \
-	$(sparc_nat_h)
+sparc64fbsd-nat.o: sparc64fbsd-nat.c $(defs_h) $(target_h) \
+	$(sparc64_tdep_h) $(sparc_nat_h)
 sparc64fbsd-tdep.o: sparc64fbsd-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbcore_h) $(osabi_h) $(regcache_h) $(regset_h) \
 	$(target_h) $(trad_frame_h) $(gdb_assert_h) $(gdb_string_h) \

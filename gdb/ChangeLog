@@ -1,3 +1,8 @@
+2005-01-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (sparc64fbsd-nat.o): Update dependencies.
+	* sparc64fbsd-nat.c: Update copyright year.  Include "target.h".
+
 2005-01-15  Andrew Cagney  <cagney@gnu.org>
 
 	* acinclude.m4: Include ../bfd/bfd.m4 instead of

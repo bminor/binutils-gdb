@@ -1,6 +1,6 @@
 /* Native-dependent code for FreeBSD/sparc64.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "target.h"
 
 #include "sparc64-tdep.h"
 #include "sparc-nat.h"
