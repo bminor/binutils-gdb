@@ -22,12 +22,9 @@ and David MacKenzie.
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
 any later version published by the Free Software Foundation; with no
-Invariant Sections, with the Front-Cover Texts being ``A GNU Manual,''
-and with the Back-Cover Texts as in (a) below.
-
-(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
-this GNU Manual, like GNU software.  Copies published by the Free
-Software Foundation raise funds for GNU development.''
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled ``GNU
+Free Documentation License''.
 @end ifinfo
 
 @setchapternewpage odd
@@ -54,13 +51,9 @@ Contributed by Cygnus Support.
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
 any later version published by the Free Software Foundation; with no
-Invariant Sections, with the Front-Cover Texts being ``A GNU Manual,''
-and with the Back-Cover Texts as in (a) below.
-
-(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
-this GNU Manual, like GNU software.  Copies published by the Free
-Software Foundation raise funds for GNU development.''
-
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled ``GNU
+Free Documentation License''.
 @end titlepage
 
 @ifinfo
@@ -85,6 +78,7 @@ This document describes the stabs debugging format.
 * Stab Sections::		In some object file formats, stabs are
                                 in sections.
 * Symbol Types Index::          Index of symbolic stab symbol type names.
+* GNU Free Documentation License::  The license for this documentation
 @end menu
 @end ifinfo
 
@@ -4032,6 +4026,8 @@ symbols in the stabs themselves.  Having the linker relocate them there
 is no more work than having the linker relocate ELF symbols, and it
 solves the problem of having to associate the ELF and stab symbols.
 However, no one has yet designed or implemented such a scheme.
+
+@include fdl.texi
 
 @node Symbol Types Index
 @unnumbered Symbol Types Index
