@@ -55,12 +55,8 @@ variants.  *-tdep.c. The Target/Architecture maintainer works with the
 host maintainer when resolving build issues.  The Target/Architecture
 maintainer works with the native maintainer when resolving API issues.
 
-	a29k		Deleted.
-
 	alpha		--target=alpha-elf ,-Werror
 			Maintenance only
-
-	arc		Deleted.
 
 	arm		--target=arm-elf ,-Werror
 			Scott Bambrough		scottb@netwinder.org
@@ -74,22 +70,14 @@ maintainer works with the native maintainer when resolving API issues.
 
 	d10v		OBSOLETE
 
-	d30v		Deleted.
-
-	fr30		Deleted.
-
 	frv		--target=frv-elf ,-Werror
 			Maintenance only
 
 	h8300		--target=h8300hms broken
 			Maintenance only
 
-	h8500		Deleted.
-
 	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org
-
-	i960		Deleted.
 
 	ia64		--target=ia64-linux-gnu ,-Werror
 			(--target=ia64-elf broken)
@@ -111,8 +99,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	mips		--target=mips-elf ,-Werror
 			Andrew Cagney		cagney@redhat.com
-
-	mn10200		Deleted.
 
 	mn10300		--target=mn10300-elf broken
 			Maintenance only
@@ -136,23 +122,17 @@ maintainer works with the native maintainer when resolving API issues.
 	sparc		--target=sparc-elf ,-Werror
 			Maintenance only
 
-	tic80		Deleted.
-
 	v850		--target=v850-elf broken
 			Maintenance only
 
 	vax		--target=vax-netbsd ,-Werror
 			Maintenance only
 
-	w65		Deleted.
-
 	x86-64		--target=x86_64-linux-gnu ,-Werror
 			Maintenance only
 
 	xstormy16	--target=xstormy16-elf
 			Corinna Vinschen	vinschen@redhat.com
-
-	z8k		Deleted.
 
 All developers recognized by this file can make arbitrary changes to
 OBSOLETE targets.

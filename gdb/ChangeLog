@@ -1,5 +1,7 @@
 2004-11-13  Andrew Cagney  <cagney@gnu.org>
 
+	* MAINTAINERS: Do not list "Deleted" architectures.
+
 	* configure.tgt: Delete i[34567]86-*-vxworks*, m68*-netx-*,
 	m68*-*-vxworks*, mips*-*-vxworks*, powerpc-*-vxworks*, and
 	sparc-*-vxworks*.
