@@ -843,6 +843,15 @@ case "${targ}" in
     targ_defvec=bfd_elf32_shlin_vec
     ;;
 
+  sh*le-*-netbsdelf*)
+    targ_defvec=bfd_elf32_shlnbsd_vec
+    targ_selvecs="bfd_elf32_shnbsd_vec shcoff_vec shlcoff_vec"
+    ;;
+  sh*-*-netbsdelf*)
+    targ_defvec=bfd_elf32_shnbsd_vec
+    targ_selvecs="bfd_elf32_shlnbsd_vec shcoff_vec shlcoff_vec"
+    ;;
+
   sh-*-elf* | sh-*-rtemself*)
     targ_defvec=bfd_elf32_sh_vec
     targ_selvecs="bfd_elf32_shl_vec shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"

@@ -1,3 +1,11 @@
+2002-01-07  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.in (sh*le): Set cpu_type=sh and endian=little.
+	(sh*-*-netbsdelf*): New target.
+	* configure: Regenerate.
+	* tc-sh.h: Update copyright years. 
+	(TARGET_FORMAT): Add version for TE_NetBSD.
+
 2002-01-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* read.c (emit_expr): Do not allow 'size' or 'nbytes' to go

@@ -256,6 +256,14 @@ sh*eb-*-linux*)
 sh*-*-linux*)
 			targ_emul=shlelf_linux
 			;;
+sh*le-*-netbsdelf*)
+			targ_emul=shlelf_nbsd
+			targ_extra_emuls=shelf_nbsd
+			;;
+sh*-*-netbsdelf*)
+			targ_emul=shelf_nbsd
+			targ_extra_emuls=shlelf_nbsd
+			;;
 sh-*-elf* | sh-*-rtemself*)
 			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"

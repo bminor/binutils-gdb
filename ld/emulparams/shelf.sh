@@ -1,5 +1,5 @@
 # If you change this file, please also look at files which source this one:
-# shlelf.sh
+# shlelf.sh, shelf_nbsd.sh
 
 SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-sh"

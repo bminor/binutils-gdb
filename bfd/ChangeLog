@@ -1,3 +1,20 @@
+2002-01-07  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add elf32-sh-nbsd.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-sh-nbsd.c.
+	(elf32-sh-nbsd.lo): New rule.
+	* Makefile.in: Regenerate.
+	* config.bfd (sh*le-*-netbsdelf*): New target.
+	(sh*-*-netbsdelf*): New target.
+	* configure.in: Include netbsd-core.lo for native sh*-*-netbsd*.
+	(bfd_elf32_shnbsd_vec): New vector.
+	(bfd_elf32_shlnbsd_vec): New vector.
+	* configure: Regenerate.
+	* elf32-sh-nbsd.c: New file.
+	* targets.c: Update copyright years.
+	(_bfd_target_vector): Add bfd_elf32_shlnbsd_vec and 
+	bfd_elf32_shnbsd_vec.
+
 2002-01-07  Aldy Hernandez  <aldyh@redhat.com>
 
 	* coff-rs6000.c (READ20): Use bfd_scan_vma.

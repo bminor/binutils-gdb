@@ -1,3 +1,15 @@
+2002-01-07  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eshelf_nbsd.o and eshlelf_nbsd.o.
+	(eshelf_nbsd.c): New rule. 
+	(eshlelf_nbsd.c): New rule.
+	* Makefile.in: Regenerate.
+	* configure.tgt (sh*le-*-netbsdelf*): New target.
+	(sh*-*-netbsdelf*): New target.
+	* emulparams/shelf.sh: Document that shelf_nbsd.sh sources this file.
+	* ld/emulparams/shelf_nbsd.sh: New emulation.
+	* ld/emulparams/shlelf_nbsd.sh: New emulation.
+
 2002-01-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/es.po: New file: Spanish translation.

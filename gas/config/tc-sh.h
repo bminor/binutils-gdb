@@ -1,5 +1,5 @@
 /* This file is tc-sh.h
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -165,6 +165,8 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *));
 extern int target_big_endian;
 #ifdef TE_LINUX
 #define TARGET_FORMAT (!target_big_endian ? "elf32-sh-linux" : "elf32-shbig-linux")
+#elif defined(TE_NetBSD)
+#define TARGET_FORMAT (!target_big_endian ? "elf32-shl-nbsd" : "elf32-sh-nbsd")
 #else
 #define TARGET_FORMAT (!target_big_endian ? "elf32-shl" : "elf32-sh")
 #endif
