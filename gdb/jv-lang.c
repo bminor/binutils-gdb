@@ -1,5 +1,5 @@
 /* Java language support routines for GDB, the GNU debugger.
-   Copyright 1997 Free Software Foundation, Inc.
+   Copyright 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -44,16 +44,17 @@ struct type *java_float_type;
 struct type *java_double_type;
 struct type *java_void_type;
 
-struct type *java_object_type;
+static void java_emit_char PARAMS ((int c, GDB_FILE *stream, int quoter));
 
 /* This objfile contains symtabs that have been dynamically created
    to record dynamically loaded Java classes and dynamically
    compiled java methods. */
-struct objfile *dynamics_objfile = NULL;
 
-struct type *java_link_class_type PARAMS((struct type*, value_ptr));
+static struct objfile *dynamics_objfile = NULL;
 
-struct objfile *
+static struct type *java_link_class_type PARAMS ((struct type *, value_ptr));
+
+static struct objfile *
 get_dynamics_objfile ()
 {
   if (dynamics_objfile == NULL)
@@ -560,7 +561,9 @@ java_link_class_type (type, clas)
   return type;
 }
 
-struct type*
+static struct type *java_object_type;
+
+struct type *
 get_java_object_type ()
 {
   return java_object_type;
@@ -704,15 +707,16 @@ java_value_string (ptr, len)
   error ("not implemented - java_value_string"); /* FIXME */
 }
 
-static void java_printchar PARAMS ((int c, GDB_FILE *stream));
+/* Print the character C on STREAM as part of the contents of a literal
+   string whose delimiter is QUOTER.  Note that that format for printing
+   characters and strings is language specific. */
 
 static void
-java_printchar (c, stream)
+java_emit_char (c, stream, quoter)
      int c;
      GDB_FILE *stream;
+     int quoter;
 {
-  fputc_filtered ('\'', stream);
-
   switch (c)
     {
     case '\\':
@@ -741,8 +745,6 @@ java_printchar (c, stream)
 	fprintf_filtered (stream, "\\u%.4x", (unsigned int) c);
       break;
     }
-
-  fputc_filtered ('\'', stream);
 }
 
 static value_ptr
@@ -929,8 +931,9 @@ const struct language_defn java_language_defn = {
   java_parse,
   java_error,
   evaluate_subexp_java,
-  java_printchar,		/* Print a character constant */
+  c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
+  java_emit_char,		/* Function to print a single character */
   java_create_fundamental_type,	/* Create fundamental type in this language */
   java_print_type,		/* Print a type using appropriate syntax */
   java_val_print,		/* Print a value using appropriate syntax */

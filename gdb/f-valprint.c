@@ -392,7 +392,7 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
     {
     case TYPE_CODE_STRING: 
       f77_get_dynamic_length_of_aggregate (type);
-      LA_PRINT_STRING (stream, valaddr, TYPE_LENGTH (type), 0);
+      LA_PRINT_STRING (stream, valaddr, TYPE_LENGTH (type), 1, 0);
       break;
       
     case TYPE_CODE_ARRAY:
@@ -434,7 +434,7 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	      && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && (format == 0 || format == 's')
 	      && addr != 0)
-	    i = val_print_string (addr, 0, stream);
+	    i = val_print_string (addr, -1, TYPE_LENGTH (elttype), stream);
 	  
 	  /* Return number of characters printed, plus one for the
 	     terminating null if we have "reached the end".  */

@@ -84,10 +84,13 @@ static void
 set_type_range PARAMS ((void));
 
 static void
-unk_lang_printchar PARAMS ((int, GDB_FILE *));
+unk_lang_emit_char PARAMS ((int c, GDB_FILE *stream, int quoter));
 
 static void
-unk_lang_printstr PARAMS ((GDB_FILE *, char *, unsigned int, int));
+unk_lang_printchar PARAMS ((int c, GDB_FILE *stream));
+
+static void
+unk_lang_printstr PARAMS ((GDB_FILE *stream, char *string, unsigned int length, int width, int force_ellipses));
 
 static struct type *
 unk_lang_create_fundamental_type PARAMS ((struct objfile *, int));
@@ -1213,6 +1216,15 @@ unk_lang_error (msg)
 }
 
 static void
+unk_lang_emit_char (c, stream, quoter)
+     register int c;
+     GDB_FILE *stream;
+     int quoter;
+{
+  error ("internal error - unimplemented function unk_lang_emit_char called.");
+}
+
+static void
 unk_lang_printchar (c, stream)
      register int c;
      GDB_FILE *stream;
@@ -1221,10 +1233,11 @@ unk_lang_printchar (c, stream)
 }
 
 static void
-unk_lang_printstr (stream, string, length, force_ellipses)
+unk_lang_printstr (stream, string, length, width, force_ellipses)
      GDB_FILE *stream;
      char *string;
      unsigned int length;
+     int width;
      int force_ellipses;
 {
   error ("internal error - unimplemented function unk_lang_printstr called.");
@@ -1290,6 +1303,7 @@ const struct language_defn unknown_language_defn = {
   evaluate_subexp_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
+  unk_lang_emit_char,
   unk_lang_create_fundamental_type,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
@@ -1317,6 +1331,7 @@ const struct language_defn auto_language_defn = {
   evaluate_subexp_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
+  unk_lang_emit_char,
   unk_lang_create_fundamental_type,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
@@ -1343,6 +1358,7 @@ const struct language_defn local_language_defn = {
   evaluate_subexp_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
+  unk_lang_emit_char,
   unk_lang_create_fundamental_type,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */

@@ -95,7 +95,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		  len = temp_len;
 		}
 	      
-	      LA_PRINT_STRING (stream, valaddr, len, 0);
+	      LA_PRINT_STRING (stream, valaddr, len, eltlen, 0);
 	      i = len;
 	    }
 	  else
@@ -169,12 +169,14 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */
+	  /* FIXME: need to handle wchar_t here... */
+
 	  if (TYPE_LENGTH (elttype) == 1
 	      && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && (format == 0 || format == 's')
 	      && addr != 0)
 	    {
-	      i = val_print_string (addr, 0, stream);
+	      i = val_print_string (addr, -1, TYPE_LENGTH (elttype), stream);
 	    }
 	  else if (cp_is_vtbl_member(type))
   	    {

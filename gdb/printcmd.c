@@ -293,8 +293,9 @@ print_formatted (val, format, size)
   switch (format)
     {
     case 's':
+      /* FIXME: Need to handle wchar_t's here... */
       next_address = VALUE_ADDRESS (val)
-	+ val_print_string (VALUE_ADDRESS (val), 0, gdb_stdout);
+	+ val_print_string (VALUE_ADDRESS (val), -1, 1, gdb_stdout);
       next_section = VALUE_BFD_SECTION (val);
       break;
 
@@ -688,6 +689,8 @@ print_address_demangle (addr, stream, do_demangle)
 /* These are the types that $__ will get after an examine command of one
    of these sizes.  */
 
+static struct type *examine_i_type;
+
 static struct type *examine_b_type;
 static struct type *examine_h_type;
 static struct type *examine_w_type;
@@ -720,7 +723,9 @@ do_examine (fmt, addr, sect)
   if (format == 's' || format == 'i')
     size = 'b';
 
-  if (size == 'b')
+  if (format == 'i')
+    val_type = examine_i_type;
+  else if (size == 'b')
     val_type = examine_b_type;
   else if (size == 'h')
     val_type = examine_h_type;
@@ -753,7 +758,16 @@ do_examine (fmt, addr, sect)
 	  /* Note that print_formatted sets next_address for the next
 	     object.  */
 	  last_examine_address = next_address;
-	  last_examine_value = value_at (val_type, next_address, sect);
+	  /* The value to be displayed is not fetched greedily.
+             Instead, to avoid the posibility of a fetched value not
+             being used, its retreval is delayed until the print code
+             uses it.  When examining an instruction stream, the
+             disassembler will perform its own memory fetch using just
+             the address stored in LAST_EXAMINE_VALUE.  FIXME: Should
+             the disassembler be modified so that LAST_EXAMINE_VALUE
+             is left with the byte sequence from the last complete
+             instruction fetched from memory? */
+	  last_examine_value = value_at_lazy (val_type, next_address, sect);
 	  print_formatted (last_examine_value, format, size);
 	}
       printf_filtered ("\n");
@@ -1261,7 +1275,13 @@ x_command (exp, from_tty)
 				   (LONGEST) last_examine_address));
       
       /* Make contents of last address examined available to the user as $__.*/
-      set_internalvar (lookup_internalvar ("__"), last_examine_value);
+      /* If the last value has not been fetched from memory then don't
+         fetch it now - instead mark it by voiding the $__ variable. */
+      if (VALUE_LAZY (last_examine_value))
+	set_internalvar (lookup_internalvar ("__"),
+			 allocate_value (builtin_type_void));
+      else
+	set_internalvar (lookup_internalvar ("__"), last_examine_value);
     }
 }
 
@@ -2190,7 +2210,6 @@ disassemble_command (arg, from_tty)
       if (find_pc_partial_function (pc, &name, &low, &high) == 0)
 	error ("No function contains program counter for selected frame.\n");
       low += FUNCTION_START_OFFSET;
-      high -= 1;
     }
   else if (!(space_index = (char *) strchr (arg, ' ')))
     {
@@ -2199,20 +2218,6 @@ disassemble_command (arg, from_tty)
       if (find_pc_partial_function (pc, &name, &low, &high) == 0)
 	error ("No function contains specified address.\n");
       low += FUNCTION_START_OFFSET;
-      high -= 1;
-      if (overlay_debugging)
-	{
-	  section = find_pc_overlay (pc);
-	  if (pc_in_unmapped_range (pc, section))
-	    {
-	      /* find_pc_partial_function will have returned low and high
-		 relative to the symbolic (mapped) address range.  Need to
-		 translate them back to the unmapped range where PC is.  */
-
-	      low  = overlay_unmapped_address (low, section);
-	      high = overlay_unmapped_address (high, section);
-	    }
-	}
     }
   else
     {
@@ -2220,7 +2225,6 @@ disassemble_command (arg, from_tty)
       *space_index = '\0';
       low = parse_and_eval_address (arg);
       high = parse_and_eval_address (space_index + 1);
-      high -= 1;
     }
 
   printf_filtered ("Dump of assembler code ");
@@ -2246,7 +2250,7 @@ disassemble_command (arg, from_tty)
   pc_masked = pc;
 #endif
 
-  while (pc_masked <= high)
+  while (pc_masked < high)
     {
       QUIT;
       print_address (pc_masked, gdb_stdout);
@@ -2441,6 +2445,11 @@ environment, the value is printed in its own window.");
 	"Set printing of source filename and line number with <symbol>.",
 		   &setprintlist),
       &showprintlist);
+
+  /* For examine/instruction a single byte quantity is specified as
+     the data.  This avoids problems with value_at_lazy() requiring a
+     valid data type (and rejecting VOID). */
+  examine_i_type = init_type (TYPE_CODE_INT, 1, 0, "examine_i_type", NULL);
 
   examine_b_type = init_type (TYPE_CODE_INT, 1, 0, "examine_b_type", NULL);
   examine_h_type = init_type (TYPE_CODE_INT, 2, 0, "examine_h_type", NULL);

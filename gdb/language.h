@@ -134,12 +134,16 @@ struct language_defn
   void (*la_error) PARAMS ((char *));
 
   /* Evaluate an expression. */
-  struct value * (*evaluate_exp) PARAMS ((struct type*, struct expression *, 
+  struct value * (*evaluate_exp) PARAMS ((struct type *, struct expression *, 
 					  int *, enum noside));
 
-  void (*la_printchar) PARAMS ((int, GDB_FILE *));
+  void (*la_printchar) PARAMS ((int ch, GDB_FILE *stream));
 
-  void (*la_printstr) PARAMS ((GDB_FILE *, char *, unsigned int, int));
+  void (*la_printstr) PARAMS ((GDB_FILE *stream, char *string,
+			       unsigned int length, int width,
+			       int force_ellipses));
+
+  void (*la_emitchar) PARAMS ((int ch, GDB_FILE *stream, int quoter));
 
   struct type *(*la_fund_type) PARAMS ((struct objfile *, int));
 
@@ -309,8 +313,10 @@ set_language PARAMS ((enum language));
 
 #define LA_PRINT_CHAR(ch, stream) \
   (current_language->la_printchar(ch, stream))
-#define LA_PRINT_STRING(stream, string, length, force_ellipses) \
-  (current_language->la_printstr(stream, string, length, force_ellipses))
+#define LA_PRINT_STRING(stream, string, length, width, force_ellipses) \
+  (current_language->la_printstr(stream, string, length, width, force_ellipses))
+#define LA_EMIT_CHAR(ch, stream, quoter) \
+  (current_language->la_emitchar(ch, stream, quoter))
 
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,

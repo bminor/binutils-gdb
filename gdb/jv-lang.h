@@ -56,7 +56,7 @@ extern struct type *java_primitive_type PARAMS ((int));
 
 extern struct type *java_array_type PARAMS ((struct type*, int));
 
-extern struct type *get_java_object_type ();
+extern struct type *get_java_object_type PARAMS ((void));
 
 extern struct type * java_lookup_class PARAMS((char *));
 

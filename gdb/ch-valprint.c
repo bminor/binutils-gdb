@@ -329,9 +329,8 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  && /* If print_max is UINT_MAX, the alloca below will fail.
 		In that case don't try to print the string.  */
 	  print_max < UINT_MAX)
-	  {
-	    i = val_print_string (addr, 0, stream);
-	  }
+	i = val_print_string (addr, -1, TYPE_LENGTH (elttype), stream);
+
       /* Return number of characters printed, plus one for the
 	 terminating null if we have "reached the end".  */
       return (i + (print_max && i != print_max));
@@ -339,7 +338,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 
     case TYPE_CODE_STRING:
       i = TYPE_LENGTH (type);
-      LA_PRINT_STRING (stream, valaddr, i, 0);
+      LA_PRINT_STRING (stream, valaddr, i, 1, 0);
       /* Return number of characters printed, plus one for the terminating
 	 null if we have "reached the end".  */
       return (i + (print_max && i != print_max));
@@ -432,7 +431,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		     segfault.  */
 		  return length;
 		}
-	      LA_PRINT_STRING (stream, data_addr, length, 0);
+	      LA_PRINT_STRING (stream, data_addr, length, 1, 0);
 	      return length;
 	    default:
 	      break;

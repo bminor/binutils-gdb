@@ -42,7 +42,7 @@ static struct type *
 chill_create_fundamental_type PARAMS ((struct objfile *, int));
 
 static void
-chill_printstr PARAMS ((GDB_FILE *, char *, unsigned int, int));
+chill_printstr PARAMS ((GDB_FILE *stream, char *string, unsigned int length, int width, int force_ellipses));
 
 static void
 chill_printchar PARAMS ((int, GDB_FILE *));
@@ -111,10 +111,11 @@ chill_printchar (c, stream)
   */
 
 static void
-chill_printstr (stream, string, length, force_ellipses)
+chill_printstr (stream, string, length, width, force_ellipses)
      GDB_FILE *stream;
      char *string;
      unsigned int length;
+     int width;
      int force_ellipses;
 {
   register unsigned int i;
@@ -628,6 +629,7 @@ const struct language_defn chill_language_defn = {
   evaluate_subexp_chill,
   chill_printchar,		/* print a character constant */
   chill_printstr,		/* function to print a string constant */
+  NULL,				/* Function to print a single char */
   chill_create_fundamental_type,/* Create fundamental type in this language */
   chill_print_type,		/* Print a type using appropriate syntax */
   chill_val_print,		/* Print a value using appropriate syntax */

@@ -34,7 +34,7 @@ static value_ptr evaluate_subexp_scm PARAMS ((struct type *, struct expression *
 					      int *, enum noside));
 static value_ptr scm_lookup_name PARAMS ((char *));
 static int in_eval_c PARAMS ((void));
-static void scm_printstr PARAMS ((GDB_FILE *, char *, unsigned int, int));
+static void scm_printstr PARAMS ((GDB_FILE *stream, char *string, unsigned int length, int width, int force_ellipses));
 
 extern struct type ** CONST_PTR (c_builtin_types[]);
 
@@ -49,10 +49,11 @@ scm_printchar (c, stream)
 }
 
 static void
-scm_printstr (stream, string, length, force_ellipses)
+scm_printstr (stream, string, length, width, force_ellipses)
      GDB_FILE *stream;
      char *string;
      unsigned int length;
+     int width;
      int force_ellipses;
 {
   fprintf_filtered (stream, "\"%s\"", string);
@@ -245,9 +246,10 @@ const struct language_defn scm_language_defn = {
   scm_parse,
   c_error,
   evaluate_subexp_scm,
-  scm_printchar,			/* Print a character constant */
+  scm_printchar,		/* Print a character constant */
   scm_printstr,			/* Function to print string constant */
-  NULL,	/* Create fundamental type in this language */
+  NULL,				/* Function to print a single character */
+  NULL,				/* Create fundamental type in this language */
   c_print_type,			/* Print a type using appropriate syntax */
   scm_val_print,		/* Print a value using appropriate syntax */
   scm_value_print,		/* Print a top-level value */

@@ -41,7 +41,9 @@ c_value_print PARAMS ((struct value *, GDB_FILE *, int, enum val_prettyprint));
 
 extern void c_printchar PARAMS ((int, GDB_FILE*));
 
-extern void c_printstr PARAMS ((GDB_FILE *, char *, unsigned int, int));
+extern void c_printstr PARAMS ((GDB_FILE *stream, char *string,
+				unsigned int length, int width,
+				int force_ellipses));
 
 extern struct type * c_create_fundamental_type PARAMS ((struct objfile*, int));
 

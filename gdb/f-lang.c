@@ -82,9 +82,9 @@ static void patch_common_entries PARAMS ((SAVED_F77_COMMON_PTR, CORE_ADDR, int))
 #endif
 
 static struct type *f_create_fundamental_type PARAMS ((struct objfile *, int));
-static void f_printstr PARAMS ((FILE *, char *, unsigned int, int));
-static void f_printchar PARAMS ((int, FILE *));
-static void emit_char PARAMS ((int, FILE *, int));
+static void f_printstr PARAMS ((GDB_FILE *stream, char *string, unsigned int length, int width, int force_ellipses));
+static void f_printchar PARAMS ((int c, GDB_FILE *stream));
+static void f_emit_char PARAMS ((int c, GDB_FILE *stream, int quoter));
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
@@ -93,9 +93,9 @@ static void emit_char PARAMS ((int, FILE *, int));
    be replaced with a true F77 version.  */
 
 static void
-emit_char (c, stream, quoter)
+f_emit_char (c, stream, quoter)
      register int c;
-     FILE *stream;
+     GDB_FILE *stream;
      int quoter;
 {
   c &= 0xFF;			/* Avoid sign bit follies */
@@ -147,7 +147,7 @@ f_printchar (c, stream)
      FILE *stream;
 {
   fputs_filtered ("'", stream);
-  emit_char (c, stream, '\'');
+  LA_EMIT_CHAR (c, stream, '\'');
   fputs_filtered ("'", stream);
 }
 
@@ -159,10 +159,11 @@ f_printchar (c, stream)
    be replaced with a true F77 version. */
 
 static void
-f_printstr (stream, string, length, force_ellipses)
+f_printstr (stream, string, length, width, force_ellipses)
      FILE *stream;
      char *string;
      unsigned int length;
+     int width;
      int force_ellipses;
 {
   register unsigned int i;
@@ -229,7 +230,7 @@ f_printstr (stream, string, length, force_ellipses)
 		fputs_filtered ("'", stream);
 	      in_quotes = 1;
 	    }
-	  emit_char (string[i], stream, '"');
+	  LA_EMIT_CHAR (string[i], stream, '"');
 	  ++things_printed;
 	}
     }
@@ -470,6 +471,7 @@ const struct language_defn f_language_defn = {
   evaluate_subexp_standard,
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
+  f_emit_char,			/* Function to print a single character */
   f_create_fundamental_type,	/* Create fundamental type in this language */
   f_print_type,		        /* Print a type using appropriate syntax */
   f_val_print,			/* Print a value using appropriate syntax */

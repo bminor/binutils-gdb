@@ -27,9 +27,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "c-lang.h"
 
 static struct type *m2_create_fundamental_type PARAMS ((struct objfile *, int));
-static void m2_printstr PARAMS ((GDB_FILE *, char *, unsigned int, int));
+static void m2_printstr PARAMS ((GDB_FILE *stream, char *string, unsigned int length, int width, int force_ellipses));
 static void m2_printchar PARAMS ((int, GDB_FILE *));
-static void emit_char PARAMS ((int, GDB_FILE *, int));
+static void m2_emit_char PARAMS ((int, GDB_FILE *, int));
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
@@ -39,7 +39,7 @@ static void emit_char PARAMS ((int, GDB_FILE *, int));
  */
 
 static void
-emit_char (c, stream, quoter)
+m2_emit_char (c, stream, quoter)
      register int c;
      GDB_FILE *stream;
      int quoter;
@@ -96,7 +96,7 @@ m2_printchar (c, stream)
      GDB_FILE *stream;
 {
   fputs_filtered ("'", stream);
-  emit_char (c, stream, '\'');
+  LA_EMIT_CHAR (c, stream, '\'');
   fputs_filtered ("'", stream);
 }
 
@@ -108,10 +108,11 @@ m2_printchar (c, stream)
    be replaced with a true Modula version. */
 
 static void
-m2_printstr (stream, string, length, force_ellipses)
+m2_printstr (stream, string, length, width, force_ellipses)
      GDB_FILE *stream;
      char *string;
      unsigned int length;
+     int width;
      int force_ellipses;
 {
   register unsigned int i;
@@ -178,7 +179,7 @@ m2_printstr (stream, string, length, force_ellipses)
 		fputs_filtered ("\"", stream);
 	      in_quotes = 1;
 	    }
-	  emit_char (string[i], stream, '"');
+	  LA_EMIT_CHAR (string[i], stream, '"');
 	  ++things_printed;
 	}
     }
@@ -424,6 +425,7 @@ const struct language_defn m2_language_defn = {
   evaluate_subexp_standard,
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
+  m2_emit_char,			/* Function to print a single character */
   m2_create_fundamental_type,	/* Create fundamental type in this language */
   m2_print_type,		/* Print a type using appropriate syntax */
   m2_val_print,			/* Print a value using appropriate syntax */

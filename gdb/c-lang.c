@@ -25,19 +25,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "c-lang.h"
 
-static void emit_char PARAMS ((int, GDB_FILE *, int));
+static void c_emit_char PARAMS ((int c, GDB_FILE *stream, int quoter));
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
    characters and strings is language specific. */
 
 static void
-emit_char (c, stream, quoter)
+c_emit_char (c, stream, quoter)
      register int c;
      GDB_FILE *stream;
      int quoter;
 {
-
   c &= 0xFF;			/* Avoid sign bit follies */
 
   if (PRINT_LITERAL_FORM (c))
@@ -85,21 +84,23 @@ c_printchar (c, stream)
      int c;
      GDB_FILE *stream;
 {
-  fputs_filtered ("'", stream);
-  emit_char (c, stream, '\'');
-  fputs_filtered ("'", stream);
+  fputc_filtered ('\'', stream);
+  LA_EMIT_CHAR (c, stream, '\'');
+  fputc_filtered ('\'', stream);
 }
 
 /* Print the character string STRING, printing at most LENGTH characters.
-   Printing stops early if the number hits print_max; repeat counts
-   are printed as appropriate.  Print ellipses at the end if we
-   had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.  */
+   LENGTH is -1 if the string is nul terminated.  Each character is WIDTH bytes
+   long.  Printing stops early if the number hits print_max; repeat counts are
+   printed as appropriate.  Print ellipses at the end if we had to stop before
+   printing LENGTH characters, or if FORCE_ELLIPSES.  */
 
 void
-c_printstr (stream, string, length, force_ellipses)
+c_printstr (stream, string, length, width, force_ellipses)
      GDB_FILE *stream;
      char *string;
      unsigned int length;
+     int width;
      int force_ellipses;
 {
   register unsigned int i;
@@ -113,7 +114,9 @@ c_printstr (stream, string, length, force_ellipses)
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in traditional C
      style.  */
-  if ((!force_ellipses) && length > 0 && string[length-1] == '\0')
+  if (!force_ellipses
+      && length > 0
+      && extract_unsigned_integer (string + (length - 1) * width, width) == '\0')
     length--;
 
   if (length == 0)
@@ -129,6 +132,7 @@ c_printstr (stream, string, length, force_ellipses)
       unsigned int rep1;
       /* Number of repetitions we have detected so far.  */
       unsigned int reps;
+      unsigned long current_char;
 
       QUIT;
 
@@ -138,9 +142,13 @@ c_printstr (stream, string, length, force_ellipses)
 	  need_comma = 0;
 	}
 
+      current_char = extract_unsigned_integer (string + i * width, width);
+
       rep1 = i + 1;
       reps = 1;
-      while (rep1 < length && string[rep1] == string[i])
+      while (rep1 < length
+	     && extract_unsigned_integer (string + rep1 * width, width)
+	        == current_char)
 	{
 	  ++rep1;
 	  ++reps;
@@ -156,7 +164,7 @@ c_printstr (stream, string, length, force_ellipses)
 		fputs_filtered ("\", ", stream);
 	      in_quotes = 0;
 	    }
-	  c_printchar (string[i], stream);
+	  LA_PRINT_CHAR (current_char, stream);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  i = rep1 - 1;
 	  things_printed += repeat_count_threshold;
@@ -172,7 +180,7 @@ c_printstr (stream, string, length, force_ellipses)
 		fputs_filtered ("\"", stream);
 	      in_quotes = 1;
 	    }
-	  emit_char (string[i], stream, '"');
+	  LA_EMIT_CHAR (current_char, stream, '"');
 	  ++things_printed;
 	}
     }
@@ -404,6 +412,7 @@ const struct language_defn c_language_defn = {
   evaluate_subexp_standard,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
+  c_emit_char,			/* Print a single char */
   c_create_fundamental_type,	/* Create fundamental type in this language */
   c_print_type,			/* Print a type using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
@@ -430,6 +439,7 @@ const struct language_defn cplus_language_defn = {
   evaluate_subexp_standard,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
+  c_emit_char,			/* Print a single char */
   c_create_fundamental_type,	/* Create fundamental type in this language */
   c_print_type,			/* Print a type using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
@@ -456,6 +466,7 @@ const struct language_defn asm_language_defn = {
   evaluate_subexp_standard,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
+  c_emit_char,			/* Print a single char */
   c_create_fundamental_type,	/* Create fundamental type in this language */
   c_print_type,			/* Print a type using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */

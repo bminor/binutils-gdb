@@ -149,6 +149,41 @@ java_value_print (val, stream, format, pretty)
       return 0;
     }
 
+  /* If it's type String, print it */
+
+  if (TYPE_CODE (type) == TYPE_CODE_PTR
+      && TYPE_TARGET_TYPE (type)
+      && TYPE_NAME (TYPE_TARGET_TYPE (type))
+      && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "java.lang.String") == 0
+      && (format == 0 || format == 's')
+      && address != 0)
+    {
+      value_ptr data_val;
+      CORE_ADDR data;
+      value_ptr boffset_val;
+      unsigned long boffset;
+      value_ptr count_val;
+      unsigned long count;
+      value_ptr mark;
+
+      mark = value_mark ();	/* Remember start of new values */
+
+      data_val = value_struct_elt (&val, NULL, "data", NULL, NULL);
+      data = value_as_pointer (data_val);
+
+      boffset_val = value_struct_elt (&val, NULL, "boffset", NULL, NULL);
+      boffset = value_as_pointer (boffset_val);
+
+      count_val = value_struct_elt (&val, NULL, "count", NULL, NULL);
+      count = value_as_pointer (count_val);
+
+      value_free_to_mark (mark); /* Release unnecessary values */
+
+      val_print_string (data + boffset, count, 2, stream);
+
+      return 0;
+    }
+
   return (val_print (type, VALUE_CONTENTS (val), address,
 		     stream, format, 1, 0, pretty));
 }
@@ -353,9 +388,22 @@ java_print_value_fields (type, valaddr, address, stream,
   fprintf_filtered (stream, "}");
 }
 
+/* Print data of type TYPE located at VALADDR (within GDB), which came from
+   the inferior at address ADDRESS, onto stdio stream STREAM according to
+   FORMAT (a letter or 0 for natural format).  The data at VALADDR is in
+   target byte order.
+
+   If the data are a string pointer, returns the number of string characters
+   printed.
+
+   If DEREF_REF is nonzero, then dereference references, otherwise just print
+   them like pointers.
+
+   The PRETTY parameter controls prettyprinting.  */
+
 int
 java_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
-	     pretty)
+		pretty)
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
@@ -366,7 +414,7 @@ java_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
      enum val_prettyprint pretty;
 {
   register unsigned int i = 0;		/* Number of characters printed */
-  struct type *elttype;
+  struct type *target_type;
   CORE_ADDR addr;
 
   CHECK_TYPEDEF (type);
@@ -395,26 +443,23 @@ java_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  fputs_filtered ("null", stream);
 	  return i;
 	}
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      target_type = check_typedef (TYPE_TARGET_TYPE (type));
+
+      if (TYPE_CODE (target_type) == TYPE_CODE_FUNC)
 	{
-	print_unpacked_pointer:
-          elttype = check_typedef (TYPE_TARGET_TYPE (type));
-
-	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
-	    {
-	      /* Try to print what function it points to.  */
-	      print_address_demangle (addr, stream, demangle);
-	      /* Return value is irrelevant except for string pointers.  */
-	      return (0);
-	    }
-
-	  if (addressprint && format != 's')
-	    {
-	      fputs_filtered ("@", stream);
-	      print_longest (stream, 'x', 0, (ULONGEST) addr);
-	    }
-	  return i;
+	  /* Try to print what function it points to.  */
+	  print_address_demangle (addr, stream, demangle);
+	  /* Return value is irrelevant except for string pointers.  */
+	  return (0);
 	}
+
+      if (addressprint && format != 's')
+	{
+	  fputs_filtered ("@", stream);
+	  print_longest (stream, 'x', 0, (ULONGEST) addr);
+	}
+
+      return i;
     case TYPE_CODE_CHAR:
       format = format ? format : output_format;
       if (format)
