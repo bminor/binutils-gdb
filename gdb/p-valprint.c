@@ -175,7 +175,7 @@ pascal_val_print (struct type *type, const bfd_byte *valaddr,
 
 	  if (addressprint && format != 's')
 	    {
-	      print_address_numeric (addr, 1, stream);
+	      deprecated_print_address_numeric (addr, 1, stream);
 	    }
 
 	  /* For a pointer to char or unsigned char, also print the string
@@ -275,7 +275,7 @@ pascal_val_print (struct type *type, const bfd_byte *valaddr,
 	{
 	  fprintf_filtered (stream, "@");
 	  /* Extract the address, assume that it is unsigned.  */
-	  print_address_numeric
+	  deprecated_print_address_numeric
 	    (extract_unsigned_integer (valaddr + embedded_offset,
 				       TARGET_PTR_BIT / HOST_CHAR_BIT),
 	     1, stream);

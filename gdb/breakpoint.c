@@ -872,7 +872,7 @@ insert_bp_location (struct bp_location *bpt,
 				      bpt->owner->number);
 		  fprintf_filtered (tmp_error_stream, 
 				    "Error accessing memory address ");
-		  print_address_numeric (bpt->address, 1, tmp_error_stream);
+		  deprecated_print_address_numeric (bpt->address, 1, tmp_error_stream);
 		  fprintf_filtered (tmp_error_stream, ": %s.\n",
 				    safe_strerror (val));
 		}
@@ -1028,7 +1028,7 @@ in which its expression is valid.\n"),
 			      bpt->owner->number);
 	  fprintf_filtered (tmp_error_stream, 
 			    "Error accessing memory address ");
-	  print_address_numeric (bpt->address, 1, tmp_error_stream);
+	  deprecated_print_address_numeric (bpt->address, 1, tmp_error_stream);
 	  fprintf_filtered (tmp_error_stream, ": %s.\n",
 			    safe_strerror (val));
 	  bpt->owner->enable_state = bp_disabled;
@@ -3769,7 +3769,7 @@ describe_other_breakpoints (CORE_ADDR pc, asection *section)
 			       : ((others == 1) ? " and" : ""));
 	    }
       printf_filtered (_("also set at pc "));
-      print_address_numeric (pc, 1, gdb_stdout);
+      deprecated_print_address_numeric (pc, 1, gdb_stdout);
       printf_filtered (".\n");
     }
 }
@@ -4854,7 +4854,7 @@ mention (struct breakpoint *b)
 	  if (addressprint || b->source_file == NULL)
 	    {
 	      printf_filtered (" at ");
-	      print_address_numeric (b->loc->address, 1, gdb_stdout);
+	      deprecated_print_address_numeric (b->loc->address, 1, gdb_stdout);
 	    }
 	  if (b->source_file)
 	    printf_filtered (": file %s, line %d.",
@@ -6822,7 +6822,7 @@ delete_breakpoint (struct breakpoint *bpt)
 		  {
 		    fprintf_unfiltered (tmp_error_stream, "Cannot insert breakpoint %d.\n", b->number);
 		    fprintf_filtered (tmp_error_stream, "Error accessing memory address ");
-		    print_address_numeric (b->loc->address, 1, tmp_error_stream);
+		    deprecated_print_address_numeric (b->loc->address, 1, tmp_error_stream);
 		    fprintf_filtered (tmp_error_stream, ": %s.\n",
 				      safe_strerror (val));
 		  }

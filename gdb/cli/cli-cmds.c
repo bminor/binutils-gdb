@@ -604,14 +604,14 @@ edit_command (char *arg, int from_tty)
           sym = find_pc_function (sal.pc);
           if (sym)
 	    {
-	      print_address_numeric (sal.pc, 1, gdb_stdout);
+	      deprecated_print_address_numeric (sal.pc, 1, gdb_stdout);
 	      printf_filtered (" is in ");
 	      fputs_filtered (SYMBOL_PRINT_NAME (sym), gdb_stdout);
 	      printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
 	    }
           else
 	    {
-	      print_address_numeric (sal.pc, 1, gdb_stdout);
+	      deprecated_print_address_numeric (sal.pc, 1, gdb_stdout);
 	      printf_filtered (" is at %s:%d.\n",
 			       sal.symtab->filename, sal.line);
 	    }
@@ -771,14 +771,14 @@ list_command (char *arg, int from_tty)
       sym = find_pc_function (sal.pc);
       if (sym)
 	{
-	  print_address_numeric (sal.pc, 1, gdb_stdout);
+	  deprecated_print_address_numeric (sal.pc, 1, gdb_stdout);
 	  printf_filtered (" is in ");
 	  fputs_filtered (SYMBOL_PRINT_NAME (sym), gdb_stdout);
 	  printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
 	}
       else
 	{
-	  print_address_numeric (sal.pc, 1, gdb_stdout);
+	  deprecated_print_address_numeric (sal.pc, 1, gdb_stdout);
 	  printf_filtered (" is at %s:%d.\n",
 			   sal.symtab->filename, sal.line);
 	}
@@ -895,9 +895,9 @@ disassemble_command (char *arg, int from_tty)
       else
 	{
 	  printf_filtered ("from ");
-	  print_address_numeric (low, 1, gdb_stdout);
+	  deprecated_print_address_numeric (low, 1, gdb_stdout);
 	  printf_filtered (" to ");
-	  print_address_numeric (high, 1, gdb_stdout);
+	  deprecated_print_address_numeric (high, 1, gdb_stdout);
 	  printf_filtered (":\n");
 	}
 

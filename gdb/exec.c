@@ -531,7 +531,7 @@ print_section_info (struct target_ops *t, bfd *abfd)
   if (abfd == exec_bfd)
     {
       printf_filtered (_("\tEntry point: "));
-      print_address_numeric (bfd_get_start_address (abfd), 1, gdb_stdout);
+      deprecated_print_address_numeric (bfd_get_start_address (abfd), 1, gdb_stdout);
       printf_filtered ("\n");
     }
   for (p = t->to_sections; p < t->to_sections_end; p++)

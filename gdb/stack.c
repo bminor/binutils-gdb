@@ -941,17 +941,17 @@ frame_info (char *addr_exp, int from_tty)
     {
       printf_filtered (_("Stack level %d, frame at "),
 		       frame_relative_level (fi));
-      print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
+      deprecated_print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
   else
     {
       printf_filtered (_("Stack frame at "));
-      print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
+      deprecated_print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
   printf_filtered (" %s = ", pc_regname);
-  print_address_numeric (get_frame_pc (fi), 1, gdb_stdout);
+  deprecated_print_address_numeric (get_frame_pc (fi), 1, gdb_stdout);
 
   wrap_here ("   ");
   if (funname)
@@ -966,13 +966,13 @@ frame_info (char *addr_exp, int from_tty)
   puts_filtered ("; ");
   wrap_here ("    ");
   printf_filtered ("saved %s ", pc_regname);
-  print_address_numeric (frame_pc_unwind (fi), 1, gdb_stdout);
+  deprecated_print_address_numeric (frame_pc_unwind (fi), 1, gdb_stdout);
   printf_filtered ("\n");
 
   if (calling_frame_info)
     {
       printf_filtered (" called by frame at ");
-      print_address_numeric (get_frame_base (calling_frame_info),
+      deprecated_print_address_numeric (get_frame_base (calling_frame_info),
 			     1, gdb_stdout);
     }
   if (get_next_frame (fi) && calling_frame_info)
@@ -981,7 +981,7 @@ frame_info (char *addr_exp, int from_tty)
   if (get_next_frame (fi))
     {
       printf_filtered (" caller of frame at ");
-      print_address_numeric (get_frame_base (get_next_frame (fi)), 1,
+      deprecated_print_address_numeric (get_frame_base (get_next_frame (fi)), 1,
 			     gdb_stdout);
     }
   if (get_next_frame (fi) || calling_frame_info)
@@ -1001,7 +1001,7 @@ frame_info (char *addr_exp, int from_tty)
     else
       {
 	printf_filtered (" Arglist at ");
-	print_address_numeric (arg_list, 1, gdb_stdout);
+	deprecated_print_address_numeric (arg_list, 1, gdb_stdout);
 	printf_filtered (",");
 
 	if (!FRAME_NUM_ARGS_P ())
@@ -1033,7 +1033,7 @@ frame_info (char *addr_exp, int from_tty)
     else
       {
 	printf_filtered (" Locals at ");
-	print_address_numeric (arg_list, 1, gdb_stdout);
+	deprecated_print_address_numeric (arg_list, 1, gdb_stdout);
 	printf_filtered (",");
       }
   }
@@ -1071,14 +1071,14 @@ frame_info (char *addr_exp, int from_tty)
                may or may not be valid.  */
 	    sp = extract_unsigned_integer (value, register_size (current_gdbarch, SP_REGNUM));
 	    printf_filtered (" Previous frame's sp is ");
-	    print_address_numeric (sp, 1, gdb_stdout);
+	    deprecated_print_address_numeric (sp, 1, gdb_stdout);
 	    printf_filtered ("\n");
 	    need_nl = 0;
 	  }
 	else if (!optimized && lval == lval_memory)
 	  {
 	    printf_filtered (" Previous frame's sp at ");
-	    print_address_numeric (addr, 1, gdb_stdout);
+	    deprecated_print_address_numeric (addr, 1, gdb_stdout);
 	    printf_filtered ("\n");
 	    need_nl = 0;
 	  }
@@ -1111,7 +1111,7 @@ frame_info (char *addr_exp, int from_tty)
 		puts_filtered (",");
 	      wrap_here (" ");
 	      printf_filtered (" %s at ", REGISTER_NAME (i));
-	      print_address_numeric (addr, 1, gdb_stdout);
+	      deprecated_print_address_numeric (addr, 1, gdb_stdout);
 	      count++;
 	    }
 	}
@@ -1383,7 +1383,7 @@ print_block_frame_labels (struct block *b, int *have_default,
 	  if (addressprint)
 	    {
 	      fprintf_filtered (stream, " ");
-	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 1, stream);
+	      deprecated_print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 1, stream);
 	    }
 	  fprintf_filtered (stream, " in file %s, line %d\n",
 			    sal.symtab->filename, sal.line);

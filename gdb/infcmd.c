@@ -889,7 +889,7 @@ jump_command (char *arg, int from_tty)
   if (from_tty)
     {
       printf_filtered (_("Continuing at "));
-      print_address_numeric (addr, 1, gdb_stdout);
+      deprecated_print_address_numeric (addr, 1, gdb_stdout);
       printf_filtered (".\n");
     }
 

@@ -686,22 +686,19 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 /* Print address ADDR on STREAM.  USE_LOCAL means the same thing as for
    print_longest.  */
 void
-print_address_numeric (CORE_ADDR addr, int use_local, struct ui_file *stream)
+deprecated_print_address_numeric (CORE_ADDR addr, int use_local,
+				  struct ui_file *stream)
 {
-  /* Truncate address to the size of a target address, avoiding shifts
-     larger or equal than the width of a CORE_ADDR.  The local
-     variable ADDR_BIT stops the compiler reporting a shift overflow
-     when it won't occur. */
-  /* NOTE: This assumes that the significant address information is
-     kept in the least significant bits of ADDR - the upper bits were
-     either zero or sign extended.  Should ADDRESS_TO_POINTER() or
-     some ADDRESS_TO_PRINTABLE() be used to do the conversion?  */
+  if (use_local)
+    fputs_filtered (paddress (addr), stream);
+  else
+    {
+      int addr_bit = TARGET_ADDR_BIT;
 
-  int addr_bit = TARGET_ADDR_BIT;
-
-  if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
-    addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
-  print_longest (stream, 'x', use_local, (ULONGEST) addr);
+      if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
+	addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
+      print_longest (stream, 'x', 0, (ULONGEST) addr);
+    }
 }
 
 /* Print address ADDR symbolically on STREAM.
@@ -711,7 +708,7 @@ print_address_numeric (CORE_ADDR addr, int use_local, struct ui_file *stream)
 void
 print_address (CORE_ADDR addr, struct ui_file *stream)
 {
-  print_address_numeric (addr, 1, stream);
+  deprecated_print_address_numeric (addr, 1, stream);
   print_address_symbolic (addr, stream, asm_demangle, " ");
 }
 
@@ -729,7 +726,7 @@ print_address_demangle (CORE_ADDR addr, struct ui_file *stream, int do_demangle)
     }
   else if (addressprint)
     {
-      print_address_numeric (addr, 1, stream);
+      deprecated_print_address_numeric (addr, 1, stream);
       print_address_symbolic (addr, stream, do_demangle, " ");
     }
   else
@@ -1075,14 +1072,14 @@ address_info (char *exp, int from_tty)
 	  fprintf_symbol_filtered (gdb_stdout, exp,
 				   current_language->la_language, DMGL_ANSI);
 	  printf_filtered ("\" is at ");
-	  print_address_numeric (load_addr, 1, gdb_stdout);
+	  deprecated_print_address_numeric (load_addr, 1, gdb_stdout);
 	  printf_filtered (" in a file compiled without debugging");
 	  section = SYMBOL_BFD_SECTION (msymbol);
 	  if (section_is_overlay (section))
 	    {
 	      load_addr = overlay_unmapped_address (load_addr, section);
 	      printf_filtered (",\n -- loaded at ");
-	      print_address_numeric (load_addr, 1, gdb_stdout);
+	      deprecated_print_address_numeric (load_addr, 1, gdb_stdout);
 	      printf_filtered (" in overlay section %s", section->name);
 	    }
 	  printf_filtered (".\n");
@@ -1109,13 +1106,13 @@ address_info (char *exp, int from_tty)
 
     case LOC_LABEL:
       printf_filtered ("a label at address ");
-      print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (sym),
+      deprecated_print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (sym),
 			     1, gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
 	  printf_filtered (",\n -- loaded at ");
-	  print_address_numeric (load_addr, 1, gdb_stdout);
+	  deprecated_print_address_numeric (load_addr, 1, gdb_stdout);
 	  printf_filtered (" in overlay section %s", section->name);
 	}
       break;
@@ -1136,27 +1133,27 @@ address_info (char *exp, int from_tty)
 
     case LOC_STATIC:
       printf_filtered (_("static storage at address "));
-      print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (sym),
+      deprecated_print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (sym),
 			     1, gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
 	  printf_filtered (_(",\n -- loaded at "));
-	  print_address_numeric (load_addr, 1, gdb_stdout);
+	  deprecated_print_address_numeric (load_addr, 1, gdb_stdout);
 	  printf_filtered (_(" in overlay section %s"), section->name);
 	}
       break;
 
     case LOC_INDIRECT:
       printf_filtered (_("external global (indirect addressing), at address *("));
-      print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (sym),
+      deprecated_print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (sym),
 			     1, gdb_stdout);
       printf_filtered (")");
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
 	  printf_filtered (_(",\n -- loaded at "));
-	  print_address_numeric (load_addr, 1, gdb_stdout);
+	  deprecated_print_address_numeric (load_addr, 1, gdb_stdout);
 	  printf_filtered (_(" in overlay section %s"), section->name);
 	}
       break;
@@ -1201,13 +1198,13 @@ address_info (char *exp, int from_tty)
 
     case LOC_BLOCK:
       printf_filtered (_("a function at address "));
-      print_address_numeric (load_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+      deprecated_print_address_numeric (load_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
 			     1, gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
 	  printf_filtered (_(",\n -- loaded at "));
-	  print_address_numeric (load_addr, 1, gdb_stdout);
+	  deprecated_print_address_numeric (load_addr, 1, gdb_stdout);
 	  printf_filtered (_(" in overlay section %s"), section->name);
 	}
       break;
@@ -1223,13 +1220,13 @@ address_info (char *exp, int from_tty)
 	  {
 	    section = SYMBOL_BFD_SECTION (msym);
 	    printf_filtered (_("static storage at address "));
-	    print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (msym),
+	    deprecated_print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (msym),
 				   1, gdb_stdout);
 	    if (section_is_overlay (section))
 	      {
 		load_addr = overlay_unmapped_address (load_addr, section);
 		printf_filtered (_(",\n -- loaded at "));
-		print_address_numeric (load_addr, 1, gdb_stdout);
+		deprecated_print_address_numeric (load_addr, 1, gdb_stdout);
 		printf_filtered (_(" in overlay section %s"), section->name);
 	      }
 	  }

@@ -49,7 +49,7 @@ print_function_pointer_address (CORE_ADDR address, struct ui_file *stream)
   if (addressprint && func_addr != address)
     {
       fputs_filtered ("@", stream);
-      print_address_numeric (address, 1, stream);
+      deprecated_print_address_numeric (address, 1, stream);
       fputs_filtered (": ", stream);
     }
   print_address_demangle (func_addr, stream, demangle);
@@ -184,7 +184,7 @@ c_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 
 	  if (addressprint && format != 's')
 	    {
-	      print_address_numeric (addr, 1, stream);
+	      deprecated_print_address_numeric (addr, 1, stream);
 	    }
 
 	  /* For a pointer to char or unsigned char, also print the string
@@ -269,7 +269,7 @@ c_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
 	  fprintf_filtered (stream, "@");
-	  print_address_numeric (addr, 1, stream);
+	  deprecated_print_address_numeric (addr, 1, stream);
 	  if (deref_ref)
 	    fputs_filtered (": ", stream);
 	}

@@ -83,7 +83,7 @@ m32r_load_section (bfd *abfd, asection *s, void *obj)
 
       printf_filtered ("Loading section %s, size 0x%lx lma ",
 		       bfd_section_name (abfd, s), section_size);
-      print_address_numeric (section_base, 1, gdb_stdout);
+      deprecated_print_address_numeric (section_base, 1, gdb_stdout);
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);
       monitor_printf ("%s mw\r", paddr_nz (section_base));
@@ -142,7 +142,7 @@ m32r_load (char *filename, int from_tty)
 
 	printf_filtered ("Loading section %s, size 0x%lx vma ",
 			 bfd_section_name (abfd, s), section_size);
-	print_address_numeric (section_base, 1, gdb_stdout);
+	deprecated_print_address_numeric (section_base, 1, gdb_stdout);
 	printf_filtered ("\n");
 	gdb_flush (gdb_stdout);
 	monitor_printf ("%x mw\r", section_base);
@@ -510,7 +510,7 @@ m32r_upload_command (char *args, int from_tty)
 
 	    printf_filtered ("Loading section %s, size 0x%lx lma ",
 			     bfd_section_name (abfd, s), section_size);
-	    print_address_numeric (section_base, 1, gdb_stdout);
+	    deprecated_print_address_numeric (section_base, 1, gdb_stdout);
 	    printf_filtered ("\n");
 	    gdb_flush (gdb_stdout);
 	  }

@@ -494,7 +494,7 @@ ui_out_field_core_addr (struct ui_out *uiout,
   /* FIXME: cagney/2002-05-03: Need local_address_string() function
      that returns the language localized string formatted to a width
      based on TARGET_ADDR_BIT.  */
-  /* print_address_numeric (address, 1, local_stream); */
+  /* deprecated_print_address_numeric (address, 1, local_stream); */
   if (TARGET_ADDR_BIT <= 32)
     strcpy (addstr, hex_string_custom (address, 8));
   else

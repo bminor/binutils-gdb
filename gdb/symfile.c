@@ -3080,13 +3080,13 @@ list_overlays_command (char *args, int from_tty)
 	name = bfd_section_name (objfile->obfd, osect->the_bfd_section);
 
 	printf_filtered ("Section %s, loaded at ", name);
-	print_address_numeric (lma, 1, gdb_stdout);
+	deprecated_print_address_numeric (lma, 1, gdb_stdout);
 	puts_filtered (" - ");
-	print_address_numeric (lma + size, 1, gdb_stdout);
+	deprecated_print_address_numeric (lma + size, 1, gdb_stdout);
 	printf_filtered (", mapped at ");
-	print_address_numeric (vma, 1, gdb_stdout);
+	deprecated_print_address_numeric (vma, 1, gdb_stdout);
 	puts_filtered (" - ");
-	print_address_numeric (vma + size, 1, gdb_stdout);
+	deprecated_print_address_numeric (vma + size, 1, gdb_stdout);
 	puts_filtered ("\n");
 
 	nmapped++;

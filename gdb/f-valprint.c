@@ -402,7 +402,7 @@ f_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 	    }
 
 	  if (addressprint && format != 's')
-	    print_address_numeric (addr, 1, stream);
+	    deprecated_print_address_numeric (addr, 1, stream);
 
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */
@@ -426,7 +426,7 @@ f_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
 	  fprintf_filtered (stream, "@");
-	  print_address_numeric (addr, 1, stream);
+	  deprecated_print_address_numeric (addr, 1, stream);
 	  if (deref_ref)
 	    fputs_filtered (": ", stream);
 	}

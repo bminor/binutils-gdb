@@ -1,3 +1,16 @@
+2005-02-14  Andrew Cagney  <cagney@gnu.org>
+
+	* utils.c (paddress): New function.
+	* defs.h (paddress): Declare.
+	* printcmd.c (deprecated_print_address_numeric): Rename
+	print_address_numeric, call paddress.
+	* valprint.c, ui-out.c, tui/tui-stack.c, tracepoint.c: Update.
+	* symmisc.c, symfile.c stack.c, p-valprint.c, printcmd.c: Update.
+	* maint.c, m32r-rom.c, infcmd.c, f-valprint.c, exec.c: Update.
+	* dwarf2read.c, dve3900-rom.c, defs.h, c-valprint.c: Update.
+	* corefile.c, cli/cli-cmds.c, breakpoint.c, annotate.c: Update.
+	* ada-valprint.c: Update.
+
 2005-02-13  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
 	* MAINTAINERS: Add myself to "Write After Approval".

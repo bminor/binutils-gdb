@@ -826,7 +826,7 @@ load_section (bfd *abfd, asection *s, unsigned int *data_count)
       /* Print some fluff about the section being loaded.  */
       printf_filtered ("Loading section %s, size 0x%lx lma ",
 		       bfd_section_name (abfd, s), (long) section_size);
-      print_address_numeric (section_base, 1, gdb_stdout);
+      deprecated_print_address_numeric (section_base, 1, gdb_stdout);
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);
 

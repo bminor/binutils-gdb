@@ -2528,6 +2528,25 @@ paddr_nz (CORE_ADDR addr)
   return phex_nz (addr, TARGET_ADDR_BIT / 8);
 }
 
+const char *
+paddress (CORE_ADDR addr)
+{
+  /* Truncate address to the size of a target address, avoiding shifts
+     larger or equal than the width of a CORE_ADDR.  The local
+     variable ADDR_BIT stops the compiler reporting a shift overflow
+     when it won't occur. */
+  /* NOTE: This assumes that the significant address information is
+     kept in the least significant bits of ADDR - the upper bits were
+     either zero or sign extended.  Should ADDRESS_TO_POINTER() or
+     some ADDRESS_TO_PRINTABLE() be used to do the conversion?  */
+
+  int addr_bit = TARGET_ADDR_BIT;
+
+  if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
+    addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
+  return hex_string (addr);
+}
+
 static void
 decimal2str (char *paddr_str, char *sign, ULONGEST addr, int width)
 {

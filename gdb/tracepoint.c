@@ -443,7 +443,7 @@ trace_mention (struct tracepoint *tp)
   if (addressprint || (tp->source_file == NULL))
     {
       printf_filtered (" at ");
-      print_address_numeric (tp->address, 1, gdb_stdout);
+      deprecated_print_address_numeric (tp->address, 1, gdb_stdout);
     }
   if (tp->source_file)
     printf_filtered (": file %s, line %d.",
@@ -2420,7 +2420,7 @@ scope_info (char *args, int from_tty)
 	      break;
 	    case LOC_STATIC:
 	      printf_filtered ("in static storage at address ");
-	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 
+	      deprecated_print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 
 				     1, gdb_stdout);
 	      break;
 	    case LOC_REGISTER:
@@ -2453,12 +2453,12 @@ scope_info (char *args, int from_tty)
 	      continue;
 	    case LOC_LABEL:
 	      printf_filtered ("a label at address ");
-	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 
+	      deprecated_print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 
 				     1, gdb_stdout);
 	      break;
 	    case LOC_BLOCK:
 	      printf_filtered ("a function at address ");
-	      print_address_numeric (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+	      deprecated_print_address_numeric (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
 				     1, gdb_stdout);
 	      break;
 	    case LOC_BASEREG:
@@ -2479,7 +2479,7 @@ scope_info (char *args, int from_tty)
 	      else
 		{
 		  printf_filtered ("static storage at address ");
-		  print_address_numeric (SYMBOL_VALUE_ADDRESS (msym), 1,
+		  deprecated_print_address_numeric (SYMBOL_VALUE_ADDRESS (msym), 1,
 					 gdb_stdout);
 		}
 	      break;
@@ -2491,7 +2491,7 @@ scope_info (char *args, int from_tty)
 	      break;
 	    case LOC_INDIRECT:
 	      printf_filtered ("extern (local indirect) at address ");
-	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 
+	      deprecated_print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 
 				     1, gdb_stdout);
 	      break;
 	    case LOC_COMPUTED:

@@ -423,7 +423,7 @@ annotate_source (char *filename, int line, int character, int mid, CORE_ADDR pc)
   printf_filtered (("%s:%d:%d:%s:0x"), filename,
 		   line, character,
 		   mid ? "middle" : "beg");
-  print_address_numeric (pc, 0, gdb_stdout);
+  deprecated_print_address_numeric (pc, 0, gdb_stdout);
   printf_filtered (("\n"));
 }
 
@@ -433,7 +433,7 @@ annotate_frame_begin (int level, CORE_ADDR pc)
   if (annotation_level == 2)
     {
       printf_filtered (("\n\032\032frame-begin %d 0x"), level);
-      print_address_numeric (pc, 0, gdb_stdout);
+      deprecated_print_address_numeric (pc, 0, gdb_stdout);
       printf_filtered (("\n"));
     }
 }
