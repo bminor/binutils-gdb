@@ -515,7 +515,7 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
       s = bfd_get_section_by_name (b, ".drectve");
       if (s)
 	{
-	  int size = bfd_get_section_size_before_reloc (s);
+	  int size = bfd_get_section_size (s);
 	  char *buf = xmalloc (size);
 
 	  bfd_get_section_contents (b, s, buf, 0, size);

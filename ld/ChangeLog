@@ -1,3 +1,9 @@
+2004-06-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldwrite.c (build_link_order): Use bfd_get_section_size
+	instead of bfd_get_section_size_before_reloc or _raw_size.
+	* pe-dll.c (process_def_file): Likewise.
+
 2004-06-14  Alan Modra  <amodra@bigpond.net.au>
 
 	From Richard Wirth <r.wirth@wirthware.de>

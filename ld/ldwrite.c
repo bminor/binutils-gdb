@@ -254,7 +254,7 @@ build_link_order (lang_statement_union_type *statement)
 	      if (i->_cooked_size)
 		link_order->size = i->_cooked_size;
 	      else
-		link_order->size = bfd_get_section_size_before_reloc (i);
+		link_order->size = bfd_get_section_size (i);
 	      link_order->offset = i->output_offset;
 	    }
 	}
