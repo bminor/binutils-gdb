@@ -1,5 +1,10 @@
 2003-01-30  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (mon960-rom.o): Delete rule.
+	* mon960-rom.c: Delete file.
+
+2003-01-30  Andrew Cagney  <ac131313@redhat.com>
+
 	* d10v-tdep.c: Include "frame-unwind.h".
 	(d10v_gdbarch_init): Append d10v_frame_p to the unwind predicate
 	list.

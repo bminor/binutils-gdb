@@ -1953,9 +1953,6 @@ mn10200-tdep.o: mn10200-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(target_h) $(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) \
 	$(symfile_h) $(regcache_h) $(arch_utils_h)
-mon960-rom.o: mon960-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
-	$(serial_h) $(srec_h) $(xmodem_h) $(symtab_h) $(symfile_h) \
-	$(inferior_h) $(gdb_string_h)
 monitor.o: monitor.c $(defs_h) $(gdbcore_h) $(target_h) $(gdb_string_h) \
 	$(command_h) $(serial_h) $(monitor_h) $(gdbcmd_h) $(inferior_h) \
 	$(gdb_regex_h) $(srec_h) $(regcache_h)
