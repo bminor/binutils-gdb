@@ -1,3 +1,32 @@
+Fri Feb 14 17:24:48 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (do_align): Add max parameter.  Change all callers.
+	Remove useless static variables.
+	(s_align): New static function.  Do common portion of
+	s_align_bytes and s_align_ptwo.
+	(s_align_bytes, s_align_ptwo): Just call s_align.
+	* frags.c (frag_align): Add max parameter.  Change all callers.
+	(frag_align_pattern): Likewise.
+	* frags.h (frag_align, frag_align_pattern): Update declarations.
+	* write.c (relax_segment): Limit alignment change to fr_subtype.
+	Fix some types to be addressT.
+	* config/obj-coff.c (size_section): Likewise.
+	* config/obj-ieee.c (size_section): Likewise.
+	* config/tc-d10v.h (md_do_align): Add max parameter.
+	* config/tc-i386.h (md_do_align): Likewise.
+	* config/tc-m88k.h (md_do_align): Likewise.
+	* config/tc-m88k.c (m88k_do_align): Likewise.
+	* config/tc-sh.h (md_do_align): Likewise.
+	* config/tc-sh.c (sh_do_align): Likewise.
+	* as.h: Improve comments on rs_align and rs_align_code.
+	* doc/as.texinfo: Document new alignment arguments.
+	* doc/internals.texi (Frags): Document use of fr_subtype field for
+	rs_align and rs_align_code.
+
+Fri Feb 14 15:56:06 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c: Changed opcode parsing.
+
 Thu Feb 13 20:02:16 1997  Fred Fish  <fnf@cygnus.com>
 
 	* config/{tc-alpha.h, tc-arc.h, tc-d10v.h, tc-generic.h, tc-i960.h,

@@ -1,5 +1,5 @@
 /* tc-d10v.h -- Header file for tc-d10v.c.
-   Copyright (C) 1996 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
    Written by Martin Hunt, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -19,6 +19,8 @@
    the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define TC_D10V
+
+#define TARGET_BYTES_BIG_ENDIAN 0
 
 #ifndef BFD_ASSEMBLER
  #error D10V support requires BFD_ASSEMBLER
@@ -50,7 +52,7 @@
 int d10v_cleanup PARAMS ((void));
 #define md_after_pass_hook()	     d10v_cleanup()
 #define md_cleanup()		     d10v_cleanup()
-#define md_do_align(a,b,c,d)	     d10v_cleanup()
+#define md_do_align(a,b,c,d,e)	     d10v_cleanup()
 #define TC_START_LABEL(ch, ptr)  (ch == ':' && d10v_cleanup())
 
 

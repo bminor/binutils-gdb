@@ -1524,8 +1524,15 @@ size_section (abfd, idx)
 	  break;
 	case rs_align:
 	case rs_align_code:
-	  size += frag->fr_fix;
-	  size += relax_align (size, frag->fr_offset);
+	  {
+	    addressT off;
+
+	    size += frag->fr_fix;
+	    off = relax_align (size, frag->fr_offset);
+	    if (frag->fr_subtype != 0 && off > frag->fr_subtype)
+	      off = 0;
+	    size += off;
+	  }
 	  break;
 	default:
 	  BAD_CASE (frag->fr_type);
@@ -1648,7 +1655,16 @@ do_relocs_for (abfd, h, file_cursor)
 		      while (symbol_ptr->sy_value.X_op == O_symbol
 			     && (! S_IS_DEFINED (symbol_ptr)
 				 || S_IS_COMMON (symbol_ptr)))
-			symbol_ptr = symbol_ptr->sy_value.X_add_symbol;
+			{
+			  symbolS *n;
+
+			  /* We must avoid looping, as that can occur
+                             with a badly written program.  */
+			  n = symbol_ptr->sy_value.X_add_symbol;
+			  if (n == symbol_ptr)
+			    break;
+			  symbol_ptr = n;
+			}
 
 		      /* Turn the segment of the symbol into an offset.  */
 		      if (symbol_ptr)
@@ -3106,10 +3122,10 @@ write_object_file ()
 #ifdef md_do_align
       {
 	static char nop = NOP_OPCODE;
-	md_do_align (SUB_SEGMENT_ALIGN (now_seg), &nop, 1, alignment_done);
+	md_do_align (SUB_SEGMENT_ALIGN (now_seg), &nop, 1, 0, alignment_done);
       }
 #endif
-      frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE);
+      frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE, 0);
 #ifdef md_do_align
     alignment_done:
 #endif
@@ -3848,6 +3864,34 @@ fixup_segment (segP, this_segment_type)
          happened if these are expression symbols.  */
       if (add_symbolP != NULL && ! add_symbolP->sy_resolved)
 	resolve_symbol_value (add_symbolP);
+
+      if (add_symbolP != NULL)
+	{
+	  /* If this fixup is against a symbol which has been equated
+	     to another symbol, convert it to the other symbol.  */
+	  if (add_symbolP->sy_value.X_op == O_symbol
+	      && (! S_IS_DEFINED (add_symbolP)
+		  || S_IS_COMMON (add_symbolP)))
+	    {
+	      while (add_symbolP->sy_value.X_op == O_symbol
+		     && (! S_IS_DEFINED (add_symbolP)
+			 || S_IS_COMMON (add_symbolP)))
+		{
+		  symbolS *n;
+
+		  /* We must avoid looping, as that can occur with a
+		     badly written program.  */
+		  n = add_symbolP->sy_value.X_add_symbol;
+		  if (n == add_symbolP)
+		    break;
+		  add_number += add_symbolP->sy_value.X_add_number;
+		  add_symbolP = n;
+		}
+	      fixP->fx_addsy = add_symbolP;
+	      fixP->fx_offset = add_number;
+	    }
+	}
+
       if (sub_symbolP != NULL && ! sub_symbolP->sy_resolved)
 	resolve_symbol_value (sub_symbolP);
 
@@ -4096,12 +4140,12 @@ fixup_segment (segP, this_segment_type)
 	       && ((add_number & ~0xFF)
 		   || (fixP->fx_signed && (add_number & 0x80)))
 	       && ((add_number & ~0xFF) != (-1 & ~0xFF)
-		   || (fixP->fx_signed && (add_number & 0x80) == 0)))
+		   || (add_number & 0x80) == 0))
 	      || (size == 2
 		  && ((add_number & ~0xFFFF)
 		      || (fixP->fx_signed && (add_number & 0x8000)))
 		  && ((add_number & ~0xFFFF) != (-1 & ~0xFFFF)
-		      || (fixP->fx_signed && (add_number & 0x8000) == 0))))
+		      || (add_number & 0x8000) == 0)))
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    "Value of %ld too large for field of %d bytes at 0x%lx",

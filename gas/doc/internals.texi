@@ -495,8 +495,11 @@ The start of the following frag should be aligned on some boundary.  In this
 frag, @code{fr_offset} is the logarithm (base 2) of the alignment in bytes.
 (For example, if alignment on an 8-byte boundary were desired, @code{fr_offset}
 would have a value of 3.)  The variable characters indicate the fill pattern to
-be used.  Target backends can use @code{rs_align_code} to handle certain types
-of alignment differently.
+be used.  The @code{fr_subtype} field holds the maximum number of bytes to skip
+when doing this alignment.  If more bytes are needed, the alignment is not
+done.  An @code{fr_subtype} value of 0 means no maximum, which is the normal
+case.  Target backends can use @code{rs_align_code} to handle certain types of
+alignment differently.
 
 @item rs_broken_word
 This indicates that ``broken word'' processing should be done (@pxref{Broken
@@ -857,6 +860,15 @@ If this macro is defined, GAS will call it for any symbol found in an
 expression.  You can define this to handle special symbols in a special way.
 If a symbol always has a certain value, you should normally enter it in the
 symbol table, perhaps using @code{reg_section}.
+
+@item md_undefined_symbol
+@cindex md_undefined_symbol
+GAS will call this function when a symbol table lookup fails, before it
+creates a new symbol.  Typically this would be used to supply symbols whose
+name or value changes dynamically, possibly in a context sensitive way.
+Predefined symbols with fixed values, such as register names or condition
+codes, are typically entered directly into the symbol table when @code{md_begin}
+is called.
 
 @item md_operand
 @cindex md_operand

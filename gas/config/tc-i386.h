@@ -1,5 +1,5 @@
 /* tc-i386.h -- Header file for tc-i386.c
-   Copyright (C) 1989, 1992, 1993, 1994, 1995 Free Software Foundation.
+   Copyright (C) 1989, 92, 93, 94, 95, 96, 1997 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -19,6 +19,8 @@
 
 #ifndef TC_I386
 #define TC_I386 1
+
+#define TARGET_BYTES_BIG_ENDIAN	0
 
 #ifdef TE_LYNX
 #define TARGET_FORMAT		"coff-i386-lynx"
@@ -59,7 +61,6 @@
    && (FIX)->fx_r_type != BFD_RELOC_386_GOTPC)
 
 #define TARGET_ARCH		bfd_arch_i386
-#define TARGET_BYTES_BIG_ENDIAN	0
 
 #ifdef OBJ_AOUT
 #ifdef TE_NetBSD
@@ -90,17 +91,26 @@
 #define COFF_MAGIC I386MAGIC
 #define BFD_ARCH bfd_arch_i386
 #define COFF_FLAGS F_AR32WR
-#define TC_COUNT_RELOC(x) ((x)->fx_addsy /* ||(x)->fx_subsy||(x)->fx_offset */)
+#define TC_COUNT_RELOC(x) ((x)->fx_addsy || (x)->fx_r_type==7)
+#define TC_FORCE_RELOCATION(x) ((x)->fx_r_type==7)
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
 extern short tc_coff_fix2rtype ();
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
 extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #define SUB_SEGMENT_ALIGN(SEG) 2
-
+#define TC_RVA_RELOC 7
 /* Need this for PIC relocations */
 #define NEED_FX_R_TYPE
 
+
+#ifdef TE_386BSD
+/* The BSDI linker apparently rejects objects with a machine type of
+   M_386 (100).  */
+#define AOUT_MACHTYPE 0
+#else
 #define AOUT_MACHTYPE 100
+#endif
+
 #undef REVERSE_SORT_RELOCS
 
 #endif /* ! BFD_ASSEMBLER */
@@ -113,10 +123,12 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #define tc_coff_symbol_emit_hook(a)	;	/* not used */
 
 #ifndef OBJ_AOUT
+#ifndef TE_PE
 /* Local labels starts with .L */
 #define LOCAL_LABEL(name) (name[0] == '.' \
 		 && (name[1] == 'L' || name[1] == 'X' || name[1] == '.'))
 #define FAKE_LABEL_NAME ".L0\001"
+#endif
 #endif
 #define LOCAL_LABELS_FB 1
 
@@ -362,5 +374,41 @@ void i386_validate_fix ();
 
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
+
+
+extern int flag_16bit_code;
+
+#define md_do_align(n, fill, len, max, around)				\
+if ((n) && !need_pass_2							\
+    && (!(fill) || ((char)*(fill) == (char)0x90 && (len) == 1))		\
+    && now_seg != data_section && now_seg != bss_section)		\
+  {									\
+    char *p;								\
+    p = frag_var (rs_align_code, 15, 1, (relax_substateT) max,		\
+		  (symbolS *) 0, (long) (n), (char *) 0);		\
+    *p = 0x90;								\
+    goto around;							\
+  }
+
+extern void i386_align_code PARAMS ((fragS *, int));
+
+#define HANDLE_ALIGN(fragP)						\
+if (fragP->fr_type == rs_align_code) 					\
+  i386_align_code (fragP, (fragP->fr_next->fr_address			\
+			   - fragP->fr_address				\
+			   - fragP->fr_fix));
+
+/* call md_apply_fix3 with segment instead of md_apply_fix */
+#define MD_APPLY_FIX3
+
+void i386_print_statistics PARAMS ((FILE *));
+#define tc_print_statistics i386_print_statistics
+
+#define md_number_to_chars number_to_chars_littleendian
+
+#ifdef SCO_ELF
+#define tc_init_after_args() sco_id ()
+extern void sco_id PARAMS ((void));
+#endif
 
 /* end of tc-i386.h */
