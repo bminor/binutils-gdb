@@ -1110,7 +1110,9 @@ md_begin ()
   /* Set the EABI kind based on the ISA before the user gets
      to change the ISA with directives.  This isn't really
      the best, but then neither is basing the abi on the isa. */     
-  if (mips_opts.isa > 2 && 0 == strcmp (mips_abi_string,"eabi"))
+  if (mips_opts.isa > 2 
+      && mips_abi_string
+      && 0 == strcmp (mips_abi_string,"eabi"))
     mips_eabi64 = 1;
 
   if (mips_cpu != 0 && mips_cpu != -1)

@@ -1,3 +1,8 @@
+1998-12-29  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (md_begin): Another correction to the setting of
+	mips_eabi64.
+
 1998-12-23  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* config/tc-mips.c (md_begin): Correct type-o in setting of mips_eabi64.
