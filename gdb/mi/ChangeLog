@@ -1,3 +1,8 @@
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (get_register): Use register_type instead of
+	REGISTER_VIRTUAL_TYPE.
+
 2003-02-25  David Carlton  <carlton@math.stanford.edu>
 
 	* mi-cmd-stack.c: Replace all instances of SYMBOL_NAME with

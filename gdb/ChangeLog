@@ -1,3 +1,11 @@
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (ax-gdb.o): Update dependencies.
+	* ax-gdb.c: Include "regcache.h".
+	(gen_expr): Use register_type instead of REGISTER_VIRTUAL_TYPE.
+	* findvar.c (value_of_register): Ditto.
+	* infcmd.c (default_print_registers_info): Ditto.
+
 2003-03-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-tdep.c (find_minsym_and_objfile): Replace usage of

@@ -34,6 +34,7 @@
 #include "ax-gdb.h"
 #include "gdb_string.h"
 #include "block.h"
+#include "regcache.h"
 
 /* To make sense of this file, you should read doc/agentexpr.texi.
    Then look at the types and enums in ax-gdb.h.  For the code itself,
@@ -1595,7 +1596,7 @@ gen_expr (union exp_element **pc, struct agent_expr *ax,
 	(*pc) += 3;
 	value->kind = axs_lvalue_register;
 	value->u.reg = reg;
-	value->type = REGISTER_VIRTUAL_TYPE (reg);
+	value->type = register_type (current_gdbarch, reg);
       }
       break;
 

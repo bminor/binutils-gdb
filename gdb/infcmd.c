@@ -1665,7 +1665,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
       /* Convert raw data to virtual format if necessary.  */
       if (REGISTER_CONVERTIBLE (i))
 	{
-	  REGISTER_CONVERT_TO_VIRTUAL (i, REGISTER_VIRTUAL_TYPE (i),
+	  REGISTER_CONVERT_TO_VIRTUAL (i, register_type (current_gdbarch, i),
 				       raw_buffer, virtual_buffer);
 	}
       else
@@ -1676,11 +1676,11 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
       /* If virtual format is floating, print it that way, and in raw
          hex.  */
-      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
+      if (TYPE_CODE (register_type (current_gdbarch, i)) == TYPE_CODE_FLT)
 	{
 	  int j;
 
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+	  val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
 		     file, 0, 1, 0, Val_pretty_default);
 
 	  fprintf_filtered (file, "\t(raw 0x");
@@ -1698,14 +1698,14 @@ default_print_registers_info (struct gdbarch *gdbarch,
       else
 	{
 	  /* Print the register in hex.  */
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+	  val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
 		     file, 'x', 1, 0, Val_pretty_default);
           /* If not a vector register, print it also according to its
              natural format.  */
-	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)) == 0)
+	  if (TYPE_VECTOR (register_type (current_gdbarch, i)) == 0)
 	    {
 	      fprintf_filtered (file, "\t");
-	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+	      val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
 			 file, 0, 1, 0, Val_pretty_default);
 	    }
 	}

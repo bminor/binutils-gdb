@@ -288,7 +288,7 @@ store_typed_address (void *buf, struct type *type, CORE_ADDR addr)
 
 /* Return a `value' with the contents of (virtual or cooked) register
    REGNUM as found in the specified FRAME.  The register's type is
-   determined by REGISTER_VIRTUAL_TYPE.
+   determined by register_type().
 
    NOTE: returns NULL if register value is not available.  Caller will
    check return value or die!  */
@@ -320,13 +320,13 @@ value_of_register (int regnum, struct frame_info *frame)
   if (register_cached (regnum) < 0)
     return NULL;		/* register value not available */
 
-  reg_val = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
+  reg_val = allocate_value (register_type (current_gdbarch, regnum));
 
   /* Convert raw data to virtual format if necessary.  */
 
   if (REGISTER_CONVERTIBLE (regnum))
     {
-      REGISTER_CONVERT_TO_VIRTUAL (regnum, REGISTER_VIRTUAL_TYPE (regnum),
+      REGISTER_CONVERT_TO_VIRTUAL (regnum, register_type (current_gdbarch, regnum),
 				   raw_buffer, VALUE_CONTENTS_RAW (reg_val));
     }
   else if (REGISTER_RAW_SIZE (regnum) == REGISTER_VIRTUAL_SIZE (regnum))
