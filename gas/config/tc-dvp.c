@@ -243,7 +243,8 @@ md_begin ()
   cur_state_index = 0;
   set_asm_state (ASM_INIT);
 
-  dma_pack_vif_p = 0;
+  /* Pack vif insns in dma tags by default.  */
+  dma_pack_vif_p = 1;
 
   /* Disable automatic mpg insertion.  */
   vu_count = -1;
@@ -342,7 +343,7 @@ static void
 assemble_dma (str)
      char *str;
 {
-  DVP_INSN insn_buf[4];
+  DVP_INSN insn_buf[2];
   /* Insn's length, in 32 bit words.  */
   int len;
   /* Pointer to allocated frag.  */
@@ -361,11 +362,6 @@ assemble_dma (str)
   /* This is the DMA tag.  */
   insn_buf[0] = 0;
   insn_buf[1] = 0;
-  /* These are VIF NOPs.
-     They may be over-written later if DmaPackPke is on.
-     initialize the remainder with zeros.  */
-  insn_buf[2] = 0;
-  insn_buf[3] = 0;
 
   opcode = assemble_one_insn (DVP_DMA,
 			      dma_opcode_lookup_asm (str), dma_operands,
@@ -377,11 +373,10 @@ assemble_dma (str)
 
   record_mach (DVP_DMA, 0);
 
-  len = 4;
-  f = frag_more (len * 4);
+  f = frag_more (8);
 
   /* Write out the DMA instruction. */
-  for (i = 0; i < len; ++i)
+  for (i = 0; i < 2; ++i)
     md_number_to_chars (f + i * 4, insn_buf[i], 4);
 
   /* Create any fixups.  */
@@ -407,6 +402,22 @@ assemble_dma (str)
 		   &fixups[i].exp,
 		   (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
 		   (bfd_reloc_code_real_type) reloc_type);
+    }
+
+  /* The upper two words are vif insns.  */
+  record_mach (DVP_VIF, 0);
+
+  /* If not doing dma/vif packing, fill out the insn with vif nops.
+     ??? We take advantage of the fact that the default fill value of zero
+     is the vifnop insn.  This occurs for example when handling mpg
+     alignment.  It also occurs when one dma tag immediately follows the
+     previous one.  */
+  if (! dma_pack_vif_p)
+    {
+      f = frag_more (8);
+#define VIFNOP 0
+      md_number_to_chars (f + 0, VIFNOP, 4);
+      md_number_to_chars (f + 4, VIFNOP, 4);
     }
 }
 
@@ -1021,7 +1032,7 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 }
 
 /* Given a dvp cpu type, return it's STO_DVP value.
-   The section name prefix to use is stored in *PNAME.  */
+   The label prefix to use is stored in *PNAME.  */
 
 static int
 cpu_sto (cpu, pname)
@@ -1130,6 +1141,13 @@ md_undefined_symbol (name)
 void
 dvp_after_pass_hook ()
 {
+  /* If doing dma packing, ensure the last dma tag is filled out.  */
+  if (dma_pack_vif_p)
+    {
+      /* Nothing to do as vifnops are zero and frag_align at beginning
+	 of dmatag is all we need.  */
+    }
+
 #if 0 /* ??? Doesn't work unless we keep track of the nested include file
 	 level.  */
   /* Check for missing .EndMpg, and supply one if necessary.  */
@@ -1159,7 +1177,7 @@ dvp_frob_label (sym)
 /* Functions concerning relocs.  */
 
 /* Spacing between each cpu type's operand numbers.
-   Should be at least as bit as any operand table.  */
+   Should be at least as big as any operand table.  */
 #define RELOC_SPACING 256
 
 /* Given a cpu type and operand number, return a temporary reloc type
@@ -2120,8 +2138,6 @@ s_dmapackvif (ignore)
     int ignore;
 {
   /* Syntax: .dmapackvif 0|1 */
-  symbolS *label;		/* Points to symbol */
-  char *name;			/* points to name of symbol */
 
   /* Leading whitespace is part of operand. */
   SKIP_WHITESPACE ();
@@ -2134,7 +2150,7 @@ s_dmapackvif (ignore)
       dma_pack_vif_p = 1;
       break;
     default:
-      as_bad ("illegal argument to `.DmaPackPke'");
+      as_bad ("illegal argument to `.dmapackvif'");
     }
   demand_empty_rest_of_line ();
 }

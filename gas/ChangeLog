@@ -1,4 +1,10 @@
 start-sanitize-sky
+Tue Mar 17 10:40:54 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (md_begin): Turn dma/vif packing on by default.
+	(assemble_dma): Only output 8 bytes for actual dma insn if dma/vif
+	packing is enabled.  Emit VIF cpu marker after dma insn.
+
 Mon Mar 16 10:19:44 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-dvp.c (md_pseudo_table): Make .quad 16 bytes.
