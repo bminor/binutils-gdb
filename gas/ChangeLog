@@ -1,3 +1,8 @@
+1999-08-08  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* Makefile.am (noinst_SCRIPTS): Change .gdbinit to $(GDBINIT).
+	(EXTRA_SCRIPTS): Define to keep automake happy.
+
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* Makefile.am: Rename .dep* files to DEP*.
@@ -26,7 +31,7 @@
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* configure.in: Define and substitute GDBINIT.  Change AC_OUTPUT
-	line to crate ${GDBINIT} rather than .gdbinit.
+	line to create ${GDBINIT} rather than .gdbinit.
 	* configure, Makefile.in, doc/Makefile.in: Rebuild.
 
 Fri Aug  6 12:12:44 1999  Jeffrey A Law  (law@cygnus.com)

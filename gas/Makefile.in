@@ -487,7 +487,8 @@ POTFILES = $(MULTI_CFILES) $(TARGET_ENV_HFILES) $(OBJ_FORMAT_HFILES) \
 
 
 noinst_PROGRAMS = as-new gasp-new
-noinst_SCRIPTS = .gdbinit
+noinst_SCRIPTS = $(GDBINIT)
+EXTRA_SCRIPTS = .gdbinit
 
 EXTRA_DIST = make-gas.com
 

@@ -369,7 +369,8 @@ po/POTFILES.in: @MAINT@ Makefile
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
 noinst_PROGRAMS = as-new gasp-new
-noinst_SCRIPTS = .gdbinit
+noinst_SCRIPTS = $(GDBINIT)
+EXTRA_SCRIPTS = .gdbinit
 
 $(srcdir)/make-gas.com: stamp-mk.com
 stamp-mk.com: vmsconf.sh Makefile
