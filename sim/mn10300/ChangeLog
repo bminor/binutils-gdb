@@ -1,3 +1,17 @@
+2004-06-26  Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.in: Use common simulator always.  Don't subst sim_gen
+	nor mn10300_common.
+	* configure: Rebuilt.
+	* Makefile.in (WITHOUT_COMMON_OBJS, WITHOUT_COMMON_INTERP_DEP,
+	WITHOUT_COMMON_RUN_OBJS): Remove.
+	(WITH_COMMON_OBJS): Rename to MN10300_OBJS.
+	(WITH_COMMON_INTERP_DEP): Rename to MN10300_INTERP_DEP.
+	(WITH_COMMON_RUN_OBJS): Rename to SIM_RUN_OBJS.
+	(SIM_EXTRA_CFLAGS): Don't use @sim_gen@.
+	* interp.c: Remove non-common bits.
+	* mn10300_sim.h: Likewise.
+
 2003-08-28  Andrew Cagney  <cagney@redhat.com>
 
 	* dv-mn103ser.c (do_polling_event): Change type of "serial_reg" to
