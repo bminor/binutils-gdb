@@ -1,3 +1,11 @@
+Mon Feb 28 16:46:50 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* config.sub: Add os9k checking.
+
+Thu Feb 24 07:09:04 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config.guess: Handle OSF1 running on HPPA processors
+
 Fri Feb 18 14:14:00 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
 	* configure: If subdir configure fails, print out a message with
