@@ -1,3 +1,7 @@
+Fri Apr  5 03:16:13 1996  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* Makefile.in (BASE_FLAGS_TO_PASS): pass down $(MAKE).
+
 Thu Mar 28 14:11:11 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* Makefile.in (ALL_MODULES): Include all-perl.
