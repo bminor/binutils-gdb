@@ -1347,7 +1347,8 @@ eelf32ppcnto.c: $(srcdir)/emulparams/elf32ppcnto.sh \
   $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppcnto "$(tdir_elf32ppcnto)"
-eelf32ppcwindiss.c: $(srcdir)/emulparams/elf32ppcwindiss.sh ${GEN_DEPENDS}
+eelf32ppcwindiss.c: $(srcdir)/emulparams/elf32ppcwindiss.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppcwindiss "$(tdir_elf32ppcwindiss)"
 eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \
   $(srcdir)/emulparams/elf32lmip.sh $(srcdir)/emulparams/elf32bmip.sh \

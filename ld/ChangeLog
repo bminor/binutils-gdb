@@ -1,5 +1,8 @@
 2002-11-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am (eelf32ppcwindiss.c): Correct dependencies.
+	* Makefile.in: Regenerate.
+
 	* ld.h, ldcref.c, ldctor.c, ldctor.h, ldemul.c, ldemul.h, ldexp.c,
 	ldexp.h, ldfile.c, ldfile.h, ldgram.y, ldlang.c, ldlang.h, ldmain.c,
 	ldmain.h, ldmisc.c, ldwrite.c, lexsup.c, mri.c, pe-dll.c, pe-dll.h,
