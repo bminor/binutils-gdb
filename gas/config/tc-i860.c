@@ -477,6 +477,7 @@ i860_process_insn (str)
       int t;
       opcode = insn->match;
       memset (&the_insn, '\0', sizeof (the_insn));
+      fc = 0;
       for (t = 0; t < MAX_FIXUPS; t++)
         {
           the_insn.fi[t].reloc = BFD_RELOC_NONE;

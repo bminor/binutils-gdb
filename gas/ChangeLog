@@ -1,3 +1,8 @@
+2003-05-18  Jason Eckhardt  <jle@rice.edu>
+
+	* config/tc-i860.c (i860_process_insn): Initialize fc after
+	each opcode mismatch.
+
 2003-05-16  Kelley Cook  <kelleycook@wideopenwest.com>
 
 	* configure.in: Accept i[3-7]86 variants.

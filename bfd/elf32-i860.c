@@ -803,7 +803,7 @@ elf32_i860_relocate_highadj (input_bfd, rel, contents, value)
   insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 
   value += rel->r_addend;
-  value += (value & 0x8000) << 1; 
+  value += 0x8000; 
   value = ((value >> 16) & 0xffff);
 
   insn = (insn & 0xffff0000) | value;

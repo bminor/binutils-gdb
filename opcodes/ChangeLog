@@ -1,3 +1,8 @@
+2003-05-18  Jason Eckhardt  <jle@rice.edu>
+
+	* i860-dis.c (print_insn_i860): Instruction shrd has a dual bit,
+	print it.
+
 2003-05-17  Andreas Jaeger  <aj@suse.de>
 
         * Makefile.am (libopcodes_la_LIBADD): Add libbfd.la.

@@ -1,3 +1,7 @@
+2003-05-18  Jason Eckhardt  <jle@rice.edu>
+
+	* elf32-i860.c (elf32_i860_relocate_highadj): Simplify calculation.
+
 2003-05-17  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (elf_m68k_check_relocs): Cache reloc section in
