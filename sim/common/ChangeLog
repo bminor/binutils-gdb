@@ -1,3 +1,7 @@
+2001-12-20  Kazu Hirata  <kazu@hxi.com>
+
+	* run.c (usage): Fix a typo.
+
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
 	* Make-common.in (srccgen): Remove.

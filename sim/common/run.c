@@ -318,7 +318,7 @@ usage ()
   fprintf (stderr, "-c size         Set simulator cache size to `size'.\n");
 #endif
 #ifdef SIM_H8300
-  fprintf (stderr, "-h              Executable is for h8/300h or h8/300s.\n");
+  fprintf (stderr, "-h              Executable is for H8/300H or H8/S.\n");
 #endif
   fprintf (stderr, "-m size         Set memory size of simulator, in bytes.\n");
 #ifdef SIM_HAVE_ENVIRONMENT
