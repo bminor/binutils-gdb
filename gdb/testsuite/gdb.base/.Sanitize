@@ -34,6 +34,7 @@ break.exp
 callfuncs.c
 callfuncs.exp
 commands.exp
+compiler.c
 configure.in
 corefile.exp
 coremaker.c
@@ -68,7 +69,6 @@ mips_pro.c
 mips_pro.exp
 nodebug.c
 nodebug.exp
-opaque-info.c
 opaque.exp
 opaque0.c
 opaque1.c
@@ -99,7 +99,6 @@ twice.c
 twice.exp
 watchpoint.c
 watchpoint.exp
-whatis-info.c
 whatis.c
 whatis.exp
 

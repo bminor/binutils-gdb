@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -41,7 +41,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
-source gdb.base/opaque-info.exp
+source gdb.base/opaque0.ci
 
 #
 # Test basic opaque structure handling (statically).
@@ -59,8 +59,8 @@ source gdb.base/opaque-info.exp
 # Define a procedure to set up an xfail for all targets that do not support
 # this sort of cross reference.
 # Any target gcc that has a DBX_NO_XREFS definition in its config file will
-# not support it.
-# XCOFF does not seem to support it either.  See the very end of gcc/xcoffout.h.
+# not support it (FIXME: Is this still true; I suspect maybe not).
+
 # Native alpha ecoff doesn't support it either.
 # I don't think this type of cross reference works for any COFF target
 # either.
@@ -68,80 +68,54 @@ source gdb.base/opaque-info.exp
 proc setup_xfail_on_opaque_pointer {} {
 	global gcc_compiled
 
-	setup_xfail "rs6000-*-*" "a29k-*-udi" "vax-*-*" "i*86-sequent-bsd*"
+	setup_xfail "a29k-*-udi" "vax-*-*" "i*86-sequent-bsd*"
 	if {!$gcc_compiled} then {
 		setup_xfail "alpha-*-*"
 	}
 }
 
-setup_xfail_on_opaque_pointer
-send "whatis foop\n"
-expect {
-	-re "whatis foop\r
-type = struct foo \[*\]+\r
-$prompt $" { pass "whatis on opaque struct pointer (statically)"}
-	-re ".*$prompt $"	{ fail "whatis on opaque struct *" }
-	timeout 		{ fail "(timeout) whatis on opaque struct *" }
+# This seems easier than trying to track different versions of xlc; I'm
+# not sure there is much rhyme or reason regarding which tests it fails
+# and which ones it passes.
+if {[istarget "rs6000-*-aix*"] && !$gcc_compiled} then {
+    warning "xfails in opaque.exp may not be set up correctly for xlc"
 }
+
+setup_xfail_on_opaque_pointer
+gdb_test "whatis foop" \
+    "type = struct foo \[*\]+" \
+    "whatis on opaque struct pointer (statically)"
 
 
 # Ensure that we know the form of the structure that foop points to.
 
 setup_xfail_on_opaque_pointer
-send "ptype foop\n"
-expect {
-	-re "ptype foop\r
-type = struct foo \{\r
-    int a;\r
-    int b;\r
-\} \[*\]+\r
-$prompt $" { pass "ptype on opaque struct pointer (statically)" }
-	-re ".*$prompt $"	{ fail "ptype on opaque struct *" }
-	timeout 		{ fail "(timeout) ptype on opaque struct *" }
-}
+if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+gdb_test "ptype foop" \
+    "type = struct foo \{\r\n    int a;\r\n    int b;\r\n\} \[*\]+" \
+    "ptype on opaque struct pointer (statically)"
 
 
 # An instance of the opaque structure (afoo) is defined in a different file.
 # Ensure that we can locate afoo and the structure definition.
 
-send "whatis afoo\n"
-expect {
-	-re "whatis afoo\r
-type = struct foo\r
-$prompt $" { pass "whatis on opaque struct instance (statically)" }
-	-re ".*$prompt $"	{ fail "whatis on opaque struct" }
-	timeout 		{ fail "(timeout) whatis on opaque struct" }
-}
+gdb_test "whatis afoo" \
+    "type = struct foo" \
+    "whatis on opaque struct instance (statically)"
 
 
 # Ensure that we know the form of "afoo".
 
-send "ptype afoo\n"
-expect {
-	-re "ptype afoo\r
-type = struct foo \{\r
-    int a;\r
-    int b;\r
-\}\r
-$prompt $" { pass "ptype on opaque struct instance (statically)" }
-	-re ".*$prompt $"	{ fail "ptype on opaque struct instance" }
-	timeout 		{ fail "(timeout) ptype on opaque struct" }
-}
+gdb_test "ptype afoo" \
+    "type = struct foo \{\r\n    int a;\r\n    int b;\r\n\}" \
+    "ptype on opaque struct instance (statically)"
 
 
 # Ensure that we know what a struct foo looks like.
 
-send "ptype struct foo\n"
-expect {
-	-re "ptype struct foo\r
-type = struct foo \{\r
-    int a;\r
-    int b;\r
-\}\r
-$prompt $" { pass "ptype on opaque struct tagname (statically)" }
-	-re ".*$prompt $"	{ fail "ptype on opaque struct" }
-	timeout 		{ fail "(timeout) ptype on opaque struct" }
-}
+gdb_test "ptype struct foo" \
+    "type = struct foo \{\r\n    int a;\r\n    int b;\r\n\}" \
+    "ptype on opaque struct tagname (statically)"
 
 
 #
@@ -159,7 +133,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
 # Run to main, where struct foo is incomplete.
-if ![runto main] {
+if ![runto_main] {
     perror "cannot run to breakpoint at main"
 }
 
@@ -169,70 +143,37 @@ if ![runto main] {
 # the opaque structure in the current file.  Ensure we know it's type.
 
 setup_xfail_on_opaque_pointer
-send "whatis foop\n"
-expect {
-	-re "whatis foop\r
-type = struct foo \[*\]+\r
-$prompt $" { pass "whatis on opaque struct pointer (dynamically)"}
-	-re ".*$prompt $"	{ fail "whatis on opaque struct pointer" }
-	timeout			{ fail "(timeout) whatis on opaque struct ptr" }
-}
+gdb_test "whatis foop" \
+    "type = struct foo \[*\]+" \
+    "whatis on opaque struct pointer (dynamically)"
 
 
 # Ensure that we know the form of the thing foop points to.
 
 setup_xfail_on_opaque_pointer
-send "ptype foop\n"
-expect {
-	-re "ptype foop\r
-type = struct foo \{\r
-    int a;\r
-    int b;\r
-\} \[*\]+\r
-$prompt $" { pass "ptype on opaque struct pointer (dynamically)" }
-	-re ".*$prompt $"	{ fail "ptype on opaque struct *" }
-	timeout 		{ fail "(timeout) ptype on opaque struct *" }
-}
+if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+gdb_test "ptype foop" \
+    "type = struct foo \{\r\n    int a;\r\n    int b;\r\n\} \[*\]+" \
+    "ptype on opaque struct pointer (dynamically) 1"
 
-
-send "whatis afoo\n"
-expect {
-	-re "whatis afoo\r
-type = struct foo\r
-$prompt $" { pass "whatis on opaque struct instance (dynamically)" }
-	-re ".*$prompt $"	{ fail "whatis on opaque struct" }
-	timeout 		{ fail "(timeout) whatis on opaque struct" }
-}
+gdb_test "whatis afoo" \
+    "type = struct foo" \
+    "whatis on opaque struct instance (dynamically) 1"
 
 
 # Ensure that we know the form of afoo, an instance of a struct foo.
 
-send "ptype afoo\n"
-expect {
-	-re "ptype afoo\r
-type = struct foo \{\r
-    int a;\r
-    int b;\r
-\}\r
-$prompt $" { pass "ptype on opaque struct instance (dynamically)" }
-	-re ".*$prompt $"	{ fail "ptype on opaque struct instance" }
-	timeout 		{ fail "(timeout) ptype on opaque struct" }
-}
+gdb_test "ptype afoo" \
+    "type = struct foo \{\r\n    int a;\r\n    int b;\r\n\}" \
+    "ptype on opaque struct instance (dynamically) 1"
 
 
 # Ensure that we know the form of an explicit struct foo.
 
-send "ptype struct foo\n"
-expect {
-	-re "ptype struct foo\r
-type = struct foo \{\r
-    int a;\r
-    int b;\r
-\}\r
-$prompt $" { pass "ptype on opaque struct tagname (dynamically)" }
-	-re ".*$prompt $"	{ fail "ptype on opaque struct" }
-	timeout 		{ fail "(timeout) ptype on opaque struct" }
-}
+if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+gdb_test "ptype struct foo" \
+    "type = struct foo \{\r\n    int a;\r\n    int b;\r\n\}" \
+    "ptype on opaque struct tagname (dynamically) 1"
 
 
 # Now reload the symbols again so we forget about anything we might
@@ -255,67 +196,33 @@ if ![runto getfoo] {
 # Ensure that we know what foop is.
 
 setup_xfail_on_opaque_pointer
-send "whatis foop\n"
-expect {
-	-re "whatis foop\r
-type = struct foo \[*\]+\r
-$prompt $" { pass "whatis on opaque struct pointer (dynamically)"}
-	-re ".*$prompt $"	{ fail "whatis on opaque struct pointer" }
-	timeout			{ fail "(timeout) whatis on opaque struct ptr" }
-}
+gdb_test "whatis foop" \
+    "type = struct foo \[*\]+" \
+    "whatis on opaque struct pointer (dynamically)"
 
 
 # Ensure that we know the form of the thing foop points to.
 
 setup_xfail_on_opaque_pointer
-send "ptype foop\n"
-expect {
-	-re "ptype foop\r
-type = struct foo \{\r
-    int a;\r
-    int b;\r
-\} \[*\]+\r
-$prompt $" { pass "ptype on opaque struct pointer (dynamically)" }
-	-re ".*$prompt $"	{ fail "ptype on opaque struct *" }
-	timeout 		{ fail "(timeout) ptype on opaque struct *" }
-}
+if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+gdb_test "ptype foop" \
+    "type = struct foo \{\r\n    int a;\r\n    int b;\r\n\} \[*\]+" \
+    "ptype on opaque struct pointer (dynamically) 2"
 
-
-send "whatis afoo\n"
-expect {
-	-re "whatis afoo\r
-type = struct foo\r
-$prompt $" { pass "whatis on opaque struct instance (dynamically)" }
-	-re ".*$prompt $"	{ fail "whatis on opaque struct" }
-	timeout 		{ fail "(timeout) whatis on opaque struct" }
-}
+gdb_test "whatis afoo" \
+    "type = struct foo" \
+    "whatis on opaque struct instance (dynamically) 2"
 
 
 # Ensure that we know the form of afoo, an instance of a struct foo.
 
-send "ptype afoo\n"
-expect {
-	-re "ptype afoo\r
-type = struct foo \{\r
-    int a;\r
-    int b;\r
-\}\r
-$prompt $" { pass "ptype on opaque struct instance (dynamically)" }
-	-re ".*$prompt $"	{ fail "ptype on opaque struct instance" }
-	timeout 		{ fail "(timeout) ptype on opaque struct" }
-}
+gdb_test "ptype afoo" \
+    "type = struct foo \{\r\n    int a;\r\n    int b;\r\n\}" \
+    "ptype on opaque struct instance (dynamically) 2"
 
 
 # Ensure that we know the form of an explicit struct foo.
 
-send "ptype struct foo\n"
-expect {
-	-re "ptype struct foo\r
-type = struct foo \{\r
-    int a;\r
-    int b;\r
-\}\r
-$prompt $" { pass "ptype on opaque struct tagname (dynamically)" }
-	-re ".*$prompt $"	{ fail "ptype on opaque struct" }
-	timeout 		{ fail "(timeout) ptype on opaque struct" }
-}
+gdb_test "ptype struct foo" \
+    "type = struct foo \{\r\n    int a;\r\n    int b;\r\n\}" \
+    "ptype on opaque struct tagname (dynamically) 2"

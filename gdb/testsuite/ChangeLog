@@ -1,3 +1,120 @@
+Tue Aug 15 09:42:44 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/Makefile.in:  Add action to .c.o transformation
+	rule that generates a .ci file for each .o file and remove
+	explicit .c.o rules except for callfuncs.o.
+	* gdb.c++/Makefile.in:  Add .cc.o transformation rule that
+	generates a .ci file for each .o file and remove explicit
+	.cc.o rules.
+	(clean): Remove *.tmp *.ci files.
+	(EXECUTABLES): Remove templ-info.exp.
+	* gdb.base/compiler.c: New file.
+	* gdb.c++/compiler.cc: New file
+	* gdb.base/scope.exp: Source gdb.base/scope.ci.
+	Change rs6000-*-* xfail for
+	"print 'scope0.c'::filelocal_ro" and
+	"print 'scope1.c'::filelocal" and
+	"print 'scope1.c'::filelocal_bss" and
+	"print 'scope1.c'::filelocal_ro" and
+	"print 'scope1.c'::foo::funclocal" and
+	"print 'scope1.c'::foo::funclocal_ro" and
+	"print 'scope1.c'::bar::funclocal" and
+	"print 'scope0.c'::filelocal_ro" and
+	"print 'scope1.c'::filelocal at foo" and
+	"print 'scope1.c'::filelocal_bss at foo" and
+	"print 'scope1.c'::filelocal_ro at foo" and
+	"print 'scope1.c'::foo::funclocal at foo" and
+	"print 'scope1.c'::foo::funclocal_bss at foo" and
+	"print 'scope1.c'::foo::funclocal_ro at foo" and
+	"print 'scope1.c'::bar::funclocal at foo" and
+	"print 'scope0.c'::filelocal_ro" and
+	"print 'scope1.c'::filelocal" and
+	"print 'scope1.c'::filelocal_bss" and
+	"print 'scope1.c'::filelocal_ro" and
+	"print 'scope1.c'::foo::funclocal" and
+	"print 'scope1.c'::foo::funclocal_bss" and
+	"print 'scope1.c'::foo::funclocal_ro" and
+	"print 'scope1.c'::bar::funclocal" and
+	"print 'scope1.c'::bar::funclocal_bss"
+	to only be xfail'd when not compiled with gcc.
+	Add rs6000-*-* xfail for 
+	"print 'scope0.c'::filelocal_bss before run"
+	when compiled with gcc.
+	(test_at_main): Add rs6000-*-* xfail for
+	"print filelocal_ro in test_at_main"
+	when compiled with gcc.
+	* gdb.base/ptype.exp: Source gdb.base/ptype.ci.
+ 	Add rs6000-*-aix* xfail for 
+	"whatis unnamed typedef'd enum (compiler bug in IBM's xlc)" and
+	"ptype t_char_array",  not compiled with gcc.
+	* gdb.base/list.exp (test_list_function):  Add rs6000-*-*
+	xfail for "list foo (in include file)" when gcc	compiled.
+	* gdb.base/funcargs.exp: Source gdb.base/funcargs.ci
+ 	(integral_args): Add rs6000-*-* xfail for
+	"run to call0a" if not compiled with gcc.
+	(unsigned_integral_args): Add rs6000-*-* xfail for
+	"run to call1a" if not compiled with gcc.
+	(float_and_integral_args):  Add rs6000-*-* xfail for
+	"run to call2a" if not compiled with gcc and for
+	"continue to call2b" for any compiler.
+	Add rs6000-*-* xfail to
+	"print f1 after run to call2a" for gcc compiled.
+	(discard_and_shuffle): Add rs6000-*-* xfail for
+	"run to call6a".
+	(shuffle_round_robin): Add rs6000-*-* xfail for
+	"backtrace from call7a" if not compiled with gcc.
+	Add rs6000-*-* xfail for
+	"backtrace from call7b" if compiled with gcc.
+	(call_after_alloca): Add rs6000-*-* xfail for
+	"print c in call_after_alloca" and
+	"print s in call_after_alloca" and
+	"backtrace from call_after_alloca_subr"
+	if not compiled with gcc.
+	(localvars_in_indirect_call): Add rs6000-*-* xfail for
+	"print c in localvars_in_indirect_call" and
+	"print c in localvars_in_indirect_call" and
+	"backtrace in indirectly called function" and
+	"stepping into indirectly called function"
+	if not compiled with gcc.
+	(localvars_after_alloca): Add rs6000-*-* xfail for
+	"print c after runto localvars_after_alloca" and
+	"print s after runto localvars_after_alloca" and
+	"print i after runto localvars_after_alloca" and
+	"print l after runto localvars_after_alloca"
+	for all compilers.
+	* gdb.base/whatis.exp: Source gdb.base/whatis.ci rather
+	than whatis-info.exp.
+	* gdb.base/opaque.exp: Source gdb.base/opaque0.ci rather
+	than opaque-info.exp.
+	Setup rs6000-*-* xfail for
+	"ptype on opaque struct pointer (statically)" and 
+	"ptype on opaque struct pointer (dynamically)" when
+	not compiled with gcc.
+	* gdb.base/callfuncs.exp: Source gdb.base/callfuncs.ci
+	rather than callf-info.exp.
+	(do_function_calls):  Add clear_xfail for rs6000-*-* for
+	"p t_float_values2(3.14159,float_val2)".  Seems to work
+	fine there, both with xlc and gcc.  Need to find out what
+	it is doing right and fix other platforms.
+	* gdb.base/callfuncs.exp: Add rs6000-*-* xfail for
+	"call inferior func with struct - returns int",
+	"call inferior func with struct - returns long",
+	"call inferior func with struct - returns float",
+	"call inferior func with struct - returns double",
+	"call inferior func with struct - returns char *",
+	but only if not gcc compiled (presumes xlc compiled).
+	Change rs6000-*-* xfails for
+	"call inferior func with struct - returns char" and
+	" call inferior func with struct -  returns short" to only
+	xfail if not using gcc.
+	(clean mostlyclean):  Remove *.ci and *.tmp files.
+	* gdb.c++/templates.exp: Source gdb.c++/templates.ci rather
+	than templ-info.exp.
+	* gdb.base/langs.exp:  Source gdb.base/langs.ci.
+	Add rs6000-*-* xfail for "up to foo in langs.exp"
+	"up to cppsub_ in langs.exp" and "up to fsub in langs.exp"
+ 	when not gcc compiled.
+	
 Sat Aug 12 15:05:36 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* gdb.base/callfuncs.exp: Add xfails for the powerpc.
@@ -17,6 +134,24 @@ Fri Aug 11 13:36:20 1995  Jeff Law  (law@snake.cs.utah.edu)
 	failure (opcode table has been fixed to match reality).
 
 end-sanitize-sh3e
+Mon Aug 14 09:01:59 1995  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* gdb.base/callfuncs.exp: Add rs6000-*-* xfails for
+	"call inferior func with struct - returns char",
+	"call inferior func with struct - returns short"
+
+	* gdb.base/scope.exp: Remove rs6000-*-* xfails for
+	"print 'scope0.c'::filelocal at main",
+	"print 'scope0.c'::filelocal_bss in test_at_main",
+	"print 'scope0.c'::filelocal at foo",
+	"print 'scope0.c'::filelocal_bss in test_at_foo",
+	"print 'scope0.c'::filelocal at bar",
+	"print 'scope0.c'::filelocal_bss in test_at_bar"
+	
+	* gdb.base/list.exp: Remove rs6000-*-* xfail for "list function
+	in source file 1".  This bug seems to have been fixed with both
+	gcc and native cc (was native assembler bug?).
+
 Wed Aug  9 08:04:12 1995  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.base/a1-selftest.exp: Change "i*86-*-sysv4" xfail for

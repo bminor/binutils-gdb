@@ -14,8 +14,8 @@
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING.  If not, write to
-# the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 srcdir = .
 prefix = /usr/local
@@ -99,7 +99,6 @@ EXECUTABLES =  \
 	mips_pro  \
 	nodebug  \
 	opaque  \
-	opaque-info.exp  \
 	printcmds  \
 	ptype  \
 	recurse  \
@@ -112,7 +111,6 @@ EXECUTABLES =  \
 	twice  \
 	watchpoint  \
 	whatis  \
-	whatis-info.exp  \
 	$(CROSS_EXECUTABLES)
 
 # List of test executables that we have available.  They are kept in
@@ -130,23 +128,18 @@ CROSS_EXECUTABLES =  \
 
 .c.o:
 	$(CC) -c $(CFLAGS) $<
-
+	$(CC) -E $(CFLAGS) $(srcdir)/compiler.c >$*.tmp
+	mv $*.tmp $*.ci
 
 all:	$(EXECUTABLES)
 
 run: run.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o run run.o $(LIBS)
 
-# We want to make sure comp-info.exp reflects the way that whatis was compiled;
-# that's why this isn't a separate rule.
+whatis: whatis.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o whatis whatis.o $(LIBS)
 
-whatis whatis-info.exp: whatis.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o whatis.tmp whatis.o $(LIBS)
-	$(CC) $(CFLAGS) -E $(srcdir)/whatis-info.c >whatis-info.tmp
-	mv whatis-info.tmp whatis-info.exp
-	mv whatis.tmp whatis
-
-.PRECIOUS: whatis whatis-info.exp
+.PRECIOUS: whatis
 
 ptype: ptype.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o ptype ptype.o $(LIBS)
@@ -177,14 +170,8 @@ watchpoint: watchpoint.o
 recurse: recurse.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o recurse recurse.o $(LIBS)
 
-# We want to make sure opaque-info.exp reflects the way that opaque
-# was compiled; that's why this isn't a separate rule.
-
-opaque opaque-info.exp: opaque0.o opaque1.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o opaque.tmp opaque0.o opaque1.o $(LIBS)
-	$(CC) $(CFLAGS) -E $(srcdir)/opaque-info.c >opaque-info.tmp
-	mv opaque-info.tmp opaque-info.exp
-	mv opaque.tmp opaque
+opaque: opaque0.o opaque1.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o opaque opaque0.o opaque1.o $(LIBS)
 
 coremaker: coremaker.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o coremaker coremaker.o $(LIBS)
@@ -254,10 +241,12 @@ printcmds: printcmds.o
 # Try compiling this with prototypes, if that fails maybe the compiler
 # is a pre-ANSI compiler, in which case don't use prototypes.
 callfuncs.o: callfuncs.c
-	(echo set prototypes 1 > callf-info.exp; \
+	(echo set prototypes 1 >callfuncs.tmp; \
 	  $(CC) -c $(CFLAGS) $(srcdir)/callfuncs.c 2>/dev/null) \
-	|| (echo set prototypes 0 > callf-info.exp; \
+	|| (echo set prototypes 0 >callfuncs.tmp; \
 	  $(CC) -c $(CFLAGS) -DNO_PROTOTYPES $(srcdir)/callfuncs.c)
+	$(CC) $(CFLAGS) -E $(srcdir)/compiler.c >>callfuncs.tmp
+	mv callfuncs.tmp callfuncs.ci
 
 callfuncs: callfuncs.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o callfuncs callfuncs.o $(LIBS)
@@ -310,7 +299,7 @@ just-check:
 	$(RUNTEST) $(RUNTESTFLAGS) --tool gdb --srcdir $(srcdir)
 
 clean mostlyclean:
-	-rm -f *~ *.o a.out xgdb *.x $(EXECUTABLES) callf-info.exp
+	-rm -f *~ *.o a.out xgdb *.x $(EXECUTABLES) *.ci *.tmp
 	-rm -f core core.coremaker coremaker.core corefile
 
 distclean realclean: clean

@@ -34,6 +34,8 @@ if ![file exists $objdir/$subdir/$binfile] then {
     return 0
 }
 
+source gdb.base/scope0.ci
+
 # Test locating various things when stopped just inside main, after
 # running init().  To prevent cascading of errors, we report the
 # first one and quit.  If all pass, then we print the pass results.
@@ -44,6 +46,7 @@ proc test_at_main {} {
     global det_file
     global srcdir
     global subdir
+    global gcc_compiled
 
     # skip past init.  There may be a call to __main at the start of
     # main, so the first next may only get us to the init call.
@@ -69,8 +72,6 @@ proc test_at_main {} {
 	}
     }
 
-    # The RS/6000 does not seem to be handle print 'file'::var.
-    setup_xfail "rs6000-*-*"
     send "print 'scope0.c'::filelocal\n"
     expect {
 	-re "\\\$$decimal = 1\r\n$prompt $" {
@@ -99,7 +100,6 @@ proc test_at_main {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
     send "print 'scope0.c'::filelocal_bss\n"
     expect {
 	-re "\\\$$decimal = 101\r\n$prompt $" {
@@ -122,16 +122,23 @@ proc test_at_main {} {
 
     # No clue why the powerpc fails this test.
     setup_xfail "powerpc-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print filelocal_ro\n"
     expect {
-	-re "\\\$$decimal = 201\r\n$prompt $" { pass "print filelocal_ro" }
-	-re "$prompt $" { fail "print filelocal_ro" ; return }
+	-re "\\\$$decimal = 201\r\n$prompt $" {
+	    pass "print filelocal_ro in test_at_main"
+	}
+	-re "$prompt $" {
+	    fail "print filelocal_ro in test_at_main"
+	    return
+	}
 	timeout {
-	    fail "(timeout) print filelocal_ro" ; return
+	    fail "(timeout) print filelocal_ro in test_at_main"
+	    return
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     setup_xfail "powerpc-*-*"
     send "print 'scope0.c'::filelocal_ro\n"
     expect {
@@ -150,7 +157,7 @@ proc test_at_main {} {
 
     # Print scope1.c::filelocal, which is 2
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::filelocal\n"
     expect {
 	-re "\\\$$decimal = 2\r\n$prompt $" {
@@ -168,7 +175,7 @@ proc test_at_main {} {
 
     # Print scope1.c::filelocal_bss, which is 102
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::filelocal_bss\n"
     expect {
 	-re "\\\$$decimal = 102\r\n$prompt $" {
@@ -186,7 +193,7 @@ proc test_at_main {} {
 
     # Print scope1.c::filelocal_ro, which is 202
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::filelocal_ro\n"
     expect {
 	-re "\\\$$decimal = 202\r\n$prompt $" {
@@ -213,7 +220,7 @@ proc test_at_main {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::foo::funclocal\n"
     expect {
 	-re "\\\$$decimal = 3\r\n$prompt $" {
@@ -242,7 +249,7 @@ proc test_at_main {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::foo::funclocal_ro\n"
     expect {
 	-re "\\\$$decimal = 203\r\n$prompt $" {
@@ -268,7 +275,7 @@ proc test_at_main {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::bar::funclocal\n"
     expect {
 	-re "\\\$$decimal = 4\r\n$prompt $" {
@@ -291,6 +298,7 @@ proc test_at_foo {} {
     global det_file
     global srcdir
     global subdir
+    global gcc_compiled
 
     send "next\n"
     expect {
@@ -301,7 +309,6 @@ proc test_at_foo {} {
 
     # Print scope0.c::filelocal, which is 1
 
-    setup_xfail "rs6000-*-*"
     send "print 'scope0.c'::filelocal\n"
     expect {
 	-re "\\\$$decimal = 1\r\n$prompt $" {
@@ -319,7 +326,6 @@ proc test_at_foo {} {
 
     # Print scope0.c::filelocal_bss, which is 101
 
-    setup_xfail "rs6000-*-*"
     send "print 'scope0.c'::filelocal_bss\n"
     expect {
 	-re "\\\$$decimal = 101\r\n$prompt $" {
@@ -341,7 +347,7 @@ proc test_at_foo {} {
 
     # Print scope0.c::filelocal_ro, which is 201
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     setup_xfail "powerpc-*-*"
     send "print 'scope0.c'::filelocal_ro\n"
     expect {
@@ -360,7 +366,7 @@ proc test_at_foo {} {
 
     # Print scope1.c::filelocal, which is 2
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::filelocal\n"
     expect {
 	-re "\\\$$decimal = 2\r\n$prompt $" {
@@ -379,7 +385,7 @@ proc test_at_foo {} {
     gdb_test "print filelocal_bss" "\\\$$decimal = 102" \
 	"print filelocal_bss at foo"
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::filelocal_bss\n"
     expect {
 	-re "\\\$$decimal = 102\r\n$prompt $" {
@@ -398,7 +404,7 @@ proc test_at_foo {} {
     gdb_test "print filelocal_ro" "\\\$$decimal = 202" \
 	"print filelocal_ro at foo"
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::filelocal_ro\n"
     expect {
 	-re "\\\$$decimal = 202\r\n$prompt $" { pass "print 'scope1.c'::filelocal_ro at foo" }
@@ -419,7 +425,7 @@ proc test_at_foo {} {
     gdb_test "print foo::funclocal" "\\\$$decimal = 3" \
 	"print foo::funclocal at foo"
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::foo::funclocal\n"
     expect {
 	-re "\\\$$decimal = 3\r\n$prompt $" {
@@ -443,7 +449,7 @@ proc test_at_foo {} {
     gdb_test "print foo::funclocal_bss" "\\\$$decimal = 103" \
 	"print foo::funclocal_bss at foo"
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::foo::funclocal_bss\n"
     expect {
 	-re "\\\$$decimal = 103\r\n$prompt $" {
@@ -469,7 +475,7 @@ proc test_at_foo {} {
     gdb_test "print foo::funclocal_ro" "\\\$$decimal = 203" \
 	"print foo::funclocal_ro at foo"
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::foo::funclocal_ro\n"
     expect {
 	-re "\\\$$decimal = 203\r\n$prompt $" {
@@ -490,7 +496,7 @@ proc test_at_foo {} {
     gdb_test "print bar::funclocal" "\\\$$decimal = 4" \
 	"print bar::funclocal at foo"
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::bar::funclocal\n"
     expect {
 	-re "\\\$$decimal = 4\r\n$prompt $" {
@@ -513,6 +519,7 @@ proc test_at_bar {} {
     global det_file
     global srcdir
     global subdir
+    global gcc_compiled
 
     send "next\n"
     expect {
@@ -522,7 +529,6 @@ proc test_at_bar {} {
 
     # Print scope0.c::filelocal, which is 1
 
-    setup_xfail "rs6000-*-*"
     send "print 'scope0.c'::filelocal\n"
     expect {
 	-re "\\\$$decimal = 1\r\n$prompt $" {
@@ -540,7 +546,6 @@ proc test_at_bar {} {
 
    # Print scope0.c::filelocal_bss, which is 101
 
-    setup_xfail "rs6000-*-*"
     send "print 'scope0.c'::filelocal_bss\n"
     expect {
 	-re "\\\$$decimal = 101\r\n$prompt $" {
@@ -562,7 +567,7 @@ proc test_at_bar {} {
 
    # Print scope0.c::filelocal_ro, which is 201
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     setup_xfail "powerpc-*-*"
     send "print 'scope0.c'::filelocal_ro\n"
     expect {
@@ -588,7 +593,7 @@ proc test_at_bar {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::filelocal\n"
     expect {
 	-re "\\\$$decimal = 2\r\n$prompt $" { pass "print 'scope1.c'::filelocal" }
@@ -613,7 +618,7 @@ proc test_at_bar {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::filelocal_bss\n"
     expect {
 	-re "\\\$$decimal = 102\r\n$prompt $" { pass "print 'scope1.c'::filelocal_bss" }
@@ -631,14 +636,20 @@ proc test_at_bar {} {
 
     send "print filelocal_ro\n"
     expect {
-	-re "\\\$$decimal = 202\r\n$prompt $" { pass "print filelocal_ro" }
-	-re "$prompt $" { fail "print filelocal_ro" ; return }
+	-re "\\\$$decimal = 202\r\n$prompt $" {
+	    pass "print filelocal_ro in test_at_bar"
+	}
+	-re "$prompt $" {
+	    fail "print filelocal_ro in test_at_bar"
+	    return
+	}
 	timeout {
-	    fail "(timeout) print filelocal_ro" ; return
+	    fail "(timeout) print filelocal_ro in test_at_bar"
+	    return
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::filelocal_ro\n"
     expect {
 	-re "\\\$$decimal = 202\r\n$prompt $" { pass "print 'scope1.c'::filelocal_ro" }
@@ -663,7 +674,7 @@ proc test_at_bar {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::foo::funclocal\n"
     expect {
 	-re "\\\$$decimal = 3\r\n$prompt $" { pass "print 'scope1.c'::foo::funclocal" }
@@ -688,7 +699,7 @@ proc test_at_bar {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::foo::funclocal_bss\n"
     expect {
 	-re "\\\$$decimal = 103\r\n$prompt $" { pass "print 'scope1.c'::foo::funclocal_bss" }
@@ -713,7 +724,7 @@ proc test_at_bar {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::foo::funclocal_ro\n"
     expect {
 	-re "\\\$$decimal = 203\r\n$prompt $" { pass "print 'scope1.c'::foo::funclocal_ro" }
@@ -747,7 +758,7 @@ proc test_at_bar {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::bar::funclocal\n"
     expect {
 	-re "\\\$$decimal = 4\r\n$prompt $" { pass "print 'scope1.c'::bar::funclocal" }
@@ -781,7 +792,7 @@ proc test_at_bar {} {
 	}
     }
 
-    setup_xfail "rs6000-*-*"
+    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "print 'scope1.c'::bar::funclocal_bss\n"
     expect {
 	-re "\\\$$decimal = 104\r\n$prompt $" { pass "print 'scope1.c'::bar::funclocal_bss" }
@@ -923,6 +934,7 @@ gdb_test "print 'scope0.c'::filelocal_ro" "= 201"
 
 # gdb currently cannot access bss memory on some targets if the inferior
 # is not running.
+if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
 send "print 'scope0.c'::filelocal_bss\n"
 expect {
     -re " = 0\r\n$prompt $" {

@@ -79,6 +79,7 @@ proc set_lang_c {} {
 
 proc do_function_calls {} {
     global prototypes
+    global gcc_compiled
 
     gdb_test "p t_char_values(0,0)" " = 0"
     gdb_test "p t_char_values('a','b')" " = 1"
@@ -112,7 +113,13 @@ proc do_function_calls {} {
 
     # Test passing of arguments which might not be widened.
     gdb_test "p t_float_values2(0.0,0.0)" " = 0"
-    if $prototypes then {setup_xfail "*-*-*" 5318}
+
+    # Although PR 5318 mentions SunOS specifically, this seems
+    # to be a generic problem on all platforms except r6000.
+    if $prototypes then {
+	setup_xfail "*-*-*" 5318
+	clear_xfail "rs6000-*-*"
+    }
     gdb_test "p t_float_values2(3.14159,float_val2)" " = 1"
     gdb_test "p t_small_values(1,2,3,4,5,6,7,8,9,10)" " = 55"
 
@@ -174,20 +181,27 @@ proc do_function_calls {} {
     gdb_test "p sum_args(4,{2,3,4,5})" " = 14"
     gdb_test "p sum10 (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)" " = 55"
 
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "p t_structs_c(struct_val1)" "= 120 'x'" \
 	"call inferior func with struct - returns char"
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "p t_structs_s(struct_val1)" "= 87" \
 	"call inferior func with struct -  returns short"
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "p t_structs_i(struct_val1)" "= 76" \
 	"call inferior func with struct - returns int"
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "p t_structs_l(struct_val1)" "= 51" \
 	"call inferior func with struct - returns long"
     setup_xfail "i*86-*-*"
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "p t_structs_f(struct_val1)" "= 2.12.*" \
 	"call inferior func with struct - returns float"
     setup_xfail "i*86-*-*"
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "p t_structs_d(struct_val1)" "= 9.87.*" \
 	"call inferior func with struct - returns double"
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "p t_structs_a(struct_val1)" "= \"foo\"" \
 	"call inferior func with struct - returns char *"
 
@@ -200,7 +214,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
-source gdb.base/callf-info.exp
+source gdb.base/callfuncs.ci
 
 send "set print sevenbit-strings\n" ; expect -re "$prompt $"
 send "set print address off\n" ; expect -re "$prompt $"

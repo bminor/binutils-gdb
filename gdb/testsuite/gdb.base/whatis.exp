@@ -43,7 +43,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
-source gdb.base/whatis-info.exp
+source gdb.base/whatis.ci
 
 # If we did not use the signed keyword when compiling the file, don't
 # expect GDB to know that char is signed.

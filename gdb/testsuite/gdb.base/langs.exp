@@ -17,6 +17,8 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
 
+source gdb.base/langs0.ci
+
 gdb_test "b langs0" {Function "langs0" not defined\.} \
     "break on nonexistent function in langs.exp"
 
@@ -30,6 +32,7 @@ if [runto csub] then {
     # because it depends on details of the compiler.
     gdb_test "bt" "#0.*csub.*#1.*(foo|foo__Fi) \\(.*#2.*cppsub_ .*#3.*fsub.*#4.*langs0__2do \\(.*#5  \[0-9a-fx\]* in main.*" "backtrace in langs.exp"
 
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     setup_xfail "i*86-*-sysv4*"
     gdb_test "up" ".* in (foo|foo__Fi) .* at langs2\\.cxx.*return csub \\(.*" \
 	"up to foo in langs.exp"
@@ -38,6 +41,7 @@ if [runto csub] then {
 	"show language at foo in langs.exp"
 
     setup_xfail "i*86-*-sysv4*"
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "up" ".* in cppsub_ .* at langs2\\.cxx.*return foo \\(.*" \
 	"up to cppsub_ in langs.exp"
     setup_xfail "i*86-*-sysv4*"
@@ -45,6 +49,7 @@ if [runto csub] then {
 	"show language at cppsub_ in langs.exp"
 
     setup_xfail "i*86-*-sysv4*"
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "up" ".* in fsub.* at langs1\\.f.*return \\(cppsub .*" \
 	"up to fsub in langs.exp"
     setup_xfail "i*86-*-sysv4*"
