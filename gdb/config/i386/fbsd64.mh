@@ -1,7 +1,0 @@
-# Host: FreeBSD/amd64
-
-XM_FILE= xm-i386.h
-
-NAT_FILE= nm-fbsd64.h
-# NOTE: Do not spread NATDEPFILES over several lines - it hurts BSD make.
-NATDEPFILES= fork-child.o infptrace.o inftarg.o solib.o solib-svr4.o solib-legacy.o amd64-nat.o amd64bsd-nat.o amd64fbsd-nat.o gcore.o fbsd-proc.o
