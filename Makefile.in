@@ -121,7 +121,7 @@ all.cross: all-libiberty all-mmalloc all-gas all-bison all-ld \
 	all-bfd all-libgcc all-readline all-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
-clean: clean-stamps clean-libiberty clean-mmalloc clean-texinfo clean-bfd \
+clean: clean-libiberty clean-mmalloc clean-texinfo clean-bfd \
 	clean-newlib clean-binutils clean-flex \
 	clean-bison clean-byacc clean-ld clean-gas \
 	clean-gcc clean-libgcc clean-readline clean-glob clean-gdb \
