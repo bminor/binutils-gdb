@@ -46,7 +46,7 @@
 
 Do-first:
 
-keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
+keep_these_too="${keep_these_too} .cvsignore autoconf
 	apache bash 
 	bfd binutils bison byacc cvs deja-gnu dejagnu diff dosrel dvips
 	emacs emacs19 examples expect fileutils findutils flex
@@ -65,7 +65,7 @@ keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 
 lose_these_too="${lose_these_too} testsuite"
 
-cygnus_files="release release-info build-all.mk test-build.mk COPYING.NEWLIB"
+cygnus_files="release release-info build-all.mk test-build.mk CYGNUS COPYING.NEWLIB"
 
 if ( echo $* | grep keep\-cygnus > /dev/null) ; then
 	keep_these_too="${keep_these_too} ${cygnus_files}"
