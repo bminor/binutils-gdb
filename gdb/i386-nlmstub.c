@@ -864,13 +864,41 @@ handle_exception (frame)
     }
 }
 
-char *baudRates[] = { "50", "75", "110", "134.5", "150", "300", "600", "1200",
-			"1800", "2000",	"2400", "3600", "4800", "7200", "9600",
-			"19200", "38400", "57600", "115200" };
 
-char dataBits[] = "5678";
+char *progname;
 
-char *stopBits[] = { "1", "1.5", "2" };
+struct bitRate {
+  BYTE bitRate;
+  const char *bitRateString;
+};
+
+struct bitRate bitRateTable[] = 
+{
+  { AIO_BAUD_50    ,      "50" },
+  { AIO_BAUD_75    ,      "75" },
+  { AIO_BAUD_110   ,     "110" },
+  { AIO_BAUD_134p5 ,   "134.5" },
+  { AIO_BAUD_150   ,     "150" },
+  { AIO_BAUD_300   ,     "300" },
+  { AIO_BAUD_600   ,     "600" },
+  { AIO_BAUD_1200  ,    "1200" },
+  { AIO_BAUD_1800  ,    "1800" },
+  { AIO_BAUD_2000  ,    "2000" },
+  { AIO_BAUD_2400  ,    "2400" },
+  { AIO_BAUD_3600  ,    "3600" },
+  { AIO_BAUD_4800  ,    "4800" },
+  { AIO_BAUD_7200  ,    "7200" },
+  { AIO_BAUD_9600  ,    "9600" },
+  { AIO_BAUD_19200 ,   "19200" },
+  { AIO_BAUD_38400 ,   "38400" },
+  { AIO_BAUD_57600 ,   "57600" },
+  { AIO_BAUD_115200,  "115200" },
+  { -1, NULL }
+};
+
+char dataBitsTable[] = "5678";
+
+char *stopBitsTable[] = { "1", "1.5", "2" };
 
 char parity[] = "NOEMS";
 
@@ -886,29 +914,92 @@ main (argc, argv)
      char **argv;
 {
   int hardware, board, port;
+  BYTE bitRate;
+  BYTE dataBits;
+  BYTE stopBits;
+  BYTE parityMode;
   LONG err;
   struct debuggerStructure s;
+  int cmdindx;
   char *cmdlin;
   int i;
 
-/* Use the -B option to invoke the NID if you want to debug the stub. */
-
-  if (argc > 1 && strcmp(argv[1], "-B") == 0)
-    {
-      Breakpoint(argc);
-      ++argv, --argc;
-    }
-
-  if (argc < 4)
-    {
-      fprintf (stderr,
-	       "Usage: load gdbserve board port program [arguments]\n");
-      exit (1);
-    }
+  /* set progname */
+  progname = "nlmstub";
 
   hardware = -1;
-  board = strtol (argv[1], (char **) NULL, 0);
-  port = strtol (argv[2], (char **) NULL, 0);
+  board = 0;
+  port = 0;
+
+  /* set default serial line characteristics */
+  bitRate  = AIO_BAUD_9600;
+  dataBits = AIO_DATA_BITS_8;
+  stopBits = AIO_STOP_BITS_1;
+  parityMode = AIO_PARITY_NONE;
+
+  cmdindx = 0;
+  for (argc--, argv++; *argv; argc--, argv++) 
+    {
+      char *bp;
+      char *ep;
+
+      if (strncmp(*argv, "BAUD=", 5) == 0) 
+	{
+	  struct bitRate *brp;
+
+	  bp = *argv + 5;
+	  for (brp = bitRateTable; brp->bitRateString != NULL; brp++) 
+	    {
+	      if (strcmp(brp->bitRateString, bp) == 0) 
+		{
+		  bitRate = brp->bitRate;
+		  break;
+		}
+	    }
+
+	  if (brp->bitRateString == NULL) 
+	    {
+	      fprintf(stderr, "%s: %s: unknown or unsupported bit rate",
+		      progname, bp);
+	      exit (1);
+	    }
+	}
+      else if (strncmp(*argv, "NODE=", 5) == 0)
+	{
+	  bp = *argv + 5;
+	  board = strtol (bp, &ep, 0);
+	  if (ep == bp || *ep != '\0') 
+	    {
+	      fprintf (stderr, "%s: %s: expected integer argument\n", 
+		       progname, bp);
+	      exit(1);
+	    }
+	}
+      else if (strncmp(*argv, "PORT=", 5) == 0)
+	{
+	  bp = *argv + 5;
+	  port = strtol (bp, &ep, 0);
+	  if (ep == bp || *ep != '\0')
+	    {
+	      fprintf (stderr, "%s: %s: expected integer argument\n", 
+		       progname, bp);
+	      exit(1);
+	    }
+	}
+      else
+	{
+	  break;
+	}
+
+      cmdindx++;
+    }
+    
+  if (argc == 0)
+    {
+      fprintf (stderr,
+	       "Usage: load %s [options] program [arguments]\n", progname);
+      exit (1);
+    }
 
   err = AIOAcquirePort (&hardware, &board, &port, &AIOhandle);
   if (err != AIO_SUCCESS)
@@ -932,8 +1023,7 @@ main (argc, argv)
       exit (1);
     }
 
-  err = AIOConfigurePort (AIOhandle, AIO_BAUD_9600, AIO_DATA_BITS_8,
-			  AIO_STOP_BITS_1, AIO_PARITY_NONE,
+  err = AIOConfigurePort (AIOhandle, bitRate, dataBits, stopBits, parityMode,
 			  AIO_HARDWARE_FLOW_CONTROL_OFF);
 
   if (err == AIO_QUALIFIED_SUCCESS)
@@ -946,9 +1036,9 @@ main (argc, argv)
       fprintf (stderr,
 	       "  Bit Rate: %s, Data Bits: %c, Stop Bits: %s, Parity: %c,\
  Flow:%s\n",
-	       baudRates[portConfig.bitRate],
-	       dataBits[portConfig.dataBits],
-	       stopBits[portConfig.stopBits],
+	       bitRateTable[portConfig.bitRate],
+	       dataBitsTable[portConfig.dataBits],
+	       stopBitsTable[portConfig.stopBits],
 	       parity[portConfig.parityMode],
 	       portConfig.flowCtrlMode ? "ON" : "OFF");
     }
@@ -995,14 +1085,14 @@ main (argc, argv)
     }
 
   /* Get the command line we were invoked with, and advance it past
-     our name and the board and port arguments.  */
+     our name and command line arguments.  */
   cmdlin = getcmd ((char *) NULL);
-  for (i = 0; i < 2; i++)
+  for (i = 0; i < cmdindx; i++)
     {
       while (! isspace (*cmdlin))
-	++cmdlin;
+	cmdlin++;
       while (isspace (*cmdlin))
-	++cmdlin;
+	cmdlin++;
     }
   
   /* In case GDB is started before us, ack any packets (presumably

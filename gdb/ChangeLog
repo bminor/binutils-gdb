@@ -1,3 +1,10 @@
+Mon Jul 25 11:36:02 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* Makefile.in (LD_FOR_TARGET): Look for ld in ../ld/ld.new.
+
+	* i386-nlmstub.c: Add support for NODE, PORT and BAUD command
+	  line arguments.
+
 Sat Jul 23 14:36:09 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* symfile.c (deduce_language_from_filename): Recognize .S as asm,
