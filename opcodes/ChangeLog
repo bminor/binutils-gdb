@@ -1,5 +1,7 @@
 Mon Apr  7 11:45:44 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* cgen-opc.c (hash_keyword_name): Improve algorithm.
+
 	* disassemble.c (disassembler): Handle m32r.
 
 Fri Apr  4 12:29:38 1997  Doug Evans  <dje@canuck.cygnus.com>

@@ -236,7 +236,7 @@ hash_keyword_name (kt, name)
   unsigned int hash;
 
   for (hash = 0; *name; ++name)
-    hash += *name;
+    hash = (hash * 97) + (unsigned char) *name;
   return hash % kt->hash_table_size;
 }
 
