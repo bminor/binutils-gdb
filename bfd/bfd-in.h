@@ -331,7 +331,7 @@ alent;
 /* Object and core file sections.  */
 
 #define	align_power(addr, align)	\
-	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
+  (((addr) + ((bfd_vma) 1 << (align)) - 1) & ((bfd_vma) -1 << (align)))
 
 typedef struct sec *sec_ptr;
 
