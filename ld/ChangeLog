@@ -1,3 +1,7 @@
+Mon Jun 28 12:22:11 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in (scriptdir): Base on tooldir, not datadir.
+
 Sat Jun 26 12:03:57 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldver.c (help): New function.
