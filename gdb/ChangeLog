@@ -1,3 +1,21 @@
+2001-12-06  Elena Zannoni  <ezannoni@redhat.com>
+
+        From Jakub Jelinek  <jakub@redhat.com>:
+
+        * dwarf2read.c (dwarf_str_buffer): New.
+        (struct dwarf2_pinfo): Add dwarf_str_buffer and dwarf_str_size.
+        (DWARF_STR_BUFFER, DWARF_STR_SIZE): Define.
+        (dwarf2_has_info): Clear dwarf_str_offset.
+        (dwarf2_build_psymtabs): Read .debug_str section if present.
+        (dwarf2_build_psymtabs_hard): Save DWARF_STR_BUFFER and
+        DWARF_STR_SIZE.
+        (psymtab_to_symtab_1): Restore DWARF_STR_BUFFER and DWARF_STR_SIZE.
+        (read_attribute): Handle DW_FORM_strp.
+        (read_n_bytes, read_string): Remove HOST_CHAR_BIT != 8
+        handling code.
+        (read_indirect_string): New.
+        (dump_die): Handle DW_FORM_strp.
+
 2001-11-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* version.in: Bump version to 5.1.0_0000-00-00-cvs.

@@ -43,6 +43,7 @@
 #include "bcache.h"
 #include <fcntl.h>
 #include "gdb_string.h"
+#include "gdb_assert.h"
 #include <sys/types.h>
 
 #ifndef DWARF2_REG_TO_REGNUM
@@ -302,6 +303,7 @@ static const struct language_defn *cu_language_defn;
 static char *dwarf_info_buffer;
 static char *dwarf_abbrev_buffer;
 static char *dwarf_line_buffer;
+static char *dwarf_str_buffer;
 
 /* A zeroed version of a partial die for initialization purposes.  */
 static struct partial_die_info zeroed_partial_die;
@@ -383,6 +385,14 @@ struct dwarf2_pinfo
     /* Pointer to start of dwarf line buffer for the objfile.  */
 
     char *dwarf_line_buffer;
+
+    /* Pointer to start of dwarf string buffer for the objfile.  */
+
+    char *dwarf_str_buffer;
+
+    /* Size of dwarf string section for the objfile.  */
+
+    unsigned int dwarf_str_size;
   };
 
 #define PST_PRIVATE(p) ((struct dwarf2_pinfo *)(p)->read_symtab_private)
@@ -391,6 +401,8 @@ struct dwarf2_pinfo
 #define DWARF_ABBREV_BUFFER(p) (PST_PRIVATE(p)->dwarf_abbrev_buffer)
 #define DWARF_ABBREV_SIZE(p) (PST_PRIVATE(p)->dwarf_abbrev_size)
 #define DWARF_LINE_BUFFER(p) (PST_PRIVATE(p)->dwarf_line_buffer)
+#define DWARF_STR_BUFFER(p)  (PST_PRIVATE(p)->dwarf_str_buffer)
+#define DWARF_STR_SIZE(p)    (PST_PRIVATE(p)->dwarf_str_size)
 
 /* Maintain an array of referenced fundamental types for the current
    compilation unit being read.  For DWARF version 1, we have to construct
@@ -619,6 +631,9 @@ static char *read_n_bytes (bfd *, char *, unsigned int);
 
 static char *read_string (bfd *, char *, unsigned int *);
 
+static char *read_indirect_string (bfd *, char *, const struct comp_unit_head *,
+				   unsigned int *);
+
 static unsigned long read_unsigned_leb128 (bfd *, char *, unsigned int *);
 
 static long read_signed_leb128 (bfd *, char *, unsigned int *);
@@ -791,6 +806,7 @@ int
 dwarf2_has_info (bfd *abfd)
 {
   dwarf_info_offset = dwarf_abbrev_offset = dwarf_line_offset = 0;
+  dwarf_str_offset = 0;
   bfd_map_over_sections (abfd, dwarf2_locate_sections, NULL);
   if (dwarf_info_offset && dwarf_abbrev_offset)
     {
@@ -868,6 +884,12 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
   dwarf_line_buffer = dwarf2_read_section (objfile,
 					   dwarf_line_offset,
 					   dwarf_line_size);
+  if (dwarf_str_offset)
+    dwarf_str_buffer = dwarf2_read_section (objfile,
+ 					    dwarf_str_offset,
+ 					    dwarf_str_size);
+  else
+    dwarf_str_buffer = NULL;
 
   if (mainline || objfile->global_psymbols.size == 0 ||
       objfile->static_psymbols.size == 0)
@@ -1045,6 +1067,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       DWARF_ABBREV_BUFFER (pst) = dwarf_abbrev_buffer;
       DWARF_ABBREV_SIZE (pst) = dwarf_abbrev_size;
       DWARF_LINE_BUFFER (pst) = dwarf_line_buffer;
+      DWARF_STR_BUFFER (pst) = dwarf_str_buffer;
+      DWARF_STR_SIZE (pst) = dwarf_str_size;
       baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
       /* Store the function that reads in the rest of the symbol table */
@@ -1344,6 +1368,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   dwarf_abbrev_buffer = DWARF_ABBREV_BUFFER (pst);
   dwarf_abbrev_size = DWARF_ABBREV_SIZE (pst);
   dwarf_line_buffer = DWARF_LINE_BUFFER (pst);
+  dwarf_str_buffer = DWARF_STR_BUFFER (pst);
+  dwarf_str_size = DWARF_STR_SIZE (pst);
   baseaddr = ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (objfile));
   cu_header_offset = offset;
   info_ptr = dwarf_info_buffer + offset;
@@ -3358,6 +3384,11 @@ read_attribute (struct attribute *attr, struct attr_abbrev *abbrev,
       DW_STRING (attr) = read_string (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
+    case DW_FORM_strp:
+      DW_STRING (attr) = read_indirect_string (abfd, info_ptr, cu_header,
+					       &bytes_read);
+      info_ptr += bytes_read;
+      break;
     case DW_FORM_block:
       blk = dwarf_alloc_block ();
       blk->size = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
@@ -3410,7 +3441,6 @@ read_attribute (struct attribute *attr, struct attr_abbrev *abbrev,
       DW_UNSND (attr) = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
-    case DW_FORM_strp:
     case DW_FORM_indirect:
     default:
       error ("Dwarf Error: Cannot handle %s in DWARF reader.",
@@ -3600,20 +3630,8 @@ read_n_bytes (bfd *abfd, char *buf, unsigned int size)
   /* If the size of a host char is 8 bits, we can return a pointer
      to the buffer, otherwise we have to copy the data to a buffer
      allocated on the temporary obstack.  */
-#if HOST_CHAR_BIT == 8
+  gdb_assert (HOST_CHAR_BIT == 8);
   return buf;
-#else
-  char *ret;
-  unsigned int i;
-
-  ret = obstack_alloc (&dwarf2_tmp_obstack, size);
-  for (i = 0; i < size; ++i)
-    {
-      ret[i] = bfd_get_8 (abfd, (bfd_byte *) buf);
-      buf++;
-    }
-  return ret;
-#endif
 }
 
 static char *
@@ -3622,7 +3640,7 @@ read_string (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
   /* If the size of a host char is 8 bits, we can return a pointer
      to the string, otherwise we have to copy the string to a buffer
      allocated on the temporary obstack.  */
-#if HOST_CHAR_BIT == 8
+  gdb_assert (HOST_CHAR_BIT == 8);
   if (*buf == '\0')
     {
       *bytes_read_ptr = 1;
@@ -3630,25 +3648,30 @@ read_string (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
     }
   *bytes_read_ptr = strlen (buf) + 1;
   return buf;
-#else
-  int byte;
-  unsigned int i = 0;
+}
 
-  while ((byte = bfd_get_8 (abfd, (bfd_byte *) buf)) != 0)
+static char *
+read_indirect_string (bfd *abfd, char *buf,
+		      const struct comp_unit_head *cu_header,
+		      unsigned int *bytes_read_ptr)
+{
+  LONGEST str_offset = read_offset (abfd, buf, cu_header,
+				    (int *) bytes_read_ptr);
+
+  if (dwarf_str_buffer == NULL)
     {
-      obstack_1grow (&dwarf2_tmp_obstack, byte);
-      i++;
-      buf++;
-    }
-  if (i == 0)
-    {
-      *bytes_read_ptr = 1;
+      error ("DW_FORM_strp used without .debug_str section");
       return NULL;
     }
-  obstack_1grow (&dwarf2_tmp_obstack, '\0');
-  *bytes_read_ptr = i + 1;
-  return obstack_finish (&dwarf2_tmp_obstack);
-#endif
+  if (str_offset >= dwarf_str_size)
+    {
+      error ("DW_FORM_strp pointing outside of .debug_str section");
+      return NULL;
+    }
+  gdb_assert (HOST_CHAR_BIT == 8);
+  if (dwarf_str_buffer[str_offset] == '\0')
+    return NULL;
+  return dwarf_str_buffer + str_offset;
 }
 
 static unsigned long
@@ -5552,6 +5575,7 @@ dump_die (struct die_info *die)
 	  fprintf (stderr, "constant: %ld", DW_UNSND (&die->attrs[i]));
 	  break;
 	case DW_FORM_string:
+	case DW_FORM_strp:
 	  fprintf (stderr, "string: \"%s\"",
 		   DW_STRING (&die->attrs[i])
 		   ? DW_STRING (&die->attrs[i]) : "");
@@ -5562,8 +5586,6 @@ dump_die (struct die_info *die)
 	  else
 	    fprintf (stderr, "flag: FALSE");
 	  break;
-	case DW_FORM_strp:	/* we do not support separate string
-				   section yet */
 	case DW_FORM_indirect:	/* we do not handle indirect yet */
 	default:
 	  fprintf (stderr, "unsupported attribute form: %d.",
