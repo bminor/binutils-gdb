@@ -1,3 +1,40 @@
+Mon Sep 30 20:16:22 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/interrupt.exp: Add i*86-*-linux* setup_xfail for
+	"p func1 ()" and note that rests of tests are skipped.
+	* gdb.base/corefile.exp: Add i*86-*-linux* and m68*-*-hpux*
+ 	setup_xfails for "print func2::coremaker_local".
+	Add i*86-*-linux* setup_xfail for "backtrace in corefile.exp".
+	* gdb.base/mips_pro.exp: Restart gdb in this test so it isn't
+	affected by the previous run test.
+	* gdb.chill/misc.exp: Add m68*-*-hpux* setup_xfails for
+	"print array () ubyte (foo)" and "print/x array () byte (\$i)"
+	* gdb.chill/pr-8742.exp: Add m68*-*-hpux* setup_xfails for
+	"pass int powerset tuple" and "pass modeless int powerset tuple".
+	* gdb.chill/tests2.exp: Add m68*-*-hpux* setup xfails for
+	"real write 4" and "real write 8".
+	* gdb.shill/tuples.exp: Add i*86-*-linux* and m68*-*-hpux*
+ 	setup_xfails for "print vs1 after tuple assign 2",
+	"print \$i after tuple assign 2", and
+	"print vs2 after tuple assign 2".
+	* lib/gdb.exp (gdb_test): When a gdb aborts, print a more
+	meaningful error message and return -1 so the caller can
+	suppress further tests and avoid a cascade of errors.
+	
+Fri Sep 27 10:34:51 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/a1-selftest.exp: Tweak tests to account for new
+	format for printing version.
+	* gdb.base/default.exp: Ditto.
+	* gdb.base/interrupt.exp: Fix problem with cascade of
+	errors if child process dies while calling a function.
+	
+Fri Sep 13 21:43:48 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (VPATH): Add
+	* Makefile.in (Makefile, config.status): Fix rules so things get
+	remade when necessary.
+
 Fri Sep 13 18:16:10 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (just-check): Add path to sibling expect dir

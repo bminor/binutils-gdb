@@ -275,8 +275,7 @@ proc runto_main {} {
     global usestubs
 
     if $usestubs==0 {
-	runto main
-	return 1
+	return [runto main]
     }			
 
     send "delete\n"
@@ -320,6 +319,7 @@ proc gdb_test { args } {
     global prompt
     global GDB
     global spawn_id
+    global expect_out
     upvar timeout timeout
 
     if [llength $args]==3 then {
@@ -364,6 +364,24 @@ proc gdb_test { args } {
 	    perror "\"$command\" is not a unique command name."
 	    set result 1
 	}
+	-re "(.*)(Program exited with code \[0-9\]+)(.*$prompt $)" {
+	    if ![string match "" $message] then {
+		set errmsg "$message: $expect_out(2,string)"
+	    } else {
+		set errmsg "$command: $expect_out(2,string)"
+	    }
+	    perror "$errmsg"
+	    return -1
+	}
+	-re "The program is not being run.*$prompt $" {
+	    if ![string match "" $message] then {
+		set errmsg "$message: the program is no longer running"
+	    } else {
+		set errmsg "$command: the program is no longer running"
+	    }
+	    perror "$errmsg"
+	    return -1
+	}
 	-re ".*$prompt $" {
 	    if ![string match "" $message] then {
 		fail "$message"
@@ -382,7 +400,7 @@ proc gdb_test { args } {
 	    perror "Process no longer exists"
 	    return -1
 	}
-	buffer_full {
+	full_buffer {
 	    perror "internal buffer is full."
 	}
 	timeout	{

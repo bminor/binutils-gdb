@@ -130,6 +130,7 @@ proc do_tests {} {
 	"print vs1 after tuple assign 1"
     send "set var vs1 := \[ \"bar\", 42, m_ps\[ a \] \]\n"
     expect -re "$prompt $"
+    setup_xfail "i*86-*-linux*" "m68*-*-hpux*"
     gdb_test_exact "print vs1" { = [.str: "bar", .i: 42, .ps: [a]]} \
 	"print vs1 after tuple assign 2"
 
@@ -139,6 +140,7 @@ proc do_tests {} {
 	"print \$i after tuple assign 1"
     send "set var \$i := m_s1\[\"foo\", 44, m_ps\[a \]\]\n"
     expect -re "$prompt $"
+    setup_xfail "i*86-*-linux*" "m68*-*-hpux*"
     gdb_test_exact {print $i} { = [.str: "foo", .i: 44, .ps: [a]]} \
 	"print \$i after tuple assign 2"
 
@@ -149,9 +151,10 @@ proc do_tests {} {
 	"print vs2 after tuple assign 1"
     send "set var vs2 := \[ 10+3, m_s1\[ \"foo\" , 42, m_ps\[ b \] \] \]\n"
     expect -re "$prompt $"
+    setup_xfail "i*86-*-linux*" "m68*-*-hpux*"
     gdb_test_exact "print vs2" \
 	{ = [.i: 13, .s: [.str: "foo", .i: 42, .ps: [b]]]} \
-	"print vs2 after tuple assign 1"
+	"print vs2 after tuple assign 2"
 
     send "set var vs3 := \[ 33, \[ -1, -2, -3 \] \]\n" ; expect -re "$prompt $"
     gdb_test_exact "print vs3" {[.i: 33, .a: [(1): -1, (2): -2, (3): -3]]} \
