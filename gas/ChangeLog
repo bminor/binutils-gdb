@@ -1,3 +1,11 @@
+Fri Jan 16 14:51:48 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (dwarf_file_string): New file static variable.
+	(emit_expr): Look for constant sequence that leads up to a file
+	name in DWARF debugging output.
+	(stringer): Use dwarf_file_string to decide whether to accept a
+	string as a file name.
+
 Fri Jan 16 11:30:37 1998  Richard Henderson  <rth@cygnus.com>
 
 	* tc-m68k.c (m68k_ip): Remove absl->reglst MRI hack.
