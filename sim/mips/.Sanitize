@@ -51,6 +51,8 @@ sim-main.h
 tconfig.in
 mips.igen
 m16.igen
+m16.dc
+m16run.c
 mips.dc
 
 Things-to-lose:
