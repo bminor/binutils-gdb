@@ -1,3 +1,8 @@
+2001-05-03  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* targets.c (_bfd_target_vector_entries): Compute value based on
+	the size of the _bfd_target_vector and not bfd_target_vector.
+
 2001-05-03  H.J. Lu  <hjl@gnu.org>
 
 	* elfcode.h: Include "libiberty.h".
