@@ -62,9 +62,6 @@
 #define FCRIR_REGNUM 70		/* FP implementation/revision */
 
 
-#undef  DEPRECATED_REGISTER_BYTES
-#define DEPRECATED_REGISTER_BYTES (MIPS_NUMREGS * 8 + (NUM_REGS - MIPS_NUMREGS) * MIPS_REGSIZE)
-
 #undef  REGISTER_BYTE
 #define REGISTER_BYTE(N) \
      (((N) < FP0_REGNUM) ? (N) * MIPS_REGSIZE : \
@@ -95,10 +92,6 @@
 #undef SIGFRAME_FPREGSAVE_OFF
 #define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_BASE + 2 * 4 + 8 + 32 * 8 + 4)
 #define SIGFRAME_REG_SIZE	8
-
-/* Select the disassembler */
-#undef TM_PRINT_INSN_MACH
-#define TM_PRINT_INSN_MACH bfd_mach_mips8000
 
 /* Undefine those methods which have been multiarched.  */
 #undef REGISTER_VIRTUAL_TYPE

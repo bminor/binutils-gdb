@@ -30,9 +30,6 @@
  * Irix 6 (n32 ABI) has 32-bit GP regs and 64-bit FP regs
  */
 
-#undef  DEPRECATED_REGISTER_BYTES
-#define DEPRECATED_REGISTER_BYTES (MIPS_NUMREGS * 8 + (NUM_REGS - MIPS_NUMREGS) * MIPS_REGSIZE)
-
 #undef  REGISTER_BYTE
 #define REGISTER_BYTE(N) \
      (((N) < FP0_REGNUM) ? (N) * MIPS_REGSIZE : \

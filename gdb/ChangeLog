@@ -1,5 +1,21 @@
 2003-06-01  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (is_mips16_addr): New function.
+	(make_mips16_addr, unmake_mips16_addr): New functions.
+	(pc_is_mips16, mips_fetch_instruction): Use.
+	(gdb_print_insn_mips, mips_breakpoint_from_pc): Use.
+	(gdb_print_insn_mips): Eliminate TM_PRINT_INSN_MACH.
+	(mips_dump_tdep): Delete print of TM_PRINT_INSN_MACH,
+	UNMAKE_MIPS16_ADDR, MAKE_MIPS16_ADDR, IS_MIPS16_ADDR and
+	TARGET_MIPS.
+	* config/mips/tm-mips.h: Update copyright.
+	(TARGET_MIPS, TM_PRINT_INSN_MACH): Delete.
+	(DEPRECATED_REGISTER_SIZE, DEPRECATED_REGISTER_BYTES): Delete.
+	(IS_MIPS16_ADDR, MAKE_MIPS16_ADDR, UNMAKE_MIPS16_ADDR): Delete.
+	* config/mips/tm-irix6.h (DEPRECATED_REGISTER_BYTES): Delete.
+	(TM_PRINT_INSN_MACH): Delete.
+	* config/mips/tm-irix5.h (DEPRECATED_REGISTER_BYTES): Delete.
+
 	* configure.tgt: Replace mips64*vr4xxx*el-*-elf*,
 	mips64*vr4xxx*-*-elf*, mips64*vr4300*el-*-elf*,
 	mips64*vr4300*-*-elf*, mips64*vr4100*el-*-elf*,

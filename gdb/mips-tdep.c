@@ -152,6 +152,27 @@ static const char *mips_saved_regsize_string = size_auto;
 
 #define MIPS_SAVED_REGSIZE (mips_saved_regsize())
 
+/* MIPS16 function addresses are odd (bit 0 is set).  Here are some
+   functions to test, set, or clear bit 0 of addresses.  */
+
+static CORE_ADDR
+is_mips16_addr (CORE_ADDR addr)
+{
+  return ((addr) & 1);
+}
+
+static CORE_ADDR
+make_mips16_addr (CORE_ADDR addr)
+{
+  return ((addr) | 1);
+}
+
+static CORE_ADDR
+unmake_mips16_addr (CORE_ADDR addr)
+{
+  return ((addr) & ~1);
+}
+
 /* Return the contents of register REGNUM as a signed integer.  */
 
 static LONGEST
@@ -789,7 +810,7 @@ pc_is_mips16 (bfd_vma memaddr)
   struct minimal_symbol *sym;
 
   /* If bit 0 of the address is set, assume this is a MIPS16 address. */
-  if (IS_MIPS16_ADDR (memaddr))
+  if (is_mips16_addr (memaddr))
     return 1;
 
   /* A flag indicating that this is a MIPS16 function is stored by elfread.c in
@@ -922,7 +943,7 @@ mips_fetch_instruction (CORE_ADDR addr)
   if (pc_is_mips16 (addr))
     {
       instlen = MIPS16_INSTLEN;
-      addr = UNMAKE_MIPS16_ADDR (addr);
+      addr = unmake_mips16_addr (addr);
     }
   else
     instlen = MIPS_INSTLEN;
@@ -5108,7 +5129,7 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
      the search would fail because the symbol table says the function
      starts at an odd address, i.e. 1 byte past the given address.  */
   memaddr = ADDR_BITS_REMOVE (memaddr);
-  proc_desc = non_heuristic_proc_desc (MAKE_MIPS16_ADDR (memaddr), NULL);
+  proc_desc = non_heuristic_proc_desc (make_mips16_addr (memaddr), NULL);
 
   /* Make an attempt to determine if this is a 16-bit function.  If
      the procedure descriptor exists and the address therein is odd,
@@ -5116,10 +5137,10 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
      guess that if the address passed in is odd, it's 16-bits.  */
   if (proc_desc)
     info->mach = pc_is_mips16 (PROC_LOW_ADDR (proc_desc)) ?
-      bfd_mach_mips16 : TM_PRINT_INSN_MACH;
+      bfd_mach_mips16 : 0;
   else
     info->mach = pc_is_mips16 (memaddr) ?
-      bfd_mach_mips16 : TM_PRINT_INSN_MACH;
+      bfd_mach_mips16 : 0;
 
   /* Round down the instruction address to the appropriate boundary.  */
   memaddr &= (info->mach == bfd_mach_mips16 ? ~1 : ~3);
@@ -5146,7 +5167,7 @@ mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
       if (pc_is_mips16 (*pcptr))
 	{
 	  static unsigned char mips16_big_breakpoint[] = {0xe8, 0xa5};
-	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
+	  *pcptr = unmake_mips16_addr (*pcptr);
 	  *lenptr = sizeof (mips16_big_breakpoint);
 	  return mips16_big_breakpoint;
 	}
@@ -5176,7 +5197,7 @@ mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
       if (pc_is_mips16 (*pcptr))
 	{
 	  static unsigned char mips16_little_breakpoint[] = {0xa5, 0xe8};
-	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
+	  *pcptr = unmake_mips16_addr (*pcptr);
 	  *lenptr = sizeof (mips16_little_breakpoint);
 	  return mips16_little_breakpoint;
 	}
@@ -6164,8 +6185,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: IN_SOLIB_RETURN_TRAMPOLINE # %s\n",
 		      XSTRING (IN_SOLIB_RETURN_TRAMPOLINE (PC, NAME)));
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: IS_MIPS16_ADDR = FIXME!\n");
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: LAST_EMBED_REGNUM = %d\n",
 		      LAST_EMBED_REGNUM);
   fprintf_unfiltered (file,
@@ -6186,8 +6205,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: MACHINE_CPROC_SP_OFFSET = %d\n",
 		      MACHINE_CPROC_SP_OFFSET);
 #endif
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MAKE_MIPS16_ADDR = FIXME!\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS16_INSTLEN = %d\n",
 		      MIPS16_INSTLEN);
@@ -6334,11 +6351,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: TARGET_HAS_HARDWARE_WATCHPOINTS # %s\n",
 		      XSTRING (TARGET_HAS_HARDWARE_WATCHPOINTS));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: TARGET_MIPS = used?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: TM_PRINT_INSN_MACH # %s\n",
-		      XSTRING (TM_PRINT_INSN_MACH));
 #ifdef TRACE_CLEAR
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: TRACE_CLEAR # %s\n",
@@ -6359,8 +6371,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: TRACE_SET # %s\n",
 		      XSTRING (TRACE_SET (X,STATE)));
 #endif
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: UNMAKE_MIPS16_ADDR = function?\n");
 #ifdef UNUSED_REGNUM
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: UNUSED_REGNUM = %d\n",
