@@ -92,6 +92,7 @@ static bfd *open_output PARAMS ((const char *));
 static void ldlang_open_output PARAMS ((lang_statement_union_type *));
 static void open_input_bfds PARAMS ((lang_statement_union_type *, boolean));
 static void lang_reasonable_defaults PARAMS ((void));
+static void insert_undefined PARAMS ((const char *));
 static void lang_place_undefineds PARAMS ((void));
 static void map_input_to_output_sections
   PARAMS ((lang_statement_union_type *, const char *,
@@ -2010,7 +2011,11 @@ lang_reasonable_defaults ()
 }
 
 /* Add the supplied name to the symbol table as an undefined reference.
-   Remove items from the chain as we open input bfds.  */
+   This is a two step process as the symbol table doesn't even exist at
+   the time the ld command line is processed.  First we put the name
+   on a list, then, once the output file has been opened, transfer the
+   name to the symbol table.  */
+
 typedef struct ldlang_undef_chain_list
 {
   struct ldlang_undef_chain_list *next;
@@ -2031,6 +2036,28 @@ ldlang_add_undef (name)
   ldlang_undef_chain_list_head = new;
 
   new->name = xstrdup (name);
+
+  if (output_bfd != NULL)
+    insert_undefined (new->name);
+}
+
+/* Insert NAME as undefined in the symbol table.  */
+
+static void
+insert_undefined (name)
+     const char *name;
+{
+  struct bfd_link_hash_entry *h;
+
+  h = bfd_link_hash_lookup (link_info.hash, name, true, false, true);
+  if (h == (struct bfd_link_hash_entry *) NULL)
+    einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
+  if (h->type == bfd_link_hash_new)
+    {
+      h->type = bfd_link_hash_undefined;
+      h->u.undef.abfd = NULL;
+      bfd_link_add_undef (link_info.hash, h);
+    }
 }
 
 /* Run through the list of undefineds created above and place them
@@ -2046,17 +2073,7 @@ lang_place_undefineds ()
        ptr != (ldlang_undef_chain_list_type *) NULL;
        ptr = ptr->next)
     {
-      struct bfd_link_hash_entry *h;
-
-      h = bfd_link_hash_lookup (link_info.hash, ptr->name, true, false, true);
-      if (h == (struct bfd_link_hash_entry *) NULL)
-	einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
-      if (h->type == bfd_link_hash_new)
-	{
-	  h->type = bfd_link_hash_undefined;
-	  h->u.undef.abfd = NULL;
-	  bfd_link_add_undef (link_info.hash, h);
-	}
+      insert_undefined (ptr->name);
     }
 }
 

@@ -1,3 +1,10 @@
+2002-03-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (ldlang_add_undef): If the output bfd has been opened,
+	add the symbol to the linker hash table immediately.
+	(lang_place_undefineds): Split symbol creation out..
+	(insert_undefined): ..to here.
+
 2002-03-18  David O'Brien  <obrien@FreeBSD.org>
 
 	* emultempl/elf32.em: Use lbasename vs. basename to fix problem where
