@@ -1,7 +1,7 @@
 Wed May 19 15:51:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* trad-core.c: Check macro TRAD_CORE_EXTRA_SIZE_ALLOWED.
-	hosts/i386linux.h: Define it.
+	* trad-core.c:  Check macro TRAD_CORE_EXTRA_SIZE_ALLOWED.
+	hosts/i386linux.h:  Define it.
 
 Mon May 17 15:00:33 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
