@@ -139,5 +139,5 @@ gdb_test "run" \
 
 gdb_test "continue" \
 "Continuing.*y is 7.*warning: Temporarily disabling breakpoints for.*unloadshr.sl.*Program exited normally." \
-"continuing to end of program"
+"continuing to end of program second time"
 

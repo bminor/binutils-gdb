@@ -1,3 +1,7 @@
+2004-09-01  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/unload.exp: Fix so messages aren't duplicated.
+
 2004-09-01  Manoj Iyer  <manjo@austin.ibm.com>
 
 	* gdb.gdb/complaints.exp (setup_test): use new gdb.exp functionality
