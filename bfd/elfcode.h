@@ -3237,22 +3237,14 @@ elf_set_arch_mach (abfd, arch, machine)
      enum bfd_architecture arch;
      unsigned long machine;
 {
-  /* Allow any architecture to be supported by the elf backend */
-  switch (arch)
-    {
-    case bfd_arch_unknown:	/* EM_NONE */
-    case bfd_arch_sparc:	/* EM_SPARC */
-    case bfd_arch_i386:	/* EM_386 */
-    case bfd_arch_m68k:	/* EM_68K */
-    case bfd_arch_m88k:	/* EM_88K */
-    case bfd_arch_i860:	/* EM_860 */
-    case bfd_arch_mips:	/* EM_MIPS (MIPS R3000) */
-    case bfd_arch_hppa:	/* EM_HPPA (HP PA_RISC) */
-    case bfd_arch_powerpc:	/* EM_CYGNUS_POWERPC */
-      return bfd_default_set_arch_mach (abfd, arch, machine);
-    default:
-      return false;
-    }
+  /* If this isn't the right architecture for this backend, and this
+     isn't the generic backend, fail.  */
+  if (arch != get_elf_backend_data (abfd)->arch
+      && arch != bfd_arch_unknown
+      && get_elf_backend_data (abfd)->arch != bfd_arch_unknown)
+    return false;
+
+  return bfd_default_set_arch_mach (abfd, arch, machine);
 }
 
 boolean

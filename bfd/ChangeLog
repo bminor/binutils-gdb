@@ -1,5 +1,18 @@
 Fri Apr 22 11:08:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* aout-adobe.c (aout_adobe_set_arch_mach): Check return value of
+	bfd_default_set_arch_mach.  Accept bfd_arch_m68k as well as
+	bfd_arch_unknown.
+	* coffcode.h (coff_set_arch_mach): Check return value of
+	bfd_default_set_arch_mach.
+	* elfcode.h (elf_set_arch_mach): Don't check a list of ELF
+	architectures, just see if the desired architecture matches what
+	the ELF backend permits.
+
+	* coffcode.h (coff_set_arch_mach_hook): Rename SHMAGIC to
+	SH_ARCH_MAGIC to match change in coff/sh.h.
+	(coff_set_flags): Likewise.
+
 	Follow convention in which each NLM header has an 8 byte stamp
 	followed by a four byte length.
 	* libnlm.h (struct nlm_obj_tdata): Rename nlm_cygnus_section_hdr
