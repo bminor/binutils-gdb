@@ -198,23 +198,9 @@ hardwire_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
 
   new_state = *(struct hardwire_ttystate *)new_ttystate;
 
-#ifdef HAVE_TERMIOS
-  /* I'm not sure whether this is necessary; the manpage makes no mention
-     of discarding input when switching to/from ICANON.  */
-  if (state->termios.c_lflag & ICANON)
-    new_state.termios.c_lflag |= ICANON;
-  else
-    new_state.termios.c_lflag &= ~ICANON;
-#endif
-
-#ifdef HAVE_TERMIO
-  /* I'm not sure whether this is necessary; the manpage makes no mention
-     of discarding input when switching to/from ICANON.  */
-  if (state->termio.c_lflag & ICANON)
-    new_state.termio.c_lflag |= ICANON;
-  else
-    new_state.termio.c_lflag &= ~ICANON;
-#endif
+  /* Don't change in or out of raw mode; we don't want to flush input.
+     termio and termios have no such restriction; for them flushing input
+     is separate from setting the attributes.  */
 
 #ifdef HAVE_SGTTY
   if (state->sgttyb.sg_flags & RAW)

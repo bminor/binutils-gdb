@@ -1,5 +1,9 @@
 Mon Jan 17 22:00:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* ser-unix.c (hardwire_noflush_set_tty_state): Don't muck with ICANON.
+	* inflow.c (terminal_ours_1): When discussing how to deal with the
+	tty state, make note of query() as well as readline.
+
 	* infrun.c (_initialize_infrun): Add TARGET_SIGNAL_POLL to list of
 	signals for which stop and print are cleared by default.
 
