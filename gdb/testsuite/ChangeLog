@@ -1,3 +1,8 @@
+2001-06-24  Michael Chastain  <chastain@redhat.com>
+
+	* gdb.base/arithmet.exp: Remove some tests to make all test names
+	unique.
+
 2001-07-03  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.c++/classes.exp: Accept both "foo(void)" and "foo()" in
