@@ -18,6 +18,7 @@
 Do-first:
 
 echo Sanitizing `pwd`...
+recover="tc-sparc.c"
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -108,7 +109,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.2  1991/09/02 01:03:38  rich
+# Revision 1.3  1991/09/02 21:26:15  rich
+# "recover" tc-sparc.c
+#
+# Revision 1.2  1991/09/02  01:03:38  rich
 # Correct a few things.
 #
 # Revision 1.1  1991/05/23  17:09:03  rich
