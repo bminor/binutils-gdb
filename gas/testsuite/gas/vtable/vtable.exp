@@ -38,6 +38,11 @@ if { ([istarget "*-*-elf*"]
       return
     }
 
+    # not yet supported by ARC
+    if {[istarget "arc*-*-*"]} {
+      return
+    }
+
     run_dump_test "inherit0" 
     run_list_test "inherit1" "-al"
 
@@ -45,6 +50,7 @@ if { ([istarget "*-*-elf*"]
     if {[istarget "i*86-*-*"] 
 	|| [istarget "mips*-*-*"] 
 	|| [istarget "strongarm*-*-*"] 
+	|| [istarget "xscale*-*-*"] 
 	|| [istarget "arm*-*-*"]} then {
 
 	run_dump_test "entry0"
