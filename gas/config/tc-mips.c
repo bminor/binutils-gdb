@@ -1054,6 +1054,9 @@ macro_build (counter, ep, name, fmt, va_alist)
 	  insn.insn_opcode |= va_arg (args, int) << 11;
 	  continue;
 
+	case 'z':
+	  continue;
+
 	case '<':
 	  insn.insn_opcode |= va_arg (args, int) << 6;
 	  continue;
@@ -1764,21 +1767,12 @@ macro (ip)
 	  macro_build (&icnt, NULL, "break", "c", 7);
 	  return;
 	}
-      if (dreg == 0)
-	{
-	  /* The MIPS assembler treats a destination of $0 as a
-	     request for just the machine instruction.  */
-	  macro_build (&icnt, NULL,
-		       dbl ? "ddiv" : "div",
-		       "s,t", sreg, treg);
-	  return;
-	}
 
       mips_emit_delays ();
       ++mips_noreorder;
       macro_build (&icnt, NULL,
 		   dbl ? "ddiv" : "div",
-		   "s,t", sreg, treg);
+		   "z,s,t", sreg, treg);
       expr1.X_add_number = 8;
       macro_build (&icnt, &expr1, "bne", "s,t,p", treg, 0);
       macro_build (&icnt, NULL, "nop", "", 0);
@@ -1874,7 +1868,7 @@ macro (ip)
 	}
 
       load_register (&icnt, AT, &imm_expr);
-      macro_build (&icnt, NULL, s, "s,t", sreg, AT);
+      macro_build (&icnt, NULL, s, "z,s,t", sreg, AT);
       macro_build (&icnt, NULL, s2, "d", dreg);
       break;
 
@@ -1896,7 +1890,7 @@ macro (ip)
     do_divu3:
       mips_emit_delays ();
       ++mips_noreorder;
-      macro_build (&icnt, NULL, s, "s,t", sreg, treg);
+      macro_build (&icnt, NULL, s, "z,s,t", sreg, treg);
       expr1.X_add_number = 8;
       macro_build (&icnt, &expr1, "bne", "s,t,p", treg, 0);
       macro_build (&icnt, NULL, "nop", "", 0);
@@ -3002,6 +2996,7 @@ mips_ip (str, ip)
 	    case 'E':		/* coprocessor target register */
 	    case 'G':		/* coprocessor destination register */
 	    case 'x':		/* ignore register name */
+	    case 'z':		/* must be zero register */
 	      s_reset = s;
 	      if (s[0] == '$')
 		{
@@ -3058,6 +3053,9 @@ mips_ip (str, ip)
 			  args++;
 			}
 		    }
+		  /* 'z' only matches $0.  */
+		  if (c == 'z' && regno != 0)
+		    break;
 		  switch (c)
 		    {
 		    case 'r':
@@ -3083,6 +3081,12 @@ mips_ip (str, ip)
 			 ignores the register.  Thus the insn version
 			 is MIPS_ISA2 and uses 'x', and the macro
 			 version is MIPS_ISA1 and uses 't'.  */
+		      break;
+		    case 'z':
+		      /* This case is for the div instruction, which
+			 acts differently if the destination argument
+			 is $0.  This only matches $0, and is checked
+			 outside the switch.  */
 		      break;
 		    }
 		  lastregno = regno;

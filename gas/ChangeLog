@@ -1,8 +1,9 @@
 Thu Sep  2 10:43:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	* config/tc-mips.c (macro): If $0 is destination of divide, just
-	generate the simple machine instruction, for compatibility with
-	the MIPS assembler.
+	* config/tc-mips.c (macro_build): Accept 'z', and ignore it.
+	(macro): Use "z,s,t" for div instructions to match corresponding
+	change in opcode table.
+	(mips_ip): Added 'z'--must be zero register.
 
 Wed Sep  1 15:56:42 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
