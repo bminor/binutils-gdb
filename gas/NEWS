@@ -4,6 +4,10 @@ Changes in 2.10:
 
 Support for numbers with suffixes.
 
+Added support for breaking to the end of repeat loops.
+
+Added support for parallel instruction syntax (DOUBLEBAR_PARALLEL).
+
 New .elseif pseudo-op added.
 
 New --fatal-warnings option.
