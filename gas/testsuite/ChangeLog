@@ -1,3 +1,8 @@
+2002-01-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/mn10300/basic.exp (run_list_test): New proc, from alpha.
+	* gas/mn10300/movpc.s, gas/mn10300/movpc.l: New tests.
+
 2002-01-22  Richard Henderson  <rth@redhat.com>
 
 	* gas/alpha/unop.s, gas/alpha/unop.d: New test.
