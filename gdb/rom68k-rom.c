@@ -25,7 +25,57 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "monitor.h"
 #include "serial.h"
 
-void rom68k_open();
+static void rom68k_open PARAMS ((char *args, int from_tty));
+
+static void
+rom68k_supply_register (regname, regnamelen, val, vallen)
+     char *regname;
+     int regnamelen;
+     char *val;
+     int vallen;
+{
+  int numregs;
+  int regno;
+
+  numregs = 1;
+  regno = -1;
+
+  if (regnamelen == 2)
+    switch (regname[0])
+      {
+      case 'S':
+	if (regname[1] == 'R')
+	  regno = PS_REGNUM;
+	break;
+      case 'P':
+	if (regname[1] == 'C')
+	  regno = PC_REGNUM;
+	break;
+      case 'D':
+	if (regname[1] != 'R')
+	  break;
+	regno = D0_REGNUM;
+	numregs = 8;
+	break;
+      case 'A':
+	if (regname[1] != 'R')
+	  break;
+	regno = A0_REGNUM;
+	numregs = 7;
+	break;
+      }
+  else if (regnamelen == 3)
+    switch (regname[0])
+      {
+      case 'I':
+	if (regname[1] == 'S' && regname[2] == 'P')
+	  regno = SP_REGNUM;
+      }
+
+  if (regno >= 0)
+    while (numregs-- > 0)
+      val = monitor_supply_register (regno++, val);
+}
 
 /*
  * this array of registers need to match the indexes used by GDB. The
@@ -66,7 +116,7 @@ static struct monitor_ops rom68k_cmds =
     NULL,			/* setreg.term_cmd */
   },
   {
-    "dm %x 1\r",		/* getmem.cmd (addr) */
+    "dm %x %x\r",		/* getmem.cmd (addr, len) */
     "  ",			/* getmem.resp_delim */
     NULL,			/* getmem.term */
     NULL,			/* getmem.term_cmd */
@@ -83,6 +133,9 @@ static struct monitor_ops rom68k_cmds =
     "= ",			/* getreg.term */
     ".\r"			/* getreg.term_cmd */
   },
+				/* register_pattern */
+  "\\(\\w+\\)=\\([0-9a-fA-F]+\\( +[0-9a-fA-F]+\\b\\)*\\)",
+  rom68k_supply_register,	/* supply_register */
   "dc\r",			/* download command */
   "ROM68K :->",			/* monitor command prompt */
   "=",				/* end-of-command delimitor */

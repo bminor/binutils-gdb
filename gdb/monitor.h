@@ -76,6 +76,13 @@ struct monitor_ops {
   struct cmd_resp getmem;	/* display memory */
   struct cmd_resp setreg;	/* set a register */
   struct cmd_resp getreg;	/* get a register */
+				/* Some commands can dump a bunch of registers
+				   at once.  This comes as a set of REG=VAL
+				   pairs.  This should be called for each pair
+				   of registers that we can parse to supply
+				   GDB with the value of a register.  */
+  char *register_pattern;	/* Pattern that picks out register from reg dump */
+  void	(*supply_register) PARAMS ((char *name, int namelen, char *val, int vallen));
   char	*load;			/* load command */
   char	*prompt;		/* monitor command prompt */
   char	*cmd_delim;		/* end-of-command delimitor */
@@ -133,3 +140,4 @@ extern struct monitor_ops        *current_monitor;
 #define REG_DELIM               (current_monitor->regset.delim)
 
 extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops, int from_tty));
+extern char *monitor_supply_register PARAMS ((int regno, char *valstr));

@@ -1,3 +1,29 @@
+Wed Mar 15 15:09:29 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* findvar.c (read_register_bytes write_register_bytes):  Make
+	these routines much smarter about updating registers from the
+	target, only doing so when absolutely necessary.  This really
+	speeds up register modification on some remote targets.
+
+	* monitor.c:  More cleanups.  Get rid of monitor_load_ascii_srec.
+	BFD makes this unnecessary.  Lots of debugging speedups.
+	* (expect):  NULL terminate return string.
+	* (monitor_open	monitor_supply_register parse_register_dump
+	monitor_wait monitor_fetch_register):  Switch to using GNU regexp
+	library to parse multi-register displays.
+	* (monitor_read_memory): Read multiple bytes (up to 16) at once.
+	* (monitor_create_inferior):  Call clear_proceed_status to make run
+	command notice first breakpoint.
+	* (monitor_load):  Clean up.  Reset inferior_pid, set pc to start
+	address and reset symbol table stuff to make loads put things into
+	a fresh state.
+	* (monitor_load_srec):  Lower sleep time to 1 second.
+
+	* monitor.h (struct monitor_ops):  Add register_pattern and
+	supply_register to monitor_ops.
+
+	* rom68k-rom.c:  Add new support for handling register dumps.
+
 Wed Mar 15 15:18:27 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* utils.c, defs.h (putchar_unfiltered, fputc_unfiltered): Make
