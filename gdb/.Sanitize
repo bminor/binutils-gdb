@@ -342,6 +342,8 @@ energize.h
 remote-sa.sparc.c
 state.c
 state.h
+arc-tdep.c
+remote-arc.c
 
 Do-last:
 
