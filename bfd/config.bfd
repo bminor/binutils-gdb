@@ -192,8 +192,6 @@ case "${targ}" in
     ;;
   i[3456]86-*-gnu*)
     targ_defvec=bfd_elf32_i386_vec
-    targ_selvecs=i386mach3_vec
-    targ_cflags=-DSTAT_FOR_EXEC
     ;;
   i[3456]86-*-mach* | i[3456]86-*-osf1mk*)
     targ_defvec=i386mach3_vec
