@@ -598,6 +598,7 @@ gdb_sim_d10v_h = $(INCLUDE_DIR)/gdb/sim-d10v.h
 gdb_sim_frv_h = $(INCLUDE_DIR)/gdb/sim-frv.h
 gdb_sim_sh_h =	$(INCLUDE_DIR)/gdb/sim-sh.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
+safe_ctype_h = $(INCLUDE_DIR)/safe-ctype.h
 
 readline_headers = \
 	$(READLINE_SRC)/chardefs.h \
@@ -1148,6 +1149,7 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f init.c version.c
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
+	rm -f test-cpnames
 
 # This used to depend on c-exp.tab.c m2-exp.tab.c TAGS
 # I believe this is wrong; the makefile standards for distclean just
@@ -1436,9 +1438,16 @@ c-exp.tab.c: c-exp.y
 	-rm c-exp.tmp
 	mv c-exp.new ./c-exp.tab.c
 .PRECIOUS: cp-names.tab.c
-cp-names.tab.o: cp-names.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
-	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(charset_h) $(block_h) $(cp_support_h)
+cp-names.tab.o: cp-names.tab.c $(safe_ctype_h) \
+	$(srcdir)/../libiberty/cp-demangle.c
+
+cp-names-main.tab.o: cp-names.tab.c $(safe_ctype_h) \
+	$(srcdir)/../libiberty/cp-demangle.c
+	$(CC) -c $(INTERNAL_CFLAGS) -DTEST_CPNAMES \
+		-o cp-names-main.tab.o cp-names.tab.c
+test-cpnames: cp-names-main.tab.o
+	$(CC) -o test-cpnames cp-names-main.tab.o -liberty
+
 cp-names.tab.c: cp-names.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
 	    $(srcdir)/cp-names.y  y.tab.c cp-names.tmp -- $(YFLAGS) 

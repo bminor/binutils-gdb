@@ -1,3 +1,40 @@
+2003-12-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-names.y (LONGEST, ULONGEST, DOUBLEST): Remove.
+	(d_qualify): Take an int argument.  Update for new INT_LLONG
+	handling.
+	(INT_CHAR, INT_SHORT, INT_LONG, INT_LLONG, INT_SIGNED)
+	(INT_UNSIGNED): Change into bitflags.
+	(%union): Change lval and typed_val_int.val to ints.
+	(scope_id, typespec): Inline non-terminals at their use sites.
+	(sign, size, int_type): Remove.
+	(int_part, int_seq): New non-terminals.
+	(result): Add missing semicolon.
+	(name, nested_name): Inline scope_id here.
+	(template_arg, function_args): Inline type here.
+	(builtin_type): Use int_seq.  Add missing semicolon.
+	(typespec_2): Inline typespec and colon_name here.
+	(start, qualifiers_opt, qualifiers): Remove redundant action.
+	(abstract_declarator, direct_abstract_declarator): Likewise.
+	(abstract_declarator_fn): Likewise.
+	(d_builtin_type): New helper function.
+	(parse_number): Use d_builtin_type.
+	(HANDLE_SPECIAL): Only take one argument.
+	(yylex): Remove unused variable unquoted_expr.  Use d_builtin_type. 
+	Update calls to HANDLE_SPECIAL.  Jump around case '-' instead of
+	falling through it.  Use ISALNUM and ISALPHA.  Add a return
+	statement after a call to error.  Match trailing speaces on special
+	tokens.
+	(cp_print): Take a len argument, and pass it to d_print.  Print the
+	string instead of returning it.
+	(main): Pass len to cp_print.  Allocate and free myinfo.comps.
+	Use putchar and puts instead of printf.
+
+	* Makefile.in (safe_ctype_h): Add.
+	(test-cpnames, cp-names-main.tab.o): New rules.
+	(clean): Remove test-cpnames.
+	(cp-names.tab.o): Update dependencies.
+
 2003-12-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cp-names.y (%union): Remove abstract_fn.  Add abstract.

@@ -43,10 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <string.h>
 
-typedef long long LONGEST;
-typedef unsigned long long ULONGEST;
-typedef long double DOUBLEST;
-
 #include "safe-ctype.h"
 
 /* #define CP_DEMANGLE_DEBUG */
@@ -54,7 +50,7 @@ typedef long double DOUBLEST;
 
 static char *lexptr, *prev_lexptr;
 
-static struct d_comp *d_qualify (struct d_comp *, LONGEST, int);
+static struct d_comp *d_qualify (struct d_comp *, int, int);
 
 static struct d_comp *d_int_type (int);
 
@@ -88,13 +84,13 @@ static struct d_comp *result;
 #define QUAL_RESTRICT 2
 #define QUAL_VOLATILE 4
 
-#define INT_CHAR	1
-#define INT_SHORT	2
-#define INT_LONG	3
-#define INT_LLONG	4
+#define INT_CHAR	(1 << 0)
+#define INT_SHORT	(1 << 1)
+#define INT_LONG	(1 << 2)
+#define INT_LLONG	(1 << 3)
 
-#define INT_SIGNED	(1 << 3)
-#define INT_UNSIGNED	(2 << 3)
+#define INT_SIGNED	(1 << 4)
+#define INT_UNSIGNED	(1 << 5)
 
 #define BINOP_ADD 1
 #define BINOP_RSH 2
@@ -188,9 +184,9 @@ void yyerror (char *);
       struct d_comp *start;
       int fold_flag;
     } abstract;
-    LONGEST lval;
+    int lval;
     struct {
-      LONGEST val;
+      int val;
       struct d_comp *type;
     } typed_val_int;
     const char *opname;
@@ -202,10 +198,10 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %}
 
 %type <comp> exp exp1 type start start_opt operator colon_name
-%type <comp> unqualified_name scope_id colon_ext_name
+%type <comp> unqualified_name colon_ext_name
 %type <comp> template template_arg
 %type <comp> builtin_type
-%type <comp> typespec typespec_2 array_indicator
+%type <comp> typespec_2 array_indicator
 %type <comp> colon_ext_only ext_only_name
 
 %type <comp> demangler_special function conversion_op
@@ -224,7 +220,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 
 %type <lval> qualifier qualifiers qualifiers_opt
 
-%type <lval> sign size int_type
+%type <lval> int_part int_seq
 
 %token <comp> INT
 %token <comp> FLOAT
@@ -298,9 +294,9 @@ enum {
 
 result		:	start
 			{ result = $1; }
+		;
 
 start		:	type
-			{ $$ = $1; }
 
 		|	demangler_special
 
@@ -473,9 +469,13 @@ unqualified_name:	operator
 			{ $$ = d_make_dtor (di, gnu_v3_complete_object_dtor, $2); }
 		;
 
+/* This rule is used in name and nested_name, and expanded inline there
+   for efficiency.  */
+/*
 scope_id	:	NAME
 		|	template
 		;
+*/
 
 colon_name	:	name
 		|	COLONCOLON name
@@ -484,9 +484,12 @@ colon_name	:	name
 
 /* D_COMP_QUAL_NAME */
 /* D_COMP_CTOR / D_COMP_DTOR ? */
-name		:	nested_name scope_id %prec NAME
+name		:	nested_name NAME %prec NAME
 			{ $$ = $1.comp; d_right ($1.last) = $2; }
-		|	scope_id %prec NAME
+		|	NAME %prec NAME
+		|	nested_name template %prec NAME
+			{ $$ = $1.comp; d_right ($1.last) = $2; }
+		|	template %prec NAME
 		;
 
 colon_ext_name	:	colon_name
@@ -503,30 +506,32 @@ ext_only_name	:	nested_name unqualified_name
 		|	unqualified_name
 		;
 
-nested_name	:	scope_id COLONCOLON
-			{ $$.comp = d_make_comp (di, D_COMP_QUAL_NAME, $1, $1);
+nested_name	:	NAME COLONCOLON
+			{ $$.comp = d_make_empty (di, D_COMP_QUAL_NAME);
+			  d_left ($$.comp) = $1;
 			  d_right ($$.comp) = NULL;
 			  $$.last = $$.comp;
 			}
-		|	nested_name scope_id COLONCOLON
+		|	nested_name NAME COLONCOLON
 			{ $$.comp = $1.comp;
-			  d_right ($1.last) = d_make_comp (di, D_COMP_QUAL_NAME, $2, $2);
+			  d_right ($1.last) = d_make_empty (di, D_COMP_QUAL_NAME);
 			  $$.last = d_right ($1.last);
+			  d_left ($$.last) = $2;
 			  d_right ($$.last) = NULL;
 			}
-/*
-		|	scope_id function_arglist COLONCOLON
-			{ $$.comp = d_make_comp (di, D_COMP_QUAL_NAME, $1, $1);
+		|	template COLONCOLON
+			{ $$.comp = d_make_empty (di, D_COMP_QUAL_NAME);
+			  d_left ($$.comp) = $1;
 			  d_right ($$.comp) = NULL;
 			  $$.last = $$.comp;
 			}
-		|	nested_name scope_id function_arglist COLONCOLON
+		|	nested_name template COLONCOLON
 			{ $$.comp = $1.comp;
-			  d_right ($1.last) = d_make_comp (di, D_COMP_QUAL_NAME, $2, $2);
+			  d_right ($1.last) = d_make_empty (di, D_COMP_QUAL_NAME);
 			  $$.last = d_right ($1.last);
+			  d_left ($$.last) = $2;
 			  d_right ($$.last) = NULL;
 			}
-*/
 		;
 
 /* D_COMP_TEMPLATE */
@@ -545,9 +550,15 @@ template_params	:	template_arg
 			}
 		;
 
+/* "type" is inlined into template_arg and function_args.  */
+
 /* Also an integral constant-expression of integral type, and a
    pointer to member (?) */
-template_arg	:	type
+template_arg	:	typespec_2
+		|	typespec_2 abstract_declarator
+			{ $$ = $2.comp;
+			  *$2.last = $1;
+			}
 		|	'&' start
 			{ $$ = d_make_comp (di, D_COMP_UNARY, d_op_from_string ("&"), $2); }
 		|	'&' '(' start ')'
@@ -555,7 +566,7 @@ template_arg	:	type
 		|	exp
 		;
 
-function_args	:	type
+function_args	:	typespec_2
 			{ if ($1->type == D_COMP_BUILTIN_TYPE
 			      && $1->u.s_builtin.type->print == D_PRINT_VOID)
 			    {
@@ -568,8 +579,19 @@ function_args	:	type
 			      $$.last = &d_right ($$.comp);
 			    }
 			}
-		|	function_args ',' type
+		|	typespec_2 abstract_declarator
+			{ *$2.last = $1;
+			  $$.comp = d_make_comp (di, D_COMP_ARGLIST, $2.comp, NULL);
+			  $$.last = &d_right ($$.comp);
+			}
+		|	function_args ',' typespec_2
 			{ *$1.last = d_make_comp (di, D_COMP_ARGLIST, $3, NULL);
+			  $$.comp = $1.comp;
+			  $$.last = &d_right (*$1.last);
+			}
+		|	function_args ',' typespec_2 abstract_declarator
+			{ *$4.last = $3;
+			  *$1.last = d_make_comp (di, D_COMP_ARGLIST, $4.comp, NULL);
 			  $$.comp = $1.comp;
 			  $$.last = &d_right (*$1.last);
 			}
@@ -597,7 +619,6 @@ function_arglist:	'(' function_args ')' qualifiers_opt
 qualifiers_opt	:	/* epsilon */
 			{ $$ = 0; }
 		|	qualifiers
-			{ $$ = $1; }
 		;
 
 qualifier	:	RESTRICT
@@ -609,58 +630,33 @@ qualifier	:	RESTRICT
 		;
 
 qualifiers	:	qualifier
-			{ $$ = $1; }
 		|	qualifier qualifiers
 			{ $$ = $1 | $2; }
 		;
 
-int_opt		:	/* */
-			{ }
-		|	INT_KEYWORD
-			{ }
-		;
+/* This accepts all sorts of invalid constructions and produces
+   invalid output for them - an error would be better.  */
 
-sign		:	SIGNED_KEYWORD
+int_part	:	INT_KEYWORD
+			{ $$ = 0; }
+		|	SIGNED_KEYWORD
 			{ $$ = INT_SIGNED; }
 		|	UNSIGNED
 			{ $$ = INT_UNSIGNED; }
-		;
-
-size		:	CHAR
+		|	CHAR
 			{ $$ = INT_CHAR; }
 		|	LONG
 			{ $$ = INT_LONG; }
 		|	SHORT
 			{ $$ = INT_SHORT; }
-		|	LONG LONG
-			{ $$ = INT_LLONG; }
 		;
 
-int_type	:	sign size int_opt
-			{ $$ = $1 | $2; }
-		|	size sign int_opt
-			{ $$ = $1 | $2; }
-		|	sign INT_KEYWORD size
-			{ $$ = $1 | $3; }
-		|	size INT_KEYWORD sign
-			{ $$ = $1 | $3; }
-		|	INT_KEYWORD sign size
-			{ $$ = $2 | $3; }
-		|	INT_KEYWORD size sign
-			{ $$ = $2 | $3; }
-		|	sign int_opt
-			{ $$ = $1; }
-		|	INT_KEYWORD sign
-			{ $$ = $2; }
-		|	size int_opt
-			{ $$ = $1; }
-		|	INT_KEYWORD size
-			{ $$ = $2; }
-		|	INT_KEYWORD
-			{ $$ = 0; }
+int_seq		:	int_part
+		|	int_seq int_part
+			{ $$ = $1 | $2; if ($1 & $2 & INT_LONG) $$ = $1 | INT_LLONG; }
 		;
 
-builtin_type	:	int_type
+builtin_type	:	int_seq
 			{ $$ = d_int_type ($1); }
 		|	FLOAT_KEYWORD
 			{ $$ = d_make_builtin_type (di, &d_builtin_types['f' - 'a']); }
@@ -712,17 +708,42 @@ array_indicator	:	'[' ']'
 			{ $$ = d_make_empty (di, D_COMP_ARRAY_TYPE);
 			  d_left ($$) = $2;
 			}
+		;
 
 /* Details of this approach inspired by the G++ < 3.4 parser.  */
 
+/* This rule is only used in typespec_2, and expanded inline there for
+   efficiency.  */
+/*
 typespec	:	builtin_type
 		|	colon_name
 		;
+*/
 
-typespec_2	:	typespec qualifiers_opt
+typespec_2	:	builtin_type qualifiers
 			{ $$ = d_qualify ($1, $2, 0); }
-		|	qualifiers typespec qualifiers_opt
+		|	builtin_type
+		|	qualifiers builtin_type qualifiers
 			{ $$ = d_qualify ($2, $1 | $3, 0); }
+		|	qualifiers builtin_type
+			{ $$ = d_qualify ($2, $1, 0); }
+
+		|	name qualifiers
+			{ $$ = d_qualify ($1, $2, 0); }
+		|	name
+		|	qualifiers name qualifiers
+			{ $$ = d_qualify ($2, $1 | $3, 0); }
+		|	qualifiers name
+			{ $$ = d_qualify ($2, $1, 0); }
+
+		|	COLONCOLON name qualifiers
+			{ $$ = d_qualify ($2, $3, 0); }
+		|	COLONCOLON name
+			{ $$ = $2; }
+		|	qualifiers COLONCOLON name qualifiers
+			{ $$ = d_qualify ($3, $1 | $4, 0); }
+		|	qualifiers COLONCOLON name
+			{ $$ = d_qualify ($3, $1, 0); }
 		;
 
 abstract_declarator
@@ -735,7 +756,7 @@ abstract_declarator
 			  *$$.last = $1.comp;
 			  $$.last = $1.last; }
 		|	direct_abstract_declarator
-			{ $$ = $1; $$.fn.comp = NULL; $$.fn.last = NULL;
+			{ $$.fn.comp = NULL; $$.fn.last = NULL;
 			  if ($1.fn.comp) { $$.last = $1.fn.last; *$1.last = $1.fn.comp; }
 			}
 		;
@@ -746,7 +767,7 @@ direct_abstract_declarator
 			  if ($2.fn.comp) { $$.last = $2.fn.last; *$2.last = $2.fn.comp; }
 			}
 		|	direct_abstract_declarator function_arglist
-			{ $$ = $1; $$.fold_flag = 0;
+			{ $$.fold_flag = 0;
 			  if ($1.fn.comp) { $$.last = $1.fn.last; *$1.last = $1.fn.comp; }
 			  if ($1.fold_flag)
 			    {
@@ -757,7 +778,7 @@ direct_abstract_declarator
 			    $$.fn = $2;
 			}
 		|	direct_abstract_declarator array_indicator
-			{ $$ = $1; $$.fn.comp = NULL; $$.fn.last = NULL; $$.fold_flag = 0;
+			{ $$.fn.comp = NULL; $$.fn.last = NULL; $$.fold_flag = 0;
 			  if ($1.fn.comp) { $$.last = $1.fn.last; *$1.last = $1.fn.comp; }
 			  *$1.last = $2;
 			  $$.last = &d_right ($2);
@@ -793,7 +814,7 @@ abstract_declarator_fn
 		|	direct_abstract_declarator
 			{ $$.comp = $1.comp; $$.last = $1.last; $$.fn = $1.fn; $$.start = NULL; }
 		|	direct_abstract_declarator function_arglist COLONCOLON start
-			{ $$ = $1; $$.start = $4;
+			{ $$.start = $4;
 			  if ($1.fn.comp) { $$.last = $1.fn.last; *$1.last = $1.fn.comp; }
 			  if ($1.fold_flag)
 			    {
@@ -1108,7 +1129,7 @@ exp     :       FALSEKEYWORD
 
 /* */
 struct d_comp *
-d_qualify (struct d_comp *lhs, LONGEST qualifiers, int is_method)
+d_qualify (struct d_comp *lhs, int qualifiers, int is_method)
 {
   struct d_comp **inner_p;
   enum d_comp_type type;
@@ -1177,11 +1198,11 @@ d_int_type (int flags)
     case INT_UNSIGNED | INT_SHORT:
       i = 19;
       break;
-    case INT_LLONG:
-    case INT_SIGNED | INT_LLONG:
+    case INT_LLONG | INT_LONG:
+    case INT_SIGNED | INT_LLONG | INT_LONG:
       i = 23;
       break;
-    case INT_UNSIGNED | INT_LLONG:
+    case INT_UNSIGNED | INT_LLONG | INT_LONG:
       i = 24;
       break;
     default:
@@ -1189,6 +1210,12 @@ d_int_type (int flags)
     }
 
   return d_make_builtin_type (di, &d_builtin_types[i]);
+}
+
+static struct d_comp *
+d_builtin_type (int which)
+{
+  return d_make_builtin_type (di, &d_builtin_types[which]);
 }
 
 static struct d_comp *
@@ -1320,18 +1347,18 @@ parse_number (p, len, parsed_float, putithere)
 
   if (long_p == 0)
     {
-      unsigned_type = d_int_type ('j' - 'a');
-      signed_type = d_int_type ('i' - 'a');
+      unsigned_type = d_builtin_type ('j' - 'a');
+      signed_type = d_builtin_type ('i' - 'a');
     }
   else if (long_p == 1)
     {
-      unsigned_type = d_int_type ('m' - 'a');
-      signed_type = d_int_type ('l' - 'a');
+      unsigned_type = d_builtin_type ('m' - 'a');
+      signed_type = d_builtin_type ('l' - 'a');
     }
   else
     {
-      unsigned_type = d_int_type ('x' - 'a');
-      signed_type = d_int_type ('y' - 'a');
+      unsigned_type = d_builtin_type ('x' - 'a');
+      signed_type = d_builtin_type ('y' - 'a');
     }
 
    /* If the high bit of the worked out type is set then this number
@@ -1508,12 +1535,12 @@ struct token
   int opcode;
 };
 
-#define HANDLE_SPECIAL(string, len, comp)		\
-  if (strncmp (tokstart, string, len) == 0)		\
-    {							\
-      lexptr = tokstart + len;				\
-      yylval.lval = comp;				\
-      return DEMANGLER_SPECIAL;				\
+#define HANDLE_SPECIAL(string, comp)				\
+  if (strncmp (tokstart, string, sizeof (string) - 1) == 0)	\
+    {								\
+      lexptr = tokstart + sizeof (string) - 1;			\
+      yylval.lval = comp;					\
+      return DEMANGLER_SPECIAL;					\
     }
 
 #define HANDLE_TOKEN2(string, token, op)		\
@@ -1544,13 +1571,9 @@ yylex (void)
   int tempbufindex;
   static char *tempbuf;
   static int tempbufsize;
-  int unquoted_expr;
-   
+
  retry:
-
   prev_lexptr = lexptr;
-  unquoted_expr = 1;
-
   tokstart = lexptr;
 
   switch (c = *tokstart)
@@ -1585,7 +1608,7 @@ yylex (void)
         }
 
       yylval.typed_val_int.val = c;
-      yylval.typed_val_int.type = d_int_type ('c' - 'a');
+      yylval.typed_val_int.type = d_builtin_type ('c' - 'a');
 
       c = *lexptr++;
       if (c != '\'')
@@ -1618,7 +1641,8 @@ yylex (void)
       /* Might be a floating point number.  */
       if (lexptr[1] < '0' || lexptr[1] > '9')
 	goto symbol;		/* Nope, must be a symbol. */
-      /* FALL THRU into number case.  */
+
+      goto try_number;
 
     case '-':
       HANDLE_TOKEN2 ("-=", ASSIGN_MODIFY, BINOP_SUB);
@@ -1639,6 +1663,7 @@ yylex (void)
 	}
       /* FALL THRU into number case.  */
 
+    try_number:
     case '0':
     case '1':
     case '2':
@@ -1688,9 +1713,7 @@ yylex (void)
 	      continue;
 	    /* We will take any letters or digits.  parse_number will
 	       complain if past the radix, or if L or U are not final.  */
-	    else if ((*p < '0' || *p > '9')
-		     && ((*p < 'a' || *p > 'z')
-				  && (*p < 'A' || *p > 'Z')))
+	    else if (! ISALNUM (*p))
 	      break;
 	  }
 	toktype = parse_number (tokstart, p - tokstart, got_dot|got_e, &yylval);
@@ -1701,6 +1724,7 @@ yylex (void)
 	    memcpy (err_copy, tokstart, p - tokstart);
 	    err_copy[p - tokstart] = 0;
 	    error ("Invalid number \"%s\".", err_copy);
+	    return ERROR;
 	  }
 	lexptr = p;
 	return toktype;
@@ -1844,21 +1868,21 @@ yylex (void)
 #endif
     }
 
-  if (!(c == '_' || c == '$'
-	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+  if (!(c == '_' || c == '$' || ISALPHA (c)))
     /* We must have come across a bad character (e.g. ';').  */
     error ("Invalid character '%c' in expression.", c);
 
   /* It's a name.  See how long it is.  */
   namelen = 0;
   for (c = tokstart[namelen];
-       (c == '_' || c == '$' || (c >= '0' && c <= '9')
-	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));)
+       ISALNUM (c) || c == '_' || c == '$'; )
     c = tokstart[++namelen];
 
   lexptr += namelen;
 
-  /* Catch specific keywords.  Should be done with a data structure.  */
+  /* Catch specific keywords.  Notice that some of the keywords contain
+     spaces, and are sorted by the length of the first word.  They must
+     all include a trailing space in the string comparison.  */
   switch (namelen)
     {
     case 16:
@@ -1866,9 +1890,9 @@ yylex (void)
         return REINTERPRET_CAST;
       break;
     case 12:
-      if (strncmp (tokstart, "construction vtable for", 23) == 0)
+      if (strncmp (tokstart, "construction vtable for ", 24) == 0)
 	{
-	  lexptr = tokstart + 23;
+	  lexptr = tokstart + 24;
 	  return CONSTRUCTION_VTABLE;
 	}
       if (strncmp (tokstart, "dynamic_cast", 12) == 0)
@@ -1879,13 +1903,13 @@ yylex (void)
         return STATIC_CAST;
       break;
     case 9:
-      HANDLE_SPECIAL ("covariant return thunk to", 25, D_COMP_COVARIANT_THUNK);
-      HANDLE_SPECIAL ("reference temporary for", 23, D_COMP_REFTEMP);
+      HANDLE_SPECIAL ("covariant return thunk to ", D_COMP_COVARIANT_THUNK);
+      HANDLE_SPECIAL ("reference temporary for ", D_COMP_REFTEMP);
       break;
     case 8:
-      HANDLE_SPECIAL ("typeinfo for", 12, D_COMP_TYPEINFO);
-      HANDLE_SPECIAL ("typeinfo fn for", 15, D_COMP_TYPEINFO_FN);
-      HANDLE_SPECIAL ("typeinfo name for", 17, D_COMP_TYPEINFO_NAME);
+      HANDLE_SPECIAL ("typeinfo for ", D_COMP_TYPEINFO);
+      HANDLE_SPECIAL ("typeinfo fn for ", D_COMP_TYPEINFO_FN);
+      HANDLE_SPECIAL ("typeinfo name for ", D_COMP_TYPEINFO_NAME);
       if (strncmp (tokstart, "operator", 8) == 0)
 	return OPERATOR;
       if (strncmp (tokstart, "restrict", 8) == 0)
@@ -1898,35 +1922,35 @@ yylex (void)
 	return VOLATILE_KEYWORD;
       break;
     case 7:
-      HANDLE_SPECIAL ("virtual thunk to", 16, D_COMP_VIRTUAL_THUNK);
+      HANDLE_SPECIAL ("virtual thunk to ", D_COMP_VIRTUAL_THUNK);
       if (strncmp (tokstart, "wchar_t", 7) == 0)
 	return WCHAR_T;
       break;
     case 6:
-      if (strncmp (tokstart, "global constructors keyed to", 28) == 0)
+      if (strncmp (tokstart, "global constructors keyed to ", 29) == 0)
 	{
 	  char *p;
-	  lexptr = tokstart + 28;
+	  lexptr = tokstart + 29;
 	  yylval.typed_val_int.val = GLOBAL_CONSTRUCTORS;
-	  /* Skip the trailing space, find the end of the symbol.  */
-	  p = symbol_end (lexptr + 1);
-	  yylval.typed_val_int.type = d_make_name (di, lexptr + 1, p - (lexptr + 1));
+	  /* Find the end of the symbol.  */
+	  p = symbol_end (lexptr);
+	  yylval.typed_val_int.type = d_make_name (di, lexptr, p - lexptr);
 	  lexptr = p;
 	  return GLOBAL;
 	}
-      if (strncmp (tokstart, "global destructors keyed to", 27) == 0)
+      if (strncmp (tokstart, "global destructors keyed to ", 28) == 0)
 	{
 	  char *p;
-	  lexptr = tokstart + 27;
+	  lexptr = tokstart + 28;
 	  yylval.typed_val_int.val = GLOBAL_DESTRUCTORS;
-	  /* Skip the trailing space, find the end of the symbol.  */
-	  p = symbol_end (lexptr + 1);
-	  yylval.typed_val_int.type = d_make_name (di, lexptr + 1, p - (lexptr + 1));
+	  /* Find the end of the symbol.  */
+	  p = symbol_end (lexptr);
+	  yylval.typed_val_int.type = d_make_name (di, lexptr, p - lexptr);
 	  lexptr = p;
 	  return GLOBAL;
 	}
 
-      HANDLE_SPECIAL ("vtable for", 10, D_COMP_VTABLE);
+      HANDLE_SPECIAL ("vtable for ", D_COMP_VTABLE);
       if (strncmp (tokstart, "delete", 6) == 0)
 	return DELETE;
       if (strncmp (tokstart, "struct", 6) == 0)
@@ -1939,7 +1963,7 @@ yylex (void)
 	return DOUBLE_KEYWORD;
       break;
     case 5:
-      HANDLE_SPECIAL ("guard variable for", 18, D_COMP_GUARD);
+      HANDLE_SPECIAL ("guard variable for ", D_COMP_GUARD);
       if (strncmp (tokstart, "false", 5) == 0)
 	return FALSEKEYWORD;
       if (strncmp (tokstart, "class", 5) == 0)
@@ -1968,8 +1992,8 @@ yylex (void)
 	return TRUEKEYWORD;
       break;
     case 3:
-      HANDLE_SPECIAL ("VTT for", 7, D_COMP_VTT);
-      HANDLE_SPECIAL ("non-virtual thunk to", 20, D_COMP_THUNK);
+      HANDLE_SPECIAL ("VTT for ", D_COMP_VTT);
+      HANDLE_SPECIAL ("non-virtual thunk to ", D_COMP_THUNK);
       if (strncmp (tokstart, "new", 3) == 0)
 	return NEW;
       if (strncmp (tokstart, "int", 3) == 0)
@@ -1995,35 +2019,30 @@ yyerror (msg)
 
 #ifdef TEST_CPNAMES
 
-static char *
-cp_print (struct d_comp *result)
+static void
+cp_print (struct d_comp *result, int len)
 {
-  char *str, *str2 = NULL, *str3;
+  char *str;
   int err = 0;
 
   if (result->type == GLOBAL_DESTRUCTORS)
     {
       result = d_left (result);
-      str2 = "global destructors keyed to ";
+      puts ("global destructors keyed to ");
     }
   else if (result->type == GLOBAL_CONSTRUCTORS)
     {
       result = d_left (result);
-      str2 = "global constructors keyed to ";
+      puts ("global constructors keyed to ");
     }
 
-  str = d_print (DMGL_PARAMS | DMGL_ANSI, result, &err);
+  str = d_print (DMGL_PARAMS | DMGL_ANSI, result, len, &err);
   if (str == NULL)
-    return NULL;
+    return;
 
-  if (str2 == NULL)
-    return str;
+  puts (str);
 
-  str3 = malloc (strlen (str) + strlen (str2) + 1);
-  strcpy (str3, str2);
-  strcat (str3, str);
   free (str);
-  return str3;
 }
 
 static char *
@@ -2057,7 +2076,7 @@ int
 main (int argc, char **argv)
 {
   struct d_info myinfo;
-  char *str, *str2, *extra_chars, c;
+  char *str2, *extra_chars, c;
   char buf[65536];
   int arg;
 
@@ -2071,6 +2090,7 @@ main (int argc, char **argv)
   if (argv[arg] == NULL)
     while (fgets (buf, 65536, stdin) != NULL)
       {
+	int len;
 	result = NULL;
 	buf[strlen (buf) - 1] = 0;
 	/* Use DMGL_VERBOSE to get expanded standard substitutions.  */
@@ -2086,28 +2106,39 @@ main (int argc, char **argv)
 	      printf ("%s\n", buf);
 	    continue;
 	  }
-	d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, 2 * strlen (lexptr), &myinfo);
+	len = strlen (lexptr);
+	d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, len, &myinfo);
+	myinfo.comps = malloc (myinfo.num_comps * sizeof (struct d_comp));
+	myinfo.subs = NULL;
 	di = &myinfo;
 	if (yyparse () || result == NULL)
 	  continue;
-	str = cp_print (result);
+	cp_print (result, len);
 	free (str2);
-	printf ("%s", str);
 	if (c)
-	  printf ("%c%s", c, extra_chars);
-	printf ("\n");
-	free (str);
+	  {
+	    putchar (c);
+	    puts (extra_chars);
+	  }
+	putchar ('\n');
+	free (myinfo.comps);
+	if (myinfo.subs)
+	  free (myinfo.subs);
       }
   else
     {
+      int len;
       lexptr = argv[arg];
-      d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, 2 * strlen (lexptr), &myinfo);
+      len = strlen (lexptr);
+      d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, len, &myinfo);
+      myinfo.comps = malloc (myinfo.num_comps * sizeof (struct d_comp));
       di = &myinfo;
       if (yyparse () || result == NULL)
 	return 0;
-      str = cp_print (result);
-      printf ("%s\n", str);
-      free (str);
+      cp_print (result, len);
+      free (myinfo.comps);
+      if (myinfo.subs)
+	free (myinfo.subs);
     }
   return 0;
 }
