@@ -1810,7 +1810,7 @@ statement.
 @kindex @var{filename}(@var{section})
 @cindex files and sections, section defn
 @item @var{filename}( @var{section} )
-@itemx @var{filename}( @var{section}, @var{section}, @dots{} )
+@itemx @var{filename}( @var{section} , @var{section}, @dots{} )
 @itemx @var{filename}( @var{section} @var{section} @dots{} )
 You can name one or more sections from your input files, for
 insertion in the current output section.  If you wish to specify a list
