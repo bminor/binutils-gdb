@@ -1,3 +1,13 @@
+Tue Sep 15 10:24:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* printcmd.c (examine_i_type): New static - type for instructions.
+	(do_examine): For "i" format, specify examine_i_type.
+	(do_examine): Call value_at_lazy instead of value_at so that
+ 	examine data is only fetched if it is used.
+	(x_command): If examine data was not fetched, set convenience
+ 	variable "__" to void.
+	(_initialize_printcmd): Initialize examine_i_type.
+
 Sun Sep 13 01:34:59 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
  	* blockframe.c (find_pc_sect_partial_function): use bfd section 
