@@ -1,3 +1,20 @@
+Tue Feb  1 12:13:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-coff.c (dot_text_symbol, dot_data_symbol,
+	dot_bss_symbol): Don't define if BFD_ASSEMBLER.
+	(obj_symbol_to_chars): bfd_coff_swap_aux_out now takes more
+	arguments.
+	(coff_line_base): Renamed from line_base.  Changed all uses.
+	(coff_add_linesym): Renamed from add_line_sym.  Made non-static.
+	Changed all uses.
+	* config/obj-coff.h: If TC_PPC, include coff/rs6000.h.
+	(S_SET_STORAGE_CLASS, S_GET_STORAGE_CLASS): Declare if
+	BFD_ASSEMBLER.
+	(coff_line_base): Declare.
+	(coff_add_linesym): Declare if BFD_ASSEMBLER.
+	* config/obj-coffbfd.c (symbol_to_chars): bfd_coff_swap_aux_out
+	now takes more arguments.
+
 Mon Jan 31 17:55:14 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* as.c (statistics_flag): Renamed from quiet_flag.
