@@ -425,13 +425,18 @@ parse_args (pargc, pargv)
     {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
   };
 
-  /* Construct the option lists from the standard list and the
-     target dependent list.  */
+  /* Construct the option lists from the standard list and the target
+     dependent list.  Include space for an extra NULL option and
+     always NULL terminate. */
   shortopts = concat (std_shortopts, md_shortopts, (char *) NULL);
-  longopts = (struct option *) xmalloc (sizeof (std_longopts) + md_longopts_size);
+  longopts = (struct option *) xmalloc (sizeof (std_longopts)
+					+ md_longopts_size
+					+ sizeof (struct option));
   memcpy (longopts, std_longopts, sizeof (std_longopts));
   memcpy ((char *) longopts + sizeof (std_longopts),
 	  md_longopts, md_longopts_size);
+  memset ((char *) longopts + sizeof (std_longopts) + md_longopts_size,
+	  0, sizeof (struct option));
 
   /* Make a local copy of the old argv.  */
   old_argc = *pargc;
