@@ -2144,7 +2144,7 @@ lang_one_common (h, info)
   /* Increase the size of the section.  */
   section->_raw_size += size;
 
-  if (write_map && config.map_file != NULL)
+  if (config.map_file != NULL)
     fprintf (config.map_file, "Allocating common %s: %lx at %lx %s\n",
 	     h->root.string, (unsigned long) size,
 	     (unsigned long) h->u.def.value, section->owner->filename);

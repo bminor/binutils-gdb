@@ -1,3 +1,16 @@
+Sat Feb 26 10:58:25 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldmain.c (write_map): Don't define.  Removed all references.
+	Just use map_file or map_filename instead.
+	(add_archive_element): Use minfo to write map information, not
+	info_msg.
+	(constructor_callback): Use fprintf to write map information, not
+	info_msg.
+	* ldmain.h (write_map): Don't declare.
+	* ldgram.y (mri_script_command): Removed reference to write_map.
+	* ldlang.c (lang_one_common): Likewise.
+	* lexsup.c (parse_args): Likewise.
+
 Fri Feb 25 19:12:03 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* scripttempl/elf.sc: Force all sections to be aligned.
