@@ -27,6 +27,7 @@ struct symtab_and_line;
 struct frame_unwind;
 struct frame_base;
 struct block;
+struct gdbarch;
 
 /* A legacy unwinder to prop up architectures using the old style
    saved regs array.  */

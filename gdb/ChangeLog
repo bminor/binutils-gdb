@@ -1,3 +1,8 @@
+2003-04-09  J. Brobecker  <brobecker@gnat.com>
+
+	* frame.h (struct gdbarch): Add opaque structure definition
+	to avoid a compilation warning on LynxOS 4.0.
+
 2003-04-09  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (struct frame_info): Delete field "pc".  Replace
