@@ -101,14 +101,6 @@ Eliminate all uses of PARAMS in GDB's source code.
 
 --
 
-Elimination of make_cleanup_func. (Andrew Cagney)
-
-make_cleanup_func elimination
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00791.html
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
-
---
-
 Fix copyright notices.
 
 Turns out that ``1998-2000'' isn't considered valid :-(
@@ -143,6 +135,9 @@ file at a time.
 Elimination of ``(catch_errors_ftype *) func''.
 
 Like make_cleanup_func it isn't portable.
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00791.html
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
+
 
 --
 

@@ -519,6 +519,28 @@ restore_current_thread (pid)
     }
 }
 
+struct current_thread_cleanup
+{
+  int inferior_pid;
+};
+
+static void
+do_restore_current_thread_cleanup (void *arg)
+{
+  struct current_thread_cleanup *old = arg;
+  restore_current_thread (old->inferior_pid);
+  free (old);
+}
+
+static struct cleanup *
+make_cleanup_restore_current_thread (int inferior_pid)
+{
+  struct current_thread_cleanup *old
+    = xmalloc (sizeof (struct current_thread_cleanup));
+  old->inferior_pid = inferior_pid;
+  return make_cleanup (do_restore_current_thread_cleanup, old);
+}
+
 /* Apply a GDB command to a list of threads.  List syntax is a whitespace
    seperated list of numbers, or ranges, or the keyword `all'.  Ranges consist
    of two numbers seperated by a hyphen.  Examples:
@@ -539,8 +561,7 @@ thread_apply_all_command (cmd, from_tty)
   if (cmd == NULL || *cmd == '\000')
     error ("Please specify a command following the thread ID list");
 
-  old_chain = make_cleanup ((make_cleanup_func) restore_current_thread,
-			    (void *) inferior_pid);
+  old_chain = make_cleanup_restore_current_thread (inferior_pid);
 
   for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
@@ -556,6 +577,8 @@ thread_apply_all_command (cmd, from_tty)
 #endif
 	execute_command (cmd, from_tty);
       }
+
+  do_cleanups (old_chain);
 }
 
 static void
@@ -575,8 +598,7 @@ thread_apply_command (tidlist, from_tty)
   if (*cmd == '\000')
     error ("Please specify a command following the thread ID list");
 
-  old_chain = make_cleanup ((make_cleanup_func) restore_current_thread,
-			    (void *) inferior_pid);
+  old_chain = make_cleanup_restore_current_thread (inferior_pid);
 
   while (tidlist < cmd)
     {
@@ -627,6 +649,8 @@ thread_apply_command (tidlist, from_tty)
 	    }
 	}
     }
+
+  do_cleanups (old_chain);
 }
 
 /* Switch to the specified thread.  Will dispatch off to thread_apply_command
