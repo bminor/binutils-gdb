@@ -67,6 +67,12 @@
      ((__m_num) >= _PA_RISC1_1_ID && (__m_num) <= _PA_RISC_MAXID))
 #endif /* _PA_RISC_ID */
 
+/* Size (in chars) of the temporary buffers used during fixup and string
+   table writes.   */
+   
+#define SOM_TMP_BUFSIZE 8192
+
+
 /* SOM allows any one of the four previous relocations to be reused
    with a "R_PREV_FIXUP" relocation entry.  Since R_PREV_FIXUP
    relocations are always a single byte, using a R_PREV_FIXUP instead
@@ -162,7 +168,7 @@ static int som_sizeof_headers PARAMS ((bfd *, boolean));
 static boolean som_write_headers PARAMS ((bfd *));
 static boolean som_build_and_write_symbol_table PARAMS ((bfd *));
 static void som_prep_for_fixups PARAMS ((bfd *, asymbol **, unsigned long));
-
+static boolean som_write_fixups PARAMS ((bfd *, unsigned long, unsigned int *));
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -1538,6 +1544,255 @@ som_prep_for_fixups (abfd, syms, num_syms)
       else
         (*som_symbol_data (syms[i]))->index = i;
     }
+}
+
+static boolean
+som_write_fixups (abfd, current_offset, total_reloc_sizep)
+     bfd *abfd;
+     unsigned long current_offset;
+     unsigned int *total_reloc_sizep;
+{
+  unsigned int i, j;
+  unsigned char *tmp_space, *p;
+  unsigned int total_reloc_size = 0;
+  unsigned int subspace_reloc_size = 0;
+  unsigned int num_spaces = obj_som_file_hdr (abfd)->space_total;
+  asection *section = abfd->sections;
+
+  /* Get a chunk of memory that we can use as buffer space, then throw
+     away.  */
+  tmp_space = alloca (SOM_TMP_BUFSIZE);
+  bzero (tmp_space, SOM_TMP_BUFSIZE);
+  p = tmp_space;
+
+  /* All the fixups for a particular subspace are emitted in a single
+     stream.  All the subspaces for a particular space are emitted
+     as a single stream.
+
+     So, to get all the locations correct one must iterate through all the
+     spaces, for each space iterate through its subspaces and output a
+     fixups stream.  */
+  for (i = 0; i < num_spaces; i++)
+    {
+      asection *subsection;
+
+      /* Find a space.  */
+      while (som_section_data (section)->is_space == 0)
+	section = section->next;
+
+      /* Now iterate through each of its subspaces.  */
+      for (subsection = abfd->sections;
+	   subsection != NULL;
+	   subsection = subsection->next)
+	{
+	  int reloc_offset;
+
+	  /* Find a subspace of this space.  */
+	  if (som_section_data (subsection)->is_subspace == 0
+	      || som_section_data (subsection)->containing_space != section)
+	    continue;
+
+	  /* If this subspace had no relocations, then we're finished 
+	     with it.  */
+	  if (subsection->reloc_count <= 0)
+	    {
+	      som_section_data (subsection)->subspace_dict.fixup_request_index
+		= -1;
+	      continue;
+	    }
+
+	  /* This subspace has some relocations.  Put the relocation stream
+	     index into the subspace record.  */
+	  som_section_data (subsection)->subspace_dict.fixup_request_index
+	    = total_reloc_size;
+
+	  /* To make life easier start over with a clean slate for 
+	     each subspace.  Seek to the start of the relocation stream
+	     for this subspace in preparation for writing out its fixup
+	     stream.  */
+	  if (bfd_seek (abfd, current_offset + total_reloc_size, SEEK_SET) != 0)
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+
+	  /* Buffer space has already been allocated.  Just perform some
+	     initialization here.  */
+	  p = tmp_space;
+	  subspace_reloc_size = 0;
+	  reloc_offset = 0;
+	  som_initialize_reloc_queue (reloc_queue);
+
+	  /* Translate each BFD relocation into one or more SOM 
+	     relocations.  */
+	  for (j = 0; j < subsection->reloc_count; j++)
+	    {
+	      arelent *bfd_reloc = subsection->orelocation[j];
+	      unsigned int skip;
+	      int sym_num;
+
+	      /* Get the symbol number.  Remember it's stored in a 
+		 special place for section symbols.  */
+	      if ((*bfd_reloc->sym_ptr_ptr)->flags & BSF_SECTION_SYM)
+		sym_num = (int) (*bfd_reloc->sym_ptr_ptr)->udata;
+	      else
+		sym_num  = (*som_symbol_data ((*bfd_reloc->sym_ptr_ptr)))->index;
+	      
+	      /* If there is not enough room for the next couple relocations,
+		 then dump the current buffer contents now.  Also reinitialize
+		 the relocation queue. 
+
+		 FIXME.  We assume here that no BFD relocation will expand
+		 to more than 100 bytes of SOM relocations.  This should (?!?)
+		 be quite safe.  */
+	      if (p - tmp_space + 100 > SOM_TMP_BUFSIZE)
+		{
+		  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd)
+		      != p - tmp_space)
+		    {
+		      bfd_error = system_call_error;
+		      return false;
+		    }
+		  p = tmp_space;
+		  som_initialize_reloc_queue (reloc_queue);
+		}
+
+	      /* Emit R_NO_RELOCATION fixups to map any bytes which were
+		 skipped.  */
+	      skip = bfd_reloc->address - reloc_offset;
+	      p = som_reloc_skip (abfd, skip, p,
+				  &subspace_reloc_size, reloc_queue);
+
+	      /* Update reloc_offset for the next iteration.
+
+		 Note R_ENTRY and R_EXIT relocations are just markers,
+		 they do not consume input bytes.  */ 
+	      if (bfd_reloc->howto->type != R_ENTRY
+		  && bfd_reloc->howto->type != R_EXIT)
+		reloc_offset = bfd_reloc->address + 4;
+	      else
+		reloc_offset = bfd_reloc->address;
+
+
+	      /* Now the actual relocation we care about.  */
+	      switch (bfd_reloc->howto->type)
+		{
+		case R_PCREL_CALL:
+		case R_ABS_CALL:
+		  p = som_reloc_call (abfd, p, &subspace_reloc_size,
+				      bfd_reloc, sym_num, reloc_queue);
+		  break;
+
+		case R_CODE_ONE_SYMBOL:
+		case R_DP_RELATIVE:
+		  /* Account for any addend.  */
+		  if (bfd_reloc->addend)
+		    p = som_reloc_addend (abfd, bfd_reloc->addend, p, 
+					  &subspace_reloc_size, reloc_queue);
+
+		  if (sym_num < 0x20)
+		    {
+		      bfd_put_8 (abfd, bfd_reloc->howto->type + sym_num, p);
+		      subspace_reloc_size += 1;
+		      p += 1;
+		    }
+		  else if (sym_num < 0x100)
+		    {
+		      bfd_put_8 (abfd, bfd_reloc->howto->type + 32, p);
+		      bfd_put_8 (abfd, sym_num, p + 1);
+		      p = try_prev_fixup (abfd, &subspace_reloc_size, p,
+					  2, reloc_queue);
+		    }
+		  else if (sym_num < 0x10000000)
+		    {
+		      bfd_put_8 (abfd, bfd_reloc->howto->type + 33, p);
+		      bfd_put_8 (abfd, sym_num >> 16, p + 1);
+		      bfd_put_16 (abfd, sym_num, p + 2); 
+		      p = try_prev_fixup (abfd, &subspace_reloc_size,
+					  p, 4, reloc_queue);
+		    }
+		  else
+		    abort ();
+		  break;
+
+		case R_DATA_ONE_SYMBOL:
+		case R_DATA_PLABEL:
+		case R_CODE_PLABEL:
+		  /* Account for any addend.  */
+		  if (bfd_reloc->addend)
+		    p = som_reloc_addend (abfd, bfd_reloc->addend, p, 
+					  &subspace_reloc_size, reloc_queue);
+
+		  if (sym_num < 0x100)
+		    {
+		      bfd_put_8 (abfd, bfd_reloc->howto->type, p);
+		      bfd_put_8 (abfd, sym_num, p + 1);
+		      p = try_prev_fixup (abfd, &subspace_reloc_size, p,
+					  2, reloc_queue);
+		    }
+		  else if (sym_num < 0x10000000)
+		    {
+		      bfd_put_8 (abfd, bfd_reloc->howto->type + 1, p);
+		      bfd_put_8 (abfd, sym_num >> 16, p + 1);
+		      bfd_put_16 (abfd, sym_num, p + 2); 
+		      p = try_prev_fixup (abfd, &subspace_reloc_size,
+					  p, 4, reloc_queue);
+		    }
+		  else
+		    abort ();
+		  break;
+
+		case R_ENTRY:
+		  {
+		    int *descp
+		       = (int *) (*som_symbol_data ((*bfd_reloc->sym_ptr_ptr)))->unwind;
+		    bfd_put_8 (abfd, R_ENTRY, p);
+		    bfd_put_32 (abfd, descp[0], p + 1);
+		    bfd_put_32 (abfd, descp[1], p + 5);
+		    p = try_prev_fixup (abfd, &subspace_reloc_size,
+					p, 9, reloc_queue);
+		    break;
+		  }
+		  
+		case R_EXIT:
+		  bfd_put_8 (abfd, R_EXIT, p);
+		  subspace_reloc_size += 1;
+		  p += 1;
+		  break;
+
+		/* Put a "R_RESERVED" relocation in the stream if
+		   we hit something we do not understand.  The linker
+		   will complain loudly if this ever happens.  */
+		default:
+		  bfd_put_8 (abfd, 0xff, p);
+		  subspace_reloc_size += 1;
+		  p += 1;
+		}
+	    }
+
+	  /* Last BFD relocation for a subspace has been processed.
+	     Map the rest of the subspace with R_NO_RELOCATION fixups.  */
+	  p = som_reloc_skip (abfd, bfd_section_size (abfd, subsection) 
+			              - reloc_offset,
+			      p, &subspace_reloc_size, reloc_queue);
+
+	  /* Scribble out the relocations.  */
+	  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd)
+	      != p - tmp_space)
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+	  p = tmp_space;
+
+	  total_reloc_size += subspace_reloc_size;
+	  som_section_data (subsection)->subspace_dict.fixup_request_quantity
+	    = subspace_reloc_size;
+	}
+      section = section->next;
+    }
+  *total_reloc_sizep = total_reloc_size;
+  return true;
 }
 
 /* Finally, scribble out the various headers to the disk.  */
