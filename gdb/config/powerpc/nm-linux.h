@@ -33,20 +33,4 @@ extern int kernel_u_size (void);
 #define REGISTER_U_ADDR(addr, blockend, regno) \
         (addr) = ppc_register_u_addr ((blockend),(regno));
 
-/* FIXME: kettenis/2000-09-03: This should be moved to ../nm-linux.h
-   once we have converted all Linux targets to use the new threads
-   stuff (without the #undef of course).  */
-
-extern int lin_lwp_prepare_to_proceed (void);
-#undef PREPARE_TO_PROCEED
-#define PREPARE_TO_PROCEED(select_it) lin_lwp_prepare_to_proceed ()
-
-extern void lin_lwp_attach_lwp (ptid_t ptid, int verbose);
-#define ATTACH_LWP(ptid, verbose) lin_lwp_attach_lwp ((ptid), (verbose))
-
-#include <signal.h>
-
-extern void lin_thread_get_thread_signals (sigset_t *mask);
-#define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)
-
 #endif /* #ifndef NM_LINUX_H */

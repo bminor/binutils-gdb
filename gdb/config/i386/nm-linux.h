@@ -63,14 +63,7 @@ extern void i386_linux_dr_reset_addr (int regnum);
 extern unsigned long i386_linux_dr_get_status (void);
 #define I386_DR_LOW_GET_STATUS() \
   i386_linux_dr_get_status ()
-
-/* We define this if link.h is available, because with ELF we use SVR4
-   style shared libraries.  */
-
-#ifdef HAVE_LINK_H
-#define SVR4_SHARED_LIBS
-#include "solib.h"		/* Support for shared libraries.  */
-#endif
+
 
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
@@ -87,25 +80,4 @@ extern int cannot_store_register (int regno);
 /* Override child_resume in `infptrace.c'.  */
 #define CHILD_RESUME
 
-/* Override child_wait in `inftarg.c'.  */
-struct target_waitstatus;
-extern ptid_t child_wait (ptid_t ptid, struct target_waitstatus *ourstatus);
-#define CHILD_WAIT
-
-/* FIXME: kettenis/2000-09-03: This should be moved to ../nm-linux.h
-   once we have converted all Linux targets to use the new threads
-   stuff (without the #undef of course).  */
-
-extern int lin_lwp_prepare_to_proceed (void);
-#undef PREPARE_TO_PROCEED
-#define PREPARE_TO_PROCEED(select_it) lin_lwp_prepare_to_proceed ()
-
-extern void lin_lwp_attach_lwp (ptid_t ptid, int verbose);
-#define ATTACH_LWP(ptid, verbose) lin_lwp_attach_lwp ((ptid), (verbose))
-
-#include <signal.h>
-
-extern void lin_thread_get_thread_signals (sigset_t *mask);
-#define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)
-
-#endif /* nm_linux.h */
+#endif /* nm-linux.h */
