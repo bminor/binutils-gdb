@@ -798,6 +798,23 @@ extern void set_gdbarch_frame_num_args (struct gdbarch *gdbarch, gdbarch_frame_n
 #endif
 #endif
 
+#if defined (STACK_ALIGN)
+/* Legacy for systems yet to multi-arch STACK_ALIGN */
+#define STACK_ALIGN_P() (1)
+#endif
+
+extern int gdbarch_stack_align_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > 1) || !defined (STACK_ALIGN_P)
+#define STACK_ALIGN_P() (gdbarch_stack_align_p (current_gdbarch))
+#endif
+
+typedef CORE_ADDR (gdbarch_stack_align_ftype) (CORE_ADDR sp);
+extern CORE_ADDR gdbarch_stack_align (struct gdbarch *gdbarch, CORE_ADDR sp);
+extern void set_gdbarch_stack_align (struct gdbarch *gdbarch, gdbarch_stack_align_ftype *stack_align);
+#if (GDB_MULTI_ARCH > 1) || !defined (STACK_ALIGN)
+#define STACK_ALIGN(sp) (gdbarch_stack_align (current_gdbarch, sp))
+#endif
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

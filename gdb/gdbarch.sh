@@ -44,6 +44,27 @@ default_is_fallback_p ()
 # Format of the input table
 read="class level macro returntype function formal actual attrib startup default invalid_p fmt print print_p description"
 
+class_is_variable_p ()
+{
+    [ "${class}" = "v" -o "${class}" = "V" ]
+}
+
+class_is_function_p ()
+{
+    [ "${class}" = "f" -o "${class}" = "F" ]
+}
+
+class_is_predicate_p ()
+{
+    [ "${class}" = "F" -o "${class}" = "V" ]
+}
+
+class_is_info_p ()
+{
+    [ "${class}" = "i" ]
+}
+
+
 do_read ()
 {
     if eval read $read
@@ -51,7 +72,19 @@ do_read ()
 	test "${startup}" || startup=0
 	test "${fmt}" || fmt="%ld"
 	test "${print}" || print="(long) ${macro}"
-	#test "${default}" || default=0
+	#FIXME:
+	#Should set DEFAULT to zero and force the user to provide
+	#an invalid_p=0
+	#test "${default}" || default=0 - NO
+	case "${invalid_p}" in
+	    0 ) valid_p=1 ;;
+	    "" ) test "${default}" && valid_p="gdbarch->${function} != ${default}"
+		#NOT_YET
+		#test "${default}" && invalid_p="gdbarch->${function} == ${default}"
+		;;
+	    * ) valid_p="!(${invalid_p})"
+	esac
+	#NOT YET:
 	:
     else
 	false
@@ -69,8 +102,12 @@ do
 	# # -> line disable
 	# f -> function
 	#   hiding a function
+	# F -> function + predicate
+	#   hiding a function + predicate to test function validity
 	# v -> variable
 	#   hiding a variable
+	# V -> variable + predicate
+	#   hiding a variable + predicate to test variables validity
 	# i -> set from info
 	#   hiding something from the ``struct info'' object
 
@@ -136,7 +173,7 @@ do
 	# returned if the code creating the new architecture failed to
 	# initialize the MEMBER or initialized the member to something
 	# invalid. By default, a check that the value is no longer
-	# equal to DEFAULT ips performed.  The equation ``0'' disables
+	# equal to DEFAULT is performed.  The equation ``0'' disables
 	# the invalid_p check.
 
     fmt ) : ;;
@@ -284,6 +321,7 @@ f:2:FRAME_LOCALS_ADDRESS:CORE_ADDR:frame_locals_address:struct frame_info *fi:fi
 f:2:SAVED_PC_AFTER_CALL:CORE_ADDR:saved_pc_after_call:struct frame_info *frame:frame::0:0
 f:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame::0:0
 #
+F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp::0:0
 EOF
   grep -v '^#'
 }
@@ -292,23 +330,29 @@ EOF
 # dump it out
 if true
 then
-  exec > new-gdbarch
-  function_list | while do_read # eval read $read
-  do
-    cat <<EOF
+    exec > new-gdbarch
+    function_list | while do_read # eval read $read
+    do
+	cat <<EOF
 ${class} ${macro}(${actual})
   ${returntype} ${function} ($formal)${attrib}
     level=${level}
     startup=${startup}
     default=${default}
     invalid_p=${invalid_p}
+    valid_p=${valid_p}
     fmt=${fmt}
     print=${print}
     print_p=${print_p}
     description=${description}
 EOF
-  done
-  exec 1>&2
+	if class_is_predicate_p && default_is_fallback_p
+	then
+	    echo "Error: predicate function can not have a non- multi-arch default" 1>&2
+	    exit 1
+	fi
+    done
+    exec 1>&2
 fi
 
 copyright ()
@@ -398,8 +442,8 @@ echo ""
 echo "/* The following are pre-initialized by GDBARCH. */"
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "i" )
+    if class_is_info_p
+    then
 	echo ""
 	echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);"
 	echo "/* set_gdbarch_${function}() - not applicable - pre-initialized. */"
@@ -408,8 +452,7 @@ do
 	echo "#define ${macro} (gdbarch_${function} (current_gdbarch))"
 	echo "#endif"
 	echo "#endif"
-	;;
-  esac
+    fi
 done
 
 # function typedef's
@@ -418,24 +461,38 @@ echo ""
 echo "/* The following are initialized by the target dependant code. */"
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "v" )
+    if class_is_predicate_p
+    then
+	echo ""
+	echo "#if defined (${macro})"
+	echo "/* Legacy for systems yet to multi-arch ${macro} */"
+	echo "#define ${macro}_P() (1)"
+	echo "#endif"
+	echo ""
+	echo "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);"
+	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro}_P)"
+	echo "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))"
+	echo "#endif"
+    fi
+    if class_is_variable_p
+    then
 	echo ""
 	echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);"
 	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});"
-	if ! default_is_fallback_p
+	if ! default_is_fallback_p && ! class_is_predicate_p
 	then
 	    echo "#if GDB_MULTI_ARCH"
 	fi
 	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro})"
 	echo "#define ${macro} (gdbarch_${function} (current_gdbarch))"
 	echo "#endif"
-	if ! default_is_fallback_p
+	if ! default_is_fallback_p && ! class_is_predicate_p
 	then
 	    echo "#endif"
 	fi
-	;;
-    "f" )
+    fi
+    if class_is_function_p
+    then
 	echo ""
 	echo "typedef ${returntype} (gdbarch_${function}_ftype) (${formal});"
 	if [ "${formal}" = "void" ]
@@ -445,7 +502,7 @@ do
 	  echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch, ${formal});"
 	fi
 	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});"
-	if ! default_is_fallback_p
+	if ! default_is_fallback_p && ! class_is_predicate_p
 	then
 	    echo "#if GDB_MULTI_ARCH"
 	fi
@@ -460,12 +517,11 @@ do
 	  echo "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))"
 	fi
 	echo "#endif"
-	if ! default_is_fallback_p
+	if ! default_is_fallback_p && ! class_is_predicate_p
 	then
 	    echo "#endif"
 	fi
-	;;
-  esac
+    fi
 done
 
 # close it off
@@ -834,9 +890,10 @@ echo "{"
 echo "  /* basic architectural information */"
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "i" ) echo "  ${returntype} ${function};" ;;
-  esac
+    if class_is_info_p
+    then
+	echo "  ${returntype} ${function};"
+    fi
 done
 echo ""
 echo "  /* target specific vector. */"
@@ -879,10 +936,13 @@ cat <<EOF
 EOF
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "v" ) echo "  ${returntype} ${function};" ;;
-    "f" ) echo "  gdbarch_${function}_ftype *${function}${attrib};" ;;
-  esac
+    if class_is_variable_p
+    then
+	echo "  ${returntype} ${function};"
+    elif class_is_function_p
+    then
+	echo "  gdbarch_${function}_ftype *${function}${attrib};"
+    fi
 done
 echo "};"
 
@@ -900,11 +960,10 @@ echo "struct gdbarch startup_gdbarch = {"
 echo "  /* basic architecture information */"
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "i" ) 
-      echo "  ${startup},"
-    ;;
-  esac
+    if class_is_info_p
+    then
+	echo "  ${startup},"
+    fi
 done
 cat <<EOF
   /* target specific vector */
@@ -915,11 +974,10 @@ cat <<EOF
 EOF
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "f" | "v" )
-      echo "  ${startup},"
-    ;;
-  esac
+    if class_is_function_p || class_is_variable_p
+    then
+	echo "  ${startup},"
+    fi
 done
 cat <<EOF
   /* startup_gdbarch() */
@@ -948,22 +1006,22 @@ EOF
 echo ""
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "i" ) echo "  gdbarch->${function} = info->${function};"
-  esac
+    if class_is_info_p
+    then
+	echo "  gdbarch->${function} = info->${function};"
+    fi
 done
 echo ""
 echo "  /* Force the explicit initialization of these. */"
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "f" | "v" )
+    if class_is_function_p || class_is_variable_p
+    then
 	if [ "${default}" != "" -a "${default}" != "0" ]
 	then
 	  echo "  gdbarch->${function} = ${default};"
 	fi
-	;;
-  esac
+    fi
 done
 cat <<EOF
   /* gdbarch_alloc() */
@@ -1010,11 +1068,14 @@ verify_gdbarch (struct gdbarch *gdbarch)
 EOF
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "f" | "v" )
+    if class_is_function_p || class_is_variable_p
+    then
 	if [ "${invalid_p}" = "0" ]
 	then
 	    echo "  /* Skip verify of ${function}, invalid_p == 0 */"
+	elif class_is_predicate_p
+	then
+	    echo "  /* Skip verify of ${function}, has predicate */"
  	elif [ "${invalid_p}" ]
 	then
 	    echo "  if ((GDB_MULTI_ARCH >= ${level})"
@@ -1026,8 +1087,7 @@ do
 	    echo "      && (gdbarch->${function} == ${default}))"
 	    echo "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");"
 	fi
-	;;
-  esac
+    fi
 done
 cat <<EOF
 }
@@ -1045,14 +1105,13 @@ gdbarch_dump (void)
 EOF
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "f" )
+    if class_is_function_p
+    then
 	echo "  fprintf_unfiltered (gdb_stdlog,"
 	echo "                      \"gdbarch_update: ${macro} = 0x%08lx\\n\","
 	echo "                      (long) current_gdbarch->${function}"
 	echo "                      /*${macro} ()*/);"
-	;;
-    * )
+    else
 	if [ "${print_p}" = "#" ]
 	then
 	  echo "#ifdef ${macro}"
@@ -1071,8 +1130,7 @@ do
 	  echo "                      \"gdbarch_update: ${macro} = ${fmt}\\n\","
 	  echo "                      ${print});"
 	fi
-	;;
-  esac
+    fi
 done
 echo "}"
 
@@ -1091,8 +1149,22 @@ EOF
 echo ""
 function_list | while do_read # eval read $read
 do
-  case "${class}" in
-    "f" )
+    if class_is_predicate_p
+    then
+	echo ""
+	echo "int"
+	echo "gdbarch_${function}_p (struct gdbarch *gdbarch)"
+	echo "{"
+	if [ "${valid_p}" ]
+	then
+	    echo "  return ${valid_p};"
+	else
+	    echo "#error \"gdbarch_${function}_p: not defined\""
+	fi
+	echo "}"
+    fi
+    if class_is_function_p
+    then
 	echo ""
 	echo "${returntype}"
 	if [ "${formal}" = "void" ]
@@ -1134,8 +1206,8 @@ do
 	echo "{"
 	echo "  gdbarch->${function} = ${function};"
 	echo "}"
-	;;
-    "v" )
+    elif class_is_variable_p
+    then
 	echo ""
 	echo "${returntype}"
 	echo "gdbarch_${function} (struct gdbarch *gdbarch)"
@@ -1168,8 +1240,8 @@ do
 	echo "{"
 	echo "  gdbarch->${function} = ${function};"
 	echo "}"
-	;;
-    "i" )
+    elif class_is_info_p
+    then
 	echo ""
 	echo "${returntype}"
 	echo "gdbarch_${function} (struct gdbarch *gdbarch)"
@@ -1178,8 +1250,7 @@ do
 	echo "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\n\");"
 	echo "  return gdbarch->${function};"
 	echo "}"
-	;;
-  esac
+    fi
 done
 
 # All the trailing guff

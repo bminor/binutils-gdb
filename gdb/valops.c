@@ -1534,14 +1534,14 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	    arg_type = check_typedef (VALUE_ENCLOSING_TYPE (args[i]));
 	    len = TYPE_LENGTH (arg_type);
 
-#ifdef STACK_ALIGN
-	    /* MVS 11/22/96: I think at least some of this stack_align code is
-	       really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
-	       a target-defined manner.  */
-	    aligned_len = STACK_ALIGN (len);
-#else
-	    aligned_len = len;
-#endif
+	    if (STACK_ALIGN_P ())
+	      /* MVS 11/22/96: I think at least some of this
+		 stack_align code is really broken.  Better to let
+		 PUSH_ARGUMENTS adjust the stack in a target-defined
+		 manner.  */
+	      aligned_len = STACK_ALIGN (len);
+	    else
+	      aligned_len = len;
 	    if (INNER_THAN (1, 2))
 	      {
 		/* stack grows downward */
@@ -1583,12 +1583,11 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (struct_return)
     {
       int len = TYPE_LENGTH (value_type);
-#ifdef STACK_ALIGN
-      /* MVS 11/22/96: I think at least some of this stack_align code is
-         really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
-         a target-defined manner.  */
-      len = STACK_ALIGN (len);
-#endif
+      if (STACK_ALIGN_P ())
+	/* MVS 11/22/96: I think at least some of this stack_align
+	   code is really broken.  Better to let PUSH_ARGUMENTS adjust
+	   the stack in a target-defined manner.  */
+	len = STACK_ALIGN (len);
       if (INNER_THAN (1, 2))
 	{
 	  /* stack grows downward */
@@ -1609,11 +1608,10 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
    hppa_push_arguments */
 #ifndef NO_EXTRA_ALIGNMENT_NEEDED
 
-#if defined(STACK_ALIGN)
   /* MVS 11/22/96: I think at least some of this stack_align code is
      really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
      a target-defined manner.  */
-  if (INNER_THAN (1, 2))
+  if (STACK_ALIGN_P () && INNER_THAN (1, 2))
     {
       /* If stack grows down, we must leave a hole at the top. */
       int len = 0;
@@ -1624,7 +1622,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	len += CALL_DUMMY_STACK_ADJUST;
       sp -= STACK_ALIGN (len) - len;
     }
-#endif /* STACK_ALIGN */
 #endif /* NO_EXTRA_ALIGNMENT_NEEDED */
 
   sp = PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr);
@@ -1642,8 +1639,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   sp = PUSH_RETURN_ADDRESS (real_pc, sp);
 #endif /* PUSH_RETURN_ADDRESS */
 
-#if defined(STACK_ALIGN)
-  if (!INNER_THAN (1, 2))
+  if (STACK_ALIGN_P () && !INNER_THAN (1, 2))
     {
       /* If stack grows up, we must leave a hole at the bottom, note
          that sp already has been advanced for the arguments!  */
@@ -1651,7 +1647,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	sp += CALL_DUMMY_STACK_ADJUST;
       sp = STACK_ALIGN (sp);
     }
-#endif /* STACK_ALIGN */
 
 /* XXX This seems wrong.  For stacks that grow down we shouldn't do
    anything here!  */

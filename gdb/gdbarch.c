@@ -213,6 +213,7 @@ struct gdbarch
   gdbarch_frame_locals_address_ftype *frame_locals_address;
   gdbarch_saved_pc_after_call_ftype *saved_pc_after_call;
   gdbarch_frame_num_args_ftype *frame_num_args;
+  gdbarch_stack_align_ftype *stack_align;
 };
 
 
@@ -277,6 +278,7 @@ struct gdbarch startup_gdbarch = {
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -620,6 +622,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frame_num_args == 0))
     internal_error ("gdbarch: verify_gdbarch: frame_num_args invalid");
+  /* Skip verify of stack_align, has predicate */
 }
 
 
@@ -955,6 +958,10 @@ gdbarch_dump (void)
                       "gdbarch_update: FRAME_NUM_ARGS = 0x%08lx\n",
                       (long) current_gdbarch->frame_num_args
                       /*FRAME_NUM_ARGS ()*/);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: STACK_ALIGN = 0x%08lx\n",
+                      (long) current_gdbarch->stack_align
+                      /*STACK_ALIGN ()*/);
 }
 
 struct gdbarch_tdep *
@@ -2485,6 +2492,29 @@ set_gdbarch_frame_num_args (struct gdbarch *gdbarch,
                             gdbarch_frame_num_args_ftype frame_num_args)
 {
   gdbarch->frame_num_args = frame_num_args;
+}
+
+int
+gdbarch_stack_align_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->stack_align != 0;
+}
+
+CORE_ADDR
+gdbarch_stack_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+{
+  if (gdbarch->stack_align == 0)
+    internal_error ("gdbarch: gdbarch_stack_align invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stack_align called\n");
+  return gdbarch->stack_align (sp);
+}
+
+void
+set_gdbarch_stack_align (struct gdbarch *gdbarch,
+                         gdbarch_stack_align_ftype stack_align)
+{
+  gdbarch->stack_align = stack_align;
 }
 
 

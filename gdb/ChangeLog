@@ -1,3 +1,11 @@
+Thu Apr 20 14:35:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* valops.c (hand_function_call): Replace #ifdef STACK_ALIGN with
+ 	run-time test for STACK_ALIGN_P.
+	* gdbarch.sh: Add support for function and variable predicates.
+	(STACK_ALIGN): Add.  Implement with predicate - STACK_ALIGN_P.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 Thu Apr 20 17:39:11 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h, utils.c (free_current_contents): Change parameter to
