@@ -1,3 +1,9 @@
+2000-09-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* m68hc11-tdep.c (m68hc11_frame_chain): Check for pc in call dummy.
+	(m68hc11_guess_from_prologue): 'des' instruction to allocate 1 byte
+	on the stack can appear in the prologue.
+	
 2000-09-05  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* sol-thread.c (ps_pdmodel): Protect with an ifdef.

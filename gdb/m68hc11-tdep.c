@@ -378,6 +378,7 @@ m68hc11_guess_from_prologue (CORE_ADDR pc, CORE_ADDR fp,
 #define OP_ADDD (0xc3)
 #define OP_TXS  (0x35)
 #define OP_TYS  (0x35)
+#define OP_DES  (0x34)
 
   /* The 68hc11 stack is as follows:
 
@@ -468,6 +469,12 @@ m68hc11_guess_from_prologue (CORE_ADDR pc, CORE_ADDR fp,
         {
           add_sp_mode  = 1;
           pc += 2;
+        }
+      /* des to allocate 1 byte on the stack */
+      else if (op0 == OP_DES)
+        {
+          pc += 1;
+          size += 1;
         }
       else if (op0 == OP_PAGE2 && op1 == OP_TSY && op2 == OP_PAGE2)
         {
@@ -614,6 +621,9 @@ static CORE_ADDR
 m68hc11_frame_chain (struct frame_info *frame)
 {
   CORE_ADDR addr;
+
+  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+    return frame->frame;	/* dummy frame same as caller's frame */
 
   if (frame->extra_info->return_pc == 0
       || inside_entry_file (frame->extra_info->return_pc))
