@@ -1,5 +1,15 @@
 2004-03-07  Andrew Cagney  <cagney@redhat.com>
 
+	Unconditionally enable 64-bit frame and ABI code.
+	* hppa-tdep.c (hppa_gdbarch_init): Do not set deprecated
+	call_dummy_breakpoint_offset, call_dummy_length, stack_align,
+	push_dummy_frame, fix_call_dummy, push_arguments,
+	call_dummy_location, extract_return_value, use_struct_convention,
+	store_return_value, store_struct_return, saved_pc_after_call,
+	init_frame_pc, frame_init_saved_regs, init_extra_frame_info,
+	frame_chain, frame_chain_valid, frameless_function_invocation,
+	frame_saved_pc, and pop_frame.
+	
 	* hppa-tdep.c: Replace PC_REGNUM with PCOQ_HEAD_REGNUM.
 	(hppa64_return_value, hppa64_push_dummy_call): Rewrite.
 	(hppa_gdbarch_init): Do not set PC_REGNUM.

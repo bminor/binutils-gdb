@@ -5807,26 +5807,11 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_frame_align (gdbarch, hppa32_frame_align);
       break;
     case 8:
-      if (0)
-	{
-	  set_gdbarch_push_dummy_call (gdbarch, hppa64_push_dummy_call);
-	  set_gdbarch_frame_align (gdbarch, hppa64_frame_align);
-	  break;
-	}
-      else
-	{
-	  set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, hppa64_call_dummy_breakpoint_offset);
-	  set_gdbarch_deprecated_call_dummy_length (gdbarch, hppa64_call_dummy_length);
-	  set_gdbarch_deprecated_stack_align (gdbarch, hppa64_stack_align);
-	  break;
-	  set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
-	  /* set_gdbarch_deprecated_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
-	  set_gdbarch_deprecated_push_arguments (gdbarch, hppa_push_arguments);
-	  set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
-	  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-	  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-	}
+      set_gdbarch_push_dummy_call (gdbarch, hppa64_push_dummy_call);
+      set_gdbarch_frame_align (gdbarch, hppa64_frame_align);
       break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
       
   /* Struct return methods.  */
@@ -5836,43 +5821,16 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_return_value (gdbarch, hppa32_return_value);
       break;
     case 8:
-      if (0)
-	set_gdbarch_return_value (gdbarch, hppa64_return_value);
-      else
-	{
-	  set_gdbarch_deprecated_extract_return_value (gdbarch, hppa64_extract_return_value);
-	  set_gdbarch_use_struct_convention (gdbarch, hppa64_use_struct_convention);
-	  set_gdbarch_deprecated_store_return_value (gdbarch, hppa64_store_return_value);
-	  set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
-	}
-      break;
+      set_gdbarch_return_value (gdbarch, hppa64_return_value);
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
       
   /* Frame unwind methods.  */
-  switch (tdep->bytes_per_address)
-    {
-    case 4:
-      set_gdbarch_unwind_dummy_id (gdbarch, hppa_unwind_dummy_id);
-      set_gdbarch_unwind_pc (gdbarch, hppa_unwind_pc);
-      frame_unwind_append_sniffer (gdbarch, hppa_frame_unwind_sniffer);
-      frame_base_append_sniffer (gdbarch, hppa_frame_base_sniffer);
-      break;
-    case 8:
-      set_gdbarch_deprecated_saved_pc_after_call (gdbarch, hppa_saved_pc_after_call);
-      set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, hppa_frame_init_saved_regs);
-      set_gdbarch_deprecated_init_extra_frame_info (gdbarch, hppa_init_extra_frame_info);
-      set_gdbarch_deprecated_frame_chain (gdbarch, hppa_frame_chain);
-      set_gdbarch_deprecated_frame_chain_valid (gdbarch, hppa_frame_chain_valid);
-      set_gdbarch_deprecated_frameless_function_invocation (gdbarch, hppa_frameless_function_invocation);
-      set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
-      set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, "bad switch");
-    }
+  set_gdbarch_unwind_dummy_id (gdbarch, hppa_unwind_dummy_id);
+  set_gdbarch_unwind_pc (gdbarch, hppa_unwind_pc);
+  frame_unwind_append_sniffer (gdbarch, hppa_frame_unwind_sniffer);
+  frame_base_append_sniffer (gdbarch, hppa_frame_base_sniffer);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
