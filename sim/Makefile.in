@@ -19,8 +19,9 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 srcdir = .
-
+srcroot = $(srcdir)/..
 prefix = /usr/local
+program_transform_name =
 
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
@@ -44,9 +45,12 @@ docdir = doc
 
 SHELL = /bin/sh
 
-INSTALL = install -c
+INSTALL = $${srcroot}/../install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
+INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
+
 
 AR = ar
 AR_FLAGS = rc
@@ -54,6 +58,8 @@ CFLAGS = -g
 BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
+
+MAKEOVERRIDES=
 
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
@@ -121,7 +127,7 @@ install-nothing: force
 ### z8k
 
 all-z8k: force
-	if [ -f ./z8k/Makefile ] ; then \
+	@if [ -f ./z8k/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./z8k ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
@@ -129,15 +135,16 @@ all-z8k: force
 	fi
 
 install-z8k: force
-	if [ -f ./z8k/Makefile ] ; then \
+	@if [ -f ./z8k/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		  srcroot=`cd $(srcdir); pwd`; export srcroot; \
 		( cd ./z8k ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
 
 clean-z8k: force
-	if [ -f ./z8k/Makefile ] ; then \
+	@if [ -f ./z8k/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./z8k ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
@@ -148,7 +155,7 @@ clean-z8k: force
 ### h8300
 
 all-h8300: force
-	if [ -f ./h8300/Makefile ] ; then \
+	@if [ -f ./h8300/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
@@ -156,15 +163,16 @@ all-h8300: force
 	fi
 
 install-h8300: force
-	if [ -f ./h8300/Makefile ] ; then \
+	@if [ -f ./h8300/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		  srcroot=`cd $(srcdir); pwd`; export srcroot; \
 		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
 
 clean-h8300: force
-	if [ -f ./h8300/Makefile ] ; then \
+	@if [ -f ./h8300/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
@@ -175,8 +183,8 @@ clean-h8300: force
 
 ### h8500
 
-all-h8500: endian.h force
-	if [ -f ./h8500/Makefile ] ; then \
+all-h8500: force
+	@if [ -f ./h8500/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
@@ -184,15 +192,16 @@ all-h8500: endian.h force
 	fi
 
 install-h8500: force
-	if [ -f ./h8500/Makefile ] ; then \
+	@if [ -f ./h8500/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		  srcroot=`cd $(srcdir); pwd`; export srcroot; \
 		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
 
 clean-h8500: force
-	if [ -f ./h8500/Makefile ] ; then \
+	@if [ -f ./h8500/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
@@ -204,7 +213,7 @@ clean-h8500: force
 ### sh
 
 all-sh: force
-	if [ -f ./sh/Makefile ] ; then \
+	@if [ -f ./sh/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./sh ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
@@ -212,7 +221,7 @@ all-sh: force
 	fi
 
 install-sh: force
-	if [ -f ./sh/Makefile ] ; then \
+	@if [ -f ./sh/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./sh ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
@@ -220,7 +229,7 @@ install-sh: force
 	fi
 
 clean-sh: force
-	if [ -f ./sh/Makefile ] ; then \
+	@if [ -f ./sh/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./sh ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
