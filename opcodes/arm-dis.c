@@ -709,7 +709,6 @@ print_insn_big_arm (pc, info)
   unsigned char      b[4];
   long               given;
   int                status;
-  asymbol *          saved_symbol;
   coff_symbol_type * cs;
   int                is_thumb;
   
@@ -758,8 +757,6 @@ print_insn_big_arm (pc, info)
       given = (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | (b[3]);
     }
 
-  saved_symbol = info->symbol;
-  
   if (is_thumb)
     {
       status = print_insn_thumb (pc, info, given);
@@ -769,8 +766,6 @@ print_insn_big_arm (pc, info)
       status = print_insn_arm (pc, info, given);
     }
 
-  info->symbol = saved_symbol; /* Stop displayed symbols from resetting the stored symbol */
-  
   return status;
 }
 
@@ -782,7 +777,6 @@ print_insn_little_arm (pc, info)
   unsigned char      b[4];
   long               given;
   int                status;
-  asymbol *          saved_symbol;
   coff_symbol_type * cs;
   int                is_thumb;
   
@@ -813,8 +807,6 @@ print_insn_little_arm (pc, info)
 
   given = (b[0]) | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
 
-  saved_symbol = info->symbol;
-  
   if (is_thumb)
     {
       status = print_insn_thumb (pc, info, given);
@@ -823,8 +815,6 @@ print_insn_little_arm (pc, info)
     {
       status = print_insn_arm (pc, info, given);
     }
-
-  info->symbol = saved_symbol; /* Stop displayed symbols from resetting the stored symbol */
 
   return status;
 }
