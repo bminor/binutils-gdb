@@ -1,3 +1,35 @@
+Fri Nov 19 14:12:39 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in (mips*-sgi-irix5*): New target.  Use mipsb-elf32.
+	* emulparams/elf32mipsb.sh (DATA_ADDR): Define.
+	(OTHER_READONLY_SECTIONS): Define for .reginfo.
+	(EXECUTABLE_SYMBOLS): Define for _DYNAMIC_LINK.
+	* scripttempl/elf.sc: Use EXECUTABLE_SYMBOLS when not relocating.
+	Move OTHER_READONLY_SECTIONS after all the other readonly
+	sections.  Don't use DATA_ADDR twice.
+
+	* ldmain.c (enter_file_symbols): Removed duplicate tests of p.  If
+	p is in a common section, make sure the BFD has a section of that
+	name.
+
+	* ldlang.c (lang_common): Add newline to error message.
+
+Thu Nov 11 15:54:41 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* emulparams/m68klynx.sh (SCRIPT_NAME): Define to use a
+	Lynx-specific script instead of m68kcoff.
+	(OUTPUT_FORMAT): Define as "coff-m68k-lynx".
+	(ENTRY): Define as __main.
+	(TEXT_START_ADDR): Define as 0.
+	(PAGE_SIZE): Define as 0x1000.
+	* emulparams/i386lynx.sh, emulparams/sparclynx.sh: Fix comment.
+	* scripttempl/m68klynx.sc: New file.
+
+Mon Nov  8 12:00:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldmain.c (get_emulation): Ignore -mips1, -mips2 and -mips3
+	arguments rather than treating them as emulation names.
+
 Fri Nov  5 09:02:52 1993  D. V. Henkel-Wallace  (gumby@blues.cygnus.com)
 
 	* configure.in: Support x86 unixware and netware plus generic netware.
