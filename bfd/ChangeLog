@@ -1,5 +1,9 @@
 Mon Oct 31 14:19:08 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* archive.c (bfd_dont_truncate_arname): Add the ar padding
+	character, if there is room for it, even if the name is the
+	maximum length.
+
 	* elfcode.h (assign_file_positions_except_relocs): Sort the ELF
 	headers by section address when assigning file positions.
 	(elf_sort_hdrs): New static function.

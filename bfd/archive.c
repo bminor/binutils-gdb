@@ -1412,7 +1412,9 @@ bfd_dont_truncate_arname (abfd, pathname, arhdr)
   if (length <= maxlen)
     memcpy (hdr->ar_name, filename, length);
 
-  if (length < maxlen)
+  /* Add the padding character if there is room for it.  */
+  if (length < maxlen
+      || (length == maxlen && length < sizeof hdr->ar_name))
     (hdr->ar_name)[length] = ar_padchar (abfd);
 }
 
