@@ -1,3 +1,8 @@
+Mon Apr  6 12:06:39 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* config/tc-m68k.c (m68k_ip, case "#B"): Install the offset of the
+	operand in the opcode.
+
 start-sanitize-sky
 Fri Apr  3 12:13:03 1998  Doug Evans  <devans@canuck.cygnus.com>
 
