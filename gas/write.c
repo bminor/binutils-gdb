@@ -187,9 +187,6 @@ static void cvt_frag_to_fill PARAMS ((object_headers *, segT, fragS *));
 static void remove_subsegs PARAMS ((frchainS *, int, fragS **, fragS **));
 static void relax_and_size_all_segments PARAMS ((void));
 #endif
-#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && defined (TE_GO32)
-static void set_segment_vma PARAMS ((bfd *, asection *, PTR));
-#endif
 
 /* Create a fixS in obstack 'notes'.  */
 
@@ -1375,20 +1372,6 @@ set_symtab ()
 }
 #endif
 
-#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && defined (TE_GO32)
-static void
-set_segment_vma (abfd, sec, xxx)
-     bfd *abfd;
-     asection *sec;
-     PTR xxx ATTRIBUTE_UNUSED;
-{
-  static bfd_vma addr = 0;
-
-  bfd_set_section_vma (abfd, sec, addr);
-  addr += bfd_section_size (abfd, sec);
-}
-#endif /* BFD_ASSEMBLER && OBJ_COFF && !TE_PE  */
-
 /* Finish the subsegments.  After every sub-segment, we fake an
    ".align ...".  This conforms to BSD4.2 brane-damage.  We then fake
    ".fill 0" because that is the kind of frag that requires least
@@ -1572,14 +1555,6 @@ write_object_file ()
 
   /* Relaxation has completed.  Freeze all syms.  */
   finalize_syms = 1;
-
-#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && defined (TE_GO32)
-  /* Now that the segments have their final sizes, run through the
-     sections and set their vma and lma. !BFD gas sets them, and BFD gas
-     should too. Currently, only DJGPP uses this code, but other
-     COFF targets may need to execute this too.  */
-  bfd_map_over_sections (stdoutput, set_segment_vma, (char *) 0);
-#endif
 
 #ifndef BFD_ASSEMBLER
   /* Crawl the symbol chain.
