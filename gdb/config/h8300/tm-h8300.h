@@ -32,7 +32,7 @@ extern int h8300sxmode;
 #define GDB_TARGET_IS_H8300
 
 /* Needed for remote.c */
-#define REMOTE_BREAKPOINT { 0x57, 0x30}		/* trapa #3 */
+#define DEPRECATED_REMOTE_BREAKPOINT { 0x57, 0x30}		/* trapa #3 */
 /* Needed for remote-hms.c */
 #define CCR_REGNUM 8
 /* Needed for remote-e7000.c */

@@ -1,5 +1,14 @@
 2003-06-08  Andrew Cagney  <cagney@redhat.com>
 
+	Deprecate BIG_REMOTE_BREAKPOINT, LITTLE_REMOTE_BREAKPOINT and
+	REMOTE_BREAKPOINT.
+	* remote.c: Update.
+	* config/sh/tm-sh.h (DEPRECATED_BIG_REMOTE_BREAKPOINT): Update.
+	(DEPRECATED_LITTLE_REMOTE_BREAKPOINT): Update.
+	* config/m68k/tm-sun3.h: Update.
+	* config/m68k/tm-m68klynx.h: Update.
+	* config/h8300/tm-h8300.h (DEPRECATED_REMOTE_BREAKPOINT): Update.
+
 	* trad-frame.h (struct trad_frame_saved_reg): Rename "struct
 	trad_frame".  Update comments.
 	* d10v-tdep.c (struct d10v_unwind_cache): Update.

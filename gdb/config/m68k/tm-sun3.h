@@ -46,7 +46,7 @@
 #include "m68k/tm-m68k.h"
 
 /* Disable alternate breakpoint mechanism needed by 68k stub. */
-#undef REMOTE_BREAKPOINT
+#undef DEPRECATED_REMOTE_BREAKPOINT
 
 /* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least
    documented in a comment in <machine/setjmp.h>! */

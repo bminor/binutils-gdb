@@ -4633,33 +4633,33 @@ extended_remote_async_create_inferior (char *exec_file, char *args, char **env)
 
 
 /* On some machines, e.g. 68k, we may use a different breakpoint
-   instruction than other targets; in those use REMOTE_BREAKPOINT
-   instead of just BREAKPOINT_FROM_PC.  Also, bi-endian targets may
-   define LITTLE_REMOTE_BREAKPOINT and BIG_REMOTE_BREAKPOINT.  If none
-   of these are defined, we just call the standard routines that are
-   in mem-break.c.  */
+   instruction than other targets; in those use
+   DEPRECATED_REMOTE_BREAKPOINT instead of just BREAKPOINT_FROM_PC.
+   Also, bi-endian targets may define
+   DEPRECATED_LITTLE_REMOTE_BREAKPOINT and
+   DEPRECATED_BIG_REMOTE_BREAKPOINT.  If none of these are defined, we
+   just call the standard routines that are in mem-break.c.  */
 
-/* FIXME, these ought to be done in a more dynamic fashion.  For instance,
-   the choice of breakpoint instruction affects target program design and
-   vice versa, and by making it user-tweakable, the special code here
-   goes away and we need fewer special GDB configurations.  */
+/* NOTE: cagney/2003-06-08: This is silly.  A remote and simulator
+   target should use an identical BREAKPOINT_FROM_PC.  As for native,
+   the ARCH-OS-tdep.c code can override the default.  */
 
-#if defined (LITTLE_REMOTE_BREAKPOINT) && defined (BIG_REMOTE_BREAKPOINT) && !defined(REMOTE_BREAKPOINT)
-#define REMOTE_BREAKPOINT
+#if defined (DEPRECATED_LITTLE_REMOTE_BREAKPOINT) && defined (DEPRECATED_BIG_REMOTE_BREAKPOINT) && !defined(DEPRECATED_REMOTE_BREAKPOINT)
+#define DEPRECATED_REMOTE_BREAKPOINT
 #endif
 
-#ifdef REMOTE_BREAKPOINT
+#ifdef DEPRECATED_REMOTE_BREAKPOINT
 
 /* If the target isn't bi-endian, just pretend it is.  */
-#if !defined (LITTLE_REMOTE_BREAKPOINT) && !defined (BIG_REMOTE_BREAKPOINT)
-#define LITTLE_REMOTE_BREAKPOINT REMOTE_BREAKPOINT
-#define BIG_REMOTE_BREAKPOINT REMOTE_BREAKPOINT
+#if !defined (DEPRECATED_LITTLE_REMOTE_BREAKPOINT) && !defined (DEPRECATED_BIG_REMOTE_BREAKPOINT)
+#define DEPRECATED_LITTLE_REMOTE_BREAKPOINT DEPRECATED_REMOTE_BREAKPOINT
+#define DEPRECATED_BIG_REMOTE_BREAKPOINT DEPRECATED_REMOTE_BREAKPOINT
 #endif
 
-static unsigned char big_break_insn[] = BIG_REMOTE_BREAKPOINT;
-static unsigned char little_break_insn[] = LITTLE_REMOTE_BREAKPOINT;
+static unsigned char big_break_insn[] = DEPRECATED_BIG_REMOTE_BREAKPOINT;
+static unsigned char little_break_insn[] = DEPRECATED_LITTLE_REMOTE_BREAKPOINT;
 
-#endif /* REMOTE_BREAKPOINT */
+#endif /* DEPRECATED_REMOTE_BREAKPOINT */
 
 /* Insert a breakpoint on targets that don't have any better
    breakpoint support.  We read the contents of the target location
@@ -4673,7 +4673,7 @@ static int
 remote_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   struct remote_state *rs = get_remote_state ();
-#ifdef REMOTE_BREAKPOINT
+#ifdef DEPRECATED_REMOTE_BREAKPOINT
   int val;
 #endif  
   int bp_size;
@@ -4710,7 +4710,7 @@ remote_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 	}
     }
 
-#ifdef REMOTE_BREAKPOINT  
+#ifdef DEPRECATED_REMOTE_BREAKPOINT  
   val = target_read_memory (addr, contents_cache, sizeof big_break_insn);
 
   if (val == 0)
@@ -4726,7 +4726,7 @@ remote_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
   return val;
 #else
   return memory_insert_breakpoint (addr, contents_cache);
-#endif /* REMOTE_BREAKPOINT */
+#endif /* DEPRECATED_REMOTE_BREAKPOINT */
 }
 
 static int
@@ -4755,11 +4755,11 @@ remote_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
       return (buf[0] == 'E');
     }
 
-#ifdef REMOTE_BREAKPOINT
+#ifdef DEPRECATED_REMOTE_BREAKPOINT
   return target_write_memory (addr, contents_cache, sizeof big_break_insn);
 #else
   return memory_remove_breakpoint (addr, contents_cache);
-#endif /* REMOTE_BREAKPOINT */
+#endif /* DEPRECATED_REMOTE_BREAKPOINT */
 }
 
 static int

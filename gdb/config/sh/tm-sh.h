@@ -27,7 +27,7 @@
 
 #define REGISTER_TYPE  long /* used in standalone.c */
 
-#define BIG_REMOTE_BREAKPOINT    { 0xc3, 0x20 } /* Used in remote.c */
-#define LITTLE_REMOTE_BREAKPOINT { 0x20, 0xc3 } /* Used in remote.c */
+#define DEPRECATED_BIG_REMOTE_BREAKPOINT    { 0xc3, 0x20 } /* Used in remote.c */
+#define DEPRECATED_LITTLE_REMOTE_BREAKPOINT { 0x20, 0xc3 } /* Used in remote.c */
 
 /*#define NOP   {0x20, 0x0b}*/ /* Who uses this???*/
