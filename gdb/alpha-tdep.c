@@ -503,8 +503,8 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	{
 	case 4:
 	  alpha_convert_flt_dbl (raw_buffer, valbuf);
-	  valbuf = raw_buffer;
-	  /* FALLTHRU */
+	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM, raw_buffer);
+	  break;
 
 	case 8:
 	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM, valbuf);
