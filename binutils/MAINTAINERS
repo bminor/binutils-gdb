@@ -32,6 +32,7 @@ other maintainers.
 
 ARM		Nick Clifton <nickc@redhat.com>
 AVR		Denis Chertykov <denisc@overta.ru>
+CRIS		Hans-Peter Nilsson <hp@axis.com>
 HPPA elf32	Alan Modra <alan@linuxcare.com.au>
 ix86		Alan Modra <alan@linuxcare.com.au>
 ix86 COFF,PE	DJ Delorie <dj@redhat.com>

@@ -71,6 +71,7 @@
 #include "elf/pj.h"
 #include "elf/avr.h"
 #include "elf/ia64.h"
+#include "elf/cris.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -565,6 +566,7 @@ guess_is_rela (e_machine)
     case EM_MCORE:
     case EM_IA_64:
     case EM_AVR:
+    case EM_CRIS:
       return TRUE;
 
     case EM_MMA:
@@ -878,6 +880,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  break;
 	case EM_IA_64:
 	  rtype = elf_ia64_reloc_type (type);
+	  break;
+
+	case EM_CRIS:
+	  rtype = elf_cris_reloc_type (type);
 	  break;
 	}
 
@@ -1248,6 +1254,7 @@ get_machine_name (e_machine)
     case EM_ST19:     		return "STMicroelectronics ST19 8-bit microcontroller";
     case EM_VAX:      		return "Digital VAX";
     case EM_AVR:                return "Atmel AVR 8-bit microcontroller";
+    case EM_CRIS:		return "Axis Communications 32-bit embedded processor";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;
