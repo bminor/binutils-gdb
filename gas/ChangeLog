@@ -1,5 +1,8 @@
 Mon Sep 12 17:51:39 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* config/obj-elf.c (obj_elf_type): Rewrite to accept syntax
+	reportedly to be used on Irix 6.
+
 	* config/tc-mips.c (md_pseudo_table): Handle .globl and .global.
 	(s_mips_globl): New static function; needed for Irix 5 support.
 	* ecoff.c (ecoff_build_symbols): If BSF_FUNCTION is set for an
