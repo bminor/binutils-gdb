@@ -1,5 +1,20 @@
 2004-02-21  Mark Kettenis  <kettenis@gnu.org>
 
+	Fix PR build/1549.
+	* i386obsd-tdep.c: Update copyright years.  Include
+	"solib-svr4.h".
+	(i386obsd_init_abi): Don't set regset_from_core_section here.
+	(i386obsd_aout_init_abi): New function.  Set
+	regset_from_core_section here.
+	(i386obsd_elf_init_abi): New function.
+	(_initialize_i386obsd_tdep): Register OS/ABI for OpenBSD ELF.
+	* Makefile.in (i386obsd-tdep.o): Update dependecies.
+	* config/i386/obsd.mt (TDEPFILES): Add solib.o and solib-svr4.o.
+	(TM_FILE): Set to tm-nbsd.h.
+
+	* config/i386/obsd.mh (NATDEPFILES): Remove solib.o and
+	solib-sunos.o.
+
 	* solib-svr4.h: Update copyright year.
 	(svr4_ilp32_fetch_link_map_offsets)
 	(svr4_lp64_fetch_link_map_offsets): New prototype.

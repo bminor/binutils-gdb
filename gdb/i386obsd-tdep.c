@@ -1,6 +1,7 @@
 /* Target-dependent code for OpenBSD/i386.
 
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002, 2003
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002,
+   2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -32,6 +33,7 @@
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
+#include "solib-svr4.h"
 
 /* From <machine/reg.h>.  */
 static int i386obsd_r_reg_offset[] =
@@ -130,10 +132,6 @@ i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (i386obsd_r_reg_offset);
   tdep->sizeof_gregset = 16 * 4;
 
-  /* OpenBSD has a single register set.  */
-  set_gdbarch_regset_from_core_section
-    (gdbarch, i386obsd_aout_regset_from_core_section);
-
   /* OpenBSD uses -freg-struct-return by default.  */
   tdep->struct_return = reg_struct_return;
 
@@ -145,6 +143,38 @@ i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      origional 4.3 BSD.  */
   tdep->sc_reg_offset = i386obsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386obsd_sc_reg_offset);
+}
+
+/* OpenBSD a.out.  */
+
+static void
+i386obsd_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  i386obsd_init_abi (info, gdbarch);
+
+  /* OpenBSD a.out has a single register set.  */
+  set_gdbarch_regset_from_core_section
+    (gdbarch, i386obsd_aout_regset_from_core_section);
+}
+
+/* OpenBSD ELF.  */
+
+static void
+i386obsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* It's still OpenBSD.  */
+  i386obsd_init_abi (info, gdbarch);
+
+  /* But ELF-based.  */
+  i386_elf_init_abi (info, gdbarch);
+
+  /* OpenBSD ELF uses SVR4-style shared libraries.  */
+  set_gdbarch_in_solib_call_trampoline
+    (gdbarch, generic_in_solib_call_trampoline);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
 
@@ -161,5 +191,7 @@ _initialize_i386obsd_tdep (void)
 #define GDB_OSABI_OPENBSD_AOUT GDB_OSABI_NETBSD_AOUT
 
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_OPENBSD_AOUT,
-			  i386obsd_init_abi);
+			  i386obsd_aout_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_OPENBSD_ELF,
+			  i386obsd_elf_init_abi);
 }
