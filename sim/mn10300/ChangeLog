@@ -1,3 +1,10 @@
+2003-02-26  David Carlton  <carlton@math.stanford.edu>
+
+	* dv-mn103tim.c (read_special_timer6_reg): Add break after
+	empty default: label.
+	(write_special_timer6_reg): Ditto.
+	Update copyright.
+
 2002-11-28  Andrew Cagney  <cagney@redhat.com>
 
 	* sim-main.h: Only include "idecode.h" once.
