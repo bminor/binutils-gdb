@@ -262,15 +262,11 @@ fetch_register (int regno)
    Returns the length copied, which is either the LEN argument or zero.
    This xfer function does not do partial moves, since child_ops
    doesn't allow memory operations to cross below us in the target stack
-   anyway.  */
+   anyway.  TARGET is ignored.  */
 
 int
-child_xfer_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* ignored */
+child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		   struct target_ops *target)
 {
   register int i;
   /* Round starting address down to longword boundary.  */

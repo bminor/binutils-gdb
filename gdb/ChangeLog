@@ -1,5 +1,10 @@
 2000-09-01  Kevin Buettner  <kevinb@redhat.com>
 
+	* hppa-tdep.c (record_text_segment_lowaddr): Protoize.
+	* hppah-nat.c (child_xfer_memory): Protoize.
+
+2000-09-01  Kevin Buettner  <kevinb@redhat.com>
+
 	* symtab.c (decode_line_1):  Make sure leading character is
 	actually a colon before skipping over leading colons in global
 	namespace specification.

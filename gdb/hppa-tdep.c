@@ -294,10 +294,7 @@ compare_unwind_entries (const void *arg1, const void *arg2)
 static CORE_ADDR low_text_segment_address;
 
 static void
-record_text_segment_lowaddr (abfd, section, ignored)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *section;
-     PTR ignored ATTRIBUTE_UNUSED;
+record_text_segment_lowaddr (bfd *abfd, asection *section, void *ignored)
 {
   if ((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY)
        == (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
