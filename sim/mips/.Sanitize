@@ -24,6 +24,13 @@ else
         lose_these_too="${r5900_files} ${lose_these_too}"
 fi
 
+vr4320_files="vr4320.igen"
+if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
+        keep_these_too="${vr4320_files} ${keep_these_too}"
+else
+        lose_these_too="${vr4320_files} ${lose_these_too}"
+fi
+
 sky_files="ChangeLog.sky sky-device.c sky-device.h sky-dma.c sky-dma.h sky-bits.h"
 sky_files="$sky_files sky-engine.c sky-gpuif.c sky-gpuif.h"
 sky_files="$sky_files sky-hardware.c sky-hardware.h sky-gdb.c"
@@ -209,6 +216,35 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-vr5400/,/end-\sanitize\-vr5400/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+vr4320_files="ChangeLog Makefile.in configure configure.in mips.igen"
+
+if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
+	for i in $vr4320_files ; do
+		if test ! -d $i && (grep sanitize-vr4320 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vr4320 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-vr4320 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vr4320\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vr4320/,/end-\sanitize\-vr4320/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
