@@ -1,3 +1,13 @@
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
+	* elf.c (_bfd_elf_print_private_bfd_data): Handle DT_BIND_NOW,
+	DT_INIT_ARRAY, DT_FINI_ARRAY, DT_INIT_ARRAYSZ, DT_FINI_ARRAYSZ,
+	DT_RUNPATH, DT_FLAGS, DT_PREINIT_ARRAY, DT_PREINIT_ARRAYSZ,
+	DT_PLTPADSZ, DT_MOVEENT, DT_MOVESZ, DT_FEATURE, DT_POSFLAG_1,
+	DT_SYMINSZ, DT_SYMINENT, DT_CONFIG, DT_DEPAUDIT, DT_AUDIT,
+	DT_PLTPAD, DT_MOVETAB, DT_SYMINFO, DT_RELACOUNT, DT_RELCOUNT,
+	DT_FLAGS_1, DT_USED and DT_CHECKSUM.
+
 Tue Jul 18 13:11:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* elf.c (bfd_elf_get_sign_extend_vma, bfd_elf_get_arch_size): Move

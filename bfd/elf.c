@@ -657,13 +657,42 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    case DT_DEBUG: name = "DEBUG"; break;
 	    case DT_TEXTREL: name = "TEXTREL"; break;
 	    case DT_JMPREL: name = "JMPREL"; break;
-	    case DT_AUXILIARY: name = "AUXILIARY"; stringp = true; break;
-	    case DT_FILTER: name = "FILTER"; stringp = true; break;
+	    case DT_BIND_NOW: name = "BIND_NOW"; break;
+	    case DT_INIT_ARRAY: name = "INIT_ARRAY"; break;
+	    case DT_FINI_ARRAY: name = "FINI_ARRAY"; break;
+	    case DT_INIT_ARRAYSZ: name = "INIT_ARRAYSZ"; break;
+	    case DT_FINI_ARRAYSZ: name = "FINI_ARRAYSZ"; break;
+	    case DT_RUNPATH: name = "RUNPATH"; stringp = true; break;
+	    case DT_FLAGS: name = "FLAGS"; break;
+	    case DT_PREINIT_ARRAY: name = "PREINIT_ARRAY"; break;
+	    case DT_PREINIT_ARRAYSZ: name = "PREINIT_ARRAYSZ"; break;
+	    case DT_PLTPADSZ: name = "PLTPADSZ"; break;
+	    case DT_MOVEENT: name = "MOVEENT"; break;
+	    case DT_MOVESZ: name = "MOVESZ"; break;
+	    case DT_FEATURE: name = "FEATURE"; break;
+	    case DT_POSFLAG_1: name = "POSFLAG_1"; break;
+	    case DT_SYMINSZ: name = "SYMINSZ"; break;
+	    case DT_SYMINENT: name = "SYMINENT"; break;
+	    case DT_CONFIG: name = "CONFIG"; break;
+	    case DT_DEPAUDIT: name = "DEPAUDIT"; break;
+	    case DT_AUDIT: name = "AUDIT"; break;
+	    case DT_PLTPAD: name = "PLTPAD"; break;
+	    case DT_MOVETAB: name = "MOVETAB"; break;
+	    case DT_SYMINFO: name = "SYMINFO"; break;
+	    case DT_RELACOUNT: name = "RELACOUNT"; break;
+	    case DT_RELCOUNT: name = "RELCOUNT"; break;
+	    case DT_FLAGS_1: name = "FLAGS_1"; break;
 	    case DT_VERSYM: name = "VERSYM"; break;
 	    case DT_VERDEF: name = "VERDEF"; break;
 	    case DT_VERDEFNUM: name = "VERDEFNUM"; break;
 	    case DT_VERNEED: name = "VERNEED"; break;
 	    case DT_VERNEEDNUM: name = "VERNEEDNUM"; break;
+	    case DT_AUXILIARY: name = "AUXILIARY"; stringp = true; break;
+	    case DT_USED: name = "USED"; break;
+	    case DT_FILTER: name = "FILTER"; stringp = true; break;
+#if DT_CHECKSUM != 0
+	    case DT_CHECKSUM: name = "CHECKSUM"; break;
+#endif
 	    }
 
 	  fprintf (f, "  %-11s ", name);
