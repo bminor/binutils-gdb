@@ -1816,6 +1816,10 @@ decode_base_type (cs, c_type, aux)
 	    /* anonymous union type */
 	    type = coff_alloc_type (cs->c_symnum);
 	    TYPE_NAME (type) = concat ("union ", "<opaque>", NULL);
+	    TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
+	      obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
+	    bzero (TYPE_CPLUS_SPECIFIC (type), sizeof (struct cplus_struct_type));
+	    TYPE_LENGTH (type) = 0;
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_FIELDS (type) = 0;
 	    TYPE_NFIELDS (type) = 0;

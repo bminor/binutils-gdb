@@ -1,6 +1,6 @@
 /* Read a symbol table in MIPS' format (Third-Eye).
-   Copyright (C) 1986, 1987, 1989-1991 Free Software Foundation, Inc.
-   Contributed by Alessandro Forin (af@cs.cmu.edu) at CMU
+   Copyright 1986, 1987, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Contributed by Alessandro Forin (af@cs.cmu.edu) at CMU.
 
 This file is part of GDB.
 
@@ -161,15 +161,6 @@ struct type *builtin_type_fixed_dec;
 struct type *builtin_type_float_dec;
 struct type *builtin_type_string;
 
-/* Template types */
-
-static struct type *builtin_type_ptr;
-static struct type *builtin_type_struct;
-static struct type *builtin_type_union;
-static struct type *builtin_type_enum;
-static struct type *builtin_type_range;
-static struct type *builtin_type_set;
-
 /* Forward declarations */
 
 static struct symbol	*new_symbol();
@@ -242,9 +233,6 @@ mipscoff_symfile_read(sf, addr, mainline)
   register int val;
   int symtab_offset;
   int stringtab_offset;
-
-  /* Initialize a variable that we couldn't do at _initialize_ time. */
-  builtin_type_ptr = lookup_pointer_type (builtin_type_void);
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
    desc = fileno ((FILE *)(abfd->iostream));	/* Raw file descriptor */
@@ -1066,7 +1054,7 @@ static struct type *parse_type(ax, sh, bs)
 
 	TIR            *t;
 	struct type    *tp = 0, *tp1;
-	char           *fmt = "%s";
+	char           *fmt;
 
 	/* Procedures start off by one */
 	if (sh->st == stProc || sh->st == stStaticProc)
@@ -1079,38 +1067,43 @@ static struct type *parse_type(ax, sh, bs)
 
 	/* Use aux as a type information record, map its basic type */
 	t = &ax->ti;
-	if (t->bt > 26 || t->bt == btPicture) {
+	if (t->bt > (sizeof (map_bt)/sizeof (*map_bt))) {
 		complain (&basic_type_complaint, t->bt);
 		return builtin_type_int;
 	}
 	if (map_bt[t->bt])
 		tp = *map_bt[t->bt];
+		fmt = "%s";
 	else {
-		/* Cannot use builtin types, use templates */
-		tp = make_type(TYPE_CODE_VOID, 0, 0, 0);
+		/* Cannot use builtin types -- build our own */
 		switch (t->bt) {
 		    case btAdr:
-			*tp = *builtin_type_ptr;
+			tp = lookup_pointer_type (builtin_type_void);
+			fmt = "%s";
 			break;
 		    case btStruct:
-			*tp = *builtin_type_struct;
+			tp = make_struct_type(TYPE_CODE_STRUCT, 0, 0, 0);
 			fmt = "struct %s";
 			break;
 		    case btUnion:
-			*tp = *builtin_type_union;
+			tp = make_struct_type(TYPE_CODE_UNION, 0, 0, 0);
 			fmt = "union %s";
 			break;
 		    case btEnum:
-			*tp = *builtin_type_enum;
+			tp = make_type(TYPE_CODE_ENUM, 0, 0, 0);
 			fmt = "enum %s";
 			break;
 		    case btRange:
-			*tp = *builtin_type_range;
+			tp = make_type(TYPE_CODE_RANGE, 0, 0, 0);
+			fmt = "%s";
 			break;
 		    case btSet:
-			*tp = *builtin_type_set;
+			tp = make_type(TYPE_CODE_SET, 0, 0, 0);
 			fmt = "set %s";
 			break;
+		    default:
+			complain (&basic_type_complaint, t->bt);
+			return builtin_type_int;
 		}
 	}
 
@@ -2548,6 +2541,7 @@ make_type(code, length, uns, name)
 {
 	register struct type *type;
 
+	/* FIXME, I don't think this ever gets freed.  */
 	type = (struct type *) xzalloc(sizeof(struct type));
 	TYPE_CODE(type) = code;
 	TYPE_LENGTH(type) = length;
@@ -2555,6 +2549,25 @@ make_type(code, length, uns, name)
 	TYPE_NAME(type) = name;
 	TYPE_VPTR_FIELDNO (type) = -1;
 
+	return type;
+}
+
+/* Create and initialize a new struct or union type, a la make_type.  */
+
+static
+struct type *
+make_struct_type(code, length, uns, name)
+     enum type_code code;
+     int length, uns;
+     char *name;
+{
+	register struct type *type;
+
+	type = make_type (code, length, uns, name);
+	
+	/* FIXME, I don't think this ever gets freed.  */
+	TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
+	  xzalloc (sizeof (struct cplus_struct_type));
 	return type;
 }
 
@@ -2795,15 +2808,4 @@ _initialize_mipsread ()
 					   0, "fixed_decimal");
 	builtin_type_float_dec = make_type(TYPE_CODE_FLT, sizeof(double),
 					   0, "floating_decimal");
-
-	/* Templates types */
-	builtin_type_struct = make_type(TYPE_CODE_STRUCT, 0, 0, 0);
-	builtin_type_union = make_type(TYPE_CODE_UNION, 0, 0, 0);
-	builtin_type_enum = make_type(TYPE_CODE_ENUM, 0, 0, 0);
-	builtin_type_range = make_type(TYPE_CODE_RANGE, 0, 0, 0);
-	builtin_type_set = make_type(TYPE_CODE_SET, 0, 0, 0);
-
-	/* We can't do this now because builtin_type_void may not
-	   be set yet.  Do it at symbol reading time.  */
-	/* builtin_type_ptr = lookup_pointer_type (builtin_type_void); */
 }

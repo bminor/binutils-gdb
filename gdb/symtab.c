@@ -393,7 +393,7 @@ lookup_template_type (name, type, block)
   strcpy(nam, name);
   strcat(nam, "<");
   strcat(nam, type->name);
-  strcat(nam, " >");		/* extra space still introduced in gcc? */
+  strcat(nam, " >");	/* FIXME, extra space still introduced in gcc? */
 
   sym = lookup_symbol (nam, block, VAR_NAMESPACE, 0, (struct symtab **)NULL);
 
@@ -416,7 +416,7 @@ lookup_struct_elt_type (type, name, noerr)
 {
   int i;
 
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
+  if (   TYPE_CODE (type) != TYPE_CODE_STRUCT
       && TYPE_CODE (type) != TYPE_CODE_UNION)
     {
       target_terminal_ours ();
@@ -524,212 +524,118 @@ struct type *
 lookup_member_type (type, domain)
      struct type *type, *domain;
 {
-  register struct type *mtype = TYPE_MAIN_VARIANT (type);
-  struct type *main_type;
+  register struct type *mtype;
 
-  main_type = mtype;
-  while (mtype)
-    {
-      if (TYPE_DOMAIN_TYPE (mtype) == domain)
-	return mtype;
-      mtype = TYPE_NEXT_VARIANT (mtype);
-    }
-
-  /* This is the first time anyone wanted this member type.  */
-  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
-    mtype  = (struct type *) xmalloc (sizeof (struct type));
-  else
-    mtype  = (struct type *) obstack_alloc (symbol_obstack,
-					    sizeof (struct type));
-
-  bzero (mtype, sizeof (struct type));
-  if (main_type == 0)
-    main_type = mtype;
-  else
-    {
-      TYPE_NEXT_VARIANT (mtype) = TYPE_NEXT_VARIANT (main_type);
-      TYPE_NEXT_VARIANT (main_type) = mtype;
-    }
-  TYPE_MAIN_VARIANT (mtype) = main_type;
-  TYPE_TARGET_TYPE (mtype) = type;
-  TYPE_DOMAIN_TYPE (mtype) = domain;
-  /* New type is permanent if type pointed to is permanent.  */
-  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
-    TYPE_FLAGS (mtype) |= TYPE_FLAG_PERM;
-
-  /* In practice, this is never used.  */
-  TYPE_LENGTH (mtype) = 1;
-  TYPE_CODE (mtype) = TYPE_CODE_MEMBER;
-
-#if 0
-  /* Now splice in the new member pointer type.  */
-  if (main_type)
-    {
-      /* This type was not "smashed".  */
-      TYPE_CHAIN (mtype) = TYPE_CHAIN (main_type);
-      TYPE_CHAIN (main_type) = mtype;
-    }
-#endif
-
+  mtype  = (struct type *) obstack_alloc (symbol_obstack,
+					  sizeof (struct type));
+  smash_to_member_type (mtype, domain, type);
   return mtype;
 }
 
-/* Allocate a stub method whose return type is
-   TYPE.  We will fill in arguments later.  This always
-   returns a fresh type.  If we unify this type with
-   an existing type later, the storage allocated
-   here can be freed.  */
+/* Allocate a stub method whose return type is TYPE.  
+   This apparently happens for speed of symbol reading, since parsing
+   out the arguments to the method is cpu-intensive, the way we are doing
+   it.  So, we will fill in arguments later.
+   This always returns a fresh type.   */
+
 struct type *
 allocate_stub_method (type)
      struct type *type;
 {
-  struct type *mtype = (struct type *)xmalloc (sizeof (struct type));
+  struct type *mtype = (struct type *) obstack_alloc (symbol_obstack,
+						      sizeof (struct type));
   bzero (mtype, sizeof (struct type));
-  TYPE_MAIN_VARIANT (mtype) = mtype;
   TYPE_TARGET_TYPE (mtype) = type;
+  /*  _DOMAIN_TYPE (mtype) = unknown yet */
+  /*  _ARG_TYPES (mtype) = unknown yet */
   TYPE_FLAGS (mtype) = TYPE_FLAG_STUB;
   TYPE_CODE (mtype) = TYPE_CODE_METHOD;
   TYPE_LENGTH (mtype) = 1;
   return mtype;
 }
 
-/* Lookup a method type belonging to class DOMAIN, returning type TYPE,
-   and taking a list of arguments ARGS.
-   If one is not found, allocate a new one.  */
+/* Ugly hack to convert method stubs into method types.
 
-struct type *
-lookup_method_type (domain, type, args)
-     struct type *domain, *type, **args;
-{
-  register struct type *mtype = TYPE_MAIN_VARIANT (type);
-  struct type *main_type;
-
-  main_type = mtype;
-  while (mtype)
-    {
-      if (TYPE_DOMAIN_TYPE (mtype) == domain)
-	{
-	  struct type **t1 = args;
-	  struct type **t2 = TYPE_ARG_TYPES (mtype);
-	  if (t2)
-	    {
-	      int i;
-	      for (i = 0; t1[i] != 0 && t1[i]->code != TYPE_CODE_VOID; i++)
-		if (t1[i] != t2[i])
-		  break;
-	      if (t1[i] == t2[i])
-		return mtype;
-	    }
-	}
-      mtype = TYPE_NEXT_VARIANT (mtype);
-    }
-
-  /* This is the first time anyone wanted this member type.  */
-  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
-    mtype  = (struct type *) xmalloc (sizeof (struct type));
-  else
-    mtype  = (struct type *) obstack_alloc (symbol_obstack,
-					    sizeof (struct type));
-
-  bzero (mtype, sizeof (struct type));
-  if (main_type == 0)
-    main_type = mtype;
-  else
-    {
-      TYPE_NEXT_VARIANT (mtype) = TYPE_NEXT_VARIANT (main_type);
-      TYPE_NEXT_VARIANT (main_type) = mtype;
-    }
-  TYPE_MAIN_VARIANT (mtype) = main_type;
-  TYPE_TARGET_TYPE (mtype) = type;
-  TYPE_DOMAIN_TYPE (mtype) = domain;
-  TYPE_ARG_TYPES (mtype) = args;
-  /* New type is permanent if type pointed to is permanent.  */
-  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
-    TYPE_FLAGS (mtype) |= TYPE_FLAG_PERM;
-
-  /* In practice, this is never used.  */
-  TYPE_LENGTH (mtype) = 1;
-  TYPE_CODE (mtype) = TYPE_CODE_METHOD;
-
-#if 0
-  /* Now splice in the new member pointer type.  */
-  if (main_type)
-    {
-      /* This type was not "smashed".  */
-      TYPE_CHAIN (mtype) = TYPE_CHAIN (main_type);
-      TYPE_CHAIN (main_type) = mtype;
-    }
-#endif
-
-  return mtype;
-}
-
-#if 0
-/* Given a type TYPE, return a type which has offset OFFSET,
-   via_virtual VIA_VIRTUAL, and via_public VIA_PUBLIC.
-   May need to construct such a type if none exists.  */
-struct type *
-lookup_basetype_type (type, offset, via_virtual, via_public)
+   He ain't kiddin'.  This demangles the name of the method into a string
+   including argument types, parses out each argument type, generates
+   a string casting a zero to that type, evaluates the string, and stuffs
+   the resulting type into an argtype vector!!!  Then it knows the type
+   of the whole function (including argument types for overloading),
+   which info used to be in the stab's but was removed to hack back
+   the space required for them.  */
+void
+check_stub_method (type, i, j)
      struct type *type;
-     int offset;
-     int via_virtual, via_public;
+     int i, j;
 {
-  register struct type *btype = TYPE_MAIN_VARIANT (type);
-  struct type *main_type;
+  extern char *gdb_mangle_name (), *strchr ();
+  struct fn_field *f;
+  char *mangled_name = gdb_mangle_name (type, i, j);
+  char *demangled_name = cplus_demangle (mangled_name, 0);
+  char *argtypetext, *p;
+  int depth = 0, argcount = 1;
+  struct type **argtypes;
+  struct type *mtype;
 
-  if (offset != 0)
+  /* Now, read in the parameters that define this type.  */
+  argtypetext = strchr (demangled_name, '(') + 1;
+  p = argtypetext;
+  while (*p)
     {
-      printf ("Internal error: type offset non-zero in lookup_basetype_type");
-      offset = 0;
+      if (*p == '(')
+	depth += 1;
+      else if (*p == ')')
+	depth -= 1;
+      else if (*p == ',' && depth == 0)
+	argcount += 1;
+
+      p += 1;
+    }
+  /* We need one more slot for the void [...] or NULL [end of arglist] */
+  argtypes = (struct type **) obstack_alloc (symbol_obstack,
+				(argcount+1) * sizeof (struct type *));
+  p = argtypetext;
+  argtypes[0] = lookup_pointer_type (type);
+  argcount = 1;
+
+  if (*p != ')')			/* () means no args, skip while */
+    {
+      depth = 0;
+      while (*p)
+	{
+	  if (depth <= 0 && (*p == ',' || *p == ')'))
+	    {
+	      argtypes[argcount] =
+		  parse_and_eval_type (argtypetext, p - argtypetext);
+	      argcount += 1;
+	      argtypetext = p + 1;
+	    }
+
+	  if (*p == '(')
+	    depth += 1;
+	  else if (*p == ')')
+	    depth -= 1;
+
+	  p += 1;
+	}
     }
 
-  main_type = btype;
-  while (btype)
-    {
-      if (/* TYPE_OFFSET (btype) == offset
-	  && */ TYPE_VIA_PUBLIC (btype) == via_public
-	  && TYPE_VIA_VIRTUAL (btype) == via_virtual)
-	return btype;
-      btype = TYPE_NEXT_VARIANT (btype);
-    }
-
-  /* This is the first time anyone wanted this member type.  */
-  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
-    btype  = (struct type *) xmalloc (sizeof (struct type));
+  if (p[-2] != '.')			/* ... */
+    argtypes[argcount] = builtin_type_void;	/* Ellist terminator */
   else
-    btype  = (struct type *) obstack_alloc (symbol_obstack,
-					    sizeof (struct type));
+    argtypes[argcount] = NULL;		/* List terminator */
 
-  if (main_type == 0)
-    {
-      main_type = btype;
-      bzero (btype, sizeof (struct type));
-      TYPE_MAIN_VARIANT (btype) = main_type;
-    }
-  else
-    {
-      bcopy (main_type, btype, sizeof (struct type));
-      TYPE_NEXT_VARIANT (main_type) = btype;
-    }
-/* TYPE_OFFSET (btype) = offset; */
-  if (via_public)
-    TYPE_FLAGS (btype) |= TYPE_FLAG_VIA_PUBLIC;
-  if (via_virtual)
-    TYPE_FLAGS (btype) |= TYPE_FLAG_VIA_VIRTUAL;
-  /* New type is permanent if type pointed to is permanent.  */
-  if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
-    TYPE_FLAGS (btype) |= TYPE_FLAG_PERM;
+  free (demangled_name);
 
-  /* In practice, this is never used.  */
-  TYPE_LENGTH (btype) = 1;
-  TYPE_CODE (btype) = TYPE_CODE_STRUCT;
-  TYPE_CPLUS_SPECIFIC (btype)
-    = (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type)));
-  bzero (TYPE_CPLUS_SPECIFIC (btype), sizeof (struct cplus_struct_type));
+  f = TYPE_FN_FIELDLIST1 (type, i);
+  TYPE_FN_FIELD_PHYSNAME (f, j) = mangled_name;
 
-  return btype;
+  /* Now update the old "stub" type into a real type.  */
+  mtype = TYPE_FN_FIELD_TYPE (f, j);
+  TYPE_DOMAIN_TYPE (mtype) = type;
+  TYPE_ARG_TYPES (mtype) = argtypes;
+  TYPE_FLAGS (mtype) &= ~TYPE_FLAG_STUB;
 }
-#endif
 
 /* Given a type TYPE, return a type of functions that return that type.
    May need to construct such a type if this is the first use.  */
@@ -813,7 +719,11 @@ create_array_type (element_type, number)
 }
 
 
-/* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE.  */
+/* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE. 
+   A MEMBER is a wierd thing -- it amounts to a typed offset into
+   a struct, e.g. "an int at offset 8".  A MEMBER TYPE doesn't
+   include the offset (that's the value of the MEMBER itself), but does
+   include the structure type into which it points (for some reason).  */
 
 void
 smash_to_member_type (type, domain, to_type)
@@ -822,15 +732,12 @@ smash_to_member_type (type, domain, to_type)
   bzero (type, sizeof (struct type));
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
-
-  /* In practice, this is never needed.  */
-  TYPE_LENGTH (type) = 1;
+  TYPE_LENGTH (type) = 1;	/* In practice, this is never needed.  */
   TYPE_CODE (type) = TYPE_CODE_MEMBER;
-
-  TYPE_MAIN_VARIANT (type) = lookup_member_type (domain, to_type);
 }
 
-/* Smash TYPE to be a type of method of DOMAIN with type TO_TYPE.  */
+/* Smash TYPE to be a type of method of DOMAIN with type TO_TYPE.
+   METHOD just means `function that gets an extra "this" argument'.  */
 
 void
 smash_to_method_type (type, domain, to_type, args)
@@ -840,12 +747,8 @@ smash_to_method_type (type, domain, to_type, args)
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
   TYPE_ARG_TYPES (type) = args;
-
-  /* In practice, this is never needed.  */
-  TYPE_LENGTH (type) = 1;
+  TYPE_LENGTH (type) = 1;	/* In practice, this is never needed.  */
   TYPE_CODE (type) = TYPE_CODE_METHOD;
-
-  TYPE_MAIN_VARIANT (type) = lookup_method_type (domain, to_type, args);
 }
 
 /* Find which partial symtab on the partial_symtab_list contains
@@ -1988,7 +1891,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 				     (struct symtab **)NULL);
        
 	  if (sym_class &&
-	      (TYPE_CODE (SYMBOL_TYPE (sym_class)) == TYPE_CODE_STRUCT
+	      (   TYPE_CODE (SYMBOL_TYPE (sym_class)) == TYPE_CODE_STRUCT
 	       || TYPE_CODE (SYMBOL_TYPE (sym_class)) == TYPE_CODE_UNION))
 	    {
 	      /* Arg token is not digits => try it as a function name
@@ -2772,11 +2675,10 @@ init_type (code, length, uns, name)
   TYPE_NAME (type) = name;
 
   /* C++ fancies.  */
-  if (code == TYPE_CODE_STRUCT)
+  if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
     {
       TYPE_CPLUS_SPECIFIC (type)
 	= (struct cplus_struct_type *) xmalloc (sizeof (struct cplus_struct_type));
-      TYPE_MAIN_VARIANT (type) = type;
       TYPE_NFN_FIELDS (type) = 0;
       TYPE_N_BASECLASSES (type) = 0;
     }

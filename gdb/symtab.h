@@ -131,10 +131,9 @@ struct type
      For an array type, describes the type of the elements.
      For a function or method type, describes the type of the value.
      For a range type, describes the type of the full range.
-     For a record type, it's the "main variant" of the record type,
-     used for computing pointers to members.
      Unused otherwise.  */
   struct type *target_type;
+
   /* Type that is a pointer to this type.
      Zero if no such pointer-to type is known yet.
      The debugger may add the address of such a type
@@ -142,7 +141,6 @@ struct type
   struct type *pointer_type;
   /* C++: also need a reference type.  */
   struct type *reference_type;
-
   /* Type that is a function returning this type.
      Zero if no such function type is known here.
      The debugger may add the address of such a type
@@ -189,7 +187,7 @@ struct type
      the field number of that pointer in the structure.
 
      For types that are pointer to member types, VPTR_BASETYPE
-     ifs the type that this pointer is a member of.
+     is the type that this pointer is a member of.
 
      Unused otherwise.  */
   struct type *vptr_basetype;
@@ -204,23 +202,10 @@ struct type
     } type_specific;
 };
 
-/* C++ language-specific information for TYPE_CODE_STRUCT nodes.  */
+/* C++ language-specific information for TYPE_CODE_STRUCT and TYPE_CODE_UNION
+   nodes.  */
 struct cplus_struct_type
 {
-  /* Handling of pointers to members:
-     TYPE_MAIN_VARIANT is used for pointer and pointer
-     to member types.  Normally it is the value of the address of its
-     containing type.  However, for pointers to members, we must be
-     able to allocate pointer to member types and look them up
-     from some place of reference.
-     NEXT_VARIANT is the next element in the chain.
-
-     A long time ago (Jul 88; GDB 2.5) Tiemann said that
-     MAIN_VARIANT/NEXT_VARIANT may no longer be necessary and that he
-     might eliminate it.  I don't know whether this is still true (or
-     ever was).  */
-  struct type *next_variant;
-
   B_TYPE *virtual_field_bits; /* if base class is virtual */
   B_TYPE *private_field_bits;
   B_TYPE *protected_field_bits;
@@ -676,8 +661,6 @@ int current_source_line;
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
 #define TYPE_FUNCTION_TYPE(thistype) (thistype)->function_type
-#define TYPE_MAIN_VARIANT(thistype) (thistype)->target_type
-#define TYPE_NEXT_VARIANT(thistype) (TYPE_CPLUS_SPECIFIC (thistype))->next_variant
 #define TYPE_LENGTH(thistype) (thistype)->length
 #define TYPE_FLAGS(thistype) (thistype)->flags
 #define TYPE_UNSIGNED(thistype) ((thistype)->flags & TYPE_FLAG_UNSIGNED)
@@ -812,7 +795,6 @@ extern int contained_in();
 extern struct type *lookup_template_type ();
 extern struct type *lookup_reference_type ();
 extern struct type *lookup_member_type ();
-extern struct type *lookup_method_type ();
 extern void smash_to_method_type ();
 void smash_to_member_type (
 #ifdef __STDC__

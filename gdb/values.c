@@ -1147,7 +1147,7 @@ value_static_field (type, fieldname, fieldno)
 }
 
 /* Compute the address of the baseclass which is
-   the INDEXth baseclass of TYPE.  The TYPE base
+   the INDEXth baseclass of class TYPE.  The TYPE base
    of the object is at VALADDR.
 
    If ERRP is non-NULL, set *ERRP to be the errno code of any error,
@@ -1174,9 +1174,6 @@ baseclass_addr (type, index, valaddr, valuep, errp)
       register int i, len = TYPE_NFIELDS (type);
       register int n_baseclasses = TYPE_N_BASECLASSES (type);
       char *vbase_name, *type_name = type_name_no_tag (basetype);
-
-      if (TYPE_MAIN_VARIANT (basetype))
-	basetype = TYPE_MAIN_VARIANT (basetype);
 
       vbase_name = (char *)alloca (strlen (type_name) + 8);
       sprintf (vbase_name, "_vb$%s", type_name);
@@ -1237,84 +1234,6 @@ baseclass_addr (type, index, valaddr, valuep, errp)
   if (valuep)
     *valuep = 0;
   return valaddr + TYPE_BASECLASS_BITPOS (type, index) / 8;
-}
-
-/* Ugly hack to convert method stubs into method types.
-
-   He ain't kiddin'.  This demangles the name of the method into a string
-   including argument types, parses out each argument type, generates
-   a string casting a zero to that type, evaluates the string, and stuffs
-   the resulting type into an argtype vector!!!  Then it knows the type
-   of the whole function (including argument types for overloading),
-   which info used to be in the stab's but was removed to hack back
-   the space required for them.  */
-void
-check_stub_method (type, i, j)
-     struct type *type;
-     int i, j;
-{
-  extern char *gdb_mangle_name (), *strchr ();
-  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
-  char *mangled_name = gdb_mangle_name (type, i, j);
-  char *demangled_name = cplus_demangle (mangled_name, 0);
-  char *argtypetext, *p;
-  int depth = 0, argcount = 1;
-  struct type **argtypes;
-
-  /* Now, read in the parameters that define this type.  */
-  argtypetext = strchr (demangled_name, '(') + 1;
-  p = argtypetext;
-  while (*p)
-    {
-      if (*p == '(')
-	depth += 1;
-      else if (*p == ')')
-	depth -= 1;
-      else if (*p == ',' && depth == 0)
-	argcount += 1;
-
-      p += 1;
-    }
-  /* We need one more slot for the void [...] or NULL [end of arglist] */
-  argtypes = (struct type **)xmalloc ((argcount+1) * sizeof (struct type *));
-  p = argtypetext;
-  argtypes[0] = lookup_pointer_type (type);
-  argcount = 1;
-
-  if (*p != ')')			/* () means no args, skip while */
-    {
-      depth = 0;
-      while (*p)
-	{
-	  if (depth <= 0 && (*p == ',' || *p == ')'))
-	    {
-	      argtypes[argcount] =
-		  parse_and_eval_type (argtypetext, p - argtypetext);
-	      argcount += 1;
-	      argtypetext = p + 1;
-	    }
-
-	  if (*p == '(')
-	    depth += 1;
-	  else if (*p == ')')
-	    depth -= 1;
-
-	  p += 1;
-	}
-    }
-
-  if (p[-2] != '.')			/* ... */
-    argtypes[argcount] = builtin_type_void;	/* Ellist terminator */
-  else
-    argtypes[argcount] = NULL;		/* List terminator */
-
-  free (demangled_name);
-
-  type = lookup_method_type (type, TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)), argtypes);
-  /* Free the stub type...it's no longer needed.  */
-  free (TYPE_FN_FIELD_TYPE (f, j));
-  TYPE_FN_FIELD_PHYSNAME (f, j) = mangled_name;
-  TYPE_FN_FIELD_TYPE (f, j) = type;
 }
 
 long
@@ -1548,9 +1467,9 @@ set_return_value (val)
   if (code == TYPE_CODE_ERROR)
     error ("Function return type unknown.");
 
-  if (code == TYPE_CODE_STRUCT
-      || code == TYPE_CODE_UNION)
-    error ("Specifying a struct or union return value is not supported.");
+  if (   code == TYPE_CODE_STRUCT
+      || code == TYPE_CODE_UNION)	/* FIXME, implement struct return.  */
+    error ("GDB does not support specifying a struct or union return value.");
 
   /* FIXME, this is bogus.  We don't know what the return conventions
      are, or how values should be promoted.... */

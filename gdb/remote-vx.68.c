@@ -318,7 +318,8 @@ vx_call_function (function, nargs, args)
        to the structure, not the structure itself.  */
     if (REG_STRUCT_HAS_ADDR (using_gcc))
       for (i = nargs - 1; i >= 0; i--)
-	if (TYPE_CODE (VALUE_TYPE (args[i])) == TYPE_CODE_STRUCT)
+	if (   TYPE_CODE (VALUE_TYPE (args[i])) == TYPE_CODE_STRUCT
+	    || TYPE_CODE (VALUE_TYPE (args[i])) == TYPE_CODE_UNION)
 	  {
 	    CORE_ADDR addr;
 #if !(1 INNER_THAN 2)

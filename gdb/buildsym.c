@@ -93,8 +93,17 @@ You seem to have compiled your program with \
 Therefore GDB will not know about your class variables", 0, 0};
 #endif
 
+struct complaint invalid_cpp_abbrev_complaint =
+  {"invalid C++ abbreviation `%s'", 0, 0};
+
+struct complaint invalid_cpp_type_complaint =
+  {"C++ abbreviated type name unknown at symtab pos %d", 0, 0};
+
+struct complaint member_fn_complaint =
+  {"member function type missing, got '%c'", 0, 0};
+
 struct complaint const_vol_complaint =
-  {"const/volatile indicator missing (ok if using g++ v1.x), got '%c'", 0, 0};
+  {"const/volatile indicator missing, got '%c'", 0, 0};
 
 struct complaint error_type_complaint =
   {"debug info mismatch between compiler and debugger", 0, 0};
@@ -1635,7 +1644,7 @@ read_type (pp)
 	type = dbx_alloc_type (typenums);
 	TYPE_CODE (type) = code;
 	TYPE_NAME (type) = type_name;
-	if (code == TYPE_CODE_STRUCT)
+	if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
 	  {
 	    TYPE_CPLUS_SPECIFIC (type)
 	      = (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
@@ -1857,9 +1866,6 @@ read_struct_type (pp, type)
   register struct next_fnfieldlist *mainlist = 0;
   int nfn_fields = 0;
 
-  if (TYPE_MAIN_VARIANT (type) == 0)
-    TYPE_MAIN_VARIANT (type) = type;
-
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   TYPE_CPLUS_SPECIFIC (type)
     = (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
@@ -1996,20 +2002,22 @@ read_struct_type (pp, type)
 		  prefix = vb_name;
 		  break;
 		default:
-		  error ("invalid abbreviation at symtab pos %d.", symnum);
+		  complain (&invalid_cpp_abbrev_complaint, *pp);
+		  prefix = "INVALID_C++_ABBREV";
+		  break;
 		}
 	      *pp = p + 1;
 	      context = read_type (pp);
 	      name = type_name_no_tag (context);
 	      if (name == 0)
 		{
-		  error ("type name unknown at symtab pos %d.", symnum);
+		  complain (&invalid_cpp_type_complaint, symnum);
 		  TYPE_NAME (context) = name;
 		}
 	      list->field.name = obconcat (prefix, name, "");
 	      p = ++(*pp);
 	      if (p[-1] != ':')
-		error ("invalid abbreviation at symtab pos %d.", symnum);
+		complain (&invalid_cpp_abbrev_complaint, *pp);
 	      list->field.type = read_type (pp);
 	      (*pp)++;			/* Skip the comma.  */
 	      list->field.bitpos = read_number (pp, ';');
@@ -2020,7 +2028,7 @@ read_struct_type (pp, type)
 	  else if (*p == '_')
 	    break;
 	  else
-	    error ("invalid abbreviation at symtab pos %d.", symnum);
+	    complain (&invalid_cpp_abbrev_complaint, *pp);
 
 	  nfields++;
 	  continue;
@@ -2192,14 +2200,17 @@ read_struct_type (pp, type)
 
 	  /* read in the name.  */
 	  while (*p != ':') p++;
-#if 0
 	  if ((*pp)[0] == 'o' && (*pp)[1] == 'p' && (*pp)[2] == CPLUS_MARKER)
 	    {
+	      /* This is a completely wierd case.  In order to stuff in the
+		 names that might contain colons (the usual name delimiter),
+		 Mike Tiemann defined a different name format which is
+		 signalled if the identifier is "op$".  In that case, the
+		 format is "op$::XXXX." where XXXX is the name.  This is
+		 used for names like "+" or "=".  YUUUUUUUK!  FIXME!  */
 	      /* This lets the user type "break operator+".
 	         We could just put in "+" as the name, but that wouldn't
 		 work for "*".  */
-	     /* I don't understand what this is trying to do.
-		It seems completely bogus.  -Per Bothner. */
 	      static char opname[32] = {'o', 'p', CPLUS_MARKER};
 	      char *o = opname + 3;
 
@@ -2214,7 +2225,6 @@ read_struct_type (pp, type)
 	      *pp = p + 1;
 	    }
 	  else
-#endif
 	      main_fn_name = savestring (*pp, p - *pp);
 	  /* Skip past '::'.  */
 	  *pp = p + 2;
@@ -2272,10 +2282,13 @@ read_struct_type (pp, type)
 		  new_sublist->fn_field.is_volatile = 1;
 	          (*pp)++;
 		  break;
+		case '*': /* File compiled with g++ version 1 -- no info */
+		case '?':
+		case '.':
+		  break;
 		default:
-		  /* This probably just means we're processing a file compiled
-		     with g++ version 1.  */
 		  complain(&const_vol_complaint, **pp);
+		  break;
 		}
 
 	      switch (*(*pp)++)
@@ -2320,8 +2333,13 @@ read_struct_type (pp, type)
 		  /* static member function.  */
 		  new_sublist->fn_field.voffset = VOFFSET_STATIC;
 		  break;
+
 		default:
-		  /* **pp == '.'.  */
+		  /* error */
+		  complain (&member_fn_complaint, (*pp)[-1]);
+		  /* Fall through into normal member function.  */
+
+		case '.':
 		  /* normal member function.  */
 		  new_sublist->fn_field.voffset = 0;
 		  new_sublist->fn_field.fcontext = 0;

@@ -1,3 +1,36 @@
+Wed Nov 27 01:23:41 1991  John Gilmore  (gnu at cygnus.com)
+
+	Fix bugs in C++ debugging.
+
+	* symtab.h:  target_type is not used in record types.
+	Eliminate TYPE_MAIN_VARIANT and TYPE_NEXT_VARIANT.  Eliminate
+	lookup_method_type.
+
+	* symtab.c (lookup_member_type):  Don't chain them up, just
+	allocate one in symbol_obstack when we need one.
+	(allocate_stub_method):  Build stub in symbol_obstack.
+	(check_stub_method):  Move here from values.c.  Don't deallocate
+	stub; overwrite it.
+	(lookup_method_type):  Gone now.
+
+	* buildsym.c: Handle g++ v1 stabs a little bit better.
+	Change some C++ parsing error()s to complain()ts.
+	* buildsym.c, findvar.c, printcmd.c, symtab.c:  Make unions and
+	structs have the same representation and work the same as far as
+	C++ is concerned. 
+	* buildsym.c, symtab.c, values.c: Remove all references to
+	TYPE_MAIN_VARIANT and TYPE_NEXT_VARIANT.
+
+	* valops.c:  Improve comments and indentation.  Only call
+	check_stub_method when the stub flag is on.
+	* valprint.c:  Fix or mark minor bugs and unportabilities.
+	
+	* coffread.c (anonymous unions):  Allocate a cplus structure.
+
+	* mipsread.c:  Eliminate "template" types.  Build new, real
+	types whenever we need them.  Allocate cplus structures as needed.
+	Bulletproof the type parsing a bit more.  Mark storage leaks.
+
 Fri Nov 22 16:39:57 1991  John Gilmore  (gnu at cygnus.com)
 
 	* inflow.c (terminal_inferior):  Check the results of ioctl's, and
