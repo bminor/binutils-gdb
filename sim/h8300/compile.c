@@ -1875,6 +1875,39 @@ sim_load (prog, from_tty)
       bfd_close (abfd);
     }
 
+  /* If we're using gdb attached to the simulator, then we have to
+     reallocate memory for the simulator.
+
+     When gdb first starts, it calls fetch_registers (among other
+     functions), which in turn calls init_pointers, which allocates
+     simulator memory.
+
+     The problem is when we do that, we don't know whether we're
+     debugging an h8/300 or h8/300h program.
+
+     This is the first point at which we can make that determination,
+     so we just reallocate memory now; this will also allow us to handle
+     switching between h8/300 and h8/300h programs without exiting
+     gdb.  */
+  if (h8300hmode)
+    memory_size = H8300H_MSIZE;
+  else
+    memory_size = H8300_MSIZE;
+
+  if (cpu.memory)
+    free (cpu.memory);
+  if (cpu.cache_idx)
+    free (cpu.cache_idx);
+
+  cpu.memory = (unsigned char *) calloc (sizeof (char), memory_size);
+  cpu.cache_idx = (unsigned short *) calloc (sizeof (short), memory_size);
+  cpu.eightbit = (unsigned char *) calloc (sizeof (char), 256);
+
+  /* `msize' must be a power of two */
+  if ((memory_size & (memory_size - 1)) != 0)
+    abort ();
+  cpu.mask = memory_size - 1;
+
   /* Return non-zero so gdb will handle it.  */
   return 1;
 }
