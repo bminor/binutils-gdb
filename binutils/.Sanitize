@@ -37,9 +37,9 @@ am29k-pinsn.c
 ar.1
 ar.c
 arlex.l
+arparse.y
 arsup.c
 arsup.h
-arparse.y
 binutils.texi
 bucomm.c
 bucomm.h
@@ -65,6 +65,7 @@ objdump.c
 objdump.h
 ranlib.1
 ranlib.sh
+sanity.sh
 size.1
 size.c
 sparc-pinsn.c
