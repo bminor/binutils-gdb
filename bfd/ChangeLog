@@ -1,3 +1,26 @@
+Mon Aug 14 11:39:24 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): If a symbol is a weak
+	definition, add it to the dynamic symbol table if any dynamic
+	object mentions it.  If we do add it, make sure we add the
+	corresponding real symbol.
+	(elf_adjust_dynamic_symbol): Adjust a weak defined symbol which we
+	put in the dynamic symbol table, even if no regular object refers
+	to it.
+	* elf32-i386.c (elf_i386_check_relocs): When creating a shared
+	library, don't allocate space for a PC relative reloc against a
+	local symbol.
+	* elf32-m68k.c (elf_m68k_check_relocs): Likewise.
+	* elf32-sparc.c (elf32_sparc_check_relocs): Likewise.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Change assertion
+	to accept symbol with weakdef set.
+	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Likewise.
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): When creating a shared
+	libary, don't copy over a PC relative reloc against a local
+	symbol.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+
 Sun Aug 13 00:40:58 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.h (R_HPPA_BEGIN_BRTAB): Define.

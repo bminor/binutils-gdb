@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
 /* ELF linker code.  */
 
 static boolean elf_link_add_object_symbols
@@ -507,6 +508,7 @@ elf_link_add_object_symbols (abfd, info)
       const char *name;
       struct elf_link_hash_entry *h = NULL;
       boolean definition;
+      boolean new_weakdef;
 
       elf_swap_symbol_in (abfd, esym, &sym);
 
@@ -646,6 +648,7 @@ elf_link_add_object_symbols (abfd, info)
 	      false, collect, (struct bfd_link_hash_entry **) sym_hash)))
 	goto error_return;
 
+      new_weakdef = false;
       if (dynamic
 	  && definition
 	  && (flags & BSF_WEAK) != 0
@@ -667,6 +670,7 @@ elf_link_add_object_symbols (abfd, info)
 
 	  (*sym_hash)->weakdef = weaks;
 	  weaks = *sym_hash;
+	  new_weakdef = true;
 	}
 
       /* Get the alignment of a common symbol.  */
@@ -721,7 +725,10 @@ elf_link_add_object_symbols (abfd, info)
 		new_flag = ELF_LINK_HASH_DEF_DYNAMIC;
 	      if ((old_flags & new_flag) != 0
 		  || (old_flags & (ELF_LINK_HASH_DEF_REGULAR
-				   | ELF_LINK_HASH_REF_REGULAR)) != 0)
+				   | ELF_LINK_HASH_REF_REGULAR)) != 0
+		  || (h->weakdef != NULL
+		      && (old_flags & (ELF_LINK_HASH_DEF_DYNAMIC
+				       | ELF_LINK_HASH_REF_DYNAMIC)) != 0))
 		dynsym = true;
 	    }
 
@@ -730,6 +737,14 @@ elf_link_add_object_symbols (abfd, info)
 	    {
 	      if (! _bfd_elf_link_record_dynamic_symbol (info, h))
 		goto error_return;
+	      if (h->weakdef != NULL
+		  && ! new_weakdef
+		  && h->weakdef->dynindx == -1)
+		{
+		  if (! _bfd_elf_link_record_dynamic_symbol (info,
+							     h->weakdef))
+		    goto error_return;
+		}
 	    }
 	}
     }
@@ -1432,13 +1447,16 @@ elf_adjust_dynamic_symbol (h, data)
 
   /* If this symbol does not require a PLT entry, and it is not
      defined by a dynamic object, or is not referenced by a regular
-     object, ignore it.  FIXME: Do we need to worry about symbols
-     which are defined by one dynamic object and referenced by another
-     one?  */
+     object, ignore it.  We do have to handle a weak defined symbol,
+     even if no regular object refers to it, if we decided to add it
+     to the dynamic symbol table.  FIXME: Do we normally need to worry
+     about symbols which are defined by one dynamic object and
+     referenced by another one?  */
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) == 0
       && ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
 	  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-	  || (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0))
+	  || ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
+	      && (h->weakdef == NULL || h->weakdef->dynindx == -1))))
     return true;
 
   /* If we've already adjusted this symbol, don't do it again.  This

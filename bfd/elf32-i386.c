@@ -417,7 +417,8 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	case R_386_32:
 	case R_386_PC32:
 	  if (info->shared
-	      && (sec->flags & SEC_ALLOC) != 0)
+	      && (sec->flags & SEC_ALLOC) != 0
+	      && (r_type != R_386_PC32 || h != NULL))
 	    {
 	      /* When creating a shared object, we must copy these
                  reloc types into the output file.  We create a reloc
@@ -486,6 +487,7 @@ elf_i386_adjust_dynamic_symbol (info, h)
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
 	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
+		  || h->weakdef != NULL
 		  || ((h->elf_link_hash_flags
 		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
 		      && (h->elf_link_hash_flags
@@ -909,7 +911,11 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  || (r_type == R_386_PLT32
 		      && h->plt_offset != (bfd_vma) -1)
 		  || (r_type == R_386_GOT32
-		      && elf_hash_table (info)->dynamic_sections_created)
+		      && elf_hash_table (info)->dynamic_sections_created
+		      && (! info->shared
+			  || ! info->symbolic
+			  || (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		  || (info->shared
 		      && (r_type == R_386_32
 			  || r_type == R_386_PC32)
@@ -927,7 +933,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (info->shared)
+	  else if (info->shared && !info->symbolic)
 	    relocation = 0;
 	  else
 	    {
@@ -957,13 +963,18 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      off = h->got_offset;
 	      BFD_ASSERT (off != (bfd_vma) -1);
 
-	      if (! elf_hash_table (info)->dynamic_sections_created)
+	      if (! elf_hash_table (info)->dynamic_sections_created
+		  || (info->shared
+		      && info->symbolic
+		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 		{
-		  /* This is actually a static link.  We must
-		     initialize this entry in the global offset table.
-		     Since the offset must always be a multiple of 4,
-		     we use the least significant bit to record
-		     whether we have initialized it already.
+		  /* This is actually a static link, or it is a
+		     -Bsymbolic link and the symbol is defined
+		     locally.  We must initialize this entry in the
+		     global offset table.  Since the offset must
+		     always be a multiple of 4, we use the least
+		     significant bit to record whether we have
+		     initialized it already.
 
 		     When doing a dynamic link, we create a .rel.got
 		     relocation entry to initialize the value.  This
@@ -1069,7 +1080,8 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (h->plt_offset == (bfd_vma) -1)
 	    {
 	      /* We didn't make a PLT entry for this symbol.  This
-                 happens when statically linking PIC code.  */
+                 happens when statically linking PIC code, or when
+                 using -Bsymbolic.  */
 	      break;
 	    }
 
@@ -1304,12 +1316,24 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
       srel = bfd_get_section_by_name (dynobj, ".rel.got");
       BFD_ASSERT (sgot != NULL && srel != NULL);
 
-      bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + h->got_offset);
-
       rel.r_offset = (sgot->output_section->vma
 		      + sgot->output_offset
-		      + h->got_offset);
-      rel.r_info = ELF32_R_INFO (h->dynindx, R_386_GLOB_DAT);
+		      + (h->got_offset &~ 1));
+
+      /* If this is a -Bsymbolic link, and the symbol is defined
+	 locally, we just want to emit a RELATIVE reloc.  The entry in
+	 the global offset table will already have been initialized in
+	 the relocate_section function.  */
+      if (info->shared
+	  && info->symbolic
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+	rel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
+      else
+	{
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + h->got_offset);
+	  rel.r_info = ELF32_R_INFO (h->dynindx, R_386_GLOB_DAT);
+	}
+
       bfd_elf32_swap_reloc_out (output_bfd, &rel,
 				((Elf32_External_Rel *) srel->contents
 				 + srel->reloc_count));
