@@ -1,3 +1,19 @@
+2000-11-28  Nick Clifton  <nickc@redhat.com>
+
+	* strip.1 (COPYING): Mention that the GNU Free Documentation
+	License is present in the sources, but not the output, and
+	also available from the GNU website.
+	(GNU Free Documentation License): Comment out this section.
+	* strings.1: Ditto.
+	* size.1: Ditto.
+	* ranlib.1: Ditto.
+	* objdump.1: Ditto.
+	* objcopy.1: Ditto.
+	* nm.1: Ditto.
+	* nlmconv.1: Ditto.
+	* ar.1: Ditto.
+	* addr2line.1: Ditto.
+
 2000-11-27  DJ Delorie  <dj@redhat.com>
 
 	* readelf.c (usage): Add -wf (--debug-dump=frames) option.

@@ -1,3 +1,10 @@
+2000-11-28  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.1 (COPYING): Mention that the GNU Free Documentation
+	License is present in the sources, but not the output, and
+	also available from the GNU website.
+	(GNU Free Documentation License): Comment out this section.
+
 2000-11-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	* Makefile.am (CPU_OBJ_VALID): Add case to filter out invalid coff
