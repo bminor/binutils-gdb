@@ -1447,6 +1447,10 @@ case "${target}" in
   mn10200*-*-*)
 	sim_target=mn10200
 	;;
+  sh64-*-*)
+	sim_target=sh64
+	extra_subdirs="${extra_subdirs} testsuite"
+	;;
   sh*-*-*)		sim_target=sh ;;
   powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | \
   powerpc*-*-elf* | powerpc*-*-linux* | powerpc*-*-netbsd* )
