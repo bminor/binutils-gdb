@@ -1,5 +1,7 @@
 Wed Apr  7 10:11:22 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* symfile.h: Change NULL->'\0' in comment (that wasn't a typo).
+
 	* xcoffread.c (read_xcoff_symtab): Use E_SYMNMLEN.
 
 Tue Apr  6 22:30:58 1993  K. Richard Pixley  (rich@cygnus.com)
