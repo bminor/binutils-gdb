@@ -1,3 +1,7 @@
+2003-05-24  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (macro): Don't use uninitialized tempreg.
+
 2003-05-19  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* config/tc-tic4x.c (md_assemble): Added support for one-line parallel insns.
