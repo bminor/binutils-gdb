@@ -1,3 +1,25 @@
+Wed Jun 15 01:34:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h: Rewrite symbol duplicate elimination to use BFD hash
+	tables.
+	(struct stringtab_entry, struct stringtab_data): Remove.
+	(HASHMAXLEN, HASH_CHAR, hash, compare, log2, emit_strtab): Remove.
+	(struct strtab_hash_entry, struct strtab_hash): Define.
+	(strtab_hash_newfunc, strtab_hash_lookup): Define.
+	(stringtab_free, emit_stringtab): Define.
+	(stringtab_init, add_to_stringtab): Rewrite.
+	(NAME(aout,write_syms)): Use new stringtab code.
+	(struct aout_final_link_info, NAME(aout,final_link)): Likewise.
+	(aout_link_write_symbols, aout_link_write_other_symbol): Likewise.
+
+	* bfd-in.h (BFD_TRADITIONAL_FORMAT): Define new BFD flag to
+	request BFD to write object in the traditional format, whatever
+	that means for the particular backend.
+	* bfd-in2.h: Rebuilt.
+
+	* hash.c (bfd_hash_allocate): If obstack_alloc fails, set
+	bfd_error_no_memory.
+
 Tue Jun 14 13:00:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* libaout.h (struct aoutdata): Add q_magic_format to subformat
