@@ -382,7 +382,7 @@ Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 	copyright.  Add new private data pointer for use by target back-ends.
 	* thread.c (struct thread_info): move definition to gdbthread.h.
 	(find_thread_pid): new exported function for thread lookup.
-	(iterate_over_threads): new exported function for applying 
+	(iterate_over_threads): new exported function for applying
 	arbitrary operations to threads.  Update copyright to 2000.
 	(info_threads_command): use new target_extra_thread_info vector
 	to display extra information about each thread (if implemented).
@@ -406,7 +406,7 @@ Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 2000-01-06  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* remote.c (remote_open_1): Fix message so it does not imply a
-	specific syntax for serial ports, as it is OS dependent. 
+	specific syntax for serial ports, as it is OS dependent.
 	(remote_async_open_1): Ibid.
 	(init_remote_ops): Ibid.
 
