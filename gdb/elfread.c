@@ -407,6 +407,17 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 		       should be harmless (but I encourage people to fix this
 		       in the assembler instead of adding checks here).  */
 		    continue;
+#ifdef HARRIS_TARGET
+		  else if (sym->name[0] == '.' && sym->name[1] == '.')
+		    {
+		      /* Looks like a Harris compiler generated label for the
+			 purpose of marking instructions that are relevant to
+			 DWARF dies.  The assembler can't get rid of these 
+			 because they are relocatable addresses that the
+			 linker needs to resolve. */
+		      continue;
+		    }
+#endif	  
 		  else
 		    {
 		      ms_type = mst_file_text;
@@ -592,7 +603,12 @@ elf_symfile_read (objfile, section_offsets, mainline)
      special ELF sections.  We first have to find them... */
 
   bfd_map_over_sections (abfd, elf_locate_sections, (PTR) &ei);
-  if (ei.dboffset && ei.lnoffset)
+  if (dwarf2_has_info (abfd) && !offset)
+    {
+      /* DWARF 2 sections */
+      dwarf2_build_psymtabs (objfile, section_offsets, mainline);
+    }
+  else if (ei.dboffset && ei.lnoffset)
     {
       /* DWARF sections */
       dwarf_build_psymtabs (objfile,

@@ -1,3 +1,15 @@
+Fri Jul 19 14:05:57 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* dwarf2read.c: New file, DWARF 2 reader originally contributed by
+	Brent Benson, with additions by Gary Funck and Jerry Kreuscher.
+	* Makefile.in (COMMON_OBS): Add dwarf2read.o.
+	(SFILES): Add dwarf2read.c.
+	(dwarf2read.o): Add build rule.
+	* symfile.h (dwarf2_has_info, dwarf2_build_psymtabs): Declare
+	exported functions.
+	* elfread.c (elf_symfile_read): Call them.
+	(elf_symtab_read) [HARRIS_TARGET]: Skip some special symbols.
+
 Thu Jul 18 01:22:01 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* symfile.c (symfile_bfd_open): 

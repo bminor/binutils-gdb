@@ -205,6 +205,13 @@ extern void
 dwarf_build_psymtabs PARAMS ((struct objfile *, struct section_offsets *, int,
 			      file_ptr, unsigned int, file_ptr, unsigned int));
 
+/* From dwarf2read.c */
+
+extern int dwarf2_has_info PARAMS ((bfd *abfd));
+
+extern void dwarf2_build_psymtabs PARAMS ((struct objfile *,
+					   struct section_offsets *,
+					   int));
 /* From mdebugread.c */
 
 /* Hack to force structures to exist before use in parameter list.  */

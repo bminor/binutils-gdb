@@ -352,7 +352,8 @@ TARGET_FLAGS_TO_PASS = \
 SFILES = bcache.c blockframe.c breakpoint.c buildsym.c callback.c c-exp.y \
 	c-lang.c c-typeprint.c c-valprint.c ch-exp.c ch-lang.c \
 	ch-typeprint.c ch-valprint.c coffread.c command.c complaints.c \
-	corefile.c cp-valprint.c dbxread.c demangle.c dwarfread.c \
+	corefile.c cp-valprint.c \
+	dbxread.c demangle.c dwarfread.c dwarf2read.c \
 	elfread.c environ.c eval.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c \
 	gdbtypes.c infcmd.c inflow.c infrun.c language.c \
@@ -361,8 +362,9 @@ SFILES = bcache.c blockframe.c breakpoint.c buildsym.c callback.c c-exp.y \
 	printcmd.c remote.c remote-nrom.c scm-exp.c scm-lang.c scm-valprint.c \
 	source.c stabsread.c stack.c symfile.c symmisc.c \
 	symtab.c target.c thread.c top.c \
-	typeprint.c utils.c valarith.c valops.c \
-	valprint.c values.c serial.c ser-unix.c mdebugread.c os9kread.c
+	typeprint.c utils.c \
+	valarith.c valops.c valprint.c values.c \
+	serial.c ser-unix.c mdebugread.c os9kread.c
 
 LINTFILES = $(SFILES) $(YYFILES) init.c
 
@@ -467,7 +469,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o elfread.o \
-	dwarfread.o mipsread.o stabsread.o corefile.o \
+	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
 	c-lang.o ch-exp.o ch-lang.o f-lang.o m2-lang.o \
 	scm-exp.o scm-lang.o scm-valprint.o complaints.o typeprint.o \
 	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
@@ -1106,6 +1108,10 @@ dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) gdb_string.h
 dstread.o: dstread.c gdb_string.h
 
 dwarfread.o: dwarfread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
+	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
+	$(symtab_h) gdb_string.h
+
+dwarf2read.o: dwarf2read.c $(bfd_h) buildsym.h $(defs_h) \
 	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
 	$(symtab_h) gdb_string.h
 
