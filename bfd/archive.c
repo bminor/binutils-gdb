@@ -518,7 +518,7 @@ _bfd_get_elt_at_filepos (archive, filepos)
   if (0 > bfd_seek (archive, filepos, SEEK_SET))
     return NULL;
 
-  if ((new_areldata = _bfd_read_ar_hdr (archive)) == NULL)
+  if ((new_areldata = (struct areltdata *) _bfd_read_ar_hdr (archive)) == NULL)
     return NULL;
 
   n_nfd = _bfd_create_empty_archive_element_shell (archive);
@@ -677,7 +677,7 @@ bfd_generic_archive_p (abfd)
       return NULL;
     }
 
-  if (bfd_has_map (abfd) && abfd->target_defaulted)
+  if (bfd_has_map (abfd))
     {
       bfd *first;
 
@@ -693,8 +693,18 @@ bfd_generic_archive_p (abfd)
       first = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
       if (first != NULL)
 	{
+	  boolean fail;
+
 	  first->target_defaulted = false;
+	  fail = false;
 	  if (! bfd_check_format (first, bfd_object))
+	    fail = true;
+	  else if (first->xvec != abfd->xvec)
+	    {
+	      bfd_set_error (bfd_error_wrong_format);
+	      fail = true;
+	    }
+	  if (fail)
 	    {
 	      bfd_error_type err;
 
@@ -745,7 +755,7 @@ do_slurp_bsd_armap (abfd)
   unsigned int parsed_size;
   carsym *set;
 
-  mapdata = _bfd_read_ar_hdr (abfd);
+  mapdata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
   if (mapdata == NULL)
     return false;
   parsed_size = mapdata->parsed_size;
@@ -826,7 +836,7 @@ do_slurp_coff_armap (abfd)
   char int_buf[sizeof (long)];
   unsigned int carsym_size, ptrsize, i;
 
-  mapdata = _bfd_read_ar_hdr (abfd);
+  mapdata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
   if (mapdata == NULL)
     return false;
   parsed_size = mapdata->parsed_size;
@@ -915,7 +925,7 @@ do_slurp_coff_armap (abfd)
     struct areltdata *tmp;
 
     bfd_seek (abfd,   ardata->first_file_filepos, SEEK_SET);
-    tmp = _bfd_read_ar_hdr (abfd);
+    tmp = (struct areltdata *) _bfd_read_ar_hdr (abfd);
     if (tmp != NULL) 
       {
 	if (tmp->arch_header[0] == '/'
@@ -1005,7 +1015,7 @@ bfd_slurp_bsd_armap_f2 (abfd)
       return true;
     }
 
-  mapdata = _bfd_read_ar_hdr (abfd);
+  mapdata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
   if (mapdata == NULL)
     return false;
 
@@ -1106,7 +1116,7 @@ _bfd_slurp_extended_name_table (abfd)
 	  return true;
 	}
 
-      namedata = _bfd_read_ar_hdr (abfd);
+      namedata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
       if (namedata == NULL)
 	return false;
 
