@@ -1,3 +1,7 @@
+Thu Aug  1 23:51:52 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c: Revert yesterday's changes.
+	
 start-sanitize-d10v
 Wed Jul 31 14:46:11 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
