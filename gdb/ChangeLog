@@ -1,5 +1,8 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* cris-tdep.c (cris_register_size): Restore function, still used
+	locally.
+
 	* gdbarch.sh (deprecated_target_read_fp)
 	(deprecated_frame_locals_address, deprecated_frame_args_address)
 	(deprecated_frame_chain_valid, deprecated_frame_chain)

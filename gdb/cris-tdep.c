@@ -1096,6 +1096,45 @@ cris_spec_reg_applicable (struct cris_spec_reg spec_reg)
     }
 }
 
+/* Returns the register size in unit byte.  Returns 0 for an unimplemented
+   register, -1 for an invalid register.  */
+
+static int
+cris_register_size (int regno)
+{
+  int i;
+  int spec_regno;
+  
+  if (regno >= 0 && regno < NUM_GENREGS)
+    {
+      /* General registers (R0 - R15) are 32 bits.  */
+      return 4;
+    }
+  else if (regno >= NUM_GENREGS && regno < NUM_REGS)
+    {
+      /* Special register (R16 - R31).  cris_spec_regs is zero-based. 
+         Adjust regno accordingly.  */
+      spec_regno = regno - NUM_GENREGS;
+      
+      /* The entries in cris_spec_regs are stored in register number order,
+         which means we can shortcut into the array when searching it.  */
+      for (i = spec_regno; cris_spec_regs[i].name != NULL; i++)
+        {
+          if (cris_spec_regs[i].number == spec_regno 
+              && cris_spec_reg_applicable (cris_spec_regs[i]))
+            /* Go with the first applicable register.  */
+            return cris_spec_regs[i].reg_size;
+        }
+      /* Special register not applicable to this CRIS version.  */
+      return 0;
+    }
+  else
+    {
+      /* Invalid register.  */
+      return -1;
+    }
+}
+
 /* Nonzero if regno should not be fetched from the target.  This is the case
    for unimplemented (size 0) and non-existant registers.  */
 
