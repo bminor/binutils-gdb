@@ -202,37 +202,47 @@ dnl Note that we only want this if we are both native (host == target), and
 dnl not doing a canadian cross build (build == host).
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
-	case ${host_os} in
-	hpux*)
-		AC_MSG_CHECKING(for HPUX/OSF thread support)
-		if test -f /usr/include/dce/cma_config.h ; then
-			if test "$GCC" = "yes" ; then
-				AC_MSG_RESULT(yes)
-				AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
-				CONFIG_OBS="${CONFIG_OJS} hpux-thread.o"
-			else
-				AC_MSG_RESULT(no (suppressed because you are not using GCC))
-			fi
-		else
-			AC_MSG_RESULT(no)
-		fi
-		;;
-	solaris*)
-		AC_MSG_CHECKING(for Solaris thread debugging library)
-		if test -f /usr/lib/libthread_db.so.1 ; then
-			AC_MSG_RESULT(yes)
-			AC_DEFINE(HAVE_THREAD_DB_LIB)
-			CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
-			AC_CHECK_LIB(dl, dlopen)
-			if test "$GCC" = "yes" ; then
-				CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Xlinker -export-dynamic"
-			fi
-		else
-			AC_MSG_RESULT(no)
-		fi
-		;;
-	esac
-	AC_SUBST(CONFIG_LDFLAGS)
+   case ${host_os} in
+   hpux*)
+      AC_MSG_CHECKING(for HPUX/OSF thread support)
+      if test -f /usr/include/dce/cma_config.h ; then
+         if test "$GCC" = "yes" ; then
+            AC_MSG_RESULT(yes)
+            AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
+            CONFIG_OBS="${CONFIG_OJS} hpux-thread.o"
+         else
+            AC_MSG_RESULT(no (suppressed because you are not using GCC))
+         fi
+      else
+         AC_MSG_RESULT(no)
+      fi
+      ;;
+   solaris*)
+      AC_MSG_CHECKING(for Solaris thread debugging library)
+      if test -f /usr/lib/libthread_db.so.1 ; then
+         AC_MSG_RESULT(yes)
+         AC_DEFINE(HAVE_THREAD_DB_LIB)
+         CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
+         AC_CHECK_LIB(dl, dlopen)
+         if test "$GCC" = "yes" ; then
+            # The GNU linker requires the -export-dynamic option to make
+            # all symbols visible in the dynamic symbol table.
+            hold_ldflags=$LDFLAGS
+            AC_MSG_CHECKING(for the ld -export-dynamic flag)
+            LDFLAGS="${LDFLAGS} -Wl,-export-dynamic"
+            AC_TRY_LINK(, [int i;], found=yes, found=no)
+            LDFLAGS=$hold_ldflags
+            AC_MSG_RESULT($found)
+            if test $found = yes; then
+               CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Wl,-export-dynamic"
+            fi
+         fi
+      else
+         AC_MSG_RESULT(no)
+      fi
+      ;;
+   esac
+   AC_SUBST(CONFIG_LDFLAGS)
 fi
 
 dnl Handle optional features that can be enabled.

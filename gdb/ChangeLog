@@ -1,3 +1,8 @@
+Tue Jan 27 16:14:23 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* configure.in (CONFIG_LDFLAGS): Only add -export-dynamic
+	when using GNU ld.
+
 Mon Jan 26 19:07:46 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* config/alpha/tm-alphalinux.h (alpha_linux_sigtramp_offset):
