@@ -992,11 +992,10 @@ xcoff64_write_object_contents (abfd)
   return true;
 }
 
-/* This is the relocation function for the RS/6000/POWER/PowerPC.
-   This is currently the only processor which uses XCOFF; I hope that
-   will never change.  */
+/* This is the relocation function for the PowerPC64.
+   See xcoff_ppc_relocation_section for more information. */
 
-static boolean
+boolean
 xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
 			      input_section, contents, relocs, syms,
 			      sections)
@@ -1022,73 +1021,48 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
       bfd_vma addend;
       bfd_vma val;
       struct reloc_howto_struct howto;
-      bfd_reloc_status_type rstat;
+      bfd_vma relocation;
+      bfd_vma value_to_relocate;
+      bfd_vma address;
+      bfd_byte *location;
 
       /* Relocation type R_REF is a special relocation type which is
-	 merely used to prevent garbage collection from occurring for
-	 the csect including the symbol which it references.  */
+         merely used to prevent garbage collection from occurring for
+         the csect including the symbol which it references.  */
       if (rel->r_type == R_REF)
 	continue;
 
-      symndx = rel->r_symndx;
-
-      if (symndx == -1)
-	{
-	  h = NULL;
-	  sym = NULL;
-	  addend = 0;
-	}
-      else
-	{
-	  h = obj_xcoff_sym_hashes (input_bfd)[symndx];
-	  sym = syms + symndx;
-	  addend = - sym->n_value;
-	}
-
-      /* We build the howto information on the fly.  */
-
+      /* howto */
       howto.type = rel->r_type;
       howto.rightshift = 0;
-      howto.size = 4;
       howto.bitsize = (rel->r_size & 0x3f) + 1;
+      howto.size = howto.bitsize > 16 ? (howto.bitsize > 32 ? 4 : 2) : 1;
       howto.pc_relative = false;
       howto.bitpos = 0;
-      if ((rel->r_size & 0x80) != 0)
-	howto.complain_on_overflow = complain_overflow_signed;
-      else
-	howto.complain_on_overflow = complain_overflow_bitfield;
+      howto.complain_on_overflow = rel->r_size & 0x80 ? 
+	complain_overflow_signed : complain_overflow_bitfield;
       howto.special_function = NULL;
       howto.name = "internal";
       howto.partial_inplace = true;
-
-      if (howto.bitsize == 64)
-	{
-	  howto.src_mask = howto.dst_mask = MINUS_ONE;
-	}
-      else if (howto.bitsize == 32)
-	{
-	  howto.src_mask = howto.dst_mask = 0xffffffff;
-	}
-      else
-	{
-	  howto.src_mask = howto.dst_mask = (1 << howto.bitsize) - 1;
-	  if (howto.bitsize == 16)
-	    howto.size = 1;
-	}
+      howto.src_mask = howto.dst_mask = N_ONES(howto.bitsize);
       howto.pcrel_offset = false;
 
+      /* symbol */
       val = 0;
+      addend = 0;
+      h = NULL;
+      sym = NULL;
+      symndx = rel->r_symndx;      
 
-      if (h == NULL)
+      if (-1 != symndx)	
 	{
 	  asection *sec;
-
-	  if (symndx == -1)
-	    {
-	      sec = bfd_abs_section_ptr;
-	      val = 0;
-	    }
-	  else
+	  
+	  h = obj_xcoff_sym_hashes (input_bfd)[symndx];
+	  sym = syms + symndx;
+	  addend = - sym->n_value;
+	  
+	  if (NULL == h) 
 	    {
 	      sec = sections[symndx];
 	      /* Hack to make sure we use the right TOC anchor value
@@ -1101,266 +1075,113 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
 		       + sec->output_offset
 		       + sym->n_value
 		       - sec->vma);
-	    }
-
-	}
-      else
-	{
-
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
+	    } 
+	  else 
 	    {
-	      asection *sec;
-
-	      sec = h->root.u.def.section;
-	      val = (h->root.u.def.value
-		     + sec->output_section->vma
-		     + sec->output_offset);
-
-	    }
-	  else if (h->root.type == bfd_link_hash_common)
-	    {
-	      asection *sec;
-
-	      sec = h->root.u.c.p->section;
-	      val = (sec->output_section->vma
-		     + sec->output_offset);
-	    }
-	  else if ((h->flags & XCOFF_DEF_DYNAMIC) != 0
-		   || (h->flags & XCOFF_IMPORT) != 0)
-	    {
-	      /* Every symbol in a shared object is defined somewhere.  */
-	      val = 0;
-	    }
-	  else if (! info->relocateable)
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd, input_section,
-		      rel->r_vaddr - input_section->vma, true)))
-		return false;
-
-	      /* Don't try to process the reloc.  It can't help, and
-		 it may generate another error.  */
-	      continue;
-	    }
-	}
-
-      /* I took the relocation type definitions from two documents:
-	 the PowerPC AIX Version 4 Application Binary Interface, First
-	 Edition (April 1992), and the PowerOpen ABI, Big-Endian
-	 32-Bit Hardware Implementation (June 30, 1994).  Differences
-	 between the documents are noted below.  */
-
-      switch (rel->r_type)
-	{
-	case R_RTB:
-	case R_RRTBI:
-	case R_RRTBA:
-	  /* These relocs are defined by the PowerPC ABI to be
-	     relative branches which use half of the difference
-	     between the symbol and the program counter.  I can't
-	     quite figure out when this is useful.  These relocs are
-	     not defined by the PowerOpen ABI.  */
-	default:
-	  (*_bfd_error_handler)
-	    (_("%s: unsupported relocation type 0x%02x"),
-	     bfd_archive_filename (input_bfd), (unsigned int) rel->r_type);
-	  bfd_set_error (bfd_error_bad_value);
-	  return false;
-	case R_POS:
-	  /* Simple positive relocation.  */
-	  break;
-	case R_NEG:
-	  /* Simple negative relocation.  */
-	  val = - val;
-	  break;
-	case R_REL:
-	  /* Simple PC relative relocation.  */
-	  howto.pc_relative = true;
-	  break;
-	case R_TOC:
-	  /* TOC relative relocation.  The value in the instruction in
-	     the input file is the offset from the input file TOC to
-	     the desired location.  We want the offset from the final
-	     TOC to the desired location.  We have:
-	     isym = iTOC + in
-	     iinsn = in + o
-	     osym = oTOC + on
-	     oinsn = on + o
-	     so we must change insn by on - in.
-	  */
-	case R_GL:
-	  /* Global linkage relocation.  The value of this relocation
-	     is the address of the entry in the TOC section.  */
-	case R_TCL:
-	  /* Local object TOC address.  I can't figure out the
-	     difference between this and case R_GL.  */
-	case R_TRL:
-	  /* TOC relative relocation.  A TOC relative load instruction
-	     which may be changed to a load address instruction.
-	     FIXME: We don't currently implement this optimization.  */
-	case R_TRLA:
-	  /* TOC relative relocation.  This is a TOC relative load
-	     address instruction which may be changed to a load
-	     instruction.  FIXME: I don't know if this is the correct
-	     implementation.  */
-	  if (h != NULL && h->smclas != XMC_TD)
-	    {
-	      if (h->toc_section == NULL)
+	      if (h->root.type == bfd_link_hash_defined 
+		  || h->root.type == bfd_link_hash_defweak) 
 		{
-		  (*_bfd_error_handler)
-		    (_("%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry"),
-		     bfd_archive_filename (input_bfd), rel->r_vaddr,
-		     h->root.root.string);
-		  bfd_set_error (bfd_error_bad_value);
-		  return false;
+		  sec = h->root.u.def.section;
+		  val = (h->root.u.def.value
+			 + sec->output_section->vma
+			 + sec->output_offset);
+		} 
+	      else if (h->root.type == bfd_link_hash_common) 
+		{
+		  sec = h->root.u.c.p->section;
+		  val = (sec->output_section->vma
+			 + sec->output_offset);
+		} 
+	      else if ((0 == (h->flags & (XCOFF_DEF_DYNAMIC | XCOFF_IMPORT))) 
+		       && ! info->relocateable) 
+		{
+		  if (! ((*info->callbacks->undefined_symbol)
+			 (info, h->root.root.string, input_bfd, input_section,
+			  rel->r_vaddr - input_section->vma, true)))
+		    return false;
+		  
+		  /* Don't try to process the reloc.  It can't help, and
+		     it may generate another error.  */
+		  continue;
 		}
-
-	      BFD_ASSERT ((h->flags & XCOFF_SET_TOC) == 0);
-	      val = (h->toc_section->output_section->vma
-		     + h->toc_section->output_offset);
-	    }
-
-	  val = ((val - xcoff_data (output_bfd)->toc)
-		 - (sym->n_value - xcoff_data (input_bfd)->toc));
-
-	  addend = 0;
-	  break;
-	case R_BA:
-	  /* Absolute branch.  We don't want to mess with the lower
-	     two bits of the instruction.  */
-	case R_CAI:
-	  /* The PowerPC ABI defines this as an absolute call which
-	     may be modified to become a relative call.  The PowerOpen
-	     ABI does not define this relocation type.  */
-	case R_RBA:
-	  /* Absolute branch which may be modified to become a
-	     relative branch.  */
-	case R_RBAC:
-	  /* The PowerPC ABI defines this as an absolute branch to a
-	     fixed address which may be modified to an absolute branch
-	     to a symbol.  The PowerOpen ABI does not define this
-	     relocation type.  */
-	case R_RBRC:
-	  /* The PowerPC ABI defines this as an absolute branch to a
-	     fixed address which may be modified to a relative branch.
-	     The PowerOpen ABI does not define this relocation type.  */
-	  howto.src_mask &= ~3;
-	  howto.dst_mask = howto.src_mask;
-	  break;
-	case R_BR:
-	  /* Relative branch.  We don't want to mess with the lower
-	     two bits of the instruction.  */
-	case R_CREL:
-	  /* The PowerPC ABI defines this as a relative call which may
-	     be modified to become an absolute call.  The PowerOpen
-	     ABI does not define this relocation type.  */
-	case R_RBR:
-	  /* A relative branch which may be modified to become an
-	     absolute branch.  FIXME: We don't implement this,
-	     although we should for symbols of storage mapping class
-	     XMC_XO.  */
-	  howto.pc_relative = true;
-	  howto.src_mask &= ~3;
-	  howto.dst_mask = howto.src_mask;
-	  howto.size = 2;
-	  howto.complain_on_overflow = complain_overflow_bitfield;
-	  break;
-	case R_RL:
-	  /* The PowerPC AIX ABI describes this as a load which may be
-	     changed to a load address.  The PowerOpen ABI says this
-	     is the same as case R_POS.  */
-	  break;
-	case R_RLA:
-	  /* The PowerPC AIX ABI describes this as a load address
-	     which may be changed to a load.  The PowerOpen ABI says
-	     this is the same as R_POS.  */
-	  break;
-	}
-
-      /* If we see an R_BR or R_RBR reloc which is jumping to global
-	 linkage code, and it is followed by an appropriate cror nop
-	 instruction, we replace the cror with ld r2,40(r1).  This
-	 restores the TOC after the glink code.  Contrariwise, if the
-	 call is followed by a ld r2,40(r1), but the call is not
-	 going to global linkage code, we can replace the load with a
-	 cror.  */
-      if ((rel->r_type == R_BR || rel->r_type == R_RBR)
-	  && h != NULL
-	  && h->root.type == bfd_link_hash_defined
-	  && (rel->r_vaddr - input_section->vma + 8
-	      <= input_section->_cooked_size))
-	{
-	  bfd_byte *pnext;
-	  unsigned long next;
-
-	  pnext = contents + (rel->r_vaddr - input_section->vma) + 4;
-	  next = bfd_get_32 (input_bfd, pnext);
-
-
-	  /* The _ptrgl function is magic.  It is used by the AIX
-	   * compiler to call a function through a pointer.
-	   *
-	   * special case XMC_GL, global linkage
-	   */
-	  if (h->smclas == XMC_GL
-	      || strcmp (h->root.root.string, "._ptrgl") == 0)
-	    {
-	      if (next == 0x4def7b82 /* cror 15,15,15 */
-		  || next == 0x4ffffb82 /* cror 31,31,31 */
-		  || next == 0x60000000 /* ori r0,r0,0 */)
-		bfd_put_32 (input_bfd, (bfd_vma) 0xe8410028 /* ld r2,40(r1) */,
-			    pnext);
-	    }
-	  else
-	    {
-	      if (next == 0xe8410028 /* ld r2,40(r1) */)
-		bfd_put_32 (input_bfd, (bfd_vma) 0x60000000 /* ori r0,r0,0 */,
-			    pnext);
 	    }
 	}
-
-      /* A PC relative reloc includes the section address.  */
-      if (howto.pc_relative)
-	addend += input_section->vma;
-
-      rstat = _bfd_final_link_relocate (&howto, input_bfd, input_section,
-					contents,
-					rel->r_vaddr - input_section->vma,
-					val, addend);
-
-      switch (rstat)
+      
+      if (rel->r_type >= XCOFF_MAX_CALCULATE_RELOCATION 
+	  || (false == xcoff_calculate_relocation[rel->r_type]
+	      (input_bfd, input_section, output_bfd, rel, sym, &howto, val, 
+	       addend, &relocation, contents))) 
+	return false;
+      
+      /* address */
+      address = rel->r_vaddr - input_section->vma;
+      location = contents + address;
+      
+      if (address > input_section->_raw_size)
+	abort();
+      
+      /* Get the value we are going to relocate.  */
+      if (1 == howto.size)
+	value_to_relocate = bfd_get_16 (input_bfd, location);
+      else if (2 == howto.size)
+	value_to_relocate = bfd_get_32 (input_bfd, location);
+      else 
+	value_to_relocate = bfd_get_64 (input_bfd, location);
+      
+      /* overflow.  
+	 
+	 FIXME: We may drop bits during the addition
+	 which we don't check for.  We must either check at every single
+	 operation, which would be tedious, or we must do the computations
+	 in a type larger than bfd_vma, which would be inefficient.  */
+      
+      if ((unsigned int) howto.complain_on_overflow >= 
+	  XCOFF_MAX_COMPLAIN_OVERFLOW)
+	abort();
+      
+      if ((true == xcoff_complain_overflow[howto.complain_on_overflow]
+	   (input_bfd, value_to_relocate, relocation, &howto))) 
 	{
-	default:
-	  abort ();
-	case bfd_reloc_ok:
-	  break;
-	case bfd_reloc_overflow:
-	  {
-	    const char *name;
-	    char buf[SYMNMLEN + 1];
-	    char howto_name[10];
-
-	    if (symndx == -1)
+	  const char *name;
+	  char buf[SYMNMLEN + 1];
+	  char reloc_type_name[10];
+	  
+	  if (symndx == -1) 
+	    {
 	      name = "*ABS*";
-	    else if (h != NULL)
+	    } 
+	  else if (h != NULL) 
+	    {
 	      name = h->root.root.string;
-	    else
-	      {
-		name = _bfd_coff_internal_syment_name (input_bfd, sym, buf);
-		if (name == NULL)
-		  return false;
-	      }
-	    sprintf (howto_name, "0x%02x", rel->r_type);
-
-	    if (! ((*info->callbacks->reloc_overflow)
-		   (info, name, howto_name, (bfd_vma) 0, input_bfd,
-		    input_section, rel->r_vaddr - input_section->vma)))
-	      return false;
-	  }
+	    } 
+	  else 
+	    {
+	      name = _bfd_coff_internal_syment_name (input_bfd, sym, buf);
+	      if (name == NULL)
+		name = "UNKNOWN";
+	    }
+	  sprintf (reloc_type_name, "0x%02x", rel->r_type);
+	  
+	  if (! ((*info->callbacks->reloc_overflow)
+		 (info, name, reloc_type_name, (bfd_vma) 0, input_bfd,
+		  input_section, rel->r_vaddr - input_section->vma)))
+	    return false;
 	}
-    }
 
+      /* Add RELOCATION to the right bits of VALUE_TO_RELOCATE.  */
+      value_to_relocate = ((value_to_relocate & ~howto.dst_mask) | 
+			   (((value_to_relocate & howto.src_mask) + 
+			     relocation) & howto.dst_mask));
+      
+      /* Put the value back in the object file.  */
+      if (1 == howto.size)
+	bfd_put_16 (input_bfd, value_to_relocate, location);
+      else if (2 == howto.size)
+	bfd_put_32 (input_bfd, value_to_relocate, location);
+      else
+	bfd_put_64 (input_bfd, value_to_relocate, location);
+      
+    }
   return true;
 }
 

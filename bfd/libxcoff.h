@@ -200,4 +200,26 @@ struct xcoff_backend_data_rec
 #define bfd_xcoff_text_align_power(a) ((xcoff_data (a)->text_align_power))
 #define bfd_xcoff_data_align_power(a) ((xcoff_data (a)->data_align_power))
 
+/* xcoff*_ppc_relocate_section macros  */
+#define XCOFF_MAX_CALCULATE_RELOCATION (0x1c)
+#define XCOFF_MAX_COMPLAIN_OVERFLOW (4)
+/* N_ONES produces N one bits, without overflowing machine arithmetic.  */
+#ifdef N_ONES
+#undef N_ONES
+#endif
+#define N_ONES(n) (((((bfd_vma) 1 << ((n) - 1)) - 1) << 1) | 1)
+
+#define XCOFF_RELOC_FUNCTION_ARGS \
+  bfd *, asection *, bfd *, struct internal_reloc *, \
+  struct internal_syment *, struct reloc_howto_struct *, bfd_vma, bfd_vma, \
+  bfd_vma *relocation, bfd_byte *contents
+
+#define XCOFF_COMPLAIN_FUNCTION_ARGS \
+  bfd *, bfd_vma, bfd_vma, struct reloc_howto_struct *howto
+
+extern boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
+     (XCOFF_RELOC_FUNCTION_ARGS);
+extern boolean (*xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW])
+     (XCOFF_COMPLAIN_FUNCTION_ARGS);
+
 #endif /* LIBXCOFF_H */

@@ -1,3 +1,27 @@
+2002-04-28  Tom Rix  <trix@redhat.com>
+
+	* coff-rs6000.c (xcoff_calculate_relocation) : Function table for
+	calulating relocations. 
+	(xcoff_complain_overflow) : Function table for relocation errors.
+	(xcoff_ppc_relocate_section): Use relocation and complain function 
+	tables. 
+	(xcoff_complain_overflow_unsigned_func): New complain function. 
+	(xcoff_complain_overflow_signed_func): Same.
+	(xcoff_complain_overflow_bitfield_func): Same.
+	(xcoff_complain_overflow_dont_func): Same.
+	(xcoff_reloc_type_crel): New recot function.
+	(xcoff_reloc_type_br): Same.
+	(xcoff_reloc_type_ba): Same.
+	(xcoff_reloc_type_toc): Same.
+	(xcoff_reloc_type_rel): Same.
+	(xcoff_reloc_type_neg): Same.
+	(xcoff_reloc_type_pos): Same.
+	(xcoff_reloc_type_fail): Same.
+	(xcoff_reloc_type_noop): Same.
+	* libxcoff.h : Declare common parts for xcoff64.
+	* coff64-rs6000.c (xcoff64_ppc_relocate_section): Use relocation
+	and complain function tables. 
+
 2002-04-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-x86-64.c (struct elf64_x86_64_dyn_relocs): Comment typo.
