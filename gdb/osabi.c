@@ -42,6 +42,7 @@ static const char * const gdb_osabi_names[] =
   "Windows CE",
   "DJGPP",
   "NetWare",
+  "Irix",
   "LynxOS",
 
   "ARM EABI v1",

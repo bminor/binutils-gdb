@@ -4,6 +4,10 @@
 	* solib-irix.c: ...to here.  Revised substantially to work with
 	generic solib framework.
 
+	* osabi.h (gdb_osabi): Add new enum constant GDB_OSABI_IRIX.
+	* osabi.c (gdb_osabi_names): Add corresponding string for Irix.
+	* mips-irix-tdep.c: New file.
+
 2002-07-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* aix-thread.c (coff/internal.h, bfd/libcoff.h, pthread.h): Remove
