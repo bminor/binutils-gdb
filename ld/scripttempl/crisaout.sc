@@ -62,6 +62,14 @@ SECTIONS
     ${CONSTRUCTING+ PROVIDE(___dtors_end = .);}
     ${CONSTRUCTING+ ___elf_ctors_dtors_end = .;}
 
+    /* We include objects that force alignment of the data segment.
+       Unfortunately that sometimes causes a gap between .text and .data,
+       which is not detectable since .data does not have a start address
+       of itself in the a.out header.  This should only matter for
+       testing; for production use, .data is at a "known" location.
+       We assume .data does not get an alignment larger than 32 bytes.  */
+    ${RELOCATING+. = ALIGN (32);}
+
     ${RELOCATING+ __Etext = .;}
 
     /* Deprecated, use __Etext.  */
@@ -82,6 +90,10 @@ SECTIONS
     ${RELOCATING+*(.gnu.linkonce.d*)}
     ${RELOCATING+*(.eh_frame) /* FIXME: Make .text */}
     ${RELOCATING+*(.gcc_except_table)}
+
+    /* See comment at ALIGN before __Etext.  */
+    ${RELOCATING+. = ALIGN (32);}
+
     ${RELOCATING+ __Edata = .;}
 
     /* Deprecated, use __Edata.  */

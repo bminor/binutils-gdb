@@ -1,3 +1,8 @@
+2000-10-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* scripttempl/crisaout.sc (.text, .data): Pad, with ALIGN (32),
+	for consecutive sections.
+
 2000-10-17  Chandrakala Chavva  <cchavva@redhat.com>
 
         * lexsup.c: New option OPTION_TARGET_HELP. Prints all target specific
