@@ -1,3 +1,36 @@
+1999-02-13  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* doc/c-mips.texi (MIPS Opts): Updated list of -mNNNN and
+	-mcpu=NNNN flags.
+
+	* config/tc-mips.c: Remove all the mips_NNNN variables; just use
+	mips_cpu instead.
+	(mips_4650, mips_4010, mips_4100): Variables removed.
+start-sanitize-vr4xxx
+	(mips_4121): Variable removed.
+end-sanitize-vr4xxx
+start-sanitize-vr4320
+	(mips_4320): Variable removed.
+end-sanitize-vr4320
+start-sanitize-cygnus
+	(mips_5400): Variable removed.
+end-sanitize-cygnus
+start-sanitize-r5900
+	(mips_5900): Variable removed.
+end-sanitize-r5900
+start-sanitize-tx49
+	(mips_4900): Variable removed.
+end-sanitize-tx49
+	(hilo_interlocks, gpr_interlocks, append_insn, macro_build, macro,
+	macro2, mips16_macro, mips_ip): Test mips_cpu, not the mips_NNNN
+	variables.
+	(md_begin): Don't bother initializing the mips_NNNN variables;
+	mips_cpu is set, and that's good enough now.
+	(md_parse_option): Have the -mNNNN options set mips_cpu instead of
+	the mips_NNNN variable.  The -no-mNNNN flags are now no-ops.
+	(show): New function, to handle wrapping in the CPU lists.
+	(md_show_usage): Update lists of -mcpu and -mNNNN switches.
+
 Sat Feb 13 00:17:26 1999  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-i386.c (i386_intel_operand): Ignore `SHORT' rather
