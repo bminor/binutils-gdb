@@ -1,3 +1,8 @@
+Sun Oct 27 18:18:39 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* main.c (initialize_history):  Read history after reading all
+	init files.
+
 Sun Oct 27 14:09:25 1991  John Gilmore  (gnu at cygnus.com)
 
 	* buildsym.c:  Break out initial malloc sizes.

@@ -170,6 +170,7 @@ extern void init_malloc ();
 void free_command_lines ();
 char *gdb_readline ();
 char *command_line_input ();
+static void initialize_history ();
 static void initialize_main ();
 static void initialize_cmd_lists ();
 static void init_signals ();
@@ -211,7 +212,7 @@ char *baud_rate;
 #define HAVE_SIGSETMASK !defined (USG)
 #endif
 
-#if !HAVE_SIGSETMASK
+#if 0 == (HAVE_SIGSETMASK)
 #define sigsetmask(n)
 #endif
 
@@ -676,6 +677,9 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 	do_cleanups (ALL_CLEANUPS);
       }
   free (cmdarg);
+
+  /* Read in the old history after all the command files have been read. */
+  initialize_history();
 
   if (batch)
     {
@@ -1993,12 +1997,39 @@ initialize_cmd_lists ()
   unsethistlist = (struct cmd_list_element *) 0;
 }
 
+/* Init the history buffer.  Note that we are called after the init file(s)
+ * have been read so that the user can change the history file via his
+ * .gdbinit file (for instance).  The GDBHISTFILE environment variable
+ * overrides all of this.
+ */
+
+static void
+initialize_history()
+{
+  char *tmpenv;
+
+  if (tmpenv = getenv ("HISTSIZE"))
+    history_size = atoi (tmpenv);
+  else if (!history_size)
+    history_size = 256;
+
+  stifle_history (history_size);
+
+  if (tmpenv = getenv ("GDBHISTFILE"))
+    history_filename = savestring (tmpenv, strlen(tmpenv));
+  else if (!history_filename) {
+    /* We include the current directory so that if the user changes
+       directories the file written will be the same as the one
+       that was read.  */
+    history_filename = concat (current_directory, "/.gdb_history", "");
+  }
+  read_history (history_filename);
+}
+
 static void
 initialize_main ()
 {
   struct cmd_list_element *c;
-  
-  char *tmpenv;
   
 #ifdef DEFAULT_PROMPT
   prompt = savestring (DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
@@ -2011,23 +2042,6 @@ initialize_main ()
   history_expansion_p = 0;
   write_history_p = 0;
   
-  if (tmpenv = getenv ("HISTSIZE"))
-    history_size = atoi (tmpenv);
-  else
-    history_size = 256;
-
-  stifle_history (history_size);
-
-  if (tmpenv = getenv ("GDBHISTFILE"))
-    history_filename = savestring (tmpenv, strlen(tmpenv));
-  else
-    /* We include the current directory so that if the user changes
-       directories the file written will be the same as the one
-       that was read.  */
-    history_filename = concat (current_directory, "/.gdb_history", "");
-
-  read_history (history_filename);
-
   /* Setup important stuff for command line editing.  */
   rl_completion_entry_function = (int (*)()) symbol_completion_function;
   rl_completer_word_break_characters = gdb_completer_word_break_characters;
