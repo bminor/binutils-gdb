@@ -54,8 +54,6 @@ Mon Jan 16 18:11:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
 	* printcmd.c (print_insn): New function, generic disassembler.
 	* config/*/*.mt (TDEPFILES): Remove refs to *-pinsn.o.
 
-	* defs.h (query_hook, error_hook): Fix prototypes.
-
 Mon Jan 16 15:43:29 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* Makefile.in: add new files remote-vx29k.c, config/a29k/tm-vx29k.h,
