@@ -1,3 +1,10 @@
+2002-06-02  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Don't dereference
+	null when there are no got entries for a symbol.
+	(elf64_alpha_relax_find_tls_segment): Rearrange to avoid
+	uninitialized variable warning.
+
 2002-06-01  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_with_lituse): Don't test for

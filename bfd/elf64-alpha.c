@@ -1988,24 +1988,21 @@ elf64_alpha_relax_find_tls_segment (info, seg)
      struct elf_link_tls_segment *seg;
 {
   bfd *output_bfd = info->sec->output_section->owner;
-  asection *first_tls_sec = NULL, *o;
+  asection *o;
   unsigned int align;
   bfd_vma base, end;
 
   for (o = output_bfd->sections; o ; o = o->next)
     if ((o->flags & SEC_THREAD_LOCAL) != 0
         && (o->flags & SEC_LOAD) != 0)
-      {
-        first_tls_sec = o;
-        break;
-      }
-  if (!first_tls_sec)
+      break;
+  if (!o)
     return NULL;
 
-  base = first_tls_sec->vma;
+  base = o->vma;
   align = 0;
 
-  for (o = first_tls_sec; o && (o->flags & SEC_THREAD_LOCAL); o = o->next)
+  do
     {
       bfd_vma size;
 
@@ -2021,7 +2018,9 @@ elf64_alpha_relax_find_tls_segment (info, seg)
 	      size = lo->offset + lo->size;
 	}
       end = o->vma + size;
+      o = o->next;
     }
+  while (o && (o->flags & SEC_THREAD_LOCAL));
 
   seg->start = base;
   seg->size = end - base;
@@ -4366,10 +4365,11 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* Need to adjust local GOT entries' addends for SEC_MERGE
 	     unless it has been done already.  */
 	  if ((sec->flags & SEC_MERGE)
-	       && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-	       && (elf_section_data (sec)->sec_info_type
-		   == ELF_INFO_TYPE_MERGE)
-	       && !gotent->reloc_xlated)
+	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
+	      && (elf_section_data (sec)->sec_info_type
+		  == ELF_INFO_TYPE_MERGE)
+	      && gotent
+	      && !gotent->reloc_xlated)
 	    {
 	      struct alpha_elf_got_entry *ent;
 	      asection *msec;
