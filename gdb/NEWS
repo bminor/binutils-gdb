@@ -1,7 +1,12 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
-*** Changes in GDB-???:
+The "set remotedebug" option is now consistent between the mips remote
+target, remote targets using the gdb-specific protocol, and the 88k
+bug monitor.  It is now an integer specifying a debug level (normally
+0 or 1, but 2 means more debugging info for the mips target).
+
+*** Changes in GDB-4.10:
 
  * User visible changes:
 
