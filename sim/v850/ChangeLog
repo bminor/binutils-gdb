@@ -1,5 +1,9 @@
 Thu Oct 24 12:26:35 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c (OP_500): Mask off low bit in displacement
+	for sld.w.
+	(OP_501): Similarly.
+
 	* simops.c (OP_500): Fix displacement handling for sld.w.
 	(OP_501): Similarly for sst.w.
 
