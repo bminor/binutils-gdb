@@ -1,3 +1,13 @@
+Tue Nov  5 13:26:58 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (mn10300_operands): Add DN2, DM2, AN2, AM2
+	operands (for indexed load/stores).  Fix bitpos for DI
+	operand.  Add SN8N_SHIFT8, IMM8_SHIFT8, and D16_SHIFT for the
+	few instructions that insert immediates/displacements in the
+	middle of the instruction.  Add IMM8E for 8 bit immediate in
+	the extended part of an instruction.
+	(mn10300_operands): Use new opcodes as appropriate.
+
 start-sanitize-d10v
 Tue Nov  5 10:30:51 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

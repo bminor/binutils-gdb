@@ -29,25 +29,37 @@ const struct mn10300_operand mn10300_operands[] = {
 #define DN1      (DN0+1)
   {2, 2, MN10300_OPERAND_DREG},
 
-#define DM0      (DN1+1)
+#define DN2      (DN1+1)
+  {2, 4, MN10300_OPERAND_DREG},
+
+#define DM0      (DN2+1)
   {2, 0, MN10300_OPERAND_DREG},
 
 #define DM1      (DM0+1)
   {2, 2, MN10300_OPERAND_DREG},
 
-#define AN0      (DM1+1)
+#define DM2      (DM1+1)
+  {2, 4, MN10300_OPERAND_DREG},
+
+#define AN0      (DM2+1)
   {2, 0, MN10300_OPERAND_AREG},
 
 #define AN1      (AN0+1)
   {2, 2, MN10300_OPERAND_AREG},
 
-#define AM0      (AN1+1)
+#define AN2      (AN1+1)
+  {2, 4, MN10300_OPERAND_AREG},
+
+#define AM0      (AN2+1)
   {2, 0, MN10300_OPERAND_AREG},
 
 #define AM1      (AM0+1)
   {2, 2, MN10300_OPERAND_AREG},
 
-#define IMM8    (AM1+1)
+#define AM2      (AM1+1)
+  {2, 4, MN10300_OPERAND_AREG},
+
+#define IMM8    (AM2+1)
   {8, 0, MN10300_OPERAND_PROMOTE},
 
 #define IMM16    (IMM8+1)
@@ -81,7 +93,7 @@ const struct mn10300_operand mn10300_operands[] = {
   {32, 0, 0},
 
 #define DI (ABS32+1)
-  {2, 0, MN10300_OPERAND_DREG},
+  {2, 2, MN10300_OPERAND_DREG},
 
 #define SD8    (DI+1)
   {8, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
@@ -92,7 +104,10 @@ const struct mn10300_operand mn10300_operands[] = {
 #define SD8N    (SD16+1)
   {8, 0, MN10300_OPERAND_SIGNED},
 
-#define SIMM8    (SD8N+1)
+#define SD8N_SHIFT8    (SD8N+1)
+  {8, 8, MN10300_OPERAND_SIGNED},
+
+#define SIMM8    (SD8N_SHIFT8+1)
   {8, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
 #define SIMM16    (SIMM8+1)
@@ -106,6 +121,15 @@ const struct mn10300_operand mn10300_operands[] = {
 
 #define AN01     (DN01+1)
   {2, 0, MN10300_OPERAND_AREG | MN10300_OPERAND_REPEATED},
+
+#define D16_SHIFT (AN01+1)
+  {16, 8, MN10300_OPERAND_PROMOTE},
+
+#define IMM8E    (D16_SHIFT+1)
+  {8, 0, MN10300_OPERAND_EXTENDED},
+
+#define IMM8_SHIFT8 (IMM8E + 1)
+  {8, 8, 0},
 
 } ; 
 
@@ -149,7 +173,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0x5800,		0xfc00,		FMT_S1, {MEM2(D8, SP), DN0}},
 { "mov",	0xfab40000,	0xfffc0000,	FMT_D2, {MEM2(D16, SP), DN0}},
 { "mov",	0xfcb40000,	0xfffc0000,	FMT_D4, {MEM2(D32, SP), DN0}},
-{ "mov",	0xf300,		0xffc0,		FMT_D0, {MEM2(DI, AM0), DN0}},
+{ "mov",	0xf300,		0xffc0,		FMT_D0, {MEM2(DI, AM0), DN2}},
 { "mov",	0x300000,	0xfc0000,	FMT_S2, {MEM(ABS16), DN0}},
 { "mov",	0xfca40000,	0xfffc0000,	FMT_D4, {MEM(ABS32), DN0}},
 { "mov",	0xf000,		0xfff0,		FMT_D0, {MEM(AM0), AN1}},
@@ -159,7 +183,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0x5c00,		0xfc00,		FMT_S1, {MEM2(D8, SP), AN0}},
 { "mov",	0xfab00000,	0xfffc0000,	FMT_D2, {MEM2(D16, SP), AN0}},
 { "mov",	0xfcb00000,	0xfffc0000,	FMT_D4, {MEM2(D32, SP), AN0}},
-{ "mov",	0xf380,		0xffc0,		FMT_D0, {MEM2(DI, AM0), AN0}},
+{ "mov",	0xf380,		0xffc0,		FMT_D0, {MEM2(DI, AM0), AN2}},
 { "mov",	0xfaa00000,	0xfffc0000,	FMT_D2, {MEM(ABS16), AN0}},
 { "mov",	0xfca00000,	0xfffc0000,	FMT_D4, {MEM(ABS32), AN0}},
 { "mov",	0xf8f000,	0xfffc00,	FMT_D1, {MEM2(SD8N, AM0), SP}},
@@ -170,7 +194,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0x4200,		0xf300,		FMT_S1, {DM1, MEM2(D8, SP)}},
 { "mov",	0xfa910000,	0xfff30000,	FMT_D2, {DM1, MEM2(D16, SP)}},
 { "mov",	0xfc910000,	0xfff30000,	FMT_D4, {DM1, MEM2(D32, SP)}},
-{ "mov",	0xf340,		0xffc0,		FMT_D0, {DM0, MEM2(DI, AN0)}},
+{ "mov",	0xf340,		0xffc0,		FMT_D0, {DM2, MEM2(DI, AN0)}},
 { "mov",	0x010000,	0xf30000,	FMT_S2, {DM1, MEM(ABS16)}},
 { "mov",	0xfc810000,	0xfff30000,	FMT_D4, {DM1, MEM(ABS32)}},
 { "mov",	0xf010,		0xfff0,		FMT_D0, {AM1, MEM(AN0)}},
@@ -180,7 +204,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0x4300,		0xf300,		FMT_S1, {AM1, MEM2(D8, SP)}},
 { "mov",	0xfa900000,	0xfff30000,	FMT_D2, {AM1, MEM2(D16, SP)}},
 { "mov",	0xfc900000,	0xfc930000,	FMT_D4, {AM1, MEM2(D32, SP)}},
-{ "mov",	0xf3c0,		0xffc0,		FMT_D0, {AM0, MEM2(DI, AN0)}},
+{ "mov",	0xf3c0,		0xffc0,		FMT_D0, {AM2, MEM2(DI, AN0)}},
 { "mov",	0xfa800000,	0xfff30000,	FMT_D2, {AM1, MEM(ABS16)}},
 { "mov",	0xfc800000,	0xfff30000,	FMT_D4, {AM1, MEM(ABS32)}},
 { "mov",	0xf8f400,	0xfffc00,	FMT_D1, {SP, MEM2(SD8N, AN0)}},
@@ -196,7 +220,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movbu",	0xf8b800,	0xfffc00,	FMT_D1, {MEM2(D8, SP), DN0}},
 { "movbu",	0xfab80000,	0xfffc0000,	FMT_D2, {MEM2(D16, SP), DN0}},
 { "movbu",	0xfcb80000,	0xfffc0000,	FMT_D4, {MEM2(D32, SP), DN0}},
-{ "movbu",	0xf400,		0xffc0,		FMT_D0, {MEM2(DI, AM0), DN0}},
+{ "movbu",	0xf400,		0xffc0,		FMT_D0, {MEM2(DI, AM0), DN2}},
 { "movbu",	0x340000,	0xfc0000,	FMT_S2, {MEM(ABS16), DN0}},
 { "movbu",	0xfca80000,	0xfffc0000,	FMT_D4, {MEM(ABS32), DN0}},
 { "movbu",	0xf050,		0xfff0,		FMT_D0, {DM1, MEM(AN0)}},
@@ -206,7 +230,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movbu",	0xf89200,	0xfff300,	FMT_D1, {DM1, MEM2(D8, SP)}},
 { "movbu",	0xfa920000,	0xfff30000,	FMT_D2, {DM1, MEM2(D16, SP)}},
 { "movbu",	0xfc920000,	0xfff30000,	FMT_D4, {DM1, MEM2(D32, SP)}},
-{ "movbu",	0xf440,		0xffc0,		FMT_D0, {DM0, MEM2(DI, AN0)}},
+{ "movbu",	0xf440,		0xffc0,		FMT_D0, {DM2, MEM2(DI, AN0)}},
 { "movbu",	0x020000,	0xf30000,	FMT_S2, {DM1, MEM(ABS16)}},
 { "movbu",	0xfc820000,	0xfff30000,	FMT_D4, {DM1, MEM(ABS32)}},
 
@@ -217,7 +241,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movhu",	0xf8bc00,	0xfffc00,	FMT_D1, {MEM2(D8, SP), DN0}},
 { "movhu",	0xfabc0000,	0xfffc0000,	FMT_D2, {MEM2(D16, SP), DN0}},
 { "movhu",	0xfcbc0000,	0xfffc0000,	FMT_D4, {MEM2(D32, SP), DN0}},
-{ "movhu",	0xf480,		0xffc0,		FMT_D0, {MEM2(DI, AM0), DN0}},
+{ "movhu",	0xf480,		0xffc0,		FMT_D0, {MEM2(DI, AM0), DN2}},
 { "movhu",	0x380000,	0xfc0000,	FMT_S2, {MEM(ABS16), DN0}},
 { "movhu",	0xfcac0000,	0xfffc0000,	FMT_D4, {MEM(ABS32), DN0}},
 { "movhu",	0xf070,		0xfff0,		FMT_D0, {DM1, MEM(AN0)}},
@@ -227,7 +251,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movhu",	0xf89300,	0xfff300,	FMT_D1, {DM1, MEM2(D8, SP)}},
 { "movhu",	0xfa930000,	0xfff30000,	FMT_D2, {DM1, MEM2(D16, SP)}},
 { "movhu",	0xfc930000,	0xfff30000,	FMT_D4, {DM1, MEM2(D32, SP)}},
-{ "movhu",	0xf4c0,		0xffc0,		FMT_D0, {DM0, MEM2(DI, AN0)}},
+{ "movhu",	0xf4c0,		0xffc0,		FMT_D0, {DM2, MEM2(DI, AN0)}},
 { "movhu",	0x030000,	0xf30000,	FMT_S2, {DM1, MEM(ABS16)}},
 { "movhu",	0xfc830000,	0xfff30000,	FMT_D4, {DM1, MEM(ABS32)}},
 
@@ -305,13 +329,16 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "btst",	0xfaec0000,	0xfffc0000,	FMT_D2, {IMM16, DN0}},
 { "btst",	0xfcec0000,	0xfffc0000,	FMT_D4, {IMM32, DN0}},
 { "btst",	0xfe020000,	0xffff0000,	FMT_D5, {IMM8, MEM(ABS32)}},
-{ "btst",	0xfaf80000,	0xfffc0000,	FMT_D2, {IMM8, MEM2(SD8N,AN0)}},
+{ "btst",	0xfaf80000,	0xfffc0000,	FMT_D2,
+					{IMM8, MEM2(SD8N_SHIFT8,AN0)}},
 { "bset",	0xf080,		0xfff0,		FMT_D0, {DM1, MEM(AN0)}},
 { "bset",	0xfe000000,	0xffff0000,	FMT_D5, {IMM8, MEM(ABS32)}},
-{ "bset",	0xfaf00000,	0xfffc0000,	FMT_D2, {IMM8, MEM2(SD8N,AN0)}},
+{ "bset",	0xfaf00000,	0xfffc0000,	FMT_D2,
+					{IMM8, MEM2(SD8N_SHIFT8,AN0)}},
 { "bclr",	0xf090,		0xfff0,		FMT_D0, {DM1, MEM(AN0)}},
 { "bclr",	0xfe010000,	0xffff0000,	FMT_D5, {IMM8, MEM(ABS32)}},
-{ "bclr",	0xfaf40000,	0xfffc0000,	FMT_D2, {IMM8, MEM2(SD8N,AN0)}},
+{ "bclr",	0xfaf40000,	0xfffc0000,	FMT_D2, {IMM8,
+					MEM2(SD8N_SHIFT8,AN0)}},
 
 { "asr",	0xf2b0,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "asr",	0xf8c800,	0xfffc00,	FMT_D1, {IMM8, DN0}},
@@ -356,14 +383,14 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "jmp",	0xf0f4,		0xfffc,		FMT_D0, {AN0}},
 { "jmp",	0xcc0000,	0xff0000,	FMT_S2, {D16}},
 { "jmp",	0xdc0000,	0xff0000,	FMT_S4, {D32}},
-{ "call",	0xcd000000,	0xff000000,	FMT_S4, {D16,IMM8,IMM8}},
+{ "call",	0xcd000000,	0xff000000,	FMT_S4, {D16_SHIFT,IMM8,IMM8E}},
 { "call",	0xdd000000,	0xff000000,	FMT_S6, {D32,IMM8,IMM8}},
 { "calls",	0xf0f0,		0xfffc,		FMT_D0, {AN0}},
 { "calls",	0xfaff0000,	0xffff0000,	FMT_D2, {D16}},
 { "calls",	0xfcff0000,	0xffff0000,	FMT_D4, {D32}},
 
-{ "ret",	0xdf0000,	0xff00000,	FMT_S2, {IMM8, IMM8}},
-{ "retf",	0xde0000,	0xff00000,	FMT_S2, {IMM8, IMM8}},
+{ "ret",	0xdf0000,	0xff00000,	FMT_S2, {IMM8_SHIFT8, IMM8}},
+{ "retf",	0xde0000,	0xff00000,	FMT_S2, {IMM8_SHIFT8, IMM8}},
 { "rets",	0xf0fc,		0xffff,		FMT_D0, {UNUSED}},
 { "rti",	0xf0fd,		0xffff,		FMT_D0, {UNUSED}},
 { "trap",	0xf0fe,		0xffff,		FMT_D0, {UNUSED}},
