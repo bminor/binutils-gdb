@@ -3,18 +3,17 @@
 
 		See also: http://www.gnu.org/software/gdb/bugs/
 
-mips*-*-*
-powerpc*-*-*
-sparc*-*-*
 
-GDB's SPARC, MIPS and PowerPC targets, in 6.0, have not been updated
-to use the new frame mechanism.
+*** Misc
 
-People encountering problems with these targets should consult GDB's
-web pages and mailing lists (http://www.gnu.org/software/gdb/) to see
-if there is an update.
+gdb/1560: Control-C does not always interrupt GDB.
 
-*** Regressions since gdb 6.0
+When GDB is busy processing a command which takes a long time to
+complete, hitting Control-C does not have the expected effect.
+The command execution is not aborted, and the "QUIT" message confirming
+the abortion is displayed only after the command has been completed.
+
+*** C++ support
 
 gdb/826: variables in C++ namespaces have to be enclosed in quotes
 
@@ -26,11 +25,6 @@ gdb/931: GDB could be more generous when reading types C++ templates on input
 When the user types a template, GDB frequently requires the type to be
 typed in a certain way (e.g. "const char*" as opposed to "const char *"
 or "char const *" or "char const*").
-
-gdb/1505: [regression] gdb prints a bad backtrace for a thread
-
-When backtracing a thread, gdb doesn't stop until it hits garbage.
-This is sensitive to the operating system and thread library.
 
 gdb/1512: no canonical way to output names of C++ types
 
@@ -50,15 +44,6 @@ This applies only to classes where the class type is defined inside a
 function, not to variables defined with types that are defined somewhere
 outside any function (which most types are).
 
-gdb/1560: Control-C does not always interrupt GDB.
-
-When GDB is busy processing a command which takes a long time to
-complete, hitting Control-C does not have the expected effect.
-The command execution is not aborted, and the "QUIT" message confirming
-the abortion is displayed only after the command has been completed.
-
-*** Regressions since gdb 5.3
-
 gdb/1091: Constructor breakpoints ignored
 gdb/1193: g++ 3.3 creates multiple constructors: gdb 5.3 can't set breakpoints
 
@@ -76,3 +61,29 @@ implement virtual base classes.  gcc 2.x generated just one object code
 function with a hidden parameter, but gcc 3.x conforms to a multi-vendor
 ABI for C++ which requires multiple object code functions.
 
+*** Stack backtraces
+
+gdb/1505: [regression] gdb prints a bad backtrace for a thread
+
+When backtracing a thread, gdb doesn't stop until it hits garbage.
+This is sensitive to the operating system and thread library.
+
+mips*-*-*
+powerpc*-*-*
+sparc*-*-*
+
+GDB's SPARC, MIPS and PowerPC targets, in 6.0, have not been updated
+to use the new frame mechanism.
+
+People encountering problems with these targets should consult GDB's
+web pages and mailing lists (http://www.gnu.org/software/gdb/) to see
+if there is an update.
+
+arm-*-*
+
+GDB's ARM target, in 6.0, has not been updated to use the new frame
+mechanism.
+
+Fortunately the ARM target, in the GDB's mainline sources, has been
+updated so people encountering problems should consider downloading a
+more current GDB (http://www.gnu.org/software/gdb/current).
