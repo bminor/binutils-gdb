@@ -1,3 +1,19 @@
+Tue Sep 13 14:17:24 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* Makefile.in (version.o): Depend upon Makefile, so that version.o
+	gets rebuilt when make variable VERSION is changed.
+
+	* objdump.c (dump_section_header): Print the SEC_NEVER_LOAD flag.
+
+Wed Aug 24 12:40:09 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in: Change i[34]86 to i[345]86.
+
+Tue Aug 23 11:00:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ar.c (ranlib_touch): Don't update the archive map if there isn't
+	one.
+
 Mon Aug 22 16:02:18 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ar.c: Include libiberty.h.
