@@ -222,7 +222,7 @@ child_attach (char *args, int from_tty)
 	  printf_unfiltered ("Attaching to program: %s, %s\n", exec_file,
 			     target_pid_to_str (pid_to_ptid (pid)));
 	else
-	  printf_unfiltered ("Attaching to %s\n", 
+	  printf_unfiltered ("Attaching to %s\n",
 	                     target_pid_to_str (pid_to_ptid (pid)));
 
 	gdb_flush (gdb_stdout);
@@ -578,11 +578,12 @@ child_xfer_partial (struct target_ops *ops, enum target_object object,
       return NATIVE_XFER_UNWIND_TABLE (ops, object, annex, readbuf, writebuf,
 				       offset, len);
 
-#if 0
     case TARGET_OBJECT_AUXV:
-      return native_xfer_auxv (PIDGET (inferior_ptid), readbuf, writebuf,
-			       offset, len);
+#ifndef NATIVE_XFER_AUXV
+#define NATIVE_XFER_AUXV(OPS,OBJECT,ANNEX,WRITEBUF,READBUF,OFFSET,LEN) (-1)
 #endif
+      return NATIVE_XFER_AUXV (ops, object, annex, readbuf, writebuf,
+			       offset, len);
 
     default:
       return -1;
@@ -655,10 +656,10 @@ init_child_ops (void)
 }
 
 /* Take over the 'find_mapped_memory' vector from inftarg.c. */
-extern void 
-inftarg_set_find_memory_regions (int (*func) (int (*) (CORE_ADDR, 
-						       unsigned long, 
-						       int, int, int, 
+extern void
+inftarg_set_find_memory_regions (int (*func) (int (*) (CORE_ADDR,
+						       unsigned long,
+						       int, int, int,
 						       void *),
 					      void *))
 {
@@ -666,7 +667,7 @@ inftarg_set_find_memory_regions (int (*func) (int (*) (CORE_ADDR,
 }
 
 /* Take over the 'make_corefile_notes' vector from inftarg.c. */
-extern void 
+extern void
 inftarg_set_make_corefile_notes (char * (*func) (bfd *, int *))
 {
   child_ops.to_make_corefile_notes = func;
