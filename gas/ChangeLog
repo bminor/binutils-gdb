@@ -1,5 +1,10 @@
 Fri Sep  8 00:27:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* app.c (do_scrub_chars): In MRI mode, keep a space before a
+	possible comment character.
+	* config/tc-m68k.c (m68k_ip): In MRI mode, ignore anything after
+	an instruction which takes no operands.
+
 	* Makefile.in (install): Don't install gasp in $(tooldir).
 
 	* config/tc-mips.c (macro): Handle a non zero base register for

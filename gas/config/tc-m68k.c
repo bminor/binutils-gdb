@@ -29,7 +29,7 @@
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
-#ifdef OBJ_ELF
+#if defined (OBJ_ELF) || defined (TE_DELTA)
 CONST char comment_chars[] = "|#";
 #else
 CONST char comment_chars[] = "|";
@@ -711,6 +711,18 @@ m68k_ip (instring)
       input_line_pointer = old;
       *old = 0;
 
+      return;
+    }
+
+  if (flag_mri && opcode->m_opnum == 0)
+    {
+      /* In MRI mode, random garbage is allowed after an instruction
+         which accepts no operands.  */
+      the_ins.args = opcode->m_operands;
+      the_ins.numargs = opcode->m_opnum;
+      the_ins.numo = opcode->m_codenum;
+      the_ins.opcode[0] = getone (opcode);
+      the_ins.opcode[1] = gettwo (opcode);
       return;
     }
 
@@ -1757,7 +1769,7 @@ m68k_ip (instring)
 			  siz2 = SIZE_LONG;
 			  nextword |= 0x3;
 			}
-		      else if (! isvar (&opP->disp) && outro == 0)
+		      else if (! isvar (&opP->odisp) && outro == 0)
 			nextword |= 0x1;
 		      else
 			{
@@ -1775,7 +1787,8 @@ m68k_ip (instring)
 		      nextword |= 0x3;
 		      break;
 		    }
-		  if (opP->mode == POST)
+		  if (opP->mode == POST
+		      && (nextword & 0x40) == 0)
 		    nextword |= 0x04;
 		}
 	      addword (nextword);
@@ -5842,7 +5855,8 @@ md_show_usage (stream)
 			specify variant of 680X0 architecture [default 68020]\n\
 -m68881 | -m68882 | -mno-68881 | -mno-68882\n\
 			target has/lacks floating-point coprocessor\n\
-			[default yes for 68020, 68030, and cpu32]\n\
+			[default yes for 68020, 68030, and cpu32]\n");
+  fprintf(stream, "\
 -m68851 | -mno-68851\n\
 			target has/lacks memory-management unit coprocessor\n\
 			[default yes for 68020 and up]\n\

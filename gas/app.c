@@ -587,6 +587,13 @@ do_scrub_chars (get, tostart, tolen)
 	      /* cpp never outputs a leading space before the #, so
 		 try to avoid being confused.  */
 	      not_cpp_line = 1;
+	      if (flag_mri)
+		{
+		  /* In MRI mode, we keep these spaces.  */
+		  UNGET (ch);
+		  PUT (' ');
+		  break;
+		}
 	      goto recycle;
 	    }
 
