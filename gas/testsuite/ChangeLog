@@ -1,3 +1,12 @@
+start-sanitize-d30v
+Wed Apr 16 12:20:24 1997  Martin Hunt  <hunt@cygnus.com>
+
+	* gas/d30v/d30.exp: Add optimizer test case.
+	* gas/d30v/opt.s: Add conditional compilation tests.
+	* gas/d30v/opt.d: Rebuild.
+
+end-sanitize-d30v	
+
 Tue Apr 15 18:10:01 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* gas/mips/{delay.d,nodelay.d}: added.
