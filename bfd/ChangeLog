@@ -1,3 +1,8 @@
+2001-10-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* dwarf2.c (comp_unit_find_nearest_line): Check for end of
+	compilation unit.
+
 2001-10-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd.c (bfd_assert): Report bfd version.
