@@ -102,12 +102,12 @@
 /* TUI output files.  */
 static struct ui_file *tui_stdout;
 static struct ui_file *tui_stderr;
-static struct ui_out *tui_out;
+struct ui_out *tui_out;
 
 /* GDB output files in non-curses mode.  */
 static struct ui_file *tui_old_stdout;
 static struct ui_file *tui_old_stderr;
-static struct ui_out *tui_old_uiout;
+struct ui_out *tui_old_uiout;
 
 /* Readline previous hooks.  */
 static Function *tui_old_rl_getc_function;
@@ -578,7 +578,7 @@ tui_initialize_io ()
 
   /* Create the default UI.  It is not created because we installed
      a init_ui_hook.  */
-  uiout = cli_out_new (gdb_stdout);
+  tui_old_uiout = uiout = cli_out_new (gdb_stdout);
 
 #ifdef TUI_USE_PIPE_FOR_READLINE
   /* Temporary solution for readline writing to stdout:

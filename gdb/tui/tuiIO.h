@@ -41,6 +41,8 @@ extern int tui_getc (FILE*);
    changed the edited text.  */
 extern void tui_redisplay_readline (void);
 
+extern struct ui_out *tui_out;
+extern struct ui_out *tui_old_uiout;
 
 #define m_tuiStartNewLine       tuiStartNewLines(1)
 #define m_isStartSequence(ch)   (ch == 27)
