@@ -37,6 +37,11 @@ altosgas)
 	vendor=altos
 	os=gas
 	;;
+am29k)
+	cpu=a29k
+	vendor=none
+	os=bsd
+	;;
 amdahl)
 	cpu=580
 	vendor=amdahl
@@ -415,7 +420,7 @@ esac
 
 case "${os}" in
 aix* | aout | bout | bsd* | coff | ctix* | dynix* | esix* | hpux* | irix* \
-	| isc* | kern | mach* | newsos* | nindy* | none | osf* | osf* | sco* \
+	| isc* | kern | mach* | newsos* | nindy* | none | osf* | sco* \
 	| sunos* | sysv* | ultrix* | unos* | v88r* | vms* | vxworks* \
 	| sym[1-9]* | unicos* | uts | svr4 | amigados)
 	;;
