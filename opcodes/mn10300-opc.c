@@ -66,17 +66,40 @@ const struct mn10300_operand mn10300_operands[] = {
   {16, 0, MN10300_OPERAND_PROMOTE},
 
 /* 32bit immediate, high 16 bits in the main instruction
-   word, 16bits in the extension word.  */
+   word, 16bits in the extension word. 
+
+   The "bits" field indicates how many bits are in the
+   main instruction word for MN10300_OPERAND_SPLIT!  */
 #define IMM32    (IMM16+1)
-  {32, 0, MN10300_OPERAND_SPLIT},
+  {16, 0, MN10300_OPERAND_SPLIT},
 
 /* 32bit immediate, high 16 bits in the main instruction
    word, 16bits in the extension word, low 16bits are left
-   shifted 8 places.  */
-#define IMM32_LOWSHIFT8    (IMM32+1)
-  {32, 8, MN10300_OPERAND_SPLIT},
+   shifted 8 places. 
 
-#define SP    (IMM32_LOWSHIFT8+1)
+   The "bits" field indicates how many bits are in the
+   main instruction word for MN10300_OPERAND_SPLIT!  */
+#define IMM32_LOWSHIFT8    (IMM32+1)
+  {16, 8, MN10300_OPERAND_SPLIT},
+
+/* 32bit immediate, high 24 bits in the main instruction
+   word, 8 in the extension word.
+
+   The "bits" field indicates how many bits are in the
+   main instruction word for MN10300_OPERAND_SPLIT!  */
+#define IMM32_HIGH24    (IMM32_LOWSHIFT8+1)
+  {24, 0, MN10300_OPERAND_SPLIT},
+
+/* 32bit immediate, high 24 bits in the main instruction
+   word, 8 in the extension word, low 8 bits are left
+   shifted 16 places. 
+
+   The "bits" field indicates how many bits are in the
+   main instruction word for MN10300_OPERAND_SPLIT!  */
+#define IMM32_HIGH24_LOWSHIFT16    (IMM32_HIGH24+1)
+  {24, 16, MN10300_OPERAND_SPLIT},
+
+#define SP    (IMM32_HIGH24_LOWSHIFT16+1)
   {8, 0, MN10300_OPERAND_SP},
 
 #define PSW    (SP+1)
@@ -121,7 +144,10 @@ const struct mn10300_operand mn10300_operands[] = {
 #define IMM8E    (D16_SHIFT+1)
   {8, 0, MN10300_OPERAND_EXTENDED},
 
-#define IMM8_SHIFT8 (IMM8E + 1)
+#define IMM8E_SHIFT8    (IMM8E+1)
+  {8, 8, MN10300_OPERAND_EXTENDED},
+
+#define IMM8_SHIFT8 (IMM8E_SHIFT8 + 1)
   {8, 8, 0},
 
 } ; 
@@ -378,9 +404,10 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 
 { "jmp",	0xf0f4,		0xfffc,		FMT_D0, {AN0}},
 { "jmp",	0xcc0000,	0xff0000,	FMT_S2, {IMM16}},
-{ "jmp",	0xdc0000,	0xff0000,	FMT_S4, {IMM32}},
+{ "jmp",	0xdc000000,	0xff000000,	FMT_S4, {IMM32_HIGH24}},
 { "call",	0xcd000000,	0xff000000,	FMT_S4, {D16_SHIFT,IMM8,IMM8E}},
-{ "call",	0xdd000000,	0xff000000,	FMT_S6, {IMM32,IMM8,IMM8}},
+{ "call",	0xdd000000,	0xff000000,	FMT_S6,
+					{IMM32_HIGH24_LOWSHIFT16,IMM8E_SHIFT8,IMM8E}},
 { "calls",	0xf0f0,		0xfffc,		FMT_D0, {AN0}},
 { "calls",	0xfaff0000,	0xffff0000,	FMT_D2, {IMM16}},
 { "calls",	0xfcff0000,	0xffff0000,	FMT_D4, {IMM32}},

@@ -1,5 +1,11 @@
 Wed Nov  6 13:42:32 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-opc.c (mn10300_operands): Hijack "bits" field
+	in MN10300_OPERAND_SPLIT operands for how many bits
+	appear in the basic insn word.  Add IMM32_HIGH24,
+	IMM32_HIGH24_LOWSHIFT8, IMM8E_SHIFT8.  
+	(mn10300_opcodes): Use new operands as needed.
+
 	* mn10300-opc.c (mn10300_operands): Add IMM32_LOWSHIFT8
 	for bset, bclr, btst instructions.
 	(mn10300_opcodes): Use new IMM32_LOWSHIFT8 as needed.
