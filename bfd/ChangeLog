@@ -1,3 +1,8 @@
+2004-02-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (elf32_frv_howto_table) <R_FRV_LABEL16>: Set
+	complain_on_overflow to signed.
+
 2004-02-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.h (sort_symbol): New.

@@ -117,7 +117,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 16,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_LABEL16",	/* name */
 	 FALSE,			/* partial_inplace */
