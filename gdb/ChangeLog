@@ -9,6 +9,7 @@
 	(parse_frame_info): New, derived from former dwarf2_build_frame_info.
 	fixed augmentation handling, added relative addressing, 
 	ignore duplicate FDEs. Added comments.
+	* dwarf2cfi.c: Reindented.
 	
 2002-06-20  Elena Zannoni  <ezannoni@redhat.com>
 

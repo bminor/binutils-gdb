@@ -176,7 +176,8 @@ struct frame_state
   struct objfile *objfile;
 };
 
-enum ptr_encoding { 
+enum ptr_encoding
+{
   PE_absptr = DW_EH_PE_absptr,
   PE_pcrel = DW_EH_PE_pcrel,
   PE_textrel = DW_EH_PE_textrel,
@@ -561,7 +562,7 @@ pointer_encoding (unsigned char encoding)
 
   if (encoding & DW_EH_PE_indirect)
     warning ("CFI: Unsupported pointer encoding: DW_EH_PE_indirect");
-  
+
   switch (encoding & 0x70)
     {
     case DW_EH_PE_absptr:
@@ -572,8 +573,7 @@ pointer_encoding (unsigned char encoding)
       ret = encoding & 0x70;
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-    		  "CFI: unknown pointer encoding");
+      internal_error (__FILE__, __LINE__, "CFI: unknown pointer encoding");
     }
   return ret;
 }
@@ -649,10 +649,10 @@ execute_cfa_program (struct objfile *objfile, char *insn_ptr, char *insn_end,
 	  case DW_CFA_set_loc:
 	    fs->pc = read_encoded_pointer (objfile->obfd, &insn_ptr,
 					   fs->addr_encoding);
-	    
+
 	    if (pointer_encoding (fs->addr_encoding) != PE_absptr)
-		warning ("CFI: DW_CFA_set_loc uses relative addressing");
-	    
+	      warning ("CFI: DW_CFA_set_loc uses relative addressing");
+
 	    break;
 
 	  case DW_CFA_advance_loc1:
@@ -1454,7 +1454,7 @@ parse_frame_info (struct objfile *objfile, file_ptr frame_offset,
 	  unsigned long length;
 	  ULONGEST cie_id;
 	  ULONGEST unit_offset = start - frame_buffer;
-	  int bytes_read, dwarf64, flag_pcrel;
+	  int bytes_read, dwarf64;
 	  char *block_end;
 
 	  length = read_initial_length (abfd, start, &bytes_read);
@@ -1596,17 +1596,17 @@ parse_frame_info (struct objfile *objfile, file_ptr frame_offset,
 					       cie->addr_encoding);
 
 	      switch (pointer_encoding (cie->addr_encoding))
-	      {
+		{
 		case PE_absptr:
-			break;
+		  break;
 		case PE_pcrel:
-			/* start-frame_buffer gives offset from 
-		           the beginning of actual section.  */
-			init_loc += curr_section_vma + start - frame_buffer;
-			break;
+		  /* start-frame_buffer gives offset from 
+		     the beginning of actual section.  */
+		  init_loc += curr_section_vma + start - frame_buffer;
+		  break;
 		default:
-			warning ("CFI: Unsupported pointer encoding\n");
-	      }
+		  warning ("CFI: Unsupported pointer encoding\n");
+		}
 
 	      /* For relocatable objects we must add an offset telling
 	         where the section is actually mapped in the memory.  */
@@ -1625,23 +1625,23 @@ parse_frame_info (struct objfile *objfile, file_ptr frame_offset,
 	         and don't need to care about duplicate FDEs, because
 	         .debug_frame is parsed first.  */
 	      if (eh_frame == 2)
-	        for (i = 0; eh_frame == 2 && i < fde_chunks.elems; i++)
-		{
-		  /* We assume that FDEs in .debug_frame and .eh_frame 
-		     have the same order (if they are present, of course).
-		     If we find a duplicate entry for one FDE and save
-		     it's index to last_dup_fde it's very likely, that 
-		     we'll find an entry for the following FDE right after 
-		     the previous one. Thus in many cases we'll run this 
-		     loop only once.  */
-		  last_dup_fde = (last_dup_fde + i) % fde_chunks.elems;
-		  if (fde_chunks.array[last_dup_fde]->initial_location
-		      == init_loc)
-		    {
-		      dup = 1;
-		      break;
-		    }
-		}
+		for (i = 0; eh_frame == 2 && i < fde_chunks.elems; i++)
+		  {
+		    /* We assume that FDEs in .debug_frame and .eh_frame 
+		       have the same order (if they are present, of course).
+		       If we find a duplicate entry for one FDE and save
+		       it's index to last_dup_fde it's very likely, that 
+		       we'll find an entry for the following FDE right after 
+		       the previous one. Thus in many cases we'll run this 
+		       loop only once.  */
+		    last_dup_fde = (last_dup_fde + i) % fde_chunks.elems;
+		    if (fde_chunks.array[last_dup_fde]->initial_location
+			== init_loc)
+		      {
+			dup = 1;
+			break;
+		      }
+		  }
 
 	      /* Allocate a new entry only if this FDE isn't a duplicate of
 	         something we have already seen.   */
@@ -1688,15 +1688,15 @@ dwarf2_build_frame_info (struct objfile *objfile)
      eh_frame==1.  */
 
   if (dwarf_frame_offset)
-  {
-    parse_frame_info (objfile, dwarf_frame_offset,
-		      dwarf_frame_size, 0 /* = debug_frame */);
-    after_debug_frame = 1;
-  }
+    {
+      parse_frame_info (objfile, dwarf_frame_offset,
+			dwarf_frame_size, 0 /* = debug_frame */ );
+      after_debug_frame = 1;
+    }
 
   if (dwarf_eh_frame_offset)
-    parse_frame_info (objfile, dwarf_eh_frame_offset, dwarf_eh_frame_size, 
-		      1 /* = eh_frame */ + after_debug_frame);
+    parse_frame_info (objfile, dwarf_eh_frame_offset, dwarf_eh_frame_size,
+		      1 /* = eh_frame */  + after_debug_frame);
 }
 
 /* Return the frame address.  */
@@ -1861,7 +1861,7 @@ cfi_get_ra (struct frame_info *fi)
 void
 cfi_get_saved_register (char *raw_buffer,
 			int *optimized,
-			CORE_ADDR * addrp,
+			CORE_ADDR *addrp,
 			struct frame_info *frame,
 			int regnum, enum lval_type *lval)
 {
