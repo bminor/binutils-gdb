@@ -1,3 +1,7 @@
+Mon Jun 21 12:31:01 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* snapshots.readme: Tell people to always report missing files.
+
 Fri Jun 18 19:42:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo: Document common blocks.

@@ -161,10 +161,14 @@ on *any* machine.  It is likely that such bugs will be fixed by the next
 snapshot, so it really isn't necessary to report them unless they persist
 for a couple days.
 
-Bugs which are non-obvious, such as failure to compile on only a specific
-machine, a new machine dependent bug (particularly one not detected by the
-testsuite), missing machine dependent files, etc should be reported when
-you discover them, or have a suggested patch to fix them.
+Missing files should always be reported, since they usually mean there
+is a problem with the snapshot-generating process and we won't know
+about them unless someone tells us.
+
+Bugs which are non-obvious, such as failure to compile on only a
+specific machine, a new machine dependent or obscure bug (particularly
+one not detected by the testsuite), etc should be reported when you
+discover them, or have a suggested patch to fix them.
 
 
 FORMAT FOR PATCHES
