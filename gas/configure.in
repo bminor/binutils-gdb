@@ -82,7 +82,9 @@ changequote(,)dnl
 changequote([,])dnl
       m8*)		cpu_type=m88k ;;
       mips*el)		cpu_type=mips endian=little ;;
+# start-sanitize-r5900
       mips*5900*)       cpu_type=mips endian=little ;;
+# end-sanitize-r5900
       mips*)		cpu_type=mips endian=big ;;
       powerpcle*)	cpu_type=ppc endian=little ;;
       powerpc*)		cpu_type=ppc endian=big ;;
