@@ -1,5 +1,16 @@
 2004-02-09  Andrew Cagney  <cagney@redhat.com>
 
+	* config/alpha/tm-nbsd.h: Update copyright, delete #undef
+	START_INFERIOR_TRAPS_EXPECTED.
+	* config/alpha/tm-fbsd.h: Update copyright, delete #undef
+	START_INFERIOR_TRAPS_EXPECTED.
+	* config/alpha/tm-alphalinux.h (START_INFERIOR_TRAPS_EXPECTED):
+	Delete macro.
+	* config/alpha/tm-alpha.h (START_INFERIOR_TRAPS_EXPECTED): Delete
+	macro, moved to "nm-osf.h".  Update copyright.
+	* config/alpha/nm-osf.h (START_INFERIOR_TRAPS_EXPECTED): Define,
+	update copyright.
+
 	* gdbarch.sh (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION): Predicate
 	and function replacing FRAMELESS_FUNCTION_INVOCATION.
 	* blockframe.c (legacy_frameless_look_for_prologue): Rename
