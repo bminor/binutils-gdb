@@ -48,7 +48,7 @@ SHELL = /bin/sh
 INSTALL = $${srcroot}/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
-INSTALL_XFORM = $(INSTALL) -t="$(program_transform_name)"
+INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 
 AS = as
 AR = ar
