@@ -80,13 +80,9 @@
 
 
 #ifndef COMPILING_ON_WINDOWS
-/* these two might not work for windows */
-  extern int sys_nerr;
-#ifdef __linux__
-  extern const char *const sys_errlist[];
-#else
-  extern char *sys_errlist[];
-#endif
+/* These two might not work for windows.  */
+extern int sys_nerr;
+extern char * sys_errlist[];
 #endif
 
 #ifndef UNUSED
