@@ -2111,8 +2111,6 @@ the @code{ENTRY(@var{symbol})} command in a linker control script;
 @item 
 the value of the symbol @code{start}, if present;
 @item 
-the value of the symbol @code{_main}, if present;
-@item 
 the address of the first byte of the @code{.text} section, if present;
 @item 
 The address @code{0}.
