@@ -443,6 +443,23 @@ static bfd *reldyn_sorting_bfd;
 #define MIPS_ELF_RTYPE_TO_HOWTO(abfd, rtype, rela)			\
   (get_elf_backend_data (abfd)->elf_backend_mips_rtype_to_howto (rtype, rela))
 
+/* Determine whether the internal relocation of index REL_IDX is REL
+   (zero) or RELA (non-zero).  The assumption is that, if there are
+   two relocation sections for this section, one of them is REL and
+   the other is RELA.  If the index of the relocation we're testing is
+   in range for the first relocation section, check that the external
+   relocation size is that for RELA.  It is also assumed that, if
+   rel_idx is not in range for the first section, and this first
+   section contains REL relocs, then the relocation is in the second
+   section, that is RELA.  */
+#define MIPS_RELOC_RELA_P(abfd, sec, rel_idx)				\
+  ((NUM_SHDR_ENTRIES (&elf_section_data (sec)->rel_hdr)			\
+    * get_elf_backend_data (abfd)->s->int_rels_per_ext_rel		\
+    > (bfd_vma)(rel_idx))						\
+   == (elf_section_data (sec)->rel_hdr.sh_entsize			\
+       == (ABI_64_P (abfd) ? sizeof (Elf64_External_Rela)		\
+	   : sizeof (Elf32_External_Rela))))
+
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
 #define MINUS_ONE	(((bfd_vma)0) - 1)
@@ -5044,7 +5061,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       else
 	/* NewABI defaults to RELA relocations.  */
 	howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, r_type,
-					 NEWABI_P (input_bfd));
+					 NEWABI_P (input_bfd)
+					 && (MIPS_RELOC_RELA_P
+					     (input_bfd, input_section,
+					      rel - relocs)));
 
       if (!use_saved_addend_p)
 	{
