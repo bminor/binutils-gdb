@@ -23,9 +23,6 @@ extern struct obstack notes;	/* eg FixS live here. */
 extern struct obstack cond_obstack;	/* this is where we track .ifdef/.endif
 				       (if we do that at all).  */
 
-extern unsigned int local_bss_counter;	/* Zeroed before a pass. */
-/* Only used by .lcomm directive. */
-
 extern symbolS *symbol_rootP;	/* all the symbol nodes */
 extern symbolS *symbol_lastP;	/* last struct symbol we made, or NULL */
 
@@ -35,67 +32,47 @@ extern symbolS *dot_text_symbol;
 extern symbolS *dot_data_symbol;
 extern symbolS *dot_bss_symbol;
 
-#if __STDC__ == 1
-
-char *decode_local_label_name (char *s);
-symbolS *symbol_find (char *name);
-symbolS *symbol_find_base (char *name, int strip_underscore);
-symbolS *symbol_find_or_make (char *name);
-symbolS *symbol_make (char *name);
-symbolS *symbol_new (char *name, segT segment, long value, fragS * frag);
-void colon (char *sym_name);
-void local_colon (int n);
-void symbol_begin (void);
-void symbol_table_insert (symbolS * symbolP);
-void verify_symbol_chain (symbolS * rootP, symbolS * lastP);
+char *decode_local_label_name PARAMS ((char *s));
+symbolS *symbol_find PARAMS ((CONST char *name));
+symbolS *symbol_find_base PARAMS ((CONST char *name, int strip_underscore));
+symbolS *symbol_find_or_make PARAMS ((char *name));
+symbolS *symbol_make PARAMS ((CONST char *name));
+symbolS *symbol_new PARAMS ((CONST char *name, segT segment, valueT value,
+			     fragS * frag));
+void colon PARAMS ((char *sym_name));
+void local_colon PARAMS ((int n));
+void symbol_begin PARAMS ((void));
+void symbol_table_insert PARAMS ((symbolS * symbolP));
+void verify_symbol_chain PARAMS ((symbolS * rootP, symbolS * lastP));
 
 #ifdef LOCAL_LABELS_DOLLAR
-int dollar_label_defined (long l);
-void dollar_label_clear (void);
-void define_dollar_label (long l);
-char *dollar_label_name (long l, int augend);
+int dollar_label_defined PARAMS ((long l));
+void dollar_label_clear PARAMS ((void));
+void define_dollar_label PARAMS ((long l));
+char *dollar_label_name PARAMS ((long l, int augend));
 #endif /* LOCAL_LABELS_DOLLAR */
 
 #ifdef LOCAL_LABELS_FB
-void fb_label_instance_inc (long label);
-char *fb_label_name (long n, long augend);
+void fb_label_instance_inc PARAMS ((long label));
+char *fb_label_name PARAMS ((long n, long augend));
 #endif /* LOCAL_LABELS_FB */
 
-#else /* not __STDC__ */
-
-char *decode_local_label_name ();
-char *fb_label_name ();
-symbolS *symbol_find ();
-symbolS *symbol_find_base ();
-symbolS *symbol_find_or_make ();
-symbolS *symbol_make ();
-symbolS *symbol_new ();
-void colon ();
-void local_colon ();
-void symbol_begin ();
-void symbol_table_insert ();
-void verify_symbol_chain ();
-
-#ifdef LOCAL_LABELS_DOLLAR
-int dollar_label_defined ();
-void dollar_label_clear ();
-void define_dollar_label ();
-char *dollar_label_name ();
-#endif /* LOCAL_LABELS_DOLLAR */
-
-#ifdef LOCAL_LABELS_FB
-void fb_label_instance_inc ();
-char *fb_label_name ();
-#endif /* LOCAL_LABELS_FB */
-
-#endif /* not __STDC__ */
-
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
+#ifdef BFD_ASSEMBLER
+extern int S_IS_EXTERNAL PARAMS ((symbolS *));
+extern int S_IS_COMMON PARAMS ((symbolS *));
+extern int S_IS_DEFINED PARAMS ((symbolS *));
+extern int S_IS_DEBUG PARAMS ((symbolS *));
+extern int S_IS_LOCAL PARAMS ((symbolS *));
+extern int S_IS_EXTERN PARAMS ((symbolS *));
+extern int S_IS_STABD PARAMS ((symbolS *));
+extern valueT S_GET_VALUE PARAMS ((symbolS *));
+extern CONST char *S_GET_NAME PARAMS ((symbolS *));
+extern segT S_GET_SEGMENT PARAMS ((symbolS *));
+extern void S_SET_VALUE PARAMS ((symbolS *, valueT));
+extern void S_SET_SEGMENT PARAMS ((symbolS *, segT));
+extern void S_SET_EXTERNAL PARAMS ((symbolS *));
+extern void S_SET_NAME PARAMS ((symbolS *, char *));
+extern void S_CLEAR_EXTERNAL PARAMS ((symbolS *));
+#endif
 
 /* end of symbols.h */

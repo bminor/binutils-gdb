@@ -1,6 +1,6 @@
 /* symbols.c -symbol table-
 
-   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -18,6 +18,8 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#define DEBUG
+
 #include <ctype.h>
 
 #include "as.h"
@@ -28,13 +30,9 @@
 #ifndef WORKING_DOT_WORD
 extern int new_broken_words;
 #endif
-#ifdef VMS
-extern char const_flag;
-#endif
 
-static
-struct hash_control *
-  sy_hash;			/* symbol-name => struct symbol pointer */
+/* symbol-name => struct symbol pointer */
+static struct hash_control *sy_hash;
 
 /* Below are commented in "symbols.h". */
 symbolS *symbol_rootP;
@@ -56,7 +54,12 @@ symbol_begin ()
   symbol_rootP = NULL;		/* In case we have 0 symbols (!!) */
   sy_hash = hash_new ();
   memset ((char *) (&abs_symbol), '\0', sizeof (abs_symbol));
-  S_SET_SEGMENT (&abs_symbol, SEG_ABSOLUTE);	/* Can't initialise a union. Sigh. */
+#ifdef BFD_ASSEMBLER
+  abs_symbol.bsym = bfd_abs_section.symbol;
+#else
+  /* Can't initialise a union. Sigh. */
+  S_SET_SEGMENT (&abs_symbol, absolute_section);
+#endif
 #ifdef LOCAL_LABELS_FB
   fb_label_init ();
 #endif /* LOCAL_LABELS_FB */
@@ -81,9 +84,9 @@ symbol_begin ()
 
 symbolS *
 symbol_new (name, segment, value, frag)
-     char *name;		/* It is copied, the caller can destroy/modify */
+     CONST char *name;		/* It is copied, the caller can destroy/modify */
      segT segment;		/* Segment identifier (SEG_<something>) */
-     long value;		/* Symbol value */
+     valueT value;		/* Symbol value */
      fragS *frag;		/* Associated fragment */
 {
   unsigned int name_length;
@@ -93,42 +96,47 @@ symbol_new (name, segment, value, frag)
   name_length = strlen (name) + 1;	/* +1 for \0 */
   obstack_grow (&notes, name, name_length);
   preserved_copy_of_name = obstack_finish (&notes);
+#ifdef STRIP_UNDERSCORE
+  if (preserved_copy_of_name[0] == '_')
+    preserved_copy_of_name++;
+#endif
   symbolP = (symbolS *) obstack_alloc (&notes, sizeof (symbolS));
 
   /* symbol must be born in some fixed state.  This seems as good as any. */
   memset (symbolP, 0, sizeof (symbolS));
 
-#ifdef STRIP_UNDERSCORE
-  S_SET_NAME (symbolP, (*preserved_copy_of_name == '_'
-			? preserved_copy_of_name + 1
-			: preserved_copy_of_name));
-#else /* STRIP_UNDERSCORE */
+
+#ifdef BFD_ASSEMBLER
+  symbolP->bsym = bfd_make_empty_symbol (stdoutput);
+  assert (symbolP->bsym != 0);
+  symbolP->bsym->udata = (PTR) symbolP;
+#endif
   S_SET_NAME (symbolP, preserved_copy_of_name);
-#endif /* STRIP_UNDERSCORE */
 
   S_SET_SEGMENT (symbolP, segment);
   S_SET_VALUE (symbolP, value);
-  /*	symbol_clear_list_pointers(symbolP); uneeded if symbol is born zeroed. */
+  symbol_clear_list_pointers(symbolP);
 
   symbolP->sy_frag = frag;
-  /* krm: uneeded if symbol is born zeroed.
-	     symbolP->sy_forward = NULL; *//* JF */
+  symbolP->sy_forward = NULL;
+#ifndef BFD_ASSEMBLER
   symbolP->sy_number = ~0;
   symbolP->sy_name_offset = ~0;
+#endif
 
   /*
-	 * Link to end of symbol chain.
-	 */
+   * Link to end of symbol chain.
+   */
   symbol_append (symbolP, symbol_lastP, &symbol_rootP, &symbol_lastP);
 
   obj_symbol_new_hook (symbolP);
 
 #ifdef DEBUG
-  /*	verify_symbol_chain(symbol_rootP, symbol_lastP); */
+  verify_symbol_chain(symbol_rootP, symbol_lastP);
 #endif /* DEBUG */
 
-  return (symbolP);
-}				/* symbol_new() */
+  return symbolP;
+}
 
 
 /*
@@ -148,7 +156,8 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
   register symbolS *symbolP;	/* symbol we are working with */
 
 #ifdef LOCAL_LABELS_DOLLAR
-  /* Sun local labels go out of scope whenever a non-local symbol is defined.  */
+  /* Sun local labels go out of scope whenever a non-local symbol is
+     defined.  */
 
   if (*sym_name != 'L')
     dollar_label_clear ();
@@ -162,9 +171,10 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
       fragS *frag_tmp;
       char *frag_opcode;
 
-      extern md_short_jump_size;
-      extern md_long_jump_size;
-      possible_bytes = md_short_jump_size + new_broken_words * md_long_jump_size;
+      extern const int md_short_jump_size;
+      extern const int md_long_jump_size;
+      possible_bytes = (md_short_jump_size
+			+ new_broken_words * md_long_jump_size);
 
       frag_tmp = frag_now;
       frag_opcode = frag_var (rs_broken_word,
@@ -176,8 +186,11 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 			      NULL);
 
       /* We want to store the pointer to where to insert the jump table in the
-		   fr_opcode of the rs_broken_word frag.  This requires a little hackery */
-      while (frag_tmp && (frag_tmp->fr_type != rs_broken_word || frag_tmp->fr_opcode))
+	 fr_opcode of the rs_broken_word frag.  This requires a little
+	 hackery.  */
+      while (frag_tmp
+	     && (frag_tmp->fr_type != rs_broken_word
+		 || frag_tmp->fr_opcode))
 	frag_tmp = frag_tmp->fr_next;
       know (frag_tmp);
       frag_tmp->fr_opcode = frag_opcode;
@@ -190,40 +203,22 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 
   if ((symbolP = symbol_find (sym_name)) != 0)
     {
-#ifdef	VMS
-      /*
-		 *	If the new symbol is .comm AND it has a size of zero,
-		 *	we ignore it (i.e. the old symbol overrides it)
-		 */
-      if ((SEGMENT_TO_SYMBOL_TYPE ((int) now_seg) == (N_UNDF | N_EXT)) &&
-	  ((obstack_next_free (&frags) - frag_now->fr_literal) == 0))
+#ifdef RESOLVE_SYMBOL_REDEFINITION
+      if (RESOLVE_SYMBOL_REDEFINITION (symbolP))
 	return;
+#endif
       /*
-		 *	If the old symbol is .comm and it has a size of zero,
-		 *	we override it with the new symbol value.
-		 */
-      if ((symbolP->sy_type == (N_UNDF | N_EXT))
-	  && (S_GET_VALUE (symbolP) == 0))
-	{
-	  symbolP->sy_frag = frag_now;
-	  symbolP->sy_other = const_flag;
-	  S_SET_VALUE (symbolP, obstack_next_free (&frags) - frag_now->fr_literal);
-	  symbolP->sy_type |= SEGMENT_TO_SYMBOL_TYPE ((int) now_seg);	/* keep N_EXT bit */
-	  return;
-	}
-#endif /* VMS */
-      /*
-		 *	Now check for undefined symbols
-		 */
+       *	Now check for undefined symbols
+       */
       if (!S_IS_DEFINED (symbolP))
 	{
 	  if (S_GET_VALUE (symbolP) == 0)
 	    {
 	      symbolP->sy_frag = frag_now;
-#ifdef VMS
-	      symbolP->sy_other = const_flag;
+#ifdef OBJ_VMS
+	      S_GET_OTHER(symbolP) = const_flag;
 #endif
-	      S_SET_VALUE (symbolP, obstack_next_free (&frags) - frag_now->fr_literal);
+	      S_SET_VALUE (symbolP, (valueT) ((char*)obstack_next_free (&frags) - frag_now->fr_literal));
 	      S_SET_SEGMENT (symbolP, now_seg);
 #ifdef N_UNDF
 	      know (N_UNDF == 0);
@@ -233,43 +228,38 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 	  else
 	    {
 	      /*
-				 *	There are still several cases to check:
-				 *		A .comm/.lcomm symbol being redefined as
-				 *			initialized data is OK
-				 *		A .comm/.lcomm symbol being redefined with
-				 *			a larger size is also OK
-				 *
-				 * This only used to be allowed on VMS gas, but Sun cc
-				 * on the sparc also depends on it.
-				 */
-	      /*			  char New_Type = SEGMENT_TO_SYMBOL_TYPE((int) now_seg); */
-#ifdef MANY_SEGMENTS
-#define SEG_BSS SEG_E2
-#define SEG_DATA SEG_E1
-#endif
+	       *	There are still several cases to check:
+	       *		A .comm/.lcomm symbol being redefined as
+	       *			initialized data is OK
+	       *		A .comm/.lcomm symbol being redefined with
+	       *			a larger size is also OK
+	       *
+	       * This only used to be allowed on VMS gas, but Sun cc
+	       * on the sparc also depends on it.
+	       */
 
-	      if (((!S_IS_DEBUG (symbolP) && !S_IS_DEFINED (symbolP) && S_IS_EXTERNAL (symbolP))
-		   || (S_GET_SEGMENT (symbolP) == SEG_BSS))
-		  && ((now_seg == SEG_DATA)
-		      || (now_seg == S_GET_SEGMENT (symbolP))))
+	      if (((!S_IS_DEBUG (symbolP)
+		    && !S_IS_DEFINED (symbolP)
+		    && S_IS_EXTERNAL (symbolP))
+		   || S_GET_SEGMENT (symbolP) == bss_section)
+		  && (now_seg == data_section
+		      || now_seg == S_GET_SEGMENT (symbolP)))
 		{
 		  /*
-					 *	Select which of the 2 cases this is
-					 */
-		  if (now_seg != SEG_DATA)
+		   *	Select which of the 2 cases this is
+		   */
+		  if (now_seg != data_section)
 		    {
 		      /*
-						 *   New .comm for prev .comm symbol.
-						 *	If the new size is larger we just
-						 *	change its value.  If the new size
-						 *	is smaller, we ignore this symbol
-						 */
+		       *   New .comm for prev .comm symbol.
+		       *	If the new size is larger we just
+		       *	change its value.  If the new size
+		       *	is smaller, we ignore this symbol
+		       */
 		      if (S_GET_VALUE (symbolP)
-			  < ((unsigned) (obstack_next_free (&frags) - frag_now->fr_literal)))
+			  < ((unsigned) frag_now_fix ()))
 			{
-			  S_SET_VALUE (symbolP,
-				       obstack_next_free (&frags) -
-				       frag_now->fr_literal);
+			  S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
 			}
 		    }
 		  else
@@ -277,27 +267,27 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 		      /* It is a .comm/.lcomm being converted to initialized
 			 data.  */
 		      symbolP->sy_frag = frag_now;
-#ifdef VMS
-		      symbolP->sy_other = const_flag;
-#endif /* VMS */
-		      S_SET_VALUE (symbolP, obstack_next_free (&frags) - frag_now->fr_literal);
+#ifdef OBJ_VMS
+		      S_GET_OTHER(symbolP) = const_flag;
+#endif /* OBJ_VMS */
+		      S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
 		      S_SET_SEGMENT (symbolP, now_seg);	/* keep N_EXT bit */
 		    }
 		}
 	      else
 		{
-#ifdef OBJ_COFF
+#if defined (S_GET_OTHER) && defined (S_GET_DESC)
+		  as_fatal ("Symbol \"%s\" is already defined as \"%s\"/%d.%d.%ld.",
+			    sym_name,
+			    segment_name (S_GET_SEGMENT (symbolP)),
+			    S_GET_OTHER (symbolP), S_GET_DESC (symbolP),
+			    (long) S_GET_VALUE (symbolP));
+#else
 		  as_fatal ("Symbol \"%s\" is already defined as \"%s\"/%d.",
 			    sym_name,
 			    segment_name (S_GET_SEGMENT (symbolP)),
 			    S_GET_VALUE (symbolP));
-#else /* OBJ_COFF */
-		  as_fatal ("Symbol \"%s\" is already defined as \"%s\"/%d.%d.%d.",
-			    sym_name,
-			    segment_name (S_GET_SEGMENT (symbolP)),
-			    S_GET_OTHER (symbolP), S_GET_DESC (symbolP),
-			    S_GET_VALUE (symbolP));
-#endif /* OBJ_COFF */
+#endif
 		}
 	    }			/* if the undefined symbol has no value */
 	}
@@ -305,7 +295,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 	{
 	  /* Don't blow up if the definition is the same */
 	  if (!(frag_now == symbolP->sy_frag
-		&& S_GET_VALUE (symbolP) == obstack_next_free (&frags) - frag_now->fr_literal
+		&& S_GET_VALUE (symbolP) == (char*)obstack_next_free (&frags) - frag_now->fr_literal
 		&& S_GET_SEGMENT (symbolP) == now_seg))
 	    as_fatal ("Symbol %s already defined.", sym_name);
 	}			/* if this symbol is not yet defined */
@@ -315,14 +305,17 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
     {
       symbolP = symbol_new (sym_name,
 			    now_seg,
-	       (valueT) (obstack_next_free (&frags) - frag_now->fr_literal),
+	       (valueT) ((char*)obstack_next_free (&frags) - frag_now->fr_literal),
 			    frag_now);
-#ifdef VMS
+#ifdef OBJ_VMS
       S_SET_OTHER (symbolP, const_flag);
-#endif /* VMS */
+#endif /* OBJ_VMS */
 
       symbol_table_insert (symbolP);
     }				/* if we have seen this symbol before */
+#ifdef TC_HPPA
+    pa_define_label(symbolP);
+#endif
 
   return;
 }				/* colon() */
@@ -377,20 +370,15 @@ symbol_find_or_make (name)
 
 symbolS *
 symbol_make (name)
-     char *name;
+     CONST char *name;
 {
   symbolS *symbolP;
 
   /* Let the machine description default it, e.g. for register names. */
-  symbolP = md_undefined_symbol (name);
+  symbolP = md_undefined_symbol ((char *) name);
 
   if (!symbolP)
-    {
-      symbolP = symbol_new (name,
-			    SEG_UNKNOWN,
-			    0,
-			    &zero_address_frag);
-    }				/* if md didn't build us a symbol */
+    symbolP = symbol_new (name, undefined_section, (valueT) 0, &zero_address_frag);
 
   return (symbolP);
 }				/* symbol_make() */
@@ -406,7 +394,7 @@ symbol_make (name)
 
 symbolS *
 symbol_find (name)
-     char *name;
+     CONST char *name;
 {
 #ifdef STRIP_UNDERSCORE
   return (symbol_find_base (name, 1));
@@ -417,7 +405,7 @@ symbol_find (name)
 
 symbolS *
 symbol_find_base (name, strip_underscore)
-     char *name;
+     CONST char *name;
      int strip_underscore;
 {
   if (strip_underscore && *name == '_')
@@ -468,13 +456,7 @@ symbol_append (addme, target, rootPP, lastPP)
 #ifdef SYMBOLS_NEED_BACKPOINTERS
   addme->sy_previous = target;
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
-
-#ifdef DEBUG
-  /*	verify_symbol_chain(*rootPP, *lastPP); */
-#endif /* DEBUG */
-
-  return;
-}				/* symbol_append() */
+}
 
 #ifdef SYMBOLS_NEED_BACKPOINTERS
 /* Remove SYMBOLP from the list. */
@@ -507,9 +489,7 @@ symbol_remove (symbolP, rootPP, lastPP)
 #ifdef DEBUG
   verify_symbol_chain (*rootPP, *lastPP);
 #endif /* DEBUG */
-
-  return;
-}				/* symbol_remove() */
+}
 
 /* Set the chain pointers of SYMBOL to null. */
 void 
@@ -518,7 +498,7 @@ symbol_clear_list_pointers (symbolP)
 {
   symbolP->sy_next = NULL;
   symbolP->sy_previous = NULL;
-}				/* symbol_clear_list_pointers() */
+}
 
 /* Link symbol ADDME before symbol TARGET in the chain. */
 void 
@@ -545,9 +525,7 @@ symbol_insert (addme, target, rootPP, lastPP)
 #ifdef DEBUG
   verify_symbol_chain (*rootPP, *lastPP);
 #endif /* DEBUG */
-
-  return;
-}				/* symbol_insert() */
+}
 
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
 
@@ -559,29 +537,34 @@ verify_symbol_chain (rootP, lastP)
   symbolS *symbolP = rootP;
 
   if (symbolP == NULL)
-    {
-      return;
-    }				/* empty chain */
+    return;
 
   for (; symbol_next (symbolP) != NULL; symbolP = symbol_next (symbolP))
     {
 #ifdef SYMBOLS_NEED_BACKPOINTERS
-      /*$if (symbolP->sy_previous) {
-		  know(symbolP->sy_previous->sy_next == symbolP);
-		  } else {
-		  know(symbolP == rootP);
-		        }$*//* both directions */
       know (symbolP->sy_next->sy_previous == symbolP);
-#else /* SYMBOLS_NEED_BACKPOINTERS */
-      ;
+#else
+      /* Walk the list anyways, to make sure pointers are still good.  */
+      *symbolP;
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
-    }				/* verify pointers */
+    }
 
-  know (lastP == symbolP);
+  assert (lastP == symbolP);
+}
 
-  return;
-}				/* verify_symbol_chain() */
-
+void
+verify_symbol_chain_2 (sym)
+     symbolS *sym;
+{
+  symbolS *p = sym, *n = sym;
+#ifdef SYMBOLS_NEED_BACKPOINTERS
+  while (symbol_previous (p))
+    p = symbol_previous (p);
+#endif
+  while (symbol_next (n))
+    n = symbol_next (n);
+  verify_symbol_chain (p, n);
+}
 
 #ifdef LOCAL_LABELS_DOLLAR
 
@@ -592,11 +575,11 @@ verify_symbol_chain (rootP, lastP)
    the instance number, keep a list of defined symbols separate from the real
    symbol table, and we treat these buggers as a sparse array.  */
 
-static long *dollar_labels = NULL;
-static long *dollar_label_instances = NULL;
-static char *dollar_label_defines = NULL;
-static long dollar_label_count = 0;
-static long dollar_label_max = 0;
+static long *dollar_labels;
+static long *dollar_label_instances;
+static char *dollar_label_defines;
+static long dollar_label_count;
+static long dollar_label_max;
 
 int 
 dollar_label_defined (label)
@@ -607,15 +590,11 @@ dollar_label_defined (label)
   know ((dollar_labels != NULL) || (dollar_label_count == 0));
 
   for (i = dollar_labels; i < dollar_labels + dollar_label_count; ++i)
-    {
-      if (*i == label)
-	{
-	  return (dollar_label_defines[i - dollar_labels]);
-	}			/* found it */
-    }				/* look for label */
+    if (*i == label)
+      return dollar_label_defines[i - dollar_labels];
 
   /* if we get here, label isn't defined */
-  return (0);
+  return 0;
 }				/* dollar_label_defined() */
 
 static int 
@@ -627,24 +606,19 @@ dollar_label_instance (label)
   know ((dollar_labels != NULL) || (dollar_label_count == 0));
 
   for (i = dollar_labels; i < dollar_labels + dollar_label_count; ++i)
-    {
-      if (*i == label)
-	{
-	  return (dollar_label_instances[i - dollar_labels]);
-	}			/* found it */
-    }				/* look for (the union :-) label */
+    if (*i == label)
+      return (dollar_label_instances[i - dollar_labels]);
 
-  /* if we get here, we haven't seen the label before, therefor it's instance
-    count is zero.  */
-  return (0);
-}				/* dollar_label_instance() */
+  /* If we get here, we haven't seen the label before, therefore its instance
+     count is zero.  */
+  return 0;
+}
 
 void 
 dollar_label_clear ()
 {
   memset (dollar_label_defines, '\0', dollar_label_count);
-  return;
-}				/* clear_dollar_labels() */
+}
 
 #define DOLLAR_LABEL_BUMP_BY 10
 
@@ -655,14 +629,12 @@ define_dollar_label (label)
   long *i;
 
   for (i = dollar_labels; i < dollar_labels + dollar_label_count; ++i)
-    {
-      if (*i == label)
-	{
-	  ++dollar_label_instances[i - dollar_labels];
-	  dollar_label_defines[i - dollar_labels] = 1;
-	  return;
-	}			/* if we find it */
-    }				/* for each existing label */
+    if (*i == label)
+      {
+	++dollar_label_instances[i - dollar_labels];
+	dollar_label_defines[i - dollar_labels] = 1;
+	return;
+      }
 
   /* if we get to here, we don't have label listed yet. */
 
@@ -673,7 +645,6 @@ define_dollar_label (label)
       dollar_label_defines = xmalloc (DOLLAR_LABEL_BUMP_BY);
       dollar_label_max = DOLLAR_LABEL_BUMP_BY;
       dollar_label_count = 0;
-
     }
   else if (dollar_label_count == dollar_label_max)
     {
@@ -689,19 +660,18 @@ define_dollar_label (label)
   dollar_label_instances[dollar_label_count] = 1;
   dollar_label_defines[dollar_label_count] = 1;
   ++dollar_label_count;
-  return;
-}				/* define_dollar_label() */
+}
 
 /*
  *			dollar_label_name()
  *
  * Caller must copy returned name: we re-use the area for the next name.
  *
- * The mth occurence of label n: is turned into the symbol "Ln^Am" where
- * n is the label number and m is the instance number. "L" makes it a label discarded
- * unless debugging and "^A"('\1') ensures no ordinary symbol SHOULD get the
- * same name as a local label symbol. The first "4:" is "L4^A1" - the m
- * numbers begin at 1.
+ * The mth occurence of label n: is turned into the symbol "Ln^Am"
+ * where n is the label number and m is the instance number. "L" makes
+ * it a label discarded unless debugging and "^A"('\1') ensures no
+ * ordinary symbol SHOULD get the same name as a local label
+ * symbol. The first "4:" is "L4^A1" - the m numbers begin at 1.
  *
  * fb labels get the same treatment, except that ^B is used in place of ^A.
  */
@@ -746,8 +716,8 @@ dollar_label_name (n, augend)
   while ((*p++ = *--q) != '\0');;
 
   /* The label, as a '\0' ended string, starts at symbol_name_build. */
-  return (symbol_name_build);
-}				/* dollar_label_name() */
+  return symbol_name_build;
+}
 
 #endif /* LOCAL_LABELS_DOLLAR */
 
@@ -855,22 +825,21 @@ fb_label_instance (label)
     }				/* for each existing label */
 
   /* NOTREACHED */
-  know (0);
-}				/* fb_label_instance() */
+  abort ();
+}
 
 /*
  *			fb_label_name()
  *
  * Caller must copy returned name: we re-use the area for the next name.
  *
- * The mth occurence of label n: is turned into the symbol "Ln^Bm" where
- * n is the label number and m is the instance number. "L" makes it a label discarded
- * unless debugging and "^B"('\2') ensures no ordinary symbol SHOULD get the
- * same name as a local label symbol. The first "4:" is "L4^B1" - the m
- * numbers begin at 1.
+ * The mth occurence of label n: is turned into the symbol "Ln^Bm"
+ * where n is the label number and m is the instance number. "L" makes
+ * it a label discarded unless debugging and "^B"('\2') ensures no
+ * ordinary symbol SHOULD get the same name as a local label
+ * symbol. The first "4:" is "L4^B1" - the m numbers begin at 1.
  *
- * dollar labels get the same treatment, except that ^A is used in place of ^B.
- */
+ * dollar labels get the same treatment, except that ^A is used in place of ^B. */
 
 char *				/* Return local label name. */
 fb_label_name (n, augend)
@@ -967,5 +936,137 @@ decode_local_label_name (s)
 
   return (symbol_decode);
 }				/* decode_local_label_name() */
+
+#ifdef BFD_ASSEMBLER
+
+int
+S_IS_EXTERNAL (s)
+     symbolS *s;
+{
+  flagword flags = s->bsym->flags;
+
+  /* sanity check */
+  if (flags & BSF_LOCAL && flags & (BSF_EXPORT | BSF_GLOBAL))
+    abort ();
+
+  return (flags & (BSF_EXPORT | BSF_GLOBAL)) != 0;
+}
+
+int
+S_IS_COMMON (s)
+     symbolS *s;
+{
+  return s->bsym->section == &bfd_com_section;
+}
+
+int
+S_IS_DEFINED (s)
+     symbolS *s;
+{
+  return s->bsym->section != undefined_section;
+}
+
+int
+S_IS_DEBUG (s)
+     symbolS *s;
+{
+  if (s->bsym->flags & BSF_DEBUGGING)
+    return 1;
+  return 0;
+}
+
+int
+S_IS_LOCAL (s)
+     symbolS *s;
+{
+  flagword flags = s->bsym->flags;
+
+  /* sanity check */
+  if (flags & BSF_LOCAL && flags & (BSF_EXPORT | BSF_GLOBAL))
+    abort ();
+
+  return (S_GET_NAME (s)
+	  && ! S_IS_DEBUG (s)
+	  && (strchr (S_GET_NAME (s), '\001')
+	      || strchr (S_GET_NAME (s), '\002')
+	      || (S_LOCAL_NAME (s)
+		  && !flagseen['L'])));
+}
+
+int
+S_IS_EXTERN (s)
+     symbolS *s;
+{
+  return S_IS_EXTERNAL (s);
+}
+
+int
+S_IS_STABD (s)
+     symbolS *s;
+{
+  return S_GET_NAME (s) == 0;
+}
+
+valueT
+S_GET_VALUE (s)
+     symbolS *s;
+{
+  return s->bsym->value;
+}
+
+CONST char *
+S_GET_NAME (s)
+     symbolS *s;
+{
+  return s->bsym->name;
+}
+
+segT
+S_GET_SEGMENT (s)
+     symbolS *s;
+{
+  return s->bsym->section;
+}
+
+void
+S_SET_VALUE (s, val)
+     symbolS *s;
+     valueT val;
+{
+  s->bsym->value = val;
+}
+
+void
+S_SET_SEGMENT (s, seg)
+     symbolS *s;
+     segT seg;
+{
+  s->bsym->section = seg;
+}
+
+void
+S_SET_EXTERNAL (s)
+     symbolS *s;
+{
+  s->bsym->flags |= BSF_EXPORT | BSF_GLOBAL;
+  s->bsym->flags &= ~BSF_LOCAL;
+}
+
+void
+S_CLEAR_EXTERNAL (s)
+     symbolS *s;
+{
+  s->bsym->flags |= BSF_LOCAL;
+  s->bsym->flags &= ~(BSF_EXPORT | BSF_GLOBAL);
+}
+
+void
+S_SET_NAME (s, name)
+     symbolS *s;
+     char *name;
+{
+  s->bsym->name = name;
+}
+#endif /* BFD_ASSEMBLER */
 
 /* end of symbols.c */
