@@ -78,7 +78,7 @@ static int elf32_thumb_to_arm_stub
    this.  It is set up so that any shared library function that is
    called before the relocation has been set up calls the dynamic
    linker first.  */
-static const bfd_byte elf32_arm_plt0_entry [PLT_ENTRY_SIZE] =
+static const unsigned long elf32_arm_plt0_entry [PLT_ENTRY_SIZE / 4] =
 {
   0xe52de004,	/* str   lr, [sp, #-4]!     */
   0xe59fe010,	/* ldr   lr, [pc, #16]      */
@@ -88,7 +88,7 @@ static const bfd_byte elf32_arm_plt0_entry [PLT_ENTRY_SIZE] =
 
 /* Subsequent entries in a procedure linkage table look like
    this.  */
-static const bfd_byte elf32_arm_plt_entry [PLT_ENTRY_SIZE] =
+static const unsigned long elf32_arm_plt_entry [PLT_ENTRY_SIZE / 4] =
 {
   0xe59fc004,	/* ldr   ip, [pc, #4]       */
   0xe08fc00c,	/* add   ip, pc, ip         */
