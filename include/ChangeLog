@@ -1,3 +1,15 @@
+Mon Aug 21 18:11:36 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* bfdlink.h (struct bfd_link_info): Remove PE stuff.
+
+Wed Aug  2 08:14:12 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* dis-asm.h (print_insn_sparc64): Declare.
+
+Mon Jul 10 13:26:49 1995  Eric Youngdale  <eric@aib.com>
+
+	* bfdlink.h (struct bfd_link_info): Add new field symbolic.
+
 Sun Jul  2 17:48:40 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bfdlink.h (struct bfd_link_info): Change type of base_file to
