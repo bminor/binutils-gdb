@@ -1,3 +1,8 @@
+2002-10-31  David O'Brien  <obrien@FreeBSD.org>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't mix
+	signed and unsigned in comparison.
+
 2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* bfd-in2.h: Regenerated.
