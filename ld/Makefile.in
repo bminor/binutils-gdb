@@ -440,7 +440,7 @@ install: $(LD_PROG)
 	-rm -f $(tooldir)/ld
 	if [ -d $(tooldir) ]; then $(INSTALL_PROGRAM) ld.new $(tooldir)/ld; else true; fi
 	-rm -f $(man1dir)/$(program_prefix)ld$(program_suffix).1
-	$(INSTALL_DATA) $(srcdir)/gld.1 $(man1dir)/$(program_prefix)ld$(program_suffix).1
+	$(INSTALL_DATA) $(srcdir)/ld.1 $(man1dir)/$(program_prefix)ld$(program_suffix).1
 
 install-info: info
 	for i in ld.info* ; do \
