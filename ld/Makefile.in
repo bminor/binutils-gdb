@@ -706,7 +706,7 @@ install:
 	done
 	-n=`t='$(program_transform_name)'; echo ld | sed -e "" $$t`; \
 	  rm -f $(tooldir)/bin/ld; \
-	  ln $(bindir)/$$n $(tooldir)/bin/ld \
+	  ln $(bindir)/$$n $(tooldir)/bin/ld >/dev/null 2>/dev/null \
 	   || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld
 
 install-info: ld.info

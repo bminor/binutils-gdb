@@ -1,3 +1,7 @@
+Wed May 18 10:15:39 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (install): Redirect output of ln to /dev/null.
+
 Mon May 16 13:35:08 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* emultempl/hppaelf.em: Change all references of
