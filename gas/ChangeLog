@@ -1,5 +1,14 @@
 1999-06-11  Ian Lance Taylor  <ian@zembu.com>
 
+	* read.c (read_a_source_file): Only declare inescape if
+	QUOTES_IN_INSN.
+
+	* itbl-ops.c (itbl_disassemble): Change sprintf format strings to
+	match parameters.
+	(find_entry_byval): Add parens to avoid warning.
+
+	* as.c: If HAVE_ITBL_CPU, include "itbl-ops.h".
+
 	* symbols.c (resolve_symbol_value): Don't permit subtraction of
 	undefined symbols.
 

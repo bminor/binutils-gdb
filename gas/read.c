@@ -829,7 +829,10 @@ read_a_source_file (name)
 		    }
 		  else
 		    {
-		      int inquote = 0, inescape = 0;
+		      int inquote = 0;
+#ifdef QUOTES_IN_INSN
+		      int inescape = 0;
+#endif
 
 		      /* WARNING: c has char, which may be end-of-line. */
 		      /* Also: input_line_pointer->`\0` where c was. */
