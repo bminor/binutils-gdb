@@ -1,3 +1,61 @@
+2002-05-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (CROR_151515, CROR_313131): Define.
+	(ppc64_elf_relocate_section): Use them.  Don't look for plt calls
+	on R_PPC64_ADDR24 relocs.  Require a nop or no link reg on plt
+	call branches.  Correct undefined weak destination.
+	(ppc64_elf_func_desc_adjust): Always create at least one blr in
+	.sfpr, and correct case where either only savef* or restf* is
+	needed.
+
+	Long branch stubs, multiple stub sections.
+	* elf64-ppc.h (ppc64_elf_setup_section_lists): Declare.
+	(ppc64_elf_next_input_section): Declare.
+	* elf64-ppc.c: Move linker-only prototypes.
+	(STUB_SUFFIX): Define.
+	(enum ppc_stub_type): New.
+	(struct ppc_stub_hash_entry): New.
+	(struct ppc_branch_hash_entry): New.
+	(struct ppc_link_hash_entry): Add stub_cache, oh.
+	(struct ppc_link_hash_table): Add stub_hash_table etc.  Remove
+	sstub.  Add sbrlt, srelbrlt, has_14bit_branch, stub_iteration.
+	Rename plt_overflow to stub_error.
+	(ppc_stub_hash_lookup): Define.
+	(ppc_branch_hash_lookup): Define.
+	(stub_hash_newfunc): New function.
+	(branch_hash_newfunc): New function.
+	(link_hash_newfunc): Init new fields.
+	(ppc64_elf_link_hash_table_create): Likewise.
+	(ppc64_elf_link_hash_table_free): New function.
+	(ppc_stub_name): New function.
+	(ppc_get_stub_entry): New function.
+	(ppc_add_stub): New function.
+	(create_linkage_sections): Use bfd_make_section_anyway.  Create
+	.branch_lt and .rela.branch_lt sections.  Don't create .stub.
+	(ppc64_elf_check_relocs): Set has_14bit_branch on R_PPC64_REL14*,
+	and set up for plt call stubs.  Link func and func desc syms.
+	(ppc64_elf_gc_sweep_hook): Handle REL14* as per REL24.
+	(func_desc_adjust): Avoid hash lookup when func desc sym available
+	via shortcut, and set links when processing.
+	(ppc64_elf_hide_symbol): Likewise.
+	(allocate_dynrelocs): Don't allocate stub section here.
+	(ppc64_elf_size_dynamic_sections): Handle sbrlt and srelbrlt.
+	Remove sstub code.
+	(ppc_type_of_stub): New function.
+	(build_one_stub): Delete.
+	(ppc_build_one_stub): New function.
+	(ppc_size_one_stub): New function.
+	(ppc64_elf_setup_section_lists): New function.
+	(ppc64_elf_next_input_section): New function.
+	(group_sections): New function.
+	(get_local_syms): New function.
+	(ppc64_elf_size_stubs): Rewrite.
+	(ppc64_elf_build_stubs): Rewrite.
+	(ppc64_elf_relocate_section): Look up stub entry for REL24
+	relocs.  Don't propagate REL14* to dynamic objects.  Look for long
+	branch stubs if REL14* or REL24 relocs won't reach.
+	(bfd_elf64_bfd_link_hash_table_free): Define.
+
 2002-04-30  Mark Mitchell  <mark@codesourcery.com>
 
 	* bfd/config.bfd: Add support for powerpc-*-windiss.
