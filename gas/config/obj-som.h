@@ -75,4 +75,8 @@ extern void obj_som_init_stab_section PARAMS ((segT));
    for the various debugging sections.  */
 #define INIT_STAB_SECTION(seg) obj_som_init_stab_section (seg)
 
+/* We'll be updating the magic 1st stab entry once the entire assembly
+   fail has been processed.  */
+#define obj_frob_file() som_frob_file()
+
 #endif /* _OBJ_SOM_H */
