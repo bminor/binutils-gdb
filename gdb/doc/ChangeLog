@@ -1,3 +1,8 @@
+Mon Feb  1 15:35:47 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdbinv-s.texi:  Mention that Z8000 simulator can simulate Z8001
+	as well as Z8002.
+
 Sat Nov 28 06:51:35 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Add sections on clean design and on how to send

@@ -953,8 +953,10 @@ simulator.
 @table @code
 @item target z8ksim
 @kindex z8ksim
-This debugging target is a simulator for the Z8002, the unsegmented
-variant of the Z8000 architecture.
+This debugging target is a simulator for the Z8002 (the unsegmented
+variant of the Z8000 architecture) and the Z8001 (the segmented
+variant).  The simulator recognizes which architecture is appropriate by
+inspecting the object code.
 @end table
 
 @noindent
