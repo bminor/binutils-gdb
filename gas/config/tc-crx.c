@@ -28,10 +28,7 @@
 #include "opcode/crx.h"
 #include "elf/crx.h"
 
-#include <limits.h>
-
 /* Word is considered here as a 16-bit unsigned short int.  */
-#define WORD_SIZE   16
 #define WORD_SHIFT  16
 
 /* Register is 4-bit size.  */
@@ -43,39 +40,26 @@
 /* Maximum bits which may be set in a `mask16' operand.  */
 #define MAX_REGS_IN_MASK16  8
 
-/* Escape to 16-bit immediate.  */
-#define ESC_16  0xE
-/* Escape to 32-bit immediate.  */
-#define ESC_32  0xF
-
 /* Utility macros for string comparison.  */
 #define streq(a, b)           (strcmp (a, b) == 0)
 #define strneq(a, b, c)       (strncmp (a, b, c) == 0)
 
-/* A mask to set n_bits starting from offset offs.  */
-#define SET_BITS_MASK(offs,n_bits)    ((((1 << (n_bits)) - 1) << (offs)))
-/* A mask to clear n_bits starting from offset offs.  */
-#define CLEAR_BITS_MASK(offs,n_bits)  (~(((1 << (n_bits)) - 1) << (offs)))
-
-/* Get the argument type for each operand of a given instruction.  */
-#define GET_ACTUAL_TYPE						  \
-  for (i = 0; i < insn->nargs; i++)				  \
-    atyp_act[i] = getarg_type (instruction->operands[i].op_type)
-
-/* Get the size (in bits) for each operand of a given instruction.  */
-#define GET_ACTUAL_SIZE						  \
-  for (i = 0; i < insn->nargs; i++)				  \
-    bits_act[i] = getbits (instruction->operands[i].op_type)
-
-/* Non-zero if OP is instruction with no operands.  */
-#define NO_OPERANDS_INST(OP)			  \
-  (streq (OP, "di") || streq (OP, "nop")	  \
-   || streq (OP, "retx") || streq (OP, "ei")	  \
-   || streq (OP, "wait") || streq (OP, "eiwait"))
-
-/* Print a number NUM, shifted by SHIFT bytes, into a location
+/* Assign a number NUM, shifted by SHIFT bytes, into a location
    pointed by index BYTE of array 'output_opcode'.  */
 #define CRX_PRINT(BYTE, NUM, SHIFT)   output_opcode[BYTE] |= (NUM << SHIFT)
+
+/* Operand errors.  */
+typedef enum
+  {
+    OP_LEGAL = 0,	/* Legal operand.  */
+    OP_OUT_OF_RANGE,	/* Operand not within permitted range.  */
+    OP_NOT_EVEN,	/* Operand is Odd number, should be even.  */
+    OP_ILLEGAL_DISPU4,	/* Operand is not within DISPU4 range.  */
+    OP_ILLEGAL_CST4,	/* Operand is not within CST4 range.  */
+    OP_NOT_UPPER_64KB	/* Operand is not within the upper 64KB 
+			   (0xFFFF0000-0xFFFFFFFF).  */
+  }
+op_err;
 
 /* Opcode mnemonics hash table.  */
 static struct hash_control *crx_inst_hash;
@@ -86,19 +70,18 @@ static struct hash_control *copreg_hash;
 /* Current instruction we're assembling.  */
 const inst *instruction;
 
-/* Initialize global variables.  */
+/* Global variables.  */
+
+/* Array to hold an instruction encoding.  */
 long output_opcode[2];
+
 /* Nonzero means a relocatable symbol.  */
 int relocatable;
-/* Nonzero means a constant's bit-size was already set.  */
-int size_was_set;
-/* Nonzero means a negative constant.  */
-int signflag;
-/* Nonzero means a CST4 instruction.  */
-int cst4flag;
+
 /* A copy of the original instruction (used in error messages).  */
 char ins_parse[MAX_INST_LEN];
-/* Holds the current processed argument number.  */
+
+/* The current processed argument number.  */
 int cur_arg_num;
 
 /* Generic assembler global variables which must be defined by all targets.  */
@@ -139,6 +122,7 @@ const pseudo_typeS md_pseudo_table[] =
   {0, 0, 0}
 };
 
+/* CRX relaxation table.  */
 const relax_typeS md_relax_table[] =
 {
   /* bCC  */
@@ -155,37 +139,38 @@ const relax_typeS md_relax_table[] =
   {0xfffffe, -0x1000000, 6, 0}		/* 24 */
 };
 
-static void    reset_vars	        (char *, ins *);
+static void    reset_vars	        (char *);
 static reg     get_register	        (char *);
 static copreg  get_copregister	        (char *);
-static void    set_operand_size		(ins *);
-static argtype getarg_type	        (operand_type);
-static int     getbits		        (operand_type);
-static int     get_flags	        (operand_type);
+static argtype get_optype	        (operand_type);
+static int     get_opbits	        (operand_type);
+static int     get_opflags	        (operand_type);
 static int     get_number_of_operands   (void);
 static void    parse_operand	        (char *, ins *);
 static int     gettrap		        (char *);
 static void    handle_LoadStor	        (char *);
 static int     get_cinv_parameters      (char *);
-static unsigned long getconstant        (unsigned long, int);
+static long    getconstant		(long, int);
+static op_err  check_range		(long *, int, unsigned int, int);
 static int     getreg_image	        (reg);
 static void    parse_operands	        (ins *, char *);
 static void    parse_insn	        (ins *, char *);
 static void    print_operand	        (int, int, argument *);
 static void    print_constant	        (int, int, argument *);
 static int     exponent2scale	        (int);
-static void    mask_const	        (unsigned long *, int);
 static void    mask_reg		        (int, unsigned short *);
-static int     process_label_constant   (char *, ins *);
+static void    process_label_constant   (char *, ins *);
 static void    set_operand	        (char *, ins *);
 static char *  preprocess_reglist       (char *, int *);
 static int     assemble_insn	        (char *, ins *);
 static void    print_insn	        (ins *);
+static void    warn_if_needed		(ins *);
+static int     adjust_if_needed		(ins *);
 
 /* Return the bit size for a given operand.  */
 
 static int
-getbits (operand_type op)
+get_opbits (operand_type op)
 {
   if (op < MAX_OPRD)
     return crx_optab[op].bit_size;
@@ -196,7 +181,7 @@ getbits (operand_type op)
 /* Return the argument type of a given operand.  */
 
 static argtype
-getarg_type (operand_type op)
+get_optype (operand_type op)
 {
   if (op < MAX_OPRD)
     return crx_optab[op].arg_type;
@@ -207,7 +192,7 @@ getarg_type (operand_type op)
 /* Return the flags of a given operand.  */
 
 static int
-get_flags (operand_type op)
+get_opflags (operand_type op)
 {
   if (op < MAX_OPRD)
     return crx_optab[op].flags;
@@ -245,14 +230,6 @@ get_copregister (char *copreg_name)
     return nullcopregister;
 }
 
-/* Mask a constant to the number of bits it is to be mapped to.  */
-
-static void
-mask_const (unsigned long int *t, int size)
-{
-  *t &= (((LONGLONG)1 << size) - 1);
-}
-
 /* Round up a section size to the appropriate boundary.  */
 
 valueT
@@ -285,16 +262,10 @@ md_operand (expressionS * exp)
 /* Reset global variables before parsing a new instruction.  */
 
 static void
-reset_vars (char *op, ins *crx_ins)
+reset_vars (char *op)
 {
-  unsigned int i;
-
-  cur_arg_num = relocatable = size_was_set = signflag = cst4flag = 0;
+  cur_arg_num = relocatable = 0;
   memset (& output_opcode, '\0', sizeof (output_opcode));
-
-  /* Memset the 'signflag' field in every argument.  */
-  for (i = 0; i < MAX_OPERANDS; i++)
-    crx_ins->arg[i].signflag = 0;
 
   /* Save a copy of the original OP (used in error messages).  */
   strcpy (ins_parse, op);
@@ -671,194 +642,20 @@ md_begin (void)
   linkrelax = 1;
 }
 
-/* Set the number of bits corresponding to a constant -
-   here we check for possible overflow cases.  */
+/* Process constants (immediate/absolute) 
+   and labels (jump targets/Memory locations).  */
 
 static void
-set_operand_size (ins * crx_ins)
-{
-  int cnt_bits = 0;
-  const cst4_entry *cst4_op;
-  argument *cur_arg = &crx_ins->arg[cur_arg_num];  /* Current argument.  */
-  unsigned long int temp = cur_arg->constant;
-
-  /* If the constant's size was already set - nothing to do.  */
-  if (size_was_set)
-    return;
-
-  /* Already dealt with negative numbers in process_label_constants.  */
-  while (temp > 0)
-    {
-      temp >>= 1;
-      cnt_bits++;
-    }
-
-  /* Arithmetic instructions :
-     16-bit positive signed immediate -->> represent as 32-bit.  */
-  if (IS_INSN_TYPE (ARITH_INS) && !relocatable && !signflag)
-    {
-      if (cnt_bits == 16)
-        {
-          cur_arg->size = 32;
-          return;
-        }
-    }
-  /* Index addressing mode :
-     6-bit positive signed immediate -->> represent as 22-bit.  */
-  if (IS_INSN_TYPE (LD_STOR_INS)
-      || IS_INSN_TYPE (STOR_IMM_INS)
-      || IS_INSN_TYPE (CSTBIT_INS))
-    {
-      if (!signflag && cur_arg->type == arg_idxr)
-        {
-          if (cnt_bits == 6)
-            {
-              cur_arg->size = 22;
-              return;
-            }
-          if (cnt_bits == 22)
-	    as_bad (_("Offset out of range in Instruction `%s'"), ins_parse);
-        }
-    }
-  /* load/stor instructions :
-     16-bit positive signed immediate -->> represent as 32-bit.  */
-  if (IS_INSN_TYPE (LD_STOR_INS))
-    {
-      if (!signflag && cur_arg->type == arg_cr)
-        {
-          if (cnt_bits == 16)
-            {
-              cur_arg->size = 32;
-              return;
-            }
-          if (cnt_bits == 32)
-	    as_bad (_("Offset out of range in Instruction `%s'"), ins_parse);
-        }
-    }
-  /* Post-increment mode :
-     12-bit positive signed immediate -->> represent as 28-bit.  */
-  if (IS_INSN_TYPE (CSTBIT_INS)
-      || IS_INSN_TYPE (LD_STOR_INS_INC)
-      || IS_INSN_TYPE (STOR_IMM_INS))
-    {
-      if (!signflag && cur_arg->type == arg_cr)
-        {
-          if (cnt_bits == 12)
-            {
-              cur_arg->size = 28;
-              if (IS_INSN_TYPE (LD_STOR_INS_INC))
-		as_bad (_("Offset out of range in Instruction `%s'"), ins_parse);
-              return;
-            }
-          if (IS_INSN_TYPE (CSTBIT_INS) || IS_INSN_TYPE (STOR_IMM_INS))
-            {
-              if (cnt_bits == 28)
-		as_bad (_("Offset out of range in Instruction `%s'"), ins_parse);
-            }
-
-        }
-    }
-
-  /* Handle negative cst4 mapping for arithmetic/cmp&br operations.  */
-  if (signflag && !relocatable
-      && ((IS_INSN_TYPE (ARITH_INS) || IS_INSN_TYPE (ARITH_BYTE_INS))
-      || ((IS_INSN_TYPE (CMPBR_INS) && cur_arg_num == 0))))
-    {
-      for (cst4_op = cst4_map; cst4_op < (cst4_map + cst4_maps); cst4_op++)
-	{
-	  if (cur_arg->constant == (unsigned int)(-cst4_op->value))
-	    {
-	      cur_arg->size = 4;
-	      cur_arg->constant = cst4_op->binary;
-	      cur_arg->signflag = 0;
-	      return;
-	    }
-	}
-    }
-  /* Because of the cst4 mapping -- -1 and -4 already handled above
-     as well as for relocatable cases.  */
-  if (signflag && IS_INSN_TYPE (ARITH_BYTE_INS))
-    {
-      if (!relocatable)
-        {
-          if (cur_arg->constant <= 0xffff)
-            cur_arg->size = 16;
-          else
-	    /* Setting to 18 so that there is no match.  */
-            cur_arg->size = 18;
-        }
-      else
-        cur_arg->size = 16;
-      return;
-    }
-
-  if (signflag && IS_INSN_TYPE (ARITH_INS))
-    {
-      /* For all immediates which can be expressed in less than 16 bits.  */
-      if (cur_arg->constant <= 0xffff && !relocatable)
-        {
-          cur_arg->size = 16;
-          return;
-        }
-      /* Either it is relocatable or not representable in 16 bits.  */
-      if (cur_arg->constant < 0xffffffff || relocatable)
-        {
-          cur_arg->size = 32;
-          return;
-        }
-      cur_arg->size = 33;
-      return;
-    }
-
-  if (signflag && !relocatable)
-    return;
-
-  if (!relocatable)
-    cur_arg->size = cnt_bits;
-
-  /* Checking for Error Conditions.  */
-  if (IS_INSN_TYPE (ARITH_INS) && !signflag)
-    {
-      if (cnt_bits > 32)
-	as_bad (_("Cannot represent Immediate in %d bits in Instruction `%s'"),
-		cnt_bits, ins_parse);
-    }
-  else if (IS_INSN_TYPE (ARITH_BYTE_INS) && !signflag)
-    {
-      if (cnt_bits > 16)
-	as_bad (_("Cannot represent Immediate in %d bits in Instruction `%s'"),
-		cnt_bits, ins_parse);
-    }
-}
-
-/* Handle the constants immediate/absolute values and
-   Labels (jump targets/Memory locations).  */
-
-static int
 process_label_constant (char *str, ins * crx_ins)
 {
-  char *save;
-  unsigned long int temp, cnt;
-  const cst4_entry *cst4_op;
-  int is_cst4 = 0;
-  int constant_val = 0;
+  char *saved_input_line_pointer;
   argument *cur_arg = &crx_ins->arg[cur_arg_num];  /* Current argument.  */
 
-  save = input_line_pointer;
-  signflag = 0;
-
-  if (str[0] == '-')
-    {
-      signflag = 1;
-      str++;
-    }
-  else if (str[0] == '+')
-    str++;
-
+  saved_input_line_pointer = input_line_pointer;
   input_line_pointer = str;
 
   expression (&crx_ins->exp);
-
+  
   switch (crx_ins->exp.X_op)
     {
     case O_big:
@@ -870,286 +667,37 @@ process_label_constant (char *str, ins * crx_ins)
       crx_ins->exp.X_add_number = 0;
       crx_ins->exp.X_add_symbol = (symbolS *) 0;
       crx_ins->exp.X_op_symbol = (symbolS *) 0;
-      break;
+      /* Fall through.  */
 
     case O_constant:
-      cur_arg->constant = constant_val = crx_ins->exp.X_add_number;
-      if ((IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
-	   && cur_arg_num == 2)
-        {
-          LONGLONG temp64 = 0;
-          char ptr;
-          char temp_str[30];
-          unsigned int jump_value = 0;
-          int BR_MASK = 0, BR_SIZE = 0;
-          temp_str[0] = '\0';
-          if (signflag)
-            {
-              temp_str[0] = '-';
-              temp_str[1] = '\0';
-            }
-          strncat (temp_str, str, strlen (str));
-	  temp64 = strtoll (temp_str, (char **) &ptr,0);
-
-          if (temp64 % 2 != 0)
-	    as_bad (_("Odd Offset in displacement in Instruction `%s'"),
-		    ins_parse);
-
-	  /* Determine the branch size.  */
-          jump_value = (unsigned int)temp64 & 0xFFFFFFFF;
-          if (((jump_value & 0xFFFFFF00) == 0xFFFFFF00)
-	      || ((jump_value & 0xFFFFFF00) == 0x0))
-            {
-              BR_MASK = 0xFF;
-              BR_SIZE = 8;
-            }
-          else
-            if (((jump_value & 0xFF000000) == 0xFF000000)
-		|| ((jump_value & 0xFF000000) == 0x0))
-            {
-              BR_MASK = 0xFFFFFF;
-              BR_SIZE = 24;
-            }
-	  jump_value = jump_value >> 1;
-          cur_arg->constant = jump_value & BR_MASK;
-          cur_arg->size = BR_SIZE;
-	  size_was_set = 1;
-          cur_arg->signflag = signflag;
-          input_line_pointer = save;
-          return crx_ins->exp.X_op;
-        }
-
-      if (IS_INSN_TYPE (BRANCH_INS)
-	  || IS_INSN_MNEMONIC ("bal")
-	  || IS_INSN_TYPE (DCR_BRANCH_INS))
-        {
-          LONGLONG temp64 = 0;
-          char ptr;
-          char temp_str[30];
-          unsigned int jump_value = 0;
-          int BR_MASK = 0, BR_SIZE = 0;
-
-          temp_str[0] = '\0';
-          if (signflag)
-            {
-              temp_str[0] = '-';
-              temp_str[1] = '\0';
-            }
-          strncat (temp_str, str, strlen (str));
-	  temp64 = strtoll (temp_str, (char **) &ptr,0);
-
-	  if (temp64 % 2 != 0)
-	    as_bad (_("Odd Offset in displacement in Instruction `%s'"),
-	    ins_parse);
-
-	  /* Determine the branch size.  */
-          jump_value = (unsigned int)temp64 & 0xFFFFFFFF;
-          if (!IS_INSN_MNEMONIC ("bal") && !IS_INSN_TYPE (DCR_BRANCH_INS)
-	      && (((jump_value & 0xFFFFFF00) == 0xFFFFFF00)
-		  || ((jump_value & 0xFFFFFF00) == 0x0)))
-            {
-              BR_MASK = 0xFF;
-              BR_SIZE = 8;
-            }
-          else if (((jump_value & 0xFFFF0000) == 0xFFFF0000)
-		   || ((jump_value & 0xFFFF0000) == 0x0))
-            {
-              BR_MASK = 0xFFFF;
-              BR_SIZE = 16;
-            }
-          else
-            {
-              BR_MASK = 0xFFFFFFFF;
-              BR_SIZE = 32;
-            }
-	  jump_value = jump_value >> 1;
-          cur_arg->constant = jump_value & BR_MASK;
-          cur_arg->size = BR_SIZE;
-	  size_was_set = 1;
-          cur_arg->signflag = signflag;
-          input_line_pointer = save;
-          return crx_ins->exp.X_op;
-        }
-      /* Fix for movd $0xF12344, r0 -- signflag has to be set.  */
-      if (constant_val < 0 && signflag != 1
-          && !IS_INSN_TYPE (LD_STOR_INS) && !IS_INSN_TYPE (LD_STOR_INS_INC)
-          && !IS_INSN_TYPE (CSTBIT_INS) && !IS_INSN_TYPE (STOR_IMM_INS)
-          && !IS_INSN_TYPE (BRANCH_INS) && !IS_INSN_MNEMONIC ("bal"))
-        {
-          cur_arg->constant = ~(cur_arg->constant) + 1;
-          signflag = 1;
-        }
-      /* For load/store instruction when the value is in the offset part.  */
-      if (constant_val < 0 && signflag != 1
-          && (IS_INSN_TYPE (LD_STOR_INS) || IS_INSN_TYPE (LD_STOR_INS_INC)
-	      || IS_INSN_TYPE (CSTBIT_INS) || IS_INSN_TYPE (STOR_IMM_INS)))
-        {
-          if (cur_arg->type == arg_cr || cur_arg->type == arg_idxr)
-            {
-              cur_arg->constant = ~(cur_arg->constant) + 1;
-              signflag = 1;
-            }
-        }
-      if (signflag)
-        {
-          /* Signflag in never set in case of load store instructions
-	     Mapping in case of only the arithinsn case.  */
-          if ((cur_arg->constant != 1 && cur_arg->constant != 4)
-	     || (!IS_INSN_TYPE (ARITH_INS)
-		 && !IS_INSN_TYPE (ARITH_BYTE_INS)
-		 && !IS_INSN_TYPE (CMPBR_INS)))
-            {
-              /* Counting the number of bits required to represent
-	         the constant.  */
-              cnt = 0;
-              temp = cur_arg->constant - 1;
-              while (temp > 0)
-                {
-                  temp >>= 1;
-                  cnt++;
-                }
-              cur_arg->size = cnt + 1;
-              cur_arg->constant = ~(cur_arg->constant) + 1;
-              if (IS_INSN_TYPE (ARITH_INS) || IS_INSN_TYPE (ARITH_BYTE_INS))
-                {
-                  char ptr;
-                  LONGLONG temp64;
-
-		  temp64 = strtoull (str, (char **) &ptr, 0);
-                  if (cnt < 4)
-		    cur_arg->size = 5;
-
-                  if (IS_INSN_TYPE (ARITH_INS))
-                    {
-                      if (cur_arg->size > 32
-			  || (temp64 > ULONG_MAX))
-			{
-                          if (cur_arg->size > 32)
-			    as_bad (_("In Instruction `%s': Immediate size is \
-				    %lu bits cannot be accomodated"),
-				    ins_parse, cnt + 1);
-
-			  if (temp64 > ULONG_MAX)
-			    as_bad (_("Value given more than 32 bits in \
-				    Instruction `%s'"), ins_parse);
-                        }
-                    }
-                  if (IS_INSN_TYPE (ARITH_BYTE_INS))
-                    {
-                      if (cur_arg->size > 16
-			  || !((temp64 & 0xFFFF0000) == 0xFFFF0000
-			       || (temp64 & 0xFFFF0000) == 0x0))
-                        {
-                          if (cur_arg->size > 16)
-			    as_bad (_("In Instruction `%s': Immediate size is \
-				    %lu bits cannot be accomodated"),
-				    ins_parse, cnt + 1);
-
-			  if (!((temp64 & 0xFFFF0000) == 0xFFFF0000
-				|| (temp64 & 0xFFFF0000) == 0x0))
-			    as_bad (_("Value given more than 16 bits in \
-				    Instruction `%s'"), ins_parse);
-                        }
-                    }
-                }
-              if (IS_INSN_TYPE (LD_STOR_INS) && cur_arg->type == arg_cr)
-                {
-                  /* Cases handled ---
-		     dispub4/dispuw4/dispud4 and for load store dispubwd4
-		     is applicable only.  */
-                  if (cur_arg->size <= 4)
-                    cur_arg->size = 5;
-                }
-	      /* Argument number is checked to distinguish between
-		 immediate and displacement in cmpbranch and bcopcond.  */
-              if ((IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
-		   && cur_arg_num == 2)
-                {
-                  if (cur_arg->size != 32)
-                    cur_arg->constant >>= 1;
-                }
-
-	      mask_const (&cur_arg->constant, (int) cur_arg->size);
-            }
-        }
-      else
-        {
-	  /* Argument number is checked to distinguish between
-	     immediate and displacement in cmpbranch and bcopcond.  */
-          if (((IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
-		  && cur_arg_num == 2)
-	        || IS_INSN_TYPE (BRANCH_NEQ_INS))
-            {
-              if (IS_INSN_TYPE (BRANCH_NEQ_INS))
-                {
-                  if (cur_arg->constant == 0)
-		    as_bad (_("Instruction `%s' has Zero offset"), ins_parse);
-                }
-
-              if (cur_arg->constant % 2 != 0)
-		as_bad (_("Instruction `%s' has odd offset"), ins_parse);
-
-              if (IS_INSN_TYPE (BRANCH_NEQ_INS))
-                {
-                  if (cur_arg->constant > 32 || cur_arg->constant < 2)
-		      as_bad (_("Instruction `%s' has illegal offset (%ld)"),
-			      ins_parse, cur_arg->constant);
-
-		  cur_arg->constant -= 2;
-                }
-
-              cur_arg->constant >>= 1;
-              set_operand_size (crx_ins);
-            }
-
-	  /* Compare branch argument number zero to be compared -
-	     mapped to cst4.  */
-          if (IS_INSN_TYPE (CMPBR_INS) && cur_arg_num == 0)
-            {
-	      for (cst4_op = cst4_map; cst4_op < (cst4_map + cst4_maps); cst4_op++)
-		{
-		  if (cur_arg->constant == (unsigned int)cst4_op->value)
-		    {
-		      cur_arg->constant = cst4_op->binary;
-		      is_cst4 = 1;
-		      break;
-		    }
-		}
-	      if (!is_cst4)
-		as_bad (_("Instruction `%s' has invalid imm value as an \
-			  operand"), ins_parse);
-            }
-        }
+      cur_arg->X_op = O_constant;
+      cur_arg->constant = crx_ins->exp.X_add_number;
       break;
 
     case O_symbol:
     case O_subtract:
+    case O_add:
+      cur_arg->X_op = O_symbol;
       crx_ins->rtype = BFD_RELOC_NONE;
       relocatable = 1;
 
       switch (cur_arg->type)
 	{
 	case arg_cr:
-          /* Have to consider various cases here.  */
           if (IS_INSN_TYPE (LD_STOR_INS_INC))
-	    /* 'load/stor <num>(reg)+'.  */
 	    crx_ins->rtype = BFD_RELOC_CRX_REGREL12;
           else if (IS_INSN_TYPE (CSTBIT_INS)
 		   || IS_INSN_TYPE (STOR_IMM_INS))
-	    /* 'stor imm' and '[stc]bit'.  */
 	    crx_ins->rtype = BFD_RELOC_CRX_REGREL28;
           else
-	    /* General load/stor instruction.  */
 	    crx_ins->rtype = BFD_RELOC_CRX_REGREL32;
-	    break;
+	  break;
+
 	case arg_idxr:
-	  /* Index Mode 22 bits relocation.  */
 	    crx_ins->rtype = BFD_RELOC_CRX_REGREL22;
 	  break;
+	
 	case arg_c:
-	  /* Absolute types.  */
-          /* Case for jumps...dx  types.  */
-          /* For bal.  */
           if (IS_INSN_MNEMONIC ("bal") || IS_INSN_TYPE (DCR_BRANCH_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_REL16;
 	  else if (IS_INSN_TYPE (BRANCH_INS))
@@ -1159,9 +707,12 @@ process_label_constant (char *str, ins * crx_ins)
 	    crx_ins->rtype = BFD_RELOC_CRX_ABS32;
 	  else if (IS_INSN_TYPE (BRANCH_NEQ_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_REL4;
-          else if (IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
+          else if (IS_INSN_TYPE (CMPBR_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_REL8_CMP;
+          else if (IS_INSN_TYPE (COP_BRANCH_INS))
+	    crx_ins->rtype = BFD_RELOC_CRX_REL24;
 	  break;
+	
 	case arg_ic:
           if (IS_INSN_TYPE (ARITH_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_IMM32;
@@ -1171,16 +722,15 @@ process_label_constant (char *str, ins * crx_ins)
 	default:
 	  break;
       }
-      cur_arg->size = (bfd_reloc_type_lookup (stdoutput, crx_ins->rtype))->bitsize;
       break;
 
     default:
+      cur_arg->X_op = crx_ins->exp.X_op;
       break;
     }
 
-  input_line_pointer = save;
-  cur_arg->signflag = signflag;
-  return crx_ins->exp.X_op;
+  input_line_pointer = saved_input_line_pointer;
+  return;
 }
 
 /* Get the values of the scale to be encoded -
@@ -1343,7 +893,8 @@ parse_operand (char *operand, ins * crx_ins)
     {
       cur_arg->type = arg_r;
       cur_arg->r = ret_val;
-      goto set_size;
+      cur_arg->X_op = O_register;
+      return;
     }
 
   /* Check whether this is a core [special] coprocessor register.  */
@@ -1353,7 +904,8 @@ parse_operand (char *operand, ins * crx_ins)
       if (ret_val >= cs0)
 	cur_arg->type = arg_copsr;
       cur_arg->cr = ret_val;
-      goto set_size;
+      cur_arg->X_op = O_register;
+      return;
     }
 
   /* Deal with special characters.  */
@@ -1397,32 +949,6 @@ parse_operand (char *operand, ins * crx_ins)
 set_params:
   cur_arg->constant = 0;
   set_operand (operand, crx_ins);
-
-/* Determine argument size.  */
-set_size:
-  switch (cur_arg->type)
-    {
-    /* The following are all registers, so set their size to REG_SIZE.  */
-    case arg_r:
-    case arg_copr:
-    case arg_copsr:
-    case arg_rbase:
-      cur_arg->size = REG_SIZE;
-      break;
-
-    case arg_c:
-    case arg_ic:
-    case arg_sc:
-    case arg_cr:
-    case arg_icr:
-    case arg_idxr:
-      set_operand_size (crx_ins);
-      break;
-
-    default:
-      as_bad (_("Illegal argument type in instruction `%s'"), ins_parse);
-      break;
-    }
 }
 
 /* Parse the various operands. Each operand is then analyzed to fillup 
@@ -1559,14 +1085,26 @@ handle_LoadStor (char *operands)
 static void
 parse_insn (ins *insn, char *operands)
 {
-  /* Handle 'excp'/'cinv' */
+  int i;
+
+  /* Handle instructions with no operands.  */
+  for (i = 0; no_op_insn[i] != NULL; i++)
+  {
+    if (streq (no_op_insn[i], instruction->mnemonic))
+    {
+      insn->nargs = 0;
+      return;
+    }
+  }
+
+  /* Handle 'excp'/'cinv' instructions.  */
   if (IS_INSN_MNEMONIC ("excp") || IS_INSN_MNEMONIC ("cinv"))
     {
       insn->nargs = 1;
       insn->arg[0].type = arg_ic;
-      insn->arg[0].size = 4;
       insn->arg[0].constant = IS_INSN_MNEMONIC ("excp") ?
 	gettrap (operands) : get_cinv_parameters (operands);
+      insn->arg[0].X_op = O_constant;
       return;
     }
 
@@ -1677,34 +1215,11 @@ getreg_image (reg r)
   return 0;
 }
 
-/* Routine used to get the binary-string equivalent of a integer constant
-   which currently require currbits to represent itself to be extended to
-   nbits.  */
+/* Routine used to represent integer X using NBITS bits.  */
 
-static unsigned long int
-getconstant (unsigned long int x, int nbits)
+static long
+getconstant (long x, int nbits)
 {
-  int cnt = 0;
-  unsigned long int temp = x;
-
-  while (temp > 0)
-    {
-      temp >>= 1;
-      cnt++;
-    }
-
-  /* Escape sequence to next 16bit immediate.  */
-  if (cnt > nbits)
-    as_bad (_("Value `%ld' truncated to fit `%d' bits in instruction `%s'"),
-	    x, cnt, ins_parse);
-  else
-    {
-      if (signflag)
-	x |= SET_BITS_MASK (cnt, nbits - cnt);
-      else
-	x &= CLEAR_BITS_MASK (cnt, nbits - cnt);
-    }
-
   /* The following expression avoids overflow if
      'nbits' is the number of bits in 'bfd_vma'.  */
   return (x & ((((1 << (nbits - 1)) - 1) << 1) | 1));
@@ -1824,9 +1339,8 @@ print_operand (int nbits, int shift, argument *arg)
 
     case arg_cr:
       /* case base_cst4.  */
-      if ((instruction->flags & DISPU4MAP) && cst4flag)
-	output_opcode[0] |= (getconstant (arg->constant, nbits)
-			     << (shift + REG_SIZE));
+      if (instruction->flags & DISPU4MAP)
+	print_constant (nbits, shift + REG_SIZE, arg);
       else
 	/* rbase_disps<NN> and other such cases.  */
 	print_constant (nbits, shift, arg);
@@ -1851,68 +1365,167 @@ get_number_of_operands (void)
   return i;
 }
 
-/* Assemble a single instruction :
-   Instruction has been parsed and all operand values set appropriately.
-   Algorithm for assembling -
-   For instruction to be assembled:
-    Step 1: Find instruction in the array crx_instruction with same mnemonic.
-    Step 2: Find instruction with same operand types.
-    Step 3: If (size_of_operands) match then done, else increment the
-	    array_index and goto Step3.
-    Step 4: Cannot assemble
+/* Verify that the number NUM can be represented in BITS bits (that is, 
+   within its permitted range), based on the instruction's FLAGS.  
+   If UPDATE is nonzero, update the value of NUM if necessary.
+   Return OP_LEGAL upon success, actual error type upon failure.  */
+
+static op_err
+check_range (long *num, int bits, int unsigned flags, int update)
+{
+  long min, max;
+  int retval = OP_LEGAL;
+  int bin;
+  long upper_64kb = 0xFFFF0000;
+  long value = *num;
+
+  /* Verify operand value is even.  */
+  if (flags & OP_EVEN)
+    {
+      if (value % 2)
+	return OP_NOT_EVEN;
+    }
+
+  if (flags & OP_UPPER_64KB)
+    {
+      /* Check if value is to be mapped to upper 64 KB memory area.  */
+      if ((value & upper_64kb) == upper_64kb)
+	{
+	  value -= upper_64kb;
+	  if (update)
+	    *num = value;
+	}
+      else
+	return OP_NOT_UPPER_64KB;
+    }
+
+  if (flags & OP_SHIFT)
+    {
+      value >>= 1;
+      if (update)
+	*num = value;
+    }
+  else if (flags & OP_SHIFT_DEC)
+    {
+      value = (value >> 1) - 1;
+      if (update)
+	*num = value;
+    }
+
+  if (flags & OP_ESC)
+    {
+      /* 0x7e and 0x7f are reserved escape sequences of dispe9.  */
+      if (value == 0x7e || value == 0x7f)
+	return OP_OUT_OF_RANGE;
+    }
+
+  if (flags & OP_DISPU4)
+    {
+      int is_dispu4 = 0;
+
+      int mul = (instruction->flags & DISPUB4) ? 1 
+		: (instruction->flags & DISPUW4) ? 2
+		: (instruction->flags & DISPUD4) ? 4 : 0;
+      
+      for (bin = 0; bin < cst4_maps; bin++)
+	{
+	  if (value == (mul * bin))
+	    {
+	      is_dispu4 = 1;
+	      if (update)
+		*num = bin;
+	      break;
+	    }
+	}
+      if (!is_dispu4)
+	retval = OP_ILLEGAL_DISPU4;
+    }
+  else if (flags & OP_CST4)
+    {
+      int is_cst4 = 0;
+
+      for (bin = 0; bin < cst4_maps; bin++)
+	{
+	  if (value == cst4_map[bin])
+	    {
+	      is_cst4 = 1;
+	      if (update)
+		*num = bin;
+	      break;
+	    }
+	}
+      if (!is_cst4)
+	retval = OP_ILLEGAL_CST4;
+    }
+  else if (flags & OP_SIGNED)
+    {
+      max = (1 << (bits - 1)) - 1;
+      min = - (1 << (bits - 1));
+      if ((value > max) || (value < min))
+	retval = OP_OUT_OF_RANGE;
+    }
+  else if (flags & OP_UNSIGNED)
+    {
+      max = ((((1 << (bits - 1)) - 1) << 1) | 1);
+      min = 0;
+      if (((unsigned long) value > (unsigned long) max) 
+	    || ((unsigned long) value < (unsigned long) min))
+	retval = OP_OUT_OF_RANGE;
+    }
+  return retval;
+}
+
+/* Assemble a single instruction:
+   INSN is already parsed (that is, all operand values and types are set).
+   For instruction to be assembled, we need to find an appropriate template in 
+   the instruction table, meeting the following conditions:
+    1: Has the same number of operands.
+    2: Has the same operand types.
+    3: Each operand size is sufficient to represent the instruction's values.
    Returns 1 upon success, 0 upon failure.  */
 
 static int
 assemble_insn (char *mnemonic, ins *insn)
 {
-  /* Argument type of each operand in the instruction we are looking for.  */
-  argtype atyp[MAX_OPERANDS];
-  /* Argument type of each operand in the current instruction.  */
-  argtype atyp_act[MAX_OPERANDS];
-  /* Size (in bits) of each operand in the instruction we are looking for.  */
-  int bits[MAX_OPERANDS];
-  /* Size (in bits) of each operand in the current instruction.  */
-  int bits_act[MAX_OPERANDS];
-  /* Location (in bits) of each operand in the current instruction.  */
-  int shift_act[MAX_OPERANDS];
+  /* Type of each operand in the current template.  */
+  argtype cur_type[MAX_OPERANDS];
+  /* Size (in bits) of each operand in the current template.  */
+  unsigned int cur_size[MAX_OPERANDS];
+  /* Flags of each operand in the current template.  */
+  unsigned int cur_flags[MAX_OPERANDS];
   /* Instruction type to match.  */
   unsigned int ins_type;
+  /* Boolean flag to mark whether a match was found.  */
   int match = 0;
-  int done_flag = 0;
-  int dispu4map_type = 0;
-  int changed_already = 0;
-  unsigned int temp_value = 0;
-  int instrtype, i;
-  /* A pointer to the argument's constant value.  */
-  unsigned long int *cons;
-  /* Pointer to loop over all cst4_map entries.  */
-  const cst4_entry *cst4_op;
+  int i;
+  /* Nonzero if an instruction with same number of operands was found.  */
+  int found_same_number_of_operands = 0;
+  /* Nonzero if an instruction with same argument types was found.  */
+  int found_same_argument_types = 0;
+  /* Nonzero if a constant was found within the required range.  */
+  int found_const_within_range  = 0;
+  /* Argument number of an operand with invalid type.  */
+  int invalid_optype = -1;
+  /* Argument number of an operand with invalid constant value.  */
+  int invalid_const  = -1;
+  /* Operand error (used for issuing various constant error messages).  */
+  op_err op_error, const_err = OP_LEGAL;
 
-  /* Instruction has no operands -> copy only the constant opcode.   */
+/* Retrieve data (based on FUNC) for each operand of a given instruction.  */
+#define GET_CURRENT_DATA(FUNC, ARRAY)				  \
+  for (i = 0; i < insn->nargs; i++)				  \
+    ARRAY[i] = FUNC (instruction->operands[i].op_type)
+
+#define GET_CURRENT_TYPE    GET_CURRENT_DATA(get_optype, cur_type)
+#define GET_CURRENT_SIZE    GET_CURRENT_DATA(get_opbits, cur_size)
+#define GET_CURRENT_FLAGS   GET_CURRENT_DATA(get_opflags, cur_flags)
+
+  /* Instruction has no operands -> only copy the constant opcode.   */
   if (insn->nargs == 0)
     {
       output_opcode[0] = BIN (instruction->match, instruction->match_bits);
       return 1;
     }
-
-  /* Find instruction with same number of operands.  */
-  while (get_number_of_operands () != insn->nargs
-         && IS_INSN_MNEMONIC (mnemonic))
-    instruction++;
-
-  if (!IS_INSN_MNEMONIC (mnemonic))
-    return 0;
-
-  /* Initialize argument type and size of each given operand.  */
-  for (i = 0; i < insn->nargs; i++)
-    {
-      atyp[i] = insn->arg[i].type;
-      bits[i] = insn->arg[i].size;
-    }
-
-  /* Initialize argument type and size of each operand in current inst.  */
-  GET_ACTUAL_TYPE;
-  GET_ACTUAL_SIZE;
 
   /* In some case, same mnemonic can appear with different instruction types.
      For example, 'storb' is supported with 3 different types :
@@ -1922,7 +1535,8 @@ assemble_insn (char *mnemonic, ins *insn)
      during a search for matching instruction.  */
   ins_type = CRX_INS_TYPE(instruction->flags);
 
-  while (match != 1
+  while (/* Check that match is still not found.  */
+	 match != 1
 	 /* Check we didn't get to end of table.  */
 	 && instruction->mnemonic != NULL
 	 /* Check that the actual mnemonic is still available.  */
@@ -1930,292 +1544,222 @@ assemble_insn (char *mnemonic, ins *insn)
 	 /* Check that the instruction type wasn't changed.  */
 	 && IS_INSN_TYPE(ins_type))
     {
-      /* Check for argement type compatibility.  */
+      /* Check whether number of arguments is legal.  */
+      if (get_number_of_operands () != insn->nargs)
+	goto next_insn;
+      found_same_number_of_operands = 1;
+
+      /* Initialize arrays with data of each operand in current template.  */
+      GET_CURRENT_TYPE;
+      GET_CURRENT_SIZE;
+      GET_CURRENT_FLAGS;
+
+      /* Check for type compatibility.  */
       for (i = 0; i < insn->nargs; i++)
         {
-          if (atyp_act[i] == atyp[i])
-	    done_flag = 1;
-          else
-            {
-              done_flag = 0;
-              break;
-            }
-        }
-
-      if (done_flag)
-	{
-	  for (i = 0; i < insn->nargs; i++)
+	  if (cur_type[i] != insn->arg[i].type)
 	    {
-	      if ((get_flags (instruction->operands[i].op_type) & OPERAND_UNSIGNED)
-		  && (insn->arg[i].signflag))
-		    {
-		      done_flag = 0;
-		      break;
-		    }
+	      if (invalid_optype == -1)
+		invalid_optype = i + 1;
+	      goto next_insn;
 	    }
 	}
+      found_same_argument_types = 1;
 
-      if (done_flag == 0)
-        {
-	  /* Try again with next instruction.  */
-          instruction++;
-	  GET_ACTUAL_TYPE;
-	  GET_ACTUAL_SIZE;
-          continue;
-        }
-      else
-        {
-          /* Check for size compatibility.  */
-          for (i = 0; i < insn->nargs; i++)
-            {
-              if (bits[i] > bits_act[i])
-                {
-		  /* Actual size is too small - try again.  */
-                  done_flag = 0;
-                  instruction++;
-	  	  GET_ACTUAL_TYPE;
-		  GET_ACTUAL_SIZE;
-                  break;
-                }
-            }
+      for (i = 0; i < insn->nargs; i++)
+	{
+	  /* Reverse the operand indices for certain opcodes:
+	     Index 0	  -->> 1
+	     Index 1	  -->> 0	
+	     Other index  -->> stays the same.  */
+	  int j = instruction->flags & REVERSE_MATCH ? 
+		  i == 0 ? 1 : 
+		  i == 1 ? 0 : i : 
+		  i;
 
-        }
+	  /* Only check range - don't update the constant's value, since the 
+	     current instruction may not be the last we try to match.  
+	     The constant's value will be updated later, right before printing 
+	     it to the object file.  */
+  	  if ((insn->arg[j].X_op == O_constant) 
+	       && (op_error = check_range (&insn->arg[j].constant, cur_size[j], 
+					   cur_flags[j], 0)))
+  	    {
+	      if (invalid_const == -1)
+	      {
+		invalid_const = j + 1;
+		const_err = op_error;
+	      }
+	      goto next_insn;
+	    }
+	  /* For symbols, we make sure the relocation size (which was already 
+	     determined) is sufficient.  */
+	  else if ((insn->arg[j].X_op == O_symbol)
+		    && ((bfd_reloc_type_lookup (stdoutput, insn->rtype))->bitsize 
+			 > cur_size[j]))
+		  goto next_insn;
+	}
+      found_const_within_range = 1;
 
-      if (done_flag == 1)
-        {
-	  /* Full match is found.  */
-          match = 1;
-          break;
-        }
+      /* If we got till here -> Full match is found.  */
+      match = 1;
+      break;
+
+/* Try again with next instruction.  */
+next_insn:
+      instruction++;
     }
 
-  if (match == 0)
-    /* We haven't found a match - instruction can't be assembled.  */
-    return 0;
-  else
-    /* Full match - print the final image.  */
+  if (!match)
     {
-      /* If the post-increment address mode is used and the load/store 
-	 source register is the same as rbase, the result of the 
-	 instruction is undefined.  */
-      if (IS_INSN_TYPE (LD_STOR_INS_INC))
+      /* We haven't found a match - instruction can't be assembled.  */
+      if (!found_same_number_of_operands)
+	as_bad (_("Incorrect number of operands"));
+      else if (!found_same_argument_types)
+	as_bad (_("Illegal type of operand (arg %d)"), invalid_optype);
+      else if (!found_const_within_range)
+      {
+	switch (const_err)
 	{
-	  /* Enough to verify that one of the arguments is a simple reg.  */
-	  if ((insn->arg[0].type == arg_r) || (insn->arg[1].type == arg_r))
-	    if (insn->arg[0].r == insn->arg[1].r)
-	      as_bad (_("Same src/dest register is used (`r%d'), result is undefined"), 
-		       insn->arg[0].r);
+	case OP_OUT_OF_RANGE:
+	  as_bad (_("Operand out of range (arg %d)"), invalid_const);
+	  break;
+	case OP_NOT_EVEN:
+	  as_bad (_("Operand has odd displacement (arg %d)"), invalid_const);
+	  break;
+	case OP_ILLEGAL_DISPU4:
+	  as_bad (_("Invalid DISPU4 operand value (arg %d)"), invalid_const);
+	  break;
+	case OP_ILLEGAL_CST4:
+	  as_bad (_("Invalid CST4 operand value (arg %d)"), invalid_const);
+	  break;
+	case OP_NOT_UPPER_64KB:
+	  as_bad (_("Operand value is not within upper 64 KB (arg %d)"), 
+		    invalid_const);
+	  break;
+	default:
+	  as_bad (_("Illegal operand (arg %d)"), invalid_const);
+	  break;
 	}
-
-      /* Optimization: Omit a zero displacement in bit operations, 
-	 saving 2-byte encoding space (e.g., 'cbitw $8, 0(r1)').  */
-      if (IS_INSN_TYPE (CSTBIT_INS) && !relocatable)
-        {
-          if ((instruction->operands[1].op_type == rbase_disps12)
-	       && (insn->arg[1].constant == 0))
-                {
-                  instruction--;
-		  GET_ACTUAL_SIZE;
-                }
-        }
-
-      /* Some instruction assume the stack pointer as rptr operand.
-	 Issue an error when the register to be loaded is also SP.  */
-      if (instruction->flags & NO_SP)
-        {
-	  if (getreg_image (insn->arg[0].r) == getreg_image (sp))
-	    as_bad (_("`%s' has undefined result"), ins_parse);
-	}
-
-      /* If the rptr register is specified as one of the registers to be loaded, 
-	 the final contents of rptr are undefined. Thus, we issue an error.  */
-      if (instruction->flags & NO_RPTR)
-        {
-	  if ((1 << getreg_image (insn->arg[0].r)) & insn->arg[1].constant)
-	    as_bad (_("Same src/dest register is used (`r%d'), result is undefined"), 
-	     getreg_image (insn->arg[0].r));
-	}
-
-      /* Handle positive constants.  */
-      if (!signflag)
-        {
-          if ((instruction->flags & DISPU4MAP) && !relocatable)
-            {
-              /* Get the map type of the instruction.  */
-              instrtype = instruction->flags & REVERSE_MATCH ? 0 : 1;
-	      cons = &insn->arg[instrtype].constant;
-              dispu4map_type = instruction->flags & DISPU4MAP;
-
-	      switch (dispu4map_type)
-		{
-		case DISPUB4:
-		  /* 14 and 15 are reserved escape sequences of dispub4.  */
-                  if (*cons == 14 || *cons == 15)
-                    {
-                      instruction++;
-		      GET_ACTUAL_SIZE;
-                    }
-		  break;
-
-		case DISPUW4:
-		  /* Mapping has to be done.  */
-		  if (*cons <= 15 && *cons % 2 != 0)
-                    {
-                      instruction++;
-		      GET_ACTUAL_SIZE;
-                    }
-                  else if (*cons > 15 && *cons < 27 && *cons % 2 == 0)
-                    {
-                      instruction--;
-		      GET_ACTUAL_SIZE;
-                    }
-		  if (*cons < 27 && *cons % 2 == 0)
-		    *cons /= 2;
-		  break;
-
-		case DISPUD4:
-                  /* Mapping has to be done.  */
-                  if (*cons <= 15 && *cons % 4 != 0)
-                    {
-                      instruction++;
-		      GET_ACTUAL_SIZE;
-                    }
-                  else if (*cons > 15 && *cons < 53 && *cons % 4 == 0)
-                    {
-                      instruction--;
-		      GET_ACTUAL_SIZE;
-                    }
-		  if (*cons < 53 && *cons % 4 == 0)
-		    *cons /= 4;
-		  break;
-		default:
-		  as_bad (_("Invalid DISPU4 type"));
-		  break;
-	      }
-            }
-
-	  /* Check whether a cst4 mapping has to be done.  */
-	  if ((instruction->flags & CST4MAP) && !relocatable)
-	    {
-	      /* 'const' equals reserved escape sequences -->>
-		 represent as i16.  */
-	      if (insn->arg[0].constant == ESC_16
-		  || insn->arg[0].constant == ESC_32)
-		{
-		  instruction++;
-		  GET_ACTUAL_SIZE;
-		}
-	      else
-		{
-		  /* Loop over cst4_map entries.  */
-		  for (cst4_op = cst4_map; cst4_op < (cst4_map + cst4_maps);
-		       cst4_op++)
-		    {
-		      /* 'const' equals a binary, which is already mapped
-			 by a different value -->> represent as i16.  */
-		      if (insn->arg[0].constant == (unsigned int)cst4_op->binary
-			  && cst4_op->binary != cst4_op->value)
-			{
-			  instruction++;
-			  GET_ACTUAL_SIZE;
-			}
-		      /* 'const' equals a value bigger than 16 -->> map to
-			 its binary and represent as cst4.  */
-		      else if (insn->arg[0].constant == (unsigned int)cst4_op->value
-			       && insn->arg[0].constant >= 16)
-			{
-			  instruction--;
-			  insn->arg[0].constant = cst4_op->binary;
-			  GET_ACTUAL_SIZE;
-			}
-		    }
-		}
-	    }
-
-	  /* Special check for 'addub 0, r0' instruction -
-	     The opcode '0000 0000 0000 0000' is not allowed.  */
-          if (IS_INSN_MNEMONIC ("addub"))
-            {
-              if ((instruction->operands[0].op_type == cst4)
-		  && instruction->operands[1].op_type == regr)
-                {
-                  if (insn->arg[0].constant == 0 && insn->arg[1].r == r0)
-		    instruction++;
-                }
-            }
-          if ((IS_INSN_TYPE (LD_STOR_INS) || IS_INSN_TYPE (CSTBIT_INS)
-	       || IS_INSN_TYPE (STOR_IMM_INS)) & !relocatable)
-            {
-	      instrtype = instruction->flags & REVERSE_MATCH ? 0 : 1;
-              changed_already = 0;
-              /* Convert 32 bits accesses to 16 bits accesses.  */
-              if (instruction->operands[instrtype].op_type == abs32)
-                {
-                  if ((insn->arg[instrtype].constant & 0xFFFF0000) == 0xFFFF0000)
-                    {
-                      instruction--;
-                      insn->arg[instrtype].constant =
-                        insn->arg[instrtype].constant & 0xFFFF;
-                      insn->arg[instrtype].size = 16;
-                      changed_already = 1;
-		      GET_ACTUAL_SIZE;
-                    }
-                }
-              /* Convert 16 bits accesses to 32 bits accesses.  */
-              if (instruction->operands[instrtype].op_type == abs16
-                  && changed_already != 1)
-                {
-                  instruction++;
-                  insn->arg[instrtype].constant =
-                    insn->arg[instrtype].constant & 0xFFFF;
-                  insn->arg[instrtype].size = 32;
-		  GET_ACTUAL_SIZE;
-                }
-              changed_already = 0;
-            }
-        }
+      }
+      
+      return 0;
+    }
+  else
+    /* Full match - print the encoding to output file.  */
+    {
+      /* Make further checkings (such that couldn't be made earlier).
+	 Warn the user if necessary.  */
+      warn_if_needed (insn);
+      
+      /* Check whether we need to adjust the instruction pointer.  */
+      if (adjust_if_needed (insn))
+	/* If instruction pointer was adjusted, we need to update 
+	   the size of the current template operands.  */
+	GET_CURRENT_SIZE;
 
       for (i = 0; i < insn->nargs; i++)
         {
-	  /* Mark a CST4 argument, if exists.  */
-	  if (get_flags (instruction->operands[i].op_type) & OPERAND_CST4)
-	    cst4flag = 1;
+	  int j = instruction->flags & REVERSE_MATCH ? 
+		  i == 0 ? 1 : 
+		  i == 1 ? 0 : i : 
+		  i;
 
-	  /* Handle reserved escape sequences.  */
-	  if ((get_flags (instruction->operands[i].op_type) & OPERAND_ESC)
-	      && !relocatable)
-            {
-	      /* 0x7e and 0x7f are reserved escape sequences of dispe9.  */
-	      if (insn->arg[i].constant == 0x7e || insn->arg[i].constant == 0x7f)
-                {
-		  /* Use a disps17 for these values.  */
-                  instruction++;
-		  GET_ACTUAL_SIZE;
-                }
-            }
+	  /* This time, update constant value before printing it.  */
+  	  if ((insn->arg[j].X_op == O_constant) 
+	       && (check_range (&insn->arg[j].constant, cur_size[j], 
+				cur_flags[j], 1) != OP_LEGAL))
+	      as_fatal (_("Illegal operand (arg %d)"), j+1);
 	}
 
       /* First, copy the instruction's opcode.  */
       output_opcode[0] = BIN (instruction->match, instruction->match_bits);
 
-      /* Swap the argument values in case bcop instructions.  */
-      if (IS_INSN_TYPE (COP_BRANCH_INS))
-        {
-          temp_value = insn->arg[0].constant;
-          insn->arg[0].constant = insn->arg[1].constant;
-          insn->arg[1].constant = temp_value;
-        }
-
       for (i = 0; i < insn->nargs; i++)
         {
-	  shift_act[i] = instruction->operands[i].shift;
-          signflag = insn->arg[i].signflag;
-          cur_arg_num = i;
-          print_operand (bits_act[i], shift_act[i], &insn->arg[i]);
+	  cur_arg_num = i;
+          print_operand (cur_size[i], instruction->operands[i].shift, 
+			 &insn->arg[i]);
         }
     }
 
   return 1;
+}
+
+/* Bunch of error checkings.
+   The checks are made after a matching instruction was found.  */
+
+void
+warn_if_needed (ins *insn)
+{
+  /* If the post-increment address mode is used and the load/store 
+     source register is the same as rbase, the result of the 
+     instruction is undefined.  */
+  if (IS_INSN_TYPE (LD_STOR_INS_INC))
+    {
+      /* Enough to verify that one of the arguments is a simple reg.  */
+      if ((insn->arg[0].type == arg_r) || (insn->arg[1].type == arg_r))
+	if (insn->arg[0].r == insn->arg[1].r)
+	  as_bad (_("Same src/dest register is used (`r%d'), result is undefined"), 
+		   insn->arg[0].r);
+    }
+
+  /* Some instruction assume the stack pointer as rptr operand.
+     Issue an error when the register to be loaded is also SP.  */
+  if (instruction->flags & NO_SP)
+    {
+      if (getreg_image (insn->arg[0].r) == getreg_image (sp))
+	as_bad (_("`%s' has undefined result"), ins_parse);
+    }
+
+  /* If the rptr register is specified as one of the registers to be loaded, 
+     the final contents of rptr are undefined. Thus, we issue an error.  */
+  if (instruction->flags & NO_RPTR)
+    {
+      if ((1 << getreg_image (insn->arg[0].r)) & insn->arg[1].constant)
+	as_bad (_("Same src/dest register is used (`r%d'), result is undefined"), 
+	 getreg_image (insn->arg[0].r));
+    }
+}
+
+/* In some cases, we need to adjust the instruction pointer although a 
+   match was already found. Here, we gather all these cases.
+   Returns 1 if instruction pointer was adjusted, otherwise 0.  */
+
+int
+adjust_if_needed (ins *insn)
+{
+  int ret_value = 0;
+
+  /* Special check for 'addub $0, r0' instruction -
+     The opcode '0000 0000 0000 0000' is not allowed.  */
+  if (IS_INSN_MNEMONIC ("addub"))
+    {
+      if ((instruction->operands[0].op_type == cst4)
+	  && instruction->operands[1].op_type == regr)
+        {
+          if (insn->arg[0].constant == 0 && insn->arg[1].r == r0)
+	    {
+	      instruction++;
+	      ret_value = 1;
+	    }
+        }
+    }
+
+  /* Optimization: Omit a zero displacement in bit operations, 
+     saving 2-byte encoding space (e.g., 'cbitw $8, 0(r1)').  */
+  if (IS_INSN_TYPE (CSTBIT_INS))
+    {
+      if ((instruction->operands[1].op_type == rbase_disps12)
+	   && (insn->arg[1].X_op == O_constant)
+	   && (insn->arg[1].constant == 0))
+            {
+              instruction--;
+	      ret_value = 1;
+            }
+    }
+
+  return ret_value;
 }
 
 /* Set the appropriate bit for register 'r' in 'mask'.
@@ -2471,7 +2015,7 @@ md_assemble (char *op)
   char c;
 
   /* Reset global variables for a new instruction.  */
-  reset_vars (op, &crx_ins);
+  reset_vars (op);
 
   /* Strip the mnemonic.  */
   for (param = op; *param != 0 && !ISSPACE (*param); param++)
@@ -2490,19 +2034,12 @@ md_assemble (char *op)
   /* Tie dwarf2 debug info to the address at the start of the insn.  */
   dwarf2_emit_insn (0);
 
-  if (NO_OPERANDS_INST (op))
-    /* Handle instructions with no operands.  */
-    crx_ins.nargs = 0;
-  else
-    /* Parse the instruction's operands.  */
-    parse_insn (&crx_ins, param);
+  /* Parse the instruction's operands.  */
+  parse_insn (&crx_ins, param);
 
-  /* Assemble the instruction.  */
+  /* Assemble the instruction - return upon failure.  */
   if (assemble_insn (op, &crx_ins) == 0)
-    {
-      as_bad (_("Illegal operands in instruction : `%s'"), ins_parse);
-      return;
-    }
+    return;
 
   /* Print the instruction.  */
   print_insn (&crx_ins);
