@@ -1,3 +1,8 @@
+Thu Feb 16 14:30:13 1995  Doug Evans  <dje@cygnus.com>
+
+	* expr.c (operand): Move md_operand handling to default case
+	(so it works).
+
 Wed Feb 15 16:08:47 1995  Jason Molenda  <crash@cygnus.com>
 
 	* config/tc-h8500.c (tc_coff_symbol_emit_hook): Add ignored
