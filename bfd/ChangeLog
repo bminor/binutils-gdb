@@ -1,3 +1,18 @@
+2002-09-27  Matt Thomas  <matt@3am-software.com>
+
+	* elf32-vax.c (elf_vax_check_relocs): Remove unused
+	local_got_refcounts usage.  Remove allocation of got slot.
+	(elf_vax_gc_sweep_hook): Remove unused local_got_refcounts usage.
+	Remove de-allocation of got slot.
+	(elf_vax_size_dynamic_section): Fix some indentation.  Add hash
+	traversal for elf_vax_instantiate_got_entries.  Allow empty .got
+	sections to be GC'ed.
+	(elf_vax_instantiate_got_entries): New function.
+	(elf_vax_relocate_section): Simplify R_VAX_GOT32 handling.  Remove
+	tests that are now handled by elf_vax_instantiate_got_entries.
+	Assert GOT entry falls within .got section size.  Remove redundant
+	comparisions.  Fix comments.
+
 2002-09-27  Jakub Jelinek  <jakub@redhat.com>
 
 	* reloc.c: Add x86-64 TLS relocs.
