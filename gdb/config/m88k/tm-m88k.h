@@ -43,7 +43,7 @@
 	init_extra_frame_info (fromleaf, fi)
 extern void init_extra_frame_info ();
 
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

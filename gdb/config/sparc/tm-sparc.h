@@ -28,7 +28,7 @@ struct value;
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 
 /* Floating point is IEEE compatible.  */
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 
 /* If an argument is declared "register", Sun cc will keep it in a register,
    never saving it onto the stack.  So we better not believe the "p" symbol

@@ -171,6 +171,14 @@ extern void set_gdbarch_long_double_bit (struct gdbarch *gdbarch, int long_doubl
 #endif
 #endif
 
+extern int gdbarch_ieee_float (struct gdbarch *gdbarch);
+extern void set_gdbarch_ieee_float (struct gdbarch *gdbarch, int ieee_float);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (IEEE_FLOAT)
+#define IEEE_FLOAT (gdbarch_ieee_float (current_gdbarch))
+#endif
+#endif
+
 typedef CORE_ADDR (gdbarch_read_pc_ftype) (int pid);
 extern CORE_ADDR gdbarch_read_pc (struct gdbarch *gdbarch, int pid);
 extern void set_gdbarch_read_pc (struct gdbarch *gdbarch, gdbarch_read_pc_ftype *read_pc);

@@ -193,6 +193,7 @@ v:1:TARGET_LONG_LONG_BIT:int:long_long_bit::::8 * sizeof (LONGEST):0
 v:1:TARGET_FLOAT_BIT:int:float_bit::::8 * sizeof (float):0
 v:1:TARGET_DOUBLE_BIT:int:double_bit::::8 * sizeof (double):0
 v:1:TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):0
+v:1:IEEE_FLOAT:int:ieee_float::::0:1:0
 #
 f:1:TARGET_READ_PC:CORE_ADDR:read_pc:int pid:pid::0:0
 f:1:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, int pid:val, pid::0:0
@@ -815,7 +816,7 @@ copyright
 cat <<EOF
 
 #include "defs.h"
-#include "gdbarch-utils.h"
+#include "arch-utils.h"
 
 #if GDB_MULTI_ARCH
 #include "gdbcmd.h"

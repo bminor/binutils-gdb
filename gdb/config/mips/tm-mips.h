@@ -58,7 +58,7 @@ struct value;
 #endif
 
 /* Floating point is IEEE compliant */
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 
 /* The name of the usual type of MIPS processor that is in the target
    system.  */

@@ -135,6 +135,7 @@ struct gdbarch
   int float_bit;
   int double_bit;
   int long_double_bit;
+  int ieee_float;
   gdbarch_read_pc_ftype *read_pc;
   gdbarch_write_pc_ftype *write_pc;
   gdbarch_read_fp_ftype *read_fp;
@@ -273,6 +274,7 @@ struct gdbarch startup_gdbarch = {
   0,
   0,
   0,
+  0,
   generic_get_saved_register,
   0,
   0,
@@ -335,6 +337,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
 
   /* Force the explicit initialization of these. */
   gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
+  gdbarch->ieee_float = 1;
   gdbarch->num_regs = -1;
   gdbarch->sp_regnum = -1;
   gdbarch->fp_regnum = -1;
@@ -423,6 +426,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->long_double_bit == 0))
     internal_error ("gdbarch: verify_gdbarch: long_double_bit invalid");
+  /* Skip verify of ieee_float, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->read_pc == 0))
     internal_error ("gdbarch: verify_gdbarch: read_pc invalid");
@@ -655,6 +659,9 @@ gdbarch_dump (void)
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: TARGET_LONG_DOUBLE_BIT = %ld\n",
                       (long) TARGET_LONG_DOUBLE_BIT);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: IEEE_FLOAT = %ld\n",
+                      (long) IEEE_FLOAT);
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: TARGET_READ_PC = 0x%08lx\n",
                       (long) current_gdbarch->read_pc
@@ -1118,6 +1125,22 @@ set_gdbarch_long_double_bit (struct gdbarch *gdbarch,
                              int long_double_bit)
 {
   gdbarch->long_double_bit = long_double_bit;
+}
+
+int
+gdbarch_ieee_float (struct gdbarch *gdbarch)
+{
+  /* Skip verify of ieee_float, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_ieee_float called\n");
+  return gdbarch->ieee_float;
+}
+
+void
+set_gdbarch_ieee_float (struct gdbarch *gdbarch,
+                        int ieee_float)
+{
+  gdbarch->ieee_float = ieee_float;
 }
 
 CORE_ADDR

@@ -50,7 +50,7 @@ extern int h8300smode;
 
 extern void h8300_init_extra_frame_info ();
 
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 /* Define the bit, byte, and word ordering of the machine.  */
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 #undef TARGET_INT_BIT

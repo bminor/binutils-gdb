@@ -40,7 +40,7 @@
 
 /* We have IEEE floating point, if we have any float at all.  */
 
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

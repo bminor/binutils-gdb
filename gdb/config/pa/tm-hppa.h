@@ -53,7 +53,7 @@ struct inferior_status;
 
 /* Watch out for NaNs */
 
-#define IEEE_FLOAT
+#define IEEE_FLOAT (1)
 
 /* On the PA, any pass-by-value structure > 8 bytes is actually
    passed via a pointer regardless of its type or the compiler
