@@ -2655,28 +2655,35 @@ default_fill_link_order (abfd, info, sec, link_order)
      struct bfd_link_order *link_order;
 {
   size_t size;
-  char *space;
+  unsigned char *space;
   size_t i;
-  int fill;
+  unsigned int fill;
+  file_ptr loc;
   boolean result;
 
   BFD_ASSERT ((sec->flags & SEC_HAS_CONTENTS) != 0);
 
   size = (size_t) link_order->size;
-  space = (char *) bfd_malloc (size);
-  if (space == NULL && size != 0)
+  if (size == 0)
+    return true;
+
+  space = (unsigned char *) bfd_malloc (size);
+  if (space == NULL)
     return false;
 
   fill = link_order->u.fill.value;
-  for (i = 0; i < size; i += 2)
+  for (i = 0; i < size; i += 4)
+    space[i] = fill >> 24;
+  for (i = 1; i < size; i += 4)
+    space[i] = fill >> 16;
+  for (i = 2; i < size; i += 4)
     space[i] = fill >> 8;
-  for (i = 1; i < size; i += 2)
+  for (i = 3; i < size; i += 4)
     space[i] = fill;
-  result = bfd_set_section_contents (abfd, sec, space,
-				     (file_ptr)
-                                     (link_order->offset *
-                                      bfd_octets_per_byte (abfd)),
-				     link_order->size);
+
+  loc = (file_ptr) (link_order->offset * bfd_octets_per_byte (abfd));
+  result = bfd_set_section_contents (abfd, sec, space, loc, link_order->size);
+
   free (space);
   return result;
 }

@@ -1,5 +1,9 @@
 2001-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* linker.c (default_fill_link_order): Handle four byte fill value.
+
+2001-08-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-sparc.c (sparc64_elf_output_arch_syms): Add missing
 	prototype.
 	* nlm32-alpha.c (nlm_alpha_write_external): Fix warning.
@@ -31,6 +35,8 @@
 	(elfNN_ia64_relocate_section): Fix warning.
 	(elfNN_ia64_unwind_entry_compare): Make params const.
 
+2001-08-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* config.bfd (targ64_selvecs): New.
 	<powerpc-*-aix* entry>: Use it here instead of ineffectual #ifdef.
 
@@ -42,6 +48,8 @@
 	(bfd_default_target_size): New.  Set from taget_size. AC_SUBST.
 	* bfd-in2.h: Regenerate.
 	* configure: Regenerate.
+
+2001-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd.c (enum bfd_error): Add bfd_error_wrong_object_format.
 	(bfd_errmsgs): Add corresponding message.
