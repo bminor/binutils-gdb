@@ -1,3 +1,7 @@
+2001-06-22  Eric Christopher  <echristo@redhat.com>
+
+	* mips-opc.c: Move prefx to start of the table.
+
 2001-06-22  Stacey Sheldon <ssheldon@Catena.com>
 
 	* arc-opc.c (insert_st_syntax): Fix over-optimisation of ST

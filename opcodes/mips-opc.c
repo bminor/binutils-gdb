@@ -115,6 +115,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
    instruction name anyhow.  */
 /* name,    args,	match,	    mask,	pinfo,          	membership */
 {"pref",    "k,o(b)",   0xcc000000, 0xfc000000, RD_b,           	I32|G3	},
+{"prefx",   "h,t(b)",	0x4c00000f, 0xfc0007ff, RD_b|RD_t,		I4	},
 {"nop",     "",         0x00000000, 0xffffffff, 0,              	I1      },
 {"ssnop",   "",         0x00000040, 0xffffffff, 0,              	I32	},
 {"li",      "t,j",      0x24000000, 0xffe00000, WR_t,			I1	}, /* addiu */
@@ -641,8 +642,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"pll.ps",  "D,V,T",	0x46c0002c, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I5	},
 {"plu.ps",  "D,V,T",	0x46c0002d, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I5	},
 
-/* pref is at the start of the table.  */
-{"prefx",   "h,t(b)",	0x4c00000f, 0xfc0007ff, RD_b|RD_t,		I4	},
+  /* pref and prefx are at the start of the table.  */
 
 {"pul.ps",  "D,V,T",	0x46c0002e, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I5	},
 {"puu.ps",  "D,V,T",	0x46c0002f, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I5	},
@@ -737,7 +737,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"standby", "",         0x42000021, 0xffffffff,	0,			V1	},
 {"sub",     "d,v,t",	0x00000022, 0xfc0007ff,	WR_d|RD_s|RD_t,		I1	},
 {"sub",     "d,v,I",	0,    (int) M_SUB_I,	INSN_MACRO,		I1	},
-{"sub.d",   "D,V,T",	0x46200001, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I1	},     
+{"sub.d",   "D,V,T",	0x46200001, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I1	},
 {"sub.s",   "D,V,T",	0x46000001, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	I1	},
 {"sub.ps",  "D,V,T",	0x46c00001, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I5	},
 {"subu",    "d,v,t",	0x00000023, 0xfc0007ff,	WR_d|RD_s|RD_t,		I1	},
@@ -858,10 +858,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 	((sizeof mips_builtin_opcodes) / (sizeof (mips_builtin_opcodes[0])))
 const int bfd_mips_num_builtin_opcodes = MIPS_NUM_OPCODES;
 
-/* const removed from the following to allow for dynamic extensions to the 
+/* const removed from the following to allow for dynamic extensions to the
  * built-in instruction set. */
 struct mips_opcode *mips_opcodes =
   (struct mips_opcode *) mips_builtin_opcodes;
 int bfd_mips_num_opcodes = MIPS_NUM_OPCODES;
 #undef MIPS_NUM_OPCODES
-
