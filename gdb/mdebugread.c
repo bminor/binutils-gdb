@@ -293,6 +293,9 @@ static FDR
 *get_rfd PARAMS ((int, int));
 
 static int
+has_opaque_xref PARAMS ((FDR *, SYMR *));
+
+static int
 cross_ref PARAMS ((int, union aux_ext *, struct type **, enum type_code,
 		   char **, int, char *));
 
@@ -1235,6 +1238,11 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	 to struct foo sometimes is given as `foo *' instead of `struct foo *'.
 	 The problem is fixed with alpha cc.  */
 
+      /* However if the typedef cross references to an opaque aggregate, it
+	 is safe to omit it from the symbol table.  */
+
+      if (has_opaque_xref (cur_fdr, sh))
+	break;
       s = new_symbol (name);
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_TYPEDEF;
@@ -1856,18 +1864,16 @@ ecoff_relocate_efi (sym, delta)
 }
 
 /* Parse the external symbol ES. Just call parse_symbol() after
-   making sure we know where the aux are for it. For procedures,
-   parsing of the PDRs has already provided all the needed
-   information, we only parse them if SKIP_PROCEDURES is false,
-   and only if this causes no symbol duplication.
+   making sure we know where the aux are for it.
    BIGEND says whether aux entries are big-endian or little-endian.
 
    This routine clobbers top_stack->cur_block and ->cur_st. */
 
+static void parse_external PARAMS ((EXTR *, int, struct section_offsets *));
+
 static void
-parse_external (es, skip_procedures, bigend, section_offsets)
+parse_external (es, bigend, section_offsets)
      EXTR *es;
-     int skip_procedures;
      int bigend;
      struct section_offsets *section_offsets;
 {
@@ -1924,14 +1930,17 @@ parse_external (es, skip_procedures, bigend, section_offsets)
   switch (es->asym.st)
     {
     case stProc:
-      /* If we have full symbols we do not need more */
-      if (skip_procedures)
-	return;
-      if (mylookup_symbol (debug_info->ssext + es->asym.iss,
-			   top_stack->cur_block,
-			   VAR_NAMESPACE, LOC_BLOCK))
-	break;
-      /* fall through */
+    case stStaticProc:
+      /* There is no need to parse the external procedure symbols.
+	 If they are from objects compiled without -g, their index will
+	 be indexNil, and the symbol definition from the minimal symbol
+	 is preferrable (yielding a function returning int instead of int).
+	 If the index points to a local procedure symbol, the local
+	 symbol already provides the correct type.
+	 Note that the index of the external procedure symbol points
+	 to the local procedure symbol in the local symbol table, and
+	 _not_ to the auxiliary symbol info.  */
+      break;
     case stGlobal:
     case stLabel:
       /* Note that the case of a symbol with indexNil must be handled
@@ -2477,8 +2486,8 @@ parse_partial_symbols (objfile, section_offsets)
 
 		case stTypedef:/* Typedef */
 		  /* Skip typedefs for forward declarations and opaque
-		     structs from alpha cc.  */
-		  if (sh.iss == 0)
+		     structs from alpha and mips cc.  */
+		  if (sh.iss == 0 || has_opaque_xref (fh, &sh))
 		    goto skip;
 		  class = LOC_TYPEDEF;
 		  break;
@@ -2571,14 +2580,10 @@ parse_partial_symbols (objfile, section_offsets)
 		  continue;
 		case stProc:
 		case stStaticProc:
-		  /* If the index of the global symbol is not indexNil,
-		     it points to the local stProc symbol with the same
-		     name, which has already been entered into the
-		     partial symbol table above.  */
-		  if (psh->index != indexNil)
-		    continue;
-		  class = LOC_BLOCK;
-		  break;
+		  /* External procedure symbols have been entered
+		     into the minimal symbol table in pass 2 above.
+		     Ignore them, as parse_external will ignore them too.  */
+		  continue;
 		case stLabel:
 		  class = LOC_LABEL;
 		  break;
@@ -3067,7 +3072,7 @@ psymtab_to_symtab_1 (pst, filename)
 
       ext_ptr = PST_PRIVATE (pst)->extern_tab;
       for (i = PST_PRIVATE (pst)->extern_count; --i >= 0; ext_ptr++)
-	parse_external (ext_ptr, 1, fh->fBigendian, pst->section_offsets);
+	parse_external (ext_ptr, fh->fBigendian, pst->section_offsets);
 
       /* If there are undefined symbols, tell the user.
 	 The alpha has an undefined symbol for every symbol that is
@@ -3098,6 +3103,38 @@ psymtab_to_symtab_1 (pst, filename)
 }
 
 /* Ancillary parsing procedures. */
+
+/* Return 1 if the symbol pointed to by SH has a cross reference
+   to an opaque aggregate type, else 0.  */
+
+static int
+has_opaque_xref (fh, sh)
+     FDR *fh;
+     SYMR *sh;
+{
+  TIR tir;
+  union aux_ext *ax;
+  RNDXR rn[1];
+  unsigned int rf;
+
+  if (sh->index == indexNil)
+    return 0;
+
+  ax = debug_info->external_aux + fh->iauxBase + sh->index;
+  ecoff_swap_tir_in (fh->fBigendian, &ax->a_ti, &tir);
+  if (tir.bt != btStruct && tir.bt != btUnion && tir.bt != btEnum)
+    return 0;
+
+  ax++;
+  ecoff_swap_rndx_in (fh->fBigendian, &ax->a_rndx, rn);
+  if (rn->rfd == 0xfff)
+    rf = AUX_GET_ISYM (fh->fBigendian, ax + 1);
+  else
+    rf = rn->rfd;
+  if (rf != -1)
+    return 0;
+  return 1;
+}
 
 /* Lookup the type at relative index RN.  Return it in TPP
    if found and in any event come up with its name PNAME.

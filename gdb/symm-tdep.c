@@ -33,18 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include <fcntl.h>
 
-/*
- * Following macro translates i386 opcode register numbers to Symmetry
- * register numbers.  This is used by FRAME_FIND_SAVED_REGS.
- *
- *           %eax  %ecx  %edx  %ebx  %esp  %ebp  %esi  %edi
- * i386        0     1     2     3     4     5     6     7
- * Symmetry    0     2     1     5    14    15     6     7
- *
- */
-#define I386_REGNO_TO_SYMMETRY(n) \
-((n)==0?0 :(n)==1?2 :(n)==2?1 :(n)==3?5 :(n)==4?14 :(n)==5?15 :(n))
-
 void
 symmetry_extract_return_value(type, regbuf, valbuf)
      struct type *type;

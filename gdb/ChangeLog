@@ -1,3 +1,43 @@
+Wed Mar 30 00:31:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* ch-exp.y (decode_integer_value, match_character_literal,
+	match_bitstring_literal):  Guard tolower calls with isupper,
+	tolower on old BSD systems blindly subtracts a constant.
+	* dbxread.c (read_ofile_symtab):  Check for __gnu_compiled_* as
+	well when determining the producer of the object file.
+	* mdebugread.c (has_opaque_xref):  New function to check for
+	cross reference to an opaque aggregate.
+	* mdebugread.c (parse_symbol, parse_partial_symbols):  Do not
+	enter typedefs to opaque aggregates into the symbol tables.
+	* mdebugread.c (parse_external):  Remove skip_procedures argument,
+	it has always been 1.  Remove code that handled stProc symbols,
+	it was never executed and was wrong, as the index of a
+	stProc symbol points to the local symbol table and not to the
+	auxiliary symbol info. Update caller.
+	* mdebugread.c (parse_partial_symbols):  Do not enter external
+	stProc symbols into the partial symbol table, they are already
+	entered into the minimal symbol table.
+	* config/i386/tm-symmetry.h:  Clean up, it is now only used for Dynix.
+	Remove all conditionals and definitions for ptx.
+	I386_REGNO_TO_SYMMETRY moved to here from symm-tdep.c.
+	Fix addresses of floating point registers in REGISTER_U_ADDR.
+	STORE_STRUCT_RETURN now handles cc and gcc conventions.
+	FRAME_CHAIN, FRAMELESS_FUNCTION_INVOCATION, FRAME_SAVED_PC,
+	IN_SIGTRAMP, SIGCONTEXT_PC_OFFSET defined to make backtracing through
+	signal trampoline code work.
+	* config/i386/xm-symmetry.h:  Clean up, it is now only used for Dynix.
+	Remove all conditionals and definitions for ptx.
+	Remove KDB definitions.
+	* symm-nat.c (store_inferior_registers):  Fetch registers before
+	storing them to obtain valid floating point control registers.
+	Store fpu registers.
+	* symm-nat.c (print_1167_control_word):  Dynix 3.1.1 defines
+	FPA_PCR_CC_C0 and FPA_PCR_CC_C1, avoid duplicate case value.
+	* symm-nat.c (fetch_inferior_registers, child_xfer_memory):
+	Fix typos.
+	* symm-nat.c (child_resume):  Update type of `signal' parameter.
+	* symm-tdep.c (I386_REGNO_TO_SYMMETRY):  Moved to tm-symmetry.h.
+
 Tue Mar 29 23:01:33 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (hppa_fix_call_dummy): Use an alternate method for

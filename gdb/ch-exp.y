@@ -1079,7 +1079,9 @@ decode_integer_value (base, tokptrptr, ivalptr)
 
   while (*tokptr != '\0')
     {
-      temp = tolower (*tokptr);
+      temp = *tokptr;
+      if (isupper (temp))
+        temp = tolower (temp);
       tokptr++;
       switch (temp)
 	{
@@ -1405,7 +1407,7 @@ match_character_literal ()
   char *tokptr = lexptr;
   int ival = 0;
   
-  if ((tolower (*tokptr) == 'c') && (*(tokptr + 1) == '\''))
+  if ((*tokptr == 'c' || *tokptr == 'C') && (*(tokptr + 1) == '\''))
     {
       /* We have a GNU chill extension form, so skip the leading "C'",
 	 decode the hex value, and then ensure that we have a trailing
@@ -1536,7 +1538,9 @@ match_bitstring_literal ()
   
   while (*tokptr != '\0' && *tokptr != '\'')
     {
-      digit = tolower (*tokptr);
+      digit = *tokptr;
+      if (isupper (digit))
+        digit = tolower (digit);
       tokptr++;
       switch (digit)
 	{

@@ -37,7 +37,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/dir.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#ifdef _SEQUENT_
 #include <sys/ptrace.h>
+#else
+/* Dynix has only machine/ptrace.h, which is already included by sys/user.h  */
+/* Dynix has no mptrace call */
+#define mptrace ptrace
+#endif
 #include "gdbcore.h"
 #include <fcntl.h>
 #include <sgtty.h>
@@ -50,9 +56,16 @@ store_inferior_registers(regno)
 int regno;
 {
   struct pt_regset regs;
-  int reg_tmp, i;
+  int i;
   extern char registers[];
-  
+
+  /* FIXME: Fetching the registers is a kludge to initialize all elements
+     in the fpu and fpa status. This works for normal debugging, but
+     might cause problems when calling functions in the inferior.
+     At least fpu_control and fpa_pcr (probably more) should be added 
+     to the registers array to solve this properly.  */
+  mptrace (XPT_RREGS, inferior_pid, (PTRACE_ARG3_TYPE) &regs, 0);
+
   regs.pr_eax = *(int *)&registers[REGISTER_BYTE(0)];
   regs.pr_ebx = *(int *)&registers[REGISTER_BYTE(5)];
   regs.pr_ecx = *(int *)&registers[REGISTER_BYTE(2)];
@@ -68,6 +81,14 @@ int regno;
       regs.pr_fpa.fpa_regs[i] =
 	*(int *)&registers[REGISTER_BYTE(FP1_REGNUM+i)];
     }
+  memcpy (regs.pr_fpu.fpu_stack[0], &registers[REGISTER_BYTE(ST0_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[1], &registers[REGISTER_BYTE(ST1_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[2], &registers[REGISTER_BYTE(ST2_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[3], &registers[REGISTER_BYTE(ST3_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[4], &registers[REGISTER_BYTE(ST4_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[5], &registers[REGISTER_BYTE(ST5_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[6], &registers[REGISTER_BYTE(ST6_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[7], &registers[REGISTER_BYTE(ST7_REGNUM)], 10);
   mptrace (XPT_WREGS, inferior_pid, (PTRACE_ARG3_TYPE) &regs, 0);
 }
 
@@ -81,7 +102,7 @@ fetch_inferior_registers (regno)
 
   registers_fetched ();
 
-  mptrace (XPT_RREGS, (pid), (regaddr), 0);
+  mptrace (XPT_RREGS, inferior_pid, (PTRACE_ARG3_TYPE) &regs, 0);
   *(int *)&registers[REGISTER_BYTE(EAX_REGNUM)] = regs.pr_eax;
   *(int *)&registers[REGISTER_BYTE(EBX_REGNUM)] = regs.pr_ebx;
   *(int *)&registers[REGISTER_BYTE(ECX_REGNUM)] = regs.pr_ecx;
@@ -216,9 +237,8 @@ unsigned int pcr;
        the OS knows what it is doing.  */
 #ifdef FPA_PCR_CC_C1
     if (pcr_tmp & FPA_PCR_CC_C1) printf_unfiltered(" C1");
-#endif
-#ifdef FPA_PCR_CC_C0
-    if (pcr_tmp & FPA_PCR_CC_C1) printf_unfiltered(" C0");
+#else
+    if (pcr_tmp & FPA_PCR_CC_C0) printf_unfiltered(" C0");
 #endif
 
     switch (pcr_tmp)
@@ -228,8 +248,7 @@ unsigned int pcr;
 	break;
 #ifdef FPA_PCR_CC_C1
       case FPA_PCR_CC_C1:
-#endif
-#ifdef FPA_PCR_CC_C0
+#else
       case FPA_PCR_CC_C0:
 #endif
 	printf_unfiltered(" (Less than)");
@@ -605,7 +624,7 @@ void
 child_resume (pid, step, signal)
      int pid;
      int step;
-     int signal;
+     enum target_signal signal;
 {
   errno = 0;
 
@@ -736,7 +755,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
       for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
-	  ptrace (PT_WRITE_D, inferior_pid, (PTRACE_ARG3_TYPE) addr,
+	  ptrace (PT_WDATA, inferior_pid, (PTRACE_ARG3_TYPE) addr,
 		  buffer[i]);
 	  if (errno)
 	    {
