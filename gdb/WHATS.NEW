@@ -56,7 +56,7 @@ history size N:  The size, in commands, of the command history.  The
 		 default is 256, or the value of the environment variable
 		 HISTSIZE.
 
-history write on/off: If this value is set to ON, the history file will
+history save on/off: If this value is set to ON, the history file will
 		      be saved after exiting gdb.  If set to OFF, the 
 		      file will not be saved.  The default is OFF.
 
@@ -97,6 +97,10 @@ print asm-demangle on/off:  Same, for assembler level printouts
 
 print vtbl on/off:  Prettyprint C++ virtual function tables.  Default is OFF.
 
+write on/off:  GDB can now write to executable and core files (e.g. patch
+		a variable's value) if you turn this switch on, specify
+		the file ("exec foo" or "core foo"), then modify it, e.g.
+		by assigning a new value to a variable.
 
  *  Support for Epoch Environment.
 
