@@ -108,6 +108,12 @@ static struct sec_merge_hash_entry *sec_merge_add
 	   struct sec_merge_sec_info *));
 static boolean sec_merge_emit
   PARAMS ((bfd *, struct sec_merge_hash_entry *));
+static int cmplengthentry PARAMS ((const PTR, const PTR));
+static int last4_eq PARAMS ((const PTR, const PTR));
+static int last_eq PARAMS ((const PTR, const PTR));
+static boolean record_section
+  PARAMS ((struct sec_merge_info *, struct sec_merge_sec_info *));
+static void merge_strings PARAMS ((struct sec_merge_info *));
 
 /* Routine to create an entry in a section merge hashtab.  */
 
@@ -475,7 +481,8 @@ cmplengthentry (a, b)
 
 static int
 last4_eq (a, b)
-     const void *a, *b;
+     const PTR a;
+     const PTR b;
 {
   struct sec_merge_hash_entry * A = (struct sec_merge_hash_entry *) a;
   struct sec_merge_hash_entry * B = (struct sec_merge_hash_entry *) b;
@@ -502,7 +509,8 @@ last4_eq (a, b)
 
 static int
 last_eq (a, b)
-     const void *a, *b;
+     const PTR a;
+     const PTR b;
 {
   struct sec_merge_hash_entry * A = (struct sec_merge_hash_entry *) a;
   struct sec_merge_hash_entry * B = (struct sec_merge_hash_entry *) b;

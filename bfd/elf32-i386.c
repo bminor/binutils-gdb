@@ -41,6 +41,12 @@ static boolean elf_i386_create_dynamic_sections
 static boolean elf_i386_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
+static asection *elf_i386_gc_mark_hook
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+static boolean elf_i386_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 static boolean elf_i386_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static boolean allocate_plt_and_got_and_discard_relocs
@@ -55,6 +61,8 @@ static boolean elf_i386_finish_dynamic_symbol
 	   Elf_Internal_Sym *));
 static boolean elf_i386_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+static boolean elf_i386_fake_sections
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
 
 #define USE_REL	1		/* 386 uses REL relocations instead of RELA */
 

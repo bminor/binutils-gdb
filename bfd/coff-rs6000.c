@@ -111,6 +111,41 @@ extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
 /* The main body of code is in coffcode.h.  */
 
 static const char *normalize_filename PARAMS ((bfd *));
+static boolean xcoff_write_armap_old
+  PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int));
+static boolean xcoff_write_one_armap_big
+  PARAMS ((bfd *, struct orl *, unsigned int, unsigned int, unsigned int,
+	   int, const char *, char *));
+static boolean xcoff_write_armap_big
+  PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int));
+static boolean xcoff_write_archive_contents_old PARAMS ((bfd *));
+static boolean xcoff_write_archive_contents_big PARAMS ((bfd *));
+static void xcoff_swap_ldhdr_in
+  PARAMS ((bfd *, const struct external_ldhdr *, struct internal_ldhdr *));
+static void xcoff_swap_ldhdr_out
+  PARAMS ((bfd *, const struct internal_ldhdr *, struct external_ldhdr *));
+static void xcoff_swap_ldsym_in
+  PARAMS ((bfd *, const struct external_ldsym *, struct internal_ldsym *));
+static void xcoff_swap_ldsym_out
+  PARAMS ((bfd *, const struct internal_ldsym *, struct external_ldsym *));
+static void xcoff_swap_ldrel_in
+  PARAMS ((bfd *, const struct external_ldrel *, struct internal_ldrel *));
+static void xcoff_swap_ldrel_out
+  PARAMS ((bfd *, const struct internal_ldrel *, struct external_ldrel *));
+static boolean xcoff_ppc_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   struct internal_reloc *, struct internal_syment *, asection **));
+static boolean _bfd_xcoff_put_ldsymbol_name
+  PARAMS ((bfd *, struct xcoff_loader_info *, struct internal_ldsym *,
+	   const char *));
+static asection *xcoff_create_csect_from_smclas
+  PARAMS ((bfd *, union internal_auxent *, char *));
+static boolean xcoff_is_lineno_count_overflow PARAMS ((bfd *, bfd_vma));
+static boolean xcoff_is_reloc_count_overflow PARAMS ((bfd *, bfd_vma));
+static bfd_vma xcoff_loader_symbol_offset
+  PARAMS ((bfd *, struct internal_ldhdr *));
+static bfd_vma xcoff_loader_reloc_offset
+  PARAMS ((bfd *, struct internal_ldhdr *));
 
 /* We use our own tdata type.  Its first field is the COFF tdata type,
    so the COFF routines are compatible.  */
@@ -2350,7 +2385,7 @@ xcoff_swap_ldrel_out (abfd, src, dst)
    This is currently the only processor which uses XCOFF; I hope that
    will never change.  */
 
-boolean
+static boolean
 xcoff_ppc_relocate_section (output_bfd, info, input_bfd,
 			    input_section, contents, relocs, syms,
 			    sections)
@@ -2814,7 +2849,7 @@ xcoff_create_csect_from_smclas (abfd, aux, symbol_name)
   return return_value;
 }
 
-boolean 
+static boolean 
 xcoff_is_lineno_count_overflow (abfd, value)
     bfd *abfd ATTRIBUTE_UNUSED;
 	bfd_vma value;
@@ -2825,7 +2860,7 @@ xcoff_is_lineno_count_overflow (abfd, value)
   return false;
 }
 
-boolean 
+static boolean 
 xcoff_is_reloc_count_overflow (abfd, value)
     bfd *abfd ATTRIBUTE_UNUSED;
 	bfd_vma value;
@@ -2836,7 +2871,7 @@ xcoff_is_reloc_count_overflow (abfd, value)
   return false;
 }
 
-bfd_vma
+static bfd_vma
 xcoff_loader_symbol_offset (abfd, ldhdr)
     bfd *abfd;
 	struct internal_ldhdr *ldhdr ATTRIBUTE_UNUSED;
@@ -2844,7 +2879,7 @@ xcoff_loader_symbol_offset (abfd, ldhdr)
   return bfd_xcoff_ldhdrsz(abfd);
 }
 
-bfd_vma
+static bfd_vma
 xcoff_loader_reloc_offset (abfd, ldhdr)
     bfd *abfd;
 	struct internal_ldhdr *ldhdr;
@@ -3393,4 +3428,3 @@ const bfd_target pmac_xcoff_vec =
   /* back end data */
   (void *) &bfd_pmac_xcoff_backend_data,
 };
-

@@ -1,3 +1,24 @@
+2001-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-rs6000.c: Add missing prototypes.
+	(xcoff_ppc_relocate_section, xcoff_is_lineno_count_overflow,
+	xcoff_is_reloc_count_overflow, xcoff_loader_symbol_offset,
+	xcoff_loader_reloc_offset): Make static.
+	* dwarf1.c: Add missing prototypes.
+	* dwarf2.c: Add missing prototypes.
+	(struct abbrev_info): Move definition.
+	(struct attr_abbrev, ABBREV_HASH_SIZE, ATTR_ALLOC_CHUNK): Likewise.
+	* elf.c: Add missing prototypes.
+	* elf32-gen.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	(ppc_elf_sort_rela): Use PTR instead of "void *".
+	* elflink.h: Add missing prototypes.  Formatting fixes.
+	* merge.c: Add missing prototypes.
+	(last4_eq): Use PTR instead of "void *".
+	(last_eq): Likewise.
+	* syms.c: Add missing prototypes.
+
 2001-08-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* bfd.c: Fix formatting.

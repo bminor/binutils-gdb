@@ -173,6 +173,72 @@ struct comp_unit
   unsigned char addr_size;
 };
 
+/* This data structure holds the information of an abbrev.  */
+struct abbrev_info
+{
+  unsigned int number;		/* Number identifying abbrev.  */
+  enum dwarf_tag tag;		/* DWARF tag.  */
+  int has_children;		/* Boolean.  */
+  unsigned int num_attrs;	/* Number of attributes.  */
+  struct attr_abbrev *attrs;	/* An array of attribute descriptions.  */
+  struct abbrev_info *next;	/* Next in chain.  */
+};
+
+struct attr_abbrev
+{
+  enum dwarf_attribute name;
+  enum dwarf_form form;
+};
+
+#ifndef ABBREV_HASH_SIZE
+#define ABBREV_HASH_SIZE 121
+#endif
+#ifndef ATTR_ALLOC_CHUNK
+#define ATTR_ALLOC_CHUNK 4
+#endif
+
+static unsigned int read_1_byte PARAMS ((bfd *, char *));
+static int read_1_signed_byte PARAMS ((bfd *, char *));
+static unsigned int read_2_bytes PARAMS ((bfd *, char *));
+static unsigned int read_4_bytes PARAMS ((bfd *, char *));
+static unsigned int read_8_bytes PARAMS ((bfd *, char *));
+static char *read_n_bytes PARAMS ((bfd *, char *, unsigned int));
+static char *read_string PARAMS ((bfd *, char *, unsigned int *));
+static unsigned int read_unsigned_leb128
+  PARAMS ((bfd *, char *, unsigned int *));
+static int read_signed_leb128
+  PARAMS ((bfd *, char *, unsigned int *));
+static bfd_vma read_address PARAMS ((struct comp_unit *, char *));
+static struct abbrev_info *lookup_abbrev
+  PARAMS ((unsigned int, struct abbrev_info **));
+static struct abbrev_info **read_abbrevs
+  PARAMS ((bfd *, unsigned int, struct dwarf2_debug *));
+static char *read_attribute
+  PARAMS ((struct attribute *, struct attr_abbrev *,
+	   struct comp_unit *, char *));
+static void add_line_info
+  PARAMS ((struct line_info_table *, bfd_vma, char *,
+	   unsigned int, unsigned int, int));
+static char *concat_filename PARAMS ((struct line_info_table *, unsigned int));
+static void arange_add PARAMS ((struct comp_unit *, bfd_vma, bfd_vma));
+static struct line_info_table *decode_line_info
+  PARAMS ((struct comp_unit *, struct dwarf2_debug *));
+static boolean lookup_address_in_line_info_table
+  PARAMS ((struct line_info_table *, bfd_vma, const char **, unsigned int *));
+static boolean lookup_address_in_function_table
+  PARAMS ((struct funcinfo *, bfd_vma, const char **));
+static boolean scan_unit_for_functions PARAMS ((struct comp_unit *));
+static bfd_vma find_rela_addend
+  PARAMS ((bfd *, asection *, bfd_size_type, asymbol**));
+static struct comp_unit *parse_comp_unit
+  PARAMS ((bfd *, struct dwarf2_debug *, bfd_vma, unsigned int));
+static boolean comp_unit_contains_address
+  PARAMS ((struct comp_unit *, bfd_vma));
+static boolean comp_unit_find_nearest_line
+  PARAMS ((struct comp_unit *, bfd_vma, const char **, const char **,
+	   unsigned int *, struct dwarf2_debug *));
+static asection *find_debug_info PARAMS ((bfd *, asection *));
+
 /* VERBATIM
    The following function up to the END VERBATIM mark are
    copied directly from dwarf2read.c.  */
@@ -356,30 +422,6 @@ read_address (unit, buf)
       abort ();
     }
 }
-
-/* This data structure holds the information of an abbrev.  */
-struct abbrev_info
-{
-  unsigned int number;		/* Number identifying abbrev.  */
-  enum dwarf_tag tag;		/* DWARF tag.  */
-  int has_children;		/* Boolean.  */
-  unsigned int num_attrs;	/* Number of attributes.  */
-  struct attr_abbrev *attrs;	/* An array of attribute descriptions.  */
-  struct abbrev_info *next;	/* Next in chain.  */
-};
-
-struct attr_abbrev
-{
-  enum dwarf_attribute name;
-  enum dwarf_form form;
-};
-
-#ifndef ABBREV_HASH_SIZE
-#define ABBREV_HASH_SIZE 121
-#endif
-#ifndef ATTR_ALLOC_CHUNK
-#define ATTR_ALLOC_CHUNK 4
-#endif
 
 /* Lookup an abbrev_info structure in the abbrev hash table.  */
 

@@ -38,6 +38,9 @@ static reloc_howto_type *ppc_elf_reloc_type_lookup
 static void ppc_elf_info_to_howto
   PARAMS ((bfd *abfd, arelent *cache_ptr, Elf32_Internal_Rela *dst));
 static void ppc_elf_howto_init PARAMS ((void));
+static int ppc_elf_sort_rela PARAMS ((const PTR, const PTR));
+static boolean ppc_elf_relax_section
+  PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 static bfd_reloc_status_type ppc_elf_addr16_ha_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static boolean ppc_elf_set_private_flags PARAMS ((bfd *, flagword));
@@ -989,8 +992,8 @@ ppc_elf_howto_init ()
 
 static int
 ppc_elf_sort_rela (arg1, arg2)
-     const void *arg1;
-     const void *arg2;
+     const PTR arg1;
+     const PTR arg2;
 {
   const Elf_Internal_Rela **rela1 = (const Elf_Internal_Rela**) arg1;
   const Elf_Internal_Rela **rela2 = (const Elf_Internal_Rela**) arg2;

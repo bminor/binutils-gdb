@@ -1,5 +1,5 @@
 /* DWARF 1 find nearest line (_bfd_dwarf1_find_nearest_line).
-   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
 Written by Gavin Romig-Koch of Cygnus Solutions (gavin@cygnus.com).
 
@@ -125,6 +125,18 @@ struct linenumber {
 
 /* Find the form of an attr, from the attr field.  */
 #define FORM_FROM_ATTR(attr)	((attr) & 0xF)	/* Implicitly specified */
+
+static struct dwarf1_unit *alloc_dwarf1_unit PARAMS ((struct dwarf1_debug *));
+static struct dwarf1_func *alloc_dwarf1_func
+  PARAMS ((struct dwarf1_debug *, struct dwarf1_unit *));
+static boolean parse_die PARAMS ((bfd *, struct die_info *, char *));
+static boolean parse_line_table
+  PARAMS ((struct dwarf1_debug *, struct dwarf1_unit *));
+static boolean parse_functions_in_unit
+  PARAMS ((struct dwarf1_debug *, struct dwarf1_unit *));
+static boolean dwarf1_unit_find_nearest_line
+  PARAMS ((struct dwarf1_debug *, struct dwarf1_unit *, unsigned long,
+	   const char **, const char **, unsigned int *));
 
 /* Return a newly allocated dwarf1_unit.  It should be cleared and
    then attached into the 'stash' at 'stash->lastUnit'.  */

@@ -1,6 +1,6 @@
 /* Generic symbol-table support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000
+   2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -312,6 +312,7 @@ CODE_FRAGMENT
 #include "aout/stab_gnu.h"
 
 static char coff_section_type PARAMS ((const char *));
+static int cmpindexentry PARAMS ((const PTR, const PTR));
 
 /*
 DOCDD

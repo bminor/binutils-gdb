@@ -57,10 +57,16 @@ static INLINE int sym_is_global PARAMS ((bfd *, asymbol *));
 static boolean elf_map_symbols PARAMS ((bfd *));
 static bfd_size_type get_program_header_size PARAMS ((bfd *));
 static boolean elfcore_read_notes PARAMS ((bfd *, bfd_vma, bfd_vma));
-static boolean elf_find_function PARAMS ((bfd *, asection *,
-                                         asymbol **,
-                                         bfd_vma, const char **,
-                                         const char **));
+static boolean elf_find_function PARAMS ((bfd *, asection *, asymbol **,
+					  bfd_vma, const char **,
+					  const char **));
+static int elfcore_make_pid PARAMS ((bfd *));
+static boolean elfcore_maybe_make_sect PARAMS ((bfd *, char *, asection *));
+static boolean elfcore_make_note_pseudosection PARAMS ((bfd *, char *,
+							Elf_Internal_Note *));
+static boolean elfcore_grok_prfpreg PARAMS ((bfd *, Elf_Internal_Note *));
+static boolean elfcore_grok_prxfpreg PARAMS ((bfd *, Elf_Internal_Note *));
+static boolean elfcore_grok_note PARAMS ((bfd *, Elf_Internal_Note *));
 
 /* Swap version information in and out.  The version information is
    currently size independent.  If that ever changes, this code will
@@ -5424,6 +5430,8 @@ _bfd_elfcore_make_pseudosection (abfd, name, size, filepos)
 */
 
 #if defined (HAVE_PRSTATUS_T)
+static boolean elfcore_grok_prstatus PARAMS ((bfd *, Elf_Internal_Note *));
+
 static boolean
 elfcore_grok_prstatus (abfd, note)
      bfd *abfd;
@@ -5569,6 +5577,7 @@ _bfd_elfcore_strndup (abfd, start, max)
 }
 
 #if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
+static boolean elfcore_grok_psinfo PARAMS ((bfd *, Elf_Internal_Note *));
 
 static boolean
 elfcore_grok_psinfo (abfd, note)
