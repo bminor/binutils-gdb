@@ -1,3 +1,12 @@
+Wed Aug  7 11:50:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (tc_gen_reloc): Accept all relocs; remove
+	#ifndef OBJ_ELF lines.  From Eric Valette <valette@crf.canon.fr>.
+	(tc_gen_reloc): If out of memory call as_fatal rather than
+	assert.  If no howto found, call as_bad_where rather than
+	as_fatal.  Change the error message slightly.  Set howto to a
+	non-NULL value in order to keep going.
+
 start-sanitize-d10v
 Tue Aug  6 12:58:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

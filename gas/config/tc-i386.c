@@ -1,5 +1,5 @@
 /* i386.c -- Assemble code for the Intel 80386
-   Copyright (C) 1989, 1991, 1992, 1993 Free Software Foundation.
+   Copyright (C) 1989, 91, 92, 93, 94, 95, 1996 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -14,8 +14,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 /*
   Intel 80386 machine specific gas.
@@ -1154,8 +1155,8 @@ md_assemble (line)
 	for (op = 0; op < MAX_OPERANDS; op++)
 	  if (i.types[op] & Reg)
 	    {
-	      i.suffix = ((i.types[op] == Reg8) ? BYTE_OPCODE_SUFFIX :
-			  (i.types[op] == Reg16) ? WORD_OPCODE_SUFFIX :
+	      i.suffix = ((i.types[op] & Reg8) ? BYTE_OPCODE_SUFFIX :
+			  (i.types[op] & Reg16) ? WORD_OPCODE_SUFFIX :
 			  DWORD_OPCODE_SUFFIX);
 	    }
       }
@@ -1163,26 +1164,33 @@ md_assemble (line)
 	     && i.reg_operands != 0
 	     && (i.types[i.operands - 1] & Reg) != 0)
       {
-	int want;
+	int bad;
 
 	/* If the last operand is a register, make sure it is
            compatible with the suffix.  */
 
+	bad = 0;
 	switch (i.suffix)
 	  {
 	  default:
 	    abort ();
 	  case BYTE_OPCODE_SUFFIX:
-	    want = Reg8;
+	    /* If this is an eight bit register, it's OK.  If it's the
+               16 or 32 bit version of an eight bit register, we will
+               just use the low portion, and that's OK too.  */
+	    if ((i.types[i.operands - 1] & Reg8) == 0
+		&& i.regs[i.operands - 1]->reg_num >= 4)
+	      bad = 1;
 	    break;
 	  case WORD_OPCODE_SUFFIX:
-	    want = Reg16;
-	    break;
 	  case DWORD_OPCODE_SUFFIX:
-	    want = Reg32;
-	    break;
+	    /* We don't insist on the presence or absence of the e
+               prefix on the register, but we reject eight bit
+               registers.  */
+	    if ((i.types[i.operands - 1] & Reg8) != 0)
+	      bad = 1;
 	  }
-	if ((i.types[i.operands - 1] & want) == 0)
+	if (bad)
 	  as_bad ("register does not match opcode suffix");
       }
 
@@ -2595,16 +2603,6 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
     }
 }
 
-void				/* Knows about order of bytes in address. */
-md_number_to_chars (con, value, nbytes)
-     char con[];		/* Return 'nbytes' of chars here. */
-     valueT value;		/* The value of the bits. */
-     int nbytes;		/* Number of bytes in the output. */
-{
-  number_to_chars_littleendian (con, value, nbytes);
-}
-
-
 /* Apply a fixup (fixS) to segment data, once it has been determined
    by our caller that we have all the info we need to fix it up.
 
@@ -2956,15 +2954,11 @@ tc_gen_reloc (section, fixp)
     default:
       switch (F (fixp->fx_size, fixp->fx_pcrel))
 	{
-#ifndef OBJ_ELF
 	  MAP (1, 0, BFD_RELOC_8);
 	  MAP (2, 0, BFD_RELOC_16);
-#endif
 	  MAP (4, 0, BFD_RELOC_32);
-#ifndef OBJ_ELF
 	  MAP (1, 1, BFD_RELOC_8_PCREL);
 	  MAP (2, 1, BFD_RELOC_16_PCREL);
-#endif
 	  MAP (4, 1, BFD_RELOC_32_PCREL);
 	default:
 	  as_bad ("Can not do %d byte %srelocation", fixp->fx_size,
@@ -2980,7 +2974,8 @@ tc_gen_reloc (section, fixp)
     code = BFD_RELOC_386_GOTPC;
 
   rel = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
-  assert (rel != 0);
+  if (rel == NULL)
+    as_fatal ("Out of memory");
   rel->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   if (fixp->fx_pcrel)
@@ -2989,15 +2984,14 @@ tc_gen_reloc (section, fixp)
     rel->addend = 0;
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, code);
-  if (!rel->howto)
+  if (rel->howto == NULL)
     {
-      const char *name;
-
-      name = S_GET_NAME (fixp->fx_addsy);
-      if (name == NULL)
-	name = "<unknown>";
-      as_fatal ("Cannot generate relocation type for symbol %s, code %s",
-		name, bfd_get_reloc_code_name (code));
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+		    "Cannot represent relocation type %s",
+		    bfd_get_reloc_code_name (code));
+      /* Set howto to a garbage value so that we can keep going.  */
+      rel->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);
+      assert (rel->howto != NULL);
     }
 
   return rel;
