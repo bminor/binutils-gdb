@@ -1,5 +1,6 @@
 /* ldlang.h - linker command language support
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    
    This file is part of GLD, the Gnu Linker.
    
@@ -383,7 +384,8 @@ extern struct memory_region_struct *lang_memory_region_lookup
 extern struct memory_region_struct *lang_memory_region_default
   PARAMS ((asection *));
 extern void lang_map PARAMS ((void));
-extern void lang_set_flags PARAMS ((lang_memory_region_type *, const char *));
+extern void lang_set_flags PARAMS ((lang_memory_region_type *, const char *,
+				    int));
 extern void lang_add_output PARAMS ((const char *, int from_script));
 extern void lang_enter_output_section_statement
   PARAMS ((const char *output_section_statement_name,

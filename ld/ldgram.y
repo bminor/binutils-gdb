@@ -1,5 +1,5 @@
 /* A YACC grammer to parse a superset of the AT&T linker scripting languaue.
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
@@ -132,7 +132,7 @@ static int error_index;
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
 %token ALIGNMOD AT PROVIDE
-%type <token> assign_op atype
+%type <token> assign_op atype attributes_opt
 %type <name>  filename
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD ASSERT_K
 %token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE REL
@@ -610,15 +610,24 @@ length_spec:
 					       "length",
 					       lang_first_phase_enum);
 		}
-	
+	;
 
 attributes_opt:
-		  '(' NAME ')'
-			{
-			lang_set_flags(region, $2);
-			}
-	|
-  
+		/* empty */
+		  { /* dummy action to avoid bison 1.25 error message */ }
+	|	'(' attributes_list ')'
+	;
+
+attributes_list:
+		attributes_string
+	|	attributes_list attributes_string
+	;
+
+attributes_string:
+		NAME
+		  { lang_set_flags (region, $1, 0); }
+	|	'!' NAME
+		  { lang_set_flags (region, $2, 1); }
 	;
 
 startup:

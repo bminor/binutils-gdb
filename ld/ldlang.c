@@ -3255,21 +3255,18 @@ lang_place_orphans ()
 
 
 void
-lang_set_flags (ptr, flags)
+lang_set_flags (ptr, flags, invert)
      lang_memory_region_type *ptr;
      CONST char *flags;
+     int invert;
 {
-  flagword *ptr_flags = &ptr->flags;
+  flagword *ptr_flags;
 
-  ptr->flags = ptr->not_flags = 0;
+  ptr_flags = invert ? &ptr->not_flags : &ptr->flags;
   while (*flags)
     {
       switch (*flags)
 	{
-	case '!':
-	  ptr_flags = (ptr_flags == &ptr->flags) ? &ptr->not_flags : &ptr->flags;
-	  break;
-
 	case 'A': case 'a':
 	  *ptr_flags |= SEC_ALLOC;
 	  break;

@@ -1,3 +1,12 @@
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	From Thomas Zenker <thz@lennartz-electronic.de>:
+	* ldgram.y (attributes_opt): Use attributes_list instead of NAME.
+	(attributes_list, attributes_string): New nonterminals.
+	* ldlang.c (lang_set_flags): Add invert parameter.  Don't handle
+	'!'.
+	* ldlang.c (lang_set_flags): Update declaration.
+
 1999-06-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_after_parse): Don't add
