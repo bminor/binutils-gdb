@@ -923,8 +923,8 @@ _fi__(_GENERIC__)
 @itemx -n
 Do not execute commands from any @file{_GDBINIT__} initialization files.
 Normally, the commands in these files are executed after all the
-command options and arguments have been processed.  @xref{Command
-Files}.
+command options and arguments have been processed.  
+@xref{Command Files}.
 
 @item -quiet
 @itemx -q
@@ -1991,8 +1991,8 @@ there is another enabled breakpoint at the same address.  (In that
 case, _GDBN__ might see the other breakpoint first and stop the program
 without checking the condition of this one.)  Note that breakpoint
 commands are usually more convenient and flexible for the purpose of
-performing side effects when a breakpoint is reached (@pxref{Break
-Commands}).
+performing side effects when a breakpoint is reached 
+(@pxref{Break Commands}).
 
 Break conditions can be specified when a breakpoint is set, by using
 @samp{if} in the arguments to the @code{break} command.  @xref{Set Breaks}.
@@ -2369,9 +2369,9 @@ argument.
 @item u @var{location}
 Continue running the program until either the specified location is
 reached, or the current stack frame returns.  @var{location}
-is any of the forms of argument acceptable to @code{break} (@pxref{Set
-Breaks}).  This form of the command uses breakpoints, and hence is
-quicker than @code{until} without an argument.
+is any of the forms of argument acceptable to @code{break} 
+(@pxref{Set Breaks}).  This form of the command uses breakpoints, and
+hence is quicker than @code{until} without an argument.
 
 @item stepi
 @itemx si
@@ -2513,7 +2513,7 @@ you are interested in.
 
 When the program stops, _GDBN__ automatically selects the currently executing
 frame and describes it briefly as the @code{frame} command does
-(@pxref{Frame Info, Info}).
+(@pxref{Frame Info}).
 
 @menu
 * Frames::                      Stack Frames
@@ -2657,14 +2657,14 @@ impossible for _GDBN__ to assign numbers properly to all frames.  In
 addition, this can be useful when the program has multiple stacks and
 switches between them.
 
-_if_(_SPARC__)
+_if__(_SPARC__)
 On the SPARC architecture, @code{frame} needs two addresses to
 select an arbitrary frame: a frame pointer and a stack pointer.  
 @c note to future updaters: this is conditioned on a flag
 @c FRAME_SPECIFICATION_DYADIC in the tm-*.h files, currently only used
 @c by SPARC, hence the specific attribution.  Generalize or list all
 @c possibilities if more supported machines start doing this.
-_fi_(_SPARC__)
+_fi__(_SPARC__)
 
 @item up @var{n}
 @kindex up
@@ -3431,9 +3431,10 @@ string or instruction examined will start in the right place.
 When the @code{print} command shows a value that resides in memory,
 @code{print} also sets the default address for the @code{x} command.
 @code{info line} also sets the default for @code{x}, to the address of
-the start of the machine code for the specified line (@pxref{Machine
-Code}), and @code{info breakpoints} sets it to the address of the last
-breakpoint listed (@pxref{Set Breaks}).
+the start of the machine code for the specified line 
+(@pxref{Machine Code}), 
+and @code{info breakpoints} sets it to the address of the last
+breakpoint listed (@pxref{Set Breaks}).@refill
 
 When you use @key{RET} to repeat an @code{x} command, the address
 specified previously (if any) is ignored, so that the repeated command
@@ -5506,9 +5507,9 @@ the registers used for returning values of functions.
 
 The @code{return} command does not resume execution; it leaves the
 program stopped in the state that would exist if the function had just
-returned.  In contrast, the @code{finish} command (@pxref{Continuing and
-Stepping}) resumes execution until the selected stack frame returns
-naturally.@refill
+returned.  In contrast, the @code{finish} command 
+(@pxref{Continuing and Stepping}) 
+resumes execution until the selected stack frame returns naturally.@refill
 
 @node     Calling, Patching, Returning, Altering
 @section Calling your Program's Functions
