@@ -531,7 +531,7 @@ case "${target}" in
     ;;    
 esac
 
-targets that need a second pass
+# targets that need a second pass
 case "${target}" in
   *-gm-magic*)
     noconfigdirs="$noconfigdirs libgloss"
