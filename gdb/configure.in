@@ -195,7 +195,7 @@ sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-vxworks*)	gdb_target=sparc-un ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
-sparclite-*-*)		gdb_target=sun4os4 ;;
+sparclite*-*-*)		gdb_target=sun4os4 ;;
 
 tahoe-*-*)		gdb_target=tahoe ;;
 vax-*-*)		gdb_target=vax ;;
