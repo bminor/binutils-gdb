@@ -1,5 +1,7 @@
 2002-12-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* PROBLEMS: Delete reference to PR gdb/725.
+	
 	* MAINTAINERS (gdb.c++): Add David Carlton.
 
 2002-12-09  David Carlton  <carlton@math.stanford.edu>
