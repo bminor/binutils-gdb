@@ -1,3 +1,7 @@
+2004-11-11  Andreas Schwab  <schwab@suse.de>
+
+	* sim_calls.c: Include "libiberty.h".
+
 2004-09-24  Ian Lance Taylor <ian@wasabisystems.com>
 
 	Committed by Andrew Cagney.

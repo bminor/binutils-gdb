@@ -40,6 +40,7 @@
 #endif
 #endif
 
+#include "libiberty.h"
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
