@@ -1,3 +1,13 @@
+Fri May 15 15:59:04 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.h (cgen_hw_lookup_by_name): Renamed from cgen_hw_lookup.
+	(cgen_hw_lookup_by_num): Declare.
+
+Thu May  7 09:27:58 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* mips.h (OP_{SH,MASK}_CODE2): Added "q" operand format for lower
+	ten bits of MIPS ISA1 "break" instruction, and for "sdbbp"
+
 Thu May  7 02:14:08 1998  Doug Evans  <devans@charmed.cygnus.com>
 
 	* cgen.h (cgen_asm_init_parse): Delete.
@@ -40,7 +50,7 @@ Mon Apr  6 17:33:31 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* dvp.h (dvp_expand_macro): Declare.
 	(vif_macros,vif_macro_count): Declare.
 
-start-sanitize-sky
+end-sanitize-sky
 Fri Apr  3 12:04:48 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386.h: Remove NoModrm flag from all insns: it's never checked.
