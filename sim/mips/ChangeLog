@@ -1,3 +1,38 @@
+Tue Nov 26 11:53:12 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Add support for mips16 (16 bit MIPS implementation):
+	* gencode.c (inst_type): Add mips16 instruction encoding types.
+	(GETDATASIZEINSN): Define.
+	(MIPS_DECODE): Add REG flag to dsllv, dsrav, and dsrlv.  Add
+	jalx.  Add LEFT flag to mfhi and mflo.  Add RIGHT flag to mthi and
+	mtlo.
+	(MIPS16_DECODE): New table, for mips16 instructions.
+	(bitmap_val): New static function.
+	(struct mips16_op): Define.
+	(mips16_op_table): New table, for mips16 operands.
+	(build_mips16_operands): New static function.
+	(process_instructions): If PC is odd, decode a mips16
+	instruction.  Break out instruction handling into new
+	build_instruction function.
+	(build_instruction): New static function, broken out of
+	process_instructions.  Check modifiers rather than flags for SHIFT
+	bit count and m[ft]{hi,lo} direction.
+	(usage): Pass program name to fprintf.
+	(main): Remove unused variable this_option_optind.  Change
+	``*loptarg++'' to ``loptarg++''.
+	(my_strtoul): Parenthesize && within ||.
+	* interp.c (sim_trace): If tracefh is NULL, set it to stderr.
+	(LoadMemory): Accept a halfword pAddr if vAddr is odd.
+	(simulate): If PC is odd, fetch a 16 bit instruction, and
+	increment PC by 2 rather than 4.
+	* configure.in: Add case for mips16*-*-*.
+	* configure: Rebuild.
+
+Fri Nov 22 08:49:36 1996  Mark Alexander  <marka@cygnus.com>
+
+	* interp.c: Allow -t to enable tracing in standalone simulator.
+	Fix garbage output in trace file and error messages.
+
 Wed Nov 20 01:54:37 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in: Delete stuff moved to ../common/Make-common.in.

@@ -7,6 +7,7 @@ SIM_AC_COMMON
 # Ensure a reasonable default simulator is constructed:
 case "${target}" in
   mips64*-*-*)          SIMCONF="-mips0 --warnings";;
+  mips16*-*-*)          SIMCONF="-mips0 --warnings";;
   mips*-*-*)            SIMCONF="-mips2 --warnings";;
   *)                    SIMCONF="-mips0 --warnings";;
 esac

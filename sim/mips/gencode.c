@@ -128,7 +128,7 @@
    access Rn in an instruction immediately following an Rn update
    "WARNING : Invalid value read". The simulator engine is designed
    that the previous value is read in such cases, to allow programs
-   that make use of this feature to execute. *
+   that make use of this feature to execute. */
 /* If MIPS II or later, attempting to read a register before the
    update has completed will generate a "WARNING : Processor stall"
    message (since the processor will lock the pipeline until the value
@@ -250,7 +250,9 @@ typedef enum {
  COP1,
  COP1X,
  COP1S, /* These instructions live in the reserved FP format values: 0..15,18-19,22-31 */
- UNKNOWN
+
+ /* mips16 encoding types.  */
+ I, RI, RR, RRI, RRR, RRI_A, ISHIFT, I8, I8_MOVR32, I8_MOV32R, I64, RI64
 } inst_type;
 
 /* Main instruction families: */
@@ -310,6 +312,7 @@ typedef enum {
 
 /* Shorthand to get the size field from the flags value: */
 #define GETDATASIZE()   ((MIPS_DECODE[loop].flags >> SIM_SH_SIZE) & SIM_MASK_SIZE)
+#define GETDATASIZEINSN(i) (((i)->flags >> SIM_SH_SIZE) & SIM_MASK_SIZE)
 
 /* The rest are single bit flags: */
 #define MULTIPLY        (1 << 3)        /* actually FP multiply ADD/SUB modifier */
@@ -428,13 +431,13 @@ struct instruction MIPS_DECODE[] = {
  {"DMULTU",  3,"000000sssssggggg0000000000011101",SPECIAL,MUL,      (DOUBLEWORD | UNSIGNED | HI | LO)},
  {"DMxC1",   3,"01000100x01kkkkkvvvvv00000000000",COP1S,  FPMOVEC,  (FP | DOUBLEWORD)},
  {"DSLL",    3,"00000000000gggggdddddaaaaa111000",SPECIAL,SHIFT,    (DOUBLEWORD | LEFT | LOGICAL)},
- {"DSLLV",   3,"000000sssssgggggddddd00000010100",SPECIAL,SHIFT,    (DOUBLEWORD | LEFT | LOGICAL)},
+ {"DSLLV",   3,"000000sssssgggggddddd00000010100",SPECIAL,SHIFT,    (DOUBLEWORD | LEFT | LOGICAL | REG)},
  {"DSLL32",  3,"00000000000gggggdddddaaaaa111100",SPECIAL,SHIFT,    (DOUBLEWORD | LEFT | LOGICAL | HI32)}, /* rd = rt << (sa + 32) */
  {"DSRA",    3,"00000000000gggggdddddaaaaa111011",SPECIAL,SHIFT,    (DOUBLEWORD | RIGHT | ARITHMETIC)},
- {"DSRAV",   3,"000000sssssgggggddddd00000010111",SPECIAL,SHIFT,    (DOUBLEWORD | RIGHT | ARITHMETIC)},
+ {"DSRAV",   3,"000000sssssgggggddddd00000010111",SPECIAL,SHIFT,    (DOUBLEWORD | RIGHT | ARITHMETIC | REG)},
  {"DSRA32",  3,"00000000000gggggdddddaaaaa111111",SPECIAL,SHIFT,    (DOUBLEWORD | RIGHT | ARITHMETIC | HI32)}, /* rd = rt >> (sa + 32) */
  {"DSRL",    3,"00000000000gggggdddddaaaaa111010",SPECIAL,SHIFT,    (DOUBLEWORD | RIGHT | LOGICAL)},
- {"DSRLV",   3,"000000sssssgggggddddd00000010110",SPECIAL,SHIFT,    (DOUBLEWORD | RIGHT | LOGICAL)},
+ {"DSRLV",   3,"000000sssssgggggddddd00000010110",SPECIAL,SHIFT,    (DOUBLEWORD | RIGHT | LOGICAL | REG)},
  {"DSRL32",  3,"00000000000gggggdddddaaaaa111110",SPECIAL,SHIFT,    (DOUBLEWORD | RIGHT | LOGICAL | HI32)},
  {"DSUB",    3,"000000sssssgggggddddd00000101110",SPECIAL,SUB,      (DOUBLEWORD)},
  {"DSUBU",   3,"000000sssssgggggddddd00000101111",SPECIAL,SUB,      (DOUBLEWORD | UNSIGNED)},
@@ -443,6 +446,7 @@ struct instruction MIPS_DECODE[] = {
  {"J",       1,"000010jjjjjjjjjjjjjjjjjjjjjjjjjj",NORMAL, JUMP,     (NONE)},			/* NOTE: boundary case due to delay slot address being used */
  {"JAL",     1,"000011jjjjjjjjjjjjjjjjjjjjjjjjjj",NORMAL, JUMP,     (LINK)},			/* NOTE: boundary case due to delay slot address being used */
  {"JALR",    1,"000000sssss00000ddddd00000001001",SPECIAL,JUMP,     (LINK | REG)},
+ {"JALX",    1,"011101jjjjjjjjjjjjjjjjjjjjjjjjjj",NORMAL, JUMP,     (LINK | NOT)},
  {"JR",      1,"000000sssss000000000000000001000",SPECIAL,JUMP,     (NONE)}, /* need to check PC as part of instruction fetch */
  {"LB",      1,"100000ssssstttttyyyyyyyyyyyyyyyy",NORMAL, LOAD,     (BYTE | SIGNEXTEND)},	/* NOTE: "i" rather than "o" because BYTE addressing is allowed */
  {"LBU",     1,"100100ssssstttttyyyyyyyyyyyyyyyy",NORMAL, LOAD,     (BYTE)},	                /* NOTE: See "LB" comment */
@@ -467,10 +471,10 @@ struct instruction MIPS_DECODE[] = {
  {"MADD16",  (ARCH_VR4100 | 3),"000000sssssggggg0000000000101000",SPECIAL,MADD16,   (WORD | HI | LO)},
  {"MADD.D",  4,"010011bbbbbkkkkkvvvvvrrrrr100001",COP1X,  FPADD,    (FP | MULTIPLY | DOUBLE)},
  {"MADD.S",  4,"010011bbbbbkkkkkvvvvvrrrrr100000",COP1X,  FPADD,    (FP | MULTIPLY | SINGLE)},
- {"MFHI",    1,"0000000000000000ddddd00000010000",SPECIAL,MOVE,     (HI)},    /* with following, from and to denoted by usage of "s" or "d" */
- {"MFLO",    1,"0000000000000000ddddd00000010010",SPECIAL,MOVE,     (LO)},
- {"MTHI",    1,"000000sssss000000000000000010001",SPECIAL,MOVE,     (HI)},
- {"MTLO",    1,"000000sssss000000000000000010011",SPECIAL,MOVE,     (LO)},
+ {"MFHI",    1,"0000000000000000ddddd00000010000",SPECIAL,MOVE,     (HI | LEFT)},    /* with following, from and to denoted by usage of LEFT or RIGHT */
+ {"MFLO",    1,"0000000000000000ddddd00000010010",SPECIAL,MOVE,     (LO | LEFT)},
+ {"MTHI",    1,"000000sssss000000000000000010001",SPECIAL,MOVE,     (HI | RIGHT)},
+ {"MTLO",    1,"000000sssss000000000000000010011",SPECIAL,MOVE,     (LO | RIGHT)},
  {"MOV",     1,"01000110mmm00000vvvvvrrrrr000110",COP1,   FPMOVE,   (FP)},
  {"MOVN",    4,"000000sssssgggggddddd00000001011",SPECIAL,MOVE,     (NOT | EQ)},
  {"MOVN",    4,"01000110mmmgggggvvvvvrrrrr010011",COP1,   FPMOVE,   (FP | NOT | EQ)},
@@ -549,6 +553,100 @@ struct instruction MIPS_DECODE[] = {
  {"CACHE",   3,"101111sssssnnnnnyyyyyyyyyyyyyyyy",NORMAL, CACHE,    (NONE)},
  {"<INT>",   1,"111011sssssgggggyyyyyyyyyyyyyyyy",NORMAL, RSVD,     (NONE)},
 };
+
+static const struct instruction MIPS16_DECODE[] = {
+{"ADDIU",   1, "01000xxxddd04444",  RRI_A,   ADD,     WORD | WORD32 },
+{"ADDIU8",  1, "01001wwwkkkkkkkk",  RI,      ADD,     WORD | WORD32 },
+{"ADJSP",   1, "01100011KKKKKKKKS", I8,      ADD,     WORD | WORD32 },
+{"ADDIUPC", 1, "00001dddAAAAAAAAP", RI,      ADD,     WORD | WORD32 },
+{"ADDIUSP", 1, "00000dddAAAAAAAAs", RI,      ADD,     WORD | WORD32 },
+{"ADDU",    1, "11100xxxyyyddd01",  RRR,     ADD,     WORD | WORD32 },
+{"AND",	    1, "11101wwwyyy01100",  RR,      AND,     NONE },
+{"B",	    1, "00010qqqqqqqqqqqzZ", I,      BRANCH,  EQ },
+{"BEQZ",    1, "00100xxxppppppppz", RI,      BRANCH,  EQ },
+{"BNEZ",    1, "00101xxxppppppppz", RI,      BRANCH,  NOT | EQ },
+{"BREAK",   1, "01100??????00101",  RR,      BREAK,   NOARG },
+{"BTEQZ",   1, "01100000pppppppptz", I8,     BRANCH,  EQ },
+{"BTNEZ",   1, "01100001pppppppptz", I8,     BRANCH,  NOT | EQ },
+{"CMP",     1, "11101xxxyyy01010T", RR,      XOR,     NONE },
+{"CMPI",    1, "01110xxxUUUUUUUUT", RI,      XOR,     NONE },
+{"DADDIU",  3, "01000xxxddd14444",  RRI_A,   ADD,     DOUBLEWORD },
+{"DADDIU5", 3, "11111101wwwjjjjj",  RI64,    ADD,     DOUBLEWORD },
+{"DADJSP",  3, "11111011KKKKKKKKS", I64,     ADD,     DOUBLEWORD },
+{"DADIUPC", 3, "11111110dddEEEEEP", RI64,    ADD,     DOUBLEWORD },
+{"DADIUSP", 3, "11111111dddEEEEEs", RI64,    ADD,     DOUBLEWORD },
+{"DADDU",   3, "11100xxxyyyddd00",  RRR,     ADD,     DOUBLEWORD },
+{"DDIV",    3, "11101xxxyyy11110",  RR,      DIV,     DOUBLEWORD | HI | LO },
+{"DDIVU",   3, "11101xxxyyy11111",  RR,      DIV,     DOUBLEWORD | UNSIGNED | HI | LO },
+{"DIV",	    1, "11101xxxyyy11010",  RR,      DIV,     WORD | WORD32 | SIGNEXTEND | HI | LO },
+{"DIVU",    1, "11101xxxyyy11011",  RR,      DIV,     WORD | WORD32 | UNSIGNED | SIGNEXTEND | HI | LO },
+{"DMULT",   3, "11101xxxyyy11100",  RR,      MUL,     DOUBLEWORD | HI | LO },
+{"DMULTU",  3, "11101xxxyyy11101",  RR,      MUL,     DOUBLEWORD | UNSIGNED | HI | LO },
+{"DSLL",    3, "00110dddyyy[[[01",  ISHIFT,  SHIFT,   DOUBLEWORD | LEFT | LOGICAL },
+{"DSLLV",   3, "11101xxxvvv10100",  RR,      SHIFT,   DOUBLEWORD | LEFT | LOGICAL | REG },
+{"DSRA",    3, "11101]]]vvv10011",  RR,      SHIFT,   DOUBLEWORD | RIGHT | ARITHMETIC },
+{"DSRAV",   3, "11101xxxvvv10111",  RR,      SHIFT,   DOUBLEWORD | RIGHT | ARITHMETIC | REG},
+{"DSRL",    3, "11101]]]vvv01000",  RR,      SHIFT,   DOUBLEWORD | RIGHT | LOGICAL },
+{"DSRLV",   3, "11101xxxvvv10110",  RR,      SHIFT,   DOUBLEWORD | RIGHT | LOGICAL | REG},
+{"DSUBU",   3, "11100xxxyyyddd10",  RRR,     SUB,     DOUBLEWORD | UNSIGNED},
+#if 0
+  /* FIXME: Should we handle these ourselves, or should we require an
+     emulation routine?  */
+{"EXIT",    1, "1110111100001000",  RR,      BREAK,   EXIT },
+{"ENTRY",   1, "11101??????01000",  RR,      BREAK,   ENTRY },
+#endif
+{"EXTEND",  1, "11110eeeeeeeeeee",  I,       RSVD,    NOARG },
+{"JALR",    1, "11101xxx01000000R", RR,      JUMP,    LINK | REG },
+{"JAL",     1, "00011aaaaaaaaaaa",  I,       JUMP,    LINK },
+{"JR",      1, "11101xxx00000000",  RR,      JUMP,    NONE },
+{"JRRA",    1, "1110100000100000r", RR,      JUMP,    NONE },
+{"LB",      1, "10000xxxddd55555",  RRI,     LOAD,    BYTE | SIGNEXTEND },
+{"LBU",     1, "10100xxxddd55555",  RRI,     LOAD,    BYTE },
+{"LD",      3, "00111xxxdddDDDDD",  RRI,     LOAD,    DOUBLEWORD },
+{"LDPC",    3, "11111100dddDDDDDP", RI64,    LOAD,    DOUBLEWORD },
+{"LDSP",    3, "11111000dddDDDDDs", RI64,    LOAD,    DOUBLEWORD },
+{"LH",      1, "10001xxxdddHHHHH",  RRI,     LOAD,    HALFWORD | SIGNEXTEND },
+{"LHU",     1, "10101xxxdddHHHHH",  RRI,     LOAD,    HALFWORD },
+{"LI",      1, "01101dddUUUUUUUUZ", RI,      OR,      NONE },
+{"LW",      1, "10011xxxdddWWWWW",  RRI,     LOAD,    WORD | SIGNEXTEND },
+{"LWPC",    1, "10110dddVVVVVVVVP", RI,      LOAD,    WORD | SIGNEXTEND },
+{"LWSP",    1, "10010dddVVVVVVVVs", RI,      LOAD,    WORD | SIGNEXTEND },
+{"LWU",     1, "10111xxxdddWWWWW",  RRI,     LOAD,    WORD },
+{"MFHI",    1, "11101ddd00010000",  RR,      MOVE,    HI | LEFT },
+{"MFLO",    1, "11101ddd00010010",  RR,      MOVE,    LO | LEFT },
+{"MOVR32",  1, "01100111dddXXXXXz", I8_MOVR32, OR,    NONE },
+{"MOV32R",  1, "01100101YYYYYxxxz", I8_MOV32R, OR,    NONE },
+{"MULT",    1, "11101xxxyyy11000",  RR,      MUL,     WORD | WORD32 | HI | LO},
+{"MULTU",   1, "11101xxxyyy11001",  RR,      MUL,     WORD | WORD32 | UNSIGNED | HI | LO },
+{"NEG",     1, "11101dddyyy01011Z", RR,      SUB,     WORD },
+{"NOT",     1, "11101dddyyy01111Z", RR,      OR,      NOT },
+{"OR",      1, "11101wwwyyy01101",  RR,      OR,      NONE },
+{"SB",      1, "11000xxxyyy55555",  RRI,     STORE,   BYTE },
+{"SD",      3, "01111xxxyyyDDDDD",  RRI,     STORE,   DOUBLEWORD },
+{"SDSP",    3, "11111001yyyDDDDDs", RI64,    STORE,   DOUBLEWORD },
+{"SDRASP",  3, "11111010CCCCCCCCsQ", I64,    STORE,   DOUBLEWORD },
+{"SH",      1, "11001xxxyyyHHHHH",  RRI,     STORE,   HALFWORD },
+{"SLL",     1, "00110dddyyy<<<00",  ISHIFT,  SHIFT,   WORD | LEFT | LOGICAL },
+{"SLLV",    1, "11101xxxvvv00100",  RR,      SHIFT,   WORD | LEFT | LOGICAL | REG},
+{"SLT",     1, "11101xxxyyy00010T", RR,      SET,     LT },
+{"SLTI",    1, "01010xxx88888888T", RI,      SET,     LT },
+{"SLTU",    1, "11101xxxyyy00011T", RR,      SET,     LT | UNSIGNED },
+{"SLTIU",   1, "01011xxx88888888T", RI,      SET,     LT | UNSIGNED },
+{"SRA",     1, "00110dddyyy<<<11",  ISHIFT,  SHIFT,   WORD | WORD32 | RIGHT | ARITHMETIC },
+{"SRAV",    1, "11101xxxvvv00111",  RR,      SHIFT,   WORD | WORD32 | RIGHT | ARITHMETIC | REG },
+{"SRL",     1, "00110dddyyy<<<10",  ISHIFT,  SHIFT,   WORD | WORD32 | RIGHT | LOGICAL },
+{"SRLV",    1, "11101xxxvvv00110",  RR,      SHIFT,   WORD | WORD32 | RIGHT | LOGICAL | REG },
+{"SUBU",    1, "11100xxxyyyddd11",  RRR,     SUB,     WORD | WORD32 },
+{"SW",      1, "11011xxxyyyWWWWW",  RRI,     STORE,   WORD },
+{"SWSP",    1, "11010yyyVVVVVVVVs", RI,      STORE,   WORD },
+{"SWRASP",  1, "01100010VVVVVVVVQs", RI,     STORE,   WORD },
+{"XOR",     1, "11101wwwyyy01110",  RR,      XOR,     NONE }
+};
+
+static int bitmap_val PARAMS ((const char *, int, int));
+static void build_mips16_operands PARAMS ((const char *));
+static void build_instruction
+  PARAMS ((int, unsigned int, int, const struct instruction *));
 
 /*---------------------------------------------------------------------------*/
 
@@ -636,6 +734,35 @@ convert_bitmap(bitmap,onemask,zeromask,dontmask)
  return(flags);
 }
 
+/* Get the value of a 16 bit bitstring for a given shift count and
+   number of bits.  */
+
+static int
+bitmap_val (bitmap, shift, bits)
+     const char *bitmap;
+     int shift;
+     int bits;
+{
+  const char *s;
+  int ret;
+
+  ret = 0;
+  s = bitmap + 16 - shift - bits;
+  for (; bits > 0; --bits)
+    {
+      ret <<= 1;
+      if (*s == '0')
+	;
+      else if (*s == '1')
+	ret |= 1;
+      else
+	abort ();
+      ++s;
+    }
+
+  return ret;
+}
+
 /*---------------------------------------------------------------------------*/
 
 static void
@@ -674,6 +801,286 @@ build_operands(flags)
    }
 
  return;
+}
+
+/* The mips16 operand table.  */
+
+struct mips16_op
+{
+  /* The character which appears in the bitmap string.  */
+  int type;
+  /* The type of the variable in the simulator.  */
+  const char *vartype;
+  /* The name of the variable in the simulator.  */
+  const char *name;
+  /* The number of bits.  */
+  int nbits;
+  /* The number of bits when extended (zero if can not be extended).  */
+  int extbits;
+  /* The amount by which the short form is shifted when it is used;
+     for example, the sw instruction has a shift count of 2.  */
+  int shift;
+  /* Flags.  */
+  int flags;
+};
+
+/* Flags which appears in the mips16 operand table.  */
+
+/* Whether this is a mips16 register index.  */
+#define MIPS16_REG16 (0x1)
+/* Whether this is a register value.  */
+#define MIPS16_REGVAL (0x2)
+/* Whether this is a swapped mips32 register index (MOV32R) */
+#define MIPS16_REG32_SWAPPED (0x4)
+/* Whether this index is also the destination register.  */
+#define MIPS16_DESTREG (0x8)
+/* Whether the short form is unsigned.  */
+#define MIPS16_UNSP (0x10)
+/* Whether the extended form is unsigned.  */
+#define MIPS16_EXTU (0x20)
+/* Implicit stack pointer.  */
+#define MIPS16_SP (0x40)
+/* Implicit program counter.  */
+#define MIPS16_PC (0x80)
+/* Implicit $0.  */
+#define MIPS16_ZERO (0x100)
+/* Implicit $24.  */
+#define MIPS16_TREG (0x200)
+/* Implicit $31.  */
+#define MIPS16_RA (0x400)
+/* Jump address.  */
+#define MIPS16_JUMP_ADDR (0x800)
+/* Branch offset.  */
+#define MIPS16_BRANCH (0x1000)
+
+/* The mips16 operand table.  */
+
+static const struct mips16_op mips16_op_table[] =
+{
+  { 'd', "int", "destreg", 3,  0, 0, MIPS16_REG16 },
+  { 'x', "t_reg", "op1",  3,  0, 0, MIPS16_REG16 | MIPS16_REGVAL },
+  { 'w', "t_reg", "op1",  3,  0, 0, MIPS16_REG16|MIPS16_REGVAL|MIPS16_DESTREG},
+  { 'y', "t_reg", "op2", 3,  0, 0, MIPS16_REG16 | MIPS16_REGVAL },
+  { 'v', "t_reg", "op2", 3,  0, 0, MIPS16_REG16|MIPS16_REGVAL|MIPS16_DESTREG },
+  { 'X', "t_reg", "op1", 5,  0, 0, MIPS16_REGVAL },
+  { 'Y', "int", "destreg", 5,  0, 0, MIPS16_REG32_SWAPPED },
+  { 'a', "ut_reg", "op1", 11,  0, 0, MIPS16_JUMP_ADDR },
+  { 'e', "int", "ext", 11,  0, 0, 0 },
+  { '<', "int", "op1",  3,  5, 0, MIPS16_UNSP | MIPS16_EXTU },
+  { '>', "int", "op1",  3,  5, 0, MIPS16_UNSP | MIPS16_EXTU },
+  { '[', "int", "op1",  3,  6, 0, MIPS16_UNSP | MIPS16_EXTU },
+  { ']', "int", "op1",  3,  6, 0, MIPS16_UNSP | MIPS16_EXTU },
+  { '4', "int", "op2",  4, 15, 0, 0 },
+  { '5', "int", "offset",  5, 16, 0, MIPS16_UNSP },
+  { 'H', "int", "offset",  5, 16, 1, MIPS16_UNSP },
+  { 'W', "int", "offset",  5, 16, 2, MIPS16_UNSP },
+  { 'D', "int", "offset",  5, 16, 3, MIPS16_UNSP },
+  { 'j', "int", "op2",  5, 16, 0, 0 },
+  { '8', "int", "op2",  8, 16, 0, MIPS16_UNSP },
+  { 'V', "int", "offset",  8, 16, 2, MIPS16_UNSP },
+  { 'C', "int", "offset",  8, 16, 3, MIPS16_UNSP },
+  { 'U', "int", "op2",  8, 16, 0, MIPS16_UNSP | MIPS16_EXTU },
+  { 'k', "int", "op2",  8, 16, 0, 0 },
+  { 'K', "int", "op2",  8, 16, 3, 0 },
+  { 'p', "int", "offset",  8, 16, 0, MIPS16_BRANCH },
+  { 'q', "int", "offset", 11, 16, 0, MIPS16_BRANCH },
+  { 'A', "int", "op2",  8, 16, 2, MIPS16_UNSP },
+  { 'B', "int", "op2",  5, 16, 3, MIPS16_UNSP },
+  { 'E', "int", "op2",  5, 16, 2, MIPS16_UNSP },
+
+  /* The remaining operands are special operands which encode implied
+     arguments.  These only appear at the end of a bitmap string, and
+     do not represent actual bits.  */
+  { 's', "t_reg", "op1",  0,  0, 0, MIPS16_SP | MIPS16_REGVAL  },
+  { 'S', "t_reg", "op1",  0,  0, 0, MIPS16_SP|MIPS16_REGVAL|MIPS16_DESTREG },
+  { 'P', "t_reg", "op1",  0,  0, 0, MIPS16_PC },
+  { 'z', "t_reg", "op2",  0,  0, 0, MIPS16_ZERO },
+  { 'Z', "t_reg", "op1",  0,  0, 0, MIPS16_ZERO },
+  { 't', "t_reg", "op1",  0,  0, 0, MIPS16_TREG | MIPS16_REGVAL },
+  { 'T', "int",   "destreg",  0,  0, 0, MIPS16_TREG },
+  { 'r', "t_reg", "op1",  0,  0, 0, MIPS16_RA | MIPS16_REGVAL },
+  { 'R', "int",   "destreg",  0,  0, 0, MIPS16_RA },
+  { 'Q', "t_reg", "op2",  0,  0, 0, MIPS16_RA | MIPS16_REGVAL },
+
+  { '\0', NULL,  NULL,     0, 0,  0, 0 }
+};
+
+/* Build mips16 operands.  */
+
+static void
+build_mips16_operands (bitmap)
+     const char *bitmap;
+{
+  const char *s;
+  int start = -1;
+  const struct mips16_op *op = NULL;
+  const struct mips16_op *ops[3];
+  int opindex = 0;
+  int i;
+
+  for (s = bitmap; *s != '\0'; s++)
+    {
+      if (op != NULL)
+	{
+	  if (op->type == *s)
+	    continue;
+
+	  /* Make sure we saw the right number of bits for that
+             operand.  */
+	  if (op->nbits != 0 && (s - bitmap) - op->nbits != start)
+	    abort ();
+	  op = NULL;
+	}
+
+      if (*s == '0' || *s == '1' || *s == '?')
+	continue;
+
+      start = s - bitmap;
+
+      for (op = mips16_op_table; op->type != *s; ++op)
+	if (op->type == '\0')
+	  abort ();
+
+      printf ("  %s %s = ", op->vartype, op->name);
+      if (op->nbits != 0)
+	printf ("(instruction >> %d) & 0x%x",
+		16 - (s - bitmap) - op->nbits,
+		(1 << op->nbits) - 1);
+      else
+	{
+	  if ((op->flags & MIPS16_SP) != 0)
+	    printf ("29");
+	  else if ((op->flags & MIPS16_PC) != 0)
+	    {
+	      int j;
+
+	      printf ("PC & ~ (uword64) 1");
+	      for (j = 0; j < opindex; j++)
+		if (ops[j]->shift != 0)
+		  printf (" & 0x%x", ~ ((1 << op->shift) - 1));
+	    }
+	  else if ((op->flags & MIPS16_ZERO) != 0)
+	    printf ("0");
+	  else if ((op->flags & MIPS16_TREG) != 0)
+	    printf ("24");
+	  else if ((op->flags & MIPS16_RA) != 0)
+	    printf ("31");
+	  else
+	    abort ();
+	}
+      printf (";\n");
+
+      if ((op->flags & MIPS16_DESTREG) != 0)
+	printf ("  int destreg;\n");
+
+      if (opindex > 2)
+	abort ();
+      ops[opindex] = op;
+      ++opindex;
+    }
+
+  if (op != NULL)
+    {
+      /* Make sure we saw the right number of bits for that
+	 operand.  */
+      if (op->nbits != 0 && 16 - op->nbits != start)
+	abort ();
+    }
+
+  for (i = 0; i < opindex; i++)
+    {
+      op = ops[i];
+      if ((op->flags & MIPS16_REG16) != 0)
+	{
+	  printf ("  if (%s < 2)\n", op->name);
+	  printf ("    %s += 16;\n", op->name);
+	}
+      if ((op->flags & MIPS16_REG32_SWAPPED) != 0)
+	printf ("  %s = (%s >> 2) | ((%s & 3) << 3);\n",
+		op->name, op->name, op->name);
+      if ((op->flags & MIPS16_DESTREG) != 0)
+	printf ("  destreg = %s;\n", op->name);
+      if ((op->flags & MIPS16_REGVAL) != 0)
+	printf ("  %s = GPR[%s];\n", op->name, op->name);
+
+      if (op->extbits != 0)
+	{
+	  printf ("  if (have_extendval)\n");
+	  printf ("    {\n");
+	  if (op->extbits == 16)
+	    printf ("      %s |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);\n",
+		    op->name);
+	  else if (op->extbits == 15)
+	    printf ("      %s |= ((extendval & 0xf) << 11) | (extendval & 0x7f0);\n",
+		    op->name);
+	  else if (op->extbits == 6)
+	    printf ("      %s = ((extendval >> 6) & 0x1f) | (extendval & 0x20);\n",
+		    op->name);
+	  else
+	    printf ("      %s = (extendval >> 6) & 0x1f;\n",
+		    op->name);
+	  if ((op->flags & MIPS16_EXTU) == 0)
+	    {
+	      printf ("      if (%s >= 0x%x)\n",
+		      op->name, 1 << (op->extbits - 1));
+	      printf ("        %s -= 0x%x;\n",
+		      op->name, 1 << op->extbits);
+	    }
+	  printf ("      have_extendval = 0;\n");
+	  printf ("    }\n");
+	  printf ("  else\n");
+	  printf ("    {\n");
+	  if ((op->flags & MIPS16_UNSP) == 0)
+	    {
+	      printf ("      if (%s >= 0x%x)\n",
+		      op->name, 1 << (op->nbits - 1));
+	      printf ("        %s -= 0x%x;\n",
+		      op->name, 1 << op->nbits);
+	    }
+	  if (op->shift != 0)
+	    printf ("      %s <<= %d;\n", op->name, op->shift);
+	  if (op->type == '<' || op->type == '>'
+	      || op->type == '[' || op->type == ']')
+	    {
+	      printf ("      if (%s == 0)\n", op->name);
+	      printf ("        %s = 8;\n", op->name);
+	    }
+	  printf ("    }\n");
+	}
+
+      if ((op->flags & MIPS16_BRANCH) != 0)
+	printf ("  %s *= 2;\n", op->name);
+
+      if ((op->flags & MIPS16_JUMP_ADDR) != 0)
+	{
+	  printf ("  {\n");
+	  printf ("    uword64 paddr;\n");
+	  printf ("    int uncached;\n");
+	  printf ("    if (AddressTranslation (PC &~ (uword64) 1, isINSTRUCTION, isLOAD, &paddr, &uncached, isTARGET, isREAL))\n");
+	  printf ("      {\n");
+	  printf ("        uword64 memval;\n");
+	  printf ("        unsigned int reverse = (ReverseEndian ? 3 : 0);\n");
+	  printf ("        unsigned int bigend = (BigEndianCPU ? 3 : 0);\n");
+	  printf ("        unsigned int byte;\n");
+	  printf ("        paddr = ((paddr & ~0x7) | ((paddr & 0x7) ^ (reverse << 1)));\n");
+	  printf ("        memval = LoadMemory (uncached, AccessLength_HALFWORD, paddr, PC, isINSTRUCTION, isREAL);\n");
+	  printf ("        byte = (((PC &~ (uword64) 1) & 0x7) ^ (bigend << 1));\n");
+	  printf ("        memval = (memval >> (8 * byte)) & 0xffff;\n");
+	  printf ("        %s = (((%s & 0x1f) << 23)\n", op->name, op->name);
+	  printf ("              | ((%s & 0x3e0) << 13)\n", op->name);
+	  printf ("              | (memval << 2));\n");
+	  printf ("        if ((instruction & 0x400) == 0)\n");
+	  printf ("          %s |= 1;\n", op->name);
+	  printf ("        PC += 2;\n");
+	  printf ("      }\n");
+	  printf ("  }\n");
+	  printf ("  %s |= PC & ~ (uword64) 0x0fffffff;\n", op->name);
+	}
+    }
+
+  /* FIXME: Is this the way to detect an unused extend opcode?  */
+  printf ("  if (have_extendval)\n");
+  printf ("    SignalException (ReservedInstruction, instruction);\n");
 }
 
 /*---------------------------------------------------------------------------*/
@@ -789,7 +1196,7 @@ process_instructions(doarch,features)
  }
 
  printf("/* Actual instruction decoding block */\n");
- printf("{\n");
+ printf("if ((vaddr & 1) == 0){\n");
   {
     int limit;
     printf("int num = ((instruction >> %d) & 0x%08X);\n",OP_SH_OP,OP_MASK_OP);
@@ -832,7 +1239,6 @@ process_instructions(doarch,features)
      unsigned int mask;
      unsigned int number;
      unsigned int flags = convert_bitmap(MIPS_DECODE[loop].bitmap,&onemask,&zeromask,&dontmask);
-     char *regtype = ((gprlen == 64) ? "uword64" : "unsigned int");
 
      if (!(MIPS_DECODE[loop].flags & COPROC) && ((GETDATASIZE() == DOUBLEWORD) && !proc64)) {
        fprintf(stderr,"DOUBLEWORD width specified for non 64-bit processor for instruction \"%s\"\n",MIPS_DECODE[loop].name);
@@ -987,1105 +1393,1233 @@ process_instructions(doarch,features)
 
      printf("  {\n") ;
 
-     switch (MIPS_DECODE[loop].type) {
-       /* TODO: To make these easier to edit and maintain, they should
-          actually be provided as source macros (or inline functions)
-          OUTSIDE this main switch statement. The PPC simulator has a
-          neater scheme for describing the instruction sequences. */
+     build_instruction (doisa, features, 0, &MIPS_DECODE[loop]);
 
-       case ADD:
-       case SUB:
-        {
-          char *signed_basetype = "unknown";
-          char *unsigned_basetype = "unknown";
-
-          switch (GETDATASIZE()) {
-            case WORD :
-             signed_basetype = "signed int";
-             unsigned_basetype = "unsigned int";
-             break;
-            case DOUBLEWORD :
-             signed_basetype = "word64";
-             unsigned_basetype = "uword64";
-             break;
-            default :
-             fprintf(stderr,"Opcode table error: size of ADD/SUB operands not known (%d)\n",GETDATASIZE());
-             exit(1);
-          }
-
-          if ((MIPS_DECODE[loop].type) == ADD) {
-            printf("   %s temp = (%s)(op1 + op2);\n", unsigned_basetype, unsigned_basetype);
-            printf("   %s tempS = (%s)temp;\n", signed_basetype, signed_basetype);
-            if (MIPS_DECODE[loop].flags & OVERFLOW) {
-              printf("   if (((op1 < 0) == (op2 < 0)) && ((tempS < 0) != (op1 < 0)))\n");
-              printf("    SignalException(IntegerOverflow);\n");
-              printf("   else\n");
-            }
-            if (!proc64 || (MIPS_DECODE[loop].flags & UNSIGNED) || (GETDATASIZE() == DOUBLEWORD))
-             printf("   GPR[destreg] = (%s)temp;\n",regtype);
-            else /* only sign-extend when placing 32bit result in 64bit processor */
-             printf("   GPR[destreg] = SIGNEXTEND(((%s)temp),32);\n",regtype);
-          } else { /* SUB */
-            printf("   %s temp = (%s)(op1 - op2);\n", unsigned_basetype, unsigned_basetype);
-            printf("   %s tempS = (%s)temp;\n", signed_basetype, signed_basetype);
-            if (MIPS_DECODE[loop].flags & OVERFLOW) { /* different signs => overflow if result_sign != arg_sign */
-              printf("   if (((op1 < 0) != (op2 < 0)) && ((tempS < 0) == (op1 < 0)))\n");
-              printf("    SignalException(IntegerOverflow);\n");
-              printf("   else\n");
-            }
-            /* UNSIGNED 32bit operations on a 64bit processor should
-               *STILL* be sign-extended. We have cheated in the
-               data-structure, by not marking it with UNSIGNED, and not
-               setting OVERFLOW. */
-            if (!proc64 || (MIPS_DECODE[loop].flags & UNSIGNED) || (GETDATASIZE() == DOUBLEWORD))
-             printf("   GPR[destreg] = (%s)temp;\n",regtype);
-            else /* only sign-extend when placing 32bit result in 64bit processor */
-             printf("   GPR[destreg] = SIGNEXTEND(((%s)temp),32);\n",regtype);
-          }
-        }
-        break ;
-
-       case MUL:
-        if (features & FEATURE_WARN_LOHI) {
-          printf("   CHECKHILO(\"Multiplication\");\n");
-        }
-        printf("   {\n");
-        if (GETDATASIZE() == DOUBLEWORD) {
-          printf("   uword64 mid;\n");
-	  printf("   uword64 midhi;\n");
-          printf("   uword64 temp;\n");
-	  if ((MIPS_DECODE[loop].flags & UNSIGNED) == 0)
-	    {
-	      printf("   int sign = 0;\n");
-	      printf("   if (op1 < 0) { op1 = - op1; ++sign; }\n");
-	      printf("   if (op2 < 0) { op2 = - op2; ++sign; }\n");
-	    }
-          printf("   LO = ((uword64)WORD64LO(op1) * WORD64LO(op2));\n");
-          printf("   HI = ((uword64)WORD64HI(op1) * WORD64HI(op2));\n");
-          printf("   mid = ((uword64)WORD64HI(op1) * WORD64LO(op2));\n");
-	  printf("   midhi = SET64HI(WORD64LO(mid));\n");
-          printf("   temp = (LO + midhi);\n");
-          printf("   if ((temp == midhi) ? (LO != 0) : (temp < midhi))\n");
-          printf("    HI += 1;\n");
-          printf("   HI += WORD64HI(mid);\n");
-          printf("   mid = ((uword64)WORD64LO(op1) * WORD64HI(op2));\n");
-	  printf("   midhi = SET64HI(WORD64LO(mid));\n");
-          printf("   LO = (temp + midhi);\n");
-          printf("   if ((LO == midhi) ? (temp != 0) : (LO < midhi))\n");
-          printf("    HI += 1;\n");
-          printf("   HI += WORD64HI(mid);\n");
-	  if ((MIPS_DECODE[loop].flags & UNSIGNED) == 0)
-	    printf("   if (sign & 1) { LO = - LO; HI = (LO == 0 ? 0 : -1) - HI; }\n");
-        } else {
-	  if (MIPS_DECODE[loop].flags & UNSIGNED)
-	    printf("   uword64 temp = ((uword64)(op1 & 0xffffffff) * (uword64)(op2 & 0xffffffff));\n");
-	  else
-	    printf("   uword64 temp = (op1 * op2);\n");
-          printf("   LO = SIGNEXTEND((%s)WORD64LO(temp),32);\n",regtype);
-          printf("   HI = SIGNEXTEND((%s)WORD64HI(temp),32);\n",regtype);
-        }
-        printf("   }\n");
-        break ;
-
-       case DIV:
-        {
-         int boolU = (MIPS_DECODE[loop].flags & UNSIGNED);
-
-         if (features & FEATURE_WARN_LOHI) {
-           printf("   CHECKHILO(\"Division\");\n");
-         }
-         printf("   {\n");
-         if (GETDATASIZE() == DOUBLEWORD) {
-           printf("   LO = ((%sword64)op1 / (%sword64)op2);\n",(boolU ? "u" : ""),(boolU ? "u" : ""));
-           printf("   HI = ((%sword64)op1 %c (%sword64)op2);\n",(boolU ? "u" : ""),'%',(boolU ? "u" : ""));
-         } else {
-           printf("   LO = SIGNEXTEND(((%sint)op1 / (%sint)op2),32);\n",(boolU ? "unsigned " : ""),(boolU ? "unsigned " : ""));
-           printf("   HI = SIGNEXTEND(((%sint)op1 %c (%sint)op2),32);\n",(boolU ? "unsigned " : ""),'%',(boolU ? "unsigned " : ""));
-         }
-         printf("   }\n");
-        }
-        break ;
-
-       case SHIFT:
-        {
-         int datalen = GETDATASIZE();
-         int bits = ((datalen == WORD) ? 32 : 64);
-         char *ltype = ((datalen == WORD) ? "unsigned int" : "uword64");
-
-         /* Check that the specified SHIFT is valid: */
-         if ((datalen == BYTE) || (datalen == HALFWORD)) {
-           fprintf(stderr,"Shift \"%s\" specified with BYTE or HALFWORD\n",MIPS_DECODE[loop].name);
-           exit(9);
-         }
-         if ((MIPS_DECODE[loop].flags & LEFT) && (MIPS_DECODE[loop].flags & RIGHT)) {
-           fprintf(stderr,"Shift \"%s\" specified with both LEFT and RIGHT\n",MIPS_DECODE[loop].name);
-           exit(9);
-         }
-         if (!(MIPS_DECODE[loop].flags & LEFT) && !(MIPS_DECODE[loop].flags & RIGHT)) {
-           fprintf(stderr,"Shift \"%s\" specified with neither LEFT or RIGHT\n",MIPS_DECODE[loop].name);
-           exit(9);
-         }
-         if ((MIPS_DECODE[loop].flags & LOGICAL) && (MIPS_DECODE[loop].flags & ARITHMETIC)) {
-           fprintf(stderr,"Shift \"%s\" specified with both LOGICAL and ARITHMETIC\n",MIPS_DECODE[loop].name);
-           exit(9);
-         }
-         if (!(MIPS_DECODE[loop].flags & LOGICAL) && !(MIPS_DECODE[loop].flags & ARITHMETIC)) {
-           fprintf(stderr,"Shift \"%s\" specified with neither LOGICAL or ARITHMETIC\n",MIPS_DECODE[loop].name);
-           exit(9);
-         }
-         if ((MIPS_DECODE[loop].flags & LEFT) && (MIPS_DECODE[loop].flags & ARITHMETIC)) {
-           fprintf(stderr,"Arithmetic LEFT shift \"%s\" specified\n",MIPS_DECODE[loop].name);
-           exit(9);
-         }
-
-         /* If register specified shift, then extract the relevant shift amount: */
-         if (flags & fieldval('s'))
-          printf("   op1 &= 0x%02X;\n",(bits - 1));
-
-         /* If HI32 specified, then shift range is 32..63 */
-         if (MIPS_DECODE[loop].flags & HI32)
-          printf("   op1 |= (1 << 5);\n");
-
-         /* We do not need to perform pre-masking with 0xFFFFFFFF when
-            dealing with 32bit shift lefts, since the sign-extension
-            code will replace any remaining hi-bits: */
-         if (MIPS_DECODE[loop].flags & LEFT)
-          printf("   GPR[destreg] = ((uword64)op2 << op1);\n");
-         else
-          printf("   GPR[destreg] = ((uword64)(op2%s) >> op1);\n",((bits == 32) ? " & 0xFFFFFFFF" : ""));
-
-         /* For ARITHMETIC shifts, we must duplicate the sign-bit.  We
-            don't do this if op1 is zero, since it is not needed and
-            since that would cause an undefined shift of the number of
-            bits in the type.  */
-         if (MIPS_DECODE[loop].flags & ARITHMETIC)
-          printf("   GPR[destreg] |= (op1 != 0 && (op2 & ((%s)1 << %d)) ? ((((%s)1 << op1) - 1) << (%d - op1)) : 0);\n",ltype,(bits - 1),ltype,bits);
-
-         /* Ensure WORD values are sign-extended into 64bit registers */
-         if ((bits == 32) && (gprlen == 64))
-          printf("   GPR[destreg] = SIGNEXTEND(GPR[destreg],%d);\n",bits);
-        }
-        break ;
-
-       case MOVE:
-        if (MIPS_DECODE[loop].flags & (HI | LO)) {
-          char *regname = ((MIPS_DECODE[loop].flags & LO) ? "LO" : "HI");
-          if (flags & fieldval('d'))
-           printf("   GPR[destreg] = %s;\n",regname);
-          else {
-            if (features & FEATURE_WARN_LOHI) {
-              printf("   if (%sACCESS != 0)\n",regname);
-              printf("     sim_warning(\"MT (move-to) over-writing %s register value\");\n",regname);
-            }
-            printf("   %s = op1;\n",regname);
-          }
-          if (features & FEATURE_WARN_LOHI)
-           printf("   %sACCESS = 3; /* 3rd instruction will be safe */\n",regname);
-        } else
-         if (MIPS_DECODE[loop].flags & SHIFT16)
-          printf("   GPR[destreg] = (op2 << 16);\n");
-         else {
-           /* perform conditional move */
-           if (!(MIPS_DECODE[loop].flags & EQ)) {
-             fprintf(stderr,"Standard conditional %s does not have the equality flag\n",MIPS_DECODE[loop].name);
-             exit(8);
-           }
-           printf("   if (op2 %c= 0)\n",((MIPS_DECODE[loop].flags & NOT) ? '!' : '='));
-           printf("    GPR[destreg] = op1;\n");
-         }
-        break ;
-
-       case SYNC:
-        printf("   SyncOperation(op1);\n");
-        break ;
-
-       case SYSCALL:
-        printf("   SignalException(SystemCall,instruction);\n");
-        break ;
-
-       case BREAK:
-        printf("   SignalException(BreakPoint,instruction);\n");
-        break ;
-
-       case TRAP:
-        {
-         int boolNOT = (MIPS_DECODE[loop].flags & NOT);
-         int boolEQ  = (MIPS_DECODE[loop].flags & EQ);
-         int boolGT  = (MIPS_DECODE[loop].flags & GT);
-         int boolLT  = (MIPS_DECODE[loop].flags & LT);
-         int boolU   = (MIPS_DECODE[loop].flags & UNSIGNED);
-
-         if (boolGT && boolLT) {
-           fprintf(stderr,"GT and LT specified for \"%s\"\n",MIPS_DECODE[loop].name);
-           exit(8);
-         }
-
-         if (boolNOT && (boolGT || boolLT)) {
-           fprintf(stderr,"NOT specified with GT or LT specified for \"%s\"\n",MIPS_DECODE[loop].name);
-           exit(8);
-         }
-
-         printf("  if ((%sword64)op1 ",(boolU ? "u" : ""));
-         printf("%c%s",(boolNOT ? '!' : (boolLT ? '<' : (boolGT ? '>' : '='))),(boolEQ ? "=" : ""));
-         printf(" (%sword64)op2)\n",(boolU ? "u" : ""));
-         printf("   SignalException(Trap,instruction);\n");
-        }
-        break ;
-
-       case SET:
-        {
-         int boolU = (MIPS_DECODE[loop].flags & UNSIGNED);
-
-         if (!(MIPS_DECODE[loop].flags & LT)) {
-           fprintf(stderr,"Set instruction without LT specified \"%s\"\n",MIPS_DECODE[loop].name);
-           exit(8);
-         }
-
-         printf("   if ((%sword64)op1 < (%sword64)op2)\n",(boolU ? "u" : ""),(boolU ? "u" : ""));
-         printf("    GPR[destreg] = 1;\n");
-         printf("   else\n");
-         printf("    GPR[destreg] = 0;\n");
-        }
-	break ;
-
-       case AND:
-        printf("   GPR[destreg] = (op1 & op2);\n");
-  	break ;
-
-       case OR:
-        printf("   GPR[destreg] = %s(op1 | op2);\n",((MIPS_DECODE[loop].flags & NOT) ? "~" : ""));
-	break ;
-
-       case XOR:
-        printf("   GPR[destreg] = (op1 ^ op2);\n");
-	break ;
-
-       case DECODE:
-        printf("   decode_coproc(instruction);\n");
-        break ;
-
-       case CACHE:
-        /* 16-bit offset is sign-extended and added to the base register to make a virtual address */
-        /* The virtual address is translated to a physical address using the TLB */
-        /* The hint specifies a cache operation for that address */
-        printf("    uword64 vaddr = (op1 + offset);\n");
-        printf("    uword64 paddr;\n");
-        printf("    int uncached;\n");
-        /* NOTE: We are assuming that the AddressTranslation is a load: */
-        printf("    if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))\n");
-        printf("      CacheOp(hint,vaddr,paddr,instruction);\n");
-        break;
-
-       case MADD16: /* VR4100 specific multiply-add instructions */
-        /* Some of this code is shared with the standard multiply
-           routines, so an effort should be made to merge where
-           possible. */
-        if (features & FEATURE_WARN_LOHI) {
-          printf("   CHECKHILO(\"Multiply-Add\");\n");
-        }
-        if (features & FEATURE_WARN_RESULT) {
-          /* Give user a warning if either op1 or op2 are not 16bit signed integers */
-          printf("   if (NOTHALFWORDVALUE(op1) || NOTHALFWORDVALUE(op2))\n");
-          printf("     sim_warning(\"MADD16 operation with non-16bit operands\");\n");
-        }
-        printf("   {\n");
-        printf("    uword64 temp = (op1 * op2);\n"); /* 16x16 multiply */
-        if (GETDATASIZE() == DOUBLEWORD) {
-          printf("   LO = LO + temp;\n");
-        } else { /* WORD */
-          printf("   temp += (SET64HI(WORD64LO(HI)) | WORD64LO(LO));\n");
-          printf("   LO = SIGNEXTEND((%s)WORD64LO(temp),32);\n",regtype);
-          printf("   HI = SIGNEXTEND((%s)WORD64HI(temp),32);\n",regtype);
-        }
-        printf("   }\n");
-        break;
-
-       case RSVD: /* "Reserved Instruction" on MIPS IV, or if co-proc 3 absent. Otherwise "CoProcessorUnusable" */
-        if (doisa < 4) {
-          printf("   if (CoProcPresent(3))\n");
-          printf("    SignalException(CoProcessorUnusable);\n");
-          printf("   else\n");
-        }
-        printf("   SignalException(ReservedInstruction,instruction);\n");
-  	break ;
-
-       case JUMP:
-        if (MIPS_DECODE[loop].flags & LINK) {
-          if (!(MIPS_DECODE[loop].flags & REG))
-           printf("   int destreg = 31;\n");
-          printf("   GPR[destreg] = (PC + 4); /* NOTE: The PC is already 4 ahead within the simulator */\n");
-        }
-
-        printf("   /* NOTE: The jump occurs AFTER the next instruction has been executed */\n");
-        printf("   DSPC = op1;\n");
-        printf("   DELAYSLOT();\n");
-	break ;
-
-       case BRANCH: /* execute delay slot instruction before branch unless (LIKELY && branch_not_taken) */
-        if (MIPS_DECODE[loop].flags & FP) {
-          if (doisa < 4) {
-            printf("  if (condition_code != 0)\n");
-            printf("   SignalException(ReservedInstruction,instruction);\n");
-            printf("  else {\n");
-          }
-          /* "PREVCOC1()" should be the COC1 value at the start of the preceding instruction */
-          printf("   int condition = (%s == boolean);\n",((doisa < 4) ? "PREVCOC1()" : "GETFCC(condition_code)"));
-        } else {
-          if ((MIPS_DECODE[loop].flags & NOT) && !(MIPS_DECODE[loop].flags & EQ)) {
-            fprintf(stderr,"NOT specified when not EQ in \"%s\"\n",MIPS_DECODE[loop].name);
-            exit(7);
-          }
-          if ((MIPS_DECODE[loop].flags & NOT) && (MIPS_DECODE[loop].flags & (GT | LT))) {
-            fprintf(stderr,"NOT specified with GT or LT in \"%s\"\n",MIPS_DECODE[loop].name);
-            exit(7);
-          }            
-          /* GT  LT */
-          if (MIPS_DECODE[loop].flags & GT)
-           printf("   int condition = (op1 >%s 0);\n",((MIPS_DECODE[loop].flags & EQ) ? "=" : ""));
-          else
-           if (MIPS_DECODE[loop].flags & LT)
-            printf("   int condition = (op1 <%s 0);\n",((MIPS_DECODE[loop].flags & EQ) ? "=" : ""));
-           else
-            if (MIPS_DECODE[loop].flags & EQ)
-             printf("   int condition = (op1 %c= op2);\n",((MIPS_DECODE[loop].flags & NOT) ? '!' : '='));
-        }
-
-        if (MIPS_DECODE[loop].flags & LINK) {
-          if (features & FEATURE_WARN_R31) {
-            printf("   if (((instruction >> %d) & 0x%08X) == 31)\n",OP_SH_RS,OP_MASK_RS);
-            printf("    sim_warning(\"Branch with link using r31 as source operand\");\n");
-          }
-          printf("   GPR[31] = (PC + 4); /* NOTE: PC is already 8 ahead */\n");
-        }
-
-        printf("   /* NOTE: The branch occurs AFTER the next instruction has been executed */\n");
-        printf("   if (condition) {\n");
-        printf("    DSPC = (PC + offset);\n");
-        printf("    DELAYSLOT();\n");
-        printf("   }\n");
-        if ((MIPS_DECODE[loop].flags & FP) && (doisa != 1)) {
-          printf("   else if (likely) {\n");
-          printf("    NULLIFY();\n");
-          printf("   }\n");
-        } else if (MIPS_DECODE[loop].flags & LIKELY) {
-          printf("   else\n");
-          printf("    NULLIFY();\n");
-        }
-        if ((MIPS_DECODE[loop].flags & FP) && (doisa < 4))
-         printf("   }\n");
-	break ;
-
-       case PREFETCH: /* The beginning is shared with normal load operations */
-       case LOAD:
-       case STORE:
-        {
-         int isload = ((MIPS_DECODE[loop].type == LOAD) || (MIPS_DECODE[loop].type == PREFETCH));
-         int datalen;
-         char *accesslength = "<UNKNOWN>";
-
-         switch (GETDATASIZE()) {
-           case BYTE :
-            datalen = 1;
-            accesslength = "AccessLength_BYTE";
-            break ;
-
-           case HALFWORD :
-            datalen = 2;
-            accesslength = "AccessLength_HALFWORD";
-            break ;
-
-           case WORD :
-            datalen = 4;
-            accesslength = "AccessLength_WORD";
-            break ;
-
-           case DOUBLEWORD :
-            datalen = 8;
-            accesslength = "AccessLength_DOUBLEWORD";
-            break ;
-         }
-
-         if (MIPS_DECODE[loop].flags & REG)
-          printf("   uword64 vaddr = ((uword64)op1 + op2);\n");
-         else
-          printf("   uword64 vaddr = ((uword64)op1 + offset);\n");
-         printf("   uword64 paddr;\n");
-         printf("   int uncached;\n");
-
-         /* The following check should only occur on normal (non-shifted) memory loads */
-         if ((datalen != 1) && !(MIPS_DECODE[loop].flags & (LEFT | RIGHT))) {
-           printf("   if ((vaddr & %d) != 0)\n",(datalen - 1));
-           printf("    SignalException(%s);\n",(isload ? "AddressLoad" : "AddressStore"));
-           printf("   else\n") ;
-         }
-
-         printf("   {\n");
-         printf("    if (AddressTranslation(vaddr,isDATA,%s,&paddr,&uncached,isTARGET,isREAL))\n",(isload ? "isLOAD" : "isSTORE"));
-
-         if (MIPS_DECODE[loop].type == PREFETCH)
-          printf("     Prefetch(uncached,paddr,vaddr,isDATA,hint);\n");
-         else {
-           printf("    {\n");
-           printf("     %s memval;\n",(proc64 ? "uword64" : "unsigned int"));
-
-           if ((MIPS_DECODE[loop].flags & COPROC) && ((datalen != 4) && (datalen != 8))) {
-             fprintf(stderr,"Co-processor transfer operation not WORD or DOUBLEWORD in length \"%s\"\n",MIPS_DECODE[loop].name);
-             exit(6);
-           }
-
-           if (MIPS_DECODE[loop].flags & (LEFT | RIGHT)) {
-             if ((MIPS_DECODE[loop].flags & LEFT) && (MIPS_DECODE[loop].flags & RIGHT)) {
-               fprintf(stderr,"Memory transfer with both LEFT and RIGHT specified \"%s\"\n",MIPS_DECODE[loop].name);
-               exit(4);
-             }
-
-             switch (datalen) {
-              case 8:
-               if (!proc64) {
-                 fprintf(stderr,"DOUBLEWORD shifted memory transfers only valid for 64-bit processors \"%s\"\n",MIPS_DECODE[loop].name);
-                 exit(4);
-               }
-               /* fall through to... */
-              case 4:
-               {
-                 char *maskstr = ((datalen == 8) ? "((uword64)-1)" : "0xFFFFFFFF");
-
-                 printf("     uword64 mask = %d;\n",((datalen == 8) ? 0x7 : 0x3));
-                 printf("     unsigned int reverse = (ReverseEndian ? mask : 0);\n");
-                 printf("     unsigned int bigend = (BigEndianCPU ? mask : 0);\n");
-                 printf("     int byte;\n");
-                 printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));\n");
-                 printf("     byte = ((vaddr & mask) ^ bigend);\n");
-                 printf("     if (%sBigEndianMem)\n",((MIPS_DECODE[loop].flags & LEFT) ? "!" : ""));
-                 printf("      paddr &= ~mask;\n");
-
-                 if (isload) {
-                   if (MIPS_DECODE[loop].flags & LEFT)
-                    printf("     memval = LoadMemory(uncached,byte,paddr,vaddr,isDATA,isREAL);\n");
-                   else
-                    printf("     memval = LoadMemory(uncached,(%d - byte),paddr,vaddr,isDATA,isREAL);\n",(datalen - 1));
-                 }
-
-                 if (MIPS_DECODE[loop].flags & LEFT) {
-                   if (isload) {
-                     /* For WORD transfers work out if the value will
-                        be in the top or bottom of the DOUBLEWORD
-                        returned: */
-#if 1
-                     build_endian_shift(proc64,datalen,2,s_right,32);
-#else
-                     if (proc64 && (datalen == 4)) {
-                       printf("     if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {\n");
-                       printf("      memval >>= 32;\n");
-                       printf("     }\n");
-                     }
-#endif
-                     printf("     GPR[destreg] = ((memval << ((%d - byte) * 8)) | (GPR[destreg] & (((uword64)1 << ((%d - byte) * 8)) - 1)));\n",(datalen - 1),(datalen - 1));
-                     if (proc64 && (datalen == 4))
-                      printf("     GPR[destreg] = SIGNEXTEND(GPR[destreg],32);\n");
-                   } else { /* store */
-                     printf("     memval = (op2 >> (8 * (%d - byte)));\n",(datalen - 1));
-#if 1
-                     build_endian_shift(proc64,datalen,2,s_left,32);
-#else
-                     /* TODO: This is duplicated in the LOAD code
-                        above - and the RIGHT LOAD and STORE code
-                        below. It should be merged if possible. */
-                     if (proc64 && (datalen == 4)) {
-                       printf("    if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {\n");
-                       printf("     memval <<= 32;\n");
-                       printf("    }\n");
-                     }
-#endif
-                     printf("     StoreMemory(uncached,byte,memval,paddr,vaddr,isREAL);\n");
-                   }
-                 } else { /* RIGHT */
-                   if (isload) {
-#if 1
-                     build_endian_shift(proc64,datalen,2,s_right,32);
-#else
-                     if (proc64 && (datalen == 4)) {
-                       printf("     if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {\n");
-                       printf("      memval >>= 32;\n");
-                       printf("     }\n");
-                     }
-#endif
-                     printf("     {\n");
-                     printf("      uword64 srcmask;\n");
-                     /* All of this extra code is just a bodge
-                        required because some hosts don't allow
-                        ((v) << 64). The SPARC just leaves the (v)
-                        value un-touched. */
-                     printf("      if (byte == 0)\n");
-                     printf("       srcmask = 0;\n");
-                     printf("      else\n");
-                     printf("       srcmask = ((uword64)-1 << (8 * (%d - byte)));\n",datalen);
-                     printf("      GPR[destreg] = ((GPR[destreg] & srcmask) | (memval >> (8 * byte)));\n",datalen);
-                     printf("     }\n");
-                     if (proc64 && (datalen == 4))
-                      printf("     GPR[destreg] = SIGNEXTEND(GPR[destreg],32);\n");
-                   } else { /* store */
-                     printf("     memval = (op2 << (byte * 8));\n");
-		     build_endian_shift(proc64,datalen,2,s_left,32);
-                     printf("     StoreMemory(uncached,(%s - byte),memval,paddr,vaddr,isREAL);\n",accesslength);
-                   }
-                 }
-               }
-               break;
-
-              default:
-               fprintf(stderr,"Shifted memory transfer not WORD or DOUBLEWORD in length \"%s\"\n",MIPS_DECODE[loop].name);
-               exit(6);
-             }
-           } else { /* normal memory transfer */
-             if (!(MIPS_DECODE[loop].flags & COPROC) && ((datalen == 8) || ((datalen == 4) & (MIPS_DECODE[loop].flags & UNSIGNED))) && !proc64) {
-               fprintf(stderr,"Operation not available with 32bit wide memory access \"%s\"\n",MIPS_DECODE[loop].name);
-               exit(4);
-               /* TODO: The R4000 documentation states that a LWU
-                  instruction executed when in a 32bit processor mode
-                  should cause a ReservedInstruction exception. This
-                  will mean adding a run-time check into the code
-                  sequence. */
-             }
-
-             if (isload) {
-#if 1 /* see the comments attached to LOADDRMASK above */
-               printf("     uword64 mask = 0x7;\n");
-#else
-               printf("     uword64 mask = %d;\n",(proc64 ? 0x7 : 0x3));
-#endif
-               printf("     unsigned int shift = %d;\n",(datalen >> 1));
-               printf("     unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);\n");
-               printf("     unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);\n");
-               printf("     unsigned int byte;\n");
-
-/* TODO: This should really also check for 32bit world performing 32bit access */
-               if (datalen != 8) /* not for DOUBLEWORD */
-                printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));\n");
-
-               printf("     memval = LoadMemory(uncached,%s,paddr,vaddr,isDATA,isREAL);\n",accesslength);
-
-               /* The following will only make sense if the
-                  "LoadMemory" above returns a DOUBLEWORD entity */
-               if (datalen != 8) { /* not for DOUBLEWORD */
-                 int valmask;
-                 switch (datalen) {
-                  case 1:
-                   valmask = 0xFF;
-                   break;
-
-                  case 2:
-                   valmask = 0xFFFF;
-                   break;
-
-                  case 4:
-                   valmask = 0xFFFFFFFF;
-                   break;
-
-                  default:
-                   fprintf(stderr,"Unrecognised datalen (%d) when processing \"%s\"\n",datalen,MIPS_DECODE[loop].name);
-                   exit(4);
-                 }
-                 printf("     byte = ((vaddr & mask) ^ (bigend << shift));\n");
-                 /* NOTE: The R4000 user manual has the COP_LW
-                    occuring in the same cycle as the rest of the
-                    instruction, yet the MIPS IV shows the operation
-                    happening on the next cycle. To keep the simulator
-                    simple, this code follows the R4000
-                    manual. Experimentation with a silicon
-                    implementation will be needed to ascertain the
-                    correct operation. */
-                 if (MIPS_DECODE[loop].flags & COPROC)
-                  printf("     COP_LW(%s,destreg,(unsigned int)",
-			 ((MIPS_DECODE[loop].flags & REG)
-			  ? "1"
-			  : "((instruction >> 26) & 0x3)"));
-                 else
-                  printf("     GPR[destreg] = (");
-
-                 if (MIPS_DECODE[loop].flags & SIGNEXTEND)
-                  printf("SIGNEXTEND(");
-                 printf("((memval >> (8 * byte)) & 0x%08X)",valmask);
-                 if (MIPS_DECODE[loop].flags & SIGNEXTEND)
-                  printf(",%d)",(datalen * 8));
-                 printf(");\n");
-               } else {
-                 if (MIPS_DECODE[loop].flags & COPROC)
-                  printf("     COP_LD(%s,destreg,memval);;\n",
-			 ((MIPS_DECODE[loop].flags & REG)
-			  ? "1"
-			  : "((instruction >> 26) & 0x3)"));
-                 else
-                  printf("     GPR[destreg] = memval;\n");
-               }
-             } else { /* store operation */
-               if ((datalen == 1) || (datalen == 2)) {
-                 /* SH and SB */
-#if 1 /* see the comments attached to LOADDRMASK above */
-                 printf("     uword64 mask = 0x7;\n");
-#else
-                 printf("     uword64 mask = %d;\n",(proc64 ? 0x7 : 0x3));
-#endif
-                 printf("     unsigned int shift = %d;\n",(datalen >> 1));
-                 printf("     unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);\n");
-                 printf("     unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);\n");
-                 printf("     unsigned int byte;\n");
-
-                 printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));\n");
-                 printf("     byte = ((vaddr & mask) ^ (bigend << shift));\n");
-                 printf("     memval = (op2 << (8 * byte));\n");
-               } else
-                if (proc64 && (datalen == 4)) { /* proc64 SC and SW */
-#if 1 /* see the comments attached to LOADDRMASK above */
-                  printf("     uword64 mask = 0x7;\n");
-#else
-                  printf("     uword64 mask = %d;\n",(proc64 ? 0x7 : 0x3));
-#endif
-                  printf("     unsigned int byte;\n");
-                  printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));\n");
-                  printf("     byte = ((vaddr & mask) ^ (BigEndianCPU << 2));\n");
-                  if (MIPS_DECODE[loop].flags & COPROC)
-                   printf("     memval = (((uword64)COP_SW(%s,%s)) << (8 * byte));\n",
-			  ((MIPS_DECODE[loop].flags & REG)
-			   ? "1"
-			   : "((instruction >> 26) & 0x3)"),
-			  ((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
-                  else
-                   printf("     memval = (op2 << (8 * byte));\n");
-                } else { /* !proc64 SC and SW, plus proc64 SD and SCD */
-                  if (MIPS_DECODE[loop].flags & COPROC)
-                   printf("     memval = (uword64)COP_S%c(%s,%s);\n",
-			  ((datalen == 8) ? 'D' : 'W'),
-			  ((MIPS_DECODE[loop].flags & REG)
-			   ? "1"
-			   : "((instruction >> 26) & 0x3)"),
-			  ((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
-                  else
-                   printf("     memval = op2;\n");
-                }
-
-               if (MIPS_DECODE[loop].flags & ATOMIC)
-                printf("      if (LLBIT)\n");
-
-               printf("      {\n");
-               printf("       StoreMemory(uncached,%s,memval,paddr,vaddr,isREAL);\n",accesslength);
-               printf("      }\n");
-             }
-
-             if (MIPS_DECODE[loop].flags & ATOMIC) {
-               if ((datalen != 4) && (datalen != 8)) {
-                 fprintf(stderr,"ATOMIC can only be applied to WORD and DOUBLEWORD instructions \"%s\"\n",MIPS_DECODE[loop].name);
-                 exit(4);
-               } else
-                if (isload)
-                 printf("     LLBIT = 1;\n");
-                else {
-                  /* The documentation states that:
-
-                     SC *WILL* fail if coherent store into the same
-                     block occurs, or if an exception occurs between
-                     the LL and SC instructions.
-
-                     SC *MAY* fail if a load, store or prefetch is
-                     executed on the processor (VR4300 doesn't seem
-                     to), or if the instructions between the LL and
-                     SC are not in a 2048byte contiguous VM range.
-
-                     SC *MUST* have been preceded by an LL
-                     (i.e. LLBIT will be set), and it must use the
-                     same Vaddr, Paddr and cache-coherence algorithm
-                     as the LL (which means we should store this
-                     information from the load-conditional).
-                     */
-                  printf("     GPR[(instruction >> %d) & 0x%08X] = LLBIT;\n",OP_SH_RT,OP_MASK_RT);
-                }
-             }
-           }
-           printf("    }\n");
-         }
-         printf("   }\n");
-        }
-	break ;
-
-       case FPPREFX:
-        /* This code could be merged with the PREFIX generation above: */
-        printf("   uword64 vaddr = ((uword64)op1 + (uword64)op2);\n");
-        printf("   uword64 paddr;\n");
-        printf("   int uncached;\n");
-        printf("   if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))\n");
-        printf("    Prefetch(uncached,paddr,vaddr,isDATA,fs);\n");
-        break ;
-
-       case FPMOVEC:
-        if (MIPS_DECODE[loop].flags & CONTROL) {
-          /* The following "magic" of interpreting the FP
-             control-register number would not be needed if we were not
-             trying to match our internal register numbers with those
-             used by GDB. */
-          printf("    if (to) {\n");
-          if (doisa < 4) {
-            printf("     if (fs == 0) {\n");
-            printf("      PENDING_FILL((fs + FCR0IDX),WORD64LO(GPR[ft]));\n");
-            printf("     } else if (fs == 31) {\n");
-            printf("      PENDING_FILL((fs + FCR31IDX),WORD64LO(GPR[ft]));\n");
-            printf("     } /* else NOP */\n");
-            printf("     PENDING_FILL(COCIDX,0); /* special case */\n");
-          } else {
-            printf("     if (fs == 0) {\n");
-            printf("      FCR0 = WORD64LO(GPR[ft]);\n");
-            printf("     } else if (fs == 31) {\n");
-            printf("      FCR31 = WORD64LO(GPR[ft]);\n");
-            printf("     } /* else NOP */\n");
-            printf("     SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0)); /* COC[1] */\n");
-          }
-          printf("    } else { /* control from */\n");
-          if (doisa < 4) {
-            printf("     if (fs == 0) {\n");
-            printf("      PENDING_FILL(ft,SIGNEXTEND(FCR0,32));\n");
-            printf("     } else if (fs == 31) {\n");
-            printf("      PENDING_FILL(ft,SIGNEXTEND(FCR31,32));\n");
-            printf("     } /* else NOP */\n");
-          } else {
-            printf("     if (fs == 0) {\n");
-            printf("      GPR[ft] = SIGNEXTEND(FCR0,32);\n");
-            printf("     } else if (fs == 31) {\n");
-            printf("      GPR[ft] = SIGNEXTEND(FCR31,32);\n");
-            printf("     } /* else NOP */\n");
-          }
-          printf("    }\n");
-        } else {
-          printf("    if (to) {\n");
-          if (GETDATASIZE() == WORD) {
-            if (doisa < 4) { 
-              printf("     if (SizeFGR() == 64) {\n");
-              printf("      PENDING_FILL((fs + FGRIDX),(SET64HI(0xDEADC0DE) | WORD64LO(GPR[ft])));\n");
-              printf("     } else { \n");
-              printf("      PENDING_FILL((fs + FGRIDX),WORD64LO(GPR[ft]));\n");
-              printf("     }\n");
-            } else {
-              printf("     if (SizeFGR() == 64)\n");
-              printf("      FGR[fs] = (SET64HI(0xDEADC0DE) | WORD64LO(GPR[ft]));\n");
-              printf("     else\n");
-              printf("      FGR[fs] = WORD64LO(GPR[ft]);\n");
-              printf("     fpr_state[fs] = fmt_uninterpreted;\n");
-            }
-          } else if (GETDATASIZE() == DOUBLEWORD) {
-            if (doisa < 4) {
-              printf("     if (SizeFGR() == 64) {\n");
-              printf("      PENDING_FILL((fs + FGRIDX),GPR[ft]);\n");
-              printf("     } else\n");
-              printf("      if ((fs & 0x1) == 0)\n");
-              printf("       {\n");
-              printf("        PENDING_FILL(((fs + 1) + FGRIDX),WORD64HI(GPR[ft]));\n");
-              printf("        PENDING_FILL((fs + FGRIDX),WORD64LO(GPR[ft]));\n");
-              printf("       }\n");
-              if (features & FEATURE_WARN_RESULT) {
-                printf("      else\n");
-                printf("       UndefinedResult();\n");
-              }
-            } else {
-              printf("     if (SizeFGR() == 64) {\n");
-              printf("      FGR[fs] = GPR[ft];\n");
-	      printf("      fpr_state[fs] = fmt_uninterpreted;\n");
-              printf("     } else\n");
-              printf("      if ((fs & 0x1) == 0)\n");
-              printf("       {\n");
-              printf("        FGR[fs + 1] = WORD64HI(GPR[ft]);\n");
-              printf("        FGR[fs] = WORD64LO(GPR[ft]);\n");
-	      printf("        fpr_state[fs + 1] = fmt_uninterpreted;\n");
-	      printf("        fpr_state[fs] = fmt_uninterpreted;\n");
-              printf("       }\n");
-              if (features & FEATURE_WARN_RESULT) {
-                printf("      else\n");
-                printf("       UndefinedResult();\n");
-              }
-            }
-          } else {
-            fprintf(stderr,"Invalid data width specified in FPU Move operation\n");
-            exit(1);
-          }
-          printf("    } else {\n");
-          if (GETDATASIZE() == WORD) {
-            if (doisa < 4) /* write-back occurs in next cycle */
-             printf("     PENDING_FILL(ft,SIGNEXTEND(FGR[fs],32));\n");
-            else /* in this cycle */
-             printf("     GPR[ft] = SIGNEXTEND(FGR[fs],32);\n");
-          } else if (GETDATASIZE() == DOUBLEWORD) {
-            if (doisa < 4) { 
-              printf("     if (SizeFGR() == 64) {\n");
-              printf("      PENDING_FILL(ft,FGR[fs]);\n");
-              printf("     } else\n");
-              printf("      if ((fs & 0x1) == 0) {\n");
-              printf("       PENDING_FILL(ft,(SET64HI(FGR[fs+1]) | FGR[fs]));\n");
-              printf("      } else {\n");
-              printf("       PENDING_FILL(ft,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);\n");
-              if (features & FEATURE_WARN_RESULT)
-              printf("        UndefinedResult();\n");
-              printf("      }\n");
-            } else {
-              printf("     if (SizeFGR() == 64)\n");
-              printf("      GPR[ft] = FGR[fs];\n");
-              printf("     else\n");
-              printf("      if ((fs & 0x1) == 0)\n");
-              printf("       GPR[ft] = (SET64HI(FGR[fs + 1]) | FGR[fs]);\n");
-              printf("      else {\n");
-              printf("       GPR[ft] = (SET64HI(0xDEADC0DE) | 0xBAD0BAD0);\n");
-              if (features & FEATURE_WARN_RESULT)
-              printf("       UndefinedResult();\n");
-              printf("      }\n");
-            }
-          } else {
-            fprintf(stderr,"Invalid data width specified in FPU Move operation\n");
-            exit(1);
-          }
-          printf("    }\n");
-        }
-        break ;
-
-       case FPMOVE:
-        if (MIPS_DECODE[loop].flags & CONDITIONAL) {
-          if (MIPS_DECODE[loop].flags & INTEGER) { /* moving GPR - testing FGR */
-            printf("   if (GETFCC(condition_code) == boolean)\n");
-            printf("    GPR[destreg] = op1;\n");
-          } else {
-            if (MIPS_DECODE[loop].flags & EQ) /* moving FGR - testing GPR */
-             printf("   if (op2 %c= 0)\n",((MIPS_DECODE[loop].flags & NOT) ? '!' : '='));
-            else
-             printf("   if (GETFCC(condition_code) == boolean)\n");
-            printf("    StoreFPR(destreg,format,ValueFPR(fs,format));\n");
-            printf("   else\n");
-            printf("    StoreFPR(destreg,format,ValueFPR(destreg,format));\n");
-          }
-        } else { /* simple MOVE */
-          printf("   StoreFPR(destreg,format,ValueFPR(fs,format));\n");
-        }
-        break ;
-
-       case FPNEG:
-        printf("  if ((format != fmt_single) && (format != fmt_double))\n");
-        printf("   SignalException(ReservedInstruction,instruction);\n");
-        printf("  else\n");
-        printf("   StoreFPR(destreg,format,Negate(ValueFPR(fs,format),format));\n");
-        break ;
-
-       case FPABS:
-        printf("  if ((format != fmt_single) && (format != fmt_double))\n");
-        printf("   SignalException(ReservedInstruction,instruction);\n");
-        printf("  else\n");
-        printf("   StoreFPR(destreg,format,AbsoluteValue(ValueFPR(fs,format),format));\n");
-        break ;
-
-       case FPDIV:
-        printf("  if ((format != fmt_single) && (format != fmt_double))\n");
-        printf("   SignalException(ReservedInstruction,instruction);\n");
-        printf("  else\n");
-        printf("   StoreFPR(destreg,format,Divide(ValueFPR(fs,format),ValueFPR(ft,format),format));\n");
-        break ;
-
-       case FPMUL:
-        printf("  if ((format != fmt_single) && (format != fmt_double))\n");
-        printf("   SignalException(ReservedInstruction,instruction);\n");
-        printf("  else\n");
-        printf("   StoreFPR(destreg,format,Multiply(ValueFPR(fs,format),ValueFPR(ft,format),format));\n");
-        break ;
-
-       case FPRECIP:
-        printf("  if ((format != fmt_single) && (format != fmt_double))\n");
-        printf("   SignalException(ReservedInstruction,instruction);\n");
-        printf("  else\n");
-        printf("   StoreFPR(destreg,format,Recip(ValueFPR(fs,format),format));\n");
-        break ;
-
-       case FPSQRT:
-        printf("  if ((format != fmt_single) && (format != fmt_double))\n");
-        printf("   SignalException(ReservedInstruction,instruction);\n");
-        printf("  else\n");
-        printf("   StoreFPR(destreg,format,%s(SquareRoot(ValueFPR(fs,format),format)));\n",((MIPS_DECODE[loop].flags & RECIP) ? "Recip" : ""));
-        break ;
-
-       case FPCEIL:
-       case FPFLOOR:
-       case FPTRUNC:
-       case FPROUND:
-        {
-          char *op = "";
-          char *type = "";
-
-          switch (MIPS_DECODE[loop].type) {
-            case FPCEIL:
-             op = "FP_RM_TOPINF";
-             break;
-            case FPFLOOR:
-             op = "FP_RM_TOMINF";
-             break;
-            case FPTRUNC:
-             op = "FP_RM_TOZERO";
-             break;
-            case FPROUND:
-             op = "FP_RM_NEAREST";
-             break;
-            default:
-             fprintf(stderr,"Error: Handled missing for FP reason code %d\n",MIPS_DECODE[loop].type);
-             exit(1);
-          }
-
-          switch (GETDATASIZE()) {
-            case WORD :
-             type = "fmt_word";
-             break;
-            case DOUBLEWORD :
-             type = "fmt_long";
-             break;
-            default:
-             fprintf(stderr,"Error in instruction encoding table for FP %s operation (not WORD or DOUBLEWORD)\n",op);
-             exit(1);
-          }
-          printf("  if ((format != fmt_single) && (format != fmt_double))\n");
-          printf("   SignalException(ReservedInstruction,instruction);\n");
-          printf("  else\n");
-          printf("   StoreFPR(destreg,%s,Convert(%s,ValueFPR(fs,format),format,%s));\n",type,op,type);
-        }
-        break ;
-
-       case FPCONVERT:
-        {
-          char *type = "";
-          switch (GETDATASIZE()) {
-            case SINGLE:
-             type = "fmt_single";
-             break;
-            case DOUBLE:
-             type = "fmt_double";
-             break;
-            case WORD:
-             type = "fmt_word";
-             break;
-            case DOUBLEWORD:
-             type = "fmt_long";
-             break;
-            default :
-             fprintf(stderr,"Error: Unknown data size %d in FPCONVERT instruction\n",GETDATASIZE());
-             exit(1);
-           }
-
-          /* Not all combinations of conversion are valid at the
-             moment: When converting to a fixed-point format, only
-             floating-point sources are allowed. */
-          printf("   if ((format == %s) | %s)\n",type,((MIPS_DECODE[loop].flags & FIXED) ? "((format == fmt_long) || (format == fmt_word))": "0"));
-          printf("    SignalException(ReservedInstruction,instruction);\n");
-          printf("   else\n");
-          printf("    StoreFPR(destreg,%s,Convert(GETRM(),ValueFPR(fs,format),format,%s));\n",type,type);
-        }
-        break ;
-
-       case FPSUB:
-        if (MIPS_DECODE[loop].flags & MULTIPLY) {
-          char *type = "";
-          switch (GETDATASIZE()) {
-            case SINGLE:
-             type = "fmt_single";
-             break;
-            case DOUBLE:
-             type = "fmt_double";
-             break;
-            default:
-             fprintf(stderr,"Error: Invalid data size %d for FPSUB operation\n",GETDATASIZE());
-             exit(1);
-          }
-          printf("   StoreFPR(destreg,%s,%s(Sub(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s),%s));\n",type,((MIPS_DECODE[loop].flags & NOT) ? "Negate" : ""),type,type,type,type,type,type);
-        } else {
-          printf("  if ((format != fmt_single) && (format != fmt_double))\n");
-          printf("   SignalException(ReservedInstruction,instruction);\n");
-          printf("  else\n");
-          printf("   StoreFPR(destreg,format,Sub(ValueFPR(fs,format),ValueFPR(ft,format),format));\n");
-        }
-        break ;
-
-       case FPADD:
-        if (MIPS_DECODE[loop].flags & MULTIPLY) {
-          char *type = "";
-          switch (GETDATASIZE()) {
-            case SINGLE:
-             type = "fmt_single";
-             break;
-            case DOUBLE:
-             type = "fmt_double";
-             break;
-            default:
-             fprintf(stderr,"Error: Invalid data size %d for FPADD operation in instruction table\n",GETDATASIZE());
-             exit(1);
-          }
-	  if (MIPS_DECODE[loop].flags & NOT)
-	    printf ("   StoreFPR(destreg,%s,Negate(Add(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s),%s));\n",
-		    type, type, type, type, type, type, type);
-	  else
-	    printf ("   StoreFPR(destreg,%s,Add(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s));\n",
-		    type, type, type, type, type, type);
-        } else {
-          printf("  if ((format != fmt_single) && (format != fmt_double))\n");
-          printf("   SignalException(ReservedInstruction,instruction);\n");
-          printf("  else\n");
-          printf("   StoreFPR(destreg,format,Add(ValueFPR(fs,format),ValueFPR(ft,format),format));\n");
-        }
-        break ;
-
-       case FPCOMPARE:
-        /* For the MIPS I,II or III there *MUST* be at least one
-           instruction between the compare that sets a condition code
-           and the branch that tests it. NOTE: However the hardware
-           does not detect this condition. */
-        /* Explicitly limit the operation to S and D formats: */
-        printf("   if ((format != fmt_single) && (format != fmt_double))\n");
-        printf("    SignalException(ReservedInstruction,instruction);\n") ;
-        printf("   else {\n");
-        if (doisa < 4) {
-          printf("    if ((cmpflags & (1 << 3)) || (condition_code != 0))\n");
-          printf("     SignalException(ReservedInstruction,instruction);\n") ;
-          printf("    else\n");
-        }
-        printf("     {\n");
-        printf("      int ignore = 0;\n");
-        printf("      int less = 0;\n");
-        printf("      int equal = 0;\n");
-        printf("      int unordered = 1;\n");
-        printf("      uword64 ofs = ValueFPR(fs,format);\n");
-        printf("      uword64 oft = ValueFPR(ft,format);\n");
-        printf("      if (NaN(ofs,format) || NaN(oft,format)) {\n");
-        printf("      if (FCSR & FP_ENABLE(IO)) {\n");
-        printf("       FCSR |= FP_CAUSE(IO);\n");
-        printf("       SignalException(FPE);\n");
-        printf("       ignore = 1;\n");
-        printf("      }\n");
-        printf("     } else {\n");
-        printf("      less = Less(ofs,oft,format);\n");
-        printf("      equal = Equal(ofs,oft,format);\n");
-        printf("      unordered = 0;\n");
-        printf("     }\n");
-        printf("     if (!ignore) {\n");
-        printf("      int condition = (((cmpflags & (1 << 2)) && less) || ((cmpflags & (1 << 1)) && equal) || ((cmpflags & (1 << 0)) && unordered));\n");
-        printf("      SETFCC(condition_code,condition);\n");
-        printf("     }\n");
-        printf("    }\n");
-        printf("   }\n");
-        break ;
-
-       default:
-	fprintf(stderr,"Unrecognised opcode type %d\n",MIPS_DECODE[loop].type) ;
-        exit(6) ;
-      }
      printf("  }\n") ;
      printf(" }\n") ;
      printf(" break ;\n") ;
-    }
+   }
   }
 
  printf("default : /* Unrecognised instruction */\n") ;
  printf(" SignalException(ReservedInstruction,instruction);\n") ;
  printf(" break ;\n") ;
  printf("}\n}\n") ;
+
+ /* Handle mips16 instructions.  The switch table looks like this:
+     0 - 31: I, RI, and RRI instructions by major.
+    32 - 35: ISHIFT instructions by function + 32
+    36 - 37: RRI_A instructions by function + 36
+    38 - 45: I8, I8_MOV32R, and I8_MOVR32 instructions by function + 38
+    46 - 49: RRR instructions by function + 46
+    50 - 81: RR instructions by minor + 50 (except for minor == 0)
+    82 - 89: I64 and RI64 instructions by funct + 82
+    90 - 97: jalr (RR minor 0) by y + 90
+    */
+ printf ("else {\n");
+ printf ("static int extendval;\n");
+ printf ("static int have_extendval;\n");
+ printf ("int num = ((instruction >> %d) & 0x%08X);\n",
+	 MIPS16OP_SH_OP, MIPS16OP_MASK_OP);
+ printf ("switch (num)\n{\n");
+ printf ("case 0x6: num = 32 + (instruction & 3); break;\n");
+ printf ("case 0x8: num = 36 + ((instruction & 0x10) >> 4); break;\n");
+ printf ("case 0xc: num = 38 + ((instruction & 0x700) >> 8); break;\n");
+ printf ("case 0x1c: num = 46 + (instruction & 3); break;\n");
+ printf ("case 0x1d: num = 50 + (instruction & 0x1f);\n");
+ printf ("           if (num == 50) num = 90 + ((instruction & 0xe0) >> 5);\n");
+ printf ("           break;\n");
+ printf ("case 0x1f: num = 82 + ((instruction & 0x700) >> 8); break;\n");
+ printf ("default: break;\n}\n");
+ printf ("switch (num)\n{\n");
+
+ for (loop = 0; loop < sizeof MIPS16_DECODE / sizeof MIPS16_DECODE[0]; loop++)
+   {
+     const char *bitmap;
+     int num;
+
+     bitmap = MIPS16_DECODE[loop].bitmap;
+     switch (MIPS16_DECODE[loop].mark)
+       {
+       case I:
+       case RI:
+       case RRI:
+	 num = bitmap_val (bitmap, 11, 5);
+	 break;
+       case ISHIFT:
+	 num = 32 + bitmap_val (bitmap, 0, 2);
+	 break;
+       case RRI_A:
+	 num = 36 + bitmap_val (bitmap, 4, 1);
+	 break;
+       case I8:
+       case I8_MOV32R:
+       case I8_MOVR32:
+	 num = 38 + bitmap_val (bitmap, 8, 3);
+	 break;
+       case RRR:
+	 num = 46 + bitmap_val (bitmap, 0, 2);
+	 break;
+       case RR:
+	 {
+	   int minor;
+
+	   minor = bitmap_val (bitmap, 0, 5);
+	   if (minor != 0)
+	     num = 50 + minor;
+	   else
+	     num = 90 + bitmap_val (bitmap, 5, 3);
+	 }
+	 break;
+       case I64:
+       case RI64:
+	 num = 82 + bitmap_val (bitmap, 8, 3);
+	 break;
+       default:
+	 abort ();
+       }
+
+     printf ("case %d: /* \"%s\" %s */\n", num, MIPS16_DECODE[loop].name,
+	     bitmap);
+
+     printf (" {\n");
+
+     build_mips16_operands (bitmap);
+
+     printf ("  {\n") ;
+
+     /* build_instruction doesn't know about extend.  */
+     if (num != 30)
+       build_instruction (doisa, features, 1, &MIPS16_DECODE[loop]);
+     else
+       {
+	 printf ("    extendval = ext;\n");
+	 printf ("    have_extendval = 1;\n");
+       }
+
+     printf ("  }\n");
+     printf (" }\n") ;
+     printf (" break ;\n") ;
+   }
+
+ printf ("default : /* Unrecognised instruction */\n") ;
+ printf (" SignalException(ReservedInstruction,instruction);\n") ;
+ printf (" break ;\n") ;
+ printf ("}\n}\n") ;
+
  printf("#endif /* simulator engine */\n");
 
  return ;
+}
+
+/* Output the code to execute an instruction, assuming the operands
+   have already been extracted.  */
+
+static void 
+build_instruction (doisa, features, mips16, insn)
+     int doisa;
+     unsigned int features;
+     int mips16;
+     const struct instruction *insn;
+{
+  int gprlen=((features & FEATURE_GP64) ? 64 : 32);
+  int proc64 = ((features & FEATURE_PROC32) ? 0 : -1);
+  char *regtype = ((gprlen == 64) ? "uword64" : "unsigned int");
+
+  switch (insn->type) {
+      /* TODO: To make these easier to edit and maintain, they should
+	 actually be provided as source macros (or inline functions)
+	 OUTSIDE this main switch statement. The PPC simulator has a
+	 neater scheme for describing the instruction sequences. */
+
+    case ADD:
+    case SUB:
+     {
+       char *signed_basetype = "unknown";
+       char *unsigned_basetype = "unknown";
+
+       switch (GETDATASIZEINSN(insn)) {
+	 case WORD :
+	  signed_basetype = "signed int";
+	  unsigned_basetype = "unsigned int";
+	  break;
+	 case DOUBLEWORD :
+	  signed_basetype = "word64";
+	  unsigned_basetype = "uword64";
+	  break;
+	 default :
+	  fprintf(stderr,"Opcode table error: size of ADD/SUB operands not known (%d)\n",GETDATASIZEINSN(insn));
+	  exit(1);
+       }
+
+       if ((insn->type) == ADD) {
+	 printf("   %s temp = (%s)(op1 + op2);\n", unsigned_basetype, unsigned_basetype);
+	 printf("   %s tempS = (%s)temp;\n", signed_basetype, signed_basetype);
+	 if (insn->flags & OVERFLOW) {
+	   printf("   if (((op1 < 0) == (op2 < 0)) && ((tempS < 0) != (op1 < 0)))\n");
+	   printf("    SignalException(IntegerOverflow);\n");
+	   printf("   else\n");
+	 }
+	 if (!proc64 || (insn->flags & UNSIGNED) || (GETDATASIZEINSN(insn) == DOUBLEWORD))
+	  printf("   GPR[destreg] = (%s)temp;\n",regtype);
+	 else /* only sign-extend when placing 32bit result in 64bit processor */
+	  printf("   GPR[destreg] = SIGNEXTEND(((%s)temp),32);\n",regtype);
+       } else { /* SUB */
+	 printf("   %s temp = (%s)(op1 - op2);\n", unsigned_basetype, unsigned_basetype);
+	 printf("   %s tempS = (%s)temp;\n", signed_basetype, signed_basetype);
+	 if (insn->flags & OVERFLOW) { /* different signs => overflow if result_sign != arg_sign */
+	   printf("   if (((op1 < 0) != (op2 < 0)) && ((tempS < 0) == (op1 < 0)))\n");
+	   printf("    SignalException(IntegerOverflow);\n");
+	   printf("   else\n");
+	 }
+	 /* UNSIGNED 32bit operations on a 64bit processor should
+	    *STILL* be sign-extended. We have cheated in the
+	    data-structure, by not marking it with UNSIGNED, and not
+	    setting OVERFLOW. */
+	 if (!proc64 || (insn->flags & UNSIGNED) || (GETDATASIZEINSN(insn) == DOUBLEWORD))
+	  printf("   GPR[destreg] = (%s)temp;\n",regtype);
+	 else /* only sign-extend when placing 32bit result in 64bit processor */
+	  printf("   GPR[destreg] = SIGNEXTEND(((%s)temp),32);\n",regtype);
+       }
+     }
+     break ;
+
+    case MUL:
+     if (features & FEATURE_WARN_LOHI) {
+       printf("   CHECKHILO(\"Multiplication\");\n");
+     }
+     printf("   {\n");
+     if (GETDATASIZEINSN(insn) == DOUBLEWORD) {
+       printf("   uword64 mid;\n");
+       printf("   uword64 midhi;\n");
+       printf("   uword64 temp;\n");
+       if ((insn->flags & UNSIGNED) == 0)
+	 {
+	   printf("   int sign = 0;\n");
+	   printf("   if (op1 < 0) { op1 = - op1; ++sign; }\n");
+	   printf("   if (op2 < 0) { op2 = - op2; ++sign; }\n");
+	 }
+       printf("   LO = ((uword64)WORD64LO(op1) * WORD64LO(op2));\n");
+       printf("   HI = ((uword64)WORD64HI(op1) * WORD64HI(op2));\n");
+       printf("   mid = ((uword64)WORD64HI(op1) * WORD64LO(op2));\n");
+       printf("   midhi = SET64HI(WORD64LO(mid));\n");
+       printf("   temp = (LO + midhi);\n");
+       printf("   if ((temp == midhi) ? (LO != 0) : (temp < midhi))\n");
+       printf("    HI += 1;\n");
+       printf("   HI += WORD64HI(mid);\n");
+       printf("   mid = ((uword64)WORD64LO(op1) * WORD64HI(op2));\n");
+       printf("   midhi = SET64HI(WORD64LO(mid));\n");
+       printf("   LO = (temp + midhi);\n");
+       printf("   if ((LO == midhi) ? (temp != 0) : (LO < midhi))\n");
+       printf("    HI += 1;\n");
+       printf("   HI += WORD64HI(mid);\n");
+       if ((insn->flags & UNSIGNED) == 0)
+	 printf("   if (sign & 1) { LO = - LO; HI = (LO == 0 ? 0 : -1) - HI; }\n");
+     } else {
+       if (insn->flags & UNSIGNED)
+	 printf("   uword64 temp = ((uword64)(op1 & 0xffffffff) * (uword64)(op2 & 0xffffffff));\n");
+       else
+	 printf("   uword64 temp = (op1 * op2);\n");
+       printf("   LO = SIGNEXTEND((%s)WORD64LO(temp),32);\n",regtype);
+       printf("   HI = SIGNEXTEND((%s)WORD64HI(temp),32);\n",regtype);
+     }
+     printf("   }\n");
+     break ;
+
+    case DIV:
+     {
+      int boolU = (insn->flags & UNSIGNED);
+
+      if (features & FEATURE_WARN_LOHI) {
+	printf("   CHECKHILO(\"Division\");\n");
+      }
+      printf("   {\n");
+      if (GETDATASIZEINSN(insn) == DOUBLEWORD) {
+	printf("   LO = ((%sword64)op1 / (%sword64)op2);\n",(boolU ? "u" : ""),(boolU ? "u" : ""));
+	printf("   HI = ((%sword64)op1 %c (%sword64)op2);\n",(boolU ? "u" : ""),'%',(boolU ? "u" : ""));
+      } else {
+	printf("   LO = SIGNEXTEND(((%sint)op1 / (%sint)op2),32);\n",(boolU ? "unsigned " : ""),(boolU ? "unsigned " : ""));
+	printf("   HI = SIGNEXTEND(((%sint)op1 %c (%sint)op2),32);\n",(boolU ? "unsigned " : ""),'%',(boolU ? "unsigned " : ""));
+      }
+      printf("   }\n");
+     }
+     break ;
+
+    case SHIFT:
+     {
+      int datalen = GETDATASIZEINSN(insn);
+      int bits = ((datalen == WORD) ? 32 : 64);
+      char *ltype = ((datalen == WORD) ? "unsigned int" : "uword64");
+
+      /* Check that the specified SHIFT is valid: */
+      if ((datalen == BYTE) || (datalen == HALFWORD)) {
+	fprintf(stderr,"Shift \"%s\" specified with BYTE or HALFWORD\n",insn->name);
+	exit(9);
+      }
+      if ((insn->flags & LEFT) && (insn->flags & RIGHT)) {
+	fprintf(stderr,"Shift \"%s\" specified with both LEFT and RIGHT\n",insn->name);
+	exit(9);
+      }
+      if (!(insn->flags & LEFT) && !(insn->flags & RIGHT)) {
+	fprintf(stderr,"Shift \"%s\" specified with neither LEFT or RIGHT\n",insn->name);
+	exit(9);
+      }
+      if ((insn->flags & LOGICAL) && (insn->flags & ARITHMETIC)) {
+	fprintf(stderr,"Shift \"%s\" specified with both LOGICAL and ARITHMETIC\n",insn->name);
+	exit(9);
+      }
+      if (!(insn->flags & LOGICAL) && !(insn->flags & ARITHMETIC)) {
+	fprintf(stderr,"Shift \"%s\" specified with neither LOGICAL or ARITHMETIC\n",insn->name);
+	exit(9);
+      }
+      if ((insn->flags & LEFT) && (insn->flags & ARITHMETIC)) {
+	fprintf(stderr,"Arithmetic LEFT shift \"%s\" specified\n",insn->name);
+	exit(9);
+      }
+
+      /* If register specified shift, then extract the relevant shift amount: */
+      if (insn->flags & REG)
+       printf("   op1 &= 0x%02X;\n",(bits - 1));
+
+      /* If HI32 specified, then shift range is 32..63 */
+      if (insn->flags & HI32)
+       printf("   op1 |= (1 << 5);\n");
+
+      /* We do not need to perform pre-masking with 0xFFFFFFFF when
+	 dealing with 32bit shift lefts, since the sign-extension
+	 code will replace any remaining hi-bits: */
+      if (insn->flags & LEFT)
+       printf("   GPR[destreg] = ((uword64)op2 << op1);\n");
+      else
+       printf("   GPR[destreg] = ((uword64)(op2%s) >> op1);\n",((bits == 32) ? " & 0xFFFFFFFF" : ""));
+
+      /* For ARITHMETIC shifts, we must duplicate the sign-bit.  We
+	 don't do this if op1 is zero, since it is not needed and
+	 since that would cause an undefined shift of the number of
+	 bits in the type.  */
+      if (insn->flags & ARITHMETIC)
+       printf("   GPR[destreg] |= (op1 != 0 && (op2 & ((%s)1 << %d)) ? ((((%s)1 << op1) - 1) << (%d - op1)) : 0);\n",ltype,(bits - 1),ltype,bits);
+
+      /* Ensure WORD values are sign-extended into 64bit registers */
+      if ((bits == 32) && (gprlen == 64))
+       printf("   GPR[destreg] = SIGNEXTEND(GPR[destreg],%d);\n",bits);
+     }
+     break ;
+
+    case MOVE:
+     if (insn->flags & (HI | LO)) {
+       char *regname = ((insn->flags & LO) ? "LO" : "HI");
+       if (insn->flags & LEFT)
+	printf("   GPR[destreg] = %s;\n",regname);
+       else {
+	 if (features & FEATURE_WARN_LOHI) {
+	   printf("   if (%sACCESS != 0)\n",regname);
+	   printf("     sim_warning(\"MT (move-to) over-writing %s register value\");\n",regname);
+	 }
+	 printf("   %s = op1;\n",regname);
+       }
+       if (features & FEATURE_WARN_LOHI)
+	printf("   %sACCESS = 3; /* 3rd instruction will be safe */\n",regname);
+     } else
+      if (insn->flags & SHIFT16)
+       printf("   GPR[destreg] = (op2 << 16);\n");
+      else {
+	/* perform conditional move */
+	if (!(insn->flags & EQ)) {
+	  fprintf(stderr,"Standard conditional %s does not have the equality flag\n",insn->name);
+	  exit(8);
+	}
+	printf("   if (op2 %c= 0)\n",((insn->flags & NOT) ? '!' : '='));
+	printf("    GPR[destreg] = op1;\n");
+      }
+     break ;
+
+    case SYNC:
+     printf("   SyncOperation(op1);\n");
+     break ;
+
+    case SYSCALL:
+     printf("   SignalException(SystemCall,instruction);\n");
+     break ;
+
+    case BREAK:
+     printf("   SignalException(BreakPoint,instruction);\n");
+     break ;
+
+    case TRAP:
+     {
+      int boolNOT = (insn->flags & NOT);
+      int boolEQ  = (insn->flags & EQ);
+      int boolGT  = (insn->flags & GT);
+      int boolLT  = (insn->flags & LT);
+      int boolU   = (insn->flags & UNSIGNED);
+
+      if (boolGT && boolLT) {
+	fprintf(stderr,"GT and LT specified for \"%s\"\n",insn->name);
+	exit(8);
+      }
+
+      if (boolNOT && (boolGT || boolLT)) {
+	fprintf(stderr,"NOT specified with GT or LT specified for \"%s\"\n",insn->name);
+	exit(8);
+      }
+
+      printf("  if ((%sword64)op1 ",(boolU ? "u" : ""));
+      printf("%c%s",(boolNOT ? '!' : (boolLT ? '<' : (boolGT ? '>' : '='))),(boolEQ ? "=" : ""));
+      printf(" (%sword64)op2)\n",(boolU ? "u" : ""));
+      printf("   SignalException(Trap,instruction);\n");
+     }
+     break ;
+
+    case SET:
+     {
+      int boolU = (insn->flags & UNSIGNED);
+
+      if (!(insn->flags & LT)) {
+	fprintf(stderr,"Set instruction without LT specified \"%s\"\n",insn->name);
+	exit(8);
+      }
+
+      printf("   if ((%sword64)op1 < (%sword64)op2)\n",(boolU ? "u" : ""),(boolU ? "u" : ""));
+      printf("    GPR[destreg] = 1;\n");
+      printf("   else\n");
+      printf("    GPR[destreg] = 0;\n");
+     }
+     break ;
+
+    case AND:
+     printf("   GPR[destreg] = (op1 & op2);\n");
+     break ;
+
+    case OR:
+     printf("   GPR[destreg] = %s(op1 | op2);\n",((insn->flags & NOT) ? "~" : ""));
+     break ;
+
+    case XOR:
+     printf("   GPR[destreg] = (op1 ^ op2);\n");
+     break ;
+
+    case DECODE:
+     printf("   decode_coproc(instruction);\n");
+     break ;
+
+    case CACHE:
+     /* 16-bit offset is sign-extended and added to the base register to make a virtual address */
+     /* The virtual address is translated to a physical address using the TLB */
+     /* The hint specifies a cache operation for that address */
+     printf("    uword64 vaddr = (op1 + offset);\n");
+     printf("    uword64 paddr;\n");
+     printf("    int uncached;\n");
+     /* NOTE: We are assuming that the AddressTranslation is a load: */
+     printf("    if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))\n");
+     printf("      CacheOp(hint,vaddr,paddr,instruction);\n");
+     break;
+
+    case MADD16: /* VR4100 specific multiply-add instructions */
+     /* Some of this code is shared with the standard multiply
+	routines, so an effort should be made to merge where
+	possible. */
+     if (features & FEATURE_WARN_LOHI) {
+       printf("   CHECKHILO(\"Multiply-Add\");\n");
+     }
+     if (features & FEATURE_WARN_RESULT) {
+       /* Give user a warning if either op1 or op2 are not 16bit signed integers */
+       printf("   if (NOTHALFWORDVALUE(op1) || NOTHALFWORDVALUE(op2))\n");
+       printf("     sim_warning(\"MADD16 operation with non-16bit operands\");\n");
+     }
+     printf("   {\n");
+     printf("    uword64 temp = (op1 * op2);\n"); /* 16x16 multiply */
+     if (GETDATASIZEINSN(insn) == DOUBLEWORD) {
+       printf("   LO = LO + temp;\n");
+     } else { /* WORD */
+       printf("   temp += (SET64HI(WORD64LO(HI)) | WORD64LO(LO));\n");
+       printf("   LO = SIGNEXTEND((%s)WORD64LO(temp),32);\n",regtype);
+       printf("   HI = SIGNEXTEND((%s)WORD64HI(temp),32);\n",regtype);
+     }
+     printf("   }\n");
+     break;
+
+    case RSVD: /* "Reserved Instruction" on MIPS IV, or if co-proc 3 absent. Otherwise "CoProcessorUnusable" */
+     if (doisa < 4) {
+       printf("   if (CoProcPresent(3))\n");
+       printf("    SignalException(CoProcessorUnusable);\n");
+       printf("   else\n");
+     }
+     printf("   SignalException(ReservedInstruction,instruction);\n");
+     break ;
+
+    case JUMP:
+     if (insn->flags & LINK) {
+       if (!(insn->flags & REG))
+	printf("   int destreg = 31;\n");
+       printf("   GPR[destreg] = (PC + %d); /* NOTE: The PC is already %d ahead within the simulator */\n",
+	      mips16 ? 2 : 4, mips16 ? 2 : 4);
+     }
+
+     if (insn->flags & NOT)
+       printf("   op1 ^= 1;\n");
+
+     printf("   /* NOTE: The jump occurs AFTER the next instruction has been executed */\n");
+     printf("   DSPC = op1;\n");
+     printf("   DELAYSLOT();\n");
+     break ;
+
+    case BRANCH: /* execute delay slot instruction before branch unless (LIKELY && branch_not_taken) */
+     if (insn->flags & FP) {
+       if (doisa < 4) {
+	 printf("  if (condition_code != 0)\n");
+	 printf("   SignalException(ReservedInstruction,instruction);\n");
+	 printf("  else {\n");
+       }
+       /* "PREVCOC1()" should be the COC1 value at the start of the preceding instruction */
+       printf("   int condition = (%s == boolean);\n",((doisa < 4) ? "PREVCOC1()" : "GETFCC(condition_code)"));
+     } else {
+       if ((insn->flags & NOT) && !(insn->flags & EQ)) {
+	 fprintf(stderr,"NOT specified when not EQ in \"%s\"\n",insn->name);
+	 exit(7);
+       }
+       if ((insn->flags & NOT) && (insn->flags & (GT | LT))) {
+	 fprintf(stderr,"NOT specified with GT or LT in \"%s\"\n",insn->name);
+	 exit(7);
+       }            
+       /* GT  LT */
+       if (insn->flags & GT)
+	printf("   int condition = (op1 >%s 0);\n",((insn->flags & EQ) ? "=" : ""));
+       else
+	if (insn->flags & LT)
+	 printf("   int condition = (op1 <%s 0);\n",((insn->flags & EQ) ? "=" : ""));
+	else
+	 if (insn->flags & EQ)
+	  printf("   int condition = (op1 %c= op2);\n",((insn->flags & NOT) ? '!' : '='));
+     }
+
+     if (insn->flags & LINK) {
+       if (features & FEATURE_WARN_R31) {
+	 printf("   if (((instruction >> %d) & 0x%08X) == 31)\n",OP_SH_RS,OP_MASK_RS);
+	 printf("    sim_warning(\"Branch with link using r31 as source operand\");\n");
+       }
+       printf("   GPR[31] = (PC + 4); /* NOTE: PC is already 8 ahead */\n");
+     }
+
+     if (! mips16) {
+       printf("   /* NOTE: The branch occurs AFTER the next instruction has been executed */\n");
+       printf("   if (condition) {\n");
+       printf("    DSPC = (PC + offset);\n");
+       printf("    DELAYSLOT();\n");
+       printf("   }\n");
+     } else {
+       /* No delayed slots for mips16 branches.  */
+       printf("   if (condition)\n");
+       printf("    PC = PC + offset;\n");
+     }
+     if ((insn->flags & FP) && (doisa != 1)) {
+       printf("   else if (likely) {\n");
+       printf("    NULLIFY();\n");
+       printf("   }\n");
+     } else if (insn->flags & LIKELY) {
+       printf("   else\n");
+       printf("    NULLIFY();\n");
+     }
+     if ((insn->flags & FP) && (doisa < 4))
+      printf("   }\n");
+     break ;
+
+    case PREFETCH: /* The beginning is shared with normal load operations */
+    case LOAD:
+    case STORE:
+     {
+      int isload = ((insn->type == LOAD) || (insn->type == PREFETCH));
+      int datalen;
+      char *accesslength = "<UNKNOWN>";
+
+      switch (GETDATASIZEINSN(insn)) {
+	case BYTE :
+	 datalen = 1;
+	 accesslength = "AccessLength_BYTE";
+	 break ;
+
+	case HALFWORD :
+	 datalen = 2;
+	 accesslength = "AccessLength_HALFWORD";
+	 break ;
+
+	case WORD :
+	 datalen = 4;
+	 accesslength = "AccessLength_WORD";
+	 break ;
+
+	case DOUBLEWORD :
+	 datalen = 8;
+	 accesslength = "AccessLength_DOUBLEWORD";
+	 break ;
+      }
+
+      if (insn->flags & REG)
+       printf("   uword64 vaddr = ((uword64)op1 + op2);\n");
+      else
+       printf("   uword64 vaddr = ((uword64)op1 + offset);\n");
+      printf("   uword64 paddr;\n");
+      printf("   int uncached;\n");
+
+      /* The following check should only occur on normal (non-shifted) memory loads */
+      if ((datalen != 1) && !(insn->flags & (LEFT | RIGHT))) {
+	printf("   if ((vaddr & %d) != 0)\n",(datalen - 1));
+	printf("    SignalException(%s);\n",(isload ? "AddressLoad" : "AddressStore"));
+	printf("   else\n") ;
+      }
+
+      printf("   {\n");
+      printf("    if (AddressTranslation(vaddr,isDATA,%s,&paddr,&uncached,isTARGET,isREAL))\n",(isload ? "isLOAD" : "isSTORE"));
+
+      if (insn->type == PREFETCH)
+       printf("     Prefetch(uncached,paddr,vaddr,isDATA,hint);\n");
+      else {
+	printf("    {\n");
+	printf("     %s memval;\n",(proc64 ? "uword64" : "unsigned int"));
+
+	if ((insn->flags & COPROC) && ((datalen != 4) && (datalen != 8))) {
+	  fprintf(stderr,"Co-processor transfer operation not WORD or DOUBLEWORD in length \"%s\"\n",insn->name);
+	  exit(6);
+	}
+
+	if (insn->flags & (LEFT | RIGHT)) {
+	  if ((insn->flags & LEFT) && (insn->flags & RIGHT)) {
+	    fprintf(stderr,"Memory transfer with both LEFT and RIGHT specified \"%s\"\n",insn->name);
+	    exit(4);
+	  }
+
+	  switch (datalen) {
+	   case 8:
+	    if (!proc64) {
+	      fprintf(stderr,"DOUBLEWORD shifted memory transfers only valid for 64-bit processors \"%s\"\n",insn->name);
+	      exit(4);
+	    }
+	    /* fall through to... */
+	   case 4:
+	    {
+	      printf("     uword64 mask = %d;\n",((datalen == 8) ? 0x7 : 0x3));
+	      printf("     unsigned int reverse = (ReverseEndian ? mask : 0);\n");
+	      printf("     unsigned int bigend = (BigEndianCPU ? mask : 0);\n");
+	      printf("     int byte;\n");
+	      printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));\n");
+	      printf("     byte = ((vaddr & mask) ^ bigend);\n");
+	      printf("     if (%sBigEndianMem)\n",((insn->flags & LEFT) ? "!" : ""));
+	      printf("      paddr &= ~mask;\n");
+
+	      if (isload) {
+		if (insn->flags & LEFT)
+		 printf("     memval = LoadMemory(uncached,byte,paddr,vaddr,isDATA,isREAL);\n");
+		else
+		 printf("     memval = LoadMemory(uncached,(%d - byte),paddr,vaddr,isDATA,isREAL);\n",(datalen - 1));
+	      }
+
+	      if (insn->flags & LEFT) {
+		if (isload) {
+		  /* For WORD transfers work out if the value will
+		     be in the top or bottom of the DOUBLEWORD
+		     returned: */
+#if 1
+		  build_endian_shift(proc64,datalen,2,s_right,32);
+#else
+		  if (proc64 && (datalen == 4)) {
+		    printf("     if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {\n");
+		    printf("      memval >>= 32;\n");
+		    printf("     }\n");
+		  }
+#endif
+		  printf("     GPR[destreg] = ((memval << ((%d - byte) * 8)) | (GPR[destreg] & (((uword64)1 << ((%d - byte) * 8)) - 1)));\n",(datalen - 1),(datalen - 1));
+		  if (proc64 && (datalen == 4))
+		   printf("     GPR[destreg] = SIGNEXTEND(GPR[destreg],32);\n");
+		} else { /* store */
+		  printf("     memval = (op2 >> (8 * (%d - byte)));\n",(datalen - 1));
+#if 1
+		  build_endian_shift(proc64,datalen,2,s_left,32);
+#else
+		  /* TODO: This is duplicated in the LOAD code
+		     above - and the RIGHT LOAD and STORE code
+		     below. It should be merged if possible. */
+		  if (proc64 && (datalen == 4)) {
+		    printf("    if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {\n");
+		    printf("     memval <<= 32;\n");
+		    printf("    }\n");
+		  }
+#endif
+		  printf("     StoreMemory(uncached,byte,memval,paddr,vaddr,isREAL);\n");
+		}
+	      } else { /* RIGHT */
+		if (isload) {
+#if 1
+		  build_endian_shift(proc64,datalen,2,s_right,32);
+#else
+		  if (proc64 && (datalen == 4)) {
+		    printf("     if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {\n");
+		    printf("      memval >>= 32;\n");
+		    printf("     }\n");
+		  }
+#endif
+		  printf("     {\n");
+		  printf("      uword64 srcmask;\n");
+		  /* All of this extra code is just a bodge
+		     required because some hosts don't allow
+		     ((v) << 64). The SPARC just leaves the (v)
+		     value un-touched. */
+		  printf("      if (byte == 0)\n");
+		  printf("       srcmask = 0;\n");
+		  printf("      else\n");
+		  printf("       srcmask = ((uword64)-1 << (8 * (%d - byte)));\n",datalen);
+		  printf("      GPR[destreg] = ((GPR[destreg] & srcmask) | (memval >> (8 * byte)));\n");
+		  printf("     }\n");
+		  if (proc64 && (datalen == 4))
+		   printf("     GPR[destreg] = SIGNEXTEND(GPR[destreg],32);\n");
+		} else { /* store */
+		  printf("     memval = (op2 << (byte * 8));\n");
+		  build_endian_shift(proc64,datalen,2,s_left,32);
+		  printf("     StoreMemory(uncached,(%s - byte),memval,paddr,vaddr,isREAL);\n",accesslength);
+		}
+	      }
+	    }
+	    break;
+
+	   default:
+	    fprintf(stderr,"Shifted memory transfer not WORD or DOUBLEWORD in length \"%s\"\n",insn->name);
+	    exit(6);
+	  }
+	} else { /* normal memory transfer */
+	  if (!(insn->flags & COPROC) && ((datalen == 8) || ((datalen == 4) & (insn->flags & UNSIGNED))) && !proc64) {
+	    fprintf(stderr,"Operation not available with 32bit wide memory access \"%s\"\n",insn->name);
+	    exit(4);
+	    /* TODO: The R4000 documentation states that a LWU
+	       instruction executed when in a 32bit processor mode
+	       should cause a ReservedInstruction exception. This
+	       will mean adding a run-time check into the code
+	       sequence. */
+	  }
+
+	  if (isload) {
+#if 1 /* see the comments attached to LOADDRMASK above */
+	    printf("     uword64 mask = 0x7;\n");
+#else
+	    printf("     uword64 mask = %d;\n",(proc64 ? 0x7 : 0x3));
+#endif
+	    printf("     unsigned int shift = %d;\n",(datalen >> 1));
+	    printf("     unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);\n");
+	    printf("     unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);\n");
+	    printf("     unsigned int byte;\n");
+
+/* TODO: This should really also check for 32bit world performing 32bit access */
+	    if (datalen != 8) /* not for DOUBLEWORD */
+	     printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));\n");
+
+	    printf("     memval = LoadMemory(uncached,%s,paddr,vaddr,isDATA,isREAL);\n",accesslength);
+
+	    /* The following will only make sense if the
+	       "LoadMemory" above returns a DOUBLEWORD entity */
+	    if (datalen != 8) { /* not for DOUBLEWORD */
+	      int valmask;
+	      switch (datalen) {
+	       case 1:
+		valmask = 0xFF;
+		break;
+
+	       case 2:
+		valmask = 0xFFFF;
+		break;
+
+	       case 4:
+		valmask = 0xFFFFFFFF;
+		break;
+
+	       default:
+		fprintf(stderr,"Unrecognised datalen (%d) when processing \"%s\"\n",datalen,insn->name);
+		exit(4);
+	      }
+	      printf("     byte = ((vaddr & mask) ^ (bigend << shift));\n");
+	      /* NOTE: The R4000 user manual has the COP_LW
+		 occuring in the same cycle as the rest of the
+		 instruction, yet the MIPS IV shows the operation
+		 happening on the next cycle. To keep the simulator
+		 simple, this code follows the R4000
+		 manual. Experimentation with a silicon
+		 implementation will be needed to ascertain the
+		 correct operation. */
+	      if (insn->flags & COPROC)
+	       printf("     COP_LW(%s,destreg,(unsigned int)",
+		      ((insn->flags & REG)
+		       ? "1"
+		       : "((instruction >> 26) & 0x3)"));
+	      else
+	       printf("     GPR[destreg] = (");
+
+	      if (insn->flags & SIGNEXTEND)
+	       printf("SIGNEXTEND(");
+	      printf("((memval >> (8 * byte)) & 0x%08X)",valmask);
+	      if (insn->flags & SIGNEXTEND)
+	       printf(",%d)",(datalen * 8));
+	      printf(");\n");
+	    } else {
+	      if (insn->flags & COPROC)
+	       printf("     COP_LD(%s,destreg,memval);;\n",
+		      ((insn->flags & REG)
+		       ? "1"
+		       : "((instruction >> 26) & 0x3)"));
+	      else
+	       printf("     GPR[destreg] = memval;\n");
+	    }
+	  } else { /* store operation */
+	    if ((datalen == 1) || (datalen == 2)) {
+	      /* SH and SB */
+#if 1 /* see the comments attached to LOADDRMASK above */
+	      printf("     uword64 mask = 0x7;\n");
+#else
+	      printf("     uword64 mask = %d;\n",(proc64 ? 0x7 : 0x3));
+#endif
+	      printf("     unsigned int shift = %d;\n",(datalen >> 1));
+	      printf("     unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);\n");
+	      printf("     unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);\n");
+	      printf("     unsigned int byte;\n");
+
+	      printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));\n");
+	      printf("     byte = ((vaddr & mask) ^ (bigend << shift));\n");
+	      printf("     memval = (op2 << (8 * byte));\n");
+	    } else
+	     if (proc64 && (datalen == 4)) { /* proc64 SC and SW */
+#if 1 /* see the comments attached to LOADDRMASK above */
+	       printf("     uword64 mask = 0x7;\n");
+#else
+	       printf("     uword64 mask = %d;\n",(proc64 ? 0x7 : 0x3));
+#endif
+	       printf("     unsigned int byte;\n");
+	       printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));\n");
+	       printf("     byte = ((vaddr & mask) ^ (BigEndianCPU << 2));\n");
+	       if (insn->flags & COPROC)
+		printf("     memval = (((uword64)COP_SW(%s,%s)) << (8 * byte));\n",
+		       ((insn->flags & REG)
+			? "1"
+			: "((instruction >> 26) & 0x3)"),
+		       ((insn->flags & FP) ? "fs" : "destreg"));
+	       else
+		printf("     memval = (op2 << (8 * byte));\n");
+	     } else { /* !proc64 SC and SW, plus proc64 SD and SCD */
+	       if (insn->flags & COPROC)
+		printf("     memval = (uword64)COP_S%c(%s,%s);\n",
+		       ((datalen == 8) ? 'D' : 'W'),
+		       ((insn->flags & REG)
+			? "1"
+			: "((instruction >> 26) & 0x3)"),
+		       ((insn->flags & FP) ? "fs" : "destreg"));
+	       else
+		printf("     memval = op2;\n");
+	     }
+
+	    if (insn->flags & ATOMIC)
+	     printf("      if (LLBIT)\n");
+
+	    printf("      {\n");
+	    printf("       StoreMemory(uncached,%s,memval,paddr,vaddr,isREAL);\n",accesslength);
+	    printf("      }\n");
+	  }
+
+	  if (insn->flags & ATOMIC) {
+	    if ((datalen != 4) && (datalen != 8)) {
+	      fprintf(stderr,"ATOMIC can only be applied to WORD and DOUBLEWORD instructions \"%s\"\n",insn->name);
+	      exit(4);
+	    } else
+	     if (isload)
+	      printf("     LLBIT = 1;\n");
+	     else {
+	       /* The documentation states that:
+
+		  SC *WILL* fail if coherent store into the same
+		  block occurs, or if an exception occurs between
+		  the LL and SC instructions.
+
+		  SC *MAY* fail if a load, store or prefetch is
+		  executed on the processor (VR4300 doesn't seem
+		  to), or if the instructions between the LL and
+		  SC are not in a 2048byte contiguous VM range.
+
+		  SC *MUST* have been preceded by an LL
+		  (i.e. LLBIT will be set), and it must use the
+		  same Vaddr, Paddr and cache-coherence algorithm
+		  as the LL (which means we should store this
+		  information from the load-conditional).
+		  */
+	       printf("     GPR[(instruction >> %d) & 0x%08X] = LLBIT;\n",OP_SH_RT,OP_MASK_RT);
+	     }
+	  }
+	}
+	printf("    }\n");
+      }
+      printf("   }\n");
+     }
+     break ;
+
+    case FPPREFX:
+     /* This code could be merged with the PREFIX generation above: */
+     printf("   uword64 vaddr = ((uword64)op1 + (uword64)op2);\n");
+     printf("   uword64 paddr;\n");
+     printf("   int uncached;\n");
+     printf("   if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))\n");
+     printf("    Prefetch(uncached,paddr,vaddr,isDATA,fs);\n");
+     break ;
+
+    case FPMOVEC:
+     if (insn->flags & CONTROL) {
+       /* The following "magic" of interpreting the FP
+	  control-register number would not be needed if we were not
+	  trying to match our internal register numbers with those
+	  used by GDB. */
+       printf("    if (to) {\n");
+       if (doisa < 4) {
+	 printf("     if (fs == 0) {\n");
+	 printf("      PENDING_FILL((fs + FCR0IDX),WORD64LO(GPR[ft]));\n");
+	 printf("     } else if (fs == 31) {\n");
+	 printf("      PENDING_FILL((fs + FCR31IDX),WORD64LO(GPR[ft]));\n");
+	 printf("     } /* else NOP */\n");
+	 printf("     PENDING_FILL(COCIDX,0); /* special case */\n");
+       } else {
+	 printf("     if (fs == 0) {\n");
+	 printf("      FCR0 = WORD64LO(GPR[ft]);\n");
+	 printf("     } else if (fs == 31) {\n");
+	 printf("      FCR31 = WORD64LO(GPR[ft]);\n");
+	 printf("     } /* else NOP */\n");
+	 printf("     SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0)); /* COC[1] */\n");
+       }
+       printf("    } else { /* control from */\n");
+       if (doisa < 4) {
+	 printf("     if (fs == 0) {\n");
+	 printf("      PENDING_FILL(ft,SIGNEXTEND(FCR0,32));\n");
+	 printf("     } else if (fs == 31) {\n");
+	 printf("      PENDING_FILL(ft,SIGNEXTEND(FCR31,32));\n");
+	 printf("     } /* else NOP */\n");
+       } else {
+	 printf("     if (fs == 0) {\n");
+	 printf("      GPR[ft] = SIGNEXTEND(FCR0,32);\n");
+	 printf("     } else if (fs == 31) {\n");
+	 printf("      GPR[ft] = SIGNEXTEND(FCR31,32);\n");
+	 printf("     } /* else NOP */\n");
+       }
+       printf("    }\n");
+     } else {
+       printf("    if (to) {\n");
+       if (GETDATASIZEINSN(insn) == WORD) {
+	 if (doisa < 4) { 
+	   printf("     if (SizeFGR() == 64) {\n");
+	   printf("      PENDING_FILL((fs + FGRIDX),(SET64HI(0xDEADC0DE) | WORD64LO(GPR[ft])));\n");
+	   printf("     } else { \n");
+	   printf("      PENDING_FILL((fs + FGRIDX),WORD64LO(GPR[ft]));\n");
+	   printf("     }\n");
+	 } else {
+	   printf("     if (SizeFGR() == 64)\n");
+	   printf("      FGR[fs] = (SET64HI(0xDEADC0DE) | WORD64LO(GPR[ft]));\n");
+	   printf("     else\n");
+	   printf("      FGR[fs] = WORD64LO(GPR[ft]);\n");
+	   printf("     fpr_state[fs] = fmt_uninterpreted;\n");
+	 }
+       } else if (GETDATASIZEINSN(insn) == DOUBLEWORD) {
+	 if (doisa < 4) {
+	   printf("     if (SizeFGR() == 64) {\n");
+	   printf("      PENDING_FILL((fs + FGRIDX),GPR[ft]);\n");
+	   printf("     } else\n");
+	   printf("      if ((fs & 0x1) == 0)\n");
+	   printf("       {\n");
+	   printf("        PENDING_FILL(((fs + 1) + FGRIDX),WORD64HI(GPR[ft]));\n");
+	   printf("        PENDING_FILL((fs + FGRIDX),WORD64LO(GPR[ft]));\n");
+	   printf("       }\n");
+	   if (features & FEATURE_WARN_RESULT) {
+	     printf("      else\n");
+	     printf("       UndefinedResult();\n");
+	   }
+	 } else {
+	   printf("     if (SizeFGR() == 64) {\n");
+	   printf("      FGR[fs] = GPR[ft];\n");
+	   printf("      fpr_state[fs] = fmt_uninterpreted;\n");
+	   printf("     } else\n");
+	   printf("      if ((fs & 0x1) == 0)\n");
+	   printf("       {\n");
+	   printf("        FGR[fs + 1] = WORD64HI(GPR[ft]);\n");
+	   printf("        FGR[fs] = WORD64LO(GPR[ft]);\n");
+	   printf("        fpr_state[fs + 1] = fmt_uninterpreted;\n");
+	   printf("        fpr_state[fs] = fmt_uninterpreted;\n");
+	   printf("       }\n");
+	   if (features & FEATURE_WARN_RESULT) {
+	     printf("      else\n");
+	     printf("       UndefinedResult();\n");
+	   }
+	 }
+       } else {
+	 fprintf(stderr,"Invalid data width specified in FPU Move operation\n");
+	 exit(1);
+       }
+       printf("    } else {\n");
+       if (GETDATASIZEINSN(insn) == WORD) {
+	 if (doisa < 4) /* write-back occurs in next cycle */
+	  printf("     PENDING_FILL(ft,SIGNEXTEND(FGR[fs],32));\n");
+	 else /* in this cycle */
+	  printf("     GPR[ft] = SIGNEXTEND(FGR[fs],32);\n");
+       } else if (GETDATASIZEINSN(insn) == DOUBLEWORD) {
+	 if (doisa < 4) { 
+	   printf("     if (SizeFGR() == 64) {\n");
+	   printf("      PENDING_FILL(ft,FGR[fs]);\n");
+	   printf("     } else\n");
+	   printf("      if ((fs & 0x1) == 0) {\n");
+	   printf("       PENDING_FILL(ft,(SET64HI(FGR[fs+1]) | FGR[fs]));\n");
+	   printf("      } else {\n");
+	   printf("       PENDING_FILL(ft,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);\n");
+	   if (features & FEATURE_WARN_RESULT)
+	   printf("        UndefinedResult();\n");
+	   printf("      }\n");
+	 } else {
+	   printf("     if (SizeFGR() == 64)\n");
+	   printf("      GPR[ft] = FGR[fs];\n");
+	   printf("     else\n");
+	   printf("      if ((fs & 0x1) == 0)\n");
+	   printf("       GPR[ft] = (SET64HI(FGR[fs + 1]) | FGR[fs]);\n");
+	   printf("      else {\n");
+	   printf("       GPR[ft] = (SET64HI(0xDEADC0DE) | 0xBAD0BAD0);\n");
+	   if (features & FEATURE_WARN_RESULT)
+	   printf("       UndefinedResult();\n");
+	   printf("      }\n");
+	 }
+       } else {
+	 fprintf(stderr,"Invalid data width specified in FPU Move operation\n");
+	 exit(1);
+       }
+       printf("    }\n");
+     }
+     break ;
+
+    case FPMOVE:
+     if (insn->flags & CONDITIONAL) {
+       if (insn->flags & INTEGER) { /* moving GPR - testing FGR */
+	 printf("   if (GETFCC(condition_code) == boolean)\n");
+	 printf("    GPR[destreg] = op1;\n");
+       } else {
+	 if (insn->flags & EQ) /* moving FGR - testing GPR */
+	  printf("   if (op2 %c= 0)\n",((insn->flags & NOT) ? '!' : '='));
+	 else
+	  printf("   if (GETFCC(condition_code) == boolean)\n");
+	 printf("    StoreFPR(destreg,format,ValueFPR(fs,format));\n");
+	 printf("   else\n");
+	 printf("    StoreFPR(destreg,format,ValueFPR(destreg,format));\n");
+       }
+     } else { /* simple MOVE */
+       printf("   StoreFPR(destreg,format,ValueFPR(fs,format));\n");
+     }
+     break ;
+
+    case FPNEG:
+     printf("  if ((format != fmt_single) && (format != fmt_double))\n");
+     printf("   SignalException(ReservedInstruction,instruction);\n");
+     printf("  else\n");
+     printf("   StoreFPR(destreg,format,Negate(ValueFPR(fs,format),format));\n");
+     break ;
+
+    case FPABS:
+     printf("  if ((format != fmt_single) && (format != fmt_double))\n");
+     printf("   SignalException(ReservedInstruction,instruction);\n");
+     printf("  else\n");
+     printf("   StoreFPR(destreg,format,AbsoluteValue(ValueFPR(fs,format),format));\n");
+     break ;
+
+    case FPDIV:
+     printf("  if ((format != fmt_single) && (format != fmt_double))\n");
+     printf("   SignalException(ReservedInstruction,instruction);\n");
+     printf("  else\n");
+     printf("   StoreFPR(destreg,format,Divide(ValueFPR(fs,format),ValueFPR(ft,format),format));\n");
+     break ;
+
+    case FPMUL:
+     printf("  if ((format != fmt_single) && (format != fmt_double))\n");
+     printf("   SignalException(ReservedInstruction,instruction);\n");
+     printf("  else\n");
+     printf("   StoreFPR(destreg,format,Multiply(ValueFPR(fs,format),ValueFPR(ft,format),format));\n");
+     break ;
+
+    case FPRECIP:
+     printf("  if ((format != fmt_single) && (format != fmt_double))\n");
+     printf("   SignalException(ReservedInstruction,instruction);\n");
+     printf("  else\n");
+     printf("   StoreFPR(destreg,format,Recip(ValueFPR(fs,format),format));\n");
+     break ;
+
+    case FPSQRT:
+     printf("  if ((format != fmt_single) && (format != fmt_double))\n");
+     printf("   SignalException(ReservedInstruction,instruction);\n");
+     printf("  else\n");
+     printf("   StoreFPR(destreg,format,%s(SquareRoot(ValueFPR(fs,format),format)));\n",((insn->flags & RECIP) ? "Recip" : ""));
+     break ;
+
+    case FPCEIL:
+    case FPFLOOR:
+    case FPTRUNC:
+    case FPROUND:
+     {
+       char *op = "";
+       char *type = "";
+
+       switch (insn->type) {
+	 case FPCEIL:
+	  op = "FP_RM_TOPINF";
+	  break;
+	 case FPFLOOR:
+	  op = "FP_RM_TOMINF";
+	  break;
+	 case FPTRUNC:
+	  op = "FP_RM_TOZERO";
+	  break;
+	 case FPROUND:
+	  op = "FP_RM_NEAREST";
+	  break;
+	 default:
+	  fprintf(stderr,"Error: Handled missing for FP reason code %d\n",insn->type);
+	  exit(1);
+       }
+
+       switch (GETDATASIZEINSN(insn)) {
+	 case WORD :
+	  type = "fmt_word";
+	  break;
+	 case DOUBLEWORD :
+	  type = "fmt_long";
+	  break;
+	 default:
+	  fprintf(stderr,"Error in instruction encoding table for FP %s operation (not WORD or DOUBLEWORD)\n",op);
+	  exit(1);
+       }
+       printf("  if ((format != fmt_single) && (format != fmt_double))\n");
+       printf("   SignalException(ReservedInstruction,instruction);\n");
+       printf("  else\n");
+       printf("   StoreFPR(destreg,%s,Convert(%s,ValueFPR(fs,format),format,%s));\n",type,op,type);
+     }
+     break ;
+
+    case FPCONVERT:
+     {
+       char *type = "";
+       switch (GETDATASIZEINSN(insn)) {
+	 case SINGLE:
+	  type = "fmt_single";
+	  break;
+	 case DOUBLE:
+	  type = "fmt_double";
+	  break;
+	 case WORD:
+	  type = "fmt_word";
+	  break;
+	 case DOUBLEWORD:
+	  type = "fmt_long";
+	  break;
+	 default :
+	  fprintf(stderr,"Error: Unknown data size %d in FPCONVERT instruction\n",GETDATASIZEINSN(insn));
+	  exit(1);
+	}
+
+       /* Not all combinations of conversion are valid at the
+	  moment: When converting to a fixed-point format, only
+	  floating-point sources are allowed. */
+       printf("   if ((format == %s) | %s)\n",type,((insn->flags & FIXED) ? "((format == fmt_long) || (format == fmt_word))": "0"));
+       printf("    SignalException(ReservedInstruction,instruction);\n");
+       printf("   else\n");
+       printf("    StoreFPR(destreg,%s,Convert(GETRM(),ValueFPR(fs,format),format,%s));\n",type,type);
+     }
+     break ;
+
+    case FPSUB:
+     if (insn->flags & MULTIPLY) {
+       char *type = "";
+       switch (GETDATASIZEINSN(insn)) {
+	 case SINGLE:
+	  type = "fmt_single";
+	  break;
+	 case DOUBLE:
+	  type = "fmt_double";
+	  break;
+	 default:
+	  fprintf(stderr,"Error: Invalid data size %d for FPSUB operation\n",GETDATASIZEINSN(insn));
+	  exit(1);
+       }
+       printf("   StoreFPR(destreg,%s,%s(Sub(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s),%s));\n",type,((insn->flags & NOT) ? "Negate" : ""),type,type,type,type,type,type);
+     } else {
+       printf("  if ((format != fmt_single) && (format != fmt_double))\n");
+       printf("   SignalException(ReservedInstruction,instruction);\n");
+       printf("  else\n");
+       printf("   StoreFPR(destreg,format,Sub(ValueFPR(fs,format),ValueFPR(ft,format),format));\n");
+     }
+     break ;
+
+    case FPADD:
+     if (insn->flags & MULTIPLY) {
+       char *type = "";
+       switch (GETDATASIZEINSN(insn)) {
+	 case SINGLE:
+	  type = "fmt_single";
+	  break;
+	 case DOUBLE:
+	  type = "fmt_double";
+	  break;
+	 default:
+	  fprintf(stderr,"Error: Invalid data size %d for FPADD operation in instruction table\n",GETDATASIZEINSN(insn));
+	  exit(1);
+       }
+       if (insn->flags & NOT)
+	 printf ("   StoreFPR(destreg,%s,Negate(Add(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s),%s));\n",
+		 type, type, type, type, type, type, type);
+       else
+	 printf ("   StoreFPR(destreg,%s,Add(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s));\n",
+		 type, type, type, type, type, type);
+     } else {
+       printf("  if ((format != fmt_single) && (format != fmt_double))\n");
+       printf("   SignalException(ReservedInstruction,instruction);\n");
+       printf("  else\n");
+       printf("   StoreFPR(destreg,format,Add(ValueFPR(fs,format),ValueFPR(ft,format),format));\n");
+     }
+     break ;
+
+    case FPCOMPARE:
+     /* For the MIPS I,II or III there *MUST* be at least one
+	instruction between the compare that sets a condition code
+	and the branch that tests it. NOTE: However the hardware
+	does not detect this condition. */
+     /* Explicitly limit the operation to S and D formats: */
+     printf("   if ((format != fmt_single) && (format != fmt_double))\n");
+     printf("    SignalException(ReservedInstruction,instruction);\n") ;
+     printf("   else {\n");
+     if (doisa < 4) {
+       printf("    if ((cmpflags & (1 << 3)) || (condition_code != 0))\n");
+       printf("     SignalException(ReservedInstruction,instruction);\n") ;
+       printf("    else\n");
+     }
+     printf("     {\n");
+     printf("      int ignore = 0;\n");
+     printf("      int less = 0;\n");
+     printf("      int equal = 0;\n");
+     printf("      int unordered = 1;\n");
+     printf("      uword64 ofs = ValueFPR(fs,format);\n");
+     printf("      uword64 oft = ValueFPR(ft,format);\n");
+     printf("      if (NaN(ofs,format) || NaN(oft,format)) {\n");
+     printf("      if (FCSR & FP_ENABLE(IO)) {\n");
+     printf("       FCSR |= FP_CAUSE(IO);\n");
+     printf("       SignalException(FPE);\n");
+     printf("       ignore = 1;\n");
+     printf("      }\n");
+     printf("     } else {\n");
+     printf("      less = Less(ofs,oft,format);\n");
+     printf("      equal = Equal(ofs,oft,format);\n");
+     printf("      unordered = 0;\n");
+     printf("     }\n");
+     printf("     if (!ignore) {\n");
+     printf("      int condition = (((cmpflags & (1 << 2)) && less) || ((cmpflags & (1 << 1)) && equal) || ((cmpflags & (1 << 0)) && unordered));\n");
+     printf("      SETFCC(condition_code,condition);\n");
+     printf("     }\n");
+     printf("    }\n");
+     printf("   }\n");
+     break ;
+
+    default:
+     fprintf(stderr,"Unrecognised opcode type %d\n",insn->type) ;
+     exit(6) ;
+   }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -2160,7 +2694,7 @@ simulator.\n");
        break;
 
      default :
-       fprintf(stderr,"%s: FATAL error: unrecognised machine option type ID %d\n",machine_options[loop].type);
+       fprintf(stderr,"%s: FATAL error: unrecognised machine option type ID %d\n",name,machine_options[loop].type);
        exit(1);
    }
    fprintf(stderr,"%s\n",machine_options[loop].desc);
@@ -2206,7 +2740,6 @@ main(argc,argv)
    features |= FEATURE_GP64;
 
   while (1) {
-    int this_option_optind = (optind ? optind : 1);
     int option_index = 0;
     static struct option cmdline[] = {
       {"fast",    0,0,'f'},
@@ -2319,10 +2852,10 @@ main(argc,argv)
 
                  for (archloop = 0; (available_architectures[archloop].name != 0); archloop++) {
                    if ((*loptarg == 'v') || (*loptarg == 'V'))
-                    *loptarg++;
+                    loptarg++;
 
-                   if (*loptarg && (*loptarg == 'r') || (*loptarg == 'R'))
-                    *loptarg++;
+                   if ((*loptarg == 'r') || (*loptarg == 'R'))
+		    loptarg++;
 
                    if (strcmp(available_architectures[archloop].name,loptarg) == 0) {
                      doarch |= available_architectures[archloop].idflag;
@@ -2465,7 +2998,7 @@ my_strtoul(nptr, endptr, base)
 			break;
 		if (c >= base)
 			break;
-		if (any < 0 || acc > cutoff || acc == cutoff && c > cutlim)
+		if (any < 0 || acc > cutoff || (acc == cutoff && c > cutlim))
 			any = -1;
 		else {
 			any = 1;
