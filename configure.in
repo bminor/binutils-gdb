@@ -84,7 +84,7 @@ srcname="gnu development package"
 case "${host}" in
   m68k-apollo-sysv*)      host_makefile_frag=config/mh-apollo68 ;;
   m68k-apollo-bsd*)       host_makefile_frag=config/mh-a68bsd ;;
-  m88k-motorola-m88kbcs)  host_makefile_frag=config/mh-delta88;;
+  m88k-motorola-sysv*)    host_makefile_frag=config/mh-delta88;;
   m88k-dg-dgux*)	  host_makefile_frag=config/mh-dgux ;;
   mips-dec-ultrix*)       host_makefile_frag=config/mh-decstation ;;
   mips-sgi-irix4*)        host_makefile_frag=config/mh-irix4 ;;
