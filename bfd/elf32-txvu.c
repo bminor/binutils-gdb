@@ -53,15 +53,18 @@ static reloc_howto_type txvu_elf_howto_table[] =
 	 false),		/* pcrel_offset */
 
   /* A PC Relative 11-bit relocation, shifted by 3.
-     This reloc is complicated because relocations are relative to the upper
-     instruction, and I don't think BFD handles 64 bit instructions easily.
-     We could set the address of the reloc as the address of the lower
-     instruction, but then we'd have to do what is done for R_M32R_10_PCREL
-     which is to mask off the lower 3 bits of the pc before performing the
-     reloc.  */
+     Fortunately, the lower instruction has the lower address in the 64 bit
+     pair.  Thus we can treat the address of the instruction as a whole
+     as the address of the lower instruction (the one with the branch),
+     and pretend the instruction size is 32 bits.
+     Otherwise, we'd have to either perform the relocation on all 64 bits
+     (since the pc relative address is the start of the pair), or set the
+     address of the reloc as the address of the lower instruction and do what
+     is done for R_M32R_10_PCREL which is to mask off the lower 3 bits of the
+     pc before performing the reloc.  */
   HOWTO (R_TXVU_11_PCREL,	/* type */
 	 3,	                /* rightshift */
-	 3,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 11,	                /* bitsize */
 	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
