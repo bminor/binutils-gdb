@@ -275,6 +275,9 @@ ld2: ld1
 	$(HOSTING_EMU); ./ld1 -o foo.o -r $(OFILES)
 	$(HOSTING_EMU); ./ld1 -o ld2 $(HOSTING_CRT0) foo.o $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
+bootstrap: ld3
+	cmp ld2 ld3
+
 ld3: ld2
 	$(HOSTING_EMU); ./ld2 -o ld3 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
