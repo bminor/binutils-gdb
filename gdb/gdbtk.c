@@ -376,7 +376,7 @@ gdb_get_breakpoint_info (clientData, interp, argc, argv)
 			      "longjmp", "longjmp resume", "step resume",
 			      "through sigtramp", "watchpoint scope",
 			      "call dummy" };
-  static char *bpdisp[] = {"delete", "disable", "donttouch"};
+  static char *bpdisp[] = {"delete", "delstop", "disable", "donttouch"};
   struct command_line *cmd;
   int bpnum;
   struct breakpoint *b;

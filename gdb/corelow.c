@@ -278,7 +278,7 @@ get_core_registers (regno)
   sec_ptr reg_sec;
   unsigned size;
   char *the_regs;
-  char secname[10];
+  char secname[30];
   enum bfd_flavour our_flavour = bfd_get_flavour (core_bfd);
   struct core_fns *cf = NULL;
 

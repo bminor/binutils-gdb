@@ -305,12 +305,11 @@ gdb_mangle_name (type, i, j)
   if (len == 0)
     {
       sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
-      if (strcmp(buf, "__") == 0)
-	buf[0] = '\0';
     }
-  else if (newname != NULL && strchr (newname, '<') != NULL)
+  else if (physname[0] == 't' || physname[0] == 'Q')
     {
-      /* Template methods are fully mangled.  */
+      /* The physname for template and qualified methods already includes
+	 the class name.  */
       sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
       newname = NULL;
       len = 0;
@@ -2063,6 +2062,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	xmalloc (sizeof (struct symtab_and_line));
       values.nelts = 1;
       values.sals[0] = find_pc_line (pc, 0);
+      values.sals[0].pc = pc;
       return values;
     }
 

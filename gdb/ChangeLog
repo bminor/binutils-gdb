@@ -1,3 +1,21 @@
+Sat Jun  7 02:34:19 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+start-sanitize-gdbtk
+	* gdbtk.c (gdb_get_breakpoint_info):  Add string for new
+	enumeration del_at_next_stop to bpdisp array.
+
+end-sanitize-gdbtk
+	* eval.c (evaluate_subexp_for_sizeof):  Handle dereferencing
+	of non-pointer values.
+
+	* symtab.c (gdb_mangle_name):  Improve mangling of nested types,
+	their physical names already include the class name.
+
+	* valops.c (value_cast):  Handle upcast of a class pointer.
+
+	From Andreas Schwab (schwab@issan.informatik.uni-dortmund.de):
+	* corelow.c (get_core_registers):  Make secname big enough.
+
 Fri Jun  6 14:43:23 1997  Keith Seitz  <keiths@pizza.cygnus.com>
 
 	* config/sh/tm-sh.h: add define for FPSCR_REGNUM
