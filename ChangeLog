@@ -1,3 +1,8 @@
+Fri Apr  2 09:02:31 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* build-all.mk: Set GCC to gcc -O -G 8 for MIPS targets, since gcc
+	with gas currently defaults to -G 0.
+
 Thu Apr  1 08:25:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (all-flex): flex depends on byacc.
