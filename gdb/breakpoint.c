@@ -1697,7 +1697,7 @@ deprecated_frame_in_dummy (struct frame_info *frame)
        for signals.exp in the testsuite.  */
 	&& (get_frame_pc (frame)
 	    >= (b->address
-		- SIZEOF_CALL_DUMMY_WORDS / sizeof (LONGEST) * REGISTER_SIZE))
+		- DEPRECATED_SIZEOF_CALL_DUMMY_WORDS / sizeof (LONGEST) * DEPRECATED_REGISTER_SIZE))
 	&& get_frame_pc (frame) <= b->address)
       return 1;
   }
@@ -5464,7 +5464,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 
 #if !defined(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT)
 #define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(BYTE_SIZE) \
-    ((BYTE_SIZE) <= (REGISTER_SIZE))
+    ((BYTE_SIZE) <= (DEPRECATED_REGISTER_SIZE))
 #endif
 
 #if !defined(TARGET_REGION_OK_FOR_HW_WATCHPOINT)

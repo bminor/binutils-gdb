@@ -79,4 +79,4 @@
 /* Number of registers in a ptrace_getfpregs call. */
 
 #define VX_SIZE_FPREGS (8 * REGISTER_RAW_SIZE (FP0_REGNUM) \
-			+ (3 * REGISTER_SIZE))
+			+ (3 * DEPRECATED_REGISTER_SIZE))

@@ -274,20 +274,20 @@ extern void hppa_frame_init_saved_regs (struct frame_info *);
   (DEPRECATED_PC_IN_CALL_DUMMY((pc), (sp), (frame_address)) && \
    (read_memory_integer((pc), 4) == BREAKPOINT32))
 
-/*
- * Insert the specified number of args and function address
- * into a call sequence of the above form stored at DUMMYNAME.
- *
- * On the hppa we need to call the stack dummy through $$dyncall.
- * Therefore our version of FIX_CALL_DUMMY takes an extra argument,
- * real_pc, which is the location where gdb should start up the
- * inferior to do the function call.
- */
+/* Insert the specified number of args and function address into a
+   call sequence of the above form stored at DUMMYNAME.
+
+   On the hppa we need to call the stack dummy through $$dyncall.
+   Therefore our version of DEPRECATED_FIX_CALL_DUMMY takes an extra
+   argument, real_pc, which is the location where gdb should start up
+   the inferior to do the function call.  */
 
 /* FIXME: brobecker 2002-12-26.  This macro is going to cause us some
-   problems before we can go to multiarch partial as it has been diverted
-   on HPUX to return the value of the PC!  */
-#define FIX_CALL_DUMMY hppa_fix_call_dummy
+   problems before we can go to multiarch partial as it has been
+   diverted on HPUX to return the value of the PC!  */
+/* NOTE: cagney/2003-05-03: This has been replaced by push_dummy_code.
+   Hopefully that has all the parameters HP/UX needs.  */
+#define DEPRECATED_FIX_CALL_DUMMY hppa_fix_call_dummy
 extern CORE_ADDR hppa_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
 		                      struct value **, struct type *, int);
 

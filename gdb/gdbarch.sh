@@ -472,7 +472,7 @@ f:2:DWARF_REG_TO_REGNUM:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr:::no
 f:2:SDB_REG_TO_REGNUM:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr:::no_op_reg_to_regnum::0
 f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:::no_op_reg_to_regnum::0
 f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_name::0
-v::REGISTER_SIZE:int:register_size
+v::DEPRECATED_REGISTER_SIZE:int:deprecated_register_size
 v::REGISTER_BYTES:int:register_bytes
 # NOTE: cagney/2002-05-02: This function with predicate has a valid
 # (callable) initial value.  As a consequence, even when the predicate
@@ -533,11 +533,11 @@ v::CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
 # Replaced by push_dummy_code.
 f::CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void::::entry_point_address::0
 # Replaced by push_dummy_code.
-v::CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset
+v::DEPRECATED_CALL_DUMMY_START_OFFSET:CORE_ADDR:deprecated_call_dummy_start_offset
 # Replaced by push_dummy_code.
-v::CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset
+v::DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:deprecated_call_dummy_breakpoint_offset
 # Replaced by push_dummy_code.
-v::CALL_DUMMY_LENGTH:int:call_dummy_length
+v::DEPRECATED_CALL_DUMMY_LENGTH:int:deprecated_call_dummy_length
 # NOTE: cagney/2002-11-24: This function with predicate has a valid
 # (callable) initial value.  As a consequence, even when the predicate
 # is false, the corresponding function works.  This simplifies the
@@ -545,14 +545,14 @@ v::CALL_DUMMY_LENGTH:int:call_dummy_length
 # doesn't need to be modified.
 F::DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::generic_pc_in_call_dummy:generic_pc_in_call_dummy
 # Replaced by push_dummy_code.
-v::CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
+v::DEPRECATED_CALL_DUMMY_WORDS:LONGEST *:deprecated_call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
 # Replaced by push_dummy_code.
-v::SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0
+v::DEPRECATED_SIZEOF_CALL_DUMMY_WORDS:int:deprecated_sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0
 # Replaced by push_dummy_code.
 V:2:DEPRECATED_CALL_DUMMY_STACK_ADJUST:int:deprecated_call_dummy_stack_adjust::::0
 # Replaced by push_dummy_code.
-F::FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
-# This is a replacement for FIX_CALL_DUMMY et.al.
+F::DEPRECATED_FIX_CALL_DUMMY:void:deprecated_fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
+# This is a replacement for DEPRECATED_FIX_CALL_DUMMY et.al.
 M::PUSH_DUMMY_CODE:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr:
 F:2:DEPRECATED_INIT_FRAME_PC_FIRST:CORE_ADDR:deprecated_init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev
 F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev

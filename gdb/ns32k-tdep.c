@@ -556,7 +556,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, NS32K_PC_REGNUM);
   set_gdbarch_num_regs (gdbarch, NS32K_PS_REGNUM);
 
-  set_gdbarch_register_size (gdbarch, NS32K_REGISTER_SIZE);
+  set_gdbarch_deprecated_register_size (gdbarch, NS32K_REGISTER_SIZE);
   set_gdbarch_register_raw_size (gdbarch, ns32k_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, NS32K_MAX_REGISTER_RAW_SIZE);
   set_gdbarch_register_virtual_size (gdbarch, ns32k_register_virtual_size);
@@ -595,11 +595,11 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, ns32k_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_words (gdbarch, ns32k_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof_ns32k_call_dummy_words);
-  set_gdbarch_fix_call_dummy (gdbarch, ns32k_fix_call_dummy);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 3);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 15);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, ns32k_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof_ns32k_call_dummy_words);
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, ns32k_fix_call_dummy);
+  set_gdbarch_deprecated_call_dummy_start_offset (gdbarch, 3);
+  set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 15);
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
 

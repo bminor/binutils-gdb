@@ -1237,7 +1237,7 @@ arm_push_dummy_frame (void)
   write_register (ARM_SP_REGNUM, sp);
 }
 
-/* CALL_DUMMY_WORDS:
+/* DEPRECATED_CALL_DUMMY_WORDS:
    This sequence of words is the instructions
 
    mov  lr,pc
@@ -1265,9 +1265,9 @@ static void
 arm_set_call_dummy_breakpoint_offset (void)
 {
   if (caller_is_thumb)
-    set_gdbarch_call_dummy_breakpoint_offset (current_gdbarch, 4);
+    set_gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch, 4);
   else
-    set_gdbarch_call_dummy_breakpoint_offset (current_gdbarch, 8);
+    set_gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch, 8);
 }
 
 /* Fix up the call dummy, based on whether the processor is currently
@@ -1430,7 +1430,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
   /* Some platforms require a double-word aligned stack.  Make sure sp
      is correctly aligned before we start.  We always do this even if
      it isn't really needed -- it can never hurt things.  */
-  sp &= ~(CORE_ADDR)(2 * REGISTER_SIZE - 1);
+  sp &= ~(CORE_ADDR)(2 * DEPRECATED_REGISTER_SIZE - 1);
 
   /* The struct_return pointer occupies the first parameter
      passing register.  */
@@ -1477,7 +1477,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
 	 registers and stack.  */
       while (len > 0)
 	{
-	  int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
+	  int partial_len = len < DEPRECATED_REGISTER_SIZE ? len : DEPRECATED_REGISTER_SIZE;
 
 	  if (argreg <= ARM_LAST_ARG_REGNUM)
 	    {
@@ -1487,7 +1487,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
 	      if (arm_debug)
 		fprintf_unfiltered (gdb_stdlog, "arg %d in %s = 0x%s\n",
 				    argnum, REGISTER_NAME (argreg),
-				    phex (regval, REGISTER_SIZE));
+				    phex (regval, DEPRECATED_REGISTER_SIZE));
 	      regcache_cooked_write_unsigned (regcache, argreg, regval);
 	      argreg++;
 	    }
@@ -1497,8 +1497,8 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
 	      if (arm_debug)
 		fprintf_unfiltered (gdb_stdlog, "arg %d @ sp + %d\n",
 				    argnum, nstack);
-	      si = push_stack_item (si, val, REGISTER_SIZE);
-	      nstack += REGISTER_SIZE;
+	      si = push_stack_item (si, val, DEPRECATED_REGISTER_SIZE);
+	      nstack += DEPRECATED_REGISTER_SIZE;
 	    }
 	      
 	  len -= partial_len;
@@ -1799,7 +1799,7 @@ thumb_get_next_pc (CORE_ADDR pc)
 
       /* Fetch the saved PC from the stack.  It's stored above
          all of the other registers.  */
-      offset = bitcount (bits (inst1, 0, 7)) * REGISTER_SIZE;
+      offset = bitcount (bits (inst1, 0, 7)) * DEPRECATED_REGISTER_SIZE;
       sp = read_register (ARM_SP_REGNUM);
       nextpc = (CORE_ADDR) read_memory_integer (sp + offset, 4);
       nextpc = ADDR_BITS_REMOVE (nextpc);
@@ -2309,10 +2309,10 @@ arm_use_struct_convention (int gcc_p, struct type *type)
 
   /* In the ARM ABI, "integer" like aggregate types are returned in
      registers.  For an aggregate type to be integer like, its size
-     must be less than or equal to REGISTER_SIZE and the offset of
-     each addressable subfield must be zero.  Note that bit fields are
-     not addressable, and all addressable subfields of unions always
-     start at offset zero.
+     must be less than or equal to DEPRECATED_REGISTER_SIZE and the
+     offset of each addressable subfield must be zero.  Note that bit
+     fields are not addressable, and all addressable subfields of
+     unions always start at offset zero.
 
      This function is based on the behaviour of GCC 2.95.1.
      See: gcc/arm.c: arm_return_in_memory() for details.
@@ -2326,7 +2326,7 @@ arm_use_struct_convention (int gcc_p, struct type *type)
 
   /* All aggregate types that won't fit in a register must be returned
      in memory.  */
-  if (TYPE_LENGTH (type) > REGISTER_SIZE)
+  if (TYPE_LENGTH (type) > DEPRECATED_REGISTER_SIZE)
     {
       return 1;
     }
@@ -2348,11 +2348,11 @@ arm_use_struct_convention (int gcc_p, struct type *type)
       int i;
       /* Need to check if this struct/union is "integer" like.  For
          this to be true, its size must be less than or equal to
-         REGISTER_SIZE and the offset of each addressable subfield
-         must be zero.  Note that bit fields are not addressable, and
-         unions always start at offset zero.  If any of the subfields
-         is a floating point type, the struct/union cannot be an
-         integer type.  */
+         DEPRECATED_REGISTER_SIZE and the offset of each addressable
+         subfield must be zero.  Note that bit fields are not
+         addressable, and unions always start at offset zero.  If any
+         of the subfields is a floating point type, the struct/union
+         cannot be an integer type.  */
 
       /* For each field in the object, check:
          1) Is it FP? --> yes, nRc = 1;
@@ -2930,8 +2930,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
 
-  set_gdbarch_call_dummy_words (gdbarch, arm_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, arm_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
 
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
 
@@ -2991,7 +2991,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
 
   /* Integer registers are 4 bytes.  */
-  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_register_name (gdbarch, arm_register_name);
 
   /* Returning results.  */

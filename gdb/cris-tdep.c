@@ -971,7 +971,7 @@ cris_abi_original_store_return_value (struct type *type, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
   
-  if (len <= REGISTER_SIZE) 
+  if (len <= DEPRECATED_REGISTER_SIZE) 
     deprecated_write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_original_store_return_value: type length too large.");
@@ -984,7 +984,7 @@ cris_abi_v2_store_return_value (struct type *type, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
   
-  if (len <= 2 * REGISTER_SIZE)
+  if (len <= 2 * DEPRECATED_REGISTER_SIZE)
     {
       /* Note that this works since R10 and R11 are consecutive registers.  */
       deprecated_write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf,
@@ -1057,7 +1057,7 @@ cris_abi_original_extract_return_value (struct type *type, char *regbuf,
 {
   int len = TYPE_LENGTH (type);
   
-  if (len <= REGISTER_SIZE)
+  if (len <= DEPRECATED_REGISTER_SIZE)
     memcpy (valbuf, regbuf + REGISTER_BYTE (RET_REGNUM), len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_original_extract_return_value: type length too large");
@@ -1071,7 +1071,7 @@ cris_abi_v2_extract_return_value (struct type *type, char *regbuf,
 {
   int len = TYPE_LENGTH (type);
   
-  if (len <= 2 * REGISTER_SIZE)
+  if (len <= 2 * DEPRECATED_REGISTER_SIZE)
     memcpy (valbuf, regbuf + REGISTER_BYTE (RET_REGNUM), len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_v2_extract_return_value: type length too large");
@@ -1311,13 +1311,13 @@ cris_abi_original_push_arguments (int nargs, struct value **args,
   /* Make sure there's space on the stack.  Allocate space for data and a 
      parameter to refer to that data.  */
   for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
-    stack_alloc += (TYPE_LENGTH (VALUE_TYPE (args[argnum])) + REGISTER_SIZE);
+    stack_alloc += (TYPE_LENGTH (VALUE_TYPE (args[argnum])) + DEPRECATED_REGISTER_SIZE);
   sp -= stack_alloc;
   /* We may over-allocate a little here, but that won't hurt anything.  */
 
   /* Initialize stack frame pointers.  */
   fp_params = sp;
-  fp_data = sp + (nargs * REGISTER_SIZE);
+  fp_data = sp + (nargs * DEPRECATED_REGISTER_SIZE);
 
   /* Now load as many as possible of the first arguments into
      registers, and push the rest onto the stack.  */
@@ -1330,14 +1330,14 @@ cris_abi_original_push_arguments (int nargs, struct value **args,
       len = TYPE_LENGTH (type);
       val = (char *) VALUE_CONTENTS (args[argnum]);
     
-      if (len <= REGISTER_SIZE && argreg <= ARG4_REGNUM)
+      if (len <= DEPRECATED_REGISTER_SIZE && argreg <= ARG4_REGNUM)
         {
           /* Data fits in a register; put it in the first available 
              register.  */
           write_register (argreg, *(unsigned long *) val);
           argreg++;
         }
-      else if (len > REGISTER_SIZE && argreg <= ARG4_REGNUM)
+      else if (len > DEPRECATED_REGISTER_SIZE && argreg <= ARG4_REGNUM)
         {
           /* Data does not fit in register; pass it on the stack and
              put its address in the first available register.  */
@@ -1346,21 +1346,21 @@ cris_abi_original_push_arguments (int nargs, struct value **args,
           fp_data += len;
           argreg++;      
         }
-      else if (len > REGISTER_SIZE)
+      else if (len > DEPRECATED_REGISTER_SIZE)
         {
           /* Data does not fit in register; put both data and 
              parameter on the stack.  */
           write_memory (fp_data, val, len);
-          write_memory (fp_params, (char *) (&fp_data), REGISTER_SIZE);
+          write_memory (fp_params, (char *) (&fp_data), DEPRECATED_REGISTER_SIZE);
           fp_data += len;
-          fp_params += REGISTER_SIZE;
+          fp_params += DEPRECATED_REGISTER_SIZE;
         }
       else
         {
           /* Data fits in a register, but we are out of registers;
              put the parameter on the stack.  */
-          write_memory (fp_params, val, REGISTER_SIZE);
-          fp_params += REGISTER_SIZE;
+          write_memory (fp_params, val, DEPRECATED_REGISTER_SIZE);
+          fp_params += DEPRECATED_REGISTER_SIZE;
         }
     }
 
@@ -1401,20 +1401,21 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       int reg_demand;
       
       len = TYPE_LENGTH (VALUE_TYPE (args[argnum]));
-      reg_demand = (len / REGISTER_SIZE) + (len % REGISTER_SIZE != 0 ? 1 : 0);
+      reg_demand = (len / DEPRECATED_REGISTER_SIZE) + (len % DEPRECATED_REGISTER_SIZE != 0 ? 1 : 0);
 
-      /* reg_demand * REGISTER_SIZE is the amount of memory we might need to
-         allocate for this argument.  2 * REGISTER_SIZE is the amount of stack
-         space we might need to pass the argument itself (either by value or by
+      /* reg_demand * DEPRECATED_REGISTER_SIZE is the amount of memory
+         we might need to allocate for this argument.  2 *
+         DEPRECATED_REGISTER_SIZE is the amount of stack space we
+         might need to pass the argument itself (either by value or by
          reference).  */
-      stack_alloc += (reg_demand * REGISTER_SIZE + 2 * REGISTER_SIZE);
+      stack_alloc += (reg_demand * DEPRECATED_REGISTER_SIZE + 2 * DEPRECATED_REGISTER_SIZE);
     }
   sp -= stack_alloc;
   /* We may over-allocate a little here, but that won't hurt anything.  */
 
   /* Initialize frame pointers.  */
   fp_arg = sp;
-  fp_mem = sp + (nargs * (2 * REGISTER_SIZE));
+  fp_mem = sp + (nargs * (2 * DEPRECATED_REGISTER_SIZE));
 
   /* Now load as many as possible of the first arguments into registers,
      and push the rest onto the stack.  */
@@ -1432,9 +1433,9 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       val = (char *) VALUE_CONTENTS (args[argnum]);
       
       /* How may registers worth of storage do we need for this argument?  */
-      reg_demand = (len / REGISTER_SIZE) + (len % REGISTER_SIZE != 0 ? 1 : 0);
+      reg_demand = (len / DEPRECATED_REGISTER_SIZE) + (len % DEPRECATED_REGISTER_SIZE != 0 ? 1 : 0);
         
-      if (len <= (2 * REGISTER_SIZE)
+      if (len <= (2 * DEPRECATED_REGISTER_SIZE)
           && (argreg + reg_demand - 1 <= ARG4_REGNUM)) 
         {
           /* Data passed by value.  Fits in available register(s).  */
@@ -1442,10 +1443,10 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
             {
               write_register (argreg, *(unsigned long *) val);
               argreg++;
-              val += REGISTER_SIZE;
+              val += DEPRECATED_REGISTER_SIZE;
             }
         }
-      else if (len <= (2 * REGISTER_SIZE) && argreg <= ARG4_REGNUM)
+      else if (len <= (2 * DEPRECATED_REGISTER_SIZE) && argreg <= ARG4_REGNUM)
         {
           /* Data passed by value. Does not fit in available register(s).  
              Use the register(s) first, then the stack.  */
@@ -1455,28 +1456,29 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
                 {
                   write_register (argreg, *(unsigned long *) val);
                   argreg++;
-                  val += REGISTER_SIZE;
+                  val += DEPRECATED_REGISTER_SIZE;
                 }
               else
                 {
-                  /* I guess this memory write could write the remaining data
-                     all at once instead of in REGISTER_SIZE chunks.  */
-                  write_memory (fp_arg, val, REGISTER_SIZE);
-                  fp_arg += REGISTER_SIZE;
-                  val += REGISTER_SIZE;              
+                  /* I guess this memory write could write the
+                     remaining data all at once instead of in
+                     DEPRECATED_REGISTER_SIZE chunks.  */
+                  write_memory (fp_arg, val, DEPRECATED_REGISTER_SIZE);
+                  fp_arg += DEPRECATED_REGISTER_SIZE;
+                  val += DEPRECATED_REGISTER_SIZE;              
                 }
             }    
         }
-      else if (len > (2 * REGISTER_SIZE))
+      else if (len > (2 * DEPRECATED_REGISTER_SIZE))
         {
           /* Data passed by reference.  Put it on the stack.  */
           write_memory (fp_mem, val, len);
-          write_memory (fp_arg, (char *) (&fp_mem), REGISTER_SIZE);
+          write_memory (fp_arg, (char *) (&fp_mem), DEPRECATED_REGISTER_SIZE);
 
           /* fp_mem need not be word-aligned since it's just a chunk of
              memory being pointed at.  That is, += len would do.  */
-          fp_mem += reg_demand * REGISTER_SIZE;
-          fp_arg += REGISTER_SIZE;
+          fp_mem += reg_demand * DEPRECATED_REGISTER_SIZE;
+          fp_arg += DEPRECATED_REGISTER_SIZE;
         }
       else
         {
@@ -1486,7 +1488,7 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
           /* fp_arg must be word-aligned (i.e., don't += len) to match
              the function prologue.  */
-          fp_arg += reg_demand * REGISTER_SIZE;
+          fp_arg += reg_demand * DEPRECATED_REGISTER_SIZE;
         }
     }
 
@@ -4189,7 +4191,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   
   /* Length of ordinary registers used in push_word and a few other places. 
      REGISTER_RAW_SIZE is the real way to know how big a register is.  */
-  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
   
   /* NEW */
   set_gdbarch_register_bytes_ok (gdbarch, cris_register_bytes_ok);
@@ -4260,8 +4262,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   
   /* Defined to 1 to indicate that the target supports inferior function 
      calls.  */
-  set_gdbarch_call_dummy_words (gdbarch, 0);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, 0);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   

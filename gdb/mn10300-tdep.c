@@ -695,7 +695,8 @@ mn10300_frame_chain (struct frame_info *fi)
       /* Our caller has a frame pointer.  So find the frame in $a3 or
          in the stack.  */
       if (get_frame_saved_regs (fi)[A3_REGNUM])
-	return (read_memory_integer (get_frame_saved_regs (fi)[A3_REGNUM], REGISTER_SIZE));
+	return (read_memory_integer (get_frame_saved_regs (fi)[A3_REGNUM],
+				     DEPRECATED_REGISTER_SIZE));
       else
 	return read_register (A3_REGNUM);
     }
@@ -879,7 +880,8 @@ mn10300_frame_saved_pc (struct frame_info *fi)
 {
   int adjust = saved_regs_size (fi);
 
-  return (read_memory_integer (get_frame_base (fi) + adjust, REGISTER_SIZE));
+  return (read_memory_integer (get_frame_base (fi) + adjust,
+			       DEPRECATED_REGISTER_SIZE));
 }
 
 /* Function: mn10300_init_extra_frame_info
@@ -1144,9 +1146,8 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   /* Registers.  */
   set_gdbarch_num_regs (gdbarch, num_regs);
   set_gdbarch_register_name (gdbarch, register_name);
-  set_gdbarch_register_size (gdbarch, 4);
-  set_gdbarch_register_bytes (gdbarch, 
-                              num_regs * gdbarch_register_size (gdbarch));
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
+  set_gdbarch_register_bytes (gdbarch, num_regs * gdbarch_deprecated_register_size (gdbarch));
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_register_raw_size (gdbarch, mn10300_register_raw_size);
   set_gdbarch_register_byte (gdbarch, mn10300_register_byte);
@@ -1186,9 +1187,8 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_target_read_fp (gdbarch, generic_target_read_sp);
 
   /* Calling functions in the inferior from GDB.  */
-  set_gdbarch_call_dummy_words (gdbarch, mn10300_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 
-                                       sizeof (mn10300_call_dummy_words));
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, mn10300_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (mn10300_call_dummy_words));
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_deprecated_push_arguments (gdbarch, mn10300_push_arguments);
   set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);

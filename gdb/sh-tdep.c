@@ -1770,7 +1770,7 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       get_frame_extra_info (fi)->return_pc = deprecated_read_register_dummy (get_frame_pc (fi),
 								  get_frame_base (fi),
 								  PC_REGNUM);
-      get_frame_extra_info (fi)->f_offset = -(CALL_DUMMY_LENGTH + 4);
+      get_frame_extra_info (fi)->f_offset = -(DEPRECATED_CALL_DUMMY_LENGTH + 4);
       get_frame_extra_info (fi)->leaf_function = 0;
       return;
     }
@@ -1801,7 +1801,7 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       get_frame_extra_info (fi)->return_pc = 
 	deprecated_read_register_dummy (get_frame_pc (fi),
 					get_frame_base (fi), PC_REGNUM);
-      get_frame_extra_info (fi)->f_offset = -(CALL_DUMMY_LENGTH + 4);
+      get_frame_extra_info (fi)->f_offset = -(DEPRECATED_CALL_DUMMY_LENGTH + 4);
       get_frame_extra_info (fi)->leaf_function = 0;
       return;
     }
@@ -4367,7 +4367,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, 15);
   set_gdbarch_deprecated_fp_regnum (gdbarch, 14);
   set_gdbarch_pc_regnum (gdbarch, 16);
-  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, SH_DEFAULT_NUM_REGS * 4);
   set_gdbarch_deprecated_do_registers_info (gdbarch, sh_do_registers_info);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
@@ -4586,7 +4586,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* the number of real registers is the same whether we are in 
 	 ISA16(compact) or ISA32(media). */
       set_gdbarch_num_regs (gdbarch, SIM_SH64_NR_REGS);
-      set_gdbarch_register_size (gdbarch, 8); /*????*/
+      set_gdbarch_deprecated_register_size (gdbarch, 8); /*????*/
       set_gdbarch_register_bytes (gdbarch, 
 				  ((SIM_SH64_NR_FP_REGS + 1) * 4)
 				  + (SIM_SH64_NR_REGS - SIM_SH64_NR_FP_REGS -1) * 8);
@@ -4652,8 +4652,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
 
-  set_gdbarch_call_dummy_words (gdbarch, sh_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (sh_call_dummy_words));
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, sh_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (sh_call_dummy_words));
 
   set_gdbarch_deprecated_push_return_address (gdbarch, sh_push_return_address);
 

@@ -683,7 +683,8 @@ mcore_frame_chain (struct frame_info * fi)
 	{
 	  /* The "FP" was saved on the stack.  Don't forget to adjust
 	     the "FP" with the framesize to get a real FP. */
-	  callers_addr = read_memory_integer (get_frame_saved_regs (fi)[fp], REGISTER_SIZE)
+	  callers_addr = read_memory_integer (get_frame_saved_regs (fi)[fp],
+					      DEPRECATED_REGISTER_SIZE)
 	    + get_frame_extra_info (dummy)->framesize;
 	}
       else
@@ -767,7 +768,7 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
 					       get_frame_base (fi), regnum);
       else if (get_frame_saved_regs (fi)[regnum] != 0)
 	return read_memory_integer (get_frame_saved_regs (fi)[regnum],
-				    REGISTER_SIZE);
+				    DEPRECATED_REGISTER_SIZE);
     }
 
   return read_register (regnum);
@@ -814,7 +815,7 @@ mcore_pop_frame (void)
 	      ULONGEST value;
 
 	      value = read_memory_unsigned_integer (get_frame_saved_regs (fi)[rn],
-						    REGISTER_SIZE);
+						    DEPRECATED_REGISTER_SIZE);
 	      write_register (rn, value);
 	    }
 	}
@@ -830,9 +831,9 @@ mcore_pop_frame (void)
 /* Setup arguments and PR for a call to the target. First six arguments
    go in FIRST_ARGREG -> LAST_ARGREG, subsequent args go on to the stack.
 
-   * Types with lengths greater than REGISTER_SIZE may not be split
-   between registers and the stack, and they must start in an even-numbered
-   register. Subsequent args will go onto the stack.
+   - Types with lengths greater than DEPRECATED_REGISTER_SIZE may not
+   be split between registers and the stack, and they must start in an
+   even-numbered register. Subsequent args will go onto the stack.
 
    * Structs may be split between registers and stack, left-aligned.
 
@@ -884,21 +885,21 @@ mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
          numbered register. */
       olen = len;
 
-      if (TYPE_CODE (type) != TYPE_CODE_STRUCT && len > REGISTER_SIZE && argreg % 2)
+      if (TYPE_CODE (type) != TYPE_CODE_STRUCT && len > DEPRECATED_REGISTER_SIZE && argreg % 2)
 	{
-	  mcore_insn_debug (("MCORE PUSH: %d > REGISTER_SIZE: and %s is not even\n",
+	  mcore_insn_debug (("MCORE PUSH: %d > DEPRECATED_REGISTER_SIZE: and %s is not even\n",
 			     len, mcore_register_names[argreg]));
 	  argreg++;
 	}
 
-      if ((argreg <= LAST_ARGREG && len <= (LAST_ARGREG - argreg + 1) * REGISTER_SIZE)
+      if ((argreg <= LAST_ARGREG && len <= (LAST_ARGREG - argreg + 1) * DEPRECATED_REGISTER_SIZE)
 	  || (TYPE_CODE (type) == TYPE_CODE_STRUCT))
 	{
 	  /* Something that will fit entirely into registers (or a struct
 	     which may be split between registers and stack). */
 	  mcore_insn_debug (("MCORE PUSH: arg %d going into regs\n", argnum));
 
-	  if (TYPE_CODE (type) == TYPE_CODE_STRUCT && olen < REGISTER_SIZE)
+	  if (TYPE_CODE (type) == TYPE_CODE_STRUCT && olen < DEPRECATED_REGISTER_SIZE)
 	    {
 	      /* Small structs must be right aligned within the register,
 	         the most significant bits are undefined. */
@@ -909,16 +910,16 @@ mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
 	  while (len > 0 && argreg <= LAST_ARGREG)
 	    {
-	      write_register (argreg, extract_unsigned_integer (val, REGISTER_SIZE));
+	      write_register (argreg, extract_unsigned_integer (val, DEPRECATED_REGISTER_SIZE));
 	      argreg++;
-	      val += REGISTER_SIZE;
-	      len -= REGISTER_SIZE;
+	      val += DEPRECATED_REGISTER_SIZE;
+	      len -= DEPRECATED_REGISTER_SIZE;
 	    }
 
 	  /* Any remainder for the stack is noted below... */
 	}
       else if (TYPE_CODE (VALUE_TYPE (args[argnum])) != TYPE_CODE_STRUCT
-	       && len > REGISTER_SIZE)
+	       && len > DEPRECATED_REGISTER_SIZE)
 	{
 	  /* All subsequent args go onto the stack. */
 	  mcore_insn_debug (("MCORE PUSH: does not fit into regs, going onto stack\n"));
@@ -991,7 +992,7 @@ mcore_use_struct_convention (int gcc_p, struct type *type)
 CORE_ADDR
 mcore_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (regbuf + REGISTER_BYTE (FIRST_ARGREG), REGISTER_SIZE);
+  return extract_address (regbuf + REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
 }
 
 /* Given a function which returns a value of type TYPE, extract the
@@ -1029,7 +1030,7 @@ mcore_store_return_value (struct type *type, char *valbuf)
   value_size = TYPE_LENGTH (type);
 
   /* Return value fits into registers. */
-  return_size = (value_size + REGISTER_SIZE - 1) & ~(REGISTER_SIZE - 1);
+  return_size = (value_size + DEPRECATED_REGISTER_SIZE - 1) & ~(DEPRECATED_REGISTER_SIZE - 1);
   offset = REGISTER_BYTE (RETVAL_REGNUM) + (return_size - value_size);
   zeros = alloca (return_size);
   memset (zeros, 0, return_size);
@@ -1101,7 +1102,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Registers: */
 
   /* All registers are 32 bits */
-  set_gdbarch_register_size (gdbarch, MCORE_REG_SIZE);
+  set_gdbarch_deprecated_register_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_register_name (gdbarch, mcore_register_name);
@@ -1117,8 +1118,8 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call Dummies:  */
 
-  set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
   set_gdbarch_function_start_offset (gdbarch, 0);

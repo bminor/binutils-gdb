@@ -66,8 +66,6 @@ static gdbarch_frame_locals_address_ftype alpha_frame_locals_address;
 
 static gdbarch_skip_prologue_ftype alpha_skip_prologue;
 
-static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
-
 static gdbarch_get_longjmp_target_ftype alpha_get_longjmp_target;
 
 struct frame_extra_info
@@ -1811,7 +1809,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, ALPHA_FP0_REGNUM);
 
   set_gdbarch_register_name (gdbarch, alpha_register_name);
-  set_gdbarch_register_size (gdbarch, ALPHA_REGISTER_SIZE);
+  set_gdbarch_deprecated_register_size (gdbarch, ALPHA_REGISTER_SIZE);
   set_gdbarch_register_bytes (gdbarch, ALPHA_REGISTER_BYTES);
   set_gdbarch_register_byte (gdbarch, alpha_register_byte);
   set_gdbarch_register_raw_size (gdbarch, alpha_register_raw_size);
@@ -1859,8 +1857,8 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      stopping the user call is achieved via a bp_call_dummy breakpoint.
      But we need a fake CALL_DUMMY definition to enable the proper
      call_function_by_hand and to avoid zero length array warnings.  */
-  set_gdbarch_call_dummy_words (gdbarch, alpha_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, alpha_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, alpha_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, alpha_frame_locals_address);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, alpha_init_extra_frame_info);
@@ -1873,7 +1871,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, alpha_push_dummy_frame);
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
-  set_gdbarch_fix_call_dummy (gdbarch, alpha_fix_call_dummy);
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, alpha_fix_call_dummy);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_deprecated_init_frame_pc_first (gdbarch, alpha_init_frame_pc_first);
 

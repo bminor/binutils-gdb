@@ -954,7 +954,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      in use on any of the supported x86-64 targets.  */
 
   set_gdbarch_register_name (gdbarch, x86_64_register_name);
-  set_gdbarch_register_size (gdbarch, 8);
+  set_gdbarch_deprecated_register_size (gdbarch, 8);
 
   /* Total amount of space needed to store our copies of the machine's
      register (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS +

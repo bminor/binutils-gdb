@@ -636,9 +636,9 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  /* Get the value as a number */
 	  value = parse_and_eval_address (argv[i + 1]);
 	  /* Get the value into an array */
-	  buffer = xmalloc (REGISTER_SIZE);
+	  buffer = xmalloc (DEPRECATED_REGISTER_SIZE);
 	  old_chain = make_cleanup (xfree, buffer);
-	  store_signed_integer (buffer, REGISTER_SIZE, value);
+	  store_signed_integer (buffer, DEPRECATED_REGISTER_SIZE, value);
 	  /* Write it down */
 	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
 	  /* Free the buffer.  */

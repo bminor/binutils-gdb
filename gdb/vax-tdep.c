@@ -50,7 +50,6 @@ static gdbarch_deprecated_extract_struct_value_address_ftype
     vax_extract_struct_value_address;
 
 static gdbarch_deprecated_push_dummy_frame_ftype vax_push_dummy_frame;
-static gdbarch_fix_call_dummy_ftype vax_fix_call_dummy;
 
 /* Return 1 if P points to an invalid floating point value.
    LEN is the length in bytes -- not relevant on the Vax.  */
@@ -627,7 +626,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ps_regnum (gdbarch, VAX_PS_REGNUM);
 
   set_gdbarch_register_name (gdbarch, vax_register_name);
-  set_gdbarch_register_size (gdbarch, VAX_REGISTER_SIZE);
+  set_gdbarch_deprecated_register_size (gdbarch, VAX_REGISTER_SIZE);
   set_gdbarch_register_bytes (gdbarch, VAX_REGISTER_BYTES);
   set_gdbarch_register_byte (gdbarch, vax_register_byte);
   set_gdbarch_register_raw_size (gdbarch, vax_register_raw_size);
@@ -667,10 +666,10 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, vax_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, vax_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_words (gdbarch, vax_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof_vax_call_dummy_words);
-  set_gdbarch_fix_call_dummy (gdbarch, vax_fix_call_dummy);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 7);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, vax_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof_vax_call_dummy_words);
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, vax_fix_call_dummy);
+  set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 7);
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
 

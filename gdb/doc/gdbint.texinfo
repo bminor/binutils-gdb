@@ -3085,8 +3085,8 @@ custom breakpoint insertion and removal routines if
 @code{BREAKPOINT_FROM_PC} needs to read the target's memory for some
 reason.
 
-@item CALL_DUMMY_WORDS
-@findex CALL_DUMMY_WORDS
+@item DEPRECATED_CALL_DUMMY_WORDS
+@findex DEPRECATED_CALL_DUMMY_WORDS
 Pointer to an array of @code{LONGEST} words of data containing
 host-byte-ordered @code{REGISTER_BYTES} sized values that partially
 specify the sequence of instructions needed for an inferior function
@@ -3098,17 +3098,18 @@ data.
 This method has been replaced by @code{push_dummy_code}
 (@pxref{push_dummy_code}).
 
-@item SIZEOF_CALL_DUMMY_WORDS
-@findex SIZEOF_CALL_DUMMY_WORDS
-The size of @code{CALL_DUMMY_WORDS}.  This must return a positive value.
-See also @code{CALL_DUMMY_LENGTH}.
+@item DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
+@findex DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
+The size of @code{DEPRECATED_CALL_DUMMY_WORDS}.  This must return a
+positive value.  See also @code{DEPRECATED_CALL_DUMMY_LENGTH}.
 
 This method has been replaced by @code{push_dummy_code}
 (@pxref{push_dummy_code}).
 
 @item CALL_DUMMY
 @findex CALL_DUMMY
-A static initializer for @code{CALL_DUMMY_WORDS}.  Deprecated.
+A static initializer for @code{DEPRECATED_CALL_DUMMY_WORDS}.
+Deprecated.
 
 This method has been replaced by @code{push_dummy_code}
 (@pxref{push_dummy_code}).
@@ -3721,7 +3722,7 @@ This method replaces @code{DEPRECATED_PUSH_ARGUMENTS}.
 
 @item CORE_ADDR push_dummy_code (@var{gdbarch}, @var{sp}, @var{funaddr}, @var{using_gcc}, @var{args}, @var{nargs}, @var{value_type}, @var{real_pc}, @var{bp_addr})
 @findex push_dummy_code
-@findex FIX_CALL_DUMMY
+@findex DEPRECATED_FIX_CALL_DUMMY
 @anchor{push_dummy_code} Given a stack based call dummy, push the
 instruction sequence (including space for a breakpoint) to which the
 called function should return.
@@ -3734,11 +3735,12 @@ By default, the stack is grown sufficient to hold a frame-aligned
 (@pxref{frame_align}) breakpoint, @var{bp_addr} is set to the address
 reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
 
-This method replaces @code{CALL_DUMMY_WORDS},
-@code{SIZEOF_CALL_DUMMY_WORDS}, @code{CALL_DUMMY},
-@code{CALL_DUMMY_LOCATION}, @code{REGISTER_SIZE},
-@code{GDB_TARGET_IS_HPPA}, @code{CALL_DUMMY_BREAKPOINT_OFFSET}, and
-@code{FIX_CALL_DUMMY}.
+This method replaces @code{DEPRECATED_CALL_DUMMY_WORDS},
+@code{DEPRECATED_SIZEOF_CALL_DUMMY_WORDS}, @code{CALL_DUMMY},
+@code{CALL_DUMMY_LOCATION}, @code{DEPRECATED_REGISTER_SIZE},
+@code{GDB_TARGET_IS_HPPA},
+@code{DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET}, and
+@code{DEPRECATED_FIX_CALL_DUMMY}.
 
 @item DEPRECATED_PUSH_DUMMY_FRAME
 @findex DEPRECATED_PUSH_DUMMY_FRAME

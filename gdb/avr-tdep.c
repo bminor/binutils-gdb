@@ -1156,7 +1156,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, AVR_PC_REGNUM);
 
   set_gdbarch_register_name (gdbarch, avr_register_name);
-  set_gdbarch_register_size (gdbarch, 1);
+  set_gdbarch_deprecated_register_size (gdbarch, 1);
   set_gdbarch_register_bytes (gdbarch, AVR_NUM_REG_BYTES);
   set_gdbarch_register_byte (gdbarch, avr_register_byte);
   set_gdbarch_register_raw_size (gdbarch, avr_register_raw_size);
@@ -1168,7 +1168,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
   set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
-  set_gdbarch_call_dummy_words (gdbarch, avr_call_dummy_words);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, avr_call_dummy_words);
 
 /*    set_gdbarch_believe_pcc_promotion (gdbarch, 1); // TRoth: should this be set? */
 

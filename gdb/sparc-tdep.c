@@ -2357,9 +2357,10 @@ sparc_store_return_value (struct type *type, char *valbuf)
 
    For structs and unions, if the function was compiled with Sun cc,
    it expects 'unimp' after the call.  But gcc doesn't use that
-   (twisted) convention.  So leave a nop there for gcc (FIX_CALL_DUMMY
-   can assume it is operating on a pristine CALL_DUMMY, not one that
-   has already been customized for a different function).  */
+   (twisted) convention.  So leave a nop there for gcc
+   (DEPRECATED_FIX_CALL_DUMMY can assume it is operating on a pristine
+   CALL_DUMMY, not one that has already been customized for a
+   different function).  */
 
 void
 sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
@@ -2392,10 +2393,10 @@ sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
     {
       store_unsigned_integer (dummy + CALL_DUMMY_CALL_OFFSET + 8, 4,
 			      TYPE_LENGTH (value_type) & 0x1fff);
-      set_gdbarch_call_dummy_breakpoint_offset (current_gdbarch, 0x30);
+      set_gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch, 0x30);
     }
   else
-    set_gdbarch_call_dummy_breakpoint_offset (current_gdbarch, 0x2c);
+    set_gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch, 0x2c);
 
   if (!(GDB_TARGET_IS_SPARC64))
     {
@@ -3054,7 +3055,7 @@ sparc_gdbarch_fix_call_dummy (char *dummy,
 static CORE_ADDR
 sparc_call_dummy_address (void)
 {
-  return (CALL_DUMMY_START_OFFSET) + CALL_DUMMY_BREAKPOINT_OFFSET;
+  return (DEPRECATED_CALL_DUMMY_START_OFFSET) + DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET;
 }
 
 /* Supply the Y register number to those that need it.  */
@@ -3163,7 +3164,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sparc_extract_struct_value_address);
-  set_gdbarch_fix_call_dummy (gdbarch, sparc_gdbarch_fix_call_dummy);
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, sparc_gdbarch_fix_call_dummy);
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_deprecated_fp_regnum (gdbarch, SPARC_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
@@ -3221,8 +3222,8 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 #ifdef SPARC32_CALL_DUMMY_ON_STACK
       set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
       set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
-      set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0x30);
-      set_gdbarch_call_dummy_length (gdbarch, 0x38);
+      set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 0x30);
+      set_gdbarch_deprecated_call_dummy_length (gdbarch, 0x38);
 
       /* NOTE: cagney/2003-05-01: Using the just added push_dummy_code
 	 architecture method, it is now possible to implement a
@@ -3276,10 +3277,10 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	 are explained in Appendix D.3.  */
 
       set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-      set_gdbarch_call_dummy_words (gdbarch, call_dummy_32);
+      set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_32);
 #else
       set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-      set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
+      set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_nil);
 #endif
       set_gdbarch_deprecated_call_dummy_stack_adjust (gdbarch, 68);
       set_gdbarch_frame_args_skip (gdbarch, 68);
@@ -3293,14 +3294,14 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       set_gdbarch_register_byte (gdbarch, sparc32_register_byte);
       set_gdbarch_register_raw_size (gdbarch, sparc32_register_size);
-      set_gdbarch_register_size (gdbarch, 4);
+      set_gdbarch_deprecated_register_size (gdbarch, 4);
       set_gdbarch_register_virtual_size (gdbarch, sparc32_register_size);
       set_gdbarch_register_virtual_type (gdbarch, 
 					 sparc32_register_virtual_type);
 #ifdef SPARC32_CALL_DUMMY_ON_STACK
-      set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_32));
+      set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_32));
 #else
-      set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+      set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
 #endif
       set_gdbarch_stack_align (gdbarch, sparc32_stack_align);
       set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
@@ -3323,14 +3324,14 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 #ifdef SPARC64_CALL_DUMMY_ON_STACK
       set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
       set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
-      set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 8 * 4);
-      set_gdbarch_call_dummy_length (gdbarch, 192);
+      set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 8 * 4);
+      set_gdbarch_deprecated_call_dummy_length (gdbarch, 192);
       set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-      set_gdbarch_call_dummy_start_offset (gdbarch, 148);
-      set_gdbarch_call_dummy_words (gdbarch, call_dummy_64);
+      set_gdbarch_deprecated_call_dummy_start_offset (gdbarch, 148);
+      set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_64);
 #else
       set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-      set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
+      set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_nil);
 #endif
       set_gdbarch_deprecated_call_dummy_stack_adjust (gdbarch, 128);
       set_gdbarch_frame_args_skip (gdbarch, 136);
@@ -3347,14 +3348,14 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	 to assume they all are (since most of them are).  */
       set_gdbarch_register_byte (gdbarch, sparc64_register_byte);
       set_gdbarch_register_raw_size (gdbarch, sparc64_register_size);
-      set_gdbarch_register_size (gdbarch, 8);
+      set_gdbarch_deprecated_register_size (gdbarch, 8);
       set_gdbarch_register_virtual_size (gdbarch, sparc64_register_size);
       set_gdbarch_register_virtual_type (gdbarch, 
 					 sparc64_register_virtual_type);
 #ifdef SPARC64_CALL_DUMMY_ON_STACK
-      set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_64));
+      set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_64));
 #else
-      set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+      set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
 #endif
       set_gdbarch_stack_align (gdbarch, sparc64_stack_align);
       set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);

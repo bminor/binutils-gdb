@@ -149,8 +149,9 @@ generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
    figure out what the real PC (as in the resume address) is BEFORE
    calling this function (Oh, and I'm not even sure that this function
    is called with an decremented PC, the call to pc_in_call_dummy() in
-   that file is conditional on !CALL_DUMMY_BREAKPOINT_OFFSET_P yet
-   generic dummy targets set CALL_DUMMY_BREAKPOINT_OFFSET. True?).  */
+   that file is conditional on
+   !DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET_P yet generic dummy
+   targets set DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET. True?).  */
 
 int
 pc_in_dummy_frame (CORE_ADDR pc)

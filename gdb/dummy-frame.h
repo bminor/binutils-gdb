@@ -37,12 +37,13 @@ struct frame_id;
    generic enough to be used by many targets.
  
    The cheapest and most generic way to do CALL_DUMMY on a new target
-   is probably to define CALL_DUMMY to be empty, CALL_DUMMY_LENGTH to
-   zero, and CALL_DUMMY_LOCATION to AT_ENTRY.  Then you must remember
-   to define PUSH_RETURN_ADDRESS, because no call instruction will be
-   being executed by the target.  Also DEPRECATED_FRAME_CHAIN_VALID as
+   is probably to define CALL_DUMMY to be empty,
+   DEPRECATED_CALL_DUMMY_LENGTH to zero, and CALL_DUMMY_LOCATION to
+   AT_ENTRY.  Then you must remember to define PUSH_RETURN_ADDRESS,
+   because no call instruction will be being executed by the target.
+   Also DEPRECATED_FRAME_CHAIN_VALID as
    generic_{file,func}_frame_chain_valid and do not set
-   FIX_CALL_DUMMY.  */
+   DEPRECATED_FIX_CALL_DUMMY.  */
 
 /* If the PC falls in a dummy frame, return a dummy frame
    unwinder.  */

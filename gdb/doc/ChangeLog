@@ -1,3 +1,10 @@
+2003-05-05  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Make
+	CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS, CALL_DUMMY_LENGTH,
+	FIX_CALL_DUMMY, CALL_DUMMY_BREAKPOINT_OFFSET and
+	CALL_DUMMY_BREAKPOINT_OFFSET deprecated.
+
 2003-05-04  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.texinfo (GDB/MI Symbol Query): Use @{ and @}.

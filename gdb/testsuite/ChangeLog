@@ -1,3 +1,8 @@
+2003-05-05  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/watchpoint.exp: Rename CALL_DUMMY_BREAKPOINT_OFFSET to
+	DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET in comments.
+
 2003-05-02  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.base/charset.exp: Update based on new behavior of set/show

@@ -2878,7 +2878,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, v->nregs);
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
   set_gdbarch_register_name (gdbarch, rs6000_register_name);
-  set_gdbarch_register_size (gdbarch, wordsize);
+  set_gdbarch_deprecated_register_size (gdbarch, wordsize);
   set_gdbarch_register_bytes (gdbarch, off);
   set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
   set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
@@ -2900,7 +2900,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_char_signed (gdbarch, 0);
 
-  set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);

@@ -1,3 +1,32 @@
+2003-05-05  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_REGISTER_SIZE): Rename REGISTER_SIZE.
+	(DEPRECATED_SIZEOF_CALL_DUMMY_WORDS): Rename
+	SIZEOF_CALL_DUMMY_WORDS.
+	(DEPRECATED_CALL_DUMMY_WORDS): Rename CALL_DUMMY_WORDS.
+	(DEPRECATED_FIX_CALL_DUMMY): Rename FIX_CALL_DUMMY.
+	(DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET): Rename
+	CALL_DUMMY_BREAKPOINT_OFFSET.
+	(DEPRECATED_CALL_DUMMY_START_OFFSET): Rename
+	CALL_DUMMY_START_OFFSET.
+	(DEPRECATED_CALL_DUMMY_LENGTH): Rename CALL_DUMMY_LENGTH.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* alpha-tdep.c, alphafbsd-tdep.c, arm-linux-tdep.c: Update.
+	* arm-tdep.c, avr-tdep.c, breakpoint.c, cris-tdep.c: Update.
+	* dummy-frame.c, dummy-frame.h, frv-tdep.c, gdbarch.c: Update.
+	* gdbarch.h, gdbarch.sh, h8300-tdep.c, hppa-tdep.c: Update.
+	* i386-tdep.c, ia64-tdep.c, infcall.c, inferior.h: Update.
+	* m68hc11-tdep.c, m68k-tdep.c, mcore-tdep.c: Update.
+	* mips-tdep.c, mn10300-tdep.c, ns32k-tdep.c: Update.
+	* rs6000-tdep.c, s390-tdep.c, sh-tdep.c, sol-thread.c: Update.
+	* sparc-tdep.c, target.c, v850-tdep.c, valops.c: Update.
+	* vax-tdep.c, x86-64-tdep.c, xstormy16-tdep.c: Update.
+	* config/ia64/tm-ia64.h, config/m68k/tm-vx68.h: Update.
+	* config/mips/tm-mips.h, config/pa/nm-hppah.h: Update.
+	* config/pa/tm-hppa.h, config/pa/tm-hppa64.h: Update.
+	* config/s390/tm-s390.h, config/sparc/tm-sp64.h: Update.
+	* config/sparc/tm-sparc.h: Update.
+	
 2003-05-04  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbthread.h (save_infrun_state): Drop prev_func_name parameter.

@@ -109,7 +109,7 @@ extern CORE_ADDR hppa_stack_align (CORE_ADDR sp);
    real way to know how big a register is.  */
 
 #if !GDB_MULTI_ARCH
-#define REGISTER_SIZE 4
+#define DEPRECATED_REGISTER_SIZE 4
 #endif
 
 /* Number of machine registers */
@@ -308,11 +308,11 @@ extern void hppa_pop_frame (void);
 #endif
 
 #if !GDB_MULTI_ARCH
-#define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 28)
+#define DEPRECATED_CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 28)
 #endif
 
 #if !GDB_MULTI_ARCH
-#define CALL_DUMMY_START_OFFSET 0
+#define DEPRECATED_CALL_DUMMY_START_OFFSET 0
 #endif
 
 #if !GDB_MULTI_ARCH
@@ -357,8 +357,8 @@ extern CORE_ADDR hppa_target_read_fp (void);
    push_word and a few other places, but REGISTER_RAW_SIZE is
    the real way to know how big a register is.  */
 
-#undef REGISTER_SIZE
-#define REGISTER_SIZE 8
+#undef DEPRECATED_REGISTER_SIZE
+#define DEPRECATED_REGISTER_SIZE 8
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  On the PA-RISC 2.0, all regs are 8 bytes, including
@@ -501,14 +501,14 @@ call_dummy
                     0xe820f0000fb110d3LL, 0x0001000400151820LL,\
                     0xe6c0000008000240LL}
 
-#define CALL_DUMMY_BREAKPOINT_OFFSET 22 * 4
+#define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET 22 * 4
 
-/* CALL_DUMMY_LENGTH is computed based on the size of a word on the target
-   machine, not the size of an instruction.  Since a word on this target
-   holds two instructions we have to divide the instruction size by two to
-   get the word size of the dummy.  */
-#undef CALL_DUMMY_LENGTH
-#define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 26 / 2)
+/* DEPRECATED_CALL_DUMMY_LENGTH is computed based on the size of a
+   word on the target machine, not the size of an instruction.  Since
+   a word on this target holds two instructions we have to divide the
+   instruction size by two to get the word size of the dummy.  */
+#undef DEPRECATED_CALL_DUMMY_LENGTH
+#define DEPRECATED_CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 26 / 2)
 
 /* The PA64 ABI mandates a 16 byte stack alignment.  */
 #undef STACK_ALIGN
@@ -540,12 +540,12 @@ call_dummy
     if (TYPE_CODE (TYPE) == TYPE_CODE_FLT) \
       memcpy ((VALBUF), \
 	      ((char *)(REGBUF)) + REGISTER_BYTE (FP4_REGNUM) + \
-              (REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
+              (DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
 	      TYPE_LENGTH (TYPE)); \
     else if  (is_integral_type(TYPE))   \
        memcpy ((VALBUF), \
                (char *)(REGBUF) + REGISTER_BYTE (28) + \
-               (REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
+               (DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
                TYPE_LENGTH (TYPE)); \
     else if (TYPE_LENGTH (TYPE) <= 8)   \
        memcpy ((VALBUF), \
@@ -574,13 +574,13 @@ call_dummy
     if (TYPE_CODE (TYPE) == TYPE_CODE_FLT) \
       deprecated_write_register_bytes \
 	      (REGISTER_BYTE (FP4_REGNUM) + \
-              (REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
+              (DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
               (VALBUF), \
 	      TYPE_LENGTH (TYPE)); \
     else if (is_integral_type(TYPE))   \
        deprecated_write_register_bytes \
               (REGISTER_BYTE (28) + \
-                 (REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
+                 (DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
                (VALBUF), \
                TYPE_LENGTH (TYPE)); \
     else if (TYPE_LENGTH (TYPE) <= 8)   \

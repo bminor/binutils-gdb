@@ -1,3 +1,8 @@
+2003-05-05  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (mi_cmd_data_write_register_values): Replace
+	REGISTER_SIZE with DEPRECATED_REGISTER_SIZE.
+
 2003-05-03  J. Brobecker  <brobecker@gnat.com>
 
 	From  Thierry Schneider  <tpschneider1@yahoo.com>:

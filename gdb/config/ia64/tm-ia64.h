@@ -31,7 +31,7 @@
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 
-#define REGISTER_SIZE 8
+#define DEPRECATED_REGISTER_SIZE 8
 
 #undef  NUM_REGS
 #define NUM_REGS 590

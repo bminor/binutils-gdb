@@ -24,15 +24,15 @@
 #define TM_S390_H 1
 
 #define S390_NUM_GPRS      (16)
-#define S390_GPR_SIZE      REGISTER_SIZE
-#define S390_PSW_MASK_SIZE REGISTER_SIZE
-#define S390_PSW_ADDR_SIZE REGISTER_SIZE
+#define S390_GPR_SIZE      DEPRECATED_REGISTER_SIZE
+#define S390_PSW_MASK_SIZE DEPRECATED_REGISTER_SIZE
+#define S390_PSW_ADDR_SIZE DEPRECATED_REGISTER_SIZE
 #define S390_NUM_FPRS      (16)
 #define S390_FPR_SIZE      (8)
 #define S390_FPC_SIZE      (4)
 #define S390_FPC_PAD_SIZE  (4)	/* gcc insists on aligning the fpregs */
 #define S390_NUM_CRS       (16)
-#define S390_CR_SIZE       REGISTER_SIZE
+#define S390_CR_SIZE       DEPRECATED_REGISTER_SIZE
 #define S390_NUM_ACRS      (16)
 #define S390_ACR_SIZE      (4)
 
@@ -94,7 +94,7 @@ int s390_cannot_fetch_register (int regno);
 int s390x_register_raw_size (int reg_nr);
 #define REGISTER_RAW_SIZE(reg_nr) s390x_register_raw_size(reg_nr)
 #define GDB_TARGET_IS_ESAME (1)
-#define REGISTER_SIZE       (8)
+#define DEPRECATED_REGISTER_SIZE       (8)
 #define REGISTER_BYTES S390X_REGISTER_BYTES
 
 #else /*  CONFIG_ARCH_S390X */
@@ -102,7 +102,7 @@ int s390x_register_raw_size (int reg_nr);
 int s390_register_raw_size (int reg_nr);
 #define REGISTER_RAW_SIZE(reg_nr) s390_register_raw_size(reg_nr)
 #define GDB_TARGET_IS_ESAME (0)
-#define REGISTER_SIZE       (4)
+#define DEPRECATED_REGISTER_SIZE       (4)
 #define REGISTER_BYTES S390_REGISTER_BYTES
 
 #endif /* CONFIG_ARCH_S390X */

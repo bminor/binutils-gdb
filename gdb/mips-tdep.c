@@ -5908,9 +5908,9 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
   set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
-  set_gdbarch_fix_call_dummy (gdbarch, mips_fix_call_dummy);
-  set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, mips_fix_call_dummy);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, mips_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
   set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);

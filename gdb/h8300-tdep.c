@@ -1104,7 +1104,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_fp_regnum (gdbarch, E_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_register_name (gdbarch, h8300_register_name);
-  set_gdbarch_register_size (gdbarch, BINWORD);
+  set_gdbarch_deprecated_register_size (gdbarch, BINWORD);
   set_gdbarch_register_bytes (gdbarch, E_NUM_REGS * BINWORD);
   set_gdbarch_register_byte (gdbarch, h8300_register_byte);
   set_gdbarch_register_raw_size (gdbarch, h8300_register_raw_size);
@@ -1156,8 +1156,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, h8300_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, h8300_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, h8300_use_struct_convention);
-  set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, h8300_breakpoint_from_pc);
 
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);

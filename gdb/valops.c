@@ -962,7 +962,7 @@ value_ind (struct value *arg1)
 CORE_ADDR
 push_word (CORE_ADDR sp, ULONGEST word)
 {
-  register int len = REGISTER_SIZE;
+  register int len = DEPRECATED_REGISTER_SIZE;
   char *buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
   store_unsigned_integer (buffer, len, word);

@@ -167,7 +167,7 @@ struct gdbarch
   gdbarch_sdb_reg_to_regnum_ftype *sdb_reg_to_regnum;
   gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum;
   gdbarch_register_name_ftype *register_name;
-  int register_size;
+  int deprecated_register_size;
   int register_bytes;
   gdbarch_register_byte_ftype *register_byte;
   gdbarch_register_raw_size_ftype *register_raw_size;
@@ -188,14 +188,14 @@ struct gdbarch
   int deprecated_use_generic_dummy_frames;
   int call_dummy_location;
   gdbarch_call_dummy_address_ftype *call_dummy_address;
-  CORE_ADDR call_dummy_start_offset;
-  CORE_ADDR call_dummy_breakpoint_offset;
-  int call_dummy_length;
+  CORE_ADDR deprecated_call_dummy_start_offset;
+  CORE_ADDR deprecated_call_dummy_breakpoint_offset;
+  int deprecated_call_dummy_length;
   gdbarch_deprecated_pc_in_call_dummy_ftype *deprecated_pc_in_call_dummy;
-  LONGEST * call_dummy_words;
-  int sizeof_call_dummy_words;
+  LONGEST * deprecated_call_dummy_words;
+  int deprecated_sizeof_call_dummy_words;
   int deprecated_call_dummy_stack_adjust;
-  gdbarch_fix_call_dummy_ftype *fix_call_dummy;
+  gdbarch_deprecated_fix_call_dummy_ftype *deprecated_fix_call_dummy;
   gdbarch_push_dummy_code_ftype *push_dummy_code;
   gdbarch_deprecated_init_frame_pc_first_ftype *deprecated_init_frame_pc_first;
   gdbarch_deprecated_init_frame_pc_ftype *deprecated_init_frame_pc;
@@ -527,8 +527,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
   current_gdbarch->call_dummy_address = entry_point_address;
   current_gdbarch->deprecated_pc_in_call_dummy = generic_pc_in_call_dummy;
-  current_gdbarch->call_dummy_words = legacy_call_dummy_words;
-  current_gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
+  current_gdbarch->deprecated_call_dummy_words = legacy_call_dummy_words;
+  current_gdbarch->deprecated_sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
   current_gdbarch->register_convertible = generic_register_convertible_not;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
@@ -663,10 +663,10 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of call_dummy_location, invalid_p == 0 */
   /* Skip verify of call_dummy_address, invalid_p == 0 */
   /* Skip verify of deprecated_pc_in_call_dummy, has predicate */
-  /* Skip verify of call_dummy_words, invalid_p == 0 */
-  /* Skip verify of sizeof_call_dummy_words, invalid_p == 0 */
+  /* Skip verify of deprecated_call_dummy_words, invalid_p == 0 */
+  /* Skip verify of deprecated_sizeof_call_dummy_words, invalid_p == 0 */
   /* Skip verify of deprecated_call_dummy_stack_adjust, has predicate */
-  /* Skip verify of fix_call_dummy, has predicate */
+  /* Skip verify of deprecated_fix_call_dummy, has predicate */
   /* Skip verify of push_dummy_code, has predicate */
   /* Skip verify of deprecated_init_frame_pc_first, has predicate */
   /* Skip verify of deprecated_init_frame_pc, has predicate */
@@ -916,22 +916,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->call_dummy_address
                         /*CALL_DUMMY_ADDRESS ()*/);
 #endif
-#ifdef CALL_DUMMY_BREAKPOINT_OFFSET
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET # %s\n",
-                      XSTRING (CALL_DUMMY_BREAKPOINT_OFFSET));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET = %ld\n",
-                      (long) CALL_DUMMY_BREAKPOINT_OFFSET);
-#endif
-#ifdef CALL_DUMMY_LENGTH
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_LENGTH # %s\n",
-                      XSTRING (CALL_DUMMY_LENGTH));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_LENGTH = %d\n",
-                      CALL_DUMMY_LENGTH);
-#endif
 #ifdef CALL_DUMMY_LOCATION
   fprintf_unfiltered (file,
                       "gdbarch_dump: CALL_DUMMY_LOCATION # %s\n",
@@ -939,22 +923,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: CALL_DUMMY_LOCATION = %d\n",
                       CALL_DUMMY_LOCATION);
-#endif
-#ifdef CALL_DUMMY_START_OFFSET
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_START_OFFSET # %s\n",
-                      XSTRING (CALL_DUMMY_START_OFFSET));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_START_OFFSET = %ld\n",
-                      (long) CALL_DUMMY_START_OFFSET);
-#endif
-#ifdef CALL_DUMMY_WORDS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_WORDS # %s\n",
-                      XSTRING (CALL_DUMMY_WORDS));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_WORDS = 0x%08lx\n",
-                      (long) CALL_DUMMY_WORDS);
 #endif
 #ifdef CANNOT_FETCH_REGISTER
   fprintf_unfiltered (file,
@@ -1034,6 +1002,22 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
 #endif
+#ifdef DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET # %s\n",
+                      XSTRING (DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET = %ld\n",
+                      (long) DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET);
+#endif
+#ifdef DEPRECATED_CALL_DUMMY_LENGTH
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_LENGTH # %s\n",
+                      XSTRING (DEPRECATED_CALL_DUMMY_LENGTH));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_LENGTH = %d\n",
+                      DEPRECATED_CALL_DUMMY_LENGTH);
+#endif
 #ifdef DEPRECATED_CALL_DUMMY_STACK_ADJUST_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1050,6 +1034,22 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_CALL_DUMMY_STACK_ADJUST = %d\n",
                       DEPRECATED_CALL_DUMMY_STACK_ADJUST);
+#endif
+#ifdef DEPRECATED_CALL_DUMMY_START_OFFSET
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_START_OFFSET # %s\n",
+                      XSTRING (DEPRECATED_CALL_DUMMY_START_OFFSET));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_START_OFFSET = %ld\n",
+                      (long) DEPRECATED_CALL_DUMMY_START_OFFSET);
+#endif
+#ifdef DEPRECATED_CALL_DUMMY_WORDS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_WORDS # %s\n",
+                      XSTRING (DEPRECATED_CALL_DUMMY_WORDS));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_WORDS = 0x%08lx\n",
+                      (long) DEPRECATED_CALL_DUMMY_WORDS);
 #endif
 #ifdef DEPRECATED_DO_REGISTERS_INFO_P
   fprintf_unfiltered (file,
@@ -1138,6 +1138,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED = %d\n",
                       DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED);
+#endif
+#ifdef DEPRECATED_FIX_CALL_DUMMY_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FIX_CALL_DUMMY_P()",
+                      XSTRING (DEPRECATED_FIX_CALL_DUMMY_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FIX_CALL_DUMMY_P() = %d\n",
+                      DEPRECATED_FIX_CALL_DUMMY_P ());
+#endif
+#ifdef DEPRECATED_FIX_CALL_DUMMY
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p)",
+                      XSTRING (DEPRECATED_FIX_CALL_DUMMY (dummy, pc, fun, nargs, args, type, gcc_p)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_FIX_CALL_DUMMY = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_fix_call_dummy
+                        /*DEPRECATED_FIX_CALL_DUMMY ()*/);
 #endif
 #ifdef DEPRECATED_FP_REGNUM
   fprintf_unfiltered (file,
@@ -1456,6 +1479,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_push_return_address
                         /*DEPRECATED_PUSH_RETURN_ADDRESS ()*/);
 #endif
+#ifdef DEPRECATED_REGISTER_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_SIZE # %s\n",
+                      XSTRING (DEPRECATED_REGISTER_SIZE));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_SIZE = %d\n",
+                      DEPRECATED_REGISTER_SIZE);
+#endif
 #ifdef DEPRECATED_SAVED_PC_AFTER_CALL_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1475,6 +1506,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_SAVED_PC_AFTER_CALL = <0x%08lx>\n",
                         (long) current_gdbarch->deprecated_saved_pc_after_call
                         /*DEPRECATED_SAVED_PC_AFTER_CALL ()*/);
+#endif
+#ifdef DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_SIZEOF_CALL_DUMMY_WORDS # %s\n",
+                      XSTRING (DEPRECATED_SIZEOF_CALL_DUMMY_WORDS));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_SIZEOF_CALL_DUMMY_WORDS = %d\n",
+                      DEPRECATED_SIZEOF_CALL_DUMMY_WORDS);
 #endif
 #ifdef DEPRECATED_STORE_RETURN_VALUE
 #if GDB_MULTI_ARCH
@@ -1644,29 +1683,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->extract_struct_value_address
                         /*EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
-#endif
-#ifdef FIX_CALL_DUMMY_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FIX_CALL_DUMMY_P()",
-                      XSTRING (FIX_CALL_DUMMY_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FIX_CALL_DUMMY_P() = %d\n",
-                      FIX_CALL_DUMMY_P ());
-#endif
-#ifdef FIX_CALL_DUMMY
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p)",
-                      XSTRING (FIX_CALL_DUMMY (dummy, pc, fun, nargs, args, type, gcc_p)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: FIX_CALL_DUMMY = <0x%08lx>\n",
-                        (long) current_gdbarch->fix_call_dummy
-                        /*FIX_CALL_DUMMY ()*/);
 #endif
 #ifdef FP0_REGNUM
   fprintf_unfiltered (file,
@@ -2095,14 +2111,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->register_sim_regno
                         /*REGISTER_SIM_REGNO ()*/);
 #endif
-#ifdef REGISTER_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_SIZE # %s\n",
-                      XSTRING (REGISTER_SIZE));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_SIZE = %d\n",
-                      REGISTER_SIZE);
-#endif
 #ifdef REGISTER_TO_VALUE
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -2274,14 +2282,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: SIGTRAMP_START = <0x%08lx>\n",
                         (long) current_gdbarch->sigtramp_start
                         /*SIGTRAMP_START ()*/);
-#endif
-#ifdef SIZEOF_CALL_DUMMY_WORDS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SIZEOF_CALL_DUMMY_WORDS # %s\n",
-                      XSTRING (SIZEOF_CALL_DUMMY_WORDS));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SIZEOF_CALL_DUMMY_WORDS = %d\n",
-                      SIZEOF_CALL_DUMMY_WORDS);
 #endif
 #ifdef SKIP_PROLOGUE
   fprintf_unfiltered (file,
@@ -3295,19 +3295,19 @@ set_gdbarch_register_name (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_register_size (struct gdbarch *gdbarch)
+gdbarch_deprecated_register_size (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_size called\n");
-  return gdbarch->register_size;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_size called\n");
+  return gdbarch->deprecated_register_size;
 }
 
 void
-set_gdbarch_register_size (struct gdbarch *gdbarch,
-                           int register_size)
+set_gdbarch_deprecated_register_size (struct gdbarch *gdbarch,
+                                      int deprecated_register_size)
 {
-  gdbarch->register_size = register_size;
+  gdbarch->deprecated_register_size = deprecated_register_size;
 }
 
 int
@@ -3749,51 +3749,51 @@ set_gdbarch_call_dummy_address (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch)
+gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_start_offset called\n");
-  return gdbarch->call_dummy_start_offset;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_start_offset called\n");
+  return gdbarch->deprecated_call_dummy_start_offset;
 }
 
 void
-set_gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch,
-                                     CORE_ADDR call_dummy_start_offset)
+set_gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch,
+                                                CORE_ADDR deprecated_call_dummy_start_offset)
 {
-  gdbarch->call_dummy_start_offset = call_dummy_start_offset;
+  gdbarch->deprecated_call_dummy_start_offset = deprecated_call_dummy_start_offset;
 }
 
 CORE_ADDR
-gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch)
+gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_breakpoint_offset called\n");
-  return gdbarch->call_dummy_breakpoint_offset;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_breakpoint_offset called\n");
+  return gdbarch->deprecated_call_dummy_breakpoint_offset;
 }
 
 void
-set_gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch,
-                                          CORE_ADDR call_dummy_breakpoint_offset)
+set_gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch *gdbarch,
+                                                     CORE_ADDR deprecated_call_dummy_breakpoint_offset)
 {
-  gdbarch->call_dummy_breakpoint_offset = call_dummy_breakpoint_offset;
+  gdbarch->deprecated_call_dummy_breakpoint_offset = deprecated_call_dummy_breakpoint_offset;
 }
 
 int
-gdbarch_call_dummy_length (struct gdbarch *gdbarch)
+gdbarch_deprecated_call_dummy_length (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_length called\n");
-  return gdbarch->call_dummy_length;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_length called\n");
+  return gdbarch->deprecated_call_dummy_length;
 }
 
 void
-set_gdbarch_call_dummy_length (struct gdbarch *gdbarch,
-                               int call_dummy_length)
+set_gdbarch_deprecated_call_dummy_length (struct gdbarch *gdbarch,
+                                          int deprecated_call_dummy_length)
 {
-  gdbarch->call_dummy_length = call_dummy_length;
+  gdbarch->deprecated_call_dummy_length = deprecated_call_dummy_length;
 }
 
 int
@@ -3824,37 +3824,37 @@ set_gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch,
 }
 
 LONGEST *
-gdbarch_call_dummy_words (struct gdbarch *gdbarch)
+gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of call_dummy_words, invalid_p == 0 */
+  /* Skip verify of deprecated_call_dummy_words, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_words called\n");
-  return gdbarch->call_dummy_words;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_words called\n");
+  return gdbarch->deprecated_call_dummy_words;
 }
 
 void
-set_gdbarch_call_dummy_words (struct gdbarch *gdbarch,
-                              LONGEST * call_dummy_words)
+set_gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch,
+                                         LONGEST * deprecated_call_dummy_words)
 {
-  gdbarch->call_dummy_words = call_dummy_words;
+  gdbarch->deprecated_call_dummy_words = deprecated_call_dummy_words;
 }
 
 int
-gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch)
+gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of sizeof_call_dummy_words, invalid_p == 0 */
+  /* Skip verify of deprecated_sizeof_call_dummy_words, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_sizeof_call_dummy_words called\n");
-  return gdbarch->sizeof_call_dummy_words;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_sizeof_call_dummy_words called\n");
+  return gdbarch->deprecated_sizeof_call_dummy_words;
 }
 
 void
-set_gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch,
-                                     int sizeof_call_dummy_words)
+set_gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch,
+                                                int deprecated_sizeof_call_dummy_words)
 {
-  gdbarch->sizeof_call_dummy_words = sizeof_call_dummy_words;
+  gdbarch->deprecated_sizeof_call_dummy_words = deprecated_sizeof_call_dummy_words;
 }
 
 int
@@ -3881,29 +3881,29 @@ set_gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_fix_call_dummy_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_fix_call_dummy_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->fix_call_dummy != 0;
+  return gdbarch->deprecated_fix_call_dummy != 0;
 }
 
 void
-gdbarch_fix_call_dummy (struct gdbarch *gdbarch, char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p)
+gdbarch_deprecated_fix_call_dummy (struct gdbarch *gdbarch, char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->fix_call_dummy == 0)
+  if (gdbarch->deprecated_fix_call_dummy == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_fix_call_dummy invalid");
+                    "gdbarch: gdbarch_deprecated_fix_call_dummy invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_fix_call_dummy called\n");
-  gdbarch->fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_fix_call_dummy called\n");
+  gdbarch->deprecated_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p);
 }
 
 void
-set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch,
-                            gdbarch_fix_call_dummy_ftype fix_call_dummy)
+set_gdbarch_deprecated_fix_call_dummy (struct gdbarch *gdbarch,
+                                       gdbarch_deprecated_fix_call_dummy_ftype deprecated_fix_call_dummy)
 {
-  gdbarch->fix_call_dummy = fix_call_dummy;
+  gdbarch->deprecated_fix_call_dummy = deprecated_fix_call_dummy;
 }
 
 int

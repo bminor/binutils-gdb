@@ -1486,7 +1486,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      be in use on any of the supported i386 targets.  */
 
   set_gdbarch_register_name (gdbarch, i386_register_name);
-  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
   set_gdbarch_register_type (gdbarch, i386_register_type);
 
@@ -1495,8 +1495,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
   /* Call dummy code.  */
-  set_gdbarch_call_dummy_words (gdbarch, NULL);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, NULL);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
 
   set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch,

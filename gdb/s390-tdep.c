@@ -1150,7 +1150,7 @@ void
 s390_store_return_value (struct type *valtype, char *valbuf)
 {
   int arglen;
-  char *reg_buff = alloca (max (S390_FPR_SIZE, REGISTER_SIZE)), *value;
+  char *reg_buff = alloca (max (S390_FPR_SIZE, DEPRECATED_REGISTER_SIZE)), *value;
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
@@ -1876,14 +1876,13 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_push_return_address (gdbarch,
                                               s390_push_return_address);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch,
-                                       sizeof (s390_call_dummy_words));
-  set_gdbarch_call_dummy_words (gdbarch, s390_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (s390_call_dummy_words));
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, s390_call_dummy_words);
 
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_s390_31:
-      set_gdbarch_register_size (gdbarch, 4);
+      set_gdbarch_deprecated_register_size (gdbarch, 4);
       set_gdbarch_register_raw_size (gdbarch, s390_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, s390_register_raw_size);
       set_gdbarch_register_virtual_type (gdbarch, s390_register_virtual_type);
@@ -1892,7 +1891,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_bytes (gdbarch, S390_REGISTER_BYTES);
       break;
     case bfd_mach_s390_64:
-      set_gdbarch_register_size (gdbarch, 8);
+      set_gdbarch_deprecated_register_size (gdbarch, 8);
       set_gdbarch_register_raw_size (gdbarch, s390x_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, s390x_register_raw_size);
       set_gdbarch_register_virtual_type (gdbarch,
