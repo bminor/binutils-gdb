@@ -17,10 +17,10 @@
 # along with GDB; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-XDEPFILES= fork-child.o
+XDEPFILES= 
 XM_FILE= xm-rs6000.h
 NAT_FILE= nm-rs6000.h
-NATDEPFILES= infptrace.o inftarg.o rs6000-nat.o
+NATDEPFILES= fork-child.o infptrace.o inftarg.o rs6000-nat.o
 
 # When compiled with cc, for debugging, this argument should be passed.
 # We have no idea who our current compiler is though, so we skip it.

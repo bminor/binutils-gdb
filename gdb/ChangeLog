@@ -1,3 +1,12 @@
+Thu Oct  8 23:50:51 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* config/rs6000.mh (XDEPFILES): removed fork-child.o.
+	(NATDEPFILES): added fork-child.o
+	* config/sun3os3.mh (XDEPFILES): removed fork-child.o.
+	(NATDEPFILES): added fork-child.o
+	* config/sun3os4.mh (XDEPFILES): removed fork-child.o.
+	(NATDEPFILES): added fork-child.o
+
 Thu Oct  8 23:19:25 1992  John Gilmore  (gnu@cygnus.com)
 
 	* infcmd.c (path_info):  Avoid 250-char limit on printf_filtered,
