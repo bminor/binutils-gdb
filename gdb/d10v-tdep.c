@@ -45,7 +45,6 @@ d10v_pop_frame ()
   char raw_buffer[8];
 
   fp = FRAME_FP (frame);
-  printf("pop_frame %x\n",(int)fp);
   if (frame->dummy)
     {
       d10v_pop_dummy_frame(frame);
@@ -142,9 +141,28 @@ d10v_skip_prologue (pc)
       else
 	{
 	  /* short instructions */
-	  op1 = (op & 0x3FFF8000) >> 15;
-	  op2 = op & 0x7FFF;
-	  if (!check_prologue(op1) || !check_prologue(op2))
+	  if ((op & 0xC0000000) == 0x80000000)
+	    {
+	      op2 = (op & 0x3FFF8000) >> 15;
+	      op1 = op & 0x7FFF;
+	    } 
+	  else 
+	    {
+	      op1 = (op & 0x3FFF8000) >> 15;
+	      op2 = op & 0x7FFF;
+	    }
+	  if (check_prologue(op1))
+	    {
+	      if (!check_prologue(op2))
+		{
+		  /* if the previous opcode was really part of the prologue */
+		  /* and not just a NOP, then we want to break after both instructions */
+		  if (op1 != 0x5E00)
+		    pc += 4;
+		  break;
+		}
+	    }
+	  else
 	    break;
 	}
       pc += 4;
@@ -163,19 +181,26 @@ d10v_frame_chain (frame)
 {
   struct frame_saved_regs fsr;
 
-  if (inside_entry_file (frame->pc))
-    return 0;
-
   d10v_frame_find_saved_regs (frame, &fsr);
+
+  if (frame->return_pc == IMEM_START)
+    return (CORE_ADDR)0;
 
   if (!fsr.regs[FP_REGNUM])
     {
-      return (CORE_ADDR)fsr.regs[SP_REGNUM]+0x2000000;
+      if (!fsr.regs[SP_REGNUM] || fsr.regs[SP_REGNUM] == STACK_START)
+	return (CORE_ADDR)0;
+      
+      return fsr.regs[SP_REGNUM];
     }
-  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2)+0x2000000;
+
+  if (!read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2))
+    return (CORE_ADDR)0;
+
+  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2)| DMEM_START;
 }  
 
-static int next_addr;
+static int next_addr, uses_frame;
 
 static int 
 prologue_find_regs (op, fsr, addr)
@@ -216,7 +241,10 @@ prologue_find_regs (op, fsr, addr)
 
   /* mv  r11, sp */
   if (op == 0x417E)
+    {
+      uses_frame = 1;
       return 1;
+    }
 
   /* nop */
   if (op == 0x5E00)
@@ -263,6 +291,7 @@ d10v_frame_find_saved_regs (fi, fsr)
 
   pc = get_pc_function_start (fi->pc);
 
+  uses_frame = 0;
   while (1)
     {
       op = (unsigned long)read_memory_integer (pc, 4);
@@ -296,8 +325,16 @@ d10v_frame_find_saved_regs (fi, fsr)
       else
 	{
 	  /* short instructions */
-	  op1 = (op & 0x3FFF8000) >> 15;
-	  op2 = op & 0x7FFF;
+	  if ((op & 0xC0000000) == 0x80000000)
+	    {
+	      op2 = (op & 0x3FFF8000) >> 15;
+	      op1 = op & 0x7FFF;
+	    } 
+	  else 
+	    {
+	      op1 = (op & 0x3FFF8000) >> 15;
+	      op2 = op & 0x7FFF;
+	    }
 	  if (!prologue_find_regs(op1,fsr,pc) || !prologue_find_regs(op2,fsr,pc))
 	    break;
 	}
@@ -306,26 +343,33 @@ d10v_frame_find_saved_regs (fi, fsr)
   
   fi->size = -next_addr;
 
+  if (!(fp & 0xffff))
+    fp = read_register(SP_REGNUM) | DMEM_START;
+
   for (i=0; i<NUM_REGS-1; i++)
     if (fsr->regs[i])
       {
 	fsr->regs[i] = fp - (next_addr - fsr->regs[i]); 
       }
 
-  if (fsr->regs[13])
-    fi->return_pc = ((read_memory_unsigned_integer(fsr->regs[13],2)-1) << 2) + 0x1000000;
+  if (fsr->regs[LR_REGNUM])
+    fi->return_pc = ((read_memory_unsigned_integer(fsr->regs[LR_REGNUM],2) - 1) << 2) | IMEM_START;
   else
-    fi->return_pc = ((read_register(13) - 1)  << 2) + 0x1000000;
-
+    fi->return_pc = ((read_register(LR_REGNUM) - 1) << 2) | IMEM_START;
+  
   /* th SP is not normally (ever?) saved, but check anyway */
   if (!fsr->regs[SP_REGNUM])
     {
       /* if the FP was saved, that means the current FP is valid, */
       /* otherwise, it isn't being used, so we use the SP instead */
-      if (fsr->regs[FP_REGNUM])
+      if (uses_frame)
 	fsr->regs[SP_REGNUM] = read_register(FP_REGNUM) + fi->size;
       else
-	fsr->regs[SP_REGNUM] = read_register(SP_REGNUM) + fi->size;
+	{
+	  fsr->regs[SP_REGNUM] = fp + fi->size;
+	  fi->frameless = 1;
+	  fsr->regs[FP_REGNUM] = 0;
+	}
     }
 }
 
@@ -336,22 +380,10 @@ d10v_init_extra_frame_info (fromleaf, fi)
 {
   struct frame_saved_regs dummy;
 
-  if (fi->next && (fi->pc == 0)) 
+  if (fi->next && ((fi->pc & 0xffff) == 0)) 
     fi->pc = fi->next->return_pc; 
 
-  /*
-  printf("init_extra_frame_info: fi->pc=%x  frame=%x  PC=%x SP=%x\n",
-	 (int)fi->pc,(int)fi->frame,(int)read_register(PC_REGNUM)<<2,(int)read_register(SP_REGNUM));
-	 */
-
-  d10v_frame_find_saved_regs (fi, &dummy); 
-  if (!dummy.regs[FP_REGNUM])
-    {
-      /*      printf("init_extra_frame_info: sp=%x  size=%x\n",dummy.regs[SP_REGNUM],fi->size);; */
-      fi->frame = dummy.regs[SP_REGNUM] - fi->size + 0x2000000;
-      d10v_frame_find_saved_regs (fi, &dummy); 
-    }
-  /*  printf("init_extra_frame_info end: pc=%x  frame=%x\n",(int)fi->pc,(int)fi->frame); */
+  d10v_frame_find_saved_regs (fi, &dummy);
 }
 
 static void
@@ -361,7 +393,7 @@ show_regs (args, from_tty)
 {
   long long num1, num2;
   printf_filtered ("PC=%04x (0x%x) PSW=%04x RPT_S=%04x RPT_E=%04x RPT_C=%04x\n",
-                   read_register (PC_REGNUM), read_register (PC_REGNUM) << 2,
+                   read_register (PC_REGNUM), (read_register (PC_REGNUM) << 2) + IMEM_START,
                    read_register (PSW_REGNUM),
                    read_register (24),
                    read_register (25),
@@ -432,7 +464,7 @@ d10v_read_pc (pid)
 
 void
 d10v_write_pc (val, pid)
-     LONGEST val;
+     CORE_ADDR val;
      int pid;
 {
   int save_pid;
@@ -444,19 +476,19 @@ d10v_write_pc (val, pid)
 }
 
 CORE_ADDR
-d10v_read_fp ()
+d10v_read_sp ()
 {
-  return (read_register(FP_REGNUM) + 0x2000000);
+  return (read_register(SP_REGNUM) | DMEM_START);
 }
 
 void
-d10v_write_fp (val)
-     LONGEST val;
+d10v_write_sp (val)
+     CORE_ADDR val;
 {
-  write_register (FP_REGNUM, val & 0xffff);
+  write_register (SP_REGNUM, (LONGEST)(val & 0xffff));
 }
 
-void
+CORE_ADDR
 d10v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
      char *dummyname;
      CORE_ADDR start_sp;
@@ -466,39 +498,42 @@ d10v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
      struct type *type;
      int gcc_p;
 {
-  int regnum, i;
+  int regnum;
   CORE_ADDR sp;
   char buffer[MAX_REGISTER_RAW_SIZE];
   struct frame_info *frame = get_current_frame ();
   frame->dummy = 1;
-  printf("D10v_fix_call_dummy: %x %x %d  frame=%x\n",(int)start_sp,(int)fun,nargs,(int)frame->frame);
+  start_sp |= DMEM_START;
+
   sp = start_sp;
-  for (regnum = 0; regnum < NUM_REGS-1; regnum++)
+  for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
+      sp -= REGISTER_RAW_SIZE(regnum);
       store_address (buffer, REGISTER_RAW_SIZE(regnum), read_register(regnum));
       write_memory (sp, buffer, REGISTER_RAW_SIZE(regnum));
-      sp -= REGISTER_RAW_SIZE(regnum);
     }
-  write_register (SP_REGNUM, (LONGEST)sp);  
-  printf("writing %x to sp\n",(int)sp);
+  write_register (SP_REGNUM, (LONGEST)(sp & 0xffff)); 
   /* now we need to load LR with the return address */
-  write_register (LR_REGNUM, (LONGEST)d10v_call_dummy_address()>>2);  
+  write_register (LR_REGNUM, (LONGEST)(d10v_call_dummy_address() & 0xffff) >> 2);  
+  return sp;
 }
 
 static void
 d10v_pop_dummy_frame (fi)
      struct frame_info *fi;
 {
-  printf("pop_dummy_frame:  start_sp=%x\n",(int)fi->frame);
-  /*
-  sp = start_sp;
-  for (regnum = 0; regnum < NUM_REGS-1; regnum++)
+  CORE_ADDR sp = fi->frame;
+  int regnum;
+
+  for (regnum = NUM_REGS-1; regnum >= 0; regnum--)
     {
-      store_address (buffer, REGISTER_RAW_SIZE(regnum), read_register(regnum));
-      write_memory (sp, buffer, REGISTER_RAW_SIZE(regnum));
-      sp -= REGISTER_RAW_SIZE(regnum);
+      write_register(regnum, read_memory_unsigned_integer (sp, REGISTER_RAW_SIZE(regnum)));
+      sp += REGISTER_RAW_SIZE(regnum);
     }
-    */
+  target_store_registers (-1);
+  flush_cached_frames ();
+
+  write_register(SP_REGNUM, sp & 0xffff);
 }
 
 
@@ -532,11 +567,11 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
       len = TYPE_LENGTH (arg_type);
       contents = VALUE_CONTENTS(arg);
       val = extract_signed_integer (contents, len);
-      printf("arg %d:  len=%d  contents=%x\n",i,len,(int)val);
       if (len == 4)
 	write_register (regnum++, val>>16);
       write_register (regnum++, val & 0xffff);
     }
+  return sp;
 }
 
 
@@ -568,7 +603,5 @@ d10v_extract_return_value (valtype, regbuf, valbuf)
      char regbuf[REGISTER_BYTES];
      char *valbuf;
 {
-  printf("EXTRACT: regbuf=%x, *regbuf=%x %x %x %x  len=%d %d\n",(int)regbuf,*(int *)regbuf,
-	 *(int *)(regbuf+4),*(int *)(regbuf+8),*(int *)(regbuf+12),TYPE_LENGTH (valtype),REGISTER_BYTE (2) );
   memcpy (valbuf, regbuf + REGISTER_BYTE (2), TYPE_LENGTH (valtype));
 }

@@ -1,3 +1,11 @@
+start-sanitize-d10v
+Fri Nov  1 13:59:28 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-tdep.c, config/d10v/tm-d10v.h:  Major fixes to support
+	inferior function calls and proper stack backtracing on D10V-EVA
+	board.
+
+end-sanitize-d10v
 Fri Nov  1 10:50:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/powerpc/linux.mh (NATDEPFILES): Fix up things so that it
