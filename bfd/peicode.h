@@ -1933,6 +1933,9 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
 
   pe->real_flags = internal_f->f_flags;
 
+  if ((internal_f->f_flags & F_DLL) != 0)
+    pe->dll = 1;
+
 #ifdef COFF_IMAGE_WITH_PE
   if (aouthdr) 
     {
@@ -1960,7 +1963,8 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
       || obfd->xvec->flavour != bfd_target_coff_flavour)
     return true;
 
-  pe_data(obfd)->pe_opthdr = pe_data (ibfd)->pe_opthdr;
+  pe_data (obfd)->pe_opthdr = pe_data (ibfd)->pe_opthdr;
+  pe_data (obfd)->dll = pe_data (ibfd)->dll;
 
   return true;
 }

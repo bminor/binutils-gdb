@@ -1,5 +1,8 @@
 Wed Oct 15 13:45:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* peicode.h (pe_mkobject_hook): Set DLL flag.
+	(pe_bfd_copy_private_bfd_data): Copy DLL flag.
+
 	* peicode.h (coff_swap_scnhdr_out): Set IMAGE_SCN_MEM_DISCARDABLE
 	for .stab* sections.  Replace strlen of constant strings with
 	number.
