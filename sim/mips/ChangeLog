@@ -1,4 +1,5 @@
 2002-06-13  Chris Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
 
 	* cp1.c (FP_PS_upper, FP_PS_lower, FP_PS_cat, FPQNaN_PS): New macros.
 	(value_fpr, store_fpr, fp_cmp, fp_unary, fp_binary, fp_mac)
