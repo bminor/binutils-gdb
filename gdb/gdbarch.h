@@ -1210,9 +1210,29 @@ extern void set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, gdbarch
 #endif
 #endif
 
+#if defined (GET_SAVED_REGISTER)
+/* Legacy for systems yet to multi-arch GET_SAVED_REGISTER */
+#if !defined (GET_SAVED_REGISTER_P)
+#define GET_SAVED_REGISTER_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (GET_SAVED_REGISTER_P)
+#define GET_SAVED_REGISTER_P() (0)
+#endif
+
+extern int gdbarch_get_saved_register_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (GET_SAVED_REGISTER_P)
+#error "Non multi-arch definition of GET_SAVED_REGISTER"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (GET_SAVED_REGISTER_P)
+#define GET_SAVED_REGISTER_P() (gdbarch_get_saved_register_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (GET_SAVED_REGISTER)
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval))
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (internal_error (__FILE__, __LINE__, "GET_SAVED_REGISTER"), 0)
 #endif
 
 typedef void (gdbarch_get_saved_register_ftype) (char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);

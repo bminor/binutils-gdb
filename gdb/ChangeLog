@@ -1,3 +1,15 @@
+2002-11-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (GET_SAVED_REGISTER): Change to a predicate function.
+	* gdbarch.h, gdbarch.c: Regnerate.
+	* frame.h (frame_register): Declare.
+	* frame.c (frame_register): New function.
+	(get_saved_register): Test GET_SAVED_REGISTER_P before calling
+	GET_SAVED_REGISTER, otherwize call
+	generic_unwind_get_saved_register.
+	(frame_register_read): Use frame_register instead of
+	get_saved_register.
+
 2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
 
 	* event-loop.c (start_event_loop): Add comment.

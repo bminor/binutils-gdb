@@ -125,6 +125,66 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 }
 
 void
+frame_register (struct frame_info *frame, int regnum,
+		int *optimizedp, enum lval_type *lvalp,
+		CORE_ADDR *addrp, int *realnump, void *bufferp)
+{
+  /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
+     that the value proper does not need to be fetched.  */
+  gdb_assert (optimizedp != NULL);
+  gdb_assert (lvalp != NULL);
+  gdb_assert (addrp != NULL);
+  gdb_assert (realnump != NULL);
+  /* gdb_assert (bufferp != NULL); */
+
+  /* Ulgh!  Old code that, for lval_register, sets ADDRP to the offset
+     of the register in the register cache.  It should instead return
+     the REGNUM corresponding to that register.  Translate the .  */
+  if (GET_SAVED_REGISTER_P ())
+    {
+      GET_SAVED_REGISTER (bufferp, optimizedp, addrp, frame, regnum, lvalp);
+      /* Compute the REALNUM if the caller wants it.  */
+      if (*lvalp == lval_register)
+	{
+	  int regnum;
+	  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+	    {
+	      if (*addrp == register_offset_hack (current_gdbarch, regnum))
+		{
+		  *realnump = regnum;
+		  return;
+		}
+	    }
+	  internal_error (__FILE__, __LINE__,
+			  "Failed to compute the register number corresponding"
+			  " to 0x%s", paddr_d (*addrp));
+	}
+      *realnump = -1;
+      return;
+    }
+
+  /* Reached the the bottom (youngest, inner most) of the frame chain
+     (youngest, inner most) frame, go direct to the hardware register
+     cache (do not pass go, do not try to cache the value, ...).  The
+     unwound value would have been cached in frame->next but that
+     doesn't exist.  This doesn't matter as the hardware register
+     cache is stopping any unnecessary accesses to the target.  */
+
+  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
+     special case, there was always an inner frame dedicated to the
+     hardware registers.  Unfortunatly, there is too much unwind code
+     around that looks up/down the frame chain while making the
+     assumption that each frame level is using the same unwind code.  */
+
+  if (frame == NULL)
+    frame_register_unwind (NULL, regnum, optimizedp, lvalp, addrp, realnump,
+			   bufferp);
+  else
+    frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
+			   realnump, bufferp);
+}
+
+void
 frame_unwind_signed_register (struct frame_info *frame, int regnum,
 			      LONGEST *val)
 {
@@ -240,7 +300,13 @@ get_saved_register (char *raw_buffer,
 		    int regnum,
 		    enum lval_type *lval)
 {
-  GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame, regnum, lval);
+  if (GET_SAVED_REGISTER_P ())
+    {
+      GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame, regnum, lval);
+      return;
+    }
+  generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame,
+				     regnum, lval);
 }
 
 /* frame_register_read ()
@@ -253,9 +319,11 @@ get_saved_register (char *raw_buffer,
 int
 frame_register_read (struct frame_info *frame, int regnum, void *myaddr)
 {
-  int optim;
-  get_saved_register (myaddr, &optim, (CORE_ADDR *) NULL, frame,
-		      regnum, (enum lval_type *) NULL);
+  int optimized;
+  enum lval_type lval;
+  CORE_ADDR addr;
+  int realnum;
+  frame_register (frame, regnum, &optimized, &lval, &addr, &realnum, myaddr);
 
   /* FIXME: cagney/2002-05-15: This test, is just bogus.
 
@@ -267,7 +335,7 @@ frame_register_read (struct frame_info *frame, int regnum, void *myaddr)
   if (register_cached (regnum) < 0)
     return 0;			/* register value not available */
 
-  return !optim;
+  return !optimized;
 }
 
 

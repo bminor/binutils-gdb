@@ -534,7 +534,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->init_frame_pc_first = init_frame_pc_noop;
   current_gdbarch->init_frame_pc = init_frame_pc_default;
   current_gdbarch->coerce_float_to_double = default_coerce_float_to_double;
-  current_gdbarch->get_saved_register = generic_unwind_get_saved_register;
   current_gdbarch->register_convertible = generic_register_convertible_not;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
@@ -718,7 +717,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of init_frame_pc_first, invalid_p == 0 */
   /* Skip verify of init_frame_pc, invalid_p == 0 */
   /* Skip verify of coerce_float_to_double, invalid_p == 0 */
-  /* Skip verify of get_saved_register, invalid_p == 0 */
+  /* Skip verify of get_saved_register, has predicate */
   /* Skip verify of register_convertible, invalid_p == 0 */
   /* Skip verify of register_convert_to_virtual, invalid_p == 0 */
   /* Skip verify of register_convert_to_raw, invalid_p == 0 */
@@ -3676,6 +3675,13 @@ set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch,
                                     gdbarch_coerce_float_to_double_ftype coerce_float_to_double)
 {
   gdbarch->coerce_float_to_double = coerce_float_to_double;
+}
+
+int
+gdbarch_get_saved_register_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->get_saved_register != 0;
 }
 
 void

@@ -350,6 +350,16 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
 				   CORE_ADDR *addrp, int *realnump,
 				   void *valuep);
 
+/* Return the value of the register in this FRAME.  Convenience
+   function that is equivalent to frame_register_unwind
+   (get_next_frame (FRAME), ...).  If VALUEP is NULL, don't
+   fetch/compute the value.  */
+
+extern void frame_register (struct frame_info *frame, int regnum,
+			    int *optimizedp, enum lval_type *lvalp,
+			    CORE_ADDR *addrp, int *realnump,
+			    void *valuep);
+
 /* Unwind FRAME so that the value of register REGNUM, in the previous
    frame is returned.  Simplified versions of frame_register_unwind.  */
 /* NOTE: cagney/2002-09-13: Return void as one day these functions may
