@@ -1,6 +1,6 @@
 /* This test file is part of GDB, the GNU debugger.
 
-   Copyright 1995, 1999, 2003 Free Software Foundation, Inc.
+   Copyright 1995, 1999, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -33,18 +33,6 @@
    TODO:  It might be a good idea to add expect code that tests each
    definition made with 'set" to see if one already exists, and if so
    warn about conflicts if it is being set to something else.  */
-
-#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 6))
-set supports_template_debugging 1
-#else
-set supports_template_debugging 0
-#endif
-
-#if defined(__cplusplus) 
-set supports_template_debugging 1
-#else
-set supports_template_debugging 0
-#endif
 
 #if defined (__GNUC__)
 set gcc_compiled __GNUC__
