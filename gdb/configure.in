@@ -1,5 +1,4 @@
-#configdirs="doc testsuite"
-configdirs="doc"
+configdirs="doc testsuite"
 srcname="GDB"
 srctrigger=main.c
 
