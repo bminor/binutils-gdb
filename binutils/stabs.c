@@ -375,7 +375,7 @@ warn_stab (p, err)
 /*ARGSUSED*/
 PTR
 start_stab (dhandle, abfd, sections, syms, symcount)
-     PTR dhandle;
+     PTR dhandle ATTRIBUTE_UNUSED;
      bfd *abfd;
      boolean sections;
      asymbol **syms;
@@ -1818,7 +1818,7 @@ parse_stab_range_type (dhandle, info, typename, pp, typenums)
 	    return debug_make_int_type (dhandle, 1, true);
 	  else if (n3 == 0xffff)
 	    return debug_make_int_type (dhandle, 2, true);
-	  else if (n3 == 0xffffffff)
+	  else if (n3 == (bfd_signed_vma) 0xffffffff)
 	    return debug_make_int_type (dhandle, 4, true);
 #ifdef BFD64
 	  else if (n3 == ((((bfd_vma) 0xffffffff) << 32) | 0xffffffff))
@@ -3439,7 +3439,7 @@ stab_find_type (dhandle, info, typenums)
 
 static boolean
 stab_record_type (dhandle, info, typenums, type)
-     PTR dhandle;
+     PTR dhandle ATTRIBUTE_UNUSED;
      struct stab_handle *info;
      const int *typenums;
      debug_type type;
@@ -4513,7 +4513,7 @@ stab_demangle_template (minfo, pp, pname)
 
 static boolean
 stab_demangle_class (minfo, pp, pstart)
-     struct stab_demangle_info *minfo;
+     struct stab_demangle_info *minfo ATTRIBUTE_UNUSED;
      const char **pp;
      const char **pstart;
 {

@@ -1880,7 +1880,7 @@ process_program_headers (file)
 		      ? (section->sh_addr >= segment->p_vaddr
 			 && section->sh_addr + section->sh_size
 			 <= segment->p_vaddr + segment->p_memsz)
-		      : (section->sh_offset >= segment->p_offset
+		      : ((bfd_vma) section->sh_offset >= segment->p_offset
 			 && (section->sh_offset + section->sh_size
 			     <= segment->p_offset + segment->p_filesz))))
 		printf ("%s ", SECTION_NAME (section));
@@ -2205,7 +2205,7 @@ process_relocs (file)
 
   if (do_using_dynamic)
     {
-      int is_rela;
+      int is_rela = FALSE;
 
       rel_size   = 0;
       rel_offset = 0;
@@ -3549,7 +3549,7 @@ process_symbol_table (file)
   Elf32_Internal_Shdr *   section;
   char   nb [4];
   char   nc [4];
-  int    nbuckets;
+  int    nbuckets = 0;
   int    nchains;
   int *  buckets = NULL;
   int *  chains = NULL;
@@ -3884,9 +3884,9 @@ process_symbol_table (file)
 
 static int
 process_syminfo (file)
-     FILE * file;
+     FILE * file ATTRIBUTE_UNUSED;
 {
-  int i;
+  unsigned int i;
 
   if (dynamic_syminfo == NULL
       || !do_dynamic)
@@ -4179,7 +4179,7 @@ static int
 display_debug_lines (section, start, file)
      Elf32_Internal_Shdr * section;
      unsigned char *       start;
-     FILE *                file;
+     FILE *                file ATTRIBUTE_UNUSED;
 {
   DWARF2_External_LineInfo * external;
   DWARF2_Internal_LineInfo   info;
@@ -4399,7 +4399,7 @@ static int
 display_debug_pubnames (section, start, file)
      Elf32_Internal_Shdr * section;
      unsigned char *       start;
-     FILE *                file;
+     FILE *                file ATTRIBUTE_UNUSED;
 {
   DWARF2_External_PubNames * external;
   DWARF2_Internal_PubNames   pubnames;
@@ -4821,7 +4821,7 @@ static int
 display_debug_abbrev (section, start, file)
      Elf32_Internal_Shdr * section;
      unsigned char *       start;
-     FILE *                file;
+     FILE *                file ATTRIBUTE_UNUSED;
 {
   abbrev_entry * entry;
   unsigned char * end = start + section->sh_size;
@@ -5343,8 +5343,8 @@ read_and_display_attr (attribute, form, data, pointer_size)
      unsigned char * data;
      unsigned long   pointer_size;
 {
-  unsigned long   uvalue;
-  unsigned char * block_start;
+  unsigned long   uvalue = 0;
+  unsigned char * block_start = NULL;
   int             bytes_read;
   int		  is_ref = 0;
 
@@ -5665,7 +5665,7 @@ display_debug_info (section, start, file)
       while (tags < start)
 	{
 	  int            bytes_read;
-	  int            abbrev_number;
+	  unsigned long  abbrev_number;
 	  abbrev_entry * entry;
 	  abbrev_attr  * attr;
 
@@ -5688,12 +5688,12 @@ display_debug_info (section, start, file)
 
 	  if (entry == NULL)
 	    {
-	      warn (_("Unable to locate entry %d in the abbreviation table\n"),
+	      warn (_("Unable to locate entry %lu in the abbreviation table\n"),
 		    abbrev_number);
 	      return 0;
 	    }
 
-	  printf (_(" <%d><%x>: Abbrev Number: %d (%s)\n"),
+	  printf (_(" <%d><%x>: Abbrev Number: %lu (%s)\n"),
 		  level, tags - section_begin - bytes_read,
 		  abbrev_number,
 		  get_TAG_name (entry->tag));
@@ -5718,7 +5718,7 @@ static int
 display_debug_aranges (section, start, file)
      Elf32_Internal_Shdr * section;
      unsigned char *       start;
-     FILE *                file;
+     FILE *                file ATTRIBUTE_UNUSED;
 {
   unsigned char * end = start + section->sh_size;
 
@@ -5778,8 +5778,8 @@ display_debug_aranges (section, start, file)
 static int
 display_debug_not_supported (section, start, file)
      Elf32_Internal_Shdr * section;
-     unsigned char *       start;
-     FILE *                file;
+     unsigned char *       start ATTRIBUTE_UNUSED;
+     FILE *                file ATTRIBUTE_UNUSED;
 {
   printf (_("Displaying the debug contents of section %s is not yet supported.\n"),
 	    SECTION_NAME (section));
@@ -5991,7 +5991,7 @@ process_mips_specific (file)
 		  { " DELTA", LL_DELTA }
 		};
 	      int flags = liblist.l_flags;
-	      int fcnt;
+	      size_t fcnt;
 
 	      for (fcnt = 0;
 		   fcnt < sizeof (l_flags_vals) / sizeof (l_flags_vals[0]);

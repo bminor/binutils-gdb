@@ -289,9 +289,9 @@ static struct option long_options[]=
 
 static void
 dump_section_header (abfd, section, ignored)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *section;
-     PTR ignored;
+     PTR ignored ATTRIBUTE_UNUSED;
 {
   char *comma = "";
 
@@ -1139,7 +1139,7 @@ objdump_sprintf (va_alist)
 
   n = strlen (buf);
 
-  while ((f->buffer + f->size) - f->current < n + 1)
+  while ((size_t) ((f->buffer + f->size) - f->current) < n + 1)
     {
       size_t curroff;
 
@@ -1319,7 +1319,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	    }
 	  else
 	    {
-	      long j;
+	      bfd_vma j;
 
 	      bytes = bytes_per_line;
 	      if (i + bytes > stop)
@@ -1339,7 +1339,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      ? show_raw_insn > 0
 	      : show_raw_insn >= 0)
 	    {
-	      long j;
+	      bfd_vma j;
 
 	      /* If ! prefix_addresses and ! wide_output, we print
                  bytes_per_line bytes per line.  */
@@ -1399,7 +1399,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	    {
 	      while (pb < bytes)
 		{
-		  long j;
+		  bfd_vma j;
 		  char *s;
 
 		  putchar ('\n');
@@ -1871,7 +1871,7 @@ static void
 print_section_stabs (abfd, stabsect_name, strsect_name)
      bfd *abfd;
      const char *stabsect_name;
-     const char *strsect_name;
+     const char *strsect_name ATTRIBUTE_UNUSED;
 {
   int i;
   unsigned file_string_table_offset = 0, next_file_string_table_offset = 0;
@@ -2227,7 +2227,7 @@ dump_data (abfd)
 /* Should perhaps share code and display with nm? */
 static void
 dump_symbols (abfd, dynamic)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      boolean dynamic;
 {
   asymbol **current;

@@ -1,5 +1,5 @@
 /* stabs.c -- Parse COFF debugging information
-   Copyright (C) 1996, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -498,7 +498,7 @@ static debug_type
 parse_coff_enum_type (abfd, symbols, types, pauxent, dhandle)
      bfd *abfd;
      struct coff_symbols *symbols;
-     struct coff_types *types;
+     struct coff_types *types ATTRIBUTE_UNUSED;
      union internal_auxent *pauxent;
      PTR dhandle;
 {
@@ -569,7 +569,7 @@ parse_coff_enum_type (abfd, symbols, types, pauxent, dhandle)
 static boolean
 parse_coff_symbol (abfd, types, sym, coff_symno, psyment, dhandle, type,
 		   within_function)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      struct coff_types *types;
      asymbol *sym;
      long coff_symno;

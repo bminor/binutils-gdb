@@ -467,7 +467,7 @@ is_specified_symbol (name, list)
 
 static boolean
 is_strip_section (abfd, sec)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
 {
   struct section_list *p;
@@ -605,7 +605,7 @@ filter_bytes (memhunk, size)
 
   for (; from < end; from += interleave)
     *to++ = *from;
-  if (*size % interleave > copy_byte)
+  if (*size % interleave > (bfd_size_type) copy_byte)
     *size = (*size / interleave) + 1;
   else
     *size /= interleave;
@@ -1360,7 +1360,7 @@ copy_section (ibfd, isection, obfdarg)
 
 static void
 get_sections (obfd, osection, secppparg)
-     bfd *obfd;
+     bfd *obfd ATTRIBUTE_UNUSED;
      asection *osection;
      PTR secppparg;
 {
@@ -1467,8 +1467,8 @@ static boolean
 write_debugging_info (obfd, dhandle, symcountp, symppp)
      bfd *obfd;
      PTR dhandle;
-     long *symcountp;
-     asymbol ***symppp;
+     long *symcountp ATTRIBUTE_UNUSED;
+     asymbol ***symppp ATTRIBUTE_UNUSED;
 {
   if (bfd_get_flavour (obfd) == bfd_target_ieee_flavour)
     return write_ieee_debugging_info (obfd, dhandle);
@@ -1807,15 +1807,21 @@ copy_main (argc, argv)
 	    const char *s;
 	    int len;
 	    char *name;
-	    char *option;
+	    char *option = NULL;
 	    bfd_vma val;
-	    enum change_action what;
+	    enum change_action what = CHANGE_IGNORE;
 	    
 	    switch (c)
 	      {
-	      case OPTION_CHANGE_SECTION_ADDRESS: option = "--change-section-address"; break;
-	      case OPTION_CHANGE_SECTION_LMA: option = "--change-section-lma"; break;
-	      case OPTION_CHANGE_SECTION_VMA: option = "--change-section-vma"; break;
+	      case OPTION_CHANGE_SECTION_ADDRESS:
+		option = "--change-section-address";
+		break;
+	      case OPTION_CHANGE_SECTION_LMA:
+		option = "--change-section-lma";
+		break;
+	      case OPTION_CHANGE_SECTION_VMA:
+		option = "--change-section-vma";
+		break;
 	      }
 	    
 	    s = strchr (optarg, '=');

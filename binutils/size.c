@@ -366,9 +366,9 @@ static bfd_size_type textsize;
 
 static void
 berkeley_sum (abfd, sec, ignore)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      sec_ptr sec;
-     PTR ignore;
+     PTR ignore ATTRIBUTE_UNUSED;
 {
   flagword flags;
   bfd_size_type size;
@@ -433,9 +433,9 @@ int svi_sizelen = 0;
 
 static void
 sysv_internal_sizer (file, sec, ignore)
-     bfd *file;
+     bfd *file ATTRIBUTE_UNUSED;
      sec_ptr sec;
-     PTR ignore;
+     PTR ignore ATTRIBUTE_UNUSED;
 {
   bfd_size_type size = bfd_section_size (file, sec);
   if (!bfd_is_abs_section (sec)
@@ -454,9 +454,9 @@ sysv_internal_sizer (file, sec, ignore)
 
 static void
 sysv_internal_printer (file, sec, ignore)
-     bfd *file;
+     bfd *file ATTRIBUTE_UNUSED;
      sec_ptr sec;
-     PTR ignore;
+     PTR ignore ATTRIBUTE_UNUSED;
 {
   bfd_size_type size = bfd_section_size (file, sec);
   if (!bfd_is_abs_section (sec)
