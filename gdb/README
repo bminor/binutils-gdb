@@ -1,126 +1,268 @@
+		README for gdb-3.98 beta release
+		John Gilmore	      31 July 91
+
 This is GDB, the GNU source-level debugger, presently running under
-un*x.  This is a pre-alpha version of GDB version 4, and has NOT been
+un*x.  This is a beta test version of GDB version 4, and has not been
 extensively tested.  It surely has some bugs, both bugs that were
-present in version 3 and new bugs.  I have filed all the bug reports
-and fixes mailed to bug-gdb, and the fixes in particular will move
-into these sources as I find the time.
+present in version 3, and new bugs.  If your favorite bugfix is not
+yet present here, I encourage you to port it into this version and
+then send the diffs to bug-gdb@prep.ai.mit.edu.
 
-This release moves the generic GNU include files, the BFD ("binary
-file description") library, the
-getopt routines, obstacks, and the readline library into the parent
-directory of gdb.  The idea is that a variety of GNU tools can share a
-common copy of these things.
+A summary of features new since gdb-3.5 is in the file `WHATS.NEW'.
 
-These generic files are packaged separately from GDB.  You must obtain
-them separately from GDB, and unpack them into the same directory, so
-that the directories:
 
-	bfd	gdb	include	libiberty	readline	texinfo
+		Unpacking and Installation
 
-are all in the same directory.  There should also be a "configure"
-script (and its parameters, in "configure.in" and "Makefile.in"),
-in the same place.
+This release moves the generic GNU include files, the BFD ("binary file
+description") library, the getopt routines, obstacks, and the readline
+library into the parent directory of gdb.  The idea is that a variety
+of GNU tools can share a common copy of these things.
 
-Once you have this stuff unpacked, you can cd to the directory in which
-you unpacked them, and type:
+These generic files are packaged separately from GDB, in a tar file
+called "bfd.ilrt-3.98.tar.Z".  ("ilrt" stands for include, libiberty,
+readline, texinfo).  Unpack that tar file in the same directory in
+which you unpacked the gdb-3.98.tar.Z file, so that for example the
+'bfd' directory sits next to the 'gdb' directory.  The whole top-level
+directory will look like this with `ls -F':
+
+  Makefile.in       configure*        include/          texinfo/
+  README.configure  configure.in      libiberty/
+  bfd/              gdb/              readline/
+
+Once you have this stuff unpacked, and your current directory is here,
+you can type:
 
 	./configure HOSTNAME
 	make
 
 and all the libraries, as well as GDB will be configured and built.
-
-
-When building gdb's for multiple platforms, you must manually
-rebuild the libraries separately for each platform.	FIXME FIXME no more!
-MENTION VPATH.
-
-		cd ../readline
-		[edit Makefile as appropriate]
-		make
-
-A summary of features new since gdb-3.5 is in the file `WHATS.NEW'.
-
-The best way to build GDB (and the supporting libraries and include
-files), in my opinion, is in subdirectories.  The configure script
-does this automatically if you specify more than one HOSTNAME; you can
-force it, even for one host only, by using configure's "+forcesubdirs"
-option (which you can abbreviate to +f).  configure will create two
-directory levels, Host-machine and Target-machine.   "machine"
-depends on your configuration options; the two directory levels
-reflect the fact that GDB can be configured for cross-debugging
-(described further below).
-
-For example, you can do
-
-	cd ..		(the directory *above* where this README is)
-	configure +f mymachine
-	cd Host-mymachine/Target-mymachine
-	make
-
-Machine is like "vax" or "sun4".  For more information type
-`./configure'.  For a list of host machines, see the "xconfig"
-directory; for a list of targets, see the "tconfig" directory.
-
-
-Once you have done that, just `make' will do everything, producing an
-executable `gdb' in this directory.  You can install it anywhere; it has
-no hardwired paths in it.  However, you should make sure that the shell
-on your path (named by the SHELL environment variable) is publicly
-readable; various systems refuse to let GDB debug child programs which
-are not readable, and GDB uses the shell to start your program.
-
-You can also build gdb binaries in a completely different directory from its 
-sources, by specifying "-destdir=YYY" to ./configure, giving it an absolute
-or relative path to the installation directory.  
+If you get compiler warnings during this stage, see the `Reporting Bugs'
+section below; there are a few known problems.
 
 GDB can be used as a cross-debugger, running on a machine of one type
 while debugging a program running on a machine of another type.  You
-configure it this way by specifying `./configure host -target=target'
-where host is where GDB runs, and target is where your program runs.
+configure it this way by specifying `./configure host -target=target';
+see below.
 
-If you want a new (current to this release) version of the manual, you
-can run, from the GDB source directory,
+
+		More Documentation
+
+The GDB manual is much expanded and improved.  For online browsing,
+gdb/gdb.info is the main file, and there are gdb/gdb.info-1 through -6
+files that can be installed into your main `info' tree.  If you want a
+printed version of the manual, you can run, from the GDB source
+directory,
+
 	make gdb.dvi
-to make the TeX device-independent output file, or
-	make gdb.info 
-to make the "info" version for online browsing.  The former assumes
-you have a running TeX on your system; the latter, a running makeinfo.
-The source for the GDB manual is in the doc/gdb.texinfo file (and a
-few other files it includes) provided with this distribution.  The
-Makefile attempts to use a texinfo.tex from a "texinfo" directory
-parallel to the GDB directory (../texinfo/texinfo.tex, from the
-directory where this README is).  For details see the texinfo manual
-(distributed with emacs and as a printed manual).
 
-About languages other than C...
+to make the TeX device-independent output file.  This assumes you have
+a running TeX on your system.  The source for the GDB manual is in
+doc/gdb.texinfo (and a few other files it includes), provided with
+this distribution.  The Makefile attempts to use the texinfo.tex
+supplied as part of the BFD-and-libraries tar file, since the manual
+uses Texinfo-2 which is not in common use yet.
+
+
+		Configuration Details (extracted from gdb.texinfo)
+
+   GDB is distributed with a `configure' script that automates the
+process of preparing GDB for installation; you can then use `make'
+to build the `gdb' program.
+
+   The `configure' script that's specific to GDB is distributed in
+the main GDB source directory.  However, building GDB also requires
+several other directories of source common to multiple GNU programs.
+These directories (GNU libraries and includes) are distributed
+separately, but their `configure' scripts and `Makefile's are
+designed to work together.  To ensure that GDB's `Makefile' can find
+all the pieces, you should make a single overall directory to hold
+the directories of source for GNU libraries and includes, and you
+should install the GDB source directory there too.  In this
+Appendix, we refer to the directory of GNU source directories as GNUSRC.
+
+   At a minimum, to build GDB you need the directories
+
+`GNUSRC/gdb'
+     the source specific to GDB itself
+
+`GNUSRC/bfd'
+     source for the Binary File Descriptor Library
+
+`GNUSRC/include'
+     GNU include files
+
+`GNUSRC/libiberty'
+     source for the `-liberty' free software library
+
+`GNUSRC/readline'
+     source for the GNU command-line interface
+
+Each of these directories has its own `configure' script.  GNUSRC has
+an overall `configure' script, which is distributed with the GNU
+libraries and includes.
+
+   `configure' is designed to be called recursively, so it is most
+convenient to run `configure' from the GNUSRC directory.  The
+simplest way to configure and build GDB is the following:
+
+     cd GNUSRC
+     ./configure HOST
+     make
+
+where HOST is something like `sun4' or `vax', that identifies the
+platform where GDB will run.  This builds the three libraries `bfd',
+`readline', and `libiberty', then `gdb' itself.  The configured
+source files, and the binaries, are left in the corresponding source
+directories.
+
+   You can install `gdb' anywhere; it has no hardwired paths. 
+However, you should make sure that the shell on your path (named by
+the `SHELL' environment variable) is publicly readable; some systems
+refuse to let GDB debug child processes whose programs are not
+readable, and GDB uses the shell to start your program.
+
+
+		Configuration Subdirectories
+
+   If you build GDB for several host or target machines, and if your
+`make' program handles the `VPATH' feature (GNU `make' does), it is
+most convenient instead to build the different GDB configurations in
+subdirectories (separate from the source).  `configure' does this
+for you when you simultaneously specify several configurations; but
+it's a good habit even for a single configuration.  You can specify
+the use of subdirectories using the `+forcesubdirs' option
+(abbreviated `+f').  For example, you can build GDB on a Sun 4 as
+follows:
+
+     cd GNUSRC
+     ./configure +f sun4
+     cd Host-sun4/Target-sun4
+     make
+
+   When `configure' uses subdirectories to build programs or
+libraries, it creates nested directories `Host-HOST/Target-MACHINE'.
+This is because GDB can be configured for cross-compiling: GDB can
+run on one machine (the host) while debugging programs that run on
+another machine (the target).  You specify cross-debugging targets
+by giving the `+target=MACHINE' option to `configure'.  Specifying
+only hosts still gives you two levels of subdirectory for each host,
+with the same machine-name suffix on both.  On the other hand,
+whenever you specify both hosts and targets on the same command
+line, `configure' creates all combinations of the hosts and targets you
+list.
+
+   When you run `make' to build a program or library, you must run it
+in a configured directory.  If you made a single configuration,
+without subdirectories, run `make' in the source directory.  If you
+have `Host-HOST/Target-MACHINE' subdirectories, run `make' in those
+subdirectories.
+
+   Each `configure' and `Makefile' under each source directory runs
+recursively, so that typing `make' in GNUSRC (or in a
+`GNUSRC/Host-HOST/Target-MACHINE' subdirectory) builds all the
+required libraries, then GDB.
+
+   If you run `configure' from a directory (such as GNUSRC) that
+contains source directories for multiple libraries or programs,
+`configure' creates the `Host-HOST/Target-MACHINE' subdirectories in
+each library or program's source directory.  For example, typing:
+
+     cd GNUSRC
+     configure sun4 +target=vx960
+
+creates the following directories:
+
+     GNUSRC/Host-sun4/Target-vx960
+     GNUSRC/bfd/Host-sun4/Target-vx960
+     GNUSRC/gdb/Host-sun4/Target-vx960
+     GNUSRC/libiberty/Host-sun4/Target-vx960
+     GNUSRC/readline/Host-sun4/Target-vx960
+
+The `Makefile' in `GNUSRC/Host-sun4/Target-vx960' will `cd' to the
+appropriate lower-level directories (such as
+`GNUSRC/bfd/Host-sun4/Target-vx960'), building each in turn.
+
+   When you have multiple hosts or targets configured, you can run
+`make' on them in parallel (for example, if they are NFS-mounted on
+each of the hosts); they will not interfere with each other.
+
+
+		`configure' Options
+
+   Here is a summary of all the `configure' options and arguments
+that you might use for building GDB:
+
+     configure [+destdir=DIR] [+forcesubdirs] [+norecur] [+rm]
+               [+target=MACHINE...] HOST...
+
+You may introduce options with the character `-' rather than `+' if
+you prefer; but options introduced with `+' may be truncated.
+
+`+destdir=DIR'
+     DIR is an installation directory *path prefix*.  After you
+     configure with this option, `make install' will install GDB as
+     `DIR/bin/gdb', and the libraries in `DIR/lib'.  If you specify
+    
+     `+destdir=/usr/local', for example, `make install' creates
+     `/usr/local/bin/gdb'.
+
+`+forcesubdirs'
+     Write configuration specific files in subdirectories of the form
+
+          Host-MACHINE/Target-MACHINE
+
+     (and configure the `Makefile' to write binaries there too). 
+     Without this option, if you specify only one configuration for
+     GDB, `configure' will use the same directory for source,
+     configured files, and binaries.  This option is used
+     automatically if you specify more than one HOST or more than
+     one `+target=MACHINE' option on the `configure' command line.
+
+`+norecur'
+     Configure only the directory where `configure' is executed; do
+     not propagate configuration to subdirectories.
+
+`+rm'
+     Remove the configuration specified by other arguments.
+
+`+target=MACHINE ...'
+     Configure GDB for cross-debugging programs running on each
+     specified MACHINE.  You may specify as many `+target' options
+     as you wish.  To see a list of available targets, execute `ls
+     tconfig' in the GDB source directory.  Without this option, GDB
+     is configured to debug programs that run on the same machine
+     (HOST) as GDB itself.
+
+`HOST ...'
+     Configure GDB to run on each specified HOST.  You may specify as
+     many host names as you wish.  To see a list of available hosts,
+     execute `ls xconfig' in the GDB source directory.
+
+`configure' accepts other options, for compatibility with configuring
+other GNU tools recursively; but these are the only options that
+affect GDB or its supporting libraries.
+
+
+		Languages other than C
 
 C++ support has been integrated into gdb.  GDB should work with FORTRAN
-programs.  (If you have problems, please send a bug report; you
-may have to refer to some FORTRAN variables with a trailing
-underscore).  I am not aware of anyone who is working on getting gdb
-to use the syntax of any language other than C or C++.  Pascal programs
-which use sets, subranges, file variables, or nested functions will not
-currently work.
+programs.  (If you have problems, please send a bug report; you may
+have to refer to some FORTRAN variables with a trailing underscore).
+There is an effort to produce a GDB that works with Modula-2.  I am not
+aware of anyone who is working on getting gdb to use the syntax of any
+other language.  Pascal programs which use sets, subranges, file
+variables, or nested functions will not currently work.
 
-About kernel debugging...
+
+		Kernel debugging
 
 I have't done this myself so I can't really offer any advice.
-Remote debugging over serial lines is more like to be in a currently
-functioning state than the standalone gdb (kdb).  FIXME.
+Remote debugging over serial lines works fine, but the kernel debugging
+code in here has not been tested in years.  Van Jacobson claims to have
+better kernel debugging, but won't release it for ordinary mortals.
 
-About remote debugging...
 
-[This section seems to be out of date, I have never seen the "rapp"
-program, though I would like to.  FIXME.]
-`rapp' runs under unix and acts as a remote stub (like rem-multi.shar
-distributed with GDB version 3).  Currently it just works over UDP
-(network), not over a serial line.  To get it running
-* Compile GDB on the host machine as usual
-* Compile rapp on the target machine, giving for both host and target
-  the type of the target machine
-* Install "gdb" in /etc/services on both machines.
-
-This will get reworked before the initial release of 4.x.  FIXME.
+		Remote debugging
 
 The files m68k-stub.c and i386-stub.c contain two examples of remote
 stubs to be used with remote.c.  They are designeded to run standalone
@@ -140,22 +282,53 @@ VxWorks realtime kernel, which communicates over TCP using the Sun
 RPC library.  This would be a useful starting point for other remote-
 via-ethernet back ends.
 
-About reporting bugs...
+[This section seems to be out of date, I have never seen the "rapp"
+program, though I would like to.  FIXME.]
+`rapp' runs under unix and acts as a remote stub (like rem-multi.shar
+distributed with GDB version 3).  Currently it just works over UDP
+(network), not over a serial line.  To get it running
+* Compile GDB on the host machine as usual
+* Compile rapp on the target machine, giving for both host and target
+  the type of the target machine
+* Install "gdb" in /etc/services on both machines.
 
-The correct address for reporting bugs found with gdb is
+
+		Reporting Bugs
+
+The correct address for reporting bugs found in gdb is
 "bug-gdb@prep.ai.mit.edu".  Please email all bugs to that address.
 
-About xgdb...
+"mcheck.c", line 32, will produce a pointer conversion warning, which
+can be ignored.
+
+When gdb reads object files produced by the Sun bundled C compiler,
+you will often get a "bad block start address patched" message.  You
+can shut off such messages with the command `set complaint 0' (which
+you can put in your ~/.gdbinit if you like).  Messages like this
+during symbol reading indicate some mismatch between the object file
+and GDB's symbol reading code (in this case, it's a mismatch
+between the specs for the object file format, and what Sun's compiler
+actually outputs).
+
+If you port gdb to a new machine, please send the required changes
+to bug-gdb@prep.ai.mit.edu.  If your changes are more than a few
+lines, obtain and send in a copyright assignment from gnu@prep.ai.mit.edu, as
+described in the section `Writing Code for GDB'.
+
+
+		X Windows versus GDB
 
 xgdb is obsolete.  We are not doing any development or support of it.
 
-There is an "xxgdb", which shows more promise.
+There is an "xxgdb", which shows more promise, which was posted to
+comp.sources.x.
 
 For those intersted in auto display of source and the availability of
 an editor while debugging I suggest trying gdb-mode in gnu-emacs
 (Try typing M-x gdb RETURN).  Comments on this mode are welcome.
 
-About the machine-dependent files...
+
+		About the machine-dependent files
 
 tconfig/<machine>
 This contains Makefile stuff for when the target system is <machine>.
@@ -166,8 +339,8 @@ This contains Makefile stuff for when the host system is <machine>.
 It also specifies the name of the xm-XXX.h file for this machine.
 
 tm-XXX.h (tm.h is a link to this file, created by configure).
-This file contains macro definitions that express information
-about the target machine's registers, stack frame format and instructions.
+This file contains macro definitions about the target machine's
+registers, stack frame format and instructions.
 
 xm-XXX.h (xm.h is a link to this file, created by configure).
 This contains macro definitions describing the host system environment,
@@ -212,7 +385,8 @@ Machine and system-dependent aspects of reading executable files.
 Some machines use exec.c; some have the routines in <machine>-tdep.c
 Since BFD, virtually all machines should use exec.c.
 
-About writing code for GDB...
+
+		Writing Code for GDB
 
 We appreciate having users contribute code that is of general use, but
 for it to be included in future GDB releases it must be cleanly
@@ -258,27 +432,35 @@ currently assumes BSD format.
 
 Please avoid duplicating code.  For example, in GDB 3.x all the stuff
 in infptrace.c was duplicated in *-dep.c, and so changing something
-was very painful.  Thus in GDB 4.x these have all been consolidated
+was very painful.  In GDB 4.x, these have all been consolidated
 into infptrace.c.  infptrace.c can deal with variations between
 systems the same way any system-independent file would (hooks, #if
 defined, etc.), and machines which are radically different don't need
 to use infptrace.c at all.  The same was true of core_file_command
 and exec_file_command.
 
-About debugging gdb with itself...
 
-You probably want to do a "make TAGS" after you configure your
-distribution; this will put the machine dependent routines for your
-local machine where they will be accessed first by a M-period .
+		Debugging gdb with itself
 
-Also, make sure that you've compiled gdb with your local cc or taken
-appropriate precautions regarding ansification of include files.  See
-the Makefile for more information.
+If gdb is limping on your machine, this is the preferred way to get it
+fully functional.  Be warned that in some ancient Unix systems, like
+Ultrix 4.0, a program can't be running in one process while it is being
+debugged in another.  Rather than doing "./gdb ./gdb", which works on
+Suns and such, you can copy gdb to gdb2 and then do "./gdb ./gdb2".
 
 When you run gdb in this directory, it will read a ".gdbinit" file that
 sets up some simple things to make debugging gdb easier.  The "info"
 command, when executed without a subcommand in a gdb being debugged by
 gdb, will pop you back up to the top level gdb.  See .gdbinit for details.
+
+If you use emacs, you will probably want to do a "make TAGS" after you
+configure your distribution; this will put the machine dependent
+routines for your local machine where they will be accessed first by a
+M-period.
+
+Also, make sure that you've compiled gdb with your local cc or taken
+appropriate precautions regarding ansification of include files.  See
+the Makefile for more information.
 
 (this is for editing this file with GNU emacs)
 Local Variables:
