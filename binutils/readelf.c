@@ -74,6 +74,7 @@
 #include "elf/cris.h"
 #include "elf/i860.h"
 #include "elf/x86-64.h"
+#include "elf/s390.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -583,6 +584,7 @@ guess_is_rela (e_machine)
     case EM_CRIS:
     case EM_860:
     case EM_X86_64:
+    case EM_S390:
       return TRUE;
 
     case EM_MMA:
@@ -938,6 +940,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_X86_64:
 	  rtype = elf_x86_64_reloc_type (type);
 	  break;
+
+        case EM_S390:
+          rtype = elf_s390_reloc_type (type);
+          break;
 	}
 
       if (rtype == NULL)
@@ -1315,6 +1321,7 @@ get_machine_name (e_machine)
     case EM_HUANY:       	return "Harvard Universitys's machine-independent object format";
     case EM_PRISM:       	return "SiTera Prism";
     case EM_X86_64:		return "Advanced Micro Devices X86-64";
+    case EM_S390:               return "IBM S/390";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;

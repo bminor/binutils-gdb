@@ -1,3 +1,12 @@
+2001-02-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* Makefile.am: Add linux target for S/390.
+	* Makefile.in: Likewise.
+	* configure.host: Likewise.
+	* configure.tgt: Likewise.
+	* emulparams/elf64_s390.sh: New file.
+	* emulparams/elf_s390.sh: New file.
+
 2001-02-09  Jakub Jelinek  <jakub@redhat.com>
 
 	* configure.tgt (sparc64-*-linux-gnu*): Add elf32_sparc into

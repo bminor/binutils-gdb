@@ -72,6 +72,7 @@ ALL_MACHINES = \
 	cpu-pj.lo \
 	cpu-powerpc.lo \
 	cpu-rs6000.lo \
+	cpu-s390.lo \
 	cpu-sh.lo \
 	cpu-sparc.lo \
 	cpu-tic30.lo \
@@ -114,6 +115,7 @@ ALL_MACHINES_CFILES = \
 	cpu-pj.c \
 	cpu-powerpc.c \
 	cpu-rs6000.c \
+	cpu-s390.c \
 	cpu-sh.c \
 	cpu-sparc.c \
 	cpu-tic30.c \
@@ -199,6 +201,7 @@ BFD32_BACKENDS = \
 	elf32-mips.lo \
 	elf32-pj.lo \
 	elf32-ppc.lo \
+	elf32-s390.lo \
 	elf32-sh.lo \
 	elf32-sh-lin.lo \
 	elf32-sparc.lo \
@@ -336,6 +339,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-mips.c \
 	elf32-pj.c \
 	elf32-ppc.c \
+	elf32-s390.c \
 	elf32-sh.c \
 	elf32-sh-lin.c \
 	elf32-sparc.c \
@@ -417,6 +421,7 @@ BFD64_BACKENDS = \
 	elf64-ia64.lo \
 	elf64-gen.lo \
 	elf64-mips.lo \
+	elf64-s390.lo \
 	elf64-sparc.lo \
 	elf64.lo \
 	nlm32-alpha.lo \
@@ -433,6 +438,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-hppa.c \
 	elf64-gen.c \
 	elf64-mips.c \
+	elf64-s390.c \
 	elf64-sparc.c \
 	elf64.c \
 	nlm32-alpha.c \
@@ -767,6 +773,7 @@ cpu-ns32k.lo: cpu-ns32k.c $(INCDIR)/filenames.h ns32k.h
 cpu-pj.lo: cpu-pj.c $(INCDIR)/filenames.h
 cpu-powerpc.lo: cpu-powerpc.c $(INCDIR)/filenames.h
 cpu-rs6000.lo: cpu-rs6000.c $(INCDIR)/filenames.h
+cpu-s390.lo: cpu-s390.c $(INCDIR)/filenames.h
 cpu-sh.lo: cpu-sh.c $(INCDIR)/filenames.h
 cpu-sparc.lo: cpu-sparc.c $(INCDIR)/filenames.h
 cpu-tic30.lo: cpu-tic30.c $(INCDIR)/filenames.h
@@ -1025,6 +1032,11 @@ elf32-ppc.lo: elf32-ppc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
+elf32-s390.lo: elf32-s390.c $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/s390.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/s390.h \
+  elf32-target.h
 elf32-sh.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
@@ -1269,6 +1281,11 @@ elf64-mips.lo: elf64-mips.c $(INCDIR)/filenames.h $(INCDIR)/aout/ar.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/alpha.h \
   ecoffswap.h elf64-target.h
+elf64-s390.lo: elf64-s390.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/opcode/s390.h \
+  $(INCDIR)/elf/s390.h $(INCDIR)/elf/reloc-macros.h \
+  elf64-target.h
 elf64-sparc.lo: elf64-sparc.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/opcode/sparc.h \

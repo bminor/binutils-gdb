@@ -1,3 +1,10 @@
+2001-02-09  Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* Makefile.am: Add linux target for S/390.
+	* configure.in: Likewise.
+	* config/tc-s390.c: New file.
+	* config/tc-s390.h: New file.
+
 2001-02-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.c (md_pseudo_table): Add uaquad.  Use s_uacons for

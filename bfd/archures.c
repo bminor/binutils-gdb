@@ -248,6 +248,9 @@ DESCRIPTION
 .#define bfd_mach_avr4		4
 .#define bfd_mach_avr5		5
 .  bfd_arch_cris,      {* Axis CRIS *}
+.  bfd_arch_s390,      {* IBM s390 *}
+.#define bfd_mach_s390_esa      0
+.#define bfd_mach_s390_esame    1
 .  bfd_arch_last
 .  };
 */
@@ -323,6 +326,7 @@ extern const bfd_arch_info_type bfd_fr30_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_avr_arch;
 extern const bfd_arch_info_type bfd_ia64_arch;
+extern const bfd_arch_info_type bfd_s390_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] = {
 #ifdef SELECT_ARCHITECTURES
@@ -367,6 +371,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] = {
   &bfd_mcore_arch,
   &bfd_avr_arch,
   &bfd_ia64_arch,
+  &bfd_s390_arch,
 #endif
   0
 };

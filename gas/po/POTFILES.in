@@ -96,6 +96,8 @@ config/tc-pj.c
 config/tc-pj.h
 config/tc-ppc.c
 config/tc-ppc.h
+config/tc-s390.c
+config/tc-s390.h
 config/tc-sh.c
 config/tc-sh.h
 config/tc-sparc.c

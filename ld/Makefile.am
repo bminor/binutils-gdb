@@ -153,6 +153,7 @@ ALL_EMULATIONS = \
 	eelf_i386.o \
 	eelf_i386_be.o \
 	eelf_i386_chaos.o \
+	eelf_s390.o \
 	egld960.o \
 	egld960coff.o \
 	eh8300.o \
@@ -242,6 +243,7 @@ ALL_EMULATIONS = \
 ALL_64_EMULATIONS = \
 	eelf64_ia64.o \
 	eelf_x86_64.o \
+	eelf64_s390.o \
 	eelf64_sparc.o \
 	eelf64alpha.o \
 	eelf64bmip.o \
@@ -486,6 +488,9 @@ eelf64hppa.c: $(srcdir)/emulparams/elf64hppa.sh \
 eelf64_ia64.c: $(srcdir)/emulparams/elf64_ia64.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_ia64 "$(tdir_elf64_ia64)"
+eelf64_s390.c: $(srcdir)/emulparams/elf64_s390.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64_s390 "$(tdir_elf64_s390)"
 eelf64_sparc.c: $(srcdir)/emulparams/elf64_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_sparc "$(tdir_elf64_sparc)"
@@ -504,6 +509,9 @@ eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
 eelf_i386_chaos.c: $(srcdir)/emulparams/elf_i386_chaos.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_chaos "$(tdir_elf_i386_chaos)"
+eelf_s390.c: $(srcdir)/emulparams/elf_s390.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_s390 "$(tdir_elf_s390)"
 egld960.c: $(srcdir)/emulparams/gld960.sh \
   $(srcdir)/emultempl/gld960.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} gld960 "$(tdir_gld960)"

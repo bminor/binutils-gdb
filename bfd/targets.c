@@ -542,6 +542,7 @@ extern const bfd_target bfd_elf32_pj_vec;
 extern const bfd_target bfd_elf32_pjl_vec;
 extern const bfd_target bfd_elf32_powerpc_vec;
 extern const bfd_target bfd_elf32_powerpcle_vec;
+extern const bfd_target bfd_elf32_s390_vec;
 extern const bfd_target bfd_elf32_sh_vec;
 extern const bfd_target bfd_elf32_shblin_vec;
 extern const bfd_target bfd_elf32_shl_vec;
@@ -560,6 +561,7 @@ extern const bfd_target bfd_elf64_ia64_big_vec;
 extern const bfd_target bfd_elf64_ia64_little_vec;
 extern const bfd_target bfd_elf64_little_generic_vec;
 extern const bfd_target bfd_elf64_littlemips_vec;
+extern const bfd_target bfd_elf64_s390_vec;
 extern const bfd_target bfd_elf64_sparc_vec;
 extern const bfd_target bfd_elf64_x86_64_vec;
 extern const bfd_target bfd_powerpc_pe_vec;
@@ -925,7 +927,10 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&vms_vax_vec,
 	&we32kcoff_vec,
 	&z8kcoff_vec,
-
+        &bfd_elf32_s390_vec, 
+#ifdef BFD64
+        &bfd_elf64_s390_vec,
+#endif
 #endif /* not SELECT_VECS */
 
 /* Always support S-records, for convenience.  */

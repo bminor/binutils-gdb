@@ -163,6 +163,12 @@
 /* Default architecture. */
 #undef DEFAULT_ARCH
 
+/* Default architecture. */
+#undef DEFAULT_ARCH
+
+/* Default architecture. */
+#undef DEFAULT_ARCH
+
 /* Using cgen code? */
 #undef USING_CGEN
 

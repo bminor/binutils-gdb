@@ -139,6 +139,8 @@ changequote([,])dnl
       powerpcle*)	cpu_type=ppc endian=little ;;
       powerpc*)		cpu_type=ppc endian=big ;;
       rs6000*)		cpu_type=ppc ;;
+      s390x*)		cpu_type=s390 arch=s390x ;;
+      s390*)		cpu_type=s390 arch=s390 ;;
       sparclite*)	cpu_type=sparc arch=sparclite ;;
       sparclet*)	cpu_type=sparc arch=sparclet ;;
       sparc64*)		cpu_type=sparc arch=v9-64 ;;
@@ -377,6 +379,9 @@ changequote([,])dnl
       ppc-*-netware*)       fmt=elf em=ppcnw ;;
       ppc-*-vxworks*)       fmt=elf ;;
 
+      s390x-*-linux-gnu*)   fmt=elf em=linux ;;
+      s390-*-linux-gnu*)    fmt=elf em=linux ;;
+
       sh-*-linux*)	    fmt=elf em=linux ;;
       sh-*-elf*)	    fmt=elf ;;
       sh-*-coff*)           fmt=coff ;;
@@ -522,6 +527,12 @@ changequote([,])dnl
 	*) extra_objects="$extra_objects m68k-parse.o" ;;
 	esac
 	;;
+
+      s390)
+       if test $this_target = $target ; then
+	  AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])
+       fi
+       ;;
 
       mips)
 	echo ${extra_objects} | grep -s "itbl-parse.o" 

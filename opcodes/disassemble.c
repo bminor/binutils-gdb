@@ -50,6 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_pj
 #define ARCH_powerpc
 #define ARCH_rs6000
+#define ARCH_s390
 #define ARCH_sh
 #define ARCH_sparc
 #define ARCH_tic30
@@ -243,6 +244,11 @@ disassembler (abfd)
 	disassemble = print_insn_big_powerpc;
       else
 	disassemble = print_insn_rs6000;
+      break;
+#endif
+#ifdef ARCH_s390
+    case bfd_arch_s390:
+      disassemble = print_insn_s390;
       break;
 #endif
 #ifdef ARCH_sh

@@ -101,6 +101,8 @@ CFILES = \
 	pj-opc.c \
 	ppc-dis.c \
 	ppc-opc.c \
+	s390-opc.c \
+	s390-dis.c \
 	sh-dis.c \
 	sparc-dis.c \
 	sparc-opc.c \
@@ -173,6 +175,8 @@ ALL_MACHINES = \
 	ppc-dis.lo \
 	ppc-opc.lo \
 	ns32k-dis.lo \
+	s390-dis.lo \
+	s390-opc.lo \
 	sh-dis.lo \
 	sparc-dis.lo \
 	sparc-opc.lo \
@@ -489,6 +493,10 @@ ppc-dis.lo: ppc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/ppc.h
 ppc-opc.lo: ppc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/ppc.h opintl.h
+s390-dis.lo: s390-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/s390.h
+s390-opc.lo: s390-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/s390.h opintl.h
 sh-dis.lo: sh-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   sh-opc.h $(INCDIR)/dis-asm.h $(BFD_H)
 sparc-dis.lo: sparc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \

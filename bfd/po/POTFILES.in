@@ -85,6 +85,7 @@ cpu-ns32k.c
 cpu-pj.c
 cpu-powerpc.c
 cpu-rs6000.c
+cpu-s390.c
 cpu-sh.c
 cpu-sparc.c
 cpu-tic30.c
@@ -127,6 +128,7 @@ elf32-mcore.c
 elf32-mips.c
 elf32-pj.c
 elf32-ppc.c
+elf32-s390.c
 elf32-sh.c
 elf32-sh-lin.c
 elf32-sparc.c
@@ -137,6 +139,7 @@ elf64-gen.c
 elf64-hppa.c
 elf64-hppa.h
 elf64-mips.c
+elf64-s390.c
 elf64-sparc.c
 elf64-x86-64.c
 elfarm-nabi.c

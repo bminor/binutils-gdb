@@ -65,6 +65,7 @@ CPU_TYPES = \
 	ns32k \
 	pj \
 	ppc \
+	s390 \
 	sh \
 	sparc \
 	tahoe \
@@ -246,6 +247,7 @@ TARGET_CPU_CFILES = \
 	config/tc-ns32k.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
+	config/tc-s390.c \
 	config/tc-sh.c \
 	config/tc-sparc.c \
 	config/tc-tahoe.c \
@@ -286,6 +288,7 @@ TARGET_CPU_HFILES = \
 	config/tc-ns32k.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \
+	config/tc-s390.h \
 	config/tc-sh.h \
 	config/tc-sparc.h \
 	config/tc-tahoe.h \
@@ -1180,6 +1183,11 @@ DEPTC_ppc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ppc.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/opcode/ppc.h $(INCDIR)/elf/ppc.h \
   $(INCDIR)/elf/reloc-macros.h
+DEPTC_s390_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-s390.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/s390.h $(INCDIR)/elf/s390.h \
+  $(INCDIR)/elf/reloc-macros.h
 DEPTC_sh_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sh.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/sh-opc.h \
@@ -1507,6 +1515,10 @@ DEPOBJ_ppc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ppc.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/aout/aout64.h
+DEPOBJ_s390_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-s390.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
 DEPOBJ_sh_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sh.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
@@ -1772,6 +1784,9 @@ DEP_ppc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ppc.h \
 DEP_ppc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ppc.h
+DEP_s390_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-s390.h
 DEP_sh_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sh.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h

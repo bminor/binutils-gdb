@@ -1,3 +1,7 @@
+2001-02-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* readelf.c: Add linux target for S/390.
+
 2001-02-10  Alan Modra  <alan@linuxcare.com.au>
 
 	* nm.c (print_symbol_info_bsd): Don't #ifdef inside printf in case

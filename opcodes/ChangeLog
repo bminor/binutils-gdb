@@ -1,3 +1,14 @@
+2001-02-09  Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* Makefile.am: Add linux target for S/390.
+	* Makefile.in: Likewise.
+	* configure.in: Likewise.
+	* disassemble.c: Likewise.
+	* s390-dis.c: New file.
+	* s390-mkopc.c: New file.
+	* s390-opc.c: New file.
+	* s390-opc.txt: New file.
+
 2001-02-05  Jim Wilson  <wilson@redhat.com>
 
 	* ia64-asmtab.c: Revert 2000-12-16 change.

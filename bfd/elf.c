@@ -3320,6 +3320,9 @@ prep_headers (abfd)
     case bfd_arch_m68hc12:
       i_ehdrp->e_machine = EM_68HC12;
       break;
+    case bfd_arch_s390:
+      i_ehdrp->e_machine = EM_S390;
+      break;
     case bfd_arch_m68k:
       i_ehdrp->e_machine = EM_68K;
       break;
