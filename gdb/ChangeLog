@@ -1,5 +1,13 @@
 2002-08-16  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (gdbtk.o): Move to end of file.
+	(gdbtk-bp.o, gdbtk-cmds.o): Ditto.
+	(gdbtk-hooks.o, gdbtk-register.o): Ditto.
+	(gdbtk-stack.o, gdbtk-varobj.o): Ditto.
+	(gdbtk-wrapper.o, gdbres.o): Ditto.
+
+2002-08-16  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in (copying.o): Separate out compile rule.
 	(hpux-thread.o, procfs.o, signals.o): Ditto.
 	(v850ice.o, z8k-tdep.o): Ditto.
