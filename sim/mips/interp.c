@@ -83,7 +83,7 @@ char* pr_uword64 PARAMS ((uword64 addr));
 
 /* Get the simulator engine description, without including the code: */
 #define SIM_MANIFESTS
-#include "engine.c"
+#include "oengine.c"
 #undef SIM_MANIFESTS
 
 
@@ -4195,7 +4195,7 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
 
     if (!(STATE & simSKIPNEXT)) {
       /* Include the simulator engine */
-#include "engine.c"
+#include "oengine.c"
 #if ((GPRLEN == 64) && !PROCESSOR_64BIT) || ((GPRLEN == 32) && PROCESSOR_64BIT)
 #error "Mismatch between run-time simulator code and simulation engine"
 #endif
