@@ -1,3 +1,7 @@
+Tue May 16 12:46:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* wrapper.h (wrap_value_subscript): Delete declaration.
+
 Tue May 16 10:54:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (make_cleanup_bfd_close): Add declaration.

@@ -32,7 +32,6 @@ extern int gdb_value_fetch_lazy PARAMS ((value_ptr));
 extern int gdb_value_equal PARAMS ((value_ptr, value_ptr, int *));
 
 extern int gdb_value_subscript PARAMS ((value_ptr, value_ptr, value_ptr *));
-extern int wrap_value_subscript PARAMS ((char *));
 
 extern int gdb_value_ind PARAMS ((value_ptr val, value_ptr * rval));
 
