@@ -171,7 +171,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"def", s_set, 0},
   {"dfloat", float_cons, 'd'},
   {"ffloat", float_cons, 'f'},
-  {"global", s_globl, 0},
   {"half", cons, 2},
   {"bss", s_lcomm, 1},
   {"string", stringer, 0},

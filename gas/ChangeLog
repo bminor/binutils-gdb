@@ -1,3 +1,7 @@
+2001-07-05  Ben Elliston  <bje@redhat.com>
+
+	* config/tc-m88k.c (md_pseudo_table): Remove redundant "global".
+
 2001-07-04  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-ia64.c (md_pseudo_table): Add 2byte, 4byte, and 8byte.
