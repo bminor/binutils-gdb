@@ -405,6 +405,14 @@ DESCRIPTION
 	around in macros--for example libaout.h defines GET_WORD to
 	either bfd_get_32 or bfd_get_64.
 
+	In the put routines, val must be a bfd_vma.  If we are on a
+	system without prototypes, the caller is responsible for making
+	sure that is true, with a cast if necessary.  We don't cast
+	them in the macro definitions because that would prevent lint
+	or gcc -Wall from detecting sins such as passing a pointer.
+	To detect calling these with less than a bfd_vma, use gcc
+	-Wconversion on a host with 64 bit bfd_vma's.
+
 .#define bfd_put_8(abfd, val, ptr) \
 .                (*((unsigned char *)ptr) = (unsigned char)val)
 .#define bfd_put_signed_8(abfd, val, ptr) (*((char *)(ptr)) = (char)(val))
@@ -412,21 +420,21 @@ DESCRIPTION
 .                (*((unsigned char *)(ptr)))
 .#define bfd_get_signed_8(abfd, ptr) (((*(char *)(ptr) ^ 0x80) & 0xff) - 0x80)
 .#define bfd_put_16(abfd, val, ptr) \
-.                BFD_SEND(abfd, bfd_putx16, ((bfd_vma)(val),(ptr)))
+.                BFD_SEND(abfd, bfd_putx16, ((val),(ptr)))
 .#define bfd_put_signed_16 bfd_put_16
 .#define bfd_get_16(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_getx16, (ptr))
 .#define bfd_get_signed_16(abfd, ptr) \
 .         	 BFD_SEND (abfd, bfd_getx_signed_16, (ptr))
 .#define bfd_put_32(abfd, val, ptr) \
-.                BFD_SEND(abfd, bfd_putx32, ((bfd_vma)(val),(ptr)))
+.                BFD_SEND(abfd, bfd_putx32, ((val),(ptr)))
 .#define bfd_put_signed_32 bfd_put_32
 .#define bfd_get_32(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_getx32, (ptr))
 .#define bfd_get_signed_32(abfd, ptr) \
 .		 BFD_SEND(abfd, bfd_getx_signed_32, (ptr))
 .#define bfd_put_64(abfd, val, ptr) \
-.                BFD_SEND(abfd, bfd_putx64, ((bfd_vma)(val), (ptr)))
+.                BFD_SEND(abfd, bfd_putx64, ((val), (ptr)))
 .#define bfd_put_signed_64 bfd_put_64
 .#define bfd_get_64(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_getx64, (ptr))

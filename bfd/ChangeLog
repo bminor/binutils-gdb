@@ -1,3 +1,7 @@
+Mon Apr 19 06:09:41 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* libbfd.c: bfd_put*: Remove casts to bfd_vma.
+
 Fri Apr 16 17:49:27 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* aoutf1.h (internal_sunos_core): Make c_stacktop a bfd_vma.
