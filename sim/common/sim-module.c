@@ -21,13 +21,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-main.h"
 #include "sim-io.h"
 #include "sim-options.h"
+#include "sim-assert.h"
+
+#include "libiberty.h"
 
 /* List of all modules.  */
 static MODULE_INSTALL_FN * const modules[] = {
   standard_install,
+#if WITH_ENGINE
+  sim_engine_install,
+#endif
+#if WITH_TRACE
   trace_install,
+#endif
+#if WITH_PROFILE
   profile_install,
+#endif
   sim_core_install,
+  sim_events_install,
+#if WITH_WATCHPOINTS
+  sim_watchpoint_install,
+#endif
 #if WITH_SCACHE
   scache_install,
 #endif
@@ -48,6 +62,7 @@ static MODULE_INSTALL_FN * const modules[] = {
 SIM_RC
 sim_pre_argv_init (SIM_DESC sd, const char *myname)
 {
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   STATE_MY_NAME (sd) = myname + strlen (myname);
   while (STATE_MY_NAME (sd) > myname && STATE_MY_NAME (sd)[-1] != '/')
     --STATE_MY_NAME (sd);
@@ -65,6 +80,7 @@ SIM_RC
 sim_post_argv_init (SIM_DESC sd)
 {
   int i;
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   if (sim_module_init (sd) != SIM_RC_OK)
     return SIM_RC_FAIL;
@@ -82,6 +98,7 @@ SIM_RC
 sim_module_install (SIM_DESC sd)
 {
   MODULE_INSTALL_FN * const *modp;
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   for (modp = modules; *modp != NULL; ++modp)
     {
@@ -98,8 +115,41 @@ SIM_RC
 sim_module_init (SIM_DESC sd)
 {
   MODULE_INIT_LIST *modp;
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   for (modp = STATE_INIT_LIST (sd); modp != NULL; modp = modp->next)
+    {
+      if ((*modp->fn) (sd) != SIM_RC_OK)
+	return SIM_RC_FAIL;
+    }
+  return SIM_RC_OK;
+}
+
+/* Called when ever the simulator is resumed */
+
+SIM_RC
+sim_module_resume (SIM_DESC sd)
+{
+  MODULE_RESUME_LIST *modp;
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  for (modp = STATE_RESUME_LIST (sd); modp != NULL; modp = modp->next)
+    {
+      if ((*modp->fn) (sd) != SIM_RC_OK)
+	return SIM_RC_FAIL;
+    }
+  return SIM_RC_OK;
+}
+
+/* Called when ever the simulator is suspended */
+
+SIM_RC
+sim_module_suspend (SIM_DESC sd)
+{
+  MODULE_SUSPEND_LIST *modp;
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  for (modp = STATE_SUSPEND_LIST (sd); modp != NULL; modp = modp->next)
     {
       if ((*modp->fn) (sd) != SIM_RC_OK)
 	return SIM_RC_FAIL;
@@ -113,26 +163,72 @@ void
 sim_module_uninstall (SIM_DESC sd)
 {
   MODULE_UNINSTALL_LIST *modp;
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* Uninstall the modules.  */
   for (modp = STATE_UNINSTALL_LIST (sd); modp != NULL; modp = modp->next)
     (*modp->fn) (sd);
 }
 
-/* Add FN to the init handler list.  */
+/* Add FN to the init handler list.
+   init in the same order as the install. */
 
 void
 sim_module_add_init_fn (SIM_DESC sd, MODULE_INIT_FN fn)
 {
   MODULE_INIT_LIST *l =
     (MODULE_INIT_LIST *) xmalloc (sizeof (MODULE_INIT_LIST));
+  MODULE_INIT_LIST **last = &STATE_INIT_LIST (sd);
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  while (*last != NULL)
+    last = &((*last)->next);
 
   l->fn = fn;
-  l->next = STATE_INIT_LIST (sd);
-  STATE_INIT_LIST (sd) = l;
+  l->next = NULL;
+  *last = l;
 }
 
-/* Add FN to the uninstall handler list.  */
+/* Add FN to the resume handler list.
+   resume in the same order as the install. */
+
+void
+sim_module_add_resume_fn (SIM_DESC sd, MODULE_RESUME_FN fn)
+{
+  MODULE_RESUME_LIST *l = ZALLOC (MODULE_RESUME_LIST);
+  MODULE_RESUME_LIST **last;
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  last = &STATE_RESUME_LIST (sd);
+  while (*last != NULL)
+    last = &((*last)->next);
+
+  l->fn = fn;
+  l->next = NULL;
+  *last = l;
+}
+
+/* Add FN to the init handler list.
+   suspend in the reverse order to install. */
+
+void
+sim_module_add_suspend_fn (SIM_DESC sd, MODULE_SUSPEND_FN fn)
+{
+  MODULE_SUSPEND_LIST *l = ZALLOC (MODULE_SUSPEND_LIST);
+  MODULE_SUSPEND_LIST **last;
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  last = &STATE_SUSPEND_LIST (sd);
+  while (*last != NULL)
+    last = &((*last)->next);
+
+  l->fn = fn;
+  l->next = STATE_SUSPEND_LIST (sd);
+  STATE_SUSPEND_LIST (sd) = l;
+}
+
+/* Add FN to the uninstall handler list.
+   Uninstall in reverse order to install.  */
 
 void
 sim_module_add_uninstall_fn (SIM_DESC sd, MODULE_UNINSTALL_FN fn)

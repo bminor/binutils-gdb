@@ -89,7 +89,8 @@ struct _sim_events {
   sim_event *held;
   volatile int nr_held;
   /* timekeeping */
-  SIM_ELAPSED_TIME initial_wallclock;
+  unsigned long elapsed_wallclock;
+  SIM_ELAPSED_TIME resume_wallclock;
   signed64 time_of_event;
   int time_from_event;
   int trace;
@@ -101,20 +102,6 @@ struct _sim_events {
 
 EXTERN_SIM_EVENTS\
 (SIM_RC) sim_events_install (SIM_DESC sd);
-
-
-/* Uninstall the "events" subsystem.  */
-
-EXTERN_SIM_EVENTS\
-(void)
-sim_events_uninstall (SIM_DESC sd);
-
-
-
-/* Initialization */
-
-EXTERN_SIM_EVENTS\
-(SIM_RC) sim_events_init (SIM_DESC sd);
 
 
 /* Set Tracing Level */

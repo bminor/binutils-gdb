@@ -189,6 +189,11 @@ sim_events_poll (SIM_DESC sd,
    This is called via sim_module_install to install the "events" subsystem
    into the simulator.  */
 
+STATIC_SIM_EVENTS (MODULE_UNINSTALL_FN) sim_events_uninstall;
+STATIC_SIM_EVENTS (MODULE_INIT_FN) sim_events_init;
+STATIC_SIM_EVENTS (MODULE_RESUME_FN) sim_events_resume;
+STATIC_SIM_EVENTS (MODULE_SUSPEND_FN) sim_events_suspend;
+
 EXTERN_SIM_EVENTS\
 (SIM_RC)
 sim_events_install (SIM_DESC sd)
@@ -196,16 +201,46 @@ sim_events_install (SIM_DESC sd)
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   sim_module_add_uninstall_fn (sd, sim_events_uninstall);
   sim_module_add_init_fn (sd, sim_events_init);
+  sim_module_add_resume_fn (sd, sim_events_resume);
+  sim_module_add_suspend_fn (sd, sim_events_suspend);
+  return SIM_RC_OK;
+}
+
+
+/* Suspend/resume the event queue manager when the simulator is not
+   running */
+
+STATIC_SIM_EVENTS\
+(SIM_RC)
+sim_events_resume (SIM_DESC sd)
+{
+  sim_events *events = STATE_EVENTS (sd);
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+  SIM_ASSERT (events->resume_wallclock == 0);
+  events->resume_wallclock = sim_elapsed_time_get ();
+  return SIM_RC_OK;
+}
+
+STATIC_SIM_EVENTS\
+(SIM_RC)
+sim_events_suspend (SIM_DESC sd)
+{
+  sim_events *events = STATE_EVENTS (sd);
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+  SIM_ASSERT (events->resume_wallclock != 0);
+  events->elapsed_wallclock += sim_elapsed_time_since (events->resume_wallclock);
+  events->resume_wallclock = 0;
   return SIM_RC_OK;
 }
 
 
 /* Uninstall the "events" subsystem from the simulator.  */
 
-EXTERN_SIM_EVENTS\
+STATIC_SIM_EVENTS\
 (void)
 sim_events_uninstall (SIM_DESC sd)
 {
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   /* FIXME: free buffers, etc. */
 }
 
@@ -285,7 +320,8 @@ sim_events_init (SIM_DESC sd)
   events->nr_ticks_to_process = 1; /* start by doing queue */
   events->time_of_event = 0;
   events->time_from_event = 0;
-  events->initial_wallclock = sim_elapsed_time_get ();
+  events->elapsed_wallclock = 0;
+  events->resume_wallclock = 0;
 
   /* schedule our initial counter event */
   sim_events_schedule (sd, 0, sim_events_poll, sd);
@@ -453,7 +489,12 @@ sim_events_watch_clock (SIM_DESC sd,
   new_event->data = data;
   new_event->handler = handler;
   /* data */
-  new_event->wallclock = (sim_elapsed_time_since (events->initial_wallclock) + delta_ms_time);
+  if (events->resume_wallclock == 0)
+    new_event->wallclock = (events->elapsed_wallclock + delta_ms_time);
+  else
+    new_event->wallclock = (events->elapsed_wallclock
+			    + sim_elapsed_time_since (events->resume_wallclock)
+			    + delta_ms_time);
   /* insert */
   new_event->next = events->watchpoints;
   events->watchpoints = new_event;
@@ -824,7 +865,9 @@ sim_watch_valid (SIM_DESC sd,
 
     case watch_clock: /* wallclock */
       {
-	unsigned long elapsed_time = sim_elapsed_time_since (STATE_EVENTS (sd)->initial_wallclock);
+	unsigned long elapsed_time =
+	  (sim_elapsed_time_since (STATE_EVENTS (sd)->resume_wallclock)
+	   + STATE_EVENTS (sd)->elapsed_wallclock);
 	return (elapsed_time >= to_do->wallclock);
       }
 

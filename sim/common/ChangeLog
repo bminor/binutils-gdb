@@ -1,5 +1,27 @@
 Wed Sep  3 10:08:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-resume.c (sim_resume): Suspend/resume the simulator.
+
+	* sim-events.c (sim_watch_valid): Compute total elapsed time from
+ 	both resumed and previous elapsed time.
+	(sim_events_init): Set initial_wallclock and current_wallclock to
+ 	zero.
+	(sim_events_install): Install sim_events_suspend and
+ 	sim_events_resume.
+	(sim_events_watch_clock): Allow for suspended simulator when
+ 	computing the time of the clock event.
+
+	* sim-events.h (struct _sim_event): Add resume_wallclock, rename
+ 	initial_wallclock to elapsed_wallclock, set both to zero.
+	(sim_events_init, sim_events_uninstall): Delete prototypes.
+
+	* sim-module.h (MODULE_SUSPEND_FN, MODULE_RESUME_FN): Define types.
+	
+	* sim-module.c(sim_module_resume, sim_module_suspend): New
+ 	functions.
+
+Wed Sep  3 10:08:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
 	* sim-core.c (sim_core_map_attach): Clarify memory overlap error
  	message.
 

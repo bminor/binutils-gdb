@@ -34,8 +34,10 @@ char *sim_add_commas (char *, int, unsigned long);
 
 /* Utilities for elapsed time reporting.  */
 
-/* Opaque type, known only inside sim_elapsed_time_foo fns.  */
+/* Opaque type, known only inside sim_elapsed_time_foo fns. Externally
+   it is known to never have the value zero. */
 typedef unsigned long SIM_ELAPSED_TIME;
+
 
 /* Get reference point for future call to sim_time_elapsed.  */
 SIM_ELAPSED_TIME sim_elapsed_time_get (void);
