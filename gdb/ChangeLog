@@ -1,3 +1,8 @@
+Wed Jun  9 12:56:58 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* config/sparc/sun4os4.mh (XM_CLIBS): remove -lresolv.  This
+	  breaks stock sunos installations.
+
 Wed Jun  9 06:14:33 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* m68k-stub.c: Add comment about frame cache.
