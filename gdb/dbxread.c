@@ -1230,6 +1230,52 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
   do_cleanups (back_to);
 }
 
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+CORE_ADDR
+find_stab_function_addr (char *namestring, char *filename,
+			 struct objfile *objfile)
+{
+  struct minimal_symbol *msym;
+  char *p;
+  int n;
+
+  p = strchr (namestring, ':');
+  if (p == NULL)
+    p = namestring;
+  n = p - namestring;
+  p = alloca (n + 2);
+  strncpy (p, namestring, n);
+  p[n] = 0;
+
+  msym = lookup_minimal_symbol (p, filename, objfile);
+  if (msym == NULL)
+    {
+      /* Sun Fortran appends an underscore to the minimal symbol name,
+         try again with an appended underscore if the minimal symbol
+         was not found.  */
+      p[n] = '_';
+      p[n + 1] = 0;
+      msym = lookup_minimal_symbol (p, filename, objfile);
+    }
+
+  if (msym == NULL && filename != NULL)
+    {
+      /* Try again without the filename. */
+      p[n] = 0;
+      msym = lookup_minimal_symbol (p, NULL, objfile);
+    }
+  if (msym == NULL && filename != NULL)
+    {
+      /* And try again for Sun Fortran, but without the filename. */
+      p[n] = '_';
+      p[n + 1] = 0;
+      msym = lookup_minimal_symbol (p, NULL, objfile);
+    }
+
+  return msym == NULL ? 0 : SYMBOL_VALUE_ADDRESS (msym);
+}
+#endif /* SOFUN_ADDRESS_MAYBE_MISSING */
+
 /* Setup partial_symtab's describing each source file for which
    debugging information is available. */
 

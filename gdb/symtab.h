@@ -1139,10 +1139,6 @@ extern struct minimal_symbol *prim_record_minimal_symbol_and_info
    enum minimal_symbol_type,
    char *info, int section, asection * bfd_section, struct objfile *);
 
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
-extern CORE_ADDR find_stab_function_addr (char *, char *, struct objfile *);
-#endif
-
 extern unsigned int msymbol_hash_iw (const char *);
 
 extern unsigned int msymbol_hash (const char *);

@@ -1,3 +1,9 @@
+2002-04-24  David S. Miller  <davem@redhat.com>
+
+	* symtab.h (find_stab_function_addr): Kill extern.
+	* minsyms.c (find_stab_function_addr): Remove from here...
+	* dbxread.c: ... to here, and mark it static.
+
 2002-04-20  David S. Miller  <davem@redhat.com>
 
 	* sparc-tdep.c (sparc_pop_frame): Only need to allocate
