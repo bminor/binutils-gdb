@@ -54,7 +54,6 @@ SECTION
 @* Looking Up or Entering a String::
 @* Traversing a Hash Table::
 @* Deriving a New Hash Table Type::
-@* Changing the default Hash Table Size::
 @end menu
 
 INODE

@@ -1,3 +1,8 @@
+2004-05-24  Nick Clifton  <nickc@redhat.com>
+
+	* hash.c: Remove bogus node "Changing the default Hash Table Size"
+	introduced by hash table size patch.
+
 2004-05-22  Ben Elliston  <bje@au.ibm.com>
 
 	* configure.in (is_release): Remove.
