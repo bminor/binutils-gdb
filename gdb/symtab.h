@@ -992,6 +992,8 @@ lookup_minimal_symbol PARAMS ((const char *, struct objfile *));
 extern struct minimal_symbol *
 lookup_minimal_symbol_by_pc PARAMS ((CORE_ADDR));
 
+extern struct minimal_symbol *lookup_next_minimal_symbol PARAMS ((CORE_ADDR));
+
 extern void
 init_minimal_symbol_collection PARAMS ((void));
 

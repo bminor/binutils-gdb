@@ -212,7 +212,7 @@ lookup_minimal_symbol_by_pc (pc)
 	{
 	  lo = 0;
 	  hi = objfile -> minimal_symbol_count - 1;
-	  
+
 	  /* This code assumes that the minimal symbols are sorted by
 	     ascending address values.  If the pc value is greater than or
 	     equal to the first symbol's address, then some symbol in this
@@ -260,7 +260,90 @@ lookup_minimal_symbol_by_pc (pc)
 		  best_symbol = &msymbol[hi];
 		}
 	    }
-	}      
+	}
+    }
+  return (best_symbol);
+}
+
+/* Just like lookup_minimal_symbol_by_pc, but look up the closest minimal
+   symbol > PC, not the one <= PC.  */
+
+struct minimal_symbol *
+lookup_next_minimal_symbol (pc)
+     CORE_ADDR pc;
+{
+  register int lo;
+  register int hi;
+  register int new;
+  register struct objfile *objfile;
+  register struct minimal_symbol *msymbol;
+  register struct minimal_symbol *best_symbol = NULL;
+
+  for (objfile = object_files;
+       objfile != NULL;
+       objfile = objfile -> next)
+    {
+      /* If this objfile has a minimal symbol table, go search it using
+	 a binary search.  Note that a minimal symbol table always consists
+	 of at least two symbols, a "real" symbol and the terminating
+	 "null symbol".  If there are no real symbols, then there is no
+	 minimal symbol table at all. */
+
+      if ((msymbol = objfile -> msymbols) != NULL)
+	{
+	  lo = 0;
+	  hi = objfile -> minimal_symbol_count - 1;
+
+	  /* This code assumes that the minimal symbols are sorted by
+	     ascending address values.  If the pc value is greater than or
+	     equal to the first symbol's address, then some symbol in this
+	     minimal symbol table is a suitable candidate for being the
+	     "best" symbol.  This includes the last real symbol, for cases
+	     where the pc value is larger than any address in this vector.
+
+	     By iterating until the address associated with the current
+	     hi index (the endpoint of the test interval) is less than
+	     or equal to the desired pc value, we accomplish two things:
+	     (1) the case where the pc value is larger than any minimal
+	     symbol address is trivially solved, (2) the address associated
+	     with the hi index is always the one we want when the interation
+	     terminates.  In essence, we are iterating the test interval
+	     down until the pc value is pushed out of it from the high end.
+
+	     Warning: this code is trickier than it would appear at first. */
+
+	  /* Intentionally does not check that pc <= start of objfile.
+	     dbxread.c:process_one_symbol wants to call this with zero and
+	     get the first minimal symbol.  */
+	  if (pc < SYMBOL_VALUE_ADDRESS (&msymbol[hi]))
+	    {
+	      while (SYMBOL_VALUE_ADDRESS (&msymbol[lo]) <= pc)
+		{
+		  /* pc is still strictly less than highest address */
+		  /* Note "new" will always be >= lo */
+		  new = (lo + hi) / 2;
+		  if ((SYMBOL_VALUE_ADDRESS (&msymbol[new]) < pc) ||
+		      (lo == new))
+		    {
+		      hi = new;
+		    }
+		  else
+		    {
+		      lo = new;
+		    }
+		}
+	      /* The minimal symbol indexed by hi now is the best one in this
+		 objfile's minimal symbol table.  See if it is the best one
+		 overall. */
+
+	      if ((best_symbol == NULL) ||
+		  (SYMBOL_VALUE_ADDRESS (best_symbol) >
+		   SYMBOL_VALUE_ADDRESS (&msymbol[lo])))
+		{
+		  best_symbol = &msymbol[lo];
+		}
+	    }
+	}
     }
   return (best_symbol);
 }
