@@ -1595,7 +1595,7 @@ setup_section (ibfd, isection, obfdarg)
     }
 
   if (p != NULL && p->set_flags)
-    flags = p->flags | (flags & SEC_HAS_CONTENTS);
+    flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
   if (!bfd_set_section_flags (obfd, osection, flags))
     {
       err = _("flags");

@@ -1,3 +1,8 @@
+2001-11-28  Mike Stump  <mrs@wrs.com>
+
+	* objcopy.c (setup_section): Preserve SEC_RELOC when
+	--set-section-flags is used.
+
 2001-11-19  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* readelf.c (do_debug_str): New variable.
