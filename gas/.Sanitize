@@ -28,28 +28,25 @@ echo Sanitizing `pwd`...
 Things-to-keep:
 
 .gdbinit
+CONTRIBUTORS
 COPYING
 ChangeLog
-Makefile.bat
 Makefile.in
+NEWS
 NOTES
 NOTES.config
 README
 README-quirks
-README-vms-dbg
+README-vms
 README.coff
-obstack.h
-obstack.c
-bit_fix.h
-strerror.c
 README.rich
-a.out.gnu.h
 app.c
 as.c
 as.h
 atof-generic.c
 bignum-copy.c
 bignum.h
+bit_fix.h
 cond.c
 config
 configure.bat
@@ -58,13 +55,12 @@ debug.c
 doc
 expr.c
 expr.h
-flonum-konst.c
 flonum-copy.c
+flonum-konst.c
 flonum-mult.c
 flonum.h
 frags.c
 frags.h
-gas-format.el
 hash.c
 hash.h
 hex-value.c
@@ -75,15 +71,12 @@ link.cmd
 listing.c
 listing.h
 make-gas.com
-makefile.dos
 messages.c
 obj.h
-objdump.c
 output-file.c
 output-file.h
 read.c
 read.h
-strstr.c
 struc-symbol.h
 subsegs.c
 subsegs.h
@@ -91,12 +84,10 @@ symbols.c
 symbols.h
 tc.h
 testscripts
-ver960.c
 version.c
 write.c
 write.h
 xmalloc.c
-xrealloc.c
 
 Do-last:
 
@@ -105,7 +96,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.12  1992/07/28 18:58:12  gumby
+# Revision 1.13  1992/12/08 08:05:32  raeburn
+# updated for added/deleted files
+#
+# Revision 1.12  1992/07/28  18:58:12  gumby
 # Don't save obsolete/
 #
 # Revision 1.11  1992/03/13  16:04:15  sac
