@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 91, 92, 93, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -146,7 +146,9 @@ DESCRIPTION
 .  bfd_target_tekhex_flavour,
 .  bfd_target_srec_flavour,
 .  bfd_target_som_flavour,
-.  bfd_target_os9k_flavour};
+.  bfd_target_os9k_flavour,
+.  bfd_target_msdos_flavour
+.};
 .
 .{* Forward declaration.  *}
 .typedef struct bfd_link_info _bfd_link_info;
@@ -351,7 +353,7 @@ The general target vector.
 .  long  (*_bfd_canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **,
 .                                            struct symbol_cache_entry **));
 .  {* See documentation on reloc types.  *}
-.  CONST struct reloc_howto_struct *
+.  reloc_howto_type *
 .       (*reloc_type_lookup) PARAMS ((bfd *abfd,
 .                                     bfd_reloc_code_real_type code));
 .
@@ -431,7 +433,8 @@ extern const bfd_target apollocoff_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
 /* start-sanitize-arc */
-extern const bfd_target bfd_elf32_arc_vec;
+extern const bfd_target bfd_elf32_bigarc_vec;
+extern const bfd_target bfd_elf32_littlearc_vec;
 /* end-sanitize-arc */
 extern const bfd_target bfd_elf32_big_generic_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
@@ -467,6 +470,7 @@ extern const bfd_target i386linux_vec;
 extern const bfd_target i386lynx_aout_vec;
 extern const bfd_target i386lynx_coff_vec;
 extern const bfd_target i386mach3_vec;
+extern const bfd_target i386msdos_vec;
 extern const bfd_target i386netbsd_vec;
 extern const bfd_target icoff_big_vec;
 extern const bfd_target icoff_little_vec;
@@ -551,15 +555,18 @@ const bfd_target * const bfd_target_vector[] = {
 	   But that does not mean they are unnecessary.  If configured with
 	   --enable-targets=all, objdump or gdb should be able to examine
 	   the file even if we don't recognize the machine type.  */
-/* start-sanitize-arc */
-	&bfd_elf32_arc_vec,
-/* end-sanitize-arc */
 	&bfd_elf32_big_generic_vec,
+/* start-sanitize-arc */
+	&bfd_elf32_bigarc_vec,
+/* end-sanitize-arc */
 	&bfd_elf32_bigmips_vec,
 	&bfd_elf32_hppa_vec,
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_i860_vec,
 	&bfd_elf32_little_generic_vec,
+/* start-sanitize-arc */
+	&bfd_elf32_littlearc_vec,
+/* end-sanitize-arc */
 	&bfd_elf32_littlemips_vec,
 	&bfd_elf32_m68k_vec,
 	&bfd_elf32_m88k_vec,
@@ -612,6 +619,7 @@ const bfd_target * const bfd_target_vector[] = {
 	/* No distinguishing features for Mach 3 executables.  */
 	&i386mach3_vec,
 #endif
+	&i386msdos_vec,
 	&i386netbsd_vec,
 	&i386os9k_vec,
 	&icoff_big_vec,

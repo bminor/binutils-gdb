@@ -1,3 +1,14 @@
+start-sanitize-arc
+Tue Mar  7 20:34:43 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* configure.in (SELECT_VECS): Split bfd_elf32_arc_vec into big/little.
+	* targets.c (bfd_target_vector): Likewise.
+	* elf32-arc.c (TARGET_BIG_SYM): Define.
+	(TARGET_BIG_NAME): Define.
+	* config/arc-elf.mt (DEFAULT_VECTOR): Set to bfd_elf32_littlearc_vec.
+	(SELECT_VECS): Add bfd_elf32_bigarc_vec.
+end-sanitize-arc
+
 Tue Mar  7 12:23:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (bfd_coff_backend_data): Add new field
