@@ -1,5 +1,13 @@
 2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
 
+	* ld-sh/sh64/reldl64.rd: Add relocation symbol data in info field.
+	* ld-sh/sh64/crange-2i.s: Add align to match align in crange-2h.s.
+	* ld-sh/sh64/crange3-cmpct.rd: Adjust to reflect modifications
+	in section ordering.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+	* ld-sh/sh64/crange3.rd: Likewise.
+	* ld-sh/sh64/crange3.dd: Likewise.
+
 	* ld-sh/shared-1.d: Fix relocation addend.
 
 2002-02-09  Hans-Peter Nilsson  <hp@bitrange.com>

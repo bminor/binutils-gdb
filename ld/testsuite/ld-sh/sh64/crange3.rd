@@ -39,7 +39,7 @@ Symbol table '\.symtab' contains 28 entries:
     14: 000010a4     0 NOTYPE  LOCAL  DEFAULT    2 start2
     15: 000010bc     0 NOTYPE  LOCAL  DEFAULT    2 sec3
     16: 00000000     0 NOTYPE  LOCAL  DEFAULT  ABS \*ABS\*
-    17: 000010c2     0 NOTYPE  GLOBAL DEFAULT    2 diversion
+    17: 000010c4     0 NOTYPE  GLOBAL DEFAULT    2 diversion
     18: 00001160     0 OBJECT  GLOBAL DEFAULT    5 ___dtors
     19: 00001160     0 OBJECT  GLOBAL DEFAULT  ABS __bss_start
     20: 00001160     0 OBJECT  GLOBAL DEFAULT    4 ___ctors_end
@@ -52,23 +52,23 @@ Symbol table '\.symtab' contains 28 entries:
     27: 00001160     0 OBJECT  GLOBAL DEFAULT    5 ___dtors_end
 
 Hex dump of section '\.text':
-  0x00001004 e10f0009 00090009 00090009 00090009 .*
-  0x00001014 00090009 0009e10e 6ff0fff0 6ff0fff0 .*
+  0x00001004 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*
+  0x00001014 6ff0fff0 6ff0fff0 cc00bd40 6ff0fff0 .*
   0x00001024 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*
-  0x00001034 cc00bd40 6ff0fff0 6ff0fff0 6ff0fff0 .*
-  0x00001044 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*
-  0x00001054 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*
-  0x00001064 6ff0fff0 cc00bd50 cc0084c0 6ff0fff0 .*
+  0x00001034 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*
+  0x00001044 6ff0fff0 6ff0fff0 6ff0fff0 cc00bd50 .*
+  0x00001054 cc0084c0 6ff0fff0 6ff0fff0 6ff0fff0 .*
+  0x00001064 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*
   0x00001074 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*
   0x00001084 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*
-  0x00001094 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*
-  0x000010a4 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*
-  0x000010b4 6ff0fff0 cc0084d0 6ff0fff0 6ff0fff0 .*
-  0x000010c4 6ff0fff0 0000002a 0000002b 00090009 .*
-  0x000010d4 00090009 0009                       .*
+  0x00001094 6ff0fff0 6ff0fff0 6ff0fff0 cc0084d0 .*
+  0x000010a4 6ff0fff0 6ff0fff0 6ff0fff0 0000002a .*
+  0x000010b4 0000002b 00090009 00090009 00090000 .*
+  0x000010c4 e10f0009 00090009 00090009 00090009 .*
+  0x000010d4 00090009 0009e10e                   .*
 
 Hex dump of section '\.cranges':
-  0x00000000 00001004 00000018 00020000 101c0000 .*
-  0x00000010 00a00003 000010bc 0000000c 00030000 .*
-  0x00000020 10c80000 00080001 000010d0 00000004 .*
-  0x00000030 00020000 10d40000 00060002          .*
+  0x00000000 00001004 000000a0 00030000 10a40000 .*
+  0x00000010 000c0003 000010b0 00000008 00010000 .*
+  0x00000020 10b80000 00040002 000010bc 00000006 .*
+  0x00000030 00020000 10c40000 00180002          .*

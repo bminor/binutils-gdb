@@ -3,5 +3,6 @@
 ! SHcompact insns.
 	.section .text,"ax"
 	.mode SHmedia
+	.align 2
 	.global diversion
 diversion:
