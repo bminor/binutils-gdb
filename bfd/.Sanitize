@@ -139,6 +139,7 @@ cpu-z8k.c
 demo64.c
 dep-in.sed
 doc
+dwarf1.c
 dwarf2.c
 ecoff.c
 ecofflink.c
