@@ -108,7 +108,6 @@ typedef int (*disassembler_ftype)
 extern int print_insn_big_mips		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_mips	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_i386		PARAMS ((bfd_vma, disassemble_info*));
-extern int print_insn_i8086		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_m68k		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_z8001		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_z8002		PARAMS ((bfd_vma, disassemble_info*));
@@ -123,8 +122,6 @@ extern disassembler_ftype arc_get_disassembler PARAMS ((int, int));
 extern int print_insn_big_arm		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_arm	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_sparc		PARAMS ((bfd_vma, disassemble_info*));
-extern int print_insn_sparc64		PARAMS ((bfd_vma, disassemble_info*));
-extern int print_insn_sparclite		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_big_a29k		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_a29k	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_i960		PARAMS ((bfd_vma, disassemble_info*));
@@ -164,6 +161,17 @@ extern void generic_print_address
 /* Macro to initialize a disassemble_info struct.  This should be called
    by all applications creating such a struct.  */
 #define INIT_DISASSEMBLE_INFO(INFO, STREAM, FPRINTF_FUNC) \
+  (INFO).arch = bfd_arch_unknown, \
+  (INFO).mach = 0, \
+  (INFO).endian = BFD_ENDIAN_UNKNOWN, \
+  INIT_DISASSEMBLE_INFO_NO_ARCH(INFO, STREAM, FPRINTF_FUNC)
+
+/* Call this macro to initialize only the internal variables for the
+   disassembler.  Architecture dependent things such as byte order, or machine
+   variant are not touched by this macro.  This makes things much easier for
+   GDB which must initialize these things seperatly.  */
+
+#define INIT_DISASSEMBLE_INFO_NO_ARCH(INFO, STREAM, FPRINTF_FUNC) \
   (INFO).fprintf_func = (FPRINTF_FUNC), \
   (INFO).stream = (STREAM), \
   (INFO).buffer = NULL, \
@@ -172,9 +180,6 @@ extern void generic_print_address
   (INFO).read_memory_func = buffer_read_memory, \
   (INFO).memory_error_func = perror_memory, \
   (INFO).print_address_func = generic_print_address, \
-  (INFO).arch = bfd_arch_unknown, \
-  (INFO).mach = 0, \
-  (INFO).endian = BFD_ENDIAN_UNKNOWN, \
   (INFO).flags = 0, \
   (INFO).insn_info_valid = 0
 

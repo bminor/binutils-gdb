@@ -1,3 +1,11 @@
+Mon Jul 15 16:55:38 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* dis-asm.h:  Get rid of decls for print_insn_i8086,
+	print_insn_sparc64 and print_insn_sparclite.
+	* (INIT_DISASSEMBLE_INFO):  Split into two pieces.  One,
+	INIT_DISASSEMBLE_INFO_NO_ARCH inits everything except for endian,
+	mach, and arch.
+
 Fri Jul 12 10:19:27 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* dis-asm.h (print_insn_i8086):  Declare.
