@@ -125,14 +125,9 @@ ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
 	em_m68kcoff.o em_st2000.o em_sa29200.o \
 	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
 	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500hms.o \
-	em_hppaosf.o em_mipsidtl.o
+	em_hppaosf.o em_mipsidtl.o em_sh.o
 
-# start-sanitize-sh
-OTHER_EMULATIONS=em_sh.o
-# end-sanitize-sh
-
-#EMULATION_OFILES=${ALL_EMULATIONS}
-EMULATION_OFILES=${ALL_EMULATIONS} ${OTHER_EMULATIONS}
+EMULATION_OFILES=${ALL_EMULATIONS}
 
 OFILES= ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o ldindr.o \
 	ldwarn.o ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o ldsym.o \
@@ -253,11 +248,9 @@ em_h8300hms.c: $(srcdir)/h8300hms.sh \
 em_h8500hms.c: $(srcdir)/h8500hms.sh \
   $(srcdir)/h8500hms.em $(srcdir)/h8500hms.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} h8500hms.sh
-# start-sanitize-sh
 em_sh.c: $(srcdir)/sh.sh \
   $(srcdir)/sh.em $(srcdir)/sh.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} sh.sh
-# end-sanitize-sh
 em_st2000.c: $(srcdir)/st2000.sh \
   $(srcdir)/st2000.em $(srcdir)/st2000.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} st2000.sh
