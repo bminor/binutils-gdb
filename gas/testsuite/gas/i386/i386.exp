@@ -14,8 +14,29 @@ proc run_list_test { name opts } {
     pass $testname
 }
 
+proc gas_64_check { } {
+    global NM
+    global NMFLAGS
+    global srcdir
 
-if [istarget "i*86-*-*"] then {
+    catch "exec $srcdir/lib/run $NM $NMFLAGS --help" nm_help
+    return [regexp "targets:.*x86_64" $nm_help];
+}
+proc gas_32_check { } {
+    global NM
+    global NMFLAGS
+    global srcdir
+
+    catch "exec $srcdir/lib/run $NM $NMFLAGS --help" nm_help
+    return [regexp "targets:.*i386" $nm_help];
+}
+
+
+if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]]  then {
+
+    global ASFLAGS
+    set old_ASFLAGS "$ASFLAGS"
+    set ASFLAGS "$ASFLAGS --32"
 
     run_list_test "float" "-al"
     run_list_test "general" "-al --listing-lhs-width=2"
@@ -36,4 +57,15 @@ if [istarget "i*86-*-*"] then {
 	run_dump_test "jump16"
 	run_list_test "white" "-al --listing-lhs-width=3"
     }
+    set ASFLAGS "$old_ASFLAGS"
+}
+if [istarget "x86_64-*-*"] then {
+
+    global ASFLAGS
+    set old_ASFLAGS "$ASFLAGS"
+    set ASFLAGS "$ASFLAGS --64"
+
+    run_dump_test "x86_64"
+
+    set ASFLAGS "$old_ASFLAGS"
 }

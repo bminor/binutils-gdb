@@ -1863,8 +1863,11 @@ md_assemble (line)
 	for (op = i.operands; --op >= 0; )
 	  if ((i.types[op] & Reg)
 	      && (i.op[op].regs->reg_flags & (RegRex64|RegRex)))
-	    as_bad (_("Extended register `%%%s' available only in 64bit mode."),
-		    i.op[op].regs->reg_name);
+	    {
+	      as_bad (_("Extended register `%%%s' available only in 64bit mode."),
+		      i.op[op].regs->reg_name);
+	      return;
+	    }
       }
 
     /* If matched instruction specifies an explicit instruction mnemonic
@@ -2006,8 +2009,6 @@ md_assemble (line)
 	else if (i.suffix == QWORD_MNEM_SUFFIX)
 	  {
 	    int op;
-	    if (flag_code < CODE_64BIT)
-	      as_bad (_("64bit operations available only in 64bit modes."));
 
 	    for (op = i.operands; --op >= 0; )
 	      /* Reject eight bit registers, except where the template
@@ -2197,7 +2198,14 @@ md_assemble (line)
 	/* Set mode64 for an operand.  */
 	if (i.suffix == QWORD_MNEM_SUFFIX
 	    && !(i.tm.opcode_modifier & NoRex64))
+	  {
 	    i.rex.mode64 = 1;
+	    if (flag_code < CODE_64BIT)
+	      {
+		 as_bad (_("64bit operations available only in 64bit modes."));
+		 return;
+	      }
+	  }
 
 	/* Size floating point instruction.  */
 	if (i.suffix == LONG_MNEM_SUFFIX)

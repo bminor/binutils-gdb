@@ -1,3 +1,9 @@
+Sat Jan  6 13:33:10 MET 2001  Jan Hubicka  <jh@suse.cz>
+
+	* configure.in: Define DEFAULT_ARCH for i386.
+	* tc-i386.c (md_assemble): Return after the error message;
+	move testing for 64bit operands to proper place.
+
 2001-01-06  Jan Hubicka <jh@suse.cz>, Andreas Jaeger  <aj@suse.de>
 
 	* doc/as.texinfo: Document '#' as comment character for i386 and
