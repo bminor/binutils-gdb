@@ -24,12 +24,6 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
-README-ALPHA-NETWARE
-aio.h
-alpha-io.S
-alpha.c
-alpha.h
-altdebug.h
 configure.in
 gdbserve.c
 gdbserve.def
