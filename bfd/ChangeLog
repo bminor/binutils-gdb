@@ -1,3 +1,10 @@
+Thu May 16 16:34:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cache.c (bfd_open_file): Unlink the file before opening it for
+	write.  From Marty Leisner <leisner@sdsp.mc.xerox.com>.
+
+	* opncls.c (bfd_fdopenr): Set opened_once.
+
 Tue May 14 12:35:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* som.c (som_slurp_reloc_table): Clear external_relocs cache after
