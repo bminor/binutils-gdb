@@ -113,8 +113,6 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
   regsec = bfd_make_section (abfd, REGINFO);
   if (regsec == NULL)
     return NULL;
-  /* Tell the linker to leave this section completely alone.  */
-  regsec->flags = SEC_SHARED_LIBRARY;
 
   if (internal_a != (struct internal_aouthdr *) NULL)
     {
@@ -174,7 +172,11 @@ ecoff_new_section_hook (abfd, section)
     section->flags |= SEC_ALLOC;
   else if (strcmp (section->name, REGINFO) == 0)
     {
-      section->flags |= SEC_HAS_CONTENTS | SEC_NEVER_LOAD;
+      /* Setting SEC_SHARED_LIBRARY should make the linker leave the
+	 section completely alone.  */
+      section->flags |= (SEC_SHARED_LIBRARY
+			 | SEC_HAS_CONTENTS
+			 | SEC_NEVER_LOAD);
       section->_raw_size = sizeof (struct ecoff_reginfo);
     }
 

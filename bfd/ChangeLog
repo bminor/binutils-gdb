@@ -1,3 +1,9 @@
+Fri Jan  7 15:40:16 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_mkobject_hook): Don't set SEC_SHARED_LIBRARY flag
+	for .reginfo section here.
+	(ecoff_new_section_hook): Set it here instead.
+
 Fri Jan  7 10:29:27 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
     	* bfd-in.h: (bfd_boolean): Add workaround for systems that also
