@@ -1,1 +1,1 @@
-EMUL=hppaosf
+EMUL=hppaelf
