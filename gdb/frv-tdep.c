@@ -236,21 +236,8 @@ frv_register_name (int reg)
   return CURRENT_VARIANT->register_names[reg];
 }
 
-
-static int
-frv_register_raw_size (int reg)
-{
-  return 4;
-}
-
-static int
-frv_register_virtual_size (int reg)
-{
-  return 4;
-}
-
 static struct type *
-frv_register_virtual_type (int reg)
+frv_register_type (struct gdbarch *gdbarch, int reg)
 {
   if (reg >= 64 && reg <= 127)
     return builtin_type_float;
@@ -1007,10 +994,12 @@ frv_frame_this_id (struct frame_info *next_frame,
   /* The FUNC is easy.  */
   func = frame_func_unwind (next_frame);
 
+#if 0
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
   if (inside_entry_func (func))
     return;
+#endif
 
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);
@@ -1149,14 +1138,8 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, pc_regnum);
 
   set_gdbarch_register_name (gdbarch, frv_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, 4);
-  set_gdbarch_deprecated_register_bytes (gdbarch, frv_num_regs * 4);
   set_gdbarch_deprecated_register_byte (gdbarch, frv_register_byte);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, frv_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_deprecated_register_virtual_size (gdbarch, frv_register_virtual_size);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, frv_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, frv_register_type);
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);

@@ -1,3 +1,20 @@
+2003-10-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (frv_register_raw_size, frv_register_virtual_size):
+	Delete.
+	(frv_register_type): Rename from frv_register_virtual_type.  Add
+	``struct gdbarch *'' parameter.
+	(frv_gdbarch_init): Delete calls to the following functions:
+	set_gdbarch_deprecated_size(),
+	set_gdbarch_deprecated_register_bytes(),
+	set_gdbarch_deprecated_register_raw_size(),
+	set_gdbarch_deprecated_max_register_raw_size(),
+	set_gdbarch_deprecated_register_virtual_size(),
+	set_gdbarch_deprecated_max_register_virtual_size(),
+	set_gdbarch_deprecated_register_virtual_size(),
+	set_gdbarch_deprecated_register_virtual_type().
+	Add call to function set_gdbarch_register_type().
+
 2003-10-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h (FCS_REGNUM, FCOFF_REGNUM, FDS_REGNUM,
