@@ -1,5 +1,10 @@
 Wed Mar 16 07:18:43 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* printcmd.c: Remove "set print fast-symbolic-addr off" command.
+	The which it worked around was fixed on 25 Feb 94 in coffread.c,
+	so I'm nuking the command.
+	* symtab.c (find_addr_symbol): Comment out, no longer used.
+
 	* main.c (main): Don't init_source_path for the -cd argument.  Now
 	that source_path doesn't contain the current_directory from when
 	GDB started up, init_source_path is no longer useful (and is
