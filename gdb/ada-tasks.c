@@ -62,18 +62,6 @@ enum task_states
   Master_Phase_2_Sleep
 };
 
-struct task_control_block
-{
-  char state;
-  CORE_ADDR parent;
-  int priority;
-  char image [32];
-  int image_len;    /* This field is not always present in the ATCB.  */
-  CORE_ADDR call;
-  CORE_ADDR thread;
-  CORE_ADDR lwp;    /* This field is not always present in the ATCB.  */
-};
-
 /* The index of certain important fields in the Ada Task Control Block
    record and sub-records.  */
 
@@ -101,25 +89,6 @@ struct tcb_fieldnos
 #else
 #define TASK_LWP(atcb) extract_unsigned_integer (&(atcb).lwp, sizeof ((atcb).lwp))
 #endif
-
-struct task_ptid
-{
-  int pid;                      /* The Process id */
-  long lwp;                     /* The Light Weight Process id */
-  long tid;                     /* The Thread id */
-};
-typedef struct task_ptid task_ptid_t;
-
-struct task_entry
-{
-  CORE_ADDR task_id;
-  struct task_control_block atcb;
-  int task_num;
-  int known_tasks_index;
-  struct task_entry *next_task;
-  task_ptid_t task_ptid;
-  int stack_per;
-};
 
 /* FIXME: move all this conditional compilation in description
    files or in configure.in */
@@ -267,7 +236,6 @@ static void get_tcb_call_type_info (struct type **atcb_call_type,
                                     int *atcb_call_self_fieldno);
 static CORE_ADDR get_known_tasks_addr (void);
 static int read_known_tasks_array (void);
-static int build_task_list (void);
 static void value_as_string (char *dest, struct value *val, int length);
 static struct task_control_block read_atcb (CORE_ADDR atcb_addr);
 static CORE_ADDR read_caller (const CORE_ADDR call);
@@ -283,9 +251,9 @@ static void ada_tasks_attach_observers (void);
 
 int ada__tasks_check_symbol_table = 1;
 CORE_ADDR pthread_kern_addr = 0;
+struct task_entry *task_list = NULL;
 
 /* Local global variables.  */
-static struct task_entry *task_list = NULL;
 
 /* When non-zero, this flag indicates that the current task_list
    is obsolete, and should be recomputed before it is accessed.  */
@@ -850,8 +818,8 @@ read_known_tasks_array (void)
    the inferior.  Prints an appropriate message and returns non-zero
    if it failed to build this list.  */
 
-static int
-build_task_list (void)
+int
+ada_build_task_list (void)
 {
   if (!target_has_stack)
     error ("No stack");
@@ -1306,7 +1274,7 @@ info_tasks (char *arg, int from_tty)
 static void
 info_tasks_command (char *arg, int from_tty)
 {
-  const int task_list_built = build_task_list ();
+  const int task_list_built = ada_build_task_list ();
 
   if (!task_list_built)
     return;
@@ -1358,13 +1326,10 @@ switch_to_task (struct task_entry *new_task)
       select_frame (get_current_frame ());
       return ret_code;
     }
-  else if (task_ptid_get_pid (new_task->task_ptid) != 0)        /* ?? */
-    {
-      switch_to_thread (task_ptid_get_ptid (new_task->task_ptid));
-      return 0;
-    }
+
+  switch_to_thread (task_ptid_get_ptid (new_task->task_ptid));
 #endif
-  return -1;
+  return 0;
 }
 
 /* Print a message telling the user id of the current task.
@@ -1412,7 +1377,7 @@ task_command_1 (char *tidstr, int from_tty)
 static void
 task_command (char *tidstr, int from_tty)
 {
-  const int task_list_built = build_task_list ();
+  const int task_list_built = ada_build_task_list ();
 
   if (!task_list_built)
     return;

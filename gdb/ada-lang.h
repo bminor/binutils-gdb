@@ -124,6 +124,41 @@ struct ada_symbol_info {
   struct symtab* symtab;
 };
 
+/* Ada task structures.  */
+
+/* Ada task control block, as defined in the GNAT runt-time library.  */
+
+struct task_control_block
+{
+  char state;
+  CORE_ADDR parent;
+  int priority;
+  char image [32];
+  int image_len;    /* This field is not always present in the ATCB.  */
+  CORE_ADDR call;
+  CORE_ADDR thread;
+  CORE_ADDR lwp;    /* This field is not always present in the ATCB.  */
+};
+
+struct task_ptid
+{
+  int pid;                      /* The Process id */
+  long lwp;                     /* The Light Weight Process id */
+  long tid;                     /* The Thread id */
+};
+typedef struct task_ptid task_ptid_t;
+
+struct task_entry
+{
+  CORE_ADDR task_id;
+  struct task_control_block atcb;
+  int task_num;
+  int known_tasks_index;
+  struct task_entry *next_task;
+  task_ptid_t task_ptid;
+  int stack_per;
+};
+
 extern struct type *builtin_type_ada_int;
 extern struct type *builtin_type_ada_short;
 extern struct type *builtin_type_ada_long;
@@ -136,8 +171,12 @@ extern struct type *builtin_type_ada_natural;
 extern struct type *builtin_type_ada_positive;
 extern struct type *builtin_type_ada_system_address;
 
-/* The maximum number of tasks known to the Ada runtime */
+/* The maximum number of tasks known to the Ada runtime.  */
 extern const int MAX_NUMBER_OF_KNOWN_TASKS;
+
+/* task entry list.  */
+extern struct task_entry *task_list;
+
 
 /* Assuming V points to an array of S objects,  make sure that it contains at
    least M objects, updating V and S as necessary. */
@@ -393,6 +432,8 @@ extern void ada_find_printable_frame (struct frame_info *fi);
 
 extern void ada_reset_thread_registers (void);
 
+extern int ada_build_task_list (void);
+
 /* Look up a symbol by name using the search conventions of 
    a specific language (optional block, optional symtab). 
    FIXME: Should be symtab.h. */
@@ -403,5 +444,4 @@ extern struct symbol *lookup_symbol_in_language (const char *,
 						 enum language,
 						 int *,
 						 struct symtab **);
-
 #endif

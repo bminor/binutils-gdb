@@ -1,3 +1,21 @@
+2004-06-16  Paul N. Hilfinger  <Hilfinger@gnat.com>
+	
+	* ada-tasks.c: Rename build_task_list to ada_build_task_list, and
+	make it non-static.
+	* ada-lang.h (task_control_block): declaration moved from ada-task.c
+	to ada-lang.h; this is needed to be able to implement the kill command
+	in multi-task mode.
+	(task_ptid): Ditto.
+	(task_entry): Ditto.
+	(task_list): Ditto.
+	(ada_build_task_list): Ditto.
+	
+	* ada-lang.c: Conditionalize routines and data structures related 
+	to breakpoints, exceptions, completion, and symbol caching on 
+	GNAT_GDB, since these are not yet used in the submitted public sources.
+	(ada_main_name): Editorial: Move definition out of exception-related 
+	code.
+
 2004-06-15  Andrew Cagney  <cagney@gnu.org>
 
 	* mips-tdep.c (non_heuristic_proc_desc): Delete call to
