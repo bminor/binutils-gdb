@@ -12,18 +12,18 @@
 
 
 [ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test0[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test1,[ 	]*"",[ 	]*@progbits[ 	]*
+[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test1,[ 	]*"",[ 	]*%progbits[ 	]*
 [ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test2[ 	]*
 [ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test3,[ 	]*"aw"[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test4,[ 	]*"aw",[ 	]*@nobits[ 	]*
+[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test4,[ 	]*"aw",[ 	]*%nobits[ 	]*
 [ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test1,[ 	]*"aw",[ 	]*@nobits[ 	]*
+[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test1,[ 	]*"aw",[ 	]*%nobits[ 	]*
 [ 	]+[[:digit:]]+[ 	]+.*
 [ 	]+[[:digit:]]+[ 	]*
 [ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test2,[ 	]*"w"[ 	]*
 [ 	]+[[:digit:]]+[ 	]+.*
 [ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test3,[ 	]*"aw",[ 	]*@progbits[ 	]*
+[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test3,[ 	]*"aw",[ 	]*%progbits[ 	]*
 [ 	]+[[:digit:]]+[ 	]+.*
 [ 	]+[[:digit:]]+[ 	]*
 [ 	]+[[:digit:]]+[ 	]+.section[ 	]+.test4,[ 	]*"aw"[ 	]*
@@ -32,6 +32,6 @@
 [ 	]+[[:digit:]]+[ 	]*
 [ 	]+[[:digit:]]+[ 	]+.section[ 	]+.bss,[ 	]*"a"[ 	]*
 [ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.data,[ 	]*"aw",[ 	]*@nobits[ 	]*
+[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.data,[ 	]*"aw",[ 	]*%nobits[ 	]*
 [ 	]+[[:digit:]]+[ 	]*
-[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.bss,[ 	]*"aw",[ 	]*@progbits[ 	]*
+[ 	]+[[:digit:]]+[ 	]+.section[ 	]+.bss,[ 	]*"aw",[ 	]*%progbits[ 	]*
