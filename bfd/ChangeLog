@@ -1,5 +1,10 @@
 Tue Mar 18 12:58:08 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+start-sanitize-m32r
+	* elf32-m32r.c (m32r_elf_is_local_label_name): Remove.
+	(bfd_elf32_bfd_is_local_label): Don't define.
+
+end-sanitize-m32r
 	* xcofflink.c (_bfd_xcoff_bfd_final_link): Call bfd_malloc rather
 	than malloc.
 
