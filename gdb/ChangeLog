@@ -1,5 +1,53 @@
 Wed Jun 23 15:04:54 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Makefile overhaul dropping autodepend features.
+	* Makefile.in: many comment changes.  forced consistent use of $()
+	  for makefile variables references.  dropped leading ./ in file
+	  references.  Drop $(srcdir)/ prefix on all dependencies.
+	  Inserted contents of alldeps.mak and depend.
+	  (INCLUDE_CFLAGS): erdefined as new macro for getting libiberty's
+	  include directory into the compilation line.
+	  (GDB_CFLAGS): new macro to take up the semantic previously held
+	  by INCLUDE_CFLAGS.
+	  (LIBIBERTY): dropped ancient subdir macro.  I last removed this
+	  macro in feb of '92.  How does it keep coming back?
+	  (MMALLOC_LIB): renamed to MMALLOC.
+	  (BFD_SRC_DIR): renamed to BFD_SRC.
+	  (BFD_OBJ_DIR): renamed to BFD_DIR.
+	  (BFD_LIB): renamed to BFD.
+	  (BFD_INCLUDES): renamed to BFD_CFLAGS.
+	  (READLINE_DIR): now represents object directory.
+	  (RL_LIB): renamed to READLINE.
+	  (READLINE_SRC, READLINE_CFLAGS, OPCODES, OPCODES_CFLAGS): new
+	  macros.
+	  (INTERNAL_CFLAGS): added GDB_CFLAGS, OPCODES_CFLAGS,
+	  READLINE_CFLAGS, BFD_CFLAGS.  Dropped USER_CFLAGS.
+	  (LDFLAGS): removed default assignment.
+	  (TEXIDIR, INCLUDE_DEP, MMALLOC_DIR, MMALLOC_DEP, BFD_DEP,
+	  READLINE_DEP, LIBIBERTY_DIR, TESTS, depend, STAGESTUFF): unused, so removed.
+	  (ALLOCA1, ALLOCA): removed all references.  alloca is now in
+	  libiberty.
+	  (VERSION): unilaterally and arbitrarily bumped to 4.9.3.
+	  (SFILES, NONSRC, HFILES, ALLDEPFILES, ALLPARAM, ALLCONFIG):
+	  removed all $(srcdir) prefixes.
+	  (getopt_h, ieee-float_h, bfd_h, wait_h, dis-asm_h): new macros
+	  for potential dependencies.  commented out by default.
+	  (readline_headers, udiheaders): convenient abbreviations.
+	  (gdbcore_h, frame_h, symtab_h, gdbtypes_h, expression_h,
+	  value_h, breakpoint_h, command_h, gdbcmd_h, defs_h, inferior_h):
+	  new macros used for header file dependencies.
+	  (install-info, clean-info): collapse into the info rule.
+	  (install): now depends on all.
+	  (install-only): new target for installing without depending on
+	  all.
+	  (uninstall): new target.
+	  (config-check, config-check-hosts, config-check-targets): added
+	  fixme comments.
+	  (ch-exp.tab.c, m2-exp.tab.c): added artificial dependencies in
+	  order to force parallel makes into keeping these rules separate.
+	* configure.in: omit cat'ing depend file onto generated Makefile.
+	* alldeps.mak, depend: removed.
+
 	* inferior.h: remove redundant include of symtab.h which is
 	included in value.h via breakpoint.h.
 

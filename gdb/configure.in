@@ -336,5 +336,3 @@ if [ "${nativefile}" = "" ] ; then
 		< Makefile > Makefile.tem
 	mv -f Makefile.tem Makefile
 fi
-
-cat ${srcdir}/depend >>Makefile
