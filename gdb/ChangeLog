@@ -1,5 +1,10 @@
 2002-04-14  Elena Zannoni  <ezannoni@redhat.com>
 
+        * mi/mi-cmd-disas.c (dump_insns): Use TARGET_PRINT_INSN
+        instead of tm_print_insn.
+
+2002-04-14  Elena Zannoni  <ezannoni@redhat.com>
+
 	* ppc-bdm.c (bdm_ppc_fetch_registers): Fix typo.
 
 2002-04-14  Andrew Cagney  <ac131313@redhat.com>

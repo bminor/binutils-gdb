@@ -123,7 +123,7 @@ dump_insns (disassemble_info * di, CORE_ADDR low, CORE_ADDR high,
 	xfree (name);
 
       ui_file_rewind (stb->stream);
-      pc += (*tm_print_insn) (pc, di);
+      pc += TARGET_PRINT_INSN (pc, di);
       ui_out_field_stream (uiout, "inst", stb);
       ui_file_rewind (stb->stream);
       ui_out_tuple_end (uiout);
