@@ -1,3 +1,8 @@
+2003-08-18  Andreas Schwab  <schwab@suse.de>
+
+	* libpei.h (bfd_pe_executable_p): Also recognize efi-app
+	executables.
+
 2003-08-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Move
