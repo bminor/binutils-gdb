@@ -1,3 +1,10 @@
+2002-07-30  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldlang.c (lang_add_section): Don't turn .tbss into normal sections
+	for relocatable link.
+	(lang_size_sections_1): Don't make .tbss zero size for relocatable
+	link.
+
 2002-07-26  Bernd Schmidt  <bernds@redhat.com>
 
 	* emulparams/elf32frv.sh (OTHER_RELOCATING_SECTIONS): Delete.

@@ -1,3 +1,7 @@
+2002-07-30  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (elf_fake_sections): Fix up .tbss sh_size and sh_type.
+
 2002-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* aoutx.h (some_aout_object_p): Clean up tdata properly on error.
