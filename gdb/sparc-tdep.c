@@ -34,8 +34,6 @@
 #include "gdb_string.h"
 #include "regcache.h"
 
-#include "elf-bfd.h"
-
 #ifdef	USE_PROC_FS
 #include <sys/procfs.h>
 /* Prototypes for supply_gregset etc. */
@@ -46,7 +44,74 @@
 
 #include "symfile.h" 	/* for 'entry_point_address' */
 
-#include "sparc-tdep.h"
+/*
+ * Some local macros that have multi-arch and non-multi-arch versions:
+ */
+
+#if (GDB_MULTI_ARCH > 0)
+
+/* Does the target have Floating Point registers?  */
+#define SPARC_HAS_FPU     (gdbarch_tdep (current_gdbarch)->has_fpu)
+/* Number of bytes devoted to Floating Point registers: */
+#define FP_REGISTER_BYTES (gdbarch_tdep (current_gdbarch)->fp_register_bytes)
+/* Highest numbered Floating Point register.  */
+#define FP_MAX_REGNUM     (gdbarch_tdep (current_gdbarch)->fp_max_regnum)
+/* Size of a general (integer) register: */
+#define SPARC_INTREG_SIZE (gdbarch_tdep (current_gdbarch)->intreg_size)
+/* Offset within the call dummy stack of the saved registers.  */
+#define DUMMY_REG_SAVE_OFFSET (gdbarch_tdep (current_gdbarch)->reg_save_offset)
+
+#else /* non-multi-arch */
+
+
+/* Does the target have Floating Point registers?  */
+#if defined(TARGET_SPARCLET) || defined(TARGET_SPARCLITE)
+#define SPARC_HAS_FPU 0
+#else
+#define SPARC_HAS_FPU 1
+#endif
+
+/* Number of bytes devoted to Floating Point registers: */
+#if (GDB_TARGET_IS_SPARC64)
+#define FP_REGISTER_BYTES (64 * 4)
+#else
+#if (SPARC_HAS_FPU)
+#define FP_REGISTER_BYTES (32 * 4)
+#else
+#define FP_REGISTER_BYTES 0
+#endif
+#endif
+
+/* Highest numbered Floating Point register.  */
+#if (GDB_TARGET_IS_SPARC64)
+#define FP_MAX_REGNUM (FP0_REGNUM + 48)
+#else
+#define FP_MAX_REGNUM (FP0_REGNUM + 32)
+#endif
+
+/* Size of a general (integer) register: */
+#define SPARC_INTREG_SIZE (REGISTER_RAW_SIZE (G0_REGNUM))
+
+/* Offset within the call dummy stack of the saved registers.  */
+#if (GDB_TARGET_IS_SPARC64)
+#define DUMMY_REG_SAVE_OFFSET (128 + 16)
+#else
+#define DUMMY_REG_SAVE_OFFSET 0x60
+#endif
+
+#endif /* GDB_MULTI_ARCH */
+
+struct gdbarch_tdep
+  {
+    int has_fpu;
+    int fp_register_bytes;
+    int y_regnum;
+    int fp_max_regnum;
+    int intreg_size;
+    int reg_save_offset;
+    int call_dummy_call_offset;
+    int print_insn_mach;
+  };
 
 /* Now make GDB_TARGET_IS_SPARC64 a runtime test.  */
 /* FIXME MVS: or try testing bfd_arch_info.arch and bfd_arch_info.mach ... 
@@ -2075,6 +2140,11 @@ sparclet_store_return_value (struct type *type, char *valbuf)
 }
 
 
+#ifndef CALL_DUMMY_CALL_OFFSET
+#define CALL_DUMMY_CALL_OFFSET \
+     (gdbarch_tdep (current_gdbarch)->call_dummy_call_offset)
+#endif /* CALL_DUMMY_CALL_OFFSET */
+
 /* Insert the function address into a call dummy instruction sequence
    stored at DUMMY.
 
@@ -2175,13 +2245,11 @@ sparc_target_architecture_hook (const bfd_arch_info_type *ap)
 static struct gdbarch * sparc_gdbarch_init (struct gdbarch_info info,
 					    struct gdbarch_list *arches);
 
-static void sparc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file);
-
 void
 _initialize_sparc_tdep (void)
 {
   /* Hook us into the gdbarch mechanism.  */
-  gdbarch_register (bfd_arch_sparc, sparc_gdbarch_init, sparc_dump_tdep);
+  register_gdbarch_init (bfd_arch_sparc, sparc_gdbarch_init);
 
   tm_print_insn = gdb_print_insn_sparc;
   tm_print_insn_info.mach = TM_PRINT_INSN_MACH;		/* Selects sparc/sparclite */
@@ -2822,92 +2890,6 @@ sparc_return_value_on_stack (struct type *type)
     return 0;
 }
 
-
-static void
-process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
-{
-  int *os_ident_ptr = obj;
-  const char *name;
-  unsigned int sect_size;
-
-  name = bfd_get_section_name (abfd, sect);
-  sect_size = bfd_section_size (abfd, sect);
-  if (strcmp (name, ".note.ABI-tag") == 0 && sect_size > 0)
-    {
-      unsigned int name_length, data_length, note_type;
-      char *note = alloca (sect_size);
-
-      bfd_get_section_contents (abfd, sect, note,
-                                (file_ptr) 0, (bfd_size_type) sect_size);
-
-      name_length = bfd_h_get_32 (abfd, note);
-      data_length = bfd_h_get_32 (abfd, note + 4);
-      note_type = bfd_h_get_32 (abfd, note + 8);
-
-      if (name_length == 4 && data_length == 16 && note_type == 1
-          && strcmp (note + 12, "GNU") == 0)
-        {
-          int os_number = bfd_h_get_32 (abfd, note + 16);
-
-          /* The case numbers are from abi-tags in glibc.  */
-          switch (os_number)
-            {
-            case 0:
-              *os_ident_ptr = ELFOSABI_LINUX;
-              break;
-            case 1:
-              *os_ident_ptr = ELFOSABI_HURD;
-              break;
-            case 2:
-              *os_ident_ptr = ELFOSABI_SOLARIS;
-              break;
-            default:
-              internal_error (__FILE__, __LINE__,
-                              "process_note_abi_sections: "
-                              "unknown OS number %d", os_number);
-              break;
-            }
-        }
-    }
-}
-
-struct sparc_abi_handler
-{
-  struct sparc_abi_handler *next;
-  int os_ident;
-  void (*init_abi)(struct gdbarch_info, struct gdbarch *);
-};
-
-struct sparc_abi_handler *sparc_abi_handler_list = NULL;
-
-void
-sparc_gdbarch_register_os_abi (int os_ident,
-			       void (*init_abi)(struct gdbarch_info,
-						struct gdbarch *))
-{
-  struct sparc_abi_handler *p;
-
-  for (p = sparc_abi_handler_list; p != NULL; p = p->next)
-    {
-      if (p->os_ident == os_ident)
-	{
-	  internal_error
-	    (__FILE__, __LINE__,
-	     "sparc_gdbarch_register_os_abi: A handler for this ABI variant (%d)"
-	     " has already been registered", (int)os_ident);
-	  /* If user wants to continue, override previous definition.  */
-	  p->init_abi = init_abi;
-	  return;
-	}
-    }
-
-  p = (struct sparc_abi_handler *) xmalloc (sizeof (*p));
-  p->os_ident = os_ident;
-  p->init_abi = init_abi;
-  p->next = sparc_abi_handler_list;
-  sparc_abi_handler_list = p;
-}
-
 /*
  * Gdbarch "constructor" function.
  */
@@ -2929,8 +2911,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
-  struct sparc_abi_handler *abi_handler;
-  int os_ident;
 
   static LONGEST call_dummy_32[] = 
     { 0xbc100001, 0x9de38000, 0xbc100002, 0xbe100003,
@@ -2954,33 +2934,10 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     };
   static LONGEST call_dummy_nil[] = {0};
 
-  if (info.abfd != NULL
-      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
-    {
-      os_ident = elf_elfheader (info.abfd)->e_ident[EI_OSABI];
-
-      /* If os_ident is 0, it is not necessarily the case that we're
-         on a SYSV system.  (ELFOSABI_NONE is defined to be 0.)
-         GNU/Linux uses a note section to record OS/ABI info, but
-         leaves e_ident[EI_OSABI] zero.  So we have to check for note
-         sections too.  */
-      if (os_ident == ELFOSABI_NONE)
-	bfd_map_over_sections (info.abfd,
-			       process_note_abi_tag_sections,
-			       &os_ident);
-    }
-  else
-    os_ident = -1;
-
   /* First see if there is already a gdbarch that can satisfy the request.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->os_ident == os_ident)
-        return arches->gdbarch;
-    }
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
   /* None found: is the request for a sparc architecture? */
   if (info.bfd_arch_info->arch != bfd_arch_sparc)
@@ -2989,8 +2946,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Yes: create a new gdbarch for the specified machine type.  */
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
-
-  tdep->os_ident = os_ident;
 
   /* First set settings that are common for all sparc architectures.  */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
@@ -3263,107 +3218,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     }
 
-  for (abi_handler = sparc_abi_handler_list;
-       abi_handler;
-       abi_handler = abi_handler->next)
-    if (abi_handler->os_ident == os_ident)
-      break;
-
-  if (abi_handler)
-    abi_handler->init_abi (info, gdbarch);
-
   return gdbarch;
 }
 
-static void
-sparc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (tdep == NULL)
-    return;
-
-  fprintf_unfiltered (file, "sparc_dump_tdep: os_ident ");
-  switch (tdep->os_ident)
-    {
-    case ELFOSABI_NONE:
-      fprintf_unfiltered (file, "ELFOSABI_NONE");
-      break;
-    case ELFOSABI_NETBSD:
-      fprintf_unfiltered (file, "ELFOSABI_NETBSD");
-      break;
-    case ELFOSABI_LINUX:
-      fprintf_unfiltered (file, "ELFOSABI_LINUX");
-      break;
-    case ELFOSABI_HURD:
-      fprintf_unfiltered (file, "ELFOSABI_HURD");
-      break;
-    case ELFOSABI_SOLARIS:
-      fprintf_unfiltered (file, "ELFOSABI_SOLARIS");
-      break;
-    case ELFOSABI_FREEBSD:
-      fprintf_unfiltered (file, "ELFOSABI_FREEBSD");
-      break;
-    case ELFOSABI_OPENBSD:
-      fprintf_unfiltered (file, "ELFOSABI_OPENBSD");
-      break;
-    case ELFOSABI_STANDALONE:
-      fprintf_unfiltered (file, "ELFOSABI_STANDALONE");
-      break;
-    default:
-      fprintf_unfiltered (file, "UNKNOWN");
-      break;
-    }
-
-  fprintf_unfiltered (file, "sparc_dump_tdep: has_fpu %d\n",
-		      tdep->has_fpu);
-  fprintf_unfiltered (file, "sparc_dump_tdep: fp_register_bytes %d\n",
-		      tdep->fp_register_bytes);
-  fprintf_unfiltered (file, "sparc_dump_tdep: y_regnum %d\n",
-		      tdep->y_regnum);
-  fprintf_unfiltered (file, "sparc_dump_tdep: fp_max_regnum %d\n",
-		      tdep->fp_max_regnum);
-  fprintf_unfiltered (file, "sparc_dump_tdep: intreg_size %d\n",
-		      tdep->intreg_size);
-  fprintf_unfiltered (file, "sparc_dump_tdep: reg_save_offset %d\n",
-		      tdep->reg_save_offset);
-  fprintf_unfiltered (file, "sparc_dump_tdep: call_dummy_call_offset %d\n",
-		      tdep->call_dummy_call_offset);
-  fprintf_unfiltered (file, "sparc_dump_tdep: print_insn_mach ");
-  switch (tdep->print_insn_mach)
-    {
-    case bfd_mach_sparc:
-      fprintf_unfiltered (file, "bfd_mach_sparc\n");
-      break;
-    case bfd_mach_sparc_sparclet:
-      fprintf_unfiltered (file, "bfd_mach_sparc_sparclet\n");
-      break;
-    case bfd_mach_sparc_sparclite:
-      fprintf_unfiltered (file, "bfd_mach_sparc_sparclite\n");
-      break;
-    case bfd_mach_sparc_sparclite_le:
-      fprintf_unfiltered (file, "bfd_mach_sparc_sparclite_le\n");
-      break;
-    case bfd_mach_sparc_v8plus:
-      fprintf_unfiltered (file, "bfd_mach_sparc_v8plus\n");
-      break;
-    case bfd_mach_sparc_v8plusa:
-      fprintf_unfiltered (file, "bfd_mach_sparc_v8plusa\n");
-      break;
-    case bfd_mach_sparc_v8plusb:
-      fprintf_unfiltered (file, "bfd_mach_sparc_v8plusb\n");
-      break;
-    case bfd_mach_sparc_v9:
-      fprintf_unfiltered (file, "bfd_mach_sparc_v9\n");
-      break;
-    case bfd_mach_sparc_v9a:
-      fprintf_unfiltered (file, "bfd_mach_sparc_v9a\n");
-      break;
-    case bfd_mach_sparc_v9b:
-      fprintf_unfiltered (file, "bfd_mach_sparc_v9b\n");
-      break;
-    default:
-      fprintf_unfiltered (file, "UNKNOWN\n");
-      break;
-    };
-}

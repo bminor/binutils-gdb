@@ -18,22 +18,6 @@
 	* sparc-tdep.c (sparc_prologue_frameless_p): Implement.
 	(sparc_gdbarch_init): Pass it to
 	set_gdbarch_prologue_frameless_p.
-
-	* sparc-tdep.h: New file.
-	* sparc-tdep.c (elf-bfd.h): Include.
-	(SPARC_HAS_FPU, FP_REGISTER_BYTES, FP_MAX_REGNUM,
-	SPARC_INTREG_SIZE, DUMMY_REG_SAVE_OFFSET, gdbarch_tdep,
-	CALL_DUMMY_CALL_OFFSET): Move out to sparc-tdep.h
-	(sparc_dump_tdep): New function.
-	(_initialize_sparc_tdep): Use gdbarch_register instead of
-	register_gdbarch_init which is deprecated.
-	(process_note_abi_tag_sections, sparc_abi_handler,
-	sparc_abi_handler_list, sparc_gdbarch_register_os_abi): New.
-	(sparc_gdbarch_init): Determine elf os ident key based upon
-	either the elf header or by using process_note_abi_tag_sections.
-	Fix 'gdbarch already exists' test by comparing os_ident as well.
-	As the last action, invoke OS abi_handler if installed.
-	
 2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.in (ALLDEPFILES): Add alphabsd-nat.c.
