@@ -1,3 +1,7 @@
+Thu Sep 28 21:18:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-configure: Fix sed command file name.
+
 Thu Sep 28 17:39:56 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* configure.in (host i[345]86-*-win32): Reduce the 
