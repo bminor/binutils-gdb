@@ -7,6 +7,7 @@ Tue Jul 27 12:07:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	conform to GDB conventions like using memcpy not bcopy, serial.h,
 	etc.  This is to make it host on Solaris, AIX, etc.
 	* Makefile.in: Reflect removed nindy-share files.
+	* config/i960/nindy960.mt (TDEPFILES): Remove ttybreak.o.
 
 	* stack.c (print_frame_info): Revise comment about `pathological'
 	case (there was a wrong FIXME about text labels; also asm() can
