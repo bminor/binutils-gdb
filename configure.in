@@ -167,21 +167,6 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/gdb//;s/emacs//;s/fileutils//'`
     configdirs=`echo ${configdirs} | sed -e 's/grep//;s/libg++//'`
     ;;	
-  rs6000-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
-    ;;
-  hppa*-*-osf)
-# Do configure ld/binutils/gas for this case.
-    ;;
-  hppa*-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
-    ;;
-  *-*-solaris2*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/gas//'`
-    ;;
-  *-*-vms)
-    configdirs=`echo ${configdirs} | sed -e 's/bfd//;s/ld//;s/binutils//'`
-    ;;
   h8300-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/libg++//'`
 ## start-sanitize-chill
@@ -193,6 +178,24 @@ case "${target}" in
 ## start-sanitize-chill
     configdirs=`echo ${configdirs} | sed -e 's/chillrt//'`
 ## end-sanitize-chill
+    ;;
+  hppa*-*-osf)
+# Do configure ld/binutils/gas for this case.
+    ;;
+  hppa*-*-*)
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    ;;
+  rs6000-*-*)
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    ;;
+  *-*-solaris2*)
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/gas//'`
+    ;;
+  *-*-sysv4*)
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    ;;
+  *-*-vms)
+    configdirs=`echo ${configdirs} | sed -e 's/bfd//;s/ld//;s/binutils//'`
     ;;
 esac
 
