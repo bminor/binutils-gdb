@@ -2599,16 +2599,23 @@ Whether the breakpoint is marked to be disabled or deleted when hit.
 Enabled breakpoints are marked with @samp{y}.  @samp{n} marks breakpoints
 that are not enabled.
 @item Address
-Where the breakpoint is in your program, as a memory address.
+Where the breakpoint is in your program, as a memory address.  If the
+breakpoint is pending (see below for details) on a future load of a shared library, the address
+will be listed as @samp{<PENDING>}.
 @item What
 Where the breakpoint is in the source for your program, as a file and
-line number.
+line number.  For a pending breakpoint, the original string passed to
+the breakpoint command will be listed as it cannot be resolved until
+the appropriate shared library is loaded in the future.
 @end table
 
 @noindent
 If a breakpoint is conditional, @code{info break} shows the condition on
 the line following the affected breakpoint; breakpoint commands, if any,
-are listed after that.
+are listed after that.  A pending breakpoint is allowed to have a condition
+specified for it.  The condition is not parsed for validity until a shared
+library is loaded that allows the pending breakpoint to resolve to a
+valid location.
 
 @noindent
 @code{info break} with a breakpoint
@@ -2630,6 +2637,31 @@ will get you quickly to the last hit of that breakpoint.
 your program.  There is nothing silly or meaningless about this.  When
 the breakpoints are conditional, this is even useful
 (@pxref{Conditions, ,Break conditions}).
+
+@cindex pending breakpoints
+If a specified breakpoint location cannot be found, @value{GDBN} will
+prompt you
+as to whether to make the breakpoint pending on a future shared
+library load.  This is useful for setting breakpoints at the start of your
+@value{GDBN} session for locations that you know will be dynamically loaded
+later by the program being debugged.  When shared libraries are loaded,
+a check is made to see if the load resoloves any pending breakpoint locations.
+If a pending breakpoint location has been resolved,
+a real breakpoint is created and the original pending breakpoint is removed.
+
+@cindex operations allowed on pending breakpoints 
+Normal breakpoint operations apply to pending breakpoints as well.  You may 
+specify a condition for a pending breakpoint and/or commands to run when the 
+breakpoint is reached.  You can also enable or disable
+the pending breakpoint.  When you specify a condition for a pending breakpoint,
+the parsing of the condition will be deferred until the point where the
+pending breakpoint location is resolved.  Disabling a pending breakpoint
+tells @value{GDBN} to not attempt to resolve the breakpoint on any subsequent
+shared library load.  When a pending breakpoint is re-enabled,
+@value{GDBN} checks to see if the location is already resolved. 
+This is done because any number of shared library loads could have
+occurred since the time the breakpoint was disabled and one or more
+of these loads could resolve the location.
 
 @cindex negative breakpoint numbers
 @cindex internal @value{GDBN} breakpoints
