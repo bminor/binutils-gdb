@@ -6,6 +6,7 @@ Thu Mar 16 13:59:14 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 	(main): Initialize it to false.
 	* ldmain.h: Declare whole_archive.
 	* lexsup.c (parse_args): Grok --whole-archive switch.
+	* ld.texinfo, ld.1: Document --whole-archive.
 
 Thu Mar 16 11:38:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 

@@ -108,6 +108,7 @@ ld \- the GNU linker
 .RB "[\|" \-\-version "\|]"
 .RB "[\|" \-warn\-common "\|]" 
 .RB "[\|" \-warn\-once "\|]" 
+.RB "[\|" \-\-whole\-archive "\|]" 
 .RB "[\|" \-X "\|]" 
 .RB "[\|" \-x "\|]" 
 .ad b
@@ -825,6 +826,14 @@ you to find potential problems from combining global symbols.
 .B \-warn\-once
 Only warn once for each undefined symbol, rather than once per module
 which refers to it.
+
+.TP
+.B \-\-whole\-archive
+For each archive mentioned on the command line, include every object
+file in the archive in the link, rather than searching the archive for
+the required object files.  This is normally used to turn an archive
+file into a shared library, forcing every object to be included in the
+resulting shared library.
 
 .TP
 .B \-X 
