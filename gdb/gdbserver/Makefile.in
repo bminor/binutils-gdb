@@ -122,7 +122,9 @@ DEPFILES = @GDBSERVER_DEPFILES@
 SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
 
-OBS = utils.o $(DEPFILES) server.o remote-utils.o regcache.o signals.o
+OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
+	utils.o \
+	$(DEPFILES)
 
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
@@ -230,12 +232,14 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 regdat_sh = $(srcdir)/../regformats/regdat.sh
 regdef_h = $(srcdir)/../regformats/regdef.h
 regcache_h = $(srcdir)/regcache.h
-server_h = $(srcdir)/server.h $(regcache_h) config.h
+server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h
 
-server.o: server.c $(server_h)
-remote-utils.o: remote-utils.c terminal.h $(server_h)
-utils.o: utils.c $(server_h)
+inferiors.o: inferiors.c $(server_h)
 regcache.o: regcache.c $(server_h) $(regdef_h)
+remote-utils.o: remote-utils.c terminal.h $(server_h)
+server.o: server.c $(server_h)
+target.o: target.c $(server_h)
+utils.o: utils.c $(server_h)
 
 signals.o: ../signals/signals.c $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER

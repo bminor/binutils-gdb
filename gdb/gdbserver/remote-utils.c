@@ -186,6 +186,25 @@ fromhex (int a)
   return 0;
 }
 
+int
+unhexify (char *bin, const char *hex, int count)
+{
+  int i;
+
+  for (i = 0; i < count; i++)
+    {
+      if (hex[0] == 0 || hex[1] == 0)
+        {
+          /* Hex string is short, or of uneven length.
+             Return the count that has been converted so far. */
+          return i;
+        }
+      *bin++ = fromhex (hex[0]) * 16 + fromhex (hex[1]);
+      hex += 2;
+    }
+  return i;
+}
+
 /* Convert number NIB to a hex digit.  */
 
 static int
@@ -195,6 +214,24 @@ tohex (int nib)
     return '0' + nib;
   else
     return 'a' + nib - 10;
+}
+
+int
+hexify (char *hex, const char *bin, int count)
+{
+  int i;
+
+  /* May use a length, or a nul-terminated string as input. */
+  if (count == 0)
+    count = strlen (bin);
+
+  for (i = 0; i < count; i++)
+    {
+      *hex++ = tohex ((*bin >> 4) & 0xf);
+      *hex++ = tohex (*bin++ & 0xf);
+    }
+  *hex = 0;
+  return i;
 }
 
 /* Send a packet to the remote machine, with error checking.
@@ -292,7 +329,7 @@ input_interrupt (int unused)
 	  return;
 	}
       
-      kill (inferior_pid, SIGINT);
+      kill (signal_pid, SIGINT);
     }
 }
 

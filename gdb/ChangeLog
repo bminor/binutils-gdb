@@ -1,5 +1,41 @@
 2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/inferiors.c: New file.
+	* gdbserver/target.c: New file.
+	* gdbserver/target.h: New file.
+	* gdbserver/Makefile.in:  Add target.o and inferiors.o.  Update
+	dependencies.
+	* gdbserver/linux-low.c (inferior_pid): New static variable,
+	moved from server.c.
+	(linux_create_inferior): Renamed from create_inferior.
+	Call add_inferior.  Return 0 on success instead of a PID.
+	(linux_attach): Renamed from myattach.
+	(linux_kill): Renamed from kill_inferior.  Call clear_inferiors ().
+	(linux_thread_alive): Renamed from mythread_alive.
+	(linux_wait): Renamed from mywait.  Call clear_inferiors () if the
+	child dies.
+	(linux_resume): Renamed from myresume.  Add missing ``return 0''.
+	(regsets_store_inferior_registers): Correct error message.
+	Add missing ``return 0''.
+	(linux_fetch_registers): Renamed from fetch_inferior_registers.
+	(linux_store_registers): Renamed from store_inferior_registers.
+	(linux_read_memory): Renamed from read_inferior_memory.
+	(linux_write_memory): Renamed from write_inferior_memory.
+	(linux_target_ops): New structure.
+	(initialize_low): Call set_target_ops ().
+	* gdbserver/remote-utils.c (unhexify): New function.
+	(hexify): New function.
+	(input_interrupt): Send signals to ``signal_pid''.
+	* gdbserver/server.c (inferior_pid): Remove.
+	(start_inferior): Update create_inferior call.
+	(attach_inferior): Call add_inferior.
+	(handle_query): New function.
+	(main): Call handle_query for `q' packets.
+	* gdbserver/server.h: Include "target.h".  Remove obsolete prototypes.
+	Add prototypes for "inferiors.c", "target.c", hexify, and unhexify.
+
+2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/Makefile.in: Add WARN_CFLAGS.  Update configury
 	dependencies.
 	* gdbserver/configure.in: Check for <string.h>

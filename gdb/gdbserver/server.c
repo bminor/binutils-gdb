@@ -27,13 +27,14 @@ int thread_from_wait;
 int old_thread_from_wait;
 int extended_protocol;
 jmp_buf toplevel;
-int inferior_pid;
 
 static unsigned char
 start_inferior (char *argv[], char *statusptr)
 {
-  inferior_pid = create_inferior (argv[0], argv);
-  fprintf (stderr, "Process %s created; pid = %d\n", argv[0], inferior_pid);
+  /* FIXME Check error? Or turn to void.  */
+  create_inferior (argv[0], argv);
+  /* FIXME Print pid properly.  */
+  fprintf (stderr, "Process %s created; pid = %d\n", argv[0], signal_pid);
 
   /* Wait till we are at 1st instruction in program, return signal number.  */
   return mywait (statusptr);
@@ -47,7 +48,7 @@ attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
   if (myattach (pid) != 0)
     return -1;
 
-  inferior_pid = pid;
+  add_inferior (pid);
 
   *sigptr = mywait (statusptr);
 
@@ -55,6 +56,29 @@ attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
 }
 
 extern int remote_debug;
+
+/* Handle all of the extended 'q' packets.  */
+void
+handle_query (char *own_buf)
+{
+  if (strcmp ("qSymbol::", own_buf) == 0)
+    {
+#if 0
+      strcpy (own_buf, "qSymbol:");
+      hexify (own_buf + strlen ("qSymbol:"), "main", 4);
+      putpkt (own_buf);
+      getpkt (own_buf);
+      fprintf (stderr, "Got %s", own_buf);
+#endif
+      strcpy (own_buf, "OK");
+      return;
+    }
+
+  /* Otherwise we didn't know what packet it was.  Say we didn't
+     understand it.  */
+  own_buf[0] = 0;
+}
+
 static int attached;
 
 int
@@ -132,6 +156,9 @@ main (int argc, char *argv[])
 	  ch = own_buf[i++];
 	  switch (ch)
 	    {
+	    case 'q':
+	      handle_query (own_buf);
+	      break;
 	    case 'd':
 	      remote_debug = !remote_debug;
 	      break;

@@ -49,11 +49,13 @@ extern int num_regs;
 extern int regmap[];
 #endif
 
+static int inferior_pid;
+
 /* Start an inferior process and returns its pid.
    ALLARGS is a vector of program-name and args. */
 
-int
-create_inferior (char *program, char **allargs)
+static int
+linux_create_inferior (char *program, char **allargs)
 {
   int pid;
 
@@ -73,13 +75,16 @@ create_inferior (char *program, char **allargs)
       _exit (0177);
     }
 
-  return pid;
+  add_inferior (pid);
+  /* FIXME remove */
+  inferior_pid = pid;
+  return 0;
 }
 
 /* Attach to an inferior process.  */
 
-int
-myattach (int pid)
+static int
+linux_attach (int pid)
 {
   if (ptrace (PTRACE_ATTACH, pid, 0, 0) != 0)
     {
@@ -95,26 +100,27 @@ myattach (int pid)
 
 /* Kill the inferior process.  Make us have no inferior.  */
 
-void
-kill_inferior (void)
+static void
+linux_kill (void)
 {
   if (inferior_pid == 0)
     return;
   ptrace (PTRACE_KILL, inferior_pid, 0, 0);
   wait (0);
+  clear_inferiors ();
 }
 
 /* Return nonzero if the given thread is still alive.  */
-int
-mythread_alive (int pid)
+static int
+linux_thread_alive (int pid)
 {
   return 1;
 }
 
 /* Wait for process, returns status */
 
-unsigned char
-mywait (char *status)
+static unsigned char
+linux_wait (char *status)
 {
   int pid;
   int w;
@@ -129,11 +135,13 @@ mywait (char *status)
     {
       fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
       *status = 'W';
+      clear_inferiors ();
       return ((unsigned char) WEXITSTATUS (w));
     }
   else if (!WIFSTOPPED (w))
     {
       fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
+      clear_inferiors ();
       *status = 'X';
       return ((unsigned char) WTERMSIG (w));
     }
@@ -148,8 +156,8 @@ mywait (char *status)
    If STEP is nonzero, single-step it.
    If SIGNAL is nonzero, give it that signal.  */
 
-void
-myresume (int step, int signal)
+static void
+linux_resume (int step, int signal)
 {
   errno = 0;
   ptrace (step ? PTRACE_SINGLESTEP : PTRACE_CONT, inferior_pid, 1, signal);
@@ -318,6 +326,7 @@ regsets_fetch_inferior_registers (void)
       regset->store_function (buf);
       regset ++;
     }
+  return 0;
 }
 
 static int
@@ -360,18 +369,19 @@ regsets_store_inferior_registers (void)
 	    }
 	  else
 	    {
-	      perror ("Warning: ptrace(regsets_fetch_inferior_registers)");
+	      perror ("Warning: ptrace(regsets_store_inferior_registers)");
 	    }
 	}
       regset ++;
     }
+  return 0;
 }
 
 #endif /* HAVE_LINUX_REGSETS */
 
 
 void
-fetch_inferior_registers (int regno)
+linux_fetch_registers (int regno)
 {
 #ifdef HAVE_LINUX_REGSETS
   if (use_regsets_p)
@@ -386,7 +396,7 @@ fetch_inferior_registers (int regno)
 }
 
 void
-store_inferior_registers (int regno)
+linux_store_registers (int regno)
 {
 #ifdef HAVE_LINUX_REGSETS
   if (use_regsets_p)
@@ -404,8 +414,8 @@ store_inferior_registers (int regno)
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
 
-void
-read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
+static void
+linux_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -433,8 +443,8 @@ read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
    On failure (cannot write the inferior)
    returns the value of errno.  */
 
-int
-write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
+static int
+linux_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -477,8 +487,22 @@ write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
   return 0;
 }
 
+static struct target_ops linux_target_ops = {
+  linux_create_inferior,
+  linux_attach,
+  linux_kill,
+  linux_thread_alive,
+  linux_resume,
+  linux_wait,
+  linux_fetch_registers,
+  linux_store_registers,
+  linux_read_memory,
+  linux_write_memory,
+};
+
 void
 initialize_low (void)
 {
+  set_target_ops (&linux_target_ops);
   init_registers ();
 }

@@ -53,24 +53,23 @@ typedef long long CORE_ADDR;
 #include "regcache.h"
 #include "gdb/signals.h"
 
+#include "target.h"
 
 /* Target-specific functions */
 
-int create_inferior (char *program, char **allargs);
-void kill_inferior (void);
-void fetch_inferior_registers (int regno);
-void store_inferior_registers (int regno);
-int mythread_alive (int pid);
-void myresume (int step, int signo);
-unsigned char mywait (char *status);
-void read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
-int write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
-int create_inferior ();
 void initialize_low ();
 
 /* Target-specific variables */
 
 extern char *registers;
+
+/* From inferiors.c.  */
+
+struct inferior_info;
+extern struct inferior_info *current_inferior;
+extern int signal_pid;
+void add_inferior (int pid);
+void clear_inferiors (void);
 
 /* Public variables in server.c */
 
@@ -80,7 +79,6 @@ extern int thread_from_wait;
 extern int old_thread_from_wait;
 
 extern jmp_buf toplevel;
-extern int inferior_pid;
 
 /* Functions from remote-utils.c */
 
@@ -100,6 +98,10 @@ void decode_m_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr);
 void decode_M_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr, char *to);
+
+int unhexify (char *bin, const char *hex, int count);
+int hexify (char *hex, const char *bin, int count);
+
 
 /* Functions from ``signals.c''.  */
 enum target_signal target_signal_from_host (int hostsig);
