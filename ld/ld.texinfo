@@ -1,7 +1,9 @@
 \input texinfo
-@setfilename gld.info
+@setfilename ld.info
 @c $Id$
 @syncodeindex ky cp
+@c @smallbook
+@c @cropmarks
 @ifinfo
 This file documents the GNU linker GLD.
 
@@ -36,13 +38,13 @@ original English.
 @setchapternewpage odd
 @settitle GLD, the GNU linker
 @titlepage
-@title{gld}
-@subtitle{The GNU linker}
+@title gld
+@subtitle The GNU linker
 @sp 1
 @subtitle Second Edition---@code{gld} version 2.0
 @subtitle April 1991
-@author {Steve Chamberlain and Roland Pesch}
-@author {Cygnus Support}
+@author Steve Chamberlain and Roland Pesch
+@author Cygnus Support
 @page
 
 @tex
@@ -81,49 +83,49 @@ This file documents the GNU linker gld.
 @end ifinfo
 
 @menu
-* Overview::			Overview
-* Invocation::			Invocation
-* Commands::			Command Language
-* BFD::				BFD
-* Index::			Index
+* Overview::                    Overview
+* Invocation::                  Invocation
+* Commands::                    Command Language
+* BFD::                         BFD
+* Index::                       Index
 
  --- The Detailed Node Listing ---
 
 Invocation
 
-* Options::			Command Line Options
-* Environment::			Environment Variables
+* Options::                     Command Line Options
+* Environment::                 Environment Variables
 
 Command Language
 
-* Scripts::			Linker Scripts
-* Expressions::			Expressions
-* MEMORY::			MEMORY Command
-* SECTIONS::			SECTIONS Command
-* Entry Point::			The Entry Point
-* Other Commands::		Other Commands
+* Scripts::                     Linker Scripts
+* Expressions::                 Expressions
+* MEMORY::                      MEMORY Command
+* SECTIONS::                    SECTIONS Command
+* Entry Point::                 The Entry Point
+* Other Commands::              Other Commands
 
 Expressions
 
-* Integers::			Integers
-* Symbols::			Symbol Names
-* Location Counter::		The Location Counter
-* Operators::			Operators
-* Evaluation::			Evaluation
-* Assignment::			Assignment: Defining Symbols
-* Built-ins::			Built-In Functions
+* Integers::                    Integers
+* Symbols::                     Symbol Names
+* Location Counter::            The Location Counter
+* Operators::                   Operators
+* Evaluation::                  Evaluation
+* Assignment::                  Assignment: Defining Symbols
+* Built-ins::                   Built-In Functions
 
 SECTIONS Command
 
-* Section Definition::		Section Definitions
-* Section Contents::		Section Contents
-* Section Options::		Optional Section Attributes
+* Section Definition::          Section Definitions
+* Section Contents::            Section Contents
+* Section Options::             Optional Section Attributes
 
 BFD
 
-* BFD outline::			How it works: an outline of BFD
-* BFD information loss::	Information Loss
-* Mechanism::			Mechanism 
+* BFD outline::                 How it works: an outline of BFD
+* BFD information loss::        Information Loss
+* Mechanism::                   Mechanism 
 @end menu
 
 @node Overview, Invocation, Top, Top
@@ -161,8 +163,8 @@ you have many choices to control its behavior through the command line,
 and through environment variables.
 
 @menu
-* Options::			Command Line Options
-* Environment::			Environment Variables
+* Options::                     Command Line Options
+* Environment::                 Environment Variables
 @end menu
 
 @node Options, Environment, Invocation, Invocation
@@ -173,7 +175,7 @@ and through environment variables.
 Here is a sketch of the options you can use on the @code{gld} command
 line:
 
-@example
+@smallexample
 gld [-o @var{output} ] @var{objfiles}@dots{}
     [ -A@var{architecture} ]  [ -b @var{input-format} ]  [ -Bstatic ]  
     [ -c @var{commandfile} ]  [ -d | -dc | -dp ]  
@@ -190,7 +192,7 @@ gld [-o @var{output} ] @var{objfiles}@dots{}
     [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]  [ -Tbss @var{bssorg} ]
     [ -t ]  [ -u @var{sym}]  [-v]  [ -X ]  [ -x ] 
     [ @{ @var{script} @} ] 
-@end example
+@end smallexample
 
 This plethora of command-line options may seem intimidating, but in
 actual practice few of them are used in any particular context.
@@ -747,12 +749,12 @@ You can also include a script directly on the @code{gld} command line,
 delimited by the characters @samp{@{} and @samp{@}}.
 
 @menu
-* Scripts::			Linker Scripts
-* Expressions::			Expressions
-* MEMORY::			MEMORY Command
-* SECTIONS::			SECTIONS Command
-* Entry Point::			The Entry Point
-* Other Commands::		Other Commands
+* Scripts::                     Linker Scripts
+* Expressions::                 Expressions
+* MEMORY::                      MEMORY Command
+* SECTIONS::                    SECTIONS Command
+* Entry Point::                 The Entry Point
+* Other Commands::              Other Commands
 @end menu
 
 @node Scripts, Expressions, Commands, Commands
@@ -805,13 +807,13 @@ You may call special purpose built-in functions.
 @end itemize
 
 @menu
-* Integers::			Integers
-* Symbols::			Symbol Names
-* Location Counter::		The Location Counter
-* Operators::			Operators
-* Evaluation::			Evaluation
-* Assignment::			Assignment: Defining Symbols
-* Built-ins::			Built-In Functions
+* Integers::                    Integers
+* Symbols::                     Symbol Names
+* Location Counter::            The Location Counter
+* Operators::                   Operators
+* Evaluation::                  Evaluation
+* Assignment::                  Assignment: Defining Symbols
+* Built-ins::                   Built-In Functions
 @end menu
 
 @node Integers, Symbols, Expressions, Expressions
@@ -853,12 +855,16 @@ _as_neg = -57005;
 @cindex integer suffixes
 Additionally the suffixes @code{K} and @code{M} may be used to scale a
 constant by 
+@c TEXI2ROFF-KILL
+@ifinfo
+@c END TEXI2ROFF-KILL
+@code{1024} or @code{1024*1024}
+@c TEXI2ROFF-KILL
+@end ifinfo
 @tex
 ${\rm 1024}$ or ${\rm 1024}^2$
 @end tex
-@ifinfo
-1024 or 1024*1024
-@end ifinfo
+@c END TEXI2ROFF-KILL
 respectively. For example, the following all refer to the same quantity:@refill
 
 @example
@@ -926,26 +932,29 @@ the gaps (@pxref{Section Options}).
 @cindex precedence in expressions
 The linker recognizes  the standard C set of arithmetic operators, with
 the standard bindings and precedence levels:
+@c TEXI2ROFF-KILL
 @ifinfo
+@c END TEXI2ROFF-KILL
 @example
-precedence	associativity	Operators                Notes
+precedence      associativity   Operators                Notes
 (highest)
-1		left		!  -  ~                  (1)
-2		left		*  /  %
-3		left		+  -
-4		left		>>  <<
-5		left		==  !=  >  <  <=  >=
-6		left		&
-7		left		|
-8		left		&&
-9		left		||
-10		right		? :
-11		right		&=  +=  -=  *=  /=       (2)
+1               left            !  -  ~                  (1)
+2               left            *  /  %
+3               left            +  -
+4               left            >>  <<
+5               left            ==  !=  >  <  <=  >=
+6               left            &
+7               left            |
+8               left            &&
+9               left            ||
+10              right           ? :
+11              right           &=  +=  -=  *=  /=       (2)
 (lowest)
 @end example
 Notes:
 (1) Prefix operators 
 (2) @xref{Assignment}
+@c TEXI2ROFF-KILL
 @end ifinfo
 @tex
 \vskip \baselineskip
@@ -983,6 +992,7 @@ height2pt&\omit&&\omit&&\omit&\cr}
 @ddag@quad @xref{Assignment}.
 }
 @end iftex
+@c END TEXI2ROFF-KILL
 
 @node Evaluation, Assignment, Operators, Expressions
 @subsection Evaluation
@@ -1169,14 +1179,14 @@ values for symbols.  For example, this command-file fragment shows how
 to set a global symbol @code{begin} to the first location in the
 @code{.text} section---but if a symbol called @code{begin} already
 existed, its value is preserved:
-@example
+@smallexample
 SECTIONS@{ @dots{}
         .text: @{
                 begin = DEFINED(begin) ? begin : . ;
                 @dots{}
         @}
 @dots{} @}
-@end example
+@end smallexample
 
 @item NEXT(@var{exp})
 @kindex NEXT(@var{exp})
@@ -1234,7 +1244,7 @@ regions and issue errors when the regions become too full.
 Command files may contain at most one use of the @code{MEMORY}
 command; however, you can define as many blocks of memory within it as
 you wish.  The syntax is:
-	
+        
 @example
 MEMORY 
       @{
@@ -1325,9 +1335,9 @@ for example, the order of sections in the output file will match the
 order in the first input file.
 
 @menu
-* Section Definition::		Section Definitions
-* Section Contents::		Section Contents
-* Section Options::		Optional Section Attributes
+* Section Definition::          Section Definitions
+* Section Contents::            Section Contents
+* Section Options::             Optional Section Attributes
 @end menu
 
 @node Section Definition, Section Contents, SECTIONS, SECTIONS
@@ -1885,10 +1895,10 @@ it to the library.  BFD supports the following combinations of
 architectures (row labels below) and object formats (column headings):
 @cindex formats available
 @cindex architectures available
+@c TEXI2ROFF-KILL
 @ifinfo
+@c END TEXI2ROFF-KILL
 @example
-                OBJECT FORMATS
-              \ ---------------------------------------
                |ieee
                |  |oasys
                |  |  |a.out-generic-little
@@ -1898,7 +1908,7 @@ architectures (row labels below) and object formats (column headings):
                |  |  |  |  |  |  |coff-Intel-little
                |  |  |  |  |  |  |  |coff-Intel-big
                |  |  |  |  |  |  |  |  |b.out.little
-ARCHITECTURES  |  |  |  |  |  |  |  |  |  |b.out.big
+               |  |  |  |  |  |  |  |  |  |b.out.big
                |  |  |  |  |  |  |  |  |  |
            m68k|**|**|  |  |  |**|  |  |  |
             vax|**|**|  |  |  |**|  |  |  |
@@ -1918,29 +1928,27 @@ ARCHITECTURES  |  |  |  |  |  |  |  |  |  |b.out.big
          H8/300|**|**|  |  |  |**|  |  |  |
 
 @end example
+@c TEXI2ROFF-KILL
 @end ifinfo
 @tex
 \def\sqbull{\vrule height12pt width 10pt depth 4pt}
 \vskip\baselineskip
 \vbox{\offinterlineskip
 \halign
-{\strut\hfil #\ &\vrule#&\quad #\quad &\vrule#&\quad #\quad
-&\vrule#&\quad #\quad &\vrule#&\quad #\quad &\vrule#&\quad #\quad &\vrule#&\quad #\quad &\vrule#&\quad #\quad &\vrule#&\quad #\quad &\vrule#&\quad #\quad &\vrule#&\quad #\quad &\vrule#\cr
-		    &&\multispan{20}\hfil{\it OBJECT FORMATS}\hfil\cr
-		    &&\multispan{20}\quad\vbox{\hrule}\cr
-		    &&\multispan{20}\quad\code{ieee}\hfil\cr
-		    &&  &&\multispan{18}\quad\code{oasys}\hfil\cr
-		    &&  &&  &&\multispan{16}\quad\code{a.out-generic-little}\hfil\cr
-		    &&  &&  &&  &&\multispan{14}\quad\code{a.out-generic-big}\hfil\cr
-		    &&  &&  &&  &&  &&\multispan{12}\quad\code{m88kbcs}\hfil\cr
-		    &&  &&  &&  &&  &&  &&\multispan{10}\quad\code{srec}\hfil\cr
-		    &&  &&  &&  &&  &&  &&  &&\multispan8\quad\code{coff-Intel-little}\hfil\cr
-		    &&  &&  &&  &&  &&  &&  &&  &&\multispan6\quad\code{coff-Intel-big}\hfil\cr
-		    &&  &&  &&  &&  &&  &&  &&  &&
+{\strut\hfil #\ &\vrule#&\hskip .5em #\hskip .5em &\vrule#&\hskip .5em #\hskip .5em
+&\vrule#&\hskip .5em #\hskip .5em &\vrule#&\hskip .5em #\hskip .5em &\vrule#&\hskip .5em #\hskip .5em &\vrule#&\hskip .5em #\hskip .5em &\vrule#&\hskip .5em #\hskip .5em &\vrule#&\hskip .5em #\hskip .5em &\vrule#&\hskip .5em #\hskip .5em &\vrule#&\hskip .5em #\hskip .5em &\vrule#\cr
+                    &&\multispan{20}\quad\vbox{\hrule}\cr
+                    &&\multispan{20}\quad\code{ieee}\hfil\cr
+                    &&  &&\multispan{18}\quad\code{oasys}\hfil\cr
+                    &&  &&  &&\multispan{16}\quad\code{a.out-generic-little}\hfil\cr
+                    &&  &&  &&  &&\multispan{14}\quad\code{a.out-generic-big}\hfil\cr
+                    &&  &&  &&  &&  &&\multispan{12}\quad\code{m88kbcs}\hfil\cr
+                    &&  &&  &&  &&  &&  &&\multispan{10}\quad\code{srec}\hfil\cr
+                    &&  &&  &&  &&  &&  &&  &&\multispan8\quad\code{coff-Intel-little}\hfil\cr
+                    &&  &&  &&  &&  &&  &&  &&  &&\multispan6\quad\code{coff-Intel-big}\hfil\cr
+                    &&  &&  &&  &&  &&  &&  &&  &&
 &&\multispan4\quad\code{b.out.little}\hfil \cr
-		    &&  &&  &&  &&  &&  &&  &&  &&  &&  &&\multispan2\quad\code{b.out.big}\hidewidth\cr
-{\it ARCHITECTURES} &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &\cr
-                    &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &\cr
+                    &&  &&  &&  &&  &&  &&  &&  &&  &&  &&\multispan2\quad\code{b.out.big}\hidewidth\cr
            \code{m68k}&&\sqbull&&\sqbull&&  &&  &&  &&\sqbull&&  &&  &&  &&  &\cr
             \code{vax}&&\sqbull&&\sqbull&&  &&  &&  &&\sqbull&&  &&  &&  &&  &\cr
            \code{i960}&&\sqbull&&\sqbull&&  &&  &&  &&\sqbull&&\sqbull&&\sqbull&&\sqbull&&\sqbull  &\cr
@@ -1959,6 +1967,7 @@ ARCHITECTURES  |  |  |  |  |  |  |  |  |  |b.out.big
          \code{H8/300}&&\sqbull&&\sqbull&&  &&  &&  &&\sqbull&&  &&  &&  &&  &\cr
 }}
 @end tex
+@c END TEXI2ROFF-KILL
 
 @cindex BFD requirements
 @cindex requirements for BFD
@@ -1976,9 +1985,9 @@ useful information can be lost using the BFD mechanism; during
 conversion and during output. @xref{BFD information loss}.
 
 @menu
-* BFD outline::			How it works: an outline of BFD
-* BFD information loss::	Information Loss
-* Mechanism::			Mechanism 
+* BFD outline::                 How it works: an outline of BFD
+* BFD information loss::        Information Loss
+* Mechanism::                   Mechanism 
 @end menu
 
 @node BFD outline, BFD information loss, BFD, BFD
