@@ -61,8 +61,7 @@ typedef struct _bfd bfd;
    and false on failure (unless they're a predicate).   -- bfd.doc */
 /* I'm sure this is going to break something and someone is going to
    force me to change it. */
-/* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
-typedef enum bfd_boolean {false, true} boolean;
+typedef enum boolean {false, true} boolean;
 
 /* Try to avoid breaking stuff */
 typedef  long int file_ptr;
@@ -916,25 +915,15 @@ typedef struct bfd_arch_info_struct
   boolean EXFUN((*scan),(CONST struct bfd_arch_info_struct *,CONST char *));
   unsigned int EXFUN((*disassemble),(bfd_vma addr, CONST char *data,
 				     PTR stream));
-  CONST struct reloc_howto_struct *EXFUN((*reloc_type_lookup), (bfd_reloc_code_enum_type  code));
+  CONST struct reloc_howto_struct *EXFUN((*reloc_type_lookup), (CONST struct
+								bfd_arch_info_struct *,
+								bfd_reloc_code_enum_type  code));
 
   struct bfd_arch_info_struct *next;
 
 } bfd_arch_info_struct_type;
 
 /*
- bfd_printable_arch_mach
-Return a printable string representing the architecture and machine
-type. 
-
-NB. The use of this routine is depreciated.
-*/
-
- PROTO(CONST char *,bfd_printable_arch_mach,
-    (enum bfd_architecture arch, unsigned long machine));
-
-/*
-
  bfd_printable_name
 
 Return a printable string representing the architecture and machine
@@ -1021,57 +1010,32 @@ Returns the number of bits in one of the architectures addresses
  bfd_arch_info_struct_type * EXFUN(bfd_get_arch_info,(bfd *));
 
 /*
+
+ bfd_lookup_arch
+ 
 */
-
-
-/*:howto.c*/
-/* bfd_reloc_code_enum_type
-*/
-
-typedef enum 
-{
-
-/*
-16 bits wide, simple reloc 
-*/
-
-  BFD_RELOC_16,	
-
-/*
-8 bits wide, but used to form an address like 0xffnn
-*/
-
-  BFD_RELOC_8_FFnn,
-
-/*
-8 bits wide, simple
-*/
-
-  BFD_RELOC_8,
-
-/*
-8 bits wide, pc relative
-*/
-
-  BFD_RELOC_8_PCREL
- } bfd_reloc_code_enum_real_type;
+ bfd_arch_info_struct_type * EXFUN(bfd_lookup_arch,(enum
+    bfd_architecture arch,long machine));
 
 /*
 
- bfd_reloc_type_lookup
-This routine returns a pointer to a howto struct which when invoked,
-will perform the supplied relocation on data from the architecture
-noted.
+Look for the architecure info struct which matches the arguments
+given. A machine of 0 will match the machine/architecture structure which
+marks itself as the default.
 
-[Note] This function will go away.
+ bfd_printable_arch_mach
+Return a printable string representing the architecture and machine
+type. 
+
+NB. The use of this routine is depreciated.
 */
 
- PROTO(struct reloc_howto_struct *,
-	bfd_reloc_type_lookup,
-	(enum bfd_architecture arch, bfd_reloc_code_enum_type code));
+ PROTO(CONST char *,bfd_printable_arch_mach,
+    (enum bfd_architecture arch, unsigned long machine));
 
 /*
 */
+
 /*:reloc.c*/
 /* bfd_perform_relocation
 The relocation routine returns as a status an enumerated type:
@@ -1349,6 +1313,53 @@ this problem.
                         PTR data,
                         asection *input_section,
                         bfd *output_bfd));
+
+/*
+
+ bfd_reloc_code_enum_type
+*/
+
+typedef enum 
+{
+
+/*
+16 bits wide, simple reloc 
+*/
+
+  BFD_RELOC_16,	
+
+/*
+8 bits wide, but used to form an address like 0xffnn
+*/
+
+  BFD_RELOC_8_FFnn,
+
+/*
+8 bits wide, simple
+*/
+
+  BFD_RELOC_8,
+
+/*
+8 bits wide, pc relative
+*/
+
+  BFD_RELOC_8_PCREL
+ } bfd_reloc_code_enum_real_type;
+
+/*
+
+ bfd_reloc_type_lookup
+This routine returns a pointer to a howto struct which when invoked,
+will perform the supplied relocation on data from the architecture
+noted.
+
+[Note] This function will go away.
+*/
+
+ PROTO(CONST struct reloc_howto_struct *,
+	bfd_reloc_type_lookup,
+	(CONST bfd_arch_info_struct_type *arch, bfd_reloc_code_enum_type code));
 
 /*
 */
@@ -2088,7 +2099,7 @@ Standard stuff.
 Symbols and reloctions
 */
 
-  SDEF (unsigned int, _get_symtab_upper_bound, (bfd *));
+ SDEF (unsigned int, _get_symtab_upper_bound, (bfd *));
   SDEF (unsigned int, _bfd_canonicalize_symtab,
            (bfd *, struct symbol_cache_entry **));
   SDEF (unsigned int, _get_reloc_upper_bound, (bfd *, sec_ptr));
