@@ -34,7 +34,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
-
+#include "observer.h"
 #include "gdb_wait.h"
 #include "inflow.h"
 
@@ -232,6 +232,10 @@ child_attach (char *args, int from_tty)
 
     inferior_ptid = pid_to_ptid (pid);
     push_target (&child_ops);
+
+    /* Do this first, before anything has had a chance to query the
+       inferiors symbol table or similar.  */
+    observer_notify_inferior_created (&current_target, from_tty);
   }
 #endif /* ATTACH_DETACH */
 }
@@ -365,6 +369,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env,
   fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, NULL, NULL);
 #endif
   /* We are at the first instruction we care about.  */
+  observer_notify_inferior_created (&current_target, from_tty);
   /* Pedal to the metal... */
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }

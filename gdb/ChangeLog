@@ -1,5 +1,13 @@
 2004-05-25  Andrew Cagney  <cagney@gnu.org>
 
+	* inftarg.c: Include "observer.h".
+	(child_attach, child_create_inferior): Notify inferior_created.
+	* corelow.c: Include "observer.h".
+	(core_open): Notify inferior_created.
+	* Makefile.in (inftarg.o, corelow.o): Update dependencies.
+
+2004-05-25  Andrew Cagney  <cagney@gnu.org>
+
 	* target.h (struct target_ops): Add from_tty to
 	to_create_inferior.
 	(target_create_inferior, find_default_create_inferior): Update.

@@ -43,7 +43,7 @@
 #include "symfile.h"
 #include "exec.h"
 #include "readline/readline.h"
-
+#include "observer.h"
 #include "gdb_assert.h"
 
 #ifndef O_BINARY
@@ -354,6 +354,10 @@ core_open (char *filename, int from_tty)
 
   ontop = !push_target (&core_ops);
   discard_cleanups (old_chain);
+
+  /* This is done first, before anything has a chance to query the
+     inferior for information such as symbols.  */
+  observer_notify_inferior_created (&core_ops, from_tty);
 
   p = bfd_core_file_failing_command (core_bfd);
   if (p)
