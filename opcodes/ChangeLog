@@ -1,3 +1,13 @@
+Mon Oct  7 16:48:45 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (FMT_XX): Renumber starting at one.
+	(mn10300_operands): Rough cut.  Enough to parse "mov" instructions
+	at this time.
+	(mn10300_opcodes): Break opcode format out into its own field.
+	Update many operand fields to deal with signed vs unsigned
+	issues.  Fix one or two typos in the "mov" instruction
+	opcode, mask and/or operand fields.
+ 
 Mon Oct  7 11:39:49 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k-opc.c (plusha): Prefer encoding for m68040up, in case
