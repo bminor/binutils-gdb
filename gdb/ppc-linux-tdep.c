@@ -35,6 +35,8 @@
 #include "regset.h"
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
+#include "trad-frame.h"
+#include "frame-unwind.h"
 
 /* The following instructions are used in the signal trampoline code
    on GNU/Linux PPC. The kernel used to use magic syscalls 0x6666 and
@@ -1017,6 +1019,110 @@ static struct regset ppc32_linux_gregset = {
   NULL, ppc32_linux_supply_gregset
 };
 
+struct ppc_linux_sigtramp_cache
+{
+  CORE_ADDR base;
+  struct trad_frame_saved_reg *saved_regs;
+};
+
+static struct ppc_linux_sigtramp_cache *
+ppc_linux_sigtramp_cache (struct frame_info *next_frame, void **this_cache)
+{
+  CORE_ADDR regs;
+  CORE_ADDR gpregs;
+  CORE_ADDR fpregs;
+  int i;
+  struct ppc_linux_sigtramp_cache *cache;
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if ((*this_cache) != NULL)
+    return (*this_cache);
+  cache = FRAME_OBSTACK_ZALLOC (struct ppc_linux_sigtramp_cache);
+  (*this_cache) = cache;
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  cache->base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+
+  /* Find the register pointer, which gives the address of the
+     register buffers.  */
+  if (tdep->wordsize == 4)
+    regs = (cache->base
+	    + 0xd0 /* Offset to ucontext_t.  */
+	    + 0x30 /* Offset to .reg.  */);
+  else
+    regs = (cache->base
+	    + 0x80 /* Offset to ucontext_t.  */
+	    + 0xe0 /* Offset to .reg.  */);
+  /* And the corresponding register buffers.  */
+  gpregs = read_memory_unsigned_integer (regs, tdep->wordsize);
+  fpregs = gpregs + 48 * tdep->wordsize;
+
+  /* General purpose.  */
+  for (i = 0; i < 32; i++)
+    {
+      int regnum = i + tdep->ppc_gp0_regnum;
+      cache->saved_regs[regnum].addr = gpregs + i * tdep->wordsize;
+    }
+  cache->saved_regs[PC_REGNUM].addr = gpregs + 32 * tdep->wordsize;
+  cache->saved_regs[tdep->ppc_ctr_regnum].addr = gpregs + 35 * tdep->wordsize;
+  cache->saved_regs[tdep->ppc_lr_regnum].addr = gpregs + 36 * tdep->wordsize;
+  cache->saved_regs[tdep->ppc_xer_regnum].addr = gpregs + 37 * tdep->wordsize;
+  cache->saved_regs[tdep->ppc_cr_regnum].addr = gpregs + 38 * tdep->wordsize;
+
+  /* Floating point registers.  */
+  for (i = 0; i < 32; i++)
+    {
+      int regnum = i + FP0_REGNUM;
+      cache->saved_regs[regnum].addr = fpregs + i * tdep->wordsize;
+    }
+  cache->saved_regs[tdep->ppc_fpscr_regnum].addr = fpregs + 32 * tdep->wordsize;
+
+  return cache;
+}
+
+static void
+ppc_linux_sigtramp_this_id (struct frame_info *next_frame, void **this_cache,
+			  struct frame_id *this_id)
+{
+  struct ppc_linux_sigtramp_cache *info
+    = ppc_linux_sigtramp_cache (next_frame, this_cache);
+  (*this_id) = frame_id_build (info->base, frame_pc_unwind (next_frame));
+}
+
+static void
+ppc_linux_sigtramp_prev_register (struct frame_info *next_frame,
+				void **this_cache,
+				int regnum, int *optimizedp,
+				enum lval_type *lvalp, CORE_ADDR *addrp,
+				int *realnump, void *valuep)
+{
+  struct ppc_linux_sigtramp_cache *info
+    = ppc_linux_sigtramp_cache (next_frame, this_cache);
+  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
+			    optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind ppc_linux_sigtramp_unwind =
+{
+  SIGTRAMP_FRAME,
+  ppc_linux_sigtramp_this_id,
+  ppc_linux_sigtramp_prev_register
+};
+
+static const struct frame_unwind *
+ppc_linux_sigtramp_sniffer (struct frame_info *next_frame)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
+  if (frame_pc_unwind (next_frame)
+      > frame_unwind_register_unsigned (next_frame, SP_REGNUM))
+    /* Assume anything that is vaguely on the stack is a signal
+       trampoline.  */
+    return &ppc_linux_sigtramp_unwind;
+  else
+    return NULL;
+}
+
 static void
 ppc64_linux_supply_gregset (const struct regset *regset,
 			    struct regcache * regcache,
@@ -1084,6 +1190,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	 PowerOpen struct convention.  */
       set_gdbarch_return_value (gdbarch, ppc_linux_return_value);
 
+#if 0
       /* Note: kevinb/2002-04-12: See note in rs6000_gdbarch_init regarding
 	 *_push_arguments().  The same remarks hold for the methods below.  */
       set_gdbarch_deprecated_frameless_function_invocation (gdbarch, ppc_linux_frameless_function_invocation);
@@ -1094,9 +1201,11 @@ ppc_linux_init_abi (struct gdbarch_info info,
                                          ppc_linux_frame_init_saved_regs);
       set_gdbarch_deprecated_init_extra_frame_info (gdbarch,
                                          ppc_linux_init_extra_frame_info);
+#endif
 
       set_gdbarch_memory_remove_breakpoint (gdbarch,
                                             ppc_linux_memory_remove_breakpoint);
+
       /* Shared library handling.  */
       set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
       set_gdbarch_skip_trampoline_code (gdbarch,
@@ -1120,6 +1229,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_name_of_malloc (gdbarch, ".malloc");
     }
   set_gdbarch_regset_from_core_section (gdbarch, ppc_linux_regset_from_core_section);
+  frame_unwind_append_sniffer (gdbarch, ppc_linux_sigtramp_sniffer);
 }
 
 void

@@ -1,3 +1,25 @@
+2004-03-19  Andrew Cagney  <cagney@redhat.com>
+
+	Committed by Kevin Buettner <kevinb@redhat.com>.
+
+	* ppc-linux-tdep.c: Include "trad-frame.h", and "frame-unwind.h".
+	Update copyright.
+	(struct ppc_linux_sigtramp_cache, ppc_linux_sigtramp_cache)
+	(ppc_linux_sigtramp_this_id, ppc_linux_sigtramp_prev_register)
+	(ppc_linux_sigtramp_unwind, ppc_linux_sigtramp_sniffer)
+	(ppc_linux_init_abi): Add both 32- and 64-bit signal trampoline
+	unwinders.  #ifdef legacy frame code.
+	* rs6000-tdep.c: Include "trad-frame.h", "frame-unwind.h", and
+	"frame-base.h".
+	(rs6000_unwind_pc, rs6000_unwind_dummy_id)
+	(struct rs6000_frame_cache, rs6000_frame_cache)
+	(rs6000_frame_this_id, rs6000_frame_prev_register)
+	(rs6000_frame_sniffer, rs6000_frame_unwind)
+	(rs6000_frame_base_address, rs6000_frame_base_sniffer)
+	(rs6000_frame_base): Implement a traditional frame unwinder.
+	(rs6000_gdbarch_init): When unknown, NetBSD, or GNU/Linux use the
+	frame unwinder.
+
 2004-03-19  Kevin Buettner  <kevinb@redhat.com>
 
 	* breakpoint.c (adjust_breakpoint_address): Don't adjust

@@ -50,6 +50,10 @@
 #include "gdb_assert.h"
 #include "dis-asm.h"
 
+#include "trad-frame.h"
+#include "frame-unwind.h"
+#include "frame-base.h"
+
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
    the address of the sigcontext in an argument register. Usually
@@ -2639,6 +2643,221 @@ gdb_print_insn_powerpc (bfd_vma memaddr, disassemble_info *info)
     return print_insn_little_powerpc (memaddr, info);
 }
 
+static CORE_ADDR
+rs6000_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_unwind_register_unsigned (next_frame, PC_REGNUM);
+}
+
+static struct frame_id
+rs6000_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_id_build (frame_unwind_register_unsigned (next_frame,
+							 SP_REGNUM),
+			 frame_pc_unwind (next_frame));
+}
+
+struct rs6000_frame_cache
+{
+  CORE_ADDR base;
+  CORE_ADDR initial_sp;
+  struct trad_frame_saved_reg *saved_regs;
+};
+
+static struct rs6000_frame_cache *
+rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct rs6000_frame_cache *cache;
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct rs6000_framedata fdata;
+  int wordsize = tdep->wordsize;
+
+  if ((*this_cache) != NULL)
+    return (*this_cache);
+  cache = FRAME_OBSTACK_ZALLOC (struct rs6000_frame_cache);
+  (*this_cache) = cache;
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  skip_prologue (frame_func_unwind (next_frame), frame_pc_unwind (next_frame),
+		 &fdata);
+
+  /* If there were any saved registers, figure out parent's stack
+     pointer.  */
+  /* The following is true only if the frame doesn't have a call to
+     alloca(), FIXME.  */
+
+  if (fdata.saved_fpr == 0
+      && fdata.saved_gpr == 0
+      && fdata.saved_vr == 0
+      && fdata.saved_ev == 0
+      && fdata.lr_offset == 0
+      && fdata.cr_offset == 0
+      && fdata.vr_offset == 0
+      && fdata.ev_offset == 0)
+    cache->base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+  else
+    {
+      /* NOTE: cagney/2002-04-14: The ->frame points to the inner-most
+	 address of the current frame.  Things might be easier if the
+	 ->frame pointed to the outer-most address of the frame.  In
+	 the mean time, the address of the prev frame is used as the
+	 base address of this frame.  */
+      cache->base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+      if (!fdata.frameless)
+	/* Frameless really means stackless.  */
+	cache->base = read_memory_addr (cache->base, wordsize);
+    }
+  trad_frame_set_value (cache->saved_regs, SP_REGNUM, cache->base);
+
+  /* if != -1, fdata.saved_fpr is the smallest number of saved_fpr.
+     All fpr's from saved_fpr to fp31 are saved.  */
+
+  if (fdata.saved_fpr >= 0)
+    {
+      int i;
+      CORE_ADDR fpr_addr = cache->base + fdata.fpr_offset;
+      for (i = fdata.saved_fpr; i < 32; i++)
+	{
+	  cache->saved_regs[FP0_REGNUM + i].addr = fpr_addr;
+	  fpr_addr += 8;
+	}
+    }
+
+  /* if != -1, fdata.saved_gpr is the smallest number of saved_gpr.
+     All gpr's from saved_gpr to gpr31 are saved.  */
+
+  if (fdata.saved_gpr >= 0)
+    {
+      int i;
+      CORE_ADDR gpr_addr = cache->base + fdata.gpr_offset;
+      for (i = fdata.saved_gpr; i < 32; i++)
+	{
+	  cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = gpr_addr;
+	  gpr_addr += wordsize;
+	}
+    }
+
+  /* if != -1, fdata.saved_vr is the smallest number of saved_vr.
+     All vr's from saved_vr to vr31 are saved.  */
+  if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
+    {
+      if (fdata.saved_vr >= 0)
+	{
+	  int i;
+	  CORE_ADDR vr_addr = cache->base + fdata.vr_offset;
+	  for (i = fdata.saved_vr; i < 32; i++)
+	    {
+	      cache->saved_regs[tdep->ppc_vr0_regnum + i].addr = vr_addr;
+	      vr_addr += register_size (gdbarch, tdep->ppc_vr0_regnum);
+	    }
+	}
+    }
+
+  /* if != -1, fdata.saved_ev is the smallest number of saved_ev.
+     All vr's from saved_ev to ev31 are saved. ????? */
+  if (tdep->ppc_ev0_regnum != -1 && tdep->ppc_ev31_regnum != -1)
+    {
+      if (fdata.saved_ev >= 0)
+	{
+	  int i;
+	  CORE_ADDR ev_addr = cache->base + fdata.ev_offset;
+	  for (i = fdata.saved_ev; i < 32; i++)
+	    {
+	      cache->saved_regs[tdep->ppc_ev0_regnum + i].addr = ev_addr;
+              cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = ev_addr + 4;
+	      ev_addr += register_size (gdbarch, tdep->ppc_ev0_regnum);
+            }
+	}
+    }
+
+  /* If != 0, fdata.cr_offset is the offset from the frame that
+     holds the CR.  */
+  if (fdata.cr_offset != 0)
+    cache->saved_regs[tdep->ppc_cr_regnum].addr = cache->base + fdata.cr_offset;
+
+  /* If != 0, fdata.lr_offset is the offset from the frame that
+     holds the LR.  */
+  if (fdata.lr_offset != 0)
+    cache->saved_regs[tdep->ppc_lr_regnum].addr = cache->base + fdata.lr_offset;
+  /* The PC is found in the link register.  */
+  cache->saved_regs[PC_REGNUM] = cache->saved_regs[tdep->ppc_lr_regnum];
+
+  /* If != 0, fdata.vrsave_offset is the offset from the frame that
+     holds the VRSAVE.  */
+  if (fdata.vrsave_offset != 0)
+    cache->saved_regs[tdep->ppc_vrsave_regnum].addr = cache->base + fdata.vrsave_offset;
+
+  if (fdata.alloca_reg < 0)
+    /* If no alloca register used, then fi->frame is the value of the
+       %sp for this frame, and it is good enough.  */
+    cache->initial_sp = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+  else
+    cache->initial_sp = frame_unwind_register_unsigned (next_frame,
+							fdata.alloca_reg);
+
+  return cache;
+}
+
+static void
+rs6000_frame_this_id (struct frame_info *next_frame, void **this_cache,
+		      struct frame_id *this_id)
+{
+  struct rs6000_frame_cache *info = rs6000_frame_cache (next_frame,
+							this_cache);
+  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+}
+
+static void
+rs6000_frame_prev_register (struct frame_info *next_frame,
+				 void **this_cache,
+				 int regnum, int *optimizedp,
+				 enum lval_type *lvalp, CORE_ADDR *addrp,
+				 int *realnump, void *valuep)
+{
+  struct rs6000_frame_cache *info = rs6000_frame_cache (next_frame,
+							this_cache);
+  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
+			    optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind rs6000_frame_unwind =
+{
+  NORMAL_FRAME,
+  rs6000_frame_this_id,
+  rs6000_frame_prev_register
+};
+
+static const struct frame_unwind *
+rs6000_frame_sniffer (struct frame_info *next_frame)
+{
+  return &rs6000_frame_unwind;
+}
+
+
+
+static CORE_ADDR
+rs6000_frame_base_address (struct frame_info *next_frame,
+				void **this_cache)
+{
+  struct rs6000_frame_cache *info = rs6000_frame_cache (next_frame,
+							this_cache);
+  return info->initial_sp;
+}
+
+static const struct frame_base rs6000_frame_base = {
+  &rs6000_frame_unwind,
+  rs6000_frame_base_address,
+  rs6000_frame_base_address,
+  rs6000_frame_base_address
+};
+
+static const struct frame_base *
+rs6000_frame_base_sniffer (struct frame_info *next_frame)
+{
+  return &rs6000_frame_base;
+}
+
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
    during this debugging session.
@@ -2891,8 +3110,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        Problem is, 220 isn't frame (16 byte) aligned.  Round it up to
        224.  */
     set_gdbarch_frame_red_zone_size (gdbarch, 224);
-  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   set_gdbarch_deprecated_register_convertible (gdbarch, rs6000_register_convertible);
   set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
@@ -2913,7 +3130,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
 
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
-  set_gdbarch_deprecated_pop_frame (gdbarch, rs6000_pop_frame);
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
@@ -2935,14 +3151,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_use_struct_convention (gdbarch,
 				       rs6000_use_struct_convention);
 
-  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, rs6000_frameless_function_invocation);
-  set_gdbarch_deprecated_frame_chain (gdbarch, rs6000_frame_chain);
-  set_gdbarch_deprecated_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
-
-  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
-  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
-  set_gdbarch_deprecated_init_frame_pc_first (gdbarch, rs6000_init_frame_pc_first);
-
   if (!sysv_abi)
     {
       /* Handle RS/6000 function pointers (which are really function
@@ -2950,15 +3158,38 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 	rs6000_convert_from_func_ptr_addr);
     }
-  set_gdbarch_deprecated_frame_args_address (gdbarch, rs6000_frame_args_address);
-  set_gdbarch_deprecated_frame_locals_address (gdbarch, rs6000_frame_args_address);
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
 
   /* Helpers for function argument information.  */
   set_gdbarch_fetch_pointer_argument (gdbarch, rs6000_fetch_pointer_argument);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  switch (info.osabi)
+    {
+    case GDB_OSABI_NETBSD_AOUT:
+    case GDB_OSABI_NETBSD_ELF:
+    case GDB_OSABI_UNKNOWN:
+    case GDB_OSABI_LINUX:
+      set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
+      frame_unwind_append_sniffer (gdbarch, rs6000_frame_sniffer);
+      set_gdbarch_unwind_dummy_id (gdbarch, rs6000_unwind_dummy_id);
+      frame_base_append_sniffer (gdbarch, rs6000_frame_base_sniffer);
+      break;
+    default:
+      set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+      set_gdbarch_believe_pcc_promotion (gdbarch, 1);
+      set_gdbarch_deprecated_pop_frame (gdbarch, rs6000_pop_frame);
+      set_gdbarch_deprecated_frame_args_address (gdbarch, rs6000_frame_args_address);
+      set_gdbarch_deprecated_frame_locals_address (gdbarch, rs6000_frame_args_address);
+      set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
+      set_gdbarch_deprecated_frameless_function_invocation (gdbarch, rs6000_frameless_function_invocation);
+      set_gdbarch_deprecated_frame_chain (gdbarch, rs6000_frame_chain);
+      set_gdbarch_deprecated_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
+      set_gdbarch_deprecated_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
+      set_gdbarch_deprecated_init_frame_pc_first (gdbarch, rs6000_init_frame_pc_first);
+    }
 
   if (from_xcoff_exec)
     {
