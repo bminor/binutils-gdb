@@ -1,3 +1,23 @@
+Fri Jun  5 23:42:43 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h (i386_regtab): Remove BaseIndex modifier from esp.
+
+	* i386.h: Allow `l' suffix on fld, fst, fstp, fcom, fcomp with
+	register operands, because this is a common idiom.  Flag them with
+	a warning.  Allow illegal faddp, fsubp, fsubrp, fmulp, fdivp,
+	fdivrp because gcc erroneously generates them.  Also flag with a
+	warning.
+
+	* i386.h: Add suffix modifiers to most insns, and tighter operand
+	checks in some cases.  Fix a number of UnixWare compatibility
+	issues with float insns.  Merge some floating point opcodes, using
+	new FloatMF modifier.
+	(WORD_PREFIX_OPCODE): Rename to DATA_PREFIX_OPCODE for
+	consistency.
+
+	* i386.h: Change occurence of ShortformW to W|ShortForm.  Add
+	IgnoreDataSize where appropriate.
+
 Wed Jun  3 18:28:45 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386.h: (one_byte_segment_defaults): Remove.
