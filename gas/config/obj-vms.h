@@ -1,5 +1,5 @@
 /* VMS object file format
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1994 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -36,6 +36,17 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
    bit for psects in the const section.  */
 
 extern char const_flag;
+
+/* This is overloaded onto const_flag, for convenience.  It's used to flag
+   dummy labels like "gcc2_compiled."  which occur before the first .text
+   or .data section directive.  */
+
+#define IN_DEFAULT_SECTION 0x80
+
+/* Compiler-generated label "__vax_g_doubles" is used to augment .stabs. */
+
+#define tc_frob_label(X) vms_check_for_special_label(X)
+extern void vms_check_for_special_label();
 
 /* These are defined in obj-vms.c. */
 extern const short seg_N_TYPE[];
@@ -373,7 +384,8 @@ extern int vms_resolve_symbol_redef ();
  *					machine-readable version seems
  *					to be available.
  */
-#define	DST_S_C_C		7	/* Language == "C"	*/
+#define DST_S_C_C	  7	/* Language == "C"	*/
+#define DST_S_C_CXX	 15	/* Language == "C++"	*/
 #define DST_S_C_VERSION	153
 #define	DST_S_C_SOURCE	155	/* Source file		*/
 #define DST_S_C_PROLOG	162
@@ -434,26 +446,73 @@ extern int vms_resolve_symbol_redef ();
 #define DBG_S_C_COMPLX8_G	0x1d		/* 2xG_float complex double */
 #define DBG_S_C_FUNCTION_ADDR	0x17
 #define DBG_S_C_ADVANCED_TYPE	0xa3
+/*  Some of these are just for future reference.  [pr]
+ */
+#define DBG_S_C_UBITA		0x01	/* unsigned, aligned bit field */
+#define DBG_S_C_UBITU		0x22	/* unsigned, unaligned bit field */
+#define DBG_S_C_SBITA		0x29	/* signed, aligned bit field */
+#define DBG_S_C_SBITU		0x2a	/* signed, unaligned bit field */
+#define DBG_S_C_CSTRING		0x2e	/* asciz ('\0' terminated) string */
+#define DBG_S_C_WCHAR		0x38	/* wchar_t */
+/*  These are descriptor class codes.
+ */
+#define DSC_K_CLASS_S		0x01	/* static (fixed length) */
+#define DSC_K_CLASS_D		0x02	/* dynamic string (not via malloc!) */
+#define DSC_K_CLASS_A		0x04	/* array */
+#define DSC_K_CLASS_UBS		0x0d	/* unaligned bit string */
 /*  These are the codes that are used to generate the definitions of struct
  *  union and enum records
  */
-#define DBG_S_C_ENUM_ITEM			0xa4
+#define DBG_S_C_ENUM_ITEM		0xa4
 #define DBG_S_C_ENUM_START		0xa5
-#define DBG_S_C_ENUM_END			0xa6
+#define DBG_S_C_ENUM_END		0xa6
+#define DBG_S_C_STRUCT_ITEM		DST_K_VFLAGS_BITOFFS	/* 0xff */
 #define DBG_S_C_STRUCT_START		0xab
-#define DBG_S_C_STRUCT_ITEM		0xff
 #define DBG_S_C_STRUCT_END		0xac
+#define DST_K_TYPSPEC			0xaf		/* type specification */
+/* These codes are used in the generation of the symbol definition records
+ */
+#define DST_K_VFLAGS_NOVAL		0x80	/* struct definition only */
+#define DST_K_VFLAGS_DSC		0xfa	/* descriptor used */
+#define DST_K_VFLAGS_TVS		0xfb	/* trailing value specified */
+#define DST_K_VS_FOLLOWS		0xfd	/* value spec follows */
+#define DST_K_VFLAGS_BITOFFS		0xff	/* value contains bit offset */
+#define DST_K_VALKIND_LITERAL	0
+#define DST_K_VALKIND_ADDR	1
+#define DST_K_VALKIND_DESC	2
+#define DST_K_VALKIND_REG	3
+#define DST_K_REG_VAX_AP	0x0c	/* R12 */
+#define DST_K_REG_VAX_FP	0x0d	/* R13 */
+#define DST_K_REG_VAX_SP	0x0e	/* R14 */
+#define DST_V_VALKIND		0	/* offset of valkind field */
+#define DST_V_INDIRECT		2	/* offset to indirect bit */
+#define DST_V_DISP		3	/* offset to displacement bit */
+#define DST_V_REGNUM		4	/* offset to register number */
+#define DST_M_INDIRECT		(1<<DST_V_INDIRECT)
+#define DST_M_DISP		(1<<DST_V_DISP)
+#define DBG_C_FUNCTION_PARAM	/* 0xc9 */	\
+	(DST_K_VALKIND_ADDR|DST_M_DISP|(DST_K_REG_VAX_AP<<DST_V_REGNUM))
+#define DBG_C_LOCAL_SYM		/* 0xd9 */	\
+	(DST_K_VALKIND_ADDR|DST_M_DISP|(DST_K_REG_VAX_FP<<DST_V_REGNUM))
+/* Kinds of value specifications
+ */
+#define DST_K_VS_ALLOC_SPLIT	3	/* split lifetime */
+/* Kinds of type specifications
+ */
+#define DST_K_TS_ATOM		0x01	/* atomic type specification */
+#define DST_K_TS_DSC		0x02	/* descriptor type spec */
+#define DST_K_TS_IND		0x03	/* indirect type specification */
+#define DST_K_TS_TPTR		0x04	/* typed pointer type spec */
+#define DST_K_TS_PTR		0x05	/* pointer type spec */
+#define DST_K_TS_ARRAY		0x07	/* array type spec */
+#define DST_K_TS_NOV_LENG	0x0e	/* novel length type spec */
 /*  These are the codes that are used in the suffix records to determine the
  *  actual data type
  */
-#define DBG_S_C_BASIC			0x01
-#define DBG_S_C_BASIC_ARRAY		0x02
-#define DBG_S_C_STRUCT			0x03
-#define DBG_S_C_POINTER			0x04
-#define DBG_S_C_VOID			0x05
-#define DBG_S_C_COMPLEX_ARRAY		0x07
-/* These codes are used in the generation of the symbol definition records
- */
-#define DBG_S_C_FUNCTION_PARAMETER	0xc9
-#define DBG_S_C_LOCAL_SYM			0xd9
+#define DBG_S_C_BASIC			DST_K_TS_ATOM
+#define DBG_S_C_BASIC_ARRAY		DST_K_TS_DSC
+#define DBG_S_C_STRUCT			DST_K_TS_IND
+#define DBG_S_C_POINTER			DST_K_TS_TPTR
+#define DBG_S_C_VOID			DST_K_TS_PTR
+#define DBG_S_C_COMPLEX_ARRAY		DST_K_TS_ARRAY
 /* end of obj-vms.h */
