@@ -1,5 +1,5 @@
 /* Serial interface for local (hardwired) serial ports on Un*x like systems
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -482,7 +482,7 @@ wait_for(scb, timeout)
 	       25.  */
 
 	    scb->current_timeout = 12;
-	    state.termios.c_cc[VTIME] = scb->current_timeout * 10;
+	    state.termio.c_cc[VTIME] = scb->current_timeout * 10;
 	    scb->timeout_remaining = timeout - scb->current_timeout;
 	  }
       }

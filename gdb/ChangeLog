@@ -1,3 +1,8 @@
+Thu Feb 24 04:29:19 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* exec.c (print_section_info):  Print entry point for exec_bfd only.
+	* ser-unix.c (wait_for):  Fix typo in HAVE_TERMIO case.
+
 Wed Feb 23 16:28:55 1994  Jeffrey A. Law  (law@cygnus.com)
 
 	* tm-hppa.h (CALL_DUMMY): Add two NOP instructions to the end of
