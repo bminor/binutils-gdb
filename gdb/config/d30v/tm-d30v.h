@@ -270,7 +270,7 @@ extern void d30v_frame_find_saved_regs PARAMS ((struct frame_info *, struct fram
    When it hits the breakpoint, clear the break point and pop the old
    register contents off the stack. */
 
-#define CALL_DUMMY		{ }  
+#define CALL_DUMMY		{ 0 }  
 #define PUSH_DUMMY_FRAME
 #define CALL_DUMMY_START_OFFSET	0	
 #define CALL_DUMMY_LOCATION	AT_ENTRY_POINT

@@ -1,3 +1,13 @@
+start-sanitize-d30v
+Wed Jan 14 18:11:26 1998  Michael Meissner  <meissner@cygnus.com>
+
+	Patch from Jim Wilson.
+	* d30v-tdep.c (d30v_frame_find_saved_regs_offsets): Properly
+	declare void function before use.
+
+	* config/d30v/tm-d30v.h (CALL_DUMMY): Initialize as { 0 }, not {}.
+
+end-sanitize-d30v
 Tue Jan 13 16:38:48 1998  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in (--with-mmalloc): Add new configure arg to use the

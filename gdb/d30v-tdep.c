@@ -35,6 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 void d30v_frame_find_saved_regs PARAMS ((struct frame_info *fi,
 					 struct frame_saved_regs *fsr));
+void d30v_frame_find_saved_regs_offsets PARAMS ((struct frame_info *fi,
+						 struct frame_saved_regs *fsr));
 static void d30v_pop_dummy_frame PARAMS ((struct frame_info *fi));
 static void d30v_print_flags PARAMS ((void));
 static void print_flags_command PARAMS ((char *, int));
