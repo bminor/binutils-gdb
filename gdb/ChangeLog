@@ -1,8 +1,13 @@
 Fri Feb 18 07:30:55 1994  Jim Kingdon  (kingdon@cygnus.com)
 
+	* config/rs6000/{tm-rs6000lynx.h,nm-rs6000lynx.h,xm-rs6000lynx.h}:
+	Rename to tm-rs6000ly.h, nm-rs6000ly.h, xm-rs6000ly.h for 14
+	character file names.
+	* Makefile.in (ALLPARAM): Add these files.
+
 	* config/mips/littlemips64.mt: Rename to mipsel64.mt for 14
 	character file names.
-	Makefile.in: Add Kung's new mips64 files.
+	* Makefile.in: Add Kung's new mips64 files.
 
 Thu Feb 17 17:25:47 1994  Kung Hsu  (kung@mexican.cygnus.com)
 

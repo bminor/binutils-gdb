@@ -980,6 +980,8 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/pa/xm-hppab.h config/pa/xm-hppah.h config/pa/xm-pa.h \
 	config/pyr/tm-pyr.h \
 	config/pyr/xm-pyr.h config/romp/xm-rtbsd.h config/rs6000/nm-rs6000.h \
+	config/rs6000/tm-rs6000ly.h config/rs6000/xm-rs6000ly.h \
+	config/rs6000/nm-rs6000ly.h \
 	config/rs6000/tm-rs6000.h config/rs6000/xm-rs6000.h config/sh/tm-sh.h \
 	config/sparc/nm-sun4os4.h config/sparc/nm-sparclynx.h \
 	config/sparc/tm-sparclite.h config/sparc/tm-sparclynx.h \
