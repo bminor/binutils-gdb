@@ -59,7 +59,7 @@ gdb_dis_asm_read_memory (bfd_vma memaddr, bfd_byte * myaddr,
   int res;
 
   errno = 0;
-  res = xfer_memory (memaddr, myaddr, len, 0, &exec_ops);
+  res = xfer_memory (memaddr, myaddr, len, 0, 0, &exec_ops);
 
   if (res == len)
     return 0;

@@ -1,3 +1,9 @@
+2001-01-27  Fernando Nasser  <fnasser@redhat.com>
+
+	From Momchil Velikov  <velco@fadata.bg>
+	* mi-cmd-disas.c (gdb_dis_asm_read_memory): Add missing memory
+	attributes argument in the call to `xfer_memory'.
+
 2000-12-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* mi-cmd-disas.c, mi-cmd-var.c, mi-console.c, mi-main.c,
