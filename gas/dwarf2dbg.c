@@ -52,10 +52,6 @@
 # define DWARF2_ADDR_SIZE(bfd) (bfd_arch_bits_per_address (bfd) / 8);
 #endif
 
-#ifndef TC_DWARF2_EMIT_OFFSET
-# define TC_DWARF2_EMIT_OFFSET  generic_dwarf2_emit_offset
-#endif
-
 #ifdef BFD_ASSEMBLER
 
 #include "subsegs.h"
@@ -160,7 +156,6 @@ static struct dwarf2_line_info current;
 /* The size of an address on the target.  */
 static unsigned int sizeof_address;
 
-static void generic_dwarf2_emit_offset PARAMS((symbolS *, unsigned int));
 static struct line_subseg *get_line_subseg PARAMS ((segT, subsegT));
 static unsigned int get_filenum PARAMS ((const char *, unsigned int));
 static struct frag *first_frag_for_seg PARAMS ((segT));
@@ -185,6 +180,10 @@ static void out_debug_aranges PARAMS ((segT, segT));
 static void out_debug_abbrev PARAMS ((segT));
 static void out_debug_info PARAMS ((segT, segT, segT));
 
+#ifndef TC_DWARF2_EMIT_OFFSET
+# define TC_DWARF2_EMIT_OFFSET  generic_dwarf2_emit_offset
+static void generic_dwarf2_emit_offset PARAMS ((symbolS *, unsigned int));
+
 /* Create an offset to .dwarf2_*.  */
 
 static void
@@ -199,6 +198,7 @@ generic_dwarf2_emit_offset (symbol, size)
   expr.X_add_number = 0;
   emit_expr (&expr, size);
 }
+#endif
 
 /* Find or create an entry for SEG+SUBSEG in ALL_SEGS.  */
 
@@ -632,11 +632,7 @@ get_frag_fix (frag)
      on some subsegment chain.  */
   for (fr = frchain_root; fr; fr = fr->frch_next)
     if (fr->frch_last == frag)
-      {
-	long align_mask = -1 << get_recorded_alignment (fr->frch_seg);
-	return (((char *) obstack_next_free (&fr->frch_obstack)
-		 - frag->fr_literal) + ~align_mask) & align_mask;
-      }
+      return (char *) obstack_next_free (&fr->frch_obstack) - frag->fr_literal;
 
   abort ();
 }
