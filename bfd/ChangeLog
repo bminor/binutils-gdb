@@ -1,3 +1,30 @@
+Thu Nov  9 13:01:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (XCOFF_DESCRIPTOR): Define.
+	(struct xcoff_link_hash_table): Add descriptor_section and
+	special_sections fields.
+	(_bfd_xcoff_bfd_link_hash_table_create): Initialize new fields.
+	(xcoff_link_add_symbols): Set linkage section alignment.  Create
+	descriptor section.  Check for magic symbol names (_text, etc.),
+	and record them in special_sections if found.  Set
+	XCOFF_DESCRIPTOR flag for a function descriptor, and set its
+	descriptor field to point back to the function code symbol.
+	(xcoff_sweep): Always mark the special descriptor_section.
+	(bfd_xcoff_export_symbol): Check whether the symbol might be a
+	function descriptor, and mark it if it is.
+	(bfd_xcoff_size_dynamic_sections): Add new special_sections
+	parameter, and fill it in.  Allocate space for the descriptor
+	section.
+	(xcoff_build_ldsyms): Set XCOFF_DEF_REGULAR flag when defining
+	global linkage code.  If an undefined function descriptor is
+	exported, arrange to define it.  Warn about any other undefined
+	exported symbol.
+	(_bfd_xcoff_bfd_final_link): Write out the descriptor section.
+	(xcoff_write_global_symbol): Create a function descriptor when
+	necessary.
+	* bfd-in.h (bfd_xcoff_size_dynamic_sections): Update declaration.
+	* bfd-in2.h: Rebuild.
+
 Thu Nov  9 08:40:23 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* coff-ppc.c (ppc_coff_link_hash_entry): new types for hashing

@@ -261,7 +261,9 @@ struct xcoff_link_hash_entry
     } u;
 
   /* If this symbol is a function entry point which is called, this
-     field holds a pointer to the function descriptor.  */
+     field holds a pointer to the function descriptor.  If this symbol
+     is a function descriptor, this field holds a pointer to the
+     function entry point.  */
   struct xcoff_link_hash_entry *descriptor;
 
   /* The .loader symbol table entry, if there is one.  */
@@ -296,6 +298,8 @@ struct xcoff_link_hash_entry
 #define XCOFF_MARK (02000)
   /* Symbol size is recorded in size_list list from hash table.  */
 #define XCOFF_HAS_SIZE (04000)
+  /* Symbol is a function descriptor.  */
+#define XCOFF_DESCRIPTOR (010000)
 
   /* The storage mapping class.  */
   unsigned char smclas;
@@ -332,6 +336,10 @@ struct xcoff_link_hash_table
      linkage code.  */
   asection *toc_section;
 
+  /* The .ds section we use to hold function descriptors which we
+     create for exported symbols.  */
+  asection *descriptor_section;
+
   /* The list of import files.  */
   struct xcoff_import_file *imports;
 
@@ -351,6 +359,9 @@ struct xcoff_link_hash_table
       struct xcoff_link_hash_entry *h;
       bfd_size_type size;
     } *size_list;
+
+  /* Magic sections: _text, _etext, _data, _edata, _end, end.  */
+  asection *special_sections[6];
 };
 
 /* Information we keep for each section in the output file during the
@@ -627,10 +638,12 @@ _bfd_xcoff_bfd_link_hash_table_create (abfd)
   memset (&ret->ldhdr, 0, sizeof (struct internal_ldhdr));
   ret->linkage_section = NULL;
   ret->toc_section = NULL;
+  ret->descriptor_section = NULL;
   ret->imports = NULL;
   ret->file_align = 0;
   ret->textro = false;
   ret->gc = false;
+  memset (ret->special_sections, 0, sizeof ret->special_sections);
 
   /* The linker will always generate a full a.out header.  We need to
      record that fact now, before the sizeof_headers routine could be
@@ -978,6 +991,7 @@ xcoff_link_add_symbols (abfd, info)
 	goto error_return;
       xcoff_hash_table (info)->linkage_section = lsec;
       lsec->flags |= SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      lsec->alignment_power = 2;
     }
   /* Likewise for the TOC section.  */
   if (xcoff_hash_table (info)->toc_section == NULL)
@@ -990,6 +1004,18 @@ xcoff_link_add_symbols (abfd, info)
       xcoff_hash_table (info)->toc_section = tsec;
       tsec->flags |= SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
       tsec->alignment_power = 2;
+    }
+  /* Likewise for the descriptor section.  */
+  if (xcoff_hash_table (info)->descriptor_section == NULL)
+    {
+      asection *dsec;
+
+      dsec = bfd_make_section_anyway (abfd, ".ds");
+      if (dsec == NULL)
+	goto error_return;
+      xcoff_hash_table (info)->descriptor_section = dsec;
+      dsec->flags |= SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      dsec->alignment_power = 2;
     }
   /* Likewise for the .debug section.  */
   if (xcoff_hash_table (info)->debug_section == NULL)
@@ -1623,6 +1649,33 @@ xcoff_link_add_symbols (abfd, info)
 	  break;
 	}
 
+      /* Check for magic symbol names.  */
+      if ((smtyp == XTY_SD || smtyp == XTY_CM)
+	  && aux.x_csect.x_smclas != XMC_TC)
+	{
+	  int i;
+
+	  i = -1;
+	  if (name[0] == '_')
+	    {
+	      if (strcmp (name, "_text") == 0)
+		i = 0;
+	      else if (strcmp (name, "_etext") == 0)
+		i = 1;
+	      else if (strcmp (name, "_data") == 0)
+		i = 2;
+	      else if (strcmp (name, "_edata") == 0)
+		i = 3;
+	      else if (strcmp (name, "_end") == 0)
+		i = 4;
+	    }
+	  else if (name[0] == 'e' && strcmp (name, "end") == 0)
+	    i = 5;
+
+	  if (i != -1)
+	    xcoff_hash_table (info)->special_sections[i] = csect;
+	}
+
       /* Now we have enough information to add the symbol to the
          linker hash table.  */
 
@@ -1800,6 +1853,10 @@ xcoff_link_add_symbols (abfd, info)
 				  (struct bfd_link_hash_entry **) &hds)))
 			    goto error_return;
 			}
+		      hds->flags |= XCOFF_DESCRIPTOR;
+		      BFD_ASSERT ((hds->flags & XCOFF_CALLED) == 0
+				  && (h->flags & XCOFF_DESCRIPTOR) == 0);
+		      hds->descriptor = h;
 		      h->descriptor = hds;
 		    }
 		}
@@ -2250,6 +2307,7 @@ xcoff_sweep (info)
 		  || o == xcoff_hash_table (info)->loader_section
 		  || o == xcoff_hash_table (info)->linkage_section
 		  || o == xcoff_hash_table (info)->toc_section
+		  || o == xcoff_hash_table (info)->descriptor_section
 		  || strcmp (o->name, ".debug") == 0)
 		o->flags |= SEC_MARK;
 	      else
@@ -2411,9 +2469,50 @@ bfd_xcoff_export_symbol (output_bfd, info, harg, syscall)
   /* FIXME: I'm not at all sure what syscall is supposed to mean, so
      I'm just going to ignore it until somebody explains it.  */
 
+  /* See if this is a function descriptor.  It may be one even though
+     it is not so marked.  */
+  if ((h->flags & XCOFF_DESCRIPTOR) == 0
+      && h->root.root.string[0] != '.')
+    {
+      char *fnname;
+      struct xcoff_link_hash_entry *hfn;
+
+      fnname = (char *) malloc (strlen (h->root.root.string + 2));
+      if (fnname == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+      fnname[0] = '.';
+      strcpy (fnname + 1, h->root.root.string);
+      hfn = xcoff_link_hash_lookup (xcoff_hash_table (info),
+				    fnname, false, false, true);
+      free (fnname);
+      if (hfn != NULL
+	  && hfn->smclas == XMC_PR
+	  && (hfn->root.type == bfd_link_hash_defined
+	      || hfn->root.type == bfd_link_hash_defweak))
+	{
+	  h->flags |= XCOFF_DESCRIPTOR;
+	  h->descriptor = hfn;
+	  hfn->descriptor = h;
+	}
+    }
+
   /* Make sure we don't garbage collect this symbol.  */
   if (! xcoff_mark_symbol (info, h))
     return false;
+
+  /* If this is a function descriptor, make sure we don't garbage
+     collect the associated function code.  We normally don't have to
+     worry about this, because the descriptor will be attached to a
+     section with relocs, but if we are creating the descriptor
+     ourselves those relocs will not be visible to the mark code.  */
+  if ((h->flags & XCOFF_DESCRIPTOR) != 0)
+    {
+      if (! xcoff_mark_symbol (info, h->descriptor))
+	return false;
+    }
 
   return true;
 }
@@ -2507,7 +2606,7 @@ struct xcoff_loader_info
 boolean
 bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 				 file_align, maxstack, maxdata, gc,
-				 modtype, textro)
+				 modtype, textro, special_sections)
      bfd *output_bfd;
      struct bfd_link_info *info;
      const char *libpath;
@@ -2518,10 +2617,12 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
      boolean gc;
      int modtype;
      boolean textro;
+     asection **special_sections;
 {
   struct xcoff_link_hash_entry *hentry;
   asection *lsec;
   struct xcoff_loader_info ldinfo;
+  int i;
   size_t impsize, impcount;
   struct xcoff_import_file *fl;
   struct internal_ldhdr *ldhdr;
@@ -2593,6 +2694,19 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 	goto error_return;
       xcoff_sweep (info);
       xcoff_hash_table (info)->gc = true;
+    }
+
+  /* Return special sections to the caller.  */
+  for (i = 0; i < 6; i++)
+    {
+      asection *sec;
+
+      sec = xcoff_hash_table (info)->special_sections[i];
+      if (sec != NULL
+	  && gc
+	  && (sec->flags & SEC_MARK) == 0)
+	sec = NULL;
+      special_sections[i] = sec;
     }
 
   if (info->input_bfds == NULL)
@@ -2694,8 +2808,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
      when the corresponding normal relocs are handled in
      xcoff_link_input_bfd.  */
 
-  /* Allocate space for the global linkage section and the global toc
-     section.  */
+  /* Allocate space for the magic sections.  */
   sec = xcoff_hash_table (info)->linkage_section;
   if (sec->_raw_size > 0)
     {
@@ -2707,6 +2820,16 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 	}
     }
   sec = xcoff_hash_table (info)->toc_section;
+  if (sec->_raw_size > 0)
+    {
+      sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->_raw_size);
+      if (sec->contents == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
+    }
+  sec = xcoff_hash_table (info)->descriptor_section;
   if (sec->_raw_size > 0)
     {
       sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->_raw_size);
@@ -2877,6 +3000,7 @@ xcoff_build_ldsyms (h, p)
       h->root.u.def.section = sec;
       h->root.u.def.value = sec->_raw_size;
       h->smclas = XMC_GL;
+      h->flags |= XCOFF_DEF_REGULAR;
       sec->_raw_size += XCOFF_GLINK_SIZE;
 
       /* The global linkage code requires a TOC entry for the
@@ -2899,6 +3023,53 @@ xcoff_build_ldsyms (h, p)
 	  /* We need to call xcoff_build_ldsyms recursively here,
              because we may already have passed hds on the traversal.  */
 	  xcoff_build_ldsyms (hds, p);
+	}
+    }
+
+  /* If this symbol is exported, but not defined, we need to try to
+     define it.  */
+  if ((h->flags & XCOFF_EXPORT) != 0
+      && (h->flags & XCOFF_IMPORT) == 0
+      && (h->flags & XCOFF_DEF_REGULAR) == 0
+      && (h->flags & XCOFF_DEF_DYNAMIC) == 0
+      && (h->root.type == bfd_link_hash_undefined
+	  || h->root.type == bfd_link_hash_undefweak))
+    {
+      if ((h->flags & XCOFF_DESCRIPTOR) != 0
+	  && (h->descriptor->root.type == bfd_link_hash_defined
+	      || h->descriptor->root.type == bfd_link_hash_defweak))
+	{
+	  asection *sec;
+
+	  /* This is an undefined function descriptor associated with
+             a defined entry point.  We can build up a function
+             descriptor ourselves.  Believe it or not, the AIX linker
+             actually does this, and there are cases where we need to
+             do it as well.  */
+	  sec = xcoff_hash_table (ldinfo->info)->descriptor_section;
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.section = sec;
+	  h->root.u.def.value = sec->_raw_size;
+	  h->smclas = XMC_DS;
+	  h->flags |= XCOFF_DEF_REGULAR;
+	  sec->_raw_size += 12;
+
+	  /* A function descriptor uses two relocs: one for the
+             associated code, and one for the TOC address.  */
+	  xcoff_hash_table (ldinfo->info)->ldrel_count += 2;
+	  sec->reloc_count += 2;
+
+	  /* We handle writing out the contents of the descriptor in
+             xcoff_write_global_symbol.  */
+	}
+      else
+	{
+	  (*_bfd_error_handler)
+	    ("attempt to export undefined symbol `%s'",
+	     h->root.root.string);
+	  ldinfo->failed = true;
+	  bfd_set_error (bfd_error_invalid_operation);
+	  return false;
 	}
     }
 
@@ -3528,13 +3699,18 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 				  o->_raw_size))
     goto error_return;
 
-  /* Write out the global linkage section and the toc section.  */
+  /* Write out the magic sections.  */
   o = xcoff_hash_table (info)->linkage_section;
   if (o->_raw_size > 0
       && ! bfd_set_section_contents (abfd, o->output_section, o->contents,
 				     o->output_offset, o->_raw_size))
     goto error_return;
   o = xcoff_hash_table (info)->toc_section;
+  if (o->_raw_size > 0
+      && ! bfd_set_section_contents (abfd, o->output_section, o->contents,
+				     o->output_offset, o->_raw_size))
+    goto error_return;
+  o = xcoff_hash_table (info)->descriptor_section;
   if (o->_raw_size > 0
       && ! bfd_set_section_contents (abfd, o->output_section, o->contents,
 				     o->output_offset, o->_raw_size))
@@ -4851,6 +5027,109 @@ xcoff_write_global_symbol (h, p)
       BFD_ASSERT (h->ldindx >= 0);
       ldrel.l_vaddr = irel->r_vaddr;
       ldrel.l_symndx = h->ldindx;
+      ldrel.l_rtype = (31 << 8) | R_POS;
+      ldrel.l_rsecnm = oindx;
+      xcoff_swap_ldrel_out (output_bfd, &ldrel, finfo->ldrel);
+      ++finfo->ldrel;
+    }
+
+  /* If this symbol is a specially defined function descriptor, write
+     it out.  The first word is the address of the function code
+     itself, the second word is the address of the TOC, and the third
+     word is zero.  */
+  if ((h->flags & XCOFF_DESCRIPTOR) != 0
+      && h->root.type == bfd_link_hash_defined
+      && (h->root.u.def.section
+	  == xcoff_hash_table (finfo->info)->descriptor_section))
+    {
+      asection *sec;
+      asection *osec;
+      int oindx;
+      bfd_byte *p;
+      struct xcoff_link_hash_entry *hentry;
+      asection *esec;
+      struct internal_reloc *irel;
+      struct internal_ldrel ldrel;
+      asection *tsec;
+
+      sec = h->root.u.def.section;
+      osec = sec->output_section;
+      oindx = osec->target_index;
+      p = sec->contents + h->root.u.def.value;
+
+      hentry = h->descriptor;
+      BFD_ASSERT (hentry != NULL
+		  && (hentry->root.type == bfd_link_hash_defined
+		      || hentry->root.type == bfd_link_hash_defweak));
+      esec = hentry->root.u.def.section;
+      bfd_put_32 (output_bfd,
+		  (esec->output_section->vma
+		   + esec->output_offset
+		   + hentry->root.u.def.value),
+		  p);
+
+      irel = finfo->section_info[oindx].relocs + osec->reloc_count;
+      irel->r_vaddr = (osec->vma
+		       + sec->output_offset
+		       + h->root.u.def.value);
+      irel->r_symndx = esec->output_section->target_index;
+      irel->r_type = R_POS;
+      irel->r_size = 31;
+      finfo->section_info[oindx].rel_hashes[osec->reloc_count] = NULL;
+      ++osec->reloc_count;
+
+      ldrel.l_vaddr = irel->r_vaddr;
+      if (strcmp (esec->output_section->name, ".text") == 0)
+	ldrel.l_symndx = 0;
+      else if (strcmp (esec->output_section->name, ".data") == 0)
+	ldrel.l_symndx = 1;
+      else if (strcmp (esec->output_section->name, ".bss") == 0)
+	ldrel.l_symndx = 2;
+      else
+	{
+	  (*_bfd_error_handler)
+	    ("%s: loader reloc in unrecognized section `%s'",
+	     bfd_get_filename (output_bfd),
+	     esec->output_section->name);
+	  bfd_set_error (bfd_error_nonrepresentable_section);
+	  return false;
+	}
+      ldrel.l_rtype = (31 << 8) | R_POS;
+      ldrel.l_rsecnm = oindx;
+      xcoff_swap_ldrel_out (output_bfd, &ldrel, finfo->ldrel);
+      ++finfo->ldrel;
+
+      bfd_put_32 (output_bfd, xcoff_data (output_bfd)->toc, p + 4);
+
+      tsec = xcoff_data (output_bfd)->toc_section;
+
+      ++irel;
+      irel->r_vaddr = (osec->vma
+		       + sec->output_offset
+		       + h->root.u.def.value
+		       + 4);
+      irel->r_symndx = tsec->output_section->target_index;
+      irel->r_type = R_POS;
+      irel->r_size = 31;
+      finfo->section_info[oindx].rel_hashes[osec->reloc_count] = NULL;
+      ++osec->reloc_count;
+
+      ldrel.l_vaddr = irel->r_vaddr;
+      if (strcmp (tsec->output_section->name, ".text") == 0)
+	ldrel.l_symndx = 0;
+      else if (strcmp (tsec->output_section->name, ".data") == 0)
+	ldrel.l_symndx = 1;
+      else if (strcmp (tsec->output_section->name, ".bss") == 0)
+	ldrel.l_symndx = 2;
+      else
+	{
+	  (*_bfd_error_handler)
+	    ("%s: loader reloc in unrecognized section `%s'",
+	     bfd_get_filename (output_bfd),
+	     tsec->output_section->name);
+	  bfd_set_error (bfd_error_nonrepresentable_section);
+	  return false;
+	}
       ldrel.l_rtype = (31 << 8) | R_POS;
       ldrel.l_rsecnm = oindx;
       xcoff_swap_ldrel_out (output_bfd, &ldrel, finfo->ldrel);
