@@ -593,11 +593,11 @@ setup_arbitrary_frame (argc, argv)
 
 CORE_ADDR
 alpha_push_arguments (nargs, args, sp, struct_return, struct_addr)
-  int nargs;
-  value *args;
-  CORE_ADDR sp;
-  int struct_return;
-  CORE_ADDR struct_addr;
+     int nargs;
+     value_ptr *args;
+     CORE_ADDR sp;
+     int struct_return;
+     CORE_ADDR struct_addr;
 {
   register i;
   int accumulate_size = struct_return ? 8 : 0;
@@ -611,7 +611,7 @@ alpha_push_arguments (nargs, args, sp, struct_return, struct_addr)
 
   for (i = 0, m_arg = alpha_args; i < nargs; i++, m_arg++)
     {
-      value arg = value_arg_coerce (args[i]);
+      value_ptr arg = value_arg_coerce (args[i]);
       /* Cast argument to long if necessary as the compiler does it too.  */
       if (TYPE_LENGTH (VALUE_TYPE (arg)) < TYPE_LENGTH (builtin_type_long))
         arg = value_cast (builtin_type_long, arg);
@@ -974,7 +974,7 @@ alpha_extract_return_value (valtype, regbuf, valbuf)
 }
 
 /* Given a return value in `regbuf' with a type `valtype', 
-   write it's value into the appropriate register.  */
+   write its value into the appropriate register.  */
 void
 alpha_store_return_value (valtype, valbuf)
     struct type *valtype;
