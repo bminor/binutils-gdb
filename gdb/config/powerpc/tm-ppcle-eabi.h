@@ -25,7 +25,4 @@
 /* Use normal ppc-eabi definitions */
 #include "powerpc/tm-ppc-eabi.h"
 
-#undef  TARGET_BYTE_ORDER_DEFAULT
-#define TARGET_BYTE_ORDER_DEFAULT BFD_ENDIAN_LITTLE
-
 #endif /* TM_PPCLE_EABI_H */

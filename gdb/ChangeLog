@@ -1,3 +1,8 @@
+2002-02-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/powerpc/tm-ppcle-eabi.h (TARGET_BYTE_ORDER_DEFAULT):
+	Delete macro.
+
 2002-02-07  Michael Snyder  <msnyder@redhat.com>
 
 	* solib-legacy.c (legacy_svr4_fetch_link_map_offsets): 
@@ -518,7 +523,6 @@
 	(target_byte_order): Initialize to BFD_ENDIAN_BIG.
 	(initialize_current_architecture): Update target_byte_order using
 	information from BFD.
-	* config/powerpc/tm-ppcle-eabi.h (TARGET_BYTE_ORDER_DEFAULT):
 	* config/mcore/tm-mcore.h (TARGET_BYTE_ORDER_DEFAULT): 
 	* config/arm/tm-arm.h (TARGET_BYTE_ORDER_DEFAULT): Delete.
 
