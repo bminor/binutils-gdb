@@ -1,3 +1,12 @@
+Thu Jun  6 12:30:05 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/m68k/all.exp: Pass -m68020 when assembling the disperr.s
+	test.
+
+Fri May 31 10:11:13 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/h8300/h8300.exp: Fix add.l test for H8/300H.
+
 Wed May 29 16:35:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/jal-xgot.d: Correct for 64 bit output.
