@@ -1,5 +1,7 @@
 Tue Jun  3 16:15:13 1997  Nick Clifton  <nickc@cygnus.com>
 
+	* config/tc-arm.h: Merged in changes from armT-970328-branch.
+
 	* configure.in (emulations): Added Thumb architecture support from
 	armT-9703-28-branch.
 
