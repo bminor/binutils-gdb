@@ -65,6 +65,7 @@ struct type *builtin_type_uint32;
 struct type *builtin_type_int64;
 struct type *builtin_type_uint64;
 struct type *builtin_type_bool;
+struct type *builtin_type_v4sf;
 
 int opaque_type_resolution = 1;
 
@@ -632,6 +633,43 @@ create_set_type (result_type, domain_type)
 
   return (result_type);
 }
+
+
+/* Construct and return a type of the form:
+	struct NAME { ELT_TYPE ELT_NAME[N]; }
+   We use these types for SIMD registers.  For example, the type of
+   the SSE registers on the late x86-family processors is:
+	struct __builtin_v4sf { float f[4]; }
+   built by the function call:
+	init_simd_type ("__builtin_v4sf", builtin_type_float, "f", 4)
+   The type returned is a permanent type, allocated using malloc; it
+   doesn't live in any objfile's obstack.  */
+struct type *
+init_simd_type (char *name,
+		struct type *elt_type,
+		char *elt_name,
+		int n)
+{
+  struct type *t;
+  struct field *f;
+
+  /* Build the field structure.  */
+  f = xmalloc (sizeof (*f));
+  memset (f, 0, sizeof (*f));
+  f->loc.bitpos = 0;
+  f->type = create_array_type (0, elt_type,
+			       create_range_type (0, builtin_type_int, 0, n));
+  f->name = elt_name;
+
+  /* Build a struct type with that field.  */
+  t = init_type (TYPE_CODE_STRUCT, n * TYPE_LENGTH (elt_type), 0, 0, 0);
+  t->nfields = 1;
+  t->fields = f;
+  t->tag_name = name;
+
+  return t;
+}
+
 
 /* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE. 
    A MEMBER is a wierd thing -- it amounts to a typed offset into
@@ -2925,6 +2963,10 @@ build_gdbtypes ()
      &showlist);
   opaque_type_resolution = 1;
 
+
+  /* Build SIMD types.  */
+  builtin_type_v4sf
+    = init_simd_type ("__builtin_v4sf", builtin_type_float, "f", 4);
 }
 
 
@@ -2963,5 +3005,6 @@ _initialize_gdbtypes ()
   register_gdbarch_swap (&builtin_type_uint32, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_int64, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_uint64, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v4sf, sizeof (struct type *), NULL);
   register_gdbarch_swap (NULL, 0, build_gdbtypes);
 }

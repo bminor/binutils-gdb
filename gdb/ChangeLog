@@ -1,3 +1,222 @@
+1999-10-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* breakpoint.h: Change return type of field print_it of struct
+ 	bpstats to enumeration print_stop_action.
+	Define new enumeration print_stop_action.
+
+	* breakpoint.c (print_it_normal): Change return type to
+ 	enumeration type print_stop_action. Handle bp_shlib_event here
+ 	instead of in normal_stop().
+	(bpstat_print): Change return type to enumeration type
+ 	print_stop_action.
+	(print_it_done): Ditto.
+	(print_it_noop): Ditto.
+	
+	* infrun.c (is_internal_shlib_eventpoint): Delete this function.
+	(stopped_for_internal_shlib_event): Delete.
+	(normal_stop): Move logic to handle bp_shlib_event from here to
+ 	print_it_normal(). Use switch to handle return value from
+ 	bpstat_print().
+
+Mon Oct 18 17:32:51 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* symfile.c (generic_load): Rewrite.  Make the size of each
+ 	chunk/block write a run-time option. Check for quit_flag.
+	Use target_write_memory_partial for downloads.
+
+1999-10-18  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	Change Linux x86 register support to use the new tm-i386.h layout.
+	* config/i386/tm-linux.h (HAVE_I387_REGS): #define this, so we get
+	the full set of FP register definitions from tm-i386.h.
+	(REGISTER_RAW_SIZE, REGISTER_NAMES, REGISTER_BYTES, REGISTER_BYTE,
+	MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE, NUM_REGS,
+	NUM_FREGS): Remove #undefs and subsequent redefinitions: we're
+	using the values from tm-i386.h now.
+	(FPSTART_REGNUM, FPCONTROL_REGNUM, FPSTATUS_REGNUM, FPTAG_REGNUM,
+	FPDATA_REGNUM, FPEND_REGNUM, FPENV_BYTES, FPREG_RAW_SIZE,
+	FPREG_BYTES): Deleted.
+	(TARGET_LONG_DOUBLE_BIT): Deleted.
+	(REGISTER_CONVERTIBLE, REGISTER_CONVERT_TO_VIRTUAL,
+	REGISTER_CONVERT_TO_RAW): Redefine these only if LD_I387 is #defined.
+	* i386-linux-nat.c (convert_to_gregset, convert_to_fpregset,
+	FPREGSET_T_FPREG_OFFSET): New functions and macros.
+	(supply_gregset, fill_gregset, supply_fpregset,
+	fill_fpregset, fetch_fpregs, store_fpregs, fetch_regs,
+	store_regs, fetch_inferior_registers, store_inferior_registers):
+	Adjusted to use new macros from tm-i386.h.
+	
+	* config/i386/tm-i386.h: Provide a decent x86 FPU description here,
+	so that the various i386 targets can share more FPU handling code.
+	(NUM_GREGS): New macro.
+	(NUM_SSE_REGS): New macro, dependent on HAVE_SSE_REGS
+	(NUM_FREGS): Depend on HAVE_I387_REGS.
+	(NUM_REGS, REGISTER_BYTES): Define in terms of NUM_GREGS,
+	NUM_FREGS, and NUM_SSE_REGS.
+	(MAX_NUM_REGS): New macro.
+	(REGISTER_NAMES): Expand name list with FPU control registers and
+	SSE registers.
+	(FP7_REGNUM, FCTRL_REGNUM, FSTAT_REGNUM, FTAG_REGNUM, FCS_REGNUM,
+	FCOFF_REGNUM, FDS_REGNUM, FDOFF_REGNUM, FOP_REGNUM,
+	FIRST_FPU_CTRL_REGNUM, LAST_FPU_CTRL_REGNUM): New macros, more
+	fully describing the FPU register set.
+	(XMM0_REGNUM, XMM7_REGNUM, MXCSR_REGNUM): New macros, describing
+	the SSE register set.
+	(IS_FP_REGNUM, IS_SSE_REGNUM, FPU_REG_RAW_SIZE, SIZEOF_GREGS,
+	SIZEOF_FPU_REGS, SIZEOF_FPU_CTRL_REGS, SIZEOF_SSE_REGS): New
+	convenience macros.
+	(REGISTER_BYTE, REGISTER_RAW_SIZE, REGISTER_VIRTUAL_SIZE): Turn
+	these into tables, since the register sizes are pretty irregular.
+	(i386_register_byte, i386_register_raw_size,
+	i386_register_virtual_size): New extern declarations.
+	(TARGET_LONG_DOUBLE_BIT): Define.
+	(MAX_REGISTER_RAW_SIZE): Bump to 16, for the SSE registers.
+	(REGISTER_VIRTUAL_TYPE, REGISTER_CONVERTIBLE,
+	REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW): New macros
+	for handling floating-point registers.
+	(i387_to_double, double_to_i387): New extern declarations.
+	* i386-tdep.c (i386_register_byte, i386_register_raw_size,
+	i386_register_virtual_size): New arrays.
+	(_initialize_i386_tdep): Initialize i386_register_byte and
+	i386_register_virtual_size.
+
+	* i386-tdep.c (_initialize_i386_tdep): Move new_cmd to a block
+	created specially for its use.
+
+Mon Oct 18 23:36:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* symfile.c (generic_load): Cleanup the validate code - remove
+ 	#ifdef, use paddr to print address.
+	(validate_download): Static, replace VALIDATE_DOWNLOAD
+	
+	* symfile.c (generic_load): Use strtoul to scan the optional load
+ 	offset.  Allocate a filename of the correct size.
+
+Mon Oct 18 17:32:51 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* symfile.c (generic_load): Don't filter output. Use
+ 	print_transfer_performance for summary. Use paddr for addresses.
+	(print_transfer_performance): New function.  Includes write count.
+	(report_transfer_performance): Call
+ 	print_transfer_performance. Deprecate.
+
+	* defs.h (print_transfer_performance): Add declaration.
+	(generic_load): Move declaration to here.
+	* symfile.h (generic_load): From here.
+
+Mon Oct 18 16:29:52 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* remote.c (remote_write_bytes): Re-write.  Transfer a single
+ 	packet and then return the that packets byte size.
+
+Sun Oct 17 15:09:00 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (remote_console_output): Flush gdb_stdtarg after
+ 	processing an ``O'' packet.
+	* remote.h (remote_console_output): Strip PARAMS.
+	
+Sun Oct 17 15:12:33 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* target.c (target_xfer_memory_partial): New function. Simple
+ 	implementation of partial memory reads.
+	(target_read_memory_partial): New function.  Replaces old
+ 	target_read_memory_partial.
+	(target_write_memory_partial): New function.
+	* target.h: Update.
+
+	* valprint.c (partial_memory_read): New function, based on old
+ 	memory_read_partial.  Implement partial memory reads the way that
+ 	val_print_string likes.
+	(val_print_string): Use partial_memory_read.
+
+Sun Oct 17 13:58:56 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (ui_load_progress_hook): Add declaration.
+	* dsrec.c (ui_load_progress_hook): Delete extern declaration.
+	
+	* symfile.c (ui_load_progress_hook): Make first argument const.
+	(generic_load): Don't cast the result of bfd_get_section_name.
+  	Replace ``sect'' with ``sect_name'', use consistently.
+
+1999-10-15  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	Add beginnings of support for SIMD register types.
+	* gdbtypes.c (init_simd_type): New function for building
+	types for registers consisting of arrays of objects.
+	(builtin_type_v4sf): New built-in type.
+	(build_gdbtypes): Initialize it.
+	(_initialize_gdbtypes): Arrange for gdbarch swapping.
+	* gdbtypes.h (builtin_type_v4sf): Add external decl.
+
+Fri Oct 15 18:20:33 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-hms.c: Commented out H8 code.
+
+Fri Oct 15 17:46:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dcache.c (dcache_p): Rename variable remote_dcache.  Make
+ 	static.
+	(_initialize_dcache): Fix description of ``set remotecache''.
+  	Cache is OFF by default.
+
+1999-10-13  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	* valops.c (value_push): Don't forget to initialize container_len.
+
+Wed Oct 13 17:58:20 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* utils.c (tui_file_flush): Don't call flush_hook.  Don't try to
+ 	flush ``astring''.
+	* gdb-events.sh: Update
+	* top.c (flush_hook): Delete.
+
+1999-10-13  Kevin Buettner  <kevinb@cygnus.com>
+
+	* mem-break.c (memory_insert_breakpoint,
+	memory_remove_breakpoint): Added missing return statements.
+
+Wed Oct 13 20:53:42 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* utils.c (mem_fileopen, mem_file_delete, mem_file_new,
+ 	mem_file_rewind, mem_file_put, mem_file_fputs): New functions.
+	* defs.h (mem_fileopen): Declare.
+	
+1999-10-13  Kevin Buettner  <kevinb@cygnus.com>
+
+	* mem-break.c (default_memory_insert_breakpoint): Renamed from
+	memory_insert_breakpoint.
+	(default_memory_remove_breakpoint): Renamed from
+	memory_remove_breakpoint.
+	(memory_insert_breakpoint, memory_remove_breakpoint,
+	MEMORY_INSERT_BREAKPOINT, MEMORY_REMOVE_BREAKPOINT):  New
+	wrappers.
+	* target.h (default_memory_remove_breakpoint,
+	default_memory_insert_breakpoint): Added declarations.
+	* gdbarch.sh (MEMORY_INSERT_BREAKPOINT, MEMORY_REMOVE_BREAKPOINT):
+	New methods.
+	* gdbarch.h, gdbarch.c (MEMORY_INSERT_BREAKPOINT,
+	MEMORY_REMOVE_BREAKPOINT, gdbarch_memory_insert_breakpoint,
+	gdbarch_memory_remove_breakpoint, set_gdbarch_memory_insert_breakpoint,
+	set_gdbarch_memory_remove_breakpoint) : Generated from gdbarch.sh.
+
+Wed Oct 13 19:15:51 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h: Remove PARAMS from all declarations.  Re-indent.  Clean
+ 	up the gdb_file declarations.
+
+Tue Oct 12 12:19:07 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* i386-linux-nat.c (supply_fpregset, fill_fpregset): copy
+	from/to start of fpregsetp not start of st_space as the first
+	stuff we copy is the FP control registers not the actual FP values.
+
+1999-10-12  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* eval.c (evaluate_subexp_standard): Fix gdb invocation of
+	inferior C functions when debugging C++ code.
+	* valops.c (find_overload_match): Ditto.
+	* symtab.c (make_symbol_overload_list): Ditto.
+
 1999-10-11  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* config/pa/tm-hppa.h (SYMBOLS_CAN_START_WITH_DOLLAR): It's not

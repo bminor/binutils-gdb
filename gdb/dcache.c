@@ -1,7 +1,7 @@
 /* Caching code.  Typically used by remote back ends for
    caching remote memory.
 
-   Copyright 1992, 1993, 1995, 1998 Free Software Foundation, Inc.
+   Copyright 1992-1993, 1995, 1998-1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -168,7 +168,7 @@ static void dcache_info PARAMS ((char *exp, int tty));
 
 void _initialize_dcache PARAMS ((void));
 
-int remote_dcache = 0;
+static int dcache_enabled_p = 0;
 
 DCACHE *last_cache;		/* Used by info dcache */
 
@@ -288,7 +288,7 @@ dcache_alloc (dcache)
 {
   register struct dcache_block *db;
 
-  if (remote_dcache == 0)
+  if (dcache_enabled_p == 0)
     abort ();
 
   /* Take something from the free list */
@@ -479,7 +479,7 @@ dcache_xfer_memory (dcache, memaddr, myaddr, len, should_write)
 {
   int i;
 
-  if (remote_dcache)
+  if (dcache_enabled_p)
     {
       int (*xfunc) PARAMS ((DCACHE * dcache, CORE_ADDR addr, char *ptr));
       xfunc = should_write ? dcache_poke_byte : dcache_peek_byte;
@@ -512,7 +512,7 @@ dcache_info (exp, tty)
 {
   struct dcache_block *p;
 
-  if (!remote_dcache)
+  if (!dcache_enabled_p)
     {
       printf_filtered ("Dcache not enabled\n");
       return;
@@ -543,14 +543,14 @@ _initialize_dcache ()
 {
   add_show_from_set
     (add_set_cmd ("remotecache", class_support, var_boolean,
-		  (char *) &remote_dcache,
+		  (char *) &dcache_enabled_p,
 		  "\
 Set cache use for remote targets.\n\
 When on, use data caching for remote targets.  For many remote targets\n\
 this option can offer better throughput for reading target memory.\n\
 Unfortunately, gdb does not currently know anything about volatile\n\
 registers and thus data caching will produce incorrect results with\n\
-volatile registers are in use.  By default, this option is on.",
+volatile registers are in use.  By default, this option is off.",
 		  &setlist),
      &showlist);
 

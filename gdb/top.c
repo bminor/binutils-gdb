@@ -391,10 +391,6 @@ int (*query_hook) PARAMS ((const char *, va_list));
 
 void (*warning_hook) PARAMS ((const char *, va_list));
 
-/* Called from gdb_flush to flush output.  */
-
-void (*flush_hook) PARAMS ((GDB_FILE * stream));
-
 /* These three functions support getting lines of text from the user.  They
    are used in sequence.  First readline_begin_hook is called with a text
    string that might be (for example) a message for the user to type in a

@@ -1,3 +1,16 @@
+1999-10-18  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdb.threads/linux-dp.c, gdb.threads/linux-dp.exp: New test suite
+	for LinuxThreads support, merged from the Code Fusion branch.
+
+Mon Oct 11 13:57:21 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* lib/gdb.exp (gdb_run_cmd): Break complicated gdb_expect
+ 	containing exp_continue into a while within an expect.  Don't
+ 	attempt a start more than three times.  Check return value from
+ 	gdb_load.
+	
+	
 Wed Oct  6 12:05:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/watchpoint.exp: Match fail ``finish from marker1'' with

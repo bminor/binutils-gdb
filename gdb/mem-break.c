@@ -84,7 +84,7 @@ memory_breakpoint_from_pc (pcptr, lenptr)
    is accomplished via BREAKPOINT_MAX).  */
 
 int
-memory_insert_breakpoint (addr, contents_cache)
+default_memory_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
@@ -109,7 +109,7 @@ memory_insert_breakpoint (addr, contents_cache)
 
 
 int
-memory_remove_breakpoint (addr, contents_cache)
+default_memory_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
@@ -122,4 +122,29 @@ memory_remove_breakpoint (addr, contents_cache)
     error ("Software breakpoints not implemented for this target.");
 
   return target_write_memory (addr, contents_cache, bplen);
+}
+
+
+#if !defined(MEMORY_INSERT_BREAKPOINT)
+#define MEMORY_INSERT_BREAKPOINT(addr, contents_cache) \
+  default_memory_insert_breakpoint(addr, contents_cache)
+#endif
+int
+memory_insert_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+  return MEMORY_INSERT_BREAKPOINT(addr, contents_cache);
+}
+
+#if !defined(MEMORY_REMOVE_BREAKPOINT)
+#define MEMORY_REMOVE_BREAKPOINT(addr, contents_cache) \
+  default_memory_remove_breakpoint(addr, contents_cache)
+#endif
+int
+memory_remove_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+  return MEMORY_REMOVE_BREAKPOINT(addr, contents_cache);
 }

@@ -155,6 +155,24 @@ void sim_queue_mem_si_write (SIM_CPU *cpu, SI address, SI value)
   element->kinds.mem_si_write.value   = value;
 }
 
+void sim_queue_mem_di_write (SIM_CPU *cpu, SI address, DI value)
+{
+  CGEN_WRITE_QUEUE *q = CPU_WRITE_QUEUE (cpu);
+  CGEN_WRITE_QUEUE_ELEMENT *element = CGEN_WRITE_QUEUE_NEXT (q);
+  element->kind = CGEN_MEM_DI_WRITE;
+  element->kinds.mem_di_write.address = address;
+  element->kinds.mem_di_write.value   = value;
+}
+
+void sim_queue_mem_df_write (SIM_CPU *cpu, SI address, DF value)
+{
+  CGEN_WRITE_QUEUE *q = CPU_WRITE_QUEUE (cpu);
+  CGEN_WRITE_QUEUE_ELEMENT *element = CGEN_WRITE_QUEUE_NEXT (q);
+  element->kind = CGEN_MEM_DF_WRITE;
+  element->kinds.mem_df_write.address = address;
+  element->kinds.mem_df_write.value   = value;
+}
+
 /* Execute a write stored on the write queue.  */
 void
 cgen_write_queue_element_execute (SIM_CPU *cpu, CGEN_WRITE_QUEUE_ELEMENT *item)
@@ -211,6 +229,16 @@ cgen_write_queue_element_execute (SIM_CPU *cpu, CGEN_WRITE_QUEUE_ELEMENT *item)
       pc = CPU_PC_GET (cpu);
       SETMEMSI (cpu, pc, item->kinds.mem_si_write.address,
 		item->kinds.mem_si_write.value);
+      break;
+    case CGEN_MEM_DI_WRITE:
+      pc = CPU_PC_GET (cpu);
+      SETMEMDI (cpu, pc, item->kinds.mem_di_write.address,
+		item->kinds.mem_di_write.value);
+      break;
+    case CGEN_MEM_DF_WRITE:
+      pc = CPU_PC_GET (cpu);
+      SETMEMDF (cpu, pc, item->kinds.mem_df_write.address,
+		item->kinds.mem_df_write.value);
       break;
     default:
       break; /* FIXME: for now....print message later.  */

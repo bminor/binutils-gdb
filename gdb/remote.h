@@ -40,7 +40,7 @@ extern int putpkt (char *buf);
 
 /* Send HEX encoded string to the target console. (gdb_stdtarg) */
 
-extern void remote_console_output PARAMS ((char *));
+extern void remote_console_output (char *);
 
 
 /* FIXME: cagney/1999-09-20: The remote cisco stuff in remote.c needs

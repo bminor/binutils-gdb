@@ -87,10 +87,11 @@ static void nosupport_runtime PARAMS ((void));
 
 static void normal_target_post_startup_inferior PARAMS ((int pid));
 
-/* Transfer LEN bytes between target address MEMADDR and GDB address MYADDR.
-   Returns 0 for success, errno code for failure (which includes partial
-   transfers--if you want a more useful response to partial transfers, try
-   target_read_memory_partial).  */
+/* Transfer LEN bytes between target address MEMADDR and GDB address
+   MYADDR.  Returns 0 for success, errno code for failure (which
+   includes partial transfers -- if you want a more useful response to
+   partial transfers, try either target_read_memory_partial or
+   target_write_memory_partial).  */
 
 static int
 target_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
@@ -787,48 +788,6 @@ target_read_memory_section (memaddr, myaddr, len, bfd_section)
   return target_xfer_memory (memaddr, myaddr, len, 0, bfd_section);
 }
 
-/* Read LEN bytes of target memory at address MEMADDR, placing the results
-   in GDB's memory at MYADDR.  Returns a count of the bytes actually read,
-   and optionally an errno value in the location pointed to by ERRNOPTR
-   if ERRNOPTR is non-null. */
-
-int
-target_read_memory_partial (memaddr, myaddr, len, errnoptr)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int *errnoptr;
-{
-  int nread;			/* Number of bytes actually read. */
-  int errcode;			/* Error from last read. */
-
-  /* First try a complete read. */
-  errcode = target_xfer_memory (memaddr, myaddr, len, 0, NULL);
-  if (errcode == 0)
-    {
-      /* Got it all. */
-      nread = len;
-    }
-  else
-    {
-      /* Loop, reading one byte at a time until we get as much as we can. */
-      for (errcode = 0, nread = 0; len > 0 && errcode == 0; nread++, len--)
-	{
-	  errcode = target_xfer_memory (memaddr++, myaddr++, 1, 0, NULL);
-	}
-      /* If an error, the last read was unsuccessful, so adjust count. */
-      if (errcode != 0)
-	{
-	  nread--;
-	}
-    }
-  if (errnoptr != NULL)
-    {
-      *errnoptr = errcode;
-    }
-  return (nread);
-}
-
 int
 target_write_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
@@ -922,6 +881,75 @@ target_xfer_memory (memaddr, myaddr, len, write, bfd_section)
   return 0;			/* We managed to cover it all somehow. */
 }
 
+
+/* Perform a partial memory transfer.  */
+
+static int
+target_xfer_memory_partial (CORE_ADDR memaddr, char *buf, int len,
+			    int write_p, int *err)
+{
+  int res;
+  int err_res;
+  int len_res;
+  struct target_ops *t;
+  struct target_stack_item *item;
+
+  /* Zero length requests are ok and require no work.  */
+  if (len == 0)
+    {
+      *err = 0;
+      return 0;
+    }
+
+  /* The quick case is that the top target does it all.  */
+  res = current_target.to_xfer_memory (memaddr, buf, len, write_p, &current_target);
+  if (res > 0)
+    {
+      *err = 0;
+      return res;
+    }
+
+  /* xfer memory doesn't always reliably set errno. */
+  errno = 0;
+
+  /* Try all levels of the target stack to see one can handle it. */
+  for (item = target_stack; item; item = item->next)
+    {
+      t = item->target_ops;
+      if (!t->to_has_memory)
+	continue;
+      res = t->to_xfer_memory (memaddr, buf, len, write_p, t);
+      if (res > 0)
+	{
+	  /* Handled all or part of xfer */
+	  *err = 0;
+	  return res;
+	}
+      if (t->to_has_all_memory)
+	break;
+    }
+
+  /* Total failure.  Return error. */
+  if (errno != 0)
+    {
+      *err = errno;
+      return -1;
+    }
+  *err = EIO;
+  return -1;
+}
+
+int
+target_read_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
+{
+  return target_xfer_memory_partial (memaddr, buf, len, 0, err);
+}
+
+int
+target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
+{
+  return target_xfer_memory_partial (memaddr, buf, len, 1, err);
+}
 
 /* ARGSUSED */
 static void

@@ -221,9 +221,6 @@ extern void find_lowest_section PARAMS ((bfd *, asection *, PTR));
 
 extern bfd *symfile_bfd_open PARAMS ((char *));
 
-/* Remote targets may wish to use this as their load function.  */
-extern void generic_load PARAMS ((char *name, int from_tty));
-
 /* Utility functions for overlay sections: */
 extern int overlay_debugging;
 extern int overlay_cache_invalid;

@@ -37,6 +37,9 @@
 
 /* Prototypes for local functions */
 
+static int partial_memory_read (CORE_ADDR memaddr, char *myaddr,
+				int len, int *errnoptr);
+
 static void print_hex_chars PARAMS ((GDB_FILE *, unsigned char *,
 				     unsigned int));
 
@@ -1149,6 +1152,47 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
     }
 }
 
+/* Read LEN bytes of target memory at address MEMADDR, placing the
+   results in GDB's memory at MYADDR.  Returns a count of the bytes
+   actually read, and optionally an errno value in the location
+   pointed to by ERRNOPTR if ERRNOPTR is non-null. */
+
+/* FIXME: cagney/1999-10-14: Only used by val_print_string.  Can this
+   function be eliminated.  */
+
+static int
+partial_memory_read (CORE_ADDR memaddr, char *myaddr, int len, int *errnoptr)
+{
+  int nread;			/* Number of bytes actually read. */
+  int errcode;			/* Error from last read. */
+
+  /* First try a complete read. */
+  errcode = target_read_memory (memaddr, myaddr, len);
+  if (errcode == 0)
+    {
+      /* Got it all. */
+      nread = len;
+    }
+  else
+    {
+      /* Loop, reading one byte at a time until we get as much as we can. */
+      for (errcode = 0, nread = 0; len > 0 && errcode == 0; nread++, len--)
+	{
+	  errcode = target_read_memory (memaddr++, myaddr++, 1);
+	}
+      /* If an error, the last read was unsuccessful, so adjust count. */
+      if (errcode != 0)
+	{
+	  nread--;
+	}
+    }
+  if (errnoptr != NULL)
+    {
+      *errnoptr = errcode;
+    }
+  return (nread);
+}
+
 /*  Print a string from the inferior, starting at ADDR and printing up to LEN
    characters, of WIDTH bytes a piece, to STREAM.  If LEN is -1, printing
    stops at the first null byte, otherwise printing proceeds (including null
@@ -1208,7 +1252,7 @@ val_print_string (addr, len, width, stream)
       bufptr = buffer;
       old_chain = make_cleanup (free, buffer);
 
-      nfetch = target_read_memory_partial (addr, bufptr, len * width, &errcode)
+      nfetch = partial_memory_read (addr, bufptr, len * width, &errcode)
 	/ width;
       addr += nfetch * width;
       bufptr += nfetch * width;
@@ -1234,7 +1278,7 @@ val_print_string (addr, len, width, stream)
 	  bufsize += nfetch;
 
 	  /* Read as much as we can. */
-	  nfetch = target_read_memory_partial (addr, bufptr, nfetch * width, &errcode)
+	  nfetch = partial_memory_read (addr, bufptr, nfetch * width, &errcode)
 	    / width;
 
 	  /* Scan this chunk for the null byte that terminates the string

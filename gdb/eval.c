@@ -892,9 +892,12 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	  argvec[1] = arg2;
 	  argvec[0] = arg1;
 	}
-      else
+      else if (op == OP_VAR_VALUE)
 	{
 	  /* Non-member function being called */
+          /* fn: This can only be done for C++ functions.  A C-style function
+             in a C++ program, for instance, does not have the fields that 
+             are expected here */
 
 	  if (overload_resolution && (exp->language_defn->la_language == language_cplus))
 	    {
@@ -908,11 +911,11 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 
 	      (void) find_overload_match (arg_types, nargs, NULL /* no need for name */ ,
 				 0 /* not method */ , 0 /* strict match */ ,
-			      NULL, exp->elts[5].symbol /* the function */ ,
+		      NULL, exp->elts[save_pos1+2].symbol /* the function */ ,
 					  NULL, &symp, NULL);
 
 	      /* Now fix the expression being evaluated */
-	      exp->elts[5].symbol = symp;
+	      exp->elts[save_pos1+2].symbol = symp;
 	      argvec[0] = evaluate_subexp_with_coercion (exp, &save_pos1, noside);
 	    }
 	  else
@@ -920,6 +923,11 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	      /* Not C++, or no overload resolution allowed */
 	      /* nothing to be done; argvec already correctly set up */
 	    }
+	}
+      else
+	{
+	  /* It is probably a C-style function */
+	  /* nothing to be done; argvec already correctly set up */
 	}
 
     do_call_it:

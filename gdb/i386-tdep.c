@@ -46,6 +46,32 @@ static int gdb_print_insn_i386 (bfd_vma, disassemble_info *);
 
 void _initialize_i386_tdep PARAMS ((void));
 
+/* i386_register_byte[i] is the offset into the register file of the
+   start of register number i.  We initialize this from
+   i386_register_raw_size.  */
+int i386_register_byte[MAX_NUM_REGS];
+
+/* i386_register_raw_size[i] is the number of bytes of storage in the
+   actual machine representation for register i.  */
+int i386_register_raw_size[MAX_NUM_REGS] = {
+   4,  4,  4,  4,
+   4,  4,  4,  4,
+   4,  4,  4,  4,
+   4,  4,  4,  4,
+  10, 10, 10, 10,
+  10, 10, 10, 10,
+   4,  4,  4,  4,
+   4,  4,  4,  4,
+  16, 16, 16, 16,
+  16, 16, 16, 16,
+   4
+};
+
+/* i386_register_virtual_size[i] is the size in bytes of the virtual
+   type of register i.  */
+int i386_register_virtual_size[MAX_NUM_REGS];
+
+
 /* This is the variable the is set with "set disassembly-flavor",
    and its legitimate values. */
 static char att_flavor[] = "att";
@@ -974,25 +1000,46 @@ set_disassembly_flavor ()
 void
 _initialize_i386_tdep ()
 {
-  struct cmd_list_element *new_cmd;
+  /* Initialize the table saying where each register starts in the
+     register file.  */
+  {
+    int i, offset;
+
+    offset = 0;
+    for (i = 0; i < MAX_NUM_REGS; i++)
+      {
+	i386_register_byte[i] = offset;
+	offset += i386_register_raw_size[i];
+      }
+  }
+
+  /* Initialize the table of virtual register sizes.  */
+  {
+    int i;
+
+    for (i = 0; i < MAX_NUM_REGS; i++)
+      i386_register_virtual_size[i] = TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (i));
+  }
 
   tm_print_insn = gdb_print_insn_i386;
   tm_print_insn_info.mach = bfd_lookup_arch (bfd_arch_i386, 0)->mach;
 
   /* Add the variable that controls the disassembly flavor */
+  {
+    struct cmd_list_element *new_cmd;
 
-  new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
-			      valid_flavors,
-			      (char *) &disassembly_flavor,
-			      "Set the disassembly flavor, the valid values are \"att\" and \"intel\", \
+    new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
+				valid_flavors,
+				(char *) &disassembly_flavor,
+				"Set the disassembly flavor, the valid values are \"att\" and \"intel\", \
 and the default value is \"att\".",
-			      &setlist);
-  new_cmd->function.sfunc = set_disassembly_flavor_sfunc;
-  add_show_from_set (new_cmd, &showlist);
+				&setlist);
+    new_cmd->function.sfunc = set_disassembly_flavor_sfunc;
+    add_show_from_set (new_cmd, &showlist);
+  }
 
   /* Finally, initialize the disassembly flavor to the default given
      in the disassembly_flavor variable */
 
   set_disassembly_flavor ();
-
 }

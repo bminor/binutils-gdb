@@ -64,8 +64,7 @@ void async_remote_interrupt_twice PARAMS ((gdb_client_data));
 
 static void build_remote_gdbarch_data PARAMS ((void));
 
-static int remote_write_bytes PARAMS ((CORE_ADDR memaddr,
-				       char *myaddr, int len));
+static int remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len);
 
 static int remote_read_bytes PARAMS ((CORE_ADDR memaddr,
 				      char *myaddr, int len));
@@ -2269,8 +2268,7 @@ remote_async_terminal_ours (void)
 int kill_kludge;
 
 void
-remote_console_output (msg)
-     char *msg;
+remote_console_output (char *msg)
 {
   char *p;
 
@@ -2282,6 +2280,7 @@ remote_console_output (msg)
       tb[1] = 0;
       fputs_unfiltered (tb, gdb_stdtarg);
     }
+  gdb_flush (gdb_stdtarg);
 }
 
 /* Wait until the remote machine stops, then return,
@@ -3078,139 +3077,134 @@ check_binary_download (addr)
    MYADDR is the address of the buffer in our space.
    LEN is the number of bytes.
 
-   Returns number of bytes transferred, or 0 for error.  */
+   Returns number of bytes transferred, or 0 (setting errno) for
+   error.  Only transfer a single packet. */
 
 static int
-remote_write_bytes (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 {
-  unsigned char *buf = alloca (PBUFSIZ);
+  unsigned char *buf;
   int max_buf_size;		/* Max size of packet output buffer */
-  int origlen;
+  unsigned char *p;
+  unsigned char *plen;
+  int plenlen;
+  int todo;
+  int nr_bytes;
 
   /* Verify that the target can support a binary download */
   check_binary_download (memaddr);
 
-  /* Chop the transfer down if necessary */
-
+  /* Determine the max packet size. */
   max_buf_size = min (remote_write_size, PBUFSIZ);
   if (remote_register_buf_size != 0)
     max_buf_size = min (max_buf_size, remote_register_buf_size);
+  buf = alloca (max_buf_size + 1);
 
   /* Subtract header overhead from max payload size -  $M<memaddr>,<len>:#nn */
   max_buf_size -= 2 + hexnumlen (memaddr + len - 1) + 1 + hexnumlen (len) + 4;
 
-  origlen = len;
-  while (len > 0)
+  /* construct "M"<memaddr>","<len>":" */
+  /* sprintf (buf, "M%lx,%x:", (unsigned long) memaddr, todo); */
+  p = buf;
+
+  /* Append [XM].  Compute a best guess of the number of bytes
+     actually transfered. */
+  switch (remote_protocol_binary_download.support)
     {
-      unsigned char *p, *plen;
-      int plenlen;
-      int todo;
-      int i;
-
-      /* construct "M"<memaddr>","<len>":" */
-      /* sprintf (buf, "M%lx,%x:", (unsigned long) memaddr, todo); */
-      memaddr = remote_address_masked (memaddr);
-      p = buf;
-      switch (remote_protocol_binary_download.support)
-	{
-	case PACKET_ENABLE:
-	  *p++ = 'X';
-	  todo = min (len, max_buf_size);
-	  break;
-	case PACKET_DISABLE:
-	  *p++ = 'M';
-	  todo = min (len, max_buf_size / 2);	/* num bytes that will fit */
-	  break;
-	case PACKET_SUPPORT_UNKNOWN:
-	  internal_error ("remote_write_bytes: bad switch");
-	}
-
-      p += hexnumstr (p, (ULONGEST) memaddr);
-      *p++ = ',';
-
-      plen = p;			/* remember where len field goes */
-      plenlen = hexnumstr (p, (ULONGEST) todo);
-      p += plenlen;
-      *p++ = ':';
-      *p = '\0';
-
-      /* We send target system values byte by byte, in increasing byte
-         addresses, each byte encoded as two hex characters (or one
-         binary character).  */
-      switch (remote_protocol_binary_download.support)
-	{
-	case PACKET_ENABLE:
-	  {
-	    int escaped = 0;
-	    for (i = 0;
-		 (i < todo) && (i + escaped) < (max_buf_size - 2);
-		 i++)
-	      {
-		switch (myaddr[i] & 0xff)
-		  {
-		  case '$':
-		  case '#':
-		  case 0x7d:
-		    /* These must be escaped */
-		    escaped++;
-		    *p++ = 0x7d;
-		    *p++ = (myaddr[i] & 0xff) ^ 0x20;
-		    break;
-		  default:
-		    *p++ = myaddr[i] & 0xff;
-		    break;
-		  }
-	      }
-	    
-	    if (i < todo)
-	      {
-		/* Escape chars have filled up the buffer prematurely, 
-		   and we have actually sent fewer bytes than planned.
-		   Fix-up the length field of the packet.  Use the same
-		   number of characters as before.  */
-		
-		plen += hexnumnstr (plen, (ULONGEST) i, plenlen);
-		*plen = ':';  /* overwrite \0 from hexnumnstr() */
-	      }
-	    break;
-	  }
-	case PACKET_DISABLE:
-	  {
-	    for (i = 0; i < todo; i++)
-	      {
-		*p++ = tohex ((myaddr[i] >> 4) & 0xf);
-		*p++ = tohex (myaddr[i] & 0xf);
-	      }
-	    *p = '\0';
-	    break;
-	  }
-	case PACKET_SUPPORT_UNKNOWN:
-	  internal_error ("remote_write_bytes: bad switch");
-	}
-
-      putpkt_binary (buf, (int) (p - buf));
-      getpkt (buf, 0);
-
-      if (buf[0] == 'E')
-	{
-	  /* There is no correspondance between what the remote protocol uses
-	     for errors and errno codes.  We would like a cleaner way of
-	     representing errors (big enough to include errno codes, bfd_error
-	     codes, and others).  But for now just return EIO.  */
-	  errno = EIO;
-	  return 0;
-	}
-
-      /* Increment by i, not by todo, in case escape chars 
-         caused us to send fewer bytes than we'd planned.  */
-      myaddr += i;
-      memaddr += i;
-      len -= i;
+    case PACKET_ENABLE:
+      *p++ = 'X';
+      /* Best guess at number of bytes that will fit. */
+      todo = min (len, max_buf_size);
+      break;
+    case PACKET_DISABLE:
+      *p++ = 'M';
+      /* num bytes that will fit */
+      todo = min (len, max_buf_size / 2);
+      break;
+    case PACKET_SUPPORT_UNKNOWN:
+      internal_error ("remote_write_bytes: bad switch");
     }
-  return origlen;
+  
+  /* Append <memaddr> */
+  memaddr = remote_address_masked (memaddr);
+  p += hexnumstr (p, (ULONGEST) memaddr);
+  *p++ = ',';
+  
+  /* Append <len>.  Retain the location/size of <len>.  It may
+     need to be adjusted once the packet body has been created. */
+  plen = p;
+  plenlen = hexnumstr (p, (ULONGEST) todo);
+  p += plenlen;
+  *p++ = ':';
+  *p = '\0';
+  
+  /* Append the packet body. */
+  switch (remote_protocol_binary_download.support)
+    {
+    case PACKET_ENABLE:
+      /* Binary mode.  Send target system values byte by byte, in
+	 increasing byte addresses.  Only escape certain critical
+	 characters.  */
+      for (nr_bytes = 0;
+	   (nr_bytes < todo) && (p - buf) < (max_buf_size - 2);
+	   nr_bytes++)
+	{
+	  switch (myaddr[nr_bytes] & 0xff)
+	    {
+	    case '$':
+	    case '#':
+	    case 0x7d:
+	      /* These must be escaped */
+	      *p++ = 0x7d;
+	      *p++ = (myaddr[nr_bytes] & 0xff) ^ 0x20;
+	      break;
+	    default:
+	      *p++ = myaddr[nr_bytes] & 0xff;
+	      break;
+	    }
+	}
+      if (nr_bytes < todo)
+	{
+	  /* Escape chars have filled up the buffer prematurely, 
+	     and we have actually sent fewer bytes than planned.
+	     Fix-up the length field of the packet.  Use the same
+	     number of characters as before.  */
+	  
+	  plen += hexnumnstr (plen, (ULONGEST) nr_bytes, plenlen);
+	  *plen = ':';  /* overwrite \0 from hexnumnstr() */
+	}
+      break;
+    case PACKET_DISABLE:
+      /* Normal mode: Send target system values byte by byte, in
+	 increasing byte addresses.  Each byte is encoded as a two hex
+	 value.  */
+      for (nr_bytes = 0; nr_bytes < todo; nr_bytes++)
+	{
+	  *p++ = tohex ((myaddr[nr_bytes] >> 4) & 0xf);
+	  *p++ = tohex (myaddr[nr_bytes] & 0xf);
+	}
+      *p = '\0';
+      break;
+    case PACKET_SUPPORT_UNKNOWN:
+      internal_error ("remote_write_bytes: bad switch");
+    }
+  
+  putpkt_binary (buf, (int) (p - buf));
+  getpkt (buf, 0);
+  
+  if (buf[0] == 'E')
+    {
+      /* There is no correspondance between what the remote protocol
+	 uses for errors and errno codes.  We would like a cleaner way
+	 of representing errors (big enough to include errno codes,
+	 bfd_error codes, and others).  But for now just return EIO.  */
+      errno = EIO;
+      return 0;
+    }
+  
+  /* Return NR_BYTES, not TODO, in case escape chars caused us to send fewer
+     bytes than we'd planned.  */
+  return nr_bytes;
 }
 
 /* Read memory data directly from the remote machine.
@@ -3220,6 +3214,13 @@ remote_write_bytes (memaddr, myaddr, len)
    LEN is the number of bytes.
 
    Returns number of bytes transferred, or 0 for error.  */
+
+/* NOTE: cagney/1999-10-18: This function (and its siblings in other
+   remote targets) shouldn't attempt to read the entire buffer.
+   Instead it should read a single packet worth of data and then
+   return the byte size of that packet to the caller.  The caller (its
+   caller and its callers caller ;-) already contains code for
+   handling partial reads. */
 
 static int
 remote_read_bytes (memaddr, myaddr, len)

@@ -157,7 +157,7 @@ insertion_state_t;
 static int
 remove_breakpoint PARAMS ((struct breakpoint *, insertion_state_t));
 
-static int print_it_normal PARAMS ((bpstat));
+static enum print_stop_action print_it_normal PARAMS ((bpstat));
 
 typedef struct
   {
@@ -170,9 +170,9 @@ static int watchpoint_check PARAMS ((PTR));
 
 static int cover_target_enable_exception_callback PARAMS ((PTR));
 
-static int print_it_done PARAMS ((bpstat));
+static enum print_stop_action print_it_done PARAMS ((bpstat));
 
-static int print_it_noop PARAMS ((bpstat));
+static enum print_stop_action print_it_noop PARAMS ((bpstat));
 
 static void maintenance_info_breakpoints PARAMS ((char *, int));
 
@@ -1752,13 +1752,15 @@ top:
 
    Return values from this routine (used by bpstat_print() to
    decide what to do):
-   1: Means we printed something, and we do *not* desire that
+   PRINT_NOTHING: Means we already printed all we needed to print, don't 
+   print anything else.
+   PRINT_SRC_ONLY: Means we printed something, and we do *not* desire that
    something to be followed by a location.
-   0: Means we printed something, and we *do*  desire that
+   PRINT_SCR_AND_LOC: Means we printed something, and we *do*  desire that
    something to be followed by a location.
-   -1: Means we printed nothing.  */
+   PRINT_UNKNOWN: Means we printed nothing or we need to do some more analysis.  */
 
-static int
+static enum print_stop_action
 print_it_normal (bs)
      bpstat bs;
 {
@@ -1766,6 +1768,7 @@ print_it_normal (bs)
      which has since been deleted.  */
   if (bs->breakpoint_at == NULL
       || (bs->breakpoint_at->type != bp_breakpoint
+	  && bs->breakpoint_at->type != bp_shlib_event
 	  && bs->breakpoint_at->type != bp_catch_load
 	  && bs->breakpoint_at->type != bp_catch_unload
 	  && bs->breakpoint_at->type != bp_catch_fork
@@ -1778,7 +1781,7 @@ print_it_normal (bs)
 	  && bs->breakpoint_at->type != bp_read_watchpoint
 	  && bs->breakpoint_at->type != bp_access_watchpoint
 	  && bs->breakpoint_at->type != bp_hardware_watchpoint))
-    return -1;
+    return PRINT_UNKNOWN;
 
   if (ep_is_shlib_catchpoint (bs->breakpoint_at))
     {
@@ -1789,7 +1792,15 @@ print_it_normal (bs)
       else if (bs->breakpoint_at->type == bp_catch_unload)
 	printf_filtered ("unloaded");
       printf_filtered (" %s), ", bs->breakpoint_at->triggered_dll_pathname);
-      return 0;
+      return PRINT_SRC_AND_LOC;
+    }
+  else if (bs->breakpoint_at->type == bp_shlib_event)
+    {
+      /* Did we stop because the user set the stop_on_solib_events
+	 variable?  (If so, we report this as a generic, "Stopped due
+	 to shlib event" message.) */
+       printf_filtered ("Stopped due to shared library event\n");
+       return PRINT_NOTHING;
     }
   else if (bs->breakpoint_at->type == bp_catch_fork ||
 	   bs->breakpoint_at->type == bp_catch_vfork)
@@ -1802,7 +1813,7 @@ print_it_normal (bs)
 	printf_filtered ("vforked");
       printf_filtered (" process %d), ", 
 		       bs->breakpoint_at->forked_inferior_pid);
-      return 0;
+      return PRINT_SRC_AND_LOC;
     }
   else if (bs->breakpoint_at->type == bp_catch_exec)
     {
@@ -1810,7 +1821,7 @@ print_it_normal (bs)
       printf_filtered ("\nCatchpoint %d (exec'd %s), ",
 		       bs->breakpoint_at->number,
 		       bs->breakpoint_at->exec_pathname);
-      return 0;
+      return PRINT_SRC_AND_LOC;
     }
   else if (bs->breakpoint_at->type == bp_catch_catch)
     {
@@ -1837,11 +1848,11 @@ print_it_normal (bs)
 	    printf_filtered ("unknown");
 
 	  printf_filtered ("\n");
-	  return 1;	/* don't bother to print location frame info */
+	  return PRINT_SRC_ONLY;  /* don't bother to print location frame info */
 	}
       else
 	{
-	  return -1;	/* really throw, some other bpstat will handle it */
+	  return PRINT_UNKNOWN;	/* really throw, some other bpstat will handle it */
 	}
     }
   else if (bs->breakpoint_at->type == bp_catch_throw)
@@ -1869,11 +1880,11 @@ print_it_normal (bs)
 	    printf_filtered ("unknown");
 
 	  printf_filtered ("\n");
-	  return 1;	/* don't bother to print location frame info */
+	  return PRINT_SRC_ONLY; /* don't bother to print location frame info */
 	}
       else
 	{
-	  return -1;	/* really catch, some other bpstat willhandle it */
+	  return PRINT_UNKNOWN;	/* really catch, some other bpstat willhandle it */
 	}
     }
 
@@ -1884,7 +1895,7 @@ print_it_normal (bs)
          number, not all of them.  */
       annotate_breakpoint (bs->breakpoint_at->number);
       printf_filtered ("\nBreakpoint %d, ", bs->breakpoint_at->number);
-      return 0;
+      return PRINT_SRC_AND_LOC;
     }
   else if ((bs->old_val != NULL) &&
 	   (bs->breakpoint_at->type == bp_watchpoint ||
@@ -1902,7 +1913,7 @@ print_it_normal (bs)
       value_free (bs->old_val);
       bs->old_val = NULL;
       /* More than one watchpoint may have been triggered.  */
-      return -1;
+      return PRINT_UNKNOWN;
     }
   else if (bs->breakpoint_at->type == bp_access_watchpoint ||
 	   bs->breakpoint_at->type == bp_read_watchpoint)
@@ -1912,11 +1923,11 @@ print_it_normal (bs)
       value_print (bs->breakpoint_at->val, gdb_stdout, 0,
 		   Val_pretty_default);
       printf_filtered ("\n");
-      return -1;
+      return PRINT_UNKNOWN;
     }
   /* We can't deal with it.  
      Maybe another member of the bpstat chain can.  */
-  return -1;
+  return PRINT_UNKNOWN;
 }
 
 /* Print a message indicating what happened.
@@ -1928,27 +1939,29 @@ print_it_normal (bs)
    the "Breakpoint n," part of the output.
    The return value of this routine is one of:
 
-   -1: Means we printed nothing
-   0: Means we printed something, and expect subsequent
+   PRINT_UNKNOWN: Means we printed nothing
+   PRINT_SRC_AND_LOC: Means we printed something, and expect subsequent
    code to print the location. An example is 
    "Breakpoint 1, " which should be followed by
    the location.
-   1 : Means we printed something, but there is no need
+   PRINT_SRC_ONLY: Means we printed something, but there is no need
    to also print the location part of the message.
    An example is the catch/throw messages, which
-   don't require a location appended to the end.  */
+   don't require a location appended to the end.  
+   PRINT_NOTHING: We have done some printing and we don't need any 
+   further info to be printed.*/
 
-int
+enum print_stop_action
 bpstat_print (bs)
      bpstat bs;
 {
   int val;
 
   if (bs == NULL)
-    return -1;
+    return PRINT_UNKNOWN;
 
   val = (*bs->print_it) (bs);
-  if (val >= 0)
+  if (val == PRINT_SRC_ONLY || val == PRINT_SRC_AND_LOC || val == PRINT_NOTHING)
     return val;
 
   /* Maybe another breakpoint in the chain caused us to stop.
@@ -1959,7 +1972,7 @@ bpstat_print (bs)
     return bpstat_print (bs->next);
 
   /* We reached the end of the chain without printing anything.  */
-  return -1;
+  return PRINT_UNKNOWN;
 }
 
 /* Evaluate the expression EXP and return 1 if value is zero.
@@ -2096,11 +2109,11 @@ which its expression is valid.\n", bs->breakpoint_at->number);
    two possibilities. See comments in bpstat_print() and
    in header of print_it_normal() for more detail.  */
 
-static int
+static enum print_stop_action
 print_it_done (bs)
      bpstat bs;
 {
-  return 0;
+  return PRINT_SRC_AND_LOC;
 }
 
 /* This is used when nothing should be printed for this bpstat entry.  */
@@ -2112,11 +2125,11 @@ print_it_done (bs)
    two possibilities. See comments in bpstat_print() and
    in header of print_it_normal() for more detail.  */
 
-static int
+static enum print_stop_action
 print_it_noop (bs)
      bpstat bs;
 {
-  return -1;
+  return PRINT_UNKNOWN;
 }
 
 /* Get a bpstat associated with having just stopped at address *PC

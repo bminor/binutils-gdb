@@ -85,7 +85,6 @@ tuiInit (argv0)
      * the bottom of the screen (tuiTermUnsetup()).
    */
   fputs_unfiltered_hook = NULL;
-  flush_hook = NULL;
   rl_initialize ();		/* need readline initialization to
 				   * create termcap sequences
 				 */

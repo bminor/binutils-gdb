@@ -23,7 +23,6 @@
 #include "srec.h"
 #include <time.h>
 
-int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t));
 
 extern int remote_debug;

@@ -73,10 +73,6 @@ static void follow_vfork (int parent_pid, int child_pid);
 static void set_schedlock_func (char *args, int from_tty,
 				struct cmd_list_element * c);
 
-static int is_internal_shlib_eventpoint (struct breakpoint * ep);
-
-static int stopped_for_internal_shlib_event (bpstat bs);
-
 struct execution_control_state;
 
 static int currently_stepping (struct execution_control_state *ecs);
@@ -2427,7 +2423,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	       dynamically loaded objects (among other things).  */
 	    if (stop_on_solib_events)
 	      {
-		stop_print_frame = 0;
 		stop_stepping (ecs);
 		return;
 	      }
@@ -3197,40 +3192,6 @@ prepare_to_wait (struct execution_control_state *ecs)
      soon.  */
   ecs->wait_some_more = 1;
 }
-
-/* This function returns TRUE if ep is an internal breakpoint
-   set to catch generic shared library (aka dynamically-linked
-   library) events.  (This is *NOT* the same as a catchpoint for a
-   shlib event.  The latter is something a user can set; this is
-   something gdb sets for its own use, and isn't ever shown to a
-   user.) */
-static int
-is_internal_shlib_eventpoint (struct breakpoint *ep)
-{
-  return
-    (ep->type == bp_shlib_event)
-    ;
-}
-
-/* This function returns TRUE if bs indicates that the inferior
-   stopped due to a shared library (aka dynamically-linked library)
-   event. */
-
-static int
-stopped_for_internal_shlib_event (bpstat bs)
-{
-  /* Note that multiple eventpoints may've caused the stop.  Any
-     that are associated with shlib events will be accepted. */
-  for (; bs != NULL; bs = bs->next)
-    {
-      if ((bs->breakpoint_at != NULL)
-	  && is_internal_shlib_eventpoint (bs->breakpoint_at))
-	return 1;
-    }
-
-  /* If we get here, then no candidate was found. */
-  return 0;
-}
 
 
 /* Here to return control to GDB when the inferior stops for real.
@@ -3305,14 +3266,6 @@ The same program may be running in another process.\n");
 
   target_terminal_ours ();
 
-  /* Did we stop because the user set the stop_on_solib_events
-     variable?  (If so, we report this as a generic, "Stopped due
-     to shlib event" message.) */
-  if (stopped_for_internal_shlib_event (stop_bpstat))
-    {
-      printf_filtered ("Stopped due to shared library event\n");
-    }
-
   /* Look up the hook_stop and run it if it exists.  */
 
   if (stop_command && stop_command->hook)
@@ -3346,32 +3299,39 @@ The same program may be running in another process.\n");
 	{
 	  int bpstat_ret;
 	  int source_flag;
+	  int do_frame_printing = 1;
 
 	  bpstat_ret = bpstat_print (stop_bpstat);
-	  /* bpstat_print() returned one of:
-	     -1: Didn't print anything
-	     0: Printed preliminary "Breakpoint n, " message, desires
-	     location tacked on
-	     1: Printed something, don't tack on location */
-
-	  if (bpstat_ret == -1)
-	    if (stop_step
-		&& step_frame_address == FRAME_FP (get_current_frame ())
-		&& step_start_function == find_pc_function (stop_pc))
-	      source_flag = -1;	/* finished step, just print source line */
-	    else
-	      source_flag = 1;	/* print location and source line */
-	  else if (bpstat_ret == 0)	/* hit bpt, desire location */
-	    source_flag = 1;	/* print location and source line */
-	  else			/* bpstat_ret == 1, hit bpt, do not desire location */
-	    source_flag = -1;	/* just print source line */
+	  switch (bpstat_ret)
+	    {
+	    case PRINT_UNKNOWN:
+	      if (stop_step
+		  && step_frame_address == FRAME_FP (get_current_frame ())
+		  && step_start_function == find_pc_function (stop_pc))
+		source_flag = -1;   /* finished step, just print source line */
+	      else
+		source_flag = 1;    /* print location and source line */
+	      break;
+	    case PRINT_SRC_AND_LOC:
+	      source_flag = 1;	    /* print location and source line */
+	      break;
+	    case PRINT_SRC_ONLY:
+	      source_flag = -1;
+	      break;
+	    case PRINT_NOTHING:
+	      do_frame_printing = 0;
+	      break;
+	    default:
+	      internal_error ("Unknown value.");
+	    }
 
 	  /* The behavior of this routine with respect to the source
 	     flag is:
 	     -1: Print only source line
 	     0: Print only location
 	     1: Print location and source line */
-	  show_and_print_stack_frame (selected_frame, -1, source_flag);
+	  if (do_frame_printing)
+	    show_and_print_stack_frame (selected_frame, -1, source_flag);
 
 	  /* Display the auto-display expressions.  */
 	  do_displays ();

@@ -77,7 +77,6 @@ f:void:breakpoint_modify:int b:b
 #*:void:print_frame_info_listing_hook:struct symtab *s, int line, int stopline, int noerror:s, line, stopline, noerror
 #*:int:query_hook:const char *query, va_list args:query, args
 #*:void:warning_hook:const char *string, va_list args:string, args
-#*:void:flush_hook:GDB_FILE *stream:stream
 #*:void:target_output_hook:char *b:b
 #*:void:interactive_hook:void
 #*:void:registers_changed_hook:void

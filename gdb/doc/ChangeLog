@@ -1,3 +1,13 @@
+1999-10-15  Kevin Buettner  <kevinb@cygnus.com>
+
+	* gdbint.texinfo (MEMORY_INSERT_BREAKPOINT,
+	MEMORY_REMOVE_BREAKPOINT):  Document.
+
+Thu Oct 14 21:17:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.texinfo (remote): Document how GDB ignores the qOffsets BSS
+ 	offset re-using the DATA offset instead.
+
 1999-10-11  Jim Kingdon  <kingdon@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Add PARM_BOUNDARY.

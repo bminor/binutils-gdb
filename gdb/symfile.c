@@ -63,7 +63,7 @@ extern int hp_cxx_exception_support_initialized;
                               } while (0)
 #endif
 
-int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
+int (*ui_load_progress_hook) (const char *section, unsigned long num);
 void (*pre_add_symbol_hook) PARAMS ((char *));
 void (*post_add_symbol_hook) PARAMS ((void));
 
@@ -1207,42 +1207,52 @@ load_command (arg, from_tty)
    to worry about finding it, and (b) On VMS, fork() is very slow and so
    we don't want to run a subprocess.  On the other hand, I'm not sure how
    performance compares.  */
-#define GENERIC_LOAD_CHUNK 256
-#define VALIDATE_DOWNLOAD 0
+
+static int download_write_size = 512;
+static int validate_download = 0;
+
 void
-generic_load (filename, from_tty)
-     char *filename;
-     int from_tty;
+generic_load (char *args, int from_tty)
 {
-  struct cleanup *old_cleanups;
   asection *s;
   bfd *loadfile_bfd;
   time_t start_time, end_time;	/* Start and end times of download */
   unsigned long data_count = 0;	/* Number of bytes transferred to memory */
-  int n;
-  unsigned long load_offset = 0;	/* offset to add to vma for each section */
-  char buf[GENERIC_LOAD_CHUNK + 8];
-#if VALIDATE_DOWNLOAD
-  char verify_buffer[GENERIC_LOAD_CHUNK + 8];
-#endif
+  unsigned long write_count = 0;	/* Number of writes needed. */
+  unsigned long load_offset;	/* offset to add to vma for each section */
+  char *filename;
+  struct cleanup *old_cleanups;
+  char *offptr;
 
-  /* enable user to specify address for downloading as 2nd arg to load */
-  n = sscanf (filename, "%s 0x%lx", buf, &load_offset);
-  if (n > 1)
-    filename = buf;
+  /* Parse the input argument - the user can specify a load offset as
+     a second argument. */
+  filename = xmalloc (strlen (args) + 1);
+  old_cleanups = make_cleanup (free, filename);
+  strcpy (filename, args);
+  offptr = strchr (filename, ' ');
+  if (offptr != NULL)
+    {
+      char *endptr;
+      load_offset = strtoul (offptr, &endptr, 0);
+      if (offptr == endptr)
+	error ("Invalid download offset:%s\n", offptr);
+      *offptr = '\0';
+    }
   else
     load_offset = 0;
 
+  /* Open the file for loading. */
   loadfile_bfd = bfd_openr (filename, gnutarget);
   if (loadfile_bfd == NULL)
     {
       perror_with_name (filename);
       return;
     }
+
   /* FIXME: should be checking for errors from bfd_close (for one thing,
      on error it does not free all the storage associated with the
      bfd).  */
-  old_cleanups = make_cleanup ((make_cleanup_func) bfd_close, loadfile_bfd);
+  make_cleanup ((make_cleanup_func) bfd_close, loadfile_bfd);
 
   if (!bfd_check_format (loadfile_bfd, bfd_object))
     {
@@ -1256,72 +1266,78 @@ generic_load (filename, from_tty)
     {
       if (s->flags & SEC_LOAD)
 	{
-	  bfd_size_type size;
-
-	  size = bfd_get_section_size_before_reloc (s);
+	  CORE_ADDR size = bfd_get_section_size_before_reloc (s);
 	  if (size > 0)
 	    {
 	      char *buffer;
 	      struct cleanup *old_chain;
-	      bfd_vma lma;
-	      unsigned long l = size;
+	      CORE_ADDR lma = s->lma + load_offset;
+	      CORE_ADDR block_size;
 	      int err;
-	      char *sect;
-	      unsigned long sent;
-	      unsigned long len;
+	      const char *sect_name = bfd_get_section_name (loadfile_bfd, s);
+	      CORE_ADDR sent;
 
-	      l = l > GENERIC_LOAD_CHUNK ? GENERIC_LOAD_CHUNK : l;
+	      if (download_write_size > 0 && size > download_write_size)
+		block_size = download_write_size;
+	      else
+		block_size = size;
 
 	      buffer = xmalloc (size);
 	      old_chain = make_cleanup (free, buffer);
 
-	      lma = s->lma;
-	      lma += load_offset;
-
 	      /* Is this really necessary?  I guess it gives the user something
 	         to look at during a long download.  */
-	      printf_filtered ("Loading section %s, size 0x%lx lma ",
-			       bfd_get_section_name (loadfile_bfd, s),
-			       (unsigned long) size);
-	      print_address_numeric (lma, 1, gdb_stdout);
-	      printf_filtered ("\n");
+	      fprintf_unfiltered (gdb_stdout,
+				  "Loading section %s, size 0x%s lma 0x%s\n",
+				  sect_name, paddr_nz (size), paddr_nz (lma));
 
 	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
 
-	      sect = (char *) bfd_get_section_name (loadfile_bfd, s);
 	      sent = 0;
 	      do
 		{
-		  len = (size - sent) < l ? (size - sent) : l;
-		  sent += len;
-		  err = target_write_memory (lma, buffer, len);
-		  if (ui_load_progress_hook)
-		    if (ui_load_progress_hook (sect, sent))
-		      error ("Canceled the download");
-#if VALIDATE_DOWNLOAD
-		  /* Broken memories and broken monitors manifest themselves
-		     here when bring new computers to life.
-		     This doubles already slow downloads.
-		   */
+		  CORE_ADDR len;
+		  CORE_ADDR this_transfer = size - sent;
+		  if (this_transfer >= block_size)
+		    this_transfer = block_size;
+		  len = target_write_memory_partial (lma, buffer,
+						     this_transfer, &err);
 		  if (err)
 		    break;
-		  {
-		    target_read_memory (lma, verify_buffer, len);
-		    if (0 != bcmp (buffer, verify_buffer, len))
-		      error ("Download verify failed at %08x",
-			     (unsigned long) lma);
-		  }
-
-#endif
+		  if (validate_download)
+		    {
+		      /* Broken memories and broken monitors manifest
+			 themselves here when bring new computers to
+			 life.  This doubles already slow downloads.  */
+		      /* NOTE: cagney/1999-10-18: A more efficient
+                         implementation might add a verify_memory()
+                         method to the target vector and then use
+                         that.  remote.c could implement that method
+                         using the ``qCRC'' packet.  */
+		      char *check = xmalloc (len);
+		      struct cleanup *verify_cleanups = make_cleanup (free, check);
+		      if (target_read_memory (lma, check, len) != 0)
+			error ("Download verify read failed at 0x%s",
+			       paddr (lma));
+		      if (memcmp (buffer, check, len) != 0)
+			error ("Download verify compare failed at 0x%s",
+			       paddr (lma));
+		      do_cleanups (verify_cleanups);
+ 		    }
 		  data_count += len;
 		  lma += len;
 		  buffer += len;
-		}		/* od */
-	      while (err == 0 && sent < size);
+		  write_count += 1;
+		  sent += len;
+		  if (quit_flag
+		      || (ui_load_progress_hook != NULL
+			  && ui_load_progress_hook (sect_name, sent)))
+		    error ("Canceled the download");
+		}
+	      while (sent < size);
 
 	      if (err != 0)
-		error ("Memory access error while loading section %s.",
-		       bfd_get_section_name (loadfile_bfd, s));
+		error ("Memory access error while loading section %s.", sect_name);
 
 	      do_cleanups (old_chain);
 	    }
@@ -1330,9 +1346,11 @@ generic_load (filename, from_tty)
 
   end_time = time (NULL);
   {
-    unsigned long entry;
+    CORE_ADDR entry;
     entry = bfd_get_start_address (loadfile_bfd);
-    printf_filtered ("Start address 0x%lx , load size %ld\n", entry, data_count);
+    fprintf_unfiltered (gdb_stdout,
+			"Start address 0x%s , load size %ld\n",
+			paddr_nz (entry), data_count);
     /* We were doing this in remote-mips.c, I suspect it is right
        for other targets too.  */
     write_pc (entry);
@@ -1344,25 +1362,40 @@ generic_load (filename, from_tty)
      loaded in.  remote-nindy.c had no call to symbol_file_add, but remote-vx.c
      does.  */
 
-  report_transfer_performance (data_count, start_time, end_time);
+  print_transfer_performance (gdb_stdout, data_count, write_count,
+			      end_time - start_time);
 
   do_cleanups (old_cleanups);
 }
 
 /* Report how fast the transfer went. */
 
+/* DEPRECATED: cagney/1999-10-18: report_transfer_performance is being
+   replaced by print_transfer_performance (with a very different
+   function signature). */
+
 void
 report_transfer_performance (data_count, start_time, end_time)
      unsigned long data_count;
      time_t start_time, end_time;
 {
-  printf_filtered ("Transfer rate: ");
-  if (end_time != start_time)
-    printf_filtered ("%ld bits/sec",
-		     (data_count * 8) / (end_time - start_time));
+  print_transfer_performance (gdb_stdout, data_count, end_time - start_time, 0);
+}
+
+void
+print_transfer_performance (struct gdb_file *stream,
+			    unsigned long data_count,
+			    unsigned long write_count,
+			    unsigned long time_count)
+{
+  fprintf_unfiltered (stream, "Transfer rate: ");
+  if (time_count > 0)
+    fprintf_unfiltered (stream, "%ld bits/sec", (data_count * 8) / time_count);
   else
-    printf_filtered ("%ld bits in <1 sec", (data_count * 8));
-  printf_filtered (".\n");
+    fprintf_unfiltered (stream, "%ld bits in <1 sec", (data_count * 8));
+  if (write_count > 0)
+    fprintf_unfiltered (stream, ", %ld bytes/write", data_count / write_count);
+  fprintf_unfiltered (stream, ".\n");
 }
 
 /* This function allows the addition of incrementally linked object files.
@@ -3291,4 +3324,16 @@ Usage: set extension-language .foo bar",
 
   add_info ("extensions", info_ext_lang_command,
 	    "All filename extensions associated with a source language.");
+
+  add_show_from_set
+    (add_set_cmd ("download-write-size", class_obscure,
+		  var_integer, (char *) &download_write_size,
+		  "Set the write size used when downloading a program.\n"
+		  "Only used when downloading a program onto a remote\n"
+		  "target. Specify zero, or a negative value, to disable\n"
+		  "blocked writes. The actual size of each transfer is also\n"
+		  "limited by the size of the target packet and the memory\n"
+		  "cache.\n",
+		  &setlist),
+     &showlist);
 }

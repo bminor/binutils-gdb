@@ -855,6 +855,7 @@ extern struct type *builtin_type_int32;
 extern struct type *builtin_type_uint32;
 extern struct type *builtin_type_int64;
 extern struct type *builtin_type_uint64;
+extern struct type *builtin_type_v4sf;
 
 /* We use this for the '/c' print format, because builtin_type_char is
    just a one-byte integral type, which languages less laid back than

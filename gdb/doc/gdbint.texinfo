@@ -1239,6 +1239,23 @@ instruction of the architecture.
 
 Replaces all the other @var{BREAKPOINT} macros.
 
+@item MEMORY_INSERT_BREAKPOINT (addr, contents_cache)
+@item MEMORY_REMOVE_BREAKPOINT (addr, contents_cache)
+
+Insert or remove memory based breakpoints.  Reasonable defaults
+(@code{default_memory_insert_breakpoint} and
+@code{default_memory_remove_breakpoint} respectively) have been
+provided so that it is not necessary to define these for most
+architectures.  Architectures which may want to define
+@var{MEMORY_INSERT_BREAKPOINT} and @var{MEMORY_REMOVE_BREAKPOINT} will
+likely have instructions that are oddly sized or are not stored in a
+conventional manner.
+
+It may also be desirable (from an efficiency standpoint) to define
+custom breakpoint insertion and removal routines if
+@var{BREAKPOINT_FROM_PC} needs to read the target's memory for some
+reason.
+
 @item CALL_DUMMY_P
 A C expresson that is non-zero when the target suports inferior function
 calls.

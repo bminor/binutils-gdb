@@ -45,16 +45,9 @@ static int regmap[] =
 };
 
 
-/*  FIXME:  These routine absolutely depends upon (NUM_REGS - NUM_FREGS)
-    being less than or equal to the number of registers that can be stored
-    in a gregset_t.  Note that with the current scheme there will typically
-    be more registers actually stored in a gregset_t that what we know
-    about.  This is bogus and should be fixed. */
-
-/*  Given a pointer to a general register set in /proc format (gregset_t *),
-    unpack the register contents and supply them as gdb's idea of the current
-    register values. */
-
+/* Given a pointer to a general register set in struct user format
+   (gregset_t *), unpack the register contents and supply them as
+   gdb's idea of the current register values. */
 void
 supply_gregset (gregsetp)
      gregset_t *gregsetp;
@@ -62,197 +55,234 @@ supply_gregset (gregsetp)
   register int regi;
   register greg_t *regp = (greg_t *) gregsetp;
 
-  for (regi = 0 ; regi < (NUM_REGS - NUM_FREGS) ; regi++)
+  for (regi = 0; regi < NUM_GREGS; regi++)
     {
       supply_register (regi, (char *) (regp + regmap[regi]));
     }
 }
 
+/* Fill in a gregset_t object with selected data from a gdb-format
+   register file.
+   - GREGSETP points to the gregset_t object to be filled.
+   - GDB_REGS points to the GDB-style register file providing the data.
+   - VALID is an array indicating which registers in GDB_REGS are
+     valid; the parts of *GREGSETP that would hold registers marked
+     invalid in GDB_REGS are left unchanged.  If VALID is zero, all
+     registers are assumed to be valid.  */
 void
-fill_gregset (gregsetp, regno)
-     gregset_t *gregsetp;
-     int regno;
+convert_to_gregset (gregset_t *gregsetp,
+		    char *gdb_regs,
+		    signed char *valid)
 {
   int regi;
   register greg_t *regp = (greg_t *) gregsetp;
 
-  for (regi = 0 ; regi < (NUM_REGS - NUM_FREGS) ; regi++)
-    {
-      if ((regno == -1) || (regno == regi))
-	{
-	  *(regp + regmap[regi]) = *(int *) &registers[REGISTER_BYTE (regi)];
-	}
-    }
+  for (regi = 0; regi < NUM_GREGS; regi++)
+    if (! valid || valid[regi])
+      *(regp + regmap[regi]) = * (int *) &registers[REGISTER_BYTE (regi)];
 }
-
-
-/*  Given a pointer to a floating point register set in (fpregset_t *)
-    format, unpack the register contents and supply them as gdb's
-    idea of the current floating point register values. */
-
-void 
-supply_fpregset (fpregsetp)
-     fpregset_t *fpregsetp;
-{
-  register int regi;
-  char *from;
-  from = (char *) &(fpregsetp->st_space[0]);
-  for (regi = FPSTART_REGNUM ; regi <= FPEND_REGNUM ; regi++)
-    {
-      supply_register(regi, from);
-      from += REGISTER_RAW_SIZE(regi);
-    }
-}
-
-/*  Given a pointer to a floating point register set in (fpregset_t *)
-    format, update all of the registers from gdb's idea
-    of the current floating point register set. */
 
 void
-fill_fpregset (fpregsetp, regno)
-     fpregset_t *fpregsetp;
-     int regno;
+fill_gregset (gregset_t *gregsetp,
+	      int regno)
 {
-  int regi;
-  char *to;
-  char *from;
-
-  to = (char *) &(fpregsetp->st_space[0]);
-  for (regi = FPSTART_REGNUM ; regi <= FPEND_REGNUM ; regi++)
+  if (regno == -1)
+    convert_to_gregset (gregsetp, registers, 0);
+  else
     {
-      from = (char *) &registers[REGISTER_BYTE (regi)];
-      memcpy (to, from, REGISTER_RAW_SIZE (regi));
-      to += REGISTER_RAW_SIZE(regi);
+      signed char valid[NUM_GREGS];
+      memset (valid, 0, sizeof (valid));
+      valid[regno] = 1;
+      convert_to_gregset (gregsetp, valid, valid);
     }
 }
 
-/*
-  Get the whole floating point state of the process and
-  store the floating point stack into registers[].
-  */
+
+/* Where does st(N) start in the fpregset_t structure F?  */
+#define FPREGSET_T_FPREG_OFFSET(f, n) \
+  ((char *) &(f)->st_space + (n) * 10)
+
+/* Fill GDB's register file with the floating-point register values in
+   *FPREGSETP.  */
+void 
+supply_fpregset (fpregset_t *fpregsetp)
+{
+  int i;
+
+  /* Supply the floating-point registers.  */
+  for (i = 0; i < 8; i++)
+    supply_register (FP0_REGNUM + i, FPREGSET_T_FPREG_OFFSET (fpregsetp, i));
+
+  supply_register (FCTRL_REGNUM, (char *) &fpregsetp->cwd);
+  supply_register (FSTAT_REGNUM, (char *) &fpregsetp->swd);
+  supply_register (FTAG_REGNUM,  (char *) &fpregsetp->twd);
+  supply_register (FCOFF_REGNUM, (char *) &fpregsetp->fip);
+  supply_register (FDS_REGNUM,   (char *) &fpregsetp->fos);
+  supply_register (FDOFF_REGNUM, (char *) &fpregsetp->foo);
+  
+  /* Extract the code segment and opcode from the  "fcs" member.  */
+  {
+    long l;
+
+    l = fpregsetp->fcs & 0xffff;
+    supply_register (FCS_REGNUM, (char *) &l);
+
+    l = (fpregsetp->fcs >> 16) & ((1 << 11) - 1);
+    supply_register (FOP_REGNUM, (char *) &l);
+  }
+}
+
+
+/* Fill in an fpregset_t structure with selected data from a
+   gdb-format register file.
+   - FPREGSETP points to the structure to be filled. 
+   - GDB_REGS points to the GDB-style register file providing the data.
+   - VALID is an array indicating which registers in GDB_REGS are
+     valid; the parts of *FPREGSETP that would hold registers marked
+     invalid in GDB_REGS are left unchanged.  If VALID is zero, all
+     registers are assumed to be valid.  */
+void
+convert_to_fpregset (fpregset_t *fpregsetp,
+		     char *gdb_regs,
+		     signed char *valid)
+{
+  int i;
+
+  /* Fill in the floating-point registers.  */
+  for (i = 0; i < 8; i++)
+    if (!valid || valid[i])
+      memcpy (FPREGSET_T_FPREG_OFFSET (fpregsetp, i),
+	      &registers[REGISTER_BYTE (FP0_REGNUM + i)],
+	      REGISTER_RAW_SIZE(FP0_REGNUM + i));
+
+#define fill(MEMBER, REGNO)						\
+  if (! valid || valid[(REGNO)])					\
+    memcpy (&fpregsetp->MEMBER, &registers[REGISTER_BYTE (REGNO)],	\
+	    sizeof (fpregsetp->MEMBER))
+
+  fill (cwd, FCTRL_REGNUM);
+  fill (swd, FSTAT_REGNUM);
+  fill (twd, FTAG_REGNUM);
+  fill (fip, FCOFF_REGNUM);
+  fill (foo, FDOFF_REGNUM);
+  fill (fos, FDS_REGNUM);
+
+#undef fill
+
+  if (! valid || valid[FCS_REGNUM])
+    fpregsetp->fcs
+      = ((fpregsetp->fcs & ~0xffff)
+	 | (* (int *) &registers[REGISTER_BYTE (FCS_REGNUM)] & 0xffff));
+
+  if (! valid || valid[FOP_REGNUM])
+    fpregsetp->fcs
+      = ((fpregsetp->fcs & 0xffff)
+	 | ((*(int *) &registers[REGISTER_BYTE (FOP_REGNUM)] & ((1 << 11) - 1))
+	    << 16));
+}
+
+
+/* Given a pointer to a floating point register set in (fpregset_t *)
+   format, update all of the registers from gdb's idea of the current
+   floating point register set.  */
+
+void
+fill_fpregset (fpregset_t *fpregsetp,
+	       int regno)
+{
+  convert_to_fpregset (fpregsetp, registers, 0);
+}
+
+
+/* Get the whole floating point state of the process and store the
+   floating point stack into registers[].  */
 static void
-fetch_fpregs(void)
+fetch_fpregs ()
 {
   int ret, regno;
-  char buf[FPREG_BYTES];
+  fpregset_t buf;
 
-  ret = ptrace (PTRACE_GETFPREGS, inferior_pid,	0, (int)buf);
-  if ( ret < 0 )
+  ret = ptrace (PTRACE_GETFPREGS, inferior_pid,	0, (int) &buf);
+  if (ret < 0)
     {
       warning ("Couldn't get floating point status");
       return;
     }
 
-  for ( regno = 0; regno < NUM_FREGS; regno++ )
-    {
-      if ( regno < 7 )
-	supply_register (NUM_REGS-NUM_FREGS+regno, buf + regno*4);
-      else
-	supply_register (NUM_REGS-NUM_FREGS+regno,
-			 buf + FPENV_BYTES + (regno-7)*FPREG_RAW_SIZE);
-    }
-
+  /* ptrace fills an fpregset_t, so we can use the same function we do
+     for core files.  */
+  supply_fpregset (&buf);
 }
 
 
-/*
-  Get the whole floating point state of the process and
-  replace the contents from registers[].
-  */
+/* Set the inferior's floating-point registers to the values in
+   registers[] --- but only those registers marked valid.  */
 static void
-store_fpregs(void)
+store_fpregs ()
 {
-  int ret, regno;
-  char buf[FPREG_BYTES];
+  int ret;
+  fpregset_t buf;
 
-  ret = ptrace (PTRACE_GETFPREGS, inferior_pid,	0, (int)buf);
-  if ( ret < 0 )
+  ret = ptrace (PTRACE_GETFPREGS, inferior_pid,	0, (int) &buf);
+  if (ret < 0)
     {
       warning ("Couldn't get floating point status");
       return;
     }
 
-  for ( regno = 0; regno < NUM_FREGS; regno++ )
-    {
-      if ( register_valid[regno] )
-	{
-	  if ( regno < 7 )
-	    {
-	      read_register_gen (NUM_REGS-NUM_FREGS+regno,
-				 buf + regno*4);
-	    }
-	  else
-	    {
-	      read_register_gen (NUM_REGS-NUM_FREGS+regno,
-				 buf + FPENV_BYTES + (regno-7)*FPREG_RAW_SIZE);
-	    }
-	}
-    }
+  convert_to_fpregset (&buf, registers, register_valid);
 
-  ret = ptrace (PTRACE_SETFPREGS, inferior_pid, 0, (int)buf);
-  if ( ret < 0 )
+  ret = ptrace (PTRACE_SETFPREGS, inferior_pid, 0, (int) &buf);
+  if (ret < 0)
     {
       warning ("Couldn't write floating point status");
       return;
     }
-
 }
 
 
-/*
-  Get state of all non-fp registers of the process and
-  store into registers[].
-  */
+/* Read the general registers from the process, and store them
+   in registers[].  */
 static void
-fetch_regs(void)
+fetch_regs ()
 {
   int ret, regno;
-  char buf[17*sizeof(unsigned int)];
+  gregset_t buf;
 
-  ret = ptrace (PTRACE_GETREGS, inferior_pid, 0, (int)buf);
-  if ( ret < 0 )
+  ret = ptrace (PTRACE_GETREGS, inferior_pid, 0, (int) &buf);
+  if (ret < 0)
     {
       warning ("Couldn't get registers");
       return;
     }
 
-  for ( regno = 0; regno < NUM_REGS-NUM_FREGS; regno++ )
-    supply_register (regno, buf + register_addr (regno, U_REGS_OFFSET));
-
+  supply_gregset (&buf);
 }
 
 
-/*
-  Get the whole non-floating-point register state of the process and
-  replace them in the process from registers[].
-  */
+/* Set the inferior's general registers to the values in registers[]
+   --- but only those registers marked as valid.  */
 static void
-store_regs(void)
+store_regs ()
 {
   int ret, regno;
-  char buf[17*sizeof(unsigned int)];
+  gregset_t buf;
 
-  ret = ptrace (PTRACE_GETREGS, inferior_pid, 0, (int)buf);
-  if ( ret < 0 )
+  ret = ptrace (PTRACE_GETREGS, inferior_pid, 0, (int) &buf);
+  if (ret < 0)
     {
       warning ("Couldn't get registers");
       return;
     }
 
-  for ( regno = 0; regno < NUM_REGS-NUM_FREGS; regno++ )
-    {
-      if ( register_valid[regno] )
-	read_register_gen (regno, buf + register_addr (regno, U_REGS_OFFSET));
-    }
+  convert_to_gregset (&buf, registers, register_valid);
 
   ret = ptrace (PTRACE_SETREGS, inferior_pid, 0, (int)buf);
-
-  if ( ret < 0 )
+  if (ret < 0)
     {
-      warning ("Couldn't write floating point status");
+      warning ("Couldn't write registers");
       return;
     }
-
 }
 
 
@@ -262,14 +292,13 @@ store_regs(void)
    upon the value of regno. */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
-  if ( (regno < NUM_REGS - NUM_FREGS) || (regno == -1) )
-    fetch_regs();
+  if (regno < NUM_GREGS || regno == -1)
+    fetch_regs ();
 
-  if ( (regno >= NUM_REGS - NUM_FREGS) || (regno == -1) )
-    fetch_fpregs();
+  if (regno >= NUM_GREGS || regno == -1)
+    fetch_fpregs ();
 }
 
 
@@ -283,11 +312,11 @@ void
 store_inferior_registers (regno)
      int regno;
 {
-  if ( (regno < NUM_REGS - NUM_FREGS) || (regno == -1) )
-    store_regs();
+  if (regno < NUM_GREGS || regno == -1)
+    store_regs ();
 
-  if ( (regno >= NUM_REGS - NUM_FREGS) || (regno == -1) )
-    store_fpregs();
+  if (regno >= NUM_GREGS || regno == -1)
+    store_fpregs ();
 }
 
 

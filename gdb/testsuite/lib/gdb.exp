@@ -180,8 +180,11 @@ proc gdb_run_cmd {args} {
 
     if [target_info exists use_gdb_stub] {
 	if [target_info exists gdb,do_reload_on_run] {
-	    # According to Stu, this will always work.
-	    gdb_load "";
+	    # Specifying no file, defaults to the executable
+	    # currently being debugged.
+	    if { [gdb_load ""] < 0 } {
+		return;
+	    }
 	    send_gdb "continue\n";
 	    gdb_expect 60 {
 		-re "Continu\[^\r\n\]*\[\r\n\]" {}
@@ -196,31 +199,44 @@ proc gdb_run_cmd {args} {
 	    set start "start";
 	}
 	send_gdb  "jump *$start\n"
-	gdb_expect 30 {
-	    -re "Continuing at \[^\r\n\]*\[\r\n\]" {
-		if ![target_info exists gdb_stub] {
-		    return;
-		}
-	    }
-	    -re "No symbol \"start\" in current.*$gdb_prompt $" {
-		send_gdb "jump *_start\n";
-		exp_continue;
-	    }
-	    -re "No symbol \"_start\" in current.*$gdb_prompt $" {
-		perror "Can't find start symbol to run in gdb_run";
+	set start_attempt 1;
+	while { $start_attempt } {
+	    # Cap (re)start attempts at three to ensure that this loop
+	    # always eventually fails.  Don't worry about trying to be
+	    # clever and not send a command when it has failed.
+	    if [expr $start_attempt > 3] {
+		perror "Jump to start() failed (retry count exceeded)";
 		return;
 	    }
-	    -re "Line.* Jump anyway.*y or n. $" {
-		send_gdb "y\n"
-		exp_continue;
-            }
-	    -re "No symbol.*context.*$gdb_prompt $" {}
-	    -re "The program is not being run.*$gdb_prompt $" {
-		gdb_load "";
-		send_gdb "jump *$start\n";
-		exp_continue;
+	    set start_attempt [expr $start_attempt + 1];
+	    gdb_expect 30 {
+		-re "Continuing at \[^\r\n\]*\[\r\n\]" {
+		    set start_attempt 0;
+		}
+		-re "No symbol \"_start\" in current.*$gdb_prompt $" {
+		    perror "Can't find start symbol to run in gdb_run";
+		    return;
+		}
+		-re "No symbol \"start\" in current.*$gdb_prompt $" {
+		    send_gdb "jump *_start\n";
+		}
+		-re "No symbol.*context.*$gdb_prompt $" {
+		    set start_attempt 0;
+		}
+		-re "Line.* Jump anyway.*y or n. $" {
+		    send_gdb "y\n"
+		}
+		-re "The program is not being run.*$gdb_prompt $" {
+		    if { [gdb_load ""] < 0 } {
+			return;
+		    }
+		    send_gdb "jump *$start\n";
+		}
+		timeout {
+		    perror "Jump to start() failed (timeout)"; 
+		    return
+		}
 	    }
-	    timeout { perror "Jump to start() failed (timeout)"; return }
 	}
 	if [target_info exists gdb_stub] {
 	    gdb_expect 60 {

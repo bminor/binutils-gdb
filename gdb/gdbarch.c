@@ -192,6 +192,8 @@ struct gdbarch
   gdbarch_skip_prologue_ftype *skip_prologue;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
+  gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint;
+  gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint;
   CORE_ADDR decr_pc_after_break;
   CORE_ADDR function_start_offset;
   gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address;
@@ -300,6 +302,8 @@ struct gdbarch default_gdbarch = {
   0,
   0,
   0,
+  0,
+  0,
   /* default_gdbarch() */
 };
 struct gdbarch *current_gdbarch = &default_gdbarch;
@@ -336,6 +340,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->call_dummy_length = -1;
   gdbarch->call_dummy_p = -1;
   gdbarch->call_dummy_stack_adjust_p = -1;
+  gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
+  gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   gdbarch->decr_pc_after_break = -1;
   gdbarch->function_start_offset = -1;
   gdbarch->frame_args_skip = -1;
@@ -548,6 +554,12 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->breakpoint_from_pc == 0))
     internal_error ("gdbarch: verify_gdbarch: breakpoint_from_pc invalid");
+  if ((GDB_MULTI_ARCH >= 2)
+      && (0))
+    internal_error ("gdbarch: verify_gdbarch: memory_insert_breakpoint invalid");
+  if ((GDB_MULTI_ARCH >= 2)
+      && (0))
+    internal_error ("gdbarch: verify_gdbarch: memory_remove_breakpoint invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->decr_pc_after_break == -1))
     internal_error ("gdbarch: verify_gdbarch: decr_pc_after_break invalid");
@@ -844,6 +856,14 @@ gdbarch_dump (void)
                       "gdbarch_update: BREAKPOINT_FROM_PC = 0x%08lx\n",
                       (long) current_gdbarch->breakpoint_from_pc
                       /*BREAKPOINT_FROM_PC ()*/);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: MEMORY_INSERT_BREAKPOINT = 0x%08lx\n",
+                      (long) current_gdbarch->memory_insert_breakpoint
+                      /*MEMORY_INSERT_BREAKPOINT ()*/);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: MEMORY_REMOVE_BREAKPOINT = 0x%08lx\n",
+                      (long) current_gdbarch->memory_remove_breakpoint
+                      /*MEMORY_REMOVE_BREAKPOINT ()*/);
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
@@ -2115,6 +2135,42 @@ set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch,
                                 gdbarch_breakpoint_from_pc_ftype breakpoint_from_pc)
 {
   gdbarch->breakpoint_from_pc = breakpoint_from_pc;
+}
+
+int
+gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, char *contents_cache)
+{
+  if (gdbarch->memory_insert_breakpoint == 0)
+    internal_error ("gdbarch: gdbarch_memory_insert_breakpoint invalid");
+  if (gdbarch_debug >= 2)
+    /* FIXME: gdb_std??? */
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_memory_insert_breakpoint called\n");
+  return gdbarch->memory_insert_breakpoint (addr, contents_cache);
+}
+
+void
+set_gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch,
+                                      gdbarch_memory_insert_breakpoint_ftype memory_insert_breakpoint)
+{
+  gdbarch->memory_insert_breakpoint = memory_insert_breakpoint;
+}
+
+int
+gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, char *contents_cache)
+{
+  if (gdbarch->memory_remove_breakpoint == 0)
+    internal_error ("gdbarch: gdbarch_memory_remove_breakpoint invalid");
+  if (gdbarch_debug >= 2)
+    /* FIXME: gdb_std??? */
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_memory_remove_breakpoint called\n");
+  return gdbarch->memory_remove_breakpoint (addr, contents_cache);
+}
+
+void
+set_gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch,
+                                      gdbarch_memory_remove_breakpoint_ftype memory_remove_breakpoint)
+{
+  gdbarch->memory_remove_breakpoint = memory_remove_breakpoint;
 }
 
 CORE_ADDR

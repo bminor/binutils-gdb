@@ -1074,7 +1074,7 @@ value_push (sp, arg)
      value_ptr arg;
 {
   register int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
-  register int container_len;
+  register int container_len = len;
   register int offset;
 
   /* How big is the container we're going to put this value in?  */
@@ -2676,6 +2676,14 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
     {
       int i = -1;
       func_name = cplus_demangle (SYMBOL_NAME (fsym), DMGL_NO_OPTS);
+
+      /* If the name is NULL this must be a C-style function.
+         Just return the same symbol. */
+      if (!func_name)
+        {
+	  *symp = fsym;
+          return 0;
+        }
 
       oload_syms = make_symbol_overload_list (fsym);
       while (oload_syms[++i])

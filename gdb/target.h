@@ -591,9 +591,6 @@ target_read_memory_section PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
 				    asection * bfd_section));
 
 extern int
-target_read_memory_partial PARAMS ((CORE_ADDR, char *, int, int *));
-
-extern int
 target_write_memory PARAMS ((CORE_ADDR, char *, int));
 
 extern int
@@ -601,6 +598,16 @@ xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
 
 extern int
 child_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
+
+/* Make a single attempt at transfering LEN bytes.  On a successful
+   transfer, the number of bytes actually transfered is returned and
+   ERR is set to 0.  When a transfer fails, -1 is returned (the number
+   of bytes actually transfered is not defined) and ERR is set to a
+   non-zero error indication. */
+
+extern int target_read_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
+
+extern int target_write_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
 
 extern char *
   child_pid_to_exec_file PARAMS ((int));
@@ -1257,6 +1264,10 @@ build_section_table PARAMS ((bfd *, struct section_table **,
 extern int memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
 
 extern int memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+
+extern int default_memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+
+extern int default_memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
 
 extern breakpoint_from_pc_fn memory_breakpoint_from_pc;
 #ifndef BREAKPOINT_FROM_PC

@@ -4413,7 +4413,10 @@ overload_list_add_symbol (sym, oload_name)
 
   /* skip symbols that cannot match */
   if (strcmp (sym_name, oload_name) != 0)
-    return;
+    {
+      free (sym_name);
+      return;
+    }
 
   /* If there is no type information, we can't do anything, so skip */
   if (SYMBOL_TYPE (sym) == NULL)
@@ -4475,18 +4478,8 @@ make_symbol_overload_list (fsym)
   sym_return_val = (struct symbol **) xmalloc ((sym_return_val_size + 1) * sizeof (struct symbol *));
   sym_return_val[0] = NULL;
 
-  /* Comment and #if 0 from Rajiv Mirani <mirani@cup.hp.com>.
-     However, leaving #if 0's around is uncool.  We need to figure out
-     what this is really trying to do, decide whether we want that,
-     and either fix it or delete it.  --- Jim Blandy, Mar 1999 */
-
-  /* ??? RM: What in hell is this? overload_list_add_symbol expects a symbol,
-   * not a partial_symbol or a minimal_symbol. And it looks at the type field
-   * of the symbol, and we don't know the type of minimal and partial symbols
-   */
-#if 0
   /* Look through the partial symtabs for all symbols which begin
-     by matching OLOAD_NAME.  Add each one that you find to the list.  */
+     by matching OLOAD_NAME.  Make sure we read that symbol table in. */
 
   ALL_PSYMTABS (objfile, ps)
   {
@@ -4504,7 +4497,8 @@ make_symbol_overload_list (fsym)
       {
 	/* If interrupted, then quit. */
 	QUIT;
-	overload_list_add_symbol (*psym, oload_name);
+        /* This will cause the symbol table to be read if it has not yet been */
+        s = PSYMTAB_TO_SYMTAB (ps);
       }
 
     for (psym = objfile->static_psymbols.list + ps->statics_offset;
@@ -4513,21 +4507,10 @@ make_symbol_overload_list (fsym)
 	 psym++)
       {
 	QUIT;
-	overload_list_add_symbol (*psym, oload_name);
+        /* This will cause the symbol table to be read if it has not yet been */
+        s = PSYMTAB_TO_SYMTAB (ps);
       }
   }
-
-  /* At this point scan through the misc symbol vectors and add each
-     symbol you find to the list.  Eventually we want to ignore
-     anything that isn't a text symbol (everything else will be
-     handled by the psymtab code above).  */
-
-  ALL_MSYMBOLS (objfile, msymbol)
-  {
-    QUIT;
-    overload_list_add_symbol (msymbol, oload_name);
-  }
-#endif
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */

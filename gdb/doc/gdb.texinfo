@@ -9226,7 +9226,11 @@ digits).  See @code{remote.c:parse_threadlist_response()}.
 
 @item query sect offs
 @tab @code{q}@code{Offsets}
-@tab Get section offsets.
+@tab
+Get section offsets that the target used when re-locating the downloaded
+image.  @emph{Note: while a @code{Bss} offset is included in the
+response, @value{GDBN} ignores this and instead applies the @code{Data}
+offset to the @code{Bss} section.}
 @item
 @tab reply @code{Text=}@var{xxx}@code{;Data=}@var{yyy}@code{;Bss=}@var{zzz}
 

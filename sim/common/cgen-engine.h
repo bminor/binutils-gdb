@@ -18,7 +18,9 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* This file must be included after eng.h and before ${cpu}.h.  */
+/* This file must be included after eng.h and before ${cpu}.h.
+   ??? A lot of this could be moved to genmloop.sh to be put in eng.h
+   and thus remove some conditional compilation.  Worth it?  */
 
 /* Semantic functions come in six versions on two axes:
    fast/full-featured, and using one of the simple/scache/compilation engines.
@@ -61,22 +63,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define EXTRACT_LSB0_UINT(val, total, start, length) \
 (((UINT) (val) << ((sizeof (UINT) * 8) - (start) - 1)) \
  >> ((sizeof (UINT) * 8) - (length)))
-
-#if CGEN_INSN_LSB0_P
-
-#define EXTRACT_INT(val, total, start, length) \
-  EXTRACT_LSB0_INT ((val), (total), (start), (length))
-#define EXTRACT_UINT(val, total, start, length) \
-  EXTRACT_LSB0_UINT ((val), (total), (start), (length))
-
-#else
-
-#define EXTRACT_INT(val, total, start, length) \
-  EXTRACT_MSB0_INT ((val), (total), (start), (length))
-#define EXTRACT_UINT(val, total, start, length) \
-  EXTRACT_MSB0_UINT ((val), (total), (start), (length))
-
-#endif
 
 /* Semantic routines.  */
 

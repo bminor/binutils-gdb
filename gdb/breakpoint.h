@@ -455,7 +455,7 @@ struct bpstats
     /* Function called by bpstat_print to print stuff associated with
        this element of the bpstat chain.  Returns 0 or 1 just like
        bpstat_print, or -1 if it can't deal with it.  */
-    int (*print_it) PARAMS ((bpstat bs));
+    enum print_stop_action (*print_it) PARAMS ((bpstat bs));
   };
 
 enum inf_context
@@ -472,6 +472,16 @@ enum breakpoint_here
     no_breakpoint_here = 0,
     ordinary_breakpoint_here,
     permanent_breakpoint_here
+  };
+
+/* The possible return values for print_bpstat, print_it_normal,
+   print_it_done, print_it_noop. */
+enum print_stop_action
+  {
+    PRINT_UNKNOWN = -1,
+    PRINT_SRC_AND_LOC,
+    PRINT_SRC_ONLY,
+    PRINT_NOTHING
   };
 
 

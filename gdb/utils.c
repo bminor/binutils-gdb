@@ -47,6 +47,9 @@
 
 #include <readline/readline.h>
 
+#undef XMALLOC
+#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
+
 /* readline defines this.  */
 #undef savestring
 
@@ -1727,6 +1730,108 @@ stdio_fileopen (file)
 }
 
 
+/* A pure memory based ``struct gdb_file'' that can be used an output
+   collector. It's input is available through gdb_file_put(). */
+
+struct mem_file
+  {
+    int *magic;
+    char *buffer;
+    int sizeof_buffer;
+    int strlen_buffer;
+  };
+
+extern gdb_file_fputs_ftype mem_file_fputs;
+static gdb_file_rewind_ftype mem_file_rewind;
+static gdb_file_put_ftype mem_file_put;
+static gdb_file_delete_ftype mem_file_delete;
+static struct gdb_file *mem_file_new PARAMS ((void));
+static int mem_file_magic;
+
+static struct gdb_file *
+mem_file_new (void)
+{
+  struct mem_file *stream = XMALLOC (struct mem_file);
+  struct gdb_file *file = gdb_file_new ();
+  set_gdb_file_data (file, stream, mem_file_delete);
+  set_gdb_file_fputs (file, mem_file_fputs);
+  set_gdb_file_rewind (file, mem_file_rewind);
+  set_gdb_file_put (file, mem_file_put);
+  stream->magic = &mem_file_magic;
+  stream->buffer = NULL;
+  stream->sizeof_buffer = 0;
+  return file;
+}
+
+static void
+mem_file_delete (struct gdb_file *file)
+{
+  struct mem_file *stream = gdb_file_data (file);
+  if (stream->magic != &mem_file_magic)
+    internal_error ("mem_file_delete: bad magic number");
+  if (stream->buffer != NULL)
+    free (stream->buffer);
+  free (stream);
+}
+
+struct gdb_file *
+mem_fileopen (void)
+{
+  return mem_file_new ();
+}
+
+static void
+mem_file_rewind (struct gdb_file *file)
+{
+  struct mem_file *stream = gdb_file_data (file);
+  if (stream->magic != &mem_file_magic)
+    internal_error ("mem_file_rewind: bad magic number");
+  if (stream->buffer != NULL)
+    {
+      stream->buffer[0] = '\0';
+      stream->strlen_buffer = 0;
+    }
+}
+
+static void
+mem_file_put (struct gdb_file *file, struct gdb_file *dest)
+{
+  struct mem_file *stream = gdb_file_data (file);
+  if (stream->magic != &mem_file_magic)
+    internal_error ("mem_file_put: bad magic number");
+  if (stream->buffer != NULL)
+    fputs_unfiltered (stream->buffer, dest);
+}
+
+void
+mem_file_fputs (const char *linebuffer, struct gdb_file *file)
+{
+  struct mem_file *stream = gdb_file_data (file);
+  if (stream->magic != &mem_file_magic)
+    internal_error ("mem_file_fputs: bad magic number");
+  if (stream->buffer == NULL)
+    {
+      stream->strlen_buffer = strlen (linebuffer);
+      stream->sizeof_buffer = stream->strlen_buffer + 1;
+      stream->buffer = xmalloc (stream->sizeof_buffer);
+      strcpy (stream->buffer, linebuffer);
+    }
+  else
+    {
+      int len = strlen (linebuffer);
+      int new_strlen = stream->strlen_buffer + len;
+      int new_sizeof = new_strlen + 1;
+      if (new_sizeof >= stream->sizeof_buffer)
+	{
+	  stream->sizeof_buffer = new_sizeof;
+	  stream->buffer = xrealloc (stream->buffer, stream->sizeof_buffer);
+	}
+      strcpy (stream->buffer + stream->strlen_buffer, linebuffer);
+      stream->strlen_buffer = new_strlen;
+    }
+}
+
+
 /* A ``struct gdb_file'' that is compatible with all the legacy
    code. */
 
@@ -1875,12 +1980,10 @@ tui_file_fputs (linebuffer, file)
 #if defined(TUI)
   extern int tui_owns_terminal;
 #endif
-  /* If anything (GUI, TUI) wants to capture GDB output, this is
-   * the place... the way to do it is to set up 
-   * fputs_unfiltered_hook.
-   * Our TUI ("gdb -tui") used to hook output, but in the
-   * new (XDB style) scheme, we do not do that anymore... - RT
-   */
+  /* NOTE: cagney/1999-10-13: The use of fputs_unfiltered_hook is
+     seriously discouraged.  Those wanting to hook output should
+     instead implement their own gdb_file object and install that. See
+     also tui_file_flush(). */
   if (fputs_unfiltered_hook
       && (file == gdb_stdout
 	  || file == gdb_stderr))
@@ -2028,16 +2131,23 @@ tui_file_flush (file)
 {
   struct tui_stream *stream = gdb_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
-    error ("Internal error: bad magic number");
-  if (flush_hook
-      && (file == gdb_stdout
-	  || file == gdb_stderr))
-    {
-      flush_hook (file);
-      return;
-    }
+    internal_error ("tui_file_flush: bad magic number");
 
-  fflush (stream->ts_filestream);
+  /* NOTE: cagney/1999-10-12: If we've been linked with code that uses
+     fputs_unfiltered_hook then we assume that it doesn't need to know
+     about flushes.  Code that does need to know about flushes can
+     implement a proper gdb_file object. */
+  if (fputs_unfiltered_hook)
+    return;
+
+  switch (stream->ts_streamtype)
+    {
+    case astring:
+      break;
+    case afile:
+      fflush (stream->ts_filestream);
+      break;
+    }
 }
 
 void

@@ -74,10 +74,13 @@ divsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op2;
   sim_fpu ans;
   unsigned32 res;
+  sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
   sim_fpu_32to (&op2, y);
-  sim_fpu_div (&ans, &op1, &op2);
+  status = sim_fpu_div (&ans, &op1, &op2);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to32 (&res, &ans);
 
   return res;
