@@ -29,6 +29,8 @@ amix.mh
 amix.mt
 apollo68b.mh
 apollo68v.mh
+delta68.mh
+delta68.mt
 dpx2.mh
 dpx2.mt
 es1800.mt
@@ -45,6 +47,7 @@ news.mt
 news1000.mh
 nm-apollo68b.h
 nm-apollo68v.h
+nm-delta68.h
 nm-dpx2.h
 nm-hp300bsd.h
 nm-hp300hpux.h
@@ -62,6 +65,7 @@ sun3os3.mt
 sun3os4.mh
 sun3os4.mt
 tm-3b1.h
+tm-delta68.h
 tm-m68k-fp.h
 tm-m68k-nofp.h
 tm-m68k.h
@@ -86,6 +90,7 @@ xm-altos.h
 xm-amix.h
 xm-apollo68b.h
 xm-apollo68v.h
+xm-delta68.h
 xm-dpx2.h
 xm-hp300bsd.h
 xm-hp300hpux.h
