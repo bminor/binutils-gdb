@@ -1,3 +1,9 @@
+1999-05-10  Catherine Moore  <clm@cygnus.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open):
+	Check for TARGET_IS_arm_epoc_pe.
+	(gld_${EMULATION_NAME}_before_allocation): Likewise.
+
 1999-05-12  Anthony Green  <green@cygnus.com>
 
 	* ldlang.c (walk_wild, walk_wild_file, walk_wild_section,

@@ -626,7 +626,7 @@ gld_${EMULATION_NAME}_after_open ()
     pe_dll_build_sections (output_bfd, &link_info);
 #endif
 
-#ifdef TARGET_IS_armpe
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
   {
     /* Find a BFD that can hold the interworking stubs.  */
     LANG_FOR_EACH_INPUT_STATEMENT (is)
@@ -658,7 +658,7 @@ gld_${EMULATION_NAME}_before_allocation()
   ppc_allocate_toc_section (&link_info);
 #endif /* TARGET_IS_ppcpe */
 
-#ifdef TARGET_IS_armpe
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
   /* FIXME: we should be able to set the size of the interworking stub
      section.
 
