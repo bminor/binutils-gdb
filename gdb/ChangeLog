@@ -1,3 +1,14 @@
+2004-03-04  Orjan Friberg  <orjanf@axis.com>
+
+	* cris-tdep.c (cris_scan_prologue): Save the frame pointer's offset
+	when the frame pointer is pushed.  Don't set the frame pointer's 
+	address on the stack unless it's actually located there.  
+	Set the SRP's address on the stack correctly when the PC is still in
+	the prologue.
+	(cris_return_value): New function.
+	(cris_gdbarch_init): Clear deprecated store_return_value,
+	extract_return_value.
+
 2004-03-02  Jim Blandy  <jimb@redhat.com>
 
 	* stabsread.c (reg_value_complaint): The maximum register number

@@ -792,6 +792,14 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 		  info->leaf_function = 0;
 		}
             }
+	  else if (insn_next == 0x8FEE)
+            {
+	      /* push $r8 */
+	      if (info)
+		{
+		  info->r8_offset = info->sp_offset;
+		}
+            }
         }
       else if (insn == 0x866E)
         {
@@ -799,7 +807,6 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 	  if (info)
 	    {
 	      info->uses_frame = 1;
-	      info->r8_offset = info->sp_offset;
 	    }
           continue;
         }
@@ -947,6 +954,8 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *next_frame,
       frame_unwind_unsigned_register (next_frame, CRIS_FP_REGNUM, 
 				      &this_base);
       info->base = this_base;
+      info->saved_regs[CRIS_FP_REGNUM].addr = info->base;
+  
       /* The FP points at the last saved register.  Adjust the FP back
          to before the first saved register giving the SP.  */
       info->prev_sp = info->base + info->r8_offset;
@@ -961,8 +970,6 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *next_frame,
       info->prev_sp = info->base + info->size;
     }
       
-  info->saved_regs[CRIS_FP_REGNUM].addr = info->base;
-
   /* Calculate the addresses for the saved registers on the stack.  */
   /* FIXME: The address calculation should really be done on the fly while
      we're analyzing the prologue (we only hold one regsave value as it is 
@@ -981,8 +988,17 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 
   if (!info->leaf_function)
     {
-      /* SRP saved on the stack.  */
-      info->saved_regs[SRP_REGNUM].addr = info->base + 4;
+      /* SRP saved on the stack.  But where?  */
+      if (info->r8_offset == 0)
+	{
+	  /* R8 not pushed yet.  */
+	  info->saved_regs[SRP_REGNUM].addr = info->base;
+	}
+      else
+	{
+	  /* R8 pushed, but SP may or may not be moved to R8 yet.  */
+	  info->saved_regs[SRP_REGNUM].addr = info->base + 4;
+	}
     }
 
   /* The PC is found in SRP (the actual register or located on the stack).  */
@@ -1338,6 +1354,28 @@ cris_extract_return_value (struct type *type, struct regcache *regcache,
     }
   else
     error ("cris_extract_return_value: type length too large");
+}
+
+/* Handle the CRIS return value convention.  */
+
+static enum return_value_convention
+cris_return_value (struct gdbarch *gdbarch, struct type *type,
+		   struct regcache *regcache, void *readbuf,
+		   const void *writebuf)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT 
+      || TYPE_CODE (type) == TYPE_CODE_UNION
+      || TYPE_LENGTH (type) > 8)
+    /* Structs, unions, and anything larger than 8 bytes (2 registers)
+       goes on the stack.  */
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
+  if (readbuf)
+    cris_extract_return_value (type, regcache, readbuf);
+  if (writebuf)
+    cris_store_return_value (type, regcache, writebuf);
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
 /* Returns 1 if the given type will be passed by pointer rather than 
@@ -3792,9 +3830,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       internal_error (__FILE__, __LINE__, "cris_gdbarch_init: unknown byte order in info");
     }
 
-  /* FIXME: Should be replaced by a cris_return_value implementation.  */
-  set_gdbarch_store_return_value (gdbarch, cris_store_return_value);
-  set_gdbarch_extract_return_value (gdbarch, cris_extract_return_value);
+  set_gdbarch_return_value (gdbarch, cris_return_value);
   set_gdbarch_deprecated_reg_struct_has_addr (gdbarch, 
 					      cris_reg_struct_has_addr);
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
@@ -3883,8 +3919,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, cris_breakpoint_from_pc);
   
-  /* Prologue analyzer may have to be able to parse an incomplete
-     prologue (PC in prologue, that is).  Check infrun.c.  */
   set_gdbarch_unwind_pc (gdbarch, cris_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, cris_unwind_sp);
   set_gdbarch_unwind_dummy_id (gdbarch, cris_unwind_dummy_id);
