@@ -40,6 +40,12 @@ Fri Mar 24 13:44:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add Fernando Nasser to testsuite maintainers. 
 	
+2000-03-23  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* solib.c (open_symbol_file_object): to sneak an int argument 
+	past catch_errors, instead of casting it to a pointer, simply
+	pass it by address.
+
 2000-03-23  Jimmy Guo	<guo@cup.hp.com>
 
  	* gdbtypes.c (rank_function): Rank all N parameters and use correct

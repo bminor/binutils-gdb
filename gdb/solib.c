@@ -921,7 +921,7 @@ first_link_map_member ()
 
   LOCAL FUNCTION
 
-  open_exec_file_object
+  open_symbol_file_object
 
   SYNOPSIS
 
@@ -936,11 +936,10 @@ first_link_map_member ()
 
  */
 
-int
-open_symbol_file_object (arg)
-     PTR arg;
+static int
+open_symbol_file_object (from_ttyp)
+     int *from_ttyp;	/* sneak past catch_errors */
 {
-  int from_tty = (int) arg;	/* sneak past catch_errors */
   CORE_ADDR lm;
   struct link_map lmcopy;
   char *filename;
@@ -975,7 +974,7 @@ open_symbol_file_object (arg)
 
   make_cleanup ((make_cleanup_func) free, (void *) filename);
   /* Have a pathname: read the symbol file.  */
-  symbol_file_command (filename, from_tty);
+  symbol_file_command (filename, *from_ttyp);
 
   return 1;
 }
@@ -1234,7 +1233,7 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
      symbols now!  */
   if (attach_flag &&
       symfile_objfile == NULL)
-    catch_errors (open_symbol_file_object, (PTR) from_tty, 
+    catch_errors (open_symbol_file_object, (PTR) &from_tty, 
 		  "Error reading attached process's symbol file.\n",
 		  RETURN_MASK_ALL);
 
