@@ -2472,9 +2472,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      /* If we have seen .set volatile or .set nomove, don't
 		 optimize.  */
 	      || mips_opts.nomove != 0
-	      /* If we had to emit any NOP instructions, then we
-		 already know we can not swap.  */
-	      || nops != 0
 	      /* We can't swap if the previous instruction's position
 		 is fixed.  */
 	      || history[0].fixed_p
@@ -2536,11 +2533,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
                   /* Itbl support may require additional care here.  */
 		  && (prev_pinfo & INSN_COPROC_MEMORY_DELAY)
 		  && ! cop_mem_interlocks)
-	      /* We can not swap with a branch instruction.  */
-	      || (prev_pinfo
-		  & (INSN_UNCOND_BRANCH_DELAY
-		     | INSN_COND_BRANCH_DELAY
-		     | INSN_COND_BRANCH_LIKELY))
 	      /* We do not swap with a trap instruction, since it
 		 complicates trap handlers to have the trap
 		 instruction be in a delay slot.  */
