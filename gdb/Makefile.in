@@ -145,7 +145,7 @@ TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
 #
 SUBDIR_CLI_OBS = \
 	cli-dump.o \
-	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o cli-utils.o
+	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o cli-utils.o \
 	cli-interp.o
 SUBDIR_CLI_SRCS = \
 	cli/cli-dump.c \
