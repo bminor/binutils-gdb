@@ -1,3 +1,16 @@
+Fri Jul 23 13:09:44 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-elf.c (obj_elf_section): Sections ".init" and ".fini"
+	are also magic, and have special default flag settings.
+	(obj_elf_frob_symbol): Since the return value from this function
+	isn't used, don't bother calling obj_elf_write_symbol_p, since it
+	doesn't accomplish anything else.
+
+	* config/tc-sparc.c (md_section_align): Round up section size only
+	for a.out format.
+
+	* symbols.c: Don't define DEBUG by default.
+
 Thu Jul 22 12:09:41 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* write.c (fix_new_exp): Handle a O_uminus expression.
