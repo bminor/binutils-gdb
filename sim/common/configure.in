@@ -3,7 +3,7 @@ AC_PREREQ(2.5)dnl
 AC_INIT(Makefile.in)
 
 # This is intended for use by the target specific directories, and by us.
-SIM_AC_COMMON
+SIM_AC_COMMON(cconfig.h)
 
 # Put a useful copy of CPP_FOR_TARGET in Makefile.
 # This is only used to build the target values header files.  These files are
@@ -37,4 +37,4 @@ AC_SUBST(TARGET_SUBDIR)
 AC_CHECK_HEADERS(stdlib.h string.h strings.h time.h sys/times.h)
 
 AC_OUTPUT(Makefile,
-[case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])
+[case x$CONFIG_HEADERS in xcconfig.h:config.in) echo > stamp-h ;; esac])
