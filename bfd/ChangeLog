@@ -1,5 +1,8 @@
 Thu Nov  9 04:00:38 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* Makefile.in (.dep1): Make sure the file mkdep is to write exists
+	first.
+
 	* configure.in: Added new option --with[out]-mmap.  Set USE_MMAP
 	if it is given and mmep is available.
 	* acconfig.h: Undef USE_MMAP.
