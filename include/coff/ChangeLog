@@ -1,3 +1,33 @@
+Wed Nov 17 17:18:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (struct ecoff_debug_info): Define.
+
+Tue Nov  2 17:56:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.h (struct ecoff_debug_swap): Define.
+
+Thu Oct 28 17:07:50 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* i386.h (I386LYNXMAGIC): Rename to LYNXCOFFMAGIC.
+	* m68k.h (LYNXCOFFMAGIC): Define.
+	* sparc.h: New file.
+
+Tue Oct 19 15:34:50 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* alpha.h (external_aouthdr): Split four byte padding field into
+	two byte bldrev field and two byte padding field.
+
+	* ecoff.h (_LITA, _PDATA, _XDATA, STYP_LITA): Defined.
+
+Wed Oct 13 15:52:34 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	Sun Oct 10 17:27:10 1993  Troy Rollo (troy@cbme.unsw.edu.au)
+
+	* coff/internal.h: Added o_sri, o_inlib and o_vid for Apollos
+			as well as R_DIR16.
+
+	* coff/apollo.h: New file
+
 Mon Oct 11 17:16:48 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.h (REGINFO, struct ecoff_reginfo): Define.
