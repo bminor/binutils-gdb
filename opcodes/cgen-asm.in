@@ -36,10 +36,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    compiled with GCC), or switch to macros, or use something else.
 */
 
+static const char * insert_normal
+     PARAMS ((long, unsigned int, int, int, int, char *));
 static const char * parse_insn_normal
      PARAMS ((const CGEN_INSN *, const char **, CGEN_FIELDS *));
 static const char * insert_insn_normal
      PARAMS ((const CGEN_INSN *, CGEN_FIELDS *, cgen_insn_t *));
+
+/* -- assembler routines inserted here */
 
 /* Default insertion routine.
 
@@ -55,22 +59,16 @@ static const char * insert_insn_normal
    store insn in `field' struct and add registers, etc. while parsing?  */
 
 static const char *
-insert_normal (value, attrs, start, length, shift, total_length, buffer)
+insert_normal (value, attrs, start, length, total_length, buffer)
      long value;
      unsigned int attrs;
      int start;
      int length;
-     int shift;
      int total_length;
      char * buffer;
 {
   bfd_vma x;
   static char buf[100];
-
-  if (shift < 0)
-    value <<= -shift;
-  else
-    value >>= shift;
 
   /* Ensure VALUE will fit.  */
   if ((attrs & (1 << CGEN_OPERAND_UNSIGNED)) != 0)
@@ -149,8 +147,6 @@ insert_normal (value, attrs, start, length, shift, total_length, buffer)
 
   return NULL;
 }
-
-/* -- assembler routines inserted here */
 
 /* Default insn parser.
 
@@ -330,9 +326,14 @@ insert_insn_normal (insn, fields, buffer)
    This routine is called for each instruction to be assembled.
    STR points to the insn to be assembled.
    We assume all necessary tables have been initialized.
+   The assembled instruction, less any fixups, is stored in buf.
+   [??? What byte order?]
    The result is a pointer to the insn's entry in the opcode table,
    or NULL if an error occured (an error message will have already been
-   printed).  */
+   printed).
+
+   Note that when processing (non-alias) macro-insns,
+   this function recurses.  */
 
 const CGEN_INSN *
 @arch@_cgen_assemble_insn (str, fields, buf, errmsg)
