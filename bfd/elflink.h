@@ -2848,7 +2848,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 				     true, true);
 	  if (indx == (bfd_size_type) -1
 	      || ! elf_add_dynamic_entry (info, DT_RPATH, indx)
-	      || ! elf_add_dynamic_entry (info, DT_RUNPATH, indx))
+	      || (info->new_dtags
+		  && ! elf_add_dynamic_entry (info, DT_RUNPATH, indx)))
 	    return false;
 	}
 
@@ -3137,7 +3138,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  elf_tdata (output_bfd)->cverdefs = cdefs;
 	}
 
-      if (info->flags)
+      if (info->new_dtags && info->flags)
 	{
 	  if (! elf_add_dynamic_entry (info, DT_FLAGS, info->flags))
 	    return false;
