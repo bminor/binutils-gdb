@@ -1,3 +1,9 @@
+2001-03-19  Andreas Schwab  <schwab@suse.de>
+
+	* gas/m68k/pcrel.s: Force alignment to 8 byte boundary to get
+	consistent output across targets.
+	* gas/m68k/pcrel.d: Adjusted.
+
 2001-03-18  H.J. Lu  <hjl@gnu.org>
 
 	* gas/i386/intel.s: Move PIC code to ...

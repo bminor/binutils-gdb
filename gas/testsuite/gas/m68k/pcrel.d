@@ -21,7 +21,7 @@ Contents of section .text:
  00e0 41fb0170 ffff7fff 4e7141fa 7fff41fb  A..p....NqA...A.
  00f0 01700000 80004e71 41fb0170 00000000  .p....NqA..p....
  0100 41fb0930 00000000 4e7141f9 00000000  A..0....NqA.....
- 0110 4e710000 0000                        Nq....          
+ 0110 4e710000 00000000                    Nq........      
 Disassembly of section \.text:
 0+0000 <.*> nop
 0+0002 <lbl_b> nop
@@ -85,3 +85,4 @@ Disassembly of section \.text:
 			10c: R_68K_32	undef
 0+0110 <lbl_a\+(0x|)6c> nop
 0+0112 <lbl_a\+(0x|)6e> orib #0,%d0
+	\.\.\.
