@@ -45,8 +45,6 @@
 #define	STACK_REGS	2
 #define	FP_REGS		4
 
-static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
-
 /* Fetch one or more registers from the inferior.  REGNO == -1 to get
    them all.  We actually fetch more than requested, when convenient,
    marking them as valid so we won't fetch them again.  */

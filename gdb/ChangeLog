@@ -1,5 +1,7 @@
 2001-10-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-nat.c (fetch_core_registers): Remove redundant prototype.
+
 	* proc-service.c (BUILD_LWP): Redefine in terms of ptid_build.
 
 	Fix attaching to cloned processes.  This fixes PR gdb/61.
