@@ -1,6 +1,6 @@
-AR = ar-a29k
-AR_FLAGS = qs
-RANLIB = echo 
+#AR = ar-a29k
+#AR_FLAGS = qs
+#RANLIB = echo 
 
 # This is a hack. By declaring subdirs using "SUBDIRS=" rather than
 # with a space, config won't reset this.  This is a hack to override
