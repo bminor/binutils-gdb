@@ -112,7 +112,7 @@ save_npx (void)
 static void
 load_npx (void)
 {
-asm ("frstor %0":"=m" (npx));
+  asm ("frstor %0":"=m" (npx));
 }
 /* ------------------------------------------------------------------------- */
 /* Stubs for the missing redirection functions.  */
@@ -122,25 +122,34 @@ typedef struct {
 } cmdline_t;
 
 void
-redir_cmdline_delete (cmdline_t *ptr) {ptr->redirected = 0;}
+redir_cmdline_delete (cmdline_t *ptr)
+{
+  ptr->redirected = 0;
+}
 
 int
 redir_cmdline_parse (const char *args, cmdline_t *ptr)
 {
   return -1;
 }
+
 int
 redir_to_child (cmdline_t *ptr)
 {
   return 1;
 }
+
 int
 redir_to_debugger (cmdline_t *ptr)
 {
   return 1;
 }
+
 int
-redir_debug_init (cmdline_t *ptr) { return 0; }
+redir_debug_init (cmdline_t *ptr)
+{
+  return 0;
+}
 #endif /* __DJGPP_MINOR < 3 */
 
 typedef enum { wp_insert, wp_remove, wp_count } wp_op;

@@ -1,3 +1,7 @@
+2001-04-01  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c: Minor tweaks, to pacify the ari script.
+
 2001-04-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_extract_struct_value_address): New function.
