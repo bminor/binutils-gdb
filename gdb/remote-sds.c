@@ -45,6 +45,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <signal.h>
 #include "serial.h"
 
+extern void _initialize_remote_sds PARAMS ((void));
+
 /* Declarations of local functions. */
 
 static int sds_write_bytes PARAMS ((CORE_ADDR, char *, int));
@@ -106,16 +108,19 @@ static int sds_insert_breakpoint PARAMS ((CORE_ADDR, char *));
 
 static int sds_remove_breakpoint PARAMS ((CORE_ADDR, char *));
 
+static void init_sds_ops PARAMS ((void));
 
-static struct target_ops sds_ops;	/* Forward decl */
+static void sds_command PARAMS ((char *args, int from_tty));
+
+/* Define the target operations vector. */
+
+static struct target_ops sds_ops;
 
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
    other form of hairy serial connection, I would think 2 seconds would
    be plenty.  */
 
-/* Changed to allow option to set timeout value.
-   was static int sds_timeout = 2; */
 static int sds_timeout = 2;
 
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so
@@ -1120,76 +1125,36 @@ sds_remove_breakpoint (addr, contents_cache)
   return 0;
 }
 
-/* Define the target operations vector. */
-
-static struct target_ops sds_ops ;
-
 static void 
-init_sds_ops(void)
+init_sds_ops ()
 {
-  sds_ops.to_shortname =   "sds";
-  sds_ops.to_longname =   "Remote serial target with SDS protocol";
-  sds_ops.to_doc =   "Use a remote computer via a serial line; using the SDS protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).", 
-    sds_ops.to_open =   sds_open;	
-  sds_ops.to_close =   sds_close;	
-  sds_ops.to_attach =   NULL;
-  sds_ops.to_post_attach = NULL;
-  sds_ops.to_require_attach = NULL;		
-  sds_ops.to_detach =   sds_detach;
-  sds_ops.to_require_detach = NULL;	
-  sds_ops.to_resume =   sds_resume;	
-  sds_ops.to_wait  =   sds_wait;
-  sds_ops.to_post_wait = NULL;	
-  sds_ops.to_fetch_registers  =   sds_fetch_registers;
-  sds_ops.to_store_registers  =   sds_store_registers;	
-  sds_ops.to_prepare_to_store =   sds_prepare_to_store;	
-  sds_ops.to_xfer_memory  =   sds_xfer_memory;	
-  sds_ops.to_files_info  =   sds_files_info;	
-  sds_ops.to_insert_breakpoint =   sds_insert_breakpoint;
-  sds_ops.to_remove_breakpoint =   sds_remove_breakpoint;
-  sds_ops.to_terminal_init  =   NULL;		
-  sds_ops.to_terminal_inferior =   NULL;	
-  sds_ops.to_terminal_ours_for_output =   NULL;	
-  sds_ops.to_terminal_ours  =   NULL;	
-  sds_ops.to_terminal_info  =   NULL;	
-  sds_ops.to_kill  =   sds_kill;	
-  sds_ops.to_load  =   sds_load;	
-  sds_ops.to_lookup_symbol =   NULL;			
-  sds_ops.to_create_inferior =   sds_create_inferior;
-  sds_ops.to_post_startup_inferior = NULL;
-  sds_ops.to_acknowledge_created_inferior = NULL;
-  sds_ops.to_clone_and_follow_inferior = NULL;
-  sds_ops.to_post_follow_inferior_by_clone = NULL;
-  sds_ops.to_insert_fork_catchpoint = NULL;
-  sds_ops.to_remove_fork_catchpoint = NULL;
-  sds_ops.to_insert_vfork_catchpoint = NULL;
-  sds_ops.to_remove_vfork_catchpoint = NULL;
-  sds_ops.to_has_forked = NULL;
-  sds_ops.to_has_vforked = NULL;
-  sds_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  sds_ops.to_post_follow_vfork = NULL;
-  sds_ops.to_insert_exec_catchpoint = NULL;
-  sds_ops.to_remove_exec_catchpoint = NULL;
-  sds_ops.to_has_execd = NULL;
-  sds_ops.to_reported_exec_events_per_exec_call = NULL;
-  sds_ops.to_has_exited = NULL;
-  sds_ops.to_mourn_inferior =   sds_mourn;
-  sds_ops.to_can_run  =   0;		
-  sds_ops.to_notice_signals =   0;	
-  sds_ops.to_thread_alive  =   0;	
-  sds_ops.to_stop  =   0;
-  sds_ops.to_pid_to_exec_file = NULL;
-  sds_ops.to_core_file_to_sym_file = NULL;		
-  sds_ops.to_stratum =   process_stratum;
-  sds_ops.DONT_USE =   NULL;		
-  sds_ops.to_has_all_memory =   1;
-  sds_ops.to_has_memory =   1;	
-  sds_ops.to_has_stack =   1;				/* to_has_stack */
-  sds_ops.to_has_registers =   1;  sds_ops.to_has_execution =   1;
-  sds_ops.to_sections =   NULL;	
-  sds_ops.to_sections_end =   NULL;
-  sds_ops.to_magic =   OPS_MAGIC ;
+  sds_ops.to_shortname = "sds";
+  sds_ops.to_longname = "Remote serial target with SDS protocol";
+  sds_ops.to_doc = "Use a remote computer via a serial line; using the SDS protocol.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";
+  sds_ops.to_open = sds_open;
+  sds_ops.to_close = sds_close;
+  sds_ops.to_detach = sds_detach;
+  sds_ops.to_resume = sds_resume;
+  sds_ops.to_wait = sds_wait;
+  sds_ops.to_fetch_registers = sds_fetch_registers;
+  sds_ops.to_store_registers = sds_store_registers;
+  sds_ops.to_prepare_to_store = sds_prepare_to_store;
+  sds_ops.to_xfer_memory = sds_xfer_memory;
+  sds_ops.to_files_info = sds_files_info;
+  sds_ops.to_insert_breakpoint = sds_insert_breakpoint;
+  sds_ops.to_remove_breakpoint = sds_remove_breakpoint;
+  sds_ops.to_kill = sds_kill;
+  sds_ops.to_load = sds_load;
+  sds_ops.to_create_inferior = sds_create_inferior;
+  sds_ops.to_mourn_inferior = sds_mourn;
+  sds_ops.to_stratum = process_stratum;
+  sds_ops.to_has_all_memory = 1;
+  sds_ops.to_has_memory = 1;
+  sds_ops.to_has_stack = 1;
+  sds_ops.to_has_registers = 1;
+  sds_ops.to_has_execution = 1;
+  sds_ops.to_magic = OPS_MAGIC;
 }
 
 /* Put a command string, in args, out to the monitor and display the
@@ -1228,7 +1193,7 @@ sds_command (args, from_tty)
 void
 _initialize_remote_sds ()
 {
-  init_sds_ops() ;
+  init_sds_ops ();
   add_target (&sds_ops);
 
   add_show_from_set (add_set_cmd ("sdstimeout", no_class,
