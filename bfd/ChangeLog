@@ -1,3 +1,8 @@
+1999-05-07  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-mcore.c (coff_mcore_relocate_section): Replace assert about
+	endianism with an error message.
+
 Thu May  6 17:09:09 1999  Fred Fish  <fnf@be.com>
 
 	* dwarf2.c (read_abbrevs): Change cast of dwarf_abbrev_buffer

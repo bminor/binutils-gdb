@@ -357,8 +357,19 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
   if (info->relocateable)
     return true;
   
-  BFD_ASSERT (input_bfd->xvec->byteorder
-	      == output_bfd->xvec->byteorder);
+  /* Check if we have the same endianess */
+  if (   input_bfd->xvec->byteorder != output_bfd->xvec->byteorder
+      && output_bfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
+    {
+      (*_bfd_error_handler)
+	(_("%s: compiled for a %s endian system and target is %s endian.\n"),
+	 bfd_get_filename (input_bfd),
+         bfd_big_endian (input_bfd) ? "big" : "little",
+         bfd_big_endian (output_bfd) ? "big" : "little");
+
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
 
   hihalf = false;
   hihalf_val = 0;
