@@ -414,7 +414,7 @@ net_read_registers (reg_buf, len, procnum)
     error (rpcerr);
   if (ptrace_out.status == -1)
     {
-      errno = ptrace_out.errno;
+      errno = ptrace_out.errno_num;
       sprintf (message, "reading %s registers", (procnum == PTRACE_GETREGS)
 						 ? "general-purpose"
 						 : "floating-point");
@@ -460,7 +460,7 @@ net_write_registers (reg_buf, len, procnum)
     error (rpcerr);
   if (ptrace_out.status == -1)
     {
-      errno = ptrace_out.errno;
+      errno = ptrace_out.errno_num;
       sprintf (message, "writing %s registers", (procnum == PTRACE_SETREGS)
 						 ? "general-purpose"
 						 : "floating-point");
@@ -557,7 +557,7 @@ vx_xfer_memory (memaddr, myaddr, len, write, target)
              code chosen by the target so that a later perror () will
              say something meaningful.  */
 
-          errno = ptrace_out.errno;
+          errno = ptrace_out.errno_num;
         }
     }
 
@@ -629,7 +629,7 @@ vx_resume (pid, step, siggnal)
     error (rpcerr);
   if (ptrace_out.status == -1)
     {
-      errno = ptrace_out.errno;
+      errno = ptrace_out.errno_num;
       perror_with_name ("Resuming remote process");
     }
 }
@@ -1244,7 +1244,7 @@ vx_attach (args, from_tty)
     error (rpcerr);
   if (ptrace_out.status == -1)
     {
-      errno = ptrace_out.errno;
+      errno = ptrace_out.errno_num;
       perror_with_name ("Attaching remote process");
     }
 
@@ -1296,7 +1296,7 @@ vx_detach (args, from_tty)
     error (rpcerr);
   if (ptrace_out.status == -1)
     {
-      errno = ptrace_out.errno;
+      errno = ptrace_out.errno_num;
       perror_with_name ("Detaching VxWorks process");
     }
 
@@ -1324,7 +1324,7 @@ vx_kill ()
     warning (rpcerr);
   else if (ptrace_out.status == -1)
     {
-      errno = ptrace_out.errno;
+      errno = ptrace_out.errno_num;
       perror_with_name ("Killing VxWorks process");
     }
 

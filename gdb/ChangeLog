@@ -1,3 +1,10 @@
+1998-11-05  Jim Wilson  <wilson@cygnus.com>
+
+	* remote-vx.c (net_read_registers, net_write_registers, vx_xver_memory,
+	vx_resume, vx_attach, vx_detach, vx_kill): Change errno to errno_num.
+	* vx-share/xdr_ptrace.c (xdr_ptrace_return): Likewise.
+	* vx-share/xdr_ptrace.h (struct ptrace_return): Likewise.
+
 Thu Nov  5 08:41:33 1998  Christopher Faylor <cgf@cygnus.com>
 
 	* top.c (gdb_readline): Allow CRLF line termination on systems

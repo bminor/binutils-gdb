@@ -57,9 +57,11 @@ typedef struct rptrace Rptrace;
 /*
  * structure returned by server on all remote ptrace calls
  */
+/* This used to have a field called errno, but that fails on hosts which
+   define errno to be a macro, so it was changed to errno_num.  */
 struct ptrace_return {
 	int status;
-	int errno;
+	int errno_num;
 	Ptrace_info	info;
 };
 typedef struct ptrace_return Ptrace_return;

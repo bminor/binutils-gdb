@@ -109,7 +109,7 @@ bool_t xdr_ptrace_return(xdrs, objp)
     {
     if (! xdr_int(xdrs, &objp->status)) 
 	return(FALSE);
-    if (! xdr_int(xdrs, &objp->errno)) 
+    if (! xdr_int(xdrs, &objp->errno_num)) 
 	return(FALSE);
     if (! xdr_ptrace_info(xdrs, &objp->info)) 
 	return(FALSE);
