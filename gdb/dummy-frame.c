@@ -345,16 +345,17 @@ dummy_frame_pc_unwind (struct frame_info *frame,
 }
 
 
-struct frame_id
-dummy_frame_id_unwind (struct frame_info *frame,
-		       void **cache)
+void
+dummy_frame_id_unwind (struct frame_info *frame, void **cache,
+		       struct frame_id *id)
 {
   struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
   /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
      that the frame doesn't unwind.  Should this function instead
      return a has-no-caller indication?  */
   if (dummy == NULL)
-    return null_frame_id;
-  return dummy->id;
+    (*id) = null_frame_id;
+  else
+    (*id) = dummy->id;
 }
 

@@ -138,8 +138,7 @@ frame_id_unwind (struct frame_info *frame)
 {
   if (!frame->id_unwind_cache_p)
     {
-      frame->id_unwind_cache =
-	frame->id_unwind (frame, &frame->unwind_cache);
+      frame->id_unwind (frame, &frame->unwind_cache, &frame->id_unwind_cache);
       frame->id_unwind_cache_p = 1;
     }
   return frame->id_unwind_cache;
@@ -655,11 +654,16 @@ frame_saved_regs_pc_unwind (struct frame_info *frame, void **cache)
   return FRAME_SAVED_PC (frame);
 }
 	
-static struct frame_id
-frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache)
+static void
+frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
+			    struct frame_id *id)
 {
   int fromleaf;
-  struct frame_id id;
+  CORE_ADDR base;
+  CORE_ADDR pc;
+
+  /* Start out by assuming it's NULL.  */
+  (*id) = null_frame_id;
 
   if (next_frame->next == NULL)
     /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
@@ -677,7 +681,7 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache)
     /* FIXME: 2002-11-09: There isn't any reason to special case this
        edge condition.  Instead the per-architecture code should hande
        it locally.  */
-    id.base = get_frame_base (next_frame);
+    base = get_frame_base (next_frame);
   else
     {
       /* Two macros defined in tm.h specify the machine-dependent
@@ -695,18 +699,19 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache)
          this to after the ffi test; I'd rather have backtraces from
          start go curfluy than have an abort called from main not show
          main.  */
-      id.base = FRAME_CHAIN (next_frame);
+      base = FRAME_CHAIN (next_frame);
 
-      if (!frame_chain_valid (id.base, next_frame))
-	return null_frame_id;
+      if (!frame_chain_valid (base, next_frame))
+	return;
     }
-  if (id.base == 0)
-    return null_frame_id;
+  if (base == 0)
+    return;
 
   /* FIXME: cagney/2002-06-08: This should probably return the frame's
      function and not the PC (a.k.a. resume address).  */
-  id.pc = frame_pc_unwind (next_frame);
-  return id;
+  pc = frame_pc_unwind (next_frame);
+  id->pc = pc;
+  id->base = base;
 }
 	
 /* Function: get_saved_register

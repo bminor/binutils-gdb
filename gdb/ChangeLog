@@ -1,3 +1,13 @@
+2003-01-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.h (frame_id_unwind_ftype): Change type so that the frame's
+	ID back using a parameter.
+	* frame.c (frame_id_unwind): Update call.
+	(frame_saved_regs_id_unwind): Update.
+	* dummy-frame.c (dummy_frame_id_unwind): Update function.
+	* dummy-frame.h (struct frame_id): Add opaque declaration.
+	(dummy_frame_id_unwind): Update declaration.
+
 2003-01-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* sparc-tdep.c: Delete reference to PRINT_REGISTER_HOOK.
