@@ -106,12 +106,6 @@ enum mips_fpu_type
 #endif
 static int mips_fpu_type_auto = 1;
 static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
-#define MIPS_FPU_TYPE mips_fpu_type
-
-/* Do not use "TARGET_IS_MIPS64" to test the size of floating point registers */
-#ifndef FP_REGISTER_DOUBLE
-#define FP_REGISTER_DOUBLE (REGISTER_VIRTUAL_SIZE(FP0_REGNUM) == 8)
-#endif
 
 static int mips_debug = 0;
 
@@ -137,35 +131,18 @@ struct gdbarch_tdep
     enum gdb_osabi osabi;
   };
 
-#if GDB_MULTI_ARCH
-#undef MIPS_EABI
 #define MIPS_EABI (gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_EABI32 \
 		   || gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_EABI64)
-#endif
 
-#if GDB_MULTI_ARCH
-#undef MIPS_LAST_FP_ARG_REGNUM
 #define MIPS_LAST_FP_ARG_REGNUM (gdbarch_tdep (current_gdbarch)->mips_last_fp_arg_regnum)
-#endif
 
-#if GDB_MULTI_ARCH
-#undef MIPS_LAST_ARG_REGNUM
 #define MIPS_LAST_ARG_REGNUM (gdbarch_tdep (current_gdbarch)->mips_last_arg_regnum)
-#endif
 
-#if GDB_MULTI_ARCH
-#undef MIPS_FPU_TYPE
 #define MIPS_FPU_TYPE (gdbarch_tdep (current_gdbarch)->mips_fpu_type)
-#endif
 
 /* Return the currently configured (or set) saved register size. */
 
-#if GDB_MULTI_ARCH
-#undef MIPS_DEFAULT_SAVED_REGSIZE
 #define MIPS_DEFAULT_SAVED_REGSIZE (gdbarch_tdep (current_gdbarch)->mips_default_saved_regsize)
-#elif !defined (MIPS_DEFAULT_SAVED_REGSIZE)
-#define MIPS_DEFAULT_SAVED_REGSIZE MIPS_REGSIZE
-#endif
 
 static const char *mips_saved_regsize_string = size_auto;
 
@@ -212,31 +189,18 @@ mips2_fp_compat (void)
    form double-precision values).  Do not use "TARGET_IS_MIPS64" to
    determine if the ABI is using double-precision registers.  See also
    MIPS_FPU_TYPE. */
-#if GDB_MULTI_ARCH
-#undef FP_REGISTER_DOUBLE
 #define FP_REGISTER_DOUBLE (gdbarch_tdep (current_gdbarch)->mips_fp_register_double)
-#endif
 
 /* Does the caller allocate a ``home'' for each register used in the
    function call?  The N32 ABI and MIPS_EABI do not, the others do. */
 
-#if GDB_MULTI_ARCH
-#undef MIPS_REGS_HAVE_HOME_P
 #define MIPS_REGS_HAVE_HOME_P (gdbarch_tdep (current_gdbarch)->mips_regs_have_home_p)
-#elif !defined (MIPS_REGS_HAVE_HOME_P)
-#define MIPS_REGS_HAVE_HOME_P (!MIPS_EABI)
-#endif
 
 /* The amount of space reserved on the stack for registers. This is
    different to MIPS_SAVED_REGSIZE as it determines the alignment of
    data allocated after the registers have run out. */
 
-#if GDB_MULTI_ARCH
-#undef MIPS_DEFAULT_STACK_ARGSIZE
 #define MIPS_DEFAULT_STACK_ARGSIZE (gdbarch_tdep (current_gdbarch)->mips_default_stack_argsize)
-#elif !defined (MIPS_DEFAULT_STACK_ARGSIZE)
-#define MIPS_DEFAULT_STACK_ARGSIZE (MIPS_DEFAULT_SAVED_REGSIZE)
-#endif
 
 #define MIPS_STACK_ARGSIZE (mips_stack_argsize ())
 
@@ -253,17 +217,9 @@ mips_stack_argsize (void)
     return 4;
 }
 
-#if GDB_MULTI_ARCH
-#undef GDB_TARGET_IS_MIPS64
 #define GDB_TARGET_IS_MIPS64 (gdbarch_tdep (current_gdbarch)->gdb_target_is_mips64 + 0)
-#endif
 
-#if GDB_MULTI_ARCH
-#undef MIPS_DEFAULT_MASK_ADDRESS_P
 #define MIPS_DEFAULT_MASK_ADDRESS_P (gdbarch_tdep (current_gdbarch)->default_mask_address_p)
-#elif !defined (MIPS_DEFAULT_MASK_ADDRESS_P)
-#define MIPS_DEFAULT_MASK_ADDRESS_P (0)
-#endif
 
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
@@ -3567,10 +3523,7 @@ set_mipsfpu_single_command (char *args, int from_tty)
 {
   mips_fpu_type = MIPS_FPU_SINGLE;
   mips_fpu_type_auto = 0;
-  if (GDB_MULTI_ARCH)
-    {
-      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_SINGLE;
-    }
+  gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_SINGLE;
 }
 
 static void
@@ -3578,10 +3531,7 @@ set_mipsfpu_double_command (char *args, int from_tty)
 {
   mips_fpu_type = MIPS_FPU_DOUBLE;
   mips_fpu_type_auto = 0;
-  if (GDB_MULTI_ARCH)
-    {
-      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_DOUBLE;
-    }
+  gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_DOUBLE;
 }
 
 static void
@@ -3589,10 +3539,7 @@ set_mipsfpu_none_command (char *args, int from_tty)
 {
   mips_fpu_type = MIPS_FPU_NONE;
   mips_fpu_type_auto = 0;
-  if (GDB_MULTI_ARCH)
-    {
-      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_NONE;
-    }
+  gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_NONE;
 }
 
 static void
@@ -4969,21 +4916,6 @@ This option can be set to one of:\n\
   add_cmd ("mipsfpu", class_support, show_mipsfpu_command,
 	   "Show current use of MIPS floating-point coprocessor target.",
 	   &showlist);
-
-#if !GDB_MULTI_ARCH
-  c = add_set_cmd ("processor", class_support, var_string_noescape,
-		   (char *) &tmp_mips_processor_type,
-		   "Set the type of MIPS processor in use.\n\
-Set this to be able to access processor-type-specific registers.\n\
-",
-		   &setlist);
-  set_cmd_cfunc (c, mips_set_processor_type_command);
-  c = add_show_from_set (c, &showlist);
-  set_cmd_cfunc (c, mips_show_processor_type_command);
-
-  tmp_mips_processor_type = xstrdup (DEFAULT_MIPS_TYPE);
-  mips_set_processor_type_command (xstrdup (DEFAULT_MIPS_TYPE), 0);
-#endif
 
   /* We really would like to have both "0" and "unlimited" work, but
      command.c doesn't deal with that.  So make it a var_zinteger

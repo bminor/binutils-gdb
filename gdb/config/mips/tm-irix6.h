@@ -95,18 +95,6 @@
 	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
 	 : builtin_type_int)
 
-#undef  MIPS_LAST_ARG_REGNUM
-#define MIPS_LAST_ARG_REGNUM 11	/* N32 uses R4 through R11 for args */
-
-/* MIPS_STACK_ARGSIZE -- how many bytes does a pushed function arg take
-   up on the stack? For the n32 ABI, eight bytes are reserved for each
-   register. Like MIPS_SAVED_REGSIZE but different. */
-#define MIPS_DEFAULT_STACK_ARGSIZE 8
-
-/* N32 does not reserve home space for registers used to carry
-   parameters. */
-#define MIPS_REGS_HAVE_HOME_P 0
-
 /* Force N32 ABI as the default. */
 #define MIPS_DEFAULT_ABI MIPS_ABI_N32
 
