@@ -491,7 +491,7 @@ struct cmd_list_element *setmemorylist;
 
 #define C(name,a,b,c) name () { h8500_set_pointer_size(a); code_size = b; data_size = c; }
 
-C(large_command, 32,4,4);
+C(big_command, 32,4,4);
 C(medium_command, 32, 4,2);
 C(compact_command, 32,2,4);
 C(small_command, 16,2,2);
@@ -526,7 +526,7 @@ h8500_is_trapped_internalvar (name)
     return 0;
 }
 
-value
+value_ptr
 h8500_value_of_trapped_internalvar (var)
      struct internalvar *var;
 {
@@ -577,7 +577,7 @@ void
 h8500_set_trapped_internalvar (var, newval, bitpos, bitsize, offset)
      struct internalvar *var;
      int offset, bitpos, bitsize;
-     value newval;
+     value_ptr newval;
 {
   char *page_regnum, *regnum;
   char expression[100];
@@ -636,8 +636,8 @@ _initialize_h8500_tdep ()
   add_cmd ("small", class_support, small_command,
 	   "Set small memory model. (16 bit code, 16 bit data)", &setmemorylist);
 
-  add_cmd ("large", class_support, large_command,
-	   "Set large memory model. (32 bit code, 32 bit data)", &setmemorylist);
+  add_cmd ("big", class_support, big_command,
+	   "Set big memory model. (32 bit code, 32 bit data)", &setmemorylist);
 
   add_cmd ("medium", class_support, medium_command,
 	   "Set medium memory model. (32 bit code, 16 bit data)", &setmemorylist);

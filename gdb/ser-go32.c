@@ -160,11 +160,13 @@ dos_async_rx ()
     }
 
   rv = *aptr (async->getp++);
+
   if (async->getp >= async->buffer_end)
     async->getp = async->buffer_start;
 
   return rv;
 }
+
 
 static int
 dosasync_read (fd, buf, len, timeout)
@@ -186,7 +188,7 @@ dosasync_read (fd, buf, len, timeout)
 	  while (!dos_async_ready ())
 	    {
 	      time (&now);
-	      if (now >= then)
+	      if (now >= then && timeout > 0)
 		return i;
 	    }
 	}
@@ -257,6 +259,7 @@ go32_readchar (scb, timeout)
      int timeout;
 {
   char buf;
+
 
   /* Shortcut for polling */
   if (timeout == 0)

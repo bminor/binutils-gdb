@@ -1,3 +1,15 @@
+Fri Apr 15 11:35:19 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* h8500-tdep.c (initialize_h8500_tdep, large_command):
+	All references to value changed to value_ptrlage_command is now
+	called big_command.
+	All references to value changed to value_ptr.
+	* remote-e7000.c (e7000_wait): Use target_waitstatus and SETSTOP
+	* remote-hms.c (hms_wait): Timeout after five seconds.
+	* ser-go32.c (dosasync_read): Poll if timeout < 0.
+	* config/tm/tm-h8500.h (BEFORE_MAIN_LOOP_HOOK): Deleted.
+	* config/sh/tm-sh.h (BREAKPOINT): Is now sleep opcode.
+
 Thu Apr 14 07:01:56 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* procfs.c (procfs_wait): Protect watchpoint code with appropriate

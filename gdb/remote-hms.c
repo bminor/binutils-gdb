@@ -726,7 +726,7 @@ hms_wait (pid, status)
       return 0;
     }
 
-  timeout = -1;			/* Don't time out -- user program is running.
+  timeout = 5;			/* Don't time out for a while - user program is running.
 				 */
   immediate_quit = 1;		/* Helps ability to QUIT */
   while (1)
