@@ -26,6 +26,7 @@ Things-to-keep:
 .gdbinit
 ChangeLog
 Makefile.in
+TODO
 config
 configure.in
 gdb.disasm
