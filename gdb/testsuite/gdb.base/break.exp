@@ -166,7 +166,7 @@ if ![target_info exists use_gdb_stub] {
   }
 } else {
     if ![target_info exists gdb_stub] {
-	gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:75.*75\[\t \]+if .argc.*\{" "stub continue"
+	gdb_test continue ".*Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:75.*75\[\t \]+if .argc.*\{.*" "stub continue"
     }
 }
 

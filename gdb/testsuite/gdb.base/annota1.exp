@@ -420,7 +420,7 @@ gdb_expect {
 #
 send_gdb "signal SIGTRAP\n"
 gdb_expect {
-  -re ".*\032\032post-prompt\r\nContinuing with signal SIGTRAP.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032signalled\r\n\r\n\032\032frames-invalid\r\n\r\nProgram terminated with signal \r\n\032\032signal-name\r\nSIGTRAP\r\n\032\032signal-name-end\r\n, \r\n\032\032signal-string\r\nTrace.breakpoint trap\r\n\032\032signal-string-end\r\n.\r\nThe program no longer exists.\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
+  -re ".*\032\032post-prompt\r\nContinuing with signal SIGTRAP.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032signalled\r\n\r\nProgram terminated with signal \r\n\032\032signal-name\r\nSIGTRAP\r\n\032\032signal-name-end\r\n, \r\n\032\032signal-string\r\nTrace.breakpoint trap\r\n\032\032signal-string-end\r\n.\r\nThe program no longer exists.\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
 	  { pass "signal sent" }
   -re ".*$gdb_prompt$" { fail "signal sent" }
   timeout { fail "signal sent (timeout)" }
@@ -442,7 +442,6 @@ if [ regexp "core not found" $exec_output]  {
       pass "Core dumped and removed"
   }
 }
-
 
 # restore the original prompt for the rest of the testsuite
 

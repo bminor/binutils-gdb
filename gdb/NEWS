@@ -48,6 +48,12 @@ The command ``set remotebinarydownload'' command has been replaced by
 ``set remote X-packet''.  Other commands in ``set remote'' family
 include ``set remote P-packet''.
 
+* Breakpoint commands accept ranges.
+
+The breakpoint commands ``enable'', ``disable'', and ``delete'' now
+accept a range of breakpoints, e.g. ``5-7''.  The tracepoint command
+``tracepoint passcount'' also accepts a range of tracepoints.
+
 *** Changes in GDB-4.18:
 
 * New native configurations

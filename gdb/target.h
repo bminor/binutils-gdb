@@ -755,8 +755,7 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
    not only bring new code into the target process, but also to update
    GDB's symbol tables to match.  */
 
-#define target_load(arg, from_tty) \
-	(*current_target.to_load) (arg, from_tty)
+extern void target_load (char *arg, int from_tty);
 
 /* Look up a symbol in the target's symbol table.  NAME is the symbol
    name.  ADDRP is a CORE_ADDR * pointing to where the value of the symbol
@@ -1063,10 +1062,30 @@ extern char *normal_pid_to_str PARAMS ((int pid));
 extern char *normal_pid_to_str PARAMS ((int pid));
 #endif
 
+/*
+ * New Objfile Event Hook:
+ *
+ * Sometimes a GDB component wants to get notified whenever a new
+ * objfile is loaded.  Mainly this is used by thread-debugging 
+ * implementations that need to know when symbols for the target
+ * thread implemenation are available.
+ *
+ * The old way of doing this is to define a macro 'target_new_objfile'
+ * that points to the function that you want to be called on every
+ * objfile/shlib load.
+ *
+ * The new way is to grab the function pointer, 'target_new_objfile_hook',
+ * and point it to the function that you want to be called on every
+ * objfile/shlib load.
+ *
+ * If multiple clients are willing to be cooperative, they can each
+ * save a pointer to the previous value of target_new_objfile_hook
+ * before modifying it, and arrange for their function to call the
+ * previous function in the chain.  In that way, multiple clients
+ * can receive this notification (something like with signal handlers).
+ */
 
-#ifndef target_new_objfile
-#define target_new_objfile(OBJFILE)
-#endif
+extern void (*target_new_objfile_hook) PARAMS ((struct objfile *));
 
 #ifndef target_pid_or_tid_to_str
 #define target_pid_or_tid_to_str(ID) \
@@ -1338,7 +1357,7 @@ extern void push_remote_target PARAMS ((char *name, int from_tty));
 
 #ifndef SOFTWARE_SINGLE_STEP_P
 #define SOFTWARE_SINGLE_STEP_P 0
-#define SOFTWARE_SINGLE_STEP(sig,bp_p) abort ()
+#define SOFTWARE_SINGLE_STEP(sig,bp_p) (internal_error ("SOFTWARE_SINGLE_STEP"), 0)
 #endif /* SOFTWARE_SINGLE_STEP_P */
 
 /* Blank target vector entries are initialized to target_ignore. */

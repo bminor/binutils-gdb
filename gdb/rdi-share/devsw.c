@@ -47,7 +47,9 @@ static void openLogFile ()
       perror ("fopen");
     }
   else
-    setlinebuf (angelDebugLogFile);
+    /* The following line is equivalent to: */
+    /* setlinebuf (angelDebugLogFile); */
+    setvbuf(angelDebugLogFile, (char *)NULL, _IOLBF, 0);
   
   time (&t);
   fprintf (angelDebugLogFile,"ADP log file opened at %s\n",asctime(localtime(&t)));

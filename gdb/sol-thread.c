@@ -857,6 +857,13 @@ sol_thread_create_inferior (exec_file, allargs, env)
    those variables don't show up until the library gets mapped and the symbol
    table is read in.  */
 
+/* This new_objfile event is now managed by a chained function pointer. 
+ * It is the callee's responsability to call the next client on the chain.
+ */
+
+/* Saved pointer to previous owner of the new_objfile event. */
+static void (*target_new_objfile_chain) PARAMS ((struct objfile *));
+
 void
 sol_thread_new_objfile (objfile)
      struct objfile *objfile;
@@ -866,13 +873,12 @@ sol_thread_new_objfile (objfile)
   if (!objfile)
     {
       sol_thread_active = 0;
-
-      return;
+      goto quit;
     }
 
   /* don't do anything if init failed to resolve the libthread_db library */
   if (!procfs_suppress_run)
-    return;
+    goto quit;
 
   /* Now, initialize the thread debugging library.  This needs to be done after
      the shared libraries are located because it needs information from the
@@ -880,15 +886,25 @@ sol_thread_new_objfile (objfile)
 
   val = p_td_init ();
   if (val != TD_OK)
-    error ("target_new_objfile: td_init: %s", td_err_string (val));
+    {
+      warning ("sol_thread_new_objfile: td_init: %s", td_err_string (val));
+      goto quit;
+    }
 
   val = p_td_ta_new (&main_ph, &main_ta);
   if (val == TD_NOLIBTHREAD)
-    return;
+    goto quit;
   else if (val != TD_OK)
-    error ("target_new_objfile: td_ta_new: %s", td_err_string (val));
+    {
+      warning ("sol_thread_new_objfile: td_ta_new: %s", td_err_string (val));
+      goto quit;
+    }
 
   sol_thread_active = 1;
+quit:
+  /* Call predecessor on chain, if any. */
+  if (target_new_objfile_chain)
+    target_new_objfile_chain (objfile);
 }
 
 /* Clean up after the inferior dies.  */
@@ -1698,6 +1714,9 @@ _initialize_sol_thread ()
   memcpy (&core_ops, &sol_core_ops, sizeof (struct target_ops));
   add_target (&core_ops);
 
+  /* Hook into new_objfile notification. */
+  target_new_objfile_chain = target_new_objfile_hook;
+  target_new_objfile_hook  = sol_thread_new_objfile;
   return;
 
 die:

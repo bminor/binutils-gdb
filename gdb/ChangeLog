@@ -1,3 +1,231 @@
+1999-11-08  Mark Salter  <msalter@cygnus.com>
+
+	* utils.c (floatformat_to_doublest): Fix conversion of denormals.
+
+Mon Nov  8 20:14:13 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* remote.c (get_memory_read_packet_size): For moment limit read
+ 	size to PBUFSIZ.
+	(putpkt_binary): Remove check on packet size.  Allocate ``cnt +
+ 	6'' characters for output buffer.
+	(get_memory_packet_size): When packet size is ``fixed'' and the
+ 	size is zero, return MAX_REMOTE_PACKET_SIZE.  Check that packets
+ 	are at least MIN_REMOTE_PACKET_SIZE.
+	(set_memory_packet_size): Print usage when ``args'' is NULL.
+
+Mon Nov  8 18:18:07 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h, utils.c (gdb_file_deallocate): Delete.
+	* corefile.c (memory_error): Use make_cleanup_gdb_file_delete.
+
+	* defs.h, utils.c (gdb_file_init_astring): Delete.
+
+	* defs.h, utils.c (tui_file_get_strbuf): Rename
+ 	gdb_file_get_strbuf.
+	(tui_file_adjust_strbuf): Rename gdb_file_adjust_strbuf.
+	* utils.c (error_stream, error_last_message): Update.
+	
+Mon Nov  8 16:28:00 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h, utils.c (gdb_fclose): Delete.
+	* defs.h (make_cleanup_gdb_file): Declare.
+	* utils.c (make_cleanup_gdb_file_delete, do_gdb_file_delete): New
+ 	functions.
+
+	* symmisc.c (maintenance_print_symbols,
+ 	maintenance_print_psymbols, maintenance_print_msymbols): Use
+ 	make_cleanup_gdb_file_delete.
+	* serial.c (do_serial_close): Use gdb_file_delete.
+
+Mon Nov  8 14:16:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (gdb_file_write_ftype, set_gdb_file_write,
+ 	gdb_file_write): Declare.
+
+	* utils.c (struct gdb_file): Add to_write member.
+	(gdb_file_write, set_gdb_file_write): New functions.
+	(gdb_file_new): Initialize the write method.
+	(null_file_write): New function.
+	(null_file_fputs, null_file_write): ``write'' calls ``fputs'' and
+ 	``fputs'' calls ``write'' when the other is implemented.
+	(stdio_file_new): Initialize write method.
+	(stdio_file_write): New function.
+
+	* utils.c (putchar_unfiltered, fputc_unfiltered): Use
+ 	gdb_file_write.
+
+Thu Nov  4 11:59:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (get_memory_packet_size, set_memory_packet_size,
+ 	build_memory_packet_size): New functions. Set / compute / update
+ 	the size of a memory read / write packet.
+	(set_memory_read_packet_size, set_memory_write_packet_size): New
+ 	functions.  Verify changes to the memory read / write packet size.
+	(prefered_memory_write_packet_size,
+ 	current_memory_write_packet_size, prefered_memory_read_packet_size,
+ 	current_memory_read_packet_size): New variables.
+	(get_memory_read_packet_size, get_memory_write_packet_size): New
+ 	functions. Determine the current memory read/write packet size.  A
+ 	function is needed as ``current_register_packet_size'', a variable
+ 	is used in the calculation.
+	(register_remote_packet_sizes, build_remote_packet_sizes):
+ 	Initialize packet sizes according the current architecture.
+	(remote_fetch_registers, remote_write_bytes, remote_read_bytes,
+ 	build_remote_gdbarch_data): Update.
+	(_initialize_remote): Add the commands ``set remote
+ 	memory-read-packet-size'' and ``set remote
+ 	memory-write-packet-size''.  Deprecate ``set remotepacketsize''.
+
+Sun Nov  7 18:09:54 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* target.h, target.c (target_load): Replace macro with a function.
+
+	* config/i960/tm-nindy960.h (ADDITIONAL_OPTION_HANDLER): Rewrite
+ 	replacing SET_TOP_LEVEL with catch_command_errors.
+	(nindy_open): Add extern declaration.
+
+	* top.h (top_level_val, SET_TOP_LEVEL): Delete.
+	* defs.h (catch_command_errors_ftype, catch_command_errors): Add
+ 	declarations.
+	* top.c (struct captured_command_args): Declare.
+	(do_captured_command, catch_command_errors): New functions. Call
+ 	the command function via catch_errors.
+	(catch_errors): Add more comments.
+	
+	* main.c (struct captured_main_args): Define.
+ 	(captured_main): New.  Rewrite main.  Replace SET_TOP_LEVEL with
+ 	calls to catch_command_errors. Delete calls to do_cleanups which
+ 	are now handled by catch_errors. Call the command loop via
+ 	captured_command_loop and catch_errors.
+	(main): Move code body to captured_main.  Call captured_main via
+ 	catch_errors.
+	(captured_command_loop): New function. Wrap call to command_loop.
+
+1999-11-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* procfs.c (unconditionally_kill_inferior) (init_procinfo)
+ 	(create_procinfo) (procfs_exit_handler) (proc_set_exec_trap)
+ 	(do_attach) (do_detach) (procfs_wait) (set_proc_siginfo)
+ 	(procfs_resume) (info_proc_mappings)
+ 	(modify_run_on_last_close_flag) (procfs_lwp_creation_handler)
+ 	(procfs_thread_alive): Remove unused variables, conditionalize
+ 	vars declarations to eliminate compiler warnings.
+
+Fri Nov  5 16:32:04 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* inferior.h (CALL_DUMMY_ADDRESS, CALL_DUMMY_START_OFFSET,
+ 	CALL_DUMMY_BREAKPOINT_OFFSET, CALL_DUMMY_LENGTH,
+ 	CALL_DUMMY_STACK_ADJUST, CALL_DUMMY_WORDS,
+ 	SIZEOF_CALL_DUMMY_WORDS, PUSH_DUMMY_FRAME, FIX_CALL_DUMMY,
+ 	STORE_STRUCT_RETURN), d10v-tdep.c (print_insn), d30v-tdep.c
+ 	(print_insn), target.h (SOFTWARE_SINGLE_STEP): Call internal_error
+ 	instead of abort.
+
+	* utils.c (stdio_file_delete, stdio_file_flush, stdio_file_fputs,
+ 	stdio_file_isatty, tui_file_delete, tui_file_isatty,
+ 	tui_file_rewind, tui_file_put, gdb_file_init_astring,
+ 	gdb_file_get_strbuf, gdb_file_adjust_strbuf): Call internal_error
+ 	instead of error.
+
+1999-11-04  Kevin Buettner  <kevinb@cygnus.com>
+
+	* remote.c (build_remote_gdbarch_data): Set remote_address_size...
+	(_initialize_remote) ...but don't set it here.  Also, tie
+	remote_address_size to the target architecture via call to
+	register_gdbarch_swap().
+
+1999-11-04  Jeff Holcomb  <jeffh@cygnus.com>
+
+	* remote-rdp.c (send_rdp): Fix typo.
+
+1999-11-04  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* breakpoint.c (commands_command): remove unprotected ref to 
+	args pointer (which may be null).
+
+1999-11-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infcmd.c (print_return_value): New function. Print return value
+ 	from finish command.
+	(finish_command_continuation): Call print_return_value().
+	(finish_command): Ditto.
+
+1999-11-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infrun.c (handle_inferior_event): Add calls to print_stop_reason()
+	for end of stepping range cases.
+	
+Thu Nov  4 17:46:36 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* event-loop.c (gdb_do_one_event): Delete SET_TOP_LEVEL call.
+  	Move error code to start_event_loop.
+	(start_event_loop): Call gdb_do_one_event via catch_errors.
+  	Handle caught errors.
+
+Thu Nov  4 17:36:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* breakpoint.c (get_number): Delete static declaration.
+
+1999-11-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* breakpoint.c (map_breakpoint_numbers): use a match count
+	instead of a goto.
+
+1999-11-03  Nick Clifton  <nickc@cygnus.com>
+
+	* config/mcore/tm-mcore.h (TARGET_BYTE_ORDER_DEFAULT): Change to
+	little endian.
+
+1999-11-02  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* target.h (target_new_objfile) replace macro with function pointer
+	hook.  Any module needing notification of new objfiles may claim
+	this hook.  Multiple notification clients must cooperate by saving
+	the previous pointer (if any) and calling it.
+	* sol-thread.c (_initialize_sol_thread): point new_objfile hook at
+	sol_thread_new_objfile.  Save old pointer if any.
+	(sol_thread_new_objfile): call old owner of event hook if any.
+	* hpux-thread.c (_initialize_hpux_thread, hpux_thread_new_objfile):
+	ditto.
+	* linux-thread.c (_initialize_linux_thread, linux_thread_new_objfile):
+	ditto.
+	symfile.c (symbol_file_add, clear_symtab_users) call the new
+	function pointer hook, instead of the macro.
+	* config/sparc/nm-sun4sol2.h: remove define of target_new_objfile.
+	* config/pa/nm-hppah.h: ditto.
+	* config/i386/nm-i386sol2.h: ditto.
+	* config/i386/nm-linux.h: ditto.
+	
+1999-11-02  Tom Tromey  <tromey@cygnus.com>
+
+	* NEWS: Mention breakpoint ranges.
+
+1999-11-02  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* rdi-share/devsw.c (openLogFile): Change a call to setlinebuf()
+	to an equivalent call to setvbuf() to prevent an unresolved
+	reference when building on cygwin.
+
+1999-11-02  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infrun.c (inferior_stop_reason): New enum, explicitly name the
+ 	resons for which the inferior stops.
+	(handle_inferior_event): Case TARGET_WAITKIND_EXITED: replace
+ 	printf's with call to print_stop_reason(). Case
+ 	TARGET_WAITKIND_SIGNALLED: Same.  When stopped by random signal:
+ 	Same.
+	(print_stop_reason): New static function. Print relevant messages
+ 	when stopping.
+
+1999-11-02  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* rdi-share/Makefile.in: Rename dependency from bytesex.o to
+	angel_bytesex.o.
+
+1999-11-02  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+        * kod.c: Remove prototype for show_kod() which is no longer used.
+
 1999-11-01  Michael Snyder <msnyder@cygnus.com>
 	    Tom Tromey  <tromey@cygnus.com>
 

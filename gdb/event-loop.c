@@ -256,7 +256,7 @@ static void create_file_handler (int fd, int mask, handler_func * proc, gdb_clie
 static void invoke_async_signal_handler (void);
 static void handle_file_event (int event_file_desc);
 static int gdb_wait_for_event (void);
-static int gdb_do_one_event (void);
+static int gdb_do_one_event (void *data);
 static int check_async_ready (void);
 static void async_queue_event (gdb_event * event_ptr, queue_position position);
 static gdb_event *create_file_event (int fd);
@@ -388,52 +388,61 @@ process_event (void)
 
 /* Process one high level event.  If nothing is ready at this time,
    wait for something to happen (via gdb_wait_for_event), then process
-   it.  Returns 1 if something was done otherwise returns 0 (this can
-   happen if there are no event sources to wait for). */
-static int
-gdb_do_one_event (void)
-{
-  int result = 0;
+   it.  Returns >0 if something was done otherwise returns <0 (this
+   can happen if there are no event sources to wait for).  If an error
+   occures catch_errors() which calls this function returns zero. */
 
+static int
+gdb_do_one_event (void *data)
+{
+  /* Any events already waiting in the queue? */
+  if (process_event ())
+    {
+      return 1;
+    }
+  
+  /* Are any timers that are ready? If so, put an event on the queue. */
+  poll_timers ();
+  
+  /* Wait for a new event.  If gdb_wait_for_event returns -1,
+     we should get out because this means that there are no
+     event sources left. This will make the event loop stop,
+     and the application exit. */
+  
+  if (gdb_wait_for_event () < 0)
+    {
+      return -1;
+    }
+  
+  /* Handle any new events occurred while waiting. */
+  if (process_event ())
+    {
+      return 1;
+    }
+  
+  /* If gdb_wait_for_event has returned 1, it means that one
+     event has been handled. We break out of the loop. */
+  return 1;
+}
+
+/* Start up the event loop. This is the entry point to the event loop
+   from the command loop. */
+
+void
+start_event_loop (void)
+{
+  /* Loop until there is nothing to do. This is the entry point to the
+     event loop engine. gdb_do_one_event, called via catch_errors()
+     will process one event for each invocation.  It blocks waits for
+     an event and then processes it.  >0 when an event is processed, 0
+     when catch_errors() caught an error and <0 when there are no
+     longer any event sources registered. */
   while (1)
     {
-      if (!SET_TOP_LEVEL ())
-	{
-	  /* Any events already waiting in the queue? */
-	  if (process_event ())
-	    {
-	      result = 1;
-	      break;
-	    }
-
-	  /* Are any timers that are ready? If so, put an event on the queue. */
-	  poll_timers ();
-
-	  /* Wait for a new event.  If gdb_wait_for_event returns -1,
-	     we should get out because this means that there are no
-	     event sources left. This will make the event loop stop,
-	     and the application exit. */
-
-	  result = gdb_wait_for_event ();
-	  if (result < 0)
-	    {
-	      result = 0;
-	      break;
-	    }
-
-	  /* Handle any new events occurred while waiting. */
-	  if (process_event ())
-	    {
-	      result = 1;
-	      break;
-	    }
-
-	  /* If gdb_wait_for_event has returned 1, it means that one
-	     event has been handled. We break out of the loop. */
-	  if (result)
-	    break;
-	}			/* end of if !set_top_level */
-      else
+      int result = catch_errors (gdb_do_one_event, 0, "", RETURN_MASK_ALL);
+      if (result < 0)
+	break;
+      if (result == 0)
 	{
 	  /* FIXME: this should really be a call to a hook that is
 	     interface specific, because interfaces can display the
@@ -443,21 +452,6 @@ gdb_do_one_event (void)
 	     whether display the prompt or not. */
 	}
     }
-  return result;
-}
-
-
-/* Start up the event loop. This is the entry point to the event loop
-   from the command loop. */
-void
-start_event_loop (void)
-{
-  /* Loop until there is something to do. This is the entry point to
-     the event loop engine. gdb_do_one_event will process one event
-     for each invocation.  It always returns 1, unless there are no
-     more event sources registered. In this case it returns 0.  */
-  while (gdb_do_one_event () != 0)
-    ;
 
   /* We are done with the event loop. There are no more event sources
      to listen to.  So we exit GDB. */

@@ -272,6 +272,12 @@ target_ignore ()
 {
 }
 
+void
+target_load (char *arg, int from_tty)
+{
+  (*current_target.to_load) (arg, from_tty);
+}
+
 /* ARGSUSED */
 static int
 nomemory (memaddr, myaddr, len, write, t)

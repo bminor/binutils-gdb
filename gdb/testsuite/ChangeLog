@@ -1,3 +1,44 @@
+Mon Nov  8 23:07:09 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* gdb.base/remote.exp: Test ``set remote memory-write-packet-sized
+ 	{limit,fixed}''.  Test ``set download-write-size''.
+
+Sun Nov  7 17:37:01 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/funcargs.exp: Rewrite stack traceback checks using
+ 	gdb_expect_list.
+
+Fri Nov  5 18:40:52 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* lib/gdb.exp (gdb_expect_list): Return a success/fail indication.
+
+1999-11-03  Mark Salter  <msalter@cygnus.com>
+
+	* gdb.base/break.exp: Fix "stub continue" pattern.
+
+1999-11-03  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdb.base/shlib-call.exp ("next to shr1"): Fix test name.
+
+1999-11-02  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdb.base/display.exp ("finish"): Add timeout clause.
+
+	* gdb.base/condbreak.exp ("run until breakpoint at marker1"): Add
+	plain prompt clause, so this doesn't have to time out in order to
+	fail.
+
+	* gdb.base/condbreak.exp, gdb.base/ena-dis-br.exp: XFAIL if the
+ 	breakpoint hit messages include an address.
+
+	* gdb.base/display.exp: Don't forget to escape parens in regular
+	expressions.  Unix regexp notatation sucks.
+
+1999-11-02  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/annota1.exp: Test for annotate-signalled: change output
+ 	order for 'signalled' message.
+
 1999-11-01  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From Jimmy Guo  <guo@cup.hp.com>:

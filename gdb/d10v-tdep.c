@@ -1312,7 +1312,7 @@ print_insn (memaddr, stream)
 {
   /* If there's no disassembler, something is very wrong.  */
   if (tm_print_insn == NULL)
-    abort ();
+    internal_error ("print_insn: no disassembler");
 
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     tm_print_insn_info.endian = BFD_ENDIAN_BIG;

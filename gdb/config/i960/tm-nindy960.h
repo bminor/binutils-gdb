@@ -60,13 +60,18 @@ extern char *nindy_ttyname;	/* Name of serial port to talk to nindy */
 /* If specified on the command line, open tty for talking to nindy,
    and download the executable file if one was specified.  */
 
-#define	ADDITIONAL_OPTION_HANDLER	\
-	if (!SET_TOP_LEVEL () && nindy_ttyname) {		\
-	  nindy_open (nindy_ttyname, !batch);			\
-	  if (!SET_TOP_LEVEL () && execarg) {			\
-		target_load (execarg, !batch);			\
-	  }							\
-	}
+extern void nindy_open (char *name, int from_tty);
+#define	ADDITIONAL_OPTION_HANDLER					\
+	if (nindy_ttyname != NULL)					\
+          {								\
+            if (catch_command_errors (nindy_open, nindy_ttyname,	\
+				      !batch, RETURN_MASK_ALL))		\
+	      {								\
+                if (execarg != NULL)					\
+                  catch_command_errors (target_load, execarg, !batch,	\
+					RETURN_MASK_ALL);		\
+	      }								\
+	  }
 
 /* If configured for i960 target, we take control before main loop
    and demand that we configure for a nindy target.  */

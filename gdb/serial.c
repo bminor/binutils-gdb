@@ -288,7 +288,7 @@ do_serial_close (serial_t scb, int really_close)
       serial_current_type = 0;
 
       /* XXX - What if serial_logfp == gdb_stdout or gdb_stderr? */
-      gdb_fclose (&serial_logfp);
+      gdb_file_delete (serial_logfp);
       serial_logfp = NULL;
     }
 

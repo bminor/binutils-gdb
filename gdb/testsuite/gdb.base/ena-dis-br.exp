@@ -97,10 +97,14 @@ gdb_expect {
   timeout {fail "(timeout) info break marker1"}
 }
 
+# See the comments in condbreak.exp for "run until breakpoint at marker1" 
+# for an explanation of the xfail below.
 send_gdb "continue\n"
 gdb_expect {
   -re "Breakpoint \[0-9\]*, marker1.*$gdb_prompt $"\
           {pass "continue to break marker1"}
+  -re "Breakpoint \[0-9\]*, $hex in marker1.*$gdb_prompt $"\
+          {xfail "continue to break marker1"}
   -re "$gdb_prompt $"\
           {fail "continue to break marker1"}
   timeout {fail "(timeout) continue to break marker1"}
@@ -141,10 +145,14 @@ gdb_expect {
   timeout {fail "(timeout) info auto-disabled break marker2"}
 }
 
+# See the comments in condbreak.exp for "run until breakpoint at marker1" 
+# for an explanation of the xfail below.
 send_gdb "continue\n"
 gdb_expect {
   -re "Breakpoint \[0-9\]*, marker2.*$gdb_prompt $"\
           {pass "continue to auto-disabled break marker2"}
+  -re "Breakpoint \[0-9\]*, $hex in marker2.*$gdb_prompt $"\
+          {xfail "continue to auto-disabled break marker2"}
   -re "$gdb_prompt $"\
           {fail "continue to auto-disabled break marker2"}
   timeout {fail "(timeout) continue to auto-disabled break marker2"}
@@ -325,13 +333,17 @@ gdb_expect {
 gdb_continue_to_end "no stop at ignored break marker1"
 rerun_to_main
 
+# See the comments in condbreak.exp for "run until breakpoint at marker1" 
+# for an explanation of the xfail below.
 send_gdb "continue\n"
 gdb_expect {
   -re "Breakpoint \[0-9\]*, marker1.*$gdb_prompt $"\
-          {pass "continue to break marker1"}
+          {pass "continue to break marker1, 2nd time"}
+  -re "Breakpoint \[0-9\]*, $hex in marker1.*$gdb_prompt $"\
+          {xfail "continue to break marker1, 2nd time"}
   -re "$gdb_prompt $"\
-          {fail "continue to break marker1"}
-  timeout {fail "(timeout) continue to break marker1"}
+          {fail "continue to break marker1, 2nd time"}
+  timeout {fail "(timeout) continue to break marker1, 2nd time"}
 }
 
 # Verify that we can specify both an ignore count and an auto-delete.

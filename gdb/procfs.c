@@ -2003,7 +2003,6 @@ unconditionally_kill_inferior (pi)
      struct procinfo *pi;
 {
   int ppid;
-  struct proc_ctl pctl;
 
   ppid = pi->prstatus.pr_ppid;
 
@@ -2231,8 +2230,9 @@ init_procinfo (pid, kill)
 {
   struct procinfo *pi = (struct procinfo *)
   xmalloc (sizeof (struct procinfo));
+#ifdef UNIXWARE
   struct sig_ctl sctl;
-  struct flt_ctl fctl;
+#endif /* UNIXWARE */
 
   memset ((char *) pi, 0, sizeof (*pi));
   if (!open_proc_file (pid, pi, O_RDWR, 1))
@@ -2313,8 +2313,9 @@ create_procinfo (pid)
      int pid;
 {
   struct procinfo *pi;
-  struct sig_ctl sctl;
+#ifdef PROCFS_USE_READ_WRITE
   struct flt_ctl fctl;
+#endif
 
   pi = find_procinfo (pid, 1);
   if (pi != NULL)
@@ -2381,7 +2382,9 @@ procfs_exit_handler (pi, syscall_num, why, rtnvalp, statvalp)
      int *statvalp;
 {
   struct procinfo *temp_pi, *next_pi;
+#if defined (UNIXWARE) || defined (PROCFS_USE_READ_WRITE)	
   struct proc_ctl pctl;
+#endif
 
 #ifdef UNIXWARE
   pctl.cmd = PCRUN;
@@ -2913,7 +2916,9 @@ proc_set_exec_trap ()
 #ifdef PR_ASYNC
   {
     long pr_flags;
+#ifdef PROCFS_USE_READ_WRITE
     struct proc_ctl pctl;
+#endif
 
 /* Solaris needs this to make procfs treat all threads seperately.  Without
    this, all threads halt whenever something happens to any thread.  Since
@@ -3250,8 +3255,9 @@ do_attach (pid)
      int pid;
 {
   struct procinfo *pi;
-  struct sig_ctl sctl;
+#ifdef PROCFS_USE_READ_WRITE
   struct flt_ctl fctl;
+#endif
   int nlwp, *lwps;
 
   pi = init_procinfo (pid, 0);
@@ -3285,7 +3291,9 @@ do_attach (pid)
 	  pi->was_stopped = 0;
 	  if (1 || query ("Process is currently running, stop it? "))
 	    {
+#ifdef PROCFS_USE_READ_WRITE
 	      long cmd;
+#endif
 	      /* Make it run again when we close it.  */
 	      modify_run_on_last_close_flag (pi->ctl_fd, 1);
 #ifdef PROCFS_USE_READ_WRITE
@@ -3447,8 +3455,9 @@ do_detach (signal)
 	  if (signal
 	  || (THE_PR_LWP (pi->prstatus).pr_flags & (PR_STOPPED | PR_ISTOP)))
 	    {
+#ifdef PROCFS_USE_READ_WRITE
 	      long cmd;
-	      struct proc_ctl pctl;
+#endif
 
 	      if (signal || !pi->was_stopped ||
 	      query ("Was stopped when attached, make it runnable again? "))
@@ -3516,7 +3525,6 @@ procfs_wait (pid, ourstatus)
   int checkerr = 0;
   int rtnval = -1;
   struct procinfo *pi;
-  struct proc_ctl pctl;
 
 scan_again:
 
@@ -3783,7 +3791,9 @@ set_proc_siginfo (pip, signo)
 {
   struct siginfo newsiginfo;
   struct siginfo *sip;
+#if defined (UNIXWARE) || defined (PROCFS_USE_READ_WRITE)	
   struct sigi_ctl sictl;
+#endif
 
 #ifdef PROCFS_DONT_PIOCSSIG_CURSIG
   /* With Alpha OSF/1 procfs, the kernel gets really confused if it
@@ -3844,7 +3854,9 @@ procfs_resume (pid, step, signo)
 {
   int signal_to_pass;
   struct procinfo *pi, *procinfo, *next_pi;
+#if defined (UNIXWARE) || defined (PROCFS_USE_READ_WRITE)	
   struct proc_ctl pctl;
+#endif
 
   pi = find_procinfo (pid == -1 ? inferior_pid : pid, 0);
 
@@ -4791,7 +4803,9 @@ info_proc_mappings (pip, summary)
   int nmap;
   struct prmap *prmaps;
   struct prmap *prmap;
+#ifdef PROCFS_USE_READ_WRITE
   struct stat sbuf;
+#endif
 
   if (!summary)
     {
@@ -5116,7 +5130,9 @@ modify_inherit_on_fork_flag (fd, flag)
   long pr_flags;
 #endif
   int retval = 0;
+#ifdef PROCFS_USE_READ_WRITE
   struct proc_ctl pctl;
+#endif
 
 #if defined (PIOCSET) || defined (PCSET)	/* New method */
   pr_flags = PR_FORK;
@@ -5192,7 +5208,9 @@ modify_run_on_last_close_flag (fd, flag)
   long pr_flags;
 #endif
   int retval = 0;
+#ifdef PROCFS_USE_READ_WRITE
   struct proc_ctl pctl;
+#endif
 
 #if defined (PIOCSET) || defined (PCSET)	/* New method */
   pr_flags = PR_RLC;
@@ -5473,7 +5491,9 @@ procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
 {
   int lwp_id;
   struct procinfo *childpi;
+#ifdef UNIXWARE
   struct proc_ctl pctl;
+#endif
 
   /* We've just detected the completion of an lwp_create system call.  Now we
      need to setup a procinfo struct for this thread, and notify the thread
@@ -5781,14 +5801,16 @@ procfs_thread_alive (pid)
     {
       next_pi = pi->next;
       if (pi->pid == pid)
-	if (procfs_read_status (pi))	/* alive */
-	  return 1;
-	else
-	  /* defunct (exited) */
-	  {
-	    close_proc_file (pi);
-	    return 0;
-	  }
+	{
+	  if (procfs_read_status (pi))	/* alive */
+	    return 1;
+	  else
+	    /* defunct (exited) */
+	    {
+	      close_proc_file (pi);
+	      return 0;
+	    }
+	}
     }
   return 0;
 }

@@ -121,6 +121,25 @@ void sim_queue_fn_di_write (
   element->kinds.fn_di_write.value = value;
 }
 
+void sim_queue_fn_xi_write (
+  SIM_CPU *cpu,
+  void (*write_function)(SIM_CPU *cpu, UINT, SI *),
+  UINT regno,
+  SI *value
+)
+{
+  CGEN_WRITE_QUEUE *q = CPU_WRITE_QUEUE (cpu);
+  CGEN_WRITE_QUEUE_ELEMENT *element = CGEN_WRITE_QUEUE_NEXT (q);
+  element->kind = CGEN_FN_XI_WRITE;
+  element->insn_address = CPU_PC_GET (cpu);
+  element->kinds.fn_xi_write.function = write_function;
+  element->kinds.fn_xi_write.regno = regno;
+  element->kinds.fn_xi_write.value[0] = value[0];
+  element->kinds.fn_xi_write.value[1] = value[1];
+  element->kinds.fn_xi_write.value[2] = value[2];
+  element->kinds.fn_xi_write.value[3] = value[3];
+}
+
 void sim_queue_fn_df_write (
   SIM_CPU *cpu,
   void (*write_function)(SIM_CPU *cpu, UINT, DI),
@@ -201,6 +220,19 @@ void sim_queue_mem_df_write (SIM_CPU *cpu, SI address, DF value)
   element->kinds.mem_df_write.value   = value;
 }
 
+void sim_queue_mem_xi_write (SIM_CPU *cpu, SI address, SI *value)
+{
+  CGEN_WRITE_QUEUE *q = CPU_WRITE_QUEUE (cpu);
+  CGEN_WRITE_QUEUE_ELEMENT *element = CGEN_WRITE_QUEUE_NEXT (q);
+  element->kind = CGEN_MEM_XI_WRITE;
+  element->insn_address = CPU_PC_GET (cpu);
+  element->kinds.mem_xi_write.address = address;
+  element->kinds.mem_xi_write.value[0] = value[0];
+  element->kinds.mem_xi_write.value[1] = value[1];
+  element->kinds.mem_xi_write.value[2] = value[2];
+  element->kinds.mem_xi_write.value[3] = value[3];
+}
+
 /* Execute a write stored on the write queue.  */
 void
 cgen_write_queue_element_execute (SIM_CPU *cpu, CGEN_WRITE_QUEUE_ELEMENT *item)
@@ -243,6 +275,11 @@ cgen_write_queue_element_execute (SIM_CPU *cpu, CGEN_WRITE_QUEUE_ELEMENT *item)
 					item->kinds.fn_df_write.regno,
 					item->kinds.fn_df_write.value);
       break;
+    case CGEN_FN_XI_WRITE:
+      item->kinds.fn_xi_write.function (cpu,
+					item->kinds.fn_xi_write.regno,
+					item->kinds.fn_xi_write.value);
+      break;
     case CGEN_FN_PC_WRITE:
       item->kinds.fn_pc_write.function (cpu, item->kinds.fn_pc_write.value);
       break;
@@ -270,6 +307,17 @@ cgen_write_queue_element_execute (SIM_CPU *cpu, CGEN_WRITE_QUEUE_ELEMENT *item)
       pc = item->insn_address;
       SETMEMDF (cpu, pc, item->kinds.mem_df_write.address,
 		item->kinds.mem_df_write.value);
+      break;
+    case CGEN_MEM_XI_WRITE:
+      pc = item->insn_address;
+      SETMEMSI (cpu, pc, item->kinds.mem_xi_write.address,
+		item->kinds.mem_xi_write.value[0]);
+      SETMEMSI (cpu, pc, item->kinds.mem_xi_write.address + 4,
+		item->kinds.mem_xi_write.value[1]);
+      SETMEMSI (cpu, pc, item->kinds.mem_xi_write.address + 8,
+		item->kinds.mem_xi_write.value[2]);
+      SETMEMSI (cpu, pc, item->kinds.mem_xi_write.address + 12,
+		item->kinds.mem_xi_write.value[3]);
       break;
     default:
       break; /* FIXME: for now....print message later.  */

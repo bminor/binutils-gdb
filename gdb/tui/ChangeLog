@@ -1,3 +1,16 @@
+Mon Nov  8 17:47:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* tuiRegs.c (_tuiRegisterFormat), tuiDisassem.c
+	(tuiSetDisassemContent): Replace gdb_file_init_astring with
+ 	tui_sfileopen.  Replace gdb_file_get_strbuf with
+ 	tui_file_get_strbuf.
+	
+Mon Nov  8 16:54:51 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* tuiRegs.c (_tuiRegisterFormat), tuiDisassem.c
+ 	(tuiSetDisassemContent): Repace gdb_file_deallocate with
+ 	gdb_file_delete. Replace gdb_file_init_astring with tui_sfileopen.
+
 Fri Sep 17 19:34:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* tuiSource.c: Include "source.h".

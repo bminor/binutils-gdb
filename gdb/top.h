@@ -42,19 +42,6 @@ extern char gdbinit[];
 #define SIGLONGJMP(buf,val)	longjmp(buf,val)
 #endif
 
-/* Temporary variable for SET_TOP_LEVEL.  */
-
-int top_level_val;
-
-/* Do a setjmp on error_return and quit_return.  catch_errors is
-   generally a cleaner way to do this, but main() would look pretty
-   ugly if it had to use catch_errors each time.  */
-
-#define SET_TOP_LEVEL() \
-  (((top_level_val = SIGSETJMP (error_return)) \
-    ? (PTR) 0 : (PTR) memcpy (quit_return, error_return, sizeof (SIGJMP_BUF))) \
-   , top_level_val)
-
 extern SIGJMP_BUF error_return;
 extern SIGJMP_BUF quit_return;
 

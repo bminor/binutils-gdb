@@ -18,8 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA. */
 
-/* The mcore is big endian */
-#define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN
+/* The mcore is little endian (by default) */
+#define TARGET_BYTE_ORDER_DEFAULT LITTLE_ENDIAN
 
 /* All registers are 32 bits */
 #define REGISTER_SIZE 4

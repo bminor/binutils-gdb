@@ -524,6 +524,25 @@ return_to_top_level (reason)
    catch_errors.  Note that quit should return to the command line
    fairly quickly, even if some further processing is being done.  */
 
+/* MAYBE: cagney/1999-11-05: catch_errors() in conjunction with
+   error() et.al. could maintain a set of flags that indicate the the
+   current state of each of the longjmp buffers.  This would give the
+   longjmp code the chance to detect a longjmp botch (before it gets
+   to longjmperror()).  Prior to 1999-11-05 this wasn't possible as
+   code also randomly used a SET_TOP_LEVEL macro that directly
+   initialize the longjmp buffers. */
+
+/* MAYBE: cagney/1999-11-05: Since the SET_TOP_LEVEL macro has been
+   eliminated it is now possible to use the stack to directly store
+   each longjmp buffer.  The global code would just need to update a
+   pointer (onto the stack - ulgh!?) indicating the current longjmp
+   buffers. It would certainly improve the performance of the longjmp
+   code since the memcpy's would be eliminated. */
+
+/* MAYBE: cagney/1999-11-05: Should the catch_erros and cleanups code
+   be consolidated into a single file instead of being distributed
+   between utils.c and top.c? */
+
 int
 catch_errors (func, args, errstring, mask)
      catch_errors_ftype *func;
@@ -561,6 +580,14 @@ catch_errors (func, args, errstring, mask)
       if (mask & RETURN_MASK_QUIT)
 	memcpy (quit_return, tmp_jmp, sizeof (SIGJMP_BUF));
       val = (*func) (args);
+      /* FIXME: cagney/1999-11-05: A correct FUNC implementaton will
+         clean things up (restoring the cleanup chain) to the state
+         they were just prior to the call.  Technically, this means
+         that the below restore_cleanups call is redundant.
+         Unfortunatly, many FUNC's are not that well behaved.
+         restore_cleanups should either be replaced with a do_cleanups
+         call (to cover the problem) or an assertion check to detect
+         bad FUNCs code. */
     }
   else
     val = 0;
@@ -579,6 +606,41 @@ catch_errors (func, args, errstring, mask)
     }
   return val;
 }
+
+struct captured_command_args
+  {
+    catch_command_errors_ftype *command;
+    char *arg;
+    int from_tty;
+  };
+
+static int
+do_captured_command (void *data)
+{
+  struct captured_command_args *context = data;
+  context->command (context->arg, context->from_tty);
+  /* FIXME: cagney/1999-11-07: Technically this do_cleanups() call
+     isn't needed.  Instead an assertion check could be made that
+     simply confirmed that the called function correctly cleaned up
+     after its self.  Unfortunatly, old code (prior to 1999-11-04) in
+     main.c was calling SET_TOP_LEVEL(), calling the command function,
+     and then *always* calling do_cleanups().  For the moment we
+     remain ``bug compatible'' with that old code..  */
+  do_cleanups (ALL_CLEANUPS);
+  return 1;
+}
+
+int
+catch_command_errors (catch_command_errors_ftype *command,
+		      char *arg, int from_tty, return_mask mask)
+{
+  struct captured_command_args args;
+  args.command = command;
+  args.arg = arg;
+  args.from_tty = from_tty;
+  return catch_errors (do_captured_command, &args, "", mask);
+}
+
 
 /* Handler for SIGHUP.  */
 

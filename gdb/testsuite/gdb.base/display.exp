@@ -136,14 +136,21 @@ gdb_test "c" ".*Breakpoint 4.*" "watch off"
 # "do_vars".
 send_gdb "finish\n"
 gdb_expect {
-    -re ".*do_loops();.*$gdb_prompt $" {
+    -re ".*do_loops\\(\\);.*$gdb_prompt $" {
 	send_gdb "step\n"
 	exp_continue
     }
     -re ".*do_vars.*$gdb_prompt $" {
 	pass "finish"
     }
-    default { fail "finish" ; gdb_suppress_tests; }
+    -re ".*$gdb_prompt $" {
+	fail "finish"
+	gdb_suppress_tests
+    }
+    timeout  {
+	fail "(timeout) finish"
+	gdb_suppress_tests
+    }
 }
 
 gdb_test "s" ".*do_vars.*.*27.*"

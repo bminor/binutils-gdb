@@ -20,12 +20,3 @@
 
 #include "nm-sysv4.h"
 
-#ifdef HAVE_THREAD_DB_LIB
-
-struct objfile;
-
-#define target_new_objfile(OBJFILE) sol_thread_new_objfile (OBJFILE)
-
-void sol_thread_new_objfile PARAMS ((struct objfile * objfile));
-
-#endif

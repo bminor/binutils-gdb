@@ -480,7 +480,7 @@ send_rdp (char *template,...)
 	  abort ();
 	}
     }
-  va_end (args);
+  va_end (alist);
 
   if (dst != buf)
     abort ();

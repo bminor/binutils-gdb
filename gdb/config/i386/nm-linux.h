@@ -76,14 +76,6 @@ i386_remove_watchpoint PARAMS ((int pid, CORE_ADDR addr, int len));
 
 /* Support for the glibc linuxthreads package. */
 
-#ifdef __STDC__
-struct objfile;
-#endif
-
-extern void
-linuxthreads_new_objfile PARAMS ((struct objfile *objfile));
-#define target_new_objfile(OBJFILE) linuxthreads_new_objfile (OBJFILE)
-
 extern char *
 linuxthreads_pid_to_str PARAMS ((int pid));
 #define target_pid_to_str(PID) linuxthreads_pid_to_str (PID)

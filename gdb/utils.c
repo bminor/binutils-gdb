@@ -211,6 +211,18 @@ make_cleanup_freeargv (arg)
   return make_my_cleanup (&cleanup_chain, do_freeargv, arg);
 }
 
+static void
+do_gdb_file_delete (void *arg)
+{
+  gdb_file_delete (arg);
+}
+
+struct cleanup *
+make_cleanup_gdb_file_delete (struct gdb_file *arg)
+{
+  return make_my_cleanup (&cleanup_chain, do_gdb_file_delete, arg);
+}
+
 struct cleanup *
 make_my_cleanup (pmy_chain, function, arg)
      struct cleanup **pmy_chain;
@@ -535,7 +547,7 @@ error (const char *string,...)
 NORETURN void
 error_stream (GDB_FILE *stream)
 {
-  error (gdb_file_get_strbuf (stream));
+  error (tui_file_get_strbuf (stream));
 }
 
 /* Get the last error message issued by gdb */
@@ -543,7 +555,7 @@ error_stream (GDB_FILE *stream)
 char *
 error_last_message (void)
 {
-  return (gdb_file_get_strbuf (gdb_lasterr));
+  return (tui_file_get_strbuf (gdb_lasterr));
 }
 
 /* This is to be called by main() at the very beginning */
@@ -1643,6 +1655,7 @@ begin_line ()
 /* ``struct gdb_file'' implementation that maps directly onto
    <stdio.h>'s FILE. */
 
+static gdb_file_write_ftype stdio_file_write;
 static gdb_file_fputs_ftype stdio_file_fputs;
 static gdb_file_isatty_ftype stdio_file_isatty;
 static gdb_file_delete_ftype stdio_file_delete;
@@ -1670,6 +1683,7 @@ stdio_file_new (file, close_p)
   stdio->close_p = close_p;
   set_gdb_file_data (gdb_file, stdio, stdio_file_delete);
   set_gdb_file_flush (gdb_file, stdio_file_flush);
+  set_gdb_file_write (gdb_file, stdio_file_write);
   set_gdb_file_fputs (gdb_file, stdio_file_fputs);
   set_gdb_file_isatty (gdb_file, stdio_file_isatty);
   return gdb_file;
@@ -1681,7 +1695,7 @@ stdio_file_delete (file)
 {
   struct stdio_file *stdio = gdb_file_data (file);
   if (stdio->magic != &stdio_file_magic)
-    error ("Internal error: bad magic number");
+    internal_error ("stdio_file_delete: bad magic number");
   if (stdio->close_p)
     {
       fclose (stdio->file);
@@ -1695,8 +1709,17 @@ stdio_file_flush (file)
 {
   struct stdio_file *stdio = gdb_file_data (file);
   if (stdio->magic != &stdio_file_magic)
-    error ("Internal error: bad magic number");
+    internal_error ("stdio_file_flush: bad magic number");
   fflush (stdio->file);
+}
+
+static void
+stdio_file_write (struct gdb_file *file, const char *buf, long length_buf)
+{
+  struct stdio_file *stdio = gdb_file_data (file);
+  if (stdio->magic != &stdio_file_magic)
+    internal_error ("stdio_file_write: bad magic number");
+  fwrite (buf, length_buf, 1, stdio->file);
 }
 
 static void
@@ -1706,7 +1729,7 @@ stdio_file_fputs (linebuffer, file)
 {
   struct stdio_file *stdio = gdb_file_data (file);
   if (stdio->magic != &stdio_file_magic)
-    error ("Internal error: bad magic number");
+    internal_error ("stdio_file_fputs: bad magic number");
   fputs (linebuffer, stdio->file);
 }
 
@@ -1716,7 +1739,7 @@ stdio_file_isatty (file)
 {
   struct stdio_file *stdio = gdb_file_data (file);
   if (stdio->magic != &stdio_file_magic)
-    error ("Internal error: bad magic number");
+    internal_error ("stdio_file_isatty: bad magic number");
   return (isatty (fileno (stdio->file)));
 }
 
@@ -1882,7 +1905,7 @@ tui_file_delete (file)
 {
   struct tui_stream *tmpstream = gdb_file_data (file);
   if (tmpstream->ts_magic != &tui_file_magic)
-    error ("Internal error: bad magic number");
+    internal_error ("tui_file_delete: bad magic number");
   if ((tmpstream->ts_streamtype == astring) &&
       (tmpstream->ts_strbuf != NULL))
     {
@@ -1919,7 +1942,7 @@ tui_sfileopen (n)
     }
   else
     /* Do not allocate the buffer now.  The first time something is printed
-       one will be allocated by gdb_file_adjust_strbuf()  */
+       one will be allocated by tui_file_adjust_strbuf()  */
     tmpstream->ts_strbuf = NULL;
   tmpstream->ts_buflen = n;
   return file;
@@ -1931,7 +1954,7 @@ tui_file_isatty (file)
 {
   struct tui_stream *stream = gdb_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
-    error ("Internal error: bad magic number");
+    internal_error ("tui_file_isatty: bad magic number");
   if (stream->ts_streamtype == afile)
     return (isatty (fileno (stream->ts_filestream)));
   else
@@ -1944,7 +1967,7 @@ tui_file_rewind (file)
 {
   struct tui_stream *stream = gdb_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
-    error ("Internal error: bad magic number");
+    internal_error ("tui_file_rewind: bad magic number");
   stream->ts_strbuf[0] = '\0';
 }
 
@@ -1955,7 +1978,7 @@ tui_file_put (file, dest)
 {
   struct tui_stream *stream = gdb_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
-    error ("Internal error: bad magic number");
+    internal_error ("tui_file_put: bad magic number");
   if (stream->ts_streamtype == astring)
     {
       fputs_unfiltered (stream->ts_strbuf, dest);
@@ -2001,7 +2024,7 @@ tui_file_fputs (linebuffer, file)
 
 	  if (stream->ts_streamtype == astring)
 	    {
-	      gdb_file_adjust_strbuf (strlen (linebuffer), stream);
+	      tui_file_adjust_strbuf (strlen (linebuffer), stream);
 	      strcat (stream->ts_strbuf, linebuffer);
 	    }
 	  else
@@ -2020,7 +2043,7 @@ tui_file_fputs (linebuffer, file)
 	  /* The normal case - just do a fputs() */
 	  if (stream->ts_streamtype == astring)
 	    {
-	      gdb_file_adjust_strbuf (strlen (linebuffer), stream);
+	      tui_file_adjust_strbuf (strlen (linebuffer), stream);
 	      strcat (stream->ts_strbuf, linebuffer);
 	    }
 	  else
@@ -2031,7 +2054,7 @@ tui_file_fputs (linebuffer, file)
 #else
       if (stream->ts_streamtype == astring)
 	{
-	  gdb_file_adjust_strbuf (strlen (linebuffer), file);
+	  tui_file_adjust_strbuf (strlen (linebuffer), file);
 	  strcat (stream->ts_strbuf, linebuffer);
 	}
       else
@@ -2040,60 +2063,24 @@ tui_file_fputs (linebuffer, file)
     }
 }
 
-/* DEPRECATED: Use tui_sfileopen() instead */
-
-GDB_FILE *
-gdb_file_init_astring (n)
-     int n;
-{
-  struct gdb_file *file = tui_file_new ();
-  struct tui_stream *tmpstream = gdb_file_data (file);
-  if (tmpstream->ts_magic != &tui_file_magic)
-    error ("Internal error: bad magic number");
-
-  tmpstream->ts_streamtype = astring;
-  tmpstream->ts_filestream = NULL;
-  if (n > 0)
-    {
-      tmpstream->ts_strbuf = xmalloc ((n + 1) * sizeof (char));
-      tmpstream->ts_strbuf[0] = '\0';
-    }
-  else
-    tmpstream->ts_strbuf = NULL;
-  tmpstream->ts_buflen = n;
-
-  return file;
-}
-
-void
-gdb_file_deallocate (streamptr)
-     GDB_FILE **streamptr;
-{
-  gdb_file_delete (*streamptr);
-  *streamptr = NULL;
-}
-
 char *
-gdb_file_get_strbuf (file)
-     GDB_FILE *file;
+tui_file_get_strbuf (struct gdb_file *file)
 {
   struct tui_stream *stream = gdb_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
-    error ("Internal error: bad magic number");
+    internal_error ("tui_file_get_strbuf: bad magic number");
   return (stream->ts_strbuf);
 }
 
 /* adjust the length of the buffer by the amount necessary
    to accomodate appending a string of length N to the buffer contents */
 void
-gdb_file_adjust_strbuf (n, file)
-     int n;
-     GDB_FILE *file;
+tui_file_adjust_strbuf (int n, struct gdb_file *file)
 {
   struct tui_stream *stream = gdb_file_data (file);
   int non_null_chars;
   if (stream->ts_magic != &tui_file_magic)
-    error ("Internal error: bad magic number");
+    internal_error ("tui_file_adjust_strbuf: bad magic number");
 
   if (stream->ts_streamtype != astring)
     return;
@@ -2150,18 +2137,10 @@ tui_file_flush (file)
     }
 }
 
-void
-gdb_fclose (streamptr)
-     GDB_FILE **streamptr;
-{
-  gdb_file_delete (*streamptr);
-  *streamptr = NULL;
-}
-
-
 /* Implement the ``struct gdb_file'' object. */
 
 static gdb_file_isatty_ftype null_file_isatty;
+static gdb_file_write_ftype null_file_write;
 static gdb_file_fputs_ftype null_file_fputs;
 static gdb_file_flush_ftype null_file_flush;
 static gdb_file_delete_ftype null_file_delete;
@@ -2171,6 +2150,7 @@ static gdb_file_put_ftype null_file_put;
 struct gdb_file
   {
     gdb_file_flush_ftype *to_flush;
+    gdb_file_write_ftype *to_write;
     gdb_file_fputs_ftype *to_fputs;
     gdb_file_delete_ftype *to_delete;
     gdb_file_isatty_ftype *to_isatty;
@@ -2185,6 +2165,7 @@ gdb_file_new ()
   struct gdb_file *file = xmalloc (sizeof (struct gdb_file));
   set_gdb_file_data (file, NULL, null_file_delete);
   set_gdb_file_flush (file, null_file_flush);
+  set_gdb_file_write (file, null_file_write);
   set_gdb_file_fputs (file, null_file_fputs);
   set_gdb_file_isatty (file, null_file_isatty);
   set_gdb_file_rewind (file, null_file_rewind);
@@ -2230,11 +2211,47 @@ null_file_flush (file)
 }
 
 static void
+null_file_write (struct gdb_file *file,
+		 const char *buf,
+		 long sizeof_buf)
+{
+  if (file->to_fputs == null_file_fputs)
+    /* Both the write and fputs methods are null. Discard the
+       request. */
+    return;
+  else
+    {
+      /* The fputs method isn't null, slowly pass the write request
+         onto that.  FYI, this isn't as bad as it may look - the
+         current (as of 1999-11-07) printf_* function calls fputc and
+         fputc does exactly the below.  By having a write function it
+         is possible to clean up that code.  */
+      int i;
+      char b[2];
+      b[1] = '\0';
+      for (i = 0; i < sizeof_buf; i++)
+	{
+	  b[0] = buf[i];
+	  file->to_fputs (b, file);
+	}
+      return;
+    }
+}
+
+static void
 null_file_fputs (buf, file)
      const char *buf;
      struct gdb_file *file;
 {
-  return;
+  if (file->to_write == null_file_write)
+    /* Both the write and fputs methods are null. Discard the
+       request. */
+    return;
+  else
+    {
+      /* The write method was implemented, use that. */
+      file->to_write (file, buf, strlen (buf));
+    }
 }
 
 static void
@@ -2281,6 +2298,14 @@ gdb_file_put (file, dest)
 }
 
 void
+gdb_file_write (struct gdb_file *file,
+		const char *buf,
+		long length_buf)
+{
+  file->to_write (file, buf, length_buf);
+}
+
+void
 fputs_unfiltered (buf, file)
      const char *buf;
      struct gdb_file *file;
@@ -2318,6 +2343,13 @@ set_gdb_file_put (file, put)
      gdb_file_put_ftype *put;
 {
   file->to_put = put;
+}
+
+void
+set_gdb_file_write (struct gdb_file *file,
+		    gdb_file_write_ftype *write)
+{
+  file->to_write = write;
 }
 
 void
@@ -2467,11 +2499,8 @@ int
 putchar_unfiltered (c)
      int c;
 {
-  char buf[2];
-
-  buf[0] = c;
-  buf[1] = 0;
-  fputs_unfiltered (buf, gdb_stdout);
+  char buf = c;
+  gdb_file_write (gdb_stdout, &buf, 1);
   return c;
 }
 
@@ -2480,11 +2509,8 @@ fputc_unfiltered (c, stream)
      int c;
      GDB_FILE *stream;
 {
-  char buf[2];
-
-  buf[0] = c;
-  buf[1] = 0;
-  fputs_unfiltered (buf, stream);
+  char buf = c;
+  gdb_file_write (stream, &buf, 1);
   return c;
 }
 
@@ -3122,9 +3148,12 @@ floatformat_to_doublest (fmt, from, to)
 
   special_exponent = exponent == 0 || exponent == fmt->exp_nan;
 
-/* Don't bias zero's, denorms or NaNs.  */
+/* Don't bias NaNs. Use minimum exponent for denorms. For simplicity,
+   we don't check for zero as the exponent doesn't matter. */
   if (!special_exponent)
     exponent -= fmt->exp_bias;
+  else if (exponent == 0)
+    exponent = 1 - fmt->exp_bias;
 
   /* Build the result algebraically.  Might go infinite, underflow, etc;
      who cares. */

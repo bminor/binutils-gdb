@@ -395,20 +395,20 @@ extern int attach_flag;
 #endif /* No CALL_DUMMY_LOCATION.  */
 
 #if !defined (CALL_DUMMY_ADDRESS)
-#define CALL_DUMMY_ADDRESS() (abort (), 0)	/* anything to abort GDB */
+#define CALL_DUMMY_ADDRESS() (internal_error ("CALL_DUMMY_ADDRESS"), 0)
 #endif
 #if !defined (CALL_DUMMY_START_OFFSET)
-#define CALL_DUMMY_START_OFFSET (abort (), 0)	/* anything to abort GDB */
+#define CALL_DUMMY_START_OFFSET (internal_error ("CALL_DUMMY_START_OFFSET"), 0)
 #endif
 #if !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
 #define CALL_DUMMY_BREAKPOINT_OFFSET_P (0)
-#define CALL_DUMMY_BREAKPOINT_OFFSET (abort (), 0)	/* anything to abort GDB */
+#define CALL_DUMMY_BREAKPOINT_OFFSET (internal_error ("CALL_DUMMY_BREAKPOINT_OFFSET"), 0)
 #endif
 #if !defined CALL_DUMMY_BREAKPOINT_OFFSET_P
 #define CALL_DUMMY_BREAKPOINT_OFFSET_P (1)
 #endif
 #if !defined (CALL_DUMMY_LENGTH)
-#define CALL_DUMMY_LENGTH (abort (), 0)		/* anything to abort GDB */
+#define CALL_DUMMY_LENGTH (internal_error ("CALL_DUMMY_LENGTH"), 0)
 #endif
 
 #if defined (CALL_DUMMY_STACK_ADJUST)
@@ -417,7 +417,7 @@ extern int attach_flag;
 #endif
 #endif
 #if !defined (CALL_DUMMY_STACK_ADJUST)
-#define CALL_DUMMY_STACK_ADJUST (abort (), 0)
+#define CALL_DUMMY_STACK_ADJUST (internal_error ("CALL_DUMMY_STACK_ADJUST"), 0)
 #endif
 #if !defined (CALL_DUMMY_STACK_ADJUST_P)
 #define CALL_DUMMY_STACK_ADJUST_P (0)
@@ -436,7 +436,7 @@ extern int attach_flag;
 extern LONGEST call_dummy_words[];
 #define CALL_DUMMY_WORDS (call_dummy_words)
 #else
-#define CALL_DUMMY_WORDS (abort (), (void*) 0)	/* anything to abort GDB */
+#define CALL_DUMMY_WORDS (internal_error ("CALL_DUMMY_WORDS"), (void*) 0)
 #endif
 #endif
 
@@ -445,20 +445,20 @@ extern LONGEST call_dummy_words[];
 extern int sizeof_call_dummy_words;
 #define SIZEOF_CALL_DUMMY_WORDS (sizeof_call_dummy_words)
 #else
-#define SIZEOF_CALL_DUMMY_WORDS (abort (), 0)	/* anything to abort GDB */
+#define SIZEOF_CALL_DUMMY_WORDS (internal_error ("SIZEOF_CALL_DUMMY_WORDS"), 0)
 #endif
 #endif
 
 #if !defined PUSH_DUMMY_FRAME
-#define PUSH_DUMMY_FRAME (abort ())
+#define PUSH_DUMMY_FRAME (internal_error ("PUSH_DUMMY_FRAME"), 0)
 #endif
 
 #if !defined FIX_CALL_DUMMY
-#define FIX_CALL_DUMMY(a1,a2,a3,a4,a5,a6,a7) (abort ())
+#define FIX_CALL_DUMMY(a1,a2,a3,a4,a5,a6,a7) (internal_error ("FIX_CALL_DUMMY"), 0)
 #endif
 
 #if !defined STORE_STRUCT_RETURN
-#define STORE_STRUCT_RETURN(a1,a2) (abort ())
+#define STORE_STRUCT_RETURN(a1,a2) (internal_error ("STORE_STRUCT_RETURN"), 0)
 #endif
 
 

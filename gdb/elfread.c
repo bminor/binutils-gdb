@@ -375,7 +375,7 @@ elf_symtab_read (objfile, dynamic)
 	      if (sym->section == &bfd_abs_section)
 		{
 		  /* This is a hack to get the minimal symbol type
-		     right for Irix 5, which has absolute adresses
+		     right for Irix 5, which has absolute addresses
 		     with special section indices for dynamic symbols. */
 		  unsigned short shndx =
 		  ((elf_symbol_type *) sym)->internal_elf_sym.st_shndx;

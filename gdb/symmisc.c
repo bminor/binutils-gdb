@@ -543,7 +543,7 @@ Arguments missing: an output file name and an optional symbol file name");
   outfile = gdb_fopen (filename, FOPEN_WT);
   if (outfile == 0)
     perror_with_name (filename);
-  make_cleanup ((make_cleanup_func) gdb_fclose, (char *) &outfile);
+  make_cleanup_gdb_file_delete (outfile);
 
   immediate_quit++;
   ALL_SYMTABS (objfile, s)
@@ -780,7 +780,7 @@ maintenance_print_psymbols (args, from_tty)
   outfile = gdb_fopen (filename, FOPEN_WT);
   if (outfile == 0)
     perror_with_name (filename);
-  make_cleanup ((make_cleanup_func) gdb_fclose, &outfile);
+  make_cleanup_gdb_file_delete (outfile);
 
   immediate_quit++;
   ALL_PSYMTABS (objfile, ps)
@@ -928,7 +928,7 @@ maintenance_print_msymbols (args, from_tty)
   outfile = gdb_fopen (filename, FOPEN_WT);
   if (outfile == 0)
     perror_with_name (filename);
-  make_cleanup ((make_cleanup_func) gdb_fclose, &outfile);
+  make_cleanup_gdb_file_delete (outfile);
 
   immediate_quit++;
   ALL_OBJFILES (objfile)

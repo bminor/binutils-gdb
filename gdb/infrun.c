@@ -1160,6 +1160,24 @@ enum infwait_states
   infwait_nonstep_watch_state
 };
 
+/* Why did the inferior stop? Used to print the appropriate messages
+   to the interface from within handle_inferior_event(). */
+enum inferior_stop_reason
+{
+  /* We don't know why. */
+  STOP_UNKNOWN,
+  /* Step, next, nexti, stepi finished. */
+  END_STEPPING_RANGE,
+  /* Found breakpoint. */
+  BREAKPOINT_HIT,
+  /* Inferior terminated by signal. */
+  SIGNAL_EXITED,
+  /* Inferior exited. */
+  EXITED,
+  /* Inferior received signal, and user asked to be notified. */
+  SIGNAL_RECEIVED
+};
+
 /* This structure contains what used to be local variables in
    wait_for_inferior.  Probably many of them can return to being
    locals in handle_inferior_event.  */
@@ -1202,6 +1220,7 @@ static void step_over_function (struct execution_control_state *ecs);
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
+static void print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info);
 
 /* Wait for control to return from inferior to debugger.
    If inferior gets a signal, we may decide to start it up again
@@ -1499,12 +1518,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       case TARGET_WAITKIND_EXITED:
 	target_terminal_ours ();	/* Must do this before mourn anyway */
-	annotate_exited (ecs->ws.value.integer);
-	if (ecs->ws.value.integer)
-	  printf_filtered ("\nProgram exited with code 0%o.\n",
-			   (unsigned int) ecs->ws.value.integer);
-	else
-	  printf_filtered ("\nProgram exited normally.\n");
+	print_stop_reason (EXITED, ecs->ws.value.integer);
 
 	/* Record the exit code in the convenience variable $_exitcode, so
 	   that the user can inspect this again later.  */
@@ -1522,7 +1536,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	stop_print_frame = 0;
 	stop_signal = ecs->ws.value.sig;
 	target_terminal_ours ();	/* Must do this before mourn anyway */
-	annotate_signalled ();
 
 	/* This looks pretty bogus to me.  Doesn't TARGET_WAITKIND_SIGNALLED
 	   mean it is already dead?  This has been here since GDB 2.8, so
@@ -1531,18 +1544,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   rather than trying to change it here --kingdon, 5 Dec 1994.  */
 	target_kill ();		/* kill mourns as well */
 
-	printf_filtered ("\nProgram terminated with signal ");
-	annotate_signal_name ();
-	printf_filtered ("%s", target_signal_to_name (stop_signal));
-	annotate_signal_name_end ();
-	printf_filtered (", ");
-	annotate_signal_string ();
-	printf_filtered ("%s", target_signal_to_string (stop_signal));
-	annotate_signal_string_end ();
-	printf_filtered (".\n");
-
-	printf_filtered ("The program no longer exists.\n");
-	gdb_flush (gdb_stdout);
+	print_stop_reason (SIGNAL_EXITED, stop_signal);
 	singlestep_breakpoints_inserted_p = 0;	/*SOFTWARE_SINGLE_STEP_P */
 	stop_stepping (ecs);
 	return;
@@ -2182,17 +2184,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  {
 	    printed = 1;
 	    target_terminal_ours_for_output ();
-	    annotate_signal ();
-	    printf_filtered ("\nProgram received signal ");
-	    annotate_signal_name ();
-	    printf_filtered ("%s", target_signal_to_name (stop_signal));
-	    annotate_signal_name_end ();
-	    printf_filtered (", ");
-	    annotate_signal_string ();
-	    printf_filtered ("%s", target_signal_to_string (stop_signal));
-	    annotate_signal_string_end ();
-	    printf_filtered (".\n");
-	    gdb_flush (gdb_stdout);
+	    print_stop_reason (SIGNAL_RECEIVED, stop_signal);
 	  }
 	if (signal_stop[stop_signal])
 	  {
@@ -2704,6 +2696,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	       supposed to be stepping at the assembly language level
 	       ("stepi").  Just stop.  */
 	    stop_step = 1;
+	    print_stop_reason (END_STEPPING_RANGE, 0);
 	    stop_stepping (ecs);
 	    return;
 	  }
@@ -2775,6 +2768,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* It is stepi or nexti.  We always want to stop stepping after
 	   one instruction.  */
 	stop_step = 1;
+	print_stop_reason (END_STEPPING_RANGE, 0);
 	stop_stepping (ecs);
 	return;
       }
@@ -2820,6 +2814,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   when we do "s" in a function with no line numbers,
 	   or can this happen as a result of a return or longjmp?).  */
 	stop_step = 1;
+	print_stop_reason (END_STEPPING_RANGE, 0);
 	stop_stepping (ecs);
 	return;
       }
@@ -2832,6 +2827,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   That is said to make things like for (;;) statements work
 	   better.  */
 	stop_step = 1;
+	print_stop_reason (END_STEPPING_RANGE, 0);
 	stop_stepping (ecs);
 	return;
       }
@@ -2851,6 +2847,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   in which after skipping the prologue we better stop even though
 	   we will be in mid-line.  */
 	stop_step = 1;
+	print_stop_reason (END_STEPPING_RANGE, 0);
 	stop_stepping (ecs);
 	return;
       }
@@ -2957,6 +2954,7 @@ step_into_function (struct execution_control_state *ecs)
     {
       /* We are already there: stop now.  */
       stop_step = 1;
+	print_stop_reason (END_STEPPING_RANGE, 0);
       stop_stepping (ecs);
       return;
     }
@@ -3191,6 +3189,74 @@ prepare_to_wait (struct execution_control_state *ecs)
      want to wait for the inferior some more and get called again
      soon.  */
   ecs->wait_some_more = 1;
+}
+
+/* Print why the inferior has stopped. We always print something when
+   the inferior exits, or receives a signal. The rest of the cases are
+   dealt with later on in normal_stop() and print_it_typical().  Ideally
+   there should be a call to this function from handle_inferior_event()
+   each time stop_stepping() is called.*/
+static void
+print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
+{
+  switch (stop_reason)
+    {
+    case STOP_UNKNOWN:
+      /* We don't deal with these cases from handle_inferior_event()
+         yet. */
+      break;
+    case END_STEPPING_RANGE:
+      /* We are done with a step/next/si/ni command. */
+      /* For now print nothing. */
+      break;
+    case BREAKPOINT_HIT:
+      /* We found a breakpoint. */
+      /* For now print nothing. */
+      break;
+    case SIGNAL_EXITED:
+      /* The inferior was terminated by a signal. */
+      annotate_signalled ();
+      printf_filtered ("\nProgram terminated with signal ");
+      annotate_signal_name ();
+      printf_filtered ("%s", target_signal_to_name (stop_info));
+      annotate_signal_name_end ();
+      printf_filtered (", ");
+      annotate_signal_string ();
+      printf_filtered ("%s", target_signal_to_string (stop_info));
+      annotate_signal_string_end ();
+      printf_filtered (".\n");
+
+      printf_filtered ("The program no longer exists.\n");
+      gdb_flush (gdb_stdout);
+      break;
+    case EXITED:
+      /* The inferior program is finished. */
+      annotate_exited (stop_info);
+      if (stop_info)
+	printf_filtered ("\nProgram exited with code 0%o.\n",
+			 (unsigned int) stop_info);
+      else
+	printf_filtered ("\nProgram exited normally.\n");
+      break;
+    case SIGNAL_RECEIVED:
+      /* Signal received. The signal table tells us to print about
+         it. */
+      annotate_signal ();
+      printf_filtered ("\nProgram received signal ");
+      annotate_signal_name ();
+      printf_filtered ("%s", target_signal_to_name (stop_info));
+      annotate_signal_name_end ();
+      printf_filtered (", ");
+      annotate_signal_string ();
+      printf_filtered ("%s", target_signal_to_string (stop_info));
+      annotate_signal_string_end ();
+      printf_filtered (".\n");
+      gdb_flush (gdb_stdout);      
+      break;
+    default:
+      internal_error ("print_stop_reason: unrecognized enum value");
+      break;
+    }
 }
 
 

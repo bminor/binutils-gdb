@@ -1164,17 +1164,27 @@ proc gdb_expect { args } {
     }
 }
 
+# gdb_expect_list MESSAGE SENTINAL LIST -- expect a sequence of outputs
 #
 # Check for long sequence of output by parts.
-# TEST: is the test message.
+# MESSAGE: is the test message to be printed with the test success/fail.
 # SENTINEL: Is the terminal pattern indicating that output has finished.
 # LIST: is the sequence of outputs to match.
 # If the sentinel is recognized early, it is considered an error.
 #
+# Returns:
+#    1 if the test failed,
+#    0 if the test passes,
+#   -1 if there was an internal error.
+#
 proc gdb_expect_list {test sentinal list} {
     global gdb_prompt
+    global suppress_flag
     set index 0
     set ok 1
+    if { $suppress_flag } {
+	set ok 0
+    }
     while { ${index} < [llength ${list}] } {
 	set pattern [lindex ${list} ${index}]
         set index [expr ${index} + 1]
@@ -1211,6 +1221,11 @@ proc gdb_expect_list {test sentinal list} {
 		fail "${test}, pattern ${index}"
 	    }
 	}
+    }
+    if { ${ok} } {
+	return 0
+    } else {
+	return 1
     }
 }
 

@@ -237,7 +237,7 @@ memory_error (status, memaddr)
      CORE_ADDR memaddr;
 {
   GDB_FILE *tmp_stream = tui_sfileopen (130);
-  make_cleanup ((make_cleanup_func) gdb_file_deallocate, &tmp_stream);
+  make_cleanup_gdb_file_delete (tmp_stream);
 
   error_begin ();
 

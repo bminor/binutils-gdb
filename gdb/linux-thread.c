@@ -831,11 +831,19 @@ update_stop_threads (test_pid)
     do_cleanups (old_chain);
 }
 
-/* This routine is called whenever a new symbol table is read in, or when all
-   symbol tables are removed.  libpthread can only be initialized when it
-   finds the right variables in libpthread.so.  Since it's a shared library,
-   those variables don't show up until the library gets mapped and the symbol
-   table is read in.  */
+/* This routine is called whenever a new symbol table is read in, or
+   when all symbol tables are removed.  linux-thread event handling
+   can only be initialized when we find the right variables in
+   libpthread.so.  Since it's a shared library, those variables don't
+   show up until the library gets mapped and the symbol table is read
+   in.  */
+
+/* This new_objfile event is now managed by a chained function pointer. 
+ * It is the callee's responsability to call the next client on the chain.
+ */
+
+/* Saved pointer to previous owner of the new_objfile event. */
+static void (*target_new_objfile_chain) PARAMS ((struct objfile *));
 
 void
 linuxthreads_new_objfile (objfile)
@@ -853,17 +861,17 @@ linuxthreads_new_objfile (objfile)
       /* Indicate that we don't know anything's address any more.  */
       linuxthreads_max = 0;
 
-      return;
+      goto quit;
     }
 
   /* If we've already found our variables in another objfile, don't
      bother looking for them again.  */
   if (linuxthreads_max)
-    return;
+    goto quit;
 
   if (! lookup_minimal_symbol ("__pthread_initial_thread", NULL, objfile))
     /* This object file isn't the pthreads library.  */
-    return;
+    goto quit;
 
   if ((ms = lookup_minimal_symbol ("__pthread_threads_debug",
 				   NULL, objfile)) == NULL)
@@ -874,7 +882,7 @@ This program seems to use POSIX threads, but the thread library used\n\
 does not support debugging.  This may make using GDB difficult.  Don't\n\
 set breakpoints or single-step through code that might be executed by\n\
 any thread other than the main thread.");
-      return;
+      goto quit;
     }
   linuxthreads_debug = SYMBOL_VALUE_ADDRESS (ms);
 
@@ -888,7 +896,7 @@ any thread other than the main thread.");
       fprintf_unfiltered (gdb_stderr,
 			  "Unable to find linuxthreads symbol \"%s\"\n",
 			  "__pthread_sizeof_handle");
-      return;
+      goto quit;
     }
 
   if ((ms = lookup_minimal_symbol ("__pthread_offsetof_descr",
@@ -900,7 +908,7 @@ any thread other than the main thread.");
       fprintf_unfiltered (gdb_stderr,
 			  "Unable to find linuxthreads symbol \"%s\"\n",
 			  "__pthread_offsetof_descr");
-      return;
+      goto quit;
     }
 	 
   if ((ms = lookup_minimal_symbol ("__pthread_offsetof_pid",
@@ -912,11 +920,11 @@ any thread other than the main thread.");
       fprintf_unfiltered (gdb_stderr,
 			  "Unable to find linuxthreads symbol \"%s\"\n",
 			  "__pthread_offsetof_pid");
-      return;
+      goto quit;
     }
 
   if (! find_all_signal_vars (objfile))
-    return;
+    goto quit;
 
   /* Read adresses of internal structures to access */
   if ((ms = lookup_minimal_symbol ("__pthread_handles",
@@ -925,7 +933,7 @@ any thread other than the main thread.");
       fprintf_unfiltered (gdb_stderr,
 			  "Unable to find linuxthreads symbol \"%s\"\n",
 			  "__pthread_handles");
-      return;
+      goto quit;
     }
   linuxthreads_handles = SYMBOL_VALUE_ADDRESS (ms);
 
@@ -935,7 +943,7 @@ any thread other than the main thread.");
       fprintf_unfiltered (gdb_stderr,
 			  "Unable to find linuxthreads symbol \"%s\"\n",
 			  "__pthread_handles_num");
-      return;
+      goto quit;
     }
   linuxthreads_num = SYMBOL_VALUE_ADDRESS (ms);
 
@@ -945,7 +953,7 @@ any thread other than the main thread.");
       fprintf_unfiltered (gdb_stderr,
 			  "Unable to find linuxthreads symbol \"%s\"\n",
 			  "__pthread_manager_thread");
-      return;
+      goto quit;
     }
   linuxthreads_manager = SYMBOL_VALUE_ADDRESS (ms) + linuxthreads_offset_pid;
 
@@ -955,7 +963,7 @@ any thread other than the main thread.");
       fprintf_unfiltered (gdb_stderr,
 			  "Unable to find linuxthreads symbol \"%s\"\n",
 			  "__pthread_initial_thread");
-      return;
+      goto quit;
     }
   linuxthreads_initial = SYMBOL_VALUE_ADDRESS (ms) + linuxthreads_offset_pid;
 
@@ -970,7 +978,7 @@ any thread other than the main thread.");
       fprintf_unfiltered (gdb_stderr,
 			  "Unable to find linuxthreads symbol \"%s\"\n",
 			  "__pthread_threads_max");
-      return;
+      goto quit;
     }
 
   /* Allocate gdb internal structures */
@@ -989,6 +997,11 @@ any thread other than the main thread.");
       update_stop_threads (inferior_pid);
       linuxthreads_attach_pending = 0;
     }
+
+quit:
+  /* Call predecessor on chain, if any. */
+  if (target_new_objfile_chain)
+    target_new_objfile_chain (objfile);
 }
 
 /* If we have switched threads from a one that stopped at breakpoint,
@@ -1634,6 +1647,13 @@ _initialize_linuxthreads ()
   init_linuxthreads_ops ();
   add_target (&linuxthreads_ops);
   child_suppress_run = 1;
+
+  /* Hook onto the "new_objfile" event.
+   * If someone else is already hooked onto the event, 
+   * then make sure he will be called after we are.
+   */
+  target_new_objfile_chain = target_new_objfile_hook;
+  target_new_objfile_hook  = linuxthreads_new_objfile;
 
   /* Attach SIGCHLD handler */
   sact.sa_handler = sigchld_handler;

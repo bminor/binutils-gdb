@@ -279,11 +279,6 @@ extern int hppa_resume_execd_vforking_child_to_get_parent_vfork PARAMS ((void));
 
 #ifdef HAVE_HPUX_THREAD_SUPPORT
 
-struct objfile;
-
-void hpux_thread_new_objfile PARAMS ((struct objfile * objfile));
-#define target_new_objfile(OBJFILE) hpux_thread_new_objfile (OBJFILE)
-
 extern char *hpux_pid_to_str PARAMS ((int pid));
 #define target_pid_to_str(PID) hpux_pid_to_str (PID)
 

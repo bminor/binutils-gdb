@@ -94,7 +94,7 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libangsd_a_LIBADD = 
-libangsd_a_OBJECTS =  ardi.o bytesex.o crc.o devsw.o drivers.o \
+libangsd_a_OBJECTS =  ardi.o angel_bytesex.o crc.o devsw.o drivers.o \
 etherdrv.o hostchan.o hsys.o logging.o msgbuild.o params.o rx.o \
 serdrv.o serpardr.o tx.o unixcomm.o
 AR = ar

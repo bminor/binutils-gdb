@@ -49,6 +49,8 @@ void registers_info PARAMS ((char *, int));
 
 void continue_command PARAMS ((char *, int));
 
+static void print_return_value (int struct_return, struct type *value_type);
+
 static void finish_command_continuation PARAMS ((struct continuation_arg *));
 
 static void until_next_command PARAMS ((int));
@@ -869,6 +871,37 @@ until_command (arg, from_tty)
 }
 
 
+/* Print the result of a function at the end of a 'finish' command. */
+static void
+print_return_value (int structure_return, struct type *value_type)
+{
+  register value_ptr value;
+
+  if (!structure_return)
+    {
+      value = value_being_returned (value_type, stop_registers, structure_return);
+      printf_filtered ("Value returned is $%d = ", record_latest_value (value));
+      value_print (value, gdb_stdout, 0, Val_no_prettyprint);
+      printf_filtered ("\n");
+    }
+  else
+    {
+      /* We cannot determine the contents of the structure because
+	 it is on the stack, and we don't know where, since we did not
+	 initiate the call, as opposed to the call_function_by_hand case */
+#ifdef VALUE_RETURNED_FROM_STACK
+      value = 0;
+      printf_filtered ("Value returned has type: %s.", TYPE_NAME (value_type));
+      printf_filtered (" Cannot determine contents\n");
+#else
+      value = value_being_returned (value_type, stop_registers, structure_return);
+      printf_filtered ("Value returned is $%d = ", record_latest_value (value));
+      value_print (value, gdb_stdout, 0, Val_no_prettyprint);
+      printf_filtered ("\n");
+#endif
+    }
+}
+
 /* Stuff that needs to be done by the finish command after the target
    has stopped.  In asynchronous mode, we wait for the target to stop in
    the call to poll or select in the event loop, so it is impossible to
@@ -891,7 +924,6 @@ finish_command_continuation (arg)
       && function != 0)
     {
       struct type *value_type;
-      register value_ptr val;
       CORE_ADDR funcaddr;
       int struct_return;
 
@@ -908,38 +940,11 @@ finish_command_continuation (arg)
       funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
 
       struct_return = using_struct_return (value_of_variable (function, NULL),
-
 					   funcaddr,
 					   check_typedef (value_type),
-			BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
+					   BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
 
-      if (!struct_return)
-	{
-	  val = value_being_returned (value_type, stop_registers, struct_return);
-	  printf_filtered ("Value returned is $%d = ", record_latest_value (val));
-	  value_print (val, gdb_stdout, 0, Val_no_prettyprint);
-	  printf_filtered ("\n");
-	}
-      else
-	{
-	  /* We cannot determine the contents of the structure because
-	     it is on the stack, and we don't know where, since we did not
-	     initiate the call, as opposed to the call_function_by_hand case */
-#ifdef VALUE_RETURNED_FROM_STACK
-	  val = 0;
-	  printf_filtered ("Value returned has type: %s.",
-			   TYPE_NAME (value_type));
-	  printf_filtered (" Cannot determine contents\n");
-#else
-	  val = value_being_returned (value_type, stop_registers,
-				      struct_return);
-	  printf_filtered ("Value returned is $%d = ",
-			   record_latest_value (val));
-	  value_print (val, gdb_stdout, 0, Val_no_prettyprint);
-	  printf_filtered ("\n");
-#endif
-
-	}
+      print_return_value (struct_return, value_type); 
     }
   do_exec_cleanups (ALL_CLEANUPS);
 }
@@ -1044,7 +1049,6 @@ finish_command (arg, from_tty)
 	  && function != 0)
 	{
 	  struct type *value_type;
-	  register value_ptr val;
 	  CORE_ADDR funcaddr;
 	  int struct_return;
 
@@ -1064,35 +1068,7 @@ finish_command (arg, from_tty)
 				 check_typedef (value_type),
 			BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
 
-	  if (!struct_return)
-	    {
-	      val =
-		value_being_returned (value_type, stop_registers, struct_return);
-	      printf_filtered ("Value returned is $%d = ",
-			       record_latest_value (val));
-	      value_print (val, gdb_stdout, 0, Val_no_prettyprint);
-	      printf_filtered ("\n");
-	    }
-	  else
-	    {
-	      /* We cannot determine the contents of the structure
-	         because it is on the stack, and we don't know
-	         where, since we did not initiate the call, as
-	         opposed to the call_function_by_hand case */
-#ifdef VALUE_RETURNED_FROM_STACK
-	      val = 0;
-	      printf_filtered ("Value returned has type: %s.",
-			       TYPE_NAME (value_type));
-	      printf_filtered (" Cannot determine contents\n");
-#else
-	      val = value_being_returned (value_type, stop_registers,
-					  struct_return);
-	      printf_filtered ("Value returned is $%d = ",
-			       record_latest_value (val));
-	      value_print (val, gdb_stdout, 0, Val_no_prettyprint);
-	      printf_filtered ("\n");
-#endif
-	    }
+	  print_return_value (struct_return, value_type); 
 	}
       do_cleanups (old_chain);
     }

@@ -520,6 +520,13 @@ hpux_thread_create_inferior (exec_file, allargs, env)
    those variables don't show up until the library gets mapped and the symbol
    table is read in.  */
 
+/* This new_objfile event is now managed by a chained function pointer. 
+ * It is the callee's responsability to call the next client on the chain.
+ */
+
+/* Saved pointer to previous owner of the new_objfile event. */
+static void (*target_new_objfile_chain) PARAMS ((struct objfile *));
+
 void
 hpux_thread_new_objfile (objfile)
      struct objfile *objfile;
@@ -529,25 +536,28 @@ hpux_thread_new_objfile (objfile)
   if (!objfile)
     {
       hpux_thread_active = 0;
-
-      return;
+      goto quit;
     }
 
   ms = lookup_minimal_symbol ("cma__g_known_threads", NULL, objfile);
 
   if (!ms)
-    return;
+    goto quit;
 
   P_cma__g_known_threads = SYMBOL_VALUE_ADDRESS (ms);
 
   ms = lookup_minimal_symbol ("cma__g_current_thread", NULL, objfile);
 
   if (!ms)
-    return;
+    goto quit;
 
   P_cma__g_current_thread = SYMBOL_VALUE_ADDRESS (ms);
 
   hpux_thread_active = 1;
+quit:
+  /* Call predecessor on chain, if any. */
+  if (target_new_objfile_chain)
+    target_new_objfile_chain (objfile);
 }
 
 /* Clean up after the inferior dies.  */
@@ -638,4 +648,7 @@ _initialize_hpux_thread ()
   add_target (&hpux_thread_ops);
 
   child_suppress_run = 1;
+  /* Hook into new_objfile notification. */
+  target_new_objfile_chain = target_new_objfile_hook;
+  target_new_objfile_hook  = hpux_thread_new_objfile;
 }

@@ -119,9 +119,9 @@ if ![runto_main] then {
 
     send_gdb "next\n"
     gdb_expect {
-        -re ".*g = shr1\\(g\\).*$gdb_prompt $" {pass "next to shr2"}
-        -re ".*$gdb_prompt $" { fail "next to shr2" }
-        timeout { fail "next to shr2 (timeout)" }
+        -re ".*g = shr1\\(g\\).*$gdb_prompt $" {pass "next to shr1"}
+        -re ".*$gdb_prompt $" { fail "next to shr1" }
+        timeout { fail "next to shr1 (timeout)" }
     }
 
 

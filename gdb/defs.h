@@ -299,6 +299,9 @@ extern struct cleanup *make_cleanup (make_cleanup_func, void *);
 
 extern struct cleanup *make_cleanup_freeargv (char **);
 
+struct gdb_file;
+extern struct cleanup *make_cleanup_gdb_file_delete (struct gdb_file *);
+
 extern struct cleanup *make_final_cleanup (make_cleanup_func, void *);
 
 extern struct cleanup *make_my_cleanup (struct cleanup **,
@@ -392,6 +395,11 @@ extern struct gdb_file *gdb_file_new (void);
 typedef void (gdb_file_flush_ftype) (struct gdb_file * stream);
 extern void set_gdb_file_flush (struct gdb_file *stream, gdb_file_flush_ftype * flush);
 
+/* NOTE: Both fputs and write methods are available. Default
+   implementations that mapping one onto the other are included. */
+typedef void (gdb_file_write_ftype) (struct gdb_file * stream, const char *buf, long length_buf);
+extern void set_gdb_file_write (struct gdb_file *stream, gdb_file_write_ftype *fputs);
+
 typedef void (gdb_file_fputs_ftype) (const char *, struct gdb_file * stream);
 extern void set_gdb_file_fputs (struct gdb_file *stream, gdb_file_fputs_ftype * fputs);
 
@@ -427,6 +435,8 @@ extern void gdb_file_delete (struct gdb_file *stream);
 extern void gdb_file_rewind (struct gdb_file *stream);
 
 extern int gdb_file_isatty (GDB_FILE *);
+
+extern void gdb_file_write (struct gdb_file *file, const char *buf, long length_buf);
 
 /* NOTE: copies left to right */
 extern void gdb_file_put (struct gdb_file *src, struct gdb_file *dest);
@@ -471,13 +481,10 @@ extern void printf_unfiltered (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 /* #if defined (TUI) */
 /* DEPRECATED: Only the TUI should use these methods. */
-extern GDB_FILE *gdb_file_init_astring (int);
 extern struct gdb_file *tui_fileopen (FILE *);
 extern struct gdb_file *tui_sfileopen (int);
-extern void gdb_fclose (GDB_FILE **);
-extern void gdb_file_deallocate (GDB_FILE **);
-extern char *gdb_file_get_strbuf (GDB_FILE *);
-extern void gdb_file_adjust_strbuf (int, GDB_FILE *);
+extern char *tui_file_get_strbuf (struct gdb_file *);
+extern void tui_file_adjust_strbuf (int, struct gdb_file *);
 /* #endif */
 
 extern void print_spaces (int, GDB_FILE *);
@@ -847,8 +854,21 @@ typedef int return_mask;
 
 extern NORETURN void return_to_top_level (enum return_reason) ATTR_NORETURN;
 
+/* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
+   otherwize the result from CATCH_ERRORS_FTYPE is returned. It is
+   probably useful for CATCH_ERRORS_FTYPE to always return a non-zero
+   value. It's unfortunate that, catch_errors() does not return an
+   indication of the exact exception that it caught - quit_flag might
+   help. */
+
 typedef int (catch_errors_ftype) (PTR);
 extern int catch_errors (catch_errors_ftype *, PTR, char *, return_mask);
+
+/* Template to catch_errors() that wraps calls to command
+   functions. */
+
+typedef void (catch_command_errors_ftype) (char *, int);
+extern int catch_command_errors (catch_command_errors_ftype *func, char *command, int from_tty, return_mask);
 
 extern void warning_begin (void);
 

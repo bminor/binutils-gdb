@@ -325,6 +325,13 @@ store_fpregs ()
 /* Transfering floating-point and SSE registers to and from GDB.  */
 
 
+/* PTRACE_GETXFPREGS is a Cygnus invention, since we wrote our own
+   Linux kernel patch for SSE support.  That patch may or may not
+   actually make it into the official distribution.  If you find that
+   years have gone by since this code was added, and Linux isn't using
+   PTRACE_GETXFPREGS, that means that our patch didn't make it, and
+   you can delete this code.  */
+
 #ifdef HAVE_PTRACE_GETXFPREGS
 static void
 supply_xfpregset (struct user_xfpregs_struct *xfpregs)

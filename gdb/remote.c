@@ -280,28 +280,6 @@ static serial_t remote_desc = NULL;
    to denote that the target is in kernel mode.  */
 static int cisco_kernel_mode = 0;
 
-/* Maximum number of bytes to read/write at once.  The value here
-   is chosen to fill up a packet (the headers account for the 32).  */
-#define MAXBUFBYTES(N) (((N)-32)/2)
-
-/* Having this larger than 400 causes us to be incompatible with m68k-stub.c
-   and i386-stub.c.  Normally, no one would notice because it only matters
-   for writing large chunks of memory (e.g. in downloads).  Also, this needs
-   to be more than 400 if required to hold the registers (see below, where
-   we round it up based on REGISTER_BYTES).  */
-/* Round up PBUFSIZ to hold all the registers, at least.  */
-#define	PBUFSIZ ((REGISTER_BYTES > MAXBUFBYTES (400)) \
-		 ? (REGISTER_BYTES * 2 + 32) \
-		 : 400)
-
-
-/* This variable sets the number of bytes to be written to the target
-   in a single packet.  Normally PBUFSIZ is satisfactory, but some
-   targets need smaller values (perhaps because the receiving end
-   is slow).  */
-
-static int remote_write_size;
-
 /* This variable sets the number of bits in an address that are to be
    sent in a memory ("M" or "m") packet.  Normally, after stripping
    leading zeros, the entire address would be sent. This variable
@@ -315,18 +293,226 @@ static int remote_write_size;
 
 static int remote_address_size;
 
-/* This is the size (in chars) of the first response to the `g' command.  This
-   is used to limit the size of the memory read and write commands to prevent
-   stub buffers from overflowing.  The size does not include headers and
-   trailers, it is only the payload size. */
-
-static int remote_register_buf_size = 0;
-
 /* Tempoary to track who currently owns the terminal.  See
    target_async_terminal_* for more details.  */
 
 static int remote_async_terminal_ours_p;
 
+
+/* This is the size (in chars) of the first response to the ``g''
+   packet.  It is used as a heuristic when determining the maximum
+   size of memory-read and memory-write packets.  A target will
+   typically only reserve a buffer large enough to hold the ``g''
+   packet.  The size does not include packet overhead (headers and
+   trailers). */
+
+static long actual_register_packet_size;
+
+/* This is the maximum size (in chars) of a non read/write packet.  It
+   is also used as a cap on the size of read/write packets. */
+
+static long remote_packet_size;
+/* compatibility. */
+#define PBUFSIZ (remote_packet_size)
+
+/* User configurable variables for the number of characters in a
+   memory read/write packet.  MIN (PBUFSIZ, g-packet-size) is the
+   default.  Some targets need smaller values (fifo overruns, et.al.)
+   and some users need larger values (speed up transfers).  The
+   variables ``preferred_*'' (the user request), ``current_*'' (what
+   was actually set) and ``forced_*'' (Positive - a soft limit,
+   negative - a hard limit). */
+
+struct memory_packet_config
+{
+  char *name;
+  long size;
+  int fixed_p;
+};
+
+/* Compute the current size of a read/write packet.  Since this makes
+   use of ``actual_register_packet_size'' the computation is dynamic.  */
+
+static long
+get_memory_packet_size (struct memory_packet_config *config)
+{
+  /* NOTE: The somewhat arbitrary 16k comes from the knowledge (folk
+     law?) that some hosts don't cope very well with large alloca()
+     calls.  Eventually the alloca() code will be replaced by calls to
+     xmalloc() and make_cleanups() allowing this restriction to either
+     be lifted or removed. */
+#ifndef MAX_REMOTE_PACKET_SIZE
+#define MAX_REMOTE_PACKET_SIZE 16384
+#endif
+  /* NOTE: 16 is just chosen at random. */
+#ifndef MIN_REMOTE_PACKET_SIZE
+#define MIN_REMOTE_PACKET_SIZE 16
+#endif
+  long what_they_get;
+  if (config->fixed_p)
+    {
+      if (config->size <= 0)
+	what_they_get = MAX_REMOTE_PACKET_SIZE;
+      else
+	what_they_get = config->size;
+    }
+  else
+    {
+      what_they_get = remote_packet_size;
+      /* Limit the packet to the size specified by the user. */
+      if (config->size > 0
+	  && what_they_get > config->size)
+	what_they_get = config->size;
+      /* Limit it to the size of the targets ``g'' response. */
+      if (actual_register_packet_size > 0
+	  && what_they_get > actual_register_packet_size)
+	what_they_get = actual_register_packet_size;
+    }
+  if (what_they_get > MAX_REMOTE_PACKET_SIZE)
+    what_they_get = MAX_REMOTE_PACKET_SIZE;
+  if (what_they_get < MIN_REMOTE_PACKET_SIZE)
+    what_they_get = MIN_REMOTE_PACKET_SIZE;
+  return what_they_get;
+}
+
+/* Update the size of a read/write packet. If they user wants
+   something really big then do a sanity check. */
+
+static void
+set_memory_packet_size (char *args, struct memory_packet_config *config)
+{
+  int fixed_p = config->fixed_p;
+  long size = config->size;
+  if (args == NULL)
+    error ("Argument required (integer, `fixed' or `limited').");
+  else if (strcmp (args, "hard") == 0
+      || strcmp (args, "fixed") == 0)
+    fixed_p = 1;
+  else if (strcmp (args, "soft") == 0
+	   || strcmp (args, "limit") == 0)
+    fixed_p = 0;
+  else
+    {
+      char *end;
+      size = strtoul (args, &end, 0);
+      if (args == end)
+	error ("Invalid %s (bad syntax).", config->name);
+#if 0
+      /* Instead of explicitly capping the size of a packet to
+         MAX_REMOTE_PACKET_SIZE or dissallowing it, the user is
+         instead allowed to set the size to something arbitrarily
+         large. */
+      if (size > MAX_REMOTE_PACKET_SIZE)
+	error ("Invalid %s (too large).", config->name);
+#endif
+    }
+  /* Extra checks? */
+  if (fixed_p && !config->fixed_p)
+    {
+      if (! query ("The target may not be able to correctly handle a %s\n"
+		   "of %ld bytes. Change the packet size? ",
+		   config->name, size))
+	error ("Packet size not changed.");
+    }
+  /* Update the config. */
+  config->fixed_p = fixed_p;
+  config->size = size;
+}
+
+static void
+show_memory_packet_size (struct memory_packet_config *config)
+{
+  printf_filtered ("The %s is %ld. ", config->name, config->size);
+  if (config->fixed_p)
+    printf_filtered ("Packets are fixed at %ld bytes.\n",
+		     get_memory_packet_size (config));
+  else
+    printf_filtered ("Packets are limited to %ld bytes.\n",
+		     get_memory_packet_size (config));
+}
+
+static struct memory_packet_config memory_write_packet_config =
+{
+  "memory-write-packet-size",
+};
+
+static void
+set_memory_write_packet_size (char *args, int from_tty)
+{
+  set_memory_packet_size (args, &memory_write_packet_config);
+}
+
+static void
+show_memory_write_packet_size (char *args, int from_tty)
+{
+  show_memory_packet_size (&memory_write_packet_config);
+}
+
+static long
+get_memory_write_packet_size (void)
+{
+  return get_memory_packet_size (&memory_write_packet_config);
+}
+
+static struct memory_packet_config memory_read_packet_config =
+{
+  "memory-read-packet-size",
+};
+
+static void
+set_memory_read_packet_size (char *args, int from_tty)
+{
+  set_memory_packet_size (args, &memory_read_packet_config);
+}
+
+static void
+show_memory_read_packet_size (char *args, int from_tty)
+{
+  show_memory_packet_size (&memory_read_packet_config);
+}
+
+static long
+get_memory_read_packet_size (void)
+{
+  long size = get_memory_packet_size (&memory_read_packet_config);
+  /* FIXME: cagney/1999-11-07: Functions like getpkt() need to get an
+     extra buffer size argument before the memory read size can be
+     increased beyond PBUFSIZ. */
+  if (size > PBUFSIZ)
+    size = PBUFSIZ;
+  return size;
+}
+
+/* Register packet size initialization. Since the bounds change when
+   the architecture changes (namely REGISTER_BYTES) this all needs to
+   be multi-arched.  */
+
+static void
+register_remote_packet_sizes (void)
+{
+  REGISTER_GDBARCH_SWAP (remote_packet_size);
+  REGISTER_GDBARCH_SWAP (actual_register_packet_size);
+}
+
+static void
+build_remote_packet_sizes (void)
+{
+  /* Maximum number of characters in a packet. This default m68k-stub.c and
+     i386-stub.c stubs. */
+  remote_packet_size = 400;
+  /* Should REGISTER_BYTES needs more space than the default, adjust
+     the size accordingly. Remember that each byte is encoded as two
+     characters. 32 is the overhead for the packet header /
+     footer. NOTE: cagney/1999-10-26: I suspect that 8
+     (``$NN:G...#NN'') is a better guess, the below has been padded a
+     little. */
+  if (REGISTER_BYTES > ((remote_packet_size - 32) / 2))
+    remote_packet_size = (REGISTER_BYTES * 2 + 32);
+  
+  /* This one is filled in when a ``g'' packet is received. */
+  actual_register_packet_size = 0;
+}
+
 /* Generic configuration support for packets the stub optionally
    supports. Allows the user to specify the use of the packet as well
    as allowing GDB to auto-detect support in the remote stub. */
@@ -2749,8 +2935,11 @@ remote_fetch_registers (regno)
   sprintf (buf, "g");
   remote_send (buf);
 
-  if (remote_register_buf_size == 0)
-    remote_register_buf_size = strlen (buf);
+  /* Save the size of the packet sent to us by the target.  Its used
+     as a heuristic when determining the max size of packets that the
+     target can safely receive. */
+  if (actual_register_packet_size == 0)
+    actual_register_packet_size = strlen (buf);
 
   /* Unimplemented registers read as all bits zero.  */
   memset (regs, 0, REGISTER_BYTES);
@@ -3095,9 +3284,7 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
   check_binary_download (memaddr);
 
   /* Determine the max packet size. */
-  max_buf_size = min (remote_write_size, PBUFSIZ);
-  if (remote_register_buf_size != 0)
-    max_buf_size = min (max_buf_size, remote_register_buf_size);
+  max_buf_size = get_memory_write_packet_size ();
   buf = alloca (max_buf_size + 1);
 
   /* Subtract header overhead from max payload size -  $M<memaddr>,<len>:#nn */
@@ -3228,15 +3415,13 @@ remote_read_bytes (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  char *buf = alloca (PBUFSIZ);
+  char *buf;
   int max_buf_size;		/* Max size of packet output buffer */
   int origlen;
 
-  /* Chop the transfer down if necessary */
-
-  max_buf_size = min (remote_write_size, PBUFSIZ);
-  if (remote_register_buf_size != 0)
-    max_buf_size = min (max_buf_size, remote_register_buf_size);
+  /* Create a buffer big enough for this packet. */
+  max_buf_size = get_memory_read_packet_size ();
+  buf = alloca (max_buf_size);
 
   origlen = len;
   while (len > 0)
@@ -3477,7 +3662,7 @@ putpkt_binary (buf, cnt)
 {
   int i;
   unsigned char csum = 0;
-  char *buf2 = alloca (PBUFSIZ);
+  char *buf2 = alloca (cnt + 6);
   char *junkbuf = alloca (PBUFSIZ);
 
   int ch;
@@ -3486,9 +3671,6 @@ putpkt_binary (buf, cnt)
 
   /* Copy the packet into buffer BUF2, encapsulating it
      and giving it a checksum.  */
-
-  if (cnt > BUFSIZ - 5)		/* Prosanity check */
-    abort ();
 
   p = buf2;
   *p++ = '$';
@@ -5220,7 +5402,11 @@ set_remote_cmd (args, from_tty)
 static void
 build_remote_gdbarch_data ()
 {
+  build_remote_packet_sizes ();
+
+  /* Cisco stuff */
   tty_input = xmalloc (PBUFSIZ);
+  remote_address_size = TARGET_PTR_BIT;
 }
 
 void
@@ -5228,15 +5414,15 @@ _initialize_remote ()
 {
   static struct cmd_list_element *remote_set_cmdlist;
   static struct cmd_list_element *remote_show_cmdlist;
+  struct cmd_list_element *tmpcmd;
 
   /* architecture specific data */
   build_remote_gdbarch_data ();
   register_gdbarch_swap (&tty_input, sizeof (&tty_input), NULL);
+  register_remote_packet_sizes ();
+  register_gdbarch_swap (&remote_address_size, 
+                         sizeof (&remote_address_size), NULL);
   register_gdbarch_swap (NULL, 0, build_remote_gdbarch_data);
-
-  /* runtime constants - we retain the value of remote_write_size
-     across architecture swaps. */
-  remote_write_size = PBUFSIZ;
 
   init_remote_ops ();
   add_target (&remote_ops);
@@ -5298,14 +5484,39 @@ terminating `#' character and checksum.",
 		  &setlist),
      &showlist);
 
-  add_show_from_set
-    (add_set_cmd ("remotewritesize", no_class,
-		  var_integer, (char *) &remote_write_size,
-	       "Set the maximum number of bytes per memory write packet.\n",
-		  &setlist),
-     &showlist);
+  /* Install commands for configuring memory read/write packets. */
 
-  remote_address_size = TARGET_PTR_BIT;
+  add_cmd ("remotewritesize", no_class, set_memory_write_packet_size,
+	   "Set the maximum number of bytes per memory write packet (deprecated).\n",
+	   &setlist);
+  add_cmd ("remotewritesize", no_class, set_memory_write_packet_size,
+	   "Show the maximum number of bytes per memory write packet (deprecated).\n",
+	   &showlist);
+  add_cmd ("memory-write-packet-size", no_class,
+	   set_memory_write_packet_size,
+	   "Set the maximum number of bytes per memory-write packet.\n"
+	   "Specify the number of bytes in a packet or 0 (zero) for the\n"
+	   "default packet size.  The actual limit is further reduced\n"
+	   "dependent on the target.  Specify ``fixed'' to disable the\n"
+	   "further restriction and ``limit'' to enable that restriction\n",
+	   &remote_set_cmdlist);
+  add_cmd ("memory-read-packet-size", no_class,
+	   set_memory_read_packet_size,
+	   "Set the maximum number of bytes per memory-read packet.\n"
+	   "Specify the number of bytes in a packet or 0 (zero) for the\n"
+	   "default packet size.  The actual limit is further reduced\n"
+	   "dependent on the target.  Specify ``fixed'' to disable the\n"
+	   "further restriction and ``limit'' to enable that restriction\n",
+	   &remote_set_cmdlist);
+  add_cmd ("memory-write-packet-size", no_class,
+	   show_memory_write_packet_size,
+	   "Show the maximum number of bytes per memory-write packet.\n",
+	   &remote_show_cmdlist);
+  add_cmd ("memory-read-packet-size", no_class,
+	   show_memory_read_packet_size,
+	   "Show the maximum number of bytes per memory-read packet.\n",
+	   &remote_show_cmdlist);
+
   add_show_from_set
     (add_set_cmd ("remoteaddresssize", class_obscure,
 		  var_integer, (char *) &remote_address_size,

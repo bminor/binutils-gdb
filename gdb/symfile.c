@@ -66,6 +66,7 @@ extern int hp_cxx_exception_support_initialized;
 int (*ui_load_progress_hook) (const char *section, unsigned long num);
 void (*pre_add_symbol_hook) PARAMS ((char *));
 void (*post_add_symbol_hook) PARAMS ((void));
+void (*target_new_objfile_hook) PARAMS ((struct objfile *));
 
 /* Global variables owned by this file */
 int readnow_symbol_files;	/* Read full symbols immediately */
@@ -920,7 +921,8 @@ symbol_file_add (name, from_tty, addrs, mainline, flags)
 
   new_symfile_objfile (objfile, mainline, from_tty);
 
-  target_new_objfile (objfile);
+  if (target_new_objfile_hook)
+    target_new_objfile_hook (objfile);
 
   return (objfile);
 }
@@ -2096,7 +2098,8 @@ clear_symtab_users ()
   current_source_symtab = 0;
   current_source_line = 0;
   clear_pc_function_cache ();
-  target_new_objfile (NULL);
+  if (target_new_objfile_hook)
+    target_new_objfile_hook (NULL);
 }
 
 /* clear_symtab_users_once:

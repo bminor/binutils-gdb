@@ -2229,14 +2229,19 @@ See also @ref{Conditions, ,Break conditions}.
 @kindex rbreak
 @cindex regular expression
 @item rbreak @var{regex}
-@c FIXME what kind of regexp?
 Set breakpoints on all functions matching the regular expression
-@var{regex}.  This command
-sets an unconditional breakpoint on all matches, printing a list of all
-breakpoints it set.  Once these breakpoints are set, they are treated
-just like the breakpoints set with the @code{break} command.  You can
-delete them, disable them, or make them conditional the same way as any
-other breakpoint.
+@var{regex}.  This command sets an unconditional breakpoint on all
+matches, printing a list of all breakpoints it set.  Once these
+breakpoints are set, they are treated just like the breakpoints set with
+the @code{break} command.  You can delete them, disable them, or make
+them conditional the same way as any other breakpoint.
+
+The syntax of the regular expression is the standard one used with tools
+like @file{grep}.  Note that this is different from the syntax used by
+shells, so for instance @code{foo*} matches all functions that include
+an @code{fo} followed by zero or more @code{o}s.  There is an implicit
+@code{.*} leading and trailing the regular expression you supply, so to
+match only functions that begin with @code{foo}, use @code{^foo}.
 
 When debugging C++ programs, @code{rbreak} is useful for setting
 breakpoints on overloaded functions that are not members of any special

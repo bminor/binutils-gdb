@@ -31,7 +31,6 @@
 void _initialize_kod (void);
 
 /* Prototypes for local functions.  */
-static void show_kod (char *, int);
 static void info_kod_command (char *, int);
 static void load_kod_library (char *);
 

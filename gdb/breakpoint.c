@@ -471,6 +471,7 @@ get_number_trailer (pp, trailer)
   return retval;
 }
 
+
 /* Like get_number_trailer, but don't allow a trailer.  */
 int
 get_number (pp)
@@ -632,8 +633,6 @@ commands_command (arg, from_tty)
 
   p = arg;
   bnum = get_number (&p);
-  if (bnum == 0)
-    error ("bad breakpoint number: '%s'", arg);
 
   if (p && *p)
     error ("Unexpected extra arguments following breakpoint number.");
@@ -2070,9 +2069,9 @@ print_it_typical (bs)
     /* Fall through, we don't deal with these types of breakpoints
        here. */
 
+    case bp_finish:
     case bp_none:
     case bp_until:
-    case bp_finish:
     case bp_longjmp:
     case bp_longjmp_resume:
     case bp_step_resume:
@@ -2115,7 +2114,6 @@ print_bp_stop_message (bpstat bs)
       break;
     }
 }
-
 
 /* Print a message indicating what happened.  This is called from
    normal_stop().  The input to this routine is the head of the bpstat
@@ -6610,12 +6608,14 @@ map_breakpoint_numbers (args, function)
   char *p1;
   register int num;
   register struct breakpoint *b, *tmp;
+  int match;
 
   if (p == 0)
     error_no_arg ("one or more breakpoint numbers");
 
   while (*p)
     {
+      match = 0;
       p1 = p;
 
       num = get_number_or_range (&p1);
@@ -6629,13 +6629,14 @@ map_breakpoint_numbers (args, function)
 	    if (b->number == num)
 	      {
 		struct breakpoint *related_breakpoint = b->related_breakpoint;
+		match = 1;
 		function (b);
 		if (related_breakpoint)
 		  function (related_breakpoint);
-		goto win;
+		break;
 	      }
-	  printf_unfiltered ("No breakpoint number %d.\n", num);
-	win:
+	  if (match == 0)
+	    printf_unfiltered ("No breakpoint number %d.\n", num);
 	}
       p = p1;
     }

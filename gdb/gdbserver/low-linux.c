@@ -492,7 +492,7 @@ static int u_offsets[] =
     -1,		/* Not available: ITC */
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    PT_AR_PFS,
+    PT_CR_IFS,	/* was PT_AR_PFS, but it seemed bogus */
     PT_AR_LC,
     -1,		/* Not available: EC, the Epilog Count register */
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

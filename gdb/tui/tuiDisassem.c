@@ -66,7 +66,7 @@ tuiSetDisassemContent (s, startAddr)
 	  threshold = (lineWidth - 1) + offset;
 
 	  /* now init the gdb_file structure */
-	  gdb_dis_out = gdb_file_init_astring (threshold);
+	  gdb_dis_out = tui_sfileopen (threshold);
 
 	  INIT_DISASSEMBLE_INFO_NO_ARCH (asmInfo, gdb_dis_out, (fprintf_ftype) fprintf_filtered);
 	  asmInfo.read_memory_func = dis_asm_read_memory;
@@ -82,27 +82,27 @@ tuiSetDisassemContent (s, startAddr)
 
 	      print_address (pc, gdb_dis_out);
 
-	      curLen = strlen (gdb_file_get_strbuf (gdb_dis_out));
+	      curLen = strlen (tui_file_get_strbuf (gdb_dis_out));
 	      i = curLen - ((curLen / tab_len) * tab_len);
 
 	      /* adjust buffer length if necessary */
-	      gdb_file_adjust_strbuf ((tab_len - i > 0) ? (tab_len - i) : 0, gdb_dis_out);
+	      tui_file_adjust_strbuf ((tab_len - i > 0) ? (tab_len - i) : 0, gdb_dis_out);
 
 	      /* Add spaces to make the instructions start onthe same column */
 	      while (i < tab_len)
 		{
-		  gdb_file_get_strbuf (gdb_dis_out)[curLen] = ' ';
+		  tui_file_get_strbuf (gdb_dis_out)[curLen] = ' ';
 		  i++;
 		  curLen++;
 		}
-	      gdb_file_get_strbuf (gdb_dis_out)[curLen] = '\0';
+	      tui_file_get_strbuf (gdb_dis_out)[curLen] = '\0';
 
 	      newpc = pc + ((*tm_print_insn) (pc, &asmInfo));
 
 	      /* Now copy the line taking the offset into account */
-	      if (strlen (gdb_file_get_strbuf (gdb_dis_out)) > offset)
+	      if (strlen (tui_file_get_strbuf (gdb_dis_out)) > offset)
 		strcpy (element->whichElement.source.line,
-			&(gdb_file_get_strbuf (gdb_dis_out)[offset]));
+			&(tui_file_get_strbuf (gdb_dis_out)[offset]));
 	      else
 		element->whichElement.source.line[0] = '\0';
 	      element->whichElement.source.lineOrAddr.addr = (Opaque) pc;
@@ -116,9 +116,10 @@ tuiSetDisassemContent (s, startAddr)
 	      curLine++;
 	      pc = newpc;
 	      /* reset the buffer to empty */
-	      gdb_file_get_strbuf (gdb_dis_out)[0] = '\0';
+	      tui_file_get_strbuf (gdb_dis_out)[0] = '\0';
 	    }
-	  gdb_file_deallocate (&gdb_dis_out);
+	  gdb_file_delete (gdb_dis_out);
+	  gdb_dis_out = NULL;
 	  disassemWin->generic.contentSize = curLine;
 	  ret = TUI_SUCCESS;
 	}
