@@ -1,3 +1,8 @@
+2002-11-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/elf.exp: Remove sec64k test.
+	* ld-elf/sec64k.exp: Reinstate.
+
 2002-11-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/elf.exp: Renamed from sec64k.exp.  Add test_list loop.
