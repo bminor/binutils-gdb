@@ -15,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 /* This thing should be set up to do byteordering correctly.  But... */
 
@@ -1855,7 +1856,6 @@ write_object_file ()
  * these frag addresses may not be the same as final object-file addresses.
  */
 
-#ifndef md_relax_frag
 #ifdef TC_GENERIC_RELAX_TABLE
 
 /* Subroutines of relax_segment.  */
@@ -1870,8 +1870,111 @@ is_dnrange (f1, f2)
   return 0;
 }
 
+/* Relax a fragment by scanning TC_GENERIC_RELAX_TABLE.  */
+
+long
+relax_frag (fragP, stretch)
+     fragS *fragP;
+     long stretch;
+{
+  const relax_typeS *this_type;
+  const relax_typeS *start_type;
+  relax_substateT next_state;
+  relax_substateT this_state;
+  long aim, target, growth;
+  symbolS *symbolP = fragP->fr_symbol;
+  long offset = fragP->fr_offset;
+  /* Recompute was_address by undoing "+= stretch" done by relax_segment.  */
+  unsigned long was_address = fragP->fr_address - stretch;
+  unsigned long address = fragP->fr_address;
+  const relax_typeS *table = TC_GENERIC_RELAX_TABLE;
+
+  this_state = fragP->fr_subtype;
+  start_type = this_type = table + this_state;
+  target = offset;
+
+  if (symbolP)
+    {
+#ifndef DIFF_EXPR_OK
+#if !defined (MANY_SEGMENTS) && !defined (BFD_ASSEMBLER)
+      know ((S_GET_SEGMENT (symbolP) == SEG_ABSOLUTE)
+	    || (S_GET_SEGMENT (symbolP) == SEG_DATA)
+	    || (S_GET_SEGMENT (symbolP) == SEG_BSS)
+	    || (S_GET_SEGMENT (symbolP) == SEG_TEXT));
+#endif
+      know (symbolP->sy_frag);
+#endif
+      know (!(S_GET_SEGMENT (symbolP) == absolute_section)
+	    || symbolP->sy_frag == &zero_address_frag);
+      target +=
+	S_GET_VALUE (symbolP)
+	  + symbolP->sy_frag->fr_address;
+
+      /* If frag has yet to be reached on this pass,
+	 assume it will move by STRETCH just as we did.
+	 If this is not so, it will be because some frag
+	 between grows, and that will force another pass.
+
+	 Beware zero-length frags.
+
+	 There should be a faster way to do this.  */
+
+      if (symbolP->sy_frag->fr_address >= was_address
+	  && is_dnrange (fragP, symbolP->sy_frag))
+	{
+	  target += stretch;
+	}
+    }
+
+  aim = target - address - fragP->fr_fix;
+#ifdef TC_PCREL_ADJUST
+  /* Currently only the ns32k family needs this */
+  aim += TC_PCREL_ADJUST(fragP);
+/*#else*/
+  /* This machine doesn't want to use pcrel_adjust.
+     In that case, pcrel_adjust should be zero.  */
+/*  assert (fragP->fr_pcrel_adjust == 0);*/
+#endif
+#ifdef md_prepare_relax_scan /* formerly called M68K_AIM_KLUDGE */
+  md_prepare_relax_scan (fragP, address, aim, this_state, this_type);
+#endif
+
+  if (aim < 0)
+    {
+      /* Look backwards. */
+      for (next_state = this_type->rlx_more; next_state;)
+	if (aim >= this_type->rlx_backward)
+	  next_state = 0;
+	else
+	  {
+	    /* Grow to next state. */
+	    this_state = next_state;
+	    this_type = table + this_state;
+	    next_state = this_type->rlx_more;
+	  }
+    }
+  else
+    {
+      /* Look forwards. */
+      for (next_state = this_type->rlx_more; next_state;)
+	if (aim <= this_type->rlx_forward)
+	  next_state = 0;
+	else
+	  {
+	    /* Grow to next state. */
+	    this_state = next_state;
+	    this_type = table + this_state;
+	    next_state = this_type->rlx_more;
+	  }
+    }
+
+  growth = this_type->rlx_length - start_type->rlx_length;
+  if (growth != 0)
+    fragP->fr_subtype = this_state;
+  return growth;
+}
+
 #endif /* defined (TC_GENERIC_RELAX_TABLE) */
-#endif /* ! defined (md_relax_frag) */
 
 /* Relax_align. Advance location counter to next address that has 'alignment'
    lowest order bits all 0s, return size of adjustment made.  */
@@ -1976,8 +2079,6 @@ relax_segment (segment_frag_root, segment)
 	    unsigned long was_address;
 	    long offset;
 	    symbolS *symbolP;
-	    long target;
-	    long after;
 
 	    was_address = fragP->fr_address;
 	    address = fragP->fr_address += stretch;
@@ -2062,37 +2163,40 @@ relax_segment (segment_frag_root, segment)
 		break;
 
 	      case rs_org:
-		target = offset;
+		{
+		  long target = offset;
+		  long after;
 
-		if (symbolP)
-		  {
+		  if (symbolP)
+		    {
 #if !defined (MANY_SEGMENTS) && !defined (BFD_ASSEMBLER)
-		    know ((S_GET_SEGMENT (symbolP) == SEG_ABSOLUTE)
-			  || (S_GET_SEGMENT (symbolP) == SEG_DATA)
-			  || (S_GET_SEGMENT (symbolP) == SEG_TEXT)
-			  || S_GET_SEGMENT (symbolP) == SEG_BSS);
-		    know (symbolP->sy_frag);
-		    know (!(S_GET_SEGMENT (symbolP) == SEG_ABSOLUTE)
-			  || (symbolP->sy_frag == &zero_address_frag));
+		      know ((S_GET_SEGMENT (symbolP) == SEG_ABSOLUTE)
+			    || (S_GET_SEGMENT (symbolP) == SEG_DATA)
+			    || (S_GET_SEGMENT (symbolP) == SEG_TEXT)
+			    || S_GET_SEGMENT (symbolP) == SEG_BSS);
+		      know (symbolP->sy_frag);
+		      know (!(S_GET_SEGMENT (symbolP) == SEG_ABSOLUTE)
+			    || (symbolP->sy_frag == &zero_address_frag));
 #endif
-		    target += S_GET_VALUE (symbolP)
-		      + symbolP->sy_frag->fr_address;
-		  }		/* if we have a symbol */
+		      target += S_GET_VALUE (symbolP)
+			+ symbolP->sy_frag->fr_address;
+		    }		/* if we have a symbol */
 
-		know (fragP->fr_next);
-		after = fragP->fr_next->fr_address;
-		growth = target - after;
-		if (growth < 0)
-		  {
-		    /* Growth may be negative, but variable part of frag
-		       cannot have fewer than 0 chars.  That is, we can't
-		       .org backwards. */
-		    as_bad ("attempt to .org backwards ignored");
-		    growth = 0;
-		  }
+		  know (fragP->fr_next);
+		  after = fragP->fr_next->fr_address;
+		  growth = target - after;
+		  if (growth < 0)
+		    {
+		      /* Growth may be negative, but variable part of frag
+			 cannot have fewer than 0 chars.  That is, we can't
+			 .org backwards. */
+		      as_bad ("attempt to .org backwards ignored");
+		      growth = 0;
+		    }
 
-		growth -= stretch;	/* This is an absolute growth factor */
-		break;
+		  growth -= stretch;	/* This is an absolute growth factor */
+		  break;
+		}
 
 	      case rs_space:
 		if (symbolP)
@@ -2117,98 +2221,8 @@ relax_segment (segment_frag_root, segment)
 #else
 #ifdef TC_GENERIC_RELAX_TABLE
 		/* The default way to relax a frag is to look through
-		   md_relax_table.  */
-		{
-		  const relax_typeS *this_type;
-		  const relax_typeS *start_type;
-		  relax_substateT next_state;
-		  relax_substateT this_state;
-		  long aim;
-		  const relax_typeS *table = TC_GENERIC_RELAX_TABLE;
-
-		  this_state = fragP->fr_subtype;
-		  start_type = this_type = table + this_state;
-		  target = offset;
-
-		  if (symbolP)
-		    {
-#ifndef DIFF_EXPR_OK
-#if !defined (MANY_SEGMENTS) && !defined (BFD_ASSEMBLER)
-		      know ((S_GET_SEGMENT (symbolP) == SEG_ABSOLUTE)
-			    || (S_GET_SEGMENT (symbolP) == SEG_DATA)
-			    || (S_GET_SEGMENT (symbolP) == SEG_BSS)
-			    || (S_GET_SEGMENT (symbolP) == SEG_TEXT));
-#endif
-		      know (symbolP->sy_frag);
-#endif
-		      know (!(S_GET_SEGMENT (symbolP) == absolute_section)
-			    || symbolP->sy_frag == &zero_address_frag);
-		      target +=
-			S_GET_VALUE (symbolP)
-			+ symbolP->sy_frag->fr_address;
-
-		      /* If frag has yet to be reached on this pass,
-			 assume it will move by STRETCH just as we did.
-			 If this is not so, it will be because some frag
-			 between grows, and that will force another pass.
-
-			 Beware zero-length frags.
-
-			 There should be a faster way to do this.  */
-
-		      if (symbolP->sy_frag->fr_address >= was_address
-			  && is_dnrange (fragP, symbolP->sy_frag))
-			{
-			  target += stretch;
-			}
-		    }
-
-		  aim = target - address - fragP->fr_fix;
-#ifdef TC_PCREL_ADJUST
-		  /* Currently only the ns32k family needs this */
-		  aim += TC_PCREL_ADJUST(fragP);
-#else
-		  /* This machine doesn't want to use pcrel_adjust.
-		     In that case, pcrel_adjust should be zero.  */
-		  assert (fragP->fr_pcrel_adjust == 0);
-#endif
-
-		  if (aim < 0)
-		    {
-		      /* Look backwards. */
-		      for (next_state = this_type->rlx_more; next_state;)
-			if (aim >= this_type->rlx_backward)
-			  next_state = 0;
-			else
-			  {
-			    /* Grow to next state. */
-			    this_state = next_state;
-			    this_type = table + this_state;
-			    next_state = this_type->rlx_more;
-			  }
-		    }
-		  else
-		    {
-#ifdef M68K_AIM_KLUDGE
-		      M68K_AIM_KLUDGE (aim, this_state, this_type);
-#endif
-		      /* Look forwards. */
-		      for (next_state = this_type->rlx_more; next_state;)
-			if (aim <= this_type->rlx_forward)
-			  next_state = 0;
-			else
-			  {
-			    /* Grow to next state. */
-			    this_state = next_state;
-			    this_type = table + this_state;
-			    next_state = this_type->rlx_more;
-			  }
-		    }
-
-		  growth = this_type->rlx_length - start_type->rlx_length;
-		  if (growth != 0)
-		    fragP->fr_subtype = this_state;
-		}
+		   TC_GENERIC_RELAX_TABLE.  */
+		growth = relax_frag (fragP, stretch);
 #endif /* TC_GENERIC_RELAX_TABLE */
 #endif
 		break;
@@ -2550,10 +2564,12 @@ fixup_segment (fixP, this_segment_type)
 
       if (!fixP->fx_bit_fixP && !fixP->fx_no_overflow && size > 0)
 	{
-	  valueT mask = 0;
-	  if (size < sizeof (mask))
+	  if (size < sizeof (valueT))
 	    {
+	      valueT mask, hibit;
+
 	      /* set all bits to one */
+	      mask = 0;
 	      mask--;
 	      /* Technically, combining these produces an undefined result
 		 if size is sizeof (valueT), though I think these two
@@ -2562,12 +2578,12 @@ fixup_segment (fixP, this_segment_type)
 		 the host architecture.  */
 	      mask <<= size * 4;
 	      mask <<= size * 4;
+	      hibit = (valueT) 1 << (size * 8 - 1);
 	      if (((add_number & mask) != 0
 		   || (fixP->fx_signed
-		       && (add_number & (mask >> 1)) != 0))
+		       && (add_number & hibit) != 0))
 		  && ((add_number & mask) != mask
-		      || (fixP->fx_signed
-			  && (add_number & (mask >> 1)) == 0)))
+		      || (add_number & hibit) == 0))
 		{
 		  char buf[50], buf2[50];
 		  sprint_value (buf, fragP->fr_address + where);

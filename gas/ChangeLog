@@ -1,3 +1,14 @@
+Wed Jan 22 10:39:39 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	Patch presumed to have been checked in awhile ago but wasn't.
+	Mon Nov 25 10:45:14 1996  Doug Evans  <dje@seba.cygnus.com>
+	* write.c: Delete "ifndef md_relax_frag" around is_dnrange.
+	(relax_segment, case rs_org): Move code inside braces.  Move locals
+	target,after inside too.
+	(relax_segment, case rs_machine_dependent): Guts moved to ...
+	(relax_frag): New function.
+	Call md_prepare_relax_scan if defined.
+
 Mon Jan 20 10:56:47 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* config/tc-m68k.c (m68k_ip): Reject pc-relative addresses for the
