@@ -1,3 +1,25 @@
+Wed Aug 11 13:08:26 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* size.c (berkeley_sum): New function.
+	(bsssize, datasize, textsize): New global variables.
+	(bss_section_name, data_section_name, text_section_name): Removed.
+	(print_berkeley_format): Map berkeley_sum over all the sections,
+	rather than only reporting sizes of specifically named sections.
+	* Makefile.in ($(OBJDUMP_PROG)): Removed dependency on size.o.
+
+Tue Aug 10 10:46:01 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* nlmconv.c, nlmconv.h, nlmheader.y: New files for program to
+	convert object files into NetWare Loadable Modules.
+	* Makefile.in (NLMCONV_PROG): New macro, define to be nlmconv.
+	(PROGS): Add NLMCONV_PROG.
+	(nlmheader.c, nlmheader.o, nlmconv.o, $(NLMCONV_PROG)): New
+	targets.
+
+Thu Aug  5 15:48:32 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* Makefile.in: define MAKEOVERRIDES to an empty string
+
 Wed Aug  4 17:08:08 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* objcopy.c (copy_file): Make failures to process a file nonfatal.

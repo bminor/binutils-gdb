@@ -47,7 +47,7 @@ SHELL = /bin/sh
 INSTALL = `cd $(srcdir)/..;pwd`/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
-INSTALL_XFORM = $(INSTALL) -t='$(program_tranform_name)'
+INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
 AR = ar
@@ -58,6 +58,7 @@ TEXI2DVI = texi2dvi
 RANLIB = ranlib
 BISONFLAGS = -d
 TEXI2ROFF=texi2roff
+MAKEOVERRIDES=
 
 NM_FOR_TARGET = nm
 NM = $(NM_FOR_TARGET)
@@ -99,7 +100,9 @@ OBJDUMP_PROG=objdump
 # This is the demangler, as a standalone program.
 DEMANGLER_PROG=c++filt
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG)
+NLMCONV_PROG=nlmconv
+
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(NLMCONV_PROG)
 STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
 DISTSTUFF=arparse.c arlex.c
@@ -203,7 +206,7 @@ $(STRIP_PROG): $(ADDL_LIBS) objcopy.o is-strip.o $(BFD)
 $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
 
-$(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(BFD) $(OPCODES)
+$(OBJDUMP_PROG): $(ADDL_LIBS) objdump.o $(BFD) $(OPCODES)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
 
 underscore.c:
@@ -220,8 +223,8 @@ underscore.c:
 cplus-dem.o: $(LIBIBERTY_SRC_DIR)/cplus-dem.c
 	$(CC) -c -DMAIN $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(LIBIBERTY_SRC_DIR)/cplus-dem.c
 
-$(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o
+$(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o version.o
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o version.o
 
 arparse.c:arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
@@ -257,6 +260,20 @@ objcopy_with_strip: $(ADDL_LIBS) objcopy.o maybe-strip.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(STRIP_PROG)
 	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
+
+nlmheader.c: nlmheader.y
+	$(BISON) $<
+	rm -f nlmheader.c
+	mv y.tab.c nlmheader.c
+
+nlmheader.o: nlmheader.c nlmconv.h $(BASEDIR)/include/nlm/common.h \
+  $(BASEDIR)/include/nlm/internal.h
+
+nlmconv.o: nlmconv.c nlmconv.h $(BASEDIR)/include/nlm/common.h \
+  $(BASEDIR)/include/nlm/internal.h $(BASEDIR)/bfd/libnlm.h
+
+$(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_LIBS) $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
 
 stage1: force
 	- mkdir stage1
@@ -371,7 +388,7 @@ realclean: distclean
 etags tags: TAGS
 
 TAGS: force
-	etags $(INCDIR)/*.h $(BFDSRC)/*.[hc] *.[hc]
+	etags $(srcdir)/../include/*.h $(srcdir)/*.[hc] 
 
 install: all
 	for i in $(PROGS) ; do \
@@ -443,6 +460,8 @@ strings.o:strings.c
 strip.o:strip.c
 version.o: $(srcdir)/version.c
 	$(CC) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) -DVERSION='"$(VERSION)"' -c $(srcdir)/version.c
+
+ar.o arsup.o nm.o objcopy.o strings.o: bucomm.h
 
 #-----------------------------------------------------------------------------
 #		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
