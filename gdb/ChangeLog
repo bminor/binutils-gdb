@@ -1,3 +1,8 @@
+Fri Sep 13 14:59:55 2002  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (read_next_frame_reg): Re-hack using
+ 	frame_register_unwind.
+
 Fri Sep 13 07:42:09 2002  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_get_saved_register): Re-hack using

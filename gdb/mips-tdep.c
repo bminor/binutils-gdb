@@ -1589,21 +1589,29 @@ mips_frame_init_saved_regs (struct frame_info *frame)
 static CORE_ADDR
 read_next_frame_reg (struct frame_info *fi, int regno)
 {
-  for (; fi; fi = fi->next)
+  int optimized;
+  CORE_ADDR addr;
+  int realnum;
+  enum lval_type lval;
+  void *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  frame_register_unwind (fi, regno, &optimized, &lval, &addr, &realnum,
+			 raw_buffer);
+  /* FIXME: cagney/2002-09-13: This is just soooo bad.  The MIPS
+     should have a pseudo register range that correspons to the ABI's,
+     rather than the ISA's, view of registers.  These registers would
+     then implicitly describe their size and hence could be used
+     without the below munging.  */
+  if (lval == lval_memory)
     {
-      /* We have to get the saved sp from the sigcontext
-         if it is a signal handler frame.  */
-      if (regno == SP_REGNUM && !fi->signal_handler_caller)
-	return fi->frame;
-      else
+      if (regno < 32)
 	{
-	  if (fi->saved_regs == NULL)
-	    FRAME_INIT_SAVED_REGS (fi);
-	  if (fi->saved_regs[regno])
-	    return read_memory_integer (ADDR_BITS_REMOVE (fi->saved_regs[regno]), MIPS_SAVED_REGSIZE);
+	  /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
+	     saved. */
+	  return read_memory_integer (addr, MIPS_SAVED_REGSIZE);
 	}
     }
-  return read_signed_register (regno);
+
+  return extract_signed_integer (raw_buffer, REGISTER_VIRTUAL_SIZE (regno));
 }
 
 /* mips_addr_bits_remove - remove useless address bits  */
