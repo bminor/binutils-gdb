@@ -1,3 +1,24 @@
+Sat Oct 14 21:36:02 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* coff-ppc.c (in_reloc_p): Add, clone from coff-i386.c.
+
+Fri Oct 13 17:48:43 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* acconfig.h (HAVE_SYS_PROCFS_H): Undef, with comment.
+	* config.in: Regenerated.
+
+	* opncls.c (getpagesize) [!HAVE_GETPAGESIZE]: Define as 2048.
+	(_bfd_chunksize): New variable.
+	(_bfd_new_bfd): Set it to getpagesize() if negative, and use it
+	for obstack chunk size.
+	* configure.in: Check for getpagesize.
+	* configure: Regenerated.
+
+	Mon Sep 25 22:49:32 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* trad-core.c (rawptr): Make it a local variable of
+ 	ptrace_unix_core_file_p.
+
 Fri Oct 13 11:22:01 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* coff-arm.c (in_reloc_p): New.
@@ -132,7 +153,6 @@ Fri Oct  6 16:18:35 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* ptrace-core.c (rawptr): Make it a local variable of
  	ptrace_unix_core_file_p.
-	* trad-core.c (rawptr): Likewise, for trad_unix_core_file_p.
 
 Fri Oct  6 12:24:47 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
