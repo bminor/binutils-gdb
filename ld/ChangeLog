@@ -1,3 +1,7 @@
+Wed Apr 22 16:01:35 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* po/Make-in (MKINSTALLDIRS): Don't look in $(top_srcdir).
+
 Wed Apr 22 12:40:56 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (check-DEJAGNU): Add $(INTLLIBS) to LIBIBERTY when
