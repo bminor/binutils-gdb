@@ -225,10 +225,15 @@ ALL_EMULATIONS = \
 	ez8001.o \
 	ez8002.o
 
+# The following object file has been removed from ALL_EMULATIONS
+# because the BFD support is currently broken.
+#	ehppaelf.o 
+
 ALL_64_EMULATIONS = \
 	eelf64_ia64.o \
 	eelf64_sparc.o \
 	eelf64alpha.o \
+	eelf64hppa.o \
 	eelf64bmip.o
 
 ALL_EMUL_EXTRA_OFILES = \
@@ -450,6 +455,9 @@ eelf32i370.c: $(srcdir)/emulparams/elf32i370.sh \
 eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha "$(tdir_elf64alpha)"
+eelf64hppa.c: $(srcdir)/emulparams/elf64hppa.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64hppa "$(tdir_elf64hppa)"
 eelf64_ia64.c: $(srcdir)/emulparams/elf64_ia64.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_ia64 "$(tdir_elf64_ia64)"
@@ -501,6 +509,9 @@ ehp300bsd.c: $(srcdir)/emulparams/hp300bsd.sh \
 ehp3hpux.c: $(srcdir)/emulparams/hp3hpux.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hp3hpux "$(tdir_hp3hpux)"
+ehppaelf.c: $(srcdir)/emulparams/hppaelf.sh \
+  $(srcdir)/emultempl/hppaelf.em $(srcdir)/scripttempl/hppaelf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} hppaelf "$(tdir_hppaelf)"
 ei386aout.c: $(srcdir)/emulparams/i386aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386aout "$(tdir_i386aout)"

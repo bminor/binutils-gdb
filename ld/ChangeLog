@@ -1,3 +1,10 @@
+Tue Apr 25 11:20:43 2000  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.am: Add PA64 support.  Add missing dependencies for
+	PA32 elf support.
+	* Makefile.in: Rebuilt.
+	* configure.tgt: Add PA64 support (currently disabled).
+
 2000-04-25  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_section): Delete.
