@@ -323,7 +323,7 @@ v850_comm (area)
 	    }
 	}
       
-      if (symbolP->local)
+      if (symbol_get_obj (symbolP)->local)
 	{
 	  segT   old_sec;
 	  int    old_subsec;
@@ -435,7 +435,7 @@ v850_comm (area)
 	      break;
 
 	    default:
-	      abort();
+	      abort ();
 	    }
 	  
 	  symbol_set_frag (symbolP, frag_now);
