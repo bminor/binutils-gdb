@@ -23,6 +23,14 @@ else
 	lose_these_too="${arc_files} ${lose_these_too}"
 fi
 
+d10v_files="d10velf.sh"
+
+if ( echo $* | grep keep\-d10v > /dev/null ) ; then
+	keep_these_too="${d10v_files} ${keep_these_too}"
+else
+	lose_these_too="${d10v_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
