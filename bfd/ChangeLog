@@ -1,3 +1,9 @@
+Tue Oct  8 11:40:16 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (elf_mips_isa): New static function.
+	(_bfd_mips_elf_merge_private_bfd_data): Don't warn about linking
+	-mips1 and -mips2 code together, or -mips3 and -mips4 code.
+
 Mon Oct  7 11:44:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* archive.c (do_slurp_coff_armap): Only treat archive as little

@@ -56,6 +56,7 @@ static boolean mips_elf_create_procedure_table
 	   struct ecoff_debug_info *));
 static int mips_elf_additional_program_headers PARAMS ((bfd *));
 static boolean mips_elf_modify_segment_map PARAMS ((bfd *));
+static INLINE int elf_mips_isa PARAMS ((flagword));
 static boolean mips_elf32_section_from_shdr
   PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
 static boolean mips_elf32_section_processing
@@ -1485,7 +1486,7 @@ _bfd_mips_elf_object_p (abfd)
     {
     default:
     case E_MIPS_ARCH_1:
-      /* Just use the default, which was set in elfcode.h.  */
+      (void) bfd_default_set_arch_mach (abfd, bfd_arch_mips, 3000);
       break;
 
     case E_MIPS_ARCH_2:
@@ -1648,10 +1649,8 @@ _bfd_mips_elf_copy_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
-  /* This function is selected based on the input vector.  We only
-     want to copy information over if the output BFD also uses Elf
-     format.  */
-  if (bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
 
   BFD_ASSERT (!elf_flags_init (obfd)
@@ -1662,6 +1661,26 @@ _bfd_mips_elf_copy_private_bfd_data (ibfd, obfd)
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
   elf_flags_init (obfd) = true;
   return true;
+}
+
+/* Return the ISA for a MIPS e_flags value.  */
+
+static INLINE int
+elf_mips_isa (flags)
+     flagword flags;
+{
+  switch (flags & EF_MIPS_ARCH)
+    {
+    case E_MIPS_ARCH_1:
+      return 1;
+    case E_MIPS_ARCH_2:
+      return 2;
+    case E_MIPS_ARCH_3:
+      return 3;
+    case E_MIPS_ARCH_4:
+      return 4;
+    }
+  return 4;
 }
 
 /* Merge backend specific data from an object file to the output
@@ -1689,10 +1708,8 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
       return false;
     }
 
-  /* This function is selected based on the input vector.  We only
-     want to copy information over if the output BFD also uses Elf
-     format.  */
-  if (bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
@@ -1703,6 +1720,9 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
     {
       elf_flags_init (obfd) = true;
       elf_elfheader (obfd)->e_flags = new_flags;
+      if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
+	  && bfd_get_arch_info (obfd)->the_default)
+	bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
     }
   else if (((new_flags ^ old_flags) & ~EF_MIPS_NOREORDER)
 	   == 0)			/* Compatible flags are ok */
@@ -1713,6 +1733,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
       if ((new_flags & EF_MIPS_PIC) != (old_flags & EF_MIPS_PIC))
 	{
 	  new_flags &= ~EF_MIPS_PIC;
+	  old_flags &= ~EF_MIPS_PIC;
 	  (*_bfd_error_handler)
 	    ("%s: needs all files compiled with -fPIC",
 	     bfd_get_filename (ibfd));
@@ -1721,9 +1742,30 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
       if ((new_flags & EF_MIPS_CPIC) != (old_flags & EF_MIPS_CPIC))
 	{
 	  new_flags &= ~EF_MIPS_CPIC;
+	  old_flags &= ~EF_MIPS_CPIC;
 	  (*_bfd_error_handler)
 	    ("%s: needs all files compiled with -mabicalls",
 	     bfd_get_filename (ibfd));
+	}
+
+      /* Don't warn about mixing -mips1 and -mips2 code, or mixing
+         -mips3 and -mips4 code.  They will normally use the same data
+         sizes and calling conventions.  */
+      if ((new_flags & EF_MIPS_ARCH) != (old_flags & EF_MIPS_ARCH))
+	{
+	  int new_isa, old_isa;
+
+	  new_isa = elf_mips_isa (new_flags);
+	  old_isa = elf_mips_isa (old_flags);
+	  if ((new_isa == 1 || new_isa == 2)
+	      ? (old_isa != 1 && old_isa != 2)
+	      : (old_isa == 1 || old_isa == 2))
+	    (*_bfd_error_handler)
+	      ("%s: ISA mismatch (-mips%d) with previous modules (-mips%d)",
+	       bfd_get_filename (ibfd), new_isa, old_isa);
+
+	  new_flags &= ~ EF_MIPS_ARCH;
+	  old_flags &= ~ EF_MIPS_ARCH;
 	}
 
       /* Warn about any other mismatches */
@@ -4988,9 +5030,14 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
   else
     {
       sgot = bfd_get_section_by_name (dynobj, ".got");
-      BFD_ASSERT (elf_section_data (sgot) != NULL);
-      g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
-      BFD_ASSERT (g != NULL);
+      if (sgot == NULL)
+	g = NULL;
+      else
+	{
+	  BFD_ASSERT (elf_section_data (sgot) != NULL);
+	  g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
+	  BFD_ASSERT (g != NULL);
+	}
     }
 
   sreloc = NULL;
