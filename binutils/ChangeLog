@@ -1,3 +1,10 @@
+Tue Oct 14 16:14:35 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* objdump.c (objdump_symbol_at_address): New function.  Returns
+	true if a symbol can be found at the address passed in.
+	(disassemble_data): Set the symbol_at_address_func field to point
+	to objdump_symbol_at_address.
+
 Fri Oct 10 14:13:09 1997  Ricahrd Henderson  <rth@cygnus.com>
 
 	* objcopy.c, objcopy.1, binutils.texi: "localize" is a better name
