@@ -1,3 +1,12 @@
+2005-03-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.h: Update copyrigh year.
+	(enum dwarf2_frame_reg_rule): Add DWARF2_FRAME_REG_RA_OFFSET.
+	* dwarf2-frame.c: Update copyright year.
+	(struct dwarf2_frame_cache): Add member `retaddr_reg'.
+	(dwarf2_frame_cache): Deal with DWARF2_FRAME_REG_RA_OFFSET.
+	(dwarf2_frame_prev_register): Handle DWARF2_FRAME_REG_RA_OFFSET.
+
 2005-03-23  Martin Hunt  <hunt@redhat.com>
 
 	* configure.ac: Remove -fwritable-strings from CFLAGS.

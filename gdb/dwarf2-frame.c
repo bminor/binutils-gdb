@@ -1,6 +1,6 @@
 /* Frame unwinder for frames with DWARF Call Frame Information.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Mark Kettenis.
 
@@ -588,6 +588,9 @@ struct dwarf2_frame_cache
   /* Saved registers, indexed by GDB register number, not by DWARF
      register number.  */
   struct dwarf2_frame_state_reg *reg;
+
+  /* Return address register.  */
+  struct dwarf2_frame_state_reg retaddr_reg;
 };
 
 static struct dwarf2_frame_cache *
@@ -717,13 +720,15 @@ incomplete CFI data; unspecified registers (e.g., %s) at 0x%s"),
       }
   }
 
-  /* Eliminate any DWARF2_FRAME_REG_RA rules.  */
+  /* Eliminate any DWARF2_FRAME_REG_RA rules, and save the information
+     we need for evaluating DWARF2_FRAME_REG_RA_OFFSET rules.  */
   {
     int regnum;
 
     for (regnum = 0; regnum < num_regs; regnum++)
       {
-	if (cache->reg[regnum].how == DWARF2_FRAME_REG_RA)
+	if (cache->reg[regnum].how == DWARF2_FRAME_REG_RA
+	    || cache->reg[regnum].how == DWARF2_FRAME_REG_RA_OFFSET)
 	  {
 	    struct dwarf2_frame_state_reg *retaddr_reg =
 	      &fs->regs.reg[fs->retaddr_column];
@@ -733,16 +738,29 @@ incomplete CFI data; unspecified registers (e.g., %s) at 0x%s"),
                what GCC does on some targets.  It turns out that GCC
                assumes that the return address can be found in the
                register corresponding to the return address column.
-               Incidentally, that's how should treat a return address
-               column specifying "same value" too.  */
+               Incidentally, that's how we should treat a return
+               address column specifying "same value" too.  */
 	    if (fs->retaddr_column < fs->regs.num_regs
 		&& retaddr_reg->how != DWARF2_FRAME_REG_UNSPECIFIED
 		&& retaddr_reg->how != DWARF2_FRAME_REG_SAME_VALUE)
-	      cache->reg[regnum] = *retaddr_reg;
+	      {
+		if (cache->reg[regnum].how == DWARF2_FRAME_REG_RA)
+		  cache->reg[regnum] = *retaddr_reg;
+		else
+		  cache->retaddr_reg = *retaddr_reg;
+	      }
 	    else
 	      {
-		cache->reg[regnum].loc.reg = fs->retaddr_column;
-		cache->reg[regnum].how = DWARF2_FRAME_REG_SAVED_REG;
+		if (cache->reg[regnum].how == DWARF2_FRAME_REG_RA)
+		  {
+		    cache->reg[regnum].loc.reg = fs->retaddr_column;
+		    cache->reg[regnum].how = DWARF2_FRAME_REG_SAVED_REG;
+		  }
+		else
+		  {
+		    cache->retaddr_reg.loc.reg = fs->retaddr_column;
+		    cache->retaddr_reg.how = DWARF2_FRAME_REG_SAVED_REG;
+		  }
 	      }
 	  }
       }
@@ -862,6 +880,21 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	  /* Store the value.  */
 	  store_typed_address (valuep, builtin_type_void_data_ptr, cache->cfa);
 	}
+      break;
+
+    case DWARF2_FRAME_REG_RA_OFFSET:
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+        {
+          CORE_ADDR pc = cache->reg[regnum].loc.offset;
+
+          regnum = DWARF2_REG_TO_REGNUM (cache->retaddr_reg.loc.reg);
+          pc += frame_unwind_register_unsigned (next_frame, regnum);
+          store_typed_address (valuep, builtin_type_void_func_ptr, pc);
+        }
       break;
 
     default:

@@ -1,6 +1,6 @@
 /* Frame unwinder for frames with DWARF Call Frame Information.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Mark Kettenis.
 
@@ -54,6 +54,7 @@ enum dwarf2_frame_reg_rule
   /* These aren't defined by the DWARF2 CFI specification, but are
      used internally by GDB.  */
   DWARF2_FRAME_REG_RA,		/* Return Address.  */
+  DWARF2_FRAME_REG_RA_OFFSET,	/* Return Address with offset.  */
   DWARF2_FRAME_REG_CFA		/* Call Frame Address.  */
 };
 
