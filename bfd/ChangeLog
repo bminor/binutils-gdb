@@ -1,5 +1,11 @@
 Fri Aug  9 12:44:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* cofflink.c (coff_link_add_symbols): Only set (*sym_hash)->numaux
+	if sym.n_numaux is not zero.
+	(_bfd_coff_link_input_bfd): Permit the symbol and the hash table
+	entry to disagree about the number of aux entries if the symbol
+	has zero.
+
 	* elf32-mips.c (mips_elf_check_relocs): Create the .rel.dyn
 	section if it might be needed, not just if info->shared.
 	(mips_elf_adjust_dynamic_symbol): Make room for a null element at
