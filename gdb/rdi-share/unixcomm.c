@@ -88,6 +88,14 @@
 #define PARPORT2   "/dev/par1"
 #endif
 
+#if defined (__FreeBSD__) || defined (__NetBSD__) || defined (__OpenBSD__) || defined (bsdi)
+#define SERPORT1   "/dev/cuaa0"
+#define SERPORT2   "/dev/cuaa1"
+#define PARPORT1   "/dev/lpt0"
+#define PARPORT2   "/dev/lpt1"
+#endif
+
+
 #define SERIAL_PREFIX "/dev/tty"
 #if defined(_WIN32) || defined (__CYGWIN32__) 
 #define SERPORT1   "com1"
@@ -97,6 +105,8 @@
 #undef SERIAL_PREFIX
 #define SERIAL_PREFIX "com"
 #endif
+
+
 
 /*
  * Parallel port output pins, used for signalling to target
