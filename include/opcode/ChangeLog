@@ -4,6 +4,10 @@ Thu Jan 28 21:32:22 1993  John Gilmore  (gnu@cygnus.com)
 	* m88k.h (PMEM):  Avoid previous definition from <sys/param.h>.
 	(AND):  Change to AND_ to avoid ansidecl.h `AND' conflict.
 
+Sat Jan 23 18:10:49 PST 1993  Ralph Campbell  (ralphc@pyramid.com)
+
+	* mips.h: document "i" and "j" operands correctly.
+
 Thu Jan  7 15:58:13 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips.h: Removed endianness dependency.
@@ -22,7 +26,7 @@ Sat Dec 12 16:09:48 1992  Ian Lance Taylor  (ian@cygnus.com)
 	* i386.h: accept shld and shrd both with and without the shift
 	count argument, which is always %cl.
 
-Fri Nov 27 17:13:18 1992  Ken Raeburn  (raeburn at cambridge-laptop)
+Fri Nov 27 17:13:18 1992  Ken Raeburn  (raeburn at cygnus.com)
 
 	* i386.h (i386_optab_end, i386_regtab_end): Now const.
 	(one_byte_segment_defaults, two_byte_segment_defaults,
