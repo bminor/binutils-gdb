@@ -372,11 +372,17 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 	      {
 		struct dwarf2_frame_state_reg_info *old_rs = fs->regs.prev;
 
-		gdb_assert (old_rs);
-
-		xfree (fs->regs.reg);
-		fs->regs = *old_rs;
-		xfree (old_rs);
+		if (old_rs == NULL)
+		  {
+		    complaint (&symfile_complaints, "\
+bad CFI data; mismatched DW_CFA_restore_state at 0x%s", paddr (fs->pc));
+		  }
+		else
+		  {
+		    xfree (fs->regs.reg);
+		    fs->regs = *old_rs;
+		    xfree (old_rs);
+		  }
 	      }
 	      break;
 

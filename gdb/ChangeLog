@@ -1,3 +1,9 @@
+2004-05-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (execute_cfa_program): Complain if we encounter a
+	DW_CFA_restore state without a matching DW_CFA_remember_state
+	instead of aborting.  Fixes PR backtrace/1589.
+
 2004-04-30  Joel Brobecker  <brobecker@gnat.com>
 
 	* MAINTAINERS: Add self as AIX maintainer.
