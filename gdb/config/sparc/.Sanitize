@@ -13,6 +13,10 @@
 
 Do-first:
 
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	keep_these_too="sp64sim.mt tm-sp64.h tm-sp64sim.h"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
