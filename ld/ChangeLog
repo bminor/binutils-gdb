@@ -1,3 +1,12 @@
+Tue Nov  1 10:30:19 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* Makefile.in (ALL_EMULATIONS): Added em68knbsd.o.
+	  (em68knbsd.c): New target.
+
+	* config/m68k-nbsd.mt: New file.
+	* emulparams/m68knbsd.sh: New file.
+	* configure.in (m68*-*-netbsd*): Use above configs.
+
 Mon Oct 31 19:35:17 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): If we find an

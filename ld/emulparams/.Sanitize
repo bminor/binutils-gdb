@@ -61,6 +61,7 @@ lnk960.sh
 m68kaout.sh
 m68kcoff.sh
 m68klynx.sh
+m68knbsd.sh
 m88kbcs.sh
 mipsbig.sh
 mipsbsd.sh
