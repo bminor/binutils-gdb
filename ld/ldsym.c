@@ -70,6 +70,8 @@ extern discard_locals_type discard_locals;
 ldsym_type *symbol_head = (ldsym_type *)NULL;
 ldsym_type **symbol_tail_ptr = &symbol_head;
 
+extern ld_config_type config;
+
 /*
   incremented for each symbol in the ldsym_type table
   no matter what flavour it is 
@@ -192,9 +194,9 @@ list_file_locals (entry)
 lang_input_statement_type *entry;
 {
   asymbol **q;
-  printf ( "\nLocal symbols of ");
-  info("%I", entry);
-  printf (":\n\n");
+  fprintf (config.map_file, "\nLocal symbols of ");
+  minfo("%I", entry);
+  fprintf (config.map_file, ":\n\n");
   if (entry->asymbols) {
     for (q = entry->asymbols; *q; q++) 
       {
@@ -209,13 +211,13 @@ lang_input_statement_type *entry;
 
 
 static void
-print_file_stuff(f)
-lang_input_statement_type *f;
+DEFUN(print_file_stuff,(f),
+      lang_input_statement_type *f)
 {
-  fprintf (stdout, "  %s\n", f->filename);
+  fprintf (config.map_file,"  %s\n", f->filename);
   if (f->just_syms_flag) 
   {
-    fprintf (stdout, " symbols only\n");
+    fprintf (config.map_file, " symbols only\n");
   }
   else 
   {
@@ -227,14 +229,14 @@ lang_input_statement_type *f;
 	    print_address(s->output_offset);
 	    if (s->flags & SEC_HAS_CONTENTS) 
 	    {
-	      printf (" %08x 2**%2ud %s\n",
+	      fprintf (config.map_file, " %08x 2**%2ud %s\n",
 		      (unsigned)bfd_get_section_size_after_reloc(s),
 		      s->alignment_power, s->name);
 	    }
 	    
 	    else 
 	    {
-	      printf (" %08x 2**%2ud %s\n",
+	      fprintf (config.map_file, " %08x 2**%2ud %s\n",
 		      (unsigned)bfd_get_section_size_before_reloc(s),
 		      s->alignment_power, s->name);
 	    }
@@ -247,32 +249,32 @@ lang_input_statement_type *f;
 	for (s = f->the_bfd->sections;
 	     s != (asection *)NULL;
 	     s = s->next) {
-	    printf("%s ", s->name);
+	    fprintf(config.map_file, "%s ", s->name);
 	    print_address(s->output_offset);
-	    printf("(%x)", (unsigned)bfd_get_section_size_after_reloc(s));
+	    fprintf(config.map_file, "(%x)", (unsigned)bfd_get_section_size_after_reloc(s));
 	  }
-	printf("hex \n");
+	fprintf(config.map_file, "hex \n");
       }
   }
-  fprintf (stdout, "\n");
+  fprintf (config.map_file, "\n");
 }
 
 void
 ldsym_print_symbol_table ()
 {
-  fprintf (stdout, "**FILES**\n\n");
+  fprintf (config.map_file, "**FILES**\n\n");
 
   lang_for_each_file(print_file_stuff);
 
-  fprintf(stdout, "**GLOBAL SYMBOLS**\n\n");
-  fprintf(stdout, "offset    section    offset   symbol\n");
+  fprintf(config.map_file, "**GLOBAL SYMBOLS**\n\n");
+  fprintf(config.map_file, "offset    section    offset   symbol\n");
   {
     register ldsym_type *sp;
 
     for (sp = symbol_head; sp; sp = sp->next)
       {
 	if (sp->flags & SYM_INDIRECT) {
-	  fprintf(stdout,"indirect %s to %s\n",
+	  fprintf(config.map_file,"indirect %s to %s\n",
 		  sp->name, (((ldsym_type *)(sp->sdefs_chain))->name));
 	}
 	else {
@@ -283,7 +285,7 @@ ldsym_print_symbol_table ()
 	      print_address(defsym->value);
 	      if (defsec)
 		{
-		  printf("  %-10s",
+		  fprintf(config.map_file, "  %-10s",
 			 bfd_section_name(output_bfd,
 					  defsec));
 		  print_space();
@@ -292,23 +294,23 @@ ldsym_print_symbol_table ()
 		}
 	      else 
 		{
-		  printf("         .......");
+		  fprintf(config.map_file, "         .......");
 		}
 
 	    }	
 
 
 	  if (sp->scoms_chain) {
-	    printf("common               ");
+	    fprintf(config.map_file, "common               ");
 	    print_address((*(sp->scoms_chain))->value);
-	    printf(" %s ",sp->name);
+	    fprintf(config.map_file, " %s ",sp->name);
 	  }
 	  else if (sp->sdefs_chain) {
-	    printf(" %s ",sp->name);
+	    fprintf(config.map_file, " %s ",sp->name);
 	  }
 	  else {
-	    printf("undefined                     ");
-	    printf("%s ",sp->name);
+	    fprintf(config.map_file, "undefined                     ");
+	    fprintf(config.map_file, "%s ",sp->name);
 
 	  }
 	}

@@ -112,19 +112,19 @@ static void
 DEFUN(print_size,(value),
       size_t value)
 {
-  printf("%5x", (unsigned)value);
+  fprintf(config.map_file, "%5x", (unsigned)value);
 }
 static void 
 DEFUN(print_alignment,(value),
       unsigned int value)
 {
-  printf("2**%1u",value);
+  fprintf(config.map_file, "2**%1u",value);
 }
 static void 
 DEFUN(print_fill,(value),
       fill_type value)
 {
-  printf("%04x",(unsigned)value);
+  fprintf(config.map_file, "%04x",(unsigned)value);
 }
 
 
@@ -132,7 +132,7 @@ static void
 DEFUN(print_section,(name),
       CONST char *CONST name)
 {
-  printf("%*s", -longest_section_name, name);
+  fprintf(config.map_file, "%*s", -longest_section_name, name);
 }
 
 /*----------------------------------------------------------------------
@@ -443,46 +443,44 @@ DEFUN(lang_output_section_statement_lookup,(name),
 
 
 static void
-DEFUN(print_flags, (outfile, ignore_flags),
-      FILE *outfile AND
+DEFUN(print_flags, ( ignore_flags),
       int  *ignore_flags)
 {
-  fprintf(outfile,"(");
+  fprintf(config.map_file, "(");
 #if 0
   if (flags->flag_read) fprintf(outfile,"R");
   if (flags->flag_write) fprintf(outfile,"W");
   if (flags->flag_executable) fprintf(outfile,"X");
   if (flags->flag_loadable) fprintf(outfile,"L");
 #endif
-  fprintf(outfile,")");
+  fprintf(config.map_file, ")");
 }
 
 void
-DEFUN(lang_map,(outfile),
-      FILE *outfile)
+DEFUN_VOID(lang_map)
 {
   lang_memory_region_type *m;
-  fprintf(outfile,"**MEMORY CONFIGURATION**\n\n");
+  fprintf(config.map_file,"**MEMORY CONFIGURATION**\n\n");
 #ifdef HOST_64_BIT
-  fprintf(outfile,"name\t\torigin\t\tlength\t\tattributes\n");
+  fprintf(config.map_file,"name\t\torigin\t\tlength\t\tattributes\n");
 #else
-  fprintf(outfile,"name\t\torigin   length\t\tattributes\n");
+  fprintf(config.map_file,"name\t\torigin   length\t\tattributes\n");
 #endif
   for (m = lang_memory_region_list;
        m != (lang_memory_region_type *)NULL;
        m = m->next) 
     {
-      fprintf(outfile,"%-16s", m->name);
+      fprintf(config.map_file,"%-16s", m->name);
       print_address(m->origin);
       print_space();
       print_address(m->length);
       print_space();
-      print_flags(outfile, &m->flags);
-      fprintf(outfile,"\n");
+      print_flags( &m->flags);
+      fprintf(config.map_file,"\n");
     }
-  fprintf(outfile,"\n\n**LINK EDITOR MEMORY MAP**\n\n");
-  fprintf(outfile,"output   input     virtual\n");
-  fprintf(outfile,"section  section   address    tsize\n\n");
+  fprintf(config.map_file,"\n\n**LINK EDITOR MEMORY MAP**\n\n");
+  fprintf(config.map_file,"output   input     virtual\n");
+  fprintf(config.map_file,"section  section   address    tsize\n\n");
 
   print_statements();
 
@@ -941,21 +939,21 @@ DEFUN(print_output_section_statement,(output_section_statement),
     print_alignment(section->alignment_power);
     print_space();
 #if 0
-    printf("%s flags", output_section_statement->region->name);
+    fprintf(config.map_file, "%s flags", output_section_statement->region->name);
     print_flags(stdout, &output_section_statement->flags);
 #endif
     if (section->flags & SEC_LOAD)
-      printf("load ");
+      fprintf(config.map_file, "load ");
     if (section->flags & SEC_ALLOC)
-      printf("alloc ");
+      fprintf(config.map_file, "alloc ");
     if (section->flags & SEC_RELOC)
-      printf("reloc ");
+      fprintf(config.map_file, "reloc ");
     if (section->flags & SEC_HAS_CONTENTS)
-      printf("contents ");
+      fprintf(config.map_file, "contents ");
 
   }
   else {
-    printf("No attached output section");
+    fprintf(config.map_file, "No attached output section");
   }
   print_nl();
   print_statement(output_section_statement->children.head,
@@ -986,11 +984,11 @@ DEFUN(print_assignment,(assignment, output_section),
   }
   else 
       {
-	printf("*undefined*");
+	fprintf(config.map_file, "*undefined*");
       }
   print_space();
-  exp_print_tree(stdout, assignment->exp);
-  printf("\n");
+  exp_print_tree(assignment->exp);
+  fprintf(config.map_file, "\n");
 }
 
 static void
@@ -998,7 +996,7 @@ DEFUN(print_input_statement,(statm),
       lang_input_statement_type *statm)
 {
   if (statm->filename != (char *)NULL) {
-    printf("LOAD %s\n",statm->filename);
+    fprintf(config.map_file, "LOAD %s\n",statm->filename);
   }
 }
 
@@ -1007,11 +1005,11 @@ DEFUN(print_symbol,(q),
       asymbol *q)
 {
   print_section("");
-  printf(" ");
+  fprintf(config.map_file, " ");
   print_section("");
-  printf(" ");
+  fprintf(config.map_file, " ");
   print_address(outside_symbol_address(q));
-  printf("              %s", q->name ? q->name : " ");
+  fprintf(config.map_file, "              %s", q->name ? q->name : " ");
   print_nl();
 }
 
@@ -1027,32 +1025,32 @@ DEFUN(print_input_section,(in),
 
   if(size != 0) {
     print_section("");
-    printf(" ");
+    fprintf(config.map_file, " ");
     print_section(i->name);
-    printf(" ");
+    fprintf(config.map_file, " ");
     if (i->output_section) {
       print_address(i->output_section->vma + i->output_offset);
-      printf(" ");
+      fprintf(config.map_file, " ");
       print_size(size);
-      printf(" ");
+      fprintf(config.map_file, " ");
       print_alignment(i->alignment_power);
-      printf(" ");
+      fprintf(config.map_file, " ");
       if (in->ifile) {
 
 	bfd *abfd = in->ifile->the_bfd;
 	if (in->ifile->just_syms_flag == true) {
-	  printf("symbols only ");
+	  fprintf(config.map_file, "symbols only ");
 	}
 
-	printf(" %s ",abfd->xvec->name);
+	fprintf(config.map_file, " %s ",abfd->xvec->name);
 	if(abfd->my_archive != (bfd *)NULL) {
-	  printf("[%s]%s", abfd->my_archive->filename,
+	  fprintf(config.map_file, "[%s]%s", abfd->my_archive->filename,
 		 abfd->filename);
 	}
 	else {
-	  printf("%s", abfd->filename);
+	  fprintf(config.map_file, "%s", abfd->filename);
 	}
-	printf("(overhead %d bytes)", (int)bfd_alloc_size(abfd));
+	fprintf(config.map_file, "(overhead %d bytes)", (int)bfd_alloc_size(abfd));
 	print_nl();
 
 	/* Find all the symbols in this file defined in this section */
@@ -1075,7 +1073,7 @@ DEFUN(print_input_section,(in),
       print_dot = outside_section_address(i) + size;
     }
     else {
-      printf("No output section allocated\n");
+      fprintf(config.map_file, "No output section allocated\n");
     }
   }
 }
@@ -1084,7 +1082,7 @@ static void
 DEFUN(print_fill_statement,(fill),
       lang_fill_statement_type *fill)
 {
-  printf("FILL mask ");
+  fprintf(config.map_file, "FILL mask ");
   print_fill( fill->fill);
 }
 
@@ -1105,22 +1103,22 @@ DEFUN(print_data_statement,(data),
   print_space();
   switch (data->type) {
   case BYTE :
-    printf("BYTE ");
+    fprintf(config.map_file, "BYTE ");
     print_dot += BYTE_SIZE;
     break;
   case SHORT:
-    printf("SHORT ");
+    fprintf(config.map_file, "SHORT ");
     print_dot += SHORT_SIZE;
     break;  
   case LONG:
-    printf("LONG ");
+    fprintf(config.map_file, "LONG ");
     print_dot += LONG_SIZE;
     break;
   }
 
-  exp_print_tree(stdout, data->exp);
+  exp_print_tree(data->exp);
   
-  printf("\n");
+  fprintf(config.map_file, "\n");
 }
 
 
@@ -1145,18 +1143,18 @@ DEFUN(print_wild_statement,(w,os),
       lang_wild_statement_type *w AND
       lang_output_section_statement_type *os)
 {
-  printf(" from ");
+  fprintf(config.map_file, " from ");
   if (w->filename != (char *)NULL) {
-    printf("%s",w->filename);
+    fprintf(config.map_file, "%s",w->filename);
   }
   else {
-    printf("*");
+    fprintf(config.map_file, "*");
   }
   if (w->section_name != (char *)NULL) {
-    printf("(%s)",w->section_name);
+    fprintf(config.map_file, "(%s)",w->section_name);
   }
   else {
-    printf("(*)");
+    fprintf(config.map_file, "(*)");
   }
   print_nl();
   print_statement(w->children.head, os);
@@ -1172,22 +1170,22 @@ DEFUN(print_statement,(s, os),
 	switch (s->header.type) 
 	{
 	   case lang_constructors_statement_enum:
-	    printf("constructors:\n");
+	    fprintf(config.map_file, "constructors:\n");
 	    print_statement(constructor_list.head, os);
 	    break;	
 	   case lang_wild_statement_enum:
 	    print_wild_statement(&s->wild_statement, os);
 	    break;
 	   default:
-	    printf("Fail with %d\n",s->header.type);
+	    fprintf(config.map_file, "Fail with %d\n",s->header.type);
 	    FAIL();
 	    break;
 	   case lang_address_statement_enum:
-	    printf("address\n");
+	    fprintf(config.map_file, "address\n");
 	    break;
 	    break;
 	   case lang_object_symbols_statement_enum:
-	    printf("object symbols\n");
+	    fprintf(config.map_file, "object symbols\n");
 	    break;
 	   case lang_fill_statement_enum:
 	    print_fill_statement(&s->fill_statement);
@@ -1209,10 +1207,10 @@ DEFUN(print_statement,(s, os),
 			     os);
 	    break;
 	   case lang_target_statement_enum:
-	    printf("TARGET(%s)\n", s->target_statement.target);
+	    fprintf(config.map_file, "TARGET(%s)\n", s->target_statement.target);
 	    break;
 	   case lang_output_statement_enum:
-	    printf("OUTPUT(%s %s)\n",
+	    fprintf(config.map_file, "OUTPUT(%s %s)\n",
 		   s->output_statement.name,
 		   output_target);
 	    break;
@@ -2005,7 +2003,7 @@ DEFUN_VOID(lang_common)
 
 	      if (write_map) 
 		{
-		  printf ("Allocating common %s: %x at %x %s\n",
+		  fprintf (config.map_file, "Allocating common %s: %x at %x %s\n",
 			  lgs->name, 
 			  (unsigned) size,
 			  (unsigned) com->value,

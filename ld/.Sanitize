@@ -30,6 +30,7 @@ README
 i386aout.c
 i386aout.sc
 ChangeLog
+relax.c
 Makefile.in
 config
 config.h
@@ -91,7 +92,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.25  1991/12/12 03:42:08  sac
+# Revision 1.26  1992/01/24 22:35:55  sac
+# .Sanitize: added relax.c
+# ldsym.c ldlang.* more map stuff
+#
+# Revision 1.25  1991/12/12  03:42:08  sac
 # New dos files
 #
 # Revision 1.24  1991/12/08  01:27:59  sac
