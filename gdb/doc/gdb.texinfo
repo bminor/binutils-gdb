@@ -176,9 +176,9 @@ _if__(!_DOSHOST__)
 * Emacs::                       Using _GDBN__ under GNU Emacs
 _fi__(!_DOSHOST__)
 * _GDBN__ Bugs::                    Reporting bugs in _GDBN__
-_if__(!_H8__)
+_if__(_GENERIC__||!_H8__)
 * Renamed Commands::
-_fi__(!_H8__)
+_fi__(_GENERIC__||!_H8__)
 * Formatting Documentation::    How to format and print GDB documentation
 * Installing GDB::              Installing GDB
 * Copying::                     GNU GENERAL PUBLIC LICENSE
@@ -6511,8 +6511,15 @@ Remote PC-resident AMD EB29K board, attached over serial lines.
 @var{dev} is the serial device, as for @code{target remote};
 @var{speed} allows you to specify the linespeed; and @var{PROG} is the
 name of the program to be debugged, as it appears to DOS on the PC.
-@xref{EB29K Remote, ,GDB with a Remote EB29K}.
+@xref{EB29K Remote, ,_GDBN__ with a Remote EB29K}.
 
+@item target udi
+@kindex target udi
+@cindex UDI interface to 29K
+@cindex AMD UDI-29K
+Remote AMD 29K board, attached over the AMD ``Universal Debug
+Interface'', a protocol based on TCP/IP.  @xref{UDI29K Remote,,_GDBN__
+and the UDI 29K protocol}.
 _fi__(_AMD29K__)
 _if__(_H8__)
 @item target hms
@@ -6531,6 +6538,16 @@ the name of the serial device to use for the connection, e.g.
 @file{/dev/ttya}.  @xref{i960-Nindy Remote, ,_GDBN__ with a Remote i960 (Nindy)}.
 
 _fi__(_I960__)
+_if__(_ST2000__)
+@item target st2000 @var{dev} @var{speed}
+@kindex target st2000
+A Tandem ST2000 phone switch, running Tandem's STDBUG protocol.  @var{dev}
+is the name of the device attached to the ST2000 serial line;
+@var{speed} is the communication line speed.  The arguments are not used
+if _GDBN__ is configured to connect to the ST2000 using TCP or Telnet.
+@xref{ST2000 Remote,,_GDBN__ with a Tandem ST2000}.
+
+_fi__(_ST2000__)
 _if__(_VXWORKS__)
 @item target vxworks @var{machinename}
 @kindex target vxworks

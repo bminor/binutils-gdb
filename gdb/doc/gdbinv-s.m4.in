@@ -622,7 +622,70 @@ current working directory, to help debug problems with the connection.
 of the commands sent to it.  Running @samp{tail -f} on this file in
 another window often helps to understand trouble with @code{EBMON}, or
 unexpected events on the PC side of the connection.
+
+@node UDI29K Remote
+@subsection _GDBN__ and the UDI 29K protocol
+
+If your 29K development system supports the UDI (``Universal Debug
+Interface'') protocol, using _GDBN__ is almost transparent.  UDI is a
+TCP/IP based protocol.  On some 29K development systens that do not
+support TCP/IP directly, however, the manufacturer supplies an interface
+adapter daemon, which translates UDI to whatever communications
+interface---typically a serial port---is available.
+
+Please see the manufacturer's documentation for your 29K system for how
+to set up the UDI connection for your hardware.
+
+Once the UDI connection is established, use @samp{target udi} from _GDBN__
+to start using it.  All the usual facilities of _GDBN__ are immediately
+available: use @code{load} to get your program to the board,
+@code{breakpoint} to say where to stop, @code{run} to start the program,
+and so on.
 _fi__(_AMD29K__)
+
+_if__(_ST2000__)
+@node ST2000 Remote
+@subsection _GDBN__ with a Tandem ST2000
+
+To connect your ST2000 to the host system, see the manufacturer's
+manual.  Once the ST2000 is physically attached, you can run
+
+@example
+target st2000 @var{dev} @var{speed}
+@end example
+
+@noindent
+to establish it as your debugging environment.  
+
+The @code{load} and @code{attach} commands are @emph{not} defined for
+this target; you must load your program into the ST2000 as you normally
+would for standalone operation.  _GDBN__ will read debugging information
+(such as symbols) from a separate, debugging version of the program
+available on your host computer.
+@c FIXME!! This is terribly vague; what little content is here is
+@c basically hearsay.
+
+@cindex ST2000 auxiliary commands
+These auxiliary _GDBN__ commands are available to help you with the ST2000
+environment:
+
+@table @code
+@item st2000 @var{command}
+@kindex st2000 @var{cmd}
+@cindex STDBUG commands (ST2000)
+@cindex commands to STDBUG (ST2000)
+Send a @var{command} to the STDBUG monitor.  See the manufacturer's
+manual for available commands.
+
+@item connect
+@cindex connect (to STDBUG)
+Connect the controlling terminal to the STDBUG command monitor.  When
+you are done interacting with STDBUG, typing either of two character
+sequences will get you back to the _GDBN__ command prompt:
+@kbd{@key{RET}~.} (Return, followed by tilde and period) or
+@kbd{@key{RET}~@key{C-d}} (Return, followed by tilde and control-D).
+@end table
+_fi__(_ST2000__)
 
 _if__(_VXWORKS__)
 @node VxWorks Remote

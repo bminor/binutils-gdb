@@ -8,11 +8,12 @@ _define__(<_COFF__>,<1>)
 _define__(<_ELF__>,<1>)
 
 _define__(<_AMD29K__>,<1>)
-_define__(<_H8__>,<0>)           Include this when it's stable.
+_define__(<_H8__>,<1>)           Include this when it's stable.
 _define__(<_I80386__>,<1>)
 _define__(<_I960__>,<1>)
 _define__(<_M680X0__>,<1>)
 _define__(<_SPARC__>,<1>)
+_define__(<_ST2000__>,<1>)
 _define__(<_VAX__>,<1>)
 _define__(<_VXWORKS__>,<1>)
 
