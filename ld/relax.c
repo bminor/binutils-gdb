@@ -1,4 +1,20 @@
+/* Copyright (C) 1992, 1993 Free Software Foundation, Inc.
 
+This file is part of GLD, the Gnu Linker.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* 
  
@@ -150,9 +166,10 @@ DEFUN(build_it,(statement),
 
 
 void 
-DEFUN(write_relaxnorel,(output_bfd, data),
+DEFUN(write_relax,(output_bfd, data, relocateable),
       bfd *output_bfd AND
-      PTR data)
+      PTR data AND
+      boolean relocateable)
 {
 /* Tie up all the statements to generate an output bfd structure which
    bfd can mull over */
@@ -160,7 +177,7 @@ DEFUN(write_relaxnorel,(output_bfd, data),
 
   lang_for_each_statement(build_it);
 
-  seclet_dump(output_bfd, data);
+  bfd_seclet_link(output_bfd, data, relocateable);
 
 }
 

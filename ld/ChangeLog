@@ -1,3 +1,13 @@
+Mon Jan 11 18:50:07 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldwrite.c: Removed perform_relocation, copy_and_relocate, and
+	write_norel.  All linking is now done via write_relax.  Call
+	ldsym_write before calling write_relax.
+	* relax.c: Added copyright.
+	(write_relax): Renamed from write_relaxnorel.  Added relocateable
+	argument.  seclet_dump renamed to bfd_seclet_link.
+	* relax.h: Added copyright.
+
 Mon Jan 11 15:41:56 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldmain.c (decode_library_subfile): Patch from
