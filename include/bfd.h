@@ -494,6 +494,11 @@ typedef struct sec
 
 #define SEC_NEVER_LOAD 0x400
 
+         /* The section is a shared library section.  The linker must leave
+           these completely alone, as the vma and size are used when
+           the executable is loaded. */
+
+#define SEC_SHARED_LIBRARY 0x800
 
        
    bfd_vma vma;
