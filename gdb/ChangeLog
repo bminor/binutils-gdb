@@ -1,3 +1,11 @@
+Thu Jan 26 18:24:41 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* remote-vx.c: Revert all of Kung's changes of 16 Jan.  The
+	problems with those changes were (a) the file didn't compile, (b)
+	they changed memset to bzero--memset is correct, (c) they took out
+	code to deal with boards lacking floating point, (d) who knows
+	what I didn't discover in a quick read.
+
 Thu Jan 26 17:32:54 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* sparcl-tdep.c:  Clean up formatting and indentation.
