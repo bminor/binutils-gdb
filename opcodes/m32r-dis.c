@@ -3,7 +3,7 @@
 
 This file is used to generate m32r-dis.c.
 
-Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -46,57 +46,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static int print_insn PARAMS ((bfd_vma, disassemble_info *, char *, int));
 
+static int extract_normal
+     PARAMS ((PTR, cgen_insn_t, unsigned int, int, int, int, long *));
+static void print_normal
+     PARAMS ((PTR, long, unsigned int, unsigned long, int));
+static void print_keyword
+     PARAMS ((PTR, CGEN_KEYWORD *, long, unsigned int));
 static int extract_insn_normal
      PARAMS ((const CGEN_INSN *, void *, cgen_insn_t, CGEN_FIELDS *));
 static void print_insn_normal
      PARAMS ((void *, const CGEN_INSN *, CGEN_FIELDS *, bfd_vma, int));
 
-/* Default extraction routine.
+/* -- disassembler routines inserted here */
+/* -- dis.c */
 
-   ATTRS is a mask of the boolean attributes.  We only need `unsigned',
-   but for generality we take a bitmask of all of them.  */
+/* Immediate values are prefixed with '#'.  */
 
-static int
-extract_normal (buf_ctrl, insn_value, attrs, start, length, shift, total_length, valuep)
-     PTR buf_ctrl;
-     cgen_insn_t insn_value;
-     unsigned int attrs;
-     int start, length, shift, total_length;
-     long *valuep;
-{
-  long value;
+#define CGEN_PRINT_NORMAL(info, value, attrs, pc, length) \
+do { \
+  if ((attrs) & (1 << CGEN_OPERAND_HASH_PREFIX)) \
+    (*info->fprintf_func) (info->stream, "#"); \
+} while (0)
 
-#ifdef CGEN_INT_INSN
-#if 0
-  value = ((insn_value >> (CGEN_BASE_INSN_BITSIZE - (start + length)))
-	   & ((1 << length) - 1));
-#else
-  value = ((insn_value >> (total_length - (start + length)))
-	   & ((1 << length) - 1));
-#endif
-  if (! (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED))
-      && (value & (1 << (length - 1))))
-    value -= 1 << length;
-#else
-  /* FIXME: unfinished */
-#endif
-
-  /* This is backwards as we undo the effects of insert_normal.  */
-  if (shift < 0)
-    value >>= -shift;
-  else
-    value <<= shift;
-
-  *valuep = value;
-
-  /* FIXME: for now */
-  return 1;
-}
-
-/* Default print handler.  */
+/* Handle '#' prefixes as operands.  */
 
 static void
-print_normal (dis_info, value, attrs, pc, length)
+print_hash (dis_info, value, attrs, pc, length)
      PTR dis_info;
      long value;
      unsigned int attrs;
@@ -104,43 +79,8 @@ print_normal (dis_info, value, attrs, pc, length)
      int length;
 {
   disassemble_info *info = dis_info;
-
-  /* Print the operand as directed by the attributes.  */
-  if (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_FAKE))
-    ; /* nothing to do (??? at least not yet) */
-  else if (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_PCREL_ADDR))
-    (*info->print_address_func) (pc + CGEN_PCREL_OFFSET + value, info);
-  /* ??? Not all cases of this are currently caught.  */
-  else if (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_ABS_ADDR))
-    /* FIXME: Why & 0xffffffff?  */
-    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
-  else if (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED))
-    (*info->fprintf_func) (info->stream, "0x%lx", value);
-  else
-    (*info->fprintf_func) (info->stream, "%ld", value);
+  (*info->fprintf_func) (info->stream, "#");
 }
-
-/* Keyword print handler.  */
-
-static void
-print_keyword (dis_info, keyword_table, value, attrs)
-     PTR dis_info;
-     CGEN_KEYWORD *keyword_table;
-     long value;
-     CGEN_ATTR *attrs;
-{
-  disassemble_info *info = dis_info;
-  const CGEN_KEYWORD_ENTRY *ke;
-
-  ke = cgen_keyword_lookup_value (keyword_table, value);
-  if (ke != NULL)
-    (*info->fprintf_func) (info->stream, "%s", ke->name);
-  else
-    (*info->fprintf_func) (info->stream, "???");
-}
-
-/* -- disassembler routines inserted here */
-/* -- dis.c */
 
 #undef CGEN_PRINT_INSN
 #define CGEN_PRINT_INSN my_print_insn
@@ -209,92 +149,95 @@ m32r_cgen_extract_operand (opindex, buf_ctrl, insn_value, fields)
   switch (opindex)
     {
     case M32R_OPERAND_SR :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_r2);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_r2);
       break;
     case M32R_OPERAND_DR :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_r1);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_r1);
       break;
     case M32R_OPERAND_SRC1 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_r1);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_r1);
       break;
     case M32R_OPERAND_SRC2 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_r2);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_r2);
       break;
     case M32R_OPERAND_SCR :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_r2);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_r2);
       break;
     case M32R_OPERAND_DCR :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_r1);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_r1);
       break;
     case M32R_OPERAND_SIMM8 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0, 8, 8, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_simm8);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX), 8, 8, CGEN_FIELDS_BITSIZE (fields), & fields->f_simm8);
       break;
     case M32R_OPERAND_SIMM16 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0, 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_simm16);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX), 16, 16, CGEN_FIELDS_BITSIZE (fields), & fields->f_simm16);
       break;
     case M32R_OPERAND_UIMM4 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm4);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm4);
       break;
     case M32R_OPERAND_UIMM5 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 11, 5, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm5);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 11, 5, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm5);
       break;
     case M32R_OPERAND_UIMM16 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm16);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm16);
       break;
 /* start-sanitize-m32rx */
     case M32R_OPERAND_IMM1 :
       {
         long value;
-        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 15, 1, 0, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 15, 1, CGEN_FIELDS_BITSIZE (fields), & value);
         fields->f_imm1 = ((value) + (1));
       }
       break;
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
     case M32R_OPERAND_ACCD :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 2, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_accd);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 2, CGEN_FIELDS_BITSIZE (fields), & fields->f_accd);
       break;
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
     case M32R_OPERAND_ACCS :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 2, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_accs);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 2, CGEN_FIELDS_BITSIZE (fields), & fields->f_accs);
       break;
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
     case M32R_OPERAND_ACC :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 1, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_acc);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 1, CGEN_FIELDS_BITSIZE (fields), & fields->f_acc);
       break;
 /* end-sanitize-m32rx */
+    case M32R_OPERAND_HASH :
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_nil);
+      break;
     case M32R_OPERAND_HI16 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_hi16);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, CGEN_FIELDS_BITSIZE (fields), & fields->f_hi16);
       break;
     case M32R_OPERAND_SLO16 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0, 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_simm16);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0, 16, 16, CGEN_FIELDS_BITSIZE (fields), & fields->f_simm16);
       break;
     case M32R_OPERAND_ULO16 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm16);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm16);
       break;
     case M32R_OPERAND_UIMM24 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_ABS_ADDR)|(1<<CGEN_OPERAND_UNSIGNED), 8, 24, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm24);
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_ABS_ADDR)|(1<<CGEN_OPERAND_UNSIGNED), 8, 24, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm24);
       break;
     case M32R_OPERAND_DISP8 :
       {
         long value;
-        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 8, 0, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
         fields->f_disp8 = ((value) << (2));
       }
       break;
     case M32R_OPERAND_DISP16 :
       {
         long value;
-        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 16, 16, CGEN_FIELDS_BITSIZE (fields), & value);
         fields->f_disp16 = ((value) << (2));
       }
       break;
     case M32R_OPERAND_DISP24 :
       {
         long value;
-        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 24, 0, CGEN_FIELDS_BITSIZE (fields), & value);
+        length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 24, CGEN_FIELDS_BITSIZE (fields), & value);
         fields->f_disp24 = ((value) << (2));
       }
       break;
@@ -352,23 +295,23 @@ m32r_cgen_print_operand (opindex, info, fields, attrs, pc, length)
       print_keyword (info, & m32r_cgen_opval_h_cr, fields->f_r1, 0|(1<<CGEN_OPERAND_UNSIGNED));
       break;
     case M32R_OPERAND_SIMM8 :
-      print_normal (info, fields->f_simm8, 0, pc, length);
+      print_normal (info, fields->f_simm8, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case M32R_OPERAND_SIMM16 :
-      print_normal (info, fields->f_simm16, 0, pc, length);
+      print_normal (info, fields->f_simm16, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case M32R_OPERAND_UIMM4 :
-      print_normal (info, fields->f_uimm4, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      print_normal (info, fields->f_uimm4, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case M32R_OPERAND_UIMM5 :
-      print_normal (info, fields->f_uimm5, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      print_normal (info, fields->f_uimm5, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case M32R_OPERAND_UIMM16 :
-      print_normal (info, fields->f_uimm16, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      print_normal (info, fields->f_uimm16, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
 /* start-sanitize-m32rx */
     case M32R_OPERAND_IMM1 :
-      print_normal (info, fields->f_imm1, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      print_normal (info, fields->f_imm1, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
@@ -386,6 +329,9 @@ m32r_cgen_print_operand (opindex, info, fields, attrs, pc, length)
       print_keyword (info, & m32r_cgen_opval_h_accums, fields->f_acc, 0|(1<<CGEN_OPERAND_UNSIGNED));
       break;
 /* end-sanitize-m32rx */
+    case M32R_OPERAND_HASH :
+      print_hash (info, fields->f_nil, 0, pc, length);
+      break;
     case M32R_OPERAND_HI16 :
       print_normal (info, fields->f_hi16, 0|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
@@ -396,7 +342,7 @@ m32r_cgen_print_operand (opindex, info, fields, attrs, pc, length)
       print_normal (info, fields->f_uimm16, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case M32R_OPERAND_UIMM24 :
-      print_normal (info, fields->f_uimm24, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_ABS_ADDR)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      print_normal (info, fields->f_uimm24, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_ABS_ADDR)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case M32R_OPERAND_DISP8 :
       print_normal (info, fields->f_disp8, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
@@ -434,10 +380,96 @@ m32r_cgen_init_dis (mach, endian)
      enum cgen_endian endian;
 {
   m32r_cgen_init_tables (mach);
-  cgen_set_cpu (& m32r_cgen_opcode_data, mach, endian);
+  cgen_set_cpu (& m32r_cgen_opcode_table, mach, endian);
   cgen_dis_init ();
 }
 
+
+/* Default extraction routine.
+
+   ATTRS is a mask of the boolean attributes.  We only need `unsigned',
+   but for generality we take a bitmask of all of them.  */
+
+static int
+extract_normal (buf_ctrl, insn_value, attrs, start, length, total_length, valuep)
+     PTR buf_ctrl;
+     cgen_insn_t insn_value;
+     unsigned int attrs;
+     int start, length, total_length;
+     long *valuep;
+{
+  long value;
+
+#ifdef CGEN_INT_INSN
+#if 0
+  value = ((insn_value >> (CGEN_BASE_INSN_BITSIZE - (start + length)))
+	   & ((1 << length) - 1));
+#else
+  value = ((insn_value >> (total_length - (start + length)))
+	   & ((1 << length) - 1));
+#endif
+  if (! (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED))
+      && (value & (1 << (length - 1))))
+    value -= 1 << length;
+#else
+  /* FIXME: unfinished */
+#endif
+
+  *valuep = value;
+
+  /* FIXME: for now */
+  return 1;
+}
+
+/* Default print handler.  */
+
+static void
+print_normal (dis_info, value, attrs, pc, length)
+     PTR dis_info;
+     long value;
+     unsigned int attrs;
+     unsigned long pc; /* FIXME: should be bfd_vma */
+     int length;
+{
+  disassemble_info *info = dis_info;
+
+#ifdef CGEN_PRINT_NORMAL
+  CGEN_PRINT_NORMAL (info, value, attrs, pc, length);
+#endif
+
+  /* Print the operand as directed by the attributes.  */
+  if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_FAKE))
+    ; /* nothing to do (??? at least not yet) */
+  else if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_PCREL_ADDR))
+    (*info->print_address_func) (pc + CGEN_PCREL_OFFSET + value, info);
+  /* ??? Not all cases of this are currently caught.  */
+  else if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_ABS_ADDR))
+    /* FIXME: Why & 0xffffffff?  */
+    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
+  else if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_UNSIGNED))
+    (*info->fprintf_func) (info->stream, "0x%lx", value);
+  else
+    (*info->fprintf_func) (info->stream, "%ld", value);
+}
+
+/* Keyword print handler.  */
+
+static void
+print_keyword (dis_info, keyword_table, value, attrs)
+     PTR dis_info;
+     CGEN_KEYWORD *keyword_table;
+     long value;
+     unsigned int attrs;
+{
+  disassemble_info *info = dis_info;
+  const CGEN_KEYWORD_ENTRY *ke;
+
+  ke = cgen_keyword_lookup_value (keyword_table, value);
+  if (ke != NULL)
+    (*info->fprintf_func) (info->stream, "%s", ke->name);
+  else
+    (*info->fprintf_func) (info->stream, "???");
+}
 
 /* Default insn extractor.
 

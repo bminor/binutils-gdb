@@ -20,6 +20,7 @@ Mon Apr 27 10:33:56 1998  Doug Evans  <devans@seba.cygnus.com>
 	(@arch@_cgen_get_insn_operands): Change result type to void.
 	Delete args insn_value, length.  New arg fields.  All callers updated.
 	(@arch@_cgen_lookup_get_insn_operands): New function.
+	* m32r-opc.h,m32r-opc.c,m32r-asm.c,m32r-dis.c: Regenerate.
 
 Fri Apr 24 16:07:57 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 

@@ -30,10 +30,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "m32r-opc.h"
 
 /* Look up instruction INSN_VALUE and extract its fields.
-   If non-null INSN is the insn table entry.
+   INSN, if non-null, is the insn table entry.
    Otherwise INSN_VALUE is examined to compute it.
    LENGTH is the bit length of INSN_VALUE if known, otherwise 0.
+   0 is only valid if `insn == NULL && ! defined (CGEN_INT_INSN)'.
+   If INSN != NULL, LENGTH must be valid.
    ALIAS_P is non-zero if alias insns are to be included in the search.
+
    The result a pointer to the insn table entry, or NULL if the instruction
    wasn't recognized.  */
 
@@ -43,6 +46,7 @@ m32r_cgen_lookup_insn (insn, insn_value, length, fields, alias_p)
      cgen_insn_t insn_value;
      int length;
      CGEN_FIELDS *fields;
+     int alias_p;
 {
   char buf[16];
 
@@ -91,9 +95,15 @@ m32r_cgen_lookup_insn (insn, insn_value, length, fields, alias_p)
 		 extract handler.  */
 	      if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
 		{
-		  length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
-		  if (length > 0)
-		    return insn;
+		  int elength = (*CGEN_EXTRACT_FN (insn)) (insn, NULL,
+							   insn_value, fields);
+		  if (elength > 0)
+		    {
+		      /* sanity check */
+		      if (length != 0 && length != elength)
+			abort ();
+		      return insn;
+		    }
 		}
 	    }
 
@@ -106,42 +116,33 @@ m32r_cgen_lookup_insn (insn, insn_value, length, fields, alias_p)
       if (! alias_p
 	  && CGEN_INSN_ATTR (insn, CGEN_INSN_ALIAS))
 	abort ();
+      /* Sanity check: length must be correct.  */
+      if (length != CGEN_INSN_BITSIZE (insn))
+	abort ();
 
       length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
-      if (length > 0)
-	return insn;
+      /* Sanity check: must succeed.
+	 Could relax this later if it ever proves useful.  */
+      if (length == 0)
+	abort ();
+      return insn;
     }
 
   return NULL;
 }
 
-/* Fill in the operand instances used by insn INSN_VALUE.
-   If non-null INS is the insn table entry.
-   Otherwise INSN_VALUE is examined to compute it.
-   LENGTH is the number of bits in INSN_VALUE if known, otherwise 0.
+/* Fill in the operand instances used by INSN whose operands are FIELDS.
    INDICES is a pointer to a buffer of MAX_OPERAND_INSTANCES ints to be filled
-   in.
-   The result a pointer to the insn table entry, or NULL if the instruction
-   wasn't recognized.  */
+   in.  */
 
-const CGEN_INSN *
-m32r_cgen_get_insn_operands (insn, insn_value, length, indices)
-     const CGEN_INSN *insn;
-     cgen_insn_t insn_value;
-     int length;
+void
+m32r_cgen_get_insn_operands (insn, fields, indices)
+     const CGEN_INSN * insn;
+     const CGEN_FIELDS * fields;
      int *indices;
 {
-  CGEN_FIELDS fields;
   const CGEN_OPERAND_INSTANCE *opinst;
   int i;
-
-  /* FIXME: ALIAS insns are in transition from being record in the insn table
-     to being recorded separately as macros.  They don't have semantic code
-     so they can't be used here.  Thus we currently always ignore the INSN
-     argument.  */
-  insn = m32r_cgen_lookup_insn (NULL, insn_value, length, &fields, 0);
-  if (! insn)
-    return NULL;
 
   for (i = 0, opinst = CGEN_INSN_OPERANDS (insn);
        opinst != NULL
@@ -152,9 +153,35 @@ m32r_cgen_get_insn_operands (insn, insn_value, length, indices)
       if (op == NULL)
 	indices[i] = CGEN_OPERAND_INSTANCE_INDEX (opinst);
       else
-	indices[i] = m32r_cgen_get_operand (CGEN_OPERAND_INDEX (op), &fields);
+	indices[i] = m32r_cgen_get_operand (CGEN_OPERAND_INDEX (op), fields);
     }
+}
 
+/* Cover function to m32r_cgen_get_insn_operands when either INSN or FIELDS
+   isn't known.
+   The INSN, INSN_VALUE, and LENGTH arguments are passed to
+   m32r_cgen_lookup_insn unchanged.
+
+   The result is the insn table entry or NULL if the instruction wasn't
+   recognized.  */
+
+const CGEN_INSN *
+m32r_cgen_lookup_get_insn_operands (insn, insn_value, length, indices)
+     const CGEN_INSN *insn;
+     cgen_insn_t insn_value;
+     int length;
+     int *indices;
+{
+  CGEN_FIELDS fields;
+
+  /* Pass non-zero for ALIAS_P only if INSN != NULL.
+     If INSN == NULL, we want a real insn.  */
+  insn = m32r_cgen_lookup_insn (insn, insn_value, length, &fields,
+				  insn != NULL);
+  if (! insn)
+    return NULL;
+
+  m32r_cgen_get_insn_operands (insn, &fields, indices);
   return insn;
 }
 /* Attributes.  */
@@ -204,6 +231,7 @@ const CGEN_ATTR_TABLE m32r_cgen_insn_attr_table[] =
   { "ALIAS", NULL },
   { "COND-CTI", NULL },
   { "FILL-SLOT", NULL },
+  { "NO-DIS", NULL },
   { "PARALLEL", NULL },
   { "RELAX", NULL },
   { "RELAXABLE", NULL },
@@ -420,42 +448,42 @@ const CGEN_OPERAND m32r_cgen_operand_table[MAX_OPERANDS] =
 #define INPUT CGEN_OPERAND_INSTANCE_INPUT
 #define OUTPUT CGEN_OPERAND_INSTANCE_OUTPUT
 
-static const CGEN_OPERAND_INSTANCE fmt_0_add_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_add_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_1_add3_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_add3_ops[] = {
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_2_and3_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_and3_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (UIMM16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_3_or3_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_or3_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { INPUT, & HW_ENT (HW_H_ULO16), CGEN_MODE_UHI, & OP_ENT (ULO16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_4_addi_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_addi_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM8), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_5_addv_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_addv_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
@@ -463,7 +491,7 @@ static const CGEN_OPERAND_INSTANCE fmt_5_addv_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_6_addv3_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_addv3_ops[] = {
   { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
@@ -471,7 +499,7 @@ static const CGEN_OPERAND_INSTANCE fmt_6_addv3_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_7_addx_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_addx_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -480,21 +508,21 @@ static const CGEN_OPERAND_INSTANCE fmt_7_addx_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_8_bc8_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_bc8_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_10_bc24_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_bc24_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_12_beq_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_beq_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -502,14 +530,14 @@ static const CGEN_OPERAND_INSTANCE fmt_12_beq_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_13_beqz_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_beqz_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_14_bl8_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_bl8_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
@@ -517,7 +545,7 @@ static const CGEN_OPERAND_INSTANCE fmt_14_bl8_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_15_bl24_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_bl24_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
@@ -526,7 +554,7 @@ static const CGEN_OPERAND_INSTANCE fmt_15_bl24_ops[] = {
 };
 
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_16_bcl8_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_bcl8_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
@@ -537,7 +565,7 @@ static const CGEN_OPERAND_INSTANCE fmt_16_bcl8_ops[] = {
 
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_17_bcl24_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_bcl24_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
@@ -547,48 +575,41 @@ static const CGEN_OPERAND_INSTANCE fmt_17_bcl24_ops[] = {
 };
 
 /* end-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_18_bra8_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_bra8_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_19_bra24_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_bra24_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_20_cmp_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_cmp_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_21_cmpi_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_cmpi_ops[] = {
   { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_22_cmpui_ops[] = {
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
-  { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (UIMM16), 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
-  { 0 }
-};
-
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_23_cmpz_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_cmpz_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
 /* end-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_24_div_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_div_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
@@ -596,7 +617,7 @@ static const CGEN_OPERAND_INSTANCE fmt_24_div_ops[] = {
 };
 
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_25_jc_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_jc_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
@@ -604,7 +625,7 @@ static const CGEN_OPERAND_INSTANCE fmt_25_jc_ops[] = {
 };
 
 /* end-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_26_jl_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_jl_ops[] = {
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
@@ -612,20 +633,20 @@ static const CGEN_OPERAND_INSTANCE fmt_26_jl_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_27_jmp_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_jmp_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_28_ld_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_ld_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_30_ld_d_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_ld_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -633,14 +654,14 @@ static const CGEN_OPERAND_INSTANCE fmt_30_ld_d_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_32_ldb_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_ldb_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_33_ldb_d_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_ldb_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -648,14 +669,14 @@ static const CGEN_OPERAND_INSTANCE fmt_33_ldb_d_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_34_ldh_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_ldh_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_35_ldh_d_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_ldh_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -663,7 +684,7 @@ static const CGEN_OPERAND_INSTANCE fmt_35_ldh_d_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_36_ld_plus_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_ld_plus_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
@@ -671,25 +692,25 @@ static const CGEN_OPERAND_INSTANCE fmt_36_ld_plus_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_37_ld24_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_ld24_ops[] = {
   { INPUT, & HW_ENT (HW_H_ADDR), CGEN_MODE_VM, & OP_ENT (UIMM24), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_38_ldi8_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_ldi8_ops[] = {
   { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM8), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_39_ldi16_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_ldi16_ops[] = {
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_40_lock_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_lock_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
@@ -697,7 +718,7 @@ static const CGEN_OPERAND_INSTANCE fmt_40_lock_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_41_machi_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_machi_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -706,7 +727,7 @@ static const CGEN_OPERAND_INSTANCE fmt_41_machi_ops[] = {
 };
 
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_42_machi_a_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_machi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACC), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -715,7 +736,7 @@ static const CGEN_OPERAND_INSTANCE fmt_42_machi_a_ops[] = {
 };
 
 /* end-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_43_mulhi_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_mulhi_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
@@ -723,7 +744,7 @@ static const CGEN_OPERAND_INSTANCE fmt_43_mulhi_ops[] = {
 };
 
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_44_mulhi_a_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_mulhi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACC), 0 },
@@ -731,33 +752,33 @@ static const CGEN_OPERAND_INSTANCE fmt_44_mulhi_a_ops[] = {
 };
 
 /* end-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_45_mv_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_mv_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_46_mvfachi_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_mvfachi_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_47_mvfachi_a_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_mvfachi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
 /* end-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_48_mvfc_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_mvfc_ops[] = {
   { INPUT, & HW_ENT (HW_H_CR), CGEN_MODE_USI, & OP_ENT (SCR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_49_mvtachi_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_mvtachi_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
@@ -765,7 +786,7 @@ static const CGEN_OPERAND_INSTANCE fmt_49_mvtachi_ops[] = {
 };
 
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_50_mvtachi_a_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_mvtachi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
@@ -773,20 +794,20 @@ static const CGEN_OPERAND_INSTANCE fmt_50_mvtachi_a_ops[] = {
 };
 
 /* end-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_51_mvtc_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_mvtc_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_CR), CGEN_MODE_USI, & OP_ENT (DCR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_53_rac_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_rac_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
   { 0 }
 };
 
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_56_rac_dsi_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_rac_dsi_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (IMM1), 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCD), 0 },
@@ -794,7 +815,7 @@ static const CGEN_OPERAND_INSTANCE fmt_56_rac_dsi_ops[] = {
 };
 
 /* end-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_57_rte_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_rte_ops[] = {
   { INPUT, & HW_ENT (HW_H_BCOND), CGEN_MODE_VM, 0, 0 },
   { INPUT, & HW_ENT (HW_H_BIE), CGEN_MODE_VM, 0, 0 },
   { INPUT, & HW_ENT (HW_H_BPC), CGEN_MODE_VM, 0, 0 },
@@ -806,34 +827,34 @@ static const CGEN_OPERAND_INSTANCE fmt_57_rte_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_58_seth_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_seth_ops[] = {
   { INPUT, & HW_ENT (HW_H_HI16), CGEN_MODE_UHI, & OP_ENT (HI16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_59_sll3_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_sll3_ops[] = {
   { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_60_slli_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_slli_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (UIMM5), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_61_st_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_st_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_63_st_d_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_st_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -841,14 +862,14 @@ static const CGEN_OPERAND_INSTANCE fmt_63_st_d_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_65_stb_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_stb_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_66_stb_d_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_stb_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -856,14 +877,14 @@ static const CGEN_OPERAND_INSTANCE fmt_66_stb_d_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_67_sth_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_sth_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_68_sth_d_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_sth_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -871,7 +892,7 @@ static const CGEN_OPERAND_INSTANCE fmt_68_sth_d_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_69_st_plus_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_st_plus_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
@@ -879,7 +900,7 @@ static const CGEN_OPERAND_INSTANCE fmt_69_st_plus_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_70_trap_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_trap_ops[] = {
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_CR), CGEN_MODE_SI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (UIMM4), 0 },
@@ -889,7 +910,7 @@ static const CGEN_OPERAND_INSTANCE fmt_70_trap_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_71_unlock_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_unlock_ops[] = {
   { INPUT, & HW_ENT (HW_H_LOCK), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -899,7 +920,7 @@ static const CGEN_OPERAND_INSTANCE fmt_71_unlock_ops[] = {
 };
 
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_74_satb_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_satb_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
@@ -907,7 +928,7 @@ static const CGEN_OPERAND_INSTANCE fmt_74_satb_ops[] = {
 
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_75_sat_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_sat_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
@@ -916,7 +937,7 @@ static const CGEN_OPERAND_INSTANCE fmt_75_sat_ops[] = {
 
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_76_sadd_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_sadd_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 1 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 0 },
@@ -925,7 +946,7 @@ static const CGEN_OPERAND_INSTANCE fmt_76_sadd_ops[] = {
 
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_77_macwu1_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_macwu1_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 1 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -935,7 +956,7 @@ static const CGEN_OPERAND_INSTANCE fmt_77_macwu1_ops[] = {
 
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_78_mulwu1_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_mulwu1_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 1 },
@@ -944,7 +965,7 @@ static const CGEN_OPERAND_INSTANCE fmt_78_mulwu1_ops[] = {
 
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
-static const CGEN_OPERAND_INSTANCE fmt_79_sc_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_sc_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
@@ -957,468 +978,356 @@ static const CGEN_OPERAND_INSTANCE fmt_79_sc_ops[] = {
 #define MNEM CGEN_SYNTAX_MNEMONIC /* syntax value for mnemonic */
 #define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
 
-/* The instruction table.  */
+/* The instruction table.
+   This is currently non-static because the simulator accesses it
+   directly.  */
 
 const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 {
-  /* null first entry, end of all hash chains */
+  /* Special null first entry.
+     A `num' value of zero is thus illegal.
+     Also, the special `illegal' insn resides here.  */
   { { 0 }, 0 },
 /* add $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "add", "add",
+    M32R_INSN_ADD, "add", "add",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0xa0,
-    & fmt_0_add_ops[0],
+    (PTR) & fmt_add_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(PARALLEL), { (1<<MACH_M32R), PIPE_OS } }
   },
 /* add3 $dr,$sr,$hash$slo16 */
   {
     { 1, 1, 1, 1 },
-    "add3", "add3",
+    M32R_INSN_ADD3, "add3", "add3",
     { MNEM, ' ', OP (DR), ',', OP (SR), ',', OP (HASH), OP (SLO16), 0 },
     { 32, 32, 0xf0f00000 }, 0x80a00000,
-    & fmt_1_add3_ops[0],
+    (PTR) & fmt_add3_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* and $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "and", "and",
+    M32R_INSN_AND, "and", "and",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0xc0,
-    & fmt_0_add_ops[0],
+    (PTR) & fmt_add_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(PARALLEL), { (1<<MACH_M32R), PIPE_OS } }
   },
 /* and3 $dr,$sr,$uimm16 */
   {
     { 1, 1, 1, 1 },
-    "and3", "and3",
+    M32R_INSN_AND3, "and3", "and3",
     { MNEM, ' ', OP (DR), ',', OP (SR), ',', OP (UIMM16), 0 },
     { 32, 32, 0xf0f00000 }, 0x80c00000,
-    & fmt_2_and3_ops[0],
+    (PTR) & fmt_and3_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* or $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "or", "or",
+    M32R_INSN_OR, "or", "or",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0xe0,
-    & fmt_0_add_ops[0],
+    (PTR) & fmt_add_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(PARALLEL), { (1<<MACH_M32R), PIPE_OS } }
   },
 /* or3 $dr,$sr,$hash$ulo16 */
   {
     { 1, 1, 1, 1 },
-    "or3", "or3",
+    M32R_INSN_OR3, "or3", "or3",
     { MNEM, ' ', OP (DR), ',', OP (SR), ',', OP (HASH), OP (ULO16), 0 },
     { 32, 32, 0xf0f00000 }, 0x80e00000,
-    & fmt_3_or3_ops[0],
+    (PTR) & fmt_or3_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* xor $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "xor", "xor",
+    M32R_INSN_XOR, "xor", "xor",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0xd0,
-    & fmt_0_add_ops[0],
+    (PTR) & fmt_add_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(PARALLEL), { (1<<MACH_M32R), PIPE_OS } }
   },
 /* xor3 $dr,$sr,$uimm16 */
   {
     { 1, 1, 1, 1 },
-    "xor3", "xor3",
+    M32R_INSN_XOR3, "xor3", "xor3",
     { MNEM, ' ', OP (DR), ',', OP (SR), ',', OP (UIMM16), 0 },
     { 32, 32, 0xf0f00000 }, 0x80d00000,
-    & fmt_2_and3_ops[0],
+    (PTR) & fmt_and3_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* addi $dr,$simm8 */
   {
     { 1, 1, 1, 1 },
-    "addi", "addi",
+    M32R_INSN_ADDI, "addi", "addi",
     { MNEM, ' ', OP (DR), ',', OP (SIMM8), 0 },
     { 16, 16, 0xf000 }, 0x4000,
-    & fmt_4_addi_ops[0],
+    (PTR) & fmt_addi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* addv $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "addv", "addv",
+    M32R_INSN_ADDV, "addv", "addv",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x80,
-    & fmt_5_addv_ops[0],
+    (PTR) & fmt_addv_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* addv3 $dr,$sr,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "addv3", "addv3",
+    M32R_INSN_ADDV3, "addv3", "addv3",
     { MNEM, ' ', OP (DR), ',', OP (SR), ',', OP (SIMM16), 0 },
     { 32, 32, 0xf0f00000 }, 0x80800000,
-    & fmt_6_addv3_ops[0],
+    (PTR) & fmt_addv3_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* addx $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "addx", "addx",
+    M32R_INSN_ADDX, "addx", "addx",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x90,
-    & fmt_7_addx_ops[0],
+    (PTR) & fmt_addx_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
-  },
-/* bc $disp8 */
-  {
-    { 1, 1, 1, 1 },
-    "bc8", "bc",
-    { MNEM, ' ', OP (DISP8), 0 },
-    { 16, 16, 0xff00 }, 0x7c00,
-    & fmt_8_bc8_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* bc.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bc8.s", "bc.s",
+    M32R_INSN_BC8, "bc8", "bc.s",
     { MNEM, ' ', OP (DISP8), 0 },
     { 16, 16, 0xff00 }, 0x7c00,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32R), PIPE_O } }
-  },
-/* bc $disp24 */
-  {
-    { 1, 1, 1, 1 },
-    "bc24", "bc",
-    { MNEM, ' ', OP (DISP24), 0 },
-    { 32, 32, 0xff000000 }, 0xfc000000,
-    & fmt_10_bc24_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
+    (PTR) & fmt_bc8_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* bc.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bc24.l", "bc.l",
+    M32R_INSN_BC24, "bc24", "bc.l",
     { MNEM, ' ', OP (DISP24), 0 },
     { 32, 32, 0xff000000 }, 0xfc000000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
+    (PTR) & fmt_bc24_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* beq $src1,$src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "beq", "beq",
+    M32R_INSN_BEQ, "beq", "beq",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), ',', OP (DISP16), 0 },
     { 32, 32, 0xf0f00000 }, 0xb0000000,
-    & fmt_12_beq_ops[0],
+    (PTR) & fmt_beq_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* beqz $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "beqz", "beqz",
+    M32R_INSN_BEQZ, "beqz", "beqz",
     { MNEM, ' ', OP (SRC2), ',', OP (DISP16), 0 },
     { 32, 32, 0xfff00000 }, 0xb0800000,
-    & fmt_13_beqz_ops[0],
+    (PTR) & fmt_beqz_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* bgez $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "bgez", "bgez",
+    M32R_INSN_BGEZ, "bgez", "bgez",
     { MNEM, ' ', OP (SRC2), ',', OP (DISP16), 0 },
     { 32, 32, 0xfff00000 }, 0xb0b00000,
-    & fmt_13_beqz_ops[0],
+    (PTR) & fmt_beqz_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* bgtz $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "bgtz", "bgtz",
+    M32R_INSN_BGTZ, "bgtz", "bgtz",
     { MNEM, ' ', OP (SRC2), ',', OP (DISP16), 0 },
     { 32, 32, 0xfff00000 }, 0xb0d00000,
-    & fmt_13_beqz_ops[0],
+    (PTR) & fmt_beqz_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* blez $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "blez", "blez",
+    M32R_INSN_BLEZ, "blez", "blez",
     { MNEM, ' ', OP (SRC2), ',', OP (DISP16), 0 },
     { 32, 32, 0xfff00000 }, 0xb0c00000,
-    & fmt_13_beqz_ops[0],
+    (PTR) & fmt_beqz_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* bltz $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "bltz", "bltz",
+    M32R_INSN_BLTZ, "bltz", "bltz",
     { MNEM, ' ', OP (SRC2), ',', OP (DISP16), 0 },
     { 32, 32, 0xfff00000 }, 0xb0a00000,
-    & fmt_13_beqz_ops[0],
+    (PTR) & fmt_beqz_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* bnez $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "bnez", "bnez",
+    M32R_INSN_BNEZ, "bnez", "bnez",
     { MNEM, ' ', OP (SRC2), ',', OP (DISP16), 0 },
     { 32, 32, 0xfff00000 }, 0xb0900000,
-    & fmt_13_beqz_ops[0],
+    (PTR) & fmt_beqz_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* bl $disp8 */
-  {
-    { 1, 1, 1, 1 },
-    "bl8", "bl",
-    { MNEM, ' ', OP (DISP8), 0 },
-    { 16, 16, 0xff00 }, 0x7e00,
-    & fmt_14_bl8_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(FILL_SLOT)|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* bl.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bl8.s", "bl.s",
+    M32R_INSN_BL8, "bl8", "bl.s",
     { MNEM, ' ', OP (DISP8), 0 },
     { 16, 16, 0xff00 }, 0x7e00,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(FILL_SLOT)|A(ALIAS)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O } }
-  },
-/* bl $disp24 */
-  {
-    { 1, 1, 1, 1 },
-    "bl24", "bl",
-    { MNEM, ' ', OP (DISP24), 0 },
-    { 32, 32, 0xff000000 }, 0xfe000000,
-    & fmt_15_bl24_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
+    (PTR) & fmt_bl8_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(FILL_SLOT)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* bl.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bl24.l", "bl.l",
+    M32R_INSN_BL24, "bl24", "bl.l",
     { MNEM, ' ', OP (DISP24), 0 },
     { 32, 32, 0xff000000 }, 0xfe000000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
+    (PTR) & fmt_bl24_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
   },
-/* start-sanitize-m32rx */
-/* bcl $disp8 */
-  {
-    { 1, 1, 1, 1 },
-    "bcl8", "bcl",
-    { MNEM, ' ', OP (DISP8), 0 },
-    { 16, 16, 0xff00 }, 0x7800,
-    & fmt_16_bcl8_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
-  },
-/* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
 /* bcl.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bcl8.s", "bcl.s",
+    M32R_INSN_BCL8, "bcl8", "bcl.s",
     { MNEM, ' ', OP (DISP8), 0 },
     { 16, 16, 0xff00 }, 0x7800,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
-  },
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
-/* bcl $disp24 */
-  {
-    { 1, 1, 1, 1 },
-    "bcl24", "bcl",
-    { MNEM, ' ', OP (DISP24), 0 },
-    { 32, 32, 0xff000000 }, 0xf8000000,
-    & fmt_17_bcl24_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_NONE } }
+    (PTR) & fmt_bcl8_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
   },
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
 /* bcl.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bcl24.l", "bcl.l",
+    M32R_INSN_BCL24, "bcl24", "bcl.l",
     { MNEM, ' ', OP (DISP24), 0 },
     { 32, 32, 0xff000000 }, 0xf8000000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_NONE } }
+    (PTR) & fmt_bcl24_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* end-sanitize-m32rx */
-/* bnc $disp8 */
-  {
-    { 1, 1, 1, 1 },
-    "bnc8", "bnc",
-    { MNEM, ' ', OP (DISP8), 0 },
-    { 16, 16, 0xff00 }, 0x7d00,
-    & fmt_8_bc8_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_M32R), PIPE_O } }
-  },
 /* bnc.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bnc8.s", "bnc.s",
+    M32R_INSN_BNC8, "bnc8", "bnc.s",
     { MNEM, ' ', OP (DISP8), 0 },
     { 16, 16, 0xff00 }, 0x7d00,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32R), PIPE_O } }
-  },
-/* bnc $disp24 */
-  {
-    { 1, 1, 1, 1 },
-    "bnc24", "bnc",
-    { MNEM, ' ', OP (DISP24), 0 },
-    { 32, 32, 0xff000000 }, 0xfd000000,
-    & fmt_10_bc24_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
+    (PTR) & fmt_bc8_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* bnc.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bnc24.l", "bnc.l",
+    M32R_INSN_BNC24, "bnc24", "bnc.l",
     { MNEM, ' ', OP (DISP24), 0 },
     { 32, 32, 0xff000000 }, 0xfd000000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
+    (PTR) & fmt_bc24_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* bne $src1,$src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "bne", "bne",
+    M32R_INSN_BNE, "bne", "bne",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), ',', OP (DISP16), 0 },
     { 32, 32, 0xf0f00000 }, 0xb0100000,
-    & fmt_12_beq_ops[0],
+    (PTR) & fmt_beq_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* bra $disp8 */
-  {
-    { 1, 1, 1, 1 },
-    "bra8", "bra",
-    { MNEM, ' ', OP (DISP8), 0 },
-    { 16, 16, 0xff00 }, 0x7f00,
-    & fmt_18_bra8_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(FILL_SLOT)|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* bra.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bra8.s", "bra.s",
+    M32R_INSN_BRA8, "bra8", "bra.s",
     { MNEM, ' ', OP (DISP8), 0 },
     { 16, 16, 0xff00 }, 0x7f00,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O } }
-  },
-/* bra $disp24 */
-  {
-    { 1, 1, 1, 1 },
-    "bra24", "bra",
-    { MNEM, ' ', OP (DISP24), 0 },
-    { 32, 32, 0xff000000 }, 0xff000000,
-    & fmt_19_bra24_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
+    (PTR) & fmt_bra8_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(FILL_SLOT)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* bra.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bra24.l", "bra.l",
+    M32R_INSN_BRA24, "bra24", "bra.l",
     { MNEM, ' ', OP (DISP24), 0 },
     { 32, 32, 0xff000000 }, 0xff000000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
+    (PTR) & fmt_bra24_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_NONE } }
   },
-/* start-sanitize-m32rx */
-/* bncl $disp8 */
-  {
-    { 1, 1, 1, 1 },
-    "bncl8", "bncl",
-    { MNEM, ' ', OP (DISP8), 0 },
-    { 16, 16, 0xff00 }, 0x7900,
-    & fmt_16_bcl8_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
-  },
-/* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
 /* bncl.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bncl8.s", "bncl.s",
+    M32R_INSN_BNCL8, "bncl8", "bncl.s",
     { MNEM, ' ', OP (DISP8), 0 },
     { 16, 16, 0xff00 }, 0x7900,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
-  },
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
-/* bncl $disp24 */
-  {
-    { 1, 1, 1, 1 },
-    "bncl24", "bncl",
-    { MNEM, ' ', OP (DISP24), 0 },
-    { 32, 32, 0xff000000 }, 0xf9000000,
-    & fmt_17_bcl24_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_NONE } }
+    (PTR) & fmt_bcl8_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
   },
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
 /* bncl.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bncl24.l", "bncl.l",
+    M32R_INSN_BNCL24, "bncl24", "bncl.l",
     { MNEM, ' ', OP (DISP24), 0 },
     { 32, 32, 0xff000000 }, 0xf9000000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_NONE } }
+    (PTR) & fmt_bcl24_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* end-sanitize-m32rx */
 /* cmp $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "cmp", "cmp",
+    M32R_INSN_CMP, "cmp", "cmp",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x40,
-    & fmt_20_cmp_ops[0],
+    (PTR) & fmt_cmp_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* cmpi $src2,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "cmpi", "cmpi",
+    M32R_INSN_CMPI, "cmpi", "cmpi",
     { MNEM, ' ', OP (SRC2), ',', OP (SIMM16), 0 },
     { 32, 32, 0xfff00000 }, 0x80400000,
-    & fmt_21_cmpi_ops[0],
+    (PTR) & fmt_cmpi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* cmpu $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "cmpu", "cmpu",
+    M32R_INSN_CMPU, "cmpu", "cmpu",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x50,
-    & fmt_20_cmp_ops[0],
+    (PTR) & fmt_cmp_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
-/* cmpui $src2,$uimm16 */
+/* cmpui $src2,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "cmpui", "cmpui",
-    { MNEM, ' ', OP (SRC2), ',', OP (UIMM16), 0 },
+    M32R_INSN_CMPUI, "cmpui", "cmpui",
+    { MNEM, ' ', OP (SRC2), ',', OP (SIMM16), 0 },
     { 32, 32, 0xfff00000 }, 0x80500000,
-    & fmt_22_cmpui_ops[0],
+    (PTR) & fmt_cmpi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* start-sanitize-m32rx */
 /* cmpeq $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "cmpeq", "cmpeq",
+    M32R_INSN_CMPEQ, "cmpeq", "cmpeq",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x60,
-    & fmt_20_cmp_ops[0],
+    (PTR) & fmt_cmp_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_OS } }
   },
 /* end-sanitize-m32rx */
@@ -1426,57 +1335,57 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* cmpz $src2 */
   {
     { 1, 1, 1, 1 },
-    "cmpz", "cmpz",
+    M32R_INSN_CMPZ, "cmpz", "cmpz",
     { MNEM, ' ', OP (SRC2), 0 },
     { 16, 16, 0xfff0 }, 0x70,
-    & fmt_23_cmpz_ops[0],
+    (PTR) & fmt_cmpz_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_OS } }
   },
 /* end-sanitize-m32rx */
 /* div $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "div", "div",
+    M32R_INSN_DIV, "div", "div",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 32, 32, 0xf0f0ffff }, 0x90000000,
-    & fmt_24_div_ops[0],
+    (PTR) & fmt_div_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* divu $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "divu", "divu",
+    M32R_INSN_DIVU, "divu", "divu",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 32, 32, 0xf0f0ffff }, 0x90100000,
-    & fmt_24_div_ops[0],
+    (PTR) & fmt_div_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* rem $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "rem", "rem",
+    M32R_INSN_REM, "rem", "rem",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 32, 32, 0xf0f0ffff }, 0x90200000,
-    & fmt_24_div_ops[0],
+    (PTR) & fmt_div_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* remu $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "remu", "remu",
+    M32R_INSN_REMU, "remu", "remu",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 32, 32, 0xf0f0ffff }, 0x90300000,
-    & fmt_24_div_ops[0],
+    (PTR) & fmt_div_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* start-sanitize-m32rx */
 /* divh $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "divh", "divh",
+    M32R_INSN_DIVH, "divh", "divh",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 32, 32, 0xf0f0ffff }, 0x90000010,
-    & fmt_24_div_ops[0],
+    (PTR) & fmt_div_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* end-sanitize-m32rx */
@@ -1484,10 +1393,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* jc $sr */
   {
     { 1, 1, 1, 1 },
-    "jc", "jc",
+    M32R_INSN_JC, "jc", "jc",
     { MNEM, ' ', OP (SR), 0 },
     { 16, 16, 0xfff0 }, 0x1cc0,
-    & fmt_25_jc_ops[0],
+    (PTR) & fmt_jc_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
   },
 /* end-sanitize-m32rx */
@@ -1495,933 +1404,709 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* jnc $sr */
   {
     { 1, 1, 1, 1 },
-    "jnc", "jnc",
+    M32R_INSN_JNC, "jnc", "jnc",
     { MNEM, ' ', OP (SR), 0 },
     { 16, 16, 0xfff0 }, 0x1dc0,
-    & fmt_25_jc_ops[0],
+    (PTR) & fmt_jc_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
   },
 /* end-sanitize-m32rx */
 /* jl $sr */
   {
     { 1, 1, 1, 1 },
-    "jl", "jl",
+    M32R_INSN_JL, "jl", "jl",
     { MNEM, ' ', OP (SR), 0 },
     { 16, 16, 0xfff0 }, 0x1ec0,
-    & fmt_26_jl_ops[0],
+    (PTR) & fmt_jl_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(FILL_SLOT)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* jmp $sr */
   {
     { 1, 1, 1, 1 },
-    "jmp", "jmp",
+    M32R_INSN_JMP, "jmp", "jmp",
     { MNEM, ' ', OP (SR), 0 },
     { 16, 16, 0xfff0 }, 0x1fc0,
-    & fmt_27_jmp_ops[0],
+    (PTR) & fmt_jmp_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* ld $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "ld", "ld",
+    M32R_INSN_LD, "ld", "ld",
     { MNEM, ' ', OP (DR), ',', '@', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x20c0,
-    & fmt_28_ld_ops[0],
+    (PTR) & fmt_ld_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
-  },
-/* ld $dr,@($sr) */
-  {
-    { 1, 1, 1, 1 },
-    "ld-2", "ld",
-    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ')', 0 },
-    { 16, 16, 0xf0f0 }, 0x20c0,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
   },
 /* ld $dr,@($slo16,$sr) */
   {
     { 1, 1, 1, 1 },
-    "ld-d", "ld",
+    M32R_INSN_LD_D, "ld-d", "ld",
     { MNEM, ' ', OP (DR), ',', '@', '(', OP (SLO16), ',', OP (SR), ')', 0 },
     { 32, 32, 0xf0f00000 }, 0xa0c00000,
-    & fmt_30_ld_d_ops[0],
+    (PTR) & fmt_ld_d_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* ld $dr,@($sr,$slo16) */
-  {
-    { 1, 1, 1, 1 },
-    "ld-d2", "ld",
-    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ',', OP (SLO16), ')', 0 },
-    { 32, 32, 0xf0f00000 }, 0xa0c00000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* ldb $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "ldb", "ldb",
+    M32R_INSN_LDB, "ldb", "ldb",
     { MNEM, ' ', OP (DR), ',', '@', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x2080,
-    & fmt_32_ldb_ops[0],
+    (PTR) & fmt_ldb_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
-  },
-/* ldb $dr,@($sr) */
-  {
-    { 1, 1, 1, 1 },
-    "ldb-2", "ldb",
-    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ')', 0 },
-    { 16, 16, 0xf0f0 }, 0x2080,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
   },
 /* ldb $dr,@($slo16,$sr) */
   {
     { 1, 1, 1, 1 },
-    "ldb-d", "ldb",
+    M32R_INSN_LDB_D, "ldb-d", "ldb",
     { MNEM, ' ', OP (DR), ',', '@', '(', OP (SLO16), ',', OP (SR), ')', 0 },
     { 32, 32, 0xf0f00000 }, 0xa0800000,
-    & fmt_33_ldb_d_ops[0],
+    (PTR) & fmt_ldb_d_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* ldb $dr,@($sr,$slo16) */
-  {
-    { 1, 1, 1, 1 },
-    "ldb-d2", "ldb",
-    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ',', OP (SLO16), ')', 0 },
-    { 32, 32, 0xf0f00000 }, 0xa0800000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* ldh $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "ldh", "ldh",
+    M32R_INSN_LDH, "ldh", "ldh",
     { MNEM, ' ', OP (DR), ',', '@', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x20a0,
-    & fmt_34_ldh_ops[0],
+    (PTR) & fmt_ldh_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
-  },
-/* ldh $dr,@($sr) */
-  {
-    { 1, 1, 1, 1 },
-    "ldh-2", "ldh",
-    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ')', 0 },
-    { 16, 16, 0xf0f0 }, 0x20a0,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
   },
 /* ldh $dr,@($slo16,$sr) */
   {
     { 1, 1, 1, 1 },
-    "ldh-d", "ldh",
+    M32R_INSN_LDH_D, "ldh-d", "ldh",
     { MNEM, ' ', OP (DR), ',', '@', '(', OP (SLO16), ',', OP (SR), ')', 0 },
     { 32, 32, 0xf0f00000 }, 0xa0a00000,
-    & fmt_35_ldh_d_ops[0],
+    (PTR) & fmt_ldh_d_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* ldh $dr,@($sr,$slo16) */
-  {
-    { 1, 1, 1, 1 },
-    "ldh-d2", "ldh",
-    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ',', OP (SLO16), ')', 0 },
-    { 32, 32, 0xf0f00000 }, 0xa0a00000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* ldub $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "ldub", "ldub",
+    M32R_INSN_LDUB, "ldub", "ldub",
     { MNEM, ' ', OP (DR), ',', '@', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x2090,
-    & fmt_32_ldb_ops[0],
+    (PTR) & fmt_ldb_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
-  },
-/* ldub $dr,@($sr) */
-  {
-    { 1, 1, 1, 1 },
-    "ldub-2", "ldub",
-    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ')', 0 },
-    { 16, 16, 0xf0f0 }, 0x2090,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
   },
 /* ldub $dr,@($slo16,$sr) */
   {
     { 1, 1, 1, 1 },
-    "ldub-d", "ldub",
+    M32R_INSN_LDUB_D, "ldub-d", "ldub",
     { MNEM, ' ', OP (DR), ',', '@', '(', OP (SLO16), ',', OP (SR), ')', 0 },
     { 32, 32, 0xf0f00000 }, 0xa0900000,
-    & fmt_33_ldb_d_ops[0],
+    (PTR) & fmt_ldb_d_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* ldub $dr,@($sr,$slo16) */
-  {
-    { 1, 1, 1, 1 },
-    "ldub-d2", "ldub",
-    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ',', OP (SLO16), ')', 0 },
-    { 32, 32, 0xf0f00000 }, 0xa0900000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* lduh $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "lduh", "lduh",
+    M32R_INSN_LDUH, "lduh", "lduh",
     { MNEM, ' ', OP (DR), ',', '@', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x20b0,
-    & fmt_34_ldh_ops[0],
+    (PTR) & fmt_ldh_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
-  },
-/* lduh $dr,@($sr) */
-  {
-    { 1, 1, 1, 1 },
-    "lduh-2", "lduh",
-    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ')', 0 },
-    { 16, 16, 0xf0f0 }, 0x20b0,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
   },
 /* lduh $dr,@($slo16,$sr) */
   {
     { 1, 1, 1, 1 },
-    "lduh-d", "lduh",
+    M32R_INSN_LDUH_D, "lduh-d", "lduh",
     { MNEM, ' ', OP (DR), ',', '@', '(', OP (SLO16), ',', OP (SR), ')', 0 },
     { 32, 32, 0xf0f00000 }, 0xa0b00000,
-    & fmt_35_ldh_d_ops[0],
+    (PTR) & fmt_ldh_d_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* lduh $dr,@($sr,$slo16) */
-  {
-    { 1, 1, 1, 1 },
-    "lduh-d2", "lduh",
-    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ',', OP (SLO16), ')', 0 },
-    { 32, 32, 0xf0f00000 }, 0xa0b00000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* ld $dr,@$sr+ */
   {
     { 1, 1, 1, 1 },
-    "ld-plus", "ld",
+    M32R_INSN_LD_PLUS, "ld-plus", "ld",
     { MNEM, ' ', OP (DR), ',', '@', OP (SR), '+', 0 },
     { 16, 16, 0xf0f0 }, 0x20e0,
-    & fmt_36_ld_plus_ops[0],
+    (PTR) & fmt_ld_plus_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* ld24 $dr,$uimm24 */
   {
     { 1, 1, 1, 1 },
-    "ld24", "ld24",
+    M32R_INSN_LD24, "ld24", "ld24",
     { MNEM, ' ', OP (DR), ',', OP (UIMM24), 0 },
     { 32, 32, 0xf0000000 }, 0xe0000000,
-    & fmt_37_ld24_ops[0],
+    (PTR) & fmt_ld24_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* ldi $dr,$simm8 */
-  {
-    { 1, 1, 1, 1 },
-    "ldi8", "ldi",
-    { MNEM, ' ', OP (DR), ',', OP (SIMM8), 0 },
-    { 16, 16, 0xf000 }, 0x6000,
-    & fmt_38_ldi8_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* ldi8 $dr,$simm8 */
   {
     { 1, 1, 1, 1 },
-    "ldi8a", "ldi8",
+    M32R_INSN_LDI8, "ldi8", "ldi8",
     { MNEM, ' ', OP (DR), ',', OP (SIMM8), 0 },
     { 16, 16, 0xf000 }, 0x6000,
-    & fmt_38_ldi8_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_OS } }
-  },
-/* ldi $dr,$hash$slo16 */
-  {
-    { 1, 1, 1, 1 },
-    "ldi16", "ldi",
-    { MNEM, ' ', OP (DR), ',', OP (HASH), OP (SLO16), 0 },
-    { 32, 32, 0xf0ff0000 }, 0x90f00000,
-    & fmt_39_ldi16_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
+    (PTR) & fmt_ldi8_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* ldi16 $dr,$hash$slo16 */
   {
     { 1, 1, 1, 1 },
-    "ldi16a", "ldi16",
+    M32R_INSN_LDI16, "ldi16", "ldi16",
     { MNEM, ' ', OP (DR), ',', OP (HASH), OP (SLO16), 0 },
     { 32, 32, 0xf0ff0000 }, 0x90f00000,
-    & fmt_39_ldi16_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+    (PTR) & fmt_ldi16_ops[0],
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* lock $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "lock", "lock",
+    M32R_INSN_LOCK, "lock", "lock",
     { MNEM, ' ', OP (DR), ',', '@', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x20d0,
-    & fmt_40_lock_ops[0],
+    (PTR) & fmt_lock_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* machi $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "machi", "machi",
+    M32R_INSN_MACHI, "machi", "machi",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x3040,
-    & fmt_41_machi_ops[0],
+    (PTR) & fmt_machi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* start-sanitize-m32rx */
 /* machi $src1,$src2,$acc */
   {
     { 1, 1, 1, 1 },
-    "machi-a", "machi",
+    M32R_INSN_MACHI_A, "machi-a", "machi",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), ',', OP (ACC), 0 },
     { 16, 16, 0xf070 }, 0x3040,
-    & fmt_42_machi_a_ops[0],
+    (PTR) & fmt_machi_a_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* maclo $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "maclo", "maclo",
+    M32R_INSN_MACLO, "maclo", "maclo",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x3050,
-    & fmt_41_machi_ops[0],
+    (PTR) & fmt_machi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* start-sanitize-m32rx */
 /* maclo $src1,$src2,$acc */
   {
     { 1, 1, 1, 1 },
-    "maclo-a", "maclo",
+    M32R_INSN_MACLO_A, "maclo-a", "maclo",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), ',', OP (ACC), 0 },
     { 16, 16, 0xf070 }, 0x3050,
-    & fmt_42_machi_a_ops[0],
+    (PTR) & fmt_machi_a_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* macwhi $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "macwhi", "macwhi",
+    M32R_INSN_MACWHI, "macwhi", "macwhi",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x3060,
-    & fmt_41_machi_ops[0],
+    (PTR) & fmt_machi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* macwlo $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "macwlo", "macwlo",
+    M32R_INSN_MACWLO, "macwlo", "macwlo",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x3070,
-    & fmt_41_machi_ops[0],
+    (PTR) & fmt_machi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* mul $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "mul", "mul",
+    M32R_INSN_MUL, "mul", "mul",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x1060,
-    & fmt_0_add_ops[0],
+    (PTR) & fmt_add_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* mulhi $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "mulhi", "mulhi",
+    M32R_INSN_MULHI, "mulhi", "mulhi",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x3000,
-    & fmt_43_mulhi_ops[0],
+    (PTR) & fmt_mulhi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* start-sanitize-m32rx */
 /* mulhi $src1,$src2,$acc */
   {
     { 1, 1, 1, 1 },
-    "mulhi-a", "mulhi",
+    M32R_INSN_MULHI_A, "mulhi-a", "mulhi",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), ',', OP (ACC), 0 },
     { 16, 16, 0xf070 }, 0x3000,
-    & fmt_44_mulhi_a_ops[0],
+    (PTR) & fmt_mulhi_a_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* mullo $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "mullo", "mullo",
+    M32R_INSN_MULLO, "mullo", "mullo",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x3010,
-    & fmt_43_mulhi_ops[0],
+    (PTR) & fmt_mulhi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* start-sanitize-m32rx */
 /* mullo $src1,$src2,$acc */
   {
     { 1, 1, 1, 1 },
-    "mullo-a", "mullo",
+    M32R_INSN_MULLO_A, "mullo-a", "mullo",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), ',', OP (ACC), 0 },
     { 16, 16, 0xf070 }, 0x3010,
-    & fmt_44_mulhi_a_ops[0],
+    (PTR) & fmt_mulhi_a_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* mulwhi $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "mulwhi", "mulwhi",
+    M32R_INSN_MULWHI, "mulwhi", "mulwhi",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x3020,
-    & fmt_43_mulhi_ops[0],
+    (PTR) & fmt_mulhi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* mulwlo $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "mulwlo", "mulwlo",
+    M32R_INSN_MULWLO, "mulwlo", "mulwlo",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x3030,
-    & fmt_43_mulhi_ops[0],
+    (PTR) & fmt_mulhi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* mv $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "mv", "mv",
+    M32R_INSN_MV, "mv", "mv",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x1080,
-    & fmt_45_mv_ops[0],
+    (PTR) & fmt_mv_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* mvfachi $dr */
   {
     { 1, 1, 1, 1 },
-    "mvfachi", "mvfachi",
+    M32R_INSN_MVFACHI, "mvfachi", "mvfachi",
     { MNEM, ' ', OP (DR), 0 },
     { 16, 16, 0xf0ff }, 0x50f0,
-    & fmt_46_mvfachi_ops[0],
+    (PTR) & fmt_mvfachi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* start-sanitize-m32rx */
 /* mvfachi $dr,$accs */
   {
     { 1, 1, 1, 1 },
-    "mvfachi-a", "mvfachi",
+    M32R_INSN_MVFACHI_A, "mvfachi-a", "mvfachi",
     { MNEM, ' ', OP (DR), ',', OP (ACCS), 0 },
     { 16, 16, 0xf0f3 }, 0x50f0,
-    & fmt_47_mvfachi_a_ops[0],
+    (PTR) & fmt_mvfachi_a_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* mvfaclo $dr */
   {
     { 1, 1, 1, 1 },
-    "mvfaclo", "mvfaclo",
+    M32R_INSN_MVFACLO, "mvfaclo", "mvfaclo",
     { MNEM, ' ', OP (DR), 0 },
     { 16, 16, 0xf0ff }, 0x50f1,
-    & fmt_46_mvfachi_ops[0],
+    (PTR) & fmt_mvfachi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* start-sanitize-m32rx */
 /* mvfaclo $dr,$accs */
   {
     { 1, 1, 1, 1 },
-    "mvfaclo-a", "mvfaclo",
+    M32R_INSN_MVFACLO_A, "mvfaclo-a", "mvfaclo",
     { MNEM, ' ', OP (DR), ',', OP (ACCS), 0 },
     { 16, 16, 0xf0f3 }, 0x50f1,
-    & fmt_47_mvfachi_a_ops[0],
+    (PTR) & fmt_mvfachi_a_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* mvfacmi $dr */
   {
     { 1, 1, 1, 1 },
-    "mvfacmi", "mvfacmi",
+    M32R_INSN_MVFACMI, "mvfacmi", "mvfacmi",
     { MNEM, ' ', OP (DR), 0 },
     { 16, 16, 0xf0ff }, 0x50f2,
-    & fmt_46_mvfachi_ops[0],
+    (PTR) & fmt_mvfachi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* start-sanitize-m32rx */
 /* mvfacmi $dr,$accs */
   {
     { 1, 1, 1, 1 },
-    "mvfacmi-a", "mvfacmi",
+    M32R_INSN_MVFACMI_A, "mvfacmi-a", "mvfacmi",
     { MNEM, ' ', OP (DR), ',', OP (ACCS), 0 },
     { 16, 16, 0xf0f3 }, 0x50f2,
-    & fmt_47_mvfachi_a_ops[0],
+    (PTR) & fmt_mvfachi_a_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* mvfc $dr,$scr */
   {
     { 1, 1, 1, 1 },
-    "mvfc", "mvfc",
+    M32R_INSN_MVFC, "mvfc", "mvfc",
     { MNEM, ' ', OP (DR), ',', OP (SCR), 0 },
     { 16, 16, 0xf0f0 }, 0x1090,
-    & fmt_48_mvfc_ops[0],
+    (PTR) & fmt_mvfc_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* mvtachi $src1 */
   {
     { 1, 1, 1, 1 },
-    "mvtachi", "mvtachi",
+    M32R_INSN_MVTACHI, "mvtachi", "mvtachi",
     { MNEM, ' ', OP (SRC1), 0 },
     { 16, 16, 0xf0ff }, 0x5070,
-    & fmt_49_mvtachi_ops[0],
+    (PTR) & fmt_mvtachi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* start-sanitize-m32rx */
 /* mvtachi $src1,$accs */
   {
     { 1, 1, 1, 1 },
-    "mvtachi-a", "mvtachi",
+    M32R_INSN_MVTACHI_A, "mvtachi-a", "mvtachi",
     { MNEM, ' ', OP (SRC1), ',', OP (ACCS), 0 },
     { 16, 16, 0xf0f3 }, 0x5070,
-    & fmt_50_mvtachi_a_ops[0],
+    (PTR) & fmt_mvtachi_a_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* mvtaclo $src1 */
   {
     { 1, 1, 1, 1 },
-    "mvtaclo", "mvtaclo",
+    M32R_INSN_MVTACLO, "mvtaclo", "mvtaclo",
     { MNEM, ' ', OP (SRC1), 0 },
     { 16, 16, 0xf0ff }, 0x5071,
-    & fmt_49_mvtachi_ops[0],
+    (PTR) & fmt_mvtachi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
 /* start-sanitize-m32rx */
 /* mvtaclo $src1,$accs */
   {
     { 1, 1, 1, 1 },
-    "mvtaclo-a", "mvtaclo",
+    M32R_INSN_MVTACLO_A, "mvtaclo-a", "mvtaclo",
     { MNEM, ' ', OP (SRC1), ',', OP (ACCS), 0 },
     { 16, 16, 0xf0f3 }, 0x5071,
-    & fmt_50_mvtachi_a_ops[0],
+    (PTR) & fmt_mvtachi_a_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* mvtc $sr,$dcr */
   {
     { 1, 1, 1, 1 },
-    "mvtc", "mvtc",
+    M32R_INSN_MVTC, "mvtc", "mvtc",
     { MNEM, ' ', OP (SR), ',', OP (DCR), 0 },
     { 16, 16, 0xf0f0 }, 0x10a0,
-    & fmt_51_mvtc_ops[0],
+    (PTR) & fmt_mvtc_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* neg $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "neg", "neg",
+    M32R_INSN_NEG, "neg", "neg",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x30,
-    & fmt_45_mv_ops[0],
+    (PTR) & fmt_mv_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* nop */
   {
     { 1, 1, 1, 1 },
-    "nop", "nop",
+    M32R_INSN_NOP, "nop", "nop",
     { MNEM, 0 },
     { 16, 16, 0xffff }, 0x7000,
-    0,
+    (PTR) 0,
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* not $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "not", "not",
+    M32R_INSN_NOT, "not", "not",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0xb0,
-    & fmt_45_mv_ops[0],
+    (PTR) & fmt_mv_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* rac */
   {
     { 1, 1, 1, 1 },
-    "rac", "rac",
+    M32R_INSN_RAC, "rac", "rac",
     { MNEM, 0 },
     { 16, 16, 0xffff }, 0x5090,
-    & fmt_53_rac_ops[0],
+    (PTR) & fmt_rac_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
-/* start-sanitize-m32rx */
-/* rac $accd */
-  {
-    { 1, 1, 1, 1 },
-    "rac-d", "rac",
-    { MNEM, ' ', OP (ACCD), 0 },
-    { 16, 16, 0xf3ff }, 0x5090,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
-/* rac $accd,$accs */
-  {
-    { 1, 1, 1, 1 },
-    "rac-ds", "rac",
-    { MNEM, ' ', OP (ACCD), ',', OP (ACCS), 0 },
-    { 16, 16, 0xf3f3 }, 0x5090,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
 /* rac $accd,$accs,$imm1 */
   {
     { 1, 1, 1, 1 },
-    "rac-dsi", "rac",
+    M32R_INSN_RAC_DSI, "rac-dsi", "rac",
     { MNEM, ' ', OP (ACCD), ',', OP (ACCS), ',', OP (IMM1), 0 },
     { 16, 16, 0xf3f2 }, 0x5090,
-    & fmt_56_rac_dsi_ops[0],
+    (PTR) & fmt_rac_dsi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* rach */
   {
     { 1, 1, 1, 1 },
-    "rach", "rach",
+    M32R_INSN_RACH, "rach", "rach",
     { MNEM, 0 },
     { 16, 16, 0xffff }, 0x5080,
-    & fmt_53_rac_ops[0],
+    (PTR) & fmt_rac_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_S } }
   },
-/* start-sanitize-m32rx */
-/* rach $accd */
-  {
-    { 1, 1, 1, 1 },
-    "rach-d", "rach",
-    { MNEM, ' ', OP (ACCD), 0 },
-    { 16, 16, 0xf3ff }, 0x5080,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
-/* rach $accd,$accs */
-  {
-    { 1, 1, 1, 1 },
-    "rach-ds", "rach",
-    { MNEM, ' ', OP (ACCD), ',', OP (ACCS), 0 },
-    { 16, 16, 0xf3f3 }, 0x5080,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
 /* rach $accd,$accs,$imm1 */
   {
     { 1, 1, 1, 1 },
-    "rach-dsi", "rach",
+    M32R_INSN_RACH_DSI, "rach-dsi", "rach",
     { MNEM, ' ', OP (ACCD), ',', OP (ACCS), ',', OP (IMM1), 0 },
     { 16, 16, 0xf3f2 }, 0x5080,
-    & fmt_56_rac_dsi_ops[0],
+    (PTR) & fmt_rac_dsi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
 /* rte */
   {
     { 1, 1, 1, 1 },
-    "rte", "rte",
+    M32R_INSN_RTE, "rte", "rte",
     { MNEM, 0 },
     { 16, 16, 0xffff }, 0x10d6,
-    & fmt_57_rte_ops[0],
+    (PTR) & fmt_rte_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* seth $dr,$hash$hi16 */
   {
     { 1, 1, 1, 1 },
-    "seth", "seth",
+    M32R_INSN_SETH, "seth", "seth",
     { MNEM, ' ', OP (DR), ',', OP (HASH), OP (HI16), 0 },
     { 32, 32, 0xf0ff0000 }, 0xd0c00000,
-    & fmt_58_seth_ops[0],
+    (PTR) & fmt_seth_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* sll $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "sll", "sll",
+    M32R_INSN_SLL, "sll", "sll",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x1040,
-    & fmt_0_add_ops[0],
+    (PTR) & fmt_add_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* sll3 $dr,$sr,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "sll3", "sll3",
+    M32R_INSN_SLL3, "sll3", "sll3",
     { MNEM, ' ', OP (DR), ',', OP (SR), ',', OP (SIMM16), 0 },
     { 32, 32, 0xf0f00000 }, 0x90c00000,
-    & fmt_59_sll3_ops[0],
+    (PTR) & fmt_sll3_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* slli $dr,$uimm5 */
   {
     { 1, 1, 1, 1 },
-    "slli", "slli",
+    M32R_INSN_SLLI, "slli", "slli",
     { MNEM, ' ', OP (DR), ',', OP (UIMM5), 0 },
     { 16, 16, 0xf0e0 }, 0x5040,
-    & fmt_60_slli_ops[0],
+    (PTR) & fmt_slli_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* sra $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "sra", "sra",
+    M32R_INSN_SRA, "sra", "sra",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x1020,
-    & fmt_0_add_ops[0],
+    (PTR) & fmt_add_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* sra3 $dr,$sr,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "sra3", "sra3",
+    M32R_INSN_SRA3, "sra3", "sra3",
     { MNEM, ' ', OP (DR), ',', OP (SR), ',', OP (SIMM16), 0 },
     { 32, 32, 0xf0f00000 }, 0x90a00000,
-    & fmt_59_sll3_ops[0],
+    (PTR) & fmt_sll3_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* srai $dr,$uimm5 */
   {
     { 1, 1, 1, 1 },
-    "srai", "srai",
+    M32R_INSN_SRAI, "srai", "srai",
     { MNEM, ' ', OP (DR), ',', OP (UIMM5), 0 },
     { 16, 16, 0xf0e0 }, 0x5020,
-    & fmt_60_slli_ops[0],
+    (PTR) & fmt_slli_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* srl $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "srl", "srl",
+    M32R_INSN_SRL, "srl", "srl",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x1000,
-    & fmt_0_add_ops[0],
+    (PTR) & fmt_add_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* srl3 $dr,$sr,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "srl3", "srl3",
+    M32R_INSN_SRL3, "srl3", "srl3",
     { MNEM, ' ', OP (DR), ',', OP (SR), ',', OP (SIMM16), 0 },
     { 32, 32, 0xf0f00000 }, 0x90800000,
-    & fmt_59_sll3_ops[0],
+    (PTR) & fmt_sll3_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* srli $dr,$uimm5 */
   {
     { 1, 1, 1, 1 },
-    "srli", "srli",
+    M32R_INSN_SRLI, "srli", "srli",
     { MNEM, ' ', OP (DR), ',', OP (UIMM5), 0 },
     { 16, 16, 0xf0e0 }, 0x5000,
-    & fmt_60_slli_ops[0],
+    (PTR) & fmt_slli_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* st $src1,@$src2 */
   {
     { 1, 1, 1, 1 },
-    "st", "st",
+    M32R_INSN_ST, "st", "st",
     { MNEM, ' ', OP (SRC1), ',', '@', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x2040,
-    & fmt_61_st_ops[0],
+    (PTR) & fmt_st_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
-  },
-/* st $src1,@($src2) */
-  {
-    { 1, 1, 1, 1 },
-    "st-2", "st",
-    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ')', 0 },
-    { 16, 16, 0xf0f0 }, 0x2040,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
   },
 /* st $src1,@($slo16,$src2) */
   {
     { 1, 1, 1, 1 },
-    "st-d", "st",
+    M32R_INSN_ST_D, "st-d", "st",
     { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SLO16), ',', OP (SRC2), ')', 0 },
     { 32, 32, 0xf0f00000 }, 0xa0400000,
-    & fmt_63_st_d_ops[0],
+    (PTR) & fmt_st_d_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* st $src1,@($src2,$slo16) */
-  {
-    { 1, 1, 1, 1 },
-    "st-d2", "st",
-    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ',', OP (SLO16), ')', 0 },
-    { 32, 32, 0xf0f00000 }, 0xa0400000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* stb $src1,@$src2 */
   {
     { 1, 1, 1, 1 },
-    "stb", "stb",
+    M32R_INSN_STB, "stb", "stb",
     { MNEM, ' ', OP (SRC1), ',', '@', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x2000,
-    & fmt_65_stb_ops[0],
+    (PTR) & fmt_stb_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
-  },
-/* stb $src1,@($src2) */
-  {
-    { 1, 1, 1, 1 },
-    "stb-2", "stb",
-    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ')', 0 },
-    { 16, 16, 0xf0f0 }, 0x2000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
   },
 /* stb $src1,@($slo16,$src2) */
   {
     { 1, 1, 1, 1 },
-    "stb-d", "stb",
+    M32R_INSN_STB_D, "stb-d", "stb",
     { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SLO16), ',', OP (SRC2), ')', 0 },
     { 32, 32, 0xf0f00000 }, 0xa0000000,
-    & fmt_66_stb_d_ops[0],
+    (PTR) & fmt_stb_d_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* stb $src1,@($src2,$slo16) */
-  {
-    { 1, 1, 1, 1 },
-    "stb-d2", "stb",
-    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ',', OP (SLO16), ')', 0 },
-    { 32, 32, 0xf0f00000 }, 0xa0000000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* sth $src1,@$src2 */
   {
     { 1, 1, 1, 1 },
-    "sth", "sth",
+    M32R_INSN_STH, "sth", "sth",
     { MNEM, ' ', OP (SRC1), ',', '@', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x2020,
-    & fmt_67_sth_ops[0],
+    (PTR) & fmt_sth_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
-  },
-/* sth $src1,@($src2) */
-  {
-    { 1, 1, 1, 1 },
-    "sth-2", "sth",
-    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ')', 0 },
-    { 16, 16, 0xf0f0 }, 0x2020,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
   },
 /* sth $src1,@($slo16,$src2) */
   {
     { 1, 1, 1, 1 },
-    "sth-d", "sth",
+    M32R_INSN_STH_D, "sth-d", "sth",
     { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SLO16), ',', OP (SRC2), ')', 0 },
     { 32, 32, 0xf0f00000 }, 0xa0200000,
-    & fmt_68_sth_d_ops[0],
+    (PTR) & fmt_sth_d_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* sth $src1,@($src2,$slo16) */
-  {
-    { 1, 1, 1, 1 },
-    "sth-d2", "sth",
-    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ',', OP (SLO16), ')', 0 },
-    { 32, 32, 0xf0f00000 }, 0xa0200000,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* st $src1,@+$src2 */
   {
     { 1, 1, 1, 1 },
-    "st-plus", "st",
+    M32R_INSN_ST_PLUS, "st-plus", "st",
     { MNEM, ' ', OP (SRC1), ',', '@', '+', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x2060,
-    & fmt_69_st_plus_ops[0],
+    (PTR) & fmt_st_plus_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* st $src1,@-$src2 */
   {
     { 1, 1, 1, 1 },
-    "st-minus", "st",
+    M32R_INSN_ST_MINUS, "st-minus", "st",
     { MNEM, ' ', OP (SRC1), ',', '@', '-', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x2070,
-    & fmt_69_st_plus_ops[0],
+    (PTR) & fmt_st_plus_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
   },
 /* sub $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "sub", "sub",
+    M32R_INSN_SUB, "sub", "sub",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x20,
-    & fmt_0_add_ops[0],
+    (PTR) & fmt_add_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* subv $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "subv", "subv",
+    M32R_INSN_SUBV, "subv", "subv",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x0,
-    & fmt_5_addv_ops[0],
+    (PTR) & fmt_addv_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* subx $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "subx", "subx",
+    M32R_INSN_SUBX, "subx", "subx",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 16, 16, 0xf0f0 }, 0x10,
-    & fmt_7_addx_ops[0],
+    (PTR) & fmt_addx_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_OS } }
   },
 /* trap $uimm4 */
   {
     { 1, 1, 1, 1 },
-    "trap", "trap",
+    M32R_INSN_TRAP, "trap", "trap",
     { MNEM, ' ', OP (UIMM4), 0 },
     { 16, 16, 0xfff0 }, 0x10f0,
-    & fmt_70_trap_ops[0],
+    (PTR) & fmt_trap_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0|A(FILL_SLOT)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O } }
   },
 /* unlock $src1,@$src2 */
   {
     { 1, 1, 1, 1 },
-    "unlock", "unlock",
+    M32R_INSN_UNLOCK, "unlock", "unlock",
     { MNEM, ' ', OP (SRC1), ',', '@', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x2050,
-    & fmt_71_unlock_ops[0],
+    (PTR) & fmt_unlock_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32R), PIPE_O } }
-  },
-/* push $src1 */
-  {
-    { 1, 1, 1, 1 },
-    "push", "push",
-    { MNEM, ' ', OP (SRC1), 0 },
-    { 16, 16, 0xf0ff }, 0x207f,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
-  },
-/* pop $dr */
-  {
-    { 1, 1, 1, 1 },
-    "pop", "pop",
-    { MNEM, ' ', OP (DR), 0 },
-    { 16, 16, 0xf0ff }, 0x20ef,
-    0,
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
   },
 /* start-sanitize-m32rx */
 /* satb $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "satb", "satb",
+    M32R_INSN_SATB, "satb", "satb",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 32, 32, 0xf0f0ffff }, 0x80600300,
-    & fmt_74_satb_ops[0],
+    (PTR) & fmt_satb_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* end-sanitize-m32rx */
@@ -2429,10 +2114,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* sath $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "sath", "sath",
+    M32R_INSN_SATH, "sath", "sath",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 32, 32, 0xf0f0ffff }, 0x80600200,
-    & fmt_74_satb_ops[0],
+    (PTR) & fmt_satb_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* end-sanitize-m32rx */
@@ -2440,10 +2125,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* sat $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "sat", "sat",
+    M32R_INSN_SAT, "sat", "sat",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 32, 32, 0xf0f0ffff }, 0x80600000,
-    & fmt_75_sat_ops[0],
+    (PTR) & fmt_sat_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* end-sanitize-m32rx */
@@ -2451,10 +2136,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* pcmpbz $src2 */
   {
     { 1, 1, 1, 1 },
-    "pcmpbz", "pcmpbz",
+    M32R_INSN_PCMPBZ, "pcmpbz", "pcmpbz",
     { MNEM, ' ', OP (SRC2), 0 },
     { 16, 16, 0xfff0 }, 0x370,
-    & fmt_23_cmpz_ops[0],
+    (PTR) & fmt_cmpz_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_OS } }
   },
 /* end-sanitize-m32rx */
@@ -2462,10 +2147,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* sadd */
   {
     { 1, 1, 1, 1 },
-    "sadd", "sadd",
+    M32R_INSN_SADD, "sadd", "sadd",
     { MNEM, 0 },
     { 16, 16, 0xffff }, 0x50e4,
-    & fmt_76_sadd_ops[0],
+    (PTR) & fmt_sadd_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
@@ -2473,10 +2158,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* macwu1 $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "macwu1", "macwu1",
+    M32R_INSN_MACWU1, "macwu1", "macwu1",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x50b0,
-    & fmt_77_macwu1_ops[0],
+    (PTR) & fmt_macwu1_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
@@ -2484,10 +2169,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* msblo $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "msblo", "msblo",
+    M32R_INSN_MSBLO, "msblo", "msblo",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x50d0,
-    & fmt_41_machi_ops[0],
+    (PTR) & fmt_machi_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
@@ -2495,10 +2180,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* mulwu1 $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "mulwu1", "mulwu1",
+    M32R_INSN_MULWU1, "mulwu1", "mulwu1",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x50a0,
-    & fmt_78_mulwu1_ops[0],
+    (PTR) & fmt_mulwu1_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
@@ -2506,10 +2191,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* maclh1 $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "maclh1", "maclh1",
+    M32R_INSN_MACLH1, "maclh1", "maclh1",
     { MNEM, ' ', OP (SRC1), ',', OP (SRC2), 0 },
     { 16, 16, 0xf0f0 }, 0x50c0,
-    & fmt_77_macwu1_ops[0],
+    (PTR) & fmt_macwu1_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_S } }
   },
 /* end-sanitize-m32rx */
@@ -2517,10 +2202,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* sc */
   {
     { 1, 1, 1, 1 },
-    "sc", "sc",
+    M32R_INSN_SC, "sc", "sc",
     { MNEM, 0 },
     { 16, 16, 0xffff }, 0x7401,
-    & fmt_79_sc_ops[0],
+    (PTR) & fmt_sc_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_O } }
   },
 /* end-sanitize-m32rx */
@@ -2528,10 +2213,10 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* snc */
   {
     { 1, 1, 1, 1 },
-    "snc", "snc",
+    M32R_INSN_SNC, "snc", "snc",
     { MNEM, 0 },
     { 16, 16, 0xffff }, 0x7501,
-    & fmt_79_sc_ops[0],
+    (PTR) & fmt_sc_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_O } }
   },
 /* end-sanitize-m32rx */
@@ -2541,38 +2226,418 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 #undef MNEM
 #undef OP
 
-CGEN_INSN_TABLE m32r_cgen_insn_table =
+static CGEN_INSN_TABLE insn_table =
 {
   & m32r_cgen_insn_table_entries[0],
   sizeof (CGEN_INSN),
   MAX_INSNS,
-  NULL,
-  m32r_cgen_asm_hash_insn, CGEN_ASM_HASH_SIZE,
-  m32r_cgen_dis_hash_insn, CGEN_DIS_HASH_SIZE
+  NULL
+};
+
+/* Each non-simple macro entry points to an array of expansion possibilities.  */
+
+#define A(a) (1 << CONCAT2 (CGEN_INSN_,a))
+#define MNEM CGEN_SYNTAX_MNEMONIC /* syntax value for mnemonic */
+#define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
+
+/* The macro instruction table.  */
+
+static const CGEN_INSN macro_insn_table_entries[] =
+{
+/* bc $disp8 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bc8r", "bc",
+    { MNEM, ' ', OP (DISP8), 0 },
+    { 16, 16, 0xff00 }, 0x7c00,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAXABLE)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* bc $disp24 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bc24r", "bc",
+    { MNEM, ' ', OP (DISP24), 0 },
+    { 32, 32, 0xff000000 }, 0xfc000000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* bl $disp8 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bl8r", "bl",
+    { MNEM, ' ', OP (DISP8), 0 },
+    { 16, 16, 0xff00 }, 0x7e00,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAXABLE)|A(FILL_SLOT)|A(UNCOND_CTI)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* bl $disp24 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bl24r", "bl",
+    { MNEM, ' ', OP (DISP24), 0 },
+    { 32, 32, 0xff000000 }, 0xfe000000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(UNCOND_CTI)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* bcl $disp8 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bcl8r", "bcl",
+    { MNEM, ' ', OP (DISP8), 0 },
+    { 16, 16, 0xff00 }, 0x7800,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAXABLE)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32RX), PIPE_O } }
+  },
+/* bcl $disp24 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bcl24r", "bcl",
+    { MNEM, ' ', OP (DISP24), 0 },
+    { 32, 32, 0xff000000 }, 0xf8000000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32RX), PIPE_NONE } }
+  },
+/* bnc $disp8 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bnc8r", "bnc",
+    { MNEM, ' ', OP (DISP8), 0 },
+    { 16, 16, 0xff00 }, 0x7d00,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAXABLE)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* bnc $disp24 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bnc24r", "bnc",
+    { MNEM, ' ', OP (DISP24), 0 },
+    { 32, 32, 0xff000000 }, 0xfd000000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* bra $disp8 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bra8r", "bra",
+    { MNEM, ' ', OP (DISP8), 0 },
+    { 16, 16, 0xff00 }, 0x7f00,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAXABLE)|A(FILL_SLOT)|A(UNCOND_CTI)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* bra $disp24 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bra24r", "bra",
+    { MNEM, ' ', OP (DISP24), 0 },
+    { 32, 32, 0xff000000 }, 0xff000000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(UNCOND_CTI)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* bncl $disp8 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bncl8r", "bncl",
+    { MNEM, ' ', OP (DISP8), 0 },
+    { 16, 16, 0xff00 }, 0x7900,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAXABLE)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32RX), PIPE_O } }
+  },
+/* bncl $disp24 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "bncl24r", "bncl",
+    { MNEM, ' ', OP (DISP24), 0 },
+    { 32, 32, 0xff000000 }, 0xf9000000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(RELAX)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32RX), PIPE_NONE } }
+  },
+/* ld $dr,@($sr) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ld-2", "ld",
+    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ')', 0 },
+    { 16, 16, 0xf0f0 }, 0x20c0,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* ld $dr,@($sr,$slo16) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ld-d2", "ld",
+    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ',', OP (SLO16), ')', 0 },
+    { 32, 32, 0xf0f00000 }, 0xa0c00000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* ldb $dr,@($sr) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ldb-2", "ldb",
+    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ')', 0 },
+    { 16, 16, 0xf0f0 }, 0x2080,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* ldb $dr,@($sr,$slo16) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ldb-d2", "ldb",
+    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ',', OP (SLO16), ')', 0 },
+    { 32, 32, 0xf0f00000 }, 0xa0800000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* ldh $dr,@($sr) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ldh-2", "ldh",
+    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ')', 0 },
+    { 16, 16, 0xf0f0 }, 0x20a0,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* ldh $dr,@($sr,$slo16) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ldh-d2", "ldh",
+    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ',', OP (SLO16), ')', 0 },
+    { 32, 32, 0xf0f00000 }, 0xa0a00000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* ldub $dr,@($sr) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ldub-2", "ldub",
+    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ')', 0 },
+    { 16, 16, 0xf0f0 }, 0x2090,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* ldub $dr,@($sr,$slo16) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ldub-d2", "ldub",
+    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ',', OP (SLO16), ')', 0 },
+    { 32, 32, 0xf0f00000 }, 0xa0900000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* lduh $dr,@($sr) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "lduh-2", "lduh",
+    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ')', 0 },
+    { 16, 16, 0xf0f0 }, 0x20b0,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* lduh $dr,@($sr,$slo16) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "lduh-d2", "lduh",
+    { MNEM, ' ', OP (DR), ',', '@', '(', OP (SR), ',', OP (SLO16), ')', 0 },
+    { 32, 32, 0xf0f00000 }, 0xa0b00000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* pop $dr */
+  {
+    { 1, 1, 1, 1 },
+    -1, "pop", "pop",
+    { MNEM, ' ', OP (DR), 0 },
+    { 16, 16, 0xf0ff }, 0x20ef,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* ldi $dr,$simm8 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ldi8a", "ldi",
+    { MNEM, ' ', OP (DR), ',', OP (SIMM8), 0 },
+    { 16, 16, 0xf000 }, 0x6000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_OS } }
+  },
+/* ldi $dr,$hash$slo16 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ldi16a", "ldi",
+    { MNEM, ' ', OP (DR), ',', OP (HASH), OP (SLO16), 0 },
+    { 32, 32, 0xf0ff0000 }, 0x90f00000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* rac $accd */
+  {
+    { 1, 1, 1, 1 },
+    -1, "rac-d", "rac",
+    { MNEM, ' ', OP (ACCD), 0 },
+    { 16, 16, 0xf3ff }, 0x5090,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32RX), PIPE_S } }
+  },
+/* rac $accd,$accs */
+  {
+    { 1, 1, 1, 1 },
+    -1, "rac-ds", "rac",
+    { MNEM, ' ', OP (ACCD), ',', OP (ACCS), 0 },
+    { 16, 16, 0xf3f3 }, 0x5090,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32RX), PIPE_S } }
+  },
+/* rach $accd */
+  {
+    { 1, 1, 1, 1 },
+    -1, "rach-d", "rach",
+    { MNEM, ' ', OP (ACCD), 0 },
+    { 16, 16, 0xf3ff }, 0x5080,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32RX), PIPE_S } }
+  },
+/* rach $accd,$accs */
+  {
+    { 1, 1, 1, 1 },
+    -1, "rach-ds", "rach",
+    { MNEM, ' ', OP (ACCD), ',', OP (ACCS), 0 },
+    { 16, 16, 0xf3f3 }, 0x5080,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32RX), PIPE_S } }
+  },
+/* st $src1,@($src2) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "st-2", "st",
+    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ')', 0 },
+    { 16, 16, 0xf0f0 }, 0x2040,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* st $src1,@($src2,$slo16) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "st-d2", "st",
+    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ',', OP (SLO16), ')', 0 },
+    { 32, 32, 0xf0f00000 }, 0xa0400000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* stb $src1,@($src2) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "stb-2", "stb",
+    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ')', 0 },
+    { 16, 16, 0xf0f0 }, 0x2000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* stb $src1,@($src2,$slo16) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "stb-d2", "stb",
+    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ',', OP (SLO16), ')', 0 },
+    { 32, 32, 0xf0f00000 }, 0xa0000000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* sth $src1,@($src2) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "sth-2", "sth",
+    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ')', 0 },
+    { 16, 16, 0xf0f0 }, 0x2020,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_O } }
+  },
+/* sth $src1,@($src2,$slo16) */
+  {
+    { 1, 1, 1, 1 },
+    -1, "sth-d2", "sth",
+    { MNEM, ' ', OP (SRC1), ',', '@', '(', OP (SRC2), ',', OP (SLO16), ')', 0 },
+    { 32, 32, 0xf0f00000 }, 0xa0200000,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+/* push $src1 */
+  {
+    { 1, 1, 1, 1 },
+    -1, "push", "push",
+    { MNEM, ' ', OP (SRC1), 0 },
+    { 16, 16, 0xf0ff }, 0x207f,
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE } }
+  },
+};
+
+#undef A
+#undef MNEM
+#undef OP
+
+static CGEN_INSN_TABLE macro_insn_table =
+{
+  & macro_insn_table_entries[0],
+  sizeof (CGEN_INSN),
+  (sizeof (macro_insn_table_entries) /
+   sizeof (macro_insn_table_entries[0])),
+  NULL
 };
 
 /* The hash functions are recorded here to help keep assembler code out of
-   the disassembler and vice versa.  */
+   the disassembler and vice versa.
 
-unsigned int
-m32r_cgen_asm_hash_insn (insn)
-     const char * insn;
+static int asm_hash_insn_p PARAMS ((const CGEN_INSN *));
+static unsigned int asm_hash_insn PARAMS ((const char *));
+static int dis_hash_insn_p PARAMS ((const CGEN_INSN *));
+static unsigned int dis_hash_insn PARAMS ((const char *, unsigned long));
+
+/* Return non-zero if INSN is to be added to the hash table.
+   Targets are free to override CGEN_{ASM,DIS}_HASH_P in the .opc file.  */
+
+static int
+asm_hash_insn_p (insn)
+     const CGEN_INSN * insn;
 {
-  return CGEN_ASM_HASH (insn);
+  return CGEN_ASM_HASH_P (insn);
 }
 
-unsigned int
-m32r_cgen_dis_hash_insn (buf, value)
+static int
+dis_hash_insn_p (insn)
+     const CGEN_INSN * insn;
+{
+  /* If building the hash table and the NO-DIS attribute is present,
+     ignore.  */
+  if (CGEN_INSN_ATTR (insn, CGEN_INSN_NO_DIS))
+    return 0;
+  return CGEN_DIS_HASH_P (insn);
+}
+
+/* The result is the hash value of the insn.
+   Targets are free to override CGEN_{ASM,DIS}_HASH in the .opc file.  */
+
+static unsigned int
+asm_hash_insn (mnem)
+     const char * mnem;
+{
+  return CGEN_ASM_HASH (mnem);
+}
+
+static unsigned int
+dis_hash_insn (buf, value)
      const char * buf;
      unsigned long value;
 {
   return CGEN_DIS_HASH (buf, value);
 }
 
-CGEN_OPCODE_DATA m32r_cgen_opcode_data = 
+const CGEN_OPCODE_TABLE m32r_cgen_opcode_table =
 {
   & m32r_cgen_hw_entries[0],
-  & m32r_cgen_insn_table,
+  /*& m32r_cgen_operand_table[0], - FIXME:wip */
+  & insn_table,
+  & macro_insn_table,
+  asm_hash_insn_p, asm_hash_insn, CGEN_ASM_HASH_SIZE,
+  dis_hash_insn_p, dis_hash_insn, CGEN_DIS_HASH_SIZE
 };
 
 void
