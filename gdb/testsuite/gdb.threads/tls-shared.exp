@@ -78,7 +78,7 @@ if { ($gcc_compiled
 }
 
 if {[gdb_compile_pthreads "${objdir}/${subdir}/${testfile}.o ${objdir}/${subdir}/${libfile}.so" "${binfile}" executable [list debug $additional_flags]] != ""} {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    return -1
 }
 
 

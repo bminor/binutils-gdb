@@ -1,3 +1,11 @@
+2003-07-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/print-threads.exp (test_all_threads): Loosen KFAIL
+	pattern.
+	* gdb.threads/tls-shared.exp: Don't use gdb_suppress_entire_file.
+	* gdb.threads/tls.exp: Recognize one case of the host library not
+	supporting TLS.
+
 2003-07-27  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/fileio.exp: Use SH when running commands using
