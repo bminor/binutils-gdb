@@ -1,3 +1,8 @@
+1999-02-04  DJ Delorie  <dj@cygnus.com>
+
+	* libbfd.c (real_read): don't call fread for zero bytes.  This
+	covers up a bug (or misuse of bfd) that's exposed by Solaris.
+
 Thu Feb  4 12:38:10 1999  Stan Cox  <scox@cygnus.com>
 
 	* elf32-mips.c (mips_elf_relocate_section): Insure that the target
