@@ -1897,7 +1897,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       os_ident = elf_elfheader (info.abfd)->e_ident[EI_OSABI];
 
       /* If os_ident is 0, it is not necessarily the case that we're on a
-         SYSV system.  (ELFOSABI_SYSV is defined to be 0.) GNU/Linux uses
+         SYSV system.  (ELFOSABI_NONE is defined to be 0.) GNU/Linux uses
 	 a note section to record OS/ABI info, but leaves e_ident[EI_OSABI]
 	 zero.  So we have to check for note sections too. */
       if (os_ident == 0)
