@@ -1527,3 +1527,19 @@ i860_handle_align (fragS *fragp)
   fragp->fr_var = 4;
 }
 
+/* This is called after a user-defined label is seen.  We check
+   if the label has a double colon (valid in Intel syntax mode only),
+   in which case it should be externalized.  */
+
+void
+i860_check_label (symbolS *labelsym)
+{
+  /* At this point, the current line pointer is sitting on the character
+     just after the first colon on the label.  */ 
+  if (target_intel_syntax && *input_line_pointer == ':')
+    {
+      S_SET_EXTERNAL (labelsym);
+      input_line_pointer++;
+    }
+}
+
