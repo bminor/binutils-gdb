@@ -2155,35 +2155,60 @@ value_slice (array, lowbound, length)
      value_ptr array;
      int lowbound, length;
 {
+  struct type *slice_range_type, *slice_type, *range_type;
+  LONGEST lowerbound, upperbound, offset;
+  value_ptr slice;
   struct type *array_type;
   array_type = check_typedef (VALUE_TYPE (array));
   COERCE_VARYING_ARRAY (array, array_type);
-  if (TYPE_CODE (array_type) == TYPE_CODE_BITSTRING)
-    error ("not implemented - bitstring slice");
   if (TYPE_CODE (array_type) != TYPE_CODE_ARRAY
-      && TYPE_CODE (array_type) != TYPE_CODE_STRING)
+      && TYPE_CODE (array_type) != TYPE_CODE_STRING
+      && TYPE_CODE (array_type) != TYPE_CODE_BITSTRING)
     error ("cannot take slice of non-array");
+  range_type = TYPE_INDEX_TYPE (array_type);
+  if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
+    error ("slice from bad array or bitstring");
+  if (lowbound < lowerbound || length < 0
+      || lowbound + length - 1 > upperbound
+      /* Chill allows zero-length strings but not arrays. */
+      || (current_language->la_language == language_chill
+	  && length == 0 && TYPE_CODE (array_type) == TYPE_CODE_ARRAY))
+    error ("slice out of range");
+  /* FIXME-type-allocation: need a way to free this type when we are
+     done with it.  */
+  slice_range_type = create_range_type ((struct type*) NULL,
+					TYPE_TARGET_TYPE (range_type),
+					lowerbound, lowerbound + length - 1);
+  if (TYPE_CODE (array_type) == TYPE_CODE_BITSTRING)
+    {
+      int i;
+      slice_type = create_set_type ((struct type*) NULL, slice_range_type);
+      TYPE_CODE (slice_type) = TYPE_CODE_BITSTRING;
+      slice = value_zero (slice_type, not_lval);
+      for (i = 0; i < length; i++)
+	{
+	  int element = value_bit_index (array_type,
+					 VALUE_CONTENTS (array),
+					 lowbound + i);
+	  if (element < 0)
+	    error ("internal error accessing bitstring");
+	  else if (element > 0)
+	    {
+	      int j = i % TARGET_CHAR_BIT;
+	      if (BITS_BIG_ENDIAN)
+		j = TARGET_CHAR_BIT - 1 - j;
+	      VALUE_CONTENTS_RAW (slice)[i / TARGET_CHAR_BIT] |= (1 << j);
+	    }
+	}
+      /* We should set the address, bitssize, and bitspos, so the clice
+	 can be used on the LHS, but that may require extensions to
+	 value_assign.  For now, just leave as a non_lval.  FIXME.  */
+    }
   else
     {
-      struct type *slice_range_type, *slice_type;
-      value_ptr slice;
-      struct type *range_type = TYPE_FIELD_TYPE (array_type,0);
       struct type *element_type = TYPE_TARGET_TYPE (array_type);
-      LONGEST lowerbound, upperbound, offset;
-
-      if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
-        error ("slice from bad array");
       offset
 	= (lowbound - lowerbound) * TYPE_LENGTH (check_typedef (element_type));
-      if (lowbound < lowerbound || length < 0
-	  || lowbound + length - 1 > upperbound)
-	error ("slice out of range");
-      /* FIXME-type-allocation: need a way to free this type when we are
-	 done with it.  */
-      slice_range_type = create_range_type ((struct type*) NULL,
-					    TYPE_TARGET_TYPE (range_type),
-					    lowerbound,
-					    lowerbound + length - 1);
       slice_type = create_array_type ((struct type*) NULL, element_type,
 				      slice_range_type);
       TYPE_CODE (slice_type) = TYPE_CODE (array_type);
@@ -2199,8 +2224,8 @@ value_slice (array, lowbound, length)
 	VALUE_LVAL (slice) = VALUE_LVAL (array);
       VALUE_ADDRESS (slice) = VALUE_ADDRESS (array);
       VALUE_OFFSET (slice) = VALUE_OFFSET (array) + offset;
-      return slice;
     }
+  return slice;
 }
 
 /* Assuming chill_varying_type (VARRAY) is true, return an equivalent
