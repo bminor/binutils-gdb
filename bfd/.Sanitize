@@ -70,6 +70,7 @@ configure.in
 configure.host
 core.c
 demo64.c
+elf.c
 elf32-hppa.c
 elf32-hppa.h
 elf32-i386.c
@@ -86,6 +87,7 @@ host-aout.c
 hosts
 hp300hpux.c
 hppa.c
+hppa_stubs.h
 i386aout.c
 i386bsd.c
 i386linux.c
