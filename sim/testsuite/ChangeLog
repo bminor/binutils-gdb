@@ -1,3 +1,8 @@
+2004-10-26  Nick Clifton  <nickc@redhat.com>
+
+	* lib/sim-defs.exp (sim_run): Add support for the "rawsid"
+	protocol.
+
 2004-09-13  DJ Delorie  <dj@redhat.com>
 
 	* lib/sim-defs.exp (run_sim_test): Add global_as_options,
