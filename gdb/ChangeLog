@@ -1,3 +1,48 @@
+Thu Mar 25 12:26:50 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* findvar.c (read_register, write_register):  Make these capable
+	of reading/writing registers that are shorter than REGISTER_TYPE.
+	* (value_from_register):  Install H8500 specific code to return
+	proper value when register is being used as a pointer.
+	* h8500-tdep.c:  Remove extra defines of NUM_REGS.
+	(h8500_skip_prologue):  Use correct lengths for LINK instructions.
+	(FRAME_CHAIN):  Change name to h8500_frame_chain.  Rewrite code to
+	chain frames properly by combining frame pointer with T reg.
+	(init_extra_frame_info):  Delete.  It's now a macro.
+	(frame_args_address):  Don't add PTR_SIZE.  Stack args are already
+	offset by the correct amount off of the frame pointer.
+	(register_byte):  Delete.  It's now a macro.
+	(register_raw_size, register_virtual_size):  Delete.  Replaced by
+	common routine h8500_register_size, cuz there's no difference
+	between the raw & virtual sizes on this machine.
+	(register_convert_to_raw, register_convert_to_virtual):  Delete,
+	cuz there's no difference between the raw & virtual forms.
+	Replaced by memcpy in tm file.
+	(register_virtual_type):  Rename to h8500_register_virtual_type.
+	Get rid of pointer pseudo-regs, use _REGNUM with all reg names.
+	(_initialize_h8500_tdep):  Get rid of crock to ensure that GDB &
+	emulator have same reg offsets.  This is all handled in the
+	simulator code now.
+	(h8500_trapped_internalvar):  New routine to detect references to
+	convenience vars acting as pointer pseudo-regs.
+	(h8500_value_trapped_internalvar):  Conjure up value of pointer
+	pseudo-regs.
+	(h8500_set_trapped_internalvar):  Convert set value in real
+	register references.
+	infcmd.c (read_pc, write_pc):  Add h8500 specific code to handle
+	code segment register.
+	infrun.c (proceed):  Simplify.  Call write_pc instead of doing it
+	by hand.
+	(wait_for_inferior):  Add h8500 specific code to add stack segment
+	when reading SP register.
+	remote-sim.c (fetch_register):  Spacing.
+	tm-h8500.h:  #define GDB_TARGET_IS_H8500 to make it easier to
+	detect cruft.  Redo all register manipulation stuff.  Get rid of
+	pointer pseudo-regs.  (INIT_EXTRA_FRAME_INFO):  Adds stack segment
+	to frame pointer.  (IS_TRAPPED_INTERNALVAL,
+	VALUE_OF_TRAPPED_INTERNALVAR, SET_TRAPPED_INTERNALVAR):  Use these
+	to create internal vars for pointer pseudo-regs.
+
 Thu Mar 25 10:10:28 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in:  Numerous small changes to macro definitions

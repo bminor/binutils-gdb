@@ -191,23 +191,22 @@ sim_wait (status)
   return 0;
 }
 
-
-
 static void
 fetch_register(regno)
-int regno;
+     int regno;
 {
   if (regno  == -1) 
-  {
-    for (regno = 0; regno < NUM_REGS; regno++)
-     fetch_register(regno);
-  }
+    {
+      for (regno = 0; regno < NUM_REGS; regno++)
+	fetch_register(regno);
+    }
   else 
-  {
-    char buf[MAX_REGISTER_RAW_SIZE];
-    sim_fetch_register(regno, buf);
-    supply_register(regno, buf);
-  }
+    {
+      char buf[MAX_REGISTER_RAW_SIZE];
+
+      sim_fetch_register(regno, buf);
+      supply_register(regno, buf);
+    }
 }
 
 

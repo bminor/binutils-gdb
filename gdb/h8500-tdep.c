@@ -28,14 +28,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcmd.h"
+#include "value.h"
 #include "dis-asm.h"
 #include "../opcodes/h8500-opc.h"
 ;
-#undef NUM_REGS
-#define NUM_REGS 11
 
 #define UNSIGNED_SHORT(X) ((X) & 0xffff)
-
 
 /* Shape of an H8/500 frame : 
 
@@ -79,6 +77,11 @@ int minimum_mode = 1;
 CORE_ADDR examine_prologue ();
 
 void frame_find_saved_regs ();
+
+int regoff[NUM_REGS] = {0,  2,  4,  6,  8,  10,  12, 14, /* r0->r7 */
+		  16, 18, /* ccr, pc */
+		  20, 21, 22, 23}; /* cp, dp, ep, tp */
+
 CORE_ADDR
 h8500_skip_prologue (start_pc)
      CORE_ADDR start_pc;
@@ -86,47 +89,20 @@ h8500_skip_prologue (start_pc)
 {
   short int w;
 
-  
   w = read_memory_integer (start_pc, 1);
   if (w == LINK_8)
     {
-      start_pc ++;
+      start_pc += 2;
       w = read_memory_integer (start_pc,1);
     }
 
   if (w == LINK_16)
     {
-      start_pc +=2;
+      start_pc += 3;
       w = read_memory_integer (start_pc,2);
     }
 
-  /* Skip past a move to FP */
-  if (IS_MOVE_FP (w))
-    {
-      start_pc += 2;
-      w = read_memory_short (start_pc);
-    }
-
-  /* Skip the stack adjust */
-
-  if (IS_MOVK_R5 (w))
-    {
-      start_pc += 2;
-      w = read_memory_short (start_pc);
-    }
-  if (IS_SUB_R5SP (w))
-    {
-      start_pc += 2;
-      w = read_memory_short (start_pc);
-    }
-  while (IS_SUB2_SP (w))
-    {
-      start_pc += 2;
-      w = read_memory_short (start_pc);
-    }
-
   return start_pc;
-
 }
 
 int
@@ -150,22 +126,15 @@ print_insn (memaddr, stream)
    the function prologue to determine the caller's sp value, and return it.  */
 
 FRAME_ADDR
-FRAME_CHAIN (thisframe)
+h8500_frame_chain (thisframe)
      FRAME thisframe;
 {
-  static int loopcount;
-  static int prevr;
-  if (!inside_entry_file ((thisframe)->pc))
-    {
-      int v =  read_memory_integer ((thisframe)->frame, PTR_SIZE) ;
 
-      /* Detect loops in the stack */
-      if (v == prevr) loopcount++;
-      else loopcount = 0;
-      v = prevr;
-      if (loopcount > 5) return 0;
-    }
-  return 0;
+  if (!inside_entry_file (thisframe->pc))
+      return read_memory_integer(thisframe->frame, 2)
+	| (read_register(SEG_T_REGNUM) << 16);
+  else
+    return 0;
 }
 
 /* Put here the code to store, into a struct frame_saved_regs,
@@ -361,19 +330,6 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
   return (ip);
 }
 #endif
-#if 0
-void
-init_extra_frame_info (fromleaf, fi)
-     int fromleaf;
-     struct frame_info *fi;
-{
-  fi->fsr = 0;			/* Not yet allocated */
-  fi->args_pointer = 0;		/* Unknown */
-  fi->locals_pointer = 0;	/* Unknown */
-  fi->from_pc = 0;
-
-}
-#endif
 
 /* Return the saved PC from this frame. */
 
@@ -381,7 +337,7 @@ CORE_ADDR
 frame_saved_pc (frame)
      FRAME frame;
 {
-	return read_memory_integer ((frame)->frame + 2, PTR_SIZE);
+  return read_memory_integer ((frame)->frame + 2, PTR_SIZE);
 }
 
 CORE_ADDR
@@ -398,7 +354,7 @@ CORE_ADDR
 frame_args_address (fi)
      struct frame_info *fi;
 {
-  return fi->frame + PTR_SIZE;	/* Skip the PC */
+  return fi->frame;
 }
 
 void
@@ -474,126 +430,42 @@ print_register_hook (regno)
     }
 }
 
-
-
-#if 0
-register_byte (N)
+int
+h8500_register_size (regno)
+     int regno;
 {
-  return reginfo[N].offset;
-}
-#endif
-register_raw_size (N)
-{
-  if (N <= R7) return 2;
-  return 4;
-}
-
-register_virtual_size (N)
-{
-  if (N <= R7) return 2;
-  return 4;
-}
-
-
-
-register_convert_to_raw (regnum, from, to)
-     int regnum;
-     char *from;
-     char *to;
-{
-  switch (regnum)
-    {
-    case PR0:
-    case PR1:
-    case PR2:
-    case PR3:
-    case PR4:
-    case PR5:
-    case PR6:
-    case PR7:
-    case PC_REGNUM:
-      to[0] = 0;
-      to[1] = from[1];
-      to[2] = from[2];
-      to[3] = from[3];
-      break;
-    default:
-      to[0] = from[0];
-      to[1] = from[1];
-      break;
-    }
-}
-
-
-register_convert_to_virtual (regnum, from, to)
-     int regnum;
-     char *from;
-     char *to;
-{
-  switch (regnum)
-    {
-    case PR0:
-    case PR1:
-    case PR2:
-    case PR3:
-    case PR4:
-    case PR5:
-    case PR6:
-    case PR7:
-    case PC_REGNUM:
-      to[0] = 0;
-      to[1] = from[1];
-      to[2] = from[2];
-      to[3] = from[3];
-      break;
-    default:
-      to[0] = from[0];
-      to[1] = from[1];
-      break;
-    }
+  if (regno <= PC_REGNUM)
+    return 2;
+  else
+    return 1;
 }
 
 struct type *
-register_virtual_type (N)
+h8500_register_virtual_type (regno)
+     int regno;
 {
-  switch (N)
+  switch (regno)
     {
-      /* Although these are actually word size registers, we treat them
-	 like longs so that we can deal with any implicit segmentation */
-    case PR0:
-    case PR1:
-    case PR2:
-    case PR3:
-    case PR4:
-    case PR5:
-    case PR6:
-    case PR7:
-    case PC_REGNUM:
-      return builtin_type_unsigned_long;
-    case SEG_C:
-    case SEG_E:
-    case SEG_D:
-    case SEG_T:
+    case SEG_C_REGNUM:
+    case SEG_E_REGNUM:
+    case SEG_D_REGNUM:
+    case SEG_T_REGNUM:
       return builtin_type_unsigned_char;
-    case R0:
-    case R1:
-    case R2:
-    case R3:
-    case R4:
-    case R5:
-    case R6:
-    case R7:
+    case R0_REGNUM:
+    case R1_REGNUM:
+    case R2_REGNUM:
+    case R3_REGNUM:
+    case R4_REGNUM:
+    case R5_REGNUM:
+    case R6_REGNUM:
+    case R7_REGNUM:
+    case PC_REGNUM:
     case CCR_REGNUM:
       return builtin_type_unsigned_short;
-
-
     default:
       abort();
     }
 }
-
-
-
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -769,28 +641,119 @@ set_memory (args, from_tty)
   help_list (setmemorylist, "set memory ", -1, stdout);
 }
 
+/* See if variable name is ppc or pr[0-7] */
+
+int
+h8500_is_trapped_internalvar (name)
+     char *name;
+{
+  if (name[0] != 'p')
+    return 0;
+
+  if (strcmp(name+1, "pc") == 0)
+    return 1;
+
+  if (name[1] == 'r'
+      && name[2] >= '0'
+      && name[2] <= '7'
+      && name[3] == '\000')
+    return 1;
+  else
+    return 0;
+}
+
+PTR
+h8500_value_of_trapped_internalvar (var)
+     struct internalvar *var;
+{
+  LONGEST regval;
+  unsigned char regbuf[4];
+  int page_regnum, regnum;
+
+  regnum = var->name[2] == 'c' ? PC_REGNUM : var->name[2] - '0';
+
+  switch (var->name[2])
+    {
+    case 'c':
+      page_regnum = SEG_C_REGNUM;
+      break;
+    case '0': case '1': case '2': case '3':
+      page_regnum = SEG_D_REGNUM;
+      break;
+    case '4': case '5':
+      page_regnum = SEG_E_REGNUM;
+      break;
+    case '6': case '7':
+      page_regnum = SEG_T_REGNUM;
+      break;
+    }
+
+  get_saved_register (regbuf, NULL, NULL, selected_frame, page_regnum, NULL);
+  regval = regbuf[0] << 16;
+
+  get_saved_register (regbuf, NULL, NULL, selected_frame, regnum, NULL);
+  regval |= regbuf[0] << 8 | regbuf[1];	/* XXX host/target byte order */
+
+  free (var->value);		/* Free up old value */
+
+  var->value = value_from_longest (builtin_type_unsigned_long, regval);
+  release_value (var->value);	/* Unchain new value */
+
+  VALUE_LVAL (var->value) = lval_internalvar;
+  VALUE_INTERNALVAR (var->value) = var;
+  return var->value;
+}
+
+void
+h8500_set_trapped_internalvar (var, newval, bitpos, bitsize, offset)
+     struct internalvar *var;
+     int offset, bitpos, bitsize;
+     value newval;
+{
+  char *page_regnum, *regnum;
+  char expression[100];
+  unsigned new_regval;
+  struct type *type;
+  enum type_code newval_type_code;
+
+  type = VALUE_TYPE (newval);
+  newval_type_code = TYPE_CODE (type);
+
+  if ((newval_type_code != TYPE_CODE_INT
+       && newval_type_code != TYPE_CODE_PTR)
+      || TYPE_LENGTH (type) != sizeof(new_regval))
+    error("Illegal type (%s) for assignment to $%s\n",
+	  TYPE_NAME (type), var->name);
+
+  new_regval = *(long *)VALUE_CONTENTS_RAW(newval);
+
+  regnum = var->name + 1;
+
+  switch (var->name[2])
+    {
+    case 'c':
+      page_regnum = "cp";
+      break;
+    case '0': case '1': case '2': case '3':
+      page_regnum = "dp";
+      break;
+    case '4': case '5':
+      page_regnum = "ep";
+      break;
+    case '6': case '7':
+      page_regnum = "tp";
+      break;
+    }
+
+  sprintf (expression, "$%s=%d", page_regnum, new_regval >> 16);
+  parse_and_eval(expression);
+
+  sprintf (expression, "$%s=%d", regnum, new_regval & 0xffff);
+  parse_and_eval(expression);
+}
 
 _initialize_h8500_tdep ()
 {
-  /* Sanitity check a few things */
-  if (FP_REGNUM != GPR6
-      || SP_REGNUM != GPR7
-      || CCR_REGNUM != GCCR
-      || PC_REGNUM != GPC
-      || SEG_C != GSEGC
-      || SEG_D != GSEGD
-      || SEG_E != GSEGE
-      || SEG_T != GSEGT
-      || PR0 != GPR0
-      || PR1 != GPR1
-      || PR2 != GPR2
-      || PR3 != GPR3
-      || PR4 != GPR4
-      || PR5 != GPR5
-      || PR6 != GPR6
-      || PR7 != GPR7)
-    abort ();
-
   add_prefix_cmd ("memory", no_class, set_memory,
 		  "set the memory model", &setmemorylist, "set memory ", 0,
 		  &setlist);
