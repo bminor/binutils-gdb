@@ -1,3 +1,8 @@
+Wed Nov 13 19:51:05 2002  Andrew Cagney  <cagney@redhat.com>
+
+	* utils.c (gdb_realpath): Add comment mentioning realpath with a
+ 	NULL buffer.
+
 2002-11-13  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.h (deprecated_read_register_bytes): Rename

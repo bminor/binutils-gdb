@@ -2739,6 +2739,15 @@ gdb_realpath (const char *filename)
   }
 #endif
 
+  /* FIXME: cagney/2002-11-13:
+
+     Method 2a: Use realpath() with a NULL buffer.  Some systems, due
+     to the problems described in in method 3, have modified their
+     realpath() implementation so that it will allocate a buffer when
+     NULL is passed in.  Before this can be used, though, some sort of
+     configure time test would need to be added.  Otherwize the code
+     will likely core dump.  */
+
   /* Method 3: Now we're getting desperate!  The system doesn't have a
      compile time buffer size and no alternative function.  Query the
      OS, using pathconf(), for the buffer limit.  Care is needed
