@@ -1,3 +1,8 @@
+Thu Jun 20 18:14:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (ecoff_armap_hash): If hlog is 0, just return 0, rather
+	than relying on a right shift of 32.
+
 Thu Jun 20 11:00:57 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* peicode.h (coff_swap_scnhdr_out): ".drectve" doesn't have trailing 0.
