@@ -199,7 +199,7 @@ struct cmd_list_element
     var_types var_type;
 
     /* Pointer to NULL terminated list of enumerated values (like argv).  */
-    char **enums;
+    const char **enums;
 
     /* Pointer to command strings of user-defined commands */
     struct command_line *user_commands;
@@ -274,7 +274,7 @@ extern struct cmd_list_element *add_info_alias (char *, char *, int);
 
 extern char **complete_on_cmdlist (struct cmd_list_element *, char *, char *);
 
-extern char **complete_on_enum (char **enumlist, char *, char *);
+extern char **complete_on_enum (const char *enumlist[], char *, char *);
 
 extern void delete_cmd (char *, struct cmd_list_element **);
 
@@ -294,8 +294,8 @@ extern struct cmd_list_element *add_set_cmd (char *name, enum
 
 extern struct cmd_list_element *add_set_enum_cmd (char *name,
 						  enum command_class class,
-						  char *enumlist[],
-						  char **var,
+						  const char *enumlist[],
+						  const char **var,
 						  char *doc,
 						  struct cmd_list_element **list);
 

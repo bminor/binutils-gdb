@@ -249,17 +249,17 @@ generic_register_convertible_not (num)
 int target_byte_order = TARGET_BYTE_ORDER_DEFAULT;
 int target_byte_order_auto = 1;
 
-static char endian_big[] = "big";
-static char endian_little[] = "little";
-static char endian_auto[] = "auto";
-static char *endian_enum[] =
+static const char endian_big[] = "big";
+static const char endian_little[] = "little";
+static const char endian_auto[] = "auto";
+static const char *endian_enum[] =
 {
   endian_big,
   endian_little,
   endian_auto,
   NULL,
 };
-static char *set_endian_string;
+static const char *set_endian_string;
 
 /* Called by ``show endian''.  */
 
@@ -352,7 +352,7 @@ enum set_arch { set_arch_auto, set_arch_manual };
 
 int target_architecture_auto = 1;
 
-char *set_architecture_string;
+const char *set_architecture_string;
 
 /* Old way of changing the current architecture. */
 
@@ -585,7 +585,7 @@ initialize_current_architecture (void)
        of ``const char *''.  We just happen to know that the casts are
        safe. */
     c = add_set_enum_cmd ("architecture", class_support,
-			  (char **) arches, (char **) &set_architecture_string,
+			  arches, &set_architecture_string,
 			  "Set architecture of target.",
 			  &setlist);
     c->function.sfunc = set_architecture;

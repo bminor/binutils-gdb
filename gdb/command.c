@@ -315,8 +315,8 @@ add_set_cmd (char *name,
 struct cmd_list_element *
 add_set_enum_cmd (char *name,
 		  enum command_class class,
-		  char *enumlist[],
-		  char **var,
+		  const char *enumlist[],
+		  const char **var,
 		  char *doc,
 		  struct cmd_list_element **list)
 {
@@ -1470,17 +1470,16 @@ complete_on_cmdlist (list, text, word)
    "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
 
 char **
-complete_on_enum (enumlist, text, word)
-     char **enumlist;
-     char *text;
-     char *word;
+complete_on_enum (const char *enumlist[],
+		  char *text,
+		  char *word)
 {
   char **matchlist;
   int sizeof_matchlist;
   int matches;
   int textlen = strlen (text);
   int i;
-  char *name;
+  const char *name;
 
   sizeof_matchlist = 10;
   matchlist = (char **) xmalloc (sizeof_matchlist * sizeof (char *));
@@ -1667,7 +1666,7 @@ do_setshow_command (arg, from_tty, c)
 	    int i;
 	    int len;
 	    int nmatches;
-	    char *match = NULL;
+	    const char *match = NULL;
 	    char *p;
 
 	    /* if no argument was supplied, print an informative error message */
@@ -1715,7 +1714,7 @@ do_setshow_command (arg, from_tty, c)
 	    if (nmatches > 1)
 	      error ("Ambiguous item \"%s\".", arg);
 
-	    *(char **) c->var = match;
+	    *(const char **) c->var = match;
 	  }
 	  break;
 	default:

@@ -50,12 +50,12 @@ static struct ui_file *serial_logfp = NULL;
 
 static struct serial_ops *serial_interface_lookup (char *);
 static void serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout);
-static char logbase_hex[] = "hex";
-static char logbase_octal[] = "octal";
-static char logbase_ascii[] = "ascii";
-static char *logbase_enums[] =
+static const char logbase_hex[] = "hex";
+static const char logbase_octal[] = "octal";
+static const char logbase_ascii[] = "ascii";
+static const char *logbase_enums[] =
 {logbase_hex, logbase_octal, logbase_ascii, NULL};
-static char *serial_logbase = logbase_ascii;
+static const char *serial_logbase = logbase_ascii;
 
 
 

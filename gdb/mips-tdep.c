@@ -62,11 +62,11 @@ struct frame_extra_info
    overridden dynamically.  Establish an enum/array for managing
    them. */
 
-static char size_auto[] = "auto";
-static char size_32[] = "32";
-static char size_64[] = "64";
+static const char size_auto[] = "auto";
+static const char size_32[] = "32";
+static const char size_64[] = "64";
 
-static char *size_enums[] = {
+static const char *size_enums[] = {
   size_auto,
   size_32,
   size_64,
@@ -143,7 +143,7 @@ struct gdbarch_tdep
 #define MIPS_DEFAULT_SAVED_REGSIZE MIPS_REGSIZE
 #endif
 
-static char *mips_saved_regsize_string = size_auto;
+static const char *mips_saved_regsize_string = size_auto;
 
 #define MIPS_SAVED_REGSIZE (mips_saved_regsize())
 
@@ -191,7 +191,7 @@ mips_saved_regsize ()
 
 #define MIPS_STACK_ARGSIZE (mips_stack_argsize ())
 
-static char *mips_stack_argsize_string = size_auto;
+static const char *mips_stack_argsize_string = size_auto;
 
 static unsigned int
 mips_stack_argsize (void)

@@ -434,17 +434,25 @@ pending_follow;
    follow-fork-mode.) */
 static int follow_vfork_when_exec;
 
-static char *follow_fork_mode_kind_names[] =
+static const char follow_fork_mode_ask[] = "ask";
+static const char follow_fork_mode_both[] = "both";
+static const char follow_fork_mode_child[] = "child";
+static const char follow_fork_mode_parent[] = "parent";
+
+static const char *follow_fork_mode_kind_names[] =
 {
+  follow_fork_mode_ask,
   /* ??rehrauer: The "both" option is broken, by what may be a 10.20
      kernel problem.  It's also not terribly useful without a GUI to
      help the user drive two debuggers.  So for now, I'm disabling the
      "both" option. */
-  /* "parent", "child", "both", "ask" */
-  "parent", "child", "ask", NULL
+  /* follow_fork_mode_both, */
+  follow_fork_mode_child,
+  follow_fork_mode_parent,
+  NULL
 };
 
-static char *follow_fork_mode_string = NULL;
+static const char *follow_fork_mode_string = follow_fork_mode_parent;
 
 
 static void
@@ -455,23 +463,19 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
   int followed_child = 0;
 
   /* Which process did the user want us to follow? */
-  char *follow_mode =
-    savestring (follow_fork_mode_string, strlen (follow_fork_mode_string));
+  const char *follow_mode = follow_fork_mode_string;
 
   /* Or, did the user not know, and want us to ask? */
-  if (STREQ (follow_fork_mode_string, "ask"))
+  if (follow_fork_mode_string == "ask")
     {
-      char requested_mode[100];
-
-      free (follow_mode);
-      error ("\"ask\" mode NYI");
-      follow_mode = savestring (requested_mode, strlen (requested_mode));
+      internal_error ("follow_inferior_fork: \"ask\" mode not implemented");
+      /* follow_mode = follow_fork_mode_...; */
     }
 
   /* If we're to be following the parent, then detach from child_pid.
      We're already following the parent, so need do nothing explicit
      for it. */
-  if (STREQ (follow_mode, "parent"))
+  if (follow_mode == follow_fork_mode_parent)
     {
       followed_parent = 1;
 
@@ -496,7 +500,7 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
 
   /* If we're to be following the child, then attach to it, detach
      from inferior_pid, and set inferior_pid to child_pid. */
-  else if (STREQ (follow_mode, "child"))
+  else if (follow_mode == follow_fork_mode_child)
     {
       char child_pid_spelling[100];	/* Arbitrary length. */
 
@@ -558,7 +562,7 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
 
   /* If we're to be following both parent and child, then fork ourselves,
      and attach the debugger clone to the child. */
-  else if (STREQ (follow_mode, "both"))
+  else if (follow_mode == follow_fork_mode_both)
     {
       char pid_suffix[100];	/* Arbitrary length. */
 
@@ -614,8 +618,6 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
 
   pending_follow.fork_event.saw_parent_fork = 0;
   pending_follow.fork_event.saw_child_fork = 0;
-
-  free (follow_mode);
 }
 
 static void
@@ -757,11 +759,11 @@ resume_cleanups (void *ignore)
   normal_stop ();
 }
 
-static char schedlock_off[] = "off";
-static char schedlock_on[] = "on";
-static char schedlock_step[] = "step";
-static char *scheduler_mode = schedlock_off;
-static char *scheduler_enums[] =
+static const char schedlock_off[] = "off";
+static const char schedlock_on[] = "on";
+static const char schedlock_step[] = "step";
+static const char *scheduler_mode = schedlock_off;
+static const char *scheduler_enums[] =
 {
   schedlock_off,
   schedlock_on,
@@ -4133,20 +4135,6 @@ discard_inferior_status (struct inferior_status *inf_status)
   free_inferior_status (inf_status);
 }
 
-static void
-set_follow_fork_mode_command (char *arg, int from_tty,
-			      struct cmd_list_element *c)
-{
-  if (!STREQ (arg, "parent") &&
-      !STREQ (arg, "child") &&
-      !STREQ (arg, "both") &&
-      !STREQ (arg, "ask"))
-    error ("follow-fork-mode must be one of \"parent\", \"child\", \"both\" or \"ask\".");
-
-  if (follow_fork_mode_string != NULL)
-    free (follow_fork_mode_string);
-  follow_fork_mode_string = savestring (arg, strlen (arg));
-}
 
 static void
 build_infrun (void)
@@ -4308,8 +4296,6 @@ By default, the debugger will follow the parent process.",
 			&setlist);
 /*  c->function.sfunc = ; */
   add_show_from_set (c, &showlist);
-
-  set_follow_fork_mode_command ("parent", 0, NULL);
 
   c = add_set_enum_cmd ("scheduler-locking", class_run,
 			scheduler_enums,	/* array of string names */

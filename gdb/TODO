@@ -292,12 +292,6 @@ http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00845.html
 
 --
 
-Change the parameter ``char *list[]'' (etc) to ``const char (*)[]'' so
-that dynamic lists from things like gdbarch_printable_names() can be
-passed.
-
---
-
 The ``maintenance deprecate set endian big'' command doesn't notice
 that it is deprecating ``set endian'' and not ``set endian big'' (big
 is implemented using an enum).  Is anyone going to notice this?
@@ -309,6 +303,22 @@ deprecated ``set archdebug'' and expand to ``set architecture''.
 
 --
 
+Eliminate ``arm_register_names[j] = (char *) regnames[j]'' and the
+like from arm-tdep.c.
+
+--
+
+Fix uses of ->function.cfunc = set_function().
+
+The command.c code calls sfunc() when a set command.  Rather than
+change it suggest fixing the callback function so that it is more
+useful.  See:
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-06/msg00062.html
+
+See also ``Fix implementation of  ``target xxx''.'' below.
+
+--
 
 			New Features and Fixes
 			======================
@@ -1148,6 +1158,9 @@ CLI code so that it passes to the callback function (attatched to a
 command) useful information such as the actual command and a context
 for that command.  Other changes such as making ``struct command''
 opaque may also help.
+
+See also:
+http://sourceware.cygnus.com/ml/gdb-patches/2000-06/msg00062.html
 
 --
 

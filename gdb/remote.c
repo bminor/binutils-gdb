@@ -526,17 +526,17 @@ enum packet_detect
 
 struct packet_config
   {
-    char *state;
+    const char *state;
     char *name;
     char *title;
     enum packet_detect detect;
     enum packet_support support;
   };
 
-static char packet_support_auto[] = "auto";
-static char packet_enable[] = "enable";
-static char packet_disable[] = "disable";
-static char *packet_support_enums[] =
+static const char packet_support_auto[] = "auto";
+static const char packet_enable[] = "enable";
+static const char packet_disable[] = "disable";
+static const char *packet_support_enums[] =
 {
   packet_support_auto,
   packet_enable,

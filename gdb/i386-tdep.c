@@ -75,15 +75,15 @@ int i386_register_virtual_size[MAX_NUM_REGS];
 
 /* This is the variable the is set with "set disassembly-flavor",
    and its legitimate values. */
-static char att_flavor[] = "att";
-static char intel_flavor[] = "intel";
-static char *valid_flavors[] =
+static const char att_flavor[] = "att";
+static const char intel_flavor[] = "intel";
+static const char *valid_flavors[] =
 {
   att_flavor,
   intel_flavor,
   NULL
 };
-static char *disassembly_flavor = att_flavor;
+static const char *disassembly_flavor = att_flavor;
 
 static void i386_print_register (char *, int, int);
 
