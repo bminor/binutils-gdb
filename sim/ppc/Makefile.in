@@ -275,11 +275,11 @@ tmp-gencode: gen ppc-instructions ppc-spr-table $(srcdir)/../../move-if-change
 # icache.h idecode.h idecode.c semantics.h semantics.c spreg.h spreg.c: tmp-gencode
 
 gen.o: gen.c config.h ppc-config.h
-	$(CC_FOR_BUILD) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $(srcdir)/gen.c
+	$(CC_FOR_BUILD) -c $(CFLAGS) $(INLINE_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $(srcdir)/gen.c
 
 gen: gen.o config.h ppc-config.h $(LIBIBERTY_LIB) $(LIBS)
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o gen gen.o $(LIBIBERTY_LIB) $(LIBS)
-		
+
 #
 
 tags etags: TAGS
@@ -289,6 +289,7 @@ TAGS: tmp-gencode config.h ppc-config.h
 
 clean mostlyclean:
 	rm -f tmp-* *.[oas] core psim run gen config.log
+	rm -f icache.h idecode.h idecode.c semantics.h semantics.c spreg.h spreg.c ppc-config.h
 
 distclean maintainer-clean realclean: clean
 	rm -f TAGS $(BUILT_SRC) Makefile config.cache config.status config.h stamp-h

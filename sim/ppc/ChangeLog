@@ -1,3 +1,12 @@
+Thu Oct 19 21:43:39 1995  Fred Fish  <fnf@fishfood.amigalib.com>
+
+	* Makefile.in:  Remove tabs from otherwise empty line.
+	Confuses many non-GNU versions of "make".
+
+Wed Oct 18 08:51:25 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (clean): Delete files produced by gen.
+
 Mon Oct 16 17:34:24 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* gen.c (lf_print_c_semantic_function): Move counting # of

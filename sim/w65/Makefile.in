@@ -134,7 +134,7 @@ case.c: gencode
 optable:gencode
 	./gencode >optable
 	./gencode -a >$(srcdir)/../../opcodes/w65-opc.h
-	
+
 gencode:gencode.c
 	$(CC_FOR_BUILD) -o gencode $<
 

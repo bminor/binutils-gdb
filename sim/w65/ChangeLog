@@ -1,3 +1,8 @@
+Thu Oct 19 21:44:14 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in:  Remove tabs from otherwise empty line.
+	Confuses many older non-GNU versions of "make".
+
 Tue Oct 10 11:13:01 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (BISONFLAGS): Remove macro.
