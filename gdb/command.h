@@ -347,7 +347,7 @@ extern void do_setshow_command (char *, int, struct cmd_list_element *);
 
 extern void cmd_show_list (struct cmd_list_element *, int, char *);
 
-extern void error_no_arg (char *);
+extern NORETURN void error_no_arg (char *) ATTR_NORETURN;
 
 extern void dont_repeat (void);
 
