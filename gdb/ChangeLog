@@ -1,3 +1,72 @@
+Sat Jan 25 00:07:59 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dwarf2read.c:  Replace integral tag, name and form fields in
+	internal structure definitions with the corresponding enumeration
+	types from dwarf2.h. Add default cases to switches on enumerations
+	where appropriate.
+	Make quoting of string arguments in complaint messages consistent.
+	Check for NULL returns from DW_STRING.
+	(struct partial_die_info):  Add sibling and has_type fields, remove
+	unused value field.
+	(DW_*):  Move access macro definitions near the definition of the
+	attribute structure.
+	(struct field_info):  New structure to pass information about fields
+	and member functions between die processing routines.
+	(dwarf2_build_psymtabs_hard):  Set cu_header_offset.
+	(scan_partial_symbols):  Do not enter DW_TAG_subprogram dies into
+	the partial symbol table if the DW_AT_*_pc attributes are missing.
+	Add file scope base type definitions to the partial symbol table.
+	Skip over child dies if the die has a sibling attribute.
+	(add_partial_symbol):  Enter global variables with type attributes
+	and without location descriptors into the partial symbol table.
+	Store value of DW_TAG_variable dies in the partial symbol table.
+	Do not enter global variables into the minimal symbol table.
+	Add base type definitions to the partial symbol table.
+	(psymtab_to_symtab_1):  Use dwarf2_get_pc_bounds to determine highpc.
+	(process_die):  Move check for DW_AT_low_pc to read_func_scope.
+	Add a typedef symbol for base type definitions to the symbol table.
+	Ignore DW_TAG_inlined_subroutine tags for now.
+	(read_file_scope):  Use dwarf2_get_pc_bounds to determine pc bounds.
+	(read_func_scope, read_lexical_block_scope):  Use dwarf2_get_pc_bounds
+	to determine pc bounds, ignore dies with invalid bounds.
+	(dwarf2_get_pc_bounds):  New routine to extract and validate the
+	DW_AT_*_pc attributes of a die.
+	(dwarf2_add_field, dwarf2_attach_fields_to_type, skip_member_fn_name,
+	dwarf2_add_member_fn, dwarf2_attach_fn_fields_to_type):
+	New functions to handle fields and member functions.
+	(read_structure_scope):  Rewritten to use them.
+	(read_array_type):  Renamed from dwarf_read_array_type.
+	Default upper array bound to describe an array with unspecified
+	length.
+	Create array types in backwards order, as dwarf2 puts out the array
+	dimensions from left to right.
+	(read_subroutine_type):  Handle DW_TAG_unspecified_parameters,
+	DW_AT_artificial and DW_AT_prototyped.
+	(read_base_type):  Make an unsigned type for DW_ATE_boolean.
+	Pass objfile to dwarf_base_type.
+	(read_partial_die):  Use read_attribute to read in the attributes.
+	Handle DW_AT_sibling and DW_AT_type.
+	Follow references when determining DW_AT_name and DW_AT_external
+	attributes of the die.
+	Validate DW_AT_*_pc attributes.
+	(read_full_die):  Use read_attribute to read in the attributes.
+	(read_attribute):  New function to read an attribute described
+	by an abbreviated attribute.
+	(new_symbol):  Relocate symbol value for DW_TAG_label with baseaddr.
+	Do not set SYMBOL_VALUE_ADDRESS for DW_TAG_subprogram,
+	SYMBOL_BLOCK_VALUE for the symbol will be set later by finish_block.
+	Change symbol class for global variables with a zero valued location
+	descriptor to LOC_UNRESOLVED.
+	Handle DW_AT_const_value attributes for DW_TAG_variable,
+	DW_TAG_formal_parameter and DW_TAG_enumerator.
+	Build a typedef symbol for DW_TAG_base_type.
+	(dwarf2_const_value):  New routine to copy a constant value from an
+	attribute to a symbol.
+	(dwarf_base_type):  Use passed in objfile, not current_objfile
+	when calling dwarf2_fundamental_type.
+	(dump_die):  Use DW_* accessor macros to access values of attributes.
+	(decode_locdesc):  Handle DW_OP_plus_uconst.
+
 Wed Jan 22 01:31:16 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	Start mn10200 gdb port by adding copies of mn10300
