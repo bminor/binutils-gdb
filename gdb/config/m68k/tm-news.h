@@ -18,16 +18,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* See following cpu type determination macro to get the machine type.
-  
+
 Here is an m-news.h file for gdb.  It supports the 68881 registers.
                                            by hikichi@srava.sra.junet
-  
-* Support Sun assembly format instead of Motorola one.
+
 * Ptrace for handling floating register has a bug(before NEWS OS version 2.2),
 * After NEWS OS version 3.2, some of ptrace's bug is fixed.
   But we cannot change the floating register(see adb(1) in OS 3.2) yet.  */
-
-#define HAVE_68881
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,

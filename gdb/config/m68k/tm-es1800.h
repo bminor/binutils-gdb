@@ -24,8 +24,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	DEFAULT_PROMPT		"(esgdb) "
 
-#define HAVE_68881
-
 #include "m68k/tm-m68k.h"
 
 /* Longjmp stuff borrowed from sun3 configuration.  Don't know if correct. 

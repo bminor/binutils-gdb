@@ -17,8 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define HAVE_68881
-
 #include "m68k/tm-m68k.h"
 
 /* Longjmp info comes from the Sun-3 machine description.  Might as well

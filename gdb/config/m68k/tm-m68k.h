@@ -17,12 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Generic 68000 stuff, to be included by other tm-*.h files.
-   Define HAVE_68881 if that is the case.  */
+/* Generic 68000 stuff, to be included by other tm-*.h files.  */
 
-#if defined (HAVE_68881)
 #define IEEE_FLOAT 1
-#endif
 
 /* Define the bit, byte, and word ordering of the machine.  */
 #define TARGET_BYTE_ORDER BIG_ENDIAN
@@ -91,28 +88,33 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 #define REGISTER_TYPE long
 
-#if defined (HAVE_68881)
-#  if defined (GDB_TARGET_IS_SUN3)
-    /* Sun3 status includes fpflags, which shows whether the FPU has been used
-       by the process, and whether the FPU was done with an instruction or 
-       was interrupted in the middle of a long instruction.  See
-       <machine/reg.h>.  */
-    /*                      a&d, pc,sr, fp, fpstat, fpflags   */
-#    define NUM_REGS 31
-#    define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4 + 4)
-#  else /* Not sun3.  */
-#    define NUM_REGS 29
-#    define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4)
-#  endif /* Not sun3.  */
-#else /* No 68881.  */
-#  define NUM_REGS 18
-#  define REGISTER_BYTES (16*4 + 8)
-#endif /* No 68881.  */
+#define REGISTER_BYTES_SUN3 (16*4 + 8 + 8*12 + 3*4 + 4)
+#define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
+#define REGISTER_BYTES_NOFP (16*4 + 8)
+
+#if defined (GDB_TARGET_IS_SUN3)
+  /* Sun3 status includes fpflags, which shows whether the FPU has been used
+     by the process, and whether the FPU was done with an instruction or 
+     was interrupted in the middle of a long instruction.  See
+     <machine/reg.h>.  */
+  /*                      a&d, pc,sr, fp, fpstat, fpflags   */
+#  define NUM_REGS 31
+#  define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4 + 4)
+#  define REGISTER_BYTES_OK(b) \
+     ((b) == REGISTER_BYTES_SUN3 \
+      || (b) == REGISTER_BYTES_FP \
+      || (b) == REGISTER_BYTES_NOFP)
+#else /* Not sun3.  */
+#  define NUM_REGS 29
+#  define REGISTER_BYTES_OK(b) \
+     ((b) == REGISTER_BYTES_FP \
+      || (b) == REGISTER_BYTES_NOFP)
+#  define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4)
+#endif /* Not sun3.  */
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#if defined (HAVE_68881)
 #define REGISTER_BYTE(N)  \
  ((N) >= FPC_REGNUM ? (((N) - FPC_REGNUM) * 4) + 168	\
   : (N) >= FP0_REGNUM ? (((N) - FP0_REGNUM) * 12) + 72	\
@@ -181,52 +183,6 @@ extern const struct ext_format ext_format_68881;
   (N) == PC_REGNUM || (N) == FP_REGNUM || (N) == SP_REGNUM ?         \
   lookup_pointer_type (builtin_type_void) : builtin_type_int)
 
-#else /* no 68881.  */
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-#define REGISTER_BYTE(N)  ((N) * 4)
-
-/* Number of bytes of storage in the actual machine representation
-   for register N.  On the 68000, all regs are 4 bytes.  */
-
-#define REGISTER_RAW_SIZE(N) 4
-
-/* Number of bytes of storage in the program's representation
-   for register N.  On the 68000, all regs are 4 bytes.  */
-
-#define REGISTER_VIRTUAL_SIZE(N) 4
-
-/* Largest value REGISTER_RAW_SIZE can have.  */
-
-#define MAX_REGISTER_RAW_SIZE 4
-
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
-
-#define MAX_REGISTER_VIRTUAL_SIZE 4
-
-/* Nonzero if register N requires conversion
-   from raw format to virtual format.  */
-
-#define REGISTER_CONVERTIBLE(N) 0
-
-/* Convert data from raw format for register REGNUM
-   to virtual format for register REGNUM.  */
-
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)  memcpy ((TO), (FROM), 4);
-
-/* Convert data from virtual format for register REGNUM
-   to raw format for register REGNUM.  */
-
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)  memcpy ((TO), (FROM), 4);
-
-/* Return the GDB type object for the "standard" data type
-   of data in register N.  */
-
-#define REGISTER_VIRTUAL_TYPE(N)  builtin_type_int
-
-#endif /* No 68881.  */
-
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */
 
@@ -249,12 +205,10 @@ extern const struct ext_format ext_format_68881;
 #define SP_REGNUM 15		/* Contains address of top of stack */
 #define PS_REGNUM 16		/* Contains processor status */
 #define PC_REGNUM 17		/* Contains program counter */
-#if defined (HAVE_68881)
 #define FP0_REGNUM 18		/* Floating point register 0 */
 #define FPC_REGNUM 26		/* 68881 control register */
 #define FPS_REGNUM 27		/* 68881 status register */
 #define FPI_REGNUM 28		/* 68881 iaddr register */
-#endif /* 68881.  */
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
@@ -373,15 +327,18 @@ extern const struct ext_format ext_format_68881;
 /* The CALL_DUMMY macro is the sequence of instructions, as disassembled
    by gdb itself:
 
+   These instructions exist only so that m68k_find_saved_regs can parse
+   them as a "prologue"; they are never executed.
+
 	fmovemx fp0-fp7,sp@-			0xf227 0xe0ff
 	moveml d0-a5,sp@-			0x48e7 0xfffc
 	clrw sp@-				0x4267
 	movew ccr,sp@-				0x42e7
 
-	/..* The arguments are pushed at this point by GDB;
-	no code is needed in the dummy for this.
-	The CALL_DUMMY_START_OFFSET gives the position of 
-	the following jsr instruction.  *../
+   The arguments are pushed at this point by GDB; no code is needed in
+   the dummy for this.  The CALL_DUMMY_START_OFFSET gives the position
+   of the following jsr instruction.  That is where we start
+   executing.
 
 	jsr @#0x32323232			0x4eb9 0x3232 0x3232
 	addal #0x69696969,sp			0xdffc 0x6969 0x6969
@@ -389,27 +346,19 @@ extern const struct ext_format ext_format_68881;
 	nop					0x4e71
 
    Note this is CALL_DUMMY_LENGTH bytes (28 for the above example).
-   We actually start executing at the jsr, since the pushing of the
-   registers is done by PUSH_DUMMY_FRAME.  If this were real code,
-   the arguments for the function called by the jsr would be pushed
-   between the moveml and the jsr, and we could allow it to execute through.
-   But the arguments have to be pushed by GDB after the PUSH_DUMMY_FRAME is
-   done, and we cannot allow the moveml to push the registers again lest
-   they be taken for the arguments.  */
 
-#if defined (HAVE_68881)
+   The dummy frame always saves the floating-point registers, whether they
+   actually exist on this target or not.  */
+
+/* FIXME: Wrong to hardwire this as BPT_VECTOR when sometimes it
+   should be REMOTE_BPT_VECTOR.  We should be using
+   target_insert_breakpoint (but then I think we need
+   target_remove_breakpoint somewhere--easiest way to make this happen
+   is to make this breakpoint a real breakpoint.c type breakpoint).  */
 
 #define CALL_DUMMY {0xf227e0ff, 0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, (0x4e404e71 | (BPT_VECTOR << 16))}
 #define CALL_DUMMY_LENGTH 28		/* Size of CALL_DUMMY */
 #define CALL_DUMMY_START_OFFSET 12	/* Offset to jsr instruction*/
-
-#else
-
-#define CALL_DUMMY {0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, (0x4e404e71 | (BPT_VECTOR << 16))}
-#define CALL_DUMMY_LENGTH 24		/* Size of CALL_DUMMY */
-#define CALL_DUMMY_START_OFFSET 8	/* Offset to jsr instruction*/
-
-#endif	/* HAVE_68881 */
 
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.

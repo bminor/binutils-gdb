@@ -1,8 +1,31 @@
+Thu Sep  9 10:18:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote-udi.c (udi_wait, case UDIStdinNeeded): Use a loop calling
+	getchar() (terminated only on '\n') instead of scanf.  Send the
+	'\n' which terminates it to the remote system.
+
+	More gcc lint:
+	* exec.c (ignore): Return 0.
+	* stack.c (return_command): Fetch lazy value directly, not via
+	VALUE_CONTENTS, to avoid "value computed is not used".
+	* inflow.c (new_tty): Move osigttou inside #if.
+
+	* remote.c (remote_fetch_registers): If remote reply is short, just
+	note that fact and keep going (reading extra registers as all bits 0).
+	(remote_store_registers): Send number of registers that were found
+	by remote_fetch_registers.
+	* m68k-tdep.c, config/m68k/tm-m68k.h, config/m68k/tm-*.h: Remove
+	HAVE_68881.  Define CANNOT_STORE_REGISTER if ptrace() can't write
+	floating registers.
+	* config/m68k/{tm-m68k-nofp.h,m68k-nofp.mt,tm-m68k-fp.h,m68k-fp.mt}:
+	Remove, replaced by {tm-m68k-em.h,m68k-em.mt}.
+	* Makefile.in, configure.in: Change accordingly.
+
 Thu Sep  9 04:59:03 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mipsread.c (cross_ref):  Allow SGI extended symbol types as cross
 	reference targets.
-	* symmisc.c (print_symbol):  Use TYP_TAG_NAME not TYPE_NAME to avoid
+	* symmisc.c (print_symbol):  Use TYPE_TAG_NAME not TYPE_NAME to avoid
 	printing of identities.
 
 Wed Sep  8 19:18:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)

@@ -22,8 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define BPT_VECTOR 0xe
 
-#define HAVE_68881
-
 /* Need to get function ends by adding this to epilogue address from .bf
    record, not using x_fsize field.  */
 #define FUNCTION_EPILOGUE_SIZE 4

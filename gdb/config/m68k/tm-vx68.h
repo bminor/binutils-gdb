@@ -22,8 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	DEFAULT_PROMPT		"(vxgdb) "
 
-#define HAVE_68881
-
 /* We have more complex, useful breakpoints on the target.  */
 #define	DECR_PC_AFTER_BREAK	0
 

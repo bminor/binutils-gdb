@@ -20,8 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* This has not been tested on ISI's running BSD 4.2, but it will probably
    work.  */
 
-#define HAVE_68881
-
 /* Data segment starts at etext rounded up to DATAROUND in {N,Z}MAGIC files */
 
 #define DATAROUND	0x20000
