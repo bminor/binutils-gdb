@@ -1,5 +1,12 @@
 2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/cttiadd.cc: Add copyright notice.
+	* gdb.cp/cttiadd1.cc: Likewise.
+	* gdb.cp/cttiadd2.cc: Likewise.
+	* gdb.cp/cttiadd3.cc: Likewise.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/ctti.exp: Partial rewrite.  Call gdb_compile properly.
 	Use gdb_test, gdb_test_multiple.  Use floating-point values that
 	have exact representations in IEEE-ish formats.
