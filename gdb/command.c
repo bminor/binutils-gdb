@@ -165,7 +165,7 @@ add_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
   return c;
 }
 
-/* Like add_prefix_cmd butsets the abbrev_flag on the new command. */
+/* Like add_prefix_cmd but sets the abbrev_flag on the new command. */
    
 struct cmd_list_element *
 add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,

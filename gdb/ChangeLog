@@ -1,3 +1,12 @@
+Mon Jun 22 20:18:06 1992  Fred Fish  (fnf@cygnus.com)
+
+	* command.c (add_abbrev_prefix_cmd):  Fix misspelling in comment.
+	* dwarfread.c (enum_type):  Fix misspelling in comment.
+	* valprint.c (val_print_fields, cplus_val_print):  Minor
+	adjustment to printing of C++ class structures to more closely
+	match format for printing C structures, with and without setting
+	pretty print.
+
 Mon Jun 22 17:19:02 1992  Per Bothner  (bothner@cygnus.com)
 
 	* infrun.c (wait_for_inferior):  Don't test for SIGEMT

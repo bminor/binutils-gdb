@@ -513,11 +513,14 @@ val_print_fields (type, valaddr, stream, format, recurse, pretty, dont_print)
 	    fprintf_filtered (stream, ", ");
 	  else if (n_baseclasses > 0)
 	    {
-	      fprintf_filtered (stream, "\n");
-	      print_spaces_filtered (2 + 2 * recurse, stream);
-	      fputs_filtered ("members of ", stream);
-	      fputs_filtered (type_name_no_tag (type), stream);
-	      fputs_filtered (": ", stream);
+	      if (pretty)
+		{
+		  fprintf_filtered (stream, "\n");
+		  print_spaces_filtered (2 + 2 * recurse, stream);
+		  fputs_filtered ("members of ", stream);
+		  fputs_filtered (type_name_no_tag (type), stream);
+		  fputs_filtered (": ", stream);
+		}
 	    }
 	  fields_seen = 1;
 
@@ -627,9 +630,11 @@ cplus_val_print (type, valaddr, stream, format, recurse, pretty, dont_print)
 	error ("could not find virtual baseclass `%s'\n",
 	       type_name_no_tag (TYPE_BASECLASS (type, i)));
 
-      fprintf_filtered (stream, "\n");
       if (pretty)
-	print_spaces_filtered (2 + 2 * recurse, stream);
+	{
+	  fprintf_filtered (stream, "\n");
+	  print_spaces_filtered (2 * recurse, stream);
+	}
       fputs_filtered ("<", stream);
       fputs_filtered (type_name_no_tag (TYPE_BASECLASS (type, i)), stream);
       fputs_filtered ("> = ", stream);
@@ -639,6 +644,8 @@ cplus_val_print (type, valaddr, stream, format, recurse, pretty, dont_print)
 	val_print_fields (TYPE_BASECLASS (type, i), baddr, stream, format,
 			  recurse, pretty,
 			  (struct type **)obstack_base (&dont_print_obstack));
+      fputs_filtered (", ", stream);
+
     flush_it:
       ;
     }

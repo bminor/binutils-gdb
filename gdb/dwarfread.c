@@ -1456,7 +1456,7 @@ enum_type (dip, objfile)
 	  add_symbol_to_list (sym, list_in_scope);
 	}
       /* Now create the vector of fields, and record how big it is. This is
-	 where we reverse the order, by pulling the members of the list in
+	 where we reverse the order, by pulling the members off the list in
 	 reverse order from how they were inserted.  If we have no fields
 	 (this is apparently possible in C++) then skip building a field
 	 vector. */
