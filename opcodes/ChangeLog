@@ -1,3 +1,11 @@
+start-sanitize-sky
+Wed Dec  9 14:57:23 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Update vmtir syntax.
+	* dvp-opc.c (vu_lower_opcodes): Update mtir entry.
+	(extract_ffstreg): Fix calculation of reg part of returned value.
+
+end-sanitize-sky
 Tue Dec  8 13:56:18 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	* dis-buf.c (generic_strcat_address): reformat to GNU coding

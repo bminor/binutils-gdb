@@ -241,7 +241,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"vmsubax", "&UK,2K,1#x",	0x4a0000fc, 0xfe0007ff,	0, 		T5},
 {"vmsubay", "&UK,2K,1#y",	0x4a0000fd, 0xfe0007ff,	0, 		T5},
 {"vmsubaz", "&UK,2K,1#z",	0x4a0000fe, 0xfe0007ff,	0, 		T5},
-{"vmtir",   "&4,2K",	0x4a0003fc, 0xfe0007ff,	0, 		T5},
+{"vmtir",   "4,8",	0x4a0003fc, 0xff8007ff,	0, 		T5},
 {"vmul",    "&3K,2K,1K",	0x4a00002a, 0xfe00003f,	0, 		T5},
 {"vmuli",   "&3K,2K,J",	0x4a00001e, 0xfe1f003f,	0, 		T5},
 {"vmulq",   "&3K,2K,Q",	0x4a00001c, 0xfe1f003f,	0, 		T5},
