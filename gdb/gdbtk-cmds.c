@@ -2081,7 +2081,7 @@ gdb_disassemble (clientData, interp, objc, objv)
       di_initialized = 1;
     }
 
-  di.mach = tm_print_insn_info.mach;
+  di.mach = TM_PRINT_INSN_INFO->mach;
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     di.endian = BFD_ENDIAN_BIG;
   else

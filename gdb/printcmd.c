@@ -2283,20 +2283,16 @@ print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      GDB_FILE *stream;
 {
-  /* If there's no disassembler, something is very wrong.  */
-  if (tm_print_insn == NULL)
-    abort ();
-
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-    tm_print_insn_info.endian = BFD_ENDIAN_BIG;
+    TARGET_PRINT_INSN_INFO->endian = BFD_ENDIAN_BIG;
   else
-    tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;
+    TARGET_PRINT_INSN_INFO->endian = BFD_ENDIAN_LITTLE;
 
-  if (target_architecture != NULL)
-    tm_print_insn_info.mach = target_architecture->mach;
+  if (TARGET_ARCHITECTURE != NULL)
+    TARGET_PRINT_INSN_INFO->mach = TARGET_ARCHITECTURE->mach;
   /* else: should set .mach=0 but some disassemblers don't grok this */
 
-  return (*tm_print_insn) (memaddr, &tm_print_insn_info);
+  return TARGET_PRINT_INSN (memaddr, TARGET_PRINT_INSN_INFO);
 }
 
 

@@ -3200,14 +3200,22 @@ dont_repeat_command (ignored, from_tty)
 /* Functions to manipulate the endianness of the target.  */
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
+/* compat - Catch old targets that expect a selectable byte-order to
+   default to BIG_ENDIAN */
 #ifndef TARGET_BYTE_ORDER_DEFAULT
 #define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN
 #endif
+#endif
+#ifndef TARGET_BYTE_ORDER_DEFAULT
+/* compat - Catch old non byte-order selectable targets that do not
+   define TARGET_BYTE_ORDER_DEFAULT and instead expect
+   TARGET_BYTE_ORDER to be used as the default.  For targets that
+   defined neither TARGET_BYTE_ORDER nor TARGET_BYTE_ORDER_DEFAULT the
+   below will get a strange compiler warning. */
+#define TARGET_BYTE_ORDER_DEFAULT TARGET_BYTE_ORDER
+#endif
 int target_byte_order = TARGET_BYTE_ORDER_DEFAULT;
 int target_byte_order_auto = 1;
-#else
-static int target_byte_order_auto = 0;
-#endif
 
 /* Called if the user enters ``set endian'' without an argument.  */
 static void
@@ -3225,13 +3233,16 @@ set_endian_big (args, from_tty)
      char *args;
      int from_tty;
 {
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-  target_byte_order = BIG_ENDIAN;
-  target_byte_order_auto = 0;
-#else
-  printf_unfiltered ("Byte order is not selectable.");
-  show_endian (args, from_tty);
-#endif
+  if (TARGET_BYTE_ORDER_SELECTABLE_P)
+    {
+      target_byte_order = BIG_ENDIAN;
+      target_byte_order_auto = 0;
+    }
+  else
+    {
+      printf_unfiltered ("Byte order is not selectable.");
+      show_endian (args, from_tty);
+    }
 }
 
 /* Called by ``set endian little''.  */
@@ -3240,13 +3251,16 @@ set_endian_little (args, from_tty)
      char *args;
      int from_tty;
 {
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-  target_byte_order = LITTLE_ENDIAN;
-  target_byte_order_auto = 0;
-#else
-  printf_unfiltered ("Byte order is not selectable.");
-  show_endian (args, from_tty);
-#endif
+  if (TARGET_BYTE_ORDER_SELECTABLE_P)
+    {
+      target_byte_order = LITTLE_ENDIAN;
+      target_byte_order_auto = 0;
+    }
+  else
+    {
+      printf_unfiltered ("Byte order is not selectable.");
+      show_endian (args, from_tty);
+    }
 }
 
 /* Called by ``set endian auto''.  */
@@ -3255,12 +3269,15 @@ set_endian_auto (args, from_tty)
      char *args;
      int from_tty;
 {
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-  target_byte_order_auto = 1;
-#else
-  printf_unfiltered ("Byte order is not selectable.");
-  show_endian (args, from_tty);
-#endif
+  if (TARGET_BYTE_ORDER_SELECTABLE_P)
+    {
+      target_byte_order_auto = 1;
+    }
+  else
+    {
+      printf_unfiltered ("Byte order is not selectable.");
+      show_endian (args, from_tty);
+    }
 }
 
 /* Called by ``show endian''.  */
@@ -3269,11 +3286,11 @@ show_endian (args, from_tty)
      char *args;
      int from_tty;
 {
-  const char *msg =
-    (target_byte_order_auto
+  char *msg =
+    (TARGET_BYTE_ORDER_AUTO
      ? "The target endianness is set automatically (currently %s endian)\n"
      : "The target is assumed to be %s endian\n");
-  printf_unfiltered ((char *) msg, TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
+  printf_unfiltered (msg, (TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little"));
 }
 
 /* Set the endianness from a BFD.  */
@@ -3281,30 +3298,30 @@ void
 set_endian_from_file (abfd)
      bfd *abfd;
 {
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-  int want;
-
-  if (bfd_big_endian (abfd))
-    want = BIG_ENDIAN;
+  if (TARGET_BYTE_ORDER_SELECTABLE_P)
+    {
+      int want;
+      
+      if (bfd_big_endian (abfd))
+	want = BIG_ENDIAN;
+      else
+	want = LITTLE_ENDIAN;
+      if (TARGET_BYTE_ORDER_AUTO)
+	target_byte_order = want;
+      else if (TARGET_BYTE_ORDER != want)
+	warning ("%s endian file does not match %s endian target.",
+		 want == BIG_ENDIAN ? "big" : "little",
+		 TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
+    }
   else
-    want = LITTLE_ENDIAN;
-  if (target_byte_order_auto)
-    target_byte_order = want;
-  else if (target_byte_order != want)
-    warning ("%s endian file does not match %s endian target.",
-	     want == BIG_ENDIAN ? "big" : "little",
-	     TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
-
-#else /* ! defined (TARGET_BYTE_ORDER_SELECTABLE) */
-
-  if (bfd_big_endian (abfd)
-      ? TARGET_BYTE_ORDER != BIG_ENDIAN
-      : TARGET_BYTE_ORDER == BIG_ENDIAN)
-    warning ("%s endian file does not match %s endian target.",
-	     bfd_big_endian (abfd) ? "big" : "little",
-	     TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
-
-#endif /* ! defined (TARGET_BYTE_ORDER_SELECTABLE) */
+    {
+      if (bfd_big_endian (abfd)
+	  ? TARGET_BYTE_ORDER != BIG_ENDIAN
+	  : TARGET_BYTE_ORDER == BIG_ENDIAN)
+	warning ("%s endian file does not match %s endian target.",
+		 bfd_big_endian (abfd) ? "big" : "little",
+		 TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
+    }
 }
 
 /* Functions to manipulate the architecture of the target */

@@ -1,3 +1,21 @@
+Sun Dec 13 09:52:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (TARGET_PRINT_INSN_INFO, TARGET_PRINT_INSN): Define.
+	(TARGET_ARCHITECTURE, TARGET_ARCHITECTURE_AUTO): Define.
+	(TARGET_BYTE_ORDER_AUTO): Define.
+	(TARGET_BYTE_ORDER_SELECTABLE_P): Provide default. Replaces
+ 	TARGET_BYTE_ORDER_SELECTABLE. Handle compat issues.
+	(BITS_BIG_ENDIAN): Simplify.
+	(TARGET_FLOAT_FORMAT): Ditto.
+	(TARGET_DOUBLE_FORMAT): 
+
+	* remote-e7000.c, sh-tdep.c, printcmd.c, gdbtk-cmds.c,
+ 	remote-sim.c, remote-rdi.c, sparc-tdep.c: Update.
+	
+	* config/powerpc/tm-ppcle-eabi.h, config/rs6000/tm-rs6000.h,
+ 	config/powerpc/tm-ppc-eabi.h, config/mn10300/tm-mn10300.h:
+ 	Convert.
+
 Sat Dec 12 09:28:13 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* frame.h (struct frame_info): Add CORE_ADDR *saved_regs and

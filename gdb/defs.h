@@ -780,15 +780,35 @@ extern void free ();
 
 /* Target-system-dependent parameters for GDB. */
 
+/* TARGET_BYTE_ORDER_SELECTABLE_P determines if the target endianness
+   is selectable at runtime.  The user can use the `set endian'
+   command to change it.  TARGET_BYTE_ORDER_AUTO is nonzero when
+   target_byte_order should be auto-detected (from the program image
+   say). */
+
+#ifndef TARGET_BYTE_ORDER_SELECTABLE_P
+/* compat - Catch old targets that define TARGET_BYTE_ORDER_SLECTABLE
+   when they should have defined TARGET_BYTE_ORDER_SELECTABLE_P 1 */
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
-/* The target endianness is selectable at runtime.  Define
-   TARGET_BYTE_ORDER to be a variable.  The user can use the `set
-   endian' command to change it.  */
-#undef TARGET_BYTE_ORDER
-#define TARGET_BYTE_ORDER target_byte_order
+#define TARGET_BYTE_ORDER_SELECTABLE_P 1
+#else
+#define TARGET_BYTE_ORDER_SELECTABLE_P 0
+#endif
+#endif
+
 extern int target_byte_order;
-/* Nonzero when target_byte_order auto-detected */
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
+/* compat - Catch old targets that define TARGET_BYTE_ORDER_SELECTABLE
+   and expect defs.h to re-define TARGET_BYTE_ORDER. */
+#undef TARGET_BYTE_ORDER
+#endif
+#ifndef TARGET_BYTE_ORDER
+#define TARGET_BYTE_ORDER (target_byte_order + 0)
+#endif
+
 extern int target_byte_order_auto;
+#ifndef TARGET_BYTE_ORDER_AUTO
+#define TARGET_BYTE_ORDER_AUTO (target_byte_order_auto + 0)
 #endif
 
 extern void set_endian_from_file PARAMS ((bfd *));
@@ -796,6 +816,8 @@ extern void set_endian_from_file PARAMS ((bfd *));
 /* The target architecture can be set at run-time. */
 extern int target_architecture_auto;
 extern const bfd_arch_info_type *target_architecture;
+#define TARGET_ARCHITECTURE_AUTO (target_architecture_auto + 0)
+#define TARGET_ARCHITECTURE (target_architecture + 0)
 extern void set_architecture_from_file PARAMS ((bfd *));
 /* Notify target of a change to the selected architecture. Zero return
    status indicates that the target did not like the change. */
@@ -864,22 +886,8 @@ extern void set_architecture_from_arch_mach PARAMS ((enum bfd_architecture arch,
    from byte/word byte order.  */
 
 #if !defined (BITS_BIG_ENDIAN)
-#ifndef TARGET_BYTE_ORDER_SELECTABLE
-
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-#define BITS_BIG_ENDIAN 1
-#endif /* Big endian.  */
-
-#if TARGET_BYTE_ORDER == LITTLE_ENDIAN
-#define BITS_BIG_ENDIAN 0
-#endif /* Little endian.  */
-
-#else /* defined (TARGET_BYTE_ORDER_SELECTABLE) */
-
 #define BITS_BIG_ENDIAN (TARGET_BYTE_ORDER == BIG_ENDIAN)
-
-#endif /* defined (TARGET_BYTE_ORDER_SELECTABLE) */
-#endif /* BITS_BIG_ENDIAN not defined.  */
+#endif
 
 /* In findvar.c.  */
 
@@ -929,33 +937,15 @@ extern const struct floatformat floatformat_unknown;
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_unknown
 #endif
 
-#ifndef TARGET_BYTE_ORDER_SELECTABLE
-#  if TARGET_BYTE_ORDER == BIG_ENDIAN
-#    ifndef TARGET_FLOAT_FORMAT
-#      define TARGET_FLOAT_FORMAT &floatformat_ieee_single_big
-#    endif
-#    ifndef TARGET_DOUBLE_FORMAT
-#      define TARGET_DOUBLE_FORMAT &floatformat_ieee_double_big
-#    endif
-#  else /* LITTLE_ENDIAN */
-#    ifndef TARGET_FLOAT_FORMAT
-#      define TARGET_FLOAT_FORMAT &floatformat_ieee_single_little
-#    endif
-#    ifndef TARGET_DOUBLE_FORMAT
-#      define TARGET_DOUBLE_FORMAT &floatformat_ieee_double_little
-#    endif
-#  endif
-#else				/* TARGET_BYTE_ORDER_SELECTABLE */
-#  ifndef TARGET_FLOAT_FORMAT
-#    define TARGET_FLOAT_FORMAT (target_byte_order == BIG_ENDIAN \
-				 ? &floatformat_ieee_single_big \
-				 : &floatformat_ieee_single_little)
-#  endif
-#  ifndef TARGET_DOUBLE_FORMAT
-#    define TARGET_DOUBLE_FORMAT (target_byte_order == BIG_ENDIAN \
-				  ? &floatformat_ieee_double_big \
-				  : &floatformat_ieee_double_little)
-#  endif
+#ifndef TARGET_FLOAT_FORMAT
+#define TARGET_FLOAT_FORMAT (target_byte_order == BIG_ENDIAN \
+			     ? &floatformat_ieee_single_big \
+			     : &floatformat_ieee_single_little)
+#endif
+#ifndef TARGET_DOUBLE_FORMAT
+#define TARGET_DOUBLE_FORMAT (target_byte_order == BIG_ENDIAN \
+			      ? &floatformat_ieee_double_big \
+			      : &floatformat_ieee_double_little)
 #endif
 
 #ifndef TARGET_LONG_DOUBLE_FORMAT
@@ -1036,6 +1026,12 @@ extern void dis_asm_print_address PARAMS ((bfd_vma addr,
 
 extern int (*tm_print_insn) PARAMS ((bfd_vma, disassemble_info*));
 extern disassemble_info tm_print_insn_info;
+#ifndef TARGET_PRINT_INSN
+#define TARGET_PRINT_INSN(vma, info) (*tm_print_insn) (vma, info)
+#endif
+#ifndef TARGET_PRINT_INSN_INFO
+#define TARGET_PRINT_INSN_INFO (&tm_print_insn_info)
+#endif
 
 /* Hooks for alternate command interfaces.  */
 

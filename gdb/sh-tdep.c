@@ -626,8 +626,8 @@ sh_show_regs (args, from_tty)
      int from_tty;
 {
   int cpu;
-  if (target_architecture->arch == bfd_arch_sh)
-    cpu = target_architecture->mach;
+  if (TARGET_ARCHITECTURE->arch == bfd_arch_sh)
+    cpu = TARGET_ARCHITECTURE->mach;
   else
     cpu = 0;
   /* FIXME: sh4 has more registers */

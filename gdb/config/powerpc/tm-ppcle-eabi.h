@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Use normal ppc-eabi definitions */
 #include "powerpc/tm-ppc-eabi.h"
 
-#undef  TARGET_BYTE_ORDER
-#define TARGET_BYTE_ORDER	LITTLE_ENDIAN
+#undef  TARGET_BYTE_ORDER_DEFAULT
+#define TARGET_BYTE_ORDER_DEFAULT	LITTLE_ENDIAN
 
 #endif /* TM_PPCLE_EABI_H */

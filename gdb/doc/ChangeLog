@@ -1,3 +1,8 @@
+Sun Dec 13 10:27:59 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo: Document TARGET_BYTE_ORDER_DEFAULT and
+ 	TARGET_BYTE_ORDER_SELECTABLE_P.
+
 Thu Dec 10 16:07:09 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (FRAME_FIND_SAVED_REGS): Document.

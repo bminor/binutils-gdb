@@ -1,5 +1,5 @@
 /* Remote debugging interface for Hitachi E7000 ICE, for GDB
-   Copyright 1993, 1994, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support. 
 
    Written by Steve Chamberlain for Cygnus Support.
@@ -47,6 +47,7 @@
 #include "symfile.h"
 #include <time.h>
 #include <ctype.h>
+
 
 #if 1
 #define HARD_BREAKPOINTS	/* Now handled by set option. */
@@ -381,7 +382,7 @@ e7000_create_inferior (execfile, args, env)
     error ("Can't pass arguments to remote E7000DEBUG process");
 
   if (execfile == 0 || exec_bfd == 0)
-    error ("No exec file specified");
+    error ("No executable file specified");
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
@@ -920,21 +921,19 @@ e7000_fetch_registers ()
 
 #ifdef GDB_TARGET_IS_SH
   wanted = want;
-  if (target_architecture->arch == bfd_arch_sh)
-    switch (target_architecture->mach)
+  if (TARGET_ARCHITECTURE->arch == bfd_arch_sh)
+    switch (TARGET_ARCHITECTURE->mach)
       {
       case bfd_mach_sh3:
       case bfd_mach_sh3e:
-	/* start-sanitize-sh4 */	
       case bfd_mach_sh4:
-	/* end-sanitize-sh4 */	
 	wanted = want_sh3;
       }
 #else
   if (h8300smode)
     wanted = want_h8300s;
   else
-    wanted = want_h8300h);
+    wanted = want_h8300h;
 #endif
   fetch_regs_from_dump (gch, wanted);
 
@@ -1576,7 +1575,7 @@ e7000_load (args, from_tty)
       perror_with_name (filename);
       return;
     }
-  old_chain = make_cleanup (bfd_close, pbfd);
+  old_chain = make_cleanup ((make_cleanup_func) bfd_close, pbfd);
 
   if (!bfd_check_format (pbfd, bfd_object)) 
     error ("\"%s\" is not an object file: %s", filename,
@@ -1709,8 +1708,6 @@ e7000_mourn_inferior ()
 #else
 #define MAX_E7000DEBUG_BREAKPOINTS MAX_BREAKPOINTS
 #endif
-
-extern int memory_breakpoint_size;
 
 /* Since we can change to soft breakpoints dynamically, we must define 
    more than enough.  Was breakaddr[MAX_E7000DEBUG_BREAKPOINTS]. */
@@ -2077,21 +2074,19 @@ e7000_wait (pid, status)
 
 #ifdef GDB_TARGET_IS_SH
   wanted_nopc = want_nopc;
-  if (target_architecture->arch == bfd_arch_sh)
-    switch (target_architecture->mach)
+  if (TARGET_ARCHITECTURE->arch == bfd_arch_sh)
+    switch (TARGET_ARCHITECTURE->mach)
       {
       case bfd_mach_sh3:
       case bfd_mach_sh3e:
-	/* start-sanitize-sh4 */	
       case bfd_mach_sh4:
-	/* end-sanitize-sh4 */	
 	wanted_nopc = want_sh3_nopc;
       }
 #else
   if (h8300smode)
     wanted_nopc = want_nopc_h8300s;
   else
-    wanted_nopc = want_nopc_h8300h);
+    wanted_nopc = want_nopc_h8300h;
 #endif
   fetch_regs_from_dump (gch, wanted_nopc);
 
@@ -2163,59 +2158,61 @@ e7000_stop ()
 
 /* Define the target subroutine names. */
 
-struct target_ops e7000_ops =
+struct target_ops e7000_ops ;
+static void init_e7000_ops(void)
 {
-  "e7000",
-  "Remote Hitachi e7000 target",
-  "Use a remote Hitachi e7000 ICE connected by a serial line,\n\
+  e7000_ops.to_shortname =   "e7000";
+  e7000_ops.to_longname =   "Remote Hitachi e7000 target";
+  e7000_ops.to_doc =   "Use a remote Hitachi e7000 ICE connected by a serial line;\n\
 or a network connection.\n\
 Arguments are the name of the device for the serial line,\n\
 the speed to connect at in bits per second.\n\
 eg\n\
 target e7000 /dev/ttya 9600\n\
-target e7000 foobar",
-  e7000_open,			/* to_open */
-  e7000_close,			/* to_close */
-  0,				/* to_attach */
-  e7000_detach,			/* to_detach */
-  e7000_resume,			/* to_resume */
-  e7000_wait,			/* to_wait */
-  e7000_fetch_register,		/* to_fetch_registers */
-  e7000_store_register,		/* to_store_registers */
-  e7000_prepare_to_store,	/* to_prepare_to_store */
-  e7000_xfer_inferior_memory,	/* to_xfer_memory */
-  e7000_files_info,		/* to_files_info */
-  e7000_insert_breakpoint,	/* to_insert_breakpoint */
-  e7000_remove_breakpoint,	/* to_remove_breakpoint */
-  0,				/* to_terminal_init */
-  0,				/* to_terminal_inferior */
-  0,				/* to_terminal_ours_for_output */
-  0,				/* to_terminal_ours */
-  0,				/* to_terminal_info */
-  e7000_kill,			/* to_kill */
-  e7000_load,			/* to_load */
-  0,				/* to_lookup_symbol */
-  e7000_create_inferior,	/* to_create_inferior */
-  e7000_mourn_inferior,		/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  e7000_stop,			/* to_stop */
-  process_stratum,		/* to_stratum */
-  0,				/* next (unused) */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  0,				/* to_sections */
-  0,				/* to_sections_end */
-  OPS_MAGIC,			/* Always the last thing */
+target e7000 foobar" ;
+  e7000_ops.to_open =   e7000_open;	
+  e7000_ops.to_close =   e7000_close;	
+  e7000_ops.to_attach =   0;		
+  e7000_ops.to_detach =   e7000_detach;	
+  e7000_ops.to_resume =   e7000_resume;	
+  e7000_ops.to_wait  =   e7000_wait;	
+  e7000_ops.to_fetch_registers  =   e7000_fetch_register;
+  e7000_ops.to_store_registers  =   e7000_store_register;
+  e7000_ops.to_prepare_to_store =   e7000_prepare_to_store;
+  e7000_ops.to_xfer_memory  =   e7000_xfer_inferior_memory;
+  e7000_ops.to_files_info  =   e7000_files_info;		
+  e7000_ops.to_insert_breakpoint =   e7000_insert_breakpoint;	
+  e7000_ops.to_remove_breakpoint =   e7000_remove_breakpoint;	
+  e7000_ops.to_terminal_init  =   0;				
+  e7000_ops.to_terminal_inferior =   0;				
+  e7000_ops.to_terminal_ours_for_output =   0;			
+  e7000_ops.to_terminal_ours  =   0;				
+  e7000_ops.to_terminal_info  =   0;				
+  e7000_ops.to_kill  =   e7000_kill;		
+  e7000_ops.to_load  =   e7000_load;		
+  e7000_ops.to_lookup_symbol =   0;		
+  e7000_ops.to_create_inferior =   e7000_create_inferior;
+  e7000_ops.to_mourn_inferior =   e7000_mourn_inferior;		
+  e7000_ops.to_can_run  =   0;			
+  e7000_ops.to_notice_signals =   0;		
+  e7000_ops.to_thread_alive  =   0;		
+  e7000_ops.to_stop  =   e7000_stop;		
+  e7000_ops.to_stratum =   process_stratum;	
+  e7000_ops.DONT_USE =   0;			
+  e7000_ops.to_has_all_memory =   1;		
+  e7000_ops.to_has_memory =   1;		
+  e7000_ops.to_has_stack =   1;			
+  e7000_ops.to_has_registers =   1;		
+  e7000_ops.to_has_execution =   1;		
+  e7000_ops.to_sections =   0;			
+  e7000_ops.to_sections_end =   0;		
+  e7000_ops.to_magic =   OPS_MAGIC;		
 };
 
 void
 _initialize_remote_e7000 ()
 {
+  init_e7000_ops() ;
   add_target (&e7000_ops);
 
   add_com ("e7000", class_obscure, e7000_command,

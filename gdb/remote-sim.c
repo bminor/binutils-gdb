@@ -528,8 +528,8 @@ gdbsim_open (args, from_tty)
   strcpy (arg_buf, "gdbsim"); /* 7 */
   /* Specify the byte order for the target when it is both selectable
      and explicitly specified by the user (not auto detected). */
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-  if (!target_byte_order_auto)
+  if (TARGET_BYTE_ORDER_SELECTABLE_P
+      && !TARGET_BYTE_ORDER_AUTO)
     {
       switch (TARGET_BYTE_ORDER)
 	{
@@ -543,13 +543,12 @@ gdbsim_open (args, from_tty)
 	  fatal ("Value of TARGET_BYTE_ORDER unknown");
 	}
     }
-#endif
   /* Specify the architecture of the target when it has been
      explicitly specified */
-  if (!target_architecture_auto)
+  if (!TARGET_ARCHITECTURE_AUTO)
     {
       strcat (arg_buf, " --architecture=");
-      strcat (arg_buf, target_architecture->printable_name);
+      strcat (arg_buf, TARGET_ARCHITECTURE->printable_name);
     }
   /* finally, any explicit args */
   if (args)
