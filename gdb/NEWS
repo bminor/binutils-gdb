@@ -3,6 +3,8 @@
 
 *** Changes since GDB 6.1:
 
+* Cygwin support for DWARF 2 added.
+
 * Fixed build problem on IRIX 5
 
 Due to header problems with <sys/proc.h>, the file gdb/proc-api.c
