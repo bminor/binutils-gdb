@@ -3296,7 +3296,8 @@ alignment request in bytes.  For example @samp{.align 8} advances
 the location counter until it is a multiple of 8.  If the location counter
 is already a multiple of 8, no change is needed.
 
-For other systems, including the i386 using a.out format, it is the
+For other systems, including the i386 using a.out format, and the arm and
+strongarm, it is the
 number of low-order zero bits the location counter must have after
 advancement.  For example @samp{.align 3} advances the location
 counter until it a multiple of 8.  If the location counter is already a

@@ -52,7 +52,6 @@
 #define ARM_HALFWORD    0x00000020	/* allow half word loads */
 #define ARM_THUMB       0x00000040	/* allow BX instruction  */
 #define ARM_EXT_V5	0x00000080	/* allow CLZ etc	 */
-#define ARM_EXT_V5E     0x00000200	/* "El Segundo" 	 */
 
 /* Architectures are the sum of the base and extensions.  */
 #define ARM_ARCH_V4	(ARM_7 | ARM_LONGMUL | ARM_HALFWORD)
@@ -6748,7 +6747,6 @@ md_parse_option (c, arg)
 		  switch (*++str)
 		    {
 		    case 't': cpu_variant |= ARM_THUMB; break;
-		    case 'e': cpu_variant |= ARM_EXT_V5E; break;
 		    case 0:   break;
 		    default:
 		      as_bad (_("Invalid architecture variant -m%s"), arg);

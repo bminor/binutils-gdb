@@ -1,3 +1,10 @@
+2000-04-24  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/c-arm.texi (ARM Directives): Document behaviour of .align 0.
+	* doc/as.texinfo (Align): Include arm and strongarm in list of
+	targets that have the second form of the behaviour of the .align
+	directive. 
+
 2000-04-24  Mark Klein <mklein@dis.com>
 
 	 * obj-som.c: Terminate obj_pseudo_table.
