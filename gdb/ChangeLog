@@ -1,3 +1,7 @@
+Tue Jul 11 17:50:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* symtab.c: Use paddr_nz() to print addresses.
+
 Tue Jul 11 12:52:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* value.h (read_register, read_signed_register): Change return

@@ -1472,10 +1472,9 @@ find_pc_sect_symtab (pc, section)
 	/* Might want to error() here (in case symtab is corrupt and
 	   will cause a core dump), but maybe we can successfully
 	   continue, so let's not.  */
-	/* FIXME-32x64: assumes pc fits in a long */
 	warning ("\
-(Internal error: pc 0x%lx in read in psymtab, but not in symtab.)\n",
-		 (unsigned long) pc);
+(Internal error: pc 0x%s in read in psymtab, but not in symtab.)\n",
+		 paddr_nz (pc));
       s = PSYMTAB_TO_SYMTAB (ps);
     }
   return (s);
