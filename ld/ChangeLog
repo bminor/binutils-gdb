@@ -1,3 +1,10 @@
+Thu Nov  9 13:09:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em (gld${EMULATION_NAME}_before_allocation): Add
+	new local variable special_sections, and pass it to
+	size_dynamic_sections.  Look through the results, and move the
+	sections around in the mapping so that they are defined correctly.
+
 Wed Nov  8 11:40:59 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldemul.c (ldemul_default_target): Cast getenv return value.

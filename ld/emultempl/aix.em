@@ -433,6 +433,8 @@ gld${EMULATION_NAME}_before_allocation ()
   struct filelist *fl;
   struct export_symbol_list *el;
   char *libpath;
+  asection *special_sections[6];
+  int i;
 
   /* Handle the import and export files, if any.  */
   for (fl = import_files; fl != NULL; fl = fl->next)
@@ -487,8 +489,113 @@ gld${EMULATION_NAME}_before_allocation ()
 					 maxstack, maxdata,
 					 gc ? true : false,
 					 modtype,
-					 textro ? true : false))
+					 textro ? true : false,
+					 special_sections))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
+
+  /* Look through the special sections, and put them in the right
+     place in the link ordering.  This is especially magic.  */
+  for (i = 0; i < 6; i++)
+    {
+      asection *sec;
+      lang_output_section_statement_type *os;
+      lang_statement_union_type **pls;
+      lang_input_section_type *is;
+      const char *oname;
+      boolean start;
+
+      sec = special_sections[i];
+      if (sec == NULL)
+	continue;
+
+      /* Remove this section from the list of the output section.
+         This assumes we know what the script looks like.  */
+      is = NULL;
+      os = lang_output_section_find (sec->output_section->name);
+      if (os == NULL)
+	einfo ("%P%F: can't find output section %s\n",
+	       sec->output_section->name);
+      for (pls = &os->children.head; *pls != NULL; pls = &(*pls)->next)
+	{
+	  if ((*pls)->header.type == lang_input_section_enum
+	      && (*pls)->input_section.section == sec)
+	    {
+	      is = (lang_input_section_type *) *pls;
+	      *pls = (*pls)->next;
+	      break;
+	    }
+	  if ((*pls)->header.type == lang_wild_statement_enum)
+	    {
+	      lang_statement_union_type **pwls;
+
+	      for (pwls = &(*pls)->wild_statement.children.head;
+		   *pwls != NULL;
+		   pwls = &(*pwls)->next)
+		{
+		  if ((*pwls)->header.type == lang_input_section_enum
+		      && (*pwls)->input_section.section == sec)
+		    {
+		      is = (lang_input_section_type *) *pwls;
+		      *pwls = (*pwls)->next;
+		      break;
+		    }
+		}
+	      if (is != NULL)
+		break;
+	    }
+	}	
+
+      if (is == NULL)
+	einfo ("%P%F: can't find %s in output section\n",
+	       bfd_get_section_name (sec->owner, sec));
+
+      /* Now figure out where the section should go.  */
+      switch (i)
+	{
+	default: /* to avoid warnings */
+	case 0:
+	  /* _text */
+	  oname = ".text";
+	  start = true;
+	  break;
+	case 1:
+	  /* _etext */
+	  oname = ".text";
+	  start = false;
+	  break;
+	case 2:
+	  /* _data */
+	  oname = ".data";
+	  start = true;
+	  break;
+	case 3:
+	  /* _edata */
+	  oname = ".data";
+	  start = false;
+	  break;
+	case 4:
+	case 5:
+	  /* _end and end */
+	  oname = ".bss";
+	  start = false;
+	  break;
+	}
+
+      os = lang_output_section_find (oname);
+
+      if (start)
+	{
+	  is->header.next = os->children.head;
+	  os->children.head = (lang_statement_union_type *) is;
+	}
+      else
+	{
+	  is->header.next = NULL;
+	  lang_statement_append (&os->children,
+				 (lang_statement_union_type *) is,
+				 &is->header.next);
+	}
+    }
 }
 
 /* Read an import or export file.  For an import file, this is called
