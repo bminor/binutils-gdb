@@ -193,7 +193,7 @@ static debug_type stab_find_tagged_type
   PARAMS ((PTR, struct stab_handle *, const char *, int,
 	   enum debug_type_kind));
 static debug_type *stab_demangle_argtypes
-  PARAMS ((PTR, struct stab_handle *, const char *));
+  PARAMS ((PTR, struct stab_handle *, const char *, boolean *));
 
 /* Save a string in memory.  */
 
@@ -827,9 +827,13 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
 	  dtype = parse_stab_type (dhandle, info, (const char *) NULL, &p,
 				   (debug_type **) NULL);
 	  if (dtype != DEBUG_TYPE_NULL)
-	    dtype = debug_make_pointer_type (dhandle,
-					     debug_make_function_type (dhandle,
-								       dtype));
+	    {
+	      debug_type ftype;
+
+	      ftype = debug_make_function_type (dhandle, dtype,
+						(debug_type *) NULL, false);
+	      dtype = debug_make_pointer_type (dhandle, ftype);
+	    }
 	}
       if (dtype == DEBUG_TYPE_NULL)
 	return false;
@@ -1278,7 +1282,8 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
       dtype = (debug_make_function_type
 	       (dhandle,
 		parse_stab_type (dhandle, info, (const char *) NULL, pp,
-				 (debug_type **) NULL)));
+				 (debug_type **) NULL),
+		(debug_type *) NULL, false));
       break;
 
     case 'k':
@@ -1348,7 +1353,8 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	    }
 	  ++*pp;
 	  dtype = debug_make_method_type (dhandle, return_type,
-					  DEBUG_TYPE_NULL, NULL);
+					  DEBUG_TYPE_NULL,
+					  (debug_type *) NULL, false);
 	}
       else
 	{
@@ -1357,6 +1363,7 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	  debug_type *args;
 	  unsigned int n;
 	  unsigned int alloc;
+	  boolean varargs;
 
 	  domain = parse_stab_type (dhandle, info, (const char *) NULL,
 				    pp, (debug_type **) NULL);
@@ -1402,30 +1409,22 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	    }
 	  ++*pp;
 
-	  /* If the last type is void, then this function does not
-	     take a variable number of arguments.  If the last is not
-	     void, then it does.  */
-	  if (n > 0
-	      && debug_get_type_kind (dhandle, args[n - 1]) == DEBUG_KIND_VOID)
-	    --n;
+	  /* If the last type is not void, then this function takes a
+	     variable number of arguments.  Otherwise, we must strip
+	     the void type.  */
+	  if (n == 0
+	      || debug_get_type_kind (dhandle, args[n - 1]) != DEBUG_KIND_VOID)
+	    varargs = true;
 	  else
 	    {
-	      if (n + 1 >= alloc)
-		{
-		  alloc += 10;
-		  args = ((debug_type *)
-			  xrealloc ((PTR) args, alloc * sizeof *args));
-		}
-
-	      args[n] = debug_make_ellipsis_type (dhandle);
-	      if (args[n] == DEBUG_TYPE_NULL)
-		return DEBUG_TYPE_NULL;
-	      ++n;
+	      --n;
+	      varargs = false;
 	    }
 
 	  args[n] = DEBUG_TYPE_NULL;
 
-	  dtype = debug_make_method_type (dhandle, return_type, domain, args);
+	  dtype = debug_make_method_type (dhandle, return_type, domain, args,
+					  varargs);
 	}
       break;
 
@@ -2499,6 +2498,7 @@ parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
 	  bfd_vma voffset;
 	  debug_type context;
 	  const char *physname;
+	  boolean varargs;
 
 	  if (look_ahead_type != DEBUG_TYPE_NULL)
 	    {
@@ -2661,7 +2661,7 @@ parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
 	     and the argument types, must be deduced from it.  */
 
 	  if (debug_get_type_kind (dhandle, type) == DEBUG_KIND_METHOD
-	      && debug_get_parameter_types (dhandle, type) != NULL)
+	      && debug_get_parameter_types (dhandle, type, &varargs) != NULL)
 	    physname = argtypes;
 	  else
 	    {
@@ -2759,6 +2759,7 @@ parse_stab_argtypes (dhandle, info, class_type, fieldname, tagname,
   boolean is_constructor;
   boolean is_destructor;
   debug_type *args;
+  boolean varargs;
 
   /* Constructors are sometimes handled specially.  */
   is_full_physname_constructor = ((argtypes[0] == '_'
@@ -2847,14 +2848,16 @@ parse_stab_argtypes (dhandle, info, class_type, fieldname, tagname,
     {
       args = (debug_type *) xmalloc (sizeof *args);
       *args = NULL;
-      return debug_make_method_type (dhandle, return_type, class_type, args);
+      return debug_make_method_type (dhandle, return_type, class_type, args,
+				     false);
     }
 
-  args = stab_demangle_argtypes (dhandle, info, *pphysname);
+  args = stab_demangle_argtypes (dhandle, info, *pphysname, &varargs);
   if (args == NULL)
     return DEBUG_TYPE_NULL;
 
-  return debug_make_method_type (dhandle, return_type, class_type, args);
+  return debug_make_method_type (dhandle, return_type, class_type, args,
+				 varargs);
 }
 
 /* The tail end of stabs for C++ classes that contain a virtual function
@@ -3492,6 +3495,8 @@ struct stab_demangle_info
   struct stab_handle *info;
   /* The array of arguments we are building.  */
   debug_type *args;
+  /* Whether the method takes a variable number of arguments.  */
+  boolean varargs;
   /* The array of types we have remembered.  */
   struct stab_demangle_typestring *typestrings;
   /* The number of typestrings.  */
@@ -3517,7 +3522,8 @@ static boolean stab_demangle_template
 static boolean stab_demangle_class
   PARAMS ((struct stab_demangle_info *, const char **, const char **));
 static boolean stab_demangle_args
-  PARAMS ((struct stab_demangle_info *, const char **, debug_type **));
+  PARAMS ((struct stab_demangle_info *, const char **, debug_type **,
+	   boolean *));
 static boolean stab_demangle_arg
   PARAMS ((struct stab_demangle_info *, const char **, debug_type **,
 	   unsigned int *, unsigned int *));
@@ -3596,16 +3602,18 @@ stab_demangle_get_count (pp, pi)
    terminated array of argument types.  */
 
 static debug_type *
-stab_demangle_argtypes (dhandle, info, physname)
+stab_demangle_argtypes (dhandle, info, physname, pvarargs)
      PTR dhandle;
      struct stab_handle *info;
      const char *physname;
+     boolean *pvarargs;
 {
   struct stab_demangle_info minfo;
 
   minfo.dhandle = dhandle;
   minfo.info = info;
   minfo.args = NULL;
+  minfo.varargs = false;
   minfo.typestring_alloc = 10;
   minfo.typestrings = ((struct stab_demangle_typestring *)
 		       xmalloc (minfo.typestring_alloc
@@ -3630,6 +3638,7 @@ stab_demangle_argtypes (dhandle, info, physname)
   if (minfo.args == NULL)
     fprintf (stderr, "no argument types in mangled string\n");
 
+  *pvarargs = minfo.varargs;
   return minfo.args;
 
  error_return:
@@ -3820,7 +3829,7 @@ stab_demangle_signature (minfo, pp)
 	  hold = NULL;
 	  func_done = true;
 	  ++*pp;
-	  if (! stab_demangle_args (minfo, pp, &minfo->args))
+	  if (! stab_demangle_args (minfo, pp, &minfo->args, &minfo->varargs))
 	    return false;
 	  break;
 
@@ -3848,7 +3857,7 @@ stab_demangle_signature (minfo, pp)
 	  /* Assume we have stumbled onto the first outermost function
 	     argument token, and start processing args.  */
 	  func_done = true;
-	  if (! stab_demangle_args (minfo, pp, &minfo->args))
+	  if (! stab_demangle_args (minfo, pp, &minfo->args, &minfo->varargs))
 	    return false;
 	  break;
 	}
@@ -3856,7 +3865,7 @@ stab_demangle_signature (minfo, pp)
       if (expect_func)
 	{
 	  func_done = true;
-	  if (! stab_demangle_args (minfo, pp, &minfo->args))
+	  if (! stab_demangle_args (minfo, pp, &minfo->args, &minfo->varargs))
 	    return false;
 	}
     }
@@ -3867,7 +3876,7 @@ stab_demangle_signature (minfo, pp)
 	 bar__3fooi is 'foo::bar(int)'.  We get here when we find the
 	 first case, and need to ensure that the '(void)' gets added
 	 to the current declp.  */
-      if (! stab_demangle_args (minfo, pp, &minfo->args))
+      if (! stab_demangle_args (minfo, pp, &minfo->args, &minfo->varargs))
 	return false;
     }
 
@@ -4250,10 +4259,11 @@ stab_demangle_class (minfo, pp, pstart)
    is set to a NULL terminated array holding the arguments.  */
 
 static boolean
-stab_demangle_args (minfo, pp, pargs)
+stab_demangle_args (minfo, pp, pargs, pvarargs)
      struct stab_demangle_info *minfo;
      const char **pp;
      debug_type **pargs;
+     boolean *pvarargs;
 {
   const char *orig;
   unsigned int alloc, count;
@@ -4262,7 +4272,10 @@ stab_demangle_args (minfo, pp, pargs)
 
   alloc = 10;
   if (pargs != NULL)
-    *pargs = (debug_type *) xmalloc (alloc * sizeof **pargs);
+    {
+      *pargs = (debug_type *) xmalloc (alloc * sizeof **pargs);
+      *pvarargs = false;
+    }
   count = 0;
 
   while (**pp != '_' && **pp != '\0' && **pp != 'e')
@@ -4313,31 +4326,15 @@ stab_demangle_args (minfo, pp, pargs)
 	}
     }
 
+  if (pargs != NULL)
+    (*pargs)[count] = DEBUG_TYPE_NULL;
+
   if (**pp == 'e')
     {
       if (pargs != NULL)
-	{
-	  debug_type type;
-
-	  type = debug_make_ellipsis_type (minfo->dhandle);
-	  if (type == DEBUG_TYPE_NULL)
-	    return false;
-
-	  if (count + 1 >= alloc)
-	    {
-	      alloc += 10;
-	      *pargs = ((debug_type *)
-			xrealloc (*pargs, alloc * sizeof **pargs));
-	    }
-	  (*pargs)[count] = type;
-	  ++count;
-	}
-
+	*pvarargs = true;
       ++*pp;
     }
-
-  if (pargs != NULL)
-    (*pargs)[count] = DEBUG_TYPE_NULL;
 
   return true;
 }
@@ -4478,23 +4475,35 @@ stab_demangle_type (minfo, pp, ptype)
 
     case 'F':
       /* A function.  */
-      ++*pp;
-      /* FIXME: We should pick up the argument types.  */
-      if (! stab_demangle_args (minfo, pp, (debug_type **) NULL))
-	return false;
-      if (**pp != '_')
-	{
-	  /* cplus_demangle will accept a function without a return
-             type, but I don't know when that will happen, or what to
-             do if it does.  */
-	  stab_bad_demangle (orig);
+      {
+	debug_type *args;
+	boolean varargs;
+
+	++*pp;
+	if (! stab_demangle_args (minfo, pp,
+				  (ptype == NULL
+				   ? (debug_type **) NULL
+				   : &args),
+				  (ptype == NULL
+				   ? (boolean *) NULL
+				   : &varargs)))
 	  return false;
-	}
-      ++*pp;
-      if (! stab_demangle_type (minfo, pp, ptype))
-	return false;
-      if (ptype != NULL)
-	*ptype = debug_make_function_type (minfo->dhandle, *ptype);
+	if (**pp != '_')
+	  {
+	    /* cplus_demangle will accept a function without a return
+	       type, but I don't know when that will happen, or what
+	       to do if it does.  */
+	    stab_bad_demangle (orig);
+	    return false;
+	  }
+	++*pp;
+	if (! stab_demangle_type (minfo, pp, ptype))
+	  return false;
+	if (ptype != NULL)
+	  *ptype = debug_make_function_type (minfo->dhandle, *ptype, args,
+					     varargs);
+
+      }
       break;
 
     case 'M':
@@ -4502,6 +4511,7 @@ stab_demangle_type (minfo, pp, ptype)
       {
 	boolean memberp, constp, volatilep;
 	debug_type *args;
+	boolean varargs;
 	unsigned int n;
 	const char *name;
 
@@ -4509,6 +4519,7 @@ stab_demangle_type (minfo, pp, ptype)
 	constp = false;
 	volatilep = false;
 	args = NULL;
+	varargs = false;
 
 	++*pp;
 	if (! isdigit ((unsigned char) **pp))
@@ -4546,7 +4557,10 @@ stab_demangle_type (minfo, pp, ptype)
 	    if (! stab_demangle_args (minfo, pp,
 				      (ptype == NULL
 				       ? (debug_type **) NULL
-				       : &args)))
+				       : &args),
+				      (ptype == NULL
+				       ? (boolean *) NULL
+				       : &varargs)))
 	      return false;
 	  }
 
@@ -4578,7 +4592,7 @@ stab_demangle_type (minfo, pp, ptype)
 		/* FIXME: We have no way to record constp or
                    volatilep.  */
 		*ptype = debug_make_method_type (minfo->dhandle, *ptype,
-						 class_type, args);
+						 class_type, args, varargs);
 	      }
 	  }
       }

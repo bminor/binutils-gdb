@@ -174,11 +174,6 @@ struct debug_write_fns
 
   /* Each writer must keep a stack of types.  */
 
-  /* Push an ellipsis type onto the type stack.  This is not a real
-     type, but is used when a method takes a variable number of
-     arguments.  */
-  boolean (*ellipsis_type) PARAMS ((PTR));
-
   /* Push an empty type onto the type stack.  This type can appear if
      there is a reference to a type which is never defined.  */
   boolean (*empty_type) PARAMS ((PTR));
@@ -210,9 +205,15 @@ struct debug_write_fns
      type onto the type stack.  */
   boolean (*pointer_type) PARAMS ((PTR));
 
-  /* Pop the top type on the type stack, and push a function returning
-     that type onto the type stack.  */
-  boolean (*function_type) PARAMS ((PTR));
+  /* Push a function type onto the type stack.  The second argument
+     indicates the number of argument types that have been pushed onto
+     the stack.  If the number of argument types is passed as -1, then
+     the argument types of the function are unknown, and no types have
+     been pushed onto the stack.  The third argument is true if the
+     function takes a variable number of arguments.  The return type
+     of the function is pushed onto the type stack below the argument
+     types, if any.  */
+  boolean (*function_type) PARAMS ((PTR, int, boolean));
 
   /* Pop the top type on the type stack, and push a reference to that
      type onto the type stack.  */
@@ -247,12 +248,13 @@ struct debug_write_fns
      class to which the method is attached.  The third argument is the
      number of argument types; these are pushed onto the type stack in
      reverse order (the first type popped is the last argument to the
-     method).  An argument type of -1 means that no argument in
-     formation is available.  The next type on the type stack below
-     the domain and the argument types is the return type of the
-     method.  All these types must be popped, and then the method type
-     must be pushed.  */
-  boolean (*method_type) PARAMS ((PTR, boolean, int));
+     method).  A value of -1 for the third argument means that no
+     argument information is available.  The fourth argument is true
+     if the function takes a variable number of arguments.  The next
+     type on the type stack below the domain and the argument types is
+     the return type of the method.  All these types must be popped,
+     and then the method type must be pushed.  */
+  boolean (*method_type) PARAMS ((PTR, boolean, int, boolean));
 
   /* Pop the top type off the type stack, and push a const qualified
      version of that type onto the type stack.  */
@@ -519,13 +521,6 @@ extern boolean debug_record_variable
 extern debug_type debug_make_indirect_type
   PARAMS ((PTR, debug_type *, const char *));
 
-/* Make an ellipsis type.  This is not a type at all, but is a marker
-   suitable for appearing in the list of argument types passed to
-   debug_make_method_type.  It should be used to indicate a method
-   which takes a variable number of arguments.  */
-
-extern debug_type debug_make_ellipsis_type PARAMS ((PTR));
-
 /* Make a void type.  */
 
 extern debug_type debug_make_void_type PARAMS ((PTR));
@@ -578,10 +573,14 @@ extern debug_type debug_make_enum_type
 extern debug_type debug_make_pointer_type
   PARAMS ((PTR, debug_type));
 
-/* Make a function returning a given type.  FIXME: We should be able
-   to record the parameter types.  */
+/* Make a function type.  The second argument is the return type.  The
+   third argument is a NULL terminated array of argument types.  The
+   fourth argument is true if the function takes a variable number of
+   arguments.  If the third argument is NULL, then the argument types
+   are unknown.  */
 
-extern debug_type debug_make_function_type PARAMS ((PTR, debug_type));
+extern debug_type debug_make_function_type
+  PARAMS ((PTR, debug_type, debug_type *, boolean));
 
 /* Make a reference to a given type.  */
 
@@ -618,14 +617,17 @@ extern debug_type debug_make_offset_type
   PARAMS ((PTR, debug_type, debug_type));
 
 /* Make a type for a method function.  The second argument is the
-   return type, the third argument is the domain, and the fourth
-   argument is a NULL terminated array of argument types.  The domain
-   and the argument array may be NULL, in which case this is a stub
-   method and that information is not available.  Stabs debugging uses
-   this, and gets the argument types from the mangled name.  */
+   return type.  The third argument is the domain.  The fourth
+   argument is a NULL terminated array of argument types.  The fifth
+   argument is true if the function takes a variable number of
+   arguments, in which case the array of argument types indicates the
+   types of the first arguments.  The domain and the argument array
+   may be NULL, in which case this is a stub method and that
+   information is not available.  Stabs debugging uses this, and gets
+   the argument types from the mangled name.  */
 
 extern debug_type debug_make_method_type
-  PARAMS ((PTR, debug_type, debug_type, debug_type *));
+  PARAMS ((PTR, debug_type, debug_type, debug_type *, boolean));
 
 /* Make a const qualified version of a given type.  */
 
@@ -738,9 +740,18 @@ extern debug_type debug_get_return_type PARAMS ((PTR, debug_type));
 /* Get the NULL terminated array of parameter types for a function or
    method type (actually, parameter types are not currently stored for
    function types).  This may be used to determine whether a method
-   type is a stub method or not.  */
+   type is a stub method or not.  The last argument points to a
+   boolean which is set to true if the function takes a variable
+   number of arguments.  */
 
-extern const debug_type *debug_get_parameter_types PARAMS ((PTR, debug_type));
+extern const debug_type *debug_get_parameter_types PARAMS ((PTR,
+							    debug_type,
+							    boolean *));
+
+/* Get the target type of a pointer or reference or const or volatile
+   type.  */
+
+extern debug_type debug_get_target_type PARAMS ((PTR, debug_type));
 
 /* Get the NULL terminated array of fields for a struct, union, or
    class.  */

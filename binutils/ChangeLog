@@ -1,5 +1,42 @@
 Fri Jan 19 12:31:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* debug.h (struct debug_write_fns): Remove ellipsis_type.  Add int
+	and boolean parameters to function_type.  Add boolean parameter to
+	method_type.
+	(debug_make_ellipsis_type): Don't declare.
+	(debug_make_function_type): Add debug_type * and boolean
+	parameters.  Change all callers.
+	(debug_make_method_type): Add boolean parameter.  Change all
+	callers.
+	(debug_get_parameter_types): Add boolean * parameter.  Change all
+	callers.
+	(debug_get_target_type): Declare.
+	* debug.c (struct debug_function_type): Add fields arg_types and
+	varargs.
+	(struct debug_method_type): Add field varargs.
+	(debug_ellipsis_type, ELLIPSIS_P): Remove.
+	(debug_make_ellipsis_type): Remove.
+	(debug_make_function_type): Add arg_types and varargs parameters.
+	(debug_make_method_type): Add varargs parameter.
+	(debug_get_parameter_types): Add pvarargs parameter.
+	(debug_get_target_type): New function.
+	(debug_write_type): In case DEBUG_KIND_FUNCTION, push argument
+	types and pass count to function_type.  In DEBUG_KIND_METHOD, use
+	a signed int for the count, don't call ellipsis_type, and pass
+	varargs to method_type.
+	* stabs.c (struct stab_demangle_info): Add varargs field.
+	(stab_demangle_argtypes): Add pvarargs parameter.  Change all
+	callers.
+	(stab_demangle_args): Likewise.
+	(stab_demangle_type): In case 'F', pick up argument types.
+	* prdbg.c (pr_ellipsis_type): Remove.
+	(pr_function_type): Add argcount and varargs parameters.
+	(pr_method_type): Add varargs parameter.
+	* ieee.c (ieee_ellipsis_type): Remove.
+	(ieee_function_type): Add argcount and varargs parameters.
+	(ieee_method_type): Add varargs parameter.  Remove most of
+	function body, and just call ieee_function_type.
+
 	* stabs.c: Include "demangle.h".  Added several new static
 	functions not listed below to demangle argument types; they are
 	all called via stab_demangle_argtypes.

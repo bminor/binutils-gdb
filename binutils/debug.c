@@ -184,6 +184,10 @@ struct debug_function_type
 {
   /* Return type.  */
   debug_type return_type;
+  /* NULL terminated array of argument types.  */
+  debug_type *arg_types;
+  /* Whether the function takes a variable number of arguments.  */
+  boolean varargs;
 };
 
 /* Information kept for a range.  */
@@ -244,6 +248,8 @@ struct debug_method_type
   debug_type domain_type;
   /* A NULL terminated array of argument types.  */
   debug_type *arg_types;
+  /* Whether the method takes a variable number of arguments.  */
+  boolean varargs;
 };
 
 /* Information kept for a named type.  */
@@ -502,15 +508,6 @@ struct debug_name
       struct debug_typed_constant *typed_constant;
     } u;
 };
-
-/* This variable is an ellipsis type.  The contents are not used; its
-   address is returned by debug_make_ellipsis_type, and anything which
-   needs to know whether it is dealing with an ellipsis compares
-   addresses.  */
-
-static const struct debug_type debug_ellipsis_type;
-
-#define ELLIPSIS_P(t) ((t) == &debug_ellipsis_type)
 
 /* Local functions.  */
 
@@ -1241,18 +1238,6 @@ debug_make_indirect_type (handle, slot, tag)
   return t;
 }
 
-/* Make an ellipsis type.  This is not a type at all, but is a marker
-   suitable for appearing in the list of argument types passed to
-   debug_make_method_type.  It should be used to indicate a method
-   which takes a variable number of arguments.  */
-
-debug_type
-debug_make_ellipsis_type (handle)
-     PTR handle;
-{
-  return (debug_type) &debug_ellipsis_type;
-}
-
 /* Make a void type.  There is only one of these.  */
 
 debug_type
@@ -1458,9 +1443,11 @@ debug_make_pointer_type (handle, type)
    to record the parameter types.  */
 
 debug_type
-debug_make_function_type (handle, type)
+debug_make_function_type (handle, type, arg_types, varargs)
      PTR handle;
      debug_type type;
+     debug_type *arg_types;
+     boolean varargs;
 {
   struct debug_handle *info = (struct debug_handle *) handle;
   struct debug_type *t;
@@ -1477,6 +1464,8 @@ debug_make_function_type (handle, type)
   memset (f, 0, sizeof *f);
 
   f->return_type = type;
+  f->arg_types = arg_types;
+  f->varargs = varargs;
 
   t->u.kfunction = f;
 
@@ -1648,11 +1637,12 @@ debug_make_offset_type (handle, base_type, target_type)
    argument is a NULL terminated array of argument types.  */
 
 debug_type
-debug_make_method_type (handle, return_type, domain_type, arg_types)
+debug_make_method_type (handle, return_type, domain_type, arg_types, varargs)
      PTR handle;
      debug_type return_type;
      debug_type domain_type;
      debug_type *arg_types;
+     boolean varargs;
 {
   struct debug_handle *info = (struct debug_handle *) handle;
   struct debug_type *t;
@@ -1671,6 +1661,7 @@ debug_make_method_type (handle, return_type, domain_type, arg_types)
   m->return_type = return_type;
   m->domain_type = domain_type;
   m->arg_types = arg_types;
+  m->varargs = varargs;
 
   t->u.kmethod = m;
 
@@ -2230,7 +2221,29 @@ debug_get_return_type (handle, type)
    we don't currently store the parameter types of a function).  */
 
 const debug_type *
-debug_get_parameter_types (handle, type)
+debug_get_parameter_types (handle, type, pvarargs)
+     PTR handle;
+     debug_type type;
+     boolean *pvarargs;
+{
+  if (type == NULL)
+    return NULL;
+  type = debug_get_real_type (handle, type);
+  switch (type->kind)
+    {
+    default:
+      return NULL;
+    case DEBUG_KIND_METHOD:
+      *pvarargs = type->u.kmethod->varargs;
+      return type->u.kmethod->arg_types;
+    }
+  /*NOTREACHED*/
+}
+
+/* Get the target type of a type.  */
+
+debug_type
+debug_get_target_type (handle, type)
      PTR handle;
      debug_type type;
 {
@@ -2241,8 +2254,14 @@ debug_get_parameter_types (handle, type)
     {
     default:
       return NULL;
-    case DEBUG_KIND_METHOD:
-      return type->u.kmethod->arg_types;
+    case DEBUG_KIND_POINTER:
+      return type->u.kpointer;
+    case DEBUG_KIND_REFERENCE:
+      return type->u.kreference;
+    case DEBUG_KIND_CONST:
+      return type->u.kconst;
+    case DEBUG_KIND_VOLATILE:
+      return type->u.kvolatile;
     }
   /*NOTREACHED*/
 }
@@ -2422,6 +2441,7 @@ debug_write_type (info, fns, fhandle, type, name)
      struct debug_name *name;
 {
   unsigned int i;
+  int is;
   const char *tag;
 
   /* If we have a name for this type, just output it.  We only output
@@ -2533,11 +2553,22 @@ debug_write_type (info, fns, fhandle, type, name)
 	return false;
       return (*fns->pointer_type) (fhandle);
     case DEBUG_KIND_FUNCTION:
+      if (type->u.kfunction->arg_types == NULL)
+	is = -1;
+      else
+	{
+	  for (is = 0; type->u.kfunction->arg_types[is] != NULL; is++)
+	    if (! debug_write_type (info, fns, fhandle,
+				    type->u.kfunction->arg_types[is],
+				    (struct debug_name *) NULL))
+	      return false;
+	}
       if (! debug_write_type (info, fns, fhandle,
 			      type->u.kfunction->return_type,
 			      (struct debug_name *) NULL))
 	return false;
-      return (*fns->function_type) (fhandle);
+      return (*fns->function_type) (fhandle, is,
+				    type->u.kfunction->varargs);
     case DEBUG_KIND_REFERENCE:
       if (! debug_write_type (info, fns, fhandle, type->u.kreference,
 			      (struct debug_name *) NULL))
@@ -2578,24 +2609,14 @@ debug_write_type (info, fns, fhandle, type, name)
 			      (struct debug_name *) NULL))
 	return false;
       if (type->u.kmethod->arg_types == NULL)
-	i = -1;
+	is = -1;
       else
 	{
-	  for (i = 0; type->u.kmethod->arg_types[i] != NULL; i++)
-	    {
-	      if (ELLIPSIS_P (type->u.kmethod->arg_types[i]))
-		{
-		  if (! (*fns->ellipsis_type) (fhandle))
-		    return false;
-		}
-	      else
-		{
-		  if (! debug_write_type (info, fns, fhandle,
-					  type->u.kmethod->arg_types[i],
-					  (struct debug_name *) NULL))
-		    return false;
-		}
-	    }
+	  for (is = 0; type->u.kmethod->arg_types[is] != NULL; is++)
+	    if (! debug_write_type (info, fns, fhandle,
+				    type->u.kmethod->arg_types[is],
+				    (struct debug_name *) NULL))
+	      return false;
 	}
       if (type->u.kmethod->domain_type != NULL)
 	{
@@ -2606,7 +2627,8 @@ debug_write_type (info, fns, fhandle, type, name)
 	}
       return (*fns->method_type) (fhandle,
 				  type->u.kmethod->domain_type != NULL,
-				  i);
+				  is,
+				  type->u.kmethod->varargs);
     case DEBUG_KIND_CONST:
       if (! debug_write_type (info, fns, fhandle, type->u.kconst,
 			      (struct debug_name *) NULL))

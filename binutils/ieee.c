@@ -1664,7 +1664,8 @@ parse_ieee_ty (dhandle, abfd, types, vars, bytes, pp, pend)
 	  }
 	while (present);
 
-	type = debug_make_function_type (dhandle, rtype);
+	type = debug_make_function_type (dhandle, rtype, (debug_type *) NULL,
+					 false);
 	return_type = rtype;
       }
       break;
@@ -1779,6 +1780,8 @@ parse_ieee_ty (dhandle, abfd, types, vars, bytes, pp, pend)
       {
 	bfd_vma attr, frame_type, push_mask, nargs, level, father;
 	debug_type rtype;
+	debug_type *arg_types;
+	boolean varargs;
 	boolean present;
 
 	/* FIXME: We ignore almost all this information.  */
@@ -1790,23 +1793,49 @@ parse_ieee_ty (dhandle, abfd, types, vars, bytes, pp, pend)
 				       &rtype)
 	    || ! ieee_read_number (abfd, bytes, pp, pend, &nargs))
 	  return false;
-	if (nargs != (bfd_vma) -1)
+	if (nargs == (bfd_vma) -1)
 	  {
-	    for (; nargs > 0; nargs--)
-	      {
-		debug_type atype;
+	    arg_types = NULL;
+	    varargs = false;
+	  }
+	else
+	  {
+	    unsigned int i;
 
-		if (! ieee_read_type_index (dhandle, abfd, types, bytes, pp,
-					    pend, &atype))
-		  return false;
+	    arg_types = ((debug_type *)
+			 xmalloc ((nargs + 1) * sizeof *arg_types));
+	    for (i = 0; i < nargs; i++)
+	      if (! ieee_read_type_index (dhandle, abfd, types, bytes, pp,
+					  pend, arg_types + i))
+		return false;
+
+	    /* If the last type is pointer to void, this is really a
+               varargs function.  */
+	    varargs = false;
+	    if (nargs > 0)
+	      {
+		debug_type last;
+
+		last = arg_types[nargs - 1];
+		if (debug_get_type_kind (dhandle, last) == DEBUG_KIND_POINTER
+		    && (debug_get_type_kind (dhandle,
+					     debug_get_target_type (dhandle,
+								    last))
+			== DEBUG_KIND_VOID))
+		  {
+		    --nargs;
+		    varargs = true;
+		  }
 	      }
+
+	    arg_types[nargs] = DEBUG_TYPE_NULL;
 	  }
 	if (! ieee_read_number (abfd, bytes, pp, pend, &level)
 	    || ! ieee_read_optional_number (abfd, bytes, pp, pend, &father,
 					    &present))
 	  return false;
 
-	type = debug_make_function_type (dhandle, rtype);
+	type = debug_make_function_type (dhandle, rtype, arg_types, varargs);
 	return_type = rtype;
       }
       break;
@@ -2357,7 +2386,6 @@ static boolean ieee_output_pending_parms PARAMS ((struct ieee_handle *));
 
 static boolean ieee_start_compilation_unit PARAMS ((PTR, const char *));
 static boolean ieee_start_source PARAMS ((PTR, const char *));
-static boolean ieee_ellipsis_type PARAMS ((PTR));
 static boolean ieee_empty_type PARAMS ((PTR));
 static boolean ieee_void_type PARAMS ((PTR));
 static boolean ieee_int_type PARAMS ((PTR, unsigned int, boolean));
@@ -2367,14 +2395,14 @@ static boolean ieee_bool_type PARAMS ((PTR, unsigned int));
 static boolean ieee_enum_type
   PARAMS ((PTR, const char *, const char **, bfd_signed_vma *));
 static boolean ieee_pointer_type PARAMS ((PTR));
-static boolean ieee_function_type PARAMS ((PTR));
+static boolean ieee_function_type PARAMS ((PTR, int, boolean));
 static boolean ieee_reference_type PARAMS ((PTR));
 static boolean ieee_range_type PARAMS ((PTR, bfd_signed_vma, bfd_signed_vma));
 static boolean ieee_array_type
   PARAMS ((PTR, bfd_signed_vma, bfd_signed_vma, boolean));
 static boolean ieee_set_type PARAMS ((PTR, boolean));
 static boolean ieee_offset_type PARAMS ((PTR));
-static boolean ieee_method_type PARAMS ((PTR, boolean, int));
+static boolean ieee_method_type PARAMS ((PTR, boolean, int, boolean));
 static boolean ieee_const_type PARAMS ((PTR));
 static boolean ieee_volatile_type PARAMS ((PTR));
 static boolean ieee_start_struct_type
@@ -2420,7 +2448,6 @@ static const struct debug_write_fns ieee_fns =
 {
   ieee_start_compilation_unit,
   ieee_start_source,
-  ieee_ellipsis_type,
   ieee_empty_type,
   ieee_void_type,
   ieee_int_type,
@@ -3161,15 +3188,6 @@ ieee_start_source (p, filename)
   return true;
 }
 
-/* Make an ellipsis type.  */
-
-static boolean
-ieee_ellipsis_type (p)
-     PTR p;
-{
-  abort ();
-}
-
 /* Make an empty type.  */
 
 static boolean
@@ -3382,27 +3400,53 @@ ieee_pointer_type (p)
 /* Make a function type.  */
 
 static boolean
-ieee_function_type (p)
+ieee_function_type (p, argcount, varargs)
      PTR p;
+     int argcount;
+     boolean varargs;
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
-  unsigned int indx;
+  unsigned int *args = NULL;
+  int i;
+  unsigned int retindx;
 
-  indx = ieee_pop_type (info);
+  if (argcount > 0)
+    {
+      args = (unsigned int *) xmalloc (argcount * sizeof *args);
+      for (i = argcount - 1; i >= 0; i--)
+	args[i] = ieee_pop_type (info);
+    }
+  else if (argcount < 0)
+    varargs = false;
 
-  /* FIXME: IEEE can represent the argument types for the function,
-     but we didn't store them.  */
+  retindx = ieee_pop_type (info);
 
   /* An attribute of 0x41 means that the frame and push mask are
      unknown.  */
-  return (ieee_define_type (info, 0, true)
-	  && ieee_write_number (info, 'x')
-	  && ieee_write_number (info, 0x41)
-	  && ieee_write_number (info, 0)
-	  && ieee_write_number (info, 0)
-	  && ieee_write_number (info, indx)
-	  && ieee_write_number (info, (bfd_vma) -1)
-	  && ieee_write_number (info, 0));
+  if (! ieee_define_type (info, 0, true)
+      || ! ieee_write_number (info, 'x')
+      || ! ieee_write_number (info, 0x41)
+      || ! ieee_write_number (info, 0)
+      || ! ieee_write_number (info, 0)
+      || ! ieee_write_number (info, retindx)
+      || ! ieee_write_number (info, (bfd_vma) argcount + (varargs ? 1 : 0)))
+    return false;
+  if (argcount > 0)
+    {
+      for (i = 0; i < argcount; i++)
+	if (! ieee_write_number (info, args[i]))
+	  return false;
+      free (args);
+    }
+  if (varargs)
+    {
+      /* A varargs function is represented by writing out the last
+         argument as type void *, although this makes little sense.  */
+      if (! ieee_write_number (info, (bfd_vma) builtin_void + 32))
+	return false;
+    }
+
+  return ieee_write_number (info, 0);
 }
 
 /* Make a reference type.  */
@@ -3520,15 +3564,13 @@ ieee_offset_type (p)
 /* Make a method type.  */
 
 static boolean
-ieee_method_type (p, domain, argcount)
+ieee_method_type (p, domain, argcount, varargs)
      PTR p;
      boolean domain;
      int argcount;
+     boolean varargs;
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
-  unsigned int *args = NULL;
-  int i;
-  unsigned int retindx;
 
   /* FIXME: The MRI/HP IEEE spec defines a pmisc record to use for a
      method, but the definition is incomplete.  We just output an 'x'
@@ -3537,32 +3579,7 @@ ieee_method_type (p, domain, argcount)
   if (domain)
     (void) ieee_pop_type (info);
 
-  if (argcount > 0)
-    {
-      args = (unsigned int *) xmalloc (argcount * sizeof *args);
-      for (i = argcount - 1; i >= 0; i--)
-	args[i] = ieee_pop_type (info);
-    }
-
-  retindx = ieee_pop_type (info);
-
-  if (! ieee_define_type (info, 0, true)
-      || ! ieee_write_number (info, 'x')
-      || ! ieee_write_number (info, 0x41)
-      || ! ieee_write_number (info, 0)
-      || ! ieee_write_number (info, 0)
-      || ! ieee_write_number (info, retindx)
-      || ! ieee_write_number (info, (bfd_vma) argcount))
-    return false;
-  if (argcount > 0)
-    {
-      for (i = 0; i < argcount; i++)
-	if (! ieee_write_number (info, args[i]))
-	  return false;
-      free (args);
-    }
-
-  return ieee_write_number (info, 0);
+  return ieee_function_type (p, argcount, varargs);
 }
 
 /* Make a const qualified type.  */
