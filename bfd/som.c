@@ -1,6 +1,6 @@
 /* bfd back-end for HP PA-RISC SOM objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -6410,6 +6410,7 @@ som_bfd_link_split_section (abfd, sec)
 
 #define som_bfd_gc_sections		bfd_generic_gc_sections
 #define som_bfd_merge_sections		bfd_generic_merge_sections
+#define som_bfd_is_group_section	bfd_generic_is_group_section
 #define som_bfd_discard_group		bfd_generic_discard_group
 
 const bfd_target som_vec = {
