@@ -14,6 +14,20 @@ Sun Feb 12 10:02:16 1995  Per Bothner  <bothner@cygnus.com>
 	(recursive_dump_type):  Don't print TYPE_FUNCTION_TYPE.
 	* dwarfread.c (read_subroutine_type):  Don't set TYPE_FUNCTION_TYPE.
 
+	* valops.c (value_arg_coerce):  Now takes param_type argument.
+	(call_function_by_hand):  Convert arguments with value_arg_coerce
+	early, and overwrite original args with converted args.
+	No longer need multiple calls to value_arg_coerce.
+	(value_arg_push):  Removed.
+	* hppa-tdep.c (hppa_push_arguments):  No longer call value_arg_coerce.
+	* mips-tdep.c (mips_push_arguments):  Likewise.
+	* alpha-tdep.c (alpha_push_arguments):  Likewise.
+	* rs6000-tdep.c (push_arguments, ran_out_of_registers_for_arguments):
+	Likewise.
+	* value.h (value_arg_coerce):  Remove declaration.  (It's now static.)
+
+	* valops.c (value_cast):  Do COERCE_VARYING_ARRAY after COERCE_REF.
+
 Sun Feb 12 09:03:47 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* buildsym.c (start_subfile): Set language for f2c like for cfront.

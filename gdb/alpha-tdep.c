@@ -680,7 +680,7 @@ alpha_push_arguments (nargs, args, sp, struct_return, struct_addr)
 
   for (i = 0, m_arg = alpha_args; i < nargs; i++, m_arg++)
     {
-      value_ptr arg = value_arg_coerce (args[i]);
+      value_ptr arg = args[i];
       /* Cast argument to long if necessary as the compiler does it too.  */
       if (TYPE_LENGTH (VALUE_TYPE (arg)) < TYPE_LENGTH (builtin_type_long))
         arg = value_cast (builtin_type_long, arg);

@@ -40,8 +40,6 @@ static CORE_ADDR find_function_addr PARAMS ((value_ptr, struct type **));
 
 static CORE_ADDR value_push PARAMS ((CORE_ADDR, value_ptr));
 
-static CORE_ADDR value_arg_push PARAMS ((CORE_ADDR, value_ptr));
-
 static value_ptr search_struct_field PARAMS ((char *, value_ptr, int,
 					      struct type *, int));
 
@@ -53,13 +51,7 @@ static int check_field_in PARAMS ((struct type *, const char *));
 
 static CORE_ADDR allocate_space_in_inferior PARAMS ((int));
 
-static value_ptr f77_cast_into_complex PARAMS ((struct type *, value_ptr));
-
-static value_ptr f77_assign_from_literal_string PARAMS ((value_ptr,
-							 value_ptr));
-
-static value_ptr f77_assign_from_literal_complex PARAMS ((value_ptr,
-							  value_ptr));
+static value_ptr cast_into_complex PARAMS ((struct type *, value_ptr));
 
 #define VALUE_SUBSTRING_START(VAL) VALUE_FRAME(VAL)
 
@@ -91,7 +83,7 @@ allocate_space_in_inferior (len)
     }
   else
     {
-      msymbol = lookup_minimal_symbol ("malloc", (struct objfile *) NULL);
+      msymbol = lookup_minimal_symbol ("malloc", NULL, NULL);
       if (msymbol != NULL)
 	{
 	  type = lookup_pointer_type (builtin_type_char);
@@ -132,18 +124,18 @@ value_cast (type, arg2)
   if (VALUE_TYPE (arg2) == type)
     return arg2;
 
-  COERCE_VARYING_ARRAY (arg2);
-
   /* Coerce arrays but not enums.  Enums will work as-is
      and coercing them would cause an infinite recursion.  */
   if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_ENUM)
     COERCE_ARRAY (arg2);
 
+  COERCE_VARYING_ARRAY (arg2);
+
   code1 = TYPE_CODE (type);
   code2 = TYPE_CODE (VALUE_TYPE (arg2));
 
   if (code1 == TYPE_CODE_COMPLEX) 
-    return f77_cast_into_complex (type, arg2); 
+    return cast_into_complex (type, arg2); 
   if (code1 == TYPE_CODE_BOOL) 
     code1 = TYPE_CODE_INT; 
   if (code2 == TYPE_CODE_BOOL) 
@@ -351,19 +343,6 @@ value_assign (toval, fromval)
   register value_ptr val;
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   int use_buffer = 0;
-
-  if (current_language->la_language == language_fortran)
-    {
-      /* Deal with literal assignment in F77.  All composite (i.e. string
-	 and complex number types) types are allocated in the superior
-	 NOT the inferior.  Therefore assigment is somewhat tricky.  */
-
-      if (TYPE_CODE (VALUE_TYPE (fromval)) == TYPE_CODE_LITERAL_STRING)
-	return f77_assign_from_literal_string (toval, fromval);
-
-      if (TYPE_CODE (VALUE_TYPE (fromval)) == TYPE_CODE_LITERAL_COMPLEX)
-	return f77_assign_from_literal_complex (toval, fromval);
-    }
 
   if (!toval->modifiable)
     error ("Left operand of assignment is not a modifiable lvalue.");
@@ -822,54 +801,51 @@ value_push (sp, arg)
 }
 
 /* Perform the standard coercions that are specified
-   for arguments to be passed to C functions.  */
+   for arguments to be passed to C functions.
 
-value_ptr
-value_arg_coerce (arg)
+   If PARAM_TYPE is non-NULL, it is the expected parameter type. */
+
+static value_ptr
+value_arg_coerce (arg, param_type)
      value_ptr arg;
+     struct type *param_type;
 {
-  register struct type *type;
+  register struct type *type = param_type ? param_type : VALUE_TYPE (arg);
 
-  /* FIXME: We should coerce this according to the prototype (if we have
-     one).  Right now we do a little bit of this in typecmp(), but that
-     doesn't always get called.  For example, if passing a ref to a function
-     without a prototype, we probably should de-reference it.  Currently
-     we don't.  */
-
-  if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ENUM)
-    arg = value_cast (builtin_type_unsigned_int, arg);
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_REF:
+      if (TYPE_CODE (SYMBOL_TYPE (arg)) != TYPE_CODE_REF)
+	{
+	  arg = value_addr (arg);
+	  VALUE_TYPE (arg) = param_type;
+	  return arg;
+	}
+      break;
+    case TYPE_CODE_INT:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_ENUM:
+      if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
+	type = builtin_type_int;
+      break;
+    case TYPE_CODE_FLT:
+      if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
+	type = builtin_type_double;
+      break;
+    case TYPE_CODE_FUNC:
+      type = lookup_pointer_type (type);
+      break;
+    }
 
 #if 1	/* FIXME:  This is only a temporary patch.  -fnf */
   if (current_language->c_style_arrays
       && (VALUE_REPEATED (arg)
 	  || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY))
     arg = value_coerce_array (arg);
-  if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FUNC)
-    arg = value_coerce_function (arg);
 #endif
 
-  type = VALUE_TYPE (arg);
-
-  if (TYPE_CODE (type) == TYPE_CODE_INT
-      && TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
-    return value_cast (builtin_type_int, arg);
-
-  if (TYPE_CODE (type) == TYPE_CODE_FLT
-      && TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
-    return value_cast (builtin_type_double, arg);
-
-  return arg;
-}
-
-/* Push the value ARG, first coercing it as an argument
-   to a C function.  */
-
-static CORE_ADDR
-value_arg_push (sp, arg)
-     register CORE_ADDR sp;
-     value_ptr arg;
-{
-  return value_push (sp, value_arg_coerce (arg));
+  return value_cast (type, arg);
 }
 
 /* Determine a function's address and its return type from its value. 
@@ -945,7 +921,9 @@ find_function_addr (function, retval_type)
    FUNCTION is a value, the function to be called.
    Returns a value representing what the function returned.
    May fail to return, if a breakpoint or signal is hit
-   during the execution of the function.  */
+   during the execution of the function.
+
+   ARGS is modified to contain coerced values. */
 
 value_ptr
 call_function_by_hand (function, nargs, args)
@@ -971,6 +949,7 @@ call_function_by_hand (function, nargs, args)
   CORE_ADDR funaddr;
   int using_gcc;
   CORE_ADDR real_pc;
+  struct type *ftype = SYMBOL_TYPE (function);
 
   if (!target_has_execution)
     noprocess();
@@ -1064,6 +1043,16 @@ call_function_by_hand (function, nargs, args)
   sp = old_sp;		/* It really is used, for some ifdef's... */
 #endif
 
+  for (i = nargs - 1; i >= 0; i--)
+    {
+      struct type *param_type;
+      if (TYPE_NFIELDS (ftype) > i)
+	param_type = TYPE_FIELD_TYPE (ftype, i);
+      else
+	param_type = 0;
+      args[i] = value_arg_coerce (args[i], param_type);
+    }
+
 #ifdef STACK_ALIGN
   /* If stack grows down, we must leave a hole at the top. */
   {
@@ -1076,7 +1065,7 @@ call_function_by_hand (function, nargs, args)
       len += TYPE_LENGTH (value_type);
     
     for (i = nargs - 1; i >= 0; i--)
-      len += TYPE_LENGTH (VALUE_TYPE (value_arg_coerce (args[i])));
+      len += TYPE_LENGTH (VALUE_TYPE (args[i]));
 #ifdef CALL_DUMMY_STACK_ADJUST
     len += CALL_DUMMY_STACK_ADJUST;
 #endif
@@ -1135,7 +1124,7 @@ call_function_by_hand (function, nargs, args)
   PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr);
 #else /* !PUSH_ARGUMENTS */
   for (i = nargs - 1; i >= 0; i--)
-    sp = value_arg_push (sp, args[i]);
+    sp = value_push (sp, args[i]);
 #endif /* !PUSH_ARGUMENTS */
 
 #ifdef CALL_DUMMY_STACK_ADJUST
@@ -1320,8 +1309,10 @@ value_string (ptr, len)
      int len;
 {
   value_ptr val;
+  int lowbound = current_language->string_lower_bound;
   struct type *rangetype = create_range_type ((struct type *) NULL,
-					      builtin_type_int, 0, len - 1);
+					      builtin_type_int,
+					      lowbound, len + lowbound - 1);
   struct type *stringtype
     = create_string_type ((struct type *) NULL, rangetype);
   CORE_ADDR addr;
@@ -2015,80 +2006,6 @@ value_of_this (complain)
   return this;
 }
 
-/* Create a value for a literal string.  We copy data into a local 
-   (NOT inferior's memory) buffer, and then set up an array value.
-
-   The array bounds are set from LOWBOUND and HIGHBOUND, and the array is
-   populated from the values passed in ELEMVEC.
-
-   The element type of the array is inherited from the type of the
-   first element, and all elements must have the same size (though we
-   don't currently enforce any restriction on their types). */
-
-value_ptr
-f77_value_literal_string (lowbound, highbound, elemvec)
-     int lowbound;
-     int highbound;
-     value_ptr *elemvec;
-{
-  int nelem;
-  int idx;
-  int typelength;
-  register value_ptr val;
-  struct type *rangetype;
-  struct type *arraytype;
-  char *addr;
-
-  /* Validate that the bounds are reasonable and that each of the elements
-     have the same size. */
-
-  nelem = highbound - lowbound + 1;
-  if (nelem <= 0)
-    error ("bad array bounds (%d, %d)", lowbound, highbound);
-  typelength = TYPE_LENGTH (VALUE_TYPE (elemvec[0]));
-  for (idx = 0; idx < nelem; idx++)
-    {
-      if (TYPE_LENGTH (VALUE_TYPE (elemvec[idx])) != typelength)
-	error ("array elements must all be the same size");
-    }
-
-  /* Make sure we are dealing with characters */ 
-
-  if (typelength != 1)
-    error ("Found a non character type in a literal string "); 
-
-  /* Allocate space to store the array */ 
-
-  addr = xmalloc (nelem); 
-  for (idx = 0; idx < nelem; idx++)
-    {
-      memcpy (addr + (idx), VALUE_CONTENTS (elemvec[idx]), 1);
-    }
-
-  rangetype = create_range_type ((struct type *) NULL, builtin_type_int,
-				 lowbound, highbound);
-
-  arraytype = f77_create_literal_string_type ((struct type *) NULL, 
-                                              rangetype); 
-
-  val = allocate_value (arraytype); 
-
-  /* Make sure that this the rest of the world knows that this is 
-     a standard literal string, not one that is a substring of  
-     some base */ 
-
-  VALUE_SUBSTRING_MEMADDR (val) = (CORE_ADDR)0;
-
-  VALUE_LAZY (val) = 0; 
-  VALUE_LITERAL_DATA (val) = addr;
-
-  /* Since this is a standard literal string with no real lval, 
-     make sure that value_lval indicates this fact */ 
-
-  VALUE_LVAL (val) = not_lval; 
-  return val;
-}
-
 /* Create a slice (sub-string, sub-array) of ARRAY, that is LENGTH elements
    long, starting at LOWBOUND.  The result has the same lower bound as
    the original ARRAY.  */
@@ -2152,116 +2069,6 @@ varying_to_slice (varray)
   return value_slice (value_primitive_field (varray, 0, 1, vtype), 0, length);
 }
 
-/* Create a value for a substring.  We copy data into a local 
-   (NOT inferior's memory) buffer, and then set up an array value.
-
-   The array bounds for the string are (1:(to-from +1))
-   The elements of the string are all characters.  */
-
-value_ptr
-f77_value_substring (str, from, to)
-     value_ptr str; 
-     int from;
-     int to; 
-{
-  int nelem;
-  register value_ptr val;
-  struct type *rangetype;
-  struct type *arraytype;
-  struct internalvar *var; 
-  char *addr;
-
-  /* Validate that the bounds are reasonable. */ 
-
-  nelem = to - from + 1;
-  if (nelem <= 0)
-    error ("bad substring bounds (%d, %d)", from, to);
-
-  rangetype = create_range_type ((struct type *) NULL, builtin_type_int,
-				 1, nelem);
-
-  arraytype = f77_create_literal_string_type ((struct type *) NULL, 
-					      rangetype); 
-
-  val = allocate_value (arraytype); 
-
-  /* Allocate space to store the substring array */ 
-
-  addr = xmalloc (nelem); 
-
-  /* Copy over the data */
-
-  /* In case we ever try to use this substring on the LHS of an assignment 
-     remember where the SOURCE substring begins, for lval_memory 
-     types this ptr is to a location in legal inferior memory, 
-     for lval_internalvars it is a ptr. to superior memory. This 
-     helps us out later when we do assigments like:
-
-     set var ARR(2:3) = 'ab'
- 
-     */ 
-
-
-  if (VALUE_LVAL (str) == lval_memory) 
-    {
-      if (VALUE_SUBSTRING_MEMADDR (str) == (CORE_ADDR)0)
-	{
-	  /* This is a regular lval_memory string located in the
-	     inferior */ 
-
-	  VALUE_SUBSTRING_MEMADDR (val) = VALUE_ADDRESS (str) + (from - 1); 
-	  target_read_memory (VALUE_SUBSTRING_MEMADDR (val), addr, nelem);
-	}
-      else
-	{
-
-#if 0 
-	  /* str is a substring allocated in the superior. Just 
-	     do a memcpy */ 
-
-	  VALUE_SUBSTRING_MYADDR (val) = VALUE_LITERAL_DATA(str)+(from - 1); 
-	  memcpy(addr, VALUE_SUBSTRING_MYADDR (val), nelem); 
-#else
-	  error ("Cannot get substrings of substrings"); 
-#endif
-	}
-    }
-  else
-    if (VALUE_LVAL(str) == lval_internalvar)
-      {
-        /* Internal variables of type TYPE_CODE_LITERAL_STRING 
-           have their data located in the superior 
-           process not the inferior */ 
- 
-        var = VALUE_INTERNALVAR (str);
-        
-        if (VALUE_SUBSTRING_MEMADDR (str) == (CORE_ADDR)0) 
-           VALUE_SUBSTRING_MYADDR (val) =
-	     ((char *) VALUE_LITERAL_DATA (var->value)) + (from - 1);
-        else 
-#if 0 
-	  VALUE_SUBSTRING_MYADDR (val) = VALUE_LITERAL_DATA(str)+(from -1);
-#else
-	error ("Cannot get substrings of substrings"); 
-#endif
-        memcpy (addr, VALUE_SUBSTRING_MYADDR (val), nelem);
-      }
-    else
-      error ("Substrings can not be applied to this data item"); 
-
-  VALUE_LAZY (val) = 0; 
-  VALUE_LITERAL_DATA (val) = addr; 
-
-  /* This literal string's *data* is located in the superior BUT 
-     we do need to know where it came from (i.e. was the source
-     string an internalvar or a regular lval_memory variable), so 
-     we set the lval field to indicate this.  This will be useful 
-     when we use this value on the LHS of an expr. */ 
-     
-  VALUE_LVAL (val) = VALUE_LVAL (str); 
-  return val;
-}
-
 /* Create a value for a FORTRAN complex number.  Currently most of 
    the time values are coerced to COMPLEX*16 (i.e. a complex number 
    composed of 2 doubles.  This really should be a smarter routine 
@@ -2269,477 +2076,50 @@ f77_value_substring (str, from, to)
    doubles. FIXME: fmb */ 
 
 value_ptr
-f77_value_literal_complex (arg1, arg2, size)
+value_literal_complex (arg1, arg2, type)
      value_ptr arg1;
      value_ptr arg2;
-     int size;
+     struct type *type;
 {
-  struct type *complex_type; 
   register value_ptr val;
-  char *addr; 
+  struct type *real_type = TYPE_TARGET_TYPE (type);
 
-  if (size != 8 && size != 16 && size != 32)
-    error ("Cannot create number of type 'complex*%d'", size);
-  
-  /* If either value comprising a complex number is a non-floating 
-     type, cast to double. */
+  val = allocate_value (type);
+  arg1 = value_cast (real_type, arg1);
+  arg2 = value_cast (real_type, arg2);
 
-  if (TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_FLT)
-    arg1 = value_cast (builtin_type_f_real_s8, arg1);
-
-  if (TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_FLT)
-    arg2 = value_cast (builtin_type_f_real_s8, arg2);
-     
-  complex_type = f77_create_literal_complex_type (VALUE_TYPE (arg1),
-						  VALUE_TYPE (arg2)
-#if 0
-/* FIXME: does f77_create_literal_complex_type need to do something with
-   this?  */
-						  ,
-						  size
-#endif
-						  );
-
-  val = allocate_value (complex_type); 
-
-  /* Now create a pointer to enough memory to hold the the two args */
-  
-  addr = xmalloc (TYPE_LENGTH (complex_type)); 
-
-  /* Copy over the two components */
-
-  memcpy (addr, VALUE_CONTENTS_RAW (arg1), TYPE_LENGTH (VALUE_TYPE (arg1)));
-  
-  memcpy (addr + TYPE_LENGTH (VALUE_TYPE (arg1)), VALUE_CONTENTS_RAW (arg2),
-	  TYPE_LENGTH (VALUE_TYPE (arg2)));
-
-  VALUE_ADDRESS (val) = 0; /* Not located in the inferior */ 
-  VALUE_LAZY (val) = 0; 
-  VALUE_LITERAL_DATA (val) = addr; 
-
-  /* Since this is a literal value, make sure that value_lval indicates 
-     this fact */ 
-
-  VALUE_LVAL (val) = not_lval; 
+  memcpy (VALUE_CONTENTS_RAW (val),
+	  VALUE_CONTENTS (arg1), TYPE_LENGTH (real_type));
+  memcpy (VALUE_CONTENTS_RAW (val) + TYPE_LENGTH (real_type),
+	  VALUE_CONTENTS (arg2), TYPE_LENGTH (real_type));
   return val;
 }
 
-/* Cast a value into the appropriate complex data type. Only works 
-   if both values are complex.  */
+/* Cast a value into the appropriate complex data type. */
 
 static value_ptr
-f77_cast_into_complex (type, val)
+cast_into_complex (type, val)
      struct type *type;
      register value_ptr val;
 {
-  register enum type_code valcode;
-  float tmp_f;
-  double tmp_d;
-  register value_ptr piece1, piece2; 
-   
-  int lenfrom, lento;
-
-  valcode = TYPE_CODE (VALUE_TYPE (val));
-
-  /* This casting will only work if the right hand side is 
-     either a regular complex type or a literal complex type. 
-     I.e: this casting is only for size adjustment of 
-     complex numbers not anything else. */ 
-
-  if ((valcode != TYPE_CODE_COMPLEX) && 
-      (valcode != TYPE_CODE_LITERAL_COMPLEX))
-    error ("Cannot cast from a non complex type!"); 
-
-  lenfrom = TYPE_LENGTH (VALUE_TYPE (val));
-  lento =   TYPE_LENGTH (type); 
-
-  if (lento == lenfrom)
-    error ("Value to be cast is already of type %s", TYPE_NAME (type));
-
-  if (lento == 32 || lenfrom == 32) 
-    error ("Casting into/out of complex*32 unsupported"); 
-
-  switch (lento)
+  struct type *real_type = TYPE_TARGET_TYPE (type);
+  if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_COMPLEX)
     {
-    case 16:
-      {
-	/* Since we have excluded lenfrom == 32 and 
-	   lenfrom == 16, it MUST be 8 */ 
+      struct type *val_real_type = TYPE_TARGET_TYPE (VALUE_TYPE (val));
+      value_ptr re_val = allocate_value (val_real_type);
+      value_ptr im_val = allocate_value (val_real_type);
 
-	if (valcode == TYPE_CODE_LITERAL_COMPLEX) 
-	  {
-	    /* Located in superior's memory. Routine should 
-	       deal with both real literal complex numbers
-	       as well as internal vars */ 
+      memcpy (VALUE_CONTENTS_RAW (re_val),
+	      VALUE_CONTENTS (val), TYPE_LENGTH (val_real_type));
+      memcpy (VALUE_CONTENTS_RAW (im_val),
+	      VALUE_CONTENTS (val) + TYPE_LENGTH (val_real_type),
+	       TYPE_LENGTH (val_real_type));
 
-	    /* Grab the two 4 byte reals that make up the complex*8 */ 
-                     
-	    tmp_f = *((float *) VALUE_LITERAL_DATA (val));
-                     
-	    piece1 = value_from_double(builtin_type_f_real_s8,tmp_f);
-	    
-	    tmp_f = *((float *) (((char *) VALUE_LITERAL_DATA (val))
-				 + sizeof(float))); 
-                     
-	    piece2 = value_from_double (builtin_type_f_real_s8, tmp_f);
-	  }
-	else
-	  {
-	    /* Located in inferior memory, so first we need 
-	       to read the 2 floats that make up the 8 byte
-	       complex we are are casting from */ 
-
-	    read_memory ((CORE_ADDR) VALUE_CONTENTS (val),
-			 (char *) &tmp_f, sizeof(float));
-	    
-	    piece1 = value_from_double (builtin_type_f_real_s8, tmp_f);
-	    
-	    read_memory ((CORE_ADDR) VALUE_CONTENTS (val) + sizeof(float),
-			 (char *) &tmp_f, sizeof(float));
-                     
-	    piece2 = value_from_double (builtin_type_f_real_s8, tmp_f);
-	  }
-	return f77_value_literal_complex (piece1, piece2, 16);
-      }
-
-    case 8:
-      {
-	/* Since we have excluded lenfrom == 32 and 
-	   lenfrom == 8, it MUST be 16. NOTE: in this 
-	   case data may be since we are dropping precison */ 
-
-	if (valcode == TYPE_CODE_LITERAL_COMPLEX) 
-	  {
-	    /* Located in superior's memory. Routine should 
-	       deal with both real literal complex numbers
-	       as well as internal vars */ 
-	    
-	    /* Grab the two 8 byte reals that make up the complex*16 */ 
-                     
-	    tmp_d = *((double *) VALUE_LITERAL_DATA (val));
-                     
-	    piece1 = value_from_double (builtin_type_f_real, tmp_d);
-
-	    tmp_d = *((double *) (((char *) VALUE_LITERAL_DATA (val))
-				  + sizeof(double)));
-                     
-	    piece2 = value_from_double (builtin_type_f_real, tmp_d);
-	  }
-	else
-	  {
-	    /* Located in inferior memory, so first we need to read the
-	       2 floats that make up the 8 byte complex we are are
-	       casting from.  */ 
-
-	    read_memory ((CORE_ADDR) VALUE_CONTENTS (val),
-			 (char *) &tmp_d, sizeof(double));
-                     
-	    piece1 = value_from_double (builtin_type_f_real, tmp_d);
-
-	    read_memory ((CORE_ADDR) VALUE_CONTENTS (val) + sizeof(double),
-			 (char *) &tmp_f, sizeof(double));
-                     
-	    piece2 = value_from_double (builtin_type_f_real, tmp_d);
-	  }
-	return f77_value_literal_complex (piece1, piece2, 8);
-      }
-                     
-    default:
-      error ("Invalid F77 complex number cast");
+      return value_literal_complex (re_val, im_val, type);
     }
-}
-
-/* The following function is called in order to assign 
-   a literal F77 array to either an internal GDB variable 
-   or to a real array variable in the inferior. 
-   This function is necessary because in F77, literal 
-   arrays are allocated in the superior's memory space 
-   NOT the inferior's.  This function provides a way to 
-   get the F77 stuff to work without messing with the 
-   way C deals with this issue. NOTE: we are assuming 
-   that all F77 array literals are STRING array literals.  F77 
-   users have no good way of expressing non-string 
-   literal strings. 
-
-   This routine now also handles assignment TO literal strings 
-   in the peculiar case of substring assignments of the 
-   form:
-
-   STR(2:3) = 'foo' 
-
-   */ 
-
-static value_ptr
-f77_assign_from_literal_string (toval, fromval)
-     register value_ptr toval, fromval;
-{
-  register struct type *type = VALUE_TYPE (toval);
-  register value_ptr val;
-  struct internalvar *var; 
-  int lenfrom, lento; 
-  CORE_ADDR tmp_addr; 
-  char *c; 
-
-  lenfrom = TYPE_LENGTH (VALUE_TYPE (fromval));
-  lento = TYPE_LENGTH (VALUE_TYPE (toval)); 
-   
-  if ((VALUE_LVAL (toval) == lval_internalvar
-       || VALUE_LVAL (toval) == lval_memory)
-      && VALUE_SUBSTRING_START (toval) != 0) 
-    {
-      /* We are assigning TO a substring type. This is of the form:
-            
-	 set A(2:5) = 'foov'
-
-	 The result of this will be a modified toval not a brand new 
-	 value. This is high F77 weirdness.  */ 
-
-      /* Simply overwrite the relevant memory, wherever it 
-	 exists. Use standard F77 character assignment rules 
-	 (if len(toval) > len(fromval) pad with blanks,
-	 if len(toval) < len(fromval) truncate else just copy. */ 
-
-      if (VALUE_LVAL (toval) == lval_internalvar)
-	{
-	  /* Memory in superior.  */ 
-	  var = VALUE_INTERNALVAR (toval); 
-	  memcpy ((char *) VALUE_SUBSTRING_START (toval),
-		  (char *) VALUE_LITERAL_DATA (fromval),
-		  (lento > lenfrom) ? lenfrom : lento); 
-	  
-	  /* Check to see if we have to pad. */
-
-	  if (lento > lenfrom) 
-	    {
-	      memset((char *) VALUE_SUBSTRING_START(toval) + lenfrom,
-		     ' ', lento - lenfrom); 
-	    }
-	}
-      else
-	{
-	  /* Memory in inferior.  */ 
-	  write_memory ((CORE_ADDR) VALUE_SUBSTRING_START (toval),
-			(char *) VALUE_LITERAL_DATA (fromval),
-			(lento > lenfrom) ? lenfrom : lento); 
-
-	  /* Check to see if we have to pad.  */
-
-	  if (lento > lenfrom) 
-	    {
-	      c = alloca (lento-lenfrom); 
-	      memset (c, ' ', lento - lenfrom);
-
-	      tmp_addr = VALUE_SUBSTRING_START (toval) + lenfrom; 
-	      write_memory (tmp_addr, c, lento - lenfrom);
-	    } 
-	}
-      return fromval;
-    }
-  else 
-    { 
-      if (VALUE_LVAL (toval) == lval_internalvar)
-	type = VALUE_TYPE (fromval); 
-
-      val = allocate_value (type);
-
-      switch (VALUE_LVAL (toval))
-	{
-	case lval_internalvar:
-
-	  /* Internal variables are funny.  Their value information 
-	     is stored in the location.internalvar sub structure.  */ 
-
-	  var = VALUE_INTERNALVAR (toval); 
-
-	  /* The item in toval is a regular internal variable
-	     and this assignment is of the form:
-
-	     set var $foo = 'hello' */
-
-	  /* First free up any old stuff in this internalvar.  */
-
-	  free (VALUE_LITERAL_DATA (var->value));
-	  VALUE_LITERAL_DATA (var->value) = 0; 
-	  VALUE_LAZY (var->value) = 0; /* Disable lazy fetches since this 
-					  is not located in inferior. */ 
-
-	  /* Copy over the relevant value data from 'fromval' */
-
-	  set_internalvar (VALUE_INTERNALVAR (toval), fromval);
-
-	  /* Now replicate the VALUE_LITERAL_DATA field so that 
-	     we may later safely de-allocate fromval. */
-
-	  VALUE_LITERAL_DATA (var->value) = 
-	    malloc (TYPE_LENGTH (VALUE_TYPE (fromval)));
-         
-	  memcpy((char *) VALUE_LITERAL_DATA (var->value), 
-		 (char *) VALUE_LITERAL_DATA (fromval), 
-		 lenfrom); 
-         
-	  /* Copy over all relevant value data from 'toval'.  into 
-	     the structure to returned */ 
-
-	  memcpy (val, toval, sizeof(struct value));
-         
-	  /* Lastly copy the pointer to the area where the 
-	     internalvar data is stored to the VALUE_CONTENTS field.
-	     This will be a helpful shortcut for printout 
-	     routines later */ 
-
-	  VALUE_LITERAL_DATA (val) = VALUE_LITERAL_DATA (var->value); 
-	  break;
-
-	case lval_memory:
-
-	  /* We are copying memory from the local (superior) 
-	     literal string to a legitimate address in the 
-	     inferior. VALUE_ADDRESS is the address in 
-	     the inferior. VALUE_OFFSET is not used because
-	     structs do not exist in F77. */ 
-
-	  /* Copy over all relevant value data from 'toval'.  */ 
-
-	  memcpy (val, toval, sizeof(struct value));
-
-	  write_memory ((CORE_ADDR) VALUE_ADDRESS (val),
-			(char *) VALUE_LITERAL_DATA (fromval),
-			(lento > lenfrom) ? lenfrom : lento); 
-               
-	  /* Check to see if we have to pad */
-               
-	  if (lento > lenfrom) 
-	    {
-	      c = alloca (lento - lenfrom); 
-	      memset (c, ' ', lento - lenfrom);
-	      tmp_addr = VALUE_ADDRESS (val) + lenfrom; 
-	      write_memory (tmp_addr, c, lento - lenfrom);
-	    }
-	  break;
-
-	default:
-	  error ("Unknown lval type in f77_assign_from_literal_string"); 
-	}
-
-      /* Now free up the transient literal string's storage. */
-
-      free (VALUE_LITERAL_DATA (fromval)); 
-
-      VALUE_TYPE (val) = type;
-  
-      return val; 
-    }
-}
-
-
-/* The following function is called in order to assign a literal F77
-   complex to either an internal GDB variable or to a real complex
-   variable in the inferior.  This function is necessary because in F77,
-   composite literals are allocated in the superior's memory space 
-   NOT the inferior's.  This function provides a way to get the F77 stuff
-   to work without messing with the way C deals with this issue. */ 
-
-static value_ptr
-f77_assign_from_literal_complex (toval, fromval)
-     register value_ptr toval, fromval;
-{
-  register struct type *type = VALUE_TYPE (toval);
-  register value_ptr val;
-  struct internalvar *var; 
-  float tmp_float=0;
-  double tmp_double = 0;
-
-  if (VALUE_LVAL (toval) == lval_internalvar)
-    type = VALUE_TYPE (fromval); 
-
-  /* Allocate a value node for the result.  */
-
-  val = allocate_value (type);
-
-  if (VALUE_LVAL (toval) == lval_internalvar)
-    {
-      /* Internal variables are funny.  Their value information 
-	 is stored in the location.internalvar sub structure.  */ 
-
-      var = VALUE_INTERNALVAR (toval);
-
-      /* First free up any old stuff in this internalvar. */
-
-      free (VALUE_LITERAL_DATA (var->value));
-      VALUE_LITERAL_DATA (var->value) = 0; 
-      VALUE_LAZY (var->value) = 0; /* Disable lazy fetches since 
-				      this is not located in inferior. */ 
-              
-      /* Copy over the relevant value data from 'fromval'.  */
-
-      set_internalvar (VALUE_INTERNALVAR (toval), fromval);
-
-      /* Now replicate the VALUE_LITERAL_DATA field so that 
-	 we may later safely de-allocate  fromval.  */
-
-      VALUE_LITERAL_DATA (var->value) = 
-	malloc (TYPE_LENGTH (VALUE_TYPE (fromval)));
-         
-      memcpy ((char *) VALUE_LITERAL_DATA (var->value), 
-	      (char *) VALUE_LITERAL_DATA (fromval), 
-	      TYPE_LENGTH (VALUE_TYPE (fromval))); 
-
-      /* Copy over all relevant value data from 'toval' into the
-	 structure to be returned.  */ 
-
-      memcpy (val, toval, sizeof(struct value));
-    }
+  else if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FLT
+	   || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT)
+    return value_literal_complex (val, value_zero (real_type, not_lval), type);
   else
-    { 
-      /* We are copying memory from the local (superior) process to a
-	 legitimate address in the inferior. VALUE_ADDRESS is the
-	 address in the inferior. */ 
-
-      /* Copy over all relevant value data from 'toval'.  */ 
-
-      memcpy (val, toval, sizeof(struct value));
-         
-      if (TYPE_LENGTH (VALUE_TYPE (fromval))
-	  > TYPE_LENGTH (VALUE_TYPE (toval)))
-	{
-	  /* Since all literals are actually complex*16 types, deal with
-	     the case when one tries to assign a literal to a complex*8.  */
-
-	  if ((TYPE_LENGTH(VALUE_TYPE(fromval)) == 16) && 
-	      (TYPE_LENGTH(VALUE_TYPE(toval)) == 8))
-	    {
-	      tmp_double = *((double *) VALUE_LITERAL_DATA (fromval));
-	      
-	      tmp_float = (float) tmp_double;
-
-	      write_memory (VALUE_ADDRESS(val),
-			    (char *) &tmp_float, sizeof(float));
-
-	      tmp_double = *((double *) 
-			     (((char *) VALUE_LITERAL_DATA (fromval))
-			      + sizeof(double))); 
-	      
-	      tmp_float = (float) tmp_double;
-
-	      write_memory(VALUE_ADDRESS(val) + sizeof(float),
-			   (char *) &tmp_float, sizeof(float));
-	    }
-	  else
-	    error ("Cannot assign literal complex to variable!");
-	}
-      else 
-	{
-	  write_memory (VALUE_ADDRESS (val),
-			(char *) VALUE_LITERAL_DATA (fromval),
-			TYPE_LENGTH (VALUE_TYPE (fromval)));
-	}
-    }
-
-  /* Now free up the transient literal string's storage */
-   
-  free (VALUE_LITERAL_DATA (fromval)); 
-
-  VALUE_TYPE (val) = type;
-  
-  return val;
+    error ("cannot cast non-number to complex");
 }

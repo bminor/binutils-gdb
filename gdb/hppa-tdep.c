@@ -1367,9 +1367,6 @@ hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
   
   for (i = 0; i < nargs; i++)
     {
-      /* Coerce chars to int & float to double if necessary */
-      args[i] = value_arg_coerce (args[i]);
-
       cum += TYPE_LENGTH (VALUE_TYPE (args[i]));
 
     /* value must go at proper alignment. Assume alignment is a

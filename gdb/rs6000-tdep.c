@@ -731,7 +731,7 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
 
   for (argno=0, argbytes=0; argno < nargs && ii<8; ++ii) {
 
-    arg = value_arg_coerce (args[argno]);
+    arg = args[argno];
     len = TYPE_LENGTH (VALUE_TYPE (arg));
 
     if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FLT) {
@@ -796,7 +796,7 @@ ran_out_of_registers_for_arguments:
       jj = argno;
 
     for (; jj < nargs; ++jj) {
-      val = value_arg_coerce (args[jj]);
+      val = args[jj];
       space += ((TYPE_LENGTH (VALUE_TYPE (val))) + 3) & -4;
     }
 
@@ -824,7 +824,7 @@ ran_out_of_registers_for_arguments:
     /* push the rest of the arguments into stack. */
     for (; argno < nargs; ++argno) {
 
-      arg = value_arg_coerce (args[argno]);
+      arg = args[argno];
       len = TYPE_LENGTH (VALUE_TYPE (arg));
 
 

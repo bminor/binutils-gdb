@@ -147,29 +147,6 @@ extern int value_fetch_lazy PARAMS ((value_ptr val));
 #define VALUE_REGNO(val) (val)->regno
 #define VALUE_OPTIMIZED_OUT(val) ((val)->optimized_out)
 
-/* This is probably not the right thing to do for in-gdb arrays.  FIXME */
-/* Overload the contents field to store literal data for 
-   arrays.  */
-
-#define VALUE_LITERAL_DATA(val)  ((val)->aligner.literal_data)
-
-/* Pointer to 
-   the base substring, for F77 string substring operators.
-   We use this ONLY when doing operations of the form 
-   
-   FOO= 'hello' 
-   FOO(2:4) = 'foo'
-
-   In the above case VALUE_SUBSTRING_* would point to 
-   FOO(2) in the original FOO string. 
-
-   Depending on whether the base object is allocated in the 
-   inferior or the superior process, use VALUE_SUBSTRING_MYADDR or
-   VALUE_SUBSTRING_MEMADDR.  */
-
-#define VALUE_SUBSTRING_MEMADDR(val) (val)->substring_addr.memaddr
-#define VALUE_SUBSTRING_MYADDR(val) (val)->substring_addr.myaddr
-
 /* Convert a REF to the object referenced. */
 
 #define COERCE_REF(arg)    \
@@ -484,8 +461,6 @@ extern void
 print_variable_value PARAMS ((struct symbol *var, struct frame_info *frame,
 			      GDB_FILE *stream));
 
-extern value_ptr value_arg_coerce PARAMS ((value_ptr));
-
 extern int check_field PARAMS ((value_ptr, const char *));
 
 extern void
@@ -514,10 +489,6 @@ extern value_ptr value_slice PARAMS ((value_ptr, int, int));
 
 extern value_ptr call_function_by_hand PARAMS ((value_ptr, int, value_ptr *));
 
-extern value_ptr f77_value_literal_complex PARAMS ((value_ptr, value_ptr, int));
-
-extern value_ptr f77_value_literal_string PARAMS ((int, int, value_ptr *));
-
-extern value_ptr f77_value_substring PARAMS ((value_ptr, int, int));
+extern value_ptr value_literal_complex PARAMS ((value_ptr, value_ptr, struct type*));
 
 #endif	/* !defined (VALUE_H) */
