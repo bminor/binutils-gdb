@@ -1,3 +1,8 @@
+Thu Feb 13 21:56:51 1997  Klaus Kaempf  <kkaempf@progis.de>
+
+	* makefile.vms: Remove 8 bit characters.  Update to latest
+	gcc release.
+
 Thu Feb 13 20:41:22 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* m68k-opc.c (m68k_opcodes): Add swbeg pseudo-instruction.
