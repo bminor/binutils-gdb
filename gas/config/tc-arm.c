@@ -57,7 +57,7 @@
 #define ARM_EXT_V5	0x00000080	/* Allow CLZ, etc.         */
 #define ARM_EXT_V5E	0x00000100	/* "El Segundo". 	   */
 #define ARM_EXT_XSCALE	0x00000200	/* Allow MIA etc.  	   */
-#define ARM_EXT_MAVERIK 0x00000400      /* Use Cirrus/DSP coprocessor.  */
+#define ARM_EXT_MAVERICK 0x00000400      /* Use Cirrus/DSP coprocessor.  */
 
 /* Architectures are the sum of the base and extensions.  */
 #define ARM_ARCH_V3M     ARM_EXT_LONGMUL
@@ -655,7 +655,7 @@ static void do_fp_cmp		PARAMS ((char *, unsigned long));
 static void do_fp_from_reg	PARAMS ((char *, unsigned long));
 static void do_fp_to_reg	PARAMS ((char *, unsigned long));
 
-/* ARM_EXT_MAVERIK.  */
+/* ARM_EXT_MAVERICK.  */
 static void do_c_binops		PARAMS ((char *, unsigned long, int));
 static void do_c_binops_1	PARAMS ((char *, unsigned long));
 static void do_c_binops_2	PARAMS ((char *, unsigned long));
@@ -943,82 +943,82 @@ static CONST struct asm_opcode insns[] =
   {"mrrc",  0x0c500000, NULL,   NULL,         ARM_EXT_V5E, do_co_reg2c},
 
   /* Cirrus DSP instructions.  */
-  {"cfldrs",	0x0c100400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_1},
-  {"cfldrd",	0x0c500400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_2},
-  {"cfldr32",	0x0c100500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_3},
-  {"cfldr64",	0x0c500500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_4},
-  {"cfstrs",	0x0c000400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_1},
-  {"cfstrd",	0x0c400400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_2},
-  {"cfstr32",	0x0c000500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_3},
-  {"cfstr64",	0x0c400500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_ldst_4},
-  {"cfmvsr",	0x0e000450,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_2},
-  {"cfmvrs",	0x0e100450,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfmvdlr",	0x0e000410,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_2},
-  {"cfmvrdl",	0x0e100410,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfmvdhr",	0x0e000430,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_2},
-  {"cfmvrdh",	0x0e100430,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfmv64lr",	0x0e000510,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_2},
-  {"cfmvr64l",	0x0e100510,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfmv64hr",	0x0e000530,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_2},
-  {"cfmvr64h",	0x0e100530,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfmval32",	0x0e100610,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
-  {"cfmv32al",	0x0e000610,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
-  {"cfmvam32",	0x0e100630,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
-  {"cfmv32am",	0x0e000630,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
-  {"cfmvah32",	0x0e100650,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
-  {"cfmv32ah",	0x0e000650,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
-  {"cfmv32a",	0x0e000670,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
-  {"cfmva32",	0x0e100670,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
-  {"cfmv64a",	0x0e000690,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
-  {"cfmva64",	0x0e100690,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_3},
-  {"cfmvsc32",	0x0e1006b0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_dspsc_1},
-  {"cfmv32sc",	0x0e0006b0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_dspsc_2},
-  {"cfcpys",	0x0e000400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfcpyd",	0x0e000420,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfcvtsd",	0x0e000460,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfcvtds",	0x0e000440,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfcvt32s",	0x0e000480,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfcvt32d",	0x0e0004a0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfcvt64s",	0x0e0004c0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfcvt64d",	0x0e0004e0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfcvts32",	0x0e100580,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfcvtd32",	0x0e1005a0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cftruncs32",0x0e1005c0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cftruncd32",0x0e1005e0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfrshl32",	0x0e000550,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_4},
-  {"cfrshl64",	0x0e000570,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_4},
-  {"cfsh32",	0x0e000500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_shift_1},
-  {"cfsh64",	0x0e200500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_shift_2},
-  {"cfcmps",	0x0e100490,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfcmpd",	0x0e1004b0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfcmp32",	0x0e100590,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfcmp64",	0x0e1005b0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfabss",	0x0e300400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfabsd",	0x0e300420,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfnegs",	0x0e300440,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfnegd",	0x0e300460,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfadds",	0x0e300480,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfaddd",	0x0e3004a0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfsubs",	0x0e3004c0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfsubd",	0x0e3004e0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfmuls",	0x0e100400,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfmuld",	0x0e100420,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfabs32",	0x0e300500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfabs64",	0x0e300520,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfneg32",	0x0e300540,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfneg64",	0x0e300560,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_binops_1},
-  {"cfadd32",	0x0e300580,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfadd64",	0x0e3005a0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfsub32",	0x0e3005c0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfsub64",	0x0e3005e0,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfmul32",	0x0e100500,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfmul64",	0x0e100520,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfmac32",	0x0e100540,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfmsc32",	0x0e100560,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_triple_5},
-  {"cfmadd32",	0x0e000600,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_quad_6},
-  {"cfmsub32",	0x0e100600,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_quad_6},
-  {"cfmadda32",	0x0e200600,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_quad_6},
-  {"cfmsuba32",	0x0e300600,	NULL,	NULL,	ARM_EXT_MAVERIK, do_c_quad_6},
+  {"cfldrs",	0x0c100400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_1},
+  {"cfldrd",	0x0c500400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_2},
+  {"cfldr32",	0x0c100500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_3},
+  {"cfldr64",	0x0c500500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_4},
+  {"cfstrs",	0x0c000400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_1},
+  {"cfstrd",	0x0c400400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_2},
+  {"cfstr32",	0x0c000500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_3},
+  {"cfstr64",	0x0c400500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_4},
+  {"cfmvsr",	0x0e000450,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_2},
+  {"cfmvrs",	0x0e100450,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfmvdlr",	0x0e000410,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_2},
+  {"cfmvrdl",	0x0e100410,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfmvdhr",	0x0e000430,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_2},
+  {"cfmvrdh",	0x0e100430,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfmv64lr",	0x0e000510,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_2},
+  {"cfmvr64l",	0x0e100510,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfmv64hr",	0x0e000530,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_2},
+  {"cfmvr64h",	0x0e100530,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfmval32",	0x0e100610,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmv32al",	0x0e000610,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmvam32",	0x0e100630,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmv32am",	0x0e000630,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmvah32",	0x0e100650,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmv32ah",	0x0e000650,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmv32a",	0x0e000670,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmva32",	0x0e100670,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmv64a",	0x0e000690,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmva64",	0x0e100690,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmvsc32",	0x0e1006b0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_dspsc_1},
+  {"cfmv32sc",	0x0e0006b0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_dspsc_2},
+  {"cfcpys",	0x0e000400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcpyd",	0x0e000420,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvtsd",	0x0e000460,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvtds",	0x0e000440,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvt32s",	0x0e000480,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvt32d",	0x0e0004a0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvt64s",	0x0e0004c0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvt64d",	0x0e0004e0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvts32",	0x0e100580,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvtd32",	0x0e1005a0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cftruncs32",0x0e1005c0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cftruncd32",0x0e1005e0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfrshl32",	0x0e000550,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_4},
+  {"cfrshl64",	0x0e000570,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_4},
+  {"cfsh32",	0x0e000500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_shift_1},
+  {"cfsh64",	0x0e200500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_shift_2},
+  {"cfcmps",	0x0e100490,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfcmpd",	0x0e1004b0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfcmp32",	0x0e100590,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfcmp64",	0x0e1005b0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfabss",	0x0e300400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfabsd",	0x0e300420,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfnegs",	0x0e300440,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfnegd",	0x0e300460,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfadds",	0x0e300480,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfaddd",	0x0e3004a0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfsubs",	0x0e3004c0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfsubd",	0x0e3004e0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmuls",	0x0e100400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmuld",	0x0e100420,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfabs32",	0x0e300500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfabs64",	0x0e300520,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfneg32",	0x0e300540,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfneg64",	0x0e300560,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfadd32",	0x0e300580,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfadd64",	0x0e3005a0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfsub32",	0x0e3005c0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfsub64",	0x0e3005e0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmul32",	0x0e100500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmul64",	0x0e100520,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmac32",	0x0e100540,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmsc32",	0x0e100560,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmadd32",	0x0e000600,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_quad_6},
+  {"cfmsub32",	0x0e100600,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_quad_6},
+  {"cfmadda32",	0x0e200600,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_quad_6},
+  {"cfmsuba32",	0x0e300600,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_quad_6},
 };
 
 /* Defines for various bits that we will want to toggle.  */
@@ -1249,7 +1249,7 @@ struct reg_entry
 #define cp_register(reg) ((reg) >= 32 && (reg) <= 47)
 #define fp_register(reg) ((reg) >= 16 && (reg) <= 23)
 
-#define ARM_EXT_MAVERIKSC_REG	134
+#define ARM_EXT_MAVERICKSC_REG	134
 
 #define cirrus_register(reg)		((reg) >= 50 && (reg) <= 134)
 #define cirrus_mvf_register(reg)	((reg) >= 50 && (reg) <= 65)
@@ -1257,7 +1257,7 @@ struct reg_entry
 #define cirrus_mvfx_register(reg)	((reg) >= 90 && (reg) <= 105)
 #define cirrus_mvdx_register(reg)	((reg) >= 110 && (reg) <= 125)
 #define cirrus_mvax_register(reg)	((reg) >= 130 && (reg) <= 133)
-#define ARM_EXT_MAVERIKsc_register(reg) 	((reg) == ARM_EXT_MAVERIKSC_REG)
+#define ARM_EXT_MAVERICKsc_register(reg) 	((reg) == ARM_EXT_MAVERICKSC_REG)
 
 #define REG_PC	15
 #define REG_LR  14
@@ -1312,7 +1312,7 @@ static CONST struct reg_entry reg_table[] =
   {"mvdx8", 118}, {"mvdx9", 119}, {"mvdx10", 120},{"mvdx11", 121},
   {"mvdx12", 122},{"mvdx13", 123},{"mvdx14", 124},{"mvdx15", 125},
   {"mvax0", 130}, {"mvax1", 131}, {"mvax2", 132}, {"mvax3", 133},
-  {"dspsc", ARM_EXT_MAVERIKSC_REG},
+  {"dspsc", ARM_EXT_MAVERICKSC_REG},
   /* FIXME: At some point we need to add VFP register names.  */
   /* Array terminator.  */
   {NULL, 0}
@@ -6174,7 +6174,7 @@ cirrus_valid_reg (reg, regtype)
       return cirrus_mvax_register (reg);
 
     case CIRRUS_REGTYPE_DSPSC:
-      return ARM_EXT_MAVERIKsc_register (reg);
+      return ARM_EXT_MAVERICKsc_register (reg);
     }
 
   return 0;
@@ -6215,7 +6215,7 @@ cirrus_reg_required_here (str, shift, regtype)
 
       /* Calculate actual register # for opcode.  */
       if (cirrus_register (reg)
-	  && !ARM_EXT_MAVERIKsc_register (reg)) /* Leave this one as is.  */
+	  && !ARM_EXT_MAVERICKsc_register (reg)) /* Leave this one as is.  */
 	{
 	  if (reg >= 130)
 	    reg -= 130;
@@ -8930,7 +8930,7 @@ md_parse_option (c, arg)
 		  | ARM_9 | ARM_ARCH_V4T;
 	      else if (streq (str, "9e"))
 		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_V4T | ARM_EXT_MAVERIK;
+		  | ARM_9 | ARM_ARCH_V4T | ARM_EXT_MAVERICK;
 	      else
 		goto bad;
 	      break;

@@ -1,3 +1,7 @@
+2001-10-09  Aldy Hernandez  <aldyh@redhat.com>
+
+	* config/tc-arm.c: Change MAVERIK to MAVERICK.
+
 2001-10-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c: Make use of elf_group_name and elf_next_in_group
