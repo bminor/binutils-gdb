@@ -1,3 +1,5 @@
 # Host: Little-endian MIPS machine such as DECstation.
 XDEPFILES= infptrace.o mips-xdep.o coredep.o
 XM_FILE= xm-mips.h
+# Might need to uncomment this for old versions of Ultrix.
+XM_CFLAGS= -DHAVE_STRSTR
