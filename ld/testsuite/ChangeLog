@@ -1,3 +1,9 @@
+2005-02-10  Paul Brook  <paul@codesourcery.com>
+
+	* ld-elfvsb/hidden2.s: New file
+	* ld-elfvsb/hidden2.d: New file
+	* ld-elfvsb/hidden2.ld: New file
+
 2005-02-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-frv/fdpic-shared-8-fail.d: Tweak error messages.

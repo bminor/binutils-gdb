@@ -1,3 +1,11 @@
+2005-02-10  Paul Brook  <paul@codesourcery.com>
+
+	* elflink.c (bfd_elf_record_link_assignment): Make hidden and internal
+	symbols local.
+	(elf_link_renumber_hash_table_dynsyms): Ignore local symbols.
+	(elf_link_renumber_local_hash_table_dynsyms): New function.
+	(_bfd_elf_link_renumber_dynsyms): Number local dynamic symbols.
+
 2005-02-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* bfd-in.h (BFD_LINKER_CREATED): Define.

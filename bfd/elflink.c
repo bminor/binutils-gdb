@@ -484,6 +484,14 @@ bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   h->def_regular = 1;
 
+  /* STV_HIDDEN and STV_INTERNAL symbols must be STB_LOCAL in shared objects
+     and executables.  */
+  if (!info->relocatable
+      && h->dynindx != -1
+      && (ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
+	  || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL))
+    h->forced_local = 1;
+
   if ((h->def_dynamic
        || h->ref_dynamic
        || info->shared)
@@ -624,6 +632,31 @@ elf_link_renumber_hash_table_dynsyms (struct elf_link_hash_entry *h,
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
+  if (h->forced_local)
+    return TRUE;
+
+  if (h->dynindx != -1)
+    h->dynindx = ++(*count);
+
+  return TRUE;
+}
+
+
+/* Like elf_link_renumber_hash_table_dynsyms, but just number symbols with
+   STB_LOCAL binding.  */
+
+static bfd_boolean
+elf_link_renumber_local_hash_table_dynsyms (struct elf_link_hash_entry *h,
+					    void *data)
+{
+  size_t *count = data;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  if (!h->forced_local)
+    return TRUE;
+
   if (h->dynindx != -1)
     h->dynindx = ++(*count);
 
@@ -667,9 +700,10 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
 }
 
 /* Assign dynsym indices.  In a shared library we generate a section
-   symbol for each output section, which come first.  Next come all of
-   the back-end allocated local dynamic syms, followed by the rest of
-   the global symbols.  */
+   symbol for each output section, which come first.  Next come symbols
+   which have been forced to local binding.  Then all of the back-end
+   allocated local dynamic syms, followed by the rest of the global
+   symbols.  */
 
 unsigned long
 _bfd_elf_link_renumber_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
@@ -686,6 +720,10 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
 	    && !(*bed->elf_backend_omit_section_dynsym) (output_bfd, info, p))
 	  elf_section_data (p)->dynindx = ++dynsymcount;
     }
+
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_link_renumber_local_hash_table_dynsyms,
+			  &dynsymcount);
 
   if (elf_hash_table (info)->dynlocal)
     {
