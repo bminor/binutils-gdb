@@ -25,6 +25,7 @@
 #include "gdbcore.h"
 #include "osabi.h"
 #include "regcache.h"
+#include "regset.h"
 #include "target.h"
 #include "trad-frame.h"
 
@@ -48,45 +49,21 @@ const struct sparc_gregset sparc64fbsd_gregset =
 };
 
 
-/* Size of `struct reg' and `struct fpreg'.  */
-static const int sparc64fbsd_sizeof_struct_reg = 256;
-static const int sparc64fbsd_sizeof_struct_fpreg = 272;
-
 static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
-                      CORE_ADDR ignore)
+sparc64fbsd_supply_gregset (const struct regset *regset,
+			    struct regcache *regcache,
+			    int regnum, const void *gregs, size_t len)
 {
-  switch (which)
-    {
-    case 0:  /* Integer registers */
-      if (core_reg_size != sparc64fbsd_sizeof_struct_reg)
-	warning ("Wrong size register set in core file.");
-      else
-	sparc64_supply_gregset (&sparc64fbsd_gregset, current_regcache,
-				-1, core_reg_sect);
-      break;
-
-    case 2:  /* Floating pointer registers */
-      if (core_reg_size != sparc64fbsd_sizeof_struct_fpreg)
-	warning ("Wrong size FP register set in core file.");
-      else
-	sparc64_supply_fpregset (current_regcache, -1, core_reg_sect);
-      break;
-
-    default:
-      /* Don't know what kind of register request this is; just ignore it.  */
-      break;
-    }
+  sparc64_supply_gregset (regset->descr, regcache, regnum, gregs);
 }
 
-static struct core_fns sparc64fbsd_core_fns =
+static void
+sparc64fbsd_supply_fpregset (const struct regset *regset,
+			     struct regcache *regcache,
+			     int regnum, const void *fpregs, size_t len)
 {
-  bfd_target_elf_flavour,		/* core_flavour */
-  default_check_format,			/* check_format */
-  default_core_sniffer,			/* core_sniffer */
-  fetch_core_registers,			/* core_read_registers */
-  NULL
-};
+  sparc64_supply_fpregset (regcache, regnum, fpregs);
+}
 
 
 /* Signal trampolines.  */
@@ -220,6 +197,17 @@ sparc64fbsd_sigtramp_frame_sniffer (struct frame_info *next_frame)
 static void
 sparc64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->gregset = XMALLOC (struct regset);
+  tdep->gregset->descr = &sparc64fbsd_gregset;
+  tdep->gregset->supply_regset = sparc64fbsd_supply_gregset;
+  tdep->sizeof_gregset = 256;
+
+  tdep->fpregset = XMALLOC (struct regset);
+  tdep->fpregset->supply_regset = sparc64fbsd_supply_fpregset;
+  tdep->sizeof_fpregset = 272;
+
   set_gdbarch_pc_in_sigtramp (gdbarch, sparc64fbsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc64fbsd_sigtramp_frame_sniffer);
 
@@ -234,6 +222,4 @@ _initialize_sparc64fbsd_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9,
 			  GDB_OSABI_FREEBSD_ELF, sparc64fbsd_init_abi);
-
-  add_core_fns (&sparc64fbsd_core_fns);
 }
