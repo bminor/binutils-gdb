@@ -1522,7 +1522,11 @@ yylex ()
       }
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
         {
-#if 0
+#if 1
+	  /* Despite the following flaw, we need to keep this code enabled.
+	     Because we can get called from check_stub_method, if we don't
+	     handle nested types then it screws many operations in any
+	     program which uses nested types.  */
 	  /* In "A::x", if x is a member function of A and there happens
 	     to be a type (nested or not, since the stabs don't make that
 	     distinction) named x, then this code incorrectly thinks we

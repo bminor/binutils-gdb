@@ -1,3 +1,7 @@
+Fri Jan 28 08:45:02 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* c-exp.y (yylex): Reenable nested type code.
+
 Fri Jan 28 15:40:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* a29k-tdep.c (examine_tag): Add comment regarding argcount.
@@ -25,6 +29,7 @@ Fri Jan 28 11:55:52 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 	addition to the standard serial support.
 
 Fri Jan 28 08:45:02 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+>>>>>>> 1.2186
 
 	* mdebugread.c (psymtab_to_symtab_1): Don't complain on stLabel with
 	index indexNil.
