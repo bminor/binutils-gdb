@@ -1902,7 +1902,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   sgot = splt = sreloc = NULL;
 
   rel = relocs;
-  relend = relocs + NUM_SHDR_ENTIRES (& elf_section_data (input_section)->rel_hdr);
+  relend = relocs + NUM_SHDR_ENTRIES (& elf_section_data (input_section)->rel_hdr);
   for (; rel < relend; rel++)
     {
       int r_type;
