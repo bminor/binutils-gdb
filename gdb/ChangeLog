@@ -1,5 +1,12 @@
 Fri Nov  4 13:11:54 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
+	* gdbserver/Makefile.in (MMALLOC_CFLAGS): Add -I${MMALLOC_DIR}.
+	Correct definition of MMALLOC_DIR to reflect fact this is
+	gdb/gdbserver/Makefile.in, not gdb/Makefile.in.
+
+	* gdbserver/server.c (main): After we kill the inferior in
+	response to a 'k' request, exit.
+
 	* remote.c (remote_kill): Use catch_errors when calling putpkt.
 	(putpkt): Return int, not void, to match catch_errors calling
 	convention.
