@@ -1638,6 +1638,9 @@ yet been defined.
 Another way is with the @samp{x} type descriptor, which is followed by
 @samp{s} for a structure tag, @samp{u} for a union tag, or @samp{e} for
 a enumerator tag, followed by the name of the tag, followed by @samp{:}.
+The name can contain @samp{::}---only a single @samp{:} ends the name;
+see @ref{Nested Symbols}.
+
 For example, the following C declarations:
 
 @example
