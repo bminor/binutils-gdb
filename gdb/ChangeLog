@@ -1,3 +1,28 @@
+2003-05-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* symtab.h (enum domain_enum): Rename from namespace_enum.
+	(UNDEF_DOMAIN, VAR_DOMAIN, STRUCT_DOMAIN, LABEL_DOMAIN,
+	VARIABLES_DOMAIN, FUNCTIONS_DOMAIN, TYPES_DOMAIN, METHODS_DOMAIN):
+	Rename from UNDEF_NAMESPACE, VAR_NAMESPACE, STRUCT_NAMESPACE,
+	LABEL_NAMESPACE, VARIABLES_NAMESPACE, FUNCTIONS_NAMESPACE,
+	TYPES_NAMESPACE, METHODS_NAMESPACE.
+	(SYMBOL_NAMESPACE): Rename to SYMBOL_DOMAIN.
+	(struct symbol, struct partial_symbol): Rename field
+	'namespace_enum namespace' to 'domain_enum domain'.
+	(PSYMBOL_NAMESPACE): Rename to PSYMBOL_DOMAIN.
+	Delete old define kludge for namespace.
+
+	* ada-exp.y, ada-lang.c, ada-lang.h, alpha-tdep.c, arm-tdep.c,
+	blockframe.c, c-exp.y, c-valprint.c, coffread.c, dbxread.c,
+	dwarf2read.c, dwarfread.c, f-exp.y, gdbtypes.c, gdbtypes.h,
+	gnu-v3-abi.c, hppa-tdep.c, hpread.c, jv-exp.y, jv-lang.c,
+	language.c, linespec.c, m2-exp.y, m3-nat.c, mdebugread.c,
+	mips-tdep.c, nlmread.c, objc-exp.y, objc-lang.c, objfiles.c,
+	p-exp.y, p-valprint.c, parse.c, printcmd.c, scm-lang.c, source.c,
+	stabsread.c, stack.c, symfile.c, symfile.h, symmisc.c, symtab.c,
+	valops.c, values.c, xcoffread.c, xstormy16-tdep.c: Replace all
+	occurrences of the above.
+
 2003-05-14  Ian Lance Taylor  <ian@airs.com>
 
 	* Makefile.in (install-only): Use $(SHELL) when running

@@ -1,3 +1,8 @@
+2003-05-12  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-mi-cmd-stack.c (list_args_or_locals): Rename VAR_NAMESPACE to
+	VAR_DOMAIN.
+
 2003-05-11  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-symbol-cmds.c: Rename "mi-cmd-symbol.c", avoid 8.3 problem.

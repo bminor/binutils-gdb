@@ -87,7 +87,7 @@ struct value *
 find_function_in_inferior (const char *name)
 {
   register struct symbol *sym;
-  sym = lookup_symbol (name, 0, VAR_NAMESPACE, 0, NULL);
+  sym = lookup_symbol (name, 0, VAR_DOMAIN, 0, NULL);
   if (sym != NULL)
     {
       if (SYMBOL_CLASS (sym) != LOC_BLOCK)
@@ -2350,7 +2350,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  else
 	    {
 	      struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-						0, VAR_NAMESPACE, 0, NULL);
+						0, VAR_DOMAIN, 0, NULL);
 	      if (s == NULL)
 		{
 		  v = 0;
@@ -2510,7 +2510,7 @@ value_of_local (const char *name, int complain)
 
   /* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
      symbol instead of the LOC_ARG one (if both exist).  */
-  sym = lookup_block_symbol (b, name, NULL, VAR_NAMESPACE);
+  sym = lookup_block_symbol (b, name, NULL, VAR_DOMAIN);
   if (sym == NULL)
     {
       if (complain)

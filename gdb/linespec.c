@@ -194,7 +194,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
      the class, then the loop can't do any good.  */
   if (class_name
       && (lookup_symbol (class_name, (struct block *) NULL,
-			 STRUCT_NAMESPACE, (int *) NULL,
+			 STRUCT_DOMAIN, (int *) NULL,
 			 (struct symtab **) NULL)))
     {
       int method_counter;
@@ -255,7 +255,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		  continue;
 
 		sym_arr[i1] = lookup_symbol (phys_name,
-					     NULL, VAR_NAMESPACE,
+					     NULL, VAR_DOMAIN,
 					     (int *) NULL,
 					     (struct symtab **) NULL);
 		if (sym_arr[i1])
@@ -301,7 +301,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		  /* If this method is actually defined, include it in the
 		     list.  */
 		  sym_arr[i1] = lookup_symbol (phys_name,
-					       NULL, VAR_NAMESPACE,
+					       NULL, VAR_DOMAIN,
 					       (int *) NULL,
 					       (struct symtab **) NULL);
 		  if (sym_arr[i1])
@@ -682,7 +682,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       copy = (char *) alloca (p - *argptr + 1);
       memcpy (copy, *argptr, p - *argptr);
       copy[p - *argptr] = '\000';
-      sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
+      sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0, &sym_symtab);
       if (sym)
 	{
 	  *argptr = (*p == '\'') ? p + 1 : p;
@@ -1214,7 +1214,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   /* Set argptr to skip over the name.  */
   *argptr = (*p == '\'') ? p + 1 : p;
   /* Look up entire name */
-  sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
+  sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0, &sym_symtab);
   if (sym)
     return symbol_found (funfirstline, canonical, copy, sym,
 			 NULL, sym_symtab);
@@ -1253,7 +1253,7 @@ lookup_prefix_sym (char **argptr, char *p)
     p++;
   *argptr = p;
 
-  return lookup_symbol (copy, 0, STRUCT_NAMESPACE, 0,
+  return lookup_symbol (copy, 0, STRUCT_DOMAIN, 0,
 			(struct symtab **) NULL);
 }
 
@@ -1343,7 +1343,7 @@ collect_methods (char *copy, struct type *t,
 
 	  sym_arr[i1] =
 	    lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, f_index),
-			   NULL, VAR_NAMESPACE, (int *) NULL,
+			   NULL, VAR_DOMAIN, (int *) NULL,
 			   (struct symtab **) NULL);
 	  if (sym_arr[i1])
 	    i1++;
@@ -1521,7 +1521,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 	 convenience variable.  */
 
       /* Look up entire name as a symbol first.  */
-      sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
+      sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0, &sym_symtab);
       file_symtab = (struct symtab *) 0;
       need_canonical = 1;
       /* Symbol was found --> jump to normal symbol processing.  */
@@ -1579,7 +1579,7 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
 			? BLOCKVECTOR_BLOCK (BLOCKVECTOR (file_symtab),
 					     STATIC_BLOCK)
 			: get_selected_block (0)),
-		       VAR_NAMESPACE, 0, &sym_symtab);
+		       VAR_DOMAIN, 0, &sym_symtab);
 
   if (sym != NULL)
     return symbol_found (funfirstline, canonical, copy, sym,
@@ -1631,7 +1631,7 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
 	{
 	  struct blockvector *bv = BLOCKVECTOR (sym_symtab);
 	  struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	  if (lookup_block_symbol (b, copy, NULL, VAR_NAMESPACE) != NULL)
+	  if (lookup_block_symbol (b, copy, NULL, VAR_DOMAIN) != NULL)
 	    build_canonical_line_spec (values.sals, copy, canonical);
 	}
       return values;

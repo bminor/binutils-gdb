@@ -2640,7 +2640,7 @@ start_psymtab_common (struct objfile *objfile,
    Since one arg is a struct, we pass in a ptr and deref it (sigh).  */
 
 void
-add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
+add_psymbol_to_list (char *name, int namelength, domain_enum domain,
 		     enum address_class class,
 		     struct psymbol_allocation_list *list, long val,	/* Value as a long */
 		     CORE_ADDR coreaddr,	/* Value as a CORE_ADDR */
@@ -2667,7 +2667,7 @@ add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
     }
   SYMBOL_SECTION (&psymbol) = 0;
   SYMBOL_LANGUAGE (&psymbol) = language;
-  PSYMBOL_NAMESPACE (&psymbol) = namespace;
+  PSYMBOL_DOMAIN (&psymbol) = domain;
   PSYMBOL_CLASS (&psymbol) = class;
 
   SYMBOL_SET_NAMES (&psymbol, buf, namelength, objfile);
@@ -2690,7 +2690,7 @@ add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
 
 void
 add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
-				   int dem_namelength, namespace_enum namespace,
+				   int dem_namelength, domain_enum domain,
 				   enum address_class class,
 				   struct psymbol_allocation_list *list, long val,	/* Value as a long */
 				   CORE_ADDR coreaddr,	/* Value as a CORE_ADDR */
@@ -2735,7 +2735,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
     }
   SYMBOL_SECTION (&psymbol) = 0;
   SYMBOL_LANGUAGE (&psymbol) = language;
-  PSYMBOL_NAMESPACE (&psymbol) = namespace;
+  PSYMBOL_DOMAIN (&psymbol) = domain;
   PSYMBOL_CLASS (&psymbol) = class;
   SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, language);
 

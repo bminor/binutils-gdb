@@ -1076,7 +1076,7 @@ address_info (char *exp, int from_tty)
   if (exp == 0)
     error ("Argument required.");
 
-  sym = lookup_symbol (exp, get_selected_block (0), VAR_NAMESPACE,
+  sym = lookup_symbol (exp, get_selected_block (0), VAR_DOMAIN,
 		       &is_a_field_of_this, (struct symtab **) NULL);
   if (sym == NULL)
     {
@@ -1844,7 +1844,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	      struct symbol *nsym;
 	      nsym = lookup_symbol
 		(DEPRECATED_SYMBOL_NAME (sym),
-		 b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
+		 b, VAR_DOMAIN, (int *) NULL, (struct symtab **) NULL);
 	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
 		{
 		  /* There is a LOC_ARG/LOC_REGISTER pair.  This means that

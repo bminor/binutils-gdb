@@ -648,7 +648,7 @@ xstormy16_skip_prologue (CORE_ADDR pc)
         return plg_end;
 
       /* Found a function.  */
-      sym = lookup_symbol (func_name, NULL, VAR_NAMESPACE, NULL, NULL);
+      sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL, NULL);
       /* Don't use line number debug info for assembly source files. */
       if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
 	{

@@ -1589,7 +1589,7 @@ read_enumeration (struct dieinfo *dip, char *thisdie, char *enddie,
    of the enumeration and return a type pointer for the enumeration.
 
    At the same time, for each member of the enumeration, create a
-   symbol for it with namespace VAR_NAMESPACE and class LOC_CONST,
+   symbol for it with domain VAR_DOMAIN and class LOC_CONST,
    and give it the type of the enumeration itself.
 
    NOTES
@@ -1679,7 +1679,7 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
 	  DEPRECATED_SYMBOL_NAME (sym) = create_name (list->field.name,
 					   &objfile->symbol_obstack);
 	  SYMBOL_INIT_LANGUAGE_SPECIFIC (sym, cu_language);
-	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_TYPE (sym) = type;
 	  SYMBOL_VALUE (sym) = FIELD_BITPOS (list->field);
@@ -2447,7 +2447,7 @@ add_enum_psymbol (struct dieinfo *dip, struct objfile *objfile)
       while (scan < listend)
 	{
 	  scan += TARGET_FT_LONG_SIZE (objfile);
-	  add_psymbol_to_list (scan, strlen (scan), VAR_NAMESPACE, LOC_CONST,
+	  add_psymbol_to_list (scan, strlen (scan), VAR_DOMAIN, LOC_CONST,
 			       &objfile->static_psymbols, 0, 0, cu_language,
 			       objfile);
 	  scan += strlen (scan) + 1;
@@ -2479,31 +2479,31 @@ add_partial_symbol (struct dieinfo *dip, struct objfile *objfile)
     {
     case TAG_global_subroutine:
       add_psymbol_to_list (dip->at_name, strlen (dip->at_name),
-			   VAR_NAMESPACE, LOC_BLOCK,
+			   VAR_DOMAIN, LOC_BLOCK,
 			   &objfile->global_psymbols,
 			   0, dip->at_low_pc, cu_language, objfile);
       break;
     case TAG_global_variable:
       add_psymbol_to_list (dip->at_name, strlen (dip->at_name),
-			   VAR_NAMESPACE, LOC_STATIC,
+			   VAR_DOMAIN, LOC_STATIC,
 			   &objfile->global_psymbols,
 			   0, 0, cu_language, objfile);
       break;
     case TAG_subroutine:
       add_psymbol_to_list (dip->at_name, strlen (dip->at_name),
-			   VAR_NAMESPACE, LOC_BLOCK,
+			   VAR_DOMAIN, LOC_BLOCK,
 			   &objfile->static_psymbols,
 			   0, dip->at_low_pc, cu_language, objfile);
       break;
     case TAG_local_variable:
       add_psymbol_to_list (dip->at_name, strlen (dip->at_name),
-			   VAR_NAMESPACE, LOC_STATIC,
+			   VAR_DOMAIN, LOC_STATIC,
 			   &objfile->static_psymbols,
 			   0, 0, cu_language, objfile);
       break;
     case TAG_typedef:
       add_psymbol_to_list (dip->at_name, strlen (dip->at_name),
-			   VAR_NAMESPACE, LOC_TYPEDEF,
+			   VAR_DOMAIN, LOC_TYPEDEF,
 			   &objfile->static_psymbols,
 			   0, 0, cu_language, objfile);
       break;
@@ -2515,14 +2515,14 @@ add_partial_symbol (struct dieinfo *dip, struct objfile *objfile)
       if (!dip->has_at_byte_size)
 	break;
       add_psymbol_to_list (dip->at_name, strlen (dip->at_name),
-			   STRUCT_NAMESPACE, LOC_TYPEDEF,
+			   STRUCT_DOMAIN, LOC_TYPEDEF,
 			   &objfile->static_psymbols,
 			   0, 0, cu_language, objfile);
       if (cu_language == language_cplus)
 	{
 	  /* For C++, these implicitly act as typedefs as well. */
 	  add_psymbol_to_list (dip->at_name, strlen (dip->at_name),
-			       VAR_NAMESPACE, LOC_TYPEDEF,
+			       VAR_DOMAIN, LOC_TYPEDEF,
 			       &objfile->static_psymbols,
 			       0, 0, cu_language, objfile);
 	}
@@ -2821,7 +2821,7 @@ new_symbol (struct dieinfo *dip, struct objfile *objfile)
       OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
       /* default assumptions */
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_TYPE (sym) = decode_die_type (dip);
 
@@ -2927,12 +2927,12 @@ new_symbol (struct dieinfo *dip, struct objfile *objfile)
 	case TAG_union_type:
 	case TAG_enumeration_type:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
-	  SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
+	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
 	  add_symbol_to_list (sym, list_in_scope);
 	  break;
 	case TAG_typedef:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
-	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  add_symbol_to_list (sym, list_in_scope);
 	  break;
 	default:
@@ -2984,7 +2984,7 @@ synthesize_typedef (struct dieinfo *dip, struct objfile *objfile,
       SYMBOL_INIT_LANGUAGE_SPECIFIC (sym, cu_language);
       SYMBOL_TYPE (sym) = type;
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, list_in_scope);
     }
 }

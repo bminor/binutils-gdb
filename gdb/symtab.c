@@ -79,12 +79,12 @@ char *operator_chars (char *p, char **end);
 static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 						     const char *,
 						     const char *, int,
-						     namespace_enum);
+						     domain_enum);
 
 static struct symbol *lookup_symbol_aux (const char *name,
 					 const char *mangled_name,
 					 const struct block *block,
-					 const namespace_enum namespace,
+					 const domain_enum domain,
 					 int *is_a_field_of_this,
 					 struct symtab **symtab);
 
@@ -92,7 +92,7 @@ static
 struct symbol *lookup_symbol_aux_local (const char *name,
 					const char *mangled_name,
 					const struct block *block,
-					const namespace_enum namespace,
+					const domain_enum domain,
 					struct symtab **symtab,
 					const struct block **static_block);
 
@@ -100,27 +100,27 @@ static
 struct symbol *lookup_symbol_aux_block (const char *name,
 					const char *mangled_name,
 					const struct block *block,
-					const namespace_enum namespace,
+					const domain_enum domain,
 					struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  const char *name,
 					  const char *mangled_name,
-					  const namespace_enum namespace,
+					  const domain_enum domain,
 					  struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_psymtabs (int block_index,
 					   const char *name,
 					   const char *mangled_name,
-					   const namespace_enum namespace,
+					   const domain_enum domain,
 					   struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_minsyms (const char *name,
 					  const char *mangled_name,
-					  const namespace_enum namespace,
+					  const domain_enum domain,
 					  int *is_a_field_of_this,
 					  struct symtab **symtab);
 
@@ -134,12 +134,12 @@ static void fixup_section (struct general_symbol_info *, struct objfile *);
 
 static int file_matches (char *, char **, int);
 
-static void print_symbol_info (namespace_enum,
+static void print_symbol_info (domain_enum,
 			       struct symtab *, struct symbol *, int, char *);
 
 static void print_msymbol_info (struct minimal_symbol *);
 
-static void symtab_symbol_info (char *, namespace_enum, int);
+static void symtab_symbol_info (char *, domain_enum, int);
 
 static void overload_list_add_symbol (struct symbol *sym, char *oload_name);
 
@@ -779,7 +779,7 @@ find_pc_sect_psymbol (struct partial_symtab *psymtab, CORE_ADDR pc,
        pp++)
     {
       p = *pp;
-      if (SYMBOL_NAMESPACE (p) == VAR_NAMESPACE
+      if (SYMBOL_DOMAIN (p) == VAR_DOMAIN
 	  && SYMBOL_CLASS (p) == LOC_BLOCK
 	  && pc >= SYMBOL_VALUE_ADDRESS (p)
 	  && (SYMBOL_VALUE_ADDRESS (p) > best_pc
@@ -803,7 +803,7 @@ find_pc_sect_psymbol (struct partial_symtab *psymtab, CORE_ADDR pc,
        pp++)
     {
       p = *pp;
-      if (SYMBOL_NAMESPACE (p) == VAR_NAMESPACE
+      if (SYMBOL_DOMAIN (p) == VAR_DOMAIN
 	  && SYMBOL_CLASS (p) == LOC_BLOCK
 	  && pc >= SYMBOL_VALUE_ADDRESS (p)
 	  && (SYMBOL_VALUE_ADDRESS (p) > best_pc
@@ -878,7 +878,7 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
 }
 
 /* Find the definition for a specified symbol name NAME
-   in namespace NAMESPACE, visible from lexical block BLOCK.
+   in domain DOMAIN, visible from lexical block BLOCK.
    Returns the struct symbol pointer, or zero if no symbol is found.
    If SYMTAB is non-NULL, store the symbol table in which the
    symbol was found there, or NULL if not found.
@@ -900,7 +900,7 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
 
 struct symbol *
 lookup_symbol (const char *name, const struct block *block,
-	       const namespace_enum namespace, int *is_a_field_of_this,
+	       const domain_enum domain, int *is_a_field_of_this,
 	       struct symtab **symtab)
 {
   char *demangled_name = NULL;
@@ -938,7 +938,7 @@ lookup_symbol (const char *name, const struct block *block,
     }
 
   returnval = lookup_symbol_aux (modified_name, mangled_name, block,
-				 namespace, is_a_field_of_this, symtab);
+				 domain, is_a_field_of_this, symtab);
   if (needtofreename)
     xfree (demangled_name);
 
@@ -947,7 +947,7 @@ lookup_symbol (const char *name, const struct block *block,
 
 static struct symbol *
 lookup_symbol_aux (const char *name, const char *mangled_name,
-		   const struct block *block, const namespace_enum namespace,
+		   const struct block *block, const domain_enum domain,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
   struct symbol *sym;
@@ -956,7 +956,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
-  sym = lookup_symbol_aux_local (name, mangled_name, block, namespace,
+  sym = lookup_symbol_aux_local (name, mangled_name, block, domain,
 				 symtab, &static_block);
   if (sym != NULL)
     return sym;
@@ -969,7 +969,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   /* FIXME: this code is never executed--block is always NULL at this
      point.  What is it trying to do, anyway?  We already should have
      checked the STATIC_BLOCK above (it is the superblock of top-level
-     blocks).  Why is VAR_NAMESPACE special-cased?  */
+     blocks).  Why is VAR_DOMAIN special-cased?  */
   /* Don't need to mess with the psymtabs; if we have a block,
      that file is read in.  If we don't, then we deal later with
      all the psymtab stuff that needs checking.  */
@@ -983,7 +983,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
    * code to find any 'sym''s that were not found above. I vote for 
    * deleting the following paragraph of code.
    */
-  if (namespace == VAR_NAMESPACE && block != NULL)
+  if (domain == VAR_DOMAIN && block != NULL)
     {
       struct block *b;
       /* Find the right symtab.  */
@@ -994,7 +994,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	if (BLOCK_START (b) <= BLOCK_START (block)
 	    && BLOCK_END (b) > BLOCK_START (block))
 	  {
-	    sym = lookup_block_symbol (b, name, mangled_name, VAR_NAMESPACE);
+	    sym = lookup_block_symbol (b, name, mangled_name, VAR_DOMAIN);
 	    if (sym)
 	      {
 		block_found = b;
@@ -1050,7 +1050,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   if (static_block != NULL)
     {
       sym = lookup_symbol_aux_block (name, mangled_name, static_block,
-				     namespace, symtab);
+				     domain, symtab);
       if (sym != NULL)
 	return sym;
     }
@@ -1061,7 +1061,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      conversion on the fly and return the found symbol. */
 
   sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, mangled_name,
-				   namespace, symtab);
+				   domain, symtab);
   if (sym != NULL)
     return sym;
 
@@ -1072,7 +1072,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      Eventually, all global symbols might be resolved in this way.  */
 
   sym = lookup_symbol_aux_minsyms (name, mangled_name,
-				   namespace, is_a_field_of_this,
+				   domain, is_a_field_of_this,
 				   symtab);
   
   if (sym != NULL)
@@ -1081,7 +1081,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 #endif
 
   sym = lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, mangled_name,
-				    namespace, symtab);
+				    domain, symtab);
   if (sym != NULL)
     return sym;
 
@@ -1092,12 +1092,12 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      conversion on the fly and return the found symbol. */
 
   sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, mangled_name,
-				   namespace, symtab);
+				   domain, symtab);
   if (sym != NULL)
     return sym;
   
   sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, mangled_name,
-				    namespace, symtab);
+				    domain, symtab);
   if (sym != NULL)
     return sym;
 
@@ -1120,7 +1120,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
 
   sym = lookup_symbol_aux_minsyms (name, mangled_name,
-				   namespace, is_a_field_of_this,
+				   domain, is_a_field_of_this,
 				   symtab);
   
   if (sym != NULL)
@@ -1140,7 +1140,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 static struct symbol *
 lookup_symbol_aux_local (const char *name, const char *mangled_name,
 			 const struct block *block,
-			 const namespace_enum namespace,
+			 const domain_enum domain,
 			 struct symtab **symtab,
 			 const struct block **static_block)
 {
@@ -1156,7 +1156,7 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
 
   while (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) != NULL)
     {
-      sym = lookup_symbol_aux_block (name, mangled_name, block, namespace,
+      sym = lookup_symbol_aux_block (name, mangled_name, block, domain,
 				     symtab);
       if (sym != NULL)
 	return sym;
@@ -1175,7 +1175,7 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
 static struct symbol *
 lookup_symbol_aux_block (const char *name, const char *mangled_name,
 			 const struct block *block,
-			 const namespace_enum namespace,
+			 const domain_enum domain,
 			 struct symtab **symtab)
 {
   struct symbol *sym;
@@ -1184,7 +1184,7 @@ lookup_symbol_aux_block (const char *name, const char *mangled_name,
   struct block *b;
   struct symtab *s = NULL;
 
-  sym = lookup_block_symbol (block, name, mangled_name, namespace);
+  sym = lookup_block_symbol (block, name, mangled_name, domain);
   if (sym)
     {
       block_found = block;
@@ -1218,7 +1218,7 @@ lookup_symbol_aux_block (const char *name, const char *mangled_name,
 static struct symbol *
 lookup_symbol_aux_symtabs (int block_index,
 			   const char *name, const char *mangled_name,
-			   const namespace_enum namespace,
+			   const domain_enum domain,
 			   struct symtab **symtab)
 {
   struct symbol *sym;
@@ -1231,7 +1231,7 @@ lookup_symbol_aux_symtabs (int block_index,
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, block_index);
-    sym = lookup_block_symbol (block, name, mangled_name, namespace);
+    sym = lookup_block_symbol (block, name, mangled_name, domain);
     if (sym)
       {
 	block_found = block;
@@ -1252,7 +1252,7 @@ lookup_symbol_aux_symtabs (int block_index,
 static struct symbol *
 lookup_symbol_aux_psymtabs (int block_index, const char *name,
 			    const char *mangled_name,
-			    const namespace_enum namespace,
+			    const domain_enum domain,
 			    struct symtab **symtab)
 {
   struct symbol *sym;
@@ -1267,12 +1267,12 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
   {
     if (!ps->readin
 	&& lookup_partial_symbol (ps, name, mangled_name,
-				  psymtab_index, namespace))
+				  psymtab_index, domain))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, block_index);
-	sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	sym = lookup_block_symbol (block, name, mangled_name, domain);
 	if (!sym)
 	  {
 	    /* This shouldn't be necessary, but as a last resort try
@@ -1289,7 +1289,7 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 	    block = BLOCKVECTOR_BLOCK (bv,
 				       block_index == GLOBAL_BLOCK ?
 				       STATIC_BLOCK : GLOBAL_BLOCK);
-	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	    sym = lookup_block_symbol (block, name, mangled_name, domain);
 	    if (!sym)
 	      error ("Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
 		     block_index == GLOBAL_BLOCK ? "global" : "static",
@@ -1320,7 +1320,7 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 static struct symbol *
 lookup_symbol_aux_minsyms (const char *name,
 			   const char *mangled_name,
-			   const namespace_enum namespace,
+			   const domain_enum domain,
 			   int *is_a_field_of_this,
 			   struct symtab **symtab)
 {
@@ -1330,7 +1330,7 @@ lookup_symbol_aux_minsyms (const char *name,
   struct minimal_symbol *msymbol;
   struct symtab *s;
 
-  if (namespace == VAR_NAMESPACE)
+  if (domain == VAR_DOMAIN)
     {
       msymbol = lookup_minimal_symbol (name, NULL, NULL);
 
@@ -1364,14 +1364,14 @@ lookup_symbol_aux_minsyms (const char *name,
 	         to be clearly the wrong thing to pass as the
 	         unmangled name.  */
 	      sym =
-		lookup_block_symbol (block, name, mangled_name, namespace);
+		lookup_block_symbol (block, name, mangled_name, domain);
 	      /* We kept static functions in minimal symbol table as well as
 	         in static scope. We want to find them in the symbol table. */
 	      if (!sym)
 		{
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 		  sym = lookup_block_symbol (block, name,
-					     mangled_name, namespace);
+					     mangled_name, domain);
 		}
 
 	      /* NOTE: carlton/2002-12-04: The following comment was
@@ -1424,7 +1424,7 @@ lookup_symbol_aux_minsyms (const char *name,
 	      /* This is a mangled variable, look it up by its
 	         mangled name.  */
 	      return lookup_symbol_aux (DEPRECATED_SYMBOL_NAME (msymbol), mangled_name,
-					NULL, namespace, is_a_field_of_this,
+					NULL, domain, is_a_field_of_this,
 					symtab);
 	    }
 	}
@@ -1441,7 +1441,7 @@ lookup_symbol_aux_minsyms (const char *name,
 static struct partial_symbol *
 lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 		       const char *linkage_name, int global,
-		       namespace_enum namespace)
+		       domain_enum domain)
 {
   struct partial_symbol *temp;
   struct partial_symbol **start, **psym;
@@ -1465,7 +1465,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
          pointing at the earliest partial symbol whose name might be
          correct.  At that point *all* partial symbols with an
          appropriate name will be checked against the correct
-         namespace.  */
+         domain.  */
 
       bottom = start;
       top = start + length - 1;
@@ -1497,7 +1497,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 		 ? strcmp (SYMBOL_LINKAGE_NAME (*top), linkage_name) == 0
 		 : SYMBOL_MATCHES_NATURAL_NAME (*top,name)))
 	{
-	  if (SYMBOL_NAMESPACE (*top) == namespace)
+	  if (SYMBOL_DOMAIN (*top) == domain)
 	    {
 		  return (*top);
 	    }
@@ -1512,7 +1512,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
     {			
       for (psym = start; psym < start + length; psym++)
 	{
-	  if (namespace == SYMBOL_NAMESPACE (*psym))
+	  if (domain == SYMBOL_DOMAIN (*psym))
 	    {
 	      if (linkage_name != NULL
 		  ? strcmp (SYMBOL_LINKAGE_NAME (*psym), linkage_name) == 0
@@ -1527,12 +1527,12 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
   return (NULL);
 }
 
-/* Look up a type named NAME in the struct_namespace.  The type returned
+/* Look up a type named NAME in the struct_domain.  The type returned
    must not be opaque -- i.e., must have at least one field defined
 
    This code was modelled on lookup_symbol -- the parts not relevant to looking
    up types were just left out.  In particular it's assumed here that types
-   are available in struct_namespace and only at file-static or global blocks. */
+   are available in struct_domain and only at file-static or global blocks. */
 
 
 struct type *
@@ -1554,7 +1554,7 @@ lookup_transparent_type (const char *name)
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-    sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
+    sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
     if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
       {
 	return SYMBOL_TYPE (sym);
@@ -1564,12 +1564,12 @@ lookup_transparent_type (const char *name)
   ALL_PSYMTABS (objfile, ps)
   {
     if (!ps->readin && lookup_partial_symbol (ps, name, NULL,
-					      1, STRUCT_NAMESPACE))
+					      1, STRUCT_DOMAIN))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
+	sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
 	if (!sym)
 	  {
 	    /* This shouldn't be necessary, but as a last resort
@@ -1578,7 +1578,7 @@ lookup_transparent_type (const char *name)
 	     * the psymtab gets it wrong in some cases.
 	     */
 	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	    sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
+	    sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
 	    if (!sym)
 	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
@@ -1602,7 +1602,7 @@ lookup_transparent_type (const char *name)
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-    sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
+    sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
     if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
       {
 	return SYMBOL_TYPE (sym);
@@ -1611,12 +1611,12 @@ lookup_transparent_type (const char *name)
 
   ALL_PSYMTABS (objfile, ps)
   {
-    if (!ps->readin && lookup_partial_symbol (ps, name, NULL, 0, STRUCT_NAMESPACE))
+    if (!ps->readin && lookup_partial_symbol (ps, name, NULL, 0, STRUCT_DOMAIN))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
+	sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
 	if (!sym)
 	  {
 	    /* This shouldn't be necessary, but as a last resort
@@ -1625,7 +1625,7 @@ lookup_transparent_type (const char *name)
 	     * the psymtab gets it wrong in some cases.
 	     */
 	    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	    sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
+	    sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
 	    if (!sym)
 	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
@@ -1652,7 +1652,7 @@ find_main_psymtab (void)
 
   ALL_PSYMTABS (objfile, pst)
   {
-    if (lookup_partial_symbol (pst, main_name (), NULL, 1, VAR_NAMESPACE))
+    if (lookup_partial_symbol (pst, main_name (), NULL, 1, VAR_DOMAIN))
       {
 	return (pst);
       }
@@ -1660,7 +1660,7 @@ find_main_psymtab (void)
   return (NULL);
 }
 
-/* Search BLOCK for symbol NAME in NAMESPACE.
+/* Search BLOCK for symbol NAME in DOMAIN.
 
    Note that if NAME is the demangled form of a C++ symbol, we will fail
    to find a match during the binary search of the non-encoded names, but
@@ -1678,7 +1678,7 @@ find_main_psymtab (void)
 struct symbol *
 lookup_block_symbol (register const struct block *block, const char *name,
 		     const char *mangled_name,
-		     const namespace_enum namespace)
+		     const domain_enum domain)
 {
   register int bot, top, inc;
   register struct symbol *sym;
@@ -1692,7 +1692,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
       hash_index = hash_index % BLOCK_BUCKETS (block);
       for (sym = BLOCK_BUCKET (block, hash_index); sym; sym = sym->hash_next)
 	{
-	  if (SYMBOL_NAMESPACE (sym) == namespace 
+	  if (SYMBOL_DOMAIN (sym) == domain 
 	      && (mangled_name
 		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
 		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
@@ -1749,9 +1749,9 @@ lookup_block_symbol (register const struct block *block, const char *name,
 
       /* Now scan forward until we run out of symbols, find one whose
          name is greater than NAME, or find one we want.  If there is
-         more than one symbol with the right name and namespace, we
+         more than one symbol with the right name and domain, we
          return the first one; I believe it is now impossible for us
-         to encounter two symbols with the same name and namespace
+         to encounter two symbols with the same name and domain
          here, because blocks containing argument symbols are no
          longer sorted.  The exception is for C++, where multiple functions
 	 (cloned constructors / destructors, in particular) can have
@@ -1762,7 +1762,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
       while (bot < top)
 	{
 	  sym = BLOCK_SYM (block, bot);
-	  if (SYMBOL_NAMESPACE (sym) == namespace
+	  if (SYMBOL_DOMAIN (sym) == domain
 	      && (mangled_name
 		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
 		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
@@ -1797,7 +1797,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
       while (bot < top)
 	{
 	  sym = BLOCK_SYM (block, bot);
-	  if (SYMBOL_NAMESPACE (sym) == namespace
+	  if (SYMBOL_DOMAIN (sym) == domain
 	      && (mangled_name
 		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
 		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
@@ -2868,10 +2868,10 @@ sort_search_symbols (struct symbol_search *prevtail, int nfound)
    returning the results in *MATCHES.
 
    Only symbols of KIND are searched:
-   FUNCTIONS_NAMESPACE - search all functions
-   TYPES_NAMESPACE     - search all type names
-   METHODS_NAMESPACE   - search all methods NOT IMPLEMENTED
-   VARIABLES_NAMESPACE - search all symbols, excluding functions, type names,
+   FUNCTIONS_DOMAIN - search all functions
+   TYPES_DOMAIN     - search all type names
+   METHODS_DOMAIN   - search all methods NOT IMPLEMENTED
+   VARIABLES_DOMAIN - search all symbols, excluding functions, type names,
    and constants (enums)
 
    free_search_symbols should be called when *MATCHES is no longer needed.
@@ -2880,7 +2880,7 @@ sort_search_symbols (struct symbol_search *prevtail, int nfound)
    separately alphabetized.
  */
 void
-search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
+search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 		struct symbol_search **matches)
 {
   register struct symtab *s;
@@ -2917,13 +2917,13 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
   struct symbol_search *tail;
   struct cleanup *old_chain = NULL;
 
-  if (kind < VARIABLES_NAMESPACE)
-    error ("must search on specific namespace");
+  if (kind < VARIABLES_DOMAIN)
+    error ("must search on specific domain");
 
-  ourtype = types[(int) (kind - VARIABLES_NAMESPACE)];
-  ourtype2 = types2[(int) (kind - VARIABLES_NAMESPACE)];
-  ourtype3 = types3[(int) (kind - VARIABLES_NAMESPACE)];
-  ourtype4 = types4[(int) (kind - VARIABLES_NAMESPACE)];
+  ourtype = types[(int) (kind - VARIABLES_DOMAIN)];
+  ourtype2 = types2[(int) (kind - VARIABLES_DOMAIN)];
+  ourtype3 = types3[(int) (kind - VARIABLES_DOMAIN)];
+  ourtype4 = types4[(int) (kind - VARIABLES_DOMAIN)];
 
   sr = *matches = NULL;
   tail = NULL;
@@ -3005,11 +3005,11 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	    if (file_matches (ps->filename, files, nfiles)
 		&& ((regexp == NULL
 		     || re_exec (SYMBOL_NATURAL_NAME (*psym)) != 0)
-		    && ((kind == VARIABLES_NAMESPACE && SYMBOL_CLASS (*psym) != LOC_TYPEDEF
+		    && ((kind == VARIABLES_DOMAIN && SYMBOL_CLASS (*psym) != LOC_TYPEDEF
 			 && SYMBOL_CLASS (*psym) != LOC_BLOCK)
-			|| (kind == FUNCTIONS_NAMESPACE && SYMBOL_CLASS (*psym) == LOC_BLOCK)
-			|| (kind == TYPES_NAMESPACE && SYMBOL_CLASS (*psym) == LOC_TYPEDEF)
-			|| (kind == METHODS_NAMESPACE && SYMBOL_CLASS (*psym) == LOC_BLOCK))))
+			|| (kind == FUNCTIONS_DOMAIN && SYMBOL_CLASS (*psym) == LOC_BLOCK)
+			|| (kind == TYPES_DOMAIN && SYMBOL_CLASS (*psym) == LOC_TYPEDEF)
+			|| (kind == METHODS_DOMAIN && SYMBOL_CLASS (*psym) == LOC_BLOCK))))
 	      {
 		PSYMTAB_TO_SYMTAB (ps);
 		keep_going = 0;
@@ -3032,7 +3032,7 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
      any matching symbols without debug info.
    */
 
-  if (nfiles == 0 && (kind == VARIABLES_NAMESPACE || kind == FUNCTIONS_NAMESPACE))
+  if (nfiles == 0 && (kind == VARIABLES_DOMAIN || kind == FUNCTIONS_DOMAIN))
     {
       ALL_MSYMBOLS (objfile, msymbol)
       {
@@ -3052,10 +3052,10 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 		       function lookup_symbol_minsym that found the
 		       symbol associated to a given minimal symbol (if
 		       any).  */
-		    if (kind == FUNCTIONS_NAMESPACE
+		    if (kind == FUNCTIONS_DOMAIN
 			|| lookup_symbol (DEPRECATED_SYMBOL_NAME (msymbol),
 					  (struct block *) NULL,
-					  VAR_NAMESPACE,
+					  VAR_DOMAIN,
 					0, (struct symtab **) NULL) == NULL)
 		      found_misc = 1;
 		  }
@@ -3084,12 +3084,12 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	      if (file_matches (s->filename, files, nfiles)
 		  && ((regexp == NULL
 		       || re_exec (SYMBOL_NATURAL_NAME (sym)) != 0)
-		      && ((kind == VARIABLES_NAMESPACE && SYMBOL_CLASS (sym) != LOC_TYPEDEF
+		      && ((kind == VARIABLES_DOMAIN && SYMBOL_CLASS (sym) != LOC_TYPEDEF
 			   && SYMBOL_CLASS (sym) != LOC_BLOCK
 			   && SYMBOL_CLASS (sym) != LOC_CONST)
-			  || (kind == FUNCTIONS_NAMESPACE && SYMBOL_CLASS (sym) == LOC_BLOCK)
-			  || (kind == TYPES_NAMESPACE && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-			  || (kind == METHODS_NAMESPACE && SYMBOL_CLASS (sym) == LOC_BLOCK))))
+			  || (kind == FUNCTIONS_DOMAIN && SYMBOL_CLASS (sym) == LOC_BLOCK)
+			  || (kind == TYPES_DOMAIN && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+			  || (kind == METHODS_DOMAIN && SYMBOL_CLASS (sym) == LOC_BLOCK))))
 		{
 		  /* match */
 		  psr = (struct symbol_search *) xmalloc (sizeof (struct symbol_search));
@@ -3128,7 +3128,7 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
   /* If there are no eyes, avoid all contact.  I mean, if there are
      no debug symbols, then print directly from the msymbol_vector.  */
 
-  if (found_misc || kind != FUNCTIONS_NAMESPACE)
+  if (found_misc || kind != FUNCTIONS_DOMAIN)
     {
       ALL_MSYMBOLS (objfile, msymbol)
       {
@@ -3141,12 +3141,12 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 		|| re_exec (SYMBOL_NATURAL_NAME (msymbol)) != 0)
 	      {
 		/* Functions:  Look up by address. */
-		if (kind != FUNCTIONS_NAMESPACE ||
+		if (kind != FUNCTIONS_DOMAIN ||
 		    (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol))))
 		  {
 		    /* Variables/Absolutes:  Look up by name */
 		    if (lookup_symbol (DEPRECATED_SYMBOL_NAME (msymbol),
-				       (struct block *) NULL, VAR_NAMESPACE,
+				       (struct block *) NULL, VAR_DOMAIN,
 				       0, (struct symtab **) NULL) == NULL)
 		      {
 			/* match */
@@ -3181,7 +3181,7 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
    regarding the match to gdb_stdout.
  */
 static void
-print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
+print_symbol_info (domain_enum kind, struct symtab *s, struct symbol *sym,
 		   int block, char *last)
 {
   if (last == NULL || strcmp (last, s->filename) != 0)
@@ -3191,17 +3191,17 @@ print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
       fputs_filtered (":\n", gdb_stdout);
     }
 
-  if (kind != TYPES_NAMESPACE && block == STATIC_BLOCK)
+  if (kind != TYPES_DOMAIN && block == STATIC_BLOCK)
     printf_filtered ("static ");
 
   /* Typedef that is not a C++ class */
-  if (kind == TYPES_NAMESPACE
-      && SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE)
+  if (kind == TYPES_DOMAIN
+      && SYMBOL_DOMAIN (sym) != STRUCT_DOMAIN)
     typedef_print (SYMBOL_TYPE (sym), sym, gdb_stdout);
   /* variable, func, or typedef-that-is-c++-class */
-  else if (kind < TYPES_NAMESPACE ||
-	   (kind == TYPES_NAMESPACE &&
-	    SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE))
+  else if (kind < TYPES_DOMAIN ||
+	   (kind == TYPES_DOMAIN &&
+	    SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN))
     {
       type_print (SYMBOL_TYPE (sym),
 		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
@@ -3237,7 +3237,7 @@ print_msymbol_info (struct minimal_symbol *msymbol)
    matches.
  */
 static void
-symtab_symbol_info (char *regexp, namespace_enum kind, int from_tty)
+symtab_symbol_info (char *regexp, domain_enum kind, int from_tty)
 {
   static char *classnames[]
   =
@@ -3255,7 +3255,7 @@ symtab_symbol_info (char *regexp, namespace_enum kind, int from_tty)
   printf_filtered (regexp
 		   ? "All %ss matching regular expression \"%s\":\n"
 		   : "All defined %ss:\n",
-		   classnames[(int) (kind - VARIABLES_NAMESPACE)], regexp);
+		   classnames[(int) (kind - VARIABLES_DOMAIN)], regexp);
 
   for (p = symbols; p != NULL; p = p->next)
     {
@@ -3287,20 +3287,20 @@ symtab_symbol_info (char *regexp, namespace_enum kind, int from_tty)
 static void
 variables_info (char *regexp, int from_tty)
 {
-  symtab_symbol_info (regexp, VARIABLES_NAMESPACE, from_tty);
+  symtab_symbol_info (regexp, VARIABLES_DOMAIN, from_tty);
 }
 
 static void
 functions_info (char *regexp, int from_tty)
 {
-  symtab_symbol_info (regexp, FUNCTIONS_NAMESPACE, from_tty);
+  symtab_symbol_info (regexp, FUNCTIONS_DOMAIN, from_tty);
 }
 
 
 static void
 types_info (char *regexp, int from_tty)
 {
-  symtab_symbol_info (regexp, TYPES_NAMESPACE, from_tty);
+  symtab_symbol_info (regexp, TYPES_DOMAIN, from_tty);
 }
 
 /* Breakpoint all functions matching regular expression. */
@@ -3318,7 +3318,7 @@ rbreak_command (char *regexp, int from_tty)
   struct symbol_search *p;
   struct cleanup *old_chain;
 
-  search_symbols (regexp, FUNCTIONS_NAMESPACE, 0, (char **) NULL, &ss);
+  search_symbols (regexp, FUNCTIONS_DOMAIN, 0, (char **) NULL, &ss);
   old_chain = make_cleanup_free_search_symbols (ss);
 
   for (p = ss; p != NULL; p = p->next)
@@ -3333,7 +3333,7 @@ rbreak_command (char *regexp, int from_tty)
 	  strcat (string, DEPRECATED_SYMBOL_NAME (p->symbol));
 	  strcat (string, "'");
 	  break_command (string, from_tty);
-	  print_symbol_info (FUNCTIONS_NAMESPACE,
+	  print_symbol_info (FUNCTIONS_DOMAIN,
 			     p->symtab,
 			     p->symbol,
 			     p->block,
@@ -4102,9 +4102,9 @@ make_symbol_overload_list (struct symbol *fsym)
     if (ps->readin)
       continue;
 
-    if ((lookup_partial_symbol (ps, oload_name, NULL, 1, VAR_NAMESPACE)
+    if ((lookup_partial_symbol (ps, oload_name, NULL, 1, VAR_DOMAIN)
 	 != NULL)
-	|| (lookup_partial_symbol (ps, oload_name, NULL, 0, VAR_NAMESPACE)
+	|| (lookup_partial_symbol (ps, oload_name, NULL, 0, VAR_DOMAIN)
 	    != NULL))
       PSYMTAB_TO_SYMTAB (ps);
   }

@@ -418,7 +418,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 			       sizeof (struct symbol));
 
 	      memset (sym, 0, sizeof (struct symbol));
-	      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+	      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
 	      DEPRECATED_SYMBOL_NAME (sym) =
 		obsavestring (name, pp - name, &objfile->symbol_obstack);
@@ -677,7 +677,7 @@ read_type_number (register char **pp, register int *typenums)
 // OBSOLETE  	    return 1;
 // OBSOLETE  	  }
 // OBSOLETE  	/* FIXME! attach base info to type */
-// OBSOLETE  	bsym = lookup_symbol (bname, 0, STRUCT_NAMESPACE, 0, 0);	/*demangled_name */
+// OBSOLETE  	bsym = lookup_symbol (bname, 0, STRUCT_DOMAIN, 0, 0);	/*demangled_name */
 // OBSOLETE  	if (bsym)
 // OBSOLETE  	  {
 // OBSOLETE  	    new->field.type = SYMBOL_TYPE (bsym);
@@ -750,7 +750,7 @@ read_type_number (register char **pp, register int *typenums)
 // OBSOLETE  	  sublist_count++;
 // OBSOLETE  	  fname++;
 // OBSOLETE  	}
-// OBSOLETE        ref_func = lookup_symbol (fname, 0, VAR_NAMESPACE, 0, 0);		/* demangled name */
+// OBSOLETE        ref_func = lookup_symbol (fname, 0, VAR_DOMAIN, 0, 0);		/* demangled name */
 // OBSOLETE        if (!ref_func)
 // OBSOLETE  	{
 // OBSOLETE  	  complaint (&symfile_complaints,
@@ -946,7 +946,7 @@ read_type_number (register char **pp, register int *typenums)
 // OBSOLETE    /* Find symbol's internal gdb reference using demangled_name.
 // OBSOLETE       This is the real sym that we want; 
 // OBSOLETE       sym was a temp hack to make debugger happy */
-// OBSOLETE    ref_sym = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym), 0, STRUCT_NAMESPACE, 0, 0);
+// OBSOLETE    ref_sym = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym), 0, STRUCT_DOMAIN, 0, 0);
 // OBSOLETE    type = SYMBOL_TYPE (ref_sym);
 
 
@@ -1379,7 +1379,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	{
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_TYPE (sym) = error_type (&p, objfile);
-	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  add_symbol_to_list (sym, &file_symbols);
 	  return sym;
 	}
@@ -1472,7 +1472,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    SYMBOL_TYPE (sym) = error_type (&p, objfile);
 	  }
 	}
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &file_symbols);
       return sym;
 
@@ -1480,7 +1480,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* The name of a caught exception.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_LABEL;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
       add_symbol_to_list (sym, &local_symbols);
       break;
@@ -1489,7 +1489,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* A static function definition.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_BLOCK;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &file_symbols);
       /* fall into process_function_types.  */
 
@@ -1560,7 +1560,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* A global function definition.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_BLOCK;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &global_symbols);
       goto process_function_types;
 
@@ -1571,7 +1571,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
          These definitions appear at the end of the namelist.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_STATIC;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       /* Don't add symbol references to global_sym_chain.
          Symbol references don't have valid names and wont't match up with
          minimal symbols when the global_sym_chain is relocated.
@@ -1593,7 +1593,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_LOCAL;
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
       break;
 
@@ -1613,7 +1613,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
       SYMBOL_CLASS (sym) = LOC_ARG;
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
 
       if (TARGET_BYTE_ORDER != BFD_ENDIAN_BIG)
@@ -1725,7 +1725,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 			       SYMBOL_PRINT_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
       break;
 
@@ -1741,7 +1741,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 			       SYMBOL_PRINT_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       if (within_function)
 	{
 	  /* Sun cc uses a pair of symbols, one 'p' and one 'r' with the same
@@ -1812,7 +1812,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    }
 	}
 #endif
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &file_symbols);
       break;
 
@@ -1827,7 +1827,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       /* C++ vagaries: we may have a type which is derived from
          a base type which did not have its name defined when the
          derived class was output.  We fill in the derived class's
@@ -1928,7 +1928,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
       if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
 	TYPE_TAG_NAME (SYMBOL_TYPE (sym))
 	  = obconcat (&objfile->type_obstack, "", "", DEPRECATED_SYMBOL_NAME (sym));
@@ -1942,7 +1942,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  *typedef_sym = *sym;
 	  SYMBOL_CLASS (typedef_sym) = LOC_TYPEDEF;
 	  SYMBOL_VALUE (typedef_sym) = valu;
-	  SYMBOL_NAMESPACE (typedef_sym) = VAR_NAMESPACE;
+	  SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
 	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 	    TYPE_NAME (SYMBOL_TYPE (sym))
 	      = obconcat (&objfile->type_obstack, "", "", DEPRECATED_SYMBOL_NAME (sym));
@@ -1967,7 +1967,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    }
 	}
 #endif
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	add_symbol_to_list (sym, &local_symbols);
       break;
 
@@ -1976,7 +1976,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REF_ARG;
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
       break;
 
@@ -1992,7 +1992,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 			       SYMBOL_PRINT_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
       break;
 
@@ -2004,7 +2004,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_LOCAL;
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
       break;
 #if 0 /* OBSOLETE CFront */
@@ -2027,7 +2027,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 // OBSOLETE        SYMBOL_TYPE (sym) = error_type (&p, objfile);	/* FIXME! change later */
 // OBSOLETE        SYMBOL_CLASS (sym) = LOC_CONST;
 // OBSOLETE        SYMBOL_VALUE (sym) = 0;
-// OBSOLETE        SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+// OBSOLETE        SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 // OBSOLETE        /* Don't add to list - we'll delete it later when 
 // OBSOLETE           we add the continuation to the real sym */
 // OBSOLETE        return sym;
@@ -2038,7 +2038,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = error_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_VALUE (sym) = 0;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &file_symbols);
       break;
     }
@@ -2393,7 +2393,7 @@ again:
 	      struct symbol *sym = ppt->symbol[i];
 
 	      if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-		  && SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE
+		  && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		  && (TYPE_CODE (SYMBOL_TYPE (sym)) == code)
 		  && STREQ (DEPRECATED_SYMBOL_NAME (sym), type_name))
 		{
@@ -4068,7 +4068,7 @@ attach_fn_fields_to_type (struct field_info *fip, register struct type *type)
 // OBSOLETE    STABS_CONTINUE (pp, objfile);	/* handle \\ */
 // OBSOLETE    while (**pp != ';' && (sname = get_substring (pp, ' '), sname))
 // OBSOLETE      {
-// OBSOLETE        ref_static = lookup_symbol (sname, 0, VAR_NAMESPACE, 0, 0);	/*demangled_name */
+// OBSOLETE        ref_static = lookup_symbol (sname, 0, VAR_DOMAIN, 0, 0);	/*demangled_name */
 // OBSOLETE        if (!ref_static)
 // OBSOLETE  	{
 // OBSOLETE  	  complaint (&symfile_complaints,
@@ -4500,7 +4500,7 @@ read_enum_type (register char **pp, register struct type *type,
       DEPRECATED_SYMBOL_NAME (sym) = name;
       SYMBOL_LANGUAGE (sym) = current_subfile->language;
       SYMBOL_CLASS (sym) = LOC_CONST;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_VALUE (sym) = n;
       if (n < 0)
 	unsigned_enum = 0;
@@ -5187,7 +5187,7 @@ cleanup_undefined_types (void)
 			struct symbol *sym = ppt->symbol[i];
 
 			if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-			    && SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE
+			    && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 			    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
 				TYPE_CODE (*type))
 			    && STREQ (DEPRECATED_SYMBOL_NAME (sym), typename))

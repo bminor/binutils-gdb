@@ -328,50 +328,50 @@ struct minimal_symbol
 
 /* Represent one symbol name; a variable, constant, function or typedef.  */
 
-/* Different name spaces for symbols.  Looking up a symbol specifies a
-   namespace and ignores symbol definitions in other name spaces. */
+/* Different name domains for symbols.  Looking up a symbol specifies a
+   domain and ignores symbol definitions in other name domains. */
 
 typedef enum
 {
-  /* UNDEF_NAMESPACE is used when a namespace has not been discovered or
+  /* UNDEF_DOMAIN is used when a domain has not been discovered or
      none of the following apply.  This usually indicates an error either
      in the symbol information or in gdb's handling of symbols. */
 
-  UNDEF_NAMESPACE,
+  UNDEF_DOMAIN,
 
-  /* VAR_NAMESPACE is the usual namespace.  In C, this contains variables,
+  /* VAR_DOMAIN is the usual domain.  In C, this contains variables,
      function names, typedef names and enum type values. */
 
-  VAR_NAMESPACE,
+  VAR_DOMAIN,
 
-  /* STRUCT_NAMESPACE is used in C to hold struct, union and enum type names.
+  /* STRUCT_DOMAIN is used in C to hold struct, union and enum type names.
      Thus, if `struct foo' is used in a C program, it produces a symbol named
-     `foo' in the STRUCT_NAMESPACE. */
+     `foo' in the STRUCT_DOMAIN. */
 
-  STRUCT_NAMESPACE,
+  STRUCT_DOMAIN,
 
-  /* LABEL_NAMESPACE may be used for names of labels (for gotos);
+  /* LABEL_DOMAIN may be used for names of labels (for gotos);
      currently it is not used and labels are not recorded at all.  */
 
-  LABEL_NAMESPACE,
+  LABEL_DOMAIN,
 
-  /* Searching namespaces. These overlap with VAR_NAMESPACE, providing
+  /* Searching domains. These overlap with VAR_DOMAIN, providing
      some granularity with the search_symbols function. */
 
-  /* Everything in VAR_NAMESPACE minus FUNCTIONS_-, TYPES_-, and
-     METHODS_NAMESPACE */
-  VARIABLES_NAMESPACE,
+  /* Everything in VAR_DOMAIN minus FUNCTIONS_-, TYPES_-, and
+     METHODS_DOMAIN */
+  VARIABLES_DOMAIN,
 
   /* All functions -- for some reason not methods, though. */
-  FUNCTIONS_NAMESPACE,
+  FUNCTIONS_DOMAIN,
 
   /* All defined types */
-  TYPES_NAMESPACE,
+  TYPES_DOMAIN,
 
   /* All class methods -- why is this separated out? */
-  METHODS_NAMESPACE
+  METHODS_DOMAIN
 }
-namespace_enum;
+domain_enum;
 
 /* An address-class says where to find the value of a symbol.  */
 
@@ -427,8 +427,8 @@ enum address_class
 
   LOC_LOCAL,
 
-  /* Value not used; definition in SYMBOL_TYPE.  Symbols in the namespace
-     STRUCT_NAMESPACE all have this class.  */
+  /* Value not used; definition in SYMBOL_TYPE.  Symbols in the domain
+     STRUCT_DOMAIN all have this class.  */
 
   LOC_TYPEDEF,
 
@@ -593,14 +593,9 @@ struct symbol
 
   struct type *type;
 
-  /* Name space code.  */
+  /* Domain code.  */
 
-#ifdef __MFC4__
-  /* FIXME: don't conflict with C++'s namespace */
-  /* would be safer to do a global change for all namespace identifiers. */
-#define namespace _namespace
-#endif
-  namespace_enum namespace BYTE_BITFIELD;
+  domain_enum domain BYTE_BITFIELD;
 
   /* Address class */
 
@@ -656,7 +651,7 @@ struct symbol
 };
 
 
-#define SYMBOL_NAMESPACE(symbol)	(symbol)->namespace
+#define SYMBOL_DOMAIN(symbol)	(symbol)->domain
 #define SYMBOL_CLASS(symbol)		(symbol)->aclass
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
@@ -667,7 +662,7 @@ struct symbol
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.loc.baton
 #define SYMBOL_LOCATION_FUNCS(symbol)   (symbol)->aux_value.loc.funcs
 
-/* A partial_symbol records the name, namespace, and address class of
+/* A partial_symbol records the name, domain, and address class of
    symbols whose types we have not parsed yet.  For functions, it also
    contains their memory address, so we can find them from a PC value.
    Each partial_symbol sits in a partial_symtab, all of which are chained
@@ -683,7 +678,7 @@ struct partial_symbol
 
   /* Name space code.  */
 
-  namespace_enum namespace BYTE_BITFIELD;
+  domain_enum domain BYTE_BITFIELD;
 
   /* Address class (for info_symbols) */
 
@@ -691,7 +686,7 @@ struct partial_symbol
 
 };
 
-#define PSYMBOL_NAMESPACE(psymbol)	(psymbol)->namespace
+#define PSYMBOL_DOMAIN(psymbol)	(psymbol)->domain
 #define PSYMBOL_CLASS(psymbol)		(psymbol)->aclass
 
 
@@ -1000,14 +995,14 @@ extern struct symtab *lookup_symtab (const char *);
 /* lookup a symbol by name (optional block, optional symtab) */
 
 extern struct symbol *lookup_symbol (const char *, const struct block *,
-				     const namespace_enum, int *,
+				     const domain_enum, int *,
 				     struct symtab **);
 
 /* lookup a symbol by name, within a specified block */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,
 					   const char *,
-					   const namespace_enum);
+					   const domain_enum);
 
 /* lookup a [struct, union, enum] by name, within a specified block */
 
@@ -1320,7 +1315,7 @@ struct symbol_search
   struct symbol_search *next;
 };
 
-extern void search_symbols (char *, namespace_enum, int, char **,
+extern void search_symbols (char *, domain_enum, int, char **,
 			    struct symbol_search **);
 extern void free_search_symbols (struct symbol_search *);
 extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search

@@ -1973,10 +1973,10 @@ find_stub_with_shl_get (struct minimal_symbol *function, CORE_ADDR handle)
 
   args = alloca (sizeof (struct value *) * 8);		/* 6 for the arguments and one null one??? */
   funcval = find_function_in_inferior ("__d_shl_get");
-  get_sym = lookup_symbol ("__d_shl_get", NULL, VAR_NAMESPACE, NULL, NULL);
+  get_sym = lookup_symbol ("__d_shl_get", NULL, VAR_DOMAIN, NULL, NULL);
   buff_minsym = lookup_minimal_symbol ("__buffer", NULL, NULL);
   msymbol = lookup_minimal_symbol ("__shldp", NULL, NULL);
-  symbol2 = lookup_symbol ("__shldp", NULL, VAR_NAMESPACE, NULL, NULL);
+  symbol2 = lookup_symbol ("__shldp", NULL, VAR_DOMAIN, NULL, NULL);
   endo_buff_addr = SYMBOL_VALUE_ADDRESS (buff_minsym);
   namelen = strlen (DEPRECATED_SYMBOL_NAME (function));
   value_return_addr = endo_buff_addr + namelen;
@@ -4345,7 +4345,7 @@ initialize_hp_cxx_exception_support (void)
 
   /* Next look for the catch enable flag provided in end.o */
   sym = lookup_symbol (HP_ACC_EH_catch_catch, (struct block *) NULL,
-		       VAR_NAMESPACE, 0, (struct symtab **) NULL);
+		       VAR_DOMAIN, 0, (struct symtab **) NULL);
   if (sym)			/* sometimes present in debug info */
     {
       eh_catch_catch_addr = SYMBOL_VALUE_ADDRESS (sym);
@@ -4371,7 +4371,7 @@ initialize_hp_cxx_exception_support (void)
 
   /* Next look for the catch enable flag provided end.o */
   sym = lookup_symbol (HP_ACC_EH_catch_catch, (struct block *) NULL,
-		       VAR_NAMESPACE, 0, (struct symtab **) NULL);
+		       VAR_DOMAIN, 0, (struct symtab **) NULL);
   if (sym)			/* sometimes present in debug info */
     {
       eh_catch_throw_addr = SYMBOL_VALUE_ADDRESS (sym);

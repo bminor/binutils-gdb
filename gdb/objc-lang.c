@@ -116,7 +116,7 @@ lookup_struct_typedef (char *name, struct block *block, int noerr)
 {
   register struct symbol *sym;
 
-  sym = lookup_symbol (name, block, STRUCT_NAMESPACE, 0, 
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0, 
 		       (struct symtab **) NULL);
 
   if (sym == NULL)
@@ -1461,7 +1461,7 @@ char *find_imps (struct symtab *symtab, struct block *block,
     if (tmp == NULL)
       return NULL;
     
-    sym = lookup_symbol (selector, block, VAR_NAMESPACE, 0, &sym_symtab);
+    sym = lookup_symbol (selector, block, VAR_DOMAIN, 0, &sym_symtab);
     if (sym != NULL) 
       {
 	if (syms)

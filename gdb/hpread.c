@@ -789,7 +789,7 @@ scan_procs (int *curr_pd_p, quick_procedure_entry *qPD, int max_procs,
 					   strlen (rtn_name),
 					   rtn_dem_name,
 					   strlen (rtn_dem_name),
-					   VAR_NAMESPACE,
+					   VAR_DOMAIN,
 					   LOC_BLOCK,	/* "I am a routine"        */
 					   &objfile->global_psymbols,
 					   (qPD[curr_pd].adrStart +	/* Starting address of rtn */
@@ -802,7 +802,7 @@ scan_procs (int *curr_pd_p, quick_procedure_entry *qPD, int max_procs,
 					   strlen (rtn_name),
 					   rtn_dem_name,
 					   strlen (rtn_dem_name),
-					   VAR_NAMESPACE,
+					   VAR_DOMAIN,
 					   LOC_BLOCK,	/* "I am a routine"        */
 					   &objfile->static_psymbols,
 					   (qPD[curr_pd].adrStart +	/* Starting address of rtn */
@@ -2061,12 +2061,12 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 	      set_namestring (dn_bufp, &namestring, objfile);
 	      if (dn_bufp->dfunc.global)
 		add_psymbol_to_list (namestring, strlen (namestring),
-				     VAR_NAMESPACE, LOC_BLOCK,
+				     VAR_DOMAIN, LOC_BLOCK,
 				     &objfile->global_psymbols, valu,
 				     0, language_unknown, objfile);
 	      else
 		add_psymbol_to_list (namestring, strlen (namestring),
-				     VAR_NAMESPACE, LOC_BLOCK,
+				     VAR_DOMAIN, LOC_BLOCK,
 				     &objfile->static_psymbols, valu,
 				     0, language_unknown, objfile);
 	      within_function = 1;
@@ -2082,12 +2082,12 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 	      set_namestring (dn_bufp, &namestring, objfile);
 	      if (dn_bufp->ddocfunc.global)
 		add_psymbol_to_list (namestring, strlen (namestring),
-				     VAR_NAMESPACE, LOC_BLOCK,
+				     VAR_DOMAIN, LOC_BLOCK,
 				     &objfile->global_psymbols, valu,
 				     0, language_unknown, objfile);
 	      else
 		add_psymbol_to_list (namestring, strlen (namestring),
-				     VAR_NAMESPACE, LOC_BLOCK,
+				     VAR_DOMAIN, LOC_BLOCK,
 				     &objfile->static_psymbols, valu,
 				     0, language_unknown, objfile);
 	      within_function = 1;
@@ -2128,7 +2128,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 	      {
 		/* Variables, typedefs an the like.  */
 		enum address_class storage;
-		namespace_enum namespace;
+		domain_enum domain;
 
 		/* Don't add locals to the partial symbol table.  */
 		if (within_function
@@ -2136,11 +2136,11 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 			|| dn_bufp->dblock.kind == DNTT_TYPE_DVAR))
 		  continue;
 
-		/* TAGDEFs go into the structure namespace.  */
+		/* TAGDEFs go into the structure domain.  */
 		if (dn_bufp->dblock.kind == DNTT_TYPE_TAGDEF)
-		  namespace = STRUCT_NAMESPACE;
+		  domain = STRUCT_DOMAIN;
 		else
-		  namespace = VAR_NAMESPACE;
+		  domain = VAR_DOMAIN;
 
 		/* What kind of "storage" does this use?  */
 		if (dn_bufp->dblock.kind == DNTT_TYPE_SVAR)
@@ -2178,7 +2178,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 		if (dn_bufp->dsvar.global)
 		  {
 		    add_psymbol_to_list (namestring, strlen (namestring),
-					 namespace, storage,
+					 domain, storage,
 					 &objfile->global_psymbols,
 					 valu,
 					 0, language_unknown, objfile);
@@ -2186,18 +2186,18 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 		else
 		  {
 		    add_psymbol_to_list (namestring, strlen (namestring),
-					 namespace, storage,
+					 domain, storage,
 					 &objfile->static_psymbols,
 					 valu,
 					 0, language_unknown, objfile);
 		  }
 
 		/* For TAGDEF's, the above code added the tagname to the
-		   struct namespace. This will cause tag "t" to be found
+		   struct domain. This will cause tag "t" to be found
 		   on a reference of the form "(struct t) x". But for
 		   C++ classes, "t" will also be a typename, which we
 		   want to find on a reference of the form "ptype t".
-		   Therefore, we also add "t" to the var namespace.
+		   Therefore, we also add "t" to the var domain.
 		   Do the same for enum's due to the way aCC generates
 		   debug info for these (see more extended comment
 		   in hp-symtab-read.c).
@@ -2216,7 +2216,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 			if (global)
 			  {
 			    add_psymbol_to_list (namestring, strlen (namestring),
-						 VAR_NAMESPACE, storage,
+						 VAR_DOMAIN, storage,
 						 &objfile->global_psymbols,
 						 dn_bufp->dsvar.location,
 					      0, language_unknown, objfile);
@@ -2224,7 +2224,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 			else
 			  {
 			    add_psymbol_to_list (namestring, strlen (namestring),
-						 VAR_NAMESPACE, storage,
+						 VAR_DOMAIN, storage,
 						 &objfile->static_psymbols,
 						 dn_bufp->dsvar.location,
 					      0, language_unknown, objfile);
@@ -2249,12 +2249,12 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 		}
 	      if (dn_bufp->dconst.global)
 		add_psymbol_to_list (namestring, strlen (namestring),
-				     VAR_NAMESPACE, LOC_CONST,
+				     VAR_DOMAIN, LOC_CONST,
 				     &objfile->global_psymbols, 0,
 				     0, language_unknown, objfile);
 	      else
 		add_psymbol_to_list (namestring, strlen (namestring),
-				     VAR_NAMESPACE, LOC_CONST,
+				     VAR_DOMAIN, LOC_CONST,
 				     &objfile->static_psymbols, 0,
 				     0, language_unknown, objfile);
 	      continue;
@@ -3133,7 +3133,7 @@ hpread_read_enum_type (dnttpointer hp_type, union dnttentry *dn_bufp,
       DEPRECATED_SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
 					&objfile->symbol_obstack);
       SYMBOL_CLASS (sym) = LOC_CONST;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_VALUE (sym) = memp->dmember.value;
       add_symbol_to_list (sym, symlist);
       nsyms++;
@@ -3248,7 +3248,7 @@ hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	SYMBOL_CLASS (sym) = LOC_REF_ARG;
       else
 	SYMBOL_CLASS (sym) = LOC_ARG;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       if (paramp->dfparam.copyparam)
 	{
 	  SYMBOL_VALUE (sym) = paramp->dfparam.location;
@@ -3427,7 +3427,7 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	SYMBOL_CLASS (sym) = LOC_REF_ARG;
       else
 	SYMBOL_CLASS (sym) = LOC_ARG;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       if (paramp->dfparam.copyparam)
 	{
 	  SYMBOL_VALUE (sym) = paramp->dfparam.location;
@@ -5100,7 +5100,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
   memset (sym, 0, sizeof (struct symbol));
   DEPRECATED_SYMBOL_NAME (sym) = obsavestring (name, strlen (name), &objfile->symbol_obstack);
   SYMBOL_LANGUAGE (sym) = language_auto;
-  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
   SYMBOL_LINE (sym) = 0;
   SYMBOL_VALUE (sym) = 0;
   SYMBOL_CLASS (sym) = LOC_TYPEDEF;
@@ -5660,7 +5660,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
       /* DNTT_TYPE_IMPORT is not handled */
 
     case DNTT_TYPE_LABEL:
-      SYMBOL_NAMESPACE (sym) = LABEL_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = LABEL_DOMAIN;
       break;
 
     case DNTT_TYPE_FPARAM:
@@ -5695,7 +5695,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	SYMBOL_CLASS (sym) = LOC_REF_ARG;
       else
 	SYMBOL_CLASS (sym) = LOC_ARG;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       if (dn_bufp->dfparam.copyparam)
 	{
 	  SYMBOL_VALUE (sym) = dn_bufp->dfparam.location;
@@ -5811,9 +5811,9 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 
     case DNTT_TYPE_TYPEDEF:
       /* A typedef. We do want to process these, since a name is
-       * added to the namespace for the typedef'ed name.
+       * added to the domain for the typedef'ed name.
        */
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dtype.type, objfile);
       if (dn_bufp->dtype.global)
 	add_symbol_to_list (sym, &global_symbols);
@@ -5828,10 +5828,10 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	int global = dn_bufp->dtag.global;
 	/* Structure, union, enum, template, or class tag definition */
 	/* We do want to process these, since a name is
-	 * added to the namespace for the tag name (and if C++ class,
+	 * added to the domain for the tag name (and if C++ class,
 	 * for the typename also).
 	 */
-	SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
+	SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
 
 	/* The tag contains in its "type" field a pointer to the
 	 * DNTT_TYPE_STRUCT, DNTT_TYPE_UNION, DNTT_TYPE_ENUM, 
@@ -5888,7 +5888,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	    memset (newsym, 0, sizeof (struct symbol));
 	    DEPRECATED_SYMBOL_NAME (newsym) = name;
 	    SYMBOL_LANGUAGE (newsym) = language_auto;
-	    SYMBOL_NAMESPACE (newsym) = VAR_NAMESPACE;
+	    SYMBOL_DOMAIN (newsym) = VAR_DOMAIN;
 	    SYMBOL_LINE (newsym) = 0;
 	    SYMBOL_VALUE (newsym) = 0;
 	    SYMBOL_CLASS (newsym) = LOC_TYPEDEF;

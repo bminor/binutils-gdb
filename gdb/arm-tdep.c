@@ -443,7 +443,7 @@ arm_skip_prologue (CORE_ADDR pc)
       struct symbol *sym;
 
       /* Found a function.  */
-      sym = lookup_symbol (func_name, NULL, VAR_NAMESPACE, NULL, NULL);
+      sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL, NULL);
       if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
         {
 	  /* Don't use this trick for assembly source files.  */
