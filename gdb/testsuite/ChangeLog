@@ -1,5 +1,9 @@
 2004-09-05  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* config/hppro.exp: Removed.
+
+2004-09-05  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* config/sparclet.exp: Removed.
 
 2004-09-05  Michael Chastain  <mec.gnu@mindspring.com>
