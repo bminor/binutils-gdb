@@ -1,3 +1,10 @@
+start-sanitize-gm
+Fri Oct 27 09:41:51 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* config.bfd:  Add config stuff for mips*-*-magic* to set
+	targ_defvec to ecoff_big_vec.
+
+end-sanitize-gm
 Thu Oct 26 14:16:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c: Numerous changes to get closer to a working XCOFF

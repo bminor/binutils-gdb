@@ -304,6 +304,11 @@ case "${targ}" in
     targ_defvec=ecoff_little_vec
     targ_selvecs=ecoff_big_vec
     ;;
+# start-sanitize-gm
+  mips*-*-magic*)
+    targ_defvec=ecoff_big_vec
+    ;;
+# end-sanitize-gm
   mips*-*-ecoff*)
     targ_defvec=ecoff_big_vec
     targ_selvecs=ecoff_little_vec
