@@ -316,7 +316,7 @@ struct objfile
   /* Information about stabs.  Will be filled in with a dbx_symfile_info
      struct by those readers that need it. */
 
-  PTR sym_stab_info;
+  struct dbx_symfile_info *sym_stab_info;
 
   /* Hook for information for use by the symbol reader (currently used
      for information shared by sym_init and sym_read).  It is

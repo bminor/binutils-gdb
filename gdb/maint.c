@@ -278,6 +278,47 @@ maintenance_print_command (arg, from_tty)
   help_list (maintenanceprintlist, "maintenance print ", -1, gdb_stdout);
 }
 
+/* The "maintenance translate-address" command converts a section and address
+   to a symbol.  This can be called in two ways:
+		maintenance translate-address <secname> <addr>
+	or	maintenance translate-address <addr>
+*/
+
+static void
+maintenance_translate_address (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  CORE_ADDR address;
+  asection *sect;
+  char *p;
+  struct symbol *sym;
+
+  sect = NULL;
+  p = arg;
+
+  if (!isdigit (p))
+    {				/* See if we have a valid section name */
+      while (*p && !isspace (*p)) /* Find end of section name */
+	p++;
+      if (*p == '\000')		/* End of command? */
+	error ("Need to specify <section-name> and <address>");
+      *p++ = '\000';
+      while (isspace (*p)) p++;	/* Skip whitespace */
+
+      sect = bfd_get_section_by_name (exec_bfd, arg);
+      if (!sect)
+	error ("Unknown section %s.", arg);
+    }
+
+  address = parse_and_eval_address (p);
+
+  return;
+/*  sym = find_pc_function_section (address, sect);*/
+
+  printf_unfiltered ("%s+%u\n", SYMBOL_SOURCE_NAME (sym), address - SYMBOL_VALUE_ADDRESS (sym));
+}
+
 #endif	/* MAINTENANCE_CMDS */
 
 void
@@ -368,6 +409,10 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
 
   add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
 	   "Check consistency of psymtabs and symtabs.",
+	   &maintenancelist);
+
+  add_cmd ("translate-address", class_maintenance, maintenance_translate_address,
+	   "Translate a section name and address to a symbol.",
 	   &maintenancelist);
 
   add_show_from_set (

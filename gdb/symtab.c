@@ -459,6 +459,30 @@ find_pc_psymbol (psymtab, pc)
   return best;
 }
 
+/* Debug symbols usually don't have section information.  We need to dig that
+   out of the minimal symbols and stash that in the debug symbol.  */
+
+static
+struct symbol * fixup_symbol_section PARAMS ((struct symbol *sym,
+					      struct objfile *objfile));
+static struct symbol *
+fixup_symbol_section (sym, objfile)
+     struct symbol *sym;
+     struct objfile *objfile;
+{
+  struct minimal_symbol *msym;
+
+  if (SYMBOL_BFD_SECTION (sym))
+    return sym;
+
+  msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, objfile);
+
+  if (msym)
+    SYMBOL_BFD_SECTION (sym) = SYMBOL_BFD_SECTION (msym);
+
+  return sym;
+}
+
 
 /* Find the definition for a specified symbol name NAME
    in namespace NAMESPACE, visible from lexical block BLOCK.
@@ -493,7 +517,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
   register struct symtab *s = NULL;
   register struct partial_symtab *ps;
   struct blockvector *bv;
-  register struct objfile *objfile;
+  register struct objfile *objfile = NULL;
   register struct block *b;
   register struct minimal_symbol *msymbol;
 
@@ -521,7 +545,7 @@ found:
 	      *symtab = s;
 	    }
 
-	  return (sym);
+	  return fixup_symbol_section (sym, objfile);
 	}
       block = BLOCK_SUPERBLOCK (block);
     }
@@ -550,7 +574,7 @@ found:
 		  block_found = b;
 		  if (symtab != NULL)
 		    *symtab = s;
-		  return sym;
+		  return fixup_symbol_section (sym, objfile);
 		}
 	    }
 	}
@@ -569,7 +593,7 @@ found:
 	  *is_a_field_of_this = 1;
 	  if (symtab != NULL)
 	    *symtab = NULL;
-	  return 0;
+	  return NULL;
 	}
     }
 
@@ -586,7 +610,7 @@ found:
 	  block_found = block;
 	  if (symtab != NULL)
 	    *symtab = s;
-	  return sym;
+	  return fixup_symbol_section (sym, objfile);
 	}
     }
 
@@ -630,7 +654,7 @@ found:
 
 	      if (symtab != NULL)
 		*symtab = s;
-	      return sym;
+	      return fixup_symbol_section (sym, objfile);
 	    }
 	  else if (MSYMBOL_TYPE (msymbol) != mst_text
 		   && MSYMBOL_TYPE (msymbol) != mst_file_text
@@ -638,8 +662,10 @@ found:
 	    {
 	      /* This is a mangled variable, look it up by its
 		 mangled name.  */
-	      return lookup_symbol (SYMBOL_NAME (msymbol), block,
-				    namespace, is_a_field_of_this, symtab);
+	      return fixup_symbol_section
+		(lookup_symbol (SYMBOL_NAME (msymbol), block,
+				namespace, is_a_field_of_this, symtab),
+		 NULL);
 	    }
 	  /* There are no debug symbols for this file, or we are looking
 	     for an unmangled variable.
@@ -659,7 +685,7 @@ found:
 	    error ("Internal: global symbol `%s' found in %s psymtab but not in symtab", name, ps->filename);
 	  if (symtab != NULL)
 	    *symtab = s;
-	  return sym;
+	  return fixup_symbol_section (sym, objfile);
 	}
     }
 
@@ -677,7 +703,7 @@ found:
 	  block_found = block;
 	  if (symtab != NULL)
 	    *symtab = s;
-	  return sym;
+	  return fixup_symbol_section (sym, objfile);
 	}
     }
 
@@ -693,7 +719,7 @@ found:
 	    error ("Internal: static symbol `%s' found in %s psymtab but not in symtab", name, ps->filename);
 	  if (symtab != NULL)
 	    *symtab = s;
-	  return sym;
+	  return fixup_symbol_section (sym, objfile);
 	}
     }
 
