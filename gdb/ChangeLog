@@ -1,3 +1,9 @@
+2003-10-20  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-tdep.c: Change all occurrences of
+	DEPRECATED_REGISTER_RAW_SIZE to use register_size() instead.
+	(ia64_frame_prev_register): Minor whitespace change.
+
 2003-10-20  Michael Chastain  <mec@shout.net>
 
 	* config/djgpp/fnchange.lst: Add lines for:

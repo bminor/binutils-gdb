@@ -343,7 +343,7 @@ read_sigcontext_register (struct frame_info *frame, int regnum)
 
   regaddr = SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), regnum);
   if (regaddr)
-    return read_memory_integer (regaddr, DEPRECATED_REGISTER_RAW_SIZE (regnum));
+    return read_memory_integer (regaddr, register_size (current_gdbarch, regnum));
   else
     internal_error (__FILE__, __LINE__,
 		    "read_sigcontext_register: Register %d not in struct sigcontext", regnum);
@@ -716,10 +716,10 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	{
 	  ULONGEST reg_addr = rse_address_add (bsp, (regnum - V32_REGNUM));
 	  reg = read_memory_integer ((CORE_ADDR)reg_addr, 8);
-	  store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum), reg);
+	  store_unsigned_integer (buf, register_size (current_gdbarch, regnum), reg);
 	}
       else
-	store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum), 0);
+	store_unsigned_integer (buf, register_size (current_gdbarch, regnum), 0);
     }
   else if (IA64_NAT0_REGNUM <= regnum && regnum <= IA64_NAT31_REGNUM)
     {
@@ -727,7 +727,7 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       ULONGEST unat;
       regcache_cooked_read_unsigned (regcache, IA64_UNAT_REGNUM, &unat);
       unatN_val = (unat & (1LL << (regnum - IA64_NAT0_REGNUM))) != 0;
-      store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum), unatN_val);
+      store_unsigned_integer (buf, register_size (current_gdbarch, regnum), unatN_val);
     }
   else if (IA64_NAT32_REGNUM <= regnum && regnum <= IA64_NAT127_REGNUM)
     {
@@ -762,7 +762,7 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	  natN_val = (nat_collection >> nat_bit) & 1;
 	}
       
-      store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum), natN_val);
+      store_unsigned_integer (buf, register_size (current_gdbarch, regnum), natN_val);
     }
   else if (regnum == VBOF_REGNUM)
     {
@@ -777,7 +777,7 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* The bsp points at the end of the register frame so we
 	 subtract the size of frame from it to get beginning of frame.  */
       vbsp = rse_address_add (bsp, -(cfm & 0x7f));
-      store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum), vbsp);
+      store_unsigned_integer (buf, register_size (current_gdbarch, regnum), vbsp);
     }
   else if (VP0_REGNUM <= regnum && regnum <= VP63_REGNUM)
     {
@@ -799,10 +799,10 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	         + ((regnum - VP16_REGNUM) + rrb_pr) % 48;
 	}
       prN_val = (pr & (1LL << (regnum - VP0_REGNUM))) != 0;
-      store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum), prN_val);
+      store_unsigned_integer (buf, register_size (current_gdbarch, regnum), prN_val);
     }
   else
-    memset (buf, 0, DEPRECATED_REGISTER_RAW_SIZE (regnum));
+    memset (buf, 0, register_size (current_gdbarch, regnum));
 }
 
 static void
@@ -829,7 +829,7 @@ ia64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       ULONGEST unatN_val, unat, unatN_mask;
       regcache_cooked_read_unsigned (regcache, IA64_UNAT_REGNUM, &unat);
-      unatN_val = extract_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum)); 
+      unatN_val = extract_unsigned_integer (buf, register_size (current_gdbarch, regnum)); 
       unatN_mask = (1LL << (regnum - IA64_NAT0_REGNUM));
       if (unatN_val == 0)
 	unat &= ~unatN_mask;
@@ -853,7 +853,7 @@ ia64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       if ((cfm & 0x7f) > regnum - V32_REGNUM) 
 	gr_addr = rse_address_add (bsp, (regnum - V32_REGNUM));
       
-      natN_val = extract_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum)); 
+      natN_val = extract_unsigned_integer (buf, register_size (current_gdbarch, regnum)); 
 
       if (gr_addr != 0 && (natN_val == 0 || natN_val == 1))
 	{
@@ -882,7 +882,7 @@ ia64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 		nat_collection |= natN_mask;
 	      else
 		nat_collection &= ~natN_mask;
-	      store_unsigned_integer (nat_buf, DEPRECATED_REGISTER_RAW_SIZE (regnum), nat_collection);
+	      store_unsigned_integer (nat_buf, register_size (current_gdbarch, regnum), nat_collection);
 	      write_memory (nat_addr, nat_buf, 8);
 	    }
 	}
@@ -907,7 +907,7 @@ ia64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	  regnum = VP16_REGNUM 
 	         + ((regnum - VP16_REGNUM) + rrb_pr) % 48;
 	}
-      prN_val = extract_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum)); 
+      prN_val = extract_unsigned_integer (buf, register_size (current_gdbarch, regnum)); 
       prN_mask = (1LL << (regnum - VP0_REGNUM));
       if (prN_val == 0)
 	pr &= ~prN_mask;
@@ -1593,12 +1593,12 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
   if (!valuep)
     valuep = dummy_valp;
   
-  memset (valuep, 0, DEPRECATED_REGISTER_RAW_SIZE (regnum));
+  memset (valuep, 0, register_size (current_gdbarch, regnum));
  
   if (regnum == SP_REGNUM)
     {
       /* Handle SP values for all frames but the topmost. */
-      store_unsigned_integer (valuep, DEPRECATED_REGISTER_RAW_SIZE (regnum),
+      store_unsigned_integer (valuep, register_size (current_gdbarch, regnum),
 			      cache->base);
     }
   else if (regnum == IA64_BSP_REGNUM)
@@ -1613,7 +1613,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       /* We want to calculate the previous bsp as the end of the previous register stack frame.
 	 This corresponds to what the hardware bsp register will be if we pop the frame
 	 back which is why we might have been called.  We know the beginning of the current
-         frame is cache->bsp - cache->sof.  This value in the previous frame points to
+	 frame is cache->bsp - cache->sof.  This value in the previous frame points to
 	 the start of the output registers.  We can calculate the end of that frame by adding
 	 the size of output (sof (size of frame) - sol (size of locals)).  */
       ia64_frame_prev_register (next_frame, this_cache, IA64_CFM_REGNUM,
@@ -1623,7 +1623,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       bsp = rse_address_add (cache->bsp, -(cache->sof));
       prev_bsp = rse_address_add (bsp, (prev_cfm & 0x7f) - ((prev_cfm >> 7) & 0x7f));
 
-      store_unsigned_integer (valuep, DEPRECATED_REGISTER_RAW_SIZE (regnum), 
+      store_unsigned_integer (valuep, register_size (current_gdbarch, regnum), 
 			      prev_bsp);
     }
   else if (regnum == IA64_CFM_REGNUM)
@@ -1639,7 +1639,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	{
 	  addr = cache->saved_regs[IA64_CFM_REGNUM];
 	  if (addr != 0)
-	    read_memory (addr, valuep, DEPRECATED_REGISTER_RAW_SIZE (regnum));
+	    read_memory (addr, valuep, register_size (current_gdbarch, regnum));
 	}
     }
   else if (regnum == IA64_VFP_REGNUM)
@@ -1649,7 +1649,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	 above.  If the function lacks one of these frame pointers, we can
 	 still provide a value since we know the size of the frame.  */
       CORE_ADDR vfp = cache->base;
-      store_unsigned_integer (valuep, DEPRECATED_REGISTER_RAW_SIZE (IA64_VFP_REGNUM), vfp);
+      store_unsigned_integer (valuep, register_size (current_gdbarch, IA64_VFP_REGNUM), vfp);
     }
   else if (VP0_REGNUM <= regnum && regnum <= VP63_REGNUM)
     {
@@ -1673,7 +1673,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	}
       prN_val = extract_bit_field ((unsigned char *) pr_valuep,
                                    regnum - VP0_REGNUM, 1);
-      store_unsigned_integer (valuep, DEPRECATED_REGISTER_RAW_SIZE (regnum), prN_val);
+      store_unsigned_integer (valuep, register_size (current_gdbarch, regnum), prN_val);
     }
   else if (IA64_NAT0_REGNUM <= regnum && regnum <= IA64_NAT31_REGNUM)
     {
@@ -1687,7 +1687,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 				&unat_optim, &unat_lval, &unat_addr, &unat_realnum, unat_valuep);
       unatN_val = extract_bit_field ((unsigned char *) unat_valuep,
                                    regnum - IA64_NAT0_REGNUM, 1);
-      store_unsigned_integer (valuep, DEPRECATED_REGISTER_RAW_SIZE (regnum), 
+      store_unsigned_integer (valuep, register_size (current_gdbarch, regnum), 
                               unatN_val);
     }
   else if (IA64_NAT32_REGNUM <= regnum && regnum <= IA64_NAT127_REGNUM)
@@ -1722,7 +1722,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	  natval = (nat_collection >> nat_bit) & 1;
 	}
 
-      store_unsigned_integer (valuep, DEPRECATED_REGISTER_RAW_SIZE (regnum), natval);
+      store_unsigned_integer (valuep, register_size (current_gdbarch, regnum), natval);
     }
   else if (regnum == IA64_IP_REGNUM)
     {
@@ -1738,7 +1738,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	  CORE_ADDR addr = cache->saved_regs[IA64_VRAP_REGNUM];
 	  if (addr != 0)
 	    {
-	      read_memory (addr, buf, DEPRECATED_REGISTER_RAW_SIZE (IA64_IP_REGNUM));
+	      read_memory (addr, buf, register_size (current_gdbarch, IA64_IP_REGNUM));
 	      pc = extract_unsigned_integer (buf, 8);
 	    }
 	}
@@ -1765,7 +1765,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	  CORE_ADDR addr = cache->saved_regs[IA64_VRAP_REGNUM];
 	  if (addr != 0)
 	    {
-	      read_memory (addr, buf, DEPRECATED_REGISTER_RAW_SIZE (IA64_IP_REGNUM));
+	      read_memory (addr, buf, register_size (current_gdbarch, IA64_IP_REGNUM));
 	      pc = extract_unsigned_integer (buf, 8);
 	    }
 	}
@@ -1785,7 +1785,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	{
 	  *lvalp = lval_memory;
 	  *addrp = addr;
-	  read_memory (addr, valuep, DEPRECATED_REGISTER_RAW_SIZE (regnum));
+	  read_memory (addr, valuep, register_size (current_gdbarch, regnum));
 	}
       else if (cache->frameless)
         {
@@ -1809,7 +1809,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	  addr = rse_address_add (prev_bof, (regnum - IA64_GR32_REGNUM));
 	  *lvalp = lval_memory;
 	  *addrp = addr;
-	  read_memory (addr, valuep, DEPRECATED_REGISTER_RAW_SIZE (regnum));
+	  read_memory (addr, valuep, register_size (current_gdbarch, regnum));
         }
     }
   else
@@ -1833,7 +1833,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	{
 	  *lvalp = lval_memory;
 	  *addrp = addr;
-	  read_memory (addr, valuep, DEPRECATED_REGISTER_RAW_SIZE (regnum));
+	  read_memory (addr, valuep, register_size (current_gdbarch, regnum));
 	}
       /* Otherwise, punt and get the current value of the register.  */
       else 
