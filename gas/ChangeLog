@@ -1,7 +1,6 @@
 Wed Aug 31 17:43:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* Makefile.in (prefix, exec_prefix): Use @-subtitutions.
-	(INCLUDES): Include "-I.." for libiberty/alloca-conf.h.
 
 	* aclocal.m4 (AC_OUTPUT_LINKS): Deleted redefinition, since
 	autoconf 1.109 has this fixed.
@@ -9,6 +8,10 @@ Wed Aug 31 17:43:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	invocation.  Don't use AC_HEADER_STDC, since it requires running a
 	program.  Cache NEED_*_DECLARATION values.
 	* configure, conf.in: Regenerated with a modified autoconf 1.109.
+
+	* as.h (volatile): Don't test or define here; not needed.
+	(alloca): Replace alloca-conf.h inclusion with code recommended in
+	autoconf documentation.  Include config.h first.
 
 Wed Aug 31 11:20:48 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
