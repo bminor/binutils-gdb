@@ -45,7 +45,7 @@ set srcfile1 ${testfile}1.cc
 set objfile1 ${objdir}/${subdir}/${testfile}1.o
 set binfile ${objdir}/${subdir}/${testfile}
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info ${binfile} c++] {
     return -1;
 }
 

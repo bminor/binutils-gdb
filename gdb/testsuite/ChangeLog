@@ -1,5 +1,9 @@
 2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/namespace.exp: Call get_compiler_info with "c++".
+
+2004-01-06  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/cvexpr.c: Be type-safe with function pointers and
 	data pointers.
 
