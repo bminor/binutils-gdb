@@ -1,3 +1,9 @@
+2003-04-14  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_link_add_object_symbols): Maintain maximum
+	alignment for common symbols. Warn reducing alignment for
+	common symbols. Report old filename when symbol size changes.
+
 2003-04-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Adjust two other

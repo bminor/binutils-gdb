@@ -1609,10 +1609,12 @@ elf_link_add_object_symbols (abfd, info)
       const char *name;
       struct elf_link_hash_entry *h;
       bfd_boolean definition;
-      bfd_boolean size_change_ok, type_change_ok;
+      bfd_boolean size_change_ok;
+      bfd_boolean type_change_ok;
       bfd_boolean new_weakdef;
-      unsigned int old_alignment;
       bfd_boolean override;
+      unsigned int old_alignment;
+      bfd *old_bfd;
 
       override = FALSE;
 
@@ -1717,6 +1719,8 @@ elf_link_add_object_symbols (abfd, info)
       size_change_ok = FALSE;
       type_change_ok = get_elf_backend_data (abfd)->type_change_ok;
       old_alignment = 0;
+      old_bfd = NULL;
+
       if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
 	  Elf_Internal_Versym iver;
@@ -1834,9 +1838,23 @@ elf_link_add_object_symbols (abfd, info)
 	     that we don't reduce the alignment later on.  We can't
 	     check later, because _bfd_generic_link_add_one_symbol
 	     will set a default for the alignment which we want to
-	     override.  */
-	  if (h->root.type == bfd_link_hash_common)
-	    old_alignment = h->root.u.c.p->alignment_power;
+	     override. We also remember the old bfd where the existing
+	     definition comes from.  */
+	  switch (h->root.type)
+	    {
+	    default:
+	      break;
+
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      old_bfd = h->root.u.def.section->owner;
+	      break;
+	    
+	    case bfd_link_hash_common:
+	      old_bfd = h->root.u.c.p->section->owner;
+	      old_alignment = h->root.u.c.p->alignment_power;
+	      break;
+	    }
 
 	  if (elf_tdata (abfd)->verdef != NULL
 	      && ! override
@@ -1893,6 +1911,8 @@ elf_link_add_object_symbols (abfd, info)
 		 is specified and no other alignments have been specified.  */
 	      || (isym->st_value == 1 && old_alignment == 0))
 	    h->root.u.c.p->alignment_power = align;
+	  else
+	    h->root.u.c.p->alignment_power = old_alignment;
 	}
 
       if (info->hash->creator->flavour == bfd_target_elf_flavour)
@@ -1901,15 +1921,50 @@ elf_link_add_object_symbols (abfd, info)
 	  bfd_boolean dynsym;
 	  int new_flag;
 
+	  /* Check the alignment when a common symbol is involved. This
+	     can change when a common symbol is overriden by a normal
+	     definition or a common symbol is ignored due to the old
+	     normal definition. We need to make sure the maximum
+	     alignment is maintained.  */
+	  if ((old_alignment || isym->st_shndx == SHN_COMMON)
+	      && h->root.type != bfd_link_hash_common)
+	    {
+	      unsigned int common_align, normal_align, symbol_align;
+
+	      symbol_align = ffs (h->root.u.def.value) - 1;
+	      if ((h->root.u.def.section->owner->flags & DYNAMIC) == 0)
+		{
+		  normal_align = h->root.u.def.section->alignment_power;
+		  if (normal_align > symbol_align)
+		    normal_align = symbol_align;
+		}
+	      else
+		normal_align = symbol_align;
+
+	      if (old_alignment)
+		common_align = old_alignment;
+	      else
+		common_align = bfd_log2 (isym->st_value);
+
+	      if (normal_align < common_align)
+		(*_bfd_error_handler)
+		  (_("Warning: alignment %u of symbol `%s' in %s is smaller than %u in %s"),
+		   1 << normal_align, name,
+		   bfd_archive_filename (old_bfd),
+		   1 << common_align, bfd_archive_filename (abfd));
+	    }
+
 	  /* Remember the symbol size and type.  */
 	  if (isym->st_size != 0
 	      && (definition || h->size == 0))
 	    {
 	      if (h->size != 0 && h->size != isym->st_size && ! size_change_ok)
 		(*_bfd_error_handler)
-		  (_("Warning: size of symbol `%s' changed from %lu to %lu in %s"),
+		  (_("Warning: size of symbol `%s' changed from %lu in %s to %lu in %s"),
 		   name, (unsigned long) h->size,
-		   (unsigned long) isym->st_size, bfd_archive_filename (abfd));
+		   bfd_archive_filename (old_bfd),
+		   (unsigned long) isym->st_size,
+		   bfd_archive_filename (abfd));
 
 	      h->size = isym->st_size;
 	    }
