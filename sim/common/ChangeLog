@@ -1,4 +1,3 @@
-start-sanitize-am30
 Fri May 22 12:16:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_HW): Add enable / disable argument.
@@ -10,7 +9,6 @@ Thu May 21 17:57:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* sim-hw.c: Include ctype.h.
 	(do_hw_poll_read): Do not assume EAGAIN.
 
-end-sanitize-am30
 Wed May 20 04:37:57 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-trace.c (first_insn_p): New static local.
@@ -109,7 +107,6 @@ Wed May  6 16:04:18 1998  Doug Evans  <devans@seba.cygnus.com>
 	* sim-io.c: #include <errno.h>.
 
 Wed May  6 12:39:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
-start-sanitize-am30
 
 	* dv-pal.c (struct hw_pal_device): Add reader.
  	(hw_pal_finish): Initialize reader.
@@ -119,13 +116,11 @@ start-sanitize-am30
 	(HW_IO_EOF, HW_IO_NOT_READY): Define.
 	* dv-pal.c: Use.
 
-end-sanitize-am30
 	* sim-io.h, sim-io.c (sim_io_poll_read): New function.  Copy from
  	../ppc/main.c sim_io_read_stdin.
 
 Fri May  1 12:11:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
-start-sanitize-am30
 	* hw-tree.h (hw_tree_print): Paramaterize with print and file
  	arguments.
 	* hw-tree.c: Update.
@@ -176,7 +171,6 @@ start-sanitize-am30
  	functions.
 	(sim_hw_print): New function.
 
-end-sanitize-am30
 	* sim-engine.h (sim_engine_vabort): Declare.
 	* sim-engine.c (sim_engine_vabort): New function.
 
@@ -333,7 +327,6 @@ Mon Mar 30 17:11:55 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* run.c (main): Handle all alternatives of enum sim_stop.
 	(main): Delete unused `asection *s'.
 
-start-sanitize-am30
 Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-tree.h, hw-tree.c (hw_tree_vparse): New function
@@ -352,7 +345,6 @@ Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	
 	* aclocal.m4 (sim_hw_obj): Add sim-hw.o
 
-end-sanitize-am30
 Fri Mar 27 14:55:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-base.h (CPU_INDEX): Define.
@@ -360,21 +352,16 @@ Fri Mar 27 14:55:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* sim-utils.c (sim_state_alloc): Initialize.
 	* sim-module.c (sim_post_argv_init): Ditto.
 
-start-sanitize-am30
 Thu Mar 26 10:07:57 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 
 	* aclocal.m4 (sim_hw_obj):  Fix sed expression to generate
 	properly formatted lists.
 
-end-sanitize-am30
-start-sanitize-am30
 Thu Mar 26 10:37:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-pal.c (enum hw_pal_address_mask): From Stu Grossman, was
  	0x2f needs to be 0x3f.
 
-end-sanitize-am30
-start-sanitize-am30
 Thu Mar 26 09:10:56 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-tree.c (hw_tree_find_property): Return NULL when device is
@@ -385,14 +372,12 @@ Thu Mar 26 09:10:56 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* dv-pal.c (hw_pal_io_read_buffer): Check the smp property is
  	present before looking for it.
 
-end-sanitize-am30
 Wed Mar 25 16:17:38 1998  Ian Carmichael  <iancarm@cygnus.com>
 
 	* aclocal.m4 (AC_CHECK_HEADERS): Add check for fpu_control.h.  
 	(AC_CHECK_FUNCS): Add check for __setfpucw.
 	* configure: Regenerated.
 
-start-sanitize-am30
 Wed Mar 25 09:18:34 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-pal.c (hw_pal_countdown, hw_pal_countdown_value,
@@ -401,8 +386,6 @@ Wed Mar 25 09:18:34 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(do_counter_event, do_counter_read, do_counter_value,
  	do_counter_write): new functions.
 
-end-sanitize-am30
-start-sanitize-am30
 Tue Mar 24 12:24:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-tree.c (hw_printf): Send tree dump to stderr, same as other
@@ -411,12 +394,10 @@ Tue Mar 24 12:24:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* hw-base.c (hw_create): Stop searching for a device when one is
  	found.
 
-end-sanitize-am30
 Wed Mar 25 12:35:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
 
-start-sanitize-am30
 Mon Mar 23 10:25:08 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Add second argument,
@@ -429,7 +410,6 @@ Mon Mar 23 10:25:08 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(SIM_HW): Definition from @sim_hw@.
 	(hw-base.o): Depend on hw-config.h
 
-end-sanitize-am30
 Tue Mar 24 17:41:35 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 
 	* Make-common.in:  Get SHELL from configure.
@@ -440,7 +420,6 @@ Tue Mar 24 17:41:35 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 	* configure:  Regenerate with autoconf 2.12.1 to fix shell issues for
 	NT native builds.
 	
-start-sanitize-am30
 Sun Mar 22 16:54:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-device.h, hw-device.c (hw_strdup): New function.
@@ -461,8 +440,6 @@ Sun Mar 22 16:54:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Make-common.in: Add rule for dv-glue.o.
 
-end-sanitize-am30
-start-sanitize-am30
 Sun Mar 22 16:45:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-base.c (hw_finish): Move setting of trace level to here.
@@ -476,8 +453,6 @@ Sun Mar 22 16:45:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* hw-tree.c (print_properties): Supress path when printing
  	properties of root node.
 
-end-sanitize-am30
-start-sanitize-am30
 Sun Mar 22 16:21:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-device.h (HW_TRACE): Define.
@@ -491,8 +466,6 @@ Sun Mar 22 16:21:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-pal.c: Replace DTRACE with HW_TRACE.
 
-end-sanitize-am30
-start-sanitize-am30
 Sun Mar 22 15:23:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-device.h (HW_ZALLOC, HW_MALLOC): New macros.
@@ -524,8 +497,6 @@ Sun Mar 22 15:23:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* dv-pal.c (hw_pal_finish): Replace zalloc/zfree with
  	hw_zalloc/hw_free.
 
-end-sanitize-am30
-start-sanitize-am30
 Sun Mar 22 15:09:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-device.h (hw_attach_address_callback,
@@ -537,12 +508,10 @@ Sun Mar 22 15:09:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* dv-core.c (dv_core_attach_address_callback): Ditto.
 	* dv-pal.c (hw_pal_attach_address): Ditto.
 
-end-sanitize-am30
 Thu Mar 19 00:41:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-options.h: Document additional CPU arg to OPTION_HANDLER.
 
-start-sanitize-am30
 Wed Mar 18 14:13:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Make-common.in (SIM_HW_OBJS, SIM_HW_SRC, SIM_DV_OBJS): Define.
@@ -570,8 +539,6 @@ Wed Mar 18 14:13:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* sim-basics.h (struct hw): Declare.
 	(enum port_direction, enum object_disposition): Declare.
 
-end-sanitize-am30
-start-sanitize-am30
 Wed Mar 18 12:38:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Set sim_hw_obj, sim_dv_obj,
@@ -580,7 +547,6 @@ Wed Mar 18 12:38:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
 
-end-sanitize-am30
 Mon Mar 16 12:37:33 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-trace.h, sim-trace.c (trace_prefix): Pass in sim_cia so that

@@ -141,7 +141,6 @@ SIM_EXTRA_CLEAN =
 # here.  Some files are used by all simulators (e.g. callback.o).
 # Those files are specified in LIB_OBJS below.
 
-# start-sanitize-am30
 SIM_COMMON_HW_OBJS = \
 	hw-device.o \
 	hw-ports.o \
@@ -150,7 +149,6 @@ SIM_COMMON_HW_OBJS = \
 	hw-tree.o \
 	sim-hw.o \
 
-# end-sanitize-am30
 SIM_NEW_COMMON_OBJS = \
 	sim-bits.o \
 	sim-break.o \
@@ -315,7 +313,6 @@ sim-options_h = $(srccom)/sim-options.h
 sim-break_h = $(srccom)/sim-break.h
 sim-signal_h = $(srccom)/sim-signal.h
 
-# start-sanitize-am30
 hw-base_h = $(srccom)/hw-base.h
 hw-device_h = $(srccom)/hw-device.h
 hw-handles_h = #$(srccom)/hw-handles.h
@@ -331,7 +328,6 @@ hw_base_headers = \
 	$(hw-handles_h) \
 	$(hw-ports_h) \
 	$(hw-properties_h) \
-# end-sanitize-am30
 
 # FIXME: If this complicated way of building .o files from ../common is
 # necessary, the reason should be documented here.
@@ -385,11 +381,9 @@ sim-hrw.o: $(srccom)/sim-hrw.c $(sim-assert_h) $(sim_core_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-hrw.c $(ALL_CFLAGS)
 
-#start-sanitize-am30
 sim-hw.o: $(srccom)/sim-hw.c $(sim_main_headers) $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-hw.c $(ALL_CFLAGS)
 
-#end-sanitize-am30
 sim-info.o: $(srccom)/sim-info.c $(sim-assert_h) \
 	  $(srcroot)/include/remote-sim.h \
 	  $(SIM_EXTRA_DEPS)
@@ -460,7 +454,6 @@ sim-break.o: $(srccom)/sim-break.c $(sim_main_headers) \
 	$(CC) -c $(srccom)/sim-break.c $(ALL_CFLAGS)
 
 
-# start-sanitize-am30
 # FIXME This is one very simple-minded way of generating the file hw-config.h
 hw-config.h: Makefile.in $(srccom)/Make-common.in config.status Makefile
 	rm -f tmp-hw.h
@@ -517,7 +510,6 @@ dv-pal.o: $(srccom)/dv-pal.c $(sim_main_headers) \
 	  $(sim-main_h) $(hw_base_headers)
 	$(CC) -c $(srccom)/dv-pal.c $(ALL_CFLAGS)
 
-#end-sanitize-am30
 
 nrun.o: $(srccom)/nrun.c config.h tconfig.h \
 	  $(srcroot)/include/remote-sim.h $(srcroot)/include/callback.h \
