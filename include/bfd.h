@@ -193,6 +193,8 @@ typedef struct sec *sec_ptr;
 #define bfd_get_section_flags(bfd, ptr) ((ptr)->flags + 0)
 #define bfd_get_section_userdata(bfd, ptr) ((ptr)->userdata)
 
+#define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
+
 #define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (val)), ((ptr)->user_set_vma = true), true)
 #define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
 #define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
@@ -462,15 +464,13 @@ typedef struct sec
          /* The section is a constuctor, and should be placed at the
           end of the . */
 
-
 #define SEC_CONSTRUCTOR_TEXT 0x1100
 
 #define SEC_CONSTRUCTOR_DATA 0x2100
 
 #define SEC_CONSTRUCTOR_BSS  0x3100
 
-
-         /* The section has contents - a bss section could be
+         /* The section has contents - a data section could be
            <<SEC_ALLOC>> | <<SEC_HAS_CONTENTS>>, a debug section could be
            <<SEC_HAS_CONTENTS>> */
 
@@ -488,6 +488,13 @@ typedef struct sec
 
 #define SEC_SHARED_LIBRARY 0x800
 
+         /* The section is a common section (symbols may be defined
+           multiple times, the value of a symbol is the amount of
+           space it requires, and the largest symbol value is the one
+           used).  Most targets have exactly one of these (.bss), but
+           ECOFF has two. */
+
+#define SEC_IS_COMMON 0x8000
        
    bfd_vma vma;
    boolean user_set_vma;
@@ -888,7 +895,7 @@ typedef CONST struct reloc_howto_struct
 #define HOWTO_PREPARE(relocation, symbol)      \
   {                                            \
   if (symbol != (asymbol *)NULL) {             \
-    if (symbol->section == &bfd_com_section) { \
+    if (bfd_is_com_section (symbol->section)) { \
       relocation = 0;                          \
     }                                          \
     else {                                     \
