@@ -494,13 +494,7 @@ Create_VMS_Object_File ()
    *	Deal with errors
    */
   if (VMS_Object_File_FD < 0)
-    {
-      char Error_Line[256];
-
-      sprintf (Error_Line, "Couldn't create VMS object file \"%s\"",
-	       out_file_name);
-      error (Error_Line);
-    }
+    as_fatal ("Couldn't create VMS object file \"%s\"", out_file_name);
   /*
    *	Initialize object file hacking variables
    */
@@ -823,7 +817,7 @@ VMS_TBT_Module_Begin ()
   if (strlen (Module_Name) > 31)
     {
       if (flag_hash_long_names)
-	printf ("%s: Module name truncated: %s\n", myname, Module_Name);
+	as_tsktsk ("Module name truncated: %s", Module_Name);
       Module_Name[31] = 0;
     }
   /*
@@ -842,7 +836,7 @@ VMS_TBT_Module_Begin ()
    *	Language type == "C"
    */
   COPY_LONG (cp, DST_S_C_C);
-  cp += sizeof (long);
+  cp += 4;
   /*
    *	Store the module name
    */
@@ -1207,7 +1201,7 @@ VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
 	    {
 	      *cp++ = DST_S_C_INCR_LINUM_W;
 	      COPY_SHORT (cp, Line_Number - 1);
-	      cp += sizeof (short);
+	      cp += 2;
 	    }
 	}
       /*
@@ -1223,13 +1217,13 @@ VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
 	    {
 	      *cp++ = DST_S_C_DELTA_PC_W;
 	      COPY_SHORT (cp, Offset);
-	      cp += sizeof (short);
+	      cp += 2;
 	    }
 	  else
 	    {
 	      *cp++ = DST_S_C_DELTA_PC_L;
 	      COPY_LONG (cp, Offset);
-	      cp += sizeof (long);
+	      cp += 4;
 	    }
 	}
       Local[0] = cp - (Local + 1);
@@ -1291,8 +1285,8 @@ VMS_TBT_Source_File (Filename, ID_Number)
   Status = sys$open (&Fab);
   if (!(Status & 1))
     {
-      printf ("gas: Couldn't find source file \"%s\", status=%%X%x\n",
-	      Filename, Status);
+      as_tsktsk ("Couldn't find source file \"%s\", status=%%X%x",
+		 Filename, Status);
       return (0);
     }
   sys$close (&Fab);
@@ -1327,25 +1321,25 @@ VMS_TBT_Source_File (Filename, ID_Number)
    *	File ID
    */
   COPY_SHORT (cp, ID_Number);
-  cp += sizeof (short);
+  cp += 2;
 #ifndef VMS
   /*
    *	Creation Date.  Unknown, so we fill with zeroes.
    */
-  *(long *) cp = 0;
-  cp += sizeof (long);
-  *(long *) cp = 0;
-  cp += sizeof (long);
+  COPY_LONG (cp, 0);
+  cp += 4;
+  COPY_LONG (cp, 0);
+  cp += 4;
   /*
    *	End of file block
    */
-  *(long *) cp = 0;
-  cp += sizeof (long);
+  COPY_LONG (cp, 0);
+  cp += 4;
   /*
    *	First free byte
    */
-  *(short *) cp = 0;
-  cp += sizeof (short);
+  COPY_SHORT (cp, 0);
+  cp += 2;
   /*
    *	Record format
    */
@@ -1359,20 +1353,18 @@ VMS_TBT_Source_File (Filename, ID_Number)
   /*
    *	Creation Date
    */
-  *(long *) cp = ((long *) &Date_Xab.xab$q_cdt)[0];
-  cp += sizeof (long);
-  *(long *) cp = ((long *) &Date_Xab.xab$q_cdt)[1];
-  cp += sizeof (long);
+  memcpy (cp, (char *) &Date_Xab.xab$q_cdt, 8);
+  cp += 8;
   /*
    *	End of file block
    */
-  *(long *) cp = File_Header_Xab.xab$l_ebk;
-  cp += sizeof (long);
+  COPY_LONG (cp, File_Header_Xab.xab$l_ebk);
+  cp += 4;
   /*
    *	First free byte
    */
-  *(short *) cp = File_Header_Xab.xab$w_ffb;
-  cp += sizeof (short);
+  COPY_SHORT (cp, File_Header_Xab.xab$w_ffb);
+  cp += 2;
   /*
    *	Record format
    */
@@ -1426,19 +1418,19 @@ VMS_TBT_Source_Lines (ID_Number, Starting_Line_Number, Number_Of_Lines)
    *	File ID Number
    */
   COPY_SHORT (cp, ID_Number);
-  cp += sizeof (short);
+  cp += 2;
   /*
    *	Set record number
    */
   *cp++ = DST_S_C_SRC_SETREC_L;
   COPY_LONG (cp, Starting_Line_Number);
-  cp += sizeof (long);
+  cp += 4;
   /*
    *	Define lines
    */
   *cp++ = DST_S_C_SRC_DEFLINES_W;
   COPY_SHORT (cp, Number_Of_Lines);
-  cp += sizeof (short);
+  cp += 2;
   /*
    *	Done
    */
@@ -1806,9 +1798,8 @@ gen1 (spnt, array_suffix_len)
 	  spnt1 = find_symbol (spnt1->type2);
 	  if (!spnt1)
 	    {
-	      printf ("gcc-as warning(debugger output):");
-	      printf ("Forward reference error, dbx type %d\n",
-		      spnt->type2);
+	      as_tsktsk ("debugger forward reference error, dbx type %d",
+			 spnt->type2);
 	      return;
 	    }
 	}
@@ -1880,7 +1871,7 @@ generate_suffix (spnt, dbx_type)
  */
   if ((total_len >= MAX_DEBUG_RECORD) || overflow)
     {
-      printf (" Variable descriptor %d too complicated. Defined as *void ", spnt->dbx_type);
+      as_warn ("Variable descriptor %d too complicated. Defined as void*", spnt->dbx_type);
       VMS_Store_Immediate_Data (pvoid, 6, OBJ_S_C_DBG);
       return;
     }
@@ -2505,8 +2496,8 @@ VMS_typedef_parse (str)
 	  strcpy(str, pnt1);
 	  return 0;
 	}
-      printf ("gcc-as warning(debugger output):");
-      printf (" %d is an unknown untyped variable.\n", spnt->dbx_type);
+      as_tsktsk ("debugginer output: %d is an unknown untyped variable.",
+		 spnt->dbx_type);
       return 1;			/* do not know what this is */
     }
 /* now define this module*/
@@ -2723,8 +2714,8 @@ VMS_typedef_parse (str)
 	      /* check if this is a forward reference */
 	      if(final_pass && final_forward_reference(spnt1))
 		{
-		  printf("gcc-as warning(debugger output):");
-		  printf("structure element `%s' has undefined type\n",pnt2);
+		  as_tsktsk ("debugger output: structure element `%s' has undefined type",
+			   pnt2);
 		  continue;
 		}
 	      Local[i++] = 7 + len;
@@ -2835,8 +2826,8 @@ VMS_typedef_parse (str)
     default:
       spnt->advanced = UNKNOWN;
       spnt->VMS_type = 0;
-      printf ("gcc-as warning(debugger output):");
-      printf (" %d is an unknown type of variable.\n", spnt->dbx_type);
+      as_tsktsk ("debugger output: %d is an unknown type of variable.",
+		 spnt->dbx_type);
       return 1;			/* unable to decipher */
     }
 /* this removes the evidence of the definition so that the outer levels of
@@ -2966,8 +2957,8 @@ VMS_LSYM_Parse ()
 /*	if (pass > 1) printf(" Required %d passes\n",pass);*/
   if (incomplete != 0)
     {
-      printf ("gcc-as warning(debugger output):");
-      printf ("Unable to resolve %d circular references.\n", incomplete);
+      as_tsktsk ("debugger output: Unable to resolve %d circular references.",
+		 incomplete);
     }
   fpnt = f_ref_root;
   symbol_name = "\0";
@@ -2978,9 +2969,8 @@ VMS_LSYM_Parse ()
 	  if (find_symbol (fpnt->dbx_type) !=
 	      (struct VMS_DBG_Symbol *) NULL)
 	    {
-	      printf ("gcc-as warning(debugger output):");
-	      printf ("Forward reference error, dbx type %d\n",
-		      fpnt->dbx_type);
+	      as_tsktsk ("debugger forward reference error, dbx type %d",
+			 fpnt->dbx_type);
 	      break;
 	    }
 	  fixit[0] = 0;
@@ -3803,14 +3793,9 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
 	  /* In this case we still generate the psect */
 	  break;
 	default:
-	  {
-	    char Error_Line[256];
-	    sprintf (Error_Line,
-		     "Globalsymbol attribute for symbol %s was unexpected.\n",
-		     Name);
-	    error (Error_Line);
-	    break;
-	  }
+	  as_fatal ("Globalsymbol attribute for symbol %s was unexpected.",
+		    Name);
+	  break;
 	}			/* switch */
     }
 
@@ -3981,7 +3966,7 @@ VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment)
 	      VMS_Global_Symbol_Spec (stripped_name, 0, globalvalue, 3);
 	      break;
 	    default:
-	      printf (" Invalid globalvalue of %s\n", stripped_name);
+	      as_tsktsk ("Invalid globalvalue of %s", stripped_name);
 	      break;
 	    }			/* switch */
 	}			/* if */
@@ -4123,12 +4108,24 @@ VMS_Store_Repeated_Data (Repeat_Count, Pointer, Size, Record_Type)
   /*
    *	Ignore zero bytes/words/longwords
    */
-  if ((Size == sizeof (char)) && (*Pointer == 0))
-    return;
-  if ((Size == sizeof (short)) && (*(short *) Pointer == 0))
-    return;
-  if ((Size == sizeof (long)) && (*(long *) Pointer == 0))
-    return;
+  switch (Size)
+    {
+    case 4:
+      if (Pointer[3] != 0
+	  || Pointer[2] != 0)
+	goto do_it;
+    case 2:
+      if (Pointer[1] != 0)
+	goto do_it;
+    case 1:
+      if (Pointer[0] != 0)
+	goto do_it;
+      /* zero value */
+      return;
+    default:
+    do_it:
+      break;
+    }
   /*
    *	If the data is too big for a TIR_S_C_STO_RIVB sub-record
    *	then we do it manually
@@ -4182,8 +4179,7 @@ VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
      int Psect_Offset;
      int Record_Type;
 {
-  register struct VMS_Symbol *vsp =
-  (struct VMS_Symbol *) (Symbol->sy_number);
+  register struct VMS_Symbol *vsp = Symbol->sy_obj;
   char Local[32];
 
   /*
@@ -4553,6 +4549,7 @@ VMS_Check_For_Main ()
 		      S_SET_VALUE (symbolP, 0);
 		      symbolP->sy_name_offset = 0;
 		      symbolP->sy_number = 0;
+		      symbolP->sy_obj = 0;
 		      symbolP->sy_frag = New_Frag;
 		      symbolP->sy_resolved = 0;
 		      symbolP->sy_resolving = 0;
@@ -4571,7 +4568,7 @@ VMS_Check_For_Main ()
 		      fixP->fx_addsy = symbolP;
 		      fixP->fx_subsy = 0;
 		      fixP->fx_offset = 0;
-		      fixP->fx_size = sizeof (long);
+		      fixP->fx_size = 4;
 		      fixP->fx_pcrel = 1;
 		      fixP->fx_next = text_fix_root;
 		      text_fix_root = fixP;
@@ -4762,7 +4759,7 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  vsp->Psect_Offset = 0;
 	  vsp->Next = VMS_Symbols;
 	  VMS_Symbols = vsp;
-	  sp->sy_number = (int) vsp;
+	  sp->sy_obj = vsp;
 	  /*
 	   *	Make the psect for this data
 	   */
@@ -4813,7 +4810,7 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	    bss_address_frag.fr_address;
 	  vsp->Next = VMS_Symbols;
 	  VMS_Symbols = vsp;
-	  sp->sy_number = (int) vsp;
+	  sp->sy_obj = vsp;
 	  break;
 	  /*
 	   *	Global initialized data
@@ -4831,15 +4828,14 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  vsp->Psect_Offset = 0;
 	  vsp->Next = VMS_Symbols;
 	  VMS_Symbols = vsp;
-	  sp->sy_number = (int) vsp;
+	  sp->sy_obj = vsp;
 	  /*
 	   *	Make its psect
 	   */
-	  Globalref = VMS_Psect_Spec (
-				       S_GET_NAME (sp),
-				       vsp->Size,
-				       S_GET_OTHER (sp) ? "CONST" : "COMMON",
-				       vsp);
+	  Globalref = VMS_Psect_Spec (S_GET_NAME (sp),
+				      vsp->Size,
+				      S_GET_OTHER (sp) ? "CONST" : "COMMON",
+				      vsp);
 	  if (Globalref)
 	    Psect_Number--;
 
@@ -4884,7 +4880,7 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  Local_Initialized_Data_Size += vsp->Size;
 	  vsp->Next = VMS_Symbols;
 	  VMS_Symbols = vsp;
-	  sp->sy_number = (int) vsp;
+	  sp->sy_obj = vsp;
 	  break;
 	  /*
 	   *	Global Text definition
@@ -4943,7 +4939,7 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	      vsp->Psect_Offset = S_GET_VALUE (sp);
 	      vsp->Next = VMS_Symbols;
 	      VMS_Symbols = vsp;
-	      sp->sy_number = (int) vsp;
+	      sp->sy_obj = vsp;
 	    }
 	  break;
 	  /*
@@ -4973,8 +4969,7 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	   *	Error
 	   */
 	  if (S_GET_TYPE (sp) != 22)
-	    printf (" ERROR, unknown type (%d)\n",
-		    S_GET_TYPE (sp));
+	    as_tsktsk ("unhandled stab type %d", S_GET_TYPE (sp));
 	  break;
 	}
     }
@@ -5110,7 +5105,7 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  /*
 	   *	Size will HAVE to be "long"
 	   */
-	  if (fixP->fx_size != sizeof (long))
+	  if (fixP->fx_size != 4)
 	    error ("Fixup datum was not a longword");
 	  /*
 	   *	Symbol must be "added" (if it is ever
@@ -5265,7 +5260,7 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	      /*
 	       *	Size will HAVE to be "long"
 	       */
-	      if (fixP->fx_size != sizeof (long))
+	      if (fixP->fx_size != 4)
 		error ("Fixup datum was not a longword");
 	      /*
 	       *	Symbol must be "added" (if it is ever
@@ -5277,16 +5272,15 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	      /*
 	       *	Store the symbol value in a PIC fashion
 	       */
-	      VMS_Store_PIC_Symbol_Reference (
-					       fixP->fx_addsy,
-					       fixP->fx_offset,
-					       fixP->fx_pcrel,
-					       vsp->Psect_Index,
-					       fixP->fx_frag->fr_address +
-					       fixP->fx_where -
-					       S_GET_VALUE (vsp->Symbol) +
-					       vsp->Psect_Offset,
-					       OBJ_S_C_TIR);
+	      VMS_Store_PIC_Symbol_Reference (fixP->fx_addsy,
+					      fixP->fx_offset,
+					      fixP->fx_pcrel,
+					      vsp->Psect_Index,
+					      fixP->fx_frag->fr_address +
+					      fixP->fx_where -
+					      S_GET_VALUE (vsp->Symbol) +
+					      vsp->Psect_Offset,
+					      OBJ_S_C_TIR);
 	      /*
 	       *	Done
 	       */

@@ -1,3 +1,23 @@
+Mon Dec 19 13:49:07 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/obj-vms.c (Create_VMS_Object_File): Instead of formatting
+	a buffer to pass to `error', just call `as_fatal' directly.
+	(VMS_Psect_Spec): Ditto.
+	(VMS_TBT_Module_Begin, VMS_TBT_Source_File, gen1,
+	VMS_typedef_parse, VMS_LSYM_Parse, VMS_Emit_Globalvalues): Call
+	as_tsktsk instead of printf.
+	(VMS_TBT_Module_Begin, VMS_TBT_Line_PC_Correlation,
+	VMS_TBT_Source_File, VMS_TBT_Source_Lines,
+	VMS_Store_Repeated_Data, VMS_Check_For_Main): Use explicit
+	integers rather than sizeof expressions using basic integer types,
+	in case host and target aren't the same.  Use memcpy or COPY_*
+	macros instead of possibly unaligned word or longword assignment.
+
+	* config/obj-vms.h (OBJ_SYMFIELD_TYPE): New macro.
+	* config/obj-vms.c (VMS_Store_PIC_Symbol_Reference,
+	VMS_Check_For_Main, VMS_write_object_file): Use sy_obj instead of
+	forcing sy_number to hold a pointer.
+
 Fri Dec 16 14:40:16 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-sh.c (md_begin): Don't fill in md_relax_table here.

@@ -129,6 +129,8 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 
 /* Symbol table macros and constants */
 
+#define OBJ_SYMFIELD_TYPE struct VMS_Symbol *
+
 /*
  *  Macros to extract information from a symbol table entry.
  *  This syntaxic indirection allows independence regarding a.out or coff.
