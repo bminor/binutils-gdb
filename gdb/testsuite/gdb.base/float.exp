@@ -51,7 +51,9 @@ if ![runto_main] then {
 
 # Test "info float".
 
-if { [istarget "arm*-*-*"] || \
+if { [istarget "alpha*-*-*"] } then {
+    gdb_test "info float" "f0.*" "info float"
+} elseif { [istarget "arm*-*-*"] || \
 	[istarget "xscale*-*-*"] || \
 	[istarget "strongarm*-*-*"] } then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"

@@ -1,5 +1,9 @@
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
+	* gdb.base/float.exp: Add expected regexp for alpha-*-*.
+
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
 	* gdb.base/selftest.exp: Next over lim_at_start initialization.
 
 2003-06-02  Richard Henderson  <rth@redhat.com>
