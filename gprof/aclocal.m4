@@ -171,10 +171,7 @@ else
 fi
 AC_CACHE_VAL(ac_cv_path_LD,
 [case "$LD" in
-  /*)
-  ac_cv_path_LD="$LD" # Let the user override the test with a path.
-  ;;
-  *)
+  "")
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
   for ac_dir in $PATH; do
     test -z "$ac_dir" && ac_dir=.
@@ -191,6 +188,9 @@ AC_CACHE_VAL(ac_cv_path_LD,
     fi
   done
   IFS="$ac_save_ifs"
+  ;;
+  *)
+  ac_cv_path_LD="$LD" # Let the user override the test with a path.
   ;;
 esac])
 LD="$ac_cv_path_LD"

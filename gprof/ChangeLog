@@ -1,3 +1,9 @@
+Wed Sep 24 11:35:43 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aclocal.m4: Rebuild with new libtool.
+	* Makefile.in: Rebuild with current automake.
+	* configure: Rebuild.
+
 Sat Aug  9 16:25:01 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Change version number to 2.8.2.  Call
