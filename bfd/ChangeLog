@@ -1,5 +1,8 @@
 Tue Feb 13 14:35:15 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in ($(SHLINK)): Check ts against $(SHLIB), not
+	$(SHLINK).
+
 	* ieee.c (get_symbol): Set the section to bfd_abs_section.
 	(do_with_relocs): If EXEC_P is set and there are no relocs, use a
 	simple number for the section address, rather than an expression.
