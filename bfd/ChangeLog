@@ -1,3 +1,10 @@
+Sat Oct 29 12:18:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* linker.c (_bfd_generic_link_add_archive_symbols): It's not an
+	error if an empty archive has no symbol table.
+	* ecoff.c (ecoff_link_add_archive_symbols): Likewise.
+	* elfcode.h (elf_link_add_archive_symbols): Likewise.
+
 Fri Oct 28 10:08:41 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
         NetBSD/m68k support, based on work by mikeb@snow.datametrics.com: 

@@ -3738,6 +3738,9 @@ elf_link_add_archive_symbols (abfd, info)
 
   if (! bfd_has_map (abfd))
     {
+      /* An empty archive is a special case.  */
+      if (bfd_openr_next_archived_file (abfd, (bfd *) NULL) == NULL)
+	return true;
       bfd_set_error (bfd_error_no_symbols);
       return false;
     }
