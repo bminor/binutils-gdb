@@ -615,7 +615,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: verify_gdbarch: call_dummy_start_offset invalid");
   if ((GDB_MULTI_ARCH >= 2)
-      && (gdbarch->call_dummy_breakpoint_offset == -1))
+      && (gdbarch->call_dummy_breakpoint_offset_p && gdbarch->call_dummy_breakpoint_offset == -1))
     internal_error (__FILE__, __LINE__,
                     "gdbarch: verify_gdbarch: call_dummy_breakpoint_offset invalid");
   if ((GDB_MULTI_ARCH >= 1)
@@ -3103,7 +3103,7 @@ set_gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch,
 CORE_ADDR
 gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch)
 {
-  if (gdbarch->call_dummy_breakpoint_offset == -1)
+  if (gdbarch->call_dummy_breakpoint_offset_p && gdbarch->call_dummy_breakpoint_offset == -1)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: gdbarch_call_dummy_breakpoint_offset invalid");
   if (gdbarch_debug >= 2)
