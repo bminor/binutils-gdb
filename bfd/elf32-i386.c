@@ -1190,6 +1190,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
   asection *s;
   boolean relocs;
   boolean reltext;
+  bfd *i;
 
   htab = elf_i386_hash_table (info);
   dynobj = htab->root.dynobj;
@@ -1197,7 +1198,6 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 
   if (htab->root.dynamic_sections_created)
     {
-      bfd *i;
 
       /* Set the contents of the .interp section to the interpreter.  */
       if (! info->shared)
@@ -1207,40 +1207,40 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
+    }
 
-      /* Set up .got offsets for local syms.  */
-      for (i = info->input_bfds; i; i = i->link_next)
+  /* Set up .got offsets for local syms.  */
+  for (i = info->input_bfds; i; i = i->link_next)
+    {
+      bfd_signed_vma *local_got;
+      bfd_signed_vma *end_local_got;
+      bfd_size_type locsymcount;
+      Elf_Internal_Shdr *symtab_hdr;
+      asection *srel;
+
+      if (bfd_get_flavour (i) != bfd_target_elf_flavour)
+	continue;
+
+      local_got = elf_local_got_refcounts (i);
+      if (!local_got)
+	continue;
+
+      symtab_hdr = &elf_tdata (i)->symtab_hdr;
+      locsymcount = symtab_hdr->sh_info;
+      end_local_got = local_got + locsymcount;
+      s = htab->sgot;
+      srel = htab->srelgot;
+      for (; local_got < end_local_got; ++local_got)
 	{
-	  bfd_signed_vma *local_got;
-	  bfd_signed_vma *end_local_got;
-	  bfd_size_type locsymcount;
-	  Elf_Internal_Shdr *symtab_hdr;
-	  asection *srel;
-
-	  if (bfd_get_flavour (i) != bfd_target_elf_flavour)
-	    continue;
-
-	  local_got = elf_local_got_refcounts (i);
-	  if (!local_got)
-	    continue;
-
-	  symtab_hdr = &elf_tdata (i)->symtab_hdr;
-	  locsymcount = symtab_hdr->sh_info;
-	  end_local_got = local_got + locsymcount;
-	  s = htab->sgot;
-	  srel = htab->srelgot;
-	  for (; local_got < end_local_got; ++local_got)
+	  if (*local_got > 0)
 	    {
-	      if (*local_got > 0)
-		{
-		  *local_got = s->_raw_size;
-		  s->_raw_size += 4;
-		  if (info->shared)
-		    srel->_raw_size += sizeof (Elf32_External_Rel);
-		}
-	      else
-		*local_got = (bfd_vma) -1;
+	      *local_got = s->_raw_size;
+	      s->_raw_size += 4;
+	      if (info->shared)
+		srel->_raw_size += sizeof (Elf32_External_Rel);
 	    }
+	  else
+	    *local_got = (bfd_vma) -1;
 	}
     }
 

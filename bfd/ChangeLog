@@ -1,3 +1,8 @@
+2001-06-20  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Always
+	allocate local .got space.
+
 2001-06-19  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): Fix creation of
