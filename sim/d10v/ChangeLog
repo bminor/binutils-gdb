@@ -1,3 +1,18 @@
+Mon Oct 27 14:43:33 1997  Fred Fish  <fnf@cygnus.com>
+
+	* (dmem_addr): If address is illegal or in I/O space, signal a bus
+ 	error.  Allocate unified memory on demand.  Fix DMEM address
+ 	calculations.
+	
+Mon Feb 16 10:27:53 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_5F20): Implement "dbt".
+	(OP_5F60): Implement "rtd".
+
+	* d10v_sim.h (DPC_CR): Define enum.
+	(DBT_VECTOR_START): Define
+	(DPSW, DPC): Define.
+
 Fri Feb 13 15:15:58 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (move_to_cr): Sync regs[SP_IDX] with State.sp according

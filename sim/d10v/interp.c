@@ -627,21 +627,31 @@ dmem_addr( addr )
       if (DMAP & 0x1000)
 	{
 	  /* instruction memory */
-	  return (DMAP & 0xf) * 0x4000 + State.imem;
+ 	  return (DMAP & 0xf) * 0x4000 + State.imem + (addr - 0x8000);
 	}
-      /* unified memory */
-      /* this is ugly because we allocate unified memory in 128K segments and */
-      /* dmap addresses 16k segments */
-      seg = (DMAP & 0x3ff) >> 3;
-      if (State.umem[seg] == NULL)
+      else 
 	{
-	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR:  unified memory region %d unmapped, pc = 0x%lx\n",
-					     seg, (long)decode_pc ());
-	  State.exception = SIGBUS;
+	  /* unified memory */
+	  /* this is ugly because we allocate unified memory in 128K segments and */
+	  /* dmap addresses 16k segments */
+	  seg = (DMAP & 0x3ff) >> 3;
+	  if (State.umem[seg] == NULL)
+	    {
+#ifdef DEBUG
+	      (*d10v_callback->printf_filtered) (d10v_callback,"Allocating %d bytes unified memory to region %d\n", 1<<UMEM_SIZE, seg);
+#endif
+	      State.umem[seg] = (uint8 *)calloc(1,1<<UMEM_SIZE);
+	      if (!State.umem[seg])
+		{
+		  (*d10v_callback->printf_filtered) (d10v_callback, 
+		      "ERROR:  alloc failed. unified memory region %d unmapped, pc = 0x%lx\n", 
+		      seg, (long)decode_pc ());
+		  State.exception = SIGBUS;
+		}
+	    }
+	  return State.umem[seg] + (DMAP & 7) * 0x4000 + (addr - 0x8000);
 	}
-      return State.umem[seg] + (DMAP & 7) * 0x4000;
     }
-
   return State.dmem + addr;
 }
 
@@ -903,13 +913,13 @@ sim_create_inferior (sd, abfd, argv, env)
     {
       /* a hack to set r0/r1 with argc/argv */
       /* some high memory that won't be overwritten by the stack soon */
-      addr = State.regs[0] = 0x7C00;
-      p = 20;
-      i = 0;
+      bfd_vma addr = State.regs[0] = 0x7C00;
+      int p = 20;
+      int i = 0;
       while (argv[i])
  	{
+ 	  int size = strlen (argv[i]) + 1;
  	  SW (addr + 2*i, addr + p); 
- 	  size = strlen (argv[i]) + 1;
  	  sim_write (sd, addr + 0, argv[i], size);
  	  p += size;
  	  i++;
