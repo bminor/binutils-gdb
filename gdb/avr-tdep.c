@@ -184,7 +184,6 @@ avr_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == AVR_PC_REGNUM)
     return builtin_type_uint32;
-
   if (reg_nr == AVR_SP_REGNUM)
     return builtin_type_void_data_ptr;
   else
@@ -375,9 +374,9 @@ avr_read_fp (void)
         sbiw    r28,<LOCALS_SIZE>
         in      __tmp_reg__,__SREG__
         cli
-        out     __SP_L__,r28
-        out     __SREG__,__tmp_reg__
         out     __SP_H__,r29
+        out     __SREG__,__tmp_reg__
+        out     __SP_L__,r28
 
    A typical AVR function prologue without a frame pointer might look like
    this:
@@ -672,7 +671,7 @@ avr_scan_prologue (struct frame_info *fi)
   /* Third stage of the prologue scanning. (Really two stages)
      Scan for:
      sbiw r28,XX or subi r28,lo8(XX)
-     sbci r29,hi8(XX)
+                    sbci r29,hi8(XX)
      in __tmp_reg__,__SREG__
      cli
      out __SP_H__,r29
