@@ -193,3 +193,5 @@ extern char *solib_address (CORE_ADDR);	/* solib.c */
 #define IN_SOLIB_DYNSYM_RESOLVE_CODE(pc) in_solib_dynsym_resolve_code (pc)
 
 extern int in_solib_dynsym_resolve_code (CORE_ADDR);	/* solib.c */
+
+extern int no_shared_libraries (char *ignored, int from_tty);

@@ -1,3 +1,8 @@
+2001-05-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* remote.c (remote_write_bytes): Set nr_bytes before returning it.
+	* solib.h (no_shared_libraries): Declare.
+
 2001-05-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (struct gdbarch_info): Delete field bfd_architecture.
