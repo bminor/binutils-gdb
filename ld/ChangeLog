@@ -1,3 +1,9 @@
+2001-12-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/tr.po: New file: Turkish translation.
+	* configure.in (ALL_LINGUAS): Add tr.
+	* configure: Regenerate.
+
 2001-12-17  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.am: Add rules for eelf64alpha_nbsd.
