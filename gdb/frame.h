@@ -629,7 +629,7 @@ extern void return_command (char *, int);
    You might think that the below global can simply be replaced by a
    call to either get_selected_frame() or select_frame().
 
-   Unfortunatly, it isn't that easy.
+   Unfortunately, it isn't that easy.
 
    The relevant code needs to be audited to determine if it is
    possible (or pratical) to instead pass the applicable frame in as a

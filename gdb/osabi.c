@@ -337,10 +337,10 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
          is implemented using BFD's compatible method (a->compatible
          (b) == a -- the lowest common denominator between a and b is
          a).  That method's definition of compatible may not be as you
-         expect.  For instance, while "amd64 can run code for i386"
+         expect.  For instance the test "amd64 can run code for i386"
          (or more generally "64-bit ISA can run code for the 32-bit
-         ISA").  Fortunatly, BFD doesn't normally consider 32-bit and
-         64-bit "compatible" so won't get a match.  */
+         ISA").  BFD doesn't normally consider 32-bit and 64-bit
+         "compatible" so it doesn't succeed.  */
       if (can_run_code_for (arch_info, handler->arch_info))
 	{
 	  (*handler->init_osabi) (info, gdbarch);

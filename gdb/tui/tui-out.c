@@ -119,7 +119,7 @@ tui_table_begin (struct ui_out *uiout, int nbrofcols,
   if (nr_rows == 0)
     data->suppress_output = 1;
   else
-    /* Only the table suppresses the output and, fortunatly, a table
+    /* Only the table suppresses the output and, fortunately, a table
        is not a recursive data structure. */
     gdb_assert (data->suppress_output == 0);
 }

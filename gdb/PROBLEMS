@@ -19,7 +19,7 @@ arm-*-*
 GDB's ARM target, in 6.0, has not been updated to use the new frame
 mechanism.
 
-Fortunatly the ARM target, in the GDB's mainline sources, has been
+Fortunately the ARM target, in the GDB's mainline sources, has been
 updated so people encountering problems should consider downloading a
 more current GDB (http://www.gnu.org/software/gdb/current).
 

@@ -107,7 +107,7 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       /* FIXME: cagney/2001-12-04: This code shouldn't need to use
-         DEPRECATED_REGISTER_BYTE().  Unfortunatly, legacy code likes
+         DEPRECATED_REGISTER_BYTE().  Unfortunately, legacy code likes
          to lay the buffer out so that certain registers just happen
          to overlap.  Ulgh!  New targets use gdbarch's register
          read/write and entirely avoid this uglyness.  */
@@ -138,7 +138,7 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
 	descr->sizeof_cooked_registers = regend;
     }
   /* FIXME: cagney/2002-05-11: Shouldn't be including pseudo-registers
-     in the register cache.  Unfortunatly some architectures still
+     in the register cache.  Unfortunately some architectures still
      rely on this and the pseudo_register_write() method.  */
   descr->sizeof_raw_registers = descr->sizeof_cooked_registers;
 }
@@ -229,7 +229,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
   }
 
   /* FIXME: cagney/2002-05-22: Should only need to allocate space for
-     the raw registers.  Unfortunatly some code still accesses the
+     the raw registers.  Unfortunately some code still accesses the
      register array directly using the global registers[].  Until that
      code has been purged, play safe and over allocating the register
      buffer.  Ulgh!  */

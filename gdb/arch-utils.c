@@ -626,7 +626,7 @@ initialize_current_architecture (void)
 
 /* Initialize a gdbarch info to values that will be automatically
    overridden.  Note: Originally, this ``struct info'' was initialized
-   using memset(0).  Unfortunatly, that ran into problems, namely
+   using memset(0).  Unfortunately, that ran into problems, namely
    BFD_ENDIAN_BIG is zero.  An explicit initialization function that
    can explicitly set each field to a well defined value is used.  */
 

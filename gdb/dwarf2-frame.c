@@ -770,7 +770,7 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
              either a register and a signed offset that are added
              together or a DWARF expression that is evaluated.  */
 	  /* NOTE: cagney/2003-09-05: Should issue a complain.
-             Unfortunatly it turns out that DWARF2 CFI has a problem.
+             Unfortunately it turns out that DWARF2 CFI has a problem.
              Since CFI specifies the location at which a register was
              saved (not its value) it isn't possible to specify
              something like "unwound(REG) == REG + constant" using CFI

@@ -65,7 +65,7 @@ struct frame_info
 
   /* The frame's type.  */
   /* FIXME: cagney/2003-04-02: Should instead be returning
-     ->unwind->type.  Unfortunatly, legacy code is still explicitly
+     ->unwind->type.  Unfortunately, legacy code is still explicitly
      setting the type using the method deprecated_set_frame_type.
      Eliminate that method and this field can be eliminated.  */
   enum frame_type type;
@@ -235,7 +235,7 @@ get_frame_id (struct frame_info *fi)
 	  fi->unwind = frame_unwind_find_by_frame (fi->next);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
-	     directly.  Unfortunatly, legacy code, called by
+	     directly.  Unfortunately, legacy code, called by
 	     legacy_get_prev_frame, explicitly set the frames type
 	     using the method deprecated_set_frame_type().  */
 	  gdb_assert (fi->unwind->type != UNKNOWN_FRAME);
@@ -492,7 +492,7 @@ frame_pop (struct frame_info *this_frame)
          burst register transfer and that the sequence of register
          writes should be batched.  The pair target_prepare_to_store()
          and target_store_registers() kind of suggest this
-         functionality.  Unfortunatly, they don't implement it.  Their
+         functionality.  Unfortunately, they don't implement it.  Their
          lack of a formal definition can lead to targets writing back
          bogus values (arguably a bug in the target code mind).  */
       /* Now copy those saved registers into the current regcache.
@@ -539,7 +539,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
       frame->unwind = frame_unwind_find_by_frame (frame->next);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
-	 directly.  Unfortunatly, legacy code, called by
+	 directly.  Unfortunately, legacy code, called by
 	 legacy_get_prev_frame, explicitly set the frames type using
 	 the method deprecated_set_frame_type().  */
       gdb_assert (frame->unwind->type != UNKNOWN_FRAME);
@@ -953,7 +953,7 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
 				 int *realnump, void *bufferp)
 {
   /* HACK: New code is passed the next frame and this cache.
-     Unfortunatly, old code expects this frame.  Since this is a
+     Unfortunately, old code expects this frame.  Since this is a
      backward compatibility hack, cheat by walking one level along the
      prologue chain to the frame the old code expects.
 
@@ -1309,7 +1309,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      DEPRECATED_INIT_FRAME_PC_FIRST and
      DEPRECATED_FRAME_INIT_SAVED_REGS methods are full of work-arounds
      that handle the frame not being correctly set from the start.
-     Unfortunatly those same work-arounds rely on the type defaulting
+     Unfortunately those same work-arounds rely on the type defaulting
      to NORMAL_FRAME.  Ulgh!  The new frame code does not have this
      problem.  */
   prev->type = UNKNOWN_FRAME;
@@ -1419,7 +1419,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
       /* FIXME: cagney/2002-01-19: This call will go away.  Instead of
 	 initializing extra info, all frames will use the frame_cache
 	 (passed to the unwind functions) to store additional frame
-	 info.  Unfortunatly legacy targets can't use
+	 info.  Unfortunately legacy targets can't use
 	 legacy_get_prev_frame() to unwind the sentinel frame and,
 	 consequently, are forced to take this code path and rely on
 	 the below call to DEPRECATED_INIT_EXTRA_FRAME_INFO to
@@ -1506,7 +1506,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	  prev->unwind = frame_unwind_find_by_frame (this_frame->next);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
-	     directly.  Unfortunatly, legacy code, called by
+	     directly.  Unfortunately, legacy code, called by
 	     legacy_get_prev_frame, explicitly set the frames type
 	     using the method deprecated_set_frame_type().  */
 	  prev->type = prev->unwind->type;
@@ -2159,7 +2159,7 @@ get_frame_type (struct frame_info *frame)
       frame->unwind = frame_unwind_find_by_frame (frame->next);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
-	 directly.  Unfortunatly, legacy code, called by
+	 directly.  Unfortunately, legacy code, called by
 	 legacy_get_prev_frame, explicitly set the frames type using
 	 the method deprecated_set_frame_type().  */
       gdb_assert (frame->unwind->type != UNKNOWN_FRAME);

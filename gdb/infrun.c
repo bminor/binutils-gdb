@@ -519,7 +519,7 @@ set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
@@ -2650,7 +2650,7 @@ process_event_stop_test:
        stepped out of a function;
      /* Of course this assumes that the frame ID unwind code is robust
         and we're willing to introduce frame unwind logic into this
-        function.  Fortunatly, those days are nearly upon us.  */
+        function.  Fortunately, those days are nearly upon us.  */
 #endif
   {
     struct frame_id current_frame = get_frame_id (get_current_frame ());
@@ -2807,7 +2807,7 @@ step_over_function (struct execution_control_state *ecs)
      - avoid handling the case where the PC hasn't been saved in the
      prologue analyzer
 
-     Unfortunatly, not five lines further down, is a call to
+     Unfortunately, not five lines further down, is a call to
      get_frame_id() and that is guarenteed to trigger the prologue
      analyzer.
      

@@ -679,7 +679,7 @@ mips_register_raw_size (int regnum)
 /* Register offset in a buffer for each register.
 
    FIXME: cagney/2003-06-15: This is so bogus.  Instead REGISTER_TYPE
-   should strictly return the layout of the buffer.  Unfortunatly
+   should strictly return the layout of the buffer.  Unfortunately
    remote.c and the MIPS have come to rely on a custom layout that
    doesn't 1:1 map onto the register type.  */
 
@@ -1741,7 +1741,7 @@ mips_find_saved_regs (struct frame_info *fci)
 	         stored first leading to the memory order $f[N] and
 	         then $f[N+1].
 
-		 Unfortunatly, when big-endian the most significant
+		 Unfortunately, when big-endian the most significant
 		 part of the double is stored first, and the least
 		 significant is stored second.  This leads to the
 		 registers being ordered in memory as firt $f[N+1] and

@@ -204,7 +204,7 @@ void _initialize_remote (void);
 /* Description of the remote protocol.  Strictly speaking, when the
    target is open()ed, remote.c should create a per-target description
    of the remote protocol using that target's architecture.
-   Unfortunatly, the target stack doesn't include local state.  For
+   Unfortunately, the target stack doesn't include local state.  For
    the moment keep the information in the target's architecture
    object.  Sigh..  */
 
@@ -2365,7 +2365,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
 
      FIXME: cagney/2002-05-19: Instead of re-throwing the exception,
      this function should return an error indication letting the
-     caller restore the previous state.  Unfortunatly the command
+     caller restore the previous state.  Unfortunately the command
      ``target remote'' is directly wired to this function making that
      impossible.  On a positive note, the CLI side of this problem has
      been fixed - the function set_cmd_context() makes it possible for

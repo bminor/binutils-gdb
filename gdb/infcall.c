@@ -909,7 +909,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     else
       {
 	/* The assumption here is that push_dummy_call() returned the
-	   stack part of the frame ID.  Unfortunatly, many older
+	   stack part of the frame ID.  Unfortunately, many older
 	   architectures were, via a convoluted mess, relying on the
 	   poorly defined and greatly overloaded
 	   DEPRECATED_TARGET_READ_FP or DEPRECATED_FP_REGNUM to supply

@@ -1,5 +1,11 @@
 2003-10-24  Andrew Cagney  <cagney@redhat.com>
 
+	* osabi.c (gdbarch_init_osabi): Fix typos, and "fortunatly"[sic].
+	* PROBLEMS, arch-utils.c, cli-out.c, command.h: Ditto.
+	* complaints.c, cris-tdep.c, disasm.c, dwarf2-frame.c: Ditto.
+	* frame.c, frame.h, infcall.c, infcmd.c, infrun.c: Ditto.
+	* kod.c, mips-tdep.c, regcache.c, regcache.h, remote.c: Ditto.
+
 	* osabi.c (gdbarch_init_osabi): Add comment on 32-bit vs 64-bit.
 	(can_run_code_for): Use the OO term "singleton".
 

@@ -146,7 +146,7 @@ This chapter discusses the known problems.
 @section Dependant on @sc{cli} output
 
 The annotation interface works by interspersing markups with
-@value{GDBN} normal command-line interpreter output.  Unfortunatly, this
+@value{GDBN} normal command-line interpreter output.  Unfortunately, this
 makes the annotation client dependant on not just the annotations, but
 also the @sc{cli} output.  This is because the client is forced to
 assume that specific @value{GDBN} commands provide specific information.

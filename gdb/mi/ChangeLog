@@ -1,3 +1,7 @@
+2003-10-24  Andrew Cagney  <cagney@redhat.com>
+
+	* tui-out.c: Fix "fortunatly"[sic].
+
 2003-10-02  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-main.c: Rename REGISTER_RAW_SIZE to

@@ -1127,7 +1127,7 @@ print_return_value (int structure_return, struct type *value_type)
 	{
 	  /* It is "struct return" yet the value is being extracted,
              presumably from registers, using EXTRACT_RETURN_VALUE.
-             This doesn't make sense.  Unfortunatly, the legacy
+             This doesn't make sense.  Unfortunately, the legacy
              interfaces allowed this behavior.  Sigh!  */
 	  value = allocate_value (value_type);
 	  CHECK_TYPEDEF (value_type);

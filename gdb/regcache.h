@@ -140,7 +140,7 @@ extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 
    FIXME: cagney/2003-02-28:
 
-   Unfortunatly, thanks to some legacy architectures, this doesn't
+   Unfortunately, thanks to some legacy architectures, this doesn't
    hold.  A register's cooked (nee virtual) and raw size can differ
    (see MIPS).  Such architectures should be using different register
    numbers for the different sized views of identical registers.

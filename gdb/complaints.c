@@ -210,7 +210,7 @@ vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
              trailing newline, the wrap_here() is just a hint.  */
 	  if (series == ISOLATED_MESSAGE)
 	    /* It would be really nice to use begin_line() here.
-	       Unfortunatly that function doesn't track GDB_STDERR and
+	       Unfortunately that function doesn't track GDB_STDERR and
 	       consequently will sometimes supress a line when it
 	       shouldn't.  */
 	    fputs_filtered ("\n", gdb_stderr);
@@ -292,7 +292,7 @@ clear_complaints (struct complaints **c, int less_verbose, int noisy)
       break;
     case SUBSEQUENT_MESSAGE:
       /* It would be really nice to use begin_line() here.
-         Unfortunatly that function doesn't track GDB_STDERR and
+         Unfortunately that function doesn't track GDB_STDERR and
          consequently will sometimes supress a line when it shouldn't.  */
       fputs_unfiltered ("\n", gdb_stderr);
       break;

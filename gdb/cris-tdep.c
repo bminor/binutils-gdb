@@ -3916,7 +3916,7 @@ cris_version_update (char *ignore_args, int from_tty,
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
@@ -3943,7 +3943,7 @@ cris_mode_update (char *ignore_args, int from_tty,
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
@@ -3970,7 +3970,7 @@ cris_abi_update (char *ignore_args, int from_tty,
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
