@@ -541,27 +541,27 @@ proc gdb_test_multiple { command message user_code } {
 	}
 	 -re "Program exited with code \[0-9\]+.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
-		set errmsg "$message: the program exited"
+		set errmsg "$message (the program exited)"
 	    } else {
-		set errmsg "$command: the program exited"
+		set errmsg "$command (the program exited)"
 	    }
 	    fail "$errmsg"
 	    set result -1
 	}
 	 -re "EXIT code \[0-9\r\n\]+Program exited normally.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
-		set errmsg "$message: the program exited"
+		set errmsg "$message (the program exited)"
 	    } else {
-		set errmsg "$command: the program exited"
+		set errmsg "$command (the program exited)"
 	    }
 	    fail "$errmsg"
 	    set result -1
 	}
 	 -re "The program is not being run.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
-		set errmsg "$message: the program is no longer running"
+		set errmsg "$message (the program is no longer running)"
 	    } else {
-		set errmsg "$command: the program is no longer running"
+		set errmsg "$command (the program is no longer running)"
 	    }
 	    fail "$errmsg"
 	    set result -1

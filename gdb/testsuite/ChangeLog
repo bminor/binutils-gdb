@@ -1,3 +1,16 @@
+2003-04-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/callfuncs.exp: Make "print add" messages unique.
+	* gdb.base/ending-run.exp: Put spaces around "breakpoint" to stop
+	matching directories by the name breakpoint.
+	* gdb.base/pointers.exp: Make "ptype pppC" message consistent.
+	Make "continue to marker1" consistent.
+	* gdb.base/call-rt-st.exp: Make "finish out from loop_count"
+	message consistent.
+	* lib/gdb.exp: Put "the program is no longer running", and "the
+	program exited" in parenthesis.
+	* lib/mi-support.exp: Ditto.
+	
 2003-04-02  Bob Rossi  <bob_rossi@cox.net>
     
 	* gdb.mi/mi-file.exp: New file for -file-list-exec-source-file.
