@@ -537,7 +537,7 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   struct symbol *symbol;
   struct symtab *symtab = 0;
   CORE_ADDR name_location = 0;
-  char *name;
+  char *name = "";
 
   /* First try to find the address in the symbol table, then
      in the minsyms.  Take the closest one.  */
@@ -1627,7 +1627,7 @@ print_frame_args (func, fi, num, stream)
 
 		 Additional note:  It might be nice if "info args" displayed
 		 both values.
-		 One more note:  There is a case with sparc sturcture passing
+		 One more note:  There is a case with sparc structure passing
 		 where we need to use the LOC_REGISTER, but this is dealt with
 		 by creating a single LOC_REGPARM in symbol reading.  */
 
@@ -1644,7 +1644,8 @@ print_frame_args (func, fi, num, stream)
       wrap_here ("    ");
 
       if (annotation_level > 1)
-	printf_filtered ("\n\032\032arg-name-begin\n");
+	printf_filtered ("\n\032\032arg-begin\n");
+
       fprintf_symbol_filtered (stream, SYMBOL_SOURCE_NAME (sym),
 			       SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
       if (annotation_level > 1)
@@ -1660,7 +1661,7 @@ print_frame_args (func, fi, num, stream)
 
       if (annotation_level > 1)
 	{
-	  printf_filtered ("\n\032\032arg-begin ");
+	  printf_filtered ("\n\032\032arg-value ");
 	  print_value_flags (val == NULL ? NULL : VALUE_TYPE (val));
 	  printf_filtered ("\n");
 	}

@@ -1,3 +1,9 @@
+Wed Apr 27 12:22:46 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* printcmd.c (print_address_symbolic): Initialize name to empty
+	string to avoid core dump if lookup fails.
+	* remote-e7000.c (printf_e7000debug): Error if target not open.
+
 Tue Apr 26 22:45:24 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* i386-nlmstub.c:  Update to be more in line with PIN stub.
