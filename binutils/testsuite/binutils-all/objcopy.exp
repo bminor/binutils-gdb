@@ -412,7 +412,7 @@ proc strip_test_with_saving_a_symbol { } {
     }
 
     set exec_output [binutils_run $NM "$NMFLAGS $objfile"]
-    if {![regexp {^([0-9a-fA-F]+)?[ ]+[T\?] main} $exec_output] \
+    if {![regexp {^([0-9a-fA-F]+)?[ ]+[TD] main} $exec_output] \
          && ![regexp {^([0-9a-fA-F]+)?[ ]+T _main} $exec_output]} {
 	fail $test
 	return
