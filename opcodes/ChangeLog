@@ -1,3 +1,24 @@
+2002-12-04  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c (PMRN): Remove.
+	(RA): Set to NB + 1.
+	(powerpc_opcodes): Change PMRN to SPR.
+	Change all RD to RS.
+	Change mftb to look like mftbl.
+	Move mftb before mftbl.
+	Add mfbbtar.
+	Add mtbbtar.
+	Change mfpmr to use PMR.
+	Change mtpmr to use PMR.
+	(RD): Remove.
+	(insert_ev2): Fix mask and shift.
+	(extract_ev2): Same.
+	(insert_ev4): Same.
+	(extract_ev4): Same.
+	(PMR): Define.
+	(extract_pmrn): Remove.
+	(insert_pmrn): Remove.
+
 2002-12-03  Richard Henderson  <rth@redhat.com>
 
 	* ia64-opc-m.c: Add ld8.mov.
