@@ -1,3 +1,10 @@
+2000-02-25  Ian Lance Taylor  <ian@zembu.com>
+
+	* Makefile.am (ALL_EMULATIONS): Remove ehppaelf.o.
+	(ALL_64_EMULATIONS): Remove eelf64hppa.o.
+	(eelf64hppa.c, ehppaelf.c): Remove targets.
+	* Makefile.in: Rebuild.
+
 2000-02-25  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
 
 	* configure.tgt (targ_extra_ofiles): Enable elf64_sparc on
