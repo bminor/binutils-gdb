@@ -157,7 +157,7 @@ proc gdbtk_tcl_breakpoint {action bpnum} {
 	set enable [lindex $bpinfo 4]
 
 	if {$action == "modify"} {
-		if {$enable == "enabled"} {
+		if {$enable == "1"} {
 			set action enable
 		} else {
 			set action disable
@@ -208,6 +208,8 @@ proc create_breakpoints_window {} {
 
 proc add_breakpoint_frame bpnum {
 	global bpframe_lasty
+	global enabled
+	global disposition
 
 	if ![winfo exists .breakpoints] return
 
@@ -217,8 +219,8 @@ proc add_breakpoint_frame bpnum {
 	set line [lindex $bpinfo 1]
 	set pc [lindex $bpinfo 2]
 	set type [lindex $bpinfo 3]
-	set enabled [lindex $bpinfo 4]
-	set disposition [lindex $bpinfo 5]
+	set enabled($bpnum) [lindex $bpinfo 4]
+	set disposition($bpnum) [lindex $bpinfo 5]
 	set silent [lindex $bpinfo 6]
 	set ignore_count [lindex $bpinfo 7]
 	set commands [lindex $bpinfo 8]
@@ -239,7 +241,8 @@ proc add_breakpoint_frame bpnum {
 		label $f.hit_count.val -text $hit_count -relief flat \
 			-bd 2 -anchor w
 		checkbutton $f.hit_count.enabled -text Enabled \
-			-variable enabled -anchor w -relief flat
+			-variable enabled($bpnum) -anchor w -relief flat
+			
 		pack $f.hit_count.label $f.hit_count.val -side left
 		pack $f.hit_count.enabled -side right
 
@@ -273,13 +276,16 @@ proc add_breakpoint_frame bpnum {
 			-anchor w -width 11
 
 		radiobutton $f.disps.delete -text Delete \
-			-variable disposition -anchor w -relief flat
+			-variable disposition($bpnum) -anchor w -relief flat \
+			-command "gdb_cmd \"delete break $bpnum\""
 
 		radiobutton $f.disps.disable -text Disable \
-			-variable disposition -anchor w -relief flat
+			-variable disposition($bpnum) -anchor w -relief flat \
+			-command "gdb_cmd \"disable break $bpnum\""
 
 		radiobutton $f.disps.donttouch -text "Leave alone" \
-				 -variable disposition -anchor w -relief flat
+			-variable disposition($bpnum) -anchor w -relief flat \
+			-command "gdb_cmd \"enable break $bpnum\""
 
 		pack $f.disps.label $f.disps.delete $f.disps.disable \
 			$f.disps.donttouch -side left -anchor w
@@ -469,6 +475,7 @@ proc delete_breakpoint {bpnum file line pc} {
 proc enable_breakpoint {bpnum file line pc} {
 	global wins
 	global cfunc pclist
+	global enabled
 
 	if [info exists wins($file)] {
 		$wins($file) tag configure $line -fgstipple {}
@@ -479,6 +486,12 @@ proc enable_breakpoint {bpnum file line pc} {
 	set win [asm_win_name $cfunc]
 	if [winfo exists $win] {
 		$win tag configure [pc_to_line $pclist($cfunc) $pc] -fgstipple {}
+	}
+
+# If there's a breakpoint window, update that too
+
+	if [winfo exists .breakpoints] {
+		set enabled($bpnum) 1
 	}
 }
 
@@ -497,6 +510,7 @@ proc enable_breakpoint {bpnum file line pc} {
 proc disable_breakpoint {bpnum file line pc} {
 	global wins
 	global cfunc pclist
+	global enabled
 
 	if [info exists wins($file)] {
 		$wins($file) tag configure $line -fgstipple gray50
@@ -507,6 +521,12 @@ proc disable_breakpoint {bpnum file line pc} {
 	set win [asm_win_name $cfunc]
 	if [winfo exists $win] {
 		$win tag configure [pc_to_line $pclist($cfunc) $pc] -fgstipple gray50
+	}
+
+# If there's a breakpoint window, update that too
+
+	if [winfo exists .breakpoints] {
+		set enabled($bpnum) 0
 	}
 }
 
