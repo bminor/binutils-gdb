@@ -138,6 +138,7 @@ mips-tdep.c
 mips-xdep.c
 mipsread.c
 munch
+nat-sun4os4.h
 news-xdep.c
 nindy-share
 nindy-tdep.c
