@@ -139,7 +139,16 @@ static void som_reloc_queue_insert PARAMS ((unsigned char *, unsigned int,
 static void som_reloc_queue_fix PARAMS ((struct reloc_queue *, unsigned int));
 static int som_reloc_queue_find PARAMS ((unsigned char *, unsigned int,
 					 struct reloc_queue *));
-				 
+static unsigned char * try_prev_fixup PARAMS ((bfd *, int *, unsigned char *,
+					       unsigned int,
+					       struct reloc_queue *));
+
+static unsigned char * som_reloc_skip PARAMS ((bfd *, unsigned int,
+					       unsigned char *, unsigned int *,
+					       struct reloc_queue *));
+static unsigned char * som_reloc_addend PARAMS ((bfd *, int, unsigned char *,
+					         unsigned int *,
+						 struct reloc_queue *));
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -512,6 +521,149 @@ som_reloc_queue_find (p, size, queue)
     return 3;
   return -1;
 }
+
+static unsigned char *
+try_prev_fixup (abfd, subspace_reloc_sizep, p, size, queue)
+     bfd *abfd;
+     int *subspace_reloc_sizep;
+     unsigned char *p;
+     unsigned int size;
+     struct reloc_queue *queue;
+{
+  int queue_index = som_reloc_queue_find (p, size, queue);
+
+  if (queue_index != -1)
+    {
+      /* Found this in a previous fixup.  Undo the fixup we
+	 just built and use R_PREV_FIXUP instead.  We saved 
+	 a total of size - 1 bytes in the fixup stream.  */
+      bfd_put_8 (abfd, R_PREV_FIXUP + queue_index, p);
+      p += 1;
+      *subspace_reloc_sizep += 1;
+      som_reloc_queue_fix (queue, queue_index);
+    }
+  else
+    {
+      som_reloc_queue_insert (p, size, queue);
+      *subspace_reloc_sizep += size;
+      p += size;
+    }
+  return p;
+}
+
+/* Emit the proper R_NO_RELOCATION fixups to map the next SKIP
+   bytes without any relocation.  Update the size of the subspace
+   relocation stream via SUBSPACE_RELOC_SIZE_P; also return the 
+   current pointer into the relocation stream.  */
+
+static unsigned char *
+som_reloc_skip (abfd, skip, p, subspace_reloc_sizep, queue)
+     bfd *abfd;
+     unsigned int skip;
+     unsigned char *p;
+     unsigned int *subspace_reloc_sizep;
+     struct reloc_queue *queue;
+{
+  /* Use a 4 byte R_NO_RELOCATION entry with a maximal value
+     then R_PREV_FIXUPs to get the difference down to a
+     reasonable size.  */
+  if (skip >= 0x1000000)
+    {
+      skip -= 0x1000000;
+      bfd_put_8 (abfd, R_NO_RELOCATION + 31, p);
+      bfd_put_8 (abfd, 0xff, p + 1);
+      bfd_put_16 (abfd, 0xffff, p + 2);
+      p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 4, queue);
+      while (skip >= 0x1000000)
+	{
+	  skip -= 0x1000000;
+	  bfd_put_8 (abfd, R_PREV_FIXUP, p);
+	  p++;
+	  *subspace_reloc_sizep += 1;
+	  /* No need to adjust queue here since we are repeating the
+	     most recent fixup.  */
+	}
+    }
+  
+  /* The difference must be less than 0x1000000.  Use one 
+     more R_NO_RELOCATION entry to get to the right difference.  */
+  if ((skip & 3) == 0 && skip <= 0xc0000 && skip > 0)
+    {
+      /* Difference can be handled in a simple single-byte
+	 R_NO_RELOCATION entry.  */
+      if (skip <= 0x60)
+	{
+	  bfd_put_8 (abfd, R_NO_RELOCATION + (skip >> 2) - 1, p);
+	  *subspace_reloc_sizep += 1;
+	  p++;
+	}
+      /* Handle it with a two byte R_NO_RELOCATION entry.  */
+      else if (skip <= 0x1000)
+	{
+	  bfd_put_8 (abfd, R_NO_RELOCATION + 24 + (((skip >> 2) - 1) >> 8), p);
+	  bfd_put_8 (abfd, (skip >> 2) - 1, p + 1);
+	  p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 2, queue);
+	}
+      /* Handle it with a three byte R_NO_RELOCATION entry.  */
+      else
+	{
+	  bfd_put_8 (abfd, R_NO_RELOCATION + 28 + (((skip >> 2) - 1) >> 16), p);
+	  bfd_put_16 (abfd, (skip >> 2) - 1, p + 1);
+	  p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 3, queue);
+	}
+    }
+  /* Ugh.  Punt and use a 4 byte entry.  */
+  else if (skip > 0)
+    {
+      bfd_put_8 (abfd, R_NO_RELOCATION + 31, p);
+      bfd_put_8 (abfd, skip >> 16, p + 1);
+      bfd_put_16 (abfd, skip, p + 2);
+      p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 4, queue);
+    }
+  return p;
+}
+
+/* Emit the proper R_DATA_OVERRIDE fixups to handle a nonzero addend
+   from a BFD relocation.  Update the size of the subspace relocation
+   stream via SUBSPACE_RELOC_SIZE_P; also return the current pointer
+   into the relocation stream.  */
+
+static unsigned char *
+som_reloc_addend (abfd, addend, p, subspace_reloc_sizep, queue)
+     bfd *abfd;
+     int addend;
+     unsigned char *p;
+     unsigned int *subspace_reloc_sizep;
+     struct reloc_queue *queue;
+{
+  if ((unsigned)(addend) + 0x80 < 0x100)
+    {
+      bfd_put_8 (abfd, R_DATA_OVERRIDE + 1, p);
+      bfd_put_8 (abfd, addend, p + 1);
+      p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 2, queue); 
+    }
+  else if ((unsigned) (addend) + 0x8000 < 0x10000)
+    {
+      bfd_put_8 (abfd, R_DATA_OVERRIDE + 2, p);
+      bfd_put_16 (abfd, addend, p + 1);
+      p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 3, queue);
+    }
+  else if ((unsigned) (addend) + 0x800000 < 0x1000000)
+    {
+      bfd_put_8 (abfd, R_DATA_OVERRIDE + 3, p);
+      bfd_put_8 (abfd, addend >> 16, p + 1);
+      bfd_put_16 (abfd, addend, p + 2);
+      p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 4, queue);
+    }
+  else
+    {
+      bfd_put_8 (abfd, R_DATA_OVERRIDE + 4, p);
+      bfd_put_32 (abfd, addend, p + 1);
+      p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 5, queue);
+    }
+  return p;
+}
+
 /* Return the logarithm of X, base 2, considering X unsigned. 
    Abort if X is not a power of two -- this should never happen (FIXME:
    It will happen on corrupt executables.  GDB should give an error, not

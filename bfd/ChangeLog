@@ -1,5 +1,9 @@
 Fri Nov 12 15:29:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (try_prev_fixup): New function.
+	(som_reloc_skip): New function.
+	(som_reloc_addend): New function.
+
 	* som.c (som_initialize_reloc_queue): New function.
 	(som_reloc_queue_insert): Likewise.
 	(som_reloc_queue_fix): Likewise.
