@@ -1,5 +1,11 @@
 2004-05-07  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c (skip_prologue_hard_way, hppa_frame_cache): Use 
+	read_memory_nobpt for code reading when doing frame unwinding.
+	* hppa-linux-tdep.c (insns_match_pattern): Likewise.
+
+2004-05-07  Randolph Chung  <tausq@debian.org>
+
 	* hppa-linux-tdep.c (hppa_linux_sigtramp_find_sigcontext): Pass in pc
 	instead of sp, handle sigaltstack case.
 	(hppa_linux_sigtramp_frame_unwind_cache): Adjust calls to 

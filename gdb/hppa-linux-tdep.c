@@ -146,7 +146,10 @@ insns_match_pattern (CORE_ADDR pc,
 
   for (i = 0; pattern[i].mask; i++)
     {
-      insn[i] = read_memory_unsigned_integer (npc, 4);
+      char buf[4];
+
+      read_memory_nobpt (npc, buf, 4);
+      insn[i] = extract_unsigned_integer (buf, 4);
       if ((insn[i] & pattern[i].mask) == pattern[i].data)
         npc += 4;
       else
