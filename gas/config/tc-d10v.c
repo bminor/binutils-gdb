@@ -905,7 +905,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 static unsigned long prev_insn;
 static struct d10v_opcode *prev_opcode = 0;
 static subsegT prev_subseg;
-static segT prev_seg;
+static segT prev_seg = 0;;
 
 void
 md_assemble (str)
@@ -942,7 +942,7 @@ md_assemble (str)
 	  
 	  /* if two instructions are present and we already have one saved
 	     then first write it out */
-	  d10v_cleanup(0);
+	  d10v_cleanup();
 	  
 	  /* assemble first instruction and save it */
 	  prev_insn = do_assemble (str, &prev_opcode);
@@ -975,15 +975,15 @@ md_assemble (str)
     {
       if (extype) 
 	as_fatal("Unable to mix instructions as specified");
-      d10v_cleanup(0);
+      d10v_cleanup();
       write_long (opcode, insn, fixups);
       prev_opcode = NULL;
       return;
     }
   
-  if (prev_opcode && ((prev_seg != now_seg) || (prev_subseg != now_subseg)))
-    d10v_cleanup(0);
-
+  if (prev_opcode && prev_seg && ((prev_seg != now_seg) || (prev_subseg != now_subseg)))
+    d10v_cleanup();
+  
   if (prev_opcode && (write_2_short (prev_opcode, prev_insn, opcode, insn, extype, fixups) == 0)) 
     {
       /* no instructions saved */
@@ -1355,8 +1355,7 @@ md_apply_fix3 (fixp, valuep, seg)
    instructions to see if it can package them with the next instruction, there may
    be a short instruction that still needs written.  */
 int
-d10v_cleanup (done)
-     int done;
+d10v_cleanup ()
 {
   segT seg;
   subsegT subseg;

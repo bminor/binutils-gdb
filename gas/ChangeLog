@@ -1,8 +1,13 @@
-Thu Dec  5 23:44:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+start-sanitize-d10v
+Fri Dec  6 00:55:48 1996  Martin  <hunt@cygnus.com>
 
-	* config/tc-ppc.c (comment_char): Correctly define for non ELF
-	systems.
+	* config/tc-d10v.c (md_assemble): Check to see if prev_seg
+	is initialized before using it.
+	(d10v_cleanup): No longer uses its argument, so make it void.
 
+	* config/tc-d10v.h (d10v_cleanup): Change prototype.
+	
+end-sanitize-d10v	
 Thu Dec  5 11:03:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (fixup_segment): Don't discard the symbol for a PC
