@@ -23,7 +23,6 @@
 #define IA64_TDEP_H
 
 extern CORE_ADDR ia64_linux_sigcontext_register_address (CORE_ADDR, int);
-extern CORE_ADDR ia64_aix_sigcontext_register_address (CORE_ADDR, int);
 extern unsigned long ia64_linux_getunwind_table (void *, size_t);
 extern void ia64_write_pc (CORE_ADDR, ptid_t);
 extern void ia64_linux_write_pc (CORE_ADDR, ptid_t);

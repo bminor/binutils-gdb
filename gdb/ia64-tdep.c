@@ -3268,8 +3268,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      to do it.  */
   if (info.osabi == GDB_OSABI_LINUX)
     tdep->sigcontext_register_address = ia64_linux_sigcontext_register_address;
-  else if (native_find_global_pointer != 0)
-    tdep->sigcontext_register_address = ia64_aix_sigcontext_register_address;
   else
     tdep->sigcontext_register_address = 0;
 

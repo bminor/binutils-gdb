@@ -1,3 +1,14 @@
+2005-01-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-tdep.c (ia64_gdbarch_init): Eliminate dependency on 
+	functions in ia64-aix-tdep.c.
+	* ia64-tdep.h (ia64_aix_sigcontext_register_address): Remove
+	function defined in ia64-aix-tdep.c.
+	* ia64-aix-tdep.c: Remove file.
+	* config/ia64/linux.mt (TDEPFILES): Remove ia64-aix-tdep.o from
+	this list.
+	* Makefile.in (ia64-aix-tdep.o): Delete.
+
 2005-01-05  Baurjan Ismagulov  <ibr@ata.cs.hun.edu.tr>
 
 	Committed by Andrew Cagney.
