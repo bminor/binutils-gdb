@@ -52,6 +52,8 @@ set i386tests {
      "--32" {tlsnopic1.s tlsnopic2.s}
      {{readelf -Ssrl tlsnopic.rd} {objdump -drj.text tlsnopic.dd}
       {objdump -sj.got tlsnopic.sd}} "libtlsnopic.so"}
+    {"Reloc section order" "-shared -melf_i386" "--32" {reloc.s}
+     {{objdump -hw reloc.d}} "reloc.so"}
 }
 
 run_ld_link_tests $i386tests

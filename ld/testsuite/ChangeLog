@@ -1,3 +1,8 @@
+2002-09-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-i386/reloc.s, ld-i386/reloc.d: New.
+	* ld-i386/i386.exp: Run new test.
+
 2002-09-27  Jakub Jelinek  <jakub@redhat.com>
 
 	* lib/ld-lib.exp (run_ld_link_tests): Add.
