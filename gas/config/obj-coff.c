@@ -19,6 +19,8 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
+#define OBJ_HEADER "obj-coff.h"
+
 #include "as.h"
 #include "obstack.h"
 #include "subsegs.h"
@@ -327,14 +329,14 @@ static symbolS *line_fsym;
 
 
 void
-obj_symbol_new_hook (symbolP)
+coff_obj_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
   char underscore = 0;		/* Symbol has leading _ */
 
   {
     long sz = (OBJ_COFF_MAX_AUXENTRIES + 1) * sizeof (combined_entry_type);
-    char *s = (char *) bfd_alloc_by_size_t (stdoutput, sz);
+    char *s = (char *) xmalloc (sz);
     memset (s, 0, sz);
     coffsymbol (symbolP->bsym)->native = (combined_entry_type *) s;
   }
@@ -364,8 +366,8 @@ add_lineno (frag, offset, num)
      int offset;
      int num;
 {
-  struct line_no *new_line = (struct line_no *) bfd_alloc_by_size_t (stdoutput,
-								     sizeof (struct line_no));
+  struct line_no *new_line =
+    (struct line_no *) xmalloc (sizeof (struct line_no));
   if (!current_lineno_sym)
     {
       abort ();
@@ -882,7 +884,7 @@ obj_coff_val (ignore)
 }
 
 void
-obj_read_begin_hook ()
+coff_obj_read_begin_hook ()
 {
   /* These had better be the same.  Usually 18 bytes. */
 #ifndef BFD_HEADERS
@@ -1047,7 +1049,7 @@ coff_frob_symbol (symp, punt)
       /* We need i entries for line numbers, plus 1 for the first
 	 entry which BFD will override, plus 1 for the last zero
 	 entry (a marker for BFD).  */
-      l = (alent *) bfd_alloc_by_size_t (stdoutput, (i + 2) * sizeof (alent));
+      l = (alent *) xmalloc ((i + 2) * sizeof (alent));
       coffsymbol (symp->bsym)->lineno = l;
       l[i + 1].line_number = 0;
       l[i + 1].u.sym = NULL;
@@ -1120,6 +1122,7 @@ coff_frob_file ()
  *                                               'w' for data
  *						 'd' (apparently m88k for data)
  *                                               'x' for text
+ *						 'r' for read-only data
  * But if the argument is not a quoted string, treat it as a
  * subsegment number.
  */
@@ -1176,6 +1179,7 @@ obj_coff_section (ignore)
 		case 'd':
 		case 'w': flags &=~ SEC_READONLY; break;
 		case 'x': flags |= SEC_CODE; break;
+		case 'r': flags |= SEC_READONLY; break;
 
 		case 'i': /* STYP_INFO */
 		case 'l': /* STYP_LIB */
@@ -2000,7 +2004,7 @@ symbol_to_chars (abfd, where, symbolP)
 }
 
 void
-obj_symbol_new_hook (symbolP)
+coff_obj_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
   char underscore = 0;		/* Symbol has leading _ */
@@ -2571,7 +2575,7 @@ obj_coff_pe_handle_link_once (type)
 #endif /* TE_PE */
 
 void
-obj_read_begin_hook ()
+coff_obj_read_begin_hook ()
 {
   /* These had better be the same.  Usually 18 bytes. */
 #ifndef BFD_HEADERS
@@ -2921,7 +2925,7 @@ crawl_symbols (h, abfd)
    * order :
    * . .file symbol
    * . debug entries for functions
-   * . fake symbols for the sections, including.text .data and .bss
+   * . fake symbols for the sections, including .text .data and .bss
    * . defined symbols
    * . undefined symbols
    * But this is not mandatory. The only important point is to put the
@@ -3356,6 +3360,7 @@ obj_coff_add_segment (name)
  *                                               'w' for data
  *						 'd' (apparently m88k for data)
  *                                               'x' for text
+ *						 'r' for read-only data
  * But if the argument is not a quoted string, treat it as a
  * subsegment number.
  */
@@ -3420,6 +3425,7 @@ obj_coff_section (ignore)
 		case 'd':
 		case 'w': flags |= STYP_DATA;   break;
 		case 'x': flags |= STYP_TEXT;   break;
+		case 'r': flags |= STYP_LIT;	break;
 		default:
 		  as_warn("unknown section attribute '%c'",
 			  *input_line_pointer);
@@ -4312,6 +4318,7 @@ const pseudo_typeS obj_pseudo_table[] =
   {"optim", s_ignore, 0},	/* For sun386i cc (?) */
   {"ident", s_ignore, 0},	/* we don't yet handle this. */
 #endif
+  {"version", s_ignore, 0},
   {"ABORT", s_abort, 0},
 #ifdef TC_M88K
   /* The m88k uses sdef instead of def.  */
@@ -4319,3 +4326,60 @@ const pseudo_typeS obj_pseudo_table[] =
 #endif
   {NULL}			/* end sentinel */
 };				/* obj_pseudo_table */
+
+#ifdef BFD_ASSEMBLER
+
+/* Support for a COFF emulation.  */
+
+static void
+coff_pop_insert ()
+{
+  pop_insert (obj_pseudo_table);
+}
+
+static int
+coff_sec_sym_ok_for_reloc (sec)
+     asection *sec;
+{
+  return 0;
+}
+
+static void
+no_func ()
+{
+  abort ();
+}
+
+const struct format_ops coff_format_ops =
+{
+  bfd_target_coff_flavour,
+  0,
+  1,
+  coff_frob_symbol,
+  coff_frob_file,
+  no_func,
+  0, 0,
+  0, 0,
+  0,
+#if 0
+  obj_generate_asm_lineno,
+#else
+  no_func,
+#endif
+#if 0
+  obj_stab,
+#else
+  no_func,
+#endif
+  coff_sec_sym_ok_for_reloc,
+  coff_pop_insert,
+#if 0
+  obj_set_ext,
+#else
+  no_func,
+#endif
+  coff_obj_read_begin_hook,
+  coff_obj_symbol_new_hook,
+};
+
+#endif

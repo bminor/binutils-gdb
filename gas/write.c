@@ -851,8 +851,7 @@ write_relocs (abfd, sec, xxx)
 
 #ifndef RELOC_EXPANSION_POSSIBLE
   /* Set up reloc information as well.  */
-  relocs = (arelent **) bfd_alloc_by_size_t (stdoutput,
-					     n * sizeof (arelent *));
+  relocs = (arelent **) xmalloc (n * sizeof (arelent *));
   memset ((char*)relocs, 0, n * sizeof (arelent*));
 
   i = 0;
@@ -913,7 +912,7 @@ write_relocs (abfd, sec, xxx)
 	  as_bad_where (fixp->fx_file, fixp->fx_line, "relocation overflow");
 	  break;
 	default:
-	  as_fatal ("%s:%u: bad return from bfd_perform_relocation",
+	  as_fatal ("%s:%u: bad return from bfd_install_relocation",
 		    fixp->fx_file, fixp->fx_line);
 	}
       relocs[i++] = reloc;
@@ -921,8 +920,7 @@ write_relocs (abfd, sec, xxx)
 #else
   n = n * MAX_RELOC_EXPANSION;
   /* Set up reloc information as well.  */
-  relocs = (arelent **) bfd_alloc_by_size_t (stdoutput,
-					     n * sizeof (arelent *));
+  relocs = (arelent **) xmalloc (stdoutput, n * sizeof (arelent *));
 
   i = 0;
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
@@ -975,7 +973,7 @@ write_relocs (abfd, sec, xxx)
 			    "relocation overflow");
 	      break;
 	    default:
-	      as_fatal ("%s:%u: bad return from bfd_perform_relocation",
+	      as_fatal ("%s:%u: bad return from bfd_install_relocation",
 			fixp->fx_file, fixp->fx_line);
 	    }
         }
@@ -1339,7 +1337,7 @@ write_object_file ()
   for (frchainP = frchain_root; frchainP; frchainP = frchainP->frch_next)
     {
       subseg_set (frchainP->frch_seg, frchainP->frch_subseg);
-      frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE);
+      frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE, 0);
       /* frag_align will have left a new frag.
 	 Use this last frag for an empty ".fill".
 
@@ -2037,13 +2035,18 @@ relax_segment (segment_frag_root, segment)
 	case rs_align:
 	case rs_align_code:
 	  {
-	    int offset = relax_align (address, (int) fragP->fr_offset);
+	    addressT offset = relax_align (address, (int) fragP->fr_offset);
+
+	    if (fragP->fr_subtype != 0 && offset > fragP->fr_subtype)
+	      offset = 0;
+
 	    if (offset % fragP->fr_var != 0)
 	      {
-		as_bad ("alignment padding (%d bytes) not a multiple of %ld",
-			offset, (long) fragP->fr_var);
+		as_bad ("alignment padding (%lu bytes) not a multiple of %ld",
+			(unsigned long) offset, (long) fragP->fr_var);
 		offset -= (offset % fragP->fr_var);
 	      }
+
 	    address += offset;
 	  }
 	  break;
@@ -2086,8 +2089,8 @@ relax_segment (segment_frag_root, segment)
 	for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
 	  {
 	    long growth = 0;
-	    unsigned long was_address;
-	    long offset;
+	    addressT was_address;
+	    offsetT offset;
 	    symbolS *symbolP;
 
 	    was_address = fragP->fr_address;
@@ -2164,12 +2167,24 @@ relax_segment (segment_frag_root, segment)
 #endif
 	      case rs_align:
 	      case rs_align_code:
-		growth = (relax_align ((relax_addressT) (address
-							 + fragP->fr_fix),
-				       (int) offset)
-			  - relax_align ((relax_addressT) (was_address
-							   + fragP->fr_fix),
-					 (int) offset));
+		{
+		  addressT oldoff, newoff;
+
+		  oldoff = relax_align (was_address + fragP->fr_fix,
+					(int) offset);
+		  newoff = relax_align (address + fragP->fr_fix,
+					(int) offset);
+
+		  if (fragP->fr_subtype != 0)
+		    {
+		      if (oldoff > fragP->fr_subtype)
+			oldoff = 0;
+		      if (newoff > fragP->fr_subtype)
+			newoff = 0;
+		    }
+
+		  growth = newoff - oldoff;
+		}
 		break;
 
 	      case rs_org:

@@ -44,7 +44,7 @@ const char *m68k_comment_chars = "|";
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output. */
 /* Also note that comments like this one will always work. */
-const char line_comment_chars[] = "#";
+const char line_comment_chars[] = "#*";
 
 const char line_separator_chars[] = "";
 
@@ -856,8 +856,7 @@ tc_gen_reloc (section, fixp)
 #undef F
 #undef MAP
 
-  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
-  assert (reloc != 0);
+  reloc = (arelent *) xmalloc (sizeof (arelent));
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 #ifndef OBJ_ELF
@@ -904,7 +903,6 @@ m68k_ip (instring)
   char c;
   int losing;
   int opsfound;
-  char *crack_operand ();
   LITTLENUM_TYPE words[6];
   LITTLENUM_TYPE *wordp;
   unsigned long ok_arch = 0;
@@ -3370,6 +3368,7 @@ md_assemble (str)
 	      n = 1;
 	      break;
 	    case 'w':
+	    case 'W':
 	      n = 2;
 	      break;
 	    case 'l':

@@ -104,7 +104,7 @@ typedef struct _i386_insn i386_insn;
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
-#if defined (TE_I386AIX) || defined (OBJ_ELF)
+#if defined (TE_I386AIX) || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 const char comment_chars[] = "#/";
 #else
 const char comment_chars[] = "#";
@@ -118,7 +118,7 @@ const char comment_chars[] = "#";
    #NO_APP at the beginning of its output. */
 /* Also note that comments started like this one will always work if
    '/' isn't otherwise defined.  */
-#if defined (TE_I386AIX) || defined (OBJ_ELF)
+#if defined (TE_I386AIX) || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 const char line_comment_chars[] = "";
 #else
 const char line_comment_chars[] = "/";
@@ -577,10 +577,13 @@ md_begin ()
       operand_chars[(unsigned char) *p] = *p;
   }
 
-#ifdef OBJ_ELF
-  record_alignment (text_section, 2);
-  record_alignment (data_section, 2);
-  record_alignment (bss_section, 2);
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+    {
+      record_alignment (text_section, 2);
+      record_alignment (data_section, 2);
+      record_alignment (bss_section, 2);
+    }
 #endif
 }
 
@@ -2653,11 +2656,13 @@ md_apply_fix3 (fixP, valp, seg)
   if (fixP->fx_r_type == BFD_RELOC_32_PCREL && fixP->fx_addsy)
     {
 #ifndef OBJ_AOUT
-      value += fixP->fx_where + fixP->fx_frag->fr_address;
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	value += fixP->fx_where + fixP->fx_frag->fr_address;
 #endif
-#ifdef OBJ_ELF
-      if (S_GET_SEGMENT (fixP->fx_addsy) == seg
-	  || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg
+	      || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0))
 	{
 	  /* Yes, we add the values in twice.  This is because
 	     bfd_perform_relocation subtracts them out again.  I think
@@ -2670,8 +2675,9 @@ md_apply_fix3 (fixP, valp, seg)
 
   /* Fix a few things - the dynamic linker expects certain values here,
      and we must not dissappoint it. */
-#ifdef OBJ_ELF
-  if (fixP->fx_addsy)
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour
+      && fixP->fx_addsy)
     switch(fixP->fx_r_type) {
     case BFD_RELOC_386_PLT32:
       /* Make the jump instruction point to the address of the operand.  At
@@ -2860,7 +2866,7 @@ md_parse_option (c, arg)
       flag_do_long_jump = 1;
       break;
 
-#ifdef OBJ_ELF
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       /* -k: Ignore for FreeBSD compatibility.  */
     case 'k':
       break;
@@ -2889,9 +2895,32 @@ md_show_usage (stream)
   fprintf (stream, "\
 -m			do long jump\n");
 }
-
-/* We have no need to default values of symbols.  */
 
+#ifdef BFD_ASSEMBLER
+#ifdef OBJ_MAYBE_ELF
+#ifdef OBJ_MAYBE_COFF
+
+/* Pick the target format to use.  */
+
+const char  *
+i386_target_format ()
+{
+  switch (OUTPUT_FLAVOR)
+    {
+    case bfd_target_coff_flavour:
+      return "coff-i386";
+    case bfd_target_elf_flavour:
+      return "elf32-i386";
+    default:
+      abort ();
+      return NULL;
+    }
+}
+
+#endif /* OBJ_MAYBE_COFF */
+#endif /* OBJ_MAYBE_ELF */
+#endif /* BFD_ASSEMBLER */
+
 /* ARGSUSED */
 symbolS *
 md_undefined_symbol (name)
@@ -3001,9 +3030,7 @@ tc_gen_reloc (section, fixp)
       && fixp->fx_addsy == GOT_symbol)
     code = BFD_RELOC_386_GOTPC;
 
-  rel = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
-  if (rel == NULL)
-    as_fatal ("Out of memory");
+  rel = (arelent *) xmalloc (sizeof (arelent));
   rel->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   if (fixp->fx_pcrel)

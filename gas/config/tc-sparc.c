@@ -1,5 +1,5 @@
 /* tc-sparc.c -- Assemble for the SPARC
-   Copyright (C) 1989, 90-95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90-96, 1997 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -355,7 +355,7 @@ s_reserve (ignore)
 	  subseg_set (bss_section, 1); /* switch to bss */
 
 	  if (align)
-	    frag_align (align, 0); /* do alignment */
+	    frag_align (align, 0, 0); /* do alignment */
 
 	  /* detach from old frag */
 	  if (S_GET_SEGMENT(symbolP) == bss_section)
@@ -472,7 +472,7 @@ s_common (ignore)
 	  record_alignment (bss_section, align);
 	  subseg_set (bss_section, 0);
 	  if (align)
-	    frag_align (align, 0);
+	    frag_align (align, 0, 0);
 	  if (S_GET_SEGMENT (symbolP) == bss_section)
 	    symbolP->sy_frag->fr_symbol = 0;
 	  symbolP->sy_frag = frag_now;
@@ -515,6 +515,11 @@ s_common (ignore)
 	;
       goto allocate_common;
     }
+
+#ifdef BFD_ASSEMBLER
+  symbolP->bsym->flags |= BSF_OBJECT;
+#endif
+
   demand_empty_rest_of_line ();
   return;
 
@@ -2613,8 +2618,7 @@ tc_gen_reloc (section, fixp)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
-  assert (reloc != 0);
+  reloc = (arelent *) xmalloc (sizeof (arelent));
 
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
@@ -2972,7 +2976,7 @@ md_show_usage (stream)
   fprintf (stream, "\
 			specify variant of SPARC architecture\n\
 -bump			warn when assembler switches architectures\n\
--sparc			ignored\n
+-sparc			ignored\n\
 --enforce-aligned-data	force .long, etc., to be aligned correctly\n");
 #ifdef OBJ_AOUT
   fprintf (stream, "\

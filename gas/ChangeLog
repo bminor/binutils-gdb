@@ -1,3 +1,8 @@
+Mon Mar 17 11:21:09 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* as.h (bfd_alloc_by_size_t): Don't declare.
+	* Many files: Use xmalloc rather than bfd_alloc_by_size_t.
+
 Sun Mar 16 13:49:21 1997  Philippe De Muyter <phdm@info.ucl.ac.be>
 
 	* symbols.c (symbol_new): Don't call debug_verify_symchain.

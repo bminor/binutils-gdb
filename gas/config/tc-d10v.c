@@ -95,7 +95,7 @@ const pseudo_typeS md_pseudo_table[] =
 /* Opcode hash table.  */
 static struct hash_control *d10v_hash;
 
-/* reg_name_search does a binary search of the pre_defined_registers
+/* reg_name_search does a binary search of the d10v_predefined_registers
    array to see if "name" is a valid regiter name.  Returns the register
    number from the array on success, or -1 on failure. */
 
@@ -107,18 +107,18 @@ reg_name_search (name)
   int cmp;
 
   low = 0;
-  high = reg_name_cnt() - 1;
+  high = d10v_reg_name_cnt() - 1;
 
   do
     {
       middle = (low + high) / 2;
-      cmp = strcasecmp (name, pre_defined_registers[middle].name);
+      cmp = strcasecmp (name, d10v_predefined_registers[middle].name);
       if (cmp < 0)
 	high = middle - 1;
       else if (cmp > 0)
 	low = middle + 1;
       else 
-	  return pre_defined_registers[middle].value;
+	  return d10v_predefined_registers[middle].value;
     }
   while (low <= high);
   return -1;
@@ -1225,7 +1225,7 @@ tc_gen_reloc (seg, fixp)
      fixS *fixp;
 {
   arelent *reloc;
-  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
+  reloc = (arelent *) xmalloc (sizeof (arelent));
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);

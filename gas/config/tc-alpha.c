@@ -1,10 +1,10 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
-   Copyright (C) 1989, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1989, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
    Modified by Richard Henderson for ELF support.
-   Modified by Klaus Kaempf for EVAX (openVMS/Alpha) support.
+   Modified by Klaus K"ampf for EVAX (openVMS/Alpha) support.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -87,8 +87,8 @@ enum alpha_macro_arg
 struct alpha_macro
 {
   const char *name;
-  void (*emit) PARAMS((const expressionS *, int, void *));
-  void *arg;
+  void (*emit) PARAMS ((const expressionS *, int, const PTR));
+  const PTR arg;
   enum alpha_macro_arg argsets[16];
 };
 
@@ -154,70 +154,73 @@ struct alpha_macro
 
 /* Prototypes for all local functions */
 
-static int tokenize_arguments PARAMS((char *, expressionS*, int));
+static int tokenize_arguments PARAMS ((char *, expressionS *, int));
 static const struct alpha_opcode *find_opcode_match
-	PARAMS((const struct alpha_opcode*, const expressionS*, int*, int*));
+  PARAMS ((const struct alpha_opcode *, const expressionS *, int *, int *));
 static const struct alpha_macro *find_macro_match
-	PARAMS((const struct alpha_macro*, const expressionS*, int*));
-static unsigned insert_operand PARAMS((unsigned, const struct alpha_operand*,
-				      offsetT, char *, unsigned));
-static void assemble_insn PARAMS((const struct alpha_opcode*,
-				  const expressionS*, int,
-				  struct alpha_insn*));
-static void emit_insn PARAMS((struct alpha_insn *));
-static void assemble_tokens_to_insn PARAMS((const char *, const expressionS*,
-					    int, struct alpha_insn *));
-static void assemble_tokens PARAMS((const char *, const expressionS*,
-				    int, int));
+  PARAMS ((const struct alpha_macro *, const expressionS *, int *));
+static unsigned insert_operand
+  PARAMS ((unsigned, const struct alpha_operand *, offsetT, char *, unsigned));
+static void assemble_insn
+  PARAMS ((const struct alpha_opcode *, const expressionS *, int,
+	   struct alpha_insn *));
+static void emit_insn PARAMS ((struct alpha_insn *));
+static void assemble_tokens_to_insn
+  PARAMS ((const char *, const expressionS *, int, struct alpha_insn *));
+static void assemble_tokens
+  PARAMS ((const char *, const expressionS *, int, int));
 
-static int load_expression PARAMS((int, const expressionS*, int *,
-				   expressionS*));
+static int load_expression
+  PARAMS ((int, const expressionS *, int *, expressionS *));
 
-static void emit_ldgp PARAMS((const expressionS*, int, void*));
-static void emit_division PARAMS((const expressionS*, int, void*));
-static void emit_lda PARAMS((const expressionS*, int, void*));
-static void emit_ldah PARAMS((const expressionS*, int, void*));
-static void emit_ir_load PARAMS((const expressionS*, int, void*));
-static void emit_loadstore PARAMS((const expressionS*, int, void*));
-static void emit_jsrjmp PARAMS((const expressionS*, int, void*));
-static void emit_ldX PARAMS((const expressionS*, int, void*));
-static void emit_ldXu PARAMS((const expressionS*, int, void*));
-static void emit_uldX PARAMS((const expressionS*, int, void*));
-static void emit_uldXu PARAMS((const expressionS*, int, void*));
-static void emit_ldil PARAMS((const expressionS*, int, void*));
-static void emit_stX PARAMS((const expressionS*, int, void*));
-static void emit_ustX PARAMS((const expressionS*, int, void*));
-static void emit_sextX PARAMS((const expressionS*, int, void*));
-static void emit_retjcr PARAMS((const expressionS*, int, void*));
+static void emit_ldgp PARAMS ((const expressionS *, int, const PTR));
+static void emit_division PARAMS ((const expressionS *, int, const PTR));
+static void emit_lda PARAMS ((const expressionS *, int, const PTR));
+static void emit_ldah PARAMS ((const expressionS *, int, const PTR));
+static void emit_ir_load PARAMS ((const expressionS *, int, const PTR));
+static void emit_loadstore PARAMS ((const expressionS *, int, const PTR));
+static void emit_jsrjmp PARAMS ((const expressionS *, int, const PTR));
+static void emit_ldX PARAMS ((const expressionS *, int, const PTR));
+static void emit_ldXu PARAMS ((const expressionS *, int, const PTR));
+static void emit_uldX PARAMS ((const expressionS *, int, const PTR));
+static void emit_uldXu PARAMS ((const expressionS *, int, const PTR));
+static void emit_ldil PARAMS ((const expressionS *, int, const PTR));
+static void emit_stX PARAMS ((const expressionS *, int, const PTR));
+static void emit_ustX PARAMS ((const expressionS *, int, const PTR));
+static void emit_sextX PARAMS ((const expressionS *, int, const PTR));
+static void emit_retjcr PARAMS ((const expressionS *, int, const PTR));
 
-static void s_alpha_text PARAMS((int));
-static void s_alpha_data PARAMS((int));
+static void s_alpha_text PARAMS ((int));
+static void s_alpha_data PARAMS ((int));
 #ifndef OBJ_ELF
-static void s_alpha_comm PARAMS((int));
+static void s_alpha_comm PARAMS ((int));
 #endif
 #if defined (OBJ_ECOFF) || defined (OBJ_EVAX)
-static void s_alpha_rdata PARAMS((int));
+static void s_alpha_rdata PARAMS ((int));
 #endif
 #ifdef OBJ_ECOFF
-static void s_alpha_sdata PARAMS((int));
+static void s_alpha_sdata PARAMS ((int));
 #endif
 #ifdef OBJ_ELF
-static void s_alpha_section PARAMS((int));
+static void s_alpha_section PARAMS ((int));
 #endif
-static void s_alpha_gprel32 PARAMS((int));
-static void s_alpha_float_cons PARAMS((int));
-static void s_alpha_proc PARAMS((int));
-static void s_alpha_set PARAMS((int));
-static void s_alpha_base PARAMS((int));
-static void s_alpha_align PARAMS((int));
-static void s_alpha_stringer PARAMS((int));
-static void s_alpha_space PARAMS((int));
+#ifdef OBJ_EVAX
+static void s_alpha_section PARAMS ((int));
+#endif
+static void s_alpha_gprel32 PARAMS ((int));
+static void s_alpha_float_cons PARAMS ((int));
+static void s_alpha_proc PARAMS ((int));
+static void s_alpha_set PARAMS ((int));
+static void s_alpha_base PARAMS ((int));
+static void s_alpha_align PARAMS ((int));
+static void s_alpha_stringer PARAMS ((int));
+static void s_alpha_space PARAMS ((int));
 
-static void create_literal_section PARAMS((const char *, segT*, symbolS**));
+static void create_literal_section PARAMS ((const char *, segT *, symbolS **));
 #ifndef OBJ_ELF
-static void select_gp_value PARAMS((void));
+static void select_gp_value PARAMS ((void));
 #endif
-static void alpha_align PARAMS((int, char *, symbolS *));
+static void alpha_align PARAMS ((int, char *, symbolS *));
 
 
 /* Generic assembler global variables which must be defined by all
@@ -287,7 +290,7 @@ size_t md_longopts_size = sizeof(md_longopts);
 #endif /* OBJ_EVAX  */
 
 /* The cpu for which we are generating code */
-static unsigned alpha_target = AXP_OPCODE_ALL;
+static unsigned alpha_target = AXP_OPCODE_BASE;
 static const char *alpha_target_name = "<all>";
 
 /* The hash table of instruction opcodes */
@@ -317,6 +320,8 @@ static segT alpha_lit4_section;
 #endif
 #ifdef OBJ_EVAX
 static segT alpha_link_section;
+static segT alpha_ctors_section;
+static segT alpha_dtors_section;
 #endif
 static segT alpha_lit8_section;
 
@@ -327,8 +332,16 @@ static symbolS *alpha_lit4_symbol;
 #endif
 #ifdef OBJ_EVAX
 static symbolS *alpha_link_symbol;
+static symbolS *alpha_ctors_symbol;
+static symbolS *alpha_dtors_symbol;
 #endif
 static symbolS *alpha_lit8_symbol;
+
+/* Literal for .litX+0x8000 within .lita */
+#ifdef OBJ_ECOFF
+static offsetT alpha_lit4_literal;
+static offsetT alpha_lit8_literal;
+#endif
 
 /* Is the assembler not allowed to use $at? */
 static int alpha_noat_on = 0;
@@ -377,21 +390,10 @@ static struct {
 
 static int alpha_flag_hash_long_names = 0;		/* -+ */
 static int alpha_flag_show_after_trunc = 0;		/* -H */
-static int alpha_flag_no_hash_mixed_case = 0;		/* -h NUM */
 
-/* Flag that determines how we map names.  This takes several values, and
- * is set with the -h switch.  A value of zero implies names should be
- * upper case, and the presence of the -h switch inhibits the case hack.
- * No -h switch at all sets alpha_vms_name_mapping to 0, and allows case hacking.
- * A value of 2 (set with -h2) implies names should be
- * all lower case, with no case hack.  A value of 3 (set with -h3) implies
- * that case should be preserved.  */
-
-/* If the -+ switch is given, then the hash is appended to any name that is
- * longer than 31 characters, regardless of the setting of the -h switch.
+/* If the -+ switch is given, then a hash is appended to any name that is
+ * longer than 64 characters, else longer symbol names are truncated.
  */
-
-static char alpha_vms_name_mapping = 0;
 
 static int alpha_basereg_clobbered;
 #endif
@@ -434,32 +436,32 @@ static const struct alpha_macro alpha_macros[] = {
     { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_FPR, MACRO_EXP, MACRO_EOA } },
 
-  { "ldb",	emit_ldX, (void *)0,
+  { "ldb",	emit_ldX, (PTR)0,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldbu",	emit_ldXu, (void *)0,
+  { "ldbu",	emit_ldXu, (PTR)0,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldw",	emit_ldX, (void *)1,
+  { "ldw",	emit_ldX, (PTR)1,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldwu",	emit_ldXu, (void *)1,
+  { "ldwu",	emit_ldXu, (PTR)1,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
 
-  { "uldw",	emit_uldX, (void*)1,
+  { "uldw",	emit_uldX, (PTR)1,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "uldwu",	emit_uldXu, (void*)1,
+  { "uldwu",	emit_uldXu, (PTR)1,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "uldl",	emit_uldX, (void*)2,
+  { "uldl",	emit_uldX, (PTR)2,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "uldlu",	emit_uldXu, (void*)2,
+  { "uldlu",	emit_uldXu, (PTR)2,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "uldq",	emit_uldXu, (void*)3,
+  { "uldq",	emit_uldXu, (PTR)3,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
 
@@ -513,19 +515,19 @@ static const struct alpha_macro alpha_macros[] = {
     { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_FPR, MACRO_EXP, MACRO_EOA } },
 
-  { "stb",	emit_stX, (void*)0,
+  { "stb",	emit_stX, (PTR)0,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "stw",	emit_stX, (void*)1,
+  { "stw",	emit_stX, (PTR)1,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ustw",	emit_ustX, (void*)1,
+  { "ustw",	emit_ustX, (PTR)1,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ustl",	emit_ustX, (void*)2,
+  { "ustl",	emit_ustX, (PTR)2,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ustq",	emit_ustX, (void*)3,
+  { "ustq",	emit_ustX, (PTR)3,
     { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
       MACRO_IR, MACRO_EXP, MACRO_EOA } },
 
@@ -539,11 +541,11 @@ static const struct alpha_macro alpha_macros[] = {
   { "absq"	emit_absq, 2, { EXP, IR } },
 #endif
 
-  { "sextb",	emit_sextX, (void *)0,
+  { "sextb",	emit_sextX, (PTR)0,
     { MACRO_IR, MACRO_IR, MACRO_EOA,
       MACRO_IR, MACRO_EOA,
       /* MACRO_EXP, MACRO_IR, MACRO_EOA */ } },
-  { "sextw",	emit_sextX, (void *)1,
+  { "sextw",	emit_sextX, (PTR)1,
     { MACRO_IR, MACRO_IR, MACRO_EOA,
       MACRO_IR, MACRO_EOA,
       /* MACRO_EXP, MACRO_IR, MACRO_EOA */ } },
@@ -744,7 +746,7 @@ md_begin ()
       sec = subseg_new(".reginfo", (subsegT)0);
       /* The ABI says this section should be loaded so that the running
 	 program can access it.  */
-      bfd_set_section_flags(stdoutput, sec, 
+      bfd_set_section_flags(stdoutput, sec,
 			    SEC_ALLOC|SEC_LOAD|SEC_READONLY|SEC_DATA);
       bfd_set_section_alignement(stdoutput, sec, 3);
 #endif
@@ -894,18 +896,34 @@ md_parse_option (c, arg)
 	  unsigned flags;
 	} *p, m[] =
 	{
-	  { "21064", AXP_OPCODE_EV4|AXP_OPCODE_ALL },
-	  { "21066", AXP_OPCODE_EV4|AXP_OPCODE_ALL },
-	  { "21164", AXP_OPCODE_EV5|AXP_OPCODE_ALL },
-	  { "21164a", AXP_OPCODE_EV56|AXP_OPCODE_ALL },
-	  { "ev4", AXP_OPCODE_EV4|AXP_OPCODE_ALL },
-	  { "ev45", AXP_OPCODE_EV4|AXP_OPCODE_ALL },
-	  { "ev5", AXP_OPCODE_EV5|AXP_OPCODE_ALL },
-	  { "ev56", AXP_OPCODE_EV56|AXP_OPCODE_ALL },
-	  { "all", AXP_OPCODE_ALL },
+	  { "21064", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+	  { "21064a", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+	  { "21066", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+	  { "21068", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+	  { "21164", AXP_OPCODE_BASE|AXP_OPCODE_EV5 },
+	  /* Do we have CIX extension here? */
+	  { "21164a", AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX },
+	  /* Still same PALcodes? */
+	  { "21164pc", (AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX
+			|AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
+	  /* All new PALcodes?  Extras? */
+	  { "21264", (AXP_OPCODE_BASE|AXP_OPCODE_BWX
+		      |AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
+
+	  { "ev4", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+	  { "ev45", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+	  { "lca45", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
+	  { "ev5", AXP_OPCODE_BASE|AXP_OPCODE_EV5 },
+	  { "ev56", AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX },
+	  { "pca56", (AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX
+		      |AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
+	  { "ev6", (AXP_OPCODE_BASE|AXP_OPCODE_BWX
+		    |AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
+
+	  { "all", AXP_OPCODE_BASE },
 	  { 0 }
 	};
-	
+
 	for (p = m; p->name; ++p)
 	  if (strcmp(arg, p->name) == 0)
 	    {
@@ -917,8 +935,8 @@ md_parse_option (c, arg)
       }
       break;
 
-#if OBJ_EVAX
-    case '+':			/* For g++.  Hash any name > 31 chars long. */
+#ifdef OBJ_EVAX
+    case '+':			/* For g++.  Hash any name > 63 chars long. */
       alpha_flag_hash_long_names = 1;
       break;
 
@@ -926,11 +944,7 @@ md_parse_option (c, arg)
       alpha_flag_show_after_trunc = 1;
       break;
 
-    case 'h':			/* No hashing of mixed-case names */
-      {
-	alpha_vms_name_mapping = atoi (arg);
-	alpha_flag_no_hash_mixed_case = 1;
-      }
+    case 'h':			/* for gnu-c/vax compatibility.  */
       break;
 #endif
 
@@ -958,10 +972,8 @@ Alpha options:\n\
 #ifdef OBJ_EVAX
   fputs ("\
 VMS options:\n\
--+			hash encode names longer than 31 characters\n\
--H			show new symbol after hash truncation\n\
--h NUM			don't hash mixed-case names, and adjust case:\n\
-			0 = upper, 2 = lower, 3 = preserve case\n",
+-+			hash encode (don't truncate) names longer than 64 characters\n\
+-H			show new symbol after hash truncation\n",
 	stream);
 #endif
 }
@@ -1015,7 +1027,7 @@ md_apply_fix (fixP, valueP)
 	fixS *next = fixP->fx_next;
 	assert (next->fx_r_type == BFD_RELOC_ALPHA_GPDISP_LO16);
 
-	fixP->fx_offset = (next->fx_frag->fr_address + next->fx_where 
+	fixP->fx_offset = (next->fx_frag->fr_address + next->fx_where
 			   - fixP->fx_frag->fr_address - fixP->fx_where);
 
 	value = (value - sign_extend_16 (value)) >> 16;
@@ -1093,12 +1105,13 @@ md_apply_fix (fixP, valueP)
       return 1;
 #endif
 #ifdef OBJ_ELF
-    case BFD_RELOC_ALPHA_LITERAL:
+    case BFD_RELOC_ALPHA_ELF_LITERAL:
     case BFD_RELOC_ALPHA_LITUSE:
       return 1;
 #endif
 #ifdef OBJ_EVAX
     case BFD_RELOC_ALPHA_LINKAGE:
+    case BFD_RELOC_ALPHA_CODEADDR:
       return 1;
 #endif
 
@@ -1106,15 +1119,15 @@ md_apply_fix (fixP, valueP)
       {
 	const struct alpha_operand *operand;
 
-	if (fixP->fx_r_type <= BFD_RELOC_UNUSED)
+	if ((int)fixP->fx_r_type >= 0)
 	  as_fatal ("unhandled relocation type %s",
 		    bfd_get_reloc_code_name (fixP->fx_r_type));
 
-	assert (fixP->fx_r_type < BFD_RELOC_UNUSED + alpha_num_operands);
-	operand = &alpha_operands[fixP->fx_r_type - BFD_RELOC_UNUSED];
+	assert (-(int)fixP->fx_r_type < alpha_num_operands);
+	operand = &alpha_operands[-(int)fixP->fx_r_type];
 
 	/* The rest of these fixups only exist internally during symbol
-	   resolution and have no representation in the object file.  
+	   resolution and have no representation in the object file.
 	   Therefore they must be completely resolved as constants.  */
 
 	if (fixP->fx_addsy != 0
@@ -1134,10 +1147,10 @@ md_apply_fix (fixP, valueP)
   else
     {
       as_warn_where(fixP->fx_file, fixP->fx_line,
-		    "type %d reloc done?\n", fixP->fx_r_type);
+		    "type %d reloc done?\n", (int)fixP->fx_r_type);
       goto done;
     }
-      
+
 write_done:
   md_number_to_chars(fixpos, image, 4);
 
@@ -1146,7 +1159,7 @@ done:
   return 0;
 }
 
-/* 
+/*
  * Look for a register name in the given symbol.
  */
 
@@ -1177,7 +1190,7 @@ md_undefined_symbol(name)
 	    num = name[0] - '0';
 	  else if (name[0] != '0' && isdigit(name[1]) && name[2] == '\0')
 	    {
-	      num = (name[0] - '0')*10 + name[1] - '0';
+	      num = (name[0] - '0') * 10 + name[1] - '0';
 	      if (num >= 32)
 		break;
 	    }
@@ -1247,11 +1260,17 @@ alpha_force_relocation (f)
     case BFD_RELOC_ALPHA_GPDISP_HI16:
     case BFD_RELOC_ALPHA_GPDISP_LO16:
     case BFD_RELOC_ALPHA_GPDISP:
+#ifdef OBJ_ECOFF
     case BFD_RELOC_ALPHA_LITERAL:
+#endif
+#ifdef OBJ_ELF
+    case BFD_RELOC_ALPHA_ELF_LITERAL:
+#endif
     case BFD_RELOC_ALPHA_LITUSE:
     case BFD_RELOC_GPREL32:
 #ifdef OBJ_EVAX
     case BFD_RELOC_ALPHA_LINKAGE:
+    case BFD_RELOC_ALPHA_CODEADDR:
 #endif
       return 1;
 
@@ -1262,8 +1281,7 @@ alpha_force_relocation (f)
       return 0;
 
     default:
-      assert(f->fx_r_type > BFD_RELOC_UNUSED &&
-	     f->fx_r_type < BFD_RELOC_UNUSED + alpha_num_operands);
+      assert((int)f->fx_r_type < 0 && -(int)f->fx_r_type < alpha_num_operands);
       return 0;
     }
 }
@@ -1284,10 +1302,37 @@ alpha_fix_adjustable (f)
      but we can adjust the values contained within it?  */
   switch (f->fx_r_type)
     {
-    case BFD_RELOC_GPREL32:
+    case BFD_RELOC_ALPHA_GPDISP_HI16:
+    case BFD_RELOC_ALPHA_GPDISP_LO16:
+    case BFD_RELOC_ALPHA_GPDISP:
+      return 0;
+
+#ifdef OBJ_ECOFF
+    case BFD_RELOC_ALPHA_LITERAL:
+#endif
+#ifdef OBJ_ELF
+    case BFD_RELOC_ALPHA_ELF_LITERAL:
+#endif
+#ifdef OBJ_EVAX
+    case BFD_RELOC_ALPHA_LINKAGE:
+    case BFD_RELOC_ALPHA_CODEADDR:
+#endif
       return 1;
+
+    case BFD_RELOC_ALPHA_LITUSE:
+      return 0;
+
+    case BFD_RELOC_GPREL32:
+    case BFD_RELOC_23_PCREL_S2:
+    case BFD_RELOC_32:
+    case BFD_RELOC_64:
+    case BFD_RELOC_ALPHA_HINT:
+      return 1;
+
     default:
-      return !alpha_force_relocation (f);
+      assert ((int)f->fx_r_type < 0
+	      && - (int)f->fx_r_type < alpha_num_operands);
+      return 1;
     }
   /*NOTREACHED*/
 }
@@ -1302,13 +1347,13 @@ tc_gen_reloc (sec, fixp)
 {
   arelent *reloc;
 
-  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
+  reloc = (arelent *) xmalloc (sizeof (arelent));
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   /* Make sure none of our internal relocations make it this far.
      They'd better have been fully resolved by this point.  */
-  assert (fixp->fx_r_type < BFD_RELOC_UNUSED);
+  assert ((int)fixp->fx_r_type > 0);
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == NULL)
@@ -1337,7 +1382,7 @@ tc_gen_reloc (sec, fixp)
     {
       reloc->addend = fixp->fx_offset;
 #ifdef OBJ_ELF
-      /* 
+      /*
        * Ohhh, this is ugly.  The problem is that if this is a local global
        * symbol, the relocation will entirely be performed at link time, not
        * at assembly time.  bfd_perform_reloc doesn't know about this sort
@@ -1394,12 +1439,12 @@ tokenize_arguments (str, tok, ntok)
   char *old_input_line_pointer;
   int saw_comma = 0, saw_arg = 0;
 
-  memset (tok, 0, sizeof(*tok)*ntok);
+  memset (tok, 0, sizeof (*tok) * ntok);
 
-  /* Save and restore input_line_pointer around this function */ 
+  /* Save and restore input_line_pointer around this function */
   old_input_line_pointer = input_line_pointer;
   input_line_pointer = str;
-  
+
   while (tok < end_tok && *input_line_pointer)
     {
       SKIP_WHITESPACE ();
@@ -1555,7 +1600,7 @@ find_opcode_match(first_opcode, tok, pntok, pcpumatch)
 
     match_failed:;
     }
-  while (++opcode-alpha_opcodes < alpha_num_opcodes 
+  while (++opcode-alpha_opcodes < alpha_num_opcodes
 	 && !strcmp(opcode->name, first_opcode->name));
 
   if (*pcpumatch)
@@ -1631,7 +1676,7 @@ find_macro_match(first_macro, tok, pntok)
 		}
 	      ++tokidx;
 	      break;
-		
+
 	    match_failed:
 	      while (*arg != MACRO_EOA)
 		++arg;
@@ -1641,7 +1686,7 @@ find_macro_match(first_macro, tok, pntok)
 	  ++arg;
 	}
     }
-  while (++macro-alpha_macros < alpha_num_macros 
+  while (++macro-alpha_macros < alpha_num_macros
 	 && !strcmp(macro->name, first_macro->name));
 
   return NULL;
@@ -1674,9 +1719,9 @@ insert_operand(insn, operand, val, file, line)
 
       if (val < min || val > max)
 	{
-	  const char *err = 
+	  const char *err =
 	    "operand out of range (%s not between %d and %d)";
-	  char buf[sizeof(val)*3+2];
+	  char buf[sizeof (val) * 3 + 2];
 
 	  sprint_value(buf, val);
 	  if (file)
@@ -1690,9 +1735,9 @@ insert_operand(insn, operand, val, file, line)
     {
       const char *errmsg = NULL;
 
-      insn = (*operand->insert)(insn, val, &errmsg);
+      insn = (*operand->insert) (insn, val, &errmsg);
       if (errmsg)
-	as_warn(errmsg);
+	as_warn (errmsg);
     }
   else
     insn |= ((val & ((1 << operand->bits) - 1)) << operand->shift);
@@ -1700,7 +1745,7 @@ insert_operand(insn, operand, val, file, line)
   return insn;
 }
 
-/* 
+/*
  * Turn an opcode description and a set of arguments into
  * an instruction and a fixup.
  */
@@ -1716,7 +1761,7 @@ assemble_insn(opcode, tok, ntok, insn)
   unsigned image;
   int tokidx = 0;
 
-  memset(insn, 0, sizeof(*insn));
+  memset (insn, 0, sizeof (*insn));
   image = opcode->opcode;
 
   for (argidx = opcode->operands; *argidx; ++argidx)
@@ -1786,7 +1831,7 @@ assemble_insn(opcode, tok, ntok, insn)
   insn->insn = image;
 }
 
-/* 
+/*
  * Actually output an instruction with its fixup.
  */
 
@@ -1816,7 +1861,7 @@ emit_insn (insn)
       fixS *fixP;
 
       /* Some fixups are only used internally and so have no howto */
-      if (fixup->reloc > BFD_RELOC_UNUSED)
+      if ((int)fixup->reloc < 0)
 	size = 4, pcrel = 0;
 #ifdef OBJ_ELF
       /* These relocation types are only used internally. */
@@ -1828,7 +1873,7 @@ emit_insn (insn)
 #endif
       else
 	{
-	  reloc_howto_type *reloc_howto 
+	  reloc_howto_type *reloc_howto
 	    = bfd_reloc_type_lookup (stdoutput, fixup->reloc);
 	  assert (reloc_howto);
 
@@ -1844,7 +1889,12 @@ emit_insn (insn)
       switch (fixup->reloc)
 	{
 	case BFD_RELOC_ALPHA_GPDISP_LO16:
+#ifdef OBJ_ECOFF
 	case BFD_RELOC_ALPHA_LITERAL:
+#endif
+#ifdef OBJ_ELF
+	case BFD_RELOC_ALPHA_ELF_LITERAL:
+#endif
 	case BFD_RELOC_GPREL32:
 	  fixP->fx_no_overflow = 1;
 	  break;
@@ -1936,7 +1986,7 @@ assemble_tokens (opname, tok, ntok, local_macros_on)
 	  return;
 	}
     }
-  
+
   if (found_something)
     if (cpumatch)
       as_bad ("inappropriate arguments for opcode `%s'", opname);
@@ -1956,14 +2006,17 @@ static const char * const extXl_op[] = { "extbl", "extwl", "extll", "extql" };
 static const char * const extXh_op[] = { NULL,    "extwh", "extlh", "extqh" };
 static const char * const mskXl_op[] = { "mskbl", "mskwl", "mskll", "mskql" };
 static const char * const mskXh_op[] = { NULL,    "mskwh", "msklh", "mskqh" };
+static const char * const stX_op[] = { "stb", "stw", "stl", "stq" };
+static const char * const ldX_op[] = { "ldb", "ldw", "ldll", "ldq" };
+static const char * const ldXu_op[] = { "ldbu", "ldwu", NULL, NULL };
 
 /* Implement the ldgp macro.  */
 
-static void 
+static void
 emit_ldgp (tok, ntok, unused)
      const expressionS *tok;
      int ntok;
-     void *unused;
+     const PTR unused;
 {
 #ifdef OBJ_AOUT
 FIXME
@@ -2004,7 +2057,7 @@ FIXME
   emit_insn (&insn);
 
   set_tok_preg (newtok[2], tok[0].X_add_number);
-  
+
   assemble_tokens_to_insn ("lda", newtok, 3, &insn);
 
 #ifdef OBJ_ECOFF
@@ -2140,7 +2193,7 @@ load_expression (targreg, exp, pbasereg, poffset)
 	      as_bad ("macro requires $at register while noat in effect");
 	    if (targreg == AXP_REG_AT)
 	      as_bad ("macro requires $at while $at in use");
-	    
+
 	    set_tok_reg (newtok[0], AXP_REG_AT);
 	  }
 	else
@@ -2162,7 +2215,7 @@ load_expression (targreg, exp, pbasereg, poffset)
 	      as_bad ("macro requires $at register while noat in effect");
 	    if (targreg == AXP_REG_AT)
 	      as_bad ("macro requires $at while $at in use");
-	    
+
 	    set_tok_reg (newtok[0], AXP_REG_AT);
 	  }
 	else
@@ -2184,7 +2237,7 @@ load_expression (targreg, exp, pbasereg, poffset)
 	assemble_tokens_to_insn ("ldq", newtok, 3, &insn);
 
 	assert (insn.nfixups == 1);
-	insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITERAL;
+	insn.fixups[0].reloc = BFD_RELOC_ALPHA_ELF_LITERAL;
 #endif /* OBJ_ELF */
 #ifdef OBJ_EVAX
 	offsetT link;
@@ -2240,6 +2293,7 @@ load_expression (targreg, exp, pbasereg, poffset)
 #endif /* OBJ_EVAX */
 
 	emit_insn(&insn);
+
 #ifndef OBJ_EVAX
 	emit_lituse = 1;
 
@@ -2252,6 +2306,7 @@ load_expression (targreg, exp, pbasereg, poffset)
 	    assemble_tokens ("addq", newtok, 3, 0);
 	  }
 #endif
+
 	basereg = targreg;
       }
       break;
@@ -2283,7 +2338,6 @@ load_expression (targreg, exp, pbasereg, poffset)
       /* for 64-bit addends, just put it in the literal pool */
 
 #ifdef OBJ_EVAX
-
       /* emit "ldq targreg, lit(basereg)"  */
       lit = add_to_link_pool (alpha_evax_proc.symbol,
 			      section_symbol (absolute_section), addend);
@@ -2291,7 +2345,6 @@ load_expression (targreg, exp, pbasereg, poffset)
       set_tok_const (newtok[1], lit);
       set_tok_preg (newtok[2], alpha_gp_register);
       assemble_tokens ("ldq", newtok, 3, 0);
-
 #else
 
       if (alpha_lit8_section == NULL)
@@ -2299,14 +2352,20 @@ load_expression (targreg, exp, pbasereg, poffset)
 	  create_literal_section (".lit8",
 				  &alpha_lit8_section,
 				  &alpha_lit8_symbol);
-	  S_SET_VALUE (alpha_lit8_symbol, 0x8000);
+
+#ifdef OBJ_ECOFF
+	  alpha_lit8_literal = add_to_literal_pool (alpha_lit8_symbol, 0x8000,
+						    alpha_lita_section, 8);
+	  if (alpha_lit8_literal >= 0x8000)
+	    as_fatal ("overflow in literal (.lita) table");
+#endif
 	}
 
       lit = add_to_literal_pool (NULL, addend, alpha_lit8_section, 8) - 0x8000;
       if (lit >= 0x8000)
 	as_fatal ("overflow in literal (.lit8) table");
 
-      /* emit "ldq litreg, .lit8+lit" */
+      /* emit "lda litreg, .lit8+0x8000" */
 
       if (targreg == basereg)
 	{
@@ -2319,9 +2378,46 @@ load_expression (targreg, exp, pbasereg, poffset)
 	}
       else
 	set_tok_reg (newtok[0], targreg);
-      set_tok_sym (newtok[1], alpha_lit8_symbol, lit);
+#ifdef OBJ_ECOFF
+      set_tok_sym (newtok[1], alpha_lita_symbol, alpha_lit8_literal);
+#endif
+#ifdef OBJ_ELF
+      set_tok_sym (newtok[1], alpha_lit8_symbol, 0x8000);
+#endif
+      set_tok_preg (newtok[2], alpha_gp_register);
 
-      assemble_tokens ("ldq", newtok, 2, 1); /* note this does recurse */
+      assemble_tokens_to_insn ("ldq", newtok, 3, &insn);
+
+      assert (insn.nfixups == 1);
+#ifdef OBJ_ECOFF
+      insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITERAL;
+#endif
+#ifdef OBJ_ELF
+      insn.fixups[0].reloc = BFD_RELOC_ALPHA_ELF_LITERAL;
+#endif
+
+      emit_insn (&insn);
+
+      /* emit "ldq litreg, lit(litreg)" */
+
+      set_tok_const (newtok[1], lit);
+      set_tok_preg (newtok[2], newtok[0].X_add_number);
+
+      assemble_tokens_to_insn ("ldq", newtok, 3, &insn);
+
+      assert (insn.nfixups < MAX_INSN_FIXUPS);
+      if (insn.nfixups > 0)
+	{
+	  memmove (&insn.fixups[1], &insn.fixups[0],
+		   sizeof(struct alpha_fixup) * insn.nfixups);
+	}
+      insn.nfixups++;
+      insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
+      insn.fixups[0].exp.X_op = O_constant;
+      insn.fixups[0].exp.X_add_number = 1;
+      emit_lituse = 0;
+
+      emit_insn (&insn);
 
       /* emit "addq litreg, base, target" */
 
@@ -2401,7 +2497,7 @@ static void
 emit_lda (tok, ntok, unused)
      const expressionS *tok;
      int ntok;
-     void *unused;
+     const PTR unused;
 {
   int basereg;
 
@@ -2420,7 +2516,7 @@ static void
 emit_ldah (tok, ntok, unused)
      const expressionS *tok;
      int ntok;
-     void *unused;
+     const PTR unused;
 {
   expressionS newtok[3];
 
@@ -2439,7 +2535,7 @@ static void
 emit_ir_load (tok, ntok, opname)
      const expressionS *tok;
      int ntok;
-     void *opname;
+     const PTR opname;
 {
   int basereg, lituse;
   expressionS newtok[3];
@@ -2473,8 +2569,8 @@ emit_ir_load (tok, ntok, opname)
     }
 
   emit_insn (&insn);
-#if OBJ_EVAX
-    /* special hack. If the basereg is clobbered for a call  
+#ifdef OBJ_EVAX
+    /* special hack. If the basereg is clobbered for a call
        all lda's before the call don't have a basereg.  */
   if ((tok[0].X_op == O_register)
      && (tok[0].X_add_number == alpha_gp_register))
@@ -2491,12 +2587,12 @@ static void
 emit_loadstore (tok, ntok, opname)
      const expressionS *tok;
      int ntok;
-     void *opname;
+     const PTR opname;
 {
   int basereg, lituse;
   expressionS newtok[3];
   struct alpha_insn insn;
-  
+
   if (ntok == 2)
     basereg = (tok[1].X_op == O_constant ? AXP_REG_ZERO : alpha_gp_register);
   else
@@ -2539,44 +2635,49 @@ emit_loadstore (tok, ntok, opname)
 
 /* Load a half-word or byte as an unsigned value.  */
 
-static void 
+static void
 emit_ldXu (tok, ntok, vlgsize)
      const expressionS *tok;
      int ntok;
-     void *vlgsize;
+     const PTR vlgsize;
 {
-  expressionS newtok[3];
+  if (alpha_target & AXP_OPCODE_BWX)
+    emit_ir_load (tok, ntok, ldXu_op[(long)vlgsize]);
+  else
+    {
+      expressionS newtok[3];
 
-  if (alpha_noat_on)
-    as_bad ("macro requires $at register while noat in effect");
-  
-  /* emit "lda $at, exp" */
+      if (alpha_noat_on)
+	as_bad ("macro requires $at register while noat in effect");
 
-  memcpy (newtok, tok, sizeof(expressionS)*ntok);
-  newtok[0].X_add_number = AXP_REG_AT;
-  assemble_tokens ("lda", newtok, ntok, 1);
+      /* emit "lda $at, exp" */
 
-  /* emit "ldq_u targ, 0($at)" */
+      memcpy (newtok, tok, sizeof (expressionS) * ntok);
+      newtok[0].X_add_number = AXP_REG_AT;
+      assemble_tokens ("lda", newtok, ntok, 1);
 
-  newtok[0] = tok[0];
-  set_tok_const (newtok[1], 0);
-  set_tok_preg (newtok[2], AXP_REG_AT);
-  assemble_tokens ("ldq_u", newtok, 3, 1);
+      /* emit "ldq_u targ, 0($at)" */
 
-  /* emit "extXl targ, $at, targ" */
+      newtok[0] = tok[0];
+      set_tok_const (newtok[1], 0);
+      set_tok_preg (newtok[2], AXP_REG_AT);
+      assemble_tokens ("ldq_u", newtok, 3, 1);
 
-  set_tok_reg (newtok[1], AXP_REG_AT);
-  newtok[2] = newtok[0];
-  assemble_tokens (extXl_op[(long)vlgsize], newtok, 3, 1);
+      /* emit "extXl targ, $at, targ" */
+
+      set_tok_reg (newtok[1], AXP_REG_AT);
+      newtok[2] = newtok[0];
+      assemble_tokens (extXl_op[(long)vlgsize], newtok, 3, 1);
+    }
 }
 
 /* Load a half-word or byte as a signed value.  */
 
-static void 
+static void
 emit_ldX (tok, ntok, vlgsize)
      const expressionS *tok;
      int ntok;
-     void *vlgsize;
+     const PTR vlgsize;
 {
   emit_ldXu (tok, ntok, vlgsize);
   assemble_tokens (sextX_op[(long)vlgsize], tok, 1, 1);
@@ -2589,7 +2690,7 @@ static void
 emit_uldXu (tok, ntok, vlgsize)
      const expressionS *tok;
      int ntok;
-     void *vlgsize;
+     const PTR vlgsize;
 {
   long lgsize = (long)vlgsize;
   expressionS newtok[3];
@@ -2599,7 +2700,7 @@ emit_uldXu (tok, ntok, vlgsize)
 
   /* emit "lda $at, exp" */
 
-  memcpy (newtok, tok, sizeof(expressionS)*ntok);
+  memcpy (newtok, tok, sizeof (expressionS) * ntok);
   newtok[0].X_add_number = AXP_REG_AT;
   assemble_tokens ("lda", newtok, ntok, 1);
 
@@ -2636,7 +2737,7 @@ emit_uldXu (tok, ntok, vlgsize)
   newtok[2] = tok[0];
   assemble_tokens ("or", newtok, 3, 1);
 }
-  
+
 /* Load an integral value from an unaligned address as a signed value.
    Note that quads should get funneled to the unsigned load since we
    don't have to do the sign extension.  */
@@ -2645,7 +2746,7 @@ static void
 emit_uldX (tok, ntok, vlgsize)
      const expressionS *tok;
      int ntok;
-     void *vlgsize;
+     const PTR vlgsize;
 {
   emit_uldXu (tok, ntok, vlgsize);
   assemble_tokens (sextX_op[(long)vlgsize], tok, 1, 1);
@@ -2657,7 +2758,7 @@ static void
 emit_ldil (tok, ntok, unused)
      const expressionS *tok;
      int ntok;
-     void *unused;
+     const PTR unused;
 {
   expressionS newtok[2];
 
@@ -2672,50 +2773,57 @@ emit_ldil (tok, ntok, unused)
 static void
 emit_stX (tok, ntok, vlgsize)
      const expressionS *tok;
-     void *vlgsize;
+     int ntok;
+     const PTR vlgsize;
 {
   int lgsize = (int)(long)vlgsize;
-  expressionS newtok[3];
 
-  if (alpha_noat_on)
-    as_bad("macro requires $at register while noat in effect");
+  if (alpha_target & AXP_OPCODE_BWX)
+    emit_loadstore (tok, ntok, stX_op[lgsize]);
+  else
+    {
+      expressionS newtok[3];
 
-  /* emit "lda $at, exp" */
+      if (alpha_noat_on)
+	as_bad("macro requires $at register while noat in effect");
 
-  memcpy (newtok, tok, sizeof(expressionS)*ntok);
-  newtok[0].X_add_number = AXP_REG_AT;
-  assemble_tokens ("lda", newtok, ntok, 1);
+      /* emit "lda $at, exp" */
 
-  /* emit "ldq_u $t9, 0($at)" */
+      memcpy (newtok, tok, sizeof (expressionS) * ntok);
+      newtok[0].X_add_number = AXP_REG_AT;
+      assemble_tokens ("lda", newtok, ntok, 1);
 
-  set_tok_reg (newtok[0], AXP_REG_T9);
-  set_tok_const (newtok[1], 0);
-  set_tok_preg (newtok[2], AXP_REG_AT);
-  assemble_tokens ("ldq_u", newtok, 3, 1);
+      /* emit "ldq_u $t9, 0($at)" */
 
-  /* emit "insXl src, $at, $t10" */
+      set_tok_reg (newtok[0], AXP_REG_T9);
+      set_tok_const (newtok[1], 0);
+      set_tok_preg (newtok[2], AXP_REG_AT);
+      assemble_tokens ("ldq_u", newtok, 3, 1);
 
-  newtok[0] = tok[0];
-  set_tok_reg (newtok[1], AXP_REG_AT);
-  set_tok_reg (newtok[2], AXP_REG_T10);
-  assemble_tokens (insXl_op[lgsize], newtok, 3, 1);
+      /* emit "insXl src, $at, $t10" */
 
-  /* emit "mskXl $t9, $at, $t9" */
+      newtok[0] = tok[0];
+      set_tok_reg (newtok[1], AXP_REG_AT);
+      set_tok_reg (newtok[2], AXP_REG_T10);
+      assemble_tokens (insXl_op[lgsize], newtok, 3, 1);
 
-  set_tok_reg (newtok[0], AXP_REG_T9);
-  newtok[2] = newtok[0];
-  assemble_tokens (mskXl_op[lgsize], newtok, 3, 1);
+      /* emit "mskXl $t9, $at, $t9" */
 
-  /* emit "or $t9, $t10, $t9" */
+      set_tok_reg (newtok[0], AXP_REG_T9);
+      newtok[2] = newtok[0];
+      assemble_tokens (mskXl_op[lgsize], newtok, 3, 1);
 
-  set_tok_reg (newtok[1], AXP_REG_T10);
-  assemble_tokens ("or", newtok, 3, 1);
+      /* emit "or $t9, $t10, $t9" */
 
-  /* emit "stq_u $t9, 0($at) */
+      set_tok_reg (newtok[1], AXP_REG_T10);
+      assemble_tokens ("or", newtok, 3, 1);
 
-  set_tok_const (newtok[1], 0);
-  set_tok_preg (newtok[2], AXP_REG_AT);
-  assemble_tokens ("stq_u", newtok, 3, 1);
+      /* emit "stq_u $t9, 0($at) */
+
+      set_tok_const (newtok[1], 0);
+      set_tok_preg (newtok[2], AXP_REG_AT);
+      assemble_tokens ("stq_u", newtok, 3, 1);
+    }
 }
 
 /* Store an integer to an unaligned address.  */
@@ -2724,14 +2832,14 @@ static void
 emit_ustX (tok, ntok, vlgsize)
      const expressionS *tok;
      int ntok;
-     void *vlgsize;
+     const PTR vlgsize;
 {
   int lgsize = (int)(long)vlgsize;
   expressionS newtok[3];
 
   /* emit "lda $at, exp" */
 
-  memcpy (newtok, tok, sizeof(expressionS)*ntok);
+  memcpy (newtok, tok, sizeof (expressionS) * ntok);
   newtok[0].X_add_number = AXP_REG_AT;
   assemble_tokens ("lda", newtok, ntok, 1);
 
@@ -2807,22 +2915,29 @@ static void
 emit_sextX (tok, ntok, vlgsize)
      const expressionS *tok;
      int ntok;
-     void *vlgsize;
+     const PTR vlgsize;
 {
-  int bitshift = 64 - 8*(1 << (long)vlgsize);
-  expressionS newtok[3];
+  long lgsize = (long)vlgsize;
 
-  /* emit "sll src,bits,dst" */
+  if (alpha_target & AXP_OPCODE_BWX)
+    assemble_tokens (sextX_op[lgsize], tok, ntok, 0);
+  else
+    {
+      int bitshift = 64 - 8 * (1 << lgsize);
+      expressionS newtok[3];
 
-  newtok[0] = tok[0];
-  set_tok_const (newtok[1], bitshift);
-  newtok[2] = tok[ntok - 1];
-  assemble_tokens ("sll", newtok, 3, 1);
+      /* emit "sll src,bits,dst" */
 
-  /* emit "sra dst,bits,dst" */
+      newtok[0] = tok[0];
+      set_tok_const (newtok[1], bitshift);
+      newtok[2] = tok[ntok - 1];
+      assemble_tokens ("sll", newtok, 3, 1);
 
-  newtok[0] = newtok[2];
-  assemble_tokens ("sra", newtok, 3, 1);
+      /* emit "sra dst,bits,dst" */
+
+      newtok[0] = newtok[2];
+      assemble_tokens ("sra", newtok, 3, 1);
+    }
 }
 
 /* Implement the division and modulus macros.  */
@@ -2832,11 +2947,11 @@ emit_sextX (tok, ntok, vlgsize)
 /* Make register usage like in normal procedure call.
    Don't clobber PV and RA.  */
 
-static void 
+static void
 emit_division (tok, ntok, symname)
      const expressionS *tok;
      int ntok;
-     void *symname;
+     const PTR symname;
 {
   /* DIVISION and MODULUS. Yech.
    *
@@ -2850,7 +2965,7 @@ emit_division (tok, ntok, symname)
    *    mov R0,result
    *
    * with appropriate optimizations if R0,R16,R17 are the registers
-   * specified by the compiler. 
+   * specified by the compiler.
    */
 
   int xr, yr, rr;
@@ -2859,7 +2974,7 @@ emit_division (tok, ntok, symname)
 
   xr = regno (tok[0].X_add_number);
   yr = regno (tok[1].X_add_number);
-    
+
   if (ntok < 3)
     rr = xr;
   else
@@ -2932,11 +3047,11 @@ emit_division (tok, ntok, symname)
 
 #else /* !OBJ_EVAX */
 
-static void 
+static void
 emit_division (tok, ntok, symname)
      const expressionS *tok;
      int ntok;
-     void *symname;
+     const PTR symname;
 {
   /* DIVISION and MODULUS. Yech.
    * Convert
@@ -2949,7 +3064,7 @@ emit_division (tok, ntok, symname)
    *    mov t12,result
    *
    * with appropriate optimizations if t10,t11,t12 are the registers
-   * specified by the compiler. 
+   * specified by the compiler.
    */
 
   int xr, yr, rr;
@@ -2958,7 +3073,7 @@ emit_division (tok, ntok, symname)
 
   xr = regno (tok[0].X_add_number);
   yr = regno (tok[1].X_add_number);
-    
+
   if (ntok < 3)
     rr = xr;
   else
@@ -3045,7 +3160,7 @@ static void
 emit_jsrjmp (tok, ntok, vopname)
      const expressionS *tok;
      int ntok;
-     void *vopname;
+     const PTR vopname;
 {
   const char *opname = (const char *) vopname;
   struct alpha_insn insn;
@@ -3102,7 +3217,7 @@ emit_jsrjmp (tok, ntok, vopname)
 
   emit_insn (&insn);
 
-#if OBJ_EVAX
+#ifdef OBJ_EVAX
   alpha_basereg_clobbered = 0;
 
   /* reload PV from 0(FP) if it is our current base register.  */
@@ -3123,7 +3238,7 @@ static void
 emit_retjcr (tok, ntok, vopname)
      const expressionS *tok;
      int ntok;
-     void *vopname;
+     const PTR vopname;
 {
   const char *opname = (const char *)vopname;
   expressionS newtok[3];
@@ -3166,7 +3281,7 @@ s_alpha_text (i)
   alpha_insn_label = NULL;
   alpha_auto_align_on = 1;
   alpha_current_align = 0;
-}  
+}
 
 /* Handle the .data pseudo-op.  This is like the usual one, but it
    clears alpha_insn_label and restores auto alignment.  */
@@ -3179,9 +3294,9 @@ s_alpha_data (i)
   alpha_insn_label = NULL;
   alpha_auto_align_on = 1;
   alpha_current_align = 0;
-}  
+}
 
-#ifndef OBJ_ELF
+#ifdef OBJ_ECOFF
 
 /* Handle the OSF/1 .comm pseudo quirks.  */
 
@@ -3228,27 +3343,6 @@ s_alpha_comm (ignore)
       return;
     }
 
-#if OBJ_EVAX
-  {
-    /* Fill common area with zeros.  */
-    char *pfrag;
-    segT current_seg = now_seg;
-    subsegT current_subseg = now_subseg;
-  
-    subseg_set (bss_section, 1);
-    frag_align (3, 0);
-  
-    symbolP->sy_frag = frag_now;
-    pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
-		      temp, (char *)0);
-      
-    *pfrag = 0;
-    S_SET_SEGMENT (symbolP, bss_section);
-
-    subseg_set (current_seg, current_subseg);
-  }
-#endif
-
   if (S_GET_VALUE (symbolP))
     {
       if (S_GET_VALUE (symbolP) != (valueT) temp)
@@ -3263,16 +3357,14 @@ s_alpha_comm (ignore)
       S_SET_EXTERNAL (symbolP);
     }
 
-#ifndef OBJ_EVAX
   know (symbolP->sy_frag == &zero_address_frag);
-#endif
 
   demand_empty_rest_of_line ();
 }
 
 #endif /* ! OBJ_ELF */
 
-#if defined (OBJ_ECOFF) || defined (OBJ_EVAX)
+#ifdef OBJ_ECOFF
 
 /* Handle the .rdata pseudo-op.  This is like the usual one, but it
    clears alpha_insn_label and restores auto alignment.  */
@@ -3318,7 +3410,7 @@ s_alpha_sdata (ignore)
 /* Handle the .section pseudo-op.  This is like the usual one, but it
    clears alpha_insn_label and restores auto alignment.  */
 
-static void 
+static void
 s_alpha_section (ignore)
      int ignore;
 {
@@ -3329,17 +3421,29 @@ s_alpha_section (ignore)
   alpha_current_align = 0;
 }
 
-#endif  
+#endif
 
 #ifdef OBJ_EVAX
+  
+/* Handle the section specific pseudo-op.  */
+  
 static void
-s_alpha_link (ignore)
-     int ignore;
+s_alpha_section (secid)
+     int secid;
 {
   int temp;
+#define EVAX_SECTION_COUNT 6
+  static char *section_name[EVAX_SECTION_COUNT+1] =
+    { "NULL", ".rdata", ".comm", ".link", ".ctors", ".dtors", ".lcomm" };
 
+  if ((secid <= 0) || (secid > EVAX_SECTION_COUNT))
+    {
+      as_fatal ("Unknown section directive");
+      demand_empty_rest_of_line ();
+      return;
+    }
   temp = get_absolute_expression ();
-  subseg_new (".link", 0);
+  subseg_new (section_name[secid], 0);
   demand_empty_rest_of_line ();
   alpha_insn_label = NULL;
   alpha_auto_align_on = 1;
@@ -3514,7 +3618,7 @@ s_alpha_pdesc (ignore)
   md_flush_pending_output ();
 #endif
 
-  frag_align (3, 0);
+  frag_align (3, 0, 0);
   p = frag_more (16);
   fixp = fix_new (frag_now, p - frag_now->fr_literal, 8, 0, 0, 0, 0);
   fixp->fx_done = 1;
@@ -3585,6 +3689,47 @@ s_alpha_pdesc (ignore)
 }
 
 
+/* Support for crash debug on vms.  */
+
+static void
+s_alpha_name (ignore)
+     int ignore;
+{
+  register char *p;
+  expressionS exp;
+  segment_info_type *seginfo = seg_info (alpha_link_section);
+
+  if (now_seg != alpha_link_section)
+    {
+      as_bad (".name directive not in link (.link) section");
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  expression (&exp);
+  if (exp.X_op != O_symbol)
+    {
+      as_warn (".name directive has no symbol");
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  demand_empty_rest_of_line ();
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  frag_align (3, 0, 0);
+  p = frag_more (8);
+  seginfo->literal_pool_size += 8;
+
+  fix_new_exp (frag_now, p-frag_now->fr_literal, 8, &exp, 0, BFD_RELOC_64);
+
+  return;
+}
+
+
 static void
 s_alpha_linkage (ignore)
      int ignore;
@@ -3607,6 +3752,35 @@ s_alpha_linkage (ignore)
       memset (p, 0, LKP_S_K_SIZE);
       fix_new_exp (frag_now, p - frag_now->fr_literal, LKP_S_K_SIZE, &exp, 0,\
 		   BFD_RELOC_ALPHA_LINKAGE);
+    }
+  demand_empty_rest_of_line ();
+
+  return;
+}
+
+
+static void
+s_alpha_code_address (ignore)
+     int ignore;
+{
+  expressionS exp;
+  char *p;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  expression (&exp);
+  if (exp.X_op != O_symbol)
+    {
+      as_fatal ("No symbol after .code_address");
+    }
+  else
+    {
+      p = frag_more (8);
+      memset (p, 0, 8);
+      fix_new_exp (frag_now, p - frag_now->fr_literal, 8, &exp, 0,\
+		   BFD_RELOC_ALPHA_CODEADDR);
     }
   demand_empty_rest_of_line ();
 
@@ -3689,17 +3863,14 @@ static void
 s_alpha_file (ignore)
      int ignore;
 {
-  symbolS* s;
+  symbolS *s;
   int length;
   static char case_hack[32];
 
   extern char *demand_copy_string PARAMS ((int *lenP));
 
-  sprintf (case_hack, "<CASE:%01d%01d%01d%01d>",
-	    alpha_flag_hash_long_names,
-	    alpha_flag_show_after_trunc,
-	    alpha_flag_no_hash_mixed_case,
-	    alpha_vms_name_mapping);
+  sprintf (case_hack, "<CASE:%01d%01d>",
+	    alpha_flag_hash_long_names, alpha_flag_show_after_trunc);
 
   s = symbol_find_or_make (case_hack);
   s->bsym->flags |= BSF_FILE;
@@ -4004,19 +4175,48 @@ alpha_cons_align (size)
   alpha_insn_label = NULL;
 }
 
+
+#ifdef DEBUG1
+/* print token expression with alpha specific extension.  */
+
+static void
+alpha_print_token(f, exp)
+    FILE *f;
+    const expressionS *exp;
+{
+  switch (exp->X_op)
+    {
+      case O_cpregister:
+	putc (',', f);
+	/* FALLTHRU */
+      case O_pregister:
+	putc ('(', f);
+	{
+	  expressionS nexp = *exp;
+	  nexp.X_op = O_register;
+	  print_expr (f, &nexp);
+	}
+	putc (')', f);
+	break;
+      default:
+	print_expr (f, exp);
+	break;
+    }
+  return;
+}
+#endif
+
 /* The target specific pseudo-ops which we support.  */
 
 const pseudo_typeS md_pseudo_table[] =
 {
   {"common", s_comm, 0},	/* is this used? */
-#ifndef OBJ_ELF
+#ifdef OBJ_ECOFF
   {"comm", s_alpha_comm, 0},	/* osf1 compiler does this */
+  {"rdata", s_alpha_rdata, 0},
 #endif
   {"text", s_alpha_text, 0},
   {"data", s_alpha_data, 0},
-#if defined (OBJ_ECOFF) || defined (OBJ_EVAX)
-  {"rdata", s_alpha_rdata, 0},
-#endif
 #ifdef OBJ_ECOFF
   {"sdata", s_alpha_sdata, 0},
 #endif
@@ -4028,15 +4228,22 @@ const pseudo_typeS md_pseudo_table[] =
 #endif
 #ifdef OBJ_EVAX
   { "pdesc", s_alpha_pdesc, 0},
+  { "name", s_alpha_name, 0},
   { "linkage", s_alpha_linkage, 0},
+  { "code_address", s_alpha_code_address, 0},
   { "ent", s_alpha_ent, 0},
   { "frame", s_alpha_frame, 0},
   { "fp_save", s_alpha_fp_save, 0},
   { "mask", s_alpha_mask, 0},
   { "fmask", s_alpha_fmask, 0},
-  { "link", s_alpha_link, 0},
   { "end", s_alpha_end, 0},
   { "file", s_alpha_file, 0},
+  { "rdata", s_alpha_section, 1},
+  { "comm", s_alpha_section, 2},
+  { "link", s_alpha_section, 3},
+  { "ctors", s_alpha_section, 4},
+  { "dtors", s_alpha_section, 5},
+  { "lcomm", s_alpha_section, 6},
 #endif
   {"gprel32", s_alpha_gprel32, 0},
   {"t_floating", s_alpha_float_cons, 'd'},
@@ -4173,14 +4380,14 @@ alpha_align (n, pfill, label)
 	     no-op instructions.  This will zero-fill, then nop-fill
 	     with proper alignment.  */
 	  if (alpha_current_align < 2)
-	    frag_align (2, 0);
-	  frag_align_pattern (n, nop, sizeof nop);
+	    frag_align (2, 0, 0);
+	  frag_align_pattern (n, nop, sizeof nop, 0);
 	}
       else
-	frag_align (n, 0);
+	frag_align (n, 0, 0);
     }
   else
-    frag_align (n, *pfill);
+    frag_align (n, *pfill, 0);
 
   alpha_current_align = n;
 
