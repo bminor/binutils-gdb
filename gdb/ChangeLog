@@ -2,6 +2,10 @@ Thu Jan 26 10:49:59 1995  Steve Chamberlain  <sac@splat>
 
 	* remote-hms.c (hms_ops): Change ref of hr_load_image
 	to gr_load_image.
+	(dcache_flush, dcache_hit, dcache_value, dcache_fetch,
+	dcache_poke, dcache_init):  Deleted.
+	(hms_open, hms_resume, hms_fetch_word, hms_store_word):
+	Use dcache routines provided by remote-util.h
 
 Thu Jan 26 12:08:31 1995  Michael Meissner  <meissner@cygnus.com>
 

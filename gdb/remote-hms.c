@@ -1,23 +1,23 @@
 /* Remote debugging interface for Hitachi HMS Monitor Version 1.0
-   Copyright 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Steve Chamberlain
    (sac@cygnus.com).
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "gdbcore.h"
 #include "serial.h"
-
+#include "remote-utils.h"
 /* External data declarations */
 extern int stop_soon_quietly;	/* for wait_for_inferior */
 
@@ -51,180 +51,11 @@ static void hms_drain ();
 static void add_commands ();
 static void remove_commands ();
 
-static int quiet = 1;  /* FIXME - can be removed after Dec '94 */
+static int quiet = 1;		/* FIXME - can be removed after Dec '94 */
 
-
+static DCACHE *remote_dcache;
 serial_t desc;
 
-/***********************************************************************/
-/* Caching stuff stolen from remote-nindy.c  */
-
-/* The data cache records all the data read from the remote machine
-   since the last time it stopped.
-
-   Each cache block holds LINE_SIZE bytes of data
-   starting at a multiple-of-LINE_SIZE address.  */
-
-#define LINE_SIZE_POWER 4
-#define LINE_SIZE (1<<LINE_SIZE_POWER)	/* eg 1<<3 == 8 */
-#define LINE_SIZE_MASK ((LINE_SIZE-1))	/* eg 7*2+1= 111*/
-#define DCACHE_SIZE 64		/* Number of cache blocks */
-#define XFORM(x)  ((x&LINE_SIZE_MASK)>>2)
-struct dcache_block
-  {
-    struct dcache_block *next, *last;
-    unsigned int addr;		/* Address for which data is recorded.  */
-    int data[LINE_SIZE / sizeof (int)];
-  };
-
-struct dcache_block dcache_free, dcache_valid;
-
-/* Free all the data cache blocks, thus discarding all cached data.  */
-static
-void
-dcache_flush ()
-{
-  register struct dcache_block *db;
-
-  while ((db = dcache_valid.next) != &dcache_valid)
-    {
-      remque (db);
-      insque (db, &dcache_free);
-    }
-}
-
-/*
- * If addr is present in the dcache, return the address of the block
- * containing it.
- */
-static
-struct dcache_block *
-dcache_hit (addr)
-     unsigned int addr;
-{
-  register struct dcache_block *db;
-
-  if (addr & 3)
-    abort ();
-
-  /* Search all cache blocks for one that is at this address.  */
-  db = dcache_valid.next;
-  while (db != &dcache_valid)
-    {
-      if ((addr & ~LINE_SIZE_MASK) == db->addr)
-	return db;
-      db = db->next;
-    }
-  return NULL;
-}
-
-/*  Return the int data at address ADDR in dcache block DC.  */
-static
-int
-dcache_value (db, addr)
-     struct dcache_block *db;
-     unsigned int addr;
-{
-  if (addr & 3)
-    abort ();
-  return (db->data[XFORM (addr)]);
-}
-
-/* Get a free cache block, put or keep it on the valid list,
-   and return its address.  The caller should store into the block
-   the address and data that it describes, then remque it from the
-   free list and insert it into the valid list.  This procedure
-   prevents errors from creeping in if a ninMemGet is interrupted
-   (which used to put garbage blocks in the valid list...).  */
-static
-struct dcache_block *
-dcache_alloc ()
-{
-  register struct dcache_block *db;
-
-  if ((db = dcache_free.next) == &dcache_free)
-    {
-      /* If we can't get one from the free list, take last valid and put
-	 it on the free list.  */
-      db = dcache_valid.last;
-      remque (db);
-      insque (db, &dcache_free);
-    }
-
-  remque (db);
-  insque (db, &dcache_valid);
-  return (db);
-}
-
-/* Return the contents of the word at address ADDR in the remote machine,
-   using the data cache.  */
-static
-int
-dcache_fetch (addr)
-     CORE_ADDR addr;
-{
-  register struct dcache_block *db;
-
-  db = dcache_hit (addr);
-  if (db == 0)
-    {
-      db = dcache_alloc ();
-      immediate_quit++;
-      hms_read_inferior_memory (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
-      immediate_quit--;
-      db->addr = addr & ~LINE_SIZE_MASK;
-      remque (db);		/* Off the free list */
-      insque (db, &dcache_valid);	/* On the valid list */
-    }
-  return (dcache_value (db, addr));
-}
-
-/* Write the word at ADDR both in the data cache and in the remote machine.  */
-static void
-dcache_poke (addr, data)
-     CORE_ADDR addr;
-     int data;
-{
-  register struct dcache_block *db;
-
-  /* First make sure the word is IN the cache.  DB is its cache block.  */
-  db = dcache_hit (addr);
-  if (db == 0)
-    {
-      db = dcache_alloc ();
-      immediate_quit++;
-      hms_write_inferior_memory (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
-      immediate_quit--;
-      db->addr = addr & ~LINE_SIZE_MASK;
-      remque (db);		/* Off the free list */
-      insque (db, &dcache_valid);	/* On the valid list */
-    }
-
-  /* Modify the word in the cache.  */
-  db->data[XFORM (addr)] = data;
-
-  /* Send the changed word.  */
-  immediate_quit++;
-  hms_write_inferior_memory (addr, (unsigned char *) &data, 4);
-  immediate_quit--;
-}
-
-/* The cache itself. */
-struct dcache_block the_cache[DCACHE_SIZE];
-
-/* Initialize the data cache.  */
-static void
-dcache_init ()
-{
-  register i;
-  register struct dcache_block *db;
-
-  db = the_cache;
-  dcache_free.next = dcache_free.last = &dcache_free;
-  dcache_valid.next = dcache_valid.last = &dcache_valid;
-  for (i = 0; i < DCACHE_SIZE; i++, db++)
-    insque (db, &dcache_free);
-}
 
 /***********************************************************************
  * I/O stuff stolen from remote-eb.c
@@ -244,9 +75,9 @@ static int after = 0xdead;
 int
 check_open ()
 {
-if (before != 0xdead
-    || after != 0xdead)
-  printf("OUTCH! \n");
+  if (before != 0xdead
+      || after != 0xdead)
+    printf ("OUTCH! \n");
   if (!is_open)
     {
       error ("remote device not open");
@@ -281,7 +112,8 @@ readchar ()
   return buf & 0x7f;
 }
 
-static void flush()
+static void 
+flush ()
 {
   while (1)
     {
@@ -317,7 +149,7 @@ expect (string)
   immediate_quit = 1;
   while (1)
     {
-      c = readchar();
+      c = readchar ();
       if (c == *p)
 	{
 	  p++;
@@ -327,7 +159,7 @@ expect (string)
 	      return;
 	    }
 	}
-      else 
+      else
 	{
 	  p = string;
 	  if (c == *p)
@@ -533,41 +365,6 @@ set_rate ()
 }
 
 
-static void
-hms_open (name, from_tty)
-     char *name;
-     int from_tty;
-{
-  unsigned int prl;
-  char *p;
-
-  if (name == 0)
-    {
-      name = "";
-    }
-  if (is_open)
-    hms_close (0);
-  dev_name = strdup (name);
-
-  if (!(desc = SERIAL_OPEN (dev_name)))
-    perror_with_name ((char *) dev_name);
-
-  SERIAL_RAW (desc);
-  is_open = 1;
-  push_target (&hms_ops);
-  dcache_init ();
-
-  /* Hello?  Are you there?  */
-  SERIAL_WRITE (desc, "\r\n", 2);
-  expect_prompt ();
-
-  /* Clear any break points */
-  hms_clear_breakpoints ();
-
-  printf_filtered ("Connected to remote board running HMS monitor.\n");
-  add_commands ();
-/*  hms_drain ();*/
-}
 
 /* Close out all files and local state before this target loses control. */
 
@@ -588,7 +385,7 @@ hms_close (quitting)
 }
 
 /* Terminate the open connection to the remote debugger.  Use this
-when you want to detach and do something else with your gdb.  */ void
+   when you want to detach and do something else with your gdb.  */ void
 hms_detach (args, from_tty)
      char *args;
      int from_tty;
@@ -599,7 +396,7 @@ hms_detach (args, from_tty)
     }
 
   pop_target ();		/* calls hms_close to do the real work
-*/
+				 */
   if (from_tty)
     printf_filtered ("Ending remote %s debugging\n",
 		     target_shortname);
@@ -613,7 +410,7 @@ hms_resume (pid, step, sig)
      enum target_signal
        sig;
 {
-  dcache_flush ();
+  dcache_flush (remote_dcache);
 
   if (step)
     {
@@ -621,8 +418,8 @@ hms_resume (pid, step, sig)
       expect ("Step>");
 
       /* Force the next hms_wait to return a trap.  Not doing anything
-	 about I/O from the target means that the user has to type "continue"
-            to see any.  FIXME, this should be fixed.  */ 
+         about I/O from the target means that the user has to type "continue"
+         to see any.  FIXME, this should be fixed.  */
       need_artificial_trap = 1;
     }
   else
@@ -633,7 +430,7 @@ hms_resume (pid, step, sig)
 }
 
 /* Wait until the remote machine stops, then return, storing status in
-STATUS just as `wait' would.  */
+   STATUS just as `wait' would.  */
 
 int
 hms_wait (pid, status)
@@ -649,8 +446,8 @@ hms_wait (pid, status)
 
   /* It would be tempting to look for "\n[__exit + 0x8]\n" but that
      requires loading symbols with "yc i" and even if we did do that we
-     don't know that the file has symbols.  */ 
-  static char exitmsg[] =  "HMS>";
+     don't know that the file has symbols.  */
+  static char exitmsg[] = "HMS>";
   char *bp = bpt;
   char *ep = exitmsg;
 
@@ -703,16 +500,16 @@ hms_wait (pid, status)
 	}
       if
 	(ch == *ep || *ep == '?')
-	  {
-	    ep++;
-	    if (*ep == '\0')
-	      break;
+	{
+	  ep++;
+	  if (*ep == '\0')
+	    break;
 
-	    if (!ch_handled)
-	      *swallowed_p++ = ch;
-	    ch_handled =
-	      1;
-	  }
+	  if (!ch_handled)
+	    *swallowed_p++ = ch;
+	  ch_handled =
+	    1;
+	}
       else
 	{
 	  ep = exitmsg;
@@ -756,7 +553,7 @@ hms_wait (pid, status)
 }
 
 /* Return the name of register number REGNO in the form input and
-output by hms.
+   output by hms.
 
    Returns a pointer to a static buffer containing the answer.  */
 static char *
@@ -769,7 +566,7 @@ get_reg_name (regno)
   return rn[regno];
 }
 
-/* Read the remote registers.  */ 
+/* Read the remote registers.  */
 
 static int
 gethex (length, start, ok)
@@ -793,9 +590,9 @@ gethex (length, start, ok)
 	}
       else if
 	(*start >= '0' && *start <= '9')
-	  {
-	    result += *start - '0';
-	  }
+	{
+	  result += *start - '0';
+	}
       else
 	*ok = 0;
       start++;
@@ -855,13 +652,13 @@ hms_write_cr (s)
 
 /* H8/500 monitor reg dump looks like:
 
-HMS>r
-PC:8000 SR:070C .7NZ.. CP:00 DP:00 EP:00 TP:00 BR:00
-R0-R7: FF5A 0001 F4FE F500 0000 F528 F528 F4EE
-HMS>
+   HMS>r
+   PC:8000 SR:070C .7NZ.. CP:00 DP:00 EP:00 TP:00 BR:00
+   R0-R7: FF5A 0001 F4FE F500 0000 F528 F528 F4EE
+   HMS>
 
 
-*/
+ */
 
 supply_val (n, size, ptr, segptr)
      int n;
@@ -926,18 +723,18 @@ hms_fetch_register (dummy)
 	{
 
 	  /*
-	    012
-	    r**
-	    -------1---------2---------3---------4---------5-----
-	    345678901234567890123456789012345678901234567890123456
-	    PC:8000 SR:070C .7NZ.. CP:00 DP:00 EP:00 TP:00 BR:00**
-	    ---6---------7---------8---------9--------10----
-	    789012345678901234567890123456789012345678901234
-	    R0-R7: FF5A 0001 F4FE F500 0000 F528 F528 F4EE**
-	
-	    56789
-	    HMS>
-	    */
+	     012
+	     r**
+	     -------1---------2---------3---------4---------5-----
+	     345678901234567890123456789012345678901234567890123456
+	     PC:8000 SR:070C .7NZ.. CP:00 DP:00 EP:00 TP:00 BR:00**
+	     ---6---------7---------8---------9--------10----
+	     789012345678901234567890123456789012345678901234
+	     R0-R7: FF5A 0001 F4FE F500 0000 F528 F528 F4EE**
+
+	     56789
+	     HMS>
+	   */
 	  gottok = 1;
 
 
@@ -1008,10 +805,10 @@ hms_fetch_register (dummy)
 	  linebuf[77] == 'S')
 	{
 	  /*
-	PC=XXXX CCR=XX:XXXXXXXX R0-R7= XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX
-	5436789012345678901234567890123456789012345678901234567890123456789012
-	0      1         2         3         4         5         6
-	*/
+	     PC=XXXX CCR=XX:XXXXXXXX R0-R7= XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX
+	     5436789012345678901234567890123456789012345678901234567890123456789012
+	     0      1         2         3         4         5         6
+	   */
 	  gottok = 1;
 
 	  reg[PC_REGNUM] = gethex (4, linebuf + 6, &gottok);
@@ -1093,7 +890,7 @@ int
 hms_fetch_word (addr)
      CORE_ADDR addr;
 {
-  return dcache_fetch (addr);
+  return dcache_fetch (remote_dcache, addr);
 }
 
 /* Write a word WORD into remote address ADDR.
@@ -1104,7 +901,7 @@ hms_store_word (addr, word)
      CORE_ADDR addr;
      int word;
 {
-  dcache_poke (addr, word);
+  dcache_poke (remote_dcache, addr, word);
 }
 
 int
@@ -1241,7 +1038,7 @@ hms_files_info ()
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
    to inferior's memory at MEMADDR.  Returns errno value.
- * sb/sh instructions don't work on unaligned addresses, when TU=1.
+   * sb/sh instructions don't work on unaligned addresses, when TU=1.
  */
 
 /* Read LEN bytes from inferior memory at MEMADDR.  Put the result
@@ -1261,10 +1058,10 @@ hms_read_inferior_memory (memaddr, myaddr, len)
   int ok = 1;
 
   /*
-    AAAA: XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX '................'
-    012345678901234567890123456789012345678901234567890123456789012345
-    0         1         2         3         4         5         6
-    */
+     AAAA: XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX '................'
+     012345678901234567890123456789012345678901234567890123456789012345
+     0         1         2         3         4         5         6
+   */
   char buffer[66];
 
   if (memaddr & 0xf)
@@ -1274,9 +1071,9 @@ hms_read_inferior_memory (memaddr, myaddr, len)
 
   sprintf (buffer, "m %4x %4x", start & 0xffff, end & 0xffff);
 
-  flush();
+  flush ();
   hms_write_cr (buffer);
-  /* drop the echo and newline*/
+  /* drop the echo and newline */
   for (i = 0; i < 13; i++)
     readchar ();
 
@@ -1292,22 +1089,23 @@ hms_read_inferior_memory (memaddr, myaddr, len)
       char byte[16];
 
       buffer[0] = readchar ();
-      while (buffer[0] == '\r' 
+      while (buffer[0] == '\r'
 	     || buffer[0] == '\n')
 	buffer[0] = readchar ();
 
       if (buffer[0] == 'M')
 	break;
 
-      for (i = 1; i < 50; i++) {
-	buffer[i] = readchar ();
-      }
+      for (i = 1; i < 50; i++)
+	{
+	  buffer[i] = readchar ();
+	}
       /* sometimes we loose characters in the ascii representation of the 
-	 data.  I don't know where.  So just scan for the end of line */
-      i = readchar();
+         data.  I don't know where.  So just scan for the end of line */
+      i = readchar ();
       while (i != '\n' && i != '\r')
-	i = readchar();	
-      
+	i = readchar ();
+
       /* Now parse the line */
 
       addr = gethex (4, buffer, &ok);
@@ -1428,8 +1226,45 @@ hms_com (args, fromtty)
   /* Clear all input so only command relative output is displayed */
 
   hms_write_cr (args);
-/*  hms_write ("\030", 1);*/
+/*  hms_write ("\030", 1); */
   expect_prompt ();
+}
+
+static void
+hms_open (name, from_tty)
+     char *name;
+     int from_tty;
+{
+  unsigned int prl;
+  char *p;
+
+  if (name == 0)
+    {
+      name = "";
+    }
+  if (is_open)
+    hms_close (0);
+  dev_name = strdup (name);
+
+  if (!(desc = SERIAL_OPEN (dev_name)))
+    perror_with_name ((char *) dev_name);
+
+  SERIAL_RAW (desc);
+  is_open = 1;
+  push_target (&hms_ops);
+  dcache_init (hms_read_inferior_memory,
+	       hms_write_inferior_memory);
+
+  /* Hello?  Are you there?  */
+  SERIAL_WRITE (desc, "\r\n", 2);
+  expect_prompt ();
+
+  /* Clear any break points */
+  hms_clear_breakpoints ();
+
+  printf_filtered ("Connected to remote board running HMS monitor.\n");
+  add_commands ();
+/*  hms_drain (); */
 }
 
 /* Define the target subroutine names */
@@ -1446,7 +1281,7 @@ by a serial line.",
   hms_prepare_to_store,
   hms_xfer_inferior_memory,
   hms_files_info,
-  hms_insert_breakpoint, hms_remove_breakpoint,	/* Breakpoints */
+  hms_insert_breakpoint, hms_remove_breakpoint,		/* Breakpoints */
   0, 0, 0, 0, 0,		/* Terminal handling */
   hms_kill,			/* FIXME, kill */
   gr_load_image,
@@ -1462,7 +1297,7 @@ by a serial line.",
   OPS_MAGIC,			/* Always the last thing */
 };
 
-hms_quiet ()      /* FIXME - this routine can be removed after Dec '94 */
+hms_quiet ()			/* FIXME - this routine can be removed after Dec '94 */
 {
   quiet = !quiet;
   if (quiet)
@@ -1470,7 +1305,7 @@ hms_quiet ()      /* FIXME - this routine can be removed after Dec '94 */
   else
     printf_filtered ("Snoop enabled\n");
 
-  printf_filtered("`snoop' is obsolete, please use `set remotedebug'.\n");
+  printf_filtered ("`snoop' is obsolete, please use `set remotedebug'.\n");
 }
 
 hms_device (s)
@@ -1544,6 +1379,7 @@ remove_commands ()
   delete_cmd ("hms-drain", &cmdlist);
 }
 
+
 void
 _initialize_remote_hms ()
 {
@@ -1552,7 +1388,7 @@ _initialize_remote_hms ()
   add_com ("hms <command>", class_obscure, hms_com,
 	   "Send a command to the HMS monitor.");
 
- /* FIXME - hms_quiet and `snoop' can be removed after Dec '94 */ 
+  /* FIXME - hms_quiet and `snoop' can be removed after Dec '94 */
   add_com ("snoop", class_obscure, hms_quiet,
 	   "Show what commands are going to the monitor (OBSOLETE - see 'set remotedebug')");
 
