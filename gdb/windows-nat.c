@@ -450,7 +450,7 @@ static int
 safe_symbol_file_add_stub (void *argv)
 {
 #define p ((struct safe_symbol_file_add_args *)argv)
-  struct so_stuff *so = solib_start.next;
+  struct so_stuff *so = &solib_start;
 
   while ((so = so->next))
     if (strcasecmp (so->name, p->name) == 0)

@@ -1,3 +1,8 @@
+2001-10-12  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (safe_symbol_file_add_stub): Properly initialize linked
+	list pointer to beginning rather than one beyond beginning.
+
 2001-10-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* symtab.h (struct block): (ALL_BLOCK_SYMBOLS): New macro.
