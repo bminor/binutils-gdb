@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses -mmips:3000
 #name: MIPS lb-empic
-#as: -mips1 -membedded-pic
+#as: -32 -mips1 -membedded-pic
 #source: lb-pic.s
 
 # Test the lb macro with -membedded-pic.

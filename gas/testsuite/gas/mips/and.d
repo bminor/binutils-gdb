@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses
 #name: MIPS and
+#as: -32
 
 # Test the and macro.
 

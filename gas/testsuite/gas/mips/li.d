@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses -mmips:4000
 #name: MIPS li
+#as: -32
 
 # Test the li macro.
 

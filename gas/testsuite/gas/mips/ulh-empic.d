@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses -mmips:3000
 #name: MIPS ulh-empic
-#as: -mips1 -membedded-pic
+#as: -32 -mips1 -membedded-pic
 #source: ulh-pic.s
 
 # Test the ulh macro with -membedded-pic.

@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses -mmips:3000
 #name: MIPS la-empic
-#as: -mips1 -membedded-pic
+#as: -32 -mips1 -membedded-pic
 
 # Test the la macro with -membedded-pic.
 

@@ -1,3 +1,52 @@
+2003-05-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/mips/abs.d, gas/mips/add.d, gas/mips/and.d,
+	gas/mips/beq.d, gas/mips/bge.d, gas/mips/bgeu.d,
+	gas/mips/blt.d, gas/mips/bltu.d, gas/mips/branch-misc-1.d,
+	gas/mips/break20.d, gas/mips/cp0sel-names-mips32.d,
+	gas/mips/cp0sel-names-mips32r2.d,
+	gas/mips/cp0sel-names-mips64.d,
+	gas/mips/cp0sel-names-numeric.d, gas/mips/cp0sel-names-sb1.d,
+	gas/mips/elf-jal.d, gas/mips/elf-rel.d, gas/mips/elf-rel2.d,
+	gas/mips/elf-rel3.d, gas/mips/elf-rel4.d, gas/mips/elf-rel5.d,
+	gas/mips/elf-rel6.d, gas/mips/elf-rel7.d,
+	gas/mips/elf_arch_mips1.d, gas/mips/elf_arch_mips2.d,
+	gas/mips/elf_arch_mips3.d, gas/mips/elf_arch_mips32.d,
+	gas/mips/elf_arch_mips32r2.d, gas/mips/elf_arch_mips4.d,
+	gas/mips/elf_arch_mips5.d, gas/mips/elf_arch_mips64.d,
+	gas/mips/elf_ase_mips16.d, gas/mips/empic.d,
+	gas/mips/empic2.d, gas/mips/empic3_e.d, gas/mips/empic3_g1.d,
+	gas/mips/empic3_g2.d, gas/mips/hwr-names-mips32r2.d,
+	gas/mips/hwr-names-numeric.d, gas/mips/jal-empic-elf-2.d,
+	gas/mips/jal-empic-elf-3.d, gas/mips/jal-empic-elf.d,
+	gas/mips/jal-svr4pic.d, gas/mips/jal-xgot.d, gas/mips/jal.d,
+	gas/mips/la-empic.d, gas/mips/la-svr4pic.d,
+	gas/mips/la-xgot.d, gas/mips/la.d, gas/mips/lb-empic.d,
+	gas/mips/lb-svr4pic.d, gas/mips/lb-xgot-ilocks.d,
+	gas/mips/lb-xgot.d, gas/mips/lb.d, gas/mips/ld-empic.d,
+	gas/mips/ld-svr4pic.d, gas/mips/ld-xgot.d, gas/mips/ld.d,
+	gas/mips/li.d, gas/mips/lif-empic.d, gas/mips/lif-svr4pic.d,
+	gas/mips/lif-xgot.d, gas/mips/lifloat.d,
+	gas/mips/mips-gp32-fp32-pic.d, gas/mips/mips-gp32-fp32.d,
+	gas/mips/mips-gp32-fp64-pic.d, gas/mips/mips-gp32-fp64.d,
+	gas/mips/mips-gp64-fp32-pic.d, gas/mips/mips-gp64-fp32.d,
+	gas/mips/mips-gp64-fp64-pic.d, gas/mips/mips-gp64-fp64.d,
+	gas/mips/mips.exp, gas/mips/mips16-e.d, gas/mips/mips16-f.d,
+	gas/mips/mips32.d, gas/mips/mips32r2.d, gas/mips/mips4010.d,
+	gas/mips/mips4650.d, gas/mips/mips64.d, gas/mips/mipsel16-e.d,
+	gas/mips/mipsel16-f.d, gas/mips/rol-hw.d, gas/mips/rol.d,
+	gas/mips/sb.d, gas/mips/sync.d, gas/mips/tempic.d,
+	gas/mips/tmips16-e.d, gas/mips/tmips16-f.d,
+	gas/mips/tmipsel16-e.d, gas/mips/tmipsel16-f.d,
+	gas/mips/trunc.d, gas/mips/uld.d, gas/mips/ulh-empic.d,
+	gas/mips/ulh-svr4pic.d, gas/mips/ulh-xgot.d, gas/mips/ulh.d,
+	gas/mips/ulh2-eb.d, gas/mips/ulh2-el.d, gas/mips/ulw.d,
+	gas/mips/ulw2-eb.d, gas/mips/ulw2-eb-ilocks.d, gas/mips/ulw2-el.d,
+	gas/mips/ulw2-el-ilocks.d, gas/mips/usd.d, gas/mips/ush.d,
+	gas/mips/usw.d, gas/mips/vr4122.d: Added ABI specification.
+	gas/vtable/vtable.exp: mips64*-*-linux* and mips*-*-irix6* are
+	RELA.
+
 2003-05-03  H.J. Lu <hjl@gnu.org>
 
 	* gas/elf/symver.s: Use '%' instead of '@' in .type.

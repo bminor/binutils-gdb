@@ -1,5 +1,5 @@
 #objdump: -d -mmips:8000
-#as: -march=8000 -EB -mfp32 -KPIC
+#as: -mabi=o64 -march=8000 -EB -mfp32 -KPIC
 #name: MIPS -mgp64 -mfp32 (SVR4 PIC)
 
 .*: +file format.*

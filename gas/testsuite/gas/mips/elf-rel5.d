@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS ELF reloc 5
+#as: -32
 
 .*: +file format elf.*mips.*
 

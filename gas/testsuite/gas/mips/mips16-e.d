@@ -1,6 +1,6 @@
 #objdump: -rst -mips16
 #name: MIPS16 reloc
-#as: -mips16
+#as: -32 -mips16
 
 # Check MIPS16 reloc processing
 

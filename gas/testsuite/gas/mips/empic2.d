@@ -1,6 +1,6 @@
 #objdump: --prefix-addresses -dr --show-raw-insn -mmips:4000
 #name: MIPS empic2
-#as: -membedded-pic -mips3
+#as: -mabi=o64 -membedded-pic -mips3
 
 # Check assembly of and relocs for -membedded-pic la, lw, ld, sw, sd macros.
 

@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: sync instructions
-#as: -mips2
+#as: -32 -mips2
 
 .*: +file format .*mips.*
 

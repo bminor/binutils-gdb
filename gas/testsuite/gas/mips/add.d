@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses
 #name: MIPS add
+#as: -32
 
 # Test the add macro.
 

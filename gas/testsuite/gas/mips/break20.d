@@ -1,4 +1,4 @@
-#as: -march=r3900
+#as: -32 -march=r3900
 #objdump: -dr --prefix-addresses -mmips:3900
 #name: MIPS 20-bit break
 

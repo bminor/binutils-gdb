@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses -mmips:4000
 #name: MIPS usd
-#as: -mips3 -mtune=r4000
+#as: -32 -mips3 -mtune=r4000
 
 # Test the usd macro.
 

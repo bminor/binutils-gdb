@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses
 #name: MIPS lb
+#as: -32
 
 # Test the lb macro.
 

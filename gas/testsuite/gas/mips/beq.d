@@ -1,5 +1,6 @@
 #objdump: -dr --prefix-addresses -mmips:4000
 #name: MIPS beq
+#as: -32
 
 # Test the beq macro.
 
