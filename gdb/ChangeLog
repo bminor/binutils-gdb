@@ -2000,8 +2000,7 @@ Mon Apr 17 11:26:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	config/h8300/tm-h8300.h, config/i386/tm-i386.h,
  	config/i960/tm-i960.h, config/m88k/tm-m88k.h,
  	config/mips/tm-mips.h, config/pa/tm-hppa.h,
- 	config/sparc/tm-sparc.h, config/delta/tm-delta.h,
- 	config/frv/tm-frv.h (IEEE_FLOAT): For all ports that #define
+ 	config/sparc/tm-sparc.h (IEEE_FLOAT): For all ports that #define
 	IEEE_FLOAT, make sure they give it the value (1).
 
 	Provide the hooks needed to support architectures on which
