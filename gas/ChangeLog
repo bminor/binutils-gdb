@@ -1,3 +1,8 @@
+Sat Oct 24 15:12:19 1998  Catherine Moore  <clm@cygnus.com>
+
+        * config/tc-sh.c (sh_fix_adjustable):  Adjust EXTERN and
+        WEAK handling.
+
 Thu Oct 22 12:41:33 1998  Catherine Moore  <clm@cygnus.com>
 
         * cgen.c (gas_cgen_md_apply_fix3):  Revert last change.
