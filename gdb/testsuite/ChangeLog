@@ -1,5 +1,8 @@
 2003-06-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb.base/signals.exp: XFAIL "continue to func1" on
+	i*86-*-freebsd*.
+
 	* gdb.base/attach.exp: When trying to attach to a nonexistent
 	process, make it possible to specify the PID based on the target,
 	and do so for *-*-freebsd*.
