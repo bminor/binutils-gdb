@@ -1,6 +1,4 @@
-# Sanitize.in for devo.
-# $Id$
-#
+# .Sanitize for devo/gas/testsuite/gas/mips.
 
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -44,16 +42,30 @@ bltu.d
 bltu.s
 div.d
 div.s
+jal-empic.d
+jal-svr4pic.d
+jal-svr4pic.s
 jal.d
 jal.s
+la-empic.d
+la-empic.s
+la-svr4pic.d
 la.d
 la.s
+lb-empic.d
+lb-pic.s
+lb-svr4pic.d
 lb.d
 lb.s
 ld.d
 ld.s
+ld-empic.d
+ld-pic.s
+ld-svr4pic.d
 li.d
 li.s
+lif-empic.d
+lif-svr4pic.d
 lifloat.d
 lifloat.s
 mips.exp
@@ -65,6 +77,9 @@ sb.d
 sb.s
 trunc.d
 trunc.s
+ulh-empic.d
+ulh-pic.s
+ulh-svr4pic.d
 ulh.d
 ulh.s
 ulw.d
