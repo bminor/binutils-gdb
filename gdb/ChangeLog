@@ -1,5 +1,10 @@
 2004-11-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-nat.c (inf_ptrace_xfer_partial): New variable.
+	(sparc_xfer_partial): New function.
+	(sparc_target): Save value of to_xfer_partial from ptrace vector.
+	Set to_xfer_partial.
+
 	* fork-child.c (fork_inferior): Fork instead of vfork if
 	PRE_TRACE_FUN is non-null.
 
