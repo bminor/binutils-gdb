@@ -1307,7 +1307,7 @@ sim_fetch_register (sd, rn, memory, length)
      int length;
 {
   int size;
-  switch ((enum gdb_d10v_regs) rn)
+  switch ((enum sim_d10v_regs) rn)
     {
     case SIM_D10V_R0_REGNUM:
     case SIM_D10V_R1_REGNUM:
@@ -1394,7 +1394,7 @@ sim_store_register (sd, rn, memory, length)
      int length;
 {
   int size;
-  switch ((enum sim_d10v_reg) rn)
+  switch ((enum sim_d10v_regs) rn)
     {
     case SIM_D10V_R0_REGNUM:
     case SIM_D10V_R1_REGNUM:

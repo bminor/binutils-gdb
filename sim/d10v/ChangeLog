@@ -1,3 +1,8 @@
+2002-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_fetch_register): Fix name of enum used in cast.
+	(sim_store_register): Ditto.
+
 2002-06-02  Elena Zannoni  <ezannoni@redhat.com>
 
         From Jason Eckhardt <jle@redhat.com>
