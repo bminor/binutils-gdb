@@ -1,3 +1,8 @@
+Wed Nov  1 13:30:24 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c (m68k_opcode_aliases): Add dbfw as an alias for dbf,
+	and likewise for all the dbxx opcodes.
+
 Mon Oct 30 20:50:40 1995  Fred Fish  <fnf@cygnus.com>
 
 	* arc-dis.c: Include elf-bfd.h rather than libelf.h.
