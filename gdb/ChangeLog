@@ -1,3 +1,8 @@
+2003-09-09  Andrew Cagney  <cagney@redhat.com>
+
+	* sh64-tdep.c (sh64_push_return_address): Use ENTRY_POINT_ADDRESS
+	instead of CALL_DUMMY_ADDRESS.
+
 2003-09-09  Paul N. Hilfinger  <hilfingr@gnat.com>
 
 	* p-lang.c: Eliminate "register".

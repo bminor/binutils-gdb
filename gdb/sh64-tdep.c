@@ -1650,7 +1650,7 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 static CORE_ADDR
 sh64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (PR_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (PR_REGNUM, entry_point_address ());
   return sp;
 }
 
