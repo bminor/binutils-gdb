@@ -1,3 +1,23 @@
+2004-10-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 465
+	* readelf.c (dynamic_strings_length): New global variable.
+	(VALID_DYNAMIC_NAME, GET_DYNAMIC_NAME): New macros for accessing
+	strings in the dynamic string table.
+	(process_section_headers): Initialise dynamic_strings_length.
+	(process_dynamic_section): Likewise.
+	(process_object): Reset dynamic_string_length when the buffer is freed.
+	(dynamic_sections_mips_val): Use the new macros.
+	(process_dynamic_section): Likewise.
+	(process_version_sections): Likewise.
+	(process_symbol_table): Likewise.
+	(process_syminfo): Likewise.
+	(process_mips_specific): Likewise.
+	(dump_relocations): Add a new parameter 'strtablen' and use this
+	to verify that string offset in a given reloc is valid.  Print a
+	suitable error message otherwise.
+	(process_relocs): Pass the new argument to dump_relocations.
+
 2004-10-23  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* dlltool.c: Include <assert.h>.

@@ -123,6 +123,7 @@ unsigned long dynamic_addr;
 bfd_size_type dynamic_size;
 unsigned int dynamic_nent;
 char *dynamic_strings;
+unsigned long dynamic_strings_length;
 char *string_table;
 unsigned long string_table_length;
 unsigned long num_dynamic_syms;
@@ -254,7 +255,11 @@ static void (*byte_put) (unsigned char *, bfd_vma, int);
   (is_32bit_elf ? get_32bit_elf_symbols (file, section)	\
    : get_64bit_elf_symbols (file, section))
 
-
+#define VALID_DYNAMIC_NAME(offset)	((dynamic_strings != NULL) && (offset < dynamic_strings_length))
+/* GET_DYNAMIC_NAME asssumes that VALID_DYNAMIC_NAME has
+   already been called and verified that the string exists.  */
+#define GET_DYNAMIC_NAME(offset)	(dynamic_strings + offset)
+
 static void
 error (const char *message, ...)
 {
@@ -863,6 +868,7 @@ dump_relocations (FILE *file,
 		  Elf_Internal_Sym *symtab,
 		  unsigned long nsyms,
 		  char *strtab,
+		  unsigned long strtablen,
 		  int is_rela)
 {
   unsigned int i;
@@ -1250,7 +1256,9 @@ dump_relocations (FILE *file,
 		  print_symbol (22, sec_name);
 		}
 	      else if (strtab == NULL)
-		printf (_("<string table index %3ld>"), psym->st_name);
+		printf (_("<string table index: %3ld>"), psym->st_name);
+	      else if (psym->st_name > strtablen)
+		printf (_("<corrupt string table index: %3ld>"), psym->st_name);
 	      else
 		print_symbol (22, strtab + psym->st_name);
 
@@ -3718,6 +3726,7 @@ process_section_headers (FILE *file)
 
 	  dynamic_strings = get_data (NULL, file, section->sh_offset,
 				      section->sh_size, _("dynamic strings"));
+	  dynamic_strings_length = section->sh_size;
 	}
       else if (section->sh_type == SHT_SYMTAB_SHNDX)
 	{
@@ -4114,7 +4123,7 @@ process_relocs (FILE *file)
 				offset_from_vma (file, rel_offset, rel_size),
 				rel_size,
 				dynamic_symbols, num_dynamic_syms,
-				dynamic_strings, is_rela);
+				dynamic_strings, dynamic_strings_length, is_rela);
 	    }
 	}
 
@@ -4141,10 +4150,7 @@ process_relocs (FILE *file)
 	  if (rel_size)
 	    {
 	      Elf_Internal_Shdr *strsec;
-	      Elf_Internal_Sym *symtab;
-	      char *strtab;
 	      int is_rela;
-	      unsigned long nsyms;
 
 	      printf (_("\nRelocation section "));
 
@@ -4156,13 +4162,16 @@ process_relocs (FILE *file)
 	      printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		 rel_offset, (unsigned long) (rel_size / section->sh_entsize));
 
-	      symtab = NULL;
-	      strtab = NULL;
-	      nsyms = 0;
+	      is_rela = section->sh_type == SHT_RELA;
+
 	      if (section->sh_link)
 		{
 		  Elf_Internal_Shdr *symsec;
-
+		  Elf_Internal_Sym *symtab;
+		  unsigned long nsyms;
+		  unsigned long strtablen;
+		  char *strtab = NULL;
+		  
 		  symsec = SECTION_HEADER (section->sh_link);
 		  nsyms = symsec->sh_size / symsec->sh_entsize;
 		  symtab = GET_ELF_SYMBOLS (file, symsec);
@@ -4174,16 +4183,17 @@ process_relocs (FILE *file)
 
 		  strtab = get_data (NULL, file, strsec->sh_offset,
 				     strsec->sh_size, _("string table"));
+		  strtablen = strtab == NULL ? 0 : strsec->sh_size;
+
+		  dump_relocations (file, rel_offset, rel_size,
+				    symtab, nsyms, strtab, strtablen, is_rela);
+		  if (strtab)
+		    free (strtab);
+		  free (symtab);
 		}
-	      is_rela = section->sh_type == SHT_RELA;
-
-	      dump_relocations (file, rel_offset, rel_size,
-				symtab, nsyms, strtab, is_rela);
-
-	      if (strtab)
-		free (strtab);
-	      if (symtab)
-		free (symtab);
+	      else
+		dump_relocations (file, rel_offset, rel_size,
+				  NULL, 0, NULL, 0, is_rela);
 
 	      found = 1;
 	    }
@@ -4648,11 +4658,10 @@ dynamic_section_mips_val (Elf_Internal_Dyn *entry)
       break;
 
     case DT_MIPS_IVERSION:
-      if (dynamic_strings != NULL)
-	printf ("Interface Version: %s\n",
-		dynamic_strings + entry->d_un.d_val);
+      if (VALID_DYNAMIC_NAME (entry->d_un.d_val))
+	printf ("Interface Version: %s\n", GET_DYNAMIC_NAME (entry->d_un.d_val));
       else
-	printf ("%ld\n", (long) entry->d_un.d_ptr);
+	printf ("<corrupt: %ld>\n", (long) entry->d_un.d_ptr);
       break;
 
     case DT_MIPS_TIME_STAMP:
@@ -4995,6 +5004,7 @@ process_dynamic_section (FILE *file)
 
 	  dynamic_strings = get_data (NULL, file, offset, str_tab_len,
 				      _("dynamic string table"));
+	  dynamic_strings_length = str_tab_len;
 	  break;
 	}
     }
@@ -5112,8 +5122,8 @@ process_dynamic_section (FILE *file)
 		  break;
 		}
 
-	      if (dynamic_strings)
-		printf (": [%s]\n", dynamic_strings + entry->d_un.d_val);
+	      if (VALID_DYNAMIC_NAME (entry->d_un.d_val))
+		printf (": [%s]\n", GET_DYNAMIC_NAME (entry->d_un.d_val));
 	      else
 		{
 		  printf (": ");
@@ -5295,10 +5305,10 @@ process_dynamic_section (FILE *file)
 	    {
 	      char *name;
 
-	      if (dynamic_strings == NULL)
-		name = NULL;
+	      if (VALID_DYNAMIC_NAME (entry->d_un.d_val))
+		name = GET_DYNAMIC_NAME (entry->d_un.d_val);
 	      else
-		name = dynamic_strings + entry->d_un.d_val;
+		name = NULL;
 
 	      if (name)
 		{
@@ -5376,11 +5386,10 @@ process_dynamic_section (FILE *file)
 	case DT_FINI_ARRAY:
 	  if (do_dynamic)
 	    {
-	      if (dynamic_strings != NULL && entry->d_tag == DT_USED)
+	      if (entry->d_tag == DT_USED
+		  && VALID_DYNAMIC_NAME (entry->d_un.d_val))
 		{
-		  char *name;
-
-		  name = dynamic_strings + entry->d_un.d_val;
+		  char *name = GET_DYNAMIC_NAME (entry->d_un.d_val);
 
 		  if (*name)
 		    {
@@ -5547,8 +5556,8 @@ process_version_sections (FILE *file)
 		aux.vda_name = BYTE_GET (eaux->vda_name);
 		aux.vda_next = BYTE_GET (eaux->vda_next);
 
-		if (dynamic_strings)
-		  printf (_("Name: %s\n"), dynamic_strings + aux.vda_name);
+		if (VALID_DYNAMIC_NAME (aux.vda_name))
+		  printf (_("Name: %s\n"), GET_DYNAMIC_NAME (aux.vda_name));
 		else
 		  printf (_("Name index: %ld\n"), aux.vda_name);
 
@@ -5564,9 +5573,9 @@ process_version_sections (FILE *file)
 		    aux.vda_name = BYTE_GET (eaux->vda_name);
 		    aux.vda_next = BYTE_GET (eaux->vda_next);
 
-		    if (dynamic_strings)
+		    if (VALID_DYNAMIC_NAME (aux.vda_name))
 		      printf (_("  %#06x: Parent %d: %s\n"),
-			      isum, j, dynamic_strings + aux.vda_name);
+			      isum, j, GET_DYNAMIC_NAME (aux.vda_name));
 		    else
 		      printf (_("  %#06x: Parent %d, name index: %ld\n"),
 			      isum, j, aux.vda_name);
@@ -5621,8 +5630,8 @@ process_version_sections (FILE *file)
 
 		printf (_("  %#06x: Version: %d"), idx, ent.vn_version);
 
-		if (dynamic_strings)
-		  printf (_("  File: %s"), dynamic_strings + ent.vn_file);
+		if (VALID_DYNAMIC_NAME (ent.vn_file))
+		  printf (_("  File: %s"), GET_DYNAMIC_NAME (ent.vn_file));
 		else
 		  printf (_("  File: %lx"), ent.vn_file);
 
@@ -5643,9 +5652,9 @@ process_version_sections (FILE *file)
 		    aux.vna_name  = BYTE_GET (eaux->vna_name);
 		    aux.vna_next  = BYTE_GET (eaux->vna_next);
 
-		    if (dynamic_strings)
+		    if (VALID_DYNAMIC_NAME (aux.vna_name))
 		      printf (_("  %#06x:   Name: %s"),
-			      isum, dynamic_strings + aux.vna_name);
+			      isum, GET_DYNAMIC_NAME (aux.vna_name));
 		    else
 		      printf (_("  %#06x:   Name index: %lx"),
 			      isum, aux.vna_name);
@@ -6105,7 +6114,10 @@ process_symbol_table (FILE *file)
 	      printf (" %6s",  get_symbol_binding (ELF_ST_BIND (psym->st_info)));
 	      printf (" %3s",  get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
 	      printf (" %3.3s ", get_symbol_index_type (psym->st_shndx));
-	      print_symbol (25, dynamic_strings + psym->st_name);
+	      if (VALID_DYNAMIC_NAME (psym->st_name))
+		print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
+	      else
+		printf (" <corrupt: %14ld>", psym->st_name);
 	      putchar ('\n');
 	    }
 	}
@@ -6404,7 +6416,10 @@ process_syminfo (FILE *file ATTRIBUTE_UNUSED)
       unsigned short int flags = dynamic_syminfo[i].si_flags;
 
       printf ("%4d: ", i);
-      print_symbol (30, dynamic_strings + dynamic_symbols[i].st_name);
+      if (VALID_DYNAMIC_NAME (dynamic_symbols[i].st_name))
+	print_symbol (30, GET_DYNAMIC_NAME (dynamic_symbols[i].st_name));
+      else
+	printf ("<corrupt: %19ld>", dynamic_symbols[i].st_name);
       putchar (' ');
 
       switch (dynamic_syminfo[i].si_boundto)
@@ -6417,12 +6432,10 @@ process_syminfo (FILE *file ATTRIBUTE_UNUSED)
 	  break;
 	default:
 	  if (dynamic_syminfo[i].si_boundto > 0
-	      && dynamic_syminfo[i].si_boundto < dynamic_nent)
+	      && dynamic_syminfo[i].si_boundto < dynamic_nent
+	      && VALID_DYNAMIC_NAME (dynamic_section[dynamic_syminfo[i].si_boundto].d_un.d_val))
 	    {
-	      print_symbol (10,
-			    dynamic_strings
-			    + (dynamic_section
-			       [dynamic_syminfo[i].si_boundto].d_un.d_val));
+	      print_symbol (10, GET_DYNAMIC_NAME (dynamic_section[dynamic_syminfo[i].si_boundto].d_un.d_val));
 	      putchar (' ' );
 	    }
 	  else
@@ -9951,7 +9964,10 @@ process_mips_specific (FILE *file)
 		       tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 
 	      printf ("%3lu: ", (unsigned long) cnt);
-	      print_symbol (20, dynamic_strings + liblist.l_name);
+	      if (VALID_DYNAMIC_NAME (liblist.l_name))
+		print_symbol (20, GET_DYNAMIC_NAME (liblist.l_name));
+	      else
+		printf ("<corrupt: %9ld>", liblist.l_name);
 	      printf (" %s %#10lx %-7ld", timebuf, liblist.l_checksum,
 		      liblist.l_version);
 
@@ -10251,7 +10267,10 @@ process_mips_specific (FILE *file)
 	  printf ("%5lu: %8lu  ", (unsigned long) cnt, iconf[cnt]);
 	  print_vma (psym->st_value, FULL_HEX);
 	  putchar (' ');
-	  print_symbol (25, dynamic_strings + psym->st_name);
+	  if (VALID_DYNAMIC_NAME (psym->st_name))
+	    print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
+	  else
+	    printf ("<corrupt: %14ld>", psym->st_name);
 	  putchar ('\n');
 	}
 
@@ -10780,6 +10799,7 @@ process_object (char *file_name, FILE *file)
     {
       free (dynamic_strings);
       dynamic_strings = NULL;
+      dynamic_strings_length = 0;
     }
 
   if (dynamic_symbols)
