@@ -8,20 +8,6 @@ AC_CANONICAL_SYSTEM
 AC_ISC_POSIX
 
 AM_INIT_AUTOMAKE(bfd, 2.15.91)
-# Uncomment the next line to remove the date from the reported bfd version
-#is_release=y
-
-changequote(,)dnl
-bfd_version=`echo "${VERSION}" | sed -e 's/\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\).*/\1.00\2.00\3.00\4.00\5/' -e 's/\([^\.]*\)\..*\(..\)\..*\(..\)\..*\(..\)\..*\(..\)$/\1\2\3\4\5/'`
-changequote([,])dnl
-
-bfd_version_string="\"${VERSION}\""
-if test x${is_release} = x; then
-  bfd_version_date=`sed -n -e 's/.*DATE //p' < ${srcdir}/version.h`
-  bfd_version_string="\"${VERSION} ${bfd_version_date}\""
-fi
-AC_SUBST(bfd_version)
-AC_SUBST(bfd_version_string)
 
 dnl These must be called before AM_PROG_LIBTOOL, because it may want
 dnl to call AC_CHECK_PROG.
@@ -945,6 +931,6 @@ case ${want_mmap}+${ac_cv_func_mmap_fixed_mapped} in
 esac
 
 rm -f doc/config.status
-AC_OUTPUT(Makefile doc/Makefile bfd-in3.h:bfd-in2.h bfdver.h:version.h po/Makefile.in:po/Make-in,
+AC_OUTPUT(Makefile doc/Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in,
 [sed -e '/SRC-POTFILES =/r po/SRC-POTFILES' -e '/BLD-POTFILES =/r po/BLD-POTFILES' po/Makefile.in > po/Makefile])
 

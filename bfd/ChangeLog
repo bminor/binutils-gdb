@@ -1,5 +1,16 @@
 2004-05-22  Ben Elliston  <bje@au.ibm.com>
 
+	* configure.in (is_release): Remove.
+	(bfd_version_date, bfd_version, bfd_version_string): Likewise.
+	(AC_OUTPUT): Don't output bfdver.h from version.h.
+	* configure: Regenerate.
+	* Makefile.am (RELEASE): New variable.
+	(bfdver.h): New target.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Likewise.
+
+2004-05-22  Ben Elliston  <bje@au.ibm.com>
+
 	* Makefile.am (config.status): Don't depend on version.h.
 	* Makefile.in: Regenerate.
 
