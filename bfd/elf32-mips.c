@@ -6771,6 +6771,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
          REL relocation.  */
       boolean rela_relocation_p = true;
       int r_type = ELF32_R_TYPE (rel->r_info);
+      const char * msg = (const char *) NULL;
 
       /* Find the relocation howto for this relocation.  */
       if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
@@ -7025,8 +7026,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  continue;
 
 	case bfd_reloc_notsupported:
-	  abort ();
-	  break;
+	  msg = _("internal error: unsupported relocation error");
+	  info->callbacks->warning
+	    (info, msg, name, input_bfd, input_section, rel->r_offset);
+	  return false;
 
 	case bfd_reloc_overflow:
 	  if (use_saved_addend_p)

@@ -1,3 +1,8 @@
+2001-03-21  Diego Novillo  <dnovillo@redhat.com>
+
+	(_bfd_mips_elf_relocate_section): Give a better error message when
+	a relocation is not recognized.
+
 2001-03-21  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.c (elf32_hppa_set_gp): Check sec->output_section
