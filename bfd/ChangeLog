@@ -113,10 +113,6 @@
 	symbol to NULL function descriptor.
 	(elf32_frv_relocate_section): Likewise.
 
-	2004-02-23  Jakub Jelinek  <jakub@redhat.com>
-	* elflink.h (size_dynamic_sections): If not adding DT_FLAGS and
-	DF_BIND_NOW is set in info->flags, create DT_BIND_NOW dynamic entry.
-
 	2004-02-21  Danny Smith  <daanysmith@users.sourceforge.net>
 	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Clear
 	IMAGE_SCN_MEM_WRITE on known sections only.
