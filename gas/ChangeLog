@@ -1,3 +1,21 @@
+Mon Mar 14 14:29:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in (literal.o): Provide dependencies.
+
+	* configure.in: Set new makefile variable OPCODES_LIB.
+	* Makefile.in (LIBS): Use it.
+
+	* Makefile.in (make-gas.com, stamp-mk.com): New targets.
+	* vmsconf.sh: New file.
+	* make-gas.com: Regenerated from new script.
+
+	* configure.in (sparc*-*-lynxos*): Handle any version number
+	suffix after "lynxos".  Set emulation to lynx.
+
+Mon Mar 14 11:30:49 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* config/obj-coff.c (obj_coff_section): Delete declaration.
+
 Fri Mar 11 22:25:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-ppc.c (md_pcrel_from): Return 0 for undefined ELF
