@@ -2340,7 +2340,7 @@ your output program.  If the @code{ABSOLUTE} command is used at all in a
 script, then only the sections named explicitly in @code{ABSOLUTE}
 commands will appear in the linker output.  You can still use other
 input sections (whatever you select on the command line, or using
-@{LOAD@}) to resolve addresses in the output file.
+@code{LOAD}) to resolve addresses in the output file.
 
 @item ALIAS @var{out-secname}, @var{in-secname}
 @cindex @code{ALIAS} (MRI)
