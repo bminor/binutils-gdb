@@ -1,3 +1,8 @@
+2004-11-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* maxq-dis.c: Formatting.
+	(print_insn): Warning fix.
+
 2004-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-dis.c (WORD_ADDRESS): Define.

@@ -358,8 +358,8 @@ get_group (const unsigned int insn)
 
   if ((insn & _DECODE_LOWNIB_HIGHBYTE) == 0x0A00)
     {
-      /* && condition with sec part added on 26 May for resoveing 2 & 3 grp
-         conflict.  */
+      /* && condition with sec part added on 26 May for resolving 2 & 3 grp
+	 conflict.  */
       if (((insn & _DECODE_LOWNIB_LOWBYTE) == 0x000A)
 	  && ((insn & _DECODE_GET_F_HIGHBYTE) == 0x8000))
 	{
@@ -652,7 +652,8 @@ print_insn (bfd_vma memaddr, struct disassemble_info *info,
 				      grp.bit_no);
 		}
 	      else
-		info->fprintf_func (info->stream, " %s", get_reg_name (grp.dst, (type1) 0));
+		info->fprintf_func (info->stream, " %s",
+				    get_reg_name (grp.dst, (type1) 0));
 	    }
 
 	  /* SRC is ABSENT in the grp.  */
@@ -682,7 +683,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info *info,
 					grp.bit_no);
 		  if (format == 0)
 		    info->fprintf_func (info->stream, " #%02xh.%d",
-					(grp.src, SRC), grp.bit_no);
+					grp.src, grp.bit_no);
 		}
 	      else
 		{
@@ -692,11 +693,11 @@ print_insn (bfd_vma memaddr, struct disassemble_info *info,
 		    format = grp.fbit;
 		  if (format == 1)
 		    info->fprintf_func (info->stream, " %s",
-					   get_reg_name (grp.src,
-							 (type1) 1 /*SRC*/));
+					get_reg_name (grp.src,
+						      (type1) 1 /*SRC*/));
 		  if (format == 0)
 		    info->fprintf_func (info->stream, " #%02xh",
-					   (grp.src));
+					(grp.src));
 		}
 	    }
 
@@ -705,7 +706,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info *info,
     }
 
   info->fprintf_func (info->stream, "Unable to Decode :  %02x %02x",
-			 insn[0], insn[1]);
+		      insn[0], insn[1]);
   return 2;			
 }
 
@@ -714,4 +715,3 @@ print_insn_maxq_little (bfd_vma memaddr, struct disassemble_info *info)
 {
   return print_insn (memaddr, info, BFD_ENDIAN_LITTLE);
 }
-
