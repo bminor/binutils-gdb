@@ -78,6 +78,8 @@ extern int linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len,
 				   int write, struct mem_attrib *attrib,
 				   struct target_ops *target);
 
+extern void linux_record_stopped_pid (int pid);
+
 #define CHILD_INSERT_FORK_CATCHPOINT
 #define CHILD_INSERT_VFORK_CATCHPOINT
 #define CHILD_INSERT_EXEC_CATCHPOINT

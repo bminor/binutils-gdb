@@ -1109,6 +1109,23 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  save_errno = EINTR;
 	}
 
+      /* Check for stop events reported by a process we didn't already
+	 know about - in this case, anything other than inferior_ptid.
+
+	 If we're expecting to receive stopped processes after fork,
+	 vfork, and clone events, then we'll just add the new one to
+	 our list and go back to waiting for the event to be reported
+	 - the stopped process might be returned from waitpid before
+	 or after the event is.  If we want to handle debugging of
+	 CLONE_PTRACE processes we need to do more here, i.e. switch
+	 to multi-threaded mode.  */
+      if (pid != -1 && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP
+	  && pid != GET_PID (inferior_ptid))
+	{
+	  pid = -1;
+	  save_errno = EINTR;
+	}
+
       clear_sigio_trap ();
       clear_sigint_trap ();
     }
@@ -1272,6 +1289,22 @@ retry:
 
 	  lp = find_lwp_pid (pid_to_ptid (lwpid));
 
+	  /* Check for stop events reported by a process we didn't
+	     already know about - anything not already in our LWP
+	     list.
+
+	     If we're expecting to receive stopped processes after
+	     fork, vfork, and clone events, then we'll just add the
+	     new one to our list and go back to waiting for the event
+	     to be reported - the stopped process might be returned
+	     from waitpid before or after the event is.  */
+	  if (WIFSTOPPED (status) && !lp)
+	    {
+	      linux_record_stopped_pid (lwpid);
+	      status = 0;
+	      continue;
+	    }
+
 	  /* Make sure we don't report an event for the exit of an LWP not in
 	     our list, i.e.  not part of the current process.  This can happen
 	     if we detach from a program we original forked and then it
@@ -1282,6 +1315,13 @@ retry:
 	      continue;
 	    }
 
+	  /* NOTE drow/2003-06-17: This code seems to be meant for debugging
+	     CLONE_PTRACE processes which do not use the thread library -
+	     otherwise we wouldn't find the new LWP this way.  That doesn't
+	     currently work, and the following code is currently unreachable
+	     due to the two blocks above.  If it's fixed some day, this code
+	     should be broken out into a function so that we can also pick up
+	     LWPs from the new interface.  */
 	  if (!lp)
 	    {
 	      lp = add_lwp (BUILD_LWP (lwpid, GET_PID (inferior_ptid)));

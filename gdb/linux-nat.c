@@ -54,10 +54,51 @@
 #define __WALL          0x40000000 /* Wait for any child.  */
 #endif
 
+struct simple_pid_list
+{
+  int pid;
+  struct simple_pid_list *next;
+};
+struct simple_pid_list *stopped_pids;
+
 /* This variable is a tri-state flag: -1 for unknown, 0 if PTRACE_O_TRACEFORK
    can not be used, 1 if it can.  */
 
 static int linux_supports_tracefork_flag = -1;
+
+
+/* Trivial list manipulation functions to keep track of a list of
+   new stopped processes.  */
+static void
+add_to_pid_list (struct simple_pid_list **listp, int pid)
+{
+  struct simple_pid_list *new_pid = xmalloc (sizeof (struct simple_pid_list));
+  new_pid->pid = pid;
+  new_pid->next = *listp;
+  *listp = new_pid;
+}
+
+static int
+pull_pid_from_list (struct simple_pid_list **listp, int pid)
+{
+  struct simple_pid_list **p;
+
+  for (p = listp; *p != NULL; p = &(*p)->next)
+    if ((*p)->pid == pid)
+      {
+	struct simple_pid_list *next = (*p)->next;
+	xfree (*p);
+	*p = next;
+	return 1;
+      }
+  return 0;
+}
+
+void
+linux_record_stopped_pid (int pid)
+{
+  add_to_pid_list (&stopped_pids, pid);
+}
 
 
 /* A helper function for linux_test_for_tracefork, called after fork ().  */

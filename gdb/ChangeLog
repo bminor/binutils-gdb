@@ -1,3 +1,11 @@
+2003-06-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/nm-linux.h (linux_record_stopped_pid): New prototype.
+	* lin-lwp.c (child_wait): Call linux_record_stopped_pid.
+	(lin_lwp_wait): Likewise.  Update comments.
+	* linux-nat.c (struct simple_pid_list, add_to_pid_list)
+	(pull_pid_from_list, linux_record_stopped_pid): New.
+
 2003-06-17  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ada-lang.c (scan_discrim_bound): Name first argument.
