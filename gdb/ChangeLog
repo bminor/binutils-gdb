@@ -1,3 +1,8 @@
+Tue May  7 18:37:06 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* target.c (debug_to_xfer_memory): Insert line breaks when
+	dumping the memory block.
+
 Mon May  6 13:52:52 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* fork-child.c (fork_inferior), inferior.h:  init_trace_fun now
