@@ -92,6 +92,7 @@ This file documents the binary file descriptor library libbfd.
 * Index::			Index
 
 BFD body:
+* Memory usage::
 * Sections::
 * Symbols::
 * Archives::
@@ -349,7 +350,29 @@ What is a backend
 @chapter BFD front end
 @include doc/bfd.doc
 @page
-@node Sections, Symbols , bfd, Top
+@node Memory Usage, Sections, bfd, Top
+@section Memory Usage
+BFD keeps all its internal structures in obstacks. There is one obstack
+per open bfd file, into which the current state is stored. When a bfd is
+closed, the obstack is deleted, and so everything which has been
+allocated by libbfd for the closing file will be thrown away.
+
+BFD will not free anything created by an application, but pointers into
+bfd structures will be invalidated on a @code{bfd_close}; for example,
+after a @code{bfd_close} the vector passed to
+@code{bfd_canonicalize_symtab} will still be around, since it has been
+allocated by the application, but the data that it pointed to will be
+lost.
+
+The general rule is not to close a bfd until all operations dependent
+upon data from the bfd have been completed, or all the data from within
+the file has been copied. To help with the management of memory, there is a function
+(@code{bfd_alloc_size}) which returns the number of bytes in obstacks
+associated with the supplied bfd. This could be used to select the
+greediest open bfd, close it to reclaim the memory, perform some
+operation and reopen the bfd again, to get a fresh copy of the data structures.
+
+@node Sections,Symbols ,Memory Usage, Top
 @include doc/section.doc
 @page
 @node Symbols, Archives ,Sections, To
