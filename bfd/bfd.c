@@ -1417,3 +1417,46 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
      objalloc.  */
   bfd_hash_table_free (&preserve->section_htab);
 }
+
+/*
+FUNCTION
+	bfd_get_section_ident
+
+SYNOPSIS
+	char *bfd_get_section_ident (asection *sec);
+
+DESCRIPTION
+	This function returns "section name[group name]" in a malloced
+	buffer if @var{sec} is a member of an ELF section group and
+	returns NULL otherwise. The caller should free the non-NULL
+	return after use.
+
+*/
+
+char *
+bfd_get_section_ident (asection *sec)
+{
+  char *buf;
+  bfd_size_type nlen;
+  bfd_size_type glen;
+
+  if (sec->owner == NULL
+      || bfd_get_flavour (sec->owner) != bfd_target_elf_flavour
+      || elf_next_in_group (sec) == NULL
+      || (sec->flags & SEC_GROUP) != 0)
+    return NULL;
+
+  nlen = strlen (sec->name);
+  glen = strlen (elf_group_name (sec));
+  buf = bfd_malloc (nlen + glen + 2 + 1);
+  if (buf != NULL)
+    {
+      strcpy (buf, sec->name);
+      buf [nlen] = '[';
+      strcpy (&buf [nlen + 1], elf_group_name (sec));
+      buf [nlen + 1 + glen] = ']';
+      buf [nlen + 1 + glen + 1] = '\0';
+    }
+
+  return buf;
+}

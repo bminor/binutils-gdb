@@ -1,3 +1,8 @@
+2004-07-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldmisc.c (vfinfo): Call bfd_get_section_ident to identify
+	the section.
+
 2004-06-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_reset_memory_regions): Save last relax pass section

@@ -1859,10 +1859,14 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	r_symndx >>= 24;
       if ((size_t) r_symndx >= nsyms)
 	{
+	  char *sec_name = bfd_get_section_ident (sec);
 	  (*_bfd_error_handler)
 	    (_("%s: bad reloc symbol index (0x%lx >= 0x%lx) for offset 0x%lx in section `%s'"),
 	     bfd_archive_filename (abfd), (unsigned long) r_symndx,
-	     (unsigned long) nsyms, irela->r_offset, sec->name);
+	     (unsigned long) nsyms, irela->r_offset,
+	     sec_name ? sec_name : sec->name);
+	  if (sec_name)
+	    free (sec_name);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -2048,11 +2052,14 @@ _bfd_elf_link_output_relocs (bfd *output_bfd,
     }
   else
     {
+      char *sec_name = bfd_get_section_ident (input_section);
       (*_bfd_error_handler)
 	(_("%s: relocation size mismatch in %s section %s"),
 	 bfd_get_filename (output_bfd),
 	 bfd_archive_filename (input_section->owner),
-	 input_section->name);
+	 sec_name ? sec_name : input_section->name);
+      if (sec_name)
+	free (sec_name);
       bfd_set_error (bfd_error_wrong_object_format);
       return FALSE;
     }
@@ -6073,11 +6080,14 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 						 input_sec->output_section);
 	    if (sym.st_shndx == SHN_BAD)
 	      {
+		char *sec_name = bfd_get_section_ident (input_sec);
 		(*_bfd_error_handler)
 		  (_("%s: could not find output section %s for input section %s"),
 		   bfd_get_filename (finfo->output_bfd),
 		   input_sec->output_section->name,
-		   input_sec->name);
+		   sec_name ? sec_name : input_sec->name);
+		if (sec_name)
+		  free (sec_name);
 		eoinfo->failed = TRUE;
 		return FALSE;
 	      }
@@ -6638,13 +6648,21 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			}
 		      else if (complain)
 			{
+			  char *r_sec
+			    = bfd_get_section_ident (o);
+			  char *d_sec
+			    = bfd_get_section_ident (sec);
 			  finfo->info->callbacks->error_handler
 			    (LD_DEFINITION_IN_DISCARDED_SECTION,
 			     _("`%T' referenced in section `%s' of %B: "
 			       "defined in discarded section `%s' of %B\n"),
-			     sym_name,
-			     sym_name, o->name, input_bfd,
-			     sec->name, sec->owner);
+			     sym_name, sym_name,
+			     r_sec ? r_sec : o->name, input_bfd,
+			     d_sec ? d_sec : sec->name, sec->owner);
+			  if (r_sec)
+			    free (r_sec);
+			  if (d_sec)
+			    free (d_sec);
 			}
 
 		      /* Remove the symbol reference from the reloc, but
@@ -8567,6 +8585,7 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
   struct elf_link_hash_entry **search, *child;
   bfd_size_type extsymcount;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  char *sec_name;
 
   /* The sh_info field of the symtab header tells us where the
      external symbols start.  We don't care about the local symbols at
@@ -8590,8 +8609,10 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
 	goto win;
     }
 
+  sec_name = bfd_get_section_ident (sec);
   (*_bfd_error_handler) ("%s: %s+%lu: No symbol found for INHERIT",
-			 bfd_archive_filename (abfd), sec->name,
+			 bfd_archive_filename (abfd),
+			 sec_name ? sec_name : sec->name,
 			 (unsigned long) offset);
   bfd_set_error (bfd_error_invalid_operation);
   return FALSE;

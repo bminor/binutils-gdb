@@ -1,3 +1,17 @@
+2004-07-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (bfd_get_section_ident): New.
+
+	* elflink.c (elf_link_read_relocs_from_section): Call
+	bfd_get_section_ident to identify the section when reporting
+	error.
+	(_bfd_elf_link_output_relocs): Likewise.
+	(elf_link_output_extsym): Likewise.
+	(elf_link_input_bfd): Likewise.
+	(bfd_elf_gc_record_vtinherit): Likewise.
+
+	* bfd-in2.h: Regenerated.
+
 2004-07-01  Jie Zhang  <zhangjie@magima.com.cn>
 	    Nick Clifton  <nickc@redhat.com>
 

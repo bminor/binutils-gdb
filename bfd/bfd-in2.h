@@ -4090,6 +4090,8 @@ void bfd_preserve_restore (bfd *, struct bfd_preserve *);
 
 void bfd_preserve_finish (bfd *, struct bfd_preserve *);
 
+char *bfd_get_section_ident (asection *sec);
+
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent
    (bfd *abfd, symindex previous, carsym **sym);

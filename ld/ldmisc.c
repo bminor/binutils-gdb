@@ -241,6 +241,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg)
 		const char *functionname;
 		unsigned int linenumber;
 		bfd_boolean discard_last;
+		char *sec_name;
 
 		abfd = va_arg (arg, bfd *);
 		section = va_arg (arg, asection *);
@@ -269,7 +270,11 @@ vfinfo (FILE *fp, const char *fmt, va_list arg)
 		      }
 		  }
 
-		lfinfo (fp, "%B(%s+0x%v)", abfd, section->name, offset);
+		sec_name = bfd_get_section_ident (section);
+		lfinfo (fp, "%B(%s+0x%v)", abfd,
+			sec_name ? sec_name : section->name, offset);
+		if (sec_name)
+		  free (sec_name);
 
 		discard_last = TRUE;
 		if (bfd_find_nearest_line (abfd, section, asymbols, offset,
