@@ -461,6 +461,7 @@ z8k-tdep.c
 
 Things-to-lose:
 
+GDB-HACK-RULES
 HOW_TO_RELEASE
 gdbcfgxref
 
