@@ -1,5 +1,13 @@
 Mon Sep  4 14:30:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in (host_makefile_frag): Don't set.  Substitute for
+	@CC@, @CFLAGS@, @HDEFINES@ and @LDFLAGS@ in Makefile.
+	* Makefile.in (AR_FLAGS): Set to rc rather than qv.
+	(CC): Define as @CC@.
+	(CFLAGS): Set to @CFLAGS@.
+	(LDFLAGS): Define as @LDFLAGS@.
+	(ALL_CFLAGS): Use @HDEFINES@ rather than $(HDEFINES).
+
 	* configure.in: Don't bother to call config.bfd for each target.
 	Just call it for the default target, and use the shell variable to
 	decide whether underscores are used.

@@ -51,8 +51,10 @@ INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
 AR = ar
-AR_FLAGS = qv
-CFLAGS = -g
+AR_FLAGS = rc
+CC = @CC@
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 RANLIB = ranlib
@@ -127,7 +129,7 @@ INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR)
 #### host and target dependant Makefile fragments come in here.
 ###
 
-ALL_CFLAGS = $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS)
+ALL_CFLAGS = $(INCLUDES) @HDEFINES@ $(TDEFINES) $(CFLAGS)
 
 .c.o:
 	$(CC) -c $(ALL_CFLAGS) $<

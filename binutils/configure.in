@@ -10,11 +10,6 @@ srcname="Binutils"
 
 . ${srcdir}/../bfd/configure.host
 
-host_makefile_frag=
-if [ -f ${srcdir}/../bfd/config/${my_host}.mh ] ; then
-	host_makefile_frag=../bfd/config/${my_host}.mh
-fi
-
 # per-target:
 
 # Canonicalize the secondary target names.
@@ -115,6 +110,13 @@ else
 fi
 echo "UNDERSCORE = ${underscore}" >> Makefile.2
 
-cat Makefile.tmp >> Makefile.2
+test -z "$CC" && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
+test -z "$CC" && CC=cc
+test -z "$CFLAGS" && CFLAGS=-g
+sed -e "s%@CC@%${CC}%" \
+    -e "s%@CFLAGS@%${CFLAGS}%" \
+    -e "s%@HDEFINES@%${HDEFINES}%" \
+    -e "s%@LDFLAGS@%${LDFLAGS}%" < Makefile.tmp >> Makefile.2
+
 rm -f Makefile.tmp
 mv Makefile.2 Makefile
