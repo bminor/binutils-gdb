@@ -1,3 +1,8 @@
+2004-08-08  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* lib/gdb.exp (gdb_get_line_number): Rewrite with native tcl
+	rather than asking gdb to search.
+
 2004-08-05  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.base/gcore.c: Include <string.h>.
