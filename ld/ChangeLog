@@ -1,3 +1,15 @@
+Tue May  7 10:56:11 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* scripttempl/pe.em (gld${EMULATION_NAME}_place_orphan): New function.
+	(gld${EMULATION_NAME}_place_section): New function.
+	(hold_{section,use,text,rdata,data}): New static locals.
+	(ld_${EMULATION_NAME}_emulation): Update orphan field.
+	* scripttempl/pe.sc: Whitespace cleanup.  Semicolon usage cleanup.
+	(INIT,FINI): Delete, unused.
+	(.text): Document orphan .text.foo sections.
+	(.rdata): Document orphan .rdata.foo sections.
+	(.data): Document orphan .data.foo sections.
+
 Tue May  7 11:35:46 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* scripttempl (h8300.sc, h8300h.sc): Place .rodata sections
