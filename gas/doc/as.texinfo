@@ -247,7 +247,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @end ifset
 @c start-sanitize-m32rx
 @ifset M32R
- [ --m32rx | --[no-]warn-explicit-parallel-conflicts ]
+ [ --m32rx | --[no-]warn-explicit-parallel-conflicts | --W[n]p ]
 @end ifset
 @c end-sanitize-m32rx
 @ifset M680X0
@@ -471,11 +471,11 @@ Mitsubishi M32R series.
 Specify which processor in the M32R family is the target.  The default
 is normally the M32R, but this option changes it to the M32RX.
 
-@item --warn-explicit-parallel-conflicts
+@item --warn-explicit-parallel-conflicts or --Wp
 Produce warning messages when questionable parallel constructs are
 encountered. 
 
-@item --no-warn-explicit-parallel-conflicts
+@item --no-warn-explicit-parallel-conflicts or --Wnp
 Do not produce warning messages when questionable parallel constructs are 
 encountered. 
 
@@ -565,7 +565,7 @@ Generate code for a particular MIPS Instruction Set Architecture level.
 processor.
 
 @item -m4650
-@item -no-m4650
+@itemx -no-m4650
 Generate code for the MIPS @sc{r4650} chip.  This tells the assembler to accept
 the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
 instructions around accesses to the @samp{HI} and @samp{LO} registers.
@@ -946,18 +946,19 @@ to the @value{TARGET}.
 to particular machine architectures.
 @end ifset
 
-If you are invoking @code{@value{AS}} via the @sc{gnu} C compiler (version 2), you
-can use the @samp{-Wa} option to pass arguments through to the
-assembler.  The assembler arguments must be separated from each other
-(and the @samp{-Wa}) by commas.  For example:
+If you are invoking @code{@value{AS}} via the @sc{gnu} C compiler (version 2),
+you can use the @samp{-Wa} option to pass arguments through to the assembler.
+The assembler arguments must be separated from each other (and the @samp{-Wa})
+by commas.  For example:
 
 @smallexample
 gcc -c -g -O -Wa,-alh,-L file.c
 @end smallexample
 
 @noindent
-emits a listing to standard output with high-level
-and assembly source.
+This passes two options to the assembler: @samp{-alh} (emit a listing to
+standard output with with high-level and assembly source) and @samp{-L} (retain
+local symbols in the symbol table).
 
 Usually you do not need to use this @samp{-Wa} mechanism, since many compiler
 command-line options are automatically passed to the assembler by the compiler.
@@ -3058,6 +3059,7 @@ Some machine configurations provide additional directives.
 * Endef::                       @code{.endef}
 @end ifset
 
+* Endfunc::                     @code{.endfunc}
 * Endif::                       @code{.endif}
 * Equ::                         @code{.equ @var{symbol}, @var{expression}}
 * Equiv::                       @code{.equiv @var{symbol}, @var{expression}}
@@ -3069,6 +3071,7 @@ Some machine configurations provide additional directives.
 
 * Fill::                        @code{.fill @var{repeat} , @var{size} , @var{value}}
 * Float::                       @code{.float @var{flonums}}
+* Func::                        @code{.func}  
 * Global::                      @code{.global @var{symbol}}, @code{.globl @var{symbol}}
 * hword::                       @code{.hword @var{expressions}}
 * Ident::                       @code{.ident}
@@ -3443,6 +3446,11 @@ directive but ignores it.
 @end ifset
 @end ifset
 
+@node Endfunc
+@section @code{.endfunc}
+@cindex @code{endfunc} directive
+@code{.endfunc} marks the end of a function specified with @code{.func}.
+
 @node Endif
 @section @code{.endif}
 
@@ -3555,6 +3563,17 @@ On the @value{TARGET} family, @code{.float} emits 32-bit floating point numbers
 in @sc{ieee} format.
 @end ifset
 @end ifclear
+
+@node Func
+@section @code{.func @var{name}[,@var{label}]}
+@cindex @code{func} directive
+@code{.func} emits debugging information to denote function @var{name}, and
+is ignored unless the file is assembled with debugging enabled.
+Only @samp{--gstabs} is currently supported.
+@var{label} is the entry point of the function and if omitted @var{name}
+is used.
+All functions are currently defined to have @code{void} return type.
+The function must be terminated with @code{.endfunc}.
 
 @node Global
 @section @code{.global @var{symbol}}, @code{.globl @var{symbol}}
