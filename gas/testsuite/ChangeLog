@@ -1,3 +1,8 @@
+Wed Jan 14 15:44:32 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mips/div.d: Update for recent assembler changes.
+	* gas/mips/div-ilocks.d: Likewise.
+
 Wed Jan 14 11:13:06 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* gas/m32r/allinsn.d (cmpui): Update output to new format.
