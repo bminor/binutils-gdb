@@ -438,10 +438,28 @@ record_minimal_symbol (name, address, type, objfile)
       ms_type = mst_file_data;
       break;
 #endif
+    case N_TEXT:
+      /* Don't put gcc_compiled, __gnu_compiled_cplus, and friends into
+	 the minimal symbols, because if there is also another symbol
+	 at the same address (e.g. the first function of the file),
+	 lookup_minimal_symbol_by_pc would have no way of getting the
+	 right one.  */
+      if (name[0] == 'g'
+	  && (strcmp (name, GCC_COMPILED_FLAG_SYMBOL) == 0
+	      || strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0))
+	return;
+
+      {
+	char *tempstring = name;
+	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
+	  ++tempstring;
+	if (STREQN (tempstring, "__gnu_compiled", 14))
+	  return;
+      }
+
     case N_NBTEXT:
     case N_FN:
     case N_FN_SEQ:
-    case N_TEXT:
       ms_type = mst_file_text;
       break;
 
@@ -450,9 +468,8 @@ record_minimal_symbol (name, address, type, objfile)
 
       /* Check for __DYNAMIC, which is used by Sun shared libraries. 
 	 Record it as global even if it's local, not global, so
-	 lookup_minimal_symbol can find it.
-	 FIXME:  this might want to check for _DYNAMIC and the current
-	 symbol_leading_char.  */
+	 lookup_minimal_symbol can find it.  We don't check symbol_leading_char
+	 because for SunOS4 it always is '_'.  */
       if (name[8] == 'C' && STREQ ("__DYNAMIC", name))
 	ms_type = mst_data;
 
@@ -2142,7 +2159,7 @@ dbx_symfile_offsets (objfile, addr)
 }
 
 /* Register our willingness to decode symbols for SunOS and a.out and
-   b.out files handled by BFD... */
+   NetBSD and b.out files handled by BFD... */
 static struct sym_fns sunos_sym_fns =
 {
   "sunOs",		/* sym_name: name or name prefix of BFD target type */
@@ -2159,6 +2176,18 @@ static struct sym_fns aout_sym_fns =
 {
   "a.out",		/* sym_name: name or name prefix of BFD target type */
   5,			/* sym_namelen: number of significant sym_name chars */
+  dbx_new_init,		/* sym_new_init: init anything gbl to entire symtab */
+  dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
+  dbx_symfile_read,	/* sym_read: read a symbol file into symtab */
+  dbx_symfile_finish,	/* sym_finish: finished with file, cleanup */
+  dbx_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
+  NULL			/* next: pointer to next struct sym_fns */
+};
+
+static struct sym_fns netbsd386_sym_fns =
+{
+  "netbsd-386",		/* sym_name: name or name prefix of BFD target type */
+  10,			/* sym_namelen: number of significant sym_name chars */
   dbx_new_init,		/* sym_new_init: init anything gbl to entire symtab */
   dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   dbx_symfile_read,	/* sym_read: read a symbol file into symtab */
@@ -2184,5 +2213,6 @@ _initialize_dbxread ()
 {
   add_symtab_fns(&sunos_sym_fns);
   add_symtab_fns(&aout_sym_fns);
+  add_symtab_fns(&netbsd386_sym_fns);
   add_symtab_fns(&bout_sym_fns);
 }
