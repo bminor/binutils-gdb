@@ -1,3 +1,8 @@
+2000-08-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c [! HAVE_PTRACE_GETFPXREGS] (fetch_fpxregs,
+	store_fpxregs): Return 0.
+
 2000-08-11  Andrew Cagney  <cagney@lulu.cygnus.com>
 
 	* regcache.c (GET_SAVED_REGISTER): Restore definition.  Was lost

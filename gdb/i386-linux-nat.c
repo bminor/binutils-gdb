@@ -505,8 +505,8 @@ dummy_sse_values (void)
 
 #else
 
-static int fetch_fpxregs (int tid) {}
-static int store_fpxregs (int tid, int regno) {}
+static int fetch_fpxregs (int tid) { return 0; }
+static int store_fpxregs (int tid, int regno) { return 0; }
 static void dummy_sse_values (void) {}
 
 #endif /* HAVE_PTRACE_GETFPXREGS */
