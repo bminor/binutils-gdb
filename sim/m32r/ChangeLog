@@ -1,3 +1,7 @@
+Tue May 19 16:45:33 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-if.c (do_trap): Treat traps 2-15 as hardware does.
+
 Sat May 16 13:04:30 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-if.c (sim_stop): Update call to @cpu@_engine_stop.

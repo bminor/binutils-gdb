@@ -487,8 +487,10 @@ do_trap (SIM_CPU *current_cpu, int num)
       break;
 
     default :
-      /* Unless in the operating environment, ignore other traps.  */
-      break;
+      {
+	USI new_pc = num * 4;
+	return new_pc;
+      }
     }
 
   /* Fake an "rte" insn.  */
