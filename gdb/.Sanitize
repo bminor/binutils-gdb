@@ -212,6 +212,7 @@ mipsm3-nat.c
 mipsv4-nat.c
 mipsread.c
 monitor.h
+monitor.c
 news-xdep.c
 nindy-share
 nindy-tdep.c
@@ -221,6 +222,7 @@ ns32k-pinsn.c
 ns32km3-nat.c
 objfiles.c
 objfiles.h
+op50-rom.c
 os9kread.c
 osfsolib.c
 parse.c
@@ -318,6 +320,7 @@ value.h
 values.c
 vax-pinsn.c
 vx-share
+w89k-rom.c
 xcoffexec.c
 xcoffread.c
 xcoffsolib.c
