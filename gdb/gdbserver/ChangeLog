@@ -1,3 +1,10 @@
+2004-12-08  Daniel Jacobowitz  <dan@debian.org>
+
+	* acinclude.m4 (SRV_CHECK_THREAD_DB): Add ps_get_thread_area.  Reset
+	LIBS when finished.
+	* aclocal.m4: Regenerated.
+	* configure: Regenerated.
+
 2004-11-21  Andreas Schwab  <schwab@suse.de>
 
 	* linux-m68k-low.c (m68k_num_gregs): Define.

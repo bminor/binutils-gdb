@@ -1,4 +1,4 @@
-dnl aclocal.m4 generated automatically by aclocal 1.4-p4
+dnl aclocal.m4 generated automatically by aclocal 1.4
 
 dnl Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
@@ -25,6 +25,7 @@ AC_DEFUN([SRV_CHECK_THREAD_DB],
    void ps_lsetregs() {}
    void ps_lgetfpregs() {}
    void ps_lsetfpregs() {}
+   void ps_get_thread_area() {}
    void ps_getpid() {}],
   [td_ta_new();],
   [srv_cv_thread_db="-lthread_db"],
@@ -44,11 +45,12 @@ AC_DEFUN([SRV_CHECK_THREAD_DB],
    void ps_lsetregs() {}
    void ps_lgetfpregs() {}
    void ps_lsetfpregs() {}
+   void ps_get_thread_area() {}
    void ps_getpid() {}],
   [td_ta_new();],
   [srv_cv_thread_db="$thread_db"],
   [srv_cv_thread_db=no])
+  ]])
  LIBS="$old_LIBS"
- ]])
 )])
 
