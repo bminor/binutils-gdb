@@ -20,7 +20,5 @@
 
 #include "fopen-bin.h"
 
-#define GDBINIT_FILENAME "gdb.ini"
-
 /* Define this if source files use \r\n rather than just \n.  */
 #define CRLF_SOURCE_FILES
