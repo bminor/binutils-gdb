@@ -1215,6 +1215,10 @@ echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}
 sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
+if test -n "$GENERATE_SHLIB_SCRIPT" ; then
+        echo '  ; else if (link_info.shared) return'       >> e${EMULATION_NAME}.c
+        sed $sc ldscripts/${EMULATION_NAME}.xs             >> e${EMULATION_NAME}.c
+fi
 echo '  ; else return'                                     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.x                      >> e${EMULATION_NAME}.c
 echo '; }'                                                 >> e${EMULATION_NAME}.c
@@ -1234,6 +1238,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
     return "ldscripts/${EMULATION_NAME}.xbn";
   else if (!config.magic_demand_paged)
     return "ldscripts/${EMULATION_NAME}.xn";
+  else if (link_info.shared)
+    return "ldscripts/${EMULATION_NAME}.xs";
   else
     return "ldscripts/${EMULATION_NAME}.x";
 }

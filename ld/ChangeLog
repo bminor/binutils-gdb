@@ -1,3 +1,8 @@
+1999-06-28  Jim Pick <jim@jimpick.com>
+
+	* emultempl/armelf.em: Added code so that .xs linker scripts are
+	called so that ARM shared libraries are built correctly.
+
 1999-06-22  Mark Mitchell  <mark@codesourcery.com>
 
 	* ldmain.c (main): Initialize link_info.init_function and
