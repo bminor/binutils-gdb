@@ -100,7 +100,8 @@ build_objfile_section_table (objfile)
 
   objfile->sections_end = 0;
   bfd_map_over_sections (objfile->obfd, add_to_objfile_sections, (char *)objfile);
-  objfile->sections = obstack_finish (&objfile->psymbol_obstack);
+  objfile->sections = (struct obj_section *)
+    obstack_finish (&objfile->psymbol_obstack);
   objfile->sections_end = objfile->sections + (int) objfile->sections_end;
   return(0);
 }
