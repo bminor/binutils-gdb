@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file was derived from various remote-* modules. It is a collection
    of generic support functions so GDB can talk directly to a ROM based
@@ -709,44 +709,39 @@ monitor_fetch_register (regno)
       return;
     }
 
- /* send the register examine command */
+  /* send the register examine command */
 
   monitor_printf (current_monitor->getreg.cmd, name);
 
-/* If RESP_DELIM is specified, we search for that as a leading delimiter for
-   the register value.  Otherwise, we just start searching from the start of
-   the buf.  */
+  /* If RESP_DELIM is specified, we search for that as a leading delimiter for
+     the register value.  Otherwise, we just start searching from the start of
+     the buf.  */
 
   if (current_monitor->getreg.resp_delim)
     monitor_expect (current_monitor->getreg.resp_delim, NULL, 0);
 
-/* Now, read the appropriate number of hex digits for this register, skipping
-   spaces.  */
+  /* Read upto the maximum number of hex digits for this register, skipping
+     spaces, but stop reading if something else is seen.  Some monitors
+     like to drop leading zeros.  */
 
   for (i = 0; i < REGISTER_RAW_SIZE (regno) * 2; i++)
     {
       int c;
+      c = readchar (timeout);
+      while (c == ' ')
+	c = readchar (timeout);
 
-      while (1)
-	{
-	  c = readchar (timeout);
-	  if (isxdigit (c))
-	    break;
-	  if (c == ' ')
-	    continue;
-
-	  error ("monitor_fetch_register (%d):  bad response from monitor: %.*s%c.",
-	 regno, i, regbuf, c);
-	}
+      if (!isxdigit (c))
+	break;
 
       regbuf[i] = c;
     }
 
   regbuf[i] = '\000';		/* terminate the number */
 
-/* If TERM is present, we wait for that to show up.  Also, (if TERM is
-   present), we will send TERM_CMD if that is present.  In any case, we collect
-   all of the output into buf, and then wait for the normal prompt.  */
+  /* If TERM is present, we wait for that to show up.  Also, (if TERM is
+     present), we will send TERM_CMD if that is present.  In any case, we collect
+     all of the output into buf, and then wait for the normal prompt.  */
 
   if (current_monitor->getreg.term)
     {
@@ -1436,9 +1431,9 @@ monitor_make_srec (buffer, type, memaddr, myaddr, len)
   checksum = 0;
   
   addr_size = 2;
-  if (memaddr >= 0xffffff)
+  if (memaddr > 0xffffff)
     addr_size = 4;
-  else if (memaddr >= 0xffffff)
+  else if (memaddr > 0xffff)
     addr_size = 3;
   else
     addr_size = 2;

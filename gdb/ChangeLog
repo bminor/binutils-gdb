@@ -1,3 +1,8 @@
+Tue Sep 12 19:37:24 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* monitor.c (monitor_make_srec): Fix thinkos in computation
+	of addr_size.
+
 Tue Sep 12 15:46:18 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* stabsread.c (read_one_struct_field): Add a patch to handle cfront
