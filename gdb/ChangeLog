@@ -1,3 +1,17 @@
+2004-03-18  Andrew Cagney  <cagney@redhat.com>
+
+	* frame-base.c: Update copyright.  Include "gdb_obstack.h".
+	(struct frame_base_table_entry): Define.
+	(struct frame_base_table): Re-implement as a linked list.
+	(frame_base_init): Re-implement.
+	(frame_base_table): Delete function.
+	(append_predicate): Delete function.
+	(frame_base_append_sniffer): Update.
+	(frame_base_set_default): Update.
+	(frame_base_find_by_frame): Update.
+	(_initialize_frame_base): Use gdbarch_data_register_pre_init.
+	* Makefile.in (frame-base.o): Update dependencies.
+
 2004-03-17  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (legacy_get_prev_frame): Pass correct frame to
