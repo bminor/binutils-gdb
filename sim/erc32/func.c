@@ -831,7 +831,7 @@ int
 buffer_read_memory(addr, buffer, size, info)
     bfd_vma         addr;
     bfd_byte       *buffer;
-    int32           size;
+    uint32          size;
     struct disassemble_info *info;
 {
     if (size == sis_memory_read(addr, buffer, size))
