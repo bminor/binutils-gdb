@@ -24,6 +24,7 @@
 * i386-Float::                  Floating Point
 * i386-SIMD::                   Intel's MMX and AMD's 3DNow! SIMD Operations
 * i386-16bit::                  Writing 16-bit Code
+* i386-Arch::                   Specifying an x86 CPU architecture
 * i386-Bugs::                   AT&T Syntax bugs
 * i386-Notes::                  Notes
 @end menu
@@ -35,13 +36,23 @@
 @cindex i386 options (none)
 The 80386 has no machine dependent options.
 
+
 @node i386-Syntax
 @section AT&T Syntax versus Intel Syntax
 
+@cindex i386 intel_syntax pseudo op
+@cindex intel_syntax pseudo op, i386
+@cindex i386 att_syntax pseudo op
+@cindex att_syntax pseudo op, i386
 @cindex i386 syntax compatibility
 @cindex syntax compatibility, i386
-In order to maintain compatibility with the output of @code{@value{GCC}},
-@code{@value{AS}} supports AT&T System V/386 assembler syntax.  This is quite
+
+@code{@value{AS}} now supports assembly using Intel assembler syntax.
+@code{.intel_syntax} selects Intel mode, and @code{.att_syntax} switches
+back to the usual AT&T mode for compatibility with the output of
+@code{@value{GCC}}.  Either of these directives may have an optional
+argument, @code{prefix}, or @code{noprefix} specifying whether registers
+require a @samp{%} prefix.  AT&T System V/386 assembler syntax is quite
 different from Intel syntax.  We mention these differences because
 almost all 80386 documents use Intel syntax.  Notable differences
 between the two syntaxes are:
@@ -505,6 +516,31 @@ than the expected @samp{%st(3) - %st}.  This happens with all the
 non-commutative arithmetic floating point operations with two register
 operands where the source register is @samp{%st} and the destination
 register is @samp{%st(i)}.
+
+@node i386-Arch
+@section Specifying CPU Architecture
+
+@cindex arch directive, i386
+@cindex i386 arch directive
+
+@code{@value{AS}} may be told to assemble for a particular CPU
+architecture with the @code{.arch @var{cpu_type}} directive.  This
+directive enables a warning when gas detects an instruction that is not
+supported on the CPU specified.  The choices for @var{cpu_type} are:
+
+@multitable @columnfractions .20 .20 .20 .20
+@item @samp{i8086} @tab @samp{i186} @tab @samp{i286} @tab @samp{i386}
+@item @samp{i486} @tab @samp{i586} @tab @samp{i686} @tab @samp{pentium}
+@item @samp{pentiumpro} @tab @samp{k6} @tab @samp{athlon}
+@end multitable
+
+Apart from the warning, there is only one other effect on
+@code{@value{AS}} operation;  If you specify a CPU other than
+@samp{i486}, then shift by one instructions such as @samp{sarl $1, %eax}
+will automatically use a two byte opcode sequence.  The larger three
+byte opcode sequence is used on the 486 (and when no architecture is
+specified) because it executes faster on the 486.  Note that you can
+explicitly request the two byte opcode by writing @samp{sarl %eax}.
 
 @node i386-Notes
 @section Notes

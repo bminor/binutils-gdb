@@ -239,77 +239,7 @@ extern const char extra_symbol_chars[];
 #define OFFSET_FLAT  6
 #define FLAT         7
 #define NONE_FOUND   8
-/*
-  When an operand is read in it is classified by its type.  This type includes
-  all the possible ways an operand can be used.  Thus, '%eax' is both 'register
-  # 0' and 'The Accumulator'.  In our language this is expressed by OR'ing
-  'Reg32' (any 32 bit register) and 'Acc' (the accumulator).
-  Operands are classified so that we can match given operand types with
-  the opcode table in opcode/i386.h.
-  */
-/* register */
-#define Reg8		   0x1	/* 8 bit reg */
-#define Reg16		   0x2	/* 16 bit reg */
-#define Reg32		   0x4	/* 32 bit reg */
-/* immediate */
-#define Imm8		   0x8	/* 8 bit immediate */
-#define Imm8S		  0x10	/* 8 bit immediate sign extended */
-#define Imm16		  0x20	/* 16 bit immediate */
-#define Imm32		  0x40	/* 32 bit immediate */
-#define Imm1		  0x80	/* 1 bit immediate */
-/* memory */
-#define BaseIndex	 0x100
-/* Disp8,16,32 are used in different ways, depending on the
-   instruction.  For jumps, they specify the size of the PC relative
-   displacement, for baseindex type instructions, they specify the
-   size of the offset relative to the base register, and for memory
-   offset instructions such as `mov 1234,%al' they specify the size of
-   the offset relative to the segment base.  */
-#define Disp8		 0x200	/* 8 bit displacement */
-#define Disp16		 0x400	/* 16 bit displacement */
-#define Disp32		 0x800	/* 32 bit displacement */
-/* specials */
-#define InOutPortReg	0x1000	/* register to hold in/out port addr = dx */
-#define ShiftCount	0x2000	/* register to hold shift cound = cl */
-#define Control	        0x4000	/* Control register */
-#define Debug	        0x8000	/* Debug register */
-#define Test	       0x10000	/* Test register */
-#define FloatReg       0x20000	/* Float register */
-#define FloatAcc       0x40000	/* Float stack top %st(0) */
-#define SReg2	       0x80000	/* 2 bit segment register */
-#define SReg3	      0x100000	/* 3 bit segment register */
-#define Acc	      0x200000	/* Accumulator %al or %ax or %eax */
-#define JumpAbsolute  0x400000
-#define RegMMX	      0x800000	/* MMX register */
-#define RegXMM	     0x1000000	/* XMM registers in PIII */
-#define EsSeg	     0x2000000	/* String insn operand with fixed es segment */
-/* InvMem is for instructions with a modrm byte that only allow a
-   general register encoding in the i.tm.mode and i.tm.regmem fields,
-   eg. control reg moves.  They really ought to support a memory form,
-   but don't, so we add an InvMem flag to the register operand to
-   indicate that it should be encoded in the i.tm.regmem field.  */
-#define InvMem	     0x4000000
 
-#define Reg	(Reg8|Reg16|Reg32)	/* gen'l register */
-#define WordReg (Reg16|Reg32)
-#define ImplicitRegister (InOutPortReg|ShiftCount|Acc|FloatAcc)
-#define Imm	(Imm8|Imm8S|Imm16|Imm32) /* gen'l immediate */
-#define Disp	(Disp8|Disp16|Disp32)	/* General displacement */
-#define AnyMem	(Disp|BaseIndex|InvMem)	/* General memory */
-/* The following aliases are defined because the opcode table
-   carefully specifies the allowed memory types for each instruction.
-   At the moment we can only tell a memory reference size by the
-   instruction suffix, so there's not much point in defining Mem8,
-   Mem16, Mem32 and Mem64 opcode modifiers - We might as well just use
-   the suffix directly to check memory operands.  */
-#define LLongMem AnyMem		/* 64 bits (or more) */
-#define LongMem AnyMem		/* 32 bit memory ref */
-#define ShortMem AnyMem		/* 16 bit memory ref */
-#define WordMem AnyMem		/* 16 or 32 bit memory ref */
-#define ByteMem AnyMem		/* 8 bit memory ref */
-
-#define SMALLEST_DISP_TYPE(num) \
-    (fits_in_signed_byte(num) ? (Disp8|Disp32) : Disp32)
 
 typedef struct
 {
@@ -329,6 +259,19 @@ typedef struct
      If this template has no extension opcode (the usual case) use None */
   unsigned int extension_opcode;
 #define None 0xffff		/* If no extension_opcode is possible. */
+
+  /* cpu feature flags */
+  unsigned int cpu_flags;
+#define Cpu086		  0x1	/* Any old cpu will do, 0 does the same */
+#define Cpu186		  0x2	/* i186 or better required */
+#define Cpu286		  0x4	/* i286 or better required */
+#define Cpu386		  0x8	/* i386 or better required */
+#define Cpu486		 0x10	/* i486 or better required */
+#define Cpu586		 0x20	/* i585 or better required */
+#define Cpu686		 0x40	/* i686 or better required */
+#define CpuMMX		 0x80	/* MMX support required */
+#define CpuSSE		0x100	/* Streaming SIMD extensions required */
+#define Cpu3dnow	0x200	/* 3dnow! support required */
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of
@@ -371,8 +314,70 @@ typedef struct
   /* operand_types[i] describes the type of operand i.  This is made
      by OR'ing together all of the possible type masks.  (e.g.
      'operand_types[i] = Reg|Imm' specifies that operand i can be
-     either a register or an immediate operand */
+     either a register or an immediate operand.  */
   unsigned int operand_types[3];
+
+  /* operand_types[i] bits */
+  /* register */
+#define Reg8		   0x1	/* 8 bit reg */
+#define Reg16		   0x2	/* 16 bit reg */
+#define Reg32		   0x4	/* 32 bit reg */
+  /* immediate */
+#define Imm8		   0x8	/* 8 bit immediate */
+#define Imm8S		  0x10	/* 8 bit immediate sign extended */
+#define Imm16		  0x20	/* 16 bit immediate */
+#define Imm32		  0x40	/* 32 bit immediate */
+#define Imm1		  0x80	/* 1 bit immediate */
+  /* memory */
+#define BaseIndex	 0x100
+  /* Disp8,16,32 are used in different ways, depending on the
+     instruction.  For jumps, they specify the size of the PC relative
+     displacement, for baseindex type instructions, they specify the
+     size of the offset relative to the base register, and for memory
+     offset instructions such as `mov 1234,%al' they specify the size of
+     the offset relative to the segment base.  */
+#define Disp8		 0x200	/* 8 bit displacement */
+#define Disp16		 0x400	/* 16 bit displacement */
+#define Disp32		 0x800	/* 32 bit displacement */
+  /* specials */
+#define InOutPortReg	0x1000	/* register to hold in/out port addr = dx */
+#define ShiftCount	0x2000	/* register to hold shift cound = cl */
+#define Control	        0x4000	/* Control register */
+#define Debug	        0x8000	/* Debug register */
+#define Test	       0x10000	/* Test register */
+#define FloatReg       0x20000	/* Float register */
+#define FloatAcc       0x40000	/* Float stack top %st(0) */
+#define SReg2	       0x80000	/* 2 bit segment register */
+#define SReg3	      0x100000	/* 3 bit segment register */
+#define Acc	      0x200000	/* Accumulator %al or %ax or %eax */
+#define JumpAbsolute  0x400000
+#define RegMMX	      0x800000	/* MMX register */
+#define RegXMM	     0x1000000	/* XMM registers in PIII */
+#define EsSeg	     0x2000000	/* String insn operand with fixed es segment */
+  /* InvMem is for instructions with a modrm byte that only allow a
+     general register encoding in the i.tm.mode and i.tm.regmem fields,
+     eg. control reg moves.  They really ought to support a memory form,
+     but don't, so we add an InvMem flag to the register operand to
+     indicate that it should be encoded in the i.tm.regmem field.  */
+#define InvMem	     0x4000000
+
+#define Reg	(Reg8|Reg16|Reg32)	/* gen'l register */
+#define WordReg (Reg16|Reg32)
+#define ImplicitRegister (InOutPortReg|ShiftCount|Acc|FloatAcc)
+#define Imm	(Imm8|Imm8S|Imm16|Imm32) /* gen'l immediate */
+#define Disp	(Disp8|Disp16|Disp32)	/* General displacement */
+#define AnyMem	(Disp|BaseIndex|InvMem)	/* General memory */
+  /* The following aliases are defined because the opcode table
+     carefully specifies the allowed memory types for each instruction.
+     At the moment we can only tell a memory reference size by the
+     instruction suffix, so there's not much point in defining Mem8,
+     Mem16, Mem32 and Mem64 opcode modifiers - We might as well just use
+     the suffix directly to check memory operands.  */
+#define LLongMem AnyMem		/* 64 bits (or more) */
+#define LongMem AnyMem		/* 32 bit memory ref */
+#define ShortMem AnyMem		/* 16 bit memory ref */
+#define WordMem AnyMem		/* 16 or 32 bit memory ref */
+#define ByteMem AnyMem		/* 8 bit memory ref */
 }
 template;
 
@@ -384,44 +389,53 @@ template;
   END.
   */
 typedef struct
-  {
-    const template *start;
-    const template *end;
-  } templates;
+{
+  const template *start;
+  const template *end;
+}
+templates;
 
 /* these are for register name --> number & type hash lookup */
 typedef struct
-  {
-    char *reg_name;
-    unsigned int reg_type;
-    unsigned int reg_num;
-  }
+{
+  char *reg_name;
+  unsigned int reg_type;
+  unsigned int reg_num;
+}
 reg_entry;
 
 typedef struct
-  {
-    char *seg_name;
-    unsigned int seg_prefix;
-  }
+{
+  char *seg_name;
+  unsigned int seg_prefix;
+}
 seg_entry;
 
 /* 386 operand encoding bytes:  see 386 book for details of this. */
 typedef struct
-  {
-    unsigned int regmem;	/* codes register or memory operand */
-    unsigned int reg;		/* codes register operand (or extended opcode) */
-    unsigned int mode;		/* how to interpret regmem & reg */
-  }
+{
+  unsigned int regmem;	/* codes register or memory operand */
+  unsigned int reg;	/* codes register operand (or extended opcode) */
+  unsigned int mode;	/* how to interpret regmem & reg */
+}
 modrm_byte;
 
 /* 386 opcode byte to code indirect addressing. */
 typedef struct
-  {
-    unsigned base;
-    unsigned index;
-    unsigned scale;
-  }
+{
+  unsigned base;
+  unsigned index;
+  unsigned scale;
+}
 sib_byte;
+
+/* x86 arch names and features */
+typedef struct
+{
+  const char *name;	/* arch name */
+  unsigned int flags;	/* cpu feature flags */
+}
+arch_entry;
 
 /* The name of the global offset table generated by the compiler. Allow
    this to be overridden if need be. */

@@ -62,6 +62,7 @@ static int add_prefix PARAMS ((unsigned int));
 static void set_16bit_code_flag PARAMS ((int));
 static void set_16bit_gcc_code_flag PARAMS((int));
 static void set_intel_syntax PARAMS ((int));
+static void set_cpu_arch PARAMS ((int));
 
 #ifdef BFD_ASSEMBLER
 static bfd_reloc_code_real_type reloc
@@ -216,15 +217,20 @@ static const templates *current_templates;
 /* Per instruction expressionS buffers: 2 displacements & 2 immediate max. */
 static expressionS disp_expressions[2], im_expressions[2];
 
-static int this_operand;	/* current operand we are working on */
+static int this_operand;	  /* Current operand we are working on.  */
 
-static int flag_do_long_jump;	/* FIXME what does this do? */
+static int flag_do_long_jump;	  /* FIXME what does this do?  */
 
-static int flag_16bit_code;	/* 1 if we're writing 16-bit code, 0 if 32-bit */
+static int flag_16bit_code;	  /* 1 if we're writing 16-bit code,
+				     0 if 32-bit.  */
 
-static int intel_syntax = 0;	/* 1 for intel syntax, 0 if att syntax */
+static int intel_syntax = 0;	  /* 1 for intel syntax, 0 if att syntax.  */
 
-static int allow_naked_reg = 0;  /* 1 if register prefix % not required */
+static const char *cpu_arch_name = NULL; /* cpu name  */
+
+static unsigned int cpu_arch_flags = 0;  /* cpu feature flags  */
+
+static int allow_naked_reg = 0;   /* 1 if register prefix % not required  */
 
 static char stackop_size = '\0';  /* Used in 16 bit gcc mode to add an l
 				     suffix to call, ret, enter, leave, push,
@@ -299,6 +305,21 @@ const relax_typeS md_relax_table[] =
      0 extra opcode bytes, 1 extra displacement byte.  */
   {0, 0, 1, 0}
 
+};
+
+static const arch_entry cpu_arch[] = {
+  {"i8086",	Cpu086 },
+  {"i186",	Cpu086|Cpu186 },
+  {"i286",	Cpu086|Cpu186|Cpu286 },
+  {"i386",	Cpu086|Cpu186|Cpu286|Cpu386 },
+  {"i486",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486 },
+  {"i586",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuMMX },
+  {"i686",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuSSE },
+  {"pentium",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuMMX },
+  {"pentiumpro",Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuSSE },
+  {"k6",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuMMX|Cpu3dnow },
+  {"athlon",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|Cpu3dnow },
+  {NULL, 0 }
 };
 
 
@@ -441,16 +462,17 @@ static int
 smallest_imm_type (num)
      offsetT num;
 {
-#if 0
-  /* This code is disabled because all the Imm1 forms in the opcode table
-     are slower on the i486, and they're the versions with the implicitly
-     specified single-position displacement, which has another syntax if
-     you really want to use that form.  If you really prefer to have the
-     one-byte-shorter Imm1 form despite these problems, re-enable this
-     code.  */
-  if (num == 1)
-    return Imm1 | Imm8 | Imm8S | Imm16 | Imm32;
-#endif
+  if (cpu_arch_flags != 0
+      && cpu_arch_flags != (Cpu086|Cpu186|Cpu286|Cpu386|Cpu486))
+    {
+      /* This code is disabled on the 486 because all the Imm1 forms
+	 in the opcode table are slower on the i486.  They're the
+	 versions with the implicitly specified single-position
+	 displacement, which has another syntax if you really want to
+	 use that form.  */
+      if (num == 1)
+	return Imm1 | Imm8 | Imm8S | Imm16 | Imm32;
+    }
   return (fits_in_signed_byte (num)
 	  ? (Imm8S | Imm8 | Imm16 | Imm32)
 	  : fits_in_unsigned_byte (num)
@@ -600,15 +622,48 @@ set_intel_syntax (syntax_flag)
     allow_naked_reg = (ask_naked_reg < 0);
 }
 
+static void
+set_cpu_arch (dummy)
+    int dummy ATTRIBUTE_UNUSED;
+{
+  SKIP_WHITESPACE();
+
+  if (! is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      char *string = input_line_pointer;
+      int e = get_symbol_end ();
+      int i;
+
+      for (i = 0; cpu_arch[i].name; i++)
+	{
+	  if (strcmp (string, cpu_arch[i].name) == 0)
+	    {
+	      cpu_arch_name = cpu_arch[i].name;
+	      cpu_arch_flags = cpu_arch[i].flags;
+	      break;
+	    }
+	}
+      if (!cpu_arch[i].name)
+	as_bad (_("no such architecture: `%s'"), string);
+
+      *input_line_pointer = e;
+    }
+  else
+    as_bad (_("missing cpu architecture"));
+
+  demand_empty_rest_of_line ();
+}
+
 const pseudo_typeS md_pseudo_table[] =
 {
-#ifndef I386COFF
-  {"bss", s_bss, 0},
-#endif
 #if !defined(OBJ_AOUT) && !defined(USE_ALIGN_PTWO)
   {"align", s_align_bytes, 0},
 #else
   {"align", s_align_ptwo, 0},
+#endif
+  {"arch", set_cpu_arch, 0},
+#ifndef I386COFF
+  {"bss", s_bss, 0},
 #endif
   {"ffloat", float_cons, 'f'},
   {"dfloat", float_cons, 'd'},
@@ -1058,7 +1113,7 @@ md_assemble (line)
 	    mnem_p++;
 	    if (mnem_p >= mnemonic + sizeof (mnemonic))
 	      {
-		as_bad (_("no such 386 instruction: `%s'"), token_start);
+		as_bad (_("no such instruction: `%s'"), token_start);
 		return;
 	      }
 	    l++;
@@ -1141,8 +1196,22 @@ md_assemble (line)
 	  }
 	if (!current_templates)
 	  {
-	    as_bad (_("no such 386 instruction: `%s'"), token_start);
+	    as_bad (_("no such instruction: `%s'"), token_start);
 	    return;
+	  }
+      }
+
+    /* Check if instruction is supported on specified architecture.  */
+    if (cpu_arch_flags != 0)
+      {
+	if (current_templates->start->cpu_flags & ~ cpu_arch_flags)
+	  {
+	    as_warn (_("`%s' is not supported on `%s'"),
+		     current_templates->start->name, cpu_arch_name);
+	  }
+	else if ((Cpu386 & ~ cpu_arch_flags) && !flag_16bit_code)
+	  {
+	    as_warn (_("use .code16 to ensure correct addressing mode"));
 	  }
       }
 

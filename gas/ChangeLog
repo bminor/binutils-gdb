@@ -1,3 +1,23 @@
+2000-05-13  Alan Modra  <alan@linuxcare.com.au>
+	    Alexander Sokolov <robocop@netlink.ru>
+
+	* doc/c-i386.texi (i386-Arch): New section.
+	(i386-Syntax): Mention .intel_syntax and .att_syntax.
+
+	* config/tc-i386.c (cpu_arch_name, cpu_arch_flags): New.
+	(smallest_imm_type): Use smallest opcode for shift by one if cpu
+	architecture has been given and is not 486.
+	(set_cpu_arch): New.
+	(md_pseudo_table): Add .arch.
+	(md_assemble): Warn if cpu architecture has been given and an
+	unsupported instruction.
+
+	* config/tc-i386.h (SMALLEST_DISP_TYPE): Delete.
+	Move operand_types bit defines after relevant template field.
+	(template): Add cpu_flags.
+	(Cpu*): Define.
+	(arch_entry): New.
+
 2000-05-12  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* config/tc-mn10300.h (md_end): Define.
