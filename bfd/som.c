@@ -2548,12 +2548,67 @@ som_begin_writing (abfd)
   current_offset += sizeof (struct header);  
 
   /* Any auxiliary headers will follow the file header.  Right now
-     we have no auxiliary headers, so current_offset does not change.  */
+     we support only the copyright and version headers.  */
   obj_som_file_hdr (abfd)->aux_header_location = current_offset;
   obj_som_file_hdr (abfd)->aux_header_size = 0;
+  if (obj_som_version_hdr (abfd) != NULL)
+    {
+      unsigned int len;
 
-  /* Next comes the initialization pointers; again we have no
-     initialization pointers, so current offset does not change.  */
+      bfd_seek (abfd, current_offset, SEEK_SET);
+
+      /* Write the aux_id structure and the string length.  */
+      len = sizeof (struct aux_id) + sizeof (unsigned int);
+      obj_som_file_hdr (abfd)->aux_header_size += len;
+      current_offset += len;
+      if (bfd_write ((PTR) obj_som_version_hdr (abfd), len, 1, abfd) != len)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+
+      /* Write the version string.  */
+      len = obj_som_version_hdr (abfd)->string_length;
+      obj_som_file_hdr (abfd)->aux_header_size += len;
+      current_offset += len;
+      if (bfd_write ((PTR) obj_som_version_hdr (abfd)->user_string,
+		     len, 1, abfd) != len)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+    }
+
+  if (obj_som_copyright_hdr (abfd) != NULL)
+    {
+      unsigned int len;
+
+      bfd_seek (abfd, current_offset, SEEK_SET);
+
+      /* Write the aux_id structure and the string length.  */
+      len = sizeof (struct aux_id) + sizeof (unsigned int);
+      obj_som_file_hdr (abfd)->aux_header_size += len;
+      current_offset += len;
+      if (bfd_write ((PTR) obj_som_copyright_hdr (abfd), len, 1, abfd) != len)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+
+      /* Write the copyright string.  */
+      len = obj_som_copyright_hdr (abfd)->string_length;
+      obj_som_file_hdr (abfd)->aux_header_size += len;
+      current_offset += len;
+      if (bfd_write ((PTR) obj_som_copyright_hdr (abfd)->copyright,
+		     len, 1, abfd) != len)
+	{
+	  bfd_error = system_call_error;
+	  return false;
+	}
+    }
+
+  /* Next comes the initialization pointers; we have no initialization
+     pointers, so current offset does not change.  */
   obj_som_file_hdr (abfd)->init_array_location = current_offset;
   obj_som_file_hdr (abfd)->init_array_total = 0;
 
@@ -3868,6 +3923,48 @@ bfd_som_attach_unwind_info (symbol, unwind_desc)
      char *unwind_desc;
 {
   (*som_symbol_data (symbol))->unwind = unwind_desc;
+}
+
+/* Attach an auxiliary header to the BFD backend so that it may be
+   written into the object file.  */
+void
+bfd_som_attach_aux_hdr (abfd, type, string)
+     bfd *abfd;
+     int type;
+     char *string;
+{
+  if (type == VERSION_AUX_ID)
+    {
+      int len = strlen (string);
+
+      if (len % 4)
+	len += (4 - (len % 4));
+      obj_som_version_hdr (abfd)
+	= bfd_zalloc (abfd,
+		      sizeof (struct aux_id) + sizeof (unsigned int) + len);
+      obj_som_version_hdr (abfd)->header_id.type = VERSION_AUX_ID;
+      obj_som_version_hdr (abfd)->header_id.length
+	= sizeof (struct aux_id) + sizeof (unsigned int) + len;
+      obj_som_version_hdr (abfd)->string_length = len;
+      strcpy (obj_som_version_hdr (abfd)->user_string, string);
+    }
+  else if (type == COPYRIGHT_AUX_ID)
+    {
+      int len = strlen (string);
+
+      if (len % 4)
+	len += (4 - (len % 4));
+      obj_som_copyright_hdr (abfd)
+	= bfd_zalloc (abfd,
+		      sizeof (struct aux_id) + sizeof (unsigned int) + len);
+      obj_som_copyright_hdr (abfd)->header_id.type = COPYRIGHT_AUX_ID;
+      obj_som_version_hdr (abfd)->header_id.length
+	= sizeof (struct aux_id) + sizeof (unsigned int) + len;
+      obj_som_copyright_hdr (abfd)->string_length = len;
+      strcpy (obj_som_copyright_hdr (abfd)->copyright, string);
+    }
+  else
+    abort ();
 }
 
 static boolean

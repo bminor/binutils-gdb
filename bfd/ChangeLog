@@ -1,5 +1,12 @@
 Sun Dec  5 19:32:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_begin_writing): Flesh out code for handling simple
+	auxiliary headers.
+	(bfd_som_attach_aux_hdr): New function.
+
+	* som.h (struct somdata): Add fields for attaching version and
+	copyright headers.  Add accessor macros.
+
 	* som.c (R_DLT_REL, R_AUX_UNWIND, R_SEC_STMT): Add protected
 	definitions for old versions of HPUX which fail to define them.
 	(som_hppa_howto_talbe): Add R_DLT_REL, R_AUX_UNWIND, and R_SEC_STMT
