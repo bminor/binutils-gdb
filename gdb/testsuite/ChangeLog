@@ -1,3 +1,7 @@
+2002-04-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/linux-dp.exp: Use 'unset' instead of 'array unset'.
+
 2002-04-23  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.base/help.exp: Change 'help status' to allow for target
