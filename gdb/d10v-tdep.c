@@ -199,7 +199,7 @@ d10v_frame_chain (frame)
 
   d10v_frame_find_saved_regs (frame, &fsr);
 
-  if (frame->return_pc == IMEM_START)
+  if (frame->return_pc == IMEM_START || inside_entry_file(frame->return_pc))
     return (CORE_ADDR)0;
 
   if (!fsr.regs[FP_REGNUM])
@@ -369,9 +369,9 @@ d10v_frame_find_saved_regs (fi, fsr)
       }
 
   if (fsr->regs[LR_REGNUM])
-    fi->return_pc = ((read_memory_unsigned_integer(fsr->regs[LR_REGNUM],2) - 1) << 2) | IMEM_START;
+    fi->return_pc = (read_memory_unsigned_integer(fsr->regs[LR_REGNUM],2) << 2) | IMEM_START;
   else
-    fi->return_pc = ((read_register(LR_REGNUM) - 1) << 2) | IMEM_START;
+    fi->return_pc = (read_register(LR_REGNUM) << 2) | IMEM_START;
   
   /* th SP is not normally (ever?) saved, but check anyway */
   if (!fsr->regs[SP_REGNUM])
@@ -395,10 +395,6 @@ d10v_init_extra_frame_info (fromleaf, fi)
      struct frame_info *fi;
 {
   struct frame_saved_regs dummy;
-
-  if (fi->next && ((fi->pc & 0xffff) == 0)) 
-    fi->pc = fi->next->return_pc; 
-
   d10v_frame_find_saved_regs (fi, &dummy);
 }
 
@@ -407,7 +403,7 @@ show_regs (args, from_tty)
      char *args;
      int from_tty;
 {
-  long long num1, num2;
+  LONGEST num1, num2;
   printf_filtered ("PC=%04x (0x%x) PSW=%04x RPT_S=%04x RPT_E=%04x RPT_C=%04x\n",
                    read_register (PC_REGNUM), (read_register (PC_REGNUM) << 2) + IMEM_START,
                    read_register (PSW_REGNUM),
@@ -497,6 +493,19 @@ d10v_write_sp (val)
   write_register (SP_REGNUM, (LONGEST)(val & 0xffff));
 }
 
+void
+d10v_write_fp (val)
+     CORE_ADDR val;
+{
+  write_register (FP_REGNUM, (LONGEST)(val & 0xffff));
+}
+
+CORE_ADDR
+d10v_read_fp ()
+{
+  return (read_register(FP_REGNUM) | DMEM_START);
+}
+
 CORE_ADDR
 d10v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
      char *dummyname;
@@ -563,7 +572,6 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (arg_type);
       contents = VALUE_CONTENTS(arg);
-      val = extract_signed_integer (contents, len);
       if (len > 4)
 	{
 	  /* put on stack and pass pointers */
@@ -580,8 +588,6 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
       value_ptr arg = args[i];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (arg_type);
-      contents = VALUE_CONTENTS(arg);
-      val = extract_signed_integer (contents, len);
       if (len > 4)
 	{
 	  /* use a pointer to previously saved data */
@@ -597,6 +603,25 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	}
       else
 	{
+	  contents = VALUE_CONTENTS(arg);
+	  val = extract_signed_integer (contents, len);
+	  /*	  printf("push: type=%d len=%d val=0x%x\n",arg_type->code,len,val);  */
+	  if (arg_type->code == TYPE_CODE_PTR)
+	    {
+	      if ( (val & 0x3000000) == 0x1000000)
+		{
+		  /* function pointer */
+		  val = (val & 0x3FFFF) >> 2;
+		  len = 2;
+		}
+	      else
+		{
+		  /* data pointer */
+		  val &= 0xFFFF;
+		  len = 2;
+		}
+	    }
+	  
 	  if (regnum < 6 )
 	    {
 	      if (len == 4)
@@ -649,7 +674,25 @@ d10v_extract_return_value (valtype, regbuf, valbuf)
      char regbuf[REGISTER_BYTES];
      char *valbuf;
 {
-  memcpy (valbuf, regbuf + REGISTER_BYTE (2), TYPE_LENGTH (valtype));
+  int len;
+  /*    printf("RET: VALTYPE=%d len=%d r2=0x%x\n",valtype->code, TYPE_LENGTH (valtype), (int)*(short *)(regbuf+REGISTER_BYTE(2)));  */
+  if (valtype->code == TYPE_CODE_PTR)
+    {
+      short snum;
+      snum =  (short)extract_address (regbuf + REGISTER_BYTE (2), 2);
+      store_address ( valbuf, 4, D10V_MAKE_DADDR(snum));
+    }
+  else
+    {
+      len = TYPE_LENGTH (valtype);
+      if (len == 1)
+	{
+	  unsigned short c = extract_unsigned_integer (regbuf + REGISTER_BYTE (2), 2);
+	  store_unsigned_integer (valbuf, 1, c);
+	}
+      else
+	memcpy (valbuf, regbuf + REGISTER_BYTE (2), len);
+    }
 }
 
 /* The following code implements access to, and display of, the D10V's

@@ -52,6 +52,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define O_BINARY 0
 #endif
 
+int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
+
 /* Global variables owned by this file */
 int readnow_symbol_files;		/* Read full symbols immediately */
 
@@ -998,41 +1000,62 @@ generic_load (filename, from_tty)
   for (s = loadfile_bfd->sections; s; s = s->next) 
     {
       if (s->flags & SEC_LOAD) 
-	{
-	  bfd_size_type size;
+        {
+          bfd_size_type size;
 
-	  size = bfd_get_section_size_before_reloc (s);
-	  if (size > 0)
-	    {
-	      char *buffer;
-	      struct cleanup *old_chain;
-	      bfd_vma lma;
+          size = bfd_get_section_size_before_reloc (s);
+          if (size > 0)
+            {
+              char *buffer;
+              struct cleanup *old_chain;
+              bfd_vma lma;
+              unsigned long l = size / 100;
+              int err;
+              char *sect;
+              unsigned long sent;
+              unsigned long len;
+	      
+	      l = l > 100 ? l : 100;
+              data_count += size;
 
-	      data_count += size;
+              buffer = xmalloc (size);
+              old_chain = make_cleanup (free, buffer);
 
-	      buffer = xmalloc (size);
-	      old_chain = make_cleanup (free, buffer);
+              lma = s->lma;
+              lma += load_offset;
 
-	      lma = s->lma;
-	      lma += load_offset;
+              /* Is this really necessary?  I guess it gives the user something
+                 to look at during a long download.  */
+              printf_filtered ("Loading section %s, size 0x%lx lma ",
+                               bfd_get_section_name (loadfile_bfd, s),
+                               (unsigned long) size);
+              print_address_numeric (lma, 1, gdb_stdout);
+              printf_filtered ("\n");
 
-	      /* Is this really necessary?  I guess it gives the user something
-		 to look at during a long download.  */
-	      printf_filtered ("Loading section %s, size 0x%lx lma ",
-			       bfd_get_section_name (loadfile_bfd, s),
- 			       (unsigned long) size);
-	      print_address_numeric (lma, 1, gdb_stdout);
-	      printf_filtered ("\n");
+              bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
 
-	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
+              sect = bfd_get_section_name (loadfile_bfd, s);
+              sent = 0;          
+              do
+                {            
+                  len = (size - sent) < l ? (size - sent) : l;
+                  sent += len;
+                  err = target_write_memory (lma, buffer, len);
+                  if (ui_load_progress_hook)
+                    if (ui_load_progress_hook (sect, sent))
+		      error ("Canceled the download");
+                  lma  += len;
+                  buffer += len;
+                }
+              while (err == 0 && sent < size);
 
-	      if (target_write_memory (lma, buffer, size) != 0)
-		error ("Memory access error while loading section %s.", 
-		       bfd_get_section_name (loadfile_bfd, s));
-
-	      do_cleanups (old_chain);
-	    }
-	}
+              if (err != 0)
+                error ("Memory access error while loading section %s.", 
+                       bfd_get_section_name (loadfile_bfd, s));
+                
+              do_cleanups (old_chain);
+            }
+        }
     }
 
   end_time = time (NULL);
@@ -1424,6 +1447,8 @@ allocate_symtab (filename, objfile)
 				     &objfile -> symbol_obstack);
   symtab -> fullname = NULL;
   symtab -> language = deduce_language_from_filename (filename);
+  symtab -> debugformat = obsavestring ("unknown", 7,
+					&objfile -> symbol_obstack);
 
   /* Hook it to the objfile it comes from */
 
@@ -1460,13 +1485,52 @@ allocate_psymtab (filename, objfile)
 				      &objfile -> psymbol_obstack);
   psymtab -> symtab = NULL;
 
-  /* Hook it to the objfile it comes from */
+  /* Prepend it to the psymtab list for the objfile it belongs to.
+     Psymtabs are searched in most recent inserted -> least recent
+     inserted order. */
 
   psymtab -> objfile = objfile;
   psymtab -> next = objfile -> psymtabs;
   objfile -> psymtabs = psymtab;
+#if 0
+  {
+    struct partial_symtab **prev_pst;
+    psymtab -> objfile = objfile;
+    psymtab -> next = NULL;
+    prev_pst = &(objfile -> psymtabs);
+    while ((*prev_pst) != NULL)
+      prev_pst = &((*prev_pst) -> next);
+    (*prev_pst) = psymtab;
+  }  
+#endif
   
   return (psymtab);
+}
+
+void
+discard_psymtab (pst)
+     struct partial_symtab *pst;
+{
+  struct partial_symtab **prev_pst;
+
+  /* From dbxread.c:
+     Empty psymtabs happen as a result of header files which don't
+     have any symbols in them.  There can be a lot of them.  But this
+     check is wrong, in that a psymtab with N_SLINE entries but
+     nothing else is not empty, but we don't realize that.  Fixing
+     that without slowing things down might be tricky.  */
+
+  /* First, snip it out of the psymtab chain */
+
+  prev_pst = &(pst->objfile->psymtabs);
+  while ((*prev_pst) != pst)
+    prev_pst = &((*prev_pst)->next);
+  (*prev_pst) = pst->next;
+
+  /* Next, put it on a free list for recycling */
+
+  pst->next = pst->objfile->free_psymtabs;
+  pst->objfile->free_psymtabs = pst;
 }
 
 
@@ -1795,14 +1859,21 @@ init_psymbol_list (objfile, total_symbols)
   
   objfile -> global_psymbols.size = total_symbols / 10;
   objfile -> static_psymbols.size = total_symbols / 10;
-  objfile -> global_psymbols.next =
-    objfile -> global_psymbols.list = (struct partial_symbol **)
-      xmmalloc (objfile -> md, objfile -> global_psymbols.size
-			     * sizeof (struct partial_symbol *));
-  objfile -> static_psymbols.next =
-    objfile -> static_psymbols.list = (struct partial_symbol **)
-      xmmalloc (objfile -> md, objfile -> static_psymbols.size
-			     * sizeof (struct partial_symbol *));
+
+  if (objfile -> global_psymbols.size > 0)
+    {
+      objfile -> global_psymbols.next =
+	objfile -> global_psymbols.list = (struct partial_symbol **)
+	xmmalloc (objfile -> md, (objfile -> global_psymbols.size
+				  * sizeof (struct partial_symbol *)));
+    }
+  if (objfile -> static_psymbols.size > 0)
+    {
+      objfile -> static_psymbols.next =
+	objfile -> static_psymbols.list = (struct partial_symbol **)
+	xmmalloc (objfile -> md, (objfile -> static_psymbols.size
+				  * sizeof (struct partial_symbol *)));
+    }
 }
 
 /* OVERLAYS:
@@ -2456,14 +2527,14 @@ simple_overlay_update_1 (osect)
   size = bfd_get_section_size_before_reloc (osect->the_bfd_section);
   for (i = 0; i < cache_novlys; i++)
     if (cache_ovly_table[i][VMA]  == osect->the_bfd_section->vma &&
-	cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma &&
-	cache_ovly_table[i][SIZE] == size)
+	cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma /* &&
+	cache_ovly_table[i][SIZE] == size */)
       {
 	read_target_int_array (cache_ovly_table_base + i * TARGET_INT_BYTES,
 			       (int *) &cache_ovly_table[i], 4);
 	if (cache_ovly_table[i][VMA]  == osect->the_bfd_section->vma &&
-	    cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma &&
-	    cache_ovly_table[i][SIZE] == size)
+	    cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma /* &&
+	    cache_ovly_table[i][SIZE] == size */)
 	  {
 	    osect->ovly_mapped = cache_ovly_table[i][MAPPED];
 	    return 1;
@@ -2518,8 +2589,8 @@ simple_overlay_update (osect)
 	size = bfd_get_section_size_before_reloc (osect->the_bfd_section);
 	for (i = 0; i < cache_novlys; i++)
 	  if (cache_ovly_table[i][VMA]  == osect->the_bfd_section->vma &&
-	      cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma &&
-	      cache_ovly_table[i][SIZE] == size)
+	      cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma /* &&
+	      cache_ovly_table[i][SIZE] == size */)
 	    { /* obj_section matches i'th entry in ovly_table */
 	      osect->ovly_mapped = cache_ovly_table[i][MAPPED];
 	      break;	/* finished with inner for loop: break out */

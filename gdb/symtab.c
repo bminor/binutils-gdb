@@ -2102,7 +2102,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	xmalloc (sizeof (struct symtab_and_line));
       values.nelts = 1;
       values.sals[0] = find_pc_line (pc, 0);
-      values.sals[0].pc = pc;
       return values;
     }
 

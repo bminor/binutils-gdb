@@ -1,3 +1,24 @@
+Fri Jan 23 07:47:06 1998  Fred Fish  <fnf@cygnus.com>
+
+	* config/d10v/tm-d10v.h (CALL_DUMMY): Define as "{ 0 }".
+	(TARGET_READ_FP): Define to d10v_read_fp rather than d10v_read_sp.
+	(TARGET_WRITE_FP): Define to d10v_write_fp rather than d10v_write_sp.
+	(d10v_write_fp, d10v_read_fp): Add prototypes.
+	* symtab.c (decode_line_1): Remove assignment of sals[0].pc field.
+	* symfile.c (simple_overlay_update, simple_overlay_update_1):
+	Ignore the size of overlay sections.  This check is redundant anyway.
+	* printcmd.c (print_frame_args): Ditto.
+	* valops.c (value_fetch_lazy): Ditto.
+	* values.c (unpack_long): Ditto.
+	* d10v-tdep.c (d10v_frame_chain, d10v_frame_find_saved_regs,
+	d10v_init_extra_frame_info): Fix some minor bugs so the finish command
+ 	works properly.
+	(show_regs): Change num1 and num2 types from "long long" to "LONGEST".
+	(d10v_read_fp, d10v_write_fp): New functions.
+	(d10v_push_arguments): Remove unneeded assigns to "val" and "contents".
+	(d10v_push_arguments): Fix for pointers and structs.
+	(d10v_extract_return_value): Fix for pointers and chars.
+
 Tue Jan 20 18:53:18 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.tgt (i386-*-mach*, m88*-*-mach3*): Remove config

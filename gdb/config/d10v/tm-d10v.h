@@ -236,7 +236,7 @@ When it hits the breakpoint, clear the break point and pop the old register cont
 off the stack.
 */
 
-#define CALL_DUMMY		{ }  
+#define CALL_DUMMY		{ 0 }  
 #define PUSH_DUMMY_FRAME
 #define CALL_DUMMY_START_OFFSET	0	
 #define CALL_DUMMY_LOCATION	AT_ENTRY_POINT
@@ -286,11 +286,13 @@ void d10v_write_pc PARAMS ((CORE_ADDR val, int pid));
 CORE_ADDR d10v_read_pc PARAMS ((int pid));
 void d10v_write_sp PARAMS ((CORE_ADDR val));
 CORE_ADDR d10v_read_sp PARAMS ((void));
+void d10v_write_fp PARAMS ((CORE_ADDR val));
+CORE_ADDR d10v_read_fp PARAMS ((void));
 
 #define TARGET_READ_PC(pid)		d10v_read_pc (pid)
 #define TARGET_WRITE_PC(val,pid)	d10v_write_pc (val, pid)
-#define TARGET_READ_FP()		d10v_read_sp ()
-#define TARGET_WRITE_FP(val)		d10v_write_sp (val)
+#define TARGET_READ_FP()		d10v_read_fp ()
+#define TARGET_WRITE_FP(val)		d10v_write_fp (val)
 #define TARGET_READ_SP()		d10v_read_sp ()
 #define TARGET_WRITE_SP(val)		d10v_write_sp (val)
 

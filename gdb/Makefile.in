@@ -578,16 +578,16 @@ install-only:
 		fi ; \
 		$(INSTALL_PROGRAM) gdb$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
 		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
-		# start-sanitize-gdbtk
-		$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
-		$(SHELL) $(srcdir)/../mkinstalldirs \
-			$(datadir)/gdbtcl/images \
-			$(datadir)/gdbtcl/images2 ; \
-		cd $(srcdir)/gdbtcl2 ; \
-		for i in *.tcl images/*.gif images2/*.gif tclIndex; \
-		  do \
-			$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
-		  done ;
+	# start-sanitize-gdbtk
+	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(datadir)/gdbtcl/images \
+		$(datadir)/gdbtcl/images2 ; \
+	cd $(srcdir)/gdbtcl2 ; \
+	for i in *.tcl images/*.gif images2/*.gif tclIndex; \
+	  do \
+		$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
+	  done ;
 	# end-sanitize-gdbtk
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
@@ -600,6 +600,9 @@ uninstall: force
 		  true ; \
 		fi ; \
 		rm -f $(bindir)/$$transformed_name$(EXEEXT) $(man1dir)/$$transformed_name.1
+	# start-sanitize-gdbtk
+	rm -rf $(datadir)/gdbtcl
+	# end-sanitize-gdbtk
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 # We do this by grepping through sources.  If that turns out to be too slow,
