@@ -1,3 +1,16 @@
+Mon Feb 23 13:30:46 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-main.h: #include symcat.h.
+	* m32r-sim.h (BRANCH_NEW_PC): Delete current_cpu arg.
+	(NEW_PC_{BASE,SKIP,2,4,BRANCH_P}): New macros.
+	* cpu.[ch],decode.[ch],extract.c,model.c: Regenerate.
+	* sem.c,sem-switch.c: Regenerate.
+start-sanitize-m32rx
+	* m32r-sim.h (SEM_NEXT_PC): Modify to handle parallel exec.
+	* mloopx.in: Rewrite.
+	* cpux.[ch],decodex.[ch],readx.c,semx.c: Regenerate.
+end-sanitize-m32rx
+
 Mon Feb 23 12:27:52 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r.c (m32r_h_cr_set, m32r_h_cr_get): Shadow control register 6
@@ -6,6 +19,7 @@ start-sanitize-m32rx
 	* m32rx.c (m32r_h_cr_set, m32r_h_cr_get): Shadow control register 6
 	in the backup PC register.
 end-sanitize-m32rx
+
 Thu Feb 19 16:39:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r.c (do_lock,do_unlock): Delete.

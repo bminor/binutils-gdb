@@ -42,7 +42,7 @@ SEM_FN_NAME (m32rx,add) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_0_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_0_ADD_CODE
 
@@ -69,7 +69,7 @@ SEM_FN_NAME (m32rx,add3) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_1_add3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_1_ADD3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_1_ADD3_CODE
 
@@ -96,7 +96,7 @@ SEM_FN_NAME (m32rx,and) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_0_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_0_ADD_CODE
 
@@ -123,7 +123,7 @@ SEM_FN_NAME (m32rx,and3) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_2_and3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_2_AND3_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_2_AND3_CODE
 
@@ -150,7 +150,7 @@ SEM_FN_NAME (m32rx,or) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_0_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_0_ADD_CODE
 
@@ -177,7 +177,7 @@ SEM_FN_NAME (m32rx,or3) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_3_or3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_3_OR3_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_3_OR3_CODE
 
@@ -204,7 +204,7 @@ SEM_FN_NAME (m32rx,xor) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_0_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_0_ADD_CODE
 
@@ -231,7 +231,7 @@ SEM_FN_NAME (m32rx,xor3) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_2_and3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_2_AND3_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_2_AND3_CODE
 
@@ -258,7 +258,7 @@ SEM_FN_NAME (m32rx,addi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_4_addi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_4_ADDI_VARS /* f-op1 f-r1 f-simm8 */
   EXTRACT_FMT_4_ADDI_CODE
 
@@ -285,7 +285,7 @@ SEM_FN_NAME (m32rx,addv) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_5_addv.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_5_ADDV_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_5_ADDV_CODE
 
@@ -319,7 +319,7 @@ SEM_FN_NAME (m32rx,addv3) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_6_addv3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_6_ADDV3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_6_ADDV3_CODE
 
@@ -353,7 +353,7 @@ SEM_FN_NAME (m32rx,addx) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_7_addx.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_7_ADDX_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_7_ADDX_CODE
 
@@ -387,13 +387,13 @@ SEM_FN_NAME (m32rx,bc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_8_bc8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_8_BC8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_8_BC8_CODE
 
 if (OPRND (condbit)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -415,13 +415,13 @@ SEM_FN_NAME (m32rx,bc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_9_bc24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_9_BC24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_9_BC24_CODE
 
 if (OPRND (condbit)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -443,13 +443,13 @@ SEM_FN_NAME (m32rx,beq) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_10_beq.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_10_BEQ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
   EXTRACT_FMT_10_BEQ_CODE
 
 if (EQSI (OPRND (src1), OPRND (src2))) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -472,13 +472,13 @@ SEM_FN_NAME (m32rx,beqz) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_11_BEQZ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
   EXTRACT_FMT_11_BEQZ_CODE
 
 if (EQSI (OPRND (src2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -501,13 +501,13 @@ SEM_FN_NAME (m32rx,bgez) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_11_BEQZ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
   EXTRACT_FMT_11_BEQZ_CODE
 
 if (GESI (OPRND (src2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -530,13 +530,13 @@ SEM_FN_NAME (m32rx,bgtz) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_11_BEQZ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
   EXTRACT_FMT_11_BEQZ_CODE
 
 if (GTSI (OPRND (src2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -559,13 +559,13 @@ SEM_FN_NAME (m32rx,blez) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_11_BEQZ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
   EXTRACT_FMT_11_BEQZ_CODE
 
 if (LESI (OPRND (src2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -588,13 +588,13 @@ SEM_FN_NAME (m32rx,bltz) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_11_BEQZ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
   EXTRACT_FMT_11_BEQZ_CODE
 
 if (LTSI (OPRND (src2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -617,13 +617,13 @@ SEM_FN_NAME (m32rx,bnez) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_11_BEQZ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
   EXTRACT_FMT_11_BEQZ_CODE
 
 if (NESI (OPRND (src2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -646,7 +646,7 @@ SEM_FN_NAME (m32rx,bl8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_12_bl8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_12_BL8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_12_BL8_CODE
@@ -654,7 +654,7 @@ SEM_FN_NAME (m32rx,bl8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
 do {
   CPU (h_gr[14]) = ADDSI (ANDSI (OPRND (pc), -4), 4);
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 
@@ -677,7 +677,7 @@ SEM_FN_NAME (m32rx,bl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_13_bl24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_13_BL24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_13_BL24_CODE
@@ -685,7 +685,7 @@ SEM_FN_NAME (m32rx,bl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
 do {
   CPU (h_gr[14]) = ADDSI (OPRND (pc), 4);
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 
@@ -708,7 +708,7 @@ SEM_FN_NAME (m32rx,bcl8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_14_bcl8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_14_BCL8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_14_BCL8_CODE
@@ -717,7 +717,7 @@ if (OPRND (condbit)) {
 do {
   CPU (h_gr[14]) = ADDSI (ANDSI (OPRND (pc), -4), 4);
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 }
@@ -741,7 +741,7 @@ SEM_FN_NAME (m32rx,bcl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_15_bcl24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_15_BCL24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_15_BCL24_CODE
@@ -750,7 +750,7 @@ if (OPRND (condbit)) {
 do {
   CPU (h_gr[14]) = ADDSI (ANDSI (OPRND (pc), -4), 4);
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 }
@@ -774,13 +774,13 @@ SEM_FN_NAME (m32rx,bnc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_8_bc8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_8_BC8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_8_BC8_CODE
 
 if (NOTBI (OPRND (condbit))) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -802,13 +802,13 @@ SEM_FN_NAME (m32rx,bnc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_9_bc24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_9_BC24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_9_BC24_CODE
 
 if (NOTBI (OPRND (condbit))) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -830,13 +830,13 @@ SEM_FN_NAME (m32rx,bne) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_10_beq.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_10_BEQ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
   EXTRACT_FMT_10_BEQ_CODE
 
 if (NESI (OPRND (src1), OPRND (src2))) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp16)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -859,12 +859,12 @@ SEM_FN_NAME (m32rx,bra8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_16_bra8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_16_BRA8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_16_BRA8_CODE
 
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 
 #if WITH_PROFILE_MODEL_P
@@ -885,12 +885,12 @@ SEM_FN_NAME (m32rx,bra24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_17_bra24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_17_BRA24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_17_BRA24_CODE
 
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 
 #if WITH_PROFILE_MODEL_P
@@ -911,7 +911,7 @@ SEM_FN_NAME (m32rx,bncl8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_14_bcl8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_14_BCL8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_14_BCL8_CODE
@@ -920,7 +920,7 @@ if (NOTBI (OPRND (condbit))) {
 do {
   CPU (h_gr[14]) = ADDSI (ANDSI (OPRND (pc), -4), 4);
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp8)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 }
@@ -944,7 +944,7 @@ SEM_FN_NAME (m32rx,bncl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_15_bcl24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
   EXTRACT_FMT_15_BCL24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_15_BCL24_CODE
@@ -953,7 +953,7 @@ if (NOTBI (OPRND (condbit))) {
 do {
   CPU (h_gr[14]) = ADDSI (ANDSI (OPRND (pc), -4), 4);
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 }
@@ -977,7 +977,7 @@ SEM_FN_NAME (m32rx,cmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_18_cmp.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_18_CMP_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_18_CMP_CODE
 
@@ -1003,7 +1003,7 @@ SEM_FN_NAME (m32rx,cmpi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_19_cmpi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_19_CMPI_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_19_CMPI_CODE
 
@@ -1029,7 +1029,7 @@ SEM_FN_NAME (m32rx,cmpu) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_18_cmp.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_18_CMP_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_18_CMP_CODE
 
@@ -1055,7 +1055,7 @@ SEM_FN_NAME (m32rx,cmpui) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_20_cmpui.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_20_CMPUI_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_20_CMPUI_CODE
 
@@ -1081,7 +1081,7 @@ SEM_FN_NAME (m32rx,cmpeq) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_18_cmp.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_18_CMP_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_18_CMP_CODE
 
@@ -1107,7 +1107,7 @@ SEM_FN_NAME (m32rx,cmpz) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_21_cmpz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_21_CMPZ_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_21_CMPZ_CODE
 
@@ -1133,7 +1133,7 @@ SEM_FN_NAME (m32rx,div) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_22_div.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_22_DIV_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_22_DIV_CODE
 
@@ -1162,7 +1162,7 @@ SEM_FN_NAME (m32rx,divu) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_22_div.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_22_DIV_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_22_DIV_CODE
 
@@ -1191,7 +1191,7 @@ SEM_FN_NAME (m32rx,rem) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_22_div.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_22_DIV_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_22_DIV_CODE
 
@@ -1220,7 +1220,7 @@ SEM_FN_NAME (m32rx,remu) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_22_div.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_22_DIV_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_22_DIV_CODE
 
@@ -1249,7 +1249,7 @@ SEM_FN_NAME (m32rx,divh) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_22_div.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_22_DIV_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_22_DIV_CODE
 
@@ -1278,13 +1278,13 @@ SEM_FN_NAME (m32rx,jc) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_23_jc.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_23_JC_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_23_JC_CODE
 
 if (OPRND (condbit)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, ANDSI (OPRND (sr), -4)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, ANDSI (OPRND (sr), -4)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -1307,13 +1307,13 @@ SEM_FN_NAME (m32rx,jnc) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_23_jc.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_23_JC_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_23_JC_CODE
 
 if (NOTBI (OPRND (condbit))) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, ANDSI (OPRND (sr), -4)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, ANDSI (OPRND (sr), -4)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
 
@@ -1336,7 +1336,7 @@ SEM_FN_NAME (m32rx,jl) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_24_jl.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_24_JL_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_24_JL_CODE
@@ -1347,7 +1347,7 @@ do {
   temp1 = OPRND (sr);
   CPU (h_gr[14]) = temp0;
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, temp1));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, temp1));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 
@@ -1371,12 +1371,12 @@ SEM_FN_NAME (m32rx,jmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_25_jmp.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_25_JMP_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_25_JMP_CODE
 
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, OPRND (sr)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, OPRND (sr)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 
 #if WITH_PROFILE_MODEL_P
@@ -1398,7 +1398,7 @@ SEM_FN_NAME (m32rx,ld) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_26_ld.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_26_LD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_26_LD_CODE
 
@@ -1425,7 +1425,7 @@ SEM_FN_NAME (m32rx,ld_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_27_ld_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_27_LD_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_27_LD_D_CODE
 
@@ -1452,7 +1452,7 @@ SEM_FN_NAME (m32rx,ldb) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_28_ldb.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_28_LDB_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_28_LDB_CODE
 
@@ -1479,7 +1479,7 @@ SEM_FN_NAME (m32rx,ldb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_29_ldb_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_29_LDB_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_29_LDB_D_CODE
 
@@ -1506,7 +1506,7 @@ SEM_FN_NAME (m32rx,ldh) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_30_ldh.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_30_LDH_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_30_LDH_CODE
 
@@ -1533,7 +1533,7 @@ SEM_FN_NAME (m32rx,ldh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_31_ldh_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_31_LDH_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_31_LDH_D_CODE
 
@@ -1560,7 +1560,7 @@ SEM_FN_NAME (m32rx,ldub) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_28_ldb.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_28_LDB_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_28_LDB_CODE
 
@@ -1587,7 +1587,7 @@ SEM_FN_NAME (m32rx,ldub_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_29_ldb_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_29_LDB_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_29_LDB_D_CODE
 
@@ -1614,7 +1614,7 @@ SEM_FN_NAME (m32rx,lduh) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_30_ldh.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_30_LDH_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_30_LDH_CODE
 
@@ -1641,7 +1641,7 @@ SEM_FN_NAME (m32rx,lduh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_31_ldh_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_31_LDH_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_31_LDH_D_CODE
 
@@ -1668,7 +1668,7 @@ SEM_FN_NAME (m32rx,ld_plus) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_32_ld_plus.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_32_LD_PLUS_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_32_LD_PLUS_CODE
 
@@ -1702,7 +1702,7 @@ SEM_FN_NAME (m32rx,ld24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_33_ld24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_33_LD24_VARS /* f-op1 f-r1 f-uimm24 */
   EXTRACT_FMT_33_LD24_CODE
 
@@ -1728,7 +1728,7 @@ SEM_FN_NAME (m32rx,ldi8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_34_ldi8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_34_LDI8_VARS /* f-op1 f-r1 f-simm8 */
   EXTRACT_FMT_34_LDI8_CODE
 
@@ -1754,7 +1754,7 @@ SEM_FN_NAME (m32rx,ldi16) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_35_ldi16.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_35_LDI16_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_35_LDI16_CODE
 
@@ -1780,7 +1780,7 @@ SEM_FN_NAME (m32rx,lock) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_36_lock.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_36_LOCK_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_36_LOCK_CODE
 
@@ -1811,7 +1811,7 @@ SEM_FN_NAME (m32rx,machi_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_37_machi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_37_MACHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
   EXTRACT_FMT_37_MACHI_A_CODE
 
@@ -1837,7 +1837,7 @@ SEM_FN_NAME (m32rx,maclo_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_37_machi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_37_MACHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
   EXTRACT_FMT_37_MACHI_A_CODE
 
@@ -1863,7 +1863,7 @@ SEM_FN_NAME (m32rx,mul) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_0_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_0_ADD_CODE
 
@@ -1890,7 +1890,7 @@ SEM_FN_NAME (m32rx,mulhi_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_38_mulhi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_38_MULHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
   EXTRACT_FMT_38_MULHI_A_CODE
 
@@ -1916,7 +1916,7 @@ SEM_FN_NAME (m32rx,mullo_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_38_mulhi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_38_MULHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
   EXTRACT_FMT_38_MULHI_A_CODE
 
@@ -1942,7 +1942,7 @@ SEM_FN_NAME (m32rx,mv) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_39_mv.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_39_MV_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_39_MV_CODE
 
@@ -1969,7 +1969,7 @@ SEM_FN_NAME (m32rx,mvfachi_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *p
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_40_mvfachi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_40_MVFACHI_A_VARS /* f-op1 f-r1 f-op2 f-accs f-op3 */
   EXTRACT_FMT_40_MVFACHI_A_CODE
 
@@ -1995,7 +1995,7 @@ SEM_FN_NAME (m32rx,mvfaclo_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *p
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_40_mvfachi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_40_MVFACHI_A_VARS /* f-op1 f-r1 f-op2 f-accs f-op3 */
   EXTRACT_FMT_40_MVFACHI_A_CODE
 
@@ -2021,7 +2021,7 @@ SEM_FN_NAME (m32rx,mvfacmi_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *p
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_40_mvfachi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_40_MVFACHI_A_VARS /* f-op1 f-r1 f-op2 f-accs f-op3 */
   EXTRACT_FMT_40_MVFACHI_A_CODE
 
@@ -2047,7 +2047,7 @@ SEM_FN_NAME (m32rx,mvfc) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_41_mvfc.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_41_MVFC_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_41_MVFC_CODE
 
@@ -2073,7 +2073,7 @@ SEM_FN_NAME (m32rx,mvtachi_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *p
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_42_mvtachi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_42_MVTACHI_A_VARS /* f-op1 f-r1 f-op2 f-accs f-op3 */
   EXTRACT_FMT_42_MVTACHI_A_CODE
 
@@ -2099,7 +2099,7 @@ SEM_FN_NAME (m32rx,mvtaclo_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *p
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_42_mvtachi_a.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_42_MVTACHI_A_VARS /* f-op1 f-r1 f-op2 f-accs f-op3 */
   EXTRACT_FMT_42_MVTACHI_A_CODE
 
@@ -2125,7 +2125,7 @@ SEM_FN_NAME (m32rx,mvtc) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_43_mvtc.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_43_MVTC_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_43_MVTC_CODE
 
@@ -2151,7 +2151,7 @@ SEM_FN_NAME (m32rx,neg) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_39_mv.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_39_MV_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_39_MV_CODE
 
@@ -2178,7 +2178,7 @@ SEM_FN_NAME (m32rx,nop) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_44_nop.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_44_NOP_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_44_NOP_CODE
 
@@ -2202,7 +2202,7 @@ SEM_FN_NAME (m32rx,not) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_39_mv.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_39_MV_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_39_MV_CODE
 
@@ -2229,7 +2229,7 @@ SEM_FN_NAME (m32rx,rac_dsi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_45_rac_dsi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_45_RAC_DSI_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
   EXTRACT_FMT_45_RAC_DSI_CODE
 
@@ -2259,7 +2259,7 @@ SEM_FN_NAME (m32rx,rach_dsi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *pa
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_45_rac_dsi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_45_RAC_DSI_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
   EXTRACT_FMT_45_RAC_DSI_CODE
 
@@ -2289,7 +2289,7 @@ SEM_FN_NAME (m32rx,rte) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_46_rte.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_46_RTE_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_46_RTE_CODE
@@ -2301,7 +2301,7 @@ do {
   TRACE_RESULT (current_cpu, "h-ie-0", 'x', CPU (h_ie));
   CPU (h_cond) = OPRND (h_bcond_0);
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, OPRND (h_bpc_0)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, OPRND (h_bpc_0)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 
@@ -2323,7 +2323,7 @@ SEM_FN_NAME (m32rx,seth) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_47_seth.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_47_SETH_VARS /* f-op1 f-r1 f-op2 f-r2 f-hi16 */
   EXTRACT_FMT_47_SETH_CODE
 
@@ -2349,7 +2349,7 @@ SEM_FN_NAME (m32rx,sll) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_0_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_0_ADD_CODE
 
@@ -2376,7 +2376,7 @@ SEM_FN_NAME (m32rx,sll3) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_48_sll3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_48_SLL3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_48_SLL3_CODE
 
@@ -2403,7 +2403,7 @@ SEM_FN_NAME (m32rx,slli) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_49_slli.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_49_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
   EXTRACT_FMT_49_SLLI_CODE
 
@@ -2430,7 +2430,7 @@ SEM_FN_NAME (m32rx,sra) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_0_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_0_ADD_CODE
 
@@ -2457,7 +2457,7 @@ SEM_FN_NAME (m32rx,sra3) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_48_sll3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_48_SLL3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_48_SLL3_CODE
 
@@ -2484,7 +2484,7 @@ SEM_FN_NAME (m32rx,srai) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_49_slli.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_49_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
   EXTRACT_FMT_49_SLLI_CODE
 
@@ -2511,7 +2511,7 @@ SEM_FN_NAME (m32rx,srl) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_0_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_0_ADD_CODE
 
@@ -2538,7 +2538,7 @@ SEM_FN_NAME (m32rx,srl3) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_48_sll3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_48_SLL3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_48_SLL3_CODE
 
@@ -2565,7 +2565,7 @@ SEM_FN_NAME (m32rx,srli) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_49_slli.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_49_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
   EXTRACT_FMT_49_SLLI_CODE
 
@@ -2592,7 +2592,7 @@ SEM_FN_NAME (m32rx,st) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_50_st.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_50_ST_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_50_ST_CODE
 
@@ -2618,7 +2618,7 @@ SEM_FN_NAME (m32rx,st_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_51_st_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_51_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_51_ST_D_CODE
 
@@ -2644,7 +2644,7 @@ SEM_FN_NAME (m32rx,stb) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_52_stb.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_52_STB_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_52_STB_CODE
 
@@ -2670,7 +2670,7 @@ SEM_FN_NAME (m32rx,stb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_53_stb_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_53_STB_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_53_STB_D_CODE
 
@@ -2696,7 +2696,7 @@ SEM_FN_NAME (m32rx,sth) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_54_sth.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_54_STH_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_54_STH_CODE
 
@@ -2722,7 +2722,7 @@ SEM_FN_NAME (m32rx,sth_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_55_sth_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_55_STH_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_55_STH_D_CODE
 
@@ -2748,15 +2748,17 @@ SEM_FN_NAME (m32rx,st_plus) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_56_st_plus.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_56_ST_PLUS_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_56_ST_PLUS_CODE
 
 do {
-  CPU (h_gr[f_r2]) = ADDSI (OPRND (src2), 4);
+  SI tmp_new_src2;
+  tmp_new_src2 = ADDSI (OPRND (src2), 4);
+SETMEMSI (current_cpu, tmp_new_src2, OPRND (src1));
+  TRACE_RESULT (current_cpu, "h-memory-new-src2", 'x', GETMEMSI (current_cpu, tmp_new_src2));
+  CPU (h_gr[f_r2]) = tmp_new_src2;
   TRACE_RESULT (current_cpu, "src2", 'x', CPU (h_gr[f_r2]));
-SETMEMSI (current_cpu, OPRND (src2), OPRND (src1));
-  TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMSI (current_cpu, OPRND (src2)));
 } while (0);
 
 #if WITH_PROFILE_MODEL_P
@@ -2779,15 +2781,17 @@ SEM_FN_NAME (m32rx,st_minus) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *pa
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_56_st_plus.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_56_ST_PLUS_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_56_ST_PLUS_CODE
 
 do {
-  CPU (h_gr[f_r2]) = SUBSI (OPRND (src2), 4);
+  SI tmp_new_src2;
+  tmp_new_src2 = SUBSI (OPRND (src2), 4);
+SETMEMSI (current_cpu, tmp_new_src2, OPRND (src1));
+  TRACE_RESULT (current_cpu, "h-memory-new-src2", 'x', GETMEMSI (current_cpu, tmp_new_src2));
+  CPU (h_gr[f_r2]) = tmp_new_src2;
   TRACE_RESULT (current_cpu, "src2", 'x', CPU (h_gr[f_r2]));
-SETMEMSI (current_cpu, OPRND (src2), OPRND (src1));
-  TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMSI (current_cpu, OPRND (src2)));
 } while (0);
 
 #if WITH_PROFILE_MODEL_P
@@ -2810,7 +2814,7 @@ SEM_FN_NAME (m32rx,sub) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_0_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_0_ADD_CODE
 
@@ -2837,7 +2841,7 @@ SEM_FN_NAME (m32rx,subv) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_5_addv.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_5_ADDV_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_5_ADDV_CODE
 
@@ -2871,7 +2875,7 @@ SEM_FN_NAME (m32rx,subx) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_7_addx.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_7_ADDX_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_7_ADDX_CODE
 
@@ -2905,7 +2909,7 @@ SEM_FN_NAME (m32rx,trap) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_57_trap.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
   EXTRACT_FMT_57_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
   EXTRACT_FMT_57_TRAP_CODE
@@ -2937,7 +2941,7 @@ SEM_FN_NAME (m32rx,unlock) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_58_unlock.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_58_UNLOCK_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_58_UNLOCK_CODE
 
@@ -2969,7 +2973,7 @@ SEM_FN_NAME (m32rx,satb) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_59_satb.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_59_SATB_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_59_SATB_CODE
 
@@ -2996,7 +3000,7 @@ SEM_FN_NAME (m32rx,sath) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_59_satb.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_59_SATB_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_59_SATB_CODE
 
@@ -3023,7 +3027,7 @@ SEM_FN_NAME (m32rx,sat) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_60_sat.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 4;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   EXTRACT_FMT_60_SAT_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_60_SAT_CODE
 
@@ -3050,7 +3054,7 @@ SEM_FN_NAME (m32rx,pcmpbz) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_21_cmpz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_21_CMPZ_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_21_CMPZ_CODE
 
@@ -3076,7 +3080,7 @@ SEM_FN_NAME (m32rx,sadd) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_61_sadd.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_61_SADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_61_SADD_CODE
 
@@ -3101,7 +3105,7 @@ SEM_FN_NAME (m32rx,macwu1) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_62_macwu1.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_62_MACWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_62_MACWU1_CODE
 
@@ -3127,7 +3131,7 @@ SEM_FN_NAME (m32rx,msblo) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_63_msblo.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_63_MSBLO_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_63_MSBLO_CODE
 
@@ -3153,7 +3157,7 @@ SEM_FN_NAME (m32rx,mulwu1) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_64_mulwu1.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_64_MULWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_64_MULWU1_CODE
 
@@ -3179,7 +3183,7 @@ SEM_FN_NAME (m32rx,maclh1) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_62_macwu1.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_62_MACWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_62_MACWU1_CODE
 
@@ -3205,13 +3209,12 @@ SEM_FN_NAME (m32rx,sc) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_65_sc.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_65_SC_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_65_SC_CODE
 
 if (OPRND (condbit)) {
-  CPU (h_abort) = 1;
-  TRACE_RESULT (current_cpu, "abort-parallel-execution", 'x', CPU (h_abort));
+BRANCH_NEW_PC (new_pc, NEW_PC_SKIP);
 }
 
 #if WITH_PROFILE_MODEL_P
@@ -3232,13 +3235,12 @@ SEM_FN_NAME (m32rx,snc) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   insn_t insn = SEM_INSN (sem_arg);
 #define OPRND(f) par_exec->operands.fmt_65_sc.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = CPU (h_pc) + 2;
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   EXTRACT_FMT_65_SC_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_65_SC_CODE
 
 if (NOTBI (OPRND (condbit))) {
-  CPU (h_abort) = 1;
-  TRACE_RESULT (current_cpu, "abort-parallel-execution", 'x', CPU (h_abort));
+BRANCH_NEW_PC (new_pc, NEW_PC_SKIP);
 }
 
 #if WITH_PROFILE_MODEL_P

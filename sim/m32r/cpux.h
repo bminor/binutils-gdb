@@ -1509,34 +1509,34 @@ struct parexec {
       SI sr;
     } fmt_25_jmp;
     struct { /* e.g. ld $dr,@$sr */
-      UQI h_memory_sr;
+      SI h_memory_sr;
       SI sr;
     } fmt_26_ld;
     struct { /* e.g. ld $dr,@($slo16,$sr) */
-      UQI h_memory_add_WI_sr_slo16;
+      SI h_memory_add_WI_sr_slo16;
       HI slo16;
       SI sr;
     } fmt_27_ld_d;
     struct { /* e.g. ldb $dr,@$sr */
-      UQI h_memory_sr;
+      QI h_memory_sr;
       SI sr;
     } fmt_28_ldb;
     struct { /* e.g. ldb $dr,@($slo16,$sr) */
-      UQI h_memory_add_WI_sr_slo16;
+      QI h_memory_add_WI_sr_slo16;
       HI slo16;
       SI sr;
     } fmt_29_ldb_d;
     struct { /* e.g. ldh $dr,@$sr */
-      UQI h_memory_sr;
+      HI h_memory_sr;
       SI sr;
     } fmt_30_ldh;
     struct { /* e.g. ldh $dr,@($slo16,$sr) */
-      UQI h_memory_add_WI_sr_slo16;
+      HI h_memory_add_WI_sr_slo16;
       HI slo16;
       SI sr;
     } fmt_31_ldh_d;
     struct { /* e.g. ld $dr,@$sr+ */
-      UQI h_memory_sr;
+      SI h_memory_sr;
       SI sr;
     } fmt_32_ld_plus;
     struct { /* e.g. ld24 $dr,#$uimm24 */
@@ -1549,7 +1549,7 @@ struct parexec {
       HI slo16;
     } fmt_35_ldi16;
     struct { /* e.g. lock $dr,@$sr */
-      UQI h_memory_sr;
+      SI h_memory_sr;
       SI sr;
     } fmt_36_lock;
     struct { /* e.g. machi $src1,$src2,$acc */
@@ -1634,7 +1634,7 @@ struct parexec {
     } fmt_56_st_plus;
     struct { /* e.g. trap #$uimm4 */
       USI pc;
-      USI h_cr_0;
+      SI h_cr_0;
       USI uimm4;
     } fmt_57_trap;
     struct { /* e.g. unlock $src1,@$src2 */

@@ -41,7 +41,7 @@ SEM_FN_NAME (m32r,add) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ADDSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -65,7 +65,7 @@ SEM_FN_NAME (m32r,add3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_1_add3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = ADDSI (* FLD (f_r2), FLD (f_simm16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -89,7 +89,7 @@ SEM_FN_NAME (m32r,and) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ANDSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -113,7 +113,7 @@ SEM_FN_NAME (m32r,and3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_2_and3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = ANDSI (* FLD (f_r2), FLD (f_uimm16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -137,7 +137,7 @@ SEM_FN_NAME (m32r,or) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ORSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -161,7 +161,7 @@ SEM_FN_NAME (m32r,or3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_3_or3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = ORSI (* FLD (f_r2), FLD (f_uimm16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -185,7 +185,7 @@ SEM_FN_NAME (m32r,xor) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = XORSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -209,7 +209,7 @@ SEM_FN_NAME (m32r,xor3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_2_and3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = XORSI (* FLD (f_r2), FLD (f_uimm16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -233,7 +233,7 @@ SEM_FN_NAME (m32r,addi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_4_addi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ADDSI (* FLD (f_r1), FLD (f_simm8));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -257,7 +257,7 @@ SEM_FN_NAME (m32r,addv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_5_addv.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
   BI temp1;SI temp0;
@@ -288,7 +288,7 @@ SEM_FN_NAME (m32r,addv3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_6_addv3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 do {
   BI temp1;SI temp0;
@@ -319,7 +319,7 @@ SEM_FN_NAME (m32r,addx) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_7_addx.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
   BI temp1;SI temp0;
@@ -350,11 +350,11 @@ SEM_FN_NAME (m32r,bc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_8_bc8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
 
 if (CPU (h_cond)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -376,11 +376,11 @@ SEM_FN_NAME (m32r,bc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_9_bc24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 if (CPU (h_cond)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -402,11 +402,11 @@ SEM_FN_NAME (m32r,beq) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_10_beq.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 if (EQSI (* FLD (f_r1), * FLD (f_r2))) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -429,11 +429,11 @@ SEM_FN_NAME (m32r,beqz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 if (EQSI (* FLD (f_r2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -456,11 +456,11 @@ SEM_FN_NAME (m32r,bgez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 if (GESI (* FLD (f_r2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -483,11 +483,11 @@ SEM_FN_NAME (m32r,bgtz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 if (GTSI (* FLD (f_r2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -510,11 +510,11 @@ SEM_FN_NAME (m32r,blez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 if (LESI (* FLD (f_r2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -537,11 +537,11 @@ SEM_FN_NAME (m32r,bltz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 if (LTSI (* FLD (f_r2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -564,11 +564,11 @@ SEM_FN_NAME (m32r,bnez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_11_beqz.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 if (NESI (* FLD (f_r2), 0)) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -591,13 +591,13 @@ SEM_FN_NAME (m32r,bl8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_12_bl8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
 
 do {
   CPU (h_gr[14]) = ADDSI (ANDSI (CPU (h_pc), -4), 4);
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
@@ -620,13 +620,13 @@ SEM_FN_NAME (m32r,bl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_13_bl24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 do {
   CPU (h_gr[14]) = ADDSI (CPU (h_pc), 4);
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
@@ -649,11 +649,11 @@ SEM_FN_NAME (m32r,bnc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_8_bc8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
 
 if (NOTBI (CPU (h_cond))) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -675,11 +675,11 @@ SEM_FN_NAME (m32r,bnc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_9_bc24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 if (NOTBI (CPU (h_cond))) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -701,11 +701,11 @@ SEM_FN_NAME (m32r,bne) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_10_beq.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
 if (NESI (* FLD (f_r1), * FLD (f_r2))) {
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp16)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 }
@@ -728,10 +728,10 @@ SEM_FN_NAME (m32r,bra8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_14_bra8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
 
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 
@@ -752,10 +752,10 @@ SEM_FN_NAME (m32r,bra24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_15_bra24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
   int taken_p = 0;
 
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 
@@ -776,7 +776,7 @@ SEM_FN_NAME (m32r,cmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_16_cmp.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_cond) = LTSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
@@ -799,7 +799,7 @@ SEM_FN_NAME (m32r,cmpi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_17_cmpi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
   CPU (h_cond) = LTSI (* FLD (f_r2), FLD (f_simm16));
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
@@ -822,7 +822,7 @@ SEM_FN_NAME (m32r,cmpu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_16_cmp.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_cond) = LTUSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
@@ -845,7 +845,7 @@ SEM_FN_NAME (m32r,cmpui) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_18_cmpui.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
   CPU (h_cond) = LTUSI (* FLD (f_r2), FLD (f_uimm16));
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
@@ -868,7 +868,7 @@ SEM_FN_NAME (m32r,div) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_19_div.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NESI (* FLD (f_r2), 0)) {
 * FLD (f_r1) = DIVSI (* FLD (f_r1), * FLD (f_r2));
@@ -894,7 +894,7 @@ SEM_FN_NAME (m32r,divu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_19_div.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NESI (* FLD (f_r2), 0)) {
 * FLD (f_r1) = UDIVSI (* FLD (f_r1), * FLD (f_r2));
@@ -920,7 +920,7 @@ SEM_FN_NAME (m32r,rem) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_19_div.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NESI (* FLD (f_r2), 0)) {
 * FLD (f_r1) = MODSI (* FLD (f_r1), * FLD (f_r2));
@@ -946,7 +946,7 @@ SEM_FN_NAME (m32r,remu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_19_div.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NESI (* FLD (f_r2), 0)) {
 * FLD (f_r1) = UMODSI (* FLD (f_r1), * FLD (f_r2));
@@ -972,7 +972,7 @@ SEM_FN_NAME (m32r,jl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_20_jl.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
 
 do {
@@ -981,7 +981,7 @@ do {
   temp1 = * FLD (f_r2);
   CPU (h_gr[14]) = temp0;
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, temp1));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, temp1));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
@@ -1005,10 +1005,10 @@ SEM_FN_NAME (m32r,jmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_21_jmp.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
 
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, * FLD (f_r2)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, * FLD (f_r2)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 
@@ -1030,7 +1030,7 @@ SEM_FN_NAME (m32r,ld) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_22_ld.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = GETMEMSI (current_cpu, * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1054,7 +1054,7 @@ SEM_FN_NAME (m32r,ld_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_23_ld_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = GETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1078,7 +1078,7 @@ SEM_FN_NAME (m32r,ldb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_24_ldb.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = EXTQISI (GETMEMQI (current_cpu, * FLD (f_r2)));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1102,7 +1102,7 @@ SEM_FN_NAME (m32r,ldb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_25_ldb_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = EXTQISI (GETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1126,7 +1126,7 @@ SEM_FN_NAME (m32r,ldh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_26_ldh.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = EXTHISI (GETMEMHI (current_cpu, * FLD (f_r2)));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1150,7 +1150,7 @@ SEM_FN_NAME (m32r,ldh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_27_ldh_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = EXTHISI (GETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1174,7 +1174,7 @@ SEM_FN_NAME (m32r,ldub) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_24_ldb.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ZEXTQISI (GETMEMQI (current_cpu, * FLD (f_r2)));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1198,7 +1198,7 @@ SEM_FN_NAME (m32r,ldub_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_25_ldb_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = ZEXTQISI (GETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1222,7 +1222,7 @@ SEM_FN_NAME (m32r,lduh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_26_ldh.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ZEXTHISI (GETMEMHI (current_cpu, * FLD (f_r2)));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1246,7 +1246,7 @@ SEM_FN_NAME (m32r,lduh_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_27_ldh_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = ZEXTHISI (GETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1270,7 +1270,7 @@ SEM_FN_NAME (m32r,ld_plus) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_28_ld_plus.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
   SI temp1;SI temp0;
@@ -1301,7 +1301,7 @@ SEM_FN_NAME (m32r,ld24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_29_ld24.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = FLD (f_uimm24);
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1324,7 +1324,7 @@ SEM_FN_NAME (m32r,ldi8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_30_ldi8.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = FLD (f_simm8);
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1347,7 +1347,7 @@ SEM_FN_NAME (m32r,ldi16) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_31_ldi16.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = FLD (f_simm16);
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1370,7 +1370,7 @@ SEM_FN_NAME (m32r,lock) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_32_lock.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
   CPU (h_lock) = 1;
@@ -1398,7 +1398,7 @@ SEM_FN_NAME (m32r,machi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_33_machi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_accum) = SRADI (SLLDI (ADDDI (CPU (h_accum), MULDI (EXTSIDI (ANDSI (* FLD (f_r1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16))))), 8), 8);
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -1421,7 +1421,7 @@ SEM_FN_NAME (m32r,maclo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_33_machi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_accum) = SRADI (SLLDI (ADDDI (CPU (h_accum), MULDI (EXTSIDI (SLLSI (* FLD (f_r1), 16)), EXTHIDI (TRUNCSIHI (* FLD (f_r2))))), 8), 8);
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -1444,7 +1444,7 @@ SEM_FN_NAME (m32r,macwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_33_machi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_accum) = SRADI (SLLDI (ADDDI (CPU (h_accum), MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16))))), 8), 8);
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -1467,7 +1467,7 @@ SEM_FN_NAME (m32r,macwlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_33_machi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_accum) = SRADI (SLLDI (ADDDI (CPU (h_accum), MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (* FLD (f_r2))))), 8), 8);
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -1490,7 +1490,7 @@ SEM_FN_NAME (m32r,mul) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = MULSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1514,7 +1514,7 @@ SEM_FN_NAME (m32r,mulhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_34_mulhi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_accum) = SRADI (SLLDI (MULDI (EXTSIDI (ANDSI (* FLD (f_r1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16)))), 16), 16);
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -1537,7 +1537,7 @@ SEM_FN_NAME (m32r,mullo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_34_mulhi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_accum) = SRADI (SLLDI (MULDI (EXTSIDI (SLLSI (* FLD (f_r1), 16)), EXTHIDI (TRUNCSIHI (* FLD (f_r2)))), 16), 16);
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -1560,7 +1560,7 @@ SEM_FN_NAME (m32r,mulwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_34_mulhi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_accum) = SRADI (SLLDI (MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16)))), 8), 8);
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -1583,7 +1583,7 @@ SEM_FN_NAME (m32r,mulwlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_34_mulhi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_accum) = SRADI (SLLDI (MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (* FLD (f_r2)))), 8), 8);
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -1606,7 +1606,7 @@ SEM_FN_NAME (m32r,mv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_35_mv.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = * FLD (f_r2);
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1630,7 +1630,7 @@ SEM_FN_NAME (m32r,mvfachi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_36_mvfachi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = TRUNCDISI (SRADI (CPU (h_accum), 32));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1653,7 +1653,7 @@ SEM_FN_NAME (m32r,mvfaclo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_36_mvfachi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = TRUNCDISI (CPU (h_accum));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1676,7 +1676,7 @@ SEM_FN_NAME (m32r,mvfacmi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_36_mvfachi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = TRUNCDISI (SRADI (CPU (h_accum), 16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1699,7 +1699,7 @@ SEM_FN_NAME (m32r,mvfc) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_37_mvfc.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = m32r_h_cr_get (current_cpu, FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1722,7 +1722,7 @@ SEM_FN_NAME (m32r,mvtachi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_38_mvtachi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_accum) = ORDI (ANDDI (CPU (h_accum), MAKEDI (0, 0xffffffff)), SLLDI (EXTSIDI (* FLD (f_r1)), 32));
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -1745,7 +1745,7 @@ SEM_FN_NAME (m32r,mvtaclo) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_38_mvtachi.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_accum) = ORDI (ANDDI (CPU (h_accum), MAKEDI (0xffffffff, 0)), ZEXTSIDI (* FLD (f_r1)));
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -1768,7 +1768,7 @@ SEM_FN_NAME (m32r,mvtc) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_39_mvtc.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 m32r_h_cr_set (current_cpu, FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dcr", 'x', m32r_h_cr_get (current_cpu, FLD (f_r1)));
@@ -1791,7 +1791,7 @@ SEM_FN_NAME (m32r,neg) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_35_mv.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = NEGSI (* FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1815,7 +1815,7 @@ SEM_FN_NAME (m32r,nop) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_40_nop.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
 
@@ -1836,7 +1836,7 @@ SEM_FN_NAME (m32r,not) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_35_mv.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = INVSI (* FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1860,7 +1860,7 @@ SEM_FN_NAME (m32r,rac) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_41_rac.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
   DI tmp_tmp1;
@@ -1887,7 +1887,7 @@ SEM_FN_NAME (m32r,rach) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_41_rac.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
   DI tmp_tmp1;
@@ -1923,7 +1923,7 @@ SEM_FN_NAME (m32r,rte) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_42_rte.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
 
 do {
@@ -1933,7 +1933,7 @@ do {
   TRACE_RESULT (current_cpu, "h-ie-0", 'x', CPU (h_ie));
   CPU (h_cond) = CPU (h_bcond);
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
-  BRANCH_NEW_PC (current_cpu, new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, CPU (h_bpc)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, CPU (h_bpc)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
@@ -1955,7 +1955,7 @@ SEM_FN_NAME (m32r,seth) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_43_seth.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = SLLSI (FLD (f_hi16), 16);
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -1978,7 +1978,7 @@ SEM_FN_NAME (m32r,sll) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SLLSI (* FLD (f_r1), ANDSI (* FLD (f_r2), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -2002,7 +2002,7 @@ SEM_FN_NAME (m32r,sll3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_44_sll3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = SLLSI (* FLD (f_r2), ANDSI (FLD (f_simm16), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -2026,7 +2026,7 @@ SEM_FN_NAME (m32r,slli) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_45_slli.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SLLSI (* FLD (f_r1), FLD (f_uimm5));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -2050,7 +2050,7 @@ SEM_FN_NAME (m32r,sra) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SRASI (* FLD (f_r1), ANDSI (* FLD (f_r2), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -2074,7 +2074,7 @@ SEM_FN_NAME (m32r,sra3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_44_sll3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = SRASI (* FLD (f_r2), ANDSI (FLD (f_simm16), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -2098,7 +2098,7 @@ SEM_FN_NAME (m32r,srai) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_45_slli.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SRASI (* FLD (f_r1), FLD (f_uimm5));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -2122,7 +2122,7 @@ SEM_FN_NAME (m32r,srl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SRLSI (* FLD (f_r1), ANDSI (* FLD (f_r2), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -2146,7 +2146,7 @@ SEM_FN_NAME (m32r,srl3) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_44_sll3.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = SRLSI (* FLD (f_r2), ANDSI (FLD (f_simm16), 31));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -2170,7 +2170,7 @@ SEM_FN_NAME (m32r,srli) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_45_slli.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SRLSI (* FLD (f_r1), FLD (f_uimm5));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -2194,7 +2194,7 @@ SEM_FN_NAME (m32r,st) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_46_st.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 SETMEMSI (current_cpu, * FLD (f_r2), * FLD (f_r1));
   TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMSI (current_cpu, * FLD (f_r2)));
@@ -2217,7 +2217,7 @@ SEM_FN_NAME (m32r,st_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_47_st_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 SETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
   TRACE_RESULT (current_cpu, "h-memory-add-WI-src2-slo16", 'x', GETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
@@ -2240,7 +2240,7 @@ SEM_FN_NAME (m32r,stb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_48_stb.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 SETMEMQI (current_cpu, * FLD (f_r2), * FLD (f_r1));
   TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMQI (current_cpu, * FLD (f_r2)));
@@ -2263,7 +2263,7 @@ SEM_FN_NAME (m32r,stb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_49_stb_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 SETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
   TRACE_RESULT (current_cpu, "h-memory-add-WI-src2-slo16", 'x', GETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
@@ -2286,7 +2286,7 @@ SEM_FN_NAME (m32r,sth) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_50_sth.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 SETMEMHI (current_cpu, * FLD (f_r2), * FLD (f_r1));
   TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMHI (current_cpu, * FLD (f_r2)));
@@ -2309,7 +2309,7 @@ SEM_FN_NAME (m32r,sth_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_51_sth_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 SETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
   TRACE_RESULT (current_cpu, "h-memory-add-WI-src2-slo16", 'x', GETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
@@ -2332,13 +2332,15 @@ SEM_FN_NAME (m32r,st_plus) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_52_st_plus.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
-* FLD (f_r2) = ADDSI (* FLD (f_r2), 4);
+  SI tmp_new_src2;
+  tmp_new_src2 = ADDSI (* FLD (f_r2), 4);
+SETMEMSI (current_cpu, tmp_new_src2, * FLD (f_r1));
+  TRACE_RESULT (current_cpu, "h-memory-new-src2", 'x', GETMEMSI (current_cpu, tmp_new_src2));
+* FLD (f_r2) = tmp_new_src2;
   TRACE_RESULT (current_cpu, "src2", 'x', * FLD (f_r2));
-SETMEMSI (current_cpu, * FLD (f_r2), * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMSI (current_cpu, * FLD (f_r2)));
 } while (0);
 
 #if WITH_PROFILE_MODEL_P
@@ -2360,13 +2362,15 @@ SEM_FN_NAME (m32r,st_minus) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_52_st_plus.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
-* FLD (f_r2) = SUBSI (* FLD (f_r2), 4);
+  SI tmp_new_src2;
+  tmp_new_src2 = SUBSI (* FLD (f_r2), 4);
+SETMEMSI (current_cpu, tmp_new_src2, * FLD (f_r1));
+  TRACE_RESULT (current_cpu, "h-memory-new-src2", 'x', GETMEMSI (current_cpu, tmp_new_src2));
+* FLD (f_r2) = tmp_new_src2;
   TRACE_RESULT (current_cpu, "src2", 'x', * FLD (f_r2));
-SETMEMSI (current_cpu, * FLD (f_r2), * FLD (f_r1));
-  TRACE_RESULT (current_cpu, "h-memory-src2", 'x', GETMEMSI (current_cpu, * FLD (f_r2)));
 } while (0);
 
 #if WITH_PROFILE_MODEL_P
@@ -2388,7 +2392,7 @@ SEM_FN_NAME (m32r,sub) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_0_add.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SUBSI (* FLD (f_r1), * FLD (f_r2));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
@@ -2412,7 +2416,7 @@ SEM_FN_NAME (m32r,subv) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_5_addv.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
   BI temp1;SI temp0;
@@ -2443,7 +2447,7 @@ SEM_FN_NAME (m32r,subx) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_7_addx.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
   BI temp1;SI temp0;
@@ -2474,7 +2478,7 @@ SEM_FN_NAME (m32r,trap) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_53_trap.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
   int taken_p = 0;
 
 do {
@@ -2503,7 +2507,7 @@ SEM_FN_NAME (m32r,unlock) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 #define FLD(f) abuf->fields.fmt_54_unlock.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  CIA new_pc = SEM_NEXT_PC (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
 if (CPU (h_lock)) {

@@ -25,9 +25,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef M32RX_DECODE_H
 #define M32RX_DECODE_H
 
-#define EX(fn) XCONCAT3 (m32rx,_ex_,fn)
-#define SEM(fn) XCONCAT3 (m32rx,_sem_,fn)
-#define SEMF(fn) XCONCAT3 (m32rx,_semf_,fn)
+#define EX(fn) CONCAT3 (m32rx,_ex_,fn)
+#define SEM(fn) CONCAT3 (m32rx,_sem_,fn)
+#define SEMF(fn) CONCAT3 (m32rx,_semf_,fn)
 
 extern EXTRACT_FN EX (illegal);
 extern SEMANTIC_FN SEM (illegal);

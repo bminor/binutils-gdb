@@ -26,7 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define WANT_CPU_M32RX
 
 #include "sim-main.h"
-#include "sim-xcat.h"
 #include "cpu-sim.h"
 #include "cpu-opc.h"
 
@@ -35,7 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    around while the cache version is being developed.
    It may still be useful to allow two versions to exist though.  */
 #if WITH_SCACHE
-#define EX(fn) XCONCAT3 (m32rx,_ex_,fn)
+#define EX(fn) CONCAT3 (m32rx,_ex_,fn)
 #else
 #define EX(fn) 0
 #endif
@@ -44,7 +43,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef __GNUC__
 #define READ(n) 0
 #else
-#define READ(n) XCONCAT3 (READ,_,n)
+#define READ(n) CONCAT3 (READ,_,n)
 #endif
 #endif
 
@@ -53,14 +52,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if WITH_SEM_SWITCH_FULL
 #define FULL(fn) 0
 #else
-#define FULL(fn) XCONCAT3 (m32rx,_sem_,fn)
+#define FULL(fn) CONCAT3 (m32rx,_sem_,fn)
 #endif
 
 #if WITH_FAST
 #if WITH_SEM_SWITCH_FAST
 #define FAST(fn) 0
 #else
-#define FAST(fn) XCONCAT3 (m32rx,_semf_,fn) /* f for fast */
+#define FAST(fn) CONCAT3 (m32rx,_semf_,fn) /* f for fast */
 #endif
 #else
 #define FAST(fn) 0
