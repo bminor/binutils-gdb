@@ -1,5 +1,10 @@
 2002-12-20  Kevin Buettner  <kevinb@redhat.com>
 
+	* solib-svr4.c (elf_locate_base): Fix sizeof() related bug.  Add
+	DT_MIPS_RLD_MAP case for 64-bit targets.
+
+2002-12-20  Kevin Buettner  <kevinb@redhat.com>
+
 	* mips-tdep.c (heuristic_proc_desc): Clear memory associated with
 	``temp_saved_regs'', not the pointer or other storage contiguous
 	to this pointer.
