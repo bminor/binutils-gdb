@@ -208,11 +208,12 @@ struct ui_out *uiout = &def_uiout;
 
 /* These are the interfaces to implementation functions */
 
-static void uo_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid);
+static void uo_table_begin (struct ui_out *uiout, int nbrofcols,
+			    const char *tblid);
 static void uo_table_body (struct ui_out *uiout);
 static void uo_table_end (struct ui_out *uiout);
 static void uo_table_header (struct ui_out *uiout, int width,
-			     enum ui_align align, char *colhdr);
+			     enum ui_align align, const char *colhdr);
 static void uo_begin (struct ui_out *uiout,
 		      enum ui_out_type type,
 		      int level, const char *id);
@@ -220,25 +221,27 @@ static void uo_end (struct ui_out *uiout,
 		    enum ui_out_type type,
 		    int level);
 static void uo_field_int (struct ui_out *uiout, int fldno, int width,
-			  enum ui_align align, char *fldname, int value);
+			  enum ui_align align, const char *fldname, int value);
 static void uo_field_skip (struct ui_out *uiout, int fldno, int width,
-			   enum ui_align align, char *fldname);
+			   enum ui_align align, const char *fldname);
 static void uo_field_string (struct ui_out *uiout, int fldno, int width,
-			  enum ui_align align, char *fldname, const char *string);
+			     enum ui_align align, const char *fldname,
+			     const char *string);
 static void uo_field_fmt (struct ui_out *uiout, int fldno, int width,
-			  enum ui_align align, char *fldname,
-			  char *format, va_list args);
+			  enum ui_align align, const char *fldname,
+			  const char *format, va_list args);
 static void uo_spaces (struct ui_out *uiout, int numspaces);
-static void uo_text (struct ui_out *uiout, char *string);
+static void uo_text (struct ui_out *uiout, const char *string);
 static void uo_message (struct ui_out *uiout, int verbosity,
-			char *format, va_list args);
+			const char *format, va_list args);
 static void uo_wrap_hint (struct ui_out *uiout, char *identstring);
 static void uo_flush (struct ui_out *uiout);
 
 /* Prototypes for local functions */
 
 extern void _initialize_ui_out (void);
-static void append_header_to_list (struct ui_out *uiout, int width, int alignment, char *colhdr);
+static void append_header_to_list (struct ui_out *uiout, int width,
+				   int alignment, const char *colhdr);
 static int get_curr_header (struct ui_out *uiout, int *colno, int *width,
 			    int *alignment, char **colhdr);
 static void clear_header_list (struct ui_out *uiout);
@@ -252,7 +255,8 @@ static void init_ui_out_state (struct ui_out *uiout);
 /* Mark beginning of a table */
 
 void
-ui_out_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
+ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
+		    const char *tblid)
 {
   if (uiout->table_flag)
     internal_error (__FILE__, __LINE__,
@@ -311,7 +315,7 @@ ui_out_table_end (struct ui_out *uiout)
 
 void
 ui_out_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
-		     char *colhdr)
+		     const char *colhdr)
 {
   if (!uiout->table_flag || uiout->body_flag)
     internal_error (__FILE__, __LINE__,
@@ -420,7 +424,9 @@ make_cleanup_ui_out_list_begin_end (struct ui_out *uiout)
 }
 
 void
-ui_out_field_int (struct ui_out *uiout, char *fldname, int value)
+ui_out_field_int (struct ui_out *uiout,
+		  const char *fldname,
+		  int value)
 {
   int fldno;
   int width;
@@ -438,7 +444,9 @@ ui_out_field_int (struct ui_out *uiout, char *fldname, int value)
 }
 
 void
-ui_out_field_core_addr (struct ui_out *uiout, char *fldname, CORE_ADDR address)
+ui_out_field_core_addr (struct ui_out *uiout,
+			const char *fldname,
+			CORE_ADDR address)
 {
   char addstr[20];
 
@@ -450,7 +458,9 @@ ui_out_field_core_addr (struct ui_out *uiout, char *fldname, CORE_ADDR address)
 }
 
 void
-ui_out_field_stream (struct ui_out *uiout, char *fldname, struct ui_stream *buf)
+ui_out_field_stream (struct ui_out *uiout,
+		     const char *fldname,
+		     struct ui_stream *buf)
 {
   long length;
   char *buffer = ui_file_xstrdup (buf->stream, &length);
@@ -466,7 +476,8 @@ ui_out_field_stream (struct ui_out *uiout, char *fldname, struct ui_stream *buf)
 /* used to ommit a field */
 
 void
-ui_out_field_skip (struct ui_out *uiout, char *fldname)
+ui_out_field_skip (struct ui_out *uiout,
+		   const char *fldname)
 {
   int fldno;
   int width;
@@ -485,7 +496,7 @@ ui_out_field_skip (struct ui_out *uiout, char *fldname)
 
 void
 ui_out_field_string (struct ui_out *uiout,
-		     char *fldname,
+		     const char *fldname,
 		     const char *string)
 {
   int fldno;
@@ -505,7 +516,9 @@ ui_out_field_string (struct ui_out *uiout,
 
 /* VARARGS */
 void
-ui_out_field_fmt (struct ui_out *uiout, char *fldname, char *format,...)
+ui_out_field_fmt (struct ui_out *uiout,
+		  const char *fldname,
+		  const char *format, ...)
 {
   va_list args;
   int fldno;
@@ -535,13 +548,15 @@ ui_out_spaces (struct ui_out *uiout, int numspaces)
 }
 
 void
-ui_out_text (struct ui_out *uiout, char *string)
+ui_out_text (struct ui_out *uiout,
+	     const char *string)
 {
   uo_text (uiout, string);
 }
 
 void
-ui_out_message (struct ui_out *uiout, int verbosity, char *format,...)
+ui_out_message (struct ui_out *uiout, int verbosity,
+		const char *format,...)
 {
   va_list args;
 
@@ -789,7 +804,8 @@ default_flush (struct ui_out *uiout)
 /* Interface to the implementation functions */
 
 void
-uo_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
+uo_table_begin (struct ui_out *uiout, int nbrofcols,
+		const char *tblid)
 {
   if (!uiout->impl->table_begin)
     return;
@@ -813,7 +829,8 @@ uo_table_end (struct ui_out *uiout)
 }
 
 void
-uo_table_header (struct ui_out *uiout, int width, enum ui_align align, char *colhdr)
+uo_table_header (struct ui_out *uiout, int width, enum ui_align align,
+		 const char *colhdr)
 {
   if (!uiout->impl->table_header)
     return;
@@ -842,7 +859,9 @@ uo_end (struct ui_out *uiout,
 }
 
 void
-uo_field_int (struct ui_out *uiout, int fldno, int width, enum ui_align align, char *fldname, int value)
+uo_field_int (struct ui_out *uiout, int fldno, int width, enum ui_align align,
+	      const char *fldname,
+	      int value)
 {
   if (!uiout->impl->field_int)
     return;
@@ -850,7 +869,8 @@ uo_field_int (struct ui_out *uiout, int fldno, int width, enum ui_align align, c
 }
 
 void
-uo_field_skip (struct ui_out *uiout, int fldno, int width, enum ui_align align, char *fldname)
+uo_field_skip (struct ui_out *uiout, int fldno, int width, enum ui_align align,
+	       const char *fldname)
 {
   if (!uiout->impl->field_skip)
     return;
@@ -859,7 +879,9 @@ uo_field_skip (struct ui_out *uiout, int fldno, int width, enum ui_align align, 
 
 void
 uo_field_string (struct ui_out *uiout, int fldno, int width,
-		 enum ui_align align, char *fldname, const char *string)
+		 enum ui_align align,
+		 const char *fldname,
+		 const char *string)
 {
   if (!uiout->impl->field_string)
     return;
@@ -867,7 +889,10 @@ uo_field_string (struct ui_out *uiout, int fldno, int width,
 }
 
 void
-uo_field_fmt (struct ui_out *uiout, int fldno, int width, enum ui_align align, char *fldname, char *format, va_list args)
+uo_field_fmt (struct ui_out *uiout, int fldno, int width, enum ui_align align,
+	      const char *fldname,
+	      const char *format,
+	      va_list args)
 {
   if (!uiout->impl->field_fmt)
     return;
@@ -883,7 +908,8 @@ uo_spaces (struct ui_out *uiout, int numspaces)
 }
 
 void
-uo_text (struct ui_out *uiout, char *string)
+uo_text (struct ui_out *uiout,
+	 const char *string)
 {
   if (!uiout->impl->text)
     return;
@@ -891,7 +917,9 @@ uo_text (struct ui_out *uiout, char *string)
 }
 
 void
-uo_message (struct ui_out *uiout, int verbosity, char *format, va_list args)
+uo_message (struct ui_out *uiout, int verbosity,
+	    const char *format,
+	    va_list args)
 {
   if (!uiout->impl->message)
     return;
@@ -937,7 +965,7 @@ static void
 append_header_to_list (struct ui_out *uiout,
 		       int width,
 		       int alignment,
-		       char *colhdr)
+		       const char *colhdr)
 {
   struct ui_out_hdr *temphdr;
 

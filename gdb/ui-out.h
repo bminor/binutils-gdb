@@ -89,10 +89,10 @@ extern struct cleanup *ui_out_begin_cleanup_end (struct ui_out *uiout,
    field, ... }, ... ] }'' */
 
 extern void ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
-				char *tblid);
+				const char *tblid);
 
 extern void ui_out_table_header (struct ui_out *uiout, int width,
-				 enum ui_align align, char *colhdr);
+				 enum ui_align align, const char *colhdr);
 
 extern void ui_out_table_body (struct ui_out *uiout);
 
@@ -114,28 +114,29 @@ extern void ui_out_tuple_end (struct ui_out *uiout);
 extern struct cleanup *make_cleanup_ui_out_tuple_begin_end (struct ui_out *uiout,
 							    const char *id);
 
-extern void ui_out_field_int (struct ui_out *uiout, char *fldname, int value);
+extern void ui_out_field_int (struct ui_out *uiout, const char *fldname,
+			      int value);
 
-extern void ui_out_field_core_addr (struct ui_out *uiout, char *fldname,
+extern void ui_out_field_core_addr (struct ui_out *uiout, const char *fldname,
 				    CORE_ADDR address);
 
-extern void ui_out_field_string (struct ui_out * uiout, char *fldname,
+extern void ui_out_field_string (struct ui_out * uiout, const char *fldname,
 				 const char *string);
 
-extern void ui_out_field_stream (struct ui_out *uiout, char *fldname,
+extern void ui_out_field_stream (struct ui_out *uiout, const char *fldname,
 				 struct ui_stream *buf);
 
-extern void ui_out_field_fmt (struct ui_out *uiout, char *fldname,
-			      char *format, ...);
+extern void ui_out_field_fmt (struct ui_out *uiout, const char *fldname,
+			      const char *format, ...);
 
-extern void ui_out_field_skip (struct ui_out *uiout, char *fldname);
+extern void ui_out_field_skip (struct ui_out *uiout, const char *fldname);
 
 extern void ui_out_spaces (struct ui_out *uiout, int numspaces);
 
-extern void ui_out_text (struct ui_out *uiout, char *string);
+extern void ui_out_text (struct ui_out *uiout, const char *string);
 
 extern void ui_out_message (struct ui_out *uiout, int verbosity,
-			    char *format, ...);
+			    const char *format, ...);
 
 extern struct ui_stream *ui_out_stream_new (struct ui_out *uiout);
 

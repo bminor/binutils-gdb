@@ -1,3 +1,20 @@
+2001-06-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* ui-out.h (ui_out_table_begin): Make char* parameters constant.
+	(ui_out_table_header, ui_out_field_int): Ditto.
+	(ui_out_field_core_addr, ui_out_field_string): Ditto.
+	(ui_out_field_stream, ui_out_field_fmt): Ditto.
+	(ui_out_field_skip, ui_out_text, ui_out_message): Ditto.
+	* ui-out.c (ui_out_table_begin, ui_out_table_header): Update.
+	(ui_out_field_core_addr, ui_out_field_stream): Update.
+	(ui_out_field_string, ui_out_field_fmt): Update.
+	(ui_out_text, ui_out_message): Update.
+	(append_header_to_list): Make char* parameters constant.
+	(uo_table_header, uo_table_begin): Ditto.
+	(uo_field_int, uo_field_skip): Ditto.
+	(uo_field_string, uo_field_fmt): Ditto.
+	(uo_text, uo_message): Ditto.
+
 2001-06-11  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* completer.c (gdb_completer_loc_break_characters): New variable.
