@@ -1,5 +1,5 @@
 /* Definitions for reading symbol files into GDB.
-   Copyright (C) 1990, 1991, 1992, 1993, 1994, 1996
+   Copyright (C) 1990, 1991, 1992, 1993, 1994, 1996, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -61,7 +61,7 @@ struct psymbol_allocation_list
    solib.c to communicate the section addresses in shared objects to
    symbol_file_add (). */
  
-#define MAX_SECTIONS 40
+#define MAX_SECTIONS 64
 struct section_addr_info 
 {
   /* Sections whose names are file format dependent. */

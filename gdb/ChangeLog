@@ -1,3 +1,8 @@
+2000-12-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb-stabs.h (SECT_OFF_MAX): Increase to 64.
+	* symfile.h (MAX_SECTIONS): Increase to 64.
+
 2000-12-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* config/sh/tm-sh.h (struct gdbarch_tdep): Get rid of
