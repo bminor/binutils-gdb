@@ -104,11 +104,12 @@ typedef struct
   } u;
 } srec_type;
 
-
+#define enda(x) (x->vma + x->size)
 /* 
    called once per input srecord, used to work out vma and size of data.
  */
 
+static bfd_vma low,high;
 static void
 size_srec(abfd, section, address, raw, length)
 bfd *abfd;
@@ -117,12 +118,12 @@ bfd_vma address;
 byte_as_two_char_type *raw;
 unsigned int length;
 {
-  if (address < section->vma)
-    section->vma = address;
-
-  if (address + length  > section->vma + section->size)
-    section->size = (address+length) -  section->vma;
+  if (address < low)
+    low = address;
+  if (address + length > high) 
+    high = address + length;
 }
+
 
 /*
  called once per input srecord, copies data from input into bfd_alloc'd area
@@ -228,8 +229,11 @@ bfd *abfd;
   section =  bfd_make_section(abfd, ".text");
   section->size = 0;
   section->vma = 0xffffffff;
+  low = 0xffffffff;
+  high = 0;
   pass_over(abfd, size_srec, section);
-
+  section->size = high - low;
+  section->vma = low;
   return abfd->xvec;
 }
 
@@ -286,9 +290,9 @@ int bytes_to_do;
   unsigned int i;
   srec_type buffer;
   bytes_written = 0;
-  if (section->size <= 0xffff) 
+  if (section->vma <= 0xffff) 
     type = 1;
-  else if (section->size <= 0xffffff) 
+  else if (section->vma <= 0xffffff) 
     type = 2;
   else
     type = 3;
@@ -368,14 +372,22 @@ DEFUN(srec_sizeof_headers,(abfd, exec),
 return 0;
 }
 
+static asymbol *
+DEFUN(srec_make_empty_symbol, (abfd),
+      bfd*abfd)
+{
+  asymbol *new=  (asymbol *)bfd_zalloc (abfd, sizeof (asymbol));
+  new->the_bfd = abfd;
+  return new;
+}
 /*SUPPRESS 460 */
 
-#define srec_new_section_hook (PROTO(boolean, (*), (bfd *, asection *)))bfd_false
+#define srec_new_section_hook (PROTO(boolean, (*), (bfd *, asection *)))bfd_true
 #define srec_get_symtab_upper_bound bfd_false
 #define srec_get_symtab (PROTO(unsigned int, (*), (bfd *, asymbol **)))bfd_0
 #define srec_get_reloc_upper_bound (PROTO(unsigned int, (*),(bfd*, asection *)))bfd_false
 #define srec_canonicalize_reloc (PROTO(unsigned int, (*),(bfd*,asection *, arelent **, asymbol **))) bfd_0
-#define srec_make_empty_symbol (PROTO(asymbol *,(*),(bfd*))) bfd_nullvoidptr
+
 #define srec_print_symbol (PROTO(void,(*),(bfd *, PTR, asymbol *, bfd_print_symbol_enum_type))) bfd_void
 
 #define srec_openr_next_archived_file (PROTO(bfd *, (*), (bfd*,bfd*))) bfd_nullvoidptr

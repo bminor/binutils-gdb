@@ -486,6 +486,11 @@ DEFUN(init_os,(s),
       ldmalloc((bfd_size_type)(sizeof(section_userdata_type)));
 
   s->bfd_section = bfd_make_section(output_bfd, s->name);
+  if (s->bfd_section == (asection *)NULL) {
+    info("%P%F output format %s cannot represent section called %s\n",
+	 output_bfd->xvec->name,
+	 s->name);
+  }
   s->bfd_section->output_section = s->bfd_section;
   s->bfd_section->flags = SEC_NO_FLAGS;
   /* We initialize an output sections output offset to minus its own */

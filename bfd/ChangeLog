@@ -1,3 +1,10 @@
+Thu Jun  6 18:27:38 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* ../include/oasys.h oasys.c (oasys_archive_p): fixed so it works
+	
+	* srec.c: now allows any number of sections to be created in a
+	file. Outputs addresses of the right length.
+
 Thu May 30 15:30:10 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* bfd.c (bfd_check_format): Fixed problem where when a defaulted

@@ -216,7 +216,7 @@ DEFUN(oasys_archive_p,(abfd),
   oasys_archive_header_type header;
   oasys_external_archive_header_type header_ext;
   unsigned int i;
-  
+  file_ptr filepos;  
   bfd_seek(abfd, (file_ptr) 0, false);
 
   
@@ -256,6 +256,7 @@ DEFUN(oasys_archive_p,(abfd),
 	(oasys_module_info_type*)
 	  bfd_alloc(abfd, sizeof(oasys_module_info_type) * header.mod_count);
 
+
       oasys_module_table_type record;
       oasys_external_module_table_type record_ext;
 
@@ -263,23 +264,34 @@ DEFUN(oasys_archive_p,(abfd),
       ar->module = module;
       ar->module_count = header.mod_count;
 
-      bfd_seek(abfd , header.mod_tbl_offset, SEEK_SET);
+
+      filepos = header.mod_tbl_offset;
       for (i = 0; i < header.mod_count; i++) {
+        bfd_seek(abfd , filepos, SEEK_SET);
 	bfd_read((PTR)&record_ext, 1, sizeof(record_ext), abfd);
 	
 	record.mod_size = bfd_h_get_32(abfd, record_ext.mod_size);
-	record.file_offset = bfd_h_get_32(abfd, record_ext.file_offset);
-	record.mod_name_length = bfd_h_get_32(abfd, record_ext.mod_name_length);
+	record.file_offset = bfd_h_get_32(abfd,
+					  record_ext.file_offset);
 
-	module[i].name = bfd_alloc(abfd,record.mod_name_length+1);
+	record.dep_count = bfd_h_get_32(abfd, record_ext.dep_count);
+	record.depee_count = bfd_h_get_32(abfd, record_ext.depee_count);
+	record.sect_count = bfd_h_get_32(abfd, record_ext.sect_count);
 
-	bfd_read(module[i].name, 1, record.mod_name_length +1, abfd);
-	/* SKip some stuff */
-	bfd_seek(abfd, record.dep_count * sizeof(int32_type),
-		 SEEK_CUR);
+
+	module[i].name = bfd_alloc(abfd,33);
+
+	memcpy(module[i].name, record_ext.mod_name, 33);
+	filepos +=
+	  sizeof(record_ext) + 
+	    record.dep_count * 4 +
+	      record.depee_count * 4 +
+		record.sect_count * 8 + 187,
+
 
 	module[i].size = record.mod_size;
 	module[i].pos = record.file_offset;
+	module[i].abfd = 0;
       }
       
     }
