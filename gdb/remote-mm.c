@@ -45,15 +45,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Offset of member MEMBER in a struct of type TYPE.  */
 #define offsetof(TYPE, MEMBER) ((int) &((TYPE *)0)->MEMBER)
 
-/* #define DEBUG 1		/* */
-#ifdef DEBUG
-# define DENTER(NAME)	(printf("Entering %s\n",NAME), fflush(stdout)) 
-# define DEXIT(NAME)	(printf("Exiting  %s\n",NAME), fflush(stdout))
-#else
-# define DENTER(NAME)	
-# define DEXIT(NAME)	
-#endif 
-
 #define DRAIN_INPUT()	(msg_recv_serial((union msg_t*)0))
 
 extern int stop_soon_quietly;           /* for wait_for_inferior */
@@ -175,8 +166,6 @@ mm_create_inferior (execfile, args, env)
    char	*token[MAX_TOKENS];
    char	cmd_line[BUFFER_SIZE];
 
-  DENTER("mm_create_inferior()");
-
   if (args && *args)
     error ("Can't pass arguments to remote mm process (yet).");
 
@@ -196,26 +185,18 @@ mm_create_inferior (execfile, args, env)
 Assuming you are at NYU debuging a kernel, i.e., no need to download.\n\n");
 
   /* We will get a task spawn event immediately.  */
-#ifdef NOTDEF		/* start_remote() now does a wait without a resume 
-			   so don't use it*/ 
-  start_remote ();
-#else
   init_wait_for_inferior ();
   clear_proceed_status ();
   stop_soon_quietly = 1;
   proceed(-1,-1,0);
   normal_stop ();
-#endif
-  DEXIT("mm_create_inferior()");
 }
 /**************************************************** REMOTE_MOURN_INFERIOR */
 static void
 mm_mourn()
 {
-  DENTER("mm_mourn()");
         pop_target ();                /* Pop back to no-child state */
         generic_mourn_inferior ();
-  DEXIT("mm_mourn()");
 }
 
 /********************************************************************** damn_b
@@ -278,8 +259,6 @@ mm_open (name, from_tty)
   TERMINAL sg;
   unsigned int prl;
   char *p;
-
-  DENTER("mm_open()");
 
   /* Find the first whitespace character, it separates dev_name from
      prog_name.  */
@@ -431,8 +410,6 @@ erroid:
   out_msg_buf->go_msg.length = 0;
   msg_send_serial(out_msg_buf);
   /* No message to expect after a GO */
-
-  DEXIT("mm_open()");
 }
 
 /**************************************************************** REMOTE_CLOSE
@@ -443,8 +420,6 @@ static void
 mm_close (quitting)	/*FIXME: how is quitting used */
      int quitting;
 {
-  DENTER("mm_close()");
-
   if (mm_desc < 0)
     error ("Can't close remote connection: not debugging remotely.");
 
@@ -470,9 +445,6 @@ mm_close (quitting)	/*FIXME: how is quitting used */
 #endif
 
   printf ("Ending remote debugging\n");
-
-  DEXIT("mm_close()");
-
 } 
 
 /************************************************************* REMOTE_ATACH */
@@ -485,16 +457,11 @@ mm_attach (args, from_tty)
      int from_tty;
 {
 
-  DENTER("mm_attach()");
-
   if (!mm_stream)
       error ("MiniMon not opened yet, use the 'target minimon' command.\n");
 	
-  dont_repeat();
-
   if (from_tty)
       printf ("Attaching to remote program %s...\n", prog_name);
-
 
   /* Make sure the target is currently running, it is supposed to be. */
   /* FIXME: is it ok to send MiniMon a BREAK if it is already stopped in 
@@ -509,16 +476,6 @@ mm_attach (args, from_tty)
   out_msg_buf->break_msg.code = BREAK;
   out_msg_buf->break_msg.length = 0;
   msg_send_serial(out_msg_buf);
-
-  mark_breakpoints_out ();
-  init_wait_for_inferior ();
-  clear_proceed_status ();
-  stop_soon_quietly = 1;
-  wait_for_inferior ();
-  stop_soon_quietly = 0;
-  normal_stop ();
-
-  DEXIT("mm_attach()");
 }
 /********************************************************** REMOTE_DETACH */
 /* Terminate the open connection to the remote debugger.
@@ -529,13 +486,11 @@ mm_detach (args,from_tty)
      char *args;
      int from_tty;
 {
-  DENTER("mm_dettach()");
   remove_breakpoints();		/* Just in case there were any left in */
   out_msg_buf->go_msg.code = GO;
   out_msg_buf->go_msg.length = 0;
   msg_send_serial(out_msg_buf);
   pop_target();         	/* calls mm_close to do the real work */
-  DEXIT("mm_dettach()");
 }
 
 
@@ -546,8 +501,6 @@ static void
 mm_resume (step, sig)
      int step, sig;
 {
-  DENTER("mm_resume()");
-
   if (sig)
     error ("Can't send signals to a remote MiniMon system.");
 
@@ -561,8 +514,6 @@ mm_resume (step, sig)
       out_msg_buf->go_msg.length = 0;
       msg_send_serial(out_msg_buf);
   }
-
-  DEXIT("mm_resume()");
 }
 
 /***************************************************************** REMOTE_WAIT
@@ -577,7 +528,6 @@ mm_wait (status)
   int old_timeout = timeout;
   int old_immediate_quit = immediate_quit;
 
-  DENTER("mm_wait()");
   WSETEXIT ((*status), 0);
 
 
@@ -688,7 +638,6 @@ exit:
 
   timeout = old_timeout;	/* Restore original timeout value */
   immediate_quit = old_immediate_quit;
-  DEXIT("mm_wait()");
   return 0;
 }
 
@@ -706,8 +655,6 @@ int	regno;
 	fetch_register(regno);
 	return;
   }
-
-  DENTER("mm_fetch_registers()");
 
 /* Gr1/rsp */
   out_msg_buf->read_req_msg.byte_count = 4*1;
@@ -797,8 +744,6 @@ int	regno;
     supply_register (FPS_REGNUM, &val);
     supply_register (EXO_REGNUM, &val);
   }
-
-  DEXIT("mm_fetch_registerS()");
 }
 
 
@@ -819,7 +764,6 @@ int regno;
     return;
   }
 
-  DENTER("mm_store_registers()");
   result = 0;
 
   out_msg_buf->write_r_msg.code= WRITE_REQ;
@@ -930,8 +874,6 @@ int regno;
   }
  
   registers_changed ();
-  DEXIT("mm_store_registers()");
-  /* FIXME return result;  it is ignored by caller.  */
 }
 
 /*************************************************** REMOTE_PREPARE_TO_STORE */
@@ -982,7 +924,6 @@ mm_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  DENTER("mm_insert_breakpoint()");
   out_msg_buf->bkpt_set_msg.code = BKPT_SET;
   out_msg_buf->bkpt_set_msg.length = 4*4;
   out_msg_buf->bkpt_set_msg.memory_space = I_MEM;
@@ -991,10 +932,8 @@ mm_insert_breakpoint (addr, contents_cache)
   out_msg_buf->bkpt_set_msg.bkpt_type = -1;	/* use illop for 29000 */
   msg_send_serial( out_msg_buf);
   if (expect_msg(BKPT_SET_ACK,in_msg_buf,1)) {
-  	DEXIT("mm_insert_breakpoint() success");
 	return 0;		/* Success */
   } else {
-  	DEXIT("mm_insert_breakpoint() failure");
 	return 1;		/* Failure */
   }
 }
@@ -1005,17 +944,14 @@ mm_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  DENTER("mm_remove_breakpoint()");
   out_msg_buf->bkpt_rm_msg.code = BKPT_RM;
   out_msg_buf->bkpt_rm_msg.length = 4*3;
   out_msg_buf->bkpt_rm_msg.memory_space = I_MEM;
   out_msg_buf->bkpt_rm_msg.bkpt_addr = (ADDR32) addr;
   msg_send_serial( out_msg_buf);
   if (expect_msg(BKPT_RM_ACK,in_msg_buf,1)) {
-  	DEXIT("mm_remove_breakpoint()");
 	return 0;		/* Success */
   } else {
-  	DEXIT("mm_remove_breakpoint()");
 	return 1;		/* Failure */
   }
 }
@@ -1029,7 +965,6 @@ int     from_tty;
 {
 	char	buf[4];
 
-  	DENTER("mm_kill()");
 #if defined(KERNEL_DEBUGGING)
 	/* We don't ever kill the kernel */
 	if (from_tty) {
@@ -1053,7 +988,6 @@ int     from_tty;
 	}
 	pop_target();
 #endif 
-	DEXIT("mm_kill()");
 }
 
 
@@ -1100,7 +1034,6 @@ mm_write_inferior_memory (memaddr, myaddr, len)
 {
   int i,nwritten;
 
-  /* DENTER("mm_write_inferior_memory()"); */
   out_msg_buf->write_req_msg.code= WRITE_REQ;
   out_msg_buf->write_req_msg.memory_space = mm_memory_space(memaddr);	
 
@@ -1121,7 +1054,6 @@ mm_write_inferior_memory (memaddr, myaddr, len)
 		break;	
   	}
   }
-  /* DEXIT("mm_write_inferior_memory()"); */
   return(nwritten);
 }
 
@@ -1136,7 +1068,6 @@ mm_read_inferior_memory(memaddr, myaddr, len)
 {
   int i,nread;
 
-  /* DENTER("mm_read_inferior_memory()"); */
   out_msg_buf->read_req_msg.code= READ_REQ;
   out_msg_buf->read_req_msg.memory_space = mm_memory_space(memaddr);
 
@@ -1371,7 +1302,6 @@ fetch_register (regno)
      int regno;
 {
      int  result;
-  DENTER("mm_fetch_register()");
   out_msg_buf->read_req_msg.code= READ_REQ;
   out_msg_buf->read_req_msg.length = 4*3;
   out_msg_buf->read_req_msg.byte_count = 4;
@@ -1412,7 +1342,6 @@ fetch_register (regno)
   } else {
 	result = -1;
   }
-  DEXIT("mm_fetch_register()");
   return result;
 }
 /*****************************************************************************/ 
@@ -1425,7 +1354,6 @@ store_register (regno)
 {
      int  result;
 
-  DENTER("store_register()");
   out_msg_buf->write_req_msg.code= WRITE_REQ;
   out_msg_buf->write_req_msg.length = 4*4;
   out_msg_buf->write_req_msg.byte_count = 4;
@@ -1472,7 +1400,6 @@ store_register (regno)
   } else {
 	result = -1;
   }
-  DEXIT("store_register()");
   return result;
 }
 /****************************************************************************/
@@ -1612,13 +1539,11 @@ INT32	msgcode;		/* Msg code we expect */
 union msg_t *msg_buf;		/* Where to put  the message received */
 int	from_tty;		/* Print message on error if non-zero */
 {
-  /* DENTER("expect_msg()"); */
   int	retries=0;
   while(msg_recv_serial(msg_buf) && (retries++<MAX_RETRIES)); 
   if (retries >= MAX_RETRIES) {
 	printf("Expected msg %s, ",msg_str(msgcode));
 	printf("no message received!\n");
-        /* DEXIT("expect_msg() failure"); */
         return(0);		/* Failure */
   }
 
@@ -1629,10 +1554,8 @@ int	from_tty;		/* Print message on error if non-zero */
         if (msg_buf->generic_msg.code == ERROR) 
 		printf("%s\n",error_msg_str(msg_buf->error_msg.error_code));
      }
-     /* DEXIT("expect_msg() failure"); */
      return(0);			/* Failure */
   }
-  /* DEXIT("expect_msg() success"); */
   return(1);			/* Success */
 }	
 /****************************************************************************/

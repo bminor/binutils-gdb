@@ -1,3 +1,26 @@
+Fri Sep 25 21:59:27 1992  John Gilmore  (gnu@cygnus.com)
+
+	Split non-target-dependent code out of target_attach routines.
+
+	* target.h:  Comments on target_attach args and results.
+	* infcmd.c (attach_command): Check for existing execution, call
+	target_attach, set up terminal status and wait_for_inferior, wait
+	for the attach status, and do normal_stop.
+	* inftarg.c (child_attach):  Remove target independent stuff.
+	* remote-adapt.c (adapt_attach):  Ditto.
+	* remote-mm.c (mm_attach):  Ditto.
+	* remote-udi.c (udi_attach):  Ditto.
+	* remote-vx.c (vx_attach):  Ditto.
+
+	Cleanup.
+
+	* remote-hms.c (hms_attach):  Remove completely, it was useless.
+	* remote-mm.c, remote-hms.c, remote-udi.c, remote-adapt.c:  Remove
+	commented-out start_remote calls.
+	* remote-hms.c, remote-adapt.c, remote-mm.c, remote-udi.c: Remove
+	DENTER and DEXIT macros and their calls.  Use a real debugger --
+	like gdb -- to see what functions are being called when.
+
 Fri Sep 25 18:48:20 1992  John Gilmore  (gnu@cygnus.com)
 
 	* infrun.c, inftarg.c, inferior.h:  Comment and lint cleanups.

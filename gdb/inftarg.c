@@ -94,8 +94,7 @@ child_wait (status)
 }
 
 
-/* Attach to process PID, then initialize for debugging it
-   and wait for the trace-trap that results from attaching.  */
+/* Attach to process PID, then initialize for debugging it.  */
 
 static void
 child_attach (args, from_tty)
@@ -104,8 +103,6 @@ child_attach (args, from_tty)
 {
   char *exec_file;
   int pid;
-
-  dont_repeat();
 
   if (!args)
     error_no_arg ("process-id to attach");
@@ -117,14 +114,6 @@ child_attach (args, from_tty)
 
   if (pid == getpid())		/* Trying to masturbate? */
     error ("I refuse to debug myself!");
-
-  if (target_has_execution)
-    {
-      if (query ("A program is being debugged already.  Kill it? "))
-	target_kill ();
-      else
-	error ("Inferior not killed.");
-    }
 
   if (from_tty)
     {
@@ -141,18 +130,6 @@ child_attach (args, from_tty)
   attach (pid);
   inferior_pid = pid;
   push_target (&child_ops);
-
-  mark_breakpoints_out ();
-  target_terminal_init ();
-  clear_proceed_status ();
-  stop_soon_quietly = 1;
-  /*proceed (-1, 0, -2);*/
-  target_terminal_inferior ();
-  wait_for_inferior ();
-#ifdef SOLIB_ADD
-  SOLIB_ADD ((char *)0, from_tty, (struct target_ops *)0);
-#endif
-  normal_stop ();
 #endif  /* ATTACH_DETACH */
 }
 

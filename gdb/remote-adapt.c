@@ -68,16 +68,6 @@ static int processor_type=TYPE_UNKNOWN;
 #define FREEZE_MODE 	(read_register(CPS_REGNUM) && 0x400) 
 #define USE_SHADOW_PC   ((processor_type == TYPE_A29050) && FREEZE_MODE)
 
-
-/* #define DEBUG	/* */
-#ifdef DEBUG
-# define DENTER(NAME)   (printf_filtered("Entering %s\n",NAME), fflush(stdout))
-# define DEXIT(NAME)    (printf_filtered("Exiting  %s\n",NAME), fflush(stdout))
-#else
-# define DENTER(NAME)
-# define DEXIT(NAME)
-#endif
-
 /* Can't seem to get binary coff working */
 #define ASCII_COFF		/* Adapt will be downloaded with ascii coff */
 
@@ -325,11 +315,9 @@ adapt_kill(arg,from_tty)
 char	*arg;
 int	from_tty;
 {
-	DENTER("adapt_kill()");
 	fprintf (adapt_stream, "K");
 	fprintf (adapt_stream, "\r");
 	expect_prompt ();
-	DEXIT("adapt_kill()");
 }
 /*
  * Download a file specified in 'args', to the adapt. 
@@ -344,7 +332,6 @@ int	fromtty;
 	int	n;
 	char	buffer[1024];
 	
-	DENTER("adapt_load()");
 	if (!adapt_stream) {
 		printf_filtered("Adapt not open. Use 'target' command to open adapt\n");
 		return;
@@ -384,7 +371,6 @@ int	fromtty;
   	expect_prompt ();	/* Skip garbage that comes out */
 	fprintf (adapt_stream, "\r");
   	expect_prompt ();
-	DEXIT("adapt_load()");
 }
 
 /* This is called not only when we first attach, but also when the
@@ -396,8 +382,6 @@ adapt_create_inferior (execfile, args, env)
      char **env;
 {
   int entry_pt;
-
-  DENTER("adapt_create_inferior()");
 
   if (args && *args)
     error ("Can't pass arguments to remote adapt process.");
@@ -439,7 +423,6 @@ adapt_create_inferior (execfile, args, env)
   } else {
 	printf_filtered("Adapt not open yet.\n");
   }
-  DEXIT("adapt_create_inferior()");
 }
 
 /* Translate baud rates from integers to damn B_codes.  Unix should
@@ -498,7 +481,6 @@ adapt_open (name, from_tty)
   unsigned int prl;
   char *p;
 
-  DENTER("adapt_open()");
   /* Find the first whitespace character, it separates dev_name from
      prog_name.  */
   if (name == 0)
@@ -555,8 +537,6 @@ the baud rate, and the name of the program to run on the remote system.");
   adapt_stream = fdopen (adapt_desc, "r+");
 
   push_target (&adapt_ops);
-  /* start_remote ();              /* Initialize gdb process mechanisms */
-
 
 #ifndef HAVE_TERMIO
 #ifndef NO_SIGINTERRUPT
@@ -615,7 +595,6 @@ the baud rate, and the name of the program to run on the remote system.");
 	fprintf_filtered(stderr,
 	"Freeze-mode debugging not available, and can only be done on an A29050.\n");
   }
-  DEXIT("adapt_open()");
 }
 
 /* Close out all files and local state before this target loses control. */
@@ -624,8 +603,6 @@ static void
 adapt_close (quitting)
      int quitting;
 {
-
-  DENTER("adapt_close()");
 
   /* Clear any break points */
   adapt_clear_breakpoints();
@@ -658,7 +635,6 @@ adapt_close (quitting)
     log_file = NULL;
   }
 #endif
-  DEXIT("adapt_close()");
 }
 
 /* Attach to the target that is already loaded and possibly running */
@@ -668,26 +644,12 @@ adapt_attach (args, from_tty)
      int from_tty;
 {
 
-  DENTER("adapt_attach()");
   if (from_tty)
       printf_filtered ("Attaching to remote program %s.\n", prog_name);
-
-  /* push_target(&adapt_ops);	/* This done in adapt_open() */
-
-  mark_breakpoints_out ();
 
   /* Send the adapt a kill. It is ok if it is not already running */
   fprintf(adapt_stream, "K\r"); fflush(adapt_stream);
   expect_prompt();		/* Slurp the echo */
-
-  /* We will get a task spawn event immediately.  */
-  init_wait_for_inferior ();
-  clear_proceed_status ();
-  stop_soon_quietly = 1;
-  wait_for_inferior ();
-  stop_soon_quietly = 0;
-  normal_stop ();
-  DEXIT("adapt_attach()");
 }
 
 
@@ -699,7 +661,7 @@ adapt_detach (args,from_tty)
      char *args;
      int from_tty;
 {
-  DENTER("adapt_detach()");
+
   if (adapt_stream) { /* Send it on its way (tell it to continue)  */
 	adapt_clear_breakpoints();
   	fprintf(adapt_stream,"G\r");
@@ -708,7 +670,6 @@ adapt_detach (args,from_tty)
   pop_target();		/* calls adapt_close to do the real work */
   if (from_tty)
     printf_filtered ("Ending remote %s debugging\n", target_shortname);
-  DEXIT("adapt_detach()");
 }
  
 /* Tell the remote machine to resume.  */
@@ -717,7 +678,6 @@ void
 adapt_resume (step, sig)
      int step, sig;
 {
-  DENTER("adapt_resume()");
   if (step)	
     {
       write (adapt_desc, "t 1,s\r", 6);
@@ -739,7 +699,6 @@ adapt_resume (step, sig)
       /* Swallow the echo.  */
       expect_prompt(); 
     }
-  DEXIT("adapt_resume()");
 }
 
 /* Wait until the remote machine stops, then return,
@@ -771,8 +730,6 @@ adapt_wait (status)
   int ch_handled;
   int old_timeout = timeout;
   int old_immediate_quit = immediate_quit;
-
-  DENTER("adapt_wait()");
 
   WSETEXIT ((*status), 0);
 
@@ -824,7 +781,6 @@ adapt_wait (status)
     WSETEXIT ((*status), 0);
   timeout = old_timeout;
   immediate_quit = old_immediate_quit;
-  DEXIT("adapt_wait()");
   return 0;
 }
 
@@ -875,8 +831,6 @@ adapt_fetch_registers ()
   char tempbuf[10];
   int	sreg_buf[16];
   int i,j;
-
-  DENTER("adapt_fetch_registers()");
 
 /* 
  * Global registers
@@ -979,8 +933,6 @@ adapt_fetch_registers ()
   expect ("GR001 ");
   get_hex_regs (1, GR1_REGNUM);
   expect_prompt ();
-
-  DEXIT("adapt_fetch_registers()");
 }
 
 /* Fetch register REGNO, or all registers if REGNO is -1.
@@ -989,7 +941,6 @@ static void
 adapt_fetch_register (regno)
      int regno;
 {
-  DENTER("adapt_fetch_register()");
   if (regno == -1)
     adapt_fetch_registers ();
   else
@@ -1001,7 +952,6 @@ adapt_fetch_register (regno)
       get_hex_regs (1, regno);
       expect_prompt ();
     }
-  DEXIT("adapt_fetch_register()");
 }
 
 /* Store the remote registers from the contents of the block REGS.  */
@@ -1011,7 +961,6 @@ adapt_store_registers ()
 {
   int i, j;
 
-  DENTER("adapt_store_registers()");
   fprintf (adapt_stream, "s gr1,%x\r", read_register (GR1_REGNUM));
   expect_prompt ();
 
@@ -1084,7 +1033,6 @@ adapt_store_register (regno)
 	registers_changed ();
       expect_prompt ();
     }
-  DEXIT("adapt_store_registers()");
 }
 
 /* Get ready to modify the registers array.  On machines which store
@@ -1157,9 +1105,7 @@ adapt_write_inferior_memory (memaddr, myaddr, len)
   int i;
   unsigned int cps;
 
-  /* DENTER("adapt_write_inferior_memory()"); */
-
-/* Turn TU bit off so we can do 'sb' commands */
+  /* Turn TU bit off so we can do 'sb' commands */
   cps = read_register(CPS_REGNUM);
   if (cps & 0x00000800)
   	write_register(CPS_REGNUM,cps&~(0x00000800));
@@ -1179,7 +1125,6 @@ adapt_write_inferior_memory (memaddr, myaddr, len)
   /* Restore the old value of cps if the TU bit was on */
   if (cps & 0x00000800)
   	write_register(CPS_REGNUM,cps);
-  /* DEXIT("adapt_write_inferior_memory()"); */
   return len;
 }
 
@@ -1211,7 +1156,6 @@ adapt_read_inferior_memory(memaddr, myaddr, len)
      adapt_read_bytes (CORE_ADDR_MAX - 3, foo, 4)
      doesn't need to work.  Detect it and give up if there's an attempt
      to do that.  */
-  /* DENTER("adapt_read_inferior_memory()"); */
 
   if (((memaddr - 1) + len) < memaddr)
     return EIO;
@@ -1256,8 +1200,6 @@ adapt_read_inferior_memory(memaddr, myaddr, len)
 
       startaddr += len_this_pass;
     }
-
-  /* DEXIT("adapt_read_inferior_memory()"); */
   return count;
 }
 
@@ -1268,18 +1210,15 @@ adapt_insert_breakpoint(addr, save)
 CORE_ADDR	addr;
 char		*save;	/* Throw away, let adapt save instructions */
 {
-  DENTER("adapt_insert_breakpoint()"); 
   if (num_brkpts < MAX_BREAKS) {
   	num_brkpts++;
   	fprintf (adapt_stream, "B %x", addr);
   	fprintf (adapt_stream, "\r");
   	expect_prompt ();
-  	DEXIT("adapt_insert_breakpoint() success"); 
 	return(0);	/* Success */
   } else {
 	fprintf_filtered(stderr,
 		"Too many break points, break point not installed\n");
-  	DEXIT("adapt_insert_breakpoint() failure"); 
 	return(1);	/* Failure */
   }
 
@@ -1289,7 +1228,6 @@ adapt_remove_breakpoint(addr, save)
 CORE_ADDR	addr;
 char		*save;	/* Throw away, let adapt save instructions */
 {
-  DENTER("adapt_remove_breakpoint()");
   if (num_brkpts > 0) {
 	  num_brkpts--;
 	  fprintf (adapt_stream, "BR %x", addr);
@@ -1297,7 +1235,6 @@ char		*save;	/* Throw away, let adapt save instructions */
 	  fflush (adapt_stream);
 	  expect_prompt ();
   }
-  DEXIT("adapt_remove_breakpoint()");
   return(0);
 }
 
@@ -1305,7 +1242,6 @@ char		*save;	/* Throw away, let adapt save instructions */
 static int
 adapt_clear_breakpoints() 
 { 
-  DENTER("adapt_clear_breakpoint()");
   if (adapt_stream) {
   	fprintf (adapt_stream, "BR");	/* Clear all break points */
   	fprintf (adapt_stream, "\r");
@@ -1313,16 +1249,13 @@ adapt_clear_breakpoints()
   	expect_prompt ();
   }
   num_brkpts = 0;
-  DEXIT("adapt_clear_breakpoint()");
 }
 static void
 adapt_mourn() 
 { 
-  DENTER("adapt_mourn()");
   adapt_clear_breakpoints();
   pop_target ();                /* Pop back to no-child state */
   generic_mourn_inferior ();
-  DEXIT("adapt_mourn()");
 }
 
 /* Display everthing we read in from the adapt until we match/see the

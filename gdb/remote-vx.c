@@ -1126,8 +1126,7 @@ vx_open (args, from_tty)
   clnt_freeres (pClient, xdr_ldtabl, &loadTable);
 }
 
-/* attach_command --
-   takes a task started up outside of gdb and ``attaches'' to it.
+/* Takes a task started up outside of gdb and ``attaches'' to it.
    This stops it cold in its tracks and allows us to start tracing it.  */
 
 static void
@@ -1140,8 +1139,6 @@ vx_attach (args, from_tty)
   Rptrace ptrace_in;
   Ptrace_return ptrace_out;
   int status;
-
-  dont_repeat();
 
   if (!args)
     error_no_arg ("process-id to attach");
@@ -1170,23 +1167,6 @@ vx_attach (args, from_tty)
   push_target (&vx_run_ops);
   inferior_pid = pid;
   vx_running = 0;
-
-  mark_breakpoints_out ();
-
-  /* Set up the "saved terminal modes" of the inferior
-     based on what modes we are starting it with.  */
-  target_terminal_init ();
-
-  /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
-
-  /* We will get a task spawn event immediately.  */
-  init_wait_for_inferior ();
-  clear_proceed_status ();
-  stop_soon_quietly = 1;
-  wait_for_inferior ();
-  stop_soon_quietly = 0;
-  normal_stop ();
 }
 
 

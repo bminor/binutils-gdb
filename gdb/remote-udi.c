@@ -50,18 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "29k-share/udi/udiproc.h"
 
 /* access the register store directly, without going through
-   the normal handler functions. This avoids an extra data copy
-*/
-
-/* #define DEBUG 1		/* */
-#ifdef DEBUG 
-# define DENTER(NAME)	(printf("Entering %s\n",NAME), fflush(stdout)) 
-# define DEXIT(NAME)	(printf("Exiting  %s\n",NAME), fflush(stdout))
-#else
-# define DENTER(NAME)	
-# define DEXIT(NAME)	
-#endif 
-
+   the normal handler functions. This avoids an extra data copy.  */
 
 extern int stop_soon_quietly;           /* for wait_for_inferior */
 extern struct value *call_function_by_hand();
@@ -169,7 +158,6 @@ udi_create_inferior (execfile, args, env)
      char *args;
      char **env;
 {
-  DENTER("udi_create_inferior()");
 
   if (execfile)
   { if (prog_name != NULL)
@@ -196,25 +184,16 @@ udi_create_inferior (execfile, args, env)
    udi_load(args, 0);
 #endif  /* !ULTRA3 */
 
-  /* We will get a task spawn event immediately.  */
-#ifdef NOTDEF		/* start_remote() now does a wait without a resume 
-			   so don't use it*/ 
-  start_remote ();
-#else
   init_wait_for_inferior ();
   clear_proceed_status ();
   proceed(-1,-1,0);
-#endif
-  DEXIT("udi_create_inferior()");
 }
 /******************************************************* UDI_MOURN_INFERIOR */
 static void
 udi_mourn()
 {
-  DENTER("udi_mourn()");
         pop_target ();                /* Pop back to no-child state */
         generic_mourn_inferior ();
-  DEXIT("udi_mourn()");
 }
 
 /******************************************************************** UDI_OPEN
@@ -241,8 +220,6 @@ udi_open (name, from_tty)
   UDIInt	NumberOfChips = 10;
   UDIPId	PId;
   UDIUInt32	TIPId, TargetId, DFEId, DFE, TIP, DFEIPCId, TIPIPCId;
-
-  DENTER("udi_open()");
 
   target_preopen(from_tty);
 
@@ -379,7 +356,6 @@ udi_close (quitting)	/*FIXME: how is quitting used */
      int quitting;
 {
   int	Terminate = -1;
-  DENTER("udi_close()");
 
   if (udi_session_id < 0)
     error ("Can't close udi connection: not debugging remotely.");
@@ -402,8 +378,6 @@ udi_close (quitting)	/*FIXME: how is quitting used */
 #endif
 
   printf_filtered ("  Ending remote debugging\n");
-
-  DEXIT("udi_close()");
 } 
 
 /**************************************************************** UDI_ATACH */
@@ -421,7 +395,6 @@ udi_attach (args, from_tty)
   UDISizeT	Size = 4;
   UDICount	CountDone;
   UDIBool	HostEndian = 0;
-  DENTER("udi_attach()");
 
   if (udi_session_id < 0)
       error ("UDI connection not opened yet, use the 'target udi' command.\n");
@@ -429,15 +402,12 @@ udi_attach (args, from_tty)
   if (from_tty)
       printf ("Attaching to remote program %s...\n", prog_name);
 
-  mark_breakpoints_out ();
   UDIStop();
   From.Space = 11;
   From.Offset = UDI29KSpecialRegs;
   if(UDIRead(From, &PC_adds, Count, Size, &CountDone, HostEndian))
     error ("UDIRead failed in udi_attach");
   printf ("Remote process is now halted, pc1 = 0x%x.\n", PC_adds);
-
-  DEXIT("udi_attach()");
 }
 /************************************************************* UDI_DETACH */
 /* Terminate the open connection to the TIP process.
@@ -448,14 +418,12 @@ udi_detach (args,from_tty)
      char *args;
      int from_tty;
 {
-  DENTER("udi_dettach()");
   remove_breakpoints();		/* Just in case there were any left in */
   if(UDIDisconnect(udi_session_id))
     error ("UDIDisconnect() failed in udi_detach");
   pop_target();         	/* calls udi_close to do the real work */
   if (from_tty)
     printf ("Ending remote debugging\n");
-  DEXIT("udi_dettach()");
 }
 
 
@@ -470,7 +438,7 @@ udi_resume (step, sig)
   UDIUInt32	Steps = 1;
   UDIStepType   StepType = UDIStepNatural;
   UDIRange      Range;
-  DENTER("udi_resume()");
+
   if (step) 			/* step 1 instruction */
   {  tip_error = tip_error = UDIStep(Steps, StepType, Range);
       if(tip_error)fprintf(stderr,  "UDIStep() error = %d\n", tip_error);
@@ -481,8 +449,6 @@ udi_resume (step, sig)
   { if(UDIExecute())
       error ("UDIExecute() failed in udi_resume");
   }
-
-  DEXIT("udi_resume()");
 }
 
 /******************************************************************** UDI_WAIT
@@ -501,7 +467,6 @@ udi_wait (status)
   int 		old_immediate_quit = immediate_quit;
   int		i;
 
-  DENTER("udi_wait()");
   WSETEXIT ((*status), 0);
 
 /* wait for message to arrive. It should be:
@@ -619,7 +584,6 @@ exit:
 
   timeout = old_timeout;	/* Restore original timeout value */
   immediate_quit = old_immediate_quit;
-  DEXIT("udi_wait()");
   return 0;
 }
 
@@ -964,7 +928,6 @@ int     from_tty;
 {
 	char	buf[4];
 
-  	DENTER("udi_kill()");
 #if defined(ULTRA3) && defined(KERNEL_DEBUGGING)
 	/* We don't ever kill the kernel */
 	if (from_tty) {
@@ -979,7 +942,6 @@ int     from_tty;
 	}
 	pop_target();
 #endif 
-	DEXIT("udi_kill()");
 }
 
 
@@ -1053,8 +1015,6 @@ udi_write_inferior_memory (memaddr, myaddr, len)
   UDICount	CountDone = 0;
   UDIBool	HostEndian = 0;
   
-
-  /* DENTER("udi_write_inferior_memory()"); */
   To.Space = udi_memory_space(memaddr);	
   From = (UDIUInt32*)myaddr;
 
@@ -1071,7 +1031,6 @@ udi_write_inferior_memory (memaddr, myaddr, len)
 	   From += CountDone;
 	}
   }
-  /* DEXIT("udi_write_inferior_memory()"); */
   return(nwritten);
 }
 
@@ -1092,8 +1051,6 @@ udi_read_inferior_memory(memaddr, myaddr, len)
   UDICount	CountDone = 0;
   UDIBool	HostEndian = 0;
   
-
-  /* DENTER("udi_read_inferior_memory()"); */
   From.Space = udi_memory_space(memaddr);	
   To = (UDIUInt32*)myaddr;
 
@@ -1198,7 +1155,6 @@ store_register (regno)
   UDICount	CountDone;
   UDIBool	HostEndian = 0;
 
-  DENTER("store_register()");
   From =  read_register (regno);	/* get data value */
 
   if (regno == GR1_REGNUM)
@@ -1240,7 +1196,6 @@ store_register (regno)
     result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
   }
 
-  DEXIT("store_register()");
   if(result)
   { result = -1;
     error("UDIWrite() failed in store_registers");

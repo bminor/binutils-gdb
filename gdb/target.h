@@ -80,6 +80,7 @@ struct target_ops
   int 	      (*to_lookup_symbol) PARAMS ((char *, CORE_ADDR *));
   void 	      (*to_create_inferior) PARAMS ((char *, char *, char **));
   void 	      (*to_mourn_inferior) PARAMS ((void));
+  int	      (*to_can_run) PARAMS ((void));
   enum strata   to_stratum;
   struct target_ops
     	       *to_next;
@@ -128,7 +129,13 @@ extern struct target_ops	*current_target;
 #define	target_close(quitting)	\
 	(*current_target->to_close) (quitting)
 
-/* Attaches to a process on the target side.  */
+/* Attaches to a process on the target side.  Arguments are as passed
+   to the `attach' command by the user.  This routine can be called
+   when the target is not on the target-stack, if the target_can_run
+   routine returns 1; in that case, it must push itself onto the stack.  
+   Upon exit, the target should be ready for normal operations, and
+   should be ready to deliver the status of the process immediately 
+   (without waiting) to an upcoming target_wait call.  */
 
 #define	target_attach(args, from_tty)	\
 	(*current_target->to_attach) (args, from_tty)
@@ -299,6 +306,11 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 #define	target_mourn_inferior()	\
 	(*current_target->to_mourn_inferior) ()
 
+/* Does target have enough data to do a run or attach command? */
+
+#define target_can_run(t) \
+  	((t)->to_can_run) ()
+
 /* Pointer to next target in the chain, e.g. a core file and an exec file.  */
 
 #define	target_next \
@@ -393,5 +405,11 @@ memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
 
 void
 noprocess PARAMS ((void));
+
+void
+find_default_attach PARAMS ((char *, int));
+
+void
+find_default_create_inferior PARAMS ((char *, char *, char **));
 
 #endif	/* !defined (TARGET_H) */

@@ -49,15 +49,6 @@ extern struct target_ops hms_ops;
 
 static int quiet = 1;
 
-#ifdef DEBUG
-# define DENTER(NAME) if (!quiet)  (printf_filtered("Entering %s\n",NAME), fflush(stdout))
-# define DEXIT(NAME)  if (!quiet)  (printf_filtered("Exiting  %s\n",NAME), fflush(stdout))
-#else
-# define DENTER(NAME)
-# define DEXIT(NAME)
-#endif
-
-
 /***********************************************************************/
 /* Caching stuff stolen from remote-nindy.c  */
 
@@ -417,8 +408,6 @@ int	fromtty;
   int	n;
   char	buffer[1024];
 
-   
-  DENTER("hms_load()");
   check_open();
 
   dcache_flush();
@@ -466,8 +455,6 @@ int	fromtty;
   sprintf(buffer, "r PC=%x", abfd->start_address);
   hms_write_cr(buffer);
   expect_prompt();
-  
-  DEXIT("hms_load()");
 }
 
 /* This is called not only when we first attach, but also when the
@@ -480,7 +467,6 @@ hms_create_inferior (execfile, args, env)
 {
   int entry_pt;
   char buffer[100];    
-  DENTER("hms_create_inferior()");
 
   if (args && *args)
    error ("Can't pass arguments to remote hms process.");
@@ -500,9 +486,6 @@ hms_create_inferior (execfile, args, env)
 
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
   proceed(entry_pt, -1, 0);
-
-
-  DEXIT("hms_create_inferior()");
 }
 
 
@@ -605,26 +588,20 @@ hms_open (name, from_tty)
   unsigned int prl;
   char *p;
   
-  DENTER("hms_open()");
   if(name == 0) 
   {
     name = "";
-    
   }
   if (is_open)  
-   hms_close (0);
+    hms_close (0);
   if (name && strlen(name))
-   dev_name = strdup(name);
+    dev_name = strdup(name);
   if (!serial_open(dev_name))
-   perror_with_name ((char *)dev_name);
+    perror_with_name ((char *)dev_name);
   serial_raw();
   is_open = 1;
 
-
   dcache_init();
-
-
-  /* start_remote ();              /* Initialize gdb process mechanisms */
 
   get_baudrate_right();
   
@@ -635,10 +612,7 @@ hms_open (name, from_tty)
   /* Clear any break points */
   hms_clear_breakpoints();
 
-
   printf_filtered("Connected to remote H8/300 HMS system.\n");
-
-  DEXIT("hms_open()");
 }
 
 /* Close out all files and local state before this target loses control. */
@@ -648,7 +622,6 @@ hms_close (quitting)
      int quitting;
 {
 
-  DENTER("hms_close()");
 
   /* Clear any break points */
   hms_clear_breakpoints();
@@ -658,38 +631,7 @@ hms_close (quitting)
   serial_write("R\r", 2);
   serial_close();
   is_open = 0;
-
-  DEXIT("hms_close()");
 }
-
-/* Attach to the target that is already loaded and possibly running */
-static void
-hms_attach (args, from_tty)
-     char *args;
-     int from_tty;
-{
-
-  DENTER("hms_attach()");
-
-  /* push_target(&hms_ops);	/* This done in hms_open() */
-
-  mark_breakpoints_out ();
-
-  /* Send the hms a kill. It is ok if it is not already running */
-#if 0
-  fprintf(hms_stream, "K\r"); 
-  expect_prompt();		/* Slurp the echo */
-#endif
-  /* We will get a task spawn event immediately.  */
-  init_wait_for_inferior ();
-  clear_proceed_status ();
-  stop_soon_quietly = 1;
-  wait_for_inferior ();
-  stop_soon_quietly = 0;
-  normal_stop ();
-  DEXIT("hms_attach()");
-}
-
 
 /* Terminate the open connection to the remote debugger.
    Use this when you want to detach and do something else
@@ -699,7 +641,6 @@ hms_detach (args,from_tty)
      char *args;
      int from_tty;
 {
-  DENTER("hms_detach()");
   if (is_open)
   { 
 	hms_clear_breakpoints();
@@ -708,7 +649,6 @@ hms_detach (args,from_tty)
   pop_target();		/* calls hms_close to do the real work */
   if (from_tty)
     printf_filtered ("Ending remote %s debugging\n", target_shortname);
-  DEXIT("hms_detach()");
 }
  
 /* Tell the remote machine to resume.  */
@@ -717,7 +657,6 @@ void
 hms_resume (step, sig)
      int step, sig;
 {
-  DENTER("hms_resume()");
   dcache_flush();
   
   if (step)	
@@ -735,7 +674,6 @@ hms_resume (step, sig)
     hms_write_cr("g");
     expect("g");
   }
-  DEXIT("hms_resume()");
 }
 
 /* Wait until the remote machine stops, then return,
@@ -769,8 +707,6 @@ hms_wait (status)
   int old_immediate_quit = immediate_quit;
   int swallowed_cr = 0;
   
-  DENTER("hms_wait()");
-
   WSETEXIT ((*status), 0);
 
   if (need_artificial_trap != 0)
@@ -844,7 +780,6 @@ hms_wait (status)
   
   timeout = old_timeout;
   immediate_quit = old_immediate_quit;
-  DEXIT("hms_wait()");
   return 0;
 }
 
@@ -1009,9 +944,6 @@ hms_store_register (regno)
     hms_write_cr(buffer);
     expect_prompt();
   }
-  
-  DEXIT("hms_store_registers()");
-
 }
 
 
@@ -1296,7 +1228,6 @@ hms_insert_breakpoint(addr, save)
 CORE_ADDR	addr;
 char		*save;	/* Throw away, let hms save instructions */
 {
-  DENTER("hms_insert_breakpoint()"); 
   check_open();
   
   if (num_brkpts < MAX_BREAKS) 
@@ -1306,14 +1237,12 @@ char		*save;	/* Throw away, let hms save instructions */
     sprintf(buffer,"b %x", addr & 0xffff);
     hms_write_cr(buffer);
     expect_prompt ();
-    DEXIT("hms_insert_breakpoint() success"); 
     return(0);
   }
   else 
   {
     fprintf_filtered(stderr,
 		     "Too many break points, break point not installed\n");
-    DEXIT("hms_insert_breakpoint() failure"); 
     return(1);
   }
 
@@ -1324,7 +1253,6 @@ hms_remove_breakpoint(addr, save)
 CORE_ADDR	addr;
 char		*save;	/* Throw away, let hms save instructions */
 {
-  DENTER("hms_remove_breakpoint()");
   if (num_brkpts > 0) 
   {
     char buffer[100];
@@ -1335,7 +1263,6 @@ char		*save;	/* Throw away, let hms save instructions */
     expect_prompt();
       
   }
-  DEXIT("hms_remove_breakpoint()");
   return(0);
 }
 
@@ -1344,21 +1271,17 @@ static int
 hms_clear_breakpoints() 
 { 
 
-  DENTER("hms_clear_breakpoint()");
   if (is_open) {
     hms_write_cr("b -");
     expect_prompt ();
   }
   num_brkpts = 0;
-  DEXIT("hms_clear_breakpoint()");
 }
 static void
 hms_mourn() 
 { 
-  DENTER("hms_mourn()");
   hms_clear_breakpoints();
   generic_mourn_inferior ();
-  DEXIT("hms_mourn()");
 }
 
 
@@ -1393,7 +1316,7 @@ struct target_ops hms_ops = {
 by a serial line.",
 
 	hms_open, hms_close, 
-	hms_attach, hms_detach, hms_resume, hms_wait,
+	0, hms_detach, hms_resume, hms_wait,	/* attach */
 	hms_fetch_register, hms_store_register,
 	hms_prepare_to_store,
 	hms_xfer_inferior_memory, 
