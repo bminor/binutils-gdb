@@ -1,3 +1,10 @@
+Sun Jun 14 10:33:27 1992  John Gilmore  (gnu at cygnus.com)
+
+	* objdump.c (dump_elf_stabs):  Also dump .stab.index and
+	.stab.excl sections.
+	(dump_elf_stabs_1):  Split out main body of old dump_elf_stabs.
+	* objdump.1, binutils.texi:  Document new sections dumped.
+
 Fri Jun 12 22:23:35 1992  John Gilmore  (gnu at cygnus.com)
 
 	* size.c, objdump.c, bucomm.c:  Lint.
