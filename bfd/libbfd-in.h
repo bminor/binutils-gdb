@@ -1,6 +1,6 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -73,7 +73,7 @@ char *bfd_zmalloc PARAMS ((bfd_size_type size));
 
 PTR	bfd_alloc PARAMS ((bfd *abfd, size_t size));
 PTR	bfd_zalloc PARAMS ((bfd *abfd, size_t size));
-PTR	bfd_realloc PARAMS ((bfd *abfd, PTR orig, size_t new));
+PTR	bfd_realloc PARAMS ((bfd *abfd, PTR orig, size_t size));
 void	bfd_alloc_grow PARAMS ((bfd *abfd, PTR thing, size_t size));
 PTR	bfd_alloc_finish PARAMS ((bfd *abfd));
 PTR	bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t wanted));
@@ -282,6 +282,17 @@ extern boolean _bfd_generic_set_section_contents
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 #define _bfd_nolink_bfd_final_link \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+
+/* Routines to use for BFD_JUMP_TABLE_DYNAMIC for targets which do not
+   have dynamic symbols or relocs.  Use BFD_JUMP_TABLE_DYNAMIC
+   (_bfd_nodynamic).  */
+
+#define _bfd_nodynamic_get_dynamic_symtab_upper_bound _bfd_n1
+#define _bfd_nodynamic_canonicalize_dynamic_symtab \
+  ((long (*) PARAMS ((bfd *, asymbol **))) _bfd_n1)
+#define _bfd_nodynamic_get_dynamic_reloc_upper_bound _bfd_n1
+#define _bfd_nodynamic_canonicalize_dynamic_reloc \
+  ((long (*) PARAMS ((bfd *, arelent **, asymbol **))) _bfd_n1)
 
 /* Generic routine to determine of the given symbol is a local
    label.  */
