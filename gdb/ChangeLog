@@ -1,5 +1,8 @@
 Fri Nov 11 10:51:07 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* ch-exp.y (yylex): Fix off-by-one error when converting string to
+	lowercase.  Null terminate new string.
+
 	* hppa-tdep.c (rp_saved): Handle IMPORT stubs too.
 
 	* somsolib.c (som_solib_add): Check the value of __dld_flags, if

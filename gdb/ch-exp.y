@@ -1844,11 +1844,12 @@ yylex ()
 
     if (inputname != NULL)
       {
-	char *simplename = (char*) alloca (strlen (inputname));
+	char *simplename = (char*) alloca (strlen (inputname) + 1);
 
 	char *dptr = simplename, *sptr = inputname;
 	for (; *sptr; sptr++)
 	  *dptr++ = isupper (*sptr) ? tolower(*sptr) : *sptr;
+	*dptr = '\0';
 
 	/* See if it is a reserved identifier. */
 	for (i = 0; i < sizeof (idtokentab) / sizeof (idtokentab[0]); i++)
