@@ -1,3 +1,10 @@
+Wed Oct 27 11:48:56 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (macro_build): Handle '>' case (shift amount
+	between 32 and 63 for double shift instruction).
+	(mips_ip): Likewise.
+	(printInsn): Likewise.
+
 Tue Oct 26 16:58:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-ns32k.c (tc_aout_fix_to_chars): Output the symbol

@@ -1166,6 +1166,7 @@ macro_build (counter, ep, name, fmt, va_alist)
 	  continue;
 
 	case '<':
+	case '>':
 	  insn.insn_opcode |= va_arg (args, int) << 6;
 	  continue;
 
@@ -3060,6 +3061,17 @@ mips_ip (str, ip)
 	      s = expr_end;
 	      continue;
 
+	    case '>':		/* shift amount minus 32 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if ((unsigned long) imm_expr.X_add_number < 32
+		  || (unsigned long) imm_expr.X_add_number > 63)
+		break;
+	      ip->insn_opcode |= (imm_expr.X_add_number - 32) << 6;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
 	    case 'c':		/* break code */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
@@ -4051,6 +4063,7 @@ printInsn (oc)
 		  continue;
 
 		case '<':
+		case '>':
 		  printf ("$%d", shamt);
 		  continue;
 
