@@ -1,5 +1,9 @@
 2004-04-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* tui/tui-hooks.c: Include "readline/readline.h" after
+	"gdb_curses.h" instead of before.
+	* tui/tui-io.c: Likewise.
+
 	* tui/tui.c: Fix typo in comment.
 
 	* sparc64-tdep.c (sparc_address_from_register): Remove function.

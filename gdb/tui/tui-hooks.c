@@ -35,7 +35,6 @@
 #include "gdb-events.h"
 #include "ui-out.h"
 #include "top.h"
-#include "readline/readline.h"
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -51,6 +50,11 @@
 #include "tui/tui-winsource.h"
 
 #include "gdb_curses.h"
+
+/* This redefines CTRL if it is not already defined, so it must come
+   after terminal state releated include files like <term.h> and
+   "gdb_curses.h".  */
+#include "readline/readline.h"
 
 int tui_target_has_run = 0;
 

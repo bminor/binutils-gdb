@@ -29,7 +29,6 @@
 #include "event-top.h"
 #include "command.h"
 #include "top.h"
-#include "readline/readline.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 #include "tui/tui-io.h"
@@ -44,6 +43,11 @@
 #include <stdio.h>
 
 #include "gdb_curses.h"
+
+/* This redefines CTRL if it is not already defined, so it must come
+   after terminal state releated include files like <term.h> and
+   "gdb_curses.h".  */
+#include "readline/readline.h"
 
 int
 key_is_start_sequence (int ch)
