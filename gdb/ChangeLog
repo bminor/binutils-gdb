@@ -1,3 +1,9 @@
+2003-10-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* objfiles.h (clear_objfile_data): New prototype.
+	* objfiles.c (clear_objfile_data): New function.
+	* symfile.c (reread_symbols): Clear per-objfile data.
+
 2003-10-28  Jeff Johnston  <jjohnstn@redhat.com>
  
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): Switch to use
