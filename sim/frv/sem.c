@@ -5762,7 +5762,7 @@ frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_FRk), 4, 1);
 #undef FLD
 }
 
-/* std: std$pack $GRk,@($GRi,$GRj) */
+/* std: std$pack $GRdoublek,@($GRi,$GRj) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,std) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -5785,7 +5785,7 @@ frvbf_write_mem_DI (current_cpu, pc, tmp_address, GET_H_GR_DOUBLE (FLD (f_GRk)))
 #undef FLD
 }
 
-/* stdf: stdf$pack $FRk,@($GRi,$GRj) */
+/* stdf: stdf$pack $FRdoublek,@($GRi,$GRj) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,stdf) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -5808,7 +5808,7 @@ frvbf_write_mem_DF (current_cpu, pc, tmp_address, GET_H_FR_DOUBLE (FLD (f_FRk)))
 #undef FLD
 }
 
-/* stdc: stdc$pack $CPRk,@($GRi,$GRj) */
+/* stdc: stdc$pack $CPRdoublek,@($GRi,$GRj) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,stdc) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -5831,7 +5831,7 @@ frvbf_write_mem_DI (current_cpu, pc, tmp_address, GET_H_CPR_DOUBLE (FLD (f_CPRk)
 #undef FLD
 }
 
-/* rstd: rstd$pack $GRk,@($GRi,$GRj) */
+/* rstd: rstd$pack $GRdoublek,@($GRi,$GRj) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,rstd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -5855,7 +5855,7 @@ frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_GRk), 8, 0);
 #undef FLD
 }
 
-/* rstdf: rstdf$pack $FRk,@($GRi,$GRj) */
+/* rstdf: rstdf$pack $FRdoublek,@($GRi,$GRj) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,rstdf) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -6178,7 +6178,7 @@ frvbf_write_mem_SI (current_cpu, pc, tmp_address, CPU (h_cpr[FLD (f_CPRk)]));
 #undef FLD
 }
 
-/* stdu: stdu$pack $GRk,@($GRi,$GRj) */
+/* stdu: stdu$pack $GRdoublek,@($GRi,$GRj) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,stdu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -6206,7 +6206,7 @@ frvbf_write_mem_DI (current_cpu, pc, tmp_address, GET_H_GR_DOUBLE (FLD (f_GRk)))
 #undef FLD
 }
 
-/* stdfu: stdfu$pack $FRk,@($GRi,$GRj) */
+/* stdfu: stdfu$pack $FRdoublek,@($GRi,$GRj) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,stdfu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -6234,7 +6234,7 @@ frvbf_write_mem_DF (current_cpu, pc, tmp_address, GET_H_FR_DOUBLE (FLD (f_FRk)))
 #undef FLD
 }
 
-/* stdcu: stdcu$pack $CPRk,@($GRi,$GRj) */
+/* stdcu: stdcu$pack $CPRdoublek,@($GRi,$GRj) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,stdcu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -7151,7 +7151,7 @@ frvbf_write_mem_SI (current_cpu, pc, ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FL
 #undef FLD
 }
 
-/* cstd: cstd$pack $GRk,@($GRi,$GRj),$CCi,$cond */
+/* cstd: cstd$pack $GRdoublek,@($GRi,$GRj),$CCi,$cond */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,cstd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -7176,7 +7176,7 @@ frvbf_write_mem_DI (current_cpu, pc, tmp_address, GET_H_GR_DOUBLE (FLD (f_GRk)))
 #undef FLD
 }
 
-/* cstdf: cstdf$pack $FRk,@($GRi,$GRj),$CCi,$cond */
+/* cstdf: cstdf$pack $FRdoublek,@($GRi,$GRj),$CCi,$cond */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,cstdf) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -7406,7 +7406,7 @@ frvbf_write_mem_SI (current_cpu, pc, tmp_address, GET_H_FR_INT (FLD (f_FRk)));
 #undef FLD
 }
 
-/* cstdu: cstdu$pack $GRk,@($GRi,$GRj),$CCi,$cond */
+/* cstdu: cstdu$pack $GRdoublek,@($GRi,$GRj),$CCi,$cond */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,cstdu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -7438,7 +7438,7 @@ frvbf_write_mem_DI (current_cpu, pc, tmp_address, GET_H_GR_DOUBLE (FLD (f_GRk)))
 #undef FLD
 }
 
-/* cstdfu: cstdfu$pack $FRk,@($GRi,$GRj),$CCi,$cond */
+/* cstdfu: cstdfu$pack $FRdoublek,@($GRi,$GRj),$CCi,$cond */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,cstdfu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -7572,7 +7572,7 @@ frvbf_write_mem_SI (current_cpu, pc, ADDSI (GET_H_GR (FLD (f_GRi)), FLD (f_d12))
 #undef FLD
 }
 
-/* stdi: stdi$pack $GRk,@($GRi,$d12) */
+/* stdi: stdi$pack $GRdoublek,@($GRi,$d12) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,stdi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -7595,7 +7595,7 @@ frvbf_write_mem_DI (current_cpu, pc, tmp_address, GET_H_GR_DOUBLE (FLD (f_GRk)))
 #undef FLD
 }
 
-/* stdfi: stdfi$pack $FRk,@($GRi,$d12) */
+/* stdfi: stdfi$pack $FRdoublek,@($GRi,$d12) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,stdfi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)

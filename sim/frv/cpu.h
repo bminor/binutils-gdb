@@ -2034,23 +2034,6 @@ struct scache {
   f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
   f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12); \
 
-#define EXTRACT_IFMT_STDF_VARS \
-  UINT f_pack; \
-  UINT f_FRk; \
-  UINT f_op; \
-  UINT f_GRi; \
-  UINT f_ope1; \
-  UINT f_GRj; \
-  unsigned int length;
-#define EXTRACT_IFMT_STDF_CODE \
-  length = 4; \
-  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
-  f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
-  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
-  f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
-  f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
-  f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
-
 #define EXTRACT_IFMT_CLDBF_VARS \
   UINT f_pack; \
   UINT f_FRk; \
@@ -2092,42 +2075,6 @@ struct scache {
   f_cond = EXTRACT_LSB0_UINT (insn, 32, 8, 1); \
   f_ope4 = EXTRACT_LSB0_UINT (insn, 32, 7, 2); \
   f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
-
-#define EXTRACT_IFMT_CSTDF_VARS \
-  UINT f_pack; \
-  UINT f_FRk; \
-  UINT f_op; \
-  UINT f_GRi; \
-  UINT f_CCi; \
-  UINT f_cond; \
-  UINT f_ope4; \
-  UINT f_GRj; \
-  unsigned int length;
-#define EXTRACT_IFMT_CSTDF_CODE \
-  length = 4; \
-  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
-  f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
-  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
-  f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
-  f_CCi = EXTRACT_LSB0_UINT (insn, 32, 11, 3); \
-  f_cond = EXTRACT_LSB0_UINT (insn, 32, 8, 1); \
-  f_ope4 = EXTRACT_LSB0_UINT (insn, 32, 7, 2); \
-  f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
-
-#define EXTRACT_IFMT_STDFI_VARS \
-  UINT f_pack; \
-  UINT f_FRk; \
-  UINT f_op; \
-  UINT f_GRi; \
-  INT f_d12; \
-  unsigned int length;
-#define EXTRACT_IFMT_STDFI_CODE \
-  length = 4; \
-  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
-  f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
-  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
-  f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6); \
-  f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12); \
 
 #define EXTRACT_IFMT_MOVGF_VARS \
   UINT f_pack; \
