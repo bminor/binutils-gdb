@@ -275,10 +275,10 @@ sparc_elf_wdisp16_reloc (abfd,
 		 + input_section->output_offset);
   relocation -= reloc_entry->address;
 
-  x = bfd_get_32 (abfd, (char *) data + reloc_entry->address);
+  x = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
   x |= ((((relocation >> 2) & 0xc000) << 6)
 	| ((relocation >> 2) & 0x3fff));
-  bfd_put_32 (abfd, x, (char *) data + reloc_entry->address);
+  bfd_put_32 (abfd, x, (bfd_byte *) data + reloc_entry->address);
 
   if ((bfd_signed_vma) relocation < - 0x40000
       || (bfd_signed_vma) relocation > 0x3ffff)

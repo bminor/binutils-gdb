@@ -1,3 +1,10 @@
+Fri Oct  3 11:23:47 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-sparc.c (sparc_elf_wdisp16_reloc): Cast to bfd_byte *, not
+	char *, when calling bfd_get_32 and bfd_put_32.
+	* sunos.c (sunos_scan_dynamic_symbol): Cast contents to char *
+	when calling strcpy.
+
 Thu Oct  2 16:15:50 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* reloc.c (bfd_check_overflow): New function.
