@@ -348,11 +348,11 @@ bfd_h8_disassemble (addr, info, mode)
 			  }
 			else if (x & INC)
 			  {
-			    fprintf (stream, "@%s+", pregnames[rs]);
+			    fprintf (stream, "@%s+", pregnames[rs & 7]);
 			  }
 			else if (x & DEC)
 			  {
-			    fprintf (stream, "@-%s", pregnames[rd]);
+			    fprintf (stream, "@-%s", pregnames[rd & 7]);
 			  }
 			else if (x & IND)
 			  {
