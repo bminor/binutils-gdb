@@ -1,3 +1,12 @@
+Wed Jan 14 12:48:07 1998  Keith Seitz  <keiths@pizza.cygnus.com>
+
+	* configure.in: Make sure we only replace RPATH_ENVVAR on
+	lines which begin with RPATH_ENVVAR, i.e. add "^" to the
+	regexp to sed.
+
+	* Makefile.in (BASE_FLAGS_TO_PASS): Pass RRPATH_ENVVAR down
+	to sub-makes.
+
 1998-01-13  Lee Iverson   (leei@ai.sri.com)
 
 	* config-ml.in (multi-do): LDFLAGS must include multilib

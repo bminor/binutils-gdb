@@ -1021,7 +1021,7 @@ if [ "${shared}" = "yes" ]; then
 
   case "${host}" in
   *-*-hpux*)
-    sed -e 's/RPATH_ENVVAR[ 	]*=.*$/RPATH_ENVVAR = SHLIB_PATH/' \
+    sed -e 's/^RPATH_ENVVAR[ 	]*=.*$/RPATH_ENVVAR = SHLIB_PATH/' \
 	Makefile > Makefile.tem
     rm -f Makefile
     mv -f Makefile.tem Makefile
