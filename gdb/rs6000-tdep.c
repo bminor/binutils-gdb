@@ -166,9 +166,9 @@ struct frame_extra_info
 void
 rs6000_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  fi->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
-  fi->extra_info->initial_sp = 0;
+  struct frame_extra_info *extra_info =
+    frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
+  extra_info->initial_sp = 0;
   if (get_next_frame (fi) != NULL
       && get_frame_pc (fi) < TEXT_SEGMENT_BASE)
     /* We're in get_prev_frame */
@@ -197,8 +197,9 @@ rs6000_frame_init_saved_regs (struct frame_info *fi)
 static CORE_ADDR
 rs6000_frame_args_address (struct frame_info *fi)
 {
-  if (fi->extra_info->initial_sp != 0)
-    return fi->extra_info->initial_sp;
+  struct frame_extra_info *extra_info = get_frame_extra_info (fi);
+  if (extra_info->initial_sp != 0)
+    return extra_info->initial_sp;
   else
     return frame_initial_stack_address (fi);
 }
@@ -1572,7 +1573,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   struct gdbarch_tdep * tdep = gdbarch_tdep (current_gdbarch);
   int wordsize = tdep->wordsize;
 
-  if (fi->saved_regs)
+  if (get_frame_saved_regs (fi))
     return;
 
   if (fdatap == NULL)
@@ -1615,7 +1616,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
       CORE_ADDR fpr_addr = frame_addr + fdatap->fpr_offset;
       for (i = fdatap->saved_fpr; i < 32; i++)
 	{
-	  fi->saved_regs[FP0_REGNUM + i] = fpr_addr;
+	  get_frame_saved_regs (fi)[FP0_REGNUM + i] = fpr_addr;
 	  fpr_addr += 8;
 	}
     }
@@ -1629,7 +1630,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
       CORE_ADDR gpr_addr = frame_addr + fdatap->gpr_offset;
       for (i = fdatap->saved_gpr; i < 32; i++)
 	{
-	  fi->saved_regs[i] = gpr_addr;
+	  get_frame_saved_regs (fi)[i] = gpr_addr;
 	  gpr_addr += wordsize;
 	}
     }
@@ -1644,7 +1645,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
 	  CORE_ADDR vr_addr = frame_addr + fdatap->vr_offset;
 	  for (i = fdatap->saved_vr; i < 32; i++)
 	    {
-	      fi->saved_regs[tdep->ppc_vr0_regnum + i] = vr_addr;
+	      get_frame_saved_regs (fi)[tdep->ppc_vr0_regnum + i] = vr_addr;
 	      vr_addr += REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
 	    }
 	}
@@ -1660,8 +1661,8 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
 	  CORE_ADDR ev_addr = frame_addr + fdatap->ev_offset;
 	  for (i = fdatap->saved_ev; i < 32; i++)
 	    {
-	      fi->saved_regs[tdep->ppc_ev0_regnum + i] = ev_addr;
-              fi->saved_regs[tdep->ppc_gp0_regnum + i] = ev_addr + 4;
+	      get_frame_saved_regs (fi)[tdep->ppc_ev0_regnum + i] = ev_addr;
+              get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = ev_addr + 4;
 	      ev_addr += REGISTER_RAW_SIZE (tdep->ppc_ev0_regnum);
             }
 	}
@@ -1670,17 +1671,17 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   /* If != 0, fdatap->cr_offset is the offset from the frame that holds
      the CR.  */
   if (fdatap->cr_offset != 0)
-    fi->saved_regs[tdep->ppc_cr_regnum] = frame_addr + fdatap->cr_offset;
+    get_frame_saved_regs (fi)[tdep->ppc_cr_regnum] = frame_addr + fdatap->cr_offset;
 
   /* If != 0, fdatap->lr_offset is the offset from the frame that holds
      the LR.  */
   if (fdatap->lr_offset != 0)
-    fi->saved_regs[tdep->ppc_lr_regnum] = frame_addr + fdatap->lr_offset;
+    get_frame_saved_regs (fi)[tdep->ppc_lr_regnum] = frame_addr + fdatap->lr_offset;
 
   /* If != 0, fdatap->vrsave_offset is the offset from the frame that holds
      the VRSAVE.  */
   if (fdatap->vrsave_offset != 0)
-    fi->saved_regs[tdep->ppc_vrsave_regnum] = frame_addr + fdatap->vrsave_offset;
+    get_frame_saved_regs (fi)[tdep->ppc_vrsave_regnum] = frame_addr + fdatap->vrsave_offset;
 }
 
 /* Return the address of a frame. This is the inital %sp value when the frame
@@ -1697,8 +1698,8 @@ frame_initial_stack_address (struct frame_info *fi)
   /* If the initial stack pointer (frame address) of this frame is known,
      just return it.  */
 
-  if (fi->extra_info->initial_sp)
-    return fi->extra_info->initial_sp;
+  if (get_frame_extra_info (fi)->initial_sp)
+    return get_frame_extra_info (fi)->initial_sp;
 
   /* Find out if this function is using an alloca register.  */
 
@@ -1708,7 +1709,7 @@ frame_initial_stack_address (struct frame_info *fi)
   /* If saved registers of this frame are not known yet, read and
      cache them.  */
 
-  if (!fi->saved_regs)
+  if (!get_frame_saved_regs (fi))
     frame_get_saved_regs (fi, &fdata);
 
   /* If no alloca register used, then fi->frame is the value of the %sp for
@@ -1716,8 +1717,8 @@ frame_initial_stack_address (struct frame_info *fi)
 
   if (fdata.alloca_reg < 0)
     {
-      fi->extra_info->initial_sp = get_frame_base (fi);
-      return fi->extra_info->initial_sp;
+      get_frame_extra_info (fi)->initial_sp = get_frame_base (fi);
+      return get_frame_extra_info (fi)->initial_sp;
     }
 
   /* There is an alloca register, use its value, in the current frame,
@@ -1726,7 +1727,7 @@ frame_initial_stack_address (struct frame_info *fi)
     char *tmpbuf = alloca (MAX_REGISTER_RAW_SIZE);
     if (frame_register_read (fi, fdata.alloca_reg, tmpbuf))
       {
-	fi->extra_info->initial_sp
+	get_frame_extra_info (fi)->initial_sp
 	  = extract_unsigned_integer (tmpbuf,
 				      REGISTER_RAW_SIZE (fdata.alloca_reg));
       }
@@ -1734,9 +1735,9 @@ frame_initial_stack_address (struct frame_info *fi)
       /* NOTE: cagney/2002-04-17: At present the only time
          frame_register_read will fail is when the register isn't
          available.  If that does happen, use the frame.  */
-      fi->extra_info->initial_sp = get_frame_base (fi);
+      get_frame_extra_info (fi)->initial_sp = get_frame_base (fi);
   }
-  return fi->extra_info->initial_sp;
+  return get_frame_extra_info (fi)->initial_sp;
 }
 
 /* Describe the pointer in each stack frame to the previous stack frame
