@@ -966,7 +966,7 @@ x86_64_frame_this_id (struct frame_info *next_frame, void **this_cache,
   if (inside_entry_file (cache->pc))
     return;
 
-  (*this_id) = frame_id_build (cache->base, cache->pc);
+  (*this_id) = frame_id_build (cache->base + 16, cache->pc);
 }
 
 static void
@@ -1064,7 +1064,7 @@ x86_64_sigtramp_frame_this_id (struct frame_info *next_frame,
   struct x86_64_frame_cache *cache =
     x86_64_sigtramp_frame_cache (next_frame, this_cache);
 
-  (*this_id) = frame_id_build (cache->base, frame_pc_unwind (next_frame));
+  (*this_id) = frame_id_build (cache->base + 16, frame_pc_unwind (next_frame));
 }
 
 static void
@@ -1133,7 +1133,7 @@ x86_64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
   frame_unwind_register (next_frame, X86_64_RBP_REGNUM, buf);
   fp = extract_unsigned_integer (buf, 8);
 
-  return frame_id_build (fp, frame_pc_unwind (next_frame));
+  return frame_id_build (fp + 16, frame_pc_unwind (next_frame));
 }
 
 void
