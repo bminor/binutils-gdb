@@ -1,3 +1,12 @@
+2004-07-27  Nitin Yewale  <nitiny@kpitcummins.com>
+
+	* ld-h8300/h8300.exp: Addition of new test case to check
+	relaxation for H8S target.
+	* ld-h8300/relax-6.s: New test source file.
+	* ld-h8300/relax-6.d: New test expected disassembly file.
+	* ld-h8300/relax-6-coff.d: New test expected disassembly file for
+	coff format.
+
 2004-07-22  Nick Clifton  <nickc@redhat.com>
 
 	PR/280
