@@ -1,3 +1,11 @@
+2003-05-18  Adam Fedor  <fedor@gnu.org>
+
+	* symtab.c (completion_list_objc_symbol): New function.
+	(make_symbol_completion_list): Use it to add ObjC symbols
+	when looking though the list.
+	(language_search_unquoted_string): New function.
+	(make_file_symbol_completion_list): Use it.
+
 2003-05-18  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile (m68klinux-nat.o, m68klinux-tdep.o): Update

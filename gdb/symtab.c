@@ -3385,6 +3385,112 @@ completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
   }
 }
 
+/* ObjC: In case we are completing on a selector, look as the msymbol
+   again and feed all the selectors into the mill.  */
+
+static void
+completion_list_objc_symbol (struct minimal_symbol *msymbol, char *sym_text,
+			     int sym_text_len, char *text, char *word)
+{
+  static char *tmp = NULL;
+  static unsigned int tmplen = 0;
+    
+  char *method, *category, *selector;
+  char *tmp2 = NULL;
+    
+  method = SYMBOL_NATURAL_NAME (msymbol);
+
+  /* Is it a method?  */
+  if ((method[0] != '-') && (method[0] != '+'))
+    return;
+
+  if (sym_text[0] == '[')
+    /* Complete on shortened method method.  */
+    completion_list_add_name (method + 1, sym_text, sym_text_len, text, word);
+    
+  while ((strlen (method) + 1) >= tmplen)
+    {
+      if (tmplen == 0)
+	tmplen = 1024;
+      else
+	tmplen *= 2;
+      tmp = xrealloc (tmp, tmplen);
+    }
+  selector = strchr (method, ' ');
+  if (selector != NULL)
+    selector++;
+    
+  category = strchr (method, '(');
+    
+  if ((category != NULL) && (selector != NULL))
+    {
+      memcpy (tmp, method, (category - method));
+      tmp[category - method] = ' ';
+      memcpy (tmp + (category - method) + 1, selector, strlen (selector) + 1);
+      completion_list_add_name (tmp, sym_text, sym_text_len, text, word);
+      if (sym_text[0] == '[')
+	completion_list_add_name (tmp + 1, sym_text, sym_text_len, text, word);
+    }
+    
+  if (selector != NULL)
+    {
+      /* Complete on selector only.  */
+      strcpy (tmp, selector);
+      tmp2 = strchr (tmp, ']');
+      if (tmp2 != NULL)
+	*tmp2 = '\0';
+	
+      completion_list_add_name (tmp, sym_text, sym_text_len, text, word);
+    }
+}
+
+/* Break the non-quoted text based on the characters which are in
+   symbols. FIXME: This should probably be language-specific. */
+
+static char *
+language_search_unquoted_string (char *text, char *p)
+{
+  for (; p > text; --p)
+    {
+      if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0')
+	continue;
+      else
+	{
+	  if ((current_language->la_language == language_objc))
+	    {
+	      if (p[-1] == ':')     /* might be part of a method name */
+		continue;
+	      else if (p[-1] == '[' && (p[-2] == '-' || p[-2] == '+'))
+		p -= 2;             /* beginning of a method name */
+	      else if (p[-1] == ' ' || p[-1] == '(' || p[-1] == ')')
+		{                   /* might be part of a method name */
+		  char *t = p;
+
+		  /* Seeing a ' ' or a '(' is not conclusive evidence
+		     that we are in the middle of a method name.  However,
+		     finding "-[" or "+[" should be pretty un-ambiguous.
+		     Unfortunately we have to find it now to decide.  */
+
+		  while (t > text)
+		    if (isalnum (t[-1]) || t[-1] == '_' ||
+			t[-1] == ' '    || t[-1] == ':' ||
+			t[-1] == '('    || t[-1] == ')')
+		      --t;
+		    else
+		      break;
+
+		  if (t[-1] == '[' && (t[-2] == '-' || t[-2] == '+'))
+		    p = t - 2;      /* method name detected */
+		  /* else we leave with p unchanged */
+		}
+	    }
+	  break;
+	}
+    }
+  return p;
+}
+
+
 /* Return a NULL terminated array of all symbols (regardless of class)
    which begin by matching TEXT.  If the answer is no symbols, then
    the return value is an array which contains only a NULL pointer.
@@ -3507,6 +3613,8 @@ make_symbol_completion_list (char *text, char *word)
   {
     QUIT;
     COMPLETION_LIST_ADD_SYMBOL (msymbol, sym_text, sym_text_len, text, word);
+    
+    completion_list_objc_symbol (msymbol, sym_text, sym_text_len, text, word);
   }
 
   /* Search upwards from currently selected frame (so that we can
@@ -3524,6 +3632,7 @@ make_symbol_completion_list (char *text, char *word)
 
       ALL_BLOCK_SYMBOLS (b, i, sym)
 	{
+	  QUIT;
 	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
 	  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 	    {
@@ -3629,16 +3738,8 @@ make_file_symbol_completion_list (char *text, char *word, char *srcfile)
       }
     else
       {
-	/* It is not a quoted string.  Break it based on the characters
-	   which are in symbols.  */
-	while (p > text)
-	  {
-	    if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0')
-	      --p;
-	    else
-	      break;
-	  }
-	sym_text = p;
+	/* Not a quoted string.  */
+	sym_text = language_search_unquoted_string (text, p);
       }
   }
 
