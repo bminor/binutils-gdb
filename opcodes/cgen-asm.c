@@ -31,6 +31,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "bfd.h"
 #include "opcode/cgen.h"
 
+/* Operand parsing callback.  */
+const char * (*cgen_asm_parse_operand_fn)
+     PARAMS ((const char **, int, int, enum cgen_asm_result *, bfd_vma *));
+
 /* This is not published as part of the public interface so we don't
    declare this in cgen.h.  */
 extern CGEN_OPCODE_DATA *cgen_current_opcode_data;
@@ -176,8 +180,8 @@ cgen_parse_signed_integer (strp, opindex, min, max, valuep)
   enum cgen_asm_result result;
   const char *errmsg;
 
-  errmsg = cgen_asm_parse_operand (strp, opindex, BFD_RELOC_NONE,
-				   &result, &value);
+  errmsg = (*cgen_asm_parse_operand_fn) (strp, opindex, BFD_RELOC_NONE,
+					 &result, &value);
   /* FIXME: Examine `result'.  */
   if (!errmsg)
     {
@@ -201,8 +205,8 @@ cgen_parse_unsigned_integer (strp, opindex, min, max, valuep)
   enum cgen_asm_result result;
   const char *errmsg;
 
-  errmsg = cgen_asm_parse_operand (strp, opindex, BFD_RELOC_NONE,
-				   &result, &value);
+  errmsg = (*cgen_asm_parse_operand_fn) (strp, opindex, BFD_RELOC_NONE,
+					 &result, &value);
   /* FIXME: Examine `result'.  */
   if (!errmsg)
     {
@@ -226,7 +230,8 @@ cgen_parse_address (strp, opindex, opinfo, valuep)
   enum cgen_asm_result result;
   const char *errmsg;
 
-  errmsg = cgen_asm_parse_operand (strp, opindex, opinfo, &result, &value);
+  errmsg = (*cgen_asm_parse_operand_fn) (strp, opindex, opinfo,
+					 &result, &value);
   /* FIXME: Examine `result'.  */
   if (!errmsg)
     {

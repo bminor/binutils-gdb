@@ -551,7 +551,6 @@ parse_insn_normal (insn, strp, fields)
 #endif
 
   CGEN_INIT_PARSE ();
-  cgen_asm_init_parse ();
 #ifdef CGEN_MNEMONIC_OPERANDS
   past_opcode_p = 0;
 #endif
@@ -678,10 +677,11 @@ insert_insn_normal (insn, fields, buffer)
    printed).  */
 
 const struct cgen_insn *
-m32r_cgen_assemble_insn (str, fields, buf)
+m32r_cgen_assemble_insn (str, fields, buf, errmsg)
      const char *str;
      struct cgen_fields *fields;
      cgen_insn_t *buf;
+     char **errmsg;
 {
   const char *start;
   CGEN_INSN_LIST *ilist;
@@ -740,13 +740,22 @@ m32r_cgen_assemble_insn (str, fields, buf)
       /* Try the next entry.  */
     }
 
-  /* FIXME: Define this as a callback, or pass back string? */
-  as_bad ("bad instruction `%s'", start);
-  return NULL;
+  /* FIXME: We can return a better error message than this.
+     Need to track why it failed and pick the right one.  */
+  {
+    static char errbuf[100];
+    sprintf (errbuf, "bad instruction `%.50s%s'",
+	     start, strlen (start) > 50 ? "..." : "");
+    *errmsg = errbuf;
+    return NULL;
+  }
 }
 
+#if 0 /* This calls back to GAS which we can't do without care.  */
+
 /* Record each member of OPVALS in the assembler's symbol table.
-   FIXME: Not currently used.  */
+   This lets GAS parse registers for us.
+   ??? Interesting idea but not currently used.  */
 
 void
 m32r_cgen_asm_hash_keywords (opvals)
@@ -764,3 +773,5 @@ m32r_cgen_asm_hash_keywords (opvals)
       cgen_asm_record_register (ke->name, ke->value);
     }
 }
+
+#endif /* 0 */
