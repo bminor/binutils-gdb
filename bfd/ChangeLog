@@ -1,4 +1,11 @@
 start-sanitize-v850
+Sat Aug 31 10:22:25 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-v850.c (enum reloc_type): Add R_V850_{32,16,8}.
+	(elf_v850_howto_table): Add support for R_V850_{32,16,8}.
+	(v850_reloc_map): Add translation from BFD_RELOC_{32,16,8}
+	to R_V850_{32,16,8}.
+
 Fri Aug 30 18:06:04 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
 	* elf32-v850.c (reloc_type): Add R_V850_HI16_S.
