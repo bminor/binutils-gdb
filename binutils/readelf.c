@@ -7026,6 +7026,7 @@ display_debug_info (section, start, file)
     {
       DWARF2_External_CompUnit * external;
       DWARF2_Internal_CompUnit   compunit;
+      Elf32_Internal_Shdr *      relsec;
       unsigned char *            tags;
       int                        i;
       int			 level;
@@ -7037,6 +7038,68 @@ display_debug_info (section, start, file)
       compunit.cu_version       = BYTE_GET (external->cu_version);
       compunit.cu_abbrev_offset = BYTE_GET (external->cu_abbrev_offset);
       compunit.cu_pointer_size  = BYTE_GET (external->cu_pointer_size);
+
+      /* Check for RELA relocations in the abbrev_offset address, and
+         apply them.  */
+      for (relsec = section_headers;
+	   relsec < section_headers + elf_header.e_shnum;
+	   ++relsec)
+	{
+	  unsigned long nrelas, nsyms;
+	  Elf_Internal_Rela *rela, *rp;
+	  Elf32_Internal_Shdr *symsec;
+	  Elf_Internal_Sym *symtab;
+	  Elf_Internal_Sym *sym;
+
+	  if (relsec->sh_type != SHT_RELA
+	      || section_headers + relsec->sh_info != section)
+	    continue;
+
+	  if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
+				  & rela, & nrelas))
+	    return 0;
+
+	  symsec = section_headers + relsec->sh_link;
+	  nsyms = symsec->sh_size / symsec->sh_entsize;
+	  symtab = GET_ELF_SYMBOLS (file, symsec->sh_offset, nsyms);
+
+	  for (rp = rela; rp < rela + nrelas; ++rp)
+	    {
+	      if (rp->r_offset
+		  != (bfd_vma) ((unsigned char *) &external->cu_abbrev_offset
+				- section_begin))
+		continue;
+	      
+	      if (is_32bit_elf)
+		{
+		  sym = symtab + ELF32_R_SYM (rp->r_info);
+
+		  if (ELF32_ST_TYPE (sym->st_info) != STT_SECTION)
+		    {
+		      warn (_("Skipping unexpected symbol type %u"),
+			    ELF32_ST_TYPE (sym->st_info));
+		      continue;
+		    }
+		}
+	      else
+		{
+		  sym = symtab + ELF64_R_SYM (rp->r_info);
+
+		  if (ELF64_ST_TYPE (sym->st_info) != STT_SECTION)
+		    {
+		      warn (_("Skipping unexpected symbol type %u"),
+			    ELF64_ST_TYPE (sym->st_info));
+		      continue;
+		    }
+		}
+
+	      compunit.cu_abbrev_offset += rp->r_addend;
+	      break;
+	    }
+
+	  free (rela);
+	  break;
+	}
 
       tags = start + sizeof (* external);
       cu_offset = start - section_begin;
