@@ -294,7 +294,7 @@ gld${EMULATION_NAME}_before_allocation ()
   if (sneed != NULL)
     {
       /* Set up the .need section.  See the description of the ld_need
-	 field in include/sun4/aout.h.  */
+	 field in include/aout/sun4.h.  */
 
       need_entries = 0;
       need_size = 0;
