@@ -1,3 +1,13 @@
+2000-12-15  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* sh-tdep.c (sh_do_pseudo_register): Indent properly. Call
+ 	do_dr_register_info() only for DR registers.
+	(sh_sh4_register_name): Add comments with numbers.
+	(_initialize_sh_tdep): Move assignment to disassemble printing
+ 	function from here...
+	(sh_gdbarch_init):...to here. Move some more general settings to
+ 	before the architecture is recognized.
+
 Fri Dec 15 23:27:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (remote_fetch_registers): Replace #ifdef
@@ -142,6 +152,7 @@ Fri Dec 15 22:58:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure.tgt (m68*-*-netbsd*, ns32k-*-netbsd*): Add gdbserver
  	to configdirs.
 
+>>>>>>> 1.847
 2000-12-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* config/sh/tm-sh.h (struct gdbarch_tdep): Rename fields

@@ -271,17 +271,28 @@ sh_sh4_register_name (int reg_nr)
 {
   static char *register_names[] =
   {
+    /* general registers 0-15 */
     "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
     "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
+    /* 16 - 22 */
     "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+    /* 23, 24 */
     "fpul", "fpscr",
+    /* floating point registers 25 - 40 */
     "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",
     "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
+    /* 41, 42 */
     "ssr",  "spc",
+    /* bank 0 43 - 50 */
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
+    /* bank 1 51 - 58 */
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
+    /* double precision (pseudo) 59 - 66 */
     "dr0",  "dr2",  "dr4",  "dr6",  "dr8",  "dr10", "dr12", "dr14",
+    /* vectors (pseudo) 67 - 70 */
     "fv0",  "fv4",  "fv8",  "fv12",
+    /* FIXME: missing XF 71 - 86 */
+    /* FIXME: missing XD 87 - 94 */
   };
   if (reg_nr < 0)
     return NULL;
@@ -1663,11 +1674,11 @@ sh_do_pseudo_register (int regnum)
 {
   if (regnum < NUM_REGS || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
     internal_error ("Invalid pseudo register number %d\n", regnum);
-  else if (regnum >= NUM_REGS && 
-	   regnum < gdbarch_tdep (current_gdbarch)->FV0_REGNUM)
+  else if (regnum >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM
+	   && regnum < gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM)
     do_dr_register_info (regnum);
-  else if (regnum >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM &&
-	   regnum <= gdbarch_tdep (current_gdbarch)->FV_LAST_REGNUM)
+  else if (regnum >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM
+	   && regnum <= gdbarch_tdep (current_gdbarch)->FV_LAST_REGNUM)
     do_fv_register_info (regnum);
 }
 
@@ -1891,10 +1902,20 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->DR_LAST_REGNUM = -1;
   tdep->FV0_REGNUM = -1;
   tdep->FV_LAST_REGNUM = -1;
+
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
   set_gdbarch_max_register_raw_size (gdbarch, 4);
   set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  set_gdbarch_num_regs (gdbarch, 59);
+  set_gdbarch_sp_regnum (gdbarch, 15);
+  set_gdbarch_fp_regnum (gdbarch, 14);
+  set_gdbarch_pc_regnum (gdbarch, 16);
+  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_register_bytes (gdbarch, NUM_REGS * 4);
+  set_gdbarch_fetch_pseudo_register (gdbarch, sh_fetch_pseudo_register);
+  set_gdbarch_store_pseudo_register (gdbarch, sh_store_pseudo_register);
   print_sh_insn = gdb_print_insn_sh;
 
   switch (info.bfd_arch_info->mach)
@@ -2042,23 +2063,16 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 
-  set_gdbarch_num_regs (gdbarch, 59);
-  set_gdbarch_sp_regnum (gdbarch, 15);
-  set_gdbarch_fp_regnum (gdbarch, 14);
-  set_gdbarch_pc_regnum (gdbarch, 16);
   set_gdbarch_register_name (gdbarch, sh_register_name);
-  set_gdbarch_register_size (gdbarch, 4);
-  set_gdbarch_register_bytes (gdbarch, NUM_REGS * 4);
   set_gdbarch_register_virtual_type (gdbarch, sh_register_virtual_type);
 
-  set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
+  set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);/*??should be 8?*/
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
@@ -2094,8 +2108,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
 
-  set_gdbarch_fetch_pseudo_register (gdbarch, sh_fetch_pseudo_register);
-  set_gdbarch_store_pseudo_register (gdbarch, sh_store_pseudo_register);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
   set_gdbarch_frame_chain (gdbarch, sh_frame_chain);
@@ -2107,6 +2119,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_ieee_float (gdbarch, 1);
+  tm_print_insn = print_sh_insn;
 
   return gdbarch;
 }
@@ -2117,7 +2130,6 @@ _initialize_sh_tdep (void)
   struct cmd_list_element *c;
   
   register_gdbarch_init (bfd_arch_sh, sh_gdbarch_init);
-  tm_print_insn = print_sh_insn;
 
   add_com ("regs", class_vars, sh_show_regs_command, "Print all registers");
 }
