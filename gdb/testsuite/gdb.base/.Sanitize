@@ -81,6 +81,8 @@ scope0.c
 scope1.c
 setvar.c
 setvar.exp
+sigall.c
+sigall.exp
 signals.c
 signals.exp
 sparc-aout.u
