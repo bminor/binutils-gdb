@@ -24,6 +24,7 @@
 	(write_register): Ditto.
 	(build_regcache): Allocate enough register_valid space for
 	pseudo-registers as well as normal (real) ones.
+	* parse.c (target_map_name_to_register): Include pseudo-regs.
 	
 Tue Jul 11 19:45:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
