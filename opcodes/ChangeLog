@@ -1,3 +1,8 @@
+Tue Dec 31 15:38:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (ALL_CFLAGS): Add -D_GNU_SOURCE.
+	(dep): Use ALL_CFLAGS rather than CFLAGS.
+
 start-sanitize-v850
 Tue Dec 31 15:09:16 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
