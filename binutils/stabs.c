@@ -1,5 +1,5 @@
 /* stabs.c -- Parse stabs debugging information
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -176,8 +176,8 @@ static debug_type parse_stab_sun_floating_type
 static debug_type parse_stab_enum_type
   PARAMS ((PTR, const char **));
 static debug_type parse_stab_struct_type
-  PARAMS ((PTR, struct stab_handle *, const char *, const char **, bfd_boolean,
-	   const int *));
+  PARAMS ((PTR, struct stab_handle *, const char *, const char **,
+	   bfd_boolean, const int *));
 static bfd_boolean parse_stab_baseclasses
   PARAMS ((PTR, struct stab_handle *, const char **, debug_baseclass **));
 static bfd_boolean parse_stab_struct_fields
@@ -222,7 +222,8 @@ static debug_type stab_find_tagged_type
   PARAMS ((PTR, struct stab_handle *, const char *, int,
 	   enum debug_type_kind));
 static debug_type *stab_demangle_argtypes
-  PARAMS ((PTR, struct stab_handle *, const char *, bfd_boolean *, unsigned int));
+  PARAMS ((PTR, struct stab_handle *, const char *, bfd_boolean *,
+	   unsigned int));
 
 /* Save a string in memory.  */
 
@@ -610,7 +611,8 @@ parse_stab (dhandle, handle, type, desc, value, string)
 
     case N_SLINE:
       if (! debug_record_line (dhandle, desc,
-			       value + info->function_start_offset))
+			       value + (info->within_function
+					? info->function_start_offset : 0)))
 	return FALSE;
       break;
 

@@ -8,6 +8,10 @@
 
 	* debug.c (debug_record_variable): Handle global register variables.
 
+	* stabs.c (parse_stab): For N_SLINE only include
+	function_start_offset if the symbol is within a function;
+	otherwise, the value is absolute.
+
 2003-02-10  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (decode_ARM_machine_flags): Handle the
