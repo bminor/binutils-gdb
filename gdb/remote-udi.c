@@ -125,8 +125,8 @@ typedef	struct 	bkpt_entry_str
     UDIBreakType Type;
     unsigned int BreakId;
 } bkpt_entry_t;
-#define		MAX_BKPT 40
-bkpt_entry_t	bkpt_table[MAX_BKPT];
+#define		BKPT_TABLE_SIZE 40
+static bkpt_entry_t	bkpt_table[BKPT_TABLE_SIZE];
 extern	char	dfe_errmsg[];		/* error string */
 
 /*********************************************************** SIGNAL SUPPORT */
@@ -882,35 +882,30 @@ udi_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  int		cnt = 0;
-  DENTER("udi_insert_breakpoint()");
+  int cnt;
+  UDIError err;
 
-  while( cnt < MAX_BKPT)		/* find BKPT slot in table */
-    	if( !(bkpt_table[cnt].Type) )
-		break;
-	else	cnt++;
-  if(cnt >= MAX_BKPT)
-  {  error("Too many breakpoints set");
-     DEXIT("udi_insert_breakpoint() failure");
-     return 1;				/* Failure */
-  }
+  for (cnt = 0; cnt < BKPT_TABLE_SIZE; cnt++)
+    if (bkpt_table[cnt].Type == 0) /* Find first free slot */
+      break;
+
+  if(cnt >= BKPT_TABLE_SIZE)
+    error("Too many breakpoints set");
+
   bkpt_table[cnt].Addr.Offset = addr;
   bkpt_table[cnt].Addr.Space  = UDI29KIRAMSpace;
   bkpt_table[cnt].PassCount = 1;
   bkpt_table[cnt].Type = UDIBreakFlagExecute;
   
-  if( UDISetBreakpoint(bkpt_table[cnt].Addr,
-  			bkpt_table[cnt].PassCount,
-			bkpt_table[cnt].Type,
-  		       &bkpt_table[cnt].BreakId) )
-  {     error("UDISetBreakpoint() failed in udi_insert_breakpoint");
-	bkpt_table[cnt].Type = 0;
-  	DEXIT("udi_insert_breakpoint() failure");
-	return 1;		/* Failure */
-  } else
-  {     DEXIT("udi_insert_breakpoint() success");
-	return 0;		/* Success */
-  }
+  err = UDISetBreakpoint(bkpt_table[cnt].Addr,
+			 bkpt_table[cnt].PassCount,
+			 bkpt_table[cnt].Type,
+			 &bkpt_table[cnt].BreakId);
+
+  if (err == 0) return 0;		/* Success */
+
+  bkpt_table[cnt].Type = 0;
+  error("UDISetBreakpoint returned error code %d\n", err);
 }
 
 /**************************************************** UDI_REMOVE_BREAKPOINT */
@@ -919,29 +914,23 @@ udi_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  int		cnt = 0;
-  DENTER("udi_remove_breakpoint()");
+  int cnt;
+  UDIError err;
 
-  while( cnt < MAX_BKPT)		/* find BKPT slot in table */
-    	if(bkpt_table[cnt].Addr.Offset = addr ) break;
-	else	cnt++;
-  if(cnt >= MAX_BKPT)
-  {  error("Can't find breakpoint in table");
-     DEXIT("udi_remove_breakpoint() failure");
-     return 1;				/* Failure */
-  }
+  for (cnt = 0; cnt < BKPT_TABLE_SIZE; cnt++)
+    if (bkpt_table[cnt].Addr.Offset == addr) /* Find matching breakpoint */
+      break;
+
+  if(cnt >= BKPT_TABLE_SIZE)
+    error("Can't find breakpoint in table");
+
   bkpt_table[cnt].Type = 0;
 
-  if ( !UDIClearBreakpoint(bkpt_table[cnt].BreakId)) {
-  	DEXIT("udi_remove_breakpoint()");
-	return 0;		/* Success */
-  } else {
-  	DEXIT("udi_remove_breakpoint()");
-	error("UDIClearBreakpoint() failed in udi_remove_breakpoint");
-	return 1;		/* Failure */
-  }
-}
+  err = UDIClearBreakpoint(bkpt_table[cnt].BreakId);
+  if (err == 0) return 0;	/* Success */
 
+  error("UDIClearBreakpoint returned error code %d\n", err);
+}
 
 /***************************************************************** UDI_KILL */
 static void
