@@ -1,3 +1,9 @@
+Wed May 14 08:58:55 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200-tdep.c (mn10200_skip_prologue): Don't look at the debug
+	symbols to find the end of the prologue.
+	* mn10300-tdep.c (mn10300_skip_prologue): Likewise.
+
 start-sanitize-tic80
 Wed May 14 12:04:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

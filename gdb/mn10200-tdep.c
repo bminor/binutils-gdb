@@ -478,24 +478,9 @@ CORE_ADDR
 mn10200_skip_prologue (pc)
      CORE_ADDR pc;
 {
-  CORE_ADDR func_addr, func_end;
-
-  /* First check the symbol table.  That'll be faster than scanning
-     the prologue instructions if we have debug sybmols.  */
-  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
-    {
-      struct symtab_and_line sal;
-
-      sal = find_pc_line (func_addr, 0);
-
-      if (sal.line != 0 && sal.end < func_end)
-	return sal.end;
-
-      return mn10200_analyze_prologue (NULL, pc);
-    }
-
-  /* We couldn't find the start of this function, do nothing.  */
-  return pc;
+  /* We used to check the debug symbols, but that can lose if
+     we have a null prologue.  */
+  return mn10200_analyze_prologue (NULL, pc);
 }
 
 /* Function: pop_frame
