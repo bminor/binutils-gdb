@@ -1,5 +1,5 @@
 /* BFD i370 CPU definition
-   Copyright 1994, 1995, 1996, 1998, 1999, 2000
+   Copyright 1994, 1995, 1996, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
    Hacked by Linas Vepstas <linas@linas.org> in 1998, 1999

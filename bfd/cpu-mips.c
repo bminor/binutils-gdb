@@ -57,7 +57,7 @@ mips_compatible (a, b)
     PRINT,						\
     3,							\
     DEFAULT,						\
-    mips_compatible, 					\
+    mips_compatible,					\
     bfd_default_scan,					\
     NEXT,						\
   }

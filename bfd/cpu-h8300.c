@@ -1,5 +1,5 @@
 /* BFD library support routines for the Hitachi H8/300 architecture.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2000, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.
 

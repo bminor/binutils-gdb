@@ -171,6 +171,7 @@ elfcode.h
 elfcore.h
 elflink.c
 elflink.h
+elfxx-mips.c
 epoc-pe-arm.c
 epoc-pei-arm.c
 format.c

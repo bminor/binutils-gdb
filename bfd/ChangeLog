@@ -1,3 +1,16 @@
+2002-04-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* dep-in.sed: Cope with absolute paths.
+	* Makefile.am (dep.sed): Subst TOPDIR, and not INCDIR.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* coff-arm.c: Fix copyright date.
+	* cpu-h8300.c: Likewise.
+	* cpu-i370.c: Likewise.
+	* cpu-s390.c: Likewise.
+	* cpu-mips.c: Likewise.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2002-04-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* Makefile.am: Add elfxx-mips.c to the known backends.
@@ -188,8 +201,8 @@
 
 2002-03-21  Richard Earnshaw  <rearnsha@arm.com>
 
-	* elf32-arm.h (elf32_arm_final_link_relocate case R_ARM_GOTOFF)
-	(case R_ARM_GOT): Handle relocations to Thumb functions.
+	* elf32-arm.h (elf32_arm_final_link_relocate <case R_ARM_GOTOFF>,
+	<case R_ARM_GOT>): Handle relocations to Thumb functions.
 
 2002-03-21  Alan Modra  <amodra@bigpond.net.au>
 
