@@ -1,3 +1,8 @@
+Wed Jul  7 18:11:07 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
+
+	* configure.in: define CROSS=-DCROSS_COMPILE if it is a cross
+	build; also recognize h8300-*-coff
+
 Wed Jul  7 10:21:24 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* symbols.c (fb_label_instance, fb_label_instance_inc): Don't dump
