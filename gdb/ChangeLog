@@ -1,3 +1,11 @@
+2002-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* jv-exp.y: Marked all strings with _().
+	(ClassInstanceCreationExpression, ArrayCreationExpression): Use
+	internal_error.
+	(MethodInvocation, CastExpression, parse_number, yyerror,
+	java_type_from_name, push_expression_name, yylex): Typo fixes.
+
 2002-07-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ui-file.c (struct tee_file, tee_file_new, tee_file_delete)
@@ -71,7 +79,6 @@
 	(regcache_raw_read): Update declaration.
 	(supply_register): Update declaration.
 
->>>>>>> 1.2946
 2002-07-24  Tom Tromey  <tromey@redhat.com>
 
 	* defs.h (gdb_readline_wrapper): Declare.
