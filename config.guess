@@ -133,6 +133,9 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	main ()
 	{
 	  long cpu = sysconf (_SC_CPU_VERSION);
+	  /* The order matters, because CPU_IS_HP_MC68K erroneously returns
+	     true for CPU_PA_RISC1_0.  CPU_IS_PA_RISC returns correct
+	     results, however.  */
 	  if (CPU_IS_PA_RISC (cpu))
 	    {
 	      switch (cpu)
@@ -143,7 +146,7 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 		  default: puts ("hppa-hitachi-hiuxwe2"); break;
 		}
 	    }
-	  if (CPU_IS_HP_MC68K (cpu))
+	  else if (CPU_IS_HP_MC68K (cpu))
 	    puts ("m68k-hitachi-hiuxwe2");
 	  else puts ("unknown-hitachi-hiuxwe2");
 	  exit (0);
@@ -279,8 +282,12 @@ main()
 #endif
 #endif
 
-#if defined(__386BSD__) || (defined(__bsdi__) && defined(__i386__))
+#if defined(__bsdi__) && defined(__i386__)
+  printf("i386-unknown-bsd386\n"); exit(0);
+#else
+#if defined(__386BSD__)
   printf("i386-unknown-bsd\n"); exit(0);
+#endif
 #endif
 
 #if defined(sequent)

@@ -1,3 +1,8 @@
+Mon Mar 28 14:55:15 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.guess:  Make BSDI generate i386-unknown-bsd386.
+	Patch from Paul Eggert <eggert@twinsun.com>.
+
 Mon Mar 28 12:54:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in (powerpc-*-aix*): Treat like rs6000-*-*.
