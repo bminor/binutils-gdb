@@ -161,4 +161,12 @@ extern enum dwarf2_format mips_dwarf2_format (void);
 extern int mips_dwarf2_addr_size (void);
 #define DWARF2_ADDR_SIZE(bfd) mips_dwarf2_addr_size ()
 
+#define TARGET_USE_CFIPOP 1
+
+#define tc_cfi_frame_initial_instructions mips_cfi_frame_initial_instructions
+extern void mips_cfi_frame_initial_instructions (void);
+
+#define DWARF2_DEFAULT_RETURN_COLUMN 31
+#define DWARF2_CIE_DATA_ALIGNMENT -4
+
 #endif /* TC_MIPS */

@@ -1141,7 +1141,7 @@ DEPTC_mips_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mips.h \
   subsegs.h $(INCDIR)/obstack.h $(INCDIR)/safe-ctype.h \
-  $(INCDIR)/opcode/mips.h itbl-ops.h dwarf2dbg.h $(INCDIR)/elf/mips.h \
+  $(INCDIR)/opcode/mips.h itbl-ops.h dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/mips.h \
   $(INCDIR)/elf/reloc-macros.h ecoff.h $(INCDIR)/coff/sym.h \
   $(INCDIR)/coff/ecoff.h
 

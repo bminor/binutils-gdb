@@ -1,3 +1,12 @@
+2005-03-14  Eric Christopher  <echristo@redhat.com>
+
+        * gas/cfi/cfi-mips-1.d, gas/cfi/cfi-mips-1.s: New dump test.
+        * gas/cfi/cfi.exp: Run it.
+        * gas/cfi/cfi-common-1.d: Update.
+        * gas/cfi/cfi-common-2.d: Ditto.
+        * gas/cfi/cfi-common-3.d: Ditto.
+        * gas/cfi/cfi-common-4.d: Ditto.
+
 2005-03-10  Aldy Hernandez  <aldyh@redhat.com>
 
         * gas/ppc/e500.d: Fix encoding of efscfd.
