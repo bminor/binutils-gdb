@@ -1,3 +1,8 @@
+Sun Apr  5 13:07:57 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/pe.sc: Use shell variables to avoid depending upon
+	how $ is handled when expanding a shell substitution.
+
 Fri Apr  3 00:56:50 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (MOSTLYCLEANFILES): Add ld.log and ld.sum.
