@@ -1,5 +1,8 @@
 Thu Mar 18 14:22:17 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
+	* nm.c:  Modify behavior of -o flag for archives to match
+	BSD4.4 and Sunos 4:  Prefix archive name before each line.
+
 	* m68k-pinsn.c:  Removed.  Subsumed by ../opcodes/m68k-dis.c.
 	* i386-pinsn.c:  Removed.  Subsumed by ../opcodes/i386-dis.c.
 	* Makefile.in:  Adjust accordingly.
