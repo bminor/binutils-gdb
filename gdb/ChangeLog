@@ -1,3 +1,11 @@
+2003-04-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c: Add some whitespace to make things more
+	readable.
+	(fetch_register, store_register, fetch_inferior_registers,
+	store_inferior_registers): Get rid of assignment in if-statement.
+	(store_register): Fix typo in error message.
+
 2003-04-16  Andrew Cagney  <cagney@redhat.com>
 
 	* utils.c (xmmalloc): Always allocate something, matches
