@@ -468,6 +468,7 @@ const struct d30v_format d30v_format_table[] =
   { SHORT_A2, 0, { Ra2, Rb, Rc } },		/* Ra2,Rb,Rc */
   { SHORT_A2, 2, { Ra2, Rb, IMM6 } },		/* Ra2,Rb,imm6 */
   { SHORT_NONE, 0, { 0 } },			/* no operands (nop, reit) */
+  { SHORT_AR, 0, { Aa, Rb, Rc } },		/* Aa,Rb,Rc */
   { LONG, 2, { Ra, Rb, IMM32 } },		/* Ra,Rb,imm32 */
   { LONG_U, 2, { IMM32 } },			/* imm32 */
   { LONG_Ur, 2, { REL32 } },			/* rel32 */
@@ -481,7 +482,6 @@ const struct d30v_format d30v_format_table[] =
   { LONG_D, 2, { REL6S3, IMM32 } },		/* rel6s3,imm32 */
   { LONG_Dr, 2, { REL6S3, REL32 } },		/* rel6s3,rel32 */
   { LONG_Dbr, 2, { IMM6U, REL32 } },		/* imm6,rel32 */
-  { SHORT_AR, 0, { Aa, Rb, Rc } },		/* Aa,Rb,Rc */
   { 0, 0, { 0 } },
 };
 

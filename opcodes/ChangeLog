@@ -1,3 +1,8 @@
+2000-03-27  Nick Clifton  <nickc@cygnus.com>
+
+	* d30v-opc.c (d30v_format_table): Move SHORT_AR to end of list of
+	short instructions, from end of list of long instructions.
+
 2000-03-27  Ian Lance Taylor  <ian@zembu.com>
 
 	* Makefile.am (CFILES): Add avr-dis.c.
