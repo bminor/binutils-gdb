@@ -635,6 +635,8 @@ test "$host_alias" != "$target_alias" &&
 
 archinc=common.inc
 case ${target} in
+*arm-*-*) archinc=arm.inc ;;
+xscale-*-*) archinc=arm.inc ;;
 d10v-*-*) archinc=d10v.inc ;;
 s390-*-*) archinc=s390.inc ;;
 i[3456]86*) archinc=i386.inc ;;

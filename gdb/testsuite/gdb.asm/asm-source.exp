@@ -35,6 +35,12 @@ set asm-arch ""
 set asm-flags ""
 set link-flags ""
 
+if [istarget "*arm-*-*"] then {
+    set asm-arch arm
+}
+if [istarget "xscale-*-*"] then {
+    set asm-arch arm
+}
 if [istarget "d10v-*-*"] then {
     set asm-arch d10v
 }

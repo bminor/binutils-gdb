@@ -1,3 +1,10 @@
+2001-12-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/arm.inc: New file.
+	* gdb.asm/asm-source.exp: Add arm targets.
+	* gdb.asm/configure.in: Ditto.
+	* gdb.asm/configure: Recreated from configure.in.
+
 Thu Dec 20 09:54:36 2001  Jeffrey A Law  (law@redhat.com)
 
 	* gdb.c++/templates.exp: Use "hppa64-*-*", not "hppa2.0w-*-*"
