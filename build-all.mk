@@ -15,11 +15,11 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 930213
+DATE	= 930309
 
 TAG	= latest-$(DATE)
 
-INSTALLDIR = /big/progressive-test/$(TAG)
+INSTALLDIR = /build/ian/devo-test/$(TAG)
 
 GCC = gcc -O 
 CFLAGS = -g
