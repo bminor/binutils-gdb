@@ -16,6 +16,8 @@
 
 * Support for i860, by Jason Eckhardt (preliminary, alpha quality).
 
+* Support for CRIS (Axis Communications ETRAX series).
+
 Changes in version 2.10:
 
 * Added AT> to the linker script language to allow load-time allocation of 

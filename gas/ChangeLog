@@ -1,3 +1,7 @@
+2000-08-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* NEWS: Mention support for CRIS.
+
 Thu Aug 24 20:41:05 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* config/tc-avr.h (TC_IMPLICIT_LCOMM_ALIGNMENT): New macros.

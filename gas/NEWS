@@ -10,6 +10,8 @@ Support for IA-64.
 
 Support for i860, by Jason Eckhardt.
 
+Support for CRIS (Axis Communications ETRAX series).
+
 x86 gas has a new .arch pseudo op to specify the target CPU architecture.
 
 x86 gas -q command line option quietens warnings about register size changes
