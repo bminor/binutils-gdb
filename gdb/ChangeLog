@@ -1,3 +1,7 @@
+2002-09-19  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gdb_mbuild.sh: New file.
+
 2002-09-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* objc-exp.y, objc-lang.h, objc-lang.c: Fix copyright notice.
