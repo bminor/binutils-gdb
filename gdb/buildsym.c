@@ -1424,6 +1424,7 @@ cleanup_undefined_types ()
 
       case TYPE_CODE_STRUCT:
       case TYPE_CODE_UNION:
+      case TYPE_CODE_ENUM:
 	{
 	  /* Reasonable test to see if it's been defined since.  */
 	  if (TYPE_NFIELDS (*type) == 0)
@@ -1437,6 +1438,8 @@ cleanup_undefined_types ()
 		typename += 7;
 	      if (!strncmp (typename, "union ", 6))
 		typename += 6;
+	      if (!strncmp (typename, "enum ", 5))
+		typename += 5;
 
 	      for (ppt = file_symbols; ppt; ppt = ppt->next)
 		for (i = 0; i < ppt->nsyms; i++)
@@ -1481,7 +1484,8 @@ cleanup_undefined_types ()
 
       default:
       badtype:
-	error ("GDB internal error.  cleanup_undefined_types with bad type.");
+	error ("GDB internal error.  cleanup_undefined_types with bad\
+ type %d.", TYPE_CODE (*type));
 	break;
     }
   }
