@@ -1,3 +1,7 @@
+2001-10-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* version.in: Bump to 5.0.91.  Add YYYY-MM-DD.
+
 2001-10-12  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* config/i386/tm-cygwin.h: include tm-i386.h instead of tm-i386v.h.
