@@ -94,7 +94,7 @@ extern CORE_ADDR saved_pc_after_call ();
 	/*  8 */ "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",\
 	/* 16 */ "g0",  "g1",  "g2",  "g3",  "g4",  "g5",  "g6",  "g7", \
 	/* 24 */ "g8",  "g9",  "g10", "g11", "g12", "g13", "g14", "fp", \
-	/* 32 */ "pc",  "ac",  "ip",  "tc",  "fp0", "fp1", "fp2", "fp3",       \
+	/* 32 */ "pc",  "ac",  "ip",  "tc",  "fp0", "fp1", "fp2", "fp3",\
 }
 
 /* Register numbers of various important registers (used to index

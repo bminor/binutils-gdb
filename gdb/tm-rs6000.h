@@ -185,8 +185,7 @@ extern int aix_loadInfoTextIndex;
    the new frame is not set up until the new function executes
    some instructions.  */
 
-extern char registers[];
-extern char register_valid [];
+#include "inferior.h"	/* For registers[] and register_valid[]. */
 
 #define	SAVED_PC_AFTER_CALL(frame)	\
 	(register_valid [LR_REGNUM] ? 	\

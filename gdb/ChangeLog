@@ -1,3 +1,13 @@
+Thu Jun 11 01:33:40 1992  John Gilmore  (gnu at cygnus.com)
+
+	* inferior.h (register_valid):  Declare.
+	* remote-udi.c, rs6000-xdep.c, sparc-xdep.c, tm-rs6000.h:  Remove decl.
+	* objfiles.h (ALL_OBJFILE_{SYMTABS,PSYMTABS,MSYMBOLS}):  Add
+	macros for traversing the data structures in a single objfile.
+	* tm-m88k.h, tm-sparc.h (REGISTER_NAMES):  Remove extra semicolon.
+	* tm-i960.h (REGISTER_NAMES):  Cosmetic change.
+	* infcmd.c:  Lint.
+
 Tue Jun  9 17:19:45 1992  Fred Fish  (fnf@cygnus.com)
 
 	* c-exp.y, m2-exp.y:  Move remapping defines for malloc and

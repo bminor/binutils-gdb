@@ -33,8 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include <sys/core.h>
 
-extern char register_valid[];
-
 /* We don't store all registers immediately when requested, since they
    get sent over in large chunks anyway.  Instead, we accumulate most
    of the changes and send them over once.  "deferred_stores" keeps

@@ -61,7 +61,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif 
 
 
-extern char register_valid[];
 extern int stop_soon_quietly;           /* for wait_for_inferior */
 extern struct value *call_function_by_hand();
 static void udi_resume();

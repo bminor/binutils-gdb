@@ -180,7 +180,7 @@ extern CORE_ADDR skip_prologue ();
 	"fpit",\
 	"fpsr",\
 	"fpcr",\
-	};
+	}
 
 
 /* Register numbers of various important registers.

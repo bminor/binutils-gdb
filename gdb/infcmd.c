@@ -17,12 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
+#include "defs.h"
 #include <signal.h>
 #include <sys/param.h>
 #include <string.h>
-#include "defs.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "frame.h"
 #include "inferior.h"
 #include "environ.h"
@@ -31,9 +31,80 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 
-extern char *sys_siglist[];
+static void
+continue_command PARAMS ((char *, int));
 
-extern void until_break_command ();	/* breakpoint.c */
+static void
+until_next_command PARAMS ((int));
+
+static void 
+until_command PARAMS ((char *, int));
+
+static void
+path_info PARAMS ((char *, int));
+
+static void
+path_command PARAMS ((char *, int));
+
+static void
+unset_command PARAMS ((char *, int));
+
+static void
+float_info PARAMS ((char *, int));
+
+static void
+detach_command PARAMS ((char *, int));
+
+static void
+nofp_registers_info PARAMS ((char *, int));
+
+static void
+all_registers_info PARAMS ((char *, int));
+
+static void
+registers_info PARAMS ((char *, int));
+
+static void
+do_registers_info PARAMS ((int, int));
+
+static void
+unset_environment_command PARAMS ((char *, int));
+
+static void
+set_environment_command PARAMS ((char *, int));
+
+static void
+environment_info PARAMS ((char *, int));
+
+static void
+program_info PARAMS ((char *, int));
+
+static void
+finish_command PARAMS ((char *, int));
+
+static void
+signal_command PARAMS ((char *, int));
+
+static void
+jump_command PARAMS ((char *, int));
+
+static void
+step_1 PARAMS ((int, int, char *));
+
+static void
+nexti_command PARAMS ((char *, int));
+
+static void
+stepi_command PARAMS ((char *, int));
+
+static void
+next_command PARAMS ((char *, int));
+
+static void
+step_command PARAMS ((char *, int));
+
+static void
+run_command PARAMS ((char *, int));
 
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error ("The program is not being run.");
@@ -117,9 +188,6 @@ int step_multi;
 
 struct environ *inferior_environ;
 
-CORE_ADDR read_pc ();
-void breakpoint_clear_ignore_counts ();
-
 
 /* ARGSUSED */
 void
@@ -153,7 +221,7 @@ Start it from the beginning? "))
 
   exec_file = (char *) get_exec_file (0);
 
-  /* The exec file is re-read every time we do an inferior_died, so
+  /* The exec file is re-read every time we do a generic_mourn_inferior, so
      we just have to worry about the symbol file.  */
   reread_symbols ();
 
@@ -167,7 +235,7 @@ Start it from the beginning? "))
 
   if (from_tty)
     {
-      printf ("Starting program: %s %s\n",
+      printf_filtered ("Starting program: %s %s\n",
 	      exec_file? exec_file: "", inferior_args);
       fflush (stdout);
     }
@@ -176,7 +244,7 @@ Start it from the beginning? "))
 			  environ_vector (inferior_environ));
 }
 
-void
+static void
 continue_command (proc_count_exp, from_tty)
      char *proc_count_exp;
      int from_tty;
@@ -202,13 +270,13 @@ continue_command (proc_count_exp, from_tty)
 	  /* set_ignore_count prints a message ending with a period.
 	     So print two spaces before "Continuing.".  */
 	  if (from_tty)
-	    printf ("  ");
+	    printf_filtered ("  ");
 	  num = bpstat_num (&bs);
 	}
     }
 
   if (from_tty)
-    printf ("Continuing.\n");
+    printf_filtered ("Continuing.\n");
 
   clear_proceed_status ();
 
@@ -216,12 +284,11 @@ continue_command (proc_count_exp, from_tty)
 }
 
 /* Step until outside of current statement.  */
-static void step_1 ();
 
 /* ARGSUSED */
 static void
 step_command (count_string, from_tty)
-     char * count_string;
+     char *count_string;
      int from_tty;
 {
   step_1 (0, 0, count_string);
@@ -232,7 +299,7 @@ step_command (count_string, from_tty)
 /* ARGSUSED */
 static void
 next_command (count_string, from_tty)
-     char * count_string;
+     char *count_string;
      int from_tty;
 {
   step_1 (1, 0, count_string);
@@ -243,7 +310,7 @@ next_command (count_string, from_tty)
 /* ARGSUSED */
 static void
 stepi_command (count_string, from_tty)
-     char * count_string;
+     char *count_string;
      int from_tty;
 {
   step_1 (0, 1, count_string);
@@ -252,7 +319,7 @@ stepi_command (count_string, from_tty)
 /* ARGSUSED */
 static void
 nexti_command (count_string, from_tty)
-     char * count_string;
+     char *count_string;
      int from_tty;
 {
   step_1 (1, 1, count_string);
@@ -266,14 +333,20 @@ step_1 (skip_subroutines, single_inst, count_string)
 {
   register int count = 1;
   FRAME fr;
+  struct cleanup *cleanups = 0;
 
   ERROR_NO_INFERIOR;
   count = count_string ? parse_and_eval_address (count_string) : 1;
 
+  if (!single_inst || skip_subroutines) /* leave si command alone */
+    {
+      enable_longjmp_breakpoint();
+      cleanups = make_cleanup(disable_longjmp_breakpoint, 0);
+    }
+
   for (; count > 0; count--)
     {
       clear_proceed_status ();
-
 
       fr = get_current_frame ();
       if (!fr)				/* Avoid coredump here.  Why tho? */
@@ -285,22 +358,22 @@ step_1 (skip_subroutines, single_inst, count_string)
 	  find_pc_line_pc_range (stop_pc, &step_range_start, &step_range_end);
 	  if (step_range_end == 0)
 	    {
-	      int misc;
+	      struct minimal_symbol *msymbol;
 
-	      misc = find_pc_misc_function (stop_pc);
+	      msymbol = lookup_minimal_symbol_by_pc (stop_pc);
 	      target_terminal_ours ();
-	      printf ("Current function has no line number information.\n");
+	      printf_filtered ("Current function has no line number information.\n");
 	      fflush (stdout);
 
 	      /* No info or after _etext ("Can't happen") */
-	      if (misc == -1 || misc == misc_function_count - 1)
+	      if (msymbol == NULL || (msymbol + 1) -> name == NULL)
 		error ("No data available on pc function.");
 
-	      printf ("Single stepping until function exit.\n");
+	      printf_filtered ("Single stepping until function exit.\n");
 	      fflush (stdout);
 
-	      step_range_start = misc_function_vector[misc].address;
-	      step_range_end = misc_function_vector[misc + 1].address;
+	      step_range_start = msymbol -> address;
+	      step_range_end = (msymbol + 1) -> address;
 	    }
 	}
       else
@@ -325,6 +398,9 @@ step_1 (skip_subroutines, single_inst, count_string)
       write_register (NPC_REGNUM, read_register (PC_REGNUM));
 #endif
     }
+
+  if (!single_inst || skip_subroutines)
+    do_cleanups(cleanups);
 }
 
 /* Continue program at specified address.  */
@@ -350,7 +426,7 @@ jump_command (arg, from_tty)
     }
 
   sal = sals.sals[0];
-  free (sals.sals);
+  free ((PTR)sals.sals);
 
   if (sal.symtab == 0 && sal.pc == 0)
     error ("No source file has been specified.");
@@ -369,7 +445,7 @@ jump_command (arg, from_tty)
   addr = ADDR_BITS_SET (sal.pc);
 
   if (from_tty)
-    printf ("Continuing at %s.\n", local_hex_string(addr));
+    printf_filtered ("Continuing at %s.\n", local_hex_string(addr));
 
   clear_proceed_status ();
   proceed (addr, 0, 0);
@@ -393,7 +469,7 @@ signal_command (signum_exp, from_tty)
   signum = parse_and_eval_address (signum_exp);
 
   if (from_tty)
-    printf ("Continuing with signal %d.\n", signum);
+    printf_filtered ("Continuing with signal %d.\n", signum);
 
   clear_proceed_status ();
   proceed (stop_pc, signum, 0);
@@ -454,7 +530,7 @@ The expression which contained the function call has been discarded.");
    of wait_for_inferior and the proceed status code. -- randy */
 
 /* ARGSUSED */
-void
+static void
 until_next_command (from_tty)
      int from_tty;
 {
@@ -476,12 +552,12 @@ until_next_command (from_tty)
   
   if (!func)
     {
-      int misc_func = find_pc_misc_function (pc);
+      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (pc);
       
-      if (misc_func != -1)
+      if (msymbol == NULL)
 	error ("Execution is not within a known function.");
       
-      step_range_start = misc_function_vector[misc_func].address;
+      step_range_start = msymbol -> address;
       step_range_end = pc;
     }
   else
@@ -500,7 +576,7 @@ until_next_command (from_tty)
   proceed ((CORE_ADDR) -1, -1, 1);
 }
 
-void 
+static void 
 until_command (arg, from_tty)
      char *arg;
      int from_tty;
@@ -525,6 +601,8 @@ finish_command (arg, from_tty)
   register FRAME frame;
   struct frame_info *fi;
   register struct symbol *function;
+  struct breakpoint *breakpoint;
+  struct cleanup *old_chain;
 
   if (arg)
     error ("The \"finish\" command does not take any arguments.");
@@ -542,7 +620,10 @@ finish_command (arg, from_tty)
   fi = get_frame_info (frame);
   sal = find_pc_line (fi->pc, 0);
   sal.pc = fi->pc;
-  set_momentary_breakpoint (sal, frame);
+
+  breakpoint = set_momentary_breakpoint (sal, frame, bp_finish);
+
+  old_chain = make_cleanup(delete_breakpoint, breakpoint);
 
   /* Find the function we will return from.  */
 
@@ -560,7 +641,9 @@ finish_command (arg, from_tty)
   proceed_to_finish = 1;		/* We want stop_registers, please... */
   proceed ((CORE_ADDR) -1, -1, 0);
 
-  if (bpstat_momentary_breakpoint (stop_bpstat) && function != 0)
+  /* Did we stop at our breakpoint? */
+  if (bpstat_find_breakpoint(stop_bpstat, breakpoint) != NULL
+      && function != 0)
     {
       struct type *value_type;
       register value val;
@@ -585,6 +668,7 @@ finish_command (arg, from_tty)
       value_print (val, stdout, 0, Val_no_prettyprint);
       printf_filtered ("\n");
     }
+  do_cleanups(old_chain);
 }
 
 /* ARGSUSED */
@@ -598,14 +682,14 @@ program_info (args, from_tty)
   
   if (!target_has_execution)
     {
-      printf ("The program being debugged is not being run.\n");
+      printf_filtered ("The program being debugged is not being run.\n");
       return;
     }
 
   target_files_info ();
-  printf ("Program stopped at %s.\n", local_hex_string(stop_pc));
+  printf_filtered ("Program stopped at %s.\n", local_hex_string(stop_pc));
   if (stop_step)
-    printf ("It stopped after being stepped.\n");
+    printf_filtered ("It stopped after being stepped.\n");
   else if (num != 0)
     {
       /* There may be several breakpoints in the same place, so this
@@ -613,9 +697,9 @@ program_info (args, from_tty)
       while (num != 0)
 	{
 	  if (num < 0)
-	    printf ("It stopped at a breakpoint that has since been deleted.\n");
+	    printf_filtered ("It stopped at a breakpoint that has since been deleted.\n");
 	  else
-	    printf ("It stopped at breakpoint %d.\n", num);
+	    printf_filtered ("It stopped at breakpoint %d.\n", num);
 	  num = bpstat_num (&bs);
 	}
     }
@@ -623,39 +707,40 @@ program_info (args, from_tty)
 #ifdef PRINT_RANDOM_SIGNAL
     PRINT_RANDOM_SIGNAL (stop_signal);
 #else
-    printf ("It stopped with signal %d (%s).\n",
-	    stop_signal, 
-	    (stop_signal > NSIG)? "unknown": sys_siglist[stop_signal]);
+    printf_filtered ("It stopped with signal %d (%s).\n",
+		     stop_signal, safe_strsignal (stop_signal));
 #endif
   }
 
   if (!from_tty)
-    printf ("Type \"info stack\" or \"info registers\" for more information.\n");
+    printf_filtered ("Type \"info stack\" or \"info registers\" for more information.\n");
 }
 
 static void
-environment_info (var)
+environment_info (var, from_tty)
      char *var;
+     int from_tty;
 {
   if (var)
     {
       register char *val = get_in_environ (inferior_environ, var);
       if (val)
-	printf ("%s = %s\n", var, val);
+	printf_filtered ("%s = %s\n", var, val);
       else
-	printf ("Environment variable \"%s\" not defined.\n", var);
+	printf_filtered ("Environment variable \"%s\" not defined.\n", var);
     }
   else
     {
       register char **vector = environ_vector (inferior_environ);
       while (*vector)
-	printf ("%s\n", *vector++);
+	printf_filtered ("%s\n", *vector++);
     }
 }
 
 static void
-set_environment_command (arg)
+set_environment_command (arg, from_tty)
      char *arg;
+     int from_tty;
 {
   register char *p, *val, *var;
   int nullset = 0;
@@ -705,7 +790,7 @@ set_environment_command (arg)
   var = savestring (arg, p - arg);
   if (nullset)
     {
-      printf ("Setting environment variable \"%s\" to null value.\n", var);
+      printf_filtered ("Setting environment variable \"%s\" to null value.\n", var);
       set_in_environ (inferior_environ, var, "");
     }
   else
@@ -737,18 +822,18 @@ unset_environment_command (var, from_tty)
 const static char path_var_name[] = "PATH";
 
 /* ARGSUSED */
-void
+static void
 path_info (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf ("Executable and object file path: %s\n", 
+  printf_filtered ("Executable and object file path: %s\n", 
       get_in_environ (inferior_environ, path_var_name));
 }
 
 /* Add zero or more directories to the front of the execution path.  */
 
-void
+static void
 path_command (dirname, from_tty)
      char *dirname;
      int from_tty;
@@ -781,7 +866,7 @@ write_pc (val)
   pc_changed = 0;
 }
 
-char *reg_names[] = REGISTER_NAMES;
+const char * const reg_names[] = REGISTER_NAMES;
 
 /* Print out the machine register regnum. If regnum is -1,
    print all registers (fpregs == 1) or all non-float registers
@@ -909,15 +994,17 @@ registers_info (addr_exp, fpregs)
 }
 
 static void
-all_registers_info (addr_exp)
+all_registers_info (addr_exp, from_tty)
      char *addr_exp;
+     int from_tty;
 {
   registers_info (addr_exp, 1);
 }
 
 static void
-nofp_registers_info (addr_exp)
+nofp_registers_info (addr_exp, from_tty)
      char *addr_exp;
+     int from_tty;
 {
   registers_info (addr_exp, 0);
 }
@@ -970,13 +1057,14 @@ detach_command (args, from_tty)
 
 /* ARGSUSED */
 static void
-float_info (addr_exp)
+float_info (addr_exp, from_tty)
      char *addr_exp;
+     int from_tty;
 {
 #ifdef FLOAT_INFO
 	FLOAT_INFO;
 #else
-	printf ("No floating point info available for this processor.\n");
+	printf_filtered ("No floating point info available for this processor.\n");
 #endif
 }
 
@@ -988,7 +1076,7 @@ unset_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf ("\"unset\" must be followed by the name of an unset subcommand.\n");
+  printf_filtered ("\"unset\" must be followed by the name of an unset subcommand.\n");
   help_list (unsetlist, "unset ", -1, stdout);
 }
 

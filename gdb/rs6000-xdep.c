@@ -59,7 +59,6 @@ static int special_regs[] = {
 /* Nonzero if we just simulated a single step break. */
 extern int one_stepped;
 
-extern char register_valid[];
 extern struct obstack frame_cache_obstack;
 
 

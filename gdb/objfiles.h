@@ -325,22 +325,39 @@ have_minimal_symbols PARAMS ((void));
        (obj) != NULL? ((nxt)=(obj)->next,1) :0;	\
        (obj) = (nxt))
 
+
+/* Traverse all symtabs in one objfile.  */
+
+#define	ALL_OBJFILE_SYMTABS(objfile, s) \
+    for ((s) = (objfile) -> symtabs; (s) != NULL; (s) = (s) -> next)
+
+/* Traverse all psymtabs in one objfile.  */
+
+#define	ALL_OBJFILE_PSYMTABS(objfile, p) \
+    for ((p) = (objfile) -> psymtabs; (p) != NULL; (p) = (p) -> next)
+
+/* Traverse all minimal symbols in one objfile.  */
+
+#define	ALL_OBJFILE_MSYMBOLS(objfile, m) \
+    for ((m) = (objfile) -> msymbols; (m)->name != NULL; (m)++)
+
+
 /* Traverse all symtabs in all objfiles.  */
 
 #define	ALL_SYMTABS(objfile, s) \
   ALL_OBJFILES (objfile)	 \
-    for ((s) = (objfile) -> symtabs; (s) != NULL; (s) = (s) -> next)
+    ALL_OBJFILE_SYMTABS (objfile, s)
 
 /* Traverse all psymtabs in all objfiles.  */
 
 #define	ALL_PSYMTABS(objfile, p) \
   ALL_OBJFILES (objfile)	 \
-    for ((p) = (objfile) -> psymtabs; (p) != NULL; (p) = (p) -> next)
+    ALL_OBJFILE_PSYMTABS (objfile, p)
 
 /* Traverse all minimal symbols in all objfiles.  */
 
 #define	ALL_MSYMBOLS(objfile, m) \
   ALL_OBJFILES (objfile)	 \
-    for ((m) = (objfile) -> msymbols; (m)->name != NULL; (m)++)
+    ALL_OBJFILE_MSYMBOLS (objfile, m)
 
 #endif	/* !defined (OBJFILES_H) */

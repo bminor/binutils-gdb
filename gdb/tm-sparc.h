@@ -137,7 +137,7 @@ extern CORE_ADDR sparc_pc_adjust();
   "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",	\
   "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",	\
                                                                 \
-  "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr" };
+  "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr" }
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
