@@ -223,7 +223,7 @@ BUILT_SRC_WO_CONFIG = \
 	pk.h \
 	hw.h hw.c \
 	filter_host.c \
-	targ-vals.h targ-map.c targ-vals.def
+	@sim_targ_vals@
 
 BUILT_SRC = \
 	$(BUILT_SRC_WO_CONFIG) \

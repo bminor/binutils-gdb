@@ -661,9 +661,11 @@ AC_MSG_CHECKING(for common simulator directory)
 if test -e "${srcdir}/../common/callback.c"; then
   AC_MSG_RESULT(yes)
   sim_callback="callback.o targ-map.o"
+  sim_targ_vals="targ-vals.h targ-map.c targ-vals.def"
 else
   AC_MSG_RESULT(no)
   sim_callback=""
+  sim_targ_vals=""
 fi
 
 AC_SUBST(CC_FOR_BUILD)
@@ -712,6 +714,7 @@ AC_SUBST(sim_stdio)
 AC_SUBST(sim_termio)
 AC_SUBST(sim_devzero)
 AC_SUBST(sim_callback)
+AC_SUBST(sim_targ_vals)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])

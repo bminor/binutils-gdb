@@ -1,3 +1,11 @@
+Thu Jan 30 11:23:20 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
+
+	* Makefile.in (BUILT_SRC_WO_CONFIG): Change targ-vals.* to
+ 	@sim_targ_vals@
+
+	* configure.in (sim_callback, sim_targ_vals): Set sim_targ_valls
+ 	if common callback is present.
+
 Wed Jan 29 12:32:41 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (sim_callback): If the gdb is post 4.16, configure
