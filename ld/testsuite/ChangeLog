@@ -1,3 +1,15 @@
+2001-06-13  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/default.exp (AS, GASP, OBJDUMP, NM, NMFLAGS, OBJCOPY,
+	OBJCOPYFLAGS, READELF, READELFFLAGS, LD, LDFLAGS): Provide
+	default.
+
+	* lib/ld-lib.exp (run_dump_test): Import from gas testsuite.  Add
+	new options "ld", "source", "xfail", "target", "notarget" and
+	"error".  Support the runtest_file_p "*.exp=testname" feature.
+	(slurp_options, regexp_diff, file_contents, verbose_eval): Import
+	from gas testsuite.
+
 2001-06-12  Martin Schwidefsky <schwidefsky@de.ibm.com>
 
 	* testsuite/ld-undefined/undefined.exp: Correct setup_xfail rule.
