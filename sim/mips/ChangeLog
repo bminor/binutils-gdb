@@ -1,3 +1,11 @@
+Sun Nov 23 01:45:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (sim-fpu.h): Include.
+
+	* interp.c (convert, SquareRoot, Recip, Divide, Multiply, Sub,
+ 	Add, Negate, AbsoluteValue, Equal, Less, Infinity, NaN): Rewrite
+ 	using host independant sim_fpu module.
+
 Thu Nov 20 19:56:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (signal_exception): Report internal errors with SIGABRT
@@ -212,12 +220,12 @@ Mon Oct 27 17:53:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
  	igen. Replace with configuration variables sim_igen_flags /
  	sim_m16_flags.
 
-	end-sanitize-v5900
-	* r5900.igen: New file. Copy v5900 insns here.
 	start-sanitize-r5900
-	end-sanitize-v5400
-	* vr5400.igen: New file. 
+	* r5900.igen: New file. Copy v5900 insns here.
+	end-sanitize-v5900
 	start-sanitize-vr5400
+	* vr5400.igen: New file. 
+	end-sanitize-v5400
 	* m16.igen: New file.  Copy mips16 insns here.
 	* mips.igen: From here.
 
