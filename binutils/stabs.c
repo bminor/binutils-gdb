@@ -51,9 +51,10 @@ struct stab_handle
 {
   /* True if this is stabs in sections.  */
   boolean sections;
-  /* The type of the last stab symbol, so that we can detect N_SO
-     pairs.  */
-  int last_type;
+  /* The accumulated file name string.  */
+  char *so_string;
+  /* The value of the last N_SO symbol.  */
+  bfd_vma so_value;
   /* The value of the start of the file, so that we can handle file
      relative N_LBRAC and N_RBRAC symbols.  */
   bfd_vma file_start_offset;
@@ -369,7 +370,8 @@ finish_stab (dhandle, handle)
 
   if (info->within_function)
     {
-      if (! debug_end_function (dhandle, (bfd_vma) -1))
+      if (! stab_emit_pending_vars (dhandle, info)
+	  || ! debug_end_function (dhandle, (bfd_vma) -1))
 	return false;
       info->within_function = false;
     }
@@ -386,9 +388,6 @@ finish_stab (dhandle, handle)
 	return false;
     }
 
-  if (info->pending)
-    fprintf (stderr, "Left over pending variables in stabs debugging\n");
-
   return true;
 }
 
@@ -404,6 +403,38 @@ parse_stab (dhandle, handle, type, desc, value, string)
      const char *string;
 {
   struct stab_handle *info = (struct stab_handle *) handle;
+
+  /* gcc will emit two N_SO strings per compilation unit, one for the
+     directory name and one for the file name.  We just collect N_SO
+     strings as we see them, and start the new compilation unit when
+     we see a non N_SO symbol.  */
+  if (info->so_string != NULL
+      && (type != N_SO || *string == '\0' || value != info->so_value))
+    {
+      if (! debug_set_filename (dhandle, info->so_string))
+	return false;
+      info->main_filename = info->so_string;
+
+      info->gcc_compiled = 0;
+      info->n_opt_found = false;
+
+      /* Generally, for stabs in the symbol table, the N_LBRAC and
+	 N_RBRAC symbols are relative to the N_SO symbol value.  */
+      if (! info->sections)
+	info->file_start_offset = info->so_value;
+
+      /* We need to reset the mapping from type numbers to types.  We
+	 can't free the old mapping, because of the use of
+	 debug_make_indirect_type.  */
+      info->files = 1;
+      info->file_types = ((struct stab_types **)
+			  xmalloc (sizeof *info->file_types));
+      info->file_types[0] = NULL;
+
+      info->so_string = NULL;
+
+      /* Now process whatever type we just got.  */
+    }
 
   switch (type)
     {
@@ -463,58 +494,40 @@ parse_stab (dhandle, handle, type, desc, value, string)
       break;
 
     case N_SO:
-      /* Start a file.  If we get two in a row, the first is the
-         directory name.  An empty string is emitted by gcc at the end
-         of a compilation unit.  */
-      if (*string == '\0')
+      /* This always ends a function.  */
+      if (info->within_function)
 	{
-	  if (info->within_function)
-	    {
-	      if (! debug_end_function (dhandle, value))
-		return false;
-	      info->within_function = false;
-	    }
-	  return true;
-	}
-      info->gcc_compiled = 0;
-      info->n_opt_found = false;
-      if (info->last_type == N_SO)
-	{
-	  char *o;
-
-	  if (! debug_append_filename (dhandle, string))
+	  if (! stab_emit_pending_vars (dhandle, info)
+	      || ! debug_end_function (dhandle, value))
 	    return false;
-	  o = info->main_filename;
-	  info->main_filename = concat (o, string, (const char *) NULL);
-	  free (o);
+	  info->within_function = false;
 	}
+
+      /* An empty string is emitted by gcc at the end of a compilation
+         unit.  */
+      if (*string == '\0')
+	return true;
+
+      /* Just accumulate strings until we see a non N_SO symbol.  If
+         the string starts with '/', we discard the previously
+         accumulated strings.  */
+      if (info->so_string == NULL)
+	info->so_string = xstrdup (string);
       else
 	{
-	  if (info->within_function)
-	    {
-	      if (! debug_end_function (dhandle, value))
-		return false;
-	      info->within_function = false;
-	    }
-	  if (! debug_set_filename (dhandle, string))
-	    return false;
-	  if (info->main_filename != NULL)
-	    free (info->main_filename);
-	  info->main_filename = xstrdup (string);
+	  char *f;
 
-	  /* Generally, for stabs in the symbol table, the N_LBRAC and
-             N_RBRAC symbols are relative to the N_SO symbol value.  */
-	  if (! info->sections)
-	    info->file_start_offset = value;
-
-	  /* We need to reset the mapping from type numbers to types.
-             We can't free the old mapping, because of the use of
-             debug_make_indirect_type.  */
-	  info->files = 1;
-	  info->file_types = ((struct stab_types **)
-			      xmalloc (sizeof *info->file_types));
-	  info->file_types[0] = NULL;
+	  f = info->so_string;
+	  if (*string == '/')
+	    info->so_string = xstrdup (string);
+	  else
+	    info->so_string = concat (info->so_string, string,
+				      (const char *) NULL);
+	  free (f);
 	}
+
+      info->so_value = value;
+
       break;
 
     case N_SOL:
@@ -577,7 +590,8 @@ parse_stab (dhandle, handle, type, desc, value, string)
 	  {
 	    if (info->within_function)
 	      {
-		if (! debug_end_function (dhandle, value))
+		if (! stab_emit_pending_vars (dhandle, info)
+		    || ! debug_end_function (dhandle, value))
 		  return false;
 	      }
 	    /* For stabs in sections, line numbers and block addresses
@@ -606,8 +620,6 @@ parse_stab (dhandle, handle, type, desc, value, string)
     case N_MAIN:
       break;
     }
-
-  info->last_type = type;
 
   return true;
 }
