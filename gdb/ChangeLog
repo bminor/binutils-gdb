@@ -1,3 +1,9 @@
+2004-06-27    <david@streamline-computing.com>
+
+	Partial fix for PR cli/1056.
+	* valarith.c: Check for zero in division and remainder 
+	evaluation.
+
 2004-06-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c: Remove excessive whitespace.
