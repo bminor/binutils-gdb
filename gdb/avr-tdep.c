@@ -996,7 +996,14 @@ avr_skip_prologue (CORE_ADDR pc)
     {
       sal = find_pc_line (func_addr, 0);
 
-      if (sal.line != 0 && sal.end < func_end)
+      /* troth/2002-08-05: For some very simple functions, gcc doesn't
+         generate a prologue and the sal.end ends up being the 2-byte ``ret''
+         instruction at the end of the function, but func_end ends up being
+         the address of the first instruction of the _next_ function. By
+         adjusting func_end by 2 bytes, we can catch these functions and not
+         return sal.end if it is the ``ret'' instruction. */
+
+      if (sal.line != 0 && sal.end < (func_end-2))
 	return sal.end;
     }
 

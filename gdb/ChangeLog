@@ -1,3 +1,7 @@
+2002-08-05  Theodore A. Roth  <troth@verinet.com>
+
+	* gdb/avr-tdep.c(avr_skip_prologue): Fix to return the correct pc.
+
 2002-08-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* mcore-tdep.c (mcore_gdbarch_init): Use
