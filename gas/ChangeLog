@@ -1,3 +1,8 @@
+Wed Apr 15 15:17:27 1998  Richard Henderson  <rth@cygnus.com>
+
+	* symbols.c (resolve_symbol_value) [O_symbol]: Also store the symbol
+	back into the expression to handle add/sub simplification correctly.
+
 start-sanitize-r5900
 Wed Apr 15 10:35:59 1998  Frank Ch. Eigler <fche@cygnus.com>
  
