@@ -1,3 +1,8 @@
+Tue Mar 12 12:09:43 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* debug.c (debug_type_samep): Don't loop endlessly in
+	DEBUG_KIND_ENUM case.  From Eric Baur <ecb@nexen.com>.
+
 Mon Mar 11 12:35:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* rddbg.c (read_section_stabs_debugging_info): Call save_stab for

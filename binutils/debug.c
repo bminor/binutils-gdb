@@ -52,12 +52,15 @@ struct debug_handle
   struct debug_lineno *current_lineno;
   /* Mark.  This is used by debug_write.  */
   unsigned int mark;
-  /* Another mark used by debug_write.  */
-  unsigned int class_mark;
   /* A struct/class ID used by debug_write.  */
   unsigned int class_id;
   /* The base for class_id for this call to debug_write.  */
   unsigned int base_id;
+  /* A list of classes which have assigned ID's during debug_write.
+     This is linked through the next_id field of debug_class_type.  */
+  struct debug_class_id *id_list;
+  /* A list used to avoid recursion during debug_type_samep.  */
+  struct debug_type_compare_list *compare_list;
 };
 
 /* Information we keep for a single compilation unit.  */
@@ -152,7 +155,8 @@ struct debug_class_type
 {
   /* NULL terminated array of fields.  */
   debug_field *fields;
-  /* A mark field used to avoid recursively printing out structs.  */
+  /* A mark field which indicates whether the struct has already been
+     printed.  */
   unsigned int mark;
   /* This is used to uniquely identify unnamed structs when printing.  */
   unsigned int id;
@@ -334,7 +338,7 @@ struct debug_method_variant
   /* The offset to the function in the virtual function table.  */
   bfd_vma voffset;
   /* If voffset is VOFFSET_STATIC_METHOD, this is a static method.  */
-#define VOFFSET_STATIC_METHOD (1)
+#define VOFFSET_STATIC_METHOD ((bfd_vma) -1)
   /* Context of a virtual method function.  */
   struct debug_type *context;
 };
@@ -509,6 +513,31 @@ struct debug_name
     } u;
 };
 
+/* During debug_write, a linked list of these structures is used to
+   keep track of ID numbers that have been assigned to classes.  */
+
+struct debug_class_id
+{
+  /* Next ID number.  */
+  struct debug_class_id *next;
+  /* The type with the ID.  */
+  struct debug_type *type;
+  /* The tag; NULL if no tag.  */
+  const char *tag;
+};
+
+/* During debug_type_samep, a linked list of these structures is kept
+   on the stack to avoid infinite recursion.  */
+
+struct debug_type_compare_list
+{
+  /* Next type on list.  */
+  struct debug_type_compare_list *next;
+  /* The types we are comparing.  */
+  struct debug_type *t1;
+  struct debug_type *t2;
+};
+
 /* Local functions.  */
 
 static void debug_error PARAMS ((const char *));
@@ -536,6 +565,12 @@ static boolean debug_write_function
 static boolean debug_write_block
   PARAMS ((struct debug_handle *, const struct debug_write_fns *, PTR,
 	   struct debug_block *));
+static boolean debug_set_class_id
+  PARAMS ((struct debug_handle *, const char *, struct debug_type *));
+static boolean debug_type_samep
+  PARAMS ((struct debug_handle *, struct debug_type *, struct debug_type *));
+static boolean debug_class_type_samep
+  PARAMS ((struct debug_handle *, struct debug_type *, struct debug_type *));
 
 /* Issue an error message.  */
 
@@ -2396,6 +2431,10 @@ debug_write (handle, fns, fhandle)
      to debug_write.  */
   info->base_id = info->class_id;
 
+  /* We keep a linked list of classes for which was have assigned ID's
+     during this call to debug_write.  */
+  info->id_list = NULL;
+
   for (u = info->units; u != NULL; u = u->next)
     {
       struct debug_file *f;
@@ -2455,10 +2494,6 @@ debug_write_name (info, fns, fhandle, n)
      PTR fhandle;
      struct debug_name *n;
 {
-  /* The class_mark field is used to prevent recursively outputting a
-     struct or class.  */
-  ++info->class_mark;
-
   switch (n->kind)
     {
     case DEBUG_OBJECT_TYPE:
@@ -2528,9 +2563,27 @@ debug_write_type (info, fns, fhandle, type, name)
       else
 	{
 	  struct debug_type *real;
+	  unsigned int id;
 
 	  real = debug_get_real_type ((PTR) info, type);
-	  return (*fns->tag_type) (fhandle, type->u.knamed->name->name, 0,
+	  id = 0;
+	  if ((real->kind == DEBUG_KIND_STRUCT
+	       || real->kind == DEBUG_KIND_UNION
+	       || real->kind == DEBUG_KIND_CLASS
+	       || real->kind == DEBUG_KIND_UNION_CLASS)
+	      && real->u.kclass != NULL)
+	    {
+	      if (real->u.kclass->id <= info->base_id)
+		{
+		  if (! debug_set_class_id (info,
+					    type->u.knamed->name->name,
+					    real))
+		    return false;
+		}
+	      id = real->u.kclass->id;
+	    }
+
+	  return (*fns->tag_type) (fhandle, type->u.knamed->name->name, id,
 				   real->kind);
 	}
     }
@@ -2575,8 +2628,13 @@ debug_write_type (info, fns, fhandle, type, name)
     case DEBUG_KIND_UNION:
       if (type->u.kclass != NULL)
 	{
-	  if (info->class_mark == type->u.kclass->mark
-	      || (tag == NULL && type->u.kclass->id > info->base_id))
+	  if (type->u.kclass->id <= info->base_id)
+	    {
+	      if (! debug_set_class_id (info, tag, type))
+		return false;
+	    }
+
+	  if (info->mark == type->u.kclass->mark)
 	    {
 	      /* We are currently outputting this struct, or we have
 		 already output it.  I don't know if this can happen,
@@ -2585,12 +2643,7 @@ debug_write_type (info, fns, fhandle, type, name)
 	      return (*fns->tag_type) (fhandle, tag, type->u.kclass->id,
 				       type->kind);
 	    }
-	  type->u.kclass->mark = info->class_mark;
-	  if (tag == NULL)
-	    {
-	      ++info->class_id;
-	      type->u.kclass->id = info->class_id;
-	    }
+	  type->u.kclass->mark = info->mark;
 	}
 
       if (! (*fns->start_struct_type) (fhandle, tag,
@@ -2750,8 +2803,13 @@ debug_write_class_type (info, fns, fhandle, type, tag)
     }
   else
     {
-      if (info->class_mark == type->u.kclass->mark
-	  || (tag == NULL && type->u.kclass->id > info->base_id))
+      if (type->u.kclass->id <= info->base_id)
+	{
+	  if (! debug_set_class_id (info, tag, type))
+	    return false;
+	}
+
+      if (info->mark == type->u.kclass->mark)
 	{
 	  /* We are currently outputting this class, or we have
 	     already output it.  This can happen when there are
@@ -2760,12 +2818,7 @@ debug_write_class_type (info, fns, fhandle, type, tag)
 	  return (*fns->tag_type) (fhandle, tag, type->u.kclass->id,
 				   type->kind);
 	}
-      type->u.kclass->mark = info->class_mark;
-      if (tag == NULL)
-	{
-	  ++info->class_id;
-	  type->u.kclass->id = info->class_id;
-	}
+      type->u.kclass->mark = info->mark;
       id = type->u.kclass->id;
 
       vptrbase = type->u.kclass->vptrbase;
@@ -2932,8 +2985,13 @@ debug_write_block (info, fns, fhandle, block)
   struct debug_name *n;
   struct debug_block *b;
 
-  if (! (*fns->start_block) (fhandle, block->start))
-    return false;
+  /* I can't see any point to writing out a block with no local
+     variables, so we don't bother, except for the top level block.  */
+  if (block->locals != NULL || block->parent == NULL)
+    {
+      if (! (*fns->start_block) (fhandle, block->start))
+	return false;
+    }
 
   if (block->locals != NULL)
     {
@@ -2950,5 +3008,445 @@ debug_write_block (info, fns, fhandle, block)
 	return false;
     }
 
-  return (*fns->end_block) (fhandle, block->end);
+  if (block->locals != NULL || block->parent == NULL)
+    {
+      if (! (*fns->end_block) (fhandle, block->end))
+	return false;
+    }
+
+  return true;
+}
+
+/* Get the ID number for a class.  If during the same call to
+   debug_write we find a struct with the same definition with the same
+   name, we use the same ID.  This type of things happens because the
+   same struct will be defined by multiple compilation units.  */
+
+static boolean
+debug_set_class_id (info, tag, type)
+     struct debug_handle *info;
+     const char *tag;
+     struct debug_type *type;
+{
+  struct debug_class_type *c;
+  struct debug_class_id *l;
+
+  assert (type->kind == DEBUG_KIND_STRUCT
+	  || type->kind == DEBUG_KIND_UNION
+	  || type->kind == DEBUG_KIND_CLASS
+	  || type->kind == DEBUG_KIND_UNION_CLASS);
+
+  c = type->u.kclass;
+
+  if (c->id > info->base_id)
+    return true;
+
+  for (l = info->id_list; l != NULL; l = l->next)
+    {
+      if (l->type->kind != type->kind)
+	continue;
+
+      if (tag == NULL)
+	{
+	  if (l->tag != NULL)
+	    continue;
+	}
+      else
+	{
+	  if (l->tag == NULL
+	      || l->tag[0] != tag[0]
+	      || strcmp (l->tag, tag) != 0)
+	    continue;
+	}
+
+      if (debug_type_samep (info, l->type, type))
+	{
+	  c->id = l->type->u.kclass->id;
+	  return true;
+	}
+    }
+
+  /* There are no identical types.  Use a new ID, and add it to the
+     list.  */
+  ++info->class_id;
+  c->id = info->class_id;
+
+  l = (struct debug_class_id *) xmalloc (sizeof *l);
+  memset (l, 0, sizeof *l);
+
+  l->type = type;
+  l->tag = tag;
+
+  l->next = info->id_list;
+  info->id_list = l;
+
+  return true;
+}
+
+/* See if two types are the same.  At this point, we don't care about
+   tags and the like.  */
+
+static boolean
+debug_type_samep (info, t1, t2)
+     struct debug_handle *info;
+     struct debug_type *t1;
+     struct debug_type *t2;
+{
+  struct debug_type_compare_list *l;
+  struct debug_type_compare_list top;
+  boolean ret;
+
+  while (t1->kind == DEBUG_KIND_INDIRECT)
+    {
+      t1 = *t1->u.kindirect->slot;
+      if (t1 == NULL)
+	return false;
+    }
+  while (t2->kind == DEBUG_KIND_INDIRECT)
+    {
+      t2 = *t2->u.kindirect->slot;
+      if (t2 == NULL)
+	return false;
+    }
+
+  if (t1 == t2)
+    return true;
+
+  /* As a special case, permit a typedef to match a tag, since C++
+     debugging output will sometimes add a typedef where C debugging
+     output will not.  */
+  if (t1->kind == DEBUG_KIND_NAMED
+      && t2->kind == DEBUG_KIND_TAGGED)
+    return debug_type_samep (info, t1->u.knamed->type, t2);
+  else if (t1->kind == DEBUG_KIND_TAGGED
+	   && t2->kind == DEBUG_KIND_NAMED)
+    return debug_type_samep (info, t1, t2->u.knamed->type);
+
+  if (t1->kind != t2->kind
+      || t1->size != t2->size)
+    return false;
+
+  /* Get rid of the trivial cases first.  */
+  switch (t1->kind)
+    {
+    default:
+      break;
+    case DEBUG_KIND_VOID:
+    case DEBUG_KIND_FLOAT:
+    case DEBUG_KIND_COMPLEX:
+    case DEBUG_KIND_BOOL:
+      return true;
+    case DEBUG_KIND_INT:
+      return t1->u.kint == t2->u.kint;
+    }
+
+  /* We have to avoid an infinite recursion.  We do this by keeping a
+     list of types which we are comparing.  We just keep the list on
+     the stack.  If we encounter a pair of types we are currently
+     comparing, we just assume that they are equal.  */
+  for (l = info->compare_list; l != NULL; l = l->next)
+    {
+      if (l->t1 == t1 && l->t2 == t2)
+	return true;
+    }
+
+  top.t1 = t1;
+  top.t2 = t2;
+  top.next = info->compare_list;
+  info->compare_list = &top;
+
+  switch (t1->kind)
+    {
+    default:
+      abort ();
+      ret = false;
+      break;
+
+    case DEBUG_KIND_STRUCT:
+    case DEBUG_KIND_UNION:
+    case DEBUG_KIND_CLASS:
+    case DEBUG_KIND_UNION_CLASS:
+      if (t1->u.kclass == NULL)
+	ret = t2->u.kclass == NULL;
+      else if (t2->u.kclass == NULL)
+	ret = false;
+      else if (t1->u.kclass->id > info->base_id
+	       && t1->u.kclass->id == t2->u.kclass->id)
+	ret = true;
+      else
+	ret = debug_class_type_samep (info, t1, t2);
+      break;
+
+    case DEBUG_KIND_ENUM:
+      if (t1->u.kenum == NULL)
+	ret = t2->u.kenum == NULL;
+      else if (t2->u.kenum == NULL)
+	ret = false;
+      else
+	{
+	  const char **pn1, **pn2;
+	  bfd_signed_vma *pv1, *pv2;
+
+	  pn1 = t1->u.kenum->names;
+	  pn2 = t2->u.kenum->names;
+	  pv1 = t1->u.kenum->values;
+	  pv2 = t2->u.kenum->values;
+	  while (*pn1 != NULL && *pn2 != NULL)
+	    {
+	      if (**pn1 != **pn2
+		  || *pv1 != *pv2
+		  || strcmp (*pn1, *pn2) != 0)
+		break;
+	      ++pn1;
+	      ++pn2;
+	    }
+	  ret = *pn1 == NULL && *pn2 == NULL;
+	}
+      break;
+
+    case DEBUG_KIND_POINTER:
+      ret = debug_type_samep (info, t1->u.kpointer, t2->u.kpointer);
+      break;
+	     
+    case DEBUG_KIND_FUNCTION:
+      if (t1->u.kfunction->varargs != t2->u.kfunction->varargs
+	  || ! debug_type_samep (info, t1->u.kfunction->return_type,
+				 t2->u.kfunction->return_type)
+	  || ((t1->u.kfunction->arg_types == NULL)
+	      != (t2->u.kfunction->arg_types == NULL)))
+	ret = false;
+      else if (t1->u.kfunction->arg_types == NULL)
+	ret = true;
+      else
+	{
+	  struct debug_type **a1, **a2;
+
+	  a1 = t1->u.kfunction->arg_types;
+	  a2 = t2->u.kfunction->arg_types;
+	  while (*a1 != NULL && *a2 != NULL)
+	    if (! debug_type_samep (info, *a1, *a2))
+	      break;
+	  ret = *a1 == NULL && *a2 == NULL;
+	}
+      break;
+
+    case DEBUG_KIND_REFERENCE:
+      ret = debug_type_samep (info, t1->u.kreference, t2->u.kreference);
+      break;
+
+    case DEBUG_KIND_RANGE:
+      ret = (t1->u.krange->lower == t2->u.krange->lower
+	     && t1->u.krange->upper == t2->u.krange->upper
+	     && debug_type_samep (info, t1->u.krange->type,
+				  t2->u.krange->type));
+
+    case DEBUG_KIND_ARRAY:
+      ret = (t1->u.karray->lower == t2->u.karray->lower
+	     && t1->u.karray->upper == t2->u.karray->upper
+	     && t1->u.karray->stringp == t2->u.karray->stringp
+	     && debug_type_samep (info, t1->u.karray->element_type,
+				  t2->u.karray->element_type));
+      break;
+
+    case DEBUG_KIND_SET:
+      ret = (t1->u.kset->bitstringp == t2->u.kset->bitstringp
+	     && debug_type_samep (info, t1->u.kset->type, t2->u.kset->type));
+      break;
+
+    case DEBUG_KIND_OFFSET:
+      ret = (debug_type_samep (info, t1->u.koffset->base_type,
+			       t2->u.koffset->base_type)
+	     && debug_type_samep (info, t1->u.koffset->target_type,
+				  t2->u.koffset->target_type));
+      break;
+
+    case DEBUG_KIND_METHOD:
+      if (t1->u.kmethod->varargs != t2->u.kmethod->varargs
+	  || ! debug_type_samep (info, t1->u.kmethod->return_type,
+				 t2->u.kmethod->return_type)
+	  || ! debug_type_samep (info, t1->u.kmethod->domain_type,
+				 t2->u.kmethod->domain_type)
+	  || ((t1->u.kmethod->arg_types == NULL)
+	      != (t2->u.kmethod->arg_types == NULL)))
+	ret = false;
+      else if (t1->u.kmethod->arg_types == NULL)
+	ret = true;
+      else
+	{
+	  struct debug_type **a1, **a2;
+
+	  a1 = t1->u.kmethod->arg_types;
+	  a2 = t2->u.kmethod->arg_types;
+	  while (*a1 != NULL && *a2 != NULL)
+	    if (! debug_type_samep (info, *a1, *a2))
+	      break;
+	  ret = *a1 == NULL && *a2 == NULL;
+	}
+      break;
+
+    case DEBUG_KIND_CONST:
+      ret = debug_type_samep (info, t1->u.kconst, t2->u.kconst);
+      break;
+
+    case DEBUG_KIND_VOLATILE:
+      ret = debug_type_samep (info, t1->u.kvolatile, t2->u.kvolatile);
+      break;
+
+    case DEBUG_KIND_NAMED:
+    case DEBUG_KIND_TAGGED:
+      ret = (strcmp (t1->u.knamed->name->name, t2->u.knamed->name->name) == 0
+	     && debug_type_samep (info, t1->u.knamed->type,
+				  t2->u.knamed->type));
+      break;
+    }
+
+  info->compare_list = top.next;
+
+  return ret;
+}
+
+/* See if two classes are the same.  This is a subroutine of
+   debug_type_samep.  */
+
+static boolean
+debug_class_type_samep (info, t1, t2)
+     struct debug_handle *info;
+     struct debug_type *t1;
+     struct debug_type *t2;
+{
+  struct debug_class_type *c1, *c2;
+
+  c1 = t1->u.kclass;
+  c2 = t2->u.kclass;
+
+  if ((c1->fields == NULL) != (c2->fields == NULL)
+      || (c1->baseclasses == NULL) != (c2->baseclasses == NULL)
+      || (c1->methods == NULL) != (c2->methods == NULL)
+      || (c1->vptrbase == NULL) != (c2->vptrbase == NULL))
+    return false;
+
+  if (c1->fields != NULL)
+    {
+      struct debug_field **pf1, **pf2;
+
+      for (pf1 = c1->fields, pf2 = c2->fields;
+	   *pf1 != NULL && *pf2 != NULL;
+	   pf1++, pf2++)
+	{
+	  struct debug_field *f1, *f2;
+
+	  f1 = *pf1;
+	  f2 = *pf2;
+	  if (f1->name[0] != f2->name[0]
+	      || f1->visibility != f2->visibility
+	      || f1->static_member != f2->static_member)
+	    return false;
+	  if (f1->static_member)
+	    {
+	      if (strcmp (f1->u.s.physname, f2->u.s.physname) != 0)
+		return false;
+	    }
+	  else
+	    {
+	      if (f1->u.f.bitpos != f2->u.f.bitpos
+		  || f1->u.f.bitsize != f2->u.f.bitsize)
+		return false;
+	    }
+	  /* We do the checks which require function calls last.  We
+             don't require that the types of fields have the same
+             names, since that sometimes fails in the presence of
+             typedefs and we really don't care.  */
+	  if (strcmp (f1->name, f2->name) != 0
+	      || ! debug_type_samep (info,
+				     debug_get_real_type ((PTR) info,
+							  f1->type),
+				     debug_get_real_type ((PTR) info,
+							  f2->type)))
+	    return false;
+	}
+      if (*pf1 != NULL || *pf2 != NULL)
+	return false;
+    }
+
+  if (c1->vptrbase != NULL)
+    {
+      if (! debug_type_samep (info, c1->vptrbase, c2->vptrbase))
+	return false;
+    }
+
+  if (c1->baseclasses != NULL)
+    {
+      struct debug_baseclass **pb1, **pb2;
+
+      for (pb1 = c1->baseclasses, pb2 = c2->baseclasses;
+	   *pb1 != NULL && *pb2 != NULL;
+	   ++pb1, ++pb2)
+	{
+	  struct debug_baseclass *b1, *b2;
+
+	  b1 = *pb1;
+	  b2 = *pb2;
+	  if (b1->bitpos != b2->bitpos
+	      || b1->virtual != b2->virtual
+	      || b1->visibility != b2->visibility
+	      || ! debug_type_samep (info, b1->type, b2->type))
+	    return false;
+	}
+      if (*pb1 != NULL || *pb2 != NULL)
+	return false;
+    }
+
+  if (c1->methods != NULL)
+    {
+      struct debug_method **pm1, **pm2;
+
+      for (pm1 = c1->methods, pm2 = c2->methods;
+	   *pm1 != NULL && *pm2 != NULL;
+	   ++pm1, ++pm2)
+	{
+	  struct debug_method *m1, *m2;
+
+	  m1 = *pm1;
+	  m2 = *pm2;
+	  if (m1->name[0] != m2->name[0]
+	      || strcmp (m1->name, m2->name) != 0
+	      || (m1->variants == NULL) != (m2->variants == NULL))
+	    return false;
+	  if (m1->variants == NULL)
+	    {
+	      struct debug_method_variant **pv1, **pv2;
+
+	      for (pv1 = m1->variants, pv2 = m2->variants;
+		   *pv1 != NULL && *pv2 != NULL;
+		   ++pv1, ++pv2)
+		{
+		  struct debug_method_variant *v1, *v2;
+
+		  v1 = *pv1;
+		  v2 = *pv2;
+		  if (v1->physname[0] != v2->physname[0]
+		      || v1->visibility != v2->visibility
+		      || v1->constp != v2->constp
+		      || v1->volatilep != v2->volatilep
+		      || v1->voffset != v2->voffset
+		      || (v1->context == NULL) != (v2->context == NULL)
+		      || strcmp (v1->physname, v2->physname) != 0
+		      || ! debug_type_samep (info, v1->type, v2->type))
+		    return false;
+		  if (v1->context != NULL)
+		    {
+		      if (! debug_type_samep (info, v1->context,
+					      v2->context))
+			return false;
+		    }
+		}
+	      if (*pv1 != NULL || *pv2 != NULL)
+		return false;
+	    }
+	}
+      if (*pm1 != NULL || *pm2 != NULL)
+	return false;
+    }
+
+  return true;
 }
