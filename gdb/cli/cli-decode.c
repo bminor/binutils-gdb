@@ -86,6 +86,18 @@ cmd_cfunc_eq (struct cmd_list_element *cmd,
   return cmd->func == do_cfunc && cmd->function.cfunc == cfunc;
 }
 
+void
+set_cmd_context (struct cmd_list_element *cmd, void *context)
+{
+  cmd->context = context;
+}
+
+void *
+get_cmd_context (struct cmd_list_element *cmd)
+{
+  return cmd->context;
+}
+
 enum cmd_types
 cmd_type (struct cmd_list_element *cmd)
 {
@@ -146,6 +158,7 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
   c->name = name;
   c->class = class;
   set_cmd_cfunc (c, fun);
+  set_cmd_context (c, NULL);
   c->doc = doc;
   c->flags = 0;
   c->replacement = NULL;

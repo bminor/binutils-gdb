@@ -145,6 +145,9 @@ struct cmd_list_element
       }
     function;
 
+    /* Local state (context) for this command.  This can be anything.  */
+    void *context;
+
     /* Documentation of this command (or help topic).
        First line is brief documentation; remaining lines form, with it,
        the full documentation.  First line should end with a period.
@@ -299,6 +302,11 @@ extern void set_cmd_completer (struct cmd_list_element *cmd,
    around in cmd objects to test the value of the commands sfunc().  */
 extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
 			 void (*cfunc) (char *args, int from_tty));
+
+/* Each command object has a local context attached to it. .  */
+extern void set_cmd_context (struct cmd_list_element *cmd, void *context);
+extern void *get_cmd_context (struct cmd_list_element *cmd);
+
 
 /* Execute CMD's pre/post hook.  Throw an error if the command fails.
    If already executing this pre/post hook, or there is no pre/post

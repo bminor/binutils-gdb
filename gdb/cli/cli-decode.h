@@ -139,6 +139,9 @@ struct cmd_list_element
       }
     function;
 
+    /* Local state (context) for this command.  This can be anything.  */
+    void *context;
+
     /* Documentation of this command (or help topic).
        First line is brief documentation; remaining lines form, with it,
        the full documentation.  First line should end with a period.
@@ -293,6 +296,10 @@ extern void set_cmd_completer (struct cmd_list_element *cmd,
    around in cmd objects to test the value of the commands sfunc().  */
 extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
 			 void (*cfunc) (char *args, int from_tty));
+
+/* Access to the command's local context.  */
+extern void set_cmd_context (struct cmd_list_element *cmd, void *context);
+extern void *get_cmd_context (struct cmd_list_element *cmd);
 
 extern struct cmd_list_element *lookup_cmd (char **,
 					    struct cmd_list_element *, char *,

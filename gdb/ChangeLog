@@ -1,3 +1,13 @@
+2002-03-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* command.h (struct cmd_list_element): Add field context.
+	(set_cmd_context, get_cmd_context): Declare.
+	* cli/cli-decode.h: Ditto.
+	* cli/cli-decode.c (get_cmd_context): New function.
+	(set_cmd_context): New function.
+	(add_cmd): Initialize context.
+	Part of fixing PR gdb/145 and PR gdb/146.
+
 2002-03-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* cli/cli-decode.c (cmd_type): New function.
