@@ -42,7 +42,9 @@ SUBDIRS=
 
 RUNTEST = runtest
 RUNTESTFLAGS = 
-FLAGS_TO_PASS =
+FLAGS_TO_PASS = \
+	"CC=$(CC)" \
+	"CFLAGS=$(CFLAGS)"
 
 #### host, target, and site specific Makefile frags come in here.
 

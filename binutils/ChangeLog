@@ -1,3 +1,7 @@
+Wed May 26 17:24:17 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (FLAGS_TO_PASS): Pass down CC and CFLAGS.
+
 Tue May 25 00:26:47 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* objdump.c (slurp_symtab): Print warning for bad symbol table.
