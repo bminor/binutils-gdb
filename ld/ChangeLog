@@ -1,3 +1,15 @@
+1999-10-07  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* scripttempl/elf.sc (.rel.sdata): Combine all the sdata relocs
+	being .rel.sdata, .rel.sdata.*, .rel.gnu.linkonce.s*.
+	(.rela.sdata): Likewise for .rela.sdata.* and .rela.gnu.linkonce.s*.
+	(.rel.sbss): Make like .rel.bss.
+	(.rela.sbss): Make like .rel.bss.
+	(.sdata): Don't include .gnu.linkonce.s.* or .sdata.* when
+	ld -r.
+	(.sbss): Do the same things as for .bss: include SDATA_START_SYMBOLS,
+	.dynsbss.
+
 1999-09-29  Andrew Haley  <aph@cygnus.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Defer
