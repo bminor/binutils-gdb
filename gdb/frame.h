@@ -98,7 +98,7 @@ struct frame_info
     int signal_handler_caller;
 
     /* Anything extra for this structure that may have been defined
-       in the machine depedent files. */
+       in the machine dependent files. */
 #ifdef EXTRA_FRAME_INFO
     EXTRA_FRAME_INFO
 #endif

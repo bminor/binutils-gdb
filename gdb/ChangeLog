@@ -1,3 +1,7 @@
+Tue Aug 17 15:10:04 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* frame.h: fixed typo in comment.
+
 Tue Aug 17 11:14:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* 29k-share/udi/udiphcfg.h: Always include udiphunix.h not udiphdos.h.
