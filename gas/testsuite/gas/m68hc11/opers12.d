@@ -25,7 +25,7 @@ Disassembly of section .text:
 0+031 <L1\+0x28> ldaa	\[257,Y\]
 0+035 <L1\+0x2c> ldab	\[32767,SP\]
 0+039 <L1\+0x30> ldd	\[32768,PC\]
-0+03d <L1\+0x34> ldd	0,PC
+0+03d <L1\+0x34> ldd	9,PC
 0+040 <L1\+0x37> std	A,X
 0+042 <L1\+0x39> ldx	B,X
 0+044 <L1\+0x3b> stx	D,Y
@@ -68,9 +68,9 @@ Disassembly of section .text:
 0+0b8 <L1\+0xaf> trap	#128
 0+0ba <L1\+0xb1> trap	#255
 0+0bc <L2> movw	1,X, 2,X
-0+0c0 <L2\+0x4> movw	0+0ffff <L2\+0xff43>, 0000ffff <L2\+0xff43>
-0+0c6 <L2\+0xa> movw	0+0ffff <L2\+0xff43>, 1,X
-0+0cb <L2\+0xf> movw	#0+0ffff <L2\+0xff43>, 1,X
+0+0c0 <L2\+0x4> movw	0+0ffff <bb\+0xd7ff>, 0000ffff <bb\+0xd7ff>
+0+0c6 <L2\+0xa> movw	0+0ffff <bb\+0xd7ff>, 1,X
+0+0cb <L2\+0xf> movw	#0+0ffff <bb\+0xd7ff>, 1,X
 0+0d0 <L2\+0x14> movw	0+03 <start\+0x3>, 0+08 <start\+0x8>
 0+0d6 <L2\+0x1a> movw	#0+03 <start\+0x3>, 0+03 <start\+0x3>
 0+0dc <L2\+0x20> movw	#0+03 <start\+0x3>, 1,X
@@ -78,4 +78,13 @@ Disassembly of section .text:
 0+0e6 <L2\+0x2a> movw	0+03 <start\+0x3>, 2,X
 0+0eb <L2\+0x2f> movw	0+04 <start\+0x4>, -2,X
 0+0f0 <L2\+0x34> rts
-
+0+0f1 <post_indexed_pb> leas	0,X
+0+0f5 <t2> leax	4,Y
+0+0f7 <t2\+0x2> leax	100,X
+0+0fb <t2\+0x6> leas	110,SP
+0+0ff <t2\+0xa> leay	10,X
+0+103 <t2\+0xe> leas	10240,Y
+0+107 <t2\+0x12> leas	255,PC
+0+10b <t2\+0x16> leas	0,PC
+0+10f <t2\+0x1a> leas	255,PC
+0+113 <t2\+0x1e> leas	0,PC

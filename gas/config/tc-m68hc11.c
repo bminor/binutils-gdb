@@ -85,7 +85,7 @@ relax_typeS md_relax_table[] =
   /* Relax for indexed offset: 5-bits, 9-bits, 16-bits.  */
   {(15), (-16), 0, ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS9)},
   {(255), (-256), 1, ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS16)},
-  {0, 0, 1, 0},
+  {0, 0, 2, 0},
   {1, 1, 0, 0},
 
   /* Relax for dbeq/ibeq/tbeq r,<L>:
@@ -1754,15 +1754,26 @@ build_indexed_byte (op, format, move_insn)
 	      return 3;
 	    }
 	}
-      f = frag_more (1);
-      number_to_chars_bigendian (f, byte, 1);
-#if 0
-      fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
-		   &op->exp, false, BFD_RELOC_16);
-#endif
-      frag_var (rs_machine_dependent, 2, 2,
-		ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_UNDF),
-		op->exp.X_add_symbol, val, f);
+      if (op->reg1 != REG_PC)
+        {
+          byte = (byte << 3) | 0xe2;
+          f = frag_more (1);
+          number_to_chars_bigendian (f, byte, 1);
+
+          f = frag_more (2);
+          fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
+                       &op->exp, false, BFD_RELOC_16);
+          number_to_chars_bigendian (f, 0, 2);
+        }
+      else
+        {
+          f = frag_more (1);
+          number_to_chars_bigendian (f, byte, 1);
+          frag_var (rs_machine_dependent, 2, 2,
+                    ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_UNDF),
+                    op->exp.X_add_symbol,
+                    op->exp.X_add_number, f);
+        }
       return 3;
     }
 
@@ -2425,6 +2436,7 @@ md_convert_frag (abfd, sec, fragP)
      fragS *fragP;
 {
   fixS *fixp;
+  long value;
   long disp;
   char *buffer_address = fragP->fr_literal;
 
@@ -2434,8 +2446,8 @@ md_convert_frag (abfd, sec, fragP)
   buffer_address += fragP->fr_fix;
 
   /* The displacement of the address, from current location.  */
-  disp = fragP->fr_symbol ? S_GET_VALUE (fragP->fr_symbol) : 0;
-  disp = (disp + fragP->fr_offset) - object_address;
+  value = fragP->fr_symbol ? S_GET_VALUE (fragP->fr_symbol) : 0;
+  disp = (value + fragP->fr_offset) - object_address;
   disp += symbol_get_frag (fragP->fr_symbol)->fr_address;
 
   switch (fragP->fr_subtype)
@@ -2485,24 +2497,37 @@ md_convert_frag (abfd, sec, fragP)
       break;
 
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS5):
-      fragP->fr_opcode[0] = fragP->fr_opcode[0] << 5;
-      fragP->fr_opcode[0] |= disp & 0x1f;
+      fragP->fr_opcode[0] = fragP->fr_opcode[0] << 6;
+      if ((fragP->fr_opcode[0] & 0x0ff) == 0x0c0)
+        fragP->fr_opcode[0] |= disp & 0x1f;
+      else
+        fragP->fr_opcode[0] |= value & 0x1f;
       break;
 
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS9):
       fragP->fr_opcode[0] = (fragP->fr_opcode[0] << 3);
       fragP->fr_opcode[0] |= 0xE0;
-      fix_new (fragP, fragP->fr_fix + 1, 1,
+      fix_new (fragP, fragP->fr_fix, 1,
 	       fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_8);
       fragP->fr_fix += 1;
       break;
 
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS16):
       fragP->fr_opcode[0] = (fragP->fr_opcode[0] << 3);
-      fragP->fr_opcode[0] |= 0xE2;
-      fix_new (fragP, fragP->fr_fix, 2,
-	       fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_16);
-      fragP->fr_fix += 1;
+      fragP->fr_opcode[0] |= 0xe2;
+      if ((fragP->fr_opcode[0] & 0x0ff) == 0x0fa)
+        {
+          fixp = fix_new (fragP, fragP->fr_fix, 2,
+                          fragP->fr_symbol, fragP->fr_offset,
+                          1, BFD_RELOC_16_PCREL);
+          fixp->fx_pcrel_adjust = 2;
+        }
+      else
+        {
+          fix_new (fragP, fragP->fr_fix, 2,
+                   fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_16);
+        }
+      fragP->fr_fix += 2;
       break;
 
     case ENCODE_RELAX (STATE_XBCC_BRANCH, STATE_BYTE):
@@ -2621,13 +2646,12 @@ md_estimate_size_before_relax (fragP, segment)
       else
 	{
 	  /* Switch the indexed operation to 16-bit mode.  */
-	  if ((fragP->fr_opcode[1] & 0x21) == 0x20)
-	    fragP->fr_opcode[1] = (fragP->fr_opcode[1] >> 3) | 0xc0 | 0x02;
-
+          fragP->fr_opcode[0] = fragP->fr_opcode[0] << 3;
+          fragP->fr_opcode[0] |= 0xe2;
 	  fragP->fr_fix++;
 	  fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
 		   fragP->fr_offset, 0, BFD_RELOC_16);
-	  fragP->fr_fix += 2;
+	  fragP->fr_fix++;
 	  frag_wane (fragP);
 	}
       break;

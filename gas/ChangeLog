@@ -1,5 +1,15 @@
 2001-01-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* config/tc-m68hc11.c (md_estimate_size_before_relax): Fix
+	STATE_INDEXED_OFFSET when the symbol is undefined (16-bit offset).
+	(build_indexed_byte): Don't relax indexed byte, use 16-bit offset
+	and fix_new_exp() instead.
+	(md_convert_frag): For indexed post byte use the symbol value
+	rather than the displacement.
+	(md_relax_table): Fix indexed offset relax.
+
+2001-01-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* config/tc-m68hc11.c (md_estimate_size_before_relax):Don't
 	relax weak symbols.
 	(relaxable_symbol): New function. 

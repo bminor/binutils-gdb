@@ -1,5 +1,10 @@
 2001-01-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* gas/m68hc11/opers12.s: Add more tests for index post byte.
+	* gas/m68hc11/opers12.d: Likewise.
+
+2001-01-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* gas/m68hc11/all.exp: Add new tests for dwarf2.
 	* gas/m68hc11/lbranch-dwarf2.d: New file, test for dwarf2.
 	* gas/m68hc11/opers12-dwarf2.d: Likewise.
