@@ -28,6 +28,7 @@ avr-*-*)		targ_emul=avr85xx
 cris-*-*aout*)		targ_emul=crisaout
 			targ_extra_emuls="criself crislinux"
 			targ_extra_libpath=$targ_extra_emuls ;;
+cris-*-linux-gnu*)	targ_emul=crislinux ;;
 cris-*-*)		targ_emul=criself
 			targ_extra_emuls="crisaout crislinux"
 			targ_extra_libpath=$targ_extra_emuls ;;

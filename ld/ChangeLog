@@ -1,3 +1,8 @@
+2003-06-16  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure.tgt: Add specific case for cris-*-linux-gnu*
+	with crislinux emulation only.
+
 2003-06-13  Robert Millan  <zeratul2@wanadoo.es>
 
 	* configure.tgt: Add i386-netbsd-gnu target.
