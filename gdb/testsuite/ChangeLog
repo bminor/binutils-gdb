@@ -1,5 +1,9 @@
 2004-08-26  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.base/unload.c: Include <stdlib.h>.
+
+2004-08-26  Michael Chastain  <mec.gnu@mindspring.com>
+
 	From Paul Gilliam <pgilliam@us.ibm.com>:
 	* gdb.base/call-sc.exp (test_scalar_returns): Make sure PC is
 	synchronized after the "return".
