@@ -1,3 +1,8 @@
+Thu Feb  9 12:28:13 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* i960-dis.c (struct tabent, struct sparse_tabent): Change the
+        signed char fields to shorts, more portable.
+
 Wed Feb  8 17:29:29 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* i960-dis.c (struct tabent, struct sparse_tabent): Declare the
