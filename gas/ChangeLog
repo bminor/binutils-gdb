@@ -1,3 +1,7 @@
+Tue Sep  8 17:10:58 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (LIBS): Include opcode library.
+
 Fri Sep  4 18:20:56 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* config/tc-m68k.c (get_num, case SEG_BIG): If only small integers

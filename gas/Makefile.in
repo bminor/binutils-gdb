@@ -202,7 +202,7 @@ ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES) -DTAR
 # How to link with both our special library facilities
 # and the system's installed libraries.
 
-LIBS = $(LOCAL_LOADLIBES) $(CLIB) ../libiberty/libiberty.a
+LIBS = ../opcodes/libopcodes.a $(LOCAL_LOADLIBES) $(CLIB) ../libiberty/libiberty.a
 
 # Specify the directories to be searched for header files.
 # Both . and srcdir are used, in that order,
