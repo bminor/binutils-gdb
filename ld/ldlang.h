@@ -379,6 +379,7 @@ extern boolean delete_output_file_on_failure;
 
 extern const char *entry_symbol;
 extern boolean entry_from_cmdline;
+extern lang_statement_list_type file_chain;
 
 extern void lang_init PARAMS ((void));
 extern struct memory_region_struct *lang_memory_region_lookup
@@ -430,7 +431,6 @@ extern bfd_vma lang_do_assignments
 	   bfd_vma dot));
 
 #define LANG_FOR_EACH_INPUT_STATEMENT(statement)		\
-  extern lang_statement_list_type file_chain;			\
   lang_input_statement_type *statement;				\
   for (statement = (lang_input_statement_type *)file_chain.head;\
        statement != (lang_input_statement_type *)NULL;		\

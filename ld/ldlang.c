@@ -30,11 +30,11 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldgram.h"
 #include "ldexp.h"
 #include "ldlang.h"
-#include "ldemul.h"
 #include "ldlex.h"
 #include "ldmisc.h"
 #include "ldctor.h"
 #include "ldfile.h"
+#include "ldemul.h"
 #include "fnmatch.h"
 #include "demangle.h"
 

@@ -1,3 +1,47 @@
+2000-07-10  Alan Modra  <alan@linuxcare.com.au>
+
+	* ldemul.h (struct lang_input_statement_struct): Remove forward
+	declaration.
+	(struct search_dirs): Likewise.
+	* ldfile.h (struct lang_input_statement_struct): Likewise.
+	Protect file from multiple inclusion.
+	* ldlang.h (LANG_FOR_EACH_INPUT_STATEMENT): Move file_chain
+	declaration from macro to file scope.
+
+	* ldemul.c: ldexp.h,ldlang.h,ldfile.h,ldemul.h go in this order.
+	* ldgram.y: Likewise here.
+	* ldlang.c: And here.
+	* ldmain.c: And here.
+	* mpw-elfmips.c: And here.
+	* mpw-eppcmac.c: And here.
+	* emultempl/aix.em: And here.
+	* emultempl/armcoff.em: And here.
+	* emultempl/armelf.em: And here.
+	* emultempl/armelf_oabi.em: And here.
+	* emultempl/beos.em: And here.
+	* emultempl/elf32.em: And here.
+	* emultempl/hppaelf.em: And here.
+	* emultempl/linux.em: And here.
+	* emultempl/lnk960.em: And here.
+	* emultempl/pe.em: And here.
+	* emultempl/sunos.em: And here.
+	* mpw-esh.c: And here. Include ldexp.h and ldlang.h too.
+	* mpw-idtmips.c: Ditto.
+	* emultempl/generic.em: Ditto.
+	* emultempl/gld960.em: Ditto.
+	* emultempl/gld960c.em: Ditto.
+	* emultempl/mipsecoff.em: Ditto.
+	* emultempl/ticoff.em: Ditto.
+	* emultempl/vanilla.em: Ditto.
+
+	* pe-dll.c: Include ldfile.h
+	* ldver.c: Include ldexp.h, ldlang.h, ldfile.h
+
+	* mpw-elfmips.c: (gldelf32ebmip_before_allocation): Add missing
+	arguments to bfd_elf32_size_dynamic_sections call.
+	(gldelf32ebmip_place_orphan): Add missing arguments to
+	lang_leave_output_section_statement call.
+
 2000-07-10  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/pe.em (pe_enable_stdcall_fixup): Protect with

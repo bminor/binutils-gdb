@@ -16,11 +16,6 @@
 #ifndef LDEMUL_H
 #define LDEMUL_H
 
-#if ANSI_PROTOTYPES
-struct lang_input_statement_struct;
-struct search_dirs;
-#endif
-
 extern void ldemul_hll PARAMS ((char *));
 extern void ldemul_syslib PARAMS ((char *));
 extern void ldemul_after_parse PARAMS ((void));

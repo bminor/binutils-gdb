@@ -36,9 +36,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldgram.h"
 #include "ldexp.h"
 #include "ldlang.h"
-#include "ldemul.h"
 #include "ldlex.h"
 #include "ldfile.h"
+#include "ldemul.h"
 #include "ldctor.h"
 
 /* Somewhere above, sys/stat.h got included . . . . */

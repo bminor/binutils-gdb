@@ -1,5 +1,5 @@
 /* ldfile.h -
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 2000 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -16,6 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with GLD; see the file COPYING.  If not, write to
    the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef LDFILE_H
+#define LDFILE_H
 
 extern const char *ldfile_input_filename;
 extern boolean ldfile_assumed_script;
@@ -38,10 +41,6 @@ typedef struct search_dirs
 
 extern search_dirs_type *search_head;
 
-#if ANSI_PROTOTYPES
-struct lang_input_statement_struct;
-#endif
-
 extern void ldfile_add_arch PARAMS ((CONST char *));
 extern void ldfile_add_library_path PARAMS ((const char *, boolean cmdline));
 extern void ldfile_open_command_file PARAMS ((const char *name));
@@ -54,3 +53,5 @@ extern void ldfile_set_output_arch PARAMS ((CONST char *));
 extern boolean ldfile_open_file_search
   PARAMS ((const char *arch, struct lang_input_statement_struct *,
 	   const char *lib, const char *suffix));
+
+#endif

@@ -1,5 +1,6 @@
 /* ldver.c -- Print linker version.
-   Copyright (C) 1991, 92, 93, 94, 95, 1996, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 2000
+   Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -23,6 +24,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "ld.h"
 #include "ldver.h"
+#include "ldexp.h"
+#include "ldlang.h"
+#include "ldfile.h"
 #include "ldemul.h"
 #include "ldmain.h"
 

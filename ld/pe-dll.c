@@ -34,6 +34,7 @@
 #include "ldmisc.h"
 #include "ldgram.h"
 #include "ldmain.h"
+#include "ldfile.h"
 #include "ldemul.h"
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"

@@ -37,11 +37,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldgram.h"
 #include "ldexp.h"
 #include "ldlang.h"
+#include "ldfile.h"
 #include "ldemul.h"
 #include "ldlex.h"
 #include "ldmisc.h"
 #include "ldctor.h"
-#include "ldfile.h"
 #include "coff/internal.h"
 
 /* FIXME: This is a BFD internal header file, and we should not be
