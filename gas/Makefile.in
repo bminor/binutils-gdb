@@ -223,7 +223,7 @@ SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 # Files to be copied away after each stage in building.
 STAGESTUFF = *.o as.new
 
-as.new: $(OBJS) $(LIBDEPS)
+as.new: $(OBJS) $(LIBDEPS) $(LOCAL_LOADLIBES)
 	[ ! -f as.new ] || mv as.new as.old
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 

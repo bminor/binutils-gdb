@@ -1,3 +1,7 @@
+Sat Aug 29 12:11:12 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* Makefile.in (as.new): Depend on LOCAL_LOADLIBES.
+
 Tue Aug 25 15:50:48 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-m68k.c (init_table): Now const.  Always include 68851
