@@ -1,5 +1,9 @@
 2000-03-22  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* event-loop.c (handle_file_event): Run through indent.
+
+2000-03-22  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
         From  Philippe De Muyter  <phdm@macqel.be>
 
 	* event-loop.c (sys/types.h): File now included unconditionally.

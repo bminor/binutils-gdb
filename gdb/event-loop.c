@@ -396,26 +396,26 @@ gdb_do_one_event (void *data)
     {
       return 1;
     }
-  
+
   /* Are any timers that are ready? If so, put an event on the queue. */
   poll_timers ();
-  
+
   /* Wait for a new event.  If gdb_wait_for_event returns -1,
      we should get out because this means that there are no
      event sources left. This will make the event loop stop,
      and the application exit. */
-  
+
   if (gdb_wait_for_event () < 0)
     {
       return -1;
     }
-  
+
   /* Handle any new events occurred while waiting. */
   if (process_event ())
     {
       return 1;
     }
-  
+
   /* If gdb_wait_for_event has returned 1, it means that one
      event has been handled. We break out of the loop. */
   return 1;
@@ -469,16 +469,16 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
     {
 #ifdef HAVE_POLL
       /* Check to see if poll () is usable. If not, we'll switch to
-	 use select. This can happen on systems like
-	 m68k-motorola-sys, `poll' cannot be used to wait for `stdin'.
-	 On m68k-motorola-sysv, tty's are not stream-based and not
-	 `poll'able.*/
-    fds.fd = fd;
-    fds.events = POLLIN;
-    if (poll (&fds, 1, 0) == 1 && (fds.revents & POLLNVAL))
-      use_poll = 0;
+         use select. This can happen on systems like
+         m68k-motorola-sys, `poll' cannot be used to wait for `stdin'.
+         On m68k-motorola-sysv, tty's are not stream-based and not
+         `poll'able. */
+      fds.fd = fd;
+      fds.events = POLLIN;
+      if (poll (&fds, 1, 0) == 1 && (fds.revents & POLLNVAL))
+	use_poll = 0;
 #else
-    internal_error ("event-loop.c : use_poll without HAVE_POLL");
+      internal_error ("event-loop.c : use_poll without HAVE_POLL");
 #endif /* HAVE_POLL */
     }
   if (use_poll)
@@ -538,7 +538,7 @@ create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data clie
       if (gdb_notifier.poll_fds)
 	gdb_notifier.poll_fds =
 	  (struct pollfd *) realloc (gdb_notifier.poll_fds,
-			       (gdb_notifier.num_fds) * sizeof (struct pollfd));
+			   (gdb_notifier.num_fds) * sizeof (struct pollfd));
       else
 	gdb_notifier.poll_fds =
 	  (struct pollfd *) xmalloc (sizeof (struct pollfd));
@@ -599,7 +599,7 @@ delete_file_handler (int fd)
     {
 #ifdef HAVE_POLL
       /* Create a new poll_fds array by copying every fd's information but the
-	 one we want to get rid of. */
+         one we want to get rid of. */
 
       new_poll_fds =
 	(struct pollfd *) xmalloc ((gdb_notifier.num_fds - 1) * sizeof (struct pollfd));
@@ -719,7 +719,7 @@ handle_file_event (int event_file_desc)
 	      else
 		file_ptr->error = 0;
 #else
-      internal_error ("event-loop.c : use_poll without HAVE_POLL");
+	      internal_error ("event-loop.c : use_poll without HAVE_POLL");
 #endif /* HAVE_POLL */
 	    }
 	  else
@@ -776,7 +776,7 @@ gdb_wait_for_event (void)
 	      gdb_notifier.timeout_valid ? gdb_notifier.poll_timeout : -1);
 
       /* Don't print anything if we get out of poll because of a
-	 signal. */
+         signal. */
       if (num_found == -1 && errno != EINTR)
 	perror_with_name ("Poll");
 #else
@@ -789,9 +789,9 @@ gdb_wait_for_event (void)
       gdb_notifier.ready_masks[1] = gdb_notifier.check_masks[1];
       gdb_notifier.ready_masks[2] = gdb_notifier.check_masks[2];
       num_found = select (gdb_notifier.num_fds,
-			  & gdb_notifier.ready_masks[0],
-			  & gdb_notifier.ready_masks[1],
-			  & gdb_notifier.ready_masks[2],
+			  &gdb_notifier.ready_masks[0],
+			  &gdb_notifier.ready_masks[1],
+			  &gdb_notifier.ready_masks[2],
 			  gdb_notifier.timeout_valid
 			  ? &gdb_notifier.select_timeout : NULL);
 
@@ -830,7 +830,7 @@ gdb_wait_for_event (void)
 	  if (file_ptr)
 	    {
 	      /* Enqueue an event only if this is still a new event for
-		 this fd. */
+	         this fd. */
 	      if (file_ptr->ready_mask == 0)
 		{
 		  file_event_ptr = create_file_event (file_ptr->fd);
@@ -1137,7 +1137,7 @@ poll_timers (void)
 
       /* Oops it expired already. Tell select / poll to return
          immediately. (Cannot simply test if delta.tv_sec is negative
-	 because time_t might be unsigned.)  */
+         because time_t might be unsigned.)  */
       if (timer_list.first_timer->when.tv_sec < time_now.tv_sec
 	  || (timer_list.first_timer->when.tv_sec == time_now.tv_sec
 	      && timer_list.first_timer->when.tv_usec < time_now.tv_usec))
