@@ -1,3 +1,10 @@
+2003-09-22  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (read_array_type): When building the type for an
+	array of unspecified length, make sure to choose the upper bound
+	so that the array's total length comes out to be zero --- that's
+	how we represent such arrays.
+
 2003-09-22  Michael Chastain  <mec@shout.net>
 
 	* MAINTAINERS: Rename gdb.c++ to gdb.cp.
