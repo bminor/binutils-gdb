@@ -76,7 +76,7 @@ MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 RANLIB = ranlib
 CC_FOR_BUILD={CC}
-BISON = bison -y
+BISON = byacc
 LEX = flex
 
 # Seach path to override the default search path for -lfoo libraries.
@@ -178,19 +178,16 @@ ALL_CFLAGS={INCLUDES} {HDEFINES} {TDEFINES} {CDEFINES} {CFLAGS}
 BFDLIB = ::bfd:libbfd.o
 LIBIBERTY = ::libiberty:libiberty.o
 
-ALL_EMULATIONS = "{o}"em_lnk960.c.o "{o}"em_sun3.c.o "{o}"em_i386aout.c.o "{o}"em_go32.c.o "{o}"em_vsta.c.o \Option-d
-	"{o}"em_m88kbcs.c.o "{o}"em_a29k.c.o "{o}"em_news.c.o "{o}"em_hp300bsd.c.o "{o}"em_hp3hpux.c.o \Option-d
-	"{o}"em_h8300.c.o "{o}"em_h8300h.c.o "{o}"em_ebmon29k.c.o "{o}"em_sun4.c.o "{o}"em_gld960.c.o \Option-d
-	"{o}"em_m68kcoff.c.o "{o}"em_st2000.c.o "{o}"em_sa29200.c.o "{o}"em_i386mach.c.o \Option-d
-	"{o}"em_vanilla.c.o "{o}"em_i386coff.c.o "{o}"em_z8ksim.c.o "{o}"em_mipslit.c.o "{o}"em_i386bsd.c.o \Option-d
-	"{o}"em_mipsbig.c.o "{o}"em_mipsbsd.c.o "{o}"em_mipsidt.c.o "{o}"em_vax.c.o "{o}"em_h8500.c.o \Option-d
-	"{o}"em_hppaosf.c.o "{o}"em_mipsidtl.c.o "{o}"em_sh.c.o "{o}"em_elf_i386.c.o "{o}"em_alpha.c.o \Option-d
-	"{o}"em_i386lynx.c.o "{o}"em_m68klynx.c.o "{o}"em_sparclynx.c.o "{o}"em_coff_sparc.c.o \Option-d
-	"{o}"em_delta68.c.o \Option-d
+ALL_EMULATIONS = "{o}"elnk960.c.o "{o}"esun3.c.o "{o}"ei386aout.c.o "{o}"ego32.c.o "{o}"evsta.c.o \Option-d
+	"{o}"em88kbcs.c.o "{o}"ea29k.c.o "{o}"enews.c.o "{o}"ehp300bsd.c.o "{o}"ehp3hpux.c.o \Option-d
+	"{o}"eh8300.c.o "{o}"eh8300h.c.o "{o}"eebmon29k.c.o "{o}"esun4.c.o "{o}"egld960.c.o \Option-d
+	"{o}"em68kcoff.c.o "{o}"est2000.c.o "{o}"esa29200.c.o "{o}"ei386mach.c.o \Option-d
+	"{o}"evanilla.c.o "{o}"ei386coff.c.o "{o}"ez8ksim.c.o "{o}"emipslit.c.o "{o}"ei386bsd.c.o \Option-d
+	"{o}"emipsbig.c.o "{o}"emipsbsd.c.o "{o}"emipsidt.c.o "{o}"evax.c.o "{o}"eh8500.c.o \Option-d
+	"{o}"ehppaosf.c.o "{o}"emipsidtl.c.o "{o}"esh.c.o "{o}"eelf_i386.c.o "{o}"ealpha.c.o \Option-d
+	"{o}"ei386lynx.c.o "{o}"em68klynx.c.o "{o}"esparclynx.c.o "{o}"ecoff_sparc.c.o \Option-d
+	"{o}"edelta68.c.o \Option-d
 	{OTHER_EMULATIONS}
-
-# This is now set by configure.in.
-EMULATION_OFILES = "{o}"em_mipsidt.c.o
 
 CFILES = "{s}"ldctor.c "{s}"ldemul.c "{s}"ldexp.c "{s}"ldfile.c "{s}"ldlang.c \Option-d
 	ldmain.c "{s}"ldmisc.c "{s}"ldver.c "{s}"ldwrite.c "{s}"lexsup.c \Option-d
@@ -208,22 +205,25 @@ OFILES = "{o}"ldgram.c.o "{o}"ldlex.c.o "{o}"lexsup.c.o "{o}"ldlang.c.o "{o}"mri
 	"{o}"ldwrite.c.o "{o}"ldexp.c.o  "{o}"ldemul.c.o "{o}"ldver.c.o "{o}"ldmisc.c.o \Option-d
 	"{o}"ldfile.c.o {EMULATION_OFILES}
 
-LINTSOURCES = {CFILES} {GENERATED_CFILES} em_\Option-x.c
+LINTSOURCES = {CFILES} {GENERATED_CFILES} e\Option-x.c
 
-STAGESTUFF = "{o}"\Option-x.c.o ldscripts:\Option-x em_\Option-x.c {GENERATED_CFILES} {GENERATED_HFILES}
+STAGESTUFF = "{o}"\Option-x.c.o ldscripts:\Option-x e\Option-x.c {GENERATED_CFILES} {GENERATED_HFILES}
 
 info \Option-f  ld.info
 # .PHONY \Option-f  info
 
-:ldgram.h :ldgram.c \Option-f  "{s}"ldgram.y
+:ldgram.c \Option-f "{s}"ldgram.y
 	{BISON} {BISONFLAGS} -d "{srcdir}"ldgram.y
 	Rename -y y.tab.c :ldgram.c
 	Rename -y y.tab.h :ldgram.h
 
+# Separate from ldgram.c so that a parallel make doesn't try to build
+# both ldgram.c and ldgram.h simultaneously.
+:ldgram.h \Option-f :ldgram.c
+
 # EMUL is the name of a file in the emulparams subdir, without the .sh.
 "{o}"ldmain.c.o \Option-f  "{s}"ldmain.c config.status 
 	{CC} {INCLUDES} {HDEFINES} {TDEFINES} {CDEFINES} -d DEFAULT_EMULATION=\Option-d"{EMUL}\Option-d" -d SCRIPTDIR=\Option-d"{scriptdir}\Option-d" {CFLAGS} "{s}"ldmain.c -o "{o}"ldmain.c.o
-	fi
 
 # Use this when flex is working correctly.
 :ldlex.c \Option-f  "{s}"ldlex.l
@@ -234,134 +234,167 @@ info \Option-f  ld.info
 #:ldlex.c \Option-f  "{s}"mpw-ldlex.c
 #	Catenate "{s}"mpw-ldlex.c >:ldlex.c
 
-# These all start with em_ so 'make clean' can find them.
+# These all start with e so 'make clean' can find them.
 
 GENSCRIPTS = {SHELL} "{srcdir}"genscripts.sh {srcdir} {libdir} {host_alias} {target_alias} {EMUL} "{NATIVE_LIB_DIRS}"
 GEN_DEPENDS = "{srcdir}"genscripts.sh
 
-em_sun4.c \Option-f  "{srcdir}"emulparams:sun4.sh \Option-d
+esun4.c \Option-f  "{srcdir}"emulparams:sun4.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} sun4
-em_sun3.c \Option-f  "{srcdir}"emulparams:sun3.sh \Option-d
+esun3.c \Option-f  "{srcdir}"emulparams:sun3.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} sun3
-em_vsta.c \Option-f  "{srcdir}"emulparams:vsta.sh \Option-d
+evsta.c \Option-f  "{srcdir}"emulparams:vsta.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} vsta
-em_go32.c \Option-f  "{srcdir}"emulparams:go32.sh \Option-d
+ego32.c \Option-f  "{srcdir}"emulparams:go32.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} go32
-em_news.c \Option-f  "{srcdir}"emulparams:news.sh \Option-d
+enews.c \Option-f  "{srcdir}"emulparams:news.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} news
-em_vax.c \Option-f  "{srcdir}"emulparams:vax.sh \Option-d
+evax.c \Option-f  "{srcdir}"emulparams:vax.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} vax
-em_hp300bsd.c \Option-f  "{srcdir}"emulparams:hp300bsd.sh \Option-d
+ehp300bsd.c \Option-f  "{srcdir}"emulparams:hp300bsd.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} hp300bsd
-em_hp3hpux.c \Option-f  "{srcdir}"emulparams:hp3hpux.sh \Option-d
+ehp3hpux.c \Option-f  "{srcdir}"emulparams:hp3hpux.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} hp3hpux
-em_hppaosf.c \Option-f  "{srcdir}"emulparams:hppaosf.sh \Option-d
+ehppaosf.c \Option-f  "{srcdir}"emulparams:hppaosf.sh \Option-d
   "{srcdir}"emultempl:hppaosf.em "{srcdir}"scripttempl:hppaosf.sc {GEN_DEPENDS}
 	{GENSCRIPTS} hppaosf
-em_i386aout.c \Option-f  "{srcdir}"emulparams:i386aout.sh \Option-d
+ei386aout.c \Option-f  "{srcdir}"emulparams:i386aout.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} i386aout
-em_i386mach.c \Option-f  "{srcdir}"emulparams:i386mach.sh \Option-d
+ei386mach.c \Option-f  "{srcdir}"emulparams:i386mach.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} i386mach
-em_ebmon29k.c \Option-f  "{srcdir}"emulparams:ebmon29k.sh \Option-d
+eebmon29k.c \Option-f  "{srcdir}"emulparams:ebmon29k.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:ebmon29k.sc {GEN_DEPENDS}
 	{GENSCRIPTS} ebmon29k
-em_sa29200.c \Option-f  "{srcdir}"emulparams:sa29200.sh \Option-d
+esa29200.c \Option-f  "{srcdir}"emulparams:sa29200.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:sa29200.sc {GEN_DEPENDS}
 	{GENSCRIPTS} sa29200
-em_a29k.c \Option-f  "{srcdir}"emulparams:a29k.sh \Option-d
+ea29k.c \Option-f  "{srcdir}"emulparams:a29k.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:a29k.sc {GEN_DEPENDS}
 	{GENSCRIPTS} a29k
-em_m88kbcs.c \Option-f  "{srcdir}"emulparams:m88kbcs.sh \Option-d
+em88kbcs.c \Option-f  "{srcdir}"emulparams:m88kbcs.sh \Option-d
   "{srcdir}"emultempl:m88kbcs.em "{srcdir}"scripttempl:m88kbcs.sc {GEN_DEPENDS}
 	{GENSCRIPTS} m88kbcs
-em_h8300.c \Option-f  "{srcdir}"emulparams:h8300.sh \Option-d
+eh8300.c \Option-f  "{srcdir}"emulparams:h8300.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:h8300.sc {GEN_DEPENDS}
 	{GENSCRIPTS} h8300
-em_h8300h.c \Option-f  "{srcdir}"emulparams:h8300h.sh \Option-d
+eh8300h.c \Option-f  "{srcdir}"emulparams:h8300h.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:h8300h.sc {GEN_DEPENDS}
 	{GENSCRIPTS} h8300h
-em_h8500.c \Option-f  "{srcdir}"emulparams:h8500.sh \Option-d
+eh8500.c \Option-f  "{srcdir}"emulparams:h8500.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:h8500.sc {GEN_DEPENDS}
 	{GENSCRIPTS} h8500
-em_sh.c \Option-f  "{srcdir}"emulparams:sh.sh \Option-d
+esh.c \Option-f  "{srcdir}"emulparams:sh.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:sh.sc {GEN_DEPENDS}
 	{GENSCRIPTS} sh
-em_st2000.c \Option-f  "{srcdir}"emulparams:st2000.sh \Option-d
+est2000.c \Option-f  "{srcdir}"emulparams:st2000.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:st2000.sc {GEN_DEPENDS}
 	{GENSCRIPTS} st2000
-em_z8ksim.c \Option-f  "{srcdir}"emulparams:z8ksim.sh \Option-d
+ez8ksim.c \Option-f  "{srcdir}"emulparams:z8ksim.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:z8ksim.sc {GEN_DEPENDS}
 	{GENSCRIPTS} z8ksim
-em_vanilla.c \Option-f  "{srcdir}"emulparams:vanilla.sh \Option-d
+evanilla.c \Option-f  "{srcdir}"emulparams:vanilla.sh \Option-d
   "{srcdir}"emultempl:vanilla.em "{srcdir}"scripttempl:vanilla.sc {GEN_DEPENDS}
 	{GENSCRIPTS} vanilla
-em_lnk960.c \Option-f  "{srcdir}"emulparams:lnk960.sh \Option-d
+elnk960.c \Option-f  "{srcdir}"emulparams:lnk960.sh \Option-d
   "{srcdir}"emultempl:lnk960.em "{srcdir}"scripttempl:i960.sc {GEN_DEPENDS}
 	{GENSCRIPTS} lnk960
-em_gld960.c \Option-f  "{srcdir}"emulparams:gld960.sh \Option-d
+egld960.c \Option-f  "{srcdir}"emulparams:gld960.sh \Option-d
   "{srcdir}"emultempl:gld960.em "{srcdir}"scripttempl:i960.sc {GEN_DEPENDS}
 	{GENSCRIPTS} gld960
-em_m68kcoff.c \Option-f  "{srcdir}"emulparams:m68kcoff.sh \Option-d
+em68kcoff.c \Option-f  "{srcdir}"emulparams:m68kcoff.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:m68kcoff.sc {GEN_DEPENDS}
 	{GENSCRIPTS} m68kcoff
-em_delta68.c \Option-f  "{srcdir}"emulparams:delta68.sh \Option-d
+edelta68.c \Option-f  "{srcdir}"emulparams:delta68.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:delta68.sc {GEN_DEPENDS}
 	{GENSCRIPTS} delta68
-em_m68klynx.c \Option-f  "{srcdir}"emulparams:m68klynx.sh \Option-d
+em68klynx.c \Option-f  "{srcdir}"emulparams:m68klynx.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:m68kcoff.sc {GEN_DEPENDS}
 	{GENSCRIPTS} m68klynx
-em_i386coff.c \Option-f  "{srcdir}"emulparams:i386coff.sh \Option-d
+ei386coff.c \Option-f  "{srcdir}"emulparams:i386coff.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:i386coff.sc {GEN_DEPENDS}
 	{GENSCRIPTS} i386coff
-em_i386lynx.c \Option-f  "{srcdir}"emulparams:i386lynx.sh \Option-d
+ei386lynx.c \Option-f  "{srcdir}"emulparams:i386lynx.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:i386coff.sc {GEN_DEPENDS}
 	{GENSCRIPTS} i386lynx
-em_sparclynx.c \Option-f  "{srcdir}"emulparams:sparclynx.sh \Option-d
+esparclynx.c \Option-f  "{srcdir}"emulparams:sparclynx.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:sparccoff.sc {GEN_DEPENDS}
 	{GENSCRIPTS} sparclynx
-em_mipslit.c \Option-f   "{srcdir}"emulparams:mipslit.sh \Option-d
+emipslit.c \Option-f   "{srcdir}"emulparams:mipslit.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:mips.sc {GEN_DEPENDS}
 	{GENSCRIPTS} mipslit
-em_i386bsd.c \Option-f  "{srcdir}"emulparams:i386bsd.sh \Option-d
+ei386bsd.c \Option-f  "{srcdir}"emulparams:i386bsd.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} i386bsd
-em_mipsbig.c \Option-f   "{srcdir}"emulparams:mipsbig.sh \Option-d
+emipsbig.c \Option-f   "{srcdir}"emulparams:mipsbig.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:mips.sc {GEN_DEPENDS}
 	{GENSCRIPTS} mipsbig
-em_mipsbsd.c \Option-f  "{srcdir}"emulparams:mipsbsd.sh \Option-d
+emipsbsd.c \Option-f  "{srcdir}"emulparams:mipsbsd.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:aout.sc {GEN_DEPENDS}
 	{GENSCRIPTS} mipsbsd
-em_mipsidt.c \Option-f  "{srcdir}"emulparams:mipsidt.sh \Option-d
+emipsidt.c \Option-f  "{srcdir}"emulparams:mipsidt.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:mips.sc {GEN_DEPENDS}
 	{GENSCRIPTS} mipsidt
-em_mipsidtl.c \Option-f  "{srcdir}"emulparams:mipsidtl.sh \Option-d
+emipsidtl.c \Option-f  "{srcdir}"emulparams:mipsidtl.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:mips.sc {GEN_DEPENDS}
 	{GENSCRIPTS} mipsidtl
-em_elf_i386.c \Option-f  "{srcdir}"emulparams:elf_i386.sh \Option-d
+eelf_i386.c \Option-f  "{srcdir}"emulparams:elf_i386.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:elf.sc {GEN_DEPENDS}
 	{GENSCRIPTS} elf_i386
-em_elf32mipb.c \Option-f  "{srcdir}"emulparams:elf32mipb.sh \Option-d
+eelf32mipb.c \Option-f  "{srcdir}"emulparams:elf32mipb.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:elf.sc {GEN_DEPENDS}
 	{GENSCRIPTS} elf32mipb
-em_alpha.c \Option-f  "{srcdir}"emulparams:alpha.sh \Option-d
+ealpha.c \Option-f  "{srcdir}"emulparams:alpha.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:alpha.sc {GEN_DEPENDS}
 	{GENSCRIPTS} alpha
-em_coff_sparc.c \Option-f  "{srcdir}"emulparams:coff_sparc.sh \Option-d
+ecoff_sparc.c \Option-f  "{srcdir}"emulparams:coff_sparc.sh \Option-d
   "{srcdir}"emultempl:generic.em "{srcdir}"scripttempl:sparccoff.sc {GEN_DEPENDS}
 	{GENSCRIPTS} coff_sparc
 
-{LD_PROG} \Option-f  {OFILES} {BFDLIB} {LIBIBERTY}
+{LD_PROG} \Option-f  {OFILES} {BFDLIB} {LIBIBERTY} "{o}"Version.r
+	Rez -rd -o {LD_PROG} "{o}"Version.r -append
 	Link    {LDFLAGS} -o {LD_PROG} {OFILES} {BFDLIB} {LIBIBERTY} {EXTRALIBS}
+
+"{o}"Version.r \Option-f "{o}"version-stamp
+
+"{o}"version-stamp \Option-f Makefile
+	Delete -i -y "{o}"version.new "{o}"version-stamp
+	Set major `Search 'ld version ' {srcdir}ldver.c | sed -e 's/.*ld version [^0-9]*\([0-9]*\)\.\([0-9]*\)\..*/\1/'`
+	Set minor `Search 'ld version ' {srcdir}ldver.c | sed -e 's/.*ld version [^0-9]*\([0-9]*\)\.\([0-9]*\)\..*/\2/'`
+	Set release 0
+	Echo '/* Version resources. */'			 > "{o}"version.new
+	Echo '#include "SysTypes.r"'			>> "{o}"version.new
+	Echo ''						>> "{o}"version.new
+	Echo "resource 'vers' (1) " `open-brace`	>> "{o}"version.new
+	Echo "	{major},"				>> "{o}"version.new
+	Echo "	{minor},"				>> "{o}"version.new
+	Echo "	{release},"				>> "{o}"version.new
+	Echo '	0,'					>> "{o}"version.new
+	Echo '	verUs,'					>> "{o}"version.new
+	Echo '	"{version}",'				>> "{o}"version.new
+	Echo '	"{version} (c) 1986-95 FSF, Inc. "'	>> "{o}"version.new
+	Echo '};'					>> "{o}"version.new
+	Echo ''						>> "{o}"version.new
+	Echo "resource 'vers' (2, purgeable) " `open-brace`  >> "{o}"version.new
+	Echo "	{major},"				>> "{o}"version.new
+	Echo "	{minor},"				>> "{o}"version.new
+	Echo "	{release},"				>> "{o}"version.new
+	Echo '	0,'					>> "{o}"version.new
+	Echo '	verUs,'					>> "{o}"version.new
+	Echo '	"{version}",'				>> "{o}"version.new
+	Echo '	"GNU LD for MPW"'			>> "{o}"version.new
+	Echo '};'					>> "{o}"version.new
+	MoveIfChange "{o}"version.new "{o}"Version.r
+	Echo ' ' > "{o}"version-stamp
 
 # The generated emulation files mostly have the same dependencies.
 {EMULATION_OFILES} \Option-f  ::bfd:bfd.h ::bfd:sysdep.h "{INCDIR}":bfdlink.h \Option-d

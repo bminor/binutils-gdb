@@ -1,3 +1,18 @@
+Fri Mar 17 15:42:33 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in (i386-unknown-aout): Change to i386-unknown-go32.
+	(i386-unknown-coff): Remove.
+	(sh-hitachi-hms): New target.
+	(emulation_ofiles): Set correctly for each target.
+	(version, TDEFINES): Add to makefile fragment.
+	* mpw-make.in (BISON): Use byacc instead of bison.
+	(em_*.c): Replace with e*.c everywhere.
+	(ldgram.h): Separate action from ldgram.c generation.
+	(LD_PROG): Depend on Version.r.
+	(Version.r): generate from version info.
+	* mpw-em.c: Remove.
+	* mpw-emipsidt.c: New file, modified for MPW from emipsidt.c.
+
 Wed Dec 14 13:29:52 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in (m68k-apple-macos, ppc-apple-macos,
