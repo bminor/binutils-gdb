@@ -16,10 +16,6 @@ You should have received a copy of the GNU General Public License
 along with GLD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$
- *
-*/
-
 #include "bfd.h"
 #include "sysdep.h"
 
@@ -459,6 +455,7 @@ DEFUN (lang_output_section_statement_lookup, (name),
       lookup->next = (lang_statement_union_type *) NULL;
       lookup->bfd_section = (asection *) NULL;
       lookup->processed = false;
+      lookup->loadable = 1;
       lookup->addr_tree = (etree_type *) NULL;
       lang_list_init (&lookup->children);
 
@@ -485,7 +482,7 @@ DEFUN (print_flags, (ignore_flags),
   if (flags->flag_loadable)
     fprintf (outfile, "L");
 #endif
-  fprintf (config.map_file, ")");
+ fprintf (config.map_file, ")");
 }
 
 void
@@ -497,7 +494,9 @@ DEFUN_VOID (lang_map)
 #ifdef HOST_64_BIT
   fprintf (config.map_file, "name\t\torigin\t\tlength\t\tattributes\n");
 #else
-  fprintf (config.map_file, "name\t\torigin   length\t\tattributes\n");
+  fprintf (config.map_file,
+	   "name\t\torigin   length   r_size   c_size    is    attributes\n");
+
 #endif
   for (m = lang_memory_region_list;
        m != (lang_memory_region_type *) NULL;
@@ -508,6 +507,12 @@ DEFUN_VOID (lang_map)
       print_space ();
       print_address (m->length);
       print_space ();
+      print_address (m->old_length);
+      print_space();
+      print_address (m->current - m->origin);
+      print_space();
+      if (m->old_length)
+       fprintf(config.map_file," %2d%%  ", ( m->current - m->origin) * 100 / m->old_length);
       print_flags (&m->flags);
       fprintf (config.map_file, "\n");
     }
@@ -540,7 +545,7 @@ DEFUN (init_os, (s),
 	     output_bfd->xvec->name, s->name);
     }
   s->bfd_section->output_section = s->bfd_section;
-  /* s->bfd_section->flags = s->flags;*/
+/*  s->bfd_section->flags = s->flags;*/
 
   /* We initialize an output sections output offset to minus its own */
   /* vma to allow us to output a section through itself */
@@ -571,25 +576,30 @@ DEFUN (wild_doit, (ptr, section, output, file),
        lang_input_statement_type * file)
 {
   if (output->bfd_section == (asection *) NULL)
-    {
-      init_os (output);
-    }
+  {
+    init_os (output);
+  }
 
   if (section != (asection *) NULL
       && section->output_section == (asection *) NULL)
-    {
-      /* Add a section reference to the list */
-      lang_input_section_type *new = new_stat (lang_input_section, ptr);
+  {
+    /* Add a section reference to the list */
+    lang_input_section_type *new = new_stat (lang_input_section, ptr);
 
-      new->section = section;
-      new->ifile = file;
-      section->output_section = output->bfd_section;
-      section->output_section->flags |= section->flags;
-      if (section->alignment_power > output->bfd_section->alignment_power)
-	{
-	  output->bfd_section->alignment_power = section->alignment_power;
-	}
+    new->section = section;
+    new->ifile = file;
+    section->output_section = output->bfd_section;
+    section->output_section->flags |= section->flags;
+    if (!output->loadable) 
+    {
+      /* Turn of load flag */
+      output->bfd_section->flags &= ~SEC_LOAD;
     }
+    if (section->alignment_power > output->bfd_section->alignment_power)
+    {
+      output->bfd_section->alignment_power = section->alignment_power;
+    }
+  }
 }
 
 static asection *
@@ -721,30 +731,30 @@ DEFUN (open_output, (name),
   bfd *output;
 
   if (output_target == (char *) NULL)
-  {
-    if (current_target != (char *) NULL)
-     output_target = current_target;
-    else
-     output_target = default_target;
-  }
+    {
+      if (current_target != (char *) NULL)
+	output_target = current_target;
+      else
+	output_target = default_target;
+    }
   output = bfd_openw (name, output_target);
   output_filename = name;
 
   if (output == (bfd *) NULL)
-  {
-    if (bfd_error == invalid_target)
     {
-      einfo ("%P%F target %s not found\n", output_target);
+      if (bfd_error == invalid_target)
+	{
+	  einfo ("%P%F target %s not found\n", output_target);
+	}
+      einfo ("%P%F problem opening output file %s, %E", name);
     }
-    einfo ("%P%F problem opening output file %s, %E", name);
-  }
 
   /*  output->flags |= D_PAGED;*/
 
   bfd_set_format (output, bfd_object);
-  bfd_set_arch_mach(output,
-		    ldfile_output_architecture,
-		    ldfile_output_machine);
+  bfd_set_arch_mach (output,
+		     ldfile_output_architecture,
+		     ldfile_output_machine);
   return output;
 }
 
@@ -1009,7 +1019,9 @@ DEFUN (print_output_section_statement, (output_section_statement),
       print_space ();
       print_address (section->vma);
       print_space ();
-      print_size (bfd_get_section_size_before_reloc (section));
+      print_size (section->_raw_size);
+      print_space();
+      print_size(section->_cooked_size);
       print_space ();
       print_alignment (section->alignment_power);
       print_space ();
@@ -1112,7 +1124,9 @@ DEFUN (print_input_section, (in),
 	{
 	  print_address (i->output_section->vma + i->output_offset);
 	  fprintf (config.map_file, " ");
-	  print_size (size);
+	  print_size (i->_raw_size);
+	  fprintf (config.map_file, " ");
+	  print_size(i->_cooked_size);
 	  fprintf (config.map_file, " ");
 	  print_alignment (i->alignment_power);
 	  fprintf (config.map_file, " ");
@@ -1141,20 +1155,20 @@ DEFUN (print_input_section, (in),
 
 	      /* Find all the symbols in this file defined in this section */
 
-		if (in->ifile->symbol_count)
-		  {
-		    asymbol **p;
+	      if (in->ifile->symbol_count)
+		{
+		  asymbol **p;
 
-		    for (p = in->ifile->asymbols; *p; p++)
-		      {
-			asymbol *q = *p;
+		  for (p = in->ifile->asymbols; *p; p++)
+		    {
+		      asymbol *q = *p;
 
-			if (bfd_get_section (q) == i && q->flags & BSF_GLOBAL)
-			  {
-			    print_symbol (q);
-			  }
-		      }
-		  }
+		      if (bfd_get_section (q) == i && q->flags & BSF_GLOBAL)
+			{
+			  print_symbol (q);
+			}
+		    }
+		}
 	    }
 	  else
 	    {
@@ -1382,11 +1396,13 @@ DEFUN (insert_pad, (this_ptr, fill, power, output_section_statement, dot),
 
 /* Work out how much this section will move the dot point */
 static bfd_vma
-DEFUN (size_input_section, (this_ptr, output_section_statement, fill, dot),
+DEFUN (size_input_section, (this_ptr, output_section_statement, fill,
+			    dot, relax),
        lang_statement_union_type ** this_ptr AND
        lang_output_section_statement_type * output_section_statement AND
        unsigned short fill AND
-       bfd_vma dot)
+       bfd_vma dot AND
+       boolean relax)
 {
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
@@ -1410,10 +1426,17 @@ DEFUN (size_input_section, (this_ptr, output_section_statement, fill, dot),
 
       i->output_offset = dot - output_section_statement->bfd_section->vma;
 
-      /* Mark how big the output section must be to contain this now */
-      dot += bfd_get_section_size_before_reloc (i);
-      output_section_statement->bfd_section->_raw_size =
-	dot - output_section_statement->bfd_section->vma;
+      /* Mark how big the output section must be to contain this now
+	 */
+      if (relax)
+	{
+	  dot += i->_cooked_size;
+	}
+      else
+	{
+	  dot += i->_raw_size;
+	}
+      output_section_statement->bfd_section->_raw_size = dot - output_section_statement->bfd_section->vma;
     }
   else
     {
@@ -1441,213 +1464,219 @@ DEFUN (lang_size_sections, (s, output_section_statement, prev, fill,
 {
   /* Size up the sections from their constituent parts */
   for (; s != (lang_statement_union_type *) NULL; s = s->next)
+  {
+    switch (s->header.type)
     {
-      switch (s->header.type)
-	{
 
-	case lang_output_section_statement_enum:
-	  {
-	    bfd_vma after;
-	    lang_output_section_statement_type *os = &s->output_section_statement;
+     case lang_output_section_statement_enum:
+     {
+       bfd_vma after;
+       lang_output_section_statement_type *os = &s->output_section_statement;
 
-	    if (os->bfd_section == &bfd_abs_section)
-	      {
-		/* No matter what happens, an abs section starts at zero */
-		bfd_set_section_vma (0, os->bfd_section, 0);
-	      }
-	    else
-	      {
-		if (os->addr_tree == (etree_type *) NULL)
-		  {
-		    /* No address specified for this section, get one
-		       from the region specification
-		       */
-		    if (os->region == (lang_memory_region_type *) NULL)
-		      {
-			os->region = lang_memory_region_lookup ("*default*");
-		      }
-		    dot = os->region->current;
-		  }
-		else
-		  {
-		    etree_value_type r;
+       if (os->bfd_section == &bfd_abs_section)
+       {
+	 /* No matter what happens, an abs section starts at zero */
+	 bfd_set_section_vma (0, os->bfd_section, 0);
+       }
+       else
+       {
+	 if (os->addr_tree == (etree_type *) NULL)
+	 {
+	   /* No address specified for this section, get one
+	      from the region specification
+	      */
+	   if (os->region == (lang_memory_region_type *) NULL)
+	   {
+	     os->region = lang_memory_region_lookup ("*default*");
+	   }
+	   dot = os->region->current;
+	 }
+	 else
+	 {
+	   etree_value_type r;
 
-		    r = exp_fold_tree (os->addr_tree,
-				       abs_output_section,
-				       lang_allocating_phase_enum,
-				       dot, &dot);
-		    if (r.valid == false)
-		      {
-			einfo ("%F%S: non constant address expression for section %s\n",
-			       os->name);
-		      }
-		    dot = r.value;
-		  }
-		/* The section starts here */
-		/* First, align to what the section needs */
+	   r = exp_fold_tree (os->addr_tree,
+			      abs_output_section,
+			      lang_allocating_phase_enum,
+			      dot, &dot);
+	   if (r.valid == false)
+	   {
+	     einfo ("%F%S: non constant address expression for section %s\n",
+		    os->name);
+	   }
+	   dot = r.value;
+	 }
+	 /* The section starts here */
+	 /* First, align to what the section needs */
 
 
-		dot = align_power (dot, os->bfd_section->alignment_power);
-		bfd_set_section_vma (0, os->bfd_section, dot);
-	      }
+	 dot = align_power (dot, os->bfd_section->alignment_power);
+	 bfd_set_section_vma (0, os->bfd_section, dot);
+       }
 
 
-	    os->bfd_section->output_offset = 0;
+       os->bfd_section->output_offset = 0;
 
-	    (void) lang_size_sections (os->children.head, os, &os->children.head,
-				       os->fill, dot, relax);
-	    /* Ignore the size of the input sections, use the vma and size to */
-	    /* align against */
-
-
-	    after = ALIGN (os->bfd_section->vma +
-			   os->bfd_section->_raw_size,
-			   os->block_value);
+       (void) lang_size_sections (os->children.head, os, &os->children.head,
+				  os->fill, dot, relax);
+       /* Ignore the size of the input sections, use the vma and size to */
+       /* align against */
 
 
-	    os->bfd_section->_raw_size = after - os->bfd_section->vma;
-	    dot = os->bfd_section->vma + os->bfd_section->_raw_size;
-	    os->processed = true;
+       after = ALIGN (os->bfd_section->vma +
+		      os->bfd_section->_raw_size,
+		      os->block_value);
 
-	    /* Replace into region ? */
-	    if (os->addr_tree == (etree_type *) NULL
-		&& os->region != (lang_memory_region_type *) NULL)
-	      {
-		os->region->current = dot;
-		/* Make sure this isn't silly */
-		if (os->region->current >
-		    os->region->origin +
-		    os->region->length)
-		  {
-		    einfo ("%X%P: Region %s is full (%B section %s)\n",
-			   os->region->name,
-			   os->bfd_section->owner,
-			   os->bfd_section->name);
-		    /* Reset the region pointer */
-		    os->region->current = 0;
 
-		  }
+       os->bfd_section->_raw_size = after - os->bfd_section->vma;
+       dot = os->bfd_section->vma + os->bfd_section->_raw_size;
+       os->processed = true;
 
-	      }
-	  }
+       /* Replace into region ? */
+       if (os->addr_tree == (etree_type *) NULL
+	   && os->region != (lang_memory_region_type *) NULL)
+       {
+	 os->region->current = dot;
+	 /* Make sure this isn't silly */
+	 if (os->region->current >
+	     os->region->origin +
+	     os->region->length)
+	 {
+	   einfo ("%X%P: Region %s is full (%B section %s)\n",
+		  os->region->name,
+		  os->bfd_section->owner,
+		  os->bfd_section->name);
+	   /* Reset the region pointer */
+	   os->region->current = 0;
 
-	  break;
-	case lang_constructors_statement_enum:
-	  dot = lang_size_sections (constructor_list.head,
-				    output_section_statement,
-				    &s->wild_statement.children.head,
-				    fill,
-				    dot, relax);
-	  break;
+	 }
 
-	case lang_data_statement_enum:
-	  {
-	    unsigned int size = 0;
+       }
+     }
 
-	    s->data_statement.output_vma = dot - output_section_statement->bfd_section->vma;
-	    s->data_statement.output_section =
-	      output_section_statement->bfd_section;
+      break;
+     case lang_constructors_statement_enum:
+      dot = lang_size_sections (constructor_list.head,
+				output_section_statement,
+				&s->wild_statement.children.head,
+				fill,
+				dot, relax);
+      break;
 
-	    switch (s->data_statement.type)
-	      {
-	      case LONG:
-		size = LONG_SIZE;
-		break;
-	      case SHORT:
-		size = SHORT_SIZE;
-		break;
-	      case BYTE:
-		size = BYTE_SIZE;
-		break;
+     case lang_data_statement_enum:
+     {
+       unsigned int size = 0;
 
-	      }
-	    dot += size;
-	    output_section_statement->bfd_section->_raw_size += size;
-	  }
-	  break;
+       s->data_statement.output_vma = dot - output_section_statement->bfd_section->vma;
+       s->data_statement.output_section =
+	output_section_statement->bfd_section;
 
-	case lang_wild_statement_enum:
+       switch (s->data_statement.type)
+       {
+	case LONG:
+	 size = LONG_SIZE;
+	 break;
+	case SHORT:
+	 size = SHORT_SIZE;
+	 break;
+	case BYTE:
+	 size = BYTE_SIZE;
+	 break;
 
-	  dot = lang_size_sections (s->wild_statement.children.head,
-				    output_section_statement,
-				    &s->wild_statement.children.head,
+       }
+       dot += size;
+       output_section_statement->bfd_section->_raw_size += size;
+     }
+      break;
 
-				    fill, dot, relax);
+     case lang_wild_statement_enum:
 
-	  break;
+      dot = lang_size_sections (s->wild_statement.children.head,
+				output_section_statement,
+				&s->wild_statement.children.head,
 
-	case lang_object_symbols_statement_enum:
-	  create_object_symbols = output_section_statement;
-	  break;
-	case lang_output_statement_enum:
-	case lang_target_statement_enum:
-	  break;
-	case lang_input_section_enum:
-	  if (relax)
-	    {
-	      relaxing = true;
+				fill, dot, relax);
 
-	      had_relax = had_relax || relax_section (prev);
-	      relaxing = false;
+      break;
 
-	    }
+     case lang_object_symbols_statement_enum:
+      create_object_symbols = output_section_statement;
+      break;
+     case lang_output_statement_enum:
+     case lang_target_statement_enum:
+      break;
+     case lang_input_section_enum:
+      if (relax)
+      {
+	relaxing = true;
 
-	  dot = size_input_section (prev,
-				    output_section_statement,
-				    output_section_statement->fill, dot);
-	  break;
-	case lang_input_statement_enum:
-	  break;
-	case lang_fill_statement_enum:
-	  s->fill_statement.output_section = output_section_statement->bfd_section;
+	if( relax_section (prev))
+	 had_relax = true;
+	relaxing = false;
 
-	  fill = s->fill_statement.fill;
-	  break;
-	case lang_assignment_statement_enum:
-	  {
-	    bfd_vma newdot = dot;
+      }
+      else  {
+	(*prev)->input_section.section->_cooked_size = 
+	 (*prev)->input_section.section->_raw_size ;
 
-	    exp_fold_tree (s->assignment_statement.exp,
-			   output_section_statement,
-			   lang_allocating_phase_enum,
-			   dot,
-			   &newdot);
+      }
+      dot = size_input_section (prev,
+				output_section_statement,
+				output_section_statement->fill,
+				dot, relax);
+      break;
+     case lang_input_statement_enum:
+      break;
+     case lang_fill_statement_enum:
+      s->fill_statement.output_section = output_section_statement->bfd_section;
 
-	    if (newdot != dot && !relax)
-	      /* We've been moved ! so insert a pad */
-	      {
-		lang_statement_union_type *new =
-		(lang_statement_union_type *)
-		stat_alloc ((bfd_size_type) (sizeof (lang_padding_statement_type)));
+      fill = s->fill_statement.fill;
+      break;
+     case lang_assignment_statement_enum:
+     {
+       bfd_vma newdot = dot;
 
-		/* Link into existing chain */
-		new->header.next = *prev;
-		*prev = new;
-		new->header.type = lang_padding_statement_enum;
-		new->padding_statement.output_section =
-		  output_section_statement->bfd_section;
-		new->padding_statement.output_offset =
-		  dot - output_section_statement->bfd_section->vma;
-		new->padding_statement.fill = fill;
-		new->padding_statement.size = newdot - dot;
-		output_section_statement->bfd_section->_raw_size +=
-		  new->padding_statement.size;
-		dot = newdot;
-	      }
-	  }
+       exp_fold_tree (s->assignment_statement.exp,
+		      output_section_statement,
+		      lang_allocating_phase_enum,
+		      dot,
+		      &newdot);
 
-	  break;
-	default:
-	  FAIL ();
-	  break;
-	  /* This can only get here when relaxing is turned on */
-	case lang_padding_statement_enum:
+       if (newdot != dot && !relax)
+	/* We've been moved ! so insert a pad */
+       {
+	 lang_statement_union_type *new =
+	  (lang_statement_union_type *)
+	   stat_alloc ((bfd_size_type) (sizeof (lang_padding_statement_type)));
 
-	case lang_address_statement_enum:
-	  break;
-	}
-      prev = &s->header.next;
+	 /* Link into existing chain */
+	 new->header.next = *prev;
+	 *prev = new;
+	 new->header.type = lang_padding_statement_enum;
+	 new->padding_statement.output_section =
+	  output_section_statement->bfd_section;
+	 new->padding_statement.output_offset =
+	  dot - output_section_statement->bfd_section->vma;
+	 new->padding_statement.fill = fill;
+	 new->padding_statement.size = newdot - dot;
+	 output_section_statement->bfd_section->_raw_size +=
+	  new->padding_statement.size;
+	 dot = newdot;
+       }
+     }
+
+      break;
+     default:
+      FAIL ();
+      break;
+      /* This can only get here when relaxing is turned on */
+     case lang_padding_statement_enum:
+
+     case lang_address_statement_enum:
+      break;
     }
+    prev = &s->header.next;
+  }
   return dot;
 }
 
@@ -2202,6 +2231,10 @@ DEFUN (lang_enter_output_section_statement,
 	address_exp;
     }
   os->flags = flags;
+  if (flags & SEC_NEVER_LOAD)
+   os->loadable = 0;
+  else
+   os->loadable = 1;
   os->block_value = block_value;
   stat_ptr = &os->children;
 
@@ -2228,9 +2261,11 @@ DEFUN_VOID (reset_memory_regions)
        p != (lang_memory_region_type *) NULL;
        p = p->next)
     {
+      p->old_length = p->current - p->origin;
       p->current = p->origin;
     }
 }
+
 
 
 asymbol *
@@ -2301,38 +2336,65 @@ DEFUN_VOID (lang_process)
   ldemul_before_allocation ();
 
 
-  /* Size up the sections */
-  lang_size_sections (statement_list.head,
-		      abs_output_section,
-		      &(statement_list.head), 0, (bfd_vma) 0, false);
+#if 0
+  had_relax = true;
+  while (had_relax)
+    {
 
+      had_relax = false;
+
+      lang_size_sections (statement_list.head,
+			  (lang_output_section_statement_type *) NULL,
+			  &(statement_list.head), 0, (bfd_vma) 0, true);
+      /* FIXME. Until the code in relax is fixed so that it only reads in
+         stuff once, we cant iterate since there is no way for the linker to
+         know what has been patched and what hasn't */
+      break;
+
+    }
+#endif
 
   /* Now run around and relax if we can */
   if (command_line.relax)
     {
-      reset_memory_regions ();
-
-      /* Move the global symbols around */
-      lang_relocate_globals ();
-
-      had_relax = true;
-      while (had_relax)
-	{
-
-	  had_relax = false;
-
-	  lang_size_sections (statement_list.head,
-			      (lang_output_section_statement_type *) NULL,
-			      &(statement_list.head), 0, (bfd_vma) 0, true);
-	  /* FIXME. Until the code in relax is fixed so that it only reads in
-	     stuff once, we cant iterate since there is no way for the linker to
-	     know what has been patched and what hasn't */
-	  break;
-
-	}
+      /* First time round is a trial run to get the 'worst case' addresses of the
+         objects if there was no relaxing */
+      lang_size_sections (statement_list.head,
+			  (lang_output_section_statement_type *) NULL,
+			  &(statement_list.head), 0, (bfd_vma) 0, false);
 
 
 
+  /* Move the global symbols around so the second pass of relaxing can
+     see them */
+  lang_relocate_globals ();
+
+  reset_memory_regions ();
+
+  /* Do all the assignments, now that we know the final restingplaces
+     of all the symbols */
+
+  lang_do_assignments (statement_list.head,
+		       abs_output_section,
+		       0, (bfd_vma) 0);
+
+
+      /* Perform another relax pass - this time we know where the
+	 globals are, so can make better guess */
+      lang_size_sections (statement_list.head,
+			  (lang_output_section_statement_type *) NULL,
+			  &(statement_list.head), 0, (bfd_vma) 0, true);
+
+
+
+    }
+
+  else
+    {
+      /* Size up the sections */
+      lang_size_sections (statement_list.head,
+			  abs_output_section,
+			  &(statement_list.head), 0, (bfd_vma) 0, false);
 
     }
 

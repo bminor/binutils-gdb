@@ -299,7 +299,7 @@ command_line_option:
 		{ lang_add_input_file($1,lang_input_file_is_file_enum,
 				 (char *)NULL); }
 	|	OPTION_c filename 
-			{ ldfile_open_command_file($2); } mri_script_file  END {  ldlex_command()};
+			{ ldfile_open_command_file($2); } mri_script_file  END {  ldlex_command();}
 
 	|	OPTION_Tfile 
 			{ ldfile_open_command_file($1); } script_file
@@ -327,7 +327,7 @@ END {  ldlex_command();}
 			lang_add_assignment(exp_assop($4,$3,$5));
 			}	
 	| '-' NAME
-		 { info("%P%F Unrecognised option -%s\n", $2);  }
+		 { info("%P%F Unrecognized option -%s\n", $2);  }
 
 	| '{' script_file '}'  
 	;
@@ -747,6 +747,8 @@ exp	:
 			{ $$ = exp_nameop(SIZEOF,$3); }
 	|	ADDR '(' NAME ')'
 			{ $$ = exp_nameop(ADDR,$3); }
+	|	ABSOLUTE '(' exp ')'
+			{ $$ = exp_unop(ABSOLUTE, $3); }
 	|	ALIGN_K '(' exp ')'
 			{ $$ = exp_unop(ALIGN_K,$3); }
 	|	NAME
@@ -772,11 +774,11 @@ opt_comma
 	;
 
 opt_type:
-	  '(' NOLOAD ')' { $$ = SEC_NO_FLAGS; }
-	| '(' DSECT ')' { $$ = 0; }
-	| '(' COPY ')' { $$ = 0; }
-	| '(' INFO ')' { $$ = 0; }
-	| '(' OVERLAY ')' { $$ = 0; }
+	   NOLOAD  { $$ = SEC_NEVER_LOAD; }
+	|  DSECT   { $$ = 0; }
+	|  COPY    { $$ = 0; }
+	|  INFO    { $$ = 0; }
+	|  OVERLAY { $$ = 0; }
   	| { $$ = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS; }
 	;
 

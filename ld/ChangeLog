@@ -1,3 +1,14 @@
+Fri Aug  7 12:31:10 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldlang.h: add new field "loadable" to output_section_statement.
+	* ldlang.c (lang_output_section_statement_lookup): initilize new
+	field. (wild_doit): if new field is not set, then stop output
+	section from being loadable.
+	(lang_enter_output_section_statement): set the field from the
+	NOLOAD keyword
+	* ldgram.y: new synax for NOLOAD. Removes a shift/reduce too.
+	* h8300hms.sc-sh, h8300hms.em: get -r right.
+
 Thu Aug  6 18:35:21 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* ldint.texinfo:  New internals manual (beginnings thereof).
