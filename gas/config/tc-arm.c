@@ -57,7 +57,7 @@
 /* Architectures are the sum of the base and extensions */
 #define ARM_ARCH_V4	(ARM_7 | ARM_LONGMUL | ARM_HALFWORD)
 #define ARM_ARCH_V4T	(ARM_ARCH_V4 | ARM_THUMB)
-#define ARM_ARCH_V5	(ARM_ARCH_V4 | ARM_EXT_V5 )
+#define ARM_ARCH_V5	(ARM_ARCH_V4 | ARM_EXT_V5)
 #define ARM_ARCH_V5T	(ARM_ARCH_V5 | ARM_THUMB)
 
 /* Some useful combinations:  */
@@ -6123,7 +6123,7 @@ md_assemble (str)
 		  if (opcode->comp_suffix)
 		    {
 		       if (*opcode->comp_suffix != '\0')
-		    	 as_bad (_("Opcode `%s' must have suffix from <%s>\n"),
+		    	 as_bad (_("Opcode `%s' must have suffix from list: <%s>"),
 			     str, opcode->comp_suffix);
 		       else
 			 /* Not a conditional instruction. */
@@ -6163,7 +6163,6 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
 		}
 	      else
 		cond_code = COND_ALWAYS;
-
 
 	      /* Apply the conditional, or complain it's not allowed. */
 	      if (opcode->comp_suffix && *opcode->comp_suffix == '\0')
@@ -6408,7 +6407,8 @@ md_parse_option (c, arg)
             }
           else if (streq (str, "thumb-interwork"))
             {
-              cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_THUMB | ARM_ARCH_V4;
+	      if ((cpu_variant & ARM_THUMB) == 0)
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V4T;
 #if defined OBJ_COFF || defined OBJ_ELF
               support_interwork = true;
 #endif
@@ -6643,7 +6643,6 @@ md_parse_option (c, arg)
 		    default:  as_bad (_("Invalid architecture variant -m%s"), arg); break;
 		    }
 		  break;
-
 		  
 		default:
 		  as_bad (_("Invalid architecture variant -m%s"), arg);
@@ -6680,7 +6679,7 @@ md_show_usage (fp)
 _("\
  ARM Specific Assembler Options:\n\
   -m[arm][<processor name>] select processor variant\n\
-  -m[arm]v[2|2a|3|3m|4|4t|5]select architecture variant\n\
+  -m[arm]v[2|2a|3|3m|4|4t|5[t][e]] select architecture variant\n\
   -mthumb                   only allow Thumb instructions\n\
   -mthumb-interwork         mark the assembled code as supporting interworking\n\
   -mall                     allow any instruction\n\
