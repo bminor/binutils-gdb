@@ -1996,7 +1996,10 @@ md_assemble (line)
 		    if (!quiet_warnings
 			&& (i.tm.operand_types[op] & InOutPortReg) == 0)
 		      as_warn (_("using `%%%s' instead of `%%%s' due to `%c' suffix"),
-			       (i.op[op].regs - (i.types[op] & Reg16 ? 8 : 16))->reg_name,
+			       (i.op[op].regs
+				+ (i.types[op] & Reg16
+				   ? REGNAM_AL - REGNAM_AX
+				   : REGNAM_AL - REGNAM_EAX))->reg_name,
 			       i.op[op].regs->reg_name,
 			       i.suffix);
 #endif
@@ -2046,7 +2049,7 @@ md_assemble (line)
 #if REGISTER_WARNINGS
 		  else
 		    as_warn (_("using `%%%s' instead of `%%%s' due to `%c' suffix"),
-			     (i.op[op].regs + 8)->reg_name,
+			     (i.op[op].regs + REGNAM_EAX - REGNAM_AX)->reg_name,
 			     i.op[op].regs->reg_name,
 			     i.suffix);
 #endif
@@ -2117,7 +2120,7 @@ md_assemble (line)
 		  else
 #if REGISTER_WARNINGS
 		    as_warn (_("using `%%%s' instead of `%%%s' due to `%c' suffix"),
-			     (i.op[op].regs - 8)->reg_name,
+			     (i.op[op].regs + REGNAM_AX - REGNAM_EAX)->reg_name,
 			     i.op[op].regs->reg_name,
 			     i.suffix);
 #endif

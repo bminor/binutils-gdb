@@ -1,3 +1,8 @@
+2001-03-19  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (md_assemble <REGISTER_WARNINGS>): Correct
+	used register name.
+
 2001-03-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (md_pseudo_table): Recognize xrefb to comply
