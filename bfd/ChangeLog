@@ -1,3 +1,9 @@
+Wed Jun  2 17:57:13 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	From Utah:
+	* hosts/hppabsd.h: Eliminate use of obsolete EXFUN.
+	* config/hppabsd.mh: Don't use ranlib.
+
 Tue Jun  1 04:15:57 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* elf.c: New file, for word-size independent code.
