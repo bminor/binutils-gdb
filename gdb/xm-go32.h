@@ -26,3 +26,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Define this lseek(n) != nth byte of file */
 #define LSEEK_NOT_LINEAR
 
+#define CANT_FORK

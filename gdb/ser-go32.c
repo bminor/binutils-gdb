@@ -21,6 +21,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    the IBM PC.  FIXME.    -- gnu@cygnus.com, Sep92 */
 
 #include "defs.h"
+
+/* dummy */
+struct ttystate;  
+
 #include "serial.h"
 
 #include <sys/dos.h>
@@ -278,7 +282,9 @@ serial_default_name ()
 
 
 void
-serial_raw ()
+serial_raw (fd, old)
+int fd;
+struct ttystate *old;
 {
   /* Always in raw mode */
 }
@@ -326,7 +332,7 @@ serial_write (str, len)
   dosasync_write(fd, str, len);
 }
 
-int
+void
 serial_close ()
 {
 }

@@ -17,6 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#ifdef __GO32__
+
+/* Then you use the asynctsr */
+
+#else
 #ifdef HAVE_TERMIO
 
 #include <termios.h>
@@ -38,6 +43,7 @@ struct ttystate {
 };
 
 #endif /* not HAVE_TERMIO */
+#endif
 /* Return a sensible default name for a serial device, something which
    can be used as an argument to serial_open.  */
    
