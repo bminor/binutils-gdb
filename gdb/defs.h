@@ -23,20 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 
 /* First include ansidecl.h so we can use the various macro definitions
-   in all subsequent file inclusions.  FIXME:  This inclusion can now
-   be removed from all files that include defs.h */
+   here and in all subsequent file inclusions.  */
 
 #include "ansidecl.h"
-
-/* We could use the EXFUN macro in ansidecl.h to handle prototypes, but
-   the name is misleading the the result is ugly.  So just define a simple
-   macro to handle the parameter lists. */
-
-#ifdef __STDC__
-#define PARAMS(paramlist) paramlist
-#else
-#define PARAMS(paramlist) ()
-#endif
 
 /* An address in the program being debugged.  Host byte order.  */
 typedef unsigned int CORE_ADDR;
@@ -694,6 +683,7 @@ strerror PARAMS ((int));				/* 4.11.6.2 */
 # else
 #  ifdef sparc
 #   include <alloca.h>
+    extern char *alloca ();	/* SPARC alloca.h doesn't declare damn thing */
 #  endif
 #  ifndef alloca		/* May be macro, with args, in <alloca.h> */
     extern char *alloca ();
@@ -701,7 +691,7 @@ strerror PARAMS ((int));				/* 4.11.6.2 */
 # endif
 #endif
 
-/* TARGET_BYTE_ORDER and HOST_BYTE_ORDER should be defined to one of these.  */
+/* TARGET_BYTE_ORDER and HOST_BYTE_ORDER must be defined to one of these.  */
 
 #if !defined (BIG_ENDIAN)
 #define BIG_ENDIAN 4321

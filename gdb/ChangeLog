@@ -1,5 +1,9 @@
 Thu Jun 25 04:00:10 1992  John Gilmore  (gnu at cygnus.com)
 
+	* defs.h (PARAMS):  Move to ../include/ansidecl.h.
+	(alloca):  Declare return type on SPARC, since Sun doesn't.
+	(*_BYTE_ORDER):  Improve comment:  *must* be defined.
+
 	* tm-hppa.h:  New file, architectural definition of HP PA.
 	* tm-hppabsd.h, tm-hppahpux.h:  Shrink to deltas from tm-hppa.h.
 
