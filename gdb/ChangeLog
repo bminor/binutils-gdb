@@ -1,3 +1,8 @@
+Wed Jul  5 11:38:36 1995  Kung Hsu  <kung@rtl.cygnus.com>
+
+	* remote-nindy (nindy_wait): Use infinite timeout reading after
+	esacpe character.
+
 Tue Jul  4 10:30:22 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* infrun.c (wait_for_inferior): When switching from one thread to

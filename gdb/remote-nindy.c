@@ -366,7 +366,7 @@ nindy_wait( pid, status )
 	    }
 	  else if (c == 0x1b) /* ESC */
 	    {
-	      c = SERIAL_READCHAR (nindy_serial, 1);
+	      c = SERIAL_READCHAR (nindy_serial, -1);
 	      c &= ~0x40;
 	    } 
 	  else if (c != 0x10) /* DLE */
