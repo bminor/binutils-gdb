@@ -375,7 +375,7 @@ config.h: stamp-h ; @true
 stamp-h: config.in config.status
 	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
-config.status: configure config.make config.hdr
+config.status: configure
 	$(SHELL) ./config.status --recheck
 
 install:

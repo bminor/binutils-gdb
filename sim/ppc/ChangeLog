@@ -1,5 +1,8 @@
 Mon Nov  6 10:39:28 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* Makefile.in (config.status): Remove references to config.make
+	and config.hdr.
+
 	* config.{make,hdr}: Delete, no longer used.
 	* build-psim: Ditto.
 
