@@ -1,3 +1,9 @@
+2001-05-02  Johan Rydberg  <jrydberg@opencores.org>
+
+        * elf32-openrisc.c (openrisc_elf_howto_table): Do not complain
+	about overflow in R_OPENRISC_LO_16_IN_INSN and
+	R_OPENRISC_HI_16_IN_INSN.Index: bfd/elf32-openrisc.c 
+
 2001-04-30  H.J. Lu  <hjl@gnu.org>
 
 	* elf.c (_bfd_elf_link_hash_hide_symbol): Set dynindx to -1

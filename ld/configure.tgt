@@ -304,6 +304,7 @@ alpha*-*-netbsd*)	targ_emul=elf64alpha ;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532macha ;;
 ns32k-pc532-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
+openrisc-*-*)		targ_emul=elf32openrisc ;;
 powerpc-*-freebsd*)	targ_emul=elf32ppc;
 			targ_extra_emuls=elf32ppcsim;
 			targ_extra_libpath=elf32ppc;

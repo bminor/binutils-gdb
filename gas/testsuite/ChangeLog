@@ -1,3 +1,15 @@
+2001-05-02  Johan Rydberg  <jrydberg@opencores.org>
+
+        * gas/openrisc/addi.s: New file.
+        * gas/openrisc/addi.d: Likewise.
+        * gas/openrisc/allinsn.exp: Likewise.
+        * gas/openrisc/allinsn.s: Likewise.
+        * gas/openrisc/allinsn.d: Likewise.
+        * gas/openrisc/lohi.s: Likewise.
+        * gas/openrisc/lohi.d: Likewise.
+        * gas/openrisc/store.s: Likewise.
+        * gas/openrisc/store.d: Likewise.
+
 2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/rd-dw2-1.d, gas/cris/rd-dw2-2.d, gas/cris/rd-dw2-3.d,

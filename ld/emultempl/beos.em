@@ -739,7 +739,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   /* Look up the output section.  The Microsoft specs say sections names in
      image files never contain a '\$'.  Fortunately, lang_..._lookup creates
      the section if it doesn't exist.  */
-  output_secname = buystring (secname);
+  output_secname = xstrdup (secname);
   ps = strchr (output_secname + 1, '\$');
   *ps = 0;
   os = lang_output_section_statement_lookup (output_secname);

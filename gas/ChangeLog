@@ -1,3 +1,14 @@
+2001-05-02  Johan Rydberg  <jrydberg@opencores.org>
+
+        * config/tc-openrisc.c: New file.
+        * config/tc-openrisc.h: Likewise.
+
+        * Makefile.am: Add OpenRISC target.
+        * Makefile.in: Regenerated.
+
+        * configure.in (openrisc-*-*): Add target.
+        * configure: Regenerated.
+
 2001-05-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c (arm_frag_align_code): Change error message to

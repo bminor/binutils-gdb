@@ -358,6 +358,7 @@ changequote([,])dnl
 			    ;;
       mn10200-*-*)	    fmt=elf bfd_gas=yes ;;
       mn10300-*-*)	    fmt=elf bfd_gas=yes ;;
+      openrisc-*-*)	    fmt=elf bfd_gas=yes ;;
       pj*)		    fmt=elf ;;
       ppc-*-pe | ppc-*-cygwin* | ppc-*-winnt*)
 		            fmt=coff em=pe ;;
@@ -526,7 +527,7 @@ changequote([,])dnl
 
     # Any other special object files needed ?
     case ${cpu_type} in
-      fr30 | m32r)
+      fr30 | m32r | openrisc)
 	using_cgen=yes
 	;;
 

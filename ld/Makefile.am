@@ -155,6 +155,7 @@ ALL_EMULATIONS = \
 	eelf32lppc.o \
 	eelf32lppcsim.o \
 	eelf32mcore.o \
+	eelf32openrisc.o \
 	eelf32ppc.o \
 	eelf32ppclinux.o \
 	eelf32ppcsim.o \
@@ -482,6 +483,9 @@ eelf32lppcsim.c: $(srcdir)/emulparams/elf32lppcsim.sh \
 eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lsmip "$(tdir_elf32lsmip)"
+eelf32openrisc.c: $(srcdir)/emulparams/elf32openrisc.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32openrisc "$(tdir_openrisc)"
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc "$(tdir_elf32ppc)"
