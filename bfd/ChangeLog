@@ -1,3 +1,17 @@
+Mon Sep 12 01:58:47 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c (elf32_hppa_relocate_section): If there was a link
+	error of some sort (for example, undefined symbols), then do not
+	apply any relocs, just notify the user of the errors.
+	(elf32_hppa_backend_begin_write_processing): Do not build a symbol
+	extension section for an executable (it's useless).
+	(elf32_hppa_link_output_symbol_hook): Do nothing if there was a
+	link error of some sort (for example, undefined symbols).
+	(elf32_hppa_read_symext_info): Kludge.  Turn off SEC_HAS_CONTENTS
+	for all the input symbol extension sections to keep the generic
+	BFD code happy.  Temporarily turn it on to read the contents of
+	the symbol extension section.
+
 Sun Sep 11 21:58:59 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/hppaosf.mh (RANLIB): Do not set.
