@@ -1,3 +1,9 @@
+Thu Aug  8 08:17:32 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* archive.c (bsd_write_armap):  Ifdef around calls to getuid and
+	getgid if _WIN32 is defined.
+	* opncls.c (bfd_fdopenr):  Remove unnecessary WINGDB ifdef.
+
 Wed Aug  7 23:19:00 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* aoutx.h bfd-in.h bfd-in2.h opncls.c riscix.c som.c targets.c:
