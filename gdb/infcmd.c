@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "target.h"
+#include "language.h"
 
 static void
 continue_command PARAMS ((char *, int));
@@ -226,6 +227,14 @@ Start it from the beginning? "))
   /* The exec file is re-read every time we do a generic_mourn_inferior, so
      we just have to worry about the symbol file.  */
   reread_symbols ();
+
+  /* We keep symbols from add-symbol-file, on the grounds that the
+     user might want to add some symbols before running the program
+     (right?).  But sometimes (dynamic loading where the user manually
+     introduces the new symbols with add-symbol-file), the code which
+     the symbols describe does not persist between runs.  Currently
+     the user has to manually nuke all symbols between runs if they
+     want them to go away (PR 2207).  This is probably reasonable.  */
 
   if (args)
     {
@@ -549,9 +558,20 @@ run_stack_dummy (addr, buffer)
     struct breakpoint *bpt;
     struct symtab_and_line sal;
 
+#if CALL_DUMMY_LOCATION != AT_ENTRY_POINT
     sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
+#else
+    sal.pc = entry_point_address ();
+#endif
     sal.symtab = NULL;
     sal.line = 0;
+
+    /* Set up a FRAME for the dummy frame so we can pass it to
+       set_momentary_breakpoint.  We need to give the breakpoint a
+       frame in case there is only one copy of the dummy (e.g.
+       CALL_DUMMY_LOCATION == AFTER_TEXT_END).  */
+    flush_cached_frames ();
+    set_current_frame (create_new_frame (read_fp (), sal.pc));
 
     /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need to put
        a breakpoint instruction.  If not, the call dummy already has the
@@ -560,7 +580,7 @@ run_stack_dummy (addr, buffer)
        addr is the address of the call dummy plus the CALL_DUMMY_START_OFFSET,
        so we need to subtract the CALL_DUMMY_START_OFFSET.  */
     bpt = set_momentary_breakpoint (sal,
-				    NULL,
+				    get_current_frame (),
 				    bp_call_dummy);
     bpt->disposition = delete;
 

@@ -376,6 +376,11 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 	  symfile_objfile = NULL;
 	}
 
+      /* Currently we keep symbols from the add-symbol-file command.
+	 If the user wants to get rid of them, they should do "symbol-file"
+	 without arguments first.  Not sure this is the best behavior
+	 (PR 2207).  */
+
       (*objfile -> sf -> sym_new_init) (objfile);
     }
 

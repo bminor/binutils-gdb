@@ -1,3 +1,8 @@
+Sun Oct 31 09:28:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* objfiles.h, infcmd.c, symfile.c: Add comments about how various
+	objfiles get created and when we should blow them away.
+
 Sat Oct 30 08:32:53 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symfile.c (reread_symbols): When re-reading symbols, do all the
