@@ -244,11 +244,11 @@ elf_symtab_read (abfd, addr, objfile)
      CORE_ADDR addr;
      struct objfile *objfile;
 {
-  unsigned int storage_needed;
+  long storage_needed;
   asymbol *sym;
   asymbol **symbol_table;
-  unsigned int number_of_symbols;
-  unsigned int i;
+  long number_of_symbols;
+  long i;
   int index;
   struct cleanup *back_to;
   CORE_ADDR symaddr;
@@ -263,12 +263,18 @@ elf_symtab_read (abfd, addr, objfile)
 				 objfile->sym_stab_info;
   unsigned long size;
   
-  storage_needed = get_symtab_upper_bound (abfd);
+  storage_needed = bfd_get_symtab_upper_bound (abfd);
+  if (storage_needed < 0)
+    error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),
+	   bfd_errmsg (bfd_get_error ()));
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
       back_to = make_cleanup (free, symbol_table);
-      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table); 
+      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
+      if (number_of_symbols < 0)
+	error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),
+	       bfd_errmsg (bfd_get_error ()));
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = symbol_table[i];

@@ -1,3 +1,11 @@
+Wed Mar 30 16:14:27 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfread.c (elf_symtab_read): Change storage_needed,
+	number_of_symbols and i to long.  Rename get_symtab_upper_bound to
+	bfd_get_symtab_upper_bound.  Check for errors from
+	bfd_get_symtab_upper_bound and bfd_canonicalize_symtab.
+	* nlmread.c (nlm_symtab_read): Same changes.
+
 Wed Mar 30 11:43:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* xcoffread.c (xcoff_next_symbol_text): New function.
