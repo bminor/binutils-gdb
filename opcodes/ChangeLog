@@ -1,3 +1,19 @@
+2005-01-17  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* sh-opc.h (arch_sh2a_or_sh3e,arch_sh2a_or_sh4): Correct definition.
+	(inheritance diagram): Add missing edge.
+	(arch_sh1_up): Rename arch_sh_up to match external name to make life
+	easier for the testsuite.
+	(arch_sh4_nofp_up): Likewise, rename arch_sh4_nofpu_up.
+	(arch_sh4a_nofp_up): Likewise, rename arch_sh4a_nofpu_up.
+	(arch_sh2a_nofpu_or_sh4_nommu_nofpu_up): Add missing 
+	arch_sh2a_or_sh4_up child.
+	(sh_table): Do renaming as above.
+	Correct comment for ldc.l for gas testsuite to read.
+	Remove rogue mul.l from sh1 (duplicate of the one for sh2).
+	Correct comments for movy.w and movy.l for gas testsuite to read.
+	Correct comments for fmov.d and fmov.s for gas testsuite to read.
+
 2005-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OP_E): Don't ignore scale in SIB for 64 bit mode.

@@ -1,3 +1,9 @@
+2005-01-17  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* tc-sh.c (md_begin,md_parse_option): Change arch_sh1_up to
+	arch_sh_up in order to match the external name and make the
+	testsuite's job easier.
+
 2005-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 659	

@@ -1,6 +1,6 @@
 /* tc-sh.c -- Assemble code for the Renesas / SuperH SH
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004  Free Software Foundation, Inc.
+   2003, 2004, 2005  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -839,7 +839,7 @@ md_begin (void)
   unsigned int target_arch;
 
   target_arch
-    = preset_target_arch ? preset_target_arch : arch_sh1_up & ~arch_sh_has_dsp;
+    = preset_target_arch ? preset_target_arch : arch_sh_up & ~arch_sh_has_dsp;
   valid_arch = target_arch;
 
 #ifdef HAVE_SH64
@@ -3083,7 +3083,7 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       break;
 
     case OPTION_DSP:
-      preset_target_arch = arch_sh1_up & ~(arch_sh_sp_fpu|arch_sh_dp_fpu);
+      preset_target_arch = arch_sh_up & ~(arch_sh_sp_fpu|arch_sh_dp_fpu);
       break;
 
     case OPTION_RENESAS:
@@ -3092,11 +3092,11 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_ISA:
       if (strcasecmp (arg, "dsp") == 0)
-	preset_target_arch = arch_sh1_up & ~(arch_sh_sp_fpu|arch_sh_dp_fpu);
+	preset_target_arch = arch_sh_up & ~(arch_sh_sp_fpu|arch_sh_dp_fpu);
       else if (strcasecmp (arg, "fp") == 0)
-	preset_target_arch = arch_sh1_up & ~arch_sh_has_dsp;
+	preset_target_arch = arch_sh_up & ~arch_sh_has_dsp;
       else if (strcasecmp (arg, "any") == 0)
-	preset_target_arch = arch_sh1_up;
+	preset_target_arch = arch_sh_up;
 #ifdef HAVE_SH64
       else if (strcasecmp (arg, "shmedia") == 0)
 	{

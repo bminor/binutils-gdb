@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
-# dejagnu@gnu.org
+# binutils@sources.redhat.com
 
 # This scripts tests of all available SH architectures with all other SH
 # architectures. It ensures that those combinations which should not work
@@ -26,12 +26,13 @@
 # It looks for files in the same directory as this file named sh*.s .
 # Each file must contain one or more instructions which uniquely identifies
 # that architecture. The architecture name is inferred from the file name.
+# It is best to use the same files used by the assembler testsuite.
 #
 # It also creates another architecture named 'sh-unknown' by modifying
 # another arch type (there is no way to assemble such an arch) in order
 # to test what the linker would do with an older object file.
 #
-# The script generates the architecture  permutations automatically,
+# The script generates the architecture permutations automatically,
 # but it reads the expected results from the file arch_expected.txt (also
 # found in the same directory as this script).
 #
@@ -75,9 +76,12 @@ proc test_arch { file1 file2 arch resultfile } {
     set name2 [file tail $file2]
     set rootname2 [file rootname $name2]
 
-    set result [default_ld_simple_link $LD "${rootname1}_${rootname2}.o" "$file1 $file2"]
+    # This must use -r to prevent LD trying to relocate the (unrealistic) file
+    send_log "$LD -r -o ${rootname1}_${rootname2}.o $file1 $file2\n"
+    catch "exec $LD -r -o ${rootname1}_${rootname2}.o $file1 $file2" ld_output
+    send_log $ld_output
 
-    if {$result == 1} then {
+    if {[string equal $ld_output ""] == 1} then {
 	pass "$rootname1 file should link with $rootname2 file"
 
 	set result [get_sh_arch "${rootname1}_${rootname2}.o"]
@@ -113,9 +117,12 @@ proc test_arch_error { file1 file2 resultfile} {
     set name2 [file tail $file2]
     set rootname2 [file rootname $name2]
 
-    set result [default_ld_simple_link $LD "${rootname1}_${rootname2}.o" "$file1 $file2"]
+    # This must use -r to prevent LD trying to relocate the (unrealistic) file
+    send_log "$LD -r -o ${rootname1}_${rootname2}.o $file1 $file2\n"
+    catch "exec $LD -r -o ${rootname1}_${rootname2}.o $file1 $file2" ld_output
+    send_log $ld_output
 
-    if {$result == 1} then {
+    if {[string equal $ld_output ""] == 1} then {
 	fail "$rootname1 file should NOT link with $rootname2 file"
 	puts $resultfile [format "%-20s %-20s [get_sh_arch ${rootname1}_${rootname2}.o]" $file1 $file2]
     } else {

@@ -1,3 +1,31 @@
+2005-01-17  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gas/sh/arch/arch.exp: Correct the email address.
+	Correct a few comment typos.
+	Add new tests to ensure that the assembler will only accept
+	instructions valid in each architecture and vice-versa.
+	* gas/sh/arch/arch_expected.txt: Update/Correct the test results.
+	* gas/sh/arch/sh2a-nofpu-or-sh3-nommu.s: Regenerate.
+	* gas/sh/arch/sh2a-nofpu-or-sh4-nommu-nofpu.s: Regenerate.
+	* gas/sh/arch/sh2a-nofpu.s: Generate new file.
+	* gas/sh/arch/sh2a-or-sh3e.s: Regenerate.
+	* gas/sh/arch/sh2a-or-sh4.s: Regenerate.
+	* gas/sh/arch/sh2a.s: Generate new file.
+	* gas/sh/arch/sh2e.s: Regenerate.
+	* gas/sh/arch/sh2.s: Regenerate.
+	* gas/sh/arch/sh3-dsp.s: Regenerate.
+	* gas/sh/arch/sh3e.s: Regenerate.
+	* gas/sh/arch/sh3-nommu.s: Regenerate.
+	* gas/sh/arch/sh3.s: Regenerate.
+	* gas/sh/arch/sh4al-dsp.s: Regenerate.
+	* gas/sh/arch/sh4a-nofpu.s: Regenerate.
+	* gas/sh/arch/sh4a.s: Regenerate.
+	* gas/sh/arch/sh4-nofpu.s: Regenerate.
+	* gas/sh/arch/sh4-nommu-nofpu.s: Regenerate.
+	* gas/sh/arch/sh4.s: Regenerate.
+	* gas/sh/arch/sh-dsp.s: Regenerate.
+	* gas/sh/arch/sh.s: Regenerate.
+
 2005-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386/i386.exp: Run "sib".

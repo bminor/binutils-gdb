@@ -1,3 +1,14 @@
+2005-01-17  Andrew Stubbs  <andrew.stubbs@st.com>
+	    Nick Clifton   <nickc@redhat.com>
+
+	* cpu-sh.c (bfd_to_arch_table): Change arch_sh1_up to arch_sh_up,
+	arch__sh4_nofp_up to arch_sh4_nofpu_up and arch_sh4a_nofp_up to
+	arch_sh4a_nofpu_up in order to match the external names and make the
+	testsuite's job easier.
+	* archuires.c: Rename bfd_mach_sh2a_fake? to more meaningful
+	names.
+	* bfd-in2.h: Regenerate.
+
 2005-01-15  Andrew Cagney  <cagney@gnu.org>
 
 	* bfd.m4: New file.

@@ -1,3 +1,31 @@
+2005-01-17  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* ld-sh/arch/arch.exp: Correct the email address.
+	Correct a few comment typos.
+	(test_arch,test_arch_error): Use 'ld -r' to avoid illegal
+	relocations killing the test.
+	* ld-sh/arch/arch_expected.txt: Update/Correct the test results.
+	* ld-sh/arch/sh2a-nofpu-or-sh3-nommu.s: Regenerate.
+	* ld-sh/arch/sh2a-nofpu-or-sh4-nommu-nofpu.s: Regenerate.
+	* ld-sh/arch/sh2a-nofpu.s: Generate new file.
+	* ld-sh/arch/sh2a-or-sh3e.s: Regenerate.
+	* ld-sh/arch/sh2a-or-sh4.s: Regenerate.
+	* ld-sh/arch/sh2a.s: Generate new file.
+	* ld-sh/arch/sh2e.s: Regenerate.
+	* ld-sh/arch/sh2.s: Regenerate.
+	* ld-sh/arch/sh3-dsp.s: Regenerate.
+	* ld-sh/arch/sh3e.s: Regenerate.
+	* ld-sh/arch/sh3-nommu.s: Regenerate.
+	* ld-sh/arch/sh3.s: Regenerate.
+	* ld-sh/arch/sh4al-dsp.s: Regenerate.
+	* ld-sh/arch/sh4a-nofpu.s: Regenerate.
+	* ld-sh/arch/sh4a.s: Regenerate.
+	* ld-sh/arch/sh4-nofpu.s: Regenerate.
+	* ld-sh/arch/sh4-nommu-nofpu.s: Regenerate.
+	* ld-sh/arch/sh4.s: Regenerate.
+	* ld-sh/arch/sh-dsp.s: Regenerate.
+	* ld-sh/arch/sh.s: Regenerate.
+
 2005-01-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/shared-1.d: Update for changed dynamic syms.
