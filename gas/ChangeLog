@@ -1,4 +1,15 @@
+Thu May  5 17:25:38 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/obj-coff*.*: Merged coffbfd versions into coff versions,
+	with a single "#ifdef BFD_ASSEMBLER" controlling most of it for
+	now.  Deleted obj-coffbfd.* files.
+	* configure.in: Always use obj-coff.* for COFF targets.
+
 Wed May  4 13:34:11 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/te-dpx2.h (TARGET_FORMAT, REGISTER_PREFIX_OPTIONAL):
+	Define.
+	* configure.in (m68k-bull-sysv3*): Enable.
 
 	* config/coff_gnu.h: Deleted.
 
