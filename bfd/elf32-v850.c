@@ -26,6 +26,9 @@ static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void v850_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+static bfd_reloc_status_type bfd_elf32_v850_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+
 
 
 /* Try to minimize the amount of space occupied by relocation tables
@@ -71,7 +74,7 @@ static reloc_howto_type elf_v850_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 bfd_elf32_v850_reloc,	/* special_function */
 	 "R_V850_9_PCREL",	/* name */
 	 false,			/* partial_inplace */
 	 0x00ffffff,		/* src_mask */
@@ -86,7 +89,7 @@ static reloc_howto_type elf_v850_howto_table[] =
 	 true,			/* pc_relative */
 	 7,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 bfd_elf32_v850_reloc,	/* special_function */
 	 "R_V850_22_PCREL",	/* name */
 	 false,			/* partial_inplace */
 	 0x07ffff80,		/* src_mask */
@@ -99,9 +102,9 @@ static reloc_howto_type elf_v850_howto_table[] =
          1,                     /* size (0 = byte, 1 = short, 2 = long) */
          16,                    /* bitsize */
          false,                 /* pc_relative */
-         16,                    /* bitpos */
+         0,                    /* bitpos */
          complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf_generic_reloc, /* special_function */
+         bfd_elf32_v850_reloc, /* special_function */
          "R_V850_HI16_S",       /* name */
          true,                  /* partial_inplace */
          0xffff,                /* src_mask */
@@ -114,9 +117,9 @@ static reloc_howto_type elf_v850_howto_table[] =
          1,                     /* size (0 = byte, 1 = short, 2 = long) */
          16,                    /* bitsize */
          false,                 /* pc_relative */
-         16,                    /* bitpos */
+         0,                    /* bitpos */
          complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf_generic_reloc, /* special_function */
+         bfd_elf32_v850_reloc, /* special_function */
          "R_V850_HI16",         /* name */
          true,                  /* partial_inplace */
          0xffff,                /* src_mask */
@@ -129,7 +132,7 @@ static reloc_howto_type elf_v850_howto_table[] =
          1,                     /* size (0 = byte, 1 = short, 2 = long) */
          16,                    /* bitsize */
          false,                 /* pc_relative */
-         16,                     /* bitpos */
+         0,                     /* bitpos */
          complain_overflow_dont,/* complain_on_overflow */
          bfd_elf_generic_reloc, /* special_function */
          "R_V850_LO16",         /* name */
@@ -148,8 +151,8 @@ static reloc_howto_type elf_v850_howto_table[] =
          complain_overflow_dont,/* complain_on_overflow */
          bfd_elf_generic_reloc, /* special_function */
          "R_V850_32",         /* name */
-         false,                  /* partial_inplace */
-         0,                /* src_mask */
+         true,                  /* partial_inplace */
+         0xffffffff,                /* src_mask */
          0xffffffff,                /* dst_mask */
          false),                /* pcrel_offset */
 
@@ -163,8 +166,8 @@ static reloc_howto_type elf_v850_howto_table[] =
          complain_overflow_dont,/* complain_on_overflow */
          bfd_elf_generic_reloc, /* special_function */
          "R_V850_16",         /* name */
-         false,                  /* partial_inplace */
-         0,                /* src_mask */
+         true,                  /* partial_inplace */
+         0xffff,                /* src_mask */
          0xffff,                /* dst_mask */
          false),                /* pcrel_offset */
 
@@ -178,8 +181,8 @@ static reloc_howto_type elf_v850_howto_table[] =
          complain_overflow_dont,/* complain_on_overflow */
          bfd_elf_generic_reloc, /* special_function */
          "R_V850_8",         /* name */
-         false,                  /* partial_inplace */
-         0,                /* src_mask */
+         true,                  /* partial_inplace */
+         0xff,                /* src_mask */
          0xff,                /* dst_mask */
          false),                /* pcrel_offset */
 };
@@ -238,8 +241,110 @@ v850_info_to_howto_rel (abfd, cache_ptr, dst)
   cache_ptr->howto = &elf_v850_howto_table[r_type];
 }
 
-#define TARGET_BIG_SYM		bfd_elf32_v850_vec
-#define TARGET_BIG_NAME		"elf32-v850"
+static bfd_reloc_status_type
+bfd_elf32_v850_reloc (abfd, reloc, symbol, data, isection, obfd, err)
+     bfd *abfd;
+     arelent *reloc;
+     asymbol *symbol;
+     PTR data;
+     asection *isection;
+     bfd *obfd;
+     char **err;
+{
+  if (obfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc->howto->partial_inplace
+	  || reloc->addend == 0))
+    {
+      reloc->address += isection->output_offset;
+      return bfd_reloc_ok;
+    }
+  else if (obfd != NULL)
+    {
+      return bfd_reloc_continue;
+    }
+
+  /* We handle final linking of some relocs ourselves.  */
+    {
+      long relocation, insn;
+
+      /* Is the address of the relocation really within the section?  */
+      if (reloc->address > isection->_cooked_size)
+	return bfd_reloc_outofrange;
+
+      /* Work out which section the relocation is targetted at and the
+	 initial relocation command value.  */
+
+      /* Get symbol value.  (Common symbols are special.)  */
+      if (bfd_is_com_section (symbol->section))
+	relocation = 0;
+      else
+	relocation = symbol->value;
+
+      /* Convert input-section-relative symbol value to absolute + addend.  */
+      relocation += symbol->section->output_section->vma;
+      relocation += symbol->section->output_offset;
+      relocation += reloc->addend;
+
+      if (reloc->howto->pc_relative == true)
+	{
+	  /* Here the variable relocation holds the final address of the
+	     symbol we are relocating against, plus any addend.  */
+	  relocation -= isection->output_section->vma + isection->output_offset;
+
+	  /* Deal with pcrel_offset */
+	  relocation -= reloc->address;
+	}
+
+      /* I've got no clue... */
+      reloc->addend = 0;	
+
+      if (reloc->howto->type == R_V850_22_PCREL)
+	{
+	  if (relocation > 0x1ffff || relocation < -0x200000)
+	    return bfd_reloc_overflow;
+
+	  if ((relocation % 2) != 0)
+	    return bfd_reloc_dangerous;
+
+	  insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc->address);
+	  insn |= (((relocation & 0xfffe) << 16)
+		   | ((relocation & 0x3f0000) >> 16));
+	  bfd_put_32 (abfd, insn, (bfd_byte *)data + reloc->address);
+	  return bfd_reloc_ok;
+	}
+      else if (reloc->howto->type == R_V850_9_PCREL)
+	{
+	  if (relocation > 0xff || relocation < -0x100)
+	    return bfd_reloc_overflow;
+
+	  if ((relocation % 2) != 0)
+	    return bfd_reloc_dangerous;
+
+	  insn = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
+	  insn |= ((relocation & 0x1f0) << 7) | ((relocation & 0x0e) << 3);
+	  bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
+	  return bfd_reloc_ok;
+	}
+      else if (reloc->howto->type == R_V850_HI16_S)
+	{
+	  relocation = (relocation >> 16) + ((relocation & 0x8000) != 0);
+	  bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
+	  return bfd_reloc_ok;
+	}
+      else if (reloc->howto->type == R_V850_HI16)
+	{
+	  relocation = (relocation >> 16);
+	  bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
+	  return bfd_reloc_ok;
+	}
+    }
+
+  return bfd_reloc_continue;
+}
+
+#define TARGET_LITTLE_SYM		bfd_elf32_v850_vec
+#define TARGET_LITTLE_NAME		"elf32-v850"
 #define ELF_ARCH		bfd_arch_v850
 #define ELF_MACHINE_CODE	EM_CYGNUS_V850
 #define ELF_MAXPAGESIZE		0x1000

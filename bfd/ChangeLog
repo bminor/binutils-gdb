@@ -5,7 +5,6 @@ Tue Sep  3 12:16:20 1996  Doug Evans  <dje@canuck.cygnus.com>
 	* config.bfd (sparclet-*-aout*): Add case.
 	* configure.in (sparcle_aout_vec): Add case.
 	* configure: Regenerated.
-	* libaout.h (machine_type): Add M_SPARCLET_LE.
 	* targets.c (sparcle_aout_vec): Declare.
 	(bfd_target_vector): Add sparcle_aout_vec.
 	* aout-sparcle.c: New file.
@@ -13,7 +12,10 @@ Tue Sep  3 12:16:20 1996  Doug Evans  <dje@canuck.cygnus.com>
 start-sanitize-v850
 Tue Sep  3 00:57:02 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* elf32-v850.c (bfd_elf3_v850_reloc): New function for
+	* elf32-v850.c (bfd_elf32_v850_reloc): Fix handling of
+	low order sign bit propogation for R_V850_HI16_S.
+
+	* elf32-v850.c (bfd_elf32_v850_reloc): New function for
 	handling V850 specific relocs.
 	(elf_v850_howto_table): Use the new function for some
 	relocations.  Twiddle masks & shifts for some relocs.
