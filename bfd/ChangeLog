@@ -1,3 +1,10 @@
+1999-06-26  David Mosberger  <davidm@hpl.hp.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add member dwarf_line_buffer.
+	(decode_line_info): Add variable STASH and initialize it to point
+	to the per-bfd dwarf2_debug info.  Remove static variable
+	dwarf_line_buffer and use stash->dwarf_line_buffer in its place.
+
 1999-06-26  Ian Lance Taylor  <ian@zembu.com>
 
 	* elflink.h (elf_link_output_extsym): It's OK for a -Bsymbolic

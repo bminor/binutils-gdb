@@ -99,6 +99,9 @@ struct dwarf2_debug {
 
   /* Length of the loaded .debug_abbrev section. */
   unsigned long dwarf_abbrev_size;
+
+  /* Buffer for decode_line_info.  */
+  char *dwarf_line_buffer;
 };
 
 
@@ -710,7 +713,7 @@ decode_line_info (unit)
 {
   bfd *abfd = unit->abfd;
 
-  static char* dwarf_line_buffer = 0;
+  struct dwarf2_debug *stash;
 
   struct line_info_table* table;
 
@@ -727,7 +730,9 @@ decode_line_info (unit)
   bfd_vma hi_pc = 0, lo_pc = ~ (bfd_vma) 0;
 #endif
 
-  if (! dwarf_line_buffer)
+  stash = elf_tdata (abfd)->dwarf2_find_line_info;
+
+  if (! stash->dwarf_line_buffer)
     {
       asection *msec;
       unsigned long size;
@@ -741,7 +746,7 @@ decode_line_info (unit)
 	}
       
       size = bfd_get_section_size_before_reloc (msec);
-      dwarf_line_buffer = (char*) bfd_alloc (abfd, size);
+      stash->dwarf_line_buffer = (char *) bfd_alloc (abfd, size);
       if (! dwarf_line_buffer)
 	return 0;
 
@@ -768,7 +773,7 @@ decode_line_info (unit)
   table->files = NULL;
   table->last_line = NULL;
 
-  line_ptr = dwarf_line_buffer + unit->line_offset;
+  line_ptr = stash->dwarf_line_buffer + unit->line_offset;
 
   /* read in the prologue */
   lh.total_length = read_4_bytes (abfd, line_ptr);
