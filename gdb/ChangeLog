@@ -1,5 +1,12 @@
 2001-06-06  Keith Seitz  <keiths@redhat.com>
 
+	* gdb-events.sh (function_list): Add tracepoint_create,
+	tracepoint_delete, and tracepoint_modify events.
+	* gdb-events.c: Regenerated.
+	* gdb-events.h: Regenerated.
+
+2001-06-06  Keith Seitz  <keiths@redhat.com>
+
 	* gdb-events.sh: Update copyrights.
 	Change free to xfree.
 	* gdb-events.c: Regenerated.
