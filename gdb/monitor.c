@@ -43,6 +43,7 @@
 #include "defs.h"
 #include "gdbcore.h"
 #include "target.h"
+#include "exceptions.h"
 #include <signal.h>
 #include <ctype.h>
 #include "gdb_string.h"

@@ -1,3 +1,31 @@
+2005-01-12  Andrew Cagney  <cagney@gnu.org>
+
+	* exceptions.h (enum return_reason, RETURN_MASK)
+	(RETURN_MASK_QUIT, RETURN_MASK_ERROR, RETURN_MASK_ALL)
+	(return_mask, throw_exception, catch_exceptions_ftype)
+	(catch_exceptions_with_msg, catch_errors_ftype, catch_errors)
+	(catch_command_errors_ftype, catch_command_errors): Move to
+	exceptions.h.
+	* exceptions.c, exceptions.h: New files.
+	* top.c: Do not include <setjmp.h>.
+	(SIGJMP_BUF, SIGSETJMP, SIGLONGJMP, catch_return)
+	(throw_exception, catcher, catch_exceptions)
+	(catch_exceptions_with_msg, struct catch_errors_args)
+	(do_catch_errors, catch_errors, struct captured_command_args)
+	(do_captured_command, catch_command_errors): Move to exceptions.c.
+	* wrapper.c, wince.c, win32-nat.c, utils.c: Include "exceptions.h".
+	* tui/tui-interp.c, top.c, thread.c, symmisc.c: Ditto.
+	* symfile-mem.c, stack.c, solib.c, rs6000-nat.c: Ditto.
+	* remote-sds.c, remote-mips.c, remote-fileio.c: Ditto.
+	* remote-e7000.c, objc-lang.c, ocd.c: Ditto.
+	* remote.c, nto-procfs.c, monitor.c, mi/mi-main.c: Ditto.
+	* main.c, m32r-rom.c, infrun.c, inf-loop.c: Ditto.
+	* hppa-hpux-tdep.c, frame.c, event-top.c, event-loop.c: Ditto.
+	* corelow.c, corefile.c, cli/cli-interp.c, breakpoint.c: Ditto.
+	* ada-valprint.c, ada-lang.c: Ditto.
+	* Makefile.in (HFILES_NO_SRCDIR, COMMON_OBS): Add exceptions.h and
+	exceptions.o.  Update all dependencies.
+	
 2005-01-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-fbsd.h: Update copyright year.

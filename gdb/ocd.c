@@ -29,6 +29,7 @@
 #include "bfd.h"
 #include "symfile.h"
 #include "target.h"
+#include "exceptions.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"

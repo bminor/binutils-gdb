@@ -33,6 +33,7 @@
 #include "gdb_dirent.h"
 #include <sys/netmgr.h>
 
+#include "exceptions.h"
 #include "gdb_string.h"
 #include "gdbcore.h"
 #include "inferior.h"

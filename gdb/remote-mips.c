@@ -31,6 +31,7 @@
 #include "gdbcore.h"
 #include "serial.h"
 #include "target.h"
+#include "exceptions.h"
 #include "remote-utils.h"
 #include "gdb_string.h"
 #include "gdb_stat.h"

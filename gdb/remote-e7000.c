@@ -43,6 +43,7 @@
 #include "value.h"
 #include "command.h"
 #include "gdb_string.h"
+#include "exceptions.h"
 #include "gdbcmd.h"
 #include <sys/types.h>
 #include "serial.h"

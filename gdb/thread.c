@@ -30,6 +30,7 @@
 #include "value.h"
 #include "target.h"
 #include "gdbthread.h"
+#include "exceptions.h"
 #include "command.h"
 #include "gdbcmd.h"
 #include "regcache.h"

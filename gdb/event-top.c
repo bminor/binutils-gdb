@@ -28,6 +28,7 @@
 #include "event-top.h"
 #include "interps.h"
 #include <signal.h>
+#include "exceptions.h"
 
 /* For dont_repeat() */
 #include "gdbcmd.h"

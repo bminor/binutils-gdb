@@ -31,6 +31,7 @@
 #include "tui/tui-win.h"
 #include "tui/tui.h"
 #include "tui/tui-io.h"
+#include "exceptions.h"
 
 /* Set to 1 when the TUI mode must be activated when we first start gdb.  */
 static int tui_start_enabled = 0;

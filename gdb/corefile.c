@@ -35,6 +35,7 @@
 #include "dis-asm.h"
 #include "gdb_stat.h"
 #include "completer.h"
+#include "exceptions.h"
 
 /* Local function declarations.  */
 

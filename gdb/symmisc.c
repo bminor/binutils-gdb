@@ -30,6 +30,7 @@
 #include "breakpoint.h"
 #include "command.h"
 #include "gdb_obstack.h"
+#include "exceptions.h"
 #include "language.h"
 #include "bcache.h"
 #include "block.h"

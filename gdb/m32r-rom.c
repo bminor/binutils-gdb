@@ -28,6 +28,7 @@
 #include "defs.h"
 #include "gdbcore.h"
 #include "target.h"
+#include "exceptions.h"
 #include "monitor.h"
 #include "serial.h"
 #include "symtab.h"

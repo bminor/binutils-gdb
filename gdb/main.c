@@ -28,6 +28,7 @@
 #include "symfile.h"
 #include "gdbcore.h"
 
+#include "exceptions.h"
 #include "getopt.h"
 
 #include <sys/types.h>

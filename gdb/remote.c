@@ -30,6 +30,7 @@
 #include "inferior.h"
 #include "bfd.h"
 #include "symfile.h"
+#include "exceptions.h"
 #include "target.h"
 /*#include "terminal.h" */
 #include "gdbcmd.h"

@@ -43,6 +43,7 @@
 #include "stack.h"
 #include "gdb_assert.h"
 #include "dictionary.h"
+#include "exceptions.h"
 #include "reggroups.h"
 #include "regcache.h"
 

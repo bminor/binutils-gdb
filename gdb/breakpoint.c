@@ -51,6 +51,7 @@
 #include "block.h"
 #include "solist.h"
 #include "observer.h"
+#include "exceptions.h"
 
 #include "gdb-events.h"
 

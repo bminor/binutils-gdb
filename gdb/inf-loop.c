@@ -26,6 +26,7 @@
 #include "event-top.h"
 #include "inf-loop.h"
 #include "remote.h"
+#include "exceptions.h"
 
 static int fetch_inferior_event_wrapper (gdb_client_data client_data);
 static void complete_execution (void);

@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include "frame.h"
 #include "inferior.h"
+#include "exceptions.h"
 #include "bfd.h"
 #include "symfile.h"
 #include "target.h"

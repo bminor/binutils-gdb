@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include "gdb_string.h"
 #include "event-top.h"
+#include "exceptions.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_get_command_dimension.   */

@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ada-lang.h"
 #include "c-lang.h"
 #include "infcall.h"
+#include "exceptions.h"
 
 /* Encapsulates arguments to ada_val_print.  */
 struct ada_val_print_args

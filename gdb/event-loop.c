@@ -35,6 +35,7 @@
 #include "gdb_string.h"
 #include <errno.h>
 #include <sys/time.h>
+#include "exceptions.h"
 
 typedef struct gdb_event gdb_event;
 typedef void (event_handler_func) (int);

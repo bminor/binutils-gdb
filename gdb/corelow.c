@@ -45,6 +45,7 @@
 #include "readline/readline.h"
 #include "observer.h"
 #include "gdb_assert.h"
+#include "exceptions.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0

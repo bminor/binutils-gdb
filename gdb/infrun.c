@@ -28,6 +28,7 @@
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
+#include "exceptions.h"
 #include "breakpoint.h"
 #include "gdb_wait.h"
 #include "gdbcore.h"

@@ -41,6 +41,7 @@
 #include "gdbcmd.h"
 #include "observer.h"
 #include "objfiles.h"
+#include "exceptions.h"
 
 static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 
