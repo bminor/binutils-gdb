@@ -47,6 +47,15 @@ ldindr.h
 ldfile.h
 ldgld.c
 ldgld.sc
+ldgldi386v.sc
+ldgldi386vUr.sc
+ldgldi386vr.sc
+ldgldm68kv.sc
+ldgldm68kvUr.sc
+ldgldm68kvr.sc
+ldgldm88kbcs.sc
+ldgldi386v.c
+ldgldm68kv.c
 ldgld68k.c
 ldgld68k.sc
 ldgld68kUr.sc
@@ -92,7 +101,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.8  1991/09/04 04:21:09  rich
+# Revision 1.9  1991/09/19 21:04:07  steve
+# Modifications from James Tsillas for 386 and 68k machines
+#
+# Revision 1.8  1991/09/04  04:21:09  rich
 # Don't keep ldgram.h.  Isn't even checked in.
 #
 # Revision 1.7  1991/09/03  21:14:13  steve
