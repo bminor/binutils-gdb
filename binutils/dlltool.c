@@ -2304,6 +2304,10 @@ main (ac, av)
   program_name = av[0];
   oav = av;
 
+  setlocale (LC_MESSAGES, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+
   while ((c = getopt_long (ac, av, "xcz:S:R:A:puaD:l:e:nkvbUh?m:yd:", long_options, 0)) 
 	 != EOF)
     {

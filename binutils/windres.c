@@ -846,6 +846,10 @@ main (argc, argv)
   int language;
   struct res_directory *resources;
 
+  setlocale (LC_MESSAGES, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+
   program_name = argv[0];
   xmalloc_set_program_name (program_name);
 

@@ -2155,6 +2155,10 @@ main (argc, argv)
      int argc;
      char *argv[];
 {
+  setlocale (LC_MESSAGES, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+
   program_name = argv[0];
   xmalloc_set_program_name (program_name);
 

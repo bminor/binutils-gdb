@@ -2627,6 +2627,10 @@ main (argc, argv)
   char *target = default_target;
   boolean seenflag = false;
 
+  setlocale (LC_MESSAGES, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+
   program_name = *argv;
   xmalloc_set_program_name (program_name);
 

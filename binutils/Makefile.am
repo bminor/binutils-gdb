@@ -1,5 +1,8 @@
 ## Process this file with automake to generate Makefile.in
 
+## FIXME: Work around apparent bug in automake.
+INTLLIBS = @INTLLIBS@
+
 AUTOMAKE_OPTIONS = cygnus dejagnu
 
 SUBDIRS = po
@@ -64,7 +67,7 @@ INCDIR	= $(BASEDIR)/include
 
 DEP = mkdep
 
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @HDEFINES@
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
 HFILES = arsup.h bucomm.h budbg.h coffgrok.h debug.h nlmconv.h dlltool.h \
 	windres.h

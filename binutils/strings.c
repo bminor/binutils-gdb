@@ -122,6 +122,10 @@ main (argc, argv)
   int exit_status = 0;
   boolean files_given = false;
 
+  setlocale (LC_MESSAGES, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+
   program_name = argv[0];
   xmalloc_set_program_name (program_name);
   string_min = -1;

@@ -1917,8 +1917,12 @@ main (ac, av)
   };
   char **matching;
   char *input_file;
-
   char *output_file;
+
+  setlocale (LC_MESSAGES, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+
   program_name = av[0];
   xmalloc_set_program_name (program_name);
 

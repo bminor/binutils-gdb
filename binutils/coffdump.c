@@ -485,6 +485,10 @@ main (ac, av)
       { NULL, no_argument, 0, 0 }
     };
 
+  setlocale (LC_MESSAGES, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+
   program_name = av[0];
   xmalloc_set_program_name (program_name);
 

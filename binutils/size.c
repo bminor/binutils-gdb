@@ -107,6 +107,10 @@ main (argc, argv)
   int temp;
   int c;
 
+  setlocale (LC_MESSAGES, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+
   program_name = *argv;
   xmalloc_set_program_name (program_name);
 
