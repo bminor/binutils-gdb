@@ -1,5 +1,5 @@
 /* Convex stuff for GDB.
-   Copyright (C) 1990 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -760,18 +760,15 @@ comm_registers_info (arg)
 
   if (arg)
     {
-      if (sscanf (arg, "0x%x", &regnum) == 1
-	  || sscanf (arg, "%d", &regnum) == 1)
-	{
-	  if (regnum > 0)
-	    regnum &= ~0x8000;
-	}
-      else if (sscanf (arg, "$c%d", &regnum) == 1)
+             if (sscanf (arg, "$c%d", &regnum) == 1) {
 	;
-      else if (sscanf (arg, "$C%d", &regnum) == 1)
+      } else if (sscanf (arg, "$C%d", &regnum) == 1) {
 	;
-      else
+      } else {
 	regnum = parse_and_eval_address (arg);
+	if (regnum > 0)
+	  regnum &= ~0x8000;
+      }
 
       if (regnum >= 64)
 	error ("%s: invalid register name.", arg);
