@@ -1,3 +1,30 @@
+Fri Oct 29 16:30:36 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	LynxOS support:
+	* configure.in: Change *-*-lynx* to *-*-lynxos*, add
+	sparc-*-lynxos*.
+	* Makefile.in (ALLDEPFILES): Add m68kly-nat.c, sparcly-nat.c.
+	Rename i386lynx-nat.[co] to i386ly-nat.[co].
+	(ALLCONFIG): Add config/{m68k,sparc}/{m68k,sparc}lynx.m[ht].
+	(m68kly-nat.o, sparcly-nat.o): Add rules.
+	* i386ly-tdep.c: Cosmetics.
+	* i386lynx-nat.c: Removed.
+	* i386ly-nat.c: New file, was i386lynx-nat.c.
+	* m68kly-nat.c: New file.
+	* sparcly-nat.c: New file.
+	* config/xm-lynx.h: New file, cpu-independent host info.
+	* config/i386/i386lynx.mh: Changes for consistency.
+	* config/i386/i386lynx.mt: Ditto.
+	* config/i386/tm-i386lynx.h: Ditto.
+	* config/i386/nm-i386lynx.h: Ditto.
+	* config/i386/xm-i386lynx.h: Include config/xm-lynx.h.
+	* config/m68k/m68klynx.mh, config/m68k/m68klynx.mt,
+	config/m68k/tm-m68klynx.h, config/m68k/nm-m68klynx.h,
+	config/m68k/xm-m68klynx.h: New files, M68K LynxOS support.
+	* config/sparc/sparclynx.mh, config/sparc/sparclynx.mt,
+	config/sparc/tm-sparclynx.h, config/sparc/nm-sparclynx.h,
+	config/sparc/xm-sparclynx.h: New files, Sparc LynxOS support.
+
 Fri Oct 29 08:11:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* defs.h, findvar.c (extract_floating, store_floating): New functions.

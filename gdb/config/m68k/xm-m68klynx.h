@@ -1,4 +1,4 @@
-/* Host-dependent definitions for Intel 386 running LynxOS.
+/* Host-dependent definitions for Motorola 680x0 running LynxOS, for GDB.
    Copyright 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
+#define HOST_BYTE_ORDER BIG_ENDIAN
 
 /* Get generic LynxOS host definitions. */
 

@@ -1,4 +1,4 @@
-/* Native-dependent definitions for Intel 386 running LynxOS.
+/* Native-dependent definitions for Sparc running LynxOS.
    Copyright 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -17,8 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef NM_I386LYNX_H
-#define NM_I386LYNX_H
+#ifndef NM_SPARCLYNX_H
+#define NM_SPARCLYNX_H
 
 #include <sys/conf.h>
 #include <sys/kernel.h>
@@ -38,18 +38,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #undef FLOAT_INFO	/* No float info yet */
 
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = i386_register_u_addr ((blockend),(regno));
-
-extern int
-i386_register_u_addr PARAMS ((int, int));
-
 #define PTRACE_ARG3_TYPE char*
 
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 #define FETCH_INFERIOR_REGISTERS
 
-/* Thread ID of stopped thread */
+/* Thread ID of stopped thread.  */
 
 #define WIFTID(x) (((union wait *)&x)->w_tid)
 
@@ -57,13 +51,14 @@ i386_register_u_addr PARAMS ((int, int));
 
 extern int child_wait PARAMS ((int pid, int *status));
 
+#if 0 /* need sparcly-nat.c to define this */
 /* Lynx needs a special definition of this so that we can
    print out the pid and thread number seperatly.  */
 
 #undef target_pid_to_str
+#define target_pid_to_str(PID) sparclynx_pid_to_str (PID)
 
-#define target_pid_to_str(PID) \
-	i386lynx_pid_to_str (PID)
-extern char *i386lynx_pid_to_str PARAMS ((int pid));
+extern char *sparclynx_pid_to_str PARAMS ((int pid));
+#endif
 
-#endif /* NM_I386LYNX_H */
+#endif /* NM_SPARCLYNX_H */

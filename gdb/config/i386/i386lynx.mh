@@ -1,8 +1,8 @@
-# Host: Intel 386 running Lynx
-XDEPFILES= 
-NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o i386lynx-nat.o
+# Host: Intel 386 running LynxOS
 XM_FILE= xm-i386lynx.h
+XDEPFILES= 
 NAT_FILE= nm-i386lynx.h
+NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o i386ly-nat.o
 REGEX=regex.o
 REGEX1=regex.o
 GDBSERVER_LIBS= -lbsd

@@ -1,4 +1,4 @@
-/* Host-dependent definitions for Intel 386 running LynxOS.
+/* Macro definitions for Sparc running under LynxOS.
    Copyright 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -17,8 +17,15 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
+#ifndef TM_SPARCLYNX_H
+#define TM_SPARCLYNX_H
 
-/* Get generic LynxOS host definitions. */
+/* Use generic Sparc definitions. */
 
-#include "xm-lynx.h"
+#include "sparc/tm-sparc.h"
+
+/* Include COFF shared library support.  */
+
+#include "coff-solib.h"
+
+#endif /* TM_SPARCLYNX_H */

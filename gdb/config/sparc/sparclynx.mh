@@ -1,0 +1,9 @@
+# Host: Sparc running LynxOS
+XM_FILE= xm-sparclynx.h
+XDEPFILES= 
+NAT_FILE= nm-sparclynx.h
+NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o sparcly-nat.o
+REGEX=regex.o
+REGEX1=regex.o
+GDBSERVER_LIBS= -lbsd
+GDBSERVER_DEPFILES= low-lynx.o

@@ -1,6 +1,5 @@
-/* Target-dependent code for Lynx running on i386's, for GDB.
-   Copyright 1988, 1989, 1991, 1992, 1993
-   Free Software Foundation, Inc.
+/* Target-dependent code for Intel 386 running LynxOS.
+   Copyright 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
