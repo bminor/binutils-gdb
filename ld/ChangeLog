@@ -1,3 +1,10 @@
+2004-11-26  Melissa Mears  <asterisk@graces.dricas.com>
+
+	* emultempl/pe.em: Add --subsystem:xbox as well as
+	--subsystem:%d.
+	* ld.texinfo: (ld_options): Document acceptance of subsystem xbox
+	and numeric subsystems.
+
 2004-11-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_name): Correct PR 338 fix.

@@ -2197,8 +2197,9 @@ committed.
 @itemx --subsystem @var{which}:@var{major}.@var{minor}
 Specifies the subsystem under which your program will execute.  The
 legal values for @var{which} are @code{native}, @code{windows},
-@code{console}, and @code{posix}.  You may optionally set the
-subsystem version also.
+@code{console}, @code{posix}, and @code{xbox}.  You may optionally set
+the subsystem version also.  Numeric values are also accepted for
+@var{which}.
 [This option is specific to the i386 PE targeted port of the linker]
 
 @end table

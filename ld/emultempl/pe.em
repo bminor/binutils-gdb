@@ -372,8 +372,13 @@ static void
 set_pe_subsystem (void)
 {
   const char *sver;
+  const char *entry;
+  const char *initial_symbol_char;
+  char *end;
   int len;
   int i;
+  int subsystem;
+  unsigned long temp_subsystem;
   static const struct
     {
       const char *name;
@@ -382,29 +387,23 @@ set_pe_subsystem (void)
     }
   v[] =
     {
-      { "native", 1, "NtProcessStartup" },
-#if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
+      { "native",  1, "NtProcessStartup" },
       { "windows", 2, "WinMainCRTStartup" },
-#else
-      { "windows", 2, "WinMainCRTStartup" },
-#endif
       { "console", 3, "mainCRTStartup" },
-#if 0
-      /* The Microsoft linker does not recognize this.  */
-      { "os2", 5, "" },
-#endif
-      { "posix", 7, "__PosixProcessStartup"},
-      { "wince", 9, "_WinMainCRTStartup" },
-      { 0, 0, 0 }
+      { "posix",   7, "__PosixProcessStartup"},
+      { "wince",   9, "_WinMainCRTStartup" },
+      { "xbox",   14, "mainCRTStartup" },
+      { NULL, 0, NULL }
     };
+  /* Entry point name for arbitrary subsystem numbers.  */
+  static const char default_entry[] = "mainCRTStartup";
 
+  /* Check for the presence of a version number.  */
   sver = strchr (optarg, ':');
   if (sver == NULL)
     len = strlen (optarg);
   else
     {
-      char *end;
-
       len = sver - optarg;
       set_pe_name ("__major_subsystem_version__",
 		   strtoul (sver + 1, &end, 0));
@@ -415,40 +414,62 @@ set_pe_subsystem (void)
 	einfo (_("%P: warning: bad version number in -subsystem option\n"));
     }
 
-  for (i = 0; v[i].name; i++)
+  /* Check for numeric subsystem.  */
+  temp_subsystem = strtoul (optarg, & end, 0);
+  if ((*end == ':' || *end == '\0') && (temp_subsystem < 65536))
     {
-      if (strncmp (optarg, v[i].name, len) == 0
-	  && v[i].name[len] == '\0')
+      /* Search list for a numeric match to use its entry point.  */
+      for (i = 0; v[i].name; i++)
+	if (v[i].value == (int) temp_subsystem)
+	  break;
+
+      /* If no match, use the default.  */
+      if (v[i].name != NULL)
+	entry = v[i].entry;
+      else
+	entry = default_entry;
+
+      /* Use this subsystem.  */
+      subsystem = (int) temp_subsystem;
+    }
+  else
+    {
+      /* Search for subsystem by name.  */
+      for (i = 0; v[i].name; i++)
+	if (strncmp (optarg, v[i].name, len) == 0
+	    && v[i].name[len] == '\0')
+	  break;
+
+      if (v[i].name == NULL)
 	{
-	  const char *initial_symbol_char;
-	  const char *entry;
-
-	  set_pe_name ("__subsystem__", v[i].value);
-
-	  initial_symbol_char = ${INITIAL_SYMBOL_CHAR};
-	  if (*initial_symbol_char == '\0')
-	    entry = v[i].entry;
-	  else
-	    {
-	      char *alc_entry;
-
-	      /* lang_add_entry expects its argument to be permanently
-		 allocated, so we don't free this string.  */
-	      alc_entry = xmalloc (strlen (initial_symbol_char)
-				   + strlen (v[i].entry)
-				   + 1);
-	      strcpy (alc_entry, initial_symbol_char);
-	      strcat (alc_entry, v[i].entry);
-	      entry = alc_entry;
-	    }
-
-	  lang_add_entry (entry, TRUE);
-
+	  einfo (_("%P%F: invalid subsystem type %s\n"), optarg);
 	  return;
 	}
+
+      entry = v[i].entry;
+      subsystem = v[i].value;
     }
 
-  einfo (_("%P%F: invalid subsystem type %s\n"), optarg);
+  set_pe_name ("__subsystem__", subsystem);
+
+  initial_symbol_char = ${INITIAL_SYMBOL_CHAR};
+  if (*initial_symbol_char != '\0')
+    {
+      char *alc_entry;
+
+      /* lang_add_entry expects its argument to be permanently
+	 allocated, so we don't free this string.  */
+      alc_entry = xmalloc (strlen (initial_symbol_char)
+			   + strlen (entry)
+			   + 1);
+      strcpy (alc_entry, initial_symbol_char);
+      strcat (alc_entry, entry);
+      entry = alc_entry;
+    }
+
+  lang_add_entry (entry, TRUE);
+
+  return;
 }
 
 
