@@ -38,11 +38,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern int stop_soon_quietly;	/* for wait_for_inferior */
 
 /* Forward data declarations */
-extern struct target_ops sim_ops;	/* Forward declaration */
+/*extern struct target_ops sim_ops;	/* Forward declaration */
 
 void sim_store_register ();
 void sim_set_oc ();
 
+int inferior_pid;
 int
 sim_write_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
@@ -75,14 +76,13 @@ sim_kill (arg, from_tty)
      char *arg;
      int from_tty;
 {
-
 }
 
 /*
  * Download a file specified in 'args', to the sim.
  */
 static void
-sim_load (args, fromtty)
+sasassim_load (args, fromtty)
      char *args;
      int fromtty;
 {
@@ -160,7 +160,7 @@ sim_create_inferior (execfile, args, env)
   insert_breakpoints ();
   proceed (entry_pt, -1, 0);
 }
-
+#if 0
 static void
 sim_open (name, from_tty)
      char *name;
@@ -203,21 +203,21 @@ sim_detach (args, from_tty)
   if (from_tty)
     printf_filtered ("Ending remote %s debugging\n", target_shortname);
 }
-
+#endif
 /* Tell the remote machine to resume.  */
 
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
-
+#if 0
 int
 sim_wait (pid, status)
      int pid;
      WAITTYPE *status;
 {
-  *status = sim_stop_signal ();
-  return 0;
+  sim_stop_reason (&reason, &sigrc);
+  return inferior_pid;
 }
-
+#endif
 /* Get ready to modify the registers array.  On machines which store
    individual registers, this doesn't need to do anything.  On machines
    which store all the registers in one fell swoop, this makes sure
@@ -295,11 +295,13 @@ sim_files_info ()
    target specified yet, this will loop prompting the user to do so.
 */
 
+#if 0
 void
 sim_before_main_loop ()
 {
   push_target (&sim_ops);
 }
+
 
 /* Clear the sims notion of what the break points are */
 static void
@@ -309,7 +311,7 @@ sim_mourn ()
   unpush_target (&sim_ops);
   generic_mourn_inferior ();
 }
-
+#endif
 static void 
 rem_resume (pid, a, b)
      int pid;
@@ -319,8 +321,9 @@ rem_resume (pid, a, b)
   sim_resume (a, b);
 }
 
-/* Define the target subroutine names */
 
+/* Define the target subroutine names */
+#if 0
 struct target_ops sim_ops =
 {
   "sim", "Remote SIM monitor",
@@ -351,9 +354,6 @@ struct target_ops sim_ops =
 void
 _initialize_remote_sim ()
 {
-  extern int sim_z8001_mode;
-
-  sim_z8001_mode = z8001_mode;
   add_target (&sim_ops);
-
 }
+#endif
