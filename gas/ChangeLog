@@ -1,3 +1,10 @@
+Thu Feb  1 15:34:32 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Make sure we only add m68k-parse.o to
+	${extra_objects} once, no matter how many m68k targets have been
+	enabled.
+	* configure: Rebuild.
+
 Wed Jan 31 18:31:46 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure.in (i386-*-cygwin32, ppc-*-cygwin32): New.
