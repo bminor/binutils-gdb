@@ -1,5 +1,8 @@
 2004-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/alpha/nm-linux.h (PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE):
+	Remove defines.
+
 	* infptrace.c: Include "gdb_assert.h".
 	(PTRACE_XFER_TYPE): Remove define.
 	(offsetof): Only define if U_REGS_OFFSET isn't defined.
