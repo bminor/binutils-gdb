@@ -2619,6 +2619,17 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	      /* Stop.  */
 	      break;
 	    case WP_VALUE_CHANGED:
+	      if (b->type == bp_read_watchpoint)
+		{
+		  /* Don't stop: read watchpoints shouldn't fire if
+		     the value has changed.  This is for targets which
+		     cannot set read-only watchpoints.  */
+		  bs->print_it = print_it_noop;
+		  bs->stop = 0;
+		  continue;
+		}
+	      ++(b->hit_count);
+	      break;
 	    case WP_VALUE_NOT_CHANGED:
 	      /* Stop.  */
 	      ++(b->hit_count);

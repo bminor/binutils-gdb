@@ -1,3 +1,8 @@
+2000-03-21  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* breakpoint.c (bpstat_stop_status): Don't stop if a read
+	watchpoint appears to break, but the watched value changed.
+
 2000-03-21  Jim Blandy  <jimb@redhat.com>
 
 	* gdbarch.sh: Emit a definition and declaration for gdbarch_free,
