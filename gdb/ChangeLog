@@ -1,5 +1,8 @@
 Sat Jul  6 01:34:15 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
+	* ns32k-opcode.h (movmw, movmd):  FIx opcodes.  Bug fix
+	from Rune Nerg}rd <runene@ifi.uio.no> on 5 Jul 1991.
+
 	* main.c (command_line_input):  Flush stdout and stderr
 	before every call to readline.  This reportedly fixes a bug
 	that comes up in Sys V running emacs-gdb and/or xxgdb,
