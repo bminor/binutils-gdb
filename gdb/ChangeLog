@@ -1,3 +1,18 @@
+2002-01-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* doublest.c (floatformat_is_negative): Assert FMT is non NULL.
+	(floatformat_is_nan, floatformat_mantissa): Ditto.
+
+	* gdbtypes.c (_initialize_gdbtypes): Initialize TYPE_FLOATFORMAT
+	for builtin_type_ieee_single_little, builtin_type_ieee_double_big,
+	builtin_type_ieee_double_little,
+	builtin_type_ieee_double_littlebyte_bigword,
+	builtin_type_m68881_ext, builtin_type_i960_ext,
+	builtin_type_m88110_ext, builtin_type_m88110_harris_ext,
+	builtin_type_arm_ext_big, builtin_type_arm_ext_littlebyte_bigword,
+	builtin_type_ia64_spill_big, builtin_type_ia64_spill_little and
+	builtin_type_ia64_quad_big, builtin_type_ia64_quad_little.
+
 2002-01-22  Corinna Vinschen  <vinschen@redhat.com>
 
 	* xstormy16-tdep.c (xstormy16_scan_prologue): Add frameless

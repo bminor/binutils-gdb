@@ -439,7 +439,7 @@ int
 floatformat_is_negative (const struct floatformat *fmt, char *val)
 {
   unsigned char *uval = (unsigned char *) val;
-
+  gdb_assert (fmt != NULL);
   return get_field (uval, fmt->byteorder, fmt->totalsize, fmt->sign_start, 1);
 }
 
@@ -453,6 +453,8 @@ floatformat_is_nan (const struct floatformat *fmt, char *val)
   unsigned long mant;
   unsigned int mant_bits, mant_off;
   int mant_bits_left;
+
+  gdb_assert (fmt != NULL);
 
   if (! fmt->exp_nan)
     return 0;
@@ -503,6 +505,7 @@ floatformat_mantissa (const struct floatformat *fmt, char *val)
   char buf[9];
 
   /* Make sure we have enough room to store the mantissa.  */
+  gdb_assert (fmt != NULL);
   gdb_assert (sizeof res > ((fmt->man_len + 7) / 8) * 2);
 
   mant_off = fmt->man_start;

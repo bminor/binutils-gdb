@@ -3328,15 +3328,19 @@ _initialize_gdbtypes (void)
   builtin_type_ieee_single_little =
     init_type (TYPE_CODE_FLT, floatformat_ieee_single_little.totalsize / 8,
 	       0, "builtin_type_ieee_single_little", NULL);
+  TYPE_FLOATFORMAT (builtin_type_ieee_single_little) = &floatformat_ieee_single_little;
   builtin_type_ieee_double_big =
     init_type (TYPE_CODE_FLT, floatformat_ieee_double_big.totalsize / 8,
 	       0, "builtin_type_ieee_double_big", NULL);
+  TYPE_FLOATFORMAT (builtin_type_ieee_double_big) = &floatformat_ieee_double_big;
   builtin_type_ieee_double_little =
     init_type (TYPE_CODE_FLT, floatformat_ieee_double_little.totalsize / 8,
 	       0, "builtin_type_ieee_double_little", NULL);
+  TYPE_FLOATFORMAT (builtin_type_ieee_double_little) = &floatformat_ieee_double_little;
   builtin_type_ieee_double_littlebyte_bigword =
     init_type (TYPE_CODE_FLT, floatformat_ieee_double_littlebyte_bigword.totalsize / 8,
 	       0, "builtin_type_ieee_double_littlebyte_bigword", NULL);
+  TYPE_FLOATFORMAT (builtin_type_ieee_double_littlebyte_bigword) = &floatformat_ieee_double_littlebyte_bigword;
   builtin_type_i387_ext =
     init_type (TYPE_CODE_FLT, floatformat_i387_ext.totalsize / 8,
 	       0, "builtin_type_i387_ext", NULL);
@@ -3344,33 +3348,43 @@ _initialize_gdbtypes (void)
   builtin_type_m68881_ext =
     init_type (TYPE_CODE_FLT, floatformat_m68881_ext.totalsize / 8,
 	       0, "builtin_type_m68881_ext", NULL);
+  TYPE_FLOATFORMAT (builtin_type_m68881_ext) = &floatformat_m68881_ext;
   builtin_type_i960_ext =
     init_type (TYPE_CODE_FLT, floatformat_i960_ext.totalsize / 8,
 	       0, "builtin_type_i960_ext", NULL);
+  TYPE_FLOATFORMAT (builtin_type_i960_ext) = &floatformat_i960_ext;
   builtin_type_m88110_ext =
     init_type (TYPE_CODE_FLT, floatformat_m88110_ext.totalsize / 8,
 	       0, "builtin_type_m88110_ext", NULL);
+  TYPE_FLOATFORMAT (builtin_type_m88110_ext) = &floatformat_m88110_ext;
   builtin_type_m88110_harris_ext =
     init_type (TYPE_CODE_FLT, floatformat_m88110_harris_ext.totalsize / 8,
 	       0, "builtin_type_m88110_harris_ext", NULL);
+  TYPE_FLOATFORMAT (builtin_type_m88110_harris_ext) = &floatformat_m88110_harris_ext;
   builtin_type_arm_ext_big =
     init_type (TYPE_CODE_FLT, floatformat_arm_ext_big.totalsize / 8,
 	       0, "builtin_type_arm_ext_big", NULL);
+  TYPE_FLOATFORMAT (builtin_type_arm_ext_big) = &floatformat_arm_ext_big;
   builtin_type_arm_ext_littlebyte_bigword =
     init_type (TYPE_CODE_FLT, floatformat_arm_ext_littlebyte_bigword.totalsize / 8,
 	       0, "builtin_type_arm_ext_littlebyte_bigword", NULL);
+  TYPE_FLOATFORMAT (builtin_type_arm_ext_littlebyte_bigword) = &floatformat_arm_ext_littlebyte_bigword;
   builtin_type_ia64_spill_big =
     init_type (TYPE_CODE_FLT, floatformat_ia64_spill_big.totalsize / 8,
 	       0, "builtin_type_ia64_spill_big", NULL);
+  TYPE_FLOATFORMAT (builtin_type_ia64_spill_big) = &floatformat_ia64_spill_big;
   builtin_type_ia64_spill_little =
     init_type (TYPE_CODE_FLT, floatformat_ia64_spill_little.totalsize / 8,
 	       0, "builtin_type_ia64_spill_little", NULL);
+  TYPE_FLOATFORMAT (builtin_type_ia64_spill_little) = &floatformat_ia64_spill_little;
   builtin_type_ia64_quad_big =
     init_type (TYPE_CODE_FLT, floatformat_ia64_quad_big.totalsize / 8,
 	       0, "builtin_type_ia64_quad_big", NULL);
+  TYPE_FLOATFORMAT (builtin_type_ia64_quad_big) = &floatformat_ia64_quad_big;
   builtin_type_ia64_quad_little =
     init_type (TYPE_CODE_FLT, floatformat_ia64_quad_little.totalsize / 8,
 	       0, "builtin_type_ia64_quad_little", NULL);
+  TYPE_FLOATFORMAT (builtin_type_ia64_quad_little) = &floatformat_ia64_quad_little;
 
   add_show_from_set (
 		     add_set_cmd ("overload", no_class, var_zinteger, (char *) &overload_debug,
