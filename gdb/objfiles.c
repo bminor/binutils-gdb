@@ -650,25 +650,10 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 
     ALL_OBJFILE_OSECTIONS (objfile, s)
       {
-	flagword flags;
-
-	flags = bfd_get_section_flags (abfd, s->the_bfd_section);
-
-	if (flags & SEC_CODE)
-	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-	    s->endaddr += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-	  }
-	else if (flags & (SEC_DATA | SEC_LOAD))
-	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_DATA (objfile));
-	    s->endaddr += ANOFFSET (delta, SECT_OFF_DATA (objfile));
-	  }
-	else if (flags & SEC_ALLOC)
-	  {
-	    s->addr += ANOFFSET (delta, SECT_OFF_BSS (objfile));
-	    s->endaddr += ANOFFSET (delta, SECT_OFF_BSS (objfile));
-	  }
+      	int idx = s->the_bfd_section->index;
+	
+	s->addr += ANOFFSET (delta, idx);
+	s->endaddr += ANOFFSET (delta, idx);
       }
   }
 

@@ -1,3 +1,10 @@
+2000-09-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* objfiles.c (objfile_relocate): Don't assume that offsets
+	associated with one of SECT_OFF_TEXT, SECT_OFF_DATA, or
+	SECT_OFF_BSS will be adequate for relocating all of the
+	sections in an objfile.
+
 2000-09-12  Fernando Nasser  <fnasser@cygnus.com>
 
 	* remote-rdi.c (arm_rdi_open): Fix typo in error message.
