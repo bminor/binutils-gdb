@@ -29,6 +29,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct qelem;
 #define insque(a,b)	(insque)((struct qelem *)(a), (struct qelem *)(b))
 #define remque(a)	(remque)((struct qelem *)(a))
+#else
+
+extern int insque();
+extern int remque();
 #endif
 
 int remote_dcache = 0;
