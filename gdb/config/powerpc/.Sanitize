@@ -30,6 +30,7 @@ aix4.mt
 cygwin32.mh
 cygwin32.mt
 gdbserve.mt
+linux.mh
 macos.mh
 macos.mt
 nm-aix.h
@@ -54,6 +55,7 @@ tm-ppcle-sim.h
 tm-solaris.h
 xm-aix.h
 xm-cygwin32.h
+xm-linux.h
 xm-mpw.h
 xm-solaris.h
 
