@@ -1,5 +1,8 @@
 Mon Jan 29 12:21:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-elf.c (obj_elf_type): Set BSF_OBJECT flag for a type
+	of object.  From Ronald F. Guilmette <rfg@monkeys.com>.
+
 	* ecoff.c (localsym_t): Add addend field.
 	(add_ecoff_symbol): Add addend argument.  Change all callers.
 	(coff_sym_value): Make static.

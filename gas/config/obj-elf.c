@@ -1,5 +1,5 @@
 /* ELF object file format
-   Copyright (C) 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -13,9 +13,10 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
    the GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public
-   License along with GAS; see the file COPYING.  If not, write
-   to the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA. */
 
 #define OBJ_HEADER "obj-elf.h"
 #include "as.h"
@@ -34,6 +35,10 @@
 
 #ifdef TC_MIPS
 #include "elf/mips.h"
+#endif
+
+#ifdef TC_PPC
+#include "elf/ppc.h"
 #endif
 
 #ifdef NEED_ECOFF_DEBUG
@@ -934,10 +939,7 @@ obj_elf_size (ignore)
        .type SYM,@function
    The third (reportedly to be used on Irix 6.0) is
        .type SYM STT_FUNC
-
-   FIXME: We do not fully support this pseudo-op.  In fact, the only
-   case we do support is setting the type to STT_FUNC, which we do by
-   setting the BSF_FUNCTION flag.  */
+   */
 
 static void
 obj_elf_type (ignore)
@@ -971,7 +973,7 @@ obj_elf_type (ignore)
     type = BSF_FUNCTION;
   else if (strcmp (typename, "object") == 0
 	   || strcmp (typename, "STT_OBJECT") == 0)
-    ;
+    type = BSF_OBJECT;
   else
     as_bad ("ignoring unrecognized symbol type \"%s\"", typename);
 
