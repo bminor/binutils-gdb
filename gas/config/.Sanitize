@@ -35,7 +35,6 @@ atof-ieee.c
 atof-ns32k.c
 atof-tahoe.c
 atof-vax.c
-coff_gnu.h
 cplus-dem.c
 h8300.mt
 h8500.mt
@@ -73,8 +72,6 @@ obj-bout.c
 obj-bout.h
 obj-coff.c
 obj-coff.h
-obj-coffbfd.c
-obj-coffbfd.h
 obj-ecoff.c
 obj-ecoff.h
 obj-elf.c
