@@ -1,3 +1,12 @@
+Tue Sep 17 12:09:00 1996  Dawn Perchik <dawn@critters.cygnus.com>
+
+	* ser-e7kpc.c: Added wingdb support for target e7000pc.
+
+Tue Sep 17 10:56:52 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* remote-mips.c (pmon_wait): CAIRO PMON does not require forced
+ 	re-entry back into debug mode.
+
 Mon Sep 16 14:32:58 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* remote-mips.c (mips_load): Ensure that the PC is explicitly

@@ -18,11 +18,21 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifdef __GO32__
-#include "defs.h"
-#include "serial.h"
+#if defined(__GO32__) || defined(__WIN32__)
+#if defined(__WIN32__)
+//#define KERNEL
+//#define STRICT
+//#include <windows.h>
+/* we define the 32-bit calls which thunk to 16-bit dll calls 
+ */
+#include "win-e7kpc.h"
+/* msvc uses strnicmp instead */
+#define strncasecmp strnicmp
+#else
 #include <sys/dos.h>
-
+#include "defs.h"
+#endif
+#include "serial.h"
 
 
 static int e7000pc_open PARAMS ((serial_t scb, const char *name));
@@ -77,6 +87,23 @@ static unsigned long ready;
 static unsigned long pon;
 static unsigned long irqtop;
 static unsigned long board_at;
+
+#ifdef __WIN32__
+// These routines are normally part of the go32 dos extender.
+// We redefine them here to be calls into their Windoze equivs.
+static void dosmemget(int offset, int length, void *buffer);
+static void dosmemput(const void *buffer, int length, int offset);
+
+void dosmemget(int offset, int length, void *buffer)
+{
+    win_mem_get(buffer, length, offset);
+}
+void dosmemput(const void *buffer, int length, int offset)
+{
+    win_mem_put (buffer, length, offset);
+}
+
+#endif
 
 #define SET_BYTE(x,y)   { char _buf = y;dosmemput(&_buf,1, x);}
 #define SET_WORD(x,y)   { short _buf = y;dosmemput(&_buf,2, x);}
@@ -276,7 +303,13 @@ e7000pc_open (scb, name)
       errno = ENOENT;
       return -1;
     }
-
+#ifdef __WIN32__
+  if (win_load_e7kpc () != 0)
+    {
+      errno = ENOENT;
+      return -1;
+    }
+#endif
   scb->fd = e7000pc_init ();
 
   if (!scb->fd)
@@ -384,6 +417,9 @@ static void
 e7000pc_close (scb)
      serial_t scb;
 {
+#ifdef __WIN32__
+  win_unload_e7kpc ();
+#endif
 }
 
 static struct serial_ops e7000pc_ops =
