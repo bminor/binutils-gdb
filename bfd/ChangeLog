@@ -2,6 +2,17 @@
 
 	* elf64-x86-64.c: Convert to ISO C90 prototypes, remove
 	unnecessary prototypes.  Replace PTR with void *.
+	(elf64_x86_64_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL to
+	trim plt entries.  Move undefweak non-default visibility test ...
+	(allocate_dynrelocs): ... from here.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Pass SHARED instead of INFO.
+	Change all callers.
+	(allocate_dynrelocs): Use SYMBOL_CALLS_LOCAL.  Use
+	SYMBOL_REFERENCES_LOCAL for dynreloc check.
+	(elf64_x86_64_relocate_section): Use SYMBOL_CALLS_LOCAL for
+	dynreloc and .got relocs.
+	(elf64_x86_64_finish_dynamic_symbol): Use SYMBOL_REFERENCES_LOCAL
+	for .got relocs.
 
 2003-06-29  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
