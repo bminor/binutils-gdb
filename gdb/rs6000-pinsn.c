@@ -34,5 +34,9 @@ print_insn (memaddr, stream)
 
   GDB_INIT_DISASSEMBLE_INFO (info, stream);
 
+#ifdef GDB_TARGET_POWERPC
+  return print_insn_big_powerpc ((bfd_vma) memaddr, &info);
+#else
   return print_insn_rs6000 ((bfd_vma) memaddr, &info);
+#endif
 }

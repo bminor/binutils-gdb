@@ -1,6 +1,7 @@
 # Host: Sparc running LynxOS
 XM_FILE= xm-sparclynx.h
-XDEPFILES= 
+XM_CLIBS= -lbsd
+XDEPFILES= ser-tcp.o
 NAT_FILE= nm-sparclynx.h
 NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o lynx-nat.o
 REGEX=regex.o

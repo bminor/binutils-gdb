@@ -1,3 +1,18 @@
+Thu Sep  1 15:41:21 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* rs6000-pinsn.c (print_insn):  Use powerpc disassembler when
+	doing Power PC.
+	* config/powerpc/tm-ppc-nw.h:  Define GDB_TARGET_POWERPC.
+
+	* config/i386/i386lynx.mh, config/m68k/m68klynx.mh,
+	config/rs6000/rs6000lynx.mh, config/sparc/sparclynx.mh:  Enable
+	ser-tcp.
+
+	* nlm/Makefile.in:  Get rid of NWSOURCE.
+	* nlm/alpha-io.S (inVti, outVti):  Remove extraneous ldha's.
+	* nlm/gdbserve.o:  Add dummy __main routine.
+	* nlm/gdbserve.def:  Turn on debug.
+
 Thu Sep  1 12:36:39 1994  Jim Kingdon  (kingdon@cygnus.com)
 
 	* config/xm-nbsd.h: Don't define SET_STACK_LIMIT_HUGE; it is obsolete.

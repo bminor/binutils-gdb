@@ -23,6 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Use generic RS6000 definitions. */
 #include "rs6000/tm-rs6000.h"
 
+#define GDB_TARGET_POWERPC
+
 #undef PC_LOAD_SEGMENT
 #undef PROCESS_LINENUMBER_HOOK
 
