@@ -60,6 +60,8 @@ Wed Mar 15 15:09:29 1995  Stu Grossman  (grossman@cygnus.com)
 	supply_register to monitor_ops.
 
 	* rom68k-rom.c:  Add new support for handling register dumps.
+	* config/m68k/tm-m68k.h:  Define D0_REGNUM and A0_REGNUM for register
+	dump handling.
 
 Wed Mar 15 15:18:27 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
