@@ -137,6 +137,18 @@ altivec_register_p (int regno)
     return (regno >= tdep->ppc_vr0_regnum && regno <= tdep->ppc_vrsave_regnum);
 }
 
+/* Use the architectures FP registers?  */
+int
+ppc_floating_point_unit_p (struct gdbarch *gdbarch)
+{
+  const struct bfd_arch_info *info = gdbarch_bfd_arch_info (gdbarch);
+  if (info->arch == bfd_arch_powerpc)
+    return (info->mach != bfd_mach_ppc_e500);
+  if (info->arch == bfd_arch_rs6000)
+    return 1;
+  return 0;
+}
+
 /* Read a LEN-byte address from debugged memory address MEMADDR. */
 
 static CORE_ADDR

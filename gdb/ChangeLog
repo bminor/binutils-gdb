@@ -1,3 +1,15 @@
+2003-03-17  Andrew Cagney  <cagney@redhat.com>
+
+	* rs6000-tdep.c (ppc_floating_point_unit_p): New function.
+	* ppc-tdep.h (ppc_floating_point_unit_p): Declare.
+
+	From Elena Zannoni  <ezannoni@redhat.com>
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_arguments): Handle e500
+	vector and floating-point parameters.
+	(ppc_sysv_abi_use_struct_convention): Handle e500 struct return
+	convention.
+	(ppc_sysv_abi_broken_use_struct_convention): Ditto.
+
 2003-03-17  Fernando Nasser  <fnasser@redhat.com>
 
 	* MAINTAINERS: Remove my name from several maintainership roles.

@@ -61,11 +61,11 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   int structstkspace;
   int argoffset;
   int structoffset;
-  struct value *arg;
   struct type *type;
   int len;
   char old_sp_buf[4];
   CORE_ADDR saved_sp;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   greg = struct_return ? 4 : 3;
   freg = 1;
@@ -79,11 +79,12 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
      are put in registers. */
   for (argno = 0; argno < nargs; argno++)
     {
-      arg = args[argno];
+      struct value *arg = args[argno];
       type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (type);
 
-      if (TYPE_CODE (type) == TYPE_CODE_FLT)
+      if (TYPE_CODE (type) == TYPE_CODE_FLT
+          && ppc_floating_point_unit_p (current_gdbarch))
 	{
 	  if (freg <= 8)
 	    freg++;
@@ -96,7 +97,10 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      argstkspace += 8;
 	    }
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_INT && len == 8)	/* long long */
+      else if (len == 8 
+               && (TYPE_CODE (type) == TYPE_CODE_INT /* long long */
+                   || (!ppc_floating_point_unit_p (current_gdbarch)
+                       && TYPE_CODE (type) == TYPE_CODE_FLT))) /* double */
 	{
 	  if (greg > 9)
 	    {
@@ -144,6 +148,20 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		  argstkspace += 16;
 		}
 	    }
+          else if (len == 8 
+                   && TYPE_CODE (type) == TYPE_CODE_ARRAY
+                   && TYPE_VECTOR (type))
+            {
+              if (greg <= 10)
+                greg++;
+              else
+                {
+                  /* Vector arguments must be aligned to 8 bytes on
+                     the stack. */
+                  argstkspace += round2 (argstkspace, 8);
+                  argstkspace += 8;
+                }
+            }
 	}
     }
 
@@ -170,30 +188,33 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   freg = 1;
   greg = 3;
   vreg = 2;
+
   /* Fill in r3 with the return structure, if any */
   if (struct_return)
     {
-      char val_buf[4];
-      store_address (val_buf, 4, struct_addr);
-      memcpy (&deprecated_registers[REGISTER_BYTE (greg)], val_buf, 4);
+      write_register (tdep->ppc_gp0_regnum + greg, struct_addr);
       greg++;
     }
+
   /* Now fill in the registers and stack... */
   for (argno = 0; argno < nargs; argno++)
     {
-      arg = args[argno];
+      struct value *arg = args[argno];
+      char *val = VALUE_CONTENTS (arg);
       type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (type);
 
-      if (TYPE_CODE (type) == TYPE_CODE_FLT)
+      if (TYPE_CODE (type) == TYPE_CODE_FLT
+          && ppc_floating_point_unit_p (current_gdbarch))
 	{
 	  if (freg <= 8)
 	    {
+	      ULONGEST regval;
 	      if (len > 8)
 		printf_unfiltered (
 				   "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
-	      memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM + freg)],
-		      VALUE_CONTENTS (arg), len);
+              regval = extract_unsigned_integer (val, len);
+              write_register (FP0_REGNUM + freg, regval);
 	      freg++;
 	    }
 	  else
@@ -203,29 +224,32 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      /* FIXME: Convert floats to doubles */
 	      if (argoffset & 0x4)
 		argoffset += 4;
-	      write_memory (sp + argoffset, (char *) VALUE_CONTENTS (arg), len);
+	      write_memory (sp + argoffset, val, len);
 	      argoffset += 8;
 	    }
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_INT && len == 8)	/* long long */
+      else if (len == 8 
+               && (TYPE_CODE (type) == TYPE_CODE_INT /* long long */
+                   || (!ppc_floating_point_unit_p (current_gdbarch)
+                        && TYPE_CODE (type) == TYPE_CODE_FLT))) /* double */
 	{
 	  if (greg > 9)
 	    {
 	      greg = 11;
 	      if (argoffset & 0x4)
 		argoffset += 4;
-	      write_memory (sp + argoffset, (char *) VALUE_CONTENTS (arg), len);
+	      write_memory (sp + argoffset, val, len);
 	      argoffset += 8;
 	    }
 	  else
 	    {
+	      ULONGEST regval;
 	      if ((greg & 1) == 0)
 		greg++;
-
-	      memcpy (&deprecated_registers[REGISTER_BYTE (greg)],
-		      VALUE_CONTENTS (arg), 4);
-	      memcpy (&deprecated_registers[REGISTER_BYTE (greg + 1)],
-		      VALUE_CONTENTS (arg) + 4, 4);
+              regval = extract_unsigned_integer (val, 4);
+              write_register (tdep->ppc_gp0_regnum + greg, regval);
+              regval = extract_unsigned_integer (val + 4, 4);
+              write_register (tdep->ppc_gp0_regnum + greg + 1, regval);
 	      greg += 2;
 	    }
 	}
@@ -236,18 +260,19 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      || TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION)
 	    {
-	      write_memory (sp + structoffset, VALUE_CONTENTS (arg), len);
+	      write_memory (sp + structoffset, val, len);
 	      store_address (val_buf, 4, sp + structoffset);
 	      structoffset += round2 (len, 8);
 	    }
 	  else
 	    {
 	      memset (val_buf, 0, 4);
-	      memcpy (val_buf, VALUE_CONTENTS (arg), len);
+	      memcpy (val_buf, val, len);
 	    }
 	  if (greg <= 10)
 	    {
-	      memcpy (&deprecated_registers[REGISTER_BYTE (greg)], val_buf, 4);
+              ULONGEST regval = extract_unsigned_integer (val_buf, 4);
+              write_register (tdep->ppc_gp0_regnum + greg, regval);
 	      greg++;
 	    }
 	  else
@@ -262,15 +287,14 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      && TYPE_CODE (type) == TYPE_CODE_ARRAY
 	      && TYPE_VECTOR (type))
 	    {
-	      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 	      char *v_val_buf = alloca (16);
 	      memset (v_val_buf, 0, 16);
-	      memcpy (v_val_buf, VALUE_CONTENTS (arg), len);
+	      memcpy (v_val_buf, val, len);
 	      if (vreg <= 13)
 		{
-		  memcpy (&deprecated_registers[REGISTER_BYTE (tdep->ppc_vr0_regnum
-						    + vreg)],
-			  v_val_buf, 16);
+		  regcache_cooked_write (current_regcache,
+					 tdep->ppc_vr0_regnum + vreg,
+					 v_val_buf);
 		  vreg++;
 		}
 	      else
@@ -279,6 +303,26 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		  argoffset += 16;
 		}
 	    }
+          else if (len == 8 
+		   && TYPE_CODE (type) == TYPE_CODE_ARRAY
+		   && TYPE_VECTOR (type))
+            {
+              char *v_val_buf = alloca (8);
+              memset (v_val_buf, 0, 8);
+              memcpy (v_val_buf, val, len);
+              if (greg <= 10)
+                {
+		  regcache_cooked_write (current_regcache,
+					 tdep->ppc_ev0_regnum + greg,
+					 v_val_buf);
+                  greg++;
+                }
+              else
+                {
+                  write_memory (sp + argoffset, v_val_buf, 8);
+                  argoffset += 8;
+                }
+            }
         }
     }
 
@@ -293,7 +337,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 int     
 ppc_sysv_abi_broken_use_struct_convention (int gcc_p, struct type *value_type)
 {  
-  if (TYPE_LENGTH (value_type) == 16 
+  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
       && TYPE_VECTOR (value_type))
     return 0;                            
 
@@ -305,7 +349,7 @@ ppc_sysv_abi_broken_use_struct_convention (int gcc_p, struct type *value_type)
 int
 ppc_sysv_abi_use_struct_convention (int gcc_p, struct type *value_type)
 {
-  if (TYPE_LENGTH (value_type) == 16
+  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
       && TYPE_VECTOR (value_type))
     return 0;
 

@@ -49,6 +49,11 @@ void rs6000_frame_init_saved_regs (struct frame_info *);
 CORE_ADDR rs6000_frame_chain (struct frame_info *);
 int altivec_register_p (int regno);
 
+
+/* Return non-zero when the architecture has an FPU (or at least when
+   the ABI is using the FPU).  */
+int ppc_floating_point_unit_p (struct gdbarch *gdbarch);
+
 /* Private data that this module attaches to struct gdbarch. */
 
 struct gdbarch_tdep
