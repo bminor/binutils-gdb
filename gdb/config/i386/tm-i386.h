@@ -323,17 +323,12 @@ extern CORE_ADDR i386_extract_struct_value_address (char *regbuf);
    from the sigcontext structure which is pushed by the kernel on the
    user stack, along with a pointer to it.  */
 
-/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
-   chain-pointer.
-   In the case of the i386, the frame's nominal address
-   is the address of a 4-byte word containing the calling frame's address.  */
+/* Return the chain-pointer for FRAME.  In the case of the i386, the
+   frame's nominal address is the address of a 4-byte word containing
+   the calling frame's address.  */
 
-#define FRAME_CHAIN(thisframe)  \
-  ((thisframe)->signal_handler_caller \
-   ? (thisframe)->frame \
-   : (!inside_entry_file ((thisframe)->pc) \
-      ? read_memory_unsigned_integer ((thisframe)->frame, 4) \
-      : 0))
+#define FRAME_CHAIN(frame) i386_frame_chain ((frame))
+extern CORE_ADDR i386_frame_chain (struct frame_info *frame);
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it

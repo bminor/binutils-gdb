@@ -1,3 +1,10 @@
+2001-04-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_frame_chain): New function.
+	* config/i386/tm-i386.h (FRAME_CHAIN): Redefine in terms of
+	i386_frame_chain.
+	(i386_frame_chain): New prototype.
+
 2001-04-14  J.T. Conklin  <jtc@redback.com>
 	
 	* target.h (target_ops): Removed to_core_file_to_sym_file vector

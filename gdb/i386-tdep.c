@@ -349,6 +349,22 @@ i386_get_frame_setup (CORE_ADDR pc)
   return (-1);
 }
 
+/* Return the chain-pointer for FRAME.  In the case of the i386, the
+   frame's nominal address is the address of a 4-byte word containing
+   the calling frame's address.  */
+
+CORE_ADDR
+i386_frame_chain (struct frame_info *frame)
+{
+  if (frame->signal_handler_caller)
+    return frame->frame;
+
+  if (! inside_entry_file (frame->pc))
+    return read_memory_unsigned_integer (frame->frame, 4);
+
+  return 0;
+}
+
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
