@@ -1,3 +1,10 @@
+1999-08-09  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (elf_mips_howto_table): Fix src_mask for
+	R_MIPS_GOT16 and R_MIPS_CALL16.
+	(mips_elf_got16_entry): Use mips_elf_high to calculate the value
+	to use wheen looking for a preexisting GOT entry.
+
 1999-08-09  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* elf64-sparc.c (sparc64_elf_relocate_section): Back out part of

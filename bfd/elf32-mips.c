@@ -602,7 +602,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 _bfd_mips_elf_got16_reloc,	/* special_function */
 	 "R_MIPS_GOT16",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -632,7 +632,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_CALL16",	/* name */
 	 false,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -5537,7 +5537,11 @@ mips_elf_got16_entry (abfd, info, value)
   bfd_vma index;
   bfd_vma address;
 
-  value &= 0xffff0000;
+  /* Although the ABI says that it is "the high-order 16 bits" that we
+     want, it is really the %high value.  The complete value is
+     calculated with a `addiu' of a LO16 relocation, just as with a
+     HI16/LO16 pair.  */
+  value = mips_elf_high (value);
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
 
   /* Look to see if we already have an appropriate entry.  */
