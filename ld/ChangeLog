@@ -1,3 +1,8 @@
+2002-06-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Place
+	SEC_EXCLUDE sections when doing a relocatable link.
+
 2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eshelf32_nbsd.o,
