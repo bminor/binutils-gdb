@@ -11,6 +11,9 @@ start-sanitize-sky
 	(print_vif): Return length of 4 if mpg or direct insn so following
 	insns get properly disabled.
 	* dvp-opc.c (vif_insn_len): New argument `pcpu'.  All callers updated.
+	(gif_operands): Fix word order.
+	(gif_opcodes): Likewise.
+	({insert,extract,print}_gif_regs): Likewise.
 end-sanitize-sky
 
 Tue Feb 24 11:06:18 1998  Nick Clifton  <nickc@cygnus.com>
