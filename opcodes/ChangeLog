@@ -1,7 +1,12 @@
+start-sanitize-am33
 Mon Oct 12 10:43:51 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * m10300-opc.c: DSP instrutions which only write to one general
+        register have no restrictions on matching operands.
 
 	* m10300-opc.c (lsr_add): Fix typo for "lsr_add imm,reg,reg,reg" case.
 
+end-sanitize-am33
 Fri Oct  9 14:01:56 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* m32r-opc.h,m32r-opc.c: Regenerate.
