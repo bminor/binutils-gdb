@@ -359,9 +359,13 @@ child_follow_fork (int follow_child)
 	 also, but they'll be reinserted below.  */
       detach_breakpoints (child_pid);
 
-      fprintf_filtered (gdb_stdout,
-			"Detaching after fork from child process %d.\n",
-			child_pid);
+      if (debug_linux_nat)
+	{
+	  target_terminal_ours ();
+	  fprintf_unfiltered (gdb_stdlog,
+			      "Detaching after fork from child process %d.\n",
+			      child_pid);
+	}
 
       ptrace (PTRACE_DETACH, child_pid, 0, 0);
 
@@ -430,9 +434,13 @@ child_follow_fork (int follow_child)
       /* Before detaching from the parent, remove all breakpoints from it. */
       remove_breakpoints ();
 
-      fprintf_filtered (gdb_stdout,
-			"Attaching after fork to child process %d.\n",
-			child_pid);
+      if (debug_linux_nat)
+	{
+	  target_terminal_ours ();
+	  fprintf_unfiltered (gdb_stdlog,
+			      "Attaching after fork to child process %d.\n",
+			      child_pid);
+	}
 
       /* If we're vforking, we may want to hold on to the parent until
 	 the child exits or execs.  At exec time we can remove the old
