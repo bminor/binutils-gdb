@@ -3070,7 +3070,7 @@ reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst,
           return;
         }
       /* The instruction has the PC as its target register.  */
-      operand1 = inst_env->reg[operand1]; 
+      operand1 = inst_env->reg[cris_get_operand1 (inst)]; 
       operand2 = inst_env->reg[REG_PC];
 
       /* Check if it's a extend, signed or zero instruction.  */
