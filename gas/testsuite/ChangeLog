@@ -1,3 +1,8 @@
+Thu Aug 10 00:46:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mri/char.d: Fix for little endian machines.
+	* gas/mri/float.d: Likewise.
+
 Wed Aug  9 15:34:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/all/struct.s, gas/all/struct.d: New test.
