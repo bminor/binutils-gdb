@@ -3284,6 +3284,12 @@ value_namespace_elt (const struct type *curtype,
 
   cp_free_usings (usings);
 
+  /* FIXME: carlton/2002-11-24: Should this really be here, or should
+     it be in c-exp.y like the other similar messages?  Hmm...  */
+  
+  if (sym == NULL)
+    error ("No symbol \"%s\" in namespace \"%s\".", name, namespace_name);
+
   return value_of_variable (sym, block);
 }
 

@@ -321,7 +321,8 @@ print_formatted (struct value *val, register int format, int size,
 	  || TYPE_CODE (type) == TYPE_CODE_ARRAY
 	  || TYPE_CODE (type) == TYPE_CODE_STRING
 	  || TYPE_CODE (type) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (type) == TYPE_CODE_UNION)
+	  || TYPE_CODE (type) == TYPE_CODE_UNION
+	  || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
 	/* If format is 0, use the 'natural' format for
 	 * that type of value.  If the type is non-scalar,
 	 * we have to use language rules to print it as

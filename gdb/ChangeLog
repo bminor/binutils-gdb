@@ -1,3 +1,19 @@
+2002-11-24  David Carlton  <carlton@bactrian.org>
+
+	* Makefile.in (c-typeprint.o): Depend on gdb_assert_h.
+	* c-typeprint.c: #include "gdb_assert.h"
+	* gdbtypes.c (recursive_dump_type): Handle TYPE_CODE_NAMESPACE.
+	* c-typeprint.c (c_type_print_varspec_prefix): Ditto.
+	(c_type_print_varspec_suffix): Ditto.
+	(c_type_print_base): Ditto.
+	* typeprint.c (print_type_scalar): Ditto.
+	* printcmd.c (print_formatted): Ditto.
+	* language.c (structured_type): Ditto.
+	* cp-support.c (cp_check_namespace_symbol): Allocate type via
+	init_type.
+	* gdbtypes.c (init_type): Handle TYPE_CODE_NAMESPACE.
+	* valops.c (value_namespace_elt): Handle sym == NULL.
+
 2002-11-22  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (examine_compound_token): Rewrite as switch

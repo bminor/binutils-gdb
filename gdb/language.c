@@ -910,9 +910,10 @@ structured_type (struct type *type)
     case language_c:
     case language_cplus:
     case language_objc:
-      return (TYPE_CODE (type) == TYPE_CODE_STRUCT) ||
-	(TYPE_CODE (type) == TYPE_CODE_UNION) ||
-	(TYPE_CODE (type) == TYPE_CODE_ARRAY);
+      return (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	|| (TYPE_CODE (type) == TYPE_CODE_UNION)
+	|| (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	|| (TYPE_CODE (type) == TYPE_CODE_NAMESPACE);
    case language_pascal:
       return (TYPE_CODE(type) == TYPE_CODE_STRUCT) ||
 	 (TYPE_CODE(type) == TYPE_CODE_UNION) ||

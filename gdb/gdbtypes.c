@@ -1879,7 +1879,8 @@ init_type (enum type_code code, int length, int flags, char *name,
 
   /* C++ fancies.  */
 
-  if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
+  if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
+      || code == TYPE_CODE_NAMESPACE)
     {
       INIT_CPLUS_SPECIFIC (type);
     }
@@ -3103,6 +3104,9 @@ recursive_dump_type (struct type *type, int spaces)
       break;
     case TYPE_CODE_TEMPLATE_ARG:
       printf_filtered ("(TYPE_CODE_TEMPLATE_ARG)");
+      break;
+    case TYPE_CODE_NAMESPACE:
+      printf_filtered ("(TYPE_CODE_NAMESPACE)");
       break;
     default:
       printf_filtered ("(UNKNOWN TYPE CODE)");

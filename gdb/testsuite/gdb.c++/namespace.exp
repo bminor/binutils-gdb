@@ -78,7 +78,10 @@ gdb_test "up" ".*main.*" "up from marker1"
 # Access a data item inside a namespace using colons and
 # single quotes. :-(
 
-# NOTE: carlton/2002-11-22: the colons are becoming less necessary.
+# NOTE: carlton/2002-11-24: the colons are becoming less necessary (or
+# even desirable.)  For tests where it should still work with colons,
+# I'm including versions both with and without colons; for tests that
+# shouldn't work with colons, I'm only including one version.
 
 send_gdb "print 'AAA::c'\n"
 gdb_expect {
@@ -131,6 +134,15 @@ gdb_expect {
 
 # Call a function in a namespace
 
+send_gdb "print 'AAA::xyzq'('x')\n"
+gdb_expect {
+   -re "\\$\[0-9\]* = 97 'a'\r\n$gdb_prompt $" {
+       pass "print 'AAA::xyzq'('x')"
+   }
+   -re ".*$gdb_prompt $" { fail "print 'AAA::xyzq'('x')" }
+   timeout { fail "(timeout) print 'AAA::xyzq'('x')" }
+}
+       
 send_gdb "print AAA::xyzq('x')\n"
 gdb_expect {
    -re "\\$\[0-9\]* = 97 'a'\r\n$gdb_prompt $" {
@@ -162,6 +174,15 @@ gdb_expect {
    timeout { fail "(timeout) print 'BBB::CCC::xyzq'('x')" }
 }
        
+send_gdb "print BBB::CCC::xyzq('x')\n"
+gdb_expect {
+   -re "\\$\[0-9\]* = 122 'z'\r\n$gdb_prompt $" {
+       pass "print 'BBB::CCC::xyzq'('x')"
+   }
+   -re ".*$gdb_prompt $" { fail "print BBB::CCC::xyzq('x')" }
+   timeout { fail "(timeout) print BBB::CCC::xyzq('x')" }
+}
+       
 # Break on a function in a nested namespace
 
 send_gdb "break BBB::CCC::xyzq\n"
@@ -184,6 +205,15 @@ gdb_expect {
    timeout { fail "(timeout) print 'BBB::Class::xyzq'" }
 }
 
+send_gdb "print BBB::Class::xyzq\n"
+gdb_expect {
+   -re "\\$\[0-9\]* = \{char \\((BBB::|)Class \\*( const|), (char|int)\\)\} $hex <BBB::Class::xyzq\\(char\\)>\r\n$gdb_prompt $" {
+       pass "print BBB::Class::xyzq"
+   }
+   -re ".*$gdb_prompt $" { fail "print BBB::Class::xyzq" }
+   timeout { fail "(timeout) print BBB::Class::xyzq" }
+}
+
 # Break on a function in a class in a namespace
 
 send_gdb "break BBB::Class::xyzq\n"
@@ -199,38 +229,42 @@ gdb_expect {
 # to print out stuff from within a function defined within a
 # namespace.
 
-if ![runto "'C::D::marker2'"] then {
+if ![runto "C::D::marker2"] then {
     perror "couldn't run to marker2"
     continue
 }
 
 gdb_test "print c" "\\$\[0-9\].* = 1" "print c"
 gdb_test "print cc" "No symbol \"cc\" in current context." "print cc"
-gdb_test "print 'C::cc'" "\\$\[0-9\].* = 2" "print C::cc"
+gdb_test "print 'C::cc'" "\\$\[0-9\].* = 2" "print 'C::cc'"
+gdb_test "print C::cc" "\\$\[0-9\].* = 2" "print C::cc"
 gdb_test "print cd" "\\$\[0-9\].* = 3" "print cd"
-gdb_test "print 'C::D::cd'" "\\$\[0-9\].* = 3" "print C::D::cd"
-gdb_test "print 'E::cde'" "\\$\[0-9\].* = 5" "print E::cde"
+gdb_test "print 'C::D::cd'" "\\$\[0-9\].* = 3" "print 'C::D::cd'"
+gdb_test "print C::D::cd" "\\$\[0-9\].* = 3" "print C::D::cd"
+gdb_test "print 'E::cde'" "\\$\[0-9\].* = 5" "print 'E::cde'"
+gdb_test "print E::cde" "\\$\[0-9\].* = 5" "print E::cde"
 gdb_test "print shadow" "\\$\[0-9\].* = 13" "print shadow"
-
-# NOTE: carlton/2002-10-17: This one won't get fixed until namespaces
-# are first-class objects.  The PR isn't right, either.
-
-setup_kfail "gdb/827"
-gdb_test "print 'E::ce'" "No symbol \"E::ce\" in current context." "print E::ce"
+gdb_test "print E::ce" "No symbol \"ce\" in namespace \"C::D::E\"." "print E::ce"
+gdb_test "ptype C" "type = namespace C::C" "ptype C::C"
+gdb_test "ptype E" "type = namespace C::D::E" "ptype C::D::E"
 
 # Some anonymous namespace tests.
 
 gdb_test "print cX" "\\$\[0-9\].* = 6" "print cX"
-gdb_test "print 'F::cXf'" "\\$\[0-9\].* = 7" "print F::cXf"
-gdb_test "print 'F::cXfX'" "\\$\[0-9\].* = 8" "print F::cXfX"
+gdb_test "print 'F::cXf'" "\\$\[0-9\].* = 7" "print 'F::cXf'"
+gdb_test "print F::cXf" "\\$\[0-9\].* = 7" "print F::cXf"
+gdb_test "print 'F::cXfX'" "\\$\[0-9\].* = 8" "print 'F::cXfX'"
+gdb_test "print F::cXfX" "\\$\[0-9\].* = 8" "print F::cXfX"
 gdb_test "print X" "\\$\[0-9\].* = 9" "print X"
-gdb_test "print 'G::Xg'" "\\$\[0-9\].* = 10" "print G::Xg"
-gdb_test "print 'G::XgX'" "\\$\[0-9\].* = 11" "print G::XgX"
+gdb_test "print 'G::Xg'" "\\$\[0-9\].* = 10" "print 'G::Xg'"
+gdb_test "print G::Xg" "\\$\[0-9\].* = 10" "print G::Xg"
+gdb_test "print 'G::XgX'" "\\$\[0-9\].* = 11" "print 'G::XgX'"
+gdb_test "print G::XgX" "\\$\[0-9\].* = 11" "print G::XgX"
 
 # Test namespace renaming.
 
 setup_kfail "gdb/830"
-gdb_test "print 'I::h'" "\\$\[0-9\].* = 14" "print I::h"
+gdb_test "print I::h" "\\$\[0-9\].* = 14" "print I::h"
 
 # Test using directives.
 
@@ -241,13 +275,13 @@ gdb_test "print 'I::h'" "\\$\[0-9\].* = 14" "print I::h"
 setup_kfail "gdb/829"
 gdb_test "print j" "\\$\[0-9\].* = 15" "print j"
 setup_kfail "gdb/829"
-gdb_test "print 'L::k'" "\\$\[0-9\].* = 16" "print L::k"
+gdb_test "print L::k" "\\$\[0-9\].* = 16" "print L::k"
 setup_kfail "gdb/829"
 gdb_test "print k" "No symbol \"k\" in current context." "print k"
 setup_kfail "gdb/829"
 gdb_test "print cdm" "\\$\[0-9\].* = 17" "print cdm"
 setup_kfail "gdb/829"
-gdb_test "print 'Q::o'" "\\$\[0-9\].* = 18" "print Q::o"
+gdb_test "print Q::o" "\\$\[0-9\].* = 18" "print Q::o"
 setup_kfail "gdb/829"
 gdb_test "print o" "No symbol \"o\" in current context." "print o"
 

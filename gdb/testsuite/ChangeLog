@@ -1,3 +1,12 @@
+2002-11-24  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/namespace.exp: Eliminate some of the single quotes, and
+	duplicate some of the single quote tests without the quotes.
+	Change "print E::ce" test.
+	Add some ptype <namespace> tests.
+	* carlton_runnamespace: Use different files for compiler with and
+	without debug info.
+
 2002-11-22  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/namespace.exp: Change a couple of tests to not use

@@ -317,6 +317,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     case TYPE_CODE_MEMBER:
     case TYPE_CODE_METHOD:
     case TYPE_CODE_REF:
+    case TYPE_CODE_NAMESPACE:
       error ("internal error: unhandled type in print_type_scalar");
       break;
 

@@ -463,13 +463,10 @@ cp_check_namespace_symbol (const char *name, int len)
 
   if (sym == NULL)
     {
-      struct type *type = alloc_type (objfile);
-      INIT_CPLUS_SPECIFIC (type);
-      TYPE_TAG_NAME (type) = obsavestring (name, len, &objfile->type_obstack);
-      TYPE_NAME (type) = TYPE_TAG_NAME (type);
-      TYPE_CODE (type) = TYPE_CODE_NAMESPACE;
-      TYPE_LENGTH (type) = 0;
-      
+      struct type *type = init_type (TYPE_CODE_NAMESPACE, 0, 0,
+				     name_copy, objfile);
+      TYPE_TAG_NAME (type) = TYPE_NAME (type);
+
       sym = obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_LANGUAGE (sym) = language_cplus;
