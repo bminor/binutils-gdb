@@ -1,3 +1,14 @@
+Mon Oct  5 12:02:31 1998  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* dwarf1.c : New file.  Adds _bfd_dwarf1_find_nearest_line.
+	* configure.in (elf): Add dwarf1.lo.
+	* elf_bfd.h (elf_ob_tdata): Add dwarf1_find_line_info.
+	* elf.c (_bfd_elf_find_nearest_line): Add call to 
+	_bfd_dwarf1_find_nearest_line.
+	* elf32-mips.c (_bfd_mips_elf_find_nearest_line): 
+	Add call to _bfd_dwarf1_find_nearest_line.
+	* configure: Rebuilt.
+
 Mon Oct  5 10:06:22 1998  Catherine Moore  <clm@cygnus.com>
 
         * elflink.h (elf_gc_sections):  Do not allow garbage
