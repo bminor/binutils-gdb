@@ -61,7 +61,32 @@ static void sparclet_open PARAMS ((char *args, int from_tty));
 
 /* is wim part of psr?? */
 /* monitor wants lower case */
-static char *sparclet_regnames[NUM_REGS] = REGISTER_NAMES;
+static char *sparclet_regnames[] = {
+  "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7", 
+  "o0", "o1", "o2", "o3", "o4", "o5", "o6", "o7", 
+  "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7", 
+  "i0", "i1", "i2", "i3", "i4", "i5", "i6", "i7", 
+
+  "", "", "", "", "", "", "", "", /* no FPU regs */
+  "", "", "", "", "", "", "", "", 
+  "", "", "", "", "", "", "", "", 
+  "", "", "", "", "", "", "", "", 
+				  /* no CPSR, FPSR */
+  "y", "psr", "wim", "tbr", "pc", "npc", "", "", 
+
+  "ccsr", "ccpr", "cccrcr", "ccor", "ccobr", "ccibr", "ccir", "", 
+
+  /*       ASR15                 ASR19 (don't display them) */  
+  "asr1",  "", "asr17", "asr18", "", "asr20", "asr21", "asr22", 
+/*
+  "awr0",  "awr1",  "awr2",  "awr3",  "awr4",  "awr5",  "awr6",  "awr7",  
+  "awr8",  "awr9",  "awr10", "awr11", "awr12", "awr13", "awr14", "awr15", 
+  "awr16", "awr17", "awr18", "awr19", "awr20", "awr21", "awr22", "awr23", 
+  "awr24", "awr25", "awr26", "awr27", "awr28", "awr29", "awr30", "awr31", 
+  "apsr",
+ */
+};
+
 
 
 /* Function: sparclet_supply_register

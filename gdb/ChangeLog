@@ -1,3 +1,76 @@
+2000-05-10  Michael Snyder  <msnyder@seadog.cygnus.com>
+	Make Sparc a Multi-Arch target.  Discard PARAMS macro (require ANSI).
+	* sparc-tdep.c: include arch-utils.h.
+	(SPARC_HAS_FPU, FP_REGISTER_BYTES, FP_MAX_REG NUM, SPARC_INTREG_SIZE,
+	DUMMY_REG_SAVE_OFFSET): provide multi-arch-compatible definitions.
+	(GDB_TARGET_IS_SPARC64): make into a runtime test.
+	(struct frame_extra_info): Define, use instead of the macro.
+	(Many places): Use alloca instead of statically allocated buffers
+	that depend on a multi-arch variable such as MAX_REGISTER_RAW_SIZE.
+	(sparc_extract_struct_value_address): Accept a pointer arg instead
+	of an array sized by REGISTER_BYTES.
+	(examine_prologue): Accept a pointer to an array of CORE_ADDR, 
+	instead of the defunct struct frame_saved_regs.  Recognize new
+	Sparc64 store instructions as part of the prologue.  Ignore the
+	destination of a frame store when parsing the prologue (so long
+	as it's on the stack).
+	(sparc_push_dummy_frame): Fix incorrect buffer offset for PSTATE.
+	(sparc_frame_find_saved_regs): Accept a ptr to an array of CORE_ADDR
+	instead of the defunct struct frame_saved_regs.
+	(supply_gregset): Discard unnecessary 'zerobuf': just send NULL to
+	supply_register.  Provide 4-byte offset to compensate for diff
+	between size of the prgreg_t elements on a 64-bit host and size
+	of the registers for a 32-bit target.  Fill all inaccessible regs
+	with zero so they won't keep being requested again and again.
+	(fill_gregset): Handle 32/64 size difference between registers
+	and prgreg_t.  Handle as many new 64-bit regs as possible.
+	(supply_fpregset, fill_fpregset): Attempt to handle 64-bit world.
+	(sparc_push_arguments): Rename to sparc32_push_arguments.
+	Copy arguments into registers as well as onto stack, so that the
+	CALL_DUMMY (code pushed onto the target stack) is not required.
+	(sparc_extract_return_value): Rename to sparc32_extract_return_value.
+	(sparc_store_return_value): Use memset instead of bzero.
+	Use write_register_gen instead of write_register_bytes.
+	(sparclet_store_return_value): New function.
+	(_initialize_sparc_tdep): Call register_gdbarch_init to activate
+	the gdbarch multi-architecture system.
+	(sp64_push_arguments): Rename to sparc64_push_arguments.
+	Extend to store arguments in general registers as well as on stack.
+	(sparc64_extract_return_value): Rename to sp64_extract_return_value.
+	Use as a private function, to be called by the new external function
+	sparc64_extract_return_value.
+	(sparclet_extract_return_value): New function.
+	(sparc32_stack_align, sparc64_stack_align, sparc32_register_name,
+	sparc64_register_name, sparc_print_extra_frame_info,
+	sparclite_register_name, sparclet_register_name, 
+	sparc_push_return_address, sparc64_use_struct_convention, 
+	sparc32_store_struct_return, sparc64_store_struct_return, 
+	sparc32_register_virtual_type, sparc64_register_virtual_type, 
+	sparc32_register_size, sparc64_register_size, 
+	sparc32_register_byte, sparc64_register_byte, 
+	sparc_gdbarch_skip_prologue, sparc_convert_to_virtual, 
+	sparc_convert_to_raw, sparc_frame_init_saved_regs, 
+	sparc_frame_address, sparc_gdbarch_fix_call_dummy, 
+	sparc_coerce_float_to_double, sparc_call_dummy_address, 
+	sparc_y_regnum, sparc_reg_struct_has_addr, sparc_intreg_size,
+	sparc_return_value_on_stack): New functions supporting multi-arch.
+	(sparc_gdbarch_init): New function; initialize multi-arch.
+	(struct gdbarch_tdep): Define, use for private multi-arch data.
+	* config/sparc/tm-sparc.h: Move definitions around, enclose with
+	#ifdef GDB_MULTI_ARCH tests, provide some multi-arch alternate
+	definitions.  Add enums for register names, to help debugging gdb.
+	This header file must work for non-multi-arch and for multi-arch.
+	* config/sparc/tm-sp64.h: Add GDB_MULTI_ARCH configuration.  Also add
+	AT_ENTRY_POINT definitions for CALL_DUMMY, for non-multi-arch case.
+	Define GDB_MULTI_ARCH.
+	* config/sparc/tm-sparclet.h: Add GDB_MULTI_ARCH configuration.
+	Do not define GDB_MULTI_ARCH (bfd does not correctly identify target).
+	* config/sparc/tm-sparclite.h: Ditto.
+	* config/sparc/tm-sun4sol2.h: Define GDB_MULTI_ARCH.
+	* sparclet-rom.c (sparclet_regnames): Initialize explicitly, to
+	avoid using deprecated REGISTER_NAMES macro.
+	* Makefile.in: Let sparc-tdep.c depend on arch-utils.h.
+
 2000-05-08  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* gdbarch.sh: Add FP0_REGNUM to list of multi-arched register numbers.

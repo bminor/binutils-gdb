@@ -19,6 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+/*#define GDB_MULTI_ARCH 2*/
+
 #include "sparc/tm-sparc.h"
 #include "tm-sysv4.h"
 
