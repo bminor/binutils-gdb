@@ -633,6 +633,7 @@ instruction_address::function::do_jsr:instruction_address nia, signed32 *rLink, 
 // ld[{.b.h.d}]
 void::function::do_ld:int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
 	unsigned32 addr;
+	unsigned64 u64;
 	switch (sz)
 	  {
 	  case 0:
@@ -660,7 +661,9 @@ void::function::do_ld:int Dest, unsigned32 Base, unsigned32 *rBase, int m , int 
 	    addr = Base + (S ? (Offset << 3) : Offset);
 	    if (m)
 	      *rBase = addr;
-	    *(unsigned64*)(&GPR(Dest)) = MEM (signed, addr, 8);
+	    u64 = MEM (signed, addr, 8);
+	    GPR(Dest) = (unsigned32) u64;
+	    GPR(Dest+1) = (unsigned32) (u64 >> 32);
 	    break;
 	  default:
 	    addr = -1;
@@ -895,6 +898,7 @@ void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndM
 // st[{.b|.h|.d}]
 void::function::do_st:int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
 	unsigned32 addr;
+	unsigned64 u64;
 	switch (sz)
 	  {
 	  case 0:
@@ -914,7 +918,9 @@ void::function::do_st:int Source, unsigned32 Base, unsigned32 *rBase, int m , in
 	      engine_error (SD, CPU, cia, "0x%lx: st.d with odd source register %d",
 	                    cia.ip, Source);
 	    addr = Base + (S ? (Offset << 3) : Offset);
-	    STORE (addr, 8, *(unsigned64*)&GPR(Source));
+	    u64 = GPR (Source);
+	    u64 |= (((unsigned64) GPR (Source+1)) << 32);
+	    STORE (addr, 8, u64);
 	    break;
 	  default:
 	    addr = -1;

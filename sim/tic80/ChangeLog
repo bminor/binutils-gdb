@@ -11,6 +11,7 @@ Sun May 11 10:25:14 1997  Michael Meissner  <meissner@cygnus.com>
 	instead of TRACE_ALU2.
 	(sl r): Use EndMask as is, instead of using Source+1 register.
 	(subu): Operands are unsigned, not signed.
+	(do_{ld,st}): Fix endian problems with ld.d/st.d.
 
 Sat May 10 12:35:47 1997  Michael Meissner  <meissner@cygnus.com>
 
