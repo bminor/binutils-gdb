@@ -1,3 +1,14 @@
+2005-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/hint.b-err.l: New file.
+	* gas/ia64/hint.b-err.s: Likewise.
+	* gas/ia64/hint.b-warn.l: Likewise.
+	* gas/ia64/hint.b-warn.s: Likewise.
+
+	* gas/ia64/ia64.exp: Run hint.b-err and hint.b-warn.
+
+	* gas/ia64/opc-b.d: Pass -mhint.b=ok to as.
+
 2005-02-17  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/nostkreg.[ds]: New.

@@ -73,6 +73,15 @@ will make the assembler issue a warning when an unwind directive check
 fails.  This is the default.  @code{-munwind-check=error} will make the
 assembler issue an error when an unwind directive check fails.
 
+@item -mhint.b=ok
+@item -mhint.b=warning
+@item -mhint.b=error
+These options control what the assembler will do when the @samp{hint.b}
+instruction is used.  @code{-mhint.b=ok} will make the assembler accept
+@samp{hint.b}.  @code{-mint.b=warning} will make the assembler issue a
+warning when @samp{hint.b} is used.  @code{-mhint.b=error} will make
+the assembler treat @samp{hint.b} as an error, which is the default.
+
 @item -x
 @item -xexplicit
 These options turn on dependency violation checking.

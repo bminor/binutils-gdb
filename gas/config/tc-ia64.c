@@ -229,6 +229,14 @@ static struct
        that are predicatable.  */
     expressionS qp;
 
+    /* What to do when hint.b is used.  */
+    enum
+      {
+	hint_b_error,
+	hint_b_warning,
+	hint_b_ok
+      } hint_b;
+
     unsigned int
       manual_bundling : 1,
       debug_dv: 1,
@@ -6705,9 +6713,34 @@ emit_one_bundle ()
 	  enum ia64_opnd opnd1, opnd2;
 
 	  if ((strcmp (idesc->name, "nop") == 0)
-	      || (strcmp (idesc->name, "hint") == 0)
 	      || (strcmp (idesc->name, "break") == 0))
 	    insn_unit = required_unit;
+	  else if (strcmp (idesc->name, "hint") == 0)
+	    {
+	      insn_unit = required_unit;
+	      if (required_unit == IA64_UNIT_B)
+		{
+		  switch (md.hint_b)
+		    {
+		    case hint_b_ok:
+		      break;
+		    case hint_b_warning:
+		      as_warn ("hint in B unit may be treated as nop");
+		      break;
+		    case hint_b_error:
+		      /* When manual bundling is off and there is no
+			 user template, we choose a different unit so
+			 that hint won't go into the current slot. We
+			 will fill the current bundle with nops and
+			 try to put hint into the next bundle.  */
+		      if (!manual_bundling && user_template < 0)
+			insn_unit = IA64_UNIT_I;
+		      else
+			as_bad ("hint in B unit can't be used");
+		      break;
+		    }
+		}
+	    }
 	  else if (strcmp (idesc->name, "chk.s") == 0
 	      || strcmp (idesc->name, "mov") == 0)
 	    {
@@ -6916,6 +6949,18 @@ md_parse_option (c, arg)
 	  else
 	    return 0;
 	}
+      else if (strncmp (arg, "hint.b=", 7) == 0)
+	{
+	  arg += 7;
+	  if (strcmp (arg, "ok") == 0)
+	    md.hint_b = hint_b_ok;
+	  else if (strcmp (arg, "warning") == 0)
+	    md.hint_b = hint_b_warning;
+	  else if (strcmp (arg, "error") == 0)
+	    md.hint_b = hint_b_error;
+	  else
+	    return 0;
+	}
       else
 	return 0;
       break;
@@ -7030,6 +7075,8 @@ IA-64 options:\n\
   -mle | -mbe		  select little- or big-endian byte order (default -mle)\n\
   -munwind-check=[warning|error]\n\
 			  unwind directive check (default -munwind-check=warning)\n\
+  -mhint.b=[ok|warning|error]\n\
+			  hint.b check (default -mhint.b=error)\n\
   -x | -xexplicit	  turn on dependency violation checking\n\
   -xauto		  automagically remove dependency violations (default)\n\
   -xnone		  turn off dependency violation checking\n\
@@ -7382,6 +7429,7 @@ ia64_init (argc, argv)
   md.detect_dv = 1;
   /* FIXME: We should change it to unwind_check_error someday.  */
   md.unwind_check = unwind_check_warning;
+  md.hint_b = hint_b_error;
 }
 
 /* Return a string for the target object file format.  */
@@ -10598,6 +10646,20 @@ md_assemble (str)
 	    as_bad ("AR %d cannot be accessed by %c-unit",
 		    (int) (CURR_SLOT.opnd[rop].X_add_number - REG_AR),
 		    TOUPPER (unit));
+	}
+    }
+  else if (strcmp (idesc->name, "hint.b") == 0)
+    {
+      switch (md.hint_b)
+	{
+	case hint_b_ok:
+	  break;
+	case hint_b_warning:
+	  as_warn ("hint.b may be treated as nop");
+	  break;
+	case hint_b_error:
+	  as_bad ("hint.b shouldn't be used");
+	  break;
 	}
     }
 

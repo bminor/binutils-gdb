@@ -1,5 +1,7 @@
 -*- text -*-
 
+* New command line option -mhint.b=[ok|warning|error] for IA64 targets.
+
 * New command line option -munwind-check=[warning|error] for IA64
   targets.
 

@@ -1,4 +1,4 @@
-#as: -xnone
+#as: -xnone -mhint.b=ok
 #objdump: -d
 #name: ia64 opc-b
 

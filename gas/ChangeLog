@@ -1,3 +1,17 @@
+2005-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention "-mhint.b=[ok|warning|error]".
+
+	* config/tc-ia64.c (md): Add hint_b.
+	(emit_one_bundle): Handle md.hint_b for "hint".
+	(md_parse_option): Accepted "-mhint.b=[ok|warning|error]".
+	(md_show_usage): Add "-mhint.b=[ok|warning|error]".
+	(ia64_init): Set md.hint_b to error.
+	(md_assemble): Handle md.hint_b for "hint.b".
+
+	* doc/as.texinfo: Add "-mhint.b=[ok|warning|error]".
+	* doc/c-ia64.texi: Likewise.
+
 2005-02-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* tc.h (struct relax_type, relax_typeS): Move from here..
