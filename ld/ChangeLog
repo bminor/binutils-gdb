@@ -1,3 +1,11 @@
+Wed Aug 24 12:52:30 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in: Change i[34]86 to i[345]86.
+
+Sun Aug 21 16:17:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* emulparams/hp3hpux.sh: Define __DYNAMIC to be 0.
+
 Thu Aug 18 15:37:45 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	Make the ELF linker handle orphaned sections reasonably.  Also,
