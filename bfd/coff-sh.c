@@ -3198,6 +3198,18 @@ static const bfd_coff_backend_data bfd_coff_small_swap_table =
   false,
 #endif
   2,
+  false,
+  2,
+#ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
+  true,
+#else
+  false,
+#endif
+#ifdef COFF_DEBUG_STRING_WIDE_PREFIX
+  4,
+#else
+  2,
+#endif
   coff_swap_filehdr_in, coff_swap_aouthdr_in, coff_swap_scnhdr_in,
   coff_swap_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,

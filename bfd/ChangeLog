@@ -1,3 +1,10 @@
+Fri Apr 28 08:35:21 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* coff-mips.c (mips_ecoff_backend_data):  Add initialization of
+	_bfd_coff_force_symnames in strings and
+	_bfd_coff_debug_string_prefix_length to their default values.
+	* coff-sh.c: (bfd_coff_small_swap_table): Ditto.
+
 Fri Apr 28 08:05:12 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* coff-alpha.c (alpha_ecoff_backend_data): Add initialization of
