@@ -1,5 +1,6 @@
 2002-10-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* Makefile.in (i386v-nat.o): Add $(i386_tdep_h).
 	* i386v-nat.c: Include "i386-tdep.h".
 
 2002-10-22  David Carlton  <carlton@math.stanford.edu>
