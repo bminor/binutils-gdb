@@ -1,3 +1,8 @@
+Tue Jun 23 23:22:53 1992  Per Bothner  (bothner@cygnus.com)
+
+	* config/mh-posix:  New file, for Posix-compliant systems.
+	* configure.in:  Use mh-posix for Linux (free Unix clone).
+
 Tue Jun 23 21:59:20 1992  Fred Fish  (fnf@cygnus.com)
 
 	* sysdep-norm.h (alloca):  Protect against previous definition as

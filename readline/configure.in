@@ -35,6 +35,9 @@ m88kbcs | sysv*)
 	esac
 	;;
 
+linux)
+	host_makefile_frag=config/mh-posix
+	;;
 aix*)
 	host_makefile_frag=config/mh-sysv
 	case "${host_cpu}" in
