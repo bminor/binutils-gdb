@@ -1,7 +1,41 @@
+Mon Aug 19 13:44:46 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* 
+
 Mon Aug 19 00:41:04 1991  Michael Tiemann  (tiemann at cygint.cygnus.com)
 
 	* dbxread.c (read_struct_type): Grok anon structs for C++.
 	(vb_name, vptr_name): Null terminate these strings.
+
+Fri Aug 16 08:31:03 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Minor bug fixes from BSD Net2 gdb:
+
+	* blockframe.c (get_prev_frame_info):  If FRAME_CHAIN_COMBINE
+	returns 0, there is no previous frame.
+	* breakpoint.c (commands_command):  If !from_tty, don't call
+	input_from_terminal_p().
+	* dbxread.c (record_misc_function):  Speed up slightly.
+	(compare_psymbols):  Ditto.
+	* infcmd.c (do_registers_info):  Take a second argument to
+	determine whether to print float registers.  "info registers"
+	does not do so anymore.  "info all-registers" does, now.
+	* mips-tdep.c, pyr-tdep.c (xxx_do_registers_info):  Take second
+	arg and ignore it.
+	* tm-mips.h, tm-pyr.h (DO_REGISTERS_INFO):  Pass second arg.
+	* inflow.c (initialize_inflow):  Set tflags_ours correctly.
+	
+	Other fixes:
+
+	* breakpoint.c (bpstat_do_actions):  Use a cleanup to restore
+	executing_breakpoint_commands if we are interrupted by error.
+	* coffread.c (init_lineno):  Avoid problem with zero-sized linetab
+	versus malloc/free.  From: john@labtam.labtam.oz.au (John Carey).
+	* core.c (solib_add_stub, core_open):  Call SOLIB_ADD inside a
+	catch_errors() so we can setup the frame regardless of whether
+	the shared libs work.
+	* ieee-float.c (double_to_ieee_extended):  Get exponent from
+	right place in little-endian systems.  From John Carey.
 
 Thu Aug 15 18:43:57 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
