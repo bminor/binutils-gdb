@@ -710,9 +710,7 @@ or @kbd{C-d} to exit.)
 @menu
 * Invoking GDB::                How to start @value{GDBN}
 * Quitting GDB::                 How to quit @value{GDBN}
-@ifclear BARETARGET
 * Shell Commands::              How to use shell commands inside @value{GDBN}
-@end ifclear
 @end menu
 
 @node Invoking GDB
@@ -1024,7 +1022,6 @@ device, you can release it with the @code{detach} command
 (@pxref{Attach, ,Debugging an already-running process}).
 @end ifclear
 
-@ifclear BARETARGET
 @node Shell Commands
 @section Shell commands
 
@@ -1036,23 +1033,25 @@ just use the @code{shell} command.
 @item shell @var{command string}
 @kindex shell
 @cindex shell escape
-Directs @value{GDBN} to invoke an inferior shell to execute @var{command
-string}.  If it exists, the environment variable @code{SHELL} is used
-for the name of the shell to run.  Otherwise @value{GDBN} uses
-@code{/bin/sh}.
+Invoke a shell to execute @var{command string}.  If it exists, the
+environment variable @code{SHELL} is used for the name of the shell to
+run.
+@ifclear DOSHOST
+Otherwise @value{GDBN} uses @code{/bin/sh}.
+@end ifclear
 @end table
 
 The utility @code{make} is often needed in development environments.
-You do not have to use the @code{shell} command for this purpose in @value{GDBN}:
+You do not have to use the @code{shell} command for this purpose in
+@value{GDBN}:
 
 @table @code
 @item make @var{make-args}
 @kindex make
 @cindex calling make
-Causes @value{GDBN} to execute an inferior @code{make} program with the specified
+Execute the @code{make} program with the specified
 arguments.  This is equivalent to @samp{shell make @var{make-args}}.
 @end table
-@end ifclear
 
 @node Commands
 @chapter @value{GDBN} Commands
@@ -4271,11 +4270,11 @@ Decode based on the GNU C++ compiler (@code{g++}) encoding algorithm.
 @item lucid
 Decode based on the Lucid C++ compiler (@code{lcc}) encoding algorithm.
 
-@item cfront
+@item arm
 Decode using the algorithm in the @cite{C++ Annotated Reference Manual}.
-@strong{Warning:} despite the name, this setting alone is not sufficient
-to allow debugging @code{cfront}-generated executables.  @value{GDBN}
-would require further enhancement to permit that.
+@strong{Warning:} this setting alone is not sufficient to allow
+debugging @code{cfront}-generated executables.  @value{GDBN} would
+require further enhancement to permit that.
 @end table
 
 @item show demangle-style
@@ -7107,10 +7106,11 @@ Print ten commands just after the commands last printed.
 @cindex size of screen
 @cindex pauses in output
 
-Certain commands to @value{GDBN} may produce large amounts of information
-output to the screen.  To help you read all of it, @value{GDBN} pauses and
-asks you for input at the end of each page of output.  Type @key{RET}
-when you want to continue the output.  @value{GDBN} also uses the screen
+Certain commands to @value{GDBN} may produce large amounts of
+information output to the screen.  To help you read all of it,
+@value{GDBN} pauses and asks you for input at the end of each page of
+output.  Type @key{RET} when you want to continue the output, or @kbd{q}
+to discard the remaining output.  @value{GDBN} also uses the screen
 width setting to determine when to wrap lines of output.  Depending on
 what is being printed, it tries to break the line at a readable place,
 rather than simply letting it overflow onto the following line.
