@@ -64,6 +64,9 @@ AC_HEADER_SYS_WAIT
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(sbrk utimes)
 
+# Some systems have frexp only in -lm, not in -lc.
+AC_SEARCH_LIBS(frexp, -lm)
+
 AC_MSG_CHECKING(for time_t in time.h)
 AC_CACHE_VAL(bu_cv_decl_time_t_time_h,
 [AC_TRY_COMPILE([#include <time.h>], [time_t i;],

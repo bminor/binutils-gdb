@@ -1,5 +1,8 @@
 1999-06-12  Ian Lance Taylor  <ian@zembu.com>
 
+	* configure.in: If frexp is not available, check in -lm.
+	* configure: Rebuild.
+
 	* readelf.c (get_elf_class): Use correct printf format for type.
 	(get_data_encoding): Likewise.
 	(get_osabi_name): Likewise.
