@@ -400,40 +400,82 @@ write_contents (abfd, sec, xxx)
 
   fixup_segment (seginfo->fix_root, sec);
 
+  n = 0;
   for (i = 0, fixp = seginfo->fix_root; fixp; fixp = fixp->fx_next)
-    if (fixp->fx_addsy)
-      {
-	symbolS *sym = fixp->fx_addsy;
-	asection *sec = sym->bsym->section;
-	if (sec == &bfd_und_section
-	    || sec == &bfd_abs_section
-	    || sec == &bfd_com_section)
-	  continue;
-	if (sym->bsym == sec->symbol)
-	  continue;
-	/* If the section symbol isn't going to be output, the relocs
-	   at least should still work.  If not, figure out what to do
-	   when we run into that case.  */
-	fixp->fx_offset += S_GET_VALUE (sym);
-	fixp->fx_addsy = symbol_find (sec->name);
-	if (!fixp->fx_addsy)
-	  {
-	    fixp->fx_addsy = symbol_make (sec->name);
-	    fixp->fx_addsy->bsym = sec->symbol;
-	  }
-      }
+    {
+      n++;
+      if (fixp->fx_addsy)
+	{
+	  symbolS *sym = fixp->fx_addsy;
+	  asection *sec = sym->bsym->section;
+	  if (sec == &bfd_und_section
+	      || sec == &bfd_abs_section
+	      || sec == &bfd_com_section)
+	    continue;
+	  if (sym->bsym == sec->symbol)
+	    continue;
+	  /* If the section symbol isn't going to be output, the relocs
+	     at least should still work.  If not, figure out what to do
+	     when we run into that case.  */
+	  fixp->fx_offset += S_GET_VALUE (sym);
+	  fixp->fx_addsy = symbol_find (sec->name);
+	  if (!fixp->fx_addsy)
+	    {
+	      fixp->fx_addsy = symbol_make (sec->name);
+	      fixp->fx_addsy->bsym = sec->symbol;
+	    }
+	}
+    }
 
   /* Force calculations (size, vma) to get done.  */
   bfd_set_section_contents (stdoutput, sec, "", 0, 0);
 
   /* Set up reloc information as well.  */
-  n = 0;
-  for (fixp = seginfo->fix_root; fixp; fixp = fixp->fx_next)
-    n++;
   relocs = (arelent **) bfd_alloc_by_size_t (stdoutput,
 					     n * sizeof (arelent *));
 
-  for (frags = seginfo->frchainP->frch_root, fixp = seginfo->fix_root, i = 0;
+  i = 0;
+  for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
+    {
+      arelent *reloc;
+      extern arelent *tc_gen_reloc ();
+      char *data;
+      bfd_reloc_status_type s;
+
+      if (fixp->fx_addsy == 0)
+	{
+	  /* @@ Need some other flag to indicate which have already
+	     been performed...  */
+	  n--;
+	  continue;
+	}
+      reloc = tc_gen_reloc (sec, fixp);
+      if (!reloc)
+	{
+	  n--;
+	  continue;
+	}
+      data = fixp->fx_frag->fr_literal + fixp->fx_where;
+      if (fixp->fx_where + 4
+	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
+	abort ();
+      s = bfd_perform_relocation (stdoutput, reloc, data - reloc->address,
+				  sec, stdoutput);
+      switch (s)
+	{
+	case bfd_reloc_ok:
+	  break;
+	default:
+	  as_fatal ("bad return from bfd_perform_relocation");
+	}
+      relocs[i++] = reloc;
+    }
+      
+  if (n)
+    bfd_set_reloc (stdoutput, sec, relocs, n);
+
+  /* Write out the frags.  */
+  for (frags = seginfo->frchainP->frch_root;
        frags;
        frags = frags->fr_next)
     {
@@ -443,44 +485,6 @@ write_contents (abfd, sec, xxx)
       long count;
 
       assert (frags->fr_type == rs_fill);
-      while (fixp
-	     && fixp->fx_frag == frags)
-	{
-	  arelent *reloc;
-	  extern arelent *tc_gen_reloc ();
-	  char *data;
-	  static bfd_reloc_status_type s;
-
-	  if (fixp->fx_addsy == 0)
-	    {
-	      /* @@ Need some other flag to indicate which have already
-		 been performed...  */
-	      n--;
-	      goto next;
-	    }
-	  reloc = tc_gen_reloc (sec, fixp);
-	  if (!reloc)
-	    {
-	      n--;
-	      goto next;
-	    }
-	  data = frags->fr_literal + fixp->fx_where;
-	  if (fixp->fx_where + 4 > frags->fr_fix + frags->fr_offset)
-	    abort ();
-	  s = bfd_perform_relocation (stdoutput, reloc, data - reloc->address,
-				      sec, stdoutput);
-	  switch (s)
-	    {
-	    case bfd_reloc_ok:
-	      break;
-	    default:
-	      printf ("bad s value\n");
-	      abort ();
-	    }
-	  relocs[i++] = reloc;
-	next:
-	  fixp = fixp->fx_next;
-	}
       if (frags->fr_fix)
 	{
 	  x = bfd_set_section_contents (stdoutput, sec,
@@ -502,12 +506,6 @@ write_contents (abfd, sec, xxx)
 	    offset += fill_size;
 	  }
     }
-  /* Did we miss any relocs?  */
-  if (fixp != 0)
-    abort ();
-
-  if (n)
-    bfd_set_reloc (stdoutput, sec, relocs, n);
 }
 #endif
 

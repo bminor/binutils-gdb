@@ -1,5 +1,17 @@
 Mon Mar 15 12:17:28 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* write.c (write_contents): Compute the relocs before writing out
+	the section contents.
+	* config/obj-ecoff.h, config/obj-ecoff.c: Numerous changes to get
+	symbol table and values right.
+	* config/tc-mips.h (LOCAL_LABEL): If OBJ_ECOFF, any label starting
+	with $L is local.
+	* config/tc-mips.c (tc_gen_reloc): If OBJ_ECOFF, adjust the addend
+	by the section vma.
+
+	* config/z8k.mt (TARG_CPU_DEPENDENTS): The relevant file is
+	z8k-opc.h, not z8k.h.
+
 	* config/obj-coffbfd.c (obj_coff_endef): Correct test for .bf
 	symbol.
 
