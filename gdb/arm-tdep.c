@@ -1503,7 +1503,7 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	}
     }
 
-  /* Return the botom of the argument list (pointed to by fp).  */
+  /* Return the bottom of the argument list (pointed to by fp).  */
   return fp;
 }
 

@@ -1218,22 +1218,24 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       if (cu_header.version != 2)
 	{
-	  error ("Dwarf Error: wrong version in compilation unit header.");
+	  error ("Dwarf Error: wrong version in compilation unit header (is %d, should be %d) [in module %s]", cu_header.version, 2, bfd_get_filename (abfd));
 	  return;
 	}
       if (cu_header.abbrev_offset >= dwarf_abbrev_size)
 	{
-	  error ("Dwarf Error: bad offset (0x%lx) in compilation unit header (offset 0x%lx + 6).",
+	  error ("Dwarf Error: bad offset (0x%lx) in compilation unit header (offset 0x%lx + 6) [in module %s]",
 		 (long) cu_header.abbrev_offset,
-		 (long) (beg_of_comp_unit - dwarf_info_buffer));
+		 (long) (beg_of_comp_unit - dwarf_info_buffer),
+		 bfd_get_filename (abfd));
 	  return;
 	}
       if (beg_of_comp_unit + cu_header.length + cu_header.initial_length_size
 	  > dwarf_info_buffer + dwarf_info_size)
 	{
-	  error ("Dwarf Error: bad length (0x%lx) in compilation unit header (offset 0x%lx + 0).",
+	  error ("Dwarf Error: bad length (0x%lx) in compilation unit header (offset 0x%lx + 0) [in module %s]",
 		 (long) cu_header.length,
-		 (long) (beg_of_comp_unit - dwarf_info_buffer));
+		 (long) (beg_of_comp_unit - dwarf_info_buffer),
+		 bfd_get_filename (abfd));
 	  return;
 	}
       /* Complete the cu_header */
@@ -3787,7 +3789,8 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
   abbrev = dwarf2_lookup_abbrev (abbrev_number, cu_header);
   if (!abbrev)
     {
-      error ("Dwarf Error: Could not find abbrev number %d.", abbrev_number);
+      error ("Dwarf Error: Could not find abbrev number %d [in module %s]", abbrev_number,
+		      bfd_get_filename (abfd));
     }
   part_die->offset = info_ptr - dwarf_info_buffer;
   part_die->tag = abbrev->tag;
@@ -3931,7 +3934,8 @@ read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
   abbrev = dwarf2_lookup_abbrev (abbrev_number, cu_header);
   if (!abbrev)
     {
-      error ("Dwarf Error: could not find abbrev number %d.", abbrev_number);
+      error ("Dwarf Error: could not find abbrev number %d [in module %s]", abbrev_number, 
+		      bfd_get_filename (abfd));
     }
   die = dwarf_alloc_die ();
   die->offset = offset;
@@ -4067,8 +4071,9 @@ read_attribute_value (struct attribute *attr, unsigned form,
       info_ptr = read_attribute_value (attr, form, abfd, info_ptr, cu_header);
       break;
     default:
-      error ("Dwarf Error: Cannot handle %s in DWARF reader.",
-	     dwarf_form_name (form));
+      error ("Dwarf Error: Cannot handle %s in DWARF reader [in module %s]",
+	     dwarf_form_name (form),
+	     bfd_get_filename (abfd));
     }
   return info_ptr;
 }
@@ -4149,7 +4154,8 @@ read_address (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
 	  break;
 	default:
 	  internal_error (__FILE__, __LINE__,
-			  "read_address: bad switch, signed");
+			  "read_address: bad switch, signed [in module %s]",
+			  bfd_get_filename (abfd));
 	}
     }
   else
@@ -4167,7 +4173,8 @@ read_address (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
 	  break;
 	default:
 	  internal_error (__FILE__, __LINE__,
-			  "read_address: bad switch, unsigned");
+			  "read_address: bad switch, unsigned [in module %s]",
+			  bfd_get_filename (abfd));
 	}
     }
 
@@ -4282,7 +4289,8 @@ read_offset (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      "read_offset: bad switch");
+		      "read_offset: bad switch [in module %s]",
+		      bfd_get_filename (abfd));
     }
 
  return retval;
@@ -4324,12 +4332,14 @@ read_indirect_string (bfd *abfd, char *buf,
 
   if (dwarf_str_buffer == NULL)
     {
-      error ("DW_FORM_strp used without .debug_str section");
+      error ("DW_FORM_strp used without .debug_str section [in module %s]",
+		      bfd_get_filename (abfd));
       return NULL;
     }
   if (str_offset >= dwarf_str_size)
     {
-      error ("DW_FORM_strp pointing outside of .debug_str section");
+      error ("DW_FORM_strp pointing outside of .debug_str section [in module %s]",
+		      bfd_get_filename (abfd));
       return NULL;
     }
   gdb_assert (HOST_CHAR_BIT == 8);
@@ -5349,7 +5359,8 @@ die_type (struct die_info *die, struct objfile *objfile,
       type_die = follow_die_ref (ref);
       if (!type_die)
 	{
-	  error ("Dwarf Error: Cannot find referent at offset %d.", ref);
+	  error ("Dwarf Error: Cannot find referent at offset %d [in module %s]", 
+			  ref, objfile->name);
 	  return NULL;
 	}
     }
@@ -5357,7 +5368,8 @@ die_type (struct die_info *die, struct objfile *objfile,
   if (!type)
     {
       dump_die (type_die);
-      error ("Dwarf Error: Problem turning type die at offset into gdb type.");
+      error ("Dwarf Error: Problem turning type die at offset into gdb type [in module %s]",
+		      objfile->name);
     }
   return type;
 }
@@ -5381,7 +5393,8 @@ die_containing_type (struct die_info *die, struct objfile *objfile,
       type_die = follow_die_ref (ref);
       if (!type_die)
 	{
-	  error ("Dwarf Error: Cannot find referent at offset %d.", ref);
+	  error ("Dwarf Error: Cannot find referent at offset %d [in module %s]", ref, 
+			  objfile->name);
 	  return NULL;
 	}
       type = tag_type_to_type (type_die, objfile, cu_header);
@@ -5390,7 +5403,8 @@ die_containing_type (struct die_info *die, struct objfile *objfile,
     {
       if (type_die)
 	dump_die (type_die);
-      error ("Dwarf Error: Problem turning containing type into gdb type.");
+      error ("Dwarf Error: Problem turning containing type into gdb type [in module %s]", 
+		      objfile->name);
     }
   return type;
 }
@@ -5427,7 +5441,8 @@ tag_type_to_type (struct die_info *die, struct objfile *objfile,
       if (!die->type)
 	{
 	  dump_die (die);
-	  error ("Dwarf Error: Cannot find type of die.");
+	  error ("Dwarf Error: Cannot find type of die [in module %s]", 
+			  objfile->name);
 	}
       return die->type;
     }
@@ -6602,8 +6617,8 @@ dwarf2_fundamental_type (struct objfile *objfile, int typeid)
 {
   if (typeid < 0 || typeid >= FT_NUM_MEMBERS)
     {
-      error ("Dwarf Error: internal error - invalid fundamental type id %d.",
-	     typeid);
+      error ("Dwarf Error: internal error - invalid fundamental type id %d [in module %s]",
+	     typeid, objfile->name);
     }
 
   /* Look for this particular type in the fundamental type vector.  If

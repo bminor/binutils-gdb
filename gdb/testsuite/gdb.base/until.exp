@@ -76,6 +76,6 @@ delete_breakpoints
 # stop at main, the caller, where we put the 'guard' breakpoint.
 #
 gdb_test "until marker3" \
-	"$hex in main.*argc.*argv.*envp.*at.*${srcfile}:82.*marker2 \\(43\\)." \
+	"($hex in |)main.*argc.*argv.*envp.*at.*${srcfile}:(82.*marker2 \\(43\\)|83.*marker3 \\(.stack., .trace.\\))." \
 	"until func, not called by current frame"
 

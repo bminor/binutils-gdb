@@ -411,8 +411,9 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
          "null symbol".  If there are no real symbols, then there is no
          minimal symbol table at all. */
 
-      if ((msymbol = objfile->msymbols) != NULL)
+      if (objfile->minimal_symbol_count > 0)
 	{
+          msymbol = objfile->msymbols;
 	  lo = 0;
 	  hi = objfile->minimal_symbol_count - 1;
 

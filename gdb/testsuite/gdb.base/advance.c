@@ -29,6 +29,10 @@ int func3 ()
   x = 4;
 }
 
+void marker1 ()
+{
+}
+
 int
 main ()
 {
@@ -38,6 +42,7 @@ main ()
   b = 3;    /* advance this location */
     
   func (c); /* stop here after leaving current frame */
+  marker1 (); /* stop here after leaving current frame */
   func3 (); /* break here */
   result = bar (b + foo (c));
   return 0; /* advance malformed */

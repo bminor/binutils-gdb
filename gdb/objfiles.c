@@ -281,6 +281,8 @@ allocate_objfile (bfd *abfd, int flags)
       obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
 				  xfree);
       flags &= ~OBJF_MAPPED;
+
+      terminate_minimal_symbol_table (objfile);
     }
 
   /* Update the per-objfile information that comes from the bfd, ensuring
@@ -332,6 +334,33 @@ allocate_objfile (bfd *abfd, int flags)
 
   return (objfile);
 }
+
+
+/* Create the terminating entry of OBJFILE's minimal symbol table.
+   If OBJFILE->msymbols is zero, allocate a single entry from
+   OBJFILE->symbol_obstack; otherwise, just initialize
+   OBJFILE->msymbols[OBJFILE->minimal_symbol_count].  */
+void
+terminate_minimal_symbol_table (struct objfile *objfile)
+{
+  if (! objfile->msymbols)
+    objfile->msymbols = ((struct minimal_symbol *)
+                         obstack_alloc (&objfile->symbol_obstack,
+                                        sizeof (objfile->msymbols[0])));
+
+  {
+    struct minimal_symbol *m
+      = &objfile->msymbols[objfile->minimal_symbol_count];
+
+    memset (m, 0, sizeof (*m));
+    SYMBOL_NAME (m) = NULL;
+    SYMBOL_VALUE_ADDRESS (m) = 0;
+    MSYMBOL_INFO (m) = NULL;
+    MSYMBOL_TYPE (m) = mst_unknown;
+    SYMBOL_INIT_LANGUAGE_SPECIFIC (m, language_unknown);
+  }
+}
+
 
 /* Put one object file before a specified on in the global list.
    This can be used to make sure an object file is destroyed before
@@ -810,7 +839,7 @@ have_minimal_symbols (void)
 
   ALL_OBJFILES (ofp)
   {
-    if (ofp->msymbols != NULL)
+    if (ofp->minimal_symbol_count > 0)
       {
 	return 1;
       }
