@@ -1,6 +1,43 @@
+Wed Aug 19 16:19:51 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dlltool.c (usage): Add file parameter.  Change all callers.
+	(main): Don't treat '?' as a special case in getopt return.
+
+	* binutils.texi (dlltool): Document new options.  Add some uses of
+	@var.
+
+Wed Aug 19 16:19:07 1998  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* dlltool.c (gen_def_file): Plug memory leak.  Don't print
+	demangled name if it is NULL.
+
+	Support for exporting all symbols to an output export def file:
+	* dlltool.c ({export_all_symbols, no_default_excludes,
+	no_default_excludes, excludes}): New file static variables.
+	(struct string_list): Type to hold list of symbols to exclude.
+	(scan_drectve_symbols): Renamed from scan_open_obj_file.
+	(scan_filtered_symbols): New static function.
+	(add_excludes): New static function.
+	(match_exclude): New static function.
+	(set_default_excludes): New static function.
+	(filter_symbols): New static function.
+	(scan_all_symbols): New static function.
+	(scan_open_obj_file): New static function.
+	(usage): Document new options.
+	(long_options): Add new options.
+	(main): Handle new options.
+
+1998-07-31 21:24  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (process_program_headers): Print p_offset value with
+	six hex digits.
+	(dynamic_segment_mips_val): Add support for DT_MIPS_FLAGS,
+	DT_MIPS_IVERSION, and DT_MIPS_TIME_STAMP.
+	(process_mips_specific): Also print seconds of time stamp.
+
 Fri Jul 31 10:04:23 1998  Catherine Moore  <clm@cygnus.com>
 
-       * readelf.c (dump_relocations):  EM_ARM uses rela relocs.
+        * readelf.c (dump_relocations):  EM_ARM uses rela relocs.
 
 1998-07-30 16:25  Ulrich Drepper  <drepper@cygnus.com>
 

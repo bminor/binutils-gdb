@@ -323,6 +323,17 @@ static int dontdeltemps = 0;
 static int interwork = 0;
 #endif 
 
+/* True if we should export all symbols.  Otherwise, we only export
+   symbols listed in .drectve sections or in the def file.  */
+static boolean export_all_symbols;
+
+/* True if we should exclude the symbols in DEFAULT_EXCLUDES when
+   exporting all symbols.  */
+static boolean do_default_excludes;
+
+/* Default symbols to exclude when exporting all the symbols.  */
+static const char *default_excludes = "DllMain@12,DllEntryPoint@0,impure_ptr";
+
 static char *def_file;
 
 extern char * program_name;
@@ -481,11 +492,28 @@ typedef struct export
   }
 export_type;
 
+/* A list of symbols which we should not export.  */
+ 
+struct string_list
+{
+  struct string_list *next;
+  char *string;
+};
+
+static struct string_list *excludes;
+
 static const char *rvaafter PARAMS ((int));
 static const char *rvabefore PARAMS ((int));
 static const char *asm_prefix PARAMS ((int));
 static void append_import PARAMS ((const char *, const char *, int));
 static void run PARAMS ((const char *, char *));
+static void scan_drectve_symbols PARAMS ((bfd *));
+static void scan_filtered_symbols PARAMS ((bfd *, PTR, long, unsigned int));
+static void add_excludes PARAMS ((const char *));
+static boolean match_exclude PARAMS ((const char *));
+static void set_default_excludes PARAMS ((void));
+static long filter_symbols PARAMS ((bfd *, PTR, long, unsigned int));
+static void scan_all_symbols PARAMS ((bfd *));
 static void scan_open_obj_file PARAMS ((bfd *));
 static void scan_obj_file PARAMS ((const char *));
 static void dump_def_info PARAMS ((FILE *));
@@ -495,7 +523,9 @@ static void gen_def_file PARAMS ((void));
 static void generate_idata_ofile PARAMS ((FILE *));
 static void gen_exp_file PARAMS ((void));
 static const char *xlate PARAMS ((const char *));
+#if 0
 static void dump_iat PARAMS ((FILE *, export_type *));
+#endif
 static char *make_label PARAMS ((const char *, const char *));
 static bfd *make_one_lib_file PARAMS ((export_type *, int));
 static bfd *make_head PARAMS ((void));
@@ -509,13 +539,13 @@ static void process_duplicates PARAMS ((export_type **));
 static void fill_ordinals PARAMS ((export_type **));
 static int alphafunc PARAMS ((const void *, const void *));
 static void mangle_defs PARAMS ((void));
-static void usage PARAMS ((int));
-static void tell PARAMS ((const char *, va_list));
+static void usage PARAMS ((FILE *, int));
+static void display PARAMS ((const char *, va_list));
 static void inform PARAMS ((const char *, ...));
 static void warn PARAMS ((const char *, ...));
 
 static void
-tell (message, args)
+display (message, args)
      const char * message;
      va_list      args;
 {
@@ -549,7 +579,7 @@ inform (message, va_alist)
   va_start (args);
 #endif
 
-  tell (message, args);
+  display (message, args);
   
   va_end (args);
 }
@@ -571,7 +601,7 @@ warn (message, va_alist)
   va_start (args);
 #endif
   
-  tell (message, args);
+  display (message, args);
 
   va_end (args);
 }
@@ -1017,8 +1047,11 @@ run (what, args)
     abort ();
 }
 
+/* Look for a list of symbols to export in the .drectve section of
+   ABFD.  Pass each one to def_exports.  */
+
 static void
-scan_open_obj_file (abfd)
+scan_drectve_symbols (abfd)
      bfd *abfd;
 {
   asection * s;
@@ -1069,10 +1102,197 @@ scan_open_obj_file (abfd)
 	p++;
     }
   free (buf);
+}
 
+/* Look through the symbols in MINISYMS, and add each one to list of
+   symbols to export.  */
+
+static void
+scan_filtered_symbols (abfd, minisyms, symcount, size)
+     bfd *abfd;
+     PTR minisyms;
+     long symcount;
+     unsigned int size;
+{
+  asymbol *store;
+  bfd_byte *from, *fromend;
+
+  store = bfd_make_empty_symbol (abfd);
+  if (store == NULL)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  from = (bfd_byte *) minisyms;
+  fromend = from + symcount * size;
+  for (; from < fromend; from += size)
+    {
+      asymbol *sym;
+      const char *symbol_name;
+
+      sym = bfd_minisymbol_to_symbol (abfd, false, from, store);
+      if (sym == NULL)
+	bfd_fatal (bfd_get_filename (abfd));
+
+      symbol_name = bfd_asymbol_name (sym);
+      if (bfd_get_symbol_leading_char (abfd) == symbol_name[0])
+	++symbol_name;
+
+      def_exports (xstrdup (symbol_name), 0, -1, 0, 0, 0);
+    }
+}
+
+/* Add a list of symbols to exclude.  */
+
+static void
+add_excludes (new_excludes)
+     const char *new_excludes;
+{
+  char *local_copy;
+  char *exclude_string;
+
+  local_copy = xstrdup (new_excludes);
+
+  exclude_string = strtok (local_copy, ",:");
+  for (; exclude_string; exclude_string = strtok (NULL, ",:"))
+    {
+      struct string_list *new_exclude;
+      
+      new_exclude = ((struct string_list *)
+		     xmalloc (sizeof (struct string_list)));
+      new_exclude->string = (char *) xmalloc (strlen (exclude_string) + 2);
+      /* FIXME: Is it always right to add a leading underscore?  */
+      sprintf (new_exclude->string, "_%s", exclude_string);
+      new_exclude->next = excludes;
+      excludes = new_exclude;
+
+      /* xgettext:c-format */
+      inform (_("Excluding symbol: %s\n"), exclude_string);
+    }
+
+  free (local_copy);
+}
+
+/* See if STRING is on the list of symbols to exclude.  */
+
+static boolean
+match_exclude (string)
+     const char *string;
+{
+  struct string_list *excl_item;
+
+  for (excl_item = excludes; excl_item; excl_item = excl_item->next)
+    if (strcmp (string, excl_item->string) == 0)
+      return true;
+  return false;
+}
+
+/* Add the default list of symbols to exclude.  */
+
+static void
+set_default_excludes (void)
+{
+  add_excludes (default_excludes);
+}
+
+/* Choose which symbols to export.  */
+
+static long
+filter_symbols (abfd, minisyms, symcount, size)
+     bfd *abfd;
+     PTR minisyms;
+     long symcount;
+     unsigned int size;
+{
+  bfd_byte *from, *fromend, *to;
+  asymbol *store;
+
+  store = bfd_make_empty_symbol (abfd);
+  if (store == NULL)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  from = (bfd_byte *) minisyms;
+  fromend = from + symcount * size;
+  to = (bfd_byte *) minisyms;
+
+  for (; from < fromend; from += size)
+    {
+      int keep = 0;
+      asymbol *sym;
+
+      sym = bfd_minisymbol_to_symbol (abfd, false, (const PTR) from, store);
+      if (sym == NULL)
+	bfd_fatal (bfd_get_filename (abfd));
+
+      /* Check for external and defined only symbols.  */
+      keep = (((sym->flags & BSF_GLOBAL) != 0
+	       || (sym->flags & BSF_WEAK) != 0
+	       || bfd_is_com_section (sym->section))
+	      && ! bfd_is_und_section (sym->section));
+      
+      keep = keep && ! match_exclude (sym->name);
+
+      if (keep)
+	{
+	  memcpy (to, from, size);
+	  to += size;
+	}
+    }
+
+  return (to - (bfd_byte *) minisyms) / size;
+}
+
+/* Export all symbols in ABFD, except for ones we were told not to
+   export.  */
+
+static void
+scan_all_symbols (abfd)
+     bfd *abfd;
+{
+  long symcount;
+  PTR minisyms;
+  unsigned int size;
+
+  if (! (bfd_get_file_flags (abfd) & HAS_SYMS))
+    {
+      /* xgettext:c-format */
+      warn (_("%s: no symbols\n"), bfd_get_filename (abfd));
+      return;
+    }
+
+  symcount = bfd_read_minisymbols (abfd, false, &minisyms, &size);
+  if (symcount < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  if (symcount == 0)
+    {
+      /* xgettext:c-format */
+      warn (_("%s: no symbols\n"), bfd_get_filename (abfd));
+      return;
+    }
+
+  /* Discard the symbols we don't want to export.  It's OK to do this
+     in place; we'll free the storage anyway.  */
+
+  symcount = filter_symbols (abfd, minisyms, symcount, size);
+  scan_filtered_symbols (abfd, minisyms, symcount, size);
+
+  free (minisyms);
+}
+
+/* Look at the object file to decide which symbols to export.  */
+
+static void
+scan_open_obj_file (abfd)
+     bfd *abfd;
+{
+  if (export_all_symbols)
+    scan_all_symbols (abfd);
+  else
+    scan_drectve_symbols (abfd);
+ 
   /* FIXME: we ought to read in and block out the base relocations */
 
-  inform (_("%s: Done reading\n"));
+  /* xgettext:c-format */
+  inform (_("%s: Done reading %s\n"), bfd_get_filename (abfd));
 }
 
 static void
@@ -1187,6 +1407,8 @@ gen_def_file ()
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
       char *quote = strchr (exp->name, '.') ? "\"" : "";
+      char *res = cplus_demangle (exp->internal_name, DMGL_ANSI | DMGL_PARAMS);
+
       fprintf (output_def, "\t%s%s%s @ %d%s%s ; %s\n",
 	       quote,
 	       exp->name,
@@ -1194,7 +1416,9 @@ gen_def_file ()
 	       exp->ordinal,
 	       exp->noname ? " NONAME" : "",
 	       exp->data ? " DATA" : "",
-	       cplus_demangle (exp->internal_name, DMGL_ANSI | DMGL_PARAMS));
+	       res ? res : "");
+      if (res)
+        free (res);
     }
   
   inform (_("Added exports to output file"));
@@ -1558,6 +1782,8 @@ xlate (name)
 
 /**********************************************************************/
 
+#if 0
+
 static void
 dump_iat (f, exp)
      FILE *f;
@@ -1576,6 +1802,8 @@ dump_iat (f, exp)
 	       ASM_RVA_AFTER);
     }
 }
+
+#endif
 
 typedef struct
 {
@@ -2633,39 +2861,49 @@ mangle_defs ()
 /**********************************************************************/
 
 static void
-usage (status)
+usage (file, status)
+     FILE *file;
      int status;
 {
   /* xgetext:c-format */
-  fprintf (stderr, _("Usage %s <options> <object-files>\n"), program_name);
+  fprintf (file, _("Usage %s <options> <object-files>\n"), program_name);
   /* xgetext:c-format */
-  fprintf (stderr, _("   -m --machine <machine>    Create {arm, i386, ppc, thumb} DLL. [default: %s]\n"), mname);
-  fprintf (stderr, _("   -e --output-exp <outname> Generate an export file.\n"));
-  fprintf (stderr, _("   -l --output-lib <outname> Generate an interface library.\n"));
-  fprintf (stderr, _("   -a --add-indirect         Add dll indirects to export file.\n"));
-  fprintf (stderr, _("   -D --dllname <name>       Name of input dll to put into interface lib.\n"));
-  fprintf (stderr, _("   -d --input-def <deffile>  Name of .def file to be read in.\n"));
-  fprintf (stderr, _("   -z --output-def <deffile> Name of .def file to be created.\n"));
-  fprintf (stderr, _("   -b --base-file <basefile> Read linker generated base file.\n"));
-  fprintf (stderr, _("   -x --no-idata4            Don't generate idata$4 section.\n"));
-  fprintf (stderr, _("   -c --no-idata5            Don't generate idata$5 section.\n"));
-  fprintf (stderr, _("   -U --add-underscore       Add underscores to symbols in interface library.\n"));
-  fprintf (stderr, _("   -k --kill-at              Kill @<n> from exported names.\n"));
-  fprintf (stderr, _("   -S --as <name>            Use <name> for assembler.\n"));
-  fprintf (stderr, _("   -f --as-flags <flags>     Pass <flags> to the assembler.\n"));
+  fprintf (file, _("   -m --machine <machine>    Create {arm, i386, ppc, thumb} DLL. [default: %s]\n"), mname);
+  fprintf (file, _("   -e --output-exp <outname> Generate an export file.\n"));
+  fprintf (file, _("   -l --output-lib <outname> Generate an interface library.\n"));
+  fprintf (file, _("   -a --add-indirect         Add dll indirects to export file.\n"));
+  fprintf (file, _("   -D --dllname <name>       Name of input dll to put into interface lib.\n"));
+  fprintf (file, _("   -d --input-def <deffile>  Name of .def file to be read in.\n"));
+  fprintf (file, _("   -z --output-def <deffile> Name of .def file to be created.\n"));
+  fprintf (file, _("   --export-all-symbols      Export all symbols to .def\n"));
+  fprintf (file, _("   --no-export-all-symbols   Only export listed symbols\n"));
+  fprintf (file, _("   --exclude-symbols <list>  Don't export <list>\n"));
+  fprintf (file, _("   --no-default-excludes     Clear default exclude symbols\n"));
+  fprintf (file, _("   -b --base-file <basefile> Read linker generated base file.\n"));
+  fprintf (file, _("   -x --no-idata4            Don't generate idata$4 section.\n"));
+  fprintf (file, _("   -c --no-idata5            Don't generate idata$5 section.\n"));
+  fprintf (file, _("   -U --add-underscore       Add underscores to symbols in interface library.\n"));
+  fprintf (file, _("   -k --kill-at              Kill @<n> from exported names.\n"));
+  fprintf (file, _("   -S --as <name>            Use <name> for assembler.\n"));
+  fprintf (file, _("   -f --as-flags <flags>     Pass <flags> to the assembler.\n"));
 #ifdef DLLTOOL_ARM
-  fprintf (stderr, _("   -i --interwork            Support ARM/Thumb interworking.\n"));
+  fprintf (file, _("   -i --interwork            Support ARM/Thumb interworking.\n"));
 #endif
-  fprintf (stderr, _("   -n --no-delete            Keep temp files (repeat for extra preservation).\n"));
-  fprintf (stderr, _("   -v --verbose              Be verbose.\n"));
-  fprintf (stderr, _("   -V --version              Display the program version.\n"));
-  fprintf (stderr, _("   -h --help                 Display this information.\n"));
+  fprintf (file, _("   -n --no-delete            Keep temp files (repeat for extra preservation).\n"));
+  fprintf (file, _("   -v --verbose              Be verbose.\n"));
+  fprintf (file, _("   -V --version              Display the program version.\n"));
+  fprintf (file, _("   -h --help                 Display this information.\n"));
   
   exit (status);
 }
 
-#define OPTION_NO_IDATA4 'x'
-#define OPTION_NO_IDATA5 'c'
+#define OPTION_EXPORT_ALL_SYMS		150
+#define OPTION_NO_EXPORT_ALL_SYMS	(OPTION_EXPORT_ALL_SYMS + 1)
+#define OPTION_EXCLUDE_SYMS		(OPTION_NO_EXPORT_ALL_SYMS + 1)
+#define OPTION_NO_DEFAULT_EXCLUDES	(OPTION_EXCLUDE_SYMS + 1)
+#define OPTION_NO_IDATA4		'x'
+#define OPTION_NO_IDATA5		'c'
+
 static const struct option long_options[] =
 {
   {"no-delete", no_argument, NULL, 'n'},
@@ -2674,6 +2912,10 @@ static const struct option long_options[] =
   {"no-idata5", no_argument, NULL, OPTION_NO_IDATA5},
   {"output-exp", required_argument, NULL, 'e'},
   {"output-def", required_argument, NULL, 'z'},
+  {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL_SYMS},
+  {"no-export-all-symbols", no_argument, NULL, OPTION_NO_EXPORT_ALL_SYMS},
+  {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMS},
+  {"no-default-excludes", no_argument, NULL, OPTION_NO_DEFAULT_EXCLUDES},
   {"output-lib", required_argument, NULL, 'l'},
   {"def", required_argument, NULL, 'd'}, /* for compatiblity with older versions */
   {"input-def", required_argument, NULL, 'd'},
@@ -2722,6 +2964,18 @@ main (ac, av)
 	case OPTION_NO_IDATA5:
 	  no_idata5 = 1;
 	  break;
+	case OPTION_EXPORT_ALL_SYMS:
+	  export_all_symbols = true;
+	  break;
+	case OPTION_NO_EXPORT_ALL_SYMS:
+	  export_all_symbols = false;
+	  break;
+	case OPTION_EXCLUDE_SYMS:
+	  add_excludes (optarg);
+	  break;
+	case OPTION_NO_DEFAULT_EXCLUDES:
+	  do_default_excludes = false;
+	  break;
 	case 'S':
 	  as_name = optarg;
 	  break;
@@ -2748,8 +3002,7 @@ main (ac, av)
 	  exp_name = optarg;
 	  break;
 	case 'h':
-	case '?':
-	  usage (0);
+	  usage (stdout, 0);
 	  break;
 	case 'm':
 	  mname = optarg;
@@ -2793,7 +3046,8 @@ main (ac, av)
 
 	  break;
 	default:
-	  usage (1);
+	  usage (stderr, 1);
+	  break;
 	}
     }
 
@@ -2822,6 +3076,15 @@ main (ac, av)
       strcpy (dll_name, exp_name);
       strcat (dll_name, ".dll");
     }
+
+  /* Don't use the default exclude list if we're reading only the
+     symbols in the .drectve section.  The default excludes are meant
+     to avoid exporting DLL entry point and Cygwin32 impure_ptr.  */
+  if (! export_all_symbols)
+    do_default_excludes = false;
+  
+  if (do_default_excludes)
+    set_default_excludes ();
 
   if (def_file)
     process_def_file (def_file);
