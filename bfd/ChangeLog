@@ -1,3 +1,10 @@
+2000-11-02  Per Lundberg  <plundis@chaosdev.org>
+
+	* config.bfd: Add support for i[3456]86-chaosdev-storm-chaos.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* po/bfd.pot: Regenerate.
+	
 2000-10-31  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Only handle

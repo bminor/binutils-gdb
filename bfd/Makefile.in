@@ -685,7 +685,7 @@ configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(libbfd_a_SOURCES) $(libbfd_la_SOURCES)
 OBJECTS = $(libbfd_a_OBJECTS) $(libbfd_la_OBJECTS)

@@ -385,6 +385,10 @@ case "${targ}" in
     targ_defvec=i386aout_vec
     targ_underscore=yes
     ;;
+  i[3456]86-*-chaos)
+    targ_defvec=bfd_elf32_i386_vec
+    targ_selfvecs=i386chaos_vec
+    ;;
 
   i860-*-mach3* | i860-*-osf1* | i860-*-coff*)
     targ_defvec=i860coff_vec

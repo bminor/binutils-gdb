@@ -1,3 +1,8 @@
+2000-11-02  Per Lundberg  <plundis@chaosdev.org>
+
+	* configure.in: Recognise i[3456]86-chaosdev-storm-chaos.
+	* configure: Regenerate.
+
 2000-11-01  Nick Clifton  <nickc@redhat.com>
 
 	* read.c (original_case_string): New global variable.

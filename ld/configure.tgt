@@ -153,6 +153,7 @@ i[3456]86-*-interix*)	targ_emul=i386pe_posix;
 i[3456]86-*-beospe*)    targ_emul=i386beos ;;
 i[3456]86-*-beos*)	targ_emul=elf_i386_be ;;
 i[3456]86-*-vxworks*)	targ_emul=i386aout ;;
+i[3456]86-*-chaos)	targ_emul=elf_i386_chaos ;;
 m8*-*-*)		targ_emul=m88kbcs ;;
 a29k-*-udi)		targ_emul=sa29200 ;;
 a29k-*-ebmon)		targ_emul=ebmon29k ;;

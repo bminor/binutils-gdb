@@ -1383,7 +1383,7 @@ enum bfd_architecture
 #define bfd_mach_sparc_v9b             10 /* with cheetah add'ns */
 /* Nonzero if MACH has the v9 instruction set.  */
 #define bfd_mach_sparc_v9_p(mach) \
-  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9a \
+  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9b \
    && (mach) != bfd_mach_sparc_sparclite_le)
   bfd_arch_mips,      /* MIPS Rxxxx */
 #define bfd_mach_mips3000              3000
