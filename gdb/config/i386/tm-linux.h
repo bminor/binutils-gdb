@@ -98,7 +98,6 @@ extern int i387_store_floating   (PTR addr, int len, long double val);
    are used to identify this bit of code as a signal trampoline in
    order to support backtracing through calls to signal handlers.  */
 
-#define I386_LINUX_SIGTRAMP
 #define IN_SIGTRAMP(pc, name) i386_linux_in_sigtramp (pc, name)
 extern int i386_linux_in_sigtramp (CORE_ADDR, char *);
 
