@@ -1,3 +1,8 @@
+Tue Jun 28 14:17:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Use i386m3.mh and i386m3.mt as names of host and
+	target files, not non-existent mach3.mh and mach3.mt.
+
 Wed Jun 29 00:26:17 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* dbxread.c (dbx_symfile_read):  Unconditionally add dynamic
