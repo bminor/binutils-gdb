@@ -248,7 +248,7 @@ usage (FILE *stream, int status)
   -S, --print-size       Print size of defined symbols\n\
   -s, --print-armap      Include index for symbols from archive members\n\
       --size-sort        Sort symbols by size\n\
-      --skip-special     Ignore special symbols\n\
+      --special-syms     Include special symbols in the output\n\
       --synthetic        Display synthetic symbols as well\n\
   -t, --radix=RADIX      Use RADIX for printing symbol values\n\
       --target=BFDNAME   Specify the target object format as BFDNAME\n\
