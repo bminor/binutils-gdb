@@ -1,3 +1,7 @@
+Thu Apr 15 02:28:24 1993  John Gilmore  (gnu@cacophony.cygnus.com)
+
+	* gdb.t31/Makefile.in:  Avoid $< in explicit rule.
+
 Wed Apr 14 16:38:47 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t07/watchpoint.exp:  Remove setup_xfail for i486
