@@ -1640,11 +1640,11 @@ read_xcoff_symtab (objfile, nsyms)
 	  /* Ignore these.  */
 	  break;
 
-#ifdef STATIC_NODEBUG_VARS
 	  /* This is wrong.  These symbols are XMC_TC, which means that
 	     the value of the symbol is the address of the TOC entry, not
 	     the address of the variable itself.  */
 	case C_HIDEXT:
+#ifdef STATIC_NODEBUG_VARS
 	  {
 	    /* This is the only place that static variables show up in files
 	       compiled without -g.  External variables also have a C_EXT,

@@ -120,7 +120,7 @@ enum type_code
   TYPE_CODE_BOOL,
 
   /* Fortran */
-  TYPE_CODE_COMPLEX,		/* Complex float */
+  TYPE_CODE_COMPLEX		/* Complex float */
 };
 
 /* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an

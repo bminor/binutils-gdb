@@ -23,9 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dcache.h"
 #include "gdbcmd.h"
 
-extern int insque();
-extern int remque();
-
 int remote_dcache = 0;
 
 /* The data cache records all the data read from the remote machine

@@ -1,3 +1,14 @@
+Thu Feb  9 15:46:39 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* Makefile.in (CLIBS): Add $(LIBIBERTY) before, in addition to
+	after, any host/target/native libraries.
+	* dcache.c (insque, remque): Remove declarations.
+	* gdbtypes.h (type_code): Remove trailing comma.
+
+	From Peter Schauer:
+	* xcoffread.c (read_xcoff_symtab) [C_HIDEXT]: Move #ifdef
+	STATIC_NODEBUG_VARS inside case.
+
 Thu Feb  9 07:43:41 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* config/sparc/tm-sun4sol2.h: Define STATIC_TRANSFORM_NAME.
