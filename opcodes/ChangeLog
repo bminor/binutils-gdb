@@ -1,3 +1,10 @@
+2001-11-09  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* cgen-ibld.in (extract_1): Fix badly placed #if 0.
+	* fr30-ibld.c: Regenerate.
+	* m32r-ibld.c: Regenerate.
+	* openrisc-ibld.c: Regenerate.
+
 2001-11-04  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips-dis.c (print_insn_mips): Remove spaces at end of line.

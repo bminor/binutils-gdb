@@ -375,9 +375,9 @@ extract_1 (cd, ex_info, start, length, word_length, bufp, pc)
   int shift;
 #if 0
   int big_p = CGEN_CPU_INSN_ENDIAN (cd) == CGEN_ENDIAN_BIG;
-
-  x = cgen_get_insn_value (cd, bufp, word_length);
 #endif
+  x = cgen_get_insn_value (cd, bufp, word_length);
+
   if (CGEN_INSN_LSB0_P)
     shift = (start + 1) - length;
   else
