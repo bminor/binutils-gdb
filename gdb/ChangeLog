@@ -1,3 +1,7 @@
+2004-07-16  Andrew Cagney  <cagney@gnu.org>
+
+	* remote-m32r-sdi.c: Re-indent.
+
 2004-07-16  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-tdep.h (ppc_spr_asr): Add missing OEA SPR.

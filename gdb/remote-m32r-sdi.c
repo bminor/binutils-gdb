@@ -161,7 +161,7 @@ get_ack (void)
 {
   int c;
 
-  if (!sdi_desc) 
+  if (!sdi_desc)
     return -1;
 
   c = serial_readchar (sdi_desc, SDI_TIMEOUT);
@@ -169,7 +169,7 @@ get_ack (void)
   if (c < 0)
     return -1;
 
-  if (c != '+')		/* error */
+  if (c != '+')			/* error */
     return -1;
 
   return 0;
@@ -181,7 +181,7 @@ send_data (void *buf, int len)
 {
   int ret;
 
-  if (!sdi_desc) 
+  if (!sdi_desc)
     return -1;
 
   if (serial_write (sdi_desc, buf, len) != 0)
@@ -200,7 +200,7 @@ recv_data (void *buf, int len)
   int total = 0;
   int c;
 
-  if (!sdi_desc) 
+  if (!sdi_desc)
     return -1;
 
   while (total < len)
@@ -264,8 +264,7 @@ check_mmu_status (void)
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 static void
-m32r_create_inferior (char *execfile, char *args, char **env,
-		      int from_tty)
+m32r_create_inferior (char *execfile, char *args, char **env, int from_tty)
 {
   CORE_ADDR entry_pt;
 
@@ -326,7 +325,7 @@ m32r_open (char *args, int from_tty)
     {
       port_str = strchr (args, ':');
       if (port_str == NULL)
-        sprintf (hostname, "%s:%d", args, SDIPORT);
+	sprintf (hostname, "%s:%d", args, SDIPORT);
       else
 	strcpy (hostname, args);
     }
@@ -705,7 +704,7 @@ m32r_wait (ptid_t ptid, struct target_waitstatus *status)
       if (c < 0)
 	error ("Remote connection closed");
 
-      if (c == '-')	/* error */
+      if (c == '-')		/* error */
 	{
 	  status->kind = TARGET_WAITKIND_STOPPED;
 	  status->value.sig = TARGET_SIGNAL_HUP;
@@ -1540,11 +1539,11 @@ sdistatus_command (char *args, int from_tty)
     {
       c = serial_readchar (sdi_desc, SDI_TIMEOUT);
       if (c < 0)
-        return;
+	return;
       buf[i] = c;
       if (c == 0)
-        break;
-    }    
+	break;
+    }
 
   printf_filtered ("%s", buf);
 }
