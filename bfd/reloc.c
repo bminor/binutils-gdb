@@ -26,7 +26,7 @@ SECTION
 	symbols; they are left alone until required, then read in
 	en-mass and traslated into an internal form. There is a common
 	routine <<bfd_perform_relocation>> which acts upon the
-	canonical form to to the actual fixup.
+	canonical form to do the actual fixup.
 
 	Note that relocations are maintained on a per section basis,
 	whilst symbols are maintained on a per BFD basis.
@@ -295,9 +295,17 @@ CODE_FRAGMENT
 .           unwanted data from the relocation.  *}
 .  unsigned int rightshift;
 .
-.       {*  The size of the item to be relocated - 0, is one byte, 1 is 2
-.           bytes, 2 is four bytes.  A negative value indicates that the
-.	    result is to be subtracted from the data.  *}
+.	{*  The size of the item to be relocated.  This is *not* a
+.	    power-of-two measure.
+.		 0 : one byte
+.		 1 : two bytes
+.		 2 : four bytes
+.		 3 : nothing done (unless special_function is nonzero)
+.		 4 : eight bytes
+.		-2 : two bytes, result should be subtracted from the
+.		     data instead of added
+.	    There is currently no trivial way to extract a "number of
+.	    bytes" from a howto pointer.  *}
 .  int size;
 .
 .       {*  The number of bits in the item to be relocated.  This is used
@@ -477,7 +485,12 @@ DEFUN(bfd_perform_relocation,(abfd,
       return bfd_reloc_ok;
     }
 
-  if ((symbol->section == &bfd_und_section) && output_bfd == (bfd *)NULL)
+  /* If we are not producing relocateable output, return an error if
+     the symbol is not defined.  An undefined weak symbol is
+     considered to have a value of zero (SVR4 ABI, p. 4-27).  */
+  if (symbol->section == &bfd_und_section
+      && (symbol->flags & BSF_WEAK) == 0
+      && output_bfd == (bfd *) NULL)
     flag = bfd_reloc_undefined;
 
   /* If there is a function supplied to handle this relocation type,
@@ -782,53 +795,56 @@ TYPEDEF
 	bfd_reloc_code_type
 
 DESCRIPTION
-	The insides of a reloc code
+	The insides of a reloc code.  The idea is that, eventually, there
+	will be one enumerator for every type of relocation we ever do.
+	Pass one of these values to <<bfd_reloc_type_lookup>>, and it'll
+	return a howto pointer.
+
+	This does mean that the application must determine the correct
+	enumerator value; you can't get a howto pointer from a random set
+	of attributes.
 
 CODE_FRAGMENT
 .
 .typedef enum bfd_reloc_code_real 
-.
 .{
-.	{* 64 bits wide, simple reloc *}
+.  {* Basic absolute relocations *}
 .  BFD_RELOC_64,
-.	{* 64 bits, PC-relative *}
-.  BFD_RELOC_64_PCREL,
-.
-.       {* 32 bits wide, simple reloc *}
 .  BFD_RELOC_32,
-.	{* 32 bits, PC-relative *}
-.  BFD_RELOC_32_PCREL,
-.
-.       {* 16 bits wide, simple reloc *}
 .  BFD_RELOC_16,        
-.	{* 16 bits, PC-relative *}
-.  BFD_RELOC_16_PCREL,
-.
-.       {* 8 bits wide, simple *}
 .  BFD_RELOC_8,
-.       {* 8 bits wide, pc relative *}
+.
+.  {* PC-relative relocations *}
+.  BFD_RELOC_64_PCREL,
+.  BFD_RELOC_32_PCREL,
+.  BFD_RELOC_24_PCREL,    {* used by i960 *}
+.  BFD_RELOC_16_PCREL,
 .  BFD_RELOC_8_PCREL,
-.       {* 8 bits wide, but used to form an address like 0xffnn *}
-.  BFD_RELOC_8_FFnn,
 .
-.       {* The type of reloc used to build a contructor table - at the
-.          moment probably a 32 bit wide abs address, but the cpu can
-.          choose. *}
+.  {* Linkage-table relative *}
+.  BFD_RELOC_32_BASEREL,
+.  BFD_RELOC_16_BASEREL,
+.  BFD_RELOC_8_BASEREL,
 .
+.  {* The type of reloc used to build a contructor table - at the moment
+.     probably a 32 bit wide abs address, but the cpu can choose. *}
 .  BFD_RELOC_CTOR,
 .
-.	{* High 22 bits of 32-bit value; simple reloc.  *}
+.  {* 8 bits wide, but used to form an address like 0xffnn *}
+.  BFD_RELOC_8_FFnn,
+.
+.  {* 32-bit pc-relative, shifted right 2 bits (i.e., 30-bit
+.     word displacement, e.g. for SPARC) *}
+.  BFD_RELOC_32_PCREL_S2,
+.
+.  {* High 22 bits of 32-bit value, placed into lower 22 bits of
+.     target word; simple reloc.  *}
 .  BFD_RELOC_HI22,
-.	{* Low 10 bits.  *}
+.  {* Low 10 bits.  *}
 .  BFD_RELOC_LO10,
 .
-.	{* Reloc types used for i960/b.out.  *}
-.  BFD_RELOC_24_PCREL,
+.  {* Reloc types used for i960/b.out.  *}
 .  BFD_RELOC_I960_CALLJ,
-.
-.	{* 32-bit pc-relative, shifted right 2 bits (i.e., 30-bit
-.	   word displacement, e.g. for SPARC) *}
-.  BFD_RELOC_32_PCREL_S2,
 .
 .  {* now for the sparc/elf codes *}
 .  BFD_RELOC_NONE,		{* actually used *}
@@ -847,7 +863,7 @@ CODE_FRAGMENT
 .  BFD_RELOC_SPARC_RELATIVE,
 .  BFD_RELOC_SPARC_UA32,
 .
-.  {* this one is a.out specific? *}
+.  {* these are a.out specific? *}
 .  BFD_RELOC_SPARC_BASE13,
 .  BFD_RELOC_SPARC_BASE22,
 .
@@ -868,37 +884,37 @@ CODE_FRAGMENT
 .  BFD_RELOC_SPARC_LO7,
 .  {* end-sanitize-v9 *}
 .
-.       {* Bits 27..2 of the relocation address shifted right 2 bits;
-.         simple reloc otherwise.  *}
+.  {* Bits 27..2 of the relocation address shifted right 2 bits;
+.     simple reloc otherwise.  *}
 .  BFD_RELOC_MIPS_JMP,
 .
-.       {* signed 16-bit pc-relative, shifted right 2 bits (e.g. for MIPS) *}
+.  {* signed 16-bit pc-relative, shifted right 2 bits (e.g. for MIPS) *}
 .  BFD_RELOC_16_PCREL_S2,
 .
-.       {* High 16 bits of 32-bit value; simple reloc.  *}
+.  {* High 16 bits of 32-bit value; simple reloc.  *}
 .  BFD_RELOC_HI16,
-.       {* High 16 bits of 32-bit value but the low 16 bits will be sign
-.          extended and added to form the final result.  If the low 16
-.          bits form a negative number, we need to add one to the high value
-.          to compensate for the borrow when the low bits are added.  *}
+.  {* High 16 bits of 32-bit value but the low 16 bits will be sign
+.     extended and added to form the final result.  If the low 16
+.     bits form a negative number, we need to add one to the high value
+.     to compensate for the borrow when the low bits are added.  *}
 .  BFD_RELOC_HI16_S,
-.       {* Low 16 bits.  *}
+.  {* Low 16 bits.  *}
 .  BFD_RELOC_LO16,
 .
-.	{* 16 bit relocation relative to the global pointer.  *}
+.  {* 16 bit relocation relative to the global pointer.  *}
 .  BFD_RELOC_MIPS_GPREL,
 .
-.       {* These are, so far, specific to HPPA processors.  I'm not sure that
-.	   some don't duplicate other reloc types, such as BFD_RELOC_32 and
-.	   _32_PCREL.  Also, many more were in the list I got that don't
-.	   fit in well in the model BFD uses, so I've omitted them for now.
-.	   If we do make this reloc type get used for code that really does
-.	   implement the funky reloc types, they'll have to be added to this
-.	   list.   *}
+.  {* These are, so far, specific to HPPA processors.  I'm not sure that some
+.     don't duplicate other reloc types, such as BFD_RELOC_32 and _32_PCREL.
+.     Also, many more were in the list I got that don't fit in well in the
+.     model BFD uses, so I've omitted them for now.  If we do make this reloc
+.     type get used for code that really does implement the funky reloc types,
+.     they'll have to be added to this list.  *}
 .  BFD_RELOC_HPPA_32,
 .  BFD_RELOC_HPPA_11,
 .  BFD_RELOC_HPPA_14,
 .  BFD_RELOC_HPPA_17,
+.
 .  BFD_RELOC_HPPA_L21,
 .  BFD_RELOC_HPPA_R11,
 .  BFD_RELOC_HPPA_R14,
@@ -914,6 +930,7 @@ CODE_FRAGMENT
 .  BFD_RELOC_HPPA_LR21,
 .  BFD_RELOC_HPPA_RR14,
 .  BFD_RELOC_HPPA_RR17,
+.
 .  BFD_RELOC_HPPA_GOTOFF_11,
 .  BFD_RELOC_HPPA_GOTOFF_14,
 .  BFD_RELOC_HPPA_GOTOFF_L21,
@@ -927,12 +944,14 @@ CODE_FRAGMENT
 .  BFD_RELOC_HPPA_GOTOFF_RD14,
 .  BFD_RELOC_HPPA_GOTOFF_LR21,
 .  BFD_RELOC_HPPA_GOTOFF_RR14,
+.
 .  BFD_RELOC_HPPA_DLT_32,
 .  BFD_RELOC_HPPA_DLT_11,
 .  BFD_RELOC_HPPA_DLT_14,
 .  BFD_RELOC_HPPA_DLT_L21,
 .  BFD_RELOC_HPPA_DLT_R11,
 .  BFD_RELOC_HPPA_DLT_R14,
+.
 .  BFD_RELOC_HPPA_ABS_CALL_11,
 .  BFD_RELOC_HPPA_ABS_CALL_14,
 .  BFD_RELOC_HPPA_ABS_CALL_17,
@@ -951,6 +970,7 @@ CODE_FRAGMENT
 .  BFD_RELOC_HPPA_ABS_CALL_LR21,
 .  BFD_RELOC_HPPA_ABS_CALL_RR14,
 .  BFD_RELOC_HPPA_ABS_CALL_RR17,
+.
 .  BFD_RELOC_HPPA_PCREL_CALL_11,
 .  BFD_RELOC_HPPA_PCREL_CALL_12,
 .  BFD_RELOC_HPPA_PCREL_CALL_14,
@@ -970,12 +990,14 @@ CODE_FRAGMENT
 .  BFD_RELOC_HPPA_PCREL_CALL_LR21,
 .  BFD_RELOC_HPPA_PCREL_CALL_RR14,
 .  BFD_RELOC_HPPA_PCREL_CALL_RR17,
+.
 .  BFD_RELOC_HPPA_PLABEL_32,
 .  BFD_RELOC_HPPA_PLABEL_11,
 .  BFD_RELOC_HPPA_PLABEL_14,
 .  BFD_RELOC_HPPA_PLABEL_L21,
 .  BFD_RELOC_HPPA_PLABEL_R11,
 .  BFD_RELOC_HPPA_PLABEL_R14,
+.
 .  BFD_RELOC_HPPA_UNWIND_ENTRY,
 .  BFD_RELOC_HPPA_UNWIND_ENTRIES,
 .
@@ -993,7 +1015,6 @@ CODE_FRAGMENT
 .  BFD_RELOC_UNUSED
 . } bfd_reloc_code_real_type;
 */
-
 
 
 /*
@@ -1048,7 +1069,7 @@ DEFUN(bfd_default_reloc_type_lookup, (abfd, code),
     {
     case BFD_RELOC_CTOR:
       /* The type of reloc used in a ctor, which will be as wide as the
-	 address - so either a 64, 32, or 16 bitter.. */
+	 address - so either a 64, 32, or 16 bitter.  */
       switch (bfd_get_arch_info (abfd)->bits_per_address) {
       case 64:
 	BFD_FAIL();

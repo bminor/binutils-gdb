@@ -1,3 +1,11 @@
+Thu Oct  7 17:34:07 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* aoutx.h (howto_table_std): Correct the "size" field in some
+	entries.
+
+	* reloc.c (reloc_howto_type): Change documentation to dispel any
+	notion that the "size" field is a power-of-two indicator.
+
 Thu Oct  7 10:50:38 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
        * coffswap.h: (bfd_swap_reloc_in): a symndx is signed.
