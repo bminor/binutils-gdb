@@ -1,3 +1,8 @@
+2002-10-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib-sunos.c (allocate_rt_common_objfile): Use bcache_xmalloc
+	to allocate partial syms and macro byte caches.
+
 2002-10-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	Fix PR gdb/778
