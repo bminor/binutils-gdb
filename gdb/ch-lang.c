@@ -192,7 +192,7 @@ chill_is_varying_struct (type)
     return 0;
   if (TYPE_NFIELDS (type) != 2)
     return 0;
-  if (strcmp (TYPE_FIELD_NAME (type, 0), "<var_length>") != 0)
+  if (strcmp (TYPE_FIELD_NAME (type, 0), "__var_length") != 0)
     return 0;
   return 1;
 }

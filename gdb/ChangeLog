@@ -1,3 +1,8 @@
+Tue Mar 29 21:14:04 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* ch-lang.c (chill_is_varying_struct):  Magic string is
+	was "<var_length>" is now "__var_length" (more portable).
+
 Tue Mar 29 19:41:34 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote.c (getpkt): If we get a timeout, actually retry rather
