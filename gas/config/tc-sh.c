@@ -1845,7 +1845,8 @@ md_show_usage (stream)
 SH options:\n\
 -little			generate little endian code\n\
 -relax			alter jump instructions for long displacements\n\
--small			align sections to 4 byte boundaries, not 16\n"));
+-small			align sections to 4 byte boundaries, not 16\n
+-dsp			enable sh-dsp insns, and disable sh3e / sh4 insns.\n"));
 }
 
 void

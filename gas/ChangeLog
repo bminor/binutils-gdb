@@ -1,3 +1,7 @@
+Thu Mar 16 20:58:10 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* config/tc-sh.c (md_show_usage): Add description of -dsp.
+
 2000-03-15  Jonathan Larmour  <jlarmour@redhat.co.uk>
 
 	* config/tc-sh.c (parse_reg): Match r[0..7]_bank operands before
