@@ -1,3 +1,22 @@
+Wed Jan  6 11:02:10 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (GCC_FOR_TARGET):  Supply a default that matches
+	the one used in gcc/Makefile.in, so that a null expansion doesn't
+	override the one needed to build gcc with a native cc.
+
+	**** start-sanitize-chill ****
+Wed Jan  6 07:53:46 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (SUBDIRS):  Add chillrt.
+	* Makefile.in (all.normal):  Add all-chillrt.
+	* Makefile.in (all.cross):  Add all-chillrt.
+	* Makefile.in (install-no-fixedincludes):  Add install-chillrt.
+	* Makefile.in (install.cross):  Add install-chillrt.
+	* Makefile.in (all-chillrt, install-chillrt):  New targets.
+	* Makefile.in (subdir_do):  Handle chillrt like newlib.
+	* configure.in (target_libs):  Add chillrt.
+	**** end-sanitize-chill ****
+
 Tue Jan  5 07:55:12 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* configure: Accept -with arguments.
