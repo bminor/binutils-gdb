@@ -1,3 +1,7 @@
+Thu Jan  6 11:20:57 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in: Don't build gas for alpha-dec-osf1*.
+
 Tue Jan  4 17:10:19 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* configure:  Back out Per's change of 12/19/1993.  It changes the
