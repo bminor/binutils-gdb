@@ -290,9 +290,7 @@ build_link_order (statement)
 
 /* Call BFD to write out the linked file.  */
 
-
 /**********************************************************************/
-
 
 /* Wander around the input sections, make sure that
    we'll never try and create an output section with more relocs
@@ -345,7 +343,7 @@ clone_section (abfd, s, name, count)
 }
 
 #if TESTING
-static void 
+static void
 ds (s)
      asection *s;
 {
@@ -365,6 +363,7 @@ ds (s)
     }
   printf ("\n");
 }
+
 dump (s, a1, a2)
      char *s;
      asection *a1;
@@ -375,7 +374,7 @@ dump (s, a1, a2)
   ds (a2);
 }
 
-static void 
+static void
 sanity_check (abfd)
      bfd *abfd;
 {
@@ -399,7 +398,7 @@ sanity_check (abfd)
 #define dump(a, b, c)
 #endif
 
-static void 
+static void
 split_sections (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -520,7 +519,9 @@ split_sections (abfd, info)
     }
   sanity_check (abfd);
 }
+
 /**********************************************************************/
+
 void
 ldwrite ()
 {
@@ -541,6 +542,6 @@ ldwrite ()
       if (bfd_get_error () != bfd_error_no_error)
 	einfo (_("%F%P: final link failed: %E\n"));
       else
-	xexit(1);
+	xexit (1);
     }
 }

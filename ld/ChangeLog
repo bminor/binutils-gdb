@@ -1,3 +1,10 @@
+2000-09-21  Kazu Hirata  <kazu@hxi.com>
+
+	* ldmain.c: Fix formatting.
+	* ldmisc.c: Likewise.
+	* ldver.c: Likewise.
+	* ldwrite.c: Likewise.
+
 2000-09-21  Alan Modra  <alan@linuxcare.com.au>
 
 	* ldwrite.c (clone_section): Silence gcc warnings.
