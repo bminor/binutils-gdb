@@ -1,3 +1,10 @@
+2000-03-06  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (struct md_longopts): Add -m32r command line
+	switch.
+	(md_parse_option): Parse -m32r command line switch - disable m32rx
+	compatability.
+
 2000-03-02  Michael Meissner  <meissner@redhat.com>
 
 	* config/tc-d30v.c (check_range): Remove code that incorrectly

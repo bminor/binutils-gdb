@@ -157,29 +157,30 @@ const char * md_shortopts = M32R_SHORTOPTS;
 
 struct option md_longopts[] =
 {
-#define OPTION_M32RX	(OPTION_MD_BASE)
+#define OPTION_M32R		(OPTION_MD_BASE)
+#define OPTION_M32RX		(OPTION_M32R + 1)
+#define OPTION_WARN_PARALLEL	(OPTION_M32RX + 1)
+#define OPTION_NO_WARN_PARALLEL	(OPTION_WARN_PARALLEL + 1)
+#define OPTION_SPECIAL		(OPTION_NO_WARN_PARALLEL + 1)
+#define OPTION_WARN_UNMATCHED 	(OPTION_SPECIAL + 1)
+#define OPTION_NO_WARN_UNMATCHED (OPTION_WARN_UNMATCHED + 1)
+  {"m32r",  no_argument, NULL, OPTION_M32R},
   {"m32rx", no_argument, NULL, OPTION_M32RX},
-#define OPTION_WARN_PARALLEL	(OPTION_MD_BASE + 1)
   {"warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_WARN_PARALLEL},
   {"Wp", no_argument, NULL, OPTION_WARN_PARALLEL},
-#define OPTION_NO_WARN_PARALLEL	(OPTION_MD_BASE + 2)
   {"no-warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
   {"Wnp", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
-#define OPTION_SPECIAL	(OPTION_MD_BASE + 3)
   {"hidden", no_argument, NULL, OPTION_SPECIAL},
-
   /* Sigh.  I guess all warnings must now have both variants.  */
-#define OPTION_WARN_UNMATCHED (OPTION_MD_BASE + 4)
   {"warn-unmatched-high", no_argument, NULL, OPTION_WARN_UNMATCHED},
   {"Wuh", no_argument, NULL, OPTION_WARN_UNMATCHED},
-#define OPTION_NO_WARN_UNMATCHED (OPTION_MD_BASE + 5)
   {"no-warn-unmatched-high", no_argument, NULL, OPTION_NO_WARN_UNMATCHED},
   {"Wnuh", no_argument, NULL, OPTION_NO_WARN_UNMATCHED},
 
 #if 0 /* not supported yet */
-#define OPTION_RELAX  (OPTION_MD_BASE + 6)
+#define OPTION_RELAX		(OPTION_NO_WARN_UNMATCHED + 1)
+#define OPTION_CPU_DESC		(OPTION_RELAX + 1)
   {"relax", no_argument, NULL, OPTION_RELAX},
-#define OPTION_CPU_DESC (OPTION_MD_BASE + 7)
   {"cpu-desc", required_argument, NULL, OPTION_CPU_DESC},
 #endif
   {NULL, no_argument, NULL, 0}
@@ -197,6 +198,10 @@ md_parse_option (c, arg)
       optimize = 1;
       break;
 
+    case OPTION_M32R:
+      allow_m32rx (0);
+      break;
+      
     case OPTION_M32RX:
       allow_m32rx (1);
       break;
