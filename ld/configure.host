@@ -130,6 +130,11 @@ mips*-sgi-irix6*)
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -L/usr/lib32 -lc `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o ; else ${CC} -print-file-name=crtend.o; fi` /usr/lib32/crtn.o -init __do_global_ctors -fini __do_global_dtors'
   ;;
 
+mips*-*-linux-gnu*)
+  HOSTING_CRT0='-dynamic-linker /lib/ld.so.1 /usr/lib/crt1.o /usr/lib/crti.o `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; else ${CC} --print-file-name=crtbegin.o; fi`'
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` /usr/lib/crtn.o'
+  ;;
+
 m68*-*-linux*aout*)
   HOSTING_CRT0=/usr/lib/crt0.o
   ;;
