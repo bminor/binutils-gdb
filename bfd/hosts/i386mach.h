@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <errno.h>
+extern int errno;		/* <errno.h> forgets to do this... */
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
