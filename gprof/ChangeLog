@@ -1,3 +1,7 @@
+2000-05-29  Alan Modra  <alan@linuxcare.com.au>
+
+	* gprof.h (_): Use BFD version.
+
 2000-05-26  Alan Modra  <alan@linuxcare.com.au>
 
 	* gprof.h: Remove most nls defines.  They are pulled in by
