@@ -3685,7 +3685,7 @@ bfd_section_from_som_symbol (abfd, symbol)
     {
       unsigned int index = symbol->symbol_info;
       for (section = abfd->sections; section != NULL; section = section->next)
-	if (section->target_index == index)
+	if (section->target_index == index && som_is_subspace (section))
 	  return section;
 
       /* Could be a symbol from an external library (such as an OMOS
@@ -3702,7 +3702,8 @@ bfd_section_from_som_symbol (abfd, symbol)
       for (section = abfd->sections; section; section = section->next)
 	{
 	  if (value >= section->vma
-	      && value <= section->vma + section->_cooked_size)
+	      && value <= section->vma + section->_cooked_size
+	      && som_is_subspace (section))
 	    return section;
 	}
 

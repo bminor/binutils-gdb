@@ -1,5 +1,8 @@
 Wed Jan  4 14:14:05 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* som.c (bfd_section_from_som_symbol): Only return sections which
+	correspond to subspaces.
+
 	* som.c (som_begin_writing): Don't forget to bump the
 	total_subspaces when writing the unloadable subspaces.
 
