@@ -1,3 +1,7 @@
+Thu Jul  7 10:19:20 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.h (R_HPPA_COMPLEX): Fix dumb typo. 
+
 Wed Jul  6 19:21:57 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* hosts/sysv4.h (qsort, strtol): Don't declare.
