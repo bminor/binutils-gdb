@@ -379,7 +379,7 @@ clean:
 
 .PHONY: very
 very:
-	rm -rf $(TREE)
+	rm -rf $(TREE)  $(TREE)-stamp-co
 
 .PHONY: $(TREE)
 $(TREE): $(TREE)-stamp-co
