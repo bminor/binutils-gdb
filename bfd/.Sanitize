@@ -167,6 +167,7 @@ liboasys.h
 linker.c
 lynx-core.c
 m68klynx.c
+makefile.dos
 mipsbsd.c
 newsos3.c
 netbsd386.c
