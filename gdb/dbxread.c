@@ -1,6 +1,6 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003.
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -257,7 +257,9 @@ static int bincls_allocated;
 
 extern void _initialize_dbxread (void);
 
-static void process_now (struct objfile *);
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE static void process_now (struct objfile *);
+#endif /* OBSOLETE CFront */
 
 static void read_ofile_symtab (struct partial_symtab *);
 
@@ -770,105 +772,106 @@ static struct external_nlist symbuf[4096];
 static int symbuf_idx;
 static int symbuf_end;
 
-/* cont_elem is used for continuing information in cfront.
-   It saves information about which types need to be fixed up and 
-   completed after all the stabs are read.  */
-struct cont_elem
-  {
-    /* sym and stabstring for continuing information in cfront */
-    struct symbol *sym;
-    char *stabs;
-    /* state dependencies (statics that must be preserved) */
-    int sym_idx;
-    int sym_end;
-    int symnum;
-    int (*func) (struct objfile *, struct symbol *, char *);
-    /* other state dependencies include:
-       (assumption is that these will not change since process_now FIXME!!)
-       stringtab_global
-       n_stabs
-       objfile
-       symfile_bfd */
-  };
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE  /* cont_elem is used for continuing information in cfront.
+// OBSOLETE     It saves information about which types need to be fixed up and 
+// OBSOLETE     completed after all the stabs are read.  */
+// OBSOLETE  struct cont_elem
+// OBSOLETE    {
+// OBSOLETE      /* sym and stabstring for continuing information in cfront */
+// OBSOLETE      struct symbol *sym;
+// OBSOLETE      char *stabs;
+// OBSOLETE      /* state dependencies (statics that must be preserved) */
+// OBSOLETE      int sym_idx;
+// OBSOLETE      int sym_end;
+// OBSOLETE      int symnum;
+// OBSOLETE      int (*func) (struct objfile *, struct symbol *, char *);
+// OBSOLETE      /* other state dependencies include:
+// OBSOLETE         (assumption is that these will not change since process_now FIXME!!)
+// OBSOLETE         stringtab_global
+// OBSOLETE         n_stabs
+// OBSOLETE         objfile
+// OBSOLETE         symfile_bfd */
+// OBSOLETE    };
 
-static struct cont_elem *cont_list = 0;
-static int cont_limit = 0;
-static int cont_count = 0;
+// OBSOLETE  static struct cont_elem *cont_list = 0;
+// OBSOLETE  static int cont_limit = 0;
+// OBSOLETE  static int cont_count = 0;
 
-/* Arrange for function F to be called with arguments SYM and P later
-   in the stabs reading process.  */
-void
-process_later (struct symbol *sym, char *p,
-	       int (*f) (struct objfile *, struct symbol *, char *))
-{
+// OBSOLETE  /* Arrange for function F to be called with arguments SYM and P later
+// OBSOLETE     in the stabs reading process.  */
+// OBSOLETE  void
+// OBSOLETE  process_later (struct symbol *sym, char *p,
+// OBSOLETE  	       int (*f) (struct objfile *, struct symbol *, char *))
+// OBSOLETE  {
 
-  /* Allocate more space for the deferred list.  */
-  if (cont_count >= cont_limit - 1)
-    {
-      cont_limit += 32;		/* chunk size */
+// OBSOLETE    /* Allocate more space for the deferred list.  */
+// OBSOLETE    if (cont_count >= cont_limit - 1)
+// OBSOLETE      {
+// OBSOLETE        cont_limit += 32;		/* chunk size */
 
-      cont_list
-	= (struct cont_elem *) xrealloc (cont_list,
-					 (cont_limit
-					  * sizeof (struct cont_elem)));
-      if (!cont_list)
-	error ("Virtual memory exhausted\n");
-    }
+// OBSOLETE        cont_list
+// OBSOLETE  	= (struct cont_elem *) xrealloc (cont_list,
+// OBSOLETE  					 (cont_limit
+// OBSOLETE  					  * sizeof (struct cont_elem)));
+// OBSOLETE        if (!cont_list)
+// OBSOLETE  	error ("Virtual memory exhausted\n");
+// OBSOLETE      }
 
-  /* Save state variables so we can process these stabs later.  */
-  cont_list[cont_count].sym_idx = symbuf_idx;
-  cont_list[cont_count].sym_end = symbuf_end;
-  cont_list[cont_count].symnum = symnum;
-  cont_list[cont_count].sym = sym;
-  cont_list[cont_count].stabs = p;
-  cont_list[cont_count].func = f;
-  cont_count++;
-}
+// OBSOLETE    /* Save state variables so we can process these stabs later.  */
+// OBSOLETE    cont_list[cont_count].sym_idx = symbuf_idx;
+// OBSOLETE    cont_list[cont_count].sym_end = symbuf_end;
+// OBSOLETE    cont_list[cont_count].symnum = symnum;
+// OBSOLETE    cont_list[cont_count].sym = sym;
+// OBSOLETE    cont_list[cont_count].stabs = p;
+// OBSOLETE    cont_list[cont_count].func = f;
+// OBSOLETE    cont_count++;
+// OBSOLETE  }
 
-/* Call deferred funtions in CONT_LIST.  */
+// OBSOLETE  /* Call deferred funtions in CONT_LIST.  */
 
-static void
-process_now (struct objfile *objfile)
-{
-  int i;
-  int save_symbuf_idx;
-  int save_symbuf_end;
-  int save_symnum;
-  struct symbol *sym;
-  char *stabs;
-  int err;
-  int (*func) (struct objfile *, struct symbol *, char *);
+// OBSOLETE  static void
+// OBSOLETE  process_now (struct objfile *objfile)
+// OBSOLETE  {
+// OBSOLETE    int i;
+// OBSOLETE    int save_symbuf_idx;
+// OBSOLETE    int save_symbuf_end;
+// OBSOLETE    int save_symnum;
+// OBSOLETE    struct symbol *sym;
+// OBSOLETE    char *stabs;
+// OBSOLETE    int err;
+// OBSOLETE    int (*func) (struct objfile *, struct symbol *, char *);
 
-  /* Save the state of our caller, we'll want to restore it before
-     returning.  */
-  save_symbuf_idx = symbuf_idx;
-  save_symbuf_end = symbuf_end;
-  save_symnum = symnum;
+// OBSOLETE    /* Save the state of our caller, we'll want to restore it before
+// OBSOLETE       returning.  */
+// OBSOLETE    save_symbuf_idx = symbuf_idx;
+// OBSOLETE    save_symbuf_end = symbuf_end;
+// OBSOLETE    save_symnum = symnum;
 
-  /* Iterate over all the deferred stabs.  */
-  for (i = 0; i < cont_count; i++)
-    {
-      /* Restore the state for this deferred stab.  */
-      symbuf_idx = cont_list[i].sym_idx;
-      symbuf_end = cont_list[i].sym_end;
-      symnum = cont_list[i].symnum;
-      sym = cont_list[i].sym;
-      stabs = cont_list[i].stabs;
-      func = cont_list[i].func;
+// OBSOLETE    /* Iterate over all the deferred stabs.  */
+// OBSOLETE    for (i = 0; i < cont_count; i++)
+// OBSOLETE      {
+// OBSOLETE        /* Restore the state for this deferred stab.  */
+// OBSOLETE        symbuf_idx = cont_list[i].sym_idx;
+// OBSOLETE        symbuf_end = cont_list[i].sym_end;
+// OBSOLETE        symnum = cont_list[i].symnum;
+// OBSOLETE        sym = cont_list[i].sym;
+// OBSOLETE        stabs = cont_list[i].stabs;
+// OBSOLETE        func = cont_list[i].func;
 
-      /* Call the function to handle this deferrd stab.  */
-      err = (*func) (objfile, sym, stabs);
-      if (err)
-	error ("Internal error: unable to resolve stab.\n");
-    }
+// OBSOLETE        /* Call the function to handle this deferrd stab.  */
+// OBSOLETE        err = (*func) (objfile, sym, stabs);
+// OBSOLETE        if (err)
+// OBSOLETE  	error ("Internal error: unable to resolve stab.\n");
+// OBSOLETE      }
 
-  /* Restore our caller's state.  */
-  symbuf_idx = save_symbuf_idx;
-  symbuf_end = save_symbuf_end;
-  symnum = save_symnum;
-  cont_count = 0;
-}
-
+// OBSOLETE    /* Restore our caller's state.  */
+// OBSOLETE    symbuf_idx = save_symbuf_idx;
+// OBSOLETE    symbuf_end = save_symbuf_end;
+// OBSOLETE    symnum = save_symnum;
+// OBSOLETE    cont_count = 0;
+// OBSOLETE  }
+#endif /* OBSOLETE CFront */
 
 /* Name of last function encountered.  Used in Solaris to approximate
    object file boundaries.  */
@@ -1775,20 +1778,22 @@ read_dbx_symtab (struct objfile *objfile)
 					 psymtab_language, objfile);
 		    p += 1;
 		  }
-		/* The semantics of C++ state that "struct foo { ... }"
-		   also defines a typedef for "foo".  Unfortuantely, cfront
-		   never makes the typedef when translating from C++ to C.
-		   We make the typedef here so that "ptype foo" works as
-		   expected for cfront translated code.  */
-		else if (psymtab_language == language_cplus)
-		  {
-		    /* Also a typedef with the same name.  */
-		    add_psymbol_to_list (namestring, p - namestring,
-					 VAR_NAMESPACE, LOC_TYPEDEF,
-					 &objfile->static_psymbols,
-					 nlist.n_value, 0,
-					 psymtab_language, objfile);
-		  }
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE  		/* The semantics of C++ state that "struct foo { ... }"
+// OBSOLETE  		   also defines a typedef for "foo".  Unfortuantely, cfront
+// OBSOLETE  		   never makes the typedef when translating from C++ to C.
+// OBSOLETE  		   We make the typedef here so that "ptype foo" works as
+// OBSOLETE  		   expected for cfront translated code.  */
+// OBSOLETE  		else if (psymtab_language == language_cplus)
+// OBSOLETE  		  {
+// OBSOLETE  		    /* Also a typedef with the same name.  */
+// OBSOLETE  		    add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE  					 VAR_NAMESPACE, LOC_TYPEDEF,
+// OBSOLETE  					 &objfile->static_psymbols,
+// OBSOLETE  					 nlist.n_value, 0,
+// OBSOLETE  					 psymtab_language, objfile);
+// OBSOLETE  		  }
+#endif /* OBSOLETE CFront */
 	      }
 	    goto check_enum;
 	  case 't':
@@ -2023,9 +2028,11 @@ read_dbx_symtab (struct objfile *objfile)
 	  case '9':
 	  case '-':
 	  case '#':		/* for symbol identification (used in live ranges) */
-	    /* added to support cfront stabs strings */
-	  case 'Z':		/* for definition continuations */
-	  case 'P':		/* for prototypes */
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE  	    /* added to support cfront stabs strings */
+// OBSOLETE  	  case 'Z':		/* for definition continuations */
+// OBSOLETE  	  case 'P':		/* for prototypes */
+#endif /* OBSOLETE CFront */
 	    continue;
 
 	  case ':':
@@ -2682,10 +2689,11 @@ read_ofile_symtab (struct partial_symtab *pst)
 
   pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
 
-  /* Process items which we had to "process_later" due to dependencies 
-     on other stabs.  */
-  process_now (objfile);
-
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE    /* Process items which we had to "process_later" due to dependencies 
+// OBSOLETE       on other stabs.  */
+// OBSOLETE    process_now (objfile);
+#endif /* OBSOLETE CFront */
   end_stabs ();
 }
 

@@ -1517,9 +1517,11 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
   if (t->fBitfield)
     {
       int width = AUX_GET_WIDTH (bigend, ax);
-
-      /* Inhibit core dumps with some cfront generated objects that
-         corrupt the TIR.  */
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE      /* Inhibit core dumps with some cfront generated objects that
+// OBSOLETE         corrupt the TIR.  */
+#endif /* OBSOLETE CFront */
+      /* Inhibit core dumps if TIR is corrupted.  */
       if (bs == (int *) NULL)
 	{
 	  /* Alpha cc -migrate encodes char and unsigned char types
@@ -3036,20 +3038,22 @@ parse_partial_symbols (struct objfile *objfile)
 						     psymtab_language, objfile);
 				p += 1;
 			      }
-			    /* The semantics of C++ state that "struct foo { ... }"
-			       also defines a typedef for "foo".  Unfortuantely, cfront
-			       never makes the typedef when translating from C++ to C.
-			       We make the typedef here so that "ptype foo" works as
-			       expected for cfront translated code.  */
-			    else if (psymtab_language == language_cplus)
-			      {
-				/* Also a typedef with the same name.  */
-				add_psymbol_to_list (namestring, p - namestring,
-						     VAR_NAMESPACE, LOC_TYPEDEF,
-						     &objfile->static_psymbols,
-						     sh.value, 0,
-						     psymtab_language, objfile);
-			      }
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE  			    /* The semantics of C++ state that "struct foo { ... }"
+// OBSOLETE  			       also defines a typedef for "foo".  Unfortuantely, cfront
+// OBSOLETE  			       never makes the typedef when translating from C++ to C.
+// OBSOLETE  			       We make the typedef here so that "ptype foo" works as
+// OBSOLETE  			       expected for cfront translated code.  */
+// OBSOLETE  			    else if (psymtab_language == language_cplus)
+// OBSOLETE  			      {
+// OBSOLETE  				/* Also a typedef with the same name.  */
+// OBSOLETE  				add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE  						     VAR_NAMESPACE, LOC_TYPEDEF,
+// OBSOLETE  						     &objfile->static_psymbols,
+// OBSOLETE  						     sh.value, 0,
+// OBSOLETE  						     psymtab_language, objfile);
+// OBSOLETE  			      }
+#endif /* OBSOLETE CFront */
 			  }
 			goto check_enum;
 		      case 't':
@@ -3196,9 +3200,11 @@ parse_partial_symbols (struct objfile *objfile)
 		      case '9':
 		      case '-':
 		      case '#':		/* for symbol identification (used in live ranges) */
-			/* added to support cfront stabs strings */
-		      case 'Z':		/* for definition continuations */
-		      case 'P':		/* for prototypes */
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE 			/* added to support cfront stabs strings */
+// OBSOLETE 		      case 'Z':		/* for definition continuations */
+// OBSOLETE 		      case 'P':		/* for prototypes */
+#endif /* OBSOLETE CFront */
 			continue;
 
 		      case ':':

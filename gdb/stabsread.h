@@ -1,6 +1,6 @@
 /* Include file for stabs debugging format support functions.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1999, 2000 Free Software Foundation, Inc.
+   1996, 1997, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -198,10 +198,11 @@ extern void stabsect_build_psymtabs
 
 extern void elfstab_offset_sections (struct objfile *,
 				     struct partial_symtab *);
-
-extern void process_later
-  (struct symbol *, char *,
-   int (*f) (struct objfile *, struct symbol *, char *));
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE extern void process_later
+// OBSOLETE   (struct symbol *, char *,
+// OBSOLETE    int (*f) (struct objfile *, struct symbol *, char *));
+#endif /* OBSOLETE CFront */
 
 extern int symbol_reference_defined (char **);
 
@@ -209,9 +210,10 @@ extern void ref_add (int, struct symbol *, char *, CORE_ADDR);
 
 extern struct symbol *ref_search (int);
 
-extern int resolve_cfront_continuation
-  (struct objfile *objfile, struct symbol *sym, char *p);
-
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE extern int resolve_cfront_continuation
+// OBSOLETE   (struct objfile *objfile, struct symbol *sym, char *p);
+#endif /* OBSOLETE CFront */
 extern void free_header_files (void);
 
 extern void init_header_files (void);

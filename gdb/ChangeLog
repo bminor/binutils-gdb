@@ -1,5 +1,31 @@
 2003-01-13  Elena Zannoni  <ezannoni@redhat.com>
 
+	* stabsread.h (process_later, resolve_cfront_continuation):
+	Obsolete.
+	Update copyright years.
+	* buildsym.c (start_subfile): Obsolete comment pertinent to Cfront.
+	Update copyright year.
+	* dbxread.c(struct cont_elem): Obsolete.
+	(process_later, process_now): Obsolete functions. 
+	(read_dbx_symtab, read_ofile_symtab): Obsolete cfront support.
+	Update copyright year.
+	* gdbtypes.c (INIT_EXTRA, ADD_EXTRA): Obsolete macros.
+	(add_name, add_mangled_type, cfront_mangle_name): Obsolete functions.
+	* mdebugread.c (parse_type): Obsolete comment pertinent to Cfront.
+	(parse_partial_symbols): Obsolete cfront support.
+	* stabsread.c
+	(CFRONT_VISIBILITY_PRIVATE,CFRONT_VISIBILITY_PUBLIC): Obsolete
+	macros.
+	(get_substring, get_cfront_method_physname, msg_unknown_complaint,
+	read_cfront_baseclasses, read_cfront_member_functions,
+	resolve_cfront_continuation,read_cfront_static_fields,
+	copy_cfront_struct_fields): Obsolete functions.
+	(define_symbol, read_one_struct_field): Obsolete cfront support.
+	* xcoffread.c (scan_xcoff_symtab): Obsolete CFront support.
+	Update Copyright year.
+
+2003-01-13  Elena Zannoni  <ezannoni@redhat.com>
+
 	* stack.c (print_frame_info, print_stack_frame_base_stub,
 	print_stack_frame_base, show_and_print_stack_frame_stub,
 	show_and_print_stack_frame, print_only_stack_frame_stub,

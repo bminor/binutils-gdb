@@ -1,6 +1,6 @@
 /* Read AIX xcoff symbol tables and convert to internal format, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Derived from coffread.c, dbxread.c, and a lot of hacking.
    Contributed by IBM Corporation.
@@ -2636,20 +2636,22 @@ scan_xcoff_symtab (struct objfile *objfile)
 					     psymtab_language, objfile);
 			p += 1;
 		      }
-		    /* The semantics of C++ state that "struct foo { ... }"
-		       also defines a typedef for "foo".  Unfortuantely, cfront
-		       never makes the typedef when translating from C++ to C.
-		       We make the typedef here so that "ptype foo" works as
-		       expected for cfront translated code.  */
-		    else if (psymtab_language == language_cplus)
-		      {
-			/* Also a typedef with the same name.  */
-			add_psymbol_to_list (namestring, p - namestring,
-					     VAR_NAMESPACE, LOC_TYPEDEF,
-					     &objfile->static_psymbols,
-					     symbol.n_value, 0,
-					     psymtab_language, objfile);
-		      }
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE  		    /* The semantics of C++ state that "struct foo { ... }"
+// OBSOLETE  		       also defines a typedef for "foo".  Unfortuantely, cfront
+// OBSOLETE  		       never makes the typedef when translating from C++ to C.
+// OBSOLETE  		       We make the typedef here so that "ptype foo" works as
+// OBSOLETE  		       expected for cfront translated code.  */
+// OBSOLETE  		    else if (psymtab_language == language_cplus)
+// OBSOLETE  		      {
+// OBSOLETE  			/* Also a typedef with the same name.  */
+// OBSOLETE  			add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE  					     VAR_NAMESPACE, LOC_TYPEDEF,
+// OBSOLETE  					     &objfile->static_psymbols,
+// OBSOLETE  					     symbol.n_value, 0,
+// OBSOLETE  					     psymtab_language, objfile);
+// OBSOLETE  		      }
+#endif /* OBSOLETE CFront */
 		  }
 		goto check_enum;
 
@@ -2798,9 +2800,11 @@ scan_xcoff_symtab (struct objfile *objfile)
 	      case '9':
 	      case '-':
 	      case '#':		/* for symbol identification (used in live ranges) */
-		/* added to support cfront stabs strings */
-	      case 'Z':		/* for definition continuations */
-	      case 'P':		/* for prototypes */
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE 		/* added to support cfront stabs strings */
+// OBSOLETE 	      case 'Z':		/* for definition continuations */
+// OBSOLETE 	      case 'P':		/* for prototypes */
+#endif /* OBSOLETE CFront */
 		continue;
 
 	      case ':':

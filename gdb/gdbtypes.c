@@ -128,9 +128,9 @@ struct extra
 
 static void add_name (struct extra *, char *);
 static void add_mangled_type (struct extra *, struct type *);
-#if 0
-static void cfront_mangle_name (struct type *, int, int);
-#endif
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE static void cfront_mangle_name (struct type *, int, int);
+#endif /* OBSOLETE CFront */
 static void print_bit_vector (B_TYPE *, int);
 static void print_arg_types (struct field *, int, int);
 static void dump_fn_fieldlists (struct type *, int);
@@ -1458,193 +1458,193 @@ check_typedef (struct type *type)
   return type;
 }
 
-/* New code added to support parsing of Cfront stabs strings */
-#define INIT_EXTRA { pextras->len=0; pextras->str[0]='\0'; }
-#define ADD_EXTRA(c) { pextras->str[pextras->len++]=c; }
+#if 0 /* OBSOLETE CFront */
+// OBSOLETE  /* New code added to support parsing of Cfront stabs strings */
+// OBSOLETE  #define INIT_EXTRA { pextras->len=0; pextras->str[0]='\0'; }
+// OBSOLETE  #define ADD_EXTRA(c) { pextras->str[pextras->len++]=c; }
 
-static void
-add_name (struct extra *pextras, char *n)
-{
-  int nlen;
+// OBSOLETE  static void
+// OBSOLETE  add_name (struct extra *pextras, char *n)
+// OBSOLETE  {
+// OBSOLETE    int nlen;
 
-  if ((nlen = (n ? strlen (n) : 0)) == 0)
-    return;
-  sprintf (pextras->str + pextras->len, "%d%s", nlen, n);
-  pextras->len = strlen (pextras->str);
-}
+// OBSOLETE    if ((nlen = (n ? strlen (n) : 0)) == 0)
+// OBSOLETE      return;
+// OBSOLETE    sprintf (pextras->str + pextras->len, "%d%s", nlen, n);
+// OBSOLETE    pextras->len = strlen (pextras->str);
+// OBSOLETE  }
 
-static void
-add_mangled_type (struct extra *pextras, struct type *t)
-{
-  enum type_code tcode;
-  int tlen, tflags;
-  char *tname;
+// OBSOLETE  static void
+// OBSOLETE  add_mangled_type (struct extra *pextras, struct type *t)
+// OBSOLETE  {
+// OBSOLETE    enum type_code tcode;
+// OBSOLETE    int tlen, tflags;
+// OBSOLETE    char *tname;
 
-  tcode = TYPE_CODE (t);
-  tlen = TYPE_LENGTH (t);
-  tflags = TYPE_FLAGS (t);
-  tname = TYPE_NAME (t);
-  /* args of "..." seem to get mangled as "e" */
+// OBSOLETE    tcode = TYPE_CODE (t);
+// OBSOLETE    tlen = TYPE_LENGTH (t);
+// OBSOLETE    tflags = TYPE_FLAGS (t);
+// OBSOLETE    tname = TYPE_NAME (t);
+// OBSOLETE    /* args of "..." seem to get mangled as "e" */
 
-  switch (tcode)
-    {
-    case TYPE_CODE_INT:
-      if (tflags == 1)
-	ADD_EXTRA ('U');
-      switch (tlen)
-	{
-	case 1:
-	  ADD_EXTRA ('c');
-	  break;
-	case 2:
-	  ADD_EXTRA ('s');
-	  break;
-	case 4:
-	  {
-	    char *pname;
-	    if ((pname = strrchr (tname, 'l'), pname) && !strcmp (pname, "long"))
-	      {
-		ADD_EXTRA ('l');
-	      }
-	    else
-	      {
-		ADD_EXTRA ('i');
-	      }
-	  }
-	  break;
-	default:
-	  {
-	    complaint (&symfile_complaints, "Bad int type code length x%x",
-		       tlen);
-	  }
-	}
-      break;
-    case TYPE_CODE_FLT:
-      switch (tlen)
-	{
-	case 4:
-	  ADD_EXTRA ('f');
-	  break;
-	case 8:
-	  ADD_EXTRA ('d');
-	  break;
-	case 16:
-	  ADD_EXTRA ('r');
-	  break;
-	default:
-	  {
-	    complaint (&symfile_complaints, "Bad float type code length x%x",
-		       tlen);
-	  }
-	}
-      break;
-    case TYPE_CODE_REF:
-      ADD_EXTRA ('R');
-      /* followed by what it's a ref to */
-      break;
-    case TYPE_CODE_PTR:
-      ADD_EXTRA ('P');
-      /* followed by what it's a ptr to */
-      break;
-    case TYPE_CODE_TYPEDEF:
-      {
-	complaint (&symfile_complaints,
-	           "Typedefs in overloaded functions not yet supported");
-      }
-      /* followed by type bytes & name */
-      break;
-    case TYPE_CODE_FUNC:
-      ADD_EXTRA ('F');
-      /* followed by func's arg '_' & ret types */
-      break;
-    case TYPE_CODE_VOID:
-      ADD_EXTRA ('v');
-      break;
-    case TYPE_CODE_METHOD:
-      ADD_EXTRA ('M');
-      /* followed by name of class and func's arg '_' & ret types */
-      add_name (pextras, tname);
-      ADD_EXTRA ('F');		/* then mangle function */
-      break;
-    case TYPE_CODE_STRUCT:	/* C struct */
-    case TYPE_CODE_UNION:	/* C union */
-    case TYPE_CODE_ENUM:	/* Enumeration type */
-      /* followed by name of type */
-      add_name (pextras, tname);
-      break;
+// OBSOLETE    switch (tcode)
+// OBSOLETE      {
+// OBSOLETE      case TYPE_CODE_INT:
+// OBSOLETE        if (tflags == 1)
+// OBSOLETE  	ADD_EXTRA ('U');
+// OBSOLETE        switch (tlen)
+// OBSOLETE  	{
+// OBSOLETE  	case 1:
+// OBSOLETE  	  ADD_EXTRA ('c');
+// OBSOLETE  	  break;
+// OBSOLETE  	case 2:
+// OBSOLETE  	  ADD_EXTRA ('s');
+// OBSOLETE  	  break;
+// OBSOLETE  	case 4:
+// OBSOLETE  	  {
+// OBSOLETE  	    char *pname;
+// OBSOLETE  	    if ((pname = strrchr (tname, 'l'), pname) && !strcmp (pname, "long"))
+// OBSOLETE  	      {
+// OBSOLETE  		ADD_EXTRA ('l');
+// OBSOLETE  	      }
+// OBSOLETE  	    else
+// OBSOLETE  	      {
+// OBSOLETE  		ADD_EXTRA ('i');
+// OBSOLETE  	      }
+// OBSOLETE  	  }
+// OBSOLETE  	  break;
+// OBSOLETE  	default:
+// OBSOLETE  	  {
+// OBSOLETE  	    complaint (&symfile_complaints, "Bad int type code length x%x",
+// OBSOLETE  		       tlen);
+// OBSOLETE  	  }
+// OBSOLETE  	}
+// OBSOLETE        break;
+// OBSOLETE      case TYPE_CODE_FLT:
+// OBSOLETE        switch (tlen)
+// OBSOLETE  	{
+// OBSOLETE  	case 4:
+// OBSOLETE  	  ADD_EXTRA ('f');
+// OBSOLETE  	  break;
+// OBSOLETE  	case 8:
+// OBSOLETE  	  ADD_EXTRA ('d');
+// OBSOLETE  	  break;
+// OBSOLETE  	case 16:
+// OBSOLETE  	  ADD_EXTRA ('r');
+// OBSOLETE  	  break;
+// OBSOLETE  	default:
+// OBSOLETE  	  {
+// OBSOLETE  	    complaint (&symfile_complaints, "Bad float type code length x%x",
+// OBSOLETE  		       tlen);
+// OBSOLETE  	  }
+// OBSOLETE  	}
+// OBSOLETE        break;
+// OBSOLETE      case TYPE_CODE_REF:
+// OBSOLETE        ADD_EXTRA ('R');
+// OBSOLETE        /* followed by what it's a ref to */
+// OBSOLETE        break;
+// OBSOLETE      case TYPE_CODE_PTR:
+// OBSOLETE        ADD_EXTRA ('P');
+// OBSOLETE        /* followed by what it's a ptr to */
+// OBSOLETE        break;
+// OBSOLETE      case TYPE_CODE_TYPEDEF:
+// OBSOLETE        {
+// OBSOLETE  	complaint (&symfile_complaints,
+// OBSOLETE  	           "Typedefs in overloaded functions not yet supported");
+// OBSOLETE        }
+// OBSOLETE        /* followed by type bytes & name */
+// OBSOLETE        break;
+// OBSOLETE      case TYPE_CODE_FUNC:
+// OBSOLETE        ADD_EXTRA ('F');
+// OBSOLETE        /* followed by func's arg '_' & ret types */
+// OBSOLETE        break;
+// OBSOLETE      case TYPE_CODE_VOID:
+// OBSOLETE        ADD_EXTRA ('v');
+// OBSOLETE        break;
+// OBSOLETE      case TYPE_CODE_METHOD:
+// OBSOLETE        ADD_EXTRA ('M');
+// OBSOLETE        /* followed by name of class and func's arg '_' & ret types */
+// OBSOLETE        add_name (pextras, tname);
+// OBSOLETE        ADD_EXTRA ('F');		/* then mangle function */
+// OBSOLETE        break;
+// OBSOLETE      case TYPE_CODE_STRUCT:	/* C struct */
+// OBSOLETE      case TYPE_CODE_UNION:	/* C union */
+// OBSOLETE      case TYPE_CODE_ENUM:	/* Enumeration type */
+// OBSOLETE        /* followed by name of type */
+// OBSOLETE        add_name (pextras, tname);
+// OBSOLETE        break;
 
-      /* errors possible types/not supported */
-    case TYPE_CODE_CHAR:
-    case TYPE_CODE_ARRAY:	/* Array type */
-    case TYPE_CODE_MEMBER:	/* Member type */
-    case TYPE_CODE_BOOL:
-    case TYPE_CODE_COMPLEX:	/* Complex float */
-    case TYPE_CODE_UNDEF:
-    case TYPE_CODE_SET:	/* Pascal sets */
-    case TYPE_CODE_RANGE:
-    case TYPE_CODE_STRING:
-    case TYPE_CODE_BITSTRING:
-    case TYPE_CODE_ERROR:
-    default:
-      {
-	complaint (&symfile_complaints, "Unknown type code x%x", tcode);
-      }
-    }
-  if (TYPE_TARGET_TYPE (t))
-    add_mangled_type (pextras, TYPE_TARGET_TYPE (t));
-}
+// OBSOLETE        /* errors possible types/not supported */
+// OBSOLETE      case TYPE_CODE_CHAR:
+// OBSOLETE      case TYPE_CODE_ARRAY:	/* Array type */
+// OBSOLETE      case TYPE_CODE_MEMBER:	/* Member type */
+// OBSOLETE      case TYPE_CODE_BOOL:
+// OBSOLETE      case TYPE_CODE_COMPLEX:	/* Complex float */
+// OBSOLETE      case TYPE_CODE_UNDEF:
+// OBSOLETE      case TYPE_CODE_SET:	/* Pascal sets */
+// OBSOLETE      case TYPE_CODE_RANGE:
+// OBSOLETE      case TYPE_CODE_STRING:
+// OBSOLETE      case TYPE_CODE_BITSTRING:
+// OBSOLETE      case TYPE_CODE_ERROR:
+// OBSOLETE      default:
+// OBSOLETE        {
+// OBSOLETE  	complaint (&symfile_complaints, "Unknown type code x%x", tcode);
+// OBSOLETE        }
+// OBSOLETE      }
+// OBSOLETE    if (TYPE_TARGET_TYPE (t))
+// OBSOLETE      add_mangled_type (pextras, TYPE_TARGET_TYPE (t));
+// OBSOLETE  }
 
-#if 0
-void
-cfront_mangle_name (struct type *type, int i, int j)
-{
-  struct fn_field *f;
-  char *mangled_name = gdb_mangle_name (type, i, j);
+// OBSOLETE  void
+// OBSOLETE  cfront_mangle_name (struct type *type, int i, int j)
+// OBSOLETE  {
+// OBSOLETE    struct fn_field *f;
+// OBSOLETE    char *mangled_name = gdb_mangle_name (type, i, j);
 
-  f = TYPE_FN_FIELDLIST1 (type, i);	/* moved from below */
+// OBSOLETE    f = TYPE_FN_FIELDLIST1 (type, i);	/* moved from below */
 
-  /* kludge to support cfront methods - gdb expects to find "F" for 
-     ARM_mangled names, so when we mangle, we have to add it here */
-  if (ARM_DEMANGLING)
-    {
-      int k;
-      char *arm_mangled_name;
-      struct fn_field *method = &f[j];
-      char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
-      char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
-      char *newname = type_name_no_tag (type);
+// OBSOLETE    /* kludge to support cfront methods - gdb expects to find "F" for 
+// OBSOLETE       ARM_mangled names, so when we mangle, we have to add it here */
+// OBSOLETE    if (ARM_DEMANGLING)
+// OBSOLETE      {
+// OBSOLETE        int k;
+// OBSOLETE        char *arm_mangled_name;
+// OBSOLETE        struct fn_field *method = &f[j];
+// OBSOLETE        char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
+// OBSOLETE        char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
+// OBSOLETE        char *newname = type_name_no_tag (type);
 
-      struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);
-      int nargs = TYPE_NFIELDS (ftype);		/* number of args */
-      struct extra extras, *pextras = &extras;
-      INIT_EXTRA
+// OBSOLETE        struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);
+// OBSOLETE        int nargs = TYPE_NFIELDS (ftype);		/* number of args */
+// OBSOLETE        struct extra extras, *pextras = &extras;
+// OBSOLETE        INIT_EXTRA
 
-	if (TYPE_FN_FIELD_STATIC_P (f, j))	/* j for sublist within this list */
-	ADD_EXTRA ('S')
-	  ADD_EXTRA ('F')
-	/* add args here! */
-	  if (nargs <= 1)	/* no args besides this */
-	  ADD_EXTRA ('v')
-	    else
-	  {
-	    for (k = 1; k < nargs; k++)
-	      {
-		struct type *t;
-		t = TYPE_FIELD_TYPE (ftype, k);
-		add_mangled_type (pextras, t);
-	      }
-	  }
-      ADD_EXTRA ('\0')
-	printf ("add_mangled_type: %s\n", extras.str);	/* FIXME */
-      xasprintf (&arm_mangled_name, "%s%s", mangled_name, extras.str);
-      xfree (mangled_name);
-      mangled_name = arm_mangled_name;
-    }
-}
-#endif /* 0 */
+// OBSOLETE  	if (TYPE_FN_FIELD_STATIC_P (f, j))	/* j for sublist within this list */
+// OBSOLETE  	ADD_EXTRA ('S')
+// OBSOLETE  	  ADD_EXTRA ('F')
+// OBSOLETE  	/* add args here! */
+// OBSOLETE  	  if (nargs <= 1)	/* no args besides this */
+// OBSOLETE  	  ADD_EXTRA ('v')
+// OBSOLETE  	    else
+// OBSOLETE  	  {
+// OBSOLETE  	    for (k = 1; k < nargs; k++)
+// OBSOLETE  	      {
+// OBSOLETE  		struct type *t;
+// OBSOLETE  		t = TYPE_FIELD_TYPE (ftype, k);
+// OBSOLETE  		add_mangled_type (pextras, t);
+// OBSOLETE  	      }
+// OBSOLETE  	  }
+// OBSOLETE        ADD_EXTRA ('\0')
+// OBSOLETE  	printf ("add_mangled_type: %s\n", extras.str);	/* FIXME */
+// OBSOLETE        xasprintf (&arm_mangled_name, "%s%s", mangled_name, extras.str);
+// OBSOLETE        xfree (mangled_name);
+// OBSOLETE        mangled_name = arm_mangled_name;
+// OBSOLETE      }
+// OBSOLETE  }
 
-#undef ADD_EXTRA
-/* End of new code added to support parsing of Cfront stabs strings */
+// OBSOLETE  #undef ADD_EXTRA
+// OBSOLETE  /* End of new code added to support parsing of Cfront stabs strings */
+#endif /* OBSOLETE CFront */
 
 /* Parse a type expression in the string [P..P+LENGTH).  If an error occurs,
    silently return builtin_type_void. */
