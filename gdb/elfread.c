@@ -516,9 +516,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 	      if (msym != NULL)
 		msym->filename = filesymname;
 #endif
-#ifdef ELF_MAKE_MSYMBOL_SPECIAL
 	      ELF_MAKE_MSYMBOL_SPECIAL (sym, msym);
-#endif
 	    }
 	}
       do_cleanups (back_to);

@@ -258,6 +258,8 @@ struct gdbarch
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
   gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
   gdbarch_dwarf2_build_frame_info_ftype *dwarf2_build_frame_info;
+  gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
+  gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
 };
 
 
@@ -400,6 +402,8 @@ struct gdbarch startup_gdbarch =
   generic_in_function_epilogue_p,
   construct_inferior_arguments,
   0,
+  0,
+  0,
   /* startup_gdbarch() */
 };
 
@@ -513,6 +517,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->in_solib_call_trampoline = generic_in_solib_call_trampoline;
   current_gdbarch->in_function_epilogue_p = generic_in_function_epilogue_p;
   current_gdbarch->construct_inferior_arguments = construct_inferior_arguments;
+  current_gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
+  current_gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
   /* gdbarch_alloc() */
 
   return current_gdbarch;
@@ -768,6 +774,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
   /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
   /* Skip verify of dwarf2_build_frame_info, has predicate */
+  /* Skip verify of elf_make_msymbol_special, invalid_p == 0 */
+  /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -792,18 +800,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\n",
                       GDB_MULTI_ARCH);
+#ifdef ADDR_BITS_REMOVE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "ADDR_BITS_REMOVE(addr)",
+                      XSTRING (ADDR_BITS_REMOVE (addr)));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: in_function_epilogue_p = 0x%08lx\n",
-                        (long) current_gdbarch->in_function_epilogue_p);
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: register_read = 0x%08lx\n",
-                        (long) current_gdbarch->register_read);
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: register_write = 0x%08lx\n",
-                        (long) current_gdbarch->register_write);
+                        "gdbarch_dump: ADDR_BITS_REMOVE = 0x%08lx\n",
+                        (long) current_gdbarch->addr_bits_remove
+                        /*ADDR_BITS_REMOVE ()*/);
+#endif
 #ifdef ADDRESS_TO_POINTER
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -817,17 +824,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: ADDRESS_TO_POINTER = 0x%08lx\n",
                         (long) current_gdbarch->address_to_pointer
                         /*ADDRESS_TO_POINTER ()*/);
-#endif
-#ifdef ADDR_BITS_REMOVE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ADDR_BITS_REMOVE(addr)",
-                      XSTRING (ADDR_BITS_REMOVE (addr)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: ADDR_BITS_REMOVE = 0x%08lx\n",
-                        (long) current_gdbarch->addr_bits_remove
-                        /*ADDR_BITS_REMOVE ()*/);
 #endif
 #ifdef BELIEVE_PCC_PROMOTION
   fprintf_unfiltered (file,
@@ -975,6 +971,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->coerce_float_to_double
                         /*COERCE_FLOAT_TO_DOUBLE ()*/);
 #endif
+#ifdef COFF_MAKE_MSYMBOL_SPECIAL
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "COFF_MAKE_MSYMBOL_SPECIAL(val, msym)",
+                      XSTRING (COFF_MAKE_MSYMBOL_SPECIAL (val, msym)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: COFF_MAKE_MSYMBOL_SPECIAL = 0x%08lx\n",
+                        (long) current_gdbarch->coff_make_msymbol_special
+                        /*COFF_MAKE_MSYMBOL_SPECIAL ()*/);
+#endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: construct_inferior_arguments = 0x%08lx\n",
@@ -1059,6 +1069,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->ecoff_reg_to_regnum
                         /*ECOFF_REG_TO_REGNUM ()*/);
 #endif
+#ifdef ELF_MAKE_MSYMBOL_SPECIAL
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "ELF_MAKE_MSYMBOL_SPECIAL(sym, msym)",
+                      XSTRING (ELF_MAKE_MSYMBOL_SPECIAL (sym, msym)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: ELF_MAKE_MSYMBOL_SPECIAL = 0x%08lx\n",
+                        (long) current_gdbarch->elf_make_msymbol_special
+                        /*ELF_MAKE_MSYMBOL_SPECIAL ()*/);
+#endif
 #ifdef EXTRACT_RETURN_VALUE
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -1136,17 +1160,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: FP_REGNUM = %d\n",
                       FP_REGNUM);
 #endif
-#ifdef FRAMELESS_FUNCTION_INVOCATION
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAMELESS_FUNCTION_INVOCATION(fi)",
-                      XSTRING (FRAMELESS_FUNCTION_INVOCATION (fi)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: FRAMELESS_FUNCTION_INVOCATION = 0x%08lx\n",
-                        (long) current_gdbarch->frameless_function_invocation
-                        /*FRAMELESS_FUNCTION_INVOCATION ()*/);
-#endif
 #ifdef FRAME_ARGS_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1201,6 +1214,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FRAME_INIT_SAVED_REGS = 0x%08lx\n",
                         (long) current_gdbarch->frame_init_saved_regs
                         /*FRAME_INIT_SAVED_REGS ()*/);
+#endif
+#ifdef FRAMELESS_FUNCTION_INVOCATION
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAMELESS_FUNCTION_INVOCATION(fi)",
+                      XSTRING (FRAMELESS_FUNCTION_INVOCATION (fi)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FRAMELESS_FUNCTION_INVOCATION = 0x%08lx\n",
+                        (long) current_gdbarch->frameless_function_invocation
+                        /*FRAMELESS_FUNCTION_INVOCATION ()*/);
 #endif
 #ifdef FRAME_LOCALS_ADDRESS
   fprintf_unfiltered (file,
@@ -1271,20 +1295,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->init_extra_frame_info
                         /*INIT_EXTRA_FRAME_INFO ()*/);
 #endif
-#ifdef INIT_FRAME_PC
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INIT_FRAME_PC(fromleaf, prev)",
-                      XSTRING (INIT_FRAME_PC (fromleaf, prev)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: INIT_FRAME_PC = 0x%08lx\n",
-                        (long) current_gdbarch->init_frame_pc
-                        /*INIT_FRAME_PC ()*/);
-#endif
 #ifdef INIT_FRAME_PC_FIRST
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -1299,6 +1309,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->init_frame_pc_first
                         /*INIT_FRAME_PC_FIRST ()*/);
 #endif
+#ifdef INIT_FRAME_PC
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "INIT_FRAME_PC(fromleaf, prev)",
+                      XSTRING (INIT_FRAME_PC (fromleaf, prev)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: INIT_FRAME_PC = 0x%08lx\n",
+                        (long) current_gdbarch->init_frame_pc
+                        /*INIT_FRAME_PC ()*/);
+#endif
 #ifdef INNER_THAN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1309,17 +1333,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: INNER_THAN = 0x%08lx\n",
                         (long) current_gdbarch->inner_than
                         /*INNER_THAN ()*/);
-#endif
-#ifdef INTEGER_TO_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INTEGER_TO_ADDRESS(type, buf)",
-                      XSTRING (INTEGER_TO_ADDRESS (type, buf)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: INTEGER_TO_ADDRESS = 0x%08lx\n",
-                        (long) current_gdbarch->integer_to_address
-                        /*INTEGER_TO_ADDRESS ()*/);
 #endif
 #ifdef IN_SOLIB_CALL_TRAMPOLINE
   fprintf_unfiltered (file,
@@ -1332,6 +1345,21 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->in_solib_call_trampoline
                         /*IN_SOLIB_CALL_TRAMPOLINE ()*/);
 #endif
+#ifdef INTEGER_TO_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "INTEGER_TO_ADDRESS(type, buf)",
+                      XSTRING (INTEGER_TO_ADDRESS (type, buf)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: INTEGER_TO_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->integer_to_address
+                        /*INTEGER_TO_ADDRESS ()*/);
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: in_function_epilogue_p = 0x%08lx\n",
+                        (long) current_gdbarch->in_function_epilogue_p);
 #ifdef MAX_REGISTER_RAW_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: MAX_REGISTER_RAW_SIZE # %s\n",
@@ -2091,6 +2119,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->use_struct_convention
                         /*USE_STRUCT_CONVENTION ()*/);
 #endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: register_read = 0x%08lx\n",
+                        (long) current_gdbarch->register_read);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: register_write = 0x%08lx\n",
+                        (long) current_gdbarch->register_write);
   if (current_gdbarch->dump_tdep != NULL)
     current_gdbarch->dump_tdep (current_gdbarch, file);
 }
@@ -4384,6 +4420,42 @@ set_gdbarch_dwarf2_build_frame_info (struct gdbarch *gdbarch,
                                      gdbarch_dwarf2_build_frame_info_ftype dwarf2_build_frame_info)
 {
   gdbarch->dwarf2_build_frame_info = dwarf2_build_frame_info;
+}
+
+void
+gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, asymbol *sym, struct minimal_symbol *msym)
+{
+  if (gdbarch->elf_make_msymbol_special == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_elf_make_msymbol_special invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_elf_make_msymbol_special called\n");
+  gdbarch->elf_make_msymbol_special (sym, msym);
+}
+
+void
+set_gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch,
+                                      gdbarch_elf_make_msymbol_special_ftype elf_make_msymbol_special)
+{
+  gdbarch->elf_make_msymbol_special = elf_make_msymbol_special;
+}
+
+void
+gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, int val, struct minimal_symbol *msym)
+{
+  if (gdbarch->coff_make_msymbol_special == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_coff_make_msymbol_special invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_coff_make_msymbol_special called\n");
+  gdbarch->coff_make_msymbol_special (val, msym);
+}
+
+void
+set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch,
+                                       gdbarch_coff_make_msymbol_special_ftype coff_make_msymbol_special)
+{
+  gdbarch->coff_make_msymbol_special = coff_make_msymbol_special;
 }
 
 

@@ -43,6 +43,7 @@
 struct frame_info;
 struct value;
 struct objfile;
+struct minimal_symbol;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -2222,6 +2223,40 @@ extern void set_gdbarch_dwarf2_build_frame_info (struct gdbarch *gdbarch, gdbarc
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DWARF2_BUILD_FRAME_INFO)
 #define DWARF2_BUILD_FRAME_INFO(objfile) (gdbarch_dwarf2_build_frame_info (current_gdbarch, objfile))
+#endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (ELF_MAKE_MSYMBOL_SPECIAL)
+#define ELF_MAKE_MSYMBOL_SPECIAL(sym, msym) (default_elf_make_msymbol_special (sym, msym))
+#endif
+
+typedef void (gdbarch_elf_make_msymbol_special_ftype) (asymbol *sym, struct minimal_symbol *msym);
+extern void gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, asymbol *sym, struct minimal_symbol *msym);
+extern void set_gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (ELF_MAKE_MSYMBOL_SPECIAL)
+#error "Non multi-arch definition of ELF_MAKE_MSYMBOL_SPECIAL"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (ELF_MAKE_MSYMBOL_SPECIAL)
+#define ELF_MAKE_MSYMBOL_SPECIAL(sym, msym) (gdbarch_elf_make_msymbol_special (current_gdbarch, sym, msym))
+#endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (COFF_MAKE_MSYMBOL_SPECIAL)
+#define COFF_MAKE_MSYMBOL_SPECIAL(val, msym) (default_coff_make_msymbol_special (val, msym))
+#endif
+
+typedef void (gdbarch_coff_make_msymbol_special_ftype) (int val, struct minimal_symbol *msym);
+extern void gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, int val, struct minimal_symbol *msym);
+extern void set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (COFF_MAKE_MSYMBOL_SPECIAL)
+#error "Non multi-arch definition of COFF_MAKE_MSYMBOL_SPECIAL"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (COFF_MAKE_MSYMBOL_SPECIAL)
+#define COFF_MAKE_MSYMBOL_SPECIAL(val, msym) (gdbarch_coff_make_msymbol_special (current_gdbarch, val, msym))
 #endif
 #endif
 

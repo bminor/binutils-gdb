@@ -359,6 +359,18 @@ init_frame_pc_default (int fromleaf, struct frame_info *prev)
     prev->pc = read_pc ();
 }
 
+void
+default_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
+{
+  return;
+}
+
+void
+default_coff_make_msymbol_special (int val, struct minimal_symbol *msym)
+{
+  return;
+}
+
 int
 cannot_register_not (int regnum)
 {

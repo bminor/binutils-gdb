@@ -975,10 +975,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		msym = prim_record_minimal_symbol_and_info
 		  (cs->c_name, tmpaddr, ms_type, (void *) (long) cs->c_sclass,
 		   sec, NULL, objfile);
-#ifdef COFF_MAKE_MSYMBOL_SPECIAL
 		if (msym)
 		  COFF_MAKE_MSYMBOL_SPECIAL (cs->c_sclass, msym);
-#endif
 	      }
 	    if (SDB_TYPE (cs->c_type))
 	      {
