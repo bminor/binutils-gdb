@@ -48,6 +48,6 @@ clean-extra:
 	rm -f table.c simops.h gencode
 
 interp.o: interp.c table.c $(INCLUDE)
-simops.o: simops.c $(INCLUDE)
+simops.o: simops.c simops.h $(INCLUDE)
 endian.o: endian.c $(INCLUDE)
 table.o: table.c

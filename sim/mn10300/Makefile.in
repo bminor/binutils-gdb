@@ -152,7 +152,7 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 
 
 interp.o: interp.c $(MN10300_INTERP_DEP) $(INCLUDE)
-simops.o: simops.c $(INCLUDE)
+simops.o: simops.c simops.h $(INCLUDE)
 table.o: table.c
 
 clean-extra: clean-igen

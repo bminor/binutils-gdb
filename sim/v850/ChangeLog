@@ -1,3 +1,7 @@
+2001-04-15  J.T. Conklin  <jtc@redback.com>
+
+	* Makefile.in (simops.o): Add simops.h to dependency list.
+
 2001-03-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (gencode): Link with libintl.

@@ -1,3 +1,7 @@
+2001-04-15  J.T. Conklin  <jtc@redback.com>
+
+	* Makefile.in (simops.o): Add simops.h to dependency list.
+
 Wed Aug  9 02:24:53 2000  Graham Stott  <grahams@cygnus.co.uk>
 
 	* am33.igen: Warning clean-up.

@@ -135,6 +135,6 @@ clean-extra: clean-igen
 	rm -f table.c simops.h gencode
 
 #interp.o: interp.c table.c $(INCLUDE)
-simops.o: simops.c $(INCLUDE) targ-vals.h
+simops.o: simops.c simops.h $(INCLUDE) targ-vals.h
 #table.o: table.c
 semantics.o: $(INCLUDE)
