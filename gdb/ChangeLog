@@ -1,4 +1,4 @@
-2000-12-15  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+2000-12-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* config/sh/tm-sh.h: Don't remove SR_REGNUM from enum.
 
