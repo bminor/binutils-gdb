@@ -4,12 +4,14 @@ Wed Nov 26 11:00:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 start-sanitize-vr5400
 	* mdmx.igen (value_vr): Correct sim_io_eprintf format argument.
+	(value_cc, store_cc): Implement.
 
 	* sim-main.h: Add 8*3*8 bit accumulator.
 
 	* vr5400.igen: Move mdmx instructins from here
 	* mdmx.igen: To here - new file. Add/fix missing instructions.
 	* mips.igen: Include mdmx.igen.
+	* Makefile.in (IGEN_INCLUDE): Add mdmx.igen.
 
 start-sanitize-vr5400
 Sun Nov 23 01:45:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
