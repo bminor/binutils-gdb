@@ -1,3 +1,10 @@
+2004-02-13  Andrew Cagney  <cagney@redhat.com>
+
+	* corelow.c (core_xfer_partial): Use "struct bfd_section".
+	* config/sparc/nm-nbsd.h (struct target_ops): Declare, update
+	copyright.
+	* mips-linux-tdep.c: Use "GNU/Linux", update copyright.
+
 2004-02-12  Fred Fish  <fnf@redhat.com>
 
 	* m68hc11-tdep.c (m68hc11_gdbarch_init): Remove duplicate call to
