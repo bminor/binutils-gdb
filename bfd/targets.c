@@ -364,6 +364,10 @@ extern bfd_target bfd_elf32_i860_vec;
 extern bfd_target bfd_elf32_m88k_vec;
 extern bfd_target bfd_elf32_bigmips_vec;
 extern bfd_target bfd_elf32_littlemips_vec;
+extern bfd_target bfd_elf32_big_generic_vec;
+extern bfd_target bfd_elf32_little_generic_vec;
+extern bfd_target bfd_elf64_big_generic_vec;
+extern bfd_target bfd_elf64_little_generic_vec;
 extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
 extern bfd_target m88kbcs_vec;
@@ -381,6 +385,7 @@ extern bfd_target h8500coff_vec;
 extern bfd_target z8kcoff_vec;
 extern bfd_target we32kcoff_vec;
 extern bfd_target shcoff_vec;
+extern bfd_target hp300hpux_vec;
 
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
 extern bfd_target hppa_vec;
@@ -437,6 +442,12 @@ bfd_target *target_vector[] = {
 	&bfd_elf32_m88k_vec,
 	&bfd_elf32_littlemips_vec,
 	&bfd_elf32_bigmips_vec,
+	&bfd_elf32_little_generic_vec,
+	&bfd_elf32_big_generic_vec,
+#ifdef BFD64
+	&bfd_elf64_little_generic_vec,
+	&bfd_elf64_big_generic_vec,
+#endif
 	&a_out_adobe_vec,
 	&b_out_vec_little_host,
 	&b_out_vec_big_host,
@@ -446,6 +457,7 @@ bfd_target *target_vector[] = {
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
         &hppa_vec,
 #endif
+	&hp300hpux_vec,
 	&we32kcoff_vec,
 
 #ifdef	TRAD_CORE

@@ -451,7 +451,6 @@ DEFUN(MY(slurp_symbol_table),(abfd),
   aout_symbol_type *cached;
   unsigned num_syms = 0;
   unsigned num_secondary = 0;
-  int xxx = 0; /* for translate_from_native_sym_flags */
 
   /* If there's no work to be done, don't do any */
   if (obj_aout_symbols (abfd) != (aout_symbol_type *)NULL) return true;
@@ -516,8 +515,7 @@ DEFUN(MY(slurp_symbol_table),(abfd),
 
             cache_save = *cache_ptr;
             convert_sym_type(sym_pointer, cache_ptr, abfd);
-	    translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd,
-					     &xxx);
+	    translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd);
 
             /********************************************************/
             /* for hpux, the 'lenght' value indicates the length of */
@@ -562,8 +560,8 @@ DEFUN(MY(slurp_symbol_table),(abfd),
                 strings += length+10;
                 cache_ptr2->type &= ~HP_SECONDARY_SYMBOL;  /* clear secondary */
                 convert_sym_type(sym_pointer, cache_ptr2, abfd);
-                translate_from_native_sym_flags (sym_pointer, cache_ptr2, abfd,
-						 &xxx);
+                translate_from_native_sym_flags (sym_pointer, cache_ptr2,
+						 abfd);
             }
 
             /* skip over the embedded symbol. */
@@ -590,7 +588,6 @@ DEFUN(MY(swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
   int r_extern = 0;
   unsigned int r_length;
   int r_pcrel = 0;
-  int r_baserel = 0, r_jmptable = 0, r_relative = 0;
   struct aoutdata  *su = &(abfd->tdata.aout_data->a);
 
   cache_ptr->address = bfd_h_get_32 (abfd, bytes->r_address);
@@ -638,6 +635,7 @@ DEFUN(MY(swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
       break;
     default:
       printf("illegal relocation length: %x\n",bytes->r_length[0] );
+      r_length = 0;
     }
 
   cache_ptr->howto =  howto_table_std + r_length + 4 * r_pcrel;

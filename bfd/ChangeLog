@@ -1,3 +1,14 @@
+Wed Jul  7 10:56:21 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* aoutx.h (translate_from_native_sym_flags): Removed statep
+	argument.  Just let an indirect symbol point to the next symbol
+	without forcing the next symbol to be undefined.  Changed all
+	callers.
+	* hp300hpux.c (slurp_symbol_table): Changed call to
+	translate_from_native_sym_flags.
+	* targets.c: Added hp300hpux_vec.
+	* Makefile.in (hp300hpux.o): Added dependencies.
+
 Tue Jul  6 13:24:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* reloc.c (enum bfd_reloc_code_real): Put simple power-of-two

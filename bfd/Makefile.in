@@ -378,6 +378,10 @@ aout32.o : aout32.c aoutx.h $(BFD_H) $(INCDIR)/ansidecl.h \
 sunos.o : sunos.c aoutf1.h $(BFD_H) $(INCDIR)/obstack.h \
   libaout.h libbfd.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h 
+hp300hpux.o : hp300hpux.c aoutx.h $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h libaout.h libbfd.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
+  $(INCDIR)/aout/hp300hpux.h aout-target.h
 demo64.o : demo64.c 
 
 srec.o : srec.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h 
