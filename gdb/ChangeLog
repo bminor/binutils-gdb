@@ -1,5 +1,15 @@
 Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
 
+	* infrun.c:  When using SVR4 /proc interface instead of ptrace(),
+	call proc_set_exec_trap() to setup child to stop at first instruction.
+
+	* inftarg.c: When using SVR4 /proc interface, call proc_wait()
+	rather than wait().
+
+	* m68k-tdep.c: Add new routines supply_gregset(), fill_gregset(),
+	supply_fpregset(), and fill_fpregset(), which are machine
+	dependent support routines for SVR4 /proc interface.
+
 	* utils.c: Add warning_setup() and warning().  Warning() behaves
 	the same as error() except that it returns normally rather than
 	jumping back to command level.  Modules that don't want to call
