@@ -722,7 +722,106 @@ limited number of hardwired actions.
 
 --
 
-Get the TUI working on all platforms.
+Fix TUI
+
+     o  readline/*.h bitrot
+
+        The TUI isn't up-to-date with
+        respect to the readline currently
+        bundled with GDB.  Importing a
+        new readline is on the 5.1 wish
+        list so this can only get worse.
+
+        Grep for things like term_cursor_move.
+
+        (To be honest, I don't see anyone
+        importing a new readline before 5.1 is
+        out)
+
+     o  tui.c:va_catch_errors() bitrot
+
+        This nasty piece of work used knowledge
+        of the internals of GDBs error functions :-(
+        Ever since those internals were cleaned
+        up this code has been broken. :-(
+
+     o  tuiWin.c:c_makeVisibleWithNewHeight() broken
+        tuiLayout.c:_extractDisplayStartAddr() broken
+
+        Both these function call find_line_pc()
+        incorrectly (wrong args, wrong return value).
+
+        I suspect this bug has always been there!
+        It had been hidden because those files
+        didn't include the necessary header files
+        from gdb proper :-(
+
+     o  tuiRegs() host dependant
+
+        Not suprisingly, this isn't a very portable
+        section of code.  However, I'm sure people
+        could live with no regs in the short to
+        medium term.
+
+     o  defs.h: #include "tui.h" et.al.
+
+        I'm not sure where this came from.
+        It was a really bad idea.
+
+        To get things to compile I did a nasty
+        hack (Just declare what was needed and
+        replace any expressions like xx->y.z()
+        in GDB proper with function calls).  I
+        could commit it slightly cleaned up if
+        you like.
+
+        Medium Term. the #ifdef TUI and TuiDo()
+        should be changed to hooks (like GDBTK).
+        The gdb-events.[hc] is there for that
+        purpose (1)
+
+     o  tui.c:_tuiReset() host dependant
+
+        tui.c contains a lump of termio[s]
+        I suspect an equivalent block of
+        code can be lifted from readline.
+        An equivalent readline function may
+        even be available.
+
+     o  curses.h vs ncurses.h.
+
+        Simple portability problem.
+
+     o  subsetCompare()
+
+        This function is a mystery - where is it?
+
+     o  tui-file.[hc] cleanup
+
+        This can be significantly simplified.
+
+     o  The code should be pacified. (-Werror -W...)
+
+        There are plenty of #includes,
+        duplicate #includes, missing function decls
+        and the like.
+
+        Some of the problems I found were through
+        fixing a few of the warnings.
+
+     o  The code should be GNUtified.
+
+        It would be very nice to have this code
+        look like the rest of GDB.  That way people
+        would be more accepting of it as a true
+        gdb component.
+
+        Until it is GNUtified it is going to stick
+        out like a sore thumb to the programmer.
+
+     o  The code should be clearly copyrighted
+
+        (FSF, with due credit to HP)
 
 --
 

@@ -1,5 +1,9 @@
 2001-03-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* TODO: List known problems with TUI.
+
+2001-03-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Jimmy Guo stepped down as a maintiner (TUI,
 	gdb.hp).
 
