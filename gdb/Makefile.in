@@ -838,7 +838,7 @@ OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
 TSOBS = inflow.o
 
-SUBDIRS = @SUBDIRS@
+SUBDIRS = @subdirs@
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c \

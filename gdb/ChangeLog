@@ -1,3 +1,14 @@
+2003-01-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Remove all use of the SUBDIRS variable; add
+	directories using the AC_CONFIG_SUBDIRS macro instead.  Polish
+	code providing the --enable-multi-ice option, and move it right in
+	front of the code that checks whether gdbserver is supported.
+	Polish that too.
+	* configure: Regenerated.
+	* Makefile.in (SUBDIRS): Substitute @subdirs@ instead of
+	@SUBDIRS@.
+
 2003-01-03  Andrew Cagney  <cagney@redhat.com>
 
 	* alpha-tdep.c: Use deprecated_update_frame_base_hack.

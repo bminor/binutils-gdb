@@ -60,21 +60,8 @@ CONFIG_CLEAN=
 CONFIG_INSTALL=
 CONFIG_UNINSTALL=
 
-SUBDIRS="doc testsuite nlm"
-configdirs="doc testsuite"
-
-AC_ARG_ENABLE(multi-ice,
-[  --enable-multi-ice            Build the multi-ice-gdb-server],
-[case "${enableval}" in
-    yes ) enable_multi_ice="yes" ;;
-    no)  enable_multi_ice="no" ;;
-    *) AC_MSG_ERROR(Bad value for --enable-multi-ice: ${enableval}) ;;
-  esac
-])
-
-if test "${enable_multi_ice}" = "yes"; then
-  configdirs="${configdirs} multi-ice"
-fi
+AC_CONFIG_SUBDIRS(doc testsuite)
+configdirs=
 
 . $srcdir/configure.host
 
@@ -1118,7 +1105,6 @@ if test "${enable_gdbtk}" = "yes"; then
 	fi
     fi
 
-    SUBDIRS="${SUBDIRS} gdbtk"
     configdirs="${configdirs} gdbtk"
 fi
 
@@ -1324,22 +1310,31 @@ case "${GDB_MULTI_ARCH}" in
     *)  AC_MSG_ERROR("GDB: Unknown GDB_MULTI_ARCH value ${GDB_MULTI_ARCH}");;
 esac
 
-if test "${enable_multi_ice}" = "yes"; then
-  SUBDIRS="${SUBDIRS} multi-ice"
+# Enable multi-ice-gdb-server.
+AC_ARG_ENABLE(multi-ice,
+[  --enable-multi-ice      build the multi-ice-gdb-server],
+  [case $enableval in
+    yes | no)
+      ;;
+    *) AC_MSG_ERROR([bad value $enableval for --enable-multi-ice]) ;;
+  esac])
+if test "x$enable_multi_ice" = xyes; then
+  configdirs="$configdirs multi-ice"
 fi
 
-# ``gdbserver'' can only be built in a native configuration.
-if test x"${target}" = x"${host}"; then
-    AC_MSG_CHECKING(whether gdbserver is supported on this host)
-    if test x"${build_gdbserver}" = xyes ; then
-	configdirs="${configdirs} gdbserver"
-	SUBDIRS="${SUBDIRS} gdbserver"
-	AC_MSG_RESULT(yes)
-    else
-	AC_MSG_RESULT(no)
-    fi
+# We only build gdbserver automatically if host and target are the same.
+if test "x$target" = "x$host"; then
+  AC_MSG_CHECKING(whether gdbserver is supported on this host)
+  if test "x$build_gdbserver" = xyes; then
+    configdirs="$configdirs gdbserver"
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
 fi
 
+AC_CONFIG_SUBDIRS($configdirs)
+SUBDIRS=$subdirs
 AC_SUBST(SUBDIRS)
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
@@ -1399,7 +1394,6 @@ AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "ISO-8859-1",
 
 AM_ICONV
 
-AC_CONFIG_SUBDIRS($configdirs)
 AC_OUTPUT(Makefile .gdbinit:gdbinit.in,
 [
 dnl Autoconf doesn't provide a mechanism for modifying definitions 
