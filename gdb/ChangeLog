@@ -1,3 +1,15 @@
+Tue Sep  8 15:22:06 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* a68v-xdep.c (store_inferior_registers):  declare as void.
+	* infptrace.c:  HP/Apollos have ptrace.h in the wrong place.
+	* remote-st2000.c:  Massive changes to use new serial package.
+	Also added 'connect' command to transparantly connect to serial
+	port.
+	* ser-termios.c:  Big cleanup, use nicer coding conventions.
+	* ser-bsd.c:  New module, serial stuff for BSD systems.
+	* serial.h:  Define struct ttystate properly using HAVE_TERMIO.
+	* xm-apollo68b.h:  #define PTRACE_IN_WRONG_PLACE...
+
 Fri Sep  4 18:53:57 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* doc/gdb.texinfo: fix shameful error of agreement reported by
