@@ -60,7 +60,7 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (64, 64, bfd_mach_mips8000, "mips:8000", false, &arch_info_struct[12]),
   N (64, 64, bfd_mach_mips10000, "mips:10000", false, &arch_info_struct[13]),
 
-  /* start-sanitize-tx19
+  /* start-sanitize-tx19 */
 #undef A
 #define A 1
   N (32, 32, bfd_mach_mips1900, "mips:1900", false, &arch_info_struct[13+A]),
@@ -78,7 +78,7 @@ static const bfd_arch_info_type arch_info_struct[] =
   /* start-sanitize-r5900 */
 #undef D
 #define D 1
-  N (64, 64, bfd_mach_mips5900, "mips:5900", false, &arch_info_struct[13+A+B+C+D]),
+  N (64, 32, bfd_mach_mips5900, "mips:5900", false, &arch_info_struct[13+A+B+C+D]),
   /* end-sanitize-r5900 */
   /* start-sanitize-sky */
 #undef E
