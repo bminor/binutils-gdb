@@ -1,3 +1,11 @@
+2000-06-08  James E. Wilson  <wilson@cygnus.com>
+
+	* config/tc-ia64.c (generate_unwind_image): Call ia64_flush_insns.
+	(dot_endp): Don't call ia64_flush_insns.
+	(emit_one_bundle): Don't delete prologue/body records from
+	unwind_record list in first loop.  Rewrite second loop to account for
+	this.
+
 2000-06-07  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c: Add missing prototypes.

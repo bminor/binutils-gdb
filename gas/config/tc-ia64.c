@@ -2942,6 +2942,10 @@ generate_unwind_image ()
   int size;
   unsigned char *unw_rec;
 
+  /* Force out pending instructions, to make sure all unwind records have
+     a valid slot_number field.  */
+  ia64_flush_insns ();
+
   /* Generate the unwind record.  */
   size = output_unw_records (unwind.list, (void **) &unw_rec);
   if (size % 8 != 0)
@@ -3561,7 +3565,6 @@ dot_endp (dummy)
   demand_empty_rest_of_line ();
 
   insn_group_break (1, 0, 0);
-  ia64_flush_insns ();
 
   /* If there was a .handlerdata, we haven't generated an image yet.  */
   if (unwind.info == 0)
@@ -5239,21 +5242,12 @@ emit_one_bundle ()
       /* Set the slot number for prologue/body records now as those
 	 refer to the current point, not the point after the
 	 instruction has been issued: */
-      prev = 0;
+      /* Don't try to delete prologue/body records here, as that will cause
+	 them to also be deleted from the master list of unwind records.  */
       for (ptr = md.slot[curr].unwind_record; ptr; ptr = ptr->next)
-	{
-	  if (ptr->r.type == prologue || ptr->r.type == prologue_gr
-	      || ptr->r.type == body)
-	    {
-	      ptr->slot_number = (unsigned long) f + i;
-	      if (prev)
-		prev->next = ptr->next;
-	      else
-		md.slot[curr].unwind_record = ptr->next;
-	    }
-	  else
-	    prev = ptr;
-	}
+	if (ptr->r.type == prologue || ptr->r.type == prologue_gr
+	    || ptr->r.type == body)
+	  ptr->slot_number = (unsigned long) f + i;
 
       if (idesc->flags & IA64_OPCODE_SLOT2)
 	{
@@ -5453,13 +5447,14 @@ emit_one_bundle ()
 
       build_insn (md.slot + curr, insn + i);
 
-      /* Set slot counts for unwind records.  */
-      while (md.slot[curr].unwind_record) 
-	{
-	  md.slot[curr].unwind_record->slot_number = (unsigned long) f + i;
-	  md.slot[curr].unwind_record = md.slot[curr].unwind_record->next;
-	}
+      /* Set slot counts for non prologue/body unwind records.  */
+      for (ptr = md.slot[curr].unwind_record; ptr; ptr = ptr->next)
+	if (ptr->r.type != prologue && ptr->r.type != prologue_gr
+	    && ptr->r.type != body)
+	  ptr->slot_number = (unsigned long) f + i;
+      md.slot[curr].unwind_record = NULL;
       unwind.next_slot_number = (unsigned long) f + i + ((i == 2)?(0x10-2):1);
+
       if (required_unit == IA64_UNIT_L)
 	{
 	  know (i == 1);
