@@ -1,5 +1,10 @@
 Thu Sep  4 09:03:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/aix.em (gld${EMULATION_NAME}_parse_args): In
+	expression produced for -bpT and -bpD options, align to a 32 byte
+	boundary rather than an 8 byte boundary.
+	* scripttempl/aix.sc: Put .tocbss at start of .bss section.
+
 	* ldmisc.h, ldmisc.c, ldcref.c: Rename finfo to lfinfo, to avoid
 	function name conflict with AIX 4.2 unistd.h header file.
 
