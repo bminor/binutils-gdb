@@ -25,14 +25,16 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
 Makefile.in
 all.m4
 amd29k.m4
 configure.in
-gdbinv-m.m4.in
-gdbinv-s.m4.in
+gdb-all.texinfo
 gdb.texinfo
 gdbint.texinfo
+gdbinv-m.m4.in
+gdbinv-s.m4.in
 gen.m4
 i80386.m4
 i960.m4
