@@ -78,8 +78,6 @@ setup_xfail "alpha*-*-linux*"
 setup_xfail "hppa*64*-*-*"
 setup_xfail "mn10300-*-elf"
 setup_xfail "sh-*-*"
-setup_xfail "m6811-*-*"
-setup_xfail "m6812-*-*"
 
 set mf "tmpdir/undefined.o* In function `function':"
 checkund $mf $testfn
@@ -134,8 +132,6 @@ set ml "undefined.c:9: undefined reference to `*this_function_is_not_defined'"
 setup_xfail mcore-*-elf
 setup_xfail mips-sgi-irix6*
 setup_xfail "sh64-*-*"
-setup_xfail "m6811-*-*"
-setup_xfail "m6812-*-*"
 
 # The undefined test fails on 31 bit s/390 because the address of the 
 # function `this_function_is_not_defined' is stored in the literal pool of
