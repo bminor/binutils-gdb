@@ -1,4 +1,4 @@
-#as: -m32rx --no-warn-explicit-parallel-conflicts --enable-special
+#as: -m32rx --no-warn-explicit-parallel-conflicts --m32rx-enable-special
 #objdump: -dr
 #name: m32rx
 

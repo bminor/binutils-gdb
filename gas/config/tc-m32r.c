@@ -36,7 +36,8 @@ typedef struct sym_link
 
 static sym_linkS *debug_sym_link = (sym_linkS *)0;
   
-/* Structure to hold all of the different components describing an individual instruction.  */
+/* Structure to hold all of the different components describing
+   an individual instruction.  */
 typedef struct
 {
   const CGEN_INSN *	insn;
@@ -90,7 +91,7 @@ static int warn_unmatched_high = 0;
    extended M32RX instruction set should be enabled.  */
 static int enable_m32rx = 0;
 
-/* Non-zero if --enable-special has been specified, in which case support for
+/* Non-zero if --m32rx-enable-special has been specified, in which case support for
    the special M32RX instruction set should be enabled.  */
 static int enable_special = 0;
 
@@ -169,7 +170,8 @@ struct option md_longopts[] =
   {"no-warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
   {"Wnp", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
 #define OPTION_SPECIAL	(OPTION_MD_BASE + 3)
-  {"enable-special", no_argument, NULL, OPTION_SPECIAL},
+  {"m32rx-enable-special", no_argument, NULL, OPTION_SPECIAL},
+  {"m32rx-es", no_argument, NULL, OPTION_SPECIAL},
 /* end-sanitize-m32rx */
 
   /* Sigh.  I guess all warnings must now have both variants.  */
@@ -254,8 +256,9 @@ md_show_usage (stream)
   fprintf (stream, _("\
 --m32rx			support the extended m32rx instruction set\n"));
   fprintf (stream, _("\
---enable-special	support the special m32rx instructions\n"));
-
+--m32rx-enable-special	support the special m32rx instructions\n"));
+  fprintf (stream, _("\
+--m32rx-es		synonym for --m32rx-enable-special\n"));
   fprintf (stream, _("\
 -O			try to combine instructions in parallel\n"));
 
@@ -414,6 +417,7 @@ debug_sym (ignore)
 
   symbol_table_insert (symbolP);
   if (S_IS_DEFINED (symbolP) && S_GET_SEGMENT (symbolP) != reg_section)
+    /* xgettext:c-format */
     as_bad (_("symbol `%s' already defined"), S_GET_NAME (symbolP));
 
   else
@@ -458,7 +462,6 @@ expand_debug_syms (syms, align)
 }
 
 /* Cover function to fill_insn called after a label and at end of assembly.
-
    The result is always 1: we're called in a conditional to see if the
    current line is a label.  */
 
@@ -603,8 +606,9 @@ first_writes_to_seconds_operands (a, b, check_outputs)
 	    }
 	  else
 	    {
-	      /* Scan operand list of 'b' looking for an operand that references
-		 the same hardware element, and which goes in the right direction.  */
+	      /* Scan operand list of 'b' looking for an operand that
+		 references the same hardware element, and which goes in the
+		 right direction.  */
 	      for (b_index = 0;
 		   CGEN_OPERAND_INSTANCE_TYPE (b_operands) != CGEN_OPERAND_INSTANCE_END;
 		   b_index ++, b_operands ++)
@@ -771,6 +775,7 @@ assemble_parallel_insn (str, str2)
   /* Check to see if this is an allowable parallel insn.  */
   if (CGEN_INSN_ATTR (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
+      /* xgettext:c-format */
       as_bad (_("instruction '%s' cannot be executed in parallel."), str);
       return;
     }
@@ -793,10 +798,9 @@ assemble_parallel_insn (str, str2)
      version (eg relaxability).  When aliases behave differently this
      may have to change.  */
   first.orig_insn = first.insn;
-  first.insn = m32r_cgen_lookup_get_insn_operands (NULL,
-						   bfd_getb16 ((char *) first.buffer),
-						   16,
-						   first.indices);
+  first.insn = m32r_cgen_lookup_get_insn_operands
+    (NULL, bfd_getb16 ((char *) first.buffer), 16, first.indices);
+  
   if (first.insn == NULL)
     as_fatal (_("internal error: m32r_cgen_lookup_get_insn_operands failed for first insn"));
 
@@ -829,6 +833,7 @@ assemble_parallel_insn (str, str2)
   /* Check to see if this is an allowable parallel insn.  */
   if (CGEN_INSN_ATTR (second.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
+      /* xgettext:c-format */
       as_bad (_("instruction '%s' cannot be executed in parallel."), str);
       return;
     }
@@ -846,10 +851,9 @@ assemble_parallel_insn (str, str2)
 
   /* Get the indices of the operands of the instruction.  */
   second.orig_insn = second.insn;
-  second.insn = m32r_cgen_lookup_get_insn_operands (NULL,
-						    bfd_getb16 ((char *) second.buffer),
-						    16,
-						    second.indices);
+  second.insn = m32r_cgen_lookup_get_insn_operands
+    (NULL, bfd_getb16 ((char *) second.buffer), 16, second.indices);
+  
   if (second.insn == NULL)
     as_fatal (_("internal error: m32r_cgen_lookup_get_insn_operands failed for second insn"));
 
@@ -949,7 +953,9 @@ md_assemble (str)
   insn.debug_sym_link = debug_sym_link;
   debug_sym_link = (sym_linkS *)0;
 
-  insn.insn = CGEN_SYM (assemble_insn) (str, & insn.fields, insn.buffer, & errmsg);
+  insn.insn = CGEN_SYM (assemble_insn)
+    (str, & insn.fields, insn.buffer, & errmsg);
+  
   if (!insn.insn)
     {
       as_bad (errmsg);
@@ -1005,10 +1011,9 @@ md_assemble (str)
 	{
 	  /* Get the indices of the operands of the instruction.
 	     FIXME: See assemble_parallel for notes on orig_insn.  */
-	  insn.insn = m32r_cgen_lookup_get_insn_operands (NULL,
-							  bfd_getb16 ((char *) insn.buffer),
-							  16,
-							  insn.indices);
+	  insn.insn = m32r_cgen_lookup_get_insn_operands
+	    (NULL, bfd_getb16 ((char *) insn.buffer), 16, insn.indices);
+	  
 	  if (insn.insn == NULL)
 	    as_fatal (_("internal error: m32r_cgen_get_insn_operands failed"));
 	}
@@ -1184,6 +1189,7 @@ m32r_scomm (ignore)
   input_line_pointer ++;		/* skip ',' */
   if ((size = get_absolute_expression ()) < 0)
     {
+      /* xgettext:c-format */
       as_warn (_(".SCOMMon length (%ld.) <0! Ignored."), (long) size);
       ignore_rest_of_line ();
       return;
@@ -1223,6 +1229,7 @@ m32r_scomm (ignore)
 
   if (S_IS_DEFINED (symbolP))
     {
+      /* xgettext:c-format */
       as_bad (_("Ignoring attempt to re-define symbol `%s'."),
 	      S_GET_NAME (symbolP));
       ignore_rest_of_line ();
@@ -1231,6 +1238,7 @@ m32r_scomm (ignore)
 
   if (S_GET_VALUE (symbolP) && S_GET_VALUE (symbolP) != (valueT) size)
     {
+      /* xgettext:c-format */
       as_bad (_("Length of .scomm \"%s\" is already %ld. Not changed to %ld."),
 	      S_GET_NAME (symbolP),
 	      (long) S_GET_VALUE (symbolP),

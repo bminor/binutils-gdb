@@ -40,12 +40,17 @@ to the M32RX microprocessor, which adds some more instructions to the
 basic M32R instruction set, and some additional parameters to some of
 the original instructions.
 
-@item --enable-special
-@cindex @samp{--enable-special} option, M32RX
+@item --m32rx-enable-special
+@cindex @samp{--m32rx-enable-special} option, M32RX
 @cindex architecture options, M32RX
 @cindex M32R architecture options
 This option is the equivalent of the @emph{--m32rx} option, except that
 it also allows the special M32RX instructions to be assembled as well.
+
+@item --m32rx-es
+@cindex @samp{--m32rx-es} option, M32RX
+This is a shorter synonym for the @emph{--m32rx-enable-special}
+option.
 
 @item --warn-explicit-parallel-conflicts
 @cindex @samp{--warn-explicit-parallel-conflicts} option, M32RX

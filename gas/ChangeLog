@@ -1,3 +1,14 @@
+start-sanitize-m32rx
+Thu May 14 13:49:39 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c: Chnage command line switch from
+	--enable-special to --m32rx-enable-special and add shorter
+	synonym: --m32rx-es.
+	* doc/c-m32r.texi (M32R-Opts): Document changes to command line
+	switch. 
+	* testsuite/gas/m32rx/m32rx.d: Change switch.
+	
+end-sanitize-m32rx
 Wed May 13 10:16:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-m32r.c (warn_unmatched_high): New static local.
