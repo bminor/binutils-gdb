@@ -1,3 +1,50 @@
+Wed Feb 15 14:54:18 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (elf_powerpc_howto_table): Use a destination mask of
+	0xffffffff for R_PPC_REL32, not 0.
+	(powerpc_reloc_map): Add low 16 bit, high 16 bit, and high 16 bit
+	adjusted relocations.
+
+Tue Feb 14 17:47:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (struct mips_elf_find_line): Define.
+	(mips_elf_find_nearest_line): New static function.
+	(bfd_elf32_find_nearest_line): Define.
+	* libelf.h (struct elf_obj_tdata): Add find_line_info field.
+
+	* ecoff.c (_bfd_ecoff_swap_tir_in): Move to ecofflink.c.
+	(_bfd_ecoff_swap_tir_out): Likewise.
+	(_bfd_ecoff_swap_rndx_in): Likewise.
+	(_bfd_ecoff_swap_rndx_out): Likewise.
+	(cmp_fdrtab_entry): Likewise.
+	(mk_fdrtab): Likewise.
+	(lookup): Likewise.
+	(_bfd_ecoff_find_nearest_line): Just call _bfd_ecoff_locate_line
+	to do most of the work.  Allocate find_line_info if necessary.
+	* ecofflink.c: Include "aout/stab_gnu.h".
+	(_bfd_ecoff_swap_tir_in): Move in from ecoff.c.
+	(_bfd_ecoff_swap_tir_out): Likewise.
+	(_bfd_ecoff_swap_rndx_in): Likewise.
+	(_bfd_ecoff_swap_rndx_out): Likewise.
+	(cmp_fdrtab_entry): Likewise.  Use PTR instead of void *.
+	(mk_fdrtab): Move in from ecoff.c.  Add debug_info, debug_swap,
+	and line_info arguments, and use them instead of ecoff_data.
+	(fdrtab_lookup): Move in from lookup in ecoff.c.  Remove abfd
+	argument, add line_info argument.  Use it instead of ecoff_data.
+	(_bfd_ecoff_locate_line): New function, mostly from the old
+	_bfd_ecoff_find_nearest_line in ecoff.c.
+	* libecoff.h (ecoff_data_type): Remove find_buffer, fdrtab_len and
+	fdrtab fields, replacing them find_line_info field.
+	(_bfd_ecoff_swap_tir_in): Declare.
+	(_bfd_ecoff_swap_tir_out): Declare.
+	(_bfd_ecoff_swap_rndx_in): Declare.
+	(_bfd_ecoff_swap_rndx_out): Declare.
+	* libbfd-in.h (_bfd_ecoff_locate_line): Declare.
+	* libbfd.h: Rebuild.
+	* configure.in: Don't use ecoff.o for bfd_elf32_bigmips_vec or
+	bfd_elf32_littlemips_vec.
+	* Makefile.in: Rebuild dependencies.
+
 Tue Feb 14 14:04:22 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* libelf.h (elf_backend_data): Add fields elf_machine_alt1 and
