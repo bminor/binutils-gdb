@@ -1,3 +1,7 @@
+Wed Nov  9 14:53:03 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/te-delta.h: New file, derived from te-sysv32.h.
+
 Wed Nov  9 11:52:44 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/tc-ppc.c (ppc_bf): Always set coff_line_base.

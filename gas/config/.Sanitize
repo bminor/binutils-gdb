@@ -101,6 +101,7 @@ tc-vax.h
 tc-z8k.c
 tc-z8k.h
 te-386bsd.h
+te-delta.h
 te-dpx2.h
 te-generic.h
 te-go32.h
