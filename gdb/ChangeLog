@@ -1,3 +1,14 @@
+2001-01-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* ui-out.c (do_list_end): New function.
+	(make_cleanup_ui_out_list_end): New function.
+	* ui-out.h: Provide prototype for make_cleanup_ui_out_list_end.
+	* stack.c (print_frame) [UI_OUT]: Call
+	make_cleanup_ui_out_list_end to make sure we mark the end of the
+	list if we do a non-local exit.  At the end of the function,
+	instead of calling ui_out_list_end directly, let do_cleanups
+	handle it.
+
 2001-01-26  Fernando Nasser  <fnasser@redhat.com>
 
 	Fix double parsing of filenames passed as command line arguments

@@ -1,5 +1,6 @@
 /* Print and select stack frames for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991-1996, 1998-2000 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
+   1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -448,6 +449,7 @@ print_frame (struct frame_info *fi,
 #ifdef UI_OUT
   struct ui_stream *stb;
   struct cleanup *old_chain;
+  struct cleanup *list_chain;
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -532,6 +534,7 @@ print_frame (struct frame_info *fi,
 
 #ifdef UI_OUT
   ui_out_list_begin (uiout, "frame");
+  list_chain = make_cleanup_ui_out_list_end (uiout);
 #endif
 
   if (level >= 0)
@@ -661,7 +664,8 @@ print_frame (struct frame_info *fi,
 #endif /* PC_SOLIB */
 
 #ifdef UI_OUT
-  ui_out_list_end (uiout);
+  /* do_cleanups will call ui_out_list_end() for us.  */
+  do_cleanups (list_chain);
   ui_out_text (uiout, "\n");
   do_cleanups (old_chain);
 #else

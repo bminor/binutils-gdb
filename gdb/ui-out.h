@@ -81,6 +81,8 @@ extern void ui_out_list_begin (struct ui_out *uiout, char *lstid);
 
 extern void ui_out_list_end (struct ui_out *uiout);
 
+extern struct cleanup *make_cleanup_ui_out_list_end (struct ui_out *uiout);
+
 extern void ui_out_field_int (struct ui_out *uiout, char *fldname, int value);
 
 extern void ui_out_field_core_addr (struct ui_out *uiout, char *fldname,

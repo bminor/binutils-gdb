@@ -281,6 +281,18 @@ ui_out_list_end (struct ui_out *uiout)
   uiout->list_flag--;
 }
 
+static void
+do_list_end (void *uiout)
+{
+  ui_out_list_end (uiout);
+}
+
+struct cleanup *
+make_cleanup_ui_out_list_end (struct ui_out *uiout)
+{
+  return make_cleanup (do_list_end, uiout);
+}
+
 void
 ui_out_field_int (struct ui_out *uiout, char *fldname, int value)
 {
