@@ -106,17 +106,17 @@ typedef enum bfd_format {
          bfd_format;
 
 /* Object file flag values */
-#define NO_FLAGS    0
-#define HAS_RELOC   001
-#define EXEC_P      002
-#define HAS_LINENO  004
-#define HAS_DEBUG   010
-#define HAS_SYMS    020
-#define HAS_LOCALS  040
-#define DYNAMIC     0100
-#define WP_TEXT     0200
-#define D_PAGED     0400
-
+#define NO_FLAGS    	0x00
+#define HAS_RELOC   	0x01
+#define EXEC_P      	0x02
+#define HAS_LINENO  	0x04
+#define HAS_DEBUG   	0x08
+#define HAS_SYMS    	0x10
+#define HAS_LOCALS  	0x20
+#define DYNAMIC     	0x40
+#define WP_TEXT     	0x80
+#define D_PAGED     	0x100
+#define BFD_IS_RELAXABLE 0x200
 
 /* symbols and relocation */
 
