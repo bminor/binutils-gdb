@@ -1,5 +1,8 @@
 Thu Nov 11 13:18:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* README: Remove information on languages and just cite the (newly
+	updated) information in doc/gdb.texinfo instead.
+
 	* delta68-nat.c: Fix typos (add missing ");" and stuct -> struct).
 
 Wed Nov 10 09:31:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
