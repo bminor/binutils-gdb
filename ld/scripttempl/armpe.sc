@@ -20,11 +20,6 @@ SECTIONS
 	    ${RELOCATING+ etext  =  .};
 	  }
 
-  .bss BLOCK(0x1000)  :
-	{
-	*(.bss)
-	*(COMMON);
-	}
 
   .rdata BLOCK(0x1000) :
   { 					
@@ -46,6 +41,7 @@ SECTIONS
     *(.idata$7)
     ;
   }
+
   .CRT BLOCK(0x1000) :
   { 					
     *(.CRT$XCA)
@@ -82,6 +78,13 @@ SECTIONS
     *(.drectve)
     ;
   }
+  .bss BLOCK(0x1000)  :
+	{
+	*(.bss)
+	*(COMMON);
+	end = . ;
+	}
+
   .stab  0 ${RELOCATING+(NOLOAD)} : 
   {
     [ .stab ]
@@ -91,5 +94,6 @@ SECTIONS
   {
     [ .stabstr ]
   }
+	stack =  0x800000 ;
 }
 EOF

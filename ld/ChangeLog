@@ -1,3 +1,17 @@
+Thu Jun  8 14:17:33 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* emulparams/armpe.sh, scriptempl/armpe.sc: Add end and stack.
+
+Mon Jun  5 02:16:24 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* configure.in (i[345]86-*-gnu*): Use GNU elf config.
+
+Thu May 25 11:49:28 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	From Andrew Cagney <cagney@highland.com.au>
+	* Makefile.in: Fixup more gotchas from renaming elf32ppcle to
+	elf32lppc.
+
 Wed May 24 11:23:21 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	Add support for ARM-PE.
