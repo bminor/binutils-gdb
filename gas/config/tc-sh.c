@@ -30,6 +30,7 @@
 #define DEFINE_TABLE
 #include "opcodes/sh-opc.h"
 #include <ctype.h>
+#include "struc-symbol.h"
 
 #ifdef OBJ_ELF
 #include "elf/sh.h"
@@ -54,7 +55,7 @@ int shl = 0;
 
 static void
 little (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   shl = 1;
   target_big_endian = 0;
@@ -159,38 +160,42 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define UNCOND32_M -(1<<30)
 #define UNCOND32_LENGTH 14
 
-const relax_typeS md_relax_table[C (END, 0)] = {
-  { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
-  { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
+#define EMPTY { 0, 0, 0, 0 }
 
-  { 0 },
+const relax_typeS md_relax_table[C (END, 0)] = {
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+
+  EMPTY,
   /* C (COND_JUMP, COND8) */
   { COND8_F, COND8_M, COND8_LENGTH, C (COND_JUMP, COND12) },
   /* C (COND_JUMP, COND12) */
   { COND12_F, COND12_M, COND12_LENGTH, C (COND_JUMP, COND32), },
   /* C (COND_JUMP, COND32) */
   { COND32_F, COND32_M, COND32_LENGTH, 0, },
-  { 0 }, { 0 }, { 0 }, { 0 },
-  { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
+  EMPTY, EMPTY, EMPTY, EMPTY,
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
 
-  { 0 },
+  EMPTY,
   /* C (COND_JUMP_DELAY, COND8) */
   { COND8_F, COND8_M, COND8_LENGTH, C (COND_JUMP_DELAY, COND12) },
   /* C (COND_JUMP_DELAY, COND12) */
   { COND12_F, COND12_M, COND12_DELAY_LENGTH, C (COND_JUMP_DELAY, COND32), },
   /* C (COND_JUMP_DELAY, COND32) */
   { COND32_F, COND32_M, COND32_LENGTH, 0, },
-  { 0 }, { 0 }, { 0 }, { 0 },
-  { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
+  EMPTY, EMPTY, EMPTY, EMPTY,
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
 
-  { 0 },
+  EMPTY,
   /* C (UNCOND_JUMP, UNCOND12) */
   { UNCOND12_F, UNCOND12_M, UNCOND12_LENGTH, C (UNCOND_JUMP, UNCOND32), },
   /* C (UNCOND_JUMP, UNCOND32) */
   { UNCOND32_F, UNCOND32_M, UNCOND32_LENGTH, 0, },
-  { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
-  { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
 };
+
+#undef EMPTY
 
 static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
@@ -828,7 +833,6 @@ get_operands (info, args, operand)
      sh_opcode_info *info;
      char *args;
      sh_operand_info *operand;
-
 {
   char *ptr = args;
   if (info->arg[0])
@@ -1853,7 +1857,7 @@ md_atof (type, litP, sizeP)
 
 static void
 s_uses (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   expressionS ex;
 
@@ -1893,7 +1897,7 @@ size_t md_longopts_size = sizeof(md_longopts);
 int
 md_parse_option (c, arg)
      int c;
-     char *arg;
+     char *arg ATTRIBUTE_UNUSED;
 {
   switch (c)
     {
@@ -1958,7 +1962,7 @@ struct sh_count_relocs
 /*ARGSUSED*/
 static void
 sh_count_relocs (abfd, sec, data)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      segT sec;
      PTR data;
 {
@@ -1988,9 +1992,9 @@ sh_count_relocs (abfd, sec, data)
 /*ARGSUSED*/
 static void
 sh_frob_section (abfd, sec, ignore)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      segT sec;
-     PTR ignore;
+     PTR ignore ATTRIBUTE_UNUSED;
 {
   segment_info_type *seginfo;
   fixS *fix;
@@ -2130,7 +2134,7 @@ sh_frob_file ()
 void
 md_convert_frag (headers, seg, fragP)
 #ifdef BFD_ASSEMBLER
-     bfd *headers;
+     bfd *headers ATTRIBUTE_UNUSED;
 #else
      object_headers *headers;
 #endif
@@ -2860,7 +2864,7 @@ int
 sh_do_align (n, fill, len, max)
      int n;
      const char *fill;
-     int len;
+     int len ATTRIBUTE_UNUSED;
      int max;
 {
   if (fill == NULL
@@ -3042,7 +3046,7 @@ sh_coff_reloc_mangle (seg, fix, intr, paddr)
 
 arelent *
 tc_gen_reloc (section, fixp)
-     asection *section;
+     asection *section ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *rel;

@@ -1,3 +1,9 @@
+2000-05-29  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-sh.c: Fix compile time warning messages.
+
+	* config/tc-mips.c: Fix compile time warning messages.
+
 2000-05-29  Philip Blundell  <philb@gnu.org>
 
 	* doc/as.texinfo: Update copyright dates.
