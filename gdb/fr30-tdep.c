@@ -56,7 +56,7 @@ fr30_pop_frame ()
 		  read_memory_unsigned_integer (frame->fsr.regs[regnum],
 			REGISTER_RAW_SIZE(regnum)));
 
-      write_register (SP_REGNUM, FRAME_FP (frame));
+      write_register (SP_REGNUM, read_register (frame->framereg));
     }
 
   flush_cached_frames ();
@@ -604,7 +604,6 @@ fr30_push_return_address (pc, sp)
      CORE_ADDR pc;
      CORE_ADDR sp;
 {
-T("fr30_push_return_address", CALL_DUMMY_ADDRESS ());
   write_register (RP_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
 }
