@@ -157,7 +157,7 @@ sparc_opcode_lookup_arch (name)
 
 /* Entries for commutative arithmetic operations.  */
 /* ??? More entries can make use of this.  */
-#define commuteop(opcode, op3, arch_mask) \
+#define COMMUTEOP(opcode, op3, arch_mask) \
 { opcode,	F3(2, op3, 0), F3(~2, ~op3, ~0)|ASI(~0),	"1,2,d", 0, arch_mask }, \
 { opcode,	F3(2, op3, 1), F3(~2, ~op3, ~1),		"1,i,d", 0, arch_mask }, \
 { opcode,	F3(2, op3, 1), F3(~2, ~op3, ~1),		"i,1,d", 0, arch_mask }
@@ -1499,12 +1499,12 @@ EFPOP2_2 ("efcmpes",	0x055, "e,f"),
 
 /* sparclet specific insns */
 
-commuteop ("umac", 0x3e, sparclet),
-commuteop ("smac", 0x3f, sparclet),
-commuteop ("umacd", 0x2e, sparclet),
-commuteop ("smacd", 0x2f, sparclet),
-commuteop ("umuld", 0x09, sparclet),
-commuteop ("smuld", 0x0d, sparclet),
+COMMUTEOP ("umac", 0x3e, sparclet),
+COMMUTEOP ("smac", 0x3f, sparclet),
+COMMUTEOP ("umacd", 0x2e, sparclet),
+COMMUTEOP ("smacd", 0x2f, sparclet),
+COMMUTEOP ("umuld", 0x09, sparclet),
+COMMUTEOP ("smuld", 0x0d, sparclet),
 
 { "shuffle",	F3(2, 0x2d, 0), F3(~2, ~0x2d, ~0)|ASI(~0),	"1,2,d", 0, sparclet },
 { "shuffle",	F3(2, 0x2d, 1), F3(~2, ~0x2d, ~1),		"1,i,d", 0, sparclet },
@@ -1518,31 +1518,31 @@ commuteop ("smuld", 0x0d, sparclet),
 /* sparclet coprocessor branch insns */
 /* FIXME: We have to mark these as aliases until we can sort opcodes based
    on selected cpu.  */
-#define slcbcc2(opcode, mask, lose) \
+#define SLCBCC2(opcode, mask, lose) \
  { opcode, (mask), ANNUL|(lose), "l",    F_DELAYED|F_CONDBR|F_ALIAS, sparclet }, \
  { opcode, (mask)|ANNUL, (lose), ",a l", F_DELAYED|F_CONDBR|F_ALIAS, sparclet }
-#define slcbcc(opcode, mask) \
-  slcbcc2(opcode, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask)))
+#define SLCBCC(opcode, mask) \
+  SLCBCC2(opcode, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask)))
 
-/*slcbcc("cbn", 0), - already defined */
-slcbcc("cbe", 1),
-slcbcc("cbf", 2),
-slcbcc("cbef", 3),
-slcbcc("cbr", 4),
-slcbcc("cber", 5),
-slcbcc("cbfr", 6),
-slcbcc("cbefr", 7),
-/*slcbcc("cba", 8), - already defined */
-slcbcc("cbne", 9),
-slcbcc("cbnf", 10),
-slcbcc("cbnef", 11),
-slcbcc("cbnr", 12),
-slcbcc("cbner", 13),
-slcbcc("cbnfr", 14),
-slcbcc("cbnefr", 15),
+/*SLCBCC("cbn", 0), - already defined */
+SLCBCC("cbe", 1),
+SLCBCC("cbf", 2),
+SLCBCC("cbef", 3),
+SLCBCC("cbr", 4),
+SLCBCC("cber", 5),
+SLCBCC("cbfr", 6),
+SLCBCC("cbefr", 7),
+/*SLCBCC("cba", 8), - already defined */
+SLCBCC("cbne", 9),
+SLCBCC("cbnf", 10),
+SLCBCC("cbnef", 11),
+SLCBCC("cbnr", 12),
+SLCBCC("cbner", 13),
+SLCBCC("cbnfr", 14),
+SLCBCC("cbnefr", 15),
 
-#undef slcbcc2
-#undef slcbcc
+#undef SLCBCC2
+#undef SLCBCC
 
 /* More v9 specific insns */
 
