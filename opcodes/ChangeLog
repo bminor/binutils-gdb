@@ -1,3 +1,36 @@
+1999-05-18  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c (Ed): Define.
+	(dis386_twobyte_att, dis386_twobyte_intel): Use Ed for movd.
+	(Rw): Remove.
+	(OP_rm): Rename to OP_Rd.
+	(ONE): Remove.
+	(OP_ONE): Remove.
+	(putop): Add const to template and p.
+	(print_insn_x86): Delete.
+	(print_insn_i386): Merge old function print_insn_x86.  Add const
+	to dp.
+	(struct dis386): Add const to name.
+	(dis386_att, dis386_intel): Add const.
+	(dis386_twobyte_att, dis386_twobyte_intel): Add const.
+	(names32, names16, names8, names_seg, index16): Add const.
+	(grps, prefix_user_table, float_reg): Add const.
+	(float_mem_att, float_mem_intel): Add const.
+	(oappend): Add const to s.
+	(OP_REG): Add const to s.
+	(ptr_reg): Add const to s.
+	(dofloat): Add const to dp.
+	(OP_C): Don't skip modrm, it's now done in OP_Rd.
+	(OP_D): Ditto.
+	(OP_T): Ditto.
+	(OP_Rd): Check for valid mod.  Call Op_E to print.
+	(OP_E): Handle d_mode arg.  Check for bad sfence,lea,lds etc.
+	(OP_MS): Check for valid mod.  Call Op_EM to print.
+	(OP_3DNowSuffix): Set obufp and use oappend rather than
+	strcat.  Call BadOp() for errors.
+	(OP_SIMD_Suffix): Likewise.
+	(BadOp): New function.
+
 1999-05-12  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c (dis386_intel): Remove macro chars, except for
