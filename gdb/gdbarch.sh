@@ -1085,7 +1085,7 @@ extern int gdbarch_update_p (struct gdbarch_info info);
    The per-architecture data-pointer is either initialized explicitly
    (set_gdbarch_data()) or implicitly (by INIT() via a call to
    gdbarch_data()).  FREE() is called to delete either an existing
-   data-poitner overridden by set_gdbarch_data() or when the
+   data-pointer overridden by set_gdbarch_data() or when the
    architecture object is being deleted.
 
    When a previously created architecture is re-selected, the
