@@ -95,35 +95,63 @@ SIM_AC_OPTION_FLOAT($mips_fpu)
 
 
 #
-# Select the sim generator & architecture
+# Select the IGEN architecture
 #
-sim_gen=NO
-sim_igen_flags="-F 32,64,f -M mipsIV"
-sim_m16_flags="-F 16 -M mips16"
+sim_use_gen=NO
+sim_igen_machine="mipsIV"
+sim_m16_machine="mips16"
+sim_igen_filter="32,64,f"
+sim_m16_filter="16"
 
 case "${target}" in
 # start-sanitize-tx19
-# mipstx19*-*-*)	 sim_gen=M16
-#			 sim_igen_flags="-F 32,64,f -M tx19"
-#			 sim_m16_flags="-F 16 -M tx19"
-#			 ;;
+  mipstx19*-*-*)	sim_default_gen=M16
+			sim_igen_machine="tx19"
+			sim_m16_machine="tx19"
+			sim_igen_filter="32"
+			sim_m16_filter="16"
+			;;
 # end-sanitize-tx19
 # start-sanitize-r5900
-#  mips64r59*-*-*)       sim_gen=IGEN
-#			 sim_igen_flags="-F 32,64,f -M r5900"
-#			 ;;
+  mips64r59*-*-*)	sim_default_gen=IGEN
+			sim_igen_machine="r5900"
+			;;
 # end-sanitize-r5900
 # start-sanitize-vr5400
-  mips64vr54*-*-*)	 sim_gen=IGEN
-			 sim_igen_flags="-F 32,64,f -M vr5400"
-			 ;;
+  mips64vr54*-*-*)	sim_default_gen=IGEN
+			sim_use_gen=IGEN
+			sim_igen_machine="vr5400"
+			;;
 # end-sanitize-vr5400
-#  mips16*-*-*)          sim_gen=M16 ;;
-  *)                     sim_gen=NO ;;
+  mips16*-*-*)		sim_default_gen=M16
+			;;
+  mips32*-*-*)		sim_default_gen=IGEN
+			sim_igen_filter="32,f"
+			;;
+  *)                    sim_default_gen=IGEN
+			;;
 esac
-AC_SUBST(sim_gen)
+sim_igen_flags="-F ${sim_igen_filter} -M ${sim_igen_machine}"
+sim_m16_flags=" -F ${sim_m16_filter}  -M ${sim_m16_machine}"
 AC_SUBST(sim_igen_flags)
 AC_SUBST(sim_m16_flags)
+
+#
+# Enable igen
+#
+AC_ARG_ENABLE(sim-igen,
+[  --enable-sim-igen=opts		Enable IGEN simulator],
+[case "${enableval}" in
+  yes) sim_gen="${sim_default_gen}";;
+  no)  sim_gen=NO;;
+  16)  sim_gen=M16;;
+  *)   AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-stdio"); sim_gen="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_gen" != x""; then
+  echo "Setting sim_igen = $sim_gen" 6>&1
+fi],[sim_gen="${sim_use_gen}"])dnl
+AC_SUBST(sim_gen)
+
 
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h)

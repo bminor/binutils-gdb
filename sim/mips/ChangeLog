@@ -1,5 +1,10 @@
 Wed Nov  5 12:19:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* m16.igen (JALX): Was missing.
+
+	* configure.in (enable-sim-igen): New configuration option.
+	* configure: Re-generate.
+	
 	* sim-main.h (MAX_INSNS, INSN_NAME): Define.
 
 	* interp.c (load_memory, store_memory): Delete parameter RAW.
