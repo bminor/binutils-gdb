@@ -1,13 +1,16 @@
-Fri Jan 29 06:32:16 1999  Keith Seitz  <keiths@cygnus.com>
-
-	* gdb.gdbtk/cpp_variable.test (cpp_variable-1.1): Fix
-	function name error.
-
-	* gdb.gdbtk/cpp_variable.h (class VC): Fix compiler warning.
-
 1999-01-29  Martin Hunt  <hunt@cygnus.com>
 
-	* srcwin.test(srcwin-4.3) Change bytype field to 3.
+	* srcwin.test (click): New function that generates an event
+	at a location.
+	(srcwin-4.4): New test. Simulate a click on a line and
+	check for breakpoint set.
+	(srcwin-4.5): New test. Right-click on a line and select "Continue
+	to Here" from popup.
+
+	* srcwin.exp: Source srcwin3.test, which will test source window
+	assembly debugging on executables built without "-g".
+	
+1999-01-29  Martin Hunt  <hunt@cygnus.com>	
 
 	* srcwin.exp: Add srcwin2.test, which are basically the same
 	tests as srcwin.test, but run with a missing source file.
@@ -18,40 +21,6 @@ Fri Jan 29 06:32:16 1999  Keith Seitz  <keiths@cygnus.com>
 	testing BP balloons, variable balloons, and mixed-mode disassembly
 	of include files.
 
-Wed Dec 30 08:52:58 1998  Keith Seitz  <keiths@cygnus.com>
-
-	* gdb.gdbtk/{console.exp, browser.exp}: If no DISPLAY is set,
-	skip the tests.
-
-1998-09-29  Keith Seitz  <keiths@cygnus.com>
-
-        * gdb.gdbtk/browser.test: Fix tests which incorrectly assume
-        that gdb knows _exactly_ which files belong to the user
-        and which come from libraries.
-
-Fri Jul 24 14:57:19 1998  Keith Seitz  <keiths@cygnus.com>
-
-	* gdb.gdbtk/Makefile.in: Add new example program "stack".
-	* gdb.gdbtk/browser.test,browser.exp: Add browser window
-	  tests.
-	* gdb.gdbtk/stack1.c,stack2.c: Test case for browser window.
-	
-Sun Jun 28 22:34:34 1998  Martin M. Hunt  <hunt@cygnus.com>
-
-	* gdb.gdbtk/simple.c (main): Make main return an
-	int so compiler will stop complaining.
-
-Fri Jun 26 14:27:13 1998  Keith Seitz  <keiths@cygnus.com>
-
-	* lib/gdb.exp (gdbtk_start): Add startup for gdbtk.
-
-	* configure.in: Add options for gdbtk testsuite.
-
-	* configure: Regenerate.
-
-	* gdb.gdbtk: New directory to hold gdbtk tests.
-
-	* gdb.gdbtk/console.{exp, test}: New console window tests.
 
 Local Variables:
 mode: change-log

@@ -44,6 +44,18 @@ proc move_mouse_to {win bbox} {
   }
 }
 
+proc click {win bbox event} {
+  move_mouse_to $win $bbox
+  update
+  set x [expr [lindex $bbox 0] + [lindex $bbox 2] / 2]
+  set y [expr [lindex $bbox 1] + [lindex $bbox 3] / 2]
+
+  if {[catch {event generate $win $event -x $x -y $y} result]} {
+    return 0
+  }
+  return 1
+}
+
 
 #####                 #####
 #                         #
@@ -688,7 +700,6 @@ gdbtk_test srcwin-3.4 "stack up (4)" {
 	    if {$i == "12.2"} {
 	      incr r
 	    } else {
-	      dbug X $i
 	      incr r 5
 	    }
 	  }
@@ -863,7 +874,7 @@ gdbtk_test srcwin-3.8 "stack down when at bottom" {
   set r
 } {1}
 
-# 4.1 bp, multiple, balloon, etc
+# 4 -  BREAKPOINTS
 
 # Test: srcwin-4.1
 # Desc: Set BP in another file. Tests bp and cache functions
@@ -1060,9 +1071,87 @@ gdbtk_test srcwin-4.3 "BP Balloons" {
   set r
 } {2}
 
+#ManagedWin::open DebugWin
+
+# Test: srcwin-4.4
+# Desc: Click on line to set BP
+gdbtk_test srcwin-4.4 "Click on line to set BP" {
+  set r 0
+
+  # click mouse button 1 at index 14.1
+  if {![click $twin [$twin bbox 14.1] <Button-1>]} {set r -100}
+
+  # now look for BP at line 14
+  foreach bpnum [gdb_get_breakpoint_list] {
+    set bpinfo [gdb_get_breakpoint_info $bpnum]
+    lassign $bpinfo file func line pc type enabled disposition \
+      ignore_count commands cond thread hit_count
+    set file [lindex [file split $file] end]
+    if {$file == "list0.h"} {
+      if {$line == "14"} {
+	if {$enabled == "1"} {incr r}
+	if {$func == "foo"} {incr r}
+	if {$type == "breakpoint"} {incr r}
+	if {$disposition == "donttouch"} {incr r}
+      }
+    }
+  }
+  set r
+} {4}
+
+
+# Test: srcwin-4.5
+# Desc: Continue till here popup
+gdbtk_test srcwin-4.4 "Continue till here popup" {
+  set r 
+  set twin [$stw test_get twin]
+
+  # click mouse button 1 at index 12.1
+  set b [$twin bbox 12.1]
+  if {![click $twin $b <ButtonPress-3>]} {set r -100}
+  
+  # Hack. Just release the botton 10 pixels to the right and below
+  # where the press was.  This should select the first entry in the
+  # popup menu, "Continue to Here". This should be made more robust.
+  set x [expr [lindex $b 0] + [lindex $b 2] / 2 + 10]
+  set y [expr [lindex $b 1] + [lindex $b 3] / 2 + 10]
+  if {![click $twin [list $x $y 0 0] <ButtonRelease-3>]} {set r -200}
+
+  # check for PC_TAG on the correct line
+  if {$r == 0} {
+    if {![catch {set z [$twin dump 1.0 end]}]} {
+      foreach {k v i} $z {
+	if {$k == "tagon"} {
+	  if {$v == "PC_TAG"} {
+	    if {$i == "12.2"} {
+	      incr r
+	    } else {
+	      incr r 5
+	    }
+	  }
+	  if {$v == "STACK_TAG"} {incr r 10}
+	  if {$v == "BROWSE_TAG"} {incr r 100}
+	} elseif {$k == "image"} {
+	  switch $i {
+	    10.0 {incr r}
+	    12.0 {incr r}
+	    14.0 {incr r}
+	    default {incr r 1000}
+	  }
+	}
+      }
+    } else {
+      set r -4
+    }
+  }
+  # should have seen on PC_TAG at line 12, plus BP images at 10.0, 12.0 and 14.0
+  set r
+} {4}
+
 # 5.1 balloon variables
 # Test: srcwin-5.1
 # Desc: variable balloon test
+# continues to BP at line 14 and checks to see that value was updated
 gdbtk_test srcwin-5.1 "variable balloon test" {
   # move pointer out of the way
   warp_pointer . 0 0 
@@ -1074,9 +1163,9 @@ gdbtk_test srcwin-5.1 "variable balloon test" {
   move_mouse_to $twin [$twin bbox 10.$index]
   sleep 1
   if {[winfo ismapped $balloon]} {
-    if {![string compare "x=2" [$balloon.label cget -text]]} {incr r}
+    if {![string compare "x=6" [$balloon.label cget -text]]} {incr r}
     gdb_immediate "continue" 1
-    if {![string compare "x=4" [$balloon.label cget -text]]} {incr r}
+    if {![string compare "x=8" [$balloon.label cget -text]]} {incr r}
   } else {
     set r -1
   }
