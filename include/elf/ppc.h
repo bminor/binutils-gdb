@@ -27,15 +27,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef _ELF_PPC_H
 #define _ELF_PPC_H
 
-/* Unless otherwise told we define an enum with the relocation entries.  */
-#ifndef START_RELOC_NUMBERS
-# define START_RELOC_NUMBERS(name)   enum name {
-# define RELOC_NUMBER(name, number)  name = number ,
-# define END_RELOC_NUMBERS           };
-#endif
+#include "elf/reloc-macros.h"
 
 /* Relocations.  */
-START_RELOC_NUMBERS (elf_ppc_reloc_type)
+START_RELOC_NUMBERS (ppc_reloc_type)
   RELOC_NUMBER (R_PPC_NONE, 0)
   RELOC_NUMBER (R_PPC_ADDR32, 1)
   RELOC_NUMBER (R_PPC_ADDR24, 2)
@@ -101,7 +96,7 @@ START_RELOC_NUMBERS (elf_ppc_reloc_type)
    that may still be in object files.  */
   RELOC_NUMBER (R_PPC_TOC16, 255)
 
-  RELOC_NUMBER (R_PPC_max, 256)
+  EMPTY_RELOC (R_PPC_max)
 END_RELOC_NUMBERS
 
 

@@ -1,3 +1,28 @@
+Wed Jul 22 16:22:11 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* reloc-macros.h: New file.  Provides relocation macros:
+	START_RELOC_NUMBERS, RELOC_NUMBER, FAKE_RELOC, EMPTY_RELOC and
+	END_RELOC_NUMBERS used by other elf header files.
+	
+	* alpha.h: Use reloc-macros.h.
+	* arc.h: Use reloc-macros.h.
+	* arm.h: Use reloc-macros.h.
+	* d10v.h: Use reloc-macros.h.
+start-sanitize-d30v
+	* d30v.h: Use reloc-macros.h.
+end-sanitize-d30v
+	* hppa.h: Use reloc-macros.h.
+	* i386.h: Use reloc-macros.h.
+	* m32r.h: Use reloc-macros.h.
+	* m68k.h: Use reloc-macros.h.
+	* mips.h: Use reloc-macros.h.
+	* mn10200.h: Use reloc-macros.h.
+	* mn10300.h: Use reloc-macros.h.
+	* ppc.h: Use reloc-macros.h.
+	* sh.h: Use reloc-macros.h.
+	* sparc.h: Use reloc-macros.h.
+	* v850.h: Use reloc-macros.h.
+
 1998-07-22 13:07  Ulrich Drepper  <drepper@cygnus.com>
 
 	* mn10300.h: Rewrite relocation definition using macros.
@@ -6,7 +31,9 @@
 	* alpha.h: Likewise.
 	* arm.h: Likewise.
 	* d10v.h: Likewise.
+start-sanitize-d30v
 	* d30v.h: Likewise.
+end-sanitize-d30v
 	* m32r.h: Likewise.
 	* m68k.h: Likewise.
 	* mn10200.h: Likewise.

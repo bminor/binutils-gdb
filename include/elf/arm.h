@@ -20,12 +20,7 @@
 #ifndef _ELF_ARM_H
 #define _ELF_ARM_H
 
-/* Unless otherwise told we define an enum with the relocation entries.  */
-#ifndef START_RELOC_NUMBERS
-# define START_RELOC_NUMBERS(name)   enum name {
-# define RELOC_NUMBER(name, number)  name = number ,
-# define END_RELOC_NUMBERS           };
-#endif
+#include "elf/reloc-macros.h"
 
 /* Relocation types.  */
 START_RELOC_NUMBERS (elf_arm_reloc_type)
