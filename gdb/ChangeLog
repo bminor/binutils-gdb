@@ -1,3 +1,13 @@
+2002-06-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386.h (PARM_BOUNDARY, CALL_DUMMY,
+	CALL_DUMMY_LENGTH, CALL_DUMMY_START_OFFSET,
+	CALL_DUMMY_BREAKPOINT_OFFSET, FIX_CALL_DUMMY): Remove defines.
+	(i386_fix_call_dummy): Remove prototype.
+	* i386-tdep.c (i386_call_dummy_words): New variable.
+	(i386_gdbarch_init): Adjust for removal of the
+	macros mentioned above.
+
 2002-06-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* command.h (add_setshow_auto_boolean_cmd): Replace

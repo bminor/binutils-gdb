@@ -787,6 +787,19 @@ i386_push_dummy_frame (void)
   write_register (FP_REGNUM, fp);
 }
 
+/* The i386 call dummy sequence:
+
+     call 11223344 (32-bit relative)
+     int 3
+
+   It is 8 bytes long.  */
+
+static LONGEST i386_call_dummy_words[] =
+{
+  0x223344e8,
+  0xcc11
+};
+
 /* Insert the (relative) function address into the call sequence
    stored at DYMMY.  */
 
@@ -1407,15 +1420,26 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call dummy code.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 5);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_length (gdbarch, 8);
   set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_words (gdbarch, i386_call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch,
+				       sizeof (i386_call_dummy_words));
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+  set_gdbarch_fix_call_dummy (gdbarch, i386_fix_call_dummy);
 
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
 
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+
+  /* "An argument's size is increased, if necessary, to make it a
+     multiple of [32-bit] words.  This may require tail padding,
+     depending on the size of the argument" -- from the x86 ABI.  */
+  set_gdbarch_parm_boundary (gdbarch, 32);
 
   set_gdbarch_deprecated_extract_return_value (gdbarch,
 					       i386_extract_return_value);

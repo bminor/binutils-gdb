@@ -65,36 +65,6 @@ extern void i387_float_info (void);
 #define FLOAT_INFO { i387_float_info (); }
 
 
-/* Things needed for making the inferior call functions.  */
-
-/* "An argument's size is increased, if necessary, to make it a
-   multiple of [32 bit] words.  This may require tail padding,
-   depending on the size of the argument" - from the x86 ABI.  */
-#define PARM_BOUNDARY 32
-
-
-/* this is 
- *   call 11223344 (32 bit relative)
- *   int3
- */
-
-#define CALL_DUMMY { 0x223344e8, 0xcc11 }
-
-#define CALL_DUMMY_LENGTH 8
-
-#define CALL_DUMMY_START_OFFSET 0	/* Start execution at beginning of dummy */
-
-#define CALL_DUMMY_BREAKPOINT_OFFSET 5
-
-/* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.  */
-
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
-  i386_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
-extern void i386_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
-				 int nargs, struct value **args,
-				 struct type *type, int gcc_p);
-
 /* FIXME: kettenis/2000-06-12: These do not belong here.  */
 extern void print_387_control_word (unsigned int);
 extern void print_387_status_word (unsigned int);
