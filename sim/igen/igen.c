@@ -445,6 +445,17 @@ print_itrace_format (lf *file,
 		      lf_write (file, param, strlen_param);
 		    }
 		}
+	      else if (strncmp (fmt, "%#lx<", 5) == 0)
+		/* simple hex with 0x prefix*/
+		{
+		  if (pass == 1)
+		    lf_printf (file, "%%#lx");
+		  else
+		    {
+		      lf_printf (file, "(unsigned long) ");
+		      lf_write (file, param, strlen_param);
+		    }
+		}
 	      else if (strncmp (fmt, "%08lx<", 6) == 0)
 		/* simple hex */
 		{
