@@ -1,3 +1,8 @@
+Wed Aug  9 15:34:36 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/all/struct.s, gas/all/struct.d: New test.
+	* gas/all/gas.exp: Run it.
+
 Tue Aug  8 17:11:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/common.s, gas/mri/common.d: New test.
