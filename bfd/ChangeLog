@@ -1,3 +1,19 @@
+2002-07-09  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section): Move sanity-check for
+	NULL sym_hashes to just before use.
+	<case R_CRIS_32_GOTREL>: In test for local symbol, accept also
+	symbol with non-default visibility.
+	<case R_CRIS_32_GOTREL, case R_CRIS_32_PLT_GOTREL>: Ditto.
+	<case R_CRIS_8_PCREL, case R_CRIS_16_PCREL, case R_CRIS_32_PCREL>:
+	Ditto.
+	(cris_elf_gc_sweep_hook): Only decrease h->plt.refcount for
+	symbol with non-default visibility.
+	(cris_elf_check_relocs): At tests for local symbol before
+	increasing h->plt.refcount, also check for non-default
+	visibility.  Ditto when checking for local symbol to eliminate
+	pc-relative runtime relocs.
+
 2002-07-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c: Formatting.

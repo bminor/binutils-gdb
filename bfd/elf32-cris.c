@@ -805,11 +805,6 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   sym_hashes = elf_sym_hashes (input_bfd);
   relend     = relocs + input_section->reloc_count;
 
-  /* It seems this can happen with erroneous or unsupported input (mixing
-     a.out and elf in an archive, for example.)  */
-  if (sym_hashes == NULL)
-    return false;
-
   sgot = NULL;
   splt = NULL;
   sreloc = NULL;
@@ -879,6 +874,11 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
+	  /* It seems this can happen with erroneous or unsupported input
+	     (mixing a.out and elf in an archive, for example.)  */
+	  if (sym_hashes == NULL)
+	    return false;
+
 	  h = sym_hashes [r_symndx - symtab_hdr->sh_info];
 
 	  while (h->root.type == bfd_link_hash_indirect
@@ -1150,7 +1150,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case R_CRIS_32_GOTREL:
 	  /* This relocation must only be performed against local symbols.  */
-	  if (h != NULL)
+	  if (h != NULL && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: relocation %s is not allowed for global symbol: `%s' from %s section"),
@@ -1190,7 +1190,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  /* Resolve a PLT_PCREL reloc against a local symbol directly,
 	     without using the procedure linkage table.  */
-	  if (h == NULL)
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 	    break;
 
 	  if (h->plt.offset == (bfd_vma) -1
@@ -1215,7 +1215,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  /* Resolve a PLT_GOTREL reloc against a local symbol directly,
 	     without using the procedure linkage table.  */
-	  if (h == NULL)
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 	    break;
 
 	  if (h->plt.offset == (bfd_vma) -1
@@ -1237,7 +1237,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_CRIS_16_PCREL:
 	case R_CRIS_32_PCREL:
 	  /* If the symbol was local, we need no shlib-specific handling.  */
-	  if (h == NULL)
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 	    break;
 
 	  /* Fall through.  */
@@ -1898,7 +1898,8 @@ cris_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	  if (r_symndx >= symtab_hdr->sh_info)
 	    {
 	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	      if (h->plt.refcount > 0)
+	      if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		  && h->plt.refcount > 0)
 		--h->plt.refcount;
 	    }
 	  break;
@@ -2486,7 +2487,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 	  /* If this is a local symbol, we resolve it directly without
 	     creating a procedure linkage table entry.  */
-	  if (h == NULL)
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 	    continue;
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
@@ -2525,7 +2526,8 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 	      /* Make sure a plt entry is created for this symbol if it
 		 turns out to be a function defined by a dynamic object.  */
-	      h->plt.refcount++;
+	      if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+		h->plt.refcount++;
 	    }
 
 	  /* If we are creating a shared library and this is not a local
@@ -2558,7 +2560,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	      || r_type == R_CRIS_32_PCREL)
 	    {
 	      /* If the symbol is local, then we can eliminate the reloc.  */
-	      if (h == NULL)
+	      if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 		break;
 
 	      /* If this is with -Bsymbolic and the symbol isn't weak, and
