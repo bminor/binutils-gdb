@@ -1,3 +1,25 @@
+Sat Aug 26 00:26:11 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (parse_symbol):  Handle sh.value of zero for enums.
+	Determine signedness of enum type from enumerators.
+	(parse_type):  Handle btIndirect types, handle fBitfield for
+	some non-member types.
+	(upgrade_type):  Use TYPE_FLAG_TARGET_STUB for arrays with
+	unknown length.
+	(cross_ref):  Handle stIndirect forward reference to btTypedef.
+
+	* stabsread.c (read_enum_type):  Determine signedness of enum
+	type from enumerators.
+
+	* top.c (execute_command):  Remove trailing whitespace from
+	command arguments, except for `set' and `complete' commands.
+	(validate_comname):  Allow underscores in user defined command
+	names.
+
+	* values.c (modify_field):  Change `Value does not fit in %d bits'
+	error to a warning. Exclude sign extension bits of negative field
+	values from fit check.
+
 Fri Aug 25 11:31:29 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (powerpc*-*-eabisim*): Only link in the simulator

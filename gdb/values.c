@@ -1,5 +1,5 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
-   Copyright 1986, 1987, 1989, 1991, 1993, 1994
+   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1288,14 +1288,22 @@ modify_field (addr, fieldval, bitpos, bitsize)
 {
   LONGEST oword;
 
-  /* Reject values too big to fit in the field in question,
-     otherwise adjoining fields may be corrupted.  */
+  /* If a negative fieldval fits in the field in question, chop
+     off the sign extension bits.  */
+  if (bitsize < (8 * sizeof (fieldval))
+      && (~fieldval & ~((1 << (bitsize - 1)) - 1)) == 0)
+    fieldval = fieldval & ((1 << bitsize) - 1);
+
+  /* Warn if value is too big to fit in the field in question.  */
   if (bitsize < (8 * sizeof (fieldval))
       && 0 != (fieldval & ~((1<<bitsize)-1)))
     {
       /* FIXME: would like to include fieldval in the message, but
 	 we don't have a sprintf_longest.  */
-      error ("Value does not fit in %d bits.", bitsize);
+      warning ("Value does not fit in %d bits.", bitsize);
+
+      /* Truncate it, otherwise adjoining fields may be corrupted.  */
+      fieldval = fieldval & ((1 << bitsize) - 1);
     }
 
   oword = extract_signed_integer (addr, sizeof oword);

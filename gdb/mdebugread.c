@@ -202,6 +202,9 @@ static struct complaint unexpected_type_code_complaint =
 static struct complaint unable_to_cross_ref_complaint =
 {"unable to cross ref btTypedef for %s", 0, 0};
 
+static struct complaint bad_indirect_xref_complaint =
+{"unable to cross ref btIndirect for %s", 0, 0};
+
 static struct complaint illegal_forward_tq0_complaint =
 {"illegal tq0 in forward typedef for %s", 0, 0};
 
@@ -1060,6 +1063,8 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 
 	if (type_code == TYPE_CODE_ENUM)
 	  {
+	    int unsigned_enum = 1;
+
 	    /* This is a non-empty enum. */
 
 	    /* DEC c89 has the number of enumerators in the sh.value field,
@@ -1067,8 +1072,11 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	       incompatibility quirk.
 	       This might do the wrong thing for an enum with one or two
 	       enumerators and gcc -gcoff -fshort-enums, but these cases
-	       are hopefully rare enough.  */
-	    if (TYPE_LENGTH (t) == TYPE_NFIELDS (t))
+	       are hopefully rare enough.
+	       Alpha cc -migrate has a sh.value field of zero, we adjust
+	       that too.  */
+	    if (TYPE_LENGTH (t) == TYPE_NFIELDS (t)
+		|| TYPE_LENGTH (t) == 0)
 	      TYPE_LENGTH (t) = TARGET_INT_BIT / HOST_CHAR_BIT;
 	    for (ext_tsym = ext_sh + external_sym_size;
 		 ;
@@ -1096,12 +1104,16 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 		SYMBOL_TYPE (enum_sym) = t;
 		SYMBOL_NAMESPACE (enum_sym) = VAR_NAMESPACE;
 		SYMBOL_VALUE (enum_sym) = tsym.value;
+		if (SYMBOL_VALUE (enum_sym) < 0)
+		  unsigned_enum = 0;
 		add_symbol (enum_sym, top_stack->cur_block);
 
 		/* Skip the stMembers that we've handled. */
 		count++;
 		f++;
 	      }
+	    if (unsigned_enum)
+	      TYPE_FLAGS (t) |= TYPE_FLAG_UNSIGNED;
 	  }
 	/* make this the current type */
 	top_stack->cur_type = t;
@@ -1481,6 +1493,11 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
 	case btSet:
 	  type_code = TYPE_CODE_SET;
 	  break;
+	case btIndirect:
+	  /* alpha cc -migrate uses this for typedefs. The true type will
+	     be obtained by crossreferencing below.  */
+	  type_code = TYPE_CODE_ERROR;
+	  break;
 	case btTypedef:
 	  /* alpha cc uses this for typedefs. The true type will be
 	     obtained by crossreferencing below.  */
@@ -1497,15 +1514,57 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
 
   if (t->fBitfield)
     {
+      int width = AUX_GET_WIDTH (bigend, ax);
+
       /* Inhibit core dumps with some cfront generated objects that
 	 corrupt the TIR.  */
       if (bs == (int *)NULL)
 	{
-	  complain (&bad_fbitfield_complaint, sym_name);
+	  /* Alpha cc -migrate encodes char and unsigned char types
+	     as short and unsigned short types with a field width of 8.
+	     Enum types also have a field width which we ignore for now.  */
+	  if (t->bt == btShort && width == 8)
+	    tp = mdebug_type_char;
+	  else if (t->bt == btUShort && width == 8)
+	    tp = mdebug_type_unsigned_char;
+	  else if (t->bt == btEnum)
+	    ;
+	  else
+	    complain (&bad_fbitfield_complaint, sym_name);
+	}
+      else
+        *bs = width;
+      ax++;
+    }
+
+  /* A btIndirect entry cross references to an aux entry containing
+     the type.  */
+  if (t->bt == btIndirect)
+    {
+      RNDXR rn[1];
+      int rf;
+      FDR *xref_fh;
+      int xref_fd;
+
+      (*debug_swap->swap_rndx_in) (bigend, &ax->a_rndx, rn);
+      ax++;
+      if (rn->rfd == 0xfff)
+	{
+	  rf = AUX_GET_ISYM (bigend, ax);
+	  ax++;
+	}
+      else
+	rf = rn->rfd;
+
+      if (rf == -1)
+	{
+	  complain (&bad_indirect_xref_complaint, sym_name);
 	  return mdebug_type_int;
 	}
-      *bs = AUX_GET_WIDTH (bigend, ax);
-      ax++;
+      xref_fh = get_rfd (fd, rf);
+      xref_fd = xref_fh - debug_info->fdr;
+      tp = parse_type (xref_fd, debug_info->external_aux + xref_fh->iauxBase,
+		       rn->index, (int *) NULL, xref_fh->fBigendian, sym_name);
     }
 
   /* All these types really point to some (common) MIPS type
@@ -1575,10 +1634,8 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
   /* All these types really point to some (common) MIPS type
      definition, and only the type-qualifiers fully identify
      them.  We'll make the same effort at sharing.
-     FIXME: btIndirect cannot happen here as it is handled by the
-     switch t->bt above.  And we are not doing any guessing on range types.  */
-  if (t->bt == btIndirect ||
-      t->bt == btRange)
+     FIXME: We are not doing any guessing on range types.  */
+  if (t->bt == btRange)
     {
       char *name;
 
@@ -1762,6 +1819,13 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
 	 TYPE_LENGTH should be correct) and we should be able to
 	 ignore the erroneous bitsize from the auxiliary entry safely.
 	 dbx seems to ignore it too.  */
+
+      /* TYPE_FLAG_TARGET_STUB now takes care of the zero TYPE_LENGTH
+	 problem.  */
+      if (TYPE_LENGTH (*tpp) == 0)
+	{
+	  TYPE_FLAGS (t) |= TYPE_FLAG_TARGET_STUB;
+	}
 
       *tpp = t;
       return 4 + off;
@@ -3537,9 +3601,9 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
 		For these the type will be void. This is a bad design decision
 		as cross referencing across compilation units is impossible
 		due to the missing name.
-	     b) forward declarations of structs/unions/enums which are defined
-		later in this file or in another file in the same compilation
-		unit. Irix5 cc uses a stIndirect symbol for this.
+	     b) forward declarations of structs/unions/enums/typedefs which
+		are defined later in this file or in another file in the same
+		compilation unit. Irix5 cc uses a stIndirect symbol for this.
 		Simply cross reference those again to get the true type.
 	     The forward references are not entered in the pending list and
 	     in the symbol table.  */
@@ -3566,6 +3630,23 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
 			  + fh->iauxBase + sh.index + 1),
 			 tpp, type_code, pname,
 			 fh->fBigendian, sym_name);
+	      break;
+
+	    case btTypedef:
+	      /* Follow a forward typedef. This might recursively
+		 call cross_ref till we get a non typedef'ed type.
+		 FIXME: This is not correct behaviour, but gdb currently
+		 cannot handle typedefs without type copying. Type
+		 copying is impossible as we might have mutual forward
+		 references between two files and the copied type would not
+		 get filled in when we later parse its definition.  */
+	      *tpp = parse_type (xref_fd,
+				 debug_info->external_aux + fh->iauxBase,
+				 sh.index,
+				 (int *)NULL,
+				 fh->fBigendian,
+				 debug_info->ss + fh->issBase + sh.iss);
+	      add_pending (fh, esh, *tpp);
 	      break;
 
 	    default:

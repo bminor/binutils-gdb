@@ -1152,6 +1152,15 @@ execute_command (p, from_tty)
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;
 
+      /* Clear off trailing whitespace, except for set and complete command.  */
+      if (arg && c->type != set_cmd && c->function.cfunc != complete_command)
+	{
+	  p = arg + strlen (arg) - 1;
+	  while (p >= arg && (*p == ' ' || *p == '\t'))
+	    p--;
+	  *(p + 1) = '\0';
+	}
+
       /* If this command has been hooked, run the hook first. */
       if (c->hook)
 	execute_user_command (c->hook, (char *)0);
@@ -2574,7 +2583,7 @@ validate_comname (comname)
   p = comname;
   while (*p)
     {
-      if (!isalnum(*p) && *p != '-')
+      if (!isalnum(*p) && *p != '-' && *p != '_')
 	error ("Junk in argument list: \"%s\"", p);
       p++;
     }

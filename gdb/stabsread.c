@@ -3050,6 +3050,7 @@ read_enum_type (pp, type, objfile)
   struct pending *osyms, *syms;
   int o_nsyms;
   int nbits;
+  int unsigned_enum = 1;
 
 #if 0
   /* FIXME!  The stabs produced by Sun CC merrily define things that ought
@@ -3107,6 +3108,8 @@ read_enum_type (pp, type, objfile)
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_VALUE (sym) = n;
+      if (n < 0)
+	unsigned_enum = 0;
       add_symbol_to_list (sym, symlist);
       nsyms++;
     }
@@ -3119,6 +3122,8 @@ read_enum_type (pp, type, objfile)
   TYPE_LENGTH (type) = TARGET_INT_BIT / HOST_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
+  if (unsigned_enum)
+    TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
     TYPE_ALLOC (type, sizeof (struct field) * nsyms);
