@@ -210,6 +210,9 @@
 /* Define if you have the <curses.h> header file.  */
 #undef HAVE_CURSES_H
 
+/* Define if you have the <dirent.h> header file.  */
+#undef HAVE_DIRENT_H
+
 /* Define if you have the <endian.h> header file.  */
 #undef HAVE_ENDIAN_H
 
@@ -227,6 +230,9 @@
 
 /* Define if you have the <memory.h> header file.  */
 #undef HAVE_MEMORY_H
+
+/* Define if you have the <ndir.h> header file.  */
+#undef HAVE_NDIR_H
 
 /* Define if you have the <nl_types.h> header file.  */
 #undef HAVE_NL_TYPES_H
@@ -258,8 +264,14 @@
 /* Define if you have the <sys/debugreg.h> header file.  */
 #undef HAVE_SYS_DEBUGREG_H
 
+/* Define if you have the <sys/dir.h> header file.  */
+#undef HAVE_SYS_DIR_H
+
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H
+
+/* Define if you have the <sys/ndir.h> header file.  */
+#undef HAVE_SYS_NDIR_H
 
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H

@@ -1,5 +1,5 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999-2000 Free Software Foundation, Inc.
    Written by Michael Snyder at Cygnus Solutions.
    Based on work by Fred Fish, Stu Grossman, Geoff Noer, and others.
 
@@ -76,7 +76,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifdef NEW_PROC_API
 #include <sys/types.h>
-#include <dirent.h>	/* opendir/readdir, for listing the LWP's */
+#include "gdb_dirent.h"	/* opendir/readdir, for listing the LWP's */
 #endif
 
 #include <fcntl.h>	/* for O_RDONLY */
