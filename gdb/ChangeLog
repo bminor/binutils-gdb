@@ -3,6 +3,10 @@ Fri Dec  4 06:56:56 1992  Fred Fish  (fnf@cygnus.com)
 
 	* ch-exp.y (match_character_literal):  Fix case where no
 	match at all is found.
+	* ch-exp.y (chill_create_fundamental_type):  Chill uses fixed
+	width types.  For example, "INT" is always 2 bytes regardless
+	of the values of any TARGET_*_BIT macros.  So use explicit
+	numeric sizes for the types.
 	**** end-sanitize-chill ****
 
 Thu Dec  3 12:00:06 1992  Fred Fish  (fnf@cygnus.com)
