@@ -1,5 +1,10 @@
 2004-04-01  Joel Brobecker  <brobecker@gnat.com>
 
+	* configure.in: Generate gdb.ada/Makefile and gdb.ada/gnat_ada.gpr.
+	* configure: Regenerate.
+
+2004-04-01  Joel Brobecker  <brobecker@gnat.com>
+
 	* lib/ada.exp (gdb_compile_ada): Emit UNSUPPORTED if we failed
 	to build the application. Remove the message printed when in
 	verbose mode, redundant with the UNSUPPORTED message above.
