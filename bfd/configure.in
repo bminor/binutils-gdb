@@ -232,7 +232,7 @@ if [ x${all_targets} = xfalse ]; then
 #	start-sanitize-v9
 	bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.o elf64.o elf.o" ;;
 #	end-sanitize-v9
-	bfd_nlm32_i386_vec)	tb="$tb nlm32-i386.o" ;;
+	bfd_nlm32_i386_vec)	tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;
 	ecoff_big_vec)		tb="$tb coff-mips.o" ;;
 	ecoff_little_vec)	tb="$tb coff-mips.o" ;;
 	ecoffalpha_little_vec)	tb="$tb coff-alpha.o" ;;
