@@ -4286,6 +4286,8 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	case BFD_RELOC_RVA:
 	case BFD_RELOC_32_PCREL:
+	case BFD_RELOC_32_BASEREL:
+	case BFD_RELOC_PPC_EMB_NADDR32:
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 4);
 	  break;
@@ -4300,6 +4302,22 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_LO16_GOTOFF:
 	case BFD_RELOC_HI16_GOTOFF:
 	case BFD_RELOC_HI16_S_GOTOFF:
+	case BFD_RELOC_LO16_BASEREL:
+	case BFD_RELOC_HI16_BASEREL:
+	case BFD_RELOC_HI16_S_BASEREL:
+	case BFD_RELOC_PPC_EMB_NADDR16:
+	case BFD_RELOC_PPC_EMB_NADDR16_LO:
+	case BFD_RELOC_PPC_EMB_NADDR16_HI:
+	case BFD_RELOC_PPC_EMB_NADDR16_HA:
+	case BFD_RELOC_PPC_EMB_SDAI16:
+	case BFD_RELOC_PPC_EMB_SDA21:
+	case BFD_RELOC_PPC_EMB_SDA2REL:
+	case BFD_RELOC_PPC_EMB_SDA2I16:
+	case BFD_RELOC_PPC_EMB_RELSEC16:
+	case BFD_RELOC_PPC_EMB_RELST_LO:
+	case BFD_RELOC_PPC_EMB_RELST_HI:
+	case BFD_RELOC_PPC_EMB_RELST_HA:
+	case BFD_RELOC_PPC_EMB_RELSDA:
 	case BFD_RELOC_PPC_TOC16:
 	  if (fixp->fx_pcrel)
 	    abort ();

@@ -1,3 +1,13 @@
+Mon Jan 22 10:59:48 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/obj-elf.c (elf/ppc.h): Include elf/ppc.h if target
+	computer is PowerPC.
+
+	* config/tc-ppc.c (md_apply_fix3): Add more embedded relocations.
+
+	* config/tc-ppc.h (ELF_TC_SPECIAL_SECTIONS): Add sections
+	mentioned in the eabi.
+
 Thu Jan 18 17:58:19 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* config/tc-ppc.c (ppc_reldata): Changed alignement on reldata_section
