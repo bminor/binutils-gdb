@@ -1,3 +1,8 @@
+2002-09-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* defs.h: Move inclusion of "ansidecl.h" before "gdb_locale.h".
+	Fix some whitespace problems.
+
 2002-09-27  David Carlton  <carlton@math.stanford.edu>
 
 	* Makefile.in (cris-tdep.o): Depend on gdb_string_h.
