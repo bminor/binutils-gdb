@@ -2313,7 +2313,10 @@ cplus_value_of_child (struct varobj *parent, int index)
 
 	      if (TYPE_CODE (VALUE_TYPE (parent->value)) == TYPE_CODE_PTR
 		  || TYPE_CODE (VALUE_TYPE (parent->value)) == TYPE_CODE_REF)
-		gdb_value_ind (parent->value, &temp);
+		{
+		  if (!gdb_value_ind (parent->value, &temp))
+		    return NULL;
+		}
 	      else
 		temp = parent->value;
 
