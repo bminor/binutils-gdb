@@ -42,33 +42,33 @@ Disassembly of section \.text:
  614:	80 f8 00 00 	sethi hi\(0x0\),gr0
 Disassembly of section \.data:
 
-0001062c <D6>:
+0000462c <D6>:
 	\.\.\.
-			1062c: R_FRV_32	WD0
-			10630: R_FRV_FUNCDESC	WFb
-			10634: R_FRV_32	WFb
+			462c: R_FRV_32	WD0
+			4630: R_FRV_FUNCDESC	WFb
+			4634: R_FRV_32	WFb
 Disassembly of section \.got:
 
-000106c8 <_GLOBAL_OFFSET_TABLE_-0x20>:
-   106c8:	00 00 05 c4 	subxcc\.p gr0,gr4,gr0,icc1
-			106c8: R_FRV_FUNCDESC_VALUE	WF9
-   106cc:	00 00 00 02 	add\.p gr0,fp,gr0
-   106d0:	00 00 05 bc 	subx\.p gr0,gr60,gr0,icc1
-			106d0: R_FRV_FUNCDESC_VALUE	WF8
-   106d4:	00 00 00 02 	add\.p gr0,fp,gr0
-   106d8:	00 00 05 b4 	subx\.p gr0,gr52,gr0,icc1
-			106d8: R_FRV_FUNCDESC_VALUE	WF0
-   106dc:	00 00 00 02 	add\.p gr0,fp,gr0
-   106e0:	00 00 05 ac 	subx\.p gr0,gr44,gr0,icc1
-			106e0: R_FRV_FUNCDESC_VALUE	WF7
-   106e4:	00 00 00 02 	add\.p gr0,fp,gr0
+000046c8 <_GLOBAL_OFFSET_TABLE_-0x20>:
+    46c8:	00 00 05 c4 	subxcc\.p gr0,gr4,gr0,icc1
+			46c8: R_FRV_FUNCDESC_VALUE	WF9
+    46cc:	00 00 00 02 	add\.p gr0,fp,gr0
+    46d0:	00 00 05 bc 	subx\.p gr0,gr60,gr0,icc1
+			46d0: R_FRV_FUNCDESC_VALUE	WF8
+    46d4:	00 00 00 02 	add\.p gr0,fp,gr0
+    46d8:	00 00 05 b4 	subx\.p gr0,gr52,gr0,icc1
+			46d8: R_FRV_FUNCDESC_VALUE	WF0
+    46dc:	00 00 00 02 	add\.p gr0,fp,gr0
+    46e0:	00 00 05 ac 	subx\.p gr0,gr44,gr0,icc1
+			46e0: R_FRV_FUNCDESC_VALUE	WF7
+    46e4:	00 00 00 02 	add\.p gr0,fp,gr0
 
-000106e8 <_GLOBAL_OFFSET_TABLE_>:
+000046e8 <_GLOBAL_OFFSET_TABLE_>:
 	\.\.\.
-			106f4: R_FRV_32	WF1
-			106f8: R_FRV_FUNCDESC	WF4
-			106fc: R_FRV_32	WD2
-			10700: R_FRV_FUNCDESC	WF5
-			10704: R_FRV_FUNCDESC	WF6
-			10708: R_FRV_32	WF3
-			1070c: R_FRV_32	WF2
+			46f4: R_FRV_32	WF1
+			46f8: R_FRV_FUNCDESC	WF4
+			46fc: R_FRV_32	WD2
+			4700: R_FRV_FUNCDESC	WF5
+			4704: R_FRV_FUNCDESC	WF6
+			4708: R_FRV_32	WF3
+			470c: R_FRV_32	WF2

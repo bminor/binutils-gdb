@@ -32,53 +32,53 @@ Disassembly of section \.text:
  348:	80 f8 00 00 	sethi hi\(0x0\),gr0
 Disassembly of section \.data:
 
-00010350 <D8>:
-   10350:	00 00 00 08 	add\.p gr0,gr8,gr0
-			10350: R_FRV_32	\.data
+00004350 <D8>:
+    4350:	00 00 00 08 	add\.p gr0,gr8,gr0
+			4350: R_FRV_32	\.data
 
-00010354 <GD0>:
-   10354:	00 00 00 10 	add\.p gr0,gr16,gr0
-			10354: R_FRV_32	\.got
-   10358:	00 00 00 08 	add\.p gr0,gr8,gr0
-			10358: R_FRV_32	\.text
+00004354 <GD0>:
+    4354:	00 00 00 10 	add\.p gr0,gr16,gr0
+			4354: R_FRV_32	\.got
+    4358:	00 00 00 08 	add\.p gr0,gr8,gr0
+			4358: R_FRV_32	\.text
 Disassembly of section \.got:
 
-000103d8 <_GLOBAL_OFFSET_TABLE_-0x38>:
-   103d8:	00 00 00 08 	add\.p gr0,gr8,gr0
-			103d8: R_FRV_FUNCDESC_VALUE	\.text
-   103dc:	00 00 00 00 	add\.p gr0,gr0,gr0
-   103e0:	00 00 00 08 	add\.p gr0,gr8,gr0
-			103e0: R_FRV_FUNCDESC_VALUE	\.text
-   103e4:	00 00 00 00 	add\.p gr0,gr0,gr0
-   103e8:	00 00 00 08 	add\.p gr0,gr8,gr0
-			103e8: R_FRV_FUNCDESC_VALUE	\.text
-   103ec:	00 00 00 00 	add\.p gr0,gr0,gr0
-   103f0:	00 00 00 08 	add\.p gr0,gr8,gr0
-			103f0: R_FRV_FUNCDESC_VALUE	\.text
-   103f4:	00 00 00 00 	add\.p gr0,gr0,gr0
-   103f8:	00 00 00 08 	add\.p gr0,gr8,gr0
-			103f8: R_FRV_FUNCDESC_VALUE	\.text
-   103fc:	00 00 00 00 	add\.p gr0,gr0,gr0
-   10400:	00 00 00 08 	add\.p gr0,gr8,gr0
-			10400: R_FRV_FUNCDESC_VALUE	\.text
-   10404:	00 00 00 00 	add\.p gr0,gr0,gr0
-   10408:	00 00 00 08 	add\.p gr0,gr8,gr0
-			10408: R_FRV_FUNCDESC_VALUE	\.text
-   1040c:	00 00 00 00 	add\.p gr0,gr0,gr0
+000043d8 <_GLOBAL_OFFSET_TABLE_-0x38>:
+    43d8:	00 00 00 08 	add\.p gr0,gr8,gr0
+			43d8: R_FRV_FUNCDESC_VALUE	\.text
+    43dc:	00 00 00 00 	add\.p gr0,gr0,gr0
+    43e0:	00 00 00 08 	add\.p gr0,gr8,gr0
+			43e0: R_FRV_FUNCDESC_VALUE	\.text
+    43e4:	00 00 00 00 	add\.p gr0,gr0,gr0
+    43e8:	00 00 00 08 	add\.p gr0,gr8,gr0
+			43e8: R_FRV_FUNCDESC_VALUE	\.text
+    43ec:	00 00 00 00 	add\.p gr0,gr0,gr0
+    43f0:	00 00 00 08 	add\.p gr0,gr8,gr0
+			43f0: R_FRV_FUNCDESC_VALUE	\.text
+    43f4:	00 00 00 00 	add\.p gr0,gr0,gr0
+    43f8:	00 00 00 08 	add\.p gr0,gr8,gr0
+			43f8: R_FRV_FUNCDESC_VALUE	\.text
+    43fc:	00 00 00 00 	add\.p gr0,gr0,gr0
+    4400:	00 00 00 08 	add\.p gr0,gr8,gr0
+			4400: R_FRV_FUNCDESC_VALUE	\.text
+    4404:	00 00 00 00 	add\.p gr0,gr0,gr0
+    4408:	00 00 00 08 	add\.p gr0,gr8,gr0
+			4408: R_FRV_FUNCDESC_VALUE	\.text
+    440c:	00 00 00 00 	add\.p gr0,gr0,gr0
 
-00010410 <_GLOBAL_OFFSET_TABLE_>:
+00004410 <_GLOBAL_OFFSET_TABLE_>:
 	\.\.\.
-   1041c:	00 00 00 08 	add\.p gr0,gr8,gr0
-			1041c: R_FRV_32	\.got
-   10420:	00 00 00 08 	add\.p gr0,gr8,gr0
-			10420: R_FRV_32	\.text
-   10424:	00 00 00 08 	add\.p gr0,gr8,gr0
-			10424: R_FRV_32	\.text
-   10428:	00 00 00 20 	add\.p gr0,gr32,gr0
-			10428: R_FRV_32	\.got
-   1042c:	00 00 00 18 	add\.p gr0,gr24,gr0
-			1042c: R_FRV_32	\.got
-   10430:	00 00 00 08 	add\.p gr0,gr8,gr0
-			10430: R_FRV_32	\.data
-   10434:	00 00 00 08 	add\.p gr0,gr8,gr0
-			10434: R_FRV_32	\.text
+    441c:	00 00 00 08 	add\.p gr0,gr8,gr0
+			441c: R_FRV_32	\.got
+    4420:	00 00 00 08 	add\.p gr0,gr8,gr0
+			4420: R_FRV_32	\.text
+    4424:	00 00 00 08 	add\.p gr0,gr8,gr0
+			4424: R_FRV_32	\.text
+    4428:	00 00 00 20 	add\.p gr0,gr32,gr0
+			4428: R_FRV_32	\.got
+    442c:	00 00 00 18 	add\.p gr0,gr24,gr0
+			442c: R_FRV_32	\.got
+    4430:	00 00 00 08 	add\.p gr0,gr8,gr0
+			4430: R_FRV_32	\.data
+    4434:	00 00 00 08 	add\.p gr0,gr8,gr0
+			4434: R_FRV_32	\.text

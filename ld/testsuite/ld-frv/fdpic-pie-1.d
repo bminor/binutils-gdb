@@ -32,27 +32,27 @@ Disassembly of section \.text:
  418:	80 f8 00 00 	sethi hi\(0x0\),gr0
 Disassembly of section \.data:
 
-00010430 <D1>:
-   10430:	00 00 00 04 	add\.p gr0,gr4,gr0
-			10430: R_FRV_32	\.data
+00004430 <D1>:
+    4430:	00 00 00 04 	add\.p gr0,gr4,gr0
+			4430: R_FRV_32	\.data
 
-00010434 <\.D0>:
-   10434:	00 00 00 00 	add\.p gr0,gr0,gr0
-			10434: R_FRV_32	\.got
-   10438:	00 00 00 04 	add\.p gr0,gr4,gr0
-			10438: R_FRV_32	\.text
+00004434 <\.D0>:
+    4434:	00 00 00 00 	add\.p gr0,gr0,gr0
+			4434: R_FRV_32	\.got
+    4438:	00 00 00 04 	add\.p gr0,gr4,gr0
+			4438: R_FRV_32	\.text
 Disassembly of section \.got:
 
-000104b8 <_GLOBAL_OFFSET_TABLE_-0x8>:
-   104b8:	00 00 00 04 	add\.p gr0,gr4,gr0
-			104b8: R_FRV_FUNCDESC_VALUE	\.text
-   104bc:	00 00 00 02 	add\.p gr0,fp,gr0
+000044b8 <_GLOBAL_OFFSET_TABLE_-0x8>:
+    44b8:	00 00 00 04 	add\.p gr0,gr4,gr0
+			44b8: R_FRV_FUNCDESC_VALUE	\.text
+    44bc:	00 00 00 02 	add\.p gr0,fp,gr0
 
-000104c0 <_GLOBAL_OFFSET_TABLE_>:
+000044c0 <_GLOBAL_OFFSET_TABLE_>:
 	\.\.\.
-   104cc:	00 00 00 04 	add\.p gr0,gr4,gr0
-			104cc: R_FRV_32	\.text
-   104d0:	00 00 00 00 	add\.p gr0,gr0,gr0
-			104d0: R_FRV_32	\.got
-   104d4:	00 00 00 04 	add\.p gr0,gr4,gr0
-			104d4: R_FRV_32	\.data
+    44cc:	00 00 00 04 	add\.p gr0,gr4,gr0
+			44cc: R_FRV_32	\.text
+    44d0:	00 00 00 00 	add\.p gr0,gr0,gr0
+			44d0: R_FRV_32	\.got
+    44d4:	00 00 00 04 	add\.p gr0,gr4,gr0
+			44d4: R_FRV_32	\.data
