@@ -4915,7 +4915,9 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	      {
 		const char *name;
 
-		if (r_extern)
+		if (h != NULL)
+		  name = h->root.root.string;
+		else if (r_extern)
 		  name = strings + GET_WORD (input_bfd,
 					     syms[r_index].e_strx);
 		else
@@ -5300,10 +5302,12 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		  {
 		    const char *name;
 
-		    if (r_extern
-			|| r_type == RELOC_BASE10
-			|| r_type == RELOC_BASE13
-			|| r_type == RELOC_BASE22)
+		    if (h != NULL)
+		      name = h->root.root.string;
+		    else if (r_extern
+			     || r_type == RELOC_BASE10
+			     || r_type == RELOC_BASE13
+			     || r_type == RELOC_BASE22)
 		      name = strings + GET_WORD (input_bfd,
 						 syms[r_index].e_strx);
 		    else

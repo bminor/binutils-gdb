@@ -9,6 +9,11 @@ Mon Apr  1 10:39:24 1996  Jeffrey A Law  (law@cygnus.com)
 
 Mon Apr  1 12:35:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (aout_link_input_section_std): When reporting an
+	overflow error, use the name of the symbol in the hash table if
+	available.
+	(aout_link_input_section_ext): Likewise.
+
 	* elflink.h (elf_adjust_dynamic_symbol): If a common symbol got
 	defined in a regular file, set ELF_LINK_HASH_DEF_REGULAR.
 
