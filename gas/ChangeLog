@@ -1,7 +1,38 @@
 Mon Dec 20 10:37:48 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
-	* as.c (main): Call listing_print before BFD gets closed, when
-	symbol data hasn't been freed up yet.
+	* as.c (main): Only invoke md_end if it's defined as a macro.
+	* tc.h (md_end): Don't declare it.
+	* config/tc-*.[ch] (md_end): Deleted, in cases where it doesn't do
+	anything.
+	* config/tc-vax.c (vip_end): Deleted null function.
+	* config/tc-mips.c (md_mips_end): Renamed from md_end.
+	* config/tc-mips.h (md_mips_end): Declare.
+	(md_end): New macro, calls md_mips_end.
+
+	* write.c (write_object_file): Don't close output file.
+	* as.c (main): Close output file (if needed) after calling
+	listing_print, which should be after calling write_object_file,
+	which sets the frag addresses.
+
+	* config/obj-coff.c (obj_coff_dim, obj_coff_endef, obj_coff_line,
+	obj_coff_scl, obj_coff_size, obj_coff_tag, obj_coff_type,
+	obj_coff_val): Add unused int argument to satisfy prototypes; goes
+	with Ian's 10 Sep changes.
+	(S_GET_DATA_TYPE, S_SET_DATA_TYPE, S_GET_STORAGE_CLASS,
+	S_SET_STORAGE_CLASS): Now function instead of macros.
+	(obj_emit_lineno) [BFD_ASSEMBLER]: Deleted.
+	(tag_insert): Local var ERROR_STRING is const.  Use "const" not
+	"CONST" for argument NAME.  Fixed prototype.
+	(coff_frob_symbol): Removed explicit "#if 1" directive.  If
+	S_IS_EXTERNAL, set storage class to C_EXT.
+	(s_get_name): Use "const" not "CONST".
+	* config/obj-coff.h (S_GET_DATA_TYPE, S_SET_DATA_TYPE,
+	S_GET_STORAGE_CLASS, S_SET_STORAGE_CLASS): Deleted.
+	(obj_emit_lineno): Declare only for non-BFD_ASSEMBLER.  For
+	BFD_ASSEMBLER, define as macro that aborts.
+	(obj_extra_stuff, tc_headers_hook): Declare only for
+	non-BFD_ASSEMBLER.
+	(coff_frob_symbol): Fix prototype.
 
 Sun Dec 19 00:37:20 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
