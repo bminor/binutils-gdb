@@ -1,3 +1,10 @@
+2003-04-21  J. Brobecker  <brobecker@gnat.com>
+
+	Ongoing multi-arch conversion for HP/UX.
+	* config/pa/tm-hppa.h (GDB_MULTI_ARCH): Set to 1. Do not define
+	if already defined (allows hppa64 to stay non-multiarched for now).
+	* config/pa/tm-hppa64.h (GDB_MULTI_ARCH): Define.
+
 2003-04-21  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (frame_id_eq): Fail when the code_addr's do not match.

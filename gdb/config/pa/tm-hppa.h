@@ -27,7 +27,9 @@
 /* Wonder if this is correct?  Should be using push_dummy_call().  */
 #define DEPRECATED_DUMMY_WRITE_SP(SP) generic_target_write_sp (SP)
 
-#define GDB_MULTI_ARCH 0
+#ifndef GDB_MULTI_ARCH
+#define GDB_MULTI_ARCH 1
+#endif
 
 /* NOTE: cagney/2002-11-24: This is a guess.  */
 #define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 0

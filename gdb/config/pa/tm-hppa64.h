@@ -28,6 +28,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    gotten working yet.  */
 #define GDB_TARGET_IS_HPPA_20W
 
+/* FIXME: brobecker 2003-04-21: Although 32bit hppa is partially multiarched,
+   the conversion for hppa64 hasn't been completed yet.  */
+#define GDB_MULTI_ARCH 0
+
 #include "pa/tm-hppah.h"
 
 #define HPUX_1100 1
