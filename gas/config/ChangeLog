@@ -1,3 +1,8 @@
+Thu May 28 11:20:27 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* tc-sparc.c: Use new ARCHITECTURES_CONFLICT_P macro.  Mention new
+	-Asparclite flag.
+
 Mon May  4 18:56:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* obj-coffbfd.c: use is a synonym for section, (do_relocs_for):
