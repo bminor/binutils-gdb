@@ -1,3 +1,17 @@
+Wed May 17 11:21:32 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* Makefile.in (xcoffread.o): Depend on partial-stab.h.
+
+	* xcoffsolib.c (sharedlibrary_command): New command.
+	* xcoffsolib.c (solib_info): Call xcoff_relocate_symtab.
+	* xcoffsolib.c: Miscellaneous cleanups.
+
+	* partial-stab.h: Ignore symbol descriptor '-' (for local
+	variables with negative type numbers) without complaint.
+
+	* rs6000-nat.c (vmap_ldinfo): Use bfd_stat rather than our own
+	local emulation thereof.  Remove unused variable ostart.
+
 Wed May 17 15:55:53 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* Makefile.in (config.status): changed target so that

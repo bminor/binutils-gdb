@@ -435,7 +435,6 @@ vmap_ldinfo (ldi)
   struct stat ii, vi;
   register struct vmap *vp;
   int got_one, retried;
-  CORE_ADDR ostart;
   int got_exec_file;
 
   /* For each *ldi, see if we have a corresponding *vp.
@@ -453,8 +452,6 @@ vmap_ldinfo (ldi)
   retry:
     for (got_one = 0, vp = vmap; vp; vp = vp->nxt)
       {
-	FILE *io;
-
 	/* First try to find a `vp', which is the same as in ldinfo.
 	   If not the same, just continue and grep the next `vp'. If same,
 	   relocate its tstart, tend, dstart, dend values. If no such `vp'
@@ -467,14 +464,14 @@ vmap_ldinfo (ldi)
 	    || (memb[0] && !STREQ(memb, vp->member)))
 	  continue;
 
-	io = bfd_cache_lookup (vp->bfd);		/* totally opaque! */
-	if (!io)
-	  fatal ("cannot find BFD's iostream for %s", vp->name);
-
 	/* See if we are referring to the same file. */
-	/* An error here is innocuous, most likely meaning that
-	   the file descriptor has become worthless. */
-	if (fstat (fileno(io), &vi) < 0)
+	if (bfd_stat (vp->bfd, &vi) < 0)
+	  /* An error here is innocuous, most likely meaning that
+	     the file descriptor has become worthless.
+	     FIXME: What does it mean for a file descriptor to become
+	     "worthless"?  What makes it happen?  What error does it
+	     produce (ENOENT? others?)?  Should we at least provide
+	     a warning?  */
 	  continue;
 
 	if (ii.st_dev != vi.st_dev || ii.st_ino != vi.st_ino)
@@ -485,8 +482,7 @@ vmap_ldinfo (ldi)
 
 	++got_one;
 
-	/* found a corresponding VMAP. remap! */
-	ostart = vp->tstart;
+	/* Found a corresponding VMAP.  Remap!  */
 
 	/* We can assume pointer == CORE_ADDR, this code is native only.  */
 	vp->tstart = (CORE_ADDR) ldi->ldinfo_textorg;
@@ -507,7 +503,7 @@ vmap_ldinfo (ldi)
 	/* relocate symbol table(s). */
 	vmap_symtab (vp);
 
-	/* there may be more, so we don't break out of the loop. */
+	/* There may be more, so we don't break out of the loop.  */
       }
 
     /* if there was no matching *vp, we must perforce create the sucker(s) */

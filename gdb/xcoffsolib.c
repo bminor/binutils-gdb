@@ -18,12 +18,15 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#if 0
 #include <sys/types.h>
 #include <sys/ldr.h>
+#endif
 
 #include "defs.h"
 #include "bfd.h"
 #include "xcoffsolib.h"
+#include "inferior.h"
 
 #ifdef SOLIB_SYMBOLS_MANUAL
 
@@ -146,56 +149,63 @@ CORE_ADDR addr;
    return "(unknown load module)";
 }
 
+static void solib_info PARAMS ((char *, int));
 
-solib_info (ldi)
-register struct ld_info *ldi;
+static void
+solib_info (args, from_tty)
+     char *args;
+     int from_tty;
 {
+  struct vmap *vp = vmap;
 
-   struct vmap *vp = vmap;
+  /* Check for new shared libraries loaded with load ().  */
+  xcoff_relocate_symtab (inferior_pid);
 
-   if (!vp || !vp->nxt) {
-     printf_unfiltered("No shared libraries loaded at this time.\n");	
-     return;
-   }
+  if (vp == NULL || vp->nxt == NULL)
+    {
+      printf_unfiltered ("No shared libraries loaded at this time.\n");	
+      return;
+    }
 
-   /* skip over the first vmap, it is the main program, always loaded. */
-   vp = vp->nxt;
+  /* Skip over the first vmap, it is the main program, always loaded.  */
+  vp = vp->nxt;
 
-   printf_unfiltered ("\
+  printf_unfiltered ("\
 Text Range		Data Range		Syms	Shared Object Library\n");
 
-   for (; vp; vp = vp->nxt) {
-
-     printf_unfiltered ("0x%08x-0x%08x	0x%08x-0x%08x	%s	%s%s%s%s\n",
-	vp->tstart, vp->tend,
-	vp->dstart, vp->dend,
-	vp->loaded ? "Yes" : "No ",
-	*vp->member ? "(" : "",
-	vp->member,
-	*vp->member ? ") " : "",
-	vp->name);
-   }
+  for (; vp != NULL; vp = vp->nxt)
+    {
+      printf_unfiltered ("0x%08x-0x%08x	0x%08x-0x%08x	%s	%s%s%s%s\n",
+			 vp->tstart, vp->tend,
+			 vp->dstart, vp->dend,
+			 vp->loaded ? "Yes" : "No ",
+			 *vp->member ? "(" : "",
+			 vp->member,
+			 *vp->member ? ") " : "",
+			 vp->name);
+    }
 }
 
-#ifdef SOLIB_SYMBOLS_MANUAL
 void
 sharedlibrary_command (args, from_tty)
-  char *args;
-  int from_tty;
+     char *args;
+     int from_tty;
 {
-  dont_repeat();
+  dont_repeat ();
+
+  /* Check for new shared libraries loaded with load ().  */
+  xcoff_relocate_symtab (inferior_pid);
+
+#ifdef SOLIB_SYMBOLS_MANUAL
   solib_add (args, from_tty, (struct target_ops *)0);
-}
 #endif /* SOLIB_SYMBOLS_MANUAL */
+}
 
 void
 _initialize_solib()
 {
-
-#ifdef SOLIB_SYMBOLS_MANUAL
-  add_com("sharedlibrary", class_files, sharedlibrary_command,
+  add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   "Load shared object library symbols for files matching REGEXP.");
-#endif
-  add_info("sharedlibrary", solib_info, 
-	   "Status of loaded shared object libraries");
+  add_info ("sharedlibrary", solib_info, 
+	    "Status of loaded shared object libraries");
 }
