@@ -271,6 +271,7 @@ changequote(,)dnl
       i386-*-freebsd[12].*)		fmt=aout em=386bsd ;;
       i386-*-freebsd[12])		fmt=aout em=386bsd ;;
 changequote([,])dnl
+      i386-*-freebsd*)			fmt=elf em=freebsd ;;
       i386-*-sysv*)			fmt=coff ;;
       i386-*-sco3.2v5*coff)		fmt=coff ;;
       i386-*-isc*)			fmt=coff ;;
