@@ -1,5 +1,20 @@
 2004-03-12  Kevin Buettner  <kevinb@redhat.com>
 
+	Add shared library support for FR-V FDPIC ABI:
+	* Makefile.in (solib-frv.o): Add dependencies.
+	* frv-tdep.c (find_func_descr, frv_convert_from_func_ptr_addr):
+	New functions.
+	(frv_push_dummy_call): Add support for FDPIC ABI.
+	(frv_gdbarch_init): Call set_gdbarch_convert_from_func_ptr_addr()
+	for FDPIC ABI.
+	* frv-tdep.h (frv_fdpic_find_global_pointer): Declare.
+	(frv_fdpic_find_canonical_descriptor): Declare.
+	* solib-frv.c: New file.
+	* config/frv/frv.mt (TDEPFILES): Add solib.o and solib-frv.o.
+	* config/frv/tm-frv.h (solib.h): Include.
+
+2004-03-12  Kevin Buettner  <kevinb@redhat.com>
+
 	* Makefile.in (elf_frv_h, frv_tdep_h): Define.
 	(frv-tdep.o): Update dependencies.
 	* frv-tdep.h: New file.

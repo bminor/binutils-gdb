@@ -1037,6 +1037,45 @@ frv_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 }
 
 static CORE_ADDR
+find_func_descr (struct gdbarch *gdbarch, CORE_ADDR entry_point)
+{
+  CORE_ADDR descr;
+  char valbuf[4];
+
+  descr = frv_fdpic_find_canonical_descriptor (entry_point);
+
+  if (descr != 0)
+    return descr;
+
+  /* Construct a non-canonical descriptor from space allocated on
+     the stack.  */
+
+  descr = value_as_long (value_allocate_space_in_inferior (8));
+  store_unsigned_integer (valbuf, 4, entry_point);
+  write_memory (descr, valbuf, 4);
+  store_unsigned_integer (valbuf, 4,
+                          frv_fdpic_find_global_pointer (entry_point));
+  write_memory (descr + 4, valbuf, 4);
+  return descr;
+}
+
+static CORE_ADDR
+frv_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
+                                struct target_ops *targ)
+{
+  CORE_ADDR entry_point;
+  CORE_ADDR got_address;
+
+  entry_point = get_target_memory_unsigned (targ, addr, 4);
+  got_address = get_target_memory_unsigned (targ, addr + 4, 4);
+
+  if (got_address == frv_fdpic_find_global_pointer (entry_point))
+    return entry_point;
+  else
+    return addr;
+}
+
+static CORE_ADDR
 frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
                      struct regcache *regcache, CORE_ADDR bp_addr,
                      int nargs, struct value **args, CORE_ADDR sp,
@@ -1053,6 +1092,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   CORE_ADDR regval;
   int stack_space;
   int stack_offset;
+  enum frv_abi abi = frv_abi (gdbarch);
 
 #if 0
   printf("Push %d args at sp = %x, struct_return=%d (%x)\n",
@@ -1088,6 +1128,22 @@ frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
       if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
 	{
 	  store_unsigned_integer (valbuf, 4, VALUE_ADDRESS (arg));
+	  typecode = TYPE_CODE_PTR;
+	  len = 4;
+	  val = valbuf;
+	}
+      else if (abi == FRV_ABI_FDPIC
+	       && len == 4
+               && typecode == TYPE_CODE_PTR
+               && TYPE_CODE (TYPE_TARGET_TYPE (arg_type)) == TYPE_CODE_FUNC)
+	{
+	  /* The FDPIC ABI requires function descriptors to be passed instead
+	     of entry points.  */
+	  store_unsigned_integer
+	    (valbuf, 4,
+	     find_func_descr (gdbarch,
+	                      extract_unsigned_integer (VALUE_CONTENTS (arg),
+			                                4)));
 	  typecode = TYPE_CODE_PTR;
 	  len = 4;
 	  val = valbuf;
@@ -1128,6 +1184,14 @@ frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   /* Set the return address.  For the frv, the return breakpoint is
      always at BP_ADDR.  */
   regcache_cooked_write_unsigned (regcache, lr_regnum, bp_addr);
+
+  if (abi == FRV_ABI_FDPIC)
+    {
+      /* Set the GOT register for the FDPIC ABI.  */
+      regcache_cooked_write_unsigned
+	(regcache, first_gpr_regnum + 15,
+         frv_fdpic_find_global_pointer (func_addr));
+    }
 
   /* Finally, update the SP register.  */
   regcache_cooked_write_unsigned (regcache, sp_regnum, sp);
@@ -1449,6 +1513,9 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   set_gdbarch_print_insn (gdbarch, print_insn_frv);
+  if (frv_abi (gdbarch) == FRV_ABI_FDPIC)
+    set_gdbarch_convert_from_func_ptr_addr (gdbarch,
+					    frv_convert_from_func_ptr_addr);
 
   return gdbarch;
 }
