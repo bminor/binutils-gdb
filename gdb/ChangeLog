@@ -1,3 +1,8 @@
+2003-07-07  Joel Brobecker  <brobecker@gnat.com>
+
+	* mips-tdep.c (mips_register_raw_size): Fix compilation failure.
+	(mips_register_byte): Likewise.
+
 2003-07-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (sparc_tdep_h): New.
