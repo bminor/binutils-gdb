@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 1998-11-04 15:53-0800\n"
+"POT-Creation-Date: 1998-11-12 11:36-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -471,22 +471,23 @@ msgid ""
 "      Type: %s"
 msgstr ""
 
-#: elf-m10200.c:455 elf-m10300.c:667 elf32-arm.c:1583 elf32-fr30.c:465
-#: elf32-m32r.c:1157 elf32-v850.c:1666
+#: elf-m10200.c:455 elf-m10300.c:667 elf32-arm.c:1583 elf32-d10v.c:490
+#: elf32-fr30.c:465 elf32-m32r.c:1157 elf32-v850.c:1666
 msgid "internal error: out of range error"
 msgstr ""
 
-#: elf-m10200.c:459 elf-m10300.c:671 elf32-arm.c:1587 elf32-fr30.c:469
-#: elf32-m32r.c:1161 elf32-v850.c:1670
+#: elf-m10200.c:459 elf-m10300.c:671 elf32-arm.c:1587 elf32-d10v.c:494
+#: elf32-fr30.c:469 elf32-m32r.c:1161 elf32-v850.c:1670
 msgid "internal error: unsupported relocation error"
 msgstr ""
 
-#: elf-m10200.c:463 elf-m10300.c:675 elf32-arm.c:1591 elf32-m32r.c:1165
+#: elf-m10200.c:463 elf-m10300.c:675 elf32-arm.c:1591 elf32-d10v.c:498
+#: elf32-m32r.c:1165
 msgid "internal error: dangerous error"
 msgstr ""
 
-#: elf-m10200.c:467 elf-m10300.c:679 elf32-arm.c:1595 elf32-fr30.c:489
-#: elf32-m32r.c:1169 elf32-v850.c:1690
+#: elf-m10200.c:467 elf-m10300.c:679 elf32-arm.c:1595 elf32-d10v.c:502
+#: elf32-fr30.c:489 elf32-m32r.c:1169 elf32-v850.c:1690
 msgid "internal error: unknown error"
 msgstr ""
 
@@ -556,24 +557,24 @@ msgstr ""
 msgid "%s: warning: allocated section `%s' not in segment"
 msgstr ""
 
-#: elf.c:3313
+#: elf.c:3316
 #, c-format
 msgid "%s: symbol `%s' required but not present"
 msgstr ""
 
-#: elf.c:3322
+#: elf.c:3325
 #, c-format
 msgid ""
 "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = "
 "0x%.8lx%s\n"
 msgstr ""
 
-#: elf.c:3462
+#: elf.c:3465
 #, c-format
 msgid "%s: warning: Empty loadable segment detected\n"
 msgstr ""
 
-#: elf.c:4735
+#: elf.c:4738
 #, c-format
 msgid "%s: unsupported relocation type %s"
 msgstr ""

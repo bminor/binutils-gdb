@@ -1,3 +1,7 @@
+Thu Nov 12 19:19:54 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* po/bfd.pot: Regenerated.
+
 Tue Nov 10 16:17:06 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* acinclude.m4, config.bfd: detect cygwin* instead of cygwin32*.
