@@ -89,10 +89,10 @@ CFLAGS = -g -O $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSI
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o ctor.o seclet.o
 
-BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
-	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o
+BFD_MACHINES = cpu-h8300.o 
 
-BFD_BACKENDS = ieee.o srec.o coff-h8300.o
+
+BFD_BACKENDS = ieee.o srec.o coff-h83.o
 
 
 
@@ -113,10 +113,10 @@ BFD_H=$(INCDIR)/bfd.h
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 coff-i386.c aout64.c aout32.c sunos.c demo64.c coff-i960.c srec.c \
 	 oasys.c ieee.c coff-m68k.c coff-a29k.c coff-rs6000.c \
-	 format.c section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c seclet.c \
+	 format.c section.c core.c syms.c  reloc.c init.c ctor.c seclet.c \
 	 coff-m88k.c coff-mips.c trad-core.c newsos3.c i386aout.c bout.c elf.c \
 	cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c \
- 	cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-rs6000.c coff-h8300.c
+ 	cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-rs6000.c coff-h83.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -352,7 +352,7 @@ oasys.o : oasys.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/oasys.h liboasys.h 
 ieee.o : ieee.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/ieee.h libieee.h 
-coff-h8300.o: coff-h8300.c  $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+coff-h83.o: coff-h83.c  $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/coff/h8300.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h 
 format.o : format.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
@@ -362,7 +362,7 @@ core.o : core.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
 syms.o : syms.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
-syms.o : stab-syms.c
+
 reloc.o : reloc.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
 

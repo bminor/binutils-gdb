@@ -42,7 +42,6 @@ DEFUN(bfd_new_seclet,(abfd, section),
   section->seclets_tail = n;
 
   return n;
-  
 }
 
 
@@ -61,24 +60,16 @@ DEFUN(rel,(abfd, seclet, output_section),
   bfd_byte *data;
   if (output_section->flags & SEC_HAS_CONTENTS )
   {
-    
-  data = bfd_get_relocated_section_contents(abfd, seclet);
-
-  if(bfd_set_section_contents(abfd,
-			      output_section,
-			      data,
-			      seclet->offset,
-			      seclet->size) == false)
-  {
-    abort();
+    data = bfd_get_relocated_section_contents(abfd, seclet);
+    if(bfd_set_section_contents(abfd,
+				output_section,
+				data,
+				seclet->offset,
+				seclet->size) == false)
+    {
+      abort();
+    }
   }
-  
-}
-
-    
-
-  
-
 }
 
 void
@@ -89,21 +80,29 @@ DEFUN(seclet_dump_seclet,(abfd, seclet, section),
 {
   switch (seclet->type) 
   {
-    
-  case bfd_indirect_seclet:
+   case bfd_indirect_seclet:
     /* The contents of this section come from another one somewhere
        else */
     rel(abfd, seclet, section);
-    
-    
     break;
-    
-  default:
+   case bfd_fill_seclet:
+    /* Fill in the section with us */
+   {
+     char *d = malloc(seclet->size);
+     unsigned int i;
+     for (i =0;  i < seclet->size; i+=2) {
+       d[i] = seclet->u.fill.value >> 8;
+     }
+     for (i = 1; i < seclet->size; i+=2) {
+       d[i] = seclet->u.fill.value ;
+     }
+     bfd_set_section_contents(abfd, section, d, seclet->offset, seclet->size);
+
+   }
+    break;
+   default:
     abort();
   }
-  
-
-
 }
 
 void
@@ -122,8 +121,6 @@ DEFUN(seclet_dump,(abfd),
       seclet_dump_seclet(abfd, p, o);
       p = p ->next;
     }
- 
     o = o->next;
   }
-
 }
