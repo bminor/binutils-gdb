@@ -163,7 +163,7 @@ sce%.exe: sce%.o sce_main.o refresh.o
 sce_main.o: sce_main.c
 	$(GCC_FOR_TARGET) -c $(CFLAGS) -o $@ $<
 
-refresh.o: refresh.s
+refresh.o: refresh.dvpasm
 	$(DVPAS_FOR_TARGET) $(ASFLAGS) -o $@ $<
 
 sce_%.o: sce_%.dvpasm sce_%.vuasm
