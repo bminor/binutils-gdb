@@ -1,5 +1,5 @@
 /* tc-m68k.c -- Assemble for the m68k family
-   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1822,7 +1822,8 @@ m68k_ip (instring)
 		default:
 		  {
 		    int got_one = 0, idx;
-		    for (idx = 0; idx < sizeof (archs) / sizeof (archs[0]);
+		    for (idx = 0;
+			 idx < (int) (sizeof (archs) / sizeof (archs[0]));
 			 idx++)
 		      {
 			if ((archs[idx].arch & ok_arch)
@@ -2363,8 +2364,6 @@ m68k_ip (instring)
 		      addword (nextword);
 		      break;
 		    }
-		  /* Don't generate pc relative code on 68010 and
-		     68000.  */
 		  if (isvar (&opP->disp)
 		      && !subs (&opP->disp)
 		      && adds (&opP->disp)
@@ -2375,7 +2374,6 @@ m68k_ip (instring)
 #endif
 		      && S_GET_SEGMENT (adds (&opP->disp)) == now_seg
 		      && relaxable_symbol (adds (&opP->disp))
-		      && HAVE_LONG_BRANCH(current_architecture)
 		      && !flag_long_jumps
 		      && !strchr ("~%&$?", s[0]))
 		    {
@@ -2755,7 +2753,7 @@ m68k_ip (instring)
 
 	case 'O':
 	  tmpreg = ((opP->mode == DREG)
-		    ? 0x20 + opP->reg - DATA
+		    ? 0x20 + (int) (opP->reg - DATA)
 		    : (get_num (&opP->disp, 40) & 0x1F));
 	  install_operand (s[1], tmpreg);
 	  break;
@@ -3705,7 +3703,7 @@ md_begin ()
   register const struct m68k_opcode *ins;
   register struct m68k_incant *hack, *slak;
   register const char *retval = 0;	/* empty string, or error msg text */
-  register unsigned int i;
+  register int i;
   register char c;
 
   if (flag_mri)
@@ -3786,7 +3784,9 @@ md_begin ()
 	  { "bsr",	"jbsr", },
 	};
 
-      for (i = 0; i < sizeof mri_aliases / sizeof mri_aliases[0]; i++)
+      for (i = 0;
+	   i < (int) (sizeof mri_aliases / sizeof mri_aliases[0]);
+	   i++)
 	{
 	  const char *name = mri_aliases[i].primary;
 	  const char *alias = mri_aliases[i].alias;
@@ -3799,10 +3799,10 @@ md_begin ()
 	}
     }
 
-  for (i = 0; i < sizeof (mklower_table); i++)
+  for (i = 0; i < (int) sizeof (mklower_table); i++)
     mklower_table[i] = (isupper (c = (char) i)) ? tolower (c) : c;
 
-  for (i = 0; i < sizeof (notend_table); i++)
+  for (i = 0; i < (int) sizeof (notend_table); i++)
     {
       notend_table[i] = 0;
       alt_notend_table[i] = 0;
@@ -4348,7 +4348,10 @@ md_convert_frag_1 (fragP)
 	    }
 	  else
 	    {
-	      as_bad (_("Long branch offset not supported."));
+	      /* This should never happen, because if it's a conditional
+	         branch and we are on a 68000, BCC68000 should have been
+	         picked instead of ABRANCH. */
+	      abort ();
 	    }
 	}
       else
@@ -4484,8 +4487,8 @@ md_convert_frag_1 (fragP)
 
 void
 md_convert_frag (headers, sec, fragP)
-     object_headers *headers;
-     segT sec;
+     object_headers *headers ATTRIBUTE_UNUSED;
+     segT sec ATTRIBUTE_UNUSED;
      fragS *fragP;
 {
   md_convert_frag_1 (fragP);
@@ -4529,6 +4532,14 @@ md_estimate_size_before_relax (fragP, segment)
 	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), BYTE);
 	    break;
 	  }
+	else if ((fragP->fr_symbol != NULL) && flag_short_refs)
+	  {			/* Symbol is undefined and we want short ref */
+	    fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
+		     fragP->fr_offset, 1, NO_RELOC);
+	    fragP->fr_fix += 2;
+	    frag_wane (fragP);
+	    break;
+	  }
 	else if ((fragP->fr_symbol == 0) || !HAVE_LONG_BRANCH(current_architecture))
 	  {
 	    /* On 68000, or for absolute value, switch to abs long */
@@ -4553,7 +4564,10 @@ md_estimate_size_before_relax (fragP, segment)
 	      }
 	    else
 	      {
-		as_warn (_("Long branch offset to extern symbol not supported."));
+		/* This should never happen, because if it's a conditional
+		   branch and we are on a 68000, BCC68000 should have been
+		   picked instead of ABRANCH. */
+		abort ();
 	      }
 	  }
 	else
@@ -4593,9 +4607,7 @@ md_estimate_size_before_relax (fragP, segment)
       {
 	if ((S_GET_SEGMENT (fragP->fr_symbol) == segment
 	     && relaxable_symbol (fragP->fr_symbol))
-	    || flag_short_refs
-	    || cpu_of_arch (current_architecture) < m68020
-	    || cpu_of_arch (current_architecture) == mcf5200)
+	    || flag_short_refs)
 	  {
 	    fragP->fr_subtype = TAB (PCREL, SHORT);
 	    fragP->fr_var += 2;
@@ -4618,21 +4630,17 @@ md_estimate_size_before_relax (fragP, segment)
 	    break;
 	  }
 	/* only Bcc 68000 instructions can come here */
-	/* change bcc into b!cc/jmp absl long */
-	fragP->fr_opcode[0] ^= 0x01;	/* invert bcc */
-	if (flag_short_refs)
+	if ((fragP->fr_symbol != NULL) && flag_short_refs)
 	  {
-	    fragP->fr_opcode[1] = 0x04;	/* branch offset = 6 */
-	    /* JF: these were fr_opcode[2,3] */
-	    buffer_address[0] = 0x4e;	/* put in jmp long (0x4ef9) */
-	    buffer_address[1] = (char) 0xf8;
-	    fragP->fr_fix += 2;	/* account for jmp instruction */
+	    /* the user wants short refs, so emit one */
 	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
-		     fragP->fr_offset, 0, NO_RELOC);
+		     fragP->fr_offset, 1, NO_RELOC);
 	    fragP->fr_fix += 2;
 	  }
 	else
 	  {
+	    /* change bcc into b!cc/jmp absl long */
+	    fragP->fr_opcode[0] ^= 0x01;	/* invert bcc */
 	    fragP->fr_opcode[1] = 0x06;	/* branch offset = 6 */
 	    /* JF: these were fr_opcode[2,3] */
 	    buffer_address[0] = 0x4e;	/* put in jmp long (0x4ef9) */
@@ -4657,25 +4665,21 @@ md_estimate_size_before_relax (fragP, segment)
 	    break;
 	  }
 	/* only DBcc 68000 instructions can come here */
-	/* change dbcc into dbcc/jmp absl long */
-	/* JF: these used to be fr_opcode[2-4], which is wrong. */
-	buffer_address[0] = 0x00;	/* branch offset = 4 */
-	buffer_address[1] = 0x04;
-	buffer_address[2] = 0x60;	/* put in bra pc + ... */
 
-	if (flag_short_refs)
+	if (fragP->fr_symbol != NULL && flag_short_refs)
 	  {
-	    /* JF: these were fr_opcode[5-7] */
-	    buffer_address[3] = 0x04;	/* plus 4 */
-	    buffer_address[4] = 0x4e;	/* Put in Jump Word */
-	    buffer_address[5] = (char) 0xf8;
-	    fragP->fr_fix += 6;	/* account for bra/jmp instruction */
+	    /* the user wants short refs, so emit one */
 	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
-		     fragP->fr_offset, 0, NO_RELOC);
+		     fragP->fr_offset, 1, NO_RELOC);
 	    fragP->fr_fix += 2;
 	  }
 	else
 	  {
+	    /* change dbcc into dbcc/jmp absl long */
+	    /* JF: these used to be fr_opcode[2-4], which is wrong. */
+	    buffer_address[0] = 0x00;	/* branch offset = 4 */
+	    buffer_address[1] = 0x04;
+	    buffer_address[2] = 0x60;	/* put in bra pc + ... */
 	    /* JF: these were fr_opcode[5-7] */
 	    buffer_address[3] = 0x06;	/* Plus 6 */
 	    buffer_address[4] = 0x4e;	/* put in jmp long (0x4ef9) */
@@ -5259,7 +5263,7 @@ static const struct opt_action opt_table[] =
   { "x", 0, 0, 0, 0 }
 };
 
-#define OPTCOUNT (sizeof opt_table / sizeof opt_table[0])
+#define OPTCOUNT ((int) (sizeof opt_table / sizeof opt_table[0]))
 
 /* The MRI OPT pseudo-op.  */
 
@@ -7103,7 +7107,7 @@ md_pcrel_from (fixP)
 /*ARGSUSED*/
 void
 tc_coff_symbol_emit_hook (ignore)
-     symbolS *ignore;
+     symbolS *ignore ATTRIBUTE_UNUSED;
 {
 }
 

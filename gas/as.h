@@ -138,14 +138,14 @@ extern void *alloca ();
 
 
 /* Now GNU header files... */
-#include <ansidecl.h>
+#include "ansidecl.h"
 #ifdef BFD_ASSEMBLER
-#include <bfd.h>
+#include "bfd.h"
 #endif
-#include <libiberty.h>
+#include "libiberty.h"
 
 /* Define the standard progress macros.  */
-#include <progress.h>
+#include "progress.h"
 
 /* This doesn't get taken care of anywhere.  */
 #ifndef __MWERKS__  /* Metrowerks C chokes on the "defined (inline)" */
@@ -543,14 +543,14 @@ typedef struct _pseudo_type pseudo_typeS;
 #endif /* ! USE_STDARG */
 
 PRINTF_LIKE (as_bad);
-PRINTF_LIKE (as_fatal);
+PRINTF_LIKE (as_fatal) ATTRIBUTE_NORETURN;
 PRINTF_LIKE (as_tsktsk);
 PRINTF_LIKE (as_warn);
 PRINTF_WHERE_LIKE (as_bad_where);
 PRINTF_WHERE_LIKE (as_warn_where);
 
 void as_assert PARAMS ((const char *, int, const char *));
-void as_abort PARAMS ((const char *, int, const char *));
+void as_abort PARAMS ((const char *, int, const char *)) ATTRIBUTE_NORETURN;
 
 void fprint_value PARAMS ((FILE *file, addressT value));
 void sprint_value PARAMS ((char *buf, addressT value));

@@ -1,3 +1,23 @@
+2000-05-08  Alan Modra  <alan@linuxcare.com.au>
+
+	* as.h: #include "file", not <file> on files from ../include.
+	(as_abort, as_fatal): Add ATTRIBUTE_NORETURN.
+	* config/tc-m68k.c (m68k_ip): Fix signed/unsigned warnings.
+	(md_convert_frag): Add ATTRIBUTE_UNUSED.
+	(tc_coff_symbol_emit_hook): Ditto.
+	(OPTCOUNT): Cast to int to avoid compiler warning.
+	(md_begin): Fix signed/unsigned warnings.
+
+2000-05-08  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* config/tc-m68k.c (md_convert_frag_1): Abort if we end up in the
+	ABRANCH LONG case for a conditional branch on a 68000.
+	(md_estimate_size_before_relax): Likewise.  Also handle
+	flag_short_refs correctly for ABRANCH, BCC68000, and DBCC.
+	(m68k-ip: case ABSL): Relax absolute references to 16-bit
+	PC-relative on all CPUs.
+	(md_estimate_size_before_relax): Likewise.
+
 2000-05-04  Alan Modra  <alan@linuxcare.com.au>
 
 	* as.c (parse_args): Just mention current year in printed
