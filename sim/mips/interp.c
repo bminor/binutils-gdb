@@ -1223,7 +1223,7 @@ sim_monitor (SIM_DESC sd,
 	break;
       }
 
-    case 28 : /* PMON flush_cache */
+    case 28: /* PMON flush_cache */
       break;
 
     case 55: /* void get_mem_info(unsigned int *ptr) */
@@ -1242,7 +1242,7 @@ sim_monitor (SIM_DESC sd,
 	break;
       }
     
-    case 158 : /* PMON printf */
+    case 158: /* PMON printf */
       /* in:  A0 = pointer to format string */
       /*      A1 = optional argument 1 */
       /*      A2 = optional argument 2 */
@@ -1671,7 +1671,7 @@ signal_exception (SIM_DESC sd,
 
   switch (exception) {
 
-    case DebugBreakPoint :
+    case DebugBreakPoint:
       if (! (Debug & Debug_DM))
         {
           if (INDELAYSLOT())
@@ -1694,7 +1694,7 @@ signal_exception (SIM_DESC sd,
         }
       break;
 
-    case ReservedInstruction :
+    case ReservedInstruction:
      {
        va_list ap;
        unsigned int instruction;
@@ -1845,7 +1845,7 @@ signal_exception (SIM_DESC sd,
 	 sim_engine_halt (SD, CPU, NULL, PC,
 			  sim_stopped, SIM_SIGTRAP);
 
-       default : /* Unknown internal exception */
+       default: /* Unknown internal exception */
 	 PC = EPC;
 	 sim_engine_halt (SD, CPU, NULL, PC,
 			  sim_stopped, SIM_SIGABRT);

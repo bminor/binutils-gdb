@@ -1,5 +1,11 @@
 2002-06-03  Chris Demetriou  <cgd@broadcom.com>
 
+	* cp1.c: fix formatting of switch case and default labels.
+	* interp.c: Likewise.
+	* sim-main.c: Likewise.
+
+2002-06-03  Chris Demetriou  <cgd@broadcom.com>
+
 	* cp1.c: Clean up comments which describe FP formats.
 	 (FPQNaN_DOUBLE, FPQNaN_LONG): Generate using UNSIGNED64.
 

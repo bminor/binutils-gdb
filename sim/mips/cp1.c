@@ -176,7 +176,7 @@ value_fpr (SIM_DESC sd,
 	    }
 	  break;
 
-	default :
+	default:
 	  err = -1;
 	  break;
 	}
@@ -216,8 +216,8 @@ store_fpr (SIM_DESC sd,
 	{
 	case fmt_uninterpreted_32:
 	  fmt = fmt_uninterpreted;
-	case fmt_single :
-	case fmt_word :
+	case fmt_single:
+	case fmt_word:
 	  if (STATE_VERBOSE_P (SD))
 	    sim_io_eprintf (SD,
 			    "Warning: PC 0x%s: interp.c store_fpr DEADCODE\n",
@@ -229,13 +229,13 @@ store_fpr (SIM_DESC sd,
 	case fmt_uninterpreted_64:
 	  fmt = fmt_uninterpreted;
 	case fmt_uninterpreted:
-	case fmt_double :
-	case fmt_long :
+	case fmt_double:
+	case fmt_long:
 	  FGR[fpr] = value;
 	  FPR_STATE[fpr] = fmt;
 	  break;
 
-	default :
+	default:
 	  FPR_STATE[fpr] = fmt_unknown;
 	  err = -1;
 	  break;
@@ -247,8 +247,8 @@ store_fpr (SIM_DESC sd,
 	{
 	case fmt_uninterpreted_32:
 	  fmt = fmt_uninterpreted;
-	case fmt_single :
-	case fmt_word :
+	case fmt_single:
+	case fmt_word:
 	  FGR[fpr] = (value & 0xFFFFFFFF);
 	  FPR_STATE[fpr] = fmt;
 	  break;
@@ -256,8 +256,8 @@ store_fpr (SIM_DESC sd,
 	case fmt_uninterpreted_64:
 	  fmt = fmt_uninterpreted;
 	case fmt_uninterpreted:
-	case fmt_double :
-	case fmt_long :
+	case fmt_double:
+	case fmt_long:
 	  if ((fpr & 1) == 0)
 	    {
 	      /* even register number only */
@@ -274,7 +274,7 @@ store_fpr (SIM_DESC sd,
 	    }
 	  break;
 
-	default :
+	default:
 	  FPR_STATE[fpr] = fmt_unknown;
 	  err = -1;
 	  break;
