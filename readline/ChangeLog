@@ -1,3 +1,7 @@
+Sun Oct  8 04:17:19 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.in:  Handle powerpc-ibm-aix* like rs6000-ibm-aix*.
+
 Sat Oct  7 20:36:16 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* rltty.c (outchar): Return an int, like tputs expects.
