@@ -89,6 +89,7 @@ i386bsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 
 /* From <machine/signal.h>.  */
 int i386bsd_sc_pc_offset = 20;
+int i386bsd_sc_sp_offset = 8;
 
 static void
 i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -107,12 +108,14 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigtramp_end = 0xfdbfe000;
   tdep->sigcontext_addr = i386bsd_sigcontext_addr;
   tdep->sc_pc_offset = i386bsd_sc_pc_offset;
+  tdep->sc_sp_offset = i386bsd_sc_sp_offset;
 }
 
 /* NetBSD 1.0 or later.  */
 
 /* From <machine/signal.h>.  */
 int i386nbsd_sc_pc_offset = 44;
+int i386nbsd_sc_sp_offset = 56;
 
 static void
 i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -132,6 +135,7 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* NetBSD has a `struct sigcontext' that's different from the
      origional 4.3 BSD.  */
   tdep->sc_pc_offset = i386nbsd_sc_pc_offset;
+  tdep->sc_sp_offset = i386nbsd_sc_sp_offset;
 }
 
 /* NetBSD ELF.  */
@@ -198,6 +202,7 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 /* From <machine/signal.h>.  */
 int i386fbsd4_sc_pc_offset = 76;
+int i386fbsd4_sc_sp_offset = 88;
 
 static void
 i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -210,6 +215,7 @@ i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* FreeBSD 4.0 introduced a new `struct sigcontext'.  */
   tdep->sc_pc_offset = i386fbsd4_sc_pc_offset;
+  tdep->sc_sp_offset = i386fbsd4_sc_sp_offset;
 }
 
 

@@ -387,6 +387,7 @@ void
 _initialize_i386bsd_nat (void)
 {
   int sc_pc_offset;
+  int sc_sp_offset;
 
   /* To support the recognition of signal handlers, i386bsd-tdep.c
      hardcodes some constants.  Inclusion of this file means that we
@@ -396,13 +397,19 @@ _initialize_i386bsd_nat (void)
 
 #if defined (__FreeBSD_version) && __FreeBSD_version >= 400011
   extern int i386fbsd4_sc_pc_offset;
+  extern int i386fbsd4_sc_sp_offset;
 #define SC_PC_OFFSET i386fbsd4_sc_pc_offset
+#define SC_SP_OFFSET i386fbsd4_sc_sp_offset
 #elif defined (NetBSD) || defined (__NetBSD_Version__) || defined (OpenBSD)
   extern int i386nbsd_sc_pc_offset;
+  extern int i386nbsd_sc_sp_offset;
 #define SC_PC_OFFSET i386nbsd_sc_pc_offset
+#define SC_SP_OFFSET i386nbsd_sc_sp_offset
 #else
   extern int i386bsd_sc_pc_offset;
+  extern int i386bsd_sc_sp_offset;
 #define SC_PC_OFFSET i386bsd_sc_pc_offset
+#define SC_SP_OFFSET i386bsd_sc_sp_offset
 #endif
 
   /* Override the default value for the offset of the program counter
@@ -418,4 +425,17 @@ Please report this to <bug-gdb@gnu.org>.",
     }
 
   SC_PC_OFFSET = sc_pc_offset;
+
+  /* Likewise for the stack pointer.  */
+  sc_sp_offset = offsetof (struct sigcontext, sc_sp);
+
+  if (SC_SP_OFFSET != sc_sp_offset)
+    {
+      warning ("\
+offsetof (struct sigcontext, sc_sp) yields %d instead of %d.\n\
+Please report this to <bug-gdb@gnu.org>.",
+	       sc_sp_offset, SC_SP_OFFSET);
+    }
+
+  SC_SP_OFFSET = sc_sp_offset;
 }

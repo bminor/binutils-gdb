@@ -1,5 +1,20 @@
 2002-07-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_frameless_signal_p): New function.
+	(i386_frame_chain): Deal with frameless signals.
+	(i386_sigtramp_saved_sp): New function.
+	(i386_frame_saved_pc): Deal with frameless signals.
+	(i386_saved_pc_after_call): Make sure the correct value is
+	returned just after entry into a sigtramp.
+	* i386bsd-tdep.c (i386bsd_sc_sp_offset, i386nbsd_sc_sp_offset,
+	i386fbsd4_sc_sp_offset): New variables.
+	(i386bsd_init_abi, i386nbsd_init_abi, i386fbsd4_init_abi): Use
+	these variables to initialize tdep->sc_sp_offset.  * i386bsd-nat.c
+	(_initialize_i386bsd_nat): Add sanity check for sc_sp_offset
+	similiar to what we already did for sc_pc_offset.
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Initialize
+	tdep->sc_sp_offset.
+
 	* i386nbsd-tdep.c (fetch_elfcore_registers): Wrap long line.
 
 2002-07-02  Michal Ludvig  <mludvig@suse.cz>
