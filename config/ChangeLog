@@ -1,3 +1,17 @@
+Thu Aug 15 19:46:44 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-mh-mpw (SEGFLAG_68K, SEGFLAG_PPC): Remove.
+	(EXTRALIBS_PPC): Add libgcc.xcoff.
+
+Thu Aug  8 14:51:47 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* mt-ppc: New file, add -mrelocatable-lib and -mno-eabi to all
+	target builds for PowerPC eabi targets.
+
+Fri Jul 12 12:06:01 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw: New subdir, Mac MPW configuration support bits.
+
 Mon Jul  8 17:30:52 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* mh-irix6: New file.
