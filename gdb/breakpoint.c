@@ -574,8 +574,12 @@ insert_breakpoints ()
 Hardware watchpoint %d deleted because the program has left the block in\n\
 which its expression is valid.\n", b->number);
 	    if (b->related_breakpoint)
-	      delete_breakpoint (b->related_breakpoint);
-	    delete_breakpoint (b);
+	      {
+		b->related_breakpoint->enable = disable;
+		b->related_breakpoint->disposition = del_at_next_stop;
+	      }
+	    b->enable = disable;
+	    b->disposition = del_at_next_stop;
 	  }
 
 	/* Restore the frame and level.  */
@@ -691,21 +695,32 @@ breakpoint_init_inferior ()
     {
       b->inserted = 0;
 
-      /* If the call dummy breakpoint is at the entry point it will
-	 cause problems when the inferior is rerun, so we better
-	 get rid of it.  */
-      if (b->type == bp_call_dummy)
-	delete_breakpoint (b);
+      switch (b->type)
+	{
+	case bp_call_dummy:
+	case bp_watchpoint_scope:
 
-      /* Likewise for scope breakpoints.  */
-      if (b->type == bp_watchpoint_scope)
-	delete_breakpoint (b);
+	  /* If the call dummy breakpoint is at the entry point it will
+	     cause problems when the inferior is rerun, so we better
+	     get rid of it. 
 
-      /* Likewise for watchpoints on local expressions.  */
-      if ((b->type == bp_watchpoint || b->type == bp_hardware_watchpoint ||
-           b->type == bp_read_watchpoint || b->type == bp_access_watchpoint)
-	  && b->exp_valid_block != NULL)
-	delete_breakpoint (b);
+	     Also get rid of scope breakpoints.  */
+	  delete_breakpoint (b);
+	  break;
+
+	case bp_watchpoint:
+	case bp_hardware_watchpoint:
+	case bp_read_watchpoint:
+	case bp_access_watchpoint:
+
+	  /* Likewise for watchpoints on local expressions.  */
+	  if (b->exp_valid_block != NULL)
+	    delete_breakpoint (b);
+	  break;
+
+	default:
+	  break;
+	}
     }
 }
 
@@ -1151,8 +1166,12 @@ watchpoint_check (p)
 Watchpoint %d deleted because the program has left the block in\n\
 which its expression is valid.\n", bs->breakpoint_at->number);
       if (b->related_breakpoint)
-	delete_breakpoint (b->related_breakpoint);
-      delete_breakpoint (b);
+	{
+	  b->related_breakpoint->enable = disable;
+	  b->related_breakpoint->disposition = del_at_next_stop;
+	}
+      b->enable = disable;
+      b->disposition = del_at_next_stop;
 
       return WP_DELETED;
     }
@@ -1280,8 +1299,12 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	      /* Error from catch_errors.  */
 	      printf_filtered ("Watchpoint %d deleted.\n", b->number);
 	      if (b->related_breakpoint)
-		delete_breakpoint (b->related_breakpoint);
-	      delete_breakpoint (b);
+		{
+		  b->related_breakpoint->enable = disable;
+		  b->related_breakpoint->disposition = del_at_next_stop;
+		}
+	      b->enable = disable;
+	      b->disposition = del_at_next_stop;
 	      /* We've already printed what needs to be printed.  */
 	      bs->print_it = print_it_done;
 
@@ -1326,9 +1349,13 @@ bpstat_stop_status (pc, not_a_breakpoint)
                 case 0:
                   /* Error from catch_errors.  */
                   printf_filtered ("Watchpoint %d deleted.\n", b->number);
-                  if (b->related_breakpoint)
-                    delete_breakpoint (b->related_breakpoint);
-                  delete_breakpoint (b);
+		  if (b->related_breakpoint)
+		    {
+		      b->related_breakpoint->enable = disable;
+		      b->related_breakpoint->disposition = del_at_next_stop;
+		    }
+		  b->enable = disable;
+		  b->disposition = del_at_next_stop;
                   /* We've already printed what needs to be printed.  */
                   bs->print_it = print_it_done;
                   break;
@@ -1638,7 +1665,7 @@ breakpoint_1 (bnum, allflag)
 			      "sigtramp",
 			      "watchpoint scope", "call dummy",
 			      "shlib events" };
-  static char *bpdisps[] = {"del", "dis", "keep"};
+  static char *bpdisps[] = {"del", "dstp", "dis", "keep"};
   static char bpenables[] = "ny";
   char wrap_indent[80];
 
@@ -3231,17 +3258,26 @@ clear_command (arg, from_tty)
   free ((PTR)sals.sals);
 }
 
-/* Delete breakpoint in BS if they are `delete' breakpoints.
+/* Delete breakpoint in BS if they are `delete' breakpoints and
+   all breakpoints that are marked for deletion, whether hit or not.
    This is called after any breakpoint is hit, or after errors.  */
 
 void
 breakpoint_auto_delete (bs)
      bpstat bs;
 {
+  struct breakpoint *b, *temp;
+
   for (; bs; bs = bs->next)
     if (bs->breakpoint_at && bs->breakpoint_at->disposition == del 
 	&& bs->stop)
       delete_breakpoint (bs->breakpoint_at);
+
+  ALL_BREAKPOINTS_SAFE (b, temp)
+    {
+      if (b->disposition == del_at_next_stop)
+	delete_breakpoint (b);
+    }
 }
 
 /* Delete a breakpoint and clean up all traces of it in the data structures. */

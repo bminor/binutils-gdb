@@ -1,3 +1,17 @@
+Thu May  2 12:46:14 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* From Peter Schauer:
+	* breakpoint.h (enum bpdisp):  Add del_at_next_stop.
+	* breakpoint.c (insert_breakpoints, watchpoint_check,
+	bpstat_stop_status):  Avoid bad references to memory freed via
+	delete_breakpoint on watchpoints going out of scope.
+	Do not delete these watchpoints, disable them and change their
+	disposition to del_at_next_stop instead.
+	(breakpoint_auto_delete):  Delete all breakpoints whose disposition
+	is del_at_next_stop.
+	(breakpoint_init_inferior):  Use switch to avoid reference to
+	already deleted breakpoint.
+
 Wed May  1 17:29:18 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (rs6000-nat.o): Dependant on xcoffsolib.h.
