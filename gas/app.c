@@ -23,8 +23,8 @@
 
 /* App, the assembler pre-processor.  This pre-processor strips out excess
    spaces, turns single-quoted characters into a decimal constant, and turns
-   # <number> <filename> <garbage> into a .line <number>\n.app-file <filename> pair.
-   This needs better error-handling.
+   # <number> <filename> <garbage> into a .line <number>\n.app-file <filename>
+   pair.  This needs better error-handling.
    */
 
 #include <stdio.h>
@@ -74,10 +74,14 @@ do_scrub_begin ()
   lex['\''] = LEX_IS_ONECHAR_QUOTE;
   lex[':'] = LEX_IS_COLON;
 
-#ifdef MRI
-  lex['\''] = LEX_IS_STRINGQUOTE;
+
+
+#ifdef SINGLE_QUOTE_STRINGS
+	lex['\''] = LEX_IS_STRINGQUOTE;
 #endif
+
   /* Note that these override the previous defaults, e.g. if ';'
+
 	   is a comment char, then it isn't a line separator.  */
   for (p = symbol_chars; *p; ++p)
     {
