@@ -1,3 +1,10 @@
+Fri Jun  7 11:27:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/sunos.em: Include libiberty.h.
+	(gld${EMULATION_NAME}_set_symbols): New static function to add
+	LD_LIBRARY_PATH to the list of search directories.
+	(ld_${EMULATION_NAME}_emulation): Add new set_symbols routine.
+
 Thu Jun  6 11:50:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emulparams/elf32bmip.sh (OTHER_GOT_SYMBOLS): Use ALIGN(16)
