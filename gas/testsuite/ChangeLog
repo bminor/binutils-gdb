@@ -1,3 +1,8 @@
+2001-12-05  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/xscale.s, gas/arm/xscale.d (pld tests): PLD instruction has
+	no post-indexed addressing modes.
+
 2001-11-25  Andreas Jaeger  <aj@suse.de>
 
 	* gas/all/gas.exp (incbin): Fix condition.
