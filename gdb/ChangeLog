@@ -1,3 +1,8 @@
+Tue Jul 14 16:59:46 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* buildsym.c (read_struct_type): Don't die on TYPE_CODE_UNDEF
+	nodes as base classes.
+
 Tue Jul 14 00:12:30 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* xcoffread.c:  Add decl for section_offset to keep prototype happy.
