@@ -212,11 +212,15 @@ if test x${all_targets} = xfalse ; then
 	  # We can't decide what we want just from the CPU family.
 	  # We want SH5 support unless a specific version of sh is
 	  # specified, as in sh3-elf, sh3b-linux-gnu, etc.
-	  case " $target $canon_targets " in
-            *" all "* | *" sh64-"* | *" sh-"* | *" shl-"*)
+	  # Include it just for ELF targets, since the SH5 bfd:s are ELF only.
+	  for t in $target $canon_targets; do
+	    case $t in
+	      all |  sh64-* | sh-*-*elf* | shl-*-*elf* | sh-*-linux* | shl-*-linux*)
 				ta="$ta sh64-dis.lo sh64-opc.lo"
-				archdefs="$archdefs -DINCLUDE_SHMEDIA";;
-	  esac;
+				archdefs="$archdefs -DINCLUDE_SHMEDIA"
+				break;;
+	    esac;
+	  done
 				ta="$ta sh-dis.lo" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;
 	bfd_tahoe_arch)		;;
