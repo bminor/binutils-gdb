@@ -1,5 +1,9 @@
 2003-06-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* lib/ld-lib.exp (default_ld_simple_link): Trim ld parms before
+	trying to trim ld path.
+	(default_ld_compile): Likewise for cc.
+
 	* lib/ld-lib.exp (default_ld_simple_link): Trim ld path before
 	looking for gcc match.
 	(default_ld_compile): Likewise for cc.
