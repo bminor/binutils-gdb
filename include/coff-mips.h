@@ -30,7 +30,7 @@ struct external_filehdr {
 /********************** AOUT "OPTIONAL HEADER" **********************/
 
 
-typedef struct 
+typedef struct external_aouthdr
 {
   char 	magic[2];		/* type of file				*/
   char	vstamp[2];		/* version stamp			*/
