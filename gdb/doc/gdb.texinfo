@@ -7663,15 +7663,12 @@ The _GDBN__ reference card is designed to print in landscape mode on US
 high.  You will need to specify this form of printing as an option to
 your @sc{dvi} output program.
 
-@c FIXME: include preformatted refcard paragraph once card uses free fonts
-@ignore
 The GDB 4 release includes an already-formatted reference card, ready
 for printing on a PostScript or GhostScript printer, in the @file{gdb}
 subdirectory of the main source directory---in
 @file{gdb-4.2/gdb/refcard.ps} of the version 4.2 release.  If you have
 a PostScript or GhostScript printer, you can print the reference card
 by just sending @file{refcard.ps} to the printer.
-@end ignore
 
 @node Copying, Index, Installing _GDBN__, Top
 @unnumbered GNU GENERAL PUBLIC LICENSE
