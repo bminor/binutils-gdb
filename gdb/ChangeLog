@@ -1,3 +1,51 @@
+Wed Jan  6 12:28:35 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* configure.in: Add an --enable-tui argument.  Construct
+ 	tui/Makefile from tui/Makefile.in.  Use AM_PROG_CC_STDC.  If we
+ 	have the GUI, then we need this to process libgui.h.
+	(ENABLE_CFLAGS): define and export BUILD_TUI.
+	(AC_CHECK_HEADERS): Add check for term.h.
+	
+	* configure.host (hppa-*-hpux10.20, hppa-*-hpux11.0*): New configs.
+
+	* config.in, configure : regenerated.
+
+	* Makefile.in: Allow the TUI code to be conditionally enabled.
+	(TUI_LIBRARY): New variable, value are set by the configuration
+ 	script.  Set to the empty string when the TUI isn't enabled.
+	(gdb$(GDBEXT)): Use those, instead of referring to all-tui and
+ 	tui/libtui.a directly.
+	(BUILD_TUI): build the tui -- only when configured with
+ 	--enable-tui.
+	(YLWRAP): use ylwrap to avoid problems on systems w/o bison.
+	(gdb$(EXEEXT)): make it dependent on BUILD_TUI.
+	(all-tui): remove dependency from phony target.
+	(c-exp.tab.c): use ylwrap instead of bison.
+	(jv-exp.tab.c): ditto.
+	(f-exp.tab.c): ditto.
+	(m2-exp.tab.c): ditto.
+	(ALLDEPFILES): add somread.c, hp-psymtab-read.c, hp-symtab-read.c.
+	(SFILES): remove the above files
+	(COMMON_OBS): remove somread.o
+	(SFILES): Add the tui files to this, so they get included in etags
+ 	tables.
+	(gdb$(EXEEXT)): Add all-tui to the list of dependencies, and add
+ 	tui/libtui.a to the link list.
+	(all-tui): New rule, which does a recursive make in the tui
+ 	subdir.
+	(tui/libtui.a): When recursing, pass down ${FLAGS_TO_PASS}.  And
+ 	don't echo the make command.  This is closer to what the other
+ 	recursions do.
+	(HFILES_NO_SRCDIR): add hpread.h
+	(COMMON_OBS): add hp-psymtab-read.o, hp-symtab-read.o
+        (SFILES): add hp-psymtab-read.c, hp-symtab-read.c add rules for
+ 	the new files.  Remove hpread.c, hpread.o
+	(gdb$(EXEEXT)): Depend on the actual tui library, not on a
+ 	fictitious target.  Since the fictitious target never existed,
+ 	make would always relink.
+	(tui/libtui.a): Always recurse to make sure the library is up to
+ 	date.
+
 Wed Jan  6 12:05:12 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote.c: Pacify --enable-build-warnings, reformat code
