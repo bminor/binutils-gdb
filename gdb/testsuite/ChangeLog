@@ -1,3 +1,14 @@
+2002-09-09  Ben Elliston  <bje@redhat.com>
+
+	* config/mips.exp: Update comments.
+	* config/mips-idt.exp: Likewise.
+	* config/nind.exp: Likewise.
+	* config/slite.exp: Likewise.
+	* config/sparclet.exp: Likewise.
+	* config/udi.exp: Likewise.
+	* config/vx.exp: Likewise.
+	* config/vxworks29k.exp: Likewise.
+
 2002-09-05  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.threads/killed.exp: Fix test failure message.

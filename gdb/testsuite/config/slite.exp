@@ -14,9 +14,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
-# Please email any bugs, comments, and/or additions to this file to:
-# DejaGnu@cygnus.com
-
 # This file was written by Ian Lance Taylor <ian@cygnus.com>.
 
 # GDB support routines for a board using the MIPS remote debugging
