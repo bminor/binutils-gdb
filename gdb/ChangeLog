@@ -1,5 +1,10 @@
 Sat May 22 10:03:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* inftarg.c (child_wait): Deal with EINTR and include message from
+	strerror if printing an error message.
+
+	* main.c (command_line_input): Use STOP_SIGNAL not SIGTSTP.
+
 	* stabsread.c: Remove most uses of lookup_fundamental_type.
 	(define_symbol): Use read_type for type of enum constant,
 	not just read_type_number.  Also don't call error().
