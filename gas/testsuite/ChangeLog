@@ -1,3 +1,10 @@
+2001-05-04  Alan Modra  <amodra@one.net.au>
+
+	* gas/i386/katmai.d: Correct pmovmskb and pextrw opcodes.
+	* gas/i386/ssemmx2.d: Likewise.  Correct register for pextrw,
+	pinsrw, and pmovmskb.
+	* gas/i386/sse2.d: Correct register for movmskpd.
+
 2001-05-02  Johan Rydberg  <jrydberg@opencores.org>
 
         * gas/openrisc/addi.s: New file.

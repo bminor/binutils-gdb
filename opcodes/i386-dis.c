@@ -149,15 +149,14 @@ fetch_data (info, addr)
 #define Ev OP_E, v_mode
 #define Ed OP_E, d_mode
 #define indirEb OP_indirE, b_mode
-#define Gb OP_G, b_mode
-#define Ev OP_E, v_mode
-#define Ed OP_E, d_mode
 #define indirEv OP_indirE, v_mode
 #define Ew OP_E, w_mode
 #define Ma OP_E, v_mode
 #define M OP_E, 0		/* lea */
 #define Mp OP_E, 0		/* 32 or 48 bit memory operand for LDS, LES etc */
+#define Gb OP_G, b_mode
 #define Gv OP_G, v_mode
+#define Gd OP_G, d_mode
 #define Gw OP_G, w_mode
 #define Rd OP_Rd, d_mode
 #define Rm OP_Rd, m_mode
@@ -246,6 +245,7 @@ fetch_data (info, addr)
 #define EM OP_EM, v_mode
 #define EX OP_EX, v_mode
 #define MS OP_MS, v_mode
+#define XS OP_XS, v_mode
 #define None OP_E, 0
 #define OPSUF OP_3DNowSuffix, 0
 #define OPSIMD OP_SIMD_Suffix, 0
@@ -287,6 +287,7 @@ static void OP_XMM PARAMS ((int, int));
 static void OP_EM PARAMS ((int, int));
 static void OP_EX PARAMS ((int, int));
 static void OP_MS PARAMS ((int, int));
+static void OP_XS PARAMS ((int, int));
 static void OP_3DNowSuffix PARAMS ((int, int));
 static void OP_SIMD_Suffix PARAMS ((int, int));
 static void SIMD_Fixup PARAMS ((int, int));
@@ -1708,7 +1709,7 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "cmovle", Gv, Ev, XX },
   { "cmovg", Gv, Ev, XX },
   /* 50 */
-  { "movmskpX", Gv, EX, XX },
+  { "movmskpX", Gd, XS, XX },
   { PREGRP13 },
   { PREGRP12 },
   { PREGRP11 },
@@ -1838,8 +1839,8 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "xaddS", Ev, Gv, XX },
   { PREGRP1 },
   { "movntiS", Ev, Gv, XX },
-  { "pinsrw", MX, Ev, Ib },
-  { "pextrw", Ev, MX, Ib },
+  { "pinsrw", MX, Ed, Ib },
+  { "pextrw", Gd, MS, Ib },
   { "shufpX", XM, EX, Ib },
   { GRP9 },
   /* c8 */
@@ -1859,7 +1860,7 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "paddq", MX, EM, XX },
   { "pmullw", MX, EM, XX },
   { PREGRP21 },
-  { "pmovmskb", Ev, MX, XX },
+  { "pmovmskb", Gd, MS, XX },
   /* d8 */
   { "psubusb", MX, EM, XX },
   { "psubusw", MX, EM, XX },
@@ -2000,7 +2001,7 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "cmovle", Gv, Ev, XX },
   { "cmovg", Gv, Ev, XX },
   /* 50 */
-  { "movmskpX", Gv, EX, XX },
+  { "movmskpX", Gd, XS, XX },
   { PREGRP13 },
   { PREGRP12 },
   { PREGRP11 },
@@ -2130,8 +2131,8 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "xadd", Ev, Gv, XX },
   { PREGRP1 },
   { "movnti", Ev, Gv, XX },
-  { "pinsrw", MX, Ev, Ib },
-  { "pextrw", Ev, MX, Ib },
+  { "pinsrw", MX, Ed, Ib },
+  { "pextrw", Gd, MS, Ib },
   { "shufpX", XM, EX, Ib },
   { GRP9 },
   /* c8 */
@@ -2151,7 +2152,7 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "paddq", MX, EM, XX },
   { "pmullw", MX, EM, XX },
   { PREGRP21 },
-  { "pmovmskb", Ev, MX, XX },
+  { "pmovmskb", Gd, MS, XX },
   /* d8 */
   { "psubusb", MX, EM, XX },
   { "psubusw", MX, EM, XX },
@@ -2693,7 +2694,7 @@ static const struct dis386 prefix_user_table[][4] = {
   },
   /* PREGRP18 */
   {
-    { "maskmovq", MX, EM, XX },
+    { "maskmovq", MX, MS, XX },
     { "(bad)", XM, EX, XX },
     { "maskmovdqu", XM, EX, XX },
     { "(bad)", XM, EX, XX },
@@ -3170,7 +3171,6 @@ print_insn_i386 (pc, info)
 			used_prefixes |= (prefixes & PREFIX_REPNZ);
 			if (prefixes & PREFIX_REPNZ)
 			  index = 3;
-
 		      }
 		  }
 		dp = &prefix_user_table[dp->bytemode1][index];
@@ -4963,6 +4963,17 @@ OP_MS (bytemode, sizeflag)
 {
   if (mod == 3)
     OP_EM (bytemode, sizeflag);
+  else
+    BadOp();
+}
+
+static void
+OP_XS (bytemode, sizeflag)
+     int bytemode;
+     int sizeflag;
+{
+  if (mod == 3)
+    OP_EX (bytemode, sizeflag);
   else
     BadOp();
 }
