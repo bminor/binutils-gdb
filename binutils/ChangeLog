@@ -1,3 +1,7 @@
+2001-03-30  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (process_unwind): Just return if do_unwind is 0.
+
 2001-03-28  Roger Sayle  <roger@metaphorics.com>
 
 	* dlltool.c (make_one_lib_file): Fix section flags for

@@ -3411,6 +3411,9 @@ process_unwind (file)
   unsigned long i, addr_size;
   struct unw_aux_info aux;
 
+  if (!do_unwind)
+    return 1;
+
   if (elf_header.e_machine != EM_IA_64)
     {
       printf (_("\nThere are no unwind sections in this file.\n"));
@@ -3420,9 +3423,6 @@ process_unwind (file)
   memset (& aux, 0, sizeof (aux));
 
   addr_size = is_32bit_elf ? 4 : 8;
-
-  if (!do_unwind)
-    return 1;
 
   for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
     {
