@@ -642,10 +642,12 @@ case "${targ}" in
     targ_defvec=ecoff_big_vec
     targ_selvecs=ecoff_little_vec
     ;;
+#ifdef BFD64
   mips*-*-irix6*)
     targ_defvec=bfd_elf32_bigmips_vec
     targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;
+#endif
   mips*-*-irix5*)
     targ_defvec=bfd_elf32_bigmips_vec
     targ_selvecs="bfd_elf32_littlemips_vec ecoff_big_vec ecoff_little_vec"
@@ -695,17 +697,19 @@ case "${targ}" in
     targ_defvec=bfd_elf32_bigmips_vec
     targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec ecoff_big_vec ecoff_little_vec"
     ;;
+#ifdef BFD64
   mips64*el-*-linux*)
     targ_defvec=bfd_elf32_tradlittlemips_vec
     targ_selvecs="bfd_elf32_tradbigmips_vec bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec"
     ;;
-  mips*el-*-linux*)
-    targ_defvec=bfd_elf32_tradlittlemips_vec
-    targ_selvecs="bfd_elf32_tradbigmips_vec bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec ecoff_little_vec ecoff_big_vec"
-    ;;
   mips64*-*-linux*)
     targ_defvec=bfd_elf32_tradbigmips_vec
     targ_selvecs="bfd_elf32_tradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec"
+    ;;
+#endif
+  mips*el-*-linux*)
+    targ_defvec=bfd_elf32_tradlittlemips_vec
+    targ_selvecs="bfd_elf32_tradbigmips_vec bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec ecoff_little_vec ecoff_big_vec"
     ;;
   mips*-*-linux*)
     targ_defvec=bfd_elf32_tradbigmips_vec

@@ -1,3 +1,21 @@
+2001-12-05  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* Makefile.am: split up BFD_LIBS like statements in BFD32_LIBS and
+	BFD64_LIBS, make the latter depending on the availability of BFD64.
+	Add archive64.c source file.
+	* archive64.c: New file implementing bfd_elf64_archive_slurp_armap
+	and bfd_elf64_archive_write_armap, code from elf64-mips.c
+	* archive.c (bfd_slurp_armap): Add ELF64 archive support.
+	* config.bfd (mips*-*-irix6*): Allow with BFD64 only.
+	(mips64*el-*-linux*): Likewise.
+	(mips*el-*-linux*): Likewise. Reorder entries.
+	* configure.in (bfd_libs): Define in dependency of BFD64 and
+	AC_SUBST it.
+	* elf64-mips.c (mips_elf64_slurp_armap): Remove, use
+	bfd_elf64_archive_slurp_armap instead.
+	(mips_elf64_write_armap): Remove, use bfd_elf64_archive_write_armap
+	instead.
+
 2001-12-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config.bfd: Remove trailing blanks.

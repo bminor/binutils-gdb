@@ -25,19 +25,23 @@ BFD_H = bfd.h
 # for the debugger, so if you are downloading things as S-records you
 # need two copies of the executable, one to download and one for the
 # debugger).
-BFD_LIBS = \
+BFD32_LIBS = \
 	archive.lo archures.lo bfd.lo cache.lo coffgen.lo corefile.lo \
 	format.lo init.lo libbfd.lo opncls.lo reloc.lo \
 	section.lo syms.lo targets.lo hash.lo linker.lo \
 	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo \
 	merge.lo dwarf2.lo
 
-BFD_LIBS_CFILES = \
+BFD64_LIBS = archive64.lo
+
+BFD32_LIBS_CFILES = \
 	archive.c archures.c bfd.c cache.c coffgen.c corefile.c \
 	format.c init.c libbfd.c opncls.c reloc.c \
 	section.c syms.c targets.c hash.c linker.c \
 	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c \
 	merge.c dwarf2.c
+
+BFD64_LIBS_CFILES = archive64.c
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -486,6 +490,7 @@ OPTIONAL_BACKENDS_CFILES = \
 WORDSIZE = @wordsize@
 ALL_BACKENDS = @all_backends@
 BFD_BACKENDS = @bfd_backends@
+BFD_LIBS = @bfd_libs@
 BFD_MACHINES = @bfd_machines@
 TDEFAULTS = @tdefaults@
 
@@ -493,7 +498,8 @@ INCLUDES = -D_GNU_SOURCE @HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES
 
 # C source files that correspond to .o's.
 SOURCE_CFILES = \
-	$(BFD_LIBS_CFILES) \
+	$(BFD32_LIBS_CFILES) \
+	$(BFD64_LIBS_CFILES) \
 	$(ALL_MACHINES_CFILES) \
 	$(BFD32_BACKENDS_CFILES) \
 	$(BFD64_BACKENDS_CFILES) \
@@ -564,7 +570,7 @@ stamp-ofiles: Makefile
 
 ofiles: stamp-ofiles ; @true
 
-libbfd_la_SOURCES = $(BFD_LIBS_CFILES)
+libbfd_la_SOURCES = $(BFD32_LIBS_CFILES) $(BFD64_LIBS_CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles
 libbfd_la_LIBADD = `cat ofiles` @WIN32LIBADD@
 libbfd_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
@@ -637,7 +643,8 @@ pepigen.c : peXXigen.c
 
 BFD_H_DEPS= $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
 LOCAL_H_DEPS= libbfd.h sysdep.h config.h
-$(BFD_LIBS) \
+$(BFD32_LIBS) \
+ $(BFD64_LIBS) \
  $(ALL_MACHINES) \
  $(BFD32_BACKENDS) \
  $(BFD64_BACKENDS) \
@@ -713,6 +720,7 @@ stmp-bfd-h: bfd-in3.h
 
 BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
 	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c version.h
+BFD64_H_FILES = archive64.c
 LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c cache.c reloc.c archures.c elf.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
@@ -730,7 +738,7 @@ headers:
 # configured with --enable-maintainer-mode.
 
 $(srcdir)/bfd-in2.h: @MAINT@ stmp-bin2-h ; @true
-stmp-bin2-h: $(BFD_H_FILES)
+stmp-bin2-h: $(BFD_H_FILES) $(BFD64_H_FILES)
 	(cd $(docdir); $(MAKE) $(FLAGS_TO_PASS) bfd.h)
 	cp $(docdir)/bfd.h bfd-in2.h-new
 	$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h

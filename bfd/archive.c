@@ -164,6 +164,7 @@ static char *get_extended_arelt_filename PARAMS ((bfd *arch,
 						  const char *name));
 static boolean do_slurp_bsd_armap PARAMS ((bfd *abfd));
 static boolean do_slurp_coff_armap PARAMS ((bfd *abfd));
+boolean bfd_elf64_archive_slurp_armap PARAMS ((bfd *abfd));
 static const char *normalize PARAMS ((bfd *, const char *file));
 static struct areltdata *bfd_ar_hdr_from_filesystem PARAMS ((bfd *abfd,
 							     const char *,
@@ -934,9 +935,13 @@ bfd_slurp_armap (abfd)
     return do_slurp_coff_armap (abfd);
   else if (!strncmp (nextname, "/SYM64/         ", 16))
     {
-      /* Irix 6 archive--must be recognized by code in elf64-mips.c.  */
+      /* 64bit ELF (Irix 6) archive.  */
+#ifdef BFD64
+      return bfd_elf64_archive_slurp_armap (abfd);
+#else
       bfd_set_error (bfd_error_wrong_format);
       return false;
+#endif
     }
 
   bfd_has_map (abfd) = false;
