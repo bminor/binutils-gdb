@@ -1,4 +1,9 @@
 start-sanitize-sky
+1998-12-31  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/t-cop2.s: Adjust vmtir instruction tests for new syntax.
+	* sim/sky/t-cop2.vuexpect: Matching changes.
+
 1998-12-30  Felix Lee  <flee@cygnus.com>
  
 	* sim/sky/sky-defs.tcl: various changes for remote host testing.
