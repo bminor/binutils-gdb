@@ -112,6 +112,7 @@ OP_720 ()
   int result, temp;
 
   op0 = State.regs[OP[0]];
+  temp = OP[2];
   temp = (temp << 16) >> 16;
   temp &= ~0x1;
   op2 = temp;
@@ -128,6 +129,7 @@ OP_10720 ()
   int result, temp;
 
   op0 = State.regs[OP[0]];
+  temp = OP[2];
   temp = (temp << 16) >> 16;
   temp &= ~0x1;
   op2 = temp;
