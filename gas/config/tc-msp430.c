@@ -61,7 +61,7 @@ static void show_mcu_list
 static void del_spaces
   PARAMS ((char *));
 
-#define MAX_OP_LEN	64
+#define MAX_OP_LEN	256
 
 struct mcu_type_s
 {
@@ -199,8 +199,8 @@ md_show_usage (stream)
 	     "                  msp430x1101 msp430x1111\n"
 	     "                  msp430x1121 msp430x1122 msp430x1132\n"
 	     "                  msp430x122  msp430x123\n"
-             "                  msp430x1222 msp430x1232\n"
-             "                  msp430x133  msp430x135\n"
+	     "                  msp430x1222 msp430x1232\n"
+	     "                  msp430x133  msp430x135\n"
 	     "                  msp430x1331 msp430x1351\n"
 	     "                  msp430x147  msp430x148  msp430x149\n"
 	     "                  msp430x155  msp430x156  msp430x157\n"
@@ -209,8 +209,8 @@ md_show_usage (stream)
 	     "                  msp430x323  msp430x325\n"
 	     "                  msp430x336  msp430x337\n"
 	     "                  msp430x412  msp430x413\n"
-             "                  msp430xE423 msp430xE425 msp430E427\n"
-             "                  msp430xW423 msp430xW425 msp430W427\n"
+	     "                  msp430xE423 msp430xE425 msp430E427\n"
+	     "                  msp430xW423 msp430xW425 msp430W427\n"
 	     "                  msp430x435  msp430x436  msp430x437\n"
 	     "                  msp430x447  msp430x448  msp430x449\n"));
 
@@ -560,11 +560,10 @@ msp430_operands (opcode, line)
 
 	case 2:
 	  {
-	    char l2[16];
-
 	    /* Shift instruction.  */
 	    line = extract_operand (line, l1, sizeof (l1));
-	    strncpy (l2, l1, 16);
+	    strncpy (l2, l1, sizeof (l2));
+	    l2[sizeof (l2) - 1] = '\0';
 	    res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, &imm_op);
 	    res += msp430_dstoperand (&op2, l2, opcode->bin_opcode);
 
@@ -682,9 +681,9 @@ msp430_operands (opcode, line)
       break;
 
     case 2:			/* Single-operand mostly instr.  */
-      if (opcode->insn_opnumb == 0)	
+      if (opcode->insn_opnumb == 0)
 	{
-	  /* reti instruction.  */	  
+	  /* reti instruction.  */
 	  frag = frag_more (2);
 	  bfd_putl16 ((bfd_vma) bin, frag);
 	  break;
@@ -886,11 +885,11 @@ msp430_srcoperand (op, l, bin, imm_op)
       int rval = 0;
 
       /* Check if there is:
-         llo(x) - least significant 16 bits, x &= 0xffff
-         lhi(x) - x = (x >> 16) & 0xffff,
-         hlo(x) - x = (x >> 32) & 0xffff,
-         hhi(x) - x = (x >> 48) & 0xffff
-         The value _MUST_ be constant expression: #hlo(1231231231).  */
+	 llo(x) - least significant 16 bits, x &= 0xffff
+	 lhi(x) - x = (x >> 16) & 0xffff,
+	 hlo(x) - x = (x >> 32) & 0xffff,
+	 hhi(x) - x = (x >> 48) & 0xffff
+	 The value _MUST_ be constant expression: #hlo(1231231231).  */
 
       *imm_op = 1;
 
@@ -1424,7 +1423,7 @@ md_apply_fix3 (fixp, valuep, seg)
   if (fixp->fx_done)
     {
       /* Fetch the instruction, insert the fully resolved operand
-         value, and stuff the instruction back again.  */
+	 value, and stuff the instruction back again.  */
 
       where = fixp->fx_frag->fr_literal + fixp->fx_where;
 
