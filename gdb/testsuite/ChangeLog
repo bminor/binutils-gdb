@@ -1,5 +1,8 @@
 Thu Jul 20 11:40:13 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.c++/misc.exp: Always check for a program already being
+	started after sending a "run" command to gdb.
+
 	* gdb.base/twice.exp: Start with a fresh gdb.
 
 	* gdb.chill/chexp.exp: Remove skip_chill_tests check; these tests
