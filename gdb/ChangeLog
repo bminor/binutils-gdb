@@ -56,6 +56,12 @@ Thu Aug  4 07:55:04 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	target_terminal_inferior once the child execs.
 	* infrun.c (proceed): Pass argument to PREPARE_TO_PROCEED.
 
+Wed Aug  3 22:41:13 1994  Tom Lord  (lord@x1.cygnus.com)
+
+	* procfs.c(procfs_mourn_inferior): don't dereference the
+	procinfo pointer after it has been freed.
+
+
 Wed Aug  3 12:05:13 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* breakpoint.c (breakpoint_1): Improve pluralization in display

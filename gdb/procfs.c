@@ -3540,13 +3540,18 @@ static void
 procfs_mourn_inferior ()
 {
   struct procinfo *pi;
+  struct procinfo *next_pi;
 
-  for (pi = procinfo_list; pi; pi = pi->next)
-    unconditionally_kill_inferior (pi);
+  for (pi = procinfo_list; pi; pi = next_pi)
+    {
+      next_pi = pi->next;
+      unconditionally_kill_inferior (pi);
+    }
 
   unpush_target (&procfs_ops);
   generic_mourn_inferior ();
 }
+
 
 /* Mark our target-struct as eligible for stray "run" and "attach" commands.  */
 static int
