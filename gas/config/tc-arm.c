@@ -59,7 +59,7 @@
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00800000	/* Allow MIA etc.          */
 #define ARM_CEXT_MAVERICK 0x00400000	/* Use Cirrus/DSP coprocessor.  */
-#define ARM_CEXT_IWMMXT   0x00200000    /* Intel(r) Wireless MMX(tm) technology coprocessor.   */
+#define ARM_CEXT_IWMMXT   0x00200000    /* Intel Wireless MMX technology coprocessor.   */
 
 /* Architectures are the sum of the base and extensions.  The ARM ARM (rev E)
    defines the following: ARMv3, ARMv3M, ARMv4xM, ARMv4, ARMv4TxM, ARMv4T,
@@ -85,7 +85,7 @@
 
 /* Processors with specific extensions in the co-processor space.  */
 #define ARM_ARCH_XSCALE	(ARM_ARCH_V5TE	| ARM_CEXT_XSCALE)
-#define ARM_ARCH_IWMMXT	(ARM_ARCH_V5TE	| ARM_CEXT_XSCALE | ARM_CEXT_IWMMXT)
+#define ARM_ARCH_IWMMXT	(ARM_ARCH_XSCALE | ARM_CEXT_IWMMXT)
 
 /* Some useful combinations:  */
 #define ARM_ANY		0x0000ffff	/* Any basic core.  */
@@ -602,7 +602,7 @@ static const struct reg_entry rn_table[] =
 
 static const struct reg_entry iwmmxt_table[] =
 {
-  /* Intel(r) Wireless MMX(tm) technology register names.  */
+  /* Intel Wireless MMX technology register names.  */
   {  "wr0", 0x0 | WR_PREFIX},   {"wr1", 0x1 | WR_PREFIX},
   {  "wr2", 0x2 | WR_PREFIX},   {"wr3", 0x3 | WR_PREFIX},
   {  "wr4", 0x4 | WR_PREFIX},   {"wr5", 0x5 | WR_PREFIX},
@@ -759,7 +759,7 @@ struct reg_map all_reg_maps[] =
   {mav_mvdx_table,  15, NULL, N_("Maverick MVFX register expected")},
   {mav_mvax_table,   3, NULL, N_("Maverick MVAX register expected")},
   {mav_dspsc_table,  0, NULL, N_("Maverick DSPSC register expected")},
-  {iwmmxt_table,    23, NULL, N_("Intel(r) Wireless MMX(tm) technology register expected")},
+  {iwmmxt_table,    23, NULL, N_("Intel Wireless MMX technology register expected")},
 };
 
 /* Enumeration matching entries in table above.  */
@@ -1077,170 +1077,6 @@ struct asm_opcode
 
 static const struct asm_opcode insns[] =
 {
-  /* Intel(r) Wireless MMX(tm) technology instructions.  */
-  {"tandcb",     0xee130130, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tandc},
-  {"tandch",     0xee530130, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tandc},
-  {"tandcw",     0xee930130, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tandc},
-  {"tbcstb",     0xee400010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tbcst},
-  {"tbcsth",     0xee400050, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tbcst},
-  {"tbcstw",     0xee400090, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tbcst},
-  {"textrcb",    0xee130170, 7, ARM_CEXT_IWMMXT, do_iwmmxt_textrc},
-  {"textrch",    0xee530170, 7, ARM_CEXT_IWMMXT, do_iwmmxt_textrc},
-  {"textrcw",    0xee930170, 7, ARM_CEXT_IWMMXT, do_iwmmxt_textrc},
-  {"textrmub",   0xee100070, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
-  {"textrmuh",   0xee500070, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
-  {"textrmuw",   0xee900070, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
-  {"textrmsb",   0xee100078, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
-  {"textrmsh",   0xee500078, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
-  {"textrmsw",   0xee900078, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
-  {"tinsrb",     0xee600010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tinsr},
-  {"tinsrh",     0xee600050, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tinsr},
-  {"tinsrw",     0xee600090, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tinsr},
-  {"tmcr",       0xee000110, 4, ARM_CEXT_IWMMXT, do_iwmmxt_tmcr},
-  {"tmcrr",      0xec400000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_tmcrr},
-  {"tmia",       0xee200010, 4, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
-  {"tmiaph",     0xee280010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
-  {"tmiabb",     0xee2c0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
-  {"tmiabt",     0xee2d0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
-  {"tmiatb",     0xee2e0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
-  {"tmiatt",     0xee2f0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
-  {"tmovmskb",   0xee100030, 8, ARM_CEXT_IWMMXT, do_iwmmxt_tmovmsk},
-  {"tmovmskh",   0xee500030, 8, ARM_CEXT_IWMMXT, do_iwmmxt_tmovmsk},
-  {"tmovmskw",   0xee900030, 8, ARM_CEXT_IWMMXT, do_iwmmxt_tmovmsk},
-  {"tmrc",       0xee100110, 4, ARM_CEXT_IWMMXT, do_iwmmxt_tmrc},
-  {"tmrrc",      0xec500000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_tmrrc},
-  {"torcb",      0xee130150, 5, ARM_CEXT_IWMMXT, do_iwmmxt_torc},
-  {"torch",      0xee530150, 5, ARM_CEXT_IWMMXT, do_iwmmxt_torc},
-  {"torcw",      0xee930150, 5, ARM_CEXT_IWMMXT, do_iwmmxt_torc},
-  {"waccb",      0xee0001c0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wacch",      0xee4001c0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"waccw",      0xee8001c0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"waddbss",    0xee300180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"waddb",      0xee000180, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"waddbus",    0xee100180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"waddhss",    0xee700180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"waddh",      0xee400180, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"waddhus",    0xee500180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"waddwss",    0xeeb00180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"waddw",      0xee800180, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"waddwus",    0xee900180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"waligni",    0xee000020, 7, ARM_CEXT_IWMMXT, do_iwmmxt_waligni},
-  {"walignr0",   0xee800020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"walignr1",   0xee900020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"walignr2",   0xeea00020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"walignr3",   0xeeb00020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wand",       0xee200000, 4, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wandn",      0xee300000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wavg2b",     0xee800000, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wavg2br",    0xee900000, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wavg2h",     0xeec00000, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wavg2hr",    0xeed00000, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wcmpeqb",    0xee000060, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wcmpeqh",    0xee400060, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wcmpeqw",    0xee800060, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wcmpgtub",   0xee100060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wcmpgtuh",   0xee500060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wcmpgtuw",   0xee900060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wcmpgtsb",   0xee300060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wcmpgtsh",   0xee700060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wcmpgtsw",   0xeeb00060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wldrb",      0xec100000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
-  {"wldrh",      0xec100100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
-  {"wldrw",      0xec100200, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
-  {"wldrd",      0xec100300, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
-  {"wmacs",      0xee600100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmacsz",     0xee700100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmacu",      0xee400100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmacuz",     0xee500100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmadds",     0xeea00100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmaddu",     0xee800100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmaxsb",     0xee200160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmaxsh",     0xee600160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmaxsw",     0xeea00160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmaxub",     0xee000160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmaxuh",     0xee400160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmaxuw",     0xee800160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wminsb",     0xee300160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wminsh",     0xee700160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wminsw",     0xeeb00160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wminub",     0xee100160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wminuh",     0xee500160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wminuw",     0xee900160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmov",       0xee000000, 4, ARM_CEXT_IWMMXT, do_iwmmxt_wmov},
-  {"wmulsm",     0xee300100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmulsl",     0xee200100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmulum",     0xee100100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wmulul",     0xee000100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wor",        0xee000000, 3, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wpackhss",   0xee700080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wpackhus",   0xee500080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wpackwss",   0xeeb00080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wpackwus",   0xee900080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wpackdss",   0xeef00080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wpackdus",   0xeed00080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wrorh",      0xee700040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wrorhg",     0xee700148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wrorw",      0xeeb00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wrorwg",     0xeeb00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wrord",      0xeef00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wrordg",     0xeef00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wsadb",      0xee000120, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsadbz",     0xee100120, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsadh",      0xee400120, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsadhz",     0xee500120, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wshufh",     0xee0001e0, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wshufh},
-  {"wsllh",      0xee500040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsllhg",     0xee500148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wsllw",      0xee900040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsllwg",     0xee900148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wslld",      0xeed00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wslldg",     0xeed00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wsrah",      0xee400040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsrahg",     0xee400148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wsraw",      0xee800040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsrawg",     0xee800148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wsrad",      0xeec00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsradg",     0xeec00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wsrlh",      0xee600040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsrlhg",     0xee600148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wsrlw",      0xeea00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsrlwg",     0xeea00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wsrld",      0xeee00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsrldg",     0xeee00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
-  {"wstrb",      0xec000000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
-  {"wstrh",      0xec000100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
-  {"wstrw",      0xec000200, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
-  {"wstrd",      0xec000300, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
-  {"wsubbss",    0xee3001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsubb",      0xee0001a0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsubbus",    0xee1001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsubhss",    0xee7001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsubh",      0xee4001a0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsubhus",    0xee5001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsubwss",    0xeeb001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsubw",      0xee8001a0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wsubwus",    0xee9001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wunpckehub", 0xee0000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckehuh", 0xee4000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckehuw", 0xee8000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckehsb", 0xee2000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckehsh", 0xee6000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckehsw", 0xeea000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckihb",  0xee1000c0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wunpckihh",  0xee5000c0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wunpckihw",  0xee9000c0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wunpckelub", 0xee0000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckeluh", 0xee4000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckeluw", 0xee8000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckelsb", 0xee2000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckelsh", 0xee6000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckelsw", 0xeea000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
-  {"wunpckilb",  0xee1000e0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wunpckilh",  0xee5000e0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wunpckilw",  0xee9000e0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wxor",       0xee100000, 4, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
-  {"wzero",      0xee300000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wzero},
-
   /* Core ARM Instructions.  */
   {"and",        0xe0000000, 3,  ARM_EXT_V1,       do_arit},
   {"ands",       0xe0100000, 3,  ARM_EXT_V1,       do_arit},
@@ -1988,6 +1824,170 @@ static const struct asm_opcode insns[] =
   {"mar",        0xec400000, 3,  ARM_CEXT_XSCALE,   do_xsc_mar},
   {"mra",        0xec500000, 3,  ARM_CEXT_XSCALE,   do_xsc_mra},
 
+  /* Intel Wireless MMX technology instructions.  */
+  {"tandcb",     0xee130130, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tandc},
+  {"tandch",     0xee530130, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tandc},
+  {"tandcw",     0xee930130, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tandc},
+  {"tbcstb",     0xee400010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tbcst},
+  {"tbcsth",     0xee400050, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tbcst},
+  {"tbcstw",     0xee400090, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tbcst},
+  {"textrcb",    0xee130170, 7, ARM_CEXT_IWMMXT, do_iwmmxt_textrc},
+  {"textrch",    0xee530170, 7, ARM_CEXT_IWMMXT, do_iwmmxt_textrc},
+  {"textrcw",    0xee930170, 7, ARM_CEXT_IWMMXT, do_iwmmxt_textrc},
+  {"textrmub",   0xee100070, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"textrmuh",   0xee500070, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"textrmuw",   0xee900070, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"textrmsb",   0xee100078, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"textrmsh",   0xee500078, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"textrmsw",   0xee900078, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"tinsrb",     0xee600010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tinsr},
+  {"tinsrh",     0xee600050, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tinsr},
+  {"tinsrw",     0xee600090, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tinsr},
+  {"tmcr",       0xee000110, 4, ARM_CEXT_IWMMXT, do_iwmmxt_tmcr},
+  {"tmcrr",      0xec400000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_tmcrr},
+  {"tmia",       0xee200010, 4, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmiaph",     0xee280010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmiabb",     0xee2c0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmiabt",     0xee2d0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmiatb",     0xee2e0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmiatt",     0xee2f0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmovmskb",   0xee100030, 8, ARM_CEXT_IWMMXT, do_iwmmxt_tmovmsk},
+  {"tmovmskh",   0xee500030, 8, ARM_CEXT_IWMMXT, do_iwmmxt_tmovmsk},
+  {"tmovmskw",   0xee900030, 8, ARM_CEXT_IWMMXT, do_iwmmxt_tmovmsk},
+  {"tmrc",       0xee100110, 4, ARM_CEXT_IWMMXT, do_iwmmxt_tmrc},
+  {"tmrrc",      0xec500000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_tmrrc},
+  {"torcb",      0xee130150, 5, ARM_CEXT_IWMMXT, do_iwmmxt_torc},
+  {"torch",      0xee530150, 5, ARM_CEXT_IWMMXT, do_iwmmxt_torc},
+  {"torcw",      0xee930150, 5, ARM_CEXT_IWMMXT, do_iwmmxt_torc},
+  {"waccb",      0xee0001c0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wacch",      0xee4001c0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"waccw",      0xee8001c0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"waddbss",    0xee300180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddb",      0xee000180, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddbus",    0xee100180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddhss",    0xee700180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddh",      0xee400180, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddhus",    0xee500180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddwss",    0xeeb00180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddw",      0xee800180, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddwus",    0xee900180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waligni",    0xee000020, 7, ARM_CEXT_IWMMXT, do_iwmmxt_waligni},
+  {"walignr0",   0xee800020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"walignr1",   0xee900020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"walignr2",   0xeea00020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"walignr3",   0xeeb00020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wand",       0xee200000, 4, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wandn",      0xee300000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wavg2b",     0xee800000, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wavg2br",    0xee900000, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wavg2h",     0xeec00000, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wavg2hr",    0xeed00000, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpeqb",    0xee000060, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpeqh",    0xee400060, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpeqw",    0xee800060, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtub",   0xee100060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtuh",   0xee500060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtuw",   0xee900060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtsb",   0xee300060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtsh",   0xee700060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtsw",   0xeeb00060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wldrb",      0xec100000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
+  {"wldrh",      0xec100100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
+  {"wldrw",      0xec100200, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
+  {"wldrd",      0xec100300, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
+  {"wmacs",      0xee600100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmacsz",     0xee700100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmacu",      0xee400100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmacuz",     0xee500100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmadds",     0xeea00100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaddu",     0xee800100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxsb",     0xee200160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxsh",     0xee600160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxsw",     0xeea00160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxub",     0xee000160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxuh",     0xee400160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxuw",     0xee800160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminsb",     0xee300160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminsh",     0xee700160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminsw",     0xeeb00160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminub",     0xee100160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminuh",     0xee500160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminuw",     0xee900160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmov",       0xee000000, 4, ARM_CEXT_IWMMXT, do_iwmmxt_wmov},
+  {"wmulsm",     0xee300100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmulsl",     0xee200100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmulum",     0xee100100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmulul",     0xee000100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wor",        0xee000000, 3, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackhss",   0xee700080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackhus",   0xee500080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackwss",   0xeeb00080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackwus",   0xee900080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackdss",   0xeef00080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackdus",   0xeed00080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wrorh",      0xee700040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wrorhg",     0xee700148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wrorw",      0xeeb00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wrorwg",     0xeeb00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wrord",      0xeef00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wrordg",     0xeef00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsadb",      0xee000120, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsadbz",     0xee100120, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsadh",      0xee400120, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsadhz",     0xee500120, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wshufh",     0xee0001e0, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wshufh},
+  {"wsllh",      0xee500040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsllhg",     0xee500148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsllw",      0xee900040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsllwg",     0xee900148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wslld",      0xeed00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wslldg",     0xeed00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsrah",      0xee400040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsrahg",     0xee400148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsraw",      0xee800040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsrawg",     0xee800148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsrad",      0xeec00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsradg",     0xeec00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsrlh",      0xee600040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsrlhg",     0xee600148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsrlw",      0xeea00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsrlwg",     0xeea00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsrld",      0xeee00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsrldg",     0xeee00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wstrb",      0xec000000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
+  {"wstrh",      0xec000100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
+  {"wstrw",      0xec000200, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
+  {"wstrd",      0xec000300, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
+  {"wsubbss",    0xee3001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubb",      0xee0001a0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubbus",    0xee1001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubhss",    0xee7001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubh",      0xee4001a0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubhus",    0xee5001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubwss",    0xeeb001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubw",      0xee8001a0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubwus",    0xee9001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckehub", 0xee0000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckehuh", 0xee4000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckehuw", 0xee8000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckehsb", 0xee2000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckehsh", 0xee6000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckehsw", 0xeea000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckihb",  0xee1000c0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckihh",  0xee5000c0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckihw",  0xee9000c0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckelub", 0xee0000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckeluh", 0xee4000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckeluw", 0xee8000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckelsb", 0xee2000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckelsh", 0xee6000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckelsw", 0xeea000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckilb",  0xee1000e0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckilh",  0xee5000e0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckilw",  0xee9000e0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wxor",       0xee100000, 4, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wzero",      0xee300000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wzero},
+
   /* Cirrus Maverick instructions.  */
   {"cfldrs",     0xec100400, 6,  ARM_CEXT_MAVERICK, do_mav_ldst_1},
   {"cfldrd",     0xec500400, 6,  ARM_CEXT_MAVERICK, do_mav_ldst_2},
@@ -2361,6 +2361,9 @@ static int arm_parse_extension PARAMS ((char *, int *));
 static int arm_parse_cpu PARAMS ((char *));
 static int arm_parse_arch PARAMS ((char *));
 static int arm_parse_fpu PARAMS ((char *));
+#if defined OBJ_COFF || defined OBJ_ELF
+static void arm_add_note PARAMS ((const char *, const char *, unsigned int));
+#endif
 
 /* Stuff needed to resolve the label ambiguity
    As:
@@ -2999,7 +3002,7 @@ reg_required_here (str, shift)
   return FAIL;
 }
 
-/* A Intel(r) Wireless MMX(tm) technology register
+/* A Intel Wireless MMX technology register
    must be given at this point.
    Shift is the place to put it in inst.instruction.
    Restores input start point on err.
@@ -3044,7 +3047,7 @@ wreg_required_here (str, shift, reg_type)
 
   /* In the few cases where we might be able to accept
      something else this error can be overridden.  */
-  sprintf (buff, _("Intel(r) Wireless MMX(tm) technology register expected, not '%.100s'"), start);
+  sprintf (buff, _("Intel Wireless MMX technology register expected, not '%.100s'"), start);
   inst.error = buff;
 
   return FAIL;
@@ -10083,6 +10086,54 @@ build_arm_ops_hsh ()
     }
 }
 
+#if defined OBJ_ELF || defined OBJ_COFF
+
+#ifdef OBJ_ELF
+#define arm_Note Elf_External_Note
+#else
+typedef struct
+{
+  unsigned char	namesz[4];	/* Size of entry's owner string.  */
+  unsigned char	descsz[4];	/* Size of the note descriptor.  */
+  unsigned char	type[4];	/* Interpretation of the descriptor.  */
+  char		name[1];	/* Start of the name+desc data.  */
+} arm_Note;
+#endif
+
+/* The description is kept to a fix sized in order to make updating
+   it and merging it easier.  */
+#define ARM_NOTE_DESCRIPTION_LENGTH	8
+
+static void
+arm_add_note (name, description, type)
+     const char * name;
+     const char * description;
+     unsigned int type;
+{
+  arm_Note     note ATTRIBUTE_UNUSED;
+  char *       p;
+  unsigned int name_len;
+
+  name_len = (strlen (name) + 1 + 3) & ~3;
+  
+  p = frag_more (sizeof (note.namesz));
+  md_number_to_chars (p, (valueT) name_len, sizeof (note.namesz));
+
+  p = frag_more (sizeof (note.descsz));
+  md_number_to_chars (p, (valueT) ARM_NOTE_DESCRIPTION_LENGTH, sizeof (note.descsz));
+
+  p = frag_more (sizeof (note.type));
+  md_number_to_chars (p, (valueT) type, sizeof (note.type));
+
+  p = frag_more (name_len);
+  strcpy (p, name);
+
+  p = frag_more (ARM_NOTE_DESCRIPTION_LENGTH);
+  strncpy (p, description, ARM_NOTE_DESCRIPTION_LENGTH);
+  frag_align (2, 0, 0);
+}
+#endif
+
 void
 md_begin ()
 {
@@ -10216,7 +10267,7 @@ md_begin ()
       break;
 
     default:
-      mach = bfd_mach_arm_4;
+      mach = bfd_mach_arm_unknown;
       break;
     }
 
@@ -10246,13 +10297,24 @@ md_begin ()
   else if (cpu_variant & ARM_EXT_V3M)
     mach = bfd_mach_arm_3M;
 
+#if 0 /* Suppressed - for now.  */
 #if defined (OBJ_ELF) || defined (OBJ_COFF)
+
+  /* Create a .note section to fully identify this arm binary.  */
+
+#define NOTE_ARCH_STRING 	"arch: "
+
+#if defined OBJ_COFF && ! defined NT_VERSION
+#define NT_VERSION  1
+#define NT_ARCH     2
+#endif
+  
   {
-    expressionS exp;
     segT current_seg = now_seg;
     subsegT current_subseg = now_subseg;
     asection * arm_arch;
-    
+    const char * arch_string;
+
     arm_arch = bfd_make_section_old_way (stdoutput, ARM_NOTE_SECTION);
 
 #ifdef OBJ_COFF
@@ -10262,17 +10324,32 @@ md_begin ()
 #endif
     arm_arch->output_section = arm_arch;
     subseg_set (arm_arch, 0);
-    exp.X_op = O_constant;
-    exp.X_add_number = mach;
-    exp.X_add_symbol = NULL;
-    exp.X_op_symbol = NULL;
 
-    emit_expr (&exp, 4);
+    switch (mach)
+      {
+      default:
+      case bfd_mach_arm_unknown: arch_string = "unknown"; break;
+      case bfd_mach_arm_2:       arch_string = "armv2"; break;
+      case bfd_mach_arm_2a:      arch_string = "armv2a"; break;
+      case bfd_mach_arm_3:       arch_string = "armv3"; break;
+      case bfd_mach_arm_3M:      arch_string = "armv3M"; break;
+      case bfd_mach_arm_4:       arch_string = "armv4"; break;
+      case bfd_mach_arm_4T:      arch_string = "armv4t"; break;
+      case bfd_mach_arm_5:       arch_string = "armv5"; break;
+      case bfd_mach_arm_5T:      arch_string = "armv5t"; break;
+      case bfd_mach_arm_5TE:     arch_string = "armv5te"; break;
+      case bfd_mach_arm_XScale:  arch_string = "XScale"; break;
+      case bfd_mach_arm_ep9312:  arch_string = "ep9312"; break;
+      case bfd_mach_arm_iWMMXt:  arch_string = "iWMMXt"; break;	
+      }
+
+    arm_add_note (NOTE_ARCH_STRING, arch_string, NT_ARCH);
 
     subseg_set (current_seg, current_subseg);
   }
 #endif
-
+#endif /* Suppressed code.  */
+  
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
 }
 
@@ -11760,6 +11837,7 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"arm1020e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
   /* ??? XSCALE is really an architecture.  */
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
+  /* ??? iwmmxt is not a processor.  */
   {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP_V2},
   {"i80200",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
   /* Maverick */

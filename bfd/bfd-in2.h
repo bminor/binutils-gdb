@@ -842,6 +842,16 @@ extern bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
 extern bfd_boolean bfd_elf32_arm_add_glue_sections_to_bfd
   PARAMS ((bfd *, struct bfd_link_info *));
 
+/* ARM Note section processing.  */
+extern bfd_boolean bfd_arm_merge_machines
+  PARAMS ((bfd *, bfd *));
+
+extern bfd_boolean bfd_arm_update_notes
+  PARAMS ((bfd *, const char *));
+
+extern unsigned int bfd_arm_get_mach_from_notes
+  PARAMS ((bfd *, const char *));
+
 /* TI COFF load page support.  */
 extern void bfd_ticoff_set_section_load_page
   PARAMS ((struct sec *, int));
@@ -1680,6 +1690,7 @@ enum bfd_architecture
 #define bfd_mach_alpha_ev5  0x20
 #define bfd_mach_alpha_ev6  0x30
   bfd_arch_arm,       /* Advanced Risc Machines ARM.  */
+#define bfd_mach_arm_unknown   0
 #define bfd_mach_arm_2         1
 #define bfd_mach_arm_2a        2
 #define bfd_mach_arm_3         3

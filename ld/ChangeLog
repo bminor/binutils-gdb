@@ -1,3 +1,10 @@
+2003-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* emulparams/armelf.sh (OTHER_READONLY_SECTIONS): Chnage name of
+	note section.
+	* emulparams/armelf_linux.sh (OTHER_READONLY_SECTIONS): Chnage
+	name of note section.
+
 2003-03-31  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld.texinfo (-Tbss, -Tdata, -Ttext): Document in terms of

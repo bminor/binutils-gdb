@@ -1,3 +1,8 @@
+2003-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c: Remove presence of (r) and (tm) symbols.
+	* arm-opc.h: Remove presence of (r) and (tm) symbols.
+
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
 	    

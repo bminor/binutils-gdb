@@ -71,9 +71,9 @@ static arm_regname regnames[] =
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "v4", "v5", "v6", "v7",  "v8",  "IP",  "SP",  "LR",  "PC" }},
   { "special-atpcs", "Select special register names used in the ATPCS",
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "WR", "v5", "SB", "SL",  "FP",  "IP",  "SP",  "LR",  "PC" }},
-  { "iwmmxt_regnames", "Select register names used on the Intel(r) Wireless MMX(tm) technology coprocessor",
+  { "iwmmxt_regnames", "Select register names used on the Intel Wireless MMX technology coprocessor",
     { "wr0", "wr1", "wr2", "wr3", "wr4", "wr5", "wr6", "wr7", "wr8", "wr9", "wr10", "wr11", "wr12", "wr13", "wr14", "wr15"}},
-  { "iwmmxt_Cregnames", "Select control register names used on the Intel(r) Wireless MMX(tm) technology coprocessor",
+  { "iwmmxt_Cregnames", "Select control register names used on the Intel Wireless MMX technology coprocessor",
     {"wcid", "wcon", "wcssf", "wcasf", "reserved", "reserved", "reserved", "reserved", "wcgr0", "wcgr1", "wcgr2", "wcgr3", "reserved", "reserved", "reserved", "reserved"}}
 };
 

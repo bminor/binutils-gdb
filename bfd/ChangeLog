@@ -1,3 +1,27 @@
+2003-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* archures.c (bfd_mach_arm_unknown): Define.
+	* bfd-in.h (bfd_arm_merge_machines, bfd_arm+update_notes,
+	bfd_arm_get_mach_from_notes): Prototype.
+	* bfd-in2.h: Regenerate.
+	* coff-arm.c (coff_arm_merge_private_bfd_data): Call
+	bfd_arm_merge_machines.
+	(coff_arm_final_link_postscript): Call bfd_arm_update_notes.
+	* coffcode.h (coff_set_arch_mach_hook): Call
+	bfd_arm_get_mach_from_notes.
+	* coffgen.c (coff_real_object_p): Revert previous delta.
+	* cpu_arm.c (arm_check_note): New function.  Examine a note in a
+	.note section.
+	(bfd_arm_merge_machines): New function: Handle the merging of ARM
+	binaries compiled for different architectures..
+	(bfd_arm_update_notes): New function: Update an ARM note section.
+	(bfd_arm_get_mach_from_notes): New function: Extract a bfd machine
+	number from an ARM note section.
+	* elf32-arm.h (elf32_arm_object_p): Use
+	bfd_arm_get_mach_from_notes.
+	(elf32_arm_merge_private_bfd_data): Use bfd_arm_merge_machines.
+	(elf32_arm_final_write_processing): Use bfd_arm_update_notes.
+	
 2003-04-01  Ben Elliston  <bje@wasabisystems.com>
 
 	* dwarf2.c (read_attribute_value): Correct typo in comment.

@@ -1,3 +1,13 @@
+2003-04-01  Nick Clifton  <nickc@redhat.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.c: Remove presence of (r) and (tm) symbols.
+	(ARM_ARCH_IWMMXT): Simplify.
+	(insns): Place iwmmx instructions in correct place in table.
+	(arm_add_note): New function: Add a note entry to a .note section.
+	(md_begin): Make the default architecture be unknown.
+	Suppress the creation of an arm note section.
+
 2003-03-26  Eric Christopher  <echristo@redhat.com>
 
 	* config/tc-mips.c (nopic_need_relax): Check for

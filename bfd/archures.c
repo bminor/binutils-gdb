@@ -224,6 +224,7 @@ DESCRIPTION
 .#define bfd_mach_alpha_ev5  0x20
 .#define bfd_mach_alpha_ev6  0x30
 .  bfd_arch_arm,       {* Advanced Risc Machines ARM.  *}
+.#define bfd_mach_arm_unknown	0
 .#define bfd_mach_arm_2		1
 .#define bfd_mach_arm_2a	2
 .#define bfd_mach_arm_3		3
