@@ -1,5 +1,8 @@
 Mon Jan 24 12:56:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ldmain.c (reloc_overflow): Added name, reloc_name and addend
+	arguments.
+
 	* ldlang.c (lookup_name): Set BFD GP size to -G argument value
 	after opening BFD.
 

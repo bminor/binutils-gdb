@@ -99,8 +99,9 @@ static boolean warning_callback PARAMS ((struct bfd_link_info *,
 static boolean undefined_symbol PARAMS ((struct bfd_link_info *,
 					 const char *, bfd *,
 					 asection *, bfd_vma));
-static boolean reloc_overflow PARAMS ((struct bfd_link_info *, bfd *,
-				       asection *, bfd_vma));
+static boolean reloc_overflow PARAMS ((struct bfd_link_info *, const char *,
+				       const char *, bfd_vma,
+				       bfd *, asection *, bfd_vma));
 static boolean reloc_dangerous PARAMS ((struct bfd_link_info *, const char *,
 					bfd *, asection *, bfd_vma));
 static boolean unattached_reloc PARAMS ((struct bfd_link_info *,
@@ -547,6 +548,9 @@ add_archive_element (info, abfd, name)
   if (write_map)
     info_msg ("%s needed due to %T\n", abfd->filename, name);
 
+  if (trace_files || trace_file_tries)
+    info_msg ("%I\n", input);
+
   return true;
 }
 
@@ -754,13 +758,20 @@ undefined_symbol (info, name, abfd, section, address)
 
 /*ARGSUSED*/
 static boolean
-reloc_overflow (info, abfd, section, address)
+reloc_overflow (info, name, reloc_name, addend, abfd, section, address)
      struct bfd_link_info *info;
+     const char *name;
+     const char *reloc_name;
+     bfd_vma addend;
      bfd *abfd;
      asection *section;
      bfd_vma address;
 {
-  einfo ("%X%C: relocation truncated to fit\n", abfd, section, address);
+  einfo ("%X%C: relocation truncated to fit: %s %T", abfd, section,
+	 address, reloc_name, name);
+  if (addend != 0)
+    einfo ("+%v", addend);
+  einfo ("\n");
   return true;
 }
 
