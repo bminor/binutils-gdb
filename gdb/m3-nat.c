@@ -4586,6 +4586,7 @@ struct target_ops m3_ops = {
   0,				/* to_notice_signals */
   0,				/* to_thread_alive */
   m3_stop,			/* to_stop */
+  0,				/* to_query */
   m3_pid_to_exec_file,          /* to_pid_to_exec_file */
   NULL,                         /* to_core_file_to_sym_file */
   process_stratum,		/* to_stratum */

@@ -1505,145 +1505,9 @@ ignore (addr, contents)
   return 0;
 }
 
-struct target_ops sol_thread_ops = {
-  "solaris-threads",		/* to_shortname */
-  "Solaris threads and pthread.", /* to_longname */
-  "Solaris threads and pthread support.", /* to_doc */
-  sol_thread_open,		/* to_open */
-  0,				/* to_close */
-  sol_thread_attach,		/* to_attach */
-  NULL,                                   /* to_post_attach */
-  NULL,                         /* to_require_attach */
-  sol_thread_detach, 		/* to_detach */
-  NULL,                         /* to_require_detach */
-  sol_thread_resume,		/* to_resume */
-  sol_thread_wait,		/* to_wait */
-  NULL,                         /* to_post_wait */
-  sol_thread_fetch_registers,	/* to_fetch_registers */
-  sol_thread_store_registers,	/* to_store_registers */
-  sol_thread_prepare_to_store,	/* to_prepare_to_store */
-  sol_thread_xfer_memory,	/* to_xfer_memory */
-  sol_thread_files_info,	/* to_files_info */
-  memory_insert_breakpoint,	/* to_insert_breakpoint */
-  memory_remove_breakpoint,	/* to_remove_breakpoint */
-  terminal_init_inferior,	/* to_terminal_init */
-  terminal_inferior, 		/* to_terminal_inferior */
-  terminal_ours_for_output,	/* to_terminal_ours_for_output */
-  terminal_ours,		/* to_terminal_ours */
-  child_terminal_info,		/* to_terminal_info */
-  sol_thread_kill_inferior,	/* to_kill */
-  0,				/* to_load */
-  0,				/* to_lookup_symbol */
-  sol_thread_create_inferior,	/* to_create_inferior */
-  NULL,                         /* to_post_startup_inferior */
-  NULL,                         /* to_acknowledge_created_inferior */
-  NULL,                         /* to_clone_and_follow_inferior */
-  NULL,                         /* to_post_follow_inferior_by_clone */
-  NULL,                         /* to_insert_fork_catchpoint */
-  NULL,                         /* to_remove_fork_catchpoint */
-  NULL,                         /* to_insert_vfork_catchpoint */
-  NULL,                         /* to_remove_vfork_catchpoint */
-  NULL,                         /* to_has_forked */
-  NULL,                         /* to_has_vforked */
-  NULL,                         /* to_can_follow_vfork_prior_to_exec */
-  NULL,                         /* to_post_follow_vfork */
-  NULL,                         /* to_insert_exec_catchpoint */
-  NULL,                         /* to_remove_exec_catchpoint */
-  NULL,                         /* to_has_execd */
-  NULL,                         /* to_reported_exec_events_per_exec_call */
-  NULL,                         /* to_has_syscall_event */
-  NULL,                         /* to_has_exited */
-  sol_thread_mourn_inferior,	/* to_mourn_inferior */
-  sol_thread_can_run,		/* to_can_run */
-  sol_thread_notice_signals,	/* to_notice_signals */
-  sol_thread_alive,		/* to_thread_alive */
-  sol_thread_stop,		/* to_stop */
-  NULL,                         /* to_enable_exception_callback */
-  NULL,                         /* to_get_current_exception_event */
-  NULL,                         /* to_pid_to_exec_file */
-  NULL,                         /* to_core_file_to_sym_file */
-  process_stratum,		/* to_stratum */
-  0,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  tc_none,			/* to_has_thread_control */
-  0,				/* sections */
-  0,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
 
-struct target_ops sol_core_ops = {
-  "solaris-core",		/* to_shortname */
-  "Solaris core threads and pthread.", /* to_longname */
-  "Solaris threads and pthread support for core files.", /* to_doc */
-  sol_core_open,		/* to_open */
-  sol_core_close,		/* to_close */
-  sol_thread_attach,		/* XXX to_attach */
-  NULL,                         /* to_post_attach */
-  NULL,                         /* to_require_attach */
-  sol_core_detach, 		/* to_detach */
-  NULL,                         /* to_require_detach */
-  0,				/* to_resume */
-  0,				/* to_wait */
-  NULL,                         /* to_post_wait */
-  sol_thread_fetch_registers,	/* to_fetch_registers */
-  0,				/* to_store_registers */
-  0,				/* to_prepare_to_store */
-  sol_thread_xfer_memory,	/* XXX to_xfer_memory */
-  sol_core_files_info,		/* to_files_info */
-  ignore,			/* to_insert_breakpoint */
-  ignore,			/* to_remove_breakpoint */
-  0,				/* to_terminal_init */
-  0,		 		/* to_terminal_inferior */
-  0,				/* to_terminal_ours_for_output */
-  0,				/* to_terminal_ours */
-  0,				/* to_terminal_info */
-  0,				/* to_kill */
-  0,				/* to_load */
-  0,				/* to_lookup_symbol */
-  sol_thread_create_inferior,	/* XXX to_create_inferior */
-  NULL,                         /* to_post_startup_inferior */
-  NULL,                         /* to_acknowledge_created_inferior */
-  NULL,                         /* to_clone_and_follow_inferior */
-  NULL,                         /* to_post_follow_inferior_by_clone */
-  NULL,                         /* to_insert_fork_catchpoint */
-  NULL,                         /* to_remove_fork_catchpoint */
-  NULL,                         /* to_insert_vfork_catchpoint */
-  NULL,                         /* to_remove_vfork_catchpoint */
-  NULL,                         /* to_has_forked */
-  NULL,                         /* to_has_vforked */
-  NULL,                         /* to_can_follow_vfork_prior_to_exec */
-  NULL,                         /* to_post_follow_vfork */
-  NULL,                         /* to_insert_exec_catchpoint */
-  NULL,                         /* to_remove_exec_catchpoint */
-  NULL,                         /* to_has_execd */
-  NULL,                         /* to_reported_exec_events_per_exec_call */
-  NULL,                         /* to_has_syscall_event */
-  NULL,                         /* to_has_exited */
-  0,				/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  0,				/* to_stop */
-  NULL,                         /* to_enable_exception_callback */
-  NULL,                         /* to_get_current_exception_event */
-  NULL,                         /* to_pid_to_exec_file */
-  NULL,                         /* to_core_file_to_sym_file */
-  core_stratum,			/* to_stratum */
-  0,				/* to_next */
-  0,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  0,				/* to_has_execution */
-  tc_none,			/* to_has_thread_control */
-  0,				/* sections */
-  0,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+struct target_ops sol_thread_ops;
+struct target_ops sol_core_ops;
 
 /* we suppress the call to add_target of core_ops in corelow because
    if there are two targets in the stratum core_stratum, find_core_target
@@ -1655,6 +1519,86 @@ void
 _initialize_sol_thread ()
 {
   void *dlhandle;
+
+  /* Initialize sol_thread_ops */
+  sol_thread_ops.to_shortname = "solaris-threads";
+  sol_thread_ops.to_longname = "Solaris threads and pthread.";
+  sol_thread_ops.to_doc = "Solaris threads and pthread support.";
+  sol_thread_ops.to_open = sol_thread_open;
+  sol_thread_ops.to_close = 0;
+  sol_thread_ops.to_attach = sol_thread_attach;
+  sol_thread_ops.to_detach = sol_thread_detach;
+  sol_thread_ops.to_resume = sol_thread_resume;
+  sol_thread_ops.to_wait = sol_thread_wait;
+  sol_thread_ops.to_fetch_registers = sol_thread_fetch_registers;
+  sol_thread_ops.to_store_registers = sol_thread_store_registers;
+  sol_thread_ops.to_prepare_to_store = sol_thread_prepare_to_store;
+  sol_thread_ops.to_xfer_memory = sol_thread_xfer_memory;
+  sol_thread_ops.to_files_info = sol_thread_files_info;
+  sol_thread_ops.to_insert_breakpoint = memory_insert_breakpoint;
+  sol_thread_ops.to_remove_breakpoint = memory_remove_breakpoint;
+  sol_thread_ops.to_terminal_init = terminal_init_inferior;
+  sol_thread_ops.to_terminal_inferior = terminal_inferior;
+  sol_thread_ops.to_terminal_ours_for_output = terminal_ours_for_output;
+  sol_thread_ops.to_terminal_ours = terminal_ours;
+  sol_thread_ops.to_terminal_info = child_terminal_info;
+  sol_thread_ops.to_kill = sol_thread_kill_inferior;
+  sol_thread_ops.to_load = 0;
+  sol_thread_ops.to_lookup_symbol = 0;
+  sol_thread_ops.to_create_inferior = sol_thread_create_inferior;
+  sol_thread_ops.to_mourn_inferior = sol_thread_mourn_inferior;
+  sol_thread_ops.to_can_run = sol_thread_can_run;
+  sol_thread_ops.to_notice_signals = sol_thread_notice_signals;
+  sol_thread_ops.to_thread_alive = sol_thread_alive;
+  sol_thread_ops.to_stop = sol_thread_stop;
+  sol_thread_ops.to_stratum = process_stratum;
+  sol_thread_ops.to_has_all_memory = 1;
+  sol_thread_ops.to_has_memory = 1;
+  sol_thread_ops.to_has_stack = 1;
+  sol_thread_ops.to_has_registers = 1;
+  sol_thread_ops.to_has_execution = 1;
+  sol_thread_ops.to_has_thread_control = tc_none;
+  sol_thread_ops.to_sections = 0;
+  sol_thread_ops.to_sections_end = 0;
+  sol_thread_ops.to_magic = OPS_MAGIC;
+
+  /* Initialize sol_core_ops */
+  sol_core_ops.to_shortname  = "solaris-core";
+  sol_core_ops.to_longname  = "Solaris core threads and pthread.";
+  sol_core_ops.to_doc  = "Solaris threads and pthread support for core files.";
+  sol_core_ops.to_open  = sol_core_open;
+  sol_core_ops.to_close  = sol_core_close;
+  sol_core_ops.to_attach  = sol_thread_attach;
+  sol_core_ops.to_detach  = sol_core_detach;
+  /* sol_core_ops.to_resume  = 0; */
+  /* sol_core_ops.to_wait  = 0;	 */
+  sol_core_ops.to_fetch_registers  = sol_thread_fetch_registers;
+  /* sol_core_ops.to_store_registers  = 0; */
+  /* sol_core_ops.to_prepare_to_store  = 0; */
+  sol_core_ops.to_xfer_memory  = sol_thread_xfer_memory;
+  sol_core_ops.to_files_info  = sol_core_files_info;
+  sol_core_ops.to_insert_breakpoint  = ignore;
+  sol_core_ops.to_remove_breakpoint  = ignore;
+  /* sol_core_ops.to_terminal_init  = 0; */
+  /* sol_core_ops.to_terminal_inferior  = 0; */
+  /* sol_core_ops.to_terminal_ours_for_output  = 0; */
+  /* sol_core_ops.to_terminal_ours  = 0; */
+  /* sol_core_ops.to_terminal_info  = 0; */
+  /* sol_core_ops.to_kill  = 0; */
+  /* sol_core_ops.to_load  = 0; */
+  /* sol_core_ops.to_lookup_symbol  = 0; */
+  sol_core_ops.to_create_inferior  = sol_thread_create_inferior;
+  sol_core_ops.to_stratum  = core_stratum;
+  sol_core_ops.to_has_all_memory  = 0;
+  sol_core_ops.to_has_memory  = 1;
+  sol_core_ops.to_has_stack  = 1;
+  sol_core_ops.to_has_registers  = 1;
+  sol_core_ops.to_has_execution  = 0;
+  sol_core_ops.to_has_thread_control  = tc_none;
+  sol_core_ops.to_sections  = 0;
+  sol_core_ops.to_sections_end  = 0;
+  sol_core_ops.to_magic  = OPS_MAGIC;
+
 
   dlhandle = dlopen ("libthread_db.so.1", RTLD_NOW);
   if (!dlhandle)

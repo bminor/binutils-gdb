@@ -639,6 +639,7 @@ struct target_ops hpux_thread_ops = {
   hpux_thread_notice_signals,	/* to_notice_signals */
   hpux_thread_alive,		/* to_thread_alive */
   hpux_thread_stop,		/* to_stop */
+  0,				/* to_query */
   NULL,                         /* to_enable_exception_callback */
   NULL,                         /* to_get_current_exception_event */
   NULL,                         /* to_pid_to_exec_file */
