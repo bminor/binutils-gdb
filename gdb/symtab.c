@@ -2931,7 +2931,8 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	    /* If it would match (logic taken from loop below)
 	       load the file and go on to the next one */
 	    if (file_matches (ps->filename, files, nfiles)
-		&& ((regexp == NULL || SYMBOL_MATCHES_REGEXP (*psym))
+		&& ((regexp == NULL
+		     || re_exec (SYMBOL_NATURAL_NAME (*psym)) != 0)
 		    && ((kind == VARIABLES_NAMESPACE && SYMBOL_CLASS (*psym) != LOC_TYPEDEF
 			 && SYMBOL_CLASS (*psym) != LOC_BLOCK)
 			|| (kind == FUNCTIONS_NAMESPACE && SYMBOL_CLASS (*psym) == LOC_BLOCK)
@@ -2968,7 +2969,8 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	    MSYMBOL_TYPE (msymbol) == ourtype3 ||
 	    MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (regexp == NULL || SYMBOL_MATCHES_REGEXP (msymbol))
+	    if (regexp == NULL
+		|| re_exec (SYMBOL_NATURAL_NAME (msymbol)) != 0)
 	      {
 		if (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)))
 		  {
@@ -3008,7 +3010,8 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	    {
 	      QUIT;
 	      if (file_matches (s->filename, files, nfiles)
-		  && ((regexp == NULL || SYMBOL_MATCHES_REGEXP (sym))
+		  && ((regexp == NULL
+		       || re_exec (SYMBOL_NATURAL_NAME (sym)) != 0)
 		      && ((kind == VARIABLES_NAMESPACE && SYMBOL_CLASS (sym) != LOC_TYPEDEF
 			   && SYMBOL_CLASS (sym) != LOC_BLOCK
 			   && SYMBOL_CLASS (sym) != LOC_CONST)
@@ -3062,7 +3065,8 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	    MSYMBOL_TYPE (msymbol) == ourtype3 ||
 	    MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (regexp == NULL || SYMBOL_MATCHES_REGEXP (msymbol))
+	    if (regexp == NULL
+		|| re_exec (SYMBOL_NATURAL_NAME (msymbol)) != 0)
 	      {
 		/* Functions:  Look up by address. */
 		if (kind != FUNCTIONS_NAMESPACE ||

@@ -222,16 +222,6 @@ extern char *symbol_demangled_name (struct general_symbol_info *symbol);
    || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
        && strcmp_iw (SYMBOL_DEMANGLED_NAME (symbol), (name)) == 0))
 
-/* Macro that tests a symbol for an re-match against the last compiled regular
-   expression.  First test the unencoded name, then look for and test a C++
-   encoded name if it exists.
-   Evaluates to zero if the match fails, or nonzero if it succeeds. */
-
-#define SYMBOL_MATCHES_REGEXP(symbol)					\
-  (re_exec (DEPRECATED_SYMBOL_NAME (symbol)) != 0			\
-   || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
-       && re_exec (SYMBOL_DEMANGLED_NAME (symbol)) != 0))
-
 /* Define a simple structure used to hold some very basic information about
    all defined global symbols (text, data, bss, abs, etc).  The only required
    information is the general_symbol_info.

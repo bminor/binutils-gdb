@@ -1,5 +1,11 @@
 2003-03-03  David Carlton  <carlton@math.stanford.edu>
 
+	* symtab.h (SYMBOL_MATCHES_REGEXP): Delete.
+	* symtab.c (search_symbols): Replace uses of SYMBOL_MATCHES_REGEXP
+	by regexp matching against SYMBOL_NATURAL_NAME.
+
+2003-03-03  David Carlton  <carlton@math.stanford.edu>
+
 	* linespec.c (find_method): Extract code into collect_methods.
 	(collect_methods): New.
 
