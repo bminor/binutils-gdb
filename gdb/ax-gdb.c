@@ -1923,7 +1923,7 @@ agent_command (exp, from_tty)
     error_no_arg ("expression to translate");
 
   expr = parse_expression (exp);
-  old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  old_chain = make_cleanup (free_current_contents, &expr);
   agent = gen_trace_for_expr (fi->pc, expr);
   make_cleanup ((make_cleanup_func) free_agent_expr, agent);
   ax_print (gdb_stdout, agent);

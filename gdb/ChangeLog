@@ -1,3 +1,20 @@
+Wed Apr 26 13:50:35 2000  Philippe De Muyter  <phdm@macqel.be>
+
+	* ax-gdb.c (agent_command): Remove now useless cast of
+	`free_current_contents' when passed to `make_cleanup'.
+	* coffread.c (coff_symfile_read): Ditto.
+	* dwarf2read.c (dwarf2_add_member_fn, read_array_type): Ditto.
+	(dwarf_decode_lines): Ditto.
+	* eval.c (parse_and_eval_address, parse_and_eval_address_1): Ditto.
+	(parse_and_eval, parse_to_comma_and_eval): Ditto.
+	* parse.c (parse_exp_1): Ditto.
+	* printcmd.c (print_command_1, output_command, set_command): Ditto.
+	(x_command, print_frame_args, printf_command): Ditto.
+	* top.c (execute_control_command): Ditto.
+	* tracepoint.c (validate_actionline): Ditto.
+	* typeprint.c (whatis_exp, ptype_command): Ditto.
+	(maintenance_print_type): Ditto.
+
 2000-04-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in (ALLDEPFILES): Add ia64-linux-tdep.c.

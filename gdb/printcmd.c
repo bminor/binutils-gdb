@@ -935,8 +935,7 @@ print_command_1 (exp, inspect, voidprint)
     {
       struct type *type;
       expr = parse_expression (exp);
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				&expr);
+      old_chain = make_cleanup (free_current_contents, &expr);
       cleanup = 1;
       val = evaluate_expression (expr);
 
@@ -1049,7 +1048,7 @@ output_command (exp, from_tty)
     }
 
   expr = parse_expression (exp);
-  old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  old_chain = make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
 
@@ -1072,8 +1071,8 @@ set_command (exp, from_tty)
      int from_tty;
 {
   struct expression *expr = parse_expression (exp);
-  register struct cleanup *old_chain
-  = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  register struct cleanup *old_chain =
+    make_cleanup (free_current_contents, &expr);
   evaluate_expression (expr);
   do_cleanups (old_chain);
 }
@@ -1370,8 +1369,7 @@ x_command (exp, from_tty)
          But don't clobber a user-defined command's definition.  */
       if (from_tty)
 	*exp = 0;
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				&expr);
+      old_chain = make_cleanup (free_current_contents, &expr);
       val = evaluate_expression (expr);
       if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_REF)
 	val = value_ind (val);
@@ -1854,7 +1852,7 @@ print_frame_args (func, fi, num, stream)
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+  old_chain = make_cleanup (ui_out_stream_delete, stb);
 #endif /* UI_OUT */
 
   if (func)
@@ -1881,8 +1879,8 @@ print_frame_args (func, fi, num, stream)
 
 	    /* Compute address of next argument by adding the size of
 	       this argument and rounding to an int boundary.  */
-	    current_offset
-	      = ((current_offset + arg_size + sizeof (int) - 1)
+	    current_offset =
+	      ((current_offset + arg_size + sizeof (int) - 1)
 		 & ~(sizeof (int) - 1));
 
 	    /* If this is the highest offset seen yet, set highest_offset.  */
@@ -2110,8 +2108,7 @@ printf_command (arg, from_tty)
   struct cleanup *old_cleanups;
 
   val_args = (value_ptr *) xmalloc (allocated_args * sizeof (value_ptr));
-  old_cleanups = make_cleanup ((make_cleanup_func) free_current_contents,
-			       &val_args);
+  old_cleanups = make_cleanup (free_current_contents, &val_args);
 
   if (s == 0)
     error_no_arg ("format-control string and values to print");

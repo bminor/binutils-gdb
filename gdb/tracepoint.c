@@ -977,8 +977,7 @@ validate_actionline (line, t)
 	      /* else fall thru, treat p as an expression and parse it! */
 	    }
 	  exp = parse_exp_1 (&p, block_for_pc (t->address), 1);
-	  old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				    &exp);
+	  old_chain = make_cleanup (free_current_contents, &exp);
 
 	  if (exp->elts[0].opcode == OP_VAR_VALUE)
 	    {

@@ -1176,7 +1176,7 @@ parse_exp_1 (stringptr, block, comma)
   expout = (struct expression *)
     xmalloc (sizeof (struct expression) + EXP_ELEM_TO_BYTES (expout_size));
   expout->language_defn = current_language;
-  make_cleanup ((make_cleanup_func) free_current_contents, &expout);
+  make_cleanup (free_current_contents, &expout);
 
   if (current_language->la_parser ())
     current_language->la_error (NULL);

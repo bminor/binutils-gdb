@@ -1094,8 +1094,7 @@ execute_control_command (cmd)
       new_line = insert_args (cmd->line);
       if (!new_line)
 	return invalid_control;
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				&new_line);
+      old_chain = make_cleanup (free_current_contents, &new_line);
       execute_command (new_line, 0);
       ret = cmd->control_type;
       break;
@@ -1113,10 +1112,9 @@ execute_control_command (cmd)
 	new_line = insert_args (cmd->line);
 	if (!new_line)
 	  return invalid_control;
-	old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				  &new_line);
+	old_chain = make_cleanup (free_current_contents, &new_line);
 	expr = parse_expression (new_line);
-	make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+	make_cleanup (free_current_contents, &expr);
 
 	ret = simple_control;
 	loop = 1;
@@ -1174,11 +1172,10 @@ execute_control_command (cmd)
 	new_line = insert_args (cmd->line);
 	if (!new_line)
 	  return invalid_control;
-	old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				  &new_line);
+	old_chain = make_cleanup (free_current_contents, &new_line);
 	/* Parse the conditional for the if statement.  */
 	expr = parse_expression (new_line);
-	make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+	make_cleanup (free_current_contents, &expr);
 
 	current = NULL;
 	ret = simple_control;

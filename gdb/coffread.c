@@ -638,7 +638,7 @@ coff_symfile_read (objfile, mainline)
   temp_sym = (char *) xmalloc
     (cdata->local_symesz + cdata->local_auxesz);
   temp_aux = temp_sym + cdata->local_symesz;
-  back_to = make_cleanup ((make_cleanup_func) free_current_contents, &temp_sym);
+  back_to = make_cleanup (free_current_contents, &temp_sym);
 
   /* We need to know whether this is a PE file, because in PE files,
      unlike standard COFF files, symbol values are stored as offsets

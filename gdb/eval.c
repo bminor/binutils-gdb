@@ -85,7 +85,7 @@ parse_and_eval_address (exp)
   struct expression *expr = parse_expression (exp);
   register CORE_ADDR addr;
   register struct cleanup *old_chain =
-  make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  make_cleanup (free_current_contents, &expr);
 
   addr = value_as_pointer (evaluate_expression (expr));
   do_cleanups (old_chain);
@@ -102,7 +102,7 @@ parse_and_eval_address_1 (expptr)
   struct expression *expr = parse_exp_1 (expptr, (struct block *) 0, 0);
   register CORE_ADDR addr;
   register struct cleanup *old_chain =
-  make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  make_cleanup (free_current_contents, &expr);
 
   addr = value_as_pointer (evaluate_expression (expr));
   do_cleanups (old_chain);
@@ -116,7 +116,7 @@ parse_and_eval (exp)
   struct expression *expr = parse_expression (exp);
   register value_ptr val;
   register struct cleanup *old_chain
-  = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  = make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
   do_cleanups (old_chain);
@@ -134,7 +134,7 @@ parse_to_comma_and_eval (expp)
   struct expression *expr = parse_exp_1 (expp, (struct block *) 0, 1);
   register value_ptr val;
   register struct cleanup *old_chain
-  = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  = make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
   do_cleanups (old_chain);

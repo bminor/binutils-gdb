@@ -90,8 +90,7 @@ whatis_exp (exp, show)
   if (exp)
     {
       expr = parse_expression (exp);
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				&expr);
+      old_chain = make_cleanup (free_current_contents, &expr);
       val = evaluate_type (expr);
     }
   else
@@ -185,8 +184,7 @@ ptype_command (typename, from_tty)
   else
     {
       expr = parse_expression (typename);
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
-				&expr);
+      old_chain = make_cleanup (free_current_contents, &expr);
       type = ptype_eval (expr);
       if (type != NULL)
 	{
@@ -306,7 +304,7 @@ maintenance_print_type (typename, from_tty)
   if (typename != NULL)
     {
       expr = parse_expression (typename);
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+      old_chain = make_cleanup (free_current_contents, &expr);
       if (expr->elts[0].opcode == OP_TYPE)
 	{
 	  /* The user expression names a type directly, just use that type. */
