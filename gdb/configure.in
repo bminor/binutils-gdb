@@ -54,7 +54,7 @@ case ${srcdir} in
 esac
 
 rm -f Makefile
-if [ ! -f depend ]; then
-  make -f Makefile.conf depend
+if [ ! -f ${srcdir}/depend ]; then
+  make -f Makefile.conf make-depend
 fi
-make -f Makefile.conf Makefile
+make -f Makefile.conf make-Makefile

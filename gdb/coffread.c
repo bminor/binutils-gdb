@@ -38,6 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <obstack.h>
 #include <string.h>
 
+#include "internalcoff.h"	/* Internal format of COFF symbols in BFD */
 #include "libcoff.h"		/* FIXME secret internal data from BFD */
 
 static void add_symbol_to_list ();
@@ -69,18 +70,6 @@ extern void free_all_psymtabs ();
    dbx-in-coff file.  */
 
 #define SDB_TYPE(type) (BTYPE(type) | (type & N_TMASK))
-
-/* external routines from the BFD library -- undocumented interface used
-   by GDB to read symbols.  Move to libcoff.h.  FIXME-SOMEDAY!  */
-extern void bfd_coff_swap_sym_in (/* symfile_bfd, &sym */);
-extern void bfd_coff_swap_aux_in (/* symfile_bfd, &aux, type, sclass */);
-extern void bfd_coff_swap_lineno_in (/* symfile_bfd, &lineno */);
-extern void bfd_coff_swap_scnhdr_in (/* bfd, scnhdr_ext, scnhdr_int */);
-
-extern void bfd_coff_swap_sym (/* symfile_bfd, &sym */);
-extern void bfd_coff_swap_aux (/* symfile_bfd, &aux, type, sclass */);
-extern void bfd_coff_swap_lineno (/* symfile_bfd, &lineno */);
-
 
 /* Name of source file whose symbol data we are now processing.
    This comes from a symbol named ".file".  */
@@ -1682,7 +1671,7 @@ decode_type (cs, c_type, aux)
 
 	  /* Define an array type.  */
 	  /* auxent refers to array, not base type */
-	  if (aux->x_sym.x_tagndx == 0)
+	  if (aux->x_sym.x_tagndx.l == 0)
 	    cs->c_nsyms = 1;
 
 	  /* shift the indices down */
@@ -1707,7 +1696,7 @@ decode_type (cs, c_type, aux)
     }
 
   /* Reference to existing type */
-  if (cs->c_nsyms > 1 && aux->x_sym.x_tagndx != 0)
+  if (cs->c_nsyms > 1 && aux->x_sym.x_tagndx.l != 0)
     {
       type = coff_alloc_type (aux->x_sym.x_tagndx);
       return type;
@@ -1726,7 +1715,7 @@ decode_function_type (cs, c_type, aux)
      unsigned int c_type;
      register union internal_auxent *aux;
 {
-  if (aux->x_sym.x_tagndx == 0)
+  if (aux->x_sym.x_tagndx.l == 0)
     cs->c_nsyms = 1;	/* auxent refers to function, not base type */
 
   return decode_type (cs, DECREF (c_type), aux);

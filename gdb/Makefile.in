@@ -18,6 +18,7 @@
 
 # Host and target-dependent makefile fragments come in here.
 ####
+# End of host and target-dependent makefile fragments
 
 # Destination directory of the software tree build
 destdir = /usr/local
@@ -342,11 +343,11 @@ rapp: $(RAPP_OBS)
 # generated dependencies, etc.  Makefile.conf is built by configure,
 # and includes the body of Makefile.in as well as configuration
 # settings.  We add alldeps.mak and depend to get Makefile.
-Makefiles= Makefile.conf ${srcdir}/alldeps.mak
+# See also "make-depend:", where we also rebuild Makefile after making depend.
+Makefiles= Makefile.conf ${srcdir}/alldeps.mak depend
 
-Makefile: $(Makefiles)
-	  cat ${Makefiles} depend > Makefile
-	
+make-Makefile: $(Makefiles) depend
+	cat ${Makefiles} > ./Makefile
 
 alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
 	rm -f alldeps.mak alldeps.tmp allparam.tmp allconfig.tmp
@@ -399,7 +400,7 @@ alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
 # The sed script makes everything which depends on {x,t}m.h depend on
 # config.status as well, in case someone reconfigures gdb out from
 # under an already compiled gdb.
-depend: $(SOURCES) Makefile.in
+make-depend: $(SOURCES) Makefile.in
 	@echo Ignore errors about non-existent system-supplied include files
 	@echo for systems other than the one you are using.
 	@echo "If xm.h and tm.h don't exist, the error messages saying so"
@@ -408,15 +409,28 @@ depend: $(SOURCES) Makefile.in
 	@echo arm-convert.s.
 	-$(GCC) -MM $(CFLAGS) -I$(BFD_DIR) \
 	  `ls $(SOURCES) | grep -v \.h$$ |sort -u` >depend.tmp
-	<depend.tmp sed -e 's/ [xt]m.h/& config.status/g'  \
-	  -e 's; vx-share/; $${srcdir}/vx-share/;g'  \
-	  -e 's; nindy-share/; $${srcdir}/nindy-share/;g'  \
+# If running in srcdir, translate "./foo.c" into "$srcdir/foo.c" except
+# for xm.h and tm.h.  This allows the same "depend" file to be used
+# by the various subdirectories.
+	if [ "${srcdir}" = "." ] ; then \
+	  <depend.tmp sed \
+	    -e 's; ./xm.h; xm.h;g'  \
+	    -e 's; ./tm.h; tm.h;g'  \
+	    -e 's; \./; $${srcdir}/;g'  \
+	    -e 's; vx-share/; $${srcdir}/vx-share/;g'  \
+	    -e 's; nindy-share/; $${srcdir}/nindy-share/;g'  \
+	    >depend.tm2; \
+	  rm depend.tmp; \
+	  mv depend.tm2 depend.tmp; \
+	fi
+	<depend.tmp sed \
+	  -e 's; [xt]m.h;& config.status;g'  \
 	  -e 's; $(INCLUDE_DIR)/; $(INCLUDE_DEP)/;g'  \
 	  -e 's; $(READLINE_DIR)/; $(READLINE_DEP)/;g'  \
 	  -e 's; [a-z0-9./]*bfd/; $(BFD_DEP)/;g'  \
-	  -e 's; \./; $${srcdir}/;g'  \
+	  -e 's; ./xm.h; xm.h config.status;g'  \
+	  -e 's; ./tm.h; tm.h config.status;g'  \
 	  >depend
-	$(MAKE_MAKEFILE)
 	rm depend.tmp
 
 config.status:
@@ -477,12 +491,12 @@ clean:
 distclean: clean expread.tab.c TAGS
 	rm -f tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
-	rm -f ${TESTS} Makefile
+	rm -f ${TESTS} Makefile Makefile.conf depend
 
 realclean: clean
 	rm -f expread.tab.c TAGS
 	rm -f tm.h xm.h config.status
-	rm -f Makefile
+	rm -f Makefile Makefile.conf depend
 
 rdl-apps.texinfo: ${READLINE_DIR}/inc-readline.texinfo \
 			${READLINE_DIR}/inc-history.texinfo

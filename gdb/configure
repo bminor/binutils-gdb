@@ -246,6 +246,13 @@ if [ -n "${template}" ] ; then
 	echo Rebuilt configure in `pwd`
 
 	if [ -z "${norecurse}" ] ; then
+		# If template is relative path, make it absolute for recursing.
+		if echo "${template}" | grep -s '^/' ; then
+		   true
+		else
+		   template=`pwd`/${template}
+		fi
+
 		while [ -n "${configdirs}" ] ; do
 			# set configdir to car of configdirs, configdirs to cdr of configdirs
 			set ${configdirs}; configdir=$1; shift; configdirs=$*
@@ -543,10 +550,10 @@ case ${srcdir} in
 esac
 
 rm -f Makefile
-if [ ! -f depend ]; then
-  make -f Makefile.conf depend
+if [ ! -f ${srcdir}/depend ]; then
+  make -f Makefile.conf make-depend
 fi
-make -f Makefile.conf Makefile
+make -f Makefile.conf make-Makefile
 ## end of post-target part.
 
 			if [ "${host}" = "${target}" ] ; then
@@ -661,7 +668,20 @@ exit 0
 
 #
 # $Log$
-# Revision 1.7  1991/07/04 15:59:46  gnu
+# Revision 1.8  1991/07/05 00:04:58  gnu
+# Thu Jul  4 14:47:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
+#
+#         * configure.in, Makefile.in:  Avoid rebuilding "depend" as much.
+#         Avoid declaring Makefile dependencies, because GNU Make stupidly
+#         tries to update it if we do.
+#
+#         * coffread.c:  Revise for minor changes to bfd internal coff
+#         indexes.
+#
+#         * configure:  If -template= is given a relative path, make it
+#         absolute before recurring in subdirectories.
+#
+# Revision 1.7  1991/07/04  15:59:46  gnu
 # Make gdb work with configure.  Only thing that doesn't work is the -list
 # option (as far as I know).
 #
