@@ -1,3 +1,7 @@
+Thu May 13 09:46:59 1999  Joel Sherrill (joel@OARcorp.com)
+
+	* configure.in (i386-*-rtemself*, sh-*-rtemself*): New targets.
+
 1999-05-12  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.h (InvMem): New flag.  Add to AnyMem.
