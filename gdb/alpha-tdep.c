@@ -260,8 +260,7 @@ alpha_frame_saved_pc(frame)
   alpha_extra_func_info_t proc_desc = frame->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
-  int pcreg = frame->signal_handler_caller ? PC_REGNUM
-	      : (proc_desc ? PROC_PC_REG(proc_desc) : RA_REGNUM);
+  int pcreg = frame->signal_handler_caller ? PC_REGNUM : frame->pc_reg;
 
   if (proc_desc && PROC_DESC_IS_DUMMY(proc_desc))
       return read_memory_integer(frame->frame - 8, 8);
@@ -273,8 +272,18 @@ CORE_ADDR
 alpha_saved_pc_after_call (frame)
      struct frame_info *frame;
 {
-  alpha_extra_func_info_t proc_desc = find_proc_desc (frame->pc, frame->next);
-  int pcreg = proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM;
+  CORE_ADDR pc = frame->pc;
+  CORE_ADDR tmp;
+  alpha_extra_func_info_t proc_desc;
+  int pcreg;
+
+  /* Skip over shared library trampoline if necessary.  */
+  tmp = SKIP_TRAMPOLINE_CODE (pc);
+  if (tmp != 0)
+    pc = tmp;
+
+  proc_desc = find_proc_desc (pc, frame->next);
+  pcreg = proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM;
 
   return read_register (pcreg);
 }
@@ -530,6 +539,7 @@ find_proc_desc (pc, next_frame)
 		  {
 		    PROC_LOCALOFF (found_heuristic) =
 		      PROC_LOCALOFF (proc_desc);
+		    PROC_PC_REG (found_heuristic) = PROC_PC_REG (proc_desc);
 		    proc_desc = found_heuristic;
 		  }
 	      }
@@ -613,13 +623,16 @@ init_extra_frame_info (frame)
     frame->next ? cached_proc_desc : find_proc_desc(frame->pc, frame->next);
 
   frame->saved_regs = NULL;
-  frame->proc_desc =
-    proc_desc == &temp_proc_desc ? 0 : proc_desc;
+  frame->localoff = 0;
+  frame->pc_reg = RA_REGNUM;
+  frame->proc_desc = proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
-      /* Get the locals offset from the procedure descriptor, it is valid
-	 even if we are in the middle of the prologue.  */
+      /* Get the locals offset and the saved pc register from the
+	 procedure descriptor, they are valid even if we are in the
+	 middle of the prologue.  */
       frame->localoff = PROC_LOCALOFF(proc_desc);
+      frame->pc_reg = PROC_PC_REG(proc_desc);
 
       /* Fixup frame-pointer - only needed for top frame */
 

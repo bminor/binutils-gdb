@@ -1,3 +1,15 @@
+Thu Aug  3 01:38:45 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/alpha/tm-alpha.h (EXTRA_FRAME_INFO):  Add pc_reg field.
+	(SKIP_TRAMPOLINE_CODE):  Define.
+	* alpha-tdep.c (alpha_frame_saved_pc):  Use pc_reg field from
+	frame to find the saved pc register.
+	(alpha_saved_pc_after_call):  Skip over shared library trampoline
+	before trying to find the saved pc register.
+	(find_proc_desc):  Copy PROC_PC_REG from found proc_desc
+	to heuristic proc_desc.
+	(init_extra_frame_info):  Initialize pc_reg field in frame.
+
 Wed Aug  2 18:00:36 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.in (m68*-est-*): Use monitor target config.
