@@ -38,26 +38,28 @@ extern int original_stack_limit;
 
 extern char **environ;
 
-/* Start an inferior Unix child process and sets inferior_pid to its pid.
-   EXEC_FILE is the file to run.
-   ALLARGS is a string containing the arguments to the program.
-   ENV is the environment vector to pass.  Errors reported with error().  */
-
 #ifndef SHELL_FILE
 #define SHELL_FILE "/bin/sh"
 #endif
 
+/* Start an inferior Unix child process and sets inferior_pid to its pid.
+   EXEC_FILE is the file to run.
+   ALLARGS is a string containing the arguments to the program.
+   ENV is the environment vector to pass.  SHELL_FILE is the shell file,
+   or NULL if we should pick one.  Errors reported with error().  */
+
 void
-fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
+fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
+	       shell_file)
      char *exec_file;
      char *allargs;
      char **env;
      void (*traceme_fun) PARAMS ((void));
      void (*init_trace_fun) PARAMS ((int));
+     char *shell_file;
 {
   int pid;
   char *shell_command;
-  char *shell_file;
   static char default_shell_file[] = SHELL_FILE;
   int len;
   /* Set debug_fork then attach to the child while it sleeps, to debug. */
@@ -76,8 +78,10 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
      the program to behave the same way as if run from
      his/her favorite shell.  So we let the shell run it for us.
      FIXME-maybe, we might want a "set shell" command so the user can change
-     the shell from within GDB.  */
-  shell_file = getenv ("SHELL");
+     the shell from within GDB (if so, change callers which pass in a non-NULL
+     shell_file too).  */
+  if (shell_file == NULL)
+    shell_file = getenv ("SHELL");
   if (shell_file == NULL)
     shell_file = default_shell_file;
 

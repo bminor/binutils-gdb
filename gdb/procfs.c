@@ -34,6 +34,7 @@ regardless of whether or not the actual target has floating point hardware.
 
 #include "defs.h"
 
+#include <sys/types.h>
 #include <time.h>
 #include <sys/procfs.h>
 #include <fcntl.h>
@@ -41,6 +42,8 @@ regardless of whether or not the actual target has floating point hardware.
 #include <string.h>
 #include <stropts.h>
 #include <poll.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #include "inferior.h"
 #include "target.h"
@@ -1202,36 +1205,6 @@ init_syscall_table ()
 #if defined (SYS_sproc)
   syscall_table[SYS_sproc] = "sproc";
 #endif
-}
-
-/*
-
-GLOBAL FUNCTION
-
-	ptrace -- override library version to force errors for /proc version
-
-SYNOPSIS
-
-	int ptrace (int request, int pid, PTRACE_ARG3_TYPE arg3, int arg4)
-
-DESCRIPTION
-
-	When gdb is configured to use /proc, it should not be calling
-	or otherwise attempting to use ptrace.  In order to catch errors
-	where use of /proc is configured, but some routine is still calling
-	ptrace, we provide a local version of a function with that name
-	that does nothing but issue an error message.
-*/
-
-int
-ptrace (request, pid, arg3, arg4)
-     int request;
-     int pid;
-     PTRACE_ARG3_TYPE arg3;
-     int arg4;
-{
-  error ("internal error - there is a call to ptrace() somewhere");
-  /*NOTREACHED*/
 }
 
 /*
@@ -3448,8 +3421,78 @@ procfs_create_inferior (exec_file, allargs, env)
      char *allargs;
      char **env;
 {
+  char *shell_file = getenv ("SHELL");
+  char *tryname;
+  if (shell_file != NULL && strchr (shell_file, '/') == NULL)
+    {
+
+      /* We will be looking down the PATH to find shell_file.  If we
+	 just do this the normal way (via execlp, which operates by
+	 attempting an exec for each element of the PATH until it
+	 finds one which succeeds), then there will be an exec for
+	 each failed attempt, each of which will cause a PR_SYSEXIT
+	 stop, and we won't know how to distinguish the PR_SYSEXIT's
+	 for these failed execs with the ones for successful execs
+	 (whether the exec has succeeded is stored at that time in the
+	 carry bit or some such architecture-specific and
+	 non-ABI-specified place).
+
+	 So I can't think of anything better than to search the PATH
+	 now.  This has several disadvantages: (1) There is a race
+	 condition; if we find a file now and it is deleted before we
+	 exec it, we lose, even if the deletion leaves a valid file
+	 further down in the PATH, (2) there is no way to know exactly
+	 what an executable (in the sense of "capable of being
+	 exec'd") file is.  Using access() loses because it may lose
+	 if the caller is the superuser; failing to use it loses if
+	 there are ACLs or some such.  */
+
+      char *p;
+      char *p1;
+      /* FIXME-maybe: might want "set path" command to replace putenv hack
+	 in set_in_environ.  */
+      char *path = getenv ("PATH");
+      int len;
+      struct stat statbuf;
+
+      if (path == NULL)
+	path = "/bin:/usr/bin";
+
+      tryname = alloca (strlen (path) + strlen (shell_file) + 2);
+      for (p = path; p != NULL; p = p1 ? p1 + 1: NULL)
+	{
+	  p1 = strchr (p, ':');
+	  if (p1 != NULL)
+	    len = p1 - p;
+	  else
+	    len = strlen (p);
+	  strncpy (tryname, p, len);
+	  tryname[len] = '\0';
+	  strcat (tryname, "/");
+	  strcat (tryname, shell_file);
+	  if (access (tryname, X_OK) < 0)
+	    continue;
+	  if (stat (tryname, &statbuf) < 0)
+	    continue;
+	  if (!S_ISREG (statbuf.st_mode))
+	    /* We certainly need to reject directories.  I'm not quite
+	       as sure about FIFOs, sockets, etc., but I kind of doubt
+	       that people want to exec() these things.  */
+	    continue;
+	  break;
+	}
+      if (p == NULL)
+	/* Not found.  This must be an error rather than merely passing
+	   the file to execlp(), because execlp() would try all the
+	   exec()s, causing GDB to get confused.  */
+	error ("Can't find shell %s in PATH", shell_file);
+
+      shell_file = tryname;
+    }
+
   fork_inferior (exec_file, allargs, env,
-		 proc_set_exec_trap, procfs_init_inferior);
+		 proc_set_exec_trap, procfs_init_inferior, shell_file);
+
   /* We are at the first instruction we care about.  */
   /* Pedal to the metal... */
 

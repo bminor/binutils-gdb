@@ -3879,7 +3879,7 @@ m3_create_inferior (exec_file, allargs, env)
      char *allargs;
      char **env;
 {
-  fork_inferior (exec_file, allargs, env, m3_trace_m3, m3_trace_him);
+  fork_inferior (exec_file, allargs, env, m3_trace_m3, m3_trace_him, NULL);
   /* We are at the first instruction we care about.  */
   /* Pedal to the metal... */
   proceed ((CORE_ADDR) -1, 0, 0);

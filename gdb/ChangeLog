@@ -1,3 +1,11 @@
+Sat Jan 22 08:30:42 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* fork-child.c, inferior.h (fork_inferior): New argument shell_file.
+	* procfs.c (procfs_create_inferior), inftarg.c (child_create_inferior),
+	m3-nat.c (m3_create_inferior): Pass it.
+	* procfs.c: Remove ptrace function.  It was declared in a way which
+	conflicted with the prototype in unistd.h on Solaris.
+
 Sat Jan 22 01:37:40 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* sparc-tdep.c (frame_saved_pc):  Get the pc from the saved pc
