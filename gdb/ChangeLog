@@ -1,3 +1,8 @@
+Wed Sep 23 18:08:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (_initialize_remote, packet_command, print_packet):
+	Pretty print code.
+
 Wed Sep 23 12:32:54 1998    <cagney@amy.cygnus.com>
 
 	* remote.c (packet_command): Test REMOTE_DESC to determine if

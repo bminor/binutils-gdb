@@ -1455,8 +1455,10 @@ remote_send (buf)
 
 /* Display a null-terminated packet on stdout, for debugging, using C
    string notation.  */
+
 static void
-print_packet (char *buf)
+print_packet (buf)
+     char *buf;
 {
   puts_filtered ("\"");
   while (*buf)
@@ -2038,14 +2040,14 @@ compare_sections_command (args, from_tty)
 	printf_filtered ("matched.\n");
       else
        {
-	printf_filtered ("MIS-MATCHED!\n");
-        mismatched++;
+	 printf_filtered ("MIS-MATCHED!\n");
+	 mismatched++;
        }
 
       do_cleanups (old_chain);
     }
   if (mismatched > 0)
-     warning ("One or more sections of the remote executable does not match\nthe loaded file\n");
+    warning ("One or more sections of the remote executable does not match\nthe loaded file\n");
   if (args && !matched)
     printf_filtered ("No loaded section named '%s'.\n", args);
 }
@@ -2054,8 +2056,6 @@ static void
 packet_command (args, from_tty)
      char *args;
      int from_tty;
-
-
 {
   char buf[PBUFSIZ];
 
@@ -2142,8 +2142,7 @@ Argument is a single section name (default: all loaded sections).",
 If GDB is talking to an inferior via the GDB serial protocol, then\n\
 this command sends the string TEXT to the inferior, and displays the\n\
 response packet.  GDB supplies the initial `$' character, and the\n\
-terminating `#' character and checksum.  This command was originally\n\
-provided for use by the gdb.emc test suite.",
+terminating `#' character and checksum.",
 	   &maintenancelist);
 
   add_show_from_set (add_set_cmd ("remotetimeout", no_class,
@@ -2161,16 +2160,3 @@ provided for use by the gdb.emc test suite.",
 				  "Set the maximum number of bytes in each memory write packet.\n", &setlist),
 		     &showlist);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
