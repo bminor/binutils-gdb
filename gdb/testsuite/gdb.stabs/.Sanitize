@@ -26,9 +26,9 @@ alpha.mt
 aout.mt
 configure.in
 ecoff.mt
-weird-aout.sed
-weird-ecoff.sed
-weird-xcoff.sed
+aout.sed
+ecoff.sed
+xcoff.sed
 weird.def
 weird.exp
 xcoff.mt
