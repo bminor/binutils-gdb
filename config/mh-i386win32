@@ -20,10 +20,7 @@ DLLTOOL_FOR_TARGET=${target_alias}-dlltool
 AR_FOR_TARGET=${target_alias}-ar
 NM_FOR_TARGET=${target_alias}-nm
 RANLIB_FOR_TARGET=${target_alias}-ranlib
+LD_FOR_TARGET=${target_alias}-ld
 HOST_PREFIX=cross
 HOST_PREFIX_1=cross
 MAKEINFOFLAGS=--no-split
-
-
-
-
