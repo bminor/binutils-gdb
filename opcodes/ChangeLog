@@ -1,3 +1,27 @@
+Wed Jul 13 18:01:58 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* ns32k-dis.c: Deleted all code in "#ifdef GDB".
+	(invalid_float): Enabled general version, doesn't require running
+	on ns32k host.
+
+Sun Jul 10 00:27:47 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
+
+	* opcodes/ns32k-dis.c: Semi-new file.  Had apparently been dropped
+	from distribution. A ns32k-dis.c from a previous distribution has
+	been brought up to date and supports the new interface.
+
+	* disaaemble.c: define ARCH_ns32k and add case bfd_arch_ns32k.
+
+	* configure.in: add bfd_ns32k_arch target support.
+
+	* Makefile.in: add ns32k-dis.o to ALL_MACHINES.
+	Add ns32k-dis.c to CFILES. Add dependencies for ns32k-dis.o.
+
+Wed Jun 29 22:10:37 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* h8300-dis.c (bfd_h8_disassemble): Get 16bit branch
+	disassembly right.
+
 Tue Jun 28 13:22:06 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* h8300-dis.c, mips-dis.c: Don't use true and false.
