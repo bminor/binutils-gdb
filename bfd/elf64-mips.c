@@ -91,8 +91,14 @@ static void mips_elf64_info_to_howto_rela
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static long mips_elf64_get_reloc_upper_bound
   PARAMS ((bfd *, asection *));
+static long mips_elf64_canonicalize_reloc
+  PARAMS ((bfd *, asection *, arelent **, asymbol **));
+static long mips_elf64_get_dynamic_reloc_upper_bound PARAMS ((bfd *));
+static long mips_elf64_canonicalize_dynamic_reloc
+  PARAMS ((bfd *, arelent **, asymbol **));
 static bfd_boolean mips_elf64_slurp_one_reloc_table
-  PARAMS ((bfd *, asection *, asymbol **, const Elf_Internal_Shdr *));
+  PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, bfd_size_type,
+	   arelent *, asymbol **, bfd_boolean));
 static bfd_boolean mips_elf64_slurp_reloc_table
   PARAMS ((bfd *, asection *, asymbol **, bfd_boolean));
 static void mips_elf64_write_relocs
@@ -2022,20 +2028,104 @@ mips_elf64_get_reloc_upper_bound (abfd, sec)
   return (sec->reloc_count * 3 + 1) * sizeof (arelent *);
 }
 
-/* Read the relocations from one reloc section.  */
+static long
+mips_elf64_get_dynamic_reloc_upper_bound (abfd)
+     bfd *abfd;
+{
+  return _bfd_elf_get_dynamic_reloc_upper_bound (abfd) * 3;
+}
+
+/* We must also copy more relocations than the corresponding functions
+   in elf.c would, so the two following functions are slightly
+   modified from elf.c, that multiply the external relocation count by
+   3 to obtain the internal relocation count.  */
+
+static long
+mips_elf64_canonicalize_reloc (abfd, section, relptr, symbols)
+     bfd *abfd;
+     sec_ptr section;
+     arelent **relptr;
+     asymbol **symbols;
+{
+  arelent *tblptr;
+  unsigned int i;
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+  if (! bed->s->slurp_reloc_table (abfd, section, symbols, FALSE))
+    return -1;
+
+  tblptr = section->relocation;
+  for (i = 0; i < section->reloc_count * 3; i++)
+    *relptr++ = tblptr++;
+
+  *relptr = NULL;
+
+  return section->reloc_count * 3;
+}
+
+static long
+mips_elf64_canonicalize_dynamic_reloc (abfd, storage, syms)
+     bfd *abfd;
+     arelent **storage;
+     asymbol **syms;
+{
+  bfd_boolean (*slurp_relocs)
+    PARAMS ((bfd *, asection *, asymbol **, bfd_boolean));
+  asection *s;
+  long ret;
+
+  if (elf_dynsymtab (abfd) == 0)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+
+  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+  ret = 0;
+  for (s = abfd->sections; s != NULL; s = s->next)
+    {
+      if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
+	  && (elf_section_data (s)->this_hdr.sh_type == SHT_REL
+	      || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
+	{
+	  arelent *p;
+	  long count, i;
+
+	  if (! (*slurp_relocs) (abfd, s, syms, TRUE))
+	    return -1;
+	  count = s->_raw_size / elf_section_data (s)->this_hdr.sh_entsize * 3;
+	  p = s->relocation;
+	  for (i = 0; i < count; i++)
+	    *storage++ = p++;
+	  ret += count;
+	}
+    }
+
+  *storage = NULL;
+
+  return ret;
+}
+
+/* Read the relocations from one reloc section.  This is mostly copied
+   from elfcode.h, except for the changes to expand one external
+   relocation to 3 internal ones.  We must unfortunately set
+   reloc_count to the number of external relocations, because a lot of
+   generic code seems to depend on this.  */
 
 static bfd_boolean
-mips_elf64_slurp_one_reloc_table (abfd, asect, symbols, rel_hdr)
+mips_elf64_slurp_one_reloc_table (abfd, asect, rel_hdr, reloc_count,
+				  relents, symbols, dynamic)
      bfd *abfd;
      asection *asect;
+     Elf_Internal_Shdr *rel_hdr;
+     bfd_size_type reloc_count;
+     arelent *relents;
      asymbol **symbols;
-     const Elf_Internal_Shdr *rel_hdr;
+     bfd_boolean dynamic;
 {
   PTR allocated = NULL;
   bfd_byte *native_relocs;
-  arelent *relents;
   arelent *relent;
-  bfd_vma count;
   bfd_vma i;
   int entsize;
   reloc_howto_type *howto_table;
@@ -2045,26 +2135,24 @@ mips_elf64_slurp_one_reloc_table (abfd, asect, symbols, rel_hdr)
     return FALSE;
 
   if (bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0
-      || (bfd_bread (allocated, rel_hdr->sh_size, abfd) != rel_hdr->sh_size))
+      || (bfd_bread (allocated, rel_hdr->sh_size, abfd)
+	  != rel_hdr->sh_size))
     goto error_return;
 
   native_relocs = (bfd_byte *) allocated;
 
-  relents = asect->relocation + asect->reloc_count;
-
   entsize = rel_hdr->sh_entsize;
   BFD_ASSERT (entsize == sizeof (Elf64_Mips_External_Rel)
 	      || entsize == sizeof (Elf64_Mips_External_Rela));
-
-  count = rel_hdr->sh_size / entsize;
 
   if (entsize == sizeof (Elf64_Mips_External_Rel))
     howto_table = mips_elf64_howto_table_rel;
   else
     howto_table = mips_elf64_howto_table_rela;
 
-  relent = relents;
-  for (i = 0; i < count; i++, native_relocs += entsize)
+  for (i = 0, relent = relents;
+       i < reloc_count;
+       i++, native_relocs += entsize)
     {
       Elf64_Mips_Internal_Rela rela;
       bfd_boolean used_sym, used_ssym;
@@ -2166,7 +2254,7 @@ mips_elf64_slurp_one_reloc_table (abfd, asect, symbols, rel_hdr)
 	     object file, and absolute for an executable file or
 	     shared library.  The address of a BFD reloc is always
 	     section relative.  */
-	  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
+	  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0 || dynamic)
 	    relent->address = rela.r_offset;
 	  else
 	    relent->address = rela.r_offset - asect->vma;
@@ -2193,7 +2281,10 @@ mips_elf64_slurp_one_reloc_table (abfd, asect, symbols, rel_hdr)
 }
 
 /* Read the relocations.  On Irix 6, there can be two reloc sections
-   associated with a single data section.  */
+   associated with a single data section.  This is copied from
+   elfcode.h as well, with changes as small as accounting for 3
+   internal relocs per external reloc and resetting reloc_count to
+   zero before processing the relocs of a section.  */
 
 static bfd_boolean
 mips_elf64_slurp_reloc_table (abfd, asect, symbols, dynamic)
@@ -2202,39 +2293,72 @@ mips_elf64_slurp_reloc_table (abfd, asect, symbols, dynamic)
      asymbol **symbols;
      bfd_boolean dynamic;
 {
-  bfd_size_type amt;
   struct bfd_elf_section_data * const d = elf_section_data (asect);
+  Elf_Internal_Shdr *rel_hdr;
+  Elf_Internal_Shdr *rel_hdr2;
+  bfd_size_type reloc_count;
+  bfd_size_type reloc_count2;
+  arelent *relents;
+  bfd_size_type amt;
 
-  if (dynamic)
-    {
-      bfd_set_error (bfd_error_invalid_operation);
-      return FALSE;
-    }
-
-  if (asect->relocation != NULL
-      || (asect->flags & SEC_RELOC) == 0
-      || asect->reloc_count == 0)
+  if (asect->relocation != NULL)
     return TRUE;
 
+  if (! dynamic)
+    {
+      if ((asect->flags & SEC_RELOC) == 0
+	  || asect->reloc_count == 0)
+	return TRUE;
+
+      rel_hdr = &d->rel_hdr;
+      reloc_count = NUM_SHDR_ENTRIES (rel_hdr);
+      rel_hdr2 = d->rel_hdr2;
+      reloc_count2 = (rel_hdr2 ? NUM_SHDR_ENTRIES (rel_hdr2) : 0);
+
+      BFD_ASSERT (asect->reloc_count == reloc_count + reloc_count2);
+      BFD_ASSERT (asect->rel_filepos == rel_hdr->sh_offset
+		  || (rel_hdr2 && asect->rel_filepos == rel_hdr2->sh_offset));
+
+    }
+  else
+    {
+      /* Note that ASECT->RELOC_COUNT tends not to be accurate in this
+	 case because relocations against this section may use the
+	 dynamic symbol table, and in that case bfd_section_from_shdr
+	 in elf.c does not update the RELOC_COUNT.  */
+      if (asect->_raw_size == 0)
+	return TRUE;
+
+      rel_hdr = &d->this_hdr;
+      reloc_count = NUM_SHDR_ENTRIES (rel_hdr);
+      rel_hdr2 = NULL;
+      reloc_count2 = 0;
+    }
+
   /* Allocate space for 3 arelent structures for each Rel structure.  */
-  amt = asect->reloc_count;
-  amt *= 3 * sizeof (arelent);
-  asect->relocation = (arelent *) bfd_alloc (abfd, amt);
-  if (asect->relocation == NULL)
+  amt = (reloc_count + reloc_count2) * 3 * sizeof (arelent);
+  relents = (arelent *) bfd_alloc (abfd, amt);
+  if (relents == NULL)
     return FALSE;
 
   /* The slurp_one_reloc_table routine increments reloc_count.  */
   asect->reloc_count = 0;
 
-  if (! mips_elf64_slurp_one_reloc_table (abfd, asect, symbols, &d->rel_hdr))
+  if (! mips_elf64_slurp_one_reloc_table (abfd, asect,
+					  rel_hdr, reloc_count,
+					  relents,
+					  symbols, dynamic))
     return FALSE;
   if (d->rel_hdr2 != NULL)
     {
-      if (! mips_elf64_slurp_one_reloc_table (abfd, asect, symbols,
-					      d->rel_hdr2))
+      if (! mips_elf64_slurp_one_reloc_table (abfd, asect,
+					      rel_hdr2, reloc_count2,
+					      relents + reloc_count * 3,
+					      symbols, dynamic))
 	return FALSE;
     }
 
+  asect->relocation = relents;
   return TRUE;
 }
 
@@ -2764,6 +2888,9 @@ const struct elf_size_info mips_elf64_size_info =
 				_bfd_mips_elf_print_private_bfd_data
 
 #define bfd_elf64_get_reloc_upper_bound mips_elf64_get_reloc_upper_bound
+#define bfd_elf64_canonicalize_reloc mips_elf64_canonicalize_reloc
+#define bfd_elf64_get_dynamic_reloc_upper_bound mips_elf64_get_dynamic_reloc_upper_bound
+#define bfd_elf64_canonicalize_dynamic_reloc mips_elf64_canonicalize_dynamic_reloc
 
 /* MIPS ELF64 archive functions.  */
 #define bfd_elf64_archive_functions
