@@ -1,3 +1,7 @@
+2002-03-21  Albert Chin-A-Young  <china@thewrittenword.com>
+
+	* genscripts.sh (LIB_SEARCH_DIRS): Quote path.
+
 2002-03-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (ldlang_add_undef): If the output bfd has been opened,
