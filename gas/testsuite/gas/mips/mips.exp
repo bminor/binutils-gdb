@@ -662,6 +662,9 @@ if { [istarget mips*-*-*] } then {
 	}
 	run_dump_test "elf-rel19"
 	run_dump_test "elf-rel20"
+	if $has_newabi {
+	    run_dump_test "elf-rel21"
+	}
 
 	if { !$no_mips16 } {
 	    run_dump_test "${tmips}mips${el}16-e"

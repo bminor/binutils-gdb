@@ -1,3 +1,8 @@
+2004-10-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (append_insn): Set fx_tcbit for composite relocs.
+	(md_apply_fix3): Don't treat composite relocs as done.
+
 2004-10-07  Jan Beulich <jbeulich@novell.com>
 
 	* macro.c (macro_expand_body): When ELF, use .LL rather than LL as

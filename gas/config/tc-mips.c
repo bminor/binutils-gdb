@@ -2231,6 +2231,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		fixp[i] = fix_new_exp (frag_now, fixp[0]->fx_where,
 				       fixp[0]->fx_size, address_expr,
 				       FALSE, reloc_type[i]);
+
+		/* Use fx_tcbit to mark compound relocs.  */
+		fixp[0]->fx_tcbit = 1;
+		fixp[i]->fx_tcbit = 1;
 	      }
 	}
     }
@@ -10897,7 +10901,6 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   bfd_byte *buf;
   long insn;
-  static int previous_fx_r_type = 0;
   reloc_howto_type *howto;
 
   /* We ignore generic BFD relocations we don't know about.  */
@@ -10915,18 +10918,20 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
   buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
 
-  /* We are not done if this is a composite relocation to set up gp.  */
   assert (! fixP->fx_pcrel);
-  if (fixP->fx_addsy == NULL
-      && !(fixP->fx_r_type == BFD_RELOC_MIPS_SUB
-	   || (fixP->fx_r_type == BFD_RELOC_64
-	       && (previous_fx_r_type == BFD_RELOC_GPREL32
-		   || previous_fx_r_type == BFD_RELOC_GPREL16))
-	   || (previous_fx_r_type == BFD_RELOC_MIPS_SUB
-	       && (fixP->fx_r_type == BFD_RELOC_HI16_S
-		   || fixP->fx_r_type == BFD_RELOC_LO16))))
+
+  /* Don't treat parts of a composite relocation as done.  There are two
+     reasons for this:
+
+     (1) The second and third parts will be against 0 (RSS_UNDEF) but
+	 should nevertheless be emitted if the first part is.
+
+     (2) In normal usage, composite relocations are never assembly-time
+	 constants.  The easiest way of dealing with the pathological
+	 exceptions is to generate a relocation against STN_UNDEF and
+	 leave everything up to the linker.  */
+  if (fixP->fx_addsy == NULL && fixP->fx_tcbit == 0)
     fixP->fx_done = 1;
-  previous_fx_r_type = fixP->fx_r_type;
 
   switch (fixP->fx_r_type)
     {
