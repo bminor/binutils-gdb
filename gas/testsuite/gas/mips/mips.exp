@@ -28,7 +28,11 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "bltu"
     if !$ilocks { run_dump_test "div" } else { run_dump_test "div-ilocks" }
     run_dump_test "dli"
-    run_dump_test "jal"
+    if $svr4pic {
+	run_dump_test "elf-jal"
+    } else {
+	run_dump_test "jal"
+    }
     if $svr4pic { run_dump_test "jal-svr4pic" }
     if $svr4pic { run_dump_test "jal-xgot" }
     if $empic { run_dump_test "jal-empic" }

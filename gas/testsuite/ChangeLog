@@ -1,3 +1,9 @@
+2001-06-08  H.J. Lu  <hjl@gnu.org>
+
+	* gas/mips/elf-jal.d: New file.
+
+	* gas/mips/mips.exp: Run "elf-jal" instead of "jal" for ELF.
+
 2001-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/elf/elf.exp (run_list_test): Undo $readelf change in 2001-06-07.
