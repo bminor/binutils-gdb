@@ -2859,7 +2859,7 @@ s_syntax (ignore)
       if (strncmp (input_line_pointer, sp->operand,
 		   strlen (sp->operand)) == 0)
 	{
-	  (sp->fn)();
+	  (sp->fn) ();
 
 	  input_line_pointer += strlen (sp->operand);
 	  demand_empty_rest_of_line ();

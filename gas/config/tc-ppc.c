@@ -515,7 +515,7 @@ static const struct pd_reg pre_defined_registers[] =
 
 };
 
-#define REG_NAME_CNT	(sizeof(pre_defined_registers) / sizeof(struct pd_reg))
+#define REG_NAME_CNT	(sizeof (pre_defined_registers) / sizeof (struct pd_reg))
 
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
@@ -763,7 +763,7 @@ CONST char *md_shortopts = "um:";
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);
+size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
@@ -957,7 +957,7 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf(stream, _("\
+  fprintf (stream, _("\
 PowerPC options:\n\
 -u			ignored\n\
 -mpwrx, -mpwr2		generate code for IBM POWER/2 (RIOS2)\n\
@@ -972,7 +972,7 @@ PowerPC options:\n\
 -mregnames		Allow symbolic names for registers\n\
 -mno-regnames		Do not allow symbolic names for registers\n"));
 #ifdef OBJ_ELF
-  fprintf(stream, _("\
+  fprintf (stream, _("\
 -mrelocatable		support for GCC's -mrelocatble option\n\
 -mrelocatable-lib	support for GCC's -mrelocatble-lib option\n\
 -memb			set PPC_EMB bit in ELF flags\n\
@@ -1266,7 +1266,7 @@ ppc_elf_suffix (str_p, exp_p)
   int len;
   struct map_bfd *ptr;
 
-#define MAP(str,reloc) { str, sizeof(str)-1, reloc }
+#define MAP(str,reloc) { str, sizeof (str)-1, reloc }
 
   static struct map_bfd mapping[] = {
     MAP ("l",		BFD_RELOC_LO16),
@@ -1925,10 +1925,10 @@ md_assemble (str)
 	      as_bad (_("Unimplemented toc64 expression modifier"));
 	      break;
 	    default:
-	      fprintf(stderr,
+	      fprintf (stderr,
 		      _("Unexpected return value [%d] from parse_toc_entry!\n"),
 		      toc_kind);
-	      abort();
+	      abort ();
 	      break;
 	    }
 
@@ -2122,7 +2122,7 @@ md_assemble (str)
 	  offset = target_big_endian ? (4 - size) : 0;
 
 	  if (size < 1 || size > 4)
-	    abort();
+	    abort ();
 
 	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
 			      &fixups[i].exp, reloc_howto->pc_relative,
@@ -5105,7 +5105,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  break;
 
 	default:
-	  fprintf(stderr,
+	  fprintf (stderr,
 		  _("Gas failure, reloc value %d\n"), fixp->fx_r_type);
 	  fflush(stderr);
 	  abort ();

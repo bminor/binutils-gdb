@@ -4261,7 +4261,7 @@ struct option md_longopts[] = {
 #endif
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);
+size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
@@ -4764,7 +4764,7 @@ pa_parse_number (s, is_float)
   return 0;
 }
 
-#define REG_NAME_CNT	(sizeof(pre_defined_registers) / sizeof(struct pd_reg))
+#define REG_NAME_CNT	(sizeof (pre_defined_registers) / sizeof (struct pd_reg))
 
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */

@@ -270,7 +270,7 @@ static unsigned int cpu_arch_flags = 0;
 #endif
 
 #define ENCODE_RELAX_STATE(type,size) \
-  ((relax_substateT)((type<<2) | (size)))
+  ((relax_substateT) ((type<<2) | (size)))
 #define SIZE_FROM_RELAX_STATE(s) \
     ( (((s) & 0x3) == BIG ? 4 : (((s) & 0x3) == BIG16 ? 2 : 1)) )
 
@@ -4843,7 +4843,7 @@ intel_e11 ()
 
       save_str = (char *)malloc (strlen (cur_token.str) + 1);
       if (save_str == NULL)
-	abort();
+	abort ();
       strcpy (save_str, cur_token.str);
 
       /* Get the next token to check for register scaling.  */
@@ -4961,7 +4961,7 @@ intel_get_token ()
      string.  */
   new_token.str = (char *)malloc (strlen (intel_parser.op_string) + 1);
   if (new_token.str == NULL)
-    abort();
+    abort ();
   new_token.str[0] = '\0';
 
   if (strchr ("0123456789", *intel_parser.op_string))

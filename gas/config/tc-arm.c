@@ -2493,27 +2493,27 @@ static int
 accum0_required_here (str)
      char ** str;
 {
-  static char buff [128];	/* Note the address is taken.  Hence, static. */
+  static char buff [128];	/* Note the address is taken.  Hence, static.  */
   char * p = * str;
   char   c;
   int result = 0;		/* The accum number.  */
 
   skip_whitespace (p);
-  
+
   *str = p;			/* Advance caller's string pointer too.  */
   c = *p++;
   while (isalnum (c))
     c = *p++;
 
   *--p = 0;			/* Aap nul into input buffer at non-alnum.  */
-  
+
   if (! ( streq (*str, "acc0") || streq (*str, "ACC0")))
     {
       sprintf (buff, _("acc0 expected, not '%.100s'"), *str);
       inst.error = buff;
       result = FAIL;
     }
-  
+
   *p = c;			/* Unzap.  */
   *str = p;			/* Caller's string pointer to after match.  */
   return result;
@@ -2521,9 +2521,9 @@ accum0_required_here (str)
 
 /* Expects **str -> after a comma. May be leading blanks.
    Advances *str, recognizing a load  mode, and setting inst.instruction.
-   Returns rn, or else FAIL (in which case may set inst.error 
+   Returns rn, or else FAIL (in which case may set inst.error
    and not advance str)
- 
+
    Note: doesn't know Rd, so no err checks that require such knowledge.  */
 
 static int
@@ -2535,11 +2535,11 @@ ld_mode_required_here (string)
   int    pre_inc = 0;
 
   skip_whitespace (str);
-    
+
   if (* str == '[')
     {
       str++;
-      
+
       skip_whitespace (str);
 
       if ((rn = reg_required_here (& str, 16)) == FAIL)
@@ -2550,7 +2550,7 @@ ld_mode_required_here (string)
       if (* str == ']')
 	{
 	  str ++;
-	  
+
 	  if (skip_past_comma (& str) == SUCCESS)
 	    {
 	      /* [Rn],... (post inc) */
@@ -2580,7 +2580,7 @@ ld_mode_required_here (string)
 	    }
 
 	  pre_inc = 1;
-	  
+
 	  if (ldst_extend (& str, 1) == FAIL)
 	    return FAIL;
 
@@ -2615,14 +2615,14 @@ ld_mode_required_here (string)
       inst.reloc.exp.X_add_number -= 8;  		/* PC rel adjust.  */
       inst.reloc.pc_rel            = 1;
       inst.instruction            |= (REG_PC << 16);
-      
+
       rn = REG_PC;
       pre_inc = 1;
     }
 
   inst.instruction |= (pre_inc ? PRE_INDEX : 0);
   * string = str;
-  
+
   return rn;
 }
 
@@ -2649,7 +2649,7 @@ do_smla (str, flags)
       || (rn = reg_required_here (& str, 12)) == FAIL)
     inst.error = BAD_ARGS;
 
-  else if (rd == REG_PC || rm == REG_PC || rs == REG_PC || rn == REG_PC) 
+  else if (rd == REG_PC || rm == REG_PC || rs == REG_PC || rn == REG_PC)
     inst.error = BAD_PC;
 
   else if (flags)
@@ -2693,7 +2693,7 @@ do_smlal (str, flags)
 
   if (rdlo == rdhi)
     as_tsktsk (_("rdhi and rdlo must be different"));
-  
+
   if (flags)
     inst.error = BAD_FLAGS;
   else
@@ -2762,10 +2762,10 @@ do_qadd (str, flags)
 
 /* ARM V5E (el Segundo)
    MCRRcc <coproc>, <opcode>, <Rd>, <Rn>, <CRm>.
-   MRRCcc <coproc>, <opcode>, <Rd>, <Rn>, <CRm>. 
+   MRRCcc <coproc>, <opcode>, <Rd>, <Rn>, <CRm>.
 
    These are equivalent to the XScale instructions MAR and MRA,
-   respectively, when coproc == 0, opcode == 0, and CRm == 0.  
+   respectively, when coproc == 0, opcode == 0, and CRm == 0.
 
    Result unpredicatable if Rd or Rn is R15.  */
 
@@ -2811,7 +2811,7 @@ do_co_reg2c (str, flags)
 
   /* Unpredictable result if rd or rn is R15.  */
   if (rd == REG_PC || rn == REG_PC)
-    as_tsktsk 
+    as_tsktsk
       (_("Warning: Instruction unpredictable when using r15"));
 
   if (skip_past_comma (& str) == FAIL
@@ -2827,7 +2827,6 @@ do_co_reg2c (str, flags)
 
   end_of_line (str);
 }
-
 
 /* ARM V5 count-leading-zeroes instruction (argument parse)
      CLZ{<cond>} <Rd>, <Rm>
@@ -2961,7 +2960,7 @@ do_cdp2 (str, flags)
 
   if (flags)
     inst.error = BAD_FLAGS;
-  
+
   end_of_line (str);
 }
 
@@ -3043,7 +3042,7 @@ do_t_bkpt (str)
   expressionS expr;
   unsigned long number;
 
-  skip_whitespace (str);     
+  skip_whitespace (str);
 
   /* Allow optional leading '#'.  */
   if (is_immediate_prefix (*str))
@@ -3055,9 +3054,9 @@ do_t_bkpt (str)
       inst.error = _("bad or missing expression");
       return;
     }
-  
+
   number = expr.X_add_number;
-  
+
   /* Check it fits an 8 bit unsigned.  */
   if (number != (number & 0xff))
     {
@@ -3082,20 +3081,20 @@ do_branch25 (str, flags)
 {
   if (my_get_expression (& inst.reloc.exp, & str))
     return;
-  
+
 #ifdef OBJ_ELF
   {
     char * save_in;
-  
+
     /* ScottB: February 5, 1998 */
     /* Check to see of PLT32 reloc required for the instruction.  */
-    
+
     /* arm_parse_reloc() works on input_line_pointer.
        We actually want to parse the operands to the branch instruction
        passed in 'str'.  Save the input pointer and restore it later.  */
     save_in = input_line_pointer;
     input_line_pointer = str;
-    
+
     if (inst.reloc.exp.X_op == O_symbol
 	&& *str == '('
 	&& arm_parse_reloc () == BFD_RELOC_ARM_PLT32)
@@ -3111,14 +3110,14 @@ do_branch25 (str, flags)
 	inst.reloc.type   = BFD_RELOC_ARM_PCREL_BLX;
 	inst.reloc.pc_rel = 1;
       }
-    
+
     input_line_pointer = save_in;
   }
 #else
   inst.reloc.type   = BFD_RELOC_ARM_PCREL_BLX;
   inst.reloc.pc_rel = 1;
 #endif /* OBJ_ELF */
-  
+
   end_of_line (str);
 }
 
@@ -3127,7 +3126,7 @@ do_branch25 (str, flags)
      BLX{<condition>} <Rm>	ie BLX(2)
    Unfortunately, there are two different opcodes for this mnemonic.
    So, the insns[].value is not used, and the code here zaps values
-	into inst.instruction.	
+	into inst.instruction.
    Also, the <target_addr> can be 25 bits, hence has its own reloc.  */
 
 static void
@@ -3143,13 +3142,13 @@ do_blx (str, flags)
       as_bad (BAD_FLAGS);
       return;
     }
-    	
+
   skip_whitespace (mystr);
   rm = reg_required_here (& mystr, 0);
-  
+
   /* The above may set inst.error.  Ignore his opinion.  */
   inst.error = 0;
-  
+
   if (rm != FAIL)
     {
       /* Arg is a register.
@@ -3166,9 +3165,9 @@ do_blx (str, flags)
       	  inst.error = BAD_COND;
 	  return;
     	}
-      
+
       inst.instruction = 0xfafffffe;
-      
+
       /* Process like a B/BL, but with a different reloc.
 	 Note that B/BL expecte fffffe, not 0, offset in the opcode table.  */
       do_branch25 (str, flags);
@@ -3193,11 +3192,11 @@ do_t_blx (str)
   inst.instruction = 0x4780;
 
   /* Note that this call is to the ARM register recognizer.  BLX(2)
-     uses the ARM register space, not the Thumb one, so a call to 
+     uses the ARM register space, not the Thumb one, so a call to
      thumb_reg() would be wrong.  */
   rm = reg_required_here (& mystr, 3);
   inst.error = 0;
-  
+
   if (rm != FAIL)
     {
       /* It's BLX(2).  The .instruction was zapped with rm & is final.  */
@@ -3211,11 +3210,11 @@ do_t_blx (str)
 
       if (my_get_expression (& inst.reloc.exp, & mystr))
 	return;
-      
+
       inst.reloc.type   = BFD_RELOC_THUMB_PCREL_BLX;
       inst.reloc.pc_rel = 1;
     }
-  
+
   end_of_line (mystr);
 }
 
@@ -3235,31 +3234,31 @@ do_bkpt (str, flags)
   unsigned long number;
 
   skip_whitespace (str);
-  
+
   /* Allow optional leading '#'.  */
   if (is_immediate_prefix (* str))
     str++;
 
   memset (& expr, '\0', sizeof (expr));
-  
+
   if (my_get_expression (& expr, & str) || (expr.X_op != O_constant))
     {
       inst.error = _("bad or missing expression");
       return;
     }
-  
+
   number = expr.X_add_number;
-  
+
   /* Check it fits a 16 bit unsigned.  */
   if (number != (number & 0xffff))
     {
       inst.error = _("immediate value out of range");
       return;
     }
-  
+
   /* Top 12 of 16 bits to bits 19:8.  */
   inst.instruction |= (number & 0xfff0) << 4;
-  
+
   /* Bottom 4 of 16 bits to bits 3:0.  */
   inst.instruction |= number & 0xf;
 
@@ -3270,7 +3269,7 @@ do_bkpt (str, flags)
 }
 
 /* Xscale multiply-accumulate (argument parse)
-     MIAcc   acc0,Rm,Rs	
+     MIAcc   acc0,Rm,Rs
      MIAPHcc acc0,Rm,Rs
      MIAxycc acc0,Rm,Rs.  */
 
@@ -3284,22 +3283,22 @@ do_mia (str, flags)
 
   if (flags)
     as_bad (BAD_FLAGS);
-  
+
   else if (accum0_required_here (& str) == FAIL)
     inst.error = ERR_NO_ACCUM;
-  
+
   else if (skip_past_comma (& str) == FAIL
 	   || (rm = reg_required_here (& str, 0)) == FAIL)
     inst.error = BAD_ARGS;
-  
+
   else if (skip_past_comma (& str) == FAIL
 	   || (rs = reg_required_here (& str, 12)) == FAIL)
     inst.error = BAD_ARGS;
-  
-  /* inst.instruction has now been zapped with both rm and rs. */
+
+  /* inst.instruction has now been zapped with both rm and rs.  */
   else if (rm == REG_PC || rs == REG_PC)
     inst.error = BAD_PC;	/* Undefined result if rm or rs is R15.  */
-  
+
   else
     end_of_line (str);
 }
@@ -3317,22 +3316,22 @@ do_mar (str, flags)
 
   if (flags)
     as_bad (BAD_FLAGS);
-  
+
   else if (accum0_required_here (& str) == FAIL)
     inst.error = ERR_NO_ACCUM;
-  
+
   else if (skip_past_comma (& str) == FAIL
 	   || (rdlo = reg_required_here (& str, 12)) == FAIL)
     inst.error = BAD_ARGS;
-  
+
   else if (skip_past_comma (& str) == FAIL
 	   || (rdhi = reg_required_here (& str, 16)) == FAIL)
     inst.error = BAD_ARGS;
-  
+
   /* inst.instruction has now been zapped with both rdlo and rdhi.  */
   else if (rdlo == REG_PC || rdhi == REG_PC)
     inst.error = BAD_PC;	/* Undefined result if rdlo or rdhi is R15.  */
-  
+
   else
     end_of_line (str);
 }
@@ -3378,10 +3377,10 @@ do_mra (str, flags)
     end_of_line (str);
 }
 
-/* Xscale: Preload-Cache 
+/* Xscale: Preload-Cache
 
     PLD <addr_mode>
-    
+
   Syntactically, like LDR with B=1, W=0, L=1.  */
 
 static void
@@ -3412,7 +3411,7 @@ do_pld (str, flags)
     return;
 
   skip_whitespace (str);
-  
+
   if (* str == ']')
     {
       /* [Rn], ... ?  */
@@ -3439,7 +3438,7 @@ do_pld (str, flags)
 	  inst.error = _("pre-indexed expression expected");
 	  return;
 	}
-      
+
       if (ldst_extend (& str, 0) == FAIL)
 	return;
 
@@ -3453,13 +3452,13 @@ do_pld (str, flags)
 
       ++ str;
       skip_whitespace (str);
-      
+
       if (* str == '!') /* [Rn]! */
 	{
 	  inst.error = _("writeback used in preload instruction");
 	  ++ str;
 	}
-      
+
       inst.instruction |= PRE_INDEX;
     }
 
@@ -3493,7 +3492,7 @@ do_ldrd (str, flags)
 
       return;
     }
-  
+
   if ((cpu_variant & ARM_EXT_XSCALE) != ARM_EXT_XSCALE)
     {
       static char buff[128];
@@ -3502,15 +3501,15 @@ do_ldrd (str, flags)
       while (isspace (*str))
 	--str;
       str -= 4;
-      
+
       /* Deny all knowledge.  */
       sprintf (buff, _("bad instruction '%.100s'"), str);
       inst.error = buff;
       return;
     }
-  
+
   skip_whitespace (str);
-    
+
   if ((rd = reg_required_here (& str, 12)) == FAIL)
     {
       inst.error = BAD_ARGS;
@@ -3524,11 +3523,11 @@ do_ldrd (str, flags)
         inst.error = BAD_ARGS;
       return;
     }
-  
+
   /* inst.instruction has now been zapped with Rd and the addressing mode.  */
   if (rd & 1)		/* Unpredictable result if Rd is odd.  */
     {
-      inst.error = _("Destination register must be even");	
+      inst.error = _("Destination register must be even");
       return;
     }
 
@@ -3543,7 +3542,7 @@ do_ldrd (str, flags)
       ((inst.instruction & WRITE_BACK)
        || (!(inst.instruction & PRE_INDEX))))
     as_warn (_("pre/post-indexing used when modified address register is destination"));
-  
+
   end_of_line (str);
 }
 
@@ -6464,7 +6463,7 @@ md_begin ()
     if (atpcs)
       {
 	asection * sec;
-	
+
 	sec = bfd_make_section (stdoutput, ".arm.atpcs");
 
 	if (sec != NULL)

@@ -1109,10 +1109,10 @@ get_operand (oper, which, opmode)
 
           if (possible_mode != M6811_OP_NONE)
             mode = possible_mode;
-          
+
           if ((current_architecture & cpu6811)
               && possible_mode != M6811_OP_NONE)
-            as_bad (_("Pre-increment mode is not valid for 68HC11"));            
+            as_bad (_("Pre-increment mode is not valid for 68HC11"));
 	  /* Backtrack.  */
 	  if (which == 0 && opmode & M6812_OP_IDX_P2
 	      && reg != REG_X && reg != REG_Y

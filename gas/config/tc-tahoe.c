@@ -373,7 +373,7 @@ CONST char *md_shortopts = "ad:STt:V";
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);
+size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
@@ -417,7 +417,7 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf(stream, _("\
+  fprintf (stream, _("\
 Tahoe options:\n\
 -a			ignored\n\
 -d LENGTH		ignored\n\

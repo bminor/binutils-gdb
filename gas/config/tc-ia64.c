@@ -5267,7 +5267,7 @@ errata_nop_necessary_p (slot, insn_unit)
 		  && strncmp (idesc->name, "probe", 5) != 0)
 	      return 0;
 	    }
-	  if (prev_group->g_reg_set_conditionally[regno]) 
+	  if (prev_group->g_reg_set_conditionally[regno])
 	    return 1;
 	}
     }
@@ -8510,7 +8510,7 @@ mark_resource (idesc, dep, spec, depind, path)
       regdepstotlen += 20;
       regdeps = (struct rsrc *)
 	xrealloc ((void *) regdeps,
-		  regdepstotlen * sizeof(struct rsrc));
+		  regdepstotlen * sizeof (struct rsrc));
     }
 
   regdeps[regdepslen] = *spec;

@@ -277,7 +277,7 @@ md_assemble (str)
     {
       /* It's a fake opcode.  Dig out the args and pretend that was
          what we were passed.  */
-      ((void (*)()) opcode->name) (opcode, op_end);
+      ((void (*) ()) opcode->name) (opcode, op_end);
     }
   else
     {

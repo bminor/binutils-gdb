@@ -1,3 +1,25 @@
+2000-12-03  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-a29k.c: Fix formatting.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-cris.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-i860.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-m88k.c: Likewise.
+	* config/tc-pj.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-tahoe.c: Likewise.
+	* config/tc-vax.c: Likewise.
+
 2000-12-01  Chris Demetriou  <cgd@sibyte.com>
 
         * config/tc-mips.c (mips_ip): When calculating offsets,

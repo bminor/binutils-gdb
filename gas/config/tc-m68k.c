@@ -643,7 +643,7 @@ CONST pseudo_typeS mote_pseudo_table[] =
 extern char *input_line_pointer;
 
 static char mklower_table[256];
-#define mklower(c) (mklower_table[(unsigned char)(c)])
+#define mklower(c) (mklower_table[(unsigned char) (c)])
 static char notend_table[256];
 static char alt_notend_table[256];
 #define notend(s)						\
@@ -2441,7 +2441,7 @@ m68k_ip (instring)
 	    case FPREG:
 	    default:
 	      as_bad (_("unknown/incorrect operand"));
-	      /* abort(); */
+	      /* abort (); */
 	    }
 	  install_gen_operand (s[1], tmpreg);
 	  break;
@@ -6765,7 +6765,7 @@ struct option md_longopts[] = {
   {"pcrel", no_argument, NULL, OPTION_PCREL},
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);
+size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
@@ -6929,7 +6929,7 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf(stream, _("\
+  fprintf (stream, _("\
 680X0 options:\n\
 -l			use 1 word for refs to undefined symbols [default 2]\n\
 -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -m68060\n\
@@ -6939,7 +6939,7 @@ md_show_usage (stream)
 -m68881 | -m68882 | -mno-68881 | -mno-68882\n\
 			target has/lacks floating-point coprocessor\n\
 			[default yes for 68020, 68030, and cpu32]\n"));
-  fprintf(stream, _("\
+  fprintf (stream, _("\
 -m68851 | -mno-68851\n\
 			target has/lacks memory-management unit coprocessor\n\
 			[default yes for 68020 and up]\n\

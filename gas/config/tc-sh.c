@@ -233,7 +233,7 @@ sh_elf_suffix (str_p, exp_p, new_exp_p)
   int len;
   struct map_bfd *ptr;
 
-#define MAP(str,reloc) { str, sizeof(str)-1, reloc }
+#define MAP(str,reloc) { str, sizeof (str)-1, reloc }
 
   static struct map_bfd mapping[] = {
     MAP ("got",		BFD_RELOC_32_GOT_PCREL),

@@ -79,13 +79,13 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf(stream, "\
+  fprintf (stream, "\
 S/370 options: (these have not yet been tested and may not work) \n\
 -u        		ignored\n\
 -mregnames        	Allow symbolic names for registers\n\
 -mno-regnames        	Do not allow symbolic names for registers\n");
 #ifdef OBJ_ELF
-  fprintf(stream, "\
+  fprintf (stream, "\
 -mrelocatable        	support for GCC's -mrelocatble option\n\
 -mrelocatable-lib       support for GCC's -mrelocatble-lib option\n\
 -V        		print assembler version number\n");
@@ -274,7 +274,7 @@ static const struct pd_reg pre_defined_registers[] =
 
 };
 
-#define REG_NAME_CNT        (sizeof(pre_defined_registers) / sizeof(struct pd_reg))
+#define REG_NAME_CNT        (sizeof (pre_defined_registers) / sizeof (struct pd_reg))
 
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
@@ -437,7 +437,7 @@ struct option md_longopts[] =
 {
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);
+size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
@@ -682,7 +682,7 @@ i370_elf_suffix (str_p, exp_p)
   int len;
   struct map_bfd *ptr;
 
-#define MAP(str,reloc) { str, sizeof(str)-1, reloc }
+#define MAP(str,reloc) { str, sizeof (str)-1, reloc }
 
   static struct map_bfd mapping[] =
   {
@@ -942,7 +942,7 @@ i370_ebcdic (unused)
       p = frag_more (nbytes);
       while (end > input_line_pointer)
 	{
-	  *p = ascebc [(unsigned char)(*input_line_pointer)];
+	  *p = ascebc [(unsigned char) (*input_line_pointer)];
 	  ++p; ++input_line_pointer;
 	}
       *p = '\0';
@@ -2338,7 +2338,7 @@ md_assemble (str)
 	  size = bfd_get_reloc_size (reloc_howto);
 
 	  if (size < 1 || size > 4)
-	    abort();
+	    abort ();
 
 	  printf (" gwana doo fixup %d \n", i);
 	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal, size,
@@ -2915,7 +2915,7 @@ md_apply_fix3 (fixp, valuep, seg)
           break;
 
         default:
-          fprintf(stderr,
+          fprintf (stderr,
         	  "Gas failure, reloc value %d\n", fixp->fx_r_type);
           fflush(stderr);
           abort ();

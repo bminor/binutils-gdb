@@ -723,7 +723,7 @@ md_chars_to_number (val, n)
 }
 
 #define MAX_LITTLENUMS	6
-#define LNUM_SIZE	sizeof(LITTLENUM_TYPE)
+#define LNUM_SIZE	sizeof (LITTLENUM_TYPE)
 
 /*****************************************************************************
    md_atof:	convert ascii to floating point

@@ -1236,7 +1236,7 @@ md_apply_fix3 (fix, valuep, seg)
 {
 
   char *buf;
-  long val = (long)(*valuep);
+  long val = (long) (*valuep);
   unsigned long insn;
   valueT fup;
 

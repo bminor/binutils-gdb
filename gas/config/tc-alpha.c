@@ -145,14 +145,14 @@ struct alpha_macro
 
 #if 1
 #define range_signed_16(x) \
-	(((offsetT)(x) >> 15) == 0 || ((offsetT)(x) >> 15) == -1)
+	(((offsetT) (x) >> 15) == 0 || ((offsetT) (x) >> 15) == -1)
 #define range_signed_32(x) \
-	(((offsetT)(x) >> 31) == 0 || ((offsetT)(x) >> 31) == -1)
+	(((offsetT) (x) >> 31) == 0 || ((offsetT) (x) >> 31) == -1)
 #else
-#define range_signed_16(x)	((offsetT)(x) >= -(offsetT)0x8000 &&	\
-				 (offsetT)(x) <=  (offsetT)0x7FFF)
-#define range_signed_32(x)	((offsetT)(x) >= -(offsetT)0x80000000 && \
-				 (offsetT)(x) <=  (offsetT)0x7FFFFFFF)
+#define range_signed_16(x)	((offsetT) (x) >= -(offsetT)0x8000 &&	\
+				 (offsetT) (x) <=  (offsetT)0x7FFF)
+#define range_signed_32(x)	((offsetT) (x) >= -(offsetT)0x80000000 && \
+				 (offsetT) (x) <=  (offsetT)0x7FFFFFFF)
 #endif
 
 /* Macros for sign extending from 16- and 32-bits.  */
@@ -160,33 +160,33 @@ struct alpha_macro
    but really a predicate should be found to use the non-cast forms.  */
 
 #if 1
-#define sign_extend_16(x)	((short)(x))
-#define sign_extend_32(x)	((int)(x))
+#define sign_extend_16(x)	((short) (x))
+#define sign_extend_32(x)	((int) (x))
 #else
-#define sign_extend_16(x)	((offsetT)(((x) & 0xFFFF) ^ 0x8000) - 0x8000)
-#define sign_extend_32(x)	((offsetT)(((x) & 0xFFFFFFFF) \
+#define sign_extend_16(x)	((offsetT) (((x) & 0xFFFF) ^ 0x8000) - 0x8000)
+#define sign_extend_32(x)	((offsetT) (((x) & 0xFFFFFFFF) \
 					   ^ 0x80000000) - 0x80000000)
 #endif
 
 /* Macros to build tokens */
 
-#define set_tok_reg(t, r)	(memset(&(t), 0, sizeof(t)),		\
+#define set_tok_reg(t, r)	(memset(&(t), 0, sizeof (t)),		\
 				 (t).X_op = O_register,			\
 				 (t).X_add_number = (r))
-#define set_tok_preg(t, r)	(memset(&(t), 0, sizeof(t)),		\
+#define set_tok_preg(t, r)	(memset(&(t), 0, sizeof (t)),		\
 				 (t).X_op = O_pregister,		\
 				 (t).X_add_number = (r))
-#define set_tok_cpreg(t, r)	(memset(&(t), 0, sizeof(t)),		\
+#define set_tok_cpreg(t, r)	(memset(&(t), 0, sizeof (t)),		\
 				 (t).X_op = O_cpregister,		\
 				 (t).X_add_number = (r))
-#define set_tok_freg(t, r)	(memset(&(t), 0, sizeof(t)),		\
+#define set_tok_freg(t, r)	(memset(&(t), 0, sizeof (t)),		\
 				 (t).X_op = O_register,			\
 				 (t).X_add_number = (r)+32)
-#define set_tok_sym(t, s, a)	(memset(&(t), 0, sizeof(t)),		\
+#define set_tok_sym(t, s, a)	(memset(&(t), 0, sizeof (t)),		\
 				 (t).X_op = O_symbol,			\
 				 (t).X_add_symbol = (s),		\
 				 (t).X_add_number = (a))
-#define set_tok_const(t, n)	(memset(&(t), 0, sizeof(t)),		\
+#define set_tok_const(t, n)	(memset(&(t), 0, sizeof (t)),		\
 				 (t).X_op = O_constant,			\
 				 (t).X_add_number = (n))
 
@@ -320,7 +320,7 @@ struct option md_longopts[] = {
   { NULL, no_argument, NULL, 0 }
 };
 
-size_t md_longopts_size = sizeof(md_longopts);
+size_t md_longopts_size = sizeof (md_longopts);
 
 
 #ifdef OBJ_EVAX
@@ -478,7 +478,7 @@ static int alpha_flag_show_after_trunc = 0;		/* -H */
 #define ALPHA_RELOC_TABLE(op)						\
 &alpha_reloc_op[ ((!USER_RELOC_P (op))					\
 		  ? (abort (), 0)					\
-		  : (int)(op) - (int)O_literal) ]
+		  : (int) (op) - (int)O_literal) ]
 
 #define LITUSE_BASE	1
 #define LITUSE_BYTOFF	2
@@ -550,13 +550,13 @@ static const struct alpha_reloc_op_tag {
 };
 
 static const int alpha_num_reloc_op
-  = sizeof(alpha_reloc_op) / sizeof(*alpha_reloc_op);
+  = sizeof (alpha_reloc_op) / sizeof (*alpha_reloc_op);
 
 /* Maximum # digits needed to hold the largest sequence # */
 #define ALPHA_RELOC_DIGITS 25
 
 /* Whether a sequence number is valid.  */
-#define ALPHA_RELOC_SEQUENCE_OK(X) ((X) > 0 && ((unsigned)(X)) == (X))
+#define ALPHA_RELOC_SEQUENCE_OK(X) ((X) > 0 && ((unsigned) (X)) == (X))
 
 /* Structure to hold explict sequence information.  */
 struct alpha_literal_tag
@@ -804,7 +804,7 @@ static const struct alpha_macro alpha_macros[] = {
 };
 
 static const unsigned int alpha_num_macros
-  = sizeof(alpha_macros) / sizeof(*alpha_macros);
+  = sizeof (alpha_macros) / sizeof (*alpha_macros);
 
 /* Public interface functions */
 
@@ -881,14 +881,14 @@ md_begin ()
   for (i = 0; i < 32; ++i)
     {
       char name[4];
-      sprintf(name, "$%d", i);
+      sprintf (name, "$%d", i);
       alpha_register_table[i] = symbol_create(name, reg_section, i,
 					      &zero_address_frag);
     }
   for (; i < 64; ++i)
     {
       char name[5];
-      sprintf(name, "$f%d", i-32);
+      sprintf (name, "$f%d", i-32);
       alpha_register_table[i] = symbol_create(name, reg_section, i,
 					      &zero_address_frag);
     }
@@ -2142,7 +2142,7 @@ find_opcode_match(first_opcode, tok, pntok, pcpumatch)
 
 	    default:
 	      /* everything else should have been fake */
-	      abort();
+	      abort ();
 	    }
 	  ++tokidx;
 	}
@@ -2410,7 +2410,7 @@ assemble_insn(opcode, tok, ntok, insn)
 	      }
 	      break;
 	    default:
-	      abort();
+	      abort ();
 	    }
 	}
       else
@@ -3169,7 +3169,7 @@ load_expression (targreg, exp, pbasereg, poffset, explicit_reloc)
       if (insn.nfixups > 0)
 	{
 	  memmove (&insn.fixups[1], &insn.fixups[0],
-		   sizeof(struct alpha_fixup) * insn.nfixups);
+		   sizeof (struct alpha_fixup) * insn.nfixups);
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
@@ -3426,7 +3426,7 @@ emit_ir_load (tok, ntok, opname)
       if (insn.nfixups > 0)
 	{
 	  memmove (&insn.fixups[1], &insn.fixups[0],
-		   sizeof(struct alpha_fixup) * insn.nfixups);
+		   sizeof (struct alpha_fixup) * insn.nfixups);
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
@@ -3512,7 +3512,7 @@ emit_loadstore (tok, ntok, opname)
       if (insn.nfixups > 0)
 	{
 	  memmove (&insn.fixups[1], &insn.fixups[0],
-		   sizeof(struct alpha_fixup) * insn.nfixups);
+		   sizeof (struct alpha_fixup) * insn.nfixups);
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
@@ -3677,7 +3677,7 @@ emit_ldil (tok, ntok, unused)
     }
 #endif
 
-  memcpy (newtok, tok, sizeof(newtok));
+  memcpy (newtok, tok, sizeof (newtok));
   newtok[1].X_add_number = sign_extend_32 (tok[1].X_add_number);
 
   assemble_tokens ("lda", newtok, ntok, 1);
@@ -3691,7 +3691,7 @@ emit_stX (tok, ntok, vlgsize)
      int ntok;
      const PTR vlgsize;
 {
-  int lgsize = (int)(long)vlgsize;
+  int lgsize = (int) (long)vlgsize;
 
   if (alpha_target & AXP_OPCODE_BWX)
     emit_loadstore (tok, ntok, stX_op[lgsize]);
@@ -3749,7 +3749,7 @@ emit_ustX (tok, ntok, vlgsize)
      int ntok;
      const PTR vlgsize;
 {
-  int lgsize = (int)(long)vlgsize;
+  int lgsize = (int) (long)vlgsize;
   expressionS newtok[3];
 
   /* emit "lda $at, exp" */
@@ -4169,7 +4169,7 @@ emit_jsrjmp (tok, ntok, vopname)
       if (insn.nfixups > 0)
 	{
 	  memmove (&insn.fixups[1], &insn.fixups[0],
-		   sizeof(struct alpha_fixup) * insn.nfixups);
+		   sizeof (struct alpha_fixup) * insn.nfixups);
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
@@ -4660,10 +4660,10 @@ s_alpha_coff_wrapper (which)
     ecoff_directive_val,
   };
 
-  assert (which >= 0 && which < (int)(sizeof(fns)/sizeof(*fns)));
+  assert (which >= 0 && which < (int) (sizeof (fns)/sizeof (*fns)));
 
   if (ECOFF_DEBUGGING)
-    (*fns[which])(0);
+    (*fns[which]) (0);
   else
     {
       as_bad (_("ECOFF debugging is disabled."));
@@ -5134,7 +5134,7 @@ s_alpha_gprel32 (ignore)
     case O_symbol:
       break;
     default:
-      abort();
+      abort ();
     }
 #else
 #ifdef OBJ_ECOFF

@@ -196,7 +196,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
    changed in read.c.  Ideally it shouldn't have to know about it at all,
    but nothing is ideal around here.  */
 
-#define isoctal(c)  ((unsigned)((c) - '0') < '8')
+#define isoctal(c)  ((unsigned) ((c) - '0') < '8')
 
 struct sparc_it
   {
