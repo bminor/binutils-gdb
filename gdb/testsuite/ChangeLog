@@ -1,3 +1,7 @@
+2004-06-17  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/printmethod.cc: Add copyright notice.
+
 2004-06-16  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/psmang1.cc, gdb.cp/psmang2.cc: Add copyright notice.
