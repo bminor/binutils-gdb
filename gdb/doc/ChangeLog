@@ -1,3 +1,12 @@
+2001-07-26  Christopher Faylor  <cgf@redhat.com>
+
+	* gdb.texinfo (Options): Eliminate attempt to explain .gdbinit/gdb.ini
+	use since it is described in the referenced section.
+
+	From Eli Zaretskii <eliz@is.elta.co.il>
+	* gdb.texinfo (Command Files): Reword to make gdb.ini requirement
+	clearer when using DJGPP.
+
 2001-11-24  Christopher Faylor  <cgf@redhat.com>
 
 	* gdb.texinfo (File Options): Change description of -nx and gdb.ini to
