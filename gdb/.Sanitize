@@ -15,10 +15,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-chill > /dev/null ) ; then
-	keep_these_too="ch-exp.y ch-lang.c ch-lang.h ch-typeprint.c ch-valprint.c"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -59,6 +55,11 @@ c-lang.h
 c-typeprint.c
 c-valprint.c
 call-cmds.h
+ch-exp.y
+ch-lang.c
+ch-lang.h
+ch-typeprint.c
+ch-valprint.c
 coffread.c
 command.c
 command.h
@@ -242,11 +243,6 @@ xcoffsolib.h
 z8k-tdep.c
 
 # Things which are explicitly *not* kept, for now.
-# ch-exp.y		- Part of chill support.
-# ch-lang.c		- Part of chill support.
-# ch-lang.h		- Part of chill support.
-# ch-typeprint.c	- Part of chill support.
-# ch-valprint.c		- Part of chill support.
 # energize		- Part of Lucid support.
 # energize-patches	- Part of Lucid support.
 # energize.c		- Part of Lucid support.
@@ -260,50 +256,5 @@ z8k-tdep.c
 # tests			- ?
 
 Do-last:
-
-echo Thawing away the \"chill\"...
-
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-chill > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
-			echo Keeping chill stuff in $i
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
-			echo Thawing the \"chill\" out of $i...
-			cp $i new
-			sed '/start\-sanitize\-chill/,/end-\sanitize\-chill/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				echo Caching $i in .Recover...
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-	echo Thawing the \"chill\" out of Makefile.in...
-	cp Makefile.in new
-	sed -e 's/$(srcdir)\/ch-exp.y//g' \
-	    -e 's/${srcdir}\/ch-exp.y//g' \
-	    -e 's/ch-exp.y//g' \
-	    -e 's/ch-exp.tab.c//g' \
-	    -e 's/ch-exp.tab.o//g' \
-	    -e 's/ch-lang.h//g' \
-	    -e 's/ch-lang.c//g' \
-	    -e 's/ch-lang.o//g' \
-	    -e 's/ch-typeprint.c//g' \
-	    -e 's/ch-typeprint.o//g' \
-	    -e 's/ch-valprint.c//g' \
-	    -e 's/ch-valprint.o//g' \
-	    < Makefile.in > new
-	if [ -n "${safe}" -a ! -f .Recover/Makefile.in ] ; then
-		echo Caching Makefile.in in .Recover...
-		mv Makefile.in .Recover
-	fi
-	mv new Makefile.in
-fi
 
 # End of file.
