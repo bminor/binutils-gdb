@@ -1,5 +1,12 @@
 Mon Nov 13 12:34:20 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* mpw-README: Clarify some phrasing, add notes about CodeWarrior
+	includes and FLEX_SKELETON setting.
+	* mpw-configure (--with-gnu-ld): New option, controls whether
+	to use PPCLink or ld with PowerMac GCC.
+	* mpw-build.in (all-grez, do-grez, install-grez): New targets.
+	* mpw-config.in: Configure grez if targeting Mac.
+
 	* config.sub: Accept pmac and pmac-mpw as names for PowerMacs,
  	accept mpw and mac-mpw as names for m68k Macs, change macos7 to
  	just macos.
