@@ -24,6 +24,8 @@
 #include "elf-bfd.h"
 #include "opcode/ia64.h"
 #include "elf/ia64.h"
+#include "objalloc.h"
+#include "hashtab.h"
 
 /* THE RULES for all the stuff the linker creates --
 
@@ -115,18 +117,13 @@ struct elfNN_ia64_dyn_sym_info
 
 struct elfNN_ia64_local_hash_entry
 {
-  struct bfd_hash_entry root;
+  int id;
+  unsigned int r_sym;
   struct elfNN_ia64_dyn_sym_info *info;
 
   /* TRUE if this hash entry's addends was translated for
      SHF_MERGE optimization.  */
   unsigned sec_merge_done : 1;
-};
-
-struct elfNN_ia64_local_hash_table
-{
-  struct bfd_hash_table root;
-  /* No additional fields for now.  */
 };
 
 struct elfNN_ia64_link_hash_entry
@@ -153,7 +150,8 @@ struct elfNN_ia64_link_hash_table
   unsigned self_dtpmod_done : 1;/* has self DTPMOD entry been finished? */
   bfd_vma self_dtpmod_offset;	/* .got offset to self DTPMOD entry */
 
-  struct elfNN_ia64_local_hash_table loc_hash_table;
+  htab_t loc_hash_table;
+  void *loc_hash_memory;
 };
 
 struct elfNN_ia64_allocate_data
@@ -201,12 +199,6 @@ static bfd_boolean elfNN_ia64_is_local_label_name
   PARAMS ((bfd *abfd, const char *name));
 static bfd_boolean elfNN_ia64_dynamic_symbol_p
   PARAMS ((struct elf_link_hash_entry *h, struct bfd_link_info *info, int));
-static bfd_boolean elfNN_ia64_local_hash_table_init
-  PARAMS ((struct elfNN_ia64_local_hash_table *ht, bfd *abfd,
-	   new_hash_entry_func new));
-static struct bfd_hash_entry *elfNN_ia64_new_loc_hash_entry
-  PARAMS ((struct bfd_hash_entry *entry, struct bfd_hash_table *table,
-	   const char *string));
 static struct bfd_hash_entry *elfNN_ia64_new_elf_hash_entry
   PARAMS ((struct bfd_hash_entry *entry, struct bfd_hash_table *table,
 	   const char *string));
@@ -215,15 +207,17 @@ static void elfNN_ia64_hash_copy_indirect
 	   struct elf_link_hash_entry *));
 static void elfNN_ia64_hash_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean));
+static hashval_t elfNN_ia64_local_htab_hash PARAMS ((const void *));
+static int elfNN_ia64_local_htab_eq PARAMS ((const void *ptr1,
+					     const void *ptr2));
 static struct bfd_link_hash_table *elfNN_ia64_hash_table_create
   PARAMS ((bfd *abfd));
-static struct elfNN_ia64_local_hash_entry *elfNN_ia64_local_hash_lookup
-  PARAMS ((struct elfNN_ia64_local_hash_table *table, const char *string,
-	   bfd_boolean create, bfd_boolean copy));
+static void elfNN_ia64_hash_table_free
+  PARAMS ((struct bfd_link_hash_table *hash));
 static bfd_boolean elfNN_ia64_global_dyn_sym_thunk
   PARAMS ((struct bfd_hash_entry *, PTR));
-static bfd_boolean elfNN_ia64_local_dyn_sym_thunk
-  PARAMS ((struct bfd_hash_entry *, PTR));
+static int elfNN_ia64_local_dyn_sym_thunk
+  PARAMS ((void **, PTR));
 static void elfNN_ia64_dyn_sym_traverse
   PARAMS ((struct elfNN_ia64_link_hash_table *ia64_info,
 	   bfd_boolean (*func) (struct elfNN_ia64_dyn_sym_info *, PTR),
@@ -1552,44 +1546,6 @@ elfNN_ia64_dynamic_symbol_p (h, info, r_type)
   return _bfd_elf_dynamic_symbol_p (h, info, ignore_protected);
 }
 
-static bfd_boolean
-elfNN_ia64_local_hash_table_init (ht, abfd, new)
-     struct elfNN_ia64_local_hash_table *ht;
-     bfd *abfd ATTRIBUTE_UNUSED;
-     new_hash_entry_func new;
-{
-  memset (ht, 0, sizeof (*ht));
-  return bfd_hash_table_init (&ht->root, new);
-}
-
-static struct bfd_hash_entry*
-elfNN_ia64_new_loc_hash_entry (entry, table, string)
-     struct bfd_hash_entry *entry;
-     struct bfd_hash_table *table;
-     const char *string;
-{
-  struct elfNN_ia64_local_hash_entry *ret;
-  ret = (struct elfNN_ia64_local_hash_entry *) entry;
-
-  /* Allocate the structure if it has not already been allocated by a
-     subclass.  */
-  if (!ret)
-    ret = bfd_hash_allocate (table, sizeof (*ret));
-
-  if (!ret)
-    return 0;
-
-  /* Initialize our local data.  All zeros, and definitely easier
-     than setting a handful of bit fields.  */
-  memset (ret, 0, sizeof (*ret));
-
-  /* Call the allocation method of the superclass.  */
-  ret = ((struct elfNN_ia64_local_hash_entry *)
-	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
-
-  return (struct bfd_hash_entry *) ret;
-}
-
 static struct bfd_hash_entry*
 elfNN_ia64_new_elf_hash_entry (entry, table, string)
      struct bfd_hash_entry *entry;
@@ -1689,6 +1645,33 @@ elfNN_ia64_hash_hide_symbol (info, xh, force_local)
     }
 }
 
+/* Compute a hash of a local hash entry.  */
+
+static hashval_t
+elfNN_ia64_local_htab_hash (ptr)
+     const void *ptr;
+{
+  struct elfNN_ia64_local_hash_entry *entry
+    = (struct elfNN_ia64_local_hash_entry *) ptr;
+
+  return (((entry->id & 0xff) << 24) | ((entry->id & 0xff00) << 8))
+	  ^ entry->r_sym ^ (entry->id >> 16);
+}
+
+/* Compare local hash entries.  */
+
+static int
+elfNN_ia64_local_htab_eq (ptr1, ptr2)
+     const void *ptr1, *ptr2;
+{
+  struct elfNN_ia64_local_hash_entry *entry1
+    = (struct elfNN_ia64_local_hash_entry *) ptr1;
+  struct elfNN_ia64_local_hash_entry *entry2
+    = (struct elfNN_ia64_local_hash_entry *) ptr2;
+
+  return entry1->id == entry2->id && entry1->r_sym == entry2->r_sym;
+}
+
 /* Create the derived linker hash table.  The IA-64 ELF port uses this
    derived hash table to keep information specific to the IA-64 ElF
    linker (without using static variables).  */
@@ -1710,8 +1693,10 @@ elfNN_ia64_hash_table_create (abfd)
       return 0;
     }
 
-  if (!elfNN_ia64_local_hash_table_init (&ret->loc_hash_table, abfd,
-				         elfNN_ia64_new_loc_hash_entry))
+  ret->loc_hash_table = htab_try_create (1024, elfNN_ia64_local_htab_hash,
+					 elfNN_ia64_local_htab_eq, NULL);
+  ret->loc_hash_memory = objalloc_create ();
+  if (!ret->loc_hash_table || !ret->loc_hash_memory)
     {
       free (ret);
       return 0;
@@ -1720,16 +1705,19 @@ elfNN_ia64_hash_table_create (abfd)
   return &ret->root.root;
 }
 
-/* Look up an entry in a Alpha ELF linker hash table.  */
+/* Destroy IA-64 linker hash table.  */
 
-static INLINE struct elfNN_ia64_local_hash_entry *
-elfNN_ia64_local_hash_lookup(table, string, create, copy)
-     struct elfNN_ia64_local_hash_table *table;
-     const char *string;
-     bfd_boolean create, copy;
+static void
+elfNN_ia64_hash_table_free (hash)
+     struct bfd_link_hash_table *hash;
 {
-  return ((struct elfNN_ia64_local_hash_entry *)
-	  bfd_hash_lookup (&table->root, string, create, copy));
+  struct elfNN_ia64_link_hash_table *ia64_info
+    = (struct elfNN_ia64_link_hash_table *) hash;
+  if (ia64_info->loc_hash_table)
+    htab_delete (ia64_info->loc_hash_table);
+  if (ia64_info->loc_hash_memory)
+    objalloc_free ((struct objalloc *) ia64_info->loc_hash_memory);
+  _bfd_generic_link_hash_table_free (hash);
 }
 
 /* Traverse both local and global hash tables.  */
@@ -1761,20 +1749,20 @@ elfNN_ia64_global_dyn_sym_thunk (xentry, xdata)
 }
 
 static bfd_boolean
-elfNN_ia64_local_dyn_sym_thunk (xentry, xdata)
-     struct bfd_hash_entry *xentry;
+elfNN_ia64_local_dyn_sym_thunk (slot, xdata)
+     void **slot;
      PTR xdata;
 {
   struct elfNN_ia64_local_hash_entry *entry
-    = (struct elfNN_ia64_local_hash_entry *) xentry;
+    = (struct elfNN_ia64_local_hash_entry *) *slot;
   struct elfNN_ia64_dyn_sym_traverse_data *data
     = (struct elfNN_ia64_dyn_sym_traverse_data *) xdata;
   struct elfNN_ia64_dyn_sym_info *dyn_i;
 
   for (dyn_i = entry->info; dyn_i; dyn_i = dyn_i->next)
     if (! (*data->func) (dyn_i, data->data))
-      return FALSE;
-  return TRUE;
+      return 0;
+  return 1;
 }
 
 static void
@@ -1790,8 +1778,8 @@ elfNN_ia64_dyn_sym_traverse (ia64_info, func, data)
 
   elf_link_hash_traverse (&ia64_info->root,
 			  elfNN_ia64_global_dyn_sym_thunk, &xdata);
-  bfd_hash_traverse (&ia64_info->loc_hash_table.root,
-		     elfNN_ia64_local_dyn_sym_thunk, &xdata);
+  htab_traverse (ia64_info->loc_hash_table,
+		 elfNN_ia64_local_dyn_sym_thunk, &xdata);
 }
 
 static bfd_boolean
@@ -1853,22 +1841,33 @@ get_local_sym_hash (ia64_info, abfd, rel, create)
      const Elf_Internal_Rela *rel;
      bfd_boolean create;
 {
-  struct elfNN_ia64_local_hash_entry *ret;
+  struct elfNN_ia64_local_hash_entry e, *ret;
   asection *sec = abfd->sections;
-  char addr_name [34];
+  hashval_t h = (((sec->id & 0xff) << 24) | ((sec->id & 0xff00) << 8))
+		^ ELFNN_R_SYM (rel->r_info) ^ (sec->id >> 16);
+  void **slot;
 
-  BFD_ASSERT ((sizeof (sec->id)*2 + 1 + sizeof (unsigned long)*2 + 1) <= 34);
-  BFD_ASSERT (sec);
+  e.id = sec->id;
+  e.r_sym = ELFNN_R_SYM (rel->r_info);
+  slot = htab_find_slot_with_hash (ia64_info->loc_hash_table, &e, h,
+				   create ? INSERT : NO_INSERT);
 
-  /* Construct a string for use in the elfNN_ia64_local_hash_table.
-     name describes what was once anonymous memory.  */
+  if (!slot)
+    return NULL;
 
-  sprintf (addr_name, "%x:%lx",
-	   sec->id, (unsigned long) ELFNN_R_SYM (rel->r_info));
+  if (*slot)
+    return (struct elfNN_ia64_local_hash_entry *) *slot;
 
-  /* Collect the canonical entry data for this address.  */
-  ret = elfNN_ia64_local_hash_lookup (&ia64_info->loc_hash_table,
-				      addr_name, create, create);
+  ret = (struct elfNN_ia64_local_hash_entry *)
+	objalloc_alloc ((struct objalloc *) ia64_info->loc_hash_memory,
+			sizeof (struct elfNN_ia64_local_hash_entry));
+  if (ret)
+    {
+      memset (ret, 0, sizeof (*ret));
+      ret->id = sec->id;
+      ret->r_sym = ELFNN_R_SYM (rel->r_info);
+      *slot = ret;
+    }
   return ret;
 }
 
@@ -4871,6 +4870,8 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 /* Stuff for the BFD linker: */
 #define bfd_elfNN_bfd_link_hash_table_create \
 	elfNN_ia64_hash_table_create
+#define bfd_elfNN_bfd_link_hash_table_free \
+	elfNN_ia64_hash_table_free
 #define elf_backend_create_dynamic_sections \
 	elfNN_ia64_create_dynamic_sections
 #define elf_backend_check_relocs \

@@ -1,3 +1,25 @@
+2003-10-30  Jakub Jelinek  <jakub@redhat.com>
+
+	* elfxx-ia64.c: Include objalloc.h, hashtab.h.
+	(struct elfNN_ia64_local_hash_entry): Remove root. Add id and r_sym
+	fields.
+	(struct elfNN_ia64_local_hash_table): Remove.
+	(struct elfNN_ia64_link_hash_table): Change loc_hash_table's type
+	to htab_t.  Add loc_hash_memory field.
+	(elfNN_ia64_local_hash_table_init, elfNN_ia64_new_loc_hash_entry):
+	Removed.
+	(elfNN_ia64_local_htab_hash, elfNN_ia64_local_htab_eq): New
+	functions.
+	(elfNN_ia64_hash_table_create): Use hashtab.h hashtable for
+	loc_hash_table.  Initialize loc_hash_memory.
+	(elfNN_ia64_hash_table_free): New function.
+	(elfNN_ia64_local_hash_lookup): Remove.
+	(elfNN_ia64_local_dyn_sym_thunk): Change into htab_traverse
+	callback.
+	(elfNN_ia64_dyn_sym_traverse): Use htab_traverse.
+	(get_local_sym_hash): Use hashtab.h hashtable for loc_hash_table.
+	(bfd_elfNN_bfd_link_hash_table_free): Define.
+
 2003-10-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Modify versioned
