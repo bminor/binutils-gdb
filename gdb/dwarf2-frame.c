@@ -383,6 +383,7 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
 	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.reg[reg].how = REG_SAVED_REG;
 	      fs->regs.reg[reg].loc.reg = utmp;
 	      break;
 
