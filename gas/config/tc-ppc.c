@@ -581,7 +581,8 @@ ppc_elf_validate_fix (fixS *fixp, segT seg)
       && !fixp->fx_done
       && !fixp->fx_pcrel
       && fixp->fx_r_type <= BFD_RELOC_UNUSED
-      && strcmp (segment_name (seg), ".got2") != 0)
+      && strcmp (segment_name (seg), ".got2") != 0
+      && strcmp (segment_name (seg), ".stab") != 0)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    "Relocation cannot be done when using -mrelocatable");

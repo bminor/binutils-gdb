@@ -1,3 +1,8 @@
+Wed Mar  8 09:36:05 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_validate_fix): Allow .stab sections to
+	have non PC relative relocations with -mrelocatable.
+
 Wed Mar  8 02:57:53 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-m68k.c (opcode_ptr): Return pointer to const.
