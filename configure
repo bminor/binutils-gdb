@@ -360,8 +360,6 @@ fi
 if [ -z "${srcdir}" ] ; then
 	if [ -r configure.in ] ; then
 		srcdir=.
-	elif [ -r ../configure.in ] ; then
-		srcdir=..
 	else
 		echo '***' "Can't find configure.in.  Try using -srcdir=some_dir"
 		exit 1
@@ -755,7 +753,13 @@ ${progname}" ${arguments}  "
 					esac
 
 ### The recursion line is here.
-					if (${progname} -recurring ${host_alias} -target=${target_alias} \
+					if [ -x configure ] ; then
+						recprog=`pwd`/configure
+					else
+						recprog=${progname}
+					fi
+
+					if (${recprog} -recurring ${host_alias} -target=${target_alias} \
 						${verbose} ${subdirs} ${removing} ${prefixoption} \
 						${tmpdiroption} ${namesubdiroption} ${datadiroption} \
 						${srcdiroption}) ; then

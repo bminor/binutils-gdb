@@ -98,7 +98,7 @@ install-dir.info:
 
 # clib prms
 all.normal: all-texinfo all-bison all-byacc all-flex all-ld all-gnulib \
-	all-gdb all-make all-cvs all-emacs all-ispell
+	all-gdb all-make all-cvs all-emacs all-ispell all-fileutils
 all.cross: all-bison all-ld all-gnulib all-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
@@ -106,7 +106,7 @@ clean: clean-libiberty clean-texinfo clean-bfd clean-binutils \
 	clean-bison clean-byacc clean-flex clean-ld clean-gas \
 	clean-gcc clean-gnulib clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs clean-gdbm \
-	clean-cvs clean-emacs clean-ispell
+	clean-cvs clean-emacs clean-ispell clean-fileutils
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 install: $(INSTALL_TARGET)
@@ -116,7 +116,7 @@ install.all: install-dirs install-libiberty install-texinfo \
 	install-binutils install-bison install-byacc install-flex \
 	install-ld install-gas install-gcc install-gnulib \
 	install-readline install-glob install-gdb install-make \
-	install-cvs install-emacs install-ispell
+	install-cvs install-emacs install-ispell install-fileutils
 install.cross: install-dirs install-libiberty install-binutils install-bison \
 	install-byacc install-ld install-gas install-gnulib \
 	install-readline install-glob install-gdb
@@ -1400,6 +1400,72 @@ install-flex: force
 	if [ -d $(unsubdir)/flex ] ; then \
 		(cd $(unsubdir)/flex$(subdir); \
 		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			install) ; \
+	else \
+		true ; \
+	fi
+
+### fileutils
+.PHONY: all-fileutils just-fileutils
+all-fileutils: just-fileutils
+just-fileutils: force
+	if [ -d $(unsubdir)/fileutils ] ; then \
+		(cd $(unsubdir)/fileutils$(subdir); \
+		$(MAKE) \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
+			"mandir=$(mandir)" \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			all) ; \
+	else \
+		true ; \
+	fi
+
+clean-fileutils: force
+	if [ -d $(unsubdir)/fileutils ] ; then \
+		(cd $(unsubdir)/fileutils$(subdir); \
+		$(MAKE) \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
+			"mandir=$(mandir)" \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			clean) ; \
+	else \
+		true ; \
+	fi
+
+install-fileutils: force
+	if [ -d $(unsubdir)/fileutils ] ; then \
+		(cd $(unsubdir)/fileutils$(subdir); \
+		$(MAKE) \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
+			"mandir=$(mandir)" \
 			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \

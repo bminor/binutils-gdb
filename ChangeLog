@@ -1,8 +1,12 @@
 Fri Dec 27 16:26:47 1991  K. Richard Pixley  (rich at cygnus.com)
 
-	* configure.in, Makefile.in: fix clean-info, add flex.
+	* configure.in, Makefile.in: fix clean-info, add flex.  add
+	  fileutils.
 
-	* configure: be less sensitive to spaces in Makefile.in.
+	* configure: be less sensitive to spaces in Makefile.in.  Do not
+	  look for sources in "..".  Doing so breaks subdirectories that
+	  might have their own configure.  If a subdir has it's own
+	  configure script, use it.
 
 Thu Dec 26 16:30:26 1991  K. Richard Pixley  (rich at cygnus.com)
 
