@@ -27,11 +27,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define REGISTER_SIZE 4
 #define MAX_REGISTER_RAW_SIZE 4
 
-#define NUM_REGS 14
+#define NUM_REGS 19
 
 #define REGISTER_NAMES \
 { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3", \
-  "sp", "pc", "mdr", "psw", "lir", "lar"}
+  "sp", "pc", "mdr", "psw", "lir", "lar" \
+					\
+  "fp", "vo", "rp", "arg0", "arglast"}
 
 #define SP_REGNUM 8
 #define PC_REGNUM 9
@@ -40,9 +42,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define LIR_REGNUM 12
 #define LAR_REGNUM 13
 
-#define FP_REGNUM 3 /* ??? */
-#define V0_REGNUM 2 /* ??? */
-#define RP_REGNUM 1 /* ??? */
+#define FP_REGNUM 14 /* needs to be virtual register ??? */
+#define V0_REGNUM 15 /* needs to be virtual register ??? */
+#define RP_REGNUM 16 /* needs to be virtual register ??? */
+#define ARG0_REGNUM 17 /* needs to be virtual register ??? */
+#define ARGLAST_REGNUM 18 /* needs to be virtual register ??? */
 
 #define REGISTER_VIRTUAL_TYPE(REG) builtin_type_int
 
@@ -108,7 +112,9 @@ extern CORE_ADDR mn10300_skip_prologue PARAMS ((CORE_ADDR pc));
 extern void mn10300_pop_frame PARAMS ((struct frame_info *frame));
 #define POP_FRAME mn10300_pop_frame (get_current_frame ())
 
+#define USE_GENERIC_DUMMY_FRAMES
 #define CALL_DUMMY                   {0}
+#undef CALL_DUMMY /* for now, no function calls */
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 #define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
