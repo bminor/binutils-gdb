@@ -1,3 +1,12 @@
+2003-07-28  Eric Christopher  <echristo@redhat.com>
+
+	* elf32-ppc.c (R_PPC_RELAX32): New relocation.
+	(ppc_elf_install_value): New function.
+	(ppc_elf_sort_rela): Remove.
+	(ppc_elf_relax_section): Rewrite. Remove old relaxation
+	and replace with out of range branch stubs.
+	(ppc_elf_relocate_section): Handle R_PPC_RELAX32.
+
 2003-07-29  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_relax_section): Take symbol hash table
@@ -101,7 +110,7 @@
 	* coff-arm.c (EXTRA_S_FLAGS): Include SEC_CODE so that code
 	sections are assigned the LOAD attribute.
 
-2003-07-25  Kaz Kojima  <kkojima@rr.iij4u.or.jp>  
+2003-07-25  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c: Convert to C90.  Replace PTR with void *.
 	* elf32-sh64-com.c: Likewise.
