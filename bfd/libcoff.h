@@ -1,5 +1,5 @@
 /* BFD COFF object file private structure.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define obj_relocbase(bfd)	(coff_data(bfd)->relocbase)
 #define obj_raw_syments(bfd)	(coff_data(bfd)->raw_syments)
+#define obj_raw_syment_count(bfd)	(coff_data(bfd)->raw_syment_count)
 #define obj_convert(bfd)	(coff_data(bfd)->conversion_table)
 #define obj_conv_table_size(bfd) (coff_data(bfd)->conv_table_size)
 #if CFILE_STUFF
@@ -78,7 +79,7 @@ extern bfd_target *coff_object_p PARAMS ((bfd *));
 extern struct sec *coff_section_from_bfd_index PARAMS ((bfd *, int));
 extern unsigned int coff_get_symtab_upper_bound PARAMS ((bfd *));
 extern unsigned int coff_get_symtab PARAMS ((bfd *, asymbol **));
-extern void coff_count_linenumbers PARAMS ((bfd *));
+extern int coff_count_linenumbers PARAMS ((bfd *));
 extern struct coff_symbol_struct *coff_symbol_from PARAMS ((bfd *, asymbol *));
 extern void coff_renumber_symbols PARAMS ((bfd *));
 extern void coff_mangle_symbols PARAMS ((bfd *));
@@ -234,7 +235,8 @@ typedef struct
        PTR     internal_filehdr));
  PTR (*_bfd_coff_mkobject_hook) PARAMS ((
        bfd     *abfd,
-       PTR     internal_filehdr));
+       PTR     internal_filehdr,
+       PTR     internal_aouthdr));
  flagword (*_bfd_styp_to_sec_flags_hook) PARAMS ((
        bfd     *abfd,
        PTR     internal_scnhdr));
@@ -312,8 +314,8 @@ typedef struct
 
 #define bfd_coff_set_arch_mach_hook(abfd, filehdr)\
         ((coff_backend_info (abfd)->_bfd_coff_set_arch_mach_hook) (abfd, filehdr))
-#define bfd_coff_mkobject_hook(abfd, filehdr)\
-        ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook) (abfd, filehdr))
+#define bfd_coff_mkobject_hook(abfd, filehdr, aouthdr)\
+        ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook) (abfd, filehdr, aouthdr))
 
 #define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr)\
         ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook) (abfd, scnhdr))

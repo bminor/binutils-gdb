@@ -1,3 +1,10 @@
+Mon Feb 22 18:40:06 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* libcoff.h (obj_raw_syment_coun):  New macro.
+	* coffgen.c (coff_get_normalized_symtab):  Initialize
+	raw_syment_count.
+	* coffgen.c (coff_find_nearest_line):  Numerous little fixes.
+
 Mon Feb 22 15:03:07 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c (ecoff_set_symbol_info): stBlock symbols are always
