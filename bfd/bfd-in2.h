@@ -568,7 +568,7 @@ typedef struct sec
            which should be used in a constructor list, it creates a new
            section for the type of name (eg <<__CTOR_LIST__>>), attaches
            the symbol to it and builds a relocation. To build the lists
-           of constructors, all the linker has to to is catenate all the
+           of constructors, all the linker has to do is catenate all the
            sections called <<__CTOR_LIST__>> and relocte the data
            contained within - exactly the operations it would peform on
            standard data. */
