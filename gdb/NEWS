@@ -3,6 +3,10 @@
 
 *** Changes since GDB 5.3:
 
+* REMOVED configurations and files
+
+V850EA ISA				
+
 * MIPS $fp behavior changed
 
 The convenience variable $fp, for the MIPS, now consistently returns

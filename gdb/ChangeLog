@@ -1,3 +1,8 @@
+2002-09-20  Nick Clifton  <nickc@redhat.com>
+	
+	* NEWS: Announce that V850EA ISA is no longer supported.
+        * v850-tdep.c: Remove reference to bfd_mach_v850ea.
+
 2002-09-20  David Carlton  <carlton@math.stanford.edu>
 
 	* Makefile.in (c-lang.o): Correct dependencies.
