@@ -1198,7 +1198,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 
 
 // First field must be zero
-00000,000010,00000:I:::break
+11111,000010,00000:I:::break
 {
   sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
 }
