@@ -1,3 +1,10 @@
+2003-07-07  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.objc/basicclass.exp ("Call an Objective-C method with no
+	arguments"): Also match negative number.
+
+	* gdb.base/float.exp ("info float"): Add test for m68k-*-*.
+
 2003-07-03  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/store.c (charest): New typedef.
