@@ -74,9 +74,10 @@ static int last_run_status;
    other form of hairy serial connection, I would think 2 seconds would
    be plenty.  */
 
-/* Changed to allow option to set timeout value.
-   was static int remote_timeout = 2; */
-extern int remote_timeout;
+/* FIXME: Change to allow option to set timeout value on a per target
+   basis.
+
+static int remote_timeout = 2;
 
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    ocd_open knows that we don't have a file open when the program
@@ -196,9 +197,12 @@ ocd_start_remote (dummy)
     ocd_stop ();
 
 #if 1
+  /* When using a target box, we want to asynchronously return status when
+     target stops.  The OCD_SET_CTL_FLAGS command is ignored by Wigglers.dll
+     when using a parallel Wiggler */
   buf[0] = OCD_SET_CTL_FLAGS;
   buf[1] = 0;
-  buf[2] = 1;		/* Asynchronously return status when target stops */
+  buf[2] = 1;
   ocd_put_packet (buf, 3);
 
   p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
@@ -446,22 +450,23 @@ int
 ocd_wait ()
 {
   unsigned char *p;
-  int error_code, status;
+  int error_code;
   int pktlen;
+  char buf[1];
 
   ocd_interrupt_flag = 0;
 
-  /* Target may already be stopped by the time we get here. */
+  /* Target might already be stopped by the time we get here. */
+  /* If we aren't already stopped, we need to loop until we've dropped
+     back into BDM mode */
 
-/* if (!(last_run_status & OCD_FLAG_BDM)) */
-
-  /* Loop until we've dropped back into BDM mode */
   while (!(last_run_status & OCD_FLAG_BDM))
     {
-      ofunc = (void (*)()) signal (SIGINT, ocd_interrupt);
-
+      buf[0] = OCD_AYT;
+      ocd_put_packet (buf, 1);
       p = ocd_get_packet (OCD_AYT, &pktlen, -1);
 
+      ofunc = (void (*)()) signal (SIGINT, ocd_interrupt);
       signal (SIGINT, ofunc);
 
       if (pktlen < 2)
@@ -477,10 +482,6 @@ ocd_wait ()
 	error ("OCD device lost VCC at BDM interface.");
       else if (last_run_status & OCD_FLAG_CABLE_DISC)
 	error ("OCD device cable appears to have been disconnected.");
-#if 0
-      if (!(last_run_status & OCD_FLAG_BDM))
-	error ("OCD device woke up, but wasn't stopped: 0x%x", status);
-#endif
     }
 
   if (ocd_interrupt_flag)
@@ -1034,15 +1035,13 @@ ocd_get_packet (cmd, lenp, timeout)
   unsigned char *packet_ptr;
   unsigned char checksum;
 
- find_packet:
-
   ch = readchar (timeout);
 
   if (ch < 0)
     error ("ocd_get_packet (readchar): %d", ch);
 
   if (ch != 0x55)
-    goto find_packet;
+    error ("ocd_get_packet (readchar): %d", ch);
 
 /* Found the start of a packet */
 
@@ -1133,8 +1132,7 @@ ocd_get_packet (cmd, lenp, timeout)
 	  len = 257;
 	  break;
 	default:
-	  fprintf_filtered (gdb_stderr, "Unknown packet type 0x%x\n", ch);
-	  goto find_packet;
+	  error ("ocd_get_packet: unknown packet type 0x%x\n", ch);
 	}
     }
 
@@ -1162,7 +1160,7 @@ ocd_get_packet (cmd, lenp, timeout)
     }
 
   if (checksum != 0)
-    goto find_packet;
+    error ("ocd_get_packet: bad packet checksum");
 
   if (cmd != -1 && cmd != packet[0])
     error ("Response phase error.  Got 0x%x, expected 0x%x", packet[0], cmd);

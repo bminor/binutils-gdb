@@ -1,3 +1,22 @@
+Thu Aug 21 14:56:04 1997  Geoffrey Noer  <noer@cygnus.com>
+
+        * ppc-bdm.c (bdm_ppc_wait): stop printfing ecr, der
+        * ocd.c: initialize remote_timeout
+        (ocd_wait): while looping, call ocd_do_command with OCD_AYT 
+        (ocd_get_packet): remove find_packet goto.  If there isn't
+        an 0x55 at the start, something is quite wrong so error out
+        instead of advancing in the packet and trying again.  If checksum
+        is invalid, print error message instead of trying again.
+        * ser-ocd.c (ocd_readchar): error if we attempt to read past
+        the end of the from_wiggler_buffer.
+
+Tue Aug 19 08:41:36 1997  Fred Fish  <fnf@cygnus.com>
+
+	* objfiles.c (objfile_relocate): Add call to breakpoint_re_set
+	after relocations are complete.
+	* remote-vx.c (vx_add_symbols): Remove call to breakpoint_re_set,
+	this is now done in objfile_relocate.
+
 Mon Aug 18 17:29:54 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* win32-nat.c (handle_exception): Return a value indicating

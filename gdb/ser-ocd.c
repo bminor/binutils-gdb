@@ -81,21 +81,26 @@ ocd_raw (scb)
   /* Always in raw mode */
 }
 
-/* We need a buffer to store responses from the Wigglers.dll */
-#define WIGGLER_BUFF_SIZE 512
-unsigned char from_wiggler_buffer[WIGGLER_BUFF_SIZE];
-unsigned char * wiggler_buffer_ptr;	/* curr spot in buffer */
-
 static void
 ocd_readremote ()
 {
 }
+
+/* We need a buffer to store responses from the Wigglers.dll */
+#define WIGGLER_BUFF_SIZE 512
+unsigned char from_wiggler_buffer[WIGGLER_BUFF_SIZE];
+unsigned char * wiggler_buffer_ptr;	/* curr spot in buffer */
 
 static int
 ocd_readchar (scb, timeout)
      serial_t scb;
      int timeout;
 {
+  /* Catch attempts at reading past the end of the buffer */
+  if (wiggler_buffer_ptr >
+              (from_wiggler_buffer + (sizeof (char *) * WIGGLER_BUFF_SIZE)))
+    error ("ocd_readchar asked to read past the end of the buffer!");
+
   return (int) *wiggler_buffer_ptr++; /* return curr char and increment ptr */
 }
 

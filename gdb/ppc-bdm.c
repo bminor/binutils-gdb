@@ -116,6 +116,7 @@ bdm_ppc_wait (pid, target_status)
 
   target_status->value.sig = TARGET_SIGNAL_TRAP; /* XXX for now */
 
+#if 0
   {
     unsigned long ecr, der;
 
@@ -123,6 +124,7 @@ bdm_ppc_wait (pid, target_status)
     der = ocd_read_bdm_register (149); /* Read the debug enables register */
     fprintf_unfiltered (gdb_stdout, "ecr = 0x%x, der = 0x%x\n", ecr, der);
   }
+#endif
 
   return inferior_pid;
 }
