@@ -570,7 +570,9 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
   struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
   PEAOUTHDR *aouthdr_out = (PEAOUTHDR *) out;
   bfd_vma sa, fa, ib;
+  IMAGE_DATA_DIRECTORY idata2, idata5;
 
+  
   if (pe->force_minimum_alignment)
     {
       if (!extra->FileAlignment)
@@ -586,6 +588,9 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
   fa = extra->FileAlignment;
   ib = extra->ImageBase;
 
+  idata2 = pe->pe_opthdr.DataDirectory[1];
+  idata5 = pe->pe_opthdr.DataDirectory[12];
+  
   if (aouthdr_in->tsize)
     {
       aouthdr_in->text_start -= ib;
@@ -614,28 +619,34 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 #define SA(x) (((x) + sa -1 ) & (- sa))
 
   /* We like to have the sizes aligned.  */
-
   aouthdr_in->bsize = FA (aouthdr_in->bsize);
 
   extra->NumberOfRvaAndSizes = IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
 
-  /* first null out all data directory entries ..  */
+  /* First null out all data directory entries.  */
   memset (extra->DataDirectory, 0, sizeof (extra->DataDirectory));
 
   add_data_entry (abfd, extra, 0, ".edata", ib);
-
-  /* Don't call add_data_entry for .idata$2 or .idata$5.  It's done in
-     bfd_coff_final_link where all the required information is
-     available.  */
-
-  /* However, until other .idata fixes are made (pending patch), the
-     entry for .idata is needed for backwards compatability.  FIXME.  */
-  add_data_entry (abfd, extra, 1, ".idata", ib);
-
   add_data_entry (abfd, extra, 2, ".rsrc", ib);
-
   add_data_entry (abfd, extra, 3, ".pdata", ib);
 
+  /* In theory we do not need to call add_data_entry for .idata$2 or
+     .idata$5.  It will be done in bfd_coff_final_link where all the
+     required information is available.  If however, we are not going
+     to perform a final link, eg because we have been invoked by objcopy
+     or strip, then we need to make sure that these Data Directory
+     entries are initialised properly.
+
+     So - we copy the input values into the output values, and then, if
+     a final link is going to be performed, it can overwrite them.  */
+  extra->DataDirectory[1]  = idata2;
+  extra->DataDirectory[12] = idata5;
+
+  if (extra->DataDirectory[1].VirtualAddress == 0)
+    /* Until other .idata fixes are made (pending patch), the entry for
+       .idata is needed for backwards compatability.  FIXME.  */
+    add_data_entry (abfd, extra, 1, ".idata", ib);
+    
   /* For some reason, the virtual size (which is what's set by
      add_data_entry) for .reloc is not the same as the size recorded
      in this slot by MSVC; it doesn't seem to cause problems (so far),
@@ -689,7 +700,7 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 			  aouthdr_out->standard.text_start);
 
 #ifndef COFF_WITH_pep
-  /* PE32+ does not have data_start member! */
+  /* PE32+ does not have data_start member!  */
   PUT_AOUTHDR_DATA_START (abfd, aouthdr_in->data_start,
 			  aouthdr_out->standard.data_start);
 #endif
@@ -1994,9 +2005,9 @@ _bfd_XXi_final_link_postscript (abfd, pfinfo)
 	((h1->root.u.def.value
 	  + h1->root.u.def.section->output_section->vma
 	  + h1->root.u.def.section->output_offset)
-	 - pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);
+	 - pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);      
     }
-
+  
   /* If we couldn't find idata$2, we either have an excessively
      trivial program or are in DEEP trouble; we have to assume trivial
      program....  */

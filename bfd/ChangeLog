@@ -1,3 +1,8 @@
+2003-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Initialise $idata2 and
+	$idata5 in case bfd_coff_final_link is not called.
+
 2003-03-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-sparc.c (struct sparc64_elf_section_data): Add reloc_count
