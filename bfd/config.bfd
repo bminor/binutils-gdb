@@ -274,7 +274,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_i386_vec
     ;;
 # end-sanitize-beos
-  i[3456]86-*-mingw32* | i[3456]86-*-cygwin32* | i[3456]86-*-winnt | i[3456]86-*-pe)
+  i[3456]86-*-mingw32* | i[3456]86-*-cygwin* | i[3456]86-*-winnt | i[3456]86-*-pe)
     targ_defvec=i386pe_vec
     targ_selvecs="i386pe_vec i386pei_vec"
     ;;
@@ -354,6 +354,11 @@ case "${targ}" in
   m68*-*-linux-gnu*)
     targ_defvec=bfd_elf32_m68k_vec
     targ_selvecs=m68klinux_vec
+    ;;
+  m68*-*-gnu*)
+    targ_defvec=bfd_elf32_m68k_vec
+    # targ_selvecs=m68kmach3_vec
+    # targ_cflags=-DSTAT_FOR_EXEC
     ;;
   m68*-*-lynxos*)
     targ_defvec=m68klynx_coff_vec
@@ -520,7 +525,7 @@ case "${targ}" in
     targ_selvecs="rs6000coff_vec bfd_elf32_powerpc_vec ppcboot_vec"
     ;;
 
-  powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin32*)
+  powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin*)
     targ_defvec=bfd_powerpcle_pe_vec
     targ_selvecs="bfd_powerpcle_pei_vec bfd_powerpc_pei_vec bfd_powerpcle_pe_vec bfd_powerpc_pe_vec"
     ;;
