@@ -1091,9 +1091,6 @@ elf64_x86_64_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  int r_type;
-  struct elf_link_hash_entry *h;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -1103,85 +1100,79 @@ elf64_x86_64_gc_sweep_hook (abfd, info, sec, relocs)
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
-    switch ((r_type = elf64_x86_64_tls_transition (info,
-						   ELF64_R_TYPE (rel->r_info),
-						   ELF64_R_SYM (rel->r_info)
-						   >= symtab_hdr->sh_info)))
-      {
-      case R_X86_64_TLSLD:
-	if (elf64_x86_64_hash_table (info)->tls_ld_got.refcount > 0)
-	  elf64_x86_64_hash_table (info)->tls_ld_got.refcount -= 1;
-	break;
+    {
+      unsigned long r_symndx;
+      unsigned int r_type;
+      struct elf_link_hash_entry *h = NULL;
 
-      case R_X86_64_TLSGD:
-      case R_X86_64_GOTTPOFF:
-      case R_X86_64_GOT32:
-      case R_X86_64_GOTPCREL:
-	r_symndx = ELF64_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->got.refcount > 0)
-	      h->got.refcount -= 1;
-	  }
-	else if (local_got_refcounts != NULL)
-	  {
-	    if (local_got_refcounts[r_symndx] > 0)
-	      local_got_refcounts[r_symndx] -= 1;
-	  }
-	break;
+      r_symndx = ELF64_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  struct elf64_x86_64_link_hash_entry *eh;
+	  struct elf64_x86_64_dyn_relocs **pp;
+	  struct elf64_x86_64_dyn_relocs *p;
 
-      case R_X86_64_8:
-      case R_X86_64_16:
-      case R_X86_64_32:
-      case R_X86_64_64:
-      case R_X86_64_32S:
-      case R_X86_64_PC8:
-      case R_X86_64_PC16:
-      case R_X86_64_PC32:
-	r_symndx = ELF64_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    struct elf64_x86_64_link_hash_entry *eh;
-	    struct elf64_x86_64_dyn_relocs **pp;
-	    struct elf64_x86_64_dyn_relocs *p;
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  eh = (struct elf64_x86_64_link_hash_entry *) h;
 
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
+	}
 
-	    if (!info->shared && h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
+      r_type = ELF64_R_TYPE (rel->r_info);
+      r_type = elf64_x86_64_tls_transition (info, r_type, h != NULL);
+      switch (r_type)
+	{
+	case R_X86_64_TLSLD:
+	  if (elf64_x86_64_hash_table (info)->tls_ld_got.refcount > 0)
+	    elf64_x86_64_hash_table (info)->tls_ld_got.refcount -= 1;
+	  break;
 
-	    eh = (struct elf64_x86_64_link_hash_entry *) h;
+	case R_X86_64_TLSGD:
+	case R_X86_64_GOTTPOFF:
+	case R_X86_64_GOT32:
+	case R_X86_64_GOTPCREL:
+	  if (h != NULL)
+	    {
+	      if (h->got.refcount > 0)
+		h->got.refcount -= 1;
+	    }
+	  else if (local_got_refcounts != NULL)
+	    {
+	      if (local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx] -= 1;
+	    }
+	  break;
 
-	    for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	      if (p->sec == sec)
-		{
-		  if (ELF64_R_TYPE (rel->r_info) == R_X86_64_PC8
-		      || ELF64_R_TYPE (rel->r_info) == R_X86_64_PC16
-		      || ELF64_R_TYPE (rel->r_info) == R_X86_64_PC32)
-		    p->pc_count -= 1;
-		  p->count -= 1;
-		  if (p->count == 0)
-		    *pp = p->next;
-		  break;
-		}
-	  }
-	break;
+	case R_X86_64_8:
+	case R_X86_64_16:
+	case R_X86_64_32:
+	case R_X86_64_64:
+	case R_X86_64_32S:
+	case R_X86_64_PC8:
+	case R_X86_64_PC16:
+	case R_X86_64_PC32:
+	  if (info->shared)
+	    break;
+	  /* Fall thru */
 
+	case R_X86_64_PLT32:
+	  if (h != NULL)
+	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	    }
+	  break;
 
-      case R_X86_64_PLT32:
-	r_symndx = ELF64_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
-	  }
-	break;
-
-      default:
-	break;
-      }
+	default:
+	  break;
+	}
+    }
 
   return TRUE;
 }
@@ -2328,7 +2319,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if ((off & 1) != 0)
 	    off &= ~1;
-          else
+	  else
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -2406,12 +2397,12 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		 addq foo@gottpoff(%rip), %rax */
 	      BFD_ASSERT (rel->r_offset >= 4);
 	      for (i = 0; i < 4; i++)
-	        BFD_ASSERT (bfd_get_8 (input_bfd,
+		BFD_ASSERT (bfd_get_8 (input_bfd,
 				       contents + rel->r_offset - 4 + i)
 			    == tlsgd[i]);
 	      BFD_ASSERT (rel->r_offset + 12 <= input_section->_raw_size);
 	      for (i = 0; i < 4; i++)
-	        BFD_ASSERT (bfd_get_8 (input_bfd,
+		BFD_ASSERT (bfd_get_8 (input_bfd,
 				       contents + rel->r_offset + 4 + i)
 			    == tlsgd[i+4]);
 	      BFD_ASSERT (rel + 1 < relend);

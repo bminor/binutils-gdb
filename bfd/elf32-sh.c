@@ -4052,7 +4052,7 @@ allocate_dynrelocs (h, inf)
       && eh->gotplt_refcount > 0)
     {
       /* The symbol has been forced local, or we have some direct got refs,
-         so treat all the gotplt refs as got refs. */
+	 so treat all the gotplt refs as got refs. */
       h->got.refcount += eh->gotplt_refcount;
       if (h->plt.refcount >= eh->gotplt_refcount)
 	h->plt.refcount -= eh->gotplt_refcount;
@@ -5413,7 +5413,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if ((off & 1) != 0)
 	    off &= ~1;
-          else
+	  else
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -5919,9 +5919,6 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  struct elf_link_hash_entry *h;
-  struct elf_sh_link_hash_entry *eh;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -5932,15 +5929,20 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
     {
+      unsigned long r_symndx;
+      unsigned int r_type;
+      struct elf_link_hash_entry *h = NULL;
 #ifdef INCLUDE_SHMEDIA
       int seen_stt_datalabel = 0;
 #endif
 
       r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx < symtab_hdr->sh_info)
-	h = NULL;
-      else
+      if (r_symndx >= symtab_hdr->sh_info)
 	{
+	  struct elf_sh_link_hash_entry *eh;
+	  struct elf_sh_dyn_relocs **pp;
+	  struct elf_sh_dyn_relocs *p;
+
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 #ifdef INCLUDE_SHMEDIA
 	  while (h->root.type == bfd_link_hash_indirect
@@ -5950,12 +5952,18 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	      h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	    }
 #endif
+	  eh = (struct elf_sh_link_hash_entry *) h;
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
 	}
-      eh = (struct elf_sh_link_hash_entry *) h;
 
-      switch (sh_elf_optimized_tls_reloc (info, ELF32_R_TYPE (rel->r_info),
-					  ELF32_R_SYM (rel->r_info)
-					  >= symtab_hdr->sh_info))
+      r_type = ELF32_R_TYPE (rel->r_info);
+      switch (sh_elf_optimized_tls_reloc (info, r_type, h != NULL))
 	{
 	case R_SH_TLS_LD_32:
 	  if (sh_elf_hash_table (info)->tls_ldm_got.refcount > 0)
@@ -5988,6 +5996,8 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
 #ifdef INCLUDE_SHMEDIA
 	      if (seen_stt_datalabel)
 		{
+		  struct elf_sh_link_hash_entry *eh;
+		  eh = (struct elf_sh_link_hash_entry *) h;
 		  if (eh->datalabel_got.refcount > 0)
 		    eh->datalabel_got.refcount -= 1;
 		}
@@ -6013,27 +6023,9 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
 
 	case R_SH_DIR32:
 	case R_SH_REL32:
-	  if (h != NULL)
-	    {
-	      struct elf_sh_dyn_relocs **pp;
-	      struct elf_sh_dyn_relocs *p;
-
-
-	      if (!info->shared && h->plt.refcount > 0)
-		h->plt.refcount -= 1;
-
-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-		if (p->sec == sec)
-		  {
-		    if (ELF32_R_TYPE (rel->r_info) == R_SH_REL32)
-		      p->pc_count -= 1;
-		    p->count -= 1;
-		    if (p->count == 0)
-		      *pp = p->next;
-		    break;
-		  }
-	    }
-	  break;
+	  if (info->shared)
+	    break;
+	  /* Fall thru */
 
 	case R_SH_PLT32:
 #ifdef INCLUDE_SHMEDIA
@@ -6060,6 +6052,8 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
 #endif
 	  if (h != NULL)
 	    {
+	      struct elf_sh_link_hash_entry *eh;
+	      eh = (struct elf_sh_link_hash_entry *) h;
 	      if (eh->gotplt_refcount > 0)
 		{
 		  eh->gotplt_refcount -= 1;

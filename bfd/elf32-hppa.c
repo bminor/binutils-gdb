@@ -1685,10 +1685,6 @@ elf32_hppa_gc_sweep_hook (abfd, info, sec, relocs)
   bfd_signed_vma *local_got_refcounts;
   bfd_signed_vma *local_plt_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  struct elf_link_hash_entry *h;
-  struct elf32_hppa_link_hash_table *htab;
-  bfd *dynobj;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -1698,112 +1694,81 @@ elf32_hppa_gc_sweep_hook (abfd, info, sec, relocs)
   local_plt_refcounts = local_got_refcounts;
   if (local_plt_refcounts != NULL)
     local_plt_refcounts += symtab_hdr->sh_info;
-  htab = hppa_link_hash_table (info);
-  dynobj = htab->elf.dynobj;
-  if (dynobj == NULL)
-    return TRUE;
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
-    switch ((unsigned int) ELF32_R_TYPE (rel->r_info))
-      {
-      case R_PARISC_DLTIND14F:
-      case R_PARISC_DLTIND14R:
-      case R_PARISC_DLTIND21L:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->got.refcount > 0)
-	      h->got.refcount -= 1;
-	  }
-	else if (local_got_refcounts != NULL)
-	  {
-	    if (local_got_refcounts[r_symndx] > 0)
-	      local_got_refcounts[r_symndx] -= 1;
-	  }
-	break;
+    {
+      unsigned long r_symndx;
+      unsigned int r_type;
+      struct elf_link_hash_entry *h = NULL;
 
-      case R_PARISC_PCREL12F:
-      case R_PARISC_PCREL17C:
-      case R_PARISC_PCREL17F:
-      case R_PARISC_PCREL22F:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
-	  }
-	break;
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  struct elf32_hppa_link_hash_entry *eh;
+	  struct elf32_hppa_dyn_reloc_entry **pp;
+	  struct elf32_hppa_dyn_reloc_entry *p;
 
-      case R_PARISC_PLABEL14R:
-      case R_PARISC_PLABEL21L:
-      case R_PARISC_PLABEL32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    struct elf32_hppa_link_hash_entry *eh;
-	    struct elf32_hppa_dyn_reloc_entry **pp;
-	    struct elf32_hppa_dyn_reloc_entry *p;
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  eh = (struct elf32_hppa_link_hash_entry *) h;
 
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
+	}
 
-	    if (h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
+      r_type = ELF32_R_TYPE (rel->r_info);
+      switch (r_type)
+	{
+	case R_PARISC_DLTIND14F:
+	case R_PARISC_DLTIND14R:
+	case R_PARISC_DLTIND21L:
+	  if (h != NULL)
+	    {
+	      if (h->got.refcount > 0)
+		h->got.refcount -= 1;
+	    }
+	  else if (local_got_refcounts != NULL)
+	    {
+	      if (local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx] -= 1;
+	    }
+	  break;
 
-	    eh = (struct elf32_hppa_link_hash_entry *) h;
+	case R_PARISC_PCREL12F:
+	case R_PARISC_PCREL17C:
+	case R_PARISC_PCREL17F:
+	case R_PARISC_PCREL22F:
+	  if (h != NULL)
+	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	    }
+	  break;
 
-	    for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	      if (p->sec == sec)
-		{
-#if RELATIVE_DYNRELOCS
-		  if (!IS_ABSOLUTE_RELOC (rtype))
-		    p->relative_count -= 1;
-#endif
-		  p->count -= 1;
-		  if (p->count == 0)
-		    *pp = p->next;
-		  break;
-		}
-	  }
-	else if (local_plt_refcounts != NULL)
-	  {
-	    if (local_plt_refcounts[r_symndx] > 0)
-	      local_plt_refcounts[r_symndx] -= 1;
-	  }
-	break;
+	case R_PARISC_PLABEL14R:
+	case R_PARISC_PLABEL21L:
+	case R_PARISC_PLABEL32:
+	  if (h != NULL)
+	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	    }
+	  else if (local_plt_refcounts != NULL)
+	    {
+	      if (local_plt_refcounts[r_symndx] > 0)
+		local_plt_refcounts[r_symndx] -= 1;
+	    }
+	  break;
 
-      case R_PARISC_DIR32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    struct elf32_hppa_link_hash_entry *eh;
-	    struct elf32_hppa_dyn_reloc_entry **pp;
-	    struct elf32_hppa_dyn_reloc_entry *p;
-
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-
-	    eh = (struct elf32_hppa_link_hash_entry *) h;
-
-	    for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	      if (p->sec == sec)
-		{
-#if RELATIVE_DYNRELOCS
-		  if (!IS_ABSOLUTE_RELOC (R_PARISC_DIR32))
-		    p->relative_count -= 1;
-#endif
-		  p->count -= 1;
-		  if (p->count == 0)
-		    *pp = p->next;
-		  break;
-		}
-	  }
-	break;
-
-      default:
-	break;
-      }
+	default:
+	  break;
+	}
+    }
 
   return TRUE;
 }

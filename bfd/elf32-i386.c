@@ -1279,9 +1279,6 @@ elf_i386_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  int r_type;
-  struct elf_link_hash_entry *h;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -1291,85 +1288,74 @@ elf_i386_gc_sweep_hook (abfd, info, sec, relocs)
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
-    switch ((r_type = elf_i386_tls_transition (info,
-					       ELF32_R_TYPE (rel->r_info),
-					       ELF32_R_SYM (rel->r_info)
-					       >= symtab_hdr->sh_info)))
-      {
-      case R_386_TLS_LDM:
-	if (elf_i386_hash_table (info)->tls_ldm_got.refcount > 0)
-	  elf_i386_hash_table (info)->tls_ldm_got.refcount -= 1;
-	break;
+    {
+      unsigned long r_symndx;
+      unsigned int r_type;
+      struct elf_link_hash_entry *h = NULL;
 
-      case R_386_TLS_GD:
-      case R_386_TLS_IE_32:
-      case R_386_TLS_IE:
-      case R_386_TLS_GOTIE:
-      case R_386_GOT32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->got.refcount > 0)
-	      h->got.refcount -= 1;
-	  }
-	else if (local_got_refcounts != NULL)
-	  {
-	    if (local_got_refcounts[r_symndx] > 0)
-	      local_got_refcounts[r_symndx] -= 1;
-	  }
-	if (r_type != R_386_TLS_IE)
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  struct elf_i386_link_hash_entry *eh;
+	  struct elf_i386_dyn_relocs **pp;
+	  struct elf_i386_dyn_relocs *p;
+
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  eh = (struct elf_i386_link_hash_entry *) h;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
+	}
+
+      r_type = ELF32_R_TYPE (rel->r_info);
+      r_type = elf_i386_tls_transition (info, r_type, h != NULL);
+      switch (r_type)
+	{
+	case R_386_TLS_LDM:
+	  if (elf_i386_hash_table (info)->tls_ldm_got.refcount > 0)
+	    elf_i386_hash_table (info)->tls_ldm_got.refcount -= 1;
 	  break;
-	/* Fall through */
 
-      case R_386_TLS_LE_32:
-      case R_386_TLS_LE:
-        if (!info->shared)
+	case R_386_TLS_GD:
+	case R_386_TLS_IE_32:
+	case R_386_TLS_IE:
+	case R_386_TLS_GOTIE:
+	case R_386_GOT32:
+	  if (h != NULL)
+	    {
+	      if (h->got.refcount > 0)
+		h->got.refcount -= 1;
+	    }
+	  else if (local_got_refcounts != NULL)
+	    {
+	      if (local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx] -= 1;
+	    }
 	  break;
-	/* Fall through */
 
-      case R_386_32:
-      case R_386_PC32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    struct elf_i386_link_hash_entry *eh;
-	    struct elf_i386_dyn_relocs **pp;
-	    struct elf_i386_dyn_relocs *p;
+	case R_386_32:
+	case R_386_PC32:
+	  if (info->shared)
+	    break;
+	  /* Fall through */
 
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	case R_386_PLT32:
+	  if (h != NULL)
+	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	    }
+	  break;
 
-	    if (!info->shared && h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
-
-	    eh = (struct elf_i386_link_hash_entry *) h;
-
-	    for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	      if (p->sec == sec)
-		{
-		  if (ELF32_R_TYPE (rel->r_info) == R_386_PC32)
-		    p->pc_count -= 1;
-		  p->count -= 1;
-		  if (p->count == 0)
-		    *pp = p->next;
-		  break;
-		}
-	  }
-	break;
-
-      case R_386_PLT32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
-	  }
-	break;
-
-      default:
-	break;
-      }
+	default:
+	  break;
+	}
+    }
 
   return TRUE;
 }
@@ -1523,9 +1509,9 @@ elf_i386_adjust_dynamic_symbol (info, h)
    will be called from elflink.h.  If elflink.h doesn't call our
    finish_dynamic_symbol routine, we'll need to do something about
    initializing any .plt and .got entries in elf_i386_relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H) \
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
   ((DYN)								\
-   && ((INFO)->shared							\
+   && ((SHARED)								\
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
    && ((H)->dynindx != -1						\
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
@@ -1567,7 +1553,8 @@ allocate_dynrelocs (h, inf)
 	    return FALSE;
 	}
 
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+      if (info->shared
+	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
 	{
 	  asection *s = htab->splt;
 
@@ -1653,7 +1640,8 @@ allocate_dynrelocs (h, inf)
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
       else if (tls_type == GOT_TLS_GD)
 	htab->srelgot->_raw_size += 2 * sizeof (Elf32_External_Rel);
-      else if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
+      else if (info->shared
+	       || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
     }
   else
@@ -2289,7 +2277,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      off = h->got.offset;
 	      dyn = htab->elf.dynamic_sections_created;
-	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		  || (info->shared
 		      && (info->symbolic
 			  || h->dynindx == -1
@@ -2626,7 +2614,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		      BFD_ASSERT (rel->r_offset >= 2);
 		      type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
 		      switch (type)
-		        {
+			{
 			case 0x8b:
 			  /* movl */
 			  BFD_ASSERT ((val & 0xc7) == 0x05);
@@ -2648,7 +2636,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 			default:
 			  BFD_FAIL ();
 			  break;
-		        }
+			}
 		    }
 		  bfd_put_32 (output_bfd, -tpoff (info, relocation),
 			      contents + rel->r_offset);
@@ -2723,7 +2711,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if ((off & 1) != 0)
 	    off &= ~1;
-          else
+	  else
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;

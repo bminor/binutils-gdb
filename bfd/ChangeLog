@@ -1,5 +1,22 @@
 2003-02-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-hppa.c (elf32_hppa_gc_sweep_hook): Simplify dynamic reloc
+	removal.  Localize vars.  Remove unnecessary dynobj test.
+	* elf32-i386 (WILL_CALL_FINISH_DYNAMIC_SYMBOL): Pass SHARED instead
+	of INFO.
+	(allocate_dynrelocs): Adjust WILL_CALL_FINISH_DYNAMIC_SYMBOL uses,
+	and optimize.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_gc_sweep_hook): Simplify dyn reloc removal.  Localize vars.
+	* elf32-s390.c (elf_s390_gc_sweep_hook): Likewise.
+	* elf32-sh.c (sh_elf_gc_sweep_hook): Likewise.
+	* elf64-s390.c (elf_s390_gc_sweep_hook): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_gc_sweep_hook): Likewise.
+	* elf32-sparc.c (elf32_sparc_gc_sweep_hook): Likewise.  Remove
+	local_dynrel for section too.  Don't touch HIPLT22, LOPLT10, PCPLT32
+	or PCPLT10 relocs.  Don't subtract twice on PLT32 relocs.
+	Formatting.
+
 	* elf64-ppc.c (ELIMINATE_COPY_RELOCS): Define.
 	(ppc64_elf_check_relocs): Use it.  Correct comment.  Move SEC_ALLOC
 	test.

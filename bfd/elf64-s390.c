@@ -373,7 +373,7 @@ elf_s390_info_to_howto (abfd, cache_ptr, dst)
 /* A relocation function which doesn't do anything.  */
 static bfd_reloc_status_type
 s390_tls_reloc (abfd, reloc_entry, symbol, data, input_section,
-                      output_bfd, error_message)
+		output_bfd, error_message)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol ATTRIBUTE_UNUSED;
@@ -986,7 +986,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	  /* Fall through */
 
 	case R_390_GOT12:
-        case R_390_GOT16:
+	case R_390_GOT16:
 	case R_390_GOT32:
 	case R_390_GOT64:
 	case R_390_GOTENT:
@@ -1292,9 +1292,6 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  int r_type;
-  struct elf_link_hash_entry *h;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -1305,16 +1302,31 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
     {
+      unsigned long r_symndx;
+      unsigned int r_type;
+      struct elf_link_hash_entry *h = NULL;
+
       r_symndx = ELF64_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  struct elf_s390_link_hash_entry *eh;
+	  struct elf_s390_dyn_relocs **pp;
+	  struct elf_s390_dyn_relocs *p;
 
-      if (r_symndx < symtab_hdr->sh_info)
-	h = NULL;
-      else
-	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  eh = (struct elf_s390_link_hash_entry *) h;
 
-      r_type = elf_s390_tls_transition (info,
-					ELF64_R_TYPE (rel->r_info),
-					r_symndx >= symtab_hdr->sh_info);
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
+	}
+
+      r_type = ELF64_R_TYPE (rel->r_info);
+      r_type = elf_s390_tls_transition (info, r_type, h != NULL);
       switch (r_type)
 	{
 	case R_390_TLS_LDM64:
@@ -1347,14 +1359,7 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
 	      if (local_got_refcounts[r_symndx] > 0)
 		local_got_refcounts[r_symndx] -= 1;
 	    }
-	  if (r_type != R_390_TLS_IE64)
-	    break;
-	  /* Fall through */
-	  
-	case R_390_TLS_LE64:
-	  if (!info->shared)
-	    break;
-	  /* Fall through */
+	  break;
 
 	case R_390_8:
 	case R_390_12:
@@ -1366,33 +1371,9 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_390_PC32:
 	case R_390_PC32DBL:
 	case R_390_PC64:
-	  if (h != NULL)
-	    {
-	      struct elf_s390_link_hash_entry *eh;
-	      struct elf_s390_dyn_relocs **pp;
-	      struct elf_s390_dyn_relocs *p;
-	      
-	      if (!info->shared && h->plt.refcount > 0)
-		h->plt.refcount -= 1;
-	      
-	      eh = (struct elf_s390_link_hash_entry *) h;
-	      
-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-		if (p->sec == sec)
-		  {
-		    if (ELF64_R_TYPE (rel->r_info) == R_390_PC16
-			|| ELF64_R_TYPE (rel->r_info) == R_390_PC16DBL
-			|| ELF64_R_TYPE (rel->r_info) == R_390_PC32
-			|| ELF64_R_TYPE (rel->r_info) == R_390_PC32DBL
-			|| ELF64_R_TYPE (rel->r_info) == R_390_PC64)
-		      p->pc_count -= 1;
-		    p->count -= 1;
-		    if (p->count == 0)
-		      *pp = p->next;
-		    break;
-		  }
-	    }
-	  break;
+	  if (info->shared)
+	    break;
+	  /* Fall through */
 
 	case R_390_PLT16DBL:
 	case R_390_PLT32:
@@ -2265,14 +2246,14 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		 Current offset - size first entry / entry size.  */
 	      plt_index = (h->plt.offset - PLT_FIRST_ENTRY_SIZE) /
 		PLT_ENTRY_SIZE;
-	      
+
 	      /* Offset in GOT is PLT index plus GOT headers(3) times 4,
 		 addr & GOT addr.  */
 	      relocation = (plt_index + 3) * GOT_ENTRY_SIZE;
 	      unresolved_reloc = FALSE;
 
 	      if (r_type == R_390_GOTPLTENT)
-		relocation += htab->sgot->output_section->vma;	    
+		relocation += htab->sgot->output_section->vma;
 	      break;
 	    }
 	  /* Fall through.  */
@@ -2426,17 +2407,17 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 			+ htab->splt->output_offset
 			+ h->plt.offset);
 	  unresolved_reloc = FALSE;
-          break;
+	  break;
 
 	case R_390_PLTOFF16:
 	case R_390_PLTOFF32:
 	case R_390_PLTOFF64:
-          /* Relocation is to the entry for this symbol in the
-             procedure linkage table relative to the start of the GOT.  */
+	  /* Relocation is to the entry for this symbol in the
+	     procedure linkage table relative to the start of the GOT.  */
 
 	  /* For local symbols or if we didn't make a PLT entry for
 	     this symbol resolve the symbol directly.  */
-          if (   h == NULL
+	  if (   h == NULL
 	      || h->plt.offset == (bfd_vma) -1
 	      || htab->splt == NULL)
 	    {
@@ -2444,9 +2425,9 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      break;
 	    }
 
-          relocation = (htab->splt->output_section->vma
-                        + htab->splt->output_offset
-                        + h->plt.offset
+	  relocation = (htab->splt->output_section->vma
+			+ htab->splt->output_offset
+			+ h->plt.offset
 			- htab->sgot->output_section->vma);
 	  unresolved_reloc = FALSE;
 	  break;
@@ -2617,7 +2598,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if ((off & 1) != 0)
 	    off &= ~1;
-          else
+	  else
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -2752,7 +2733,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      htab->tls_ldm_got.offset |= 1;
 	    }
 	  relocation = htab->sgot->output_offset + off;
-	  unresolved_reloc = FALSE;	  
+	  unresolved_reloc = FALSE;
 	  break;
 
 	case R_390_TLS_LE64:
