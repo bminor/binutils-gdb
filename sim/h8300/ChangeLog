@@ -1,3 +1,8 @@
+2003-01-16  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c: Change K&R function definitions to ISO.
+	(fetch): Make static, and eliminate unused parameter 'n'.
+
 2002-12-26  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* compile.c: Fix formatting.

@@ -127,19 +127,19 @@ int h8300smode = 0;
 static int memory_size;
 
 static int
-get_now ()
+get_now (void)
 {
   return time (0);	/* WinXX HAS UNIX like 'time', so why not using it? */
 }
 
 static int
-now_persec ()
+now_persec (void)
 {
   return 1;
 }
 
 static int
-bitfrom (x)
+bitfrom (int x)
 {
   switch (x & SIZE)
     {
@@ -155,7 +155,7 @@ bitfrom (x)
 }
 
 static unsigned int
-lvalue (x, rn)
+lvalue (int x, int rn)
 {
   switch (x / 4)
     {
@@ -175,11 +175,7 @@ lvalue (x, rn)
 }
 
 static unsigned int
-decode (addr, data, dst)
-     int addr;
-     unsigned char *data;
-     decoded_inst *dst;
-
+decode (int addr, unsigned char *data, decoded_inst *dst)
 {
   int rs = 0;
   int rd = 0;
@@ -481,7 +477,7 @@ decode (addr, data, dst)
 }
 
 static void
-compile (pc)
+compile (int pc)
 {
   int idx;
 
@@ -550,9 +546,8 @@ static unsigned int *lreg[18];
 #define SET_MEMORY_B(x,y) \
   (x < memory_size ? (cpu.memory[(x)] = y) : (cpu.eightbit[x & 0xff] = y))
 
-int
-fetch (arg, n)
-     ea_type *arg;
+static int
+fetch (ea_type *arg)
 {
   int rn = arg->reg;
   int abs = arg->literal;
@@ -634,9 +629,7 @@ fetch (arg, n)
 
 
 static void
-store (arg, n)
-     ea_type *arg;
-     int n;
+store (ea_type *arg, int n)
 {
   int rn = arg->reg;
   int abs = arg->literal;
@@ -710,7 +703,7 @@ static union
 littleendian;
 
 static void
-init_pointers ()
+init_pointers (void)
 {
   static int init;
 
@@ -785,11 +778,7 @@ init_pointers ()
 }
 
 static void
-control_c (sig, code, scp, addr)
-     int sig;
-     int code;
-     char *scp;
-     char *addr;
+control_c (int sig)
 {
   cpu.state = SIM_STATE_STOPPED;
   cpu.exception = SIGINT;
@@ -805,10 +794,7 @@ control_c (sig, code, scp, addr)
 #define I (intMaskBit != 0)
 
 static int
-mop (code, bsize, sign)
-     decoded_inst *code;
-     int bsize;
-     int sign;
+mop (decoded_inst *code, int bsize, int sign)
 {
   int multiplier;
   int multiplicand;
@@ -969,8 +955,7 @@ sim_stop (sd)
 #define TICK_REGNUM     13
 
 void
-sim_resume (sd, step, siggnal)
-     SIM_DESC sd;
+sim_resume (SIM_DESC sd, int step, int siggnal)
 {
   static int init1;
   int cycles = 0;
@@ -1887,19 +1872,14 @@ sim_resume (sd, step, siggnal)
 }
 
 int
-sim_trace (sd)
-     SIM_DESC sd;
+sim_trace (SIM_DESC sd)
 {
   /* FIXME: Unfinished.  */
   abort ();
 }
 
 int
-sim_write (sd, addr, buffer, size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     unsigned char *buffer;
-     int size;
+sim_write (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 {
   int i;
 
@@ -1920,11 +1900,7 @@ sim_write (sd, addr, buffer, size)
 }
 
 int
-sim_read (sd, addr, buffer, size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     unsigned char *buffer;
-     int size;
+sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 {
   init_pointers ();
   if (addr < 0)
@@ -1938,11 +1914,7 @@ sim_read (sd, addr, buffer, size)
 
 
 int
-sim_store_register (sd, rn, value, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *value;
-     int length;
+sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
 {
   int longval;
   int shortval;
@@ -1991,11 +1963,7 @@ sim_store_register (sd, rn, value, length)
 }
 
 int
-sim_fetch_register (sd, rn, buf, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *buf;
-     int length;
+sim_fetch_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
 {
   int v;
   int longreg = 0;
@@ -2056,10 +2024,7 @@ sim_fetch_register (sd, rn, buf, length)
 }
 
 void
-sim_stop_reason (sd, reason, sigrc)
-     SIM_DESC sd;
-     enum sim_stop *reason;
-     int *sigrc;
+sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
 #if 0 /* FIXME: This should work but we can't use it.
 	 grep for SLEEP above.  */
@@ -2079,14 +2044,13 @@ sim_stop_reason (sd, reason, sigrc)
 /* FIXME: Rename to sim_set_mem_size.  */
 
 void
-sim_size (n)
-     int n;
+sim_size (int n)
 {
   /* Memory size is fixed.  */
 }
 
 void
-sim_set_simcache_size (n)
+sim_set_simcache_size (int n)
 {
   if (cpu.cache)
     free (cpu.cache);
@@ -2099,9 +2063,7 @@ sim_set_simcache_size (n)
 
 
 void
-sim_info (sd, verbose)
-     SIM_DESC sd;
-     int verbose;
+sim_info (SIM_DESC sd, int verbose)
 {
   double timetaken = (double) cpu.ticks / (double) now_persec ();
   double virttime = cpu.cycles / 10.0e6;
@@ -2149,8 +2111,7 @@ sim_info (sd, verbose)
    FLAG is non-zero for the H8/300H.  */
 
 void
-set_h8300h (h_flag, s_flag)
-     int h_flag, s_flag;
+set_h8300h (int h_flag, int s_flag)
 {
   /* FIXME: Much of the code in sim_load can be moved to sim_open.
      This function being replaced by a sim_open:ARGV configuration
@@ -2160,11 +2121,10 @@ set_h8300h (h_flag, s_flag)
 }
 
 SIM_DESC
-sim_open (kind, ptr, abfd, argv)
-     SIM_OPEN_KIND kind;
-     struct host_callback_struct *ptr;
-     struct _bfd *abfd;
-     char **argv;
+sim_open (SIM_OPEN_KIND kind, 
+	  struct host_callback_struct *ptr, 
+	  struct _bfd *abfd, 
+	  char **argv)
 {
   /* FIXME: Much of the code in sim_load can be moved here.  */
 
@@ -2176,9 +2136,7 @@ sim_open (kind, ptr, abfd, argv)
 }
 
 void
-sim_close (sd, quitting)
-     SIM_DESC sd;
-     int quitting;
+sim_close (SIM_DESC sd, int quitting)
 {
   /* Nothing to do.  */
 }
@@ -2186,11 +2144,7 @@ sim_close (sd, quitting)
 /* Called by gdb to load a program into memory.  */
 
 SIM_RC
-sim_load (sd, prog, abfd, from_tty)
-     SIM_DESC sd;
-     char *prog;
-     bfd *abfd;
-     int from_tty;
+sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 {
   bfd *prog_bfd;
 
@@ -2272,11 +2226,7 @@ sim_load (sd, prog, abfd, from_tty)
 }
 
 SIM_RC
-sim_create_inferior (sd, abfd, argv, env)
-     SIM_DESC sd;
-     struct _bfd *abfd;
-     char **argv;
-     char **env;
+sim_create_inferior (SIM_DESC sd, struct _bfd *abfd, char **argv, char **env)
 {
   if (abfd != NULL)
     cpu.pc = bfd_get_start_address (abfd);
@@ -2286,17 +2236,14 @@ sim_create_inferior (sd, abfd, argv, env)
 }
 
 void
-sim_do_command (sd, cmd)
-     SIM_DESC sd;
-     char *cmd;
+sim_do_command (SIM_DESC sd, char *cmd)
 {
   (*sim_callback->printf_filtered) (sim_callback,
 				    "This simulator does not accept any commands.\n");
 }
 
 void
-sim_set_callbacks (ptr)
-     struct host_callback_struct *ptr;
+sim_set_callbacks (struct host_callback_struct *ptr)
 {
   sim_callback = ptr;
 }
