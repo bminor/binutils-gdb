@@ -1,5 +1,12 @@
 2002-10-25  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbtypes.c (address_space_name_to_int): Update.
+	(address_space_int_to_name): Update.
+	* gdbarch.sh (address_class_type_flags_to_name): Change to a pure
+	multi-arch predicate.
+	(address_class_name_to_type_flags): Ditto.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
 	* MAINTAINERS: Check all warnings when h8300hms and alpha-elf.
 
 2002-10-24  Martin M. Hunt  <hunt@redhat.com>

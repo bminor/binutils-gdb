@@ -397,14 +397,17 @@ lookup_function_type (struct type *type)
 extern int
 address_space_name_to_int (char *space_identifier)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   int type_flags;
   /* Check for known address space delimiters. */
   if (!strcmp (space_identifier, "code"))
     return TYPE_FLAG_CODE_SPACE;
   else if (!strcmp (space_identifier, "data"))
     return TYPE_FLAG_DATA_SPACE;
-  else if (ADDRESS_CLASS_NAME_TO_TYPE_FLAGS_P ()
-           && ADDRESS_CLASS_NAME_TO_TYPE_FLAGS (space_identifier, &type_flags))
+  else if (gdbarch_address_class_name_to_type_flags_p (gdbarch)
+           && gdbarch_address_class_name_to_type_flags (gdbarch,
+							space_identifier,
+							&type_flags))
     return type_flags;
   else
     error ("Unknown address space specifier: \"%s\"", space_identifier);
@@ -416,13 +419,14 @@ address_space_name_to_int (char *space_identifier)
 extern char *
 address_space_int_to_name (int space_flag)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   if (space_flag & TYPE_FLAG_CODE_SPACE)
     return "code";
   else if (space_flag & TYPE_FLAG_DATA_SPACE)
     return "data";
   else if ((space_flag & TYPE_FLAG_ADDRESS_CLASS_ALL)
-           && ADDRESS_CLASS_TYPE_FLAGS_TO_NAME_P ())
-    return ADDRESS_CLASS_TYPE_FLAGS_TO_NAME (space_flag);
+           && gdbarch_address_class_type_flags_to_name_p (gdbarch))
+    return gdbarch_address_class_type_flags_to_name (gdbarch, space_flag);
   else
     return NULL;
 }

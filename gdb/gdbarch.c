@@ -859,17 +859,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
     fprintf_unfiltered (file,
                         "gdbarch_dump: pseudo_register_write = 0x%08lx\n",
                         (long) current_gdbarch->pseudo_register_write);
-#ifdef ADDRESS_CLASS_NAME_TO_TYPE_FLAGS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ADDRESS_CLASS_NAME_TO_TYPE_FLAGS(name, type_flags_ptr)",
-                      XSTRING (ADDRESS_CLASS_NAME_TO_TYPE_FLAGS (name, type_flags_ptr)));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: ADDRESS_CLASS_NAME_TO_TYPE_FLAGS = 0x%08lx\n",
-                        (long) current_gdbarch->address_class_name_to_type_flags
-                        /*ADDRESS_CLASS_NAME_TO_TYPE_FLAGS ()*/);
-#endif
+                        "gdbarch_dump: address_class_name_to_type_flags = 0x%08lx\n",
+                        (long) current_gdbarch->address_class_name_to_type_flags);
 #ifdef ADDRESS_CLASS_TYPE_FLAGS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -881,17 +874,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->address_class_type_flags
                         /*ADDRESS_CLASS_TYPE_FLAGS ()*/);
 #endif
-#ifdef ADDRESS_CLASS_TYPE_FLAGS_TO_NAME
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ADDRESS_CLASS_TYPE_FLAGS_TO_NAME(type_flags)",
-                      XSTRING (ADDRESS_CLASS_TYPE_FLAGS_TO_NAME (type_flags)));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: ADDRESS_CLASS_TYPE_FLAGS_TO_NAME = 0x%08lx\n",
-                        (long) current_gdbarch->address_class_type_flags_to_name
-                        /*ADDRESS_CLASS_TYPE_FLAGS_TO_NAME ()*/);
-#endif
+                        "gdbarch_dump: address_class_type_flags_to_name = 0x%08lx\n",
+                        (long) current_gdbarch->address_class_type_flags_to_name);
 #ifdef ADDRESS_TO_POINTER
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -5164,7 +5150,7 @@ gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flag
                     "gdbarch: gdbarch_address_class_type_flags_to_name invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_address_class_type_flags_to_name called\n");
-  return gdbarch->address_class_type_flags_to_name (type_flags);
+  return gdbarch->address_class_type_flags_to_name (gdbarch, type_flags);
 }
 
 void
@@ -5190,7 +5176,7 @@ gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, char *name, i
                     "gdbarch: gdbarch_address_class_name_to_type_flags invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_address_class_name_to_type_flags called\n");
-  return gdbarch->address_class_name_to_type_flags (name, type_flags_ptr);
+  return gdbarch->address_class_name_to_type_flags (gdbarch, name, type_flags_ptr);
 }
 
 void
