@@ -5,6 +5,8 @@
 	* ldlang.h (lang_reset_memory_regions): Prototype.
 	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Call
 	lang_reset_memory_regions before lang_size_sections.
+	* emultempl/hppaelf.em (hppaelf_layout_sections_again): Likewise.
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Likewise.
 
 2002-02-04  Hans-Peter Nilsson  <hp@bitrange.com>
 
