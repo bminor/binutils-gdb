@@ -1,3 +1,21 @@
+start-sanitize-sky
+Fri Dec 11 17:02:29 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	Fri Aug 21 18:13:28 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* configure.in (mips64el-skyb-elf): Use fragment mt-skyb and
+	exclude target-libiberty, target-libg++, etc.
+	* config/mt-skyb: Do not install gcc, g++, libc, libgcc, etc.
+
+	Mon Aug 10 23:04:56 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* config.sub (vpu-elf): Add a "marketing name" for mips64el-skyb-elf.
+
+	Mon Aug 10 18:59:42 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* configure.in (mips64el-skyb-elf): added new target
+
+end-sanitize-sky
 start-sanitize-java
 1998-12-11  Tom Tromey  <tromey@cygnus.com>
 

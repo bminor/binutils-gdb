@@ -86,6 +86,11 @@ case $1 in
 		set mips64vr5000-elf
                 ;;
 # end-sanitize-cygnus
+# start-sanitize-sky
+	vpu-elf)
+		set mips64el-skyb-elf
+		;;
+# end-sanitize-sky
 	*)
 		;;
 esac
@@ -208,6 +213,11 @@ case $basic_machine in
 	thumb)
 		basic_machine=$basic_machine-unknown
 		;;
+# start-sanitize-vr4xxx
+	mips64vr4xxx | mips64vr4xxxel)
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-vr4xxx
 # start-sanitize-vr4320
 	mips64vr4320 | mips64vr4320el)
 		basic_machine=$basic_machine-unknown
@@ -321,6 +331,10 @@ case $basic_machine in
 # end-sanitize-v850e
 	d30v-*) # CYGNUS LOCAL
 	        ;;
+# start-sanitize-vr4xxx
+	mips64vr4xxx-* | mips64vr4xxxel-*)
+		;;
+# end-sanitize-vr4xxx
 # start-sanitize-vr4320
 	mips64vr4320-* | mips64vr4320el-*)
 		;;

@@ -347,6 +347,9 @@ case "${target}" in
   mips64r59*-sky-elf*)
     target_makefile_frag="${target_makefile_frag} config/mt-r5900 config/mt-sky"
     ;;
+  mips64*-skyb-*)
+    target_makefile_frag="${target_makefile_frag} config/mt-r5900 config/mt-skyb"
+    ;;
 # end-sanitize-sky
 # start-sanitize-r5900
   mips64r59*)
@@ -822,6 +825,12 @@ case "${target}" in
     noconfigdirs="$noconfigdirs gprof"
     extraconfigdirs="$extraconfigdirs gas,dvp-gas,dvp-elf"
     ;;
+  mips*-skyb-elf*)
+    noconfigdirs="$noconfigdirs gprof" # gcc
+    noconfigdirs="$noconfigdirs target-libiberty" # target-newlib
+    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio"
+    extraconfigdirs="$extraconfigdirs gas,dvp-gas,dvp-elf"
+    ;;
 # end-sanitize-sky
   mips*-*-*)
     noconfigdirs="$noconfigdirs gprof"
@@ -865,7 +874,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs gcc gdb sim"
     noconfigdirs="$noconfigdirs itcl libgui tk tix"
     noconfigdirs="$noconfigdirs target-newlib target-libgloss target-libiberty"
-    noconfigdirs="$noconfigdirs target-librx target-libg++ target-libstdc++ target-libio"
+    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio"
     ;;
 # end-sanitize-sky
   v810-*-*)
