@@ -1438,13 +1438,19 @@ is zero or non-zero?
 @code{character}, 8 bit unsigned character type.
 
 @item -21
-@code{logical*1}, 8 bit unsigned integral type.
+@code{logical*1}, 8 bit type.  This @sc{fortran} type has a split
+personality in that it is used for boolean variables, but can also be
+used for unsigned integers.
 
 @item -22
-@code{logical*2}, 16 bit unsigned integral type.
+@code{logical*2}, 16 bit type.  This @sc{fortran} type has a split
+personality in that it is used for boolean variables, but can also be
+used for unsigned integers.
 
 @item -23
-@code{logical*4}, 32 bit unsigned integral type.
+@code{logical*4}, 32 bit type.  This @sc{fortran} type has a split
+personality in that it is used for boolean variables, but can also be
+used for unsigned integers.
 
 @item -24
 @code{logical}, 32 bit type.  This @sc{fortran} type has a split
