@@ -1,3 +1,24 @@
+Thu May  4 19:26:55 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* stabs.c (get_stab_string_offset): Always define.  If
+	SEPARATE_STAB_SECTIONS isn't set, abort.
+	(SEPARATE_STAB_SECTIONS): Default to zero.
+	(aout_process_stab): New function, split out from s_stab_generic.
+	(OBJ_PROCESS_STAB) [AOUT_STABS]: Define to call aout_process_stab,
+	if not already defined.
+	(s_stab_generic): Test SEPARATE_STAB_SECTIONS at run time.  If
+	it's not set, and OBJ_PROCESS_STAB isn't defined, abort.  Always
+	pass six arguments to OBJ_PROCESS_STAB.
+	* config/obj-aout.h (AOUT_STABS): Define.
+	* config/obj-bout.h (AOUT_STABS): Define.
+	* config/obj-ecoff.h (OBJ_PROCESS_STAB): Add new first argument,
+	ignored.
+	* config/obj-elf.h (OBJ_PROCESS_STAB) [ECOFF_DEBUGGING]: Ditto.
+
+	* config/obj-ecoff.h (ECOFF_DEBUGGING): Define to 1, not empty.
+	* config/obj-elf.h (ECOFF_DEBUGGING): Ditto.  Test value, not
+	whether it's defined.
+
 Wed May  3 21:38:20 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* as.h (LOCAL_LABELS_DOLLAR, LOCAL_LABELS_FB): If not already

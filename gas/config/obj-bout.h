@@ -306,4 +306,6 @@ extern void tc_bout_fix_to_chars PARAMS ((char *where,
 					  struct fix *fixP,
 					  relax_addressT segment_address));
 
+#define AOUT_STABS
+
 /* end of obj-bout.h */
