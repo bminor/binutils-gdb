@@ -8,5 +8,5 @@ _define__(<_GCC__>,<gcc960>)
 _define__(<_LD__>,<gld960>)
 _define__(<_GDB__>,<gdb960>)
 _define__(<_HOST__>,<Intel 960>)
-_define__(<_MACH_DEP__>,<i960 Dependent>)
+_define__(<_MACH_DEP__>,<i960-Dependent>)
 _divert__<>
