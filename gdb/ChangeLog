@@ -1,5 +1,9 @@
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
+	* trad-frame.h (trad_frame_set_reg_addr): Declare.
+
+2004-03-23  Andrew Cagney  <cagney@redhat.com>
+
 	* MAINTAINERS (Past Maintainers): Add Mark Salter and Fernando
 	Nasser as past testsuite/lib/ (and other) maintainers.
 
