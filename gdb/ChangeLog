@@ -1,3 +1,8 @@
+2001-03-07  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* top.c (init_main): Make `set history file name' complete on file
+	names.
+
 2001-03-06  J.T. Conklin  <jtc@redback.com>
 
 	* Makefile.in (LINTFLAGS): Update to contain all of the macros

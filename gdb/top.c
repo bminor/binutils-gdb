@@ -2081,11 +2081,12 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
   add_show_from_set (c, &showhistlist);
   c->function.sfunc = set_history_size_command;
 
-  add_show_from_set
-    (add_set_cmd ("filename", no_class, var_filename, (char *) &history_filename,
-		  "Set the filename in which to record the command history\n\
- (the list of previous commands of which a record is kept).", &sethistlist),
-     &showhistlist);
+  c = add_set_cmd ("filename", no_class, var_filename,
+		   (char *) &history_filename,
+		   "Set the filename in which to record the command history\n\
+ (the list of previous commands of which a record is kept).", &sethistlist);
+  c->completer = filename_completer;
+  add_show_from_set (c, &showhistlist);
 
   add_show_from_set
     (add_set_cmd ("confirm", class_support, var_boolean,
