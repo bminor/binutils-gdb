@@ -26,21 +26,8 @@ Cambridge, MA 02139, USA.
 #ifndef __MMALLOC_H
 #define __MMALLOC_H 1
 
-/* Ugly kludge to work around problem with some vendors (Sun for example)
-   that ship the ANSI <stdlib.h> file with non-ANSI compliant declarations
-   for malloc(), realloc(), calloc(), and free().  Since we don't use
-   these functions internally, but simply provide compatible replacements
-   layered on top of the m* equivalents, just hide whatever definitions
-   <stdlib.h> might supply. */
-
-#define malloc hide_malloc
-#define calloc hide_calloc
-#define realloc hide_realloc
-#define free hide_free
-
 #ifdef	__STDC__
 #  include <stddef.h>
-#  include <stdlib.h>
 #  define PTR void *
 #  define CONST const
 #  define PARAMS(paramlist) paramlist
@@ -64,10 +51,6 @@ Cambridge, MA 02139, USA.
 #undef calloc
 #undef realloc
 #undef free
-
-#if defined(USG)
-#  include <string.h>
-#endif
 
 #ifndef MIN
 #  define MIN(A, B) ((A) < (B) ? (A) : (B))
