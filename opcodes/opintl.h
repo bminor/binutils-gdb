@@ -12,6 +12,19 @@
 
 #ifdef ENABLE_NLS
 # include <libintl.h>
+/* Note the use of dgetext() and PACKAGE here, rather than gettext().
+   
+   This is because the code in this directory is used to build a library which
+   will be linked with code in other directories to form programs.  We want to
+   maintain a seperate translation file for this directory however, rather
+   than being forced to merge it with that of any program linked to
+   libopcodes.  This is a library, so it cannot depend on the catalog
+   currently loaded.
+
+   In order to do this, we have to make sure that when we extract messages we
+   use the OPCODES domain rather than the domain of the program that included
+   the opcodes library, (eg OBJDUMP).  Hence we use dgettext (PACKAGE, String)
+   and define PACKAGE to be 'opcodes'.  (See the code in configure).  */
 # define _(String) dgettext (PACKAGE, String)
 # ifdef gettext_noop
 #  define N_(String) gettext_noop (String)

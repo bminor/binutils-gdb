@@ -1,3 +1,8 @@
+2000-05-31  Nick Clifton  <nickc@cygnus.com>
+
+	* opintl.h (_(String)): Explain why dgettext is used instead
+	of gettext. 
+
 2000-05-31  Ulrich Drepper  <drepper@redhat.com>
 
 	* elf.c (_bfd_elf_slurp_version_tables): Correct reading of version
