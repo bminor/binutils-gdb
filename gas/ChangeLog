@@ -1,3 +1,18 @@
+Mon Jun 16 19:12:51 1997  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* config/tc-ppc.h (tc_fix_adjustable): Don't let the assembler
+	calculate relocations to any external symbol, because we might be
+	linking a shared object and the symbol might be overriden or moved
+	(for instance, moved into a static executable's .bss section).
+	(GLOBAL_OFFSET_TABLE_NAME): Delete. This is an i386 wierdness.
+
+	* config/tc-ppc.h (tc_fix_adjustable): GOT-based relocations can't
+	be calculated by the assembler.
+
+	* config/tc-ppc.c (md_apply_fix3): Handle @plt or @local branch
+	whose destination lies in the same file, by ignoring the @plt or
+	@local and aiming the branch at its destination.
+
 Mon Jun 16 13:59:18 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* symbols.c (copy_symbol_attributes): Copy BSF_OBJECT flag.
