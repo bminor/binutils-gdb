@@ -21,15 +21,19 @@
 
 #include "defs.h"
 
+#ifndef FETCH_INFERIOR_REGISTERS
+#error Not FETCH_INFERIOR_REGISTERS 
+#endif /* !FETCH_INFERIOR_REGISTERS */
+
 #include "arm-tdep.h"
 
-#ifdef FETCH_INFERIOR_REGISTERS
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 #include <machine/frame.h>
 #include "inferior.h"
 #include "regcache.h"
+#include "gdbcore.h"
 
 extern int arm_apcs_32;
 
@@ -78,7 +82,7 @@ fetch_register (int regno)
 }
 
 static void
-fetch_regs ()
+fetch_regs (void)
 {
   struct reg inferior_registers;
   int ret;
@@ -138,7 +142,7 @@ fetch_fp_register (int regno)
 }
 
 static void
-fetch_fp_regs ()
+fetch_fp_regs (void)
 {
   struct fpreg inferior_fp_registers;
   int ret;
@@ -247,7 +251,7 @@ store_register (int regno)
 }
 
 static void
-store_regs ()
+store_regs (void)
 {
   struct reg inferior_registers;
   int ret;
@@ -322,7 +326,7 @@ store_fp_register (int regno)
 }
 
 static void
-store_fp_regs ()
+store_fp_regs (void)
 {
   struct fpreg inferior_fp_registers;
   int ret;
@@ -365,19 +369,48 @@ struct md_core
   struct fpreg freg;
 };
 
-void
+static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR ignore)
 {
   struct md_core *core_reg = (struct md_core *) core_reg_sect;
+  int regno;
+  CORE_ADDR r_pc;
+  
+  /* Integer registers.  */
+  for (regno = ARM_A1_REGNUM; regno < ARM_SP_REGNUM; regno++)
+    supply_register (regno, (char *) &core_reg->intreg.r[regno]);
 
-  /* integer registers */
-  memcpy (&registers[REGISTER_BYTE (0)], &core_reg->intreg,
-	  sizeof (struct reg));
-  /* floating point registers */
-  /* XXX */
+  supply_register (ARM_SP_REGNUM, (char *) &core_reg->intreg.r_sp);
+  supply_register (ARM_LR_REGNUM, (char *) &core_reg->intreg.r_lr);
+  /* This is ok: we're running native...  */
+  r_pc = ADDR_BITS_REMOVE (core_reg->intreg.r_pc);
+  supply_register (ARM_PC_REGNUM, (char *) &r_pc);
+
+  if (arm_apcs_32)
+    supply_register (ARM_PS_REGNUM, (char *) &core_reg->intreg.r_cpsr);
+  else
+    supply_register (ARM_PS_REGNUM, (char *) &core_reg->intreg.r_pc);
+
+  /* Floating-point registers.  */
+  for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
+    supply_register
+      (regno, (char *) &core_reg->freg.fpr[regno - ARM_F0_REGNUM]);
+
+  supply_register (ARM_FPS_REGNUM, (char *) &core_reg->freg.fpr_fpsr);
 }
 
-#else
-#error Not FETCH_INFERIOR_REGISTERS 
-#endif /* !FETCH_INFERIOR_REGISTERS */
+static struct core_fns arm_netbsd_core_fns =
+{
+  bfd_target_unknown_flavour,		/* core_flovour.  */
+  default_check_format,			/* check_format.  */
+  default_core_sniffer,			/* core_sniffer.  */
+  fetch_core_registers,			/* core_read_registers.  */
+  NULL
+};
+
+void
+_initialize_arm_netbsd_nat (void)
+{
+  add_core_fns (&arm_netbsd_core_fns);
+}

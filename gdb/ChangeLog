@@ -1,3 +1,13 @@
+2002-02-21  Richard Earnshaw  <rearnsha@arm.com>
+
+	* armnbsd-nat.c: Include gdbcore.h.
+	(FETCH_INFERIOR_REGISTERS): Just error if this isn't defined.
+	(fetch_regs, fetch_fp_regs, store_regs, store_fp_regs): Add explicit
+	'void' to declaration, to shut up ARI.
+	(fetch_core_registers): Make static.  Rewrite using supply_register.
+	(arm_netbsd_core_fns): New core-file type specification.
+	(_initialize_arm_netbsd_nat): New function.
+
 2002-02-21  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (register_loaded_dll): Correctly check for invalid handle
