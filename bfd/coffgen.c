@@ -114,7 +114,7 @@ DEFUN(coff_real_object_p,(abfd, nscns, internal_f, internal_a),
   char *external_sections;
 
   /* Build a play area */
-  tdata = bfd_coff_mkobject_hook (abfd, (PTR) internal_f);
+  tdata = bfd_coff_mkobject_hook (abfd, (PTR) internal_f, (PTR) internal_a);
   if (tdata == NULL)
     return 0;
 
@@ -156,7 +156,10 @@ DEFUN(coff_real_object_p,(abfd, nscns, internal_f, internal_a),
   if (internal_f->f_nsyms)
     abfd->flags |= HAS_SYMS;
 
-  bfd_get_start_address(abfd) = internal_f->f_opthdr ? internal_a->entry : 0;
+  if (internal_a != (struct internal_aouthdr *) NULL)
+    bfd_get_start_address (abfd) = internal_a->entry;
+  else
+    bfd_get_start_address (abfd) = 0;
 
   return abfd->xvec;
  fail:
@@ -213,7 +216,10 @@ DEFUN(coff_object_p,(abfd),
   /* Seek past the opt hdr stuff */
   bfd_seek(abfd, (file_ptr) (internal_f.f_opthdr + filhsz), SEEK_SET);
 
-  return coff_real_object_p(abfd, nscns, &internal_f, &internal_a);
+  return coff_real_object_p(abfd, nscns, &internal_f,
+			    (internal_f.f_opthdr != 0
+			     ? &internal_a
+			     : (struct internal_aouthdr *) NULL));
 }
 
 /* Get the BFD section from a COFF symbol section number.  */
@@ -298,20 +304,21 @@ DEFUN(coff_get_symtab, (abfd, alocation),
 
 /* Set lineno_count for the output sections of a COFF file.  */
 
-void
+int
 DEFUN(coff_count_linenumbers,(abfd),
       bfd            *abfd)
 {
   unsigned int    limit = bfd_get_symcount(abfd);
   unsigned int    i;
+  int total = 0;
   asymbol       **p;
-    {
-      asection       *s = abfd->sections->output_section;
-      while (s) {
-	BFD_ASSERT(s->lineno_count == 0);
-	s = s->next;
-      }
-    }
+ {
+   asection       *s = abfd->sections->output_section;
+   while (s) {
+     BFD_ASSERT(s->lineno_count == 0);
+     s = s->next;
+   }
+ }
 
 
   for (p = abfd->outsymbols, i = 0; i < limit; i++, p++) {
@@ -325,14 +332,17 @@ DEFUN(coff_count_linenumbers,(abfd),
 	  */
 	alent          *l = q->lineno;
 	q->symbol.section->output_section->lineno_count++;
+	total ++;
 	l++;
 	while (l->line_number) {
+	  total ++;
 	  q->symbol.section->output_section->lineno_count++;
 	  l++;
 	}
       }
     }
   }
+  return total;
 }
 
 /* Takes a bfd and a symbol, returns a pointer to the coff specific
@@ -844,23 +854,25 @@ DEFUN(coff_write_linenumbers,(abfd),
       /* Find all the linenumbers in this section */
       while (*q) {
 	asymbol        *p = *q;
-	alent          *l =
-	  BFD_SEND(bfd_asymbol_bfd(p), _get_lineno, (bfd_asymbol_bfd(p), p));
-	if (l) {
-	  /* Found a linenumber entry, output */
-	  struct internal_lineno  out;
-	  memset( (PTR)&out, 0, sizeof(out));
-	  out.l_lnno = 0;
-	  out.l_addr.l_symndx = l->u.offset;
-	  bfd_coff_swap_lineno_out(abfd, &out, buff);
-	  bfd_write(buff, 1, linesz, abfd);
-	  l++;
-	  while (l->line_number) {
-	    out.l_lnno = l->line_number;
+	if (p->section->output_section == s) {
+	  alent          *l =
+	   BFD_SEND(bfd_asymbol_bfd(p), _get_lineno, (bfd_asymbol_bfd(p), p));
+	  if (l) {
+	    /* Found a linenumber entry, output */
+	    struct internal_lineno  out;
+	    memset( (PTR)&out, 0, sizeof(out));
+	    out.l_lnno = 0;
 	    out.l_addr.l_symndx = l->u.offset;
 	    bfd_coff_swap_lineno_out(abfd, &out, buff);
 	    bfd_write(buff, 1, linesz, abfd);
 	    l++;
+	    while (l->line_number) {
+	      out.l_lnno = l->line_number;
+	      out.l_addr.l_symndx = l->u.offset;
+	      bfd_coff_swap_lineno_out(abfd, &out, buff);
+	      bfd_write(buff, 1, linesz, abfd);
+	      l++;
+	    }
 	  }
 	}
 	q++;

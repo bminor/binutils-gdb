@@ -341,7 +341,7 @@ DEFUN(sec_to_styp_flags, (sec_name, sec_flags),
 
   }
   /* Try and figure out what it should be */
-  else   if (sec_flags & SEC_CODE) 
+  else if (sec_flags & SEC_CODE) 
   {
     styp_flags = STYP_TEXT;
   }
@@ -539,7 +539,8 @@ dependent COFF routines
 .       PTR     internal_filehdr));
 . PTR (*_bfd_coff_mkobject_hook) PARAMS ((
 .       bfd     *abfd,
-.       PTR     internal_filehdr));
+.       PTR     internal_filehdr,
+.       PTR     internal_aouthdr));
 . flagword (*_bfd_styp_to_sec_flags_hook) PARAMS ((
 .       bfd     *abfd,
 .       PTR     internal_scnhdr));
@@ -617,8 +618,8 @@ dependent COFF routines
 .
 .#define bfd_coff_set_arch_mach_hook(abfd, filehdr)\
 .        ((coff_backend_info (abfd)->_bfd_coff_set_arch_mach_hook) (abfd, filehdr))
-.#define bfd_coff_mkobject_hook(abfd, filehdr)\
-.        ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook) (abfd, filehdr))
+.#define bfd_coff_mkobject_hook(abfd, filehdr, aouthdr)\
+.        ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook) (abfd, filehdr, aouthdr))
 .
 .#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr)\
 .        ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook) (abfd, scnhdr))
@@ -756,9 +757,10 @@ DEFUN(coff_mkobject,(abfd),
 /* Create the COFF backend specific information.  */
 
 static          PTR
-DEFUN(coff_mkobject_hook,(abfd, filehdr),
+DEFUN(coff_mkobject_hook,(abfd, filehdr, aouthdr),
       bfd            *abfd AND
-      PTR	     filehdr)
+      PTR	     filehdr AND
+      PTR	     aouthdr)
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
   coff_data_type *coff;
@@ -1344,7 +1346,7 @@ DEFUN(coff_write_object_contents,(abfd),
   /* Make a pass through the symbol table to count line number entries and
      put them into the correct asections */
 
-  coff_count_linenumbers(abfd);
+  lnno_size =  coff_count_linenumbers(abfd) * LINESZ;
   data_base = scn_base;
 
   /* Work out the size of the reloc and linno areas */
@@ -1357,7 +1359,6 @@ DEFUN(coff_write_object_contents,(abfd),
     {
 	
       reloc_size += current->reloc_count * RELSZ;
-      lnno_size += current->lineno_count * LINESZ;
       data_base += SCNHSZ;
     }
       
