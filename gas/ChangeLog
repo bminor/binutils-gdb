@@ -1,3 +1,8 @@
+Mon Oct 30 17:52:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* listing.c (listing_newline): Don't create a frag in the absolute
+	section.
+
 Sat Oct 28 01:02:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.c (md_pseudo_table): Add "data" and "text".
