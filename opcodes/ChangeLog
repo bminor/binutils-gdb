@@ -1,3 +1,8 @@
+2004-01-16  Alexandre Oliva  <aoliva@redhat.com>
+
+	* m10300-opc.c (mov): 8- and 24-bit immediates are zero-extended
+	when loaded into XR registers.
+
 2004-01-14  Richard Sandiford  <rsandifo@redhat.com>
 
 	* frv-desc.h: Regenerate.

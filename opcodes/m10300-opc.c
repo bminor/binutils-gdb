@@ -1,5 +1,5 @@
 /* Assemble Matsushita MN10300 instructions.
-   Copyright 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2004 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -561,8 +561,8 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0xfb080000,  0xffff0000,  0,    FMT_D7, AM33,	{SIMM8, RN02}},
 { "mov",	0xfd080000,  0xffff0000,  0,    FMT_D8, AM33,	{SIMM24, RN02}},
 { "mov",	0xfe080000,  0xffff0000,  0,    FMT_D9, AM33,	{IMM32_HIGH8, RN02}},
-{ "mov",	0xfbf80000,  0xffff0000,  0,    FMT_D7, AM33,	{SIMM8, XRN02}},
-{ "mov",	0xfdf80000,  0xffff0000,  0,    FMT_D8, AM33,	{SIMM24, XRN02}},
+{ "mov",	0xfbf80000,  0xffff0000,  0,    FMT_D7, AM33,	{IMM8, XRN02}},
+{ "mov",	0xfdf80000,  0xffff0000,  0,    FMT_D8, AM33,	{IMM24, XRN02}},
 { "mov",	0xfef80000,  0xffff0000,  0,    FMT_D9, AM33,	{IMM32_HIGH8, XRN02}},
 { "mov",	0xfe0e0000,  0xffff0f00,  0,    FMT_D9, AM33,	{MEM(IMM32_HIGH8_MEM), RN2}},
 { "mov",	0xfe1e0000,  0xffff0f00,  0,    FMT_D9, AM33,	{RM2, MEM(IMM32_HIGH8_MEM)}},
