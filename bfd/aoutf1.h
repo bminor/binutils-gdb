@@ -574,7 +574,7 @@ DEFUN (sunos4_set_sizes, (abfd),
 }
 
 static CONST struct aout_backend_data sunos4_aout_backend = {
-  0, 1, 0, sunos4_set_sizes,
+  0, 1, 0, sunos4_set_sizes, 0,
 };
 
 #define	MY_core_file_failing_command 	sunos4_core_file_failing_command

@@ -791,7 +791,7 @@ DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
 
 	/* Fix up exec header while we're at it.  */
 	execp->a_text = obj_textsec(abfd)->_raw_size;
-	if (ztih)
+	if (ztih && (!abdp || (abdp && !abdp->exec_header_not_counted)))
 	  execp->a_text += adata(abfd).exec_bytes_size;
 	N_SET_MAGIC (*execp, ZMAGIC);
 	/* Spec says data section should be rounded up to page boundary.  */

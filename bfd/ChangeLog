@@ -1,3 +1,20 @@
+Thu Oct  8 22:18:10 1992  Mark Eichin  (eichin at tweedledumber.cygnus.com)
+
+	* libaout.h (aout_backend_data): added exec_header_not_counted
+	field. For ZMAGIC files only, when text_includes_header is set, by
+	default the length of the exec header is counted in the text
+	section size. For go32, exec header is mapped in but does *not*
+	contribute to the size of section.
+	* aoutx.h (aout_adjust_sizes_and_vmas): if exec_header_not_counted
+	is not set, but ztih is, add the size of the exec header to the
+	recorded size of the text section.
+	* aoutf1.h (sunos4_aout_backend): clear exec_header_not_counted.
+	* i386aout.c (i386aout_backend_data): set exec_header_not_counted.
+	Also set text_includes_header.
+	* aout-target.h (*_backend_data): cleare exec_header_not_counted
+	by default in MY(backend_data).
+
+
 Thu Oct  8 18:12:49 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* aout-target.h (callback): Don't define this function if it won't be

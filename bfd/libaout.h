@@ -22,8 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    variants in a few routines, and otherwise share large masses of code.
    This means we only have to fix bugs in one place, most of the time.  */
 
-/* $Id$ */
-
 #ifdef __STDC__
 #define CAT3(a,b,c) a##b##c
 #else
@@ -59,11 +57,11 @@ struct aout_backend_data
   /* Are ZMAGIC files mapped contiguously?  If so, the text section may
      need more padding, if the segment size (granularity for memory access
      control) is larger than the page size.  */
-  unsigned char zmagic_mapped_contiguous : 1;
+  unsigned char zmagic_mapped_contiguous;
   /* If this flag is set, ZMAGIC/NMAGIC file headers get mapped in with the
      text section, which starts immediately after the file header.
      If not, the text section starts on the next page.  */
-  unsigned char text_includes_header : 1;
+  unsigned char text_includes_header;
 
   /* If the text section VMA isn't specified, and we need an absolute
      address, use this as the default.  If we're producing a relocatable
@@ -72,6 +70,15 @@ struct aout_backend_data
      reasonable for a format that handles multiple CPUs with different
      load addresses for each?  */
   bfd_vma default_text_vma;
+
+  /* Callback for setting the page and segment sizes, if they can't be
+     trivially determined from the architecture.  */
+  boolean (*set_sizes) PARAMS ((bfd *));
+
+  /* zmagic files only. For go32, the length of the exec header contributes
+     to the size of the text section in the file for alignment purposes but
+     does *not* get counted in the length of the text section. */
+  unsigned char exec_header_not_counted;
 };
 #define aout_backend_info(abfd) \
 	((CONST struct aout_backend_data *)((abfd)->xvec->backend_data))
@@ -98,6 +105,7 @@ struct internal_exec
     unsigned char a_talign;	/* Alignment of text segment */
     unsigned char a_dalign;	/* Alignment of data segment */
     unsigned char a_balign;	/* Alignment of bss segment */
+    char a_relaxable;           /* Enough info for linker relax */
 };
 
 /* Magic number is written 
