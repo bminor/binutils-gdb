@@ -1,5 +1,7 @@
 Tue Feb 20 17:32:05 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
+	* config/{i386,ns32k}/nbsd.mh (NATDEPFILES): Remove core-aout.o.
+
 	* config/nm-nbsd.h (FETCH_INFERIOR_REGISTERS): Defined.
 	* config/xm-nbsd.h (CC_HAS_LONG_LONG, PRINTF_HAS_LONG_LONG):
 	#ifdef'd out definitions ---  Causes serious gdb failures on 
