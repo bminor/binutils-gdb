@@ -1,3 +1,8 @@
+2003-09-15  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add sh*-*-* as supported target.
+	* gdb.asm/sh.inc: New file.
+
 2003-09-11  David Carlton  <carlton@kealia.com>
 
 	* gdb.c++/namespace.exp: Add tests for namespace types.

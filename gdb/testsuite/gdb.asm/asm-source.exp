@@ -85,6 +85,11 @@ switch -glob -- [istarget] {
     "powerpc*-*" {
         set asm-arch powerpc
     }
+    "sh*-*-*" {
+        set asm-arch sh
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+        set link-flags "--entry _start"
+    }
     "sparc-*-*" {
         set asm-arch sparc
     }
