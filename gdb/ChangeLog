@@ -1,5 +1,9 @@
 2001-02-16  Andrew Cagney  <ac131313@redhat.com>
 
+	* TODO (5.1): Move ``Hardware watchpint problems'' out of 5.1.
+
+2001-02-16  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS (paper trail): Update.
 
 2001-02-16  Mark Kettenis  <kettenis@gnu.org>
