@@ -1,5 +1,12 @@
 2003-05-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_frame_this_id): Remove inside_entry_file
+	check.  The majority of i386 targets shouldn't need this, and it
+	hurts Cygwin.
+	* x86-64-tdep.c (x86_64_frame_this_id): Likewise.
+
+2003-05-29  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386-tdep.c (i386_skip_prologue): Fix comment.
 
 	* i386-nto-tdep.c (i386nto_sigcontext_addr): Adapt for new frame

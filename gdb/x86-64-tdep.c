@@ -962,10 +962,6 @@ x86_64_frame_this_id (struct frame_info *next_frame, void **this_cache,
   if (cache->base == 0)
     return;
 
-  /* This is meant to halt the backtrace at "_start".  */
-  if (inside_entry_file (cache->pc))
-    return;
-
   (*this_id) = frame_id_build (cache->base + 16, cache->pc);
 }
 
