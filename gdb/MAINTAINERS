@@ -150,6 +150,9 @@ maintainer works with the native maintainer when resolving API issues.
 
 	w65		Deleted.
 
+	xstormy16	--target=xstormy16-elf
+			Corinna Vinschen	vinschen@redhat.com
+
 	z8k		(--target=z8k-coff broken)
 			Known problem in 5.1
 			Maintenance only

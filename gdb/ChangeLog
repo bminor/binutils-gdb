@@ -1,3 +1,7 @@
+2001-12-17  Corinna Vinschen  <vinschen@redhat.com>
+
+	* MAINTAINERS: Add myself as XStormy16 maintainer.
+
 2001-12-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/rs6000/tm-rs6000.h (solib.h): Conditionally include.
