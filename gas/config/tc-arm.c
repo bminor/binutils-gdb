@@ -6513,29 +6513,26 @@ md_begin ()
     }
 
   /* Catch special cases.  */
-  if (cpu_variant != (FPU_DEFAULT | CPU_DEFAULT))
+  if (cpu_variant & ARM_EXT_XSCALE)
+    mach = bfd_mach_arm_XScale;
+  else if (cpu_variant & ARM_EXT_V5E)
+    mach = bfd_mach_arm_5TE;
+  else if (cpu_variant & ARM_EXT_V5)
     {
-      if (cpu_variant & ARM_EXT_XSCALE)
-	mach = bfd_mach_arm_XScale;
-      else if (cpu_variant & ARM_EXT_V5E)
-	mach = bfd_mach_arm_5TE;
-      else if (cpu_variant & ARM_EXT_V5)
-	{
-	  if (cpu_variant & ARM_EXT_THUMB)
-	    mach = bfd_mach_arm_5T;
-	  else
-	    mach = bfd_mach_arm_5;
-	}
-      else if (cpu_variant & ARM_EXT_HALFWORD)
-	{
-	  if (cpu_variant & ARM_EXT_THUMB)
-	    mach = bfd_mach_arm_4T;
-	  else
-	    mach = bfd_mach_arm_4;
-	}
-      else if (cpu_variant & ARM_EXT_LONGMUL)
-	mach = bfd_mach_arm_3M;
+      if (cpu_variant & ARM_EXT_THUMB)
+	mach = bfd_mach_arm_5T;
+      else
+	mach = bfd_mach_arm_5;
     }
+  else if (cpu_variant & ARM_EXT_HALFWORD)
+    {
+      if (cpu_variant & ARM_EXT_THUMB)
+	mach = bfd_mach_arm_4T;
+      else
+	mach = bfd_mach_arm_4;
+    }
+  else if (cpu_variant & ARM_EXT_LONGMUL)
+    mach = bfd_mach_arm_3M;
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
 }

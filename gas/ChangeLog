@@ -1,3 +1,8 @@
+2001-03-12  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (md_begin): Always set machine type based on
+	cpu_variant.
+
 2001-03-07  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (struct _i386_insn): Rename disp_reloc to reloc.
