@@ -1,3 +1,8 @@
+Sat Sep 24 17:40:10 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* TODO: Append contents of Projects file.
+	* Projects: Remove.
+
 Sat Sep 24 01:47:25 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* corelow.c (add_solib_stub):  Remove copying of to_sections,
