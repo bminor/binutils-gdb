@@ -1,3 +1,19 @@
+2002-05-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* acinclude.m4 (AM_INSTALL_LIBBFD): Fake to fool autotools.
+	* configure.in: Invoke AM_INSTALL_LIBBFD.
+	* Makefile.am (install-data-local): Move to..
+	(install_libopcodes): .. New target.
+	(uninstall_libopcodes): Likewise.
+	(install-bfdlibLTLIBRARIES): Likewise.
+	(uninstall-bfdlibLTLIBRARIES): Likewise.
+	(bfdlibdir): New.
+	(bfdincludedir): New.
+	(lib_LTLIBRARIES): Rename to bfdlib_LTLIBRARIES.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2002-05-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* fr30-asm.c: Regenerate.

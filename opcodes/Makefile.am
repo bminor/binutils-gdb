@@ -11,7 +11,10 @@ MKDEP = gcc -MM
 WARN_CFLAGS = @WARN_CFLAGS@
 AM_CFLAGS = $(WARN_CFLAGS)
 
-lib_LTLIBRARIES = libopcodes.la
+bfdlibdir = @bfdlibdir@
+bfdincludedir = @bfdincludedir@
+
+bfdlib_LTLIBRARIES = libopcodes.la
 
 # This is where bfd.h lives.
 BFD_H = ../bfd/bfd.h
@@ -271,11 +274,29 @@ po/POTFILES.in: @MAINT@ Makefile
 config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
-# Install libopcodes include file.
-install-data-local: 
+install-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@install_libopcodes
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(includedir)
-	$(INSTALL_DATA) $(INCDIR)/dis-asm.h $(DESTDIR)$(includedir)/dis-asm.h
+
+uninstall-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@uninstall_libopcodes
+	@$(NORMAL_UNINSTALL)
+
+.PHONY: install_libopcodes uninstall_libopcodes
+install_libopcodes: $(bfdlib_LTLIBRARIES)
+	$(mkinstalldirs) $(DESTDIR)$(bfdlibdir)
+	$(mkinstalldirs) $(DESTDIR)$(bfdincludedir)
+	@list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p; \
+	  else :; fi; \
+	done
+	$(INSTALL_DATA) $(INCDIR)/dis-asm.h $(DESTDIR)$(bfdincludedir)/dis-asm.h
+
+uninstall_libopcodes:
+	list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
+	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(bfdlibdir)/$$p; \
+	done
+	rm -f $(DESTDIR)$(bfdincludedir)/dis-asm.h
 
 CLEANFILES = \
 	stamp-m32r stamp-fr30 stamp-openrisc \

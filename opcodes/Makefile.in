@@ -121,7 +121,10 @@ MKDEP = gcc -MM
 WARN_CFLAGS = @WARN_CFLAGS@
 AM_CFLAGS = $(WARN_CFLAGS)
 
-lib_LTLIBRARIES = libopcodes.la
+bfdlibdir = @bfdlibdir@
+bfdincludedir = @bfdincludedir@
+
+bfdlib_LTLIBRARIES = libopcodes.la
 
 # This is where bfd.h lives.
 BFD_H = ../bfd/bfd.h
@@ -402,7 +405,7 @@ LIBS = @LIBS@
 libopcodes_a_LIBADD = 
 libopcodes_a_SOURCES = libopcodes.a.c
 libopcodes_a_OBJECTS =  libopcodes.a.$(OBJEXT)
-LTLIBRARIES =  $(lib_LTLIBRARIES)
+LTLIBRARIES =  $(bfdlib_LTLIBRARIES)
 
 libopcodes_la_OBJECTS =  dis-buf.lo disassemble.lo
 CFLAGS = @CFLAGS@
@@ -517,33 +520,17 @@ distclean-libtool:
 
 maintainer-clean-libtool:
 
-mostlyclean-libLTLIBRARIES:
+mostlyclean-bfdlibLTLIBRARIES:
 
-clean-libLTLIBRARIES:
-	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+clean-bfdlibLTLIBRARIES:
+	-test -z "$(bfdlib_LTLIBRARIES)" || rm -f $(bfdlib_LTLIBRARIES)
 
-distclean-libLTLIBRARIES:
+distclean-bfdlibLTLIBRARIES:
 
-maintainer-clean-libLTLIBRARIES:
-
-install-libLTLIBRARIES: $(lib_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(libdir)
-	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p; \
-	  else :; fi; \
-	done
-
-uninstall-libLTLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	list='$(lib_LTLIBRARIES)'; for p in $$list; do \
-	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p; \
-	done
+maintainer-clean-bfdlibLTLIBRARIES:
 
 libopcodes.la: $(libopcodes_la_OBJECTS) $(libopcodes_la_DEPENDENCIES)
-	$(LINK) -rpath $(libdir) $(libopcodes_la_LDFLAGS) $(libopcodes_la_OBJECTS) $(libopcodes_la_LIBADD) $(LIBS)
+	$(LINK) -rpath $(bfdlibdir) $(libopcodes_la_LDFLAGS) $(libopcodes_la_OBJECTS) $(libopcodes_la_LIBADD) $(LIBS)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -705,16 +692,16 @@ install-info: install-info-recursive
 all-recursive-am: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am:
 install-exec: install-exec-recursive
 
-install-data-am: install-data-local
+install-data-am: install-bfdlibLTLIBRARIES
 install-data: install-data-recursive
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-recursive
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-bfdlibLTLIBRARIES
 uninstall: uninstall-recursive
 all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) config.h
 all-redirect: all-recursive-am
@@ -722,7 +709,7 @@ install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs: installdirs-recursive
 installdirs-am:
-	$(mkinstalldirs)  $(DESTDIR)$(libdir)
+	$(mkinstalldirs)  $(DESTDIR)$(bfdlibdir)
 
 
 mostlyclean-generic:
@@ -737,19 +724,19 @@ distclean-generic:
 maintainer-clean-generic:
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstLIBRARIES \
 		mostlyclean-compile mostlyclean-libtool \
-		mostlyclean-libLTLIBRARIES mostlyclean-tags \
+		mostlyclean-bfdlibLTLIBRARIES mostlyclean-tags \
 		mostlyclean-generic
 
 mostlyclean: mostlyclean-recursive
 
 clean-am:  clean-hdr clean-noinstLIBRARIES clean-compile clean-libtool \
-		clean-libLTLIBRARIES clean-tags clean-generic \
+		clean-bfdlibLTLIBRARIES clean-tags clean-generic \
 		mostlyclean-am
 
 clean: clean-recursive
 
 distclean-am:  distclean-hdr distclean-noinstLIBRARIES distclean-compile \
-		distclean-libtool distclean-libLTLIBRARIES \
+		distclean-libtool distclean-bfdlibLTLIBRARIES \
 		distclean-tags distclean-generic clean-am
 	-rm -f libtool
 
@@ -759,8 +746,9 @@ distclean: distclean-recursive
 maintainer-clean-am:  maintainer-clean-hdr \
 		maintainer-clean-noinstLIBRARIES \
 		maintainer-clean-compile maintainer-clean-libtool \
-		maintainer-clean-libLTLIBRARIES maintainer-clean-tags \
-		maintainer-clean-generic distclean-am
+		maintainer-clean-bfdlibLTLIBRARIES \
+		maintainer-clean-tags maintainer-clean-generic \
+		distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
@@ -772,22 +760,22 @@ mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
 clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
 maintainer-clean-compile mostlyclean-libtool distclean-libtool \
-clean-libtool maintainer-clean-libtool mostlyclean-libLTLIBRARIES \
-distclean-libLTLIBRARIES clean-libLTLIBRARIES \
-maintainer-clean-libLTLIBRARIES uninstall-libLTLIBRARIES \
-install-libLTLIBRARIES install-data-recursive uninstall-data-recursive \
-install-exec-recursive uninstall-exec-recursive installdirs-recursive \
-uninstalldirs-recursive all-recursive check-recursive \
-installcheck-recursive info-recursive dvi-recursive \
-mostlyclean-recursive distclean-recursive clean-recursive \
+clean-libtool maintainer-clean-libtool mostlyclean-bfdlibLTLIBRARIES \
+distclean-bfdlibLTLIBRARIES clean-bfdlibLTLIBRARIES \
+maintainer-clean-bfdlibLTLIBRARIES uninstall-bfdlibLTLIBRARIES \
+install-bfdlibLTLIBRARIES install-data-recursive \
+uninstall-data-recursive install-exec-recursive \
+uninstall-exec-recursive installdirs-recursive uninstalldirs-recursive \
+all-recursive check-recursive installcheck-recursive info-recursive \
+dvi-recursive mostlyclean-recursive distclean-recursive clean-recursive \
 maintainer-clean-recursive tags tags-recursive mostlyclean-tags \
 distclean-tags clean-tags maintainer-clean-tags distdir info-am info \
 dvi-am dvi check check-am installcheck-am installcheck install-info-am \
 install-info all-recursive-am install-exec-am install-exec \
-install-data-local install-data-am install-data install-am install \
-uninstall-am uninstall all-redirect all-am all installdirs-am \
-installdirs mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs-am installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
 
 
 disassemble.lo: disassemble.c $(INCDIR)/dis-asm.h
@@ -812,11 +800,29 @@ po/POTFILES.in: @MAINT@ Makefile
 config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
-# Install libopcodes include file.
-install-data-local: 
+install-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@install_libopcodes
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(includedir)
-	$(INSTALL_DATA) $(INCDIR)/dis-asm.h $(DESTDIR)$(includedir)/dis-asm.h
+
+uninstall-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@uninstall_libopcodes
+	@$(NORMAL_UNINSTALL)
+
+.PHONY: install_libopcodes uninstall_libopcodes
+install_libopcodes: $(bfdlib_LTLIBRARIES)
+	$(mkinstalldirs) $(DESTDIR)$(bfdlibdir)
+	$(mkinstalldirs) $(DESTDIR)$(bfdincludedir)
+	@list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p; \
+	  else :; fi; \
+	done
+	$(INSTALL_DATA) $(INCDIR)/dis-asm.h $(DESTDIR)$(bfdincludedir)/dis-asm.h
+
+uninstall_libopcodes:
+	list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
+	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(bfdlibdir)/$$p; \
+	done
+	rm -f $(DESTDIR)$(bfdincludedir)/dis-asm.h
 
 run-cgen:
 	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) \

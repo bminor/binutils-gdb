@@ -71,6 +71,7 @@ if test -z "$target" ; then
 fi
 
 AM_MAINTAINER_MODE
+AM_INSTALL_LIBBFD
 AC_EXEEXT
 
 # host-specific stuff:
