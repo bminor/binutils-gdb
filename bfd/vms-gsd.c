@@ -1,6 +1,7 @@
 /* vms-gsd.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Free Software Foundation, Inc.
 
    go and read the openVMS linker manual (esp. appendix B)
    if you don't know what's going on here :-)
@@ -635,7 +636,7 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 	  {
 	    /* symbol specification (definition or reference)  */
 
-	    symbol = _bfd_vms_make_empty_symbol (abfd);
+	    symbol = bfd_make_empty_symbol (abfd);
 	    if (symbol == 0)
 	      return -1;
 

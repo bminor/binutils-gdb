@@ -496,6 +496,31 @@ DESCRIPTION
 
 /*
 FUNCTION
+	_bfd_generic_make_empty_symbol
+
+SYNOPSIS
+	asymbol *_bfd_generic_make_empty_symbol (bfd *);
+
+DESCRIPTION
+	Create a new <<asymbol>> structure for the BFD @var{abfd}
+	and return a pointer to it.  Used by core file routines,
+	binary back-end and anywhere else where no private info
+	is needed.
+*/
+
+asymbol *
+_bfd_generic_make_empty_symbol (abfd)
+     bfd *abfd;
+{
+  bfd_size_type amt = sizeof (asymbol);
+  asymbol *new = (asymbol *) bfd_zalloc (abfd, amt);
+  if (new)
+    new->the_bfd = abfd;
+  return new;
+}
+
+/*
+FUNCTION
 	bfd_make_debug_symbol
 
 DESCRIPTION

@@ -251,8 +251,7 @@ extern boolean _bfd_archive_coff_construct_extended_name_table
 #define _bfd_nosymbols_get_symtab_upper_bound _bfd_n1
 #define _bfd_nosymbols_get_symtab \
   ((long (*) PARAMS ((bfd *, asymbol **))) _bfd_n1)
-#define _bfd_nosymbols_make_empty_symbol \
-  ((asymbol *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
+#define _bfd_nosymbols_make_empty_symbol _bfd_generic_make_empty_symbol
 #define _bfd_nosymbols_print_symbol \
   ((void (*) PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type))) bfd_void)
 #define _bfd_nosymbols_get_symbol_info \

@@ -1,5 +1,5 @@
 /* BFD back-end for mmo objects (MMIX-specific object-format).
-   Copyright 2001
+   Copyright 2001, 2002
    Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com).
    Infrastructure and other bits originally copied from srec.c and
@@ -381,7 +381,6 @@ static boolean mmo_get_section_contents
   PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
 static long mmo_get_symtab_upper_bound PARAMS ((bfd *));
 static long mmo_get_symtab PARAMS ((bfd *, asymbol **));
-static asymbol *mmo_make_empty_symbol PARAMS ((bfd *));
 static void mmo_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 static void mmo_print_symbol PARAMS ((bfd *, PTR, asymbol *,
 				      bfd_print_symbol_type));
@@ -2188,19 +2187,6 @@ mmo_get_symtab (abfd, alocation)
   return symcount;
 }
 
-/* Make an empty symbol.  */
-
-static asymbol *
-mmo_make_empty_symbol (abfd)
-     bfd *abfd;
-{
-  asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
-
-  if (new)
-    new->the_bfd = abfd;
-  return new;
-}
-
 /* Get information about a symbol.  */
 
 static void
@@ -3171,6 +3157,7 @@ mmo_canonicalize_reloc (abfd, section, relptr, symbols)
 /* FIXME: We can do better on this one, if we have a dwarf2 .debug_line
    section or if MMO line numbers are implemented.  */
 #define mmo_find_nearest_line _bfd_nosymbols_find_nearest_line
+#define mmo_make_empty_symbol _bfd_generic_make_empty_symbol
 #define mmo_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
 #define mmo_read_minisymbols _bfd_generic_read_minisymbols
 #define mmo_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol

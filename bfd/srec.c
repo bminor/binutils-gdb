@@ -1,6 +1,6 @@
 /* BFD back-end for s-record objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -138,7 +138,6 @@ static boolean internal_srec_write_object_contents PARAMS ((bfd *, int));
 static boolean srec_write_object_contents PARAMS ((bfd *));
 static boolean symbolsrec_write_object_contents PARAMS ((bfd *));
 static int srec_sizeof_headers PARAMS ((bfd *, boolean));
-static asymbol *srec_make_empty_symbol PARAMS ((bfd *));
 static long srec_get_symtab_upper_bound PARAMS ((bfd *));
 static long srec_get_symtab PARAMS ((bfd *, asymbol **));
 
@@ -1150,18 +1149,6 @@ srec_sizeof_headers (abfd, exec)
   return 0;
 }
 
-static asymbol *
-srec_make_empty_symbol (abfd)
-     bfd *abfd;
-{
-  asymbol *new;
-
-  new = (asymbol *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asymbol));
-  if (new)
-    new->the_bfd = abfd;
-  return new;
-}
-
 /* Return the amount of memory needed to read the symbol table.  */
 
 static long
@@ -1251,6 +1238,7 @@ srec_print_symbol (abfd, afile, symbol, how)
 #define srec_bfd_is_local_label_name bfd_generic_is_local_label_name
 #define srec_get_lineno _bfd_nosymbols_get_lineno
 #define srec_find_nearest_line _bfd_nosymbols_find_nearest_line
+#define srec_make_empty_symbol _bfd_generic_make_empty_symbol
 #define srec_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
 #define srec_read_minisymbols _bfd_generic_read_minisymbols
 #define srec_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol

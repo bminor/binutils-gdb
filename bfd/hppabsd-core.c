@@ -51,7 +51,6 @@
 static asection *make_bfd_asection PARAMS ((bfd *, const char *,
 					    flagword, bfd_size_type,
 					    file_ptr, unsigned int));
-static asymbol *hppabsd_core_make_empty_symbol PARAMS ((bfd *));
 static const bfd_target *hppabsd_core_core_file_p PARAMS ((bfd *));
 static char *hppabsd_core_core_file_failing_command PARAMS ((bfd *));
 static int hppabsd_core_core_file_failing_signal PARAMS ((bfd *));
@@ -98,18 +97,6 @@ make_bfd_asection (abfd, name, flags, _raw_size, offset, alignment_power)
   asect->alignment_power = alignment_power;
 
   return asect;
-}
-
-static asymbol *
-hppabsd_core_make_empty_symbol (abfd)
-     bfd *abfd;
-{
-  asymbol *new;
-
-  new = (asymbol *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asymbol));
-  if (new)
-    new->the_bfd = abfd;
-  return new;
 }
 
 static const bfd_target *
@@ -239,19 +226,6 @@ hppabsd_core_core_file_matches_executable_p (core_bfd, exec_bfd)
   return true;
 }
 
-#define hppabsd_core_get_symtab_upper_bound \
-  _bfd_nosymbols_get_symtab_upper_bound
-#define hppabsd_core_get_symtab _bfd_nosymbols_get_symtab
-#define hppabsd_core_print_symbol _bfd_nosymbols_print_symbol
-#define hppabsd_core_get_symbol_info _bfd_nosymbols_get_symbol_info
-#define hppabsd_core_bfd_is_local_label_name \
-  _bfd_nosymbols_bfd_is_local_label_name
-#define hppabsd_core_get_lineno _bfd_nosymbols_get_lineno
-#define hppabsd_core_find_nearest_line _bfd_nosymbols_find_nearest_line
-#define hppabsd_core_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
-#define hppabsd_core_read_minisymbols _bfd_nosymbols_read_minisymbols
-#define hppabsd_core_minisymbol_to_symbol _bfd_nosymbols_minisymbol_to_symbol
-
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void
 swap_abort ()
@@ -300,15 +274,15 @@ const bfd_target hppabsd_core_vec =
      bfd_false, bfd_false
     },
 
-       BFD_JUMP_TABLE_GENERIC (_bfd_generic),
-       BFD_JUMP_TABLE_COPY (_bfd_generic),
-       BFD_JUMP_TABLE_CORE (hppabsd_core),
-       BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
-       BFD_JUMP_TABLE_SYMBOLS (hppabsd_core),
-       BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
-       BFD_JUMP_TABLE_WRITE (_bfd_generic),
-       BFD_JUMP_TABLE_LINK (_bfd_nolink),
-       BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+    BFD_JUMP_TABLE_GENERIC (_bfd_generic),
+    BFD_JUMP_TABLE_COPY (_bfd_generic),
+    BFD_JUMP_TABLE_CORE (hppabsd_core),
+    BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
+    BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols),
+    BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
+    BFD_JUMP_TABLE_WRITE (_bfd_generic),
+    BFD_JUMP_TABLE_LINK (_bfd_nolink),
+    BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     NULL,
 

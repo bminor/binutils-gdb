@@ -1,6 +1,6 @@
 /* vms.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
@@ -129,7 +129,7 @@ static long vms_canonicalize_dynamic_reloc
 static boolean vms_bfd_merge_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 static boolean vms_bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 
-#define vms_make_empty_symbol _bfd_vms_make_empty_symbol
+#define vms_make_empty_symbol _bfd_generic_make_empty_symbol
 
 /*===========================================================================*/
 
@@ -1140,34 +1140,6 @@ vms_get_symtab (abfd, symbols)
   symbols[PRIV (gsd_sym_count)] = NULL;
 
   return PRIV (gsd_sym_count);
-}
-
-/* Create a new asymbol structure for the BFD abfd and return a pointer
-   to it.
-   This routine is necessary because each back end has private information
-   surrounding the asymbol. Building your own asymbol and pointing to it
-   will not create the private information, and will cause problems later on.  */
-
-asymbol *
-_bfd_vms_make_empty_symbol (abfd)
-     bfd *abfd;
-{
-  asymbol *symbol;
-
-  symbol = (asymbol *) bfd_zalloc(abfd, (bfd_size_type) sizeof (asymbol));
-
-#if VMS_DEBUG
-  vms_debug (1, "_bfd_vms_make_empty_symbol(%p)\n", abfd);
-#endif
-
-  if (symbol == 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return 0;
-    }
-  symbol->the_bfd = abfd;
-
-  return symbol;
 }
 
 /* Print symbol to file according to how. how is one of

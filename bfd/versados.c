@@ -1,5 +1,6 @@
 /* BFD back-end for VERSAdos-E objects.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002
+   Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    Versados is a Motorola trademark.
@@ -55,7 +56,6 @@ static boolean versados_get_section_contents
 static boolean versados_set_section_contents
   PARAMS ((bfd *, sec_ptr, void *, file_ptr, bfd_size_type));
 static int versados_sizeof_headers PARAMS ((bfd *, boolean));
-static asymbol *versados_make_empty_symbol PARAMS ((bfd *));
 static long int versados_get_symtab_upper_bound PARAMS ((bfd *));
 static long int versados_get_symtab PARAMS ((bfd *, asymbol **));
 static void versados_get_symbol_info
@@ -723,18 +723,6 @@ versados_sizeof_headers (abfd, exec)
   return 0;
 }
 
-static asymbol *
-versados_make_empty_symbol (abfd)
-     bfd *abfd;
-{
-  asymbol *new;
-
-  new = (asymbol *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asymbol));
-  if (new)
-    new->the_bfd = abfd;
-  return new;
-}
-
 /* Return the amount of memory needed to read the symbol table.  */
 
 static long
@@ -865,6 +853,7 @@ versados_canonicalize_reloc (abfd, section, relptr, symbols)
 #define versados_bfd_is_local_label_name bfd_generic_is_local_label_name
 #define versados_get_lineno _bfd_nosymbols_get_lineno
 #define versados_find_nearest_line _bfd_nosymbols_find_nearest_line
+#define versados_make_empty_symbol _bfd_generic_make_empty_symbol
 #define versados_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
 #define versados_read_minisymbols _bfd_generic_read_minisymbols
 #define versados_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol

@@ -1,5 +1,5 @@
 /* BFD back-end for PPCbug boot records.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Michael Meissner, Cygnus Support, <meissner@cygnus.com>
 
@@ -96,7 +96,6 @@ static boolean ppcboot_get_section_contents
 static long ppcboot_get_symtab_upper_bound PARAMS ((bfd *));
 static char *mangle_name PARAMS ((bfd *, char *));
 static long ppcboot_get_symtab PARAMS ((bfd *, asymbol **));
-static asymbol *ppcboot_make_empty_symbol PARAMS ((bfd *));
 static void ppcboot_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 static boolean ppcboot_set_section_contents
   PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
@@ -332,17 +331,7 @@ ppcboot_get_symtab (abfd, alocation)
   return PPCBOOT_SYMS;
 }
 
-
-/* Make an empty symbol.  */
-
-static asymbol *
-ppcboot_make_empty_symbol (abfd)
-     bfd *abfd;
-{
-  return (asymbol *) bfd_alloc (abfd, (bfd_size_type) sizeof (asymbol));
-}
-
-
+#define ppcboot_make_empty_symbol _bfd_generic_make_empty_symbol
 #define ppcboot_print_symbol _bfd_nosymbols_print_symbol
 
 /* Get information about a symbol.  */

@@ -48,7 +48,6 @@ static boolean binary_get_section_contents
 static long binary_get_symtab_upper_bound PARAMS ((bfd *));
 static char *mangle_name PARAMS ((bfd *, char *));
 static long binary_get_symtab PARAMS ((bfd *, asymbol **));
-static asymbol *binary_make_empty_symbol PARAMS ((bfd *));
 static void binary_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 static boolean binary_set_section_contents
   PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
@@ -219,15 +218,7 @@ binary_get_symtab (abfd, alocation)
   return BIN_SYMS;
 }
 
-/* Make an empty symbol.  */
-
-static asymbol *
-binary_make_empty_symbol (abfd)
-     bfd *abfd;
-{
-  return (asymbol *) bfd_alloc (abfd, (bfd_size_type) sizeof (asymbol));
-}
-
+#define binary_make_empty_symbol _bfd_generic_make_empty_symbol
 #define binary_print_symbol _bfd_nosymbols_print_symbol
 
 /* Get information about a symbol.  */

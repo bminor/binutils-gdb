@@ -1,5 +1,5 @@
 /* BFD back-end for Intel Hex objects.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor of Cygnus Support <ian@cygnus.com>.
 
@@ -139,7 +139,6 @@ static boolean ihex_set_section_contents
 static boolean ihex_write_record
   PARAMS ((bfd *, size_t, unsigned int, unsigned int, bfd_byte *));
 static boolean ihex_write_object_contents PARAMS ((bfd *));
-static asymbol *ihex_make_empty_symbol PARAMS ((bfd *));
 static boolean ihex_set_arch_mach
   PARAMS ((bfd *, enum bfd_architecture, unsigned long));
 static int ihex_sizeof_headers PARAMS ((bfd *, boolean));
@@ -916,21 +915,6 @@ ihex_write_object_contents (abfd)
   return true;
 }
 
-/* Make an empty symbol.  This is required only because
-   bfd_make_section_anyway wants to create a symbol for the section.  */
-
-static asymbol *
-ihex_make_empty_symbol (abfd)
-     bfd *abfd;
-{
-  asymbol *new;
-
-  new = (asymbol *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asymbol));
-  if (new != NULL)
-    new->the_bfd = abfd;
-  return new;
-}
-
 /* Set the architecture for the output file.  The architecture is
    irrelevant, so we ignore errors about unknown architectures.  */
 
@@ -970,6 +954,7 @@ ihex_sizeof_headers (abfd, exec)
 #define ihex_get_symtab_upper_bound bfd_0l
 #define ihex_get_symtab \
   ((long (*) PARAMS ((bfd *, asymbol **))) bfd_0l)
+#define ihex_make_empty_symbol _bfd_generic_make_empty_symbol
 #define ihex_print_symbol _bfd_nosymbols_print_symbol
 #define ihex_get_symbol_info _bfd_nosymbols_get_symbol_info
 #define ihex_bfd_is_local_label_name _bfd_nosymbols_bfd_is_local_label_name

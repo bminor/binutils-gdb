@@ -1,6 +1,6 @@
 /* vms-misc.c -- Miscellaneous functions for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
@@ -1070,7 +1070,7 @@ new_symbol (abfd, name)
   _bfd_vms_debug (7,  "new_symbol %s\n", name);
 #endif
 
-  symbol = _bfd_vms_make_empty_symbol (abfd);
+  symbol = bfd_make_empty_symbol (abfd);
   if (symbol == 0)
     return symbol;
   symbol->name = name;

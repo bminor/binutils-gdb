@@ -3110,6 +3110,9 @@ bfd_print_symbol_vandf PARAMS ((bfd *abfd, PTR file, asymbol *symbol));
 
 #define bfd_make_empty_symbol(abfd) \
      BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))
+asymbol *
+_bfd_generic_make_empty_symbol PARAMS ((bfd *));
+
 #define bfd_make_debug_symbol(abfd,ptr,size) \
         BFD_SEND (abfd, _bfd_make_debug_symbol, (abfd, ptr, size))
 int

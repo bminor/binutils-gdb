@@ -103,7 +103,6 @@ struct hpux_core_struct
 static asection *make_bfd_asection
   PARAMS ((bfd *, const char *, flagword, bfd_size_type, bfd_vma,
 	   unsigned int));
-static asymbol *hpux_core_make_empty_symbol PARAMS ((bfd *));
 static const bfd_target *hpux_core_core_file_p PARAMS ((bfd *));
 static char *hpux_core_core_file_failing_command PARAMS ((bfd *));
 static int hpux_core_core_file_failing_signal PARAMS ((bfd *));
@@ -140,18 +139,6 @@ make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
   asect->alignment_power = alignment_power;
 
   return asect;
-}
-
-static asymbol *
-hpux_core_make_empty_symbol (abfd)
-     bfd *abfd;
-{
-  asymbol *new;
-
-  new = (asymbol *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asymbol));
-  if (new)
-    new->the_bfd = abfd;
-  return new;
 }
 
 /* this function builds a bfd target if the file is a corefile.
@@ -353,18 +340,6 @@ hpux_core_core_file_matches_executable_p (core_bfd, exec_bfd)
   return true;			/* FIXME, We have no way of telling at this point */
 }
 
-#define hpux_core_get_symtab_upper_bound _bfd_nosymbols_get_symtab_upper_bound
-#define hpux_core_get_symtab _bfd_nosymbols_get_symtab
-#define hpux_core_print_symbol _bfd_nosymbols_print_symbol
-#define hpux_core_get_symbol_info _bfd_nosymbols_get_symbol_info
-#define hpux_core_bfd_is_local_label_name \
-  _bfd_nosymbols_bfd_is_local_label_name
-#define hpux_core_get_lineno _bfd_nosymbols_get_lineno
-#define hpux_core_find_nearest_line _bfd_nosymbols_find_nearest_line
-#define hpux_core_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
-#define hpux_core_read_minisymbols _bfd_nosymbols_read_minisymbols
-#define hpux_core_minisymbol_to_symbol _bfd_nosymbols_minisymbol_to_symbol
-
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void
 swap_abort ()
@@ -411,15 +386,15 @@ const bfd_target hpux_core_vec =
      bfd_false, bfd_false
     },
 
-       BFD_JUMP_TABLE_GENERIC (_bfd_generic),
-       BFD_JUMP_TABLE_COPY (_bfd_generic),
-       BFD_JUMP_TABLE_CORE (hpux_core),
-       BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
-       BFD_JUMP_TABLE_SYMBOLS (hpux_core),
-       BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
-       BFD_JUMP_TABLE_WRITE (_bfd_generic),
-       BFD_JUMP_TABLE_LINK (_bfd_nolink),
-       BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+    BFD_JUMP_TABLE_GENERIC (_bfd_generic),
+    BFD_JUMP_TABLE_COPY (_bfd_generic),
+    BFD_JUMP_TABLE_CORE (hpux_core),
+    BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
+    BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols),
+    BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
+    BFD_JUMP_TABLE_WRITE (_bfd_generic),
+    BFD_JUMP_TABLE_LINK (_bfd_nolink),
+    BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     NULL,
 

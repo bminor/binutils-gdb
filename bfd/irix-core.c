@@ -48,7 +48,6 @@ static char *irix_core_core_file_failing_command PARAMS ((bfd *));
 static int irix_core_core_file_failing_signal PARAMS ((bfd *));
 static boolean irix_core_core_file_matches_executable_p
   PARAMS ((bfd *, bfd *));
-static asymbol *irix_core_make_empty_symbol PARAMS ((bfd *));
 static void swap_abort PARAMS ((void));
 
 static asection *
@@ -203,29 +202,6 @@ irix_core_core_file_matches_executable_p (core_bfd, exec_bfd)
   return true;			/* XXX - FIXME */
 }
 
-static asymbol *
-irix_core_make_empty_symbol (abfd)
-     bfd *abfd;
-{
-  bfd_size_type amt = sizeof (asymbol);
-  asymbol *new = (asymbol *) bfd_zalloc (abfd, amt);
-  if (new)
-    new->the_bfd = abfd;
-  return new;
-}
-
-#define irix_core_get_symtab_upper_bound _bfd_nosymbols_get_symtab_upper_bound
-#define irix_core_get_symtab _bfd_nosymbols_get_symtab
-#define irix_core_print_symbol _bfd_nosymbols_print_symbol
-#define irix_core_get_symbol_info _bfd_nosymbols_get_symbol_info
-#define irix_core_bfd_is_local_label_name \
-  _bfd_nosymbols_bfd_is_local_label_name
-#define irix_core_get_lineno _bfd_nosymbols_get_lineno
-#define irix_core_find_nearest_line _bfd_nosymbols_find_nearest_line
-#define irix_core_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
-#define irix_core_read_minisymbols _bfd_nosymbols_read_minisymbols
-#define irix_core_minisymbol_to_symbol _bfd_nosymbols_minisymbol_to_symbol
-
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void
 swap_abort()
@@ -272,15 +248,15 @@ const bfd_target irix_core_vec =
      bfd_false, bfd_false
     },
 
-       BFD_JUMP_TABLE_GENERIC (_bfd_generic),
-       BFD_JUMP_TABLE_COPY (_bfd_generic),
-       BFD_JUMP_TABLE_CORE (irix_core),
-       BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
-       BFD_JUMP_TABLE_SYMBOLS (irix_core),
-       BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
-       BFD_JUMP_TABLE_WRITE (_bfd_generic),
-       BFD_JUMP_TABLE_LINK (_bfd_nolink),
-       BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+    BFD_JUMP_TABLE_GENERIC (_bfd_generic),
+    BFD_JUMP_TABLE_COPY (_bfd_generic),
+    BFD_JUMP_TABLE_CORE (irix_core),
+    BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
+    BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols),
+    BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
+    BFD_JUMP_TABLE_WRITE (_bfd_generic),
+    BFD_JUMP_TABLE_LINK (_bfd_nolink),
+    BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     NULL,
 

@@ -1,3 +1,40 @@
+2002-01-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* syms.c (_bfd_generic_make_empty_symbol): New function.
+	* libbfd-in.h (_bfd_nosymbols_make_empty_symbol): Define as
+	_bfd_generic_make_empty_symbol.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* hppabsd-core.c (hppabsd_core_make_empty_symbol): Delete function.
+	(hppabsd_core_get_symtab_upper_bound): Don't define.
+	(hppabsd_core_get_symtab): Likewise.
+	(hppabsd_core_print_symbol): Likewise.
+	(hppabsd_core_get_symbol_info): Likewise.
+	(hppabsd_core_bfd_is_local_label_name): Likewise.
+	(hppabsd_core_get_lineno): Likewise.
+	(hppabsd_core_find_nearest_line): Likewise.
+	(hppabsd_core_bfd_make_debug_symbol): Likewise.
+	(hppabsd_core_read_minisymbols): Likewise.
+	(hppabsd_core_minisymbol_to_symbol): Likewise.
+	(hppabsd_core_vec): Use BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols).
+	Formatting fixes.
+	* hpux-core.c: Similarly.
+	* irix-core.c: Similarly.
+	* osf-core.c: Similarly.
+	* sco5-core.c: Similarly.
+	* binary.c (binary_make_empty_symbol): Remove function, define as
+	_bfd_generic_make_empty_symbol.
+	* ihex.c (ihex_make_empty_symbol): Likewise.
+	* mmo.c (mmo_make_empty_symbol): Likewise.
+	* ppcboot.c (ppcboot_make_empty_symbol): Likewise.
+	* srec.c (srec_make_empty_symbol): Likewise.
+	* versados.c (versados_make_empty_symbol): Likewise.
+	* vms.c (_bfd_vms_make_empty_symbol): Remove.
+	(vms_make_empty_symbol): Define as _bfd_generic_make_empty_symbol.
+	* vms-gsd.c (_bfd_vms_slurp_gsd): Call bfd_make_empty_symbol
+	rather than _bfd_vms_make_empty_symbol.
+	* vms-misc.c (new_symbol): Likewise.
+
 2002-01-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* section.c (bfd_section_init): Remove unnecessary initialisations.
