@@ -986,20 +986,22 @@ DEPTC_i370_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
 DEPTC_i386_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-i386.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/opcode/i386.h
+  dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/opcode/i386.h \
+  $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/reloc-macros.h
 
 DEPTC_i386_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-i386.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/i386.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h subsegs.h \
   $(INCDIR)/obstack.h dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h \
-  $(INCDIR)/opcode/i386.h
+  $(INCDIR)/opcode/i386.h $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/reloc-macros.h
 
 DEPTC_i386_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i386.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/opcode/i386.h
+  dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/opcode/i386.h \
+  $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/reloc-macros.h
 
 DEPTC_i860_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
@@ -3390,7 +3392,8 @@ input-scrub.o: input-scrub.c $(INCDIR)/symcat.h input-file.h \
 listing.o: listing.c $(INCDIR)/symcat.h $(INCDIR)/obstack.h \
   $(INCDIR)/safe-ctype.h input-file.h subsegs.h
 literal.o: literal.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h
-macro.o: macro.c $(INCDIR)/safe-ctype.h sb.h macro.h
+macro.o: macro.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h \
+  sb.h macro.h
 messages.o: messages.c $(INCDIR)/symcat.h
 output-file.o: output-file.c $(INCDIR)/symcat.h output-file.h
 read.o: read.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h \

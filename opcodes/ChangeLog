@@ -1,3 +1,8 @@
+2004-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+
 2004-10-12  Bob Wilson  <bob.wilson@acm.org>
 
 	* xtensa-dis.c: Use ISO C90 formatting.
