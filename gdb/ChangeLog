@@ -1,3 +1,12 @@
+2002-05-09  Michael Snyder  <msnyder@redhat.com>
+
+	* arm-tdep.c (arm_scan_prologue): Accept strb r(0123),[r11,#-nn],
+	strh r(0123),[r11,#-nn], str r(0123),[r11,#-nn], as well as
+	strb r(0123),[sp,#nn], strh r(0123),[sp,#nn] and 
+	str r(0123),[sp,#nn].
+	(arm_skip_prologue): Ditto.  Also make disassembly 
+	order-independent by placing it in a loop.
+
 2002-05-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h (i386_abi): New enum.

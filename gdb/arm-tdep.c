@@ -417,7 +417,7 @@ arm_skip_prologue (CORE_ADDR pc)
 {
   unsigned long inst;
   CORE_ADDR skip_pc;
-  CORE_ADDR func_addr, func_end;
+  CORE_ADDR func_addr, func_end = 0;
   char *func_name;
   struct symtab_and_line sal;
 
@@ -449,74 +449,63 @@ arm_skip_prologue (CORE_ADDR pc)
 
   /* Can't find the prologue end in the symbol table, try it the hard way
      by disassembling the instructions.  */
-  skip_pc = pc;
-  inst = read_memory_integer (skip_pc, 4);
-  /* "mov ip, sp" is no longer a required part of the prologue.  */
-  if (inst == 0xe1a0c00d)			/* mov ip, sp */
+
+  /* Like arm_scan_prologue, stop no later than pc + 64. */
+  if (func_end == 0 || func_end > pc + 64)
+    func_end = pc + 64;
+
+  for (skip_pc = pc; skip_pc < func_end; skip_pc += 4)
     {
-      skip_pc += 4;
       inst = read_memory_integer (skip_pc, 4);
+
+      /* "mov ip, sp" is no longer a required part of the prologue.  */
+      if (inst == 0xe1a0c00d)			/* mov ip, sp */
+	continue;
+
+      /* Some prologues begin with "str lr, [sp, #-4]!".  */
+      if (inst == 0xe52de004)			/* str lr, [sp, #-4]! */
+	continue;
+
+      if ((inst & 0xfffffff0) == 0xe92d0000)	/* stmfd sp!,{a1,a2,a3,a4} */
+	continue;
+
+      if ((inst & 0xfffff800) == 0xe92dd800)	/* stmfd sp!,{fp,ip,lr,pc} */
+	continue;
+
+      /* Any insns after this point may float into the code, if it makes
+	 for better instruction scheduling, so we skip them only if we
+	 find them, but still consider the function to be frame-ful.  */
+
+      /* We may have either one sfmfd instruction here, or several stfe
+	 insns, depending on the version of floating point code we
+	 support.  */
+      if ((inst & 0xffbf0fff) == 0xec2d0200)	/* sfmfd fn, <cnt>, [sp]! */
+	continue;
+
+      if ((inst & 0xffff8fff) == 0xed6d0103)	/* stfe fn, [sp, #-12]! */
+	continue;
+
+      if ((inst & 0xfffff000) == 0xe24cb000)	/* sub fp, ip, #nn */
+	continue;
+
+      if ((inst & 0xfffff000) == 0xe24dd000)	/* sub sp, sp, #nn */
+	continue;
+
+      if ((inst & 0xffffc000) == 0xe54b0000 ||	/* strb r(0123),[r11,#-nn] */
+	  (inst & 0xffffc0f0) == 0xe14b00b0 ||	/* strh r(0123),[r11,#-nn] */
+	  (inst & 0xffffc000) == 0xe50b0000)	/* str  r(0123),[r11,#-nn] */
+	continue;
+
+      if ((inst & 0xffffc000) == 0xe5cd0000 ||	/* strb r(0123),[sp,#nn] */
+	  (inst & 0xffffc0f0) == 0xe1cd00b0 ||	/* strh r(0123),[sp,#nn] */
+	  (inst & 0xffffc000) == 0xe58d0000)	/* str  r(0123),[sp,#nn] */
+	continue;
+
+      /* Un-recognized instruction; stop scanning.  */
+      break;
     }
 
-  /* Some prologues begin with "str lr, [sp, #-4]!".  */
-  if (inst == 0xe52de004)			/* str lr, [sp, #-4]! */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  if ((inst & 0xfffffff0) == 0xe92d0000)	/* stmfd sp!,{a1,a2,a3,a4} */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  if ((inst & 0xfffff800) == 0xe92dd800)	/* stmfd sp!,{fp,ip,lr,pc} */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  /* Any insns after this point may float into the code, if it makes
-     for better instruction scheduling, so we skip them only if we
-     find them, but still consider the function to be frame-ful.  */
-
-  /* We may have either one sfmfd instruction here, or several stfe
-     insns, depending on the version of floating point code we
-     support.  */
-  if ((inst & 0xffbf0fff) == 0xec2d0200)	/* sfmfd fn, <cnt>, [sp]! */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-  else
-    {
-      while ((inst & 0xffff8fff) == 0xed6d0103)	/* stfe fn, [sp, #-12]! */
-	{
-	  skip_pc += 4;
-	  inst = read_memory_integer (skip_pc, 4);
-	}
-    }
-
-  if ((inst & 0xfffff000) == 0xe24cb000)	/* sub fp, ip, #nn */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  if ((inst & 0xfffff000) == 0xe24dd000)	/* sub sp, sp, #nn */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  while ((inst & 0xffffcfc0) == 0xe50b0000)	/* str r(0123), [r11, #-nn] */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  return skip_pc;
+  return skip_pc;		/* End of prologue */
 }
 
 /* *INDENT-OFF* */
@@ -608,7 +597,7 @@ thumb_scan_prologue (struct frame_info *fi)
 	     whether to save LR (R14).  */
 	  mask = (insn & 0xff) | ((insn & 0x100) << 6);
 
-	  /* Calculate offsets of saved R0-R7 and LR. */
+	  /* Calculate offsets of saved R0-R7 and LR.  */
 	  for (regno = ARM_LR_REGNUM; regno >= 0; regno--)
 	    if (mask & (1 << regno))
 	      {
@@ -622,7 +611,7 @@ thumb_scan_prologue (struct frame_info *fi)
       else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
 						   sub sp, #simm */
 	{
-	  if ((findmask & 1) == 0)  		/* before push?  */
+	  if ((findmask & 1) == 0)		/* before push?  */
 	    continue;
 	  else
 	    findmask |= 4;			/* add/sub sp found */
@@ -868,7 +857,7 @@ arm_scan_prologue (struct frame_info *fi)
      Be careful, however, and if it doesn't look like a prologue,
      don't try to scan it.  If, for instance, a frameless function
      begins with stmfd sp!, then we will tell ourselves there is
-     a frame, which will confuse stack traceback, as well ad"finish" 
+     a frame, which will confuse stack traceback, as well as "finish" 
      and other operations that rely on a knowledge of the stack
      traceback.
 
@@ -881,7 +870,7 @@ arm_scan_prologue (struct frame_info *fi)
      [Note further: The "mov ip,sp" only seems to be missing in
      frameless functions at optimization level "-O2" or above,
      in which case it is often (but not always) replaced by
-     "str lr, [sp, #-4]!".  - Michael Snyder, 2002-04-23]   */
+     "str lr, [sp, #-4]!".  - Michael Snyder, 2002-04-23]  */
 
   sp_offset = fp_offset = 0;
 
@@ -915,7 +904,16 @@ arm_scan_prologue (struct frame_info *fi)
 		fi->saved_regs[regno] = sp_offset;
 	      }
 	}
-      else if ((insn & 0xffffcfc0) == 0xe50b0000)	/* str rx, [r11, -n] */
+      else if ((insn & 0xffffc000) == 0xe54b0000 ||	/* strb rx,[r11,#-n] */
+	       (insn & 0xffffc0f0) == 0xe14b00b0 ||	/* strh rx,[r11,#-n] */
+	       (insn & 0xffffc000) == 0xe50b0000)	/* str  rx,[r11,#-n] */
+	{
+	  /* No need to add this to saved_regs -- it's just an arg reg.  */
+	  continue;
+	}
+      else if ((insn & 0xffffc000) == 0xe5cd0000 ||	/* strb rx,[sp,#n] */
+	       (insn & 0xffffc0f0) == 0xe1cd00b0 ||	/* strh rx,[sp,#n] */
+	       (insn & 0xffffc000) == 0xe58d0000)	/* str  rx,[sp,#n] */
 	{
 	  /* No need to add this to saved_regs -- it's just an arg reg.  */
 	  continue;
@@ -971,7 +969,7 @@ arm_scan_prologue (struct frame_info *fi)
 	}
       else if ((insn & 0xf0000000) != 0xe0000000)
 	break;			/* Condition not true, exit early */
-      else if ((insn & 0xfe200000) == 0xe8200000) /* ldm? */
+      else if ((insn & 0xfe200000) == 0xe8200000)	/* ldm? */
 	break;			/* Don't scan past a block load */
       else
 	/* The optimizer might shove anything into the prologue,
@@ -2072,7 +2070,7 @@ arm_get_next_pc (CORE_ADDR pc)
 static void
 arm_software_single_step (enum target_signal sig, int insert_bpt)
 {
-  static int next_pc;		/* State between setting and unsetting.  */
+  static int next_pc;		 /* State between setting and unsetting.  */
   static char break_mem[BREAKPOINT_MAX]; /* Temporary storage for mem@bpt */
 
   if (insert_bpt)
