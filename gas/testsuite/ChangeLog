@@ -1,3 +1,8 @@
+2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* gas/arc/ld.s:Add checks for short immediates with ld
+	* gas/arc/ld.d:Likewise. 
+
 2005-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gas/mips/tls-o32.d, gas/mips/tls-o32.s, gas/mips/tls-ill.l,
@@ -48,6 +53,7 @@
 	section.
 	* gas/arm/pic.d: Likewise.
 
+>>>>>>> 1.791
 2005-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/m68k/mcf-emac.d: Allow for 64-bit addresses.
