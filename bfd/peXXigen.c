@@ -1841,16 +1841,17 @@ _bfd_XX_print_private_bfd_data_common (abfd, vfile)
   fprintf (file, _("\nCharacteristics 0x%x\n"), pe->real_flags);
 #undef PF
 #define PF(x, y) if (pe->real_flags & x) { fprintf (file, "\t%s\n", y); }
-  PF (F_RELFLG, "relocations stripped");
-  PF (F_EXEC, "executable");
-  PF (F_LNNO, "line numbers stripped");
-  PF (F_LSYMS, "symbols stripped");
-  PF (0x80, "little endian");
-  PF (F_AR32WR, "32 bit words");
-  PF (0x200, "debugging information removed");
-  PF (0x1000, "system file");
-  PF (F_DLL, "DLL");
-  PF (0x8000, "big endian");
+  PF (IMAGE_FILE_RELOCS_STRIPPED, "relocations stripped");
+  PF (IMAGE_FILE_EXECUTABLE_IMAGE, "executable");
+  PF (IMAGE_FILE_LINE_NUMS_STRIPPED, "line numbers stripped");
+  PF (IMAGE_FILE_LOCAL_SYMS_STRIPPED, "symbols stripped");
+  PF (IMAGE_FILE_LARGE_ADDRESS_AWARE, "large address aware");
+  PF (IMAGE_FILE_BYTES_REVERSED_LO, "little endian");
+  PF (IMAGE_FILE_32BIT_MACHINE, "32 bit words");
+  PF (IMAGE_FILE_DEBUG_STRIPPED, "debugging information removed");
+  PF (IMAGE_FILE_SYSTEM, "system file");
+  PF (IMAGE_FILE_DLL, "DLL");
+  PF (IMAGE_FILE_BYTES_REVERSED_HI, "big endian");
 #undef PF
 
   /* ctime implies '\n'.  */

@@ -1,3 +1,11 @@
+2004-05-07  Brian Ford  <ford@vss.fsi.com>
+            DJ Delorie  <dj@redhat.com>
+
+	* coffcode.h (coff_write_object_contents) [COFF_IMAGE_WITH_PE]:
+	Propagate IMAGE_FILE_LARGE_ADDRESS_AWARE.
+	* peXXigen.c (_bfd_XX_print_private_bfd_data_common): Recognize
+	IMAGE_FILE_LARGE_ADDRESS_AWARE.  Use PE defines.
+
 2004-05-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-frv.c (elf32_frvfdpic_modify_segment_map): Return

@@ -3894,6 +3894,8 @@ coff_write_object_contents (abfd)
 #ifdef COFF_IMAGE_WITH_PE
   if (! hasdebug)
     internal_f.f_flags |= IMAGE_FILE_DEBUG_STRIPPED;
+  if (pe_data (abfd)->real_flags & IMAGE_FILE_LARGE_ADDRESS_AWARE)
+    internal_f.f_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
 #endif
 
 #ifdef COFF_WITH_PE
