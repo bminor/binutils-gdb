@@ -72,9 +72,9 @@ static int dma_pack_pke_p;
 
 /* Non-zero if dma insns are to be included in the output.
    This is the default, but writing "if (! no_dma)" is klunky.  */
-static int output_dma;
+static int output_dma = 1;
 /* Non-zero if pke insns are to be included in the output.  */
-static int output_pke;
+static int output_pke = 1;
 
 const char *md_shortopts = "";
 
@@ -82,7 +82,7 @@ struct option md_longopts[] =
 {
 #define OPTION_NO_DMA (OPTION_MD_BASE + 1)
   { "no-dma", no_argument, NULL, OPTION_NO_DMA },
-#define OPTION_NO_PKE (OPTION_NO_DMA_PKE + 1)
+#define OPTION_NO_DMA_PKE (OPTION_NO_DMA + 1)
   { "no-dma-pke", no_argument, NULL, OPTION_NO_DMA_PKE },
 
   {NULL, no_argument, NULL, 0}
@@ -168,8 +168,6 @@ md_begin ()
 
   cur_asm_state = ASM_INIT;
   dma_pack_pke_p = 0;
-  output_dma = 1;
-  output_pke = 1;
 }
 
 /* We need to keep a list of fixups.  We can't simply generate them as
