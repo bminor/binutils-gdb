@@ -1,5 +1,7 @@
 Tue Feb 13 14:35:15 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.host: Set HDLFLAGS for *-*-hpux with --enable-shared.
+
 	* Makefile.in ($(SHLINK)): Check ts against $(SHLIB), not
 	$(SHLINK).
 
