@@ -1,5 +1,15 @@
 2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alphafbsd-tdep.c: Update copyright years.  Include
+	alpha-tdep.h.
+	(alphafbsd_use_struct_convention): Make static.
+	(alphafbsd_init_abi): New function.
+	(_initialize_alphafbsd_tdep): New function.
+	* config/alpha/tm-fbsd.h: Update copyright years.
+	(USE_STRUCT_CONVENTION): Remove.
+
+2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* alpha-tdep.c (alpha_abi_handler): New structure to describe
 	an Alpha ABI variant.
 	(alpha_abi_handler_list): Declare.
