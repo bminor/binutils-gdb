@@ -1,5 +1,10 @@
 2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiDisassem.c (tuiSetDisassemContent): Use tm_print_insn_info
+	to disassemble in the curses window.
+	
+2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tui.h: Cleanup to avoid inclusion of curses includes.
 	(TuiGenWinInfo, TuiGenWinInfoPtr): Move from here.
 	* tuiData.h: To here; include curses includes here.

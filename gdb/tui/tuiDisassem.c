@@ -26,9 +26,11 @@
 
 #include "tui.h"
 #include "tuiData.h"
+#include "tuiWin.h"
 #include "tuiLayout.h"
 #include "tuiSourceWin.h"
 #include "tuiStack.h"
+#include "tui-file.h"
 
 
 /*****************************************
@@ -75,9 +77,8 @@ extern void strcat_address_numeric (CORE_ADDR, int, char *, int);
 	  /* now init the ui_file structure */
 	  gdb_dis_out = tui_sfileopen (threshold);
 
-	  INIT_DISASSEMBLE_INFO_NO_ARCH (asmInfo, gdb_dis_out, (fprintf_ftype) fprintf_filtered);
-	  asmInfo.read_memory_func = dis_asm_read_memory;
-	  asmInfo.memory_error_func = dis_asm_memory_error;
+          asmInfo = tm_print_insn_info;
+          asmInfo.stream = gdb_dis_out;
 
 	  disassemWin->detail.sourceInfo.startLineOrAddr.addr = startAddr;
 
