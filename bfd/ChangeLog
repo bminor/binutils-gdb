@@ -1,3 +1,7 @@
+Wed Jun 25 12:43:10 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* elfcore.h (elf_corefile_note): Move out of HAVE_SYS_PROCFS_H.
+
 Tue Jun 24 11:20:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffgen.c (coff_object_p): Read the f_opthdr bytes from the
