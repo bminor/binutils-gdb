@@ -63,22 +63,38 @@ static void restore_current_thread (int);
 static void switch_to_thread (int pid);
 static void prune_threads (void);
 
+static void
+free_thread (struct thread_info *tp)
+{
+  /* NOTE: this will take care of any left-over step_resume breakpoints,
+     but not any user-specified thread-specific breakpoints. */
+  if (tp->step_resume_breakpoint)
+    delete_breakpoint (tp->step_resume_breakpoint);
+
+  /* FIXME: do I ever need to call the back-end to give it a
+     chance at this private data before deleting the thread?  */
+  if (tp->private)
+    free (tp->private);
+
+  free (tp);
+}
+
 void
 init_thread_list ()
 {
   struct thread_info *tp, *tpnext;
 
+  highest_thread_num = 0;
   if (!thread_list)
     return;
 
   for (tp = thread_list; tp; tp = tpnext)
     {
       tpnext = tp->next;
-      free (tp);
+      free_thread (tp);
     }
 
   thread_list = NULL;
-  highest_thread_num = 0;
 }
 
 /* add_thread now returns a pointer to the new thread_info, 
@@ -134,19 +150,7 @@ delete_thread (pid)
   else
     thread_list = tp->next;
 
-  /* NOTE: this will take care of any left-over step_resume breakpoints,
-     but not any user-specified thread-specific breakpoints. */
-  if (tp->step_resume_breakpoint)
-    delete_breakpoint (tp->step_resume_breakpoint);
-
-  /* FIXME: do I ever need to call the back-end to give it a
-     chance at this private data before deleting the thread?  */
-  if (tp->private)
-    free (tp->private);
-
-  free (tp);
-
-  return;
+  free_thread (tp);
 }
 
 static struct thread_info *

@@ -1,3 +1,10 @@
+2000-07-19  Nicholas Duffek  <nsd@redhat.com>
+
+	* thread.c (free_thread): New function.
+	(init_thread_list): Always zero highest_thread_num.  Call
+	free_thread() instead of free().
+	(delete_thread): Move thread cleanup code to free_thread().
+
 2000-07-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         Multiarch the sh target.
