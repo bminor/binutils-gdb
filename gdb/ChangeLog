@@ -191,7 +191,6 @@ Mon Nov 29 11:36:57 1993  Stu Grossman  (grossman at cygnus.com)
 	* i386ly-tdep.c (i386lynx_saved_pc_after_call):  Change call_inst
 	to unsigned char to avoid domain warning for some values.
 
->>>>>>> 1.2024
 Mon Nov 22 23:42:59 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* remote-e7000.c (e7000_wait): Cope with H8/300 register dump.
