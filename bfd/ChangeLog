@@ -1,5 +1,13 @@
 2003-06-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_howto_table): Remove unnecessary cast.
+	(ppc_elf_reloc_type_lookup): Modify comment.
+	(ppc_elf_info_to_howto): Ditto.
+	(ppc_elf_relocate_section): Ditto.
+	(ppc_elf_check_relocs): Call ppc_elf_howto_init.
+
+2003-06-25  Alan Modra  <amodra@bigpond.net.au>
+
 	* aout-ns32k.c: Correct spelling of "relocatable".
 	* aoutx.h: Likewise.
 	* bfd-in.h: Likewise.

@@ -286,7 +286,7 @@ ppc_elf_copy_indirect_symbol (struct elf_backend_data *bed,
     _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
-static reloc_howto_type *ppc_elf_howto_table[(int) R_PPC_max];
+static reloc_howto_type *ppc_elf_howto_table[R_PPC_max];
 
 static reloc_howto_type ppc_elf_howto_raw[] = {
   /* This reloc does nothing.  */
@@ -1830,8 +1830,8 @@ ppc_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   enum elf_ppc_reloc_type r;
 
+  /* Initialize howto table if not already done.  */
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
-    /* Initialize howto table if needed.  */
     ppc_elf_howto_init ();
 
   switch (code)
@@ -1932,8 +1932,8 @@ ppc_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 		       arelent *cache_ptr,
 		       Elf_Internal_Rela *dst)
 {
+  /* Initialize howto table if not already done.  */
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
-    /* Initialize howto table if needed.  */
     ppc_elf_howto_init ();
 
   BFD_ASSERT (ELF32_R_TYPE (dst->r_info) < (unsigned int) R_PPC_max);
@@ -3094,9 +3094,12 @@ ppc_elf_check_relocs (bfd *abfd,
 	   bfd_archive_filename (abfd));
 #endif
 
+  /* Initialize howto table if not already done.  */
+  if (!ppc_elf_howto_table[R_PPC_ADDR32])
+    ppc_elf_howto_init ();
+
   /* Create the linker generated sections all the time so that the
      special symbols are created.  */
-
   htab = ppc_elf_hash_table (info);
   if (htab->sdata == NULL)
     {
@@ -4201,8 +4204,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
   if (info->relocatable)
     return TRUE;
 
+  /* Initialize howto table if not already done.  */
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
-    /* Initialize howto table if needed.  */
     ppc_elf_howto_init ();
 
   htab = ppc_elf_hash_table (info);
