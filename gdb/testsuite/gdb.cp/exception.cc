@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,7 +21,8 @@
 
 // Test file for exception handling support.
 
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 int foo (int i)
 {
@@ -65,5 +66,4 @@ int main()
 
   // Not caught 
   foo (20);
-  
 }
