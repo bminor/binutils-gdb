@@ -99,8 +99,43 @@ gdb_test "n" "33\[ 	\]*.*foo2" "next over macro"
 # See if we can properly `step' into a subroutine call.
 gdb_test "s" "8\[ 	\]*.*" "step into foo2"
 
+# Test 'info target', and incidentally capture the entry point address.
+set entry_point 0
+send_gdb "info target\n"
+gdb_expect {
+    -re "Symbols from .*asm-source.*Entry point: 0x(\[01232456789abcdefABCDEF\]+).*$gdb_prompt $" {
+	set entry_point $expect_out(1,string)
+	pass "info target"
+    }
+    -re ".*$gdb_prompt $" {
+	fail "info target"
+    }
+    timeout {
+	fail "info target (timeout)"
+    }
+}
+
+# Capture the start symbol (may be '_start' or 'start')
+set entry_symbol ""
+send_gdb "info symbol 0x$entry_point\n"
+gdb_expect {
+    -re "info symbol 0x$entry_point\[\r\n\]*" {
+	exp_continue
+    }
+    -re "(.*) in section .*$gdb_prompt $" {
+	set entry_symbol $expect_out(1,string)
+	pass "info symbol"
+    }
+    -re ".*$gdb_prompt $" {
+	fail "info symbol"
+    }
+    timeout {
+	fail "info symbol (timeout)"
+    }
+}
+
 # Now try a 'list' from the other source file.
-gdb_test "list _start" ".*gdbasm_startup.*" "list"
+gdb_test "list $entry_symbol" ".*gdbasm_startup.*" "list"
 
 # Now try a source file search
 gdb_test "search A routine for foo2 to call" \

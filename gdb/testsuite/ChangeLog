@@ -1,3 +1,8 @@
+2001-12-06  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add tests for info target, info symbol, 
+	and detect whether the start symbol has a leading underscore.
+
 2001-12-04  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/completion.exp: Clarify indentation.
