@@ -2445,6 +2445,7 @@ static void s_thumb_func PARAMS ((int));
 static void s_thumb_set PARAMS ((int));
 #ifdef OBJ_ELF
 static void s_arm_elf_cons PARAMS ((int));
+static void s_arm_rel31 (int nbytes);
 #endif
 
 static int my_get_expression PARAMS ((expressionS *, char **));
@@ -2468,6 +2469,7 @@ const pseudo_typeS md_pseudo_table[] =
 #ifdef OBJ_ELF
   { "word",        s_arm_elf_cons, 4 },
   { "long",        s_arm_elf_cons, 4 },
+  { "rel31",       s_arm_rel31,   0 },
 #else
   { "word",        cons, 4},
 #endif
@@ -12481,6 +12483,7 @@ md_apply_fix3 (fixP, valP, seg)
 #ifdef OBJ_ELF
     case BFD_RELOC_ARM_GOT32:
     case BFD_RELOC_ARM_GOTOFF:
+    case BFD_RELOC_ARM_TARGET2:
       md_number_to_chars (buf, 0, 4);
       break;
 #endif
@@ -12490,6 +12493,7 @@ md_apply_fix3 (fixP, valP, seg)
     case BFD_RELOC_ARM_TARGET1:
     case BFD_RELOC_ARM_ROSEGREL32:
     case BFD_RELOC_ARM_SBREL32:
+    case BFD_RELOC_32_PCREL:
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 4);
 #ifdef OBJ_ELF
@@ -12502,6 +12506,20 @@ md_apply_fix3 (fixP, valP, seg)
       break;
 
 #ifdef OBJ_ELF
+    case BFD_RELOC_ARM_PREL31:
+      if (fixP->fx_done || fixP->fx_pcrel)
+	{
+	  newval = md_chars_to_number (buf, 4) & 0x80000000;
+	  if ((value ^ (value >> 1)) & 0x40000000)
+	    {
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    _("rel31 relocation overflow"));
+	    }
+	  newval |= value & 0x7fffffff;
+	  md_number_to_chars (buf, newval, 4);
+	}
+      break;
+
     case BFD_RELOC_ARM_PLT32:
       /* It appears the instruction is fully prepared at this point.  */
       break;
@@ -12780,6 +12798,8 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_ARM_TARGET1:
     case BFD_RELOC_ARM_ROSEGREL32:
     case BFD_RELOC_ARM_SBREL32:
+    case BFD_RELOC_ARM_PREL31:
+    case BFD_RELOC_ARM_TARGET2:
       code = fixp->fx_r_type;
       break;
 #endif
@@ -14090,7 +14110,8 @@ arm_fix_adjustable (fixP)
   /* Don't allow symbols to be discarded on GOT related relocs.  */
   if (fixP->fx_r_type == BFD_RELOC_ARM_PLT32
       || fixP->fx_r_type == BFD_RELOC_ARM_GOT32
-      || fixP->fx_r_type == BFD_RELOC_ARM_GOTOFF)
+      || fixP->fx_r_type == BFD_RELOC_ARM_GOTOFF
+      || fixP->fx_r_type == BFD_RELOC_ARM_TARGET2)
     return 0;
 
   return 1;
@@ -14151,6 +14172,7 @@ arm_parse_reloc ()
     MAP ("(plt)",    BFD_RELOC_ARM_PLT32),
     MAP ("(target1)", BFD_RELOC_ARM_TARGET1),
     MAP ("(sbrel)", BFD_RELOC_ARM_SBREL32),
+    MAP ("(target2)", BFD_RELOC_ARM_TARGET2),
     { NULL, 0,         BFD_RELOC_UNUSED }
 #undef MAP
   };
@@ -14222,6 +14244,50 @@ s_arm_elf_cons (nbytes)
 
   /* Put terminator back into stream.  */
   input_line_pointer --;
+  demand_empty_rest_of_line ();
+}
+
+
+/* Parse a .rel31 directive.  */
+
+static void
+s_arm_rel31 (int ignored ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+  char *p;
+  valueT highbit;
+    
+  SKIP_WHITESPACE ();
+
+  highbit = 0;
+  if (*input_line_pointer == '1')
+    highbit = 0x80000000;
+  else if (*input_line_pointer != '0')
+    as_bad (_("expected 0 or 1"));
+
+  input_line_pointer++;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    as_bad (_("missing comma"));
+  input_line_pointer++;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+#ifdef md_cons_align
+  md_cons_align (4);
+#endif
+
+  mapping_state (MAP_DATA);
+
+  expression (&exp);
+
+  p = frag_more (4);
+  md_number_to_chars (p, highbit, 4);
+  fix_new_arm (frag_now, p - frag_now->fr_literal, 4, &exp, 1,
+	       BFD_RELOC_ARM_PREL31);
+
   demand_empty_rest_of_line ();
 }
 

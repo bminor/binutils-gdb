@@ -1,3 +1,13 @@
+2004-09-17  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (s_arm_rel31): New funciton.
+	(md_pseudo_table): Add .rel31.
+	(md_apply_fix3): Handle BFD_RELOC_ARM_TARGET2, 
+	BFD_RELOC_32_PCREL and BFD_RELOC_ARM_PREL31.
+	(tc_gen_reloc): Handle BFD_RELOC_ARM_PREL31 and BFD_RELOC_ARM_TARGET2.
+	(arm_fix_adjustable): Return 0 for BFD_RELOC_ARM_TARGET2.
+	(arm_parse_reloc): Add (target2).
+
 2004-09-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

@@ -1,3 +1,28 @@
+2004-09-17  Paul Brook  <paul@codesourcery.com>
+
+	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add prototype.
+	(bfd_elf32_arm_process_before_allocation): Update prototype.
+	* bfd-in2.h: Regenerate.
+	* bfd/elf32-arm.h (elf32_arm_link_hash_table): Add target2_reloc.
+	(elf32_arm_link_hash_table_create): Set it.
+	(bfd_elf32_arm_process_before_allocation): Remove target1_is_rel.
+	(bfd_elf32_arm_set_target_relocs): New function.
+	(arm_real_reloc_type): New function.
+	(elf32_arm_final_link_relocate): Use it.  Handle R_ARM_PREL31 and
+	R_ARM_GOT_PREL.  Remove R_ARM_TARGET1.
+	(elf32_arm_gc_sweep_hook): Ditto.
+	(elf32_arm_check_relocs): Ditto.
+	(elf32_arm_relocate_section): Handle R_ARM_GOT_PREL.
+	* elfarm-nabi.c (elf32_arm_howto_table): Add R_ARM_PREL31 and
+	R_ARM_GOT_TARGET2.
+	(elf32_arm_got_prel): New variable.
+	(elf32_arm_howto_from_type): New function.
+	(elf32_arm_info_to_howto): Use it.
+	(elf32_arm_reloc_map): Add BFD_RELOC_ARM_PREL31 and
+	BFD_RELOC_ARM_TARGET2.
+	* libbfd.h: Regenerate.
+	* reloc.c: Add BFD_RELOC_ARM_TARGET2 and BFD_RELOC_ARM_PREL31.
+
 2004-09-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* ecoff.c: Update u.undef.next refs.

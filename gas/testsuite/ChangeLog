@@ -1,3 +1,8 @@
+2004-09-17  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/pic.s: Add (target2).
+	* gas/arm/pic.d: Ditto.
+
 2004-09-13  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/pic.d: Rename RELABS to TARGET1.

@@ -186,6 +186,9 @@ struct elf32_arm_link_hash_table
        Nonzero if R_ARM_TARGET1 means R_ARM_ABS32.  */
     int target1_is_rel;
 
+    /* The relocation to use for R_ARM_TARGET2 relocations.  */
+    int target2_reloc;
+
     /* The number of bytes in the initial entry in the PLT.  */
     bfd_size_type plt_header_size;
 
@@ -378,6 +381,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->no_pipeline_knowledge = 0;
   ret->byteswap_code = 0;
   ret->target1_is_rel = 0;
+  ret->target2_reloc = R_ARM_NONE;
 #ifdef FOUR_WORD_PLT
   ret->plt_header_size = 16;
   ret->plt_entry_size = 16;
@@ -757,8 +761,7 @@ bfd_boolean
 bfd_elf32_arm_process_before_allocation (bfd *abfd,
 					 struct bfd_link_info *link_info,
 					 int no_pipeline_knowledge,
-					 int byteswap_code,
-					 int target1_is_rel)
+					 int byteswap_code)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs = NULL;
@@ -781,7 +784,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
   globals->no_pipeline_knowledge = no_pipeline_knowledge;
-  globals->target1_is_rel = target1_is_rel;
+
   if (byteswap_code && !bfd_big_endian (abfd))
     {
       _bfd_error_handler (_("%B: BE8 images only valid in big-endian mode."),
@@ -903,6 +906,32 @@ error_return:
     free (internal_relocs);
 
   return FALSE;
+}
+#endif
+
+
+#ifndef OLD_ARM_ABI
+/* Set target relocation values needed during linking.  */
+
+void
+bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
+				 int target1_is_rel,
+				 char * target2_type)
+{
+  struct elf32_arm_link_hash_table *globals;
+
+  globals = elf32_arm_hash_table (link_info);
+
+  globals->target1_is_rel = target1_is_rel;
+  if (strcmp (target2_type, "rel") == 0)
+    globals->target2_reloc = R_ARM_REL32;
+  else if (strcmp (target2_type, "got-rel") == 0)
+    globals->target2_reloc = R_ARM_GOT_PREL;
+  else
+    {
+      _bfd_error_handler (_("Invalid TARGET2 relocation type '%s'."),
+			  target2_type);
+    }
 }
 #endif
 
@@ -1151,6 +1180,32 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
   return TRUE;
 }
 
+
+#ifndef OLD_ARM_ABI
+/* Some relocations map to different relocations depending on the
+   target.  Return the real relocation.  */
+static int
+arm_real_reloc_type (struct elf32_arm_link_hash_table * globals,
+		     int r_type)
+{
+  switch (r_type)
+    {
+    case R_ARM_TARGET1:
+      if (globals->target1_is_rel)
+	return R_ARM_REL32;
+      else
+	return R_ARM_ABS32;
+
+    case R_ARM_TARGET2:
+      return globals->target2_reloc;
+
+    default:
+      return r_type;
+    }
+}
+#endif /* OLD_ARM_ABI */
+
+
 /* Perform a relocation as part of a final link.  */
 
 static bfd_reloc_status_type
@@ -1186,15 +1241,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 #ifndef OLD_ARM_ABI
   /* Some relocation type map to different relocations depending on the
      target.  We pick the right one here.  */
-  if (r_type == R_ARM_TARGET1)
-    {
-      if (globals->target1_is_rel)
-	r_type = R_ARM_REL32;
-      else
-	r_type = R_ARM_ABS32;
-      
-      howto = &elf32_arm_howto_table[r_type];
-    }
+  r_type = arm_real_reloc_type (globals, r_type);
+  if (r_type != howto->type)
+    howto = elf32_arm_howto_from_type (r_type);
 #endif /* OLD_ARM_ABI */
 
   /* If the start address has been set, then set the EF_ARM_HASENTRY
@@ -1245,6 +1294,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     case R_ARM_REL32:
 #ifndef OLD_ARM_ABI
     case R_ARM_XPC25:
+    case R_ARM_PREL31:
 #endif
     case R_ARM_PLT32:
       /* r_symndx will be zero only for relocs against symbols
@@ -1257,7 +1307,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	 will use the symbol's value, which may point to a PLT entry, but we
 	 don't need to handle that here.  If we created a PLT entry, all
 	 branches in this object should go to it.  */
-      if ((r_type != R_ARM_ABS32 && r_type != R_ARM_REL32)
+      if ((r_type != R_ARM_ABS32 && r_type != R_ARM_REL32
+#ifndef OLD_ARM_ABI
+	   && r_type != R_ARM_PREL31
+#endif
+	   )
 	  && h != NULL
 	  && splt != NULL
 	  && h->plt.offset != (bfd_vma) -1)
@@ -1279,8 +1333,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	 into the output file to be resolved at run time.  */
       if (info->shared
 	  && (input_section->flags & SEC_ALLOC)
-	  && (r_type != R_ARM_REL32
-	      || !SYMBOL_CALLS_LOCAL (info, h))
+	  && ((r_type != R_ARM_REL32
+#ifndef OLD_ARM_ABI
+	      && r_type != R_ARM_PREL31
+#endif
+	      ) || !SYMBOL_CALLS_LOCAL (info, h))
 	  && (h == NULL
 	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	      || h->root.type != bfd_link_hash_undefweak)
@@ -1480,6 +1537,24 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		    + input_section->output_offset + rel->r_offset);
 	  value += addend;
 	  break;
+
+#ifndef OLD_ARM_ABI
+	case R_ARM_PREL31:
+	  value -= (input_section->output_section->vma
+		    + input_section->output_offset + rel->r_offset);
+	  value += signed_addend;
+	  if (! h || h->root.type != bfd_link_hash_undefweak)
+	    {
+	      /* Check for overflow */
+	      if ((value ^ (value >> 1)) & (1 << 30))
+		return bfd_reloc_overflow;
+	    }
+	  value &= 0x7fffffff;
+	  value |= (bfd_get_32 (input_bfd, hit_data) & 0x80000000);
+	  if (sym_flags == STT_ARM_TFUNC)
+	    value |= 1;
+	  break;
+#endif
 	}
 
       bfd_put_32 (input_bfd, value, hit_data);
@@ -1769,6 +1844,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 				       (bfd_vma) 0);
 
     case R_ARM_GOT32:
+#ifndef OLD_ARM_ABI
+    case R_ARM_GOT_PREL:
+#endif
       /* Relocation is to the entry for this symbol in the
          global offset table.  */
       if (sgot == NULL)
@@ -1857,6 +1935,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	  value = sgot->output_offset + off;
 	}
+      if (r_type != R_ARM_GOT32)
+	value += sgot->output_section->vma;
 
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
 				       contents, rel->r_offset, value,
@@ -2130,6 +2210,9 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 		  break;
 
 	        case R_ARM_GOT32:
+#ifndef OLD_ARM_ABI
+		case R_ARM_GOT_PREL:
+#endif
 	          if ((WILL_CALL_FINISH_DYNAMIC_SYMBOL
 		       (elf_hash_table (info)->dynamic_sections_created,
 			info->shared, h))
@@ -2726,6 +2809,9 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
   const Elf_Internal_Rela *rel, *relend;
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
+  struct elf32_arm_link_hash_table * globals;
+
+  globals = elf32_arm_hash_table (info);
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -2735,66 +2821,77 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_ARM_GOT32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->got.refcount > 0)
-	      h->got.refcount -= 1;
-	  }
-	else if (local_got_refcounts != NULL)
-	  {
-	    if (local_got_refcounts[r_symndx] > 0)
-	      local_got_refcounts[r_symndx] -= 1;
-	  }
-	break;
+    {
+      int r_type;
 
-      case R_ARM_ABS32:
-      case R_ARM_REL32:
+      r_type = ELF32_R_TYPE (rel->r_info);
 #ifndef OLD_ARM_ABI
-      case R_ARM_TARGET1:
+      r_type = arm_real_reloc_type (globals, r_type);
 #endif
-      case R_ARM_PC24:
-      case R_ARM_PLT32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    struct elf32_arm_link_hash_entry *eh;
-	    struct elf32_arm_relocs_copied **pp;
-	    struct elf32_arm_relocs_copied *p;
-
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-
-	    if (h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
-
-	    if (ELF32_R_TYPE (rel->r_info) == R_ARM_ABS32
+      switch (r_type)
+	{
+	case R_ARM_GOT32:
 #ifndef OLD_ARM_ABI
-		|| ELF32_R_TYPE (rel->r_info) == R_ARM_TARGET1
+	case R_ARM_GOT_PREL:
 #endif
-		|| ELF32_R_TYPE (rel->r_info) == R_ARM_REL32)
-	      {
-		eh = (struct elf32_arm_link_hash_entry *) h;
+	  r_symndx = ELF32_R_SYM (rel->r_info);
+	  if (r_symndx >= symtab_hdr->sh_info)
+	    {
+	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	      if (h->got.refcount > 0)
+		h->got.refcount -= 1;
+	    }
+	  else if (local_got_refcounts != NULL)
+	    {
+	      if (local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx] -= 1;
+	    }
+	  break;
 
-		for (pp = &eh->relocs_copied; (p = *pp) != NULL;
-		     pp = &p->next)
-		if (p->section == sec)
-		  {
-		    p->count -= 1;
-		    if (p->count == 0)
-		      *pp = p->next;
-		    break;
-		  }
-	      }
-	  }
-	break;
+	case R_ARM_ABS32:
+	case R_ARM_REL32:
+	case R_ARM_PC24:
+	case R_ARM_PLT32:
+#ifndef OLD_ARM_ABI
+	case R_ARM_PREL31:
+#endif
+	  r_symndx = ELF32_R_SYM (rel->r_info);
+	  if (r_symndx >= symtab_hdr->sh_info)
+	    {
+	      struct elf32_arm_link_hash_entry *eh;
+	      struct elf32_arm_relocs_copied **pp;
+	      struct elf32_arm_relocs_copied *p;
 
-      default:
-	break;
-      }
+	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+
+	      if (r_type == R_ARM_ABS32
+#ifndef OLD_ARM_ABI
+		  || r_type == R_ARM_PREL31
+#endif
+		  || r_type == R_ARM_REL32)
+		{
+		  eh = (struct elf32_arm_link_hash_entry *) h;
+
+		  for (pp = &eh->relocs_copied; (p = *pp) != NULL;
+		       pp = &p->next)
+		  if (p->section == sec)
+		    {
+		      p->count -= 1;
+		      if (p->count == 0)
+			*pp = p->next;
+		      break;
+		    }
+		}
+	    }
+	  break;
+
+	default:
+	  break;
+	}
+    }
 
   return TRUE;
 }
@@ -2837,16 +2934,24 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
     {
       struct elf_link_hash_entry *h;
       unsigned long r_symndx;
+      int r_type;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
+      r_type = ELF32_R_TYPE (rel->r_info);
+#ifndef OLD_ARM_ABI
+      r_type = arm_real_reloc_type (htab, r_type);
+#endif
       if (r_symndx < symtab_hdr->sh_info)
         h = NULL;
       else
         h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-      switch (ELF32_R_TYPE (rel->r_info))
+      switch (r_type)
         {
 	  case R_ARM_GOT32:
+#ifndef OLD_ARM_ABI
+	  case R_ARM_GOT_PREL:
+#endif
 	    /* This symbol requires a global offset table entry.  */
 	    if (h != NULL)
 	      {
@@ -2871,7 +2976,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  }
 		local_got_refcounts[r_symndx] += 1;
 	      }
-	    break;
+	    if (r_type == R_ARM_GOT32)
+	      break;
+	    /* Fall through.  */
 
 	  case R_ARM_GOTOFF:
 	  case R_ARM_GOTPC:
@@ -2886,11 +2993,11 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  case R_ARM_ABS32:
 	  case R_ARM_REL32:
-#ifndef OLD_ARM_ABI
-	  case R_ARM_TARGET1:
-#endif
 	  case R_ARM_PC24:
 	  case R_ARM_PLT32:
+#ifndef OLD_ARM_ABI
+	  case R_ARM_PREL31:
+#endif
 	    if (h != NULL)
 	      {
 		/* If this reloc is in a read-only section, we might
@@ -2906,8 +3013,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		   refers to is in a different object.  We can't tell for
 		   sure yet, because something later might force the
 		   symbol local.  */
-		if (ELF32_R_TYPE (rel->r_info) == R_ARM_PC24
-		    || ELF32_R_TYPE (rel->r_info) == R_ARM_PLT32)
+		if (r_type == R_ARM_PC24
+		    || r_type == R_ARM_PLT32)
 		  h->needs_plt = 1;
 
 		/* If we create a PLT entry, this relocation will reference
@@ -2929,12 +3036,12 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
                relocs_copied field of the hash table entry.  */
 	    if (info->shared
 		&& (sec->flags & SEC_ALLOC) != 0
-		&& ((ELF32_R_TYPE (rel->r_info) != R_ARM_PC24
-		     && ELF32_R_TYPE (rel->r_info) != R_ARM_PLT32
+		&& ((r_type != R_ARM_PC24
+		     && r_type != R_ARM_PLT32
 #ifndef OLD_ARM_ABI
-		     && ELF32_R_TYPE (rel->r_info) != R_ARM_TARGET1
+		     && r_type != R_ARM_PREL31
 #endif
-		     && ELF32_R_TYPE (rel->r_info) != R_ARM_REL32)
+		     && r_type != R_ARM_REL32)
 		    || (h != NULL
 			&& (! info->symbolic
 			    || !h->def_regular))))
@@ -3017,11 +3124,11 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    p->count = 0;
 		  }
 
-		if (ELF32_R_TYPE (rel->r_info) == R_ARM_ABS32
+		if (r_type == R_ARM_ABS32
 #ifndef OLD_ARM_ABI
-		    || ELF32_R_TYPE (rel->r_info) == R_ARM_TARGET1
+		    || r_type == R_ARM_PREL31
 #endif
-		    || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32)
+		    || r_type == R_ARM_REL32)
 		  p->count += 1;
 	      }
 	    break;

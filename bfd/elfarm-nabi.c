@@ -636,6 +636,34 @@ static reloc_howto_type elf32_arm_howto_table[] =
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_ARM_TARGET2,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_TARGET2",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_PREL31,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 31,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_PREL31",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x7fffffff,		/* src_mask */
+	 0x7fffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
 };
 
   /* GNU extension to record C++ vtable hierarchy */
@@ -702,44 +730,58 @@ static reloc_howto_type elf32_arm_thm_pc9_howto =
 	 0x000000ff,		/* dst_mask */
 	 TRUE);			/* pcrel_offset */
 
-static void elf32_arm_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+/* Place relative GOT-indirect.  */
+static reloc_howto_type elf32_arm_got_prel =
+  HOWTO (R_ARM_GOT_PREL,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_GOT_PREL",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE);			/* pcrel_offset */
+
+static reloc_howto_type *
+elf32_arm_howto_from_type (unsigned int r_type)
+{
+  if (r_type < NUM_ELEM (elf32_arm_howto_table))
+    return &elf32_arm_howto_table[r_type];
+    
+  switch (r_type)
+    {
+    case R_ARM_GOT_PREL:
+      return &elf32_arm_got_prel;
+
+    case R_ARM_GNU_VTINHERIT:
+      return &elf32_arm_vtinherit_howto;
+
+    case R_ARM_GNU_VTENTRY:
+      return &elf32_arm_vtentry_howto;
+
+    case R_ARM_THM_PC11:
+      return &elf32_arm_thm_pc11_howto;
+
+    case R_ARM_THM_PC9:
+      return &elf32_arm_thm_pc9_howto;
+
+    default:
+      return NULL;
+    }
+}
 
 static void
-elf32_arm_info_to_howto (abfd, bfd_reloc, elf_reloc)
-     bfd * abfd ATTRIBUTE_UNUSED;
-     arelent * bfd_reloc;
-     Elf_Internal_Rela * elf_reloc;
+elf32_arm_info_to_howto (bfd * abfd ATTRIBUTE_UNUSED, arelent * bfd_reloc,
+			 Elf_Internal_Rela * elf_reloc)
 {
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (elf_reloc->r_info);
-
-  switch (r_type)
-    {
-    case R_ARM_GNU_VTINHERIT:
-      bfd_reloc->howto = & elf32_arm_vtinherit_howto;
-      break;
-
-    case R_ARM_GNU_VTENTRY:
-      bfd_reloc->howto = & elf32_arm_vtentry_howto;
-      break;
-
-    case R_ARM_THM_PC11:
-      bfd_reloc->howto = & elf32_arm_thm_pc11_howto;
-      break;
-
-    case R_ARM_THM_PC9:
-      bfd_reloc->howto = & elf32_arm_thm_pc9_howto;
-      break;
-
-    default:
-      if (r_type >= NUM_ELEM (elf32_arm_howto_table))
-	bfd_reloc->howto = NULL;
-      else
-        bfd_reloc->howto = & elf32_arm_howto_table[r_type];
-      break;
-    }
+  bfd_reloc->howto = elf32_arm_howto_from_type (r_type);
 }
 
 struct elf32_arm_reloc_map
@@ -748,6 +790,7 @@ struct elf32_arm_reloc_map
     unsigned char             elf_reloc_val;
   };
 
+/* All entries in this list must also be present in elf32_arm_howto_table.  */
 static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
   {
     {BFD_RELOC_NONE,                 R_ARM_NONE},
@@ -771,7 +814,9 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
     {BFD_RELOC_ARM_PLT32,            R_ARM_PLT32},
     {BFD_RELOC_ARM_TARGET1,	     R_ARM_TARGET1},
     {BFD_RELOC_ARM_ROSEGREL32,	     R_ARM_ROSEGREL32},
-    {BFD_RELOC_ARM_SBREL32,	     R_ARM_SBREL32}
+    {BFD_RELOC_ARM_SBREL32,	     R_ARM_SBREL32},
+    {BFD_RELOC_ARM_PREL31,	     R_ARM_PREL31},
+    {BFD_RELOC_ARM_TARGET2,	     R_ARM_TARGET2}
   };
 
 static reloc_howto_type *
