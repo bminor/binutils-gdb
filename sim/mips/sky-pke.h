@@ -11,9 +11,10 @@
 /* External functions */
 
 void pke0_attach(SIM_DESC sd);
-void pke0_issue(void);
+void pke0_issue(SIM_DESC sd);
 void pke1_attach(SIM_DESC sd);
-void pke1_issue(void);
+void pke1_issue(SIM_DESC sd);
+
 
 /* Quadword data type */
 
@@ -36,9 +37,6 @@ typedef unsigned_4 quadword[4];
 /* and now a few definitions that rightfully belong elsewhere */ 
 #ifdef PKE_DEBUG
 
-/* VU PC pseudo-registers */ /* omitted from 1998-01-22 e-mail plans */
-#define VU0_PC_START 0x20025000
-#define VU1_PC_START 0x20026000
 
 /* VU source-addr tracking tables */ /* changed from 1998-01-22 e-mail plans */
 #define VU0_MEM0_SRCADDR_START 0x21000000
@@ -49,6 +47,13 @@ typedef unsigned_4 quadword[4];
 /* GPUIF STAT register */
 #define GPUIF_REG_STAT_APATH_E 11
 #define GPUIF_REG_STAT_APATH_B 10
+
+/* COP2 STAT register */
+#define COP2_REG_STAT_ADDR VPU_STAT
+#define COP2_REG_STAT_VBS1_E 8
+#define COP2_REG_STAT_VBS1_B 8
+#define COP2_REG_STAT_VBS0_E 0
+#define COP2_REG_STAT_VBS0_B 0
 
 #endif /* PKE_DEBUG */
 
@@ -84,10 +89,6 @@ typedef unsigned_4 quadword[4];
 
 #define PKE_REGISTER_WINDOW_SIZE  (sizeof(quadword) * PKE_NUM_REGS)
 
-
-/* virtual addresses for source-addr tracking */
-#define PKE0_SRCADDR    0x20000020
-#define PKE1_SRCADDR    0x20000024
 
 
 /* PKE commands */
@@ -286,16 +287,14 @@ typedef unsigned_4 quadword[4];
 ((((me)->regs[PKE_REG_MASK][0]) >> (8*(row) + 2*(col))) & 0x03)
 
 
-
-
 /* operations - replace with those in sim-bits.h when convenient */
 
 /* unsigned 32-bit mask of given width */
-#define BIT_MASK(width) (width == 31 ? 0xffffffff : (((unsigned_4)1) << (width+1)) - 1)
+#define BIT_MASK(width) ((width) == 31 ? 0xffffffff : (((unsigned_4)1) << (width+1)) - 1)
 /* e.g.: BIT_MASK(4) = 00011111 */
 
 /* mask between given given bits numbers (MSB) */
-#define BIT_MASK_BTW(begin,end) (BIT_MASK(end) & ~BIT_MASK(begin)) 
+#define BIT_MASK_BTW(begin,end) ((BIT_MASK(end) & ~((begin) == 0 ? 0 : BIT_MASK((begin)-1))))
 /* e.g.: BIT_MASK_BTW(4,11) = 0000111111110000 */
 
 /* set bitfield value */
@@ -332,15 +331,25 @@ do { \
 #define PKE_LIMIT(value,max) ((value) > (max) ? (max) : (value))
 
 
+/* Classify words in a FIFO quadword */
+enum wordclass
+{
+  wc_dma = 'D',
+  wc_pkecode = 'P',
+  wc_unknown = '?',
+  wc_pkedata = '.'
+};
+
+
 /* One row in the FIFO */
 struct fifo_quadword
 {
   /* 128 bits of data */
   quadword data;
   /* source main memory address (or 0: unknown) */
-  address_word source_address;
-  /* DMA tag present in lower 64 bits */
-  unsigned_4 dma_tag_present;
+  unsigned_4 source_address;
+  /* classification of words in quadword; wc_dma set on DMA tags at FIFO write */
+  enum wordclass word_class[4];
 };
 
 
@@ -365,8 +374,7 @@ struct pke_device
   struct fifo_quadword* fifo;
   int fifo_num_elements; /* no. of quadwords occupied in FIFO */
   int fifo_buffer_size;  /* no. of quadwords of space in FIFO */
-  FILE* fifo_trace_file; /* or 0 for no trace */ /* XXX: tracing not done */
-  /* XXX: assumes FIFOs grow indefinately */
+  FILE* fifo_trace_file; /* or 0 for no trace */
 
   /* PC */
   int fifo_pc;  /* 0 .. (fifo_num_elements-1): quadword index of next instruction */
@@ -378,6 +386,23 @@ struct pke_device
 
 #define PKE_FLAG_NONE        0x00
 #define PKE_FLAG_PENDING_PSS 0x01 /* PSS bit written-to; set STAT:PSS after current instruction */
+
+
+/* Kludge alert */
+
+#define PKE_MEM_READ(addr,data,size) \
+    do { sim_cpu* cpu;  cpu = STATE_CPU(CURRENT_STATE, 0); \
+         *(data) = sim_core_read_aligned_##size(cpu, CIA_GET(cpu), sim_core_read_map, \
+					      (addr)); } while(0)
+
+#define PKE_MEM_WRITE(addr,data,size) \
+    do { sim_cpu* cpu;  cpu = STATE_CPU(CURRENT_STATE, 0); \
+         unsigned_##size value; \
+         memcpy((void*) value, (data), size); \
+         sim_core_write_aligned_##size(cpu, CIA_GET(cpu), sim_core_write_map, \
+				       (addr), value); } while(0)
+      
+
 
 
 #endif /* H_PKE_H */
