@@ -1,3 +1,16 @@
+Fri Jan 12 14:56:19 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmisc.c: Include <stdarg.h> rather than <varargs.h> if
+	ANSI_PROTOTYPES is defined.  Remove special handling of
+	WINDOWS_NT.  Various indendation fixes.
+	(vfinfo): Change fmt parameter to const char *.
+	(info_msg): Write <stdarg.h> version.
+	(einfo, minfo, finfo): Likewise.
+	(info_assert): Change file parameter to const char *.
+	* ldmisc.h (einfo, minfo, info_msg): If ANSI_PROTOTYPES is
+	defined, use a real prototype.
+	(info_assert): Change first parameter to be const char *.
+
 Fri Jan 12 13:29:55 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* scripttempl/elfppc.sc: Add support for .sdata2/.sbss2, etc.  Add

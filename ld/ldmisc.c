@@ -22,16 +22,13 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 #include "bfd.h"
 #include "sysdep.h"
 #include <demangle.h>
-/* this collection of routines wants to use the Unix style varargs
-   use special abbreviated portion of varargs.h */
-#ifdef WINDOWS_NT
-/* Since macro __STDC__ is defined, the compiler will raise and error if
-   VARARGS.H from mstools\h is included.  Since we only need a portion of
-   this header file, it has been incorporated into local header file
-   xvarargs.h */
-#include "xvarargs.h"
+
+#ifdef ANSI_PROTOTYPES
+#include <stdarg.h>
+#define USE_STDARG 1
 #else
 #include <varargs.h>
+#define USE_STDARG 0
 #endif
 
 #include "ld.h"
@@ -44,8 +41,12 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 #include "ldfile.h"
 
 
+#if USE_STDARG
+static void finfo PARAMS ((FILE *, const char *, ...));
+#else
 /* VARARGS*/
 static void finfo ();
+#endif
 static const char *demangle PARAMS ((const char *string,
 				     int remove_underscore));
 
@@ -75,23 +76,28 @@ demangle (string, remove_underscore)
      int remove_underscore;
 {
   const char *res;
-  if (remove_underscore && output_bfd) 
-  {
-    if (bfd_get_symbol_leading_char (output_bfd) == string[0])
-     string++;
-  }
-  /* Note that there's a memory leak here, we keep buying memory
-     for demangled names, and never free.  But if you have so many
-     errors that you run out of VM with the error messages, then
-     there's something up */
-  res = cplus_demangle (string, DMGL_ANSI|DMGL_PARAMS);
+
+  if (remove_underscore
+      && output_bfd != NULL
+      && bfd_get_symbol_leading_char (output_bfd) == string[0])
+    ++string;
+
+  /* This is a hack for better error reporting on XCOFF.  */
+  if (remove_underscore && string[0] == '.')
+    ++string;
+
+  /* Note that there's a memory leak here, we keep buying memory for
+     demangled names, and never free.  But if you have so many errors
+     that you run out of VM with the error messages, then there's
+     something up.  */
+  res = cplus_demangle (string, DMGL_ANSI | DMGL_PARAMS);
   return res ? res : string;
 }
 
 static void
-vfinfo(fp, fmt, arg)
+vfinfo (fp, fmt, arg)
      FILE *fp;
-     char *fmt;
+     const char *fmt;
      va_list arg;
 {
   boolean fatal = false;
@@ -360,39 +366,63 @@ vfinfo(fp, fmt, arg)
 
 /* Format info message and print on stdout. */
 
-/* (You would think this should be called just "info", but then you would
-   hosed by LynxOS, which defines that name in its libc.) */
+/* (You would think this should be called just "info", but then you
+   would hosed by LynxOS, which defines that name in its libc.)  */
 
-void info_msg(va_alist)
+void
+#if USE_STDARG
+info_msg (const char *fmt, ...)
+#else
+info_msg (va_alist)
      va_dcl
+#endif
 {
-  char *fmt;
   va_list arg;
-  va_start(arg);
-  fmt = va_arg(arg, char *);
-  vfinfo(stdout, fmt, arg);
-  va_end(arg);
+
+#if ! USE_STDARG
+  const char *fmt;
+
+  va_start (arg);
+  fmt = va_arg (arg, const char *);
+#else
+  va_start (arg, fmt);
+#endif
+
+  vfinfo (stdout, fmt, arg);
+  va_end (arg);
 }
 
 /* ('e' for error.) Format info message and print on stderr. */
 
-void einfo(va_alist)
+void
+#if USE_STDARG
+einfo (const char *fmt, ...)
+#else
+einfo (va_alist)
      va_dcl
+#endif
 {
-  char *fmt;
   va_list arg;
-  va_start(arg);
-  fmt = va_arg(arg, char *);
-  vfinfo(stderr, fmt, arg);
-  va_end(arg);
+
+#if ! USE_STDARG
+  const char *fmt;
+
+  va_start (arg);
+  fmt = va_arg (arg, const char *);
+#else
+  va_start (arg, fmt);
+#endif
+
+  vfinfo (stderr, fmt, arg);
+  va_end (arg);
 }
 
 void 
-info_assert(file, line)
-     char *file;
+info_assert (file, line)
+     const char *file;
      unsigned int line;
 {
-  einfo("%F%P: internal error %s %d\n", file,line);
+  einfo ("%F%P: internal error %s %d\n", file, line);
 }
 
 char *
@@ -405,54 +435,72 @@ buystring (x)
   return r;
 }
 
-
 /* ('m' for map) Format info message and print on map. */
 
-void minfo(va_alist)
+void
+#if USE_STDARG
+minfo (const char *fmt, ...)
+#else
+minfo (va_alist)
      va_dcl
+#endif
 {
-  char *fmt;
   va_list arg;
-  va_start(arg);
-  fmt = va_arg(arg, char *);
-  vfinfo(config.map_file, fmt, arg);
-  va_end(arg);
-}
 
-
-static void
-finfo (va_alist)
-     va_dcl
-{
-  char *fmt;
-  FILE *file;
-  va_list arg;
+#if ! USE_STDARG
+  const char *fmt;
   va_start (arg);
-  file = va_arg (arg, FILE *);
-  fmt = va_arg (arg, char *);
-  vfinfo (file, fmt, arg);
+  fmt = va_arg (arg, const char *);
+#else
+  va_start (arg, fmt);
+#endif
+
+  vfinfo (config.map_file, fmt, arg);
   va_end (arg);
 }
 
+static void
+#if USE_STDARG
+finfo (FILE *file, const char *fmt, ...)
+#else
+finfo (va_alist)
+     va_dcl
+#endif
+{
+  va_list arg;
 
+#if ! USE_STDARG
+  FILE *file;
+  const char *fmt;
 
-/*----------------------------------------------------------------------
-  Functions to print the link map 
- */
+  va_start (arg);
+  file = va_arg (arg, FILE *);
+  fmt = va_arg (arg, const char *);
+#else
+  va_start (arg, fmt);
+#endif
+
+  vfinfo (file, fmt, arg);
+  va_end (arg);
+}
+
+/* Functions to print the link map.  */
 
 void 
 print_space ()
 {
-  fprintf(config.map_file, " ");
+  fprintf (config.map_file, " ");
 }
+
 void 
 print_nl ()
 {
-  fprintf(config.map_file, "\n");
+  fprintf (config.map_file, "\n");
 }
+
 void 
 print_address (value)
      bfd_vma value;
 {
-  fprintf_vma(config.map_file, value);
+  fprintf_vma (config.map_file, value);
 }

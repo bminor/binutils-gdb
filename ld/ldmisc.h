@@ -1,5 +1,5 @@
 /* ldmisc.h -
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -15,24 +15,29 @@
 
    You should have received a copy of the GNU General Public License
    along with GLD; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef LDMISC_H
 #define LDMISC_H
 
+#ifdef ANSI_PROTOTYPES
+extern void einfo PARAMS ((const char *, ...));
+extern void minfo PARAMS ((const char *, ...));
+extern void info_msg PARAMS ((const char *, ...));
+#else
 /* VARARGS*/
 extern void einfo ();
 /* VARARGS*/
 extern void minfo ();
 /* VARARGS*/
 extern void info_msg ();
-extern void info_assert PARAMS ((char *, unsigned int));
-extern void multiple_warn PARAMS ((char *message1, asymbol *sym,
-				   char *message2, asymbol *sy));
-extern void yyerror PARAMS ((char *));
-extern char *concat PARAMS ((CONST char *, CONST char *, CONST char *));
-extern PTR ldmalloc PARAMS ((size_t));
-extern PTR ldrealloc PARAMS ((PTR, size_t));
+#endif
+
+extern void info_assert PARAMS ((const char *, unsigned int));
+extern void yyerror PARAMS ((const char *));
+extern PTR xmalloc PARAMS ((size_t));
+extern PTR xrealloc PARAMS ((PTR, size_t));
+extern void xexit PARAMS ((int));
 extern char *buystring PARAMS ((CONST char *CONST));
 
 #define ASSERT(x) \
