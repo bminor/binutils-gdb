@@ -1,3 +1,8 @@
+2005-03-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-linux-tdep.c (frv_linux_sigcontext_reg_addr): Update comments.
+	Adjust incorrectly computed constant for realtime signal frame.
+
 2005-03-18  Mark Kettenis  <kettenis@elgar.sibelius.xs4all.nl>
 
 	From Ralf Corsepius <ralf.corsepius@rtems.org>

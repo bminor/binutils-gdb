@@ -67,14 +67,14 @@ frv_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
   return retval;
 }
 
-/* Given NEXT_FRAME, "callee" frame of the sigtramp frame that we
+/* Given NEXT_FRAME, the "callee" frame of the sigtramp frame that we
    wish to decode, and REGNO, one of the frv register numbers defined
    in frv-tdep.h, return the address of the saved register (corresponding
    to REGNO) in the sigtramp frame.  Return -1 if the register is not
    found in the sigtramp frame.  The magic numbers in the code below
    were computed by examining the following kernel structs:
 
-   From arch/frvnommu/signal.c:
+   From arch/frv/kernel/signal.c:
 
       struct sigframe
       {
@@ -96,7 +96,7 @@ frv_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 	      uint32_t retcode[2];
       };
 
-   From include/asm-frvnommu/ucontext.h:
+   From include/asm-frv/ucontext.h:
 
       struct ucontext {
 	      unsigned long		uc_flags;
@@ -106,14 +106,22 @@ frv_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 	      sigset_t		uc_sigmask;
       };
 
-   From include/asm-frvnommu/sigcontext.h:
+   From include/asm-frv/signal.h:
+
+      typedef struct sigaltstack {
+	      void *ss_sp;
+	      int ss_flags;
+	      size_t ss_size;
+      } stack_t;
+
+   From include/asm-frv/sigcontext.h:
 
       struct sigcontext {
 	      struct user_context	sc_context;
 	      unsigned long		sc_oldmask;
       } __attribute__((aligned(8)));
 
-   From include/asm-frvnommu/registers.h:
+   From include/asm-frv/registers.h:
       struct user_int_regs
       {
 	      unsigned long		psr;
@@ -184,15 +192,19 @@ frv_linux_sigcontext_reg_addr (struct frame_info *next_frame, int regno,
       else if (tramp_type == RT_SIGTRAMP)
 	{
 	  /* For a realtime sigtramp frame, SP + 12 contains a pointer
-	     to the a ucontext struct.  The ucontext struct contains
-	     a sigcontext struct starting 12 bytes in.  */
+ 	     to the a ucontext struct.  The ucontext struct contains a
+ 	     sigcontext struct starting 24 bytes in.  (The offset of
+ 	     uc_mcontext within struct ucontext is derived as follows: 
+ 	     stack_t is a 12-byte struct and struct sigcontext is
+ 	     8-byte aligned.  This gives an offset of 8 + 12 + 4 (for
+ 	     padding) = 24.) */
 	  if (target_read_memory (sp + 12, buf, sizeof buf) != 0)
 	    {
 	      warning (_("Can't read realtime sigtramp frame."));
 	      return 0;
 	    }
 	  sc_addr = extract_unsigned_integer (buf, sizeof buf);
-	  sc_addr += 12;
+ 	  sc_addr += 24;
 	}
       else
 	internal_error (__FILE__, __LINE__, _("not a signal trampoline"));
