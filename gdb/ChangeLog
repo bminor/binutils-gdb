@@ -1,5 +1,7 @@
 2004-02-08  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c: Print both the register number and name.
+
 	* Makefile.in (init.c): Eliminate duplicates.  Combine two greps
 	and a sed into a single sed.  Make .c and .o patterns more robust.
 	(OBS): Delete.

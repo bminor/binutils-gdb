@@ -509,9 +509,10 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 
   if (frame_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "{ frame_register_unwind (frame=%d,regnum=\"%s\",...) ",
-			  frame->level, frame_map_regnum_to_name (frame, regnum));
+      fprintf_unfiltered (gdb_stdlog, "\
+{ frame_register_unwind (frame=%d,regnum=%d(%s),...) ",
+			  frame->level, regnum,
+			  frame_map_regnum_to_name (frame, regnum));
     }
 
   /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
