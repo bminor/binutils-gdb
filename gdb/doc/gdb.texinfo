@@ -3454,8 +3454,9 @@ program.  You can tell @value{GDBN} in advance what to do for each kind of
 signal.
 
 @cindex handling signals
-Normally, @value{GDBN} is set up to ignore non-erroneous signals like @code{SIGALRM}
-(so as not to interfere with their role in the functioning of your program)
+Normally, @value{GDBN} is set up to let the non-erroneous signals like
+@code{SIGALRM} be silently passed to your program
+(so as not to interfere with their role in the program's functioning)
 but to stop your program immediately whenever an error signal happens.
 You can change these settings with the @code{handle} command.
 
@@ -3473,7 +3474,7 @@ the defined types of signals.
 @item handle @var{signal} @var{keywords}@dots{}
 Change the way @value{GDBN} handles signal @var{signal}.  @var{signal}
 can be the number of a signal or its name (with or without the
-@samp{SIG} at the beginning); a list of signal numberss of the form
+@samp{SIG} at the beginning); a list of signal numbers of the form
 @samp{@var{low}-@var{high}}; or the word @samp{all}, meaning all the
 known signals.  The @var{keywords} say what change to make.
 @end table
@@ -3518,6 +3519,11 @@ effect for the signal in question @emph{at that time}.  In other words,
 after @value{GDBN} reports a signal, you can use the @code{handle}
 command with @code{pass} or @code{nopass} to control whether your
 program sees that signal when you continue.
+
+The default is set to @code{nostop}, @code{noprint}, @code{pass} for
+non-erroneous signals such as @code{SIGALRM}, @code{SIGWINCH} and
+@code{SIGCHLD}, and to @code{stop}, @code{print}, @code{pass} for the
+erroneous signals.
 
 You can also use the @code{signal} command to prevent your program from
 seeing a signal, or cause it to see a signal it normally would not see,

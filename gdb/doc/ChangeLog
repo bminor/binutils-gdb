@@ -1,3 +1,8 @@
+2001-06-13  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo (Signals): Clarify the default setting of signal
+	handling.
+
 2001-05-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (CLEAR_DEFERRED_STORES): Delete stray @item
