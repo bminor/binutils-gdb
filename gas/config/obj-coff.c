@@ -2943,7 +2943,9 @@ write_object_file ()
 
   H_SET_STRING_SIZE (&headers, string_byte_count);
 
-#if !defined(TC_H8300) && !defined(TC_Z8K)
+  /* @@ Try this unconditionally for now.  Let me know if you encounter
+     cases that don't work.  -- Ken  */
+#if 1 /* !defined(TC_H8300) && !defined(TC_Z8K) */
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
       fixup_mdeps (segment_info[i].frchainP->frch_root, &headers, i);

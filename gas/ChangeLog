@@ -1,3 +1,8 @@
+Tue Jan 10 13:34:14 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/obj-coff.c (write_object_file): Don't treat h8300 and z8k
+	specially with regard to fixups.
+
 Mon Jan  9 16:22:28 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-mips.c (RELAX_RELOC1, RELAX_RELOC2): Cast values to
