@@ -1347,7 +1347,7 @@ Show the version number of @code{ranlib}.
 size [ -A | -B | --format=@var{compatibility} ]
      [ --help ]  [ -d | -o | -x | --radix=@var{number} ]
      [ --target=@var{bfdname} ]  [ -V | --version ]  
-     @var{objfile}@dots{}
+     [ @var{objfile}@dots{} ]
 @end smallexample
 
 The @sc{gnu} @code{size} utility lists the section sizes---and the total
@@ -1356,6 +1356,7 @@ argument list.  By default, one line of output is generated for each
 object file or each module in an archive.
 
 @var{objfile}@dots{} are the object files to be examined.
+If none are specified, the file @code{a.out} will be used.
 
 The command line options have the following meanings:
 
