@@ -568,7 +568,7 @@ extern void hppa_pop_frame (void);
 #else /* defined PA_LEVEL_0 */
 
 /* This is the call dummy for a level 0 PA.  Level 0's don't have space
-   registers (or floating point??), so we skip all that inter-space call stuff,
+   registers (or floating point?), so we skip all that inter-space call stuff,
    and avoid touching the fp regs.
 
    call_dummy

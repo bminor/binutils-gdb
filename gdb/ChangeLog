@@ -1,3 +1,16 @@
+2001-05-11  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2001-03-26 Rodney Brown <RodneyBrown@mynd.com>
+	* config/pa/tm-hppa.h: Remove trigraph.
+	* hp-symtab-read.c (hpread_type_translate): Provide return value.
+	(hpread_read_struct_type): Remove trigraph. Add parameter in
+	`warning'.
+	(hpread_read_array_type): Provide return value.
+	(hpread_type_lookup): Avoid ambiguous `else'. Provide return
+	value.
+	* hppa-tdep.c (initialize_hp_cxx_exception_support): Remove
+	trigraph.
+
 2001-05-11  Jim Blandy  <jimb@redhat.com>
 
 	* mips-tdep.c (mips_store_return_value,

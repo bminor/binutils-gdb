@@ -530,7 +530,7 @@ hpread_type_translate (dnttpointer typep)
   if (!typep.dntti.immediate)
     {
       error ("error in hpread_type_translate\n.");
-      return;
+      return FT_VOID;
     }
 
   switch (typep.dntti.type)
@@ -1780,7 +1780,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      /* Enums -- will be handled by other code that takes care
 	         of DNTT_TYPE_ENUM; here we see only DNTT_TYPE_MEMENUM so
 	         it's not clear we could have handled them here at all. */
-	      /* FUNC_TEMPLATE: is handled by other code (??). */
+	      /* FUNC_TEMPLATE: is handled by other code (?). */
 	      /* MEMACCESS: modified access for inherited member. Not
 	         sure what to do with this, ignoriing it at present. */
 
@@ -1863,7 +1863,8 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	{
 	  /* neither field nor genfield ?? is this possible?? */
 	  /* pai:: FIXME walk to the next -- how? */
-	  warning ("Internal error: unexpected DNTT kind %d encountered as field of struct");
+	  warning ("Internal error: unexpected DNTT kind %d encountered as field of struct",
+		   fieldp->dblock.kind);
 	  warning ("Skipping remaining fields of struct");
 	  break;		/* get out of loop of fields */
 	}
@@ -2199,7 +2200,7 @@ hpread_read_array_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	(!dn_bufp->darray.arrayisbytes && !dn_bufp->darray.elemisbytes)))
     {
       warning ("error in hpread_array_type.\n");
-      return;
+      return NULL;
     }
   else if (dn_bufp->darray.arraylength == 0x7fffffff)
     {
@@ -2302,14 +2303,17 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 
   /* First see if it's a simple builtin type.  */
   if (hp_type.dntti.immediate)
-    /* If this is a template argument, the argument number is
-     * encoded in the bitlength. All other cases, just return
-     * GDB's representation of this fundamental type.
-     */
-    if (hp_type.dntti.type == HP_TYPE_TEMPLATE_ARG)
-      return hpread_get_nth_template_arg (objfile, hp_type.dntti.bitlength);
-    else
-      return lookup_fundamental_type (objfile, hpread_type_translate (hp_type));
+    {
+      /* If this is a template argument, the argument number is
+       * encoded in the bitlength. All other cases, just return
+       * GDB's representation of this fundamental type.
+       */
+      if (hp_type.dntti.type == HP_TYPE_TEMPLATE_ARG)
+	return hpread_get_nth_template_arg (objfile, hp_type.dntti.bitlength);
+      else
+	return lookup_fundamental_type (objfile,
+					hpread_type_translate (hp_type));
+    }
 
   /* Not a builtin type.  We'll have to read it in.  */
   if (hp_type.dnttp.index < LNTT_SYMCOUNT (objfile))
@@ -2425,7 +2429,7 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 	else
 	  {
 	    complain (&hpread_type_lookup_complaint);
-	    return;
+	    return NULL;
 	  }
 
 	if (dn_bufp->dblock.kind == DNTT_TYPE_STRUCT)
