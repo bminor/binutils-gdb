@@ -11,7 +11,7 @@ AC_ISC_POSIX
 # library.  For user convenience, we always use the same version
 # number that BFD is using.
 changequote(,)dnl
-BFD_VERSION=`grep INIT_AUTOMAKE ${srcdir}/../bfd/configure.in | sed -n -e 's/[ 	]//g' -e 's/^.*,\(.*\)).*$/\1/p'`
+BFD_VERSION=`sed -n -e 's/^.._INIT_AUTOMAKE.*,[ 	]*\([^ 	]*\)[ 	]*).*/\1/p' < ${srcdir}/../bfd/configure.in`
 changequote([,])dnl
 
 AM_INIT_AUTOMAKE(opcodes, ${BFD_VERSION})

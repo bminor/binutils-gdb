@@ -1,3 +1,12 @@
+2001-02-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* configure.in (BFD_VERSION): New.
+	(AM_INIT_AUTOMAKE): Use $BFD_VERSION.
+	* configure: Regenerate.
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2001-02-26  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* config/obj-coff.c [BFD_ASSEMBLER] (obj_coff_section): Set

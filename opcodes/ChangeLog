@@ -1,3 +1,10 @@
+2001-02-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* configure.in (BFD_VERSION): Do without grep.
+	* configure: Regenerate.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2001-02-23  David Mosberger  <davidm@hpl.hp.com>
 
 	* ia64-opc-a.c: Add missing pseudo-ops for "cmp" and "cmp4".

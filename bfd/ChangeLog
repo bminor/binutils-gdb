@@ -1,3 +1,14 @@
+2001-02-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* configure.in: Bump version to 2.11.90.
+	* configure: Regenerate.
+	* Makefile.am (CFILES): Rename to SOURCE_CFILES.
+	(CFILES): $SOURCE_CFILES + generated C files.
+	(POTFILES): Include $HFILES not $SOURCE_HFILES.
+	Run "make dep-am"
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: This too.
+
 2001-02-26  Timothy Wall  <twall@cygnus.com>
 
 	* elfxx-ia64.c (elfNN_ia64_aix_add_symbol_hook): Remove obsolete
