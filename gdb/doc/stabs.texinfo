@@ -1565,7 +1565,7 @@ subrange of, a semicolon, an integral lower bound, a semicolon, an
 integral upper bound, and a semicolon.  The AIX documentation does not
 specify the trailing semicolon, in an effort to specify array indexes
 more cleanly, but a subrange which is not an array index has always
-included a trailing semicolong (@pxref{Arrays}).
+included a trailing semicolon (@pxref{Arrays}).
 
 Instead of an integer, either bound can be one of the following:
 
@@ -1820,7 +1820,7 @@ To give a type a name, use the @samp{t} symbol descriptor.  For example,
 specifies that @code{s_typedef} refers to type number 16.  Such stabs
 have symbol type @code{N_LSYM} or @code{C_DECL}.
 
-If instead, you are giving a name to a tag for a structure, union, or
+If instead, you are specifying the tag name for a structure, union, or
 enumeration, use the @samp{T} symbol descriptor instead.  I believe C is
 the only language with this feature.
 
@@ -2946,29 +2946,34 @@ dec    hex      name      source program feature
 @appendix Table B: Symbol types from assembler and linker
 
 Table B shows the types of symbol table entries that hold assembler
-and linker symbols.  
-
-The #define names for these n_types values are defined in
-/include/aout/aout64.h
+and linker symbols.  Since this document does not attempt to describe
+aspects of object file format other than the debugging format, no
+details are given.
 
 @smallexample
-dec     hex     #define
-n_type  n_type  name      used to describe
-------------------------------------------
-1       0x0     N_UNDF    undefined symbol
-2       0x2     N_ABS     absolute symbol -- defined at a particular address
-3       0x3             extern " (vs. file scope)
-4       0x4     N_TEXT    text symbol -- defined at offset in text segment
-5       0x5             extern " (vs. file scope)
-6       0x6     N_DATA    data symbol -- defined at offset in data segment
-7       0x7             extern " (vs. file scope)
-8       0x8     N_BSS     BSS symbol -- defined at offset in zero'd segment
-9                       extern " (vs. file scope)
+hex     symbolic
+n_type  name             used to describe
+----------------------------------
+0x0     N_UNDF           undefined symbol
+0x2     N_ABS            file scope absolute symbol
+0x3     N_ABS | N_EXT    external absolute symbol
+0x4     N_TEXT           file scope text symbol
+0x5     N_TEXT | N_EXT   external text symbol
+0x6     N_DATA           file scope data symbol
+0x7     N_DATA | N_EXT   external data symbol
+0x8     N_BSS            file scope BSS symbol
+0x9     N_BSS | N_EXT    external BSS symbol
 
-12      0x0C    N_FN_SEQ  func name for Sequent compilers (stab exception)
-
-49      0x12    N_COMM    common sym -- visable after shared lib dynamic link
-31      0x1f    N_FN      file name of a .o file
+0x0c    N_FN_SEQ         Same as N_FN, for Sequent compilers
+0x0a	N_INDR	         Symbol is indirected to another symbol
+0x12    N_COMM           common sym -- visable after shared lib dynamic link
+0x14	N_SETA	         Absolute set element
+0x16	N_SETT	         Text segment set element
+0x18	N_SETD	         Data segment set element
+0x1a	N_SETB	         BSS segment set element
+0x1c	N_SETV	         Pointer to set vector
+0x1e	N_WARNING        Print a warning message during linking
+0x1f    N_FN             file name of a .o file
 @end smallexample
 
 @node Symbol Descriptors
@@ -2976,7 +2981,11 @@ n_type  n_type  name      used to describe
 
 @c Please keep this alphabetical
 @table @code
-@item @var{(digit)}
+@c In TeX, this looks great, digit is in italics.  But makeinfo insists
+@c on putting it in `', not realizing that @var should override @code.
+@c I don't know of any way to make makeinfo do the right thing.  Seems
+@c like a makeinfo bug to me.
+@item @var{digit}
 @itemx (
 @itemx -
 Local variable, @xref{Automatic variables}.
