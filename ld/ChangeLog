@@ -1,3 +1,7 @@
+Thu Oct 13 14:16:27 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* configure.in (all_targets): Handle i386-linux*.
+
 Thu Oct 13 11:24:33 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* scripttempl/aout.sc: Set _etext and __etext to ., not
