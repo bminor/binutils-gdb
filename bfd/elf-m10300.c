@@ -250,6 +250,22 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
 	 false),		/* pcrel_offset */
+
+  /* Standard 24 bit reloc.  */
+  HOWTO (R_MN10300_24,
+	 0,
+	 2,
+	 24,
+	 false,
+	 0,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_MN10300_24",
+	 false,
+	 0xffffff,
+	 0xffffff,
+	 false),
+
 };
 
 struct mn10300_reloc_map
@@ -267,6 +283,7 @@ static const struct mn10300_reloc_map mn10300_reloc_map[] =
   { BFD_RELOC_32_PCREL, R_MN10300_PCREL32, },
   { BFD_RELOC_16_PCREL, R_MN10300_PCREL16, },
   { BFD_RELOC_8_PCREL, R_MN10300_PCREL8, },
+  { BFD_RELOC_24, R_MN10300_24, },
   { BFD_RELOC_VTABLE_INHERIT, R_MN10300_GNU_VTINHERIT },
   { BFD_RELOC_VTABLE_ENTRY, R_MN10300_GNU_VTENTRY },
 };
@@ -435,6 +452,17 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
     case R_MN10300_32:
       value += addend;
       bfd_put_32 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_MN10300_24:
+      value += addend;
+
+      if ((long)value > 0x7fffff || (long)value < -0x800000)
+	return bfd_reloc_overflow;
+
+      bfd_put_8 (input_bfd, value & 0xff, hit_data);
+      bfd_put_8 (input_bfd, (value >> 8) & 0xff, hit_data + 1);
+      bfd_put_8 (input_bfd, (value >> 16) & 0xff, hit_data + 2);
       return bfd_reloc_ok;
 
     case R_MN10300_16:
@@ -1861,12 +1889,151 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  *again = true;
 	}
 
+      /* start-sanitize-am33 */
+      /* Try to turn a 24 immediate, displacement or absolute address
+	 into a 8 immediate, displacement or absolute address.  */
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_24)
+	{
+	  bfd_vma value = symval;
+	  value += irel->r_addend;
+
+	  /* See if the value will fit in 8 bits.
+	  if ((long)value < 0x7f && (long)value > -0x80)
+	    {
+	      unsigned char code;
+
+	      /* AM33 insns which have 24 operands are 6 bytes long and
+		 will have 0xfd as the first byte.  */
+
+	      /* Get the first opcode.  */
+	      code = bfd_get_8 (abfd, contents + irel->r_offset - 3);
+
+	      if (code == 0xfd)
+		{
+	          /* Get the second opcode.  */
+	          code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
+
+	          if ((code & 0x0f) == 0x09 || (code & 0x0f) == 0x08
+		      || (code & 0x0f) == 0x0a || (code & 0x0f) == 0x0b
+		      || (code & 0x0f) == 0x0e)
+		    {
+		      /* Not safe if the high bit is on as relaxing may
+		         move the value out of high mem and thus not fit
+		         in a signed 8bit value.  This is currently over
+		         conservative.  */
+		      if ((value & 0x80) == 0)
+			{
+			  /* Note that we've changed the relocation contents,
+			     etc.  */
+			  elf_section_data (sec)->relocs = internal_relocs;
+			  free_relocs = NULL;
+
+			  elf_section_data (sec)->this_hdr.contents = contents;
+			  free_contents = NULL;
+
+			  symtab_hdr->contents = (bfd_byte *) extsyms;
+			  free_extsyms = NULL;
+
+			  /* Fix the opcode.  */
+			  bfd_put_8 (abfd, 0xfb, contents + irel->r_offset - 3);
+			  bfd_put_8 (abfd, code, contents + irel->r_offset - 2);
+
+			  /* Fix the relocation's type.  */
+			  irel->r_info
+			    = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						         R_MN10300_8);
+
+			  /* Delete two bytes of data.  */
+			  if (!mn10300_elf_relax_delete_bytes (abfd, sec,
+							       irel->r_offset + 3, 2))
+			    goto error_return;
+
+			  /* That will change things, so, we should relax
+			     again.  Note that this is not required, and it
+			      may be slow.  */
+			  *again = true;
+			  break;
+			}
+		    }
+
+		}
+	    }
+	}
+      /* end-sanitize-am33 */
+
       /* Try to turn a 32bit immediate, displacement or absolute address
 	 into a 16bit immediate, displacement or absolute address.  */
       if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_32)
 	{
 	  bfd_vma value = symval;
 	  value += irel->r_addend;
+
+	  /* start-sanitize-am33 */
+	  /* See if the value will fit in 24 bits.
+	     We allow any 16bit match here.  We prune those we can't
+	     handle below.  */
+	  if ((long)value < 0x7fffff && (long)value > -0x800000)
+	    {
+	      unsigned char code;
+
+	      /* AM33 insns which have 32bit operands are 7 bytes long and
+		 will have 0xfe as the first byte.  */
+
+	      /* Get the first opcode.  */
+	      code = bfd_get_8 (abfd, contents + irel->r_offset - 3);
+
+	      if (code == 0xfe)
+		{
+	          /* Get the second opcode.  */
+	          code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
+
+		  /* All the am33 32 -> 24 relaxing possibilities.  */
+	          if ((code & 0x0f) == 0x09 || (code & 0x0f) == 0x08
+		      || (code & 0x0f) == 0x0a || (code & 0x0f) == 0x0b
+		      || (code & 0x0f) == 0x0e)
+		    {
+		      /* Not safe if the high bit is on as relaxing may
+		         move the value out of high mem and thus not fit
+		         in a signed 16bit value.  This is currently over
+		         conservative.  */
+		      if ((value & 0x8000) == 0)
+			{
+			  /* Note that we've changed the relocation contents,
+			     etc.  */
+			  elf_section_data (sec)->relocs = internal_relocs;
+			  free_relocs = NULL;
+
+			  elf_section_data (sec)->this_hdr.contents = contents;
+			  free_contents = NULL;
+
+			  symtab_hdr->contents = (bfd_byte *) extsyms;
+			  free_extsyms = NULL;
+
+			  /* Fix the opcode.  */
+			  bfd_put_8 (abfd, 0xfd, contents + irel->r_offset - 3);
+			  bfd_put_8 (abfd, code, contents + irel->r_offset - 2);
+
+			  /* Fix the relocation's type.  */
+			  irel->r_info
+			    = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						         R_MN10300_24);
+
+			  /* Delete one byte of data.  */
+			  if (!mn10300_elf_relax_delete_bytes (abfd, sec,
+							       irel->r_offset + 3, 1))
+			    goto error_return;
+
+			  /* That will change things, so, we should relax
+			     again.  Note that this is not required, and it
+			      may be slow.  */
+			  *again = true;
+			  break;
+			}
+		    }
+
+		}
+	    }
+	  /* end-sanitize-am33 */
 
 	  /* See if the value will fit in 16 bits.
 	     We allow any 16bit match here.  We prune those we can't
