@@ -67,6 +67,8 @@ AS = @AS@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
 DATADIRNAME = @DATADIRNAME@
 DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
@@ -86,10 +88,12 @@ MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
 OBJDUMP = @OBJDUMP@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+STRIP = @STRIP@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
@@ -151,10 +155,13 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I.
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-gprof_OBJECTS =  basic_blocks.o call_graph.o cg_arcs.o cg_dfn.o \
-cg_print.o corefile.o gmon_io.o gprof.o hertz.o hist.o source.o \
-search_list.o symtab.o sym_ids.o utils.o i386.o alpha.o vax.o tahoe.o \
-sparc.o flat_bl.o bsd_callg_bl.o fsf_callg_bl.o
+gprof_OBJECTS =  basic_blocks.$(OBJEXT) call_graph.$(OBJEXT) \
+cg_arcs.$(OBJEXT) cg_dfn.$(OBJEXT) cg_print.$(OBJEXT) \
+corefile.$(OBJEXT) gmon_io.$(OBJEXT) gprof.$(OBJEXT) hertz.$(OBJEXT) \
+hist.$(OBJEXT) source.$(OBJEXT) search_list.$(OBJEXT) symtab.$(OBJEXT) \
+sym_ids.$(OBJEXT) utils.$(OBJEXT) i386.$(OBJEXT) alpha.$(OBJEXT) \
+vax.$(OBJEXT) tahoe.$(OBJEXT) sparc.$(OBJEXT) flat_bl.$(OBJEXT) \
+bsd_callg_bl.$(OBJEXT) fsf_callg_bl.$(OBJEXT)
 gprof_LDFLAGS = 
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -173,19 +180,19 @@ NROFF = nroff
 HEADERS =  $(noinst_HEADERS)
 
 DIST_COMMON =  ./stamp-h.in ChangeLog Makefile.am Makefile.in TODO \
-aclocal.m4 configure configure.in gconfig.in
+acinclude.m4 aclocal.m4 configure configure.in gconfig.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(gprof_SOURCES)
 OBJECTS = $(gprof_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .dvi .info .lo .m .o .ps .s .texi .texinfo .txi
+.SUFFIXES: .S .c .dvi .info .lo .m .o .obj .ps .s .texi .texinfo .txi
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
 
@@ -193,7 +200,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
-$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ configure.in 
+$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ configure.in  acinclude.m4
 	cd $(srcdir) && $(ACLOCAL)
 
 config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
@@ -257,6 +264,11 @@ uninstall-binPROGRAMS:
 .c.o:
 	$(COMPILE) -c $<
 
+# FIXME: We should only use cygpath when building on Windows,
+# and only if it is available.
+.c.obj:
+	$(COMPILE) -c `cygpath -w $<`
+
 .s.o:
 	$(COMPILE) -c $<
 
@@ -265,6 +277,7 @@ uninstall-binPROGRAMS:
 
 mostlyclean-compile:
 	-rm -f *.o core *.core
+	-rm -f *.$(OBJEXT)
 
 clean-compile:
 

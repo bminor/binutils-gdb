@@ -1,3 +1,12 @@
+2000-09-02  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Increase version number to 2.10.91.
+	* NEWS: Mention new ability to support removal of duplicate DWARF2
+	debug information.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+
 2000-09-02  Daniel Berlin <dberlin@redhat.com>
 
 	* scripttempl/elf.sc: Add .gnu.linkonce.wi.* to .debug_info

@@ -1,3 +1,12 @@
+2000-09-02  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Increase version number to 2.10.91.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* po/gas.pot: Regenerate.
+	* Makefile.in: Regenerate.
+	
 2000-09-01  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.h [OBJ_ELF] (TC_FIX_ADJUSTABLE): Define.

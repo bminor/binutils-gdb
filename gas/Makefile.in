@@ -69,6 +69,8 @@ BFDLIB = @BFDLIB@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
 DATADIRNAME = @DATADIRNAME@
 DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
@@ -89,11 +91,13 @@ MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
 OBJDUMP = @OBJDUMP@
+OBJEXT = @OBJEXT@
 OPCODES_LIB = @OPCODES_LIB@
 PACKAGE = @PACKAGE@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+STRIP = @STRIP@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
@@ -1860,17 +1864,22 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I.
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-itbl_test_OBJECTS =  itbl-parse.o itbl-lex.o
+itbl_test_OBJECTS =  itbl-parse.$(OBJEXT) itbl-lex.$(OBJEXT)
 itbl_test_DEPENDENCIES =  itbl-tops.o itbl-test.o \
 ../libiberty/libiberty.a
 itbl_test_LDFLAGS = 
-as_new_OBJECTS =  app.o as.o atof-generic.o bignum-copy.o cond.o \
-depend.o dwarf2dbg.o ecoff.o ehopt.o expr.o flonum-copy.o \
-flonum-konst.o flonum-mult.o frags.o hash.o input-file.o input-scrub.o \
-listing.o literal.o macro.o messages.o output-file.o read.o sb.o \
-stabs.o subsegs.o symbols.o write.o
+as_new_OBJECTS =  app.$(OBJEXT) as.$(OBJEXT) atof-generic.$(OBJEXT) \
+bignum-copy.$(OBJEXT) cond.$(OBJEXT) depend.$(OBJEXT) \
+dwarf2dbg.$(OBJEXT) ecoff.$(OBJEXT) ehopt.$(OBJEXT) expr.$(OBJEXT) \
+flonum-copy.$(OBJEXT) flonum-konst.$(OBJEXT) flonum-mult.$(OBJEXT) \
+frags.$(OBJEXT) hash.$(OBJEXT) input-file.$(OBJEXT) \
+input-scrub.$(OBJEXT) listing.$(OBJEXT) literal.$(OBJEXT) \
+macro.$(OBJEXT) messages.$(OBJEXT) output-file.$(OBJEXT) read.$(OBJEXT) \
+sb.$(OBJEXT) stabs.$(OBJEXT) subsegs.$(OBJEXT) symbols.$(OBJEXT) \
+write.$(OBJEXT)
 as_new_LDFLAGS = 
-gasp_new_OBJECTS =  gasp.o macro.o sb.o hash.o
+gasp_new_OBJECTS =  gasp.$(OBJEXT) macro.$(OBJEXT) sb.$(OBJEXT) \
+hash.$(OBJEXT)
 gasp_new_LDFLAGS = 
 SCRIPTS =  $(noinst_SCRIPTS)
 
@@ -1896,7 +1905,7 @@ OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS) $(gasp_new_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .l .lo .o .s .y
+.SUFFIXES: .S .c .l .lo .o .obj .s .y
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
 
@@ -1954,6 +1963,11 @@ maintainer-clean-noinstPROGRAMS:
 .c.o:
 	$(COMPILE) -c $<
 
+# FIXME: We should only use cygpath when building on Windows,
+# and only if it is available.
+.c.obj:
+	$(COMPILE) -c `cygpath -w $<`
+
 .s.o:
 	$(COMPILE) -c $<
 
@@ -1962,6 +1976,7 @@ maintainer-clean-noinstPROGRAMS:
 
 mostlyclean-compile:
 	-rm -f *.o core *.core
+	-rm -f *.$(OBJEXT)
 
 clean-compile:
 

@@ -1,4 +1,9 @@
 -*- text -*-
+* Support added for eliminating duplicate DWARF2 debug information by
+  having the compiler generate the information in sections called
+  .gnu.linkonce.wi.XXXX where XXXX is a checksum for the contents.  The
+  linker then merges these sections together into the normal .debug_info
+  section.
 
 * The native ELF linker now searches the directories in DT_RUNPATH or
   DT_RPATH of a shared library for shared libraries needed by it.

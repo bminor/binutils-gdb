@@ -871,7 +871,7 @@ fi
 
 PACKAGE=gas
 
-VERSION=2.10.90
+VERSION=2.10.91
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }

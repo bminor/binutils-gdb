@@ -1,3 +1,11 @@
+2000-09-02  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Increase version number to 2.10.91.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+	
 2000-09-02  Daniel Berlin <dberlin@redhat.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Add
