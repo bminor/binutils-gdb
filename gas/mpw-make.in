@@ -1,0 +1,95 @@
+# Makefile fragment for GAS.
+
+s = "{srcdir}"
+
+o = :
+
+C = C -d MPW_C
+
+CROSS = -d CROSS_COMPILE
+
+CFLAGS = -mc68020 -mc68881 -model far {CROSS} -d MPW -d TARGET_BYTES_BIG_ENDIAN -d BFD_ASSEMBLER -i "{topsrcdir}"include: -i "{topsrcdir}"bfd:,"{srcdir}",::bfd:
+# debug options: -mbg on -sym on
+
+"{o}" Ä : "{s}"
+
+# Default rule that puts each file into separate segment.
+
+.c.o  Ä .c
+   {C}  {DepDir}{Default}.c {CFLAGS} {SymOptions} -s gas-{Default} -o {TargDir}{Default}.c.o
+
+OBJECTS = ¶
+		"{o}"app.c.o ¶
+		"{o}"as.c.o ¶
+		"{o}"atof-generic.c.o ¶
+		"{o}"bignum-copy.c.o ¶
+		"{o}"cond.c.o ¶
+		"{o}"expr.c.o ¶
+		"{o}"flonum-konst.c.o ¶
+		"{o}"flonum-copy.c.o ¶
+		"{o}"flonum-mult.c.o ¶
+		"{o}"frags.c.o ¶
+		"{o}"hash.c.o ¶
+		"{o}"hex-value.c.o ¶
+		"{o}"input-file.c.o ¶
+		"{o}"input-scrub.c.o ¶
+		"{o}"listing.c.o ¶
+		"{o}"messages.c.o ¶
+		"{o}"output-file.c.o ¶
+		"{o}"read.c.o ¶
+		"{o}"stabs.c.o ¶
+		"{o}"subsegs.c.o ¶
+		"{o}"symbols.c.o ¶
+		"{o}"write.c.o ¶
+		"{o}"ecoff.c.o ¶
+		"{o}"xmalloc.c.o ¶
+
+INCLUDES =
+# host.h
+#"{s}".h
+
+all Ä as.new
+
+as.new ÄÄ {OBJECTS} "{o}"obj-format.c.o "{o}"targ-cpu.c.o "{o}"atof-targ.c.o ¶
+		::libiberty:libiberty.o ¶
+		::bfd:libbfd.o ¶
+		::opcodes:libopcodes.o
+	Link -d -model far -c 'MPS ' -t MPST ¶
+		{OBJECTS} ¶
+		"{o}"obj-format.c.o "{o}"targ-cpu.c.o "{o}"atof-targ.c.o ¶
+		::libiberty:libiberty.o ¶
+		::bfd:libbfd.o ¶
+		::opcodes:libopcodes.o ¶
+		#"{CLibraries}"CSANELib.o ¶
+		#"{CLibraries}"Math.o ¶
+		#"{CLibraries}"Complex.o ¶
+		"{CLibraries}"StdClib.o ¶
+		"{Libraries}"Stubs.o ¶
+		"{Libraries}"Runtime.o ¶
+		"{Libraries}"Interface.o ¶
+		#"{Libraries}"ToolLibs.o ¶
+		-o as.new
+
+"{o}"app.c.o Ä "{s}"app.c {INCLUDES}
+"{o}"as.c.o Ä "{s}"as.c {INCLUDES}
+"{o}"atof-generic.c.o Ä "{s}"atof-generic.c {INCLUDES}
+"{o}"bifnum-copy.c.o Ä "{s}"bignum-copy.c {INCLUDES}
+"{o}"cond.c.o Ä "{s}"cond.c {INCLUDES}
+"{o}"expr.c.o Ä "{s}"expr.c {INCLUDES}
+"{o}"flonum-konst.c.o Ä "{s}"flonum-konst.c {INCLUDES}
+"{o}"flonum-copy.c.o Ä "{s}"flonum-copy.c {INCLUDES}
+"{o}"flonum-mult.c.o Ä "{s}"flonum-mult.c {INCLUDES}
+"{o}"frags.c.o Ä "{s}"frags.c {INCLUDES}
+"{o}"hash.c.o Ä "{s}"hash.c {INCLUDES}
+"{o}"hex-value.c.o Ä "{s}"hex-value.c {INCLUDES}
+"{o}"input-file.c.o Ä "{s}"input-file.c {INCLUDES}
+"{o}"input-scrub.c.o Ä "{s}"input-scrub.c {INCLUDES}
+"{o}"listing.c.o Ä "{s}"listing.c {INCLUDES}
+"{o}"messages.c.o Ä "{s}"messages.c {INCLUDES}
+"{o}"output-file.c.o Ä "{s}"output-file.c {INCLUDES}
+"{o}"read.c.o Ä "{s}"read.c {INCLUDES}
+"{o}"subsegs.c.o Ä "{s}"subsegs.c {INCLUDES}
+"{o}"symbols.c.o Ä "{s}"symbols.c {INCLUDES}
+"{o}"write.c.o Ä "{s}"write.c {INCLUDES}
+"{o}"ecoff.c.o Ä "{s}"ecoff.c {INCLUDES}
+"{o}"xmalloc.c.o Ä "{s}"xmalloc.c {INCLUDES}

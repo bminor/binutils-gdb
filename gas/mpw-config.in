@@ -1,0 +1,18 @@
+# Configuration fragment for GAS.
+
+DupIfChange {srcdir}config:ho-mpw.h host.h 
+
+echo '/* empty */' >'sys/file.h'
+echo '/* empty */' >'sys/resource.h'
+echo '/* empty */' >'sys/stat.h'
+echo '#include <time.h>' >'sys/time.h'
+echo '#include <types.h>' >'sys/types.h'
+
+Echo "#ifndef __va_list__" >varargs.h
+Echo "#define __va_list__" >>varargs.h
+Echo "typedef char *va_list;" >>varargs.h
+Echo "#endif" >>varargs.h
+Echo "#define va_dcl int va_alist;" >>varargs.h
+Echo "#define va_start(list) list = (char *) &va_alist" >>varargs.h
+Echo "#define va_end(list)" >>varargs.h
+Echo "#define va_arg(list,mode) ((mode *)(list += sizeof(mode)))[-1]" >>varargs.h

@@ -1,0 +1,31 @@
+# Extra configuration fragment for GAS.
+
+DupIfChange {srcdir}config:atof-ieee.c atof-targ.c
+DupIfChange {srcdir}config:obj-ecoff.c obj-format.c
+DupIfChange {srcdir}config:obj-ecoff.h obj-format.h
+DupIfChange {srcdir}config:tc-mips.c targ-cpu.c
+DupIfChange {srcdir}config:tc-mips.h targ-cpu.h
+DupIfChange {srcdir}config:te-generic.h targ-env.h
+
+echo '#include ":aout:stab.def"' >'aout/stab.def'
+echo '#include ":aout:stab_gnu.h"' >'aout/stab_gnu.h'
+echo '#include ":coff:ecoff.h"' >'coff/ecoff.h'
+echo '#include ":coff:internal.h"' >'coff/internal.h'
+echo '#include ":coff:mips.h"' >'coff/mips.h'
+echo '#include ":coff:sym.h"' >'coff/sym.h'
+echo '#include ":coff:symconst.h"' >'coff/symconst.h'
+echo '#include "libcoff.h"' >'bfd/libcoff.h'
+echo '#include "libecoff.h"' >'bfd/libecoff.h'
+
+echo '#include ":opcode:mips.h"' >'opcode/mips.h'
+
+echo '#define TARGET_CPU "mips"' >config.new
+echo '#define TARGET_ALIAS "mips-idt-ecoff"' >>config.new
+echo '#define TARGET_CANONICAL "mips-idt-ecoff"' >>config.new
+echo '#define GAS_VERSION "cygnus-2.2.1"' >>config.new
+
+DupIfChange config.new config.h
+
+Delete -i config.new
+
+
