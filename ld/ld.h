@@ -91,14 +91,6 @@ typedef struct user_section_struct {
 #define LONG_SIZE	(4)
 #define QUAD_SIZE	(8)
 
-/* ALIGN macro changed to ALIGN_N to avoid	*/
-/* conflict in /usr/include/machine/machparam.h */
-/* WARNING: If THIS is a 64 bit address and BOUNDARY is a 32 bit int,
-   you must coerce boundary to the same type as THIS.
-   ??? Is there a portable way to avoid this.  */
-#define ALIGN_N(this, boundary) \
-  ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
-
 typedef struct {
   /* 1 => assign space to common symbols even if `relocatable_output'.  */
   boolean force_common_definition;

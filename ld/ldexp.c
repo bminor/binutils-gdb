@@ -350,7 +350,7 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 		{
 		  bfd_vma maxpage = result.value;
 
-		  result.value = ALIGN_N (dot, maxpage);
+		  result.value = align_n (dot, maxpage);
 		  if (exp_data_seg.phase != exp_dataseg_adjust)
 		    {
 		      result.value += dot & (maxpage - 1);
@@ -593,14 +593,14 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	    {
 	    case ALIGN_K:
 	      if (allocation_done != lang_first_phase_enum)
-		result = new_rel_from_section (ALIGN_N (dot, result.value),
+		result = new_rel_from_section (align_n (dot, result.value),
 					       current_section);
 	      else
 		result.valid_p = false;
 	      break;
 
 	    case ABSOLUTE:
-	      if (allocation_done != lang_first_phase_enum && result.valid_p)
+	      if (allocation_done != lang_first_phase_enum)
 		{
 		  result.value += result.section->bfd_section->vma;
 		  result.section = abs_output_section;
@@ -629,7 +629,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	      if (allocation_done == lang_allocating_phase_enum)
 		{
 		  make_abs (&result);
-		  result.value = ALIGN_N (dot, result.value);
+		  result.value = align_n (dot, result.value);
 		}
 	      else
 		result.valid_p = false;
@@ -1126,4 +1126,15 @@ exp_get_abs_int (tree, def, name, allocation_done)
     einfo (_("%F%S non constant expression for %s\n"), name);
 
   return res.value;
+}
+
+bfd_vma align_n (value, align)
+     bfd_vma value;
+     bfd_vma align;
+{
+  if (align <= 1)
+    return value;
+
+  value = (value + align - 1) / align;
+  return value * align;
 }
