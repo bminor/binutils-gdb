@@ -78,6 +78,12 @@ Clean up comments; lots of 'em are one previous maintainer griping about
 another previous maintainer, unrelated to the code.  (And with no names,
 they're not so fun to read. :-)
 
+For sparc: "call 0" becomes "jmpl %g0,%l7", and similarly for absolute
+addresses in -4096...4095.  (Solaris assembler does this.  No
+relocation required, no absolute symbol needed.)  For addresses
+outside the range, for COFF, keep generating an absolute symbol to use
+for relocs.
+
 Get Steve to document H8/500 stuff (and others).
 
 Improve test suite.  Incorporate more reported net bugs, and non-confidential
