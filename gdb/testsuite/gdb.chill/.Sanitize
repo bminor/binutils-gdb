@@ -24,6 +24,8 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
+callch.ch
+callch.exp
 chexp.exp
 chillvars.ch
 chillvars.exp
