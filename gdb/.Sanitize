@@ -834,6 +834,42 @@ else
 	done
 fi
 
+# This is a temporary measure to sanitize out references to the
+# startup code need by the TclPro debugger.  When that goes out
+# of alpha, we can remove this.
+
+if ( echo $* | grep keep\-tclpro > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-tclpro $i > /dev/null) ; then
+			echo Keeping \"tclpro\" stuff in $i, but editing out sanitize lines...
+			cp $i new
+			sed -e '/start\-sanitize\-tclpro/d' -e '/end\-sanitize\-tclpro/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				echo Caching $i in .Recover...
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-tclpro $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"tclpro\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-tclpro/,/end-\sanitize\-tclpro/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 if ( echo $* | grep keep\-mswin > /dev/null ) ; then
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-mswin $i > /dev/null) ; then

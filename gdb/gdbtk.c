@@ -1338,17 +1338,16 @@ call_obj_wrapper (clientData, interp, objc, objv)
 
       running_now = 0;
       Tcl_Eval (interp, "gdbtk_tcl_idle");
-
-
-      /* if the error message is in RESULT instead of ERROR_STRING we copy it
-         back to ERROR_STRING and free RESULT */
-
-      if ((Tcl_DStringLength (&error_string) == 0) && (Tcl_DStringLength (&result) > 0))
-        {
-          Tcl_DStringAppend (&error_string, Tcl_DStringValue (&result), Tcl_DStringLength (&result));
-          Tcl_DStringFree (&result);
-        }
-
+       /* if the error message is in RESULT instead of ERROR_STRING we copy it
+          back to ERROR_STRING and free RESULT */
+ 
+       if ((Tcl_DStringLength (&error_string) == 0) &&
+	   (Tcl_DStringLength (&result) > 0))
+         {
+           Tcl_DStringAppend (&error_string, Tcl_DStringValue (&result),
+			      Tcl_DStringLength (&result));
+           Tcl_DStringFree (&result);
+         }
     }
   
   /* do not suppress any errors -- a remote target could have errored */
@@ -2454,8 +2453,27 @@ gdbtk_find_main";
 
   fputs_unfiltered_hook = gdbtk_fputs;
 
-  if (Tcl_EvalFile (interp, gdbtk_file) != TCL_OK)
-    {
+/* start-sanitize-tclpro */
+#ifdef TCLPRO_DEBUGGER
+  {
+    Tcl_DString source_cmd;
+
+    Tcl_DStringInit (&source_cmd);
+    Tcl_DStringAppend (&source_cmd,
+		      "if {[info exists env(TCLPRO_DEBUG_DIR)]} {source [file join $env(TCLPRO_DEBUG_DIR) src loader.tcl];", -1);
+    Tcl_DStringAppend (&source_cmd, "debugger_init; debugger_eval {source {", -1);
+    Tcl_DStringAppend (&source_cmd, gdbtk_file, -1);
+    Tcl_DStringAppend (&source_cmd, "}}} else {source {", -1);
+    Tcl_DStringAppend (&source_cmd, gdbtk_file, -1);
+    Tcl_DStringAppend (&source_cmd, "}}", -1);
+    if (Tcl_GlobalEval (interp, Tcl_DStringValue (&source_cmd)) != TCL_OK)
+#else
+/* end-sanitize-tclpro */
+      if (Tcl_EvalFile (interp, gdbtk_file) != TCL_OK)
+/* start-sanitize-tclpro */
+#endif
+/* end-sanitize-tclpro */
+	{
       char *msg;
 
       /* Force errorInfo to be set up propertly.  */
@@ -2473,7 +2491,13 @@ gdbtk_find_main";
 
       error ("");
     }
-
+/* start-sanitize-tclpro */
+#ifdef TCLPRO_DEBUGGER
+      Tcl_DStringFree(&source_cmd);
+    }
+#endif
+/* end-sanitize-tclpro */
+  
 #ifdef IDE
   /* start-sanitize-ide */
   /* Don't do this until we have initialized.  Otherwise, we may get a
