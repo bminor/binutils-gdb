@@ -58,6 +58,7 @@ LD_PROG	= ld.new
 GNUTARGET=a.out-generic-big
 LDEMULATION=gld
 BFDLIB=$(srcdir)/../bfd$(subdir)/libbfd.a
+LIBIBERTY=$(srcdir)/../libiberty$(subdir)/libiberty.a
 
 OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ld-lnk960.o ld-gld68k.o \
 	ld-gldm88kbcs.o \
@@ -92,23 +93,23 @@ $(PROCESSED_SCRIPTS): mkscript $(SCRIPTS)
 #$(BFDLIB): $(BFDSOURCES)
 #	(cd ../bfd; make)
 
-$(LD_PROG): $(OFILES) $(BFDLIB)
-	$(CC) $(CFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB)
+$(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
+	$(CC) $(CFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY)
 
 #	(cd ../bfd; make)
-#	LDEMULATION=gld; export LDEMULATION;  GNUTARGET=a.out-generic-big;./ldok -format a.out-generic-big  -o ld /lib/crt0.o   $(OFILES) $(BFDLIB) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
-#	gld -o ld /lib/crt0.o   $(OFILES) $(BFDLIB) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
-#	$(CC) -Bstatic -o ld.new $(OFILES) $(BFDLIB)
+#	LDEMULATION=gld; export LDEMULATION;  GNUTARGET=a.out-generic-big;./ldok -format a.out-generic-big  -o ld /lib/crt0.o   $(OFILES) $(BFDLIB) $(LIBIBERTY) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
+#	gld -o ld /lib/crt0.o   $(OFILES) $(BFDLIB) $(LIBIBERTY) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
+#	$(CC) -Bstatic -o ld.new $(OFILES) $(BFDLIB) $(LIBIBERTY)
 
 
 ld1: ld.new
-	$(HOSTING_EMU); ./ld.new -o ld1 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(HOSTING_LIBS)
+	$(HOSTING_EMU); ./ld.new -o ld1 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
 ld2: ld1
-	$(HOSTING_EMU); ./ld1 -o ld2 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(HOSTING_LIBS)
+	$(HOSTING_EMU); ./ld1 -o ld2 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
 ld3: ld2
-	$(HOSTING_EMU); ./ld2 -o ld3 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(HOSTING_LIBS)
+	$(HOSTING_EMU); ./ld2 -o ld3 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
 ld.dvi:ld.tex
 	tex ld.tex
