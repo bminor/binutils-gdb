@@ -66,6 +66,8 @@ static int prologue_inst_adjust_sp PARAMS ((unsigned long));
 static int is_branch PARAMS ((unsigned long));
 static int inst_saves_gr PARAMS ((unsigned long));
 static int inst_saves_fr PARAMS ((unsigned long));
+static int pc_in_interrupt_handler PARAMS ((CORE_ADDR));
+static int pc_in_linker_stub PARAMS ((CORE_ADDR));
 
 
 /* Routines to extract various sized constants out of hppa 
@@ -298,9 +300,29 @@ find_unwind_entry(pc)
   return NULL;
 }
 
+/* Called to determine if PC is in an interrupt handler of some
+   kind.  */
+
+static int
+pc_in_interrupt_handler (pc)
+     CORE_ADDR pc;
+{
+  struct unwind_table_entry *u;
+  struct minimal_symbol *msym_us;
+
+  u = find_unwind_entry (pc);
+  if (!u)
+    return 0;
+
+  /* Oh joys.  HPUX sets the interrupt bit for _sigreturn even though
+     its frame isn't a pure interrupt frame.  Deal with this.  */
+  msym_us = lookup_minimal_symbol_by_pc (pc);
+
+  return u->HP_UX_interrupt_marker && !IN_SIGTRAMP (pc, SYMBOL_NAME (msym_us));
+}
+
 /* Called when no unwind descriptor was found for PC.  Returns 1 if it
    appears that PC is in a linker stub.  */
-static int pc_in_linker_stub PARAMS ((CORE_ADDR));
 
 static int
 pc_in_linker_stub (pc)
@@ -388,10 +410,11 @@ find_return_regnum(pc)
 
 /* Return size of frame, or -1 if we should use a frame pointer.  */
 int
-find_proc_framesize(pc)
+find_proc_framesize (pc)
      CORE_ADDR pc;
 {
   struct unwind_table_entry *u;
+  struct minimal_symbol *msym_us;
 
   u = find_unwind_entry (pc);
 
@@ -404,9 +427,12 @@ find_proc_framesize(pc)
 	return -1;
     }
 
-  if (u->Save_SP)
-    /* If this bit is set, it means there is a frame pointer and we should
-       use it.  */
+  msym_us = lookup_minimal_symbol_by_pc (pc);
+
+  /* If Save_SP is set, and we're not in an interrupt or signal caller,
+     then we have a frame pointer.  Use it.  */
+  if (u->Save_SP && !pc_in_interrupt_handler (pc)
+      && !IN_SIGTRAMP (pc, SYMBOL_NAME (msym_us)))
     return -1;
 
   return u->Total_frame_size << 3;
@@ -481,19 +507,71 @@ frame_saved_pc (frame)
 {
   CORE_ADDR pc = get_frame_pc (frame);
 
+  /* BSD, HPUX & OSF1 all lay out the hardware state in the same manner
+     at the base of the frame in an interrupt handler.  Registers within
+     are saved in the exact same order as GDB numbers registers.  How
+     convienent.  */
+  if (pc_in_interrupt_handler (pc))
+    return read_memory_integer (frame->frame + PC_REGNUM * 4, 4) & ~0x3;
+
+  /* Deal with signal handler caller frames too.  */
+  if (frame->signal_handler_caller)
+    {
+      CORE_ADDR rp;
+      FRAME_SAVED_PC_IN_SIGTRAMP (frame, &rp);
+      return rp;
+    }
+
   if (frameless_function_invocation (frame))
     {
       int ret_regnum;
 
       ret_regnum = find_return_regnum (pc);
 
-      return read_register (ret_regnum) & ~0x3;
+      /* If the next frame is an interrupt frame or a signal
+	 handler caller, then we need to look in the saved
+	 register area to get the return pointer (the values
+	 in the registers may not correspond to anything useful).  */
+      if (frame->next 
+	  && (frame->next->signal_handler_caller
+	      || pc_in_interrupt_handler (frame->next->pc)))
+	{
+	  struct frame_info *fi;
+	  struct frame_saved_regs saved_regs;
+
+	  fi = get_frame_info (frame->next);
+	  get_frame_saved_regs (fi, &saved_regs);
+	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM] & 0x2, 4))
+	    return read_memory_integer (saved_regs.regs[31], 4);
+	  else
+	    return read_memory_integer (saved_regs.regs[RP_REGNUM], 4);
+	}
+      else
+	return read_register (ret_regnum) & ~0x3;
     }
   else
     {
       int rp_offset = rp_saved (pc);
 
-      if (rp_offset == 0)
+      /* Similar to code in frameless function case.  If the next
+	 frame is a signal or interrupt handler, then dig the right
+	 information out of the saved register info.  */
+      if (rp_offset == 0
+	  && frame->next
+	  && (frame->next->signal_handler_caller
+	      || pc_in_interrupt_handler (frame->next->pc)))
+	{
+	  struct frame_info *fi;
+	  struct frame_saved_regs saved_regs;
+
+	  fi = get_frame_info (frame->next);
+	  get_frame_saved_regs (fi, &saved_regs);
+	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM] & 0x2, 4))
+	    return read_memory_integer (saved_regs.regs[31], 4);
+	  else
+	    return read_memory_integer (saved_regs.regs[RP_REGNUM], 4);
+	}
+      else if (rp_offset == 0)
 	return read_register (RP_REGNUM) & ~0x3;
       else
 	return read_memory_integer (frame->frame + rp_offset, 4) & ~0x3;
@@ -569,6 +647,20 @@ frame_chain (frame)
 {
   int my_framesize, caller_framesize;
   struct unwind_table_entry *u;
+  CORE_ADDR frame_base;
+
+  /* Handle HPUX, BSD, and OSF1 style interrupt frames first.  These
+     are easy; at *sp we have a full save state strucutre which we can
+     pull the old stack pointer from.  Also see frame_saved_pc for
+     code to dig a saved PC out of the save state structure.  */
+  if (pc_in_interrupt_handler (frame->pc))
+    frame_base = read_memory_integer (frame->frame + SP_REGNUM * 4, 4);
+  else if (frame->signal_handler_caller)
+    {
+      FRAME_BASE_BEFORE_SIGTRAMP (frame, &frame_base);
+    }
+  else
+    frame_base = frame->frame;
 
   /* Get frame sizes for the current frame and the frame of the 
      caller.  */
@@ -578,13 +670,13 @@ frame_chain (frame)
   /* If caller does not have a frame pointer, then its frame
      can be found at current_frame - caller_framesize.  */
   if (caller_framesize != -1)
-    return frame->frame - caller_framesize;
+    return frame_base - caller_framesize;
 
   /* Both caller and callee have frame pointers and are GCC compiled
      (SAVE_SP bit in unwind descriptor is on for both functions.
      The previous frame pointer is found at the top of the current frame.  */
   if (caller_framesize == -1 && my_framesize == -1)
-    return read_memory_integer (frame->frame, 4);
+    return read_memory_integer (frame_base, 4);
 
   /* Caller has a frame pointer, but callee does not.  This is a little
      more difficult as GCC and HP C lay out locals and callee register save
@@ -618,7 +710,9 @@ frame_chain (frame)
 
       /* Entry_GR specifies the number of callee-saved general registers
 	 saved in the stack.  It starts at %r3, so %r3 would be 1.  */
-      if (u->Entry_GR >= 1 || u->Save_SP)
+      if (u->Entry_GR >= 1 || u->Save_SP
+	  || frame->signal_handler_caller
+	  || pc_in_interrupt_handler (frame->pc))
 	break;
       else
 	frame = frame->next;
@@ -628,7 +722,9 @@ frame_chain (frame)
     {
       /* We may have walked down the chain into a function with a frame
 	 pointer.  */
-      if (u->Save_SP)
+      if (u->Save_SP
+	  && !frame->signal_handler_caller
+	  && !pc_in_interrupt_handler (frame->pc))
 	return read_memory_integer (frame->frame, 4);
       /* %r3 was saved somewhere in the stack.  Dig it out.  */
       else 
@@ -660,12 +756,16 @@ frame_chain_valid (chain, thisframe)
 {
   struct minimal_symbol *msym_us;
   struct minimal_symbol *msym_start;
-  struct unwind_table_entry *u;
+  struct unwind_table_entry *u, *next_u = NULL;
+  FRAME next;
 
   if (!chain)
     return 0;
 
   u = find_unwind_entry (thisframe->pc);
+
+  if (u == NULL)
+    return 1;
 
   /* We can't just check that the same of msym_us is "_start", because
      someone idiotically decided that they were going to make a Ltext_end
@@ -680,10 +780,16 @@ frame_chain_valid (chain, thisframe)
       && SYMBOL_VALUE_ADDRESS (msym_us) == SYMBOL_VALUE_ADDRESS (msym_start))
     return 0;
 
-  if (u == NULL)
-    return 1;
+  next = get_next_frame (thisframe);
+  if (next)
+    next_u = find_unwind_entry (next->pc);
 
-  if (u->Save_SP || u->Total_frame_size || u->stub_type != 0)
+  /* If this frame does not save SP, has no stack, isn't a stub,
+     and doesn't "call" an interrupt routine or signal handler caller,
+     then its not valid.  */
+  if (u->Save_SP || u->Total_frame_size || u->stub_type != 0
+      || (thisframe->next && thisframe->next->signal_handler_caller)
+      || (next_u && next_u->HP_UX_interrupt_marker))
     return 1;
 
   if (pc_in_linker_stub (thisframe->pc))
@@ -1407,6 +1513,29 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 			     + 6 * 4)))
     find_dummy_frame_regs (frame_info, frame_saved_regs);
 
+  /* Interrupt handlers are special too.  They lay out the register
+     state in the exact same order as the register numbers in GDB.  */
+  if (pc_in_interrupt_handler (frame_info->pc))
+    {
+      for (i = 0; i < NUM_REGS; i++)
+	{
+	  /* SP is a little special.  */
+	  if (i == SP_REGNUM)
+	    frame_saved_regs->regs[SP_REGNUM]
+	      = read_memory_integer (frame_info->frame + SP_REGNUM * 4, 4);
+	  else
+	    frame_saved_regs->regs[i] = frame_info->frame + i * 4;
+	}
+      return;
+    }
+
+  /* Handle signal handler callers.  */
+  if (frame_info->signal_handler_caller)
+    {
+      FRAME_FIND_SAVED_REGS_IN_SIGTRAMP (frame_info, frame_saved_regs);
+      return;
+    }
+
   /* Get the starting address of the function referred to by the PC
      saved in frame_info.  */
   pc = get_pc_function_start (frame_info->pc);
@@ -1438,6 +1567,11 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
   save_fr = 0;
   for (i = 12; i < u->Entry_FR + 12; i++)
     save_fr |= (1 << i);
+
+  /* The frame always represents the value of %sp at entry to the
+     current function (and is thus equivalent to the "saved" stack
+     pointer.  */
+  frame_saved_regs->regs[SP_REGNUM] = frame_info->frame;
 
   /* Loop until we find everything of interest or hit a branch.
 
@@ -1472,13 +1606,10 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 	  frame_saved_regs->regs[RP_REGNUM] = frame_info->frame - 20;
 	}
 
-      /* This is the only way we save SP into the stack.  At this time
-	 the HP compilers never bother to save SP into the stack.  */
+      /* Just note that we found the save of SP into the stack.  The
+	 value for frame_saved_regs was computed above.  */
       if ((inst & 0xffffc000) == 0x6fc10000)
-	{
-	  save_sp = 0;
-	  frame_saved_regs->regs[SP_REGNUM] = frame_info->frame;
-	}
+	save_sp = 0;
 
       /* Account for general and floating-point register saves.  */
       reg = inst_saves_gr (inst);

@@ -1,3 +1,20 @@
+Fri Mar  4 09:50:47 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (pc_in_linker_stub): Move decl to beginning of file.
+	(pc_in_interrupt_handler): New function.  Also add PARAM decl.
+	(find_proc_framesize): Deal with HPUX setting SAVE_SP bit for
+	signal trampoline and interrupt routines.
+	(frame_saved_pc): Handle signal trampolines and interrupt routines.
+	(frame_chain, frame_chain_valid): Likewise.
+	(hppa_frame_find_saved_regs): Likewise.  Also deal with special
+	saved regs convention for SP.
+	
+	* tm-hppa[bho].h: FRAME_FIND_SAVED_PC_IN_SIGTRAMP): Define.
+	(FRAME_BASE_BEFORE_SIGTRAMP): Define.
+	(FRAME_FIND_SAVED_REGS_IN_SIGTRAMP): Define.
+
+	* tm-hppah.h (IN_SIGTRAMP): Define.
+
 Thu Mar  3 12:41:16 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* ch-exp.y (match_simple_name_string): Accept '_' as well as an
