@@ -1,5 +1,6 @@
 /* Target-dependent code for the i387.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,6 +45,12 @@ extern void i387_register_to_value (struct frame_info *frame, int regnum,
 
 extern void i387_value_to_register (struct frame_info *frame, int regnum,
 				    struct type *type, const void *from);
+
+
+/* Size of the memory area use by the 'fsave' and 'fxsave'
+   instructions.  */
+#define I387_SIZEOF_FSAVE	108
+#define I387_SIZEOF_FXSAVE	512
 
 /* Fill register REGNUM in GDB's register cache with the appropriate
    value from *FSAVE.  This function masks off any of the reserved

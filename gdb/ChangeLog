@@ -1,5 +1,8 @@
 2003-08-24  Mark Kettenis  <kettenis@gnu.org>
 
+	* i387-tdep.h: Update copyright date.
+	(I387_SIZEOF_FSAVE, I387_SIZEOF_FXSAVE): New defines.
+
 	* linux-proc.c (linux_proc_xfer_memory): Remove comment about
 	CFLAGS games to reflect reality.
 
