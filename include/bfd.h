@@ -815,35 +815,33 @@ PROTO(boolean,	bfd_scan_arch_mach,(CONST char *, enum bfd_architecture *,
 #define bfd_h_get_16(abfd, ptr)		BFD_SEND(abfd, bfd_h_getx16, \
 							((bfd_byte *) ptr))
 
+#define bfd_h_put_16(abfd, val, ptr) BFD_SEND(abfd, bfd_h_putx16,(val,ptr))
+#define bfd_h_get_16(abfd, ptr)      BFD_SEND(abfd, bfd_h_getx16,(ptr))
+
 /* General purpose one fits all.  The do { } while (0) makes a single 
    statement out of it, for use in things like nested if-statements.
    
    The idea is to create your external ref as a byte array of the
    right size eg:
    char foo[4];
-   char bar[2];
    then you may do things like:
    bfd_h_put_x(abfd, 1, &foo);
-   and bfd_h_get_x(abfd,& bar);
+
 */
 
 #define bfd_h_put_x(abfd, val, ptr) \
   do {  \
-       if (sizeof((ptr)) == LONGLONG_SIZE) \
+       if (sizeof((ptr)) == 8) \
 		bfd_h_put_64  (abfd, val, (ptr));\
-       if (sizeof((ptr)) == LONG_SIZE) \
+       if (sizeof((ptr)) == 4) \
 		bfd_h_put_32  (abfd, val, (ptr));\
-  else if (sizeof((ptr)) == SHORT_SIZE) \
+  else if (sizeof((ptr)) == 2) \
 		bfd_h_put_16 (abfd, val, (ptr));\
-  else if (sizeof((ptr)) == BYTE_SIZE) \
+  else if (sizeof((ptr)) == 1) \
 		bfd_h_put_8  (abfd, val, (ptr));\
   else abort(); } while (0)
 
-#define bfd_h_get_x(abfd, ptr) \
-  ((sizeof((ptr))==LONGLONG_SIZE) ? bfd_h_get_64 (abfd, &(ptr[0])):\
-  (sizeof((ptr))==LONG_SIZE) ?  bfd_h_get_32 (abfd, &(ptr[0])):\
-   (sizeof((ptr))==SHORT_SIZE) ? bfd_h_get_16(abfd, &(ptr[0])):\
-    bfd_h_get_8 (abfd, &(ptr[0])))
+
 #ifdef GNU960
 
 #define BFD_COFF_FORMAT	bfd_target_coff_flavour_enum
