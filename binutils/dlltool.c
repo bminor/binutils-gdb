@@ -1670,23 +1670,28 @@ gen_def_file ()
       char *quote = strchr (exp->name, '.') ? "\"" : "";
       char *res = cplus_demangle (exp->internal_name, DMGL_ANSI | DMGL_PARAMS);
 
+      if (res)
+	{
+ 	  fprintf (output_def,";\t%s\n", res);
+	  free (res);
+	}
+
       if (strcmp (exp->name, exp->internal_name) == 0)
 	{
 
-	  fprintf (output_def, "\t%s%s%s @ %d%s%s ; %s\n",
+	  fprintf (output_def, "\t%s%s%s @ %d%s%s\n",
 		   quote,
 		   exp->name,
 		   quote,
 		   exp->ordinal,
 		   exp->noname ? " NONAME" : "",
-		   exp->data ? " DATA" : "",
-		   res ? res : "");
+		   exp->data ? " DATA" : "");
 	}
       else
 	{
 	  char *quote1 = strchr (exp->internal_name, '.') ? "\"" : "";
 	  /* char *alias =  */
-	  fprintf (output_def, "\t%s%s%s = %s%s%s @ %d%s%s ; %s\n",
+	  fprintf (output_def, "\t%s%s%s = %s%s%s @ %d%s%s\n",
 		   quote,
 		   exp->name,
 		   quote,
@@ -1695,11 +1700,8 @@ gen_def_file ()
 		   quote1,
 		   exp->ordinal,
 		   exp->noname ? " NONAME" : "",
-		   exp->data ? " DATA" : "",
-		   res ? res : "");
+		   exp->data ? " DATA" : "");
 	}
-      if (res)
-	free (res);
     }
 
   inform (_("Added exports to output file"));

@@ -1,3 +1,8 @@
+2003-03-22  Danny Smith  <dannysmith@users.sourceforge,net>
+
+	* dlltool.c (gen_def_file): Put demangled name comments on
+	own line preceding export name.
+
 2003-03-17  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (disassemble_data): Use disasm_info.fprintf_func not
