@@ -58,9 +58,10 @@ defaulttargets=
 fatal=
 floating_point=default
 gas=default
+host_makefile_frag=
 hosts=
-next_prefix=
 next_host=
+next_prefix=
 next_site=
 next_srcdir=
 next_target=
@@ -70,9 +71,11 @@ prefix=/usr/local
 progname=
 recurring=
 removing=
+site_makefile_frag=
 srcdir=
 srctrigger=
 target=
+target_makefile_frag=
 targets=
 undefinedargs=
 verbose=
@@ -333,6 +336,12 @@ case "${srcdir}" in
 esac
 
 
+# default datadir
+case "${datadir}" in
+"") datadir="$(prefix)/lib" ;;
+*) ;;
+esac
+
 ### break up ${srcdir}/configure.in.
 case "`grep '^# per\-host:' ${srcdir}/configure.in`" in
 "")
@@ -398,11 +407,6 @@ for host in ${hosts} ; do
 	host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 	host=${host_cpu}-${host_vendor}-${host_os}
-	host_makefile_frag=config/mh-${host}
-	if [ ! -f ${host_makefile_frag} ]
-	then
-		host_makefile_frag=config/mh-${host_alias}
-	fi
 
 	. ${tmpfile}.hst
 
@@ -414,11 +418,6 @@ for host in ${hosts} ; do
 		target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 		target=${target_cpu}-${target_vendor}-${target_os}
-		target_makefile_frag=config/mt-${target}
-		if [ ! -f ${target_makefile_frag} ]
-		then
-			target_makefile_frag=config/mt-${target_alias}
-		fi
 
 		. ${tmpfile}.tgt
 
@@ -494,11 +493,12 @@ for host in ${hosts} ; do
 				case ${srcdir} in
 				.)
 					;;
-				*)
-					echo "# "${NO_EDIT} > .gdbinit
-					echo "dir ." >> .gdbinit
-					echo "dir ${srcdir}" >> .gdbinit
-					echo "source ${srcdir}/.gdbinit" >> .gdbinit
+				*) cat > .gdbinit <<EOF
+# ${NO_EDIT} > .gdbinit
+dir .
+dir ${srcdir}
+source ${srcdir}/.gdbinit
+EOF
 					;;
 				esac
 			fi
@@ -506,135 +506,114 @@ for host in ${hosts} ; do
 			# Install a makefile, and make it set VPATH
 			# if necessary so that the sources are found.
 			# Also change its value of srcdir.
+			# NOTE: Makefile generation constitutes the majority of the time in configure.  Hence, this section has
+			# been somewhat optimized and is perhaps a bit twisty.
 
-		# FIXME-someday: This business of always writing to .tem and mv back
-		# is so that I don't screw things up while developing.  Once this
-		# template is stable, these should be optimized. xoxorich.
+			# code is order so as to try to sed the smallest input files we know.
 
+			# the three makefile fragments MUST end up in the resulting Makefile in this order: target, host, and site.
+			# so do these separately because I don't trust the order of sed -e expressions.
+
+			# Conditionalize for this site from "Makefile.in" (or whatever it's called) into Makefile.tem
+			case "${site}" in
+			"") cp ${srcdir}/${Makefile_in} Makefile.tem ;;
+			*)
+				site_makefile_frag=${srcdir}/config/ms-${site}
+
+				if [ -f ${site_makefile_frag} ] ; then
+					sed -e "/^####/  r ${site_makefile_frag}" ${srcdir}/${Makefile_in} \
+						>> Makefile.tem
+				else
+					cp ${srcdir}/${Makefile_in} Makefile.tem
+					site_makefile_frag=
+				fi
+				;;
+			esac
+			# working copy now in Makefile.tem
+
+			# Conditionalize the makefile for this host.
+			case "${host_makefile_frag}" in
+			"") mv Makefile.tem ${Makefile} ;;
+			*)
+				if [ -f ${host_makefile_frag} ] ; then
+					sed -e "/^####/  r ${host_makefile_frag}" Makefile.tem >> ${Makefile}
+				else
+					echo '***' Expected host makefile fragment \"${host_makefile_frag}\" 1>&2
+					echo '***' is missing in ${PWD}. 1>&2
+					mv Makefile.tem ${Makefile}
+				fi
+			esac
+			# working copy now in ${Makefile}
+
+			# Conditionalize the makefile for this target.
+			target_makefile_frag=${srcdir}/${target_makefile_frag}
+			if [ -f ${target_makefile_frag} ] ; then
+				sed -e "/^####/  r ${target_makefile_frag}" ${Makefile} >> Makefile.tem
+			else
+				mv ${Makefile} Makefile.tem
+				target_makefile_frag=
+			fi
+			# real copy now in Makefile.tem
+
+			# prepend warning about editting, and a bunch of variables.
+			# fixme-someday: remove the subdir/unsubdir lines.
+			cat > ${Makefile} <<EOF
+# ${NO_EDIT}
+host_alias = ${host_alias}
+host_cpu = ${host_cpu}
+host_vendor = ${host_vendor}
+host_os = ${host_os}
+target_alias = ${target_alias}
+target_cpu = ${target_cpu}
+target_vendor = ${target_vendor}
+target_os = ${target_os}
+target_makefile_frag = ${target_makefile_frag}
+host_makefile_frag = ${host_makefile_frag}
+site_makefile_frag = ${site_makefile_frag}
+VPATH = ${srcdir}
+subdir =
+unsubdir = .
+EOF
+
+			# fixme: this shouldn't be in configure.
 			# Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
 			case "${host}" in
-			"${target}") echo "ALL=all.internal" > ${Makefile} ;;
+			"${target}") echo "ALL=all.internal" >> ${Makefile} ;;
 			*)
-				echo "CROSS=-DCROSS_COMPILE" > ${Makefile}
+				echo "CROSS=-DCROSS_COMPILE" >> ${Makefile}
 				echo "ALL=all.cross" >> ${Makefile}
 				;;
 			esac
 
-			# set target, host, VPATH
-			echo "host_alias = ${host_alias}" >> ${Makefile}
-			echo "host_cpu = ${host_cpu}" >> ${Makefile}
-			echo "host_vendor = ${host_vendor}" >> ${Makefile}
-			echo "host_os = ${host_os}" >> ${Makefile}
+			# reset prefix, datadir, srcdir, SUBDIRS, NONSUBDIRS, remove any form
+			# feeds.
+			sed -e "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" \
+				-e "s:^datadir[ 	]*=.*$:datadir = ${datadir}:" \
+				-e "s:^srcdir[ 	]*=.*$:srcdir = ${srcdir}:" \
+				-e "s:^SUBDIRS[ 	]*=.*$:SUBDIRS = ${configdirs}:" \
+				-e "s:^NONSUBDIRS[ 	]*=.*$:NONSUBDIRS = ${noconfigdirs}:" \
+				-e "s///" Makefile.tem >> ${Makefile}
+			# final copy now in ${Makefile}
 
-			echo "target_alias = ${target_alias}" >> ${Makefile}
-			echo "target_cpu = ${target_cpu}" >> ${Makefile}
-			echo "target_vendor = ${target_vendor}" >> ${Makefile}
-			echo "target_os = ${target_os}" >> ${Makefile}
-
-				echo "subdir =" >> ${Makefile}
-				echo "unsubdir = ." >> ${Makefile}
-
-			echo "VPATH = ${srcdir}" >> ${Makefile}
-
-			# add "Makefile.in" (or whatever it's called)
-			cat ${srcdir}/${Makefile_in} >> ${Makefile}
-
-			# Conditionalize the makefile for this site.
-			case "${site}" in
-			"") ;;
-			*)
-				site_makefile_frag=config/ms-${site}
-
-				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
-					echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" > Makefile.tem
-					sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile} >> Makefile.tem
-				else
-					echo "site_makefile_frag =" > Makefile.tem
-					cat ${Makefile} >> Makefile.tem
-				fi
-				mv Makefile.tem ${Makefile}
-				;;
-			esac
-
-			# Conditionalize the makefile for this host.
-			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
-				echo "host_makefile_frag = ${srcdir}/${host_makefile_frag}" > Makefile.tem
-				sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" ${Makefile} >> Makefile.tem
-			else
-				echo "host_makefile_frag =" > Makefile.tem
-				cat ${Makefile} >> Makefile.tem
-			fi
-			mv Makefile.tem ${Makefile}
-
-			# Conditionalize the makefile for this target.
-			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
-				echo "target_makefile_frag = ${srcdir}/${target_makefile_frag}" > Makefile.tem
-				sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile} >> Makefile.tem
-			else
-				echo "target_makefile_frag =" > Makefile.tem
-				cat ${Makefile} >> Makefile.tem
-			fi
-			mv Makefile.tem ${Makefile}
-
-			# set srcdir
-			sed "s:^srcdir[ 	]*=.*$:srcdir = ${srcdir}:" ${Makefile} > Makefile.tem
-			mv Makefile.tem ${Makefile}
-
-			# set prefix
-			case "${prefix}" in
-			"") ;;
-			*)
-				sed "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" ${Makefile} > Makefile.tem
-				mv Makefile.tem ${Makefile}
-				;;
-			esac
-
-			# set datadir
-			case "${datadir}" in
-			"") ;;
-			*)
-				sed "s:^datadir[ 	]*=.*$:datadir = ${datadir}:" ${Makefile} > Makefile.tem
-				mv Makefile.tem ${Makefile}
-				;;
-			esac
-
-			# reset SUBDIRS
-			sed "s:^SUBDIRS[ 	]*=.*$:SUBDIRS = ${configdirs}:" ${Makefile} > Makefile.tem
-			mv Makefile.tem ${Makefile}
-
-			# reset NONSUBDIRS
-			sed "s:^NONSUBDIRS[ 	]*=.*$:NONSUBDIRS = ${noconfigdirs}:" ${Makefile} > Makefile.tem
-			mv Makefile.tem ${Makefile}
-
-			# remove any form feeds.
-			sed -e "s///" ${Makefile} > Makefile.tem
-			mv Makefile.tem ${Makefile}
-
-			# prepend warning about editting.
-			echo "# "${NO_EDIT} > ${Makefile}.tem
-			cat ${Makefile} >> ${Makefile}.tem
-			mv Makefile.tem ${Makefile}
-
-			using=
-			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
-				using="${using} and \"${host_makefile_frag}\""
-			fi
-			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
-				using="${using} and \"${target_makefile_frag}\""
-			fi
-			case "${site}" in
-			"") ;;
-			*)
-				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
-					using="${using} and \"${site_makefile_frag}\""
-				fi
-				;;
-			esac
-			using=`echo "${using}" | sed 's/and/using/'`
-			using="Created \"${Makefile}\" in ${PWD}${using}."
+			rm Makefile.tem
 
 			if [ -n "${verbose}" -o -z "${recurring}" ] ; then
-				echo ${using}
+				case "${host_makefile_frag}" in
+				"") using= ;;
+				*) using="and \"${host_makefile_frag}\"" ;;
+				esac
+
+				case "${target_makefile_frag}" in
+				"") ;;
+				*) using="${using} and \"${target_makefile_frag}\"" ;;
+				esac
+
+				case "${site_makefile_frag}" in
+				"") ;;
+				*) using="${using} and \"${site_makefile_frag}\"" ;;
+				esac
+
+				echo "Created \"${Makefile}\" in" ${PWD} `echo "${using}" | sed 's/and/using/'`
 			fi
 
 			. ${tmpfile}.pos

@@ -200,9 +200,9 @@ specify other aspects of the source configuration:
 @item -datadir=@var{dir}
 Configure the source to install host independent files in @var{dir}.
 
-This option sets the @code{configure} variable @code{datadir}.  If
-@code{datadir} is not empty, generated Makefiles will have their
-@code{datadir} variables set to this value. (See @ref{Install Details}.)
+This option sets the @code{configure} variable @code{datadir}.
+Generated Makefiles will have their @code{datadir} variables set to this
+value. (See @ref{Install Details}.)
 
 @item -gas
 Configure to use the @sc{GNU} assembler.
@@ -246,9 +246,9 @@ This option is no longer supported.  Use @code{-srcdir=} instead.
 Configure the source to install programs and files under directory
 @file{@var{dir}}.
 
-This option sets the @code{configure} variable @code{prefix}.  If
-@code{prefix} is not empty, generated Makefiles will have their
-@code{prefix} variables set to this value. (See @ref{Install Details}.)
+This option sets the @code{configure} variable @code{prefix}.  Generated
+Makefiles will have their @code{prefix} variables set to this value.
+(See @ref{Install Details}.)
 
 @item -recurring
 @c Wouldn't it make more sense to call this "-quiet"? (FIXME).
@@ -1207,15 +1207,17 @@ either the @code{-srcdir=} or the @code{-subdirs} options.  Note that
 @end defvar
 
 @defvar{host_makefile_frag}
-Is set to a file name representing to the default Makefile fragment for
-this host.  It may be set in @file{configure.in} to override this
-default.
+If set by @file{configure.in}, this variable should name a file to be
+included in the resulting Makefile.  If the named file does not exist,
+@code{configure} will print a warning message.  This variable is not set
+by @code{configure}.
 @end defvar
 
 @defvar{target_makefile_frag}
-Is set to a file name representing to the default Makefile fragment for
-this target.  It may be set in @file{configure.in} to override this
-default.
+If set by @file{configure.in}, this variable should name a file to be
+included in the resulting Makefile.  If the named file does not exist,
+@code{configure} will print a warning message.  This variable is not set
+by @code{configure}.
 @end defvar
 
 @defvar{site_makefile_frag} 
