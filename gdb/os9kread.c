@@ -1617,30 +1617,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     }
   previous_stab_code = type;
 }
-
-/* Parse the user's idea of an offset for dynamic linking, into our idea
-   of how to represent it for fast symbol reading.  */
 
-static struct section_offsets *
-os9k_symfile_offsets (objfile, addr)
-     struct objfile *objfile;
-     CORE_ADDR addr;
-{
-  struct section_offsets *section_offsets;
-  int i;
-
-  objfile->num_sections = SECT_OFF_MAX;
-  section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct section_offsets)
-		   + sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
-
-  for (i = 0; i < SECT_OFF_MAX; i++)
-    ANOFFSET (section_offsets, i) = addr;
-  
-  return section_offsets;
-}
-
 static struct sym_fns os9k_sym_fns =
 {
   bfd_target_os9k_flavour,
@@ -1648,7 +1625,8 @@ static struct sym_fns os9k_sym_fns =
   os9k_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   os9k_symfile_read,	/* sym_read: read a symbol file into symtab */
   os9k_symfile_finish,	/* sym_finish: finished with file, cleanup */
-  os9k_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form*/
+  default_symfile_offsets,
+			/* sym_offsets: parse user's offsets to internal form*/
   NULL			/* next: pointer to next struct sym_fns */
 };
 

@@ -43,9 +43,6 @@ nlm_symfile_finish PARAMS ((struct objfile *));
 static void
 nlm_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
 
-static struct section_offsets *
-nlm_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
-
 static void
 record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type,
 			       struct objfile *));
@@ -260,34 +257,6 @@ nlm_symfile_finish (objfile)
     }
 }
 
-/* NLM specific parsing routine for section offsets.
-   FIXME:  This may or may not be necessary.  All the symbol readers seem
-   to have similar code.  See if it can be generalized and moved elsewhere. */
-
-static
-struct section_offsets *
-nlm_symfile_offsets (objfile, addr)
-     struct objfile *objfile;
-     CORE_ADDR addr;
-{
-  struct section_offsets *section_offsets;
-  int i;
-
-  objfile->num_sections = SECT_OFF_MAX;
-  section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct section_offsets) +
-		   sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
-
-  for (i = 0; i < SECT_OFF_MAX; i++)
-    {
-      ANOFFSET (section_offsets, i) = addr;
-    }
-  
-  return (section_offsets);
-}
-
-
 /* Register that we are able to handle NLM file format. */
 
 static struct sym_fns nlm_sym_fns =
@@ -297,7 +266,8 @@ static struct sym_fns nlm_sym_fns =
   nlm_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   nlm_symfile_read,	/* sym_read: read a symbol file into symtab */
   nlm_symfile_finish,	/* sym_finish: finished with file, cleanup */
-  nlm_symfile_offsets,	/* sym_offsets:  Translate ext. to int. relocation */
+  default_symfile_offsets,
+			/* sym_offsets:  Translate ext. to int. relocation */
   NULL			/* next: pointer to next struct sym_fns */
 };
 

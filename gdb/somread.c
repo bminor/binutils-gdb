@@ -435,9 +435,7 @@ som_symfile_offsets (objfile, addr)
 
   objfile->num_sections = SECT_OFF_MAX;
   section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct section_offsets)
-		   + sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
+    obstack_alloc (&objfile -> psymbol_obstack, SIZEOF_SECTION_OFFSETS);
 
   /* First see if we're a shared library.  If so, get the section
      offsets from the library, else get them from addr.  */

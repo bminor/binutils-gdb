@@ -66,7 +66,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
 
 /* defined in stabsread.c; used for completing cfront stabs strings */
-extern void resolve_cont PARAMS((struct objfile * objfile, struct symbol * sym, char * p));
+extern void 
+resolve_cfront_continuation PARAMS((struct objfile * objfile, 
+		struct symbol * sym, char * p));
 
 
 /* We put a pointer to this structure in the read_symtab_private field
@@ -798,7 +800,7 @@ process_now(objfile)
       symbuf_idx = cont_list[i].sym_idx;   /* statics used by gdb */
       symbuf_end = cont_list[i].sym_end;  
       symnum = cont_list[i].symnum;  
-      resolve_cont(objfile,cont_list[i].sym,cont_list[i].stabs);
+      resolve_cfront_continuation(objfile,cont_list[i].sym,cont_list[i].stabs);
     }
   /* restore original state */
   symbuf_idx = save_symbuf_idx;
@@ -2584,29 +2586,6 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
   dbx_symfile_read (objfile, section_offsets, 0);
 }
 
-/* Parse the user's idea of an offset for dynamic linking, into our idea
-   of how to represent it for fast symbol reading.  */
-
-static struct section_offsets *
-dbx_symfile_offsets (objfile, addr)
-     struct objfile *objfile;
-     CORE_ADDR addr;
-{
-  struct section_offsets *section_offsets;
-  int i;
-
-  objfile->num_sections = SECT_OFF_MAX;
-  section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct section_offsets)
-		   + sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
-
-  for (i = 0; i < SECT_OFF_MAX; i++)
-    ANOFFSET (section_offsets, i) = addr;
-  
-  return section_offsets;
-}
-
 static struct sym_fns aout_sym_fns =
 {
   bfd_target_aout_flavour,
@@ -2614,7 +2593,8 @@ static struct sym_fns aout_sym_fns =
   dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   dbx_symfile_read,	/* sym_read: read a symbol file into symtab */
   dbx_symfile_finish,	/* sym_finish: finished with file, cleanup */
-  dbx_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
+  default_symfile_offsets,
+			/* sym_offsets: parse user's offsets to internal form */
   NULL			/* next: pointer to next struct sym_fns */
 };
 

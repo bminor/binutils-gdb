@@ -32,9 +32,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    to the single saved instance. */
 
 struct psymbol_allocation_list {
-  struct partial_symbol **list;	/* Pointer to first partial symbol pointer*/
-  struct partial_symbol **next;	/* Pointer to next avail storage for pointer */
-  int size;			/* Number of symbols */
+
+  /* Pointer to beginning of dynamically allocated array of pointers to
+   partial symbols.  The array is dynamically expanded as necessary to
+   accommodate more pointers. */
+
+  struct partial_symbol **list;
+
+  /* Pointer to next available slot in which to store a pointer to a partial
+     symbol. */
+
+  struct partial_symbol **next;
+
+  /* Number of allocated pointer slots in current dynamic array (not the
+     number of bytes of storage).  The "next" pointer will always point
+     somewhere between list[0] and list[size], and when at list[size] the
+     array will be expanded on the next attempt to store a pointer. */
+
+  int size;
 };
 
 /* Structure to keep track of symbol reading functions for various
@@ -94,65 +109,25 @@ struct sym_fns {
 
 };
 
+/* The default version of sym_fns.sym_offsets for readers that don't
+   do anything special.  */
+
+extern struct section_offsets *
+default_symfile_offsets PARAMS ((struct objfile *objfile, CORE_ADDR addr));
+
+
 extern void
 extend_psymbol_list PARAMS ((struct psymbol_allocation_list *,
 			     struct objfile *));
 
 /* Add any kind of symbol to a psymbol_allocation_list. */
 
-#ifndef INLINE_ADD_PSYMBOL
-/* Default this to off for now, and probably eventually remove support for inlining via
-   macros.  Real world tests show no performance improvements by inlining, and the macros
-   just make debugging gdb more complicated and make gdb larger by up to 150 Kb. */
-#define INLINE_ADD_PSYMBOL 0
-#endif
+/* #include "demangle.h" */
 
-#include "demangle.h"
-
-#if !INLINE_ADD_PSYMBOL
-
-/* Since one arg is a struct, we have to pass in a ptr and deref it (sigh) */
-
-#define	ADD_PSYMBOL_TO_LIST(name, namelength, namespace, class, list, value, language, objfile) \
-  add_psymbol_to_list (name, namelength, namespace, class, &list, value, language, objfile)
-
-#define	ADD_PSYMBOL_ADDR_TO_LIST(name, namelength, namespace, class, list, value, language, objfile) \
-  add_psymbol_addr_to_list (name, namelength, namespace, class, &list, value, language, objfile)
-
-#else	/* !INLINE_ADD_PSYMBOL */
-
-#define	ADD_PSYMBOL_VT_TO_LIST(NAME,NAMELENGTH,NAMESPACE,CLASS,LIST,VALUE,VT,LANGUAGE, OBJFILE) \
-  do {		        						\
-    register struct partial_symbol *psym;				\
-    char *buf = alloca ((NAMELENGTH) + 1);				\
-    struct partial_symbol psymbol;					\
-    memcpy (buf, (NAME), (NAMELENGTH));					\
-    buf[(NAMELENGTH)] = '\0';						\
-    SYMBOL_NAME (&psymbol) = bcache (buf, (NAMELENGTH) + 1, &(OBJFILE)->psymbol_cache); \
-    VT (&psymbol) = (VALUE);						\
-    SYMBOL_SECTION (&psymbol) = 0;					\
-    SYMBOL_LANGUAGE (&psymbol) = (LANGUAGE);				\
-    PSYMBOL_NAMESPACE (&psymbol) = (NAMESPACE);				\
-    PSYMBOL_CLASS (&psymbol) = (CLASS);					\
-    SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, (LANGUAGE));		\
-    psym = bcache (&psymbol, sizeof (struct partial_symbol), &(OBJFILE)->psymbol_cache); \
-    if ((LIST).next >= (LIST).list + (LIST).size)			\
-      extend_psymbol_list (&(LIST), (OBJFILE));				\
-    *(LIST).next++ = psym;						\
-    OBJSTAT ((OBJFILE), n_psyms++);					\
-  } while (0)
-
-/* Add a symbol with an integer value to a psymtab. */
-
-#define ADD_PSYMBOL_TO_LIST(name, namelength, namespace, class, list, value, language, objfile) \
-  ADD_PSYMBOL_VT_TO_LIST (name, namelength, namespace, class, list, value, SYMBOL_VALUE, language, objfile)
-
-/* Add a symbol with a CORE_ADDR value to a psymtab. */
-
-#define	ADD_PSYMBOL_ADDR_TO_LIST(name, namelength, namespace, class, list, value, language, objfile)\
-  ADD_PSYMBOL_VT_TO_LIST (name, namelength, namespace, class, list, value, SYMBOL_VALUE_ADDRESS, language, objfile)
-
-#endif	/* INLINE_ADD_PSYMBOL */
+extern void
+add_psymbol_to_list PARAMS ((char *, int, namespace_enum, enum address_class,
+			     struct psymbol_allocation_list *, long, CORE_ADDR,
+			     enum language, struct objfile *));
 
 extern void init_psymbol_list PARAMS ((struct objfile *, int));
 
@@ -218,6 +193,8 @@ extern int auto_solib_add;
 
 extern struct partial_symtab *
 allocate_psymtab PARAMS ((char *, struct objfile *));
+
+extern void find_lowest_section PARAMS ((bfd *, asection *, PTR));
 
 /* Remote targets may wish to use this as their load function.  */
 extern void generic_load PARAMS ((char *name, int from_tty));

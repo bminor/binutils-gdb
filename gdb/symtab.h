@@ -717,6 +717,13 @@ struct section_offsets
 
 #define	ANOFFSET(secoff, whichone)	(secoff->offsets[whichone])
 
+/* The maximum possible size of a section_offsets table.  */
+ 
+#define SIZEOF_SECTION_OFFSETS \
+  (sizeof (struct section_offsets) \
+   + sizeof (((struct section_offsets *) 0)->offsets) * (SECT_OFF_MAX-1))
+
+
 /* Each source file or header is represented by a struct symtab. 
    These objects are chained through the `next' field.  */
 
@@ -1061,6 +1068,11 @@ lookup_minimal_symbol PARAMS ((const char *, const char *, struct objfile *));
 
 extern struct minimal_symbol *
 lookup_minimal_symbol_text PARAMS ((const char *, const char *, struct objfile *));
+
+struct minimal_symbol *
+lookup_minimal_symbol_solib_trampoline PARAMS ((const char *,
+						const char *,
+						struct objfile *));
 
 extern struct minimal_symbol *
 lookup_minimal_symbol_by_pc PARAMS ((CORE_ADDR));

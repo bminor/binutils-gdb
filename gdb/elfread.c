@@ -78,9 +78,6 @@ elf_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *, int));
 static void
 free_elfinfo PARAMS ((void *));
 
-static struct section_offsets *
-elf_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
-
 static struct minimal_symbol *
 record_minimal_symbol_and_info PARAMS ((char *, CORE_ADDR,
 					enum minimal_symbol_type, char *,
@@ -714,31 +711,6 @@ elf_symfile_init (objfile)
   objfile->flags |= OBJF_REORDERED;
 }
 
-/* ELF specific parsing routine for section offsets.
-
-   Plain and simple for now.  */
-
-static
-struct section_offsets *
-elf_symfile_offsets (objfile, addr)
-     struct objfile *objfile;
-     CORE_ADDR addr;
-{
-  struct section_offsets *section_offsets;
-  int i;
-
-  objfile->num_sections = SECT_OFF_MAX;
-  section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct section_offsets)
-		   + sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
-
-  for (i = 0; i < SECT_OFF_MAX; i++)
-    ANOFFSET (section_offsets, i) = addr;
-
-  return section_offsets;
-}
-
 /* When handling an ELF file that contains Sun STABS debug info,
    some of the debug info is relative to the particular chunk of the
    section that was generated in its individual .o file.  E.g.
@@ -815,7 +787,8 @@ static struct sym_fns elf_sym_fns =
   elf_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   elf_symfile_read,	/* sym_read: read a symbol file into symtab */
   elf_symfile_finish,	/* sym_finish: finished with file, cleanup */
-  elf_symfile_offsets,	/* sym_offsets:  Translate ext. to int. relocation */
+  default_symfile_offsets,
+			/* sym_offsets:  Translate ext. to int. relocation */
   NULL			/* next: pointer to next struct sym_fns */
 };
 

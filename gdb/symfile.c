@@ -34,10 +34,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "complaints.h"
 #include "demangle.h"
 #include "inferior.h" /* for write_pc */
-
+#include "gdb-stabs.h"
 #include "obstack.h"
-#include <assert.h>
 
+#include <assert.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -364,6 +364,31 @@ find_lowest_section (abfd, sect, obj)
 	       <= bfd_section_size (abfd, sect)))
     *lowest = sect;
 }
+
+/* Parse the user's idea of an offset for dynamic linking, into our idea
+   of how to represent it for fast symbol reading.  This is the default 
+   version of the sym_fns.sym_offsets function for symbol readers that
+   don't need to do anything special.  It allocates a section_offsets table
+   for the objectfile OBJFILE and stuffs ADDR into all of the offsets.  */
+
+struct section_offsets *
+default_symfile_offsets (objfile, addr)
+     struct objfile *objfile;
+     CORE_ADDR addr;
+{
+  struct section_offsets *section_offsets;
+  int i;
+
+  objfile->num_sections = SECT_OFF_MAX;
+  section_offsets = (struct section_offsets *)
+    obstack_alloc (&objfile -> psymbol_obstack, SIZEOF_SECTION_OFFSETS);
+
+  for (i = 0; i < SECT_OFF_MAX; i++)
+    ANOFFSET (section_offsets, i) = addr;
+  
+  return section_offsets;
+}
+
 
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.

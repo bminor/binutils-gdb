@@ -1,3 +1,15 @@
+Tue Jul 02 21:41:20 1996  Mark Alexander  <marka@cygnus.com>
+
+	* coffread.c, dbxread.c, elfread.c, mipsread.c, nlmread.c, 
+	os9kread.c: Replace identical sym_offsets functions with
+	default_symfile_offsets.
+	* somread.c (som_symfile_offsets): Use new SIZEOF_SECTION_OFFSETS
+	macro to allocate section_offsets.
+	* symfile.c (default_symfile_offsets): New function.
+	* symfile.h: Declare default_symfile_offsets.
+	* symtab.h: Define SIZEOF_SECTION_OFFSETS macro to
+	simplify allocation of section_offsets.
+
 Tue Jul  2 15:04:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/powerpc/{linux.mh,xm-linux.h}: New files, for Linux on

@@ -1,5 +1,5 @@
 /* Read a symbol table in MIPS' format (Third-Eye).
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
    Contributed by Alessandro Forin (af@cs.cmu.edu) at CMU.  Major work
    by Per Bothner, John Gilmore and Ian Lance Taylor at Cygnus Support.
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Read symbols from an ECOFF file.  Most of the work is done in
    mdebugread.c.  */
@@ -53,9 +53,6 @@ mipscoff_symfile_read PARAMS ((struct objfile *, struct section_offsets *,
 
 static void
 mipscoff_symfile_finish PARAMS ((struct objfile *));
-
-static struct section_offsets *
-mipscoff_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
 static void
 read_alphacoff_dynamic_symtab PARAMS ((struct section_offsets *,
@@ -108,15 +105,32 @@ mipscoff_symfile_read (objfile, section_offsets, mainline)
   mdebug_build_psymtabs (objfile, &ecoff_backend (abfd)->debug_swap,
 			 &ecoff_data (abfd)->debug_info, section_offsets);
 
-  /* Add the dynamic symbols if we are reading the main symbol table.  */
+  /* Add alpha coff dynamic symbols.  */
 
-  if (mainline)
-    read_alphacoff_dynamic_symtab (section_offsets, objfile);
+  read_alphacoff_dynamic_symtab (section_offsets, objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 
   install_minimal_symbols (objfile);
+
+  /* If the entry_file bounds are still unknown after processing the
+     partial symbols, then try to set them from the minimal symbols
+     surrounding the entry_point.  */
+
+  if (mainline
+      && objfile->ei.entry_point != INVALID_ENTRY_POINT
+      && objfile->ei.entry_file_lowpc == INVALID_ENTRY_LOWPC)
+    {
+      struct minimal_symbol *m;
+
+      m = lookup_minimal_symbol_by_pc (objfile->ei.entry_point);
+      if (m && SYMBOL_NAME (m + 1))
+	{
+	  objfile->ei.entry_file_lowpc = SYMBOL_VALUE_ADDRESS (m);
+	  objfile->ei.entry_file_highpc = SYMBOL_VALUE_ADDRESS (m + 1);
+	}
+    }
 
   do_cleanups (back_to);
 }
@@ -128,29 +142,6 @@ static void
 mipscoff_symfile_finish (objfile)
      struct objfile *objfile;
 {
-}
-
-/* Fake up identical offsets for all sections.  */
-
-static struct section_offsets *
-mipscoff_symfile_offsets (objfile, addr)
-     struct objfile *objfile;
-     CORE_ADDR addr;
-{
-  struct section_offsets *section_offsets;
-  int i;
-
-  objfile->num_sections = SECT_OFF_MAX;
-  section_offsets = ((struct section_offsets *)
-		     obstack_alloc (&objfile->psymbol_obstack,
-				    (sizeof (struct section_offsets)
-				     + (sizeof (section_offsets->offsets)
-					* (SECT_OFF_MAX - 1)))));
-
-  for (i = 0; i < SECT_OFF_MAX; i++)
-    ANOFFSET (section_offsets, i) = addr;
-
-  return section_offsets;
 }
 
 /* Alpha OSF/1 encapsulates the dynamic symbols in ELF format in a
@@ -309,12 +300,15 @@ read_alphacoff_dynamic_symtab (section_offsets, objfile)
 	break;
       else if (dyn_tag == DT_MIPS_LOCAL_GOTNO)
 	{
-	  dt_mips_local_gotno = bfd_h_get_32 (abfd,
-					      (bfd_byte *) x_dynp->d_un.d_val);
+	  if (dt_mips_local_gotno < 0)
+	    dt_mips_local_gotno
+	      = bfd_h_get_32 (abfd, (bfd_byte *) x_dynp->d_un.d_val);
 	}
       else if (dyn_tag == DT_MIPS_GOTSYM)
 	{
-	  dt_mips_gotsym = bfd_h_get_32 (abfd, (bfd_byte *) x_dynp->d_un.d_val);
+	  if (dt_mips_gotsym < 0)
+	    dt_mips_gotsym
+	      = bfd_h_get_32 (abfd, (bfd_byte *) x_dynp->d_un.d_val);
 	}
     }
   if (dt_mips_local_gotno < 0 || dt_mips_gotsym < 0)
@@ -446,7 +440,7 @@ static struct sym_fns ecoff_sym_fns =
   mipscoff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   mipscoff_symfile_read,	/* sym_read: read a symbol file into symtab */
   mipscoff_symfile_finish,	/* sym_finish: finished with file, cleanup */
-  mipscoff_symfile_offsets,	/* sym_offsets: dummy FIXME til implem sym reloc */
+  default_symfile_offsets,	/* sym_offsets: dummy FIXME til implem sym reloc */
   NULL				/* next: pointer to next struct sym_fns */
 };
 
