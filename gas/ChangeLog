@@ -1,3 +1,14 @@
+1999-01-28  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-fr30.c (fr30_fix_adjustable): New function.
+	(fr30_force_relocation): Default to 0.
+
+	* config/tc-fr30.h (obj_fix_adjustable): Define.
+	(TC_FORCE_RELOCATION): Define.
+
+	* cgen.c (gas_cgen_md_apply_fix3): Do not apply fixes to VTABLE
+	relocs. 
+
 1999-01-16  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (write_2_short): Do not generate a sequential
