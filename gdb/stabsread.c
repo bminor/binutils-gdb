@@ -1802,9 +1802,10 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGPARM;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
-      if (SYMBOL_VALUE (sym) >= NUM_REGS)
+      if (SYMBOL_VALUE (sym) >= NUM_REGS + NUM_PSEUDO_REGS)
 	{
-	  complain (&reg_value_complaint, SYMBOL_VALUE (sym), NUM_REGS,
+	  complain (&reg_value_complaint, SYMBOL_VALUE (sym),
+		    NUM_REGS + NUM_PSEUDO_REGS,
 		    SYMBOL_SOURCE_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}
@@ -1817,9 +1818,10 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGISTER;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
-      if (SYMBOL_VALUE (sym) >= NUM_REGS)
+      if (SYMBOL_VALUE (sym) >= NUM_REGS + NUM_PSEUDO_REGS)
 	{
-	  complain (&reg_value_complaint, SYMBOL_VALUE (sym), NUM_REGS,
+	  complain (&reg_value_complaint, SYMBOL_VALUE (sym),
+		    NUM_REGS + NUM_PSEUDO_REGS,
 		    SYMBOL_SOURCE_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}
@@ -2066,9 +2068,10 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
-      if (SYMBOL_VALUE (sym) >= NUM_REGS)
+      if (SYMBOL_VALUE (sym) >= NUM_REGS + NUM_PSEUDO_REGS)
 	{
-	  complain (&reg_value_complaint, SYMBOL_VALUE (sym), NUM_REGS,
+	  complain (&reg_value_complaint, SYMBOL_VALUE (sym),
+		    NUM_REGS + NUM_PSEUDO_REGS,
 		    SYMBOL_SOURCE_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}

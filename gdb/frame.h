@@ -81,7 +81,7 @@ struct frame_info
        address where the sp was saved.  */
     /* Allocated by frame_saved_regs_zalloc () which is called /
        initialized by FRAME_INIT_SAVED_REGS(). */
-    CORE_ADDR *saved_regs;	/*NUM_REGS */
+    CORE_ADDR *saved_regs;	/*NUM_REGS + NUM_PSEUDO_REGS*/
 
 #ifdef EXTRA_FRAME_INFO
     /* XXXX - deprecated */
@@ -114,11 +114,17 @@ enum print_what
     LOC_AND_ADDRESS 
   };
 
-/* Allocate additional space for appendices to a struct frame_info. */
+/* Allocate additional space for appendices to a struct frame_info.
+   NOTE: Much of GDB's code works on the assumption that the allocated
+   saved_regs[] array is the size specified below.  If you try to make
+   that array smaller, GDB will happily walk off its end. */
 
-#ifndef SIZEOF_FRAME_SAVED_REGS
-#define SIZEOF_FRAME_SAVED_REGS (sizeof (CORE_ADDR) * (NUM_REGS))
+#ifdef SIZEOF_FRAME_SAVED_REGS
+#error "SIZEOF_FRAME_SAVED_REGS can not be re-defined"
 #endif
+#define SIZEOF_FRAME_SAVED_REGS \
+        (sizeof (CORE_ADDR) * (NUM_REGS+NUM_PSEUDO_REGS))
+
 extern void *frame_obstack_alloc (unsigned long size);
 extern void frame_saved_regs_zalloc (struct frame_info *);
 

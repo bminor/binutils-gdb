@@ -1,3 +1,17 @@
+2001-03-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.h (SIZEOF_FRAME_SAVED_REGS): Report an error if macro
+	already defined.
+	
+	From 2000-08-25 Stephane Carrez <Stephane.Carrez@worldnet.fr>:
+        * stabsread.c (define_symbol): A parameter ('R'), a local ('r'),
+        or a reference ('a') can be in a pseudo register.
+        * infcmd.c (do_registers_info): Must take into account the pseudo
+        registers to print their value.
+        (registers_info): Likewise.
+        * stack.c (frame_info): Likewise.
+        * frame.h (SIZEOF_FRAME_SAVED_REGS): Save the pseudo registers.
+
 2001-03-21  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	Unified support for hardware breakpoints and watchpoints on
