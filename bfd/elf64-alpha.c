@@ -135,6 +135,9 @@ static bfd_boolean elf64_alpha_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static bfd_boolean elf64_alpha_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+static void elf64_alpha_emit_dynrel
+  PARAMS ((bfd *, struct bfd_link_info *, asection *, asection *,
+	   bfd_vma, long, long, bfd_vma));
 static bfd_boolean elf64_alpha_relocate_section_r
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -1638,6 +1641,17 @@ elf64_alpha_relax_got_load (info, symval, irel, r_type)
   bfd_put_32 (info->abfd, (bfd_vma) insn, info->contents + irel->r_offset);
   info->changed_contents = TRUE;
 
+  /* Reduce the use count on this got entry by one, possibly
+     eliminating it.  */
+  if (--info->gotent->use_count == 0)
+    {
+      int sz = alpha_got_entry_size (r_type);
+      alpha_elf_tdata (info->gotobj)->total_got_size -= sz;
+      if (!info->h)
+	alpha_elf_tdata (info->gotobj)->local_got_size -= sz;
+    }
+
+  /* Smash the existing GOT relocation for its 16-bit immediate pair.  */
   switch (r_type)
     {
     case R_ALPHA_LITERAL:
@@ -1656,16 +1670,6 @@ elf64_alpha_relax_got_load (info, symval, irel, r_type)
 
   irel->r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info), r_type);
   info->changed_relocs = TRUE;
-
-  /* Reduce the use count on this got entry by one, possibly
-     eliminating it.  */
-  if (--info->gotent->use_count == 0)
-    {
-      int sz = alpha_got_entry_size (r_type);
-      alpha_elf_tdata (info->gotobj)->total_got_size -= sz;
-      if (!info->h)
-	alpha_elf_tdata (info->gotobj)->local_got_size -= sz;
-    }
 
   /* ??? Search forward through this basic block looking for insns
      that use the target register.  Stop after an insn modifying the
@@ -1748,12 +1752,14 @@ elf64_alpha_relax_tls_get_addr (info, symval, irel, is_gd)
   bfd_byte *pos[5];
   unsigned int insn;
   Elf_Internal_Rela *gpdisp, *hint;
-  bfd_boolean dynamic, use_gottprel;
+  bfd_boolean dynamic, use_gottprel, pos1_unusable;
 
   dynamic = alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info);
 
   /* ??? For LD relaxation, we need a symbol referencing the beginning
      of the TLS segment.  */
+  /* ??? The STN_UNDEF symbol (dynindex 0) works fine for this.  Adjust
+     the code below to expect that.  */
   if (!is_gd)
     return TRUE;
 
@@ -1793,15 +1799,20 @@ elf64_alpha_relax_tls_get_addr (info, symval, irel, is_gd)
   pos[2] = info->contents + irel[2].r_offset;
   pos[3] = info->contents + gpdisp->r_offset;
   pos[4] = pos[3] + gpdisp->r_addend;
+  pos1_unusable = FALSE;
 
-  /* Only positions 0 and 1 are allowed to be out of order.  */
-  if (pos[1] < pos[0])
+  /* Generally, the positions are not allowed to be out of order, lest the
+     modified insn sequence have different register lifetimes.  We can make
+     an exception when pos 1 is adjacent to pos 0.  */
+  if (pos[1] + 4 == pos[0])
     {
       bfd_byte *tmp = pos[0];
       pos[0] = pos[1];
       pos[1] = tmp;
     }
-  if (pos[1] >= pos[2] || pos[2] >= pos[3] || pos[3] >= pos[4])
+  else if (pos[1] < pos[0])
+    pos1_unusable = TRUE;
+  if (pos[1] >= pos[2] || pos[2] >= pos[3])
     return TRUE;
 
   /* Reduce the use count on the LITERAL relocation.  Do this before we
@@ -1881,7 +1892,8 @@ elf64_alpha_relax_tls_get_addr (info, symval, irel, is_gd)
 	    break;
 	  }
 	else if (disp >= -(bfd_signed_vma) 0x80000000
-		 && disp < (bfd_signed_vma) 0x7fff8000)
+		 && disp < (bfd_signed_vma) 0x7fff8000
+		 && !pos1_unusable)
 	  {
 	    insn = (OP_LDAH << 26) | (16 << 21) | (31 << 16);
 	    bfd_put_32 (info->abfd, (bfd_vma) insn, pos[0]);
@@ -3842,18 +3854,16 @@ alpha_dynamic_entries_for_reloc (r_type, dynamic, shared)
     case R_ALPHA_TLSLDM:
       return shared;
     case R_ALPHA_LITERAL:
+    case R_ALPHA_GOTTPREL:
       return dynamic || shared;
     case R_ALPHA_GOTDTPREL:
-    case R_ALPHA_GOTTPREL:
       return dynamic;
 
     /* May appear in data sections.  */
     case R_ALPHA_REFLONG:
     case R_ALPHA_REFQUAD:
-      return dynamic || shared;
-    case R_ALPHA_SREL64:
     case R_ALPHA_TPREL64:
-      return dynamic;
+      return dynamic || shared;
 
     /* Everything else is illegal.  We'll issue an error during
        relocate_section.  */
@@ -4145,6 +4155,38 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 #undef add_dynamic_entry
 
   return TRUE;
+}
+
+/* Emit a dynamic relocation for (DYNINDX, RTYPE, ADDEND) at (SEC, OFFSET)
+   into the next available slot in SREL.  */
+
+static void
+elf64_alpha_emit_dynrel (abfd, info, sec, srel, offset, dynindx, rtype, addend)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec, *srel;
+     bfd_vma offset, addend;
+     long dynindx, rtype;
+{
+  Elf_Internal_Rela outrel;
+  bfd_byte *loc;
+
+  BFD_ASSERT (srel != NULL);
+
+  outrel.r_info = ELF64_R_INFO (dynindx, rtype);
+  outrel.r_addend = addend;
+
+  offset = _bfd_elf_section_offset (abfd, info, sec, offset);
+  if ((offset | 1) != (bfd_vma) -1)
+    outrel.r_offset = sec->output_section->vma + sec->output_offset + offset;
+  else
+    memset (&outrel, 0, sizeof (outrel));
+
+  loc = srel->contents;
+  loc += srel->reloc_count++ * sizeof (Elf64_External_Rela);
+  bfd_elf64_swap_reloca_out (abfd, &outrel, loc);
+  BFD_ASSERT (sizeof (Elf64_External_Rela) * srel->reloc_count
+	      <= srel->_cooked_size);
 }
 
 /* Relocate an Alpha ELF section for a relocatable link.
@@ -4464,25 +4506,9 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		 RELATIVE reloc, otherwise it will be handled in
 		 finish_dynamic_symbol.  */
 	      if (info->shared && !dynamic_symbol_p)
-		{
-		  Elf_Internal_Rela outrel;
-		  bfd_byte *loc;
-
-		  BFD_ASSERT(srelgot != NULL);
-
-		  outrel.r_offset = (sgot->output_section->vma
-				     + sgot->output_offset
-				     + gotent->got_offset);
-		  outrel.r_info = ELF64_R_INFO (0, R_ALPHA_RELATIVE);
-		  outrel.r_addend = value;
-
-		  loc = srelgot->contents;
-		  loc += srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
-		  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
-		  BFD_ASSERT (sizeof (Elf64_External_Rela)
-			      * srelgot->reloc_count
-			      <= srelgot->_cooked_size);
-		}
+		elf64_alpha_emit_dynrel (output_bfd, info, sgot, srelgot,
+					 gotent->got_offset, 0,
+					 R_ALPHA_RELATIVE, value);
 	    }
 
 	  value = (sgot->output_section->vma
@@ -4607,8 +4633,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_ALPHA_DTPREL64:
 	case R_ALPHA_TPREL64:
 	  {
-	    Elf_Internal_Rela outrel;
-	    bfd_byte *loc;
+	    long dynindx, dyntype = r_type;
+	    bfd_vma dynaddend;
 
 	    /* Careful here to remember RELATIVE relocations for global
 	       variables for symbolic shared objects.  */
@@ -4616,8 +4642,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (dynamic_symbol_p)
 	      {
 		BFD_ASSERT(h->root.dynindx != -1);
-		outrel.r_info = ELF64_R_INFO (h->root.dynindx, r_type);
-		outrel.r_addend = addend;
+		dynindx = h->root.dynindx;
+		dynaddend = addend;
 		addend = 0, value = 0;
 	      }
 	    else if (r_type == R_ALPHA_DTPREL64)
@@ -4629,8 +4655,13 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    else if (r_type == R_ALPHA_TPREL64)
 	      {
 		BFD_ASSERT(tls_segment != NULL);
-		value -= dtp_base;
-		goto default_reloc;
+		if (!info->shared)
+		  {
+		    value -= tp_base;
+		    goto default_reloc;
+		  }
+		dynindx = 0;
+		dynaddend = value - dtp_base;
 	      }
 	    else if (info->shared
 		     && r_symndx != 0
@@ -4644,28 +4675,16 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		       h->root.root.root.string);
 		    ret_val = FALSE;
 		  }
-		outrel.r_info = ELF64_R_INFO (0, R_ALPHA_RELATIVE);
-		outrel.r_addend = value;
+		dynindx = 0;
+		dyntype = R_ALPHA_RELATIVE;
+		dynaddend = value;
 	      }
 	    else
 	      goto default_reloc;
 
-	    BFD_ASSERT(srel != NULL);
-
-	    outrel.r_offset =
-	      _bfd_elf_section_offset (output_bfd, info, input_section,
-				       rel->r_offset);
-	    if ((outrel.r_offset | 1) != (bfd_vma) -1)
-	      outrel.r_offset += (input_section->output_section->vma
-				  + input_section->output_offset);
-	    else
-	      memset (&outrel, 0, sizeof outrel);
-
-	    loc = srel->contents;
-	    loc += srel->reloc_count++ * sizeof (Elf64_External_Rela);
-	    bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
-	    BFD_ASSERT (sizeof (Elf64_External_Rela) * srel->reloc_count
-			<= srel->_cooked_size);
+	    elf64_alpha_emit_dynrel (output_bfd, info, input_section,
+				     srel, rel->r_offset, dynindx,
+				     dyntype, dynaddend);
 	  }
 	  goto default_reloc;
 
@@ -4707,26 +4726,9 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		 DTPMOD64 reloc, otherwise it will be handled in
 		 finish_dynamic_symbol.  */
 	      if (info->shared && !dynamic_symbol_p)
-		{
-		  Elf_Internal_Rela outrel;
-		  bfd_byte *loc;
-
-		  BFD_ASSERT(srelgot != NULL);
-
-		  outrel.r_offset = (sgot->output_section->vma
-				     + sgot->output_offset
-				     + gotent->got_offset);
-		  /* ??? Proper dynindx here.  */
-		  outrel.r_info = ELF64_R_INFO (0, R_ALPHA_DTPMOD64);
-		  outrel.r_addend = 0;
-
-		  loc = srelgot->contents;
-		  loc += srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
-		  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
-		  BFD_ASSERT (sizeof (Elf64_External_Rela)
-			      * srelgot->reloc_count
-			      <= srelgot->_cooked_size);
-		}
+		elf64_alpha_emit_dynrel (output_bfd, info, sgot, srelgot,
+					 gotent->got_offset, 0,
+					 R_ALPHA_DTPMOD64, 0);
 
 	      if (dynamic_symbol_p || r_type == R_ALPHA_TLSLDM)
 		value = 0;
@@ -4800,7 +4802,18 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  BFD_ASSERT(tls_segment != NULL);
-		  value -= (r_type == R_ALPHA_GOTDTPREL ? dtp_base : tp_base);
+		  if (r_type == R_ALPHA_GOTDTPREL)
+		    value -= dtp_base;
+		  else if (!info->shared)
+		    value -= tp_base;
+		  else
+		    {
+		      elf64_alpha_emit_dynrel (output_bfd, info, sgot, srelgot,
+					       gotent->got_offset, 0,
+					       R_ALPHA_TPREL64,
+					       value - dtp_base);
+		      value = 0;
+		    }
 		}
 	      bfd_put_64 (output_bfd, value,
 			  sgot->contents + gotent->got_offset);
@@ -4957,19 +4970,9 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
 		          sgot->contents + gotent->got_offset);
 
 	      if (info->shared)
-		{
-		  outrel.r_offset = (sgot->output_section->vma
-				     + sgot->output_offset
-				     + gotent->got_offset);
-		  outrel.r_info = ELF64_R_INFO(0, R_ALPHA_RELATIVE);
-		  outrel.r_addend = plt_addr;
-
-		  loc = srel->contents;
-		  loc += srel->reloc_count++ * sizeof (Elf64_External_Rela);
-		  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
-		  BFD_ASSERT (sizeof (Elf64_External_Rela) * srel->reloc_count
-			      <= srel->_cooked_size);
-		}
+		elf64_alpha_emit_dynrel (output_bfd, info, sgot, srel,
+					 gotent->got_offset, 0,
+					 R_ALPHA_RELATIVE, plt_addr);
 
 	      gotent = gotent->next;
 	    }
@@ -4980,8 +4983,6 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
     {
       /* Fill in the dynamic relocations for this symbol's .got entries.  */
       asection *srel;
-      Elf_Internal_Rela outrel;
-      bfd_byte *loc;
       struct alpha_elf_got_entry *gotent;
 
       srel = bfd_get_section_by_name (dynobj, ".rela.got");
@@ -4992,15 +4993,12 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
 	   gotent = gotent->next)
 	{
 	  asection *sgot;
-	  int r_type;
+	  long r_type;
 
 	  if (gotent->use_count == 0)
 	    continue;
 
 	  sgot = alpha_elf_tdata (gotent->gotobj)->got;
-	  outrel.r_offset = (sgot->output_section->vma
-			     + sgot->output_offset
-			     + gotent->got_offset);
 
 	  r_type = gotent->reloc_type;
 	  switch (r_type)
@@ -5022,25 +5020,14 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
 	      abort ();
 	    }
 
-	  outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
-	  outrel.r_addend = gotent->addend;
-
-	  loc = srel->contents;
-	  loc += srel->reloc_count++ * sizeof (Elf64_External_Rela);
-	  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+	  elf64_alpha_emit_dynrel (output_bfd, info, sgot, srel, 
+				   gotent->got_offset, h->dynindx,
+				   r_type, gotent->addend);
 
 	  if (gotent->reloc_type == R_ALPHA_TLSGD)
-	    {
-	      outrel.r_offset += 8;
-	      outrel.r_info = ELF64_R_INFO (h->dynindx, R_ALPHA_DTPREL64);
-
-	      loc = srel->contents;
-	      loc += srel->reloc_count++ * sizeof (Elf64_External_Rela);
-	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
-	    }
-
-	  BFD_ASSERT (sizeof (Elf64_External_Rela) * srel->reloc_count
-		      <= srel->_cooked_size);
+	    elf64_alpha_emit_dynrel (output_bfd, info, sgot, srel, 
+				     gotent->got_offset + 8, h->dynindx,
+				     R_ALPHA_DTPREL64, gotent->addend);
 	}
     }
 

@@ -1,3 +1,17 @@
+2003-01-21  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (alpha_dynamic_entries_for_reloc): GOTTPREL and
+	TPREL also get a reloc if shared.  Remove SREL support.
+	(elf64_alpha_emit_dynrel): New.
+	(elf64_alpha_relocate_section): Use it.  Resolve dynamic TPREL 
+	and GOTTPREL relocs to local symbols against the tp base.
+	(elf64_alpha_finish_dynamic_symbol): Use elf64_alpha_emit_dynrel.
+
+	* elf64-alpha.c (elf64_alpha_relax_got_load): Decrement got
+	use count before clobbering r_type.
+	(elf64_alpha_relax_tls_get_addr): Don't use pos[1] if insn
+	ordering would mean dataflow inspection is necessary.
+
 2003-01-20  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* coffcode.h (coff_set_flags): Added get/set arch hooks.
