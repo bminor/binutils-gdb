@@ -85,9 +85,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 /* start-sanitize-vr4320 */
 #define N4	INSN_4320
 /* end-sanitize-vr4320 */
-/* start-sanitize-vr5400 */
+/* start-sanitize-cygnus */
 #define N5	INSN_5400
-/* end-sanitize-vr5400 */
+/* end-sanitize-cygnus */
 /* start-sanitize-r5900 */
 #define T5	INSN_5900
 /* end-sanitize-r5900 */
@@ -111,6 +111,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 /* start-sanitize-tx49 */  \
             | T4           \
 /* end-sanitize-tx49 */    \
+/* start-sanitize-r5900 */  \
+            | T5           \
+/* end-sanitize-r5900 */    \
             )
 
 /* The order of overloaded instructions matters.  Label arguments and
@@ -140,9 +143,146 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"bal",     "p",	0x04110000, 0xffff0000,	UBD|WR_31,	I1	},/* bgezal 0*/
 
 /* start-sanitize-r5900 */
-#include "vu0.h"
-/* end-sanitize-r5900 */
+{"cfc2.ni",  "t,G",	0x48400000, 0xffe007ff, LCD|WR_t|RD_C2, I1      },
+{"cfc2.i",   "t,G",	0x48400001, 0xffe007ff, LCD|WR_t|RD_C2, I1      },
+{"ctc2.ni",  "t,G",	0x48c00000, 0xffe007ff, COD|RD_t|WR_CC, I1      },
+{"ctc2.i",   "t,G",	0x48c00001, 0xffe007ff, COD|RD_t|WR_CC, I1      },
+{"lqc2",     "1,o(b)",	0xd8000000, 0xfc000000,	0, 		T5},
+{"qmfc2",    "t,2",	0x48200000, 0xffe007ff,	0, 		T5},
+{"qmfc2.ni", "t,2",	0x48200000, 0xffe007ff,	0, 		T5},
+{"qmfc2.i",  "t,2",	0x48200001, 0xffe007ff,	0, 		T5},
+{"qmtc2",    "t,2",	0x48a00000, 0xffe007ff,	0, 		T5},
+{"qmtc2.ni", "t,2",	0x48a00000, 0xffe007ff,	0, 		T5},
+{"qmtc2.i", "t,2",	0x48a00001, 0xffe007ff,	0, 		T5},
+{"sqc2",     "1,o(b)",	0xf8000000, 0xfc000000,	0, 		T5},
+{"vabs",   "&1K,2K",	0x4a0001fd, 0xfe0007ff,	0, 		T5},
+{"vadd",   "&3K,2K,1K",	0x4a000028, 0xfe00003f,	0, 		T5},
+{"vaddi",  "&3K,2K,J",	0x4a000022, 0xfe1f003f,	0, 		T5},
+{"vaddq",  "&3K,2K,Q",	0x4a000020, 0xfe1f003f,	0, 		T5},
+{"vaddw",  "&3K,2K,1#w",	0x4a000003, 0xfe00003f,	0, 		T5},
+{"vaddx",  "&3K,2K,1#x",	0x4a000000, 0xfe00003f,	0, 		T5},
+{"vaddy",  "&3K,2K,1#y",	0x4a000001, 0xfe00003f,	0, 		T5},
+{"vaddz",  "&3K,2K,1#z",	0x4a000002, 0xfe00003f,	0, 		T5},
+{"vadda",  "&UK,1K,2K",	0x4a0002bc, 0xfe0007ff,	0, 		T5},
+{"vaddai", "&UK,2K,J",	0x4a00023e, 0xfe1f07ff,	0, 		T5},
+{"vaddaq", "&UK,2K,Q",	0x4a00023c, 0xfe1f07ff,	0, 		T5},
+{"vaddaw", "&UK,2K,1#w",	0x4a00003f, 0xfe0007ff,	0, 		T5},
+{"vaddax", "&UK,2K,1#x",	0x4a00003c, 0xfe0007ff,	0, 		T5},
+{"vadday", "&UK,2K,1#y",	0x4a00003d, 0xfe0007ff,	0, 		T5},
+{"vaddaz", "&UK,2K,1#z",	0x4a00003e, 0xfe0007ff,	0, 		T5},
+{"vcallms","O",		0x4a000038, 0xffe0003f,	0, 		T5},
+{"vcallmsr", "9",	0x4a00d839, 0xffffffff,	0, 		T5},
+{"vclip","2",		0x4be001ff, 0xffff07ff,	0, 		T5},
+{"vdiv","Q,8,7",	0x4a0003bc, 0xfe0007ff,	0, 		T5},
+{"vftoi0", "&1K,2K",	0x4a00017c, 0xfe0007ff,	0, 		T5},
+{"vftoi4", "&1K,2K",	0x4a00017d, 0xfe0007ff,	0, 		T5},
+{"vftoi12", "&1K,2K",	0x4a00017e, 0xfe0007ff,	0, 		T5},
+{"vftoi15", "&1K,2K",	0x4a00017f, 0xfe0007ff,	0, 		T5},
+{"viadd","6,5,4",	0x4a000030, 0xffe0003f,	0, 		T5},
+{"viaddi","4,5,0",	0x4a000032, 0xffe0003f,	0, 		T5},
+{"viand","6,5,4",	0x4a000034, 0xffe0003f,	0, 		T5},
+{"vilwr.w",  "4,(5)",	0x4a2003fe, 0xffe007ff,	0, 		T5},
+{"vilwr.x",  "4,(5)",	0x4b0003fe, 0xffe007ff,	0, 		T5},
+{"vilwr.y",  "4,(5)",	0x4a8003fe, 0xffe007ff,	0, 		T5},
+{"vilwr.z",  "4,(5)",	0x4a4003fe, 0xffe007ff,	0, 		T5},
+{"vior","6,5,4",	0x4a000035, 0xffe0003f,	0, 		T5},
+{"viswr.w",  "4,(5)",	0x4a2003ff, 0xffe007ff,	0, 		T5},
+{"viswr.x",  "4,(5)",	0x4b0003ff, 0xffe007ff,	0, 		T5},
+{"viswr.y",  "4,(5)",	0x4a8003ff, 0xffe007ff,	0, 		T5},
+{"viswr.z",  "4,(5)",	0x4a4003ff, 0xffe007ff,	0, 		T5},
+{"visub","6,5,4",	0x4a000031, 0xffe0003f,	0, 		T5},
+{"vitof0", "&1K,2K",	0x4a00013c, 0xfe0007ff,	0, 		T5},
+{"vitof4", "&1K,2K",	0x4a00013d, 0xfe0007ff,	0, 		T5},
+{"vitof12", "&1K,2K",	0x4a00013e, 0xfe0007ff,	0, 		T5},
+{"vitof15", "&1K,2K",	0x4a00013f, 0xfe0007ff,	0, 		T5},
+{"vlqd",  "&1K,(--5)K",	0x4a00037e, 0xfe0007ff,	0, 		T5},
+{"vlqi",  "&1K,(5++)K",	0x4a00037c, 0xfe0007ff,	0, 		T5},
+{"vmadd", "&3K,2K,1K",	0x4a000029, 0xfe00003f,	0, 		T5},
+{"vmaddi", "&3K,2K,J",	0x4a000023, 0xfe1f003f,	0, 		T5},
+{"vmaddq", "&3K,2K,Q",	0x4a000021, 0xfe1f003f,	0, 		T5},
+{"vmaddw", "&3K,2K,1#w",	0x4a00000b, 0xfe00003f,	0, 		T5},
+{"vmaddx", "&3K,2K,1#x",	0x4a000008, 0xfe00003f,	0, 		T5},
+{"vmaddy", "&3K,2K,1#y",	0x4a000009, 0xfe00003f,	0, 		T5},
+{"vmaddz", "&3K,2K,1#z",	0x4a00000a, 0xfe00003f,	0, 		T5},
+{"vmadda", "&UK,2K,1K",	0x4a0002bd, 0xfe0007ff,	0, 		T5},
+{"vmaddai", "&UK,2K,J",	0x4a00023f, 0xfe1f07ff,	0, 		T5},
+{"vmaddaq", "&UK,2K,Q",	0x4a00023d, 0xfe1f07ff,	0, 		T5},
+{"vmaddaw", "&UK,2K,1#w",	0x4a0000bf, 0xfe0007ff,	0, 		T5},
+{"vmaddax", "&UK,2K,1#x",	0x4a0000bc, 0xfe0007ff,	0, 		T5},
+{"vmadday", "&UK,2K,1#y",	0x4a0000bd, 0xfe0007ff,	0, 		T5},
+{"vmaddaz", "&UK,2K,1#z",	0x4a0000be, 0xfe0007ff,	0, 		T5},
+{"vmax",    "&3K,2K,1K",	0x4a00002b, 0xfe00003f,	0, 		T5},
+{"vmaxi",   "&3K,2K,J",	0x4a00001d, 0xfe1f003f,	0, 		T5},
+{"vmaxw",   "&3K,2K,1#w",	0x4a000013, 0xfe00003f,	0, 		T5},
+{"vmaxx",   "&3K,2K,1#x",	0x4a000010, 0xfe00003f,	0, 		T5},
+{"vmaxy",   "&3K,2K,1#y",	0x4a000011, 0xfe00003f,	0, 		T5},
+{"vmaxz",   "&3K,2K,1#z",	0x4a000012, 0xfe00003f,	0, 		T5},
+{"vmfir",   "&1K,5",	0x4a0003fd, 0xfe0007ff,	0, 		T5},
+{"vmini",   "&3K,2K,1K",	0x4a00002f, 0xfe00003f,	0, 		T5},
+{"vminii",  "&3K,2K,J",	0x4a00001f, 0xfe1f003f,	0, 		T5},
+{"vminiw",  "&3K,2K,1#w",	0x4a000017, 0xfe00003f,	0, 		T5},
+{"vminix",  "&3K,2K,1#x",	0x4a000014, 0xfe00003f,	0, 		T5},
+{"vminiy",  "&3K,2K,1#y",	0x4a000015, 0xfe00003f,	0, 		T5},
+{"vminiz",  "&3K,2K,1#z",	0x4a000016, 0xfe00003f,	0, 		T5},
+{"vmove",   "&1K,2K",	0x4a00033c, 0xfe0007ff,	0, 		T5},
+{"vmr32",   "&1K,2K",	0x4a00033d, 0xfe0007ff,	0, 		T5},
+{"vmsub",   "&3K,2K,1K",	0x4a00002d, 0xfe00003f,	0, 		T5},
+{"vmsubi",  "&3K,2K,J",	0x4a000027, 0xfe1f003f,	0, 		T5},
+{"vmsubq",  "&3K,2K,Q",	0x4a000025, 0xfe1f003f,	0, 		T5},
+{"vmsubw",  "&3K,2K,1#w",	0x4a00000f, 0xfe00003f,	0, 		T5},
+{"vmsubx",  "&3K,2K,1#x",	0x4a00000c, 0xfe00003f,	0, 		T5},
+{"vmsuby",  "&3K,2K,1#y",	0x4a00000d, 0xfe00003f,	0, 		T5},
+{"vmsubz",  "&3K,2K,1#z",	0x4a00000e, 0xfe00003f,	0, 		T5},
+{"vmsuba",  "&UK,1K,2K",	0x4a0002fd, 0xfe0007ff,	0, 		T5},
+{"vmsubai", "&UK,2K,J",	0x4a00027f, 0xfe1f07ff,	0, 		T5},
+{"vmsubaq", "&UK,2K,Q",	0x4a00027d, 0xfe1f07ff,	0, 		T5},
+{"vmsubaw", "&UK,2K,1#w",	0x4a0000ff, 0xfe0007ff,	0, 		T5},
+{"vmsubax", "&UK,2K,1#x",	0x4a0000fc, 0xfe0007ff,	0, 		T5},
+{"vmsubay", "&UK,2K,1#y",	0x4a0000fd, 0xfe0007ff,	0, 		T5},
+{"vmsubaz", "&UK,2K,1#z",	0x4a0000fe, 0xfe0007ff,	0, 		T5},
+{"vmtir",   "&4,2K",	0x4a0003fc, 0xfe0007ff,	0, 		T5},
+{"vmul",    "&3K,2K,1K",	0x4a00002a, 0xfe00003f,	0, 		T5},
+{"vmuli",   "&3K,2K,J",	0x4a00001e, 0xfe1f003f,	0, 		T5},
+{"vmulq",   "&3K,2K,Q",	0x4a00001c, 0xfe1f003f,	0, 		T5},
+{"vmulw",   "&3K,2K,1#w",	0x4a00001b, 0xfe00003f,	0, 		T5},
+{"vmulx",   "&3K,2K,1#x",	0x4a000018, 0xfe00003f,	0, 		T5},
+{"vmuly",   "&3K,2K,1#y",	0x4a000019, 0xfe00003f,	0, 		T5},
+{"vmulz",   "&3K,2K,1#z",	0x4a00001a, 0xfe00003f,	0, 		T5},
+{"vmula",   "&UK,2K,1K",	0x4a0002be, 0xfe0007ff,	0, 		T5},
+{"vmulai",  "&UK,2K,J",	0x4a0001fe, 0xfe1f07ff,	0, 		T5},
+{"vmulaq",  "&UK,2K,Q",	0x4a0001fc, 0xfe1f07ff,	0, 		T5},
+{"vmulaw",  "&UK,2K,1#w",	0x4a0001bf, 0xfe0007ff,	0, 		T5},
+{"vmulax",  "&UK,2K,1#x",	0x4a0001bc, 0xfe0007ff,	0, 		T5},
+{"vmulay",  "&UK,2K,1#y",	0x4a0001bd, 0xfe0007ff,	0, 		T5},
+{"vmulaz",  "&UK,2K,1#z",	0x4a0001be, 0xfe0007ff,	0, 		T5},
+{"vnop","",		0x4a0002ff, 0xffffffff,	0, 		T5},
+{"vopmula", ";UK,2K,1K", 0x4bc002fe, 0xffe007ff,	0, 	T5},
+{"vopmsub", ";3K,2K,1K", 0x4bc0002e, 0xffe0003f,	0, 	T5},
+{"vrget",  "&1K,X",	0x4a20043d, 0xfe00ffff,	0, 		T5},
+{"vrinit", "X,8",	0x4a00043e, 0xff9f07ff,	0, 		T5},
+{"vrnext", "&1K,X",	0x4a20043c, 0xfe00ffff,	0, 		T5},
+{"vrsqrt","Q,8,7",	0x4a0003be, 0xfe0007ff,	0, 		T5},
+{"vrxor", "X,8",	0x4a00043f, 0xff9f07ff,	0, 		T5},
+{"vsqd",  "&2K,(--4)K",	0x4a00037f, 0xfe0007ff,	0, 		T5},
+{"vsqi",  "&2K,(4++)K",	0x4a00037d, 0xfe0007ff,	0, 		T5},
+{"vsqrt", "Q,7",	0x4a2003bd, 0xfe60ffff,	0, 		T5},
+{"vsub",  "&3K,2K,1K",	0x4a00002c, 0xfe00003f,	0, 		T5},
+{"vsubi", "&3K,2K,J",	0x4a000026, 0xfe1f003f,	0, 		T5},
+{"vsubq", "&3K,2K,Q",	0x4a000024, 0xfe1f003f,	0, 		T5},
+{"vsubw", "&3K,2K,1#w",	0x4a000007, 0xfe00003f,	0, 		T5},
+{"vsubx", "&3K,2K,1#x",	0x4a000004, 0xfe00003f,	0, 		T5},
+{"vsuby", "&3K,2K,1#y",	0x4a000005, 0xfe00003f,	0, 		T5},
+{"vsubz", "&3K,2K,1#z",	0x4a000006, 0xfe00003f,	0, 		T5},
+{"vsuba", "&UK,2K,1K",	0x4a0002fc, 0xfe0007ff,	0, 		T5},
+{"vsubai", "&UK,2K,J",	0x4a00027e, 0xfe1f07ff,	0, 		T5},
+{"vsubaq", "&UK,2K,Q",	0x4a00027c, 0xfe1f07ff,	0, 		T5},
+{"vsubaw", "&UK,2K,1#w",	0x4a00007f, 0xfe0007ff,	0, 		T5},
+{"vsubax", "&UK,2K,1#x",	0x4a00007c, 0xfe0007ff,	0, 		T5},
+{"vsubay", "&UK,2K,1#y",	0x4a00007d, 0xfe0007ff,	0, 		T5},
+{"vsubaz", "&UK,2K,1#z",	0x4a00007e, 0xfe0007ff,	0, 		T5},
+{"vwaitq","",		0x4a0003bf, 0xffffffff,	0, 		T5},
 
+/* end-sanitize-r5900 */
 {"abs",     "d,v",	0,    (int) M_ABS,	INSN_MACRO,	I1	},
 {"abs.s",   "D,V",	0x46000005, 0xffff003f,	WR_D|RD_S|FP_S,	I1	},
 {"abs.d",   "D,V",	0x46200005, 0xffff003f,	WR_D|RD_S|FP_D,	I1	},
@@ -291,9 +431,6 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"c.ngl.s", "M,S,T",	0x4600003b, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_S,	I4	},
 {"c.lt.d",  "S,T",	0x4620003c, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},
 {"c.lt.d",  "M,S,T",	0x4620003c, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_D,	I4	},
-/* start-sanitize-r5900 */
-{"c.lt.s",  "S,T",	0x46000034, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	T5	},
-/* end-sanitize-r5900 */
 {"c.lt.s",  "S,T",	0x4600003c, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	I1	},
 {"c.lt.s",  "M,S,T",	0x4600003c, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_S,	I4	},
 {"c.nge.d", "S,T",	0x4620003d, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},
@@ -302,9 +439,6 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"c.nge.s", "M,S,T",	0x4600003d, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_S,	I4	},
 {"c.le.d",  "S,T",	0x4620003e, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},
 {"c.le.d",  "M,S,T",	0x4620003e, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_D,	I4	},
-/* start-sanitize-r5900 */
-{"c.le.s",  "S,T",	0x46000036, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	T5	},
-/* end-sanitize-r5900 */
 {"c.le.s",  "S,T",	0x4600003e, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	I1	},
 {"c.le.s",  "M,S,T",	0x4600003e, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_S,	I4	},
 {"c.ngt.d", "S,T",	0x4620003f, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},
@@ -346,9 +480,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"daddiu",  "t,r,j",	0x64000000, 0xfc000000, WR_t|RD_s,	I3	},
 {"daddu",   "d,v,t",	0x0000002d, 0xfc0007ff, WR_d|RD_s|RD_t,	I3	},
 {"daddu",   "t,r,I",	0,    (int) M_DADDU_I,	INSN_MACRO,	I3	},
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"dbreak",  "",		0x7000003f, 0xffffffff,	0,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-vr4320 */
 {"dclz",    "d,s",	0x0000003D, 0xfc1f07ff, WR_d|RD_s,	N4	},
   /* end-sanitize-vr4320 */
@@ -416,13 +550,13 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"dremu",   "z,s,t",	0x0000001f, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO,	I3	},
 {"dremu",   "d,v,t",	3,    (int) M_DREMU_3,	INSN_MACRO,	I3	},
 {"dremu",   "d,v,I",	3,    (int) M_DREMU_3I,	INSN_MACRO,	I3	},
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"dret",    "",		0x7000003e, 0xffffffff,	0,	N5	},
 {"drorv",   "d,t,s",	0x00000056, 0xfc0007ff, RD_t|RD_s|WR_d,	N5	},
 {"dror32",  "d,w,<",	0x0020003e, 0xffe0003f, WR_d|RD_t,	N5	},
 {"dror",    "d,w,>",	0x0020003e, 0xffe0003f, WR_d|RD_t,	N5	},
 {"dror",    "d,w,<",	0x00200036, 0xffe0003f, WR_d|RD_t,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 {"dsllv",   "d,t,s",	0x00000014, 0xfc0007ff,	WR_d|RD_t|RD_s,	I3	},
 {"dsll32",  "d,w,<",	0x0000003c, 0xffe0003f, WR_d|RD_t,	I3	},
 {"dsll",    "d,w,s",	0x00000014, 0xfc0007ff,	WR_d|RD_t|RD_s,	I3	}, /* dsllv */
@@ -547,27 +681,27 @@ const struct mips_opcode mips_builtin_opcodes[] = {
   /* start-sanitize-vr4320 */
 {"macc",    "d,s,t",	0x000000A8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
   /* end-sanitize-vr4320 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"macc",    "d,s,t",	0x00000158, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,N5},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-vr4320 */
 {"maccu",   "d,s,t",	0x000000E8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
   /* end-sanitize-vr4320 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"maccu",   "d,s,t",	0x00000159, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,N5},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-vr4320 */
 {"macchi",  "d,s,t",	0x000002A8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
   /* end-sanitize-vr4320 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"macchi",  "d,s,t",	0x00000358, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,N5},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-vr4320 */
 {"macchiu", "d,s,t",	0x000002E8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
   /* end-sanitize-vr4320 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"macchiu", "d,s,t",	0x00000359, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,N5},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 {"mad",	    "s,t",	0x70000000, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	P3	},
 {"madu",    "s,t",	0x70000001, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	P3	},
 {"madd.d",  "D,R,S,T",	0x4c000021, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_D,	I4	},
@@ -613,27 +747,27 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mtiabm",   "t",       0x4080c003, 0xffe0ffff, WR_C0|RD_t,     T5      },
   /* end-sanitize-r5900 */
 {"madd16",  "s,t",      0x00000028, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	V1	},
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"mfpc",    "t,P",	0x4000c801, 0xffe0ffc1, RD_C0|WR_t,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-r5900 */
 {"mfpc",    "t,P",	0x4000c801, 0xffe0ffc1, RD_C0|WR_t,	T5	},
   /* end-sanitize-r5900 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"mfps",    "t,P",	0x4000c800, 0xffe0ffc1, RD_C0|WR_t,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-r5900 */
 {"mfps",    "t,P",	0x4000c800, 0xffe0ffc1, RD_C0|WR_t,	T5	},
   /* end-sanitize-r5900 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"mtpc",    "t,P",	0x4080c801, 0xffe0ffc1, WR_C0|RD_t,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-r5900 */
 {"mtpc",    "t,P",	0x4080c801, 0xffe0ffc1, WR_C0|RD_t,	T5	},
   /* end-sanitize-r5900 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"mtps",    "t,P",	0x4080c800, 0xffe0ffc1, WR_C0|RD_t,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-r5900 */
 {"mtps",    "t,P",	0x4080c800, 0xffe0ffc1, WR_C0|RD_t,	T5	},
   /* end-sanitize-r5900 */
@@ -642,9 +776,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mfc1",    "t,G",	0x44000000, 0xffe007ff,	LCD|WR_t|RD_S|FP_S,	I1	},
 {"mfc2",    "t,G",	0x48000000, 0xffe007ff,	LCD|WR_t|RD_C2,	I1	},
 {"mfc3",    "t,G",	0x4c000000, 0xffe007ff,	LCD|WR_t|RD_C3,	I1	},
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"mfdr",    "t,G",	0x7000003d, 0xffe007ff, LCD|WR_t|RD_C0,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 {"mfhi",    "d",	0x00000010, 0xffff07ff,	WR_d|RD_HI,	I1	},
   /* start-sanitize-r5900 */
 {"mfhi1",   "d",	0x70000010, 0xffff07ff,	WR_d|RD_HI,	T5	},
@@ -676,12 +810,12 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"ffs",     "d,v",	0x0000000a, 0xfc1f07ff,	WR_d|RD_s,L1	},
 {"movz.d",  "D,S,t",	0x46200012, 0xffe0003f, WR_D|RD_S|RD_t|FP_D,	I4	},
 {"movz.s",  "D,S,t",	0x46000012, 0xffe0003f, WR_D|RD_S|RD_t|FP_S,	I4	},
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"msac",    "d,s,t",	0x000001d8, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
 {"msacu",   "d,s,t",	0x000001d9, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
 {"msachi",  "d,s,t",	0x000003d8, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
 {"msachiu", "d,s,t",	0x000003d9, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 /* move is at the top of the table.  */
 {"msub.d",  "D,R,S,T",	0x4c000029, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_D,	I4	},
 {"msub.s",  "D,R,S,T",	0x4c000028, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_S,	I4	},
@@ -695,9 +829,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mtc1",    "t,G",	0x44800000, 0xffe007ff,	COD|RD_t|WR_S|FP_S,	I1	},
 {"mtc2",    "t,G",	0x48800000, 0xffe007ff,	COD|RD_t|WR_C2|WR_CC,	I1	},
 {"mtc3",    "t,G",	0x4c800000, 0xffe007ff,	COD|RD_t|WR_C3|WR_CC,	I1	},
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"mtdr",    "t,G",	0x7080003d, 0xffe007ff, COD|RD_t|WR_C0,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 {"mthi",    "s",	0x00000011, 0xfc1fffff,	RD_s|WR_HI,	I1	},
   /* start-sanitize-r5900 */
 {"mthi1",   "s",	0x70000011, 0xfc1fffff,	RD_s|WR_HI,	T5	},
@@ -715,9 +849,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
   /* start-sanitize-vr4320 */
 {"mul",     "d,s,t",	0x00000128, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N4},
   /* end-sanitize-vr4320 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"mul",     "d,s,t",	0x00000058, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 {"mul",     "d,v,t",	0,    (int) M_MUL,	INSN_MACRO,	I1	},
 {"mul",     "d,v,I",	0,    (int) M_MUL_I,	INSN_MACRO,	I1	},
 {"mulo",    "d,v,t",	0,    (int) M_MULO,	INSN_MACRO,	I1	},
@@ -727,27 +861,27 @@ const struct mips_opcode mips_builtin_opcodes[] = {
   /* start-sanitize-vr4320 */
 {"mulu",    "d,s,t",	0x00000168, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N4},
   /* end-sanitize-vr4320 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"mulu",    "d,s,t",	0x00000059, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-vr4320 */
 {"mulhi",   "d,s,t",	0x00000328, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N4},
   /* end-sanitize-vr4320 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"mulhi",   "d,s,t",	0x00000258, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-vr4320 */
 {"mulhiu",  "d,s,t",	0x00000368, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N4},
   /* end-sanitize-vr4320 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"mulhiu",  "d,s,t",	0x00000259, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5},
-  /* end-sanitize-vr5400 */
-  /* start-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
+  /* start-sanitize-cygnus */
 {"muls",    "d,s,t",	0x000000d8, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
 {"mulsu",   "d,s,t",	0x000000d9, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
 {"mulshi",  "d,s,t",	0x000002d8, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
 {"mulshiu", "d,s,t",	0x000002d9, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 {"mult",    "s,t",	0x00000018, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
 {"mult",    "d,s,t",	0x00000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, G1},
   /* start-sanitize-r5900 */
@@ -823,6 +957,8 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"pextuh",   "d,v,t",	0x700005a8, 0xfc0007ff,	WR_d|RD_s|RD_t,	T5	},
 {"pextuw",   "d,v,t",	0x700004a8, 0xfc0007ff,	WR_d|RD_s|RD_t,	T5	},
 
+{"phmadh",  "d,v,t",	0x70000449, 0xfc0007ff,	WR_d|RD_s|RD_t|WR_HI|WR_LO,	T5	},
+{"phmsbh",  "d,v,t",	0x70000549, 0xfc0007ff,	WR_d|RD_s|RD_t|WR_HI|WR_LO,	T5	},
 {"phmaddh",  "d,v,t",	0x70000449, 0xfc0007ff,	WR_d|RD_s|RD_t|WR_HI|WR_LO,	T5	},
 {"phmsubh",  "d,v,t",	0x70000549, 0xfc0007ff,	WR_d|RD_s|RD_t|WR_HI|WR_LO,	T5	},
 
@@ -918,14 +1054,14 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"rfe",     "",		0x42000010, 0xffffffff,	0,	I1|T3		},
 {"rol",     "d,v,t",	0,    (int) M_ROL,	INSN_MACRO,	I1	},
 {"rol",     "d,v,I",	0,    (int) M_ROL_I,	INSN_MACRO,	I1	},
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"ror",     "d,t,<",	0x00200002, 0xffe0003f, WR_d|RD_t,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 {"ror",     "d,v,t",	0,    (int) M_ROR,	INSN_MACRO,	I1	},
 {"ror",     "d,v,I",	0,    (int) M_ROR_I,	INSN_MACRO,	I1	},
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"rorv",    "d,t,s",	0x00000046, 0xfc0007ff, RD_t|RD_s|WR_d,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 {"round.l.d", "D,S",	0x46200008, 0xffff003f, WR_D|RD_S|FP_D,	I3	},
 {"round.l.s", "D,S",	0x46000008, 0xffff003f, WR_D|RD_S|FP_S,	I3	},
 {"round.w.d", "D,S",	0x4620000c, 0xffff003f, WR_D|RD_S|FP_D,	I2	},
@@ -1104,7 +1240,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"wait",    "",		0x42000020, 0xffffffff,	TRAP,	I3	},
 {"waiti",   "",		0x42000020, 0xffffffff,	TRAP,	L1	},
 {"wb", 	    "o(b)",	0xbc040000, 0xfc1f0000, SM|RD_b,	L1	},
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 {"add.ob",  "D,S,T",    0x4ac0000b, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
 {"add.ob",  "D,S,T[e]", 0x4800000b, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
 {"add.ob",  "D,S,k",    0x4bc0000b, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
@@ -1174,7 +1310,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"xor.ob",  "D,S,T",    0x4ac0000d, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
 {"xor.ob",  "D,S,T[e]", 0x4800000d, 0xfe20003f, WR_D|RD_S|RD_T,	N5	},
 {"xor.ob",  "D,S,k",    0x4bc0000d, 0xffe0003f, WR_D|RD_S|RD_T,	N5	},
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
 /* No hazard protection on coprocessor instructions--they shouldn't
    change the state of the processor and if they do it's up to the
    user to put in nops as necessary.  These are at the end so that the

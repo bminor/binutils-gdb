@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Tue Oct 13 12:47:42 EDT 1998 Frank Ch. Eigler <fche@cygnus.com>
+
+	* mips-opc.c: Update COP2 operand formats for 
+	vrnext and vrget instructions.
+
+end-sanitize-r5900
 start-sanitize-am33
 Mon Oct 12 10:43:51 1998  Jeffrey A Law  (law@cygnus.com)
 
