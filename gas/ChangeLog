@@ -1,3 +1,8 @@
+Mon Dec 15 10:32:28 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mips.c (mips_ip): Correctly insert 'P' operands into
+	the instruction.
+
 start-sanitize-tic80
 Fri Dec 12 11:44:20 1997  Fred Fish  <fnf@cygnus.com>
 
