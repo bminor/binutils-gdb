@@ -274,8 +274,8 @@ print_function_name (lf *file,
   /* the format name if available */
   if (format_name != NULL)
     {
-      nr += print_c_name (file, format_name);
       nr += lf_printf (file, "_");
+      nr += print_c_name (file, format_name);
     }
 
   /* the suffix */
