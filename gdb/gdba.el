@@ -586,7 +586,7 @@ command if that happens to be appropriate."
 	    (save-excursion
 	      (set-buffer buf)
 	      (let ((p (point)))
-		(kill-region (point-min) (point-max))
+		(delete-region (point-min) (point-max))
 		(insert-buffer (gdb-get-create-instance-buffer
 				instance
 				'gdb-partial-output-buffer))
@@ -755,7 +755,7 @@ buffer."
     (set-buffer
      (gdb-get-create-instance-buffer
       instance 'gdb-partial-output-buffer))
-    (kill-region (point-min) (point-max))))
+    (delete-region (point-min) (point-max))))
 
 ;;
 ;; Instance Buffers.
