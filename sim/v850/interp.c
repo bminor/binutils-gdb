@@ -417,7 +417,7 @@ sim_set_callbacks(p)
   v850_callback = p;
 }
 
-/* All the code for exiting, signals, etc needs to be revamped.  */
+/* All the code for exiting, signals, etc needs to be revamped.
 
    This is enough to get c-torture limping though.  */
 void
