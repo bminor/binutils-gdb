@@ -1,3 +1,8 @@
+Fri Nov 17 10:41:25 1995  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* elf-bfd.h (struct elf_link_hash_table): Change type of
+	dynsymcount and bucketcount fields from size_t to bfd_size_type.
+
 Fri Nov 17 10:02:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Only create
