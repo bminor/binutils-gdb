@@ -411,7 +411,8 @@ varobj_create (char *objname,
 	       enum varobj_type type)
 {
   struct varobj *var;
-  struct frame_info *fi, *old_fi;
+  struct frame_info *fi;
+  struct frame_info *old_fi = NULL;
   struct block *block;
   struct cleanup *old_chain;
 
@@ -883,7 +884,7 @@ varobj_update (struct varobj *var, struct varobj ***changelist)
   int error2;
   struct varobj *v;
   struct varobj **cv;
-  struct varobj **templist;
+  struct varobj **templist = NULL;
   value_ptr new;
   struct vstack *stack = NULL;
   struct vstack *result = NULL;
