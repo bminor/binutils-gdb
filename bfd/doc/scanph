@@ -9,7 +9,6 @@ if [ $1 = "-i" ]; then
 	shift
 fi
 
-base=`echo $1 | cut -d '.' -f 1`
 out=`echo $2 | cut -d '.' -f 1`
 
 #  passes:
@@ -18,9 +17,9 @@ out=`echo $2 | cut -d '.' -f 1`
 #	2) first sed pass interprets Chamberlain markup;
 #	3) further sed passes clean up---merging adjacent comments etc.
 
-awk -f awkscan-$SFX $1 |\
-sed -f sedscript-p |\
-sed -f mergecom-p |\
-sed -f startcom-p  |\
-sed -f blins-p |\
-sed -f movecom-p  >$out.$SFX
+awk -f $3/awkscan-$SFX $1 |\
+sed -f $3/sedscript-p |\
+sed -f $3/mergecom-p |\
+sed -f $3/startcom-p  |\
+sed -f $3/blins-p |\
+sed -f $3/movecom-p  >$out.$SFX
