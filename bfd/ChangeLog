@@ -1,3 +1,8 @@
+Tue Feb 16 17:56:58 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* elf.c (elf_info_to_howto): cast an enum into unsigned char
+	  avoiding a fatal error in vax ultrix 4.2 cc.
+
 Tue Feb 16 00:44:54 1993  John Gilmore  (gnu@cygnus.com)
 
 	* bfd-in.h, VERSION:  Roll to version 2.1.
