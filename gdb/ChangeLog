@@ -1,4 +1,14 @@
+Tue Aug 10 13:07:14 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* blockframe.c (find_pc_partial_function),
+	mips-tdep.c (find_proc_desc): Deal with "pathological" case.
+
 Tue Aug 10 14:50:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* utils.c (wrap_here): Allow indent to be NULL.
+	(fputs_filtered): Don't check for null wrap_indent (wrap_here now
+	guarantees that it isn't, and anyway we were only checking one out
+	of the two places we dereferenced it).
 
 	* objfiles.h (struct objfile): Clean up comments for
 	{obj,sym}_private to clarify what they are private to.
