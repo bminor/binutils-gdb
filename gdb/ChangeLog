@@ -1,3 +1,10 @@
+Sun Feb  5 20:32:44 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+start-sanitize-gdbtk
+	* gdbtk.c (gdb_disassemble): Deference pointer to function before
+	calling it (pre-ANSI compilers generally require this).
+
+end-sanitize-gdbtk
 Fri Feb  3 16:47:31 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* ser-go32-para.c (dos_read): fix syntax errors.

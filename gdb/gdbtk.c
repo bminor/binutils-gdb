@@ -950,7 +950,7 @@ gdb_disassemble (clientData, interp, argc, argv)
 	      fputs_unfiltered ("    ", gdb_stdout);
 	      print_address (pc, gdb_stdout);
 	      fputs_unfiltered (":\t    ", gdb_stdout);
-	      pc += tm_print_insn (pc, &di);
+	      pc += (*tm_print_insn) (pc, &di);
 	      fputs_unfiltered ("\n", gdb_stdout);
 	    }
 	}
@@ -964,7 +964,7 @@ assembly_only:
 	  fputs_unfiltered ("    ", gdb_stdout);
 	  print_address (pc, gdb_stdout);
 	  fputs_unfiltered (":\t    ", gdb_stdout);
-	  pc += tm_print_insn (pc, &di);
+	  pc += (*tm_print_insn) (pc, &di);
 	  fputs_unfiltered ("\n", gdb_stdout);
 	}
     }
