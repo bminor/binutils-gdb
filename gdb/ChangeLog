@@ -1,3 +1,17 @@
+2003-11-16  Andrew Cagney  <cagney@redhat.com>
+
+	* config/mips/linux64.mt: Delete file.
+	* config/mips/tm-linux64.h: Delete file.
+	* config/mips/tm-mips64.h: Delete file.
+	* config/mips/embed64.mt: Delete file.
+	* config/djgpp/fnchange.lst: Update.
+	* configure.tgt: Delete explicit patterns for mipsisa64*-*-linux*,
+	mips64*-*-linux*, mips64*-*-*, and mipsisa64*-*-*.
+	* config/mips/tm-irix6.h: Update copyright.  Include
+	"mips/tm-mips.h" instead of "mips/tm-mips64.h".
+	* mips-tdep.c (mips_dump_tdep): Do not print "OP_LDFPR" or
+	"OP_LDGPR".
+
 2003-11-15  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_register_type): Simplify.  Eliminate reference

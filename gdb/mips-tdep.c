@@ -6318,10 +6318,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: MIPS_SAVED_REGSIZE = %d\n",
 		      MIPS_SAVED_REGSIZE);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: OP_LDFPR = used?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: OP_LDGPR = used?\n");
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: PRID_REGNUM = %d\n",
 		      PRID_REGNUM);
   fprintf_unfiltered (file,

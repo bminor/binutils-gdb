@@ -133,14 +133,8 @@ m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
 mcore*-*-*)		gdb_target=mcore ;;
 
-# "mipsisa64" targets are 64-bit MIPS, MIPS64 ISA.  They need these
-# special cases because otherwise they (obviously) are not matched by
-# the "mips64" target cases, and would therefore be treated as 32-bit.
-mipsisa64*-*-linux*)	gdb_target=linux64 ;;
-mipsisa64*-*-*)		gdb_target=embed64 ;;
 mips*-*-pe)		gdb_target=wince ;;
 mips*tx39*-elf*)	gdb_target=tx39 ;;
-mips64*-*-linux*)	gdb_target=linux64 ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-irix6*)	gdb_target=irix6 ;;
 mips*-*-linux*)		gdb_target=linux
@@ -149,7 +143,6 @@ mips*-*-linux*)		gdb_target=linux
 mips*-*-netbsd*)	gdb_target=nbsd ;;
 mips*-*-sysv4*)		gdb_target=mipsv4 ;;
 mips*-*-vxworks*)       gdb_target=vxmips ;;
-mips64*-*-*)		gdb_target=embed64 ;;
 mips*-*-*)		gdb_target=embed ;;
 
 mn10300-*-*)		gdb_target=mn10300 ;;
