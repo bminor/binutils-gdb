@@ -1,3 +1,46 @@
+2002-11-07  Joel Brobecker  <brobecker@gnat.com>
+
+	Preparation work to convert the hppa targets to multiarch partial.
+
+	* hppa-tdep.c: Add new functions replacing macro bodies from
+	config/pa/tm-hppa.h. These function will be used to initialize
+	the gdbarch structure. Import some comments from tm-hppa.h,
+	and place them where appropriate, to avoid loosing them when
+	we cleanup this file.
+	(hppa_reg_struct_has_addr): New function.
+	(hppa_inner_than): New function.
+	(hppa_stack_align): New function.
+	(hppa_pc_requires_run_before_use): New function.
+	(hppa_instruction_nullified): New function.
+	(hppa_register_byte): New function.
+	(hppa_register_virtual_type): New function.
+	(hppa_store_struct_return): New function.
+	(hppa_cannot_store_register): New function.
+	(hppa_frame_args_address): New function.
+	(hppa_frame_locals_address): New function.
+	(hppa_smash_text_address): New function.
+	(hppa_coerce_float_to_double): New function. Requires the inclusion
+	of "language.h".
+
+	* Makefile.in (hppa-tdep.o): Add dependency on language.h.
+
+	* tm-hppa.h (REG_STRUCT_HAS_ADDR): Change the definition of this
+	gdbarch-eligible macro to a call to the new associated function
+	created in hppa-tdep.c.
+	(INNER_THAN): Likewise.
+	(STACK_ALIGN): Likewise.
+	(PC_REQUIRES_RUN_BEFORE_USE): Likewise.
+	(INSTRUCTION_NULLIFIED): Likewise.
+	(REGISTER_BYTE): Likewise.
+	(REGISTER_VIRTUAL_TYPE): Likewise.
+	(STORE_STRUCT_RETURN): Likewise.
+	(CANNOT_STORE_REGISTER): Likewise.
+	(FRAME_ARGS_ADDRESS): Likewise.
+	(FRAME_LOCALS_ADDRESS): Likewise.
+	(SMASH_TEXT_ADDRESS): Likewise.
+	(COERCE_FLOAT_TO_DOUBLE): Likewise.
+	(ABOUT_TO_RETURN): Delete, as no longer used.
+
 2002-11-07  Fernando Nasser  <fnasser@redhat.com>
 
 	* printcmd.c (disassemble_command): Remove obsolete function.

@@ -52,12 +52,8 @@ struct inferior_status;
   ((X) >> (31 - (TO)) & ((1 << ((TO) - (FROM) + 1)) - 1))
 #endif
 
-/* On the PA, any pass-by-value structure > 8 bytes is actually
-   passed via a pointer regardless of its type or the compiler
-   used.  */
-
-#define REG_STRUCT_HAS_ADDR(gcc_p,type) \
-  (TYPE_LENGTH (type) > 8)
+extern int hppa_reg_struct_has_addr (int gcc_p, struct type *type);
+#define REG_STRUCT_HAS_ADDR(gcc_p,type) hppa_reg_struct_has_addr (gcc_p,type)
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -86,23 +82,16 @@ extern int in_solib_call_trampoline (CORE_ADDR, char *);
   in_solib_return_trampoline (pc, name)
 extern int in_solib_return_trampoline (CORE_ADDR, char *);
 
-/* Immediately after a function call, return the saved pc.
-   Can't go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
 #undef	SAVED_PC_AFTER_CALL
 #define SAVED_PC_AFTER_CALL(frame) saved_pc_after_call (frame)
 extern CORE_ADDR saved_pc_after_call (struct frame_info *);
 
-/* Stack grows upward */
-#define INNER_THAN(lhs,rhs) ((lhs) > (rhs))
+extern int hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs);
+#define INNER_THAN(lhs,rhs) hppa_inner_than(lhs,rhs)
 
-/* elz: adjust the quantity to the next highest value which is 64-bit aligned.
-   This is used in valops.c, when the sp is adjusted.
-   On hppa the sp must always be kept 64-bit aligned */
+extern CORE_ADDR hppa_stack_align (CORE_ADDR sp);
+#define STACK_ALIGN(sp) hppa_stack_align (sp)
 
-#define STACK_ALIGN(arg) ( ((arg)%8) ? (((arg)+7)&-8) : (arg))
 #define EXTRA_STACK_ALIGNMENT_NEEDED 0
 
 /* Sequence of bytes for breakpoint instruction.  */
@@ -118,35 +107,8 @@ extern CORE_ADDR saved_pc_after_call (struct frame_info *);
 
 #define DECR_PC_AFTER_BREAK 0
 
-/* Sometimes we may pluck out a minimal symbol that has a negative
-   address.
-
-   An example of this occurs when an a.out is linked against a foo.sl.
-   The foo.sl defines a global bar(), and the a.out declares a signature
-   for bar().  However, the a.out doesn't directly call bar(), but passes
-   its address in another call.
-
-   If you have this scenario and attempt to "break bar" before running,
-   gdb will find a minimal symbol for bar() in the a.out.  But that
-   symbol's address will be negative.  What this appears to denote is
-   an index backwards from the base of the procedure linkage table (PLT)
-   into the data linkage table (DLT), the end of which is contiguous
-   with the start of the PLT.  This is clearly not a valid address for
-   us to set a breakpoint on.
-
-   Note that one must be careful in how one checks for a negative address.
-   0xc0000000 is a legitimate address of something in a shared text
-   segment, for example.  Since I don't know what the possible range
-   is of these "really, truly negative" addresses that come from the
-   minimal symbols, I'm resorting to the gross hack of checking the
-   top byte of the address for all 1's.  Sigh.
- */
-#define PC_REQUIRES_RUN_BEFORE_USE(pc) \
-  (! target_has_stack && (pc & 0xFF000000))
-
-/* return instruction is bv r0(rp) or bv,n r0(rp) */
-
-#define ABOUT_TO_RETURN(pc) ((read_memory_integer (pc, 4) | 0x2) == 0xE840C002)
+extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
+#define PC_REQUIRES_RUN_BEFORE_USE(pc) hppa_pc_requires_run_before_use (pc)
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
@@ -264,9 +226,8 @@ extern void pa_do_strcat_registers_info (int, int, struct ui_file *, enum precis
 
 /* PA specific macro to see if the current instruction is nullified. */
 #ifndef INSTRUCTION_NULLIFIED
-#define INSTRUCTION_NULLIFIED \
-    (((int)read_register (IPSW_REGNUM) & 0x00200000) && \
-     !((int)read_register (FLAGS_REGNUM) & 0x2))
+extern int hppa_instruction_nullified (void);
+#define INSTRUCTION_NULLIFIED hppa_instruction_nullified ()
 #endif
 
 /* Number of bytes of storage in the actual machine representation
@@ -279,10 +240,8 @@ extern void pa_do_strcat_registers_info (int, int, struct ui_file *, enum precis
    register state, the array `registers'.  */
 #define REGISTER_BYTES (NUM_REGS * 4)
 
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-#define REGISTER_BYTE(N) (N) * 4
+extern int hppa_register_byte (int reg_nr);
+#define REGISTER_BYTE(N) hppa_register_byte (N)
 
 /* Number of bytes of storage in the program's representation
    for register N. */
@@ -297,16 +256,11 @@ extern void pa_do_strcat_registers_info (int, int, struct ui_file *, enum precis
 
 #define MAX_REGISTER_VIRTUAL_SIZE 8
 
-/* Return the GDB type object for the "standard" data type
-   of data in register N.  */
+extern struct type * hppa_register_virtual_type (int reg_nr);
+#define REGISTER_VIRTUAL_TYPE(N) hppa_register_virtual_type (N)
 
-#define REGISTER_VIRTUAL_TYPE(N) \
- ((N) < FP4_REGNUM ? builtin_type_int : builtin_type_float)
-
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
-
-#define STORE_STRUCT_RETURN(ADDR, SP) {write_register (28, (ADDR)); }
+extern void hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
+#define STORE_STRUCT_RETURN(ADDR, SP) hppa_store_struct_return (ADDR, SP)
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
@@ -360,21 +314,8 @@ struct value *hppa_value_returned_from_stack (register struct type *valtype,
 #define VALUE_RETURNED_FROM_STACK(valtype,addr) \
   hppa_value_returned_from_stack (valtype, addr)
 
-/*
- * This macro defines the register numbers (from REGISTER_NAMES) that
- * are effectively unavailable to the user through ptrace().  It allows
- * us to include the whole register set in REGISTER_NAMES (inorder to
- * better support remote debugging).  If it is used in
- * fetch/store_inferior_registers() gdb will not complain about I/O errors
- * on fetching these registers.  If all registers in REGISTER_NAMES
- * are available, then return false (0).
- */
-
-#define CANNOT_STORE_REGISTER(regno)            \
-                   ((regno) == 0) ||     \
-                   ((regno) == PCSQ_HEAD_REGNUM) || \
-                   ((regno) >= PCSQ_TAIL_REGNUM && (regno) < IPSW_REGNUM) ||  \
-                   ((regno) > IPSW_REGNUM && (regno) < FP4_REGNUM)
+extern int hppa_cannot_store_register (int regnum);
+#define CANNOT_STORE_REGISTER(regno) hppa_cannot_store_register (regno)
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, frame) init_extra_frame_info (fromleaf, frame)
 extern void init_extra_frame_info (int, struct frame_info *);
@@ -407,9 +348,12 @@ extern int frameless_function_invocation (struct frame_info *);
 extern CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
 #define FRAME_SAVED_PC(FRAME) hppa_frame_saved_pc (FRAME)
 
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
+extern CORE_ADDR hppa_frame_args_address (struct frame_info *fi);
+#define FRAME_ARGS_ADDRESS(fi) hppa_frame_args_address (fi)
 
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+extern CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
+#define FRAME_LOCALS_ADDRESS(fi) hppa_frame_locals_address (fi)
+
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
 
@@ -591,13 +535,8 @@ hppa_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
 extern CORE_ADDR
 hppa_push_arguments (int, struct value **, CORE_ADDR, int, CORE_ADDR);
 
-/* The low two bits of the PC on the PA contain the privilege level.  Some
-   genius implementing a (non-GCC) compiler apparently decided this means
-   that "addresses" in a text section therefore include a privilege level,
-   and thus symbol tables should contain these bits.  This seems like a
-   bonehead thing to do--anyway, it seems to work for our purposes to just
-   ignore those bits.  */
-#define SMASH_TEXT_ADDRESS(addr) ((addr) &= ~0x3)
+extern CORE_ADDR hppa_smash_text_address (CORE_ADDR addr);
+#define SMASH_TEXT_ADDRESS(addr) hppa_smash_text_address (addr)
 
 #define	GDB_TARGET_IS_HPPA
 
@@ -746,16 +685,12 @@ extern int hpread_adjust_stack_address (CORE_ADDR);
 /* If the current gcc for for this target does not produce correct debugging
    information for float parameters, both prototyped and unprototyped, then
    define this macro.  This forces gdb to  always assume that floats are
-   passed as doubles and then converted in the callee.
+   passed as doubles and then converted in the callee.  */
 
-   For the pa, it appears that the debug info marks the parameters as
-   floats regardless of whether the function is prototyped, but the actual
-   values are passed as doubles for the non-prototyped case and floats for
-   the prototyped case.  Thus we choose to make the non-prototyped case work
-   for C and break the prototyped case, since the non-prototyped case is
-   probably much more common.  (FIXME). */
-
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (current_language -> la_language == language_c)
+extern int hppa_coerce_float_to_double (struct type *formal,
+                                        struct type *actual);
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) \
+  hppa_coerce_float_to_double (formal, actual)
 
 /* Here's how to step off a permanent breakpoint.  */
 #define SKIP_PERMANENT_BREAKPOINT (hppa_skip_permanent_breakpoint)
