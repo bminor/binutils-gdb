@@ -151,7 +151,8 @@ case "${host}" in
   i[34]86-*-go32)
     configdirs=`echo ${configdirs} | sed -e 's/tcl//;s/expect//;s/deja-gnu//'`
     configdirs=`echo ${configdirs} | sed -e 's/make//;s/texinfo//'`
-    configdirs=`echo ${configdirs} | sed -e 's/patch//;s/flex//;s/byacc//;s/send_pr//'`
+    configdirs=`echo ${configdirs} | sed -e 's/patch//;s/flex//;s/byacc//'`
+    configdirs=`echo ${configdirs} | sed -e 's/send-pr//;s/gprof//'`
     ;;
 esac
 
