@@ -36,7 +36,6 @@
 #include "target.h"
 #include "annotate.h"
 #include "p-lang.h"
-#include "c-lang.h"
 #include "cp-abi.h"
 
 
@@ -73,10 +72,6 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
     {
-    case TYPE_CODE_FLAGS:
-      return c_val_print (type, valaddr, embedded_offset, address, stream,
-			  format, deref_ref, recurse, pretty);
-
     case TYPE_CODE_ARRAY:
       if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	{
