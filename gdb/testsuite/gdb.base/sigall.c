@@ -486,8 +486,15 @@ gen_FPE ()
      do the same for SIGBUS, SIGSEGV, etc., but I suspect that even this
      test might turn out to be insufficiently portable.  */
 
+#if 0
+  /* Loses on the PA because after the signal handler executes we try to
+     re-execute the failing instruction again.  Perhaps we could siglongjmp
+     out of the signal handler?  */
   /* The expect script looks for the word "kill"; don't delete it.  */
   return 5 / x; /* and we both started jumping up and down yelling kill */
+#else
+  kill (getpid (), SIGFPE);
+#endif
 }
 
 int

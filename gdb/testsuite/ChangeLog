@@ -1,3 +1,8 @@
+Wed Jan 11 00:47:58 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* gdb.base/sigall.c (gen_FPE): Generate SIGFPE with kill() rather
+	than by dividing by zero.
+
 Tue Jan 10 21:38:05 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdb.base/watchpoint.exp: hppa*-*-*bsd* no longer has problems
