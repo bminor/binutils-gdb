@@ -571,37 +571,29 @@ extern void set_gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, gdbarch_d10v_m
 typedef int (gdbarch_d10v_daddr_p_ftype) (CORE_ADDR x);
 extern int gdbarch_d10v_daddr_p (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_daddr_p (struct gdbarch *gdbarch, gdbarch_d10v_daddr_p_ftype *d10v_daddr_p);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (D10V_DADDR_P)
 #define D10V_DADDR_P(x) (gdbarch_d10v_daddr_p (current_gdbarch, x))
-#endif
 #endif
 
 typedef int (gdbarch_d10v_iaddr_p_ftype) (CORE_ADDR x);
 extern int gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch, gdbarch_d10v_iaddr_p_ftype *d10v_iaddr_p);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (D10V_IADDR_P)
 #define D10V_IADDR_P(x) (gdbarch_d10v_iaddr_p (current_gdbarch, x))
-#endif
 #endif
 
 typedef CORE_ADDR (gdbarch_d10v_convert_daddr_to_raw_ftype) (CORE_ADDR x);
 extern CORE_ADDR gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch, gdbarch_d10v_convert_daddr_to_raw_ftype *d10v_convert_daddr_to_raw);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (D10V_CONVERT_DADDR_TO_RAW)
 #define D10V_CONVERT_DADDR_TO_RAW(x) (gdbarch_d10v_convert_daddr_to_raw (current_gdbarch, x))
-#endif
 #endif
 
 typedef CORE_ADDR (gdbarch_d10v_convert_iaddr_to_raw_ftype) (CORE_ADDR x);
 extern CORE_ADDR gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch, gdbarch_d10v_convert_iaddr_to_raw_ftype *d10v_convert_iaddr_to_raw);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (D10V_CONVERT_IADDR_TO_RAW)
 #define D10V_CONVERT_IADDR_TO_RAW(x) (gdbarch_d10v_convert_iaddr_to_raw (current_gdbarch, x))
-#endif
 #endif
 
 typedef void (gdbarch_store_struct_return_ftype) (CORE_ADDR addr, CORE_ADDR sp);

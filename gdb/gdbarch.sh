@@ -288,10 +288,10 @@ f:2:POP_FRAME:void:pop_frame:void:-:::0
 # I wish that these would just go away....
 f:2:D10V_MAKE_DADDR:CORE_ADDR:d10v_make_daddr:CORE_ADDR x:x:::0:0
 f:2:D10V_MAKE_IADDR:CORE_ADDR:d10v_make_iaddr:CORE_ADDR x:x:::0:0
-f:2:D10V_DADDR_P:int:d10v_daddr_p:CORE_ADDR x:x:::0
-f:2:D10V_IADDR_P:int:d10v_iaddr_p:CORE_ADDR x:x:::0
-f:2:D10V_CONVERT_DADDR_TO_RAW:CORE_ADDR:d10v_convert_daddr_to_raw:CORE_ADDR x:x:::0
-f:2:D10V_CONVERT_IADDR_TO_RAW:CORE_ADDR:d10v_convert_iaddr_to_raw:CORE_ADDR x:x:::0
+f:2:D10V_DADDR_P:int:d10v_daddr_p:CORE_ADDR x:x:::0:0
+f:2:D10V_IADDR_P:int:d10v_iaddr_p:CORE_ADDR x:x:::0:0
+f:2:D10V_CONVERT_DADDR_TO_RAW:CORE_ADDR:d10v_convert_daddr_to_raw:CORE_ADDR x:x:::0:0
+f:2:D10V_CONVERT_IADDR_TO_RAW:CORE_ADDR:d10v_convert_iaddr_to_raw:CORE_ADDR x:x:::0:0
 #
 f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
 f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, char *valbuf:type, valbuf:::0

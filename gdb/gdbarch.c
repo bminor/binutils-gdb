@@ -553,18 +553,10 @@ verify_gdbarch (struct gdbarch *gdbarch)
     internal_error ("gdbarch: verify_gdbarch: pop_frame invalid");
   /* Skip verify of d10v_make_daddr, invalid_p == 0 */
   /* Skip verify of d10v_make_iaddr, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
-      && (gdbarch->d10v_daddr_p == 0))
-    internal_error ("gdbarch: verify_gdbarch: d10v_daddr_p invalid");
-  if ((GDB_MULTI_ARCH >= 2)
-      && (gdbarch->d10v_iaddr_p == 0))
-    internal_error ("gdbarch: verify_gdbarch: d10v_iaddr_p invalid");
-  if ((GDB_MULTI_ARCH >= 2)
-      && (gdbarch->d10v_convert_daddr_to_raw == 0))
-    internal_error ("gdbarch: verify_gdbarch: d10v_convert_daddr_to_raw invalid");
-  if ((GDB_MULTI_ARCH >= 2)
-      && (gdbarch->d10v_convert_iaddr_to_raw == 0))
-    internal_error ("gdbarch: verify_gdbarch: d10v_convert_iaddr_to_raw invalid");
+  /* Skip verify of d10v_daddr_p, invalid_p == 0 */
+  /* Skip verify of d10v_iaddr_p, invalid_p == 0 */
+  /* Skip verify of d10v_convert_daddr_to_raw, invalid_p == 0 */
+  /* Skip verify of d10v_convert_iaddr_to_raw, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->store_struct_return == 0))
     internal_error ("gdbarch: verify_gdbarch: store_struct_return invalid");
