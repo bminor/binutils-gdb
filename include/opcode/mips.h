@@ -343,6 +343,10 @@ end-sanitize-vr5400
 /* Toshiba R5900 instruction */
 #define INSN_5900                   0x00000100
 /* end-sanitize-r5900 */
+/* start-sanitize-tx49 */
+#define INSN_4900                   0x00000200
+/* end-sanitize-tx49 */
+
 
 /* This is a list of macro expanded instructions.
  *
