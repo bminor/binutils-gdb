@@ -1,3 +1,7 @@
+Mon Jun 14 17:08:18 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
+
+	* Makefile.in (install): remove parentdir cruft
+
 Mon Jun 14 19:04:09 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* hppa.c (hppa_get_symbol_info):  Remove redundant copy.

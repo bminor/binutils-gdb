@@ -80,6 +80,7 @@ BFD32_BACKENDS = aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
 	coff-rs6000.o coff-h8300.o coff-h8500.o coff-z8k.o coff-we32k.o \
 	coff-mips.o coff-msym.o \
+	elf.o \
 	elf32.o elf32-sparc.o elf32-i386.o elf32-i860.o elf32-m68k.o \
 	elf32-hppa.o \
 	bout.o \
@@ -272,17 +273,11 @@ roll:
 force:
 
 install:
-	-parent=`echo $(libdir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(libdir) ] ; then true ; else mkdir $(libdir) ; fi
 	$(INSTALL_DATA) libbfd.a $(libdir)/libbfd.a
 	$(RANLIB) $(libdir)/libbfd.a
-	-parent=`echo $(includedir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(includedir) ] ; then true ; else mkdir $(includedir) ; fi
-	# Install BFD include file, and others that it needs.  Install them
-	# both in GCC's include directory, and in the system include dir
-	# if configured as $(oldincludedir) -- which it usually isnt.
+# Install BFD include file, and others that it needs.  Install them
+# both in GCC's include directory, and in the system include dir
+# if configured as $(oldincludedir) -- which it usually isnt.
 	$(INSTALL_DATA) bfd.h $(includedir)/bfd.h
 	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(includedir)/ansidecl.h
 	$(INSTALL_DATA) $(INCDIR)/obstack.h $(includedir)/obstack.h
@@ -314,12 +309,16 @@ gen-aout: $(srcdir)/gen-aout.c Makefile
 
 BFDIN_H= $(srcdir)/bfd-in2.h
 
-bfd.h: $(BFDIN_H) Makefile
-	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' < $(BFDIN_H) > bfd.h
+bfd.h: stmp-bfd.h ; @true
+
+stmp-bfd.h : $(BFDIN_H) Makefile
+	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' < $(BFDIN_H) > bfd.h2
+	$(srcdir)/../move-if-change bfd.h2 bfd.h
+	touch stmp-bfd.h
 
 headers:
 	(cd $(docdir); $(MAKE) protos $(FLAGS_TO_PASS))
-	# Could really use a "copy-if-change"...
+# Could really use a "copy-if-change"...
 	cp $(docdir)/bfd.h bfd.h-new
 	$(srcdir)/../move-if-change bfd.h-new $(BFDIN_H)
 	cp $(docdir)/libbfd.h libbfd.h-new
@@ -438,6 +437,7 @@ bout.o : bout.c bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/bout.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h
 mipsbsd.o : mipsbsd.c bfd.h $(INCDIR)/obstack.h \
   libbfd.h libaout.h
+elf.o : bfd.h $(INCDIR)/obstack.h
 elf32.o : elf32.c elfcode.h libelf.h libbfd.h bfd.h \
   $(INCDIR)/obstack.h
 elf32-sparc.o : elf32-sparc.c libelf.h libbfd.h bfd.h \
