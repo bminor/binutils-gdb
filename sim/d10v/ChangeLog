@@ -1,3 +1,9 @@
+2002-05-28  Elena Zannoni  <ezannoni@redhat.com>
+
+        From Jason Eckhardt <jle@redhat.com>
+        * d10v_sim.h (INC_ADDR): Correctly handle the case where MOD_E is
+        less than MOD_S (post-decrement).
+
 2002-06-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* interp.c (sim_fetch_register, sim_store_register): Use a switch
