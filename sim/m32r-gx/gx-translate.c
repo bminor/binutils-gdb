@@ -433,7 +433,9 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
   sim_gx_compiled_block* block = optimized ? gx->optimized_block : gx->learning_block;
   FILE* f  = block->source_file;
 
-  ASSERT(block->source_file != NULL);
+  ASSERT(f != NULL);
+
+  /* fprintf(f, "      printf(\"0x%06x\\n\");\n", pc); */
 
   if(op1 == 0x8 && op2 == 0x4 && r1 == 0)
     {
@@ -834,6 +836,8 @@ m32r_emit_short_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
 
   ASSERT(f != NULL);
 
+  /* fprintf(f, "      printf(\"0x%06x\\n\");\n", pc); */
+
   if(0)
     ; /* place holder */
   else if(op1 == 0x0 && op2 == 0x0)
@@ -1017,8 +1021,8 @@ m32r_emit_short_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
 	  fprintf(f, "          tgx_syscall_data d = { 0x%08x, gr0, gr1, gr2, gr3 };\n", (unsigned) pc);
 	  fprintf(f, "          (*(callbacks->syscall))(info, &d);\n");
 	  fprintf(f, "          gr2 = d.errcode;\n");
-	  fprintf(f, "          gr1 = d.result;\n");
-	  fprintf(f, "          gr0 = d.result2;\n");
+	  fprintf(f, "          gr0 = d.result;\n");
+	  fprintf(f, "          gr1 = d.result2;\n");
 	  fprintf(f, "        }\n");
 	}
       else if (r2 == 1) /* gdb breakpoint */
