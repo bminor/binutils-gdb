@@ -30,11 +30,12 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+all-config.texi
 configure.in
 gdb.texinfo
-gdb-config.texi
 gdbint.texinfo
 gdbinv-s.texi
+h8-config.texi
 lpsrc.sed
 psrc.sed
 refcard.tex

@@ -1,3 +1,25 @@
+Fri Mar 26 18:00:35 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo: include list of nonstandard init file names
+
+	* *-config.texi: new switch GENERIC for text that applies *only*
+	to (usual) multiple-target version of manual
+
+	* gdb.texinfo, gdbinv-s.texi: Update conditional markup to correct
+	h8 config
+
+	* gdb.texinfo: depend on latest fixed makeinfo, use conditionals
+	in menus (rather than conditionally selected multiple alternative
+	menus).
+
+	* Makefile.in: define and use DOC_CONFIG var to select
+	configuration for GDB user manual.
+
+	* gdb-config.texi: delete from repository, generate from Makefile.
+
+	* all-config.texi: normal `generic' configuration file, formerly
+	stored as gdb-config.texi
+
 Wed Mar 24 14:03:19 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
 
 	* Makefile.in: add dvi target to build all .dvi files
