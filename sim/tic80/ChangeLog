@@ -1,3 +1,7 @@
+Mon May 12 17:15:52 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* insns (do_{ld,st}): Fix tracing for ld/st.
+
 Mon May 12 11:12:24 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-calls.c (sim_stop_reason): Restore keep_running after a

@@ -671,7 +671,7 @@ void::function::do_ld:int Dest, unsigned32 Base, unsigned32 *rBase, int m , int 
 	    addr = -1;
 	    engine_error (SD, CPU, cia, "ld - invalid sz %d", sz);
 	  }
-	TRACE_LD (MY_INDEX, m, S, GPR(Dest), Base, Offset);
+	TRACE_LD (MY_INDEX, GPR(Dest), m, S, Base, Offset);
 31.Dest,26.Base,21.0b0100,17.m,16.sz,14.SignedOffset::::ld i
 	do_ld (_SD, Dest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::ld r
@@ -932,7 +932,7 @@ void::function::do_st:int Source, unsigned32 Base, unsigned32 *rBase, int m , in
 	  }
 	if (m)
 	  *rBase = addr;
-	TRACE_ST (MY_INDEX, m, S, Source, Base, Offset);
+	TRACE_ST (MY_INDEX, Source, m, S, Base, Offset);
 31.Source,26.Base,21.0b0110,17.m,16.sz,14.SignedOffset::::st i
 	do_st (_SD, Source, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::st r
