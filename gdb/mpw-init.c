@@ -16,7 +16,6 @@ void initialize_all_files () {
   {extern void _initialize_infcmd (); _initialize_infcmd ();}
   {extern void _initialize_infrun (); _initialize_infrun ();}
   {extern void _initialize_command (); _initialize_command ();}
-  {extern void _initialize_utils (); _initialize_utils ();}
   {extern void _initialize_gdbtypes (); _initialize_gdbtypes ();}
   {extern void _initialize_copying (); _initialize_copying ();}
   {extern void _initialize_mips_tdep (); _initialize_mips_tdep ();}
@@ -25,7 +24,6 @@ void initialize_all_files () {
   {extern void _initialize_ser_mac (); _initialize_ser_mac ();}
   {extern void _initialize_remote (); _initialize_remote ();}
   {extern void _initialize_sr_support (); _initialize_sr_support ();}
-  {extern void _initialize_targets (); _initialize_targets ();}
   {extern void _initialize_parse (); _initialize_parse ();}
   {extern void _initialize_language (); _initialize_language ();}
   {extern void _initialize_buildsym (); _initialize_buildsym ();}
