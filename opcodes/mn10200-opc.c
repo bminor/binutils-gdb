@@ -68,7 +68,7 @@ const struct mn10200_operand mn10200_operands[] = {
 /* 16 bit pc-relative immediate which may promote to a 16bit
    pc-relative immediate.  */
 #define IMM16_PCREL    (IMM16+1)
-  {16, 0, MN10200_OPERAND_PROMOTE | MN10200_OPERAND_PCREL},
+  {16, 0, MN10200_OPERAND_PCREL | MN10200_OPERAND_RELAX},
 
 /* 16bit unsigned dispacement in a memory operation which
    may promote to a 32bit displacement.  */
@@ -111,7 +111,7 @@ const struct mn10200_operand mn10200_operands[] = {
 
 /* 8 bit pc-relative displacement.  */
 #define SD8N_PCREL    (SD16+1)
-  {8, 0, MN10200_OPERAND_SIGNED | MN10200_OPERAND_PCREL},
+  {8, 0, MN10200_OPERAND_SIGNED | MN10200_OPERAND_PCREL | MN10200_OPERAND_RELAX},
 
 /* 8 bit signed immediate which may promote to 16bit signed immediate.  */
 #define SIMM8    (SD8N_PCREL+1)

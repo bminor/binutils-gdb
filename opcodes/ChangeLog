@@ -1,3 +1,8 @@
+Wed Jan 29 09:39:17 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200-opc.c (mn10200_operands): Make 8 and 16 bit pc-relative
+	branchs relaxable.
+
 Tue Jan 28 15:57:34 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-dis.c (print_insn_mips16): Set insn_info information.
