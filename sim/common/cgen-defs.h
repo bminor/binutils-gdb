@@ -130,7 +130,7 @@ typedef enum {
 #define CASE(N, X) case_##N##_##X
 #define BREAK(N) goto end_switch_##N
 #define DEFAULT(N) default_##N
-#define ENDSWITCH(N) end_switch_##N:
+#define ENDSWITCH(N) end_switch_##N:;
 #else
 #define SWITCH(N, X) switch (X)
 #define CASE(N, X) case X /* FIXME: old sem-switch had (@arch@_,X) here */
