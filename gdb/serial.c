@@ -23,6 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include "gdbcmd.h"
 
+//#define DEBUGIFY
+#include "debugify.h"
+
+
 /* Linked list of serial I/O handlers */
 
 static struct serial_ops *serial_ops_list = NULL;
@@ -206,11 +210,13 @@ serial_interface_lookup (name)
      char *name;
 {
   struct serial_ops *ops;
+  DBG(("serial_interface_lookup(%s)\n",name));
 
   for (ops = serial_ops_list; ops; ops = ops->next)
     if (strcmp (name, ops->name) == 0)
       return ops;
 
+  DBG(("serial_interface_lookup: %s not found!\n",name));
   return NULL;
 }
 
@@ -231,10 +237,12 @@ serial_open (name)
   serial_t scb;
   struct serial_ops *ops;
 
+  DBG(("serial_open\n"));
   for (scb = scb_base; scb; scb = scb->next)
     if (scb->name && strcmp (scb->name, name) == 0)
       {
 	scb->refcnt++;
+        DBG(("serial_open: scb %s found\n", name));
 	return scb;
       }
 
@@ -248,7 +256,10 @@ serial_open (name)
     ops = serial_interface_lookup ("hardwire");
 
   if (!ops)
+  {
+    DBG(("serial_open: !ops; returning NULL\n"));
     return NULL;
+  }
 
   scb = (serial_t)xmalloc (sizeof (struct _serial_t));
 
@@ -260,6 +271,7 @@ serial_open (name)
   if (scb->ops->open(scb, name))
     {
       free (scb);
+      DBG(("serial_open: scb->ops->open failed!\n"));
       return NULL;
     }
 
@@ -275,10 +287,12 @@ serial_open (name)
       serial_logfp = fopen (serial_logfile, "w");
       if (serial_logfp == NULL)
 	{
+          DBG(("serial_open: unable to open serial logfile %s!\n",serial_logfile));
 	  perror_with_name (serial_logfile);
 	}
     }
 
+  DBG(("serial_open: Done! :-)\n"));
   return scb;
 }
 
@@ -288,6 +302,7 @@ serial_fdopen (fd)
 {
   serial_t scb;
   struct serial_ops *ops;
+  DBG(("serial_fdopen\n"));
 
   for (scb = scb_base; scb; scb = scb->next)
     if (scb->fd == fd)
@@ -413,6 +428,7 @@ connect_command (args, fromtty)
   char cur_esc = 0;
   serial_ttystate ttystate;
   serial_t port_desc;		/* TTY port */
+  DBG(("connect_command\n"));
 
   dont_repeat();
 

@@ -1,3 +1,27 @@
+
+Tue Feb 11 22:24:39 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* defs.h: Fix cntl-C to read from the Windows message queue.
+	Add prototypes for make_final_cleanup (and the other cleanup
+	routines.
+	* remote-e7000.c: Fix sync code to timeout if unable to sync.
+	Change sync code to report status while trying to sync-up 
+	with hardware.  Add debugging output and document.
+	* ser-e7kpc.c: Swap order of len & offset to match implementation.
+	Add debugging output and document.
+	* serial.c: Add debugging output.
+	* top.c: Add call to do_final_cleanups.
+	Remove conditionals preventing Win32 from getting SIGQUIT.
+	* utils.c: (*_cleanup): Modify cleanup routines to accept a cleanup
+	chain as a parameter.  Extract this generic code from the cleanup 
+	routines into separate funtions (*_my_cleanup).  Keep old 
+	functionality by passing "cleanup_chain" to the new funtions.  
+	Define the cleanup chain "final_cleanup_chain" to be a cleanup 
+	chain which will be executed only when gdb exits.  Add functions 
+	(*_final_cleanup) to match the original (*_cleanup) functions.
+	(pollquit, quit, notice_quit): Fix to read cntl-C from the 
+	Windows message queue.
+
 start-sanitize-m32r
 Tue Feb 11 15:36:31 1997  Doug Evans  <dje@canuck.cygnus.com>
 

@@ -96,8 +96,8 @@ extern void quit PARAMS ((void));
 
 #ifdef QUIT
 /* do twice to force compiler warning */
-#define FIXME "FIXME"
-#define FIXME "ignoring redefinition of QUIT"
+#define QUIT_FIXME "FIXME"
+#define QUIT_FIXME "ignoring redefinition of QUIT"
 #else
 #define QUIT { \
   if (quit_flag) quit (); \
@@ -230,8 +230,12 @@ extern void init_malloc PARAMS ((void *));
 extern void request_quit PARAMS ((int));
 
 extern void do_cleanups PARAMS ((struct cleanup *));
+extern void do_final_cleanups PARAMS ((struct cleanup *));
+extern void do_my_cleanups PARAMS ((struct cleanup *, struct cleanup *));
 
 extern void discard_cleanups PARAMS ((struct cleanup *));
+extern void discard_final_cleanups PARAMS ((struct cleanup *));
+extern void discard_my_cleanups PARAMS ((struct cleanup *, struct cleanup *));
 
 /* The bare make_cleanup function is one of those rare beasts that
    takes almost any type of function as the first arg and anything that
@@ -247,10 +251,18 @@ make_cleanup PARAMS ((void (*function) (void *), void *));
    wrong.  */
 
 extern struct cleanup *make_cleanup ();
+extern struct cleanup *
+make_final_cleanup PARAMS ((void (*function) (void *), void *));
+extern struct cleanup *
+make_my_cleanup PARAMS ((struct cleanup *, void (*function) (void *), void *));
 
 extern struct cleanup *save_cleanups PARAMS ((void));
+extern struct cleanup *save_final_cleanups PARAMS ((void));
+extern struct cleanup *save_my_cleanups PARAMS ((struct cleanup *));
 
 extern void restore_cleanups PARAMS ((struct cleanup *));
+extern void restore_final_cleanups PARAMS ((struct cleanup *));
+extern void restore_my_cleanups PARAMS ((struct cleanup *, struct cleanup *));
 
 extern void free_current_contents PARAMS ((char **));
 
@@ -341,6 +353,10 @@ typedef bfd_vma t_reg;
 extern char* paddr PARAMS ((t_addr addr));
 
 extern char* preg PARAMS ((t_reg reg));
+
+extern char* paddr_nz PARAMS ((t_addr addr));
+
+extern char* preg_nz PARAMS ((t_reg reg));
 
 extern void fprintf_symbol_filtered PARAMS ((GDB_FILE *, char *,
 					     enum language, int));
@@ -538,17 +554,17 @@ enum val_prettyprint
 /* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
 
 #define LONGEST BFD_HOST_64_BIT
+#define ULONGEST BFD_HOST_U_64_BIT
 
 #else /* No BFD64 */
-
-/* LONGEST should not be a typedef, because "unsigned LONGEST" needs to work.
-   CC_HAS_LONG_LONG is defined if the host compiler supports "long long" */
 
 #ifndef LONGEST
 #  ifdef CC_HAS_LONG_LONG
 #    define LONGEST long long
+#    define ULONGEST unsigned long long
 #  else
 #    define LONGEST long
+#    define ULONGEST unsigned long
 #  endif
 #endif
 
@@ -819,7 +835,7 @@ extern void set_endian_from_file PARAMS ((bfd *));
 
 extern LONGEST extract_signed_integer PARAMS ((void *, int));
 
-extern unsigned LONGEST extract_unsigned_integer PARAMS ((void *, int));
+extern ULONGEST extract_unsigned_integer PARAMS ((void *, int));
 
 extern int extract_long_unsigned_integer PARAMS ((void *, int, LONGEST *));
 
@@ -827,7 +843,7 @@ extern CORE_ADDR extract_address PARAMS ((void *, int));
 
 extern void store_signed_integer PARAMS ((void *, int, LONGEST));
 
-extern void store_unsigned_integer PARAMS ((void *, int, unsigned LONGEST));
+extern void store_unsigned_integer PARAMS ((void *, int, ULONGEST));
 
 extern void store_address PARAMS ((void *, int, CORE_ADDR));
 
@@ -936,7 +952,7 @@ extern void store_floating PARAMS ((void *, int, DOUBLEST));
 
 extern CORE_ADDR push_bytes PARAMS ((CORE_ADDR, char *, int));
 
-extern CORE_ADDR push_word PARAMS ((CORE_ADDR, unsigned LONGEST));
+extern CORE_ADDR push_word PARAMS ((CORE_ADDR, ULONGEST));
 
 /* Some parts of gdb might be considered optional, in the sense that they
    are not essential for being able to build a working, usable debugger
@@ -1045,6 +1061,15 @@ extern int use_windows;
 
 #ifndef ROOTED_P
 #define ROOTED_P(X) (SLASH_P((X)[0]))
+#endif
+
+/* On some systems, PIDGET is defined to extract the inferior pid from
+   an internal pid that has the thread id and pid in seperate bit
+   fields.  If not defined, then just use the entire internal pid as
+   the actual pid. */
+
+#ifndef PIDGET
+#define PIDGET(pid) (pid)
 #endif
 
 #endif /* #ifndef DEFS_H */

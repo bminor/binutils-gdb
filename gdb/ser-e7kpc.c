@@ -18,20 +18,31 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#if defined(__GO32__) || defined(__WIN32__)
-#if defined(__WIN32__)
-//#define KERNEL
-//#define STRICT
-//#include <windows.h>
+//#define DEBUGIFY
+#include "debugify.h"
+
+#define RMT_DBG(x) if (remote_debug) printf_unfiltered x
+
+
+#if defined(__GO32__) || defined(_WIN32)
+#if defined(_WIN32)
 /* we define the 32-bit calls which thunk to 16-bit dll calls 
  */
 #include "win-e7kpc.h"
-/* msvc uses strnicmp instead */
+#include "target.h"
+#ifdef _MSC_VER
+/* msvc uses strnicmp instead of strncasecmp */
 #define strncasecmp strnicmp
+#define W32SUT_32
+#include "windefs.h"
+#include "w32sut.h"
+#endif
+#include "gdbwin.h"
+
 #else
 #include <sys/dos.h>
 #include "defs.h"
-#endif
+#endif /* _WIN32 */
 #include "serial.h"
 
 
@@ -88,22 +99,101 @@ static unsigned long pon;
 static unsigned long irqtop;
 static unsigned long board_at;
 
-#ifdef __WIN32__
-// These routines are normally part of the go32 dos extender.
-// We redefine them here to be calls into their Windoze equivs.
+#ifdef _WIN32
+/* These routines are normally part of the go32 dos extender.
+ * We redefine them here to be calls into their Windoze equivs. */
 static void dosmemget(int offset, int length, void *buffer);
 static void dosmemput(const void *buffer, int length, int offset);
 
-void dosmemget(int offset, int length, void *buffer)
+/* dll entry points for w32se7kpc.dll; call kernel32 to thunk for us */
+typedef BOOL (APIENTRY * PUTREGISTER) (
+	HANDLE hModule,
+        LPCSTR lpsz16BitDLL,
+	LPCSTR lpszInitName,
+	LPCSTR lpszProcName,
+	UT32PROC * ppfn32Thunk,
+	FARPROC pfnUT32Callback,
+	LPVOID lpBuff
+	);
+
+/* dll entry points for w95e7kpc.dll and w31e7kpc.dll */
+HANDLE hWine7kpc = 0;
+
+typedef int (APIENTRY * PWIN_LOAD_E7KPC) (void);
+typedef void (APIENTRY * PWIN_UNLOAD_E7KPC) (void);
+typedef void (APIENTRY * PWIN_MEM_GET) (unsigned char *buf, int len, int offset);
+typedef void (APIENTRY * PWIN_MEM_PUT) (unsigned char *buf, int len, int offset);
+typedef void (APIENTRY * PWIN_REMOTE_DEBUG) (int val);
+
+PWIN_LOAD_E7KPC pwin_load_e7kpc=NULL;
+PWIN_UNLOAD_E7KPC pwin_unload_e7kpc=NULL;
+PWIN_MEM_GET pwin_mem_get=NULL;
+PWIN_MEM_PUT pwin_mem_put=NULL;
+PWIN_REMOTE_DEBUG pwin_remote_debug=NULL;
+
+static int last_remote_debug = 0;
+static int wine7kpc_loaded = 0;
+static void win_unload_e7kpc (void);
+
+static int win_load_e7kpc (void)
 {
-    win_mem_get(buffer, length, offset);
-}
-void dosmemput(const void *buffer, int length, int offset)
-{
-    win_mem_put (buffer, length, offset);
+    if (pwin_load_e7kpc && !wine7kpc_loaded)
+    {
+      wine7kpc_loaded = pwin_load_e7kpc();
+      if (wine7kpc_loaded)
+	  make_final_cleanup(win_unload_e7kpc, 0);
+    }
+    return wine7kpc_loaded;
 }
 
-#endif
+static void win_unload_e7kpc (void)
+{
+    DBG(("win_unload_e7kpc\n"));
+    if (pwin_unload_e7kpc && wine7kpc_loaded)
+      pwin_unload_e7kpc();
+    wine7kpc_loaded = 0;
+}
+
+static void win_mem_get (unsigned char *buf, int offset, int len)
+{
+    DBG(("win_mem_get(&buf=<x%x> offset=<x%x> len=<%d>)\n", buf, offset, len));
+    if (remote_debug!=last_remote_debug && pwin_remote_debug)
+    {
+	//DBG(("calling pwin_remote_debug\n"));
+	pwin_remote_debug(remote_debug);
+        last_remote_debug=remote_debug;
+    }
+    if (pwin_mem_get) 
+    {
+	//DBG(("calling pwin_mem_get\n"));
+        pwin_mem_get (buf, offset, len);
+    }
+    //DBG(("leaving win_mem_get; buf=<%s>\n", buf));
+}
+
+static void win_mem_put (unsigned char *buf, int offset, int len)
+{
+    DBG(("win_mem_put(buf=<%s> offset=<x%x> len=<%d>)\n", buf, offset, len));
+    if (remote_debug!=last_remote_debug && pwin_remote_debug)
+    {
+	pwin_remote_debug(remote_debug);
+        last_remote_debug=remote_debug;
+    }
+    if (pwin_mem_put)
+      pwin_mem_put (buf, offset, len);
+}
+
+static void dosmemget(int offset, int length, void *buffer)
+{
+    win_mem_get(buffer, offset, length);
+}
+
+static void dosmemput(const void *buffer, int length, int offset)
+{
+    win_mem_put((unsigned char*)buffer, offset, length);
+}
+
+#endif /* _WIN32 */
 
 #define SET_BYTE(x,y)   { char _buf = y;dosmemput(&_buf,1, x);}
 #define SET_WORD(x,y)   { short _buf = y;dosmemput(&_buf,2, x);}
@@ -132,6 +222,7 @@ e7000pc_init ()
 
   int try;
   
+  DBG(("e7000pc_init()\n"));
   for (try = 0; sigs[try].sw; try++)
 
     {
@@ -145,8 +236,12 @@ e7000pc_init ()
       pon = board_at + OFF_PON;	      
       irqtop = board_at + OFF_IRQTOP;
       irqtod = board_at + OFF_IRQTOD;
-      
+
+      RMT_DBG(("e7000pc_init: looking for board's signature, try=%d\n", try));
+
       val = GET_WORD (ready);
+
+      //DBG(("e7000pc_init: GET_WORD returns x%x\n", val));
 
       if (val == (0xaaa0  | sigs[try].sw))
 	{
@@ -157,15 +252,18 @@ e7000pc_init ()
 
 	      SET_BYTE (irqtop, 1); /* Disable interrupts from e7000 */
 	      SET_WORD (ready, 1);
+              DBG(("Yippie!  Connected :-)\n"));
 	      printf_filtered ("\nConnected to the E7000PC at address 0x%x\n", 
 			       sigs[try].addr);
 	      return 1;	      
 	    }
+          DBG(("Bummer!  e7000pc not on :-(\n"));
 	  error ("The E7000 PC board is working, but the E7000 is turned off.\n");
 	  return 0;
 	}
     }
 
+  DBG(("Bummer!  Can't connect :-(\n"));
   error ("GDB cannot connect to the E7000 PC board, check that it is installed\n\
 and that the switch settings are correct.  Some other DOS programs can \n\
 stop the board from working.  Try starting from a very minimal boot, \n\
@@ -185,6 +283,7 @@ e7000_get ()
   static char pbuf[1000];
   char tmp[1000];
   int x;
+  DBG(("e7000_get()\n"));
   if (pbuf_index < pbuf_size) 
     {
       x = pbuf[pbuf_index++];
@@ -199,6 +298,10 @@ e7000_get ()
       /* Tell the E7000 we've eaten */
       SET_BYTE(fb,0);	
       /* Swap it around */
+/* FIXME!  We get in an infinite loop inside e7000_open...
+ * This is called from dosasync_readchar
+ * called from remote-e7000.c trying to sync up.
+ */
       for (i = 0; i < pbuf_size; i++) 
 	{
 	  pbuf[i] = tmp[i^1];
@@ -224,20 +327,22 @@ dosasync_read (fd, buf, len, timeout)
   long now;
   long then;
   int i = 0;
-  int p;
 
+  DBG(("dosasync_read(fd=x%x,buf,len=x%x,timeout=x%x)\n",fd,len,timeout));
   /* Then look for some more if we're still hungry */
   time (&now);
   then = now + timeout;
   while (i < len)
     {
       int ch = e7000_get();
+      //DBG(("%d: e7000_get gotta x%x\n", i, ch\n"));
       
       /* While there's room in the buffer, and we've already
-	 read the stuff in, suck it over */
+       * read the stuff in, suck it over */
       if (ch != -1) 
 	{
 	  buf[i++] = ch;
+	  //DBG(("e7000_get got x%x; before loop2: len=x%x, pbuf_index=x%x, pbuf_size=x%x\n", ch, len, pbuf_index, pbuf_size));
 	  while (i < len && pbuf_index < pbuf_size )
 	    {
 	      ch = e7000_get();
@@ -249,13 +354,18 @@ dosasync_read (fd, buf, len, timeout)
 
       time (&now);
 
-      if (timeout == 0)
-	return i;
-      if (now >= then && timeout > 0)
+      if (timeout == 0 || (now >= then && timeout > 0))
 	{
+/* We timeout here but return i anyway...  
+ * were we supposed to send a TIMEOUT ?
+ * While syncing, len = 1 and timeout=1..
+ * so always take this path and return 1 char. 
+ */
+	  DBG(("timeout; read x%x chars\n", i));
 	  return i;
 	}
     }
+  //DBG(("Yay! read x%x chars\n", len));
   return len;
 }
 
@@ -269,6 +379,7 @@ dosasync_write (fd, buf, len)
   int i;
   char dummy[1000];  
 
+  DBG(("dosasync_write(fd=x%x,buf=x%x,len=x%x)\n",fd,buf,len));
   
   /* Construct copy locally */
   ((short *)dummy)[0] = CMD_CI;
@@ -293,28 +404,109 @@ dosasync_write (fd, buf, len)
   return len;
 }
 
+
+#ifdef _WIN32
+static int 
+load_wine7kpc(void)
+{
+  char dll[64];
+
+  DBG(("load_wine7kpc()\n"));
+  if (win_host()==winnt)
+    {
+        printf_filtered( "e7000pc not supported on this host.\n" );
+        return 0;
+    }
+  if (win_host()==win32s)
+      strcpy(dll, "w31e7kpc.Dll");
+  else if (win_host()==win95)
+      strcpy(dll, "w95e7kpc.Dll");
+  else return 0;
+
+  /* load dll for windows support of e7000pc */
+  DBG(("LoadLibrary(%s)\n",dll));
+  hWine7kpc = LoadLibrary (dll);
+  if (!hWine7kpc)
+    {
+        DBG(("LoadLibrary(%s) failed\n",dll));
+        printf_filtered( "Error: unable to load %s.\n",dll);
+        return 0;
+    }
+  pwin_load_e7kpc = (PWIN_LOAD_E7KPC) GetProcAddress (hWine7kpc, "win_load_e7kpc");
+  if (!pwin_load_e7kpc)
+    {
+        DBG(("!pwin_load_e7kpc\n"));
+        printf_filtered( "Error: unable to resolve win_load_e7kpc.\n" );
+        return 0;
+    }
+  pwin_unload_e7kpc = (PWIN_UNLOAD_E7KPC) GetProcAddress (hWine7kpc, "win_unload_e7kpc");
+  if (!pwin_unload_e7kpc)
+    {
+        DBG(("!pwin_unload_e7kpc\n"));
+        printf_filtered( "Error: unable to resolve win_unload_e7kpc.\n" );
+        return 0;
+    }
+  pwin_mem_get = (PWIN_MEM_GET) GetProcAddress (hWine7kpc, "win_mem_get");
+  if (!pwin_mem_get)
+    {
+        DBG(("!pwin_mem_get\n"));
+        printf_filtered( "Error: unable to resolve win_mem_get.\n" );
+        return 0;
+    }
+  pwin_mem_put= (PWIN_MEM_PUT) GetProcAddress (hWine7kpc, "win_mem_put");
+  if (!pwin_mem_put)
+    {
+        DBG(("!pwin_mem_put\n"));
+        printf_filtered( "Error: unable to resolve win_mem_put.\n" );
+        return 0;
+    }
+  pwin_remote_debug= (PWIN_REMOTE_DEBUG) GetProcAddress (hWine7kpc, "win_remote_debug");
+  if (!pwin_remote_debug)
+    {
+        DBG(("!pwin_remote_debug\n"));
+        printf_filtered( "Error: unable to resolve win_remote_debug.\n" );
+        return 0;
+    }
+  DBG(("load_wine7kpc Done! :-)\n"));
+  return 1;
+}
+#endif /* _WIN32 */
+
 static int
 e7000pc_open (scb, name)
      serial_t scb;
      const char *name;
 {
+  DBG(("e7000pc_open\n"));
   if (strncasecmp (name, "pc", 2) != 0)
     {
       errno = ENOENT;
       return -1;
     }
-#ifdef __WIN32__
+#ifdef _WIN32
+  if (!load_wine7kpc()) /* load windows dll for e7kpc support */
+    {
+        DBG(("Error! load_wine7kpc failed\n"));
+        printf_filtered("Failed to initialize dll for e7000pc support.\n" );
+        return -1;
+    }
+  //DBG(("calling win_load_e7kpc\n"));
   if (win_load_e7kpc () != 0)
     {
       errno = ENOENT;
       return -1;
     }
-#endif
+#endif /* _WIN32 */
+  //DBG(("calling e7000pc_init\n"));
   scb->fd = e7000pc_init ();
 
   if (!scb->fd)
+  {
+    DBG(("Error! !scb->fd\n"));
     return -1;
+  }
 
+  DBG(("e7000pc_open done! :-)\n"));
   return 0;
 }
 
@@ -339,8 +531,12 @@ e7000pc_readchar (scb, timeout)
 {
   char buf;
 
+ DBG(("e7000pc_readchar\n"));
  top:
 
+  /* FIXME!  How does dosasync_read ever return 0?
+   * it always goes thru the loop once, so i>0
+   */
   if (dosasync_read (scb->fd, &buf, 1, timeout))
     {
       if (buf == 0) goto top;
@@ -362,6 +558,7 @@ e7000pc_get_tty_state (scb)
      serial_t scb;
 {
   struct e7000pc_ttystate *state;
+  DBG(("e7000pc_get_tty_state\n"));
 
   state = (struct e7000pc_ttystate *) xmalloc (sizeof *state);
 
@@ -408,6 +605,7 @@ e7000pc_write (scb, str, len)
      const char *str;
      int len;
 {
+  DBG(("e7000pc_write(scb,str=%s,len=x%x)\n",str,len));
   dosasync_write (scb->fd, str, len);
 
   return 0;
@@ -417,7 +615,8 @@ static void
 e7000pc_close (scb)
      serial_t scb;
 {
-#ifdef __WIN32__
+  DBG(("e7000pc_close\n"));
+#ifdef _WIN32
   win_unload_e7kpc ();
 #endif
 }
@@ -453,4 +652,4 @@ _initialize_ser_e7000pc ()
 {
 
 }
-#endif
+#endif /* defined(__GO32__) || defined(_WIN32) */

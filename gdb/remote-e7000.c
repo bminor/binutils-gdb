@@ -47,6 +47,9 @@
 #include "symfile.h"
 #include <time.h>
 
+//#define DEBUGIFY
+#include "debugify.h"
+
 #if 1
 #define HARD_BREAKPOINTS	/* Now handled by set option. */
 #define BC_BREAKPOINTS use_hard_breakpoints
@@ -56,6 +59,8 @@
 #define ENQ  0x05
 #define ACK  0x06
 #define CTRLZ 0x1a
+
+extern void notice_quit PARAMS ((void));
 
 extern void report_transfer_performance PARAMS ((unsigned long,
 						 time_t, time_t));
@@ -125,6 +130,7 @@ puts_e7000debug (buf)
 
   if (remote_debug)
     printf("Sending %s\n", buf);
+  DBG(("Sending %s; waiting for echo...\n", buf));
 
   if (SERIAL_WRITE (e7000_desc, buf, strlen (buf)))
     fprintf (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
@@ -134,6 +140,7 @@ puts_e7000debug (buf)
   if (!using_pc)
 #endif
     expect (buf);
+  DBG(("Got echo!n"));
 }
 
 static void
@@ -532,7 +539,7 @@ or \t\ttarget e7000 tcp_remote <host>[:<port>]\n\
 or \t\ttarget e7000 pc\n");
 	}
 
-#if !defined(__GO32__) && !defined(__WIN32__)
+#if !defined(__GO32__) && !defined(_WIN32)
       /* FIXME!  test for ':' is ambiguous */
       if (n == 1 && strchr (dev_name, ':') == 0)
 	{
@@ -557,6 +564,8 @@ e7000_open (args, from_tty)
   int loop;
   int sync;
   int serial_flag;
+  int try=0;
+  int quit_trying=20;
 
   target_preopen (from_tty);
 
@@ -567,7 +576,9 @@ e7000_open (args, from_tty)
   e7000_desc = SERIAL_OPEN (dev_name);
 
   if (!e7000_desc)
-    perror_with_name (dev_name);
+  {
+      error ("Unable to open target or file not found: %s\n", dev_name);
+  }
 
   SERIAL_SETBAUDRATE (e7000_desc, baudrate);
   SERIAL_RAW (e7000_desc);
@@ -576,7 +587,7 @@ e7000_open (args, from_tty)
   sync = 0;
   loop =  0;
   putchar_e7000 (CTRLC);
-  while (!sync)
+  while (!sync && ++try <= quit_trying)
     {
       int c;
 
@@ -585,7 +596,12 @@ e7000_open (args, from_tty)
 
       write_e7000 ("\r");
       c = SERIAL_READCHAR (e7000_desc, 1);
-      while (c != SERIAL_TIMEOUT)
+
+      /* FIXME!  this didn't seem right->  while (c != SERIAL_TIMEOUT)
+       * we get stuck in this loop ...
+       * We may never timeout, and never sync up :-(
+       */
+      while (!sync && c != SERIAL_TIMEOUT)
 	{
 	  /* Dont echo cr's */
 	  if (from_tty && c != '\r')
@@ -593,6 +609,7 @@ e7000_open (args, from_tty)
 	      putchar (c);
 	      fflush (stdout);
 	    }
+	  /* Shouldn't we either break here, or check for sync in inner loop? */
 	  if (c == ':')
 	    sync = 1;
 
@@ -605,14 +622,30 @@ e7000_open (args, from_tty)
 	  QUIT ;
 
 
+	  /* FIXME!  with this logic, you might never break out of this loop!
+	   * Changed to count tries and treat reads as TIMEOUTS
+	   * In windows version, you never timeout cuz always read 1 char!
+	   */
 	  if (quit_flag)
 	    {
 	      putchar_e7000 (CTRLC);
-	      quit_flag = 0;
+	      /* Was-> quit_flag = 0; */
+	      c = SERIAL_TIMEOUT;
+	      quit_trying = try+1;  /* we don't want to try anymore */
 	    }
-	  c = SERIAL_READCHAR (e7000_desc, 1);
+	  else
+	      c = SERIAL_READCHAR (e7000_desc, 1);
 	}
     }
+
+  if (!sync)
+  {
+      if (from_tty)
+	printf_unfiltered ("Giving up after %d tries...\n",try);
+      error ("Unable to syncronize with target.\n");
+      return;
+  }
+
   puts_e7000debug ("\r");
 
   expect_prompt ();
@@ -681,11 +714,20 @@ e7000_resume (pid, step, sig)
 
 #ifdef GDB_TARGET_IS_H8300
 
-char *want = "PC=%p CCR=%c\n\
+char *want_h8300h = "PC=%p CCR=%c\n\
  ER0 - ER3  %0 %1 %2 %3\n\
  ER4 - ER7  %4 %5 %6 %7\n";
 
-char *want_nopc = "%p CCR=%c\n\
+char *want_nopc_h8300h = "%p CCR=%c\n\
+ ER0 - ER3  %0 %1 %2 %3\n\
+ ER4 - ER7  %4 %5 %6 %7";
+
+char *want_h8300s = "PC=%p CCR=%c\n\
+ MACH=\n\
+ ER0 - ER3  %0 %1 %2 %3\n\
+ ER4 - ER7  %4 %5 %6 %7\n";
+
+char *want_nopc_h8300s = "%p CCR=%c EXR=%9\n\
  ER0 - ER3  %0 %1 %2 %3\n\
  ER4 - ER7  %4 %5 %6 %7";
 
@@ -871,7 +913,7 @@ e7000_fetch_registers ()
   else
      fetch_regs_from_dump (gch, want);
 #else
-  fetch_regs_from_dump (gch, want);
+  fetch_regs_from_dump (gch, h8300smode ? want_h8300s : want_h8300h);
 #endif
 
 
@@ -2015,7 +2057,7 @@ e7000_wait (pid, status)
   else
      fetch_regs_from_dump (gch, want_nopc);
 #else
-  fetch_regs_from_dump (gch, want_nopc);
+  fetch_regs_from_dump (gch, h8300smode ? want_nopc_h8300s : want_nopc_h8300h);
 #endif
 
   /* And supply the extra ones the simulator uses */

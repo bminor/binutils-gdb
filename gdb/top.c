@@ -571,7 +571,6 @@ catch_errors (func, args, errstring, mask)
 
 /* Handler for SIGHUP.  */
 
-#ifndef _WIN32
 static void
 disconnect (signo)
 int signo;
@@ -581,7 +580,6 @@ int signo;
   signal (SIGHUP, SIG_DFL);
   kill (getpid (), SIGHUP);
 }
-#endif
 
 /* Just a little helper function for disconnect().  */
 
@@ -1899,11 +1897,9 @@ init_signals ()
      might be in memory, shared between the two).  Since we establish
      a handler for SIGQUIT, when we call exec it will set the signal
      to SIG_DFL for us.  */
-#ifndef _WIN32
   signal (SIGQUIT, do_nothing);
   if (signal (SIGHUP, do_nothing) != SIG_IGN)
     signal (SIGHUP, disconnect);
-#endif
   signal (SIGFPE, float_handler);
 
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
@@ -2855,6 +2851,8 @@ quit_command (args, from_tty)
   /* Save the history information if it is appropriate to do so.  */
   if (write_history_p && history_filename)
     write_history (history_filename);
+
+  do_final_cleanups(ALL_CLEANUPS);	/* Do any final cleanups before exiting */
 
   exit (exit_code);
 }
