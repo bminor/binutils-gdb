@@ -45,8 +45,8 @@
 void
 supply_gregset (gregset_t *gregsetp)
 {
-  register int regi;
-  register greg_t *regp = &(*gregsetp)[0];
+  int regi;
+  greg_t *regp = &(*gregsetp)[0];
   char zerobuf[MAX_REGISTER_SIZE];
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
@@ -71,7 +71,7 @@ void
 fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
-  register greg_t *regp = &(*gregsetp)[0];
+  greg_t *regp = &(*gregsetp)[0];
 
   for (regi = 0; regi <= 32; regi++)
     if ((regno == -1) || (regno == regi))
@@ -101,7 +101,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   char zerobuf[MAX_REGISTER_SIZE];
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
 

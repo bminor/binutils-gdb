@@ -334,7 +334,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
 static struct tracepoint *
 set_raw_tracepoint (struct symtab_and_line sal)
 {
-  register struct tracepoint *t, *tc;
+  struct tracepoint *t, *tc;
   struct cleanup *old_chain;
 
   t = (struct tracepoint *) xmalloc (sizeof (struct tracepoint));

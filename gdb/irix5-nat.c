@@ -53,8 +53,8 @@ static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 void
 supply_gregset (gregset_t *gregsetp)
 {
-  register int regi;
-  register greg_t *regp = &(*gregsetp)[0];
+  int regi;
+  greg_t *regp = &(*gregsetp)[0];
   int gregoff = sizeof (greg_t) - MIPS_REGSIZE;
   static char zerobuf[32] = {0};
 
@@ -74,7 +74,7 @@ void
 fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
-  register greg_t *regp = &(*gregsetp)[0];
+  greg_t *regp = &(*gregsetp)[0];
 
   /* Under Irix6, if GDB is built with N32 ABI and is debugging an O32
      executable, we have to sign extend the registers to 64 bits before
@@ -118,7 +118,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   static char zerobuf[32] = {0};
 
   /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */

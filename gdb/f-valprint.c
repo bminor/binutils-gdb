@@ -357,7 +357,7 @@ f_val_print (struct type *type, char *valaddr, int embedded_offset,
 	     CORE_ADDR address, struct ui_file *stream, int format,
 	     int deref_ref, int recurse, enum val_prettyprint pretty)
 {
-  register unsigned int i = 0;	/* Number of characters printed */
+  unsigned int i = 0;	/* Number of characters printed */
   struct type *elttype;
   LONGEST val;
   CORE_ADDR addr;
@@ -580,7 +580,7 @@ info_common_command (char *comname, int from_tty)
   SAVED_F77_COMMON_PTR the_common;
   COMMON_ENTRY_PTR entry;
   struct frame_info *fi;
-  register char *funname = 0;
+  char *funname = 0;
   struct symbol *func;
 
   /* We have been told to display the contents of F77 COMMON 
@@ -674,7 +674,7 @@ there_is_a_visible_common_named (char *comname)
 {
   SAVED_F77_COMMON_PTR the_common;
   struct frame_info *fi;
-  register char *funname = 0;
+  char *funname = 0;
   struct symbol *func;
 
   if (comname == NULL)

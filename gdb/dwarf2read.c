@@ -2133,7 +2133,7 @@ static void
 read_func_scope (struct die_info *die, struct objfile *objfile,
 		 const struct comp_unit_head *cu_header)
 {
-  register struct context_stack *new;
+  struct context_stack *new;
   CORE_ADDR lowpc;
   CORE_ADDR highpc;
   struct die_info *child_die;
@@ -2244,7 +2244,7 @@ static void
 read_lexical_block_scope (struct die_info *die, struct objfile *objfile,
 			  const struct comp_unit_head *cu_header)
 {
-  register struct context_stack *new;
+  struct context_stack *new;
   CORE_ADDR lowpc, highpc;
   struct die_info *child_die;
 

@@ -135,7 +135,7 @@ fill_gregset (prgregset_t *gregsetp, int regno)
 void
 supply_fpregset (prfpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
 
   for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
     supply_register (regi, 

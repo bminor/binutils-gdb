@@ -272,7 +272,7 @@ get_pc_function_start (CORE_ADDR pc)
 struct symbol *
 get_frame_function (struct frame_info *frame)
 {
-  register struct block *bl = get_frame_block (frame, 0);
+  struct block *bl = get_frame_block (frame, 0);
   if (bl == 0)
     return 0;
   return block_function (bl);
@@ -285,7 +285,7 @@ get_frame_function (struct frame_info *frame)
 struct symbol *
 find_pc_sect_function (CORE_ADDR pc, struct sec *section)
 {
-  register struct block *b = block_for_pc_sect (pc, section);
+  struct block *b = block_for_pc_sect (pc, section);
   if (b == 0)
     return 0;
   return block_function (b);
@@ -513,8 +513,8 @@ struct frame_info *
 block_innermost_frame (struct block *block)
 {
   struct frame_info *frame;
-  register CORE_ADDR start;
-  register CORE_ADDR end;
+  CORE_ADDR start;
+  CORE_ADDR end;
   CORE_ADDR calling_pc;
 
   if (block == NULL)

@@ -646,7 +646,7 @@ vmap_secs (struct vmap *vp, LdInfo *ldi, int arch64)
 static void
 vmap_symtab (struct vmap *vp)
 {
-  register struct objfile *objfile;
+  struct objfile *objfile;
   struct section_offsets *new_offsets;
   int i;
 
@@ -720,7 +720,7 @@ static struct vmap *
 add_vmap (LdInfo *ldi)
 {
   bfd *abfd, *last;
-  register char *mem, *objname, *filename;
+  char *mem, *objname, *filename;
   struct objfile *obj;
   struct vmap *vp;
   int fd;
@@ -803,7 +803,7 @@ static void
 vmap_ldinfo (LdInfo *ldi)
 {
   struct stat ii, vi;
-  register struct vmap *vp;
+  struct vmap *vp;
   int got_one, retried;
   int got_exec_file = 0;
   uint next;

@@ -191,7 +191,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   char zerobuf[MAX_REGISTER_SIZE];
 
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
@@ -466,7 +466,7 @@ mips64_fill_gregset (mips64_elf_gregset_t *gregsetp, int regno)
 static void
 mips64_supply_fpregset (mips64_elf_fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   char zerobuf[MAX_REGISTER_SIZE];
 
   memset (zerobuf, 0, MAX_REGISTER_SIZE);

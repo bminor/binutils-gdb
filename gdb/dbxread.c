@@ -352,8 +352,8 @@ add_this_object_header_file (int i)
 static void
 add_old_header_file (char *name, int instance)
 {
-  register struct header_file *p = HEADER_FILES (current_objfile);
-  register int i;
+  struct header_file *p = HEADER_FILES (current_objfile);
+  int i;
 
   for (i = 0; i < N_HEADER_FILES (current_objfile); i++)
     if (STREQ (p[i].name, name) && instance == p[i].instance)
@@ -378,8 +378,8 @@ add_old_header_file (char *name, int instance)
 static void
 add_new_header_file (char *name, int instance)
 {
-  register int i;
-  register struct header_file *hfile;
+  int i;
+  struct header_file *hfile;
 
   /* Make sure there is room for one more header file.  */
 
@@ -421,7 +421,7 @@ add_new_header_file (char *name, int instance)
 static struct type **
 explicit_lookup_type (int real_filenum, int index)
 {
-  register struct header_file *f = &HEADER_FILES (current_objfile)[real_filenum];
+  struct header_file *f = &HEADER_FILES (current_objfile)[real_filenum];
 
   if (index >= f->length)
     {
@@ -1292,12 +1292,12 @@ function_outside_compilation_unit_complaint (const char *arg1)
 static void
 read_dbx_symtab (struct objfile *objfile)
 {
-  register struct external_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch */
+  struct external_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch */
   struct internal_nlist nlist;
   CORE_ADDR text_addr;
   int text_size;
 
-  register char *namestring;
+  char *namestring;
   int nsl;
   int past_first_source_file = 0;
   CORE_ADDR last_o_file_start = 0;
@@ -2588,12 +2588,12 @@ dbx_psymtab_to_symtab (struct partial_symtab *pst)
 static void
 read_ofile_symtab (struct partial_symtab *pst)
 {
-  register char *namestring;
-  register struct external_nlist *bufp;
+  char *namestring;
+  struct external_nlist *bufp;
   struct internal_nlist nlist;
   unsigned char type;
   unsigned max_symnum;
-  register bfd *abfd;
+  bfd *abfd;
   struct objfile *objfile;
   int sym_offset;		/* Offset to start of symbols to read */
   int sym_size;			/* Size of symbols to read */
@@ -2805,7 +2805,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
   static CORE_ADDR last_pc_address;
 #endif
 
-  register struct context_stack *new;
+  struct context_stack *new;
   /* This remembers the address of the start of a function.  It is used
      because in Solaris 2, N_LBRAC, N_RBRAC, and N_SLINE entries are
      relative to the current function's start address.  On systems

@@ -584,7 +584,7 @@ disable_longjmp_breakpoint_cleanup (void *ignore)
 static void
 step_1 (int skip_subroutines, int single_inst, char *count_string)
 {
-  register int count = 1;
+  int count = 1;
   struct frame_info *frame;
   struct cleanup *cleanups = 0;
   int async_exec = 0;
@@ -806,7 +806,7 @@ which has no line number information.\n", name);
 static void
 jump_command (char *arg, int from_tty)
 {
-  register CORE_ADDR addr;
+  CORE_ADDR addr;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct symbol *fn;
@@ -1121,7 +1121,7 @@ print_return_value (int structure_return, struct type *value_type)
 void
 finish_command_continuation (struct continuation_arg *arg)
 {
-  register struct symbol *function;
+  struct symbol *function;
   struct breakpoint *breakpoint;
   struct cleanup *cleanups;
 
@@ -1164,8 +1164,8 @@ static void
 finish_command (char *arg, int from_tty)
 {
   struct symtab_and_line sal;
-  register struct frame_info *frame;
-  register struct symbol *function;
+  struct frame_info *frame;
+  struct symbol *function;
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
   struct continuation_arg *arg1, *arg2, *arg3;
@@ -1366,7 +1366,7 @@ environment_info (char *var, int from_tty)
 static void
 set_environment_command (char *arg, int from_tty)
 {
-  register char *p, *val, *var;
+  char *p, *val, *var;
   int nullset = 0;
 
   if (arg == 0)
@@ -1604,7 +1604,7 @@ void
 registers_info (char *addr_exp, int fpregs)
 {
   int regnum, numregs;
-  register char *end;
+  char *end;
 
   if (!target_has_registers)
     error ("The program has no registers now.");

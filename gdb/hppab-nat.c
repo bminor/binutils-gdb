@@ -54,9 +54,9 @@
 static void
 fetch_register (int regno)
 {
-  register unsigned int regaddr;
+  unsigned int regaddr;
   char buf[MAX_REGISTER_SIZE];
-  register int i;
+  int i;
 
   /* Offset of registers within the u area.  */
   unsigned int offset;
@@ -104,9 +104,9 @@ fetch_inferior_registers (int regno)
 void
 store_inferior_registers (int regno)
 {
-  register unsigned int regaddr;
+  unsigned int regaddr;
   char buf[80];
-  register int i;
+  int i;
   unsigned int offset = U_REGS_OFFSET;
   int scratch;
 

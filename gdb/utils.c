@@ -266,9 +266,9 @@ struct cleanup *
 make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 		 void *arg)
 {
-  register struct cleanup *new
+  struct cleanup *new
     = (struct cleanup *) xmalloc (sizeof (struct cleanup));
-  register struct cleanup *old_chain = *pmy_chain;
+  struct cleanup *old_chain = *pmy_chain;
 
   new->next = *pmy_chain;
   new->function = function;
@@ -315,7 +315,7 @@ void
 do_my_cleanups (register struct cleanup **pmy_chain,
 		register struct cleanup *old_chain)
 {
-  register struct cleanup *ptr;
+  struct cleanup *ptr;
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;	/* Do this first incase recursion */
@@ -349,7 +349,7 @@ void
 discard_my_cleanups (register struct cleanup **pmy_chain,
 		     register struct cleanup *old_chain)
 {
-  register struct cleanup *ptr;
+  struct cleanup *ptr;
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;
@@ -1220,7 +1220,7 @@ xvasprintf (char **ret, const char *format, va_list ap)
 int
 myread (int desc, char *addr, int len)
 {
-  register int val;
+  int val;
   int orglen = len;
 
   while (len > 0)
@@ -1243,7 +1243,7 @@ myread (int desc, char *addr, int len)
 char *
 savestring (const char *ptr, size_t size)
 {
-  register char *p = (char *) xmalloc (size + 1);
+  char *p = (char *) xmalloc (size + 1);
   memcpy (p, ptr, size);
   p[size] = 0;
   return p;
@@ -1252,7 +1252,7 @@ savestring (const char *ptr, size_t size)
 char *
 msavestring (void *md, const char *ptr, size_t size)
 {
-  register char *p = (char *) xmmalloc (md, size + 1);
+  char *p = (char *) xmmalloc (md, size + 1);
   memcpy (p, ptr, size);
   p[size] = 0;
   return p;
@@ -1293,8 +1293,8 @@ int
 query (const char *ctlstr, ...)
 {
   va_list args;
-  register int answer;
-  register int ans2;
+  int answer;
+  int ans2;
   int retval;
 
   va_start (args, ctlstr);
@@ -1398,7 +1398,7 @@ int
 parse_escape (char **string_ptr)
 {
   int target_char;
-  register int c = *(*string_ptr)++;
+  int c = *(*string_ptr)++;
   if (c_parse_backslash (c, &target_char))
     return target_char;
   else

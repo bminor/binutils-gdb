@@ -1463,7 +1463,7 @@ rs6000_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 CORE_ADDR
 rs6000_skip_trampoline_code (CORE_ADDR pc)
 {
-  register unsigned int ii, op;
+  unsigned int ii, op;
   int rel;
   CORE_ADDR solib_target_pc;
   struct minimal_symbol *msymbol;

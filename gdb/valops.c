@@ -88,7 +88,7 @@ int overload_resolution = 0;
 struct value *
 find_function_in_inferior (const char *name)
 {
-  register struct symbol *sym;
+  struct symbol *sym;
   sym = lookup_symbol (name, 0, VAR_DOMAIN, 0, NULL);
   if (sym != NULL)
     {
@@ -157,9 +157,9 @@ allocate_space_in_inferior (int len)
 struct value *
 value_cast (struct type *type, struct value *arg2)
 {
-  register enum type_code code1;
-  register enum type_code code2;
-  register int scalar;
+  enum type_code code1;
+  enum type_code code2;
+  int scalar;
   struct type *type2;
 
   int convert_to_boolean = 0;
@@ -480,7 +480,7 @@ value_fetch_lazy (struct value *val)
 struct value *
 value_assign (struct value *toval, struct value *fromval)
 {
-  register struct type *type;
+  struct type *type;
   struct value *val;
   char raw_buffer[MAX_REGISTER_SIZE];
   int use_buffer = 0;
@@ -800,7 +800,7 @@ value_of_variable (struct symbol *var, struct block *b)
 struct value *
 value_coerce_array (struct value *arg1)
 {
-  register struct type *type = check_typedef (VALUE_TYPE (arg1));
+  struct type *type = check_typedef (VALUE_TYPE (arg1));
 
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
@@ -920,7 +920,7 @@ value_ind (struct value *arg1)
 CORE_ADDR
 push_word (CORE_ADDR sp, ULONGEST word)
 {
-  register int len = DEPRECATED_REGISTER_SIZE;
+  int len = DEPRECATED_REGISTER_SIZE;
   char buffer[MAX_REGISTER_SIZE];
 
   store_unsigned_integer (buffer, len, word);
@@ -971,9 +971,9 @@ push_bytes (CORE_ADDR sp, char *buffer, int len)
 static CORE_ADDR
 value_push (register CORE_ADDR sp, struct value *arg)
 {
-  register int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
-  register int container_len = len;
-  register int offset;
+  int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
+  int container_len = len;
+  int offset;
 
   /* How big is the container we're going to put this value in?  */
   if (PARM_BOUNDARY)
@@ -1617,7 +1617,7 @@ struct value *
 value_struct_elt (struct value **argp, struct value **args,
 		  char *name, int *static_memfuncp, char *err)
 {
-  register struct type *t;
+  struct type *t;
   struct value *v;
 
   COERCE_ARRAY (*argp);
@@ -1898,8 +1898,8 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   int num_fns = 0;		/* Number of overloaded instances being considered */
   struct type *basetype = NULL;
   int boffset;
-  register int jj;
-  register int ix;
+  int jj;
+  int ix;
   int static_offset;
   struct cleanup *cleanups = NULL;
 
@@ -2140,7 +2140,7 @@ destructor_name_p (const char *name, const struct type *type)
 static int
 check_field_in (register struct type *type, const char *name)
 {
-  register int i;
+  int i;
 
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
@@ -2181,7 +2181,7 @@ check_field_in (register struct type *type, const char *name)
 int
 check_field (struct value *arg1, const char *name)
 {
-  register struct type *t;
+  struct type *t;
 
   COERCE_ARRAY (arg1);
 
@@ -2219,8 +2219,8 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 				struct type *curtype, char *name,
 				struct type *intype)
 {
-  register struct type *t = curtype;
-  register int i;
+  struct type *t = curtype;
+  int i;
   struct value *v;
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT

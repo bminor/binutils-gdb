@@ -512,9 +512,9 @@ get_number_or_range (char **pp)
 static void
 condition_command (char *arg, int from_tty)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   char *p;
-  register int bnum;
+  int bnum;
 
   if (arg == 0)
     error_no_arg ("breakpoint number");
@@ -564,9 +564,9 @@ condition_command (char *arg, int from_tty)
 static void
 commands_command (char *arg, int from_tty)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   char *p;
-  register int bnum;
+  int bnum;
   struct command_line *l;
 
   /* If we allowed this, we would have problems with when to
@@ -740,7 +740,7 @@ insert_catchpoint (struct ui_out *uo, void *args)
 int
 insert_breakpoints (void)
 {
-  register struct breakpoint *b, *temp;
+  struct breakpoint *b, *temp;
   int return_val = 0;	/* return success code. */
   int val = 0;
   int disabled_breaks = 0;
@@ -1118,7 +1118,7 @@ You may have requested too many hardware breakpoints/watchpoints.\n");
 int
 remove_breakpoints (void)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   int val;
 
   ALL_BREAKPOINTS (b)
@@ -1136,7 +1136,7 @@ remove_breakpoints (void)
 int
 remove_hw_watchpoints (void)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   int val;
 
   ALL_BREAKPOINTS (b)
@@ -1157,7 +1157,7 @@ remove_hw_watchpoints (void)
 int
 reattach_breakpoints (int pid)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   int val;
   struct cleanup *old_chain = save_inferior_ptid ();
 
@@ -1320,7 +1320,7 @@ update_breakpoints_after_exec (void)
 int
 detach_breakpoints (int pid)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   int val;
   struct cleanup *old_chain = save_inferior_ptid ();
 
@@ -1542,7 +1542,7 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 void
 mark_breakpoints_out (void)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
     b->inserted = 0;
@@ -1563,7 +1563,7 @@ mark_breakpoints_out (void)
 void
 breakpoint_init_inferior (enum inf_context context)
 {
-  register struct breakpoint *b, *temp;
+  struct breakpoint *b, *temp;
   static int warning_needed = 0;
 
   ALL_BREAKPOINTS_SAFE (b, temp)
@@ -1638,7 +1638,7 @@ breakpoint_init_inferior (enum inf_context context)
 enum breakpoint_here
 breakpoint_here_p (CORE_ADDR pc)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   int any_breakpoint_here = 0;
 
   ALL_BREAKPOINTS (b)
@@ -1667,7 +1667,7 @@ breakpoint_here_p (CORE_ADDR pc)
 int
 breakpoint_inserted_here_p (CORE_ADDR pc)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
     if (b->inserted
@@ -2507,7 +2507,7 @@ which its expression is valid.\n");
 bpstat
 bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 {
-  register struct breakpoint *b, *temp;
+  struct breakpoint *b, *temp;
   CORE_ADDR bp_addr;
   /* True if we've hit a breakpoint (as opposed to a watchpoint).  */
   int real_breakpoint = 0;
@@ -3220,8 +3220,8 @@ static void
 print_one_breakpoint (struct breakpoint *b,
 		      CORE_ADDR *last_addr)
 {
-  register struct command_line *l;
-  register struct symbol *sym;
+  struct command_line *l;
+  struct symbol *sym;
   struct ep_type_description
     {
       enum bptype type;
@@ -3527,7 +3527,7 @@ static int
 do_captured_breakpoint_query (struct ui_out *uiout, void *data)
 {
   struct captured_breakpoint_query_args *args = data;
-  register struct breakpoint *b;
+  struct breakpoint *b;
   CORE_ADDR dummy_addr = 0;
   ALL_BREAKPOINTS (b)
     {
@@ -3579,7 +3579,7 @@ user_settable_breakpoint (const struct breakpoint *b)
 static void
 breakpoint_1 (int bnum, int allflag)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   CORE_ADDR last_addr = (CORE_ADDR) -1;
   int nr_printable_breakpoints;
   struct cleanup *bkpttbl_chain;
@@ -3695,8 +3695,8 @@ maintenance_info_breakpoints (char *bnum_exp, int from_tty)
 static void
 describe_other_breakpoints (CORE_ADDR pc, asection *section)
 {
-  register int others = 0;
-  register struct breakpoint *b;
+  int others = 0;
+  struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
     if (b->address == pc)	/* address match / overlay match */
@@ -3784,8 +3784,8 @@ breakpoint_address_is_meaningful (struct breakpoint *bpt)
 static void
 check_duplicates (struct breakpoint *bpt)
 {
-  register struct breakpoint *b;
-  register int count = 0;
+  struct breakpoint *b;
+  int count = 0;
   struct breakpoint *perm_bp = 0;
   CORE_ADDR address = bpt->address;
   asection *section = bpt->section;
@@ -3862,7 +3862,7 @@ check_duplicates (struct breakpoint *bpt)
 struct breakpoint *
 set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
 {
-  register struct breakpoint *b, *b1;
+  struct breakpoint *b, *b1;
 
   b = (struct breakpoint *) xmalloc (sizeof (struct breakpoint));
   memset (b, 0, sizeof (*b));
@@ -3971,7 +3971,7 @@ create_longjmp_breakpoint (char *func_name)
 void
 enable_longjmp_breakpoint (void)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
     if (b->type == bp_longjmp)
@@ -3984,7 +3984,7 @@ enable_longjmp_breakpoint (void)
 void
 disable_longjmp_breakpoint (void)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
     if (b->type == bp_longjmp
@@ -4023,7 +4023,7 @@ create_overlay_event_breakpoint (char *func_name)
 void
 enable_overlay_breakpoints (void)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
     if (b->type == bp_overlay_event)
@@ -4037,7 +4037,7 @@ enable_overlay_breakpoints (void)
 void
 disable_overlay_breakpoints (void)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
     if (b->type == bp_overlay_event)
@@ -4076,7 +4076,7 @@ remove_thread_event_breakpoints (void)
 void
 remove_solib_event_breakpoints (void)
 {
-  register struct breakpoint *b, *temp;
+  struct breakpoint *b, *temp;
 
   ALL_BREAKPOINTS_SAFE (b, temp)
     if (b->type == bp_shlib_event)
@@ -4308,7 +4308,7 @@ create_exec_event_catchpoint (int tempflag, char *cond_string)
 static int
 hw_breakpoint_used_count (void)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   int i = 0;
 
   ALL_BREAKPOINTS (b)
@@ -4323,7 +4323,7 @@ hw_breakpoint_used_count (void)
 static int
 hw_watchpoint_used_count (enum bptype type, int *other_type_used)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   int i = 0;
 
   *other_type_used = 0;
@@ -4352,7 +4352,7 @@ hw_watchpoint_used_count (enum bptype type, int *other_type_used)
 void
 set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_id frame_id)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
     if (b->type == bp_longjmp_resume)
@@ -4414,7 +4414,7 @@ struct breakpoint *
 set_momentary_breakpoint (struct symtab_and_line sal, struct frame_id frame_id,
 			  enum bptype type)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
   b = set_raw_breakpoint (sal, type);
   b->enable_state = bp_enabled;
   b->disposition = disp_donttouch;
@@ -4743,7 +4743,7 @@ break_command_1 (char *arg, int flag, int from_tty)
 {
   int tempflag, hardwareflag;
   struct symtabs_and_lines sals;
-  register struct expression **cond = 0;
+  struct expression **cond = 0;
   /* Pointers in arg to the start, and one past the end, of the
      condition.  */
   char **cond_string = (char **) NULL;
@@ -4886,7 +4886,7 @@ do_captured_breakpoint (void *data)
 {
   struct captured_breakpoint_args *args = data;
   struct symtabs_and_lines sals;
-  register struct expression **cond;
+  struct expression **cond;
   struct cleanup *old_chain;
   struct cleanup *breakpoint_chain = NULL;
   int i;
@@ -6510,8 +6510,8 @@ breakpoint_auto_delete (bpstat bs)
 void
 delete_breakpoint (struct breakpoint *bpt)
 {
-  register struct breakpoint *b;
-  register bpstat bs;
+  struct breakpoint *b;
+  bpstat bs;
 
   if (bpt == NULL)
     error ("Internal error (attempted to delete a NULL breakpoint)");
@@ -6999,7 +6999,7 @@ breakpoint_re_set_thread (struct breakpoint *b)
 void
 set_ignore_count (int bptnum, int count, int from_tty)
 {
-  register struct breakpoint *b;
+  struct breakpoint *b;
 
   if (count < 0)
     count = 0;
@@ -7044,7 +7044,7 @@ static void
 ignore_command (char *args, int from_tty)
 {
   char *p = args;
-  register int num;
+  int num;
 
   if (p == 0)
     error_no_arg ("a breakpoint number");
@@ -7068,10 +7068,10 @@ ignore_command (char *args, int from_tty)
 static void
 map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *))
 {
-  register char *p = args;
+  char *p = args;
   char *p1;
-  register int num;
-  register struct breakpoint *b, *tmp;
+  int num;
+  struct breakpoint *b, *tmp;
   int match;
 
   if (p == 0)
@@ -7136,7 +7136,7 @@ disable_breakpoint (struct breakpoint *bpt)
 static void
 disable_command (char *args, int from_tty)
 {
-  register struct breakpoint *bpt;
+  struct breakpoint *bpt;
   if (args == 0)
     ALL_BREAKPOINTS (bpt)
       switch (bpt->type)
@@ -7270,7 +7270,7 @@ enable_breakpoint (struct breakpoint *bpt)
 static void
 enable_command (char *args, int from_tty)
 {
-  register struct breakpoint *bpt;
+  struct breakpoint *bpt;
   if (args == 0)
     ALL_BREAKPOINTS (bpt)
       switch (bpt->type)

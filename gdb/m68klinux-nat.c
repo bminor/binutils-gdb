@@ -133,7 +133,7 @@ fetch_register (int regno)
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
   char mess[128];		/* For messages */
-  register int i;
+  int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
   char buf[MAX_REGISTER_SIZE];
   int tid;
@@ -198,7 +198,7 @@ store_register (int regno)
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
   char mess[128];		/* For messages */
-  register int i;
+  int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
   int tid;
   char buf[MAX_REGISTER_SIZE];

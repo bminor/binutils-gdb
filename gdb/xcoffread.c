@@ -1441,7 +1441,7 @@ static struct symbol *
 process_xcoff_symbol (register struct coff_symbol *cs, struct objfile *objfile)
 {
   struct symbol onesymbol;
-  register struct symbol *sym = &onesymbol;
+  struct symbol *sym = &onesymbol;
   struct symbol *sym2 = NULL;
   char *name, *pp;
 

@@ -237,7 +237,7 @@ scm_read_token (int c, int weird)
 static int
 scm_skip_ws (void)
 {
-  register int c;
+  int c;
   while (1)
     switch ((c = *lexptr++))
       {

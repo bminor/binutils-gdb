@@ -255,11 +255,11 @@ static struct symbol *current_symbol = NULL;
 static struct type **
 dbx_lookup_type (int typenums[2])
 {
-  register int filenum = typenums[0];
-  register int index = typenums[1];
+  int filenum = typenums[0];
+  int index = typenums[1];
   unsigned old_len;
-  register int real_filenum;
-  register struct header_file *f;
+  int real_filenum;
+  struct header_file *f;
   int f_orig_length;
 
   if (filenum == -1)		/* -1,-1 is for temporary types.  */
@@ -356,7 +356,7 @@ dbx_lookup_type (int typenums[2])
 static struct type *
 dbx_alloc_type (int typenums[2], struct objfile *objfile)
 {
-  register struct type **type_addr;
+  struct type **type_addr;
 
   if (typenums[0] == -1)
     {
@@ -1216,11 +1216,11 @@ struct symbol *
 define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	       struct objfile *objfile)
 {
-  register struct symbol *sym;
+  struct symbol *sym;
   char *p = (char *) find_name_end (string);
   int deftype;
   int synonym = 0;
-  register int i;
+  int i;
 
   /* We would like to eliminate nameless symbols, but keep their types.
      E.g. stab entry ":t10=*2" should produce a type 10, which is a pointer
@@ -2266,7 +2266,7 @@ error_type (char **pp, struct objfile *objfile)
 static struct type *
 read_type (register char **pp, struct objfile *objfile)
 {
-  register struct type *type = 0;
+  struct type *type = 0;
   struct type *type1;
   int typenums[2];
   char type_descriptor;
@@ -3004,7 +3004,7 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
   struct next_fnfieldlist *new_fnlist;
   struct next_fnfield *new_sublist;
   char *main_fn_name;
-  register char *p;
+  char *p;
 
   /* Process each list until we find something that is not a member function
      or find the end of the functions. */
@@ -3465,7 +3465,7 @@ static int
 read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
 		 struct objfile *objfile)
 {
-  register char *p;
+  char *p;
   char *name;
   char cpp_abbrev;
   struct type *context;
@@ -3727,7 +3727,7 @@ static int
 read_struct_fields (struct field_info *fip, char **pp, struct type *type,
 		    struct objfile *objfile)
 {
-  register char *p;
+  char *p;
   struct nextfield *new;
 
   /* We better set p right now, in case there are no fields at all...    */
@@ -3948,7 +3948,7 @@ static int
 read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
 		   struct objfile *objfile)
 {
-  register char *p;
+  char *p;
 
   STABS_CONTINUE (pp, objfile);
 
@@ -4029,7 +4029,7 @@ read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
 static int
 attach_fn_fields_to_type (struct field_info *fip, register struct type *type)
 {
-  register int n;
+  int n;
 
   for (n = TYPE_NFN_FIELDS (type);
        fip->fnlist != NULL;
@@ -4181,9 +4181,9 @@ static int
 attach_fields_to_type (struct field_info *fip, register struct type *type,
 		       struct objfile *objfile)
 {
-  register int nfields = 0;
-  register int non_public_fields = 0;
-  register struct nextfield *scan;
+  int nfields = 0;
+  int non_public_fields = 0;
+  struct nextfield *scan;
 
   /* Count up the number of fields that we have, as well as taking note of
      whether or not there are any non-public fields, which requires us to
@@ -4448,10 +4448,10 @@ static struct type *
 read_enum_type (register char **pp, register struct type *type,
 		struct objfile *objfile)
 {
-  register char *p;
+  char *p;
   char *name;
-  register long n;
-  register struct symbol *sym;
+  long n;
+  struct symbol *sym;
   int nsyms = 0;
   struct pending **symlist;
   struct pending *osyms, *syms;

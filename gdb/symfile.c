@@ -206,7 +206,7 @@ int auto_solib_limit;
 static int
 compare_symbols (const void *s1p, const void *s2p)
 {
-  register struct symbol **s1, **s2;
+  struct symbol **s1, **s2;
 
   s1 = (struct symbol **) s1p;
   s2 = (struct symbol **) s2p;
@@ -244,7 +244,7 @@ sort_pst_symbols (struct partial_symtab *pst)
 char *
 obsavestring (const char *ptr, int size, struct obstack *obstackp)
 {
-  register char *p = (char *) obstack_alloc (obstackp, size + 1);
+  char *p = (char *) obstack_alloc (obstackp, size + 1);
   /* Open-coded memcpy--saves function call time.  These strings are usually
      short.  FIXME: Is this really still true with a compiler that can
      inline memcpy? */
@@ -266,8 +266,8 @@ char *
 obconcat (struct obstack *obstackp, const char *s1, const char *s2,
 	  const char *s3)
 {
-  register int len = strlen (s1) + strlen (s2) + strlen (s3) + 1;
-  register char *val = (char *) obstack_alloc (obstackp, len);
+  int len = strlen (s1) + strlen (s2) + strlen (s3) + 1;
+  char *val = (char *) obstack_alloc (obstackp, len);
   strcpy (val, s1);
   strcat (val, s2);
   strcat (val, s3);
@@ -2281,7 +2281,7 @@ deduce_language_from_filename (char *filename)
 struct symtab *
 allocate_symtab (char *filename, struct objfile *objfile)
 {
-  register struct symtab *symtab;
+  struct symtab *symtab;
 
   symtab = (struct symtab *)
     obstack_alloc (&objfile->symbol_obstack, sizeof (struct symtab));
@@ -2520,9 +2520,9 @@ free_named_symtabs (char *name)
      compilation units.  We want to blow away any old info about these
      compilation units, regardless of which objfiles they arrived in. --gnu.  */
 
-  register struct symtab *s;
-  register struct symtab *prev;
-  register struct partial_symtab *ps;
+  struct symtab *s;
+  struct symtab *prev;
+  struct partial_symtab *ps;
   struct blockvector *bv;
   int blewit = 0;
 
@@ -2653,7 +2653,7 @@ add_psymbol_to_list (char *name, int namelength, domain_enum domain,
 		     CORE_ADDR coreaddr,	/* Value as a CORE_ADDR */
 		     enum language language, struct objfile *objfile)
 {
-  register struct partial_symbol *psym;
+  struct partial_symbol *psym;
   char *buf = alloca (namelength + 1);
   /* psymbol is static so that there will be no uninitialized gaps in the
      structure which might contain random data, causing cache misses in
@@ -2706,7 +2706,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
 				   enum language language,
 				   struct objfile *objfile)
 {
-  register struct partial_symbol *psym;
+  struct partial_symbol *psym;
   char *buf = alloca (namelength + 1);
   /* psymbol is static so that there will be no uninitialized gaps in the
      structure which might contain random data, causing cache misses in

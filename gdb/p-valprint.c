@@ -60,7 +60,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 		  CORE_ADDR address, struct ui_file *stream, int format,
 		  int deref_ref, int recurse, enum val_prettyprint pretty)
 {
-  register unsigned int i = 0;	/* Number of characters printed */
+  unsigned int i = 0;	/* Number of characters printed */
   unsigned len;
   struct type *elttype;
   unsigned eltlen;
@@ -1055,7 +1055,7 @@ pascal_object_print_class_member (char *valaddr, struct type *domain,
      print it.  */
   int extra = 0;
   int bits = 0;
-  register unsigned int i;
+  unsigned int i;
   unsigned len = TYPE_NFIELDS (domain);
   /* @@ Make VAL into bit offset */
   LONGEST val = unpack_long (builtin_type_int, valaddr) << 3;

@@ -197,7 +197,7 @@ static void coff_symtab_read (long, unsigned int, struct objfile *);
 static void
 coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
 {
-  register struct coff_symfile_info *csi;
+  struct coff_symfile_info *csi;
   const char *name;
 
   csi = (struct coff_symfile_info *) csip;
@@ -339,8 +339,8 @@ coff_lookup_type (register int index)
 static struct type *
 coff_alloc_type (int index)
 {
-  register struct type **type_addr = coff_lookup_type (index);
-  register struct type *type = *type_addr;
+  struct type **type_addr = coff_lookup_type (index);
+  struct type *type = *type_addr;
 
   /* If we are referring to a type not known at all yet,
      allocate an empty type for it.
@@ -515,7 +515,7 @@ coff_symfile_read (struct objfile *objfile, int mainline)
   bfd *abfd = objfile->obfd;
   coff_data_type *cdata = coff_data (abfd);
   char *name = bfd_get_filename (abfd);
-  register int val;
+  int val;
   unsigned int num_symbols;
   int symtab_offset;
   int stringtab_offset;
@@ -679,9 +679,9 @@ static void
 coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		  struct objfile *objfile)
 {
-  register struct context_stack *new;
+  struct context_stack *new;
   struct coff_symbol coff_symbol;
-  register struct coff_symbol *cs = &coff_symbol;
+  struct coff_symbol *cs = &coff_symbol;
   static struct internal_syment main_sym;
   static union internal_auxent main_aux;
   struct coff_symbol fcn_cs_saved;
@@ -1270,7 +1270,7 @@ static char *
 coff_getfilename (union internal_auxent *aux_entry)
 {
   static char buffer[BUFSIZ];
-  register char *temp;
+  char *temp;
   char *result;
 
   if (aux_entry->x_file.x_n.x_zeroes == 0)
@@ -1351,7 +1351,7 @@ static void
 enter_linenos (long file_offset, register int first_line,
 	       register int last_line, struct objfile *objfile)
 {
-  register char *rawptr;
+  char *rawptr;
   struct internal_lineno lptr;
 
   if (!linetab)
@@ -1390,8 +1390,8 @@ enter_linenos (long file_offset, register int first_line,
 static void
 patch_type (struct type *type, struct type *real_type)
 {
-  register struct type *target = TYPE_TARGET_TYPE (type);
-  register struct type *real_target = TYPE_TARGET_TYPE (real_type);
+  struct type *target = TYPE_TARGET_TYPE (type);
+  struct type *real_target = TYPE_TARGET_TYPE (real_type);
   int field_size = TYPE_NFIELDS (real_target) * sizeof (struct field);
 
   TYPE_LENGTH (target) = TYPE_LENGTH (real_target);
@@ -1414,9 +1414,9 @@ patch_type (struct type *type, struct type *real_type)
 static void
 patch_opaque_types (struct symtab *s)
 {
-  register struct block *b;
+  struct block *b;
   struct dict_iterator iter;
-  register struct symbol *real_sym;
+  struct symbol *real_sym;
 
   /* Go through the per-file symbols only */
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
@@ -1476,7 +1476,7 @@ process_coff_symbol (register struct coff_symbol *cs,
 		     register union internal_auxent *aux,
 		     struct objfile *objfile)
 {
-  register struct symbol *sym
+  struct symbol *sym
   = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 				     sizeof (struct symbol));
   char *name;
@@ -1699,7 +1699,7 @@ static struct type *
 decode_type (register struct coff_symbol *cs, unsigned int c_type,
 	     register union internal_auxent *aux)
 {
-  register struct type *type = 0;
+  struct type *type = 0;
   unsigned int new_c_type;
 
   if (c_type & ~N_BTMASK)
@@ -1949,14 +1949,14 @@ coff_read_struct_type (int index, int length, int lastsym)
       struct field field;
     };
 
-  register struct type *type;
-  register struct nextfield *list = 0;
+  struct type *type;
+  struct nextfield *list = 0;
   struct nextfield *new;
   int nfields = 0;
-  register int n;
+  int n;
   char *name;
   struct coff_symbol member_sym;
-  register struct coff_symbol *ms = &member_sym;
+  struct coff_symbol *ms = &member_sym;
   struct internal_syment sub_sym;
   union internal_auxent sub_aux;
   int done = 0;
@@ -2040,18 +2040,18 @@ coff_read_struct_type (int index, int length, int lastsym)
 static struct type *
 coff_read_enum_type (int index, int length, int lastsym)
 {
-  register struct symbol *sym;
-  register struct type *type;
+  struct symbol *sym;
+  struct type *type;
   int nsyms = 0;
   int done = 0;
   struct pending **symlist;
   struct coff_symbol member_sym;
-  register struct coff_symbol *ms = &member_sym;
+  struct coff_symbol *ms = &member_sym;
   struct internal_syment sub_sym;
   union internal_auxent sub_aux;
   struct pending *osyms, *syms;
   int o_nsyms;
-  register int n;
+  int n;
   char *name;
   int unsigned_enum = 1;
 

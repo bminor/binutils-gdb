@@ -393,10 +393,10 @@ symbol_read_needs_frame (struct symbol *sym)
 struct value *
 read_var_value (register struct symbol *var, struct frame_info *frame)
 {
-  register struct value *v;
+  struct value *v;
   struct type *type = SYMBOL_TYPE (var);
   CORE_ADDR addr;
-  register int len;
+  int len;
 
   v = allocate_value (type);
   VALUE_LVAL (v) = lval_memory;	/* The most likely possibility.  */

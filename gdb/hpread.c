@@ -6203,9 +6203,9 @@ static int
 hpread_get_scope_depth (union dnttentry *dn_bufp, struct objfile *objfile,
 			int report_nested)
 {
-  register int index;
-  register union dnttentry *dn_tmp;
-  register short depth = 0;
+  int index;
+  union dnttentry *dn_tmp;
+  short depth = 0;
 /****************************/
   return 0;
 /****************************/
@@ -6248,7 +6248,7 @@ hpread_get_scope_depth (union dnttentry *dn_bufp, struct objfile *objfile,
 static void
 hpread_adjust_bitoffsets (struct type *type, int bits)
 {
-  register int i;
+  int i;
 
   /* This is done only for unions; caller had better check that
      it is an anonymous one. */
@@ -6285,7 +6285,7 @@ hpread_get_next_skip_over_anon_unions (int skip_fields, dnttpointer field,
 				       struct objfile *objfile)
 {
   struct type *anon_type;
-  register int i;
+  int i;
   int bitoffset;
   char *name;
 

@@ -84,8 +84,8 @@ static struct value *
 value_arg_coerce (struct value *arg, struct type *param_type,
 		  int is_prototyped)
 {
-  register struct type *arg_type = check_typedef (VALUE_TYPE (arg));
-  register struct type *type
+  struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+  struct type *type
     = param_type ? check_typedef (param_type) : arg_type;
 
   switch (TYPE_CODE (type))
@@ -161,8 +161,8 @@ value_arg_coerce (struct value *arg, struct type *param_type,
 CORE_ADDR
 find_function_addr (struct value *function, struct type **retval_type)
 {
-  register struct type *ftype = check_typedef (VALUE_TYPE (function));
-  register enum type_code code = TYPE_CODE (ftype);
+  struct type *ftype = check_typedef (VALUE_TYPE (function));
+  enum type_code code = TYPE_CODE (ftype);
   struct type *value_type;
   CORE_ADDR funaddr;
 
@@ -375,7 +375,7 @@ push_dummy_code (struct gdbarch *gdbarch,
 struct value *
 call_function_by_hand (struct value *function, int nargs, struct value **args)
 {
-  register CORE_ADDR sp;
+  CORE_ADDR sp;
   CORE_ADDR dummy_addr;
   struct type *value_type;
   unsigned char struct_return;

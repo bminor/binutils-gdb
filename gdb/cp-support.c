@@ -483,11 +483,11 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
 struct symbol **
 make_symbol_overload_list (struct symbol *fsym)
 {
-  register struct symbol *sym;
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct objfile *objfile;
-  register struct block *b, *surrounding_static_block = 0;
+  struct symbol *sym;
+  struct symtab *s;
+  struct partial_symtab *ps;
+  struct objfile *objfile;
+  struct block *b, *surrounding_static_block = 0;
   struct dict_iterator iter;
   /* The name we are completing on. */
   char *oload_name = NULL;

@@ -64,9 +64,9 @@ fetch_inferior_registers (int regno)
 void
 store_inferior_registers (int regno)
 {
-  register unsigned int regaddr;
+  unsigned int regaddr;
   char buf[80];
-  register int i;
+  int i;
   unsigned int offset = U_REGS_OFFSET;
   int scratch;
 
@@ -282,11 +282,11 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 		   struct mem_attrib *mem,
 		   struct target_ops *target)
 {
-  register int i;
+  int i;
   /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & - (CORE_ADDR)(sizeof (int));
+  CORE_ADDR addr = memaddr & - (CORE_ADDR)(sizeof (int));
   /* Round ending address up; get number of longwords that makes.  */
-  register int count
+  int count
   = (((memaddr + len) - addr) + sizeof (int) - 1) / sizeof (int);
 
   /* Allocate buffer of that many longwords.
@@ -297,7 +297,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
      this (in effect) would pile up all those alloca requests until a call
      to alloca was made from a point higher than this routine in the
      call chain.  */
-  register int *buffer = (int *) xmalloc (count * sizeof (int));
+  int *buffer = (int *) xmalloc (count * sizeof (int));
 
   if (write)
     {

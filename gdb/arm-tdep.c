@@ -1492,7 +1492,7 @@ static void
 arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		      struct frame_info *frame, const char *args)
 {
-  register unsigned long status = read_register (ARM_FPS_REGNUM);
+  unsigned long status = read_register (ARM_FPS_REGNUM);
   int type;
 
   type = (status >> 24) & 127;
@@ -2252,7 +2252,7 @@ static int
 arm_use_struct_convention (int gcc_p, struct type *type)
 {
   int nRc;
-  register enum type_code code;
+  enum type_code code;
 
   /* In the ARM ABI, "integer" like aggregate types are returned in
      registers.  For an aggregate type to be integer like, its size

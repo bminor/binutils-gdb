@@ -934,7 +934,7 @@ deprecated_safe_get_selected_frame (void)
 void
 select_frame (struct frame_info *fi)
 {
-  register struct symtab *s;
+  struct symtab *s;
 
   deprecated_selected_frame = fi;
   /* NOTE: cagney/2002-05-04: FI can be NULL.  This occures when the

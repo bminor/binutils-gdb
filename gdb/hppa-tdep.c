@@ -1588,7 +1588,7 @@ void
 hppa_push_dummy_frame (void)
 {
   CORE_ADDR sp, pc, pcspace;
-  register int regnum;
+  int regnum;
   CORE_ADDR int_buffer;
   double freg_buffer;
 
@@ -1690,9 +1690,9 @@ find_dummy_frame_regs (struct frame_info *frame,
 void
 hppa_pop_frame (void)
 {
-  register struct frame_info *frame = get_current_frame ();
-  register CORE_ADDR fp, npc, target_pc;
-  register int regnum;
+  struct frame_info *frame = get_current_frame ();
+  CORE_ADDR fp, npc, target_pc;
+  int regnum;
   CORE_ADDR *fsr;
   double freg_buffer;
 
@@ -2070,7 +2070,7 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 struct value *
 hppa_value_returned_from_stack (register struct type *valtype, CORE_ADDR addr)
 {
-  register struct value *val;
+  struct value *val;
 
   val = allocate_value (valtype);
   CHECK_TYPEDEF (valtype);
@@ -2770,7 +2770,7 @@ pa_register_look_aside (char *raw_regs, int regnum, long *raw_val)
 
   int regaddr;
   unsigned int offset;
-  register int i;
+  int i;
   int start;
 
 

@@ -1098,7 +1098,7 @@ in_plt_section (CORE_ADDR pc, char *name)
 int
 is_in_import_list (char *name, struct objfile *objfile)
 {
-  register int i;
+  int i;
 
   if (!objfile || !name || !*name)
     return 0;

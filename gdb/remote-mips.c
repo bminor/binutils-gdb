@@ -816,9 +816,9 @@ mips_receive_trailer (unsigned char *trlr, int *pgarbage, int *pch, int timeout)
 static int
 mips_cksum (const unsigned char *hdr, const unsigned char *data, int len)
 {
-  register const unsigned char *p;
-  register int c;
-  register int cksum;
+  const unsigned char *p;
+  int c;
+  int cksum;
 
   cksum = 0;
 
@@ -843,7 +843,7 @@ mips_send_packet (const char *s, int get_ack)
 {
   /* unsigned */ int len;
   unsigned char *packet;
-  register int cksum;
+  int cksum;
   int try;
 
   len = strlen (s);

@@ -72,9 +72,9 @@ static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 void
 fetch_inferior_registers (int regno)
 {
-  register unsigned int regaddr;
+  unsigned int regaddr;
   char buf[MAX_REGISTER_SIZE];
-  register int i;
+  int i;
   char zerobuf[MAX_REGISTER_SIZE];
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
@@ -104,7 +104,7 @@ fetch_inferior_registers (int regno)
 void
 store_inferior_registers (int regno)
 {
-  register unsigned int regaddr;
+  unsigned int regaddr;
   char buf[80];
 
   if (regno > 0)
@@ -172,10 +172,10 @@ static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 		      CORE_ADDR reg_addr)
 {
-  register int regno;
-  register unsigned int addr;
+  int regno;
+  unsigned int addr;
   int bad_reg = -1;
-  register reg_ptr = -reg_addr;	/* Original u.u_ar0 is -reg_addr. */
+  reg_ptr = -reg_addr;	/* Original u.u_ar0 is -reg_addr. */
 
   char zerobuf[MAX_REGISTER_SIZE];
   memset (zerobuf, 0, MAX_REGISTER_SIZE);

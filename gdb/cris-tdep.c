@@ -1148,7 +1148,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
 							  get_frame_base (fi));
   
   /* Examine the entire prologue.  */
-  register int frameless_p = 0; 
+  int frameless_p = 0; 
 
   /* Has this frame's registers already been initialized?  */
   if (get_frame_saved_regs (fi))
@@ -1500,9 +1500,9 @@ cris_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 static void 
 cris_pop_frame (void)
 {
-  register struct frame_info *fi = get_current_frame ();
-  register int regno;
-  register int stack_offset = 0;
+  struct frame_info *fi = get_current_frame ();
+  int regno;
+  int stack_offset = 0;
   
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
 				   get_frame_base (fi),

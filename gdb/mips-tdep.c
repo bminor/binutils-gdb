@@ -3946,7 +3946,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 static void
 mips_pop_frame (void)
 {
-  register int regnum;
+  int regnum;
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR new_sp = get_frame_base (frame);
   mips_extra_func_info_t proc_desc;

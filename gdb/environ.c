@@ -30,7 +30,7 @@
 struct environ *
 make_environ (void)
 {
-  register struct environ *e;
+  struct environ *e;
 
   e = (struct environ *) xmalloc (sizeof (struct environ));
 
@@ -45,7 +45,7 @@ make_environ (void)
 void
 free_environ (register struct environ *e)
 {
-  register char **vector = e->vector;
+  char **vector = e->vector;
 
   while (*vector)
     xfree (*vector++);
@@ -61,7 +61,7 @@ void
 init_environ (register struct environ *e)
 {
   extern char **environ;
-  register int i;
+  int i;
 
   if (environ == NULL)
     return;
@@ -100,9 +100,9 @@ environ_vector (struct environ *e)
 char *
 get_in_environ (const struct environ *e, const char *var)
 {
-  register int len = strlen (var);
-  register char **vector = e->vector;
-  register char *s;
+  int len = strlen (var);
+  char **vector = e->vector;
+  char *s;
 
   for (; (s = *vector) != NULL; vector++)
     if (STREQN (s, var, len) && s[len] == '=')
@@ -116,10 +116,10 @@ get_in_environ (const struct environ *e, const char *var)
 void
 set_in_environ (struct environ *e, const char *var, const char *value)
 {
-  register int i;
-  register int len = strlen (var);
-  register char **vector = e->vector;
-  register char *s;
+  int i;
+  int len = strlen (var);
+  char **vector = e->vector;
+  char *s;
 
   for (i = 0; (s = vector[i]) != NULL; i++)
     if (STREQN (s, var, len) && s[len] == '=')
@@ -163,9 +163,9 @@ set_in_environ (struct environ *e, const char *var, const char *value)
 void
 unset_in_environ (struct environ *e, char *var)
 {
-  register int len = strlen (var);
-  register char **vector = e->vector;
-  register char *s;
+  int len = strlen (var);
+  char **vector = e->vector;
+  char *s;
 
   for (; (s = *vector) != NULL; vector++)
     {

@@ -117,7 +117,7 @@ whatis_exp (char *exp, int show)
 {
   struct expression *expr;
   struct value *val;
-  register struct cleanup *old_chain = NULL;
+  struct cleanup *old_chain = NULL;
   struct type *real_type = NULL;
   struct type *type;
   int full = 0;
@@ -204,9 +204,9 @@ ptype_eval (struct expression *exp)
 static void
 ptype_command (char *typename, int from_tty)
 {
-  register struct type *type;
+  struct type *type;
   struct expression *expr;
-  register struct cleanup *old_chain;
+  struct cleanup *old_chain;
 
   if (typename == NULL)
     {
@@ -325,8 +325,8 @@ void
 maintenance_print_type (char *typename, int from_tty)
 {
   struct value *val;
-  register struct type *type;
-  register struct cleanup *old_chain;
+  struct type *type;
+  struct cleanup *old_chain;
   struct expression *expr;
 
   if (typename != NULL)

@@ -80,8 +80,8 @@ CORE_ADDR
 parse_and_eval_address (char *exp)
 {
   struct expression *expr = parse_expression (exp);
-  register CORE_ADDR addr;
-  register struct cleanup *old_chain =
+  CORE_ADDR addr;
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
   addr = value_as_address (evaluate_expression (expr));
@@ -96,8 +96,8 @@ CORE_ADDR
 parse_and_eval_address_1 (char **expptr)
 {
   struct expression *expr = parse_exp_1 (expptr, (struct block *) 0, 0);
-  register CORE_ADDR addr;
-  register struct cleanup *old_chain =
+  CORE_ADDR addr;
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
   addr = value_as_address (evaluate_expression (expr));
@@ -111,8 +111,8 @@ LONGEST
 parse_and_eval_long (char *exp)
 {
   struct expression *expr = parse_expression (exp);
-  register LONGEST retval;
-  register struct cleanup *old_chain =
+  LONGEST retval;
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
   retval = value_as_long (evaluate_expression (expr));
@@ -125,7 +125,7 @@ parse_and_eval (char *exp)
 {
   struct expression *expr = parse_expression (exp);
   struct value *val;
-  register struct cleanup *old_chain =
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
@@ -142,7 +142,7 @@ parse_to_comma_and_eval (char **expp)
 {
   struct expression *expr = parse_exp_1 (expp, (struct block *) 0, 1);
   struct value *val;
-  register struct cleanup *old_chain =
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
@@ -384,7 +384,7 @@ evaluate_subexp_standard (struct type *expect_type,
 {
   enum exp_opcode op;
   int tem, tem2, tem3;
-  register int pc, pc2 = 0, oldpos;
+  int pc, pc2 = 0, oldpos;
   struct value *arg1 = NULL;
   struct value *arg2 = NULL;
   struct value *arg3;
@@ -2067,7 +2067,7 @@ evaluate_subexp_for_address (register struct expression *exp, register int *pos,
 			     enum noside noside)
 {
   enum exp_opcode op;
-  register int pc;
+  int pc;
   struct symbol *var;
 
   pc = (*pos);
@@ -2146,8 +2146,8 @@ struct value *
 evaluate_subexp_with_coercion (register struct expression *exp,
 			       register int *pos, enum noside noside)
 {
-  register enum exp_opcode op;
-  register int pc;
+  enum exp_opcode op;
+  int pc;
   struct value *val;
   struct symbol *var;
 
@@ -2183,7 +2183,7 @@ static struct value *
 evaluate_subexp_for_sizeof (register struct expression *exp, register int *pos)
 {
   enum exp_opcode op;
-  register int pc;
+  int pc;
   struct type *type;
   struct value *val;
 

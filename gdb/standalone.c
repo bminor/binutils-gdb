@@ -130,7 +130,7 @@ int sourcedesc;
 
 open (char *filename, int modes)
 {
-  register char *next;
+  char *next;
 
   if (modes)
     {
@@ -213,8 +213,8 @@ myread (int desc, char *destptr, int size, char *filename)
 int
 fread (int bufp, int numelts, int eltsize, int stream)
 {
-  register int elts = min (numelts, sourceleft / eltsize);
-  register int len = elts * eltsize;
+  int elts = min (numelts, sourceleft / eltsize);
+  int len = elts * eltsize;
 
   if (stream != sourcedesc)
     {
@@ -284,7 +284,7 @@ fprintf (int ign, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
 
 fwrite (register char *buf, int numelts, int size, int stream)
 {
-  register int i = numelts * size;
+  int i = numelts * size;
   while (i-- > 0)
     fputc (*buf++, stream);
 }
@@ -560,7 +560,7 @@ int kdb_stack_end;
 
 _initialize_standalone (void)
 {
-  register char *next;
+  char *next;
 
   /* Find start of data on files.  */
 

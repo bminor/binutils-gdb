@@ -278,7 +278,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
     };
   struct alpha_arg *alpha_args
     = (struct alpha_arg *) alloca (nargs * sizeof (struct alpha_arg));
-  register struct alpha_arg *m_arg;
+  struct alpha_arg *m_arg;
   char arg_reg_buffer[ALPHA_REGISTER_SIZE * ALPHA_NUM_ARG_REGS];
   int required_arg_regs;
 

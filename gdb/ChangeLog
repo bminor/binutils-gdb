@@ -1,3 +1,29 @@
+2003-09-14  Andrew Cagney  <cagney@redhat.com>
+
+	* alpha-nat.c: Remove some occurances of "register".
+	* alpha-tdep.c, arm-tdep.c, blockframe.c, breakpoint.c: Ditto.
+	* buildsym.c, c-typeprint.c, c-valprint.c, coffread.c: Ditto.
+	* corefile.c, cp-support.c, cp-valprint.c, cris-tdep.c: Ditto.
+	* dbxread.c, dcache.c, dwarf2read.c, elfread.c: Ditto.
+	* environ.c, eval.c, event-top.c, f-typeprint.c: Ditto.
+	* f-valprint.c, findvar.c, frame.c, gdbtypes.c: Ditto.
+	* h8300-tdep.c, hppa-tdep.c, hppab-nat.c, hppah-nat.c: Ditto.
+	* hppam3-nat.c, hpread.c, ia64-aix-nat.c, ia64-linux-nat.c: Ditto.
+	* infcall.c, infcmd.c, inflow.c, infptrace.c, infrun.c: Ditto.
+	* infttrace.c, irix5-nat.c, jv-typeprint.c: Ditto.
+	* jv-valprint.c, m68k-tdep.c, m68klinux-nat.c, main.c: Ditto.
+	* mdebugread.c, minsyms.c, mips-linux-tdep.c: Ditto.
+	* mips-nat.c, mips-tdep.c, mipsread.c, mipsv4-nat.c: Ditto.
+	* ns32k-tdep.c, objfiles.c, p-typeprint.c: Ditto.
+	* p-valprint.c, ppc-linux-nat.c, printcmd.c: Ditto.
+	* remote-mips.c, remote-vx.c, rs6000-nat.c: Ditto.
+	* rs6000-tdep.c, scm-exp.c, sh-tdep.c, sh64-tdep.c: Ditto.
+	* solib.c, somread.c, source.c, sparc-tdep.c: Ditto.
+	* stabsread.c, stack.c, standalone.c, symfile.c: Ditto.
+	* symmisc.c, symtab.c, top.c, tracepoint.c: Ditto.
+	* typeprint.c, utils.c, valarith.c, valops.c: Ditto.
+	* values.c, vax-tdep.c, xcoffread.c: Ditto.
+	
 2003-09-13  Andrew Cagney  <cagney@redhat.com>
 
 	* config/pa/tm-hppa64.h (struct frame_info): Declare opaque.

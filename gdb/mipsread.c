@@ -193,7 +193,7 @@ struct alphacoff_dynsecinfo
 static void
 alphacoff_locate_sections (bfd *ignore_abfd, asection *sectp, void *sip)
 {
-  register struct alphacoff_dynsecinfo *si;
+  struct alphacoff_dynsecinfo *si;
 
   si = (struct alphacoff_dynsecinfo *) sip;
 

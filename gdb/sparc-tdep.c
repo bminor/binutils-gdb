@@ -1093,7 +1093,7 @@ static void sparc_frame_find_saved_regs (struct frame_info *, CORE_ADDR *);
 static void
 sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 {
-  register int regnum;
+  int regnum;
   CORE_ADDR frame_addr = get_frame_base (fi);
 
   gdb_assert (fi != NULL);
@@ -1210,8 +1210,8 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 void
 sparc_pop_frame (void)
 {
-  register struct frame_info *frame = get_current_frame ();
-  register CORE_ADDR pc;
+  struct frame_info *frame = get_current_frame ();
+  CORE_ADDR pc;
   CORE_ADDR *fsr;
   char *raw_buffer;
   int regnum;
@@ -1662,7 +1662,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 void
 supply_fpregset (gdb_fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   char *from;
 
   if (!SPARC_HAS_FPU)

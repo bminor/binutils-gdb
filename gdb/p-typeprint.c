@@ -50,7 +50,7 @@ void
 pascal_print_type (struct type *type, char *varstring, struct ui_file *stream,
 		   int show, int level)
 {
-  register enum type_code code;
+  enum type_code code;
   int demangled_args;
 
   code = TYPE_CODE (type);
@@ -440,9 +440,9 @@ void
 pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 			int level)
 {
-  register int i;
-  register int len;
-  register int lastval;
+  int i;
+  int len;
+  int lastval;
   enum
     {
       s_none, s_public, s_private, s_protected

@@ -373,7 +373,7 @@ static FDR *
 get_rfd (int cf, int rf)
 {
   FDR *fdrs;
-  register FDR *f;
+  FDR *f;
   RFDT rfd;
 
   fdrs = debug_info->fdr;
@@ -558,7 +558,7 @@ static struct mdebug_pending *
 is_pending_symbol (FDR *fh, char *sh)
 {
   int f_idx = fh - debug_info->fdr;
-  register struct mdebug_pending *p;
+  struct mdebug_pending *p;
 
   /* Linear search is ok, list is typically no more than 10 deep */
   for (p = pending_list[f_idx]; p; p = p->next)
@@ -2228,7 +2228,7 @@ parse_partial_symbols (struct objfile *objfile)
   char *ext_out;
   char *ext_out_end;
   EXTR *ext_block;
-  register EXTR *ext_in;
+  EXTR *ext_in;
   EXTR *ext_in_end;
   SYMR sh;
   struct partial_symtab *pst;
@@ -4527,7 +4527,7 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
 static int
 compare_blocks (const void *arg1, const void *arg2)
 {
-  register int addr_diff;
+  int addr_diff;
   struct block **b1 = (struct block **) arg1;
   struct block **b2 = (struct block **) arg2;
 

@@ -858,9 +858,9 @@ sh_frame_saved_pc (struct frame_info *frame)
 static void
 sh_pop_frame (void)
 {
-  register struct frame_info *frame = get_current_frame ();
-  register CORE_ADDR fp;
-  register int regnum;
+  struct frame_info *frame = get_current_frame ();
+  CORE_ADDR fp;
+  int regnum;
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
 				   get_frame_base (frame),

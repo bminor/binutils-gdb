@@ -325,7 +325,7 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
 			CORE_ADDR after_prolog_fp, CORE_ADDR *fsr,
 			struct frame_info *fi)
 {
-  register CORE_ADDR next_ip;
+  CORE_ADDR next_ip;
   int r;
   int have_fp = 0;
   unsigned short insn_word;

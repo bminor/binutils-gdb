@@ -4836,18 +4836,18 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 		   struct mem_attrib *attrib,
 		   struct target_ops *target)
 {
-  register int i;
+  int i;
   /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (TTRACE_XFER_TYPE);
+  CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (TTRACE_XFER_TYPE);
   /* Round ending address up; get number of longwords that makes.  */
-  register int count
+  int count
   = (((memaddr + len) - addr) + sizeof (TTRACE_XFER_TYPE) - 1)
   / sizeof (TTRACE_XFER_TYPE);
   /* Allocate buffer of that many longwords.  */
   /* FIXME (alloca): This code, cloned from infptrace.c, is unsafe
      because it uses alloca to allocate a buffer of arbitrary size.
      For very large xfers, this could crash GDB's stack.  */
-  register TTRACE_XFER_TYPE *buffer
+  TTRACE_XFER_TYPE *buffer
     = (TTRACE_XFER_TYPE *) alloca (count * sizeof (TTRACE_XFER_TYPE));
 
   if (write)

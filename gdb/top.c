@@ -640,8 +640,8 @@ do_chdir_cleanup (void *old_dir)
 void
 execute_command (char *p, int from_tty)
 {
-  register struct cmd_list_element *c;
-  register enum language flang;
+  struct cmd_list_element *c;
+  enum language flang;
   static int warned = 0;
   char *line;
   
@@ -1135,7 +1135,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 {
   static char *linebuffer = 0;
   static unsigned linelength = 0;
-  register char *p;
+  char *p;
   char *p1;
   char *rl;
   char *local_prompt = prompt_arg;

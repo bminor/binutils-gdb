@@ -298,7 +298,7 @@ vax_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 static CORE_ADDR
 vax_skip_prologue (CORE_ADDR pc)
 {
-  register int op = (unsigned char) read_memory_integer (pc, 1);
+  int op = (unsigned char) read_memory_integer (pc, 1);
   if (op == 0x11)
     pc += 2;			/* skip brb */
   if (op == 0x31)

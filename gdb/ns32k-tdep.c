@@ -147,7 +147,7 @@ ns32k_saved_pc_after_call (struct frame_info *frame)
 static CORE_ADDR
 umax_skip_prologue (CORE_ADDR pc)
 {
-  register unsigned char op = read_memory_integer (pc, 1);
+  unsigned char op = read_memory_integer (pc, 1);
   if (op == 0x82)
     {
       op = read_memory_integer (pc + 2, 1);

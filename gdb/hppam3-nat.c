@@ -81,7 +81,7 @@ store_inferior_registers (int regno)
   kern_return_t ret;
   thread_state_data_t state;
   unsigned int stateCnt = TRACE_FLAVOR_SIZE;
-  register int index;
+  int index;
 
   if (!MACH_PORT_VALID (current_thread))
     error ("store inferior registers: Invalid thread");

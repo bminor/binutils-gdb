@@ -1366,9 +1366,9 @@ sh_frame_saved_pc (struct frame_info *frame)
 static void
 sh64_pop_frame (void)
 {
-  register struct frame_info *frame = get_current_frame ();
-  register CORE_ADDR fp;
-  register int regnum;
+  struct frame_info *frame = get_current_frame ();
+  CORE_ADDR fp;
+  int regnum;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
 
   int media_mode = pc_is_isa32 (get_frame_pc (frame));

@@ -217,7 +217,7 @@ dcache_invalidate (DCACHE *dcache)
 static struct dcache_block *
 dcache_hit (DCACHE *dcache, CORE_ADDR addr)
 {
-  register struct dcache_block *db;
+  struct dcache_block *db;
 
   /* Search all cache blocks for one that is at this address.  */
   db = dcache->valid_head;
@@ -383,7 +383,7 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
 static struct dcache_block *
 dcache_alloc (DCACHE *dcache, CORE_ADDR addr)
 {
-  register struct dcache_block *db;
+  struct dcache_block *db;
 
   /* Take something from the free list */
   db = dcache->free_head;
@@ -444,7 +444,7 @@ dcache_writeback (DCACHE *dcache)
 static int
 dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
 {
-  register struct dcache_block *db = dcache_hit (dcache, addr);
+  struct dcache_block *db = dcache_hit (dcache, addr);
 
   if (!db)
     {
@@ -471,7 +471,7 @@ dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
 static int
 dcache_poke_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
 {
-  register struct dcache_block *db = dcache_hit (dcache, addr);
+  struct dcache_block *db = dcache_hit (dcache, addr);
 
   if (!db)
     {

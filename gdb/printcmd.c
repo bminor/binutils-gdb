@@ -190,7 +190,7 @@ static struct format_data
 decode_format (char **string_ptr, int oformat, int osize)
 {
   struct format_data val;
-  register char *p = *string_ptr;
+  char *p = *string_ptr;
 
   val.format = '?';
   val.size = '?';
@@ -773,12 +773,12 @@ static struct type *examine_g_type;
 static void
 do_examine (struct format_data fmt, CORE_ADDR addr, asection *sect)
 {
-  register char format = 0;
-  register char size;
-  register int count = 1;
+  char format = 0;
+  char size;
+  int count = 1;
   struct type *val_type = NULL;
-  register int i;
-  register int maxelts;
+  int i;
+  int maxelts;
 
   format = fmt.format;
   size = fmt.size;
@@ -873,8 +873,8 @@ static void
 print_command_1 (char *exp, int inspect, int voidprint)
 {
   struct expression *expr;
-  register struct cleanup *old_chain = 0;
-  register char format = 0;
+  struct cleanup *old_chain = 0;
+  char format = 0;
   struct value *val;
   struct format_data fmt;
   int cleanup = 0;
@@ -972,8 +972,8 @@ void
 output_command (char *exp, int from_tty)
 {
   struct expression *expr;
-  register struct cleanup *old_chain;
-  register char format = 0;
+  struct cleanup *old_chain;
+  char format = 0;
   struct value *val;
   struct format_data fmt;
 
@@ -1007,7 +1007,7 @@ static void
 set_command (char *exp, int from_tty)
 {
   struct expression *expr = parse_expression (exp);
-  register struct cleanup *old_chain =
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
   evaluate_expression (expr);
   do_cleanups (old_chain);
@@ -1062,10 +1062,10 @@ sym_info (char *arg, int from_tty)
 static void
 address_info (char *exp, int from_tty)
 {
-  register struct symbol *sym;
-  register struct minimal_symbol *msymbol;
-  register long val;
-  register long basereg;
+  struct symbol *sym;
+  struct minimal_symbol *msymbol;
+  long val;
+  long basereg;
   asection *section;
   CORE_ADDR load_addr;
   int is_a_field_of_this;	/* C++: lookup_symbol sets this to nonzero
@@ -1355,8 +1355,8 @@ static void
 display_command (char *exp, int from_tty)
 {
   struct format_data fmt;
-  register struct expression *expr;
-  register struct display *new;
+  struct expression *expr;
+  struct display *new;
   int display_it = 1;
 
 #if defined(TUI)
@@ -1424,7 +1424,7 @@ free_display (struct display *d)
 void
 clear_displays (void)
 {
-  register struct display *d;
+  struct display *d;
 
   while ((d = display_chain) != NULL)
     {
@@ -1439,7 +1439,7 @@ clear_displays (void)
 static void
 delete_display (int num)
 {
-  register struct display *d1, *d;
+  struct display *d1, *d;
 
   if (!display_chain)
     error ("No display number %d.", num);
@@ -1471,9 +1471,9 @@ delete_display (int num)
 static void
 undisplay_command (char *args, int from_tty)
 {
-  register char *p = args;
-  register char *p1;
-  register int num;
+  char *p = args;
+  char *p1;
+  int num;
 
   if (args == 0)
     {
@@ -1594,7 +1594,7 @@ do_one_display (struct display *d)
 void
 do_displays (void)
 {
-  register struct display *d;
+  struct display *d;
 
   for (d = display_chain; d; d = d->next)
     do_one_display (d);
@@ -1606,7 +1606,7 @@ do_displays (void)
 void
 disable_display (int num)
 {
-  register struct display *d;
+  struct display *d;
 
   for (d = display_chain; d; d = d->next)
     if (d->number == num)
@@ -1632,7 +1632,7 @@ disable_current_display (void)
 static void
 display_info (char *ignore, int from_tty)
 {
-  register struct display *d;
+  struct display *d;
 
   if (!display_chain)
     printf_unfiltered ("There are no auto-display expressions now.\n");
@@ -1659,10 +1659,10 @@ Num Enb Expression\n");
 static void
 enable_display (char *args, int from_tty)
 {
-  register char *p = args;
-  register char *p1;
-  register int num;
-  register struct display *d;
+  char *p = args;
+  char *p1;
+  int num;
+  struct display *d;
 
   if (p == 0)
     {
@@ -1698,9 +1698,9 @@ enable_display (char *args, int from_tty)
 static void
 disable_display_command (char *args, int from_tty)
 {
-  register char *p = args;
-  register char *p1;
-  register struct display *d;
+  char *p = args;
+  char *p1;
+  struct display *d;
 
   if (p == 0)
     {
@@ -1741,8 +1741,8 @@ print_variable_value (struct symbol *var, struct frame_info *frame,
 static void
 printf_command (char *arg, int from_tty)
 {
-  register char *f = NULL;
-  register char *s = arg;
+  char *f = NULL;
+  char *s = arg;
   char *string = NULL;
   struct value **val_args;
   char *substrings;
