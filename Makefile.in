@@ -488,6 +488,9 @@ ALL_MODULES = \
 	all-binutils \
 	all-bison \
 	all-byacc \
+	$(start-sanitize-cygnus) \
+	all-cgen \
+	$(end-sanitize-cygnus) \
 	all-cvssrc \
 	all-db \
 	all-dejagnu \
@@ -854,6 +857,9 @@ CLEAN_MODULES = \
 	clean-binutils \
 	clean-bison \
 	clean-byacc \
+	$(start-sanitize-cygnus) \
+	clean-cgen \
+	$(end-sanitize-cygnus) \
 	clean-cvssrc \
 	clean-db \
 	clean-dejagnu \
@@ -1280,6 +1286,11 @@ $(CONFIGURE_TARGET_MODULES):
 		mv $(TARGET_SUBDIR)/$${dir}/tmpmulti.out $(TARGET_SUBDIR)/$${dir}/multilib.out; \
 	      fi; \
 	    else \
+	      if echo '.;' | cmp - $(TARGET_SUBDIR)/$${dir}/tmpmulti.out >/dev/null 2>&1; then \
+		true; \
+	      else \
+		rm -f $(TARGET_SUBDIR)/$${dir}/Makefile; \
+	      fi; \
 	      mv $(TARGET_SUBDIR)/$${dir}/tmpmulti.out $(TARGET_SUBDIR)/$${dir}/multilib.out; \
 	    fi; \
 	  fi; \
@@ -1524,6 +1535,13 @@ all-bison: all-texinfo
 all-target-boehm-gc: configure-target-boehm-gc
 # end-sanitize-java
 all-byacc:
+# start-sanitize-cygnus
+all-cgen:
+# These two have dependencies on cgen, and while this section is alphabetically
+# sorted, I wish to keep these together until things settle.
+all-opcodes: all-cgen
+all-sim: all-cgen
+# end-sanitize-cygnus
 all-cvssrc:
 configure-target-cygmon: $(ALL_GCC)
 all-target-cygmon: configure-target-cygmon all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio all-target-libstub
@@ -1559,7 +1577,6 @@ all-gnuserv:
 configure-target-gperf: $(ALL_GCC)
 all-target-gperf: configure-target-gperf all-target-libiberty all-target-libstdc++
 all-gprof: all-libiberty all-bfd all-opcodes all-intl
-all-grep: all-libiberty
 all-grez: all-libiberty all-bfd all-opcodes
 all-gui: all-gdb all-libproc all-target-librx
 all-guile:
@@ -1591,8 +1608,8 @@ all-libide: all-ilu
 all-libidetcl: all-tcl all-tk all-itcl all-ilu all-libgui all-libide
 # end-sanitize-ide
 # start-sanitize-java
-configure-target-libjava: configure-target-boehm-gc
-all-target-libjava: configure-target-libjava all-target-boehm-gc
+configure-target-libjava: $(ALL_GCC) configure-target-boehm-gc
+all-target-libjava: configure-target-libjava all-gcc all-target-newlib all-target-boehm-gc
 # end-sanitize-java
 configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
