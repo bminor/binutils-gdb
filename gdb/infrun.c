@@ -1418,8 +1418,6 @@ handle_inferior_event (struct execution_control_state *ecs)
   target_last_wait_ptid = ecs->ptid;
   target_last_waitstatus = *ecs->wp;
 
-  /* Keep this extra brace for now, minimizes diffs.  */
-  {
     switch (ecs->infwait_state)
       {
       case infwait_thread_hop_state:
@@ -2936,8 +2934,6 @@ handle_inferior_event (struct execution_control_state *ecs)
     }
 
     keep_going (ecs);
-
-  } /* extra brace, to preserve old indentation */
 }
 
 /* Are we in the middle of stepping?  */

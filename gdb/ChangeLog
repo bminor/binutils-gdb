@@ -1,3 +1,8 @@
+2002-07-18  Joel Brobecker  <brobecker@gnat.com>
+
+	* infrun.c (handle_inferior_event): Remove unneeded extra brace.
+	Leave the indentation temporarily untouched, to minimize the diffs.
+
 2002-07-18  Elena Zannoni  <ezannoni@redhat.com>
 
 	* stabsread.c: Make os9k sections of the code obsolete,
