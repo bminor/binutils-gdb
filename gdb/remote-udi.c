@@ -143,6 +143,8 @@ udi_create_inferior (execfile, args, env)
       /* If the TIP is not open, open it.  */
       if (UDIConnect (udi_config_id, &udi_session_id))
 	error("UDIConnect() failed: %s\n", dfe_errmsg);
+      /* We will need to download the program.  */
+      entry.Offset = 0;
     }
 
   inferior_pid = 40000;
