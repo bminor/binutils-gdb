@@ -366,6 +366,20 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "rtm",	0xf0ff,		0xffff,		FMT_D0, {UNUSED}},
 { "nop",	0xcb,		0xff,		FMT_S0, {UNUSED}},
 /* { "udf", 0, 0, {0}},  */
+
+{ "putx",	0xf500,		0xfff0,		FMT_D0, {DM}},
+{ "getx",	0xf6f0,		0xfff0,		FMT_D0, {DN}},
+{ "mulq",	0xf600,		0xfff0,		FMT_D0, {DM, DN}},
+{ "mulq",	0xf90000,	0xfffc00,	FMT_D1, {SIMM8, DN}},
+{ "mulq",	0xfb000000,	0xfffc0000,	FMT_D2, {SIMM16, DN}},
+{ "mulq",	0xfd000000,	0xfffc0000,	FMT_D4, {IMM32, DN}},
+{ "mulqu",	0xf610,		0xfff0,		FMT_D0, {DM, DN}},
+{ "mulqu",	0xf90400,	0xfffc00,	FMT_D1, {SIMM8, DN}},
+{ "mulqu",	0xfb040000,	0xfffc0000,	FMT_D2, {SIMM16, DN}},
+{ "mulqu",	0xfd040000,	0xfffc0000,	FMT_D4, {IMM32, DN}},
+{ "sat16",	0xf640,		0xfff0,		FMT_D0, {DM, DN}},
+{ "sat24",	0xf650,		0xfff0,		FMT_D0, {DM, DN}},
+{ "bsch",	0xf670,		0xfff0,		FMT_D0, {DM, DN}},
 { 0, 0, 0, 0, {0}},
 
 } ;

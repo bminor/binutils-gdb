@@ -1,3 +1,8 @@
+Wed Oct  9 11:19:26 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (mn10300_opcodes): Add "extended" instructions,
+	"putx", "getx", "mulq", "mulqu", "sat16", "sat24", "bsch".
+	
 Tue Oct  8 11:55:35 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_operands): Remove "REGS" operand.
