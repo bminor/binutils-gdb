@@ -4163,8 +4163,12 @@ elf_link_add_object_symbols (abfd, info)
 
       /* Find the name to use in a DT_NEEDED entry that refers to this
 	 object.  If the object has a DT_SONAME entry, we use it.
-	 Otherwise, we use the file name.  */
+	 Otherwise, if the generic linker stuck something in
+	 elf_dt_needed_name, we use that.  Otherwise, we just use the
+	 file name.  */
       name = bfd_get_filename (abfd);
+      if (elf_dt_needed_name (abfd) != NULL)
+	name = elf_dt_needed_name (abfd);
       s = bfd_get_section_by_name (abfd, ".dynamic");
       if (s != NULL)
 	{

@@ -535,6 +535,7 @@ extern boolean bfd_elf32_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, struct sec **));
 extern boolean bfd_elf64_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, struct sec **));
+extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 
 /* SunOS shared library support routines for the linker.  */
 

@@ -417,6 +417,12 @@ struct elf_obj_tdata
      minus the sh_info field of the symbol table header.  */
   struct elf_link_hash_entry **sym_hashes;
 
+  /* The linker ELF emulation code needs to let the backend ELF linker
+     know what filename should be used for a dynamic object if the
+     dynamic object is found using a search.  This field is used to
+     hold that information.  */
+  const char *dt_needed_name;
+
   /* Irix 5 often screws up the symbol table, sorting local symbols
      after global symbols.  This flag is set if the symbol table in
      this BFD appears to be screwed up.  If it is, we ignore the
@@ -441,6 +447,7 @@ struct elf_obj_tdata
 #define elf_gp(bfd)		(elf_tdata(bfd) -> gp)
 #define elf_gp_size(bfd)	(elf_tdata(bfd) -> gp_size)
 #define elf_sym_hashes(bfd)	(elf_tdata(bfd) -> sym_hashes)
+#define elf_dt_needed_name(bfd)	(elf_tdata(bfd) -> dt_needed_name)
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 
 extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));

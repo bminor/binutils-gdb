@@ -10,6 +10,15 @@ Wed Jun 15 18:02:21 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 Wed Jun 15 01:34:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* libelf.h (struct elf_obj_tdata): New field dt_needed_name.
+	(elf_dt_needed_name): New accessor macro.
+	* elfcode.h (elf_link_add_object_symbols): If elf_dt_needed_name
+	is set, use that instead of the filename for the DT_NEEDED dynamic
+	entry.
+	* elf.c (bfd_elf_set_dt_needed_name): New function.
+	* bfd-in.h (bfd_elf_set_dt_needed_name): Declare.
+	* bfd-in2.h: Rebuilt.
+
 	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Add sinterpptr
 	argument, and set it to the .interp section.
 	* bfd-in.h (bfd_elf32_size_dynamic_sections): Update prototype.
