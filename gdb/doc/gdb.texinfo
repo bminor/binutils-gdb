@@ -168,6 +168,7 @@ This is Edition 4.04, March 1992, for GDB Version _GDB_VN__.
 * Emacs::                       Using _GDBN__ under GNU Emacs
 * _GDBN__ Bugs::                    Reporting bugs in _GDBN__
 * Renamed Commands::
+* Formatting Documentation::    How to format and print GDB documentation
 * Installing GDB::              Installing GDB
 * Copying::                     GNU GENERAL PUBLIC LICENSE
 * Index::                       Index
@@ -365,7 +366,6 @@ Installing GDB
 * Separate Objdir::             Compiling _GDBN__ in another directory
 * Config Names::                Specifying names for hosts and targets
 * configure Options::           Summary of options for configure
-* Formatting Documentation::    How to format and print GDB documentation
 @end menu
 
 @node Summary, New Features, Top, Top
@@ -566,8 +566,8 @@ of your program, and the latter refer to the state of GDB itself.
 @xref{Renamed Commands}, for details on what commands were renamed.
 
 @item Shared Libraries
-GDB 4 can debug programs and core files that use SunOS shared
-libraries.
+GDB 4 can debug programs and core files that use SunOS, SVR4, or IBM RS/6000
+shared libraries.
 
 @item Reference Card
 GDB 4 has a reference card.  @xref{Formatting Documentation} for
@@ -986,13 +986,34 @@ Add @var{directory} to the path to search for source files.
 @itemx -mapped
 @emph{Warning: this option depends on operating system facilities that are not
 supported on all systems.}@*
-If memory-mapped files are available through the @code{mmap} system
-call, you can use this option to get _GDBN__ to write out the symbols
-for your program in a reusable file.  Next time _GDBN__ starts up (if the
-program hasn't changed), it will map in symbol information from this
-auxiliary symbol file, rather than spending time reading the symbol
-table from the executable program.
+If memory-mapped files are available on your system through the @code{mmap}
+system call, you can use this option 
+to cause _GDBN__ to write the symbols from your
+program into a reusable file in the current directory.  If the program you are debugging is
+called @file{/tmp/fred}, the mapped symbol file will be @file{./fred.syms}.
+Future _GDBN__ debugging sessions will notice the presence of this file,
+and will quickly map in symbol information from it, rather than reading
+the symbol table from the executable program.
+
+The @file{.syms} file is specific to the host machine on which _GDBN__ is run.
+It holds an exact image of _GDBN__'s internal symbol table.  It cannot be
+shared across multiple host platforms.
+
+@item -r
+@itemx -readnow
+Read each symbol file's entire symbol table immediately, rather than
+the default, which is to read it incrementally as it is needed.
+This makes startup slower, but makes future operations faster.
 @end table
+
+The @code{-mapped} and @code{-readnow} options are typically combined in order to
+build a @file{.syms} file that contains complete symbol information.
+A simple GDB invocation to do nothing but build a @file{.syms} file for future
+use is:
+
+@example
+	gdb -batch -nx -mapped -readnow programname
+@end example
 
 _if__(!_GENERIC__)
 @node Mode Options, Mode Options, File Options, Invoking _GDBN__
@@ -5900,8 +5921,8 @@ On systems with memory-mapped files, an auxiliary symbol table file
 is, _GDBN__ will map in the symbol table from
 @file{@var{filename}.syms}, starting up more quickly.  See the
 descriptions of the options @samp{-mapped} and @samp{-readnow} (available
-with @code{file}, @code{symbol-file}, or @code{add-symbol-file}), for
-more information.
+on the command line, and with the commands @code{file}, @code{symbol-file},
+or @code{add-symbol-file}), for more information.
 
 @item file
 @code{file} with no argument makes _GDBN__ discard any information it
@@ -5971,15 +5992,19 @@ entire symbol table available.
 
 If memory-mapped files are available on your system through the
 @code{mmap} system call, you can use another option, @samp{-mapped}, to
-get _GDBN__ to write out the symbols for your program in a reusable
-file.  Next time _GDBN__ starts up (if the program hasn't changed), it
-will map in symbol information from this auxiliary symbol file, rather
-than spending time reading the symbol table from the executable program.
-Using the @samp{-mapped} option has the same effect as starting _GDBN__
-with the @samp{-m} command-line option.
+cause _GDBN__ to write the symbols for your program into a reusable
+file.  Future _GDBN__ debugging sessions will map in symbol information
+from this auxiliary symbol file (if the program hasn't changed), rather
+than spending time reading the symbol table from the executable
+program.  Using the @samp{-mapped} option has the same effect as
+starting _GDBN__ with the @samp{-mapped} command-line option.
 
 You can use both options together, to make sure the auxiliary symbol
 file has all the symbol information for your program.
+
+The @code{.syms} file is specific to the host machine on which GDB is run.
+It holds an exact image of GDB's internal symbol table.  It cannot be
+shared across multiple host platforms.
 
 The auxiliary symbol file for a program called @var{myprog} is called
 @samp{@var{myprog}.syms}.  Once this file exists (so long as it is newer
@@ -6091,15 +6116,14 @@ name and remembers it that way.
 
 @cindex shared libraries
 
-_GDBN__ supports the SunOS shared library format.  _GDBN__ automatically
-loads symbol definitions from shared libraries when you use the
-@code{run} command, or when you examine a core file.  (Before you issue
-the @code{run} command, _GDBN__ will not understand references to a
-function in a shared library, however---unless you are debugging a core
-file).
+_GDBN__ supports SunOS, SVR4, and IBM RS/6000 shared libraries.
+_GDBN__ automatically loads symbol definitions from shared libraries
+when you use the @code{run} command, or when you examine a core file.
+(Before you issue the @code{run} command, _GDBN__ will not understand
+references to a function in a shared library, however---unless you are
+debugging a core file).
 @c FIXME: next _GDBN__ release should permit some refs to undef
 @c FIXME...symbols---eg in a break cmd---assuming they are from a shared lib
-@c FIXME: still only SunOS??
 
 @table @code
 @item info share
@@ -7362,7 +7386,7 @@ things without first using the debugger to find the facts.
 @include inc-hist.texi
 @end iftex
 
-@node Renamed Commands, Installing GDB, _GDBN__ Bugs, Top
+@node Renamed Commands, Formatting Documentation, _GDBN__ Bugs, Top
 @appendix Renamed Commands
 
 The following commands were renamed in GDB 4, in order to make the
@@ -7479,7 +7503,86 @@ unset                     &&\rm(No longer an alias for delete)\cr
 @end tex
 @c END TEXI2ROFF-KILL
 
-@node Installing GDB, Copying, Renamed Commands, Top
+@node Formatting Documentation, Installing GDB, Renamed Commands, Top
+@appendix Formatting the Documentation
+
+@cindex GDB reference card
+@cindex reference card
+The GDB 4 release includes an already-formatted reference card, ready
+for printing on a PostScript or GhostScript printer, in the @file{gdb}
+subdirectory of the main source directory---in
+@file{gdb-_GDB_VN__/gdb/refcard.ps} of the version _GDB_VN__ release.  If you have
+a PostScript or GhostScript printer, you can print the reference card
+by just sending @file{refcard.ps} to the printer.
+
+The release also includes the source for the reference card.  You
+can format it, using @TeX{}, by typing:
+
+@example
+make refcard.dvi
+@end example
+
+The GDB reference card is designed to print in landscape mode on US
+``letter'' size paper; that is, on a sheet 11 inches wide by 8.5 inches
+high.  You will need to specify this form of printing as an option to
+your @sc{dvi} output program.
+
+@cindex documentation
+
+All the documentation for GDB comes as part of the machine-readable
+distribution.  The documentation is written in Texinfo format, which is
+a documentation system that uses a single source file to produce both
+on-line information and a printed manual.  You can use one of the Info
+formatting commands to create the on-line version of the documentation
+and @TeX{} (or @code{texi2roff}) to typeset the printed version.
+
+GDB includes an already formatted copy of the on-line Info version of
+this manual in the @file{gdb} subdirectory.  The main Info file is
+@file{gdb-@var{version-number}/gdb/gdb.info}, and it refers to
+subordinate files matching @samp{gdb.info*} in the same directory.
+
+If you want to format these Info files yourself, you need one of the
+Info formatting programs, such as @code{texinfo-format-buffer} or
+@code{makeinfo}.
+
+If you have @code{makeinfo} installed, and are in the top level GDB
+source directory (@file{gdb-_GDB_VN__}, in the case of version _GDB_VN__), you can
+make the Info file by typing:
+
+@example
+cd gdb
+make gdb.info
+@end example
+
+If you want to typeset and print copies of this manual, you need
+@TeX{}, a printing program such as @code{lpr}, and @file{texinfo.tex},
+the Texinfo definitions file.
+
+@TeX{} is typesetting program; it does not print files directly, but
+produces output files called @sc{dvi} files.  To print a typeset
+document, you need a program to print @sc{dvi} files.  If your system
+has @TeX{} installed, chances are it has such a program.  The precise
+command to use depends on your system; @kbd{lpr -d} is common; another
+is @kbd{dvips}.  The @sc{dvi} print command may require a file name
+without any extension or a @samp{.dvi} extension.
+
+@TeX{} also requires a macro definitions file called
+@file{texinfo.tex}.  This file tells @TeX{} how to typeset a document
+written in Texinfo format.  On its own, @TeX{} cannot read, much less
+typeset a Texinfo file.  @file{texinfo.tex} is distributed with GDB
+and is located in the @file{gdb-@var{version-number}/texinfo}
+directory.
+
+If you have @TeX{} and a @sc{dvi} printer program installed, you can
+typeset and print this manual.  First switch to the the @file{gdb}
+subdirectory of the main source directory (for example, to
+@file{gdb-_GDB_VN__/gdb}) and then type:
+
+@example
+make gdb.dvi
+@end example
+
+@node Installing GDB, Copying, Formatting Documentation, Top
 @appendix Installing GDB
 @cindex configuring GDB
 @cindex installation
@@ -7514,7 +7617,7 @@ script for configuring GDB and all its supporting libraries.
 the source specific to GDB itself
 
 @item gdb-_GDB_VN__/bfd
-source for the Binary File Descriptor Library
+source for the Binary File Descriptor library
 
 @item gdb-_GDB_VN__/include
 GNU include files
@@ -7524,6 +7627,12 @@ source for the @samp{-liberty} free software library
 
 @item gdb-_GDB_VN__/readline
 source for the GNU command-line interface
+
+@item gdb-_GDB_VN__/glob
+source for the GNU filename pattern-matching subroutine
+
+@item gdb-_GDB_VN__/mmalloc
+source for the GNU memory-mapped malloc package
 @end table
 
 The simplest way to configure and build GDB is to run @code{configure}
@@ -7547,8 +7656,8 @@ make
 where @var{host} is an identifier such as @samp{sun4} or
 @samp{decstation}, that identifies the platform where GDB will run.
 
-This sequence of @code{configure} and @code{make} builds the three
-libraries @file{bfd}, @file{readline}, and @file{libiberty}, then
+This sequence of @code{configure} and @code{make} builds the @file{bfd},
+@file{readline}, @file{mmalloc}, and @file{libiberty} libraries, then
 @code{gdb} itself.  The configured source files, and the binaries, are
 left in the corresponding source directories.
 
@@ -7590,7 +7699,6 @@ let GDB debug child processes whose programs are not readable.
 * Separate Objdir::             Compiling GDB in another directory
 * Config Names::                Specifying names for hosts and targets
 * configure Options::           Summary of options for configure
-* Formatting Documentation::    How to format and print GDB documentation
 @end menu
 
 @node Separate Objdir, Config Names, Installing GDB, Installing GDB
@@ -7607,8 +7715,10 @@ program specified there.
 
 To build @code{gdb} in a separate directory, run @code{configure}
 with the @samp{--srcdir} option to specify where to find the source.
-(Remember, you'll also need to specify a path to find @code{configure}
-itself from your working directory.)
+(You'll also need to specify a path to find @code{configure}
+itself from your working directory.  If the path to @code{configure}
+would be the same as the argument to @samp{--srcdir}, you can leave out
+the @samp{--srcdir} option; it will be assumed.)
 
 For example, with version _GDB_VN__, you can build GDB in a separate
 directory for a Sun 4 like this:
@@ -7618,7 +7728,7 @@ directory for a Sun 4 like this:
 cd gdb-_GDB_VN__
 mkdir ../gdb-sun4
 cd ../gdb-sun4
-../gdb-_GDB_VN__/configure --srcdir=../gdb-_GDB_VN__ sun4
+../gdb-_GDB_VN__/configure sun4
 make
 @end group
 @end example
@@ -7781,14 +7891,14 @@ i386-none-sysv
 @code{config.sub} is also distributed in the GDB source
 directory (@file{gdb-_GDB_VN__}, for version _GDB_VN__).
 
-@node configure Options, Formatting Documentation, Config Names, Installing GDB
+@node configure Options, , Config Names, Installing GDB
 @section @code{configure} Options
 
 Here is a summary of all the @code{configure} options and arguments that
 you might use for building GDB:
 
 @example
-configure @r{[}--destdir=@var{dir}@r{]} @r{[}--srcdir=@var{path}@r{]}
+configure @r{[}--srcdir=@var{path}@r{]}
           @r{[}--norecursion@r{]} @r{[}--rm@r{]}
           @r{[}--target=@var{target}@r{]} @var{host}
 @end example
@@ -7799,13 +7909,6 @@ You may introduce options with a single @samp{-} rather than
 @samp{--}.
 
 @table @code
-@item --destdir=@var{dir}
-@var{dir} is an installation directory @emph{path prefix}.  After you
-configure with this option, @code{make install} will install GDB as
-@file{@var{dir}/bin/gdb}, and the libraries in @file{@var{dir}/lib}.
-If you specify @samp{--destdir=/usr/local}, for example, @code{make
-install} creates @file{/usr/local/bin/gdb}.
-
 @item --srcdir=@var{path}
 @strong{Warning: using this option requires GNU @code{make}, or another
 @code{make} that implements the @code{VPATH} feature.}@*
@@ -7849,84 +7952,6 @@ There is no convenient way to generate a list of all available hosts.
 @code{configure} accepts other options, for compatibility with
 configuring other GNU tools recursively; but these are the only
 options that affect GDB or its supporting libraries.
-
-@node Formatting Documentation,  , configure Options, Installing GDB
-@section Formatting the Documentation
-
-All the documentation for GDB, including this manual, comes as part of
-the distribution.  The documentation is written in Texinfo format,
-which is a documentation system that uses a single source file to
-produce both on-line information and a printed manual.  You can use
-one of the Info formatting commands to create the on-line version of
-the documentation and @TeX{} (or @code{texi2roff}) to typeset the
-printed version.
-
-GDB includes an already formatted copy of the on-line Info version of
-this manual in the @file{gdb} subdirectory.  The main Info file is
-@file{gdb-@var{version-number}/gdb/gdb.info}, and it refers to
-subordinate files matching @samp{gdb.info*} in the same directory.
-
-If you want to format these Info files yourself, you need one of the
-Info formatting programs, such as @code{texinfo-format-buffer} or
-@code{makeinfo}.
-
-If you have @code{makeinfo} installed, and are in the top level GDB
-source directory (@file{gdb-_GDB_VN__}, in the case of version _GDB_VN__), you can
-make the Info file by typing:
-
-@example
-cd gdb
-make gdb.info
-@end example
-
-If you want to typeset and print copies of this manual, you need
-@TeX{}, a printing program such as @code{lpr}, and @file{texinfo.tex},
-the Texinfo definitions file.
-
-@TeX{} is typesetting program; it does not print files directly, but
-produces output files called @sc{dvi} files.  To print a typeset
-document, you need a program to print @sc{dvi} files.  If your system
-has @TeX{} installed, chances are it has such a program.  The precise
-command to use depends on your system; @kbd{lpr -d} is common; another
-is @kbd{dvips}.  The @sc{dvi} print command may require a file name
-without any extension or a @samp{.dvi} extension.
-
-@TeX{} also requires a macro definitions file called
-@file{texinfo.tex}.  This file tells @TeX{} how to typeset a document
-written in Texinfo format.  On its own, @TeX{} cannot read, much less
-typeset a Texinfo file.  @file{texinfo.tex} is distributed with GDB
-and is located in the @file{gdb-@var{version-number}/texinfo}
-directory.
-
-If you have @TeX{} and a @sc{dvi} printer program installed, you can
-typeset and print this manual.  First switch to the the @file{gdb}
-subdirectory of the main source directory (for example, to
-@file{gdb-_GDB_VN__/gdb}) and then type:
-
-@example
-make gdb.dvi
-@end example
-
-@cindex GDB reference card
-@cindex reference card
-In addition to the manual, the GDB 4 release includes a three-column
-reference card.  Format the GDB reference card by typing:
-
-@example
-make refcard.dvi
-@end example
-
-The GDB reference card is designed to print in landscape mode on US
-``letter'' size paper; that is, on a sheet 11 inches wide by 8.5 inches
-high.  You will need to specify this form of printing as an option to
-your @sc{dvi} output program.
-
-The GDB 4 release includes an already-formatted reference card, ready
-for printing on a PostScript or GhostScript printer, in the @file{gdb}
-subdirectory of the main source directory---in
-@file{gdb-4.2/gdb/refcard.ps} of the version 4.2 release.  If you have
-a PostScript or GhostScript printer, you can print the reference card
-by just sending @file{refcard.ps} to the printer.
 
 @node Copying, Index, Installing GDB, Top
 @unnumbered GNU GENERAL PUBLIC LICENSE

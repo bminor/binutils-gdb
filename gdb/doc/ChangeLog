@@ -1,3 +1,10 @@
+Fri Apr 10 17:50:43 1992  John Gilmore  (gnu at rtl.cygnus.com)
+
+	* gdb.texinfo:  Update for GDB-4.5.  Move `Formatting
+	Documentation' ahead of `Installing GDB' to match README.
+	Update shared library doc, -readnow and -mapped, and directory
+	structure (add glob and mmalloc).  Update configure doc.	
+
 Tue Mar 24 23:28:38 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: remove $(srcdir) from gdb.info rule.
