@@ -1,3 +1,10 @@
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-11-09 Jason Molenda (jason-cl@molenda.com):
+        * gdb.mi/mi-syn-frame.exp: New tests for synthetic frames in
+        stack backtraces.
+        * gdb.mi/mi-syn-frame.c: Part of same.
+
 2003-02-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.mi/gdb669.exp, gdb.mi/mi-pthreads.exp,

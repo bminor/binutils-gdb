@@ -1,3 +1,9 @@
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-11-09 Jason Molenda (jason-cl@molenda.com)
+        * stack.c (print_frame_info_base): Output complete FRAME tuple
+        for synthesized frames.
+
 2003-02-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* mips-nat.c (zerobuf): Delete.
