@@ -3613,7 +3613,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 				       + sgot->output_offset
 				       + gotent->got_offset);
 		    outrel.r_info = ELF64_R_INFO(0, R_ALPHA_RELATIVE);
-		    outrel.r_addend = 0;
+		    outrel.r_addend = relocation+addend;
 
 		    bfd_elf64_swap_reloca_out (output_bfd, &outrel,
 					       ((Elf64_External_Rela *)
@@ -3678,7 +3678,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    else if (info->shared && (input_section->flags & SEC_ALLOC))
 	      {
 		outrel.r_info = ELF64_R_INFO(0, R_ALPHA_RELATIVE);
-		outrel.r_addend = 0;
+		outrel.r_addend = relocation + addend;
 	      }
 	    else
 	      goto default_reloc;
@@ -3871,7 +3871,7 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
 				     + sgot->output_offset
 				     + gotent->got_offset);
 		  outrel.r_info = ELF64_R_INFO(0, R_ALPHA_RELATIVE);
-		  outrel.r_addend = 0;
+		  outrel.r_addend = plt_addr;
 
 		  bfd_elf64_swap_reloca_out (output_bfd, &outrel,
 					     ((Elf64_External_Rela *)

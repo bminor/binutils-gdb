@@ -1,3 +1,9 @@
+2001-08-31  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Duplicate memory
+	value into R_ALPHA_RELATIVE's addend.
+	(elf64_alpha_finish_dynamic_symbol): Likewise.
+
 2001-08-31  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf32-arm.h (elf32_arm_relocate_section): Do not rightshift
