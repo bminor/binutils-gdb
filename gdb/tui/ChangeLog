@@ -1,5 +1,13 @@
 2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiSourceWin.c (tui_display_main): Rename from tuiDisplayMainFunction
+	and use tuiGetBeginAsmAddress.
+	* tuiSourceWin.h (tui_display_main): Declare.
+	* tui.h (tuiDisplayMainFunction): Remove.
+	* tui-hooks.c (tui_new_objfile_hook): Update.
+
+2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiSource.h (m_tuiShowSourceAsIs): Remove macro.
 	(tuiShowSourceAsIs): Don't declare.
 

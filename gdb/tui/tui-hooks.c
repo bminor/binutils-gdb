@@ -71,9 +71,7 @@ static void
 tui_new_objfile_hook (struct objfile* objfile)
 {
   if (tui_active)
-    {
-      tuiDisplayMainFunction ();
-    }
+    tui_display_main ();
   
   if (tui_target_new_objfile_chain)
     tui_target_new_objfile_chain (objfile);

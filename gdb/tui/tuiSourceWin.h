@@ -22,7 +22,8 @@
 #ifndef _TUI_SOURCEWIN_H
 #define _TUI_SOURCEWIN_H
 
-extern void tuiDisplayMainFunction (void);
+/* Function to display the "main" routine.  */
+extern void tui_display_main (void);
 extern void tuiUpdateSourceWindow (TuiWinInfoPtr, struct symtab *, TuiLineOrAddress,
 				   int);
 extern void tuiUpdateSourceWindowAsIs (TuiWinInfoPtr, struct symtab *, TuiLineOrAddress,

@@ -56,30 +56,15 @@
 #include "tuiDisassem.h"
 
 
-/*****************************************
-** EXTERNAL FUNCTION DECLS                **
-******************************************/
-
-/*****************************************
-** EXTERNAL DATA DECLS                    **
-******************************************/
-extern int current_source_line;
-extern struct symtab *current_source_symtab;
-
-/*
-   ** tuiDisplayMainFunction().
-   **        Function to display the "main" routine"
- */
+/* Function to display the "main" routine.  */
 void
-tuiDisplayMainFunction (void)
+tui_display_main (void)
 {
   if ((sourceWindows ())->count > 0)
     {
       CORE_ADDR addr;
 
-      addr = parse_and_eval_address ("main");
-      if (addr == (CORE_ADDR) 0)
-	addr = parse_and_eval_address ("MAIN");
+      addr = tuiGetBeginAsmAddress ();
       if (addr != (CORE_ADDR) 0)
 	{
 	  struct symtab_and_line sal;

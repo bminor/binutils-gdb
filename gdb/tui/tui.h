@@ -125,7 +125,6 @@ extern void tui_vStartNewLines (va_list);
 extern TuiStatus tui_set_layout (const char *);
 
 /* tuiSourceWin.c */
-extern void tuiDisplayMainFunction (void);
 extern void tuiUpdateAllExecInfos (void);
 extern void tui_vAllSetHasBreakAt (va_list);
 extern void tui_vUpdateSourceWindowsWithAddr (va_list);
