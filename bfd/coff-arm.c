@@ -47,6 +47,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SET_INTERWORK_FLAG( abfd, flg )	(coff_data (abfd)->flags = \
 					(coff_data (abfd)->flags & ~ F_INTERWORK) \
 					 | (flg | F_INTERWORK_SET))
+
+#ifndef NUM_ELEM
+#define NUM_ELEM(a) ((sizeof (a)) / sizeof ((a)[0]))
+#endif
      
 typedef enum {bunknown, b9, b12, b23} thumb_pcrel_branchtype;
 /* some typedefs for holding instructions */
@@ -402,6 +406,8 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	PCRELOFFSET),
 };
 
+#define NUM_RELOCS NUM_ELEM (aoutarm_std_reloc_howto)
+
 #ifdef COFF_WITH_PE
 /* Return true if this relocation should
    appear in the output .reloc section. */
@@ -415,9 +421,11 @@ in_reloc_p (abfd, howto)
 }     
 #endif
 
-
-#define RTYPE2HOWTO(cache_ptr, dst) \
-	    (cache_ptr)->howto = aoutarm_std_reloc_howto + (dst)->r_type;
+#define RTYPE2HOWTO(cache_ptr, dst)		\
+  (cache_ptr)->howto =				\
+    (dst)->r_type < NUM_RELOCS			\
+    ? aoutarm_std_reloc_howto + (dst)->r_type	\
+    : NULL
 
 #define coff_rtype_to_howto coff_arm_rtype_to_howto
 
@@ -430,17 +438,17 @@ coff_arm_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      struct internal_syment *sym ATTRIBUTE_UNUSED;
      bfd_vma *addendp;
 {
-  reloc_howto_type *howto;
+  reloc_howto_type * howto;
 
+  if (rel->r_type >= NUM_RELOCS)
+    return NULL;
+  
   howto = aoutarm_std_reloc_howto + rel->r_type;
 
   if (rel->r_type == ARM_RVA32)
-    {
-      *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
-    }
+    *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
 
   return howto;
-
 }
 /* Used by the assembler. */
 
@@ -698,7 +706,8 @@ coff_arm_reloc_type_lookup (abfd, code)
       bfd * abfd;
       bfd_reloc_code_real_type code;
 {
-#define ASTD(i,j)       case i: return &aoutarm_std_reloc_howto[j]
+#define ASTD(i,j)       case i: return aoutarm_std_reloc_howto + j
+  
   if (code == BFD_RELOC_CTOR)
     switch (bfd_get_arch_info (abfd)->bits_per_address)
       {
@@ -1900,7 +1909,7 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
       for (rel = i; rel < i + sec->reloc_count; ++rel) 
 	{
 	  unsigned short                 r_type  = rel->r_type;
-	  long                           symndx;
+	  unsigned long                  symndx;
 	  struct coff_link_hash_entry *  h;
 
 	  symndx = rel->r_symndx;
@@ -1909,6 +1918,13 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 	  if (symndx == -1)
 	    continue;
 
+	  if (symndx >= obj_conv_table_size (abfd))
+	    {
+	      _bfd_error_handler (_("%s: illegal symbol index in reloc: %d"),
+				  bfd_get_filename (abfd), symndx);
+	      continue;
+	    }
+	  
 	  h = obj_coff_sym_hashes (abfd)[symndx];
 
 	  /* If the relocation is against a static symbol it must be within

@@ -1,3 +1,13 @@
+1999-12-16  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c (NUM_ELEM): New macro.
+	(NUM_RELOCS): New macro: The number of known ARM relocs.
+	(RTYPE2HOWTO): Return NULL if the reloc type is out of range.
+	(coff_arm_rtype_to_howto):  Return NULL if the reloc type is out
+	of range.
+	(bfd_arm_process_before_allocation): Produce a warning message if
+	an out of range symbol index is encountered.
+
 1999-12-14  Nick Clifton  <nickc@cygnus.com>
 
 	* elflink.h (is_global_symbol_definition): New Function: Return
