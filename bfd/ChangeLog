@@ -1,3 +1,21 @@
+Thu Dec 21 12:43:49 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_howto_raw): Add a phony reloc to handle the
+	old style TOC16 references without using R_PPC_GOT.
+	(ppc_reloc_type): Ditto.
+	(ppc_elf_reloc_type_lookup): Add support for TOC16.
+	(ppc_elf_toc16_inner): Renamed from ppc_elf_got16_inner.
+	(ppc_elf_toc16_reloc): Renamed from ppc_elf_toc16_reloc.
+	(ppc_elf_got16_{inner,reloc}): Stubs for real GOT support.
+	(ppc_elf_check_relocs): New function for GOT/PLT support that is
+	work in progress.
+	(ppc_elf_adjust_dynamic_symbol): Ditto.
+	(ppc_elf_adjust_dynindx): Ditto.
+	(ppc_elf_size_dynamic_sections): Ditto.
+	(ppc_elf_finish_dynamic_symbol): Ditto.
+	(ppc_elf_finish_dynamic_sections): Ditto.
+	(ELF_DYNAMIC_INTERPRETER): Define.
+
 Wed Dec 20 19:14:18 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* elf.c (copy_private_bfd_data): When attaching sections to
