@@ -1,3 +1,8 @@
+2000-07-18  Scott Bambrough  <scottb@netwinder.org>
+
+        * gas/arm/inst.d: Fix expected results to match current assembler
+        output.  Patch from Justin Seger <justin.m.seger@intel.com>.
+
 2000-07-10  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/vtable/vtable.exp: Disable test for hppa.

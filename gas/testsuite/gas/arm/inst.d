@@ -11,16 +11,16 @@ Disassembly of section .text:
 00000004 <[^>]*> e1a01002 ?	mov	r1, r2
 00000008 <[^>]*> e1a03184 ?	mov	r3, r4, lsl #3
 0000000c <[^>]*> e1a05736 ?	mov	r5, r6, lsr r7
-00000010 <[^>]*> e1a08a59 ?	mov	r8, r9, asr r10
-00000014 <[^>]*> e1a0bd1c ?	mov	r11, r12, lsl sp
+00000010 <[^>]*> e1a08a59 ?	mov	r8, r9, asr sl
+00000014 <[^>]*> e1a0bd1c ?	mov	fp, ip, lsl sp
 00000018 <[^>]*> e1a0e06f ?	mov	lr, pc, rrx
 0000001c <[^>]*> e1a01002 ?	mov	r1, r2
 00000020 <[^>]*> 01a02003 ?	moveq	r2, r3
 00000024 <[^>]*> 11a04005 ?	movne	r4, r5
 00000028 <[^>]*> b1a06007 ?	movlt	r6, r7
 0000002c <[^>]*> a1a08009 ?	movge	r8, r9
-00000030 <[^>]*> d1a0a00b ?	movle	r10, r11
-00000034 <[^>]*> c1a0c00d ?	movgt	r12, sp
+00000030 <[^>]*> d1a0a00b ?	movle	sl, fp
+00000034 <[^>]*> c1a0c00d ?	movgt	ip, sp
 00000038 <[^>]*> 31a01002 ?	movcc	r1, r2
 0000003c <[^>]*> 21a01003 ?	movcs	r1, r3
 00000040 <[^>]*> 41a03006 ?	movmi	r3, r6
@@ -113,8 +113,8 @@ Disassembly of section .text:
 0000019c <[^>]*> e0110392 ?	muls	r1, r2, r3
 000001a0 <[^>]*> 10000091 ?	mulne	r0, r1, r0
 000001a4 <[^>]*> 90190798 ?	mullss	r9, r8, r7
-000001a8 <[^>]*> e021ba99 ?	mla	r1, r9, r10, r11
-000001ac <[^>]*> e033c994 ?	mlas	r3, r4, r9, r12
+000001a8 <[^>]*> e021ba99 ?	mla	r1, r9, sl, fp
+000001ac <[^>]*> e033c994 ?	mlas	r3, r4, r9, ip
 000001b0 <[^>]*> b029d798 ?	mlalt	r9, r8, r7, sp
 000001b4 <[^>]*> a034e391 ?	mlages	r4, r1, r3, lr
 000001b8 <[^>]*> e5910000 ?	ldr	r0, \[r1\]
@@ -143,16 +143,16 @@ Disassembly of section .text:
 00000214 <[^>]*> e4e02000 ?	strbt	r2, \[r0\]
 00000218 <[^>]*> e8900002 ?	ldmia	r0, {r1}
 0000021c <[^>]*> 09920038 ?	ldmeqib	r2, {r3, r4, r5}
-00000220 <[^>]*> e853ffff ?	ldmda	r3, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, lr, pc}\^
-00000224 <[^>]*> e93b05ff ?	ldmdb	r11!, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r10}
+00000220 <[^>]*> e853ffff ?	ldmda	r3, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, sp, lr, pc}\^
+00000224 <[^>]*> e93b05ff ?	ldmdb	fp!, {r0, r1, r2, r3, r4, r5, r6, r7, r8, sl}
 00000228 <[^>]*> e99100f7 ?	ldmib	r1, {r0, r1, r2, r4, r5, r6, r7}
 0000022c <[^>]*> e89201f8 ?	ldmia	r2, {r3, r4, r5, r6, r7, r8}
 00000230 <[^>]*> e9130003 ?	ldmdb	r3, {r0, r1}
 00000234 <[^>]*> e8740300 ?	ldmda	r4!, {r8, r9}\^
 00000238 <[^>]*> e8800002 ?	stmia	r0, {r1}
 0000023c <[^>]*> 09820038 ?	stmeqib	r2, {r3, r4, r5}
-00000240 <[^>]*> e843ffff ?	stmda	r3, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, lr, pc}\^
-00000244 <[^>]*> e92a05ff ?	stmdb	r10!, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r10}
+00000240 <[^>]*> e843ffff ?	stmda	r3, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, sp, lr, pc}\^
+00000244 <[^>]*> e92a05ff ?	stmdb	sl!, {r0, r1, r2, r3, r4, r5, r6, r7, r8, sl}
 00000248 <[^>]*> e8010007 ?	stmda	r1, {r0, r1, r2}
 0000024c <[^>]*> e9020018 ?	stmdb	r2, {r3, r4}
 00000250 <[^>]*> e8830003 ?	stmia	r3, {r0, r1}
