@@ -909,7 +909,9 @@ DEFUN(struct_type, (dip, thisdie, enddie),
       TYPE_CODE (type) = TYPE_CODE_UNDEF;
       break;
     }
-  if (dip -> at_name == NULL)
+  /* Some compilers try to be helpful by inventing "fake" names for anonymous
+     enums, structures, and unions, like "~0fake".  Thanks, but no thanks. */
+  if (dip -> at_name == NULL || *dip -> at_name == '~')
     {
       tpart2 = "{...}";
     }
@@ -1325,7 +1327,9 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
     }
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   tpart1 = "enum ";
-  if (dip -> at_name == NULL)
+  /* Some compilers try to be helpful by inventing "fake" names for anonymous
+     enums, structures, and unions, like "~0fake".  Thanks, but no thanks. */
+  if (dip -> at_name == NULL || *dip -> at_name == '~')
     {
       tpart2 = "{...}";
     } else {

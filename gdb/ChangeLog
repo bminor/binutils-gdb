@@ -1,5 +1,8 @@
 Tue Nov 19 07:53:55 1991  Fred Fish  (fnf at cygnus.com)
 
+	* dwarfread.c (enum_type, struct_type):  Ignore names invented by
+	helpful compilers for anonymous structs, unions, and enums.
+
 	* c-exp.y, m2-exp.y:  Add defines for yymaxdepth, yy_yys, and
 	yy_yyv, so multiple parsers produced by SVR4 versions of yacc
 	can coexist in the same executable without collision.
