@@ -25,7 +25,10 @@
 #include "inferior.h"
 #include "language.h"
 #include "gdbcore.h"
+#include "gdb_string.h"
 #include "regcache.h"
+
+#include "m68k-tdep.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -51,7 +54,6 @@
 
 #include "target.h"
 
-
 /* This table must line up with REGISTER_NAMES in tm-m68k.h */
 static const int regmap[] =
 {
@@ -78,7 +80,7 @@ getregs_supplies (int regno)
 int
 getfpregs_supplies (int regno)
 {
-  return FP0_REGNUM <= regno && regno <= FPI_REGNUM;
+  return FP0_REGNUM <= regno && regno <= M68K_FPI_REGNUM;
 }
 
 /* Does the current host support the GETREGS request?  */
@@ -275,7 +277,7 @@ supply_gregset (elf_gregset_t *gregsetp)
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int regi;
 
-  for (regi = D0_REGNUM; regi <= SP_REGNUM; regi++)
+  for (regi = M68K_D0_REGNUM; regi <= SP_REGNUM; regi++)
     supply_register (regi, (char *) &regp[regmap[regi]]);
   supply_register (PS_REGNUM, (char *) &regp[PT_SR]);
   supply_register (PC_REGNUM, (char *) &regp[PT_PC]);
@@ -359,11 +361,11 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
 {
   int regi;
 
-  for (regi = FP0_REGNUM; regi < FPC_REGNUM; regi++)
+  for (regi = FP0_REGNUM; regi < FP0_REGNUM + 8; regi++)
     supply_register (regi, FPREG_ADDR (fpregsetp, regi - FP0_REGNUM));
-  supply_register (FPC_REGNUM, (char *) &fpregsetp->fpcntl[0]);
-  supply_register (FPS_REGNUM, (char *) &fpregsetp->fpcntl[1]);
-  supply_register (FPI_REGNUM, (char *) &fpregsetp->fpcntl[2]);
+  supply_register (M68K_FPC_REGNUM, (char *) &fpregsetp->fpcntl[0]);
+  supply_register (M68K_FPS_REGNUM, (char *) &fpregsetp->fpcntl[1]);
+  supply_register (M68K_FPI_REGNUM, (char *) &fpregsetp->fpcntl[2]);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -381,9 +383,9 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
       regcache_collect (regno, FPREG_ADDR (fpregsetp, regno - FP0_REGNUM));
 
   /* Fill in the floating-point control registers.  */
-  for (i = FPC_REGNUM; i <= FPI_REGNUM; i++)
+  for (i = M68K_FPC_REGNUM; i <= M68K_FPI_REGNUM; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (regno, (char *) &fpregsetp->fpcntl[regno - FPC_REGNUM]);
+      regcache_collect (regno, (char *) &fpregsetp->fpcntl[regno - M68K_FPC_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS

@@ -1,3 +1,22 @@
+2002-11-23  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (m68k_tdep_h): Define.
+	(abug-rom.o, cpu32bug-rom.o, dbug-rom.o, m68k-tdep.o, m68klinux-nat.o)
+	(remote-est.o, rom68k-rom.o): Add $(m68k_tdep_h).
+	* m68k-tdep.c: Move register number enum ...
+	* m68k-tdep.h: ... to this new file and rename the constants from
+	E_* to M68K_*.  All uses changed.
+	* config/m68k/tm-m68k.h (D0_REGNUM, A0_REGNUM): Remove definitions.
+	* abug-rom.c: Include "m68k-tdep.h".  Use
+	M68K_D0_REGNUM/M68K_A0_REGNUM instead of D0_REGNUM/A0_REGNUM.
+	* cpu32bug-rom.c: Likewise.
+	* dbug-rom.c: Likewise.
+	* m68k-tdep.c: Likewise.
+	* m68klinux-nat.c: Likewise.
+	* remote-est.c: Likewise.
+	* rom68k-rom.c: Likewise.
+	* config/m68k/tm-linux.h: Likewise.
+
 2002-11-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* arm-tdep.c (arm_gdbarch_init): Remove old style non-generic

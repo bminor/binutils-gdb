@@ -683,6 +683,7 @@ kod_h = kod.h
 language_h = language.h
 linespec_h = linespec.h
 m2_lang_h = m2-lang.h
+m68k_tdep_h = m68k-tdep.h
 macroexp_h = macroexp.h
 macroscope_h = macroscope.h $(macrotab_h) $(symtab_h)
 macrotab_h = macrotab.h
@@ -1496,7 +1497,7 @@ ada-exp.tab.o: ada-exp.tab.c ada-lex.c ada-lang.h \
 
 a68v-nat.o: a68v-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 abug-rom.o: abug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
-	$(serial_h) $(regcache_h)
+	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 ada-lang.o: ada-lang.c $(gdb_string_h) $(demangle_h) $(defs_h) $(symtab_h) \
 	$(gdbtypes_h) $(gdbcmd_h) $(expression_h) $(parser_defs_h) \
 	$(language_h) $(c_lang_h) $(inferior_h) $(symfile_h) $(objfiles_h) \
@@ -1626,7 +1627,7 @@ cp-valprint.o: cp-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
 	$(demangle_h) $(annotate_h) $(gdb_string_h) $(c_lang_h) $(target_h) \
 	$(cp_abi_h)
 cpu32bug-rom.o: cpu32bug-rom.c $(defs_h) $(gdbcore_h) $(target_h) \
-	$(monitor_h) $(serial_h) $(regcache_h)
+	$(monitor_h) $(serial_h) $(regcache_h) $(m68k_tdep_h)
 cris-tdep.o: cris-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(inferior_h) \
 	$(gdbtypes_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(value_h) \
 	$(opcode_cris_h) $(arch_utils_h) $(regcache_h) $(symfile_h) \
@@ -1639,7 +1640,7 @@ d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(sim_regno_h)
 # OBSOLETE d30v-tdep.o: d30v-tdep.c
 dbug-rom.o: dbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
-	$(serial_h) $(regcache_h)
+	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 dbxread.o: dbxread.c $(defs_h) $(gdb_string_h) $(gdb_obstack_h) \
 	$(gdb_stat_h) $(symtab_h) $(breakpoint_h) $(target_h) $(gdbcore_h) \
 	$(libaout_h) $(symfile_h) $(objfiles_h) $(buildsym_h) $(stabsread_h) \
@@ -1892,10 +1893,10 @@ m68hc11-tdep.o: m68hc11-tdep.c $(defs_h) $(frame_h) $(symtab_h) \
 m68k-stub.o: m68k-stub.c
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbcore_h) \
 	$(value_h) $(gdb_string_h) $(inferior_h) $(regcache_h) \
-	$(arch_utils_h) $(gregset_h)
+	$(arch_utils_h) $(gregset_h) $(m68k_tdep_h)
 m68klinux-nat.o: m68klinux-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(language_h) $(gdbcore_h) $(regcache_h) $(gdb_stat_h) \
-	$(floatformat_h) $(target_h) $(gregset_h)
+	$(floatformat_h) $(target_h) $(gregset_h) $(m68k_tdep_h)
 m68klinux-tdep.o: m68klinux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(target_h)
 m68knbsd-nat.o: m68knbsd-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
@@ -2062,7 +2063,7 @@ remote-es.o: remote-es.c $(defs_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(target_h) $(command_h) $(symfile_h) $(remote_utils_h) $(gdbcore_h) \
 	$(serial_h) $(regcache_h) $(value_h)
 remote-est.o: remote-est.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
-	$(serial_h) $(regcache_h)
+	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 remote-hms.o: remote-hms.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h)
 remote-mips.o: remote-mips.c $(defs_h) $(inferior_h) $(bfd_h) $(symfile_h) \
@@ -2119,7 +2120,7 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(event_loop_h) $(event_top_h) $(inf_loop_h) $(serial_h) \
 	$(gdbcore_h)
 rom68k-rom.o: rom68k-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
-	$(serial_h) $(regcache_h) $(value_h)
+	$(serial_h) $(regcache_h) $(value_h) $(m68k_tdep_h)
 rs6000-nat.o: rs6000-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(xcoffsolib_h) $(symfile_h) $(objfiles_h) $(libbfd_h) $(bfd_h) \
 	$(gdb_stabs_h) $(regcache_h) $(arch_utils_h) $(language_h) \

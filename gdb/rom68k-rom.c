@@ -27,6 +27,8 @@
 #include "regcache.h"
 #include "value.h"
 
+#include "m68k-tdep.h"
+
 static void rom68k_open (char *args, int from_tty);
 
 /* Return true if C is a hex digit.
@@ -129,13 +131,13 @@ rom68k_supply_register (char *regname, int regnamelen, char *val, int vallen)
       case 'D':
 	if (regname[1] != 'R')
 	  break;
-	regno = D0_REGNUM;
+	regno = M68K_D0_REGNUM;
 	numregs = 8;
 	break;
       case 'A':
 	if (regname[1] != 'R')
 	  break;
-	regno = A0_REGNUM;
+	regno = M68K_A0_REGNUM;
 	numregs = 7;
 	break;
       }

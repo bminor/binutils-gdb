@@ -21,6 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "regcache.h"
+#include "m68k-tdep.h"
 
 /* Number of traps that happen between exec'ing the shell to run an
    inferior, and when we finally get to the inferior code.  This is 2
@@ -46,7 +47,7 @@
 				    VALBUF);				\
     }									\
   else if (TYPE_CODE (TYPE) == TYPE_CODE_PTR)				\
-    memcpy (VALBUF, (char *) (REGBUF) + REGISTER_BYTE (A0_REGNUM),	\
+    memcpy (VALBUF, (char *) (REGBUF) + REGISTER_BYTE (M68K_A0_REGNUM),	\
 	    TYPE_LENGTH (TYPE));					\
   else									\
     memcpy (VALBUF,							\
@@ -64,15 +65,15 @@
     {									\
       char raw_buffer[REGISTER_RAW_SIZE (FP0_REGNUM)];			\
       REGISTER_CONVERT_TO_RAW (TYPE, FP0_REGNUM, VALBUF, raw_buffer);	\
-      deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),			\
-			    raw_buffer, TYPE_LENGTH (TYPE));		\
+      deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),	\
+				       raw_buffer, TYPE_LENGTH (TYPE));	\
     }									\
   else									\
     {									\
       if (TYPE_CODE (TYPE) == TYPE_CODE_PTR)				\
-	deprecated_write_register_bytes (REGISTER_BYTE (A0_REGNUM), VALBUF,	\
-			      TYPE_LENGTH (TYPE));			\
-      deprecated_write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE));		\
+	deprecated_write_register_bytes (REGISTER_BYTE (M68K_A0_REGNUM), VALBUF, \
+					 TYPE_LENGTH (TYPE));		\
+      deprecated_write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE));	\
     }									\
 }
 
@@ -85,7 +86,7 @@
 
 #undef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
 #define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  (*(CORE_ADDR *)((char *) (REGBUF) + REGISTER_BYTE (A0_REGNUM)))
+  (*(CORE_ADDR *)((char *) (REGBUF) + REGISTER_BYTE (M68K_A0_REGNUM)))
 
 /* Offsets (in target ints) into jmp_buf.  */
 

@@ -28,6 +28,8 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "arch-utils.h"
+
+#include "m68k-tdep.h"
 
 
 #define P_LINKL_FP	0x480e
@@ -42,29 +44,6 @@
 #define P_FMOVM		0xf237
 #define P_TRAP		0x4e40
 
-
-/* Register numbers of various important registers.
-   Note that some of these values are "real" register numbers,
-   and correspond to the general registers of the machine,
-   and some are "phony" register numbers which are too large
-   to be actual register numbers as far as the user is concerned
-   but do serve to get the desired values when passed to read_register.  */
-
-/* Note: Since they are used in files other than this (monitor files), 
-   D0_REGNUM and A0_REGNUM are currently defined in tm-m68k.h.  */
-
-enum
-{
-  E_A1_REGNUM = 9,
-  E_FP_REGNUM = 14,		/* Contains address of executing stack frame */
-  E_SP_REGNUM = 15,		/* Contains address of top of stack */
-  E_PS_REGNUM = 16,		/* Contains processor status */
-  E_PC_REGNUM = 17,		/* Contains program counter */
-  E_FP0_REGNUM = 18,		/* Floating point register 0 */
-  E_FPC_REGNUM = 26,		/* 68881 control register */
-  E_FPS_REGNUM = 27,		/* 68881 status register */
-  E_FPI_REGNUM = 28
-};
 
 #define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
 #define REGISTER_BYTES_NOFP (16*4 + 8)
@@ -162,13 +141,14 @@ m68k_register_virtual_type (int regnum)
   if (regnum >= FP0_REGNUM && regnum <= FP0_REGNUM + 7)
     return builtin_type_m68881_ext;
 
-  if (regnum == E_FPI_REGNUM || regnum == PC_REGNUM)
+  if (regnum == M68K_FPI_REGNUM || regnum == PC_REGNUM)
     return builtin_type_void_func_ptr;
 
-  if (regnum == E_FPC_REGNUM || regnum == E_FPS_REGNUM || regnum == PS_REGNUM)
+  if (regnum == M68K_FPC_REGNUM || regnum == M68K_FPS_REGNUM
+      || regnum == PS_REGNUM)
     return builtin_type_int32;
 
-  if (regnum >= A0_REGNUM && regnum <= A0_REGNUM + 7)
+  if (regnum >= M68K_A0_REGNUM && regnum <= M68K_A0_REGNUM + 7)
     return builtin_type_void_data_ptr;
 
   return builtin_type_int32;
@@ -210,8 +190,8 @@ m68k_stack_align (CORE_ADDR addr)
 static int
 m68k_register_byte (int regnum)
 {
-  if (regnum >= E_FPC_REGNUM)
-    return (((regnum - E_FPC_REGNUM) * 4) + 168);
+  if (regnum >= M68K_FPC_REGNUM)
+    return (((regnum - M68K_FPC_REGNUM) * 4) + 168);
   else if (regnum >= FP0_REGNUM)
     return (((regnum - FP0_REGNUM) * 12) + 72);
   else
@@ -224,7 +204,7 @@ m68k_register_byte (int regnum)
 static void
 m68k_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
-  write_register (E_A1_REGNUM, addr);
+  write_register (M68K_A1_REGNUM, addr);
 }
 
 /* Extract from an array regbuf containing the (raw) register state
@@ -276,10 +256,10 @@ m68k_store_return_value (struct type *type, char *valbuf)
 static CORE_ADDR
 m68k_frame_chain (struct frame_info *thisframe)
 {
-  if ((get_frame_type (thisframe) == SIGTRAMP_FRAME))
+  if (get_frame_type (thisframe) == SIGTRAMP_FRAME)
     return thisframe->frame;
-  else if (!inside_entry_file ((thisframe)->pc))
-    return read_memory_integer ((thisframe)->frame, 4);
+  else if (!inside_entry_file (thisframe->pc))
+    return read_memory_integer (thisframe->frame, 4);
   else
     return 0;
 }
@@ -291,7 +271,7 @@ m68k_frame_chain (struct frame_info *thisframe)
 static int
 m68k_frameless_function_invocation (struct frame_info *fi)
 {
-  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
+  if (get_frame_type (fi) == SIGTRAMP_FRAME)
     return 0;
   else
     return frameless_look_for_prologue (fi);
@@ -300,7 +280,7 @@ m68k_frameless_function_invocation (struct frame_info *fi)
 static CORE_ADDR
 m68k_frame_saved_pc (struct frame_info *frame)
 {
-  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
+  if (get_frame_type (frame) == SIGTRAMP_FRAME)
     {
       if (frame->next)
 	return read_memory_integer (frame->next->frame + SIG_PC_FP_OFFSET, 4);
@@ -349,7 +329,7 @@ delta68_frame_args_address (struct frame_info *frame_info)
 {
   /* we assume here that the only frameless functions are the system calls
      or other functions who do not put anything on the stack. */
-  if ((get_frame_type (frame_info) == SIGTRAMP_FRAME))
+  if (get_frame_type (frame_info) == SIGTRAMP_FRAME)
     return frame_info->frame + 12;
   else if (frameless_look_for_prologue (frame_info))
     {
@@ -868,14 +848,14 @@ supply_fpregset (fpregset_t *fpregsetp)
   register int regi;
   char *from;
 
-  for (regi = FP0_REGNUM; regi < E_FPC_REGNUM; regi++)
+  for (regi = FP0_REGNUM; regi < M68K_FPC_REGNUM; regi++)
     {
       from = (char *) &(fpregsetp->f_fpregs[regi - FP0_REGNUM][0]);
       supply_register (regi, from);
     }
-  supply_register (E_FPC_REGNUM, (char *) &(fpregsetp->f_pcr));
-  supply_register (E_FPS_REGNUM, (char *) &(fpregsetp->f_psr));
-  supply_register (E_FPI_REGNUM, (char *) &(fpregsetp->f_fpiaddr));
+  supply_register (M68K_FPC_REGNUM, (char *) &(fpregsetp->f_pcr));
+  supply_register (M68K_FPS_REGNUM, (char *) &(fpregsetp->f_psr));
+  supply_register (M68K_FPI_REGNUM, (char *) &(fpregsetp->f_fpiaddr));
 }
 
 /*  Given a pointer to a floating point register set in /proc format
@@ -890,7 +870,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
   char *to;
   char *from;
 
-  for (regi = FP0_REGNUM; regi < E_FPC_REGNUM; regi++)
+  for (regi = FP0_REGNUM; regi < M68K_FPC_REGNUM; regi++)
     {
       if ((regno == -1) || (regno == regi))
 	{
@@ -899,17 +879,17 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
-  if ((regno == -1) || (regno == E_FPC_REGNUM))
+  if ((regno == -1) || (regno == M68K_FPC_REGNUM))
     {
-      fpregsetp->f_pcr = *(int *) &deprecated_registers[REGISTER_BYTE (E_FPC_REGNUM)];
+      fpregsetp->f_pcr = *(int *) &deprecated_registers[REGISTER_BYTE (M68K_FPC_REGNUM)];
     }
-  if ((regno == -1) || (regno == E_FPS_REGNUM))
+  if ((regno == -1) || (regno == M68K_FPS_REGNUM))
     {
-      fpregsetp->f_psr = *(int *) &deprecated_registers[REGISTER_BYTE (E_FPS_REGNUM)];
+      fpregsetp->f_psr = *(int *) &deprecated_registers[REGISTER_BYTE (M68K_FPS_REGNUM)];
     }
-  if ((regno == -1) || (regno == E_FPI_REGNUM))
+  if ((regno == -1) || (regno == M68K_FPI_REGNUM))
     {
-      fpregsetp->f_fpiaddr = *(int *) &deprecated_registers[REGISTER_BYTE (E_FPI_REGNUM)];
+      fpregsetp->f_fpiaddr = *(int *) &deprecated_registers[REGISTER_BYTE (M68K_FPI_REGNUM)];
     }
 }
 
@@ -1045,11 +1025,11 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, 29);
   set_gdbarch_register_bytes_ok (gdbarch, m68k_register_bytes_ok);
   set_gdbarch_register_bytes (gdbarch, (16 * 4 + 8 + 8 * 12 + 3 * 4));
-  set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, E_FP_REGNUM);
-  set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
-  set_gdbarch_ps_regnum (gdbarch, E_PS_REGNUM);
-  set_gdbarch_fp0_regnum (gdbarch, E_FP0_REGNUM);
+  set_gdbarch_sp_regnum (gdbarch, M68K_SP_REGNUM);
+  set_gdbarch_fp_regnum (gdbarch, M68K_FP_REGNUM);
+  set_gdbarch_pc_regnum (gdbarch, M68K_PC_REGNUM);
+  set_gdbarch_ps_regnum (gdbarch, M68K_PS_REGNUM);
+  set_gdbarch_fp0_regnum (gdbarch, M68K_FP0_REGNUM);
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
