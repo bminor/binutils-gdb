@@ -1,3 +1,38 @@
+Wed May  4 11:09:53 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	Changed m68k-aout to set flags to 0; m68k-sunos still uses 1.
+	* aout0.c: New file.
+	* targets.c (aout0_big_vec): Declare.
+	(bfd_target_vector): Add aout0_big_vec.
+	* config.bfd (m68*-*-aout*): Use m68k-0aout, not m68k-aout.
+	* config/m68k-aout.mt (SELECT_VECS): Removed.
+	* config/m68k-0aout.mt: New file.
+	* configure.in (aout0_big_vec): New target vector: use aout0.o,
+	aout32.o and stab-syms.o.
+	* Makefile.in: Rebuilt dependencies.
+	(BFD32_BACKENDS): Add aout0.o.
+	(CFILES): Add aout0.c.
+
+	* libaout.h (struct aout_backend_data): Add field exec_hdr_flags.
+	* aout-target.h (MY_exec_hdr_flags): If not defined, define as 0.
+	MY(backend_data): Initialize exec_hdr_flags field.
+	* aoutf1.h (sunos_32_set_arch_mach): Make static.
+	(aout32_sunos4_write_object_contents): Set flags from backend
+	info.
+	(MY_exec_hdr_flags): If not defined, define as 1.
+	(sunos4_aout_backend): Initialize exec_hdr_flags field.
+	* aout-encap.c (encap_write_object_contents): Set flags from
+	backend info.
+	(MY_exec_hdr_flags): Define as N_FLAGS_COFF_ENCAPSULATE.
+	* hp300hpux.c (MY_exec_hdr_flags): Define as 0x2.
+	(MY(write_object_contents)): Set flags from backend info.
+	* i386aout.c (MY(backend_data)): Initialize exec_hdr_flags field.
+	* i386mach3.c (MY(backend_data)): Likewise.
+	* mipsbsd.c (MY(backend_data)): Likewise.
+	* sparclynx.c (NAME(aout,sparclynx_write_object_contents)): Set
+	flags from backend info.
+	(sparclynx_aout_backend): Initialize exec_hdr_flags field.
+
 Wed May  4 02:56:00 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* config.bfd (i386-*-gnu*): Treat like i386-*-mach*.

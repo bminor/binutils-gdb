@@ -148,7 +148,7 @@ int need_coff_header;
     {
       need_coff_header = 1;
       /* set this flag now, since it will change the values of N_TXTOFF, etc */
-      N_SET_FLAGS (outheader, N_FLAGS_COFF_ENCAPSULATE);
+      N_SET_FLAGS (outheader, aout_backend_info (abfd)->exec_hdr_flags);
       text_size += sizeof (struct coffheader);
     }
 #endif
@@ -232,5 +232,6 @@ int need_coff_header;
 
 #define MY_write_object_content encap_write_object_contents
 #define MY_object_p encap_object_p
+#define MY_exec_hdr_flags N_FLAGS_COFF_ENCAPSULATE
 
 #include "aout-target.h"
