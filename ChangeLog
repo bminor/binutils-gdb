@@ -1,3 +1,9 @@
+Fri Nov  5 10:35:05 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* Makefile.in (taz): Only build "info" in DISTDOCDIRS.
+	(DISTDOCDIRS): Don't assume libg++ and gdb folks necessarily want
+	this now.
+
 Thu Nov  4 18:58:23 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.sub: Accept hiux* as an OS name.
