@@ -909,6 +909,13 @@ $prompt $" { pass "backtrace from call7h" }
 	timeout { fail "(timeout) backtrace from call7h" ; return }
     }
 
+    # monitor only allows 8 breakpoints; w89k board allows 10, so
+    # break them up into two groups.
+    delete_breakpoints
+    send "break call7i\n" ; expect -re ".*$prompt $"
+    send "break call7j\n" ; expect -re ".*$prompt $"
+    send "break call7k\n" ; expect -re ".*$prompt $"
+
     # Continue; should stop at call7i and print actual arguments.
     # Print backtrace.
 
@@ -936,13 +943,6 @@ $prompt $" { pass "backtrace from call7i" }
 	-re "$prompt $" { fail "backtrace from call7i" ; return }
 	timeout { fail "(timeout) backtrace from call7i" ; return }
     }
-
-    # monitor only allows 8 breakpoints; w89k board allows 10, so
-    # break them up into two groups.
-    delete_breakpoints
-    send "break call7i\n" ; expect -re ".*$prompt $"
-    send "break call7j\n" ; expect -re ".*$prompt $"
-    send "break call7k\n" ; expect -re ".*$prompt $"
 
     # Continue; should stop at call7j and print actual arguments.
     # Print backtrace.
