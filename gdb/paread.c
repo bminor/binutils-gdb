@@ -500,8 +500,7 @@ pa_symfile_offsets (objfile, addr)
   return section_offsets;
 }
 
-/* Register that we are able to handle SOM object file formats (does this
-   work for hp300, or just PA?  I suspect the latter).  */
+/* Register that we are able to handle SOM object file formats.  */
 
 static struct sym_fns pa_sym_fns =
 {
