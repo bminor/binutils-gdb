@@ -12,3 +12,13 @@ shlib_shlibcalled ()
 {
   return 5;
 }
+
+#ifdef DSO_DEFINE_TEST
+int
+visibility ()
+{
+  return 2;
+}
+
+int visibility_var = 2;
+#endif

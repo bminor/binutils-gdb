@@ -18,10 +18,28 @@ extern int (*shlib_getfunptr1 ()) ();
 extern int (*shlib_getfunptr2 ()) ();
 extern int shlib_check ();
 extern int shlib_shlibcall2 ();
-extern int visibility ();
 extern int visibility_check ();
 extern int visibility_checkfunptr ();
 extern void *visibility_funptr ();
+extern int visibility_checkvar ();
+extern int visibility_checkvarptr ();
+extern int visibility_varval ();
+extern void *visibility_varptr ();
+
+#ifdef HIDDEN_WEAK_TEST
+#define HIDDEN_UNDEF_TEST
+#define WEAK_TEST
+#endif
+
+#ifdef PROTECTED_WEAK_TEST
+#define PROTECTED_UNDEF_TEST
+#define WEAK_TEST
+#endif
+
+#ifndef WEAK_TEST
+extern int visibility ();
+extern int visibility_var;
+#endif
 
 #if !defined (HIDDEN_TEST) && defined (PROTECTED_TEST)
 int
@@ -35,11 +53,36 @@ main_visibility_check ()
 {
   return visibility_funptr () != visibility;
 }
+
+int visibility_var = 1;
+
+static int
+main_visibility_checkvar ()
+{
+  return visibility_varval () != visibility_var
+	 && visibility_varptr () != &visibility_var;
+}
 #else
 static int
 main_visibility_check ()
 {
+#ifdef WEAK_TEST
+  return visibility_funptr () == NULL;
+#else
   return visibility_funptr () == visibility;
+#endif
+}
+
+static int
+main_visibility_checkvar ()
+{
+#ifdef WEAK_TEST
+  return visibility_varval () == 0
+	 && visibility_varptr () == NULL;
+#else
+  return visibility_varval () == visibility_var
+	 && visibility_varptr () == &visibility_var;
+#endif
 }
 #endif
 
@@ -106,5 +149,10 @@ main ()
   printf ("visibility_checkfunptr () == %d\n",
 	  visibility_checkfunptr ());
   printf ("main_visibility_check () == %d\n", main_visibility_check ());
+  printf ("visibility_checkvar () == %d\n", visibility_checkvar ());
+  printf ("visibility_checkvarptr () == %d\n",
+	  visibility_checkvarptr ());
+  printf ("main_visibility_checkvar () == %d\n",
+	  main_visibility_checkvar ());
   return 0;
 }

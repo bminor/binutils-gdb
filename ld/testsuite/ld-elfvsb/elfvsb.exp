@@ -93,7 +93,17 @@ proc visibility_test { visibility progname testname main sh1 sh2 dat args } {
 	set shared "-bM:SRE -bE:$tmpdir/xcoff.exp"
     }
     if {![ld_simple_link $ld $tmpdir/$progname.so "$shared $shldflags $tmpdir/$sh1 $tmpdir/$sh2"]} {
-        fail "$testname"
+	if { [ string match $visibility "hidden_undef" ]
+	     && [regexp ".*/sh1.c.*: undefined reference to \`visibility\'" $link_output]
+	     && [regexp ".*/sh1.c.*: undefined reference to \`visibility_var\'" $link_output] } {
+    	    pass "$testname"
+	} else { if { [ string match $visibility "protected_undef" ]
+	     && [regexp ".*/sh1.c.*: undefined reference to \`visibility\'" $link_output]
+	     && [regexp ".*/sh1.c.*: undefined reference to \`visibility_var\'" $link_output] } {
+    	    pass "$testname"
+	} else {
+	    fail "$testname"
+	}}
     	return
     }
 
@@ -107,15 +117,22 @@ proc visibility_test { visibility progname testname main sh1 sh2 dat args } {
     }
     if ![ld_link $ld $tmpdir/$progname "-rpath $rpath $tmpdir/$main $tmpdir/$progname.so"] {
 	if { [ string match $visibility "hidden" ]
-	     && [string match "*/main.c*: undefined reference to \`visibility\'" $link_output] } {
+	     && [regexp ".*/main.c.*: undefined reference to \`visibility\'" $link_output]
+	     && [regexp ".*/main.c.*: undefined reference to \`visibility_var\'" $link_output] } {
+    	    pass "$testname"
+	} else { if { [ string match $visibility "hidden_undef_def" ]
+	     && [regexp ".*/main.c.*: undefined reference to \`visibility\'" $link_output]
+	     && [regexp ".*/main.c.*: undefined reference to \`visibility_var\'" $link_output] } {
     	    pass "$testname"
 	} else {
     	    fail "$testname"
-	}
+	}}
     	return
     }
 
-    if [ string match $visibility "hidden" ] {
+    if { [ string match $visibility "hidden" ]
+	 || [ string match $visibility "hidden_undef" ]
+	 || [ string match $visibility "protected_undef" ] } {
 	fail "$testname"
     }
 
@@ -159,11 +176,23 @@ proc visibility_run {visibility} {
 	set VSBCFLAG "-DHIDDEN_TEST"
     } else { if [ string match $visibility "hidden_normal" ] {
 	set VSBCFLAG "-DHIDDEN_NORMAL_TEST"
+    } else { if [ string match $visibility "hidden_undef" ] {
+	set VSBCFLAG "-DHIDDEN_UNDEF_TEST"
+    } else { if [ string match $visibility "hidden_undef_def" ] {
+	set VSBCFLAG "-DHIDDEN_UNDEF_TEST -DDSO_DEFINE_TEST"
+    } else { if [ string match $visibility "hidden_weak" ] {
+	set VSBCFLAG "-DHIDDEN_WEAK_TEST"
     } else { if [ string match $visibility "protected" ] {
 	set VSBCFLAG "-DPROTECTED_TEST"
+    } else { if [ string match $visibility "protected_undef" ] {
+	set VSBCFLAG "-DPROTECTED_UNDEF_TEST"
+    } else { if [ string match $visibility "protected_undef_def" ] {
+	set VSBCFLAG "-DPROTECTED_UNDEF_TEST -DDSO_DEFINE_TEST"
+    } else { if [ string match $visibility "protected_weak" ] {
+	set VSBCFLAG "-DPROTECTED_WEAK_TEST"
     } else {
 	set VSBCFLAG ""
-    }}}
+    }}}}}}}}}
 
     # Compile the main program.
     if ![ld_compile "$CC $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
@@ -289,7 +318,13 @@ verbose "Using $picflag to compile PIC code"
 
 visibility_run hidden
 visibility_run hidden_normal
+visibility_run hidden_undef
+visibility_run hidden_undef_def
+visibility_run hidden_weak
 visibility_run protected
+visibility_run protected_undef
+visibility_run protected_undef_def
+visibility_run protected_weak
 visibility_run normal
 
 if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {

@@ -1,3 +1,7 @@
+#ifndef NULL
+#define NULL ((void *) 0)
+#endif
+
 /* This is part of the shared library ld test.  This file becomes part
    of a shared library.  */
 
@@ -165,11 +169,25 @@ shlib_check ()
   return 1;
 }
 
+#ifdef HIDDEN_WEAK_TEST
+#define HIDDEN_UNDEF_TEST
+#define WEAK_TEST
+#endif
+
+#ifdef PROTECTED_WEAK_TEST
+#define PROTECTED_UNDEF_TEST
+#define WEAK_TEST
+#endif
+
+#if defined (HIDDEN_UNDEF_TEST) || defined (PROTECTED_UNDEF_TEST)
+extern int visibility ();
+#else
 int
 visibility ()
 {
   return 2;
 }
+#endif
 
 #ifdef HIDDEN_NORMAL_TEST
 asm (".hidden visibility_normal");
@@ -184,32 +202,121 @@ visibility_normal ()
 int
 visibility_checkfunptr ()
 {
+#ifdef WEAK_TEST
+  return 1;
+#else
 #ifdef HIDDEN_NORMAL_TEST
   int (*v) () = visibility_normal;
 #else
   int (*v) () = visibility;
 #endif
   return (*v) () == 2;
+#endif
 }
 
 int
 visibility_check ()
 {
+#ifdef WEAK_TEST
+  if (&visibility)
+    return visibility () == 1;
+  else
+    return 1;
+#else
 #ifdef HIDDEN_NORMAL_TEST
   return visibility_normal () == 2;
 #else
   return visibility () == 2;
+#endif
 #endif
 }
 
 void *
 visibility_funptr ()
 {
-  return visibility;
+#ifdef WEAK_TEST
+  if (&visibility == NULL)
+    return NULL;
+  else
+#endif
+    return visibility;
 }
 
-#ifdef HIDDEN_TEST
+#if defined (HIDDEN_UNDEF_TEST) || defined (PROTECTED_UNDEF_TEST)
+extern int visibility_var;
+#else
+int visibility_var = 2;
+#endif
+
+#ifdef HIDDEN_NORMAL_TEST
+asm (".hidden visibility_var_normal");
+
+int visibility_var_normal = 2;
+#endif
+
+int
+visibility_checkvarptr ()
+{
+#ifdef WEAK_TEST
+  if (&visibility_var)
+    return visibility_var == 1;
+  else
+    return 1;
+#else
+#ifdef HIDDEN_NORMAL_TEST
+  int *v = &visibility_var_normal;
+#else
+  int *v = &visibility_var;
+#endif
+  return *v == 2;
+#endif
+}
+
+int
+visibility_checkvar ()
+{
+#ifdef WEAK_TEST
+  return 1;
+#else
+#ifdef HIDDEN_NORMAL_TEST
+  return visibility_var_normal == 2;
+#else
+  return visibility_var == 2;
+#endif
+#endif
+}
+
+void *
+visibility_varptr ()
+{
+#ifdef WEAK_TEST
+  if (&visibility_var == NULL)
+    return NULL;
+  else
+#endif
+    return &visibility_var;
+}
+
+int
+visibility_varval ()
+{
+#ifdef WEAK_TEST
+  if (&visibility_var == NULL)
+    return 0;
+  else
+#endif
+    return visibility_var;
+}
+
+#if defined (HIDDEN_TEST) || defined (HIDDEN_UNDEF_TEST)
 asm (".hidden visibility");
+asm (".hidden visibility_var");
 #else
 asm (".protected visibility");
+asm (".protected visibility_var");
+#endif
+
+#ifdef WEAK_TEST
+asm (".weak visibility");
+asm (".weak visibility_var");
 #endif

@@ -17,3 +17,6 @@ shlib_check () == 1
 visibility_check () == 1
 visibility_checkfunptr () == 1
 main_visibility_check () == 1
+visibility_checkvar () == 1
+visibility_checkvarptr () == 1
+main_visibility_checkvar () == 1

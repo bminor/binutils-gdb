@@ -115,7 +115,8 @@ proc default_ld_link { ld target objects } {
 #
 proc default_ld_simple_link { ld target objects } {
     global host_triplet
-    
+    global link_output
+
     if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
 	return 0
@@ -125,8 +126,8 @@ proc default_ld_simple_link { ld target objects } {
     
     verbose -log "$ld $flags -o $target $objects"
     
-    catch "exec $ld $flags -o $target $objects" exec_output
-    set exec_output [prune_warnings $exec_output]
+    catch "exec $ld $flags -o $target $objects" link_output
+    set exec_output [prune_warnings $link_output]
 
     # We don't care if we get a warning about a non-existent start
     # symbol, since the default linker script might use ENTRY.

@@ -1,3 +1,18 @@
+2000-06-05  H.J. Lu  (hjl@gnu.org)
+
+	* lib/ld-lib.exp (default_ld_link): Redirect the linker output
+	to link_output and make it global.
+
+	* ld-elfvsb/elfvsb.exp (visibility_test): Add "hidden_undef",
+	"hidden_undef_def", "hidden_weak", "protected_undef",
+	"protected_undef_def" and "protected_weak".
+	(visibility_run): Likewise.
+	* ld-elfvsb/main.c: Likewise.
+	* ld-elfvsb/sh1.c: Likewise.
+	* ld-elfvsb/sh2.c: Likewise.
+
+	* ld-elfvsb/elfvsb.dat: Updated.
+
 2000-05-21  H.J. Lu  (hjl@gnu.org)
 
 	* ld-elfvsb/main.c (main_visibility_check): Fix the protected
