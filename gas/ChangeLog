@@ -1,3 +1,12 @@
+Fri Feb 14 18:09:59 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* config/tc-m68k.c (LOCAL_LABEL): Macro redefined if TE_DELTA.
+	(tc_canonicalize_symbol_name): Macro defined if TE_DELTA.
+ 	* config/obj-coff.c (obj_coff_def): Use
+	tc_canonicalize_symbol_name if defined.
+	(obj_coff_tag, obj_coff_val): Likewise.
+	* expr.c (operand): Reject '~' as operator if is_name_beginner.
+
 Fri Feb 14 17:24:48 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (do_align): Add max parameter.  Change all callers.
