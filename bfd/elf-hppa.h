@@ -1012,7 +1012,6 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
    The list will be deleted eventually.
 
    27210 R_PARISC_SEGREL32
-   791 R_PARISC_GPREL64
    772 R_PARISC_PLTOFF14DR
    386 R_PARISC_PLTOFF21L
    6 R_PARISC_LTOFF64
@@ -1151,6 +1150,14 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_DLTREL14DR:
     case R_PARISC_DLTREL14WR:
     case R_PARISC_DLTREL21L:
+    case R_PARISC_DPREL21L:
+    case R_PARISC_DPREL14WR:
+    case R_PARISC_DPREL14DR:
+    case R_PARISC_DPREL14R:
+    case R_PARISC_DPREL14F:
+    case R_PARISC_GPREL16F:
+    case R_PARISC_GPREL16WF:
+    case R_PARISC_GPREL16DF:
       {
 	/* Subtract out the global pointer value to make value a DLT
 	   relative address.  */
@@ -1159,9 +1166,14 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	/* All DLTREL relocations are basically the same at this point,
 	   except that we need different field selectors for the 21bit
 	   version vs the 14bit versions.  */
-	if (r_type == R_PARISC_DLTREL21L)
+	if (r_type == R_PARISC_DLTREL21L
+	    || r_type == R_PARISC_DPREL21L)
 	  value = hppa_field_adjust (value, addend, e_lrsel);
-	else if (r_type == R_PARISC_DLTREL14F)
+	else if (r_type == R_PARISC_DLTREL14F
+		 || r_type == R_PARISC_DPREL14F
+		 || r_type == R_PARISC_GPREL16F
+		 || r_type == R_PARISC_GPREL16WF
+		 || r_type == R_PARISC_GPREL16DF)
 	  value = hppa_field_adjust (value, addend, e_fsel);
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
@@ -1194,6 +1206,15 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_PARISC_DIR64:
+      bfd_put_64 (input_bfd, value + addend, hit_data);
+      return bfd_reloc_ok;
+
+    case R_PARISC_GPREL64:
+      /* Subtract out the global pointer value to make value a DLT
+	 relative address.  */
+      value -= _bfd_get_gp_value (output_bfd);
+      value += addend;
+
       bfd_put_64 (input_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
 
@@ -1326,6 +1347,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_LTOFF_FPTR21L:
     case R_PARISC_PCREL21L:
     case R_PARISC_LTOFF_TP21L:
+    case R_PARISC_DPREL21L:
       {
         int w;
 
@@ -1352,6 +1374,9 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_LTOFF_TP14R:
     case R_PARISC_LTOFF_TP14F:
     case R_PARISC_LTOFF_TP16F:
+    case R_PARISC_DPREL14R:
+    case R_PARISC_DPREL14F:
+    case R_PARISC_GPREL16F:
       {
         int w;
 
@@ -1374,6 +1399,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_PCREL16DF:
     case R_PARISC_LTOFF_TP14DR:
     case R_PARISC_LTOFF_TP16DF:
+    case R_PARISC_DPREL14DR:
+    case R_PARISC_GPREL16DF:
       {
         int w;
 
@@ -1402,6 +1429,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_PCREL16WF:
     case R_PARISC_LTOFF_TP14WR:
     case R_PARISC_LTOFF_TP16WF:
+    case R_PARISC_DPREL14WR:
+    case R_PARISC_GPREL16WF:
       {
         int w;
 
