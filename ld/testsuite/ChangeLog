@@ -1,3 +1,8 @@
+2000-07-24  H.J. Lu  (hjl@gnu.org)
+
+	* ld-elfvsb/elfvsb.exp: Add -g to $CC to get the location of
+	the undefined reference.
+
 2000-07-16  H.J. Lu  (hjl@gnu.org)
 
 	* ld-elfvsb/elfvsb.exp (support_protected): New variable. Check

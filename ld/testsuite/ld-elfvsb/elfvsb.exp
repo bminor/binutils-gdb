@@ -77,7 +77,7 @@ if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 set support_protected "no"
 
 if [istarget *-*-linux*] {
-    if [ld_compile "$CC $CFLAGS -DPROTECTED_CHECK" $srcdir/$subdir/main.c $tmpdir/main.o] {
+    if [ld_compile "$CC -g $CFLAGS -DPROTECTED_CHECK" $srcdir/$subdir/main.c $tmpdir/main.o] {
       if [ld_link $ld $tmpdir/main "$tmpdir/main.o"] {
 	catch "exec $tmpdir/main" support_protected
       }
@@ -206,7 +206,7 @@ proc visibility_run {visibility} {
     }}}}}}}}}
 
     # Compile the main program.
-    if ![ld_compile "$CC $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
+    if ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
 	unresolved "visibility ($visibility) (non PIC)"
 	unresolved "visibility ($visibility)"
     } else {
@@ -216,8 +216,8 @@ proc visibility_run {visibility} {
 	# will need to do more relocation work.  However, note that not
 	# using -fpic will cause some of the tests to return different
 	# results.
-	if { ![ld_compile "$CC $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
-	     || ![ld_compile "$CC $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
+	if { ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
+	     || ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
 	    unresolved "visibility ($visibility) (non PIC)"
 	} else { if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	    visibility_test $visibility vnp "visibility ($visibility) (nonPIC)" mainnp.o sh1np.o sh2np.o xcoff
@@ -254,8 +254,8 @@ proc visibility_run {visibility} {
 
 	# Now compile the code using -fpic.
 
-	if { ![ld_compile "$CC $CFLAGS $SHCFLAG $VSBCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o] 
-	    || ![ld_compile "$CC $CFLAGS $SHCFLAG $VSBCFLAG $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
+	if { ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o] 
+	    || ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
 	    unresolved "visibility ($visibility)"
 	} else {
 	    if { [ string match $visibility "protected" ]
@@ -276,7 +276,7 @@ proc visibility_run {visibility} {
     }
 
     # Now do the same tests again, but this time compile main.c PIC.
-    if ![ld_compile "$CC $CFLAGS $SHCFLAG $VSBCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/mainp.o] {
+    if ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/mainp.o] {
 	unresolved "visibility ($visibility) (PIC main, non PIC so)"
 	unresolved "visibility ($visibility) (PIC main)"
     } else {
