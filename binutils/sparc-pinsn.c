@@ -20,9 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
    $Log$
-   Revision 1.4  1991/05/22 01:17:48  rich
-   v9 stuff.
+   Revision 1.5  1991/05/22 01:40:35  rich
+   Oops.
 
+ * Revision 1.4  1991/05/22  01:17:48  rich
+ * v9 stuff.
+ *
  * Revision 1.3  1991/05/19  08:00:57  rich
  * Updated to relect a gdb change in sparc-opcode.h.
  *
@@ -129,7 +132,7 @@ union sparc_insn
 	unsigned int op2:3;
 	unsigned int p:1;
 	unsigned int DISP21:21;
-#define	disp21	branch.DISP21
+#define	disp21	branch2.DISP21
       } branch2;
 #endif /* NO_V9 */
 
