@@ -220,6 +220,7 @@ case "${target}" in
   mips64vr5900*-*-*)    target_makefile_frag=config/mt-r5900 ;;
 # end-sanitize-r5900
   powerpc-*-netware*)   target_makefile_frag=config/mt-netware ;;
+  *-*-linux-gnu)        target_makefile_frag=config/mt-linux ;;
 esac
 
 skipdirs=
