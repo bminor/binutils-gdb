@@ -1,4 +1,13 @@
+Fri Sep 26 12:48:18 1997  Mark Alexander  <marka@cygnus.com>
+
+	* interp.c: Allow Debug, DEPC, and EPC registers to be examined in GDB.
+
 Thu Sep 25 11:15:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gencode.c (print_igen_insn_models): Assume certain architectures
+ 	include all mips* instructions.
+	(print_igen_insn_format): Use data_size==-1 as marker for MIPS16
+ 	instruction.
 
 	* Makefile.in (tmp.igen): Add target. Generate igen input from
  	gencode file.

@@ -121,6 +121,7 @@ struct sim_state simulator;
 #define IntegerOverflow         (12)    /* Arithmetic overflow (IDT monitor raises SIGFPE) */
 #define Trap                    (13)
 #define FPE                     (15)
+#define DebugBreakPoint         (16)
 #define Watch                   (23)
 
 /* The following exception code is actually private to the simulator
@@ -231,6 +232,9 @@ static int register_widths[LAST_EMBED_REGNUM + 1];
 #define FCR31IDX (70)
 #define FCR31   (registers[FCR31IDX])   /* really a 32bit register */
 #define FCSR    (FCR31)
+#define Debug	(registers[86])
+#define DEPC	(registers[87])
+#define EPC	(registers[88])
 #define COCIDX  (LAST_EMBED_REGNUM + 2) /* special case : outside the normal range */
 
 /* The following are pseudonyms for standard registers */
@@ -242,6 +246,13 @@ static int register_widths[LAST_EMBED_REGNUM + 1];
 #define A3      (registers[7])
 #define SP      (registers[29])
 #define RA      (registers[31])
+
+
+/* Bits in the Debug register */
+#define Debug_DBD 0x80000000   /* Debug Branch Delay */
+#define Debug_DM  0x40000000   /* Debug Mode         */
+#define Debug_DBp 0x00000002   /* Debug Breakpoint indicator */
+
 
 
 /* start-sanitize-r5900 */
@@ -367,8 +378,6 @@ GPR_<type>(R,I) - return, as lvalue, the I'th <type> of general register R
 /* start-sanitize-r5900 */
 static ut_reg SA;        /* the shift amount register */
 /* end-sanitize-r5900 */
-
-static ut_reg EPC = 0; /* Exception PC */
 
 #if defined(HASFPU)
 /* Keep the current format state for each register: */
@@ -580,6 +589,7 @@ static unsigned int instruction_fetch_overflow = 0;
 #define simJALDELAYSLOT	(1 << 29) /* 1 = in jal delay slot */
 
 static unsigned int state = 0;
+static unsigned int dsstate;
 
 #define DELAYSLOT()     {\
                           if (state & simDELAYSLOT)\
@@ -596,6 +606,11 @@ static unsigned int state = 0;
                           state &= ~simDELAYSLOT;\
                           state |= simSKIPNEXT;\
                         }
+
+#define CANCELDELAYSLOT() {\
+                            dsstate = 0;\
+                            state &= ~(simDELAYSLOT | simJALDELAYSLOT);\
+                          }
 
 #define INDELAYSLOT()	((state & simDELAYSLOT) != 0)
 #define INJALDELAYSLOT() ((state & simJALDELAYSLOT) != 0)
@@ -2736,16 +2751,62 @@ SignalException (int exception,...)
 {
   int vector;
   SIM_DESC sd = &simulator;
+
+#ifdef DEBUG
+	callback->printf_filtered(callback,"DBG: SignalException(%d) IPC = 0x%s\n",exception,pr_addr(IPC));
+#endif /* DEBUG */
+
   /* Ensure that any active atomic read/modify/write operation will fail: */
   LLBIT = 0;
 
   switch (exception) {
     /* TODO: For testing purposes I have been ignoring TRAPs. In
        reality we should either simulate them, or allow the user to
-       ignore them at run-time. */
+       ignore them at run-time.
+       Same for SYSCALL */
     case Trap :
      sim_warning("Ignoring instruction TRAP (PC 0x%s)",pr_addr(IPC));
      break;
+
+    case SystemCall :
+      {
+        va_list ap;
+        unsigned int instruction;
+        unsigned int code;
+
+        va_start(ap,exception);
+        instruction = va_arg(ap,unsigned int);
+        va_end(ap);
+
+        code = (instruction >> 6) & 0xFFFFF;
+        
+        sim_warning("Ignoring instruction `syscall %d' (PC 0x%s)",
+                    code, pr_addr(IPC));
+      }
+     break;
+
+    case DebugBreakPoint :
+      if (! (Debug & Debug_DM))
+        {
+          if (INDELAYSLOT())
+            {
+              CANCELDELAYSLOT();
+              
+              Debug |= Debug_DBD;  /* signaled from within in delay slot */
+              DEPC = IPC - 4;      /* reference the branch instruction */
+            }
+          else
+            {
+              Debug &= ~Debug_DBD; /* not signaled from within a delay slot */
+              DEPC = IPC;
+            }
+        
+          Debug |= Debug_DM;            /* in debugging mode */
+          Debug |= Debug_DBp;           /* raising a DBp exception */
+          PC = 0xBFC00200;
+          sim_engine_restart (sd, STATE_CPU (sd, 0), NULL, NULL_CIA);
+        }
+      break;
 
     case ReservedInstruction :
      {
@@ -3964,7 +4025,7 @@ COP_LW(coproc_num,coproc_reg,memword)
   return;
 }
 
-static void
+static void UNUSED
 COP_LD(coproc_num,coproc_reg,memword)
      int coproc_num, coproc_reg;
      uword64 memword;
@@ -4026,7 +4087,7 @@ COP_SW(coproc_num,coproc_reg)
   return(value);
 }
 
-static uword64
+static uword64 UNUSED
 COP_SD(coproc_num,coproc_reg)
      int coproc_num, coproc_reg;
 {
@@ -4117,8 +4178,28 @@ decode_coproc(instruction)
 		break;
 		/* 14 = EPC                R4000   VR4100  VR4300 */
 		/* 15 = PRId               R4000   VR4100  VR4300 */
+#ifdef SUBTARGET_R3900
+                /* 16 = Debug */
+              case 16:
+                if (code == 0x00)
+                  GPR[rt] = Debug;
+                else
+                  Debug = GPR[rt];
+                break;
+#else
 		/* 16 = Config             R4000   VR4100  VR4300 */
+#endif
+#ifdef SUBTARGET_R3900
+                /* 17 = Debug */
+              case 17:
+                if (code == 0x00)
+                  GPR[rt] = DEPC;
+                else
+                  DEPC = GPR[rt];
+                break;
+#else
 		/* 17 = LLAddr             R4000   VR4100  VR4300 */
+#endif
 		/* 18 = WatchLo            R4000   VR4100  VR4300 */
 		/* 19 = WatchHi            R4000   VR4100  VR4300 */
 		/* 20 = XContext           R4000   VR4100  VR4300 */
@@ -4152,6 +4233,17 @@ decode_coproc(instruction)
 		SR &= ~status_EXL;
 	      }
 	  }
+        else if (code == 0x10 && (instruction & 0x3f) == 0x10)
+          {
+            /* RFE */
+          }
+        else if (code == 0x10 && (instruction & 0x3f) == 0x1F)
+          {
+            /* DERET */
+            Debug &= ~Debug_DM;
+            DELAYSLOT();
+            DSPC = DEPC;
+          }
 	else
 	  sim_warning("Unrecognised COP0 instruction 0x%08X at IPC = 0x%s : No handler present",instruction,pr_addr(IPC));
         /* TODO: When executing an ERET or RFE instruction we should
@@ -4206,7 +4298,6 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
     uword64 paddr;
     int cca;
     unsigned int instruction;	/* uword64? what's this used for?  FIXME! */
-    int dsstate = (state & simDELAYSLOT);
 
 #ifdef DEBUG
     {
@@ -4224,6 +4315,7 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
     }
 #endif /* DEBUG */
 
+    dsstate = (state & simDELAYSLOT);
 #ifdef DEBUG
     if (dsstate)
      callback->printf_filtered(callback,"DBG: DSPC = 0x%s\n",pr_addr(DSPC));
@@ -4386,7 +4478,7 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
       printf("DBG: dsstate set before instruction execution - updating PC to 0x%s\n",pr_addr(DSPC));
 #endif /* DEBUG */
       PC = DSPC;
-      state &= ~(simDELAYSLOT | simJALDELAYSLOT);
+      CANCELDELAYSLOT();
     }
 
     if (MIPSISA < 4) { /* The following is only required on pre MIPS IV processors: */
