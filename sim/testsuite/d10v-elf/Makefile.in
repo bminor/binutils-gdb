@@ -48,6 +48,8 @@ TESTS = \
 	t-rac.ok \
 	t-rachi.ok \
 	t-rep.ok \
+	t-rte.ok \
+	t-sp.ok \
 	t-sub2w.ok \
 	t-sub.ok \
 	t-subi.ok \
