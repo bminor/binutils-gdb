@@ -1,5 +1,15 @@
 2003-03-05  Andrew Cagney  <cagney@redhat.com>
 
+	* d10v-tdep.c (struct frame_extra_info): Delete unused structure.
+	(struct d10v_unwind_cache): Delete field "frameless".  Replace
+	"next_addr" with "sp_offset".  Add "r11_offset".
+	(d10v_frame_unwind_cache): Update.
+	(prologue_find_regs): Update.  When "mv r11, sp", save the
+	"sp_offset" in "r11_offset".  Recognize "st rn, @r11", note that
+	RN was saved in r11_offset.
+
+2003-03-05  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (deprecated_update_frame_pc_hack): Also update the the
 	cached PC value in the next frame.
 
