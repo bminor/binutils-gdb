@@ -1,3 +1,20 @@
+2003-02-05  Andrew Cagney  <ac131313@redhat.com>
+
+	Remove orphaned hosts, targets and files.
+	* config/i386/gdbserve.mt, config/m68k/nm-apollo68b.h: Delete.
+	* config/m68k/nm-hp300bsd.h, config/m68k/tm-apollo68b.h: Delete.
+	* config/m68k/tm-es1800.h, config/m68k/tm-hp300bsd.h: Delete.
+	* config/m68k/tm-mac.h, config/m68k/xm-apollo68b.h: Delete.
+	* config/pa/hpux1020.mt, config/pa/hpux11.mt: Delete.
+	* config/pa/hpux11w.mt, config/powerpc/gdbserve.mt: Delete.
+	* config/powerpc/ppcle-eabi.mt, config/powerpc/ppcle-sim.mt: Delete.
+	* config/powerpc/tm-ppc-sim.h, config/sparc/sp64sim.mt: Delete.
+	* config/sparc/tm-sp64sim.h: Delete.
+	* configure.host: Delete strongarm-*-*, xscale-*-*, and arm*-*-*
+	hosts.
+	* configure.tgt: Delete i[3456]86-*-sco3.2v4*, and
+	mips*-dec-mach3* targets.
+
 2003-02-04  Michael Chastain  <mec@shout.net>
 
 	* NEWS: Fix typo: sepcifying -> specifying.
