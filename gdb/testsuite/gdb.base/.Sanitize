@@ -97,6 +97,8 @@ regs.exp
 reread.exp
 reread1.c
 reread2.c
+restore.c
+restore.exp
 return.c
 return.exp
 run.c
