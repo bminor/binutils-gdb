@@ -295,10 +295,8 @@ frame_id_eq (struct frame_id l, struct frame_id r)
     /* The .stack and .code are identical, the ID's are identical.  */
     eq = 1;
   else
-    /* FIXME: cagney/2003-04-06: This should be zero.  Can't yet do
-       this because most frame ID's are not being initialized
-       correctly.  */
-    eq = 1;
+    /* No luck.  */
+    eq = 0;
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "{ frame_id_eq (l=");
@@ -1388,7 +1386,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	     using the same sequence as is found a traditional
 	     unwinder.  Once all architectures supply the
 	     unwind_dummy_id method, this code can go away.  */
-	  prev->this_id.value = frame_id_build (read_fp (), read_pc ());
+	  prev->this_id.value = frame_id_build (deprecated_read_fp (),
+						read_pc ());
 	}
 
       /* Check that the unwound ID is valid.  */
@@ -1543,8 +1542,9 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      DEPRECATED_INIT_EXTRA_FRAME_INFO, one possible scheme:
 
      SETUP_INNERMOST_FRAME(): Default version is just create_new_frame
-     (read_fp ()), read_pc ()).  Machines with extra frame info would
-     do that (or the local equivalent) and then set the extra fields.
+     (deprecated_read_fp ()), read_pc ()).  Machines with extra frame
+     info would do that (or the local equivalent) and then set the
+     extra fields.
 
      SETUP_ARBITRARY_FRAME(argc, argv): Only change here is that
      create_new_frame would no longer init extra frame info;

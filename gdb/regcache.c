@@ -1328,16 +1328,16 @@ regcache_collect (int regnum, void *buf)
 }
 
 
-/* read_pc, write_pc, read_sp, read_fp, etc.  Special handling for
-   registers PC, SP, and FP.  */
+/* read_pc, write_pc, read_sp, deprecated_read_fp, etc.  Special
+   handling for registers PC, SP, and FP.  */
 
 /* NOTE: cagney/2001-02-18: The functions generic_target_read_pc(),
    read_pc_pid(), read_pc(), generic_target_write_pc(),
    write_pc_pid(), write_pc(), generic_target_read_sp(), read_sp(),
-   generic_target_write_sp(), generic_target_read_fp() and read_fp(),
-   will eventually be moved out of the reg-cache into either
-   frame.[hc] or to the multi-arch framework.  The are not part of the
-   raw register cache.  */
+   generic_target_write_sp(), and deprecated_read_fp(), will
+   eventually be moved out of the reg-cache into either frame.[hc] or
+   to the multi-arch framework.  The are not part of the raw register
+   cache.  */
 
 /* This routine is getting awfully cluttered with #if's.  It's probably
    time to turn this into READ_PC and define it in the tm.h file.
@@ -1457,20 +1457,14 @@ generic_target_write_sp (CORE_ADDR val)
 }
 
 CORE_ADDR
-generic_target_read_fp (void)
+deprecated_read_fp (void)
 {
-#ifdef FP_REGNUM
-  if (FP_REGNUM >= 0)
-    return read_register (FP_REGNUM);
-#endif
-  internal_error (__FILE__, __LINE__,
-		  "generic_target_read_fp");
-}
-
-CORE_ADDR
-read_fp (void)
-{
-  return TARGET_READ_FP ();
+  if (DEPRECATED_TARGET_READ_FP_P ())
+    return DEPRECATED_TARGET_READ_FP ();
+  else if (DEPRECATED_FP_REGNUM >= 0)
+    return read_register (DEPRECATED_FP_REGNUM);
+  else
+    internal_error (__FILE__, __LINE__, "deprecated_read_fp");
 }
 
 /* ARGSUSED */

@@ -1,8 +1,9 @@
 /* Routines for name->symbol lookups in GDB.
    
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2003 Free Software Foundation, Inc.
 
-   Contributed by David Carlton <carlton@bactrian.org>.
+   Contributed by David Carlton <carlton@bactrian.org> and by Kealia,
+   Inc.
 
    This file is part of GDB.
 
@@ -86,17 +87,6 @@
    
 */
 
-/* NOTE: carlton/2002-09-20: Originally, I'd had each dictionary start
-   with a dict_type member, and had implemented the various functions
-   via big switch statements.  But that led to some really large
-   functions, and might cause problems in the future (e.g. if I were
-   to provide two different allocators for a single type that either
-   allocate using obstacks or using xfree(), then we'd have to expand
-   the number of dict_types to get dict_free() to work), so I'm going
-   with dict_vtbl instead.  I left the dict_type in the dict_vtbl,
-   but it's never used: it's just there to make debugging a bit
-   easier.  */
-
 /* An enum representing the various implementations of dictionaries.
    Used only for debugging.  */
 
@@ -161,10 +151,6 @@ struct dictionary_linear
   int nsyms;
   struct symbol **syms;
 };
-
-/* In this implementation, symbols are stored in an array that grows
-   as necessary.  Note: the entries are ordered so that its initial
-   segment matches dictionary_linear.  */
 
 struct dictionary_linear_expandable
 {
@@ -340,7 +326,7 @@ dict_create_hashed (struct obstack *obstack,
 		    const struct pending *symbol_list)
 {
   struct dictionary *retval;
-  int nsyms, nbuckets, i;
+  int nsyms = 0, nbuckets, i;
   struct symbol **buckets;
   const struct pending *list_counter;
 
@@ -348,11 +334,11 @@ dict_create_hashed (struct obstack *obstack,
   DICT_VTBL (retval) = &dict_hashed_vtbl;
 
   /* Calculate the number of symbols, and allocate space for them.  */
-  for (nsyms = 0, list_counter = symbol_list;
+  for (list_counter = symbol_list;
        list_counter != NULL;
-       nsyms += list_counter->nsyms, list_counter = list_counter->next)
+       list_counter = list_counter->next)
     {
-      /* EMPTY */ ;
+      nsyms += list_counter->nsyms;
     }
   nbuckets = DICT_HASHTABLE_SIZE (nsyms);
   DICT_HASHED_NBUCKETS (retval) = nbuckets;
@@ -404,7 +390,7 @@ dict_create_linear (struct obstack *obstack,
 		    const struct pending *symbol_list)
 {
   struct dictionary *retval;
-  int nsyms, i, j;
+  int nsyms = 0, i, j;
   struct symbol **syms;
   const struct pending *list_counter;
 
@@ -412,11 +398,11 @@ dict_create_linear (struct obstack *obstack,
   DICT_VTBL (retval) = &dict_linear_vtbl;
 
   /* Calculate the number of symbols, and allocate space for them.  */
-  for (nsyms = 0, list_counter = symbol_list;
+  for (list_counter = symbol_list;
        list_counter != NULL;
-       nsyms += list_counter->nsyms, list_counter = list_counter->next)
+       list_counter = list_counter->next)
     {
-      /* EMPTY */ ;
+      nsyms += list_counter->nsyms;
     }
   DICT_LINEAR_NSYMS (retval) = nsyms;
   syms = obstack_alloc (obstack, nsyms * sizeof (struct symbol *));
@@ -515,19 +501,9 @@ dict_iter_name_next (const char *name, struct dict_iterator *iterator)
     ->iter_name_next (name, iterator);
 }
  
-/* These are functions that are implemented generically by means of
-   the vtable.  Typically, they're rarely used.  */
-
-/* Lookup NAME in DICT.  */
-
-struct symbol *
-dict_lookup (const struct dictionary *dict,
-	     const char *name)
-{
-  struct dict_iterator iter;
-
-  return dict_iter_name_first (dict, name, &iter);
-}
+/* Now come functions (well, one function, currently) that are
+   implemented generically by means of the vtable.  Typically, they're
+   rarely used.  */
 
 /* Test to see if DICT is empty.  */
 
@@ -574,9 +550,6 @@ iterator_next_hashed (struct dict_iterator *iterator)
   const struct dictionary *dict = DICT_ITERATOR_DICT (iterator);
   struct symbol *next;
 
-  /* FIXME: carlton/2002-09-23: Should I gdb_assert that
-     DICT_ITERATOR_CURRENT (iterator) != NULL?  (Ditto for
-     iter_name_next_hashed.)  */
   next = DICT_ITERATOR_CURRENT (iterator)->hash_next;
   
   if (next == NULL)
@@ -626,7 +599,7 @@ iter_name_first_hashed (const struct dictionary *dict,
      either way, we have the right return value.  */
   
   for (sym = DICT_HASHED_BUCKET (dict, hash_index);
-       sym;
+       sym != NULL;
        sym = sym->hash_next)
     {
       /* Warning: the order of arguments to strcmp_iw matters!  */
@@ -647,7 +620,8 @@ iter_name_next_hashed (const char *name, struct dict_iterator *iterator)
   struct symbol *next;
 
   for (next = DICT_ITERATOR_CURRENT (iterator)->hash_next;
-       next; next = next->hash_next)
+       next != NULL;
+       next = next->hash_next)
     {
       if (strcmp_iw (SYMBOL_NATURAL_NAME (next), name) == 0)
 	break;

@@ -281,8 +281,9 @@ static reloc_howto_type howto_table[] = {
 #define SELECT_RELOC(x,howto) \
   { x.r_type = select_reloc (howto); }
 
-#define BADMAG(x) (H8300BADMAG (x) && H8300HBADMAG (x) && H8300SBADMAG (x))
-#define H8300 1			/* Customize coffcode.h */
+#define BADMAG(x) (H8300BADMAG (x) && H8300HBADMAG (x) && H8300SBADMAG (x) \
+				   && H8300HNBADMAG(x) && H8300SNBADMAG(x))
+#define H8300 1			/* Customize coffcode.h  */
 #define __A_MAGIC_SET__
 
 /* Code to swap in the reloc.  */

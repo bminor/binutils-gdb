@@ -614,7 +614,7 @@ v850_scan_prologue (CORE_ADDR pc, struct prologue_info *pi)
 
 #ifdef DEBUG
       printf_filtered ("0x%.8lx ", (long) current_pc);
-      TARGET_PRINT_INSN (current_pc, &tm_print_insn_info);
+      TARGET_PRINT_INSN (current_pc, &deprecated_tm_print_insn_info);
 #endif
 
       insn = read_memory_unsigned_integer (current_pc, 2);
@@ -1155,9 +1155,10 @@ v850_frame_init_saved_regs (struct frame_info *fi)
    be valid only if this routine uses FP.  For previous frames, fi-frame will
    always be correct (since that is derived from v850_frame_chain ()).
 
-   We can be called with the PC in the call dummy under two circumstances.
-   First, during normal backtracing, second, while figuring out the frame
-   pointer just prior to calling the target function (see run_stack_dummy).  */
+   We can be called with the PC in the call dummy under two
+   circumstances.  First, during normal backtracing, second, while
+   figuring out the frame pointer just prior to calling the target
+   function (see call_function_by_hand).  */
 
 static void
 v850_init_extra_frame_info (int fromleaf, struct frame_info *fi)
@@ -1214,7 +1215,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (v850_processor_type_table[i].mach == info.bfd_arch_info->mach)
 	{
 	  v850_register_names = v850_processor_type_table[i].regnames;
-	  tm_print_insn_info.mach = info.bfd_arch_info->mach;
+	  deprecated_tm_print_insn_info.mach = info.bfd_arch_info->mach;
 	  break;
 	}
     }
@@ -1225,7 +1226,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, E_NUM_REGS);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
   set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, E_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, E_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_register_name (gdbarch, v850_register_name);
   set_gdbarch_register_size (gdbarch, v850_reg_size);
@@ -1237,7 +1238,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, v850_reg_size);
   set_gdbarch_register_virtual_type (gdbarch, v850_reg_virtual_type);
 
-  set_gdbarch_read_fp (gdbarch, v850_target_read_fp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, v850_target_read_fp);
 
   /*
    * Frame Info
@@ -1295,6 +1296,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 void
 _initialize_v850_tdep (void)
 {
-  tm_print_insn = print_insn_v850;
+  deprecated_tm_print_insn = print_insn_v850;
   register_gdbarch_init (bfd_arch_v850, v850_gdbarch_init);
 }

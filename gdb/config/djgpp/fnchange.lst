@@ -232,6 +232,7 @@
 @V@/gdb/testsuite/gdb.c++/m-static1.cc @V@/gdb/testsuite/gdb.cxx/m-stat1.cc
 @V@/gdb/testsuite/gdb.c++/m-static.exp @V@/gdb/testsuite/gdb.cxx/m-static.exp
 @V@/gdb/testsuite/gdb.c++/m-static.h @V@/gdb/testsuite/gdb.cxx/m-static.h
+@V@/gdb/testsuite/gdb.c++/maint.exp @V@/gdb/testsuite/gdb.cxx/maint.exp
 @V@/gdb/testsuite/gdb.c++/member-ptr.cc @V@/gdb/testsuite/gdb.cxx/member-ptr.cc
 @V@/gdb/testsuite/gdb.c++/member-ptr.exp @V@/gdb/testsuite/gdb.cxx/member-ptr.exp
 @V@/gdb/testsuite/gdb.c++/method.cc @V@/gdb/testsuite/gdb.cxx/method.cc

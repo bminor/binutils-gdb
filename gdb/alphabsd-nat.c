@@ -113,7 +113,7 @@ fetch_inferior_registers (int regno)
     }
 
   /* Reset virtual frame pointer.  */
-  supply_register (FP_REGNUM, NULL);
+  supply_register (DEPRECATED_FP_REGNUM, NULL);
 }
 
 /* Store register REGNO back into the inferior.  If REGNO is -1, do

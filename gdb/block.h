@@ -119,6 +119,13 @@ struct block
 #define BLOCK_NAMESPACE(bl)   (bl)->language_specific.cplus_specific.namespace
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
 
+/* Macro to loop through all symbols in a block BL, in no particular
+   order.  ITER helps keep track of the iteration, and should be a
+   struct dict_iterator.  SYM points to the current symbol.  */
+
+#define ALL_BLOCK_SYMBOLS(block, iter, sym)			\
+	ALL_DICT_SYMBOLS (BLOCK_DICT (block), iter, sym)
+
 struct blockvector
 {
   /* Number of blocks in the list.  */

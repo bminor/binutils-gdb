@@ -390,7 +390,8 @@ get_namespace_objfile (void)
   if (namespace_objfile == NULL)
     {
       namespace_objfile = allocate_objfile (NULL, 0);
-      namespace_objfile->name = "<C++-namespaces>";
+      namespace_objfile->name
+	= mstrsave (namespace_objfile->md, "<C++-namespaces>");
     }
 
   return namespace_objfile;

@@ -1,3 +1,13 @@
+2003-04-22  Doug Evans  <dje@sebabeach.org>
+
+	* fr30-desc.c,fr30-desc.h,fr30-opc.c,fr30-opc.h: Regenerate.
+	* frv-desc.c,frv-desc.h,frv-opc.c,frv-opc.h: Regenerate.
+	* ip2k-desc.c,ip2k-desc.h,ip2k-opc.c,ip2k-opc.h: Regenerate.
+	* m32r-desc.c,m32r-desc.h,m32r-opc.c,m32r-opc.h: Regenerate.
+	* m32r-opinst.c: Regenerate.
+	* openrisc-desc.c,openrisc-desc.h,openrisc-opc.c,openrisc-opc.h: Regenerate.
+	* xstormy16-desc.c,xstormy16-desc.h,xstormy16-opc.c,xstormy16-opc.h: Regenerate.
+
 2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
 
 	* h8500-opc.c: Replace occurrances of 'Hitachi' with 'Renesas'.

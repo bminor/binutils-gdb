@@ -115,8 +115,6 @@ void _initialize_infcmd (void);
 
 #define GO_USAGE   "Usage: go <location>\n"
 
-static void breakpoint_auto_delete_contents (void *);
-
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error ("The program is not being run.");
 
@@ -950,112 +948,6 @@ signal_command (char *signum_exp, int from_tty)
   proceed (oursig == TARGET_SIGNAL_0 ? (CORE_ADDR) -1 : stop_pc, oursig, 0);
 }
 
-/* Call breakpoint_auto_delete on the current contents of the bpstat
-   pointed to by arg (which is really a bpstat *).  */
-
-static void
-breakpoint_auto_delete_contents (void *arg)
-{
-  breakpoint_auto_delete (*(bpstat *) arg);
-}
-
-
-/* Execute a "stack dummy", a piece of code stored in the stack
-   by the debugger to be executed in the inferior.
-
-   To call: first, do PUSH_DUMMY_FRAME.
-   Then push the contents of the dummy.  It should end with a breakpoint insn.
-   Then call here, passing address at which to start the dummy.
-
-   The contents of all registers are saved before the dummy frame is popped
-   and copied into the buffer BUFFER.
-
-   The dummy's frame is automatically popped whenever that break is hit.
-   If that is the first time the program stops, run_stack_dummy
-   returns to its caller with that frame already gone and returns 0.
-   
-   Otherwise, run_stack-dummy returns a non-zero value.
-   If the called function receives a random signal, we do not allow the user
-   to continue executing it as this may not work.  The dummy frame is poped
-   and we return 1.
-   If we hit a breakpoint, we leave the frame in place and return 2 (the frame
-   will eventually be popped when we do hit the dummy end breakpoint).  */
-
-int
-run_stack_dummy (CORE_ADDR addr, struct regcache *buffer)
-{
-  struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
-  int saved_async = 0;
-  struct breakpoint *bpt;
-  struct symtab_and_line sal;
-
-  /* Now proceed, having reached the desired place.  */
-  clear_proceed_status ();
-
-  init_sal (&sal);		/* initialize to zeroes */
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
-    {
-      sal.pc = CALL_DUMMY_ADDRESS ();
-    }
-  else
-    {
-      /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need to
-	 put a breakpoint instruction.  If not, the call dummy already
-	 has the breakpoint instruction in it.
-
-	 ADDR IS THE ADDRESS of the call dummy plus the
-	 CALL_DUMMY_START_OFFSET, so we need to subtract the
-	 CALL_DUMMY_START_OFFSET.  */
-      sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
-    }
-  sal.section = find_pc_overlay (sal.pc);
-  
-  {
-    /* Set up a frame ID for the dummy frame so we can pass it to
-       set_momentary_breakpoint.  We need to give the breakpoint a
-       frame ID so that the breakpoint code can correctly re-identify
-       the dummy breakpoint.  */
-    struct frame_id frame = frame_id_build (read_fp (), sal.pc);
-    /* Create a momentary breakpoint at the return address of the
-       inferior.  That way it breaks when it returns.  */
-    bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
-    bpt->disposition = disp_del;
-  }
-
-  /* If all error()s out of proceed ended up calling normal_stop (and
-     perhaps they should; it already does in the special case of error
-     out of resume()), then we wouldn't need this.  */
-  make_cleanup (breakpoint_auto_delete_contents, &stop_bpstat);
-
-  disable_watchpoints_before_interactive_call_start ();
-  proceed_to_finish = 1;	/* We want stop_registers, please... */
-
-  if (target_can_async_p ())
-    saved_async = target_async_mask (0);
-
-  proceed (addr, TARGET_SIGNAL_0, 0);
-
-  if (saved_async)
-    target_async_mask (saved_async);
-
-  enable_watchpoints_after_interactive_call_stop ();
-
-  discard_cleanups (old_cleanups);
-
-  /* We can stop during an inferior call because a signal is received. */
-  if (stopped_by_random_signal)
-    return 1;
-    
-  /* We may also stop prematurely because we hit a breakpoint in the
-     called routine. */
-  if (!stop_stack_dummy)
-    return 2;
-
-  /* On normal return, the stack dummy has been popped already.  */
-  regcache_cpy_no_passthrough (buffer, stop_registers);
-  return 0;
-}
-
 /* Proceed until we reach a different source line with pc greater than
    our current one or exit the function.  We skip calls in both cases.
 

@@ -26,8 +26,6 @@
 
 static reloc_howto_type *elf_i386_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void elf_i386_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static void elf_i386_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static bfd_boolean elf_i386_is_local_label_name
@@ -370,15 +368,6 @@ elf_i386_reloc_type_lookup (abfd, code)
 
   TRACE ("Unknown");
   return 0;
-}
-
-static void
-elf_i386_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *cache_ptr ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *dst ATTRIBUTE_UNUSED;
-{
-  abort ();
 }
 
 static void
@@ -3367,7 +3356,8 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
-#define elf_info_to_howto		      elf_i386_info_to_howto
+/* Support RELA for objdump of prelink objects.  */
+#define elf_info_to_howto		      elf_i386_info_to_howto_rel
 #define elf_info_to_howto_rel		      elf_i386_info_to_howto_rel
 
 #define bfd_elf32_mkobject		      elf_i386_mkobject

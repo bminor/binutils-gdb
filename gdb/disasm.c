@@ -24,8 +24,8 @@
 #include "value.h"
 #include "ui-out.h"
 #include "gdb_string.h"
-
 #include "disasm.h"
+#include "gdbcore.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -42,6 +42,28 @@ struct dis_line_entry
   CORE_ADDR start_pc;
   CORE_ADDR end_pc;
 };
+
+/* Like target_read_memory, but slightly different parameters.  */
+static int
+dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr, unsigned int len,
+		     disassemble_info *info)
+{
+  return target_read_memory (memaddr, (char *) myaddr, len);
+}
+
+/* Like memory_error with slightly different parameters.  */
+static void
+dis_asm_memory_error (int status, bfd_vma memaddr, disassemble_info *info)
+{
+  memory_error (status, memaddr);
+}
+
+/* Like print_address with slightly different parameters.  */
+static void
+dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
+{
+  print_address (addr, info->stream);
+}
 
 /* This variable determines where memory used for disassembly is read from. */
 int gdb_disassemble_from_exec = -1;
@@ -390,4 +412,22 @@ gdb_disassembly (struct ui_out *uiout,
 				  high, symtab, how_many, stb);
 
   gdb_flush (gdb_stdout);
+}
+
+
+/* FIXME: cagney/2003-04-28: This global deprecated_tm_print_insn_info
+   is going away.  */
+disassemble_info deprecated_tm_print_insn_info;
+
+extern void _initialize_disasm (void);
+
+void
+_initialize_disasm (void)
+{
+  INIT_DISASSEMBLE_INFO_NO_ARCH (deprecated_tm_print_insn_info, gdb_stdout,
+				 (fprintf_ftype)fprintf_filtered);
+  deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
+  deprecated_tm_print_insn_info.read_memory_func = dis_asm_read_memory;
+  deprecated_tm_print_insn_info.memory_error_func = dis_asm_memory_error;
+  deprecated_tm_print_insn_info.print_address_func = dis_asm_print_address;
 }

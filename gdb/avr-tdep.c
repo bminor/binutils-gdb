@@ -753,8 +753,8 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
     {
-      /* We need to setup fi->frame here because run_stack_dummy gets it wrong
-         by assuming it's always FP.  */
+      /* We need to setup fi->frame here because call_function_by_hand
+         gets it wrong by assuming it's always FP.  */
       deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi),
 									     AVR_PC_REGNUM));
     }
@@ -1145,14 +1145,14 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_read_pc (gdbarch, avr_read_pc);
   set_gdbarch_write_pc (gdbarch, avr_write_pc);
-  set_gdbarch_read_fp (gdbarch, avr_read_fp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, avr_read_fp);
   set_gdbarch_read_sp (gdbarch, avr_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, avr_write_sp);
 
   set_gdbarch_num_regs (gdbarch, AVR_NUM_REGS);
 
   set_gdbarch_sp_regnum (gdbarch, AVR_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, AVR_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, AVR_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, AVR_PC_REGNUM);
 
   set_gdbarch_register_name (gdbarch, avr_register_name);

@@ -623,9 +623,9 @@ if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
    
    Note: kevinb/2002-08-01: The definition below should faithfully
    reproduce the behavior of each of the REGISTER_VIRTUAL_TYPE
-   definitions found in config/mips/tm-*.h.  I'm concerned about
-   the ``FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM'' clause
-   though.  In some cases FP_REGNUM is in this range, and I doubt
+   definitions found in config/mips/tm-*.h.  I'm concerned about the
+   ``FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM'' clause though.
+   In some cases DEPRECATED_FP_REGNUM is in this range, and I doubt
    that this code is correct for the 64-bit case.  */
 
 static struct type *
@@ -5543,9 +5543,9 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* Reset the disassembly info, in case it was set to something
      non-default.  */
-  tm_print_insn_info.flavour = bfd_target_unknown_flavour;
-  tm_print_insn_info.arch = bfd_arch_unknown;
-  tm_print_insn_info.mach = 0;
+  deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
+  deprecated_tm_print_insn_info.arch = bfd_arch_unknown;
+  deprecated_tm_print_insn_info.mach = 0;
 
   elf_flags = 0;
 
@@ -5626,7 +5626,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   if (wanted_abi != MIPS_ABI_UNKNOWN)
     mips_abi = wanted_abi;
 
-  /* We have to set tm_print_insn_info before looking for a
+  /* We have to set deprecated_tm_print_insn_info before looking for a
      pre-existing architecture, otherwise we may return before we get
      a chance to set it up.  */
   if (mips_abi == MIPS_ABI_N32 || mips_abi == MIPS_ABI_N64)
@@ -5634,17 +5634,17 @@ mips_gdbarch_init (struct gdbarch_info info,
       /* Set up the disassembler info, so that we get the right
 	 register names from libopcodes.  */
       if (mips_abi == MIPS_ABI_N32)
-	tm_print_insn_info.disassembler_options = "gpr-names=n32";
+	deprecated_tm_print_insn_info.disassembler_options = "gpr-names=n32";
       else
-	tm_print_insn_info.disassembler_options = "gpr-names=64";
-      tm_print_insn_info.flavour = bfd_target_elf_flavour;
-      tm_print_insn_info.arch = bfd_arch_mips;
+	deprecated_tm_print_insn_info.disassembler_options = "gpr-names=64";
+      deprecated_tm_print_insn_info.flavour = bfd_target_elf_flavour;
+      deprecated_tm_print_insn_info.arch = bfd_arch_mips;
       if (info.bfd_arch_info != NULL
 	  && info.bfd_arch_info->arch == bfd_arch_mips
 	  && info.bfd_arch_info->mach)
-	tm_print_insn_info.mach = info.bfd_arch_info->mach;
+	deprecated_tm_print_insn_info.mach = info.bfd_arch_info->mach;
       else
-	tm_print_insn_info.mach = bfd_mach_mips8000;
+	deprecated_tm_print_insn_info.mach = bfd_mach_mips8000;
     }
   else
     /* This string is not recognized explicitly by the disassembler,
@@ -5652,7 +5652,7 @@ mips_gdbarch_init (struct gdbarch_info info,
        the bfd elf headers, such that, if the user overrides the ABI
        of a program linked as NewABI, the disassembly will follow the
        register naming conventions specified by the user.  */
-    tm_print_insn_info.disassembler_options = "gpr-names=32";
+    deprecated_tm_print_insn_info.disassembler_options = "gpr-names=32";
 
   if (gdbarch_debug)
     {
@@ -5880,7 +5880,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_name (gdbarch, mips_register_name);
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */
+  set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */
   set_gdbarch_read_sp (gdbarch, mips_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
@@ -6396,8 +6396,8 @@ _initialize_mips_tdep (void)
     internal_error (__FILE__, __LINE__, "mips_abi_strings out of sync");
 
   gdbarch_register (bfd_arch_mips, mips_gdbarch_init, mips_dump_tdep);
-  if (!tm_print_insn)		/* Someone may have already set it */
-    tm_print_insn = gdb_print_insn_mips;
+  if (!deprecated_tm_print_insn)	 /* Someone may have already set it */
+    deprecated_tm_print_insn = gdb_print_insn_mips;
 
   /* Add root prefix command for all "set mips"/"show mips" commands */
   add_prefix_cmd ("mips", no_class, set_mips_command,

@@ -1,3 +1,21 @@
+2003-04-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/signals.exp: Make backtrace tests more specific.
+
+2003-04-23  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/maint.exp (test_first_component): Add tests for
+	'operator' in more locations.
+
+2003-04-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/args.exp: Invoke gdb_load for simulator targets.
+
+2003-04-16  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/completion.exp: Make 'info func mark' complete on 'info
+        func marke' instead. Update test name.
+
 2003-04-30  David Carlton  <carlton@bactrian.org>
 
 	* gdb.c++/maint.exp (test_help): Refactor, and add test for maint

@@ -892,9 +892,10 @@ mn10300_frame_saved_pc (struct frame_info *fi)
    always be correct.  mn10300_analyze_prologue will fix fi->frame if
    it's not valid.
 
-   We can be called with the PC in the call dummy under two circumstances.
-   First, during normal backtracing, second, while figuring out the frame
-   pointer just prior to calling the target function (see run_stack_dummy).  */
+   We can be called with the PC in the call dummy under two
+   circumstances.  First, during normal backtracing, second, while
+   figuring out the frame pointer just prior to calling the target
+   function (see call_function_by_hand).  */
 
 static void
 mn10300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
@@ -1156,7 +1157,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_do_registers_info (gdbarch, mn10300_do_registers_info);
   set_gdbarch_sp_regnum (gdbarch, 8);
   set_gdbarch_pc_regnum (gdbarch, 9);
-  set_gdbarch_fp_regnum (gdbarch, 31);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 31);
   set_gdbarch_virtual_frame_pointer (gdbarch, mn10300_virtual_frame_pointer);
 
   /* Breakpoints.  */
@@ -1182,7 +1183,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* That's right, we're using the stack pointer as our frame pointer.  */
-  set_gdbarch_read_fp (gdbarch, generic_target_read_sp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, generic_target_read_sp);
 
   /* Calling functions in the inferior from GDB.  */
   set_gdbarch_call_dummy_words (gdbarch, mn10300_call_dummy_words);
@@ -1208,7 +1209,7 @@ _initialize_mn10300_tdep (void)
 {
 /*  printf("_initialize_mn10300_tdep\n"); */
 
-  tm_print_insn = print_insn_mn10300;
+  deprecated_tm_print_insn = print_insn_mn10300;
 
   register_gdbarch_init (bfd_arch_mn10300, mn10300_gdbarch_init);
 }

@@ -1,8 +1,9 @@
 /* Routines for name->symbol lookups in GDB.
    
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2003 Free Software Foundation, Inc.
 
-   Contributed by David Carlton <carlton@bactrian.org>.
+   Contributed by David Carlton <carlton@bactrian.org> and by Kealia,
+   Inc.
 
    This file is part of GDB.
 
@@ -20,6 +21,9 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
+
+#ifndef DICTIONARY_H
+#define DICTIONARY_H
 
 /* An opaque type for dictionaries; only dictionary.c should know
    about its innards.  */
@@ -68,21 +72,9 @@ extern struct dictionary *dict_create_linear (struct obstack *obstack,
 extern struct dictionary *dict_create_linear_expandable (void);
 
 
-/* The functions providing the interface to dictionaries.  */
-
-/* Search DICT for a symbol whose SYMBOL_BEST_NAME is NAME, as tested
-   using strcmp_iw.  Returns NULL if there is no such symbol.  If
-   there might be multiple such symbols, use dict_iter_name_first and
-   dict_iter_name_next.  */
-
-/* FIXME: carlton/2002-09-26: Given the presence of
-   dict_iter_name_first and dict_iter_name_next, should this function
-   go away?  Currently, it's never called, because all uses need the
-   additional flexibility provided by dict_iter_name_first and
-   dict_iter_name_next.  */
-
-extern struct symbol *dict_lookup (const struct dictionary *dict,
-				   const char *name);
+/* The functions providing the interface to dictionaries.  Note that
+   the most common parts of the interface, namely symbol lookup, are
+   only provided via iterator functions.  */
 
 /* Free the memory used by a dictionary that's not on an obstack.  (If
    any.)  */
@@ -98,15 +90,9 @@ extern void dict_add_symbol (struct dictionary *dict, struct symbol *sym);
 extern int dict_empty (struct dictionary *dict);
 
 /* A type containing data that is used when iterating over all symbols
-   in a dictionary.  */
-
-/* NOTE: carlton/2002-09-11: I originally wanted to make this opaque,
-   but that led to complications.  Fortunately, it turned out that all
-   implementations of dictionaries currently need to keep track of the
-   same types of data (though how they interpret that data varies
-   depending on the implementation), so it's really not so bad after
-   all.  But code outside of dictionary.c should never examine the
-   innards of a dict_iterator.  */
+   in a dictionary.  Don't ever look at its innards; this type would
+   be opaque if we didn't need to be able to allocate it on the
+   stack.  */
 
 struct dict_iterator
 {
@@ -163,7 +149,4 @@ extern struct symbol *dict_iter_name_next (const char *name,
 	     (sym);						\
 	     (sym) = dict_iterator_next (&(iter)))
 
-/* For backwards compatibility, I suppose.  */
-
-#define ALL_BLOCK_SYMBOLS(block, iter, sym)			\
-	ALL_DICT_SYMBOLS (BLOCK_DICT (block), iter, sym)
+#endif /* DICTIONARY_H */
