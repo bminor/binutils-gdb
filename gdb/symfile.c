@@ -324,6 +324,32 @@ alloc_section_addr_info (size_t num_sections)
   return sap;
 }
 
+
+/* Return a freshly allocated copy of ADDRS.  The section names, if
+   any, are also freshly allocated copies of those in ADDRS.  */
+struct section_addr_info *
+copy_section_addr_info (struct section_addr_info *addrs)
+{
+  struct section_addr_info *copy
+    = alloc_section_addr_info (addrs->num_sections);
+  int i;
+
+  copy->num_sections = addrs->num_sections;
+  for (i = 0; i < addrs->num_sections; i++)
+    {
+      copy->other[i].addr = addrs->other[i].addr;
+      if (addrs->other[i].name)
+        copy->other[i].name = xstrdup (addrs->other[i].name);
+      else
+        copy->other[i].name = NULL;
+      copy->other[i].sectindex = addrs->other[i].sectindex;
+    }
+
+  return copy;
+}
+
+
+
 /* Build (allocate and populate) a section_addr_info struct from
    an existing section table. */
 
@@ -772,7 +798,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
   struct objfile *objfile;
   struct partial_symtab *psymtab;
   char *debugfile;
-  struct section_addr_info *orig_addrs;
+  struct section_addr_info *orig_addrs = NULL;
   struct cleanup *my_cleanups;
   const char *name = bfd_get_filename (abfd);
 
@@ -790,14 +816,10 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
   objfile = allocate_objfile (abfd, flags);
   discard_cleanups (my_cleanups);
 
-  orig_addrs = alloc_section_addr_info (bfd_count_sections (abfd));
-  my_cleanups = make_cleanup (xfree, orig_addrs);
   if (addrs)
     {
-      int i;
-      orig_addrs->num_sections = addrs->num_sections;
-      for (i = 0; i < addrs->num_sections; i++)
-	orig_addrs->other[i] = addrs->other[i];
+      orig_addrs = copy_section_addr_info (addrs);
+      make_cleanup_free_section_addr_info (orig_addrs);
     }
 
   /* We either created a new mapped symbol table, mapped an existing

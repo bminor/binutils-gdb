@@ -198,6 +198,11 @@ extern struct objfile *symbol_file_add_from_bfd (bfd *, int,
 extern struct section_addr_info *alloc_section_addr_info (size_t
 							  num_sections);
 
+/* Return a freshly allocated copy of ADDRS.  The section names, if
+   any, are also freshly allocated copies of those in ADDRS.  */
+extern struct section_addr_info *(copy_section_addr_info 
+                                  (struct section_addr_info *addrs));
+
 /* Build (allocate and populate) a section_addr_info struct from an
    existing section table.  */
 

@@ -1,3 +1,18 @@
+2004-09-08  Jim Blandy  <jimb@redhat.com>
+
+        Fix bug reported and analyzed by Olivier Crete:
+	* symfile.c (copy_section_addr_info): New function.
+	(symbol_file_add_with_addrs_or_offsets): Use it to save the
+	original set of address arguments, instead of handwritten code
+	that uses one length to allocate and a different length to
+	initialize.  Use make_cleanup_free_section_addr_info.
+	* symfile.h (copy_section_addr_info): New declaration.
+	* utils.c: #include "symfile.h".
+	(do_free_section_addr_info, make_cleanup_free_section_addr_info):
+	New functions.
+	* defs.h (make_cleanup_free_section_addr_info): New declaration.
+	* Makefile.in (utils.o): Update dependencies.
+
 2004-09-08  Andrew Cagney  <cagney@gnu.org>
 
 	* thread-db.c (keep_thread_db): Delete.

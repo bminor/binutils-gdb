@@ -51,6 +51,7 @@
 #include "charset.h"
 #include "annotate.h"
 #include "filenames.h"
+#include "symfile.h"
 
 #include "inferior.h"		/* for signed_pointer_to_address */
 
@@ -259,6 +260,19 @@ make_cleanup_ui_file_delete (struct ui_file *arg)
 {
   return make_my_cleanup (&cleanup_chain, do_ui_file_delete, arg);
 }
+
+static void
+do_free_section_addr_info (void *arg)
+{
+  free_section_addr_info (arg);
+}
+
+struct cleanup *
+make_cleanup_free_section_addr_info (struct section_addr_info *addrs)
+{
+  return make_my_cleanup (&cleanup_chain, do_free_section_addr_info, addrs);
+}
+
 
 struct cleanup *
 make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
