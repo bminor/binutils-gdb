@@ -24,7 +24,7 @@ SIM_EXTRA_CLEAN = sh-clean
 
 ## COMMON_POST_CONFIG_FRAG
 
-interp.o: interp.c code.c table.c
+interp.o: interp.c code.c table.c ppi.c
 
 code.c: gencode
 	./gencode -x >code.c
@@ -33,6 +33,9 @@ code.c: gencode
 table.c: gencode
 	./gencode -s >table.c
 #	indent table.c
+
+ppi.c: gencode
+	./gencode -p >ppi.c
 
 gencode: gencode.c
 	$(CC_FOR_BUILD) -o gencode $(srcdir)/gencode.c
