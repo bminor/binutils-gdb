@@ -1,3 +1,13 @@
+Mon Mar 10 12:27:47 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* symtab.h (INIT_SAL): New macro to initialize symtab_and_line, 
+	to insure consistant initialization of unused fields to zero.
+	* symtab.c: replace initializations of sals with new macro INIT_SAL.
+	* breakpoint.c: ditto.
+	* infrun.c: ditto.
+	* infcmd.c: ditto.
+	* source.c: add call to INIT_SAL macro.
+
 Sat Mar  8 00:16:37 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* sparc-tdep.c (isbranch):  Always handle v9 branch instructions,
