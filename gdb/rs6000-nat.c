@@ -231,6 +231,7 @@ exec_one_dummy_insn ()
 
   char shadow_contents[BREAKPOINT_MAX];	/* Stash old bkpt addr contents */
   unsigned int status, pid;
+  CORE_ADDR prev_pc;
 
   /* We plant one dummy breakpoint into DUMMY_INSN_ADDR address. We assume that
      this address will never be executed again by the real code. */
@@ -244,6 +245,7 @@ exec_one_dummy_insn ()
      on.  However, rs6000-ibm-aix4.1.3 seems to have screwed this up --
      the inferior never hits the breakpoint (it's also worth noting
      powerpc-ibm-aix4.1.3 works correctly).  */
+  prev_pc = read_pc ();
   write_pc (DUMMY_INSN_ADDR);
   ptrace (PT_CONTINUE, inferior_pid, (PTRACE_ARG3_TYPE)1, 0, 0);
 
@@ -254,6 +256,7 @@ exec_one_dummy_insn ()
     pid = wait (&status);
   } while (pid != inferior_pid);
     
+  write_pc (prev_pc);
   target_remove_breakpoint (DUMMY_INSN_ADDR, shadow_contents);
 }
 
