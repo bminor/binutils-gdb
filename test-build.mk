@@ -43,7 +43,7 @@ CVS_TAG :=
 CVS_MODULE := latest
 
 ### Historically, this was identical to CVS_TAG.  This is changing.
-RELEASE_TAG := latest-921118
+RELEASE_TAG := latest-921217
 
 ### Historically, binaries were installed here.  This is changing.
 release_root := $(ROOTING)/$(RELEASE_TAG)
@@ -280,6 +280,9 @@ $(host)-stamp-stage1:
 $(host)-stamp-stage1-installed: $(host)-stamp-stage1-checked
 	cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" install host=$(host)
 	cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+ifeq ($(host),rs6000-ibm-aix)
+	rm $(relbindir)/make
+endif
 	touch $@
 
 $(host)-stamp-stage1-checked: $(host)-stamp-stage1-built
@@ -427,6 +430,7 @@ endif
 
 ### solaris 2 -- don't use /usr/ucb/cc
 ifeq (sparc-sun-solaris2,$(host))
+PARTIAL_HOLE_DIRS := /opt/cygnus/bin
 CC_HOLE	:= cc
 else
 CC_HOLE :=
@@ -449,6 +453,7 @@ PARTIAL_HOLES := \
 
 ### look in these directories for things missing from a three-stage
 HOLE_DIRS := \
+	$(HOLE_DIRS) \
 	/bin \
 	/usr/bin \
 	/usr/ucb \
@@ -459,7 +464,7 @@ HOLE_DIRS := \
 PARTIAL_HOLE_DIRS := \
 	/usr/latest/bin \
 	/usr/progressive/bin \
-	/opt/cygnus/bin \
+	$(PARTIAL_HOLE_DIRS) \
 	/usr/vintage/bin \
 	/usr/unsupported/bin
 
