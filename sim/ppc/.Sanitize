@@ -96,13 +96,17 @@ hw_cpu.c
 hw_cpu.h
 hw_disk.c
 hw_eeprom.c
+hw_glue.c
 hw_htab.c
+hw_ide.c
 hw_init.c
 hw_iobus.c
 hw_memory.c
 hw_nvram.c
+hw_opic.c
 hw_pal.c
-hw_pic.c
+hw_phb.c
+hw_phb.h
 hw_register.c
 hw_trace.c
 hw_vm.c
@@ -158,6 +162,8 @@ sim_calls.c
 std-config.h
 table.c
 table.h
+tree.c
+tree.h
 vm.c
 vm.h
 vm_n.h
