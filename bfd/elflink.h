@@ -3761,34 +3761,38 @@ elf_link_size_reloc_section (abfd, rel_hdr, o)
      asection *o;
 {
   register struct elf_link_hash_entry **p, **pend;
+  unsigned reloc_count;
 
-  /* We are overestimating the size required for the relocation
-     sections, in the case that we are using both REL and RELA
-     relocations for a single section.  In that case, RELOC_COUNT will
-     be the total number of relocations required, and we allocate
-     space for that many REL relocations as well as that many RELA
-     relocations.  This approximation is wasteful of disk space.
-     However, until we keep track of how many of each kind of
-     relocation is required, it's difficult to calculate the right
-     value.  */
-  rel_hdr->sh_size = rel_hdr->sh_entsize * o->reloc_count;
+  /* Figure out how many relocations there will be.  */
+  if (rel_hdr == &elf_section_data (o)->rel_hdr)
+    reloc_count = elf_section_data (o)->rel_count;
+  else
+    reloc_count = elf_section_data (o)->rel_count2;
+
+  /* That allows us to calculate the size of the section.  */
+  rel_hdr->sh_size = rel_hdr->sh_entsize * reloc_count;
 
   /* The contents field must last into write_object_contents, so we
      allocate it with bfd_alloc rather than malloc.  */
   rel_hdr->contents = (PTR) bfd_alloc (abfd, rel_hdr->sh_size);
   if (rel_hdr->contents == NULL && rel_hdr->sh_size != 0)
     return false;
+  
+  /* We only allocate one set of hash entries, so we only do it the
+     first time we are called.  */
+  if (elf_section_data (o)->rel_hashes == NULL)
+    {
+      p = ((struct elf_link_hash_entry **)
+	   bfd_malloc (o->reloc_count
+		       * sizeof (struct elf_link_hash_entry *)));
+      if (p == NULL && o->reloc_count != 0)
+	return false;
 
-  p = ((struct elf_link_hash_entry **)
-       bfd_malloc (o->reloc_count
-		   * sizeof (struct elf_link_hash_entry *)));
-  if (p == NULL && o->reloc_count != 0)
-    return false;
-
-  elf_section_data (o)->rel_hashes = p;
-  pend = p + o->reloc_count;
-  for (; p < pend; p++)
-    *p = NULL;
+      elf_section_data (o)->rel_hashes = p;
+      pend = p + o->reloc_count;
+      for (; p < pend; p++)
+	*p = NULL;
+    }
 
   return true;
 }
@@ -3997,6 +4001,30 @@ elf_bfd_final_link (abfd, info)
   if (! _bfd_elf_compute_section_file_positions (abfd, info))
     goto error_return;
 
+  /* Figure out how many relocations we will have in each section.
+     Just using RELOC_COUNT isn't good enough since that doesn't
+     maintain a separate value for REL vs. RELA relocations.  */
+  if (info->relocateable)
+    for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+      for (o = sub->sections; o != NULL; o = o->next)
+	{
+	  asection* output_section = o->output_section;
+
+	  if (output_section && (o->flags & SEC_RELOC) != 0)
+	    {
+	      struct bfd_elf_section_data *esdi 
+		= elf_section_data (o);
+	      struct bfd_elf_section_data *esdo 
+		= elf_section_data (output_section);
+
+	      esdo->rel_count += (esdi->rel_hdr.sh_size 
+				  / esdi->rel_hdr.sh_entsize);
+	      if (esdi->rel_hdr2)
+		esdo->rel_count2 += (esdi->rel_hdr2->sh_size 
+				     / esdi->rel_hdr2->sh_entsize);
+	    }
+	}
+
   /* That created the reloc sections.  Set their sizes, and assign
      them file positions, and allocate some buffers.  */
   for (o = abfd->sections; o != NULL; o = o->next)
@@ -4014,6 +4042,11 @@ elf_bfd_final_link (abfd, info)
 					       o))
 	    goto error_return;
 	}
+
+      /* Now, reset REL_COUNT and REL_COUNT2 so that we can use them
+	 to count upwards while actually outputting the relocations. */
+      elf_section_data (o)->rel_count = 0;
+      elf_section_data (o)->rel_count2 = 0;
     }
 
   _bfd_elf_assign_file_positions_for_relocs (abfd);
@@ -4249,6 +4282,9 @@ elf_bfd_final_link (abfd, info)
 	  for (e = elf_hash_table (info)->dynlocal; e ; e = e->next)
 	    {
 	      asection *s;
+
+	      sym.st_size = e->isym.st_size;
+	      sym.st_other = e->isym.st_other;
 
 	      /* Copy the internal symbol as is.
 		 Note that we saved a word of storage and overwrote
