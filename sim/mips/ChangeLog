@@ -1,4 +1,14 @@
-2002-02-10  Chris Demetriou  cgd@sibyte.com
+2002-02-10  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (DDIV, DIV, DIVU, DMULT, DMULTU, DSLL, DSLL32,
+	DSLLV, DSRA, DSRA32, DSRAV, DSRL, DSRL32, DSRLV, DSUB, DSUBU,
+	JALR, JR, MOVN, MOVZ, MTLO, MULT, MULTU, SLL, SLLV, SLT, SLTU,
+	SRAV, SRLV, SUB, SUBU, SYNC, XOR, MOVtf, DI, DMFC0, DMTC0, EI,
+	ERET, RFE, TLBP, TLBR, TLBWI, TLBWR): Tweak instruction opcode
+	fields (i.e., add and move commas) so that they more closely
+	match the MIPS ISA documentation opcode partitioning.
+
+2002-02-10  Chris Demetriou  <cgd@broadcom.com>
 
         * mips.igen (ADDI): Print immediate value.
         (BREAK): Print code.
