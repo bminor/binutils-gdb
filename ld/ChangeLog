@@ -1,3 +1,8 @@
+2001-02-20  H.J. Lu  <hjl@gnu.org>
+
+	* ldfile.c (ldfile_open_file): Set entry->search_dirs_flag to
+	false if we found the file.
+
 001-02-18  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.tgt: Add FreeBSD/Alpha, FreeBSD/x86-64, FreeBSD/ia64,
