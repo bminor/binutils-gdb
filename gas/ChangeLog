@@ -1,3 +1,63 @@
+Thu Mar 11 17:56:22 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (config.h): Create file, writing out definitions of
+	target cpu, alias, and canonical name.
+	(ALL_CFLAGS): No longer define TARGET_CPU.
+
+	* Makefile.in (check): Print a message, instead of quitting
+	silently.
+
+	* as.c (main): Don't catch any signals, for now.
+
+	* version.c: Deleted.
+	* Makefile.in: Generate it, putting in only the version number
+	itself.
+	(VERSION): New variable.
+	* as.c: Include config.h.
+	(main): Reformatted version string.  Include target alias.  Don't
+	print if not requested (i.e., unknown -v argument).
+
+	* as.c (stralloc): Deleted.
+	(main): Call strdup instead.
+
+	* configure.in: Handle all 68300 series chips.
+	* config/tc-m68k.c: Include config.h.
+	(md_assemble): Assume TARGET_CPU is defined.  Accept some 68300
+	series cpus as defaults.
+	(md_parse_option): Accept some m68300 series CPUs as defaults.
+
+Wed Mar 10 17:41:16 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* as.c (EXIT_SUCCESS, EXIT_FAILURE): Define to normal values if
+	not already defined.
+	(main, got_sig): Use them.
+	* config/ho-vms.h (EXIT_SUCCESS, EXIT_FAILURE): Reverse default
+	values.
+
+Tue Mar  9 07:40:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-ecoff.c, config/obj-ecoff.h: Preliminary ECOFF
+	support.
+
+	* config/tc-mips.h (TARGET_FORMAT): Define based on OBJ_AOUT vs.
+	OBJ_ECOFF as well as TARGET_BYTES_*_ENDIAN.
+	(struct loc, struct proc, struct file): Moved to tc-mips.c within
+	#ifndef OBJ_ECOFF block, since ECOFF uses different versions.
+	* config/tc-mips.c: Rearranged for ECOFF support.  Added
+	prototypes for all static functions.  Moved existing minimal
+	debugging format support info #ifndef OBJ_ECOFF blocks.
+	(macro_build_lui): Eliminated sign_extend argument, because ECOFF
+	does not support a non sign extended high 16 bits reloc.  Adjusted
+	all callers accordingly.
+	(tc_get_register): Renamed from get_register, and made non-static.
+
+	* config/mips-big.mt, config/mips-lit.mt: New files.  Define
+	TARGET_BYTES_BIG_ENDIAN and TARGET_BYTES_LITTLE_ENDIAN,
+	respectively.
+	* configure.in (mips-*-bsd*): Use gas_target mips-lit.
+	(mips-*-ultrix*, mips-*-irix*, mips-*-ecoff): New targets, using
+	obj_format ecoff and gas_target mips-lit or mips-big.
+
 Tue Mar  9 07:43:01 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* version.c: Bump to version 2.0.1.
