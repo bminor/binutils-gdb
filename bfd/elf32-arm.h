@@ -1732,6 +1732,31 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	return bfd_reloc_ok;
       }
 
+    case R_ARM_ALU_PCREL7_0:
+    case R_ARM_ALU_PCREL15_8:
+    case R_ARM_ALU_PCREL23_15:
+      {
+	bfd_vma insn;
+	bfd_vma relocation;
+
+	insn = bfd_get_32 (input_bfd, hit_data);
+#if USE_REL
+	/* Extract the addend.  */
+	addend = (insn & 0xff) << ((insn & 0xf00) >> 7);
+	signed_addend = addend;
+#endif
+	relocation = value + signed_addend;
+
+	relocation -= (input_section->output_section->vma
+		       + input_section->output_offset
+		       + rel->r_offset);
+	insn = (insn & ~0xfff)
+	       | ((howto->bitpos << 7) & 0xf00)
+	       | ((relocation >> howto->bitpos) & 0xff);
+	bfd_put_32 (input_bfd, value, hit_data);
+      }
+      return bfd_reloc_ok;
+
     case R_ARM_GNU_VTINHERIT:
     case R_ARM_GNU_VTENTRY:
       return bfd_reloc_ok;

@@ -1,3 +1,8 @@
+2004-03-31  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Add R_ARM_ALU*.
+	* elfarm-nabi.c (elf32_arm_howto_table): Ditto.
+
 2004-03-31  Andy Chittenden <achittenden@bluearc.com>
 
 	* stabs.c (struct stab_link_includes_totals): Rename field 'total'
