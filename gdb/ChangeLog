@@ -1,3 +1,7 @@
+2000-09-25  Andrew Cagney  <ac131313@cygnus.com>
+
+	* MAINTAINERS: Add Mark Kettenis to ``Blanket Write Privs'' list.
+
 2000-09-24  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* rs6000-tdep.c (rs6000_pop_frame):  Use PC_IN_CALL_DUMMY to test
