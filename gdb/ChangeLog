@@ -1,3 +1,21 @@
+2001-07-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386gnu-nat.c: Include "i387-nat.h".
+	(struct env387): Removed.
+	(reg_offset): Fix comment.
+	(fetch_fpregs): Use FCTRL_REGNUM and FOP_REGNUM instead of
+	FIRST_FPU_CONTROL_REGNUM and LAST_FPU_CONTROL_REGNUM.  Rewrite to
+	use i387_supply_fsave.
+	(gnu_fetch_registers): Remove spurious whitespace.
+	(convert_to_env387): Remove.
+	(store_fpregs): Add argument regno.  Use i387_fill_fsave instead
+	of convert_to_env387.
+	(gnu_store_registers): Remove spurious whitespace.  Pass REGNO to
+	store_fpregs.
+	* config/i386/i386gnu.mt (TDEPFILES): Add i387-tdep.o.
+	* config/i386/i386gnu.mh (XDEPFILES): Remove i387-tdep.o.
+	(NATDEPFILES): Add i387-nat.o.
+
 2001-07-22  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* Makefile.in (ALLDEPFILES): Add m68hc11-tdep.c.

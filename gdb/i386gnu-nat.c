@@ -25,8 +25,8 @@
 #include "regcache.h"
 
 #include "gdb_assert.h"
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include <mach.h>
 #include <mach_error.h>
@@ -34,31 +34,14 @@
 #include <mach/exception.h>
 
 #include "gnu-nat.h"
+#include "i387-nat.h"
 
-/* The FPU hardware state.  */
-struct env387
-{
-  unsigned short control;
-  unsigned short r0;
-  unsigned short status;
-  unsigned short r1;
-  unsigned short tag;
-  unsigned short r2;
-  unsigned long eip;
-  unsigned short code_seg;
-  unsigned short opcode;
-  unsigned long operand;
-  unsigned short operand_seg;
-  unsigned short r3;
-  unsigned char regs[8][10];
-};
 
-
 /* Offset to the thread_state_t location where REG is stored.  */
 #define REG_OFFSET(reg) offsetof (struct i386_thread_state, reg)
 
-/* At reg_offset[i] is the offset to the thread_state_t location where
-   the gdb registers[i] is stored.  */
+/* At REG_OFFSET[N] is the offset to the thread_state_t location where
+   the GDB register N is stored.  */
 static int reg_offset[] =
 {
   REG_OFFSET (eax), REG_OFFSET (ecx), REG_OFFSET (edx), REG_OFFSET (ebx),
@@ -77,9 +60,7 @@ fetch_fpregs (struct proc *thread)
 {
   mach_msg_type_number_t count = i386_FLOAT_STATE_COUNT;
   struct i386_float_state state;
-  struct env387 *ep = (struct env387 *) state.hw_state;
   error_t err;
-  int i;
 
   err = thread_get_state (thread->port, i386_FLOAT_STATE,
 			  (thread_state_t) &state, &count);
@@ -90,37 +71,21 @@ fetch_fpregs (struct proc *thread)
       return;
     }
 
-  if (! state.initialized)
+  if (!state.initialized)
     /* The floating-point state isn't initialized.  */
     {
+      int i;
+
       for (i = FP0_REGNUM; i <= FP7_REGNUM; i++)
 	supply_register (i, NULL);
-      for (i = FIRST_FPU_CTRL_REGNUM; i <= LAST_FPU_CTRL_REGNUM; i++)
+      for (i = FCTRL_REGNUM; i <= FOP_REGNUM; i++)
 	supply_register (i, NULL);
 
       return;
     }
 
   /* Supply the floating-point registers.  */
-  for (i = 0; i < 8; i++)
-    supply_register (FP0_REGNUM + i, ep->regs[i]);
-
-  supply_register (FCTRL_REGNUM, (char *) &ep->control);
-  supply_register (FSTAT_REGNUM, (char *) &ep->status);
-  supply_register (FTAG_REGNUM,  (char *) &ep->tag);
-  supply_register (FCOFF_REGNUM, (char *) &ep->eip);
-  supply_register (FDS_REGNUM,   (char *) &ep->operand_seg);
-  supply_register (FDOFF_REGNUM, (char *) &ep->operand);
-
-  /* Store the code segment and opcode pseudo registers.  */
-  {
-    long l;
-
-    l = ep->code_seg;
-    supply_register (FCS_REGNUM, (char *) &l);
-    l = ep->opcode & ((1 << 11) - 1);
-    supply_register (FOP_REGNUM, (char *) &l);
-  }
+  i387_supply_fsave (state.hw_state);
 }
 
 /* Fetch register REGNO, or all regs if REGNO is -1.  */
@@ -140,7 +105,7 @@ gnu_fetch_registers (int regno)
   if (regno < NUM_GREGS || regno == -1)
     {
       thread_state_t state;
-      
+
       /* This does the dirty work for us.  */
       state = proc_get_state (thread, 0);
       if (!state)
@@ -153,9 +118,9 @@ gnu_fetch_registers (int regno)
       if (regno == -1)
 	{
 	  int i;
-	  
+
 	  proc_debug (thread, "fetching all register");
-	  
+
 	  for (i = 0; i < NUM_GREGS; i++)
 	    supply_register (i, REG_ADDR (state, i));
 	  thread->fetched_regs = ~0;
@@ -163,7 +128,7 @@ gnu_fetch_registers (int regno)
       else
 	{
 	  proc_debug (thread, "fetching register %s", REGISTER_NAME (regno));
-	  
+
 	  supply_register (regno, REG_ADDR (state, regno));
 	  thread->fetched_regs |= (1 << regno);
 	}
@@ -172,54 +137,16 @@ gnu_fetch_registers (int regno)
   if (regno >= NUM_GREGS || regno == -1)
     {
       proc_debug (thread, "fetching floating-point registers");
-      
+
       fetch_fpregs (thread);
     }
 }
-
 
-/* Fill the i387 hardware state EP with selected data from the set of
-   (pseudo) registers specified by REGS and VALID.  VALID is an array
-   indicating which registers in REGS are valid.  If VALID is zero,
-   all registers are assumed to be valid.  */
-static void
-convert_to_env387 (struct env387 *ep, char *regs, signed char *valid)
-{
-  int i;
-
-  /* Fill in the floating-point registers.  */
-  for (i = 0; i < 8; i++)
-    if (!valid || valid[i])
-      memcpy (ep->regs[i], &regs[REGISTER_BYTE (FP0_REGNUM + i)],
-	      REGISTER_RAW_SIZE (FP0_REGNUM + i));
-
-#define fill(member, regno)                                              \
-  if (!valid || valid[(regno)])                                          \
-    memcpy (&ep->member, &regs[REGISTER_BYTE (regno)],                   \
-            sizeof (ep->member));
-
-  fill (control, FCTRL_REGNUM);
-  fill (status, FSTAT_REGNUM);
-  fill (tag, FTAG_REGNUM);
-  fill (eip, FCOFF_REGNUM);
-  fill (operand, FDOFF_REGNUM);
-  fill (operand_seg, FDS_REGNUM);
-
-#undef fill
-
-  if (!valid || valid[FCS_REGNUM])
-    ep->code_seg =
-      (* (int *) &registers[REGISTER_BYTE (FCS_REGNUM)] & 0xffff);
-  
-  if (!valid || valid[FOP_REGNUM])
-    ep->opcode =
-      ((* (int *) &registers[REGISTER_BYTE (FOP_REGNUM)] & ((1 << 11) - 1)));
-}
 
 /* Store the whole floating-point state into THREAD using information
    from the corresponding (pseudo) registers.  */
 static void
-store_fpregs (struct proc *thread)
+store_fpregs (struct proc *thread, int regno)
 {
   mach_msg_type_number_t count = i386_FLOAT_STATE_COUNT;
   struct i386_float_state state;
@@ -234,9 +161,10 @@ store_fpregs (struct proc *thread)
       return;
     }
 
-  convert_to_env387 ((struct env387 *) state.hw_state,
-		     registers, register_valid);
-    
+  /* FIXME: kettenis/2001-07-15: Is this right?  Should we somehow
+     take into account REGISTER_VALID like the old code did?  */
+  i387_fill_fsave (state.hw_state, regno);
+
   err = thread_set_state (thread->port, i386_FLOAT_STATE,
 			  (thread_state_t) &state, i386_FLOAT_STATE_COUNT);
   if (err)
@@ -298,7 +226,7 @@ gnu_store_registers (int regno)
 		warning ("Register %s changed after the thread was aborted",
 			 REGISTER_NAME (check_regno));
 		if (regno >= 0 && regno != check_regno)
-		  /* Update gdb's copy of the register.  */
+		  /* Update GDB's copy of the register.  */
 		  supply_register (check_regno, REG_ADDR (state, check_regno));
 		else
 		  warning ("... also writing this register!  Suspicious...");
@@ -312,7 +240,7 @@ gnu_store_registers (int regno)
       if (regno == -1)
 	{
 	  int i;
-	  
+
 	  proc_debug (thread, "storing all registers");
 
 	  for (i = 0; i < NUM_GREGS; i++)
@@ -337,7 +265,7 @@ gnu_store_registers (int regno)
   if (regno >= NUM_GREGS || regno == -1)
     {
       proc_debug (thread, "storing floating-point registers");
-      
-      store_fpregs (thread);
+
+      store_fpregs (thread, regno);
     }
 }
