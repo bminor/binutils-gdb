@@ -746,16 +746,17 @@ file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@}@}
 @c @subsection Example 
 @c N.A.
 
-@section -data-disassemble <begin> <end> <mode> <number-of-lines>
+@section -data-disassemble ( -s <start-addr> -e <end-addr> ) | (-f <filename> -l <linenum> [-n <lines> ]] -- <mode>
 Where
 @table @samp
-@item <begin>
-Is a function name or an address (or $pc)
-@item <end>
-can be 0 (in which case the enclosing function will be disassembled), or
-an address.
-@item <mode>
-can be 0 (only disassembly) or 1 (mixed source and disassembly).
+@item <start-addr>
+Is the beginning address (or $pc).
+@item <end-addr>
+End address.
+@item <filename>
+Name of the file to disassemble.
+@item <linenum>
+Line number to disassemble around.
 @item <number-of-lines>
 specifies the number of disassembly lines to be produced. If it is -1
 the whole function will be disassembled, in case no <end> address is
@@ -764,79 +765,85 @@ specified.  If <end> is specified as a non-zero value, and
 <begin> and <end>, we'll display only <number-of-lines> lines, vice
 versa if <number-of-lines> is higher than the number of lines between
 <begin> and <end>, we'll display only the lines up to <end>.
+@item <mode>
+can be 0 (only disassembly) or 1 (mixed source and disassembly).
 @end table
 
 The output for each instruction is composed of two fields:
 @itemize @bullet
 @item Address
+@item Func-name
+@item Offset
 @item Instruction
 @end itemize
-Note that whatever included in those fields, is not manipulated
-directely by Flathead, i.e. it is not possible to adjust their format.
+Note that whatever included in the instruction field, is not manipulated
+directely by Flathead, i.e. it is not possible to adjust its format.
 @subsection GDB command
 N.A. No direct mapping.
 
 @subsection Example 1
+Disassemble from the current PC value to PC + 20.
+
 @example
 (gdb)
--data-disassemble main 0 0 -1
-^done,asm_insns=@{
-@{address="0x100b8 <main>",inst=" stwu r1,-16(r1)"@},
-@{address="0x100bc <main+4>",inst="mflr r0"@},
-@{address="0x100c0 <main+8>",inst=" stw r31,12(r1)"@},
-@{address="0x100c4 <main+12>",inst=" stw r0,20(r1)"@},
-@{address="0x100c8 <main+16>",inst=" mr r31,r1"@},
-@{address="0x100cc <main+20>",inst=" bl0x1013c <__eabi>"@},
-@{address="0x100d0 <main+24>",inst=" lis r9,2"@},
-@{address="0x100d4 <main+28>",inst=" addi r3,r9,-25680"@},
-@{address="0x100d8 <main+32>",inst=" bl 0x10fc8 <printf>"@},
-@{address="0x100dc <main+36>",inst=" bl 0x10100 <foo>"@},
-@{address="0x100e0 <main+40>",inst=" li r3,0"@},
-@{address="0x100e4 <main+44>",inst=" b 0x100e8 <main+48>"@},
-@{address="0x100e8 <main+48>",inst=" lwz r11,0(r1)"@},
-@{address="0x100ec <main+52>",inst=" lwz r0,4(r11)"@},
-@{address="0x100f0 <main+56>",inst=" mtlr r0"@},
-@{address="0x100f4 <main+60>",inst=" lwz r31,-4(r11)"@},
-@{address="0x100f8 <main+64>",inst=" mr r1,r11"@},
-@{address="0x100fc <main+68>",inst=" blr"@}
-(gdb) 
+-data-disassemble -s $pc -e "$pc + 20" -- 0 
+^done,
+asm_insns={
+{address="0x000107c0",func-name="main",offset="4",
+inst="mov  2, %o0"},
+{address="0x000107c4",func-name="main",offset="8",
+inst="sethi  %hi(0x11800), %o2"},
+{address="0x000107c8",func-name="main",offset="12",
+inst="or  %o2, 0x140, %o1\t! 0x11940 <_lib_version+8>"},
+{address="0x000107cc",func-name="main",offset="16",
+inst="sethi  %hi(0x11800), %o2"},
+{address="0x000107d0",func-name="main",offset="20",
+inst="or  %o2, 0x168, %o4\t! 0x11968 <_lib_version+48>"}}
+(gdb)
 @end example
 
 @subsection Example 2
+Disassemble the whole function main. Line 32 is part of main.
 @example
+-data-disassemble -f basics.c -l 32 -- 0
+^done,asm_insns={
+{address="0x000107bc",func-name="main",offset="0",inst="save  %sp, -112, %sp"},
+{address="0x000107c0",func-name="main",offset="4",inst="mov  2, %o0"},
+{address="0x000107c4",func-name="main",offset="8",inst="sethi  %hi(0x11800), %o2"},
+[...]
+{address="0x0001081c",func-name="main",offset="96",inst="ret "},
+{address="0x00010820",func-name="main",offset="100",inst="restore "}}
 (gdb)
--data-disassemble main 0 0 3
-^done,asm_insns=@{
-@{address=" 0x100b8 <main>",inst=" stwu r1,-16(r1)"@},
-@{address=" 0x100bc <main+4>",inst="mflr r0"@},
-@{address=" 0x100c0 <main+8>",inst=" stw r31,12(r1)"@}
-(gdb) 
 @end example
 
 @subsection Example 3
+Disassemble 3 instruction from the start of main.
 @example
 (gdb) 
--data-disassemble foo 0 1 -1
-^done,asm_insns=@{src_and_asm_line=@{line="11",file="hello.c",
-line_asm_insn=@{
-@{address="    0x10100 <foo>",inst="      stwu        r1,-16(r1)"@},
-@{address="    0x10104 <foo+4>",inst="           mflrr0"@},
-@{address="    0x10108 <foo+8>",inst="           stw r31,12(r1)"@},
-@{address="    0x1010c <foo+12>",inst="         stw  r0,20(r1)"@},
-@{address="    0x10110 <foo+16>",inst="           mr  r31,r1"@}@}@},
-src_and_asm_line=@{line="12",file="hello.c",
-line_asm_insn=@{
-@{address="    0x10114 <foo+20>",inst="          lisr9,2"@},
-@{address="    0x10118 <foo+24>",inst="         addi        r3,r9,-25664"@},
-@{address="    0x1011c <foo+28>",inst="        bl  0x10fc8 <printf>"@}@}@},
-src_and_asm_line=@{line="14",file="hello.c",
-line_asm_insn=@{
-@{address="    0x10120 <foo+32>",inst="        lwz r11,0(r1)"@},
-@{address="    0x10124 <foo+36>",inst="           lwz r0,4(r11)"@},
-@{address="    0x10128 <foo+40>",inst="           mtlr        r0"@},
-@{address="    0x1012c <foo+44>",inst="          lwz r31,-4(r11)"@},
-@{address="    0x10130 <foo+48>",inst="         mr r1,r11"@},
-@{address="    0x10134 <foo+52>",inst="       blr"@}@}@}@}
+-data-disassemble -f basics.c -l 32 -n 3 -- 0
+^done,asm_insns={
+{address="0x000107bc",func-name="main",offset="0",inst="save  %sp, -112, %sp"},
+{address="0x000107c0",func-name="main",offset="4",inst="mov  2, %o0"},
+{address="0x000107c4",func-name="main",offset="8",inst="sethi  %hi(0x11800), %o2"}}
+(gdb) 
+@end example
+
+@subsection Example 4
+Disassemble 3 instruction from the start of main in mixed mode.
+@example
+(gdb) 
+-data-disassemble -f basics.c -l 32 -n 3 -- 1
+^done,asm_insns={
+src_and_asm_line={line="31",
+file="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb/testsuite/gdb.mi/basics.c",
+line_asm_insn={
+{address="0x000107bc",func-name="main",offset="0",inst="save  %sp, -112, %sp"}}},
+
+src_and_asm_line={line="32",
+file="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb/testsuite/gdb.mi/basics.c",
+line_asm_insn={
+{address="0x000107c0",func-name="main",offset="4",inst="mov  2, %o0"},
+{address="0x000107c4",func-name="main",offset="8",inst="sethi  %hi(0x11800), %o2"}}}}
 (gdb) 
 @end example
 
