@@ -3678,12 +3678,16 @@ edit_opd (obfd, info)
 	      break;
 	    }
 
-	  if (sym_sec->output_section == bfd_abs_section_ptr)
-	    {
-	      /* OK, we've found a function that's excluded from the
-		 link.  */
-	      need_edit = true;
-	    }
+	  /* opd entries are always for functions defined in the
+	     current input bfd.  If the symbol isn't defined in the
+	     input bfd, then we won't be using the function in this
+	     bfd;  It must be defined in a linkonce section in another
+	     bfd, or is weak.  It's also possible that we are
+	     discarding the function due to a linker script /DISCARD/,
+	     which we test for via the output_section.  */
+	  if (sym_sec->owner != ibfd
+	      || sym_sec->output_section == bfd_abs_section_ptr)
+	    need_edit = true;
 
 	  offset += 24;
 	}
@@ -3757,7 +3761,8 @@ edit_opd (obfd, info)
 							      sym->st_shndx);
 		    }
 
-		  skip = sym_sec->output_section == bfd_abs_section_ptr;
+		  skip = (sym_sec->owner != ibfd
+			  || sym_sec->output_section == bfd_abs_section_ptr);
 		  if (skip)
 		    {
 		      if (h != NULL)
