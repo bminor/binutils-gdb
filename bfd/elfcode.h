@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -133,7 +133,7 @@ static int elf_symbol_from_bfd_symbol PARAMS ((bfd *,
 					       struct symbol_cache_entry **));
 
 static void elf_map_symbols PARAMS ((bfd *));
-static void swap_out_syms PARAMS ((bfd *));
+static boolean swap_out_syms PARAMS ((bfd *));
 
 #ifdef DEBUG
 static void elf_debug_section PARAMS ((char *, int, Elf_Internal_Shdr *));
@@ -380,9 +380,18 @@ DEFUN (bfd_new_strtab, (abfd),
 {
   struct strtab *ss;
 
-  ss = (struct strtab *) bfd_xmalloc (sizeof (struct strtab));
-  ss->tab = bfd_xmalloc (1);
-  BFD_ASSERT (ss->tab != 0);
+  ss = (struct strtab *) malloc (sizeof (struct strtab));
+  if (!ss)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
+  ss->tab = malloc (1);
+  if (!ss->tab)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
   *ss->tab = 0;
   ss->nentries = 0;
   ss->length = 1;
@@ -426,7 +435,7 @@ DEFUN (bfd_add_2_to_strtab, (abfd, ss, str, str2),
   if (ss->length)
     ss->tab = realloc (ss->tab, ss->length + ln);
   else
-    ss->tab = bfd_xmalloc (ln);
+    ss->tab = malloc (ln);
 
   BFD_ASSERT (ss->tab != 0);
   strcpy (ss->tab + ss->length, str);
@@ -1485,7 +1494,8 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd * abfd)
 
   bfd_map_over_sections (abfd, fix_up_strtabs, 0); /* .stab/.stabstr &c */
 
-  swap_out_syms (abfd);
+  if (swap_out_syms (abfd) == false)
+    return false;
 
   assign_file_positions_except_relocs (abfd);
 
@@ -1938,6 +1948,9 @@ prep_headers (abfd)
   i_shdrp = elf_elfsections (abfd);
 
   shstrtab = bfd_new_strtab (abfd);
+  if (!shstrtab)
+    return false;
+      
   elf_shstrtab (abfd) = shstrtab;
 
   i_ehdrp->e_ident[EI_MAG0] = ELFMAG0;
@@ -2031,7 +2044,7 @@ prep_headers (abfd)
   return true;
 }
 
-static void
+static boolean
 swap_out_syms (abfd)
      bfd *abfd;
 {
@@ -2047,6 +2060,8 @@ swap_out_syms (abfd)
     Elf_External_Sym *outbound_syms;
     int idx;
 
+    if (!stt)
+      return false;
     symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
     symtab_hdr->sh_type = SHT_SYMTAB;
     symtab_hdr->sh_entsize = sizeof (Elf_External_Sym);
@@ -2191,6 +2206,7 @@ swap_out_syms (abfd)
     this_hdr->sh_addralign = 1;
     this_hdr->size = 0;
   }
+  return true;
 }
 
 static boolean
@@ -2510,7 +2526,12 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
   sym = symbase;
 
   /* Temporarily allocate room for the raw ELF symbols.  */
-  x_symp = (Elf_External_Sym *) bfd_xmalloc (symcount * sizeof (Elf_External_Sym));
+  x_symp = (Elf_External_Sym *) malloc (symcount * sizeof (Elf_External_Sym));
+  if (!x_symp)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   if (bfd_read ((PTR) x_symp, sizeof (Elf_External_Sym), symcount, abfd)
       != symcount * sizeof (Elf_External_Sym))
@@ -3349,7 +3370,7 @@ DEFUN (elf_corefile_note, (abfd, hdr),
   asection *newsect;
 
   if (hdr->p_filesz > 0
-      && (buf = (char *) bfd_xmalloc (hdr->p_filesz)) != NULL
+      && (buf = (char *) malloc (hdr->p_filesz)) != NULL
       && bfd_seek (abfd, hdr->p_offset, SEEK_SET) != -1
       && bfd_read ((PTR) buf, hdr->p_filesz, 1, abfd) == hdr->p_filesz)
     {
@@ -3399,6 +3420,11 @@ DEFUN (elf_corefile_note, (abfd, hdr),
   if (buf != NULL)
     {
       free (buf);
+    }
+  else if (hdr->p_filesz > 0)
+    {
+      bfd_error = no_memory;
+      return false;
     }
   return true;
 

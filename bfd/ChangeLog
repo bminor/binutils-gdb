@@ -1,3 +1,35 @@
+Sun Feb  6 20:04:10 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* elfcode.h (prep_headers, swap_out_syms): Check for NULL return
+	from bfd_new_strtab. 
+	(elf_compute_section_file_positions): Check for false return from
+	swap_out_syms. 
+
+	* linker.c (default_indirect_link_order): Check for NULL return
+	from bfd_get_relocated_section_contents.
+
+	* syms.c: Make example application in doc call xmalloc, not
+	bfd_xmalloc. 
+
+	* aoutx.h (NAME(aout,slurp_symbol_table),
+	aout_link_get_symbols, NAME(aout,link_hash_table_create)):
+	* bout.c (b_out_slurp_reloc_table, b_out_squirt_out_relocs):
+	* ecoff.c (ecoff_bfd_link_hash_table_create): 
+	* ecofflink.c (bfd_ecoff_debug_init): 
+	* format.c (bfd_check_format_matches): 
+	* linker.c (_bfd_generic_link_hash_table_create): 
+	(_bfd_generic_final_link): 
+	* reloc16.c (bfd_coff_reloc16_relax_section): 
+	(bfd_coff_reloc16_get_relocated_section_contents): 
+	* elf32-hppa.c (hppa_elf_build_arg_reloc_stub): 
+	* elf32-mips.c (mips_elf_final_link): 
+	* elfcode.h (bfd_new_strtab): 
+	(bfd_add_2_to_strtab): 
+	(elf_slurp_symbol_table): 
+	(elf_corefile_note): 
+	* libbfd.c (bfd_zmalloc): 
+	Use malloc and check the result, instead of bfd_xmalloc.
+
 Sat Feb  5 12:39:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.bfd: Put m68*-*-sysv* line after m68*-*-sysv4*.
