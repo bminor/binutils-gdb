@@ -282,8 +282,6 @@ md_begin ()
   /* Hash up all the opcodes for fast use later.  */
 
   op_hash = hash_new ();
-  if (op_hash == NULL)
-    as_fatal ("Virtual memory exhausted");
 
   for (i = 0; i < num_opcodes; i++)
     {
