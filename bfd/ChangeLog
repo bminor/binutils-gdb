@@ -1,5 +1,11 @@
 1999-08-03  Mark Mitchell  <mark@codesourcery.com>
 
+	* elf32-mips.c (mips_elf_next_lo16_addend): Rename to ...
+	(mips_elf_next_lo16_relocation): Don't compute the addend here.
+	Just return the relocation found.
+	(mips_elf_relocate_section): Pull the LO16 addend out of the
+	section itself when using REL relocations.
+	
 	* elf32-mips.c (mips_elf_calculate_relocation): Restore
 	_DYNAMIC_LINK handling and handling of undefined symbols in shared
 	libraries.

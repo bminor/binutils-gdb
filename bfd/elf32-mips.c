@@ -165,8 +165,8 @@ static boolean mips_elf_record_global_got_symbol
 	   struct mips_got_info *));
 static bfd_vma mips_elf_got_page
   PARAMS ((bfd *, struct bfd_link_info *, bfd_vma, bfd_vma *));
-static boolean mips_elf_next_lo16_addend
-  PARAMS ((const Elf_Internal_Rela *, const Elf_Internal_Rela *, bfd_vma *));
+static const Elf_Internal_Rela *mips_elf_next_lo16_relocation
+  PARAMS ((const Elf_Internal_Rela *, const Elf_Internal_Rela *));
 static bfd_reloc_status_type mips_elf_calculate_relocation
   PARAMS ((bfd *, bfd *, asection *, struct bfd_link_info *,
 	   const Elf_Internal_Rela *, bfd_vma, reloc_howto_type *,
@@ -5563,15 +5563,13 @@ mips_elf_got16_entry (abfd, info, value)
   return index;
 }
 
-/* Sets *ADDENDP to the addend for the first R_MIPS_LO16 relocation
-   found, beginning with RELOCATION.  RELEND is one-past-the-end of
-   the relocation table.  */
+/* Returns the first R_MIPS_LO16 relocation found, beginning with
+   RELOCATION.  RELEND is one-past-the-end of the relocation table.  */
 
-static boolean
-mips_elf_next_lo16_addend (relocation, relend, addendp)
+static const Elf_Internal_Rela *
+mips_elf_next_lo16_relocation (relocation, relend)
      const Elf_Internal_Rela *relocation;
      const Elf_Internal_Rela *relend;
-     bfd_vma *addendp;
 {
   /* According to the MIPS ELF ABI, the R_MIPS_LO16 relocation must be
      immediately following.  However, for the IRIX6 ABI, the next
@@ -5582,17 +5580,14 @@ mips_elf_next_lo16_addend (relocation, relend, addendp)
   while (relocation < relend)
     {
       if (ELF32_R_TYPE (relocation->r_info) == R_MIPS_LO16)
-	{
-	  *addendp = relocation->r_addend;
-	  return true;
-	}
+	return relocation;
 
       ++relocation;
     }
 
   /* We didn't find it.  */
   bfd_set_error (bfd_error_bad_value);
-  return false;
+  return NULL;
 }
 
 /* Create a rel.dyn relocation for the dynamic linker to resolve.  The
@@ -6529,12 +6524,23 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      && mips_elf_local_relocation_p (input_bfd, rel,
 						      local_sections)))
 		{
+		  bfd_vma l;
+		  const Elf_Internal_Rela *lo16_relocation;
+		  reloc_howto_type *lo16_howto;
+
 		  /* Scan ahead to find a matching R_MIPS_LO16
 		     relocation.  */
-		  bfd_vma l;
-		  
-		  if (!mips_elf_next_lo16_addend (rel, relend, &l))
+		  lo16_relocation 
+		    = mips_elf_next_lo16_relocation (rel, relend); 
+		  if (lo16_relocation == NULL)
 		    return false;
+
+		  /* Obtain the addend kept there.  */
+		  lo16_howto = mips_rtype_to_howto (R_MIPS_LO16);
+		  l = mips_elf_obtain_contents (lo16_howto,
+						lo16_relocation,
+						input_bfd, contents);
+		  l &= lo16_howto->src_mask;
 
 		  /* Save the high-order bit for later.  When we
 		     encounter the R_MIPS_LO16 relocation we will need
@@ -6607,7 +6613,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     then we only want to write out the high-order 16 bits.
 	     The subsequent R_MIPS_LO16 will handle the low-order bits.  */
 	  if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16)
-	    addend >>= 16;
+	    addend = mips_elf_high (addend);
 	  /* If the relocation is for an R_MIPS_26 relocation, then
 	     the two low-order bits are not stored in the object file;
 	     they are implicitly zero.  */
