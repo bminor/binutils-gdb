@@ -1,5 +1,5 @@
-/* tc-fr30.c -- Assembler for the Mitsubishi FR30.
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation.
+/* tc-fr30.c -- Assembler for the Fujitsu FR30.
+   Copyright (C) 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
