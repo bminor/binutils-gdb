@@ -1,3 +1,12 @@
+Wed Apr 15 21:19:31 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: the tooldir copy of gas goes directly in tooldir.
+
+Tue Apr 14 14:50:22 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
+
+	* write.c (write_object_file): For b.out format, round up section
+	start addresses to match required alignment.
+
 Thu Apr  9 05:45:29 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
 
 	* Makefile.in (install): Install into $(tooldir)/bin, since that's
