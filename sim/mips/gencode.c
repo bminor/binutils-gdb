@@ -399,7 +399,7 @@ typedef struct instruction {
 
 struct instruction MIPS_DECODE[] = {
  /* The instructions are alphabetical, and not in instruction bit-order: */
- {"ABS",     1,"01000110mmm00000dddddaaaaa000101",COP1,   FPABS,    (FP)},
+ {"ABS",     1,"01000110mmm00000vvvvvrrrrr000101",COP1,   FPABS,    (FP)},
  {"ADD",     1,"000000sssssgggggddddd00000100000",SPECIAL,ADD,      (WORD | WORD32 | OVERFLOW)}, /* rd = rs + rt */
  {"ADD",     1,"01000110mmmkkkkkvvvvvrrrrr000000",COP1,   FPADD,    (FP)},
  {"ADDI",    1,"001000ssssstttttiiiiiiiiiiiiiiii",NORMAL, ADD,      (WORD | WORD32 | OVERFLOW)},
@@ -835,7 +835,7 @@ process_instructions(doarch,features)
  printf("switch (num)\n") ;
  printf("{\n");
 
- for (loop = 1; (loop < limit); loop++) {
+ for (loop = 0; (loop < limit); loop++) {
    /* First check that the ISA number we are constructing for is
       valid, before checking if the instruction matches any of the
       architecture specific flags. NOTE: We allow a selected ISA of

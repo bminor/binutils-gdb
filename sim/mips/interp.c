@@ -382,6 +382,7 @@ int LOACCESS = 0;
    access to the pipeline cycle count information from the simulator
    engine. */
 unsigned int instruction_fetches = 0;
+unsigned int instruction_fetch_overflow = 0;
 unsigned int pipeline_ticks = 0;
 #endif
 
@@ -417,9 +418,14 @@ unsigned int rcexit = 0; /* _exit() reason code holder */
                           state |= simSKIPNEXT;\
                         }
 
+#define K0BASE  (0x80000000)
+#define K0SIZE  (0x20000000)
+#define K1BASE  (0xA0000000)
+#define K1SIZE  (0x20000000)
+
 /* Very simple memory model to start with: */
 unsigned char *membank = NULL;
-ut_reg membank_base = 0xA0000000;
+ut_reg membank_base = K1BASE;
 unsigned membank_size = (1 << 20); /* (16 << 20); */ /* power-of-2 */
 
 /* Simple run-time monitor support */
@@ -490,12 +496,18 @@ sim_open (args)
      trust the explicit manifests held in the source: */
   {
     unsigned int s[2];
-    s[0] = 0x40805A5A;
-    s[1] = 0x00000000;
-    if (((float)4.01102924346923828125 != *(float *)s) || ((double)523.2939453125 != *(double *)s)) {
+    s[state & simHOSTBE ? 0 : 1] = 0x40805A5A;
+    s[state & simHOSTBE ? 1 : 0] = 0x00000000;
+
+    /* TODO: We need to cope with the simulated target and the host
+       not having the same endianness. This will require the high and
+       low words of a (double) to be swapped when converting between
+       the host and the simulated target. */
+
+    if (((float)4.01102924346923828125 != *(float *)(s + ((state & simHOSTBE) ? 0 : 1))) || ((double)523.2939453125 != *(double *)s)) {
       fprintf(stderr,"The host executing the simulator does not seem to have IEEE 754-1985 std FP\n");
-      fprintf(stderr,"*(float *)s = %f (4.01102924346923828125)\n",*(float *)s);
-      fprintf(stderr,"*(double *)s = %f (523.2939453125)\n",*(double *)s);
+      fprintf(stderr,"*(float *)s = %.20f (4.01102924346923828125)\n",*(float *)s);
+      fprintf(stderr,"*(double *)s = %.20f (523.2939453125)\n",*(double *)s);
       exit(1);
     }
   }
@@ -677,7 +689,6 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
     fprintf(stderr,"Not enough VM for monitor simulation (%d bytes)\n",monitor_size);
   } else {
     int loop;
-    /* TODO: Provide support for PMON monitor */
     /* Entry into the IDT monitor is via fixed address vectors, and
        not using machine instructions. To avoid clashing with use of
        the MIPS TRAP system, we place our own (simulator specific)
@@ -689,6 +700,50 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
       if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
        StoreMemory(cca,AccessLength_WORD,(RSVD_INSTRUCTION | ((loop >> 2) & RSVD_INSTRUCTION_AMASK)),paddr,vaddr,isRAW);
     }
+    /* The PMON monitor uses the same address space, but rather than
+       branching into it the address of a routine is loaded. We can
+       cheat for the moment, and direct the PMON routine to IDT style
+       instructions within the monitor space. This relies on the IDT
+       monitor not using the locations from 0xBFC00500 onwards as its
+       entry points.*/
+    for (loop = 0; (loop < 24); loop++)
+      {
+        uword64 vaddr = (monitor_base + 0x500 + (loop * 4));
+        uword64 paddr;
+        int cca;
+        unsigned int value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
+        switch (loop)
+          {
+            case 0: /* read */
+              value = 7;
+              break;
+
+            case 1: /* write */
+              value = 8;
+              break;
+
+            case 2: /* open */
+              value = 6;
+              break;
+
+            case 3: /* close */
+              value = 10;
+              break;
+
+            case 5: /* printf */
+              value = ((0x500 - 16) / 8); /* not an IDT reason code */
+              break;
+
+            case 8: /* cliexit */
+              value = 17;
+              break;
+          }
+        value = (monitor_base + (value * 8));
+        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
+          StoreMemory(cca,AccessLength_WORD,value,paddr,vaddr,isRAW);
+        else
+         callback->printf_filtered(callback,"Failed to write to monitor space 0x%08X%08X\n",WORD64HI(vaddr),WORD64LO(vaddr));
+      }
   }
 
 #if defined(TRACE)
@@ -1110,7 +1165,10 @@ sim_info (verbose)
   callback->printf_filtered(callback,"0x%08X bytes of memory at 0x%08X%08X\n",(unsigned int)membank_size,WORD64HI(membank_base),WORD64LO(membank_base));
 
 #if !defined(FASTSIM)
-  callback->printf_filtered(callback,"Instruction fetches = %d\n",instruction_fetches);
+  if (instruction_fetch_overflow != 0)
+    callback->printf_filtered(callback,"Instruction fetches = 0x%08X%08X\n",instruction_fetch_overflow,instruction_fetches);
+  else
+    callback->printf_filtered(callback,"Instruction fetches = %d\n",instruction_fetches);
   callback->printf_filtered(callback,"Pipeline ticks = %d\n",pipeline_ticks);
   /* It would be a useful feature, if when performing multi-cycle
      simulations (rather than single-stepping) we keep the start and
@@ -1394,7 +1452,7 @@ sim_trace()
 /*-- Private simulator support interface ------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-/* Simple monitor interface (currently setup for the IDT monitor) */
+/* Simple monitor interface (currently setup for the IDT and PMON monitors) */
 static void
 sim_monitor(reason)
      unsigned int reason;
@@ -1510,6 +1568,22 @@ sim_monitor(reason)
 
         if (failed)
          callback->printf_filtered(callback,"WARNING: Invalid pointer passed into monitor call\n");
+      }
+      break;
+
+    case 158 : /* PMON printf */
+      /* in:  A0 = pointer to format string */
+      /*      A1 = optional argument 1 */
+      /*      A2 = optional argument 2 */
+      /*      A3 = optional argument 3 */
+      /* out: void */
+      {
+        uword64 paddr;
+        int cca;
+        if (AddressTranslation(A0,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
+         callback->printf_filtered(callback,(char *)((int)paddr),(int)A1,(int)A2,(int)A2);
+        else
+         callback->printf_filtered(callback,"WARNING: Attempt to pass pointer that does not reference simulated memory\n");
       }
       break;
 
@@ -1730,6 +1804,19 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
   /* For a simple (flat) memory model, we simply pass virtual
      addressess through (mostly) unchanged. */
   vAddr &= 0xFFFFFFFF;
+
+  /* Treat the kernel memory spaces identically for the moment: */
+  if ((membank_base == K1BASE) && (vAddr >= K0BASE) && (vAddr < (K0BASE + K0SIZE)))
+    vAddr += (K1BASE - K0BASE);
+
+  /* Also assume that the K1BASE memory wraps. This is required to
+     allow the PMON run-time __sizemem() routine to function (without
+     having to provide exception simulation). NOTE: A kludge to work
+     around the fact that the monitor memory is currently held in the
+     K1BASE space. */
+  if (((vAddr < monitor_base) || (vAddr >= (monitor_base + monitor_size))) && (vAddr >= K1BASE && vAddr < (K1BASE + K1SIZE)))
+    vAddr = (K1BASE | (vAddr & (membank_size - 1)));
+
   *pAddr = vAddr; /* default for isTARGET */
   *CCA = Uncached; /* not used for isHOST */
 
@@ -1744,7 +1831,7 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
      *pAddr = (int)&monitor[((unsigned int)(vAddr - monitor_base) & (monitor_size - 1))];
   } else {
 #if 1 /* def DEBUG */
-    callback->printf_filtered(callback,"Failed: AddressTranslation(0x%08X%08X,%s,%s,...);\n",WORD64HI(vAddr),WORD64LO(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "isSTORE" : "isLOAD"));
+    callback->printf_filtered(callback,"Failed: AddressTranslation(0x%08X%08X,%s,%s,...) IPC = 0x%08X%08X\n",WORD64HI(vAddr),WORD64LO(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "isSTORE" : "isLOAD"),WORD64HI(IPC),WORD64LO(IPC));
 #endif /* DEBUG */
     res = 0; /* AddressTranslation has failed */
     *pAddr = -1;
@@ -2189,10 +2276,15 @@ CacheOp(op,pAddr,vAddr,instruction)
      uword64 vAddr;
      unsigned int instruction;
 {
+  static int icache_warning = 0;
+  static int dcache_warning = 0;
+
   /* If CP0 is not useable (User or Supervisor mode) and the CP0
      enable bit in the Status Register is clear - a coprocessor
      unusable exception is taken. */
+#if 0
   callback->printf_filtered(callback,"TODO: Cache availability checking (PC = 0x%08X%08X)\n",WORD64HI(IPC),WORD64LO(IPC));
+#endif
 
   switch (op & 0x3) {
     case 0: /* instruction cache */
@@ -2203,7 +2295,11 @@ CacheOp(op,pAddr,vAddr,instruction)
         case 4: /* Hit Invalidate */
         case 5: /* Fill */
         case 6: /* Hit Writeback */
-          callback->printf_filtered(callback,"SIM Warning: Instruction CACHE operation %d to be coded\n",(op >> 2));
+          if (!icache_warning)
+            {
+              callback->printf_filtered(callback,"SIM Warning: Instruction CACHE operation %d to be coded\n",(op >> 2));
+              icache_warning = 1;
+            }
           break;
 
         default:
@@ -2221,7 +2317,11 @@ CacheOp(op,pAddr,vAddr,instruction)
         case 4: /* Hit Invalidate */
         case 5: /* Hit Writeback Invalidate */
         case 6: /* Hit Writeback */ 
-          callback->printf_filtered(callback,"SIM Warning: Data CACHE operation %d to be coded\n",(op >> 2));
+          if (!dcache_warning)
+            {
+              callback->printf_filtered(callback,"SIM Warning: Data CACHE operation %d to be coded\n",(op >> 2));
+              dcache_warning = 1;
+            }
           break;
 
         default:
@@ -2612,6 +2712,36 @@ Equal(op1,op2,fmt)
 }
 
 static uword64
+AbsoluteValue(op,fmt)
+     uword64 op;
+     FP_formats fmt; 
+{
+  uword64 result;
+
+#ifdef DEBUG
+  printf("DBG: AbsoluteValue: %s: op = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op),WORD64LO(op));
+#endif /* DEBUG */
+
+  /* The format type should already have been checked: */
+  switch (fmt) {
+   case fmt_single:
+    {
+      unsigned int wop = (unsigned int)op;
+      float tmp = ((float)fabs((double)*(float *)&wop));
+      result = (uword64)*(unsigned int *)&tmp;
+    }
+    break;
+   case fmt_double:
+    {
+      double tmp = (fabs(*(double *)&op));
+      result = *(uword64 *)&tmp;
+    }
+  }
+
+  return(result);
+}
+
+static uword64
 Negate(op,fmt)
      uword64 op;
      FP_formats fmt; 
@@ -2691,7 +2821,7 @@ Sub(op1,op2,fmt)
   uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Sub: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64H(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
+  printf("DBG: Sub: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -3311,8 +3441,15 @@ simulate ()
     callback->printf_filtered(callback,"DBG: fetched 0x%08X from PC = 0x%08X%08X\n",instruction,WORD64HI(PC),WORD64LO(PC));
 #endif /* DEBUG */
 
+/*DBG*/    if (instruction == 0x46200005) /* ABS.D */
+/*DBG*/      callback->printf_filtered(callback,"DBG: ABS.D (0x%08X) instruction\n",instruction);
+
 #if !defined(FASTSIM) || defined(PROFILE)
     instruction_fetches++;
+    /* Since we increment above, the value should only ever be zero if
+       we have just overflowed: */
+    if (instruction_fetches == 0)
+      instruction_fetch_overflow++;
 #if defined(PROFILE)
     if ((state & simPROFILE) && ((instruction_fetches % profile_frequency) == 0) && profile_hist) {
       int n = ((unsigned int)(PC - profile_minpc) >> (profile_shift + 2));
