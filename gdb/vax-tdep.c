@@ -21,6 +21,9 @@
 #include "defs.h"
 #include "symtab.h"
 #include "opcode/vax.h"
+#include "gdbcore.h"
+#include "frame.h"
+#include "value.h"
 
 /* Vax instructions are never longer than this.  */
 #define MAXLEN 62
@@ -80,7 +83,7 @@ vax_print_insn (CORE_ADDR memaddr, disassemble_info *info)
   unsigned char buffer[MAXLEN];
   register int i;
   register unsigned char *p;
-  register char *d;
+  const char *d;
 
   int status = (*info->read_memory_func) (memaddr, buffer, MAXLEN, info);
   if (status != 0)

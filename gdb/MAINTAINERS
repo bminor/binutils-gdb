@@ -92,7 +92,7 @@ maintainer works with the native maintainer when resolving API issues.
 
 	tic80		maintenance only (tic80-coff)
 	v850		maintenance only (v850-elf)
-	vax		maintenance only (?)
+	vax		maintenance only (vax-dec-vms5.5)
 	w65		maintenance only (?)
 	z8k		maintenance only (?)
 
