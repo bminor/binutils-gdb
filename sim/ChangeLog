@@ -1,3 +1,14 @@
+Fri Nov  1 08:03:30 1996  Michael Meissner  <meissner@wogglebug.ziplink.net>
+
+	* configure (powerpc*-*-linux*): Treat like the other powerpc
+	system V based targets.
+
+Thu Oct 17 12:50:08 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (--enable-sim-powerpc): Delete.
+	(--enable-sim): Add.
+	* configure: Regenerated.
+
 start-sanitize-v850
 Fri Oct 11 21:13:43 1996  Jeffrey A Law  (law@cygnus.com)
 

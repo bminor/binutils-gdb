@@ -57,7 +57,7 @@ case "${target}" in
 	only_if_gcc=yes
 	;;
   sh*-*-*)		sim_target=sh ;; 
-  powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | powerpc*-*-elf* )
+  powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | powerpc*-*-elf* | powerpc*-*-linux* )
 	# The PowerPC simulator uses the GCC extension long long as well as
 	# ANSI prototypes, so don't enable it for random host compilers
 	# unless asked to.
