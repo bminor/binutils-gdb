@@ -11,12 +11,12 @@
 	.SUBSPA $CODE$
 
 	.align 4
-LC$0000
+LC$0000:
 	.STRING "%d %lf %d\x0a\x00"
 	.align 4
 	.EXPORT error__3AAAiidi
 	.EXPORT error__3AAAiidi,PRIV_LEV=3,ARGW0=GR,ARGW1=GR,ARGW2=GR,ARGW3=FR,ARGW4=FU,RTNVAL=GR
-error__3AAAiidi
+error__3AAAiidi:
 	.PROC
 	.CALLINFO FRAME=128,CALLS,SAVE_RP
 	.ENTRY
@@ -58,8 +58,8 @@ error__3AAAiidi
 	nop
 	bl,n L$0002,0
 	bl,n L$0001,0
-L$0002
-L$0001
+L$0002:
+L$0001:
 	ldw 8(0,4),9
 	ldw 12(0,4),8
 	ldw 16(0,4),7
@@ -74,7 +74,7 @@ L$0001
 	.align 4
 	.EXPORT ok__3AAAidi
 	.EXPORT ok__3AAAidi,PRIV_LEV=3,ARGW0=GR,ARGW1=GR,ARGW2=FR,ARGW3=FU,RTNVAL=GR
-ok__3AAAidi
+ok__3AAAidi:
 	.PROC
 	.CALLINFO FRAME=128,CALLS,SAVE_RP
 	.ENTRY
@@ -116,8 +116,8 @@ ok__3AAAidi
 	nop
 	bl,n L$0004,0
 	bl,n L$0003,0
-L$0004
-L$0003
+L$0004:
+L$0003:
 	ldw 8(0,4),9
 	ldw 12(0,4),8
 	ldw 16(0,4),7
@@ -131,14 +131,14 @@ L$0003
 	.PROCEND
 	.IMPORT __main,CODE
 	.align 8
-LC$0001
+LC$0001:
 	; .double 5.50000000000000000000e+00
 	.word 1075183616 ; = 0x40160000
 	.word 0 ; = 0x0
 	.align 4
 	.EXPORT main
 	.EXPORT main,PRIV_LEV=3,RTNVAL=GR
-main
+main:
 	.PROC
 	.CALLINFO FRAME=128,CALLS,SAVE_RP
 	.ENTRY
@@ -179,7 +179,7 @@ main
 	copy 0,%r28
 	bl,n L$0005,0
 	bl,n L$0005,0
-L$0005
+L$0005:
 	ldo 8(4),30
 	ldw -28(0,30),2
 	bv 0(2)
