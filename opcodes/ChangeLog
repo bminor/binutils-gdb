@@ -1,3 +1,7 @@
+2000-11-21  Chris Demetriou  <cgd@sibyte.com>
+
+	* mips-opc.c: Fix file header comment.
+
 2000-11-14  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris-dis.c (cris_get_disassembler): If abfd is NULL, return

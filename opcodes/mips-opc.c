@@ -1,4 +1,4 @@
-/* mips.h.  Mips opcode list for GDB, the GNU debugger.
+/* mips-opc.c -- MIPS opcode list.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
    Contributed by Ralph Campbell and OSF
    Commented and modified by Ian Lance Taylor, Cygnus Support
