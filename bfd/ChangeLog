@@ -1,3 +1,9 @@
+2001-09-08  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Soft fail
+	relocation errors.  Fail gp-relative relocations against
+	dynamic symbols.
+
 2001-09-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c (elf_i386_relocate_section): Check !DEF_REGULAR

@@ -3241,6 +3241,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
   asection *sec, *sgot, *srel, *srelgot;
   bfd *dynobj, *gotobj;
   bfd_vma gp;
+  boolean ret_val = true;
 
   srelgot = srel = NULL;
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -3389,7 +3390,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		     input_section, rel->r_offset,
 		     (!info->shared || info->no_undefined
 		      || ELF_ST_VISIBILITY (h->root.other)))))
-		return false;
+		ret_val = false;
 	      relocation = 0;
 	    }
 	}
@@ -3488,11 +3489,25 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_ALPHA_GPREL16:
 	case R_ALPHA_GPREL32:
 	case R_ALPHA_GPRELLOW:
+	  if (h && alpha_elf_dynamic_symbol_p (&h->root, info))
+            {
+              (*_bfd_error_handler)
+                (_("%s: gp-relative relocation against dynamic symbol %s"),
+                 bfd_get_filename (input_bfd), h->root.root.root.string);
+              ret_val = false;
+            }
 	  BFD_ASSERT(gp != 0);
 	  relocation -= gp;
 	  goto default_reloc;
 
 	case R_ALPHA_GPRELHIGH:
+	  if (h && alpha_elf_dynamic_symbol_p (&h->root, info))
+            {
+              (*_bfd_error_handler)
+                (_("%s: gp-relative relocation against dynamic symbol %s"),
+                 bfd_get_filename (input_bfd), h->root.root.root.string);
+              ret_val = false;
+            }
 	  BFD_ASSERT(gp != 0);
 	  relocation -= gp;
 	  relocation += addend;
@@ -3609,7 +3624,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (! ((*info->callbacks->reloc_overflow)
 		   (info, name, howto->name, (bfd_vma) 0,
 		    input_bfd, input_section, rel->r_offset)))
-	      return false;
+	      ret_val = false;
 	  }
 	  break;
 
@@ -3619,7 +3634,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
     }
 
-  return true;
+  return ret_val;
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various
