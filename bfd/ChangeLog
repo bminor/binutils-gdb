@@ -1,3 +1,11 @@
+Mon May  1 16:56:47 2000  Jim Wilson  <wilson@cygnus.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add efi-app-ia32.lo.
+	(BFD32_BACKENDS_CFILES): Add efi-app-ia32.c.
+	(BFD64_BACKENDS): Delete coff-ia64.lo.  Add efi-app-ia64.lo.
+	(BFD64_BACKENDS_CFILES): Delete coff-ia64.c.  Add efi-app-ia64.c.
+	* Makefile.in: Rebuild.
+
 2000-05-02  Alan Modra  <alan@linuxcare.com.au>
 
 	* config.bfd: Re-enable elf32-hppa.  It now compiles, even if it

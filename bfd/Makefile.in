@@ -280,6 +280,7 @@ BFD32_BACKENDS = \
 	dwarf2.lo \
 	ecoff.lo \
 	ecofflink.lo \
+	efi-app-ia32.lo \
 	elf.lo \
 	elf32-arc.lo \
 	elfarm-oabi.lo \
@@ -412,6 +413,7 @@ BFD32_BACKENDS_CFILES = \
 	dwarf2.c \
 	ecoff.c \
 	ecofflink.c \
+	efi-app-ia32.c \
 	elf.c \
 	elf32-arc.c \
 	elfarm-oabi.c \
@@ -507,9 +509,9 @@ BFD32_BACKENDS_CFILES = \
 BFD64_BACKENDS = \
 	aout64.lo \
 	coff-alpha.lo \
-	coff-ia64.lo \
 	coff64-rs6000.lo \
 	demo64.lo \
+	efi-app-ia64.lo \
 	elf64-alpha.lo \
 	elf64-hppa.lo \
 	elf64-ia64.lo \
@@ -524,9 +526,9 @@ BFD64_BACKENDS = \
 BFD64_BACKENDS_CFILES = \
 	aout64.c \
 	coff-alpha.c \
-	coff-ia64.c \
 	coff64-rs6000.c \
 	demo64.c \
+	efi-app-ia64.c \
 	elf64-alpha.c \
 	elf64-hppa.c \
 	elf64-ia64.c \
