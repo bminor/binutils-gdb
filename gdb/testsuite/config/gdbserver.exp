@@ -92,6 +92,8 @@ set portnum "2345";
 proc gdb_load { args } {
     global server_exec;
     global portnum;
+    global verbose;
+    global gdb_prompt;
 
     # Port id -- either specified in baseboard file, or managed here.
     if [target_info exists gdb,socketport] {
@@ -154,10 +156,20 @@ proc gdb_load { args } {
     set server_exec $args;
 
     # Fire off the debug agent
-    remote_spawn host \
+    if [target_info exists gdb_server_args] {
+        # This flavour of gdbserver takes as arguments those specified
+        # in the board configuration file
+        set custom_args [target_info gdb_server_args];
+        remote_spawn host \
+               "$gdbserver $custom_args >& /dev/null < /dev/null &" \
+               writeonly
+    } else {
+        # This flavour of gdbserver takes as arguments the port information
+        # and the name of the executable file to be debugged.
+        remote_spawn host \
 	    "$gdbserver $sockethost$portnum $args >& /dev/null < /dev/null &" \
 	    writeonly 
-    
+    } 
     # Give it a little time to establish
     sleep 2
 
@@ -169,6 +181,32 @@ proc gdb_load { args } {
     # attach to the "serial port"
     gdb_target_cmd $protocol $gdbport;
 
+    # do the real load if needed
+    if [target_info exists gdb_server_do_load] {
+        send_gdb "load\n"
+        set timeout 2400
+        verbose "Timeout is now $timeout seconds" 2
+        gdb_expect {
+            -re ".*$gdb_prompt $" {
+                if $verbose>1 then {
+                    send_user "Loaded $arg into $GDB\n"
+                }
+                set timeout 30
+                verbose "Timeout is now $timeout seconds" 2
+                return 1
+            }
+            -re "$gdb_prompt $"     {
+                if $verbose>1 then {
+                    perror "GDB couldn't load."
+                }
+            }
+            timeout {
+                if $verbose>1 then {
+                    perror "Timed out trying to load $arg."
+                }
+            }
+        }
+    }
+
     return 0;
 }
-

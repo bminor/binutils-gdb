@@ -1,3 +1,8 @@
+2001-05-10  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/completion.exp: Revamp test. Make it execute on all
+ 	platforms.
+
 2001-05-07  Keith Seitz <keiths@cygnus.com>
 
         * lib/gdb.exp (gdbtk_initialize_display): New proc which will
