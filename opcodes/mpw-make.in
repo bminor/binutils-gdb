@@ -1,0 +1,172 @@
+#    Makefile template for Configure for the opcodes library.
+#    Copyright (C) 1990, 1991, 1992 Free Software Foundation, Inc.
+#    Written by Cygnus Support.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+s = "{srcdir}"
+o = :
+
+CC = C -d MPW_C
+
+"{o}" Ä : "{s}"
+
+# Default rule that puts each file into separate segment.
+
+.c.o  Ä .c
+   {CC}  {DepDir}{Default}.c {ALL_CFLAGS} {SymOptions} -s {Default} -o {TargDir}{Default}.c.o
+
+HDEFINES =
+TDEFINES =
+CSWITCHES =
+SymOptions =
+
+prefix = :usr:local
+
+exec_prefix = {prefix}
+bindir = {exec_prefix}:bin
+libdir = {exec_prefix}:lib
+
+datadir = {prefix}:lib
+mandir = {prefix}:man
+man1dir = {mandir}:man1
+man2dir = {mandir}:man2
+man3dir = {mandir}:man3
+man4dir = {mandir}:man4
+man5dir = {mandir}:man5
+man6dir = {mandir}:man6
+man7dir = {mandir}:man7
+man8dir = {mandir}:man8
+man9dir = {mandir}:man9
+infodir = {prefix}:info
+includedir = {prefix}:include
+oldincludedir =
+docdir = {srcdir}:doc
+
+SHELL = :bin:sh
+
+INSTALL = install -c
+INSTALL_PROGRAM = {INSTALL}
+INSTALL_DATA = {INSTALL}
+
+AR = ar
+AR_FLAGS = qc
+CFLAGS = -g
+BISON = bison
+MAKEINFO = makeinfo
+RANLIB = ranlib
+
+INCDIR = "{topsrcdir}"include
+BFDDIR = "{topsrcdir}"bfd
+CSEARCH =  -i {INCDIR},{INCDIR}:,{BFDDIR}:,::bfd:
+DEP = mkdep
+
+ALL_CFLAGS =  -mc68020 -mc68881 -model far {CSEARCH}
+
+TARGETLIB = libopcodes.o
+
+# To circumvent a Sun make VPATH bug, each file listed here
+# should also have a foo.o: foo.c line further along in this file.
+
+ALL_MACHINES = a29k-dis.o alpha-dis.o h8300-dis.o h8500-dis.o ¶
+	hppa-dis.o i386-dis.o i960-dis.o m68881-ext.o m68k-dis.o ¶
+	m88k-dis.o mips-dis.o mips-opc.o sh-dis.o sparc-dis.o ¶
+	sparc-opc.o z8k-dis.o
+
+# BFD_MACHINES is set by configure.in.
+
+BFD_MACHINES = "{o}"mips-dis.c.o "{o}"mips-opc.c.o
+
+OFILES = {BFD_MACHINES} "{o}"dis-buf.c.o
+
+#### host and target dependent Makefile fragments come in here.
+###
+
+FLAGS_TO_PASS = ¶
+	"against={against}" ¶
+	"AR={AR}" ¶
+	"AR_FLAGS={AR_FLAGS}" ¶
+	"CC={CC}" ¶
+	"CFLAGS={CFLAGS}" ¶
+	"RANLIB={RANLIB}" ¶
+	"MAKEINFO={MAKEINFO}" ¶
+	"INSTALL={INSTALL}" ¶
+	"INSTALL_DATA={INSTALL_DATA}" ¶
+	"INSTALL_PROGRAM={INSTALL_PROGRAM}" ¶
+	"BISON={BISON}"
+
+
+# C source files that correspond to .o's.
+CFILES = i386-dis.c z8k-dis.c m68k-dis.c mips-dis.c
+
+STAGESTUFF = {TARGETLIB} {OFILES}
+
+all Ä {TARGETLIB} 
+
+# HDEPFILES comes from the host config; TDEPFILES from the target config.
+
+
+{TARGETLIB} Ä {OFILES}
+#	 rm -f {TARGETLIB}
+	 Lib -o {TARGETLIB} {OFILES}
+#	 {RANLIB} {TARGETLIB}
+
+"{o}"a29k-dis.o Ä "{s}"a29k-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:a29k.h
+"{o}"dis-buf.c.o Ä "{s}"dis-buf.c {INCDIR}:dis-asm.h
+"{o}"h8500-dis.o Ä "{s}"h8500-dis.c h8500-opc.h {INCDIR}:dis-asm.h
+"{o}"h8300-dis.o Ä "{s}"h8300-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:h8300.h
+"{o}"i386-dis.o Ä "{s}"i386-dis.c {INCDIR}:dis-asm.h
+"{o}"i960-dis.o Ä "{s}"i960-dis.c {INCDIR}:dis-asm.h
+"{o}"m68881-ext.o Ä "{s}"m68881-ext.c {INCDIR}:ieee-float.h
+"{o}"m68k-dis.o Ä "{s}"m68k-dis.c {INCDIR}:dis-asm.h {INCDIR}:ieee-float.h ¶
+	{INCDIR}:opcode:m68k.h
+"{o}"mips-dis.c.o Ä "{s}"mips-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:mips.h
+"{o}"mips-opc.c.o Ä "{s}"mips-opc.c {INCDIR}:opcode:mips.h
+"{o}"sparc-dis.o Ä "{s}"sparc-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:sparc.h
+"{o}"sparc-opc.o Ä "{s}"sparc-opc.c {INCDIR}:opcode:sparc.h
+"{o}"z8k-dis.o Ä "{s}"z8k-dis.c z8k-opc.h {INCDIR}:dis-asm.h
+"{o}"sh-dis.o Ä "{s}"sh-dis.c sh-opc.h {INCDIR}:dis-asm.h
+"{o}"alpha-dis.o Ä "{s}"alpha-dis.c alpha-opc.h {INCDIR}:dis-asm.h
+"{o}"hppa-dis.o Ä "{s}"hppa-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:hppa.h
+"{o}"m88k-dis.o Ä "{s}"m88k-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:m88k.h
+
+# Mark everything as depending on config.status, since the timestamp on
+# sysdep.h might actually move backwards if we reconfig and relink it
+# to a different hosts:h-xxx.h file.  This will force a recompile anyway.
+RECONFIG = config.status
+
+# Dummy target to force execution of dependent targets.
+#
+#force:
+
+#install Ä
+#	{INSTALL_DATA} {TARGETLIB} {libdir}:libopcodes.a
+#	{RANLIB} {libdir}:libopcodes.a
+
+#Makefile Ä {srcdir}:Makefile.in {host_makefile_frag} {target_makefile_frag}
+#	{SHELL} .:config.status
+
+dep Ä {CFILES}
+	mkdep {CFLAGS}
+
+
+# What appears below is generated by a hacked mkdep using gcc -MM.
+
+# DO NOT DELETE THIS LINE -- mkdep uses it.
+# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
+
+
+# IF YOU PUT ANYTHING HERE IT WILL GO AWAY
+
