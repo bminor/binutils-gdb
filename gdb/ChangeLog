@@ -1,3 +1,8 @@
+Mon Jul 12 11:29:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hppa-tdep.c (find_proc_framesize): If there is a frame pointer,
+	use it.
+
 Sun Jul 11 19:35:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symtab.c (decode_line_1): Use end of block to figure out whether

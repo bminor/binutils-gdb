@@ -327,6 +327,11 @@ find_proc_framesize(pc)
   if (!u)
     return -1;
 
+  if (u->Save_SP)
+    /* If this bit is set, it means there is a frame pointer and we should
+       use it.  */
+    return -1;
+
   return u->Total_frame_size << 3;
 }
 
