@@ -1,3 +1,24 @@
+Wed Dec  1 11:35:21 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/ho-go32.h: Include fopen-bin.h.
+	* as.h: If FOPEN_WB isn't defined, include fopen-same.h.
+	* output-file.c (output_file_create): Use FOPEN_WB instead of "w".
+	* input-file.c (input_file_open): Use FOPEN_RT instead of "r".
+	* listing.c (file_info): Use FOPEN_RB instead of "rb".
+	* read.c (s_include): Use FOPEN_RT instead of "r".
+
+	* stabs.c: Include obstack.h.
+
+	* tc.h (md_create_long_jump): Don't declare if it's already
+	defined as a macro.
+	(md_create_short_jump, md_estimate_size_before_relax): Ditto.
+
+	* messages.c (as_perror) [BFD_ASSEMBLER]: Use bfd_errmsg instead
+	of strerror.  Clear bfd_error.
+
+	* config/te-lynx.h (LOCAL_LABELS_FB): Define, if not already
+	defined.
+
 Wed Dec  1 10:41:56 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (hppa_elf_mark_end_of_function): New function.
