@@ -1,3 +1,12 @@
+Wed Feb  4 16:10:21 1998  Brent Baccala  <baccala@freesoft.org>
+
+	* syms.c (struct stab_cache): Define.
+	(struct stab_find_info): Remove cached_offset, cached_stab,
+	cached_str, and cached_stroff fields.  Add file_cache,
+	function_cache, and line_cache fields.
+	(_bfd_stab_section_find_nearest_line): Use extensive caching to
+	speed up searches.
+
 Wed Feb  4 13:34:22 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (pe_print_idata): Check for import of ordinal rather
