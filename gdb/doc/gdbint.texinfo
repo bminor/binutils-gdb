@@ -73,6 +73,7 @@ are preserved on all copies.
 * Symbol Reading::		Defining New Symbol Readers
 * Cleanups::			Cleanups
 * Wrapping::			Wrapping Output Lines
+* Frames::                      Keeping track of function calls
 
 @end menu
 
@@ -102,8 +103,8 @@ executes.   In most cases they are the same machine; unfortunately, that
 means you must add @emph{both} host and target support for new machines
 in this category.
 
-The @file{xconfig/*}, @file{xm-*.h} and @file{*-xdep.c} files are for
-host support.  Similarly, the @file{tconfig/*}, @file{tm-*.h} and
+The @file{config/mh-*}, @file{xm-*.h} and @file{*-xdep.c} files are for
+host support.  Similarly, the @file{config/mt-*}, @file{tm-*.h} and
 @file{*-tdep.c} files are for target support.  The question is, what
 features or aspects of a debugging or cross-debugging environment are
 considered to be ``host'' support?
@@ -170,17 +171,17 @@ file @file{h-@var{xxx}.h} to be linked to @file{sysdep.h} at configuration
 time.
 
 Also, if this host requires any changes to the Makefile, create a file
-@file{bfd/config/hm-@var{xxx}}, which includes the required lines.
+@file{bfd/config/mh-@var{xxx}}, which includes the required lines.
 
 (If you have the binary utilities and/or GNU ld in the same tree,
 you'll also have to edit @file{binutils/configure.in} or
 @file{ld/configure.in} to match what you've done in the @file{bfd}
 directory.)
 
-It's likely that the @file{libiberty} and @file{readline} directories
+It's possible that the @file{libiberty} and @file{readline} directories
 won't need any changes for your configuration, but if they do, you can
 change the @file{configure.in} file there to recognize your system and
-map to an @file{hm-@var{xxx}} file.  Then add @file{hm-@var{xxx}}
+map to an @file{mh-@var{xxx}} file.  Then add @file{mh-@var{xxx}}
 to the @file{config/} subdirectory, to set any makefile variables you
 need.  The only current options in there are things like @samp{-DSYSV}.
 
@@ -195,8 +196,8 @@ per-target}.
 @c *scripts*, and call them from {configure} ?
 
 Finally, you'll need to specify and define GDB's host- and
-target-dependent files used for your configuration; the next two
-chapters discuss those.
+target-dependent @file{.h} and @file{.c} files used for your
+configuration; the next two chapters discuss those.
 
 
 @node Host, Target, Config, Top
@@ -216,10 +217,11 @@ files, and interfaces to processes.  @pxref{Target,,Adding a New Target}
 Several files control GDB's configuration for host systems:
 
 @table @file
-@item gdb/xconfig/@var{xxx}
-Specifies what object files are needed when hosting on machine @var{xxx},
-by defining the makefile macro @samp{XDEPFILES=@dots{}}.  Also
-specifies the header file which describes @var{xxx}, by defining
+@item gdb/config/mh-@var{xxx}
+Specifies Makefile fragments needed when hosting on machine @var{xxx}.
+In particular, this lists the required machine-dependent object files,
+by defining @samp{XDEPFILES=@dots{}}.  Also
+specifies the header file which describes host @var{xxx}, by defining
 @samp{XM_FILE= xm-@var{xxx}.h}.  You can also define @samp{CC},
 @samp{REGEX} and @samp{REGEX1}, @samp{SYSV_DEFINE}, @samp{XM_CFLAGS},
 @samp{XM_ADD_FILES}, @samp{XM_CLIBS}, @samp{XM_CDEPS},
@@ -279,10 +281,10 @@ implementations simply locate the registers themselves.@refill
 @end table
 
 Object files needed when the target system is an @var{xxx} are listed
-in the file @file{tconfig/@var{xxx}}, in the makefile macro
+in the file @file{config/mt-@var{xxx}}, in the makefile macro
 @samp{TDEPFILES = }@dots{}.  The header file that defines the target
 system should be called @file{tm-@var{xxx}.h}, and should be specified
-as the value of @samp{TM_FILE} in @file{tconfig/@var{xxx}}.  You can
+as the value of @samp{TM_FILE} in @file{config/mt-@var{xxx}}.  You can
 also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, and @samp{TM_CDEPS} in
 there; see @file{Makefile.in}.
 
@@ -341,15 +343,15 @@ For a new target called @var{ttt}, first specify the configuration as
 described in @ref{Config,,Adding a New Configuration}.  If your new
 target is the same as your new host, you've probably already done that.
 
-A variety of files specify attributes of the target environment:
+A variety of files specify attributes of the GDB target environment:
 
 @table @file
-@item gdb/tconfig/@var{ttt}
+@item gdb/config/mt-@var{ttt}
+Contains a Makefile fragment specific to this target.
 Specifies what object files are needed for target @var{ttt}, by
-defining the makefile macro @samp{TDEPFILES=@dots{}}.
+defining @samp{TDEPFILES=@dots{}}.
 Also specifies the header file which describes @var{ttt}, by defining
-@samp{TM_FILE= tm-@var{ttt}.h}.  You can also define @samp{CC},
-@samp{REGEX} and @samp{REGEX1}, @samp{SYSV_DEFINE}, @samp{TM_CFLAGS},
+@samp{TM_FILE= tm-@var{ttt}.h}.  You can also define @samp{TM_CFLAGS},
 and other Makefile variables here; see @file{Makefile.in}.
 
 @item gdb/tm-@var{ttt}.h
@@ -771,13 +773,15 @@ unfiltered (``@code{printf}'') output.  Symbol reading routines that print
 warnings are a good example.
 
 
-@node Frames,  , Cleanups, Top
+@node Frames,  , Wrapping, Top
 @chapter Frames
 
 A frame is a construct that GDB uses to keep track of calling and called
 functions.
 
-FRAME_FP in the machine description has no meaning to the machine-independent
+@table @code
+@item FRAME_FP
+in the machine description has no meaning to the machine-independent
 part of GDB, except that it is used when setting up a new frame from
 scratch, as follows:
 
@@ -785,17 +789,18 @@ scratch, as follows:
       create_new_frame (read_register (FP_REGNUM), read_pc ()));
 @end example
 
-Other than that, all the meaning imparted to FP_REGNUM is imparted by
-the machine-dependent code.  So, FP_REGNUM can have any value that
-is convenient for the code that creates new frames.  (create_new_frame
-calls INIT_EXTRA_FRAME_INFO if it is defined; that is where you should
-use the FP_REGNUM value, if your frames are nonstandard.)
+Other than that, all the meaning imparted to @code{FP_REGNUM} is imparted by
+the machine-dependent code.  So, @code{FP_REGNUM} can have any value that
+is convenient for the code that creates new frames.  (@code{create_new_frame}
+calls @code{INIT_EXTRA_FRAME_INFO} if it is defined; that is where you should
+use the @code{FP_REGNUM} value, if your frames are nonstandard.)
 
-FRAME_CHAIN:
-
-Given a GDB frame, determine the address of the calling function's frame.
-This will be used to create a new GDB frame struct, and then
-INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
+@item FRAME_CHAIN
+Given a GDB frame, determine the address of the calling function's
+frame.  This will be used to create a new GDB frame struct, and then
+@code{INIT_EXTRA_FRAME_INFO} and @code{INIT_FRAME_PC} will be called for
+the new frame.
+@end table
 
 @contents
 @bye
