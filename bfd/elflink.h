@@ -573,7 +573,8 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
          we want the caller to frob with H rather than with the
          indirect symbol.  That will permit the caller to redefine the
          target of the indirection, rather than the indirect symbol
-         itself.  */
+         itself.  FIXME: This will break the -y option if we store a
+         symbol with a different name.  */
       *sym_hash = h;
     }
 
