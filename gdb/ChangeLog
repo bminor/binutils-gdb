@@ -1,10 +1,20 @@
 Thu Jun 16 14:41:37 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* fork-child.c (startup_inferior) [STARTUP_INFERIOR]: If defined,
+	call it instead of doing normal loop.
+	* infcmd.c (attach_command): Don't call wait_for_inferior if
+	running	Mach 3.
+	* infrun.c (proceed) [PREPARE_TO_PROCEED]: If defined, call
+	hook that can decide whether to step over the next breakpoint.
+	* utils.c (wrap_here): Abort if wrap_buffer not allocated.
+	(request_quit) [REQUEST_QUIT]: If defined, call it instead of
+	doing normal quit.
+
 	* configure.in: Improve sorting/formatting of hosts and targets.
 	(i[34]86-*-mach3*, i[34]86-*-osf1mk*, mips-*-mach3*,
 	m88*-*-mach3*, ns32k-*-mach3*): Recognize.
-	* Makefile.in (gdb-stop): New target.
-	* gdb-stop.c: New file, utility to gets attention of waiting GDBs
+	* Makefile.in (stop-gdb): New target.
+	* stop-gdb.c: New file, utility to get attention of waiting GDBs
 	in Mach 3.
 
 Wed Jun 15 00:41:03 1994  Tom Lord  (lord@rtl.cygnus.com)

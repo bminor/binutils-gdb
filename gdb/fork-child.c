@@ -259,6 +259,9 @@ startup_inferior (ntraps)
 
   terminal_initted = 0;
 
+#ifdef STARTUP_INFERIOR
+  STARTUP_INFERIOR (pending_execs);
+#else
   while (1)
     {
       stop_soon_quietly = 1;	/* Make wait_for_inferior be quiet */
@@ -292,5 +295,6 @@ startup_inferior (ntraps)
 	  resume (0, TARGET_SIGNAL_0);		/* Just make it go on */
 	}
     }
+#endif /* STARTUP_INFERIOR */
   stop_soon_quietly = 0;
 }
