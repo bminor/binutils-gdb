@@ -1,3 +1,9 @@
+Mon May  3 22:51:05 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (NONSRC):  Remove ${srcdir}/putenv.c.
+	* Makefile.in (SFILES):  Add ${srcdir}/putenv.c.
+	* depend:  Update to latest automatically built version.
+
 Mon May  3 19:20:20 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* sparclite/Makefile.in:  Create default target that does nothing

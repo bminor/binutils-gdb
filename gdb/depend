@@ -270,10 +270,6 @@ ns32k-pinsn.o : ${srcdir}/ns32k-pinsn.c ${srcdir}/defs.h ${srcdir}/../include/an
 objfiles.o : ${srcdir}/objfiles.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h ${srcdir}/symtab.h ${srcdir}/symfile.h ${srcdir}/../include/demangle.h \
   ${srcdir}/objfiles.h 
-paread.o : ${srcdir}/paread.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h ${srcdir}/../bfd/libbfd.h ${srcdir}/../bfd/libhppa.h \
-  ${srcdir}/symtab.h ${srcdir}/symfile.h ${srcdir}/../include/demangle.h ${srcdir}/objfiles.h ${srcdir}/buildsym.h ${srcdir}/gdb-stabs.h \
-  ${srcdir}/complaints.h ${srcdir}/../include/aout/aout64.h 
 parse.o : ${srcdir}/parse.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/symtab.h ${srcdir}/../include/obstack.h ${srcdir}/gdbtypes.h ${srcdir}/frame.h ${srcdir}/expression.h \
   ${srcdir}/value.h ${srcdir}/command.h ${srcdir}/language.h ${srcdir}/parser-defs.h 
@@ -285,6 +281,7 @@ procfs.o : ${srcdir}/procfs.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h x
   tm.h config.status ${srcdir}/inferior.h ${srcdir}/symtab.h ${srcdir}/../include/obstack.h ${srcdir}/breakpoint.h ${srcdir}/frame.h \
   ${srcdir}/value.h ${srcdir}/gdbtypes.h ${srcdir}/expression.h ${srcdir}/target.h ${srcdir}/../include/bfd.h ${srcdir}/command.h \
   ${srcdir}/gdbcore.h 
+putenv.o : ${srcdir}/putenv.c 
 pyr-pinsn.o : ${srcdir}/pyr-pinsn.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/pyr.h ${srcdir}/gdbcore.h \
   ${srcdir}/../include/bfd.h 
@@ -308,7 +305,7 @@ remote-es1800.o : ${srcdir}/remote-es1800.c ${srcdir}/defs.h ${srcdir}/../includ
 remote-hms.o : ${srcdir}/remote-hms.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h \
   ${srcdir}/../include/fopen-same.h tm.h config.status ${srcdir}/inferior.h ${srcdir}/symtab.h ${srcdir}/../include/obstack.h \
   ${srcdir}/breakpoint.h ${srcdir}/frame.h ${srcdir}/value.h ${srcdir}/gdbtypes.h ${srcdir}/expression.h ${srcdir}/../include/wait.h \
-  ${srcdir}/terminal.h ${srcdir}/target.h ${srcdir}/../include/bfd.h ${srcdir}/gdbcore.h 
+  ${srcdir}/terminal.h ${srcdir}/target.h ${srcdir}/../include/bfd.h ${srcdir}/gdbcore.h ${srcdir}/serial.h 
 remote-mips.o : ${srcdir}/remote-mips.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h \
   ${srcdir}/../include/fopen-same.h tm.h config.status ${srcdir}/inferior.h ${srcdir}/symtab.h ${srcdir}/../include/obstack.h \
   ${srcdir}/breakpoint.h ${srcdir}/frame.h ${srcdir}/value.h ${srcdir}/gdbtypes.h ${srcdir}/expression.h ${srcdir}/../include/bfd.h \

@@ -263,9 +263,12 @@ TARGET_FLAGS_TO_PASS = \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
 	"BISON=$(BISON)"
 
-# All source files that go into linking GDB, except config-specified files.
+# All source files that go into linking GDB.
 # Source files which are included via a config/*/* Makefile fragment should
 # *not* be specified here; they're in "ALLDEPFILES".
+# Neither should links made at configuration time be specified here, since
+# SFILES is used in building the distribution archive.
+
 SFILES = ${srcdir}/blockframe.c ${srcdir}/breakpoint.c ${srcdir}/buildsym.c \
   ${srcdir}/c-exp.y ${srcdir}/c-lang.c ${srcdir}/c-typeprint.c \
   ${srcdir}/c-valprint.c ${srcdir}/ch-exp.y ${srcdir}/ch-lang.c \
@@ -276,8 +279,8 @@ SFILES = ${srcdir}/blockframe.c ${srcdir}/breakpoint.c ${srcdir}/buildsym.c \
   ${srcdir}/eval.c ${srcdir}/expprint.c ${srcdir}/findvar.c \
   ${srcdir}/gdbtypes.c \
   ${srcdir}/infcmd.c ${srcdir}/inflow.c ${srcdir}/infrun.c \
-  ${srcdir}/language.c ${srcdir}/m2-exp.y ${srcdir}/m2-lang.c \
-  ${srcdir}/m2-typeprint.c \
+  ${srcdir}/language.c ${srcdir}/putenv.c ${srcdir}/m2-exp.y \
+  ${srcdir}/m2-lang.c ${srcdir}/m2-typeprint.c \
   ${srcdir}/m2-valprint.c ${srcdir}/main.c ${srcdir}/maint.c \
   ${srcdir}/mem-break.c ${srcdir}/minsyms.c ${srcdir}/mipsread.c \
   ${srcdir}/objfiles.c ${srcdir}/parse.c ${srcdir}/printcmd.c \
@@ -287,7 +290,7 @@ SFILES = ${srcdir}/blockframe.c ${srcdir}/breakpoint.c ${srcdir}/buildsym.c \
   ${srcdir}/target.c ${srcdir}/typeprint.c ${srcdir}/utils.c \
   ${srcdir}/valarith.c \
   ${srcdir}/valops.c ${srcdir}/valprint.c ${srcdir}/values.c \
-  ${srcdir}/serial.c ser-hardwire.c ${srcdir}/ser-go32.c ${srcdir}/ser-unix.c
+  ${srcdir}/serial.c ${srcdir}/ser-go32.c ${srcdir}/ser-unix.c
 
 # Files that are not source code, but need to go into gdb-$(VERSION).tar.Z.
 NONSRC = ${srcdir}/Makefile.in ${srcdir}/depend ${srcdir}/alldeps.mak \
@@ -298,7 +301,7 @@ NONSRC = ${srcdir}/Makefile.in ${srcdir}/depend ${srcdir}/alldeps.mak \
 	${srcdir}/COPYING $(YYFILES) ${srcdir}/copying.c \
 	${srcdir}/copying.awk \
 	${srcdir}/saber.suppress ${srcdir}/standalone.c ${srcdir}/stuff.c \
-	${srcdir}/kdb-start.c ${srcdir}/putenv.c ${srcdir}/gcc.patch \
+	${srcdir}/kdb-start.c ${srcdir}/gcc.patch \
 	${srcdir}/nindy-share/Makefile ${srcdir}/nindy-share/VERSION \
 	${srcdir}/nindy-share/README ${srcdir}/vx-share/README \
 	${srcdir}/29k-share/README \
