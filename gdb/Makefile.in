@@ -888,9 +888,11 @@ gdb1$(EXEEXT): gdb$(EXEEXT)
 # for some machines.
 # But these rules don't do what we want; we want to hack the foo.o: tm.h
 # dependency to do the right thing.
-tm-isi.h tm-sun3.h tm-news.h tm-hp300bsd.h tm-altos.h: tm-m68k.h
+tm-sun3.h tm-hp300bsd.h tm-altos.h: tm-m68k.h
+# OBSOLETE tm-news.h: tm-m68k.h
+# OBSOLETE tm-isi.h: tm-m68k.h
 tm-hp300hpux.h tm-sun2.h tm-3b1.h: tm-m68k.h
-xm-news1000.h: xm-news.h
+# OBSOLETE xm-news1000.h: xm-news.h
 xm-i386-sv32.h: xm-i386.h
 tm-i386gas.h: tm-i386.h
 xm-sun4os4.h: xm-sparc.h
@@ -1142,7 +1144,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	i386-linux-tdep.c i386-nat.c \
 	i960-tdep.c \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
-	infptrace.c inftarg.c irix4-nat.c irix5-nat.c isi-xdep.c \
+	infptrace.c inftarg.c irix4-nat.c irix5-nat.c \
 	lynx-nat.c m3-nat.c \
 	m68k-tdep.c \
 	m88k-nat.c m88k-tdep.c mac-nat.c \
@@ -1541,7 +1543,7 @@ irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) target.h \
 	$(symtab_h) symfile.h objfiles.h $(command_h) $(frame_h) gnu-regex.h \
 	language.h gdb_string.h $(regcache_h)
 
-isi-xdep.o: isi-xdep.c
+# OBSOLETE isi-xdep.o: isi-xdep.c
 
 jv-lang.o: jv-lang.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) parser-defs.h language.h symfile.h objfiles.h \

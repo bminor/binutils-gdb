@@ -85,7 +85,7 @@ ia64-*-linux*)		gdb_host=linux ;;
 
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
-m68030-sony-*)		gdb_host=news1000 ;;
+# OBSOLETE m68030-sony-*)		gdb_host=news1000 ;;
 
 m68*-apollo*-sysv*)	gdb_host=apollo68v ;;
 m68*-apollo*-bsd*)	gdb_host=apollo68b ;;
@@ -93,13 +93,13 @@ m68*-att-*)		gdb_host=3b1 ;;
 m68*-bull*-sysv*)	gdb_host=dpx2 ;;
 m68*-hp-bsd*)		gdb_host=hp300bsd ;;
 m68*-hp-hpux*)		gdb_host=hp300hpux ;;
-m68*-isi-*)		gdb_host=isi ;;
+# OBSOLETE m68*-isi-*)		gdb_host=isi ;;
 m68*-*-linux*)		gdb_host=linux ;;
 m68*-*-lynxos*)		gdb_host=m68klynx ;;
 m68*-*-netbsd*)		gdb_host=nbsd ;;
 m68*-*-sysv4*)		gdb_host=m68kv4 ;;
 m68*-motorola-*)	gdb_host=delta68 ;;
-m68*-sony-*)		gdb_host=news ;;
+# OBSOLETE m68*-sony-*)		gdb_host=news ;;
 m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
 m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
 m68*-sun-*)		gdb_host=sun3os4 ;;

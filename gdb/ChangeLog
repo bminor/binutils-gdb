@@ -1,3 +1,31 @@
+2001-04-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure.host (m68030-sony-*, m68*-isi-*, m68*-sony-*):
+	* configure.tgt (m68*-rom68k-*, m68*-*bug-*, m68*-monitor-*)
+	(m68*-est-*, m68*-sony-*, m68*-isi-*):
+	* Makefile.in (xm-news1000.h, tm-news.h, xm-news.h): Obsolete..
+	* config/m68k/xm-news.h: Obsolete.
+	* config/m68k/tm-news.h: 
+	* config/m68k/xm-news1000.h: Obsolete.
+	* config/m68k/news.mh: Obsolete.
+	* config/m68k/news.mt: Obsolete.
+	* config/m68k/nm-news.h: Obsolete.
+	* config/m68k/news1000.mh: Obsolete.
+	* news-xdep.c: Obsolete.
+	* Makefile.in (isi-xdep.o): Obsolete.
+	(ALLDEPFILES): Delete isi-xdep.c.
+	(tm-isi.h): Obsolete.
+	* m68k-tdep.c (altos_skip_prologue): Update comments.
+	(isi_skip_prologue): Obsolete.
+	* isi-xdep.c: Obsolete.
+	* config/m68k/xm-isi.h: Obsolete.
+	* config/m68k/isi.mh: Obsolete.
+	* config/m68k/tm-isi.h: Obsolete.
+	* config/m68k/isi.mt: Obsolete.
+
+	* TODO: Update.
+	* NEWS: Update.
+
 2001-04-17  Michael Snyder  <msnyder@redhat.com>
 	
 	* remote.c (remote_open_1): On opening the remote target, activate

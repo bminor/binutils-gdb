@@ -53,7 +53,7 @@ altos_skip_prologue (CORE_ADDR pc)
   else if (op == P_LINKL_FP)
     pc += 6;			/* Skip link #long */
   /* Not sure why branches are here.  */
-  /* From tm-isi.h, tm-altos.h */
+  /* From tm-altos.h */
   else if (op == 0060000)
     pc += 4;			/* Skip bra #word */
   else if (op == 00600377)
@@ -66,24 +66,24 @@ altos_skip_prologue (CORE_ADDR pc)
 /* The only reason this is here is the tm-isi.h reference below.  It
    was moved back here from tm-m68k.h.  FIXME? */
 
-extern CORE_ADDR
-isi_skip_prologue (CORE_ADDR pc)
-{
-  register int op = read_memory_integer (pc, 2);
-  if (op == P_LINKW_FP)
-    pc += 4;			/* Skip link #word */
-  else if (op == P_LINKL_FP)
-    pc += 6;			/* Skip link #long */
-  /* Not sure why branches are here.  */
-  /* From tm-isi.h, tm-altos.h */
-  else if (op == 0060000)
-    pc += 4;			/* Skip bra #word */
-  else if (op == 00600377)
-    pc += 6;			/* skip bra #long */
-  else if ((op & 0177400) == 0060000)
-    pc += 2;			/* skip bra #char */
-  return pc;
-}
+/* OBSOLETE extern CORE_ADDR */
+/* OBSOLETE isi_skip_prologue (CORE_ADDR pc) */
+/* OBSOLETE { */
+/* OBSOLETE   register int op = read_memory_integer (pc, 2); */
+/* OBSOLETE   if (op == P_LINKW_FP) */
+/* OBSOLETE     pc += 4;			 *//* Skip link #word */
+/* OBSOLETE   else if (op == P_LINKL_FP) */
+/* OBSOLETE     pc += 6;			 *//* Skip link #long */
+/* OBSOLETE    *//* Not sure why branches are here.  */
+/* OBSOLETE    *//* From tm-isi.h, tm-altos.h */
+/* OBSOLETE   else if (op == 0060000) */
+/* OBSOLETE     pc += 4;			 *//* Skip bra #word */
+/* OBSOLETE   else if (op == 00600377) */
+/* OBSOLETE     pc += 6;			 *//* skip bra #long */
+/* OBSOLETE   else if ((op & 0177400) == 0060000) */
+/* OBSOLETE     pc += 2;			 *//* skip bra #char */
+/* OBSOLETE   return pc; */
+/* OBSOLETE } */
 
 int
 delta68_in_sigtramp (CORE_ADDR pc, char *name)

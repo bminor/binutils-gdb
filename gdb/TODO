@@ -186,13 +186,13 @@ Steps:
 		  ns32k-utek-sysv*	ns32k	 merlin	  merlin     yes
 		  ns32k-utek-*		ns32k	 -	  umax	     yes
 		  tic80-*		tic80	 -	  tic80	     yes
-		  m68*-isi-*		m68k	 isi	  isi
-		  m68*-sony-*		m68k	 news	  news
-		  m68030-sony-*		m68k	 news1000 -
-		  m68*-rom68k-*		m68k	 -	  (monitor)
-		  m68*-*bug-*		m68k	 -	  (monitor)
-		  m68*-monitor-*	m68k	 -	  (monitor)
-		  m68*-est-*		m68k	 -	  (monitor)
+		  m68*-isi-*		m68k	 isi	  isi        yes
+		  m68*-sony-*		m68k	 news	  news	     yes
+		  m68030-sony-*		m68k	 news1000 -	     yes
+		  m68*-rom68k-*		m68k	 -	  (monitor)  yes
+		  m68*-*bug-*		m68k	 -	  (monitor)  yes
+		  m68*-monitor-*	m68k	 -	  (monitor)  yes
+		  m68*-est-*		m68k	 -	  (monitor)  yes
 		  a29k-*-*		a29k	 ultra3	  -          yes
 		  a29k-*-sym1*		a29k	 -	  ultra3     yes
 		  a29k-*-kern*		a29k	 -	  a29k-kern  yes
