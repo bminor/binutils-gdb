@@ -1,3 +1,52 @@
+2003-10-12  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/rd-sh.exp (LDFLAGS): Define appropriately for each
+	sh64/sh5 targets.
+	* ld-sh/sh.exp: Don't do relaxing test for sh64*-*-* and
+	sh5*-*-* targets.
+	* ld-sh/sh64/relax.exp (emul32): Set to shelf32_nbsd for netbsd.
+	* ld-sh/sh64/relfail.exp: Set parameters for netbsd.
+	* ld-sh/sh64/sh64.exp: Skip this for netbsd.  Trim the section
+	numbers for crangerel1 and crengerel2 tests.
+	* ld-sh/sh64/abi32.sd: Update.
+	* ld-sh/sh64/abi32.xd: Likewise.
+	* ld-sh/sh64/abi64.sd: Likewise.
+	* ld-sh/sh64/abi64.xd: Likewise.
+	* ld-sh/sh64/abixx-noexp.sd: Likewise.
+	* ld-sh/sh64/cmpct1.sd: Likewise.
+	* ld-sh/sh64/cmpct1.xd: Likewise.
+	* ld-sh/sh64/crange1.rd: Likewise.
+	* ld-sh/sh64/crange2.rd: Likewise.
+	* ld-sh/sh64/crange3-cmpct.rd: Likewise.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+	* ld-sh/sh64/crange3.rd: Likewise.
+	* ld-sh/sh64/crangerel1.rd: Likewise.
+	* ld-sh/sh64/crangerel2.rd: Likewise.
+	* ld-sh/sh64/dlsection.sd: Likewise.
+	* ld-sh/sh64/endian.sbd: Likewise.
+	* ld-sh/sh64/endian.sld: Likewise.
+	* ld-sh/sh64/gotplt.d: Likewise.
+	* ld-sh/sh64/init-cmpct.d: Likewise.
+	* ld-sh/sh64/init-media.d: Likewise. 
+	* ld-sh/sh64/init.s: Align functions.
+	* ld-sh/sh64/init64.d: Update.
+	* ld-sh/sh64/mix1-noexp.sd: Likewise.
+	* ld-sh/sh64/mix1.sd: Likewise.
+	* ld-sh/sh64/mix1.xd: Likewise.
+	* ld-sh/sh64/mix2-noexp.sd: Likewise.
+	* ld-sh/sh64/mix2.sd: Likewise.
+	* ld-sh/sh64/mix2.xd:Likewise.
+	* ld-sh/sh64/rel32.xd: Likewise.
+	* ld-sh/sh64/rel64.xd: Likewise.
+	* ld-sh/sh64/reldl32.rd: Likewise.
+	* ld-sh/sh64/reldl64.rd: Likewise.
+	* ld-sh/sh64/shdl32.xd: Update.
+	* ld-sh/sh64/shdl64.sd: Likewise.
+	* ld-sh/sh64/shdl64.xd: Likewise.
+	* ld-sh/shared-1.d: Add -z nocombreloc to ld option.  Update.
+	* ld-sh/sub2l-1.d: Make file format match with elf32-sh.*.
+	* ld-sh/weak1.d: Likewise.
+
 2003-10-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-scripts/defined3.d, ld-scripts/defined3.t: New test.
