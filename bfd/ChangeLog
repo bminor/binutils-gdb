@@ -1,3 +1,23 @@
+Thu Dec  2 15:43:32 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libnlm.h (struct nlm_obj_tdata): New field backend_data.
+	(nlm_backend_data, nlm_alpha_backend_data): New accessor macros.
+	(struct nlm_backend_data): New field no_uninitialized_data.
+	(nlm_no_uninitialized_data): New accessor macro.
+	* nlmcode.h (nlm_compute_section_file_positions): Handle
+	no_uninitialized_data.
+	(nlm_external_reloc_compare): Sort relocs by address for a
+	particular symbol, to make the sort more stable.
+	(nlm_write_object_contents): Cast the arguments to qsort.  Get the
+	value of a debugging symbol the same way we get the value of a
+	normal symbol.
+	* nlm32-alpha.c: Various changes.  Write out GP and .lita relocs.
+	Set no_uninitialized_data to true.
+	* nlm32-i386.c (nlm32_i386_backend), nlm32-sparc.c
+	(nlm32_sparc_backend): Set no_uninitialized_data field false.
+	* nlmswap.h (nlm_swap_fixed_header_out): Zero out destination
+	before filling it in.
+
 Wed Dec  1 21:47:58 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_section_type, som_decode_symcalss): New functions.
