@@ -482,7 +482,7 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 
 	      if (hdr->sh_flags & SHF_EXECINSTR)
 		newsect->flags |= SEC_CODE; /* FIXME: may only contain SOME code */
-	      else
+	      else if (newsect->flags & SEC_ALLOC)
 		newsect->flags |= SEC_DATA;
 
 	      hdr->rawdata = (void *) newsect;
@@ -509,10 +509,10 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	      if (!(hdr->sh_flags & SHF_WRITE))
 		newsect->flags |= SEC_READONLY;
 
+	      /* FIXME: This section is empty.  Does it really make
+		 sense to set SEC_CODE for it?  */
 	      if (hdr->sh_flags & SHF_EXECINSTR)
 		newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
-	      else
-		newsect->flags |= SEC_DATA;
 
 	      hdr->rawdata = (void *) newsect;
 	    }
@@ -586,7 +586,7 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	    newsect->flags |= SEC_READONLY;
 	  if (hdr->sh_flags & SHF_EXECINSTR)
 	    newsect->flags |= SEC_CODE;
-	  else
+	  else if (newsect->flags & SEC_ALLOC)
 	    newsect->flags |= SEC_DATA;
 	}
 

@@ -1,3 +1,16 @@
+Mon Sep 20 19:18:10 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (bfd_section_from_shdr): Only set SEC_DATA for a
+	SHF_PROGBITS or SHT_STRTAB section if SEC_ALLOC is set.  Never set
+	SEC_DATA for a SHF_NOBITS section.
+
+	* nlm32-i386.c (nlm_i386_mangle_relocs): Check SEC_LOAD rather
+	than SEC_CODE | SEC_DATA.  Add some casts to avoid warnings.
+	* nlmcode.h: Add some casts to avoid warnings.
+	(nlm_write_object_contents): Ignore relocs for sections that are
+	neither code nor data.  Just use the symbol value for debugging
+	symbols; don't offset by the section vma.
+
 Fri Sep 17 18:08:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* reloc.c (bfd_perform_relocation): Don't return an error when
