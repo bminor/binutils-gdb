@@ -67,6 +67,7 @@ news-mips.h
 ncr3000.h
 riscos.h
 rs6000.h
+rs6000lynx.h
 rtbsd.h
 solaris2.h
 sparc-ll.h
