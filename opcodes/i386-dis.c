@@ -1034,15 +1034,12 @@ print_insn_i386 (pc, info)
      bfd_vma pc;
      disassemble_info *info;
 {
-  print_insn_x86 (pc, info, 1, 1);
-}
-
-int
-print_insn_i8086 (pc, info)
-     bfd_vma pc;
-     disassemble_info *info;
-{
-  print_insn_x86 (pc, info, 0, 0);
+  if (info->mach == bfd_mach_i386_i386)
+    print_insn_x86 (pc, info, 1, 1);
+  else if (info->mach == bfd_mach_i386_i8086)
+    print_insn_x86 (pc, info, 0, 0);
+  else
+    abort ();
 }
 
 int
