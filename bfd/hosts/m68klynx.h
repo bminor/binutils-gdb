@@ -1,6 +1,8 @@
-/* Motorola 680x0 running any BSD Unix */
+/* Motorola 680x0 running LynxOS */
 
-#ifndef hosts_m68kbsd_H
+#ifndef hosts_m68klynx_H
+#define hosts_m68klynx_H
+
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -25,5 +27,9 @@
 #define u_comm u_kproc.kp_proc.p_comm
 
 #include "fopen-same.h"
-#define hosts_m68kbsd_H
-#endif
+
+/* Lynx has calloc, but no cfree, and gprof uses it. */
+
+#define cfree free
+
+#endif /* hosts_m68klynx_H */

@@ -1,7 +1,7 @@
-/* Intel 386 running LynxOS */
+/* Sparc running LynxOS */
 
-#ifndef hosts_i386lynx_h
-#define hosts_i386lynx_h
+#ifndef hosts_sparclynx_h
+#define hosts_sparclynx_h
 
 #include <fcntl.h>
 #include <errno.h>
@@ -21,17 +21,15 @@
 #include <sys/proc.h>
 
 #define	HOST_PAGE_SIZE		NBPG
-#define	HOST_MACHINE_ARCH	bfd_arch_i386
+#define	HOST_MACHINE_ARCH	bfd_arch_sparc
 #define	HOST_TEXT_START_ADDR	USRTEXT
 
 #define HOST_LYNX
 
 #include "fopen-same.h"
 
-#undef I386			/* Lynx defines this for some reason */
-
 /* Lynx has calloc, but no cfree, and gprof uses it. */
 
 #define cfree free
 
-#endif /* hosts_i386lynx_h */
+#endif /* hosts_sparclynx_h */
