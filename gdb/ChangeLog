@@ -1,5 +1,12 @@
 Fri Oct 16 13:06:08 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Native support cleanup for i386bsd (untested).
+
+	* config/i386bsd.mt (NATDEPFILES): exec.o removed.
+	* config/i386bsd.mh (NATDEPFILES): added exec.o
+	* tm-i386bsd.h (FLOAT_INFO): removed.
+	* nm-i386bsd.h (FLOAT_INFO): added.
+
 	Native support for i386v (untested).
 
 	* config/i386v.mh (XDEPFILES): removed infptrace.o inftarg.o

@@ -27,8 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    of external names before giving them to the linker.  */
 #define NAMES_HAVE_UNDERSCORE
 
-#undef FLOAT_INFO	/* No float info yet */
-
 /* 386BSD cannot handle the segment registers. */
 #undef NUM_REGS
 #define NUM_REGS 12
