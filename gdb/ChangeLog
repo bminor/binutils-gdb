@@ -1,3 +1,8 @@
+2002-11-18  Adam Fedor  <fedor@gnu.org>
+
+	* gdb/parser-defs.h: (struct objc_class_str): New structure
+	for parsing ObjC classes.
+
 2002-11-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* stack.c (frame_relative_level): Copy function from here ...
