@@ -1,5 +1,13 @@
 2003-09-03  Andrew Cagney  <cagney@redhat.com>
 
+	* config/arm/wince.mt (TM_CLIBS): Replace WIN32LIBS.
+	* config/mips/wince.mt (TM_CLIBS): Ditto.
+	* config/sh/wince.mt (TM_CLIBS): Ditto.
+	* config/pa/hppa64.mt (TM_CLIBS): Delete.
+	* config/sparc/sp64.mt (CC): Delete.
+
+2003-09-03  Andrew Cagney  <cagney@redhat.com>
+
 	* defs.h: Do not include "arch-utils.h".
 	(GDB_MULTI_ARCH): If not defined, set to GDB_MULTI_ARCH_PARTIAL or
 	GDB_MULTI_ARCH_PURE.
