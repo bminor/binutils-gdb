@@ -220,6 +220,8 @@ dump_section_header (abfd, section, ignored)
   PF (SEC_ROM, "ROM");
   PF (SEC_DEBUGGING, "DEBUGGING");
   PF (SEC_NEVER_LOAD, "NEVER_LOAD");
+  PF (SEC_EXCLUDE, "EXCLUDE");
+  PF (SEC_SORT_ENTRIES, "SORT ENTRIES");
   printf ("\n");
 #undef PF
 }
@@ -1294,7 +1296,7 @@ display_bfd (abfd)
   putchar ('\n');
   if (dump_section_headers)
     dump_headers (abfd);
-  if (dump_symtab || dump_reloc_info || disassemble)
+  if (dump_symtab || dump_reloc_info || disassemble || dump_debugging)
     {
       syms = slurp_symtab (abfd);
     }
@@ -1320,7 +1322,7 @@ display_bfd (abfd)
     {
       PTR dhandle;
 
-      dhandle = read_debugging_info (abfd);
+      dhandle = read_debugging_info (abfd, syms, symcount);
       if (dhandle != NULL)
 	{
 	  if (! print_debugging_info (stdout, dhandle))

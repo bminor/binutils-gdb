@@ -1,5 +1,5 @@
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 ** NOTE: bfd.h and bfd-in2.h are GENERATED files.  Don't change them;
@@ -873,6 +873,16 @@ typedef struct sec
            bfd_get_section_contents, and the data is retrieved from
            memory if appropriate.  */
 #define SEC_IN_MEMORY 0x20000
+
+         /* The contents of this section are to be excluded by the
+	    linker for executable and shared objects unless those
+	    objects are to be further relocated.  */
+#define SEC_EXCLUDE 0x40000
+
+	 /* The contents of this section are to be sorted by the
+	   based on the address specified in the associated symbol
+	   table.  */
+#define SEC_SORT_ENTRIES 0x80000
 
 	 /*  End of section flags.  */
 

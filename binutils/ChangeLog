@@ -1,3 +1,8 @@
+Thu Jan 11 17:31:38 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* objdump.c (dump_section_header): Add new section flags
+	SEC_{EXCLUDE,SORT_ENTRIES}.
+
 Thu Jan 11 11:45:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objcopy.c (filter_symbols): NULL terminate the output symbols.

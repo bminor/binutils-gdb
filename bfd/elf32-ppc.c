@@ -113,6 +113,10 @@ static boolean ppc_elf_set_private_flags PARAMS ((bfd *, flagword));
 static boolean ppc_elf_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static boolean ppc_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
 
+static boolean ppc_elf_section_from_shdr PARAMS ((bfd *,
+						  Elf32_Internal_Shdr *,
+						  char *));
+
 static boolean ppc_elf_check_relocs PARAMS ((bfd *,
 					     struct bfd_link_info *,
 					     asection *,
@@ -1125,6 +1129,34 @@ ppc_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
      reloc_entry->howto->type);
 
   return bfd_reloc_notsupported;
+}
+
+
+/* Handle a PowerPC specific section when reading an object file.  This
+   is called when elfcode.h finds a section with an unknown type.  */
+
+static boolean
+ppc_elf_section_from_shdr (abfd, hdr, name)
+     bfd *abfd;
+     Elf32_Internal_Shdr *hdr;
+     char *name;
+{
+  asection *newsect;
+  flagword flags;
+
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+    return false;
+
+  newsect = hdr->bfd_section;
+  flags = bfd_get_section_flags (abfd, newsect);
+  if (hdr->sh_flags & SHF_EXCLUDE)
+    flags |= SEC_EXCLUDE;
+
+  if (hdr->sh_type == SHT_ORDERED)
+    flags |= SEC_SORT_ENTRIES;
+
+  bfd_set_section_flags (abfd, newsect, flags);
+  return true;
 }
 
 
@@ -2290,6 +2322,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #define bfd_elf32_bfd_merge_private_bfd_data	ppc_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		ppc_elf_set_private_flags
 #define bfd_elf32_bfd_reloc_type_lookup		ppc_elf_reloc_type_lookup
+#define elf_backend_section_from_shdr		ppc_elf_section_from_shdr
 #define elf_backend_relocate_section		ppc_elf_relocate_section
 #define elf_backend_create_dynamic_sections	_bfd_elf_create_dynamic_sections
 #define elf_backend_check_relocs		ppc_elf_check_relocs

@@ -1,5 +1,5 @@
 /* Object file "section" support for the BFD library.
-   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 SECTION
@@ -226,19 +226,25 @@ CODE_FRAGMENT
 .#define SEC_HAS_CONTENTS 0x200
 .
 .        {* An instruction to the linker to not output the section
-.          even if it has information which would normally be written. *}
+.           even if it has information which would normally be written. *}
 .#define SEC_NEVER_LOAD 0x400
 .
-.        {* The section is a shared library section.  The linker must leave
-.           these completely alone, as the vma and size are used when
-.           the executable is loaded. *}
-.#define SEC_SHARED_LIBRARY 0x800
+.        {* The section is a COFF shared library section.  This flag is
+.           only for the linker.  If this type of section appears in
+.           the input file, the linker must copy it to the output file
+.           without changing the vma or size.  FIXME: Although this
+.           was originally intended to be general, it really is COFF
+.           specific (and the flag was renamed to indicate this).  It
+.           might be cleaner to have some more general mechanism to
+.           allow the back end to control what the linker does with
+.           sections. *}
+.#define SEC_COFF_SHARED_LIBRARY 0x800
 .
 .        {* The section is a common section (symbols may be defined
 .           multiple times, the value of a symbol is the amount of
 .           space it requires, and the largest symbol value is the one
 .           used).  Most targets have exactly one of these (which we
-.	    translate to bfd_com_section), but ECOFF has two. *}
+.	    translate to bfd_com_section_ptr), but ECOFF has two. *}
 .#define SEC_IS_COMMON 0x8000
 .
 .        {* The section contains only debugging information.  For
@@ -252,6 +258,16 @@ CODE_FRAGMENT
 .           bfd_get_section_contents, and the data is retrieved from
 .           memory if appropriate.  *}
 .#define SEC_IN_MEMORY 0x20000
+.
+.        {* The contents of this section are to be excluded by the
+.	    linker for executable and shared objects unless those
+.	    objects are to be further relocated.  *}
+.#define SEC_EXCLUDE 0x40000
+.
+.	{* The contents of this section are to be sorted by the
+.	   based on the address specified in the associated symbol
+.	   table.  *}
+.#define SEC_SORT_ENTRIES 0x80000
 .
 .	{*  End of section flags.  *}
 .
@@ -373,28 +389,36 @@ CODE_FRAGMENT
 .   struct bfd_link_order *link_order_tail;
 .} asection ;
 .
-.
 .    {* These sections are global, and are managed by BFD.  The application
 .       and target back end are not permitted to change the values in
-.	these sections.  *}
+.	these sections.  New code should use the section_ptr macros rather
+.       than referring directly to the const sections.  The const sections
+.       may eventually vanish.  *}
 .#define BFD_ABS_SECTION_NAME "*ABS*"
 .#define BFD_UND_SECTION_NAME "*UND*"
 .#define BFD_COM_SECTION_NAME "*COM*"
 .#define BFD_IND_SECTION_NAME "*IND*"
 .
 .    {* the absolute section *}
-.extern asection bfd_abs_section;
+.extern const asection bfd_abs_section;
+.#define bfd_abs_section_ptr ((asection *) &bfd_abs_section)
+.#define bfd_is_abs_section(sec) ((sec) == bfd_abs_section_ptr)
 .    {* Pointer to the undefined section *}
-.extern asection bfd_und_section;
+.extern const asection bfd_und_section;
+.#define bfd_und_section_ptr ((asection *) &bfd_und_section)
+.#define bfd_is_und_section(sec) ((sec) == bfd_und_section_ptr)
 .    {* Pointer to the common section *}
-.extern asection bfd_com_section;
+.extern const asection bfd_com_section;
+.#define bfd_com_section_ptr ((asection *) &bfd_com_section)
 .    {* Pointer to the indirect section *}
-.extern asection bfd_ind_section;
+.extern const asection bfd_ind_section;
+.#define bfd_ind_section_ptr ((asection *) &bfd_ind_section)
+.#define bfd_is_ind_section(sec) ((sec) == bfd_ind_section_ptr)
 .
-.extern struct symbol_cache_entry *bfd_abs_symbol;
-.extern struct symbol_cache_entry *bfd_com_symbol;
-.extern struct symbol_cache_entry *bfd_und_symbol;
-.extern struct symbol_cache_entry *bfd_ind_symbol;
+.extern const struct symbol_cache_entry * const bfd_abs_symbol;
+.extern const struct symbol_cache_entry * const bfd_com_symbol;
+.extern const struct symbol_cache_entry * const bfd_und_symbol;
+.extern const struct symbol_cache_entry * const bfd_ind_symbol;
 .#define bfd_get_section_size_before_reloc(section) \
 .     (section->reloc_done ? (abort(),1): (section)->_raw_size)
 .#define bfd_get_section_size_after_reloc(section) \
@@ -403,22 +427,24 @@ CODE_FRAGMENT
 
 /* These symbols are global, not specific to any BFD.  Therefore, anything
    that tries to change them is broken, and should be repaired.  */
-static CONST asymbol global_syms[] =
+static const asymbol global_syms[] =
 {
  /* the_bfd, name, value, attr, section [, udata] */
-  {0, BFD_COM_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_com_section},
-  {0, BFD_UND_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_und_section},
-  {0, BFD_ABS_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_abs_section},
-  {0, BFD_IND_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_ind_section},
+  {0, BFD_COM_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_com_section},
+  {0, BFD_UND_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_und_section},
+  {0, BFD_ABS_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_abs_section},
+  {0, BFD_IND_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_ind_section},
 };
 
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)	\
-  asymbol *SYM = (asymbol *) &global_syms[IDX]; \
-  asection SEC = { NAME, 0, 0, FLAGS, 0, 0, (boolean) 0, 0, 0, 0, &SEC,\
-		    0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, (boolean) 0, \
-		     (asymbol *) &global_syms[IDX], &SYM, }
+  const asymbol * const SYM = (asymbol *) &global_syms[IDX]; \
+  const asection SEC = \
+    { NAME, 0, 0, FLAGS, 0, false, 0, 0, 0, 0, (asection *) &SEC, \
+      0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, (boolean) 0, \
+      (asymbol *) &global_syms[IDX], (asymbol **) &SYM, }
 
-STD_SECTION (bfd_com_section, SEC_IS_COMMON, bfd_com_symbol, BFD_COM_SECTION_NAME, 0);
+STD_SECTION (bfd_com_section, SEC_IS_COMMON, bfd_com_symbol,
+	     BFD_COM_SECTION_NAME, 0);
 STD_SECTION (bfd_und_section, 0, bfd_und_symbol, BFD_UND_SECTION_NAME, 1);
 STD_SECTION (bfd_abs_section, 0, bfd_abs_symbol, BFD_ABS_SECTION_NAME, 2);
 STD_SECTION (bfd_ind_section, 0, bfd_ind_symbol, BFD_IND_SECTION_NAME, 3);
@@ -545,10 +571,7 @@ bfd_make_section_anyway (abfd, name)
 
   newsect = (asection *) bfd_zalloc (abfd, sizeof (asection));
   if (newsect == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   newsect->name = name;
   newsect->index = abfd->section_count++;
@@ -566,7 +589,7 @@ bfd_make_section_anyway (abfd, name)
      useful for things like relocs which are relative to the base of a
      section.  */
   newsect->symbol = bfd_make_empty_symbol (abfd);
-  if (!newsect)
+  if (newsect->symbol == NULL)
     return NULL;
   newsect->symbol->name = name;
   newsect->symbol->value = 0;
@@ -599,7 +622,7 @@ DESCRIPTION
    <<bfd_error>>.
 */
 
-sec_ptr
+asection *
 bfd_make_section (abfd, name)
      bfd *abfd;
      CONST char *name;
@@ -608,20 +631,20 @@ bfd_make_section (abfd, name)
 
   if (strcmp (name, BFD_ABS_SECTION_NAME) == 0)
     {
-      return &bfd_abs_section;
+      return bfd_abs_section_ptr;
     }
   if (strcmp (name, BFD_COM_SECTION_NAME) == 0)
     {
-      return &bfd_com_section;
+      return bfd_com_section_ptr;
     }
   if (strcmp (name, BFD_UND_SECTION_NAME) == 0)
     {
-      return &bfd_und_section;
+      return bfd_und_section_ptr;
     }
 
   if (strcmp (name, BFD_IND_SECTION_NAME) == 0)
     {
-      return &bfd_ind_section;
+      return bfd_ind_section_ptr;
     }
 
   while (sect)
@@ -716,7 +739,7 @@ bfd_map_over_sections (abfd, operation, user_storage)
      PTR user_storage;
 {
   asection *sect;
-  int i = 0;
+  unsigned int i = 0;
 
   for (sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     (*operation) (abfd, sect, user_storage);
@@ -813,7 +836,7 @@ bfd_set_section_contents (abfd, section, location, offset, count)
 {
   bfd_size_type sz;
 
-  if (!bfd_get_section_flags (abfd, section) & SEC_HAS_CONTENTS)
+  if (!(bfd_get_section_flags (abfd, section) & SEC_HAS_CONTENTS))
     {
       bfd_set_error (bfd_error_no_contents);
       return (false);
@@ -826,7 +849,7 @@ bfd_set_section_contents (abfd, section, location, offset, count)
       return false;
     }
   sz = bfd_get_section_size_now (abfd, section);
-  if (offset > sz
+  if ((bfd_size_type) offset > sz
       || count > sz
       || offset + count > sz)
     goto bad_val;
@@ -908,7 +931,7 @@ bfd_get_section_contents (abfd, section, location, offset, count)
   /* Even if reloc_done is true, this function reads unrelocated
      contents, so we want the raw size.  */
   sz = section->_raw_size;
-  if (offset > sz || count > sz || offset + count > sz)
+  if ((bfd_size_type) offset > sz || count > sz || offset + count > sz)
     goto bad_val;
 
   if (count == 0)
@@ -923,10 +946,31 @@ bfd_get_section_contents (abfd, section, location, offset, count)
 
   if ((section->flags & SEC_IN_MEMORY) != 0)
     {
-      memcpy (location, section->contents + offset, count);
+      memcpy (location, section->contents + offset, (size_t) count);
       return true;
     }
 
   return BFD_SEND (abfd, _bfd_get_section_contents,
 		   (abfd, section, location, offset, count));
 }
+
+/*
+FUNCTION
+	bfd_copy_private_section_data
+
+SYNOPSIS
+	boolean bfd_copy_private_section_data(bfd *ibfd, asection *isec, bfd *obfd, asection *osec);
+
+DESCRIPTION
+	Copy private section information from @var{isec} in the BFD
+	@var{ibfd} to the section @var{osec} in the BFD @var{obfd}.
+	Return <<true>> on success, <<false>> on error.  Possible error
+	returns are:
+
+	o <<bfd_error_no_memory>> -
+	Not enough memory exists to create private data for @var{osec}.
+
+.#define bfd_copy_private_section_data(ibfd, isection, obfd, osection) \
+.     BFD_SEND (ibfd, _bfd_copy_private_section_data, \
+.		(ibfd, isection, obfd, osection))
+*/

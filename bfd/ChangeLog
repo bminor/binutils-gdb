@@ -1,3 +1,16 @@
+Thu Jan 11 17:06:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* section.c (SEC_{EXCLUDE,SORT_ENTRIES}): New section flags for
+	PowerPC V.4 and eabi.
+ 	* bfd-in2.h: Regenerate.
+	* libfd.h: Regenerate.
+
+	* elfxx-target.h (TARGET_{BIG,LITTLE}_SYM): Add new flags.
+
+	* elf32-ppc.c (ppc_elf_section_from_shdr): Support SHT_ORDERED
+	section type and SHF_EXCLUDE section flag, turning them into the
+	appropriate bfd section flag.
+
 Thu Jan 11 11:23:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c: Extensive changes for a start at dynamic linking
