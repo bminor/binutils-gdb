@@ -1,5 +1,10 @@
 Thu Dec 29 18:18:31 1994  Rob Savoye  <rob@darkstar.cygnus.com>
 
+	* array-rom.c: Support for Array Tech LSI33k based RAID disk
+	controller board.
+	* configure.in: Recognize "mips*-*-ecoff*" rather than
+	"mips*-idt-ecoff*" so it'll work for the LSI33k.
+
 	* monitor.[ch], op50-rom.c, rom68k-rom.c, w89k-rom.c: Add support
 	to monitor config structure for supported baud rates for a target
 	and variable stop bits.
