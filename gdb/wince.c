@@ -1924,8 +1924,6 @@ init_child_ops (void)
   child_ops.to_has_stack = 1;
   child_ops.to_has_registers = 1;
   child_ops.to_has_execution = 1;
-  child_ops.to_sections = 0;
-  child_ops.to_sections_end = 0;
   child_ops.to_magic = OPS_MAGIC;
 }
 

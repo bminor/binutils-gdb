@@ -1,3 +1,21 @@
+2002-11-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gnu-nat.c (init_gnu_ops): Remove NULL initializations.
+	* monitor.c (init_base_monitor_ops): Likewise.
+	* ppc-bdm.c (init_bdm_ppc_ops): Likewise.
+	* remote-array.c (init_array_ops): Likewise.
+	* remote-e7000.c (init_e7000_ops): Likewise.
+	* remote-es.c (init_es1800_ops): Likewise.
+	(init_es1800_child_ops): Likewise.
+	* remote-rdp.c (init_remote_rdp_ops): Likewise.
+	* remote-sim.c (init_gdbsim_ops): Likewise.
+	* remote-st.c (init_st2000_ops): Likewise.
+	* sol-thread.c (init_sol_core_ops): Likewise.
+	(init_sol_thread_ops): Likewise.
+	* v850ice.c (init_850ice_ops): Likewise.
+	* win32-nat.c (init_child_ops): Likewise.
+	* wince.c (init_child_ops): Likewise.
+
 2002-11-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* utils.c (gdb_realpath): Make rp a constant pointer.
