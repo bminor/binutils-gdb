@@ -32,6 +32,16 @@ Note this feature does not work on hpux8.  On hpux9 you must link
 /usr/lib/end.o into your program.  This feature should work automatically
 on hpux10.
 
+* Recording and replaying remote debug sessions
+
+If you set "remotelogfile" gdb will use that filename to make a
+"recording" of a remote debug session which can be replayed back to
+gdb using "gdbreplay".  See gdbserver/README for details.  This is
+useful when you have a problem with gdb while doing remote debugging.
+By making a recording of the session and sending it to the gdb
+maintainers, it is possible to recreate your problem without access to
+the remote hardware you are using.
+
 *** Changes in GDB-4.15:
 
 * Psymtabs for XCOFF

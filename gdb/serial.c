@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "defs.h"
 #include "serial.h"
 #include "gdb_string.h"
+#include "gdbcmd.h"
 
 /* Linked list of serial I/O handlers */
 
@@ -32,6 +33,110 @@ static serial_t last_serial_opened = NULL;
 /* Pointer to list of scb's. */
 
 static serial_t scb_base;
+
+/* Non-NULL gives filename which contains a recording of the remote session,
+   suitable for playback by gdbserver. */
+
+char *serial_logfile = NULL;
+FILE *serial_logfp = NULL;
+
+
+static int serial_reading = 0;
+static int serial_writing = 0;
+
+void
+serial_log_command (cmd)
+     const char *cmd;
+{
+  if (serial_reading || serial_writing)
+    {
+      fputc ('\n', serial_logfp);
+      serial_reading = 0;
+      serial_writing = 0;
+    }
+  fprintf (serial_logfp, "c %s\n", cmd);
+  /* Make sure that the log file is as up-to-date as possible,
+     in case we are getting ready to dump core or something. */
+  fflush (serial_logfp);
+}
+
+static void
+serial_logchar (ch)
+     int ch;
+{
+  switch (ch)
+    {
+    case '\\':	fputs ("\\\\", serial_logfp); break;	
+    case '\b':	fputs ("\\b", serial_logfp); break;	
+    case '\f':	fputs ("\\f", serial_logfp); break;	
+    case '\n':	fputs ("\\n", serial_logfp); break;	
+    case '\r':	fputs ("\\r", serial_logfp); break;	
+    case '\t':	fputs ("\\t", serial_logfp); break;	
+    case '\v':	fputs ("\\v", serial_logfp); break;	
+    default:	fprintf (serial_logfp, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF); break;
+    }
+}
+
+int
+serial_write (scb, str, len)
+     serial_t scb;
+     const char *str;
+     int len;
+{
+  int count;
+
+  if (serial_logfp != NULL)
+    {
+      if (serial_reading)
+	{
+	  fputc ('\n', serial_logfp);
+	  serial_reading = 0;
+	}
+      if (!serial_writing)
+	{
+	  serial_logchar ('w');
+	  serial_logchar (' ');
+	  serial_writing = 1;
+	}
+      for (count = 0; count < len; count++)
+	{
+	  serial_logchar (str[count]);
+	}
+      /* Make sure that the log file is as up-to-date as possible,
+	 in case we are getting ready to dump core or something. */
+      fflush (serial_logfp);
+    }
+  return (scb -> ops -> write (scb, str, len));
+}
+
+int
+serial_readchar (scb, timeout)
+     serial_t scb;
+     int timeout;
+{
+  int ch;
+
+  ch = scb -> ops -> readchar (scb, timeout);
+  if (serial_logfp != NULL)
+    {
+      if (serial_writing)
+	{
+	  fputc ('\n', serial_logfp);
+	  serial_writing = 0;
+	}
+      if (!serial_reading)
+	{
+	  serial_logchar ('r');
+	  serial_logchar (' ');
+	  serial_reading = 1;
+	}
+      serial_logchar (ch);
+      /* Make sure that the log file is as up-to-date as possible,
+	 in case we are getting ready to dump core or something. */
+      fflush (serial_logfp);
+    }
+  return (ch);
+}
 
 static struct serial_ops *
 serial_interface_lookup (name)
@@ -102,6 +207,15 @@ serial_open (name)
 
   last_serial_opened = scb;
 
+  if (serial_logfile != NULL)
+    {
+      serial_logfp = fopen (serial_logfile, "w");
+      if (serial_logfp == NULL)
+	{
+	  perror_with_name (serial_logfile);
+	}
+    }
+
   return scb;
 }
 
@@ -151,6 +265,18 @@ serial_close(scb, really_close)
   serial_t tmp_scb;
 
   last_serial_opened = NULL;
+
+  if (serial_logfp)
+    {
+      if (serial_reading || serial_writing)
+	{
+	  fputc ('\n', serial_logfp);
+	  serial_reading = 0;
+	  serial_writing = 0;
+	}
+      fclose (serial_logfp);
+      serial_logfp = NULL;
+    }
 
 /* This is bogus.  It's not our fault if you pass us a bad scb...!  Rob, you
    should fix your code instead.  */
@@ -346,4 +472,12 @@ _initialize_serial ()
 	   "Connect the terminal directly up to the command monitor.\n\
 Use <CR>~. or <CR>~^D to break out.");
 #endif /* 0 */
+
+  add_show_from_set (add_set_cmd ("remotelogfile", no_class,
+				  var_filename, (char *)&serial_logfile,
+				  "Set filename for remote session recording.\n\
+This file is used to record the remote session for future playback\n\
+by gdbserver.", &setlist),
+		     &showlist);
+
 }

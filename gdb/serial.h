@@ -136,7 +136,9 @@ serial_t serial_fdopen PARAMS ((const int fd));
 #define SERIAL_TIMEOUT -2
 #define SERIAL_EOF -3
 
-#define SERIAL_READCHAR(SERIAL_T, TIMEOUT) ((SERIAL_T)->ops->readchar((SERIAL_T), TIMEOUT))
+extern int serial_readchar PARAMS ((serial_t scb, int timeout));
+
+#define SERIAL_READCHAR(SERIAL_T, TIMEOUT)  serial_readchar (SERIAL_T, TIMEOUT)
 
 /* Set the baudrate to the decimal value supplied.  Returns 0 for success,
    -1 for failure.  */
@@ -155,11 +157,13 @@ serial_t serial_fdopen PARAMS ((const int fd));
 /* Write LEN chars from STRING to the port SERIAL_T.  Returns 0 for
    success, non-zero for failure.  */
 
-#define SERIAL_WRITE(SERIAL_T, STRING, LEN) ((SERIAL_T)->ops->write((SERIAL_T), STRING, LEN))
+extern int serial_write PARAMS ((serial_t scb, const char *str, int len));
+
+#define SERIAL_WRITE(SERIAL_T, STRING,LEN)  serial_write (SERIAL_T, STRING, LEN)
 
 /* Push out all buffers, close the device and destroy SERIAL_T. */
 
-void serial_close PARAMS ((serial_t, int));
+extern void serial_close PARAMS ((serial_t, int));
 
 #define SERIAL_CLOSE(SERIAL_T) serial_close(SERIAL_T, 1)
 
@@ -169,5 +173,10 @@ void serial_close PARAMS ((serial_t, int));
 
 extern void serial_printf PARAMS ((serial_t desc, const char *, ...))
      ATTR_FORMAT(printf, 2, 3);
+
+/* File in which to record the remote debugging session */
+
+extern char *serial_logfile;
+extern FILE *serial_logfp;
 
 #endif /* SERIAL_H */

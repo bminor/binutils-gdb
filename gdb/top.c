@@ -1139,12 +1139,16 @@ execute_command (p, from_tty)
   register struct cmd_list_element *c;
   register enum language flang;
   static int warned = 0;
+  extern FILE *serial_logfp;
 
   free_all_values ();
 
   /* This can happen when command_line_input hits end of file.  */
   if (p == NULL)
       return;
+
+  if (serial_logfp != NULL)
+    serial_log_command (p);
 
   while (*p == ' ' || *p == '\t') p++;
   if (*p)

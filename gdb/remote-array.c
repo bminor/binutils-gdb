@@ -43,10 +43,6 @@
 
 extern int baud_rate;
 
-static const char hexchars[]="0123456789abcdef";
-static char *hex2mem();
-
-#define SREC_SIZE 160
 #define ARRAY_PROMPT ">> "
 
 #define SWAP_TARGET_AND_HOST(buffer,len) 				\
@@ -758,8 +754,10 @@ array_wait (pid, status)
       /* do this so it looks like there's keyboard echo */
       if (c == 3)		/* exit on Control-C */
 	break;
+#if 0
       fputc_unfiltered (c, gdb_stdout);
       fflush (stdout);
+#endif
     }
   }
   SERIAL_SET_TTY_STATE (tty_desc, ttystate);
@@ -947,21 +945,12 @@ array_read_inferior_memory(memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  int i, j;
+  int j;
   char buf[20];
   char packet[PBUFSIZ];
-
-  /* Number of bytes read so far.  */
-  int count;
-
-  /* Starting address of this pass.  */
-  unsigned long startaddr;
-
-  /* Starting address of this pass.  */
-  unsigned long endaddr;
-
-  /* Number of bytes to read in this pass.  */
-  int len_this_pass;
+  int count;			/* Number of bytes read so far.  */
+  unsigned long startaddr;	/* Starting address of this pass.  */
+  int len_this_pass;		/* Number of bytes to read in this pass.  */
 
   debuglogs (1, "array_read_inferior_memory (memaddr=0x%x, myaddr=0x%x, len=%d)", memaddr, myaddr, len);
 
@@ -979,36 +968,46 @@ array_read_inferior_memory(memaddr, myaddr, len)
     return 0;
   }
   
-  startaddr = memaddr;
-  count = 0;
-  while (count < len) {
-    len_this_pass = 16;
-    if ((startaddr % 16) != 0)
-      len_this_pass -= startaddr % 16;
-    if (len_this_pass > (len - count))
-      len_this_pass = (len - count);
-    
-    debuglogs (3, "Display %d bytes at %x for Big Endian host", len_this_pass, startaddr);
-    
-    for (i = 0; i < len_this_pass; i++) {
+  for (count = 0, startaddr = memaddr; count < len; startaddr += len_this_pass)
+    {
+      /* Try to align to 16 byte boundry (why?) */
+      len_this_pass = 16;
+      if ((startaddr % 16) != 0)
+	{
+	  len_this_pass -= startaddr % 16;
+	}
+      /* Only transfer bytes we need */
+      if (len_this_pass > (len - count))
+	{
+	  len_this_pass = (len - count);
+	}
+      /* Fetch the bytes */
+      debuglogs (3, "read %d bytes from inferior address %x", len_this_pass,
+		 startaddr);
       sprintf (buf, "m%08x,%04x", startaddr, len_this_pass);
       make_gdb_packet (packet, buf);
       if (array_send_packet (packet) == 0)
-	error ("Couldn't transmit packet\n");
+	{
+	  error ("Couldn't transmit packet\n");
+	}
       if (array_get_packet (packet) == 0)
-	error ("Couldn't receive packet\n");  
+	{
+	  error ("Couldn't receive packet\n");  
+	}
       if (*packet == 0)
-	error ("Got no data in the GDB packet\n");
-      debuglogs (4, "array_read_inferior: Got a \"%s\" back\n", packet);
-      for (j = 0; j < len_this_pass ; j++) {		/* extract the byte values */
-	myaddr[count++] = from_hex (*(packet+(j*2))) * 16 + from_hex (*(packet+(j*2)+1));
-	debuglogs (5, "myaddr set to %x\n", myaddr[count-1]);
-      }
-      startaddr += 1;
+	{
+	  error ("Got no data in the GDB packet\n");
+	}
+      /* Pick packet apart and xfer bytes to myaddr */
+      debuglogs (4, "array_read_inferior_memory: Got a \"%s\" back\n", packet);
+      for (j = 0; j < len_this_pass ; j++)
+	{
+	  /* extract the byte values */
+	  myaddr[count++] = from_hex (*(packet+(j*2))) * 16 + from_hex (*(packet+(j*2)+1));
+	  debuglogs (5, "myaddr[%d] set to %x\n", count-1, myaddr[count-1]);
+	}
     }
-
-  }
-  return len;
+  return (count);
 }
 
 /* FIXME-someday!  merge these two.  */

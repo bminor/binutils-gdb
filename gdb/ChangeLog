@@ -1,3 +1,35 @@
+Wed Jan 24 13:19:10 1996  Fred Fish  <fnf@cygnus.com>
+
+	* NEWS: Make note of new record and replay feature for
+	remote debug sessions.
+	* serial.c (gdbcmd.h): Include.
+	(serial_logfile, serial_logfp, serial_reading, serial_writing):
+ 	Define here, for remote debug session logging.
+	(serial_log_command, serial_logchar, serial_write, serial_readchar):
+	New functions for remote debug session logging.
+	(serial_open): Open remote debug session log file when needed.
+	(serial_close): Close remote debug session log file when needed.
+	(_initialize_serial): Add set/show commands for name of remote
+	debug session log file.
+	* serial.h (serial_readchar): Declare
+	(SERIAL_READCHAR): Call serial_readchar().
+	(SERIAL_WRITE): Call serial_write().
+	(serial_close): Declare as extern.
+	(serial_logfile, serial_logfp): Declare.
+	* top.c (execute_command): Declare serial_logfp.  Log user command
+	in remote debug session log if log file is open.
+	* remote-array.c (array_wait): #ifdef out echo to gdb_stdout.
+	(array_read_inferior_memory): Rewrite to fix memory overwrite bug.
+	* remote-array.c (SREC_SIZE): Remove, duplicates define in
+	monitor.h.
+	* remote-array.c (hexchars, hex2mem):  Remove, unused.
+	* gdbserver/low-linux.c (store_inferior_registers): Remove
+	unnecessary extern declaration of registers[].
+	* gdbserver/Makefile.in (all): Add gdbreplay.
+	* gdbserver/gdbreplay.c: New file.
+	* gdbserver/README: Give example of recording a remote
+	debug session with gdb and then replaying it with gdbreplay.
+	
 Tue Jan 23 18:02:35 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* stabsread.c (rs6000_builtin_type):  Make bool type unsigned.
