@@ -70,6 +70,15 @@ m68k_linux_register_u_addr (blockend, regnum)
     unpack the register contents and supply them as gdb's idea of the current
     register values. */
 
+
+/* Note both m68k-tdep.c and m68klinux-nat.c contain definitions
+   for supply_gregset and supply_fpregset. The definitions
+   in m68k-tdep.c are valid if USE_PROC_FS is defined. Otherwise,
+   the definitions in m68klinux-nat.c will be used. This is a 
+   bit of a hack. The supply_* routines do not belong in 
+   *_tdep.c files. But, there are several lynx ports that currently 
+   depend on these definitions. */ 
+
 #ifndef USE_PROC_FS
 
 void
