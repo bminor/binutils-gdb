@@ -1,5 +1,9 @@
 2000-07-19  H.J. Lu  <hjl@gnu.org>
 
+	* elf.c (_bfd_elf_print_private_bfd_data): Fix DT_CHECKSUM.
+
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
 	* elf.c (_bfd_elf_print_private_bfd_data): Handle DT_BIND_NOW,
 	DT_INIT_ARRAY, DT_FINI_ARRAY, DT_INIT_ARRAYSZ, DT_FINI_ARRAYSZ,
 	DT_RUNPATH, DT_FLAGS, DT_PREINIT_ARRAY, DT_PREINIT_ARRAYSZ,

@@ -666,6 +666,7 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    case DT_FLAGS: name = "FLAGS"; break;
 	    case DT_PREINIT_ARRAY: name = "PREINIT_ARRAY"; break;
 	    case DT_PREINIT_ARRAYSZ: name = "PREINIT_ARRAYSZ"; break;
+	    case DT_CHECKSUM: name = "CHECKSUM"; break;
 	    case DT_PLTPADSZ: name = "PLTPADSZ"; break;
 	    case DT_MOVEENT: name = "MOVEENT"; break;
 	    case DT_MOVESZ: name = "MOVESZ"; break;
@@ -690,9 +691,6 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    case DT_AUXILIARY: name = "AUXILIARY"; stringp = true; break;
 	    case DT_USED: name = "USED"; break;
 	    case DT_FILTER: name = "FILTER"; stringp = true; break;
-#if DT_CHECKSUM != 0
-	    case DT_CHECKSUM: name = "CHECKSUM"; break;
-#endif
 	    }
 
 	  fprintf (f, "  %-11s ", name);
