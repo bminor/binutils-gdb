@@ -2058,6 +2058,10 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
+  /* Floats are always passed as doubles.  */
+  set_gdbarch_coerce_float_to_double (gdbarch,
+                                      standard_coerce_float_to_double);
+
   set_gdbarch_decr_pc_after_break (gdbarch, 4);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 

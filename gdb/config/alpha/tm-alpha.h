@@ -103,19 +103,6 @@ extern struct frame_info *alpha_setup_arbitrary_frame (int, CORE_ADDR *);
    where the function itself actually starts.  If not, return 0.  */
 #define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)
 
-/* If the current gcc for for this target does not produce correct debugging
-   information for float parameters, both prototyped and unprototyped, then
-   define this macro.  This forces gdb to  always assume that floats are
-   passed as doubles and then converted in the callee.
-
-   For the alpha, it appears that the debug info marks the parameters as
-   floats regardless of whether the function is prototyped, but the actual
-   values are always passed in as doubles.  Thus by setting this to 1, both
-   types of calls will work. */
-
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) \
-  standard_coerce_float_to_double ((formal), (actual))
-
 /* Return TRUE if procedure descriptor PROC is a procedure descriptor
    that refers to a dynamically generated sigtramp function.
 
