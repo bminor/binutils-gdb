@@ -1058,6 +1058,11 @@ download(load_arg_string, from_tty)
 	  section_size = bfd_section_size (pbfd, section);
 	  section_end = To.Offset + section_size;
 
+	  if (section_size == 0)
+	    /* This is needed at least in the BSS case, where the code
+	       below starts writing before it even checks the size.  */
+	    continue;
+
 	  printf("[Loading section %s at %x (%d bytes)]\n",
 		 section_name,
 		 To.Offset,
@@ -1119,6 +1124,8 @@ download(load_arg_string, from_tty)
 	      unsigned long zero = 0;
 
 	      /* Write a zero byte at the vma */
+	      /* FIXME: Broken for sections of 1-3 bytes (we test for
+		 zero above).  */
 	      err = UDIWrite ((UDIHostMemPtr)&zero,	/* From */
 			      To,			/* To */
 			      (UDICount)1,		/* Count */
