@@ -1,3 +1,7 @@
+Thu Jan 12 18:03:03 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* mpw-make.in: Delete references to hex-value.c.
+
 Mon Dec 12 19:44:29 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Add mapping from configs to object file formats,

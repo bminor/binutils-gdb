@@ -32,7 +32,6 @@ OBJECTS = \Option-d
 		"{o}"flonum-mult.c.o \Option-d
 		"{o}"frags.c.o \Option-d
 		"{o}"hash.c.o \Option-d
-		"{o}"hex-value.c.o \Option-d
 		"{o}"input-file.c.o \Option-d
 		"{o}"input-scrub.c.o \Option-d
 		"{o}"listing.c.o \Option-d
@@ -120,7 +119,6 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 "{o}"flonum-mult.c.o \Option-f "{s}"flonum-mult.c {INCLUDES}
 "{o}"frags.c.o \Option-f "{s}"frags.c {INCLUDES}
 "{o}"hash.c.o \Option-f "{s}"hash.c {INCLUDES}
-"{o}"hex-value.c.o \Option-f "{s}"hex-value.c {INCLUDES}
 "{o}"input-file.c.o \Option-f "{s}"input-file.c {INCLUDES}
 "{o}"input-scrub.c.o \Option-f "{s}"input-scrub.c {INCLUDES}
 "{o}"listing.c.o \Option-f "{s}"listing.c {INCLUDES}
