@@ -67,6 +67,7 @@ cpu-d10v.c
 cpu-d30v.c
 cpu-dlx.c
 cpu-fr30.c
+cpu-frv.c
 cpu-h8300.c
 cpu-h8500.c
 cpu-hppa.c
@@ -127,6 +128,7 @@ elf32-d10v.c
 elf32-d30v.c
 elf32-dlx.c
 elf32-fr30.c
+elf32-frv.c
 elf32-gen.c
 elf32-h8300.c
 elf32-hppa.c

@@ -1637,6 +1637,13 @@ enum bfd_architecture
 #define bfd_mach_am33          330
   bfd_arch_fr30,
 #define bfd_mach_fr30          0x46523330
+  bfd_arch_frv,
+#define bfd_mach_frv           0
+#define bfd_mach_frvsimple     1
+#define bfd_mach_fr300         300
+#define bfd_mach_fr400         400
+#define bfd_mach_frvtomcat     499     /* fr500 prototype */
+#define bfd_mach_fr500         500
   bfd_arch_mcore,
   bfd_arch_ia64,      /* HP/Intel ia64 */
 #define bfd_mach_ia64_elf64    0
@@ -2831,6 +2838,17 @@ value of SUBI insn.  */
 /* This is a 32 bit reloc for the AVR that stores 23 bit value
 into 22 bits.  */
   BFD_RELOC_AVR_CALL,
+
+/* Fujitsu Frv Relocations. */
+  BFD_RELOC_FRV_LABEL16,
+  BFD_RELOC_FRV_LABEL24,
+  BFD_RELOC_FRV_LO16,
+  BFD_RELOC_FRV_HI16,
+  BFD_RELOC_FRV_GPREL12,
+  BFD_RELOC_FRV_GPRELU12,
+  BFD_RELOC_FRV_GPREL32,
+  BFD_RELOC_FRV_GPRELHI,
+  BFD_RELOC_FRV_GPRELLO,
 
 /* Direct 12 bit.  */
   BFD_RELOC_390_12,

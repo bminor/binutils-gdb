@@ -1,3 +1,72 @@
+2002-06-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elflink.h (size_dynamic_sections): If the target does not
+	support an ELF style has table, return true, indicating that
+	nothing needed to be done, rather than false, indicating that the
+	section's size could not be computed.
+
+2002-06-18  Dave Brolley  <brolley@redhat.com>
+
+	From Catherine Moore, Michael Meissner, Dave Brolley:
+	* po/SRC-POTFILES.in: Add cpu-frv.c and elf32-frv.c
+	* targets.c: Support bfd_elf32_frv_vec.
+	* reloc.c: Add FRV relocs.
+	* configure.in: Add support for bfd-elf32-frv-vec.
+	* config.bfd (targ_cpu): Add support for frv-*-elf.
+	* archures.c: Add frv arch and machines.
+	* Makefile.am (ALL_MACHINES): Add cpu-frv.lo.
+	(ALL_MACHINES_CFILES): Add cpu-frv.c.
+	(BFD32_BACKENDS): Add elf32-frv.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-frv.c
+	(cpu-frv.lo): New target.
+	(elf32-frv.lo): New target.
+	* cpu-frv.c: New file.
+	* elf32-frv.c: New file.
+
+2002-06-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* elfcode.h (elf_object_p): Sanity check eh_shoff == 0 implies
+	e_shnum == 0.
+	Only read the first section header if e_shoff is non-zero.
+	Don't consider e_shstrndx if there are no sections.
+
+2002-06-17  Tom Rix <trix@redhat.com>
+
+	* elf32-d10v.c (elf_d10v_howto_table): Change R_D10V_10_PCREL_R,
+	R_D10V_10_PCREL_L and R_D10V_18_PCREL to use 
+	complain_overflow_bitfield.
+
+2002-06-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* opncls.c (bfd_openr): Remove redundant bfd_set_error.
+	(bfd_fdopenr): Likewise.
+	(bfd_openstreamr): Likewise.
+	(bfd_openw): Likewise.
+
+	* targets.c: Sort target vecs.
+	(_bfd_target_vector): Add aix5coff64_vec, bfd_elf32_sh64_vec,
+	bfd_elf32_sh64l_vec, bfd_elf32_sh64lnbsd_vec,
+	bfd_elf32_sh64nbsd_vec, bfd_elf64_sh64_vec, bfd_elf64_sh64l_vec,
+	bfd_elf64_sh64lnbsd_vec, bfd_elf64_sh64nbsd_vec.
+	* configure.in: Sort target vecs.  Add m88kmach3_vec.
+	* configure: Regenerate.
+
+2002-06-16  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* elf64-mmix.c (bpo_reloc_request_sort_fn): Use member
+	bpo_reloc_no to break sort order ties, not address of items.
+
+2002-06-16  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* elf-hppa.h (elf_hppa_final_link): Fix formatting in comment.
+	Skip excluded sections in determing __gp value.
+	(elf_hppa_final_link_relocate): Use the symbol's address in
+	R_PARISC_FPTR64 relocations that don't need an opd entry.
+	* elf64-hppa.c (allocate_dynrel_entries): Simplify code.
+	(elf64_hppa_finalize_dynreloc): Likewise.
+	(elf64_hppa_size_dynamic_sections): Move comments and fix typo.
+	(elf64_hppa_finish_dynamic_symbol): Break up assert.
+
 2002-06-14  Sergey Grigoriev  <serge@leopold.Physik.Uni-Augsburg.DE>
 
 	* pei-i386.c (COFF_SECTION_ALIGNMENT_ENTRIES): Enable 16 byte

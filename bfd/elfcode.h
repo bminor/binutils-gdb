@@ -624,6 +624,10 @@ elf_object_p (abfd)
   if (i_ehdrp->e_shentsize != sizeof (x_shdr) && i_ehdrp->e_shnum != 0)
     goto got_wrong_format_error;
 
+  /* Further sanity check.  */
+  if (i_ehdrp->e_shoff == 0 && i_ehdrp->e_shnum != 0)
+    goto got_wrong_format_error;
+
   ebd = get_elf_backend_data (abfd);
 
   /* Check that the ELF e_machine field matches what this particular
@@ -677,25 +681,28 @@ elf_object_p (abfd)
   /* Remember the entry point specified in the ELF file header.  */
   bfd_set_start_address (abfd, i_ehdrp->e_entry);
 
-  /* Seek to the section header table in the file.  */
-  if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0)
-    goto got_no_match;
+  if (i_ehdrp->e_shoff != 0)
+    {
+      /* Seek to the section header table in the file.  */
+      if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0)
+	goto got_no_match;
 
-  /* Read the first section header at index 0, and convert to internal
-     form.  */
-  if (bfd_bread ((PTR) & x_shdr, (bfd_size_type) sizeof x_shdr, abfd)
-      != sizeof (x_shdr))
-    goto got_no_match;
-  elf_swap_shdr_in (abfd, &x_shdr, &i_shdr);
+      /* Read the first section header at index 0, and convert to internal
+	 form.  */
+      if (bfd_bread ((PTR) & x_shdr, (bfd_size_type) sizeof x_shdr, abfd)
+	  != sizeof (x_shdr))
+	goto got_no_match;
+      elf_swap_shdr_in (abfd, &x_shdr, &i_shdr);
 
-  /* If the section count is zero, the actual count is in the first
-     section header.  */
-  if (i_ehdrp->e_shnum == SHN_UNDEF)
-    i_ehdrp->e_shnum = i_shdr.sh_size;
+      /* If the section count is zero, the actual count is in the first
+	 section header.  */
+      if (i_ehdrp->e_shnum == SHN_UNDEF)
+	i_ehdrp->e_shnum = i_shdr.sh_size;
 
-  /* And similarly for the string table index.  */
-  if (i_ehdrp->e_shstrndx == SHN_XINDEX)
-    i_ehdrp->e_shstrndx = i_shdr.sh_link;
+      /* And similarly for the string table index.  */
+      if (i_ehdrp->e_shstrndx == SHN_XINDEX)
+	i_ehdrp->e_shstrndx = i_shdr.sh_link;
+    }
 
   /* Allocate space for a copy of the section header table in
      internal form.  */
@@ -751,7 +758,7 @@ elf_object_p (abfd)
 	}
     }
 
-  if (i_ehdrp->e_shstrndx)
+  if (i_ehdrp->e_shstrndx && i_ehdrp->e_shoff)
     {
       if (! bfd_section_from_shdr (abfd, i_ehdrp->e_shstrndx))
 	goto got_no_match;
@@ -789,7 +796,7 @@ elf_object_p (abfd)
      bfd_section_from_shdr with it (since this particular strtab is
      used to find all of the ELF section names.) */
 
-  if (i_ehdrp->e_shstrndx != 0)
+  if (i_ehdrp->e_shstrndx != 0 && i_ehdrp->e_shoff)
     {
       unsigned int num_sec;
 
