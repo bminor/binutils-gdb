@@ -47,6 +47,7 @@ int insn_bit_size = default_insn_bit_size;
 int insn_specifying_widths = 0;
 const char *global_name_prefix = "";
 const char *global_uname_prefix = "";
+int semantic_zero_reg_nr = 0;
 
 int code = generate_calls;
 
@@ -216,54 +217,264 @@ print_function_name(lf *file,
 
 
 void
-print_my_defines(lf *file,
-		 insn_bits *expanded_bits,
-		 table_entry *file_entry)
+print_my_defines (lf *file,
+		  insn_bits *expanded_bits,
+		  table_entry *file_entry)
 {
   /* #define MY_INDEX xxxxx */
-  lf_indent_suppress(file);
-  lf_printf(file, "#undef MY_INDEX\n");
-  lf_indent_suppress(file);
-  lf_printf(file, "#define MY_INDEX ");
-  print_function_name(file,
-                      file_entry->fields[insn_name],
-                      NULL,
-                      function_name_prefix_itable);
-  lf_printf(file, "\n");
+  lf_indent_suppress (file);
+  lf_printf (file, "#undef MY_INDEX\n");
+  lf_indent_suppress (file);
+  lf_printf (file, "#define MY_INDEX ");
+  print_function_name (file,
+		       file_entry->fields[insn_name],
+		       NULL,
+		       function_name_prefix_itable);
+  lf_printf (file, "\n");
   /* #define MY_PREFIX xxxxxx */
-  lf_indent_suppress(file);
-  lf_printf(file, "#undef MY_PREFIX\n");
-  lf_indent_suppress(file);
-  lf_printf(file, "#define MY_PREFIX ");
-  print_function_name(file,
-		      file_entry->fields[insn_name],
-		      expanded_bits,
-		      function_name_prefix_none);
-  lf_printf(file, "\n");
+  lf_indent_suppress (file);
+  lf_printf (file, "#undef MY_PREFIX\n");
+  lf_indent_suppress (file);
+  lf_printf (file, "#define MY_PREFIX ");
+  print_function_name (file,
+		       file_entry->fields[insn_name],
+		       expanded_bits,
+		       function_name_prefix_none);
+  lf_printf (file, "\n");
+}
+
+
+static int
+print_itrace_prefix (lf *file,
+		     table_entry *file_entry,
+		     const char *phase_lc)
+{
+  const char *prefix = "trace_one_insn (";
+  int indent = strlen (prefix);
+  lf_printf (file, "%sSD, CPU, %s, TRACE_LINENUM_P (CPU),\n",
+	     prefix, (code & generate_with_semantic_delayed_branch) ? "cia.ip" : "cia");
+  lf_indent (file, +indent);
+  lf_printf (file, "itable[MY_INDEX].file,\n");
+  lf_printf (file, "itable[MY_INDEX].line_nr,\n");
+  lf_printf (file, "\"%s\",\n", phase_lc);
+  return indent;
+}
+
+
+static void
+print_itrace_format (lf *file,
+		     table_assembler_entry *assembler)
+{
+  /* pass=1 is fmt string; pass=2 is is arguments */
+  int pass;
+  const char *chp;
+  /* print the format string */
+  for (pass = 1; pass <= 2; pass++)
+    {
+      const char *chp = assembler->format;
+      chp++; /* skip the leading quote */
+      /* prefix the format with the insn `name' */
+      if (pass == 1)
+	{
+	  lf_printf (file, "\"%%s - %%s - ");
+	}
+      else
+	{
+	  lf_printf (file, ",\n");
+	  lf_printf (file, "itable[MY_INDEX].name");
+	  lf_printf (file, ",\n");
+	  lf_printf (file, "XSTRING(MY_PREFIX)");
+	}
+      /* write out the format/args */
+      while (*chp != '\0')
+	{
+	  if (chp[0] == '\\' && (chp[1] == '<' || chp[1] == '>'))
+	    {
+	      if (pass == 1)
+		lf_putchr (file, chp[1]);
+	      chp += 2;
+	    }
+	  else if (chp[0] == '<' || chp[0] == '%')
+	    {
+	      /* parse [ "%" ... ] "<" [ func "#" ] param ">" */
+	      const char *fmt;
+	      const char *func;
+	      int strlen_func;
+	      const char *param;
+	      int strlen_param;
+	      /* the "%" ... "<" format */
+	      fmt = chp;
+	      while (chp[0] != '<' && chp[0] != '\0')
+		chp++;
+	      if (chp[0] != '<')
+		error ("%s:%d: Missing `<' after `%%'",
+		       assembler->file_name,
+		       assembler->line_nr);
+	      chp++;
+	      /* [ "func" # ] OR "param" */
+	      func = chp;
+	      param = chp;
+	      while (chp[0] != '>' && chp[0] != '#' && chp[0] != '\0')
+		chp++;
+	      strlen_func = chp - func;
+	      if (chp[0] == '#')
+		{
+		  chp++;
+		  param = chp;
+		  while (chp[0] != '>' && chp[0] != '\0')
+		    chp++;
+		}
+	      strlen_param = chp - param;
+	      if (chp[0] != '>')
+		error ("%s:%d: Missing closing `>' in assembler string",
+		       assembler->file_name,
+		       assembler->line_nr);
+	      chp++;
+	      /* now process it */
+	      if (pass == 2)
+		lf_printf (file, ",\n");
+	      if (strncmp (fmt, "<", 1) == 0)
+		/* implicit long int format */
+		{
+		  if (pass == 1)
+		    lf_printf (file, "%%ld");
+		  else
+		    {
+		      lf_printf (file, "(long) ");
+		      lf_write (file, param, strlen_param);
+		    }
+		}
+	      else if (strncmp (fmt, "%<", 2) == 0)
+		/* explicit format */
+		{
+		  if (pass == 1)
+		    lf_printf (file, "%%");
+		  else
+		    lf_write (file, param, strlen_param);
+		}
+	      else if (strncmp (fmt, "%s<", 3) == 0)
+		/* string format */
+		{
+		  if (pass == 1)
+		    lf_printf (file, "%%s");
+		  else
+		    {
+		      lf_printf (file, "%sstr_", global_name_prefix);
+		      lf_write (file, func, strlen_func);
+		      lf_printf (file, " (_SD, ");
+		      lf_write (file, param, strlen_param);
+		      lf_printf (file, ")");
+		    }
+		}
+	      else if (strncmp (fmt, "%lx<", 4) == 0)
+		/* simple hex */
+		{
+		  if (pass == 1)
+		    lf_printf (file, "%%lx");
+		  else
+		    {
+		      lf_printf (file, "(unsigned long) ");
+		      lf_write (file, param, strlen_param);
+		    }
+		}
+	      else if (strncmp (fmt, "%08lx<", 6) == 0)
+		/* simple hex */
+		{
+		  if (pass == 1)
+		    lf_printf (file, "%%08lx");
+		  else
+		    {
+		      lf_printf (file, "(unsigned long) ");
+		      lf_write (file, param, strlen_param);
+		    }
+		}
+	      else
+		error ("%s:%d: Unknown assembler string format",
+		       assembler->file_name,
+		       assembler->line_nr);
+	    }
+	  else
+	    {
+	      if (pass == 1)
+		lf_putchr (file, chp[0]);
+	      chp += 1;
+	    }
+	}
+    }
+  lf_printf (file, ");\n");
 }
 
 
 void
-print_itrace(lf *file,
-	     table_entry *file_entry,
-	     int idecode)
+print_itrace (lf *file,
+	      table_entry *file_entry,
+	      int idecode)
 {
   const char *phase = (idecode) ? "DECODE" : "INSN";
   const char *phase_lc = (idecode) ? "decode" : "insn";
-  lf_printf(file, "\n");
-  lf_indent_suppress(file);
-  lf_printf(file, "#if defined(WITH_TRACE)\n");
-  lf_printf(file, "/* trace the instructions execution if enabled */\n");
-  lf_printf(file, "if (TRACE_%s_P (CPU)) {\n", phase);
-  lf_printf(file, "  trace_one_insn (SD, CPU, %s, TRACE_LINENUM_P (CPU),\n",
-	    (code & generate_with_semantic_delayed_branch) ? "cia.ip" : "cia");
-
-  lf_printf(file, "                  itable[MY_INDEX].file, itable[MY_INDEX].line_nr,\n");
-  lf_printf(file, "                  \"%s\", itable[MY_INDEX].name);\n", phase_lc);
-
-  lf_printf(file, "}\n");
-  lf_indent_suppress(file);
-  lf_printf(file, "#endif\n");
+  lf_printf (file, "\n");
+  lf_indent_suppress (file);
+  lf_printf (file, "#if defined (WITH_TRACE)\n");
+  lf_printf (file, "/* trace the instructions execution if enabled */\n");
+  lf_printf (file, "if (TRACE_%s_P (CPU)) {\n", phase);
+  lf_indent (file, +2);
+  if (file_entry->assembler != NULL)
+    {
+      table_assembler_entry *assembler = file_entry->assembler;
+      int is_first = 1;
+      do
+	{
+	  if (assembler->condition != NULL)
+	    {
+	      int indent;
+	      lf_printf (file, "%sif (%s)\n",
+			 is_first ? "" : "else ",
+			 assembler->condition);
+	      lf_indent (file, +2);
+	      indent = print_itrace_prefix (file, file_entry, phase_lc);
+	      print_itrace_format (file, assembler);
+	      lf_indent (file, -indent);
+	      lf_indent (file, -2);
+	      if (assembler->next == NULL)
+		error ("%s:%d: Missing final unconditional assembler",
+		       assembler->file_name,
+		       assembler->line_nr);
+	    }
+	  else
+	    {
+	      int indent;
+	      if (!is_first)
+		{
+		  lf_printf (file, "else\n");
+		  lf_indent (file, +2);
+		}
+	      indent = print_itrace_prefix (file, file_entry, phase_lc);
+	      print_itrace_format (file, assembler);
+	      lf_indent (file, -indent);
+	      if (!is_first)
+		lf_indent (file, -2);
+	      if (assembler->next != NULL)
+		error ("%s:%d: Unconditional assembler is not last",
+		       assembler->file_name,
+		       assembler->line_nr);
+	    }
+	  is_first = 0;
+	  assembler = assembler->next;
+	}
+      while (assembler != NULL);
+    }
+  else
+    {
+      int indent = print_itrace_prefix (file, file_entry, phase_lc);
+      lf_printf (file, "\"%%s - %%s - ?\",\n");
+      lf_printf (file, "itable[MY_INDEX].name,\n");
+      lf_printf (file, "XSTRING(MY_PREFIX));\n");
+      lf_indent (file, -indent);
+    }
+  lf_indent (file, -2);
+  lf_printf (file, "}\n");
+  lf_indent_suppress (file);
+  lf_printf (file, "#endif\n");
 }
 
 
@@ -453,6 +664,7 @@ main(int argc,
     printf("                      insn-in-icache - save original instruction when cracking\n");
     printf("                      default-nia-minus-one - instead of cia + insn-size\n");
     printf("                      delayed-branch - instead of cia + insn-size\n");
+    printf("                      zero-r<N> - arch assumes GPR(<N>) == 0, keep it that way\n");
     printf("                      conditional-issue - conditionally issue each instruction\n");
     printf("                      validate-slot - perform slot verification as part of decode\n");
     printf("\n");
@@ -559,6 +771,10 @@ main(int argc,
       }
       else if (strcmp(optarg, "conditional-issue") == 0) {
 	code |= generate_with_semantic_conditional_issue;
+      }
+      else if (strncmp (optarg, "zero-r", strlen ("zero-r")) == 0) {
+	code |= generate_with_semantic_zero_reg;
+	semantic_zero_reg_nr = atoi (optarg + strlen ("zero-r"));
       }
       else if (strcmp(optarg, "verify-slot") == 0) {
 	code |= generate_with_idecode_slot_verification;
