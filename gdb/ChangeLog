@@ -1,3 +1,8 @@
+Fri Aug 16 15:15:37 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* config/mips/{vr4300.mt, vr4300el.mt} (SIM): Add -lm when
+ 	simulator is included.
+
 Thu Aug 15 13:44:13 1996  Fred Fish  <fnf@cygnus.com>
 
 	* findvar.c (write_register_pid): Only needed when TARGET_WRITE_PC
