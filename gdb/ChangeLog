@@ -1,5 +1,19 @@
 2002-03-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* command.h: (execute_cmd_post_hook): Declare.
+	(execute_cmd_pre_hook): Declare.
+	* cli/cli-script.c (clear_hook_in_cleanup): New function.
+	(execute_cmd_post_hook, execute_cmd_pre_hook): New
+	functions. Execute pre/post hook while ensuring that afterwords
+	hook_in is cleared.
+	* top.c (execute_command): Use execute_cmd_post_hook, and
+	execute_cmd_pre_hook to execute pre/post commands.
+	* infrun.c (normal_stop): Pass stop_command and not pre_hook to
+	hook_stop_stub.
+	(hook_stop_stub): Call execute_cmd_pre_hook.
+
+2002-03-17  Andrew Cagney  <ac131313@redhat.com>
+
 	* kod.c (kod_set_os): Revert previous change.  Is called by ``info
 	set'' and this leads to a core dump.  Move xstrdup of
 	operating_system to after check that it is not NULL.

@@ -3414,13 +3414,11 @@ and/or watchpoints.\n");
 
   target_terminal_ours ();
 
-  /* Look up the hook_stop and run it if it exists.  */
-
-  if (stop_command && stop_command->hook_pre)
-    {
-      catch_errors (hook_stop_stub, stop_command->hook_pre,
-		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
-    }
+  /* Look up the hook_stop and run it (CLI internally handles problem
+     of stop_command's pre-hook not existing).  */
+  if (stop_command)
+    catch_errors (hook_stop_stub, stop_command,
+		  "Error while running hook_stop:\n", RETURN_MASK_ALL);
 
   if (!target_has_stack)
     {
@@ -3521,7 +3519,7 @@ done:
 static int
 hook_stop_stub (void *cmd)
 {
-  execute_user_command ((struct cmd_list_element *) cmd, 0);
+  execute_cmd_pre_hook ((struct cmd_list_element *) cmd);
   return (0);
 }
 

@@ -300,6 +300,12 @@ extern void set_cmd_completer (struct cmd_list_element *cmd,
 extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
 			 void (*cfunc) (char *args, int from_tty));
 
+/* Execute CMD's pre/post hook.  Throw an error if the command fails.
+   If already executing this pre/post hook, or there is no pre/post
+   hook, the call is silently ignored.  */
+extern void execute_cmd_pre_hook (struct cmd_list_element *cmd);
+extern void execute_cmd_post_hook (struct cmd_list_element *cmd);
+
 extern struct cmd_list_element *lookup_cmd (char **,
 					    struct cmd_list_element *, char *,
 					    int, int);

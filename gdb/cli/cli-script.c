@@ -213,6 +213,39 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
     }				/* while (list) */
 }
 
+/* Handle pre-post hooks.  */
+
+void
+clear_hook_in_cleanup (void *data)
+{
+  struct cmd_list_element *c = data;
+  c->hook_in = 0; /* Allow hook to work again once it is complete */
+}
+
+void
+execute_cmd_pre_hook (struct cmd_list_element *c)
+{
+  if ((c->hook_pre) && (!c->hook_in))
+    {
+      struct cleanup *cleanups = make_cleanup (clear_hook_in_cleanup, c);
+      c->hook_in = 1; /* Prevent recursive hooking */
+      execute_user_command (c->hook_pre, (char *) 0);
+      do_cleanups (cleanups);
+    }
+}
+
+void
+execute_cmd_post_hook (struct cmd_list_element *c)
+{
+  if ((c->hook_post) && (!c->hook_in))
+    {
+      struct cleanup *cleanups = make_cleanup (clear_hook_in_cleanup, c);
+      c->hook_in = 1; /* Prevent recursive hooking */
+      execute_user_command (c->hook_post, (char *) 0);
+      do_cleanups (cleanups);
+    }
+}
+
 /* Execute the command in CMD.  */
 
 void

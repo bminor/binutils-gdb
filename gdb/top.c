@@ -693,12 +693,7 @@ execute_command (char *p, int from_tty)
 	}
 
       /* If this command has been pre-hooked, run the hook first. */
-      if ((c->hook_pre) && (!c->hook_in))
-      {
-        c->hook_in = 1; /* Prevent recursive hooking */
-        execute_user_command (c->hook_pre, (char *) 0);
-        c->hook_in = 0; /* Allow hook to work again once it is complete */
-      }
+      execute_cmd_pre_hook (c);
 
       if (c->flags & DEPRECATED_WARN_USER)
 	deprecated_cmd_warning (&line);
@@ -715,12 +710,7 @@ execute_command (char *p, int from_tty)
 	(*c->func) (c, arg, from_tty & caution);
        
       /* If this command has been post-hooked, run the hook last. */
-      if ((c->hook_post) && (!c->hook_in))
-      {
-        c->hook_in = 1; /* Prevent recursive hooking */
-        execute_user_command (c->hook_post, (char *) 0);
-        c->hook_in = 0; /* allow hook to work again once it is complete */
-      }
+      execute_cmd_post_hook (c);
 
     }
 
