@@ -614,7 +614,7 @@
 
 
 11101,3.RX,3.RY,01010:RR:16::CMP
-"sltiu r<TRX>, r<TRY>"
+"cmp r<TRX>, r<TRY>"
 *mips16:
 *vr4100:
 {
@@ -623,7 +623,7 @@
 
 
 01110,3.RX,8.IMMED:RI:16::CMPI
-"sltiu r<TRX>, <IMMED>"
+"cmpi r<TRX>, <IMMED>"
 *mips16:
 *vr4100:
 {
