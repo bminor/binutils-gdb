@@ -5,7 +5,7 @@
 # gives unlimited permission to copy, distribute and modify it.
 
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -80,6 +80,7 @@ AUTOMAKE_OPTIONS = dejagnu
 tooldir = $(exec_prefix)/$(target_alias)
 
 CC_FOR_BUILD = @CC_FOR_BUILD@
+EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
 
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
 YFLAGS = -d
@@ -117,9 +118,7 @@ man_MANS = ar.1 nm.1 objdump.1 ranlib.1 size.1 strings.1 strip.1 objcopy.1 \
 
 PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(ADDR2LINE_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@
 
-bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) \
-	$(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(ADDR2LINE_PROG) \
-	@BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@
+bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(ADDR2LINE_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@
 
 noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
 
@@ -345,7 +344,7 @@ OBJECTS = $(nlmconv_OBJECTS) $(srconv_OBJECTS) $(sysdump_OBJECTS) $(coffdump_OBJ
 default: all
 
 .SUFFIXES:
-.SUFFIXES: .c .dvi .h .info .l .lo .o .ps .texi .texinfo .y
+.SUFFIXES: .S .c .dvi .h .info .l .lo .o .ps .s .texi .texinfo .y
 $(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
 
@@ -361,7 +360,7 @@ config.status: $(srcdir)/configure
 $(srcdir)/configure: @MAINT@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
-config.h: stamp-h
+config.h: stamp-h ; @:
 stamp-h: $(srcdir)/config.in $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES= CONFIG_HEADERS=config.h:config.in \
@@ -415,6 +414,12 @@ distclean-noinstPROGRAMS:
 
 maintainer-clean-noinstPROGRAMS:
 
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
 .c.o:
 	$(COMPILE) -c $<
 
@@ -429,6 +434,13 @@ distclean-compile:
 maintainer-clean-compile:
 
 .c.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+# These are just copies of the above rule.
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.S.lo:
 	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
 mostlyclean-libtool:
@@ -888,12 +900,6 @@ stamp-under: Makefile
 	$(SHELL) $(srcdir)/../move-if-change underscore.t underscore.c
 	touch stamp-under
 
-version.o: version.c Makefile
-	$(COMPILE) -c -DVERSION='"$(VERSION)"' $(srcdir)/version.c
-
-bucomm.o: bucomm.c Makefile
-	$(COMPILE) -c -DTARGET='"@target@"' $(srcdir)/bucomm.c
-
 cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 	$(COMPILE) -c -DMAIN -DVERSION='"$(VERSION)"' $(BASEDIR)/libiberty/cplus-dem.c
 
@@ -915,15 +921,15 @@ cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 #	-rm -f $(STRIP_PROG)
 #	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
 
-sysroff.c: sysinfo sysroff.info 
-	./sysinfo -c <$(srcdir)/sysroff.info >sysroff.c
-	./sysinfo -i <$(srcdir)/sysroff.info >>sysroff.c
-	./sysinfo -g <$(srcdir)/sysroff.info >>sysroff.c
+sysroff.c: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info 
+	./sysinfo$(EXEEXT_FOR_BUILD) -c <$(srcdir)/sysroff.info >sysroff.c
+	./sysinfo$(EXEEXT_FOR_BUILD) -i <$(srcdir)/sysroff.info >>sysroff.c
+	./sysinfo$(EXEEXT_FOR_BUILD) -g <$(srcdir)/sysroff.info >>sysroff.c
 
-sysroff.h: sysinfo sysroff.info
-	./sysinfo -d <$(srcdir)/sysroff.info >sysroff.h	
+sysroff.h: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info
+	./sysinfo$(EXEEXT_FOR_BUILD) -d <$(srcdir)/sysroff.info >sysroff.h
 
-sysinfo: sysinfo.o syslex.o
+sysinfo$(EXEEXT_FOR_BUILD): sysinfo.o syslex.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o 
 
 syslex.o: syslex.c sysinfo.h

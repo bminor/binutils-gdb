@@ -1,5 +1,5 @@
 /* nlmconv.c -- NLM conversion program
-   Copyright (C) 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 1997 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -15,30 +15,34 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This program can be used to convert any appropriate object file
    into a NetWare Loadable Module (an NLM).  It will accept a linker
    specification file which is identical to that accepted by the
-   NetWare linker, NLMLINK, except that the INPUT command, normally
-   used to give a list of object files to link together, is not used.
-   This program will convert only a single object file.  */
+   NetWare linker, NLMLINK.  */
+
+/* AIX requires this to be the first thing in the file.  */
+#ifndef __GNUC__
+# ifdef _AIX
+ #pragma alloca
+#endif
+#endif
+
+#include "bfd.h"
+#include "libiberty.h"
+#include "bucomm.h"
 
 #include <ansidecl.h>
-#include <stdio.h>
 #include <time.h>
 #include <ctype.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <assert.h>
 #include <getopt.h>
-#include "bfd.h"
-#include "libiberty.h"
-#include "sysdep.h"
-#include "bucomm.h"
+
 /* Internal BFD NLM header.  */
 #include "libnlm.h"
 #include "nlmconv.h"
@@ -57,10 +61,6 @@ extern char *strerror ();
 extern struct tm *localtime ();
 #endif
 
-#ifndef getenv
-extern char *getenv ();
-#endif
-
 #ifndef SEEK_SET
 #define SEEK_SET 0
 #endif
@@ -75,9 +75,6 @@ extern char *getenv ();
 
 /* The name used to invoke the program.  */
 char *program_name;
-
-/* The version number.  */
-extern char *program_version;
 
 /* Local variables.  */
 
@@ -137,10 +134,6 @@ static void default_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					   long *, char *,
 					   bfd_size_type));
 static char *link_inputs PARAMS ((struct string_list *, char *));
-static const char *choose_temp_base_try PARAMS ((const char *,
-						 const char *));
-static void choose_temp_base PARAMS ((void));
-static int pexecute PARAMS ((char *, char *[]));
 
 #ifdef NLMCONV_I386
 static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
@@ -208,6 +201,7 @@ main (argc, argv)
   xmalloc_set_program_name (program_name);
 
   bfd_init ();
+  set_default_bfd_target ();
 
   while ((opt = getopt_long (argc, argv, "dhI:l:O:T:V", long_options,
 			     (int *) NULL))
@@ -234,8 +228,7 @@ main (argc, argv)
 	  header_file = optarg;
 	  break;
 	case 'V':
-	  printf ("GNU %s version %s\n", program_name, program_version);
-	  exit (0);
+	  print_version ("nlmconv");
 	  /*NOTREACHED*/
 	case 0:
 	  break;
@@ -343,7 +336,7 @@ main (argc, argv)
   if (output_format == NULL)
     output_format = select_output_format (bfd_get_arch (inbfd),
 					  bfd_get_mach (inbfd),
-					  inbfd->xvec->byteorder_big_p);
+					  bfd_big_endian (inbfd));
 
   assert (output_format != NULL);
 
@@ -1125,6 +1118,8 @@ Usage: %s [-dhV] [-I bfdname] [-O bfdname] [-T header-file] [-l linker]\n\
        [--help] [--version]\n\
        [in-file [out-file]]\n",
 	   program_name);
+  if (status == 0)
+    fprintf (file, "Report bugs to bug-gnu-utils@prep.ai.mit.edu\n");
   exit (status);
 }
 
@@ -1221,7 +1216,8 @@ setup_sections (inbfd, insec, data_ptr)
 				      bfd_section_alignment (inbfd, insec)))
     bfd_fatal ("set section alignment");
 
-  if (! bfd_set_section_flags (outbfd, outsec, f))
+  if (! bfd_set_section_flags (outbfd, outsec,
+			       f | bfd_get_section_flags (outbfd, outsec)))
     bfd_fatal ("set section flags");
 
   bfd_set_reloc (outbfd, outsec, (arelent **) NULL, 0);
@@ -1848,28 +1844,6 @@ powerpc_build_stubs (inbfd, outbfd, symbols_ptr, symcount_ptr)
 					 * POWERPC_STUB_TOC_ENTRY_SIZE))))
 	bfd_fatal ("stub section sizes");
     }
-
-  /* PowerPC NetWare requires a custom header.  We create it here.
-     The first word is the header version number, currently 1.  The
-     second word is the timestamp of the input file.  Unfortunately,
-     they do not conform to the emergent standard for custom headers.
-     We must fake the version number and timestamp in the offset and
-     length fields.  */
-  memcpy (nlm_custom_header (outbfd)->stamp, "CuStHeAd", 8);
-  nlm_custom_header (outbfd)->hdrLength = 0;
-  /* Put version number in dataOffset field.  */
-  nlm_custom_header (outbfd)->dataOffset = 1;
-  /* Put timestamp in length field.  */
-  {
-    struct stat s;
-
-    if (stat (bfd_get_filename (inbfd), &s) < 0)
-      s.st_mtime = 0;
-    nlm_custom_header (outbfd)->dataLength = s.st_mtime;
-  }
-  /* No data stamp.  */
-  memset (nlm_custom_header (outbfd)->dataStamp, 0,
-	  sizeof (nlm_custom_header (outbfd)->dataStamp));
 }
 
 /* Resolve all the stubs for PowerPC NetWare.  We fill in the contents
@@ -1949,7 +1923,7 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
      char *contents;
      bfd_size_type contents_size;
 {
-  const reloc_howto_type *toc_howto;
+  reloc_howto_type *toc_howto;
   long reloc_count;
   register arelent **relocs;
   register long i;
@@ -1963,8 +1937,8 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
      going to write out whatever we return in the contents field.  */
   if (strcmp (bfd_get_section_name (insec->owner, insec), ".got") == 0)
     memset (contents + powerpc_initial_got_size, 0,
-	    (bfd_get_section_size_after_reloc (insec)
-	     - powerpc_initial_got_size));
+	    (size_t) (bfd_get_section_size_after_reloc (insec)
+		      - powerpc_initial_got_size));
 
   reloc_count = *reloc_count_ptr;
   relocs = *relocs_ptr;
@@ -1972,10 +1946,29 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
     {
       arelent *rel;
       asymbol *sym;
-      bfd_vma symvalue;
+      bfd_vma sym_value;
 
       rel = *relocs++;
       sym = *rel->sym_ptr_ptr;
+
+      /* Convert any relocs against the .bss section into relocs
+         against the .data section.  */
+      if (strcmp (bfd_get_section_name (outbfd, bfd_get_section (sym)),
+		  NLM_UNINITIALIZED_DATA_NAME) == 0)
+	{
+	  asection *datasec;
+
+	  datasec = bfd_get_section_by_name (outbfd,
+					     NLM_INITIALIZED_DATA_NAME);
+	  if (datasec != NULL)
+	    {
+	      rel->addend += (bfd_get_section_vma (outbfd,
+						   bfd_get_section (sym))
+			      + sym->value);
+	      rel->sym_ptr_ptr = datasec->symbol_ptr_ptr;
+	      sym = *rel->sym_ptr_ptr;
+	    }
+	}
 
       /* We must be able to resolve all PC relative relocs at this
 	 point.  If we get a branch to an undefined symbol we build a
@@ -2029,14 +2022,14 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 	 symbol value.  The symbol will be start of the TOC section
 	 (which is named .got).  We do want to include the addend.  */
       if (rel->howto == toc_howto)
-	symvalue = 0;
+	sym_value = 0;
       else
-	symvalue = sym->value;
+	sym_value = sym->value;
 
       /* If this is a relocation against a symbol with a value, or
 	 there is a reloc addend, we need to update the addend in the
 	 object file.  */
-      if (symvalue + rel->addend != 0)
+      if (sym_value + rel->addend != 0)
 	{
 	  bfd_vma val;
 
@@ -2047,7 +2040,7 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 				(bfd_byte *) contents + rel->address);
 	      val = ((val &~ rel->howto->dst_mask)
 		     | (((val & rel->howto->src_mask)
-			 + symvalue
+			 + sym_value
 			 + rel->addend)
 			& rel->howto->dst_mask));
 	      if ((bfd_signed_vma) val < - 0x8000
@@ -2063,7 +2056,7 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 				(bfd_byte *) contents + rel->address);
 	      val = ((val &~ rel->howto->dst_mask)
 		     | (((val & rel->howto->src_mask)
-			 + symvalue
+			 + sym_value
 			 + rel->addend)
 			& rel->howto->dst_mask));
 	      bfd_put_32 (outbfd, val, (bfd_byte *) contents + rel->address);
@@ -2073,7 +2066,8 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 	      abort ();
 	    }
 
-	  rel->sym_ptr_ptr = bfd_get_section (sym)->symbol_ptr_ptr;
+	  if (! bfd_is_und_section (bfd_get_section (sym)))
+	    rel->sym_ptr_ptr = bfd_get_section (sym)->symbol_ptr_ptr;
 	  rel->addend = 0;
 	}
 
@@ -2117,12 +2111,14 @@ link_inputs (inputs, ld)
   size_t i;
   int pid;
   int status;
+  char *errfmt;
+  char *errarg;
 
   c = 0;
   for (q = inputs; q != NULL; q = q->next)
     ++c;
 
-  argv = (char **) alloca (c + 5);
+  argv = (char **) alloca ((c + 5) * sizeof(char *));
 
 #ifndef __MSDOS__
   if (ld == NULL)
@@ -2148,13 +2144,13 @@ link_inputs (inputs, ld)
   if (ld == NULL)
     ld = (char *) LD_NAME;
 
-  choose_temp_base ();
+  temp_filename = choose_temp_base ();
 
   unlink_on_exit = xmalloc (strlen (temp_filename) + 3);
   sprintf (unlink_on_exit, "%s.O", temp_filename);
 
   argv[0] = ld;
-  argv[1] = (char *) "-r";
+  argv[1] = (char *) "-Ur";
   argv[2] = (char *) "-o";
   argv[3] = unlink_on_exit;
   i = 4;
@@ -2169,11 +2165,19 @@ link_inputs (inputs, ld)
       fprintf (stderr, "\n");
     }
 
-  pid = pexecute (ld, argv);
-
-  if (waitpid (pid, &status, 0) < 0)
+  pid = pexecute (ld, argv, program_name, (char *) NULL, &errfmt, &errarg,
+		  PEXECUTE_SEARCH | PEXECUTE_ONE);
+  if (pid == -1)
     {
-      perror ("waitpid");
+      fprintf (stderr, "%s: execution of %s failed: ", program_name, ld);
+      fprintf (stderr, errfmt, errarg);
+      unlink (unlink_on_exit);
+      exit (1);
+    }
+
+  if (pwait (pid, &status, 0) < 0)
+    {
+      perror ("pwait");
       unlink (unlink_on_exit);
       exit (1);
     }
@@ -2187,162 +2191,3 @@ link_inputs (inputs, ld)
 
   return unlink_on_exit;
 }
-
-/* Choose a temporary file name.  Stolen from gcc.c.  */
-
-static const char *
-choose_temp_base_try (try, base)
-     const char *try;
-     const char *base;
-{
-  const char *rv;
-
-  if (base)
-    rv = base;
-  else if (try == NULL)
-    rv = NULL;
-  else if (access (try, R_OK | W_OK) != 0)
-    rv = NULL;
-  else
-    rv = try;
-  return rv;
-}
-
-static void
-choose_temp_base ()
-{
-  const char *base = NULL;
-  int len;
-
-  base = choose_temp_base_try (getenv ("TMPDIR"), base);
-  base = choose_temp_base_try (getenv ("TMP"), base);
-  base = choose_temp_base_try (getenv ("TEMP"), base);
-
-#ifdef P_tmpdir
-  base = choose_temp_base_try (P_tmpdir, base);
-#endif
-
-  base = choose_temp_base_try ("/usr/tmp", base);
-  base = choose_temp_base_try ("/tmp", base);
-
-  /* If all else fails, use the current directory! */  
-  if (base == NULL)
-    base = "./";
-
-  len = strlen (base);
-  temp_filename = xmalloc (len + sizeof("/ccXXXXXX") + 1);
-  strcpy (temp_filename, base);
-  if (len > 0 && temp_filename[len-1] != '/')
-    temp_filename[len++] = '/';
-  strcpy (temp_filename + len, "ccXXXXXX");
-
-  mktemp (temp_filename);
-  if (*temp_filename == '\0')
-    abort ();
-}
-
-/* Execute a job.  Stolen from gcc.c.  */
-
-#ifndef OS2
-#ifdef __MSDOS__
-
-static int
-pexecute (program, argv)
-     char *program;
-     char *argv[];
-{
-  char *scmd, *rf;
-  FILE *argfile;
-  int i;
-
-  scmd = (char *)malloc (strlen (program) + strlen (temp_filename) + 10);
-  rf = scmd + strlen(program) + 2 + el;
-  sprintf (scmd, "%s.exe @%s.gp", program, temp_filename);
-  argfile = fopen (rf, "w");
-  if (argfile == 0)
-    pfatal_with_name (rf);
-
-  for (i=1; argv[i]; i++)
-    {
-      char *cp;
-      for (cp = argv[i]; *cp; cp++)
-	{
-	  if (*cp == '"' || *cp == '\'' || *cp == '\\' || isspace (*cp))
-	    fputc ('\\', argfile);
-	  fputc (*cp, argfile);
-	}
-      fputc ('\n', argfile);
-    }
-  fclose (argfile);
-
-  i = system (scmd);
-
-  remove (rf);
-  
-  if (i == -1)
-    {
-      perror (program);
-      return MIN_FATAL_STATUS << 8;
-    }
-
-  return i << 8;
-}
-
-#else /* not __MSDOS__ */
-
-static int
-pexecute (program, argv)
-     char *program;
-     char *argv[];
-{
-  int pid;
-  int retries, sleep_interval;
-
-  /* Fork a subprocess; wait and retry if it fails.  */
-  sleep_interval = 1;
-  for (retries = 0; retries < 4; retries++)
-    {
-      pid = vfork ();
-      if (pid >= 0)
-	break;
-      sleep (sleep_interval);
-      sleep_interval *= 2;
-    }
-
-  switch (pid)
-    {
-    case -1:
-#ifdef vfork
-      perror ("fork");
-#else
-      perror ("vfork");
-#endif
-      exit (1);
-      /* NOTREACHED */
-      return 0;
-
-    case 0: /* child */
-      /* Exec the program.  */
-      execvp (program, argv);
-      perror (program);
-      exit (1);
-      /* NOTREACHED */
-      return 0;
-
-    default:
-      /* Return child's process number.  */
-      return pid;
-    }
-}
-
-#endif /* not __MSDOS__ */
-#else /* not OS2 */
-
-static int
-pexecute (program, argv)
-     char *program;
-     char *argv[];
-{
-  return spawnvp (1, program, argv);
-}
-#endif /* not OS2 */

@@ -1,3 +1,19 @@
+Wed Jan 28 17:45:46 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Remove vfork check.
+	* nlmconv.c: Never include vfork.h.
+	* aclocal.m4, configure, Makefile.in, config.in: Rebuild.
+
+Wed Jan 28 17:43:02 1998  J.J. van der Heijden <J.J.vanderHeijden@student.utwente.nl>
+
+	* configure.in: Check for mingw32 when deciding whether to build
+	dlltool.
+	* dlltool.c: Never include vfork.h.
+	(run): Use pexecute rather than vfork.
+	(gen_lib_file): Check for errors from bfd_set_archive_head and
+	bfd_close.  Close all the BFDs in the archive before deleting the
+	temporary files.
+
 Thu Jan 22 16:22:55 1998  Fred Fish  <fnf@cygnus.com>
 
 	* objdump.c (disassemble_bytes): Add flag INSN_HAS_RELOC to tell
