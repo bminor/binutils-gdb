@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1993, 1995, 1998 Free Software Foundation, Inc.
+   Copyright 1998, 1999 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -17,12 +17,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "bfd.h"
-#include "sysdep.h"
-#include "libbfd.h"
-#include "elf-bfd.h"
-
-#include "elf/arm.h"
 
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
@@ -628,289 +622,6 @@ error_return:
 
 }
 
-#define USE_RELA
-#define TARGET_UNDERSCORE '_'
-
-static reloc_howto_type elf32_arm_howto_table[] =
-{
-  /* No relocation */
-  HOWTO (R_ARM_NONE,		/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_NONE",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  HOWTO (R_ARM_PC24,		/* type */
-	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 24,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_PC24",		/* name */
-	 false,			/* partial_inplace */
-	 0x00ffffff,		/* src_mask */
-	 0x00ffffff,		/* dst_mask */
-	 true),			/* pcrel_offset */
-
-  /* 32 bit absolute */
-  HOWTO (R_ARM_ABS32,		/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_ABS32",		/* name */
-	 false,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* standard 32bit pc-relative reloc */
-  HOWTO (R_ARM_REL32,		/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_REL32",		/* name */
-	 false,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
-	 true),			/* pcrel_offset */
-
-  /* 8 bit absolute */
-  HOWTO (R_ARM_ABS8,		/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 8,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_ABS8",		/* name */
-	 false,			/* partial_inplace */
-	 0x000000ff,		/* src_mask */
-	 0x000000ff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-   /* 16 bit absolute */
-  HOWTO (R_ARM_ABS16,		/* type */
-	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_ABS16",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* 12 bit absolute */
-  HOWTO (R_ARM_ABS12,		/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 12,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_ABS12",		/* name */
-	 false,			/* partial_inplace */
-	 0x000008ff,		/* src_mask */
-	 0x000008ff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  HOWTO (R_ARM_THM_ABS5,	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 5,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_THM_ABS5",	/* name */
-	 false,			/* partial_inplace */
-	 0x000007e0,		/* src_mask */
-	 0x000007e0,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  HOWTO (R_ARM_THM_PC22,	/* type */
-	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 22,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_THM_PC22",	/* name */
-	 false,			/* partial_inplace */
-	 0x07ff07ff,		/* src_mask */
-	 0x07ff07ff,		/* dst_mask */
-	 true),			/* pcrel_offset */
-
-  HOWTO (R_ARM_SBREL32,		/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_SBREL32",	/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  HOWTO (R_ARM_AMP_VCALL9,	/* type */
-	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 8,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_AMP_VCALL9",	/* name */
-	 false,			/* partial_inplace */
-	 0x000000ff,		/* src_mask */
-	 0x000000ff,		/* dst_mask */
-	 true),			/* pcrel_offset */
-
-  /* 12 bit pc relative */
-  HOWTO (R_ARM_THM_PC11,	/* type */
-	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 11,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_THM_PC11",	/* name */
-	 false,			/* partial_inplace */
-	 0x000007ff,		/* src_mask */
-	 0x000007ff,		/* dst_mask */
-	 true),			/* pcrel_offset */
-
-  /* 12 bit pc relative */
-  HOWTO (R_ARM_THM_PC9,		/* type */
-	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 8,			/* bitsize */
-	 true,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_THM_PC9",	/* name */
-	 false,			/* partial_inplace */
-	 0x000000ff,		/* src_mask */
-	 0x000000ff,		/* dst_mask */
-	 true),			/* pcrel_offset */
-
-  /* GNU extension to record C++ vtable hierarchy */
-  HOWTO (R_ARM_GNU_VTINHERIT, /* type */
-         0,                     /* rightshift */
-         2,                     /* size (0 = byte, 1 = short, 2 = long) */
-         0,                     /* bitsize */
-         false,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont, /* complain_on_overflow */
-         NULL,                  /* special_function */
-         "R_ARM_GNU_VTINHERIT", /* name */
-         false,                 /* partial_inplace */
-         0,                     /* src_mask */
-         0,                     /* dst_mask */
-         false),                /* pcrel_offset */
-
-  /* GNU extension to record C++ vtable member usage */
-  HOWTO (R_ARM_GNU_VTENTRY,     /* type */
-         0,                     /* rightshift */
-         2,                     /* size (0 = byte, 1 = short, 2 = long) */
-         0,                     /* bitsize */
-         false,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont, /* complain_on_overflow */
-         _bfd_elf_rel_vtable_reloc_fn,  /* special_function */
-         "R_ARM_GNU_VTENTRY",   /* name */
-         false,                 /* partial_inplace */
-         0,                     /* src_mask */
-         0,                     /* dst_mask */
-         false),                /* pcrel_offset */
- 
-
-  HOWTO (R_ARM_RREL32,		/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_RREL32",	/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  HOWTO (R_ARM_RABS32,		/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_RABS32",	/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  HOWTO (R_ARM_RPC24,		/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_RPC24",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  HOWTO (R_ARM_RBASE,		/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_RBASE",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-};
 struct elf32_arm_reloc_map
   {
     unsigned char bfd_reloc_val;
@@ -952,20 +663,6 @@ elf32_arm_reloc_type_lookup (abfd, code)
     }
 
   return NULL;
-}
-
-static void
-elf32_arm_info_to_howto (abfd, bfd_reloc, elf_reloc)
-     bfd *abfd;
-     arelent *bfd_reloc;
-     Elf32_Internal_Rela *elf_reloc;
-{
-  unsigned int r_type;
-
-  r_type = ELF32_R_TYPE (elf_reloc->r_info);
-  /* fixme: need range test */
-  /* BFD_ASSERT (r_type < (unsigned int) R_ELF32_ARM_MAX); */
-  bfd_reloc->howto = &elf32_arm_howto_table[r_type];
 }
 
 /* The thumb form of a long branch is a bit finicky, because the offset
@@ -1245,6 +942,9 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
     case R_ARM_PC24:
       /* Arm B/BL instruction */
 
+#ifdef USE_REL
+      addend = (bfd_get_32 (input_bfd, hit_data) & howto->src_mask);
+#endif
       /* check for arm calling thumb function */
       if (sym_flags == STT_ARM_TFUNC)
 	{
@@ -1265,6 +965,9 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_ARM_ABS32:
+#ifdef USE_REL
+      addend = (bfd_get_32 (input_bfd, hit_data) & howto->src_mask);
+#endif
       value += addend;
       if (sym_flags == STT_ARM_TFUNC)
 	value |= 1;
@@ -1272,6 +975,9 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_ARM_REL32:
+#ifdef USE_REL
+      addend = (bfd_get_32 (input_bfd, hit_data) & howto->src_mask);
+#endif
       value -= (input_section->output_section->vma
 		+ input_section->output_offset);
       value += addend;
@@ -1280,8 +986,10 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_ARM_ABS8:
+#ifdef USE_REL
+     addend = (bfd_get_32 (input_bfd, hit_data) & howto->src_mask);
+#endif
       value += addend;
-
       if ((long) value > 0x7f || (long) value < -0x80)
 	return bfd_reloc_overflow;
 
@@ -1289,6 +997,9 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_ARM_ABS16:
+#ifdef USE_REL
+      addend = (bfd_get_32 (input_bfd, hit_data) & howto->src_mask);
+#endif
       value += addend;
 
       if ((long) value > 0x7fff || (long) value < -0x8000)
@@ -1300,6 +1011,9 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
     case R_ARM_ABS12:
       /* Support ldr and str instruction for the arm */
       /* Also thumb b (unconditional branch) */
+#ifdef USE_REL
+      addend = (bfd_get_32 (input_bfd, hit_data) & howto->src_mask);
+#endif
       value += addend;
 
       if ((long) value > 0x7ff || (long) value < -0x800)
@@ -1843,7 +1557,6 @@ elf32_arm_gc_mark_hook (abfd, info, rel, h, sym)
         break;
 
       default:
-        printf("h is %s\n", h->root.root.string);
         switch (h->root.type)
           {
           case bfd_link_hash_defined:
@@ -2020,17 +1733,10 @@ elf32_arm_find_nearest_line
   return true;
 }
 
-
-#define TARGET_LITTLE_SYM		bfd_elf32_littlearm_vec
-#define TARGET_LITTLE_NAME		"elf32-littlearm"
-#define TARGET_BIG_SYM			bfd_elf32_bigarm_vec
-#define TARGET_BIG_NAME			"elf32-bigarm"
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 
 #define bfd_elf32_bfd_reloc_type_lookup 	elf32_arm_reloc_type_lookup
-#define elf_info_to_howto			elf32_arm_info_to_howto
-#define elf_info_to_howto_rel			0
 #define elf_backend_relocate_section    	elf32_arm_relocate_section
 #define bfd_elf32_bfd_copy_private_bfd_data 	elf32_arm_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data 	elf32_arm_merge_private_bfd_data
@@ -2044,6 +1750,5 @@ elf32_arm_find_nearest_line
 #define elf_backend_check_relocs                elf32_arm_check_relocs
 
 #define elf_backend_can_gc_sections 1
-#define elf_symbol_leading_char '_'
 
 #include "elf32-target.h"

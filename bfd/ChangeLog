@@ -1,3 +1,20 @@
+Mon Feb  1 11:46:31 1999  Catherine Moore  <clm@cygnus.com>
+
+        * Makefile.am (elf32-arm-oldabi.lo):  New.
+        (elf32-arm-newabi.lo):  New.
+        * Makefile.in:  Regenerate.
+        * config.bfd (thumb-*-elf):  Remove definition of targ_underscore.
+        (arm-*-elf):  Likewise.
+        (arm-*-oabi):  New.
+        (thumb-*-oabi):  New.
+        * configure:  Regenerate.
+        * configure.in (bfd_elf32_littlearm_oabi_vec):  New.
+        (bfd_elf32_bigarm_oabi_vec):  New.
+        * elf32-arm-newabi.c:  New.
+        * elf32-arm-oldabi.c:  New.
+        * elf32-arm.c:  Removed.
+        * elf32-arm.h:  New.
+
 Mon Feb  1 11:52:12 1999  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* binary.c (binary_set_section_contents): Omit warnings for
