@@ -2177,11 +2177,6 @@ anal.
 In some cases, use the system call @code{mmap} for reading symbol
 tables.  For some machines this allows for sharing and quick updates.
 
-@item HAVE_SIGSETMASK
-@findex sigsetmask
-Define this if the host system has job control, but does not define
-@code{sigsetmask}.  Currently, this is only true of the RS/6000.
-
 @item HAVE_TERMIO
 Define this if the host system has @code{termio.h}.
 
