@@ -1,3 +1,8 @@
+Fri Sep 19 18:51:26 1997  Felix Lee  <flee@cygnus.com>
+
+	* config/i386/windows.mh (XDEPFILES): need to list some files
+ 	explicitly, for odd reasons.
+
 Tue Sep 16 20:00:05 1997  Per Bothner  <bothner@cygnus.com>
 
 	* jv-exp.y (push_fieldnames):  New, to handle EXP.FIELD1....FIELDN.
