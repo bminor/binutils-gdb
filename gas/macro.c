@@ -700,7 +700,7 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
 
 	      char buffer[10];
 	      src++;
-	      sprintf (buffer, "%05d", macro_number);
+	      sprintf (buffer, "%d", macro_number);
 	      sb_add_string (out, buffer);
 	    }
 	  else if (in->ptr[src] == '&')

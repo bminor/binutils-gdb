@@ -1,3 +1,7 @@
+Mon May  1 08:54:23 2000  Catherine Moore  <clm@cygnus.com>
+
+	* macro.c (macro_expand_body): Don't prepend macro number with zeroes.
+
 Mon May  1 14:19:39 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* config/tc-avr.c: ATTRIBUTE_UNUSED added to the necessary places.
