@@ -1,3 +1,8 @@
+2004-04-31  J. Brobecker  <brobecker@gnat.com>
+
+	* hppa-tdep.c (hppa32_push_dummy_call): Set the Stack Pointer.
+	(hppa64_push_dummy_call): Likewise.
+
 2004-03-30  Jim Blandy  <jimb@redhat.com>
 
 	From Ulrich Weigand:

@@ -911,6 +911,9 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   /* Set the return address.  */
   regcache_cooked_write_unsigned (regcache, RP_REGNUM, bp_addr);
 
+  /* Update the Stack Pointer.  */
+  regcache_cooked_write_unsigned (regcache, SP_REGNUM, param_end + 32);
+
   /* The stack will have 32 bytes of additional space for a frame marker.  */
   return param_end + 32;
 }
@@ -1031,6 +1034,9 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 
   /* Set the return address.  */
   regcache_cooked_write_unsigned (regcache, RP_REGNUM, bp_addr);
+
+  /* Update the Stack Pointer.  */
+  regcache_cooked_write_unsigned (regcache, SP_REGNUM, param_end + 64);
 
   /* The stack will have 32 bytes of additional space for a frame marker.  */
   return param_end + 64;
