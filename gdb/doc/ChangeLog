@@ -1,3 +1,8 @@
+2003-09-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	stabs_argument_has_addr.
+
 2003-09-18  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete

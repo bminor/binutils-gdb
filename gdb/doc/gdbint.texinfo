@@ -3686,6 +3686,16 @@ The number of the ``next program counter'' register, if defined.
 If non-zero, round arguments to a boundary of this many bits before
 pushing them on the stack.
 
+@item stabs_argument_has_addr (@var{gdbarch}, @var{type})
+@findex stabs_argument_has_addr
+@findex DEPRECATED_REG_STRUCT_HAS_ADDR
+@anchor{stabs_argument_has_addr} Define this to return nonzero if a
+function argument of type @var{type} is passed by reference instead of
+value.
+
+This method replaces @code{DEPRECTAED_REG_STRUCT_HAS_ADDR}
+(@pxref{DEPRECATED_REG_STRUCT_ADDR}).
+
 @item PROCESS_LINENUMBER_HOOK
 @findex PROCESS_LINENUMBER_HOOK
 A hook defined for XCOFF reading.
@@ -3758,8 +3768,11 @@ or @code{NUL} to indicate that register @var{i} is not valid.
 
 @item DEPRECATED_REG_STRUCT_HAS_ADDR (@var{gcc_p}, @var{type})
 @findex DEPRECATED_REG_STRUCT_HAS_ADDR
-Define this to return 1 if the given type will be passed by pointer
-rather than directly.
+@anchor{DEPRECATED_REG_STRUCT_HAS_ADDR}Define this to return 1 if the
+given type will be passed by pointer rather than directly.
+
+This method has been replaced by @code{stabs_argument_has_addr}
+(@pxref{stabs_argument_has_addr}).
 
 @item SAVE_DUMMY_FRAME_TOS (@var{sp})
 @findex SAVE_DUMMY_FRAME_TOS
