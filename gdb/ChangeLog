@@ -1,3 +1,14 @@
+Mon Jun 15 12:21:45 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.5.5.
+	* symtab.c (decode_line_1):  Until C++ support stabilizes, when
+	C++ lookups fail, print possibly helpful hint about completion.
+	* cplus-dem.c (demangle_signature):  Fix ARM style demangling
+	for static data members.
+	* dbxread.c (dbx_psymtab_to_symtab_1):  Fix prototype.
+	* config/ncr3000.mh (INSTALL):  Don't use /usr/ucb/install,
+	it's broken on ncr3000's.
+
 Mon Jun 15 07:21:00 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (decode_modified_type):  Change type of first arg.

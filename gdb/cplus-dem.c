@@ -529,9 +529,15 @@ demangle_signature (declp, mangled, work)
     }
   if (success && !func_done)
     {
-      /* Even with ARM style demangling, sometimes there is no explicit
-	 function argument tokens if the function takes no arguments. */
+#ifdef GNU_DEMANGLING
+      /* With GNU style demangling, bar__3foo is 'foo::bar(void)', and
+	 bar__3fooi is 'foo::bar(int)'.  We get here when we find the
+	 first case, and need to ensure that the '(void)' gets added to
+	 the current declp.  Note that with ARM_DEMANGLING, the first
+	 case represents the name of a static data member 'foo::bar',
+	 which is in the current declp, so we leave it alone. */
       success = demangle_args (declp, mangled, work);
+#endif
     }
   if (success && work -> static_type && PRINT_ARG_TYPES)
     {

@@ -1,7 +1,7 @@
 # Host: Intel 386 running SVR4.
 
 # The NCR 3000 ships with a MetaWare compiler installed as /bin/cc.
-# This compiler not only emits abnoxious copyright messages every time
+# This compiler not only emits obnoxious copyright messages every time
 # you run it, but it chokes and dies on a whole bunch of GNU source
 # files.  Default to using the AT&T compiler installed in /usr/ccs/ATT/cc.
 # Unfortunately though, the AT&T compiler sometimes generates code that
@@ -35,5 +35,6 @@ ALLOCA1=alloca.o
 # new terminfo interface and latest terminal descriptions.
 TERMCAP=-ltermlib
 
-# SVR4 puts the BSD compatible install in /usr/ucb.
-INSTALL = /usr/ucb/install -c
+# The /usr/ucb/install program is incompatible (complains about unknown
+# group staff).  Use good old cp...
+INSTALL = cp

@@ -227,7 +227,7 @@ static void
 dbx_psymtab_to_symtab PARAMS ((struct partial_symtab *));
 
 static void
-psymtab_to_symtab_1 PARAMS ((struct partial_symtab *, int));
+dbx_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
 
 static void
 read_dbx_symtab PARAMS ((CORE_ADDR, struct objfile *, CORE_ADDR, int));
@@ -1144,9 +1144,8 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 }
 
 static void
-psymtab_to_symtab_1 (pst, sym_offset)
+dbx_psymtab_to_symtab_1 (pst)
      struct partial_symtab *pst;
-     int sym_offset;
 {
   struct cleanup *old_chain;
   int i;
@@ -1176,7 +1175,7 @@ psymtab_to_symtab_1 (pst, sym_offset)
 	    wrap_here ("");		/* Flush output */
 	    fflush (stdout);
 	  }
-	psymtab_to_symtab_1 (pst->dependencies[i], sym_offset);
+	dbx_psymtab_to_symtab_1 (pst->dependencies[i]);
       }
 
   if (LDSYMLEN(pst))		/* Otherwise it's a dummy */
@@ -1184,10 +1183,11 @@ psymtab_to_symtab_1 (pst, sym_offset)
       /* Init stuff necessary for reading in symbols */
       buildsym_init ();
       old_chain = make_cleanup (really_free_pendings, 0);
-
-      /* Read in this files symbols */
-      bfd_seek (pst->objfile->obfd, sym_offset, L_SET);
       file_string_table_offset = FILE_STRING_OFFSET (pst);
+      symbol_size = SYMBOL_SIZE (pst);
+
+      /* Read in this file's symbols */
+      bfd_seek (pst->objfile->obfd, SYMBOL_OFFSET (pst), L_SET);
       pst->symtab =
 	read_ofile_symtab (pst->objfile, LDSYMOFF(pst), LDSYMLEN(pst),
 			   pst->textlow, pst->texthigh - pst->textlow,
@@ -1231,11 +1231,9 @@ dbx_psymtab_to_symtab (pst)
 
       sym_bfd = pst->objfile->obfd;
 
-      symbol_size = SYMBOL_SIZE(pst);
-
       next_symbol_text_func = dbx_next_symbol_text;
 
-      psymtab_to_symtab_1 (pst, SYMBOL_OFFSET (pst));
+      dbx_psymtab_to_symtab_1 (pst);
 
       /* Match with global symbols.  This only needs to be done once,
          after all of the symtabs and dependencies have been read in.   */

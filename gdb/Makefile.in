@@ -74,8 +74,8 @@ srcdir = .
 # CFLAGS section if your system doesn't have fcntl.h in /usr/include (which 
 # is where it should be according to Posix).
 
-YACC=byacc
-# YACC=yacc
+BISON=yacc
+YACC=$(BISON)
 MAKE=make
 
 # Documentation (gdb.dvi) needs either GNU m4 or SysV m4; 
@@ -163,7 +163,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
 ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.5.4
+VERSION = 4.5.5
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -341,8 +341,8 @@ init.c: $(srcdir)/munch $(OBS) $(TSOBS)
 	$(srcdir)/munch ${MUNCH_DEFINE} $(OBS) $(TSOBS) > init.c
 
 gdb: $(OBS) $(TSOBS) ${ADD_DEPS} ${CDEPS} init.o
-	${CC-LD} $(LDFLAGS) -o gdb init.o $(OBS) $(TSOBS) $(ADD_FILES) \
-	  $(CLIBS) $(LOADLIBES)
+	${CC-LD} $(GLOBAL_CFLAGS) $(LDFLAGS) -o gdb \
+	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#setopt load_flags $(CFLAGS) -I$(BFD_DIR) -DHOST_SYS=SUN4_SYS
