@@ -1,3 +1,20 @@
+Tue Sep 15 15:26:38 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (install): if $(tooldir) exists, install nm and
+	strip in $(tooldir)/bin.
+
+Thu Sep  3 11:57:40 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in:  Let's call it version 2.0.
+
+Wed Sep  2 00:25:13 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in:  Bump to version 0.98.
+	* TODO, README:  Minor updates.
+
+	* Makefile.in:  Added mostlyclean, distclean rules,
+	and cleaned up clean, realclean.
+
 Sun Aug 30 21:18:59 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: map program names through program_transform_name
