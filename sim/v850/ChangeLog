@@ -1,3 +1,12 @@
+Fri Sep 27 17:42:37 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c (trace_input): Fix thinko. 
+
+Wed Sep 18 09:54:12 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (exec_bfd): Rename from sim_bfd.
+	(trace_input): Ditto.
+
 Thu Sep 12 12:03:05 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* simops.c (trace_input): Use find_nearest_line to print line
