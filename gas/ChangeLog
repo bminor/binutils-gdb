@@ -1,3 +1,12 @@
+2000-02-27  Hans-Peter Nilsson  <hp@axis.com>
+
+	* doc/internals.texi (CPU backend): Mention that
+	line_separator_chars do not break up comments.  Fix typos for
+	LEX_AT and LEX_NAME descriptions.  Document operands for
+	TC_EQUAL_IN_INSN, md_operand and md_section_align.  Correct
+	description of md_create_short_jump usage.  Document argument for
+	md_undefined_symbol.
+
 2000-02-27  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-sparc.c (OPTION_UNDECLARED_REGS): New option.

@@ -914,7 +914,9 @@ comment when they appear at the start of a line.
 @cindex line_separator_chars
 This is a null terminated @code{const char} array of characters which separate
 lines (semicolon and newline are such characters by default, and need not be
-listed in this array).
+listed in this array).  Note that line_separator_chars do not separate lines
+if found in a comment, such as after a character in line_comment_chars or
+comment_chars.
 
 @item EXP_CHARS
 @cindex EXP_CHARS
@@ -932,13 +934,13 @@ Usually this includes @samp{r} and @samp{f}.
 
 @item LEX_AT
 @cindex LEX_AT
-You may define this macro to the lexical type of the @kbd{@}} character.  The
+You may define this macro to the lexical type of the @kbd{@@} character.  The
 default is zero.
 
 Lexical types are a combination of @code{LEX_NAME} and @code{LEX_BEGIN_NAME},
 both defined in @file{read.h}.  @code{LEX_NAME} indicates that the character
 may appear in a name.  @code{LEX_BEGIN_NAME} indicates that the character may
-appear at the beginning of a nem.
+appear at the beginning of a name.
 
 @item LEX_BR
 @cindex LEX_BR
@@ -1007,7 +1009,9 @@ If you define this macro, GAS will not require pseudo-ops to start with a
 @item TC_EQUAL_IN_INSN
 @cindex TC_EQUAL_IN_INSN
 If you define this macro, it should return nonzero if the instruction is
-permitted to contain an @kbd{=} character.  GAS will use this to decide if a
+permitted to contain an @kbd{=} character.  GAS will call it with two
+arguments, the character before the @kbd{=} character, and the value of
+@code{input_line_pointer} at that point.  GAS uses this macro to decide if a
 @kbd{=} is an assignment or an instruction.
 
 @item TC_EOL_IN_INSN
@@ -1029,13 +1033,14 @@ creates a new symbol.  Typically this would be used to supply symbols whose
 name or value changes dynamically, possibly in a context sensitive way.
 Predefined symbols with fixed values, such as register names or condition
 codes, are typically entered directly into the symbol table when @code{md_begin}
-is called.
+is called.  One argument is passed, a @code{char *} for the symbol.
 
 @item md_operand
 @cindex md_operand
-GAS will call this function for any expression that can not be recognized.
-When the function is called, @code{input_line_pointer} will point to the start
-of the expression.
+GAS will call this function with one argument, an @code{expressionS}
+pointer, for any expression that can not be recognized.  When the function
+is called, @code{input_line_pointer} will point to the start of the
+expression.
 
 @item tc_unrecognized_line
 @cindex tc_unrecognized_line
@@ -1125,11 +1130,11 @@ relocation entry.
 @cindex md_create_long_jump
 If @code{WORKING_DOT_WORD} is defined, GAS will not do broken word processing
 (@pxref{Broken words}).  Otherwise, you should set @code{md_short_jump_size} to
-the size of a short jump (a jump that is just long enough to jump around a long
-jmp) and @code{md_long_jump_size} to the size of a long jump (a jump that can
-go anywhere in the function), You should define @code{md_create_short_jump} to
-create a short jump around a long jump, and define @code{md_create_long_jump}
-to create a long jump.
+the size of a short jump (a jump that is just long enough to jump around a
+number of long jumps) and @code{md_long_jump_size} to the size of a long jump
+(a jump that can go anywhere in the function).  You should define
+@code{md_create_short_jump} to create a short jump around a number of long
+jumps, and define @code{md_create_long_jump} to create a long jump.
 
 @item md_estimate_size_before_relax
 @cindex md_estimate_size_before_relax
@@ -1227,7 +1232,10 @@ If you define this macro, GAS will call it each time a label is defined.
 @item md_section_align
 @cindex md_section_align
 GAS will call this function for each section at the end of the assembly, to
-permit the CPU backend to adjust the alignment of a section.
+permit the CPU backend to adjust the alignment of a section.  The function
+must take two arguments, a @code{segT} for the section and a @code{valueT}
+for the size of the section, and return a @code{valueT} for the rounded
+size.
 
 @item DOUBLEBAR_PARALLEL
 @cindex DOUBLEBAR_PARALLEL
