@@ -7262,7 +7262,7 @@ make
 where @var{host} is an identifier such as @samp{sun4} or
 @samp{decstation}, that identifies the platform where _GDBN__ will run.
 
-These @code{configure} and @code {make} commands build the three libraries @file{bfd},
+These @code{configure} and @code{make} commands build the three libraries @file{bfd},
 @file{readline}, and @file{libiberty}, then @code{gdb} itself.  The
 configured source files, and the binaries, are left in the
 corresponding source directories.
