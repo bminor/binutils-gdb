@@ -60,11 +60,11 @@ These working remote stubs are distributed with _GDBN__:
 @kindex sparc-stub.c
 For @sc{sparc} architectures.
 
-@item m68-stub.c
+@item m68k-stub.c
 @kindex m68-stub.c
 For Motorola 680x0 architectures.
 
-@item i36-stub.c
+@item i386-stub.c
 @kindex i36-stub.c
 For Intel 386 and compatible architectures.
 @end table
@@ -87,6 +87,13 @@ The debugging stub for your architecture supplies these three
 subroutines:
 
 @table @code
+@item set_debug_traps
+@kindex set_debug_traps
+@cindex remote serial stub, initialization
+This routine arranges to transfer control to @code{handle_exception}
+when your program stops.  You must call this subroutine explicitly near
+the beginning of your program.
+
 @item handle_exception
 @kindex handle_exception
 @cindex remote serial stub, main routine
@@ -104,13 +111,6 @@ retrieving and transmitting any information _GDBN__ needs, until you
 execute a _GDBN__ command that makes your program resume; at that point,
 @code{handle_exception} returns control to your own code on the target
 machine. 
-
-@item set_debug_traps
-@kindex set_debug_traps
-@cindex remote serial stub, initialization
-You must call this subroutine explicitly near the beginning of your
-program.  This is the routine that arranges to transfer control to
-@code{handle_exception} when your program stops.
 
 @item breakpoint
 @cindex @code{breakpoint} subroutine, remote
@@ -137,8 +137,7 @@ start of your debugging session.
 The debugging stubs that come with _GDBN__ are set up for a particular
 chip architecture, but they have no information about the rest of your
 debugging target machine.  To allow the stub to work, you must supply
-three special low-level subroutines, and make sure one library routine
-is available.
+these special low-level subroutines:
 
 @table @code
 @item int getDebugChar()
@@ -161,7 +160,12 @@ be a no-op.
 
 On target machines that have instruction caches, _GDBN__ requires this
 function to make certain that the state of your program is stable.
+@end table
 
+@noindent
+You must also make sure this library routine is available:
+
+@table @code
 @item void *memset(void *, int, int)
 @kindex memset
 This is the standard library function @code{memset} that sets an area of
@@ -170,9 +174,9 @@ memory to a known value.  If you have one of the free versions of
 either obtain it from your hardware manufacturer, or write your own.
 @end table
 
-If you do not use the GNU C compiler, you may also need other standard
-library subroutines; this will vary from one stub to another, but in
-general the stubs are likely to use any of the common library
+If you do not use the GNU C compiler, you may need other standard
+library subroutines as well; this will vary from one stub to another,
+but in general the stubs are likely to use any of the common library
 subroutines which @code{gcc} generates as inline code.
 
 
