@@ -625,6 +625,12 @@ extern const bfd_target sunos_big_vec;
 extern const bfd_target tekhex_vec;
 extern const bfd_target tic30_aout_vec;
 extern const bfd_target tic30_coff_vec;
+extern const bfd_target tic54x_coff0_vec;
+extern const bfd_target tic54x_coff0_beh_vec;
+extern const bfd_target tic54x_coff1_vec;
+extern const bfd_target tic54x_coff1_beh_vec;
+extern const bfd_target tic54x_coff2_vec;
+extern const bfd_target tic54x_coff2_beh_vec;
 extern const bfd_target tic80coff_vec;
 extern const bfd_target vaxnetbsd_vec;
 extern const bfd_target versados_vec;
@@ -862,6 +868,12 @@ const bfd_target * const bfd_target_vector[] = {
 	&aout0_big_vec,
 	&tic30_aout_vec,
 	&tic30_coff_vec,
+	&tic54x_coff0_vec,
+	&tic54x_coff0_beh_vec,
+	&tic54x_coff1_vec,
+	&tic54x_coff1_beh_vec,
+	&tic54x_coff2_vec,
+	&tic54x_coff2_beh_vec,
 	&tic80coff_vec,
 	&vaxnetbsd_vec,
 	&versados_vec,

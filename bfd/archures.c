@@ -181,6 +181,7 @@ DESCRIPTION
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
 .  bfd_arch_w65,       {* WDC 65816 *}
 .  bfd_arch_tic30,     {* Texas Instruments TMS320C30 *}
+.  bfd_arch_tic54x,    {* Texas Instruments TMS320C54X *}
 .  bfd_arch_tic80,     {* TI TMS320c80 (MVP) *}
 .  bfd_arch_v850,      {* NEC V850 *}
 .#define bfd_mach_v850          0
@@ -267,6 +268,7 @@ extern const bfd_arch_info_type bfd_pj_arch;
 extern const bfd_arch_info_type bfd_sh_arch;
 extern const bfd_arch_info_type bfd_sparc_arch;
 extern const bfd_arch_info_type bfd_tic30_arch;
+extern const bfd_arch_info_type bfd_tic54x_arch;
 extern const bfd_arch_info_type bfd_tic80_arch;
 extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_we32k_arch;
@@ -307,6 +309,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_sh_arch,
   &bfd_sparc_arch,
   &bfd_tic30_arch,
+  &bfd_tic54x_arch,
   &bfd_tic80_arch,
   &bfd_vax_arch,
   &bfd_we32k_arch,

@@ -33,6 +33,7 @@ arm*)	targ_archs=bfd_arm_arch ;;
 strongarm*) targ_archs=bfd_arm_arch ;;
 thumb*)	targ_archs=bfd_arm_arch ;;
 c30*)	targ_archs=bfd_tic30_arch ;;
+c54x*)	targ_archs=bfd_tic54x_arch ;;
 hppa*)	targ_archs=bfd_hppa_arch ;;
 i[3456]86) targ_archs=bfd_i386_arch ;;
 i370)   targ_archs=bfd_i370_arch ;;
@@ -184,6 +185,12 @@ case "${targ}" in
     ;;
   c30-*-*coff* | tic30-*-*coff*)
     targ_defvec=tic30_coff_vec
+    ;;
+
+  c54x*-*-*coff* | tic54x-*-*coff*)
+    targ_defvec=tic54x_coff1_vec
+    targ_selvecs="tic54x_coff1_beh_vec tic54x_coff2_vec tic54x_coff2_beh_vec tic54x_coff0_vec tic54x_coff0_beh_vec"
+    targ_underscore=yes
     ;;
 
   d10v-*-*)

@@ -574,6 +574,12 @@ do
     tekhex_vec)			tb="$tb tekhex.lo" ;;
     tic30_aout_vec)		tb="$tb aout-tic30.lo" ;;
     tic30_coff_vec)		tb="$tb coff-tic30.lo" ;;
+    tic54x_coff0_vec)		tb="$tb coff-tic54x.lo" ;;
+    tic54x_coff0_beh_vec)	tb="$tb coff-tic54x.lo" ;;
+    tic54x_coff1_vec)		tb="$tb coff-tic54x.lo" ;;
+    tic54x_coff1_beh_vec)	tb="$tb coff-tic54x.lo" ;;
+    tic54x_coff2_vec)		tb="$tb coff-tic54x.lo" ;;
+    tic54x_coff2_beh_vec)	tb="$tb coff-tic54x.lo" ;;
     tic80coff_vec)		tb="$tb coff-tic80.lo cofflink.lo" ;;
     versados_vec)		tb="$tb versados.lo" ;;
     vms_alpha_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo"

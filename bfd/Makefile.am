@@ -66,6 +66,7 @@ ALL_MACHINES = \
 	cpu-sh.lo \
 	cpu-sparc.lo \
 	cpu-tic30.lo \
+	cpu-tic54x.lo \
 	cpu-tic80.lo \
 	cpu-v850.lo \
 	cpu-vax.lo \
@@ -103,6 +104,7 @@ ALL_MACHINES_CFILES = \
 	cpu-sh.c \
 	cpu-sparc.c \
 	cpu-tic30.c \
+	cpu-tic54x.c \
 	cpu-tic80.c \
 	cpu-v850.c \
 	cpu-vax.c \
@@ -145,6 +147,7 @@ BFD32_BACKENDS = \
 	coff-stgo32.lo \
 	coff-svm68k.lo \
 	coff-tic30.lo \
+	coff-tic54x.lo \
 	coff-tic80.lo \
 	coff-u68k.lo \
 	coff-we32k.lo \
@@ -275,6 +278,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-stgo32.c \
 	coff-svm68k.c \
 	coff-tic30.c \
+	coff-tic54x.c \
 	coff-tic80.c \
 	coff-u68k.c \
 	coff-we32k.c \
@@ -715,6 +719,7 @@ cpu-sh.lo: cpu-sh.c
 cpu-sparc.lo: cpu-sparc.c
 cpu-tic30.lo: cpu-tic30.c
 cpu-tic80.lo: cpu-tic80.c
+cpu-tic54x.lo: cpu-tic54x.c
 cpu-v850.lo: cpu-v850.c
 cpu-vax.lo: cpu-vax.c
 cpu-we32k.lo: cpu-we32k.c
@@ -808,6 +813,8 @@ coff-svm68k.lo: coff-svm68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \
 coff-tic30.lo: coff-tic30.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic30.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-tic80.lo: coff-tic80.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic80.h \
+  $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
+coff-tic54x.lo: coff-tic54x.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic54x.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-u68k.lo: coff-u68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \

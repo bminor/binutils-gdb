@@ -1407,6 +1407,7 @@ enum bfd_architecture
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   bfd_arch_w65,        /* WDC 65816 */
   bfd_arch_tic30,      /* Texas Instruments TMS320C30 */
+  bfd_arch_tic54x,     /* Texas Instruments TMS320C54X */
   bfd_arch_tic80,      /* TI TMS320c80 (MVP) */
   bfd_arch_v850,       /* NEC V850 */
 #define bfd_mach_v850          0
@@ -2280,6 +2281,30 @@ instruction. */
 significant 8 bits of a 24 bit word are placed into the least
 significant 8 bits of the opcode. */
   BFD_RELOC_TIC30_LDP,
+
+/* This is a 7bit reloc for the tms320c54x, where the least
+significant 7 bits of a 16 bit word are placed into the least
+significant 7 bits of the opcode. */
+  BFD_RELOC_TIC54X_PARTLS7,
+
+/* This is a 9bit DP reloc for the tms320c54x, where the most
+significant 9 bits of a 16 bit word are placed into the least
+significant 9 bits of the opcode. */
+  BFD_RELOC_TIC54X_PARTMS9,
+
+/* This is an extended address 23-bit reloc for the tms320c54x. */
+  BFD_RELOC_TIC54X_23,
+
+/* This is a 16-bit reloc for the tms320c54x, where the least 
+significant 16 bits of a 23-bit extended address are placed into 
+the opcode. */
+  BFD_RELOC_TIC54X_16_OF_23,
+
+/* This is a reloc for the tms320c54x, where the most
+significant 7 bits of a 23-bit extended address are placed into 
+the opcode. */
+  BFD_RELOC_TIC54X_MS7_OF_23,
+
 
 /* This is a 48 bit reloc for the FR30 that stores 32 bits. */
   BFD_RELOC_FR30_48,

@@ -2539,6 +2539,41 @@ ENUMDOC
   significant 8 bits of a 24 bit word are placed into the least
   significant 8 bits of the opcode.
 
+COMMENT
+ENUM
+  BFD_RELOC_TIC54X_PARTLS7
+ENUMDOC
+  This is a 7bit reloc for the tms320c54x, where the least
+  significant 7 bits of a 16 bit word are placed into the least
+  significant 7 bits of the opcode.
+
+ENUM
+  BFD_RELOC_TIC54X_PARTMS9
+ENUMDOC
+  This is a 9bit DP reloc for the tms320c54x, where the most
+  significant 9 bits of a 16 bit word are placed into the least
+  significant 9 bits of the opcode.
+
+ENUM
+  BFD_RELOC_TIC54X_23
+ENUMDOC
+  This is an extended address 23-bit reloc for the tms320c54x.
+
+ENUM
+  BFD_RELOC_TIC54X_16_OF_23
+ENUMDOC
+  This is a 16-bit reloc for the tms320c54x, where the least 
+  significant 16 bits of a 23-bit extended address are placed into 
+  the opcode.
+
+ENUM
+  BFD_RELOC_TIC54X_MS7_OF_23
+ENUMDOC
+  This is a reloc for the tms320c54x, where the most
+  significant 7 bits of a 23-bit extended address are placed into 
+  the opcode.
+COMMENT
+
 ENUM
   BFD_RELOC_FR30_48
 ENUMDOC

@@ -1,3 +1,18 @@
+2000-04-07  Timothy Wall  <twall@cygnus.com>
+
+	* targets.c: Added vecs for tic54x.
+	* reloc.c: Added relocs for tic54x.
+	* libbfd.h: Regenerated.
+	* configure: Add TI COFF vecs for tic54x.
+	* configure.in: Ditto.
+	* config.bfd (targ_cpu): Recognize new tic54x target.
+	* coffcode.h (coff_slurp_symbol_table): Additions for TI COFF handling.
+	* bfd-in2.h: Add tic54x target and relocations.
+	* Makefile.am, Makefile.in: Add tic54x target.
+	* archures.c (bfd_archures_list): Add tic54x target.
+	* coff-tic54x.c: New.
+	* cpu-tic54x.c: New.
+	
 2000-04-06  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* elfcore.h (elf_core_file_p): call backend_object_p which
