@@ -62,7 +62,7 @@ static void sds_fetch_registers PARAMS ((int));
 
 static void sds_resume PARAMS ((int, int, enum target_signal));
 
-static int sds_start_remote PARAMS ((char *));
+static int sds_start_remote PARAMS ((PTR));
 
 static void sds_open PARAMS ((char *, int));
 
@@ -155,7 +155,7 @@ sds_close (quitting)
 
 static int
 sds_start_remote (dummy)
-     char *dummy;
+     PTR dummy;
 {
   char c;
   unsigned char buf[200];
@@ -237,7 +237,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it (we'd be
      in an inconsistent state otherwise).  */
-  if (!catch_errors (sds_start_remote, (char *)0, 
+  if (!catch_errors (sds_start_remote, NULL, 
 		     "Couldn't establish connection to remote target\n",
 		     RETURN_MASK_ALL))
     pop_target ();

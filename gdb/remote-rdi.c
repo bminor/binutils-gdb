@@ -130,7 +130,7 @@ arm_rdi_start_remote (dummy)
 void
 voiddummy ()
 {
-  printf("void dummy\n");
+  fprintf_unfiltered (gdb_stdout, "void dummy\n");
 }
 
 static void
@@ -139,7 +139,7 @@ myprint (arg, format, ap)
      const char *format;
      va_list ap;
 {
-  vfprintf (stdout, format, ap);
+  vfprintf_unfiltered (gdb_stdout, format, ap);
 }
 
 static void
@@ -148,7 +148,7 @@ mywritec (arg, c)
      int c;
 {
   if (isascii (c))
-    fputc_unfiltered (c, (FILE *) arg);
+    fputc_unfiltered (c, gdb_stdout);
 }
 
 static int
@@ -231,12 +231,12 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   gdb_hostif.dbgprint = myprint;
   gdb_hostif.dbgpause = mypause;
-  gdb_hostif.dbgarg = stdout;
+  gdb_hostif.dbgarg = NULL;
   gdb_hostif.writec = mywritec;
   gdb_hostif.readc = myreadc;
   gdb_hostif.write = mywrite;
   gdb_hostif.gets = mygets;
-  gdb_hostif.hostosarg = stdout;
+  gdb_hostif.hostosarg = NULL;
   gdb_hostif.reset = voiddummy;
 
   rslt = angel_RDI_open (10, &gdb_config, &gdb_hostif, NULL);

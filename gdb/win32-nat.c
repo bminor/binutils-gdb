@@ -64,7 +64,7 @@
 extern struct target_ops child_ops;
 
 static void child_stop PARAMS ((void));
-static int child_thread_alive PARAMS ((int));
+static int win32_child_thread_alive PARAMS ((int));
 
 static int last_sig = 0;	/* Set if a signal was received from the
 				   debugged process */
@@ -302,7 +302,7 @@ child_store_inferior_registers (int r)
    of error; store status through argument pointer OURSTATUS.  */
 
 static int
-handle_load_dll (char *dummy)
+handle_load_dll (PTR dummy)
 {
   LOAD_DLL_DEBUG_INFO * event = &current_event.u.LoadDll;
   DWORD dll_name_ptr;
@@ -1033,7 +1033,7 @@ static void init_child_ops(void)
   child_ops.to_mourn_inferior =   child_mourn_inferior;
   child_ops.to_can_run  =   child_can_run;
   child_ops.to_notice_signals =   0;
-  child_ops.to_thread_alive  =   child_thread_alive;
+  child_ops.to_thread_alive  =   win32_child_thread_alive;
   child_ops.to_stop  =   child_stop;
   child_ops.to_stratum =   process_stratum;
   child_ops.DONT_USE =   0;
@@ -1102,7 +1102,7 @@ _initialize_inftarg ()
    by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
    it means that the pid has died.  Otherwise it is assumed to be alive. */
 static int
-child_thread_alive (int pid)
+win32_child_thread_alive (int pid)
 {
   return WaitForSingleObject(thread_rec (pid, FALSE)->h, 0) == WAIT_OBJECT_0 ?
 	 FALSE : TRUE;

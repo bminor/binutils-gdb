@@ -1,3 +1,23 @@
+Mon Jan 18 14:01:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-array.c (array_open): Don't use fprintf_filtered to send
+ 	data to the log file.
+
+	* remote-array.c (handle_load_dll): Change argument type to PTR so
+ 	that it is compatible with catch_errors.
+	* ocd.c (ocd_start_remote): Ditto.
+	* remote-sds.c (sds_start_remote): Ditto.
+
+	* win32-nat.c (win32_child_thread_alive): Namespace proof
+ 	child_thread_alive.
+	(init_child_ops): Update.
+
+Mon Jan 18 12:03:47 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-rdi.c (arm_rdi_open): Set gdb_hostif.hostosarg and
+ 	gdb_hostif.dbgarg to NULL instead of stdout.
+	(voiddummy, myprint, mywritec): Use gdb_stdout instead of stdout.
+
 Mon Jan 18 16:40:50 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* ser-ocd.c (ocd_open): Handle Unix case gracefully.

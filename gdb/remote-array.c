@@ -625,9 +625,9 @@ array_open(args, name, from_tty)
   log_file = fopen (LOG_FILE, "w");
   if (log_file == NULL)
     perror_with_name (LOG_FILE);
-  fprintf_filtered (log_file, "GDB %s (%s", version);
-  fprintf_filtered (log_file, " --target %s)\n", array_ops.to_shortname);
-  fprintf_filtered (log_file, "Remote target %s connected to %s\n\n", array_ops.to_shortname, dev_name);
+  fprintf (log_file, "GDB %s (%s", version);
+  fprintf (log_file, " --target %s)\n", array_ops.to_shortname);
+  fprintf (log_file, "Remote target %s connected to %s\n\n", array_ops.to_shortname, dev_name);
 #endif
 
   /* see if the target is alive. For a ROM monitor, we can just try to force the
