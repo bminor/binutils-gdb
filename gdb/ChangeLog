@@ -1,5 +1,9 @@
 2002-11-25  Jim Blandy  <jimb@redhat.com>
 
+	* symfile.c (init_objfile_sect_indices): New function.
+	(default_symfile_offsets): Move the section-index-initializing
+	stuff into init_objfile_sect_indices, and call that.
+
 	* symtab.h (SIZEOF_N_SECTION_OFFSETS): New macro.
 	(SIZEOF_SECTION_OFFSETS): Use SIZEOF_N_SECTION_OFFSETS.
 

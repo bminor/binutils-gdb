@@ -473,43 +473,13 @@ free_section_addr_info (struct section_addr_info *sap)
 }
 
 
-/* Parse the user's idea of an offset for dynamic linking, into our idea
-   of how to represent it for fast symbol reading.  This is the default 
-   version of the sym_fns.sym_offsets function for symbol readers that
-   don't need to do anything special.  It allocates a section_offsets table
-   for the objectfile OBJFILE and stuffs ADDR into all of the offsets.  */
-
-void
-default_symfile_offsets (struct objfile *objfile,
-			 struct section_addr_info *addrs)
+/* Initialize OBJFILE's sect_index_* members.  */
+static void
+init_objfile_sect_indices (struct objfile *objfile)
 {
+  asection *sect;
   int i;
-  asection *sect = NULL;
-
-  objfile->num_sections = SECT_OFF_MAX;
-  objfile->section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
-  memset (objfile->section_offsets, 0, SIZEOF_SECTION_OFFSETS);
-
-  /* Now calculate offsets for section that were specified by the
-     caller. */
-  for (i = 0; i < MAX_SECTIONS && addrs->other[i].name; i++)
-    {
-      struct other_sections *osp ;
-
-      osp = &addrs->other[i] ;
-      if (osp->addr == 0)
-  	continue;
-
-      /* Record all sections in offsets */
-      /* The section_offsets in the objfile are here filled in using
-         the BFD index. */
-      (objfile->section_offsets)->offsets[osp->sectindex] = osp->addr;
-    }
-
-  /* Remember the bfd indexes for the .text, .data, .bss and
-     .rodata sections. */
-
+  
   sect = bfd_get_section_by_name (objfile->obfd, ".text");
   if (sect) 
     objfile->sect_index_text = sect->index;
@@ -555,6 +525,46 @@ default_symfile_offsets (struct objfile *objfile,
 	objfile->sect_index_rodata = 0;
     }
 }
+
+
+/* Parse the user's idea of an offset for dynamic linking, into our idea
+   of how to represent it for fast symbol reading.  This is the default 
+   version of the sym_fns.sym_offsets function for symbol readers that
+   don't need to do anything special.  It allocates a section_offsets table
+   for the objectfile OBJFILE and stuffs ADDR into all of the offsets.  */
+
+void
+default_symfile_offsets (struct objfile *objfile,
+			 struct section_addr_info *addrs)
+{
+  int i;
+
+  objfile->num_sections = SECT_OFF_MAX;
+  objfile->section_offsets = (struct section_offsets *)
+    obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
+  memset (objfile->section_offsets, 0, SIZEOF_SECTION_OFFSETS);
+
+  /* Now calculate offsets for section that were specified by the
+     caller. */
+  for (i = 0; i < MAX_SECTIONS && addrs->other[i].name; i++)
+    {
+      struct other_sections *osp ;
+
+      osp = &addrs->other[i] ;
+      if (osp->addr == 0)
+  	continue;
+
+      /* Record all sections in offsets */
+      /* The section_offsets in the objfile are here filled in using
+         the BFD index. */
+      (objfile->section_offsets)->offsets[osp->sectindex] = osp->addr;
+    }
+
+  /* Remember the bfd indexes for the .text, .data, .bss and
+     .rodata sections. */
+  init_objfile_sect_indices (objfile);
+}
+
 
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
