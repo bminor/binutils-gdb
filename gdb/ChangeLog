@@ -1,4 +1,7 @@
-Wed Mar  6 09:34:11 1996  Jeffrey A Law  (law@cygnus.com)
+Wed Mar  6 17:57:59 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* breakpoint.c (bfd_lookup_symbol): Provide for all SVR4 systems,
+	not just those with HANDLE_SVR4_EXEC_EMULATORS.
 
 	* From Peter Schauer:
 	* breakpoint.c (internal_breakpoint_number): Move to file scope.
