@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
-#include "../../sim/sim.h"
+#include "../sim/z8k/sim.h"
 
 /* External data declarations */
 extern int stop_soon_quietly;           /* for wait_for_inferior */
