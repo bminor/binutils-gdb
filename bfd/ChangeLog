@@ -1,3 +1,7 @@
+2003-04-01  Ben Elliston  <bje@wasabisystems.com>
+
+	* dwarf2.c (read_attribute_value): Correct typo in comment.
+
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2.c (concat_filename): Use bfd_malloc() and strdup()

@@ -650,7 +650,7 @@ read_attribute_value (attr, form, unit, info_ptr)
   switch (form)
     {
     case DW_FORM_addr:
-      /* FIXME: DWARF3 draft sais DW_FORM_ref_addr is offset_size.  */
+      /* FIXME: DWARF3 draft says DW_FORM_ref_addr is offset_size.  */
     case DW_FORM_ref_addr:
       DW_ADDR (attr) = read_address (unit, info_ptr);
       info_ptr += unit->addr_size;
