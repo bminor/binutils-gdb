@@ -1,3 +1,24 @@
+Thu Aug  7 19:40:52 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	Changes to OCD support to support wiggler box as well as
+	target boxes:
+	* ocd.c: change speed in init command to 0 from 80,
+	add (temporary) logging commands to help debugging,
+	(ocd_open): if "target ocd wiggler lpt" then use special
+	ser-ocd.c serial interface which communicates with Wigglers.dll,
+	otherwise do as we did before
+	(ocd_get_packet): add OCD_LOG_FILE and OCD_SET_CONNECTION to
+	switch of known commands of len 0
+	* ocd.h: add OCD_LOG_FILE
+	* serial.c (serial_open): do serial_interface_lookup on ocd
+	in the case of ocd
+	* ser-ocd.c: add buffer to contain responses from sending a
+	command to the Wigglers.dll.
+	(ocd_readchar): return curr char from buffer and increment ptr
+	(ocd_write): send buffer to Wigglers.dll, storing response in
+	return buffer and initializing curr location ptr to start of
+	buffer.
+
 Thu Aug  7 14:08:23 1997  Martin M. Hunt  <hunt@cygnus.com>
 
 	* configure.in: Change required Tix version to 4.1.8.0 .

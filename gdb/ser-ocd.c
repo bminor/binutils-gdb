@@ -54,8 +54,9 @@ ocd_raw (scb)
 }
 
 /* We need a buffer to store responses from the Wigglers.dll */
-char * from_wigglers_buffer;
-char * bptr;			/* curr spot in buffer */
+#define WIGGLER_BUFF_SIZE 512
+unsigned char from_wiggler_buffer[WIGGLER_BUFF_SIZE];
+unsigned char * wiggler_buffer_ptr;	/* curr spot in buffer */
 
 static void
 ocd_readremote ()
@@ -67,7 +68,7 @@ ocd_readchar (scb, timeout)
      serial_t scb;
      int timeout;
 {
-
+  return (int) *wiggler_buffer_ptr++; /* return curr char and increment ptr */
 }
 
 struct ocd_ttystate {
@@ -130,12 +131,11 @@ ocd_write (scb, str, len)
 {
   char c;
 
-  ocd_readremote();
-
 #ifdef __CYGWIN32__ 
   /* send packet to Wigglers.dll and store response so we can give it to
 	remote-wiggler.c when get_packet is run */
-  do_command (str, from_wigglers_buffer);
+  do_command (str, from_wiggler_buffer);
+  wiggler_buffer_ptr = from_wiggler_buffer;
 #endif
 
   return 0;
@@ -145,7 +145,6 @@ static void
 ocd_close (scb)
      serial_t scb;
 {
-  ocd_close (0);
 }
 
 static struct serial_ops ocd_ops =
@@ -172,3 +171,9 @@ _initialize_ser_ocd_bdm ()
 {
   serial_add_interface (&ocd_ops);
 }
+
+
+
+
+
+

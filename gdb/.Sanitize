@@ -320,6 +320,8 @@ ns32k-tdep.c
 ns32km3-nat.c
 objfiles.c
 objfiles.h
+ocd.c
+ocd.h
 op50-rom.c
 os9kread.c
 osf-share
@@ -328,6 +330,7 @@ parse.c
 parser-defs.h
 partial-stab.h
 ppcbug-rom.c
+ppc-bdm.c
 printcmd.c
 process_reply.defs
 procfs.c
@@ -359,7 +362,6 @@ remote-vx68.c
 remote-vx960.c
 remote-vxmips.c
 remote-vxsparc.c
-remote-wiggler.c
 remote.c
 reply_mig_hack.awk
 rs6000-nat.c
@@ -374,6 +376,7 @@ scm-valprint.c
 ser-e7kpc.c
 ser-go32.c
 ser-mac.c
+ser-ocd.c
 ser-tcp.c
 ser-unix.c
 serial.c
@@ -436,6 +439,7 @@ vax-tdep.c
 vx-share
 w65-tdep.c
 w89k-rom.c
+wigglers.def
 win32-nat.c
 xcoffread.c
 xcoffsolib.c

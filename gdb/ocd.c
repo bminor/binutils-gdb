@@ -168,7 +168,7 @@ ocd_start_remote (dummy)
 		     p[0], p[1], (p[2] << 16) | p[3]);
 
 #if 1
-  speed = 80;			/* Divide clock by 4000 */
+  speed = 0; /* 80;			/* Divide clock by 4000 */
 
   buf[0] = OCD_INIT;
   buf[1] = speed >> 8;
@@ -231,6 +231,11 @@ ocd_start_remote (dummy)
   select_frame (get_current_frame (), 0);
   print_stack_frame (selected_frame, -1, 1);
 
+  buf[0] = OCD_LOG_FILE;
+  buf[1] = 3;   /* close existing WIGGLERS.LOG */
+  ocd_put_packet (buf, 2);
+  p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
+
   return 1;
 }
 
@@ -246,6 +251,10 @@ ocd_open (name, from_tty, target_type, ops)
      enum ocd_target_type target_type;
      struct target_ops *ops;
 {
+  unsigned char buf[10], *p;
+  int status;
+  int pktlen;
+
   if (name == 0)
     error ("To open an OCD connection, you need to specify the\n\
 device the OCD device is attached to (e.g. /dev/ttya).");
@@ -258,9 +267,28 @@ device the OCD device is attached to (e.g. /dev/ttya).");
 
   ocd_dcache = dcache_init (ocd_read_bytes, ocd_write_bytes);
 
-  ocd_desc = SERIAL_OPEN (name);
-  if (!ocd_desc)
-    perror_with_name (name);
+  if (strncmp(name,"wiggler",7) == 0)
+      {
+	  ocd_desc = SERIAL_OPEN ("ocd");
+          if (!ocd_desc)
+            perror_with_name (name);
+
+	  buf[0] = OCD_LOG_FILE;
+	  buf[1] = 1;	/* open new or overwrite existing WIGGLERS.LOG */
+	  ocd_put_packet (buf, 2);
+	  p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
+
+	  buf[0] = OCD_SET_CONNECTION;
+	  buf[1] = 0x01;	/* atoi (name[11]); */
+	  ocd_put_packet (buf, 2);
+	  p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
+      }
+  else	/* not using Wigglers.dll */
+      {
+          ocd_desc = SERIAL_OPEN (name);
+	  if (!ocd_desc)
+	      perror_with_name (name);
+      }
 
   if (baud_rate != -1)
     {
@@ -297,7 +325,8 @@ device the OCD device is attached to (e.g. /dev/ttya).");
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
   if (!catch_errors (ocd_start_remote, (char *)target_type,
-		     "Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
+		     "Couldn't establish connection to remote target\n",
+		     RETURN_MASK_ALL))
     pop_target();
 }
 
@@ -1082,6 +1111,8 @@ ocd_get_packet (cmd, lenp, timeout)
 	case OCD_PROGRAM_FLASH: /* Write flash memory */
 	case OCD_EXIT_MON:	/* Exit the flash programming monitor  */
 	case OCD_ENTER_MON:	/* Enter the flash programming monitor  */
+	case OCD_LOG_FILE:	/* Make Wigglers.dll save Wigglers.log */
+	case OCD_SET_CONNECTION: /* Set type of connection in Wigglers.dll */
 	  len = 0;
 	  break;
 	case OCD_GET_VERSION: /* Get Version */
