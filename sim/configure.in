@@ -70,6 +70,7 @@ case "${target}" in
 	# The mn10300 simulator can only be compiled by gcc.
 	sim_target=mn10300
 	only_if_gcc=yes
+	extra_subdirs="${extra_subdirs} igen"
 	;;
   mn10200*-*-*)
 	sim_target=mn10200

@@ -1,15 +1,15 @@
-start-sanitize-sky
-Wed Feb  4 13:42:40 1998  Ian Carmichael  <iancarm@cygnus.com>
+Tue Mar 24 11::18:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
-	* configure.in: txvu-elf changed to dvp-elf.
-	* configure: Regenerated.
+	* configure.in (extra_subdirs): Enable igen for mn10300.
+	* configure: Re-generate.
 
-Thu Jan 15 10:35:49 1998  Ian Carmichael  <iancarm@cygnus.com>
+start-sanitize-vr4320
+Mon Mar  9 15:15:58 1998  Gavin Koch  <gavin@cygnus.com>
 
-	* configure.in: Add sky support.
-	* configure: Regenerated.
+	* mips/vr4320.igen: Mark the insn in here as vr4320 only.
+	Reorder the insns.
 
-end-sanitize-sky
+end-sanitize-vr4320
 Tue Dec  2 10:10:42 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in (extra_subdirs): Add support for thumb target.
