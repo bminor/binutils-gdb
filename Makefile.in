@@ -484,7 +484,7 @@ ALL_MODULES = \
 	all-binutils \
 	all-bison \
 	all-byacc \
-	all-cvs \
+	all-cvssrc \
 	all-db \
 	all-dejagnu \
 	all-diff \
@@ -561,7 +561,7 @@ CROSS_CHECK_MODULES = \
 	check-bash \
 	check-bfd \
 	check-binutils \
-	check-cvs \
+	check-cvssrc \
 	check-db \
 	check-dejagnu \
 	check-diff \
@@ -633,7 +633,7 @@ INSTALL_MODULES = \
 	install-binutils \
 	install-bison \
 	install-byacc \
-	install-cvs \
+	install-cvssrc \
 	install-db \
 	install-dejagnu \
 	install-diff \
@@ -791,7 +791,7 @@ CLEAN_MODULES = \
 	clean-binutils \
 	clean-bison \
 	clean-byacc \
-	clean-cvs \
+	clean-cvssrc \
 	clean-db \
 	clean-dejagnu \
 	clean-diff \
@@ -1440,7 +1440,7 @@ all-bfd:
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc
 all-bison: all-texinfo
 all-byacc:
-all-cvs:
+all-cvssrc:
 configure-target-cygmon: $(ALL_GCC)
 all-target-cygmon: configure-target-cygmon all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio
 all-db:
@@ -1466,7 +1466,7 @@ GDB_TK = all-tk all-tcl all-itcl all-tix all-libide
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-bison all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
 all-gnuserv:
 configure-target-gperf: $(ALL_GCC)
-all-target-gperf: configure-target-gperf all-target-libiberty all-target-libg++
+all-target-gperf: configure-target-gperf all-target-libiberty all-target-libstdc++
 all-gprof: all-libiberty all-bfd all-opcodes
 all-grep: all-libiberty
 all-grez: all-libiberty all-bfd all-opcodes

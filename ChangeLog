@@ -1,3 +1,8 @@
+Fri Dec 12 10:43:31 1997  Brendan Kehoe  <brendan@canuck.cygnus.com>
+
+	* Makefile.in (all-target-gperf): Change dependency to
+	all-target-libstdc++.
+
 Wed Dec 10 15:10:38 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Source directory cvs renamed to cvssrc:
