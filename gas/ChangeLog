@@ -1,3 +1,58 @@
+start-sanitize-d30v
+Mon Sep 15 11:28:04 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	Merge in work from Martin Hunt:
+
+	* config/tc-d30v.c (build_insn): For mvfsys and mvtsys,
+	CR is 0 for PSWL and PSWH.
+
+	* config/tc-d30v.c (do_assemble): Don't accept
+	illegal condition codes for cmpu instruction.
+
+	* config/tc-d30v.c: Add support for BFD_RELOC_D30V_9_PCREL
+	used in d*i instructions.
+
+	* config/tc-d30v.c (check_size): New function.  Check
+	relocations for overflows.
+	(md_pcrel_from_section): Fix relocations between sections.
+	(md_apply_fix3): Use new relocation types for 15 and 21
+	bit relocations in the right container. Needed because
+	the address of the instruction is not eight-byte aligned
+	but the relocations must be.
+
+	* config/tc-d30v.c (md_apply_fix3): Check for overflow.
+	(find_format): If ".s" or ".l" are used, don't try
+	to compute branch sizes.
+
+	* config/tc-d30v.c (do_assemble): Check for ".s" or
+	".l" extensions to opcode names.
+	(find_format): Generate the correct instructions when
+	".s" or ".l" are used.
+
+	* config/tc-d30v.c (build_insn): Check for odd registers
+	on instructions that require even registers.
+
+	* config/tc-d30v.h (md_start_line_hook): Define.
+	* config/tc-d30v.c (md_start_line_hook): New hook.
+	Checks the beginning of each line for a ".".  If it
+	finds one, assume a pseudo-op and flush any unwritten
+	instructions.
+
+	* config/tc-d30v.c (md_apply_fix3): Fix problem
+	with determining when fixups were done.
+
+	* config/tc-d30v.c (build_insn): Fix bug where the numeric
+	part of a symbol (for example, "foo+8") was being written
+	into the instruction.
+	(md_pseudo_table): Change .word to be 32 bits and add
+	.hword as 16 bits.
+
+	* config/tc-d30v.c (parallel_ok): Check to see if first
+	instruction is a jump.
+
+	* config/tc-d30v.c (parallel_ok): Major code reorganization.
+
+end-sanitize-d30v
 Wed Sep 10 10:07:08 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-v850e
