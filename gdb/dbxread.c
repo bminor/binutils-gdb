@@ -2927,11 +2927,26 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
       /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
       valu += function_start_offset;
 
-      /* If this is the first SLINE note in the function, record it at
-	 the start of the function instead of at the listed location.  */
+      /* GCC 2.95.3 emits the first N_SLINE stab somwehere in the
+	 middle of the prologue instead of right at the start of the
+	 function.  To deal with this we record the address for the
+	 first N_SLINE stab to be the start of the function instead of
+	 the listed location.  We really shouldn't to this.  When
+	 compiling with optimization, this first N_SLINE stab might be
+	 optimized away.  Other (non-GCC) compilers don't emit this
+	 stab at all.  There is no real harm in having an extra
+	 numbered line, although it can be a bit annoying for the
+	 user.  However, it totally screws up our testsuite.
+
+	 So for now, keep adjusting the address of the first N_SLINE
+	 stab, but only for code compiled with GCC.  */
+
       if (within_function && sline_found_in_function == 0)
 	{
-	  record_line (current_subfile, desc, last_function_start);
+	  if (processing_gcc_compilation == 2)
+	    record_line (current_subfile, desc, last_function_start);
+	  else
+	    record_line (current_subfile, desc, valu);
 	  sline_found_in_function = 1;
 	}
       else
