@@ -19,39 +19,39 @@
 
 const struct v850_operand v850_operands[] = {
 #define UNUSED	0
-  { 0, 0 }, 
+  { 0, 0, 0 }, 
 
 /* The R1 field in a format 1, 6, 7, or 9 insn. */
 #define R1	(UNUSED+1)
-  { 5, 0 }, 
+  { 5, 0, OPERAND_REG }, 
 
 /* The R2 field in a format 1, 2, 4, 5, 6, 7, 9 insn. */
 #define R2	(R1+1)
-  { 5, 11 },
+  { 5, 11, OPERAND_REG },
 
 /* The IMM5 field in a format 2 insn. */
 #define I5	(R2+1)
-  { 5, 0 }, 
+  { 5, 0, OPERAND_NUM }, 
 
 #define IMM16 field in a format 6 insn. */
 #define I16	(I5+1)
-  { 16, 0 }, 
+  { 16, 0, OPERAND_NUM }, 
 
 /* The DISP6 field in a format 4 insn. */
 #define D6	(I16+1)
-  { 6, 1 },
+  { 6, 1, OPERAND_NUM },
 
 /* The DISP8 field in a format 3 insn. */
 #define D8	(D6+1)
-  { 9, 0 },
+  { 9, 0, OPERAND_NUM },
 
 /* The DISP16 field in a format 6 insn. */
 #define D16	(D8+1)
-  { 16, 0 }, 
+  { 16, 0, OPERAND_NUM }, 
 
 /* The DISP22 field in a format 4 insn. */
 #define D22	(D16+1)
-  { 16, 0 }
+  { 16, 0, OPERAND_NUM }
 } ; 
 
 
@@ -102,6 +102,10 @@ const struct v850_opcode v850_opcodes[] = {
 /* XXX */
 
 /* arithmetic operation instructions */
+{ "mov",        OP(0x00),		OP_MASK,	IF1 },
+{ "mov",	OP(0x08),		OP_MASK,	IF2 },
+{ "movea",	OP(0x31),		OP_MASK,	IF6 },
+{ "movhi",	OP(0x31),		OP_MASK,	IF6 },
 { "add",	OP(0x0e),		OP_MASK,	IF1 },
 { "add",	OP(0x12),		OP_MASK,	IF2 },
 { "addi",	OP(0x30),		OP_MASK,	IF6 },
@@ -139,26 +143,30 @@ const struct v850_opcode v850_opcodes[] = {
 { "shr",	two(0x07e0,0x0080),	two(0x07e0,0xffff),	{R1,R2} },
 
 /* branch instructions */
+	/* signed integer */
+{ "bgt",	BOP(0xf),		BOP_MASK,	IF3 },
+{ "bge",	BOP(0xe),		BOP_MASK,	IF3 },
+{ "blt",	BOP(0x6),		BOP_MASK,	IF3 },
+{ "ble",	BOP(0x7),		BOP_MASK,	IF3 },
+	/* unsigned integer */
+{ "bh",		BOP(0xb),		BOP_MASK,	IF3 },
+{ "bnh",	BOP(0x3),		BOP_MASK,	IF3 },
+{ "bl",		BOP(0x1),		BOP_MASK,	IF3 },
+{ "bnl",	BOP(0x9),		BOP_MASK,	IF3 },
+	/* common */
+{ "be",		BOP(0x2),		BOP_MASK,	IF3 },
+{ "bne",	BOP(0xa),		BOP_MASK,	IF3 },
+	/* others */
 { "bv",		BOP(0x0),		BOP_MASK,	IF3 },
 { "bnv",	BOP(0x8),		BOP_MASK,	IF3 },
-{ "bc",		BOP(0x1),		BOP_MASK,	IF3 },
-{ "bl",		BOP(0x1),		BOP_MASK,	IF3 },
-{ "bnc",	BOP(0x9),		BOP_MASK,	IF3 },
-{ "bnl",	BOP(0x9),		BOP_MASK,	IF3 },
-{ "bz",		BOP(0x2),		BOP_MASK,	IF3 },
-{ "be",		BOP(0x2),		BOP_MASK,	IF3 },
-{ "bnz",	BOP(0xa),		BOP_MASK,	IF3 },
-{ "bne",	BOP(0xa),		BOP_MASK,	IF3 },
-{ "bnh",	BOP(0x3),		BOP_MASK,	IF3 },
-{ "bh",		BOP(0xb),		BOP_MASK,	IF3 },
 { "bn",		BOP(0x4),		BOP_MASK,	IF3 },
 { "bp",		BOP(0xc),		BOP_MASK,	IF3 },
-{ "bt",		BOP(0x5),		BOP_MASK,	IF3 },
+{ "bc",		BOP(0x1),		BOP_MASK,	IF3 },
+{ "bnc",	BOP(0x9),		BOP_MASK,	IF3 },
+{ "bz",		BOP(0x2),		BOP_MASK,	IF3 },
+{ "bnz",	BOP(0xa),		BOP_MASK,	IF3 },
+{ "br",		BOP(0x5),		BOP_MASK,	IF3 },
 { "bsa",	BOP(0xd),		BOP_MASK,	IF3 },
-{ "blt",	BOP(0x6),		BOP_MASK,	IF3 },
-{ "bge",	BOP(0xe),		BOP_MASK,	IF3 },
-{ "ble",	BOP(0x7),		BOP_MASK,	IF3 },
-{ "bgt",	BOP(0xf),		BOP_MASK,	IF3 },
 
 { "jmp",	one(0x0060),		one(0xffe0),	IF1 },
 { "jarl",	one(0x0780),		one(0xf83f),	{ R2,D22 } }, 

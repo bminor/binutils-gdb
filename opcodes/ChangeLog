@@ -1,4 +1,9 @@
 start-sanitize-v850
+Wed Aug 21 17:31:26 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
+
+	* v850-opc.c: Add flags field to struct v850_operands, add move
+ 	opcodes to opcode table.
+
 Tue Aug 20 14:41:03 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
 	* Makefile.in (ALL_MACHINES): Add v850-opc.o.
