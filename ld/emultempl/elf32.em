@@ -1349,7 +1349,7 @@ echo '  ; else if (link_info.relocateable == true) return' >> e${EMULATION_NAME}
 sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
-if ! cmp -s ldscripts/${EMULATION_NAME}.x ldscripts/${EMULATION_NAME}.xn; then
+if cmp -s ldscripts/${EMULATION_NAME}.x ldscripts/${EMULATION_NAME}.xn; then : ; else
 echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
 fi
