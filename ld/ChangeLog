@@ -1,3 +1,10 @@
+2001-05-16  Alan Modra  <amodra@one.net.au>
+
+	* ldlang.c (wild_doit): Use linker_has_input to reliably determine
+	whether an input section is the first one assigned to an output
+	section.
+	Assorted formatting fixes.
+
 2001-05-14  DJ Delorie  <dj@delorie.com>
 
 	* Makefile.am (ld.dvi): Search bfd/doc for texinfo files.

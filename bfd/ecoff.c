@@ -74,12 +74,14 @@ static unsigned int ecoff_armap_hash PARAMS ((CONST char *s,
 
 static asection bfd_debug_section =
 {
-  /* name,   id,  index, next, flags, user_set_vma, reloc_done,    */ 
-  "*DEBUG*", 0,   0,     NULL, 0,     0,            0,        
-  /* linker_mark, gc_mark, segment_mark, vma, lma, _cooked_size,   */ 
-     0,           0,       0,            0,   0,   0,
-  /* _raw_size, output_offset, output_section, alignment_power,    */
-     0,         0,             NULL,           0,
+  /* name,   id,  index, next, flags, user_set_vma, reloc_done,    */
+  "*DEBUG*", 0,   0,     NULL, 0,     0,            0,
+  /* linker_mark, linker_has_input, gc_mark, segment_mark,         */
+     0,           0,                0,       0,
+  /* vma, lma, _cooked_size, _raw_size,                            */ 
+     0,   0,   0,            0,
+  /* output_offset, output_section, alignment_power,               */
+     0,             NULL,           0,
   /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */
      NULL,       NULL,        0,           0,       0,
   /* line_filepos, userdata, contents, lineno, lineno_count,       */

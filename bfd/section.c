@@ -372,6 +372,10 @@ CODE_FRAGMENT
 .  {* A mark flag used by some of the linker backends.  *}
 .  unsigned int linker_mark : 1;
 .
+.  {* Another mark flag used by some of the linker backends.  Set for
+.     output sections that have a input section.  *}
+.  unsigned int linker_has_input : 1;
+.
 .  {* A mark flag used by some linker backends for garbage collection.  *}
 .  unsigned int gc_mark : 1;
 .
@@ -578,11 +582,14 @@ static const asymbol global_syms[] =
     /* name, id,  index, next, flags, user_set_vma, reloc_done,      */	\
     { NAME,  IDX, 0,     NULL, FLAGS, 0,            0,			\
 									\
-    /* linker_mark, gc_mark, segment_mark, vma, lma, _cooked_size,   */	\
-       0,           1,       0,            0,   0,   0,            	\
+    /* linker_mark, linker_has_input, gc_mark, segment_mark,         */	\
+       0,           0,                1,       0,			\
 									\
-    /* _raw_size, output_offset, output_section,    alignment_power, */ \
-       0,         0,           (struct sec *) &SEC, 0,			\
+    /* vma, lma, _cooked_size, _raw_size,                            */	\
+       0,   0,   0,            0,					\
+									\
+    /* output_offset, output_section,      alignment_power,          */	\
+       0,             (struct sec *) &SEC, 0,				\
 									\
     /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */	\
        NULL,       NULL,        0,           0,       0,		\
