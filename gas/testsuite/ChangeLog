@@ -1,3 +1,8 @@
+2004-11-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/all/gas.exp: Run dg-runtest for all err-*.s and warn-*.s.
+	* gas/all/err-1.s, gas/all/warn-1.s: New tests.
+
 2004-11-18  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
 
 	* gas/maxq10/call.d: Fix expected results now that bfd assembler
