@@ -37,6 +37,6 @@ typedef struct dirent dirent;
 #define _POSIX_VERSION
 #endif
 
-#ifdef _WIN32
+#if defined _WIN32 && !defined __GNUC__
 #include <malloc.h>
 #endif

@@ -1,3 +1,9 @@
+Sun Aug 11 21:06:26 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* rldefs.c:  Get rid of define of SIGALRM if _WIN32 or __MSDOS__.
+	* Don't define ScreenCols/ScreenRows/... if cygwin32.
+	* sysdep-norm.h:  Don't include <malloc.h> if cygwin32.
+
 Sun Aug 11 14:59:09 1996  Fred Fish  <fnf@cygnus.com>
 
 	* rldefs.h:  If __osf__is defined, include <termio.h> instead of
