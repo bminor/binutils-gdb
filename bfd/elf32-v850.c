@@ -1848,8 +1848,12 @@ v850_elf_object_p (abfd)
   switch (elf_elfheader (abfd)->e_flags & EF_V850_ARCH)
     {
     default:
-    case E_V850_ARCH:   (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, 0); break;
-    case E_V850E_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850e); break;
+    case E_V850_ARCH:
+      bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850);
+      break;
+    case E_V850E_ARCH:
+      bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850e);
+      break;
     }
   return true;
 }
@@ -1865,9 +1869,9 @@ v850_elf_final_write_processing (abfd, linker)
 
   switch (bfd_get_mach (abfd))
     {
-    default:
-    case 0: val = E_V850_ARCH; break;
-    case bfd_mach_v850e:  val = E_V850E_ARCH; break;
+    default:		 
+    case bfd_mach_v850:  val = E_V850_ARCH; break;
+    case bfd_mach_v850e: val = E_V850E_ARCH; break;
     }
 
   elf_elfheader (abfd)->e_flags &=~ EF_V850_ARCH;

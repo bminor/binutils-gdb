@@ -1,7 +1,22 @@
 2002-09-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* ecoff.c (_bfd_ecoff_set_arch_mach_hook): Don't use hard-coded
+	bfd_mach constants.
+	(ecoff_get_magic): Likewise.
+	* elf32-v850.c (v850_elf_object_p): Likewise.
+	(v850_elf_final_write_processing): Likewise.
+	* mipsbsd.c (MY(set_arch_mach)): Likewise.
+	(MY(write_object_contents)): Likewise.
+	* coff64-rs6000.c (xcoff64_write_object_contents): Likewise.
+	* coffcode.h (coff_write_object_contents): Likewise.
+	(coff_set_arch_mach_hook): Add comment describing machine == 0.
+	Remove unnecessary "machine" assignments.
+	(coff_write_relocs): Test for the absolute section sym by testing
+	section and flags.
+
 	* aoutx.h (NAME(aout,machine_type)): Recognize bfd_mach_i386_i386
 	and bfd_mach_i386_i386_intel_syntax.
+	* pdp11.c (NAME(aout,machine_type)): Likewise.
 
 2002-08-30  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
