@@ -1,7 +1,7 @@
 \input texinfo
 @setfilename ld.info
 @syncodeindex ky cp
-@c @include configdoc.texi
+@include configdoc.texi
 
 @c @smallbook
 @c @cropmarks
@@ -216,11 +216,11 @@ may follow, precede, or be mixed in with command-line options, except that
 an @var{objfile} argument may not be placed between an option and
 its argument.
 
-Usually the linker is invoked with at least one object file, but other
-forms of binary input files can also be specified with @samp{-l},
-@samp{-R}, and the script command language.  If @emph{no} binary input
-files at all are specified, the linker does not produce any output, and
-issues the message @samp{No input files}.
+Usually the linker is invoked with at least one object file, but you can
+specify other forms of binary input files using @samp{-l}, @samp{-R},
+and the script command language.  If @emph{no} binary input files at all
+are specified, the linker does not produce any output, and issues the
+message @samp{No input files}.
 
 Option arguments must either follow the option letter without intervening
 whitespace, or be given as separate arguments immediately following the
@@ -446,6 +446,7 @@ Use @var{output} as the name for the program produced by @code{ld}; if this
 option is not specified, the name @file{a.out} is used by default.  The
 script command @code{OUTPUT} can also specify the output file name.
 
+@ifclear SingleFormat
 @kindex -oformat
 @item -oformat @var{output-format}
 Specify the binary format for the output object file.  You don't usually
@@ -456,6 +457,7 @@ supported by the BFD libraries.  (You can list the available binary
 formats with @samp{objdump -i}.)  The script command
 @code{OUTPUT_FORMAT} can also specify the output format, but this option
 overrides it.  @xref{BFD}.
+@end ifclear
 
 @item -R @var{filename}
 @kindex -R @var{file}
@@ -584,6 +586,9 @@ Display the version number for @code{ld}.
 Display the version number for @code{ld} and exit.
 
 @item -warn-common
+@kindex -warn-comon
+@cindex warnings, on combining symbols
+@cindex combining symbols, warnings on
 Warn when a common symbol is combined with another common symbol or with
 a symbol definition.  Unix linkers allow this somewhat sloppy practice,
 but linkers on some other operating systems do not.  This option allows
@@ -646,7 +651,8 @@ Merging a common symbol with a previous same-sized common symbol.
 @item
 Merging a common symbol with a previous larger common symbol.
 @smallexample
-@var{file}(@var{section}): warning: common of `@var{symbol}' overridden by larger common
+@var{file}(@var{section}): warning: common of `@var{symbol}' overridden 
+   by larger common
 @var{file}(@var{section}): warning: larger common is here
 @end smallexample
 
@@ -655,7 +661,8 @@ Merging a common symbol with a previous smaller common symbol.  This is
 the same as the previous case, except that the symbols are
 encountered in a different order.
 @smallexample
-@var{file}(@var{section}): warning: common of `@var{symbol}' overriding smaller common
+@var{file}(@var{section}): warning: common of `@var{symbol}' overriding
+   smaller common
 @var{file}(@var{section}): warning: smaller common is here
 @end smallexample
 @end enumerate
@@ -1791,8 +1798,14 @@ output file is specified (@samp{-r}).
 @itemx INPUT ( @var{file} @var{file} @dots{} )
 @cindex binary input files
 Use this command to include binary input files in the link, without
-including them in a particular section definition.  Files specified this
-way are treated identically to object files listed on the command line.
+including them in a particular section definition.  
+Specify the full name for each @var{file}, including @samp{.a} if
+required.
+
+@code{ld} searches for each @var{file} through the archive-library
+search path, just as for files you specify on the command line.
+See the description of @samp{-L} in @ref{Options,,Command Line
+Options}.
 
 @ignore
 @item MAP ( @var{name} )
@@ -1881,11 +1894,11 @@ functionality are not listed.
 @end menu
 @end ifset
 
-@c FIXME!  This could use @up/@down, but there seems to be a conflict
+@c FIXME!  This could use @raisesections/@lowersections, but there seems to be a conflict
 @c         between those and node-defaulting.
 @ifset H8300
 @ifclear GENERIC
-@up
+@raisesections
 @end ifclear
 @node H8/300
 @section @code{ld} and the H8/300
@@ -1913,13 +1926,13 @@ page of memory, and changes them to use the eight-bit address form.
 top page of memory).
 @end table
 @ifclear GENERIC
-@down
+@lowersections
 @end ifclear
 @end ifset
 
 @ifset I960
 @ifclear GENERIC
-@up
+@raisesections
 @end ifclear
 @node i960
 @section @code{ld} and the Intel 960 family
@@ -1955,7 +1968,7 @@ the 960 architecture family allows combination of target architectures; each
 use will add another pair of name variants to search for when @w{@samp{-l}}
 specifies a library.
 @ifclear GENERIC
-@down
+@lowersections
 @end ifclear
 @end ifset
 
