@@ -1,3 +1,7 @@
+Wed Feb 10 17:53:09 1999  Bob Manson  <manson@charmed.cygnus.com>
+
+	* i386-tdep.c (gdb_print_insn_i386): Add missing returns.
+
 Wed Feb 10 13:17:21 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	Declare Gould configuration obsolete:
