@@ -247,6 +247,7 @@ Thu Apr 30 15:59:54 1998  Jason Molenda  (crash@bugshack.cygnus.com)
         (local-maintainer-clean, do-maintainer-clean): New rules.
 
 Wed Apr 29 10:20:40 1998  John Metzler  <jmetzler@cygnus.com>
+start-sanitize-vr4111
 
 	* nec4102rom.c: New file implements ROM monitor adapter for
         nec-vr4102 board.  This board hosts the vr4111 chip.  This file
@@ -254,6 +255,7 @@ Wed Apr 29 10:20:40 1998  John Metzler  <jmetzler@cygnus.com>
         filter, new flags. This version does not support more than one
         breakpoint and resuming after a breakpoint in 16 bit mode is
         completely disfunctional.  
+end-sanitize-vr4111
 
 	* monitor.h: Defined additional hooks for dmpregs, configure_hooks
 	and wait_filter. These additions require that all ROM monitor

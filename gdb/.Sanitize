@@ -102,6 +102,20 @@ else
 	fi
 fi
 
+vr4111_files="nec4102rom.c"
+
+if ( echo $* | grep keep\-vr4111 > /dev/null ) ; then
+	keep_these_too="${vr4111_files} ${keep_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Keeping ${vr4111_files}
+	fi
+else
+	lose_these_too="${vr4111_files} ${lose_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Deleting ${vr4111_files}
+	fi
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -309,7 +323,6 @@ mpw-config.in
 mpw-make.sed
 msg.defs
 msg_reply.defs
-nec4102rom.c
 news-xdep.c
 nindy-share
 nindy-tdep.c
@@ -756,6 +769,33 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-d30v/,/end-\sanitize\-d30v/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+if ( echo $* | grep keep\-vr4111 > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-vr4111 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vr4111 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-vr4111 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vr4111\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vr4111/,/end-\sanitize\-vr4111/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
