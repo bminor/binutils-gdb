@@ -1,11 +1,12 @@
 2004-09-29  Andrew Cagney  <cagney@gnu.org>
 
+	* infptrace.c (kill_inferior): Fix typo, in previous inline.  Pass
+	the address of status.
+
 	* infptrace.c (ptrace_wait): Mention problem with HPUX.
 	(kill_inferior): Inline ptrace_wait call.
 	* linux-nat.c (kill_inferior): Inline ptrace_wait call.
 	* inftarg.c (child_wait): Inline ptrace_wait call.
-
-2004-09-29  Andrew Cagney  <cagney@gnu.org>
 
 	* target.h (struct target_ops): Delete field to_post_wait.
 	(target_post_wait): Delete macro.

@@ -174,7 +174,7 @@ kill_inferior (void)
      The kill call causes problems under hpux10, so it's been removed;
      if this causes problems we'll deal with them as they arise.  */
   ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3) 0, 0);
-  wait (status);
+  wait (&status);
   target_mourn_inferior ();
 }
 #endif /* DEPRECATED_KILL_INFERIOR */
