@@ -1,3 +1,11 @@
+2001-07-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* cli/cli-cmds.c (shell_escape) [GLOBAL_CURDIR]: Condition the
+	call to chdir on this symbol rather than on __DJGPP__.
+	(CANT_FORK) [__MSDOS__]: Move from here...
+	* defs.h (CANT_FORK) [__MSDOS__]: ...to here.
+	(GLOBAL_CURDIR) [__MSDOS__]: Define.
+
 2001-07-16  Orjan Friberg  <orjanf@axis.com>
 
 	* configure.tgt: Recognise the CRIS architecture.

@@ -1403,6 +1403,11 @@ extern int use_windows;
 #endif
 #endif
 
+#ifdef __MSDOS__
+# define CANT_FORK
+# define GLOBAL_CURDIR
+#endif
+
 /* Provide default definitions of PIDGET, TIDGET, and MERGEPID.
    The name ``TIDGET'' is a historical accident.  Many uses of TIDGET
    in the code actually refer to a lightweight process id, i.e,

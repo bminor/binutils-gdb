@@ -39,11 +39,6 @@
 #define GDBINIT_FILENAME        ".gdbinit"
 #endif
 
-/* FIXME: this should be auto-configured!  */
-#ifdef __MSDOS__
-# define CANT_FORK
-#endif
-
 /* From gdb/top.c */
 
 extern void dont_repeat (void);
@@ -454,7 +449,7 @@ shell_escape (char *arg, int from_tty)
       fprintf_unfiltered (gdb_stderr, "%s exited with status %d\n", arg, rc);
       gdb_flush (gdb_stderr);
     }
-#ifdef __DJGPP__
+#ifdef GLOBAL_CURDIR
   /* Make sure to return to the directory GDB thinks it is, in case the
      shell command we just ran changed it.  */
   chdir (current_directory);
