@@ -1,7 +1,8 @@
 start-sanitize-sky
 Fri Jan 30 17:48:17 1998  Doug Evans  <devans@canuck.cygnus.com>
 
-	* elf32-mips.c (elf_mips_dvp_11_pcrel_howto): Set pcrel_offset=true.
+	* elf32-mips.c (elf_mips_dvp_11_pcrel_howto): Set pcrel_offset=true
+	and partial_inplace=false.
 	(mips_elf_relocate_section): Recognize R_MIPS_DVP_11_PCREL.
 
 end-sanitize-sky
