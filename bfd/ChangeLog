@@ -1,3 +1,14 @@
+2003-05-16  Michael Snyder  <msnyder@redhat.com>
+	From Bernd Schmidt  <bernds@redhat.com>
+	* archures.c (bfd_mach_h8300sx): New.
+	* bfd-in2.h: Regenerate.
+	* cpu-h8300.c (h8300_scan)): Add support for h8300sx.
+	(h8300sx_info_struct): New.
+	(h8300s_info_struct): Link to it.
+	* elf32-h8300.c (elf32_h8_mach): Add support for h8300sx.
+	(elf32_h8_final_write_processing): Likewise.
+	(elf32_h8_relax_section): Likewise.
+
 2003-05-16  Kelley Cook  <kelleycook@wideopenwest.com>
 
 	* config.bfd: Accept i[3-7]86 variants.

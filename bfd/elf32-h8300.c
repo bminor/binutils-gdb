@@ -579,6 +579,9 @@ elf32_h8_mach (flags)
 
     case E_H8_MACH_H8300SN:
       return bfd_mach_h8300sn;
+
+    case E_H8_MACH_H8300SX:
+      return bfd_mach_h8300sx;
     }
 }
 
@@ -614,6 +617,10 @@ elf32_h8_final_write_processing (abfd, linker)
 
     case bfd_mach_h8300sn:
       val = E_H8_MACH_H8300SN;
+      break;
+
+    case bfd_mach_h8300sx:
+      val = E_H8_MACH_H8300SX;
       break;
     }
 
@@ -1023,7 +1030,10 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		 && value >= 0xff00
 		 && value <= 0xffff)
 		|| ((bfd_get_mach (abfd) == bfd_mach_h8300h
-		     || bfd_get_mach (abfd) == bfd_mach_h8300s)
+		     /* FIXME: h8300hn? */
+		     || bfd_get_mach (abfd) == bfd_mach_h8300s
+		     /* FIXME: h8300sn? */
+		     || bfd_get_mach (abfd) == bfd_mach_h8300sx)
 		    && value >= 0xffff00
 		    && value <= 0xffffff))
 	      {
@@ -1081,7 +1091,10 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		 && value >= 0xff00
 		 && value <= 0xffff)
 		|| ((bfd_get_mach (abfd) == bfd_mach_h8300h
-		     || bfd_get_mach (abfd) == bfd_mach_h8300s)
+		     /* FIXME: h8300hn? */
+		     || bfd_get_mach (abfd) == bfd_mach_h8300s
+		     /* FIXME: h8300sn? */
+		     || bfd_get_mach (abfd) == bfd_mach_h8300sx)
 		    && value >= 0xffff00
 		    && value <= 0xffffff))
 	      {
