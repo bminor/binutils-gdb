@@ -293,30 +293,34 @@ have_full_symbols PARAMS ((void));
 extern int
 have_minimal_symbols PARAMS ((void));
 
-extern PTR
-iterate_over_objfiles PARAMS ((PTR (*func) (struct objfile *,
-					    PTR arg1, PTR arg2, PTR arg3),
-			       PTR arg1, PTR arg2, PTR arg3));
-
-extern PTR
-iterate_over_symtabs PARAMS ((PTR (*func) (struct objfile *, struct symtab *,
-					   PTR arg1, PTR arg2, PTR arg3),
-			      PTR arg1, PTR arg2, PTR arg3));
-
-extern PTR 
-iterate_over_psymtabs PARAMS ((PTR (*func) (struct objfile *,
-					    struct partial_symtab *,
-					    PTR arg1, PTR arg2, PTR arg3),
-			       PTR arg1, PTR arg2, PTR arg3));
-
 
 /* Traverse all object files.  ALL_OBJFILES_SAFE works even if you delete
    the objfile during the traversal.  */
 
 #define	ALL_OBJFILES(obj) \
-  for ((obj)=object_files; (obj)!=NULL; (obj)=(obj)->next)
+  for ((obj) = object_files; (obj) != NULL; (obj) = (obj)->next)
 
 #define	ALL_OBJFILES_SAFE(obj,nxt) \
-  for ((obj)=object_files; (obj)!=NULL?((nxt)=(obj)->next,1):0; (obj)=(nxt))
+  for ((obj) = object_files; 	   \
+       (obj) != NULL? ((nxt)=(obj)->next,1) :0;	\
+       (obj) = (nxt))
+
+/* Traverse all symtabs in all objfiles.  */
+
+#define	ALL_SYMTABS(objfile, s) \
+  ALL_OBJFILES (objfile)	 \
+    for ((s) = (objfile) -> symtabs; (s) != NULL; (s) = (s) -> next)
+
+/* Traverse all psymtabs in all objfiles.  */
+
+#define	ALL_PSYMTABS(objfile, p) \
+  ALL_OBJFILES (objfile)	 \
+    for ((p) = (objfile) -> psymtabs; (p) != NULL; (p) = (p) -> next)
+
+/* Traverse all minimal symbols in all objfiles.  */
+
+#define	ALL_MSYMBOLS(objfile, m) \
+  ALL_OBJFILES (objfile)	 \
+    for ((m) = (objfile) -> msymbols; (m)->name != NULL; (m)++)
 
 #endif	/* !defined (OBJFILES_H) */

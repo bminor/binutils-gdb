@@ -57,12 +57,14 @@ other things to work on, if you get bored. :-)
 #include "defs.h"
 #include <varargs.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include "bfd.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "libbfd.h"		/* FIXME Secret Internal BFD stuff (bfd_read) */
 #include "elf/dwarf.h"
 #include "buildsym.h"
 
@@ -310,7 +312,7 @@ read_structure_scope PARAMS ((struct dieinfo *, char *, char *,
 			      struct objfile *));
 
 static struct type *
-decode_array_element_type PARAMS ((char *, char *));
+decode_array_element_type PARAMS ((char *));
 
 static struct type *
 decode_subscr_data PARAMS ((char *, char *));
@@ -436,17 +438,9 @@ dwarf_build_psymtabs (desc, filename, addr, mainline, dbfoff, dbsize,
       init_psymbol_list (objfile, 1024);
     }
   
-  /* From this point on, we don't need to pass mainline around, so zap
-     baseaddr to zero if we don't need relocation. */
+  /* Save the relocation factor where everybody can see it.  */
 
-  if (mainline)
-    {
-      baseaddr = 0;
-    }
-  else
-    {
-      baseaddr = addr;
-    }
+  baseaddr = addr;
 
   /* Follow the compilation unit sibling chain, building a partial symbol
      table entry for each one.  Save enough information about each compilation
@@ -934,15 +928,15 @@ DESCRIPTION
  */
 
 static struct type *
-decode_array_element_type (scan, end)
+decode_array_element_type (scan)
      char *scan;
-     char *end;
 {
   struct type *typep;
   short attribute;
   DIEREF dieref;
   unsigned short fundtype;
   
+  /* FIXME, does this confuse the host and target sizeof's?  --gnu */
   (void) memcpy (&attribute, scan, sizeof (short));
   scan += sizeof (short);
   switch (attribute)
@@ -1020,7 +1014,7 @@ decode_subscr_data (scan, end)
   switch (format)
     {
     case FMT_ET:
-      typep = decode_array_element_type (scan, end);
+      typep = decode_array_element_type (scan);
       break;
     case FMT_FT_C_C:
       (void) memcpy (&fundtype, scan, sizeof (short));
@@ -1865,7 +1859,7 @@ read_ofile_symtab (pst)
   if (LNFOFF (pst))
     {
       if (bfd_seek (abfd, LNFOFF (pst), 0) ||
-	  (bfd_read (&lnsize, sizeof(long), 1, abfd) != sizeof(long)))
+	  (bfd_read ((PTR)&lnsize, sizeof(long), 1, abfd) != sizeof(long)))
 	{
 	  error ("can't read DWARF line number table size");
 	}
@@ -2043,11 +2037,11 @@ init_psymbol_list (objfile, total_symbols)
   
   if (objfile -> global_psymbols.list)
     {
-      mfree (objfile -> md, objfile -> global_psymbols.list);
+      mfree (objfile -> md, (PTR)objfile -> global_psymbols.list);
     }
   if (objfile -> static_psymbols.list)
     {
-      mfree (objfile -> md, objfile -> static_psymbols.list);
+      mfree (objfile -> md, (PTR)objfile -> static_psymbols.list);
     }
   
   /* Current best guess is that there are approximately a twentieth

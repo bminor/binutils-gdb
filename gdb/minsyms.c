@@ -76,42 +76,6 @@ compare_minimal_symbols PARAMS ((const void *, const void *));
 static int
 compact_minimal_symbols PARAMS ((struct minimal_symbol *, int));
 
-/* Call the function specified by FUNC for each currently available minimal
-   symbol, for as long as this function continues to return NULL.  If the
-   function ever returns non-NULL, then the iteration over the minimal
-   symbols is terminated and the result is returned to the caller.
-
-   The function called has full control over the form and content of the
-   information returned via the non-NULL result, which may be as simple as a
-   pointer to the minimal symbol that the iteration terminated on, or as
-   complex as a pointer to a private structure containing multiple results. */
-
-PTR
-iterate_over_msymbols (func, arg1, arg2, arg3)
-     PTR (*func) PARAMS ((struct objfile *, struct minimal_symbol *,
-			  PTR, PTR, PTR));
-     PTR arg1;
-     PTR arg2;
-     PTR arg3;
-{
-  register struct objfile *objfile;
-  register struct minimal_symbol *msymbol;
-  char *result = NULL;
-
-  for (objfile = object_files;
-       objfile != NULL && result == NULL;
-       objfile = objfile -> next)
-    {
-      for (msymbol = objfile -> msymbols;
-	   msymbol != NULL && msymbol -> name != NULL && result == NULL;
-	   msymbol++)
-	{
-	  result = (*func)(objfile, msymbol, arg1, arg2, arg3);
-	}
-    }
-  return (result);
-}
-
 /* Look through all the current minimal symbol tables and find the first
    minimal symbol that matches NAME.  If OBJF is non-NULL, it specifies a
    particular objfile and the search is limited to that objfile.  Returns
@@ -345,7 +309,7 @@ discard_minimal_symbols (foo)
   while (msym_bunch != NULL)
     {
       next = msym_bunch -> next;
-      free (msym_bunch);
+      free ((PTR)msym_bunch);
       msym_bunch = next;
     }
 }

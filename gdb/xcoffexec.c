@@ -355,48 +355,6 @@ map_vmap (bfd *bf, bfd *arch)
 }
 
 
-#define	FASTER_MSYMBOL_RELOCATION 1
-
-#ifdef FASTER_MSYMBOL_RELOCATION
-
-/* Used to relocate an object file's minimal symbols. */
-
-static void
-reloc_objfile_msymbols (objf, addr)
-struct objfile *objf;
-CORE_ADDR	addr;
-{
-  register struct minimal_symbol *msymbol;
-  int	ii;
-
-  for (msymbol = objf->msymbols, ii=0; 
-	msymbol && ii < objf->minimal_symbol_count; ++msymbol, ++ii)
-
-    if (msymbol->address < TEXT_SEGMENT_BASE)
-      msymbol->address += addr;
-}	
-
-#else /* !FASTER_MSYMBOL_RELOCATION */
-
-/* Called via iterate_over_msymbols to relocate minimal symbols */
-
-static int
-relocate_minimal_symbol (objfile, msymbol, arg1, arg2, arg3)
-     struct objfile *objfile;
-     struct minimal_symbol *msymbol;
-     PTR arg1;
-     PTR arg2;
-     PTR arg3;
-{
-  if (msymbol->address < TEXT_SEGMENT_BASE)
-    msymbol -> address += (int) arg1;
-
-  /* return 0, otherwise `iterate_over_msymbols()' will stop at the
-     first iteration. */
-  return 0;
-}
-#endif /* FASTER_MSYMBOL_RELOCATION */
-
 /* true, if symbol table and minimal symbol table are relocated. */
 
 int symtab_relocated = 0;
@@ -411,11 +369,12 @@ struct stat *vip;
 {
   register struct symtab *s;
   register struct objfile *objfile;
+  register struct minimal_symbol *msymbol;
   
   /*
    * for each symbol table generated from the vp->bfd
    */
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_OBJFILES (objfile)
     {
       for (s = objfile -> symtabs; s != NULL; s = s -> next) {
 	
@@ -463,25 +422,15 @@ struct stat *vip;
 	  for (; s; s = s->next)
 	    if (!s->nonreloc || LINETABLE(s))
 		vmap_symtab_1(s, vp, old_start);
-
-#ifdef FASTER_MSYMBOL_RELOCATION
-	  /* we can rely on the fact that at least one symtab in this objfile
-	     will get relocated. Thus, we can be sure that minimal symbol
-	     vector is guaranteed for relocation. */
-
-	  reloc_objfile_msymbols (objfile, vp->tstart - old_start);
-#endif
 	   break;
 	}
       }
     }
 
   if (vp->tstart != old_start) {
-#ifndef FASTER_MSYMBOL_RELOCATION
-    (void) iterate_over_msymbols (relocate_minimal_symbol,
-			   (PTR) (vp->tstart - old_start),
-			   (PTR) NULL, (PTR) NULL);
-#endif
+    ALL_MSYMBOLS (objfile, msymbol)
+      if (msymbol->address < TEXT_SEGMENT_BASE)
+	msymbol -> address += vp->tstart - old_start;
 
     /* breakpoints need to be relocated as well. */
     fixup_breakpoints (0, TEXT_SEGMENT_BASE, vp->tstart - old_start);

@@ -147,6 +147,9 @@ struct complaint invalid_member_complaint =
 
 struct complaint range_type_base_complaint =
   {"base type %d of range type is not defined", 0, 0};
+
+struct complaint reg_value_complaint =
+  {"register number too large in symbol %s", 0, 0};
 
 int
 hashname (name)
@@ -340,7 +343,7 @@ really_free_pendings (foo)
   for (next = free_pendings; next; next = next1)
     {
       next1 = next->next;
-      free (next);
+      free ((PTR)next);
     }
   free_pendings = 0;
 
@@ -348,7 +351,7 @@ really_free_pendings (foo)
   for (bnext = pending_blocks; bnext; bnext = bnext1)
     {
       bnext1 = bnext->next;
-      free (bnext);
+      free ((PTR)bnext);
     }
 #endif
   pending_blocks = 0;
@@ -356,14 +359,14 @@ really_free_pendings (foo)
   for (next = file_symbols; next; next = next1)
     {
       next1 = next->next;
-      free (next);
+      free ((PTR)next);
     }
   file_symbols = 0;
 
   for (next = global_symbols; next; next = next1)
     {
       next1 = next->next;
-      free (next);
+      free ((PTR)next);
     }
   global_symbols = 0;
 }
@@ -607,7 +610,7 @@ pop_subfile ()
   name = link->name;
   subfile_stack = link->next;
   header_file_prev_index = link->prev_index;
-  free (link);
+  free ((PTR)link);
 
   return name;
 }
@@ -820,7 +823,7 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
 
   if (global_stabs) {
     patch_block_stabs (global_symbols, global_stabs, objfile);
-    free (global_stabs);
+    free ((PTR)global_stabs);
     global_stabs = 0;
   }
 
@@ -892,10 +895,10 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
 #endif
       }
       if (subfile->line_vector)
-	free (subfile->line_vector);
+	free ((PTR)subfile->line_vector);
 
       nextsub = subfile->next;
-      free (subfile);
+      free ((PTR)subfile);
     }
 
 #ifdef IBM6000_TARGET
@@ -1393,17 +1396,32 @@ define_symbol (valu, string, desc, type, objfile)
 #endif /* no BELIEVE_PCC_PROMOTION_TYPE.  */
 
     case 'P':
+      /* Parameter which is in a register.  */
       SYMBOL_CLASS (sym) = LOC_REGPARM;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
+      if (SYMBOL_VALUE (sym) >= NUM_REGS)
+	{
+	  complain (&reg_value_complaint, SYMBOL_NAME (sym));
+	  SYMBOL_VALUE (sym) = SP_REGNUM;  /* Known safe, though useless */
+	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &local_symbols);
       break;
 
     case 'r':
+      /* Register variable (either global or local).  */
       SYMBOL_CLASS (sym) = LOC_REGISTER;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
+      if (SYMBOL_VALUE (sym) >= NUM_REGS)
+	{
+	  complain (&reg_value_complaint, SYMBOL_NAME (sym));
+	  SYMBOL_VALUE (sym) = SP_REGNUM;  /* Known safe, though useless */
+	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-      add_symbol_to_list (sym, &local_symbols);
+      if (within_function)
+        add_symbol_to_list (sym, &local_symbols);
+      else
+        add_symbol_to_list (sym, &file_symbols);
       break;
 
     case 'S':
@@ -2631,7 +2649,9 @@ read_struct_type (pp, type, objfile)
 	     for the derived classes, but for the fact that by then,
 	     we don't remember who needs what.  */
 
+#if 0
 	  int predicted_fieldno = -1;
+#endif
 
 	  /* Now we must record the virtual function table pointer's
 	     field information.  */
@@ -3164,14 +3184,14 @@ read_range_type (pp, typenums, objfile)
       /* a signed type */
       /* FIXME -- the only way to distinguish `int' from `long' is to look
 	 at its name!  */
-      if ((n3 == (1 << (8 * sizeof (long) - 1)) - 1) &&
+      if ((n3 ==(long)(((unsigned long)1 << (8 * sizeof (long)  - 1)) - 1)) &&
        long_kludge_name && long_kludge_name[0] == 'l' /* long */)
 	 return (lookup_fundamental_type (objfile, FT_LONG));
-      if (n3 == (1 << (8 * sizeof (int) - 1)) - 1)
+      if (n3 == (long)(((unsigned long)1 << (8 * sizeof (int)   - 1)) - 1))
 	return (lookup_fundamental_type (objfile, FT_INTEGER));
-      if (n3 == (1 << (8 * sizeof (short) - 1)) - 1)
+      if (n3 ==        (               1 << (8 * sizeof (short) - 1)) - 1)
 	return (lookup_fundamental_type (objfile, FT_SHORT));
-      if (n3 == (1 << (8 * sizeof (char) - 1)) - 1)
+      if (n3 ==        (               1 << (8 * sizeof (char)  - 1)) - 1)
 	return (lookup_fundamental_type (objfile, FT_CHAR));
     }
 

@@ -71,7 +71,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif /* not CMUCS */
 
 #include "coff/mips.h"
-#include "libaout.h"	 	/* FIXME Secret internal BFD stuff for a.out */
+#include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
 #include "coff/ecoff-ext.h"
@@ -209,50 +209,88 @@ struct type *builtin_type_string;
 /* Forward declarations */
 
 static void
-fixup_symtab ();
+fixup_symtab PARAMS ((HDRR *, char *, int, bfd *));
 
 static void
-read_mips_symtab ();
+read_mips_symtab PARAMS ((struct objfile *, int));
+
+static void
+read_the_mips_symtab PARAMS ((bfd *, int, CORE_ADDR));
 
 static int
-upgrade_type ();
+upgrade_type PARAMS ((struct type **, int, union aux_ent *, int));
 
 static void
-parse_partial_symbols();
+parse_partial_symbols PARAMS ((int, struct objfile *));
 
 static int
-cross_ref();
+cross_ref PARAMS ((union aux_ext *, struct type **, int, char **, int));
 
 static void
-fixup_sigtramp();
+fixup_sigtramp PARAMS ((void));
 
-static struct symbol	*new_symbol();
-static struct type	*new_type();
-static struct block	*new_block();
-static struct symtab	*new_symtab();
-static struct linetable	*new_linetable();
-static struct blockvector *new_bvect();
+static struct symbol *
+new_symbol PARAMS ((char *));
 
-static struct type	*parse_type();
-static struct symbol	*mylookup_symbol();
-static struct block	*shrink_block();
-static void sort_blocks();
+static struct type *
+new_type PARAMS ((char *));
 
-static int compare_symtabs();
-static int compare_psymtabs();
-static int compare_blocks();
+static struct block *
+new_block PARAMS ((int));
 
-static struct partial_symtab *new_psymtab();
-static struct partial_symtab *parse_fdr();
-static int compare_psymbols();
+static struct symtab *
+new_symtab PARAMS ((char *, int, int, struct objfile *));
 
-static void psymtab_to_symtab_1();
-static void add_block();
-static void add_symbol();
-static int  add_line();
-static struct linetable *shrink_linetable();
-static char* mips_next_symbol_text ();
+static struct linetable *
+new_linetable PARAMS ((int));
 
+static struct blockvector *
+new_bvect PARAMS ((int));
+
+static struct type *
+parse_type PARAMS ((union aux_ext *, int *, int));
+
+static struct symbol *
+mylookup_symbol PARAMS ((char *, struct block *, enum namespace,
+			 enum address_class));
+
+static struct block *
+shrink_block PARAMS ((struct block *, struct symtab *));
+
+static PTR
+xzalloc PARAMS ((unsigned int));
+
+static void
+sort_blocks PARAMS ((struct symtab *));
+
+static int
+compare_blocks PARAMS ((struct block **, struct block **));
+
+static struct partial_symtab *
+new_psymtab PARAMS ((char *, struct objfile *));
+
+#if 0
+static struct partial_symtab *
+parse_fdr PARAMS ((int, int, struct objfile *));
+#endif
+
+static void
+psymtab_to_symtab_1 PARAMS ((struct partial_symtab *, char *));
+
+static void
+add_block PARAMS ((struct block *, struct symtab *));
+
+static void
+add_symbol PARAMS ((struct symbol *, struct block *));
+
+static int
+add_line PARAMS ((struct linetable *, int, CORE_ADDR, int));
+
+static struct linetable *
+shrink_linetable PARAMS ((struct linetable *));
+
+static char *
+mips_next_symbol_text PARAMS ((void));
 
 /* Things we export to other modules */
 
@@ -262,8 +300,8 @@ static char* mips_next_symbol_text ();
 CORE_ADDR sigtramp_address, sigtramp_end;
 
 void
-mipscoff_new_init (objfile)
-     struct objfile *objfile;
+mipscoff_new_init (ignore)
+     struct objfile *ignore;
 {
 }
 
@@ -323,17 +361,18 @@ mipscoff_symfile_finish (objfile)
 
   if (cur_hdr)
     {
-      free ((char *)cur_hdr);
+      free ((PTR)cur_hdr);
     }
   cur_hdr = 0;
 }
 
 /* Allocate zeroed memory */
 
-static char *
+static PTR
 xzalloc(size)
+     int size;
 {
-	char           *p = xmalloc(size);
+	PTR p = xmalloc(size);
 
 	memset(p, 0, size);
 	return p;
@@ -348,8 +387,6 @@ static void
 mipscoff_psymtab_to_symtab(pst)
 	struct partial_symtab *pst;
 {
-	struct symtab  *ret;
-	int             i;
 
 	if (!pst)
 		return;
@@ -376,9 +413,9 @@ mipscoff_psymtab_to_symtab(pst)
 /* Exported procedure: Is PC in the signal trampoline code */
 
 int
-in_sigtramp(pc, name)
+in_sigtramp(pc, ignore)
 	CORE_ADDR pc;
-	char *name;
+	char *ignore;		/* function name */
 {
 	if (sigtramp_address == 0)
 		fixup_sigtramp();
@@ -390,9 +427,9 @@ in_sigtramp(pc, name)
 /* Read the symtab information from file FSYM into memory.  Also,
    return address just past end of our text segment in *END_OF_TEXT_SEGP.  */
 
-static
+static void
 read_the_mips_symtab(abfd, fsym, end_of_text_segp)
-	bfd 		*abfd;
+	bfd		*abfd;
 	int		fsym;
 	CORE_ADDR	*end_of_text_segp;
 {
@@ -416,7 +453,7 @@ read_the_mips_symtab(abfd, fsym, end_of_text_segp)
 	st_hdrsize = bfd_h_get_32 (abfd, filhdr.f.f_nsyms);
 	st_filptr  = bfd_h_get_32 (abfd, filhdr.f.f_symptr);
 	if (st_filptr == 0)
-		return 0;
+		return;
 
 	lseek(fsym, st_filptr, L_SET);
 	if (st_hdrsize != sizeof (hdr_ext)) {	/* Profanity check */
@@ -434,7 +471,7 @@ read_the_mips_symtab(abfd, fsym, end_of_text_segp)
 	/* Allocate space for the symbol table.  Read it in.  */
 	cur_hdr = (HDRR *) xmalloc(stsize + st_hdrsize);
 
-	memcpy(cur_hdr, &hdr_ext, st_hdrsize);
+	memcpy((PTR)cur_hdr, (PTR)&hdr_ext, st_hdrsize);
 	if (read(fsym, (char *) cur_hdr + st_hdrsize, stsize) != stsize)
 		goto readerr;
 
@@ -769,22 +806,6 @@ struct mips_pending *is_pending_symbol(fh, sh)
 	return p;
 }
 
-/* Check whether we already saw type T in file FH as undefined */
-
-static
-struct mips_pending *is_pending_type(fh, t)
-	FDR *fh;
-	struct type *t;
-{
-	int             f_idx = fh - (FDR *) cur_hdr->cbFdOffset;
-	register struct mips_pending *p;
-
-	for (p = pending_list[f_idx]; p; p = p->next)
-		if (p->t == t)
-			break;
-	return p;
-}
-
 /* Add a new undef symbol SH of type T */
 
 static
@@ -808,6 +829,7 @@ add_pending(fh, sh, t)
 }
 
 /* Throw away undef entries when done with file index F_IDX */
+/* FIXME -- storage leak.  This is never called!!!   --gnu */
 
 static
 free_pending(f_idx)
@@ -816,7 +838,7 @@ free_pending(f_idx)
 
 	for (p = pending_list[f_idx]; p; p = q) {
 		q = p->next;
-		free(p);
+		free((PTR)p);
 	}
 	pending_list[f_idx] = 0;
 }
@@ -857,6 +879,7 @@ lookup_numargs(adr)
 }
 
 /* Release storage when done with this file */
+/* FIXME -- storage leak.  This is never called!  --gnu */
 
 static void
 free_numargs()
@@ -865,7 +888,7 @@ free_numargs()
 
 	while (n) {
 		m = n->next;
-		free(n);
+		free((PTR)n);
 		n = m;
 	}
 	numargs_list = 0;
@@ -1172,7 +1195,8 @@ data:		/* Common code for symbols describing data */
 		    if (pend)
 			t = is_pending_symbol(cur_fdr, sh)->t;
 		    else
-			t = new_type(prepend_tag_kind(sh->iss, type_code));
+			t = new_type(prepend_tag_kind((char *)sh->iss,
+						      type_code));
 
 		    TYPE_CODE(t) = type_code;
 		    TYPE_LENGTH(t) = sh->value;
@@ -1193,7 +1217,7 @@ data:		/* Common code for symbols describing data */
 			    enum_sym = (struct symbol *)
 				obstack_alloc (&current_objfile->symbol_obstack,
 					       sizeof (struct symbol));
-			    memset (enum_sym, 0, sizeof (struct symbol));
+			    memset ((PTR)enum_sym, 0, sizeof (struct symbol));
 			    SYMBOL_NAME (enum_sym) = f->name;
 			    SYMBOL_CLASS (enum_sym) = LOC_CONST;
 			    SYMBOL_TYPE (enum_sym) = t;
@@ -1303,7 +1327,8 @@ data:		/* Common code for symbols describing data */
    We must byte-swap the AX entries before we use them; BIGEND says whether
    they are big-endian or little-endian (from fh->fBigendian).  */
 
-static struct type *parse_type(ax, bs, bigend)
+static struct type *
+parse_type(ax, bs, bigend)
 	union aux_ext	*ax;
 	int	*bs;
 	int	bigend;
@@ -1343,7 +1368,6 @@ static struct type *parse_type(ax, bs, bigend)
 	TIR            t[1];
 	struct type    *tp = 0;
 	char           *fmt;
-	int             i;
 	union aux_ext *tax;
 	int type_code;
 
@@ -1443,8 +1467,6 @@ static struct type *parse_type(ax, bs, bigend)
 
 	/* Deal with range types */
 	if (t->bt == btRange) {
-		struct field   *f;
-
 		TYPE_NFIELDS (tp) = 2;
 		TYPE_FIELDS (tp) =
 		  (struct field *) obstack_alloc (&current_objfile -> type_obstack,
@@ -1491,6 +1513,7 @@ again:	PARSE_TQ(tq0);
 static int
 upgrade_type(tpp, tq, ax, bigend)
 	struct type  **tpp;
+	int	       tq;
 	union aux_ext *ax;
 	int	       bigend;
 {
@@ -1535,16 +1558,16 @@ upgrade_type(tpp, tq, ax, bigend)
 		/* FIXME - Memory leak! */
 		if (TYPE_NFIELDS(t))
 		    TYPE_FIELDS(t) = (struct field*)
-			xrealloc((char *) TYPE_FIELDS(t),
+			xrealloc((PTR) TYPE_FIELDS(t),
 				 (TYPE_NFIELDS(t)+1) * sizeof(struct field));
 		else
 		    TYPE_FIELDS(t) = (struct field*)
 			xzalloc(sizeof(struct field));
 		f = &(TYPE_FIELD(t,TYPE_NFIELDS(t)));
 		TYPE_NFIELDS(t)++;
-		memset(f, 0, sizeof(struct field));
+		memset((PTR)f, 0, sizeof(struct field));
 
-/* XXX */	f->type = parse_type(fh->iauxBase + id * sizeof(union aux_ext),
+/* XXX */	f->type = parse_type(id + (union aux_ext *)fh->iauxBase,
 				     &f->bitsize, bigend);
 
 		ax++;
@@ -1689,7 +1712,7 @@ parse_external(es, skip_procedures, bigend)
 		n_undef_symbols++;
 		if (info_verbose)
 			printf_filtered("Warning: %s `%s' is undefined (in %s)\n", what,
-				es->asym.iss, fdr_name(cur_fdr->rss));
+				es->asym.iss, fdr_name((char *)cur_fdr->rss));
 		return;
 	}
 
@@ -1727,7 +1750,7 @@ parse_lines(fh, lt)
 	struct linetable *lt;
 {
 	unsigned char *base = (unsigned char*)fh->cbLineOffset;
-	int i, j, k;
+	int j, k;
 	int delta, count, lineno = 0;
 	PDR *pr;
 
@@ -1735,7 +1758,7 @@ parse_lines(fh, lt)
 		return;
 
 	/* Scan by procedure descriptors */
-	i = 0; j = 0, k = 0;
+	j = 0, k = 0;
 	for (pr = (PDR*)IPDFIRST(cur_hdr,fh); j < fh->cpd; j++, pr++) {
 		int l, halt;
 
@@ -1799,7 +1822,6 @@ parse_partial_symbols(end_of_text_seg, objfile)
     HDRR		*hdr = cur_hdr;
     /* Running pointers */
     FDR		*fh;
-    RFDT		*rh;
     register EXTR	*esh;
     register SYMR	*sh;
     struct partial_symtab *pst;
@@ -1896,7 +1918,7 @@ parse_partial_symbols(end_of_text_seg, objfile)
 			complain (&unknown_ext_complaint,
 				  (char *)(esh->asym.iss));
 		}
-		prim_record_minimal_symbol ((char *)(esh->asym.iss),
+		prim_record_minimal_symbol ((char *)esh->asym.iss,
 					    esh->asym.value,
 					    ms_type);
 	}
@@ -2234,7 +2256,7 @@ psymtab_to_symtab_1(pst, filename)
      char *filename;
 {
     int have_stabs;
-    int             i, f_max;
+    int i, f_max;
     struct symtab  *st;
     FDR *fh;
     int maxlines;
@@ -2327,11 +2349,8 @@ psymtab_to_symtab_1(pst, filename)
     if (fh) {
 	SYMR *sh;
 	PDR *pr;
-	int f_idx = cur_fd;
-	char *fh_name = (char*)fh->rss;
 	
 	/* Parse local symbols first */
-	
 	
 	if (have_stabs) {
 	    if (fh->csym <= 2)
@@ -2360,7 +2379,8 @@ psymtab_to_symtab_1(pst, filename)
 		: fh[1].adr;
 	    for (cur_sdx = 0; cur_sdx < fh->csym; ) {
 		sh = (SYMR *) (fh->isymBase) + cur_sdx;
-		cur_sdx += parse_symbol(sh, fh->iauxBase, fh->fBigendian);
+		cur_sdx += parse_symbol(sh, (union aux_ent *)fh->iauxBase,
+					fh->fBigendian);
 	    }
 
 	    /* Procedures next, note we need to look-ahead to
@@ -2521,7 +2541,8 @@ mylookup_symbol (name, block, namespace, class)
 			return sym;
 		bot++;
 	}
-	if (block = BLOCK_SUPERBLOCK (block))
+	block = BLOCK_SUPERBLOCK (block);
+	if (block)
 		return mylookup_symbol (name, block, namespace, class);
 	return 0;
 }
@@ -2571,7 +2592,7 @@ add_block(b,s)
 {
 	struct blockvector *bv = BLOCKVECTOR(s);
 
-	bv = (struct blockvector *)xrealloc((char *) bv,
+	bv = (struct blockvector *)xrealloc((PTR) bv,
 					    sizeof(struct blockvector) +
 					         BLOCKVECTOR_NBLOCKS(bv)
 						 * sizeof(bv->block));
@@ -2602,49 +2623,13 @@ add_line(lt, lineno, adr, last)
 	lt->item[lt->nitems++].pc = adr << 2;
 	return lineno;
 }
-
-
 
-/* Comparison functions, used when sorting things */
-
-/*  Symtabs must be ordered viz the code segments they cover */
-
-static int
-compare_symtabs( s1, s2)
-	struct symtab **s1, **s2;
-{
-	/* "most specific" first */
-
-	register struct block *b1, *b2;
-	b1 = BLOCKVECTOR_BLOCK(BLOCKVECTOR(*s1),GLOBAL_BLOCK);
-	b2 = BLOCKVECTOR_BLOCK(BLOCKVECTOR(*s2),GLOBAL_BLOCK);
-	if (BLOCK_END(b1) == BLOCK_END(b2))
-		return BLOCK_START(b1) - BLOCK_START(b2);
-	return BLOCK_END(b1) - BLOCK_END(b2);
-}
-
-
-/*  Partial Symtabs, same */
-
-static int
-compare_psymtabs( s1, s2)
-	struct partial_symtab **s1, **s2;
-{
-	/* Perf twist: put the ones with no code at the end */
-
-	register int a = (*s1)->textlow;
-	register int b = (*s2)->textlow;
-	if (a == 0)
-		return b;
-	if (b == 0)
-		return -a;
-	return a - b;
-}
-
+/* Sorting and reordering procedures */
 
 /* Blocks with a smaller low bound should come first */
 
-static int compare_blocks(b1,b2)
+static int
+compare_blocks(b1, b2)
 	struct block **b1, **b2;
 {
 	register int addr_diff;
@@ -2654,9 +2639,6 @@ static int compare_blocks(b1,b2)
 		return (BLOCK_END((*b1))) - (BLOCK_END((*b2)));
 	return addr_diff;
 }
-
-
-/* Sorting and reordering procedures */
 
 /* Sort the blocks of a symtab S.
    Reorder the blocks in the blockvector by code-address,
@@ -2762,31 +2744,36 @@ new_psymtab(name, objfile)
 }
 
 
-/* Allocate a linetable array of the given SIZE */
+/* Allocate a linetable array of the given SIZE.  Since the struct
+   already includes one item, we subtract one when calculating the 
+   proper size to allocate.  */
 
 static struct linetable *
 new_linetable(size)
+	int size;
 {
 	struct linetable *l;
 
-	size = size * sizeof(l->item) + sizeof(struct linetable);
+	size = (size-1) * sizeof(l->item) + sizeof(struct linetable);
 	l = (struct linetable *)xmalloc(size);
 	l->nitems = 0;
 	return l;
 }
 
 /* Oops, too big. Shrink it.  This was important with the 2.4 linetables,
-   I am not so sure about the 3.4 ones */
+   I am not so sure about the 3.4 ones.
+
+   Since the struct linetable already includes one item, we subtract one when
+   calculating the proper size to allocate.  */
 
 static struct linetable *
 shrink_linetable(lt)
 	struct linetable * lt;
 {
-	struct linetable *l = new_linetable(lt->nitems);
 
-	memcpy(l, lt, lt->nitems * sizeof(l->item) + sizeof(struct linetable));
-	free (lt);
-	return l;
+	return (struct linetable *) xrealloc ((PTR)lt, 
+					sizeof(struct linetable)
+					+ (lt->nitems - 1) * sizeof(lt->item));
 }
 
 /* Allocate and zero a new blockvector of NBLOCKS blocks. */
@@ -2794,6 +2781,7 @@ shrink_linetable(lt)
 static
 struct blockvector *
 new_bvect(nblocks)
+	int nblocks;
 {
 	struct blockvector *bv;
 	int size;
@@ -2811,11 +2799,11 @@ new_bvect(nblocks)
 static
 struct block *
 new_block(maxsyms)
+	int maxsyms;
 {
 	int size = sizeof(struct block) + (maxsyms-1) * sizeof(struct symbol *);
-	struct block *b = (struct block *)xzalloc(size);
 
-	return b;
+	return (struct block *)xzalloc (size);
 }
 
 /* Ooops, too big. Shrink block B in symtab S to its minimal size.
@@ -2832,8 +2820,8 @@ shrink_block(b, s)
 
 	/* Just reallocate it and fix references to the old one */
 
-	new = (struct block *) xrealloc ((char *)b, sizeof(struct block) +
-	  	(BLOCK_NSYMS(b)-1) * sizeof(struct symbol *));
+	new = (struct block *) xrealloc ((PTR)b, sizeof(struct block) +
+		(BLOCK_NSYMS(b)-1) * sizeof(struct symbol *));
 
 	/* Should chase pointers to old one.  Fortunately, that`s just
 	   the block`s function and inferior blocks */
@@ -2857,7 +2845,7 @@ new_symbol(name)
 	struct symbol *s = (struct symbol *) 
 		obstack_alloc (&current_objfile->symbol_obstack, sizeof (struct symbol));
 
-	memset (s, 0, sizeof (*s));
+	memset ((PTR)s, 0, sizeof (*s));
 	SYMBOL_NAME(s) = name;
 	return s;
 }
@@ -2961,11 +2949,13 @@ fixup_sigtramp()
 		e->fregoffset = -(37 * sizeof(int));
 		e->isym = (long)s;
 
+		current_objfile = st->objfile; /* Keep new_symbol happy */
 		s = new_symbol(".gdbinfo.");
 		SYMBOL_VALUE(s) = (int) e;
 		SYMBOL_NAMESPACE(s) = LABEL_NAMESPACE;
 		SYMBOL_CLASS(s) = LOC_CONST;
 		SYMBOL_TYPE(s) = builtin_type_void;
+		current_objfile = NULL;
 	}
 
 	BLOCK_SYM(b,BLOCK_NSYMS(b)++) = s;

@@ -272,17 +272,15 @@ int
 have_partial_symbols ()
 {
   struct objfile *ofp;
-  int havethem = 0;
 
-  for (ofp = object_files; ofp; ofp = ofp -> next)
+  ALL_OBJFILES (ofp)
     {
       if (ofp -> psymtabs != NULL)
 	{
-	  havethem++;
-	  break;
+	  return 1;
 	}
     }
-  return (havethem);
+  return 0;
 }
 
 /* Many places in gdb want to test just to see if we have any full
@@ -293,17 +291,15 @@ int
 have_full_symbols ()
 {
   struct objfile *ofp;
-  int havethem = 0;
 
-  for (ofp = object_files; ofp; ofp = ofp -> next)
+  ALL_OBJFILES (ofp)
     {
       if (ofp -> symtabs != NULL)
 	{
-	  havethem++;
-	  break;
+	  return 1;
 	}
     }
-  return (havethem);
+  return 0;
 }
 
 /* Many places in gdb want to test just to see if we have any minimal
@@ -314,118 +310,16 @@ int
 have_minimal_symbols ()
 {
   struct objfile *ofp;
-  int havethem = 0;
 
-  for (ofp = object_files; ofp; ofp = ofp -> next)
+  ALL_OBJFILES (ofp)
     {
       if (ofp -> msymbols != NULL)
 	{
-	  havethem++;
-	  break;
+	  return 1;
 	}
     }
-  return (havethem);
+  return 0;
 }
-
-/* Call the function specified by FUNC for each currently available objfile,
-   for as long as this function continues to return NULL.  If the function
-   ever returns non-NULL, then the iteration over the objfiles is terminated,
-   and the result is returned to the caller.  The function called has full
-   control over the form and content of the information returned via the
-   non-NULL result, which may be as simple as a pointer to the objfile that
-   the iteration terminated on, or as complex as a pointer to a private
-   structure containing multiple results. */
-
-PTR
-iterate_over_objfiles (func, arg1, arg2, arg3)
-     PTR (*func) PARAMS ((struct objfile *, PTR, PTR, PTR));
-     PTR arg1;
-     PTR arg2;
-     PTR arg3;
-{
-  register struct objfile *objfile;
-  PTR result = NULL;
-
-  for (objfile = object_files;
-       objfile != NULL && result == NULL;
-       objfile = objfile -> next)
-    {
-      result = (*func)(objfile, arg1, arg2, arg3);
-    }
-  return (result);
-}
-
-/* Call the function specified by FUNC for each currently available symbol
-   table, for as long as this function continues to return NULL.  If the
-   function ever returns non-NULL, then the iteration over the symbol tables
-   is terminated, and the result is returned to the caller.  The function
-   called has full control over the form and content of the information
-   returned via the non-NULL result, which may be as simple as a pointer
-   to the symtab that the iteration terminated on, or as complex as a
-   pointer to a private structure containing multiple results. */
-
-PTR 
-iterate_over_symtabs (func, arg1, arg2, arg3)
-     PTR (*func) PARAMS ((struct objfile *, struct symtab *, PTR, PTR, PTR));
-     PTR arg1;
-     PTR arg2;
-     PTR arg3;
-{
-  register struct objfile *objfile;
-  register struct symtab *symtab;
-  PTR result = NULL;
-
-  for (objfile = object_files;
-       objfile != NULL && result == NULL;
-       objfile = objfile -> next)
-    {
-      for (symtab = objfile -> symtabs;
-	   symtab != NULL && result == NULL;
-	   symtab = symtab -> next)
-	{
-	  result = (*func)(objfile, symtab, arg1, arg2, arg3);
-	}
-    }
-  return (result);
-}
-
-/* Call the function specified by FUNC for each currently available partial
-   symbol table, for as long as this function continues to return NULL.  If
-   the function ever returns non-NULL, then the iteration over the partial
-   symbol tables is terminated, and the result is returned to the caller.
-
-   The function called has full control over the form and content of the
-   information returned via the non-NULL result, which may be as simple as a
-   pointer to the partial symbol table that the iteration terminated on, or
-   as complex as a pointer to a private structure containing multiple
-   results. */
-
-PTR 
-iterate_over_psymtabs (func, arg1, arg2, arg3)
-     PTR (*func) PARAMS ((struct objfile *, struct partial_symtab *,
-			  PTR, PTR, PTR));
-     PTR arg1;
-     PTR arg2;
-     PTR arg3;
-{
-  register struct objfile *objfile;
-  register struct partial_symtab *psymtab;
-  PTR result = NULL;
-
-  for (objfile = object_files;
-       objfile != NULL && result == NULL;
-       objfile = objfile -> next)
-    {
-      for (psymtab = objfile -> psymtabs;
-	   psymtab != NULL && result == NULL;
-	   psymtab = psymtab -> next)
-	{
-	  result = (*func)(objfile, psymtab, arg1, arg2, arg3);
-	}
-    }
-  return (result);
-}
-
 
 /* Look for a mapped symbol file that corresponds to FILENAME and is more
    recent than MTIME.  If MAPPED is nonzero, the user has asked that gdb
