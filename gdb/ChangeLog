@@ -1,5 +1,8 @@
 2004-07-17  Andrew Cagney  <cagney@gnu.org>
 
+	* hppa-linux-nat.c: Do not include <string.h>.
+	(supply_fpregset): Remove "register" attribute.
+
 	* solib-frv.c (fetch_loadmap): Use xfree, not free.
 
 2004-07-17  Mark Kettenis  <kettenis@gnu.org>
