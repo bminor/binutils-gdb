@@ -2759,7 +2759,7 @@ build_instruction (doisa, features, mips16, insn)
      break ;
 
     case DECODE:
-     printf("   decode_coproc(instruction);\n");
+     printf("   DecodeCoproc(instruction);\n");
      break ;
 
     case CACHE:

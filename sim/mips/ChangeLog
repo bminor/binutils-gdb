@@ -1,3 +1,39 @@
+Thu Oct 16 10:31:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+start-sanitize-r5900
+	* sim-main.h (BYTES_IN_MMI_REGS, ..., SUB_REG_FETCH, ..., GPR_SB,
+ 	...): Move to sim-main.h
+	
+end-sanitize-r5900
+	* interp.c (sync_operation): Rename from SyncOperation, make
+ 	global, add SD argument.
+	(prefetch): Rename from Prefetch, make global, add SD argument.
+	(decode_coproc): Make global.
+
+	* sim-main.h (SyncOperation, DecodeCoproc, Pefetch): Define.
+
+	* gencode.c (build_instruction): Generate DecodeCoproc not
+ 	decode_coproc calls.
+
+	* interp.c (SETFCC, GETFCC, PREVCOC1): Move to sim-main.h
+	(SizeFGR): Move to sim-main.h
+	(simHALTEX, simHALTIN, simTRACE, simPROFILE, simDELAYSLOT,
+ 	simSIGINT, simJALDELAYSLOT): Move to sim-main.h
+	(FP_FLAGS, FP_ENABLE, FP_CAUSE, IR, UF, OF, DZ, IO, UO): Move to
+ 	sim-main.h.
+	(FP_FS, FP_MASK_RM, FP_SH_RM, FP_RM_NEAREST, FP_RM_TOPINF,
+ 	FP_RM_TOMINF, GETRM): Move to sim-main.h.
+	(Uncached, CachedNoncoherent, CachedCoherent, Cached,
+ 	isINSTRUCTION, ..., AccessLength_BYTE, ...): Move to sim-main.h.
+	(UserMode, BigEndianMem, ByteSwapMem, ReverseEndian,
+ 	BigEndianCPU, status_KSU_mask, ...). Moved to sim-main.h
+	
+	* sim-main.h (ALU32_END, ALU64_END): Define. When overflow raise
+ 	exception.
+	(sim-alu.h): Include.
+	(NULLIFY_NIA, NULL_CIA, CPU_CIA): Define.
+ 	(sim_cia): Typedef to instruction_address.
+	
 Thu Oct 16 10:31:41 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (interp.o): Rename generated file engine.c to

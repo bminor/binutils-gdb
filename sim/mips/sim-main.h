@@ -36,9 +36,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sim-basics.h"
 
+
+#if 0
+/* These are generated files.  */
+#include "itable.h"
+#include "idecode.h"
+#include "idecode.h"
+
 /* dummy - not used */
+typedef instruction_address sim_cia;
+static const sim_cia null_cia = {0}; /* dummy */
+#define NULL_CIA null_cia
+#else
 typedef int sim_cia;
-#define NULL_CIA 0
+#endif
+
 
 #include "sim-base.h"
 
@@ -78,6 +90,7 @@ typedef unsigned64 uword64;
 #endif
 
 
+
 /* Floating-point operations: */
 
 /* FPU registers must be one of the following types. All other values
@@ -114,6 +127,174 @@ unsigned64 SquareRoot PARAMS ((unsigned64 op, FP_formats fmt));
 unsigned64 convert PARAMS ((SIM_DESC sd, int rm, unsigned64 op, FP_formats from, FP_formats to));
 #define Convert(rm,op,from,to) convert(sd,rm,op,from,to)
 
+/* Macro to update FPSR condition-code field. This is complicated by
+   the fact that there is a hole in the index range of the bits within
+   the FCSR register. Also, the number of bits visible depends on the
+   MIPS ISA version being supported. */
+
+#define SETFCC(cc,v) {\
+  int bit = ((cc == 0) ? 23 : (24 + (cc)));\
+  FCSR = ((FCSR & ~(1 << bit)) | ((v) << bit));\
+}
+#define GETFCC(cc) (((((cc) == 0) ? (FCSR & (1 << 23)) : (FCSR & (1 << (24 + (cc))))) != 0) ? 1 : 0)
+
+/* This should be the COC1 value at the start of the preceding
+   instruction: */
+#define PREVCOC1() ((STATE & simPCOC1) ? 1 : 0)
+
+#if 1
+#define SizeFGR() (WITH_TARGET_WORD_BITSIZE)
+#else
+/* They depend on the CPU being simulated */
+#define SizeFGR() ((WITH_TARGET_WORD_BITSIZE == 64 && ((SR & status_FR) == 1)) ? 64 : 32)
+#endif
+
+/* Standard FCRS bits: */
+#define IR (0) /* Inexact Result */
+#define UF (1) /* UnderFlow */
+#define OF (2) /* OverFlow */
+#define DZ (3) /* Division by Zero */
+#define IO (4) /* Invalid Operation */
+#define UO (5) /* Unimplemented Operation */
+
+/* Get masks for individual flags: */
+#if 1 /* SAFE version */
+#define FP_FLAGS(b)  (((unsigned)(b) < 5) ? (1 << ((b) + 2)) : 0)
+#define FP_ENABLE(b) (((unsigned)(b) < 5) ? (1 << ((b) + 7)) : 0)
+#define FP_CAUSE(b)  (((unsigned)(b) < 6) ? (1 << ((b) + 12)) : 0)
+#else
+#define FP_FLAGS(b)  (1 << ((b) + 2))
+#define FP_ENABLE(b) (1 << ((b) + 7))
+#define FP_CAUSE(b)  (1 << ((b) + 12))
+#endif
+
+#define FP_FS         (1 << 24) /* MIPS III onwards : Flush to Zero */
+
+#define FP_MASK_RM    (0x3)
+#define FP_SH_RM      (0)
+#define FP_RM_NEAREST (0) /* Round to nearest        (Round) */
+#define FP_RM_TOZERO  (1) /* Round to zero           (Trunc) */
+#define FP_RM_TOPINF  (2) /* Round to Plus infinity  (Ceil) */
+#define FP_RM_TOMINF  (3) /* Round to Minus infinity (Floor) */
+#define GETRM()       (int)((FCSR >> FP_SH_RM) & FP_MASK_RM)
+
+
+
+/* Integer ALU operations: */
+
+#include "sim-alu.h"
+
+#define ALU32_END(ANS) \
+  if (ALU32_HAD_OVERFLOW) \
+    SignalExceptionIntegerOverflow (); \
+  (ANS) = alu_overflow_val;
+
+
+#define ALU64_END(ANS) \
+  if (ALU64_HAD_OVERFLOW) \
+    SignalExceptionIntegerOverflow (); \
+  (ANS) = alu_val;
+
+/* start-sanitize-r5900 */
+
+#define BYTES_IN_MMI_REGS       (sizeof(signed_word) + sizeof(signed_word))
+#define HALFWORDS_IN_MMI_REGS   (BYTES_IN_MMI_REGS/2)
+#define WORDS_IN_MMI_REGS       (BYTES_IN_MMI_REGS/4)
+#define DOUBLEWORDS_IN_MMI_REGS (BYTES_IN_MMI_REGS/8)
+
+#define BYTES_IN_MIPS_REGS       (sizeof(signed_word))
+#define HALFWORDS_IN_MIPS_REGS   (BYTES_IN_MIPS_REGS/2)
+#define WORDS_IN_MIPS_REGS       (BYTES_IN_MIPS_REGS/4)
+#define DOUBLEWORDS_IN_MIPS_REGS (BYTES_IN_MIPS_REGS/8)
+
+/* SUB_REG_FETCH - return as lvalue some sub-part of a "register"
+   T  - type of the sub part
+   TC - # of T's in the mips part of the "register"
+   I  - index (from 0) of desired sub part
+   A  - low part of "register"
+   A1 - high part of register
+*/
+#define SUB_REG_FETCH(T,TC,A,A1,I) \
+(*(((I) < (TC) ? (T*)(A) : (T*)(A1)) \
+   + (CURRENT_HOST_BYTE_ORDER == BIG_ENDIAN \
+      ? ((TC) - 1 - (I) % (TC)) \
+      : ((I) % (TC)) \
+      ) \
+   ) \
+ )
+
+/* 
+GPR_<type>(R,I) - return, as lvalue, the I'th <type> of general register R 
+            where <type> has two letters:
+                  1 is S=signed or U=unsigned
+                  2 is B=byte H=halfword W=word D=doubleword 
+*/
+
+#define SUB_REG_SB(A,A1,I) SUB_REG_FETCH(signed8,  BYTES_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_SH(A,A1,I) SUB_REG_FETCH(signed16, HALFWORDS_IN_MIPS_REGS,   A, A1, I)
+#define SUB_REG_SW(A,A1,I) SUB_REG_FETCH(signed32, WORDS_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_SD(A,A1,I) SUB_REG_FETCH(signed64, DOUBLEWORDS_IN_MIPS_REGS, A, A1, I)
+
+#define SUB_REG_UB(A,A1,I) SUB_REG_FETCH(unsigned8,  BYTES_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_UH(A,A1,I) SUB_REG_FETCH(unsigned16, HALFWORDS_IN_MIPS_REGS,   A, A1, I)
+#define SUB_REG_UW(A,A1,I) SUB_REG_FETCH(unsigned32, WORDS_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_UD(A,A1,I) SUB_REG_FETCH(unsigned64, DOUBLEWORDS_IN_MIPS_REGS, A, A1, I)
+  
+#define GPR_SB(R,I) SUB_REG_SB(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_SH(R,I) SUB_REG_SH(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_SW(R,I) SUB_REG_SW(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_SD(R,I) SUB_REG_SD(&REGISTERS[R], &REGISTERS1[R], I)
+
+#define GPR_UB(R,I) SUB_REG_UB(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_UH(R,I) SUB_REG_UH(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_UW(R,I) SUB_REG_UW(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_UD(R,I) SUB_REG_UD(&REGISTERS[R], &REGISTERS1[R], I)
+
+
+#define RS_SB(I) SUB_REG_SB(&rs_reg, &rs_reg1, I)
+#define RS_SH(I) SUB_REG_SH(&rs_reg, &rs_reg1, I)
+#define RS_SW(I) SUB_REG_SW(&rs_reg, &rs_reg1, I)
+#define RS_SD(I) SUB_REG_SD(&rs_reg, &rs_reg1, I)
+
+#define RS_UB(I) SUB_REG_UB(&rs_reg, &rs_reg1, I)
+#define RS_UH(I) SUB_REG_UH(&rs_reg, &rs_reg1, I)
+#define RS_UW(I) SUB_REG_UW(&rs_reg, &rs_reg1, I)
+#define RS_UD(I) SUB_REG_UD(&rs_reg, &rs_reg1, I)
+
+#define RT_SB(I) SUB_REG_SB(&rt_reg, &rt_reg1, I)
+#define RT_SH(I) SUB_REG_SH(&rt_reg, &rt_reg1, I)
+#define RT_SW(I) SUB_REG_SW(&rt_reg, &rt_reg1, I)
+#define RT_SD(I) SUB_REG_SD(&rt_reg, &rt_reg1, I)
+
+#define RT_UB(I) SUB_REG_UB(&rt_reg, &rt_reg1, I)
+#define RT_UH(I) SUB_REG_UH(&rt_reg, &rt_reg1, I)
+#define RT_UW(I) SUB_REG_UW(&rt_reg, &rt_reg1, I)
+#define RT_UD(I) SUB_REG_UD(&rt_reg, &rt_reg1, I)
+
+
+
+#define LO_SB(I) SUB_REG_SB(&LO, &LO1, I)
+#define LO_SH(I) SUB_REG_SH(&LO, &LO1, I)
+#define LO_SW(I) SUB_REG_SW(&LO, &LO1, I)
+#define LO_SD(I) SUB_REG_SD(&LO, &LO1, I)
+
+#define LO_UB(I) SUB_REG_UB(&LO, &LO1, I)
+#define LO_UH(I) SUB_REG_UH(&LO, &LO1, I)
+#define LO_UW(I) SUB_REG_UW(&LO, &LO1, I)
+#define LO_UD(I) SUB_REG_UD(&LO, &LO1, I)
+
+#define HI_SB(I) SUB_REG_SB(&HI, &HI1, I)
+#define HI_SH(I) SUB_REG_SH(&HI, &HI1, I)
+#define HI_SW(I) SUB_REG_SW(&HI, &HI1, I)
+#define HI_SD(I) SUB_REG_SD(&HI, &HI1, I)
+
+#define HI_UB(I) SUB_REG_UB(&HI, &HI1, I)
+#define HI_UH(I) SUB_REG_UH(&HI, &HI1, I)
+#define HI_UW(I) SUB_REG_UW(&HI, &HI1, I)
+#define HI_UD(I) SUB_REG_UD(&HI, &HI1, I)
+
+/* end-sanitize-r5900 */
+
 
 
 
@@ -121,10 +302,15 @@ struct _sim_cpu {
 
 
   /* The following are internal simulator state variables: */
+  sim_cia cia;
+#define CPU_CIA(CPU) ((CPU)->cia)
   address_word ipc; /* internal Instruction PC */
   address_word dspc;  /* delay-slot PC */
 #define IPC ((STATE_CPU (sd,0))->ipc)
 #define DSPC ((STATE_CPU (sd,0))->dspc)
+
+#define NULLIFY_NIA() { nia.ip = cia.dp + 4; nia.dp = nia.ip += 4; }
+
 
 
   /* State of the simulator */
@@ -132,6 +318,20 @@ struct _sim_cpu {
   unsigned int dsstate;
 #define STATE ((STATE_CPU (sd,0))->state)
 #define DSSTATE ((STATE_CPU (sd,0))->dsstate)
+
+/* Flags in the "state" variable: */
+#define simHALTEX       (1 << 2)  /* 0 = run; 1 = halt on exception */
+#define simHALTIN       (1 << 3)  /* 0 = run; 1 = halt on interrupt */
+#define simTRACE        (1 << 8)  /* 0 = do nothing; 1 = trace address activity */
+#define simPROFILE      (1 << 9)  /* 0 = do nothing; 1 = gather profiling samples */
+#define simPCOC0        (1 << 17) /* COC[1] from current */
+#define simPCOC1        (1 << 18) /* COC[1] from previous */
+#define simDELAYSLOT    (1 << 24) /* 0 = do nothing; 1 = delay slot entry exists */
+#define simSKIPNEXT     (1 << 25) /* 0 = do nothing; 1 = skip instruction */
+#define simSIGINT	(1 << 28)  /* 0 = do nothing; 1 = SIGINT has occured */
+#define simJALDELAYSLOT	(1 << 29) /* 1 = in jal delay slot */
+
+
 
 
 /* This is nasty, since we have to rely on matching the register
@@ -210,6 +410,22 @@ struct _sim_cpu {
 #define PENDING_SLOT_COUNT ((STATE_CPU (sd, 0))->pending_slot_count)
 #define PENDING_SLOT_REG ((STATE_CPU (sd, 0))->pending_slot_reg)
 #define PENDING_SLOT_VALUE ((STATE_CPU (sd, 0))->pending_slot_value)
+
+  /* The following are not used for MIPS IV onwards: */
+#define PENDING_FILL(r,v) {\
+/* printf("DBG: FILL BEFORE pending_in = %d, pending_out = %d, pending_total = %d\n",PENDING_IN,PENDING_OUT,PENDING_TOTAL); */\
+                            if (PENDING_SLOT_REG[PENDING_IN] != (LAST_EMBED_REGNUM + 1))\
+                             sim_io_eprintf(sd,"Attempt to over-write pending value\n");\
+                            PENDING_SLOT_COUNT[PENDING_IN] = 2;\
+                            PENDING_SLOT_REG[PENDING_IN] = (r);\
+                            PENDING_SLOT_VALUE[PENDING_IN] = (uword64)(v);\
+/*printf("DBG: FILL        reg %d value = 0x%s\n",(r),pr_addr(v));*/\
+                            PENDING_TOTAL++;\
+                            PENDING_IN++;\
+                            if (PENDING_IN == PSLOTS)\
+                             PENDING_IN = 0;\
+/*printf("DBG: FILL AFTER  pending_in = %d, pending_out = %d, pending_total = %d\n",PENDING_IN,PENDING_OUT,PENDING_TOTAL);*/\
+                          }
 
 
   /* LLBIT = Load-Linked bit. A bit of "virtual" state used by atomic
@@ -318,6 +534,65 @@ struct sim_state {
 };
 
 
+
+/* Status information: */
+
+/* TODO : these should be the bitmasks for these bits within the
+   status register. At the moment the following are VR4300
+   bit-positions: */
+#define status_KSU_mask  (0x3)          /* mask for KSU bits */
+#define status_KSU_shift (3)            /* shift for field */
+#define ksu_kernel       (0x0)
+#define ksu_supervisor   (0x1)
+#define ksu_user         (0x2)
+#define ksu_unknown      (0x3)
+
+#define status_IE	 (1 <<  0)      /* Interrupt enable */
+#define status_EXL	 (1 <<  1)	/* Exception level */
+#define status_RE        (1 << 25)      /* Reverse Endian in user mode */
+#define status_FR        (1 << 26)      /* enables MIPS III additional FP registers */
+#define status_SR        (1 << 20)      /* soft reset or NMI */
+#define status_BEV       (1 << 22)      /* Location of general exception vectors */
+#define status_TS        (1 << 21)      /* TLB shutdown has occurred */
+#define status_ERL       (1 <<  2)      /* Error level */
+#define status_RP        (1 << 27)      /* Reduced Power mode */
+
+#define cause_BD        ((unsigned)1 << 31)     /* Exception in branch delay slot */
+
+/* NOTE: We keep the following status flags as bit values (1 for true,
+   0 for false). This allows them to be used in binary boolean
+   operations without worrying about what exactly the non-zero true
+   value is. */
+
+/* UserMode */
+#define UserMode        ((((SR & status_KSU_mask) >> status_KSU_shift) == ksu_user) ? 1 : 0)
+
+/* BigEndianMem */
+/* Hardware configuration. Affects endianness of LoadMemory and
+   StoreMemory and the endianness of Kernel and Supervisor mode
+   execution. The value is 0 for little-endian; 1 for big-endian. */
+#define BigEndianMem    (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+/*(state & simBE) ? 1 : 0)*/
+
+/* ByteSwapMem */
+/* This is true if the host and target have different endianness.  */
+#define ByteSwapMem (CURRENT_TARGET_BYTE_ORDER != CURRENT_HOST_BYTE_ORDER)
+
+/* ReverseEndian */
+/* This mode is selected if in User mode with the RE bit being set in
+   SR (Status Register). It reverses the endianness of load and store
+   instructions. */
+#define ReverseEndian   (((SR & status_RE) && UserMode) ? 1 : 0)
+
+/* BigEndianCPU */
+/* The endianness for load and store instructions (0=little;1=big). In
+   User mode this endianness may be switched by setting the state_RE
+   bit in the SR register. Thus, BigEndianCPU may be computed as
+   (BigEndianMem EOR ReverseEndian). */
+#define BigEndianCPU    (BigEndianMem ^ ReverseEndian) /* Already bits */
+
+
+
 /* Exceptions: */
 
 /* NOTE: These numbers depend on the processor architecture being
@@ -369,9 +644,42 @@ uword64 cop_sd PARAMS ((SIM_DESC sd, int coproc_num, int coproc_reg));
 #define COP_SW(coproc_num,coproc_reg) cop_sw(sd,coproc_num,coproc_reg)
 #define COP_SD(coproc_num,coproc_reg) cop_sd(sd,coproc_num,coproc_reg)
 
+void decode_coproc PARAMS ((SIM_DESC sd,unsigned int instruction));
+#define DecodeCoproc(instruction) decode_coproc(sd, (instruction))
+
 
 
 /* Memory accesses */
+
+/* The following are generic to all versions of the MIPS architecture
+   to date: */
+
+/* Memory Access Types (for CCA): */
+#define Uncached                (0)
+#define CachedNoncoherent       (1)
+#define CachedCoherent          (2)
+#define Cached                  (3)
+
+#define isINSTRUCTION   (1 == 0) /* FALSE */
+#define isDATA          (1 == 1) /* TRUE */
+#define isLOAD          (1 == 0) /* FALSE */
+#define isSTORE         (1 == 1) /* TRUE */
+#define isREAL          (1 == 0) /* FALSE */
+#define isRAW           (1 == 1) /* TRUE */
+#define isTARGET        (1 == 0) /* FALSE */
+#define isHOST          (1 == 1) /* TRUE */
+
+/* The "AccessLength" specifications for Loads and Stores. NOTE: This
+   is the number of bytes minus 1. */
+#define AccessLength_BYTE       (0)
+#define AccessLength_HALFWORD   (1)
+#define AccessLength_TRIPLEBYTE (2)
+#define AccessLength_WORD       (3)
+#define AccessLength_QUINTIBYTE (4)
+#define AccessLength_SEXTIBYTE  (5)
+#define AccessLength_SEPTIBYTE  (6)
+#define AccessLength_DOUBLEWORD (7)
+#define AccessLength_QUADWORD   (15)
 
 int address_translation PARAMS ((SIM_DESC sd, uword64 vAddr, int IorD, int LorS, uword64 *pAddr, int *CCA, int host, int raw));
 #define AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw) \
@@ -387,5 +695,14 @@ store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
 
 void cache_op PARAMS ((SIM_DESC sd, int op, uword64 pAddr, uword64 vAddr, unsigned int instruction));
 #define CacheOp(op,pAddr,vAddr,instruction) cache_op(sd,op,pAddr,vAddr,instruction)
+
+void sync_operation PARAMS ((SIM_DESC sd, int stype));
+#define SyncOperation(stype) sync_operation (sd, (stype))
+
+void prefetch PARAMS ((SIM_DESC sd, int CCA, uword64 pAddr, uword64 vAddr, int DATA, int hint));
+#define Prefetch(CCA,pAddr,vAddr,DATA,hint) prefetch(sd,CCA,pAddr,vAddr,DATA,hint)
+
+#define IMEM(CIA) 0 /* FIXME */
+
 
 #endif
