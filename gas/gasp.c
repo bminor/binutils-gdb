@@ -124,32 +124,27 @@ static char chartype[256];
    a bug in the user's macro structure.  */
 
 #define IFNESTING 100
-struct
-{
+struct {
   int on;			/* Is the level being output.  */
   int hadelse;			/* Has an aelse been seen.  */
-}
-ifstack[IFNESTING];
+} ifstack[IFNESTING];
+
 int ifi;
 
 /* The final and intermediate results of expression evaluation are kept in
    exp_t's.  Note that a symbol is not an sb, but a pointer into the input
    line.  It must be coped somewhere safe before the next line is read in.  */
 
-typedef struct
-{
+typedef struct {
   char *name;
   int len;
-}
-symbol;
+} symbol;
 
-typedef struct
-{
+typedef struct {
   int value;			/* Constant part.  */
   symbol add_symbol;		/* Name part.  */
   symbol sub_symbol;		/* Name part.  */
-}
-exp_t;
+} exp_t;
 
 /* Hashing is done in a pretty standard way.  A hash_table has a
    pointer to a vector of pointers to hash_entrys, and the size of the
@@ -158,20 +153,17 @@ exp_t;
    with the same hash are kept in a chain.  */
 
 /* What the data in a hash_entry means.  */
-typedef enum
-{
+typedef enum {
   hash_integer,			/* Name->integer mapping.  */
   hash_string,			/* Name->string mapping.  */
   hash_macro,			/* Name is a macro.  */
   hash_formal			/* Name is a formal argument.  */
 } hash_type;
 
-typedef struct hs
-{
+typedef struct hs {
   sb key;			/* Symbol name.  */
   hash_type type;		/* Symbol meaning.  */
-  union
-  {
+  union {
     sb s;
     int i;
     struct macro_struct *m;
@@ -180,8 +172,7 @@ typedef struct hs
   struct hs *next;		/* Next hash_entry with same hash key.  */
 } hash_entry;
 
-typedef struct
-{
+typedef struct {
   hash_entry **table;
   int size;
 } hash_table;
@@ -201,13 +192,11 @@ typedef struct
    the same stack index.  If we're being reasonable, we can detect
    recusive expansion by checking the index is reasonably small.  */
 
-typedef enum
-{
+typedef enum {
   include_file, include_repeat, include_while, include_macro
 } include_type;
 
-struct include_stack
-{
+struct include_stack {
   sb pushback;			/* Current pushback stream.  */
   int pushback_index;		/* Next char to read from stream.  */
   FILE *handle;			/* Open file.  */
@@ -215,19 +204,17 @@ struct include_stack
   int linecount;		/* Number of lines read so far.  */
   include_type type;
   int index;			/* Index of this layer.  */
-}
-include_stack[MAX_INCLUDES];
+} include_stack[MAX_INCLUDES];
 
 struct include_stack *sp;
 #define isp (sp - include_stack)
 
 /* Include file list.  */
 
-typedef struct include_path
-{
+typedef struct include_path {
   struct include_path *next;
   sb path;
-}  include_path;
+} include_path;
 
 include_path *paths_head;
 include_path *paths_tail;
@@ -3079,15 +3066,13 @@ chartype_init ()
 #define K_IRP		(PROCESS|54)
 #define K_IRPC		(PROCESS|55)
 
-struct keyword
-{
+struct keyword {
   char *name;
   int code;
   int extra;
 };
 
-static struct keyword kinfo[] =
-{
+static struct keyword kinfo[] = {
   { "EQU", K_EQU, 0 },
   { "ALTERNATE", K_ALTERNATE, 0 },
   { "ASSIGN", K_ASSIGN, 0 },
@@ -3138,8 +3123,7 @@ static struct keyword kinfo[] =
    handle them here as well, in case they are used in a recursive
    macro to end the recursion.  */
 
-static struct keyword mrikinfo[] =
-{
+static struct keyword mrikinfo[] = {
   { "IFEQ", K_IFEQ, 0 },
   { "IFNE", K_IFNE, 0 },
   { "IFLT", K_IFLT, 0 },

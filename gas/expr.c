@@ -1417,9 +1417,8 @@ clean_up_expression (expressionP)
 #undef __
 #define __ O_illegal
 
-static const operatorT op_encoding[256] =
-{				/* Maps ASCII -> operators.  */
-
+/* Maps ASCII -> operators.  */
+static const operatorT op_encoding[256] = {
   __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
 

@@ -37,8 +37,7 @@
 
 /* An entry in a hash table.  */
 
-struct hash_entry
-{
+struct hash_entry {
   /* Next entry for this hash code.  */
   struct hash_entry *next;
   /* String being hashed.  */
@@ -52,8 +51,7 @@ struct hash_entry
 
 /* A hash table.  */
 
-struct hash_control
-{
+struct hash_control {
   /* The hash array.  */
   struct hash_entry **table;
   /* The number of slots in the hash table.  */

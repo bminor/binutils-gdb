@@ -49,8 +49,7 @@
    A sign value of 'P' means we've been asked to assemble +Inf
    A sign value of 'N' means we've been asked to assemble -Inf
    */
-struct FLONUM_STRUCT
-{
+struct FLONUM_STRUCT {
   LITTLENUM_TYPE *low;		/* low order littlenum of a bignum */
   LITTLENUM_TYPE *high;		/* high order littlenum of a bignum */
   LITTLENUM_TYPE *leader;	/* -> 1st non-zero littlenum */
@@ -76,9 +75,8 @@ typedef struct FLONUM_STRUCT FLONUM_TYPE;
 extern const FLONUM_TYPE flonum_positive_powers_of_ten[];
 extern const FLONUM_TYPE flonum_negative_powers_of_ten[];
 extern const int table_size_of_flonum_powers_of_ten;
-/* Flonum_XXX_powers_of_ten[] table has */
-/* legal indices from 0 to */
-/* + this number inclusive.  */
+/* Flonum_XXX_powers_of_ten[] table has legal indices from 0 to
+   + this number inclusive.  */
 
 /***********************************************************************\
  *									*
