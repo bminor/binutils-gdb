@@ -1,5 +1,12 @@
 2003-02-26  David Carlton  <carlton@math.stanford.edu>
 
+	* gdb.c++/templates.exp (do_tests): KFAIL the "print Foo<volatile
+	char *>::foo" test with respect to PR c++/33.  Create a new test
+	which is identical to that one except that it doesn't put the
+	space between the "char" and the "*"; KFAIL it, too.
+
+2003-02-26  David Carlton  <carlton@math.stanford.edu>
+
 	* gdb.c++/templates.exp (do_tests): Convert XFAILs about printing
 	template types into either PASSes or KFAILs (corresponding to PR
 	c++/57).  Tweak indentation.  Update copyright.
