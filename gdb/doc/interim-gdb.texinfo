@@ -538,8 +538,7 @@ of your program, and the latter refer to the state of _GDBN__ itself.
 
 @item Shared Libraries
 _GDBN__ _GDB_VN__ can debug programs and core files that use SunOS shared
-libraries.  You can load symbols from a shared library with the command
-@code{sharedlibrary} (@pxref{Files}).
+libraries. 
 
 @item Reference Card
 _GDBN__ _GDB_VN__ has a reference card; @xref{Formatting Documentation} for
