@@ -1078,7 +1078,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		      {
 			struct bfd_symbol *s;
 			struct bfd_link_hash_entry * blhe;
-			bfd *other_bfd;
+			char *other_bfd_filename;
 			char *n;
 
 			s = (relocs[i]->sym_ptr_ptr)[0];
@@ -1095,20 +1095,19 @@ gld_${EMULATION_NAME}_after_open (void)
 			    || blhe->type != bfd_link_hash_defined)
 			  continue;
 
-			other_bfd = blhe->u.def.section->owner;
-#define bfd_filename(bfd) ((bfd)->my_archive ? bfd_get_filename ((bfd)->my_archive) : bfd_get_filename (bfd))
+			other_bfd_filename
+			  = blhe->u.def.section->owner->my_archive
+			    ? bfd_get_filename (blhe->u.def.section->owner->my_archive)
+			    : bfd_get_filename (blhe->u.def.section->owner);
 
-			if (strcmp (bfd_filename (is->the_bfd),
-				    bfd_filename (other_bfd)) == 0)
+			if (strcmp (bfd_get_filename (is->the_bfd->my_archive),
+				    other_bfd_filename) == 0)
 			  continue;
 
 			/* Rename this implib to match the other one.  */
-			n = xmalloc (strlen (bfd_filename (other_bfd)) + 1);
-
-			strcpy (n, bfd_filename (other_bfd));
-
-			bfd_filename (is->the_bfd) = n;
-#undef bfd_filename
+			n = xmalloc (strlen (other_bfd_filename) + 1);
+			strcpy (n, other_bfd_filename);
+			is->the_bfd->my_archive->filename = n;
 		      }
 
 		    free (relocs);
