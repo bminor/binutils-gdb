@@ -1,3 +1,7 @@
+2002-04-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* ppc-bdm.c (bdm_ppc_fetch_registers): Fix typo.
+
 2002-04-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/pa/tm-hppa.h (FRAME_CHAIN_COMBINE): Delete macro.

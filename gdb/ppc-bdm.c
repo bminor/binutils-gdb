@@ -201,7 +201,7 @@ bdm_ppc_fetch_registers (int regno)
 
       /* if asking for an invalid register */
       if ((first_regno == gdbarch_tdep (current_gdbarch)->ppc_mq_regnum)
-          || (first_regno == gdbarch_tdep (current_gdbarch)->fpscr_regnum)
+          || (first_regno == gdbarch_tdep (current_gdbarch)->ppc_fpscr_regnum)
 	  || ((first_regno >= FP0_REGNUM) && (first_regno <= FPLAST_REGNUM)))
 	{
 /*          printf("invalid reg request!\n"); */
