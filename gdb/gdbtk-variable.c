@@ -1185,7 +1185,7 @@ variable_format (interp, objc, objv, var)
       if (STREQN (fmt, "natural", len))
         var->format = FORMAT_NATURAL;
       else if (STREQN (fmt, "binary", len))
-        var->format = FORMAT_NATURAL;
+        var->format = FORMAT_BINARY;
       else if (STREQN (fmt, "decimal", len))
         var->format = FORMAT_DECIMAL;
       else if (STREQN (fmt, "hexadecimal", len))

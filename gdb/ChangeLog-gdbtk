@@ -1,5 +1,9 @@
 1999-02-11  Martin Hunt  <hunt@cygnus.com>
 
+	* gdbtk-variable.c (variable_format): Enable binary format.
+
+1999-02-11  Martin Hunt  <hunt@cygnus.com>
+	
 	* gdbtk-hooks.c: Change ALL Tcl_Eval calls in hooks to
 	call report_error() if there are errors.
 
