@@ -3431,8 +3431,8 @@ emit_expr (exp, nbytes)
       x = (struct broken_word *) xmalloc (sizeof (struct broken_word));
       x->next_broken_word = broken_words;
       broken_words = x;
-      x->seg = seg_now;
-      x->subseg = subseg_now;
+      x->seg = now_seg;
+      x->subseg = now_subseg;
       x->frag = frag_now;
       x->word_goes_here = p;
       x->dispfrag = 0;
