@@ -235,6 +235,9 @@ sparc)
 	esac
 	;;
 
+h8300)
+	gdb_target=h8300hds 
+	;;
 
 i386)
 	case "${target_vendor}" in
