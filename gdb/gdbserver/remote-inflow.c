@@ -17,17 +17,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include "defs.h"
+#include "server.h"
 #include "frame.h"
 #include "inferior.h"
-/***************************
-#include "initialize.h"
-****************************/
 
 #include <stdio.h>
 #include <sys/param.h>
 #include <sys/dir.h>
-/*#include <sys/user.h>*/
 #define LYNXOS
 #include <sys/mem.h>
 #include <sys/signal.h>
@@ -43,25 +39,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #include "/usr/include/wait.h"
 
-/***************Begin MY defs*********************/
-int quit_flag = 0;
 char registers[REGISTER_BYTES];
 
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-
-char buf2[MAX_REGISTER_RAW_SIZE];
-/***************End MY defs*********************/
-
 #include <sys/ptrace.h>
-/*#include <machine/reg.h>*/
-
-extern char **environ;
-extern int errno;
-extern int inferior_pid;
-void error (), quit (), perror_with_name ();
-int query ();
 
 /* Start an inferior process and returns its pid.
    ALLARGS is a vector of program-name and args.
@@ -100,9 +80,10 @@ kill_inferior ()
 {
   if (inferior_pid == 0)
     return;
-  ptrace (8, inferior_pid, 0, 0);
+  ptrace (PTRACE_KILL, inferior_pid, 0, 0);
   wait (0);
-  /*************inferior_died ();****VK**************/
+
+  inferior_pid = 0;
 }
 
 /* Wait for process, returns status */
@@ -114,7 +95,12 @@ mywait (status)
   int pid;
   union wait w;
 
+  enable_async_io();
+
   pid = wait (&w);
+
+  disable_async_io();
+
   if (pid != PIDGET(inferior_pid))
     perror_with_name ("wait");
 
@@ -122,9 +108,9 @@ mywait (status)
 
   if (WIFEXITED (w))
     {
-      fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
-      *status = 'E';
-      return ((unsigned char) WEXITSTATUS (w));
+      fprintf (stderr, "\nChild exited with status %d\n", WEXITSTATUS (w));
+      fprintf (stderr, "GDBserver exiting\n");
+      exit (0);
     }
   else if (!WIFSTOPPED (w))
     {
@@ -266,6 +252,7 @@ store_inferior_registers (ignored)
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
 
+void
 read_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      char *myaddr;
@@ -283,7 +270,7 @@ read_inferior_memory (memaddr, myaddr, len)
   /* Read all the longwords */
   for (i = 0; i < count; i++, addr += sizeof (int))
     {
-      buffer[i] = ptrace (1, inferior_pid, addr, 0);
+      buffer[i] = ptrace (PTRACE_PEEKTEXT, inferior_pid, addr, 0);
     }
 
   /* Copy appropriate bytes out of the buffer.  */
@@ -313,12 +300,12 @@ write_inferior_memory (memaddr, myaddr, len)
 
   /* Fill start and end extra bytes of buffer with existing memory data.  */
 
-  buffer[0] = ptrace (1, inferior_pid, addr, 0);
+  buffer[0] = ptrace (PTRACE_PEEKTEXT, inferior_pid, addr, 0);
 
   if (count > 1)
     {
       buffer[count - 1]
-	= ptrace (1, inferior_pid,
+	= ptrace (PTRACE_PEEKTEXT, inferior_pid,
 		  addr + (count - 1) * sizeof (int), 0);
     }
 
@@ -331,22 +318,10 @@ write_inferior_memory (memaddr, myaddr, len)
   for (i = 0; i < count; i++, addr += sizeof (int))
     {
       errno = 0;
-      ptrace (4, inferior_pid, addr, buffer[i]);
+      ptrace (PTRACE_POKETEXT, inferior_pid, addr, buffer[i]);
       if (errno)
 	return errno;
     }
 
   return 0;
-}
-
-void
-initialize ()
-{
-  inferior_pid = 0;
-}
-
-int
-have_inferior_p ()
-{
-  return inferior_pid != 0;
 }
