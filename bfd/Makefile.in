@@ -35,19 +35,21 @@ CSEARCH = -I$(INCDIR)
 ###
 
 TARG = libbfd.a
-CFLAGS = -g $(CDEFINES) $(CSEARCH) $(CSWITCHES) -DINTEL960VERSION
+CFLAGS = -g $(CDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSION
 
 
-BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o archures.o
+BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
+	archures.o obstack.o
 
-BFD_BACKENDS = sunos.o icoff.o b.out.o # srec.o # bcs88kcoff.o
+BFD_BACKENDS = oasys.o ieee.o srec.o  sunos.o icoff.o b.out.o \
+	m88k-bcs.o
 
 BFD_H=$(INCDIR)/bfd.h
 SYSDEP_H=$(INCDIR)/sysdep.h
 
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
-	 sunos.c icoff.c b.out.c # srec.c # bcs88kcoff.c
+	 sunos.c icoff.c b.out.c  srec.c oasys.c ieee.c m88k-bcs.c
 
 all: $(TARG) 
 

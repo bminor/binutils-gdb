@@ -1169,7 +1169,6 @@ sunos4_slurp_symbol_table (abfd)
     register struct nlist *sym_end = syms + symbol_count;
     register aout_symbol_type *cache_ptr = cached;
 
-    if (bfd_header_twiddle_required (abfd) == true) {
       /* run through the table and byte swap if needed */
       for (sym_pointer = syms; sym_pointer < sym_end;  sym_pointer++) {
         sym_pointer->n_un.n_strx =
@@ -1184,7 +1183,7 @@ sunos4_slurp_symbol_table (abfd)
 	  bfd_h_get_x(abfd, &sym_pointer->n_type);
 
       }
-    }
+
     /* Run through table and copy values */
     for (sym_pointer = syms, cache_ptr = cached;
 	 sym_pointer < sym_end; sym_pointer++, cache_ptr++) 
@@ -2102,6 +2101,62 @@ bfd_target aoutvec =
 
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
+
+  {_bfd_dummy_target, sunos4_object_p, /* bfd_check_format */
+     bfd_generic_archive_p, sunos4_core_file_p},
+  {bfd_false, sunos4_mkobject,	/* bfd_zxset_format */
+     _bfd_generic_mkarchive, bfd_false},
+  sunos4_make_empty_symbol,
+  sunos4_print_symbol,
+  sunos4_get_lineno,
+  sunos4_set_arch_mach,
+  bsd_write_armap,
+  bfd_generic_openr_next_archived_file,
+  sunos4_find_nearest_line,	/* bfd_find_nearest_line */
+  bfd_generic_stat_arch_elt /* bfd_stat_arch_elt */
+  };
+
+bfd_target aout_little_vec =
+{
+  "a.out-generic-little",		/* name */
+  bfd_target_aout_flavour_enum,
+  true,				/* target byte order */
+  true,				/* target headers byte order */
+  (HAS_RELOC | EXEC_P |		/* object flags */
+   HAS_LINENO | HAS_DEBUG |
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  0,				/* valid reloc types */
+  ' ',				/* ar_pad_char */
+  16,				/* ar_max_namelen */
+  sunos4_close_and_cleanup,	/* _close_and_cleanup */
+  sunos4_set_section_contents,	/* bfd_set_section_contents */
+  sunos4_get_section_contents,	/* bfd_get_section_contents */
+  sunos4_new_section_hook,	/* new_section_hook */
+  sunos4_core_file_failing_command, /* _core_file_failing_command */
+  sunos4_core_file_failing_signal, /* _core_file_failing_signal */
+  sunos4_core_file_matches_executable_p, /* _core_file_matches_ex...p */
+
+  bfd_slurp_bsd_armap,		/* bfd_slurp_armap */
+  bfd_true,			/* bfd_slurp_extended_name_table */
+  bfd_bsd_truncate_arname,	/* bfd_truncate_arname */
+
+  sunos4_get_symtab_upper_bound, /* get_symtab_upper_bound */
+  sunos4_get_symtab,		/* canonicalize_symtab */
+  sunos4_reclaim_symbol_table,	/* bfd_reclaim_symbol_table */
+  sunos4_get_reloc_upper_bound,	/* get_reloc_upper_bound */
+  sunos4_canonicalize_reloc,	/* bfd_canonicalize_reloc */
+  sunos4_reclaim_reloc,		/* bfd_reclaim_reloc */
+  sunos4_get_symcount_upper_bound, /* bfd_get_symcount_upper_bound */
+  sunos4_get_first_symbol,	/* bfd_get_first_symbol */
+  sunos4_get_next_symbol,	/* bfd_get_next_symbol */
+  sunos4_classify_symbol,	/* bfd_classify_symbol */
+  sunos4_symbol_hasclass,	/* bfd_symbol_hasclass */
+  sunos4_symbol_name,		/* bfd_symbol_name */
+  sunos4_symbol_value,		/* bfd_symbol_value */
+
+  _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
+  _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* hdrs */
 
   {_bfd_dummy_target, sunos4_object_p, /* bfd_check_format */
      bfd_generic_archive_p, sunos4_core_file_p},
