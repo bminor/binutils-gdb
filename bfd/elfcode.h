@@ -29,7 +29,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
 /* Problems and other issues to resolve.
 
    (1)	BFD expects there to be some fixed number of "sections" in
@@ -50,6 +49,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	but it is this information that is most useful to gdb.  If the
 	section header table is missing, then gdb should probably try
 	to make do with the program header table.  (FIXME)
+
+   (2)  The code in this file is compiled twice, once in 32-bit mode and
+	once in 64-bit mode.  More of it should be made size-independent
+	and moved into elf.c.
 
 */
 
@@ -73,7 +76,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define elf_core_file_matches_executable_p NAME(bfd_elf,core_file_matches_executable_p)
 #define elf_object_p			NAME(bfd_elf,object_p)
 #define elf_core_file_p			NAME(bfd_elf,core_file_p)
-#define elf_mkobject			NAME(bfd_elf,mkobject)
 #define elf_write_object_contents	NAME(bfd_elf,write_object_contents)
 #define elf_get_symtab_upper_bound	NAME(bfd_elf,get_symtab_upper_bound)
 #define elf_get_reloc_upper_bound	NAME(bfd_elf,get_reloc_upper_bound)
@@ -93,6 +95,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define elf_hash			NAME(bfd_elf,hash)
 #define elf_new_section_hook		NAME(bfd_elf,new_section_hook)
 
+#if ARCH_SIZE == 64
+#define ELF_R_INFO(X,Y)	ELF64_R_INFO(X,Y)
+#define ELF_R_SYM(X)	ELF64_R_SYM(X)
+#endif
+#if ARCH_SIZE == 32
+#define ELF_R_INFO(X,Y)	ELF32_R_INFO(X,Y)
+#define ELF_R_SYM(X)	ELF32_R_SYM(X)
+#endif
 
 #ifdef HAVE_PROCFS		/* Some core file support requires host /proc files */
 #include <sys/procfs.h>
@@ -112,55 +122,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Forward declarations of static functions */
 
-static char * elf_read PARAMS ((bfd *, long, int));
-
 static struct sec * section_from_elf_index PARAMS ((bfd *, int));
 
 static int elf_section_from_bfd_section PARAMS ((bfd *, struct sec *));
 
 static boolean elf_slurp_symbol_table PARAMS ((bfd *, asymbol **));
 
-static char * elf_get_str_section PARAMS ((bfd *, unsigned int));
-
 static int elf_symbol_from_bfd_symbol PARAMS ((bfd *,
 					       struct symbol_cache_entry **));
 
 static void elf_map_symbols PARAMS ((bfd *));
 
-/* Some private data is stashed away for future use using the tdata pointer
-   in the bfd structure.  */
+#ifdef DEBUG
+static void elf_debug_section PARAMS ((char *, int, Elf_Internal_Shdr *));
+static void elf_debug_file PARAMS ((Elf_Internal_Ehdr *));
+#endif
 
-struct elf_obj_tdata
-{
-  Elf_Internal_Ehdr elf_header[1];	/* Actual data, but ref like ptr */
-  Elf_Internal_Shdr *elf_sect_ptr;
-  struct strtab *strtab_ptr;
-  int symtab_section;
-  int num_locals;
-  int num_globals;
-  int *symtab_map;
-  void *prstatus;		/* The raw /proc prstatus structure */
-  void *prpsinfo;		/* The raw /proc prpsinfo structure */
-  Elf_External_Sym *raw_syms;
-  Elf_Internal_Sym *internal_syms;
-  elf_symbol_type *symbols;
-};
-
-#define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
-#define elf_elfheader(bfd)	(elf_tdata(bfd) -> elf_header)
-#define elf_elfsections(bfd)	(elf_tdata(bfd) -> elf_sect_ptr)
-#define elf_shstrtab(bfd)	(elf_tdata(bfd) -> strtab_ptr)
-#define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
-#define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
-#define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
-#define elf_symtab_map(bfd)	(elf_tdata(bfd) -> symtab_map)
-#define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)
-#define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
-#define obj_symbols(bfd)	(elf_tdata(bfd) -> symbols)
-#define obj_raw_syms(bfd)	(elf_tdata(bfd) -> raw_syms)
-#define obj_internal_syms(bfd)	(elf_tdata(bfd) -> internal_syms)
-
-
+/* Should perhaps use put_offset, put_word, etc.  For now, the two versions
+   can be handled by explicitly specifying 32 bits or "the long type".  */
 #if ARCH_SIZE == 64
 #define put_word	bfd_h_put_64
 #define get_word	bfd_h_get_64
@@ -385,109 +364,16 @@ DEFUN (elf_swap_reloca_out, (abfd, src, dst),
   put_word (abfd, src->r_addend, dst->r_addend);
 }
 
-/*
-INTERNAL_FUNCTION
-	bfd_elf_find_section
-
-SYNOPSIS
-	struct elf_internal_shdr *bfd_elf32_find_section (bfd *abfd, char *name);
-
-DESCRIPTION
-	Helper functions for GDB to locate the string tables.
-	Since BFD hides string tables from callers, GDB needs to use an
-	internal hook to find them.  Sun's .stabstr, in particular,
-	isn't even pointed to by the .stab section, so ordinary
-	mechanisms wouldn't work to find it, even if we had some.
-*/
-
-struct elf_internal_shdr *
-DEFUN (NAME (bfd_elf,find_section), (abfd, name),
-       bfd * abfd AND
-       char *name)
-{
-  Elf_Internal_Shdr *i_shdrp;
-  Elf_Internal_Shdr *gotit = NULL;
-  char *shstrtab;
-  unsigned int max;
-  unsigned int i;
-
-  i_shdrp = elf_elfsections (abfd);
-  if (i_shdrp != NULL)
-    {
-      shstrtab = elf_get_str_section (abfd, elf_elfheader (abfd)->e_shstrndx);
-      if (shstrtab != NULL)
-	{
-	  max = elf_elfheader (abfd)->e_shnum;
-	  for (i = 1; i < max; i++)
-	    {
-	      if (!strcmp (&shstrtab[i_shdrp[i].sh_name], name))
-		{
-		  gotit = &i_shdrp[i];
-		}
-	    }
-	}
-    }
-  return gotit;
-}
-
-/* End of GDB support.  */
-
-static char *
-DEFUN (elf_get_str_section, (abfd, shindex),
-       bfd * abfd AND
-       unsigned int shindex)
-{
-  Elf_Internal_Shdr *i_shdrp;
-  char *shstrtab = NULL;
-  unsigned int offset;
-  unsigned int shstrtabsize;
-
-  i_shdrp = elf_elfsections (abfd);
-  if (i_shdrp != NULL)
-    {
-      shstrtab = i_shdrp[shindex].rawdata;
-      if (shstrtab == NULL)
-	{
-	  /* No cached one, attempt to read, and cache what we read. */
-	  offset = i_shdrp[shindex].sh_offset;
-	  shstrtabsize = i_shdrp[shindex].sh_size;
-	  shstrtab = elf_read (abfd, offset, shstrtabsize);
-	  i_shdrp[shindex].rawdata = (void *) shstrtab;
-	}
-    }
-  return shstrtab;
-}
-
-static char *
-DEFUN (elf_string_from_elf_section, (abfd, shindex, strindex),
-       bfd * abfd AND
-       unsigned int shindex AND
-       unsigned int strindex)
-{
-  Elf_Internal_Shdr *hdr;
-
-  if (strindex == 0)
-    return "";
-
-  hdr = elf_elfsections (abfd) + shindex;
-
-  if (!hdr->rawdata
-      && elf_get_str_section (abfd, shindex) == NULL)
-    return NULL;
-
-  return ((char *) hdr->rawdata) + strindex;
-}
+/* Create a new bfd section from an ELF section header. */
 
 static INLINE char *
-elf_string_from_elf_strtab (abfd, strindex)
-     bfd *abfd;
-     int strindex;
+DEFUN (elf_string_from_elf_strtab, (abfd, strindex),
+       bfd *abfd AND
+       int strindex)
 {
   return elf_string_from_elf_section (abfd, elf_elfheader (abfd)->e_shstrndx,
 				      strindex);
 }
-
-/* Create a new bfd section from an ELF section header. */
 
 static boolean
 DEFUN (bfd_section_from_shdr, (abfd, shindex),
@@ -519,7 +405,7 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	      newsect->_raw_size = hdr->sh_size;
 	      newsect->filepos = hdr->sh_offset;	/* so we can read back the bits */
 	      newsect->flags |= SEC_HAS_CONTENTS;
-	      newsect->alignment_power = hdr->sh_addralign;
+	      newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
 
 	      if (hdr->sh_flags & SHF_ALLOC)
 		{
@@ -552,7 +438,7 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	      newsect->vma = hdr->sh_addr;
 	      newsect->_raw_size = hdr->sh_size;
 	      newsect->filepos = hdr->sh_offset;	/* fake */
-	      newsect->alignment_power = hdr->sh_addralign;
+	      newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
 	      if (hdr->sh_flags & SHF_ALLOC)
 		newsect->flags |= SEC_ALLOC;
 
@@ -614,8 +500,8 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	BFD_ASSERT (!(!use_rela_p && (hdr->sh_type == SHT_RELA)));
 	BFD_ASSERT (hdr->sh_entsize ==
 		    (use_rela_p
-		     ? sizeof (Elf32_External_Rela)
-		     : sizeof (Elf32_External_Rel)));
+		     ? sizeof (Elf_External_Rela)
+		     : sizeof (Elf_External_Rel)));
 
 	bfd_section_from_shdr (abfd, hdr->sh_link);	/* symbol table */
 	bfd_section_from_shdr (abfd, hdr->sh_info);	/* target */
@@ -673,7 +559,7 @@ DEFUN (elf_new_section_hook, (abfd, sec),
        bfd *abfd
        AND asection *sec)
 {
-  sec->symbol->name = "";
+/*  sec->symbol->name = "";*/
   return true;
 }
 
@@ -762,7 +648,7 @@ DEFUN (bfd_shdr_from_section, (abfd, hdr, shstrtab, indx),
 					 bfd_section_name (abfd, sect));
   hdr[indx].sh_addr = sect->vma;
   hdr[indx].sh_size = sect->_raw_size;
-  hdr[indx].sh_addralign = sect->alignment_power;
+  hdr[indx].sh_addralign = 1 << sect->alignment_power;
   hdr[indx].sh_flags = 0;
   /* these need to be preserved on */
   hdr[indx].sh_link = 0;
@@ -1144,36 +1030,6 @@ DEFUN (elf_corefile_note, (abfd, hdr),
 }
 
 
-/* Read a specified number of bytes at a specified offset in an ELF
-   file, into a newly allocated buffer, and return a pointer to the
-   buffer. */
-
-static char *
-DEFUN (elf_read, (abfd, offset, size),
-       bfd * abfd AND
-       long offset AND
-       int size)
-{
-  char *buf;
-
-  if ((buf = bfd_alloc (abfd, size)) == NULL)
-    {
-      bfd_error = no_memory;
-      return NULL;
-    }
-  if (bfd_seek (abfd, offset, SEEK_SET) == -1)
-    {
-      bfd_error = system_call_error;
-      return NULL;
-    }
-  if (bfd_read ((PTR) buf, size, 1, abfd) != size)
-    {
-      bfd_error = system_call_error;
-      return NULL;
-    }
-  return buf;
-}
-
 /* Begin processing a given object.
 
    First we validate the file by reading in the ELF header and checking
@@ -1224,12 +1080,11 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
     goto wrong;
 
   {
-    unsigned int class = 0x12345;
 #if ARCH_SIZE == 64
-    class = ELFCLASS64;
+    unsigned int class = ELFCLASS64;
 #endif
 #if ARCH_SIZE == 32
-    class = ELFCLASS32;
+    unsigned int class = ELFCLASS32;
 #endif
     if (x_ehdr.e_ident[EI_CLASS] != class)
       goto wrong;
@@ -1266,6 +1121,9 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
   /* Now that we know the byte order, swap in the rest of the header */
   i_ehdrp = elf_elfheader (abfd);
   elf_swap_ehdr_in (abfd, &x_ehdr, i_ehdrp);
+#if DEBUG & 1
+  elf_debug_file (i_ehdrp);
+#endif
 
   /* If there is no section header table, we're hosed. */
   if (i_ehdrp->e_shoff == 0)
@@ -1297,6 +1155,15 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
 	goto wrong;
       bfd_default_set_arch_mach (abfd, bfd_arch_sparc, 0);
       break;
+
+      /* The "v9" comments are used by sanitize.  */
+    case EM_SPARC64:		/* v9 */
+      if (ebd->arch != bfd_arch_sparc) /* v9 */
+	goto wrong;		/* v9 */
+      bfd_default_set_arch_mach (abfd, bfd_arch_sparc, 0); /* v9 */
+      break;			/* v9 */
+      /* end v9 stuff */
+
     case EM_386:
       if (ebd->arch != bfd_arch_i386)
 	goto wrong;
@@ -1455,17 +1322,17 @@ DEFUN (elf_core_file_p, (abfd), bfd * abfd)
 
   /* FIXME, Check EI_VERSION here !  */
 
-  switch (x_ehdr.e_ident[EI_CLASS])
-    {
-    case ELFCLASSNONE:		/* address size not specified */
-      goto wrong;		/* No support if can't tell address size */
-    case ELFCLASS32:		/* 32-bit addresses */
-      break;
-    case ELFCLASS64:		/* 64-bit addresses */
-      goto wrong;		/* FIXME: 64 bits not yet supported */
-    default:
-      goto wrong;		/* No support if unknown address class */
-    }
+  {
+#if ARCH_SIZE == 32
+    int desired_address_size = ELFCLASS32;
+#endif
+#if ARCH_SIZE == 64
+    int desired_address_size = ELFCLASS64;
+#endif
+
+    if (x_ehdr.e_ident[EI_CLASS] != desired_address_size)
+      goto wrong;
+  }
 
   /* Switch xvec to match the specified byte order.  */
   switch (x_ehdr.e_ident[EI_DATA])
@@ -1499,6 +1366,9 @@ DEFUN (elf_core_file_p, (abfd), bfd * abfd)
   /* Now that we know the byte order, swap in the rest of the header */
   i_ehdrp = elf_elfheader (abfd);
   elf_swap_ehdr_in (abfd, &x_ehdr, i_ehdrp);
+#if DEBUG & 1
+  elf_debug_file (i_ehdrp);
+#endif
 
   /* If there is no program header, or the type is not a core file, then
      we are hosed. */
@@ -1553,24 +1423,6 @@ DEFUN (elf_core_file_p, (abfd), bfd * abfd)
   bfd_get_start_address (abfd) = i_ehdrp->e_entry;
 
   return abfd->xvec;
-}
-
-boolean
-DEFUN (elf_mkobject, (abfd), bfd * abfd)
-{
-  /* this just does initialization */
-  /* coff_mkobject zalloc's space for tdata.coff_obj_data ... */
-  elf_tdata (abfd) = (struct elf_obj_tdata *)
-    bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
-  if (elf_tdata (abfd) == 0)
-    {
-      bfd_error = no_memory;
-      return false;
-    }
-  /* since everything is done at close time, do we need any
-     initialization? */
-
-  return true;
 }
 
 /*
@@ -1664,7 +1516,7 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
 		dst_rela.r_offset = ptr->address;
 	
 	      dst_rela.r_info
-		= ELF32_R_INFO (elf_symbol_from_bfd_symbol (abfd, ptr->sym_ptr_ptr),
+		= ELF_R_INFO (elf_symbol_from_bfd_symbol (abfd, ptr->sym_ptr_ptr),
 				ptr->howto->type);
 	
 	      dst_rela.r_addend = ptr->addend;
@@ -1672,6 +1524,12 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
 	    }
 
 	  rela_hdr->contents = (void *) outbound_relocas;
+
+	  rela_hdr->sh_flags = 0;
+	  rela_hdr->sh_addr = 0;
+	  rela_hdr->sh_offset = 0;
+	  rela_hdr->sh_addralign = 0;
+	  rela_hdr->size = 0;
 	}
       else
 	/* REL relocations */
@@ -1696,7 +1554,7 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
 		dst_rel.r_offset = ptr->address;
 	
 	      dst_rel.r_info
-		= ELF32_R_INFO (elf_symbol_from_bfd_symbol (abfd, ptr->sym_ptr_ptr),
+		= ELF_R_INFO (elf_symbol_from_bfd_symbol (abfd, ptr->sym_ptr_ptr),
 				ptr->howto->type);
 	
 	      elf_swap_reloc_out (abfd, &dst_rel, src_rel);
@@ -1713,6 +1571,12 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
 			  + dst_rel.r_offset);
 	    }
 	  rela_hdr->contents = (void *) outbound_relocs;
+
+	  rela_hdr->sh_flags = 0;
+	  rela_hdr->sh_addr = 0;
+	  rela_hdr->sh_offset = 0;
+	  rela_hdr->sh_addralign = 0;
+	  rela_hdr->size = 0;
 	}
     }
   if (asect->flags & SEC_ALLOC)
@@ -1811,7 +1675,7 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
       /* we need to log the type *now* so that elf_section_from_bfd_section
 	 can find us... have to set rawdata too. */
       this_hdr->rawdata = (void *) asect;
-      this_hdr->sh_addralign = asect->alignment_power;
+      this_hdr->sh_addralign = 1 << asect->alignment_power;
       if ((asect->flags & SEC_ALLOC) && (asect->flags & SEC_LOAD))
 	this_hdr->sh_type = SHT_PROGBITS;
       /* @@ Select conditions correctly!  */
@@ -1821,6 +1685,14 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
 	/* what *do* we put here? */
 	this_hdr->sh_type = SHT_PROGBITS;
 
+      this_hdr->sh_flags = 0;
+      this_hdr->sh_addr = 0;
+      this_hdr->sh_size = 0;
+      this_hdr->sh_entsize = 0;
+      this_hdr->sh_info = 0;
+      this_hdr->sh_link = 0;
+      this_hdr->sh_offset = 0;
+      this_hdr->size = 0;
 
       {
 	/* Emit a strtab and symtab, and possibly a reloc section.  */
@@ -1850,8 +1722,21 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
 	    symstrtab_hdr->sh_type = SHT_STRTAB;
 
 	    symtab_hdr->contents = 0;
+	    symtab_hdr->sh_flags = 0;
+	    symtab_hdr->sh_addr = 0;
+	    symtab_hdr->sh_offset = 0;
+	    symtab_hdr->sh_addralign = 0;
+	    symtab_hdr->size = 0;
 	    symstrtab_hdr->contents = 0;
 	    symstrtab_hdr->sh_size = 0;
+	    symstrtab_hdr->sh_flags = 0;
+	    symstrtab_hdr->sh_addr = 0;
+	    symstrtab_hdr->sh_entsize = 0;
+	    symstrtab_hdr->sh_link = 0;
+	    symstrtab_hdr->sh_info = 0;
+	    symstrtab_hdr->sh_offset = 0;
+	    symstrtab_hdr->sh_addralign = 0;
+	    symstrtab_hdr->size = 0;
 	  }
 	else
 	  symtab_hdr = &thunk->i_shdrp[thunk->symtab_section];
@@ -1870,6 +1755,13 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
 	    rela_hdr->sh_link = thunk->symtab_section;
 	    rela_hdr->sh_info = this_section;
 	    rela_hdr->sh_entsize = sizeof (Elf_External_Rela);
+
+	    rela_hdr->sh_flags = 0;
+	    rela_hdr->sh_addr = 0;
+	    rela_hdr->sh_size = 0;
+	    rela_hdr->sh_offset = 0;
+	    rela_hdr->sh_addralign = 0;
+	    rela_hdr->size = 0;
 	  }
       }
       if (asect->flags & SEC_ALLOC)
@@ -1903,8 +1795,8 @@ xxxDESCRIPTION
         name of a BFD section.
 */
 
-struct elfNAME (internal_shdr) *
-DEFUN (bfd_elf_locate_sh, (abfd, strtab, shdrp, name),
+static struct elfNAME (internal_shdr) *
+DEFUN (elf_locate_sh, (abfd, strtab, shdrp, name),
        bfd * abfd AND
        struct strtab *strtab AND
        struct elfNAME (internal_shdr) *shdrp AND
@@ -1973,7 +1865,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
      are actually relocated against.  */
   for (asect = abfd->sections; asect; asect = asect->next)
     {
-      if (asect->flags & (SEC_LOAD | SEC_DATA | SEC_CODE))
+      if (/*asect->flags & (SEC_LOAD | SEC_DATA | SEC_CODE)*/1)
 	num_sections++;
     }
 
@@ -1989,7 +1881,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
 
       for (asect = abfd->sections; asect; asect = asect->next)
 	{
-	  if (asect->flags & (SEC_LOAD | SEC_DATA | SEC_CODE))
+	  if (/* asect->flags & (SEC_LOAD | SEC_DATA | SEC_CODE) */ 1)
 	    {
 	      asymbol *sym = syms[symcount++] = bfd_make_empty_symbol (abfd);
 	      sym->the_bfd = abfd;
@@ -2050,7 +1942,12 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd * abfd)
       i_ehdrp->e_ident[EI_MAG2] = ELFMAG2;
       i_ehdrp->e_ident[EI_MAG3] = ELFMAG3;
 
-      i_ehdrp->e_ident[EI_CLASS] = ELFCLASS32;	/* FIXME: find out from bfd */
+#if ARCH_SIZE == 32
+      i_ehdrp->e_ident[EI_CLASS] = ELFCLASS32;
+#endif
+#if ARCH_SIZE == 64
+      i_ehdrp->e_ident[EI_CLASS] = ELFCLASS64;
+#endif
       i_ehdrp->e_ident[EI_DATA] =
 	abfd->xvec->byteorder_big_p ? ELFDATA2MSB : ELFDATA2LSB;
       i_ehdrp->e_ident[EI_VERSION] = EV_CURRENT;
@@ -2066,6 +1963,11 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd * abfd)
 	  break;
 	case bfd_arch_sparc:
 	  i_ehdrp->e_machine = EM_SPARC;
+	  /* the v9 comments are used by sanitize; keep them */
+#if ARCH_SIZE == 64		/* v9 */
+	  i_ehdrp->e_machine = EM_SPARC64; /* v9 */
+#endif /* v9 */
+	  /* end v9 stuff */
 	  break;
 	case bfd_arch_i386:
 	  i_ehdrp->e_machine = EM_386;
@@ -2162,7 +2064,7 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd * abfd)
 	  {
 	    secp->filepos = psecp->filepos + psecp->_cooked_size;
 	  }
-	shp = bfd_elf_locate_sh (abfd, est.shstrtab, est.i_shdrp, secp->name);
+	shp = elf_locate_sh (abfd, est.shstrtab, est.i_shdrp, secp->name);
 	if (shp)
 	  shp->sh_offset = secp->filepos;
 	psecp = secp;
@@ -2446,16 +2348,33 @@ DEFUN (elf_write_object_contents, (abfd), bfd * abfd)
 	Elf_Internal_Sym sym;
 	bfd_vma value = syms[idx]->value;
 
-	sym.st_name = bfd_add_to_strtab (abfd, stt, syms[idx]->name);
+	if (syms[idx]->flags & BSF_SECTION_SYM)
+	  /* Section symbols have no names.  */
+	  sym.st_name = 0;
+	else
+	  sym.st_name = bfd_add_to_strtab (abfd, stt, syms[idx]->name);
 
-	value += syms[idx]->section->output_section->vma
-	  + syms[idx]->section->output_offset;
-	sym.st_value = value;
+	if (bfd_is_com_section (syms[idx]->section))
+	  {
+	    /* ELF common symbols put the alignment into the `value' field,
+	       and the size into the `size' field.  This is backwards from
+	       how BFD handles it, so reverse it here.  */
+	    sym.st_size = value;
+	    /* Should retrieve this from somewhere... */
+	    sym.st_value = 16;
+	  }
+	else
+	  {
+	    value += syms[idx]->section->output_section->vma
+	      + syms[idx]->section->output_offset;
+	    sym.st_value = value;
 
-	sym.st_size = (Elf32_Word) (elf_symbol_from (abfd, syms[idx]))->internal_elf_sym.st_size;
+	    sym.st_size = (elf_symbol_from (abfd, syms[idx]))->internal_elf_sym.st_size;
+	  }
 
-	if (syms[idx]->section == &bfd_und_section
-	    || bfd_is_com_section (syms[idx]->section))
+	if (bfd_is_com_section (syms[idx]->section))
+	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_NOTYPE);
+	else if (syms[idx]->section == &bfd_und_section)
 	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_NOTYPE);
 	else if (syms[idx]->flags & BSF_WEAK)
 	  sym.st_info = ELF_ST_INFO (STB_WEAK, STT_OBJECT);
@@ -2497,6 +2416,15 @@ DEFUN (elf_write_object_contents, (abfd), bfd * abfd)
     symstrtab_hdr->contents = (void *) stt->tab;
     symstrtab_hdr->sh_size = stt->length;
     symstrtab_hdr->sh_type = SHT_STRTAB;
+
+    symstrtab_hdr->sh_flags = 0;
+    symstrtab_hdr->sh_addr = 0;
+    symstrtab_hdr->sh_entsize = 0;
+    symstrtab_hdr->sh_link = 0;
+    symstrtab_hdr->sh_info = 0;
+    symstrtab_hdr->sh_offset = 0;
+    symstrtab_hdr->sh_addralign = 0;
+    symstrtab_hdr->size = 0;
   }
 
   /* put the strtab out too... */
@@ -2511,6 +2439,15 @@ DEFUN (elf_write_object_contents, (abfd), bfd * abfd)
     this_hdr->sh_type = SHT_STRTAB;
     this_hdr->sh_size = shstrtab->length;
     this_hdr->contents = (void *) shstrtab->tab;
+
+    this_hdr->sh_flags = 0;
+    this_hdr->sh_addr = 0;
+    this_hdr->sh_entsize = 0;
+    this_hdr->sh_link = 0;
+    this_hdr->sh_info = 0;
+    this_hdr->sh_offset = 0;
+    this_hdr->sh_addralign = 0;
+    this_hdr->size = 0;
   }
 
   outbase = i_ehdrp->e_ehsize;
@@ -2529,6 +2466,10 @@ DEFUN (elf_write_object_contents, (abfd), bfd * abfd)
     }
 
   /* swap the header before spitting it out... */
+
+#if DEBUG & 1
+  elf_debug_file (i_ehdrp);
+#endif
   elf_swap_ehdr_out (abfd, i_ehdrp, &x_ehdr);
   bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
   bfd_write ((PTR) & x_ehdr, sizeof (x_ehdr), 1, abfd);
@@ -2588,6 +2529,9 @@ DEFUN (elf_write_object_contents, (abfd), bfd * abfd)
 
   for (count = 0, scnt = 0; count < i_ehdrp->e_shnum; count++)
     {
+#if DEBUG & 2
+      elf_debug_section (shstrtab->tab + i_shdrp[scnt].sh_name, count, i_shdrp + scnt);
+#endif
       elf_swap_shdr_out (abfd, i_shdrp + count, x_shdrp + scnt);
       scnt++;
     }
@@ -2701,20 +2645,30 @@ DEFUN (elf_symbol_from_bfd_symbol, (abfd, asym_ptr_ptr),
   /* FIXME -- there has to be a better way than linear search.  */
   for (idx = 0; idx < symcount; idx++)
     {
-      if (syms[idx] == asym_ptr || (name == syms[idx]->name && name))
+      if (syms[idx] == asym_ptr
+	  || (name == syms[idx]->name && name)
+	  || ((asym_ptr->flags & BSF_SECTION_SYM)
+	      && (syms[idx]->flags & BSF_SECTION_SYM)
+	      && asym_ptr->section == syms[idx]->section))
 	break;
     }
 
-  BFD_ASSERT (idx < symcount);
+  if (idx >= symcount)
+    {
+      /* badness... */
+      fprintf (stderr, "bfd app err: can't find sym `%s' in symtab\n",
+	       name);
+      abort ();
+    }
   idx = elf_symtab_map (abfd)[idx];
 
-#ifdef DEBUG
+#if DEBUG & 4
   {
     flagword flags = asym_ptr->flags;
 
     fprintf (stderr,
-	     "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags =",
-	     (long) asym_ptr, asym_ptr->name, idx);
+	     "elfsym<-bfdsym %.8lx `%s' sec=%s symnum=%d {",
+	     (long) asym_ptr, asym_ptr->name, asym_ptr->section->name, idx);
 
     if (flags == BSF_NO_FLAGS)
       fprintf (stderr, " none");
@@ -2725,17 +2679,8 @@ DEFUN (elf_symbol_from_bfd_symbol, (abfd, asym_ptr_ptr),
     if (flags & BSF_GLOBAL)
       fprintf (stderr, " global");
 
-    if (flags & BSF_IMPORT)
-      fprintf (stderr, " import");
-
     if (flags & BSF_EXPORT)
       fprintf (stderr, " export");
-
-    if (flags & BSF_UNDEFINED_OBS)
-      fprintf (stderr, " undefined_obs");
-
-    if (flags & BSF_FORT_COMM_OBS)
-      fprintf (stderr, " fort_comm_obs");
 
     if (flags & BSF_DEBUGGING)
       fprintf (stderr, " debugging");
@@ -2748,9 +2693,6 @@ DEFUN (elf_symbol_from_bfd_symbol, (abfd, asym_ptr_ptr),
 
     if (flags & BSF_WEAK)
       fprintf (stderr, " weak");
-
-    if (flags & BSF_CTOR)
-      fprintf (stderr, " ctor");
 
     if (flags & BSF_SECTION_SYM)
       fprintf (stderr, " section_sym");
@@ -2776,7 +2718,7 @@ DEFUN (elf_symbol_from_bfd_symbol, (abfd, asym_ptr_ptr),
     if (flags & BSF_FUNCTION)
       fprintf (stderr, " function");
 
-    putc ('\n', stderr);
+    fputs (" }\n", stderr);
     fflush (stderr);
   }
 #endif
@@ -2851,17 +2793,7 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
 						      i_sym.st_name);
 
       sym->symbol.value = i_sym.st_value;
-#if 0
-      /* FIXME -- this is almost certainly bogus.  It's from Pace
-	 Willisson's hasty Solaris support, to pass the sizes of
-	 object files or functions down into GDB via the back door, to
-	 circumvent some other kludge in how Sun hacked stabs.  --
-	 gnu@cygnus.com */
-      /* XXX Size is now stored via a pointer in an elf_symbol_type;
-	 should fix gdb then turn this off.  */
-      sym->symbol.udata = (PTR) i_sym.st_size;
-      /* FIXME -- end of bogosity.  */
-#endif
+
       if (i_sym.st_shndx > 0 && i_sym.st_shndx < SHN_LORESERV)
 	{
 	  sym->symbol.section = section_from_elf_index (abfd, i_sym.st_shndx);
@@ -2873,6 +2805,11 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
       else if (i_sym.st_shndx == SHN_COMMON)
 	{
 	  sym->symbol.section = &bfd_com_section;
+	  /* Elf puts the alignment into the `value' field, and the size
+	     into the `size' field.  BFD wants to see the size in the
+	     value field, and doesn't care (at the moment) about the
+	     alignment.  */
+	  sym->symbol.value = i_sym.st_size;
 	}
       else if (i_sym.st_shndx == SHN_UNDEF)
 	{
@@ -2917,14 +2854,15 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
 	     abfd?  FIXME */
 	  struct elf_backend_data *be_data = (struct elf_backend_data *) abfd->xvec->backend_data;
 
-	  be_data->global_sym = sym;
+	  be_data->global_sym = (PTR) sym;
 	}
       sym++;
     }
 
   /* We rely on the zalloc to clear out the final symbol entry.  */
 
-  obj_raw_syms (abfd) = x_symp;
+  /* obj_raw_syms macro uses a cast... */
+  elf_tdata (abfd)->raw_syms = (PTR) x_symp;
 
   bfd_get_symcount (abfd) = symcount = sym - symbase;
 
@@ -3053,7 +2991,14 @@ DEFUN (elf_slurp_reloca_table, (abfd, asect, symbols),
 	}
       /* ELF_R_SYM(dst.r_info) is the symbol table offset; subtract 1
 	 because the first entry is NULL.  */
-      cache_ptr->sym_ptr_ptr = symbols + ELF32_R_SYM (dst.r_info) - 1;
+      cache_ptr->sym_ptr_ptr = symbols + ELF_R_SYM (dst.r_info) - 1;
+      {
+	/* Is it an ELF section symbol?  If so, translate it into a
+	   BFD section symbol.  */
+	asymbol *s = *(cache_ptr->sym_ptr_ptr);
+	if (s->flags & BSF_SECTION_SYM)
+	  cache_ptr->sym_ptr_ptr = s->section->symbol_ptr_ptr;
+      }
       cache_ptr->addend = dst.r_addend;
 
       /* Fill in the cache_ptr->howto field from dst.r_type */
@@ -3092,6 +3037,18 @@ elf_debug_section (str, num, hdr)
   fflush (stderr);
 }
 
+static void
+elf_debug_file (ehdrp)
+     Elf_Internal_Ehdr *ehdrp;
+{
+  fprintf (stderr, "e_entry      = 0x%.8lx\n", (long) ehdrp->e_entry);
+  fprintf (stderr, "e_phoff      = %ld\n", (long) ehdrp->e_phoff);
+  fprintf (stderr, "e_phnum      = %ld\n", (long) ehdrp->e_phnum);
+  fprintf (stderr, "e_phentsize  = %ld\n", (long) ehdrp->e_phentsize);
+  fprintf (stderr, "e_shoff      = %ld\n", (long) ehdrp->e_shoff);
+  fprintf (stderr, "e_shnum      = %ld\n", (long) ehdrp->e_shnum);
+  fprintf (stderr, "e_shentsize  = %ld\n", (long) ehdrp->e_shentsize);
+}
 #endif
 
 static boolean
@@ -3140,7 +3097,7 @@ DEFUN (elf_slurp_reloc_table, (abfd, asect, symbols),
   data_off = data_hdr->sh_offset;
   data_max = data_hdr->sh_size - sizeof (buf) + 1;
 
-#ifdef DEBUG
+#if DEBUG & 2
   elf_debug_section ("data section", data_hdr - i_shdrp, data_hdr);
 #endif
 
@@ -3176,7 +3133,7 @@ DEFUN (elf_slurp_reloc_table, (abfd, asect, symbols),
 	}
       /* ELF_R_SYM(dst.r_info) is the symbol table offset...
          -1 is to skip the dummy symbol table entry */
-      cache_ptr->sym_ptr_ptr = symbols + ELF32_R_SYM (dst.r_info) - 1;
+      cache_ptr->sym_ptr_ptr = symbols + ELF_R_SYM (dst.r_info) - 1;
       BFD_ASSERT (dst.r_offset <= data_max);
       if (bfd_seek (abfd, data_off + dst.r_offset, SEEK_SET) != 0
 	  || bfd_read ((PTR) buf, sizeof (buf), 1, abfd) != sizeof (buf))
@@ -3349,9 +3306,6 @@ DEFUN (elf_find_nearest_line, (abfd,
        CONST char **functionname_ptr AND
        unsigned int *line_ptr)
 {
-  fprintf (stderr, "elf_find_nearest_line unimplemented\n");
-  fflush (stderr);
-  BFD_FAIL ();
   return false;
 }
 
