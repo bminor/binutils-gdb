@@ -238,11 +238,16 @@ SECTIONS
   ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
-  .sbss    ${RELOCATING-0} : { *(.sbss) *(.scommon) }
+  .sbss    ${RELOCATING-0} :
+  {
+   *(.sbss) *(.scommon)
+   ${RELOCATING+*(.sbss.*)}
+  }
   .bss     ${RELOCATING-0} :
   {
    *(.dynbss)
    *(.bss)
+   ${RELOCATING+*(.bss.*)}
    *(COMMON)
    /* Align here to ensure that the .bss section occupies space up to
       _end.  Align after .bss to ensure correct alignment even if the

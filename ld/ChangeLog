@@ -1,3 +1,8 @@
+1999-09-26  Nick Clifton  <nickc@cygnus.com>
+
+	* scripttempl/elf.sc (.bss): Accept sections named .bss.*
+	(.sbss): Accept sections names .sbss.*
+
 1999-09-22  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.am: Add earm_epoc_pe.c build target. 
