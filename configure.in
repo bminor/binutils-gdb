@@ -353,10 +353,10 @@ case "${host}" in
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet"
 	;;
   *-*-cygwin32)
-     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"
+     noconfigdirs="patch diff tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"
     ;;
   ppc*-*-pe)
-     noconfigdirs="patch diff  make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"
+     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"
     ;;
 esac
 
@@ -415,10 +415,8 @@ case "${target}" in
     noconfigdirs="$noconfigdirs gdb target-libg++ target-libstdc++ target-libio target-librx"
     ;;
   *-*-cygwin32)
-
-    # make/glob's configure uses some AC_TRY_RUN type tests
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs tcl tk expect make target-libgloss"
+    noconfigdirs="$noconfigdirs tcl tk expect target-libgloss"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
@@ -427,7 +425,6 @@ case "${target}" in
       *-*-cygwin32 | *-*-cygwin32:*-*-cygwin32) ;; # keep gdb
       *) noconfigdirs="$noconfigdirs gdb"
     esac
-
     ;;    
   i[345]86-*-pe)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx target-libgloss"
