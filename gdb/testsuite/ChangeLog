@@ -1,3 +1,10 @@
+Wed Mar 17 11:31:01 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t17/{Makefile.in, callfuncs.exp, gdbme.c}:  New test
+	files to test gdb's calling of functions in the inferior with
+	the correct arguments and gdb's ability to retrieve any
+	result returned.
+
 Tue Mar 16 15:37:11 1993  Fred Fish  (fnf@cygnus.com)
 
 	* config/unix-gdb.exp (gdb_exit):  Remove close commands that
