@@ -1,3 +1,7 @@
+2004-10-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* syms.c (bfd_is_local_label): Return false for file symbols.
+
 2004-10-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf32xtensa_size_opt): New global variable.
