@@ -18,8 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 /*
 SECTION
 	<<typedef bfd>>
@@ -30,7 +28,7 @@ SECTION
 	functionality.
 
 	Here is the struct used to define the type <<bfd>>.  This
-	contains he major data about the file, and contains pointers
+	contains the major data about the file, and contains pointers
 	to the rest of the data.
 
 CODE_FRAGMENT
@@ -44,7 +42,7 @@ CODE_FRAGMENT
 .    struct bfd_target *xvec;
 .
 .    {* To avoid dragging too many header files into every file that
-.       includes @file{bfd.h}, IOSTREAM has been declared as a "char
+.       includes `<<bfd.h>>', IOSTREAM has been declared as a "char
 .       *", and MTIME as a "long".  Their correct types, to which they
 .       are cast when used, are "FILE *" and "time_t".    The iostream
 .       is the result of an fopen on the filename. *}
@@ -151,11 +149,12 @@ CODE_FRAGMENT
 .      struct ieee_data_struct *ieee_data;
 .      struct ieee_ar_data_struct *ieee_ar_data;
 .      struct srec_data_struct *srec_data;
-.      struct elf_obj_tdata_struct *elf_obj_data;
-.      struct elf_core_tdata_struct *elf_core_data;
+.      struct tekhex_data_struct *tekhex_data;
+.      struct elf_obj_tdata *elf_obj_data;
 .      struct bout_data_struct *bout_data;
 .      struct sun_core_struct *sun_core_data;
 .      struct trad_core_struct *trad_core_data;
+.      struct hppa_data_struct *hppa_data;
 .      PTR any;
 .      } tdata;
 .  
@@ -165,6 +164,7 @@ CODE_FRAGMENT
 .    {* Where all the allocated stuff under this BFD goes *}
 .    struct obstack memory;
 .
+.    {* Is this really needed in addition to usrdata?  *}
 .    asymbol **ld_symbols;
 .};
 .
@@ -194,7 +194,7 @@ CONST short _bfd_host_big_endian = 0x0100;
 
 bfd_ec bfd_error = no_error;
 
-char *bfd_errmsgs[] = { "No error",
+CONST char *CONST bfd_errmsgs[] = { "No error",
                         "System call error",
                         "Invalid target",
                         "File in wrong format",
@@ -210,6 +210,7 @@ char *bfd_errmsgs[] = { "No error",
                         "Section has no contents",
                         "Nonrepresentable section on output",
 			"Symbol needs debug section which does not exist",
+			"Bad value",
                         "#<Invalid error code>"
                        };
 
@@ -226,34 +227,35 @@ DEFUN(bfd_nonrepresentable_section,(abfd, name),
   exit(1);
 }
 
+/*ARGSUSED*/
 static 
 void 
 DEFUN(bfd_undefined_symbol,(relent, seclet),
       CONST  arelent *relent AND
-      CONST  struct bfd_seclet_struct *seclet)
+      CONST  struct bfd_seclet *seclet)
 {
   asymbol *symbol = *(relent->sym_ptr_ptr);
   printf("bfd error relocating, symbol %s is undefined\n",
          symbol->name);
   exit(1);
 }
+/*ARGSUSED*/
 static 
 void 
 DEFUN(bfd_reloc_value_truncated,(relent, seclet),
          CONST  arelent *relent AND
-      struct bfd_seclet_struct *seclet)
+      struct bfd_seclet *seclet)
 {
-  asymbol *symbol = *(relent->sym_ptr_ptr);
   printf("bfd error relocating, value truncated\n");
   exit(1);
 }
+/*ARGSUSED*/
 static 
 void 
 DEFUN(bfd_reloc_is_dangerous,(relent, seclet),
       CONST  arelent *relent AND
-     CONST  struct bfd_seclet_struct *seclet)
+     CONST  struct bfd_seclet *seclet)
 {
-  asymbol *symbol = *(relent->sym_ptr_ptr);
   printf("bfd error relocating, dangerous\n");
   exit(1);
 }
@@ -267,7 +269,7 @@ bfd_error_vector_type bfd_error_vector =
   };
 
 
-char *
+CONST char *
 bfd_errmsg (error_tag)
      bfd_ec error_tag;
 {
@@ -377,7 +379,7 @@ DEFUN(bfd_canonicalize_reloc,(abfd, asect, location, symbols),
 	}
     return BFD_SEND (abfd, _bfd_canonicalize_reloc,
 		     (abfd, asect, location, symbols));
-}
+  }
 
 
 /*
@@ -416,12 +418,12 @@ bfd_set_file_flags (abfd, flags)
     return false;
   }
 
+  bfd_get_file_flags (abfd) = flags;
   if ((flags & bfd_applicable_file_flags (abfd)) != flags) {
     bfd_error = invalid_operation;
     return false;
   }
 
-  bfd_get_file_flags (abfd) = flags;
 return true;
 }
 
@@ -438,7 +440,7 @@ DESCRIPTION
 	section to the supplied values.
 
 */
-
+/*ARGSUSED*/
 void
 bfd_set_reloc (ignore_abfd, asect, location, count)
      bfd *ignore_abfd;
@@ -527,6 +529,7 @@ DESCRIPTION
 .#define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
 .     BFD_SEND (abfd, _bfd_find_nearest_line,  (abfd, sec, syms, off, file, func, line))
 .
+.       {* Do these three do anything useful at all, for any back end?  *}
 .#define bfd_debug_info_start(abfd) \
 .        BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
 .
@@ -536,45 +539,16 @@ DESCRIPTION
 .#define bfd_debug_info_accumulate(abfd, section) \
 .        BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
 .
+.
 .#define bfd_stat_arch_elt(abfd, stat) \
 .        BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
-.
-.#define bfd_coff_swap_aux_in(a,e,t,c,i) \
-.        BFD_SEND (a, _bfd_coff_swap_aux_in, (a,e,t,c,i))
-.
-.#define bfd_coff_swap_sym_in(a,e,i) \
-.        BFD_SEND (a, _bfd_coff_swap_sym_in, (a,e,i))
-.
-.#define bfd_coff_swap_lineno_in(a,e,i) \
-.        BFD_SEND ( a, _bfd_coff_swap_lineno_in, (a,e,i))
 .
 .#define bfd_set_arch_mach(abfd, arch, mach)\
 .        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 .
-.#define bfd_coff_swap_reloc_out(abfd, i, o) \
-.        BFD_SEND (abfd, _bfd_coff_swap_reloc_out, (abfd, i, o))
-.
-.#define bfd_coff_swap_lineno_out(abfd, i, o) \
-.        BFD_SEND (abfd, _bfd_coff_swap_lineno_out, (abfd, i, o))
-.
-.#define bfd_coff_swap_aux_out(abfd, i, t,c,o) \
-.        BFD_SEND (abfd, _bfd_coff_swap_aux_out, (abfd, i,t,c, o))
-.
-.#define bfd_coff_swap_sym_out(abfd, i,o) \
-.        BFD_SEND (abfd, _bfd_coff_swap_sym_out, (abfd, i, o))
-.
-.#define bfd_coff_swap_scnhdr_out(abfd, i,o) \
-.        BFD_SEND (abfd, _bfd_coff_swap_scnhdr_out, (abfd, i, o))
-.
-.#define bfd_coff_swap_filehdr_out(abfd, i,o) \
-.        BFD_SEND (abfd, _bfd_coff_swap_filehdr_out, (abfd, i, o))
-.
-.#define bfd_coff_swap_aouthdr_out(abfd, i,o) \
-.        BFD_SEND (abfd, _bfd_coff_swap_aouthdr_out, (abfd, i, o))
-.
-.#define bfd_get_relocated_section_contents(abfd, seclet) \
-.	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet))
-.
+.#define bfd_get_relocated_section_contents(abfd, seclet, data) \
+.	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet, data))
+. 
 .#define bfd_relax_section(abfd, section, symbols) \
 .       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, symbols))
 

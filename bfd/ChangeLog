@@ -1,3 +1,10 @@
+Thu Dec 17 00:36:24 1992  John Gilmore  (gnu@cygnus.com)
+
+	* bfd.c:  Use right name for tekhex tdata struct.
+	* tekhex.c:  Insert leading_char (0) into bfd_target struct.  Style.
+	* libcoff.h:  Updated to get spacing change from coffcode.h.
+	* trad-core.c:  leading_char is 0 (no symbols!), not '_'.
+
 Tue Dec 15 15:40:30 1992  Per Bothner  (bothner@cygnus.com)
 
 	* archive.c (do_slurp_bsd_armap, do_slurp_coff_armap):  New
