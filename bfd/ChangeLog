@@ -1,3 +1,9 @@
+Fri Feb 17 12:34:36 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_got16_reloc): Make GOT style relocs add
+	32768, so the GOT pointer can point to 16384 pointers, instead of
+	8192.
+
 Fri Feb 17 11:45:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* syms.c (bfd_decode_symclass): Return 'W' for a weak symbol.
