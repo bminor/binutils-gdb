@@ -8,7 +8,6 @@ start-sanitize-d30v
 	* configure.in (target_cflags): Ditto for d30v.
 end-sanitize-d30v
 
-
 Tue Apr 21 23:06:54 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* Makefile.in (all-bfd): Depend on all-intl.
