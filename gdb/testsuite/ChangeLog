@@ -1,3 +1,11 @@
+Wed Apr 19 17:41:21 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* config/est.exp:  Fix copyright and comments.  Remove dead code.
+	Use targetname, serialport and baud variables instead of fixed
+	constants.
+	* config/rom68k.exp:  Fix copyright and comments.  Remove dead code.
+	* config/cpu32bug.exp:  New file to support cpu32bug monitors.
+
 Wed Apr 19 13:47:16 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/watchpoint.exp: Don't run

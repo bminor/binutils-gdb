@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+cpu32bug.exp
 est.exp
 mips-gdb.exp
 mt-a29k-udi

@@ -1,5 +1,5 @@
-# Test Framework Driver for GDB driving the EST
-#   Copyright 1995 Free Software Foundation, Inc.
+# Test Framework Driver for GDB driving a Motorola IDP 68k development board
+#   Copyright 1994, 1995 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,10 +25,10 @@ proc gdb_version {} {
 }
 
 #
-# gdb_target_est
+# gdb_target_rom68k
 # Set gdb to target the monitor
 #
-proc gdb_target_est { } {
+proc gdb_target_rom68k { } {
     global prompt
     global exit_status
     global targetname
@@ -38,11 +38,11 @@ proc gdb_target_est { } {
     send "target $targetname $serialport\n"
     set timeout 60
     expect {
-	-re "Remote target est connected to.*$prompt $"	{
-	    verbose "Set target to est"
+	-re "Remote target rom68k connected to.*$prompt $"	{
+	    verbose "Set target to rom68k"
 	}
 	timeout { 
-	    perror "Couldn't set target for est."
+	    perror "Couldn't set target for rom68k."
 	    cleanup
 	    exit $exit_status
 	}
@@ -63,7 +63,7 @@ proc gdb_load { arg } {
 
     if [gdb_file_cmd $arg] then { return -1 }
 
-    gdb_target_est
+    gdb_target_rom68k
 
     send "load\n"
     set timeout 2400

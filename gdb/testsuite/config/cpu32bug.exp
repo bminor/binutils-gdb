@@ -1,4 +1,4 @@
-# Test Framework Driver for GDB driving the EST
+# Test Framework Driver for GDB driving the Motorola Cpu32Bug monitor
 #   Copyright 1995 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -25,10 +25,10 @@ proc gdb_version {} {
 }
 
 #
-# gdb_target_est
+# gdb_target_cpu32bug
 # Set gdb to target the monitor
 #
-proc gdb_target_est { } {
+proc gdb_target_cpu32bug { } {
     global prompt
     global exit_status
     global targetname
@@ -38,11 +38,11 @@ proc gdb_target_est { } {
     send "target $targetname $serialport\n"
     set timeout 60
     expect {
-	-re "Remote target est connected to.*$prompt $"	{
-	    verbose "Set target to est"
+	-re "Remote target cpu32bug connected to.*$prompt $"	{
+	    verbose "Set target to cpu32bug"
 	}
 	timeout { 
-	    perror "Couldn't set target for est."
+	    perror "Couldn't set target for cpu32bug."
 	    cleanup
 	    exit $exit_status
 	}
@@ -63,7 +63,7 @@ proc gdb_load { arg } {
 
     if [gdb_file_cmd $arg] then { return -1 }
 
-    gdb_target_est
+    gdb_target_cpu32bug
 
     send "load\n"
     set timeout 2400
