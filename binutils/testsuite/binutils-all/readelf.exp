@@ -166,8 +166,8 @@ proc readelf_test { options binary_file regexp_file xfails } {
     send_log "exec $READELF $READELFFLAGS $options $binary_file > readelf.out\n"
     catch "exec $READELF $READELFFLAGS $options $binary_file > readelf.out" got
 
-    if { [llength $xfails] != 0 } then {
-	setup_xfail $xfails
+    foreach xfail $xfails {
+	setup_xfail $xfail
     }
     
     if ![string match "" $got] then {
@@ -231,9 +231,11 @@ readelf_test -h $tempfile readelf.h  {}
 # The v850 fails the next two tests because it creates two special
 # sections of its own: .call_table_data and .call_table_text
 # The regexp scripts are not expecting these sections...
+# MIPS targets fail because they add .rela.txt (empty), .mdebug,
+# and .reginfo sections.
 
-readelf_test -S $tempfile readelf.s  {v850*-*-*}
-readelf_test -s $tempfile readelf.ss {v850*-*-*}
+readelf_test -S $tempfile readelf.s  {v850*-*-* mips*-*-*}
+readelf_test -s $tempfile readelf.ss {v850*-*-* mips*-*-*}
 readelf_test -r $tempfile readelf.r  {}
 
 
