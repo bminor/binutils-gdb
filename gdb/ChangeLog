@@ -1,5 +1,15 @@
 2002-06-21  Dave Brolley  <brolley@redhat.com>
 
+	From Stan Shebs, Jim Blandy, Mark Salter, Kevin Buettner:
+	* config/frv/frv.mt: New file.
+	* config/frv/tm-frv.h: New file.
+	* configure.tgt: Support frv-*-*.
+	* Makefile.in (frv-tdep.o): New target.
+	* frv-tdep.c: New file.
+	* NEWS: Mention frv.
+
+2002-06-21  Dave Brolley  <brolley@redhat.com>
+
 	* MAINTAINERS: Add self to "Write After Approval" list.
 
 2002-06-21  Grace Sainsbury  <graces@redhat.com>

@@ -1487,6 +1487,9 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h)
 
+frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
+	$(arch_utils_h) $(regcache_h)
+
 regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(regcache_h)
 
 fork-child.o: fork-child.c $(gdb_wait_h) $(defs_h) $(gdbcore_h) \
