@@ -1,3 +1,8 @@
+Wed Jan 28 16:41:19 1998  J.J. van der Heijden  <J.J.vanderHeijden@student.utwente.nl>
+
+	* configure.in (i386-*-mingw32*): New target.
+	* configure: Rebuild.
+
 Wed Jan 28 14:51:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* symbols.c (resolve_symbol_value): Don't set the segment if it
