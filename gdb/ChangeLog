@@ -1,3 +1,8 @@
+2004-03-28  Andrew Cagney  <cagney@redhat.com>
+
+	* PROBLEMS (Stack backtraces): Rewrite.  Remove reference to
+	arm*-*-*.
+
 2004-03-28  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tui/tui-regs.c (tui_show_registers): Make sure the TUI is active
