@@ -1,3 +1,7 @@
+1999-05-17  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/mcore/allinsn.d: Updated to match latest objdump output.
+
 1999-05-12  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/opcode.d: Modify callw to suit disasm fix.
