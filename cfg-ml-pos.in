@@ -45,6 +45,9 @@ sed -e "s:^MULTIDIRS[ 	]*=.*$:MULTIDIRS = ${multidirs}:" \
 rm -f ${Makefile}
 mv Makefile.tem ${Makefile}
 
+# ??? May wish to add a check to avoid appending this to Makefiles that
+# don't need it.  It's not necessary, but is cleaner.
+
 cat > Multi.tem <<\EOF
 
 # FIXME: There should be an @-sign in front of the `if'.
