@@ -5,30 +5,36 @@
 _if__(_ALL_ARCH__)
 @setfilename as.info
 _fi__(_ALL_ARCH__)
-_if__(_M680X0__ && !_ALL_ARCH__)
-@setfilename as-m680x0.info
-_fi__(_M680X0__ && !_ALL_ARCH__)
 _if__(_AMD29K__ && !_ALL_ARCH__)
 @setfilename as-29k.info
 _fi__(_AMD29K__ && !_ALL_ARCH__)
+_if__(_I960__ && !_ALL_ARCH__)
+@setfilename as-960.info
+_fi__(_I960__ && !_ALL_ARCH__)
+_if__(_M680X0__ && !_ALL_ARCH__)
+@setfilename as-m680x0.info
+_fi__(_M680X0__ && !_ALL_ARCH__)
 @c
 @c NOTE: this manual is marked up for preprocessing with a collection
 @c of m4 macros called "pretex.m4".  If you see <_if__> and <_fi__>
 @c scattered around the source, you have the full source before
-@c preprocessing; if you don't, you have the source configured for some
-@c particular architecture (and you can of course get the full source,
-@c with all configurations, from wherever you got this).  The full
-@c source needs to be run through m4 before either tex- or info-
-@c formatting: for example,
-@c    m4 pretex.m4 none.m4 m680x0.m4 as.texinfo >as-680x0.texinfo
-@c will produce (assuming your path finds either GNU or SysV m4;
-@c Berkeley won't do) a file suitable for formatting.
-@c See the text in "pretex.m4" for a fuller explanation (and the macro
-@c definitions). 
+@c preprocessing; if you don't, you have the source configured for
+@c _HOST__ architectures (and you can of course get the full source,
+@c with all configurations, from wherever you got this).
+_if__(0)
+
+THIS IS THE FULL SOURCE.  The full source needs to be run through m4
+before either tex- or info- formatting: for example,
+    m4 pretex.m4 none.m4 m680x0.m4 as.texinfo >as-680x0.texinfo
+will produce (assuming your path finds either GNU or SysV m4; Berkeley
+won't do) a file suitable for formatting.  See the text in "pretex.m4"
+for a fuller explanation (and the macro definitions).
+
+_fi__(0)
 @c
 @synindex ky cp
 @ifinfo
-This file documents the GNU Assembler "as".
+This file documents the GNU Assembler "_AS__".
 
 Copyright (C) 1991 Free Software Foundation, Inc.
 
@@ -56,28 +62,25 @@ except that the section entitled ``GNU General Public License'' may be
 included in a translation approved by the author instead of in the
 original English.
 @end ifinfo
-@tex
+@iftex
 @finalout
-@end tex
+@end iftex
 @smallbook
 @setchapternewpage odd
-_if__(_M680X0__)
-@settitle Using GNU as (680x0)
-_fi__(_M680X0__)
-_if__(_AMD29K__)
-@settitle Using GNU as (AMD 29K)
-_fi__(_AMD29K__)
+_if__(_ALL_ARCH__)
+@settitle Using _AS__
+_fi__(_ALL_ARCH__)
+_if__(!_ALL_ARCH__)
+@settitle Using _AS__ (_HOST__)
+_fi__(!_ALL_ARCH__)
 @titlepage
-@title{Using GNU as}
+@title{Using _AS__}
 @subtitle{The GNU Assembler}
-_if__(_M680X0__)
-@subtitle{for Motorola 680x0}
-_fi__(_M680X0__)
-_if__(_AMD29K__)
-@subtitle{for the AMD 29K family}
-_fi__(_AMD29K__)
+_if__(!_ALL_ARCH__)
+@subtitle{for the _HOST__ family}
+_fi__(!_ALL_ARCH__)
 @sp 1
-@subtitle February 1991
+@subtitle March 1991
 @sp 13
 The Free Software Foundation Inc.  thanks The Nice Computer
 Company of Australia for loaning Dean Elsner to write the
@@ -127,209 +130,54 @@ included in a translation approved by the author instead of in the
 original English.
 @end titlepage
 @page
-
-@node Top, Overview, (dir), (dir)
-
-@menu
-* Overview::			Overview
-* Syntax::			Syntax 
-* Segments::			Segments and Relocation
-* Symbols::			Symbols
-* Expressions::			Expressions
-* Pseudo Ops::			Assembler Directives
-* Maintenance::			Maintaining the Assembler
-* Retargeting::			Teaching the Assembler about a New Machine
-* License::			GNU GENERAL PUBLIC LICENSE
-
- --- The Detailed Node Listing ---
-
-Overview
-
-* Invoking::			Invoking @code{as}
-* Manual::			Structure of this Manual		
-* GNU Assembler::		as, the GNU Assembler
-* Command Line::		Command Line
-* Input Files::			Input Files
-* Object::			Output (Object) File
-* Errors::			Error and Warning Messages
-* Options::			Options 
-
-Input Files
-
-* Filenames::			Input Filenames and Line-numbers
-
-Syntax 
-
-* Pre-processing::		Pre-processing
-* Whitespace::			Whitespace
-* Comments::			Comments
-* Symbol Intro::		Symbols
-* Statements::			Statements
-* Constants::			Constants
-
-Constants
-
-* Characters::			Character Constants
-* Numbers::			Number Constants
-
-Character Constants
-
-* Strings::			Strings
-* Chars::			Characters
-
-Segments and Relocation
-
-* Segs Background::		Background
-* ld Segments::			ld Segments
-* as Segments::			as Internal Segments
-* Sub-Segments::		Sub-Segments
-* bss::				bss Segment
-
-Segments and Relocation
-
-* ld Segments::			ld Segments
-* as Segments::			as Internal Segments
-* Sub-Segments::		Sub-Segments
-* bss::				bss Segment
-
-Symbols
-
-* Labels::			Labels
-* Setting Symbols::		Giving Symbols Other Values
-* Symbol Names::		Symbol Names
-* Dot::				The Special Dot Symbol
-* Symbol Attributes::		Symbol Attributes
-
-Symbol Names
-
-* Local Symbols::		Local Symbol Names
-
-Symbol Attributes
-
-* Symbol Value::		Value
-* Symbol Type::			Type
-* Symbol Desc::			Descriptor
-* Symbol Other::		Other
-
-Expressions
-
-* Empty Exprs::			Empty Expressions
-* Integer Exprs::		Integer Expressions
-
-Integer Expressions
-
-* Arguments::			Arguments
-* Operators::			Operators
-* Prefix Ops::			Prefix Operators
-* Infix Ops::			Infix Operators
-
-Assembler Directives
-
-* Abort::			The Abort directive causes as to abort
-* Align::			Pad the location counter to a power of 2
-* App-File::			Set the logical file name
-* Ascii::			Fill memory with bytes of ASCII characters
-* Asciz::			Fill memory with bytes of ASCII characters followed
-                by a null.
-* Byte::			Fill memory with 8-bit integers
-* Comm::			Reserve public space in the BSS segment
-* Data::			Change to the data segment
-* Desc::			Set the n_desc of a symbol
-* Double::			Fill memory with double-precision floating-point numbers
-* Else::			@code{.else}
-* End::				@code{.end}
-* Endif::			@code{.endif}
-* Equ::				@code{.equ @var{symbol}, @var{expression}}
-* Extern::			@code{.extern}
-* Fill::			Fill memory with repeated values
-* Float::			Fill memory with single-precision floating-point numbers
-* Global::			Make a symbol visible to the linker
-* Ident::			@code{.ident}
-* If::				@code{.if @var{absolute expression}}
-* Include::			@code{.include "@var{file}"}
-* Int::				Fill memory with 32-bit integers
-* Lcomm::			Reserve private space in the BSS segment
-* Line::			Set the logical line number
-* Ln::				@code{.ln @var{line-number}}
-* List::			@code{.list}, @code{.nolist}, @code{.eject}, @code{.lflags}, @code{.title}, @code{.sbttl}
-* Long::			Fill memory with 32-bit integers
-* Lsym::			Create a local symbol
-* Octa::			Fill memory with 128-bit integers
-* Org::				Change the location counter
-* Quad::			Fill memory with 64-bit integers
-* Set::				Set the value of a symbol
-* Short::			Fill memory with 16-bit integers
-* Single::			@code{.single @var{flonums}}
-* Stab::			Store debugging information
-* Text::			Change to the text segment
-* Word::			Fill memory with 32-bit integers
-* Deprecated::			Deprecated Directives
-* Machine Options::		Options
-* Machine Syntax::		Syntax
-* Floating Point::		Floating Point
-* Machine Directives::		Machine Directives
-* Opcodes::			Opcodes
-
-Machine Directives
-
-* block::			@code{.block @var{size} , @var{fill}}
-* cputype::			@code{.cputype}
-* file::			@code{.file}
-* hword::			@code{.hword @var{expressions}}
-* line::			@code{.line}
-* reg::				@code{.reg @var{symbol}, @var{expression}}
-* sect::			@code{.sect}
-* use::				@code{.use @var{segment name}}
-@end menu
-
-@node Overview, Syntax, Top, Top
+@node Top,,,
+@ifinfo
+This file is a user guide to the GNU assembler @code{_AS__}.
+_if__(!_ALL_ARCH__)
+This version of the file describes @code{_AS__} configured to generate
+code for _HOST__ architectures.
+_fi__(!_ALL_ARCH__)
+@end ifinfo
+@node Overview,,,
 @chapter Overview
+@iftex
+This manual is a user guide to the GNU assembler @code{_AS__}.
+_if__(!_ALL_ARCH__)
+This version of the manual describes @code{_AS__} configured to generate
+code for _HOST__ architectures.
+_fi__(!_ALL_ARCH__)
+@end iftex
 
-This manual is a user guide to the GNU assembler @code{as}.  
-_if__(_M680X0__)
-This version of the manual describes @code{as} configured to generate
-code for Motorola 680x0 architectures.  
-_fi__(_M680X0__)
-_if__(_AMD29K__)
-This version of the manual describes @code{as} configured to generate
-code for Advanced Micro Devices' 29K architectures.
-_fi__(_AMD29K__)
+@node Invoking,,,
+@section Invoking @code{_AS__}
 
-@menu
-* Invoking::			Invoking @code{as}
-* Manual::			Structure of this Manual		
-* GNU Assembler::		as, the GNU Assembler
-* Command Line::		Command Line
-* Input Files::			Input Files
-* Object::			Output (Object) File
-* Errors::			Error and Warning Messages
-* Options::			Options 
-@end menu
-
-@node Invoking, Manual, Overview, Overview
-@section Invoking @code{as}
-
-Here is a brief summary of how to invoke GNU @code{as}.  For details,
+Here is a brief summary of how to invoke @code{_AS__}.  For details,
 @pxref{Options}.
 
 @c We don't use @deffn and friends for the following because they seem
 @c to be limited to one line for the header.
-@example
-  as [ -D ] [ -f ] [ -I @var{path} ] [ -k ] [ -L ] [ -o @var{objfile} ] [ -R ] [ -v ] [ -w ]
-_if__(_M680X0__)
-   [ -l ] [ -mc68000 | -mc68010 | -mc68020 ]
-_fi__(_M680X0__)
+@smallexample
+  _AS__ [ -D ] [ -f ] [ -I @var{path} ] [ -k ] [ -L ]
+   [ -o @var{objfile} ] [ -R ] [ -v ] [ -w ]
 _if__(_AMD29K__)
 @c am29k has no machine-dependent assembler options
 _fi__(_AMD29K__)
+_if__(_I960__)
+@c see md_parse_option in i960.c
+   [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC ]
+   [ -b ] [ -norelax ]
+_fi__(_I960__)
+_if__(_M680X0__)
+   [ -l ] [ -mc68000 | -mc68010 | -mc68020 ]
+_fi__(_M680X0__)
    [ -- | @var{files} @dots{} ]
-@end example
+@end smallexample
 
 @table @code
 
 @item -D
 This option is accepted only for script compatibility with calls to
-other assemblers; it has no effect on GNU @code{as}.
+other assemblers; it has no effect on @code{_AS__}.
 
 @item -f
 ``fast''---skip preprocessing (assume source is compiler output)
@@ -338,18 +186,18 @@ other assemblers; it has no effect on GNU @code{as}.
 Add @var{path} to the search list for @code{.include} directives
 
 @item -k
-_if__(_AMD29K__)
-This option is accepted but has no effect on the 29K family.
-_fi__(_AMD29K__)
-_if__(!_AMD29K__)
+_if__(_AMD29K__ || _I960__)
+This option is accepted but has no effect on the _HOST__ family.
+_fi__(_AMD29K__ || _I960__)
+_if__(!(_AMD29K__||_I960__))
 Issue warnings when difference tables altered for long displacements
-_fi__(!_AMD29K__)
+_fi__(!(_AMD29K__||_I960__))
 
 @item -L
 Keep (in symbol table) local symbols, starting with @samp{L}
 
 @item -o @var{objfile}
-Name the object-file output from @code{as}
+Name the object-file output from @code{_AS__}
 
 @item -R
 Fold data segment into text segment
@@ -357,11 +205,23 @@ Fold data segment into text segment
 @item -W
 Suppress warning messages
 
+_if__(_I960__)
+@item -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC
+Specify which variant of the 960 architecture is the target.
+
+@item -b
+Add code to collect statistics about branches taken.
+
+@item -norelax
+Do not alter compare-and-branch instructions for long displaements;
+error if necessary.
+_fi__(_I960__)
+
 _if__(_M680X0__)
 @item -l
 Shorten references to undefined symbols, to one word instead of two
 
-@item -mc68000 | -mc68010 | -mc68020 
+@item -mc68000 | -mc68010 | -mc68020
 Specify what processor in the 68000 family is the target (default 68020)
 _fi__(_M680X0__)
 
@@ -370,21 +230,16 @@ Source files to assemble, or standard input
 @end table
 
 @node Manual, GNU Assembler, Invoking, Overview
-@section Structure of this Manual		
-This document is intended to describe what you need to know to use GNU
-@code{as}.  We cover the syntax expected in source files, including
+@section Structure of this Manual
+This document is intended to describe what you need to know to use
+@code{_AS__}.  We cover the syntax expected in source files, including
 notation for symbols, constants, and expressions; the directives that
-@code{as} understands; and of course how to invoke @code{as}.
+@code{_AS__} understands; and of course how to invoke @code{_AS__}.
 
-_if__(_M680X0__ && !_ALL_ARCH__)
-We also cover special features in the 68000 configuration of @code{as},
-including pseudo-operations.
-_fi__(_M680X0__ && !_ALL_ARCH__)
-_if__(_AMD29K__ && !_ALL_ARCH__)
-We also cover special features in the AMD 29K configuration of @code{as},
-including assembler directives.
-_fi__(_AMD29K__ && !_ALL_ARCH__)
-
+_if__(!_ALL_ARCH__)
+We also cover special features in the _HOST__
+configuration of @code{_AS__}, including assembler directives.
+_fi__(!_ALL_ARCH__)
 _if__(_ALL_ARCH__)
 This document also describes some of the machine-dependent features of
 various flavors of the assembler.
@@ -394,6 +249,7 @@ This document also describes how the assembler works internally, and
 provides some information that may be useful to people attempting to
 port the assembler to another machine.
 _fi__(_INTERNALS__)
+@refill
 
 On the other hand, this manual is @emph{not} intended as an introduction
 to programming in assembly language---let alone programming in general!
@@ -413,10 +269,10 @@ computer (in particular, the kinds of computers that GNU can run on);
 once this assumption is granted examples and definitions need less
 qualification.
 
-@code{as} is part of a team of programs that turn a high-level
+@code{_AS__} is part of a team of programs that turn a high-level
 human-readable series of instructions into a low-level
 computer-readable series of instructions.  Different versions of
-@code{as} are used for different kinds of computer.
+@code{_AS__} are used for different kinds of computer.
 @end ignore
 
 @c There used to be a section "Terminology" here, which defined
@@ -426,45 +282,66 @@ computer-readable series of instructions.  Different versions of
 @c version of this manual, none of these terms seem essential to define.
 @c They were used very little even in the former draft of the manual;
 @c this draft makes an effort to avoid them (except in names of
-@c directives). 
+@c directives).
 
-@node GNU Assembler, Command Line, Manual, Overview
-@section as, the GNU Assembler
-@code{as} is primarily intended to assemble the output of the GNU C
-compiler @code{gcc} for use by the linker @code{ld}.  Nevertheless,
-we've tried to make @code{as} assemble correctly everything that the native
+@node GNU Assembler,,,
+@section _AS__, the GNU Assembler
+GNU @code{as} is really a family of assemblers.  
+_if__(!_ALL_ARCH__)
+This manual describes @samp{_AS__}, a member of that family which is
+configured for the _HOST__ architectures.
+_fi__(!_ALL_ARCH__)
+If you use (or have used) the GNU assembler on another architecture, you
+should find a fairly similar environment.  Each version has much in
+common with the others, including object file formats, most assembler
+directives (often called @dfn{pseudo-ops)} and assembler syntax.@refill
+
+@code{_AS__} is primarily intended to assemble the output of the GNU C
+compiler @code{_GCC__} for use by the linker @code{_LD__}.  Nevertheless,
+we've tried to make @code{_AS__} assemble correctly everything that the native
 assembler would.
 _if__(_VAX__)
-Any exceptions are documented explicitly (@pxref{Machine Dependent}).
+Any exceptions are documented explicitly (@pxref{_MACH_DEP__}).
 _fi__(_VAX__)
-This doesn't mean @code{as} always uses the same syntax as another
+_if__(_ALL_ARCH__||_M680X0__)
+This doesn't mean @code{_AS__} always uses the same syntax as another
 assembler for the same architecture; for example, we know of several
 incompatible versions of 680x0 assembly language syntax.
+_fi__(_ALL_ARCH__||_M680X0__)
 
-GNU @code{as} is really a family of assemblers.  If you use (or have
-used) GNU @code{as} on another architecture, you should find a fairly
-similar environment.  Each version has much in common with the others,
-including object file formats, most assembler directives (often called
-@dfn{pseudo-ops)} and assembler syntax.
-
-Unlike older assemblers, @code{as} is designed to assemble a source
+Unlike older assemblers, @code{_AS__} is designed to assemble a source
 program in one pass of the source file.  This has a subtle impact on the
 @kbd{.org} directive (@pxref{Org}).
 
-@node Command Line, Input Files, GNU Assembler, Overview
+@node Object Formats,,,
+@section Object File Formats
+The GNU assembler can be configured to produce several alternative
+object file formats.  
+_if__(!_ALL_ARCH__)
+_if__(!_I960__)
+@code{_AS__} is configured to produce @code{a.out} format object
+files.@refill
+_fi__(!_I960__)
+_if__(_I960__)
+@code{_AS__} can be configured to produce either @code{b.out} or COFF
+format object files.
+_fi__(_I960__)
+_fi__(!_ALL_ARCH__)
+
+@node Command Line,,,
 @section Command Line
 
-After the program name @code{as}, the command line may contain
+After the program name @code{_AS__}, the command line may contain
 options and file names.  Options may be in any order, and may be
 before, after, or between file names.  The order of file names is
 significant.
 
 @file{--} (two hyphens) by itself names the standard input file
-explicitly, as one of the files for @code{as} to assemble.
+explicitly, as one of the files for @code{_AS__} to assemble.
 
 Except for @samp{--} any command line argument that begins with a
 hyphen (@samp{-}) is an option.  Each option changes the behavior of
-@code{as}.  No option changes the way another option works.  An
+@code{_AS__}.  No option changes the way another option works.  An
 option is a @samp{-} followed by one or more letters; the case of
 the letter is important.   All options are optional.
 
@@ -473,16 +350,16 @@ name may either immediately follow the option's letter (compatible
 with older assemblers) or it may be the next command argument (GNU
 standard).  These two command lines are equivalent:
 
-@example
-as -o my-object-file.o mumble
-as -omy-object-file.o mumble
-@end example
+@smallexample
+_AS__ -o my-object-file.o mumble.s
+_AS__ -omy-object-file.o mumble.s
+@end smallexample
 
 @node Input Files, Object, Command Line, Overview
 @section Input Files
 
 We use the phrase @dfn{source program}, abbreviated @dfn{source}, to
-describe the program input to one run of @code{as}.  The program may
+describe the program input to one run of @code{_AS__}.  The program may
 be in one or more files; how the source is partitioned into files
 doesn't change the meaning of the source.
 
@@ -491,61 +368,57 @@ doesn't change the meaning of the source.
 The source program is a concatenation of the text in all the files, in the
 order specified.
 
-Each time you run @code{as} it assembles exactly one source
+Each time you run @code{_AS__} it assembles exactly one source
 program.  The source program is made up of one or more files.
 (The standard input is also a file.)
 
-You give @code{as} a command line that has zero or more input file
+You give @code{_AS__} a command line that has zero or more input file
 names.  The input files are read (from left file name to right).  A
 command line argument (in any position) that has no special meaning
-is taken to be an input file name.  
+is taken to be an input file name.
 
-If @code{as} is given no file names it attempts to read one input file
-from @code{as}'s standard input, which is normally your terminal.  You
-may have to type @key{ctl-D} to tell @code{as} there is no more program
-to assemble. 
+If @code{_AS__} is given no file names it attempts to read one input file
+from the @code{_AS__} standard input, which is normally your terminal.  You
+may have to type @key{ctl-D} to tell @code{_AS__} there is no more program
+to assemble.
 
 Use @samp{--} if you need to explicitly name the standard input file
 in your command line.
 
-If the source is empty, @code{as} will produce a small, empty object
-file. 
-
-@menu
-* Filenames::			Input Filenames and Line-numbers
-@end menu
+If the source is empty, @code{_AS__} will produce a small, empty object
+file.
 
 @node Filenames,  , Input Files, Input Files
-@subsection Input Filenames and Line-numbers
+@subsection Filenames and Line-numbers
 There are two ways of locating a line in the input file (or files) and both
 are used in reporting error messages.  One way refers to a line
 number in a physical file; the other refers to a line number in a
 ``logical'' file.
 
 @dfn{Physical files} are those files named in the command line given
-to @code{as}.
+to @code{_AS__}.
 
 @dfn{Logical files} are simply names declared explicitly by assembler
 directives; they bear no relation to physical files.  Logical file names
-help error messages reflect the original source file, when @code{as}
+help error messages reflect the original source file, when @code{_AS__}
 source is itself synthesized from other files.  @xref{App-File}.
 
 @node Object, Errors, Input Files, Overview
 @section Output (Object) File
-Every time you run @code{as} it produces an output file, which is
+Every time you run @code{_AS__} it produces an output file, which is
 your assembly language program translated into numbers.  This file
-is the object file, named @code{a.out} unless you tell @code{as} to
+is the object file, named @code{a.out} unless you tell @code{_AS__} to
 give it another name by using the @code{-o} option.  Conventionally,
 object file names end with @file{.o}.  The default name of
 @file{a.out} is used for historical reasons:  older assemblers were
 capable of assembling self-contained programs directly into a
-runnable program.  
+runnable program.
 @c This may still work, but hasn't been tested.
 
-The object file is meant for input to the linker @code{ld}.  It contains
-assembled program code, information to help @code{ld} integrate
+The object file is meant for input to the linker @code{_LD__}.  It contains
+assembled program code, information to help @code{_LD__} integrate
 the assembled program into a runnable file, and (optionally) symbolic
-information for the debugger.  
+information for the debugger.
 
 @comment link above to some info file(s) like the description of a.out.
 @comment don't forget to describe GNU info as well as Unix lossage.
@@ -553,22 +426,22 @@ information for the debugger.
 @node Errors, Options, Object, Overview
 @section Error and Warning Messages
 
-@code{as} may write warnings and error messages to the standard error
-file (usually your terminal).  This should not happen when @code{as} is
+@code{_AS__} may write warnings and error messages to the standard error
+file (usually your terminal).  This should not happen when @code{_AS__} is
 run automatically by a compiler.  Warnings report an assumption made so
-that @code{as} could keep assembling a flawed program; errors report a
+that @code{_AS__} could keep assembling a flawed program; errors report a
 grave problem that stops the assembly.
 
 Warning messages have the format
-@example
+@smallexample
 file_name:@b{NNN}:Warning Message Text
-@end example
+@end smallexample
 @noindent(where @b{NNN} is a line number).  If a logical file name has
 been given (@pxref{App-File}) it is used for the filename, otherwise the
 name of the current input file is used.  If a logical line number was
-given 
+given
 _if__(!_AMD29K__)
-(@pxref{Line}) 
+(@pxref{Line})
 _fi__(!_AMD29K__)
 _if__(_AMD29K__)
 (@pxref{Ln})
@@ -579,80 +452,82 @@ message text is intended to be self explanatory (in the grand Unix
 tradition). @refill
 
 Error messages have the format
-@example
+@smallexample
 file_name:@b{NNN}:FATAL:Error Message Text
-@end example
+@end smallexample
 The file name and line number are derived as for warning
 messages.  The actual message text may be rather less explanatory
 because many of them aren't supposed to happen.
 
-@group
 @node Options,  , Errors, Overview
-@section Options 
+@section Options
+This section describes command-line options available in @emph{all}
+versions of the GNU assembler; @pxref{_MACH_DEP__}, for options specific
+to the _HOST__.
+
 @subsection @code{-D}
 This option has no effect whatsoever, but it is accepted to make it more
 likely that scripts written for other assemblers will also work with
-GNU @code{as}.
-@end group
+@code{_AS__}.
 
-@subsection Work Faster: @code{-f} 
+@subsection Work Faster: @code{-f}
 @samp{-f} should only be used when assembling programs written by a
 (trusted) compiler.  @samp{-f} stops the assembler from pre-processing
-the input file(s) before assembling them.  
+the input file(s) before assembling them.
 @quotation
 @emph{Warning:} if the files actually need to be pre-processed (if they
-contain comments, for example), @code{as} will not work correctly if
+contain comments, for example), @code{_AS__} will not work correctly if
 @samp{-f} is used.
 @end quotation
 
-@subsection Add to @code{.include} search path: @code{-I} @var{path}
-Use this option to add a @var{path} to the list of directories GNU
-@code{as} will search for files specified in @code{.include} directives
+@subsection @code{.include} search path: @code{-I} @var{path}
+Use this option to add a @var{path} to the list of directories
+@code{_AS__} will search for files specified in @code{.include} directives
 (@pxref{Include}).  You may use @code{-I} as many times as necessary to
 include a variety of paths.  The current working directory is always
-searched first; after that, @code{as} searches any @samp{-I} directories
+searched first; after that, @code{_AS__} searches any @samp{-I} directories
 in the same order as they were specified (left to right) on the command
-line. 
+line.
 
-@subsection Warn if difference tables altered: @code{-k}
-_if__(_AMD29K__) 
-On the AMD 29K family, this option is allowed, but has no effect.  It is
-permitted for compatibility with GNU @code{as} on other platforms,
-where it can be used to warn when @code{as} alters the machine code
-generated for @samp{.word} directives in difference tables.  The AMD 29K
+@subsection Difference Tables: @code{-k}
+_if__(_AMD29K__ || _I960__)
+On the _HOST__ family, this option is allowed, but has no effect.  It is
+permitted for compatibility with the GNU assembler on other platforms,
+where it can be used to warn when the assembler alters the machine code
+generated for @samp{.word} directives in difference tables.  The _HOST__
 family does not have the addressing limitations that sometimes lead to this
 alteration on other platforms.
-_fi__(_AMD29K__)
+_fi__(_AMD29K__ || _I960__)
 
-_if__(!_AMD29K__)
-@code{as} sometimes alters the code emitted for directives of the form
-@samp{.word @var{sym1}-@var{sym2}}; @pxref{Word}.  
+_if__(! (_AMD29K__ || _I960__) )
+@code{_AS__} sometimes alters the code emitted for directives of the form
+@samp{.word @var{sym1}-@var{sym2}}; @pxref{Word}.
 You can use the @samp{-k} option if you want a warning issued when this
-is done. 
-_fi__(!_AMD29K__)
+is done.
+_fi__(! (_AMD29K__ || _I960__) )
 
 @subsection Include Local Labels: @code{-L}
 Labels beginning with @samp{L} (upper case only) are called @dfn{local
 labels}. @xref{Symbol Names}.  Normally you don't see such labels when
 debugging, because they are intended for the use of programs (like
 compilers) that compose assembler programs, not for your notice.
-Normally both @code{as} and @code{ld} discard such labels, so you don't
+Normally both @code{_AS__} and @code{_LD__} discard such labels, so you don't
 normally debug with them.
 
-This option tells @code{as} to retain those @samp{L@dots{}} symbols
+This option tells @code{_AS__} to retain those @samp{L@dots{}} symbols
 in the object file.  Usually if you do this you also tell the linker
-@code{ld} to preserve symbols whose names begin with @samp{L}.
+@code{_LD__} to preserve symbols whose names begin with @samp{L}.
 
 @subsection Name the Object File: @code{-o}
-There is always one object file output when you run @code{as}.  By
+There is always one object file output when you run @code{_AS__}.  By
 default it has the name @file{a.out}.  You use this option (which
 takes exactly one filename) to give the object file a different name.
 
-Whatever the object file is called, @code{as} will overwrite any
+Whatever the object file is called, @code{_AS__} will overwrite any
 existing file of the same name.
 
-@subsection Data Segment into Text Segment: @code{-R}
-@code{-R} tells @code{as} to write the object file as if all
+@subsection Join Data and Text Segments: @code{-R}
+@code{-R} tells @code{_AS__} to write the object file as if all
 data-segment data lives in the text segment.  This is only done at
 the very last moment:  your binary data are the same, but data
 segment parts are relocated differently.  The data segment part of
@@ -661,39 +536,30 @@ appended to the text segment.  (@xref{Segments}.)
 
 When you specify @code{-R} it would be possible to generate shorter
 address displacements (because we don't have to cross between text and
-data segment).  We don't do this simply for compatibility with older
-versions of @code{as}.  In future, @code{-R} may work this way. 
+data segment).  We refrain from doing this simply for compatibility with
+older versions of @code{_AS__}.  In future, @code{-R} may work this way.
 
 @subsection Suppress Warnings: @code{-W}
-@code{as} should never give a warning or error message when
+@code{_AS__} should never give a warning or error message when
 assembling compiler output.  But programs written by people often
-cause @code{as} to give a warning that a particular assumption was
+cause @code{_AS__} to give a warning that a particular assumption was
 made.  All such warnings are directed to the standard error file.
 If you use this option, no warnings are issued.  This option only
 affects the warning messages: it does not change any particular of how
-@code{as} assembles your file.  Errors, which stop the assembly, are
+@code{_AS__} assembles your file.  Errors, which stop the assembly, are
 still reported.
 
 @node Syntax, Segments, Overview, Top
-@chapter Syntax 
+@chapter Syntax
 This chapter describes the machine-independent syntax allowed in a
-source file.  @code{as} syntax is similar to what many other assemblers
-use; it is inspired in BSD 4.2 
+source file.  @code{_AS__} syntax is similar to what many other assemblers
+use; it is inspired in BSD 4.2
 _if__(!_VAX__)
 assembler. @refill
 _fi__(!_VAX__)
 _if__(_VAX__)
-assembler, except that @code{as} does not assemble Vax bit-fields. 
+assembler, except that @code{_AS__} does not assemble Vax bit-fields.
 _fi__(_VAX__)
-
-@menu
-* Pre-processing::		Pre-processing
-* Whitespace::			Whitespace
-* Comments::			Comments
-* Symbol Intro::		Symbols
-* Statements::			Statements
-* Constants::			Constants
-@end menu
 
 @node Pre-processing, Whitespace, Syntax, Syntax
 @section Pre-processing
@@ -735,33 +601,33 @@ space.
 
 @node Comments, Symbol Intro, Whitespace, Syntax
 @section Comments
-There are two ways of rendering comments to @code{as}.  In both
+There are two ways of rendering comments to @code{_AS__}.  In both
 cases the comment is equivalent to one space.
 
-Anything from @samp{/*} through the next @samp{*/} is a comment.  
-This means you may not nest these comments. 
+Anything from @samp{/*} through the next @samp{*/} is a comment.
+This means you may not nest these comments.
 
-@example
+@smallexample
 /*
   The only way to include a newline ('\n') in a comment
   is to use this sort of comment.
 */
 
 /* This sort of comment does not nest. */
-@end example
+@end smallexample
 
 Anything from the @dfn{line comment} character to the next newline
 is considered a comment and is ignored.  The line comment character is
-_if__(_VAX__)
-@samp{#} on the Vax; 
-_fi__(_VAX__) 
+_if__(_VAX__ || _I960__)
+@samp{#} on the _HOST__;
+_fi__(_VAX__ || _I960__)
 _if__(_M680X0__)
-@samp{|} on the 680x0; 
+@samp{|} on the 680x0;
 _fi__(_M680X0__)
 _if__(_AMD29K__)
-@samp{;} for the AMD 29K family; 
+@samp{;} for the AMD 29K family;
 _fi__(_AMD29K__)
-@pxref{Machine Dependent}.  @refill
+@pxref{_MACH_DEP__}.  @refill
 
 _if__(_ALL_ARCH__)
 On some machines there are two different line comment characters.  One
@@ -778,13 +644,13 @@ name.  The rest of the line, if any, should be whitespace.
 
 If the first non-whitespace characters on the line are not numeric,
 the line is ignored.  (Just like a comment.)
-@example
+@smallexample
                           # This is an ordinary comment.
 # 42-6 "new_file_name"    # New logical file name
                           # This is logical line # 36.
-@end example
+@end smallexample
 This feature is deprecated, and may disappear from future versions
-of @code{as}.
+of @code{_AS__}.
 
 @node Symbol Intro, Statements, Comments, Syntax
 @section Symbols
@@ -798,29 +664,25 @@ not a possible symbol delimiter).  @xref{Symbols}.
 
 @node Statements, Constants, Symbol Intro, Syntax
 @section Statements
-A @dfn{statement} ends at a newline character (@samp{\n})
 _if__(!_AMD29K__)
-or at a semicolon (@samp{;}).  The newline or semicolon
+A @dfn{statement} ends at a newline character (@samp{\n}) or at a
+semicolon (@samp{;}).  The newline or semicolon is considered part of
+the preceding statement.  Newlines and semicolons within character
+constants are an exception: they don't end statements.
 _fi__(!_AMD29K__)
 _if__(_AMD29K__)
-or an ``at'' sign (@samp{@@}).  The newline or at sign
+A @dfn{statement} ends at a newline character (@samp{\n}) or an ``at''
+sign (@samp{@@}).  The newline or at sign is considered part of the
+preceding statement.  Newlines and at signs within character constants
+are an exception: they don't end statements.
 _fi__(_AMD29K__)
-is considered part
-of the preceding statement.  Newlines
-_if__(!_AMD29K__)
-and semicolons 
-_fi__(!_AMD29K__)
-_if__(_AMD29K__)
-and at signs
-_fi__(_AMD29K__)
-within
-character constants are an exception:  they don't end statements.
+
 It is an error to end any statement with end-of-file:  the last
 character of any input file should be a newline.@refill
 
 You may write a statement on more than one line if you put a
 backslash (@kbd{\}) immediately in front of any newlines within the
-statement.  When @code{as} reads a backslashed newline both
+statement.  When @code{_AS__} reads a backslashed newline both
 characters are ignored.  You can even put backslashed newlines in
 the middle of symbol names without changing the meaning of your
 source program.
@@ -829,27 +691,30 @@ An empty statement is allowed, and may include whitespace.  It is ignored.
 
 @c "key symbol" is not used elsewhere in the document; seems pedantic to
 @c @defn{} it in that case, as was done previously...  pesch@cygnus.com,
-@c 13feb91. 
+@c 13feb91.
 A statement begins with zero or more labels, optionally followed by a
 key symbol which determines what kind of statement it is.  The key
 symbol determines the syntax of the rest of the statement.  If the
 symbol begins with a dot @samp{.} then the statement is an assembler
 directive: typically valid for any computer.  If the symbol begins with
 a letter the statement is an assembly language @dfn{instruction}: it
-will assemble into a machine language instruction.  Different versions
-of @code{as} for different computers will recognize different
-instructions.  In fact, the same symbol may represent a different
-instruction in a different computer's assembly language. 
+will assemble into a machine language instruction.  
+_if__(_ALL_ARCH__)
+Different versions of @code{_AS__} for different computers will
+recognize different instructions.  In fact, the same symbol may
+represent a different instruction in a different computer's assembly
+language.@refill
+_fi__(_ALL_ARCH__)
 
-A label is a symbol immediately followed by a colon (@code{:}). 
+A label is a symbol immediately followed by a colon (@code{:}).
 Whitespace before a label or after a colon is permitted, but you may not
-have whitespace between a label's symbol and its colon. @xref{Labels}. 
+have whitespace between a label's symbol and its colon. @xref{Labels}.
 
-@example
+@smallexample
 label:     .directive    followed by something
 another$label:           # This is an empty statement.
            instruction   operand_1, operand_2, @dots{}
-@end example
+@end smallexample
 
 @node Constants,  , Statements, Syntax
 @section Constants
@@ -863,11 +728,6 @@ inspection, without knowing any context.  Like this:
 95028841971.693993751E-40                 # - pi, a flonum.
 @end smallexample
 
-@menu
-* Characters::			Character Constants
-* Numbers::			Number Constants
-@end menu
-
 @node Characters, Numbers, Constants, Constants
 @subsection Character Constants
 There are two kinds of character constants.  A @dfn{character} stands
@@ -876,11 +736,6 @@ numeric expressions.  String constants (properly called string
 @emph{literals}) are potentially many bytes and their values may not be
 used in arithmetic expressions.
 
-@menu
-* Strings::			Strings
-* Chars::			Characters
-@end menu
-
 @node Strings, Chars, Characters, Characters
 @subsubsection Strings
 A @dfn{string} is written between double-quotes.  It may contain
@@ -888,8 +743,8 @@ double-quotes or null characters.  The way to get special characters
 into a string is to @dfn{escape} these characters: precede them with
 a backslash @samp{\} character.  For example @samp{\\} represents
 one backslash:  the first @code{\} is an escape which tells
-@code{as} to interpret the second character literally as a backslash
-(which prevents @code{as} from recognizing the second @code{\} as an
+@code{_AS__} to interpret the second character literally as a backslash
+(which prevents @code{_AS__} from recognizing the second @code{\} as an
 escape character).  The complete list of escapes follows.
 
 @table @kbd
@@ -934,14 +789,14 @@ this character, because an unescaped @samp{"} would end the string.
 Any other character when escaped by @kbd{\} will give a warning, but
 assemble as if the @samp{\} was not present.  The idea is that if
 you used an escape sequence you clearly didn't want the literal
-interpretation of the following character.  However @code{as} has no
-other interpretation, so @code{as} knows it is giving you the wrong
+interpretation of the following character.  However @code{_AS__} has no
+other interpretation, so @code{_AS__} knows it is giving you the wrong
 code and warns you of the fact.
 @end table
 
 Which characters are escapable, and what those escapes represent,
 varies widely among assemblers.  The current set is what we think
-BSD 4.2 @code{as} recognizes, and is a subset of what most C
+the BSD 4.2 assembler recognizes, and is a subset of what most C
 compilers recognize.  If you are in doubt, don't use an escape
 sequence.
 
@@ -952,28 +807,28 @@ followed by that character.  The same escapes apply to characters as
 to strings.  So if you want to write the character backslash, you
 must write @kbd{'\\} where the first @code{\} escapes the second
 @code{\}.  As you can see, the quote is an acute accent, not a
-grave accent.  A newline 
+grave accent.  A newline
 _if__(!_AMD29K__)
 (or semicolon @samp{;})
 _fi__(!_AMD29K__)
 _if__(_AMD29K__)
 (or at sign @samp{@@})
 _fi__(_AMD29K__)
-immediately
-following an acute accent is taken as a literal character and does
-not count as the end of a statement.  The value of a character
+immediately following an acute accent is taken as a literal character
+and does not count as the end of a statement.  The value of a character
 constant in a numeric expression is the machine's byte-wide code for
-that character.  @code{as} assumes your character code is ASCII: @kbd{'A}
-means 65, @kbd{'B} means 66, and so on. @refill
+that character.  @code{_AS__} assumes your character code is ASCII:
+@kbd{'A} means 65, @kbd{'B} means 66, and so on. @refill
 
-@node Numbers,  , Characters, Constants
+@node Numbers,,,
 @subsection Number Constants
-@code{as} distinguishes three kinds of numbers according to how they
+@code{_AS__} distinguishes three kinds of numbers according to how they
 are stored in the target machine.  @emph{Integers} are numbers that
 would fit into an @code{int} in the C language.  @emph{Bignums} are
-integers, but they are stored in a more than 32 bits.  @emph{Flonums}
+integers, but they are stored in more than 32 bits.  @emph{Flonums}
 are floating point numbers, described below.
 
+@node Integers,,,
 @subsubsection Integers
 A binary integer is @samp{0b} or @samp{0B} followed by zero or more of
 the binary digits @samp{01}.
@@ -991,19 +846,21 @@ Integers have the usual values.  To denote a negative integer, use
 the prefix operator @samp{-} discussed under expressions
 (@pxref{Prefix Ops}).
 
+@node Bignums,,,
 @subsubsection Bignums
 A @dfn{bignum} has the same syntax and semantics as an integer
 except that the number (or its negative) takes more than 32 bits to
 represent in binary.  The distinction is made because in some places
 integers are permitted while bignums are not.
 
+@node Flonums,,,
 @subsubsection Flonums
 A @dfn{flonum} represents a floating point number.  The translation is
 complex: a decimal floating point number from the text is converted by
-@code{as} to a generic binary floating point number of more than
+@code{_AS__} to a generic binary floating point number of more than
 sufficient precision.  This generic floating point number is converted
 to a particular computer's floating point format (or formats) by a
-portion of @code{as} specialized to that computer.
+portion of @code{_AS__} specialized to that computer.
 
 A flonum is written by writing (in order)
 @itemize @bullet
@@ -1012,14 +869,18 @@ The digit @samp{0}.
 @item
 _if__(_AMD29K__)
 One of the letters @samp{DFPRSX} (in upper or lower case), to tell
-@code{as} the rest of the number is a flonum.
+@code{_AS__} the rest of the number is a flonum.
 _fi__(_AMD29K__)
-_if__(!_AMD29K__)
-A letter, to tell @code{as} the rest of the number is a flonum.  @kbd{e}
+_if__(_I960__)
+One of the letters @samp{DFT} (in upper or lower case), to tell
+@code{_AS__} the rest of the number is a flonum.
+_fi__(_I960__)
+_if__(!(_AMD29K__||_I960__))
+A letter, to tell @code{_AS__} the rest of the number is a flonum.  @kbd{e}
 is recommended.  Case is not important.  (Any otherwise illegal letter
 will work here, but that might be changed.  Vax BSD 4.2 assembler seems
 to allow any of @samp{defghDEFGH}.)
-_fi__(!_AMD29K__)
+_fi__(!(_AMD29K__||_I960__))
 @item
 An optional sign: either @samp{+} or @samp{-}.
 @item
@@ -1031,13 +892,9 @@ or more decimal digits.
 An optional exponent, consisting of:
 @itemize @bullet
 @item
-_if__(_AMD29K__)
 An @samp{E} or @samp{e}.
-_if__(!_AMD29K__)
-A letter; the exact significance varies according to
-the computer that executes the program.  @code{as}
-accepts any letter for now.  Case is not important.
-_fi__(!_AMD29K__)
+@c I can't find a config where "EXP_CHARS" is other than 'eE', but in
+@c principle this can perfectly well be different on different targets.
 @item
 Optional sign: either @samp{+} or @samp{-}.
 @item
@@ -1048,52 +905,84 @@ One or more decimal digits.
 At least one of @var{integer part} or @var{fraction part} must be
 present.  The floating point number has the usual base-10 value.
 
-@code{as} does all processing using integers.  Flonums are computed
+@code{_AS__} does all processing using integers.  Flonums are computed
 independently of any floating point hardware in the computer running
-@code{as}.
+@code{_AS__}.
+
+_if__(_I960__)
+@c Bit fields are written as a general facility but are also controlled
+@c by a conditional-compilation flag---which is as of now (21mar91)
+@c turned on only by the i960 config of GAS.
+@node Bit Fields,,,
+@subsubsection Bit Fields
+You can also define numeric constants as @dfn{bit fields}.
+specify two numbers separated by a colon---
+@example
+@var{mask}:@var{value}
+@end example
+@noindent
+the first will act as a mask; @code{_AS__} will bitwise-and it with the
+second value.
+
+The resulting number is then packed
+_if__(_ALL_ARCH__)
+(in host-dependent byte order)
+_fi__(_ALL_ARCH__)
+into a field whose width depends on which assembler directive has the
+bit-field as its argument.  Overflow (a result from the bitwise and
+requiring more binary digits to represent) is not an error; instead,
+more constants are generated, of the specified width, beginning with the
+least significant digits.@refill
+
+The directives @code{.byte}, @code{.hword}, @code{.int}, @code{.long},
+@code{.short}, and @code{.word} accept bit-field arguments.
+_fi__(_I960__)
 
 @node Segments, Symbols, Syntax, Top
 @chapter Segments and Relocation
-@menu
-* Segs Background::		Background
-* ld Segments::			ld Segments
-* as Segments::			as Internal Segments
-* Sub-Segments::		Sub-Segments
-* bss::				bss Segment
-@end menu
 
-@node Segs Background, ld Segments, Segments, Segments
+@node Segs Background, _LD__ Segments, Segments, Segments
 @section Background
 Roughly, a segment is a range of addresses, with no gaps; all data
-``in'' those addresses is treated the same for some particular purpose. 
-For example there may be a ``read only'' segment. 
+``in'' those addresses is treated the same for some particular purpose.
+For example there may be a ``read only'' segment.
 
-The linker @code{ld} reads many object files (partial programs) and
-combines their contents to form a runnable program.  When @code{as}
+The linker @code{_LD__} reads many object files (partial programs) and
+combines their contents to form a runnable program.  When @code{_AS__}
 emits an object file, the partial program is assumed to start at address
-0.  @code{ld} will assign the final addresses the partial program
+0.  @code{_LD__} will assign the final addresses the partial program
 occupies, so that different partial programs don't overlap.  This is
 actually an over-simplification, but it will suffice to explain how
-@code{as} uses segments. 
+@code{_AS__} uses segments.
 
-@code{ld} moves blocks of bytes of your program to their run-time
+@code{_LD__} moves blocks of bytes of your program to their run-time
 addresses.  These blocks slide to their run-time addresses as rigid
 units; their length does not change and neither does the order of bytes
 within them.  Such a rigid unit is called a @emph{segment}.  Assigning
 run-time addresses to segments is called @dfn{relocation}.  It includes
 the task of adjusting mentions of object-file addresses so they refer to
-the proper run-time addresses. 
+the proper run-time addresses.
 
-An object file written by @code{as} has three segments, any of which may
+An object file written by @code{_AS__} has three segments, any of which may
 be empty.  These are named @dfn{text}, @dfn{data} and @dfn{bss}
-segments.  Within the object file, the text segment starts at
-address @code{0}, the data segment follows, and the bss segment
-follows the data segment.
+segments.  
+_if__(_COFF__)
 
-To let @code{ld} know which data will change when the segments are
-relocated, and how to change that data, @code{as} also writes to the
+@c Thanks, Rich!
+@quotation
+@emph{Warning:} @code{_AS__} can only assign output to one of these
+three segments, even when configured for COFF output; the
+@code{.section} directive is not supported.
+@end quotation
+_fi__(_COFF__)
+
+Within the object file, the text segment starts at address @code{0}, the
+data segment follows, and the bss segment follows the data segment.
+
+To let @code{_LD__} know which data will change when the segments are
+relocated, and how to change that data, @code{_AS__} also writes to the
 object file details of the relocation needed.  To perform relocation
-@code{ld} must know, each time an address in the object
+@code{_LD__} must know, each time an address in the object
 file is mentioned:
 @itemize @bullet
 @item
@@ -1102,7 +991,7 @@ an address?
 @item
 How long (in bytes) is this reference?
 @item
-Which segment does the address refer to?  What is the numeric value of 
+Which segment does the address refer to?  What is the numeric value of
 @display
 (@var{address}) @minus{} (@var{start-address of segment})?
 @end display
@@ -1110,59 +999,55 @@ Which segment does the address refer to?  What is the numeric value of
 Is the reference to an address ``Program-Counter relative''?
 @end itemize
 
-In fact, every address @code{as} ever uses is expressed as
-@code{(@var{segment}) + (@var{offset into segment})}.  Further, every
-expression @code{as} computes is of this segmented nature.
-@dfn{Absolute expression} means an expression with segment ``absolute''
-(@pxref{ld Segments}).  A @dfn{pass1 expression} means an expression
-with segment ``pass1'' (@pxref{as Segments}).  In this manual we use the
-notation @{@var{segname} @var{N}@} to mean ``offset @var{N} into segment
-@var{segname}''.
+In fact, every address @code{_AS__} ever uses is expressed as
+@display
+(@var{segment}) + (@var{offset into segment})
+@end display
+@noindent
+Further, every expression @code{_AS__} computes is of this segmented
+nature.  @dfn{Absolute expression} means an expression with segment
+``absolute'' (@pxref{_LD__ Segments}).  A @dfn{pass1 expression} means
+an expression with segment ``pass1'' (@pxref{_AS__ Segments}).  In this
+manual we use the notation @{@var{segname} @var{N}@} to mean ``offset
+@var{N} into segment @var{segname}''.
 
 Apart from text, data and bss segments you need to know about the
-@dfn{absolute} segment.  When @code{ld} mixes partial programs,
+@dfn{absolute} segment.  When @code{_LD__} mixes partial programs,
 addresses in the absolute segment remain unchanged.  That is, address
-@code{@{absolute 0@}} is ``relocated'' to run-time address 0 by @code{ld}. 
+@code{@{absolute 0@}} is ``relocated'' to run-time address 0 by @code{_LD__}.
 Although two partial programs' data segments will not overlap addresses
-after linking, @emph{by definition} their absolute segments will overlap. 
+after linking, @emph{by definition} their absolute segments will overlap.
 Address @code{@{absolute@ 239@}} in one partial program will always be the same
 address when the program is running as address @code{@{absolute@ 239@}} in any
-other partial program. 
+other partial program.
 
 The idea of segments is extended to the @dfn{undefined} segment.  Any
 address whose segment is unknown at assembly time is by definition
-rendered @{undefined @var{U}@}---where @var{U} will be filled in later. 
+rendered @{undefined @var{U}@}---where @var{U} will be filled in later.
 Since numbers are always defined, the only way to generate an undefined
 address is to mention an undefined symbol.  A reference to a named
 common block would be such a symbol: its value is unknown at assembly
-time so it has segment @emph{undefined}. 
+time so it has segment @emph{undefined}.
 
 By analogy the word @emph{segment} is used to describe groups of segments in
-the linked program.  @code{ld} puts all partial programs' text
+the linked program.  @code{_LD__} puts all partial programs' text
 segments in contiguous addresses in the linked program.  It is
 customary to refer to the @emph{text segment} of a program, meaning all
 the addresses of all partial program's text segments.  Likewise for
 data and bss segments.
 
-Some segments are manipulated by @code{ld}; others are invented for
-use of @code{as} and have no meaning except during assembly.
+Some segments are manipulated by @code{_LD__}; others are invented for
+use of @code{_AS__} and have no meaning except during assembly.
 
-@menu
-* ld Segments::			ld Segments
-* as Segments::			as Internal Segments
-* Sub-Segments::		Sub-Segments
-* bss::				bss Segment
-@end menu
-
-@node ld Segments, as Segments, Segs Background, Segments
-@section ld Segments
-@code{ld} deals with just five kinds of segments, summarized below.
+@node _LD__ Segments, _AS__ Segments, Segs Background, Segments
+@section _LD__ Segments
+@code{_LD__} deals with just five kinds of segments, summarized below.
 
 @table @strong
 
 @item text segment
 @itemx data segment
-These segments hold your program.  @code{as} and @code{ld} treat them as
+These segments hold your program.  @code{_AS__} and @code{_LD__} treat them as
 separate but equal segments.  Anything you can say of one segment is
 true of the other.  When the program is running, however, it is
 customary for the text segment to be unalterable.  The
@@ -1171,32 +1056,32 @@ instructions, constants and the like.  The data segment of a running
 program is usually alterable: for example, C variables would be stored
 in the data segment.
 
-@item bss segment 
+@item bss segment
 This segment contains zeroed bytes when your program begins running.  It
 is used to hold unitialized variables or common storage.  The length of
 each partial program's bss segment is important, but because it starts
 out containing zeroed bytes there is no need to store explicit zero
 bytes in the object file.  The bss segment was invented to eliminate
-those explicit zeros from object files. 
+those explicit zeros from object files.
 
-@item absolute segment 
-Address 0 of this segment is always ``relocated'' to runtime address 0. 
-This is useful if you want to refer to an address that @code{ld} must
+@item absolute segment
+Address 0 of this segment is always ``relocated'' to runtime address 0.
+This is useful if you want to refer to an address that @code{_LD__} must
 not change when relocating.  In this sense we speak of absolute
-addresses being ``unrelocatable'': they don't change during relocation. 
+addresses being ``unrelocatable'': they don't change during relocation.
 
-@item @code{undefined} segment 
+@item undefined segment
 This ``segment'' is a catch-all for address references to objects not in
-the preceding segments. 
+the preceding segments.
 @c FIXME: ref to some other doc on obj-file formats could go here.
 
 @end table
 
-An idealized example of the 3 relocatable segments follows.  Memory
-addresses are on the horizontal axis. 
+An idealized example of the three relocatable segments follows.  Memory
+addresses are on the horizontal axis.
 
 @ifinfo
-@example
+@smallexample
                       +-----+----+--+
 partial program # 1:  |ttttt|dddd|00|
                       +-----+----+--+
@@ -1213,92 +1098,96 @@ linked program:       |  |TTT|ttttt|  |dddd|DDD|00000|
                       +--+---+-----+--+----+---+-----+~~
 
     addresses:        0 @dots{}
-@end example
+@end smallexample
 @end ifinfo
 @tex
-\halign{\hfil\rm #\quad&#\cr
-\cr
-   &\ibox{2.5cm}{\tt text}\ibox{2cm}{\tt data}\ibox{1cm}{\tt bss}\cr
-Partial program \#1: 
-&\boxit{2.5cm}{\tt ttttt}\boxit{2cm}{\tt dddd}\boxit{1cm}{\tt 00}\cr
-\cr
-   &\ibox{1cm}{\tt text}\ibox{1.5cm}{\tt data}\ibox{1cm}{\tt bss}\cr
-Partial program \#2:
-&\boxit{1cm}{\tt TTT}\boxit{1.5cm}{\tt DDDD}\boxit{1cm}{\tt 000}\cr
-\cr
-   &\ibox{.5cm}{}\ibox{1cm}{\tt text}\ibox{2.5cm}{}\ibox{.75cm}{}\ibox{2cm}{\tt data}\ibox{1.5cm}{}\ibox{2cm}{\tt bss}\cr
-linked program: 
-&\boxit{.5cm}{}\boxit{1cm}{\tt TTT}\boxit{2.5cm}{\tt
+
+{\it Partial program \#1: }
+
+\line{\ibox{2.5cm}{\tt text}\ibox{2cm}{\tt data}\ibox{1cm}{\tt bss}\hfil}
+\line{\boxit{2.5cm}{\tt ttttt}\boxit{2cm}{\tt dddd}\boxit{1cm}{\tt 00}\hfil}
+
+{\it Partial program \#2:}
+
+\line{\ibox{1cm}{\tt text}\ibox{1.5cm}{\tt data}\ibox{1cm}{\tt bss}\hfil}
+\line{\boxit{1cm}{\tt TTT}\boxit{1.5cm}{\tt DDDD}\boxit{1cm}{\tt 000}\hfil}
+
+{\it linked program: }
+
+\line{\ibox{.5cm}{}\ibox{1cm}{\tt text}\ibox{2.5cm}{}\ibox{.75cm}{}\ibox{2cm}{\tt data}\ibox{1.5cm}{}\ibox{2cm}{\tt bss}\hfil}
+\line{\boxit{.5cm}{}\boxit{1cm}{\tt TTT}\boxit{2.5cm}{\tt
 ttttt}\boxit{.75cm}{}\boxit{2cm}{\tt dddd}\boxit{1.5cm}{\tt
-DDDD}\boxit{2cm}{00000}\ \dots\cr
-addresses:
-&\dots\cr
-}
+DDDD}\boxit{2cm}{\tt 00000}\ \dots\hfil}
+
+{\it addresses:}
+
+\line{0\dots\hfil}
+
 @end tex
 
-@node as Segments, Sub-Segments, ld Segments, Segments
-@section as Internal Segments
-These segments are invented for the internal use of @code{as}.  They
+@node _AS__ Segments, Sub-Segments, _LD__ Segments, Segments
+@section _AS__ Internal Segments
+These segments are invented for the internal use of @code{_AS__}.  They
 have no meaning at run-time.  You don't need to know about these
-segments except that they might be mentioned in @code{as}' warning
+segments except that they might be mentioned in the @code{_AS__} warning
 messages.  These segments are invented to permit the value of every
 expression in your assembly language program to be a segmented
 address.
 
-@table @b 
-@item absent segment 
+@table @b
+@item absent segment
 An expression was expected and none was
-found.  
+found.
 
-@item goof segment 
+@item goof segment
 An internal assembler logic error has been
-found.  This means there is a bug in the assembler.  
+found.  This means there is a bug in the assembler.
 
 @item grand segment
 A @dfn{grand number} is a bignum or a flonum, but not an integer.  If a
 number can't be written as a C @code{int} constant, it is a grand
-number.  @code{as} has to remember that a flonum or a bignum does not
+number.  @code{_AS__} has to remember that a flonum or a bignum does not
 fit into 32 bits, and cannot be an argument (@pxref{Arguments}) in an
 expression: this is done by making a flonum or bignum be in segment
-grand.  This is purely for internal @code{as} convenience; grand
-segment behaves similarly to absolute segment.  
+grand.  This is purely for internal @code{_AS__} convenience; grand
+segment behaves similarly to absolute segment.
 
-@item pass1 segment 
+@item pass1 segment
 The expression was impossible to evaluate in the first pass.  The
 assembler will attempt a second pass (second reading of the source) to
 evaluate the expression.  Your expression mentioned an undefined symbol
 in a way that defies the one-pass (segment + offset in segment) assembly
-process.  No compiler need emit such an expression.  
+process.  No compiler need emit such an expression.
 
 @quotation
-@emph{Warning:} the second pass is currently not implemented.  @code{as}
+@emph{Warning:} the second pass is currently not implemented.  @code{_AS__}
 will abort with an error message if one is required.
 @end quotation
 
-@item difference segment 
+@item difference segment
 As an assist to the C compiler, expressions of the forms
 @display
-   (@var{undefined symbol}) @minus{} (@var{expression}
-   (@var{something} @minus{} (@var{undefined symbol})
+   (@var{undefined symbol}) @minus{} (@var{expression})
+   @var{something} @minus{} (@var{undefined symbol})
    (@var{undefined symbol}) @minus{} (@var{undefined symbol})
 @end display
-are permitted, and belong to the difference segment.  @code{as}
+are permitted, and belong to the difference segment.  @code{_AS__}
 re-evaluates such expressions after the source file has been read and
 the symbol table built.  If by that time there are no undefined symbols
 in the expression then the expression assumes a new segment.  The
-intention is to permit statements like 
-@samp{.word label - base_of_table} 
+intention is to permit statements like
+@samp{.word label - base_of_table}
 to be assembled in one pass where both @code{label} and
 @code{base_of_table} are undefined.  This is useful for compiling C and
 Algol switch statements, Pascal case statements, FORTRAN computed goto
-statements and the like.  
+statements and the like.
 @end table
 
-@node Sub-Segments, bss, as Segments, Segments
+@node Sub-Segments, bss, _AS__ Segments, Segments
 @section Sub-Segments
 Assembled bytes fall into two segments: text and data.
 Because you may have groups of text or data that you want to end up near
-to each other in the object file, @code{as} allows you to use
+to each other in the object file, @code{_AS__} allows you to use
 @dfn{subsegments}.  Within each segment, there can be numbered
 subsegments with values from 0 to 8192.  Objects assembled into the same
 subsegment will be grouped with other objects in the same subsegment
@@ -1312,18 +1201,25 @@ output.
 Subsegments are optional.  If you don't use subsegments, everything
 will be stored in subsegment number zero.
 
-_if__(!_AMD29K__)
+_if__(!(_AMD29K__||_I960__))
 Each subsegment is zero-padded up to a multiple of four bytes.
 (Subsegments may be padded a different amount on different flavors
-of @code{as}.)  
-_fi__(!_AMD29K__)
+of @code{_AS__}.)
+_fi__(!(_AMD29K__||_I960__))
+_if__(_I960__)
+@c Rich Pixley says padding here depends on target obj code format; that
+@c doesn't seem particularly useful to say without further elaboration,
+@c so for now I say nothing about it.  If this is a generic BFD issue,
+@c these paragraphs might need to vanish from this manual, and be
+@c discussed in BFD chapter of binutils (or some such).
+_fi__(_I960__)
 _if__(_AMD29K__)
 On the AMD 29K family, no particular padding is added to segment sizes;
-GNU as forces no alignment on this platform.
+_AS__ forces no alignment on this platform.
 _fi__(_AMD29K__)
 Subsegments appear in your object file in numeric order, lowest numbered
 to highest.  (All this to be compatible with other people's assemblers.)
-The object file contains no representation of subsegments; @code{ld} and
+The object file contains no representation of subsegments; @code{_LD__} and
 other programs that manipulate object files will see no trace of them.
 They just see all your text subsegments as a text segment, and all your
 data subsegments as a data segment.
@@ -1335,7 +1231,7 @@ expression.  (@xref{Expressions}.)  If you just say @samp{.text}
 then @samp{.text 0} is assumed.  Likewise @samp{.data} means
 @samp{.data 0}.  Assembly begins in @code{text 0}.
 For instance:
-@example
+@smallexample
 .text 0     # The default subsegment is text 0 anyway.
 .ascii "This lives in the first text subsegment. *"
 .text 1
@@ -1346,11 +1242,11 @@ For instance:
 .text 0
 .ascii "This lives in the first text segment,"
 .ascii "immediately following the asterisk (*)."
-@end example
+@end smallexample
 
 Each segment has a @dfn{location counter} incremented by one for every
 byte assembled into that segment.  Because subsegments are merely a
-convenience restricted to @code{as} there is no concept of a subsegment
+convenience restricted to @code{_AS__} there is no concept of a subsegment
 location counter.  There is no way to directly manipulate a location
 counter---but the @code{.align} directive will change it, and any label
 definition will capture its current value.  The location counter of the
@@ -1373,20 +1269,12 @@ there are no bss subsegments. @xref{Comm}; @pxref{Lcomm}.
 @chapter Symbols
 Symbols are a central concept: the programmer uses symbols to name
 things, the linker uses symbols to link, and the debugger uses symbols
-to debug. 
+to debug.
 
 @quotation
-@emph{Warning:} @code{as} does not place symbols in the object file in
+@emph{Warning:} @code{_AS__} does not place symbols in the object file in
 the same order they were declared.  This may break some debuggers.
 @end quotation
-
-@menu
-* Labels::			Labels
-* Setting Symbols::		Giving Symbols Other Values
-* Symbol Names::		Symbol Names
-* Dot::				The Special Dot Symbol
-* Symbol Attributes::		Symbol Attributes
-@end menu
 
 @node Labels, Setting Symbols, Symbols, Symbols
 @section Labels
@@ -1420,10 +1308,6 @@ Each symbol has exactly one name. Each name in an assembly language
 program refers to exactly one symbol. You may use that symbol name any
 number of times in a program.
 
-@menu
-* Local Symbols::		Local Symbol Names
-@end menu
-
 @node Local Symbols,  , Symbol Names, Symbol Names
 @subsection Local Symbol Names
 
@@ -1452,11 +1336,11 @@ parts:
 
 @table @code
 @item L
-All local labels begin with @samp{L}. Normally both @code{as} and
-@code{ld} forget symbols that start with @samp{L}. These labels are
+All local labels begin with @samp{L}. Normally both @code{_AS__} and
+@code{_LD__} forget symbols that start with @samp{L}. These labels are
 used for symbols you are never intended to see.  If you give the
-@samp{-L} option then @code{as} will retain these symbols in the
-object file. If you also instruct @code{ld} to retain these symbols,
+@samp{-L} option then @code{_AS__} will retain these symbols in the
+object file. If you also instruct @code{_LD__} to retain these symbols,
 you may use them in debugging.
 
 @item @var{digit}
@@ -1477,13 +1361,13 @@ through @samp{9:}.
 @end table
 
 For instance, the first @code{1:} is named @code{L1@ctrl{A}1}, the 44th
-@code{3:} is named @code{L3@ctrl{A}44}. 
+@code{3:} is named @code{L3@ctrl{A}44}.
 
 @node Dot, Symbol Attributes, Symbol Names, Symbols
 @section The Special Dot Symbol
 
 The special symbol @samp{.} refers to the current address that
-@code{as} is assembling into.  Thus, the expression @samp{melvin:
+@code{_AS__} is assembling into.  Thus, the expression @samp{melvin:
 .long .} will cause @code{melvin} to contain its own address.
 Assigning a value to @code{.} is treated the same as a @code{.org}
 directive.  Thus, the expression @samp{.=.+4} is the same as saying
@@ -1496,37 +1380,30 @@ _fi__(_AMD29K__)
 
 @node Symbol Attributes,  , Dot, Symbols
 @section Symbol Attributes
-Every symbol has these attributes: Value, Type, Descriptor, and ``Other''.
+Every symbol has, as well as its name, the attributes ``Value'' and
+``Type''.  Depending on output format, symbols also have auxiliary attributes.
 _if__(_INTERNALS__)
 The detailed definitions are in _0__<a.out.h>_1__.
 _fi__(_INTERNALS__)
 
-If you use a symbol without defining it, @code{as} assumes zero for
+If you use a symbol without defining it, @code{_AS__} assumes zero for
 all these attributes, and probably won't warn you.  This makes the
 symbol an externally defined symbol, which is generally what you
 would want.
 
-@menu
-* Symbol Value::		Value
-* Symbol Type::			Type
-* Symbol Desc::			Descriptor
-* Symbol Other::		Other
-@end menu
-
 @node Symbol Value, Symbol Type, Symbol Attributes, Symbol Attributes
 @subsection Value
 The value of a symbol is (usually) 32 bits, the size of one GNU C
-@code{int}.  For a symbol which labels a location in the
-text, data, bss or absolute segments the
-value is the number of addresses from the start of that segment to
-the label.  Naturally for text, data and bss
-segments the value of a symbol changes as @code{ld} changes segment
-base addresses during linking.  absolute symbols' values do
-not change during linking: that is why they are called absolute.
+@code{int}.  For a symbol which labels a location in the text, data, bss
+or absolute segments the value is the number of addresses from the start
+of that segment to the label.  Naturally for text, data and bss segments
+the value of a symbol changes as @code{_LD__} changes segment base
+addresses during linking.  Absolute symbols' values do not change during
+linking: that is why they are called absolute.
 
 The value of an undefined symbol is treated in a special way.  If it is
 0 then the symbol is not defined in this assembler source program, and
-@code{ld} will try to determine its value from other programs it is
+@code{_LD__} will try to determine its value from other programs it is
 linked with.  You make this kind of symbol simply by mentioning a symbol
 name without defining it.  A non-zero value represents a @code{.comm}
 common declaration.  The value is how much common storage to reserve, in
@@ -1535,90 +1412,61 @@ allocated storage.
 
 @node Symbol Type, Symbol Desc, Symbol Value, Symbol Attributes
 @subsection Type
-The type attribute of a symbol is 8 bits encoded in a devious way.
-We kept this coding standard for compatibility with older operating
-systems.
+The type attribute of a symbol contains relocation (segment)
+information, any flag settings indicating that a symbol is external, and
+(optionally), other information for linkers and debuggers.  The exact
+format depends on the object-code output format in use.
 
-@ifinfo
-@example
-
-        7     6     5     4     3     2     1     0     bit numbers
-     +-----+-----+-----+-----+-----+-----+-----+-----+
-     |                 |                       |     |
-     |   N_STAB bits   |      N_TYPE bits      |N_EXT|
-     |                 |                       | bit |
-     +-----+-----+-----+-----+-----+-----+-----+-----+
-
-                     Type byte
-@end example
-@end ifinfo
-@tex
-\vskip 1pc
-\halign{#\quad&#\cr
-\ibox{3cm}{7}\ibox{4cm}{4}\ibox{1.1cm}{0}&bit numbers\cr
-\boxit{3cm}{{\tt N\_STAB} bits}\boxit{4cm}{{\tt N\_TYPE}
-bits}\boxit{1.1cm}{\tt N\_EXT}\cr
-\hfill {\bf Type} byte\hfill\cr
-}
-@end tex
-
-@subsubsection @code{N_EXT} bit
-This bit is set if @code{ld} might need to use the symbol's type bits
-and value.  If this bit is off, then @code{ld} can ignore the
-symbol while linking.  It is set in two cases.  If the symbol is
-undefined, then @code{ld} is expected to find the symbol's value
-elsewhere in another program module.  Otherwise the symbol has the
-value given, but this symbol name and value are revealed to any other
-programs linked in the same executable program.  This second use of
-the @code{N_EXT} bit is most often made by a @code{.globl} statement.
-
-@subsubsection @code{N_TYPE} bits
-These establish the symbol's ``type'', which is mainly a relocation
-concept.  Common values are detailed in the manual describing the
-executable file format.
-
-@subsubsection @code{N_STAB} bits
-Common values for these bits are described in the manual on the
-executable file format.
+_if__(_AOUT__||_BOUT__)
+@node a.out Symbols,,,
+@subsection Symbol Attributes: @code{a.out}, @code{b.out}
+These symbol attributes appear only when @code{_AS__} is configured for
+one of the Berkeley-descended object output formats.
 
 @node Symbol Desc, Symbol Other, Symbol Type, Symbol Attributes
-@subsection Descriptor
+@subsubsection Descriptor
 This is an arbitrary 16-bit value.  You may establish a symbol's
 descriptor value by using a @code{.desc} statement (@pxref{Desc}).
-A descriptor value means nothing to @code{as}.
+A descriptor value means nothing to @code{_AS__}.
 
 @node Symbol Other,  , Symbol Desc, Symbol Attributes
-@subsection Other
-This is an arbitrary 8-bit value.  It means nothing to @code{as}.
+@subsubsection Other
+This is an arbitrary 8-bit value.  It means nothing to @code{_AS__}.
+_fi__(_AOUT__||_BOUT__)
+
+_if__(_COFF__)
+@node COFF Symbols,,,
+@subsection Symbol Attributes for COFF
+The COFF format supports a multitude of auxiliary symbol attributes;
+like the primary symbol attributes, they are set between @code{.def} and
+@code{.endef} directives.  
+
+@subsubsection Primary Attributes
+The symbol name is set with @code{.def}; the value and type,
+respectively, with @code{.val} and @code{.type}.
+
+@subsubsection Auxiliary Attributes
+The @code{_AS__} directives @code{.dim}, @code{.line}, @code{.scl},
+@code{.size}, and @code{.tag} can generate auxiliary symbol table
+information for COFF.
+_fi__(_COFF__)
 
 @node Expressions, Pseudo Ops, Symbols, Top
 @chapter Expressions
 An @dfn{expression} specifies an address or numeric value.
 Whitespace may precede and/or follow an expression.
 
-@menu
-* Empty Exprs::			Empty Expressions
-* Integer Exprs::		Integer Expressions
-@end menu
-
 @node Empty Exprs, Integer Exprs, Expressions, Expressions
 @section Empty Expressions
 An empty expression has no value: it is just whitespace or null.
 Wherever an absolute expression is required, you may omit the
-expression and @code{as} will assume a value of (absolute) 0.  This
+expression and @code{_AS__} will assume a value of (absolute) 0.  This
 is compatible with other assemblers.
 
 @node Integer Exprs,  , Empty Exprs, Expressions
 @section Integer Expressions
 An @dfn{integer expression} is one or more @emph{arguments} delimited
 by @emph{operators}.
-
-@menu
-* Arguments::			Arguments
-* Operators::			Operators
-* Prefix Ops::			Prefix Operators
-* Infix Ops::			Infix Operators
-@end menu
 
 @node Arguments, Operators, Integer Exprs, Integer Exprs
 @subsection Arguments
@@ -1628,17 +1476,17 @@ contexts arguments are sometimes called ``arithmetic operands''.  In
 this manual, to avoid confusing them with the ``instruction operands'' of
 the machine language, we use the term ``argument'' to refer to parts of
 expressions only, reserving the word ``operand'' to refer only to machine
-instruction operands. 
+instruction operands.
 
 Symbols are evaluated to yield @{@var{segment} @var{NNN}@} where
 @var{segment} is one of text, data, bss, absolute,
-or @code{undefined}.  @var{NNN} is a signed, 2's complement 32 bit
+or undefined.  @var{NNN} is a signed, 2's complement 32 bit
 integer.
 
 Numbers are usually integers.
 
 A number can be a flonum or bignum.  In this case, you are warned
-that only the low order 32 bits are used, and @code{as} pretends
+that only the low order 32 bits are used, and @code{_AS__} pretends
 these 32 bits are an integer.  You may write integer-manipulating
 instructions that act on exotic constants, compatible with other
 assemblers.
@@ -1656,14 +1504,26 @@ whitespace.
 
 @node Prefix Ops, Infix Ops, Operators, Integer Exprs
 @subsection Prefix Operators
-@code{as} has the following @dfn{prefix operators}.  They each take
+@code{_AS__} has the following @dfn{prefix operators}.  They each take
 one argument, which must be absolute.
+
+@c the tex/end tex stuff surrounding this small table is meant to make
+@c it align, on the printed page, with the similar table in the next
+@c section (which is inside an enumerate).
+@tex
+\global\advance\leftskip by \itemindent
+@end tex
+
 @table @code
 @item -
 @dfn{Negation}.  Two's complement negation.
 @item ~
 @dfn{Complementation}.  Bitwise not.
 @end table
+
+@tex
+\global\advance\leftskip by -\itemindent
+@end tex
 
 @node Infix Ops,  , Prefix Ops, Integer Exprs
 @subsection Infix Operators
@@ -1726,75 +1586,46 @@ Otherwise subtraction is illegal.
 
 The sense of the rule for addition is that it's only meaningful to add
 the @emph{offsets} in an address; you can only have a defined segment in
-one of the two arguments. 
+one of the two arguments.
 
-Similarly, you can't subtract quantities from two different segments. 
+Similarly, you can't subtract quantities from two different segments.
 
-@node Pseudo Ops, Machine Dependent, Expressions, Top
+@node Pseudo Ops, _MACH_DEP__, Expressions, Top
 @chapter Assembler Directives
-@menu
-* Abort::			The Abort directive causes as to abort
-* Align::			Pad the location counter to a power of 2
-* App-File::			Set the logical file name
-* Ascii::			Fill memory with bytes of ASCII characters
-* Asciz::			Fill memory with bytes of ASCII characters followed
-                by a null.
-* Byte::			Fill memory with 8-bit integers
-* Comm::			Reserve public space in the BSS segment
-* Data::			Change to the data segment
-* Desc::			Set the n_desc of a symbol
-* Double::			Fill memory with double-precision floating-point numbers
-* Else::			@code{.else}
-* End::				@code{.end}
-* Endif::			@code{.endif}
-* Equ::				@code{.equ @var{symbol}, @var{expression}}
-* Extern::			@code{.extern}
-* Fill::			Fill memory with repeated values
-* Float::			Fill memory with single-precision floating-point numbers
-* Global::			Make a symbol visible to the linker
-* Ident::			@code{.ident}
-* If::				@code{.if @var{absolute expression}}
-* Include::			@code{.include "@var{file}"}
-* Int::				Fill memory with 32-bit integers
-* Lcomm::			Reserve private space in the BSS segment
-* Line::			Set the logical line number
-* Ln::				@code{.ln @var{line-number}}
-* List::			@code{.list}, @code{.nolist}, @code{.eject}, @code{.lflags}, @code{.title}, @code{.sbttl}
-* Long::			Fill memory with 32-bit integers
-* Lsym::			Create a local symbol
-* Octa::			Fill memory with 128-bit integers
-* Org::				Change the location counter
-* Quad::			Fill memory with 64-bit integers
-* Set::				Set the value of a symbol
-* Short::			Fill memory with 16-bit integers
-* Single::			@code{.single @var{flonums}}
-* Stab::			Store debugging information
-* Text::			Change to the text segment
-* Word::			Fill memory with 32-bit integers
-* Deprecated::			Deprecated Directives
-* Machine Options::		Options
-* Machine Syntax::		Syntax
-* Floating Point::		Floating Point
-* Machine Directives::		Machine Directives
-* Opcodes::			Opcodes
-@end menu
 
-All assembler directives have names that begin with a period (@samp{.}). 
-The rest of the name is letters: their case does not matter. 
+All assembler directives have names that begin with a period (@samp{.}).
+The rest of the name is letters: their case does not matter.
 
-This chapter discusses directives present in all versions of GNU
-@code{as}; @pxref{Machine Dependent} for additional directives.
+This chapter discusses directives present regardless of the target
+machine configuration for the GNU assembler; @pxref{_MACH_DEP__} for
+additional directives.
 
-@node Abort, Align, Pseudo Ops, Pseudo Ops
+@node Abort,,,
 @section @code{.abort}
 This directive stops the assembly immediately.  It is for
 compatibility with other assemblers.  The original idea was that the
-assembler program would be piped into the assembler.  If the sender
-of a program quit, it could use this directive tells @code{as} to
+assembly language source would be piped into the assembler.  If the sender
+of the source quit, it could use this directive tells @code{_AS__} to
 quit also.  One day @code{.abort} will not be supported.
 
-@node Align, App-File, Abort, Pseudo Ops
-@section @code{.align @var{abs-expression} , @var{abs-expression}}
+_if__(_COFF__)
+@node coff-ABORT,,,
+@section @code{.ABORT}
+When producing COFF output, @code{_AS__} accepts this directive as a
+synonym for @samp{.abort}.
+_fi__(_COFF__)
+_if__(_BOUT__)
+_if__(!_COFF__)
+@node bout-ABORT,,,
+@section @code{.ABORT}
+_fi__(!_COFF__)
+
+When producing @code{b.out} output, @code{_AS__} accepts this directive,
+but ignores it.
+_fi__(_BOUT__)
+
+@node Align,,,
+@section @code{.align @var{abs-expr} , @var{abs-expr}}
 Pad the location counter (in the current subsegment) to a particular
 storage boundary.  The first expression (which must be absolute) is the
 number of low-order zero bits the location counter will have after
@@ -1806,17 +1637,21 @@ The second expression (also absolute) gives the value to be stored in
 the padding bytes.  It (and the comma) may be omitted.  If it is
 omitted, the padding bytes are zero.
 
-@node App-File, Ascii, Align, Pseudo Ops
+@node App-File,,,
 @section @code{.app-file @var{string}}
-@code{.app-file} tells @code{as} that we are about to start a new
-logical file.  @var{String} is the new file name.  In general, the
-filename is recognized whether or not it is surrounded by quotes @samp{"}; 
+@code{.app-file}
+_if__(!_AMD29K__)
+(which may also be spelled @samp{.file})
+_fi__(!_AMD29K__)
+tells @code{_AS__} that we are about to start a new
+logical file.  @var{string} is the new file name.  In general, the
+filename is recognized whether or not it is surrounded by quotes @samp{"};
 but if you wish to specify an empty file name is permitted,
 you must give the quotes--@code{""}.  This statement may go away in
-future: it is only recognized to be compatible with old @code{as}
-programs.
+future: it is only recognized to be compatible with old @code{_AS__}
+programs.@refill
 
-@node Ascii, Asciz, App-File, Pseudo Ops
+@node Ascii,,,
 @section @code{.ascii "@var{string}"}@dots{}
 @code{.ascii} expects zero or more string literals (@pxref{Strings})
 separated by commas.  It assembles each string (with no automatic
@@ -1836,70 +1671,133 @@ Each expression is assembled into the next byte.
 @node Comm, Data, Byte, Pseudo Ops
 @section @code{.comm @var{symbol} , @var{length} }
 @code{.comm} declares a named common area in the bss segment.  Normally
-@code{ld} reserves memory addresses for it during linking, so no partial
+@code{_LD__} reserves memory addresses for it during linking, so no partial
 program defines the location of the symbol.  Use @code{.comm} to tell
-@code{ld} that it must be at least @var{length} bytes long.  @code{ld}
+@code{_LD__} that it must be at least @var{length} bytes long.  @code{_LD__}
 will allocate space for each @code{.comm} symbol that is at least as
 long as the longest @code{.comm} request in any of the partial programs
-linked.  @var{length} is an absolute expression. 
+linked.  @var{length} is an absolute expression.
 
 @node Data, Desc, Comm, Pseudo Ops
 @section @code{.data @var{subsegment}}
-@code{.data} tells @code{as} to assemble the following statements onto the
+@code{.data} tells @code{_AS__} to assemble the following statements onto the
 end of the data subsegment numbered @var{subsegment} (which is an
 absolute expression).  If @var{subsegment} is omitted, it defaults
 to zero.
 
+_if__(_COFF__)
+@node Def,,,
+@section @code{.def @var{name}}
+Begin defining debugging information for a symbol @var{name}; the
+definition extends until the @code{.endef} directive is encountered.
+_if__(_BOUT__)
+
+This directive is only observed when @code{_AS__} is configured for COFF
+format output; when producing @code{b.out}, @samp{.def} is recognized,
+but ignored.
+_fi__(_BOUT__)
+_fi__(_COFF__)
+
+_if__(_AOUT__||_BOUT__)
 @node Desc, Double, Data, Pseudo Ops
 @section @code{.desc @var{symbol}, @var{abs-expression}}
 This directive sets the descriptor of the symbol (@pxref{Symbol Attributes})
 to the low 16 bits of an absolute expression.
 
+_if__(_COFF__)
+The @samp{.desc} directive is not available when @code{_AS__} is
+configured for COFF output; it is only for @code{a.out} or @code{b.out}
+object format.  For the sake of compatibility, @code{_AS__} will accept
+it, but produce no output, when configured for COFF.
+_fi__(_COFF__)
+_fi__(_AOUT__||_BOUT__)
+
+_if__(_COFF__)
+@node Dim,,,
+@section @code{.dim}
+This directive is generated by compilers to include auxiliary debugging
+information in the symbol table.  It is only permitted inside
+@code{.def}/@code{.endef} pairs.
+_if__(_BOUT__)
+
+@samp{.dim} is only meaningful when generating COFF format output; when
+@code{_AS__} is generating @code{b.out}, it accepts this directive but
+ignores it.
+_fi__(_BOUT__)
+_fi__(_COFF__)
+
 @node Double, Else, Desc, Pseudo Ops
 @section @code{.double @var{flonums}}
-@code{.double} expects zero or more flonums, separated by commas.  It assembles
-floating point numbers.  
+@code{.double} expects zero or more flonums, separated by commas.  It
+assembles floating point numbers.
 _if__(_ALL_ARCH__)
 The exact kind of floating point numbers emitted depends on how
-@code{as} is configured.  @xref{Machine Dependent}.
+@code{_AS__} is configured.  @xref{_MACH_DEP__}.
 _fi__(_ALL_ARCH__)
-_if__(_AMD29K__)
-On the AMD 29K family the floating point format used is IEEE.
-_fi__(_AMD29K__)
+_if__(_AMD29K__ || _I960__)
+On the _HOST__ family @samp{.double} emits 64-bit floating-point numbers
+in IEEE format.
+_fi__(_AMD29K__ || _I960__)
 
-@node Else, End, Double, Pseudo Ops
+@node Else,,,
 @section @code{.else}
-@code{.else} is part of the @code{as} support for conditional assembly;
+@code{.else} is part of the @code{_AS__} support for conditional assembly;
 @pxref{If}.  It marks the beginning of a section of code to be assembled
 if the condition for the preceding @code{.if} was false.
 
-@ignore
-@node End, Endif, Else, Pseudo Ops
+_if__(0)
+@node End,,,
 @section @code{.end}
 This doesn't do anything---but isn't an s_ignore, so I suspect it's
 meant to do something eventually (which is why it isn't documented here
 as "for compatibility with blah").
-@end ignore
+_fi__(0)
+
+_if__(_COFF__)
+@node Endef,,,
+@section @code{.endef}
+This directive flags the end of a symbol definition begun with
+@code{.def}. 
+_if__(_BOUT__)
+
+@samp{.endef} is only meaningful when generating COFF format output; if
+@code{_AS__} is configured to generate @code{b.out}, it accepts this
+directive but ignores it.
+_fi__(_BOUT__)
+_fi__(_COFF__)
 
 @node Endif, Equ, End, Pseudo Ops
 @section @code{.endif}
-@code{.endif} is part of the @code{as} support for conditional assembly;
+@code{.endif} is part of the @code{_AS__} support for conditional assembly;
 it marks the end of a block of code that is only assembled
 conditionally.  @xref{If}.
 
 @node Equ, Extern, Endif, Pseudo Ops
 @section @code{.equ @var{symbol}, @var{expression}}
 
-This directive sets the value of @var{symbol} to @var{expression}.  
+This directive sets the value of @var{symbol} to @var{expression}.
 It is synonymous with @samp{.set}; @pxref{Set}.
 
-@node Extern, Fill, Equ, Pseudo Ops
+@node Extern,,,
 @section @code{.extern}
 @code{.extern} is accepted in the source program---for compatibility
-with other assemblers---but it is ignored.  GNU @code{as} treats
+with other assemblers---but it is ignored.  @code{_AS__} treats
 all undefined symbols as external.
 
-@node Fill, Float, Extern, Pseudo Ops
+_if__(!_AMD29K__)
+@node File,,,
+@section @code{.app-file @var{string}}
+@code{.file} (which may also be spelled @samp{.app-file}) tells
+@code{_AS__} that we are about to start a new logical file.
+@var{string} is the new file name.  In general, the filename is
+recognized whether or not it is surrounded by quotes @samp{"}; but if
+you wish to specify an empty file name, you must give the
+quotes--@code{""}.  This statement may go away in future: it is only
+recognized to be compatible with old @code{_AS__} programs.
+_fi__(!_AMD29K__)
+
+
+@node Fill,,,
 @section @code{.fill @var{repeat} , @var{size} , @var{value}}
 @var{result}, @var{size} and @var{value} are absolute expressions.
 This emits @var{repeat} copies of @var{size} bytes.  @var{Repeat}
@@ -1908,12 +1806,12 @@ more than 8, then it is deemed to have the value 8, compatible with
 other people's assemblers.  The contents of each @var{repeat} bytes
 is taken from an 8-byte number.  The highest order 4 bytes are
 zero.  The lowest order 4 bytes are @var{value} rendered in the
-byte-order of an integer on the computer @code{as} is assembling for.
+byte-order of an integer on the computer @code{_AS__} is assembling for.
 Each @var{size} bytes in a repetition is taken from the lowest order
 @var{size} bytes of this number.  Again, this bizarre behavior is
 compatible with other people's assemblers.
 
-@var{Size} and @var{value} are optional.
+@var{size} and @var{value} are optional.
 If the second comma and @var{value} are absent, @var{value} is
 assumed zero.  If the first comma and following tokens are absent,
 @var{size} is assumed to be 1.
@@ -1921,36 +1819,55 @@ assumed zero.  If the first comma and following tokens are absent,
 @node Float, Global, Fill, Pseudo Ops
 @section @code{.float @var{flonums}}
 This directive assembles zero or more flonums, separated by commas.  It
-has the same effect as @code{.single}. 
+has the same effect as @code{.single}.
 _if__(_ALL_ARCH__)
 The exact kind of floating point numbers emitted depends on how
-@code{as} is configured.  
-@xref{Machine Dependent}.
+@code{_AS__} is configured.
+@xref{_MACH_DEP__}.
 _fi__(_ALL_ARCH__)
-_if__(_AMD29K__)
-The floating point format used for the AMD 29K family is IEEE.
-_fi__(_AMD29K__)
+_if__(_AMD29K__ || _I960__)
+On the _HOST__ family, @code{.float} emits 32-bit floating point numbers
+in IEEE format.
+_fi__(_AMD29K__ || _I960__)
 
 @node Global, Ident, Float, Pseudo Ops
 @section @code{.global @var{symbol}}, @code{.globl @var{symbol}}
-@code{.global} makes the symbol visible to @code{ld}.  If you define
+@code{.global} makes the symbol visible to @code{_LD__}.  If you define
 @var{symbol} in your partial program, its value is made available to
 other partial programs that are linked with it.  Otherwise,
 @var{symbol} will take its attributes from a symbol of the same name
 from another partial program it is linked with.
 
+_if__(!_I960__)
+@c FIXME BFD implications; this is different in COFF.
 This is done by setting the @code{N_EXT} bit of that symbol's type byte
 to 1. @xref{Symbol Attributes}.
+_fi__(!_I960__)
 
 Both spellings (@samp{.globl} and @samp{.global}) are accepted, for
 compatibility with other assemblers.
 
+@node hword, line, file, Machine Directives
+@section @code{.hword @var{expressions}}
+This expects zero or more @var{expressions}, and emits
+a 16 bit number for each.
+
+_if__(_ALL_ARCH__)
+This directive is a synonym for @samp{.short}; depending on the target
+architecture, it may also be a synonym for @samp{.word}.
+_fi__(_ALL_ARCH__)
+_if__( (_AMD29K__ || _I960__) && !_ALL_ARCH__ )
+This directive is a synonym for @samp{.short}.
+_fi__( (_AMD29K__ || _I960__) && !_ALL_ARCH__ )
+
+_if__(_AOUT__||_BOUT__||_COFF__)
 @node Ident, If, Global, Pseudo Ops
 @section @code{.ident}
 This directive is used by some assemblers to place tags in object files.
-GNU @code{as} simply accepts the directive for source-file
+@code{_AS__} simply accepts the directive for source-file
 compatibility with such assemblers, but does not actually emit anything
 for it.
+_fi__(_AOUT__||_BOUT__||_COFF__)
 
 @node If, Include, Ident, Pseudo Ops
 @section @code{.if @var{absolute expression}}
@@ -1959,7 +1876,7 @@ considered part of the source program being assembled if the argument
 (which must be an @var{absolute expression}) is non-zero.  The end of
 the conditional section of code must be marked by @code{.endif}
 (@pxref{Endif}); optionally, you may include code for the
-alternative condition, flagged by @code{.else} (@pxref{Else}. 
+alternative condition, flagged by @code{.else} (@pxref{Else}.
 
 The following variants of @code{.if} are also supported:
 @table @code
@@ -1967,20 +1884,20 @@ The following variants of @code{.if} are also supported:
 Assembles the following section of code if the specified @var{symbol}
 has been defined.
 
-@ignore
+_if__(0)
 @item ifeqs
-BOGONS??
-@end ignore
+Not yet implemented.
+_fi__(0)
 
 @item ifndef @var{symbol}
 @itemx ifnotdef @var{symbol}
 Assembles the following section of code if the specified @var{symbol}
 has not been defined.  Both spelling variants are equivalent.
 
-@ignore
+_if__(0)
 @item ifnes
-NO bogons, I presume?
-@end ignore
+Not yet implemented.
+_fi__(0)
 @end table
 
 @node Include, Int, If, Pseudo Ops
@@ -2006,19 +1923,20 @@ common denoted by @var{symbol}.  The segment and value of @var{symbol} are
 those of the new local common.  The addresses are allocated in the
 bss segment, so at run-time the bytes will start off zeroed.
 @var{Symbol} is not declared global (@pxref{Global}), so is normally
-not visible to @code{ld}.
+not visible to @code{_LD__}.
 
+_if__(_AOUT__||_BOUT__||_COFF__)
 _if__(!_AMD29K__)
-@node Line, Ln, Lcomm, Pseudo Ops
-@section @code{.line @var{line-number}}, @code{.ln @var{line-number}}
-@code{.line}, and its alternate spelling @code{.ln}, tell 
+@node Line,,,
+@section @code{.line @var{line-number}}
 _fi__(!_AMD29K__)
 _if__(_AMD29K__)
-@node Ln, List, Line, Pseudo Ops
+@node Ln,,,
 @section @code{.ln @var{line-number}}
-Tell 
 _fi__(_AMD29K__)
-@code{as} to change the logical line number.  @var{line-number} must be
+_fi__(_AOUT__||_BOUT__||_COFF__)
+_if__(_AOUT__||_BOUT__)
+Tell @code{_AS__} to change the logical line number.  @var{line-number} must be
 an absolute expression.  The next line will have that logical line
 number.  So any other statements on the current line (after a statement
 separator character
@@ -2026,16 +1944,50 @@ _if__(_AMD29K__)
 @samp{@@})
 _fi__(_AMD29K__)
 _if__(!_AMD29K__)
-@code{;}) 
+@code{;})
 _fi__(!_AMD29K__)
-will be reported as on logical line number 
-@var{logical line number} @minus{} 1.  
+will be reported as on logical line number
+@var{line-number} @minus{} 1.
 One day this directive will be unsupported: it is used only
 for compatibility with existing assembler programs. @refill
+_fi__(_AOUT__||_BOUT__)
+_if__(_COFF__)
 
-@node List, Long, Ln, Pseudo Ops
+Even though this is a directive associated with the @code{a.out} or
+@code{b.out} object-code formats, @code{_AS__} will still recognize it
+when producing COFF output, and will treat @samp{.line} as though it
+were the COFF @samp{.ln} @emph{if} it is found outside a
+@code{.def}/@code{.endef} pair.  
+
+Inside a @code{.def}, @samp{.line} is, instead, one of the directives
+used by compilers to generate auxiliary symbol information for
+debugging.
+_fi__(_COFF__)
+
+_if__(_AOUT__&&!_AMD29K__)
+@node Ln,,,
+@section @code{.ln @var{line-number}}
+@samp{.ln} is a synonym for @samp{.line}.
+_fi__(_AOUT__&&!_AMD29K__)
+
+_if__(_COFF__&&!_AOUT__)
+@node Ln,,,
+@section @code{.ln @var{line-number}}
+Tell @code{_AS__} to change the logical line number.  @var{line-number}
+must be an absolute expression.  The next line will have that logical
+line number.  So any other statements on the current line (after a
+statement separator character @code{;}) will be reported as on logical
+line number @var{line-number} @minus{} 1.
+_if__(_BOUT__)
+
+This directive is accepted, but ignored, when @code{_AS__} is configured for
+@code{b.out}; its effect is only associated with COFF output format.
+_fi__(_BOUT__)
+_fi__(_COFF__&&!_AOUT__)
+
+@node List,,,
 @section @code{.list} and related directives
-GNU @code{as} ignores the directives @code{.list}, @code{.nolist},
+@code{_AS__} ignores the directives @code{.list}, @code{.nolist},
 @code{.eject}, @code{.lflags}, @code{.title}, @code{.sbttl}; however,
 they're accepted for compatibility with assemblers that use them.
 
@@ -2049,20 +2001,22 @@ they're accepted for compatibility with assemblers that use them.
 the hash table, ensuring it cannot be referenced by name during the
 rest of the assembly.  This sets the attributes of the symbol to be
 the same as the expression value:
-@example
+@smallexample
 @var{other} = @var{descriptor} = 0
 @var{type} = @r{(segment of @var{expression})}
-N_EXT = 0
 @var{value} = @var{expression}
-@end example
+@end smallexample
+@noindent
+The new symbol is not flagged as external.
 
+@c FIXME: double size emitted for "octa" on i960, others?  Or warn?
 @node Octa, Org, Lsym, Pseudo Ops
 @section @code{.octa @var{bignums}}
 This directive expects zero or more bignums, separated by commas.  For each
 bignum, it emits a 16-byte integer.
 
-The term ``quad'' comes from contexts in which a ``word'' was two bytes;
-hence @emph{quad}-word for 8 bytes.
+The term ``octa'' comes from contexts in which a ``word'' is two bytes;
+hence @emph{octa}-word for 16 bytes.
 
 @node Org, Quad, Octa, Pseudo Ops
 @section @code{.org @var{new-lc} , @var{fill}}
@@ -2073,19 +2027,19 @@ expression with the same segment as the current subsegment.  That is,
 you can't use @code{.org} to cross segments: if @var{new-lc} has the
 wrong segment, the @code{.org} directive is ignored.  To be compatible
 with former assemblers, if the segment of @var{new-lc} is absolute,
-@code{as} will issue a warning, then pretend the segment of @var{new-lc}
+@code{_AS__} will issue a warning, then pretend the segment of @var{new-lc}
 is the same as the current subsegment.
 
 @code{.org} may only increase the location counter, or leave it
 unchanged; you cannot use @code{.org} to move the location counter
-backwards. 
+backwards.
 
 @c double negative used below "not undefined" because this is a specific
 @c reference to "undefined" (as SEG_UNKNOWN is called in this manual)
 @c segment. pesch@cygnus.com 18feb91
-Because @code{as} tries to assemble programs in one pass @var{new-lc}
+Because @code{_AS__} tries to assemble programs in one pass @var{new-lc}
 may not be undefined.  If you really detest this restriction we eagerly await
-a chance to share your improved assembler. 
+a chance to share your improved assembler.
 
 Beware that the origin is relative to the start of the segment, not
 to the start of the subsegment.  This is compatible with other
@@ -2099,25 +2053,49 @@ absolute expression.  If the comma and @var{fill} are omitted,
 @node Quad, Set, Org, Pseudo Ops
 @section @code{.quad @var{bignums}}
 @code{.quad} expects zero or more bignums, separated by commas.  For
-each bignum, it emits an 8-byte integer.  If the bignum won't fit in a 8
+each bignum, it emits
+_if__(!_I960__)
+an 8-byte integer.  If the bignum won't fit in 8
 bytes, it prints a warning message; and just takes the lowest order 8
-bytes of the bignum.
+bytes of the bignum.@refill
 
-The term ``quad'' comes from contexts in which a ``word'' was two bytes;
+The term ``quad'' comes from contexts in which a ``word'' is two bytes;
 hence @emph{quad}-word for 8 bytes.
+_fi__(!_I960__)
+_if__(_I960__)
+a 16-byte integer.  If the bignum won't fit in 16 bytes, it prints a
+warning message; and just takes the lowest order 16 bytes of the
+bignum.@refill 
+_fi__(_I960__)
 
-@node Set, Short, Quad, Pseudo Ops
+_if__(_COFF__)
+@node Scl,,,
+@section @code{.scl @var{class}}
+Set the storage-class value for a symbol.  This directive may only be
+used inside a @code{.def}/@code{.endef} pair.  Storage class may flag
+whether a symbol is static or external, or it may record further
+symbolic debugging information.
+_if__(_BOUT__)
+
+The @samp{.scl} directive is primarily associated with COFF output; when
+configured to generate @code{b.out} output format, @code{_AS__} will
+accept this directive but ignore it.
+_fi__(_BOUT__)
+_fi__(_COFF__)
+
+
+@node Set,,,
 @section @code{.set @var{symbol}, @var{expression}}
 
 This directive sets the value of @var{symbol} to @var{expression}.  This
 will change @var{symbol}'s value and type to conform to
-@var{expression}.  If @code{N_EXT} is set, it remains set.
-(@xref{Symbol Attributes}.)
+@var{expression}.  If @var{symbol} was flagged as external, it remains
+flagged. (@xref{Symbol Attributes}.)
 
 You may @code{.set} a symbol many times in the same assembly.
 If the expression's segment is unknowable during pass 1, a second
 pass over the source program will be forced.  The second pass is
-currently not implemented.  @code{as} will abort with an error
+currently not implemented.  @code{_AS__} will abort with an error
 message if one is required.
 
 If you @code{.set} a global symbol, the value stored in the object
@@ -2125,28 +2103,42 @@ file is the last value stored into it.
 
 @node Short, Single, Set, Pseudo Ops
 @section @code{.short @var{expressions}}
-_if__(! (_SPARC__ || _AMD29K__) )
+_if__(! (_SPARC__ || _AMD29K__ || _I960__) )
 @code{.short} is the same as @samp{.word}.  @xref{Word}.
-_fi__(! (_SPARC__ || _AMD29K__) )
-_if__(_SPARC__ || _AMD29K__)
+_fi__(! (_SPARC__ || _AMD29K__ || _I960__) )
+_if__(_SPARC__ || _AMD29K__ || _I960__)
 This expects zero or more @var{expressions}, and emits
 a 16 bit number for each.
-_fi__(_SPARC__ || _AMD29K__)
+_fi__(_SPARC__ || _AMD29K__ || _I960__)
 
-@node Single, Space, Short, Pseudo Ops
+@node Single,,,
 @section @code{.single @var{flonums}}
 This directive assembles zero or more flonums, separated by commas.  It
-has the same effect as @code{.float}.  
+has the same effect as @code{.float}.
 _if__(_ALL_ARCH__)
 The exact kind of floating point numbers emitted depends on how
-@code{as} is configured.  @xref{Machine Dependent}.
+@code{_AS__} is configured.  @xref{_MACH_DEP__}.
 _fi__(_ALL_ARCH__)
-_if__(_AMD29K__)
-The floating point format used for the AMD 29K family is IEEE.
-_fi__(_AMD29K__)
+_if__(_AMD29K__ || _I960__)
+On the _HOST__ family, @code{.single} emits 32-bit floating point
+numbers in IEEE format.
+_fi__(_AMD29K__ || _I960__)
 
+_if__(_COFF__)
+@node Size,,,
+@section @code{.size}
+This directive is generated by compilers to include auxiliary debugging
+information in the symbol table.  It is only permitted inside
+@code{.def}/@code{.endef} pairs.
+_if__(_BOUT__)
 
-@node Space, Space, Single, Pseudo Ops
+@samp{.size} is only meaningful when generating COFF format output; when
+@code{_AS__} is generating @code{b.out}, it accepts this directive but
+ignores it.
+_fi__(_BOUT__)
+_fi__(_COFF__)
+
+@node Space,,,
 _if__(!_AMD29K__)
 @section @code{.space @var{size} , @var{fill}}
 This directive emits @var{size} bytes, each of value @var{fill}.  Both
@@ -2160,17 +2152,18 @@ This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
 @quotation
-@emph{Warning:} In other versions of GNU @code{as}, the directive
+@emph{Warning:} In other versions of the GNU assembler, the directive
 @code{.space} has the effect of @code{.block}  @xref{Machine Directives}.
 @end quotation
 _fi__(_AMD29K__)
 
+_if__(_AOUT__||_BOUT__||_COFF__)
 @node Stab, Text, Space, Pseudo Ops
 @section @code{.stabd, .stabn, .stabs}
 There are three directives that begin @samp{.stab}.
 All emit symbols (@pxref{Symbols}), for use by symbolic debuggers.
-The symbols are not entered in @code{as}' hash table: they
-cannot be referenced elsewhere in the source file.  
+The symbols are not entered in the @code{_AS__} hash table: they
+cannot be referenced elsewhere in the source file.
 Up to five fields are required:
 @table @var
 @item string
@@ -2180,7 +2173,7 @@ code arbitrarily complex structures into symbol names using this field.
 @item type
 An absolute expression.  The symbol's type is set to the low 8
 bits of this expression.
-Any bit pattern is permitted, but @code{ld} and debuggers will choke on
+Any bit pattern is permitted, but @code{_LD__} and debuggers will choke on
 silly bit patterns.
 @item other
 An absolute expression.
@@ -2218,48 +2211,90 @@ The name of the symbol is set to the empty string @code{""}.
 
 All five fields are specified.
 @end table
+_fi__(_AOUT__||_BOUT__||_COFF__)
 
-@node Text, Word, Stab, Pseudo Ops
+_if__(_COFF__)
+@node Tag,,,
+@section @code{.tag @var{structname}}
+This directive is generated by compilers to include auxiliary debugging
+information in the symbol table.  It is only permitted inside
+@code{.def}/@code{.endef} pairs.  Tags are used to link structure
+definitions in the symbol table with instances of those structures.
+_if__(_BOUT__)
+
+@samp{.tag} is only used when generating COFF format output; when
+@code{_AS__} is generating @code{b.out}, it accepts this directive but
+ignores it.
+_fi__(_BOUT__)
+_fi__(_COFF__)
+
+@node Text,,,
 @section @code{.text @var{subsegment}}
-Tells @code{as} to assemble the following statements onto the end of
+Tells @code{_AS__} to assemble the following statements onto the end of
 the text subsegment numbered @var{subsegment}, which is an absolute
 expression.  If @var{subsegment} is omitted, subsegment number zero
 is used.
 
-@node Word, Deprecated, Text, Pseudo Ops
+_if__(_COFF__)
+@node Type,,,
+@section @code{.type @var{int}}
+This directive, permitted only within @code{.def}/@code{.endef} pairs,
+records the integer @var{int} as the type attribute of a symbol table entry.
+_if__(_BOUT__)
+
+@samp{.type} is associated only with COFF format output; when
+@code{_AS__} is configured for @code{b.out} output, it accepts this
+directive but ignores it.
+_fi__(_BOUT__)
+_fi__(_COFF__)
+
+_if__(_COFF__)
+@node Val,,,
+@section @code{.val @var{addr}}
+This directive, permitted only within @code{.def}/@code{.endef} pairs,
+records the address @var{addr} as the value attribute of a symbol table
+entry.
+_if__(_BOUT__)
+
+@samp{.val} is used only for COFF output; when @code{_AS__} is
+configured for @code{b.out}, it accepts this directive but ignores it.
+_fi__(_BOUT__)
+_fi__(_COFF__)
+
+@node Word,,,
 @section @code{.word @var{expressions}}
 This directive expects zero or more @var{expressions}, of any segment,
 separated by commas.
-_if__(_SPARC__ || _AMD29K__)
-For each expression, @code{as} emits a 32-bit number.
-_fi__(_SPARC__ || _AMD29K__)
-_if__(! (_SPARC__ || _AMD29K__) )
-For each expression, @code{as} emits a 16-bit number.
-_fi__(! (_SPARC__ || _AMD29K__) )
+_if__(_SPARC__ || _AMD29K__ || _I960__)
+For each expression, @code{_AS__} emits a 32-bit number.
+_fi__(_SPARC__ || _AMD29K__ || _I960__)
+_if__(! (_SPARC__ || _AMD29K__ || _I960__) )
+For each expression, @code{_AS__} emits a 16-bit number.
+_fi__(! (_SPARC__ || _AMD29K__ || _I960__) )
 
 _if__(_ALL_ARCH__)
 The byte order of the expression depends on what kind of computer will
 run the program.
 _fi__(_ALL_ARCH__)
 
-@c on the 29k the "special treatment to support compilers" doesn't
+@c on these boxes the "special treatment to support compilers" doesn't
 @c happen---32-bit addressability, period; no long/short jumps.
-_if__(!_AMD29K__)
+_if__(! (_AMD29K__ || _I960__) )
 @subsection Special Treatment to support Compilers
 
 In order to assemble compiler output into something that will work,
-@code{as} will occasionlly do strange things to @samp{.word} directives. 
+@code{_AS__} will occasionlly do strange things to @samp{.word} directives.
 Directives of the form @samp{.word sym1-sym2} are often emitted by
-compilers as part of jump tables.  Therefore, when @code{as} assembles a
+compilers as part of jump tables.  Therefore, when @code{_AS__} assembles a
 directive of the form @samp{.word sym1-sym2}, and the difference between
-@code{sym1} and @code{sym2} does not fit in 16 bits, @code{as} will
-create a @dfn{secondary jump table}, immediately before the next label. 
+@code{sym1} and @code{sym2} does not fit in 16 bits, @code{_AS__} will
+create a @dfn{secondary jump table}, immediately before the next label.
 This @var{secondary jump table} will be preceded by a short-jump to the
 first byte after the secondary table.  This short-jump prevents the flow
 of control from accidentally falling into the new table.  Inside the
 table will be a long-jump to @code{sym2}.  The original @samp{.word}
 will contain @code{sym1} minus the address of the long-jump to
-@code{sym2}.  
+@code{sym2}.
 
 If there were several occurrences of @samp{.word sym1-sym2} before the
 secondary jump table, all of them will be adjusted.  If there was a
@@ -2267,16 +2302,16 @@ secondary jump table, all of them will be adjusted.  If there was a
 long-jump to @code{sym4} will be included in the secondary jump table,
 and the @code{.word} directives will be adjusted to contain @code{sym3}
 minus the address of the long-jump to @code{sym4}; and so on, for as many
-entries in the original jump table as necessary. 
+entries in the original jump table as necessary.
 
 _if__(_INTERNALS__)
-@emph{This feature may be disabled by compiling @code{as} with the
+@emph{This feature may be disabled by compiling @code{_AS__} with the
 @samp{-DWORKING_DOT_WORD} option.} This feature is likely to confuse
 assembly language programmers.
 _fi__(_INTERNALS__)
-_fi__(!_AMD29K__)
+_fi__(! (_AMD29K__ || _I960__) )
 
-@node Deprecated, Machine Dependent, Word, Pseudo Ops
+@node Deprecated, _MACH_DEP__, Word, Pseudo Ops
 @section Deprecated Directives
 One day these directives won't work.
 They are included for compatibility with older assemblers.
@@ -2286,24 +2321,20 @@ They are included for compatibility with older assemblers.
 @item .line
 @end table
 
-@node Machine Dependent, Machine Dependent, Pseudo Ops, Top
+@node _MACH_DEP__,,,
 _if__(_ALL_ARCH__)
 @chapter Machine Dependent Features
 _fi__(_ALL_ARCH__)
-
-_if__(_VAX__ && !_ALL_ARCH__)
-@chapter Machine Dependent Features: VAX
-_fi__(_VAX__ && !_ALL_ARCH__)
-_if__(_ALL_ARCH__)
-@section Vax
-_fi__(_ALL_ARCH__)
 _if__(_VAX__)
-@subsection Options
+@group
+_CHAPSEC__(0+_ALL_ARCH__) VAX Dependent Features
+_CHAPSEC__(1+_ALL_ARCH__) Options
 
-The Vax version of @code{as} accepts any of the following options,
+The Vax version of @code{_AS__} accepts any of the following options,
 gives a warning message that the option was ignored and proceeds.
 These options are for compatibility with scripts designed for other
 people's assemblers.
+@end group
 
 @table @asis
 @item @kbd{-D} (Debug)
@@ -2320,7 +2351,7 @@ argument that follows @kbd{-d} (GNU standard).
 @item @kbd{-V} (Virtualize Interpass Temporary File)
 Some other assemblers use a temporary file.  This option
 commanded them to keep the information in active memory rather
-than in a disk file.  @code{as} always does this, so this
+than in a disk file.  @code{_AS__} always does this, so this
 option is redundant.
 
 @item @kbd{-J} (JUMPify Longer Branches)
@@ -2335,23 +2366,23 @@ this option to emit short and long branches.
 @item @kbd{-t} (Temporary File Directory)
 Some other assemblers may use a temporary file, and this option
 takes a filename being the directory to site the temporary
-file.  @code{as} does not use a temporary disk file, so this
+file.  @code{_AS__} does not use a temporary disk file, so this
 option makes no difference.  @kbd{-t} needs exactly one
 filename.
 @end table
 
 The Vax version of the assembler accepts two options when
 compiled for VMS.  They are @kbd{-h}, and @kbd{-+}.  The
-@kbd{-h} option prevents @code{as} from modifying the
+@kbd{-h} option prevents @code{_AS__} from modifying the
 symbol-table entries for symbols that contain lowercase
-characters (I think).  The @kbd{-+} option causes @code{as} to
+characters (I think).  The @kbd{-+} option causes @code{_AS__} to
 print warning messages if the FILENAME part of the object file,
 or any symbol name is larger than 31 characters.  The @kbd{-+}
 option also insertes some code following the @samp{_main}
 symbol so that the object file will be compatible with Vax-11
 "C".
 
-@subsection Floating Point
+_CHAPSEC__(1+_ALL_ARCH__) Floating Point
 Conversion of flonums to floating point is correct, and
 compatible with previous assemblers.  Rounding is
 towards zero if the remainder is exactly half the least significant bit.
@@ -2366,7 +2397,7 @@ boundary case.
 The @code{.float} directive produces @code{f} format numbers.
 The @code{.double} directive produces @code{d} format numbers.
 
-@subsection Machine Directives
+_CHAPSEC__(1+_ALL_ARCH__) Machine Directives
 The Vax version of the assembler supports four directives for
 generating Vax floating point constants.  They are described in the
 table below.
@@ -2390,14 +2421,14 @@ assembles Vax @code{h} format 128-bit floating point constants.
 
 @end table
 
-@subsection Opcodes
+_CHAPSEC__(1+_ALL_ARCH__) Opcodes
 All DEC mnemonics are supported.  Beware that @code{case@dots{}}
 instructions have exactly 3 operands.  The dispatch table that
 follows the @code{case@dots{}} instruction should be made with
 @code{.word} statements.  This is compatible with all unix
 assemblers we know of.
 
-@subsection Branch Improvement
+_CHAPSEC__(1+_ALL_ARCH__) Branch Improvement
 Certain pseudo opcodes are permitted.  They are for branch
 instructions.  They expand to the shortest branch instruction that
 will reach the target.  Generally these mnemonics are made by
@@ -2476,7 +2507,7 @@ Unconditional branch.
 @end table
 @end table
 
-@subsection operands
+_CHAPSEC__(1+_ALL_ARCH__) operands
 The immediate character is @samp{$} for Unix compatibility, not
 @samp{#} as DEC writes it.
 
@@ -2492,9 +2523,9 @@ Register names understood are @code{r0 r1 r2 @dots{} r15 ap fp sp
 pc}.  Any case of letters will do.
 
 For instance
-@example
+@smallexample
 tstb *w`$4(r5)
-@end example
+@end smallexample
 
 Any expression is permitted in an operand.  Operands are comma
 separated.
@@ -2503,31 +2534,32 @@ separated.
 @c in operands, but I forget what it is.  It is
 @c a syntax clash because () is used as an address mode
 @c and to encapsulate sub-expressions.
-@subsection Not Supported
-Vax bit fields can not be assembled with @code{as}.  Someone
+_CHAPSEC__(1+_ALL_ARCH__) Not Supported
+Vax bit fields can not be assembled with @code{_AS__}.  Someone
 can add the required code if they really need it.
 _fi__(_VAX__)
-
-_if__(_AMD29K__ && !_ALL_ARCH__)
-@chapter Machine Dependent Features: AMD 29K
-_fi__(_AMD29K__ && !_ALL_ARCH__)
 _if__(_AMD29K__)
-@node Machine Options, Machine Syntax, Machine Dependent, Machine Dependent
-@section Options
-GNU @code{as} has no additional command-line options for the AMD
+@group
+_CHAPSEC__(0+_ALL_ARCH__) AMD 29K Dependent Features
+@node AMD29K Options, AMD29K Syntax, _MACH_DEP__, _MACH_DEP__
+_CHAPSEC__(1+_ALL_ARCH__) Options
+@code{_AS__} has no additional command-line options for the AMD
 29K family.
+@end group
 
-@node Machine Syntax, Floating Point, Machine Options, Machine Dependent
-@section Syntax
-@subsection Special Characters
-@samp{;} is the line comment character.  
+@node AMD29K Syntax, AMD29K Floating Point, AMD29K Options, _MACH_DEP__
+@group
+_CHAPSEC__(1+_ALL_ARCH__) Syntax
+_CHAPSEC__(2+_ALL_ARCH__) Special Characters
+@samp{;} is the line comment character.
 
 @samp{@@} can be used instead of a newline to separate statements.
 
 The character @samp{?} is permitted in identifiers (but may not begin
 an identifier).
+@end group
 
-@subsection Register Names
+_CHAPSEC__(2+_ALL_ARCH__) Register Names
 General-purpose registers are represented by predefined symbols of the
 form @samp{GR@var{nnn}} (for global registers) or @samp{LR@var{nnn}}
 (for local registers), where @var{nnn} represents a number between
@@ -2538,96 +2570,82 @@ and @samp{LR7} are both valid register names.
 You may also refer to general-purpose registers by specifying the
 register number as the result of an expression (prefixed with @samp{%%}
 to flag the expression as a register number):
-@example
+@smallexample
 %%@var{expression}
-@end example
+@end smallexample
 @noindent---where @var{expression} must be an absolute expression
 evaluating to a number between @code{0} and @code{255}.  The range
 [0, 127] refers to global registers, and the range [128, 255] to local
-registers. 
+registers.
 
-In addition, GNU @code{as} understands the following protected
+In addition, @code{_AS__} understands the following protected
 special-purpose register names for the AMD 29K family:
 
-@example
+@smallexample
   vab    chd    pc0
   ops    chc    pc1
   cps    rbp    pc2
   cfg    tmc    mmu
   cha    tmr    lru
-@end example
+@end smallexample
 
 These unprotected special-purpose register names are also recognized:
-@example
-  ipc    alu    fpe 
+@smallexample
+  ipc    alu    fpe
   ipa    bp     inte
-  ipb    fc     fps 
+  ipb    fc     fps
   q      cr     exop
-@end example
+@end smallexample
 
-@node Floating Point, Machine Directives, Machine Syntax, Machine Dependent
-@section Floating Point
+@node AMD29K Floating Point, AMD29K Directives, AMD29K Syntax, _MACH_DEP__
+_CHAPSEC__(1+_ALL_ARCH__) Floating Point
 The AMD 29K family uses IEEE floating-point numbers.
 
-@node Machine Directives, Opcodes, Floating Point, Machine Dependent
-@section Machine Directives
+@group
+@node AMD29K Directives, AMD29K Opcodes, AMD29K Floating Point, _MACH_DEP__
+_CHAPSEC__(1+_ALL_ARCH__) Machine Directives
 
-@menu
-* block::			@code{.block @var{size} , @var{fill}}
-* cputype::			@code{.cputype}
-* file::			@code{.file}
-* hword::			@code{.hword @var{expressions}}
-* line::			@code{.line}
-* reg::				@code{.reg @var{symbol}, @var{expression}}
-* sect::			@code{.sect}
-* use::				@code{.use @var{segment name}}
-@end menu
-
-@node block, cputype, Machine Directives, Machine Directives
-@subsection @code{.block @var{size} , @var{fill}}
+@node block, cputype, AMD29K Directives, AMD29K Directives
+_CHAPSEC__(2+_ALL_ARCH__) @code{.block @var{size} , @var{fill}}
 This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @var{size} and @var{fill} are absolute expressions.  If the comma
 and @var{fill} are omitted, @var{fill} is assumed to be zero.
 
-In other versions of GNU @code{as}, this directive is called
-@samp{.space}. 
+In other versions of the GNU assembler, this directive is called
+@samp{.space}.
+@end group
 
 @node cputype, file, block, Machine Directives
-@subsection @code{.cputype}
+_CHAPSEC__(2+_ALL_ARCH__) @code{.cputype}
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
 @node file, hword, cputype, Machine Directives
-@subsection @code{.file}
+_CHAPSEC__(2+_ALL_ARCH__) @code{.file}
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
 @quotation
-@emph{Warning:} in other versions of GNU @code{as}, @code{.file} is
-used for the directive called @code{.app-file} in the AMD 29K support. 
+@emph{Warning:} in other versions of the GNU assembler, @code{.file} is
+used for the directive called @code{.app-file} in the AMD 29K support.
 @end quotation
 
-@node hword, line, file, Machine Directives
-@subsection @code{.hword @var{expressions}}
-This expects zero or more @var{expressions}, and emits
-a 16 bit number for each.  (Synonym for @samp{.short}.)
-
 @node line, reg, hword, Machine Directives
-@subsection @code{.line}
+_CHAPSEC__(2+_ALL_ARCH__) @code{.line}
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
 @node reg, sect, line, Machine Directives
-@subsection @code{.reg @var{symbol}, @var{expression}}
-@code{.reg} has the same effect as @code{.lsym}; @pxref{Lsym}.  
+_CHAPSEC__(2+_ALL_ARCH__) @code{.reg @var{symbol}, @var{expression}}
+@code{.reg} has the same effect as @code{.lsym}; @pxref{Lsym}.
 
 @node sect, use, reg, Machine Directives
-@subsection @code{.sect}
+_CHAPSEC__(2+_ALL_ARCH__) @code{.sect}
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
 @node use,  , sect, Machine Directives
-@subsection @code{.use @var{segment name}}
+_CHAPSEC__(2+_ALL_ARCH__) @code{.use @var{segment name}}
 Establishes the segment and subsegment for the following code;
 @var{segment name} may be one of @code{.text}, @code{.data},
 @code{.data1}, or @code{.lit}.  With one of the first three @var{segment
@@ -2636,55 +2654,288 @@ name} options, @samp{.use} is equivalent to the machine directive
 @samp{.data 200}.
 
 
-@node Opcodes, Opcodes, Machine Directives, Machine Dependent
+@node AMD29K Opcodes, , AMD29K Directives, _MACH_DEP__
 @section Opcodes
-GNU @code{as} implements all the standard AMD 29K opcodes.  No
+@code{_AS__} implements all the standard AMD 29K opcodes.  No
 additional pseudo-instructions are needed on this family.
 
 For information on the 29K machine instruction set, see @cite{Am29000
 User's Manual}, Advanced Micro Devices, Inc.
 
-
 _fi__(_AMD29K__)
-_if__(_M680X0__ && !_ALL_ARCH__)
-@chapter Machine Dependent Features: Motorola 680x0
-_fi__(_M680X0__ && !_ALL_ARCH__)
+_if__(_I960__)
+_CHAPSEC__(0+_ALL_ARCH__) Intel 80960 Dependent Features
+@node Options-i960,,,
+_CHAPSEC__(1+_ALL_ARCH__) Command-line Options
+@table @code
+
+@item -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC
+Select the 80960 architecture.  Instructions or features not supported
+by the selected architecture cause fatal errors.
+
+@samp{-ACA} is equivalent to @samp{-ACA_A}; @samp{-AKC} is equivalent to
+@samp{-AMC}.  Synonyms are provided for compatibility with other tools.
+
+If none of these options is specified, @code{_AS__} will generate code for any
+instruction or feature that is supported by @emph{some} version of the
+960 (even if this means mixing architectures!).  In principle,
+@code{_AS__} will attempt to deduce the minimal sufficient processor
+type if none is specified; depending on the object code format, the
+processor type may be recorded in the object file.  If it is critical
+that the @code{_AS__} output match a specific architecture, specify that
+architecture explicitly.
+
+
+@item -b
+Add code to collect information about conditional branches taken, for
+later optimization using branch prediction bits.  (The conditional branch
+instructions have branch prediction bits in the CA, CB, and CC
+architectures.)  If @var{BR} represents a conditional branch instruction,
+the following represents the code generated by the assembler when
+@samp{-b} is specified:
+
+@smallexample
+        call    @var{increment routine}
+        .word   0       # pre-counter
+Label:  @var{BR}
+        call    @var{increment routine}
+        .word   0       # post-counter
+@end smallexample
+
+The counter following a branch records the number of times that branch
+was @emph{not} taken; the differenc between the two counters is the
+number of times the branch @emph{was} taken.
+
+A table of all such @code{Label}s is also generated, so that the
+external postprocessor @samp{gbr960} (supplied by Intel) can locate all
+the counters.  This table is always labelled @samp{__BRANCH_TABLE__};
+this is a local symbol to permit collecting statistics for many separate
+object files.  The table is word aligned, and begins with a two-word
+header.  The first word, initialized to 0, is used in maintaining linked
+lists of branch tables.  The second word is a count of the number of
+entries in the table, which follow immediately: each is a word, pointing
+to one of the labels illustrated above.
+
+@ifinfo
+@example
+ +------------+------------+------------+ ... +------------+
+ |            |            |            |     |            |
+ |  *NEXT     |  COUNT: N  | *BRLAB 1   |     | *BRLAB N   |
+ |            |            |            |     |            |
+ +------------+------------+------------+ ... +------------+
+
+               __BRANCH_TABLE__ layout
+@end example
+@end ifinfo
+@tex
+\vskip 1pc
+\line{\leftskip=0pt\hskip\tableindent
+\boxit{2cm}{\tt *NEXT}\boxit{2cm}{\tt COUNT: \it N}\boxit{2cm}{\tt
+*BRLAB 1}\ibox{1cm}{\quad\dots}\boxit{2cm}{\tt *BRLAB \it N}\hfil}
+\centerline{\it {\tt \_\_BRANCH\_TABLE\_\_} layout}
+@end tex
+
+The first word of the header is used to locate multiple branch tables,
+since each object file may contain one. Normally the links are
+maintained with a call to an initialization routine, placed at the
+beginning of each function in the file.  The GNU C compiler will
+generate these calls automatically when you give it a @samp{-b} option.
+For further details, see the documentation of @samp{gbr960}.
+
+@item -norelax
+Normally, Compare-and-Branch instructions with targets that require
+displacements greater than 13 bits (or that have external targets) are
+replaced with the corresponding compare (or @samp{chkbit}) and branch
+instructions.  You can use the @samp{-norelax} option to specify that
+@code{_AS__} should generate errors instead, if the target displacement
+is larger than 13 bits.
+
+This option does not affect the Compare-and-Jump instructions; the code
+emitted for them is @emph{always} adjusted when necessary (depending on
+displacement size), regardless of whether you use @samp{-norelax}.
+@end table
+
+@node Floating Point-i960,,,
+_CHAPSEC__(1+_ALL_ARCH__) Floating Point
+@code{_AS__} generates IEEE floating-point numbers for the directives
+@samp{.float}, @samp{.double}, @samp{extended}, and @samp{.single}.
+
+@group
+@node Directives-i960,,,
+_CHAPSEC__(1+_ALL_ARCH__) Machine Directives
+
+@node bss-i960,,,
+_CHAPSEC__(2+_ALL_ARCH__) @code{.bss @var{symbol}, @var{length}, @var{align}}
+Reserve @var{length} bytes in the bss segment for a local @var{symbol},
+aligned to the power of two specified by @var{align}.  @var{length} and
+@var{align} must be positive absolute expressions.  This directive
+differs from @samp{.lcomm} only in that it permits you to specify
+an alignment.  @xref{Lcomm}.
+@end group
+
+@node extended-i960,,,
+_CHAPSEC__(2+_ALL_ARCH__) @code{.extended @var{flonums}}
+@code{.extended} expects zero or more flonums, separated by commas; for
+each flonum, @samp{.extended} emits an IEEE extended-format (80-bit)
+floating-point number.
+
+@node leafproc-i960,,,
+_CHAPSEC__(2+_ALL_ARCH__) @code{.leafproc @var{call-lab}, @var{bal-lab}}
+You can use the @samp{.leafproc} directive in conjunction with the
+optimized @code{callj} instruction to enable faster calls of leaf
+procedures.  If a procedure is known to call no other procedures, you
+may define an entry point that skips procedure prolog code (and that does
+not depend on system-supplied saved context), and declare it as the
+@var{bal-lab} using @samp{.leafproc}.  If the procedure also has an
+entry point that goes through the normal prolog, you can specify that
+entry point as @var{call-lab}.
+
+A @samp{.leafproc} declaration is meant for use in conjunction with the
+optimized call instruction @samp{callj}; the directive records the data
+needed later to choose between converting the @samp{callj} into a
+@code{bal} or a @code{call}.
+
+@var{call-lab} is optional; if only one argument is present, or if the
+two arguments are identical, the single argument is assumed to be the
+@code{bal} entry point.
+
+@node sysproc-i960,,,
+_CHAPSEC__(2+_ALL_ARCH__) @code{.sysproc @var{name}, @var{index}}
+The @samp{.sysproc} directive defines a name for a system procedure.
+After you define it using @samp{.sysproc}, you can use @var{name} to
+refer to the system procedure identified by @var{index} when calling
+procedures with the optimized call instruction @samp{callj}.
+
+Both arguments are required; @var{index} must be between 0 and 31
+(inclusive).
+
+@node Opcodes for i960,,,
+_CHAPSEC__(1+_ALL_ARCH__) i960 Opcodes
+All Intel 960 machine instructions are supported; @pxref{Options-i960}
+for a discussion of selecting the instruction subset for a particular
+960 architecture.@refill
+
+Some opcodes are processed beyond simply emitting a single corresponding
+instruction: @samp{callj}, and Compare-and-Branch or Compare-and-Jump
+instructions with target displacements larger than 13 bits.
+
+@node callj-i960
+_CHAPSEC__(2+_ALL_ARCH__) @code{callj}
+You can write @code{callj} to have the assembler or the linker determine
+the most appropriate form of subroutine call: @samp{call},
+@samp{bal}, or @samp{calls}.  If the assembly source contains
+enough information---a @samp{.leafproc} or @samp{.sysproc} directive
+defining the operand---then @code{_AS__} will translate the
+@code{callj}; if not, it will simply emit the @code{callj}, leaving it
+for the linker to resolve.
+
+@node Compare-and-branch-i960
+_CHAPSEC__(2+_ALL_ARCH__) Compare-and-Branch
+
+The 960 architectures provide combined Compare-and-Branch instructions
+that permit you to store the branch target in the lower 13 bits of the
+instruction word itself.  However, if you specify a branch target far
+enough away that its address won't fit in 13 bits, the assembler can
+either issue an error, or convert your Compare-and-Branch instruction
+into separate instructions to do the compare and the branch.
+
+Whether @code{_AS__} gives an error or expands the instruction depends
+on two choices you can make: whether you use the @samp{-norelax} option,
+and whether you use a ``Compare and Branch'' instruction or a ``Compare
+and Jump'' instruction.  The ``Jump'' instructions are @emph{always}
+expanded if necessary; the ``Branch'' instructions are expanded when
+necessary @emph{unless} you specify @code{-norelax}---in which case
+@code{_AS__} gives an error instead.
+
+These are the Compare-and-Branch instructions, their ``Jump'' variants,
+and the instruction pairs they may expand into:
+
+@ifinfo
+@example
+        Compare and
+     Branch      Jump       Expanded to
+     ------    ------       ------------
+        bbc                 chkbit; bno
+        bbs                 chkbit; bo
+     cmpibe    cmpije       cmpi; be
+     cmpibg    cmpijg       cmpi; bg
+    cmpibge   cmpijge       cmpi; bge
+     cmpibl    cmpijl       cmpi; bl
+    cmpible   cmpijle       cmpi; ble
+    cmpibno   cmpijno       cmpi; bno
+    cmpibne   cmpijne       cmpi; bne
+     cmpibo    cmpijo       cmpi; bo
+     cmpobe    cmpoje       cmpo; be
+     cmpobg    cmpojg       cmpo; bg
+    cmpobge   cmpojge       cmpo; bge
+     cmpobl    cmpojl       cmpo; bl
+    cmpoble   cmpojle       cmpo; ble
+    cmpobne   cmpojne       cmpo; bne
+@end example
+@end ifinfo
+@tex
+\hskip\tableindent
+\halign{\hfil {\tt #}\quad&\hfil {\tt #}\qquad&{\tt #}\hfil\cr
+\omit{\hfil\it Compare and\hfil}\span\omit&\cr
+{\it Branch}&{\it Jump}&{\it Expanded to}\cr
+        bbc&                 & chkbit; bno\cr
+        bbs&                 & chkbit; bo\cr
+     cmpibe&    cmpije&       cmpi; be\cr
+     cmpibg&    cmpijg&       cmpi; bg\cr
+    cmpibge&   cmpijge&       cmpi; bge\cr
+     cmpibl&    cmpijl&       cmpi; bl\cr
+    cmpible&   cmpijle&       cmpi; ble\cr
+    cmpibno&   cmpijno&       cmpi; bno\cr
+    cmpibne&   cmpijne&       cmpi; bne\cr
+     cmpibo&    cmpijo&       cmpi; bo\cr
+     cmpobe&    cmpoje&       cmpo; be\cr
+     cmpobg&    cmpojg&       cmpo; bg\cr
+    cmpobge&   cmpojge&       cmpo; bge\cr
+     cmpobl&    cmpojl&       cmpo; bl\cr
+    cmpoble&   cmpojle&       cmpo; ble\cr
+    cmpobne&   cmpojne&       cmpo; bne\cr}
+@end tex
+
+_fi__(_I960__)
 _if__(_M680X0__)
-@section Options
-The 680x0 version of @code{as} has two machine dependent options.
+@group
+_CHAPSEC__(0+_ALL_ARCH__) M680x0 Dependent Features
+_CHAPSEC__(1+_ALL_ARCH__) M680x0 Options
+The Motorola 680x0 version of @code{_AS__} has two machine dependent options.
 One shortens undefined references from 32 to 16 bits, while the
-other is used to tell @code{as} what kind of machine it is
+other is used to tell @code{_AS__} what kind of machine it is
 assembling for.
+@end group
 
 You can use the @kbd{-l} option to shorten the size of references to
 undefined symbols.  If the @kbd{-l} option is not given, references to
-undefined symbols will be a full long (32 bits) wide.  (Since @code{as}
-cannot know where these symbols will end up, @code{as} can only allocate
-space for the linker to fill in later.  Since @code{as} doesn't know how
+undefined symbols will be a full long (32 bits) wide.  (Since @code{_AS__}
+cannot know where these symbols will end up, @code{_AS__} can only allocate
+space for the linker to fill in later.  Since @code{_AS__} doesn't know how
 far away these symbols will be, it allocates as much space as it can.)
 If this option is given, the references will only be one word wide (16
 bits).  This may be useful if you want the object file to be as small as
 possible, and you know that the relevant symbols will be less than 17
-bits away. 
+bits away.
 
-The 680x0 version of @code{as} is most frequently used to assemble
+The 680x0 version of @code{_AS__} is most frequently used to assemble
 programs for the Motorola MC68020 microprocessor.  Occasionally it is
 used to assemble programs for the mostly similar, but slightly different
-MC68000 or MC68010 microprocessors.  You can give @code{as} the options
+MC68000 or MC68010 microprocessors.  You can give @code{_AS__} the options
 @samp{-m68000}, @samp{-mc68000}, @samp{-m68010}, @samp{-mc68010},
 @samp{-m68020}, and @samp{-mc68020} to tell it what processor is the
 target.
 
-@section Syntax
+_CHAPSEC__(1+_ALL_ARCH__) Syntax
 
-The 680x0 version of @code{as} uses syntax similar to the Sun assembler. 
+The 680x0 version of @code{_AS__} uses syntax similar to the Sun assembler.
 Size modifiers are appended directly to the end of the opcode without an
 intervening period.  For example, write @samp{movl} rather than
-@samp{move.l}. 
+@samp{move.l}.
 
 _if__(_INTERNALS__)
-If @code{as} is compiled with SUN_ASM_SYNTAX defined, it will also allow
-Sun-style local labels of the form @samp{1$} through @samp{$9}. 
+If @code{_AS__} is compiled with SUN_ASM_SYNTAX defined, it will also allow
+Sun-style local labels of the form @samp{1$} through @samp{$9}.
 _fi__(_INTERNALS__)
 
 In the following table @dfn{apc} stands for any of the address
@@ -2740,7 +2991,7 @@ by @samp{:b}, @samp{:w}, or @samp{:l}.
 @end ignore
 @end table
 
-@section Floating Point
+_CHAPSEC__(1+_ALL_ARCH__) Floating Point
 The floating point code is not too well tested, and may have
 subtle bugs in it.
 
@@ -2761,7 +3012,7 @@ immediate operands to floating-point instructions.  Adding a
 directive to create extended precision numbers would not be
 hard, but it has not yet seemed necessary.
 
-@section Machine Directives
+_CHAPSEC__(1+_ALL_ARCH__) Machine Directives
 In order to be compatible with the Sun assembler the 680x0 assembler
 understands the following directives.
 @table @code
@@ -2776,7 +3027,7 @@ This directive is identical to a @code{.align 1} directive.
 This directive is identical to a @code{.space} directive.
 @end table
 
-@section Opcodes
+_CHAPSEC__(1+_ALL_ARCH__) Opcodes
 @c pesch@cygnus.com: I don't see any point in the following
 @c                   paragraph.  Bugs are bugs; how does saying this
 @c                   help anyone?
@@ -2786,17 +3037,17 @@ fixed).  More bugs may exist.  Be careful when using obscure
 instructions.
 @end ignore
 
-@subsection Branch Improvement
+_CHAPSEC__(2+_ALL_ARCH__) Branch Improvement
 
-Certain pseudo opcodes are permitted for branch instructions. 
+Certain pseudo opcodes are permitted for branch instructions.
 They expand to the shortest branch instruction that will reach the
 target.  Generally these mnemonics are made by substituting @samp{j} for
-@samp{b} at the start of a Motorola mnemonic.  
+@samp{b} at the start of a Motorola mnemonic.
 
 The following table summarizes the pseudo-operations.  A @code{*} flags
 cases that are more fully described after the table:
 
-@example
+@smallexample
           Displacement
           +---------------------------------------------------------
           |                68020   68000/10
@@ -2804,14 +3055,14 @@ Pseudo-Op |BYTE    WORD    LONG    LONG      non-PC relative
           +---------------------------------------------------------
      jbsr |bsrs    bsr     bsrl    jsr       jsr
       jra |bras    bra     bral    jmp       jmp
-*     jXX |bXXs    bXX     bXXl    bNXs;jmpl bNXs;jmp         
-*    dbXX |dbXX    dbXX        dbXX; bra; jmpl                      
-*    fjXX |fbXXw   fbXXw   fbXXl             fbNXw;jmp        
+*     jXX |bXXs    bXX     bXXl    bNXs;jmpl bNXs;jmp
+*    dbXX |dbXX    dbXX        dbXX; bra; jmpl
+*    fjXX |fbXXw   fbXXw   fbXXl             fbNXw;jmp
 
 XX: condition
 NX: negative of condition XX
 
-@end example
+@end smallexample
 @center{@code{*}---see full description below}
 
 @table @code
@@ -2825,73 +3076,72 @@ branch target.
 Here, @samp{j@var{XX}} stands for an entire family of pseudo-operations,
 where @var{XX} is a conditional branch or condition-code test.  The full
 list of pseudo-ops in this family is:
-@example
- jhi   jls   jcc   jcs   jne   jeq   jvc  
- jvs   jpl   jmi   jge   jlt   jgt   jle  
-@end example
+@smallexample
+ jhi   jls   jcc   jcs   jne   jeq   jvc
+ jvs   jpl   jmi   jge   jlt   jgt   jle
+@end smallexample
 
 For the cases of non-PC relative displacements and long displacements on
-the 68000 or 68010, @code{as} will issue a longer code fragment in terms of
+the 68000 or 68010, @code{_AS__} will issue a longer code fragment in terms of
 @var{NX}, the opposite condition to @var{XX}:
-@example
+@smallexample
     j@var{XX} foo
-@end example
+@end smallexample
 gives
-@example
+@smallexample
      b@var{NX}s oof
      jmp foo
  oof:
-@end example
+@end smallexample
 
 @item db@var{XX}
 The full family of pseudo-operations covered here is
-@example
+@smallexample
  dbhi   dbls   dbcc   dbcs   dbne   dbeq   dbvc
  dbvs   dbpl   dbmi   dbge   dblt   dbgt   dble
  dbf    dbra   dbt
-@end example
+@end smallexample
 
 Other than for word and byte displacements, when the source reads
-@samp{db@var{XX} foo}, @code{as} will emit
-@example
+@samp{db@var{XX} foo}, @code{_AS__} will emit
+@smallexample
      db@var{XX} oo1
      bra oo2
  oo1:jmpl foo
- oo2: 
-@end example
+ oo2:
+@end smallexample
 
 @item fj@var{XX}
 This family includes
-@example
+@smallexample
  fjne   fjeq   fjge   fjlt   fjgt   fjle   fjf
- fjt    fjgl   fjgle  fjnge  fjngl  fjngle fjngt  
- fjnle  fjnlt  fjoge  fjogl  fjogt  fjole  fjolt  
+ fjt    fjgl   fjgle  fjnge  fjngl  fjngle fjngt
+ fjnle  fjnlt  fjoge  fjogl  fjogt  fjole  fjolt
  fjor   fjseq  fjsf   fjsne  fjst   fjueq  fjuge
  fjugt  fjule  fjult  fjun
-@end example
+@end smallexample
 
-For branch targets that are not PC relative, @code{as} emits
-@example
+For branch targets that are not PC relative, @code{_AS__} emits
+@smallexample
      fb@var{NX} oof
      jmp foo
  oof:
-@end example
+@end smallexample
 when it encounters @samp{fj@var{XX} foo}.
 
 @end table
 
-@subsection Special Characters
+_CHAPSEC__(2+_ALL_ARCH__) Special Characters
 The immediate character is @samp{#} for Sun compatibility.  The
 line-comment character is @samp{|}.  If a @samp{#} appears at the
 beginning of a line, it is treated as a comment unless it looks like
 @samp{# line file}, in which case it is treated normally.
 _fi__(_M680X0__)
-
-@c pesch@cygnus.com: conditionalize, rather than ignore, when filled in.
-@ignore
+@c pesch@cygnus.com: conditionalize on something other than 0 when filled in.
+_if__(0)
 @section 32x32
 @section Options
-The 32x32 version of @code{as} accepts a @kbd{-m32032} option to
+The 32x32 version of @code{_AS__} accepts a @kbd{-m32032} option to
 specify thiat it is compiling for a 32032 processor, or a
 @kbd{-m32532} to specify that it is compiling for a 32532 option.
 The default (if neither is specified) is chosen when the assembler
@@ -2899,23 +3149,20 @@ is compiled.
 
 @subsection Syntax
 I don't know anything about the 32x32 syntax assembled by
-@code{as}.  Someone who undersands the processor (I've never seen
+@code{_AS__}.  Someone who undersands the processor (I've never seen
 one) and the possible syntaxes should write this section.
 
 @subsection Floating Point
-The 32x32 uses IEEE floating point numbers, but @code{as} will only
+The 32x32 uses IEEE floating point numbers, but @code{_AS__} will only
 create single or double precision values.  I don't know if the 32x32
 understands extended precision numbers.
 
 @subsection Machine Directives
 The 32x32 has no machine dependent directives.
-@end ignore
-
-@c pesch@cygnus.com: stop ignoring this when "syntax" section filled in
-@ignore
-_if__(_SPARC__ && !_ALL_ARCH__)
-@chapter Machine Dependent Features: SPARC
-_fi__(_SPARC__ && !_ALL_ARCH__)
+_fi__(0)
+_if__(_SPARC__)
+@c fixme (sparc): Fill in "syntax" section!
+_CHAPSEC__(0+_ALL_ARCH__) SPARC Dependent Features
 @section Sparc
 @subsection Options
 The sparc has no machine dependent options.
@@ -2928,7 +3175,7 @@ will have to write this section.
 The Sparc uses ieee floating-point numbers.
 
 @subsection Machine Directives
-The Sparc version of @code{as} supports the following additional
+The Sparc version of @code{_AS__} supports the following additional
 machine directives:
 
 @table @code
@@ -2965,19 +3212,15 @@ On the Sparc, the .word directive produces 32 bit values,
 instead of the 16 bit values it produces on every other machine.
 
 @end table
-@end ignore
-
-_if__(_I80386__ && !_ALL_ARCH__)
-@chapter Machine Dependent Features: SPARC
-_fi__(_I80386__ && !_ALL_ARCH__)
+_fi__(_SPARC__)
 _if__(_I80386__)
-@section Intel 80386
-@subsection Options
+_CHAPSEC__(0+_ALL_ARCH__) 80386 Dependent Features
+_CHAPSEC__(1+_ALL_ARCH__) Options
 The 80386 has no machine dependent options.
 
-@subsection AT&T Syntax versus Intel Syntax
-In order to maintain compatibility with the output of @code{GCC},
-@code{as} supports AT&T System V/386 assembler syntax.  This is quite
+_CHAPSEC__(1+_ALL_ARCH__) AT&T Syntax versus Intel Syntax
+In order to maintain compatibility with the output of @code{_GCC__},
+@code{_AS__} supports AT&T System V/386 assembler syntax.  This is quite
 different from Intel syntax.  We mention these differences because
 almost all 80386 documents used only Intel syntax.  Notable differences
 between the two syntaxes are:
@@ -3009,7 +3252,7 @@ Immediate form long jumps and calls are
 @samp{lcall/ljmp $@var{segment}, $@var{offset}} in AT&T syntax; the
 Intel syntax is
 @samp{call/jmp far @var{segment}:@var{offset}}.  Also, the far return
-instruction 
+instruction
 is @samp{lret $@var{stack-adjust}} in AT&T syntax; Intel syntax is
 @samp{ret far @var{stack-adjust}}.
 
@@ -3018,11 +3261,11 @@ The AT&T assembler does not provide support for multiple segment
 programs.  Unix style systems expect all programs to be single segments.
 @end itemize
 
-@subsection Opcode Naming
+_CHAPSEC__(1+_ALL_ARCH__) Opcode Naming
 Opcode names are suffixed with one character modifiers which specify the
 size of operands.  The letters @samp{b}, @samp{w}, and @samp{l} specify
 byte, word, and long operands.  If no suffix is specified by an
-instruction and it contains no memory operands then @code{as} tries to
+instruction and it contains no memory operands then @code{_AS__} tries to
 fill in the missing suffix based on the destination register operand
 (the last one by convention).  Thus, @samp{mov %ax, %bx} is equivalent
 to @samp{movw %ax, %bx}; also, @samp{mov $1, %bx} is equivalent to
@@ -3056,13 +3299,13 @@ The Intel syntax conversion instructions
 @samp{cdq} --- sign-extend dword in @samp{%eax} to quad in @samp{%edx:%eax},
 @end itemize
 are called @samp{cbtw}, @samp{cwtl}, @samp{cwtd}, and @samp{cltd} in
-AT&T naming.  @code{as} accepts either naming for these instructions.
+AT&T naming.  @code{_AS__} accepts either naming for these instructions.
 
 Far call/jump instructions are @samp{lcall} and @samp{ljmp} in
 AT&T syntax, but are @samp{call far} and @samp{jump far} in Intel
-convention.  
+convention.
 
-@subsection Register Naming
+_CHAPSEC__(1+_ALL_ARCH__) Register Naming
 Register operands are always prefixes with @samp{%}.  The 80386 registers
 consist of
 @itemize @bullet
@@ -3103,7 +3346,7 @@ the 8 floating point register stack @samp{%st} or equivalently
 @samp{%st(4)}, @samp{%st(5)}, @samp{%st(6)}, and @samp{%st(7)}.
 @end itemize
 
-@subsection Opcode Prefixes
+_CHAPSEC__(1+_ALL_ARCH__) Opcode Prefixes
 Opcode prefixes are used to modify the following opcode.  They are used
 to repeat string instructions, to provide segment overrides, to perform
 bus lock operations, and to give operand and address size (16-bit
@@ -3112,10 +3355,10 @@ normally be 32-bit operands with a ``operand size'' opcode prefix).
 Opcode prefixes are usually given as single-line instructions with no
 operands, and must directly precede the instruction they act upon.  For
 example, the @samp{scas} (scan string) instruction is repeated with:
-@example
+@smallexample
 	repne
 	scas
-@end example
+@end smallexample
 
 Here is a list of opcode prefixes:
 @itemize @bullet
@@ -3145,15 +3388,15 @@ The @samp{rep}, @samp{repe}, and @samp{repne} prefixes are added
 to string instructions to make them repeat @samp{%ecx} times.
 @end itemize
 
-@subsection Memory References
+_CHAPSEC__(1+_ALL_ARCH__) Memory References
 An Intel syntax indirect memory reference of the form
-@example
+@smallexample
 @var{segment}:[@var{base} + @var{index}*@var{scale} + @var{disp}]
-@end example
+@end smallexample
 is translated into the AT&T syntax
-@example
+@smallexample
 @var{segment}:@var{disp}(@var{base}, @var{index}, @var{scale})
-@end example
+@end smallexample
 where @var{base} and @var{index} are the optional 32-bit base and
 index registers, @var{disp} is the optional displacement, and
 @var{scale}, taking the values 1, 2, 4, and 8, multiplies @var{index}
@@ -3163,7 +3406,7 @@ optional segment register for the memory operand, and may override the
 default segment register (see a 80386 manual for segment register
 defaults). Note that segment overrides in AT&T syntax @emph{must} have
 be preceded by a @samp{%}.  If you specify a segment override which
-coincides with the default segment register, @code{as} will @emph{not}
+coincides with the default segment register, @code{_AS__} will @emph{not}
 output any segment register override prefixes to assemble the given
 instruction.  Thus, segment overrides can be specified to emphasize which
 segment register is used for a given memory operand.
@@ -3189,18 +3432,18 @@ Note that @var{base} and @var{index} are both missing, but there is only
 @item AT&T: @samp{%gs:foo}; Intel @samp{gs:foo}
 This selects the contents of the variable @samp{foo} with segment
 register @var{segment} being @samp{%gs}.
-	
+
 @end table
 
 Absolute (as opposed to PC relative) call and jump operands must be
-prefixed with @samp{*}.  If no @samp{*} is specified, @code{as} will
-always choose PC relative addressing for jump/call labels.  
+prefixed with @samp{*}.  If no @samp{*} is specified, @code{_AS__} will
+always choose PC relative addressing for jump/call labels.
 
 Any instruction that has a memory operand @emph{must} specify its size (byte,
 word, or long) with an opcode suffix (@samp{b}, @samp{w}, or @samp{l},
 respectively).
 
-@subsection Handling of Jump Instructions
+_CHAPSEC__(1+_ALL_ARCH__) Handling of Jump Instructions
 Jump instructions are always optimized to use the smallest possible
 displacements.  This is accomplished by using byte (8-bit) displacement
 jumps whenever the target is sufficiently close.  If a byte displacement
@@ -3212,17 +3455,17 @@ with the @samp{addr16} opcode prefix), since the 80386 insists upon masking
 Note that the @samp{jcxz}, @samp{jecxz}, @samp{loop}, @samp{loopz},
 @samp{loope}, @samp{loopnz} and @samp{loopne} instructions only come in
 byte displacements, so that it is possible that use of these
-instructions (@code{GCC} does not use them) will cause the assembler to
+instructions (@code{_GCC__} does not use them) will cause the assembler to
 print an error message (and generate incorrect code).  The AT&T 80386
 assembler tries to get around this problem by expanding @samp{jcxz foo} to
-@example
+@smallexample
          jcxz cx_zero
          jmp cx_nonzero
 cx_zero: jmp foo
 cx_nonzero:
-@end example
+@end smallexample
 
-@subsection Floating Point
+_CHAPSEC__(1+_ALL_ARCH__) Floating Point
 All 80387 floating point types except packed BCD are supported.
 (BCD support may be added without much difficulty).  These data
 types are 16-, 32-, and 64- bit integers, and single (32-bit),
@@ -3254,21 +3497,21 @@ so that @samp{fst %st, %st(1)} is equivalent to @samp{fstl %st, %st(1)}.
 
 Since the 80387 automatically synchronizes with the 80386 @samp{fwait}
 instructions are almost never needed (this is not the case for the
-80286/80287 and 8086/8087 combinations).  Therefore, @code{as} suppresses
+80286/80287 and 8086/8087 combinations).  Therefore, @code{_AS__} suppresses
 the @samp{fwait} instruction whenever it is implicitly selected by one
 of the @samp{fn@dots{}} instructions.  For example, @samp{fsave} and
 @samp{fnsave} are treated identically.  In general, all the @samp{fn@dots{}}
 instructions are made equivalent to @samp{f@dots{}} instructions.  If
 @samp{fwait} is desired it must be explicitly coded.
 
-@subsection Notes
+_CHAPSEC__(1+_ALL_ARCH__) Notes
 There is some trickery concerning the @samp{mul} and @samp{imul}
 instructions that deserves mention.  The 16-, 32-, and 64-bit expanding
 multiplies (base opcode @samp{0xf6}; extension 4 for @samp{mul} and 5
 for @samp{imul}) can be output only in the one operand form.  Thus,
 @samp{imul %ebx, %eax} does @emph{not} select the expanding multiply;
 the expanding multiply would clobber the @samp{%edx} register, and this
-would confuse @code{GCC} output.  Use @samp{imul %ebx} to get the
+would confuse @code{_GCC__} output.  Use @samp{imul %ebx} to get the
 64-bit product in @samp{%edx:%eax}.
 
 We have added a two operand form of @samp{imul} when the first operand
@@ -3277,14 +3520,12 @@ This is just a shorthand, so that, multiplying @samp{%eax} by 69, for
 example, can be done with @samp{imul $69, %eax} rather than @samp{imul
 $69, %eax, %eax}.
 _fi__(_I80386__)
-
-
+_if__(0)
 @c pesch@cygnus.com: we ignore the following chapters, since internals are
 @c                   changing rapidly.  These may need to be moved to another
 @c                   book anyhow, if we adopt the model of user/modifier
-@c                   books. 
-@ignore
-@node Maintenance, Retargeting, Machine Dependent, Top
+@c                   books.
+@node Maintenance, Retargeting, _MACH_DEP__, Top
 @chapter Maintaining the Assembler
 [[this chapter is still being built]]
 
@@ -3292,13 +3533,13 @@ _fi__(_I80386__)
 We had these goals, in descending priority:
 @table @b
 @item Accuracy.
-For every program composed by a compiler, @code{as} should emit
+For every program composed by a compiler, @code{_AS__} should emit
 ``correct'' code.  This leaves some latitude in choosing addressing
 modes, order of @code{relocation_info} structures in the object
 file, @emph{etc}.
 
 @item Speed, for usual case.
-By far the most common use of @code{as} will be assembling compiler
+By far the most common use of @code{_AS__} will be assembling compiler
 emissions.
 
 @item Upward compatibility for existing assembler code.
@@ -3373,14 +3614,14 @@ interpret binary gobbledygook from a compiler's tables than to
 ask the compiler to write out human-readable code just so the
 assembler can parse it back to binary.
 
-Assuming you use @code{as} for human written programs: here are
+Assuming you use @code{_AS__} for human written programs: here are
 some ideas:
 @itemize @bullet
 @item
 Document (here) @code{APP}.
 @item
 Take advantage of knowing no spaces except after opcode
-to speed up @code{as}.  (Modify @code{app.c} to flush useless spaces:
+to speed up @code{_AS__}.  (Modify @code{app.c} to flush useless spaces:
 only keep space/tabs at begin of line or between 2
 symbols.)
 @item
@@ -3388,7 +3629,7 @@ Put pointers in this documentation to @file{a.out} documentation.
 @item
 Split the assembler into parts so it can gobble direct binary
 from @emph{e.g.} @code{cc}.  It is silly for@code{cc} to compose text
-just so @code{as} can parse it back to binary.
+just so @code{_AS__} can parse it back to binary.
 @item
 Rewrite hash functions: I want a more modular, faster library.
 @item
@@ -3417,7 +3658,7 @@ relaxable addresses, which is common).
 @end itemize
 
 @section Sources
-@c The following files in the @file{as} directory
+@c The following files in the @file{_AS__} directory
 @c are symbolic links to other files, of
 @c the same name, in a different directory.
 @c @itemize @bullet
@@ -3439,7 +3680,7 @@ relaxable addresses, which is common).
 @c @file{flonum_print.c}
 @c @end itemize
 
-Here is a list of the source files in the @file{as} directory.
+Here is a list of the source files in the @file{_AS__} directory.
 
 @table @file
 @item app.c
@@ -3453,11 +3694,11 @@ pointer just after the last @code{char} appended.  (JF:  All these
 little routines should probably all be put in one file.)
 
 @item as.c
-Here you will find the main program of the assembler @code{as}.
+Here you will find the main program of the assembler @code{_AS__}.
 
 @item expr.c
 This is a branch office of @file{read.c}.  This understands
-expressions, arguments.  Inside @code{as}, arguments are called
+expressions, arguments.  Inside @code{_AS__}, arguments are called
 (expression) @emph{operands}.  This is confusing, because we also talk
 (elsewhere) about instruction @emph{operands}.  Also, expression
 operands are called @emph{quantities} explicitly to avoid confusion
@@ -3479,7 +3720,7 @@ something similar.
 @item input-file.c
 This contains Operating system dependent source file reading
 routines.  Since error messages often say where we are in reading
-the source file, they live here too.  Since @code{as} is intended to
+the source file, they live here too.  Since @code{_AS__} is intended to
 run under GNU and Unix only, this might be worth flushing.  Anyway,
 almost all C compilers support stdio.
 
@@ -3493,10 +3734,10 @@ warning message reporting.  See @file{append.c} above.
 
 @item output-file.c
 This contains operating system dependent functions that write an
-object file for @code{as}.  See @file{input-file.c} above.
+object file for @code{_AS__}.  See @file{input-file.c} above.
 
 @item read.c
-This implements all the directives of @code{as}.  This also deals
+This implements all the directives of @code{_AS__}.  This also deals
 with passing input lines to the machine dependent part of the
 assembler.
 
@@ -3554,7 +3795,7 @@ be identical to the one used by GDB (which uses it for disassembly.)
 
 @item atof-ieee.c
 This contains code to turn a flonum into a ieee literal constant.
-This is used by tye 680x0, 32x32, sparc, and i386 versions of @code{as}.
+This is used by tye 680x0, 32x32, sparc, and i386 versions of @code{_AS__}.
 
 @item i386-opcode.h
 This is the opcode-table for the i386 version of the assembler.
@@ -3611,7 +3852,7 @@ Vax specific file for describing Vax operands and other Vax-ish things.
 Vax opcode table.
 
 @item vax.c
-Vax specific parts of @code{as}.  Also includes the former files
+Vax specific parts of @code{_AS__}.  Also includes the former files
 @file{vax-ins-parse.c}, @file{vax-reg-parse.c} and @file{vip-op.c}.
 
 @item atof-vax.c
@@ -3671,7 +3912,7 @@ Since nobody is running under real GNU yet, we include this file.
 Macros and function headers for reading in source files.
 
 @item struct-symbol.h
-Structure definition and macros for dealing with the gas
+Structure definition and macros for dealing with the _AS__
 internal form of a symbol.
 
 @item subsegs.h
@@ -3689,40 +3930,40 @@ Structure for doing segment fixups.
 @comment (Note:  The test directory seems to have disappeared somewhere
 @comment along the line.  If you want it, you'll probably have to find a
 @comment REALLY OLD dump tape~dots{})
-@comment 
+@comment
 @comment The ~file{test/} directory is used for regression testing.
-@comment After you modify ~@code{as}, you can get a quick go/nogo
-@comment confidence test by running the new ~@code{as} over the source
+@comment After you modify ~@code{_AS__}, you can get a quick go/nogo
+@comment confidence test by running the new ~@code{_AS__} over the source
 @comment files in this directory.  You use a shell script ~file{test/do}.
-@comment 
+@comment
 @comment The tests in this suite are evolving.  They are not comprehensive.
 @comment They have, however, caught hundreds of bugs early in the debugging
-@comment cycle of ~@code{as}.  Most test statements in this suite were naturally
-@comment selected: they were used to demonstrate actual ~@code{as} bugs rather
+@comment cycle of ~@code{_AS__}.  Most test statements in this suite were naturally
+@comment selected: they were used to demonstrate actual ~@code{_AS__} bugs rather
 @comment than being written ~i{a prioi}.
-@comment 
+@comment
 @comment Another testing suggestion: over 30 bugs have been found simply by
-@comment running examples from this manual through ~@code{as}.
+@comment running examples from this manual through ~@code{_AS__}.
 @comment Some examples in this manual are selected
-@comment to distinguish boundary conditions; they are good for testing ~@code{as}.
-@comment 
+@comment to distinguish boundary conditions; they are good for testing ~@code{_AS__}.
+@comment
 @comment ~subsubsection Regression Testing
 @comment Each regression test involves assembling a file and comparing the
-@comment actual output of ~@code{as} to ``known good'' output files.  Both
+@comment actual output of ~@code{_AS__} to ``known good'' output files.  Both
 @comment the object file and the error/warning message file (stderr) are
-@comment inspected.  Optionally ~@code{as}' exit status may be checked.
+@comment inspected.  Optionally the ~@code{_AS__} exit status may be checked.
 @comment Discrepencies are reported.  Each discrepency means either that
-@comment you broke some part of ~@code{as} or that the ``known good'' files
+@comment you broke some part of ~@code{_AS__} or that the ``known good'' files
 @comment are now out of date and should be changed to reflect the new
 @comment definition of ``good''.
-@comment 
+@comment
 @comment Each regression test lives in its own directory, in a tree
 @comment rooted in the directory ~file{test/}.  Each such directory
 @comment has a name ending in ~file{.ret}, where `ret' stands for
 @comment REgression Test.  The ~file{.ret} ending allows ~code{find
 @comment (1)} to find all regression tests in the tree, without
 @comment needing to list them explicitly.
-@comment 
+@comment
 @comment Any ~file{.ret} directory must contain a file called
 @comment ~file{input} which is the source file to assemble.  During
 @comment testing an object file ~file{output} is created, as well as
@@ -3733,16 +3974,16 @@ Structure for doing segment fixups.
 @comment deleted.  Likewise ~file{stdouterr} is removed if it exactly
 @comment matches a file ~file{stdouterr.good}.  If file
 @comment ~file{status.good} is present, containing a decimal number
-@comment before a newline, the exit status of ~@code{as} is compared
+@comment before a newline, the exit status of ~@code{_AS__} is compared
 @comment to this number.  If the status numbers are not equal, a file
 @comment ~file{status} is written to the directory, containing the
 @comment actual status as a decimal number followed by newline.
-@comment 
+@comment
 @comment Should any of the ~file{*.good} files fail to match their corresponding
 @comment actual files, this is noted by a 1-line message on the screen during
 @comment the regression test, and you can use ~@code{find (1)} to find any
 @comment files named ~file{status}, ~file {output} or ~file{stdouterr}.
-@comment 
+@comment
 @node Retargeting, License, Maintenance, Top
 @chapter Teaching the Assembler about a New Machine
 
@@ -3766,9 +4007,9 @@ contain all the information about the names of the machine
 instructions, their opcodes, and what addressing modes they
 support.  If you do this right, the assembler and GDB can share
 this file, and you'll only have to write it once.  Note that
-while you're writing @code{as}, you may want to use an
+while you're writing @code{_AS__}, you may want to use an
 independent program (if you have access to one), to make sure
-that @code{as} is emitting the correct bytes.  Since @code{as}
+that @code{_AS__} is emitting the correct bytes.  Since @code{_AS__}
 and @code{GDB} share the opcode table, an incorrect opcode
 table entry may make invalid bytes look OK when you disassemble
 them with @code{GDB}.
@@ -3795,7 +4036,7 @@ start a comment anywhere in a line.  Comments are stripped off
 automatically by the machine independent part of the
 assembler.  Note that the @samp{/*} will always start a
 comment, and that only @samp{*/} will end a comment started by
-@samp{*/}.  
+@samp{*/}.
 
 @item char line_comment_chars[];
 This character array holds the values of the chars that start a
@@ -3832,7 +4073,7 @@ any of your other routines.
 
 @item int md_parse_option(char **optionPTR, int *argcPTR, char ***argvPTR)
 This routine is called once for each option on the command line
-that the machine-independent part of @code{as} does not
+that the machine-independent part of @code{_AS__} does not
 understand.  This function should return non-zero if the option
 pointed to by @var{optionPTR} is a valid option.  If it is not
 a valid option, this routine should return zero.  The variables
@@ -4075,8 +4316,8 @@ line number, then uses @code{fprintf} to print the
 @var{message} and any arguments it was passed.
 
 @item as_bad(char *message,@dots{})
-This function should be called when @code{as} encounters
-conditions that are bad enough that @code{as} should not
+This function should be called when @code{_AS__} encounters
+conditions that are bad enough that @code{_AS__} should not
 produce an object file, but should continue reading input and
 printing warning and bad error messages.
 
@@ -4115,10 +4356,10 @@ modes.  (e.g. branch instructions) This means the size of many
 pieces of object code cannot be determined until after assembly
 is finished.  (This means that the addresses of symbols cannot be
 determined until assembly is finished.)  In order to do this,
-@code{as} stores the output bytes as @dfn{frags}.
+@code{_AS__} stores the output bytes as @dfn{frags}.
 
 Here is the definition of a frag (from @file{as.h})
-@example
+@smallexample
 struct frag
 @{
         long int fr_fix;
@@ -4132,7 +4373,7 @@ struct frag
         struct frag *fr_next;
         char fr_literal[];
 @}
-@end example
+@end smallexample
 
 @table @var
 @item fr_fix
@@ -4186,15 +4427,15 @@ actual object bytes.  A frag consists of a fixed size piece of
 object data, (which may be zero bytes long), followed by a
 piece of object data whose size may not have been determined
 yet.  Other information includes the type of the frag (which
-controls how it is relaxed), 
+controls how it is relaxed),
 
 @item fr_next
 This is the next frag in the singly-linked list.  This is
 usually only needed by the machine-independent part of
-@code{as}.
+@code{_AS__}.
 
 @end table
-@end ignore
+_fi__(0)
 
 @node License,  , Retargeting, Top
 @unnumbered GNU GENERAL PUBLIC LICENSE
@@ -4430,7 +4671,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 @end ifinfo
 
 @page
-@unnumberedsec How to Apply These Terms to Your New Programs
+@unnumberedsec Applying These Terms to Your New Programs
 
   If you develop a new program, and you want it to be of the greatest
 possible use to humanity, the best way to achieve this is to make it
