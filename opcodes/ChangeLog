@@ -1,5 +1,9 @@
 2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
 
+	* mips-dis.c: Update copyright years.
+
+2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
+
 	* mips-dis.c (mips_isa_type): Add MIPS3D instructions to the ISA
 	bit masks for bfd_mach_mips_sb1 and bfd_mach_mipsisa64.  Add
 	comments for bfd_mach_mipsisa32 and bfd_mach_mipsisa64 that
