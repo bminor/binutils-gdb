@@ -1,3 +1,8 @@
+Thu May  5 00:16:36 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* configure.in (mips*-dec-bsd*): New target; do build linker.
+	(mips*-*-bsd*): New target; don't build linker.
+
 Tue May  3 21:48:11 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* configure.in (i[34]86-*-sco*): Move to be with other i386

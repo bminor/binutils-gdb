@@ -242,6 +242,12 @@ case "${target}" in
     # The GNU linker does not support shared libraries.
     noconfigdirs="$noconfigdirs ld gprof"
     ;;
+  mips*-dec-bsd*)
+    noconfigdirs="$noconfigdirs gprof"
+    ;;
+  mips*-*-bsd*)
+    noconfigdirs="$noconfigdirs gprof ld"
+    ;;
   mips*-*-*)
     noconfigdirs="$noconfigdirs gprof"
     ;;
