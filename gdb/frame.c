@@ -1583,12 +1583,18 @@ deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
 {
   /* See comment in "frame.h".  */
   frame->pc = pc;
-  /* While we're at it, update this frame's cached PC value, found in
-     the next frame.  Oh, for the day when "struct frame_info" is
-     opaque and this hack on hack can go.  */
-  gdb_assert (frame->next != NULL);
-  frame->next->pc_unwind_cache = pc;
-  frame->next->pc_unwind_cache_p = 1;
+  /* NOTE: cagney/2003-03-11: Some architectures (e.g., Arm) are
+     maintaining a locally allocated frame object.  Since such frame's
+     are not in the frame chain, it isn't possible to assume that the
+     frame has a next.  Sigh.  */
+  if (frame->next != NULL)
+    {
+      /* While we're at it, update this frame's cached PC value, found
+	 in the next frame.  Oh for the day when "struct frame_info"
+	 is opaque and this hack on hack can just go away.  */
+      frame->next->pc_unwind_cache = pc;
+      frame->next->pc_unwind_cache_p = 1;
+    }
 }
 
 void
