@@ -17,7 +17,7 @@ static long extract_d9 PARAMS ((unsigned long, int *));
 #define one(x)		((unsigned int) (x))
 
 /* two-word opcodes */
-#define two(x,y)	((unsigned int) (y) | ((unsigned int) (x) << 16))
+#define two(x,y)	((unsigned int) (x) | ((unsigned int) (y) << 16))
 
 
 
