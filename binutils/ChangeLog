@@ -1,3 +1,7 @@
+2003-04-24  Dimitrie O. Paun <dpaun@rogers.com>
+
+        * doc/binutils.texi: Fix the documentation for the -fo option.
+
 2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* readelf.c (get_machine_name) <EM_SH>: Amend return value
