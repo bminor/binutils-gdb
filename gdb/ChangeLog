@@ -1,5 +1,8 @@
 Thu Jun 25 15:18:42 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* partial-stab.h (N_SO):  Rearrange code a little so that all SO
+	stabs cause end_psymtab to be called.
+
 	* buildsym.c (read_sun_builtin_type):  Handle new FCS Sun CC
 	compiler feature of putting 'c' into basic type descriptors for
 	all forms of char.

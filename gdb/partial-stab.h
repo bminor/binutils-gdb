@@ -204,6 +204,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	  valu += addr;		/* Relocate */
 
+	  if (pst)
+	    {
+	      END_PSYMTAB (pst, psymtab_include_list, includes_used,
+			   symnum * symbol_size, valu,
+			   dependency_list, dependencies_used);
+	      pst = (struct partial_symtab *) 0;
+	      includes_used = 0;
+	      dependencies_used = 0;
+	    }
+
 	  /* Some compilers (including gcc) emit a pair of initial N_SOs.
 	     The first one is a directory name; the second the file name.
 	     If pst exists, is empty, and has a filename ending in '/',
@@ -222,16 +232,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  if (last_so_symnum == symnum - 1)
 	    continue;		/* Ignore repeated SOs */
 	  last_so_symnum = symnum;
-
-	  if (pst)
-	    {
-	      END_PSYMTAB (pst, psymtab_include_list, includes_used,
-			   symnum * symbol_size, valu,
-			   dependency_list, dependencies_used);
-	      pst = (struct partial_symtab *) 0;
-	      includes_used = 0;
-	      dependencies_used = 0;
-	    }
 
 	  past_first_source_file = 1;
 
