@@ -577,31 +577,35 @@ gdb_expect {
 # As long as we're stopped (breakpointed) in a called function,
 # verify that we can successfully backtrace & such from here.
 #
-
-if [istarget "hppa*-*-hpux*"] then {
-  send_gdb "bt\n"
-  gdb_expect {
-      -re "#0\[ \t\]*$hex in marker2.*:4\[49\]\r\n#1.*_sr4export.*$gdb_prompt $"\
+# In this and the following test, the _sr4export check apparently is needed
+# for hppa*-*-hpux.
+#
+send_gdb "bt\n"
+gdb_expect {
+    -re "#0\[ \t\]*$hex in marker2.*:4\[49\]\r\n#1.*_sr4export.*$gdb_prompt $"\
             {pass "backtrace while in called function"}
-      -re "#0\[ \t\]*$hex in marker2.*:4\[49\]\r\n#1.*function called from gdb.*$gdb_prompt $"\
-
-            {pass "backtrace while in called function"}
+    -re "#0\[ \t\]*($hex in )?marker2.*:4\[49\]\r\n#1.*function called from gdb.*$gdb_prompt $"\
+	    {pass "backtrace while in called function"}
     -re "$gdb_prompt $"\
             {fail "backtrace while in called function"}
     timeout {fail "(timeout) backtrace while in called function"}
-  }
-  send_gdb "finish\n"
-  gdb_expect {
-      -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.* in _sr4export.*$gdb_prompt $"\
+}
+
+# Return from the called function.  For remote targets, it's important to do
+# this before runto_main, which otherwise may silently stop on the dummy
+# breakpoint inserted by GDB at the program's entry point.
+#
+send_gdb "finish\n"
+gdb_expect {
+    -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.* in _sr4export.*$gdb_prompt $"\
             {pass "finish from called function"}
-      -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.*function called from gdb.*$gdb_prompt $"\
+    -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.*function called from gdb.*$gdb_prompt $"\
             {pass "finish from called function"}
-      -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.*Value returned.*$gdb_prompt $"\
+    -re "Run till exit from .*marker2.* at .*4\[49\]\r\n.*Value returned.*$gdb_prompt $"\
             {pass "finish from called function"}
     -re "$gdb_prompt $"\
             {fail "finish from called function"}
     timeout {fail "(timeout) finish from called function"}
-  }
 }
 
 # Verify that GDB responds gracefully to a "finish" command with
