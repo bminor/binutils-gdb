@@ -1,6 +1,15 @@
+Wed Apr  5 19:57:38 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* mips-tdep.c (mips_print_register): Remove unused variable
+	our_type and call to init_type.  Fixes memory leak.  Reindent function.
+
+	* mips-tdep.c (mips_print_register), findvar.c
+	(write_register_bytes): Make buffer char[] instead of unsigned
+	char[].
+
 Mon Apr  3 19:28:14 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* top.c, utils.c, main.c: Replace error_pre_print with two
+	* top.c, utils.c, main.c, defs.h: Replace error_pre_print with two
 	variables: error_pre_print (for RETURN_ERROR) and quit_pre_print
 	(for RETURN_QUIT).  Fixes a bug whereby typing ^C (e.g. in "maint
 	print sym") could output extraneous stuff.
