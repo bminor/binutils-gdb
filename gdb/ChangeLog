@@ -1,3 +1,14 @@
+2003-05-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_analyze_frame_setup): Use I386_EBP_REGNUM
+	instead of FP_REGNUM.
+	(i386_unwind_dummy_id): Use I386_ESP_REGNUM instead of FP_REGNUM.
+	Don't mark this function as 64-bit safe.
+	(i386_save_dummy_frame_tos): Remove function.
+	(i386_push_dummy_call): Fake the frame pointer here.
+	(i386_gdbarch_init): Set save_dummy_frame_tos to
+	generic_save_dummy_frame_tos.
+
 2003-04-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h (i386bsd_sigcontext_addr): Remove prototype.

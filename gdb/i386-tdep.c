@@ -471,7 +471,7 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
     {
       /* Take into account that we've executed the `pushl %ebp' that
 	 starts this instruction sequence.  */
-      cache->saved_regs[FP_REGNUM] = 0;
+      cache->saved_regs[I386_EBP_REGNUM] = 0;
       cache->sp_offset += 4;
 
       /* If that's all, return now.  */
@@ -969,36 +969,16 @@ static const struct frame_base i386_frame_base =
   i386_frame_base_address
 };
 
-/* This function is 64-bit safe.  */
-
 static struct frame_id
 i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  char buf[8];
+  char buf[4];
   CORE_ADDR fp;
 
-  frame_unwind_register (next_frame, FP_REGNUM, buf);
+  frame_unwind_register (next_frame, I386_EBP_REGNUM, buf);
   fp = extract_typed_address (buf, builtin_type_void_data_ptr);
 
   return frame_id_build (fp, frame_pc_unwind (next_frame));
-}
-
-/* This function is 64-bit safe.  */
-
-static void
-i386_save_dummy_frame_tos (CORE_ADDR sp)
-{
-  char buf[8];
-
-  /* We can't use the saved top-of-stack to find the right dummy frame
-     when unwinding, since we can't reconstruct it properly if the
-     dummy frame is the innermost frame.  To circumvent this, we fake
-     a frame pointer here.  */
-
-  store_typed_address (buf, builtin_type_void_data_ptr, sp);
-  regcache_cooked_write (current_regcache, FP_REGNUM, buf);
-
-  generic_save_dummy_frame_tos (sp);
 }
 
 
@@ -1073,9 +1053,12 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
   store_address (buf, 4, dummy_addr);
   write_memory (sp, buf, 4);
 
-  /* Finally, update the stack pointer.  */
+  /* Finally, update the stack pointer...  */
   store_address (buf, 4, sp);
   regcache_cooked_write (regcache, I386_ESP_REGNUM, buf);
+
+  /* ...and fake a frame pointer.  */
+  regcache_cooked_write (regcache, I386_EBP_REGNUM, buf);
 
   return sp;
 }
@@ -1732,7 +1715,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, i386_print_insn);
 
   set_gdbarch_unwind_dummy_id (gdbarch, i386_unwind_dummy_id);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, i386_save_dummy_frame_tos);
+  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 
   set_gdbarch_unwind_pc (gdbarch, i386_unwind_pc);
 
