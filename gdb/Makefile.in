@@ -132,7 +132,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.0.95
+VERSION = 4.1.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -553,12 +553,8 @@ de-stage3: force
 	- (cd stage3 ; mv -f * ..)
 	- rmdir stage3
 
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; \
-		./configure +destdir=$(destdir) \
-		+norecurse \
-		`if [ "$(srcdir)" != "." ] ; then echo +subdirs; fi` \
-		$(host) +target=$(target))
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure $(host_makefile_frag) $(target_makefile_frag)
+	$(SHELL) ./config.status
 
 force:
 

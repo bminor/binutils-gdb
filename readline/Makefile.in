@@ -1,8 +1,7 @@
-## -*- text -*- ####################################################
 #								   #
 # Makefile for readline and history libraries.			   #
 #								   #
-####################################################################
+
 
 srcdir = .
 destdir = /usr/local
@@ -26,9 +25,6 @@ INCDIR = $(destdir)/include
 # Define TYPES as -DVOID_SIGHANDLER if your operating system uses
 # a return type of "void" for signal handlers.
 TYPES = -DVOID_SIGHANDLER
-
-# Define SYSV as -DSYSV if you are using a System V operating system.
-#SYSV = -DSYSV
 
 # HP-UX compilation requires the BSD library.
 #LOCAL_LIBS = -lBSD
@@ -105,14 +101,16 @@ includes:
 		 mkdir $(INCDIR)/readline;\
 		 chmod a+r $(INCDIR)/readline;\
 		fi
-		$(INSTALL_FILE) readline.h keymaps.h chardefs.h $(INCDIR)/readline/
+		$(INSTALL_FILE) $(srcdir)/readline.h $(INCDIR)/readline/
+		$(INSTALL_FILE) $(srcdir)/keymaps.h $(INCDIR)/readline/
+		$(INSTALL_FILE) $(srcdir)/chardefs.h $(INCDIR)/readline/
 clean:
 		rm -f $(STAGESTUFF) *.a *.log *.cp *.tp *.vr *.fn *.aux *.pg *.toc
 
 $(DESTDIR)/libreadline.a: libreadline.a
 		-mv $(DESTDIR)/libreadline.a $(DESTDIR)/libreadline.old
 		$(INSTALL_PROG) libreadline.a $(DESTDIR)/libreadline.a
-		$(RANLIB) -t $(DESTDIR)/libreadline.a
+		$(RANLIB) $(DESTDIR)/libreadline.a
 
 # Copy the object files from a particular stage into a subdirectory.
 stage1: force
@@ -148,9 +146,5 @@ force:
 
 # with the gnu make, this is done automatically.
 
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; \
-		./configure +destdir=$(destdir) +norecurse \
-		 `if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
-		$(host) +target=$(target))
-
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure $(host_makefile_frag) $(target_makefile_frag)
+	$(SHELL) ./config.status
