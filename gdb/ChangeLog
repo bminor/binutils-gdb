@@ -1,3 +1,10 @@
+2003-07-18  Kris Warkentin  <kewarken@qnx.com>
+
+	* nto-procfs.c: Clean ARI hits.  Change #include <..> to
+	#include "...".
+	(procfs_meminfo): Change strerror to safe_strerror.
+	(procfs_can_run): Remove K&R badness.
+
 2003-07-17  Michael Snyder  <msnyder@redhat.com>
 
 	* remote-sim.c: Comment typo fix.

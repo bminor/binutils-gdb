@@ -30,7 +30,7 @@
 #include <sys/procfs.h>
 #include <sys/neutrino.h>
 #include <sys/syspage.h>
-#include <gdb_dirent.h>
+#include "gdb_dirent.h"
 #include <sys/netmgr.h>
 
 #include "gdb_string.h"
@@ -375,7 +375,7 @@ procfs_meminfo (char *args, int from_tty)
   err = devctl (ctl_fd, DCMD_PROC_MAPINFO, NULL, 0, &num);
   if (err != EOK)
     {
-      printf ("failed devctl num mapinfos - %d (%s)\n", err, strerror (err));
+      printf ("failed devctl num mapinfos - %d (%s)\n", err, safe_strerror (err));
       return;
     }
 
@@ -389,7 +389,7 @@ procfs_meminfo (char *args, int from_tty)
 		* sizeof (procfs_mapinfo), &num);
   if (err != EOK)
     {
-      printf ("failed devctl mapinfos - %d (%s)\n", err, strerror (err));
+      printf ("failed devctl mapinfos - %d (%s)\n", err, safe_strerror (err));
       xfree (mapinfos);
       return;
     }
@@ -494,7 +494,7 @@ procfs_files_info (struct target_ops *ignore)
 
 /* Mark our target-struct as eligible for stray "run" and "attach" commands.  */
 static int
-procfs_can_run ()
+procfs_can_run (void)
 {
   return 1;
 }
