@@ -701,7 +701,7 @@ do_slurp_coff_armap (abfd)
   }
   *stringbase = 0;
 
-  ardata->symdef_count = swap((PTR)raw_armap);
+  ardata->symdef_count = nsymz;
   ardata->first_file_filepos = bfd_tell (abfd);
   /* Pad to an even boundary if you have to */
   ardata->first_file_filepos += (ardata->first_file_filepos) %2;

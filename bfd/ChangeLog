@@ -1,3 +1,8 @@
+Wed Dec 30 12:46:30 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* archive.c (do_slurp_coff_armap): set symdef_count correctly
+	(it broke a couple of weeks ago).
+
 Tue Dec 29 21:41:05 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* elf.c (bfd_elf_find_section): Switch back to "struct ..." for
