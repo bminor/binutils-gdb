@@ -1,3 +1,10 @@
+2002-11-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386v42mp.h: Remove file.  Move its contents,
+	except the inclusion of "i386/tm-i386.h", to...
+	* config/i386/nm-i386v42mp.h: ...here.
+	* config/i386/i386v42mp.mt (TM_FILE): Set to tm-i386.h.
+
 2002-11-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (frame.o): Update dependencies.
