@@ -162,7 +162,7 @@ mi_table_end (struct ui_out *uiout)
 /* Specify table header */
 
 void
-mi_table_header (struct ui_out *uiout, int width, int alignment,
+mi_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		 const char *col_name,
 		 const char *colhdr)
 {
@@ -212,8 +212,8 @@ mi_end (struct ui_out *uiout,
 /* output an int field */
 
 void
-mi_field_int (struct ui_out *uiout, int fldno, int width, int alignment,
-	      const char *fldname, int value)
+mi_field_int (struct ui_out *uiout, int fldno, int width,
+              enum ui_align alignment, const char *fldname, int value)
 {
   char buffer[20];		/* FIXME: how many chars long a %d can become? */
   struct ui_out_data *data = ui_out_data (uiout);
@@ -227,8 +227,8 @@ mi_field_int (struct ui_out *uiout, int fldno, int width, int alignment,
 /* used to ommit a field */
 
 void
-mi_field_skip (struct ui_out *uiout, int fldno, int width, int alignment,
-	       const char *fldname)
+mi_field_skip (struct ui_out *uiout, int fldno, int width,
+               enum ui_align alignment, const char *fldname)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
@@ -243,7 +243,7 @@ void
 mi_field_string (struct ui_out *uiout,
 		 int fldno,
 		 int width,
-		 int align,
+		 enum ui_align align,
 		 const char *fldname,
 		 const char *string)
 {
