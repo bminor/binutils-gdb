@@ -1,3 +1,8 @@
+2000-04-03  Kazu Hirata  <kazu@hxi.com>
+
+	* coff-h8300.c (h8300_reloc16_extra_cases): Add bsr:16 -> bsr:8 to
+	the R_PCRWORD_B case.
+
 2000-03-31  Thomas de Lellis  <tdel@wrs.com>
 
 	* srec.c : Set CHUNK size to 16 bytes to prevent download failures

@@ -901,6 +901,10 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	  /* Write it.  */
 	  bfd_put_8 (abfd, tmp, data + dst_address - 2);
 	  break;
+	case 0x5c:
+	  /* bsr:16 -> bsr:8 */
+	  bfd_put_8 (abfd, 0x55, data + dst_address - 2);
+	  break;
 
 	default:
 	  abort ();
