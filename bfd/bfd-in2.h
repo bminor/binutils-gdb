@@ -1039,9 +1039,11 @@ typedef struct sec
      some relocation information too.  */
 #define SEC_RELOC      0x004
 
-#if 0   /* Obsolete ? */
-#define SEC_BALIGN     0x008
-#endif
+  /* ELF reserves 4 processor specific bits and 8 operating system
+     specific bits in sh_flags; at present we can get away with just
+     one in communicating between the assembler and BFD, but this
+     isn't a good long-term solution.  */
+#define SEC_ARCH_BIT_0 0x008
 
   /* A signal to the OS that the section contains read only data.  */
 #define SEC_READONLY   0x010

@@ -1,3 +1,8 @@
+2001-09-28  Richard Henderson  <rth@redhat.com>
+
+	* section.c (SEC_ARCH_BIT_0): New; replace unused SEC_BALIGN.
+	* bfd-in2.h: Rebuild.
+
 2001-09-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-x86-64.c (elf64_x86_64_reloc_type_lookup): Don't map bfd
