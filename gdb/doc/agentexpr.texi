@@ -835,5 +835,3 @@ opcode 0x30 reserved, to remain compatible with the customer who added
 it.
 
 @end table
-
-@bye
