@@ -1,6 +1,6 @@
 Tue Jul 21 13:12:13 1998  Doug Evans  <devans@seba.cygnus.com>
 
-	* cgen.h (cgen_version_{major,minor,fixlevel}): Declare.
+	* cgen.h (CGEN_VERSION_{MAJOR,MINOR,FIXLEVEL}): Define.
 	(cgen_insert_fn,cgen_extract_fn): New arg `pc'.
 	(get_operand,put_operand): Replaced with get_{int,vma}_operand,
 	set_{int,vma}_operand.

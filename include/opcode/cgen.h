@@ -21,6 +21,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef CGEN_H
 #define CGEN_H
 
+/* Version information.  */
+#define CGEN_VERSION_MAJOR    0
+#define CGEN_VERSION_MINOR    6
+#define CGEN_VERSION_FIXLEVEL 0
+
 /* Prepend the arch name, defined in <arch>-opc.h, and _cgen_ to symbol S.
    The lack of spaces in the arg list is important for non-stdc systems.
    This file is included by <arch>-opc.h.
@@ -66,11 +71,6 @@ enum cgen_endian
   CGEN_ENDIAN_LITTLE,
   CGEN_ENDIAN_BIG
 };
-
-/* Version information.  */
-extern const int cgen_version_major;
-extern const int cgen_version_minor;
-extern const int cgen_version_fixlevel;
 
 /* Forward decl.  */
 typedef struct cgen_insn CGEN_INSN;
