@@ -1,5 +1,6 @@
 2000-09-07  Kazu Hirata  <kazu@hxi.com>
 
+	* doc/chew.c: Remove all uses of DEFUN and DEFUN_VOID.
 	* elf.c: Fix formatting.
 
 2000-09-07  Alexandre Oliva  <aoliva@redhat.com>
