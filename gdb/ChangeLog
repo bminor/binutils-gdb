@@ -1,3 +1,8 @@
+2003-04-23  David Carlton  <carlton@bactrian.org>
+
+	* cp-support.c (cp_find_first_component): Accept 'operator' in
+	more locations.
+
 2003-04-23  Andrew Cagney  <cagney@redhat.com>
 
 	* infcall.c (call_function_by_hand): Eliminate redundant
