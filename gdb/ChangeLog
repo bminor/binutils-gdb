@@ -1,3 +1,18 @@
+2002-10-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2read.c (dwarf2_invalid_pointer_size): New complaint.
+	(read_tag_pointer_type): Add address class support.
+	* gdbarch.sh (ADDRESS_CLASS_TYPE_FLAGS)
+	(ADDRESS_CLASS_TYPE_FLAGS_TO_NAME, ADDRESS_CLASS_NAME_TO_TYPE_FLAGS):
+	New methods.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* gdbtypes.c (address_space_name_to_int, address_space_int_to_name)
+	(make_type_with_address_space, recursive_type_dump): Add address
+	class support.
+	* gdbtypes.h (TYPE_FLAG_ADDRESS_CLASS_1, TYPE_FLAG_ADDRESS_CLASS_2)
+	(TYPE_FLAG_ADDRESS_CLASS_ALL, TYPE_ADDRESS_CLASS_1)
+	(TYPE_ADDRESS_CLASS_2, TYPE_ADDRESS_CLASS_ALL): New defines
+
 2002-10-16  Klee Dienes  <kdienes@apple.com>
 
 	* stabsread.c (read_tilde_fields): Use name[sizeof(vptr_name)-2]

@@ -683,6 +683,10 @@ static struct complaint dwarf2_invalid_attrib_class =
 {
   "invalid attribute class or form for '%s' in '%s'", 0, 0
 };
+static struct complaint dwarf2_invalid_pointer_size = 
+{
+  "invalid pointer size %d", 0, 0
+};
 
 /* local function prototypes */
 
@@ -2925,7 +2929,9 @@ read_tag_pointer_type (struct die_info *die, struct objfile *objfile,
 		       const struct comp_unit_head *cu_header)
 {
   struct type *type;
-  struct attribute *attr;
+  struct attribute *attr_byte_size;
+  struct attribute *attr_address_class;
+  int byte_size, addr_class;
 
   if (die->type)
     {
@@ -2933,15 +2939,42 @@ read_tag_pointer_type (struct die_info *die, struct objfile *objfile,
     }
 
   type = lookup_pointer_type (die_type (die, objfile, cu_header));
-  attr = dwarf_attr (die, DW_AT_byte_size);
-  if (attr)
-    {
-      TYPE_LENGTH (type) = DW_UNSND (attr);
-    }
+
+  attr_byte_size = dwarf_attr (die, DW_AT_byte_size);
+  if (attr_byte_size)
+    byte_size = DW_UNSND (attr_byte_size);
   else
+    byte_size = cu_header->addr_size;
+
+  attr_address_class = dwarf_attr (die, DW_AT_address_class);
+  if (attr_address_class)
+    addr_class = DW_UNSND (attr_address_class);
+  else
+    addr_class = DW_ADDR_none;
+
+  /* If the pointer size or address class is different than the
+     default, create a type variant marked as such and set the
+     length accordingly.  */
+  if (TYPE_LENGTH (type) != byte_size || addr_class != DW_ADDR_none)
     {
-      TYPE_LENGTH (type) = cu_header->addr_size;
+      if (ADDRESS_CLASS_TYPE_FLAGS_P ())
+	{
+	  int type_flags;
+
+	  type_flags = ADDRESS_CLASS_TYPE_FLAGS (byte_size, addr_class);
+	  gdb_assert ((type_flags & ~TYPE_FLAG_ADDRESS_CLASS_ALL) == 0);
+	  type = make_type_with_address_space (type, type_flags);
+	}
+      else if (TYPE_LENGTH (type) != byte_size)
+	{
+	  complain (&dwarf2_invalid_pointer_size, byte_size);
+	}
+      else {
+	/* Should we also complain about unhandled address classes?  */
+      }
     }
+
+  TYPE_LENGTH (type) = byte_size;
   die->type = type;
 }
 

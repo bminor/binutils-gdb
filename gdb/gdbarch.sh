@@ -664,6 +664,9 @@ f:2:COFF_MAKE_MSYMBOL_SPECIAL:void:coff_make_msymbol_special:int val, struct min
 v::NAME_OF_MALLOC:const char *:name_of_malloc::::"malloc":"malloc"::0
 v::CANNOT_STEP_BREAKPOINT:int:cannot_step_breakpoint::::0:0::0
 v::HAVE_NONSTEPPABLE_WATCHPOINT:int:have_nonsteppable_watchpoint::::0:0::0
+F:2:ADDRESS_CLASS_TYPE_FLAGS:int:address_class_type_flags:int byte_size, int dwarf2_addr_class:byte_size, dwarf2_addr_class
+F:2:ADDRESS_CLASS_TYPE_FLAGS_TO_NAME:char *:address_class_type_flags_to_name:int type_flags:type_flags
+F:2:ADDRESS_CLASS_NAME_TO_TYPE_FLAGS:int:address_class_name_to_type_flags:char *name, int *type_flags_ptr:name, type_flags_ptr
 EOF
 }
 
