@@ -47,6 +47,7 @@ sun3-xdep.c\
 sun386-xdep.c\
 symm-tdep.c\
 symm-xdep.c\
+tahoe-pinsn.c\
 tdesc.c\
 umax-xdep.c\
 vax-pinsn.c
@@ -90,6 +91,7 @@ tm-sun386.h\
 tm-sun3os4.h\
 tm-sun4os4.h\
 tm-symmetry.h\
+tm-tahoe.h\
 tm-umax.h\
 tm-vax.h\
 tm-vx68.h\
@@ -102,6 +104,7 @@ xm-bigmips.h\
 xm-convex.h\
 xm-hp300bsd.h\
 xm-hp300hpux.h\
+xm-i386sco.h\
 xm-i386v.h\
 xm-i386v32.h\
 xm-isi.h\
@@ -119,12 +122,12 @@ xm-sun386.h\
 xm-sun3os4.h\
 xm-sun4os4.h\
 xm-symmetry.h\
+xm-tahoe.h\
 xm-umax.h\
 xm-vax.h
 
 ALLCONFIG=\
 ./tconfig/3b1\
-./tconfig/CVS.adm\
 ./tconfig/altos\
 ./tconfig/altosgas\
 ./tconfig/am29k\
@@ -133,6 +136,7 @@ ALLCONFIG=\
 ./tconfig/convex\
 ./tconfig/hp300bsd\
 ./tconfig/hp300hpux\
+./tconfig/i386sco\
 ./tconfig/i386v\
 ./tconfig/i386v-g\
 ./tconfig/i386v32\
@@ -159,12 +163,12 @@ ALLCONFIG=\
 ./tconfig/sun4os3\
 ./tconfig/sun4os4\
 ./tconfig/symmetry\
+./tconfig/tahoe\
 ./tconfig/umax\
 ./tconfig/vax\
 ./tconfig/vxworks68\
 ./tconfig/vxworks960\
 ./xconfig/3b1\
-./xconfig/CVS.adm\
 ./xconfig/altos\
 ./xconfig/altosgas\
 ./xconfig/arm\
@@ -172,6 +176,7 @@ ALLCONFIG=\
 ./xconfig/convex\
 ./xconfig/hp300bsd\
 ./xconfig/hp300hpux\
+./xconfig/i386sco\
 ./xconfig/i386v\
 ./xconfig/i386v-g\
 ./xconfig/i386v32\
@@ -196,6 +201,7 @@ ALLCONFIG=\
 ./xconfig/sun4os3\
 ./xconfig/sun4os4\
 ./xconfig/symmetry\
+./xconfig/tahoe\
 ./xconfig/umax\
 ./xconfig/vax
 

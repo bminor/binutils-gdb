@@ -202,18 +202,21 @@ POSSLIBS = $(POSSLIBS_MAINDIR)
 
 TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 
-# tdesc-lib cannot be named simply tdesc, because if if it were GNU make
+# tdesc-lib cannot be named simply tdesc, because if it were, GNU make
 # would try to make it from tdesc.c.
 # tdesc-lib removed from the list due to Motorola copyrights...gnu@cygnus.com
 OTHERS = Makefile.dist depend alldeps.mak Makefile.sdir \
 	 createtags munch config.gdb config.status \
 	 ChangeLog ChangeLog-3.x \
-	 README TODO TAGS WHATS.NEW \
+	 README TODO TAGS WHATS.NEW Projects \
 	 .gdbinit COPYING expread.tab.c \
-	 copying.c Projects Convex.notes copying.awk \
+	 copying.c Convex.notes copying.awk \
 	 saber.suppress standalone.c stuff.c kdb-start.c \
-	 putenv.c \
-	 hp-include # tests
+	 putenv.c
+
+# Subdirectories of gdb, which should be included in their entirety in
+# gdb-xxx.tar.Z:
+TARDIRS = doc hp-include # tests
 
 DEPFILES= ${TDEPFILES} ${XDEPFILES}
 
@@ -308,7 +311,8 @@ Makefile: $(Makefiles)
 alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
 	rm -f alldeps.mak alldeps.tmp allparam.tmp allconfig.tmp
 	for i in `ls -d ${srcdir}/tconfig/*[0-9A-Za-z] \
-          ${srcdir}/xconfig/*[0-9A-Za-z] | grep -v RCS` ; do \
+            ${srcdir}/xconfig/*[0-9A-Za-z] | \
+	    grep -v RCS | grep -v CVS.adm | grep -v SCCS` ; do \
 	  echo $$i >>allconfig.tmp; \
 	  awk <$$i ' \
 	    $$1 == "TDEPFILES=" || $$1 == "XDEPFILES=" { \
@@ -405,13 +409,14 @@ TAGS: ${TAGFILES}
 tags: TAGS
 
 # FIXME: Get alldeps.mak up to date, config.gdb none, THEN make gdb.tar.Z!
-gdb.tar.Z: ${TARFILES}
+gdb.tar.Z: ${TARFILES} ${TARDIRS}
 	rm -f gdb.tar; rm -rf $(DIST)
 	mkdir $(DIST)
 	cd $(DIST) ; for i in ${TARFILES} ; do ln -s ../$$i . ; done
-	mkdir doc
-	cd doc; for i in ../doc/*.tex* ../doc/*.m4; \
-	   do ln -s $$i . ; done
+	cd $(DIST); for i in ${TARDIRS}; do \
+	  (mkdir $$i; cd $$i; \
+	  ln -s ../../$$i/* .; \
+	  rm -rf SCCS CVS.adm RCS); done
 	mkdir $(DIST)/xconfig ${DIST}/tconfig
 	cd $(DIST)/tconfig ; \
 	  for i in $(ALLCONFIG) ; do ln -s ../../$$i ../$$i ; done
