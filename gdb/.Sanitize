@@ -21,7 +21,7 @@ else
 	lose_these_too="sp64-tdep.c"
 fi
 
-mpw_files="mpw-config.in mpw-make.in ser-mac.c ChangeLog.mpw"
+mpw_files="mpw-config.in mpw-make.in ser-mac.c mac-xdep.c mac-defs.h macgdb.r ChangeLog.mpw"
 
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
 	keep_these_too="${mpw_files} ${keep_these_too}"
