@@ -80,6 +80,42 @@ elf_bfd_link_add_symbols (abfd, info)
     }
 }
 
+/* Return true iff this is a non-common definition of a symbol.  */
+static boolean
+is_global_symbol_definition (abfd, sym)
+     bfd * abfd;
+     Elf_Internal_Sym * sym;
+{
+  /* Local symbols do not count, but target specific ones might.  */
+  if (ELF_ST_BIND (sym->st_info) != STB_GLOBAL
+      && ELF_ST_BIND (sym->st_info) < STB_LOOS)
+    return false;
+
+  /* If the section is undefined, then so is the symbol.  */
+  if (sym->st_shndx == SHN_UNDEF)
+    return false;
+  
+  /* If the symbol is defined in the common section, then
+     it is a common definition and so does not count.  */
+  if (sym->st_shndx == SHN_COMMON)
+    return false;
+
+  /* If the symbol is in a target specific section then we
+     must rely upon the backend to tell us what it is.  */
+  if (sym->st_shndx >= SHN_LORESERVE && sym->st_shndx < SHN_ABS)
+    /* FIXME - this function is not coded yet:
+       
+       return _bfd_is_global_symbol_definition (abfd, sym);
+       
+       Instead for now assume that the definition is not global,
+       Even if this is wrong, at least the linker will behave
+       in the same way that it used to do.  */
+    return false;
+      
+  return true;
+}
+
+
 /* Search the symbol table of the archive element of the archive ABFD
    whoes archove map contains a mention of SYMDEF, and determine if
    the symbol is defined in this element.  */
@@ -104,6 +140,13 @@ elf_link_is_defined_archive_symbol (abfd, symdef)
   if (! bfd_check_format (abfd, bfd_object))
     return false;
 
+  /* If we have already included the element containing this symbol in the
+     link then we do not need to include it again.  Just claim that any symbol
+     it contains is not a definition, so that our caller will not decide to
+     (re)include this element.  */
+  if (abfd->archive_pass)
+    return false;
+  
   /* Select the appropriate symbol table.  */
   if ((abfd->flags & DYNAMIC) == 0 || elf_dynsymtab (abfd) == 0)
     hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -159,11 +202,7 @@ elf_link_is_defined_archive_symbol (abfd, symdef)
 
       if (strcmp (name, symdef->name) == 0)
 	{
-	  result =
-	    (ELF_ST_BIND (sym.st_info) == STB_GLOBAL)
-	    && (sym.st_shndx != SHN_UNDEF)
-	    && (sym.st_shndx != SHN_COMMON)
-	    ;
+	  result = is_global_symbol_definition (abfd, & sym);
 	  break;
 	}
     }

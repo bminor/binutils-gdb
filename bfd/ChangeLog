@@ -1,3 +1,13 @@
+1999-12-14  Nick Clifton  <nickc@cygnus.com>
+
+	* elflink.h (is_global_symbol_definition): New Function: Return
+	true iff the symbol is being given a global definition in this
+	bfd. 
+	(elf_link_is_defined_archive_symbol): Do not bother processing
+	symbols for an archive element that has already been included
+	in the link.
+	Use is_global_symbol_definition().
+	
 1999-12-09  Andrew Cagney  <cagney@cygnus.com>
 
 	* config.bfd: Add support for sparc-*-netbsdelf* and
