@@ -312,18 +312,18 @@ installcheck:
 # Rules for testing by relinking ld itself.
 
 ld-partial.o: ld.new
-	./ld.new -L. $(HOSTING_EMU) -o ld-partial.o -r $(OFILES)
+	./ld.new $(HOSTING_EMU) -o ld-partial.o -r $(OFILES)
 ld1: ld-partial.o
-	./ld.new -L. $(HOSTING_EMU) -o ld1 $(HOSTING_CRT0) ld-partial.o $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
+	./ld.new $(HOSTING_EMU) -o ld1 $(HOSTING_CRT0) ld-partial.o $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
 ld1-full: ld.new
-	./ld.new -L. $(HOSTING_EMU) -o ld1-full $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
+	./ld.new $(HOSTING_EMU) -o ld1-full $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
 ld2: ld1
-	./ld1 -L. $(HOSTING_EMU) -o ld2 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
+	./ld1 $(HOSTING_EMU) -o ld2 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
 ld3: ld2
-	./ld2 -L. $(HOSTING_EMU) -o ld3 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
+	./ld2 $(HOSTING_EMU) -o ld3 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
 bootstrap: ld3
 	cmp ld2 ld3
@@ -331,7 +331,7 @@ bootstrap: ld3
 # A test program for C++ constructors and destructors.
 
 cdtest: cdtest-main.o cdtest-func.o cdtest-foo.o ld.new
-	./ld.new -L. $(HOSTING_EMU) -o cdtest $(HOSTING_CRT0) \
+	./ld.new $(HOSTING_EMU) -o cdtest $(HOSTING_CRT0) \
 	  cdtest-main.o cdtest-func.o cdtest-foo.o $(HOSTING_LIBS)
 
 check-cdtest: cdtest $(srcdir)/cdtest.exp

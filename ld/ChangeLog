@@ -5,7 +5,7 @@ Fri Jul  2 18:06:05 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 	* configure.in (ldscripts): Make, instead of emulations.
 	* Makefile.in (scriptdir): Take off the "ld" part.
 	(install, clean, distclean): Use ldscripts, not emulations.
-	In tests, pass -L., not -Lemulations.
+	In tests, don't pass -Lemulations.
 	Don't pass tooldir/lib to genscripts.sh.
 	* genscripts.sh: Don't take tooldir/lib arg.
 	* ldlang.c (lang_process): Add "ldscripts/" to the name of the
