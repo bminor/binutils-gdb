@@ -84,7 +84,7 @@ YACC=$(BISON)
 M4=gm4
 
 # where to find texinfo; GDB dist should include a recent one
-TEXIDIR=${srcdir}/../texinfo/fsf
+TEXIDIR=${srcdir}/../texinfo
 
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
