@@ -1,3 +1,30 @@
+Wed Jul  7 10:21:24 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/mips-opcode.h: Moved to opcode/mips.h.
+	* config/tc-mips.c: Include opcode/mips.h rather than
+	mips-opcode.h.
+	(append_insn): An extra NOP is only needed after instructions
+	which set HI or LO, not after instructions which read it.
+	(macro_build, mips_ip): Support new 'E', 'G' and 'B' arguments.
+	(macro): cfc1 and ctc1 now take "t,G" rather than "t,d".
+	* config/tc-mips.h (struct mips_opcode): Don't define.
+	* config/mips-big.mt, config/mips-lit.mt (TARG_CPU_DEPENDENTS):
+	Set to $(srcdir)/../include/opcode/mips.h.
+
+	Get the MIPS assembler up to speed with other gas changes:
+
+	* config/obj-ecoff.c (ecoff_set_vma, ecoff_frob_symbol):
+	Removed; don't change the symbol value.
+	(ecoff_build_symbols, ecoff_build_procs, ecoff_frob_file): Use
+	bfd_asymbol_value rather than S_GET_VALUE to include section
+	vma in symbol value.
+	(ecoff_frob_file): Ignore BSF_SECTION_SYM symbols, since ECOFF
+	doesn't output them.  Set the vma of sections.
+	* config/obj-ecoff.h: Don't define obj_frob_symbol.
+	* config/tc-mips.c (tc_gen_reloc): Adjustment by section vma is no
+	longer necessary.
+	(various): use valueT rather than long.
+
 Wed Jul  7 08:33:30 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* as.h (valueT): Typedef moved here.
