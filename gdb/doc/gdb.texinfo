@@ -1,6 +1,5 @@
 \input texinfo
 @setfilename gdb.info
-@settitle GDB, The GNU Debugger
 @synindex ky cp
 @ifinfo
 This file documents the GNU debugger GDB.
@@ -33,23 +32,27 @@ original English.
 @end ifinfo
 
 @setchapternewpage odd
-@settitle GDB Manual
+@settitle Using GDB (v4.0)
 @titlepage
-@sp 6
-@center @titlefont{GDB}
+@title{Using GDB}
+@subtitle{A Guide to the GNU Source-Level Debugger}
 @sp 1
-@center The GNU Source-Level Debugger
-@sp 4
-@center Third Edition, GDB version 4.0
-@sp 1
-@center December 1990
-@sp 5
-@center Richard M. Stallman
-@center (Revised by Cygnus Support)
+@subtitle Third Edition---GDB version 4.0
+@subtitle December 1990
+@author{Richard M. Stallman}
+@author{(Revised by Cygnus Support)}
 @page
-@hfill Cygnus Support
-@par@hskip -@parfillskip@hfill $Revision$
-@par@hskip -@parfillskip@hfill @TeX{}info @texinfoversion
+
+@tex
+\def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
+\xdef\manvers{\$Revision$}  % For use in headers, footers too
+{\parskip=0pt
+\hfill Cygnus Support\par
+\hfill \manvers\par
+\hfill \TeX{}info \texinfoversion\par
+}
+@end tex
+
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990 Free Software Foundation, Inc.
 
@@ -1703,10 +1706,12 @@ Delete any breakpoints set at entry to the function @var{function}.
 Delete any breakpoints set at or within the code of the specified line.
 
 @item delete breakpoints @var{bnums}@dots{}
-@kindex delete breakpoints
 @itemx delete @var{bnums}@dots{}
+@itemx delete
+@kindex delete breakpoints
 @kindex delete
-Delete the breakpoints of the numbers specified as arguments.
+Delete the breakpoints of the numbers specified as arguments.  If no
+argument is specified, delete all breakpoints.
 @end table
 
 @node Disabling, Conditions, Delete Breaks, Breakpoints
@@ -1720,9 +1725,9 @@ remembers the information on the breakpoint so that you can @dfn{enable}
 it again later.
 
 You disable and enable breakpoints with the @samp{enable} and
-@samp{disable} commands, specifying one or more breakpoint numbers as
-arguments.  Use @samp{info break} to print a list of breakpoints if you
-don't know which breakpoint numbers to use.
+@samp{disable} commands, optionally specifying one or more breakpoint
+numbers as arguments.  Use @samp{info break} to print a list of
+breakpoints if you don't know which breakpoint numbers to use.
 
 A breakpoint can have any of four different states of enablement:
 
@@ -1746,19 +1751,22 @@ You can use the following commands to enable or disable a breakpoint:
 @table @code
 @item disable breakpoints @var{bnums}@dots{}
 @itemx disable @var{bnums}@dots{}
+@itemx disable
 @kindex disable breakpoints
 @kindex disable
-Disable the specified breakpoints.  A disabled breakpoint has no
-effect but is not forgotten.  All options such as ignore-counts,
-conditions and commands are remembered in case the breakpoint is
-enabled again later.
+Disable the specified breakpoints---or all breakpoints, if none are
+listed.  A disabled breakpoint has no effect but is not forgotten.  All
+options such as ignore-counts, conditions and commands are remembered in
+case the breakpoint is enabled again later.
 
 @item enable breakpoints @var{bnums}@dots{}
 @itemx enable @var{bnums}@dots{}
+@itemx enable
 @kindex enable breakpoints
 @kindex enable
-Enable the specified breakpoints.  They become effective once again in
-stopping the program, until you specify otherwise.
+Enable the specified breakpoints (or all defined breakpoints).  They
+become effective once again in stopping the program, until you specify
+otherwise.
 
 @item enable breakpoints once @var{bnums}@dots{}
 @itemx enable once @var{bnums}@dots{}
@@ -2733,6 +2741,7 @@ the C++ name resolution operator in GDB expressions.
 @section Artificial Arrays
 
 @cindex artificial array
+@kindex @@
 It is often useful to print out several successive objects of the
 same type in memory; a section of an array, or an array of
 dynamically determined size for which only a pointer exists in the
@@ -3976,6 +3985,9 @@ usual, but you probably will have no reason to use them.
 In the GDB I/O buffer, you can use these special Emacs commands:
 
 @table @kbd
+@item C-h m
+Describe the features of Emacs' GDB Mode.
+
 @item M-s
 Execute to another source line, like the GDB @samp{step} command.
 
@@ -4224,25 +4236,15 @@ Without this, we won't know whether there is any point in looking for
 the bug in the current version of GDB.
 
 @item
-
-A complete input file, and all necessary source files, that will
-reproduce the bug.  Run your source files through the C
-preprocessor by doing @samp{gcc -E @var{sourcefile} > @var{outfile}},
-then include the contents of @var{outfile} in the bug report.  (Any
-@samp{-I}, @samp{-D} or @samp{-U} options that you used in actual
-compilation should also be used when doing this.)
-
-A single statement is not enough of an example.  In order to compile
-it, it must be embedded in a function definition; and the bug might
-depend on the details of how this is done.
-
-Without a real example we can compile, all we can do about your bug
-report is wish you luck.  It would be futile to try to guess how to
-provoke the bug. 
+A complete input script, and all necessary source files, that will
+reproduce the bug.  
 
 @item
-What compiler (and its version) was used to compile your program---e.g.
-``GCC-1.37.1''. 
+What compiler (and its version) was used to compile GDB---e.g.
+``GCC-1.37.1''.
+
+@item
+What compiler (and its version) was used to compile GDB.
 
 @item
 The command arguments you gave the compiler to compile that example and
@@ -4330,8 +4332,10 @@ Such guesses are usually wrong.  Even we can't guess right about such
 things without first using the debugger to find the facts.
 @end itemize
 
+@iftex
 @include readline/inc-readline.texinfo
 @include readline/inc-history.texinfo
+@end iftex
 
 @node Installing GDB, , ,Top
 @appendix Installing GDB
