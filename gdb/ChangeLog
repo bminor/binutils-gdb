@@ -1,5 +1,11 @@
 2001-07-05  Daniel Jacobowitz  <drow@mvista.com>
 
+	* mips-tdep.c (mips_software_single_step): New function.
+	* config/mips/tm-mips.h: Add prototype for
+	mips_software_single_step.
+
+2001-07-05  Daniel Jacobowitz  <drow@mvista.com>
+
 	* ppc-linux-nat.c (supply_gregset): Use elf_greg_t instead
 	of greg_t.
 	(fill_gregset): Likewise.

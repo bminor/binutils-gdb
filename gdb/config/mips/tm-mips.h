@@ -502,3 +502,6 @@ extern void mips_set_processor_type_command (char *, int);
 /* MIPS sign extends addresses */
 #define POINTER_TO_ADDRESS(TYPE,BUF) (signed_pointer_to_address (TYPE, BUF))
 #define ADDRESS_TO_POINTER(TYPE,BUF,ADDR) (address_to_signed_pointer (TYPE, BUF, ADDR))
+
+/* Single step based on where the current instruction will take us.  */
+extern void mips_software_single_step (enum target_signal, int);
