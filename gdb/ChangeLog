@@ -1,3 +1,16 @@
+2003-10-02  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_justify_value_in_reg): New function.
+	(sh_stack_allocsize): Ditto.
+	(flt_argreg_array): New array used for floating point argument
+	passing.
+	(sh_init_flt_argreg): New function.
+	(sh_next_flt_argreg): Ditto.   
+	(sh_push_dummy_call_fpu): Simplify. Rename "odd_sized_struct" to
+	"pass_on_stack". Use new helper functions.  Accomodate Renesas ABI.
+	Fix argument passing strategy.
+	(sh_push_dummy_call_nofpu): Ditto.
+
 2003-10-01  Andrew Cagney  <cagney@redhat.com>
 
 	* value.h (register_value_being_returned): Declare.  Replace

@@ -647,6 +647,98 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
    not displace any of the other arguments passed in via registers R4
    to R7.   */
 
+/* Helper function to justify value in register according to endianess. */
+static char *
+sh_justify_value_in_reg (struct value *val, int len)
+{
+  static char valbuf[4];
+
+  memset (valbuf, 0, sizeof (valbuf)); 
+  if (len < 4)
+    {
+      /* value gets right-justified in the register or stack word */
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	memcpy (valbuf + (4 - len), (char *) VALUE_CONTENTS (val), len);
+      else
+	memcpy (valbuf, (char *) VALUE_CONTENTS (val), len);
+      return valbuf;
+    }
+  return (char *) VALUE_CONTENTS (val);
+} 
+
+/* Helper function to eval number of bytes to allocate on stack. */
+static CORE_ADDR
+sh_stack_allocsize (int nargs, struct value **args)
+{
+  int stack_alloc = 0;
+  while (nargs-- > 0)
+    stack_alloc += ((TYPE_LENGTH (VALUE_TYPE (args[nargs])) + 3) & ~3);
+  return stack_alloc;
+}
+
+/* Helper functions for getting the float arguments right.  Registers usage
+   depends on the ABI and the endianess.  The comments should enlighten how
+   it's intended to work. */
+
+/* This array stores which of the float arg registers are already in use. */
+static int flt_argreg_array[FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM + 1];
+
+/* This function just resets the above array to "no reg used so far". */
+static void
+sh_init_flt_argreg (void)
+{
+  memset (flt_argreg_array, 0, sizeof flt_argreg_array);
+}
+
+/* This function returns the next register to use for float arg passing.
+   It returns either a valid value between FLOAT_ARG0_REGNUM and
+   FLOAT_ARGLAST_REGNUM if a register is available, otherwise it returns 
+   FLOAT_ARGLAST_REGNUM + 1 to indicate that no register is available.
+
+   Note that register number 0 in flt_argreg_array corresponds with the
+   real float register fr4.  In contrast to FLOAT_ARG0_REGNUM (value is
+   29) the parity of the register number is preserved, which is important
+   for the double register passing test (see the "argreg & 1" test below). */
+static int
+sh_next_flt_argreg (int len)
+{
+  int argreg;
+
+  /* First search for the next free register. */
+  for (argreg = 0; argreg <= FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM; ++argreg)
+    if (!flt_argreg_array[argreg])
+      break;
+
+  /* No register left? */
+  if (argreg > FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM)
+    return FLOAT_ARGLAST_REGNUM + 1;
+
+  if (len == 8)
+    {
+      /* Doubles are always starting in a even register number. */
+      if (argreg & 1)
+        {
+	  flt_argreg_array[argreg] = 1;
+
+	  ++argreg;
+
+          /* No register left? */
+	  if (argreg > FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM)
+	    return FLOAT_ARGLAST_REGNUM + 1;
+	}
+      /* Also mark the next register as used. */
+      flt_argreg_array[argreg + 1] = 1;
+    }
+  else if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+    {
+      /* In little endian, gcc passes floats like this: f5, f4, f7, f6, ... */
+      if (!flt_argreg_array[argreg + 1])
+	++argreg;
+    }
+  flt_argreg_array[argreg] = 1;
+  return FLOAT_ARG0_REGNUM + argreg;
+}
+
 static CORE_ADDR
 sh_push_dummy_call_fpu (struct gdbarch *gdbarch, 
 			CORE_ADDR func_addr,
@@ -656,15 +748,15 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 			CORE_ADDR sp, int struct_return,
 			CORE_ADDR struct_addr)
 {
-  int stack_offset, stack_alloc;
-  int argreg, flt_argreg;
+  int stack_offset = 0;
+  int argreg = ARG0_REGNUM;
+  int flt_argreg;
   int argnum;
   struct type *type;
   CORE_ADDR regval;
   char *val;
-  char valbuf[4];
-  int len;
-  int odd_sized_struct;
+  int len, reg_size;
+  int pass_on_stack;
 
   /* first force sp to a 4-byte alignment */
   sp = sh_frame_align (gdbarch, sp);
@@ -674,75 +766,64 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 				    STRUCT_RETURN_REGNUM,
 				    struct_addr);
 
-  /* Now make sure there's space on the stack */
-  for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
-    stack_alloc += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 3) & ~3);
-  sp -= stack_alloc;		/* make room on stack for args */
+  /* make room on stack for args */
+  sp -= sh_stack_allocsize (nargs, args);
+
+  /* Initialize float argument mechanism. */
+  sh_init_flt_argreg ();
 
   /* Now load as many as possible of the first arguments into
      registers, and push the rest onto the stack.  There are 16 bytes
      in four registers available.  Loop thru args from first to last.  */
-
-  argreg = ARG0_REGNUM;
-  flt_argreg = FLOAT_ARG0_REGNUM;
-  for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
+  for (argnum = 0; argnum < nargs; argnum++)
     {
       type = VALUE_TYPE (args[argnum]);
       len = TYPE_LENGTH (type);
-      memset (valbuf, 0, sizeof (valbuf));
-      if (len < 4)
-	{
-	  /* value gets right-justified in the register or stack word */
-	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	    memcpy (valbuf + (4 - len),
-		    (char *) VALUE_CONTENTS (args[argnum]), len);
-	  else
-	    memcpy (valbuf, (char *) VALUE_CONTENTS (args[argnum]), len);
-	  val = valbuf;
-	}
-      else
-	val = (char *) VALUE_CONTENTS (args[argnum]);
+      val = sh_justify_value_in_reg (args[argnum], len);
 
-      if (len > 4 && (len & 3) != 0)
-	odd_sized_struct = 1;	/* Such structs go entirely on stack.  */
-      else if (len > 16)
-	odd_sized_struct = 1;	/* So do aggregates bigger than 4 words.  */
-      else
-	odd_sized_struct = 0;
+      /* Some decisions have to be made how various types are handled.
+         This also differs in different ABIs. */
+      pass_on_stack = 0;
+      if (len > 16)
+        pass_on_stack = 1; /* Types bigger than 16 bytes are passed on stack. */
+
+      /* Find out the next register to use for a floating point value. */
+      if (TYPE_CODE (type) == TYPE_CODE_FLT)
+        flt_argreg = sh_next_flt_argreg (len);
+
       while (len > 0)
 	{
 	  if ((TYPE_CODE (type) == TYPE_CODE_FLT 
-	       && flt_argreg > FLOAT_ARGLAST_REGNUM) 
+	       && flt_argreg > FLOAT_ARGLAST_REGNUM)
 	      || argreg > ARGLAST_REGNUM
-	      || odd_sized_struct)
-	    {			
-	      /* must go on the stack */
-	      write_memory (sp + stack_offset, val, 4);
-	      stack_offset += 4;
+	      || pass_on_stack)
+	    {                    
+	      /* The remainder of the data goes entirely on the stack,
+	         4-byte aligned. */
+	      reg_size = (len + 3) & ~3;
+	      write_memory (sp + stack_offset, val, reg_size);
+	      stack_offset += reg_size;
 	    }
-	  /* NOTE WELL!!!!!  This is not an "else if" clause!!!
-	     That's because some *&^%$ things get passed on the stack
-	     AND in the registers!   */
-	  if (TYPE_CODE (type) == TYPE_CODE_FLT &&
-	      flt_argreg > 0 && flt_argreg <= FLOAT_ARGLAST_REGNUM)
+	  else if (TYPE_CODE (type) == TYPE_CODE_FLT
+		   && flt_argreg <= FLOAT_ARGLAST_REGNUM)
 	    {
-	      /* Argument goes in a single-precision fp reg.  */
-	      regval = extract_unsigned_integer (val, register_size (gdbarch,
-								     argreg));
+	      /* Argument goes in a float argument register.  */
+	      reg_size = register_size (gdbarch, flt_argreg);
+	      regval = extract_unsigned_integer (val, reg_size);
 	      regcache_cooked_write_unsigned (regcache, flt_argreg++, regval);
 	    }
 	  else if (argreg <= ARGLAST_REGNUM)
-	    {			
+	    {
 	      /* there's room in a register */
-	      regval = extract_unsigned_integer (val, register_size (gdbarch,
-								     argreg));
+	      reg_size = register_size (gdbarch, argreg);
+	      regval = extract_unsigned_integer (val, reg_size);
 	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
 	    }
-	  /* Store the value 4 bytes at a time.  This means that things
-	     larger than 4 bytes may go partly in registers and partly
+	  /* Store the value reg_size bytes at a time.  This means that things
+	     larger than reg_size bytes may go partly in registers and partly
 	     on the stack.  */
-	  len -= register_size (gdbarch, argreg);
-	  val += register_size (gdbarch, argreg);
+	  len -= reg_size;
+	  val += reg_size;
 	}
     }
 
@@ -764,15 +845,13 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
 			  CORE_ADDR sp, int struct_return, 
 			  CORE_ADDR struct_addr)
 {
-  int stack_offset, stack_alloc;
-  int argreg;
+  int stack_offset = 0;
+  int argreg = ARG0_REGNUM;
   int argnum;
   struct type *type;
   CORE_ADDR regval;
   char *val;
-  char valbuf[4];
-  int len;
-  int odd_sized_struct;
+  int len, reg_size;
 
   /* first force sp to a 4-byte alignment */
   sp = sh_frame_align (gdbarch, sp);
@@ -782,62 +861,40 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
 				    STRUCT_RETURN_REGNUM,
 				    struct_addr);
 
-  /* Now make sure there's space on the stack */
-  for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
-    stack_alloc += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 3) & ~3);
-  sp -= stack_alloc;		/* make room on stack for args */
+  /* make room on stack for args */
+  sp -= sh_stack_allocsize (nargs, args);
 
   /* Now load as many as possible of the first arguments into
      registers, and push the rest onto the stack.  There are 16 bytes
      in four registers available.  Loop thru args from first to last.  */
-
-  argreg = ARG0_REGNUM;
-  for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
-    {
+  for (argnum = 0; argnum < nargs; argnum++)
+    { 
       type = VALUE_TYPE (args[argnum]);
       len = TYPE_LENGTH (type);
-      memset (valbuf, 0, sizeof (valbuf));
-      if (len < 4)
-	{
-	  /* value gets right-justified in the register or stack word */
-	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	    memcpy (valbuf + (4 - len),
-		    (char *) VALUE_CONTENTS (args[argnum]), len);
-	  else
-	    memcpy (valbuf, (char *) VALUE_CONTENTS (args[argnum]), len);
-	  val = valbuf;
-	}
-      else
-	val = (char *) VALUE_CONTENTS (args[argnum]);
+      val = sh_justify_value_in_reg (args[argnum], len);
 
-      if (len > 4 && (len & 3) != 0)
-	odd_sized_struct = 1;	/* such structs go entirely on stack */
-      else
-	odd_sized_struct = 0;
       while (len > 0)
 	{
-	  if (argreg > ARGLAST_REGNUM
-	      || odd_sized_struct)
-	    {			
-	      /* must go on the stack */
-	      write_memory (sp + stack_offset, val, 4);
-	      stack_offset += 4;
+	  if (argreg > ARGLAST_REGNUM)
+	    {                   
+	      /* The remainder of the data goes entirely on the stack,
+	         4-byte aligned. */
+	      reg_size = (len + 3) & ~3;
+	      write_memory (sp + stack_offset, val, reg_size);
+	      stack_offset += reg_size; 
 	    }
-	  /* NOTE WELL!!!!!  This is not an "else if" clause!!!
-	     That's because some *&^%$ things get passed on the stack
-	     AND in the registers!   */
-	  if (argreg <= ARGLAST_REGNUM)
-	    {			
+	  else if (argreg <= ARGLAST_REGNUM)
+	    {                   
 	      /* there's room in a register */
-	      regval = extract_unsigned_integer (val, register_size (gdbarch,
-								     argreg));
+	      reg_size = register_size (gdbarch, argreg);
+	      regval = extract_unsigned_integer (val, reg_size);
 	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
 	    }
-	  /* Store the value 4 bytes at a time.  This means that things
-	     larger than 4 bytes may go partly in registers and partly
+	  /* Store the value reg_size bytes at a time.  This means that things
+	     larger than reg_size bytes may go partly in registers and partly
 	     on the stack.  */
-	  len -= register_size (gdbarch, argreg);
-	  val += register_size (gdbarch, argreg);
+	  len -= reg_size;
+	  val += reg_size;
 	}
     }
 
