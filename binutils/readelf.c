@@ -1071,14 +1071,14 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
       if (is_rela)
 	{
 	  if (do_wide)
-	    printf (_("    Offset             Info            Type               Symbol's Value  Symbol's Name + Addend\n"));
+	    printf (_("    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend\n"));
 	  else
 	    printf (_("  Offset          Info           Type           Sym. Value    Sym. Name + Addend\n"));
 	}
       else
 	{
 	  if (do_wide)
-	    printf (_("    Offset             Info            Type               Symbol's Value  Symbol's Name\n"));
+	    printf (_("    Offset             Info             Type               Symbol's Value  Symbol's Name\n"));
 	  else
 	    printf (_("  Offset          Info           Type           Sym. Value    Sym. Name\n"));
 	}
@@ -1361,7 +1361,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	printf (_("unrecognized: %-7lx"), type);
 #endif
       else
-	printf (do_wide ? "%-21.21s" : "%-17.17s", rtype);
+	printf (do_wide ? "%-22.22s" : "%-17.17s", rtype);
 
       if (symtab_index)
 	{

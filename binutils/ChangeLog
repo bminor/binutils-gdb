@@ -1,3 +1,25 @@
+2003-05-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+
+	2003-05-13  Michael Eager <eager@mvista.com>
+	* objcopy.c: Treat identical src/dst file names as if only one
+	entered.  One Windows creating an output file of the same name as
+	the input file will delete the input file before it is read.
+
+	2003-05-12  Salvador Eduardo Tropea  <salvador@inti.gov.ar>
+	* debug.c (debug_get_real_type): Extend test for circular debug
+	references.
+
+	2003-05-12  Nick Clifton  <nickc@redhat.com>
+	* configure.in (ALL_LINGUAS): Add zh_CN.
+	* configure: Regenerate.
+	* po/zh_CN.po: New file: Chinese (simplified) translation.
+
+	2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
+	* readelf.c (dump_relocations): Enlarge the type field in wide
+	mode by one character.
+
 2003-05-03  Richard Henderson  <rth@redhat.com>
 
 	* readelf.c (struct Frame_Chunk): Add cfa_exp.

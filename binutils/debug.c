@@ -2183,7 +2183,7 @@ debug_get_real_type (handle, type, list)
 
   for (l = list; l != NULL; l = l->next)
     {
-      if (l->t == type)
+      if (l->t == type || l == l->next)
 	{
 	  fprintf (stderr,
 		   _("debug_get_real_type: circular debug information for %s\n"),
