@@ -1,5 +1,28 @@
 Mon May 16 10:09:22 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* bfd-in2.h: Rebuilt.
+
+	* elf32-hppa.c: Change .hppa_linker_stubs to .PARISC.stubs,
+	likewise for other PA specific sections.
+	(hppa_elf_relocate_unwind_table): Delete unused
+	function.
+	(elf_hppa_howto_table): Completely new table based on 94-02-02
+	draft PA ELF spec.  Change relocation tags appropriately
+	throughout elf32-hppa.c
+	(hppa_elf_gen_reloc_type): Rewrite and simplify based on 94-02-02
+	spec.
+	(hppa_elf_reloc): Likewise.
+	(hppa_look_for_stubs_in_section): Likewise
+	(ELF_MACHINE_CODE): Change to EM_PARISC.
+	* elf32-hppa.h: Include "elf/hppa.h".  Change relocation tags 
+	appropriately throughout elf32-hppa.h.
+	(elf32_hppa_reloc_type): New table based on 94-02-02 draft PA ELF
+	spec.
+	(R_HPPA_ABS_CALL, R_HPPA_COMPLEX*, R_HPPA_UNWIND): Delete definitions.
+	* elfcode.h (prep_headers): Use EM_PARISC instead of EM_HPPA.
+	* reloc.c (bfd_reloc_code_real): Delete unused HPPA relocations.
+	* som.h (R_HPPA_ABS_CALL, R_HPPA_COMPLEX): Delete definitions.
+
 	* libhppa.h (hppa_field_adjust): Avoid adding constant_value into
 	the final value twice for LR and RR field selectors.
 

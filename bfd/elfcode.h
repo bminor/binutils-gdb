@@ -2053,18 +2053,6 @@ assign_file_positions_except_relocs (abfd, dosyms)
       off = assign_file_position_for_section (i_shdrp, off);
 
       if (exec_p
-	  && i_shdrp->sh_type == SHT_NOBITS
-	  && (i == i_ehdrp->e_shnum
-	      || i_shdrpp[i + 1]->sh_type != SHT_NOBITS))
-	{
-	  /* Skip to the next page to ensure that when the file is
-	     loaded the bss section is loaded with zeroes.  I don't
-	     know if this is required on all platforms, but it
-	     shouldn't really hurt.  */
-	  off = BFD_ALIGN (off, maxpagesize);
-	}
-
-      if (exec_p
 	  && (abfd->flags & D_PAGED) != 0
 	  && get_elf_backend_data (abfd)->maxpagesize > 1
 	  && i_shdrp->sh_type == SHT_PROGBITS
@@ -2161,7 +2149,7 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_MIPS;	/* only MIPS R3000 */
       break;
     case bfd_arch_hppa:
-      i_ehdrp->e_machine = EM_HPPA;
+      i_ehdrp->e_machine = EM_PARISC;
       break;
     case bfd_arch_powerpc:
       i_ehdrp->e_machine = EM_CYGNUS_POWERPC;

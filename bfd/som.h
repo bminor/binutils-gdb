@@ -127,27 +127,48 @@ struct som_data_struct
     struct somdata a;
   };
 
+/* Substructure of som_section_data_struct used to hold information
+   which can't be represented by the generic BFD section structure,
+   but which must be copied during objcopy or strip.  */
+struct som_copyable_section_data_struct
+  {
+    /* Various fields in space and subspace headers that we need
+       to pass around.  */
+    unsigned int sort_key : 8;
+    unsigned int access_control_bits : 7;
+    unsigned int is_defined : 1;
+    unsigned int is_private : 1;
+    unsigned int quadrant : 2;
+
+    /* For subspaces, this points to the section which represents the
+       space in which the subspace is contained.  For spaces it points
+       back to the section for this space.  */
+    asection *container;
+
+    /* The user-specified space number.  It is wrong to use this as
+       an index since duplicates and holes are allowed.  */
+    int space_number;
+
+    /* Add more stuff here as needed.  Good examples of information
+       we might want to pass would be initialization pointers, 
+       and the many subspace flags we do not represent yet.  */
+  };
+
 /* Used to keep extra SOM specific information for a given section.
 
    reloc_size holds the size of the relocation stream, note this
    is very different from the number of relocations as SOM relocations
    are variable length. 
 
-   reloc_stream is the actual stream of relocation entries.
-
-   The BFD section index may not exactly match a SOM subspace index,
-   for this reason we keep track of the original SOM subspace index
-   when a subspace is turned into a BFD section.  */
+   reloc_stream is the actual stream of relocation entries.  */
 
 struct som_section_data_struct
   {
-    unsigned int is_space : 1;
-    unsigned int is_subspace : 1;
+    struct som_copyable_section_data_struct *copy_data;
     unsigned int reloc_size;
     char *reloc_stream;
-    asection *containing_space;
-    struct space_dictionary_record space_dict;
-    struct subspace_dictionary_record subspace_dict;
+    struct space_dictionary_record *space_dict;
+    struct subspace_dictionary_record *subspace_dict;
   };
 
 #define somdata(bfd)			((bfd)->tdata.som_data->a)
@@ -163,8 +184,7 @@ struct som_section_data_struct
 #define obj_som_reloc_filepos(bfd)	(somdata(bfd).reloc_filepos)
 #define som_section_data(sec) \
   ((struct som_section_data_struct *)sec->used_by_bfd)
-#define som_symbol_data(symbol) \
-  ((som_symbol_type *) symbol)
+#define som_symbol_data(symbol)		((som_symbol_type *) symbol)
 
 
 /* Defines groups of basic relocations.  FIXME:  These should
@@ -178,20 +198,16 @@ struct som_section_data_struct
 
 #define R_HPPA_NONE			R_NO_RELOCATION
 #define	R_HPPA				R_CODE_ONE_SYMBOL
-#define	R_HPPA_ABS_CALL			R_ABS_CALL
 #define	R_HPPA_PCREL_CALL		R_PCREL_CALL
 #define	R_HPPA_GOTOFF			R_DP_RELATIVE
-#define	R_HPPA_COMPLEX			R_COMP1
-#define	R_HPPA_COMPLEX_PCREL_CALL	R_COMP2
-#define	R_HPPA_COMPLEX_ABS_CALL		R_COMP3
 #define R_HPPA_ENTRY			R_ENTRY
 #define R_HPPA_EXIT			R_EXIT
 
 /* Exported functions, mostly for use by GAS.  */
-void bfd_som_set_section_attributes PARAMS ((asection *, int, int,
-					     unsigned int, int));
-void bfd_som_set_subsection_attributes PARAMS ((asection *, asection *,
-						int, unsigned int, int));
+boolean bfd_som_set_section_attributes PARAMS ((asection *, int, int,
+						unsigned int, int));
+boolean bfd_som_set_subsection_attributes PARAMS ((asection *, asection *,
+						   int, unsigned int, int));
 void bfd_som_set_symbol_type PARAMS ((asymbol *, unsigned int));
 void bfd_som_attach_unwind_info PARAMS ((asymbol *, char *));
 boolean bfd_som_attach_aux_hdr PARAMS ((bfd *, int, char *));
