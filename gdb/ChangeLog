@@ -1,3 +1,8 @@
+2001-08-28  Andrew Cagney  <cagney@toribio.toronto.redhat.com>
+
+	* frame.h (struct frame_info): Fix documentation on fields
+	saved_regs, next and prev.
+
 2001-08-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* event-top.c (async_stop_sig) [HAVE_SIGPROCMASK]: Some

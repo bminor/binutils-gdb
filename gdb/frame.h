@@ -77,8 +77,8 @@ struct frame_info
        the frame, or zero if it was not saved on entry to this frame.
        This includes special registers such as pc and fp saved in
        special ways in the stack frame.  The SP_REGNUM is even more
-       special, the address here is the sp for the next frame, not the
-       address where the sp was saved.  */
+       special, the address here is the sp for the previous frame, not
+       the address where the sp was saved.  */
     /* Allocated by frame_saved_regs_zalloc () which is called /
        initialized by FRAME_INIT_SAVED_REGS(). */
     CORE_ADDR *saved_regs;	/*NUM_REGS + NUM_PSEUDO_REGS*/
@@ -96,8 +96,10 @@ struct frame_info
        initialized by INIT_EXTRA_FRAME_INFO */
     struct frame_extra_info *extra_info;
 
-    /* Pointers to the next and previous frame_info's in the frame cache.  */
-    struct frame_info *next, *prev;
+    /* Pointers to the next (down, inner) and previous (up, outer)
+       frame_info's in the frame cache.  */
+    struct frame_info *next; /* down, inner */
+    struct frame_info *prev; /* up, outer */
   };
 
 /* Values for the source flag to be used in print_frame_info_base(). */
