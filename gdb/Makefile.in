@@ -1898,7 +1898,7 @@ event-top.o: event-top.c $(defs_h) $(top_h) $(inferior_h) $(target_h) \
 	$(exceptions_h) $(gdbcmd_h) $(readline_h) $(readline_history_h)
 exceptions.o: exceptions.c $(defs_h) $(exceptions_h) $(breakpoint_h) \
 	$(target_h) $(inferior_h) $(annotate_h) $(ui_out_h) $(gdb_assert_h) \
-	$(gdb_string_h)
+	$(gdb_string_h) $(serial_h)
 exec.o: exec.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcmd_h) \
 	$(language_h) $(symfile_h) $(objfiles_h) $(completer_h) $(value_h) \
 	$(exec_h) $(readline_h) $(gdb_string_h) $(gdbcore_h) $(gdb_stat_h) \

@@ -31,6 +31,7 @@
 #include "ui-out.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
+#include "serial.h"
 
 const struct exception exception_none = { 0, NO_ERROR, NULL };
 
@@ -262,11 +263,29 @@ deprecated_throw_reason (enum return_reason reason)
 static void
 print_flush (void)
 {
+  struct serial *gdb_stdout_serial;
+
   if (deprecated_error_begin_hook)
     deprecated_error_begin_hook ();
   target_terminal_ours ();
-  wrap_here ("");		/* Force out any buffered output */
+
+  /* We want all output to appear now, before we print the error.  We
+     have 3 levels of buffering we have to flush (it's possible that
+     some of these should be changed to flush the lower-level ones
+     too):  */
+
+  /* 1.  The _filtered buffer.  */
+  wrap_here ("");
+
+  /* 2.  The stdio buffer.  */
   gdb_flush (gdb_stdout);
+  gdb_flush (gdb_stderr);
+
+  /* 3.  The system-level buffer.  */
+  gdb_stdout_serial = serial_fdopen (1);
+  serial_drain_output (gdb_stdout_serial);
+  serial_un_fdopen (gdb_stdout_serial);
+
   annotate_error_begin ();
 }
 

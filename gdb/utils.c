@@ -880,47 +880,19 @@ print_sys_errmsg (const char *string, int errcode)
 void
 quit (void)
 {
-  struct serial *gdb_stdout_serial = serial_fdopen (1);
-
-  target_terminal_ours ();
-
-  /* We want all output to appear now, before we print "Quit".  We
-     have 3 levels of buffering we have to flush (it's possible that
-     some of these should be changed to flush the lower-level ones
-     too):  */
-
-  /* 1.  The _filtered buffer.  */
-  wrap_here ((char *) 0);
-
-  /* 2.  The stdio buffer.  */
-  gdb_flush (gdb_stdout);
-  gdb_flush (gdb_stderr);
-
-  /* 3.  The system-level buffer.  */
-  serial_drain_output (gdb_stdout_serial);
-  serial_un_fdopen (gdb_stdout_serial);
-
-  annotate_error_begin ();
-
-  /* Don't use *_filtered; we don't want to prompt the user to continue.  */
-  if (quit_pre_print)
-    fputs_unfiltered (quit_pre_print, gdb_stderr);
-
 #ifdef __MSDOS__
   /* No steenking SIGINT will ever be coming our way when the
      program is resumed.  Don't lie.  */
-  fprintf_unfiltered (gdb_stderr, "Quit\n");
+  fatal ("Quit");
 #else
   if (job_control
       /* If there is no terminal switching for this target, then we can't
          possibly get screwed by the lack of job control.  */
       || current_target.to_terminal_ours == NULL)
-    fprintf_unfiltered (gdb_stderr, "Quit\n");
+    fatal ("Quit");
   else
-    fprintf_unfiltered (gdb_stderr,
-			"Quit (expect signal SIGINT when the program is resumed)\n");
+    fatal ("Quit (expect signal SIGINT when the program is resumed)");
 #endif
-  deprecated_throw_reason (RETURN_QUIT);
 }
 
 /* Control C comes here */
