@@ -1,5 +1,8 @@
 Thu Feb  6 12:46:14 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* gdb.base/help.exp: Disable "help set", "help show", and
+	"help support".  Simplify regexp for "help stack".
+
 	* gdb.base/default.exp: Set match_max to 5000 and the timeout
 	to 60 seconds.  Temporarily set match_max to 15000 around the
 	"info copying" test.
