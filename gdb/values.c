@@ -793,7 +793,9 @@ unpack_pointer (struct type *type, char *valaddr)
 }
 
 
-/* Get the value of the FIELDN'th field (which must be static) of TYPE. */
+/* Get the value of the FIELDN'th field (which must be static) of
+   TYPE.  Return NULL if the field doesn't exist or has been
+   optimized out. */
 
 struct value *
 value_static_field (struct type *type, int fieldno)
@@ -809,7 +811,14 @@ value_static_field (struct type *type, int fieldno)
     {
       char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
       struct symbol *sym = lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
-      if (sym == NULL)
+      /* In some cases (involving uninitalized, unreferenced static
+	 const integral members), g++ -gdwarf-2 can emit debugging
+	 information giving rise to symbols whose SYMBOL_CLASS is
+	 LOC_UNRESOLVED.  In that case, do a minimal symbol lookup.
+	 If it returns a useful value, then the symbol was defined
+	 elsewhere, so we use that information.  Otherwise, return
+	 NULL. */
+      if (sym == NULL || SYMBOL_CLASS (sym) == LOC_UNRESOLVED)
 	{
 	  /* With some compilers, e.g. HP aCC, static data members are reported
 	     as non-debuggable symbols */

@@ -2054,11 +2054,18 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	  {
 	    struct value *v;
 	    if (TYPE_FIELD_STATIC (type, i))
-	      v = value_static_field (type, i);
+	      {
+		v = value_static_field (type, i);
+		if (v == 0)
+		  error ("field %s is nonexistent or has been optimised out",
+			 name);
+	      }
 	    else
-	      v = value_primitive_field (arg1, offset, i, type);
-	    if (v == 0)
-	      error ("there is no field named %s", name);
+	      {
+		v = value_primitive_field (arg1, offset, i, type);
+		if (v == 0)
+		  error ("there is no field named %s", name);
+	      }
 	    return v;
 	  }
 
@@ -3043,7 +3050,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      v = value_static_field (t, i);
 	      if (v == NULL)
-		error ("Internal error: could not find static variable %s",
+		error ("static field %s has been optimized out",
 		       name);
 	      return v;
 	    }

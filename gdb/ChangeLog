@@ -1,5 +1,11 @@
 2002-08-19  David Carlton  <carlton@math.stanford.edu>
 
+	* valops.c (search_struct_field): Change error message to treat
+	return value of 0 from value_static_field as meaning that field is
+	optimized out.
+	(value_struct_elt_for_reference): Ditto.
+	* values.c (value_static_field): Treat an unresolved location the
+	same as a nonexistent symbol.  Fix PR gdb/635.
 	* gnu-v2-abi.c (gnuv2_value_rtti_type): Eliminate test for being
 	enclosed.  Fix PR gdb/574.
 	* MAINTAINERS: Add self to Write After Approval list.
