@@ -76,6 +76,19 @@ int flag_reg_prefix_optional;
 /* The floating point coprocessor to use by default.  */
 static enum m68k_register m68k_float_copnum = COP1;
 
+/* If this is non-zero, then references to number(%pc) will be taken
+   to refer to number, rather than to %pc + number.  */
+static int m68k_abspcadd;
+
+/* If this is non-zero, then the quick forms of the move, add, and sub
+   instructions are used when possible.  */
+static int m68k_quick = 1;
+
+/* If this is non-zero, then if the size is not specified for a base
+   or outer displacement, the assembler assumes that the size should
+   be 32 bits.  */
+static int m68k_rel32 = 1;
+
 /* Its an arbitrary name:  This means I don't approve of it */
 /* See flames below */
 static struct obstack robyn;
@@ -280,6 +293,8 @@ static void s_proc PARAMS ((int));
 static void mri_chip PARAMS ((void));
 static void s_chip PARAMS ((int));
 static void s_fopt PARAMS ((int));
+static void s_opt PARAMS ((int));
+static void s_reg PARAMS ((int));
 
 static int current_architecture;
 
@@ -410,6 +425,8 @@ CONST pseudo_typeS md_pseudo_table[] =
   {"comline", s_space, 1},
   {"fopt", s_fopt, 0},
   {"mask2", s_ignore, 0},
+  {"opt", s_opt, 0},
+  {"reg", s_reg, 0},
 
   {0, 0, 0}
 };
@@ -1036,6 +1053,14 @@ m68k_ip (instring)
 			  opP->mode = REGLST;
 			}
 		    }
+		  else if (opP->mode == ABSL
+			   && opP->disp.size == SIZE_UNSPEC
+			   && opP->disp.exp.X_op == O_constant)
+		    {
+		      /* This is what the MRI REG pseudo-op generates.  */
+		      opP->mode = REGLST;
+		      opP->mask = opP->disp.exp.X_add_number;
+		    }
 		  else if (opP->mode != REGLST)
 		    losing++;
 		  else if (s[1] == '8' && (opP->mask & 0x0ffffff) != 0)
@@ -1048,6 +1073,10 @@ m68k_ip (instring)
 		  if (opP->mode != IMMED)
 		    losing++;
 		  else if (! expr8 (&opP->disp))
+		    losing++;
+		  else if (! m68k_quick
+			   && instring[3] != 'q'
+			   && instring[4] != 'q')
 		    losing++;
 		  break;
 
@@ -1062,6 +1091,11 @@ m68k_ip (instring)
 		  else if (! expr8 (&opP->disp)
 			   || opP->disp.exp.X_add_number < 1
 			   || opP->disp.exp.X_add_number > 8)
+		    losing++;
+		  else if (! m68k_quick
+			   && (strncmp (instring, "add", 3) == 0
+			       || strncmp (instring, "sub", 3) == 0)
+			   && instring[3] != 'q')
 		    losing++;
 		  break;
 
@@ -1409,6 +1443,20 @@ m68k_ip (instring)
 	    case DISP:
 
 	      nextword = get_num (&opP->disp, 80);
+
+	      if (opP->reg == PC
+		  && ! isvar (&opP->disp)
+		  && m68k_abspcadd)
+		{
+		  opP->disp.exp.X_op = O_symbol;
+#ifndef BFD_ASSEMBLER
+		  opP->disp.exp.X_add_symbol = &abs_symbol;
+#else
+		  opP->disp.exp.X_add_symbol =
+		    section_symbol (absolute_section);
+#endif
+		}
+
 	      /* Force into index mode.  Hope this works */
 
 	      /* We do the first bit for 32-bit displacements, and the
@@ -1621,12 +1669,14 @@ m68k_ip (instring)
 	      switch (siz1)
 		{
 		case SIZE_UNSPEC:
-		  if (isvar (&opP->disp) || !issword (baseo))
+		  if (isvar (&opP->disp)
+		      ? m68k_rel32
+		      : ! issword (baseo))
 		    {
 		      siz1 = SIZE_LONG;
 		      nextword |= 0x30;
 		    }
-		  else if (baseo == 0)
+		  else if (! isvar (&opP->disp) && baseo == 0)
 		    nextword |= 0x10;
 		  else
 		    {
@@ -1651,12 +1701,14 @@ m68k_ip (instring)
 		  switch (siz2)
 		    {
 		    case SIZE_UNSPEC:
-		      if (isvar (&opP->odisp) || !issword (outro))
+		      if (isvar (&opP->odisp)
+			  ? m68k_rel32
+			  : ! issword (outro))
 			{
 			  siz2 = SIZE_LONG;
 			  nextword |= 0x3;
 			}
-		      else if (outro == 0)
+		      else if (! isvar (&opP->disp) && outro == 0)
 			nextword |= 0x1;
 		      else
 			{
@@ -2842,7 +2894,11 @@ md_begin ()
   register char c;
 
   if (flag_mri)
-    flag_reg_prefix_optional = 1;
+    {
+      flag_reg_prefix_optional = 1;
+      m68k_abspcadd = 1;
+      m68k_rel32 = 0;
+    }
 
   op_hash = hash_new ();
 
@@ -2888,6 +2944,43 @@ md_begin ()
       retval = hash_insert (op_hash, alias, val);
       if (retval)
 	as_fatal ("Internal Error: Can't hash %s: %s", alias, retval);
+    }
+
+  /* In MRI mode, all unsized branches are variable sized.  Normally,
+     they are word sized.  */
+  if (flag_mri)
+    {
+      static struct m68k_opcode_alias mri_aliases[] =
+	{
+	  { "bhi",	"jhi", },
+	  { "bls",	"jls", },
+	  { "bcc",	"jcc", },
+	  { "bcs",	"jcs", },
+	  { "bne",	"jne", },
+	  { "beq",	"jeq", },
+	  { "bvc",	"jvc", },
+	  { "bvs",	"jvs", },
+	  { "bpl",	"jpl", },
+	  { "bmi",	"jmi", },
+	  { "bge",	"jge", },
+	  { "blt",	"jlt", },
+	  { "bgt",	"jgt", },
+	  { "ble",	"jle", },
+	  { "bra",	"jra", },
+	  { "bsr",	"jbsr", },
+	};
+
+      for (i = 0; i < sizeof mri_aliases / sizeof mri_aliases[0]; i++)
+	{
+	  const char *name = mri_aliases[i].primary;
+	  const char *alias = mri_aliases[i].alias;
+	  PTR val = hash_find (op_hash, name);
+	  if (!val)
+	    as_fatal ("Internal Error: Can't find %s in hash table", name);
+	  retval = hash_jam (op_hash, alias, val);
+	  if (retval)
+	    as_fatal ("Internal Error: Can't hash %s: %s", alias, retval);
+	}
     }
 
   for (i = 0; i < sizeof (mklower_table); i++)
@@ -4064,6 +4157,278 @@ s_fopt (ignore)
       ignore_rest_of_line ();
       return;
     }
+
+  demand_empty_rest_of_line ();
+}
+
+/* The structure used to handle the MRI OPT pseudo-op.  */
+
+struct opt_action
+{
+  /* The name of the option.  */
+  const char *name;
+
+  /* If this is not NULL, just call this function.  The first argument
+     is the ARG field of this structure, the second argument is
+     whether the option was negated.  */
+  void (*pfn) PARAMS ((int arg, int on));
+
+  /* If this is not NULL, and the PFN field is NULL, set the variable
+     this points to.  Set it to the ARG field if the option was not
+     negated, and the NOTARG field otherwise.  */
+  int *pvar;
+
+  /* The value to pass to PFN or to assign to *PVAR.  */
+  int arg;
+
+  /* The value to assign to *PVAR if the option is negated.  If PFN is
+     NULL, and PVAR is not NULL, and ARG and NOTARG are the same, then
+     the option may not be negated.  */
+  int notarg;
+};
+
+/* The table used to handle the MRI OPT pseudo-op.  */
+
+static void skip_to_comma PARAMS ((int, int));
+static void opt_chip PARAMS ((int, int));
+static void opt_list PARAMS ((int, int));
+static void opt_list_symbols PARAMS ((int, int));
+
+static const struct opt_action opt_table[] =
+{
+  { "abspcadd", 0, &m68k_abspcadd, 1, 0 },
+
+  /* We do relaxing, so there is little use for these options.  */
+  { "b", 0, 0, 0, 0 },
+  { "brs", 0, 0, 0, 0 },
+  { "brb", 0, 0, 0, 0 },
+  { "brl", 0, 0, 0, 0 },
+  { "brw", 0, 0, 0, 0 },
+
+  { "c", 0, 0, 0, 0 },
+  { "cex", 0, 0, 0, 0 },
+  { "case", 0, &symbols_case_sensitive, 1, 0 },
+  { "cl", 0, 0, 0, 0 },
+  { "cre", 0, 0, 0, 0 },
+  { "d", 0, &flag_keep_locals, 1, 0 },
+  { "e", 0, 0, 0, 0 },
+  { "f", 0, &flag_short_refs, 1, 0 },
+  { "frs", 0, &flag_short_refs, 1, 0 },
+  { "frl", 0, &flag_short_refs, 0, 1 },
+  { "g", 0, 0, 0, 0 },
+  { "i", 0, 0, 0, 0 },
+  { "m", 0, 0, 0, 0 },
+  { "mex", 0, 0, 0, 0 },
+  { "mc", 0, 0, 0, 0 },
+  { "md", 0, 0, 0, 0 },
+  { "next", skip_to_comma, 0, 0, 0 },
+  { "o", 0, 0, 0, 0 },
+  { "old", 0, 0, 0, 0 },
+  { "op", skip_to_comma, 0, 0, 0 },
+  { "pco", 0, 0, 0, 0 },
+  { "p", opt_chip, 0, 0, 0 },
+  { "pcr", 0, 0, 0, 0 },
+  { "pcs", 0, 0, 0, 0 },
+  { "r", 0, 0, 0, 0 },
+  { "quick", 0, &m68k_quick, 1, 0 },
+  { "rel32", 0, &m68k_rel32, 1, 0 },
+  { "s", opt_list, 0, 0, 0 },
+  { "t", opt_list_symbols, 0, 0, 0 },
+  { "w", 0, &flag_no_warnings, 0, 1 },
+  { "x", 0, 0, 0, 0 }
+};
+
+#define OPTCOUNT (sizeof opt_table / sizeof opt_table[0])
+
+/* The MRI OPT pseudo-op.  */
+
+static void
+s_opt (ignore)
+     int ignore;
+{
+  do
+    {
+      int t;
+      char *s;
+      char c;
+      int i;
+      const struct opt_action *o;
+
+      SKIP_WHITESPACE ();
+
+      t = 1;
+      if (*input_line_pointer == '-')
+	{
+	  ++input_line_pointer;
+	  t = 0;
+	}
+      else if (strncasecmp (input_line_pointer, "NO", 2) == 0)
+	{
+	  input_line_pointer += 2;
+	  t = 0;
+	}
+
+      s = input_line_pointer;
+      c = get_symbol_end ();
+
+      for (i = 0, o = opt_table; i < OPTCOUNT; i++, o++)
+	{
+	  if (strcasecmp (s, o->name) == 0)
+	    {
+	      if (o->pfn)
+		{
+		  /* Restore input_line_pointer now in case the option
+		     takes arguments.  */
+		  *input_line_pointer = c;
+		  (*o->pfn) (o->arg, t);
+		}
+	      else if (o->pvar != NULL)
+		{
+		  if (! t && o->arg == o->notarg)
+		    as_bad ("option `%s' may not be negated", s);
+		  *input_line_pointer = c;
+		  *o->pvar = t ? o->arg : o->notarg;
+		}
+	      break;
+	    }
+	}
+      if (i >= OPTCOUNT)
+	{
+	  as_bad ("option `%s' not recognized", s);
+	  *input_line_pointer = c;
+	}
+    }
+  while (*input_line_pointer++ == ',');
+
+  /* Move back to terminating character.  */
+  --input_line_pointer;
+  demand_empty_rest_of_line ();
+}
+
+/* Skip ahead to a comma.  This is used for OPT options which we do
+   not suppor tand which take arguments.  */
+
+static void
+skip_to_comma (arg, on)
+     int arg;
+     int on;
+{
+  while (*input_line_pointer != ','
+	 && ! is_end_of_line[(unsigned char) *input_line_pointer])
+    ++input_line_pointer;
+}
+
+/* Handle the OPT P=chip option.  */
+
+static void
+opt_chip (arg, on)
+     int arg;
+     int on;
+{
+  if (*input_line_pointer != '=')
+    {
+      /* This is just OPT P, which we do not support.  */
+      return;
+    }
+
+  ++input_line_pointer;
+  mri_chip ();
+}
+
+/* Handle the OPT S option.  */
+
+static void
+opt_list (arg, on)
+     int arg;
+     int on;
+{
+  listing_list (on);
+}
+
+/* Handle the OPT T option.  */
+
+static void
+opt_list_symbols (arg, on)
+     int arg;
+     int on;
+{
+  if (on)
+    listing |= LISTING_SYMBOLS;
+  else
+    listing &=~ LISTING_SYMBOLS;
+}
+
+/* Handle the MRI REG pseudo-op.  */
+
+static void
+s_reg (ignore)
+     int ignore;
+{
+  char *s;
+  int c;
+  struct m68k_op op;
+  unsigned long mask;
+
+  if (mri_line_label == NULL)
+    {
+      as_bad ("missing label");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  SKIP_WHITESPACE ();
+
+  s = input_line_pointer;
+  while (isalnum ((unsigned char) *input_line_pointer)
+#ifdef REGISTER_PREFIX
+	 || *input_line_pointer == REGISTER_PREFIX
+#endif
+	 || *input_line_pointer == '/'
+	 || *input_line_pointer == '-')
+    ++input_line_pointer;
+  c = *input_line_pointer;
+  *input_line_pointer = '\0';
+
+  if (m68k_ip_op (s, &op) != 0)
+    {
+      if (op.error == NULL)
+	as_bad ("bad register list");
+      else
+	as_bad ("bad register list: %s", op.error);
+      *input_line_pointer = c;
+      ignore_rest_of_line ();
+      return;
+    }
+
+  *input_line_pointer = c;
+
+  if (op.mode == REGLST)
+    mask = op.mask;
+  else if (op.mode == DREG)
+    mask = 1 << (op.reg - DATA0);
+  else if (op.mode == AREG)
+    mask = 1 << (op.reg - ADDR0 + 8);
+  else if (op.mode == FPREG)
+    mask = 1 << (op.reg - FP0 + 16);
+  else if (op.mode == CONTROL
+	   && op.reg == FPI)
+    mask = 1 << 24;
+  else if (op.mode == CONTROL
+	   && op.reg == FPS)
+    mask = 1 << 25;
+  else if (op.mode == CONTROL
+	   && op.reg == FPC)
+    mask = 1 << 26;
+  else
+    {
+      as_bad ("bad register list");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  S_SET_SEGMENT (mri_line_label, absolute_section);
+  S_SET_VALUE (mri_line_label, mask);
+  mri_line_label->sy_frag = &zero_address_frag;
 
   demand_empty_rest_of_line ();
 }

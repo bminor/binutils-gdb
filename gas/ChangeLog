@@ -1,5 +1,35 @@
 Wed Aug  9 10:51:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (m68k_abspcadd): New static variable.
+	(m68k_quick): New static variable.
+	(m68k_rel32): New static variable.
+	(md_pseudo_table): Add opt and reg.
+	(m68k_ip): Permit absolute symbols in 'l'/'L' recognition.  Check
+	m68k_quick in 'M' and 'Q' recognition.  Check m68k_abspcadd in
+	DISP handling.  Check m68k_rel32 in BASE/POST/PRE handling.
+	(md_begin): In MRI mode, initialize m68k_abspcadd and m68k_rel32.
+	In MRI mode, change unsized branch aliases to be variable sized.
+	(struct opt_action): Define.
+	(opt_table): Define.
+	(s_opt): New static function.
+	(skip_to_comma): New static function.
+	(opt_chip): New static function.
+	(opt_list): New static function.
+	(opt_list_symbols): New static function.
+	(s_reg): New static function.
+	* as.h (flag_keep_locals): Change from unsigned char to int.
+	(flag_no_warnings): Likewise.
+
+	* read.c (mri_line_label): Make non-static.
+	(potable): Add nopage, page, plen.
+	(s_org): Error if in MRI mode.
+	* read.h (mri_line_label): Declare.
+	* listing.c (listing_nopage): New function.
+	* listing.h (listing_nopage): Declare.
+
+	* symbols.c (symbol_begin): Set sy_frag of abs_symbol to
+	&zero_address_frag.
+
 	* write.c (adjust_reloc_syms): Check that symbol is not NULL
 	before checking sy_mri_common.
 	(fixup_segment): Likewise.
