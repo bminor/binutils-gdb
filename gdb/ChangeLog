@@ -1,3 +1,8 @@
+2001-12-12  Jim Blandy  <jimb@redhat.com>
+
+	* Makefile.in (c_lang_h): New variable.  Use it in dependency
+	lists, instead of `c-lang.h' itself.
+
 2001-12-11  Fred Fish  <fnf@redhat.com>
 
 	* c-typeprint.c (c_type_print_base): Use type flags access macros

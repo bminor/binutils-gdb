@@ -588,6 +588,7 @@ ax_h = 		ax.h $(doublest_h)
 bcache_h =	bcache.h
 breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
 buildsym_h =	buildsym.h
+c_lang_h =	c-lang.h $(value_h)
 call_cmds_h =	call-cmds.h
 cli_cmds_h =	$(srcdir)/cli/cli-cmds.h
 cli_decode_h =	$(srcdir)/cli/cli-decode.h
@@ -1265,10 +1266,10 @@ breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 buildsym.o: buildsym.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 	$(objfiles_h) $(symfile_h) $(symtab_h) $(gdb_string_h)
 
-c-lang.o: c-lang.c c-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
+c-lang.o: c-lang.c $(c_lang_h) $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h)
 
-c-typeprint.o: c-typeprint.c c-lang.h $(defs_h) $(expression_h) \
+c-typeprint.o: c-typeprint.c $(c_lang_h) $(defs_h) $(expression_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) $(language_h) $(symtab_h) \
 	$(target_h) $(typeprint_h) $(value_h) $(gdb_string_h) $(cp_abi_h)
 
@@ -1299,7 +1300,7 @@ ch-typeprint.o: ch-typeprint.c ch-lang.h $(defs_h) $(expression_h) \
 	$(target_h) $(value_h) $(typeprint_h) $(gdb_string_h)
 
 ch-valprint.o: ch-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	$(language_h) $(symtab_h) $(valprint_h) $(value_h) c-lang.h
+	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(c_lang_h)
 
 coff-solib.o: coff-solib.c $(defs_h)
 
@@ -1631,16 +1632,16 @@ irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 
 jv-lang.o: jv-lang.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(symfile_h) \
-	$(objfiles_h) $(gdb_string_h) $(value_h) c-lang.h jv-lang.h \
+	$(objfiles_h) $(gdb_string_h) $(value_h) $(c_lang_h) jv-lang.h \
 	$(gdbcore_h)
 
 jv-typeprint.o: jv-typeprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(demangle_h) jv-lang.h $(gdb_string_h) \
-	$(typeprint_h) c-lang.h $(cp_abi_h)
+	$(typeprint_h) $(c_lang_h) $(cp_abi_h)
 
 jv-valprint.o: jv-valprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(value_h) $(demangle_h) $(valprint_h) \
-	$(language_h) jv-lang.h c-lang.h gdbcore.h $(annotate_h)
+	$(language_h) jv-lang.h $(c_lang_h) gdbcore.h $(annotate_h)
 
 kod.o: kod.c $(defs_h) $(command_h) $(gdbcmd_h) $(target_h) $(gdb_string_h) \
 	kod.h
@@ -1975,10 +1976,10 @@ s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
 
 s390-nat.o: s390-nat.c $(defs_h) $(regcache_h)
 
-scm-exp.o: $(defs_h) $(value_h) $(parser_defs_h) $(language_h) c-lang.h \
+scm-exp.o: $(defs_h) $(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) \
 	scm-lang.h scm-tags.h
 
-scm-lang.o: $(defs_h) $(value_h) $(parser_defs_h) $(language_h) c-lang.h \
+scm-lang.o: $(defs_h) $(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) \
 	scm-lang.h scm-tags.h $(gdb_string_h) $(gdbcore_h)
 
 scm-valprint.o: $(defs_h) $(value_h) $(parser_defs_h) $(language_h)  \
@@ -2165,7 +2166,7 @@ z8k-tdep.o: z8k-tdep.c $(bfd_h) $(dis_asm_h) $(defs_h) $(frame_h) \
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
 		$(srcdir)/z8k-tdep.c
 
-c-exp.tab.o: c-exp.tab.c c-lang.h $(defs_h) $(expression_h) \
+c-exp.tab.o: c-exp.tab.c $(c_lang_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
 	$(bfd_h) $(objfiles_h) $(symfile_h)
 
