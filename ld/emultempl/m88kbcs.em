@@ -57,8 +57,8 @@ then
 # sed commands to quote an ld script as a C string.
 sc='s/["\\]/\\&/g
 s/$/\\n\\/
-1s/^/"{/
-$s/$/n}"/
+1s/^/"/
+$s/$/n"/
 '
 
 cat >>em_${EMULATION_NAME}.c <<EOF

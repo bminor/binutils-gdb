@@ -1,7 +1,7 @@
 # Makefile for the GNU linker ld (version 2)
 # Copyright (C) 1989, 90, 91, 92, 93, 1994 Free Software Foundation, Inc.
 
-# This file is part of GNU ld..
+# This file is part of GNU ld.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -496,7 +496,7 @@ configdoc.texi:	${DOCVER}-doc.texi
 
 # TeX output
 dvi: ld.dvi
-ld.dvi: $(srcdir)/ld.texinfo $(srcdir)/configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
+ld.dvi: $(srcdir)/ld.texinfo configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
 	TEXINPUTS=$(BFDDIR)/doc:$$TEXINPUTS $(TEXI2DVI) $(srcdir)/ld.texinfo
 
 ldint.dvi: $(srcdir)/ldint.texinfo
@@ -735,7 +735,7 @@ ldexp.o : ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldgram.h ldlang.h
 ldfile.o : ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
-  ld.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldlex.h
+  ld.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldgram.h ldlex.h
 ldlang.o : ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h ld.h ldmain.h ldgram.h ldexp.h \
@@ -747,7 +747,7 @@ ldmain.o : ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldfile.h ldctor.h
 ldmisc.o : ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
-  ld.h ldmisc.h ldexp.h ldlang.h ldlex.h ldmain.h ldfile.h
+  ld.h ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldmain.h ldfile.h
 ldver.o : ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   ld.h ldver.h ldemul.h ldmain.h
@@ -757,7 +757,8 @@ ldwrite.o : ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldmisc.h ldgram.h ldmain.h
 lexsup.o : lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
-  ldlex.h ld.h ldexp.h ldgram.h ldmisc.h
+  $(INCDIR)/getopt.h $(INCDIR)/bfdlink.h config.h \
+  ldgram.h ldlex.h ld.h ldexp.h ldgram.h ldmisc.h ldmain.h ldfile.h
 mri.o : mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
   ../bfd/sysdep.h $(INCDIR)/fopen-same.h ld.h ldexp.h \
   ldlang.h ldmisc.h mri.h ldgram.h

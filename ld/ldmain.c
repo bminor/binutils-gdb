@@ -22,6 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include <stdio.h>
+#include "libiberty.h"
 #include "bfdlink.h"
 
 #include "config.h"
@@ -205,16 +206,11 @@ main (argc, argv)
       char *s = ldemul_get_script (&isfile);
 
       if (isfile)
-	{
-	  /* sizeof counts the terminating NUL.  */
-	  size_t size = strlen (s) + sizeof ("-T ");
-	  char *buf = (char *) xmalloc(size);
-	  sprintf (buf, "-T %s", s);
-	  parse_line (buf, 0);
-	  free (buf);
-	}
+	ldfile_open_command_file (s);
       else
-	parse_line (s, 1);
+	lex_redirect (s);
+      parser_input = input_script;
+      yyparse ();
     }
 
   if (link_info.relocateable && command_line.relax)

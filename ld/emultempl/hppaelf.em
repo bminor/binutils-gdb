@@ -1,7 +1,7 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
 cat >em_${EMULATION_NAME}.c <<EOF
-/* An emulation for HP PA-RISC OSF/1 linkers.
+/* An emulation for HP PA-RISC ELF linkers.
    Copyright (C) 1991, 1993 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmain.h"
 #include "ldctor.h"
 
-static void hppaosf_before_parse()
+static void hppaelf_before_parse()
 {
   link_info.lprefix = "L$";
   link_info.lprefix_len = 2;
@@ -48,7 +48,7 @@ static lang_input_statement_type *stub_file = 0;
 static lang_input_section_type *stub_input_section = NULL;
 
 static void
-hppaosf_search_for_padding_statements(s,prev)
+hppaelf_search_for_padding_statements(s,prev)
 	lang_statement_union_type *s;
 	lang_statement_union_type **prev;
 {
@@ -58,14 +58,14 @@ hppaosf_search_for_padding_statements(s,prev)
       switch (s->header.type)
 	{
 	case lang_constructors_statement_enum:
-	  hppaosf_search_for_padding_statements (constructor_list.head,&constructor_list.head);
+	  hppaelf_search_for_padding_statements (constructor_list.head,&constructor_list.head);
 	  break;
 	case lang_output_section_statement_enum:
-	  hppaosf_search_for_padding_statements
+	  hppaelf_search_for_padding_statements
 	    (s->output_section_statement.children.head,&s->output_section_statement.children.head);
 	  break;
 	case lang_wild_statement_enum:
-	  hppaosf_search_for_padding_statements
+	  hppaelf_search_for_padding_statements
 	    (s->wild_statement.children.head,&s->wild_statement.children.head);
 	  break;
 	case lang_data_statement_enum:
@@ -96,7 +96,7 @@ hppaosf_search_for_padding_statements(s,prev)
 }
 
 static void
-hppaosf_finish()
+hppaelf_finish()
 {
   extern asymbol *hppa_look_for_stubs_in_section();
 
@@ -151,12 +151,12 @@ hppaosf_finish()
 
       /* If we've added stubs,remove the padding_statements because */
       /* they are no longer valid */
-      hppaosf_search_for_padding_statements(stat_ptr->head,&(stat_ptr->head));
+      hppaelf_search_for_padding_statements(stat_ptr->head,&(stat_ptr->head));
     }
 }
 
 static void
-hppaosf_create_output_section_statements()
+hppaelf_create_output_section_statements()
 {
   asection *stub_sec;
   asection *output_text_sec = bfd_make_section_old_way(output_bfd,".text");
@@ -215,7 +215,7 @@ hppaosf_create_output_section_statements()
 }
 
 static void
-hppaosf_set_output_arch()
+hppaelf_set_output_arch()
 {
   /* Set the output architecture and machine if possible */
   unsigned long  machine = 0;
@@ -223,7 +223,7 @@ hppaosf_set_output_arch()
 }
 
 static char *
-hppaosf_get_script(isfile)
+hppaelf_get_script(isfile)
      int *isfile;
 EOF
 
@@ -234,8 +234,8 @@ then
 # sed commands to quote an ld script as a C string.
 sc='s/["\\]/\\&/g
 s/$/\\n\\/
-1s/^/"{/
-$s/$/n}"/
+1s/^/"/
+$s/$/n"/
 '
 
 cat >>em_${EMULATION_NAME}.c <<EOF
@@ -279,20 +279,20 @@ fi
 
 cat >>em_${EMULATION_NAME}.c <<EOF
 
-struct ld_emulation_xfer_struct ld_hppaosf_emulation = 
+struct ld_emulation_xfer_struct ld_hppaelf_emulation = 
 {
-  hppaosf_before_parse,
+  hppaelf_before_parse,
   syslib_default,
   hll_default,
   after_parse_default,
   after_allocation_default,
-  hppaosf_set_output_arch,
+  hppaelf_set_output_arch,
   ldemul_default_target,
   before_allocation_default,
-  hppaosf_get_script,
-  "hppaosf",
+  hppaelf_get_script,
+  "hppaelf",
   "elf32-hppa",
-  hppaosf_finish,
-  hppaosf_create_output_section_statements
+  hppaelf_finish,
+  hppaelf_create_output_section_statements
 };
 EOF

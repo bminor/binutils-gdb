@@ -22,6 +22,16 @@
 
 #include <stdio.h>
 
+/* The initial parser states.  */
+typedef enum input_enum {
+  input_selected,		/* We've set the initial state.  */
+  input_script = INPUT_SCRIPT,
+  input_mri_script = INPUT_MRI_SCRIPT,
+  input_defsym = INPUT_DEFSYM
+} input_type;
+
+extern input_type parser_input;
+
 extern int hex_mode;
 extern unsigned int lineno;
 
@@ -40,8 +50,9 @@ extern void ldlex_popstate PARAMS ((void));
 /* In lexsup.c.  */
 extern int lex_input PARAMS ((void));
 extern void lex_unput PARAMS ((int));
+#ifndef yywrap
 extern int yywrap PARAMS ((void));
+#endif
 extern void parse_args PARAMS ((int, char **));
-extern void parse_line PARAMS ((char*, int));
 
 #endif

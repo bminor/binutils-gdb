@@ -1,3 +1,44 @@
+Thu Feb 24 12:27:07 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	Use getopt instead of lex and yacc to parse the command line.
+
+	* ld.texinfo (Options): Document changes to option syntax.
+	* Makefile.in: Update dependencies.
+	* ldver.c (help): Tweak dashes in usage message.
+	* ldgram.y (%union): Remove unused members.
+	Remove %tokens for command line options; add ones for input types.
+	(command_line): Rules removed.
+	(file): Instead of command line, recognize an
+	input type indicator, then use the nonterminal for that type.
+	(defsym_expr): New nonterminal from code formerly in command_line.
+	* ldlex.h: Declare parser input type enum and variable.
+	Don't declare parse_line.
+	* ldlex.l: Remove unused variables.  Make some used ones static
+	and comment them.
+	(COMMAND): Start state and its rules removed.
+	At start of yylex, return input state token if at start of input.
+	(lex_redirect): Don't need to set yyout.
+	(ldlex_command): Function removed.
+	* ldmain.c (main): Instead of calling parse_line, set up the
+	redirections and call yyparse directly.
+	* ldmisc.c (vfinfo): If there's no input filename, print nothing, not
+	"command line".
+	* lexsup.c: Remove #if 0'd code.
+	(parse_line): Function removed.
+	(parse_args): Rewrite to use getopt_long_only.
+	(set_default_dirlist): New function from code formerly in
+	ldgram.y:command_line.
+	(set_section_start): New function.
+	* emultempl/generic.em, emultempl/gld960.em, emultempl/hppaelf.em,
+	emultempl/lnk960.em, emultempl/m88kbcs.em: Don't enclose
+	compiled-in link scripts in "{" and "}", as the grammar no longer
+	wants them to be.
+
+Thu Feb 24 08:43:26 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* Makefile.in (ld.dvi): Depend on configdoc.texi, but don't
+	require that it be in $(srcdir).
+
 Tue Feb 22 09:21:18 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ldlang.c (lang_size_sections): Only align section to alignment

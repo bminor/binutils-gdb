@@ -65,21 +65,9 @@ static int error_index;
 %}
 %union {
   bfd_vma integer;
-  int voidval;
   char *name;
   int token;
   union etree_union *etree;
-  struct sec *section;
-  struct lang_output_section_statement_struct *output_section_statement;
-  union  lang_statement_union **statement_ptr;
-  int lineno;
-  struct {
-    FILE *file;
-    char *name;
-    unsigned int lineno;
-  } state;
-
-  
 }
 
 %type <etree> exp  opt_exp_with_type  mustbe_exp opt_at
@@ -103,326 +91,48 @@ static int error_index;
 %left  <token> '+' '-'
 %left  <token> '*' '/' '%'
 
-/*%token <token> '+' '-' '*' '/' '%'*/
 %right UNARY
 %token END 
 %left <token> '('
 %token <token> ALIGN_K BLOCK QUAD LONG SHORT BYTE
-%token SECTIONS  
+%token SECTIONS
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token SIZEOF_HEADERS
 %token INCLUDE
-%token MEMORY  DEFSYMEND
+%token MEMORY DEFSYMEND
 %token NOLOAD DSECT COPY INFO OVERLAY
-%token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
-%token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common OPTION_warn_common
-%token OPTION_EB OPTION_EL OPTION_G OPTION_Gval OPTION_help
-%token OPTION_format OPTION_oformat  OPTION_F OPTION_u OPTION_y OPTION_Bstatic OPTION_N
-%token <integer> SIZEOF NEXT ADDR 
-%token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
-%token OPTION_v OPTION_V OPTION_m OPTION_memul OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT  NOFLOAT 
-%token OPTION_L OPTION_Map
-%token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R OPTION_relax OPTION_version
-%token <name> OPTION_l OPTION_Lfile OPTION_T OPTION_Aarch OPTION_Tfile
-%token <name> OPTION_Texp OPTION_esymbol OPTION_usymbol OPTION_ysymbol
-%token OPTION_Ur 
-%token ORIGIN FILL OPTION_g
-%token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS
-%token OPTION_RETAIN_SYMBOLS_FILE ALIGNMOD AT
-%token OPTION_Qy OPTION_Y OPTION_dn OPTION_call_shared OPTION_non_shared
-%token OPTION_Oval OPTION_stats OPTION_no_keep_memory
-%token <name> OPTION_YP
-
+%token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY
+%token <integer> SIZEOF NEXT ADDR
+%token STARTUP HLL SYSLIB FLOAT NOFLOAT
+%token ORIGIN FILL
+%token LENGTH CREATE_OBJECT_SYMBOLS INPUT OUTPUT CONSTRUCTORS
+%token ALIGNMOD AT
 %type <token> assign_op 
-
 %type <name>  filename
-
-
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD
 %token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE REL
+%token INPUT_SCRIPT INPUT_MRI_SCRIPT INPUT_DEFSYM
 
 %%
 
-file:	command_line
+file:	
+		INPUT_SCRIPT script_file
+	|	INPUT_MRI_SCRIPT mri_script_file
+	|	INPUT_DEFSYM defsym_expr
+	;
 
 
 filename:  NAME;
 
 
-command_line:
-		command_line command_line_option
-	|
-	;
-
-command_line_option:
-        	OPTION_Bstatic { }
-	|	OPTION_help
-			{	
-			help ();
-			exit (0);
-			}
-	|	OPTION_v
-			{	
-			ldversion(0);
-			version_printed = true;
-			}
-	|	OPTION_V
-			{	
-			ldversion(1);
-			version_printed = true;
-			trace_file_tries = true;
-			}
-	|	OPTION_version
-			{	
-			ldversion(0);
-			version_printed = true;
-			}
-	|	OPTION_t {
-			trace_files = true;
-			}
-	|     OPTION_Map  NAME
+defsym_expr:
+		{ ldlex_defsym(); }
+		NAME '=' exp
 		{
-		write_map = true;
-		config.map_filename = $2;
+		  ldlex_popstate();
+		  lang_add_assignment(exp_assop($3,$2,$4));
 		}
-	|	OPTION_m NAME
-		{
-		  /* Ignore.  */
-		}
-	|	OPTION_memul
-		{
-		  /* Ignore.  */
-		}
-	|	OPTION_M 
-		{
-		  config.map_filename = "-";
-		}
-	|	OPTION_n {
-			config.magic_demand_paged = false;
-			}
-        |       OPTION_N {
-			config.text_read_only = false;
-			config.magic_demand_paged = false;
-	                }
-        |       OPTION_s {
-	  		link_info.strip = strip_all;
-			}
-	|	OPTION_S {
-			link_info.strip = strip_debugger;
-			}
-	|	OPTION_stats {
-	  		config.stats = true;
-		}
-	|	OPTION_no_keep_memory {
-			link_info.keep_memory = false;
-		}
-        |       OPTION_u NAME {
-			ldlang_add_undef($2);
-	      	}
-        |       OPTION_usymbol {
-			ldlang_add_undef($1);
-	      	}
-	|	OPTION_r {
-			link_info.relocateable = true;
-			config.build_constructors = false;
-			config.magic_demand_paged = false;
- 			config.text_read_only = false;
-			}
-        |       OPTION_Ur {
-			link_info.relocateable = true;
-			config.build_constructors = true;
-			config.magic_demand_paged = false;
- 			config.text_read_only = false;
-		      }	            
-	|	OPTION_o filename
-			{
-			lang_add_output($2, 0); 
-			}
-	|	OPTION_e NAME
-			{ lang_add_entry($2); 
-			}
-	|	OPTION_esymbol
-			{ lang_add_entry($1); 
-			}
-	|	OPTION_X {
-			link_info.discard = discard_l;
-		}
-	|	OPTION_x {
-			link_info.discard = discard_all;
-		}
-
-	| 	OPTION_noinhibit_exec
-			{
-			force_make_executable = true;
-			}
-        |      OPTION_sort_common
-			{
-			config.sort_common = true;
-			}
-        |      OPTION_warn_common
-			{
-			config.warn_common = true;
-			}
-    	|      OPTION_d {
-			  command_line.force_common_definition = true;
-			}
-
-    	|      OPTION_relax {
-			  command_line.relax = true;
-			}
-    	|      OPTION_dc
-			 {
-			  command_line.force_common_definition = true;
-			}
-	|	OPTION_g
-			{
-			/* Ignored */
-			}
-	|      	OPTION_dp
-			 {
-			  command_line.force_common_definition = true;
-			}
-	| 	OPTION_format NAME
-	           {
-			  lang_add_target($2);
-       		   }
-	| 	OPTION_oformat NAME
-	           {
-			  lang_add_output_format($2, 0);
-       		   }
-	| 	OPTION_Texp 
-		{ ldlex_expression();
-			hex_mode  = 16; 
-		} 
-		INT
-		{  ldlex_popstate();
-			lang_section_start($1,exp_intop($3));
-			hex_mode = 0; 
-		}
-	|	OPTION_y NAME
-			{
-			add_ysym($2);
-			}
-	|	OPTION_ysymbol
-			{
-			add_ysym($1);
-			}
-	| 	OPTION_Aarch 
-		{ 
-			ldfile_add_arch($1); 
-		}
-	|	 OPTION_b NAME
-			{
-			lang_add_target($2);
-			}
-	|	OPTION_L NAME
-			{
-			ldfile_add_library_path($2);
-		        }
-	|	OPTION_Lfile
-			{
-			ldfile_add_library_path($1);
-			}
-	|	OPTION_F
-		{
-		/* Ignore */
-		}
-	|	OPTION_c filename 
-			{ldfile_open_command_file($2); }
-		mri_script_file  END {  ldlex_command();}
-
-	|	OPTION_Tfile 
-			{ ldfile_open_command_file($1); } script_file
-  			END {  ldlex_command();}
-
-	|	OPTION_T filename 
-			{ ldfile_open_command_file($2); } script_file
-		END {  ldlex_command();}
-
-	|	OPTION_l
-			{
-			  lang_add_input_file($1,
-					 lang_input_file_is_l_enum,
-					 (char *)NULL);
-			}
-	| 	OPTION_R filename
-			{
-			lang_add_input_file($2,
-				lang_input_file_is_symbols_only_enum,
-				(char *)NULL);
-			}
-
-	|	OPTION_defsym  { ldlex_defsym(); }
-		NAME 	 '=' exp  DEFSYMEND { ldlex_popstate();
-			lang_add_assignment(exp_assop($4,$3,$5));
-			}
-	|	OPTION_RETAIN_SYMBOLS_FILE filename
-		{ add_keepsyms_file ($2); }
-	|	OPTION_EB
-		{
-		  /* FIXME: This is currently ignored.  It means
-		     ``produce a big-endian object file''.  It could
-		     be used to select an output format.  */
-		}
-	|	OPTION_EL
-		{
-		  /* FIXME: This is currently ignored.  It means
-		     ``produce a little-endian object file''.  It could
-		     be used to select an output format.  */
-		}
-	|	OPTION_G NAME
-		{
-		  g_switch_value = atoi ($2);
-		}
-	|	OPTION_Gval
-		{
-		  g_switch_value = yylval.integer;
-		}
-	|	OPTION_Qy
-	|	OPTION_dn
-	|	OPTION_non_shared
-	|	OPTION_call_shared
-	|	OPTION_Oval
-	|	OPTION_YP
-		{
-		  dirlist_ptr = $1;
-		  goto set_default_dirlist;
-		}
-	|	OPTION_Y NAME
-		{
-		  if (strncmp ($2, "P,", 2))
-		    einfo ("%P%F: unknown -Y option -- %s\n", $2);
-		  else
-		    {
-		      char *p;
-		      dirlist_ptr = $2;
-		    set_default_dirlist:
-		      while (1)
-			{
-			  p = strchr (dirlist_ptr, ':');
-			  if (p != NULL)
-			    *p = 0;
-			  if (*dirlist_ptr)
-			    ldfile_add_library_path (dirlist_ptr);
-			  if (p == NULL)
-			    break;
-			  *p = ':';
-			  dirlist_ptr = p + 1;
-			}
-		    }
-		}
-	|	'{' script_file '}' { /* This parses compiled-in scripts.  */ }
-        | 	NAME
-		{
-		  if (*$1 == '-')
-		    einfo("%P%F: illegal option -- %s\n", $1);
-		  else
-		    lang_add_input_file($1,lang_input_file_is_file_enum,
-					(char *)NULL);
-		}
-	;
-
 
 /* SYNTAX WITHIN AN MRI SCRIPT FILE */  
 mri_script_file:

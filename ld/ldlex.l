@@ -43,30 +43,40 @@ This was written by steve chamberlain
 #include "ldlex.h"
 #include "ldmain.h"
 
-int ldgram_in_defsym;
+/* The type of top-level parser input.
+   yylex and yyparse (indirectly) both check this.  */
+input_type parser_input;
 
+/* Radix to use for bfd_scan_vma -- 0 (default to base 10) or 16.  */
 int hex_mode;
 
+/* Line number in the current input file.
+   (FIXME Actually, it doesn't appear to get reset for each file?)  */
 unsigned int lineno = 1;
-int old;
+
+/* Support for flex reading from more than one input file (stream).
+   `include_stack' is flex's input state for each open file;
+   `file_name_stack' is the file names.
+
+   If `include_stack_ptr' is 0, we haven't started reading anything yet.
+   Otherwise, stack elements 0 through `include_stack_ptr - 1' are valid.  */
 
 #undef YY_INPUT
 #define YY_INPUT(buf,result,max_size) yy_input(buf, &result, max_size)
-#undef YY_FATAL_ERROR
-#define YY_FATAL_ERROR(s)
+
 #define MAX_INCLUDE_DEPTH 10
-YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
-char *file_name_stack[MAX_INCLUDE_DEPTH];
-unsigned int include_stack_ptr = 0;
+static YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
+static char *file_name_stack[MAX_INCLUDE_DEPTH];
+static unsigned int include_stack_ptr = 0;
 
 static YY_BUFFER_STATE yy_create_string_buffer PARAMS ((const char *string,
-							int size));
+							size_t size));
 static void yy_input PARAMS ((char *, int *result, int max_size));
+
 static void comment PARAMS ((void));
 static void lex_warn_invalid PARAMS ((char *where, char *what));
 
 /* STATES 
-	COMMAND	 	on command line
 	EXPRESSION	definitely in an expression
 	SCRIPT		definitely in a script
 	BOTH		either EXPRESSION or SCRIPT
@@ -74,6 +84,11 @@ static void lex_warn_invalid PARAMS ((char *where, char *what));
         MRI             in an MRI script
 */
 #define RTOKEN(x)  {  yylval.token = x; return x; }
+
+/* Some versions of flex want this.  */
+#ifndef yywrap
+int yywrap () { return 1; }
+#endif
 %}
 
 %a 4000
@@ -90,7 +105,6 @@ WHITE		[ \t\n]+
 NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 
 
-%s COMMAND
 %s SCRIPT
 %s EXPRESSION
 %s BOTH
@@ -98,149 +112,21 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 %s MRI
 %%
 
+  if (parser_input != input_selected)
+    {
+      /* The first token of the input determines the initial parser state.  */
+      input_type t = parser_input;
+      parser_input = input_selected;
+      return t;
+    }
 
-<BOTH,SCRIPT,EXPRESSION,COMMAND>"/*"	{ comment(); }
+<BOTH,SCRIPT,EXPRESSION>"/*"	{ comment(); }
 
 
 <DEFSYMEXP>"-"                  { RTOKEN('-');}
 <DEFSYMEXP>"+"                  { RTOKEN('+');}
 <DEFSYMEXP>{FILENAMECHAR1}{SYMBOLCHARN}*   { yylval.name = buystring(yytext); return NAME; }
-<DEFSYMEXP>[ \t]                { RTOKEN(DEFSYMEND); }
 <DEFSYMEXP>"="                  { RTOKEN('='); }
-<COMMAND>"--help"		{ return OPTION_help; }
-<COMMAND>"--version"		{ return OPTION_version; }
-<COMMAND>"-defsym"{WHITE}*	{ return OPTION_defsym; }
-<COMMAND>"-format"		{ return OPTION_format; }
-<COMMAND>"-noinhibit-exec"	{ return OPTION_noinhibit_exec; }
-<COMMAND>"-noinhibit_exec" 	{ return OPTION_noinhibit_exec; }
-<COMMAND>"-oformat"		{ return OPTION_oformat; }
-<COMMAND>"-sort-common"		{ return OPTION_sort_common;}
-<COMMAND>"-sort_common"		{ return OPTION_sort_common;}
-<COMMAND>"-warn-common"		{ return OPTION_warn_common;}
-<COMMAND>"-n"			{ return OPTION_n; }
-<COMMAND>"-N"			{ return OPTION_N; }
-<COMMAND>"-r"			{ return OPTION_r; }
-<COMMAND>"-stats"		{ return OPTION_stats; }
-<COMMAND>"-no-keep-memory"	{ return OPTION_no_keep_memory; }
-<COMMAND>"-relax"		{ return OPTION_relax; }
-<COMMAND>"-i"			{ return OPTION_r; }
-<COMMAND>"-Ur"			{ return OPTION_Ur; }
-<COMMAND>"-o"			{ return OPTION_o; }
-<COMMAND>"-g"			{ return OPTION_g; }
-<COMMAND>"-e"			{ return OPTION_e; }
-<COMMAND>"-e"{FILENAME}		{
- 					yylval.name = buystring(yytext+2);
-					return OPTION_esymbol;
-				}
-<COMMAND>"-b"			{ return OPTION_b; }
-<COMMAND>"-dc"			{ return OPTION_dc; }
-<COMMAND>"-dp"			{ return OPTION_dp; }
-<COMMAND>"-d"			{ return OPTION_d; }
-<COMMAND>"-v"			{ return OPTION_v; }
-<COMMAND>"-V"			{ return OPTION_V; }
-<COMMAND>"-m"			{ return OPTION_m; }
-<COMMAND>"-m"{FILENAME}		{ return OPTION_memul; }
-<COMMAND>"-M"			{ return OPTION_M; }
-<COMMAND>"-Map"	             	{ return OPTION_Map;}
-<COMMAND>"-t"			{ return OPTION_t; }
-<COMMAND>"-X"			{ return OPTION_X; }
-<COMMAND>"-x"			{ return OPTION_x; }
-<COMMAND>"-c"			{ return OPTION_c; }
-<COMMAND>"-R"			{ return OPTION_R; }
-<COMMAND>"-u"			{ return OPTION_u; }
-<COMMAND>"-u"{FILENAME}		{
- 					yylval.name = buystring(yytext+2);
-  					return OPTION_usymbol;
-				}
-<COMMAND>"-s"	           	{ return OPTION_s; }
-<COMMAND>"-S"	           	{ return OPTION_S; }
-<COMMAND>"-Bstat"	 	{ return OPTION_Bstatic; }
-<COMMAND>"-B"{FILENAME}	   	{ /* Ignored */ }
-<COMMAND>"-l"{FILENAME} 	{
- 					yylval.name = buystring(yytext+2);
-				  	return OPTION_l; 
-				}
-
-<COMMAND>"-L"{FILENAME} 	{ 
-					yylval.name = buystring(yytext+2);
-					return OPTION_Lfile;
-				}
-<COMMAND>"-L"			{ return OPTION_L; }
-<COMMAND>"-Ttext" 	        {
-				 yylval.name = ".text";
-				 return OPTION_Texp;
-				}
-<COMMAND>"-Tdata"  		{
-				 yylval.name = ".data";
-				 return OPTION_Texp;
-			       }
-<COMMAND>"-Tbss"		{
-				 yylval.name = ".bss";
-				 return OPTION_Texp;
-			       }
-<COMMAND>"-O"([0-9])+		{
-					yylval.integer = atoi (yytext + 2);
-					return OPTION_Oval;
-				}
-<COMMAND>"-O"{FILENAME} 	{
-				yylval.name = buystring(yytext+2);
-				return OPTION_Texp;
-				}
-
-<COMMAND>"-T"{FILENAME}  	{
-				 yylval.name = buystring(yytext+2);
-				 return OPTION_Tfile;
-			       }
-<COMMAND>"-T"          		{
-				 return OPTION_T;
-			       }
-
-<COMMAND>"-F"{FILENAME}  	{
-				 return OPTION_F;
-			       }
-<COMMAND>"-F"          		{
-				 return OPTION_F;
-			       }
-
-<COMMAND>"-y"		       {
-					return OPTION_y;
-				}
-				
-<COMMAND>"-y"{FILENAME}         {
-					yylval.name = buystring(yytext+2);
-					return OPTION_ysymbol;
-				}
-				
-<COMMAND>"-A"{FILENAME} 	{
-		                	yylval.name = buystring(yytext+2);
-				 	return OPTION_Aarch;
-			       	}
-
-<COMMAND>"-retain-symbols-file"	{ return OPTION_RETAIN_SYMBOLS_FILE; }
-
-<COMMAND>"-EB"          	{
-					return OPTION_EB;
-				}
-<COMMAND>"-EL"        		{
-					return OPTION_EL;
-				}
-<COMMAND>"-G"			{
-					return OPTION_G;
-				}
-<COMMAND>"-G"([0-9])+		{
-					yylval.integer = atoi (yytext + 2);
-					return OPTION_Gval;
-				}
-
-<COMMAND>"-Qy"			{	return OPTION_Qy; }
-<COMMAND>"-dn"			{	return OPTION_dn; }
-<COMMAND>"-Y"			{	return OPTION_Y;  }
-<COMMAND>"-YP,"{FILENAME}	{
-					yylval.name = buystring (yytext+4);
-					return OPTION_YP;
-				}
-<COMMAND>"-non_shared"		{	return OPTION_non_shared; }
-<COMMAND>"-call_shared"		{	return OPTION_call_shared; }
 
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
   				yylval.integer = bfd_scan_vma (yytext+1, 0,16);
@@ -311,18 +197,13 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT,EXPRESSION>"/"		{ RTOKEN('/');}
 <BOTH,SCRIPT,EXPRESSION>"%"		{ RTOKEN('%');}
 <BOTH,SCRIPT,EXPRESSION>"<"		{ RTOKEN('<');}
-<BOTH,SCRIPT,EXPRESSION>">"		{ RTOKEN('>');}
 <MRI,BOTH,SCRIPT,EXPRESSION>"="          { RTOKEN('=');}
 <BOTH,SCRIPT,EXPRESSION>"}"			{ RTOKEN('}') ; }
 <BOTH,SCRIPT,EXPRESSION>"{"			{ RTOKEN('{'); }
 <BOTH,SCRIPT,EXPRESSION>")"			{ RTOKEN(')');}
 <BOTH,SCRIPT,EXPRESSION>"("			{ RTOKEN('(');}
-<BOTH,SCRIPT,EXPRESSION>"]"		{ RTOKEN(']');}
-<BOTH,SCRIPT,EXPRESSION>"["		{ RTOKEN('[');}
 <BOTH,SCRIPT,EXPRESSION>":"		{ RTOKEN(':'); }
 <BOTH,SCRIPT,EXPRESSION>";"		{ RTOKEN(';');}
-<BOTH,SCRIPT,EXPRESSION>"-"		{ RTOKEN('-');}
-<BOTH,SCRIPT,EXPRESSION>"/"		{ RTOKEN('/');}
 <BOTH,SCRIPT>"MEMORY"		{ RTOKEN(MEMORY);}
 <BOTH,SCRIPT>"ORIGIN"		{ RTOKEN(ORIGIN);}
 <BOTH,SCRIPT>"BLOCK"			{ RTOKEN(BLOCK);}
@@ -395,12 +276,6 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <MRI>"sect"			{ RTOKEN(SECT); }
 <EXPRESSION,BOTH,SCRIPT,MRI>"absolute"			{ RTOKEN(ABSOLUTE); }
 
-<COMMAND>{CMDFILENAMECHAR1}{CMDFILENAMECHAR}*	{
-				 yylval.name = buystring(yytext); 
-				  return NAME;
-				}
-
-
 <MRI>{FILENAMECHAR1}{NOCFILENAMECHAR}*	{
 /* Filename without commas, needed to parse mri stuff */
 				 yylval.name = buystring(yytext); 
@@ -412,11 +287,11 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 				 yylval.name = buystring(yytext); 
 				  return NAME;
 				}
-<SCRIPT,COMMAND>{FILENAMECHAR}* { yylval.name = buystring(yytext); 
+<SCRIPT>{FILENAMECHAR}* { yylval.name = buystring(yytext); 
 				  return NAME;
 				}
 
-<EXPRESSION,BOTH,COMMAND,SCRIPT>"\""[^\"]*"\"" {
+<EXPRESSION,BOTH,SCRIPT>"\""[^\"]*"\"" {
 					/* No matter the state, quotes
 					   give what's inside */
 					yylval.name = buystring(yytext+1);
@@ -424,7 +299,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 					return NAME;
 				}
 <BOTH,SCRIPT,EXPRESSION>"\n"		{ lineno++;}
-<MRI,COMMAND,BOTH,SCRIPT,EXPRESSION>[ \t]
+<MRI,BOTH,SCRIPT,EXPRESSION>[ \t]
 
 <<EOF>> {
   include_stack_ptr--;
@@ -438,24 +313,20 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
     yy_switch_to_buffer(include_stack[include_stack_ptr]);
 
   }
-  if (include_stack_ptr==1) 
-  {
-    BEGIN(COMMAND);
-  }
-  else 
-  {
-    BEGIN(SCRIPT);
-    ldfile_input_filename = file_name_stack[include_stack_ptr-1];
-  }
+  BEGIN(SCRIPT);
+  ldfile_input_filename = file_name_stack[include_stack_ptr-1];
 
   return END;
 }
 
-<COMMAND>.		lex_warn_invalid(" on command line", yytext);
 <SCRIPT,MRI>.		lex_warn_invalid(" in script", yytext);
 <EXPRESSION,DEFSYMEXP,BOTH>.	lex_warn_invalid(" in expression", yytext);
     
 %%
+
+
+/* Switch flex to reading script file NAME, open on FILE,
+   saving the current input info on the include stack.  */
 
 void
 lex_push_file (file, name)
@@ -463,123 +334,109 @@ lex_push_file (file, name)
      char *name;
 {
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH) 
-  {
-    einfo("%F:includes nested too deeply\n");
-  }
+    {
+      einfo("%F:includes nested too deeply\n");
+    }
   file_name_stack[include_stack_ptr] = name;
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
 
   include_stack_ptr++;
   yyin = file;
   yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
-
-  BEGIN(SCRIPT);
+  BEGIN (SCRIPT);
 }
 
+/* Return a newly created flex input buffer containing STRING,
+   which is SIZE bytes long.  */
+
 static YY_BUFFER_STATE 
-yy_create_string_buffer (string,  size)
+yy_create_string_buffer (string, size)
      CONST char *string;
-     int size;
+     size_t size;
 {
   YY_BUFFER_STATE b;
 
-  b = (YY_BUFFER_STATE) malloc( sizeof( struct yy_buffer_state ) );
+  /* Calls to m-alloc get turned by sed into xm-alloc.  */
+  b = (YY_BUFFER_STATE) malloc (sizeof (struct yy_buffer_state));
   b->yy_input_file = 0;
-  
-  if ( ! b )
-   YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
-
   b->yy_buf_size = size;
 
   /* yy_ch_buf has to be 2 characters longer than the size given because
-   * we need to put in 2 end-of-buffer characters.
-   */
-  b->yy_ch_buf = (YY_CHAR *) malloc( (unsigned) (b->yy_buf_size + 3) );
-
-  if ( ! b->yy_ch_buf )
-   YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
-
+     we need to put in 2 end-of-buffer characters.  */
+  b->yy_ch_buf = (YY_CHAR *) malloc ((unsigned) (b->yy_buf_size + 3));
 
   b->yy_ch_buf[0] = '\n';
-  strcpy(b->yy_ch_buf+1,  string);
+  strcpy (b->yy_ch_buf+1, string);
   b->yy_ch_buf[size+1] = YY_END_OF_BUFFER_CHAR;
   b->yy_ch_buf[size+2] = YY_END_OF_BUFFER_CHAR;
-    b->yy_n_chars = size+1;
+  b->yy_n_chars = size+1;
   b->yy_buf_pos = &b->yy_ch_buf[1];
-
   b->yy_eof_status = EOF_NOT_SEEN;
 
-  return ( b );
+  return b;
 }
 
-
+/* Switch flex to reading from STRING, saving the current input info
+   on the include stack.  */
 
 void
 lex_redirect (string)
-     CONST  char *string;
+     CONST char *string;
 {
   YY_BUFFER_STATE tmp;
 
-  int len = strlen(string);
-  yy_init = 0  ;  
+  yy_init = 0;
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH) 
-  {
-    einfo("%F: macros nested too deeply\n");
-  }
+    {
+      einfo("%F: macros nested too deeply\n");
+    }
   file_name_stack[include_stack_ptr] = "redirect";
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
   include_stack_ptr++;
-  tmp =   yy_create_string_buffer(string, len);
-  
-  yy_switch_to_buffer(tmp);
-  BEGIN(COMMAND);
-  yyout = stdout;
+  tmp = yy_create_string_buffer (string, strlen (string));
+  yy_switch_to_buffer (tmp);
+  BEGIN (SCRIPT);
 }
+
+/* Functions to switch to a different flex start condition,
+   saving the current start condition on `state_stack'.  */
 
-int state_stack[20];
-int *state_stack_p = state_stack;
+static int state_stack[MAX_INCLUDE_DEPTH * 2];
+static int *state_stack_p = state_stack;
 
 void
 ldlex_script ()
 {
   *(state_stack_p)++ = yy_start;
-
-  BEGIN(SCRIPT);
+  BEGIN (SCRIPT);
 }
-
 
 void
 ldlex_mri_script ()
 {
   *(state_stack_p)++ = yy_start;
-  BEGIN(MRI);
+  BEGIN (MRI);
 }
 
 void
 ldlex_defsym ()
 {
   *(state_stack_p)++ = yy_start;
-  BEGIN(DEFSYMEXP);
+  BEGIN (DEFSYMEXP);
 }
 	   
 void
 ldlex_expression ()
 {
   *(state_stack_p)++ = yy_start;
-  BEGIN(EXPRESSION);
-
+  BEGIN (EXPRESSION);
 }
+
 void
 ldlex_both ()
 {
   *(state_stack_p)++ = yy_start;
-  BEGIN(BOTH);
-}
-void
-ldlex_command ()
-{
-  *(state_stack_p)++ = yy_start;
-  BEGIN(COMMAND);
+  BEGIN (BOTH);
 }
 
 void
@@ -587,52 +444,68 @@ ldlex_popstate ()
 {
   yy_start = *(--state_stack_p);
 }
+
+
+/* Place up to MAX_SIZE characters in BUF and return in *RESULT
+   either the number of characters read, or 0 to indicate EOF.  */
 
 static void
-yy_input(buf, result, max_size)
-char *buf;
-int *result;
-int max_size;
+yy_input (buf, result, max_size)
+     char *buf;
+     int *result;
+     int max_size;
 {
   *result = 0; 
   if (yy_current_buffer->yy_input_file)
-  {
-    if (yyin)
-     if ( (*result = read( fileno(yyin), (char *) buf, max_size )) < 0 ) 
-      YY_FATAL_ERROR( "read() in flex scanner failed" );
-  }
+    {
+      if (yyin)
+	{
+	  *result = read (fileno (yyin), (char *) buf, max_size);
+	  if (*result < 0) 
+	    einfo ("%F%P: read in flex scanner failed");
+	}
+    }
 }
+
+/* Eat the rest of a C-style comment.  */
 
 static void
 comment ()
 {
   int c;
+
   while (1)
   {
     c = input();
-    while (c !='*' && c != EOF) 
+    while (c != '*' && c != EOF) 
     {
-      if (c == '\n') lineno++;
+      if (c == '\n')
+	lineno++;
       c = input();
     }
-
 
     if (c == '*')
     {
       c = input();
-      while ( c == '*')
+      while (c == '*')
        c = input();
-      if ( c == '/' )
+      if (c == '/')
        break;			/* found the end */
     }
 
-    if ( c == EOF )
+    if (c == '\n')
+      lineno++;
+
+    if (c == EOF)
     {
-      einfo( "%F%P :EOF in comment\n");
+      einfo( "%F%P: EOF in comment\n");
       break;
     }
   }
 }
+
+/* Warn the user about a garbage character WHAT in the input
+   in context WHERE.  */
 
 static void
 lex_warn_invalid (where, what)
