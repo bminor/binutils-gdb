@@ -1,3 +1,8 @@
+2002-06-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb_indent.sh: Add prgregset_t, fpregset_t, and gregset_t to the
+	list of predefined types.
+
 2002-06-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386.h (REGISTER_VIRTUAL_TYPE,
