@@ -1,3 +1,8 @@
+2001-06-18  Philip Blundell  <philb@gnu.org>
+
+	* config/tc-arm.c (do_msr): Remove restriction on usage of
+	immediate operands.
+
 2001-06-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf2dbg.c (dwarf2_finish): Output file info even when no
