@@ -1,3 +1,9 @@
+2001-06-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* lexsup.c (parse_args) <case OPTION_EXPORT_DYNAMIC, case 'E'>:
+	Set new link_info member export_dynamic.
+	* ldmain.c (main): Initialize new link_info member export_dynamic.
+
 2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ldlang.c (walk_wild): Only call walk_wild_file if

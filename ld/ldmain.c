@@ -219,6 +219,7 @@ main (argc, argv)
   link_info.emitrelocations = false;
   link_info.shared = false;
   link_info.symbolic = false;
+  link_info.export_dynamic = false;
   link_info.static_link = false;
   link_info.traditional_format = false;
   link_info.optimize = false;
