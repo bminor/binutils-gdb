@@ -1,5 +1,8 @@
 2004-02-08  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_unwind_pc): New function.
+	(mips_gdbarch_init): Set mips_unwind_pc.
+
 	* frame.c (legacy_saved_regs_this_id): Return a null frame ID.
 	(get_frame_id): Allow the UNKNOWN_FRAME.
 	(frame_register_unwind, get_frame_type): Ditto.

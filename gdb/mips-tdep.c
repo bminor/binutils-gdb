@@ -810,6 +810,12 @@ mips_read_pc (ptid_t ptid)
   return read_signed_register_pid (mips_regnum (current_gdbarch)->pc, ptid);
 }
 
+static CORE_ADDR
+mips_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_unwind_register_signed (next_frame, mips_regnum (gdbarch)->pc);
+}
+
 static void
 mips_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
@@ -6030,6 +6036,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      ensure that all 32 bit addresses are sign extended to 64 bits.  */
   set_gdbarch_addr_bits_remove (gdbarch, mips_addr_bits_remove);
 
+  /* Unwind the frame.  */
+  set_gdbarch_unwind_pc (gdbarch, mips_unwind_pc);
 #if 0
 #else
   set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp);	/* Draft FRAME base.  */
