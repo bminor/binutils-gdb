@@ -1,3 +1,9 @@
+2001-12-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* lexsup.c (parse_args): Don't pass shortopts to second call to
+	getopt functions.  Restore optind rather than decrementing before
+	second call.  Remove errind as it now duplicates last_optind.
+
 2001-12-11  Christopher Faylor  <cgf@redhat.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_list_options): Fix typo.
