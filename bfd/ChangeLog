@@ -1,3 +1,18 @@
+Fri May 31 13:51:28 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-hppa.c (elf32_hppa_info_to_howto): Rename from
+	elf_info_to_howto.
+	(elf_info_to_howto): Define.
+	* elf32-sparc.c (elf32_sparc_info_to_howto): Rename from
+	elf_info_to_howto.
+	(elf_info_to_howto): Define.
+	* elf64-sparc.c (sparc64_elf_info_to_howto): Rename from
+	elf_info_to_howto.
+	(elf_info_to_howto): Define.
+
+	* coff-w65.c (h8300_reloc16_estimate): Rename R_MOVB[12] to
+	R_MOV16B[12], to match change in coff/internal.h.
+
 Thu May 30 12:38:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf64-mips.c: Extensive additions to provide better support for
