@@ -17,223 +17,200 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
+#include <assert.h>
 #include "sysdep.h"
 #include "dis-asm.h"
 #include "opintl.h"
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned long u32;
 
-#define IFMASK(a,b)     ((opcode & (a)) == (b))
-
-static char* SREG_flags = "CZNVSHTI";
-static char* sect94[] = {"COM","NEG","SWAP","INC",0,"ASR","LSR","ROR",
-			 0,0,"DEC",0,0,0,0,0};
-static char* sect98[] = {"CBI","SBIC","SBI","SBIS"};
-static char* branchs[] = {
-  "BRCS","BREQ","BRMI","BRVS",
-  "BRLT","BRHS","BRTS","BRIE",
-  "BRCC","BRNE","BRPL","BRVC",
-  "BRGE","BRHC","BRTC","BRID"
+struct avr_opcodes_s
+{
+  char *name;
+  char *constraints;
+  char *opcode;
+  int insn_size;		/* in words */
+  int isa;
+  unsigned int bin_opcode;
+  unsigned int bin_mask;
 };
 
-static char* last4[] = {"BLD","BST","SBRC","SBRS"};
+#define AVR_INSN(NAME, CONSTR, OPCODE, SIZE, ISA, BIN) \
+{#NAME, CONSTR, OPCODE, SIZE, ISA, BIN, 0},
+
+struct avr_opcodes_s avr_opcodes[] =
+{
+  #include "opcode/avr.h"
+  {NULL, NULL, NULL, 0, 0, 0, 0}
+};
 
 
-static void dispLDD PARAMS ((u16, char *));
+static void avr_operand (unsigned int insn, unsigned int insn2,
+			 unsigned int pc, int constraint, char *buf,
+			 char *comment, int regs);
 
 static void
-dispLDD (opcode, dest)
-     u16 opcode;
-     char *dest;
+avr_operand (insn, insn2, pc, constraint, buf, comment, regs)
+     unsigned int insn;
+     unsigned int insn2;
+     unsigned int pc;
+     int constraint;
+     char *buf;
+     char *comment;
+     int regs;
 {
-  opcode = (((opcode & 0x2000) >> 8) | ((opcode & 0x0c00) >> 7)
-	    | (opcode & 7));
-  sprintf(dest, "%d", opcode);
+  switch (constraint)
+    {
+      /* Any register operand.  */
+    case 'r':
+      if (regs)
+	insn = (insn & 0xf) | ((insn & 0x0200) >> 5); /* source register */
+      else
+	insn = (insn & 0x01f0) >> 4; /* destination register */
+      
+      sprintf (buf, "r%d", insn);
+      break;
+
+    case 'd':
+      if (regs)
+	sprintf (buf, "r%d", 16 + (insn & 0xf));
+      else
+	sprintf (buf, "r%d", 16 + ((insn & 0xf0) >> 4));
+      break;
+      
+    case 'w':
+      sprintf (buf, "r%d", 24 + ((insn & 0x30) >> 3));
+      break;
+      
+    case 'a':
+      if (regs)
+	sprintf (buf, "r%d", 16 + (insn & 7));
+      else
+	sprintf (buf, "r%d", 16 + ((insn >> 4) & 7));
+      break;
+
+    case 'v':
+      if (regs)
+	sprintf (buf, "r%d", (insn & 0xf) * 2);
+      else
+	sprintf (buf, "r%d", ((insn & 0xf0) >> 3));
+      break;
+
+    case 'e':
+      if (insn & 0x2)
+	*buf++ = '-';
+      switch ((insn >> 2) & 0x3)
+	{
+	case 0: *buf++ = 'Z'; break;
+	case 2: *buf++ = 'Y'; break;
+	case 3: *buf++ = 'X'; break;
+	default: buf += sprintf (buf, _ (" unknown register ")); break;
+	}
+      if (insn & 0x1)
+	*buf++ = '+';
+      *buf = '\0';
+      break;
+
+    case 'z':
+      *buf++ = 'Z';
+      if (insn & 0x1)
+	*buf++ = '+';
+      *buf = '\0';
+      break;
+
+    case 'b':
+      {
+	unsigned int x = insn;
+	
+	x = (insn & 7);
+	x |= (insn >> 7) & (3 << 3);
+	x |= (insn >> 8) & (1 << 5);
+	
+	if (insn & 0x8)
+	  *buf++ = 'Y';
+	else
+	  *buf++ = 'Z';
+	sprintf (buf, "+%d", x);
+	sprintf (comment, "0x%02x", x);
+      }
+      break;
+      
+    case 'h':
+      sprintf (buf, "0x%x%x", (insn & 1) | ((insn & (0x1f << 4)) >> 3), insn2);
+      break;
+      
+    case 'L':
+      {
+	int rel_addr = (((insn & 0xfff) ^ 0x800) - 0x800) * 2;
+	sprintf (buf, ".%+-8d", rel_addr);
+	sprintf (comment, "0x%x", pc + 2 + rel_addr);
+      }
+      break;
+
+    case 'l':
+      {
+	int rel_addr = ((((insn >> 3) & 0x7f) ^ 0x40) - 0x40) * 2;
+	sprintf (buf, ".%+-8d", rel_addr);
+	sprintf (comment, "0x%x", pc + 2 + rel_addr);
+      }
+      break;
+
+    case 'i':
+      sprintf (buf, "0x%04X", insn2);
+      break;
+      
+    case 'M':
+      sprintf (buf, "0x%02X", ((insn & 0xf00) >> 4) | (insn & 0xf));
+      sprintf (comment, "%d", ((insn & 0xf00) >> 4) | (insn & 0xf));
+      break;
+
+    case 'n':
+      sprintf (buf, _ ("Internal disassembler error"));
+      break;
+      
+    case 'K':
+      sprintf (buf, "%d", (insn & 0xf) | ((insn >> 2) & 0x30));
+      break;
+      
+    case 's':
+      sprintf (buf, "%d", insn & 7);
+      break;
+      
+    case 'S':
+      sprintf (buf, "%d", (insn >> 4) & 7);
+      break;
+      
+    case 'P':
+      {
+	unsigned int x;
+	x = (insn & 0xf);
+	x |= (insn >> 5) & 0x30;
+	sprintf (buf, "0x%02x", x);
+	sprintf (comment, "%d", x);
+      }
+      break;
+
+    case 'p':
+      {
+	unsigned int x;
+	
+	x = (insn >> 3) & 0x1f;
+	sprintf (buf, "0x%02x", x);
+	sprintf (comment, "%d", x);
+      }
+      break;
+      
+    case '?':
+      *buf = '\0';
+      break;
+      
+    default:
+      sprintf (buf, _ ("unknown constraint `%c'"), constraint);
+    }
 }
 
+static unsigned short avrdis_opcode PARAMS ((bfd_vma, disassemble_info *));
 
-static void regPP PARAMS ((u16, char *));
-
-static void
-regPP (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  opcode = ((opcode & 0x0600) >> 5) | (opcode & 0xf);
-  sprintf(dest, "0x%02X", opcode);
-}
-
-
-static void reg50 PARAMS ((u16, char *));
-
-static void
-reg50 (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  opcode = (opcode & 0x01f0) >> 4;
-  sprintf(dest, "R%d", opcode);
-}
-
-
-static void reg104 PARAMS ((u16, char *));
-
-static void
-reg104 (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  opcode = (opcode & 0xf) | ((opcode & 0x0200) >> 5);
-  sprintf(dest, "R%d", opcode);
-}
-
-
-static void reg40 PARAMS ((u16, char *));
-
-static void
-reg40 (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  opcode = (opcode & 0xf0) >> 4;
-  sprintf(dest, "R%d", opcode + 16);
-}
-
-
-static void reg20w PARAMS ((u16, char *));
-
-static void
-reg20w (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  opcode = (opcode & 0x30) >> 4;
-  sprintf(dest, "R%d", 24 + opcode * 2);
-}
-
-
-static void reg_fmul_d PARAMS ((u16, char *));
-
-static void
-reg_fmul_d (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  sprintf(dest, "R%d", 16 + ((opcode >> 4) & 7));
-}
-
-
-static void reg_fmul_r PARAMS ((u16, char *));
-
-static void
-reg_fmul_r (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  sprintf(dest, "R%d", 16 + (opcode & 7));
-}
-
-
-static void reg_muls_d PARAMS ((u16, char *));
-
-static void
-reg_muls_d (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  sprintf(dest, "R%d", 16 + ((opcode >> 4) & 0xf));
-}
-
-
-static void reg_muls_r PARAMS ((u16, char *));
-
-static void
-reg_muls_r (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  sprintf(dest, "R%d", 16 + (opcode & 0xf));
-}
-
-
-static void reg_movw_d PARAMS ((u16, char *));
-
-static void
-reg_movw_d (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  sprintf(dest, "R%d", 2 * ((opcode >> 4) & 0xf));
-}
-
-
-static void reg_movw_r PARAMS ((u16, char *));
-
-static void
-reg_movw_r (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  sprintf(dest, "R%d", 2 * (opcode & 0xf));
-}
-
-
-static void lit404 PARAMS ((u16, char *));
-
-static void
-lit404 (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  opcode = ((opcode & 0xf00) >> 4) | (opcode & 0xf);
-  sprintf(dest, "0x%02X", opcode);
-}
-
-
-static void lit204 PARAMS ((u16, char *));
-
-static void
-lit204 (opcode, dest)
-     u16 opcode;
-     char *dest;
-{
-  opcode = ((opcode & 0xc0) >> 2) | (opcode & 0xf);
-  sprintf(dest, "0x%02X", opcode);
-}
-
-
-static void add0fff PARAMS ((u16, char *, int));
-
-static void
-add0fff (op, dest, pc)
-     u16 op;
-     char *dest;
-     int pc;
-{
-  int rel_addr = (((op & 0xfff) ^ 0x800) - 0x800) * 2;
-  sprintf(dest, ".%+-8d ; 0x%06X", rel_addr, pc + 2 + rel_addr);
-}
-
-
-static void add03f8 PARAMS ((u16, char *, int));
-
-static void
-add03f8 (op, dest, pc)
-     u16 op;
-     char *dest;
-     int pc;
-{
-  int rel_addr = ((((op >> 3) & 0x7f) ^ 0x40) - 0x40) * 2;
-  sprintf(dest, ".%+-8d ; 0x%06X", rel_addr, pc + 2 + rel_addr);
-}
-
-
-static u16 avrdis_opcode PARAMS ((bfd_vma, disassemble_info *));
-
-static u16
+static unsigned short
 avrdis_opcode (addr, info)
      bfd_vma addr;
      disassemble_info *info;
@@ -255,402 +232,87 @@ print_insn_avr(addr, info)
      bfd_vma addr;
      disassemble_info *info;
 {
-  char rr[200];
-  char rd[200];
-  u16 opcode;
+  unsigned int insn, insn2;
+  struct avr_opcodes_s *opcode;
   void *stream = info->stream;
   fprintf_ftype prin = info->fprintf_func;
+  static int initialized;
   int cmd_len = 2;
 
-  opcode = avrdis_opcode (addr, info);
-
-  if (IFMASK(0xd000, 0x8000))
+  if (!initialized)
     {
-      char letter;
-      reg50(opcode, rd);
-      dispLDD(opcode, rr);
-      if (opcode & 8)
-	letter = 'Y';
-      else
-	letter = 'Z';
-      if (opcode & 0x0200)
-	(*prin) (stream, "    STD     %c+%s,%s", letter, rr, rd);
-      else
-	(*prin) (stream, "    LDD     %s,%c+%s", rd, letter, rr);
+      initialized = 1;
+      
+      for (opcode = avr_opcodes; opcode->name; opcode++)
+	{
+	  char * s;
+	  unsigned int bin = 0;
+	  unsigned int mask = 0;
+	
+	  for (s = opcode->opcode; *s; ++s)
+	    {
+	      bin <<= 1;
+	      mask <<= 1;
+	      bin |= (*s == '1');
+	      mask |= (*s == '1' || *s == '0');
+	    }
+	  assert (s - opcode->opcode == 16);
+	  assert (opcode->bin_opcode == bin);
+	  opcode->bin_mask = mask;
+	}
+    }
+
+  insn = avrdis_opcode (addr, info);
+  
+  for (opcode = avr_opcodes; opcode->name; opcode++)
+    {
+      if ((insn & opcode->bin_mask) == opcode->bin_opcode)
+	break;
+    }
+  
+  if (opcode->name)
+    {
+      char op1[20], op2[20], comment1[40], comment2[40];
+      char *op = opcode->constraints;
+
+      op1[0] = 0;
+      op2[0] = 0;
+      comment1[0] = 0;
+      comment2[0] = 0;
+
+      if (opcode->insn_size > 1)
+	{
+	  insn2 = avrdis_opcode (addr + 2, info);
+	  cmd_len = 4;
+	}
+
+      if (*op && *op != '?')
+	{
+	  int regs = REGISTER_P (*op);
+
+	  avr_operand (insn, insn2, addr, *op, op1, comment1, 0);
+
+	  if (*(++op) == ',')
+	    avr_operand (insn, insn2, addr, *(++op), op2,
+			 *comment1 ? comment2 : comment1, regs);
+	}
+
+      (*prin) (stream, "    %-8s", opcode->name);
+
+      if (*op1)
+	(*prin) (stream, "%s", op1);
+
+      if (*op2)
+	(*prin) (stream, ", %s", op2);
+
+      if (*comment1)
+	(*prin) (stream, "\t; %s", comment1);
+
+      if (*comment2)
+	(*prin) (stream, " %s", comment2);
     }
   else
-    {
-      switch (opcode & 0xf000)
-        {
-        case 0x0000:
-	  {
-	    reg50(opcode, rd);
-	    reg104(opcode, rr);
-	    switch (opcode & 0x0c00)
-	      {
-	      case 0x0000:
-		switch (opcode & 0x0300)
-		  {
-		  case 0x0000:
-		    (*prin) (stream, "    NOP");
-		    break;
-		  case 0x0100:
-		    reg_movw_d(opcode, rd);
-		    reg_movw_r(opcode, rr);
-		    (*prin) (stream, "    MOVW    %s,%s", rd, rr);
-		    break;
-		  case 0x0200:
-		    reg_muls_d(opcode, rd);
-		    reg_muls_r(opcode, rr);
-		    (*prin) (stream, "    MULS    %s,%s", rd, rr);
-		    break;
-		  case 0x0300:
-		    reg_fmul_d(opcode, rd);
-		    reg_fmul_r(opcode, rr);
-		    if (IFMASK(0x88, 0))
-		      (*prin) (stream, "    MULSU   %s,%s", rd, rr);
-		    else if (IFMASK(0x88, 8))
-		      (*prin) (stream, "    FMUL    %s,%s", rd, rr);
-		    else if (IFMASK(0x88, 0x80))
-		      (*prin) (stream, "    FMULS   %s,%s", rd, rr);
-		    else
-		      (*prin) (stream, "    FMULSU  %s,%s", rd, rr);
-		  }
-		break;
-	      case 0x0400:
-		(*prin) (stream, "    CPC     %s,%s", rd, rr);
-		break;
-	      case 0x0800:
-		(*prin) (stream, "    SBC     %s,%s", rd, rr);
-		break;
-	      case 0x0c00:
-		(*prin) (stream, "    ADD     %s,%s", rd, rr);
-		break;
-	      }
-	  }
-	  break;
-        case 0x1000:
-	  {
-	    reg50(opcode, rd);
-	    reg104(opcode, rr);
-	    switch (opcode & 0x0c00)
-	      {
-	      case 0x0000:
-		(*prin) (stream, "    CPSE    %s,%s", rd, rr);
-		break;
-	      case 0x0400:
-		(*prin) (stream, "    CP      %s,%s", rd, rr);
-		break;
-	      case 0x0800:
-		(*prin) (stream, "    SUB     %s,%s", rd, rr);
-		break;
-	      case 0x0c00:
-		(*prin) (stream, "    ADC     %s,%s", rd, rr);
-		break;
-	      }
-	  }
-	  break;
-        case 0x2000:
-	  {
-	    reg50(opcode, rd);
-	    reg104(opcode, rr);
-	    switch (opcode & 0x0c00)
-	      {
-	      case 0x0000:
-		(*prin) (stream, "    AND     %s,%s", rd, rr);
-		break;
-	      case 0x0400:
-		(*prin) (stream, "    EOR     %s,%s", rd, rr);
-		break;
-	      case 0x0800:
-		(*prin) (stream, "    OR      %s,%s", rd, rr);
-		break;
-	      case 0x0c00:
-		(*prin) (stream, "    MOV     %s,%s", rd, rr);
-		break;
-	      }
-	  }
-	  break;
-        case 0x3000:
-	  {
-	    reg40(opcode, rd);
-	    lit404(opcode, rr);
-	    (*prin) (stream, "    CPI     %s,%s", rd, rr);
-	  }
-	  break;
-        case 0x4000:
-	  {
-	    reg40(opcode, rd);
-	    lit404(opcode, rr);
-	    (*prin) (stream, "    SBCI    %s,%s", rd, rr);
-	  }
-	  break;
-        case 0x5000:
-	  {
-	    reg40(opcode, rd);
-	    lit404(opcode, rr);
-	    (*prin) (stream, "    SUBI    %s,%s", rd, rr);
-	  }
-	  break;
-        case 0x6000:
-	  {
-	    reg40(opcode, rd);
-	    lit404(opcode, rr);
-	    (*prin) (stream, "    ORI     %s,%s", rd, rr);
-	  }
-	  break;
-        case 0x7000:
-	  {
-	    reg40(opcode, rd);
-	    lit404(opcode, rr);
-	    (*prin) (stream, "    ANDI    %s,%s", rd, rr);
-	  }
-	  break;
-        case 0x9000:
-	  {
-	    switch (opcode & 0x0e00)
-	      {
-	      case 0x0000:
-		{
-		  reg50(opcode, rd);
-		  switch (opcode & 0xf)
-		    {
-		    case 0x0:
-		      {
-			(*prin) (stream, "    LDS     %s,0x%04X", rd,
-				 avrdis_opcode(addr + 2, info));
-			cmd_len = 4;
-		      }
-		      break;
-		    case 0x1:
-		      (*prin) (stream, "    LD      %s,Z+", rd);
-		      break;
-		    case 0x2:
-		      (*prin) (stream, "    LD      %s,-Z", rd);
-		      break;
-		    case 0x4:
-		      (*prin) (stream, "    LPM     %s,Z", rd);
-		      break;
-		    case 0x5:
-		      (*prin) (stream, "    LPM     %s,Z+", rd);
-		      break;
-		    case 0x6:
-		      (*prin) (stream, "    ELPM    %s,Z", rd);
-		      break;
-		    case 0x7:
-		      (*prin) (stream, "    ELPM    %s,Z+", rd);
-		      break;
-		    case 0x9:
-		      (*prin) (stream, "    LD      %s,Y+", rd);
-		      break;
-		    case 0xa:
-		      (*prin) (stream, "    LD      %s,-Y", rd);
-		      break;
-		    case 0xc:
-		      (*prin) (stream, "    LD      %s,X", rd);
-		      break;
-		    case 0xd:
-		      (*prin) (stream, "    LD      %s,X+", rd);
-		      break;
-		    case 0xe:
-		      (*prin) (stream, "    LD      %s,-X", rd);
-		      break;
-		    case 0xf:
-		      (*prin) (stream, "    POP     %s", rd);
-		      break;
-		    default:
-		      (*prin) (stream, "    ????");
-		      break;
-		    }
-		}
-		break;
-	      case 0x0200:
-		{
-		  reg50(opcode, rd);
-		  switch (opcode & 0xf)
-		    {
-		    case 0x0:
-		      {
-			(*prin) (stream, "    STS     0x%04X,%s",
-				 avrdis_opcode(addr + 2, info), rd);
-			cmd_len = 4;
-		      }
-		      break;
-		    case 0x1:
-		      (*prin) (stream, "    ST      Z+,%s", rd);
-		      break;
-		    case 0x2:
-		      (*prin) (stream, "    ST      -Z,%s", rd);
-		      break;
-		    case 0x9:
-		      (*prin) (stream, "    ST      Y+,%s", rd);
-		      break;
-		    case 0xa:
-		      (*prin) (stream, "    ST      -Y,%s", rd);
-		      break;
-		    case 0xc:
-		      (*prin) (stream, "    ST      X,%s", rd);
-		      break;
-		    case 0xd:
-		      (*prin) (stream, "    ST      X+,%s", rd);
-		      break;
-		    case 0xe:
-		      (*prin) (stream, "    ST      -X,%s", rd);
-		      break;
-		    case 0xf:
-		      (*prin) (stream, "    PUSH    %s", rd);
-		      break;
-		    default:
-		      (*prin) (stream, "    ????");
-		      break;
-		    }
-		}
-		break;
-	      case 0x0400:
-		{
-		  if (IFMASK(0x020c, 0x000c))
-		    {
-		      u32 k = ((opcode & 0x01f0) >> 3) | (opcode & 1);
-		      k = (k << 16) | avrdis_opcode(addr + 2, info);
-		      if (opcode & 0x0002)
-			(*prin) (stream, "    CALL    0x%06X", k*2);
-		      else
-			(*prin) (stream, "    JMP     0x%06X", k*2);
-		      cmd_len = 4;
-		    }
-		  else if (IFMASK(0x010f, 0x0008))
-		    {
-		      int sf = (opcode & 0x70) >> 4;
-		      if (opcode & 0x0080)
-			(*prin) (stream, "    CL%c", SREG_flags[sf]);
-		      else
-			(*prin) (stream, "    SE%c", SREG_flags[sf]);
-		    }
-		  else if (IFMASK(0x001f, 0x0009))
-		    {
-		      if (opcode & 0x0100)
-			(*prin) (stream, "    ICALL");
-		      else
-			(*prin) (stream, "    IJMP");
-		    }
-		  else if (IFMASK(0x001f, 0x0019))
-		    {
-		      if (opcode & 0x0100)
-			(*prin) (stream, "    EICALL");
-		      else
-			(*prin) (stream, "    EIJMP");
-		    }
-		  else if (IFMASK(0x010f, 0x0108))
-		    {
-		      if (IFMASK(0x0090, 0x0000))
-			(*prin) (stream, "    RET");
-		      else if (IFMASK(0x0090, 0x0010))
-			(*prin) (stream, "    RETI");
-		      else if (IFMASK(0x00e0, 0x0080))
-			(*prin) (stream, "    SLEEP");
-		      else if (IFMASK(0x00e0, 0x00a0))
-			(*prin) (stream, "    WDR");
-		      else if (IFMASK(0x00f0, 0x00c0))
-			(*prin) (stream, "    LPM");
-		      else if (IFMASK(0x00f0, 0x00d0))
-			(*prin) (stream, "    ELPM");
-		      else if (IFMASK(0x00f0, 0x00e0))
-			(*prin) (stream, "    SPM");
-		      else if (IFMASK(0x00f0, 0x00f0))
-			(*prin) (stream, "    ESPM");
-		      else
-			(*prin) (stream, "    ????");
-		    }
-		  else
-		    {
-		      const char* p;
-		      reg50(opcode, rd);
-		      p = sect94[opcode & 0xf];
-		      if (!p)
-			p = "????";
-		      (*prin) (stream, "    %-8s%s", p, rd);
-		    }
-		}
-		break;
-	      case 0x0600:
-		{
-		  if (opcode & 0x0200)
-		    {
-		      lit204(opcode, rd);
-		      reg20w(opcode, rr);
-		      if (opcode & 0x0100)
-			(*prin) (stream, "    SBIW    %s,%s", rr, rd);
-		      else
-			(*prin) (stream, "    ADIW    %s,%s", rr, rd);
-		    }
-		}
-		break;
-	      case 0x0800:
-	      case 0x0a00:
-		{
-		  (*prin) (stream, "    %-8s0x%02X,%d",
-			   sect98[(opcode & 0x0300) >> 8],
-			   (opcode & 0xf8) >> 3,
-			   opcode & 7);
-		}
-		break;
-	      default:
-		{
-		  reg50(opcode, rd);
-		  reg104(opcode, rr);
-		  (*prin) (stream, "    MUL     %s,%s", rd, rr);
-		}
-	      }
-	  }
-	  break;
-        case 0xb000:
-	  {
-	    reg50(opcode, rd);
-	    regPP(opcode, rr);
-	    if (opcode & 0x0800)
-	      (*prin) (stream, "    OUT     %s,%s", rr, rd);
-	    else
-	      (*prin) (stream, "    IN      %s,%s", rd, rr);
-	  }
-	  break;
-        case 0xc000:
-	  {
-	    add0fff(opcode, rd, addr);
-	    (*prin) (stream, "    RJMP    %s", rd);
-	  }
-	  break;
-        case 0xd000:
-	  {
-	    add0fff(opcode, rd, addr);
-	    (*prin) (stream, "    RCALL   %s", rd);
-	  }
-	  break;
-        case 0xe000:
-	  {
-	    reg40(opcode, rd);
-	    lit404(opcode, rr);
-	    (*prin) (stream, "    LDI     %s,%s", rd, rr);
-	  }
-	  break;
-        case 0xf000:
-	  {
-	    if (opcode & 0x0800)
-	      {
-		reg50(opcode, rd);
-		(*prin) (stream, "    %-8s%s,%d",
-			 last4[(opcode & 0x0600) >> 9],
-			 rd, opcode & 7);
-	      }
-	    else
-	      {
-		char* p;
-		add03f8(opcode, rd, addr);
-		p = branchs[((opcode & 0x0400) >> 7) | (opcode & 7)];
-		(*prin) (stream, "    %-8s%s", p, rd);
-	      }
-	  }
-	  break;
-        }
-    }
+   (*prin) (stream, ".word 0x%04x\t; ????", insn);
+  
   return cmd_len;
 }

@@ -1,3 +1,7 @@
+Wed Jun  7 21:36:45 2000  Denis Chertykov  <denisc@overta.ru>
+
+	* avr-dis.c: completely rewritten.
+
 2000-06-02  Kazu Hirata  <kazu@hxi.com>=0A=
 
 	* h8300-dis.c: Follow the GNU coding style.
