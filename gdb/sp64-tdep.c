@@ -23,7 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "obstack.h"
 #include "target.h"
-#include "ieee-float.h"
 
 /*#include "symfile.h" /* for objfiles.h */
 /*#include "objfiles.h" /* for find_pc_section */
