@@ -1,3 +1,8 @@
+2003-08-26  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-tdep.c (ia64_convert_from_func_addr): New function.
+	(ia64_gdbarch_init): Call set_gdbarch_convert_from_func_addr(). 
+
 2003-08-26  Jason Merrill  <jason@redhat.com>
 
 	* dwarf2read.c (dwarf_attr_name): Move DW_AT_MIPS_linkage_name

@@ -2281,6 +2281,23 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
   return fdesc; 
 }
 
+/* Use the following routine when printing out function pointers
+   so the user can see the function address rather than just the
+   function descriptor.  */
+static CORE_ADDR
+ia64_convert_from_func_ptr_addr (CORE_ADDR addr)
+{
+  struct obj_section *s;
+
+  s = find_pc_section (addr);
+
+  /* check if ADDR points to a function descriptor.  */
+  if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)
+    return read_memory_unsigned_integer (addr, 8);
+
+  return addr;
+}
+
 static CORE_ADDR
 ia64_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
@@ -2684,6 +2701,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     gdbarch, ia64_remote_translate_xfer_address);
 
   set_gdbarch_print_insn (gdbarch, ia64_print_insn);
+  set_gdbarch_convert_from_func_ptr_addr (gdbarch, ia64_convert_from_func_ptr_addr);
 
   return gdbarch;
 }
