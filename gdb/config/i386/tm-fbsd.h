@@ -24,6 +24,14 @@
 #define HAVE_I387_REGS
 #include "i386/tm-i386.h"
 
+/* FreeBSD/ELF uses stabs-in-ELF with the DWARF register numbering
+   scheme by default, so we must redefine STAB_REG_TO_REGNUM.  This
+   messes up the floating-point registers for a.out, but there is not
+   much we can do about that.  */
+
+#undef STAB_REG_TO_REGNUM
+#define STAB_REG_TO_REGNUM(reg) i386_dwarf_reg_to_regnum ((reg))
+
 /* FreeBSD uses the old gcc convention for struct returns.  */
 
 #define USE_STRUCT_CONVENTION(gcc_p, type) \

@@ -59,6 +59,68 @@ int i386_register_raw_size[MAX_NUM_REGS] = {
 /* i386_register_virtual_size[i] is the size in bytes of the virtual
    type of register i.  */
 int i386_register_virtual_size[MAX_NUM_REGS];
+
+/* Convert stabs register number REG to the appropriate register
+   number used by GDB.  */
+
+int
+i386_stab_reg_to_regnum (int reg)
+{
+  /* This implements what GCC calls the "default" register map.  */
+  if (reg >= 0 && reg <= 7)
+    {
+      /* General registers.  */
+      return reg;
+    }
+  else if (reg >= 12 && reg <= 19)
+    {
+      /* Floating-point registers.  */
+      return reg - 12 + FP0_REGNUM;
+    }
+  else if (reg >= 21 && reg <= 28)
+    {
+      /* SSE registers.  */
+      return reg - 21 + XMM0_REGNUM;
+    }
+  else if (reg >= 29 && reg <= 36)
+    {
+      /* MMX registers.  */
+      /* FIXME: kettenis/2001-07-28: Should we have the MMX registers
+         as pseudo-registers?  */
+      return reg - 29 + FP0_REGNUM;
+    }
+
+  /* This will hopefully provoke a warning.  */
+  return NUM_REGS + NUM_PSEUDO_REGS;
+}
+
+/* Convert Dwarf register number REG to the appropriate register
+   number used by GDB.  */
+
+int
+i386_dwarf_reg_to_regnum (int reg)
+{
+  /* The DWARF register numbering includes %eip and %eflags, and
+     numbers the floating point registers differently.  */
+  if (reg >= 0 && reg <= 9)
+    {
+      /* General registers.  */
+      return reg;
+    }
+  else if (reg >= 11 && reg <= 18)
+    {
+      /* Floating-point registers.  */
+      return reg - 11 + FP0_REGNUM;
+    }
+  else if (reg >= 21)
+    {
+      /* The SSE and MMX registers have identical numbers as in stabs.  */
+      return i386_stab_reg_to_regnum (reg);
+    }
+
+  /* This will hopefully provoke a warning.  */
+  return NUM_REGS + NUM_PSEUDO_REGS;
+}
 
 
 /* This is the variable that is set with "set disassembly-flavor", and

@@ -1,5 +1,15 @@
 2001-07-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-i386.h (STAB_REG_TO_REGNUM, SDB_REG_TO_REGNUM,
+	DWARF_REG_TO_REGNUM, DWARF2_REG_TO_REGNUM): New defines.
+	(i386_stab_reg_to_regnum, i386_dwarf_reg_to_regnum): New
+	prototypes.
+	* config/i386/tm-fbsd.h, config/i386/tm-i386gnu.h,
+	config/i386/tm-linux.h (STAB_REG_TO_REGNUM): Redefine to call
+	i386_dwarf_reg_to_regnum.
+	* i386-tdep.c (i386_stab_reg_to_regnum, i386_dwarf_reg_to_regnum):
+	New functions.
+
 	* i386-tdep.c: Include "gdb_assert.h"
 	(i386_register_convert_to_virtual): Fix such that it can handle
 	conversion to any floating-point type.  Assert that we are dealing
