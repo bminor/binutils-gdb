@@ -52,11 +52,6 @@ if $tracelevel then {
         }
 
 
-if { ![istarget "hppa*-hp-hpux*"] } {
-    #skip all these tests for now (FIXME)
-    continue
-}
-
 global usestubs
 
 #
@@ -379,7 +374,7 @@ gdb_expect {
     -re "^p 'a\\\x07$" {
 	send_gdb "\t"
 	gdb_expect {
-	    -re "a64l.*atol.*$gdb_prompt p .a$" {
+	    -re "a64l.*argv.*$gdb_prompt p .a$" {
 		send_gdb "\n"
 		gdb_expect {
 		    -re "Invalid character constant\\..*$gdb_prompt $" {
@@ -439,7 +434,7 @@ gdb_expect {
     -re "^p b-a\\\x07$" {
 	send_gdb "\t"
 	gdb_expect {
-	    -re "a64l.*atol.*$gdb_prompt p b-a$" {
+	    -re "a64l.*argv.*$gdb_prompt p b-a$" {
 		send_gdb "\n"
 		gdb_expect {
 		    -re "No symbol \"b\" in current context\\..*$gdb_prompt $" {
@@ -533,10 +528,10 @@ gdb_expect  {
         }
 
 
-send_gdb "file ${srcdir}/gdb.base/self\t"
+send_gdb "file ${srcdir}/gdb.base/compl\t"
 sleep 1
 gdb_expect  {
-        -re "^file ${srcdir}/gdb.base/.*'selftest\\.exp' $"\
+        -re "^file ${srcdir}/gdb.base/completion\\.exp $"\
             { send_gdb "\n"
               gdb_expect {
                       -re "\r\nA program is being debugged already\\.  Kill it\\? \\(y or n\\) $"
@@ -544,19 +539,18 @@ gdb_expect  {
                       { send_gdb "n\n"
                         gdb_expect {
                                 -re "\r\nProgram not killed\\.\r\n$gdb_prompt $"\
-                                        { pass "complete 'file gdb.base/self'"}
-                                -re ".*$gdb_prompt $" { fail "complete 'file gdb.base/self'"}
-                                timeout           {fail "(timeout) complete 'file gdb.base/self'"}
+                                        { pass "complete 'file gdb.base/compl'"}
+                                -re ".*$gdb_prompt $" { fail "complete 'file gdb.base/compl'"}
+                                timeout           {fail "(timeout) complete 'file gdb.base/compl'"}
                                }
                       }
-                      -re ".*$gdb_prompt $" { fail "complete 'file gdb.base/self'"}
-                      timeout           {fail "(timeout) complete 'file gdb.base/self'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'file gdb.base/compl'"}
+                      timeout           {fail "(timeout) complete 'file gdb.base/compl'"}
                      }
             }
-        -re ".*$gdb_prompt $"       { fail "complete 'file gdb.base/self'" }
-        timeout         { fail "(timeout) complete 'file gdb.base/self'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'file gdb.base/compl'" }
+        timeout         { fail "(timeout) complete 'file gdb.base/compl'" }
         }
-
 
 send_gdb "info func mark\t"
 sleep 1
@@ -569,7 +563,7 @@ gdb_expect  {
                       -re "marker1.*$gdb_prompt info func marker$"\
                       { send_gdb "\n"
                         gdb_expect {
-                                -re "All functions matching regular expression \"marker\":\r\n\r\nFile.*break.c:\r\nint marker1\\(.*\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long\\);\r\n$gdb_prompt $"\
+                                -re "All functions matching regular expression \"marker\":\r\n\r\nFile.*break.c:\r\nint marker1\\(\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long int\\);\r\n$gdb_prompt $"\
                                                   { pass "complete 'info func mar'"}
                                 -re ".*$gdb_prompt $" { fail "complete 'info func mar'"}
                                 timeout           {fail "(timeout) complete 'info func mar'"}
@@ -590,7 +584,7 @@ gdb_expect  {
         -re "ask.*child.*parent.*$gdb_prompt set follow-fork-mode $"\
             { send_gdb "\n"
               gdb_expect {
-                      -re "Requires an argument.*parent.*child.*ask.*$gdb_prompt $"\
+                      -re "Requires an argument.*ask.*child.*parent.*$gdb_prompt $"\
                                         { pass "complete 'set follow-fork-mode'"}
                       -re "Ambiguous item \"\"\\..*$gdb_prompt $"\
                                         { pass "complete 'set follow-fork-mode'"}
