@@ -104,7 +104,7 @@ typedef enum mode_type {
 #define MAX_MODES ((int) MODE_MAX)
 
 /* Return name of instruction numbered INSN.  */
-#define INSN_NAME(insn) (m32r_cgen_insn_table_entries[insn].syntax.name)
+#define INSN_NAME(insn) (m32r_cgen_insn_table_entries[insn].name)
 
 /* Enum declaration for model types.  */
 typedef enum model_type {

@@ -1,8 +1,17 @@
+Fri Jan 16 12:16:56 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* arch-defs.h (INSN_NAME): Fix typo.
+
+Mon Dec 15 23:17:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Thu Dec  4 09:21:05 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-sim.h (MSPR_ADDR): New macro.
 	(m32r_mspr_device): Declare.
-	(struct _devicep: Define.
+	(struct _device): Define.
 	* m32r.c (m32r_mspr_device): New global.
 	(device_{io_{read,write}_buffer,error}): New functions.
 	* mem-ops.h (SETMEM*): Use sim_core_write_map, not read map.
