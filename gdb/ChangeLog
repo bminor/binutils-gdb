@@ -1,3 +1,7 @@
+2001-10-31  Andrew Cagney  <ac131313@redhat.com>
+
+	* remote-vx.c (net_wait): Fix typo from PIDGET change.
+
 2001-10-31  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arm-linux-nat.c: Include <asm/ptrace.h> explicitly.
