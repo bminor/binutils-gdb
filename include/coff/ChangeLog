@@ -1,3 +1,13 @@
+Thu Apr 14 13:00:53 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (RELOC_BITS3_TYPE_BIG): Changed from 0x1e to 0x3e.
+	(RELOC_BITS3_TYPEHI_LITTLE): Define.
+	(RELOC_BITS3_TYPEHI_SH_LITTLE): Define.
+	(MIPS_R_PCREL16): Change value from 8 to 12 to match Irix 4.
+	(MIPS_R_RELHI): Define.
+	(MIPS_R_RELLO): Define.
+	(MIPS_R_SWITCH): Change value from 9 to 22.
+
 Thu Apr  7 14:19:35 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips.h (MIPS_R_SWITCH): Define.
