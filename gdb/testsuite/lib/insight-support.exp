@@ -1,6 +1,6 @@
 # GDB Testsuite Support for Insight.
 #
-# Copyright 2001 Red Hat, Inc.
+# Copyright 2001, 2004 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License (GPL) as published by
@@ -98,6 +98,7 @@ proc gdbtk_start {test} {
   set env(SRCDIR) $abs_srcdir
   set env(GDBTK_VERBOSE) 1
   set env(GDBTK_LOGFILE) [to_tcl_path [file join $objdir gdb.log]]
+  unset -nocomplain env(TCL_LIBRARY)
 
   set err [catch {exec $INSIGHT -nx -q --tclcommand=$test} res]
   if { $err } {
