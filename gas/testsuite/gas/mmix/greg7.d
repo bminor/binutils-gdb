@@ -22,7 +22,7 @@ OFFSET           TYPE              VALUE
 0+a R_MMIX_REG        \.MMIX\.reg_contents
 
 Contents of section \.text:
- 0000 00000000 00000021 232c0004 00000000  .*
+ 0000 00000000 00000021 232c0004           .*
 Contents of section \.data:
 Contents of section \.MMIX\.reg_contents:
  0000 00000000 00000004                    .*

@@ -1,3 +1,13 @@
+2002-07-19  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix/list-pseudoints.l: Adjust for changes in gas section
+	padding.
+	* gas/mmix/greg7.d: Ditto.
+	* gas/mmix/greg8.d: Ditto.
+	* gas/mmix/fb-2.d: Ditto.
+	* gas/mmix/comment-1.d: Ditto.
+	* gas/mmix/byte-1.d: Ditto.
+
 2002-07-17  H.J. Lu <hjl@gnu.org>
 
 	* gas/ia64/dv-branch.d: Updated.

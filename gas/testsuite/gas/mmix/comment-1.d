@@ -2,9 +2,9 @@
 #readelf: -Ssrx1 -x6
 There are 10 section headers, starting at offset 0x...:
 #...
-  \[ 5\] \.MMIX\.spec_data\.4 PROGBITS         0+  0+c8
+  \[ 5\] \.MMIX\.spec_data\.4 PROGBITS         0+  0+c4
        0+  0+           0     0     1
-  \[ 6\] \.MMIX\.reg_content PROGBITS         0+  0+c8
+  \[ 6\] \.MMIX\.reg_content PROGBITS         0+  0+c4
        0+8  0+   W       0     0     1
 #...
 Relocation section '\.rela\.text' at offset 0x... contains 5 entries:
@@ -39,7 +39,7 @@ Hex dump of section '\.text':
   0x0+50 f9000028 f2290000 fa2a0000 fb00002b .*
   0x0+60 f604002c fe2d0004 00000000 03020104 .*
   0x0+70 0007000c 00000014 00000000 0000001c .*
-  0x0+80 fd221538 00000000                   .*
+  0x0+80 fd221538                            .*
 
 Hex dump of section '\.MMIX\.reg_contents':
   0x0+ 00000000 00000033                   .*
