@@ -1,3 +1,9 @@
+2002-01-21  H.J. Lu <hjl@gnu.org>
+
+	* emulparams/elf32btsmip.sh (SHLIB_TEXT_START_ADDR): Change to
+	0.
+	* emulparams/elf64btsmip.sh (SHLIB_TEXT_START_ADDR): Likewise.
+
 2002-01-18  Andreas Jaeger  <aj@suse.de>
 
 	* ldver.c (ldversion): Update year.
