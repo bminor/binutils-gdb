@@ -1012,8 +1012,6 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
    The list will be deleted eventually.
 
    27210 R_PARISC_SEGREL32
-   1096 R_PARISC_LTOFF_TP14DR
-   982 R_PARISC_LTOFF_TP21L
    791 R_PARISC_GPREL64
    772 R_PARISC_PLTOFF14DR
    386 R_PARISC_PLTOFF21L
@@ -1026,9 +1024,9 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
       break;
 
     /* Random PC relative relocs.  */
-    case R_PARISC_PCREL21L;
-    case R_PARISC_PCREL14R;
-    case R_PARISC_PCREL14F;
+    case R_PARISC_PCREL21L:
+    case R_PARISC_PCREL14R:
+    case R_PARISC_PCREL14F:
     case R_PARISC_PCREL14WR:
     case R_PARISC_PCREL14DR:
     case R_PARISC_PCREL16F:
@@ -1113,6 +1111,14 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_LTOFF_FPTR16F:
     case R_PARISC_LTOFF_FPTR16WF:
     case R_PARISC_LTOFF_FPTR16DF:
+    case R_PARISC_LTOFF_TP21L:
+    case R_PARISC_LTOFF_TP14R:
+    case R_PARISC_LTOFF_TP14F:
+    case R_PARISC_LTOFF_TP14WR:
+    case R_PARISC_LTOFF_TP14DR:
+    case R_PARISC_LTOFF_TP16F:
+    case R_PARISC_LTOFF_TP16WF:
+    case R_PARISC_LTOFF_TP16DF:
       {
 	/* We want the value of the DLT offset for this symbol, not
 	   the symbol's actual address.  */
@@ -1122,12 +1128,16 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	   except that we need different field selectors for the 21bit
 	   version vs the 14bit versions.  */
 	if (r_type == R_PARISC_DLTIND21L
-	    || r_type == R_PARISC_LTOFF_FPTR21L)
+	    || r_type == R_PARISC_LTOFF_FPTR21L
+	    || r_type == R_PARISC_LTOFF_TP21L)
 	  value = hppa_field_adjust (value, addend, e_lrsel);
 	else if (r_type == R_PARISC_DLTIND14F
 		 || r_type == R_PARISC_LTOFF_FPTR16F
 		 || r_type == R_PARISC_LTOFF_FPTR16WF
-		 || r_type == R_PARISC_LTOFF_FPTR16DF)
+		 || r_type == R_PARISC_LTOFF_FPTR16DF
+		 || r_type == R_PARISC_LTOFF_TP16F
+		 || r_type == R_PARISC_LTOFF_TP16WF
+		 || r_type == R_PARISC_LTOFF_TP16DF)
 	  value = hppa_field_adjust (value, addend, e_fsel);
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
@@ -1170,6 +1180,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
       }
 
     case R_PARISC_LTOFF_FPTR64:
+    case R_PARISC_LTOFF_TP64:
       {
 	/* We want the value of the DLT offset for this symbol, not
 	   the symbol's actual address.  */
@@ -1198,7 +1209,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	value -= (offset + input_section->output_offset
 		  + input_section->output_section->vma);
 
-	value += addend
+	value += addend;
 	value -= 8;
 	bfd_put_64 (input_bfd, value, hit_data);
 	return bfd_reloc_ok;
@@ -1216,7 +1227,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	value -= (offset + input_section->output_offset
 		  + input_section->output_section->vma);
 
-	value += addend
+	value += addend;
 	value -= 8;
 	bfd_put_64 (input_bfd, value, hit_data);
 	return bfd_reloc_ok;
@@ -1313,7 +1324,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DLTREL21L:
     case R_PARISC_DLTIND21L:
     case R_PARISC_LTOFF_FPTR21L:
-    case R_PARISC_PCREL21L;
+    case R_PARISC_PCREL21L:
+    case R_PARISC_LTOFF_TP21L:
       {
         int w;
 
@@ -1334,9 +1346,12 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DLTIND14F:
     case R_PARISC_LTOFF_FPTR14R:
     case R_PARISC_LTOFF_FPTR16F:
-    case R_PARISC_PCREL14R;
+    case R_PARISC_PCREL14R:
     case R_PARISC_PCREL14F:
     case R_PARISC_PCREL16F:
+    case R_PARISC_LTOFF_TP14R:
+    case R_PARISC_LTOFF_TP14F:
+    case R_PARISC_LTOFF_TP16F:
       {
         int w;
 
@@ -1357,6 +1372,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_LTOFF_FPTR16DF:
     case R_PARISC_PCREL14DR:
     case R_PARISC_PCREL16DF:
+    case R_PARISC_LTOFF_TP14DR:
+    case R_PARISC_LTOFF_TP16DF:
       {
         int w;
 
@@ -1383,6 +1400,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_LTOFF_FPTR16WF:
     case R_PARISC_PCREL14WR:
     case R_PARISC_PCREL16WF:
+    case R_PARISC_LTOFF_TP14WR:
+    case R_PARISC_LTOFF_TP16WF:
       {
         int w;
 
@@ -1401,6 +1420,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
 
 	return insn | sym_value;
       }
+
 
     default:
       return insn;
