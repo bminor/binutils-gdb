@@ -52,5 +52,8 @@ extern int tui_active_border_attrs;
 
 extern int tui_update_variables ();
 
+/* Update gdb's knowledge of the terminal size.  */
+extern void tui_update_gdb_sizes (void);
+
 #endif
 /*_TUI_WIN_H*/
