@@ -2529,7 +2529,11 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 
       if (pcrel)
 	{
+#ifndef TC_M88K
+	  /* This adjustment is not correct on the m88k, for which the
+	     linker does all the computation.  */
 	  add_number -= md_pcrel_from (fixP);
+#endif
 	  if (add_symbolP == 0)
 	    {
 	      fixP->fx_addsy = &abs_symbol;

@@ -1442,7 +1442,16 @@ long
 md_pcrel_from (fixp)
      fixS *fixp;
 {
-  return fixp->fx_frag->fr_address + fixp->fx_where + 4;
+  switch (fixp->fx_r_type)
+    {
+    case RELOC_PC16:
+      return fixp->fx_frag->fr_address + fixp->fx_where - 2;
+    case RELOC_PC26:
+      return fixp->fx_frag->fr_address + fixp->fx_where;
+    default:
+      abort ();
+    }
+  /*NOTREACHED*/
 }
 
 #endif /* M88KCOFF */

@@ -1,5 +1,11 @@
 Thu Jul 15 11:51:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-coffbfd.c (fixup_segment): If TC_M88K, don't adjust
+	by md_pcrel_from if we are relocating against a symbol (we still
+	need md_pcrel_from for a PC relative relocation within the same
+	file).
+	* config/tc-m88k.c (md_pcrel_from): Corrected return value.
+
 	* Preliminary support for m88k-coff.
 	* configure.in (m88k-*-coff*): New target.  Use coffbfd and
 	m88kcoff.
