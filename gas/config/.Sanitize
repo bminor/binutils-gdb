@@ -63,6 +63,7 @@ ho-vax.h
 ho-vsta.h
 ho-vms.h
 i386coff.mt
+ic960coff.mt
 m68k.mt
 m68kcoff.mt
 m88k-opcode.h
