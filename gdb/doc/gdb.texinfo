@@ -16,13 +16,14 @@ _if__(0)
 THIS IS THE SOURCE PRIOR TO PREPROCESSING.  The full source needs to
 be run through m4 before either tex- or info- formatting: for example,
 _0__
-    m4 pretex.m4 none.m4 m680x0.m4 gdb.texinfo >gdb-680x0.texinfo
+    m4 pretex.m4 none.m4 all.m4 gdb.texinfo >gdb-all.texinfo
 _1__
 will produce (assuming your path finds either GNU m4 >= 0.84, or SysV
 m4; Berkeley won't do) a file suitable for formatting.  See the text in
 "pretex.m4" for a fuller explanation (and the macro definitions).
 
 _fi__(0)
+_include__(gdbVN.m4)
 @tex
 \def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
 \xdef\manvers{\$Revision$}  % For use in headers, footers too
@@ -64,10 +65,10 @@ instead of in the original English.
 @c @smallbook
 @setchapternewpage odd
 _if__(_GENERIC__)
-@settitle Using _GDBN__ (v4.0)
+@settitle Using _GDBN__ (<v>_GDB_VN__)
 _fi__(_GENERIC__)
 _if__(!_GENERIC__)
-@settitle Using _GDBN__ v4.0 (_HOST__)
+@settitle Using _GDBN__ <v>_GDB_VN__ (_HOST__)
 _fi__(!_GENERIC__)
 @iftex
 @finalout
@@ -80,8 +81,8 @@ _if__(!_GENERIC__)
 _fi__(!_GENERIC__)
 @sp 1
 @c Maybe crank this up to "Fourth Edition" when released at FSF
-@c @subtitle Third Edition---_GDBN__ version 4.0
-@subtitle _GDBN__ version 4.0
+@c @subtitle Third Edition---_GDBN__ version _GDB_VN__
+@subtitle _GDBN__ version _GDB_VN__
 @subtitle July 1991
 @author{Richard M. Stallman@qquad @hfill Free Software Foundation}
 @author{Roland H. Pesch@qquad @hfill Cygnus Support}
@@ -118,12 +119,12 @@ instead of in the original English.
 
 @node Top, Summary, (dir), (dir)
 @ifinfo
-This file describes version 4.0 of GDB, the GNU symbolic debugger.
+This file describes version _GDB_VN__ of GDB, the GNU symbolic debugger.
 @end ifinfo
 
 @menu
 * Summary::                     Summary of _GDBN__
-* New Features::                New Features in _GDBN__ version 4.0
+* New Features::                New Features in _GDBN__ version _GDB_VN__
 * Sample Session::              A Sample _GDBN__ Session
 * Invocation::                  Getting In and Out of _GDBN__
 * Commands::                    _GDBN__ Commands
@@ -410,7 +411,7 @@ omitted from this list, we would like to add your names!
 
 So that they may not regard their long labor as thankless, we
 particularly thank those who shepherded GDB through major releases: John
-Gilmore (releases 4.1, 4.0); Jim Kingdon (releases 3.9, 3.5, 3.4, 3.3);
+Gilmore (releases _GDB_VN__, 4.0); Jim Kingdon (releases 3.9, 3.5, 3.4, 3.3);
 and Randy Smith (releases 3.2, 3.1, 3.0).  As major maintainer of GDB
 for some period, each contributed significantly to the structure,
 stability, and capabilities of the entire debugger.
@@ -423,7 +424,7 @@ with significant additional contributions from Per Bothner.  James
 Clark wrote the GNU C++ demangler.  Early work on C++ was by Peter
 TerMaat (who also did much general update work leading to release 3.0).
 
-GDB 4.0 uses the BFD subroutine library to examine multiple
+GDB _GDB_VN__ uses the BFD subroutine library to examine multiple
 object-file formats; BFD was a joint project of V. Gumby
 Henkel-Wallace, Rich Pixley, Steve Chamberlain, and John Gilmore.
 
@@ -534,12 +535,12 @@ of your program, and the latter refer to the state of _GDBN__ itself.
 @xref{Renamed Commands}, for details on what commands were renamed.
 
 @item Shared Libraries
-_GDBN__ 4.0 can debug programs and core files that use SunOS shared
+_GDBN__ _GDB_VN__ can debug programs and core files that use SunOS shared
 libraries.  You can load symbols from a shared library with the command
 @code{sharedlibrary} (@pxref{Files}).
 
 @item Reference Card
-_GDBN__ 4.0 has a reference card; @xref{Formatting Manual} for
+_GDBN__ _GDB_VN__ has a reference card; @xref{Formatting Manual} for
 instructions on printing it.
 
 @item Work in Progress
@@ -4313,7 +4314,7 @@ being set automatically by _GDBN__.
 @node Support,  , Checks, Languages
 @section Supported Languages
 
-_GDBN__ 4.0 supports C, C++, and Modula-2.  The syntax for C and C++ is
+_GDBN__ _GDB_VN__ supports C, C++, and Modula-2.  The syntax for C and C++ is
 so closely related that _GDBN__ does not distinguish the two.  Some
 _GDBN__ features may be used in expressions regardless of the language
 you use: the _GDBN__ @code{@@} and @code{::} operators, and the
@@ -7000,37 +7001,37 @@ of preparing _GDBN__ for installation; you can then use @code{make} to
 build the @code{_GDBP__} program.
 
 The _GDBP__ distribution includes all the source code you need for
-_GDBP__ in a single directory @file{gdb-4.0}.  That directory in turn
+_GDBP__ in a single directory @file{gdb-_GDB_VN__}.  That directory in turn
 contains: 
 
 @table @code
-@item gdb-4.0/configure
+@item gdb-_GDB_VN__/configure
 Overall script for configuring _GDBN__ and all its supporting libraries.
 
-@item gdb-4.0/gdb
+@item gdb-_GDB_VN__/gdb
 the source specific to _GDBN__ itself
 
-@item gdb-4.0/bfd
+@item gdb-_GDB_VN__/bfd
 source for the Binary File Descriptor Library
 
-@item gdb-4.0/include
+@item gdb-_GDB_VN__/include
 GNU include files
 
-@item gdb-4.0/libiberty
+@item gdb-_GDB_VN__/libiberty
 source for the @samp{-liberty} free software library
 
-@item gdb-4.0/readline
+@item gdb-_GDB_VN__/readline
 source for the GNU command-line interface
 @end table
 @noindent
 Each of these directories has its own @code{configure} script, which are
-used by the overall @code{configure} script in @file{gdb-4.0}.
+used by the overall @code{configure} script in @file{gdb-_GDB_VN__}.
 
-It is most convenient to run @code{configure} from the @file{gdb-4.0}
+It is most convenient to run @code{configure} from the @file{gdb-_GDB_VN__}
 directory.  The simplest way to configure and build _GDBN__ is the
 following:
 @example
-cd gdb-4.0
+cd gdb-_GDB_VN__
 ./configure @var{host}
 make
 @end example
@@ -7073,7 +7074,7 @@ subdirectories using the @samp{+subdirs} option (abbreviated
 
 @example
 @group
-cd gdb-4.0
+cd gdb-_GDB_VN__
 ./configure +sub sun4
 cd Host-sparc-sun-sunos4/Target-sparc-sun-sunos4
 make
@@ -7104,37 +7105,37 @@ If you have @file{Host-@var{host}/Target-@var{target}} subdirectories,
 run @code{make} in those subdirectories.  
 
 Each @code{configure} and @code{Makefile} under each source directory
-runs recursively, so that typing @code{make} in @file{gdb-4.0} (or in a
-@file{gdb-4.0/Host-@var{host}/Target-@var{target}} subdirectory)
+runs recursively, so that typing @code{make} in @file{gdb-_GDB_VN__} (or in a
+@file{gdb-_GDB_VN__/Host-@var{host}/Target-@var{target}} subdirectory)
 builds all the required libraries, then _GDBN__.@refill
 
-If you run @code{configure} from a directory (such as @file{gdb-4.0}) that
+If you run @code{configure} from a directory (such as @file{gdb-_GDB_VN__}) that
 contains source directories for multiple libraries or programs,
 @code{configure} creates the @file{Host-@var{host}/Target-@var{target}}
 subdirectories in each library or program's source directory.  For
 example, typing:
 @example
-cd gdb-4.0
+cd gdb-_GDB_VN__
 configure sun4 +target=vxworks960
 @end example
 @noindent
 creates the following directories:
 @smallexample
-gdb-4.0/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
-gdb-4.0/bfd/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
-gdb-4.0/gdb/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
-gdb-4.0/libiberty/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
-gdb-4.0/readline/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
+gdb-_GDB_VN__/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
+gdb-_GDB_VN__/bfd/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
+gdb-_GDB_VN__/gdb/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
+gdb-_GDB_VN__/libiberty/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
+gdb-_GDB_VN__/readline/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
 @end smallexample
 @noindent
 The @code{Makefile} in
 @smallexample
-gdb-4.0/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
+gdb-_GDB_VN__/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
 @end smallexample
 @noindent
 will @code{cd} to the appropriate lower-level directories, for example:
 @smallexample
-gdb-4.0/bfd/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
+gdb-_GDB_VN__/bfd/Host-sparc-sun-sunos4/Target-i960-wrs-vxworks
 @end smallexample
 @noindent
 building each in turn.
@@ -7166,7 +7167,7 @@ vendor is @samp{sun}, and the operating system is @samp{sunos4}.
 @end iftex
 
 The following table shows all the architectures, hosts, and OS prefixes
-that @code{configure} recognizes in _GDBN__ 4.0.  Entries in the ``OS
+that @code{configure} recognizes in _GDBN__ _GDB_VN__.  Entries in the ``OS
 prefix'' column ending in a @samp{*} may be followed by a release number.
 
 @ifinfo
@@ -7249,7 +7250,7 @@ ARCHITECTURE  VENDOR        OS prefix
 untested. 
 @end quotation
 
-The @code{configure} script accompanying _GDBN__ 4.0 does not provide
+The @code{configure} script accompanying _GDBN__ _GDB_VN__ does not provide
 any query facility to list all supported host and target names or
 aliases.  @code{configure} calls the Bourne shell script
 @code{config.sub} to map abbreviations to full names; you can read the
@@ -7342,8 +7343,8 @@ options that affect _GDBN__ or its supporting libraries.
 @node Formatting Manual,  , configure Options, Installing _GDBN__
 @section Formatting this Manual
 
-The _GDBN__ 4.0 release includes the Info version of this manual already
-formatted: the main Info file is @file{gdb-4.0/gdb/gdb.info}, and it
+The _GDBN__ _GDB_VN__ release includes the Info version of this manual already
+formatted: the main Info file is @file{gdb-_GDB_VN__/gdb/gdb.info}, and it
 refers to subordinate files matching @samp{gdb.info*} in the same
 directory.
 
@@ -7351,7 +7352,7 @@ If you want to make these Info files yourself from the _GDBN__ manual's
 source, you need the GNU @code{makeinfo} program.  Once you have it, you
 can type
 @example
-cd gdb-4.0/gdb
+cd gdb-_GDB_VN__/gdb
 make gdb.info
 @end example
 @noindent
@@ -7365,7 +7366,7 @@ things:
 must be installed on your system and available through your execution
 path.
 @item 
-@file{gdb-4.0/texinfo}: @TeX{} macros defining the GNU
+@file{gdb-_GDB_VN__/texinfo}: @TeX{} macros defining the GNU
 Documentation Format.
 @item
 @emph{A @sc{dvi} output program.}  @TeX{} doesn't actually make marks on
@@ -7377,7 +7378,7 @@ these files; one popular example is @code{dvips}, which can print
 @noindent
 Once you have these things, you can type
 @example
-cd gdb-4.0/gdb
+cd gdb-_GDB_VN__/gdb
 make gdb.dvi
 @end example
 @noindent
@@ -7387,8 +7388,8 @@ method for @TeX{} @sc{dvi} files at your site.
 @cindex _GDBN__ reference card
 @cindex reference card
 You might also want hard copy of the _GDBN__ reference card.  The
-_GDBN__ 4.0 release includes an already-formatted reference card, ready
-for printing on a PostScript printer, as @file{gdb-4.0/gdb/refcard.ps}.
+_GDBN__ _GDB_VN__ release includes an already-formatted reference card, ready
+for printing on a PostScript printer, as @file{gdb-_GDB_VN__/gdb/refcard.ps}.
 It uses the most common PostScript fonts: the Times family, Courier, and
 Symbol.  If you have a PostScript printer you can print the reference
 card by just sending @file{refcard.ps} to the printer.
@@ -7397,7 +7398,7 @@ If you have some other kind of printer, or want to print using Computer
 Modern fonts instead, you can still print the reference card if you have
 @TeX{}.  Format the reference card by typing
 @example
-cd gdb-4.0/gdb
+cd gdb-_GDB_VN__/gdb
 make refcard.dvi
 @end example
 @noindent
