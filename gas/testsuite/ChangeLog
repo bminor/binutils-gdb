@@ -1,3 +1,18 @@
+2001-10-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* gas/mips/mips-gp64-fp32-pic.d: Use 32bit instructions for addresses.
+	* gas/mips/mips-gp64-fp32-pic.s: Likewise.
+	* gas/mips/mips-gp64-fp32.d: Likewise.
+	* gas/mips/mips-gp64-fp32.s: Likewise.
+	* gas/mips/mips-gp64-fp64-pic.d: Likewise.
+	* gas/mips/mips-gp64-fp64-pic.s: Likewise.
+	* gas/mips/mips-gp64-fp64.d: Likewise.
+	* gas/mips/mips-gp64-fp64.s: Likewise.
+	* gas/mips/elempic.d: Likewise.
+	* gas/mips/ld.d: Likewise.
+	* gas/mips/uld.d: Likewise.
+	* gas/mips/usd.d: Likewise.
+
 2001-09-29  H.J. Lu  <hjl@gnu.org>
 
 	* gas/i386/i386.exp: Run 64bit tests only for "i*86-*-* and

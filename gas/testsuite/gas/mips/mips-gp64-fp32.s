@@ -15,11 +15,11 @@ func:
 	.set noreorder
 	li	$4, 0x12345678	# 0000 lui	a0,0x1234
 				# 0004 ori	a0,a0,0x5678
-	la	$4, shared	# 0008 daddiu	a0,gp,shared
+	la	$4, shared	# 0008 addiu	a0,gp,shared
 	la	$4, unshared	# 000c lui	a0,hi(unshared)
-				# 0010 daddiu	a0,a0,lo(unshared)
+				# 0010 addiu	a0,a0,lo(unshared)
 	la	$4, end		# 0014 lui	a0,hi(end)
-				# 0018 daddiu	a0,a0,lo(end)
+				# 0018 addiu	a0,a0,lo(end)
 	j	end		# 001c j	end
 	jal	end		# 0020 jal	end
 	lw	$4, shared	# 0024 lw	a0,shared(gp)
@@ -39,13 +39,13 @@ func:
 	sd	$4, unshared	# 005c lui	at,hi(unshared)
 				# 0060 sd	a0,lo(unshared)(at)
 	ulh	$4, unshared	# 0064 lui	at,hi(unshared)
-				# 0068 daddiu	at,at,lo(unshared)
+				# 0068 addiu	at,at,lo(unshared)
 				# 006c lb	a0,0(at)
 				# 0070 lbu	at,1(at)
 				# 0074 sll	a0,a0,8
 				# 0078 or	a0,a0,at
 	ush	$4, unshared	# 007c lui	at,hi(unshared)
-				# 0080 daddiu	at,at,lo(unshared)
+				# 0080 addiu	at,at,lo(unshared)
 				# 0084 sb	a0,1(at)
 				# 0088 srl	a0,a0,8
 				# 008c sb	a0,0(at)
@@ -53,11 +53,11 @@ func:
 				# 0094 sll	a0,a0,8
 				# 0098 or	a0,a0,at
 	ulw	$4, unshared	# 009c lui	at,hi(unshared)
-				# 00a0 daddiu	at,at,lo(unshared)
+				# 00a0 addiu	at,at,lo(unshared)
 				# 00a4 lwl	a0,0(at)
 				# 00a8 lwr	a0,3(at)
 	usw	$4, unshared	# 00ac lui	at,hi(unshared)
-				# 00b0 daddiu	at,at,lo(unshared)
+				# 00b0 addiu	at,at,lo(unshared)
 				# 00b4 swl	a0,0(at)
 				# 00b8 swr	a0,3(at)
 	li.d	$4, 1.0		# 00bc li	a0,0xffc0
@@ -74,15 +74,15 @@ func:
 				# 00e8 sltu	a0,zero,a0
 	move	$4, $5		# 00ec move	a0,a1
 
-	dla	$4, shared	# 00f0 daddiu	a0,gp,shared
+	dla	$4, shared	# 00f0 addiu	a0,gp,shared
 	dla	$4, unshared	# 00f4 lui	a0,hi(unshared)
-				# 00f8 daddiu	a0,a0,lo(unshared)
+				# 00f8 addiu	a0,a0,lo(unshared)
 	uld	$4, unshared	# 00fc lui	at,hi(unshared)
-				# 0100 daddiu	at,at,lo(unshared)
+				# 0100 addiu	at,at,lo(unshared)
 				# 0104 ldl	a0,0(at)
 				# 0108 ldr	a0,7(at)
 	usd	$4, unshared	# 010c lui	at,hi(unshared)
-				# 0110 daddiu	at,at,lo(unshared)
+				# 0110 addiu	at,at,lo(unshared)
 				# 0114 sdl	a0,0(at)
 				# 0118 sdr	a0,7(at)
 
