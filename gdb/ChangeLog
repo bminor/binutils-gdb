@@ -1,3 +1,12 @@
+2002-08-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/pa/tm-hppa.h (hppa_store_return_value): Declare.
+	(hppa_value_returned_from_stack): Declare.
+	(hppa_extract_return_value): Declare.
+	* config/pa/hppa.mt: New file.
+	* configure.tgt: Recognize hppa*-*-*.
+	* MAINTAINERS: Change HPPA target to hppa-elf.  Still broken.
+
 2002-08-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-sol2-tdep.c (_initialize_i386_sol2_tdep): Fix typo in

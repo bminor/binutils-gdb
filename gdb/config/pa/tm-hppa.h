@@ -310,6 +310,7 @@ extern void pa_do_strcat_registers_info (int, int, struct ui_file *, enum precis
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
+void hppa_extract_return_value (struct type *type, char *regbuf, char *valbuf);
 #define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   hppa_extract_return_value (TYPE, REGBUF, VALBUF);
 
@@ -330,6 +331,8 @@ extern use_struct_convention_fn hppa_use_struct_convention;
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 
+
+extern void hppa_store_return_value (struct type *type, char *valbuf);
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   hppa_store_return_value (TYPE, VALBUF);
 
@@ -350,6 +353,8 @@ extern use_struct_convention_fn hppa_use_struct_convention;
    specified in the calling convention doc. As far as I know, the only
    way to get the return value is to have the caller tell us where it
    told the callee to put it, rather than have the callee tell us.  */
+struct value *hppa_value_returned_from_stack (register struct type *valtype,
+					      CORE_ADDR addr);
 #define VALUE_RETURNED_FROM_STACK(valtype,addr) \
   hppa_value_returned_from_stack (valtype, addr)
 
