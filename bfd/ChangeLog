@@ -1,3 +1,8 @@
+Mon Feb  9 19:40:59 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_store_addend_in_insn): Fix another
+	LO16/HI16S bug and improve comments about what is going on.
+
 Sat Feb  7 15:27:03 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure, aclocal.m4: Rebuild with new libtool.

@@ -713,107 +713,158 @@ v850_elf_store_addend_in_insn (abfd, r_type, addend, address, replace)
     case R_V850_LO16:
       /* Calculate the sum of the value stored in the instruction and the
 	 addend and check for overflow from the low 16 bits into the high
-	 16 bits.  This can occur if the computation sets the 16th bit when
-	 before it was clear, since the 16th bit will be sign extended into
-	 the high part, thus reducing its value by one, but since the 16th bit
-	 was originally clear, the previous R_V850_HI16_S relocation will not
-	 have added in an additional 1 to the high part to compensate for this
-	 effect.  Overflow can also occur if the compuation carries into the
-	 17th bit and it also results in the 16th bit having the same value as
-	 the 16th bit of the original value.   What happens is that the
-	 R_V850_HI16_S relocation will have already examined the 16th bit of
-	 the original value and added 1 to the high part if the bit is set.
-	 This compensates for the sign extension of 16th bit of the result of
-	 the computation.  But now there is a carry into the 17th bit, and this
-	 has not been allowed for.  Note - there is no need to change anything
-	 if a carry occurs, and the 16th bit changes its value, (this can only
-	 happen if the bit was set in the original value, but is clear in the
-	 result of the computation), as the R_V850_HI16_S relocation will have
-	 already added in 1 to the high part for us.  Here are some examples:
+	 16 bits.  The assembler has already done some of this:  If the
+	 value stored in the instruction has its 15th bit set, then the
+	 assembler will have added 1 to the value stored in the associated
+	 HI16S reloc.  So for example, these relocations:
 
-	 original value = 0x12345
-	 addend         = 0x01234
-	                  -------
-			  0x13579  => R_V850_HI16_S stores 0x0001
-			              R_V850_LO16   stores 0x3579
-				                    
-				      This is OK.
+	     movhi hi( fred ), r0, r1
+	     movea lo( fred ), r1, r1
 
-	 original value = 0x12345
-	 addend         = 0x07000
-	                  -------
-			  0x19345  => R_V850_HI16_S stores 0x0001
-			              R_V850_LO16   stores 0x9345
+	 will store 0 in the value fields for the MOVHI and MOVEA instructions
+	 and addend will be the address of fred, but for these instructions:
 
-				      but the 0x9345 value gets sign
-				      extended, so the sum becomes:
+	     movhi hi( fred + 0x123456), r0, r1
+	     movea lo( fred + 0x123456), r1, r1
 
-				      0x00010000
-				      0xffff9345
-				      ----------
-				      0x00009345  which is wrong.
+	 the value stored in the MOVHI instruction will be 0x12 and the value
+	 stored in the MOVEA instruction will be 0x3456.  If however the
+	 instructions were:
 
-				      This is the first example of overflow.
+	     movhi hi( fred + 0x10ffff), r0, r1
+	     movea lo( fred + 0x10ffff), r1, r1
 
-	  original value = 0x18888
-	  addend         = 0x08888
-	                   -------
-			   0x21110 => R_V850_HI16_S stores 0x0002 (because 16th bit of the original value is set)
-			              R_V850_LO16   stores 0x1110
+	 then the value stored in the MOVHI instruction would be 0x11 (not
+	 0x10) and the value stored in the MOVEA instruction would be 0xffff.
+	 Thus (assuming for the moment that the addend is 0), at run time the
+	 MOVHI instruction loads 0x110000 into r1, then the MOVEA instruction
+	 adds 0xffffffff (sign extension!) producing 0x10ffff.  Similarly if
+	 the instructions were:
 
-				      and the sum is now:
+	     movhi hi( fred - 1), r0, r1
+	     movea lo( fred - 1), r1, r1
 
-				      0x00020000
-				      0x00001110
-				      ----------
-				      0x00021110 which is OK.
+	 then 0 is stored in the MOVHI instruction and -1 is stored in the
+	 MOVEA instruction.
 
-	  original value = 0x1ffff
-	  addend         = 0x08888
-	                   -------
-			   0x28887 => R_V850_HI16_S stores 0x0002
-			              R_V850_LO16   stores 0x8887
+	 Overflow can occur if the addition of the value stored in the
+	 instruction plus the addend sets the 15th bit (counting from 0) when
+	 before it was clear.  This is because the 15th bit will be sign
+	 extended into the high part, thus reducing its value by one, but
+	 since the 15th bit was originally clear, the previous HI16S
+	 relocation will not have added in an additional 1 to the high part
+	 to compensate for this effect.  For example:
 
-				      and the sum is now:
+	    movhi hi( fred + 0x123456), r0, r1
+	    movea lo( fred + 0x123456), r1, r1
 
-				      0x00020000
-				      0xffff8887
-				      ----------
-				      0x00018887 which is wrong.
+	 The value stored in HI16S reloc is 0x12, the value stored in the LO16
+	 reloc is 0x3456.  If we assume that the address of fred is 0x00007000
+	 then the relocations become:
 
-				      This is the second example of overflow.
-				      (The 16th bit remains set).
+	   HI16S: 0x0012 + (0x00007000 >> 16)    = 0x12
+	   LO16:  0x3456 + (0x00007000 & 0xffff) = 0xa456
 
-	   original value = 0x15555
-	   addend         = 0x0ffff
-	                    -------
-			    0x25554 => R_V850_HI16_S stores 0x0001
-			               R_V850_LO16   stores 0x5554
+	 but when the instructions are executed, the MOVEA instruction's value
+	 is signed extended, so the sum becomes:
 
-				       the sum is now:
+	      0x00120000
+	    + 0xffffa456
+	    ------------
+	      0x0011a456    but 'fred + 0x123456' = 0x0012a456
 
-				       0x00010000
-				       0x00005554
-				       ----------
-				       0x00015554 which is wrong.
+	 Note that if the 15th bit was set in the value stored in the LO16
+	 reloc, then we do not have to do anything:
 
-				       This is the other form of the second
-				       example of overflow.  (The 16th bit
-				       remains clear)
+	    movhi hi( fred + 0x10ffff), r0, r1
+	    movea lo( fred + 0x10ffff), r1, r1
+
+	    HI16S:  0x0011 + (0x00007000 >> 16)    = 0x11
+	    LO16:   0xffff + (0x00007000 & 0xffff) = 0x6fff
+
+	      0x00110000
+	    + 0x00006fff
+	    ------------
+	      0x00116fff  = fred + 0x10ffff = 0x7000 + 0x10ffff
+
+	 
+	 Overflow can also occur if the computation carries into the 16th bit
+	 and it also results in the 15th bit having the same value as the 15th
+	 bit of the original value.   What happens is that the HI16S reloc
+	 will have already examined the 15th bit of the original value and
+	 added 1 to the high part if the bit is set.  This compensates for the
+	 sign extension of 15th bit of the result of the computation.  But now
+	 there is a carry into the 16th bit, and this has not been allowed for.
+
+	 So, for example if fred is at address 0xf000:
+
+	   movhi hi( fred + 0xffff), r0, r1    [bit 15 of the offset is 1]
+	   movea lo( fred + 0xffff), r1, r1
+
+	   HI16S: 0x0001 + (0x0000f000 >> 16)    = 0x0001
+	   LO16:  0xffff + (0x0000f000 & 0xffff) = 0xefff   (carry into bit 16)
+
+	     0x00010000
+	   + 0xffffefff
+	   ------------
+	     0x0000efff   but 'fred + 0xffff' = 0x0001efff
+
+	 Similarly, if the 15th bit remains clear, but overflow occurs into
+	 the 16th bit then (assuming the address of fred is 0xf000):
+
+	   movhi hi( fred + 0x7000), r0, r1    [bit 15 of the offset is 0]
+	   movea lo( fred + 0x7000), r1, r1
+
+	   HI16S: 0x0000 + (0x0000f000 >> 16)    = 0x0000
+	   LO16:  0x7000 + (0x0000f000 & 0xffff) = 0x6fff  (carry into bit 16)
+
+	     0x00000000
+	   + 0x00006fff
+	   ------------
+	     0x00006fff   but 'fred + 0x7000' = 0x00016fff
+	   
+	 Note - there is no need to change anything if a carry occurs, and the
+	 15th bit changes its value from being set to being clear, as the HI16S
+	 reloc will have already added in 1 to the high part for us:
+
+	   movhi hi( fred + 0xffff), r0, r1     [bit 15 of the offset is 1]
+	   movea lo( fred + 0xffff), r1, r1
+
+	   HI16S: 0x0001 + (0x00007000 >> 16)
+	   LO16:  0xffff + (0x00007000 & 0xffff) = 0x6fff  (carry into bit 16)
+
+	     0x00010000
+	   + 0x00006fff   (bit 15 not set, so the top half is zero)
+	   ------------
+	     0x00016fff   which is right (assuming that fred is at 0x7000)
+
+	 but if the 15th bit goes from being clear to being set, then we must
+	 once again handle overflow:
+
+	   movhi hi( fred + 0x7000), r0, r1     [bit 15 of the offset is 0]
+	   movea lo( fred + 0x7000), r1, r1
+
+	   HI16S: 0x0000 + (0x0000ffff >> 16)
+	   LO16:  0x7000 + (0x0000ffff & 0xffff) = 0x6fff  (carry into bit 16)
+
+	     0x00000000
+	   + 0x00006fff   (bit 15 not set, so the top half is zero)
+	   ------------
+	     0x00006fff   which is wrong (assuming that fred is at 0xffff)
 	 */
 
       {
 	long result;
-	
+
 	insn   = bfd_get_16 (abfd, address);
 	result = insn + addend;
 
-#define BIT16_SET(x) ((x) & 0x8000)
-#define OVERFLOWS(a,i) (((a) & 0xffff) + (i) > 0xffff)
+#define BIT15_SET(x) ((x) & 0x8000)
+#define OVERFLOWS(a,i) ((((a) & 0xffff) + (i)) > 0xffff)
 	
-	if ((BIT16_SET (result) && ! BIT16_SET (addend))
-	    || (OVERFLOWS (addend, insn) 
-		&& (BIT16_SET (result) == BIT16_SET (addend))))
+	if ((BIT15_SET (result) && ! BIT15_SET (addend))
+	    || (OVERFLOWS (addend, insn)
+		&& ((! BIT15_SET (insn)) || (BIT15_SET (addend)))))
 	  {
 	    /* Amend the preceding HI16_S relocation, allowing for
 	       an intervening instruction, which does occasionally happen.  */
