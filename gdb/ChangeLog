@@ -1,3 +1,24 @@
+2001-04-05  Andrew Cagney  <ac131313@redhat.com>
+
+	Obsolete powerpcle-*-cygwin* and powerpcle-*-solaris* platforms
+	and powerpc-*-netware* target.
+	* configure.host (powerpcle-*-cygwin*, powerpcle-*-solaris*):
+	Obsolete.
+	* configure.tgt (powerpc-*-netware*, powerpcle-*-cygwin*)
+	(powerpcle-*-solaris*): Obsolete.
+	* config/powerpc/tm-cygwin.h: Obsolete.
+	* config/powerpc/cygwin.mt: Obsolete.
+	* config/powerpc/xm-cygwin.h: Obsolete.
+	* config/powerpc/cygwin.mh: Obsolete.
+	* config/powerpc/nm-solaris.h: Obsolete.
+	* config/powerpc/xm-solaris.h: Obsolete.
+	* config/powerpc/tm-solaris.h: Obsolete.
+	* config/powerpc/solaris.mt: Obsolete.
+	* config/powerpc/tm-ppc-nw.h: Obsolete.
+	* config/powerpc/ppc-nw.mt: Obsolete.
+	* TODO: Update.
+	* NEWS: Update.
+
 2001-04-06  Fernando Nasser  <fnasser@redhat.com>
 
 	* buildsym.c (record_line): Turn off unused addr bits.

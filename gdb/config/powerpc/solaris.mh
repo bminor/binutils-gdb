@@ -1,19 +1,19 @@
-# Host: PowerPC, running Solaris 2
-
-XM_FILE= xm-solaris.h
-XDEPFILES=
-XM_CLIBS= -lsocket -lnsl
-
-NAT_FILE= nm-solaris.h
-NATDEPFILES= corelow.o core-sol2.o solib.o solib-svr4.o solib-legacy.o \
-	fork-child.o procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o
-
-# If you are compiling with Sun's compiler, add the -xs option to CC
-# (e.g. `make CC="cc -xs"').
-# Sun's compilers require the -xs option to produce debug information
-# in the final linked executable.  Otherwise they leave it in the .o
-# files only, with undocumented pointers to it in the linked executable.
-# This is commented out because we don't assume that the Sun compiler
-# is in use.
-#MH_CFLAGS=-xs
-HOST_IPC=-DBSD_IPC
+# OBSOLETE # Host: PowerPC, running Solaris 2
+# OBSOLETE 
+# OBSOLETE XM_FILE= xm-solaris.h
+# OBSOLETE XDEPFILES=
+# OBSOLETE XM_CLIBS= -lsocket -lnsl
+# OBSOLETE 
+# OBSOLETE NAT_FILE= nm-solaris.h
+# OBSOLETE NATDEPFILES= corelow.o core-sol2.o solib.o solib-svr4.o solib-legacy.o \
+# OBSOLETE 	fork-child.o procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o
+# OBSOLETE 
+# OBSOLETE # If you are compiling with Sun's compiler, add the -xs option to CC
+# OBSOLETE # (e.g. `make CC="cc -xs"').
+# OBSOLETE # Sun's compilers require the -xs option to produce debug information
+# OBSOLETE # in the final linked executable.  Otherwise they leave it in the .o
+# OBSOLETE # files only, with undocumented pointers to it in the linked executable.
+# OBSOLETE # This is commented out because we don't assume that the Sun compiler
+# OBSOLETE # is in use.
+# OBSOLETE #MH_CFLAGS=-xs
+# OBSOLETE HOST_IPC=-DBSD_IPC

@@ -196,10 +196,10 @@ Steps:
 		  a29k-*-*		a29k	 ultra3	  -          yes
 		  a29k-*-sym1*		a29k	 -	  ultra3     yes
 		  a29k-*-kern*		a29k	 -	  a29k-kern  yes
-		  powerpcle-*-solaris*	powerpc	 solaris  solaris
-		  powerpcle-*-cygwin*	powerpc	 cygwin	  cygwin
-		  powerpc-*-netware*	powerpc  -	  ppc-nw
-		  w65-*-*		w65	 -	  w65       yes
+		  powerpcle-*-solaris*	powerpc	 solaris  solaris    yes
+		  powerpcle-*-cygwin*	powerpc	 cygwin	  cygwin     yes
+		  powerpc-*-netware*	powerpc  -	  ppc-nw     yes
+		  w65-*-*		w65	 -	  w65        yes
 		  i[3456]86-*-sunos*	i386	 sun386	  sun386
 
 		(DONE)
@@ -219,6 +219,10 @@ Steps:
 			*-tdep.c *-nat.c *-xdep.c
 
 	o	update NEWS
+
+--
+
+Zap still more of that nonexistant romp target.
 
 --
 

@@ -230,12 +230,12 @@ ns32k-*-netbsd*)	gdb_target=nbsd
 powerpc-*-macos*)	gdb_target=macos ;;
 powerpc-*-netbsd*)	gdb_target=nbsd
 		configdirs="${configdirs} gdbserver" ;;
-powerpc-*-netware*)	gdb_target=ppc-nw
-			configdirs="${configdirs} nlm" ;;
+# OBSOLETE powerpc-*-netware*)	gdb_target=ppc-nw
+# OBSOLETE 			configdirs="${configdirs} nlm" ;;
 
 powerpc-*-aix*)		gdb_target=aix ;;
-powerpcle-*-cygwin*)	gdb_target=cygwin ;;
-powerpcle-*-solaris*)	gdb_target=solaris ;;
+# OBSOLETE powerpcle-*-cygwin*)	gdb_target=cygwin ;;
+# OBSOLETE powerpcle-*-solaris*)	gdb_target=solaris ;;
 powerpc-*-eabi* | powerpc-*-sysv* | powerpc-*-elf*)
 			if test -f ../sim/ppc/Makefile; then
 			  gdb_target=ppc-sim

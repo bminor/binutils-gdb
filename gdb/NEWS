@@ -21,6 +21,9 @@ Most ns32k hosts and targets			ns32k-*-mach3* ns32k-umax-*
 TI TMS320C80					tic80-*-*
 WDC 65816					w65-*-*
 Ultracomputer (29K) running Sym1		a29k-nyu-sym1 a29k-*-kern*
+PowerPC Solaris					powerpcle-*-solaris*
+PowerPC Windows NT				powerpcle-*-cygwin32
+PowerPC Netware					powerpc-*-netware*
 
 stuff.c (Program to stuff files into a specially prepared space in kdb)
 kdb-start.c (Main loop for the standalone kernel debugger)
