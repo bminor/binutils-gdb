@@ -1,4 +1,13 @@
-Tue Apr  9 15:13:10 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-04-09  Bernd Herd <info@herdsoft.com>
+
+	* rcparse.y: CLASS definitions in DIALOG resources 
+	are quoted.
+
+2002-04-09  Gunnar Degnbol <degnbol@danbbs.dk>
+
+	* resrc.c: print CLASS names in quotes
+
+2002-04-09  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* MAINTAINERS: Update my email address.
 

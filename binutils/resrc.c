@@ -1,5 +1,5 @@
 /* resrc.c -- read and write Windows rc files.
-   Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -173,7 +173,7 @@ static void get_data
   PARAMS ((FILE *, unsigned char *, unsigned long, const char *));
 static void define_fontdirs PARAMS ((void));
 
-/* Run `cmd' and redirect the output to `redir'. */
+/* Run `cmd' and redirect the output to `redir'.  */
 
 static int
 run_cmd (cmd, redir)
@@ -518,7 +518,7 @@ close_input_stream ()
 	pclose (cpp_pipe);
     }
 
-  /* Since this is also run via xatexit, safeguard. */
+  /* Since this is also run via xatexit, safeguard.  */
   cpp_pipe = NULL;
   cpp_temp_file = NULL;
 }
@@ -1580,7 +1580,7 @@ write_rc_directory (e, rd, type, name, language, level)
 
 	case 2:
 	  /* If we're at level 2, the key of this resource is the name
-	     we are going to use in the rc printout. */
+	     we are going to use in the rc printout.  */
 	  name = &re->id;
 	  break;
 
@@ -2060,7 +2060,7 @@ write_rc_dialog (e, dialog)
       || dialog->class.u.id != 0)
     {
       fprintf (e, "CLASS ");
-      res_id_print (e, dialog->class, 0);
+      res_id_print (e, dialog->class, 1);
       fprintf (e, "\n");
     }
   if (dialog->caption != NULL)

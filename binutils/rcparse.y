@@ -425,6 +425,10 @@ styles:
 	  {
 	    dialog.exstyle = $3;
 	  }
+	| styles CLASS QUOTEDSTRING
+	  {
+	    res_string_to_id (& dialog.class, $3);
+	  }
 	| styles FONT numexpr ',' QUOTEDSTRING
 	  {
 	    dialog.style |= DS_SETFONT;
