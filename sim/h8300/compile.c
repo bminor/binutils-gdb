@@ -74,7 +74,7 @@ void sim_set_simcache_size PARAMS ((int));
 
 #include "inst.h"
 
-/* The rate at which to call the host's poll_quit callback. */
+/* The rate at which to call the host's poll_quit callback.  */
 
 #define POLL_QUIT_INTERVAL 0x80000
 
@@ -109,7 +109,6 @@ int h8300smode = 0;
 
 static int memory_size;
 
-
 static int
 get_now ()
 {
@@ -124,7 +123,6 @@ now_persec ()
 {
   return 1;
 }
-
 
 static int
 bitfrom (x)
@@ -142,8 +140,7 @@ bitfrom (x)
     }
 }
 
-static
-unsigned int
+static unsigned int
 lvalue (x, rn)
 {
   switch (x / 4)
@@ -156,8 +153,8 @@ lvalue (x, rn)
       return X (OP_REG, SP);
 
     case OP_MEM:
-
       return X (OP_MEM, SP);
+
     default:
       abort ();
     }
@@ -174,14 +171,15 @@ decode (addr, data, dst)
   int rd = 0;
   int rdisp = 0;
   int abs = 0;
-  int plen = 0;
   int bit = 0;
-
+  int plen = 0;
   struct h8_opcode *q = h8_opcodes;
   int size = 0;
+
   dst->dst.type = -1;
   dst->src.type = -1;
-  /* Find the exact opcode/arg combo */
+
+  /* Find the exact opcode/arg combo.  */
   while (q->name)
     {
       op_type *nib;
@@ -207,40 +205,37 @@ decode (addr, data, dst)
 		{
 		  if (!(((int) thisnib & 0x8) != 0))
 		    goto fail;
-		  looking_for = (op_type) ((int) looking_for & ~(int)
-					   B31);
+
+		  looking_for = (op_type) ((int) looking_for & ~(int) B31);
 		  thisnib &= 0x7;
 		}
+
 	      if ((int) looking_for & (int) B30)
 		{
 		  if (!(((int) thisnib & 0x8) == 0))
 		    goto fail;
+
 		  looking_for = (op_type) ((int) looking_for & ~(int) B30);
 		}
+
 	      if (looking_for & DBIT)
 		{
 		  if ((looking_for & 5) != (thisnib & 5))
 		    goto fail;
+
 		  abs = (thisnib & 0x8) ? 2 : 1;
 		}
 	      else if (looking_for & (REG | IND | INC | DEC))
 		{
 		  if (looking_for & REG)
 		    {
-		      /*
-		       * Can work out size from the
-		       * register
-		       */
+		      /* Can work out size from the register.  */
 		      size = bitfrom (looking_for);
 		    }
 		  if (looking_for & SRC)
-		    {
-		      rs = thisnib;
-		    }
+		    rs = thisnib;
 		  else
-		    {
-		      rd = thisnib;
-		    }
+		    rd = thisnib;
 		}
 	      else if (looking_for & L_16)
 		{
@@ -253,10 +248,7 @@ decode (addr, data, dst)
 		}
 	      else if (looking_for & ABSJMP)
 		{
-		  abs =
-		    (data[1] << 16)
-		    | (data[2] << 8)
-		    | (data[3]);
+		  abs = (data[1] << 16) | (data[2] << 8) | (data[3]);
 		}
 	      else if (looking_for & MEMIND)
 		{
@@ -265,6 +257,7 @@ decode (addr, data, dst)
 	      else if (looking_for & L_32)
 		{
 		  int i = len >> 1;
+
 		  abs = (data[i] << 24)
 		    | (data[i + 1] << 16)
 		    | (data[i + 2] << 8)
@@ -275,12 +268,13 @@ decode (addr, data, dst)
 	      else if (looking_for & L_24)
 		{
 		  int i = len >> 1;
+
 		  abs = (data[i] << 16) | (data[i + 1] << 8) | (data[i + 2]);
 		  plen = 24;
 		}
 	      else if (looking_for & IGNORE)
 		{
-		  /* nothing to do */
+		  ;
 		}
 	      else if (looking_for & DISPREG)
 		{
@@ -313,9 +307,9 @@ decode (addr, data, dst)
 		    {
 		      plen = 8;
 		      abs = h8300hmode ? ~0xff0000ff : ~0xffff00ff;
-		      abs |= data[len >> 1] & 0xff ;
+		      abs |= data[len >> 1] & 0xff;
 		    }
-		   else
+		  else
 		    {
 		      abs = data[len >> 1] & 0xff;
 		    }
@@ -330,7 +324,7 @@ decode (addr, data, dst)
 		{
 		  dst->op = q;
 
-		  /* Fill in the args */
+		  /* Fill in the args.  */
 		  {
 		    op_type *args = q->args.nib;
 		    int hadone = 0;
@@ -342,15 +336,11 @@ decode (addr, data, dst)
 			ea_type *p;
 
 			if (x & DST)
-			  {
-			    p = &(dst->dst);
-			  }
+			  p = &(dst->dst);
 			else
-			  {
-			    p = &(dst->src);
-			  }
+			  p = &(dst->src);
 
-			if (x & (L_3))
+			if (x & L_3)
 			  {
 			    p->type = X (OP_IMM, size);
 			    p->literal = bit;
@@ -425,12 +415,9 @@ decode (addr, data, dst)
 		      }
 		  }
 
-		  /*
-		     * But a jmp or a jsr gets
-		     * automagically lvalued, since we
-		     * branch to their address not their
-		     * contents
-		   */
+		  /* But a jmp or a jsr gets automagically lvalued,
+		     since we branch to their address not their
+		     contents.  */
 		  if (q->how == O (O_JSR, SB)
 		      || q->how == O (O_JMP, SB))
 		    {
@@ -443,7 +430,7 @@ decode (addr, data, dst)
 		  dst->opcode = q->how;
 		  dst->cycles = q->time;
 
-		  /* And a jsr to 0xc4 is turned into a magic trap */
+		  /* And a jsr to 0xc4 is turned into a magic trap.  */
 
 		  if (dst->opcode == O (O_JSR, SB))
 		    {
@@ -457,9 +444,7 @@ decode (addr, data, dst)
 		  return;
 		}
 	      else
-		{
-		  printf ("Dont understand %x \n", looking_for);
-		}
+		printf ("Dont understand %x \n", looking_for);
 	    }
 
 	  len++;
@@ -470,9 +455,9 @@ decode (addr, data, dst)
       q++;
     }
 
+  /* Fell off the end.  */
   dst->opcode = O (O_ILL, SB);
 }
-
 
 static void
 compile (pc)
