@@ -1398,7 +1398,7 @@ AC_OUTPUT(Makefile .gdbinit:gdbinit.in,
 dnl Autoconf doesn't provide a mechanism for modifying definitions 
 dnl provided by makefile fragments.
 dnl
-if test "${nativefile}" = ""; then
+if test "${target}" != "${host}"; then
         < Makefile \
         sed -e '/^NATDEPFILES[[ 	]]*=.*\\$/,/[[^\\]]$/s/^/# /' \
             -e '/^NATDEPFILES[[ 	]]*=/s/^/# /' \

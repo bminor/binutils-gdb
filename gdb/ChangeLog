@@ -1,3 +1,10 @@
+2003-02-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure.in (Makefile): Use the test ${target} != ${host},
+	instead of the absence of the "nm.h" file, to determine of the
+	configuration non-native.
+	* configure: Regenerate.
+	
 2003-02-14  Elena Zannoni  <ezannoni@redhat.com>
 
         From Brian Ford  <ford@vss.fsi.com>
