@@ -1,1 +1,1 @@
-EMUL=h8300hms
+EMUL=h8300
