@@ -872,6 +872,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  break;
 
 	case EM_CYGNUS_ARC:
+	case EM_ARC:
 	  rtype = elf_arc_reloc_type (type);
 	  break;
 
@@ -1224,7 +1225,7 @@ get_machine_name (e_machine)
     case EM_SH:		 	return "Hitachi SH";
     case EM_SPARCV9:     	return "Sparc v9";
     case EM_TRICORE:    	return "Siemens Tricore";
-    case EM_ARC:		return "Argonaut RISC Core";
+    case EM_ARC:		return "ARC";
     case EM_H8_300:		return "Hitachi H8/300";
     case EM_H8_300H:		return "Hitachi H8/300H";
     case EM_H8S:		return "Hitachi H8S";
@@ -1236,7 +1237,7 @@ get_machine_name (e_machine)
     case EM_ALPHA:       	return "Alpha";
     case EM_CYGNUS_D10V:        return "d10v";
     case EM_CYGNUS_D30V:        return "d30v";
-    case EM_CYGNUS_ARC:		return "Arc";
+    case EM_CYGNUS_ARC:		return "ARC";
     case EM_CYGNUS_M32R:	return "Mitsubishi M32r";
     case EM_CYGNUS_V850:	return "NEC v850";
     case EM_CYGNUS_MN10300:	return "mn10300";
@@ -1269,7 +1270,6 @@ get_machine_name (e_machine)
     case EM_MMIX:	        return "Donald Knuth's educational 64-bit processor";
     case EM_HUANY:       	return "Harvard Universitys's machine-independent object format";
     case EM_PRISM:       	return "SiTera Prism";
-      
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;
@@ -4654,13 +4654,13 @@ process_symbol_table (file)
 
   if (do_histogram && buckets != NULL)
     {
-      int *lengths;
-      int *counts;
-      int hn;
-      int si;
-      int maxlength = 0;
-      int nzero_counts = 0;
-      int nsyms = 0;
+      int * lengths;
+      int * counts;
+      int   hn;
+      int   si;
+      int   maxlength = 0;
+      int   nzero_counts = 0;
+      int   nsyms = 0;
 
       printf (_("\nHistogram for bucket list length (total of %d buckets):\n"),
 	      nbuckets);
@@ -5678,7 +5678,7 @@ display_debug_abbrev (section, start, file)
      unsigned char *       start;
      FILE *                file ATTRIBUTE_UNUSED;
 {
-  abbrev_entry * entry;
+  abbrev_entry *  entry;
   unsigned char * end = start + section->sh_size;
 
   printf (_("Contents of the %s section:\n\n"), SECTION_NAME (section));
@@ -5731,12 +5731,12 @@ static void
 decode_location_expression (data, pointer_size, length)
      unsigned char * data;
      unsigned int    pointer_size;
-     unsigned long length;
+     unsigned long   length;
 {
-  unsigned op;
-  int           bytes_read;
-  unsigned long uvalue;
-  unsigned char *end = data + length;
+  unsigned        op;
+  int             bytes_read;
+  unsigned long   uvalue;
+  unsigned char * end = data + length;
 
   while (data < end)
     {
@@ -6467,7 +6467,7 @@ display_debug_aranges (section, start, file)
       ranges = start + sizeof (* external);
 
       /* Must pad to an alignment boundary that is twice the pointer size.  */
-      excess = sizeof (*external) % (2 * arange.ar_pointer_size);
+      excess = sizeof (* external) % (2 * arange.ar_pointer_size);
       if (excess)
 	ranges += (2 * arange.ar_pointer_size) - excess;
 
@@ -6498,20 +6498,20 @@ display_debug_aranges (section, start, file)
 
 typedef struct Frame_Chunk
 {
-  struct Frame_Chunk *next;
-  unsigned char *chunk_start;
-  int ncols;
+  struct Frame_Chunk * next;
+  unsigned char *      chunk_start;
+  int                  ncols;
   /* DW_CFA_{undefined,same_value,offset,register,unreferenced}  */
-  short int *col_type;
-  int *col_offset;
-  char *augmentation;
-  unsigned int code_factor;
-  unsigned int data_factor;
-  unsigned long pc_begin;
-  unsigned long pc_range;
-  int cfa_reg;
-  int cfa_offset;
-  int ra;
+  short int *          col_type;
+  int *                col_offset;
+  char *               augmentation;
+  unsigned int         code_factor;
+  unsigned int         data_factor;
+  unsigned long        pc_begin;
+  unsigned long        pc_range;
+  int                  cfa_reg;
+  int                  cfa_offset;
+  int                  ra;
 }
 Frame_Chunk;
 
@@ -6521,13 +6521,14 @@ Frame_Chunk;
 
 static void
 frame_need_space (fc, reg)
-     Frame_Chunk *fc;
+     Frame_Chunk * fc;
      int reg;
 {
   int prev = fc->ncols;
 
   if (reg < fc->ncols)
     return;
+
   fc->ncols = reg + 1;
   fc->col_type = (short int *) xrealloc (fc->col_type,
 					 fc->ncols * sizeof (short int));
@@ -6544,20 +6545,23 @@ frame_need_space (fc, reg)
 
 static void
 frame_display_row (fc, need_col_headers, max_regs)
-     Frame_Chunk *fc;
-     int *need_col_headers;
-     int *max_regs;
+     Frame_Chunk * fc;
+     int *         need_col_headers;
+     int *         max_regs;
 {
   int r;
   char tmp[100];
 
-  if (*max_regs < fc->ncols)
-    *max_regs = fc->ncols;
-  if (*need_col_headers)
+  if (* max_regs < fc->ncols)
+    * max_regs = fc->ncols;
+
+  if (* need_col_headers)
     {
-      *need_col_headers = 0;
+      * need_col_headers = 0;
+
       printf ("   LOC   CFA      ");
-      for (r=0; r<*max_regs; r++)
+
+      for (r = 0; r < * max_regs; r++)
 	if (fc->col_type[r] != DW_CFA_unreferenced)
 	  {
 	    if (r == fc->ra)
@@ -6565,12 +6569,15 @@ frame_display_row (fc, need_col_headers, max_regs)
 	    else
 	      printf ("r%-4d", r);
 	  }
+
       printf ("\n");
     }
+
   printf ("%08x ", (unsigned int) fc->pc_begin);
   sprintf (tmp, "r%d%+d", fc->cfa_reg, fc->cfa_offset);
   printf ("%-8s ", tmp);
-  for (r=0; r<fc->ncols; r++)
+
+  for (r = 0; r < fc->ncols; r++)
     {
       if (fc->col_type[r] != DW_CFA_unreferenced)
 	{
@@ -6599,8 +6606,8 @@ frame_display_row (fc, need_col_headers, max_regs)
 }
 
 #define GET(N)	byte_get (start, N); start += N
-#define LEB()	read_leb128 (start, &length_return, 0); start += length_return
-#define SLEB()	read_leb128 (start, &length_return, 1); start += length_return
+#define LEB()	read_leb128 (start, & length_return, 0); start += length_return
+#define SLEB()	read_leb128 (start, & length_return, 1); start += length_return
 
 static int
 display_debug_frames (section, start, file)
@@ -6609,21 +6616,25 @@ display_debug_frames (section, start, file)
      FILE *                file ATTRIBUTE_UNUSED;
 {
   unsigned char * end = start + section->sh_size;
-  unsigned char *section_start = start;
-  Frame_Chunk *chunks = 0;
-  Frame_Chunk *remembered_state = 0, *rs;
-  int is_eh = (strcmp (SECTION_NAME (section), ".eh_frame") == 0);
-  int length_return;
-  int max_regs = 0;
+  unsigned char * section_start = start;
+  Frame_Chunk *   chunks = 0;
+  Frame_Chunk *   remembered_state = 0;
+  Frame_Chunk *   rs;
+  int             is_eh = (strcmp (SECTION_NAME (section), ".eh_frame") == 0);
+  int             length_return;
+  int             max_regs = 0;
 
   printf (_("The section %s contains:\n"), SECTION_NAME (section));
 
   while (start < end)
     {
-      unsigned char *saved_start, *block_end;
-      unsigned long length, cie_id;
-      Frame_Chunk *fc, *cie;
-      int need_col_headers = 1;
+      unsigned char * saved_start;
+      unsigned char * block_end;
+      unsigned long   length;
+      unsigned long   cie_id;
+      Frame_Chunk *   fc;
+      Frame_Chunk *   cie;
+      int             need_col_headers = 1;
 
       saved_start = start;
       length = byte_get (start, 4); start += 4;
@@ -6651,7 +6662,12 @@ display_debug_frames (section, start, file)
 
 	  start ++; /* version */
 	  fc->augmentation = start;
-	  while (*start) start++; start++; /* skip past NUL */
+
+	  while (* start)
+	    start++;
+
+	  start++; /* skip past NUL */
+
 	  if (fc->augmentation[0] == 'z')
 	    {
 	      int xtra;
@@ -6683,9 +6699,10 @@ display_debug_frames (section, start, file)
 	}
       else
 	{
-	  unsigned char *look_for;
+	  unsigned char *    look_for;
 	  static Frame_Chunk fde_fc;
-	  fc = &fde_fc;
+
+	  fc = & fde_fc;
 	  memset (fc, 0, sizeof (Frame_Chunk));
 
 	  look_for = is_eh ? start-4-cie_id : (unsigned char *) cie_id;
@@ -6701,7 +6718,7 @@ display_debug_frames (section, start, file)
 	      fc->ncols = 0;
 	      fc->col_type = (short int *) xmalloc (sizeof (short int));
 	      fc->col_offset = (int *) xmalloc (sizeof (int));
-	      frame_need_space (fc, max_regs-1);
+	      frame_need_space (fc, max_regs - 1);
 	      cie = fc;
 	      fc->augmentation = "";
 	    }
@@ -6741,15 +6758,15 @@ display_debug_frames (section, start, file)
       {
 	/* Start by making a pass over the chunk, allocating storage
            and taking note of what registers are used.  */
+	unsigned char * tmp = start;
 
-	unsigned char *tmp = start;
 	while (start < block_end)
 	  {
 	    unsigned op, opa;
 	    unsigned long reg;
 	    bfd_vma vma;
 	    
-	    op = *start++;
+	    op = * start ++;
 	    opa = op & 0x3f;
 	    if (op & 0xc0)
 	      op &= 0xc0;
@@ -7156,6 +7173,7 @@ display_debug_section (section, file)
   /* See if we know how to display the contents of this section.  */
   if (strncmp (name, ".gnu.linkonce.wi.", 17) == 0)
     name = ".debug_info";  
+
   for (i = NUM_ELEM (debug_displays); i--;)
     if (strcmp (debug_displays[i].name, name) == 0)
       {
@@ -7392,7 +7410,7 @@ process_mips_specific (file)
 		      Elf_External_Options *, "options");
 
       iopt = (Elf_Internal_Options *) malloc ((sect->sh_size / sizeof (eopt))
-					      * sizeof (*iopt));
+					      * sizeof (* iopt));
       if (iopt == NULL)
 	{
 	  error (_("Out of memory"));
@@ -7439,8 +7457,8 @@ process_mips_specific (file)
 	      if (elf_header.e_machine == EM_MIPS)
 		{
 		  /* 32bit form.  */
-		  Elf32_External_RegInfo *ereg;
-		  Elf32_RegInfo reginfo;
+		  Elf32_External_RegInfo * ereg;
+		  Elf32_RegInfo            reginfo;
 
 		  ereg = (Elf32_External_RegInfo *) (option + 1);
 		  reginfo.ri_gprmask = BYTE_GET (ereg->ri_gprmask);
@@ -7557,7 +7575,7 @@ process_mips_specific (file)
 	      break;
 	    }
 
-	  len = sizeof (*eopt);
+	  len = sizeof (* eopt);
 	  while (len < option->size)
 	    if (((char *) option)[len] >= ' '
 		&& ((char *) option)[len] < 0x7f)
@@ -7585,7 +7603,7 @@ process_mips_specific (file)
 	  return 0;
 	}
 
-      iconf = (Elf32_Conflict *) malloc (conflictsno * sizeof (*iconf));
+      iconf = (Elf32_Conflict *) malloc (conflictsno * sizeof (* iconf));
       if (iconf == NULL)
 	{
 	  error (_("Out of memory"));
@@ -7594,7 +7612,7 @@ process_mips_specific (file)
 
       if (is_32bit_elf)
 	{
-	  GET_DATA_ALLOC (conflicts_offset, conflictsno * sizeof (*econf32),
+	  GET_DATA_ALLOC (conflicts_offset, conflictsno * sizeof (* econf32),
 			  econf32, Elf32_External_Conflict *, "conflict");
 
 	  for (cnt = 0; cnt < conflictsno; ++cnt)
@@ -7602,7 +7620,7 @@ process_mips_specific (file)
 	}
       else
 	{
-	  GET_DATA_ALLOC (conflicts_offset, conflictsno * sizeof (*econf64),
+	  GET_DATA_ALLOC (conflicts_offset, conflictsno * sizeof (* econf64),
 			  econf64, Elf64_External_Conflict *, "conflict");
 
 	  for (cnt = 0; cnt < conflictsno; ++cnt)

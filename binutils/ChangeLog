@@ -1,3 +1,7 @@
+2000-12-12  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c: Fix formatting.
+
 Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 	* MAINTAINERS: Add myself and Andreas Jaeger as x86_64 maintainer.

@@ -14,11 +14,10 @@
 @cindex MIPS processor
 @sc{gnu} @code{@value{AS}} for @sc{mips} architectures supports several
 different @sc{mips} processors, and MIPS ISA levels I through V, MIPS32,
-and MIPS64.  For
-information about the @sc{mips} instruction set, see @cite{MIPS RISC
-Architecture}, by Kane and Heindrich (Prentice-Hall).  For an overview
-of @sc{mips} assembly conventions, see ``Appendix D: Assembly Language
-Programming'' in the same work.
+and MIPS64.  For information about the @sc{mips} instruction set, see
+@cite{MIPS RISC Architecture}, by Kane and Heindrich (Prentice-Hall).
+For an overview of @sc{mips} assembly conventions, see ``Appendix D:
+Assembly Language Programming'' in the same work.
 
 @menu
 * MIPS Opts::   	Assembler options
@@ -68,12 +67,11 @@ Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} corresponds to the @sc{r2000} and @sc{r3000} processors,
 @samp{-mips2} to the @sc{r6000} processor, @samp{-mips3} to the
 @sc{r4000} processor, and @samp{-mips4} to the @sc{r8000} and
-@sc{r10000} processors.
-@samp{-mips5}, @samp{-mips32}, and @samp{-mips64} correspond
-to generic @sc{MIPS V}, @sc{MIPS32}, and @sc{MIPS64} ISA
-processors, respectively.
-You can also switch instruction sets during the
-assembly; see @ref{MIPS ISA, Directives to override the ISA level}.
+@sc{r10000} processors.  @samp{-mips5}, @samp{-mips32}, and
+@samp{-mips64} correspond to generic @sc{MIPS V}, @sc{MIPS32}, and
+@sc{MIPS64} ISA processors, respectively.  You can also switch
+instruction sets during the assembly; see @ref{MIPS ISA, Directives to
+override the ISA level}. 
 
 @item -mgp32
 Assume that 32-bit general purpose registers are available.  This
@@ -248,14 +246,14 @@ assembly language programmers!
 the @sc{mips} Instruction Set Architecture level on the fly: @code{.set
 mips@var{n}}.  @var{n} should be a number from 0 to 5, or 32 or 64.
 The values 1 to 5, 32, and 64 make the assembler accept instructions
-for the corresponding
-@sc{isa} level, from that point on in the assembly.  @code{.set
-mips@var{n}} affects not only which instructions are permitted, but also
-how certain macros are expanded.  @code{.set mips0} restores the
-@sc{isa} level to its original level: either the level you selected with
-command line options, or the default for your configuration.  You can
-use this feature to permit specific @sc{r4000} instructions while
-assembling in 32 bit mode.  Use this directive with care!
+for the corresponding @sc{isa} level, from that point on in the
+assembly.  @code{.set mips@var{n}} affects not only which instructions
+are permitted, but also how certain macros are expanded.  @code{.set
+mips0} restores the @sc{isa} level to its original level: either the
+level you selected with command line options, or the default for your
+configuration.  You can use this feature to permit specific @sc{r4000}
+instructions while assembling in 32 bit mode.  Use this directive with
+care! 
 
 The directive @samp{.set mips16} puts the assembler into MIPS 16 mode,
 in which it will assemble instructions for the MIPS 16 processor.  Use
