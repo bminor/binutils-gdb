@@ -1,3 +1,8 @@
+2004-10-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Add mips*-*-netbsd* to the list of
+	NetBSD/ELF targets.
+
 2004-10-29  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.threads/bp_in_thread.c: New file, copied from
