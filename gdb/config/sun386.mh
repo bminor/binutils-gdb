@@ -1,3 +1,5 @@
 # Host: Sun 386i
-XDEPFILES= infptrace.o inftarg.o fork-child.o sun386-xdep.o
+XDEPFILES= 
 XM_FILE= xm-sun386.h
+NAT_FILE= nm-sun386.h
+NATDEPFILES= exec.o infptrace.o inftarg.o fork-child.o sun386-nat.o

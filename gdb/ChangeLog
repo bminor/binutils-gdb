@@ -1,5 +1,18 @@
 Fri Oct 16 13:06:08 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Native support for sun386 (untested).
+
+	* config/sun386.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o sun386-xdep.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* config/sun386.mt (TDEPFILES): removed exec.o.
+	* Makefile.in (HFILES): added nm-sun386.h.
+	* sun386-nat.c, nm-sun386.h: new file.
+	* sun386-xdep.c: removed.
+	* xm-sun386.h: updated comment and copyright.
+	  (ATTACH_DETACH, FETCH_INFERIOR_REGISTERS): removed to
+	  nm-sun386.h.
+
 	Native support for i386mach (untested).
 
 	* config/i386mach.mh (XDEPFILES): removed infptrace.o inftarg.o

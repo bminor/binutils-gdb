@@ -154,6 +154,7 @@ nm-news.h
 nm-rs6000.h
 nm-sun2.h
 nm-sun3.h
+nm-sun386.h
 nm-sun4os4.h
 nm-trash.h
 nm-ultra3.h
@@ -205,7 +206,7 @@ stack.c
 standalone.c
 stuff.c
 sun3-nat.c
-sun386-xdep.c
+sun386-nat.c
 symfile.c
 symfile.h
 symm-tdep.c
