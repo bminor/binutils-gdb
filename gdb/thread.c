@@ -665,7 +665,7 @@ do_captured_thread_select (void *tidstr)
   int num;
   struct thread_info *tp;
 
-  num = atoi ((char *)tidstr);
+  num = value_as_long (parse_and_eval (tidstr));
 
   tp = find_thread_id (num);
 

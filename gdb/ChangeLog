@@ -1,3 +1,8 @@
+2001-04-17  Eirik Fuller <eirik@netapp.com>
+
+	* thread.c (do_captured_thread_select): Allow the argument to the
+	thread command to be an expression rather than a literal integer.
+
 2001-04-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-tdep.c (i386_linux_saved_pc_after_call): Use
