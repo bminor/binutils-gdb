@@ -260,6 +260,7 @@ extern void d10v_pop_frame PARAMS((void));
 #else
 #  define LONGEST long
 #endif 
+#define ULONGEST unsigned LONGEST
 
 void d10v_write_pc PARAMS ((CORE_ADDR val, int pid));
 CORE_ADDR d10v_read_pc PARAMS ((int pid));

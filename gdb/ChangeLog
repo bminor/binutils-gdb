@@ -1,3 +1,12 @@
+Thu Nov 14 15:54:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/d10v/tm-d10v.h (ULONGEST): Define.
+
+Tue Nov 12 12:25:27 1996  Jim Wilson  <wilson@cygnus.com>
+
+	* c-typeprint.c (cp_type_print_method_args): Pass -1 for show in
+	recursive call to type_print.
+	
 Tue Nov 12 12:18:29 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* defs.h (ULONGEST): New macro.
