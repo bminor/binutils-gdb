@@ -1,3 +1,8 @@
+2001-07-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Mode Options): Mention the mi0 and mi1
+	interpreters.
+
 2001-06-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): GDBARCH is a C
