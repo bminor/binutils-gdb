@@ -36,9 +36,6 @@ static lang_input_statement_type *stub_file;
    stubs.  */
 static int multi_subspace = 0;
 
-/* Whether we need to call hppa_layout_sections_again.  */
-static int need_laying_out = 0;
-
 /* Maximum size of a group of input sections that can be handled by
    one stub section.  A value of +/-1 indicates the bfd back-end
    should use a suitable default size.  */
@@ -220,8 +217,6 @@ hppaelf_layout_sections_again (void)
   /* If we have changed sizes of the stub sections, then we need
      to recalculate all the section offsets.  This may mean we need to
      add even more stubs.  */
-  need_laying_out = 0;
-
   lang_reset_memory_regions ();
 
   /* Resize the sections.  */
@@ -258,13 +253,6 @@ build_section_lists (lang_statement_union_type *statement)
 static void
 hppaelf_finish (void)
 {
-  /* bfd_elf_discard_info just plays with debugging sections,
-     ie. doesn't affect any code, so we can delay resizing the
-     sections.  It's likely we'll resize everything in the process of
-     adding stubs.  */
-  if (bfd_elf_discard_info (output_bfd, &link_info))
-    need_laying_out = 1;
-
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
   if (stub_file != NULL && !link_info.relocatable)
@@ -295,9 +283,6 @@ hppaelf_finish (void)
 	    }
 	}
     }
-
-  if (need_laying_out)
-    hppaelf_layout_sections_again ();
 
   if (! link_info.relocatable)
     {

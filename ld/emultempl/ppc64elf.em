@@ -32,9 +32,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static lang_input_statement_type *stub_file;
 static int stub_added = 0;
 
-/* Whether we need to call ppc_layout_sections_again.  */
-static int need_laying_out = 0;
-
 /* Maximum size of a group of input sections that can be handled by
    one stub section.  A value of +/-1 indicates the bfd back-end
    should use a suitable default size.  */
@@ -258,8 +255,6 @@ ppc_layout_sections_again (void)
   /* If we have changed sizes of the stub sections, then we need
      to recalculate all the section offsets.  This may mean we need to
      add even more stubs.  */
-  need_laying_out = 0;
-
   lang_reset_memory_regions ();
 
   /* Resize the sections.  */
@@ -321,13 +316,6 @@ ppc_finish (void)
      descriptor in the .opd section.  */
   entry_section = ".opd";
 
-  /* bfd_elf_discard_info just plays with debugging sections,
-     ie. doesn't affect any code, so we can delay resizing the
-     sections.  It's likely we'll resize everything in the process of
-     adding stubs.  */
-  if (bfd_elf_discard_info (output_bfd, &link_info))
-    need_laying_out = 1;
-
   /* If generating a relocatable output file, then we don't have any
      stubs.  */
   if (stub_file != NULL && !link_info.relocatable)
@@ -355,9 +343,6 @@ ppc_finish (void)
 	    einfo ("%X%P: can not size stub section: %E\n");
 	}
     }
-
-  if (need_laying_out)
-    ppc_layout_sections_again ();
 
   if (link_info.relocatable)
     {
