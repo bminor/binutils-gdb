@@ -1,3 +1,8 @@
+Tue Apr 15 15:31:09 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote.c (get_offsets): Don't use scanf for interpreting
+	response to qOffsets.
+
 Tue Apr 15 14:51:04 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gdbserver/Makefile.in (INSTALL_XFORM): Remove.
