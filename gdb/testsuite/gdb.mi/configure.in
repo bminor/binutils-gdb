@@ -6,10 +6,14 @@ dnl any existing configure script.
 
 AC_PREREQ(2.5)
 AC_INIT(mi-basics.exp)
+AC_CONFIG_HEADER(config.h:config.in)
 
 CC=${CC-cc}
 AC_SUBST(CC)
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../../..)
 AC_CANONICAL_SYSTEM
+
+# Check for pthread.h
+AC_CHECK_HEADERS(pthread.h)
 
 AC_OUTPUT(Makefile)

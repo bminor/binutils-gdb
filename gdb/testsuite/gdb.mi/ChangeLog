@@ -1,3 +1,12 @@
+2002-09-04  Keith Seitz  <keiths@redhat.com>
+
+	* configure.in: Add config header.
+	Check for pthread.h.
+	* configure: Regenerate.
+	* config.in: New file.
+	* mi-pthreads.exp: New file to test thread functionality.
+	* pthreads.c: New file.
+
 2002-08-21  Keith Seitz  <keiths@redhat.com>
 
 	* mi-cli.exp: Use "target_changed" instead of "register-update".
