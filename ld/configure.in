@@ -63,7 +63,7 @@ i386)
 
 sparc)
 	case "${host_os}" in
-	sunos64)	my_host=sparc-64 ;;
+	sunos64)	my_host=sparc-ll ;;
 	*)		my_host=sparc ;;
 	esac
 	;;
@@ -100,7 +100,7 @@ fi
 
 host_makefile_frag=
 if [ -f config/h-${my_host} ] ; then
-	host_makefile_frag=config/h-${my_host}
+	host_makefile_frag=config/mh-${my_host}
 fi
 
 # per-target:
@@ -116,7 +116,11 @@ sun)
 *)
 	case ${target_cpu} in
 	m88k)	my_target=m88k-bcs ;;
-	a29k)	my_target=coff-a29k ;;
+	a29k)	case ${target_os} in
+		ebmon) my_target=ebmon29k ;;
+		*) my_target=coff-a29k ;;
+		esac
+		;;
 	h8300)	my_target=h8300hds ;;
 	m68k)	
 		case ${target_vendor} in
@@ -131,4 +135,4 @@ sun)
 	;;
 esac
 
-target_makefile_frag=config/t-${my_target}
+target_makefile_frag=config/mt-${my_target}
