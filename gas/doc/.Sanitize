@@ -16,13 +16,6 @@
 
 Do-first:
 
-d10v_files="c-d10v.texi"
-if ( echo $* | grep keep\-d10v > /dev/null ) ; then
-        keep_these_too="${d10v_files} ${keep_these_too}"
-else
-        lose_these_too="${d10v_files} ${lose_these_too}"
-fi 
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -36,6 +29,7 @@ all.texi
 as.1
 as.texinfo
 c-a29k.texi
+c-d10v.texi
 c-h8300.texi
 c-h8500.texi
 c-hppa.texi
