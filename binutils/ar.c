@@ -727,7 +727,7 @@ extract_file (abfd)
 
   if (preserve_dates)
     {
-#if POSIX_UTIME
+#ifdef POSIX_UTIME
       struct utimbuf tb;
       tb.actime = buf.st_mtime;
       tb.modtime = buf.st_mtime;

@@ -1,3 +1,9 @@
+Sat Jul  1 12:25:15 1995  Fred Fish  <fnf@cygnus.com>
+
+	* ar.c: (extract_file):  Change "#if POSIX_UTIME" to
+	"#ifdef POSIX_UTIME" to match other tests of POSIX_UTIME
+	and avoid lossage when POSIX_UTIME is not defined at all.
+
 Wed Jun 28 17:51:24 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* ar.c: (print_contents.c, extract_file, do_quick_append):
