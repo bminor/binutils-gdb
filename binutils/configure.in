@@ -45,9 +45,7 @@ dlltool_defs=
 
 for targ in $target $canon_targets
 do
-    bfd_target=`${config_shell} $srcdir/../bfd/config.bfd $targ`
-
-    if [ "x$bfd_target" = "xall" ]; then
+    if [ "x$targ" = "xall" ]; then
         all_targets=true
 	build_nlmconv=true
 	build_srconv=true
@@ -108,7 +106,9 @@ if [ "x${build_dlltool}" = "xtrue" ]; then
     echo "DLLTOOL_DEFS = ${dlltool_defs}" >> Makefile.2
 fi
 
-if [ "x`${config_shell} $srcdir/../bfd/config.bfd $target _`" = "xyes" ]; then
+targ=$target
+. $srcdir/../bfd/config.bfd
+if test "x$targ_underscore" = "xyes"; then
     underscore=1
 else
     underscore=0

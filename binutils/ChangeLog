@@ -1,3 +1,9 @@
+Mon Sep  4 14:30:00 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Don't bother to call config.bfd for each target.
+	Just call it for the default target, and use the shell variable to
+	decide whether underscores are used.
+
 Thu Aug 31 19:21:48 1995  Jason Molenda    (crash@phydeaux.cygnus.com)
 
 	* configure.in: match i[3-6]86-*-win32, not just i386-*-win32.
