@@ -1,4 +1,8 @@
 start-sanitize-sky
+Fri Jul 24 19:54:21 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* mt-sky (install-dvp-gas): New rule.
+
 Fri Jul 24 08:46:41 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* mt-sky: New file.
