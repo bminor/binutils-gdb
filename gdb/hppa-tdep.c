@@ -4675,11 +4675,43 @@ hppa_skip_permanent_breakpoint (void)
 void
 _initialize_hppa_tdep (void)
 {
+  struct cmd_list_element *c;
+  void break_at_finish_command (char *arg, int from_tty);
+  void tbreak_at_finish_command (char *arg, int from_tty);
+  void break_at_finish_at_depth_command (char *arg, int from_tty);
+
   tm_print_insn = print_insn_hppa;
 
   add_cmd ("unwind", class_maintenance, unwind_command,
 	   "Print unwind table entry at given address.",
 	   &maintenanceprintlist);
+
+  add_com ("xbreak", class_breakpoint, break_at_finish_command,
+	   concat ("Set breakpoint at procedure exit. \n\
+Argument may be function name, or \"*\" and an address.\n\
+If function is specified, break at end of code for that function.\n\
+If an address is specified, break at the end of the function that contains \n\
+that exact address.\n",
+		   "With no arg, uses current execution address of selected stack frame.\n\
+This is useful for breaking on return to a stack frame.\n\
+\n\
+Multiple breakpoints at one place are permitted, and useful if conditional.\n\
+\n\
+Do \"help breakpoints\" for info on other commands dealing with breakpoints.", NULL));
+  add_com_alias ("xb", "xbreak", class_breakpoint, 1);
+  add_com_alias ("xbr", "xbreak", class_breakpoint, 1);
+  add_com_alias ("xbre", "xbreak", class_breakpoint, 1);
+  add_com_alias ("xbrea", "xbreak", class_breakpoint, 1);
+
+  c = add_com ("txbreak", class_breakpoint, tbreak_at_finish_command,
+	       "Set temporary breakpoint at procedure exit.  Either there should\n\
+be no argument or the argument must be a depth.\n");
+  c->completer = location_completer;
+
+  if (xdb_commands)
+    add_com ("bx", class_breakpoint, break_at_finish_at_depth_command,
+	     "Set breakpoint at procedure exit.  Either there should\n\
+be no argument or the argument must be a depth.\n");
 }
 
 /* Copy the function value from VALBUF into the proper location

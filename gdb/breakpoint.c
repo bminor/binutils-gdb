@@ -4961,13 +4961,13 @@ break_command (char *arg, int from_tty)
   break_command_1 (arg, 0, from_tty);
 }
 
-static void
+void
 break_at_finish_command (char *arg, int from_tty)
 {
   break_at_finish_command_1 (arg, 0, from_tty);
 }
 
-static void
+void
 break_at_finish_at_depth_command (char *arg, int from_tty)
 {
   break_at_finish_at_depth_command_1 (arg, 0, from_tty);
@@ -4979,7 +4979,7 @@ tbreak_command (char *arg, int from_tty)
   break_command_1 (arg, BP_TEMPFLAG, from_tty);
 }
 
-static void
+void
 tbreak_at_finish_command (char *arg, int from_tty)
 {
   break_at_finish_command_1 (arg, BP_TEMPFLAG, from_tty);
@@ -7357,11 +7357,6 @@ so it will be deleted when hit.  Equivalent to \"break\" followed\n\
 by using \"enable delete\" on the breakpoint number.");
   c->completer = location_completer;
 
-  c = add_com ("txbreak", class_breakpoint, tbreak_at_finish_command,
-	       "Set temporary breakpoint at procedure exit.  Either there should\n\
-be no argument or the argument must be a depth.\n");
-  c->completer = location_completer;
-
   c = add_com ("hbreak", class_breakpoint, hbreak_command,
 	       "Set a hardware assisted  breakpoint. Args like \"break\" command.\n\
 Like \"break\" except the breakpoint requires hardware support,\n\
@@ -7493,30 +7488,10 @@ Do \"help breakpoints\" for info on other commands dealing with breakpoints.", N
   add_com_alias ("bre", "break", class_run, 1);
   add_com_alias ("brea", "break", class_run, 1);
 
-  add_com ("xbreak", class_breakpoint, break_at_finish_command,
-	   concat ("Set breakpoint at procedure exit. \n\
-Argument may be function name, or \"*\" and an address.\n\
-If function is specified, break at end of code for that function.\n\
-If an address is specified, break at the end of the function that contains \n\
-that exact address.\n",
-		   "With no arg, uses current execution address of selected stack frame.\n\
-This is useful for breaking on return to a stack frame.\n\
-\n\
-Multiple breakpoints at one place are permitted, and useful if conditional.\n\
-\n\
-Do \"help breakpoints\" for info on other commands dealing with breakpoints.", NULL));
-  add_com_alias ("xb", "xbreak", class_breakpoint, 1);
-  add_com_alias ("xbr", "xbreak", class_breakpoint, 1);
-  add_com_alias ("xbre", "xbreak", class_breakpoint, 1);
-  add_com_alias ("xbrea", "xbreak", class_breakpoint, 1);
-
-  if (xdb_commands)
+ if (xdb_commands)
     {
       add_com_alias ("ba", "break", class_breakpoint, 1);
       add_com_alias ("bu", "ubreak", class_breakpoint, 1);
-      add_com ("bx", class_breakpoint, break_at_finish_at_depth_command,
-	       "Set breakpoint at procedure exit.  Either there should\n\
-be no argument or the argument must be a depth.\n");
     }
 
   if (dbx_commands)
