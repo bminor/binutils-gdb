@@ -1,3 +1,8 @@
+Fri Oct 29 11:11:14 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* objdump.c (info): Rename to formats_info.
+	(dump_stabs_1): Better comments and formatting.
+
 Thu Oct 28 19:43:16 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	* ar.c (main): Always create the archive when quick appending,

@@ -20,6 +20,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "getopt.h"
+#include "bucomm.h"
 #include <stdio.h>
 #include <ctype.h>
 #include "dis-asm.h"
@@ -30,15 +31,13 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "elf/internal.h"
 extern Elf_Internal_Shdr *bfd_elf_find_section();
 
-extern char *xmalloc ();
 #ifndef FPRINTF_ALREADY_DECLARED
 extern int fprintf PARAMS ((FILE *, CONST char *, ...));
 #endif
 
 char *default_target = NULL;	/* default at runtime */
 
-extern *program_version;
-char *program_name = NULL;
+extern char *program_version;
 
 int show_version = 0;		/* show the version number */
 int dump_section_contents;	/* -s */
@@ -50,7 +49,7 @@ int dump_ar_hdrs;		/* -a */
 int with_line_numbers;		/* -l */
 int dump_stab_section_info;	/* --stabs */
 boolean disassemble;		/* -d */
-boolean info;			/* -i */
+boolean formats_info;		/* -i */
 char *only;			/* -j secname */
 
 struct objdump_disasm_info {
@@ -782,7 +781,7 @@ dump_stabs_1 (abfd, name1, name2)
   /* Loop through all symbols and print them.
 
      We start the index at -1 because there is a dummy symbol on
-     the front of Sun's stabs-in-elf sections.  */
+     the front of stabs-in-{coff,elf} sections that supplies sizes. */
 
   for (i = -1; stabs < stabs_end; stabs++, i++)
     {
@@ -801,14 +800,16 @@ dump_stabs_1 (abfd, name1, name2)
 	  file_string_table_offset = next_file_string_table_offset;
 	  next_file_string_table_offset += stabs->n_value;
 	}
-
-      /* Now, using the possibly updated string table offset, print the
-	 string (if any) associated with this symbol.  */
-
-      if ((stabs->n_strx + file_string_table_offset) < stabstr_size)
-	printf (" %s", &strtab[stabs->n_strx + file_string_table_offset]);
       else
-        printf (" *");
+	{
+	  /* Now, using the possibly updated string table offset, print the
+	     string (if any) associated with this symbol.  */
+
+	  if ((stabs->n_strx + file_string_table_offset) < stabstr_size)
+	    printf (" %s", &strtab[stabs->n_strx + file_string_table_offset]);
+	  else
+	    printf (" *");
+	}
     }
   printf ("\n\n");
 }
@@ -1238,7 +1239,7 @@ main (argc, argv)
 	  dump_file_header = true;
 	  break;
 	case 'i':
-	  info = true;
+	  formats_info = true;
 	  break;
 	case 'x':
 	  dump_symtab = 1;
@@ -1284,7 +1285,7 @@ main (argc, argv)
   if (seenflag == false)
     usage (stderr, 1);
 
-  if (info)
+  if (formats_info)
     {
       display_info ();
     }
