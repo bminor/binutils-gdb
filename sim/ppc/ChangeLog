@@ -1,3 +1,14 @@
+2002-01-04  matthew green  <mrg@redhat.com>
+
+	* bits.c (LSMASKED64): New inline function.
+	(LSEXTRACTED64): Likewise.
+	* bits.h (_LSB_POS, _LSMASKn, LSMASK64): New macros from
+	sim/common/sim-bits.h
+	(LSMASKED64, LSEXTRACTED64): New functions definitions.
+	* Makefile.in (sim-bits.o): Remove target.
+
+	* main.c (zalloc): Fix typo in error message.
+
 2001-12-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.in (sim_fpu): Don't add sim-bits.o.

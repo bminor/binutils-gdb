@@ -248,7 +248,7 @@ zalloc(long size)
 {
   void *memory = malloc(size);
   if (memory == NULL)
-    error("zmalloc failed\n");
+    error("zalloc failed\n");
   memset(memory, 0, size);
   return memory;
 }

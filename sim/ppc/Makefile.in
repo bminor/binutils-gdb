@@ -429,9 +429,6 @@ targ-map.o: targ-map.c targ-vals.h
 sim-fpu.o: $(srcdir)/../common/sim-fpu.c config.h tconfig.h
 	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-fpu.c 
 
-sim-bits.o: $(srcdir)/../common/sim-bits.c config.h tconfig.h
-	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-bits.c 
-
 tconfig.h:
 	rm -f tconfig.h
 	echo > tconfig.h
