@@ -1,5 +1,15 @@
 2003-04-28  H.J. Lu <hjl@gnu.org>
 
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Relax ldxmov during
+	the relax finalize pass.
+
+	* section.c (struct sec): Add need_finalize_relax and remove
+	flag11.
+	(STD_SECTION): Update struct sec initializer.
+	* bfd-in2.h: Regenerated.
+
+2003-04-28  H.J. Lu <hjl@gnu.org>
+
 	* elflink.h (elf_merge_symbol): Call elf_backend_copy_indirect_symbol
 	to copy any information related to dynamic linking when we flip
 	the indirection.

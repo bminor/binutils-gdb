@@ -329,6 +329,7 @@ main (argc, argv)
   link_info.spare_dynamic_tags = 5;
   link_info.flags = (bfd_vma) 0;
   link_info.flags_1 = (bfd_vma) 0;
+  link_info.relax_finalizing = FALSE;
 
   ldfile_add_arch ("");
 

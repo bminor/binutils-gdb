@@ -1,3 +1,10 @@
+2003-04-28  H.J. Lu <hjl@gnu.org>
+
+	* ldlang.c (lang_process): Add the relax finalize pass.
+
+	* ldmain.c (main): Initialize link_info.relax_finalizing to
+	FALSE.
+
 2003-04-24  Roland McGrath  <roland@redhat.com>
 
 	* ldgram.y (phdr_type): Grok PT_TLS and PT_GNU_EH_FRAME names.

@@ -1291,8 +1291,10 @@ typedef struct sec
   /* Bits used by various backends.  */
   unsigned int has_tls_reloc:1;
 
+  /* Nonzero if this section needs the relax finalize pass.  */
+  unsigned int need_finalize_relax:1;
+
   /* Usused bits.  */
-  unsigned int flag11:1;
   unsigned int flag12:1;
   unsigned int flag13:1;
   unsigned int flag14:1;
