@@ -1,3 +1,24 @@
+2002-11-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* blockframe.c: Include "dummy-frame.h".
+	(struct dummy_frame, dummy_frame_stack)
+	(generic_find_dummy_frame, deprecated_generic_find_dummy_frame)
+	(generic_pc_in_call_dummy, deprecated_read_register_dummy)
+	(generic_push_dummy_frame, generic_save_dummy_frame_tos)
+	(generic_save_call_dummy_addr, generic_pop_current_frame)
+	(generic_pop_dummy_frame, generic_fix_call_dummy)
+	(generic_fix_call_dummy, generic_call_dummy_register_unwind): Move
+	dummy frame code from here...
+	* dummy-frame.c: ...to here.  New file.
+	* dummy-frame.h: New file.
+	(generic_call_dummy_register_unwind): Declare.
+	(generic_find_dummy_frame): Declare.
+	* Makefile.in (SFILES): Add dummy-frame.c.
+	(dummy-frame.o): Specify dependencies.
+	(dummy_frame_h): Define.
+	(COMMON_OBS): Add dummy-frame.o.
+	(blockframe.o): Update dependencies.
+
 2002-11-08  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (read_func_scope): Restore local_symbols and

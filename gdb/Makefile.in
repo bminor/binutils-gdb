@@ -535,7 +535,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	charset.c cli-out.c coffread.c complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-valprint.c \
-	dbxread.c demangle.c disasm.c doublest.c dwarfread.c dwarf2read.c \
+	dbxread.c demangle.c disasm.c doublest.c \
+	dummy-frame.c dwarfread.c dwarf2read.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c frame.c \
 	gdbarch.c arch-utils.c gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
@@ -640,6 +641,7 @@ defs_h = defs.h $(config_h) $(gdb_locale_h) $(gdb_signals_h) $(ansidecl_h) \
 disasm_h = disasm.h
 doublest_h = doublest.h $(floatformat_h)
 dst_h = dst.h
+dummy_frame_h = dummy-frame.h
 dwarf2cfi_h = dwarf2cfi.h
 environ_h = environ.h
 event_loop_h = event-loop.h
@@ -829,7 +831,7 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
-	charset.o disasm.o \
+	charset.o disasm.o dummy-frame.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \
@@ -1532,7 +1534,8 @@ ax-general.o: ax-general.c $(defs_h) $(ax_h) $(value_h) $(gdb_string_h)
 bcache.o: bcache.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(gdb_string_h)
 blockframe.o: blockframe.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(frame_h) $(gdbcore_h) $(value_h) $(target_h) \
-	$(inferior_h) $(annotate_h) $(regcache_h) $(gdb_assert_h)
+	$(inferior_h) $(annotate_h) $(regcache_h) $(gdb_assert_h) \
+	$(dummy_frame_h)
 breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcore_h) $(gdbcmd_h) $(value_h) \
 	$(command_h) $(inferior_h) $(gdbthread_h) $(target_h) $(language_h) \
@@ -1627,6 +1630,8 @@ doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
 dsrec.o: dsrec.c $(defs_h) $(serial_h) $(srec_h)
 # OBSOLETE dstread.o: dstread.c
+dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
+	$(frame_h) $(inferior_h) $(gdb_assert_h)
 dve3900-rom.o: dve3900-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(inferior_h) $(command_h) $(gdb_string_h) $(regcache_h)
 dwarf2cfi.o: dwarf2cfi.c $(defs_h) $(gdbcore_h) $(symtab_h) $(symfile_h) \
