@@ -753,11 +753,12 @@ typedef struct
        bfd     *abfd,
        PTR     internal_filehdr,
        PTR     internal_aouthdr));
- flagword (*_bfd_styp_to_sec_flags_hook) PARAMS ((
+ boolean (*_bfd_styp_to_sec_flags_hook) PARAMS ((
        bfd     *abfd,
        PTR     internal_scnhdr,
        const char *name,
-       asection *section));
+       asection *section,
+       flagword *flags_ptr));
  void (*_bfd_set_alignment_hook) PARAMS ((
        bfd     *abfd,
        asection *sec,
@@ -911,9 +912,9 @@ typedef struct
 #define bfd_coff_mkobject_hook(abfd, filehdr, aouthdr)\
         ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook) (abfd, filehdr, aouthdr))
 
-#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name, section)\
+#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name, section, flags_ptr)\
         ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook)\
-         (abfd, scnhdr, name, section))
+         (abfd, scnhdr, name, section, flags_ptr))
 
 #define bfd_coff_set_alignment_hook(abfd, sec, scnhdr)\
         ((coff_backend_info (abfd)->_bfd_set_alignment_hook) (abfd, sec, scnhdr))

@@ -371,16 +371,17 @@ ecoff_sec_to_styp_flags (name, flags)
 
 /* Get the BFD flags to use for a section.  */
 
-flagword
-_bfd_ecoff_styp_to_sec_flags (abfd, hdr, name, section)
+boolean
+_bfd_ecoff_styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR hdr;
      const char *name ATTRIBUTE_UNUSED;
      asection *section ATTRIBUTE_UNUSED;
+     flagword * flags_ptr;
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
-  flagword sec_flags=0;
+  flagword sec_flags = 0;
 
   if (styp_flags & STYP_NOLOAD)
     sec_flags |= SEC_NEVER_LOAD;
@@ -422,29 +423,20 @@ _bfd_ecoff_styp_to_sec_flags (abfd, hdr, name, section)
     }
   else if ((styp_flags & STYP_BSS)
 	   || (styp_flags & STYP_SBSS))
-    {
-      sec_flags |= SEC_ALLOC;
-    }
+    sec_flags |= SEC_ALLOC;
   else if ((styp_flags & STYP_INFO) || styp_flags == STYP_COMMENT)
-    {
-      sec_flags |= SEC_NEVER_LOAD;
-    }
+    sec_flags |= SEC_NEVER_LOAD;
   else if ((styp_flags & STYP_LITA)
 	   || (styp_flags & STYP_LIT8)
 	   || (styp_flags & STYP_LIT4))
-    {
-      sec_flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
-    }
+    sec_flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
   else if (styp_flags & STYP_ECOFF_LIB)
-    {
-      sec_flags |= SEC_COFF_SHARED_LIBRARY;
-    }
+    sec_flags |= SEC_COFF_SHARED_LIBRARY;
   else
-    {
-      sec_flags |= SEC_ALLOC | SEC_LOAD;
-    }
+    sec_flags |= SEC_ALLOC | SEC_LOAD;
 
-  return sec_flags;
+  * flags_ptr = sec_flags;
+  return true;
 }
 
 /* Read in the symbolic header for an ECOFF object file.  */

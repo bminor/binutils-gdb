@@ -341,7 +341,7 @@ extern PTR _bfd_ecoff_mkobject_hook PARAMS ((bfd *, PTR filehdr, PTR aouthdr));
   ((void (*) PARAMS ((bfd *, asection *, PTR))) bfd_void)
 extern boolean _bfd_ecoff_set_arch_mach_hook PARAMS ((bfd *abfd, PTR filehdr));
 extern flagword _bfd_ecoff_styp_to_sec_flags
-  PARAMS ((bfd *abfd, PTR hdr, const char *name, asection *section));
+  PARAMS ((bfd *, PTR, const char *, asection *, flagword *));
 extern boolean _bfd_ecoff_slurp_symbol_table PARAMS ((bfd *abfd));
 
 /* ECOFF auxiliary information swapping routines.  These are the same

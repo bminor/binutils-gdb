@@ -40,7 +40,6 @@ cofflink.c
 coff-m68k.c
 coff-m88k.c
 coff-mips.c
-coff-pmac.c
 coff-rs6000.c
 coff-sh.c
 coff-sparc.c
@@ -190,6 +189,7 @@ libieee.h
 libnlm.h
 liboasys.h
 libpei.h
+libxcoff.h
 linker.c
 lynx-core.c
 m68k4knetbsd.c

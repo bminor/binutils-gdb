@@ -1,3 +1,17 @@
+2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* coffcode.h (styp_flags_to_sec_flags): Change to a boolean
+	function.  Move flagword result into parameter list.  Remove
+	comment about setting bfd_error_handler to intercept failure
+	results.
+        * coffgen.c (make_a_section_from_file): Examine result of
+	calling bfd_coff_styp_to_sec_flags and pass a failure back to
+	caller.
+        * ecoff.h (styp_flags_to_sec_flags): Change to a boolean
+	function.  Move flagword result into parameter list.
+        * libcoff.h: Regenerate.
+        * libecoff.h: Regenerate.
+
 2001-06-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* aoutx.h (adjust_z_magic): Only pad the tesxt section if the data

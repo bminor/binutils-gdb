@@ -312,8 +312,8 @@ CODE_FRAGMENT
 #define STRING_SIZE_SIZE (4)
 
 static long sec_to_styp_flags PARAMS ((const char *, flagword));
-static flagword styp_to_sec_flags
-  PARAMS ((bfd *, PTR, const char *, asection *));
+static boolean styp_to_sec_flags
+  PARAMS ((bfd *, PTR, const char *, asection *, flagword *));
 static boolean coff_bad_format_hook PARAMS ((bfd *, PTR));
 static void coff_set_custom_section_alignment
   PARAMS ((bfd *, asection *, const struct coff_section_alignment_entry *,
@@ -553,12 +553,13 @@ sec_to_styp_flags (sec_name, sec_flags)
 
 #ifndef COFF_WITH_PE
 
-static flagword
-styp_to_sec_flags (abfd, hdr, name, section)
+static boolean
+styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR hdr;
      const char *name;
      asection *section ATTRIBUTE_UNUSED;
+     flagword *flags_ptr;
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
@@ -566,19 +567,17 @@ styp_to_sec_flags (abfd, hdr, name, section)
 
 #ifdef STYP_BLOCK
   if (styp_flags & STYP_BLOCK)
-      sec_flags |= SEC_BLOCK;
+    sec_flags |= SEC_BLOCK;
 #endif
 
 #ifdef STYP_CLINK
   if (styp_flags & STYP_CLINK)
-      sec_flags |= SEC_CLINK;
+    sec_flags |= SEC_CLINK;
 #endif
 
 #ifdef STYP_NOLOAD
   if (styp_flags & STYP_NOLOAD)
-    {
-      sec_flags |= SEC_NEVER_LOAD;
-    }
+    sec_flags |= SEC_NEVER_LOAD;
 #endif /* STYP_NOLOAD */
 
   /* For 386 COFF, at least, an unloadable text or data section is
@@ -619,9 +618,7 @@ styp_to_sec_flags (abfd, hdr, name, section)
 #endif
     }
   else if (styp_flags & STYP_PAD)
-    {
-      sec_flags = 0;
-    }
+    sec_flags = 0;
   else if (strcmp (name, _TEXT) == 0)
     {
       if (sec_flags & SEC_NEVER_LOAD)
@@ -664,26 +661,19 @@ styp_to_sec_flags (abfd, hdr, name, section)
 #endif
 #ifdef _LIT
   else if (strcmp (name, _LIT) == 0)
-    {
-      sec_flags = SEC_LOAD | SEC_ALLOC | SEC_READONLY;
-    }
+    sec_flags = SEC_LOAD | SEC_ALLOC | SEC_READONLY;
 #endif
   else
-    {
-      sec_flags |= SEC_ALLOC | SEC_LOAD;
-    }
+    sec_flags |= SEC_ALLOC | SEC_LOAD;
 
 #ifdef STYP_LIT			/* A29k readonly text/data section type */
   if ((styp_flags & STYP_LIT) == STYP_LIT)
-    {
-      sec_flags = (SEC_LOAD | SEC_ALLOC | SEC_READONLY);
-    }
+    sec_flags = (SEC_LOAD | SEC_ALLOC | SEC_READONLY);
 #endif /* STYP_LIT */
+
 #ifdef STYP_OTHER_LOAD		/* Other loaded sections */
   if (styp_flags & STYP_OTHER_LOAD)
-    {
-      sec_flags = (SEC_LOAD | SEC_ALLOC);
-    }
+    sec_flags = (SEC_LOAD | SEC_ALLOC);
 #endif /* STYP_SDATA */
 
 #if defined (COFF_LONG_SECTION_NAMES) && defined (COFF_SUPPORT_GNU_LINKONCE)
@@ -697,7 +687,11 @@ styp_to_sec_flags (abfd, hdr, name, section)
     sec_flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 
-  return sec_flags;
+  if (flags_ptr == NULL)
+    return false;
+
+  * flags_ptr = sec_flags;
+  return true;
 }
 
 #else /* COFF_WITH_PE */
@@ -966,16 +960,18 @@ handle_COMDAT (abfd, sec_flags, hdr, name, section)
    required information.  FIXME: Is the COMDAT symbol index used for
    any purpose other than objdump?  */
 
-static flagword
-styp_to_sec_flags (abfd, hdr, name, section)
+static boolean
+styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
      bfd *abfd;
      PTR hdr;
      const char *name;
      asection *section;
+     flagword *flags_ptr;
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
   flagword sec_flags;
+  boolean result = true;
 
   /* Assume read only unless IMAGE_SCN_MEM_WRITE is specified.  */
   sec_flags = SEC_READONLY;
@@ -1070,14 +1066,14 @@ styp_to_sec_flags (abfd, hdr, name, section)
 	  break;	  
 	}
 
-      /* If the section flag was not handled, report it here.  This will allow
-	 users of the BFD library to report a problem but continue executing.
-	 Tools which need to be aware of these problems (such as the linker)
-	 can override the default bfd_error_handler to intercept these reports.  */
+      /* If the section flag was not handled, report it here.  */
       if (unhandled != NULL)
-	(*_bfd_error_handler)
-	  (_("%s (%s): Section flag %s (0x%x) ignored"),
-	   bfd_get_filename (abfd), name, unhandled, flag);
+	{
+	  (*_bfd_error_handler)
+	    (_("%s (%s): Section flag %s (0x%x) ignored"),
+	     bfd_get_filename (abfd), name, unhandled, flag);
+	  result = false;
+	}
     }
 
 #if defined (COFF_LONG_SECTION_NAMES) && defined (COFF_SUPPORT_GNU_LINKONCE)
@@ -1091,7 +1087,10 @@ styp_to_sec_flags (abfd, hdr, name, section)
     sec_flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 
-  return sec_flags;
+  if (flags_ptr)
+    * flags_ptr = sec_flags;
+  
+  return result;
 }
 
 #endif /* COFF_WITH_PE */
@@ -1227,11 +1226,12 @@ dependent COFF routines:
 .       bfd     *abfd,
 .       PTR     internal_filehdr,
 .       PTR     internal_aouthdr));
-. flagword (*_bfd_styp_to_sec_flags_hook) PARAMS ((
+. boolean (*_bfd_styp_to_sec_flags_hook) PARAMS ((
 .       bfd     *abfd,
 .       PTR     internal_scnhdr,
 .       const char *name,
-.       asection *section));
+.       asection *section,
+.       flagword *flags_ptr));
 . void (*_bfd_set_alignment_hook) PARAMS ((
 .       bfd     *abfd,
 .       asection *sec,
@@ -1385,9 +1385,9 @@ dependent COFF routines:
 .#define bfd_coff_mkobject_hook(abfd, filehdr, aouthdr)\
 .        ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook) (abfd, filehdr, aouthdr))
 .
-.#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name, section)\
+.#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name, section, flags_ptr)\
 .        ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook)\
-.         (abfd, scnhdr, name, section))
+.         (abfd, scnhdr, name, section, flags_ptr))
 .
 .#define bfd_coff_set_alignment_hook(abfd, sec, scnhdr)\
 .        ((coff_backend_info (abfd)->_bfd_set_alignment_hook) (abfd, sec, scnhdr))

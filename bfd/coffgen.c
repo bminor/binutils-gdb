@@ -82,6 +82,8 @@ make_a_section_from_file (abfd, hdr, target_index)
 {
   asection *return_section;
   char *name;
+  boolean result = true;
+  flagword flags;
 
   name = NULL;
 
@@ -142,8 +144,12 @@ make_a_section_from_file (abfd, hdr, target_index)
   return_section->userdata = NULL;
   return_section->next = (asection *) NULL;
   return_section->target_index = target_index;
-  return_section->flags = bfd_coff_styp_to_sec_flags_hook (abfd, hdr, name,
-							   return_section);
+
+  if (! bfd_coff_styp_to_sec_flags_hook (abfd, hdr, name, return_section,
+					 & flags))
+    result = false;
+  
+  return_section->flags = flags;
 
   /* At least on i386-coff, the line number count for a shared library
      section must be ignored.  */
@@ -155,7 +161,8 @@ make_a_section_from_file (abfd, hdr, target_index)
   /* FIXME: should this check 'hdr->s_size > 0' */
   if (hdr->s_scnptr != 0)
     return_section->flags |= SEC_HAS_CONTENTS;
-  return true;
+
+  return result;
 }
 
 /* Read in a COFF object and make it into a BFD.  This is used by
