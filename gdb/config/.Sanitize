@@ -44,6 +44,7 @@ i386v-g
 i386v32
 i386v32-g
 i960
+irix3
 isi
 littlemips
 m88k
@@ -79,7 +80,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.3  1991/09/13 03:54:45  gnu
+# Revision 1.4  1991/09/17 06:55:53  grossman
+# sgi/irix config stuff.
+#
+# Revision 1.3  1991/09/13  03:54:45  gnu
 # New Ultracomputer/29000 stuff.
 #
 # Revision 1.2  1991/07/04  21:55:38  gnu
