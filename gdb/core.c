@@ -131,8 +131,8 @@ core_open (filename, from_tty)
 
   if (!bfd_check_format (temp_bfd, bfd_core))
     {
-      bfd_close (temp_bfd);
-      error ("\"%s\" does not appear to be a core dump", filename);
+      make_cleanup (bfd_close, temp_bfd);	/* Do it after the err msg */
+      error ("\"%s\" is not a core dump: %s", filename, bfd_errmsg(bfd_error));
     }
 
   /* Looks semi-reasonable.  Toss the old core file and work on the new.  */
@@ -399,10 +399,10 @@ get_core_registers (regno)
   if (!reg_sec) goto cant;
   size = bfd_section_size (core_bfd, reg_sec);
   the_regs = alloca (size);
-  if (bfd_get_section_contents (core_bfd, reg_sec, the_regs,
-				(unsigned)0, size))
+  if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0, size))
     {
-      fetch_core_registers (the_regs, size, 0);
+      fetch_core_registers (the_regs, size, 0,
+			    (unsigned) bfd_section_vma (abfd,reg_sec));
     }
   else
     {
@@ -416,10 +416,11 @@ cant:
   if (reg_sec) {
     size = bfd_section_size (core_bfd, reg_sec);
     the_regs = alloca (size);
-    if (bfd_get_section_contents (core_bfd, reg_sec, the_regs,
-				  (unsigned)0, size))
+    if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0,
+				  size))
       {
-	fetch_core_registers (the_regs, size, 2);
+	fetch_core_registers (the_regs, size, 2,
+			      (unsigned) bfd_section_vma (abfd,reg_sec));
       }
     else
       {
