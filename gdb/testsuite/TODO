@@ -10,8 +10,10 @@ test, but it hasn't been tried on a wide range of architectures).
 
 nodebug.exp--test printing variables.
 
-Test printing of structures passed by value, for the 7th, 8th, and
-9th arguments (PR 1714).
+Test printing of structures passed by value, for the 7th, 8th, and 9th
+arguments (PR 1714).  Test printing structure arguments of
+2,4,6,8,12,16,and 20 bytes.  Same for structure return of all those
+sizes ("return", "finish", and call function).
 
 Get crossload tests to use --with-targets and reenable them.
 
