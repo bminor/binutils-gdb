@@ -2727,15 +2727,10 @@ step_into_function (struct execution_control_state *ecs)
   /* If the prologue ends in the middle of a source line, continue to
      the end of that source line (if it is still within the function).
      Otherwise, just go to end of prologue.  */
-#ifdef PROLOGUE_FIRSTLINE_OVERLAP
-  /* no, don't either.  It skips any code that's legitimately on the
-     first line.  */
-#else
   if (ecs->sal.end
       && ecs->sal.pc != ecs->stop_func_start
       && ecs->sal.end < ecs->stop_func_end)
     ecs->stop_func_start = ecs->sal.end;
-#endif
 
   if (ecs->stop_func_start == stop_pc)
     {

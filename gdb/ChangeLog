@@ -1,5 +1,11 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* config/powerpc/tm-linux.h (PROLOGUE_FIRSTLINE_OVERLAP): Delete
+	#if 0'ed macro.
+	* infrun.c (step_into_function): Delete #ifdef
+	PROLOGUE_FIRSTLINE_OVERLAP code.
+	* symtab.c (find_function_start_sal): Ditto.
+
 	* remote-rdp.c: Update copyright.
 	(rdp_init): #if 0 references to "target_byte_order".
 
