@@ -1,3 +1,14 @@
+2002-10-23  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* configure.in: Define SKIP_ZEROES as 32 for tic4x target in
+	order to ensure proper disassembly of the valid 0-value opcode.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/binutils.pot: Regenerate.
+
 2002-10-23  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* MAINTAINERS: Add self as SH maintainer.
