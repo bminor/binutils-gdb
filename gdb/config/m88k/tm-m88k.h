@@ -258,6 +258,9 @@ extern CORE_ADDR skip_prologue ();
 
    * cr06 is invalid  */
 
+/* Note that the Harris Unix kernels emulate the m88100's behavior on
+   the m88110.  */
+
 #define SXIP_REGNUM 35		/* On m88100, Contains Shadow Execute
 				   Instruction Pointer.  */
 #define SNIP_REGNUM 36		/* On m88100, Contains Shadow Next
@@ -615,8 +618,8 @@ extern void m88k_push_dummy_frame();
    -- Kevin Buettner
 */
  
-#define TARGET_WRITE_PC(val)	{				\
-  write_register(SXIP_REGNUM, (long) val);			\
-  write_register(SNIP_REGNUM, (long) val | 2);			\
-  write_register(SFIP_REGNUM, ((long) val | 2) + 4);		\
+#define TARGET_WRITE_PC(val, pid) { \
+  write_register_pid(SXIP_REGNUM, (long) val, pid); \
+  write_register_pid(SNIP_REGNUM, (long) val | 2, pid); \
+  write_register_pid(SFIP_REGNUM, ((long) val | 2) + 4, pid); \
 }
