@@ -1,3 +1,8 @@
+Sat Dec  7 18:13:11 1991  Fred Fish  (fnf at cygnus.com)
+
+	* gmalloc.c:  Use macros to hide some of the ugly casting required
+	in the previously applied fix for pointers with high bits set.
+
 Sat Dec  7 16:49:35 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in:  Roll VERSION to 4.3.1.

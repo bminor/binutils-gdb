@@ -270,6 +270,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BLOCKSIZE	(1 << BLOCKLOG)
 #define BLOCKIFY(SIZE)	(((SIZE) + BLOCKSIZE - 1) / BLOCKSIZE)
 
+/* The difference between two pointers is a signed int.  On machines where
+   the data addresses have the high bit set, we need to ensure that the
+   difference becomes an unsigned int when we are using the address as an
+   integral value.  In addition, when using with the '%' operator, the
+   sign of the result is machine dependent for negative values, so force
+   it to be treated as an unsigned int. */
+
+#define ADDR2UINT(addr)	((unsigned int) ((char *) (addr) - (char *) NULL))
+#define RESIDUAL(addr)	((unsigned int) (ADDR2UINT (addr) % BLOCKSIZE))
+
 /* Determine the amount of memory spanned by the initial heap table
    (not an absolute limit).  */
 #define HEAP		(INT_BIT > 16 ? 4194304 : 65536)
@@ -558,8 +568,7 @@ DEFUN(__free, (ptr), PTR ptr)
 	     it is the first free fragment of this block. */
 	  prev = (struct list *) ptr;
 	  _heapinfo[block].busy.info.frag.nfree = 1;
-	  _heapinfo[block].busy.info.frag.first = (unsigned int)
-	    (((unsigned int)((char *) ptr - (char *) NULL)) % BLOCKSIZE >> type);
+	  _heapinfo[block].busy.info.frag.first = RESIDUAL (ptr) >> type;
 	  prev->next = _fraghead[type].next;
 	  prev->prev = &_fraghead[type];
 	  prev->prev->next = prev;
@@ -656,7 +665,7 @@ DEFUN(align, (size), size_t size)
   unsigned int adj;
 
   result = (*__morecore)(size);
-  adj = (unsigned int) ((unsigned int)((char *) result - (char *) NULL)) % BLOCKSIZE;
+  adj = RESIDUAL (result);
   if (adj != 0)
     {
       adj = BLOCKSIZE - adj;
@@ -769,8 +778,8 @@ DEFUN(malloc, (size), size_t size)
 	    next->next->prev = next->prev;
 	  block = BLOCK(result);
 	  if (--_heapinfo[block].busy.info.frag.nfree != 0)
-	    _heapinfo[block].busy.info.frag.first = (unsigned int)
-	      (((unsigned int)((char *) next->next - (char *) NULL)) % BLOCKSIZE) >> log;
+	    _heapinfo[block].busy.info.frag.first =
+	      RESIDUAL (next->next) >> log;
 
 	  /* Update the statistics.  */
 	  ++_chunks_used;
