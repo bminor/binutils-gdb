@@ -3,29 +3,22 @@
 # and then Sanitize.
 
 ===================================================================
-RCS file: /local/cvsfiles/devo/gdb/.Sanitize,v
-retrieving revision 2.63
-diff -c -r2.63 .Sanitize
-*** 2.63	1992/07/14 07:51:45
---- .Sanitize	1992/07/16 22:43:53
+*** config/ncr3000.mh.orig	Mon Jun 15 12:25:13 1992
+--- config/ncr3000.mh	Mon Aug 24 19:22:31 1992
 ***************
-*** 77,82 ****
---- 77,85 ----
-  doc
-  dwarfread.c
-  elfread.c
-+ energize
-+ energize.c
-+ energize.h
-  environ.c
-  environ.h
-  eval.c
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/Makefile.in,v
-retrieving revision 1.172
-diff -c -r1.172 Makefile.in
-*** 1.172	1992/07/17 23:53:54
---- Makefile.in	1992/07/18 00:11:14
+*** 38,40 ****
+--- 38,46 ----
+  # The /usr/ucb/install program is incompatible (complains about unknown
+  # group staff).  Use good old cp...
+  INSTALL = cp
++ 
++ # These are the libs that are needed for the Energize version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lc \
++ 	/usr/ucblib/libucb.a -lnsl
+*** Makefile.in.orig	Tue Aug 18 14:59:22 1992
+--- Makefile.in	Mon Aug 24 19:24:01 1992
 ***************
 *** 123,128 ****
 --- 123,135 ----
@@ -54,7 +47,7 @@ diff -c -r1.172 Makefile.in
   ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
   
-  VERSION = 4.6.1
+  VERSION = 4.6.3
   DIST=gdb
 --- 162,174 ----
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
@@ -68,44 +61,44 @@ diff -c -r1.172 Makefile.in
 ! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
 ! 	   ${ENERGIZE_LIB}
   
-  VERSION = 4.6.1
+  VERSION = 4.6.3
   DIST=gdb
 ***************
-*** 190,196 ****
+*** 203,209 ****
   	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
-  	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
+  	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
 ! 	 minsyms.c mipsread.c maint.c
   
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
---- 198,204 ----
+--- 211,217 ----
   	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
-  	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
+  	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
 ! 	 minsyms.c mipsread.c maint.c energize.c
   
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
 ***************
-*** 276,282 ****
+*** 289,295 ****
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
 !     buildsym.o objfiles.o minsyms.o maint.o demangle.o \
-      dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
+      dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
+      stabsread.o
   
-  RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
---- 284,290 ----
+--- 297,303 ----
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
 !     buildsym.o objfiles.o minsyms.o maint.o demangle.o energize.o \
-      dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
+      dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
+      stabsread.o
   
-  RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 ***************
-*** 289,295 ****
+*** 303,309 ****
   
   NTSSTART = kdb-start.o
   
@@ -113,7 +106,7 @@ diff -c -r1.172 Makefile.in
   
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
---- 297,303 ----
+--- 311,317 ----
   
   NTSSTART = kdb-start.o
   
@@ -122,8 +115,8 @@ diff -c -r1.172 Makefile.in
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
 ***************
-*** 343,348 ****
---- 351,370 ----
+*** 363,368 ****
+--- 371,390 ----
   	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
   	echo "Load .c corresponding to:" $(DEPFILES)
   
@@ -145,7 +138,7 @@ diff -c -r1.172 Makefile.in
   # This is useful when debugging GDB, because some Unix's don't let you run GDB
   # on itself without copying the executable.  So "make gdb1" will make
 ***************
-*** 643,649 ****
+*** 652,658 ****
   	     -e '/extern.*free/d' \
   	  < y.tab.c > m2-exp.tab.c
   	-rm y.tab.c
@@ -153,13 +146,9 @@ diff -c -r1.172 Makefile.in
   
   main.o:	${srcdir}/main.c
   	${CC} -c ${INTERNAL_CFLAGS} -I${READLINE_DIR} $<
---- 665,670 ----
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/breakpoint.c,v
-retrieving revision 1.40
-diff -c -r1.40 breakpoint.c
-*** 1.40	1992/07/16 23:23:02
---- breakpoint.c	1992/07/16 23:23:58
+--- 674,679 ----
+*** breakpoint.c.orig	Sun Aug 23 11:09:10 1992
+--- breakpoint.c	Mon Aug 24 19:22:26 1992
 ***************
 *** 273,278 ****
 --- 273,279 ----
@@ -219,8 +208,8 @@ diff -c -r1.40 breakpoint.c
   	  else
   	    {
 ***************
-*** 1366,1371 ****
---- 1370,1377 ----
+*** 1373,1378 ****
+--- 1377,1384 ----
   mention (b)
        struct breakpoint *b;
   {
@@ -230,8 +219,8 @@ diff -c -r1.40 breakpoint.c
       {
       case bp_watchpoint:
 ***************
-*** 2113,2118 ****
---- 2119,2126 ----
+*** 2120,2125 ****
+--- 2126,2133 ----
     register struct breakpoint *b;
     register bpstat bs;
   
@@ -241,8 +230,8 @@ diff -c -r1.40 breakpoint.c
         target_remove_breakpoint(bpt->address, bpt->shadow_contents);
   
 ***************
-*** 2284,2289 ****
---- 2292,2298 ----
+*** 2296,2301 ****
+--- 2304,2310 ----
       if (b->number == bptnum)
         {
   	b->ignore_count = count;
@@ -251,7 +240,7 @@ diff -c -r1.40 breakpoint.c
   	  return;
   	else if (count == 0)
 ***************
-*** 2308,2314 ****
+*** 2320,2326 ****
     struct breakpoint *b;
   
     ALL_BREAKPOINTS (b)
@@ -259,7 +248,7 @@ diff -c -r1.40 breakpoint.c
   }
   
   /* Command to set ignore-count of breakpoint N to COUNT.  */
---- 2317,2326 ----
+--- 2329,2338 ----
     struct breakpoint *b;
   
     ALL_BREAKPOINTS (b)
@@ -271,8 +260,8 @@ diff -c -r1.40 breakpoint.c
   
   /* Command to set ignore-count of breakpoint N to COUNT.  */
 ***************
-*** 2375,2380 ****
---- 2387,2394 ----
+*** 2387,2392 ****
+--- 2399,2406 ----
   {
     bpt->enable = enabled;
   
@@ -282,8 +271,8 @@ diff -c -r1.40 breakpoint.c
       printf ("breakpoint #%d enabled\n", bpt->number);
   
 ***************
-*** 2422,2427 ****
---- 2436,2443 ----
+*** 2434,2439 ****
+--- 2448,2455 ----
   disable_breakpoint (bpt)
        struct breakpoint *bpt;
   {
@@ -292,12 +281,8 @@ diff -c -r1.40 breakpoint.c
     bpt->enable = disabled;
   
     if (xgdb_verbose && bpt->type == bp_breakpoint)
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/command.c,v
-retrieving revision 1.18
-diff -c -r1.18 command.c
-*** 1.18	1992/07/10 17:22:30
---- command.c	1992/07/16 22:44:12
+*** command.c.orig	Fri Jul 10 10:22:30 1992
+--- command.c	Mon Aug 24 19:22:26 1992
 ***************
 *** 1148,1154 ****
       }
@@ -315,12 +300,8 @@ diff -c -r1.18 command.c
         ;
     else
       error ("Fork failed");
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/configure.in,v
-retrieving revision 1.51
-diff -c -r1.51 configure.in
-*** 1.51	1992/07/07 07:22:33
---- configure.in	1992/07/16 22:44:14
+*** configure.in.orig	Tue Aug 18 11:35:50 1992
+--- configure.in	Mon Aug 24 19:22:26 1992
 ***************
 *** 1,4 ****
 ! configdirs="doc"
@@ -332,29 +313,21 @@ diff -c -r1.51 configure.in
   srcname="GDB"
   srctrigger=main.c
   target_dependent=true
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/defs.h,v
-retrieving revision 1.43
-diff -c -r1.43 defs.h
-*** 1.43	1992/07/09 04:40:24
---- defs.h	1992/07/16 22:48:44
+*** defs.h.orig	Mon Jul 20 21:14:28 1992
+--- defs.h	Mon Aug 24 19:22:27 1992
 ***************
-*** 805,808 ****
---- 805,810 ----
+*** 808,811 ****
+--- 808,813 ----
   #define MAINTENANCE_CMDS 1
   #endif
   
 + #include "energize.h"
 + 
   #endif /* !defined (DEFS_H) */
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/inflow.c,v
-retrieving revision 1.27
-diff -c -r1.27 inflow.c
-*** 1.27	1992/07/04 03:21:21
---- inflow.c	1992/07/05 12:58:31
+*** inflow.c.orig	Wed Jul 22 21:41:45 1992
+--- inflow.c	Mon Aug 24 19:22:27 1992
 ***************
-*** 81,87 ****
+*** 89,95 ****
   static short pgrp_inferior;
   static short pgrp_ours;
   # else /* not def SHORT_PGRP */
@@ -362,7 +335,7 @@ diff -c -r1.27 inflow.c
   static int pgrp_ours;
   # endif /* not def SHORT_PGRP */
   #else /* not def TIOCGPGRP */
---- 81,87 ----
+--- 89,95 ----
   static short pgrp_inferior;
   static short pgrp_ours;
   # else /* not def SHORT_PGRP */
@@ -370,15 +343,11 @@ diff -c -r1.27 inflow.c
   static int pgrp_ours;
   # endif /* not def SHORT_PGRP */
   #else /* not def TIOCGPGRP */
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/infrun.c,v
-retrieving revision 1.52
-diff -c -r1.52 infrun.c
-*** 1.52	1992/07/04 03:21:24
---- infrun.c	1992/07/05 13:46:46
+*** infrun.c.orig	Mon Aug 24 12:00:30 1992
+--- infrun.c	Mon Aug 24 19:22:28 1992
 ***************
-*** 617,622 ****
---- 617,623 ----
+*** 633,638 ****
+--- 633,639 ----
      Here we must get it up to actual execution of the real program.  */
   
     inferior_pid = pid;		/* Needed for wait_for_inferior stuff below */
@@ -387,8 +356,8 @@ diff -c -r1.52 infrun.c
     clear_proceed_status ();
   
 ***************
-*** 755,760 ****
---- 756,762 ----
+*** 771,776 ****
+--- 772,778 ----
   
     attach (pid);
     inferior_pid = pid;
@@ -396,12 +365,8 @@ diff -c -r1.52 infrun.c
     push_target (&child_ops);
   
     mark_breakpoints_out ();
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/inftarg.c,v
-retrieving revision 1.11
-diff -c -r1.11 inftarg.c
-*** 1.11	1992/03/29 23:21:27
---- inftarg.c	1992/07/05 13:48:05
+*** inftarg.c.orig	Sun Mar 29 15:21:27 1992
+--- inftarg.c	Mon Aug 24 19:22:28 1992
 ***************
 *** 58,64 ****
   #ifdef USE_PROC_FS
@@ -419,12 +384,8 @@ diff -c -r1.11 inftarg.c
   #endif
       if (pid == -1)		/* No more children to wait for */
         {
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/main.c,v
-retrieving revision 1.51
-diff -c -r1.51 main.c
-*** 1.51	1992/07/10 17:22:33
---- main.c	1992/07/17 23:22:19
+*** main.c.orig	Fri Jul 10 10:22:33 1992
+--- main.c	Mon Aug 24 19:22:29 1992
 ***************
 *** 426,431 ****
 --- 426,432 ----
@@ -539,12 +500,8 @@ diff -c -r1.51 main.c
     fflush (stdout);
   }
   
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/printcmd.c,v
-retrieving revision 1.30
-diff -c -r1.30 printcmd.c
-*** 1.30	1992/07/06 00:22:52
---- printcmd.c	1992/07/16 22:44:42
+*** printcmd.c.orig	Sun Jul  5 17:22:52 1992
+--- printcmd.c	Mon Aug 24 19:22:29 1992
 ***************
 *** 778,783 ****
 --- 778,792 ----
@@ -595,12 +552,8 @@ diff -c -r1.30 printcmd.c
         first = 0;
       }
   
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/stack.c,v
-retrieving revision 1.33
-diff -c -r1.33 stack.c
-*** 1.33	1992/07/04 03:21:45
---- stack.c	1992/07/05 14:13:23
+*** stack.c.orig	Fri Jul  3 20:21:45 1992
+--- stack.c	Mon Aug 24 19:22:30 1992
 ***************
 *** 159,165 ****
         if (addressprint)
@@ -680,12 +633,8 @@ diff -c -r1.33 stack.c
       }
     wrap_here ("   ");
     if (sal.symtab)
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/symfile.c,v
-retrieving revision 1.55
-diff -c -r1.55 symfile.c
-*** 1.55	1992/07/04 13:58:46
---- symfile.c	1992/07/05 14:14:12
+*** symfile.c.orig	Sun Aug 23 11:09:17 1992
+--- symfile.c	Mon Aug 24 19:22:30 1992
 ***************
 *** 611,616 ****
 --- 611,618 ----
@@ -697,12 +646,8 @@ diff -c -r1.55 symfile.c
     return (objfile);
   }
   
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/utils.c,v
-retrieving revision 1.54
-diff -c -r1.54 utils.c
-*** 1.54	1992/07/09 04:40:35
---- utils.c	1992/07/16 22:44:50
+*** utils.c.orig	Sun Aug 23 11:09:21 1992
+--- utils.c	Mon Aug 24 19:22:31 1992
 ***************
 *** 694,700 ****
     register int ans2;
@@ -721,8 +666,8 @@ diff -c -r1.54 utils.c
   
     while (1)
 ***************
-*** 701,721 ****
-      {
+*** 703,723 ****
+        fflush (stdout);
         va_start (args);
         ctlstr = va_arg (args, char *);
         vfprintf_filtered (stdout, ctlstr, args);
@@ -743,8 +688,8 @@ diff -c -r1.54 utils.c
         if (answer >= 'a')
   	answer -= 040;
         if (answer == 'Y')
---- 701,732 ----
-      {
+--- 703,734 ----
+        fflush (stdout);
         va_start (args);
         ctlstr = va_arg (args, char *);
 +       energize_query (ctlstr, args);
@@ -777,8 +722,8 @@ diff -c -r1.54 utils.c
   	answer -= 040;
         if (answer == 'Y')
 ***************
-*** 723,728 ****
---- 734,740 ----
+*** 725,730 ****
+--- 736,742 ----
         if (answer == 'N')
   	return 0;
         printf_filtered ("Please answer y or n.\n");
@@ -787,8 +732,8 @@ diff -c -r1.54 utils.c
   }
   
 ***************
-*** 989,994 ****
---- 1001,1012 ----
+*** 991,996 ****
+--- 1003,1014 ----
     if (linebuffer == 0)
       return;
     
@@ -801,15 +746,11 @@ diff -c -r1.54 utils.c
     /* Don't do any filtering if it is disabled.  */
     if (stream != stdout
      || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/valprint.c,v
-retrieving revision 1.48
-diff -c -r1.48 valprint.c
-*** 1.48	1992/07/10 03:56:06
---- valprint.c	1992/07/16 22:44:53
+*** valprint.c.orig	Sat Aug  8 23:14:57 1992
+--- valprint.c	Mon Aug 24 19:22:31 1992
 ***************
-*** 485,490 ****
---- 485,491 ----
+*** 488,493 ****
+--- 488,494 ----
        struct type **dont_print;
   {
     int i, len, n_baseclasses;
@@ -818,8 +759,8 @@ diff -c -r1.48 valprint.c
     check_stub_type (type);
   
 ***************
-*** 549,554 ****
---- 550,562 ----
+*** 552,557 ****
+--- 553,565 ----
   	      fprint_symbol (stream, TYPE_FIELD_NAME (type, i));
   	      fputs_filtered (" = ", stream);
   	    }
@@ -834,8 +775,8 @@ diff -c -r1.48 valprint.c
   	    {
   	      value v;
 ***************
-*** 567,572 ****
---- 575,581 ----
+*** 570,575 ****
+--- 578,584 ----
   			 valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
   			 0, stream, format, 0, recurse + 1, pretty);
   	    }
@@ -844,8 +785,8 @@ diff -c -r1.48 valprint.c
         if (pretty)
   	{
 ***************
-*** 801,806 ****
---- 810,816 ----
+*** 804,809 ****
+--- 813,819 ----
   		  unsigned int rep1;
   		  /* Number of repetitions we have detected so far.  */
   		  unsigned int reps;
@@ -854,8 +795,8 @@ diff -c -r1.48 valprint.c
   		  if (i != 0)
   		    if (arrayprint)
 ***************
-*** 822,827 ****
---- 832,842 ----
+*** 825,830 ****
+--- 835,845 ----
   		      ++rep1;
   		    }
   
@@ -868,8 +809,8 @@ diff -c -r1.48 valprint.c
   		    {
   		      val_print (elttype, valaddr + i * eltlen,
 ***************
-*** 838,843 ****
---- 853,859 ----
+*** 841,846 ****
+--- 856,862 ----
   				 recurse + 1, pretty);
   		      things_printed++;
   		    }
@@ -877,24 +818,8 @@ diff -c -r1.48 valprint.c
   		}
   	      if (i < len)
   		fprintf_filtered (stream, "...");
-===================================================================
-*** config/ncr3000.mh	Mon Jun 15 12:25:13 1992
---- config/ncr3000.mh	Sat Jul 18 12:41:07 1992
-***************
-*** 38,40 ****
---- 38,46 ----
-  # The /usr/ucb/install program is incompatible (complains about unknown
-  # group staff).  Use good old cp...
-  INSTALL = cp
-+ 
-+ # These are the libs that are needed for the Energize version of gdb on
-+ # SVR4.  Note that we MUST include the standard C library before libucb.a,
-+ # otherwise we get lots of broken stuff we don't want.
-+ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lc \
-+ 	/usr/ucblib/libucb.a -lnsl
-===================================================================
-*** demangle.c	Wed Jul 15 13:33:17 1992
---- demangle.c	Fri Jul 17 21:34:09 1992
+*** demangle.c.orig	Wed Jul 15 12:33:17 1992
+--- demangle.c	Mon Aug 24 19:22:32 1992
 ***************
 *** 37,43 ****
      the appropriate target configuration file. */
