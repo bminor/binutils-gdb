@@ -36,19 +36,21 @@ original English.
 @settitle GDB Manual
 @titlepage
 @sp 6
-@center @titlefont{GDB Manual}
+@center @titlefont{GDB}
 @sp 1
 @center The GNU Source-Level Debugger
 @sp 4
 @center Third Edition, GDB version 4.0
 @sp 1
-@center October 1990
+@center December 1990
 @sp 5
 @center Richard M. Stallman
-@center (later modifications and additions by Cygnus Support)
+@center (Revised by Cygnus Support)
 @page
+@hfill Cygnus Support---Document $ $Header$ $
+@hfill @TeXinfo \texinfoversion
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 1989 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, 1989, 1990 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -503,7 +505,6 @@ Return to use of @samp{emacs}-style.
 
 Users who wish to temporarily to @samp{vi}-style, can use the commands
 @kbd{Control-meta-J} or @kbd{ESC-Control-J}.
-@table end
 
 @kindex info editing
 @item info editing
@@ -540,6 +541,7 @@ Disable the writing of the command history to the command history file.
 Set the number of commands which GDB will keep in its history list.
 This defaults to the value of the environmental variable
 @code{HISTSIZE}, or to 256 if this variable is not set.
+@end table
 
 @cindex history expansion
 
@@ -746,7 +748,6 @@ forgotten in GDB.
 @kindex info files
 Print the names of the executable and core dump files currently in
 use by GDB, and the file from which symbols were loaded.
-@end table
 
 While all three file-specifying commands allow both absolute and relative
 file names as arguments, GDB always converts the file name to an absolute
@@ -778,7 +779,7 @@ Load symbols for all shared libraries.
 
 @kindex info sharedlibrary
 Print the names of the shared libraries which are currently loaded.
-
+@end table
 
 
 @node Compilation, Running, Files, Top
@@ -1203,13 +1204,14 @@ address of the last breakpoint listed (@pxref{Memory}).
 A @dfn{watchpoint} is a special breakpoint that  stops your program 
 when the value of an expression
 changes.  Aside from the different syntax in setting a watchpoint,
-it behaves exactly like an other breakpoint and is enabled, disabled,
+it behaves exactly like any other breakpoint and is enabled, disabled,
 and deleted exactly like any other breakpoint.
 
+@table @code
 @kindex info watch
 @item info watch
 This command prints a list of watchpoints. 
-
+@end table
 
 @menu
 * Set Breaks::     How to establish breakpoints.
@@ -1287,6 +1289,16 @@ Set a breakpoint enabled only for one stop.  @var{args} are the
 same as in the @samp{break} command, and the breakpoint is set in the same
 way, but the breakpoint is automatically disabled the first time it
 is hit.  @xref{Disabling}.
+
+@item rbreak @var{regex}
+@kindex rbreak
+Set a breakpoint on all functions matching @var{regex}.  This is
+useful for setting breakpoints on overloaded functions that are not
+members of any special classes.  This command sets an unconditional
+breakpoint on all matches, printing a list of all breakpoints it set.
+Once these breakpoints are set, they are treated just like the
+breakpoints set with the @samp{break} command.  They can be deleted,
+disabled, made conditional, etc., in the standard ways.
 
 @kindex watch 
 @item watch @samp{expr}
@@ -1783,6 +1795,7 @@ frame and describes it briefly as the @samp{frame} command does
 * Backtrace::       Summarizing many frames at once.
 * Selection::       How to select a stack frame.
 * Info: Frame Info, Commands to print information on stack frames.
+* Exception Handling: How GDB supports exception handling for C++.
 @end menu
 
 @node Frames, Backtrace, Stack, Stack
@@ -1953,7 +1966,7 @@ that source line.  For example:
 After such a printout, the @samp{list} command with no arguments will print
 ten lines centered on the point of execution in the frame.  @xref{List}.
 
-@node Frame Info,, Selection, Stack
+@node Frame Info, Exception Handling, Selection, Stack
 @section Information on a Frame
 
 There are several other commands to print information about the selected
@@ -1992,6 +2005,70 @@ Print the local variables of the selected frame, each on a separate
 line.  These are all variables declared static or automatic within all
 program blocks that execution in this frame is currently inside of.
 @end table
+
+@item info catch
+@kindex info catch
+Print a list of all the exception handlers that are active in the
+current stack frame given the current value of @code{pc}.  To see
+other exception handlers of higher frames, visit the higher frame
+(using the @samp{up} command) and type @samp{info catch}.
+@end table
+
+@node Exception Handling,, Frame Info, Stack
+
+Some languages, such as GNU C++, implement exception handling.  GDB
+can be used to examine what caused the program to raise an exception
+and to list the exceptions the program is prepared to handle at a
+given point in time.
+
+@cindex raise exceptions
+GNU C++ raises an exception by calling a library function named
+@code{__raise_exception} which has the following ANSI C interface:
+
+@example
+    /* ADDR is where the exception identifier is stored.
+       ID is the exception identifier.  */
+    void __raise_exception (void **addr, void *id);
+@end example
+
+@noindent
+By setting a breakpoint on @code{__raise_exception}
+(@xref{Breakpoints}), all exceptions that a program raises will be
+first caught by the debugger before any stack unwinding has taken
+place.  If you set a breakpoint in an exception handler instead of at
+the point of the raise, you will likely not easily have the
+information needed to know from where the exception was raised.
+
+By using a conditional breakpoint (xref{conditions}), you can cause
+the debugger to stop only when a specific exception is raised.
+Multiple conditional breakpoints can be used to stop the program when
+any of a number of exceptions are raised.
+
+@cindex catch exceptions
+To examine the exceptions that a piece of a program is prepared to
+catch, the @samp{info catch} function is used.  This function shows
+all exception handlers that are active in the current frame (for the
+current value of the program counter).  By traversing frames (using
+the @samp{up} and @samp{down} commands), other exception handlers can
+be observed.
+
+Breakpoints can be set at active exception handlers by using the
+@samp{catch} command.  The syntax is @samp{catch @var{exceptions}},
+where @var{exceptions} is a list of names of exceptions to catch.
+
+There are currently some limitations to exception handling in GDB.
+These will be corrected in a future release.
+
+@itemize @bullet
+@item If you call a function interactively it will normally return
+control to the user when it has finished executing.  If the call
+raises an exception however, the call may bypass the mechanism that
+returns control to the user and cause the program to simply continue
+running until it hits a breakpoint, catches a signal that GDB is
+listening for, or exits.
+@item You cannot raise an exception interactively.
+@item You cannot interactively install an exception handler.
+@end itemize
 
 @node Source, Data, Stack, Top
 @chapter Examining Source Files
@@ -2151,16 +2228,16 @@ this command with as little as @samp{rev}.
 
 @cindex source path
 @cindex directories for source files
-Executable programs sometimes do not record the directories of the source files
-from which they were compiled, just the names.  Even when they do, the 
-directories could be moved between the compilation and your debugging
-session.  GDB remembers a list of
-directories to search for source files; this is called the @dfn{source
-path}.  Each time GDB wants a source file, it tries all the directories
-in the list, in the order they are present in the list, until it finds a
-file with the desired name.  @b{Note that the executable search path is
-@i{not} used for this purpose.  Neither is the current working
-directory, unless it happens to be in the source path.}  
+Executable programs sometimes do not record the directories of the source
+files from which they were compiled, just the names.  Even when they do,
+the directories could be moved between the compilation and your debugging
+session.  GDB remembers a list of directories to search for source files;
+this is called the @dfn{source path}.  Each time GDB wants a source file,
+it tries all the directories in the list, in the order they are present
+in the list, until it finds a file with the desired name.  @b{Note that
+the executable search path is @i{not} used for this purpose.  Neither is
+the current working directory, unless it happens to be in the source
+path.}
 
 If it can't find a source file in the source path, and the object program
 records what directory it was compiled in, GDB tries that directory too.
@@ -3601,9 +3678,8 @@ step and continue the remote program.
 To resume the remote program and stop debugging it, use the @samp{detach}
 command.
 
-
-HOW DO I GET AN APPENDIX, labelled as such in TEX!!!
-Fox's readline inc docs should go here.
+@include readline/inc-readline.texinfo
+@include readline/inc-history.texinfo
 
 @node Commands, Concepts, Remote, Top
 @unnumbered Command Index
