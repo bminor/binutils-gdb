@@ -618,14 +618,13 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
     }
   else
     {
-      int reg = DWARF2_REG_TO_REGNUM (fs->retaddr_column);
-      if (reg != PC_REGNUM)
+      if (DWARF2_REG_TO_REGNUM (fs->retaddr_column) != PC_REGNUM)
 	{
 	  /* See comment above about PC_REGNUM being negative.  If
 	     this assertion fails, it's a problem with this code and
 	     not the architecture.  */
 	  gdb_assert (PC_REGNUM >= 0);
-	  cache->reg[PC_REGNUM].loc.reg = reg;
+	  cache->reg[PC_REGNUM].loc.reg = fs->retaddr_column;
 	  cache->reg[PC_REGNUM].how = REG_SAVED_REG;
 	}
     }
