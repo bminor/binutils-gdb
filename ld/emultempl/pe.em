@@ -192,6 +192,29 @@ set_pe_subsystem ()
       if (!strcmp (optarg, v[i].name)) 
 	{
 	  set_pe_name ("__subsystem__", v[i].value);
+
+	  /* If the subsystem is windows, we use a different entry
+	     point.  We also register the entry point as an undefined
+	     symbol.  The reason we do this is so that the user
+	     doesn't have to because they would have to use the -u
+	     switch if they were specifying an entry point other than
+	     _mainCRTStartup.  Specifically, if creating a windows
+	     application, entry point _WinMainCRTStartup must be
+	     specified.  What I have found for non console
+	     applications (entry not _mainCRTStartup) is that the .obj
+	     that contains mainCRTStartup is brought in since it is
+	     the first encountered in libc.lib and it has other
+	     symbols in it which will be pulled in by the link
+	     process.  To avoid this, adding -u with the entry point
+	     name specified forces the correct .obj to be used.  We
+	     can avoid making the user do this by always adding the
+	     entry point name as an undefined symbol.  */
+	  if (v[i].value == 2)
+	    {
+	      lang_add_entry ("_WinMainCRTStartup", 1);
+	      ldlang_add_undef ("_WinMainCRTStartup");
+	    }
+
 	  return;
 	}
     }

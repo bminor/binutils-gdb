@@ -1,5 +1,8 @@
 Tue Oct  8 12:07:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/pe.em (set_pe_subsystem): When setting the subsystem
+	to windows, set the entry point.
+
 	* Makefile.in (ldlex.c): Don't pass any options to $(LEX).
 
 Mon Oct  7 17:29:05 1996  Ian Lance Taylor  <ian@cygnus.com>
