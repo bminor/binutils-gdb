@@ -1,3 +1,8 @@
+Wed Jan  5 17:05:36 1994  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* ecoff.h (STYP_EXTENDESC, STYP_COMMENT, STYP_XDATA, STYP_PDATA):
+	Define.
+
 Wed Jan  5 16:58:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.h (NUM_RELOC_SECTIONS): Define.

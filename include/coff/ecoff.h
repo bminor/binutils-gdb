@@ -46,15 +46,21 @@
 #define _XDATA	".xdata"
 
 /* ECOFF uses some additional section flags.  */
-#define STYP_RDATA 0x100
-#define STYP_SDATA 0x200
-#define STYP_SBSS 0x400
-#define STYP_ECOFF_FINI 0x1000000
-#define STYP_LITA 0x4000000
-#define STYP_LIT8 0x8000000
-#define STYP_LIT4 0x10000000
+#define STYP_RDATA	     0x100
+#define STYP_SDATA	     0x200
+#define STYP_SBSS	     0x400
+#define STYP_ECOFF_FINI	 0x1000000
+#define STYP_EXTENDESC	 0x2000000 /* 0x02FFF000 bits => scn type, rest clr */
+#define STYP_LITA	 0x4000000
+#define STYP_LIT8	 0x8000000
+#define STYP_LIT4	0x10000000
 #define STYP_ECOFF_INIT 0x80000000
 #define STYP_OTHER_LOAD (STYP_ECOFF_INIT | STYP_ECOFF_FINI)
+
+/* extended section types */
+#define STYP_COMMENT	 0x2100000
+#define STYP_XDATA	 0x2400000
+#define STYP_PDATA	 0x2800000
 
 /* The linker needs a section to hold small common variables while
    linking.  There is no convenient way to create it when the linker
