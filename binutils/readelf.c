@@ -5514,6 +5514,8 @@ static const char *
 get_symbol_index_type (type)
      unsigned int type;
 {
+  static char buff [32];
+
   switch (type)
     {
     case SHN_UNDEF:  return "UND";
@@ -5521,19 +5523,17 @@ get_symbol_index_type (type)
     case SHN_COMMON: return "COM";
     default:
       if (type >= SHN_LOPROC && type <= SHN_HIPROC)
-	return "PRC";
+	sprintf (buff, "PRC[0x%04x]", type);
       else if (type >= SHN_LOOS && type <= SHN_HIOS)
-	return "OS ";
+	sprintf (buff, "OS [0x%04x]", type);
       else if (type >= SHN_LORESERVE && type <= SHN_HIRESERVE)
-	return "RSV";
+	sprintf (buff, "RSV[0x%04x]", type);
       else
-	{
-	  static char buff [32];
-
-	  sprintf (buff, "%3d", type);
-	  return buff;
-	}
+	sprintf (buff, "%3d", type);
+      break;
     }
+
+  return buff;
 }
 
 static int *
