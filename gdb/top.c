@@ -3033,6 +3033,15 @@ echo_command (text, from_tty)
   gdb_flush (gdb_stdout);
 }
 
+/* ARGSUSED */
+static void
+dont_repeat_command (ignored, from_tty)
+     char *ignored;
+     int from_tty;
+{
+  *line = 0;		/* Can't call dont_repeat here because we're not
+			   necessarily reading from stdin.  */
+}
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
 
@@ -3467,6 +3476,9 @@ when gdb is started.", &cmdlist);
   add_com_alias ("q", "quit", class_support, 1);
   add_com_alias ("h", "help", class_support, 1);
 
+  add_com ("dont-repeat", class_support, dont_repeat_command, "Don't repeat this command.\n\
+Primarily used inside of user-defined commands that should not be repeated when\n\
+hitting return.");
 
   c = add_set_cmd ("verbose", class_support, var_boolean, (char *)&info_verbose,
 		   "Set ",

@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -29,9 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static void
 print_subexp PARAMS ((struct expression *, int *, GDB_FILE *, enum precedence));
-
-static void
-print_simple_m2_func PARAMS ((char *, struct expression *, int *, GDB_FILE *));
 
 void
 print_expression (exp, stream)
@@ -153,6 +150,13 @@ print_subexp (exp, pos, stream, prec)
       fputs_filtered (")", stream);
       return;
 
+    case OP_NAME:
+    case OP_EXPRSTRING:
+      nargs = longest_to_int (exp -> elts[pc + 1].longconst);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
+      fputs_filtered (&exp->elts[pc + 2].string, stream);
+      return;
+
     case OP_STRING:
       nargs = longest_to_int (exp -> elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
@@ -163,8 +167,11 @@ print_subexp (exp, pos, stream, prec)
       return;
 
     case OP_BITSTRING:
-      error ("support for OP_BITSTRING unimplemented");
-      break;
+      nargs = longest_to_int (exp -> elts[pc + 1].longconst);
+      (*pos)
+	+= 3 + BYTES_TO_EXP_ELEM ((nargs + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT);
+      fprintf (stream, "B'<unimplemented>'");
+      return;
 
     case OP_ARRAY:
       (*pos) += 3;
@@ -266,6 +273,16 @@ print_subexp (exp, pos, stream, prec)
 	fputs_filtered (")", stream);
       return;
 
+    case TERNOP_SLICE:
+    case TERNOP_SLICE_COUNT:
+      print_subexp (exp, pos, stream, PREC_SUFFIX);
+      fputs_filtered ("(", stream);
+      print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
+      fputs_filtered (opcode == TERNOP_SLICE ? " : " : " UP ", stream);
+      print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
+      fputs_filtered (")", stream);
+      return;
+
     case STRUCTOP_STRUCT:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
@@ -282,6 +299,19 @@ print_subexp (exp, pos, stream, prec)
       fputs_filtered ("->", stream);
       fputs_filtered (&exp->elts[pc + 2].string, stream);
       return;
+
+/* start-sanitize-gm */
+#ifdef GENERAL_MAGIC_HACKS
+    case STRUCTOP_FIELD:
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
+      print_subexp (exp, pos, stream, PREC_SUFFIX);
+      fputs_filtered ("@", stream);
+      fputs_filtered (&exp->elts[pc + 2].string, stream);
+      return;
+
+#endif /* GENERAL_MAGIC_HACKS */
+/* end-sanitize-gm */
 
     case BINOP_SUBSCRIPT:
       print_subexp (exp, pos, stream, PREC_SUFFIX);
@@ -386,46 +416,6 @@ print_subexp (exp, pos, stream, prec)
       print_subexp(exp,pos,stream,PREC_PREFIX);
       fprintf_unfiltered(stream,")");
       return;
-
-    case UNOP_CAP:
-      print_simple_m2_func("CAP",exp,pos,stream);
-      return;
-
-    case UNOP_CHR:
-      print_simple_m2_func("CHR",exp,pos,stream);
-      return;
-
-    case UNOP_ORD:
-      print_simple_m2_func("ORD",exp,pos,stream);
-      return;
-      
-    case UNOP_ABS:
-      print_simple_m2_func("ABS",exp,pos,stream);
-      return;
-
-    case UNOP_FLOAT:
-      print_simple_m2_func("FLOAT",exp,pos,stream);
-      return;
-
-    case UNOP_HIGH:
-      print_simple_m2_func("HIGH",exp,pos,stream);
-      return;
-
-    case UNOP_MAX:
-      print_simple_m2_func("MAX",exp,pos,stream);
-      return;
-
-    case UNOP_MIN:
-      print_simple_m2_func("MIN",exp,pos,stream);
-      return;
-
-    case UNOP_ODD:
-      print_simple_m2_func("ODD",exp,pos,stream);
-      return;
-
-    case UNOP_TRUNC:
-      print_simple_m2_func("TRUNC",exp,pos,stream);
-      return;
       
     case BINOP_INCL:
     case BINOP_EXCL:
@@ -450,6 +440,7 @@ print_subexp (exp, pos, stream, prec)
 	error ("Invalid expression");
    }
 
+  /* Note that PREC_BUILTIN will always emit parentheses. */
   if ((int) myprec < (int) prec)
     fputs_filtered ("(", stream);
   if ((int) opcode > (int) BINOP_END)
@@ -464,7 +455,11 @@ print_subexp (exp, pos, stream, prec)
 	{
 	  /* Unary prefix operator.  */
 	  fputs_filtered (op_str, stream);
+	  if (myprec == PREC_BUILTIN_FUNCTION)
+	    fputs_filtered ("(", stream);
 	  print_subexp (exp, pos, stream, PREC_PREFIX);
+	  if (myprec == PREC_BUILTIN_FUNCTION)
+	    fputs_filtered (")", stream);
 	}
     }
   else
@@ -493,23 +488,6 @@ print_subexp (exp, pos, stream, prec)
     fputs_filtered (")", stream);
 }
 
-/* Print out something of the form <s>(<arg>).
-   This is used to print out some builtin Modula-2
-   functions.
-   FIXME:  There is probably some way to get the precedence
-   rules to do this (print a unary operand with parens around it).  */
-static void
-print_simple_m2_func(s,exp,pos,stream)
-   char *s;
-   register struct expression *exp;
-   register int *pos;
-   GDB_FILE *stream;
-{
-   fprintf_unfiltered(stream,"%s(",s);
-   print_subexp(exp,pos,stream,PREC_PREFIX);
-   fprintf_unfiltered(stream,")");
-}
-   
 /* Return the operator corresponding to opcode OP as
    a string.   NULL indicates that the opcode was not found in the
    current language table.  */
@@ -596,6 +574,8 @@ dump_expression (exp, stream, note)
 	  case BINOP_CONCAT: opcode_name = "BINOP_CONCAT"; break;
 	  case BINOP_END: opcode_name = "BINOP_END"; break;
 	  case TERNOP_COND: opcode_name = "TERNOP_COND"; break;
+	  case TERNOP_SLICE: opcode_name = "TERNOP_SLICE"; break;
+	  case TERNOP_SLICE_COUNT: opcode_name = "TERNOP_SLICE_COUNT"; break;
 	  case OP_LONG: opcode_name = "OP_LONG"; break;
 	  case OP_DOUBLE: opcode_name = "OP_DOUBLE"; break;
 	  case OP_VAR_VALUE: opcode_name = "OP_VAR_VALUE"; break;
@@ -618,6 +598,9 @@ dump_expression (exp, stream, note)
 	  case UNOP_PREDECREMENT: opcode_name = "UNOP_PREDECREMENT"; break;
 	  case UNOP_POSTDECREMENT: opcode_name = "UNOP_POSTDECREMENT"; break;
 	  case UNOP_SIZEOF: opcode_name = "UNOP_SIZEOF"; break;
+	  case UNOP_LOWER: opcode_name = "UNOP_LOWER"; break;
+	  case UNOP_UPPER: opcode_name = "UNOP_UPPER"; break;
+	  case UNOP_LENGTH: opcode_name = "UNOP_LENGTH"; break;
 	  case UNOP_PLUS: opcode_name = "UNOP_PLUS"; break;
 	  case UNOP_CAP: opcode_name = "UNOP_CAP"; break;
 	  case UNOP_CHR: opcode_name = "UNOP_CHR"; break;
@@ -633,6 +616,11 @@ dump_expression (exp, stream, note)
 	  case OP_M2_STRING: opcode_name = "OP_M2_STRING"; break;
 	  case STRUCTOP_STRUCT: opcode_name = "STRUCTOP_STRUCT"; break;
 	  case STRUCTOP_PTR: opcode_name = "STRUCTOP_PTR"; break;
+/* start-sanitize-gm */
+#ifdef GENERAL_MAGIC_HACKS
++ 	  case STRUCTOP_FIELD: opcode_name = "STRUCTOP_FIELD"; break;
+#endif /* GENERAL_MAGIC_HACKS */
+/* end-sanitize-gm */
 	  case OP_THIS: opcode_name = "OP_THIS"; break;
 	  case OP_SCOPE: opcode_name = "OP_SCOPE"; break;
 	  case OP_TYPE: opcode_name = "OP_TYPE"; break;

@@ -599,6 +599,11 @@ length_of_subexp (expr, endpos)
     case OP_LABELED:
     case STRUCTOP_STRUCT:
     case STRUCTOP_PTR:
+/* start-sanitize-gm */
+#ifdef GENERAL_MAGIC_HACKS
+    case STRUCTOP_FIELD:
+#endif /* GENERAL_MAGIC_HACKS */
+/* end-sanitize-gm */
       args = 1;
       /* fall through */
     case OP_M2_STRING:

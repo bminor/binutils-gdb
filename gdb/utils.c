@@ -602,6 +602,12 @@ request_quit (signo)
      about USG defines and stuff like that.  */
   signal (signo, request_quit);
 
+/* start-sanitize-gm */
+#ifdef GENERAL_MAGIC_HACKS
+  target_kill ();
+#endif /* GENERAL_MAGIC_HACKS */
+/* end-sanitize-gm */
+
 #ifdef REQUEST_QUIT
   REQUEST_QUIT;
 #else
@@ -1508,7 +1514,7 @@ vfprintf_maybe_filtered (stream, format, args, filter)
 void
 vfprintf_filtered (stream, format, args)
      FILE *stream;
-     char *format;
+     const char *format;
      va_list args;
 {
   vfprintf_maybe_filtered (stream, format, args, 1);
@@ -1517,7 +1523,7 @@ vfprintf_filtered (stream, format, args)
 void
 vfprintf_unfiltered (stream, format, args)
      FILE *stream;
-     char *format;
+     const char *format;
      va_list args;
 {
   char *linebuffer;
@@ -1536,7 +1542,7 @@ vfprintf_unfiltered (stream, format, args)
 
 void
 vprintf_filtered (format, args)
-     char *format;
+     const char *format;
      va_list args;
 {
   vfprintf_maybe_filtered (gdb_stdout, format, args, 1);
@@ -1544,7 +1550,7 @@ vprintf_filtered (format, args)
 
 void
 vprintf_unfiltered (format, args)
-     char *format;
+     const char *format;
      va_list args;
 {
   vfprintf_unfiltered (gdb_stdout, format, args);
@@ -1553,7 +1559,7 @@ vprintf_unfiltered (format, args)
 /* VARARGS */
 void
 #ifdef ANSI_PROTOTYPES
-fprintf_filtered (FILE *stream, char *format, ...)
+fprintf_filtered (FILE *stream, const char *format, ...)
 #else
 fprintf_filtered (va_alist)
      va_dcl
@@ -1577,7 +1583,7 @@ fprintf_filtered (va_alist)
 /* VARARGS */
 void
 #ifdef ANSI_PROTOTYPES
-fprintf_unfiltered (FILE *stream, char *format, ...)
+fprintf_unfiltered (FILE *stream, const char *format, ...)
 #else
 fprintf_unfiltered (va_alist)
      va_dcl
@@ -1604,7 +1610,7 @@ fprintf_unfiltered (va_alist)
 /* VARARGS */
 void
 #ifdef ANSI_PROTOTYPES
-fprintfi_filtered (int spaces, FILE *stream, char *format, ...)
+fprintfi_filtered (int spaces, FILE *stream, const char *format, ...)
 #else
 fprintfi_filtered (va_alist)
      va_dcl
@@ -1633,7 +1639,7 @@ fprintfi_filtered (va_alist)
 /* VARARGS */
 void
 #ifdef ANSI_PROTOTYPES
-printf_filtered (char *format, ...)
+printf_filtered (const char *format, ...)
 #else
 printf_filtered (va_alist)
      va_dcl
@@ -1656,7 +1662,7 @@ printf_filtered (va_alist)
 /* VARARGS */
 void
 #ifdef ANSI_PROTOTYPES
-printf_unfiltered (char *format, ...)
+printf_unfiltered (const char *format, ...)
 #else
 printf_unfiltered (va_alist)
      va_dcl
@@ -1681,7 +1687,7 @@ printf_unfiltered (va_alist)
 /* VARARGS */
 void
 #ifdef ANSI_PROTOTYPES
-printfi_filtered (int spaces, char *format, ...)
+printfi_filtered (int spaces, const char *format, ...)
 #else
 printfi_filtered (va_alist)
      va_dcl
@@ -1710,14 +1716,14 @@ printfi_filtered (va_alist)
 
 void
 puts_filtered (string)
-     char *string;
+     const char *string;
 {
   fputs_filtered (string, gdb_stdout);
 }
 
 void
 puts_unfiltered (string)
-     char *string;
+     const char *string;
 {
   fputs_unfiltered (string, gdb_stdout);
 }

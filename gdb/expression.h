@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if !defined (EXPRESSION_H)
 #define EXPRESSION_H 1
@@ -247,6 +247,9 @@ enum exp_opcode
   UNOP_ODD,
   UNOP_TRUNC,
 
+  /* Chill builtin functions. */
+  UNOP_LOWER, UNOP_UPPER, UNOP_LENGTH,
+
   OP_BOOL,		/* Modula-2 builtin BOOLEAN type */
   OP_M2_STRING,		/* Modula-2 string constants */
 
@@ -263,6 +266,14 @@ enum exp_opcode
 
   STRUCTOP_STRUCT,
   STRUCTOP_PTR,
+
+/* start-sanitize-gm */
+#ifdef GENERAL_MAGIC_HACKS
+  /* STRUCTOP_FIELD is for handling field access for Magic Cap dynamic objects.
+   */
+  STRUCTOP_FIELD,
+#endif /* GENERAL_MAGIC_HACKS */
+/* end-sanitize-gm */
 
   /* C++ */
   /* OP_THIS is just a placeholder for the class instance variable.
@@ -287,7 +298,13 @@ enum exp_opcode
   /* OP_TYPE is for parsing types, and used with the "ptype" command
      so we can look up types that are qualified by scope, either with
      the GDB "::" operator, or the Modula-2 '.' operator. */
-  OP_TYPE
+  OP_TYPE,
+
+  /* An un-looked-up identifier. */
+  OP_NAME,
+
+  /* An unparsed expression.  Used for Scheme (for now at least) */
+  OP_EXPRSTRING
 };
 
 union exp_element
@@ -318,8 +335,6 @@ struct expression
     ((elements) * sizeof (union exp_element))
 #define BYTES_TO_EXP_ELEM(bytes) \
     (((bytes) + sizeof (union exp_element) - 1) / sizeof (union exp_element))
-
-#include "value.h"
 
 /* From parse.c */
 
@@ -353,9 +368,6 @@ enum noside
 
 extern struct value* evaluate_subexp_standard
 PARAMS ((struct type *, struct expression *, int*, enum noside));
-
-extern value_ptr evaluate_subexp_with_coercion PARAMS ((struct expression *,
-							int *, enum noside));
 
 /* From expprint.c */
 

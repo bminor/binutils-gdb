@@ -417,6 +417,9 @@ mips64*el-*-elf*)	gdb_target=idtl64 ;;
 mips64*-*-elf*)		gdb_target=idt64 ;;
 mips*el-*-ecoff*)	gdb_target=idtl ;;
 mips*-*-ecoff*)		gdb_target=idt ;;
+# start-sanitize-gm
+mips*-*-magic*)		gdb_target=magic ;;
+# end-sanitize-gm
 mips*el-*-elf*)		gdb_target=idtl ;;
 mips*-*-elf*)		gdb_target=idt ;;
 mips*-little-*)		gdb_target=littlemips ;;

@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include <ctype.h>
@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "value.h"
-#include "ctype.h"
 #include "command.h"
 #include "inferior.h"
 #include "thread.h"
@@ -1953,7 +1952,7 @@ set_raw_breakpoint (sal)
 }
 
 static void
-create_longjmp_breakpoint(func_name)
+create_longjmp_breakpoint (func_name)
      char *func_name;
 {
   struct symtab_and_line sal;
@@ -1976,7 +1975,7 @@ create_longjmp_breakpoint(func_name)
   sal.symtab = NULL;
   sal.line = 0;
 
-  b = set_raw_breakpoint(sal);
+  b = set_raw_breakpoint (sal);
   if (!b) return;
 
   b->type = func_name != NULL ? bp_longjmp : bp_longjmp_resume;
@@ -3420,10 +3419,12 @@ breakpoint_re_set ()
   set_language (save_language);
   input_radix = save_input_radix;
 
-  create_longjmp_breakpoint("longjmp");
-  create_longjmp_breakpoint("_longjmp");
-  create_longjmp_breakpoint("siglongjmp");
-  create_longjmp_breakpoint(NULL);
+#ifdef GET_LONGJMP_TARGET
+  create_longjmp_breakpoint ("longjmp");
+  create_longjmp_breakpoint ("_longjmp");
+  create_longjmp_breakpoint ("siglongjmp");
+  create_longjmp_breakpoint (NULL);
+#endif
 
 #if 0
   /* Took this out (temporaliy at least), since it produces an extra 

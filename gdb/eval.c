@@ -29,6 +29,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "demangle.h"
 #include "language.h"	/* For CAST_IS_CONVERSION */
 #include "f-lang.h"	/* for array bound stuff */
+/* start-sanitize-gm */
+#ifdef GENERAL_MAGIC_HACKS
+#include "magic.h"
+#endif /* GENERAL_MAGIC_HACKS */
+/* end-sanitize-gm */
 
 /* Prototypes for local functions. */
 
@@ -839,6 +844,36 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 				   NULL, "structure pointer");
 	}
 
+/* start-sanitize-gm */
+#ifdef GENERAL_MAGIC_HACKS
+    case STRUCTOP_FIELD:
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      {
+	CORE_ADDR object = value_as_long (arg1);
+	struct type *type = type_of_object (object);
+
+	if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	  return value_zero (lookup_struct_elt_type (type,
+						     &exp->elts[pc + 2].string,
+						     0),
+			     lval_memory);
+	else
+	  {
+	    value_ptr temp = value_from_longest (builtin_type_unsigned_long,
+						 baseptr_of_object (value_as_long(arg1)));
+
+	    VALUE_TYPE (temp) = type;
+	    return value_struct_elt (&temp, NULL, &exp->elts[pc + 2].string,
+				     NULL, "structure pointer");
+	  }
+      }
+#endif /* GENERAL_MAGIC_HACKS */
+/* end-sanitize-gm */
+
     case STRUCTOP_MEMBER:
       arg1 = evaluate_subexp_for_address (exp, pos, noside);
       goto handle_pointer_to_member;
@@ -1259,8 +1294,6 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	error ("Non-integral right operand for \"@\" operator.");
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
-	  if (VALUE_REPEATED (arg1))
-	    error ("Cannot create artificial arrays of artificial arrays.");
 	  return allocate_repeat_value (VALUE_TYPE (arg1),
 					longest_to_int (value_as_long (arg2)));
 	}
