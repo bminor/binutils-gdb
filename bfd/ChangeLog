@@ -1,3 +1,8 @@
+2002-11-12  Klee Dienes  <kdienes@apple.com>
+
+	* mach-o.c (bfd_mach_o_scan_read_thread): Don't re-use 'i' when
+	looking for an unused section name.
+
 2002-11-11  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* coff-h8300.c: Fix formatting.
