@@ -1266,7 +1266,7 @@ all-guile:
 all-gzip: all-libiberty
 all-hello: all-libiberty
 all-indent:
-all-inet: all-tcl all-send-pr
+all-inet: all-tcl all-send-pr all-perl
 all-ispell: all-emacs19
 all-ld: all-libiberty all-bfd all-opcodes all-byacc all-flex
 configure-target-libg++: $(ALL_GCC) configure-target-librx
