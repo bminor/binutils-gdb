@@ -156,13 +156,10 @@ inside_main_func (CORE_ADDR pc)
 	  && symfile_objfile->ei.main_func_highpc > pc);
 }
 
-/* Test a specified PC value to see if it is in the range of addresses
-   that correspond to the process entry point function.  See comments
-   in objfiles.h for why we might want to do this.
+/* Test whether PC is inside the range of addresses that corresponds
+   to the process entry point function.
 
-   Typically called from DEPRECATED_FRAME_CHAIN_VALID.
-
-   A PC of zero is always considered to be the bottom of the stack. */
+   A PC of zero is always considered to be the bottom of the stack.  */
 
 int
 inside_entry_func (CORE_ADDR pc)
@@ -171,16 +168,19 @@ inside_entry_func (CORE_ADDR pc)
     return 1;
   if (symfile_objfile == 0)
     return 0;
+
   if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
     {
-      /* Do not stop backtracing if the pc is in the call dummy
-         at the entry point.  */
-      /* FIXME: Won't always work with zeros for the last two arguments */
+      /* Do not stop backtracing if the program counter is in the call
+         dummy at the entry point.  */
+      /* FIXME: This won't always work with zeros for the last two
+         arguments.  */
       if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
 	return 0;
     }
-  return (symfile_objfile->ei.entry_func_lowpc <= pc &&
-	  symfile_objfile->ei.entry_func_highpc > pc);
+
+  return (symfile_objfile->ei.entry_func_lowpc <= pc
+	  && symfile_objfile->ei.entry_func_highpc > pc);
 }
 
 /* Return nonzero if the function for this frame lacks a prologue.  Many
