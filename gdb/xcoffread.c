@@ -861,7 +861,7 @@ enter_line_range (subfile, beginoffset, endoffset, startaddr, endaddr,
   namestr = (NAME); \
   if (namestr[0] == '.') ++namestr; \
   prim_record_minimal_symbol_and_info (namestr, (ADDR), (TYPE), \
-				       (char *)NULL, (SECTION), (OBJFILE)); \
+				       (char *)NULL, (SECTION), (asection *)NULL, (OBJFILE)); \
   misc_func_recorded = 1;					\
 }
 
@@ -2356,7 +2356,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
 			 NULL, secnum_to_section (symbol.n_scnum, objfile),
-			 objfile);
+			 NULL, objfile);
 		    break;
 
 		  case XMC_TC0:
@@ -2426,7 +2426,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
 			 NULL, secnum_to_section (symbol.n_scnum, objfile),
-			 objfile);
+			 NULL, objfile);
 		    break;
 		  }
 		break;
@@ -2443,7 +2443,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_bss : mst_bss,
 			 NULL, secnum_to_section (symbol.n_scnum, objfile),
-			 objfile);
+			 NULL, objfile);
 		    break;
 		  }
 		break;
