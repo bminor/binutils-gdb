@@ -237,10 +237,6 @@ extern struct target_ops remote_ops;	/* Forward decl */
    be plenty.  */
 static int remote_timeout = 2;
 
-#if 0
-int icache;
-#endif
-
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
    starts.  */
@@ -845,12 +841,11 @@ remote_store_registers (regno)
 
 /* Use of the data cache is disabled because it loses for looking at
    and changing hardware I/O ports and the like.  Accepting `volatile'
-   would perhaps be one way to fix it, but a better way which would
-   win for more cases would be to use the executable file for the text
-   segment, like the `icache' code below but done cleanly (in some
-   target-independent place, perhaps in target_xfer_memory, perhaps
-   based on assigning each target a speed or perhaps by some simpler
-   mechanism).  */
+   would perhaps be one way to fix it.  Another idea would be to use the
+   executable file for the text segment (for all SEC_CODE sections?
+   For all SEC_READONLY sections?).  This has problems if you want to
+   actually see what the memory contains (e.g. self-modifying code,
+   clobbered memory, user downloaded the wrong thing).  */
 
 /* Read a word from remote address ADDR and return it.
    This goes through the data cache.  */
@@ -859,19 +854,6 @@ static int
 remote_fetch_word (addr)
      CORE_ADDR addr;
 {
-#if 0
-  if (icache)
-    {
-      extern CORE_ADDR text_start, text_end;
-
-      if (addr >= text_start && addr < text_end)
-	{
-	  int buffer;
-	  target_read_memory (addr, &buffer, sizeof (int));
-	  return buffer;
-	}
-    }
-#endif
   return dcache_fetch (remote_dcache, addr);
 }
 
