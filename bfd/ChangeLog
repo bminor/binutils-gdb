@@ -1,3 +1,19 @@
+Mon Apr 21 11:21:31 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* elf32-m68k.c: Follow the last changes in elf32-i386.c:
+	(struct elf_m68k_pcrel_relocs_copied, struct
+	elf_m68k_link_hash_entry, struct elf_m68k_link_hash_table,
+	elf_m68k_link_hash_traverse, elf_m68k_hash_table,
+	elf_m68k_link_hash_newfunc, elf_m68k_link_hash_table_create,
+	elf_m68k_discard_copies, bfd_elf32_bfd_link_hash_table_create):
+	New definitions.
+	(elf_m68k_check_relocs): If linking with -Bsymbolic, don't copy
+	PC relative relocs for a global symbol defined in a regular
+	object, and count the number of PC relative relocs copied for any
+	global symbol.
+	(elf_m68k_size_dynamic_sections): If linking with -Bsymbolic,
+	traverse with elf_m68k_discard_copies.
+
 Sat Apr 19 22:50:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Only count PC relative
