@@ -1,3 +1,23 @@
+Fri May  2 12:48:37 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* m32r-opc.c (m32r_cgen_insn_table, cmpui): Use $uimm16 instead
+	of $simm16.
+
+Thu May  1 15:34:15 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* m32r-opc.h (CGEN_ARCH): Renamed from CGEN_CPU.
+
+Tue Apr 15 12:40:08 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (install): Depend upon installdirs.
+	(installdirs): New target.
+
+Mon Apr 14 12:13:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Thomas Graichen <graichen@rzpd.de>:
+	* configure.in: Use ${CONFIG_SHELL} when running $ac_config_sub.
+	* configure: Rebuild.
+
 Sun Apr 13 17:50:41 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* cgen-*.c, m32r-*.c: #include sysdep.h instead of config.h.
