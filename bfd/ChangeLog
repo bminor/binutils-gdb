@@ -1,3 +1,7 @@
+Thu Dec 24 17:49:09 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* hppa.c: change a 'const' to 'CONST', or else HP C compiler dies
+
 Mon Dec 21 16:33:34 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* hosts/std-host.h:  New file.  Attempt at a generic/default

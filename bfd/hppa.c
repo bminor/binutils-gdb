@@ -461,7 +461,7 @@ DEFUN (hppa_sizeof_headers, (abfd, reloc),
 static asection *
 make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
      bfd *abfd;
-     const char *name;
+     CONST char *name;
      flagword flags;
      bfd_size_type _raw_size;
      bfd_vma vma;
