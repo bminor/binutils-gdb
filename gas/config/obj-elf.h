@@ -136,9 +136,9 @@ while (0)
 extern void obj_elf_init_stab_section PARAMS ((segT));
 #define INIT_STAB_SECTION(seg) obj_elf_init_stab_section (seg)
 
-/* For now, always set ECOFF_DEBUGGING for an Alpha target.  */
 #ifdef TC_ALPHA
-#define ECOFF_DEBUGGING 1
+#define ECOFF_DEBUGGING alpha_flag_mdebug
+extern int alpha_flag_mdebug;
 #endif
 
 /* For now, always set ECOFF_DEBUGGING for a MIPS target.  */
@@ -150,8 +150,7 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
 #endif /* MIPS_STABS_ELF */
 #endif /* TC_MIPS */
 
-#if (ECOFF_DEBUGGING == 1) || defined(MIPS_STABS_ELF)
-
+#ifdef ECOFF_DEBUGGING
 /* If we are generating ECOFF debugging information, we need some
    additional fields for each symbol.  */
 #undef TARGET_SYMBOL_FIELDS
@@ -161,18 +160,19 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
   struct localsym *ecoff_symbol; \
   valueT ecoff_extern_size;
 
-#ifndef MIPS_STABS_ELF
 /* We smuggle stabs in ECOFF rather than using a separate section.
    The Irix linker can not handle a separate stabs section.  */
-#undef SEPARATE_STAB_SECTIONS
-#undef INIT_STAB_SECTION
-#define OBJ_PROCESS_STAB(seg, what, string, type, other, desc) \
-  ecoff_stab ((seg), (what), (string), (type), (other), (desc))
 
-#define OBJ_GENERATE_ASM_LINENO(filename, lineno) \
-  ecoff_generate_asm_lineno ((filename), (lineno))
+#undef  SEPARATE_STAB_SECTIONS
+#define SEPARATE_STAB_SECTIONS (!ECOFF_DEBUGGING)
 
-#endif /* MIPS_STABS_ELF */
+#undef  INIT_STAB_SECTION
+#define INIT_STAB_SECTION(seg) \
+  ((void)(ECOFF_DEBUGGING ? 0 : obj_elf_init_stab_section (seg), 0))
+
+#define OBJ_PROCESS_STAB(seg, what, string, type, other, desc)		\
+  if (ECOFF_DEBUGGING)							\
+    ecoff_stab ((seg), (what), (string), (type), (other), (desc))
 #endif /* ECOFF_DEBUGGING */
 
 extern void elf_frob_symbol PARAMS ((struct symbol *, int *));

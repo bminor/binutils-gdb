@@ -51,6 +51,7 @@
 
 #include "as.h"
 #include "subsegs.h"
+#include "ecoff.h"
 
 #include "opcode/alpha.h"
 
@@ -210,7 +211,12 @@ static void s_alpha_sdata PARAMS ((int));
 #endif
 #ifdef OBJ_ELF
 static void s_alpha_section PARAMS ((int));
+static void s_alpha_ent PARAMS ((int));
+static void s_alpha_end PARAMS ((int));
+static void s_alpha_mask PARAMS ((int));
+static void s_alpha_frame PARAMS ((int));
 static void s_alpha_prologue PARAMS ((int));
+static void s_alpha_coff_wrapper PARAMS ((int));
 #endif
 #ifdef OBJ_EVAX
 static void s_alpha_section PARAMS ((int));
@@ -268,6 +274,12 @@ struct option md_longopts[] = {
   { "32addr", no_argument, NULL, OPTION_32ADDR },
 #define OPTION_RELAX (OPTION_32ADDR+1)
   { "relax", no_argument, NULL, OPTION_RELAX },
+#ifdef OBJ_ELF
+#define OPTION_MDEBUG (OPTION_RELAX+1)
+#define OPTION_NO_MDEBUG (OPTION_MDEBUG+1)
+  { "mdebug", no_argument, NULL, OPTION_MDEBUG },
+  { "no-mdebug", no_argument, NULL, OPTION_NO_MDEBUG },
+#endif
   { NULL, no_argument, NULL, 0 }
 };
 
@@ -348,6 +360,11 @@ static offsetT alpha_lit4_literal;
 static offsetT alpha_lit8_literal;
 #endif
 
+/* The active .ent symbol.  */
+#ifdef OBJ_ELF
+static symbolS *alpha_cur_ent_sym;
+#endif
+
 /* Is the assembler not allowed to use $at? */
 static int alpha_noat_on = 0;
 
@@ -379,6 +396,11 @@ unsigned long alpha_gprmask, alpha_fprmask;
 
 /* Whether the debugging option was seen.  */
 static int alpha_debug;
+
+#ifdef OBJ_ELF
+/* Whether we are emitting an mdebug section.  */
+int alpha_flag_mdebug = 1;
+#endif
 
 /* Don't fully resolve relocations, allowing code movement in the linker.  */
 static int alpha_flag_relax;
@@ -780,20 +802,9 @@ md_begin ()
 #ifdef OBJ_ELF
   if (ECOFF_DEBUGGING)
     {
-      segT sec;
-
-      sec = subseg_new(".mdebug", (subsegT)0);
+      segT sec = subseg_new(".mdebug", (subsegT)0);
       bfd_set_section_flags(stdoutput, sec, SEC_HAS_CONTENTS|SEC_READONLY);
       bfd_set_section_alignment(stdoutput, sec, 3);
-
-#ifdef ERIC_neverdef
-      sec = subseg_new(".reginfo", (subsegT)0);
-      /* The ABI says this section should be loaded so that the running
-	 program can access it.  */
-      bfd_set_section_flags(stdoutput, sec,
-			    SEC_ALLOC|SEC_LOAD|SEC_READONLY|SEC_DATA);
-      bfd_set_section_alignement(stdoutput, sec, 3);
-#endif
     }
 #endif /* OBJ_ELF */
 
@@ -965,6 +976,15 @@ md_parse_option (c, arg)
     case OPTION_RELAX:
       alpha_flag_relax = 1;
       break;
+
+#ifdef OBJ_ELF
+    case OPTION_MDEBUG:
+      alpha_flag_mdebug = 1;
+      break;
+    case OPTION_NO_MDEBUG:
+      alpha_flag_mdebug = 0;
+      break;
+#endif
 
     default:
       return 0;
@@ -3365,12 +3385,13 @@ s_alpha_comm (ignore)
 
   *p = 0;
   symbolP = symbol_find_or_make (name);
-  *p = c;
 
 #ifdef OBJ_EVAX
   /* Make a section for the common symbol.  */
   new_seg = subseg_new (xstrdup (name), 0);
 #endif
+
+  *p = c;
 
 #ifdef OBJ_EVAX
   /* alignment might follow  */
@@ -3493,6 +3514,119 @@ s_alpha_section (ignore)
 }
 
 static void
+s_alpha_ent (dummy)
+     int dummy;
+{
+  if (ECOFF_DEBUGGING)
+    ecoff_directive_ent (0);
+  else
+    {
+      char *name, name_end;
+      name = input_line_pointer;
+      name_end = get_symbol_end ();
+
+      if (! is_name_beginner (*name))
+	{
+	  as_warn (_(".ent directive has no name"));
+	  *input_line_pointer = name_end;
+	}
+      else
+	{
+	  symbolS *sym;
+
+	  if (alpha_cur_ent_sym)
+	    as_warn (_("nested .ent directives"));
+
+	  sym = symbol_find_or_make (name);
+	  sym->bsym->flags |= BSF_FUNCTION;
+	  alpha_cur_ent_sym = sym;
+
+	  /* The .ent directive is sometimes followed by a number.  Not sure
+	     what it really means, but ignore it.  */
+	  *input_line_pointer = name_end;
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer == ',')
+	    {
+	      input_line_pointer++;
+	      SKIP_WHITESPACE ();
+	    }
+	  if (isdigit (*input_line_pointer) || *input_line_pointer == '-')
+	    (void) get_absolute_expression ();
+	}
+      demand_empty_rest_of_line ();
+    }
+}
+
+static void
+s_alpha_end (dummy)
+     int dummy;
+{
+  if (ECOFF_DEBUGGING)
+    ecoff_directive_end (0);
+  else
+    {
+      char *name, name_end;
+      name = input_line_pointer;
+      name_end = get_symbol_end ();
+
+      if (! is_name_beginner (*name))
+	{
+	  as_warn (_(".end directive has no name"));
+	  *input_line_pointer = name_end;
+	}
+      else
+	{
+	  symbolS *sym;
+
+	  sym = symbol_find (name);
+	  if (sym != alpha_cur_ent_sym)
+	    as_warn (_(".end directive names different symbol than .ent"));
+
+	  /* Create an expression to calculate the size of the function.  */
+	  if (sym)
+	    {
+	      sym->sy_obj.size = (expressionS *) xmalloc (sizeof (expressionS));
+	      sym->sy_obj.size->X_op = O_subtract;
+	      sym->sy_obj.size->X_add_symbol
+	        = symbol_new ("L0\001", now_seg, frag_now_fix (), frag_now);
+	      sym->sy_obj.size->X_op_symbol = sym;
+	      sym->sy_obj.size->X_add_number = 0;
+	    }
+
+	  alpha_cur_ent_sym = NULL;
+
+	  *input_line_pointer = name_end;
+	}
+      demand_empty_rest_of_line ();
+    }
+}
+
+static void
+s_alpha_mask (fp)
+     int fp;
+{
+  if (ECOFF_DEBUGGING)
+    {
+      if (fp)
+        ecoff_directive_fmask (0);
+      else
+        ecoff_directive_mask (0);
+    }
+  else
+    ignore_rest_of_line ();
+}
+
+static void
+s_alpha_frame (dummy)
+     int dummy;
+{
+  if (ECOFF_DEBUGGING)
+    ecoff_directive_frame (0);
+  else
+    ignore_rest_of_line ();
+}
+
+static void
 s_alpha_prologue (ignore)
      int ignore;
 {
@@ -3502,7 +3636,10 @@ s_alpha_prologue (ignore)
   arg = get_absolute_expression ();
   demand_empty_rest_of_line ();
 
-  sym = ecoff_get_cur_proc_sym ();
+  if (ECOFF_DEBUGGING)
+    sym = ecoff_get_cur_proc_sym ();
+  else
+    sym = alpha_cur_ent_sym;
   know (sym != NULL);
 
   switch (arg)
@@ -3522,7 +3659,34 @@ s_alpha_prologue (ignore)
     }  
 }
 
-#endif
+static void
+s_alpha_coff_wrapper (which)
+     int which;
+{
+  static void (* const fns[]) PARAMS ((int)) = {
+    ecoff_directive_begin,
+    ecoff_directive_bend,
+    ecoff_directive_def,
+    ecoff_directive_dim,
+    ecoff_directive_endef,
+    ecoff_directive_file,
+    ecoff_directive_scl,
+    ecoff_directive_tag,
+    ecoff_directive_val,
+    ecoff_directive_loc,
+  };
+
+  assert (which >= 0 && which < sizeof(fns)/sizeof(*fns));
+
+  if (ECOFF_DEBUGGING)
+    (*fns[which])(0);
+  else
+    {
+      as_bad (_("ECOFF debugging is disabled."));
+      ignore_rest_of_line ();
+    }
+}
+#endif /* OBJ_ELF */
 
 #ifdef OBJ_EVAX
   
@@ -4371,7 +4535,24 @@ const pseudo_typeS md_pseudo_table[] =
   { "dtors", s_alpha_section, 5},
 #endif
 #ifdef OBJ_ELF
+  /* Frame related pseudos.  */
+  {"ent", s_alpha_ent, 0},
+  {"end", s_alpha_end, 0},
+  {"mask", s_alpha_mask, 0},
+  {"fmask", s_alpha_mask, 1},
+  {"frame", s_alpha_frame, 0},
   {"prologue", s_alpha_prologue, 0},
+  /* COFF debugging related pseudos.  */
+  {"begin", s_alpha_coff_wrapper, 0},
+  {"bend", s_alpha_coff_wrapper, 1},
+  {"def", s_alpha_coff_wrapper, 2},
+  {"dim", s_alpha_coff_wrapper, 3},
+  {"endef", s_alpha_coff_wrapper, 4},
+  {"file", s_alpha_coff_wrapper, 5},
+  {"scl", s_alpha_coff_wrapper, 6},
+  {"tag", s_alpha_coff_wrapper, 7},
+  {"val", s_alpha_coff_wrapper, 8},
+  {"loc", s_alpha_coff_wrapper, 9},
 #else
   {"prologue", s_ignore, 0},
 #endif

@@ -1,3 +1,26 @@
+Sat Aug  1 19:27:30 1998  Richard Henderson  <rth@cygnus.com>
+
+	* as.h (debug_info_type): Add entries for unspecified and dwarf*.
+	* ecoff.c (ecoff_generate_asm_lineno): Take no arguments; call
+	as_where ourselves.  Provide a stub for !ECOFF_DEBUGGING.
+	* ecoff.h: Move ECOFF_DEBUGGING protection inside GAS_ECOFF_H.
+	Move ecoff_generate_asm_lineno outside ECOFF_DEBUGGING protection.
+	* read.c (generate_lineno_debug): Tidy ECOFF bits.  Use
+	DEBUG_UNSPECIFIED rather than DEBUG_NONE for initial test.
+	* config/obj-elf.h (ECOFF_DEBUGGING) [TC_ALPHA]: Define to a variable.
+	(SEPARATE_STAB_SECTIONS): Conditionalize on value of ECOFF_DEBUGGING.
+	(INIT_STAB_SECTION): Likewise.
+	(OBJ_PROCESS_STAB): Likewise.
+	
+	* config/tc-alpha.c (md_longopts): New options -mdebug/-no-mdebug.
+	(md_parse_option): Watch for them.
+	(alpha_cur_ent_sym, alpha_flag_mdebug): New variables.
+	(md_begin): Kill neverdef code.
+	(s_alpha_ent, s_alpha_end, s_alpha_mask, s_alpha_frame): New.
+	(s_alpha_prologue): Watch alpha_cur_ent_sym.
+	(s_alpha_coff_wrapper): New.
+	(md_pseudo_table): Trap all ECOFF pseudos.
+	
 Fri Jul 31 16:45:54 1998  Ron Unrau <runrau@cygnus.com>
 
 	Start of changes to remove mdebug section from mips*-elf
