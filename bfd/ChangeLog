@@ -1,3 +1,8 @@
+Sun Sep  3 11:31:58 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_bfd_print_private_bfd_data): Define to use the
+	generic version.
+
 Fri Sep  1 17:08:40 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* peicode.h (coff_swap_aouthdr_in): Add ImageBase to
