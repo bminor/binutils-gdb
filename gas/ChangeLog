@@ -1,4 +1,14 @@
 start-sanitize-sky
+Thu Mar 12 16:13:25 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.h (TC_FIX_TYPE,TC_INIT_FIX_DATA): Define.
+	* config/tc-dvp.c (compute_nloop,check_nloop): New functions.
+	(gif_insn_frag_loc): New static global.
+	(assemble_gif): Record frag and location frag of insn.
+	(md_apply_fix3): Validate user specified nloop if we couldn't do
+	it earlier.
+	(s_endgif): Queue fixup to install nloop if we can't compute it here.
+
 Fri Mar  6 11:36:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-dvp.c (s_endgif): Fix nloop calc and test.  Warn if
