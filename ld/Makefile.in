@@ -170,6 +170,7 @@ ALL_EMULATIONS = em_lnk960.o em_sun3.o em_i386aout.o em_go32.o em_vsta.o \
 	em_m68kcoff.o em_st2000.o em_sa29200.o em_i386mach.o \
 	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
 	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500.o \
+	em_h8500b.o em_h8500s.o em_h8500c.o em_h8500m.o \
 	em_hppaosf.o em_mipsidtl.o em_sh.o em_elf_i386.o em_alpha.o \
 	em_i386lynx.o em_m68klynx.o em_sparclynx.o em_coff_sparc.o \
 	em_delta68.o \
@@ -298,6 +299,18 @@ em_h8300h.c: $(srcdir)/emulparams/h8300h.sh \
 em_h8500.c: $(srcdir)/emulparams/h8500.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8500
+em_h8500b.c: $(srcdir)/emulparams/h8500b.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500b.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} h8500b
+em_h8500c.c: $(srcdir)/emulparams/h8500c.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500c.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} h8500c
+em_h8500m.c: $(srcdir)/emulparams/h8500m.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500m.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} h8500m
+em_h8500s.c: $(srcdir)/emulparams/h8500s.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500s.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} h8500s
 em_sh.c: $(srcdir)/emulparams/sh.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sh
