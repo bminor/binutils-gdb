@@ -1407,6 +1407,7 @@ disassemble_bytes (struct disassemble_info * info,
 	      for (j = addr_offset * opb; j < addr_offset * opb + pb; j += bpc)
 		{
 		  int k;
+
 		  if (bpc > 1 && info->display_endian == BFD_ENDIAN_LITTLE)
 		    {
 		      for (k = bpc - 1; k >= 0; k--)

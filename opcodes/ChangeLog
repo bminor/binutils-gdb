@@ -1,3 +1,10 @@
+2004-07-22  Nick Clifton  <nickc@redhat.com>
+
+	PR/280
+	* h8300-dis.c (bfd_h8_disassemble): Do not dump raw bytes for the
+	insns - this is done by objdump itself.
+	* h8500-dis.c (print_insn_h8500): Likewise.
+
 2004-07-21  Jan Beulich <jbeulich@novell.com>
 
 	* i386-dis.c (OP_E): Show rip-relative addressing in 64-bit mode

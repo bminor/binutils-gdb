@@ -1,3 +1,14 @@
+2004-07-22  Nick Clifton  <nickc@redhat.com>
+
+	PR/280
+	* gas/h8300/ffxx1-coff.d: Remove duplicated raw insn values.
+	* gas/h8300/ffxx1-elf.d: Likewise.
+	* gas/h8300/h8sx_disp2.d: Likewise.
+	* gas/h8300/h8sx_mov_imm.d: Likewise.
+	* gas/h8300/h8sx_rtsl.d: Likewise.	
+	* gas/h8300/ffxx1-coff.s: Remove inappropriate insn width specifier.
+	* gas/h8300/ffxx1-elf.s: Likewise.
+
 2004-07-21  Jan Beulich <jbeulich@novell.com>
 
 	* gas/i386/x86-64-addr32.[ds]: New test for x86-64 32-bit

@@ -1,3 +1,13 @@
+2004-07-22  Nick Clifton  <nickc@redhat.com>
+
+	PR/280
+	* ld-h8300/relax-3-coff.d: Remove duplicated raw insn values.
+	* ld-h8300/relax-3.d: Likewise.
+	* ld-h8300/relax-4-coff.d: Likewise.
+	* ld-h8300/relax-4.d: Likewise.
+	* ld-h8300/relax-5-coff.d: Likewise.
+	* ld-h8300/relax.d: Likewise.
+
 2004-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-scripts/crossref.exp: XFAIL ia64-*-* on the first test.
