@@ -549,11 +549,22 @@ init.c: $(OBS) $(TSOBS)
 
 .PRECIOUS: init.c
 
+# The gdb target has two dependencies that aren't really
+# used when linking gdb.  They are built for the sake of cyscm.
+
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
+gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o libmain.o libutils.o
 	rm -f gdb
 	$(CC-LD) $(INTERNAL_LDFLAGS) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
+
+LIBGDBFILES=$(LIBGDB_OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
+LIBGDBPREFIX=.
+libgdb-files: force_update
+	-rm -f libgdb-files
+	for i in $(LIBGDBFILES); do\
+		echo ${LIBGDBPREFIX}/$$i >> libgdb-files;\
+	done
 
 libgdb.a: $(LIBGDB_OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f libgdb.a
