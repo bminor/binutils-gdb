@@ -111,17 +111,18 @@ install-dir.info:
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
 
 all.normal: all-libiberty all-mmalloc all-texinfo all-bison \
-	all-byacc all-bfd all-ld all-gas all-gcc \
+	all-byacc all-flex all-bfd all-ld all-gas all-gcc \
 	all-binutils all-libg++ all-readline all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
 	all-patch all-emacs all-ispell all-fileutils \
 	all-newlib all-gprof all-send_pr
+
 all.cross: all-libiberty all-mmalloc all-gas all-bison all-ld \
 	all-bfd all-libgcc all-readline all-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 clean: clean-stamps clean-libiberty clean-mmalloc clean-texinfo clean-bfd \
-	clean-newlib clean-binutils \
+	clean-newlib clean-binutils clean-flex \
 	clean-bison clean-byacc clean-ld clean-gas \
 	clean-gcc clean-libgcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs \
@@ -137,16 +138,17 @@ install: $(INSTALL_TARGET) $(srcdir)/configure.man
 
 
 install.all: install-dirs install-libiberty install-mmalloc install-texinfo \
-	install-bfd install-binutils install-bison install-byacc \
-	install-ld install-gas install-gcc install-gprof \
-	install-libgcc install-readline install-glob install-gdb \
-	install-make install-cvs install-patch install-emacs \
-	install-ispell install-fileutils install-libg++ install-newlib \
-	install-send_pr
+        install-bfd install-binutils install-bison install-byacc install-flex \
+        install-ld install-gas install-gcc install-gprof \
+        install-libgcc install-readline install-glob install-gdb \
+        install-make install-cvs install-patch install-emacs \
+        install-ispell install-fileutils install-libg++ install-newlib \
+        install-send_pr
 
-install.cross: install-dirs install-libiberty install-mmalloc install-binutils \
-	install-bison install-byacc install-ld install-gas install-libgcc \
-	install-readline install-glob install-gdb install-mmalloc install-gprof
+install.cross: install-dirs install-libiberty install-mmalloc \
+        install-binutils install-bison install-byacc install-flex \
+        install-ld install-gas install-libgcc install-readline \
+        install-glob install-gdb install-mmalloc install-gprof
 
 ### libiberty
 all-libiberty: force
@@ -698,6 +700,63 @@ install-bison: force
 		true ; \
 	fi
 
+### flex
+all-flex: force
+	@if [ -d ./flex ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./flex; \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			all) ; \
+	else \
+		true ; \
+	fi
+
+clean-flex: force
+	@if [ -d ./flex ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./flex; \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			clean) ; \
+	else \
+		true ; \
+	fi
+
+install-flex: force
+	@if [ -d ./flex ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./flex; \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			install) ; \
+	else \
+		true ; \
+	fi
 ### gcc
 all-gcc: all-libiberty all-bison
 	@if [ -d ./gcc ] ; then \
