@@ -1,5 +1,8 @@
 Wed May 17 15:55:53 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
+	* Makefile.in (config.status): changed target so that
+	  config.status --recheck is executed if configure script changes.
+
 	* monitor.c (monitor_printf): Changed format specification in
 	  error message to work with pre-ansi compilers.
 	  (monitor_load_srec): reduced length of s-records from 128 to 32
