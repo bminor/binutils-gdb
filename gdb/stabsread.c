@@ -3096,12 +3096,11 @@ read_enum_type (pp, type, objfile)
      that in something like "enum {FOO, LAST_THING=FOO}" we print
      FOO, not LAST_THING.  */
 
-  for (syms = *symlist, n = 0; syms; syms = syms->next)
+  for (syms = *symlist, n = nsyms - 1; ; syms = syms->next)
     {
-      int j = 0;
-      if (syms == osyms)
-	j = o_nsyms;
-      for (; j < syms->nsyms; j++,n++)
+      int last = syms == osyms ? o_nsyms : 0;
+      int j = syms->nsyms;
+      for (; --j >= last; --n)
 	{
 	  struct symbol *xsym = syms->symbol[j];
 	  SYMBOL_TYPE (xsym) = type;
