@@ -1,5 +1,7 @@
 2001-03-02  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS (paper trail): Update.
+
 	* CONTRIBUTE: Update note on ``Fix PR gdb/4706'' convention.
 
 2001-03-02  Andrew Cagney  <ac131313@redhat.com>
