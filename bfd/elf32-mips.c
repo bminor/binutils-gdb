@@ -887,40 +887,41 @@ mips_elf_lo16_reloc (abfd, reloc_entry, symbol, data, input_section,
 	  unsigned long vallo;
 	  struct mips_hi16 *next;
 
-	  /* Do the HI16 relocation.  Note that we actually don't need
-	     to know anything about the LO16 itself, except where to
-	     find the low 16 bits of the addend needed by the LO16.  */
-	  insn = bfd_get_32 (abfd, l->addr);
-	  vallo = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
-
-	  /* The low order 16 bits are always treated as a signed
-	     value.  */
-	  vallo = ((vallo & 0xffff) ^ 0x8000) - 0x8000;
-	  val = ((insn & 0xffff) << 16) + vallo;
-	  val += l->addend;
-
-	  /* If PC-relative, we need to subtract out the address of the LO
-	     half of the HI/LO.  (The actual relocation is relative
-	     to that instruction.)  */
-	  if (reloc_entry->howto->pc_relative)
-	    val -= reloc_entry->address;
-
-	  /* At this point, "val" has the value of the combined HI/LO
-	     pair.  If the low order 16 bits (which will be used for
-	     the LO16 insn) are negative, then we will need an
-	     adjustment for the high order 16 bits.  */
-	  val += 0x8000;
-	  val = (val >> 16) & 0xffff;
-
-	  insn &= ~ (bfd_vma) 0xffff;
-	  insn |= val;
-	  bfd_put_32 (abfd, (bfd_vma) insn, l->addr);
-
 	  if (strcmp (bfd_asymbol_name (symbol), "_gp_disp") == 0)
 	    {
 	      gp_disp_relent = *reloc_entry;
 	      reloc_entry = &gp_disp_relent;
 	      reloc_entry->addend = l->addend;
+	    }
+	  else
+	    {
+	      /* Do the HI16 relocation.  Note that we actually don't need
+		 to know anything about the LO16 itself, except where to
+		 find the low 16 bits of the addend needed by the LO16.  */
+	      insn = bfd_get_32 (abfd, l->addr);
+	      vallo = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+	      /* The low order 16 bits are always treated as a signed
+		 value.  */
+	      vallo = ((vallo & 0xffff) ^ 0x8000) - 0x8000;
+	      val = ((insn & 0xffff) << 16) + vallo;
+	      val += l->addend;
+
+	      /* If PC-relative, we need to subtract out the address of the LO
+		 half of the HI/LO.  (The actual relocation is relative
+		 to that instruction.)  */
+	      if (reloc_entry->howto->pc_relative)
+		val -= reloc_entry->address;
+
+	      /* At this point, "val" has the value of the combined HI/LO
+		 pair.  If the low order 16 bits (which will be used for
+		 the LO16 insn) are negative, then we will need an
+		 adjustment for the high order 16 bits.  */
+	      val += 0x8000;
+	      val = (val >> 16) & 0xffff;
+
+	      insn &= ~ (bfd_vma) 0xffff;
+	      insn |= val;
+	      bfd_put_32 (abfd, (bfd_vma) insn, l->addr);
 	    }
 
 	  next = l->next;
