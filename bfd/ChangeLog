@@ -1,3 +1,8 @@
+Wed Mar 29 12:01:30 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cpu-h8500.c (arch_info_struct): Change name from "H8/300" to
+	"h8300" for consistency with other cpu-* files.
+
 Tue Mar 28 15:14:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bout.c (b_out_canonicalize_reloc): Handle SEC_CONSTRUCTOR
