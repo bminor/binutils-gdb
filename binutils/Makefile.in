@@ -161,8 +161,8 @@ ADDL_LIBS = $(MALLOC) $(BULIBS) $(BFD) $(LIBIBERTY)
 BFD = ../bfd/libbfd.a
 OPCODES = ../opcodes/libopcodes.a
 
-EXPECT = `if [ -f $${rootme}/../expect/expect ] ; then \
-          echo $${rootme}/../expect/expect ; \
+EXPECT = `if [ -f $$r/../expect/expect ] ; then \
+          echo $$r/../expect/expect ; \
           else echo expect ; fi`
 RUNTEST = `if [ -f ${srcdir}/../dejagnu/runtest ] ; then \
            echo ${srcdir}/../dejagnu/runtest ; \
@@ -177,7 +177,7 @@ CC_FOR_TARGET = ` \
       echo $$r/../gcc/xgcc -B$$r/../gcc/; \
     fi; \
   else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+    if [ "@host@" = "@target@" ] ; then \
       echo $(CC); \
     else \
       echo gcc | sed '$(program_transform_name)'; \
@@ -226,10 +226,10 @@ site.exp: ./config.status Makefile
 	-@rm -f ./tmp?
 
 check: site.exp
-	rootme=`pwd`; export rootme ; \
+	r=`pwd`; export r ; \
 	srcroot=`cd ${srcdir}; pwd` ; export srcroot ; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
-	if [ -f $$rootme/../expect/expect ] ; then  \
+	if [ -f $$r/../expect/expect ] ; then  \
 	   TCL_LIBRARY=$${srcroot}/../tcl/library ; \
 	   export TCL_LIBRARY ; else true; fi ; \
 	$(RUNTEST) --tool binutils --srcdir $(srcdir)/testsuite \

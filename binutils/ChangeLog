@@ -1,3 +1,8 @@
+Wed Nov 22 13:17:15 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (EXPECT): Use $$r, not $${rootme}.
+	(check): Set r, not rootme.
+
 Tue Nov 21 18:04:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Use BFD_NEED_DECLARATION.
