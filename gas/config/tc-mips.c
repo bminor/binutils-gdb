@@ -1858,36 +1858,47 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  int min_nops = 0;
 	  const char *pn = prev_insn.insn_mo->name;
 	  const char *tn = ip->insn_mo->name;
-	  if (strncmp(pn, "macc", 4) == 0
-	      || strncmp(pn, "dmacc", 5) == 0)
+	  if (strncmp (pn, "macc", 4) == 0
+	      || strncmp (pn, "dmacc", 5) == 0)
 	    {
 	      /* Errata 21 - [D]DIV[U] after [D]MACC */
 	      if (strstr (tn, "div"))
-		{
-		  min_nops = 1;
-		}
+		min_nops = 1;
 
-	      /* Errata 23 - Continuous DMULT[U]/DMACC instructions */
-	      if (pn[0] == 'd' /* dmacc */
-		  && (strncmp(tn, "dmult", 5) == 0
-		      || strncmp(tn, "dmacc", 5) == 0))
-		{
-		  min_nops = 1;
-		}
+	      /* VR4181A errata MD(1): "If a MULT, MULTU, DMULT or DMULTU
+		 instruction is executed immediately after a MACC or
+		 DMACC instruction, the result of [either instruction]
+		 is incorrect."  */
+	      if (strncmp (tn, "mult", 4) == 0
+		  || strncmp (tn, "dmult", 5) == 0)
+		min_nops = 1;
+
+	      /* Errata 23 - Continuous DMULT[U]/DMACC instructions.
+		 Applies on top of VR4181A MD(1) errata.  */
+	      if (pn[0] == 'd' && strncmp (tn, "dmacc", 5) == 0)
+		min_nops = 1;
 
 	      /* Errata 24 - MT{LO,HI} after [D]MACC */
 	      if (strcmp (tn, "mtlo") == 0
 		  || strcmp (tn, "mthi") == 0)
-		{
-		  min_nops = 1;
-		}
-
+		min_nops = 1;
 	    }
-	  else if (strncmp(pn, "dmult", 5) == 0
-		   && (strncmp(tn, "dmult", 5) == 0
-		       || strncmp(tn, "dmacc", 5) == 0))
+	  else if (strncmp (pn, "dmult", 5) == 0
+		   && (strncmp (tn, "dmult", 5) == 0
+		       || strncmp (tn, "dmacc", 5) == 0))
 	    {
 	      /* Here is the rest of errata 23.  */
+	      min_nops = 1;
+	    }
+	  else if ((strncmp (pn, "dmult", 5) == 0 || strstr (pn, "div"))
+		   && (strncmp (tn, "macc", 4) == 0
+		       || strncmp (tn, "dmacc", 5) == 0))
+	    {
+	      /* VR4181A errata MD(4): "If a MACC or DMACC instruction is
+		 executed immediately after a DMULT, DMULTU, DIV, DIVU,
+		 DDIV or DDIVU instruction, the result of the MACC or
+		 DMACC instruction is incorrect.".  This partly overlaps
+		 the workaround for errata 23.  */
 	      min_nops = 1;
 	    }
 	  if (nops < min_nops)
@@ -2827,12 +2838,11 @@ mips_emit_delays (bfd_boolean insns)
 	{
 	  int min_nops = 0;
 	  const char *pn = prev_insn.insn_mo->name;
-	  if (strncmp(pn, "macc", 4) == 0
-	      || strncmp(pn, "dmacc", 5) == 0
-	      || strncmp(pn, "dmult", 5) == 0)
-	    {
-	      min_nops = 1;
-	    }
+	  if (strncmp (pn, "macc", 4) == 0
+	      || strncmp (pn, "dmacc", 5) == 0
+	      || strncmp (pn, "dmult", 5) == 0
+	      || strstr (pn, "div"))
+	    min_nops = 1;
 	  if (nops < min_nops)
 	    nops = min_nops;
 	}

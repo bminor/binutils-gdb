@@ -1,3 +1,8 @@
+2004-05-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (append_insn, mips_emit_delays): Extend -mfix-vr4120
+	to cope with VR4181A errata MD(1) and MD(4).
+
 2004-05-07  Brian Ford  <ford@vss.fsi.com>
 
 	* NEWS: Mention .secrel32 for pe[i]-i386.
