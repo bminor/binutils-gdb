@@ -60,7 +60,7 @@ target processor.
 
 @cindex @code{-mfpe-old} command line option, ARM
 @item -mfpe-old
-Do not allow the assemble of floating point multiple instructions.
+Do not allow the assembly of floating point multiple instructions.
 
 @cindex @code{-mno-fpu} command line option, ARM
 @item -mno-fpu
@@ -109,7 +109,8 @@ be marked as being encoded for a little-endian processor.
 @cindex @code{-k} command line option, ARM
 @cindex PIC code generation for ARM
 @item -k
-This option enables the generation of PIC (position independent code).
+This option specifies that the output of the assembler should be marked
+as position-independent code (PIC).
 
 @cindex @code{-moabi} command line option, ARM
 @item -moabi
@@ -140,8 +141,8 @@ the first character of a line, the whole line is treated as a comment.
 @cindex line separator, ARM
 @cindex statement separator, ARM
 @cindex ARM line separator
-On ARM systems running the GNU/Linux operating system, @samp{;} can be
-used instead of a newline to separate statements.
+The @samp{;} character can be used instead of a newline to separate
+statements.
 
 @cindex immediate character, ARM
 @cindex ARM immediate character
@@ -289,7 +290,7 @@ will not make use of the literal pool.
 @end smallexample
 
 This instruction will load the address of @var{label} into the indicated
-register.  The instruction will evaluate to one or two a PC relative ADD
+register.  The instruction will evaluate to one or two PC relative ADD
 or SUB instructions depending upon where the label is located.  If a
 second instruction is not needed a NOP instruction will be generated in
 its place, so that this instruction is always 8 bytes long.

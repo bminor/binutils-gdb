@@ -1,3 +1,11 @@
+2001-01-13  Philip Blundell  <philb@gnu.org>
+
+	* doc/as.texinfo: Fix spelling and cross-references.
+
+	* doc/c-arm.texi: Fix typos.  Say that `;' is a line separator
+	character for all systems, not just GNU/Linux.  Make it explicit
+	that `-k' doesn't affect code generation, just ELF flags.
+
 Sat Jan 13 01:47:35 MET 2001  Jan Hubicka <jh@suse.cz>
 
 	* config/tc-i386.c (md_assemble): Check cpu_flags even for nullary
@@ -89,7 +97,6 @@ Sat Jan 13 01:47:35 MET 2001  Jan Hubicka <jh@suse.cz>
 	Use DOLLAR_LABEL_CHAR and LOCAL_LABEL_CHAR.
 	(S_IS_LOCAL): Use DOLLAR_LABEL_CHAR and LOCAL_LABEL_CHAR.
 
->>>>>>> 1.724
 2001-01-08  Bo Thorsen  <bo@suse.de>
 
         * config/tc-i386.c (i386_immediate, i386_displacement):

@@ -1,5 +1,5 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright (c) 1991, 92, 93, 94, 95, 96, 97, 98, 2000
+@c  Copyright (c) 1991, 92, 93, 94, 95, 96, 97, 98, 2000, 2001
 @c  Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
@@ -87,7 +87,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the GNU Assembler "@value{AS}".
 
-Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
+Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
@@ -138,7 +138,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
@@ -218,7 +218,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
    -m[arm]810 | -m[arm]9 | -m[arm]920 | -m[arm]920t | -m[arm]9tdmi |
    -mstrongarm | -mstrongarm110 | -mstrongarm1100 ]
  [ -m[arm]v2 | -m[arm]v2a | -m[arm]v3 | -m[arm]v3m | -m[arm]v4 | -m[arm]v4t |
-   -m[arm]v5 | -[arm]v5t ]
+   -m[arm]v5 | -[arm]v5t | -[arm]v5te ]
  [ -mthumb | -mall ]
  [ -mfpa10 | -mfpa11 | -mfpe-old | -mno-fpu ]
  [ -EB | -EL ]
@@ -436,7 +436,7 @@ Specify which ARM architecture variant is used by the target.
 @item -mthumb | -mall
 Enable or disable Thumb only instruction decoding.
 @item -mfpa10 | -mfpa11 | -mfpe-old | -mno-fpu
-Select which Floating Point architcture is the target.
+Select which Floating Point architecture is the target.
 @item -mapcs-32 | -mapcs-26 | -mapcs-float | -mapcs-reentrant | -moabi
 Select which procedure calling convention is in use.
 @item -EB | -EL
@@ -742,7 +742,7 @@ The command line option @samp{-nojsri2bsr} can be used to disable it.
 @item -sifilter
 @itemx -nosifilter
 Enable or disable the silicon filter behaviour.  By default this is disabled.
-The default can be overidden by the @samp{-sifilter} command line option.
+The default can be overridden by the @samp{-sifilter} command line option.
 
 @item -relax
 Alter jump instructions for long displacements.
@@ -1030,7 +1030,7 @@ information for the debugger.
 @node Errors
 @section Error and Warning Messages
 
-@cindex error messsages
+@cindex error messages
 @cindex warning messages
 @cindex messages from assembler
 @code{@value{AS}} may write warnings and error messages to the standard error
@@ -2400,7 +2400,7 @@ in the data section.
 @cindex bss section
 @item bss section
 This section contains zeroed bytes when your program begins running.  It
-is used to hold unitialized variables or common storage.  The length of
+is used to hold uninitialized variables or common storage.  The length of
 each partial program's bss section is important, but because it starts
 out containing zeroed bytes there is no need to store explicit zero
 bytes in the object file.  The bss section was invented to eliminate
@@ -3791,7 +3791,8 @@ partial programs.  You may need the HPPA-only @code{.EXPORT} directive as well.
 @cindex @code{.hidden} directive
 @cindex Visibility
 This one of the ELF visibility directives.  The other two are
-@pxref{Internal,,@code{.internal}} and @pxref{Protected,,@code{.protected}}
+@code{.internal} (@pxref{Internal,,@code{.internal}}) and 
+@code{.protected} (@pxref{Protected,,@code{.protected}}).
 
 This directive overrides the named symbols default visibility (which is set by
 their binding: local, global or weak).  The directive sets the visibility to
@@ -3948,7 +3949,8 @@ integers.  On the H8/300H and the Hitachi SH, however, @code{.int} emits
 @cindex @code{.internal} directive
 @cindex Visibility
 This one of the ELF visibility directives.  The other two are
-@pxref{Hidden,,@code{.hidden}} and @pxref{Protected,,@code{.protected}}
+@code{.hidden} (@pxref{Hidden,,@code{.hidden}}) and 
+@code{.protected} (@pxref{Protected,,@code{.protected}}).
 
 This directive overrides the named symbols default visibility (which is set by
 their binding: local, global or weak).  The directive sets the visibility to
@@ -4391,8 +4393,9 @@ undefined.
 @cindex @code{.previous} directive
 @cindex Section Stack
 This is one of the ELF section stack manipulation directives.  The others are
-@pxref{Section}, @xref{SubSection}, @pxref{PushSection}, and
-@pxref{PopSection}.
+@code{.section} (@pxref{Section}), @code{.subsection} (@pxref{SubSection}),
+@code{.pushsection} (@pxref{PushSection}), and @code{.popsection}
+(@pxref{PopSection}).
 
 This directive swaps the current section (and subsection) with most recently
 referenced section (and subsection) prior to this one.  Multiple
@@ -4410,8 +4413,9 @@ the top section on the section stack.
 @cindex @code{.popsection} directive
 @cindex Section Stack
 This is one of the ELF section stack manipulation directives.  The others are
-@pxref{Section}, @xref{SubSection}, @pxref{PushSection}, and
-@pxref{Previous}.
+@code{.section} (@pxref{Section}), @code{.subsection} (@pxref{SubSection}), 
+@code{.pushsection} (@pxref{PushSection}), and @code{.previous} 
+(@pxref{Previous}).
 
 This directive replaces the current section (and subsection) with the top
 section (and subsection) on the section stack.  This section is popped off the
@@ -4432,7 +4436,7 @@ assembly.  You must put @var{string} in double quotes.
 @cindex @code{.protected} directive
 @cindex Visibility
 This one of the ELF visibility directives.  The other two are
-@pxref{Hidden} and @pxref{Internal}
+@code{.hidden} (@pxref{Hidden}) and @code{.internal} (@pxref{Internal}).
 
 This directive overrides the named symbols default visibility (which is set by
 their binding: local, global or weak).  The directive sets the visibility to
@@ -4476,10 +4480,11 @@ expanded.  @xref{Macro}.
 @cindex @code{.pushsection} directive
 @cindex Section Stack
 This is one of the ELF section stack manipulation directives.  The others are
-@pxref{Section}, @xref{SubSection}, @pxref{PopSection}, and
-@pxref{Previous}.
+@code{.section} (@pxref{Section}), @code{.subsection} (@pxref{SubSection}), 
+@code{.popsection} (@pxref{PopSection}), and @code{.previous} 
+(@pxref{Previous}).
 
-This directive is a synonym for @code{.section}.  It psuhes the current section
+This directive is a synonym for @code{.section}.  It pushes the current section
 (and subsection) onto the top of the section stack, and then replaces the
 current section and subsection with @code{name} and @code{subsection}.
 @end ifset
@@ -4614,8 +4619,9 @@ taken as a subsegment number (@pxref{Sub-Sections}).
 @ifset ELF
 @cindex Section Stack
 This is one of the ELF section stack manipulation directives.  The others are
-@xref{SubSection}, @pxref{PushSection}@pxref{PopSection}, and
-@pxref{Previous}.
+@code{.subsection} (@pxref{SubSection}), @code{.pushsection} 
+(@pxref{PushSection}), @code{.popsection} (@pxref{PopSection}), and
+@code{.previous} (@pxref{Previous}).
 @end ifset
 
 For ELF targets, the @code{.section} directive is used like this:
@@ -4625,7 +4631,7 @@ For ELF targets, the @code{.section} directive is used like this:
 @end smallexample
 
 The optional @var{flags} argument is a quoted string which may contain any
-combintion of the following characters:
+combination of the following characters:
 @table @code
 @item a
 section is allocatable
@@ -4911,8 +4917,9 @@ before further assembly.
 @cindex @code{.subsection} directive
 @cindex Section Stack
 This is one of the ELF section stack manipulation directives.  The others are
-@pxref{Section}, @xref{PushSection}, @pxref{PopSection}, and
-@pxref{Previous}.
+@code{.section} (@pxref{Section}), @code{.pushsection} (@pxref{PushSection}), 
+@code{.popsection} (@pxref{PopSection}), and @code{.previous} 
+(@pxref{Previous}).
 
 This directive replaces the current subsection with @code{name}.  The current
 section is not changed.  The replaced subsection is put onto the section stack
@@ -4961,7 +4968,7 @@ Another usage of the @code{.symver} directive is:
 .symver @var{name}, @var{name2@@@@nodename}
 @end smallexample
 In this case, the symbol @var{name} must exist and be defined within
-the file being assembled. It is similiar to @var{name2@@nodename}. The
+the file being assembled. It is similar to @var{name2@@nodename}. The
 difference is @var{name2@@@@nodename} will also be used to resolve
 references to @var{name2} by the linker.
 
@@ -5035,9 +5042,9 @@ directive but ignores it.
 @cindex symbol type, ELF
 @cindex @code{type} directive
 This directive is used to set the type of symbol @var{name} to be either a
-function symbol or an ojbect symbol.  There are five different syntaxes
+function symbol or an object symbol.  There are five different syntaxes
 supported for the @var{type description} field, in order to provide
-comptability with various other assemblers.  The syntaxes supported are:
+compatibility with various other assemblers.  The syntaxes supported are:
 
 @smallexample
   .type <name>,#function
@@ -5104,7 +5111,7 @@ This directive finds or creates a symbol @code{table} and creates a
 @cindex @code{.vtable_inherit}
 This directive finds the symbol @code{child} and finds or creates the symbol
 @code{parent} and then creates a @code{VTABLE_INHERIT} relocation for the
-parent whoes addend is the value of the child symbol.  As a special case the
+parent whose addend is the value of the child symbol.  As a special case the
 parent name of @code{0} is treated as refering the @code{*ABS*} section.
 @end ifset
 
@@ -5113,7 +5120,7 @@ parent name of @code{0} is treated as refering the @code{*ABS*} section.
 @section @code{.weak @var{names}}
 
 @cindex @code{.weak}
-This directive sets the weak attribute on the comma seperated list of symbol
+This directive sets the weak attribute on the comma separated list of symbol
 @code{names}.  If the symbols do not already exist, they will be created.
 @end ifset
 
@@ -5154,7 +5161,7 @@ interest to you does 32-bit addressing (or doesn't require it;
 
 @end ifset
 In order to assemble compiler output into something that works,
-@code{@value{AS}} occasionlly does strange things to @samp{.word} directives.
+@code{@value{AS}} occasionally does strange things to @samp{.word} directives.
 Directives of the form @samp{.word sym1-sym2} are often emitted by
 compilers as part of jump tables.  Therefore, when @code{@value{AS}} assembles a
 directive of the form @samp{.word sym1-sym2}, and the difference between
