@@ -623,7 +623,9 @@ TAGS \Option-f
 	etags -t "{srcdir}"\Option-x.[chly] \Option-x.[chly]
 
 
-install \Option-f  
+install \Option-f  all install-only
+
+install-only \Option-f
 	If "`Exists "{prefix}"`" == ""
 		Echo "{prefix}" does not exist, cannot install anything
 		Exit 1
