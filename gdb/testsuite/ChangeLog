@@ -1,3 +1,9 @@
+Tue Aug 31 16:51:29 1993  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* config/udi-gdb.exp: gdb_exit now kills any isstip processes
+	still running and removes the leftover named socket so GDb can do
+	clean restarts.
+
 Mon Aug 30 17:55:16 1993  Rob Savoye  (rob@darkstar.cygnus.com)
 
 	* gdb.t01/run.exp: Add match for VxWorks, cause I/O comes out the
