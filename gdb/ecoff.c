@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	LANGUAGE_C		/* Wierd MIPS crap */
 #include "sym.h"		/* MIPS symbols */
 #include "symconst.h"		/* MIPS symbols */
-#include "ecoff-ext.h"		/* ECOFF external struct defns */
+#include "coff/ecoff-ext.h"	/* ECOFF external struct defns */
 
 void
 ecoff_swap_hdr_in (abfd, ext_copy, intern)
