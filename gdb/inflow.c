@@ -305,7 +305,7 @@ child_terminal_info (args, from_tty)
 
 #ifdef HAVE_TERMIO
 
-  printf_filtered (c_iflag = 0x%x, c_oflag = 0x%x,\n",
+  printf_filtered ("c_iflag = 0x%x, c_oflag = 0x%x,\n",
 	  sg_inferior.c_iflag, sg_inferior.c_oflag);
   printf_filtered ("c_cflag = 0x%x, c_lflag = 0x%x, c_line = 0x%x.\n",
 	  sg_inferior.c_cflag, sg_inferior.c_lflag, sg_inferior.c_line);

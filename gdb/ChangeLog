@@ -1,5 +1,7 @@
 Thu Dec  5 10:51:05 1991  Fred Fish  (fnf at cygnus.com)
 
+	* inflow.c (child_terminal_info): Supply missing '"' character.
+
 	* buildsym.c (define_symbol):  Supply missing parenthesis.
 
 Thu Dec  5 03:34:21 1991  John Gilmore  (gnu at cygnus.com)
