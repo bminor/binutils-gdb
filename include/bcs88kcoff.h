@@ -1,5 +1,9 @@
 /*** coff information for 88k bcs */
 
+#ifndef M88
+#define M88
+#endif
+
 /********************** FILE HEADER **********************/
 
 struct filehdr {

@@ -33,6 +33,7 @@ a.out.host.h
 a.out.sun4.h
 a.out.vax.h
 a29k-opcode.h
+amdcoff.h
 ansidecl.h
 aout64.h
 ar.h
@@ -91,7 +92,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.3  1991/06/14 22:14:07  steve
+# Revision 1.4  1991/07/15 23:34:14  steve
+# *** empty log message ***
+#
+# Revision 1.3  1991/06/14  22:14:07  steve
 # *** empty log message ***
 #
 # Revision 1.2  1991/05/31  11:26:52  gnu

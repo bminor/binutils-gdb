@@ -40,6 +40,7 @@ copy.c
 cplus-dem.c
 filemode.c
 gmalloc.c
+am29k-pinsn.c
 i960-pinsn.c
 m68k-pinsn.c
 nm.c
@@ -57,7 +58,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 21:49:14  rich
+# Revision 1.2  1991/07/15 23:38:04  steve
+# *** empty log message ***
+#
+# Revision 1.1  1991/05/23  21:49:14  rich
 # Initial revision
 #
 #

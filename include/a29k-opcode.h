@@ -63,7 +63,7 @@ struct a29k_opcode {
   char *args;
 };
 
-static const struct a29k_opcode a29k_opcodes[] =
+static CONST struct a29k_opcode a29k_opcodes[] =
 {
 
 { "add", 0x14000000, "c,a,b" },
@@ -279,11 +279,14 @@ static const struct a29k_opcode a29k_opcodes[] =
 			   if we've run off the end of the table.  */
 };
 
-const unsigned int num_opcodes = (((sizeof a29k_opcodes) / (sizeof a29k_opcodes[0])) - 1);
+CONST unsigned int num_opcodes = (((sizeof a29k_opcodes) / (sizeof a29k_opcodes[0])) - 1);
 
 /*
  * $Log$
- * Revision 1.1  1991/05/19 00:19:33  rich
+ * Revision 1.2  1991/07/15 23:34:04  steve
+ * *** empty log message ***
+ *
+ * Revision 1.1  1991/05/19  00:19:33  rich
  * Initial revision
  *
  * Revision 1.1.1.1  1991/04/04  18:15:23  rich

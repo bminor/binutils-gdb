@@ -91,8 +91,13 @@ struct internal_scnhdr {
 	long		s_scnptr;	/* file ptr to raw data for section */
 	long		s_relptr;	/* file ptr to relocation	*/
 	long		s_lnnoptr;	/* file ptr to line numbers	*/
+#ifdef M88
+	unsigned long 	s_nreloc;
+	unsigned long   s_nlnno;
+#else
 	unsigned short	s_nreloc;	/* number of relocation entries	*/
 	unsigned short	s_nlnno;	/* number of line number entries*/
+#endif
 	long		s_flags;	/* flags			*/
 #ifdef I960
 	long		s_align;	
@@ -143,7 +148,11 @@ struct internal_lineno {
 		long l_symndx;	/* function name symbol index, iff l_lnno == 0*/
 		long l_paddr;	/* (physical) address of line number	*/
 	} l_addr;
+#ifdef M88
+	unsigned long	l_lnno;	/* line number		*/
+#else
 	unsigned short	l_lnno;	/* line number		*/
+#endif
 };
 
 /********************** SYMBOLS **********************/
@@ -160,6 +169,9 @@ struct internal_syment {
 	short		n_scnum;	/* section number		*/
 	unsigned short	n_flags;	/* copy of flags from filhdr	*/
 	unsigned short	n_type;		/* type and derived type	*/
+#if __STDC__
+	signed
+#endif
 	char		n_sclass;	/* storage class		*/
 	char		n_numaux;	/* number of aux. entries	*/
 };

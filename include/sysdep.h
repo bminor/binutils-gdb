@@ -46,6 +46,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define DOS_SYS 13
 #define	VAX_BSD_SYS 14
 #define	TAHOE_BSD_SYS 15
+#define RTBSD_SYS 16  /* IBM RT/PC running bsd Unix */
 
 #include <ansidecl.h>
 
@@ -120,6 +121,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if HOST_SYS == TAHOE_BSD_SYS
 #include <sys/h-tahoebsd.h>
+#endif
+
+#if HOST_SYS == RTBSD_SYS	
+#include <sys/h-rtbsd.h>
 #endif
 
 #endif 
