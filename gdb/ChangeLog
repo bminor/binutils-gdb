@@ -1,3 +1,11 @@
+2002-08-13  Kevin Buettner  <kevinb@redhat.com>
+
+	* procfs.c (procfs_can_use_hw_breakpoint): New function.
+	(init_procfs_ops): Define ``to_can_use_hw_breakpoint'' for procfs
+	target vector.
+	* config/mips/nm-irix5.h (TARGET_CAN_USE_HARDWARE_WATCHPOINT):
+	Delete.  Add comment regarding this now-deleted target method.
+
 2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* m68hc11-tdep.c (M68HC12_NUM_PSEUDO_REGS): New define.
