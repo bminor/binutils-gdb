@@ -1516,7 +1516,7 @@ DEVO_SUPPORT= README Makefile.in configure configure.in \
 	config.guess config.sub config move-if-change \
 	mpw-README mpw-build.in mpw-config.in mpw-configure mpw-install \
 	COPYING COPYING.LIB install-sh config-ml.in symlink-tree \
-	mkinstalldirs ltconfig ltmain.sh missing
+	mkinstalldirs ltconfig ltmain.sh missing ylwrap
 
 # Files in devo/etc used in any net release.
 # ChangeLog omitted because it may refer to files which are not in this

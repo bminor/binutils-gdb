@@ -59,7 +59,7 @@ keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	texinfo tgas utils uudecode wdiff xiberty
 	configure.bat makeall.bat setup.com makefile.vms winsup
 	mpw-README mpw-configure mpw-config.in mpw-build.in mpw-install
-	ltconfig ltmain.sh missing"
+	ltconfig ltmain.sh missing ylwrap"
 
 lose_these_too="${lose_these_too} testsuite"
 
