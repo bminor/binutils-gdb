@@ -1,3 +1,13 @@
+Sun Jul  5 09:46:43 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* cadillac.c, cadillac-patches:  Rename to energize.c and
+	energize-patches.  Change all routines and variables named
+	'cadillac*' to 'energize*'.  Create new file called energize.h to
+	hold all interface declarations.
+
+	* deblib/connection/*:  Move all of this stuff into energize/, but
+	delete unneeded files.
+
 Sun Jul  5 03:06:39 1992  John Gilmore  (gnu at cygnus.com)
 
 	* tm-sysv4.h (NAMES_HAVE_UNDERSCORE):  SVR4 systems don't.
