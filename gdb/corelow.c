@@ -50,6 +50,10 @@
 #define O_BINARY 0
 #endif
 
+#ifndef O_LARGEFILE
+#define O_LARGEFILE 0
+#endif
+
 /* List of all available core_fns.  On gdb startup, each core file
    register reader calls deprecated_add_core_fns() to register
    information on each core format it is prepared to read.  */
@@ -280,6 +284,7 @@ core_open (char *filename, int from_tty)
   bfd *temp_bfd;
   int ontop;
   int scratch_chan;
+  int flags;
 
   target_preopen (from_tty);
   if (!filename)
@@ -299,7 +304,12 @@ core_open (char *filename, int from_tty)
 
   old_chain = make_cleanup (xfree, filename);
 
-  scratch_chan = open (filename, O_BINARY | ( write_files ? O_RDWR : O_RDONLY ), 0);
+  flags = O_BINARY | O_LARGEFILE;
+  if (write_files)
+    flags |= O_RDWR;
+  else
+    flags |= O_RDONLY;
+  scratch_chan = open (filename, flags, 0);
   if (scratch_chan < 0)
     perror_with_name (filename);
 

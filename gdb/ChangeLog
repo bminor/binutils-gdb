@@ -1,3 +1,9 @@
+2004-07-06  Andrew Cagney  <cagney@gnu.org>
+
+	Patch from Bart Robinson.
+	* corelow.c (core_open): Add variable "flags", or in O_LARGEFILE.
+	(O_LARGEFILE): Define to 0, if not defined.
+
 2004-07-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* m68kbsd-nat.c: Include "gdbcore.h", <sys/types.h>,
