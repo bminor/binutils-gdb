@@ -1,3 +1,9 @@
+1999-08-13  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (validate_offset_imm): Work on unsigned values.
+	(md_apply_fix3): Always pass positive values to
+	validate_offset_imm.
+
 1999-08-12  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (skip_whitespace): New macro.
