@@ -1,3 +1,7 @@
+Wed Jun 23 15:02:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Negative Type Numbers): Minor character cleanups.
+
 Tue Jun 22 16:31:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo: Express disapproval of 'D' symbol descriptor

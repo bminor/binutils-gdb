@@ -1463,7 +1463,7 @@ type.
 @code{stringptr}.  @xref{Strings}.
 
 @item -20
-@code{character}, 8 bit unsigned type.
+@code{character}, 8 bit unsigned character type.
 
 @item -21
 @code{logical*1}, 8 bit unsigned integral type.
@@ -1495,8 +1495,8 @@ floating point values.
 @code{integer*4}, 32 bit signed integral type.
 
 @item -30
-@code{wchar}.  Wide character, 16 bits wide (Unicode format?).  This is
-not used for the C type @code{wchar_t}.
+@code{wchar}.  Wide character, 16 bits wide, unsigned (what format?
+Unicode?).
 @end table
 
 @node Miscellaneous Types
