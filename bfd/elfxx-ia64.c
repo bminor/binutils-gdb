@@ -4340,7 +4340,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_SECREL64LSB:
 	  /* Make output-section relative to section where the symbol
 	     is defined. PR 475  */
-	  value -= sym_sec->output_section->vma;
+	  if (sym_sec)
+	    value -= sym_sec->output_section->vma;
 	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
