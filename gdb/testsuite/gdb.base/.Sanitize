@@ -27,7 +27,10 @@ Makefile.in
 README
 a1-selftest.exp
 a2-run.exp
+all-bin.exp
 all-types.c 
+arithmet.exp
+assign.exp
 bar.c
 baz.c
 bitfields.c
@@ -43,7 +46,10 @@ call-return-struct.c
 call-strings.c
 commands.exp
 compiler.c
+completion.exp
+cond-expr.exp
 condbreak.c
+condbreak.exp
 configure
 configure.in
 constvars.c
@@ -53,8 +59,12 @@ crossload.exp
 d10v.ld
 d10vovly.c
 default.exp
+define.exp
 display.c
+dollar.exp
 echo.exp
+environment.exp
+eval-skip.exp
 exprs.c
 exprs.exp
 foo.c
@@ -69,6 +79,7 @@ interrupt.c
 interrupt.exp
 int-type.c 
 jump.c
+jump.exp
 langs.exp
 langs0.c
 langs1.c
@@ -79,6 +90,7 @@ list.exp
 list0.c
 list0.h
 list1.c
+logical.exp
 m32r.ld
 m32rovly.c
 m68k-aout.u
@@ -98,6 +110,7 @@ overlays.exp
 ovlymgr.c
 ovlymgr.h
 pointers.c 
+pointers.exp
 pointers2.c 
 printcmds.c
 printcmds.exp
@@ -107,6 +120,7 @@ radix.exp
 recurse.c
 recurse.exp
 regs.exp
+relational.exp
 reread.exp
 reread1.c
 reread2.c
@@ -118,6 +132,7 @@ run.c
 scope.exp
 scope0.c
 scope1.c
+section_command.exp
 setshow.c
 setshow.exp
 setvar.c
@@ -147,6 +162,7 @@ watchpoint.c
 watchpoint.exp
 whatis.c
 whatis.exp
+whatis-expr.exp
 
 Things-to-lose:
 structs.c
