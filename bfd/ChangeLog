@@ -1,3 +1,10 @@
+2001-05-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* coff-i386.c (coff_i386_reloc): Don't dump core if output_bfd is
+	NULL or is not COFF.
+	(coff_i386_rtype_to_howto): Don't dump core if output section
+	owner is not COFF.
+
 2001-05-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* ecoff.c (bfd_debug_section): Fix initialization.
