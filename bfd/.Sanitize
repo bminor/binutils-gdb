@@ -135,12 +135,11 @@ elf32-m88k.c
 elf32-mips.c
 elf32-ppc.c
 elf32-sparc.c
-elf32-target.h
 elf32.c
 elf64-gen.c
 elf64-sparc.c
-elf64-target.h
 elf64.c
+elfxx-target.h
 elfcode.h
 filemode.c
 format.c
