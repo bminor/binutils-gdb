@@ -1,4 +1,17 @@
+Thu Jul 23 12:23:29 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-elfvers/vers.exp: Just check for i?86 rather than checking
+	for i386, i486, and i586.
+	(objdump_versionstuff): If we can't find the line, dump the file.
+
+Fri Jul  3 00:27:41 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/phdrs.exp: Run test on *-*-eabi*.
+	* ld-scripts/weak.exp: Likewise.
+
 Wed Jul  1 10:51:46 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-srec/srec.exp: Add xfail for v850.
 
 	* ld-undefined/undefined.exp: arm and thumb PE toolchains now pass
 	these tests.
