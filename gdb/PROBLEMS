@@ -6,6 +6,24 @@
 
 *** Build problems
 
+build/1411: build fails on hpux 10.20 and hpux 11.00 with CMA threads
+
+GDB does not build on HP/UX 10.20 or HP/UX 11.00 if the CMA
+thread package is installed.  The compile error is:
+
+  ../../gdb/hpux-thread.c:222: variable-size type declared outside of any function
+
+This happens only if the CMA thread package is installed.
+
+As a workaround, you can disable support for CMA threads
+by editing the file gdb/configure.  Find the line:
+
+  if test -f /usr/include/dce/cma_config.h ; then
+
+And replace it with:
+
+  if false ; then
+
 build/1458: compile failed on hpux11
 
 GDB has build problems on HP/UX 11 with some versions of the HP
