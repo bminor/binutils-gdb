@@ -180,7 +180,8 @@ changequote([,])dnl
       arm-*-elf | thumb-*-elf)          fmt=elf ;;
       arm*-*-conix*)			fmt=elf ;;
       arm-*-linux*aout*)	        fmt=aout em=linux ;;
-      arm*-*-linux-gnu*)		fmt=elf  em=linux ;;
+      arm*-*-linux-gnu* | arm*-*-uclinux*)	
+					fmt=elf  em=linux ;;
       arm-*-netbsd*)	                fmt=aout em=nbsd ;;
       arm-*-oabi | thumb-*-oabi)        fmt=elf ;;
       arm-epoc-pe | thumb-epoc-pe)      fmt=coff em=epoc-pe ;;
