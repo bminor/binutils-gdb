@@ -683,8 +683,12 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
       /* To make this work we have to frob the flags so that the rest
          of the code does not think we are using the regular
          definition.  */
-      h->elf_link_hash_flags &= ~ ELF_LINK_HASH_DEF_REGULAR;
-      h->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
+      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+	h->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
+      else if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
+	h->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
+      h->elf_link_hash_flags &= ~ (ELF_LINK_HASH_DEF_REGULAR
+				   | ELF_LINK_HASH_DEF_DYNAMIC);
 
       /* If H is the target of an indirection, we want the caller to
          use H rather than the indirect symbol.  Otherwise if we are

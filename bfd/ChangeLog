@@ -1,3 +1,9 @@
+1999-10-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* elflink.h (elf_merge_symbol): When overriding a weak symbol with
+	a defined symbol in a shared library, clear the DEF_DYNAMIC flag
+	too.
+
 Fri Oct  8 13:03:45 1999  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): R_MIPS_LITERAL
