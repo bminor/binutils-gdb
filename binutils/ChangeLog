@@ -1,3 +1,8 @@
+2004-09-04   Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* dlltool.c (make_one_lib): Test if internal_name was specified
+	by user before using it.
+
 2004-09-02  Carlo Wood  <carlo@alinoe.com> 
 
 	PR binutils/351
