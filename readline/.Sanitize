@@ -30,7 +30,6 @@ bind.c
 chardefs.h
 complete.c
 config
-configure.bat
 configure.in
 display.c
 doc
