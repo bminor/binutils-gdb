@@ -424,6 +424,17 @@ evaluate_subexp_chill (expect_type, exp, pos, noside)
 	  argvec = (value_ptr *) alloca (sizeof (value_ptr) * (nargs + 2));
 	  argvec[0] = arg1;
 	  tem = 1;
+	  if (type && TYPE_CODE (type) == TYPE_CODE_PTR)
+	    type = check_typedef (TYPE_TARGET_TYPE (type));
+	  if (type && TYPE_CODE (type) == TYPE_CODE_FUNC)
+	    {
+	      for (; tem <= nargs && tem <= TYPE_NFIELDS (type); tem++)
+		{
+		  argvec[tem]
+		    = evaluate_subexp_chill (TYPE_FIELD_TYPE (type, tem-1),
+					     exp, pos, noside);
+		}
+	    }
 	  for (; tem <= nargs; tem++)
 	    argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
 	  argvec[tem] = 0; /* signal end of arglist */

@@ -1000,7 +1000,9 @@ define_symbol (valu, string, desc, type, objfile)
 	      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
 				      SYMBOL_TYPE (sym))
 	      && (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
-		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
+		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION
+		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_SET
+		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_BITSTRING)
 #endif
 	      )
 	    {
@@ -1223,26 +1225,24 @@ define_symbol (valu, string, desc, type, objfile)
     }
 
   /* When passing structures to a function, some systems sometimes pass
-     the address in a register, not the structure itself. 
+     the address in a register, not the structure itself. */
 
-     If REG_STRUCT_HAS_ADDR yields non-zero we have to convert LOC_REGPARM
-     to LOC_REGPARM_ADDR for structures and unions.  */
-
-  if (SYMBOL_CLASS (sym) == LOC_REGPARM
-      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
+  if (REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
 			      SYMBOL_TYPE (sym))
       && ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
-	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)))
-    SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
-
-  /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th and
-     subsequent arguments on the sparc, for example).  */
-  if (SYMBOL_CLASS (sym) == LOC_ARG
-      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
-			      SYMBOL_TYPE (sym))
-      && ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
-	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)))
-    SYMBOL_CLASS (sym) = LOC_REF_ARG;
+	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
+	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_BITSTRING)
+	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_SET)))
+    {
+      /* If REG_STRUCT_HAS_ADDR yields non-zero we have to
+	convert LOC_REGPARM to LOC_REGPARM_ADDR for structures and unions. */
+      if (SYMBOL_CLASS (sym) == LOC_REGPARM)
+	SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
+      /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th and
+	 subsequent arguments on the sparc, for example).  */
+      else if (SYMBOL_CLASS (sym) == LOC_ARG)
+	SYMBOL_CLASS (sym) = LOC_REF_ARG;
+    }
 
   return sym;
 }

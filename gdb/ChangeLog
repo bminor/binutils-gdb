@@ -1,3 +1,11 @@
+Thu Jan 11 17:21:25 1996  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* stabsread.c (define-symbol):  Use invisible references
+	for TYPE_CODE_SET and TYPE_CODE_BITSTRING too.
+	* eval.c (evaluate_subexp_standard):  When known, use the formal
+	parameter type as the expected type when evaluating arg expressions.
+	* ch-lang.c (evaluate_subexp_chill):  Likewise (for MULTI_SUBSCRIPT).
+
 Wed Jan 10 11:25:37 1996  Fred Fish  <fnf@cygnus.com>
 
 	* coredep.c: Renamed to core-aout.c

@@ -283,7 +283,7 @@ evaluate_struct_tuple (struct_val, exp, pos, noside, nargs)
 
 	  field_type = TYPE_FIELD_TYPE (substruct_type, subfieldno);
 	  if (val == 0)
-	    val = evaluate_subexp (substruct_type, exp, pos, noside);
+	    val = evaluate_subexp (field_type, exp, pos, noside);
 
 	  /* Now actually set the field in struct_val. */
 
@@ -647,11 +647,15 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
     case OP_FUNCALL:
       (*pos) += 2;
       op = exp->elts[*pos].opcode;
+      nargs = longest_to_int (exp->elts[pc + 1].longconst);
+      /* Allocate arg vector, including space for the function to be
+	 called in argvec[0] and a terminating NULL */
+      argvec = (value_ptr *) alloca (sizeof (value_ptr) * (nargs + 3));
       if (op == STRUCTOP_MEMBER || op == STRUCTOP_MPTR)
 	{
 	  LONGEST fnptr;
 
-	  nargs = longest_to_int (exp->elts[pc + 1].longconst) + 1;
+	  nargs++;
 	  /* First, evaluate the structure into arg2 */
 	  pc2 = (*pos)++;
 
@@ -719,7 +723,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	  /* Hair for method invocations */
 	  int tem2;
 
-	  nargs = longest_to_int (exp->elts[pc + 1].longconst) + 1;
+	  nargs++;
 	  /* First, evaluate the structure into arg2 */
 	  pc2 = (*pos)++;
 	  tem2 = longest_to_int (exp->elts[pc2 + 1].longconst);
@@ -754,15 +758,27 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	}
       else
 	{
-	  nargs = longest_to_int (exp->elts[pc + 1].longconst);
-	  tem = 0;
+	  argvec[0] = evaluate_subexp_with_coercion (exp, pos, noside);
+	  tem = 1;
+	  type = VALUE_TYPE (argvec[0]);
+	  if (type && TYPE_CODE (type) == TYPE_CODE_PTR)
+	    type = TYPE_TARGET_TYPE (type);
+	  if (type && TYPE_CODE (type) == TYPE_CODE_FUNC)
+	    {
+	      for (; tem <= nargs && tem <= TYPE_NFIELDS (type); tem++)
+		{
+		  argvec[tem] = evaluate_subexp (TYPE_FIELD_TYPE (type, tem-1),
+						 exp, pos, noside);
+		}
+	    }
 	}
-      /* Allocate arg vector, including space for the function to be
-	 called in argvec[0] and a terminating NULL */
-      argvec = (value_ptr *) alloca (sizeof (value_ptr) * (nargs + 2));
+
       for (; tem <= nargs; tem++)
-	/* Ensure that array expressions are coerced into pointer objects. */
-	argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
+	{
+	  /* Ensure that array expressions are coerced into pointer objects. */
+	  
+	  argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
+	}
 
       /* signal end of arglist */
       argvec[tem] = 0;
