@@ -1,5 +1,5 @@
 /* BFD semi-generic back-end for a.out binaries.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -120,6 +120,7 @@ DESCRIPTION
 #define KEEPIT flags
 #define KEEPITTYPE int
 
+#include <string.h>		/* For strchr and friends */
 #include "bfd.h"
 #include <sysdep.h>
 #include <ansidecl.h>
@@ -216,6 +217,7 @@ DEFUN(NAME(aout,reloc_type_lookup),(abfd,code),
 	EXT (BFD_RELOC_HI22, 8);
 	EXT (BFD_RELOC_LO10, 11);
 	EXT (BFD_RELOC_32_PCREL_S2, 6);
+      default: return (CONST struct reloc_howto_struct *) 0;
       }
   else
     /* std relocs */
@@ -226,8 +228,8 @@ DEFUN(NAME(aout,reloc_type_lookup),(abfd,code),
 	STD (BFD_RELOC_8_PCREL, 4);
 	STD (BFD_RELOC_16_PCREL, 5);
 	STD (BFD_RELOC_32_PCREL, 6);
+      default: return (CONST struct reloc_howto_struct *) 0;
       }
-  return 0;
 }
 
 extern bfd_error_vector_type bfd_error_vector;
@@ -818,18 +820,7 @@ DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
 	execp->a_data = BFD_ALIGN (obj_datasec(abfd)->_raw_size,
 				   adata(abfd).page_size);
 	data_pad = execp->a_data - obj_datasec(abfd)->_raw_size;
-	/* This code is almost surely botched.  It'll only get tested
-	   for the case where the application does explicitly set the VMA
-	   of the BSS section.  */
-	if (obj_bsssec(abfd)->user_set_vma
-	    && (obj_bsssec(abfd)->vma
-		> BFD_ALIGN (obj_datasec(abfd)->vma
-			     + obj_datasec(abfd)->_raw_size,
-			     adata(abfd).page_size)))
-	  {
-	    /* Can't play with squeezing into data pages; fix this code.  */
-	    abort ();
-	  }
+
 	if (!obj_bsssec(abfd)->user_set_vma)
 	  obj_bsssec(abfd)->vma = (obj_datasec(abfd)->vma
 				   + obj_datasec(abfd)->_raw_size);
@@ -1019,179 +1010,198 @@ boolean
   stabilised these should be inlined into their (single) caller */
   
 static void
-DEFUN(translate_from_native_sym_flags,(sym_pointer, cache_ptr, abfd),
-      struct external_nlist *sym_pointer AND
-      aout_symbol_type *cache_ptr AND
-      bfd *abfd)
+DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd, statep),
+       struct external_nlist *sym_pointer AND
+       aout_symbol_type * cache_ptr AND
+       bfd * abfd AND
+       int *statep)
 {
-  switch (cache_ptr->type & N_TYPE) 
-  {
-  case N_SETA:
-  case N_SETT:
-  case N_SETD:
-  case N_SETB:
-  {
-    char *copy = bfd_alloc(abfd, strlen(cache_ptr->symbol.name)+1);
-    asection *section ;
-    asection *into_section;
-      
-    arelent_chain *reloc = (arelent_chain *)bfd_alloc(abfd, sizeof(arelent_chain));
-    strcpy(copy, cache_ptr->symbol.name);
-
-    /* Make sure that this bfd has a section with the right contructor
-       name */
-    section = bfd_get_section_by_name (abfd, copy);
-    if (!section)
-     section = bfd_make_section(abfd,copy);
-
-    /* Build a relocation entry for the constructor */
-    switch ( (cache_ptr->type  & N_TYPE) ) 
+  if (*statep)
     {
-    case N_SETA:
-      into_section = &bfd_abs_section;
-      break;
-    case N_SETT:
-      into_section = (asection *)obj_textsec(abfd);
-      break;
-    case N_SETD:
-      into_section = (asection *)obj_datasec(abfd);
-      break;
-    case N_SETB:
-      into_section = (asection *)obj_bsssec(abfd);
-      break;
-    default:
-      abort();
+      /* This is an indirect symbol  */
+      cache_ptr->symbol.flags = BSF_DEBUGGING;
+      cache_ptr->symbol.section = &bfd_und_section;
+      *statep = 0;
     }
-
-    /* Build a relocation pointing into the constuctor section
-       pointing at the symbol in the set vector specified */
-
-    reloc->relent.addend = cache_ptr->symbol.value;
-    cache_ptr->symbol.section =  into_section->symbol->section;
-    reloc->relent.sym_ptr_ptr  = into_section->symbol_ptr_ptr;
-
-	  
-    /* We modify the symbol to belong to a section depending upon the
-       name of the symbol - probably __CTOR__ or __DTOR__ but we don't
-       really care, and add to the size of the section to contain a
-       pointer to the symbol. Build a reloc entry to relocate to this
-       symbol attached to this section.  */
-	  
-    section->flags = SEC_CONSTRUCTOR;
-
-	  
-    section->reloc_count++;
-    section->alignment_power = 2;
-
-    reloc->next = section->constructor_chain;
-    section->constructor_chain = reloc;
-    reloc->relent.address = section->_raw_size;
-    section->_raw_size += sizeof(int *);
-
-    reloc->relent.howto = howto_table_ext + CTOR_TABLE_RELOC_IDX;
-    cache_ptr->symbol.flags |=  BSF_DEBUGGING  | BSF_CONSTRUCTOR;
-  }
-    break;
-  default:
-    if (cache_ptr->type ==  N_WARNING) 
+  else
     {
-      /* This symbol is the text of a warning message, the next symbol
-	 is the symbol to associate the warning with */
-      cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_WARNING;
-      cache_ptr->symbol.value = (bfd_vma)((cache_ptr+1));
-      /* We furgle with the next symbol in place. We don't want it to be undefined, we'll trample the type */
-      (sym_pointer+1)->e_type[0] = 0xff;
-      break;
-    }
-    if ((cache_ptr->type | N_EXT) == (N_INDR | N_EXT)) {
-	/* Two symbols in a row for an INDR message. The first symbol
-	   contains the name we will match, the second symbol contains the
-	   name the first name is translated into. It is supplied to us
-	   undefined. This is good, since we want to pull in any files which
-	   define it */
-	cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_INDIRECT;
-	cache_ptr->symbol.value = (bfd_vma)((cache_ptr+1));
-	cache_ptr->symbol.section = &bfd_und_section;
-	break;
-      }
-
-      
-    if (sym_is_debugger_info (cache_ptr)) {
-	cache_ptr->symbol.flags = BSF_DEBUGGING ;
-	/* Work out the section correct for this symbol */
-	switch (cache_ptr->type & N_TYPE) 
+      switch (cache_ptr->type & N_TYPE)
 	{
-	case N_TEXT:
-	case N_FN:
-	  cache_ptr->symbol.section = obj_textsec (abfd);
-	  cache_ptr->symbol.value -= obj_textsec(abfd)->vma;
-	  break;
-	case N_DATA:
-	  cache_ptr->symbol.value  -= obj_datasec(abfd)->vma;
-	  cache_ptr->symbol.section = obj_datasec (abfd);
-	  break;
-	case N_BSS :
-	  cache_ptr->symbol.section = obj_bsssec (abfd);
-	  cache_ptr->symbol.value -= obj_bsssec(abfd)->vma;
+	case N_SETA:
+	case N_SETT:
+	case N_SETD:
+	case N_SETB:
+	  {
+	    char *copy = bfd_alloc (abfd, strlen (cache_ptr->symbol.name) + 1);
+	    asection *section;
+	    asection *into_section;
+
+	    arelent_chain *reloc = (arelent_chain *) bfd_alloc (abfd, sizeof (arelent_chain));
+	    strcpy (copy, cache_ptr->symbol.name);
+
+	    /* Make sure that this bfd has a section with the right contructor
+	       name */
+	    section = bfd_get_section_by_name (abfd, copy);
+	    if (!section)
+	      section = bfd_make_section (abfd, copy);
+
+	    /* Build a relocation entry for the constructor */
+	    switch ((cache_ptr->type & N_TYPE))
+	      {
+	      case N_SETA:
+		into_section = &bfd_abs_section;
+		break;
+	      case N_SETT:
+		into_section = (asection *) obj_textsec (abfd);
+		break;
+	      case N_SETD:
+		into_section = (asection *) obj_datasec (abfd);
+		break;
+	      case N_SETB:
+		into_section = (asection *) obj_bsssec (abfd);
+		break;
+	      default:
+		abort ();
+	      }
+
+	    /* Build a relocation pointing into the constuctor section
+	       pointing at the symbol in the set vector specified */
+
+	    reloc->relent.addend = cache_ptr->symbol.value;
+	    cache_ptr->symbol.section = into_section->symbol->section;
+	    reloc->relent.sym_ptr_ptr = into_section->symbol_ptr_ptr;
+
+
+	    /* We modify the symbol to belong to a section depending upon the
+	       name of the symbol - probably __CTOR__ or __DTOR__ but we don't
+	       really care, and add to the size of the section to contain a
+	       pointer to the symbol. Build a reloc entry to relocate to this
+	       symbol attached to this section.  */
+
+	    section->flags = SEC_CONSTRUCTOR;
+
+
+	    section->reloc_count++;
+	    section->alignment_power = 2;
+
+	    reloc->next = section->constructor_chain;
+	    section->constructor_chain = reloc;
+	    reloc->relent.address = section->_raw_size;
+	    section->_raw_size += sizeof (int *);
+
+	    reloc->relent.howto = howto_table_ext + CTOR_TABLE_RELOC_IDX;
+	    cache_ptr->symbol.flags |= BSF_DEBUGGING | BSF_CONSTRUCTOR;
+	  }
 	  break;
 	default:
-	case N_ABS:
+	  if (cache_ptr->type == N_WARNING)
+	    {
+	      /* This symbol is the text of a warning message, the next symbol
+		 is the symbol to associate the warning with */
+	      cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_WARNING;
+	      cache_ptr->symbol.value = (bfd_vma) ((cache_ptr + 1));
+	      /* We furgle with the next symbol in place.
+		 We don't want it to be undefined, we'll trample the type */
+	      (sym_pointer + 1)->e_type[0] = 0xff;
+	      break;
+	    }
+	  if ((cache_ptr->type | N_EXT) == (N_INDR | N_EXT))
+	    {
+	      /* Two symbols in a row for an INDR message. The first symbol
+	       contains the name we will match, the second symbol contains the
+	       name the first name is translated into. It is supplied to us
+	       undefined. This is good, since we want to pull in any files which
+	       define it */
+	      cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_INDIRECT;
+	      cache_ptr->symbol.value = (bfd_vma) ((cache_ptr + 1));
+	      cache_ptr->symbol.section = &bfd_ind_section;
+	      *statep = 1;
+	    }
 
-	  cache_ptr->symbol.section = &bfd_abs_section;
-	  break;
-	}
-      }
-    else {
+	  else if (sym_is_debugger_info (cache_ptr))
+	    {
+	      cache_ptr->symbol.flags = BSF_DEBUGGING;
+	      /* Work out the section correct for this symbol */
+	      switch (cache_ptr->type & N_TYPE)
+		{
+		case N_TEXT:
+		case N_FN:
+		  cache_ptr->symbol.section = obj_textsec (abfd);
+		  cache_ptr->symbol.value -= obj_textsec (abfd)->vma;
+		  break;
+		case N_DATA:
+		  cache_ptr->symbol.value -= obj_datasec (abfd)->vma;
+		  cache_ptr->symbol.section = obj_datasec (abfd);
+		  break;
+		case N_BSS:
+		  cache_ptr->symbol.section = obj_bsssec (abfd);
+		  cache_ptr->symbol.value -= obj_bsssec (abfd)->vma;
+		  break;
+		default:
+		case N_ABS:
 
-	if (sym_is_fortrancommon (cache_ptr))
-	{
-	  cache_ptr->symbol.flags = 0;
-	  cache_ptr->symbol.section = &bfd_com_section;
-	}
-	else {
+		  cache_ptr->symbol.section = &bfd_abs_section;
+		  break;
+		}
+	    }
+	  else
+	    {
+
+	      if (sym_is_fortrancommon (cache_ptr))
+		{
+		  cache_ptr->symbol.flags = 0;
+		  cache_ptr->symbol.section = &bfd_com_section;
+		}
+	      else
+		{
 
 
-	  }
-	  
-	/* In a.out, the value of a symbol is always relative to the 
-	 * start of the file, if this is a data symbol we'll subtract
-	 * the size of the text section to get the section relative
-	 * value. If this is a bss symbol (which would be strange)
-	 * we'll subtract the size of the previous two sections
-	 * to find the section relative address.
-	 */
-	  
-	if (sym_in_text_section (cache_ptr))   {
-	    cache_ptr->symbol.value -= obj_textsec(abfd)->vma;
-	    cache_ptr->symbol.section = obj_textsec (abfd);
-	  }
-	else if (sym_in_data_section (cache_ptr)){
-	    cache_ptr->symbol.value -= obj_datasec(abfd)->vma;
-	    cache_ptr->symbol.section = obj_datasec (abfd);
-	  }
-	else if (sym_in_bss_section(cache_ptr)) {
-	    cache_ptr->symbol.section = obj_bsssec (abfd);
-	    cache_ptr->symbol.value -= obj_bsssec(abfd)->vma;
-	  }
-	else  if (sym_is_undefined (cache_ptr)) {
-	    cache_ptr->symbol.flags = 0;
-	    cache_ptr->symbol.section = &bfd_und_section;
-	  }
-	else if (sym_is_absolute(cache_ptr))
-	{
-	  cache_ptr->symbol.section = &bfd_abs_section;
+		}
+
+	      /* In a.out, the value of a symbol is always relative to the
+	       * start of the file, if this is a data symbol we'll subtract
+	       * the size of the text section to get the section relative
+	       * value. If this is a bss symbol (which would be strange)
+	       * we'll subtract the size of the previous two sections
+	       * to find the section relative address.
+	       */
+
+	      if (sym_in_text_section (cache_ptr))
+		{
+		  cache_ptr->symbol.value -= obj_textsec (abfd)->vma;
+		  cache_ptr->symbol.section = obj_textsec (abfd);
+		}
+	      else if (sym_in_data_section (cache_ptr))
+		{
+		  cache_ptr->symbol.value -= obj_datasec (abfd)->vma;
+		  cache_ptr->symbol.section = obj_datasec (abfd);
+		}
+	      else if (sym_in_bss_section (cache_ptr))
+		{
+		  cache_ptr->symbol.section = obj_bsssec (abfd);
+		  cache_ptr->symbol.value -= obj_bsssec (abfd)->vma;
+		}
+	      else if (sym_is_undefined (cache_ptr))
+		{
+		  cache_ptr->symbol.flags = 0;
+		  cache_ptr->symbol.section = &bfd_und_section;
+		}
+	      else if (sym_is_absolute (cache_ptr))
+		{
+		  cache_ptr->symbol.section = &bfd_abs_section;
+		}
+
+	      if (sym_is_global_defn (cache_ptr))
+		{
+		  cache_ptr->symbol.flags = BSF_GLOBAL | BSF_EXPORT;
+		}
+	      else
+		{
+		  cache_ptr->symbol.flags = BSF_LOCAL;
+		}
+	    }
 	}
-	    
-	if (sym_is_global_defn (cache_ptr)) 
-	{
-	  cache_ptr->symbol.flags = BSF_GLOBAL | BSF_EXPORT;
-	} 
-	else 
-	{
-	  cache_ptr->symbol.flags = BSF_LOCAL;
-	}
-      }
-  }
+    }
 }
 
 
@@ -1207,57 +1217,62 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
   /* mask out any existing type bits in case copying from one section
      to another */
   sym_pointer->e_type[0] &= ~N_TYPE;
+
   
   if (bfd_get_output_section(cache_ptr) == obj_bsssec (abfd)) {
-      sym_pointer->e_type[0] |= N_BSS;
-    }
+    sym_pointer->e_type[0] |= N_BSS;
+  }
   else if (bfd_get_output_section(cache_ptr) == obj_datasec (abfd)) {
-      sym_pointer->e_type[0] |= N_DATA;
-    }
+    sym_pointer->e_type[0] |= N_DATA;
+  }
   else  if (bfd_get_output_section(cache_ptr) == obj_textsec (abfd)) {
-      sym_pointer->e_type[0] |= N_TEXT;
-    }
+    sym_pointer->e_type[0] |= N_TEXT;
+  }
   else if (bfd_get_output_section(cache_ptr) == &bfd_abs_section) 
-  {
-    sym_pointer->e_type[0] |= N_ABS;
-  }
+    {
+      sym_pointer->e_type[0] |= N_ABS;
+    }
   else if (bfd_get_output_section(cache_ptr) == &bfd_und_section) 
-  {
-    sym_pointer->e_type[0] = (N_UNDF | N_EXT);
-  }
-  else if (bfd_is_com_section (bfd_get_output_section (cache_ptr))) {
+    {
       sym_pointer->e_type[0] = (N_UNDF | N_EXT);
-    }    
+    }
+  else if (bfd_get_output_section(cache_ptr) == &bfd_ind_section) 
+    {
+      sym_pointer->e_type[0] = N_INDR;
+    }
+  else if (bfd_is_com_section (bfd_get_output_section (cache_ptr))) {
+    sym_pointer->e_type[0] = (N_UNDF | N_EXT);
+  }    
   else {    
-      if (cache_ptr->section->output_section) 
+    if (cache_ptr->section->output_section) 
       {
 	
 	bfd_error_vector.nonrepresentable_section(abfd,
 						  bfd_get_output_section(cache_ptr)->name);
       }
-      else 
+    else 
       {
 	bfd_error_vector.nonrepresentable_section(abfd,
 						  cache_ptr->section->name);
 	
       }
       
-    }
+  }
   /* Turn the symbol from section relative to absolute again */
     
   value +=  cache_ptr->section->output_section->vma  + cache_ptr->section->output_offset ;
 
 
   if (cache_ptr->flags & (BSF_WARNING)) {
-      (sym_pointer+1)->e_type[0] = 1;
-    }  
+    (sym_pointer+1)->e_type[0] = 1;
+  }  
     
   if (cache_ptr->flags & (BSF_GLOBAL | BSF_EXPORT)) {
-      sym_pointer->e_type[0] |= N_EXT;
-    }
+    sym_pointer->e_type[0] |= N_EXT;
+  }
   if (cache_ptr->flags & BSF_DEBUGGING) {
-      sym_pointer->e_type [0]= ((aout_symbol_type *)cache_ptr)->type;
-    }
+    sym_pointer->e_type [0]= ((aout_symbol_type *)cache_ptr)->type;
+  }
 
   PUT_WORD(abfd, value, sym_pointer->e_value);
 }
@@ -1323,30 +1338,33 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
   if (bfd_read ((PTR)strings, 1, string_size, abfd) != string_size) {
     goto bailout;
   }
+  strings[string_size] = 0; /* Just in case. */
     
   /* OK, now walk the new symtable, cacheing symbol properties */
     {
       register struct external_nlist *sym_pointer;
+      int state = 0;
       register struct external_nlist *sym_end = syms + bfd_get_symcount (abfd);
       register aout_symbol_type *cache_ptr = cached;
 	
       /* Run through table and copy values */
       for (sym_pointer = syms, cache_ptr = cached;
-	   sym_pointer < sym_end; sym_pointer++, cache_ptr++) 
+	   sym_pointer < sym_end; sym_pointer ++, cache_ptr++) 
 	  {
-	    bfd_vma x = GET_WORD(abfd, sym_pointer->e_strx);
+	    long x = GET_WORD(abfd, sym_pointer->e_strx);
 	    cache_ptr->symbol.the_bfd = abfd;
-	    if (x)
+	    if (x >= 0 && x < string_size)
 	      cache_ptr->symbol.name = x + strings;
 	    else
-	      cache_ptr->symbol.name = (char *)NULL;
+	      goto bailout;
 	      
 	    cache_ptr->symbol.value = GET_SWORD(abfd,  sym_pointer->e_value);
 	    cache_ptr->desc = bfd_h_get_16(abfd, sym_pointer->e_desc);
 	    cache_ptr->other = bfd_h_get_8(abfd, sym_pointer->e_other);
 	    cache_ptr->type = bfd_h_get_8(abfd,  sym_pointer->e_type);
 	    cache_ptr->symbol.udata = 0;
-	    translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd);
+	    translate_from_native_sym_flags (sym_pointer, cache_ptr,	
+				     abfd, &state);
 	  }
     }
     

@@ -1,5 +1,10 @@
 Thu Apr 15 01:00:29 1993  John Gilmore  (gnu@cygnus.com)
 
+	* aoutx.h (aout_*_adjust_sizes_and_vmas):  Avoid `sanity'
+	check for the case where the user sets the address of the BSS
+	section (and the file header can't specify this).  Let the user
+	set it wherever they want, regardless of what goes in the header.
+
 	* ieee.c (ieee_slurp_sections):  Pass all ieee section names
 	straight through into BFD sections.  Add comments.
 
