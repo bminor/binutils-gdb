@@ -1,5 +1,11 @@
 2004-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-linux-tdep.c (amd64_linux_sigtramp_start): Change argument
+	from CORE_ADDR to struct frame_info *.  Use
+	safe_frame_unwind_memory instead of deprecated_read_memory_nobpt.
+	(amd64_linux_sigtramp_p): Adjust for changed signature of
+	and64_linux_sigtramp_start
+
 	* gdb_ptrace.h: GNU/Linux.
 
 	* config/alpha/nm-linux.h (PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE):

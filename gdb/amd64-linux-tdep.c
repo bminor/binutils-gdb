@@ -86,8 +86,9 @@ static const unsigned char linux_sigtramp_code[] =
    the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-amd64_linux_sigtramp_start (CORE_ADDR pc)
+amd64_linux_sigtramp_start (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   unsigned char buf[LINUX_SIGTRAMP_LEN];
 
   /* We only recognize a signal trampoline if PC is at the start of
@@ -97,7 +98,7 @@ amd64_linux_sigtramp_start (CORE_ADDR pc)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+  if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_SIGTRAMP_LEN))
     return 0;
 
   if (buf[0] != LINUX_SIGTRAMP_INSN0)
@@ -107,7 +108,7 @@ amd64_linux_sigtramp_start (CORE_ADDR pc)
 
       pc -= LINUX_SIGTRAMP_OFFSET1;
 
-      if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+      if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_SIGTRAMP_LEN))
 	return 0;
     }
 
@@ -135,7 +136,7 @@ amd64_linux_sigtramp_p (struct frame_info *next_frame)
      __sigaction, or __libc_sigaction (all aliases to the same
      function).  */
   if (name == NULL || strstr (name, "sigaction") != NULL)
-    return (amd64_linux_sigtramp_start (pc) != 0);
+    return (amd64_linux_sigtramp_start (next_frame) != 0);
 
   return (strcmp ("__restore_rt", name) == 0);
 }
