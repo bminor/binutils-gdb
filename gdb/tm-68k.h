@@ -73,7 +73,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #endif
 
 /* If your kernel resets the pc after the trap happens you may need to
-   define this in m-68k.h.  */
+   define this before including this file.  */
 
 #if !defined (DECR_PC_AFTER_BREAK)
 #define DECR_PC_AFTER_BREAK 2
@@ -467,6 +467,57 @@ extern struct ext_format ext_format_68881;
 }
 #endif /* no 68881.  */
 #endif /* no FIND_FRAME_SAVED_REGS.  */
+
+
+/* Things needed for making the inferior call functions.
+   It seems like every m68k based machine has almost identical definitions
+   in the individual machine's configuration files.  Most other cpu types
+   (mips, i386, etc) have routines in their *-tdep.c files to handle this
+   for most configurations.  The m68k family should be able to do this as
+   well.  These macros can still be overridden when necessary.  */
+
+/* The CALL_DUMMY macro is the sequence of instructions
+     fmovem 0xff,-(sp)
+     moveml 0xfffc,-(sp)
+     clrw -(sp)
+     movew ccr,-(sp)
+     /..* The arguments are pushed at this point by GDB;
+	no code is needed in the dummy for this.
+	The CALL_DUMMY_START_OFFSET gives the position of 
+	the following jsr instruction.  *../
+     jsr @#32323232
+     addl #69696969,sp
+     bpt
+     nop
+Note this is 28 bytes.
+We actually start executing at the jsr, since the pushing of the
+registers is done by PUSH_DUMMY_FRAME.  If this were real code,
+the arguments for the function called by the jsr would be pushed
+between the moveml and the jsr, and we could allow it to execute through.
+But the arguments have to be pushed by GDB after the PUSH_DUMMY_FRAME is done,
+and we cannot allow the moveml to push the registers again lest they be
+taken for the arguments.  */
+
+#define CALL_DUMMY {0xf227e0ff, 0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, 0x4e414e71}
+
+#define CALL_DUMMY_LENGTH 28
+
+#define CALL_DUMMY_START_OFFSET 12
+
+/* Insert the specified number of args and function address
+   into a call sequence of the above form stored at DUMMYNAME.  */
+
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)     \
+{ *(int *)((char *) dummyname + 20) = nargs * 4;  \
+  *(int *)((char *) dummyname + 14) = fun; }
+
+/* Push an empty stack frame, to record the current PC, etc.  */
+
+#define PUSH_DUMMY_FRAME	{ m68k_push_dummy_frame (); }
+
+/* Discard from the stack the innermost frame, restoring all registers.  */
+
+#define POP_FRAME { m68k_pop_frame (); }
 
 /* Note that stuff for calling inferior functions is not in this file
    because the call dummy is different for different breakpoint

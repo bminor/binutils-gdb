@@ -1,5 +1,10 @@
 Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
 
+	* tm-68k.h: Move code that is duplicated in almost every single
+	m68k based machine's configuration files to this common file.
+	Duplications in the configuration files still need to be removed
+	(FIXME).
+
 	* infrun.c (child_create_inferior): System V versions must call
 	setpgrp() with no arguments, to comply with prototyping typically
 	in <unistd.h>.
