@@ -50,6 +50,7 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_dump_test "maverick"    
     run_dump_test "archv6"
     run_dump_test "thumbv6"
+    run_dump_test "thumbv6k"
     run_dump_test "arch6zk"
     
     run_errors_test "vfp-bad" "-mfpu=vfp" "VFP errors"

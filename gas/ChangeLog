@@ -1,3 +1,8 @@
+2005-03-12  Zack Weinberg  <zack@codesourcery.com>
+
+	* config/tc-arm.c (tinsns): Add ARMv6K instructions sev, wfe,
+	wfi, yield.
+
 2005-03-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config-gas.com: Mark vax-vms as obsolete.

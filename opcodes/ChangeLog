@@ -4,6 +4,7 @@
 	Add entries for v6T2 ARM instructions:
 	bfc bfi mls strht ldrht ldrsht ldrsbt movw movt rbit ubfx sbfx.
 	(print_insn_arm): Add support for %E and %V.
+	(thumb_opcodes): Add ARMv6K instructions nop, sev, wfe, wfi, yield.
 
 2005-03-10  Jeff Baker  <jbaker@qnx.com>
 	    Alan Modra  <amodra@bigpond.net.au>

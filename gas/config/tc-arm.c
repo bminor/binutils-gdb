@@ -10950,6 +10950,12 @@ static const struct thumb_opcode tinsns[] =
   {"sxtb",	0xb240,		2,	ARM_EXT_V6,  do_t_arit},
   {"uxth",	0xb280,		2,	ARM_EXT_V6,  do_t_arit},
   {"uxtb",	0xb2c0,		2,	ARM_EXT_V6,  do_t_arit},
+
+  /* ARM V6K.  */
+  {"sev",	0xbf40,		2,	ARM_EXT_V6K, do_empty},
+  {"wfe",	0xbf20,		2,	ARM_EXT_V6K, do_empty},
+  {"wfi",	0xbf30,		2,	ARM_EXT_V6K, do_empty},
+  {"yield",	0xbf10,		2,	ARM_EXT_V6K, do_empty},
 };
 
 void

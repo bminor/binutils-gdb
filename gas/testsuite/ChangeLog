@@ -1,6 +1,11 @@
+2005-03-12  Zack Weinberg  <zack@codesourcery.com>
+
+	* gas/arm/thumbv6k.d, gas/arm/thumbv6k.s: New dump test.
+	* gas/arm/arm.exp: Run it.
+
 2005-03-10  Aldy Hernandez  <aldyh@redhat.com>
 
-        * gas/ppc/e500.d: Fix encoding of efscfd.
+	* gas/ppc/e500.d: Fix encoding of efscfd.
 
 2005-03-10  Jeff Baker  <jbaker@qnx.com>
 	    Alan Modra  <amodra@bigpond.net.au>
