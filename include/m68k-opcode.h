@@ -1415,9 +1415,9 @@ struct m68k_opcode m68k_opcodes[] =
 {"jsr",		one(0047200),		one(0177700),		"!s",   m68000up },
 {"lea",		one(0040700),		one(0170700),		"!sAd", m68000up },
 {"linkw",	one(0047120),		one(0177770),		"As#w", m68000up },
-{"linkl",	one(0044010),		one(0177770),		"As#l", m68000up },
+{"linkl",	one(0044010),		one(0177770),		"As#l", m68020up },
 {"link",	one(0047120),		one(0177770),		"As#w", m68000up },
-{"link",	one(0044010),		one(0177770),		"As#l", m68000up },
+{"link",	one(0044010),		one(0177770),		"As#l", m68020up },
 
 {"lslb",	one(0160410),		one(0170770),		"QdDs", m68000up },	/* lsrb #Q,	Ds */
 {"lslb",	one(0160450),		one(0170770),		"DdDs", m68000up },	/* lsrb Dd,	Ds */
@@ -1479,7 +1479,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"movew",	one(0030000),		one(0170000),		"*w$d", m68000up },
 {"movew",	one(0030100),		one(0170700),		"*wAd", m68000up },	/* movea,	written as move */
 {"movew",	one(0040300),		one(0177700),		"Ss$s", m68000up },	/* Move from sr */
-{"movew",	one(0041300),		one(0177700),		"Cs$s", m68000up },	/* Move from ccr */
+{"movew",	one(0041300),		one(0177700),		"Cs$s", m68010up },	/* Move from ccr */
 {"movew",	one(0042300),		one(0177700),		";wCd", m68000up },	/* move to ccr */
 {"movew",	one(0043300),		one(0177700),		";wSd", m68000up },	/* move to sr */
 
@@ -1496,12 +1496,12 @@ struct m68k_opcode m68k_opcodes[] =
 {"move16",	one(0xf610),	one(0xfff8),	"as_L", m68040 },
 {"move16",	one(0xf618),	one(0xfff8),	"_Las", m68040 },
 
-{"mulsl",	two(0046000, 004000),	two(0177700, 0107770),	";lD1", m68000up },
-{"mulsl",	two(0046000, 006000),	two(0177700, 0107770),	";lD3D1", m68000up },
+{"mulsl",	two(0046000, 004000),	two(0177700, 0107770),	";lD1", m68020up },
+{"mulsl",	two(0046000, 006000),	two(0177700, 0107770),	";lD3D1", m68020up },
 {"mulsw",	one(0140700),		one(0170700),		";wDd", m68000up },
 {"muls",	one(0140700),		one(0170700),		";wDd", m68000up },
-{"mulul",	two(0046000, 000000),	two(0177700, 0107770),	";lD1", m68000up },
-{"mulul",	two(0046000, 002000),	two(0177700, 0107770),	";lD3D1", m68000up },
+{"mulul",	two(0046000, 000000),	two(0177700, 0107770),	";lD1", m68020up },
+{"mulul",	two(0046000, 002000),	two(0177700, 0107770),	";lD3D1", m68020up },
 {"muluw",	one(0140300),		one(0170700),		";wDd", m68000up },
 {"mulu",	one(0140300),		one(0170700),		";wDd", m68000up },
 {"nbcd",	one(0044000),		one(0177700),		"$s", m68000up },
@@ -1586,9 +1586,11 @@ struct m68k_opcode m68k_opcodes[] =
 {"pdbss",	two(0xf048, 0x0004),	two(0xfff8, 0xffff),	"DsBw", m68851 },
 {"pdbwc",	two(0xf048, 0x0009),	two(0xfff8, 0xffff),	"DsBw", m68851 },
 {"pdbws",	two(0xf048, 0x0008),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+#endif /* NO_68851 */
 
 {"pea",		one(0044100),		one(0177700),		"!s", m68000 },
 
+#ifndef NO_68851
 {"pflusha",	two(0xf000, 0x2400),	two(0xffff, 0xffff),	"",		m68030 | m68851 },
 {"pflusha",	one(0xf510),		one(0xfff8), 		"",		m68040 },
 
@@ -1966,7 +1968,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"movw",	one(0030000),		one(0170000),		"*w$d", m68000up },
 {"movw",	one(0030100),		one(0170700),		"*wAd", m68000up },	/* mova,	written as mov */
 {"movw",	one(0040300),		one(0177700),		"Ss$s", m68000up },	/* Move from sr */
-{"movw",	one(0041300),		one(0177700),		"Cs$s", m68000up },	/* Move from ccr */
+{"movw",	one(0041300),		one(0177700),		"Cs$s", m68010up },	/* Move from ccr */
 {"movw",	one(0042300),		one(0177700),		";wCd", m68000up },	/* mov to ccr */
 {"movw",	one(0043300),		one(0177700),		";wSd", m68000up },	/* mov to sr */
 
