@@ -114,7 +114,7 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	exit 0 ;;
     i[34]86:UNIX_SV:4.*:*)
 	if grep Novell /usr/include/link.h >/dev/null 2>/dev/null; then
-		echo ${UNAME_MACHINE}-unixware-sysv${UNAME_RELEASE}
+		echo ${UNAME_MACHINE}-univel-sysv${UNAME_RELEASE}
 	else
 		echo ${UNAME_MACHINE}-unknown-sysv${UNAME_RELEASE}
 	fi
@@ -132,6 +132,8 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	# "miniframe"
 	echo m68010-convergent-sysv
 	exit 0 ;;
+     M680[234]0:*:R3V[567]*:*)
+	test -r /sysV68 && echo 'm68k-motorola-sysv' && exit 0 ;;
 esac
 
 echo '(No uname command or uname output not recognized.)' 1>&2
