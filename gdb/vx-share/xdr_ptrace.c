@@ -12,9 +12,9 @@ modification history
 01a,05jun90,llk  extracted from xdr_ptrace.h, version 01c.
 */
 
-#include <vxWorks.h>
+#include "vxWorks.h"
 #include <rpc/rpc.h>
-#include <xdr_ptrace.h>
+#include "xdr_ptrace.h"
 
 #define MAX_LEN 32000
 

@@ -1,5 +1,10 @@
 Fri May  8 07:48:27 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	* Makefile.in, remote-udi.c, remote-vx.c, 29k-share/dfe/mini2udi.c,
+	29k-share/dfe/yank.c, vx-share/xdr_ptrace.c, vx-share/xdr_regs.c:
+	Remove -I29k-share, -Ivx-share from Makefile.in.  Make #includes
+	relative to each source file.
+
 	* Makefile.in: propogate INSTALL, INSTALL_DATA, INSTALL_PROGRAM on
 	  recursions.
 

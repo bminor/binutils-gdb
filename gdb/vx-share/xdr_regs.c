@@ -8,10 +8,10 @@ This module contains the eXternal Data Representation (XDR) routines
 for the GDB interface for VxWorks.
 */
 
-#include <vxWorks.h>
+#include "vxWorks.h"
 #include <rpc/rpc.h>
-#include <reg.h>
-#include <xdr_regs.h>
+#include "reg.h"
+#include "xdr_regs.h"
 
 
 #ifdef I80960

@@ -45,7 +45,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include "terminal.h"
 #include "target.h"
-#include "udiproc.h"
+#include "29k-share/udi/udiproc.h"
 
 /* access the register store directly, without going through
    the normal handler functions. This avoids an extra data copy

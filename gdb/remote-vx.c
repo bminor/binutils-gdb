@@ -40,11 +40,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef free
 #include <sys/time.h>		/* UTek's <rpc/rpc.h> doesn't #incl this */
 #include <netdb.h>
-#include <ptrace.h>
-#include "xdr_ptrace.h"
-#include "xdr_ld.h"
-#include "xdr_rdb.h"
-#include "dbgRpcLib.h"
+#include "vx-share/ptrace.h"
+#include "vx-share/xdr_ptrace.h"
+#include "vx-share/xdr_ld.h"
+#include "vx-share/xdr_rdb.h"
+#include "vx-share/dbgRpcLib.h"
 
 #include <symtab.h>
 

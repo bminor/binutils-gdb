@@ -129,7 +129,7 @@ RL_LIB = ./../readline${subdir}/libreadline.a
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I${srcdir} possibly for regex.h also.
-INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR) -I$(READLINE_DIR) -I${srcdir}/vx-share -I${srcdir}/29k-share/include -I${srcdir}/29k-share/udi
+INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR) -I$(READLINE_DIR)
 
 # {X,T}M_CFLAGS, if defined, has system-dependent CFLAGS.
 # CFLAGS for GDB
