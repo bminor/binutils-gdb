@@ -1,3 +1,8 @@
+Sat Jun 12 16:09:22 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* stabs.texinfo: Clean up N_{L,R}BRAC.  Discuss what addresses of
+	N_{L,R}BRAC,N_SLINE are relative to.
+
 Fri Jun 11 15:15:55 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Makefile.in (GDBvn.texi): Update atomically.

@@ -437,7 +437,9 @@ include file.  @code{C_BINCL} and @code{C_EINCL} do not nest.
 
 A @code{N_SLINE} symbol represents the start of a source line.  The
 @var{desc} field contains the line number and the @var{value} field
-contains the code address for the start of that source line.
+contains the code address for the start of that source line.  On most
+machines the address is absolute; for Sun's stabs-in-elf, it is relative
+to the function in which the @code{N_SLINE} symbol occurs.
 
 GNU documents @code{N_DSLINE} and @code{N_BSLINE} symbols for line
 numbers in the data or bss segments, respectively.  They are identical
@@ -556,48 +558,26 @@ followed by line 50 of our sample assembly output, which has this form:
 @node Block Structure
 @section Block Structure
 
-@table @strong
-@item Directive:
-@code{.stabn}
-@item Types:
-@code{N_LBRAC}, @code{N_RBRAC}
-@end table
-
 The program's block structure is represented by the @code{N_LBRAC} (left
-brace) and the @code{N_RBRAC} (right brace) stab types.  The following code
-range, which is the body of @code{main}, is labeled with @samp{LBB2:} at the
-beginning and @samp{LBE2:} at the end.  
-
-@example
-37 LBB2:
-38      sethi %hi(LC0),%o1
-39      or %o1,%lo(LC0),%o0
-40      call _printf,0
-41      nop
-42 .stabn 68,0,6,LM3
-43 LM3:
-44 LBE2:
-@end example
+brace) and the @code{N_RBRAC} (right brace) stab types.  The variables
+defined inside a block preceded the @code{N_LBRAC} symbol for most
+compilers, including GCC.  Other compilers, such as the Convex, Acorn
+RISC machine, and Sun acc compilers, put the variables after the
+@code{N_LBRAC} symbol.  The values of the @code{N_LBRAC} and
+@code{N_RBRAC} symbols are the start and end addresses of the code of
+the block, respectively.  For most machines, they are relative to the
+starting address of this source file.  For the Gould NP1, they are
+absolute.  For Sun's stabs-in-elf, they are relative to the function in
+which they occur.
 
 The @code{N_LBRAC} and @code{N_RBRAC} stabs that describe the block
-scope of the procedure are located after the @code{N_FUNC} stab that
-represents the procedure itself.  The @code{N_LBRAC} uses the
-@code{LBB2} label as the code address in its value field, and the
-@code{N_RBRAC} uses @code{LBE2}.
+scope of a procedure are located after the @code{N_FUN} stab that
+represents the procedure itself.  
 
-@example
-50 .stabs "main:F1",36,0,0,_main
-@end example
-
-@example
-   .stabn N_LBRAC, NIL, NIL, @var{left-brace-address}
-   .stabn N_RBRAC, NIL, NIL, @var{right-brace-address}
-@end example
-
-@example
-51 .stabn 192,0,0,LBB2
-52 .stabn 224,0,0,LBE2
-@end example
+Sun documents the @code{desc} field of @code{N_LBRAC} and
+@code{N_RBRAC} symbols as containing the nesting level of the block.
+However, dbx seems not to care, and GCC just always set @code{desc} to
+zero.
 
 @node Constants
 @chapter Constants
@@ -3092,7 +3072,7 @@ Automatic var in the stack or type definition, @xref{N_LSYM}, @xref{Typedefs}.
 Beginning of an include file (Sun only), @xref{Source Files}.
 
 @item 0x84     N_SOL     
-Name of sub-source (#include) file., @xref{Source Files}.
+Name of include file, @xref{Source Files}.
 
 @item 0xa0     N_PSYM    
 Parameter variable, @xref{Parameters}.
@@ -3104,7 +3084,7 @@ End of an include file, @xref{Source Files}.
 Alternate entry point, @xref{N_ENTRY}.
 
 @item 0xc0     N_LBRAC   
-Beginning of a lexical block, @xref{N_LBRAC}.
+Beginning of a lexical block, @xref{Block Structure}.
 
 @item 0xc2     N_EXCL    
 Place holder for a deleted include file, @xref{Source Files}.
@@ -3113,7 +3093,7 @@ Place holder for a deleted include file, @xref{Source Files}.
 Modula2 scope information (Sun linker), @xref{N_SCOPE}.
 
 @item 0xe0     N_RBRAC   
-End of a lexical block, @xref{N_RBRAC}.
+End of a lexical block, @xref{Block Structure}.
 
 @item 0xe2     N_BCOMM   
 Begin named common block, @xref{N_BCOMM}.
@@ -3428,9 +3408,7 @@ Finally, any further information.
 * N_SSYM::      Structure or union element
 * N_LSYM::      Automatic variable
 * N_ENTRY::     Alternate entry point
-* N_LBRAC::     Beginning of lexical block
 * N_SCOPE::     Modula2 scope information (Sun only)
-* N_RBRAC::     End of lexical block
 * N_BCOMM::     Begin named common block
 * N_ECOMM::     End named common block
 * N_ECOML::     End common
@@ -3677,39 +3655,11 @@ Alternate entry point.
 Value is its address.
 <<?>>
 
-@node N_LBRAC
-@section 192 - 0xc0 - N_LBRAC   
-
-Beginning of a lexical block (left brace).  The variable defined
-inside the block precede the N_LBRAC symbol.  Or can they follow as
-well as long as a new N_FUNC was not encountered. <<?>>
-
-@display
-.stabn N_LBRAC, NIL, NIL, value
-@end display
-
-@example
-value -> code address of block start.
-@end example
-
 @node N_SCOPE
 @section 196 - 0xc4 - N_SCOPE   
 
 Modula2 scope information (Sun linker)
 <<?>>
-
-@node N_RBRAC
-@section 224 -  0xe0 - N_RBRAC  
-
-End of a lexical block (right brace)
-
-@display
-.stabn N_RBRAC, NIL, NIL, value
-@end display
-
-@example
-value -> code address of the end of the block.
-@end example
 
 @node N_BCOMM
 @section 226 - 0xe2 - N_BCOMM     
@@ -3896,11 +3846,6 @@ N_LENG          unknown
 @item
 GNU C stabs define *all* types, file or procedure scope, as
 N_LSYM.  Sun doc talks about using N_GSYM too.
-
-@item
-Stabs describing block scopes, N_LBRAC and N_RBRAC are supposed to
-contain the nesting level of the block in the desc field, re Sun doc.
-GNU stabs always have 0 in that field.  dbx seems not to care.
 
 @item
 Sun C stabs use type number pairs in the format (a,b) where a is a
