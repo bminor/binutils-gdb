@@ -120,15 +120,15 @@ fetch_inferior_registers (int regno)
      all (16 ptrace calls!) if we really need them.  */
   if (regno == -1)
     {
-      target_read_memory (*(CORE_ADDR *) & registers[REGISTER_BYTE (SP_REGNUM)],
-			  &registers[REGISTER_BYTE (L0_REGNUM)],
+      CORE_ADDR sp = *(unsigned int *) & registers[REGISTER_BYTE (SP_REGNUM)];
+      target_read_memory (sp, &registers[REGISTER_BYTE (L0_REGNUM)],
 			  16 * REGISTER_RAW_SIZE (L0_REGNUM));
       for (i = L0_REGNUM; i <= I7_REGNUM; i++)
 	register_valid[i] = 1;
     }
   else if (regno >= L0_REGNUM && regno <= I7_REGNUM)
     {
-      CORE_ADDR sp = *(CORE_ADDR *) & registers[REGISTER_BYTE (SP_REGNUM)];
+      CORE_ADDR sp = *(unsigned int *) & registers[REGISTER_BYTE (SP_REGNUM)];
       i = REGISTER_BYTE (regno);
       if (register_valid[regno])
 	printf_unfiltered ("register %d valid and read\n", regno);
@@ -190,7 +190,7 @@ store_inferior_registers (int regno)
 
   if (wanna_store & STACK_REGS)
     {
-      CORE_ADDR sp = *(CORE_ADDR *) & registers[REGISTER_BYTE (SP_REGNUM)];
+      CORE_ADDR sp = *(unsigned int *) & registers[REGISTER_BYTE (SP_REGNUM)];
 
       if (regno < 0 || regno == SP_REGNUM)
 	{
