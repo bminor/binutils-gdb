@@ -116,8 +116,8 @@ The AMD 29K family uses @sc{ieee} floating-point numbers.
 @cindex machine directives, AMD 29K
 @cindex AMD 29K machine directives
 @table @code
-@item .block @var{size} , @var{fill}
 @cindex @code{block} directive, AMD 29K
+@item .block @var{size} , @var{fill}
 This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @var{size} and @var{fill} are absolute expressions.  If the comma
 and @var{fill} are omitted, @var{fill} is assumed to be zero.
@@ -127,13 +127,13 @@ In other versions of the @sc{gnu} assembler, this directive is called
 @end table
 
 @table @code
-@item .cputype
 @cindex @code{cputype} directive, AMD 29K
+@item .cputype
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
-@item .file
 @cindex @code{file} directive, AMD 29K
+@item .file
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
@@ -142,25 +142,25 @@ AMD 29K assemblers.
 used for the directive called @code{.app-file} in the AMD 29K support.
 @end quotation
 
-@item .line
 @cindex @code{line} directive, AMD 29K
+@item .line
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
 @ignore
 @c since we're ignoring .lsym...
-@item .reg @var{symbol}, @var{expression}
 @cindex @code{reg} directive, AMD 29K
+@item .reg @var{symbol}, @var{expression}
 @code{.reg} has the same effect as @code{.lsym}; @pxref{Lsym,,@code{.lsym}}.
 @end ignore
 
-@item .sect
 @cindex @code{sect} directive, AMD 29K
+@item .sect
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
-@item .use @var{section name}
 @cindex @code{use} directive, AMD 29K
+@item .use @var{section name}
 Establishes the section and subsection for the following code;
 @var{section name} may be one of @code{.text}, @code{.data},
 @code{.data1}, or @code{.lit}.  With one of the first three @var{section
