@@ -1,3 +1,10 @@
+Wed Sep 10 13:35:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-itable.c (gen_itable_h): Collect summary info on instruction
+ 	table when traversing it.
+	(gen_itable_h): Output an enum defining the max size of each of
+ 	the itable string members.
+
 Tue Sep  9 03:30:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* igen.c (gen_run_c): New function. Generate sim_engine_run that
