@@ -1,4 +1,44 @@
+Wed Mar 12 21:44:19 1997  Eric Youngdale  <eric@andante.jic.com>
+
+	* ld-elfvers/vers.exp, *: New tests for symbol versioning.
+	* config/default.exp: Set ar and strip.
+
+Fri Feb  7 16:47:02 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* ld-bootstrap/bootstrap.exp: Use prune_warnings instead of
+	prune_system_crud.
+	* ld-cdtest/cdtest.exp: Ditto.
+	* ld-scripts/crossref.exp: Ditto.
+	* ld-sh/sh.exp: Ditto.
+	* ld-shared/shared.exp: Ditto.
+	* ld-srec/srec.exp: Ditto.
+	* lib/ld.exp: Ditto.
+
+Wed Jan 29 00:47:29 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* ld-cdtest/cdtest.exp: Put a slash between $srcdir/$subdir.
+	* ld-scripts/script.exp: Ditto.
+	* ld-sh/sh.exp: Ditto.
+	* ld-undefined/undefined.exp: Ditto.
+	* ld-versados/versados.exp: Ditto.
+	* lib/ld.exp: Ditto.
+
+Mon Dec 30 17:08:04 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/crossref.exp: Fix quoting for --defsym $global$.
+
+Tue Oct  1 15:52:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lib/ld.exp (default_ld_version): Fix for current version
+	printing.
+
+Fri Sep 13 15:51:45 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/crossref.exp: Define $global$ for hppa-elf.
+
 Thu Aug  8 14:29:32 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/cross2.t: Map XCOFF sections to .text or .data.
 
 	* lib/ld.exp: Use verbose -log instead of calling both verbose and
 	send_log.
