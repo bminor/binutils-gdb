@@ -418,17 +418,30 @@ print_insn_hppa (memaddr, info)
 		case 'S':
 		  (*info->fprintf_func) (info->stream, "sr%d", extract_3 (insn));
 		  break;
+
+		/* Handle completers.  */
 		case 'c':
-		  (*info->fprintf_func) (info->stream, "%s ",
-				    index_compl_names[GET_COMPL (insn)]);
-		  break;
-		case 'C':
-		  (*info->fprintf_func) (info->stream, "%s ",
-				    short_ldst_compl_names[GET_COMPL (insn)]);
-		  break;
-		case 'Y':
-		  (*info->fprintf_func) (info->stream, "%s ",
-				    short_bytes_compl_names[GET_COMPL (insn)]);
+		  switch (*++s)
+		    {
+		    case 'x':
+		      (*info->fprintf_func) (info->stream, "%s ",
+					     index_compl_names[GET_COMPL (insn)]);
+		      break;
+		    case 'm':
+		      (*info->fprintf_func) (info->stream, "%s ",
+					     short_ldst_compl_names[GET_COMPL (insn)]);
+		      break;
+		    case 's':
+		      (*info->fprintf_func) (info->stream, "%s ",
+					     short_bytes_compl_names[GET_COMPL (insn)]);
+		      break;
+		    case 'Z':
+		      if (GET_FIELD (insn, 26, 26))
+			(*info->fprintf_func) (info->stream, ",m ");
+		      else
+			(*info->fprintf_func) (info->stream, " ");
+		      break;
+		    }
 		  break;
 
 		/* Handle conditions.  */
@@ -646,12 +659,6 @@ print_insn_hppa (memaddr, info)
 		  break;
 		case 'A':
 		  fput_const (GET_FIELD (insn, 6, 18), info);
-		  break;
-		case 'Z':
-		  if (GET_FIELD (insn, 26, 26))
-		    (*info->fprintf_func) (info->stream, ",m ");
-		  else
-		    (*info->fprintf_func) (info->stream, " ");
 		  break;
 		case 'D':
 		  fput_const (GET_FIELD (insn, 6, 31), info);
