@@ -90,10 +90,6 @@ STP
 */
 
 
-#if 0
-/* Comment out entire file until it can be fixed (need to clean up
-   TERMINAL, etc.).  */
-
 #include <stdio.h>
 #include <signal.h>
 #include <sys/ioctl.h>
@@ -108,20 +104,10 @@ STP
 #include "inferior.h"
 #include "target.h"
 #include "wait.h"
-#include "terminal.h"
 #include "command.h"
 #include "remote-utils.h"
-
-#ifdef USG
-#include <sys/types.h>
-#include <sgtty.h>
-#endif
-
-#include <signal.h>
-
-/* External variables referenced. */
-
-extern bfd *exec_bfd;
+#include "gdbcore.h"
+#include "serial.h"
 
 /* Prototypes for local functions */
 
@@ -162,8 +148,7 @@ es1800_xfer_inferior_memory PARAMS ((CORE_ADDR, char *, int, int,
 static void 
 es1800_prepare_to_store PARAMS ((void));
 
-static int
-es1800_wait PARAMS ((WAITTYPE *));
+static int es1800_wait PARAMS ((int, struct target_waitstatus *));
 
 static void es1800_resume PARAMS ((int, int, enum target_signal));
 
@@ -255,6 +240,7 @@ es1800_init_break PARAMS ((char *, int));
 
 /* Local variables */
 
+/* FIXME: Convert this to use "set remotedebug" instead.  */
 #define LOG_FILE "es1800.log"
 #if defined (LOG_FILE)
 static FILE *log_file;
@@ -266,7 +252,7 @@ extern struct target_ops es1800_child_ops;	/* Forward decl */
 static int kiodebug;
 static int timeout = 100; 
 static char *savename;				/* Name of i/o device used */
-static TERMINAL es1800_sg_save;			/* Save stty state */
+static serial_ttystate es1800_saved_ttystate;
 static int es1800_fc_save;			/* Save fcntl state */
 
 /* indicates that the emulator uses 32-bit data-adress (68020-mode) 
@@ -277,11 +263,11 @@ static int m68020;
 #define MODE (m68020 ? "M68020" : "M68000" )
 #define ES1800_BREAK_VEC (0xf)
 
-/* Descriptor for I/O to remote machine.  Initialize it to -1 so that
+/* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    es1800_open knows that we don't have a file open when the program
    starts.  */
 
-static int es1800_desc = -1;
+static serial_t es1800_desc = NULL;
 
 #define	PBUFSIZ	1000
 #define HDRLEN sizeof("@.BAAAAAAAA=$VV\r")
@@ -333,24 +319,6 @@ es1800_reset (quit)
 }
 
 
-/* Called when SIGALRM signal sent due to alarm() timeout.
-   Rely on global variables: timeout  */
-
-#ifndef HAVE_TERMIO
-
-static void
-es1800_timer ()
-{
-  if (kiodebug)
-    {
-      printf ("es1800_timer called\n");
-    }
-  alarm (timeout);
-}
-
-#endif	/* HAVE_TERMIO */
-
-
 /* Open a connection to a remote debugger and push the new target
    onto the stack. Check if the emulator is responding and find out
    what kind of processor the emulator is connected to.
@@ -364,11 +332,9 @@ es1800_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  TERMINAL sg;
   char buf[PBUFSIZ];
   char *p;
   int i, fcflag;
-  char baudrate[1024];
 
   m68020 = 0;
 
@@ -376,7 +342,6 @@ es1800_open (name, from_tty)
     {
       error_no_arg ("serial port device name");
     }
-  sprintf(baudrate, "%d", sr_get_baud_rate());
 
   target_preopen (from_tty);
   es1800_close (0);
@@ -385,46 +350,38 @@ es1800_open (name, from_tty)
 
 #ifndef DEBUG_STDIN
 
-  es1800_desc = open (name, O_RDWR);
-  if (es1800_desc < 0)
+  es1800_desc = SERIAL_OPEN (name);
+  if (es1800_desc == NULL)
     {
       perror_with_name (name);
     }
   savename = savestring (name, strlen (name));
 
-  if (ioctl (es1800_desc, TIOCGETP, &sg) == -1)
-    {
-      perror_with_name (name);
-    }
-  es1800_sg_save = sg;
+  es1800_saved_ttystate = SERIAL_GET_TTY_STATE (es1800_desc);
 
-  if ((fcflag = fcntl (es1800_desc, F_GETFL, 0)) == -1)
+  if ((fcflag = fcntl (es1800_desc->fd, F_GETFL, 0)) == -1)
     {
       perror_with_name ("fcntl serial");
     }
   es1800_fc_save = fcflag;
 
   fcflag = (fcflag & (FREAD | FWRITE)); /* mask out any funny stuff */
-  if (fcntl (es1800_desc, F_SETFL, fcflag) == -1)
+  if (fcntl (es1800_desc->fd, F_SETFL, fcflag) == -1)
     {
       perror_with_name ("fcntl serial");
     }
 
-#ifdef HAVE_TERMIO
-  sg.c_cc[VMIN] = 0;		/* read with timeout.  */
-  sg.c_cc[VTIME] = timeout * 10;
-  sg.c_lflag &= ~(ICANON | ECHO);
-  sg.c_cflag = (sg.c_cflag & ~CBAUD) | damn_b (baudrate);
-#else
-  sg.sg_ispeed = damn_b (baudrate);
-  sg.sg_ospeed = damn_b (baudrate);
-  sg.sg_flags = CBREAK+TANDEM;
-#endif
-
-  if ((ioctl (es1800_desc, TIOCSETP, &sg)) == -1)
+  if (SERIAL_SETBAUDRATE (es1800_desc, baud_rate))
     {
-      perror ("es1800_open: error in ioctl");
+      SERIAL_CLOSE (es1800_desc);
+      perror_with_name (name);
     }
+
+  SERIAL_RAW (es1800_desc);
+
+  /* If there is something sitting in the buffer we might take it as a
+     response to a command, which would be bad.  */
+  SERIAL_FLUSH_INPUT (es1800_desc);
 
 #endif	/* DEBUG_STDIN */
 
@@ -433,30 +390,6 @@ es1800_open (name, from_tty)
     {
       printf ("Remote ES1800 debugging using %s\n", name);
     }
-
-#ifndef HAVE_TERMIO
-
-#ifndef NO_SIGINTERRUPT
-
-  /* Cause SIGALRM's to make reads fail with EINTR instead of resuming
-     the read.  */
-
-  if (siginterrupt (SIGALRM, 1) != 0)
-    {
-      perror ("es1800_open: error in siginterrupt");
-    }
-
-#endif	/* NO_SIGINTERRUPT */
-
-  /* Set up read timeout timer.  */
-
-  if ((void(*)()) signal (SIGALRM, es1800_timer) == (void(*)()) -1)
-    {
-      perror ("es1800_open: error in signal");
-    }
-
-#endif	/* HAVE_TERMIO */
-
 
 #if defined (LOG_FILE)
 
@@ -520,13 +453,14 @@ static void
 es1800_close (quitting)
      int quitting;
 {
-  if (es1800_desc >= 0)
+  if (es1800_desc != NULL)
     {
       printf ("\nClosing connection to emulator...\n");
-      ioctl (es1800_desc, TIOCSETP, &es1800_sg_save);
-      fcntl (es1800_desc,F_SETFL, es1800_fc_save);
-      close (es1800_desc);
-      es1800_desc = -1;
+      if (SERIAL_SET_TTY_STATE (es1800_desc, es1800_saved_ttystate) < 0)
+	print_sys_errmsg ("warning: unable to restore tty state", errno);
+      fcntl (es1800_desc->fd, F_SETFL, es1800_fc_save);
+      SERIAL_CLOSE (es1800_desc);
+      es1800_desc = NULL;
     }
   if (savename != NULL)
     {
@@ -552,61 +486,6 @@ es1800_close (quitting)
 #endif	/* LOG_FILE */
 
 }
-
-/* damn_b()
-
-   Translate baud rates from integers to damn B_codes.  Unix should
-   have outgrown this crap years ago, but even POSIX wouldn't buck it.
-   rate - the baudrate given as a string
-   return value: the baudrate as a B_code */
-
-#ifndef B19200
-#  define B19200 EXTA
-#endif
-#ifndef B38400
-#  define B38400 EXTB
-#endif
-
-struct
-{
-  char *rate,
-  damn_b;
-} baudtab[] = {
-  {"0", B0},
-  {"50", B50},
-  {"75", B75},
-  {"110", B110},
-  {"134", B134},
-  {"150", B150},
-  {"200", B200},
-  {"300", B300},
-  {"600", B600},
-  {"1200", B1200},
-  {"1800", B1800},
-  {"2400", B2400},
-  {"4800", B4800},
-  {"9600", B9600},
-  {"19200", B19200},
-  {"38400", B38400},
-  {0, -1},
-};
-
-static int
-damn_b (rate)
-     char *rate;
-{
-  int i;
-
-  for (i = 0; baudtab[i].rate != 0; i++)
-    {
-      if (STREQ (rate, baudtab[i].rate))
-	{
-	  return (baudtab[i].damn_b);
-	}
-    }
-  error ("Illegal baudrate");
-}
-
 
 /*  Attaches to a process on the target side
     proc_id  - the id of the process to be attached.
@@ -681,7 +560,8 @@ es1800_resume (pid, step, siggnal)
    status -  */
  
 static int
-es1800_wait (status)
+es1800_wait (pid, status)
+     int pid;
      struct target_waitstatus *status;
 {
   unsigned char buf[PBUFSIZ];
@@ -1399,7 +1279,7 @@ es1800_load (filename, from_tty)
   struct cleanup *old_chain;
   int es1800_load_format = 5;
 
-  if (es1800_desc < 0) 
+  if (es1800_desc == NULL) 
     {
       printf ("No emulator attached, type emulator-command first\n");
       return;
@@ -1721,38 +1601,23 @@ readchar ()
 static int
 readchar ()
 {
-  char buf[1];
+  int ch;
 
-  buf[0] = '\0';
+  ch = SERIAL_READCHAR (es1800_desc, timeout);
 
-#ifdef HAVE_TERMIO
-
-  /* termio does the timeout for us.  */
-  read (es1800_desc, buf, 1);
-
-#else
-
-  alarm (timeout);
-  while (read (es1800_desc, buf, 1) != 1)
-    {
-      if (errno == EINTR)
-	{
-	  error ("Timeout reading from remote system.");
-	}
-      else if (errno != EWOULDBLOCK)
-	{
-	  perror_with_name ("remote read");
-	}
-    }
-  alarm (0);
-#endif
+  /* FIXME: doing an error() here will probably cause trouble, at least if from
+     es1800_wait.  */
+  if (ch == SERIAL_TIMEOUT)
+    error ("Timeout reading from remote system.");
+  else if (ch == SERIAL_ERROR)
+    perror_with_name ("remote read");
 
 #if defined (LOG_FILE)
-  putc (buf[0] & 0x7f, log_file);
+  putc (ch & 0x7f, log_file);
   fflush (log_file);
 #endif
 
-  return (buf[0] & 0x7f);
+  return (ch);
 }
 
 #endif	/* DEBUG_STDIN */
@@ -1770,7 +1635,7 @@ send_with_reply (string, buf, len)
     int len;
 {
   send (string);
-  write (es1800_desc, "\r", 1);
+  SERIAL_WRITE (es1800_desc, "\r", 1);
 
 #ifndef DEBUG_STDIN
   expect (string, 1);
@@ -1790,7 +1655,7 @@ send_command (string)
      char *string;
 {
   send (string);
-  write (es1800_desc, "\r", 1);
+  SERIAL_WRITE (es1800_desc, "\r", 1);
 
 #ifndef DEBUG_STDIN
   expect (string, 0);
@@ -1810,7 +1675,7 @@ send (string)
     {
       fprintf (stderr, "Sending: %s\n", string);
     }
-  write (es1800_desc, string, strlen (string));
+  SERIAL_WRITE (es1800_desc, string, strlen (string));
 }
 
 
@@ -1911,6 +1776,11 @@ FILE *instream;
 
 /* Additional commands */
 
+#if defined (TIOCGETP) && defined (FNDELAY) && defined (EWOULDBLOCK)
+#define PROVIDE_TRANSPARENT
+#endif
+
+#ifdef PROVIDE_TRANSPARENT
 /* Talk directly to the emulator
    FIXME, uses busy wait, and is SUNOS (or at least BSD) specific  */
 
@@ -1936,7 +1806,7 @@ es1800_transparent (args, from_tty)
   int i;
 
   dont_repeat ();
-  if (es1800_desc < 0) 
+  if (es1800_desc == NULL) 
     {
       printf ("No emulator attached, type emulator-command first\n");
       return;
@@ -1980,7 +1850,7 @@ es1800_transparent (args, from_tty)
       perror_with_name ("ioctl console");
     }
 
-  if ((fcflag = fcntl (es1800_desc, F_GETFL, 0)) == -1)
+  if ((fcflag = fcntl (es1800_desc->fd, F_GETFL, 0)) == -1)
     {
       perror_with_name ("fcntl serial");
     }
@@ -1988,7 +1858,7 @@ es1800_transparent (args, from_tty)
   es1800_fc_save = fcflag;
   fcflag = fcflag | FNDELAY;
 
-  if (fcntl (es1800_desc, F_SETFL, fcflag) == -1)
+  if (fcntl (es1800_desc->fd, F_SETFL, fcflag) == -1)
     {
       perror_with_name ("fcntl serial");
     }
@@ -2006,9 +1876,9 @@ es1800_transparent (args, from_tty)
 	    {
 	      es1800_buf[es1800_cnt++] = inputbuf[i++];
 	    }
-	  if ((cc = write (es1800_desc, es1800_buf, es1800_cnt)) == -1)
+	  if ((cc = SERIAL_WRITE (es1800_desc, es1800_buf, es1800_cnt)) == -1)
 	    {
-	      perror_with_name ("FEL! read:");
+	      perror_with_name ("FEL! write:");
 	    }
 	  es1800_cnt -= cc;
 	  if (es1800_cnt && cc) 
@@ -2024,7 +1894,7 @@ es1800_transparent (args, from_tty)
 	  perror_with_name ("FEL! read:");
 	}
       
-      cc = read (es1800_desc,inputbuf,inputcnt);
+      cc = read (es1800_desc->fd,inputbuf,inputcnt);
       if (cc != -1)
 	{
 	  for (i = 0; i < cc; )
@@ -2063,7 +1933,7 @@ es1800_transparent (args, from_tty)
 
   close (console);
 
-  if (fcntl (es1800_desc, F_SETFL, es1800_fc_save) == -1)
+  if (fcntl (es1800_desc->fd, F_SETFL, es1800_fc_save) == -1)
     {
       perror_with_name ("FEL! fcntl");
     }
@@ -2071,6 +1941,7 @@ es1800_transparent (args, from_tty)
   printf ("\n");
 
 }
+#endif /* PROVIDE_TRANSPARENT */
 
 static void
 es1800_init_break (args, from_tty)
@@ -2259,17 +2130,16 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   NULL,				/* to_sections_end */
   OPS_MAGIC			/* to_magic (always last) */
 };
-#endif /* 0 */
 
 void
 _initialize_es1800 ()
 {
-#if 0
   add_target (&es1800_ops);
   add_target (&es1800_child_ops);
+#ifdef PROVIDE_TRANSPARENT
   add_com ("transparent", class_support, es1800_transparent,
 	   "Start transparent communication with the ES 1800 emulator.");
+#endif /* PROVIDE_TRANSPARENT */
   add_com ("init_break", class_support, es1800_init_break,
 	   "Download break routine and initialize break facility on ES 1800");
-#endif
 }
