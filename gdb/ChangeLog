@@ -1,3 +1,8 @@
+
+Fri Sep 11 12:38:34 EDT 1998  Zdenek Radouch   (radouch@cygnus.com)
+
+	* arm-tdep.c (arm_push_arguments): fixed frame construction
+
 Thu Sep 10 20:51:23 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* mn10300-tdep.c (mn10300_analyze_prologue): guard against NULL.
