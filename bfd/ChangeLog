@@ -1,3 +1,8 @@
+2002-08-22  Kaz Kojima <kkojima@rr.iij4u.or.jp>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Use a simple
+	byte read when reading the return address register column. 
+
 2002-08-22  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd: Add powepc64-*-*bsd* target.

@@ -506,7 +506,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	    }
 	  read_uleb128 (cie.code_align, buf);
 	  read_sleb128 (cie.data_align, buf);
-	  read_uleb128 (cie.ra_column, buf);
+	  cie.ra_column = *buf++;
 	  ENSURE_NO_RELOCS (buf);
 	  cie.lsda_encoding = DW_EH_PE_omit;
 	  cie.fde_encoding = DW_EH_PE_omit;
