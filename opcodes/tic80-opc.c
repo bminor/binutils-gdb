@@ -77,9 +77,15 @@ const struct tic80_operand tic80_operands[] =
 #define LUBF (LUI + 1)
   { 32, 0, NULL, NULL, TIC80_OPERAND_BITFIELD },
 
+  /* Single precision floating point immediate in following 32 bit
+     word. */
+
+#define SPFI (LUBF + 1)
+  { 32, 0, NULL, NULL, TIC80_OPERAND_FLOAT },
+
   /* Register in bits 4-0 */
 
-#define REG_0 (LUBF + 1)
+#define REG_0 (SPFI + 1)
   { 5, 0, NULL, NULL, TIC80_OPERAND_GPR },
 
   /* Register in bits 26-22 */
@@ -144,6 +150,16 @@ const struct tic80_operand tic80_operands[] =
 
 #define LSI_SCALED (REG_SCALED + 1)
   { 32, 0, NULL, NULL, TIC80_OPERAND_SIGNED | TIC80_OPERAND_SCALED },
+
+  /* Unsigned immediate in bits 4-0, used only for shift instructions */
+
+#define ROTATE (LSI_SCALED + 1)
+  { 5, 0, NULL, NULL, 0 },
+
+  /* Unsigned immediate in bits 9-5, used only for shift instructions */
+#define ENDMASK (ROTATE + 1)
+  { 5, 5, NULL, NULL, 0 },
+
 };
 
 const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
@@ -164,6 +180,12 @@ const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
 /* Register Format Instructions - basic opcode */
 #define OP_REG(x)	OP_LI(x)	/* For readability */
 #define MASK_REG	MASK_LI		/* For readability */
+
+/* The 'n' bit at bit 10 */
+#define n(x)		((x) << 10)
+
+/* The 'i' bit at bit 11 */
+#define i(x)		((x) << 11)
 
 /* The 'F' bit at bit 27 */
 #define F(x)		((x) << 27)
@@ -192,6 +214,15 @@ const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
 /* The 'S' (scale offset by data size) bit at bit 11 in long immediate
    and register opcodes. */
 #define S(x)		((x) << 11)
+
+/* The 'PD' field at bits 10-9 in floating point instructions */
+#define PD(x)		((x) << 9)
+
+/* The 'P2' field at bits 8-7 in floating point instructions */
+#define P2(x)		((x) << 7)
+
+/* The 'P1' field at bits 6-5 in floating point instructions */
+#define P1(x)		((x) << 5)
 
 
 const struct tic80_opcode tic80_opcodes[] = {
@@ -376,6 +407,56 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"etrap",	OP_SI(0x1) | E(1),	MASK_SI | E(1),		FMT_SI,		{SUI}	},
   {"etrap",	OP_LI(0x303) | E(1),	MASK_LI | E(1),		FMT_LI,		{LUI}	},
   {"etrap",	OP_REG(0x302) | E(1),	MASK_REG | E(1),	FMT_REG,	{REG_0}	},
+
+  /* Extract signed field (actually an sr.ds instruction) */
+
+  {"exts",	OP_SI(0xA) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"exts",	OP_REG(0x314) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+
+  /* Extract unsigned field (actually an sr.dz instruction */
+
+  {"extu",	OP_SI(0x8) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"extu",	OP_REG(0x310) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+
+  /* Floating-point addition */
+
+  {"fadd.sss",	OP_LI(0x3E1) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fadd.ssd",	OP_LI(0x3E1) | PD(1) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fadd.sdd",	OP_LI(0x3E1) | PD(1) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fadd.dsd",	OP_LI(0x3E1) | PD(1) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fadd.ddd",	OP_LI(0x3E1) | PD(1) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+
+  {"fadd.sss",	OP_REG(0x3E0) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fadd.ssd",	OP_REG(0x3E0) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fadd.sdd",	OP_REG(0x3E0) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fadd.dsd",	OP_REG(0x3E0) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fadd.ddd",	OP_REG(0x3E0) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+
+  /* Floating point compare */
+
+  {"fcmp.ss",	OP_LI(0x3EB) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
+  {"fcmp.sd",	OP_LI(0x3EB) | PD(0) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
+  {"fcmp.ds",	OP_LI(0x3EB) | PD(0) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
+  {"fcmp.dd",	OP_LI(0x3EB) | PD(0) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
+
+  {"fcmp.ss",	OP_REG(0x3EA) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3),  FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fcmp.sd",	OP_REG(0x3EA) | PD(0) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3),  FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fcmp.ds",	OP_REG(0x3EA) | PD(0) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3),  FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fcmp.dd",	OP_REG(0x3EA) | PD(0) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3),  FMT_REG, {REG_0, REG_22, REG_DEST}	},
+
+  /* Floating point divide */
+
+  {"fdiv.sss",	OP_LI(0x3E7) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fdiv.ssd",	OP_LI(0x3E7) | PD(1) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fdiv.sdd",	OP_LI(0x3E7) | PD(1) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fdiv.dsd",	OP_LI(0x3E7) | PD(1) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fdiv.ddd",	OP_LI(0x3E7) | PD(1) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+
+  {"fdiv.sss",	OP_REG(0x3E6) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fdiv.ssd",	OP_REG(0x3E6) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fdiv.sdd",	OP_REG(0x3E6) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fdiv.dsd",	OP_REG(0x3E6) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fdiv.ddd",	OP_REG(0x3E6) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
 
   /* WORK IN PROGRESS BELOW THIS POINT */
 

@@ -280,6 +280,14 @@ print_insn_tic80 (memaddr, info)
 		  (*info -> fprintf_func) (info -> stream, "%#lx", value);
 		}
 	    }
+	  else if ((operand -> flags & TIC80_OPERAND_FLOAT) != 0)
+	    {
+	      /* FIXME: depends upon sizeof (long) == sizeof (float) */
+	      union { float f; long l; } fval;
+
+	      fval.l = value;
+	      (*info -> fprintf_func) (info -> stream, "%g", fval.f);
+	    }
 	  else
 	    {
 	      if ((value > 999 || value < -999)
