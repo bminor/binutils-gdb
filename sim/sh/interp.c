@@ -17,10 +17,11 @@
    MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 */
+#include <signal.h>
 #include "sysdep.h"
 #include <sys/times.h>
 #include <sys/param.h>
-
+#include "bfd.h"
 #define O_RECOMPILE 85
 #define DEFINE_TABLE
 
@@ -100,6 +101,8 @@
 int sim_memory_size = 19;
 static int sim_profile_size = 17;
 static int nsamples;
+static int sim_timeout;
+
 typedef union
 {
 
@@ -160,21 +163,13 @@ saved_state_type saved_state;
 static int
 get_now ()
 {
-  struct tms b;
-  times (&b);
-  return b.tms_utime + b.tms_stime;
+  return time((char*)0);
 }
 
 static int
 now_persec ()
 {
-#ifdef CLK_TCK
-  return CLK_TCK;
-#endif
-#ifdef HZ
-  return HZ;
-#endif
-  return 50;
+  return 1;
 }
 
 
@@ -269,6 +264,12 @@ trap (i, regs)
 	  case 5:
 	    regs[4] = open (ptr (regs[5]), regs[6]);
 	    break;
+	  case 1:
+	    /* EXIT */
+	    saved_state.asregs.exception = SIGQUIT;
+	    errno = regs[5];
+	    break;
+	    
 	  default:
 	    abort ();
 	  }
@@ -279,7 +280,7 @@ trap (i, regs)
       break;
 
     case 255:
-      saved_state.asregs.exception = SIGILL;
+      saved_state.asregs.exception = SIGTRAP;
       break;
     }
 
@@ -552,12 +553,14 @@ sim_resume (step)
   register int maskb = ((saved_state.asregs.msize - 1) & ~0);
   register int maskw = ((saved_state.asregs.msize - 1) & ~1);
   register int maskl = ((saved_state.asregs.msize - 1) & ~3);
-  register unsigned char *memory = saved_state.asregs.memory;
+  register unsigned char *memory ;
   register unsigned int sbit = (1 << 31);
 
   prev = signal (SIGINT, control_c);
 
   init_pointers ();
+
+  memory = saved_state.asregs.memory;
 
   if (step)
     {
@@ -598,6 +601,9 @@ sim_resume (step)
 
       if (cycles >= doprofile)
 	{
+	  if (cycles > sim_timeout)
+	    saved_state.asregs.exception = SIGQUIT;
+	  
 	  saved_state.asregs.cycles += doprofile;
 	  cycles -= doprofile;
 	  if (saved_state.asregs.profile_hist)
@@ -643,7 +649,7 @@ sim_resume (step)
 
 
 
-void
+int
 sim_write (addr, buffer, size)
      long int addr;
      unsigned char *buffer;
@@ -656,9 +662,10 @@ sim_write (addr, buffer, size)
     {
       saved_state.asregs.memory[MMASKB & (addr + i)] = buffer[i];
     }
+return size;
 }
 
-void
+int
 sim_read (addr, buffer, size)
      long int addr;
      char *buffer;
@@ -672,15 +679,16 @@ sim_read (addr, buffer, size)
     {
       buffer[i] = saved_state.asregs.memory[MMASKB & (addr + i)];
     }
+return size;
 }
 
 
 void
 sim_store_register (rn, value)
      int rn;
-     int value;
+     unsigned char value[4];
 {
-  saved_state.asregs.regs[rn] = value;
+  saved_state.asregs.regs[rn] = (value[0] << 24) | (value[1] << 16) | (value[2] << 8) | (value[3]);
 }
 
 void
@@ -700,10 +708,12 @@ sim_trace ()
   return 0;
 }
 
-int
-sim_stop_signal ()
+enum sim_stop
+sim_stop_signal (sigrc)
+     int *sigrc;
 {
-  return saved_state.asregs.exception;
+  *sigrc = saved_state.asregs.exception;
+  return sim_stopped;
 }
 
 void
@@ -724,7 +734,7 @@ sim_info ()
   printf ("# cycles                 %10d\n", saved_state.asregs.cycles);
   printf ("# pipeline stalls        %10d\n", saved_state.asregs.stalls);
   printf ("# real time taken        %10.4f\n", timetaken);
-  printf ("# virtual time taked     %10.4f\n", virttime);
+  printf ("# virtual time taken     %10.4f\n", virttime);
   printf ("# profiling size         %10d\n", sim_profile_size);
   printf ("# profiling frequency    %10d\n", saved_state.asregs.profile);
   printf ("# profile maxpc          %10x\n", (1 << sim_profile_size) << PROFILE_SHIFT);
@@ -739,12 +749,33 @@ sim_info ()
 
 void
 sim_set_profile (n)
+     int n;
 {
   saved_state.asregs.profile = n;
 }
 
 void
 sim_set_profile_size (n)
+     int n;
 {
   sim_profile_size = n;
 }
+
+
+void
+sim_kill()
+{
+
+}
+
+int
+sim_open()
+{
+  return 0;
+}
+int sim_set_args()
+{
+  return 0;
+}
+
+

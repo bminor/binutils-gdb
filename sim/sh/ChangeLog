@@ -1,3 +1,37 @@
+Sat Oct 23 15:09:29 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* interp.c (sim_stop_signal): Result is now enum sim_stop.
+
+Fri Oct  8 10:47:09 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* gencode.c (table): Becomes unsigned.
+	* interp.c (trap): Get right breakpoint SIGnum. (sim_write,
+	sim_read): Return number of bytes copied.  (sim_store_register):
+	Value passed by reference. (sim_kill, sim_open, sim_set_args): New functions.
+
+Tue Sep  7 16:24:13 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* interp.c (sim_info): Fix small typo in printf string.
+
+Thu Aug  5 11:37:48 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* interp.c (sim_resume): Set memory after pointers inited.
+
+Mon Aug  2 14:13:22 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* interp.c (get_now): Use time system call.
+	* Makefile.in: install correctly.
+
+Tue Jul  6 10:30:46 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* run.c (main), interp.c (sim_set_timeout): Remove timeout
+	functionality.
+
+Thu Jun 24 13:29:57 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
+
+	* Makefile.in: don't run indent everytime; also add a space in the
+	includes 
+
 Thu Jun 17 18:30:42 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* gencode.c: Fix some opcodes.
