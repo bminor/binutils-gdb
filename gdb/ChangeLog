@@ -1,5 +1,8 @@
 Thu Nov  5 00:19:51 1992  John Gilmore  (gnu@cygnus.com)
 
+	* i386-stub.c:  Remove ansidecl.h and the few uses of it.
+	Stubs should stand alone as much as possible.
+
 	* README:  Add remote-es1800.c and remote-st2000.c to table.
 	* go32-nat.c:  Remove, there is no native go32 support.
 	* go32-xdep.c:  Remove unused fork, fvork, wait, execlp, kill_inferior.
