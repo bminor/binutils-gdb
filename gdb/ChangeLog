@@ -1,3 +1,10 @@
+2004-06-02  Albert Chin-A-Young  <china@thewrittenword.com>
+
+	Committed by Andrew Cagney.
+	* gdb/dictionary.c, gdb/gdbtypes.h: Remove trailing comma
+	after last enum constant to avoid error from IBM C
+	compiler.
+
 2004-06-01  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Fix PR symtab/1661.

@@ -99,7 +99,7 @@ enum dict_type
     /* Symbols are stored in a fixed-size array.  */
     DICT_LINEAR,
     /* Symbols are stored in an expandable array.  */
-    DICT_LINEAR_EXPANDABLE,
+    DICT_LINEAR_EXPANDABLE
   };
 
 /* The virtual function table.  */
