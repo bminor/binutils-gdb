@@ -513,9 +513,12 @@ buffer_line (file, line, size)
   if (c == EOF)
     {
       file->at_end = 1;
-      *p++ = '.';
-      *p++ = '.';
-      *p++ = '.';
+      if (count + 2 < size)
+	{
+	  *p++ = '.';
+	  *p++ = '.';
+	  *p++ = '.';
+	}
     }
   file->linenum++;
   *p++ = 0;

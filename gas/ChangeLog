@@ -1,3 +1,8 @@
+2001-09-25  Geoff Berry  <geoff.berry@bops.com>
+
+	* listing.c (buffer_line): Don't write past the end of `line' when
+	EOF is reached.
+
 2001-09-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mn10300.c (tc_gen_reloc): Don't emit an *ABS*
