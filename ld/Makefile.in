@@ -403,8 +403,8 @@ install: $(LD_PROG)
 	mv ld.new ld
 	-rm -f $(bindir)/$(program_prefix)ld
 	$(INSTALL_PROGRAM) ld $(bindir)/$(program_prefix)ld
-	-rm -f $(tooldir)/ld
-	$(INSTALL_PROGRAM) ld $(tooldir)/$(program_prefix)ld
+	-rm -f $(tooldir)/bin/ld
+	$(INSTALL_PROGRAM) ld $(tooldir)/bin/ld
 	-rm -f $(man1dir)/$(program_prefix)ld.1
 	$(INSTALL_DATA) $(srcdir)/gld.1 $(man1dir)/$(program_prefix)ld.1
 
