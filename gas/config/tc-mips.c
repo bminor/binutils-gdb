@@ -423,6 +423,7 @@ static offsetT mips_cprestore_offset = -1;
 static offsetT mips_cpreturn_offset = -1;
 static int mips_cpreturn_register = -1;
 static int mips_gp_register = GP;
+static int mips_gprel_offset = 0;
 
 /* Whether mips_cprestore_offset has been set in the current function
    (or whether it has already been warned about, if not).  */
@@ -11786,7 +11787,7 @@ s_gpvalue (ignore)
       return;
     }
 
-  mips_cpreturn_offset = get_absolute_expression ();
+  mips_gprel_offset = get_absolute_expression ();
 
   demand_empty_rest_of_line ();
 }
