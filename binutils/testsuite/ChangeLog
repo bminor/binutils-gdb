@@ -1,3 +1,8 @@
+2001-07-24  H.J. Lu  <hjl@gnu.org>
+
+	* binutils-all/windres/windres.exp: Set xfail on none-ix86/pe
+	targets.
+
 2001-07-18  DJ Delorie  <dj@redhat.com>
 
 	* config/default.exp (WINDRES): Add.
