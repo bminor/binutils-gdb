@@ -1,3 +1,9 @@
+Mon Feb 22 23:28:38 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* config.sub, configure.in, config.guess:  Add support
+	for Bosx, an AIX variant from Bull.
+	Patches from F.Pierresteguy@frcl.bull.fr.
+
 Sun Feb 21 11:15:22 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 
 	* devo/dejagnu: Initial creation of devo/dejagnu.

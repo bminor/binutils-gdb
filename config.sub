@@ -124,7 +124,7 @@ case $basic_machine in
 	tahoe | i[34]86 | i860 | m68k | m68000 | m88k | ns32k | arm | pyramid \
 		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 \
 		| alpha | we32k | ns16k | clipper \
-		| sparc | m680[01234]0 | m683?2 | z8k | v70)	# CYGNUS LOCAL
+		| sparc | m680[01234]0 | m683?2 | z8k | v70 | h8500)# CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
 	# Recognize the basic CPU types with with company name.
@@ -150,7 +150,7 @@ case $basic_machine in
 		;;
 	sparc64)					# CYGNUS LOCAL
 		basic_machine=sparc64-sun
-		os=-v9
+		os=-v9		# 32 bit pointers
 		;;
 	sparc64-v7 | sparc64v7)				# CYGNUS LOCAL
 		basic_machine=sparc64-sun
@@ -158,6 +158,10 @@ case $basic_machine in
 		;;
 # end-sanitize-v9
 
+	dpx20 | dpx20-*)				# CYGNUS LOCAL
+		basic_machine=rs6000-bull
+		os=-bosx
+		;;
 	vaxv)
 		basic_machine=vax-dec
 		os=-sysv
@@ -664,11 +668,12 @@ case $os in
 	      | -nindy* | -vxworks* | -ebmon* | -hds* | -m88kbcs* \
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -go32 | -sim | -es1800* | -udi | -hms* | -xray \
-	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf | -abug )
-				# The last two lines above are CYGNUS LOCAL
+	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf | -bosx* \
+	      | -abug | -ecoff)
+				# The last three lines above are CYGNUS LOCAL
 	;;
 # start-sanitize-v9
-	-v7 | -v9 | -hal32 | -hal64) ;;			# CYGNUS LOCAL
+	-v7 | -v9 | -v9p64 | -hal32 | -hal64) ;;	# CYGNUS LOCAL
 # end-sanitize-v9
 
 	-osfrose*)
@@ -815,6 +820,9 @@ case $basic_machine in
 		case $os in
 			-sunos*)
 				vendor=sun
+				;;
+			-bosx*)
+				vendor=bull
 				;;
 			-aix*)
 				vendor=ibm
