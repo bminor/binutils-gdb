@@ -26,5 +26,4 @@ Disassembly of section .text:
   40:	7c 00 04 ac 	sync	
   44:	7c 09 55 ec 	dcba	r9,r10
   48:	7c 00 06 ac 	eieio
-  4c:	00 00 00 00 	.long 0x0
 Disassembly of section .data:

@@ -10,7 +10,7 @@ start address 0x0+0000
 
 Sections:
 Idx Name +Size +VMA +LMA +File off +Algn
-  0 \.text +00000068  0+0000  0+0000  000000a8  2\*\*3
+  0 \.text +00000068  0+0000  0+0000  000000a8  2\*\*2
  +CONTENTS, ALLOC, LOAD, RELOC, CODE
   1 \.data +00000028  0+0068  0+0068  00000110  2\*\*3
  +CONTENTS, ALLOC, LOAD, RELOC, DATA

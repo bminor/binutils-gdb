@@ -1,3 +1,12 @@
+2002-06-12  Tom Rix  <trix@redhat.com>
+
+	* gas/ppc/aix.exp: Run tests for all versions of powerpc AIX. Add
+	text alignment tests.
+	* gas/ppc/textalign-xcoff-001.d: New Test.
+	* gas/ppc/textalign-xcoff-002.d: New Test.
+	* gas/ppc/test1xcoff32.d : Change text section alignment.
+	* gas/ppc/booke_xcoff.d: Remove invalid pad.
+
 2002-06-06  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* gas/hppa/basic/add.s: Set code level to 1.1.
