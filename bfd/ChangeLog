@@ -1,3 +1,12 @@
+Thu Oct  2 16:15:50 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* reloc.c (bfd_check_overflow): New function.
+	(bfd_perform_relocation, bfd_install_relocation): Use it.
+	(BFD_RELOC_SPARC_{DISP64,PLT64}): New relocs.
+	(BFD_RELOC_SPARC_{HIX22,LOX10,H44,M44,L44,REGISTER}): New relocs.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 Thu Oct  2 13:17:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (coff_swap_scnhdr_out): Set IMAGE_SCN_MEM_READ for an

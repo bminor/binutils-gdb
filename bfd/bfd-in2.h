@@ -1487,6 +1487,14 @@ typedef struct relent_chain {
 } arelent_chain;
 bfd_reloc_status_type
 
+bfd_check_overflow
+ PARAMS ((enum complain_overflow how,
+    unsigned int bitsize,
+    unsigned int rightshift,
+    bfd_vma value));
+
+bfd_reloc_status_type
+
 bfd_perform_relocation
  PARAMS ((bfd *abfd,
     arelent *reloc_entry,
@@ -1614,7 +1622,7 @@ relocation types already defined. */
   BFD_RELOC_SPARC_BASE13,
   BFD_RELOC_SPARC_BASE22,
 
-/* Some relocations we're using for SPARC V9 -- subject to change. */
+/* SPARC64 relocations */
 #define BFD_RELOC_SPARC_64 BFD_RELOC_64
   BFD_RELOC_SPARC_10,
   BFD_RELOC_SPARC_11,
@@ -1630,6 +1638,14 @@ relocation types already defined. */
   BFD_RELOC_SPARC_7,
   BFD_RELOC_SPARC_6,
   BFD_RELOC_SPARC_5,
+#define BFD_RELOC_SPARC_DISP64 BFD_RELOC_64_PCREL
+  BFD_RELOC_SPARC_PLT64,
+  BFD_RELOC_SPARC_HIX22,
+  BFD_RELOC_SPARC_LOX10,
+  BFD_RELOC_SPARC_H44,
+  BFD_RELOC_SPARC_M44,
+  BFD_RELOC_SPARC_L44,
+  BFD_RELOC_SPARC_REGISTER,
 
 /* Alpha ECOFF and ELF relocations.  Some of these treat the symbol or
 "addend" in some special way.
