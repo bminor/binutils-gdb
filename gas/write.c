@@ -25,6 +25,7 @@
 #include "subsegs.h"
 #include "obstack.h"
 #include "output-file.h"
+#include "dwarf2dbg.h"
 
 /* This looks like a good idea.  Let's try turning it on always, for now.  */
 #undef  BFD_FAST_SECTION_FILL
@@ -532,6 +533,10 @@ cvt_frag_to_fill (headersP, sec, fragP)
 
     case rs_cfa:
       eh_frame_convert_frag (fragP);
+      break;
+
+    case rs_dwarf2dbg:
+      dwarf2dbg_convert_frag (fragP);
       break;
 
     case rs_machine_dependent:
@@ -2193,6 +2198,10 @@ relax_segment (segment_frag_root, segment)
 	  address += eh_frame_estimate_size_before_relax (fragP);
 	  break;
 
+	case rs_dwarf2dbg:
+	  address += dwarf2dbg_estimate_size_before_relax (fragP);
+	  break;
+
 	default:
 	  BAD_CASE (fragP->fr_type);
 	  break;
@@ -2407,6 +2416,10 @@ relax_segment (segment_frag_root, segment)
 
 	      case rs_cfa:
 		growth = eh_frame_relax_frag (fragP);
+		break;
+
+	      case rs_dwarf2dbg:
+		growth = dwarf2dbg_relax_frag (fragP);
 		break;
 
 	      default:

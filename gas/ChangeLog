@@ -1,3 +1,19 @@
+2000-11-29  Richard Henderson  <rth@redhat.com>
+
+	* dwarf2dbg.c: Rewrite from scratch.  Queue all debugging output
+	until dwarf2_finish; use relaxation to get cross-fragment offsets;
+	thread multiple subsegments properly; handle multiple code
+	sections properly; emit proper compilation unit info for assembler
+	generated debugging.
+
+	* as.h (enum _relax_state): Add rs_dwarf2dbg.
+	* dwarf2dbg.h (struct dwarf2_line_info): Remove filename.
+	(dwarf2dbg_estimate_size_before_relax): Declare.
+	(dwarf2dbg_relax_frag, dwarf2dbg_convert_frag): Declare.
+	* write.c: Include dwarf2dbg.h.
+	(cvt_frag_to_fill): Handle rs_dwarf2dbg.
+	(relax_segment): Likewise.
+
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-sh.c (md_convert_frag) <undefined symbol, conditional

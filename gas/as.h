@@ -387,7 +387,10 @@ enum _relax_state {
   rs_leb128,
 
   /* Exception frame information which we may be able to optimize.  */
-  rs_cfa
+  rs_cfa,
+
+  /* Cross-fragment dwarf2 line number optimization.  */
+  rs_dwarf2dbg
 };
 
 typedef enum _relax_state relax_stateT;

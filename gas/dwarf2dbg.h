@@ -27,7 +27,6 @@
 #define DWARF2_FLAG_BEGIN_BLOCK	(1 << 1)	/* beginning of basic block */
 
 struct dwarf2_line_info {
-  char *filename;
   unsigned int filenum;
   unsigned int line;
   unsigned int column;
@@ -61,10 +60,13 @@ extern void dwarf2_where PARAMS ((struct dwarf2_line_info *l));
 extern void dwarf2_gen_line_info PARAMS ((addressT addr,
 					  struct dwarf2_line_info *l));
 
-/* Must be called after all other input is processed to finish up the
-   .debug_line section.  */
+/* Must be called for each generated instruction.  */
+extern void dwarf2_emit_insn PARAMS ((int));
+
 extern void dwarf2_finish PARAMS ((void));
 
-extern void dwarf2_emit_insn PARAMS ((int));
+extern int dwarf2dbg_estimate_size_before_relax PARAMS ((fragS *));
+extern int dwarf2dbg_relax_frag PARAMS ((fragS *));
+extern void dwarf2dbg_convert_frag PARAMS ((fragS *));
 
 #endif /* AS_DWARF2DBG_H */
