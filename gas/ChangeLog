@@ -1,3 +1,8 @@
+Tue Mar  2 11:56:19 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* listing.c: Cleaned up a bit, added prototypes, made NO_LISTING
+	case compile again.
+
 Tue Mar  2 08:53:34 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* config/tc-m68k.c (isbyte): Accept all values from -255 to +255,
