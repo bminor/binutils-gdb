@@ -1,5 +1,16 @@
 Sun Feb  6 06:55:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-udi.c (udi_files_info): If prog_name is NULL, just skip
+	printing the program, rather than passing NULL to printf.
+	(udi_detach): Set udi_session_id to -1 so that udi_close doesn't
+	try to call UDIDisconnect again.  Print better message.
+	(udi_kill): Just call UDIDisconnect ourselves, rather than doing
+	it via udi_close.
+	(udi_open): Unpush UDI target after target_preopen, now that
+	udi_kill doesn't pop the target.
+	(udi_create_inferior): If udi_session_id is negative, open a new
+	TIP rather than giving an error.
+
 	* config/mips/mipsm3.mh, config/i386/i386m3.mh,
 	config/ns32k/ns32km3.mh: Define NAT_FILE.
 	* config/nm-m3.h: Change guard from _OS_MACH3_H_ and _OS_MACH3_H

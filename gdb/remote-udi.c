@@ -84,6 +84,7 @@ extern struct target_ops udi_ops;             /* Forward declaration */
    starts.  */
 
 UDISessionId udi_session_id = -1;
+static char *udi_config_id;
 
 CPUOffset IMemStart = 0;
 CPUSizeT IMemSize = 0;
@@ -139,8 +140,9 @@ udi_create_inferior (execfile, args, env)
 
   if (udi_session_id < 0)
     {
-      printf_unfiltered("UDI connection not open yet.\n");
-      return;
+      /* If the TIP is not open, open it.  */
+      if (UDIConnect (udi_config_id, &udi_session_id))
+	error("UDIConnect() failed: %s\n", dfe_errmsg);
     }
 
   inferior_pid = 40000;
@@ -203,7 +205,6 @@ udi_mourn()
 
 /* XXX - need cleanups for udiconnect for various failures!!! */
 
-static char *udi_config_id;
 static void
 udi_open (name, from_tty)
      char *name;
@@ -220,6 +221,10 @@ udi_open (name, from_tty)
   UDIUInt32 TIPId, TargetId, DFEId, DFE, TIP, DFEIPCId, TIPIPCId;
 
   target_preopen(from_tty);
+  /* target_preopen calls target_kill to clean up the previous target.  But
+     udi_kill leaves it on the stack.  So we pop it here (the call to udi_close
+     is harmless now that udi_session_id is -1).  */
+  unpush_target (&udi_ops);
 
   entry.Offset = 0;
 
@@ -235,6 +240,7 @@ udi_open (name, from_tty)
   udi_config_id = strdup (strtok (name, " \t"));
 
   if (UDIConnect (udi_config_id, &udi_session_id))
+    /* FIXME: Should set udi_session_id to -1 here.  */
     error("UDIConnect() failed: %s\n", dfe_errmsg);
 
   push_target (&udi_ops);
@@ -368,13 +374,15 @@ udi_detach (args,from_tty)
   if (UDIDisconnect (udi_session_id, UDIContinueSession))
     error ("UDIDisconnect() failed in udi_detach");
 
-  /* calls udi_close to do the real work (which looks like it calls
-     UDIDisconnect with UDITerminateSession, FIXME).  */
+  /* Don't try to UDIDisconnect it again in udi_close, which is called from
+     pop_target.  */
+  udi_session_id = -1;
+  inferior_pid = 0;
+
   pop_target();
 
-  /* FIXME, message too similar to what udi_close prints.  */
   if (from_tty)
-    printf_unfiltered ("Ending remote debugging\n");
+    printf_unfiltered ("Detaching from TIP\n");
 }
 
 
@@ -936,8 +944,10 @@ udi_xfer_inferior_memory (memaddr, myaddr, len, write)
 static void
 udi_files_info ()
 {
-  printf_unfiltered ("\tAttached to UDI socket to %s and running program %s.\n",
-          udi_config_id, prog_name);
+  printf_unfiltered ("\tAttached to UDI socket to %s", udi_config_id);
+  if (prog_name != NULL)
+    printf_unfiltered ("and running program %s", prog_name);
+  printf_unfiltered (".\n");
 }
 
 /**************************************************** UDI_INSERT_BREAKPOINT */
@@ -1022,10 +1032,15 @@ just invoke udi_close, which seems to get things right.
 #endif /* 0 */
 
   /* Keep the target around, e.g. so "run" can do the right thing when
-     we are already debugging something.  FIXME-maybe: should we kill the
-     TIP with UDIDisconnect using UDITerminateSession, and then restart
-     it on the next "run"?  */
+     we are already debugging something.  */
 
+  if (UDIDisconnect (udi_session_id, UDITerminateSession))
+    {
+      warning ("UDIDisconnect() failed");
+    }
+
+  /* Do not try to close udi_session_id again, later in the program.  */
+  udi_session_id = -1;
   inferior_pid = 0;
 }
 
