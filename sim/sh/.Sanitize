@@ -57,7 +57,7 @@ else
 				echo Removing traces of \"sh4\" from $i...
 			fi
 			cp $i new
-			sed '/start\-sanitize\-sh4/,/end-\sanitize\-sh4/d' < $i > new
+			sed -e '/start\-sanitize\-sh4/,/end-\sanitize\-sh4/d' -e 's/.*restore\-sanitize\-sh4//' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
