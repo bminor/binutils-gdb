@@ -3029,10 +3029,12 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* We can't use NUM_REGS nor NUM_PSEUDO_REGS here, since that still
      references the old architecture vector, not the one we are
      building here.  */
-  prologue_cache->saved_regs = (CORE_ADDR *)
-    xcalloc (1, (sizeof (CORE_ADDR)
-		 * (gdbarch_num_regs (gdbarch)
-		    + gdbarch_num_pseudo_regs (gdbarch))));
+  {
+    CORE_ADDR *saved_regs = xcalloc (1, (sizeof (CORE_ADDR)
+					 * (gdbarch_num_regs (gdbarch)
+					    + gdbarch_num_pseudo_regs (gdbarch))));
+    deprecated_set_frame_saved_regs_hack (prologue_cache, saved_regs);
+  }
 
   return gdbarch;
 }

@@ -2476,7 +2476,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 
   frame_extra_info_zalloc (fci, sizeof (struct frame_extra_info));
 
-  fci->saved_regs = NULL;
+  deprecated_set_frame_saved_regs_hack (fci, NULL);
   get_frame_extra_info (fci)->proc_desc =
     proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)

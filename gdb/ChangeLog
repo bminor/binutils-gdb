@@ -1,3 +1,16 @@
+2003-01-08  Andrew Cagney  <cagney@redhat.com>
+
+	* cris-tdep.c (cris_frame_init_saved_regs): Use
+	get_frame_saved_regs and SIZEOF_FRAME_SAVED_REGS when copying a
+	saved_regs buffer.
+	* sh-tdep.c (sh_nofp_frame_init_saved_regs): Ditto.
+	(sh64_nofp_frame_init_saved_regs): Ditto.
+	(sh_fp_frame_init_saved_regs): Ditto.
+	* arm-tdep.c: Use deprecated_set_frame_saved_regs_hack.
+	* mips-tdep.c (mips_init_extra_frame_info): Ditto.
+	* mcore-tdep.c (analyze_dummy_frame): Ditto.
+	* mn10300-tdep.c (analyze_dummy_frame): Ditto.
+
 2003-01-08  Daniel Jacobowitz  <drow@mvista.com>
 
 	* minsyms.c (lookup_minimal_symbol): Update comment.

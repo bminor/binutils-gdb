@@ -1174,7 +1174,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
       /* I don't see this ever happening, considering the context in which
          cris_frame_init_saved_regs is called (always when we're not in
          a dummy frame).  */
-      memcpy (&fi->saved_regs, dummy_regs, sizeof (fi->saved_regs));
+      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
     }
   else
     {    

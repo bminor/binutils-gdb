@@ -1078,7 +1078,7 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
       /* DANGER!  This is ONLY going to work if the char buffer format of
          the saved registers is byte-for-byte identical to the 
          CORE_ADDR regs[NUM_REGS] format used by struct frame_saved_regs! */
-      memcpy (fi->saved_regs, dummy_regs, sizeof (fi->saved_regs));
+      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
       return;
     }
 
@@ -1418,7 +1418,7 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
       /* DANGER!  This is ONLY going to work if the char buffer format of
          the saved registers is byte-for-byte identical to the 
          CORE_ADDR regs[NUM_REGS] format used by struct frame_saved_regs! */
-      memcpy (fi->saved_regs, dummy_regs, sizeof (fi->saved_regs));
+      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
       return;
     }
 
@@ -1619,7 +1619,7 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
       /* DANGER!  This is ONLY going to work if the char buffer format of
          the saved registers is byte-for-byte identical to the 
          CORE_ADDR regs[NUM_REGS] format used by struct frame_saved_regs! */
-      memcpy (fi->saved_regs, dummy_regs, sizeof (fi->saved_regs));
+      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
       return;
     }
 
