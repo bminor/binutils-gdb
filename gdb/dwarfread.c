@@ -2382,14 +2382,49 @@ DESCRIPTION
 
 	Process the DIE's within a single compilation unit, looking for
 	interesting DIE's that contribute to the partial symbol table entry
-	for this compilation unit.  Since we cannot follow any sibling
-	chains without reading the complete DIE info for every DIE,
-	it is probably faster to just sequentially check each one to
-	see if it is one of the types we are interested in, and if so,
-	then extract all the attributes info and generate a partial
-	symbol table entry.
+	for this compilation unit.
 
 NOTES
+
+	There are some DIE's that may appear both at file scope and within
+	the scope of a function.  We are only interested in the ones at file
+	scope, and the only way to tell them apart is to keep track of the
+	scope.  For example, consider the test case:
+
+		static int i;
+		main () { int j; }
+
+	for which the relevant DWARF segment has the structure:
+	
+		0x51:
+		0x23   global subrtn   sibling     0x9b
+		                       name        main
+		                       fund_type   FT_integer
+		                       low_pc      0x800004cc
+		                       high_pc     0x800004d4
+		                            
+		0x74:
+		0x23   local var       sibling     0x97
+		                       name        j
+		                       fund_type   FT_integer
+		                       location    OP_BASEREG 0xe
+		                                   OP_CONST 0xfffffffc
+		                                   OP_ADD
+		0x97:
+		0x4         
+		
+		0x9b:
+		0x1d   local var       sibling     0xb8
+		                       name        i
+		                       fund_type   FT_integer
+		                       location    OP_ADDR 0x800025dc
+		                            
+		0xb8:
+		0x4         
+
+	We want to include the symbol 'i' in the partial symbol table, but
+	not the symbol 'j'.  In essence, we want to skip all the dies within
+	the scope of a TAG_global_subroutine DIE.
 
 	Don't attempt to add anonymous structures or unions since they have
 	no name.  Anonymous enumerations however are processed, because we
@@ -2408,6 +2443,7 @@ scan_partial_symbols (thisdie, enddie, objfile)
      struct objfile *objfile;
 {
   char *nextdie;
+  char *temp;
   struct dieinfo di;
   
   while (thisdie < enddie)
@@ -2426,6 +2462,28 @@ scan_partial_symbols (thisdie, enddie, objfile)
 	    {
 	    case TAG_global_subroutine:
 	    case TAG_subroutine:
+	      completedieinfo (&di, objfile);
+	      if (di.at_name && (di.has_at_low_pc || di.at_location))
+		{
+		  add_partial_symbol (&di, objfile);
+		  /* If there is a sibling attribute, adjust the nextdie
+		     pointer to skip the entire scope of the subroutine.
+		     Apply some sanity checking to make sure we don't 
+		     overrun or underrun the range of remaining DIE's */
+		  if (di.at_sibling != 0)
+		    {
+		      temp = dbbase + di.at_sibling - dbroff;
+		      if ((temp < thisdie) || (temp >= enddie))
+			{
+			  dwarfwarn ("reference to DIE (0x%x) outside compilation unit", di.at_sibling);
+			}
+		      else
+			{
+			  nextdie = temp;
+			}
+		    }
+		}
+	      break;
 	    case TAG_global_variable:
 	    case TAG_local_variable:
 	      completedieinfo (&di, objfile);

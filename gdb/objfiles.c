@@ -435,7 +435,8 @@ open_existing_mapped_file (symsfilename, mtime, mapped)
 	{
 	  if (!mapped)
 	    {
-	      warning ("mapped symbol file `%s' is out of date", symsfilename);
+	      warning ("mapped symbol file `%s' is out of date, ignored it",
+		       symsfilename);
 	    }
 	}
       else if ((fd = open (symsfilename, O_RDWR)) < 0)

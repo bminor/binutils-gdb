@@ -1,3 +1,13 @@
+Mon Aug 10 22:27:19 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.6.3.
+	* dwarfread.c (scan_partial_symbols):  Skip over DIE's within
+	function scopes when building partial symbol tables.
+	* objfiles.c (open_existing_mapped_file):  Make it clear in
+	warning message that out of date mapped files are ignored.
+	* symtab.c (lookup_symtab_1, lookup_symbol):  Print compilation
+	unit source file name in error message.
+
 Sat Aug  8 23:12:22 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (struct dieinfo):  Add has_at_byte_size.

@@ -126,7 +126,7 @@ RL_LIB = ./../readline${subdir}/libreadline.a
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I${srcdir} possibly for regex.h also.
-INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR) -I$(READLINE_DIR)
+INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -162,7 +162,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
 ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.6.1
+VERSION = 4.6.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -188,7 +188,7 @@ SFILES_MAINDIR = \
 	 remote.c source.c stack.c symmisc.c symtab.c symfile.c \
 	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
 	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
-	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
+	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
 	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
 	 minsyms.c mipsread.c maint.c
 
@@ -277,7 +277,8 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
     buildsym.o objfiles.o minsyms.o maint.o demangle.o \
-    dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
+    dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
+    stabsread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 
@@ -644,6 +645,10 @@ m2-exp.tab.c: $(srcdir)/m2-exp.y
 	  < y.tab.c > m2-exp.tab.c
 	-rm y.tab.c
 
+
+main.o:	${srcdir}/main.c
+	${CC} -c ${INTERNAL_CFLAGS} -I${READLINE_DIR} $<
+
 # The symbol-file readers have dependencies on BFD header files.
 dbxread.o: ${srcdir}/dbxread.c
 	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/dbxread.c
@@ -659,6 +664,9 @@ elfread.o: ${srcdir}/elfread.c
 
 dwarfread.o: ${srcdir}/dwarfread.c
 	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/dwarfread.c
+
+stabsread.o: ${srcdir}/stabsread.c
+	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/stabsread.c
 
 xcoffread.o: ${srcdir}/xcoffread.c
 	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/xcoffread.c
