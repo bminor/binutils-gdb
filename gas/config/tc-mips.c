@@ -7144,7 +7144,12 @@ mips16_ip (str, ip)
 		{
 		  /* It looks like the expression was omitted before a
                      register indirection, which means that the
-                     expression is implicitly zero.  */
+                     expression is implicitly zero.  We still set up
+                     imm_expr, so that we handle explicit extensions
+                     correctly.  */
+		  imm_expr.X_op = O_constant;
+		  imm_expr.X_add_number = 0;
+		  imm_reloc = (int) BFD_RELOC_UNUSED + c;
 		  continue;
 		}
 
