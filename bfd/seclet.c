@@ -128,7 +128,7 @@ DEFUN(seclet_dump_seclet,(abfd, seclet, section, data, relocateable),
 	  d[i] = seclet->u.fill.value ;
 	}
 	/* Don't bother to fill in empty sections */
-	if (!bfd_get_section_flags(abfd, section) & SEC_HAS_CONTENTS) 
+	if (!(bfd_get_section_flags(abfd, section) & SEC_HAS_CONTENTS))
 	  {
 	    return true;
 	  }

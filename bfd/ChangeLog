@@ -1,4 +1,28 @@
+Fri Apr  2 14:35:05 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* seclet.c (seclet_dump_seclet): Correct SEC_HAS_CONTENTS test.
+
+Wed Mar 31 17:41:05 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* reloc.c (bfd_reloc_code_real_type): Added BFD_RELOC_MIPS_GPREL.
+	* libecoff.h (ecoff_data_type): Added gp_size field.
+	* coff-mips.c (ecoff_mkobject_hook): Initialize gp_size to 8.
+	(ecoff_set_symbol_info): Compare against gp_size, not hardcoded 8.
+	Set flags to 0 for large common symbols.
+	(ecoff_gprel_reloc): Handle non-zero addend for external symbols,
+	which can occur for gas-generated relocs.
+	(ecoff_bfd_reloc_type_lookup): Added BFD_RELOC_MIPS_GPREL case.
+	* bfd.c (bfd_get_gp_size, bfd_set_gp_size): New functions.
+	* Makefile.in (bfd.o): Now depends on coff/sym.h and libecoff.h.
+
 Tue Mar 30 09:33:16 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* srec.c (srec_set_section_contents): Use lma field for load
+	address.
+	* section.c: Add declaration of lma field to section structure.
+	* coffcode.h (coff_write_object_contents): Use lma field for load
+	address.
+	* bfd-in.h (bfd_set_section_vma): Set lma along with vma.	
 
 	* aoutx.h (translate_from_native_sym_flags): Now handles indirect
 	symbols in a better way. (translate_to_native_sym_flag): Set the
