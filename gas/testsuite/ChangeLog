@@ -1,4 +1,12 @@
+Sun Nov 21 22:11:10 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/basic/fmem.s: Add quadword FP store instructions.
+	* gas/hppa/basic/basic.exp: Test quadword FP store instructions.
+
 Sun Nov  7 00:31:41 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/reloc.exp: No longer expect failure for
+	field selector on ble instruction test.
 
 	* gas/hppa/basic/basic.exp: No longer expect failures for
 	system instruction tests now that probei is fixed.
