@@ -45,10 +45,6 @@
 static int libunwind_initialized;
 static struct gdbarch_data *libunwind_descr_handle;
 
-#ifndef LIBUNWIND_SO
-#define LIBUNWIND_SO "libunwind.so"
-#endif
-
 /* Required function pointers from libunwind.  */
 static int (*unw_get_reg_p) (unw_cursor_t *, unw_regnum_t, unw_word_t *);
 static int (*unw_get_fpreg_p) (unw_cursor_t *, unw_regnum_t, unw_fpreg_t *);
@@ -74,6 +70,10 @@ struct libunwind_frame_cache
    libunwind.h header file.  */
 #define STRINGIFY2(name)	#name
 #define STRINGIFY(name)		STRINGIFY2(name)
+
+#ifndef LIBUNWIND_SO
+#define LIBUNWIND_SO "libunwind-" STRINGIFY(UNW_TARGET) ".so"
+#endif
 
 static char *get_reg_name = STRINGIFY(UNW_OBJ(get_reg));
 static char *get_fpreg_name = STRINGIFY(UNW_OBJ(get_fpreg));

@@ -677,7 +677,6 @@
 
 	* Makefile.in (CONFIG_CLEAN): Delete duplicate definition.
 
->>>>>>> 1.6211
 2004-07-28  Andrew Cagney  <cagney@gnu.org>
 
 	* PROBLEMS: Mention threads/1650.
