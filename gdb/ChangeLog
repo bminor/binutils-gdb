@@ -1,5 +1,10 @@
 2002-02-05  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/linux-low.c (create_inferior): Call strerror instead of
+	grubbing through sys_errlist.
+
+2002-02-05  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/linux-low.c: New file, copied exactly from low-linux.c.
 
 2002-02-04  Pierre Muller  <muller@ics.u-strasbg.fr>

@@ -32,6 +32,7 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <string.h>
 
 /***************Begin MY defs*********************/
 static char my_registers[REGISTER_BYTES];
@@ -70,7 +71,7 @@ create_inferior (char *program, char **allargs)
       execv (program, allargs);
 
       fprintf (stderr, "Cannot exec %s: %s.\n", program,
-	       errno < sys_nerr ? sys_errlist[errno] : "unknown error");
+	       strerror (errno));
       fflush (stderr);
       _exit (0177);
     }
