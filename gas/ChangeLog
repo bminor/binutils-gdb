@@ -1,3 +1,9 @@
+start-sanitize-d10v
+Tue Aug  6 12:58:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: Added code to support 32-bit fixups for stabs.
+
+end-sanitize-d10v	
 Tue Aug  6 11:15:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (get_specific): New operand "size" derived
