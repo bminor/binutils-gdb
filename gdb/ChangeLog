@@ -1,3 +1,7 @@
+2001-12-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/rs6000/tm-rs6000.h (solib.h): Conditionally include.
+
 2001-12-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.c: Re-generate.
