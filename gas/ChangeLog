@@ -1,3 +1,10 @@
+Sat Sep 25 05:08:19 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-m68k.c (struct m68k_incant, getone, gettwo): Moved
+	earlier in the file.
+	(insop, add_exp): Now defined as functions, for readability.
+	(insop): Now takes two arguments; callers changed.
+
 Fri Sep 24 12:37:59 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* config/tc-m88k.c (get_o6): new function.
