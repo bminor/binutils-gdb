@@ -1,3 +1,13 @@
+Fri Aug 11 13:23:56 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* write.h (struct fix): Add new field fx_no_overflow.
+
+	* write.c (fixup_segment): If fx_no_overflow is non-zero, don't
+	complain if the addend is too large.
+
+	* config/tc-ppc.c (md_assemble): Set fx_no_overflow if the half
+	word relocations BFD_RELOC_{LO16,HI16,HI16_S}.
+
 Thu Aug 10 20:56:38 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* read.c (s_mri_sect) [BFD_ASSEMBLER]: Fix typos in choosing and

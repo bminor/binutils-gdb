@@ -2391,7 +2391,7 @@ fixup_segment (fixP, this_segment_type)
 	    }
 	}
 
-      if (!fixP->fx_bit_fixP && size > 0)
+      if (!fixP->fx_bit_fixP && !fixP->fx_no_overflow && size > 0)
 	{
 	  valueT mask = 0;
 	  if (size < sizeof (mask))
