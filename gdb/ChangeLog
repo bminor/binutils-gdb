@@ -1,3 +1,10 @@
+2002-09-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* breakpoint.c, c-exp.y, defs.h, elfread.c, expression.h,
+	jv-exp.y, language.c, language.h, p-exp.y, parse.c, parser-defs.h,
+	printcmd.c, source.c, stabsread.c, symfile.c, symtab.h, utils.c,
+	valops.c, value.h: Revert previous change.
+	
 2002-09-18  Michael Snyder  <msnyder@redhat.com>
 
 	Preliminary support for Objective-C:

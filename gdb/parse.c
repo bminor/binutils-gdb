@@ -867,11 +867,6 @@ length_of_subexp (register struct expression *expr, register int endpos)
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
       break;
 
-    case OP_MSGCALL:		/* Objective C message (method) call */
-      oplen = 4;
-      args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
-      break;
-
     case UNOP_MAX:
     case UNOP_MIN:
       oplen = 3;
@@ -903,8 +898,6 @@ length_of_subexp (register struct expression *expr, register int endpos)
       /* fall through */
     case OP_M2_STRING:
     case OP_STRING:
-    case OP_NSSTRING:		/* Objective C Foundation Class NSString constant */
-    case OP_SELECTOR:		/* Objective C "@selector" pseudo-op */
     case OP_NAME:
     case OP_EXPRSTRING:
       oplen = longest_to_int (expr->elts[endpos - 2].longconst);
@@ -943,7 +936,6 @@ length_of_subexp (register struct expression *expr, register int endpos)
 
       /* C++ */
     case OP_THIS:
-    case OP_SELF:
       oplen = 2;
       break;
 
@@ -1012,11 +1004,6 @@ prefixify_subexp (register struct expression *inexpr,
       args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
       break;
 
-    case OP_MSGCALL:		/* Objective C message (method) call */
-      oplen = 4;
-      args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
-      break;
-
     case UNOP_MIN:
     case UNOP_MAX:
       oplen = 3;
@@ -1047,8 +1034,6 @@ prefixify_subexp (register struct expression *inexpr,
       /* fall through */
     case OP_M2_STRING:
     case OP_STRING:
-    case OP_NSSTRING:		/* Objective C Foundation Class NSString constant */
-    case OP_SELECTOR:		/* Objective C "@selector" pseudo-op */
     case OP_NAME:
     case OP_EXPRSTRING:
       oplen = longest_to_int (inexpr->elts[inend - 2].longconst);
@@ -1087,7 +1072,6 @@ prefixify_subexp (register struct expression *inexpr,
 
       /* C++ */
     case OP_THIS:
-    case OP_SELF:
       oplen = 2;
       break;
 

@@ -4618,16 +4618,13 @@ parse_breakpoint_sals (char **address,
          current_source_symtab (which is decode_line_1's default).  This
          should produce the results we want almost all of the time while
          leaving default_breakpoint_* alone.  */
-      /* Also ignore objc method name.  FIXME better comment?  */
       if (default_breakpoint_valid
 	  && (!current_source_symtab
-	      || ((strchr ("+-", (*address)[0]) != NULL)
-		  && ((*address)[1] != '['))))
+	      || (strchr ("+-", (*address)[0]) != NULL)))
 	*sals = decode_line_1 (address, 1, default_breakpoint_symtab,
 			       default_breakpoint_line, addr_string);
       else
-	*sals = decode_line_1 (address, 1, (struct symtab *) NULL, 
-			       0, addr_string);
+	*sals = decode_line_1 (address, 1, (struct symtab *) NULL, 0, addr_string);
     }
   /* For any SAL that didn't have a canonical string, fill one in. */
   if (sals->nelts > 0 && *addr_string == NULL)

@@ -1267,37 +1267,13 @@ symbol_reference_defined (char **string)
     }
 }
 
-static char *
-objc_find_colon (name)
-     char *name;
-{
-  char *s = name;
-  if (s[0] == '-' || *s == '+')
-    {
-      if (s[1] != '[')
-	{
-	  error ("invalid symbol name \"%s\"", name);
-	}
-      s = strchr (s, ']');
-      if (s == NULL)
-	{
-	  error ("invalid symbol name \"%s\"", name);
-	}
-      return strchr (s, ':');
-    }
-  else
-    {
-      return strchr (s, ':');
-    }
-}
-
 /* ARGSUSED */
 struct symbol *
 define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	       struct objfile *objfile)
 {
   register struct symbol *sym;
-  char *p = (char *) objc_find_colon (string);
+  char *p = (char *) strchr (string, ':');
   int deftype;
   int synonym = 0;
   register int i;
@@ -2030,8 +2006,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
          a typedef for "foo".  Unfortunately, cfront never makes the typedef
          when translating C++ into C.  We make the typedef here so that
          "ptype foo" works as expected for cfront translated code.  */
-      else if ((current_subfile->language == language_cplus)
-	       || (current_subfile->language == language_objc))
+      else if (current_subfile->language == language_cplus)
 	synonym = 1;
 
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
