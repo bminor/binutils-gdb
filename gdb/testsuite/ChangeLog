@@ -1,3 +1,8 @@
+Fri Feb  9 15:56:51 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in (CY_AC_PATH_TCLH): Remove.
+	* configure: Regenerate.
+
 Fri Feb  9 08:21:31 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.c++/Makefile.in (clean): Add missing '{'.
