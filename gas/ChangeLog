@@ -1,3 +1,23 @@
+2000-05-14  David O'Brien  <obrien@FreeBSD.org>
+
+	* config/te-386bsd.h:  Clean up comments to adhere to the GNU coding
+	standards.
+	* config/te-aux.h:  Likewise.
+	* config/te-dpx2.h:  Likewise.
+	* config/te-go32.h:  Likewise.
+	* config/te-hp300.h:  Likewise.
+	* config/te-hppa.h:  Likewise.
+	* config/te-i386aix.h:  Likewise.
+	* config/te-ic960.h:  Likewise.
+	* config/te-interix.h:  Likewise.
+	* config/te-nbsd532.h:  Likewise.
+	* config/te-pc532mach.h:  Likewise.
+	* config/te-ppcnw.h:  Likewise.
+	* config/te-psos.h:  Likewise.
+	* config/te-sparcaout.h:  Likewise.
+	* config/te-sun3.h:  Likewise.
+	* config/te-sysv32.h:  Likewise.
+
 2000-05-14  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-h8300.c (do_a_fix_imm): Don't rely on `short' being 16
