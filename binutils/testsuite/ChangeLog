@@ -1,3 +1,7 @@
+2001-03-30  H.J. Lu  <hjl@gnu.org>
+
+	* binutils-all/readelf.exp: Run on more ELF targets.
+
 2001-02-11  H.J. Lu  <hjl@gnu.org>
 
 	* config/default.exp: Set up gcc_gas_flag.
