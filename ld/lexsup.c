@@ -205,7 +205,7 @@ static const struct ld_option ld_options[] =
   { {"soname", required_argument, NULL, OPTION_SONAME},
       'h', N_("FILENAME"), N_("Set internal name of shared library"), ONE_DASH },
   { {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
-      'I', N_("PROGRAM"), N_("Set the dynamic linker to use"), TWO_DASHES },
+      'I', N_("PROGRAM"), N_("Set PROGRAM as the dynamic linker to use"), TWO_DASHES },
   { {"library", required_argument, NULL, 'l'},
       'l', N_("LIBNAME"), N_("Search for library LIBNAME"), TWO_DASHES },
   { {"library-path", required_argument, NULL, 'L'},

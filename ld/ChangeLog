@@ -1,3 +1,9 @@
+2001-12-07  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* lexsup.c (ld_options): Insert 'PROGRAM' into the text string
+	describing the -N option so that it is easier to translate into
+	foreign languages.
+
 2001-12-05  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* emultempl/pe.em (..._list_options): Replace multiple fprintf
