@@ -3207,26 +3207,26 @@ Return to compressed format for arrays.
 Show whether compressed or pretty format is selected for displaying
 arrays. 
 
-@item set demangle 
-@itemx set demangle on 
-@kindex set demangle
+@item set print demangle 
+@itemx set print demangle on 
+@kindex set print demangle
 Print C++ names in their source form rather than in the mangled form
 in which they are passed to the assembler and linker for type-safe linkage.
 The default is on.
 
-@item show demangle
-@kindex show demangle
+@item show print demangle
+@kindex show print demangle
 Show whether C++ names will be printed in mangled or demangled form.
 
-@item set asm-demangle 
-@itemx set asm-demangle on 
-@kindex set asm-demangle
+@item set print asm-demangle 
+@itemx set print asm-demangle on 
+@kindex set print asm-demangle
 Print C++ names in their source form rather than their mangled form, even
 in assembler code printouts such as instruction disassemblies.
 The default is off.
 
-@item show asm-demangle
-@kindex show asm-demangle
+@item show print asm-demangle
+@kindex show print asm-demangle
 Show whether C++ names in assembly listings will be printed in mangled
 or demangled form.
 
