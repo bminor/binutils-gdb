@@ -1,3 +1,5 @@
+			GDB Maintainers
+
 
 			Blanket Write Privs
 
@@ -25,7 +27,8 @@ Target/Architecture:
 
 Generic ISA (Instruction Set Architecture) issues, API variants, CPU
 variants.  *-tdep.c. The Target/Architecture maintainer works with the
-host maintainer when resolving build issues.
+host maintainer when resolving build issues.  The Target/Architecture
+maintainer works with the native maintainer when resolving API issues.
 
 d10v target		Andrew Cagney		cagney@cygnus.com
 d30v target		David Taylor		taylor@cygnus.com
@@ -38,6 +41,8 @@ arm target		Fernando Nasser		fnasser@cygnus.com
 			Scott Bambrough		scottb@netwinder.org
 m32r target		Michael Snyder		msnyder@cygnus.com
 IA-64 target		Kevin Buettner		kevinb@cygnus.com
+x86			Mark Kettenis           kettenis@gnu.org
+
 
 
 Host/Native:
@@ -55,14 +60,19 @@ djgpp native		*Eli Zaretskii		eliz@gnu.org
 			DJ Delorie		dj@cygnus.com
 MS Windows (N.T., CE, '00) host & native
 			Chris Faylor		cgf@cygnus.com
-GNU/Linux x86 native	Jim Blandy		jimb@cygnus.com
+GNU/Linux/x86 native & host
+			Jim Blandy		jimb@cygnus.com
+			Mark Kettenis		kettenis@gnu.org
 GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
 hurd native		Mark Kettenis		kettenis@gnu.org
 macos host & native	Stan Shebs		shebs@apple.com
 hpux, hp pa native	Jeff Law		law@cygnus.com
-UnixWare Threads	Nick Duffek		nsd@cygnus.com
+SCO/Unixware		Nick Duffek		nsd@cygnus.com
+			Robert Lipe		rjl@sco.com
 GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
-
+Solaris/x86 native & host
+			Nick Duffek		nsd@cygnus.com
+			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 
 Core: Generic components used by all of GDB
 
@@ -114,6 +124,7 @@ Web pages.		Jim Kingdon		kingdon@redhat.com
 			(anyone can edit; kingdon is just lead maintainer)
 Makefile.in, configure*	ALL
 mmalloc			ALL Host maintainers
+
 
 
 		Write After Approval
