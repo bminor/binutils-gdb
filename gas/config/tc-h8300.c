@@ -43,14 +43,15 @@ const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "";
 
-void cons        PARAMS ((int));
-void sbranch     PARAMS ((int));
-void h8300hmode  PARAMS ((int));
-void h8300smode  PARAMS ((int));
-void h8300hnmode PARAMS ((int));
-void h8300snmode PARAMS ((int));
-void h8300sxmode PARAMS ((int));
-static void pint PARAMS ((int));
+void cons         PARAMS ((int));
+void sbranch      PARAMS ((int));
+void h8300hmode   PARAMS ((int));
+void h8300smode   PARAMS ((int));
+void h8300hnmode  PARAMS ((int));
+void h8300snmode  PARAMS ((int));
+void h8300sxmode  PARAMS ((int));
+void h8300sxnmode PARAMS ((int));
+static void pint  PARAMS ((int));
 
 int Hmode;
 int Smode;
@@ -58,7 +59,6 @@ int Nmode;
 int SXmode;
 
 #define PSIZE (Hmode ? L_32 : L_16)
-#define DSYMMODE (Hmode ? L_24 : L_16)
 
 int bsize = L_8;		/* Default branch displacement.  */
 
@@ -339,12 +339,11 @@ static void build_bytes    PARAMS ((const struct h8_instruction *, struct h8_op 
 static void do_a_fix_imm   PARAMS ((int, int, struct h8_op *, int));
 static void check_operand  PARAMS ((struct h8_op *, unsigned int, char *));
 static const struct h8_instruction * get_specific PARAMS ((const struct h8_instruction *, struct h8_op *, int));
-static char * get_operands PARAMS ((unsigned, char *, struct h8_op *));
-static void   get_operand  PARAMS ((char **, struct h8_op *, int));
-static char * skip_colonthing PARAMS ((char *, expressionS *, int *));
-static char * parse_exp PARAMS ((char *, expressionS *));
-static int    parse_reg PARAMS ((char *, op_type *, unsigned *, int));
-char * colonmod24 PARAMS ((struct h8_op *, char *));
+static char *get_operands PARAMS ((unsigned, char *, struct h8_op *));
+static void get_operand PARAMS ((char **, struct h8_op *, int));
+static int parse_reg PARAMS ((char *, op_type *, unsigned *, int));
+static char *skip_colonthing PARAMS ((char *, int *));
+static char *parse_exp PARAMS ((char *, struct h8_op *));
 
 static int constant_fits_width_p PARAMS ((struct h8_op *, unsigned int));
 static int constant_fits_size_p PARAMS ((struct h8_op *, int, int));
@@ -474,56 +473,65 @@ parse_reg (src, mode, reg, direction)
   return 0;
 }
 
-static char *
-parse_exp (s, op)
-     char *s;
-     expressionS *op;
-{
-  char *save = input_line_pointer;
-  char *new;
 
-  input_line_pointer = s;
-  expression (op);
-  if (op->X_op == O_absent)
+/* Parse an immediate or address-related constant and store it in OP.
+   If the user also specifies the operand's size, store that size
+   in OP->MODE, otherwise leave it for later code to decide.  */
+
+static char *
+parse_exp (src, op)
+     char *src;
+     struct h8_op *op;
+{
+  char *save;
+
+  save = input_line_pointer;
+  input_line_pointer = src;
+  expression (&op->exp);
+  if (op->exp.X_op == O_absent)
     as_bad (_("missing operand"));
-  new = input_line_pointer;
+  src = input_line_pointer;
   input_line_pointer = save;
-  return new;
+
+  return skip_colonthing (src, &op->mode);
 }
 
+
+/* If SRC starts with an explicit operand size, skip it and store the size
+   in *MODE.  Leave *MODE unchanged otherwise.  */
+
 static char *
-skip_colonthing (ptr, exp, mode)
-     char *ptr;
-     expressionS *exp ATTRIBUTE_UNUSED;
+skip_colonthing (src, mode)
+     char *src;
      int *mode;
 {
-  if (*ptr == ':')
+  if (*src == ':')
     {
-      ptr++;
+      src++;
       *mode &= ~SIZE;
-      if (ptr[0] == '8' && ! ISDIGIT (ptr[1]))
+      if (src[0] == '8' && !ISDIGIT (src[1]))
 	*mode |= L_8;
-      else if (ptr[0] == '2' && ! ISDIGIT (ptr[1]))
+      else if (src[0] == '2' && !ISDIGIT (src[1]))
 	*mode |= L_2;
-      else if (ptr[0] == '3' && ! ISDIGIT (ptr[1]))
+      else if (src[0] == '3' && !ISDIGIT (src[1]))
 	*mode |= L_3;
-      else if (ptr[0] == '4' && ! ISDIGIT (ptr[1]))
+      else if (src[0] == '4' && !ISDIGIT (src[1]))
 	*mode |= L_4;
-      else if (ptr[0] == '5' && ! ISDIGIT (ptr[1]))
+      else if (src[0] == '5' && !ISDIGIT (src[1]))
 	*mode |= L_5;
-      else if (ptr[0] == '2' && ptr[1] == '4')
+      else if (src[0] == '2' && src[1] == '4' && !ISDIGIT (src[2]))
 	*mode |= L_24;
-      else if (ptr[0] == '3' && ptr[1] == '2')
+      else if (src[0] == '3' && src[1] == '2' && !ISDIGIT (src[2]))
 	*mode |= L_32;
-      else if (ptr[0] == '1' && ptr[1] == '6')
+      else if (src[0] == '1' && src[1] == '6' && !ISDIGIT (src[2]))
 	*mode |= L_16;
       else
 	as_bad (_("invalid operand size requested"));
 
-      while (ISDIGIT (*ptr))
-	ptr++;
+      while (ISDIGIT (*src))
+	src++;
     }
-  return ptr;
+  return src;
 }
 
 /* The many forms of operand:
@@ -540,35 +548,6 @@ skip_colonthing (ptr, exp, mode)
    #xx[:size]		immediate data
    @(exp:[8], pc)	pc rel
    @@aa[:8]		memory indirect.  */
-
-char *
-colonmod24 (op, src)
-     struct h8_op *op;
-     char *src;
-{
-  int mode = 0;
-  src = skip_colonthing (src, &op->exp, &mode);
-
-  if (!mode)
-    {
-      /* If the operand is a 16-bit constant integer, leave fix_operand_size
-	 to calculate its size.  Otherwise choose a default here.  */
-      if (op->exp.X_add_number < -32768
-	  || op->exp.X_add_number > 32767)
-	{
-	  if (Hmode)
-	    mode = L_24;
-	  else
-	    mode = L_16;
-	}
-      else if (op->exp.X_add_symbol
-	       || op->exp.X_op_symbol)
-	mode = DSYMMODE;
-    }
-
-  op->mode |= mode;
-  return src;
-}
 
 static int
 constant_fits_width_p (operand, width)
@@ -707,13 +686,7 @@ get_operand (ptr, op, direction)
       src++;
       if (*src == '@')
 	{
-	  src++;
-	  src = parse_exp (src, &op->exp);
-
-	  src = skip_colonthing (src, &op->exp, &op->mode);
-
-	  *ptr = src;
-
+	  *ptr = parse_exp (src + 1, op);
 	  if (op->exp.X_add_number >= 0x100)
 	    {
 	      int divisor;
@@ -731,32 +704,26 @@ get_operand (ptr, op, direction)
 	    }
 	  else
 	    op->mode = MEMIND;
-
 	  return;
 	}
 
       if (*src == '-' || *src == '+')
 	{
-	  char c = *src;
-	  src++;
-	  len = parse_reg (src, &mode, &num, direction);
+	  len = parse_reg (src + 1, &mode, &num, direction);
 	  if (len == 0)
 	    {
 	      /* Oops, not a reg after all, must be ordinary exp.  */
-	      src--;
-	      /* Must be a symbol.  */
-	      op->mode = ABS | PSIZE | direction;
-	      *ptr = skip_colonthing (parse_exp (src, &op->exp),
-				      &op->exp, &op->mode);
-
+	      op->mode = ABS | direction;
+	      *ptr = parse_exp (src, op);
 	      return;
 	    }
 
 	  if ((mode & SIZE) != PSIZE)
 	    as_bad (_("Wrong size pointer register for architecture."));
-	  op->mode = c == '-' ? RDPREDEC : RDPREINC;
+
+	  op->mode = src[0] == '-' ? RDPREDEC : RDPREINC;
 	  op->reg = num;
-	  *ptr = src + len;
+	  *ptr = src + 1 + len;
 	  return;
 	}
       if (*src == '(')
@@ -801,15 +768,11 @@ get_operand (ptr, op, direction)
 
 	  /* Start off assuming a 16 bit offset.  */
 
-	  src = parse_exp (src, &op->exp);
-
-	  src = colonmod24 (op, src);
-
+	  src = parse_exp (src, op);
 	  if (*src == ')')
 	    {
-	      src++;
 	      op->mode |= ABS | direction;
-	      *ptr = src;
+	      *ptr = src + 1;
 	      return;
 	    }
 
@@ -817,7 +780,6 @@ get_operand (ptr, op, direction)
 	    {
 	      as_bad (_("expected @(exp, reg16)"));
 	      return;
-
 	    }
 	  src++;
 
@@ -849,7 +811,7 @@ get_operand (ptr, op, direction)
 	    }
 	  else
 	    op->mode |= DISP | direction;
-	  src = skip_colonthing (src, &op->exp, &op->mode);
+	  src = skip_colonthing (src, &op->mode);
 
 	  if (*src != ')' && '(')
 	    {
@@ -857,7 +819,6 @@ get_operand (ptr, op, direction)
 	      return;
 	    }
 	  *ptr = src + 1;
-
 	  return;
 	}
       len = parse_reg (src, &mode, &num, direction);
@@ -889,21 +850,15 @@ get_operand (ptr, op, direction)
 	  /* must be a symbol */
 
 	  op->mode = ABS | direction;
-	  src = parse_exp (src, &op->exp);
-
-	  *ptr = colonmod24 (op, src);
-
+	  *ptr = parse_exp (src, op);
 	  return;
 	}
     }
 
   if (*src == '#')
     {
-      src++;
       op->mode = IMM;
-      src = parse_exp (src, &op->exp);
-      *ptr = skip_colonthing (src, &op->exp, &op->mode);
-
+      *ptr = parse_exp (src + 1, op);
       return;
     }
   else if (strncmp (src, "mach", 4) == 0 || 
@@ -918,35 +873,8 @@ get_operand (ptr, op, direction)
     }
   else
     {
-      src = parse_exp (src, &op->exp);
-      /* Trailing ':' size ? */
-      if (*src == ':')
-	{
-	  if (src[1] == '1' && src[2] == '6')
-	    {
-	      op->mode = PCREL | L_16;
-	      src += 3;
-	    }
-	  else if (src[1] == '8')
-	    {
-	      op->mode = PCREL | L_8;
-	      src += 2;
-	    }
-	  else
-	    as_bad (_("expect :8 or :16 here"));
-	}
-      else
-	{
-	  int val = op->exp.X_add_number;
-
-	  op->mode = PCREL;
-	  if (-128 < val && val < 127)
-	    op->mode |= L_8;
-	  else
-	    op->mode |= L_16;
-	}
-
-      *ptr = src;
+      op->mode = PCREL;
+      *ptr = parse_exp (src, op);
     }
 }
 
@@ -1010,8 +938,7 @@ get_mova_operands (char *op_end, struct h8_op *operand)
     goto error;
   ptr += 3;
   operand[0].mode = 0;
-  ptr = parse_exp (ptr, &operand[0].exp);
-  ptr = colonmod24 (operand + 0, ptr);
+  ptr = parse_exp (ptr, &operand[0]);
 
   if (*ptr !=',')
     goto error;
@@ -1880,11 +1807,11 @@ clever_message (instruction, operand)
 }
 
 
-/* Adjust OPERAND's value and size given that it is accessing a field
-   of SIZE bytes.
+/* If OPERAND is part of an address, adjust its size and value given
+   that it addresses SIZE bytes.
 
-   This function handles the choice between @(d:2,ERn) and @(d:16,ERn)
-   when no size is explicitly given.  It also scales down the assembly-level
+   This function decides how big non-immediate constants are when no
+   size was explicitly given.  It also scales down the assembly-level
    displacement in an @(d:2,ERn) operand.  */
 
 static void
@@ -1892,12 +1819,13 @@ fix_operand_size (operand, size)
      struct h8_op *operand;
      int size;
 {
-  if ((operand->mode & MODE) == DISP)
+  if (SXmode && (operand->mode & MODE) == DISP)
     {
       /* If the user didn't specify an operand width, see if we
 	 can use @(d:2,ERn).  */
-      if (SXmode
-	  && (operand->mode & SIZE) == 0
+      if ((operand->mode & SIZE) == 0
+	  && operand->exp.X_add_symbol == 0
+	  && operand->exp.X_op_symbol == 0
 	  && (operand->exp.X_add_number == size
 	      || operand->exp.X_add_number == size * 2
 	      || operand->exp.X_add_number == size * 3))
@@ -1913,8 +1841,6 @@ fix_operand_size (operand, size)
 	}
     }
 
-  /* If the operand needs a size but doesn't have one yet, it must be
-     a 16-bit integer (see colonmod24).  */
   if ((operand->mode & SIZE) == 0)
     switch (operand->mode & MODE)
       {
@@ -1923,7 +1849,26 @@ fix_operand_size (operand, size)
       case INDEXW:
       case INDEXL:
       case ABS:
-	operand->mode |= L_16;
+	/* Pick a 24-bit address unless we know that a 16-bit address
+	   is safe.  get_specific() will relax L_24 into L_32 where
+	   necessary.  */
+	if (Hmode
+	    && (operand->exp.X_add_number < -32768
+		|| operand->exp.X_add_number > 32767
+		|| operand->exp.X_add_symbol != 0
+		|| operand->exp.X_op_symbol != 0))
+	  operand->mode |= L_24;
+	else
+	  operand->mode |= L_16;
+	break;
+
+      case PCREL:
+	/* This condition is long standing, though somewhat suspect.  */
+	if (operand->exp.X_add_number > -128
+	    && operand->exp.X_add_number < 127)
+	  operand->mode |= L_8;
+	else
+	  operand->mode |= L_16;
 	break;
       }
 }

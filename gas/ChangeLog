@@ -1,3 +1,19 @@
+2003-07-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-h8300.c (h8300sxnmode): Add prototype.
+	(DSYMMODE): Remove.
+	(parse_exp): Replace expressionS argument with a h8_op.  Parse the
+	operand size as well.
+	(skip_colonthing): Remove unused expression argument.  Tighten checks
+	for 2-digit sizes.
+	(colonmod24): Remove.
+	(get_mova_operands): Combine calls to parse_exp and skip_colonthing.
+	(get_operand): Likewise.  Use the standard code to read the size of
+	pc-relative operands.
+	(fix_operand_size): Include the size-guessing logic that used to be
+	in colonmod24 and get_operand.  Don't apply dd:2 optimizations to
+	offsets with a symbolic component.
+
 2003-07-04  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-i386.c (tc_x86_regname_to_dw2regnum): Use ARRAY_SIZE
