@@ -1,5 +1,9 @@
 Fri Jan 21 09:23:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* xcoffread.c (read_xcoff_symtab): Make main_aux just a union
+	internal_xcoff_symtab, not an array of one of them.  Change lots of
+	"main_aux" to "&main_aux" and so on.
+
 	* coffread.c, xcoffread.c: Include <coff/internal.h>
 	before "symfile.h".
 

@@ -989,7 +989,7 @@ read_xcoff_symtab (objfile, nsyms)
   TracebackInfo *ptb;		/* Pointer to traceback table */
 
   struct internal_syment symbol[1];
-  union internal_auxent main_aux[1];
+  union internal_auxent main_aux;
   struct coff_symbol cs[1];
   CORE_ADDR file_start_addr = 0;
   CORE_ADDR file_end_addr = 0;
@@ -1132,7 +1132,7 @@ read_xcoff_symtab (objfile, nsyms)
     /* if explicitly specified as a function, treat is as one. */
     if (ISFCN(cs->c_type) && cs->c_sclass != C_TPDEF) {
       bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-			    main_aux);
+			    &main_aux);
       goto function_entry_point;
     }
 
@@ -1148,16 +1148,16 @@ read_xcoff_symtab (objfile, nsyms)
 
 	/* Convert the auxent to something we can access.  */
         bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-			      main_aux);
+			      &main_aux);
 
-	switch (CSECT_SMTYP (main_aux)) {
+	switch (CSECT_SMTYP (&main_aux)) {
 
 	case XTY_ER :
 	  continue;			/* ignore all external references. */
 
 	case XTY_SD :			/* a section description. */
 	  {
-	    switch (CSECT_SCLAS (main_aux)) {
+	    switch (CSECT_SCLAS (&main_aux)) {
 
 	    case XMC_PR :			/* a `.text' csect.	*/
 	      {
@@ -1200,12 +1200,12 @@ read_xcoff_symtab (objfile, nsyms)
 
 		/* If this is the very first csect seen, basically `__start'. */
 		if (just_started) {
-		  first_object_file_end = cs->c_value + CSECT_LEN (main_aux);
+		  first_object_file_end = cs->c_value + CSECT_LEN (&main_aux);
 		  just_started = 0;
 		}
 
 		file_start_addr = cs->c_value;
-		file_end_addr = cs->c_value + CSECT_LEN (main_aux);
+		file_end_addr = cs->c_value + CSECT_LEN (&main_aux);
 
 		if (cs->c_name && cs->c_name[0] == '.') {
 		  last_csect_name = cs->c_name;
@@ -1238,19 +1238,19 @@ read_xcoff_symtab (objfile, nsyms)
 	case XTY_LD :
 	  
 	  /* a function entry point. */
-	  if (CSECT_SCLAS (main_aux) == XMC_PR) {
+	  if (CSECT_SCLAS (&main_aux) == XMC_PR) {
 
 function_entry_point:
 	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text, 
 				   symname_alloced, cs->c_secnum, objfile);
 
-	    fcn_line_offset = main_aux->x_sym.x_fcnary.x_fcn.x_lnnoptr;
+	    fcn_line_offset = main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
 	    fcn_start_addr = cs->c_value;
 
 	    /* save the function header info, which will be used
 	       when `.bf' is seen. */
 	    fcn_cs_saved = *cs;
-	    fcn_aux_saved = *main_aux;
+	    fcn_aux_saved = main_aux;
 
 
 	    ptb = NULL;
@@ -1313,7 +1313,7 @@ function_entry_point:
 	    continue;
 	  }
 	  /* shared library function trampoline code entry point. */
-	  else if (CSECT_SCLAS (main_aux) == XMC_GL) {
+	  else if (CSECT_SCLAS (&main_aux) == XMC_GL) {
 
 	    /* record trampoline code entries as mst_unknown symbol. When we
 	       lookup mst symbols, we will choose mst_text over mst_unknown. */
@@ -1414,7 +1414,7 @@ function_entry_point:
       if (STREQ (cs->c_name, ".bf")) {
 
         bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-			      main_aux);
+			      &main_aux);
 
 	within_function = 1;
 
@@ -1430,14 +1430,14 @@ function_entry_point:
       else if (STREQ (cs->c_name, ".ef")) {
 
         bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-			      main_aux);
+			      &main_aux);
 
 	/* the value of .ef is the address of epilogue code;
 	   not useful for gdb */
 	/* { main_aux.x_sym.x_misc.x_lnsz.x_lnno
 	   contains number of lines to '}' */
 
-	fcn_last_line = main_aux->x_sym.x_misc.x_lnsz.x_lnno;
+	fcn_last_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
 	new = pop_context ();
 	if (context_stack_depth != 0)
 	  error ("invalid symbol data; .bf/.ef/.bb/.eb symbol mismatch, at symbol %d.",
