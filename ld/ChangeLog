@@ -1,3 +1,14 @@
+Tue Dec  2 10:14:47 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.tgt (targ_extra_emuls): Add support for Thumb target.
+
+Sat Nov 22 15:23:19 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlex.l: Don't define hex_mode.  Correct number regexp to not
+	accept hex digits without a leading $ or 0x.  Handle leading $
+	correctly.  Pass 0 rather than hex_mode to bfd_scan_vma.
+	* ldlex.h (hex_mode): Don't declare.
+
 start-sanitize-d30v
 Sun Nov 16 20:16:45 1997  Michael Meissner  <meissner@cygnus.com>
 

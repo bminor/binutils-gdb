@@ -24,6 +24,7 @@ powerpc*)		gdb_target_cpu=powerpc ;;
 pn)			gdb_target_cpu=gould ;;
 pyramid)		gdb_target_cpu=pyr ;;
 sparc*)			gdb_target_cpu=sparc ;;
+thumb*)			gdb_target_cpu=arm ;;
 *)			gdb_target_cpu=$target_cpu ;;
 
 esac
@@ -47,7 +48,7 @@ alpha-*-linux*)		gdb_target=alpha-linux ;;
 
 arc-*-*)		gdb_target=arc ;;
 
-arm-*-*)		gdb_target=arm ;;
+arm-*-* | thumb-*-*)	gdb_target=arm ;;
 
 c1-*-*)			gdb_target=convex ;;
 c2-*-*)			gdb_target=convex ;;

@@ -88,6 +88,7 @@ i[3456]86-*-netbsd*)	targ_emul=i386nbsd ;;
 i[3456]86-*-netware)	targ_emul=i386nw ;;
 i[3456]86-*-elf*)	targ_emul=elf_i386 ;;
 i[3456]86-*-freebsdelf*) targ_emul=elf_i386 ;;
+i[3456]86-*-freebsd*)	targ_emul=i386bsd ;;
 i[3456]86-*-sysv*)	targ_emul=i386coff ;;
 i[3456]86-*-ptx*)	targ_emul=i386coff ;;
 i[3456]86-*-mach*)	targ_emul=i386mach ;;
@@ -105,6 +106,7 @@ a29k-*-*)		targ_emul=a29k ;;
 arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
 armeb-*-aout)		targ_emul=armaoutb ;;
 arm-*-coff)		targ_emul=armcoff ;;
+thumb-*-coff)		targ_emul=armcoff ;;
 h8300-*-hms)		targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
 			;;
 h8500-*-hms)		targ_emul=h8500
