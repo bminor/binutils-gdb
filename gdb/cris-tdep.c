@@ -1155,7 +1155,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
   CORE_ADDR ip;
   struct symtab_and_line sal;
   int best_limit;
-  char *dummy_regs = generic_find_dummy_frame (fi->pc, fi->frame);
+  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
   
   /* Examine the entire prologue.  */
   register int frameless_p = 0; 

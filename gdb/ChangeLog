@@ -1,3 +1,17 @@
+2002-06-26  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (deprecated_generic_find_dummy_frame): Rename
+	generic_find_dummy_frame.
+	* blockframe.c (generic_find_dummy_frame): Make static.
+	(deprecated_generic_find_dummy_frame): New function.
+	* sh-tdep.c (sh_nofp_frame_init_saved_regs): Replace
+	generic_find_dummy_frame with deprecated_find_dummy_frame.
+	(sh64_nofp_frame_init_saved_regs): Ditto.
+	(sh_fp_frame_init_saved_regs): Ditto.
+	* s390-tdep.c (s390_frame_saved_pc_nofix): Ditto.
+	(s390_frame_chain): Ditto.
+	* cris-tdep.c (cris_frame_init_saved_regs): Ditto.
+
 2002-06-26  Grace Sainsbury  <graces@redhat.com>
 
 	* monitor.h: Add the function regname to monitor_ops
@@ -5,7 +19,8 @@
 	* monitor.c (monitor_fetch_register): Added support for regname
 	function. The function is called if the array regnames is NULL.
 	(monitor_store_register): Same.
-	* cpu32bug-rom.c (cpu32bug_regname):  Add function. Replaces regnames array.
+	* cpu32bug-rom.c (cpu32bug_regname): Add function. Replaces
+	regnames array.
 	(init_cpu32bug_cmds): set cpu32bug_cmds.regnames to NULL,
 	cpu32bug_cmds.regname to point to new function.
 	* abug-rom.c (abug_regname): Same as above.

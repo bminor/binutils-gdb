@@ -310,7 +310,13 @@ extern void generic_pop_dummy_frame (void);
 
 extern int generic_pc_in_call_dummy (CORE_ADDR pc,
 				     CORE_ADDR sp, CORE_ADDR fp);
-extern char *generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp);
+
+/* NOTE: cagney/2002-06-26: Targets should no longer use this
+   function.  Instead, the contents of a dummy frames registers can be
+   obtained by applying: frame_register_unwind to the dummy frame; or
+   get_saved_register to the next outer frame.  */
+
+extern char *deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp);
 
 extern void generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 				    int nargs, struct value **args,

@@ -1046,7 +1046,7 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
   int opc;
   int insn;
   int r3_val = 0;
-  char *dummy_regs = generic_find_dummy_frame (fi->pc, fi->frame);
+  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
   
   if (fi->saved_regs == NULL)
     frame_saved_regs_zalloc (fi);
@@ -1385,7 +1385,7 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
   int insn_size;
   int gdb_register_number;
   int register_number;
-  char *dummy_regs = generic_find_dummy_frame (fi->pc, fi->frame);
+  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
   
   if (fi->saved_regs == NULL)
@@ -1586,7 +1586,7 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
   int opc;
   int insn;
   int r3_val = 0;
-  char *dummy_regs = generic_find_dummy_frame (fi->pc, fi->frame);
+  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
   
   if (fi->saved_regs == NULL)
@@ -1814,8 +1814,8 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	    *lval = not_lval;
 	  if (raw_buffer)
 	    memcpy (raw_buffer,
-		    generic_find_dummy_frame (frame->pc, frame->frame) +
-		    REGISTER_BYTE (regnum),
+		    (deprecated_generic_find_dummy_frame (frame->pc, frame->frame)
+		     + REGISTER_BYTE (regnum)),
 		    REGISTER_RAW_SIZE (regnum));
 	  return;
 	}

@@ -1144,7 +1144,7 @@ static struct dummy_frame *dummy_frame_stack = NULL;
    adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
    to call this function after the PC has been adjusted.  */
 
-char *
+static char *
 generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummyframe;
@@ -1159,6 +1159,12 @@ generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
       return dummyframe->registers;
 
   return 0;
+}
+
+char *
+deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
+{
+  return generic_find_dummy_frame (pc, fp);
 }
 
 /* Function: pc_in_call_dummy (pc, sp, fp)
