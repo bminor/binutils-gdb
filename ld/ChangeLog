@@ -1,3 +1,8 @@
+2001-10-31  David Heine  <dlheine@tensilica.com>
+
+	* ldlang.c (lang_size_sections): Keep a valid output_offset field
+	for padding statements.
+
 2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* configure.tgt (mmix-*-*): New target.
@@ -8,7 +13,7 @@
 	scripttempl/mmo.sc: New files.
 	* gen-doc.texi: @set MMIX.
 	* ld.texinfo: Ditto.
-  	[MMIX] Add MMIX node.
+	[MMIX] Add MMIX node.
 	* Makefile.in: Regenerate.
 
 2001-10-29  Kazu Hirata  <kazu@hxi.com>
@@ -48,7 +53,7 @@
 	* pe-dll.c (autofilter_objectlist):  Add startup objects
 	for profiling.
 	(auto-export): Constify char * p.
-	Extract file basename and use strcmp rather than ststr 
+	Extract file basename and use strcmp rather than ststr
 	for object lookup.
 
 2001-10-18  Chris Demetriou  <cgd@broadcom.com>

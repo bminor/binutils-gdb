@@ -3156,6 +3156,14 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	     padding to shrink.  If padding is needed on this pass, it
 	     will be added back in.  */
 	  s->padding_statement.size = 0;
+
+	  /* Make sure output_offset is valid.  If relaxation shrinks
+	     the section and this pad isn't needed, it's possible to
+	     have output_offset larger than the final size of the
+	     section.  bfd_set_section_contents will complain even for
+	     a pad size of zero.  */
+	  s->padding_statement.output_offset
+	    = dot - output_section_statement->bfd_section->vma;
 	  break;
 
 	case lang_group_statement_enum:
