@@ -1,3 +1,8 @@
+Mon Sep  6 15:28:07 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elf32-i386.c (elf_howto_table): Set pcrel_offset to true for
+	R_386_PC32.
+
 Fri Sep  3 13:06:12 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* configure.in: Reorganized setting of makefile variables so
