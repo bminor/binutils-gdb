@@ -5120,6 +5120,9 @@ pa_build_unwind_subspace (call_info)
   int i, reloc;
   char c, *p;
 
+  if (seg != text_section)
+    return;
+
   if (bfd_get_arch_info (stdoutput)->bits_per_address == 32)
     reloc = R_PARISC_DIR32;
   else
@@ -5641,6 +5644,7 @@ pa_type_args (symbolP, is_export)
     {
       input_line_pointer += 4;
       symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
       type = SYMBOL_TYPE_DATA;
     }
   else if ((strncasecmp (input_line_pointer, "entry", 5) == 0))

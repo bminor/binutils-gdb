@@ -1,3 +1,9 @@
+Fri Sep 17 11:57:34 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (pa_build_unwind_subspace): Do not build
+	unwinds unless the function is in the text space.
+	(pa_type_args): Set BSF_FUNCTION for an exproted data symbol.
+
 Wed Sep 15 05:14:32 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_ip): Move dwarf2 stuff from here.
