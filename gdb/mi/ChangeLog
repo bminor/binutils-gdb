@@ -1,3 +1,33 @@
+2003-02-04  Jim Ingham <jingham@apple.com>
+	    Keith Seitz  <keiths@redhat.com>
+            Elena Zannoni  <ezannoni@redhat.com>
+            Andrew Cagney  <ac131313@redhat.com>
+	
+	* mi-main.h: New file.
+	* mi-interp.c: New file.
+	* mi-main.c: Include "interps.h".
+	(mi_error_message): Make global.
+	(mi_input): Delete static function, moved to "mi-interp.c".
+	(mi_execute_command, mi_execute_command_wrapper): Ditto.
+	(mi_command_loop, mi1_command_loop, mi2_command_loop): Ditto.
+	(mi_load_progress): Make non-static.
+	(mi_error_last_message): New function.
+	(captured_mi_execute_command): If the interpreter changed, don't
+	print anything.
+	(mi_load_progress): Use current_interp_named_p.
+	(mi_init_ui): Delete function.
+	(_initialize_mi_main): Don't install the mi interpreter, handled
+	by "mi-interp.c".
+	(mi_exec_async_cli_cmd_continuation): Make static.
+	* mi-console.h (mi_console_file_new): Add `quote' parameter.
+	* mi-console.c (struct mi_console_file): Add `quote'.
+	(mi_console_file_new): Add `quote' parameter.  Initialize `quote'.
+	(mi_console_raw_packet): Only quote the output when `quote'.
+	* mi-cmds.h (mi_cmd_interpreter_exec): Declare.
+	(mi_error_message, mi_error_last_message): Declare.
+	(mi_execute_command): Declare.
+	* mi-cmds.c: Add `interpreter-exec' command.
+
 2003-02-04  Andrew Cagney  <ac131313@redhat.com>
 
 	From Keith Seitz <keiths@redhat.com>:
@@ -143,7 +173,6 @@
 	and tuples. Do the cleanups when returning errors.
 
 2002-07-29  Andrew Cagney  <ac131313@redhat.com>
-
 
 	* mi-cmd-var.c: Include "gdb_string.h".
 	* mi-cmd-disas.c: Ditto.

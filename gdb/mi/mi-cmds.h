@@ -1,5 +1,7 @@
-/* MI Command Set.
-   Copyright 2000 Free Software Foundation, Inc.
+/* MI Command Set for GDB, the GNU debugger.
+
+   Copyright 2000, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -79,6 +81,7 @@ extern mi_cmd_args_ftype mi_cmd_exec_step_instruction;
 extern mi_cmd_args_ftype mi_cmd_exec_until;
 extern mi_cmd_args_ftype mi_cmd_exec_interrupt;
 extern mi_cmd_argv_ftype mi_cmd_gdb_exit;
+extern mi_cmd_argv_ftype mi_cmd_interpreter_exec;
 extern mi_cmd_argv_ftype mi_cmd_stack_info_depth;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_args;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_frames;
@@ -125,5 +128,9 @@ extern int mi_debug_p;
 
 /* Raw console output - FIXME: should this be a parameter? */
 extern struct ui_file *raw_stdout;
+
+extern char *mi_error_message;
+extern void mi_error_last_message (void);
+extern void mi_execute_command (char *cmd, int from_tty);
 
 #endif

@@ -1,3 +1,38 @@
+2003-02-05  Jim Ingham <jingham@apple.com>
+            Keith Seitz  <keiths@redhat.com>
+            Elena Zannoni  <ezannoni@redhat.com>
+            Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (SUBDIR_CLI_OBS): Add "cli-interp.o".
+	(SUBDIR_CLI_SRCS): Add "cli/cli-interp.c".
+	(SUBDIR_MI_OBS): Add "mi-interp.o".
+	(SUBDIR_MI_SRCS): Add "mi/mi-interp.c".
+	(SFILES): Add "interps.c".
+	(COMMON_OBS): Add "interps.o".
+	(interps_h, mi_main_h): Define.
+	(interps.o, cli-interp.o, mi-interp.o): Add dependencies.
+	(mi-main.o, main.o, event-top.o): Update dependencies.
+	* cli/cli-interp.c: New file.
+	* interps.h, interps.c: New files.
+	* top.c: (gdb_init): Don't install the default interpreter, handed
+	by captured_main.
+	* main.c: Include "interps.h".
+	(interpreter_p): Note that it should malloc'ed.
+	(captured_command_loop): Call current_interp_command_loop.
+	(captured_main): Initialize interpreter_p to INTERP_CONSOLE.  Use
+	xfree and xstrdup when updating interpreter_p.  Install the
+	default interpreter.  Add hack to stop mi1's copyright notice
+	being encoded.
+	* event-top.h (gdb_setup_readline): Declare.
+	(gdb_disable_readline): Declare.
+	* event-top.c: Include "interps.h".
+	(display_gdb_prompt): Call current_interp_display_prompt_p.
+	(gdb_setup_readline): Initialize gdb_stdout, gdb_stderr,
+	gdb_stdlog, and gdb_stdtarg.
+	(_initialize_event_loop): Don't call gdb_setup_readline.
+	* cli-out.c (cli_out_set_stream): New function.
+	* cli-out.h (cli_out_set_stream): Declare.
+
 2003-02-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.tgt (i[3456]86-*-sysv4.2*, i[3456]86-*-sysv4*,

@@ -2124,19 +2124,4 @@ gdb_init (char *argv0)
      it wants GDB to revert to the CLI, it should clear init_ui_hook. */
   if (init_ui_hook)
     init_ui_hook (argv0);
-
-  /* Install the default UI */
-  if (!init_ui_hook)
-    {
-      uiout = cli_out_new (gdb_stdout);
-
-      /* All the interpreters should have had a look at things by now.
-	 Initialize the selected interpreter. */
-      if (interpreter_p)
-	{
-	  fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
-			      interpreter_p);
-	  exit (1);
-	}
-    }
 }

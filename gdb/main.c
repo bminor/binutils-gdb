@@ -1,7 +1,8 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,6 +38,7 @@
 #include "event-loop.h"
 #include "ui-out.h"
 
+#include "interps.h"
 #include "main.h"
 
 /* If nonzero, display time usage both at startup and for each command.  */
@@ -53,7 +55,9 @@ int display_space;
    processes UI events asynchronously. */
 int event_loop_p = 1;
 
-/* Has an interpreter been specified and if so, which. */
+/* The selected interpreter.  This will be used as a set command
+   variable, so it should always be malloc'ed - since
+   do_setshow_command will free it. */
 char *interpreter_p;
 
 /* Whether this is the command line version or not */
@@ -93,10 +97,7 @@ extern char *external_editor_command;
 static int
 captured_command_loop (void *data)
 {
-  if (command_loop_hook == NULL)
-    command_loop ();
-  else
-    command_loop_hook ();
+  current_interp_command_loop ();
   /* FIXME: cagney/1999-11-05: A correct command_loop() implementaton
      would clean things up (restoring the cleanup chain) to the state
      they were just prior to the call.  Technically, this means that
@@ -226,6 +227,12 @@ captured_main (void *data)
   gdb_sysroot = "";
 #endif
 #endif
+
+  /* There will always be an interpreter.  Either the one passed into
+     this captured main (not yet implemented), or one specified by the
+     user at start up, or the console.  Make life easier by always
+     initializing the interpreter to something.  */
+  interpreter_p = xstrdup (INTERP_CONSOLE);
 
   /* Parse arguments and options.  */
   {
@@ -381,7 +388,8 @@ extern int gdbtk_test (char *);
 	    }
 #endif /* GDBTK */
 	  case 'i':
-	    interpreter_p = optarg;
+	    xfree (interpreter_p);
+	    interpreter_p = xstrdup (optarg);
 	    break;
 	  case 'd':
 	    dirarg[ndir++] = optarg;
@@ -509,7 +517,10 @@ extern int gdbtk_test (char *);
   gdb_init (argv[0]);
 
   /* Do these (and anything which might call wrap_here or *_filtered)
-     after initialize_all_files.  */
+     after initialize_all_files() but before the interpreter has been
+     installed.  Otherwize the help/version messages will be eaten by
+     the interpreter's output handler.  */
+
   if (print_version)
     {
       print_gdb_version (gdb_stdout);
@@ -525,7 +536,49 @@ extern int gdbtk_test (char *);
       exit (0);
     }
 
-  if (!quiet)
+  /* FIXME: cagney/2003-02-03: The big hack (part 1 of 2) that lets
+     GDB retain the old MI1 interpreter startup behavior.  Output the
+     copyright message before the interpreter is installed.  That way
+     it isn't encapsulated in MI output.  */
+  if (!quiet && strcmp (interpreter_p, INTERP_MI1) == 0)
+    {
+      /* Print all the junk at the top, with trailing "..." if we are about
+         to read a symbol file (possibly slowly).  */
+      print_gdb_version (gdb_stdout);
+      if (symarg)
+	printf_filtered ("..");
+      wrap_here ("");
+      gdb_flush (gdb_stdout);	/* Force to screen during slow operations */
+    }
+
+
+  /* Install the default UI.  All the interpreters should have had a
+     look at things by now.  Initialize the default interpreter. */
+
+  {
+    /* Find it.  */
+    struct interp *interp = interp_lookup (interpreter_p);
+    if (interp == NULL)
+      {
+        fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
+                            interpreter_p);
+        exit (1);
+      }
+    /* Install it.  */
+    if (!interp_set (interp))
+      {
+        fprintf_unfiltered (gdb_stderr,
+			    "Interpreter `%s' failed to initialize.\n",
+                            interpreter_p);
+        exit (1);
+      }
+  }
+
+  /* FIXME: cagney/2003-02-03: The big hack (part 2 of 2) that lets
+     GDB retain the old MI1 interpreter startup behavior.  Output the
+     copyright message after the interpreter is installed when it is
+     any sane interpreter.  */
+  if (!quiet && !current_interp_named_p (INTERP_MI1))
     {
       /* Print all the junk at the top, with trailing "..." if we are about
          to read a symbol file (possibly slowly).  */
