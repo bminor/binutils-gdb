@@ -1,3 +1,11 @@
+2004-04-17  Brian Ford  <ford@vss.fsi.com>
+
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Use the first non-zero
+	filepos for the SizeOfHeaders field.
+	(_bfd_XXi_swap_scnhdr_out): Correct section flags lossage on reloc
+	overflow.
+	(_bfd_XXi_swap_sym_in): Remove redundant section flags assignment.
+
 2004-04-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Don't

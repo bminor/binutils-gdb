@@ -198,7 +198,6 @@ _bfd_XXi_swap_sym_in (abfd, ext1, in1)
 	  sec->lineno_count = 0;
 	  sec->userdata = NULL;
 	  sec->next = (asection *) NULL;
-	  sec->flags = 0;
 	  sec->alignment_power = 2;
 	  sec->flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_DATA | SEC_LOAD;
 
@@ -658,14 +657,19 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 
   {
     asection *sec;
+    bfd_vma hsize = 0;
     bfd_vma dsize = 0;
-    bfd_vma isize = SA(abfd->sections->filepos);
+    bfd_vma isize = 0;
     bfd_vma tsize = 0;
 
     for (sec = abfd->sections; sec; sec = sec->next)
       {
 	int rounded = FA(sec->_raw_size);
 
+	/* The first non-zero section filepos is the header size.
+	   Sections without contents will have a filepos of 0.  */
+	if (hsize == 0)
+	  hsize = sec->filepos;
 	if (sec->flags & SEC_DATA)
 	  dsize += rounded;
 	if (sec->flags & SEC_CODE)
@@ -682,10 +686,10 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 
     aouthdr_in->dsize = dsize;
     aouthdr_in->tsize = tsize;
-    extra->SizeOfImage = isize;
+    extra->SizeOfHeaders = hsize;
+    extra->SizeOfImage = SA(hsize) + isize;
   }
 
-  extra->SizeOfHeaders = abfd->sections->filepos;
   H_PUT_16 (abfd, aouthdr_in->magic, aouthdr_out->standard.magic);
 
 #define LINKER_VERSION 256 /* That is, 2.56 */
@@ -983,7 +987,6 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
       };
 
     pe_required_section_flags * p;
-    int flags = scnhdr_int->s_flags;
 
     /* We have defaulted to adding the IMAGE_SCN_MEM_WRITE flag, but now
        we know exactly what this specific section wants so we remove it
@@ -998,12 +1001,12 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
 	{
 	  if (strcmp (scnhdr_int->s_name, ".text")
 	      || (bfd_get_file_flags (abfd) & WP_TEXT))
-	    flags &= ~IMAGE_SCN_MEM_WRITE;
-	  flags |= p->must_have;
+	    scnhdr_int->s_flags &= ~IMAGE_SCN_MEM_WRITE;
+	  scnhdr_int->s_flags |= p->must_have;
 	  break;
 	}
 
-    H_PUT_32 (abfd, flags, scnhdr_ext->s_flags);
+    H_PUT_32 (abfd, scnhdr_int->s_flags, scnhdr_ext->s_flags);
   }
 
   if (coff_data (abfd)->link_info
