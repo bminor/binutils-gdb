@@ -1,5 +1,10 @@
 Mon Oct 21 11:38:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (cons_fix_new_mips): Only treat 8 byte reloc
+	specially if not ELF.
+	(md_apply_fix): Handle BFD_RELOC_64.
+	(tc_gen_reloc): Handle BFD_RELOC_64.
+
 	* config/tc-i386.c (md_apply_fix3): Don't increment value for a PC
  	relative reloc when BFD_ASSEMBLER and OBJ_AOUT (more ugly gas
  	reloc hacking).

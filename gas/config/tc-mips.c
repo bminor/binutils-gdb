@@ -6551,6 +6551,7 @@ cons_fix_new_mips (frag, where, nbytes, exp)
      unsigned int nbytes;
      expressionS *exp;
 {
+#ifndef OBJ_ELF
   /* If we are assembling in 32 bit mode, turn an 8 byte reloc into a
      4 byte reloc.  */
   if (nbytes == 8 && ! mips_64)
@@ -6559,6 +6560,7 @@ cons_fix_new_mips (frag, where, nbytes, exp)
 	where += 4;
       nbytes = 4;
     }
+#endif
 
   if (nbytes != 2 && nbytes != 4 && nbytes != 8)
     as_bad ("Unsupported reloc size %d", nbytes);
@@ -6687,7 +6689,9 @@ md_apply_fix (fixP, valueP)
   unsigned char *buf;
   long insn, value;
 
-  assert (fixP->fx_size == 4 || fixP->fx_r_type == BFD_RELOC_16);
+  assert (fixP->fx_size == 4
+	  || fixP->fx_r_type == BFD_RELOC_16
+	  || fixP->fx_r_type == BFD_RELOC_64);
 
   value = *valueP;
   fixP->fx_addnumber = value;	/* Remember value for tc_gen_reloc */
@@ -6744,6 +6748,35 @@ md_apply_fix (fixP, valueP)
       if (byte_order == BIG_ENDIAN)
 	buf += 2;
       md_number_to_chars (buf, value, 2);
+      break;
+
+    case BFD_RELOC_64:
+      /* This is handled like BFD_RELOC_32, but we output a sign
+         extended value if we are only 32 bits.  */
+      if (fixP->fx_done
+	  || (mips_pic == EMBEDDED_PIC && SWITCH_TABLE (fixP)))
+	{
+	  if (8 <= sizeof (valueT))
+	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+				value, 8);
+	  else
+	    {
+	      long w1, w2;
+	      long hiv;
+
+	      w1 = w2 = fixP->fx_where;
+	      if (byte_order == BIG_ENDIAN)
+		w1 += 4;
+	      else
+		w2 += 4;
+	      md_number_to_chars (fixP->fx_frag->fr_literal + w1, value, 4);
+	      if ((value & 0x80000000) != 0)
+		hiv = 0xffffffff;
+	      else
+		hiv = 0;
+	      md_number_to_chars (fixP->fx_frag->fr_literal + w2, hiv, 4);
+	    }
+	}
       break;
 
     case BFD_RELOC_32:
@@ -7823,9 +7856,13 @@ tc_gen_reloc (section, fixp)
 	case BFD_RELOC_32:
 	  code = BFD_RELOC_32_PCREL;
 	  break;
+	case BFD_RELOC_64:
+	  code = BFD_RELOC_64_PCREL;
+	  break;
 	case BFD_RELOC_8_PCREL:
 	case BFD_RELOC_16_PCREL:
 	case BFD_RELOC_32_PCREL:
+	case BFD_RELOC_64_PCREL:
 	case BFD_RELOC_16_PCREL_S2:
 	case BFD_RELOC_PCREL_HI16_S:
 	case BFD_RELOC_PCREL_LO16:
