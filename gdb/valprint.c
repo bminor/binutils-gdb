@@ -671,11 +671,7 @@ val_print (type, valaddr, address, stream, format,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      /* FIXME: TYPE_LENGTH (type) is unsigned and therefore always
-	 >= 0.  Is "> 0" meant? I'm not sure what an "array of
-	 unspecified length" (mentioned in the comment for the else-part
-	 of this if) is.  */
-      if (TYPE_LENGTH (type) >= 0
+      if (TYPE_LENGTH (type) > 0
 	  && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	{
 	  elttype = TYPE_TARGET_TYPE (type);
@@ -772,7 +768,7 @@ val_print (type, valaddr, address, stream, format,
 
 	  addr = unpack_pointer (lookup_pointer_type (builtin_type_void),
 				valaddr);
-	  if (addr < 128)
+	  if (addr < 128)			/* FIXME!  What is this 128? */
 	    {
 	      len = TYPE_NFN_FIELDS (domain);
 	      for (i = 0; i < len; i++)
@@ -854,7 +850,7 @@ val_print (type, valaddr, address, stream, format,
 		  /* Somehow pointing into a field.  */
 		  i -= 1;
 		  extra = (val - TYPE_FIELD_BITPOS (domain, i));
-		  if (extra & 0x3)
+		  if (extra & 0x7)
 		    bits = 1;
 		  else
 		    extra >>= 3;
@@ -1463,6 +1459,7 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
 				 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
+      break;
 
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_STRUCT:

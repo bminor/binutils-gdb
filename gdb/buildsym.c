@@ -1,5 +1,5 @@
 /* Build symbol tables in GDB's internal format.
-   Copyright (C) 1986-1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -65,6 +65,14 @@ static const char vb_name[] =   { '_','v','b',CPLUS_MARKER,'\0' };
 #ifndef BELIEVE_PCC_PROMOTION
 #define BELIEVE_PCC_PROMOTION 0
 #endif
+
+/* During some calls to read_type (and thus to read_range_type), this
+   contains the name of the type being defined.  Range types are only
+   used in C as basic types.  We use the name to distinguish the otherwise
+   identical basic types "int" and "long" and their unsigned versions.
+   FIXME, this should disappear with better type management.  */
+
+static char *long_kludge_name;
 
 /* Make a list of forward references which haven't been defined.  */
 static struct type **undef_types;
@@ -1117,6 +1125,14 @@ define_symbol (valu, string, desc, type)
 					    strlen (SYMBOL_NAME (sym)));
 	}
 
+      /* Here we save the name of the symbol for read_range_type, which
+	 ends up reading in the basic types.  In stabs, unfortunately there
+	 is no distinction between "int" and "long" types except their
+	 names.  Until we work out a saner type policy (eliminating most
+	 builtin types and using the names specified in the files), we
+	 save away the name so that far away from here in read_range_type,
+	 we can examine it to decide between "int" and "long".  FIXME.  */
+      long_kludge_name = SYMBOL_NAME (sym);
       type_read = read_type (&p);
 
       if ((deftype == 'F' || deftype == 'f')
@@ -1230,29 +1246,31 @@ define_symbol (valu, string, desc, type)
 	 up).  I made this code adapt so that it will offset the symbol
 	 if it was pointing at an int-aligned location and not
 	 otherwise.  This way you can use the same gdb for 4.0.x and
-	 4.1 systems.  */
+	 4.1 systems.
 
-      if (0 == SYMBOL_VALUE (sym) % sizeof (int))
-	{
-	  if (SYMBOL_TYPE (sym) == builtin_type_char
-	      || SYMBOL_TYPE (sym) == builtin_type_unsigned_char)
-	    SYMBOL_VALUE (sym) += 3;
-	  else if (SYMBOL_TYPE (sym) == builtin_type_short
-	      || SYMBOL_TYPE (sym) == builtin_type_unsigned_short)
-	    SYMBOL_VALUE (sym) += 2;
-	}
+	If the parameter is shorter than an int, and is integral
+	(e.g. char, short, or unsigned equivalent), and is claimed to
+	be passed on an integer boundary, don't believe it!  Offset the
+	parameter's address to the tail-end of that integer.  */
+
+      if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (builtin_type_int)
+       && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT
+       && 0 == SYMBOL_VALUE (sym) % TYPE_LENGTH (builtin_type_int)) {
+	SYMBOL_VALUE (sym) += TYPE_LENGTH (builtin_type_int)
+			   -  TYPE_LENGTH (SYMBOL_TYPE (sym));
+      }
       break;
 
 #else /* no BELIEVE_PCC_PROMOTION_TYPE.  */
 
       /* If PCC says a parameter is a short or a char,
 	 it is really an int.  */
-      if (SYMBOL_TYPE (sym) == builtin_type_char
-	  || SYMBOL_TYPE (sym) == builtin_type_short)
-	SYMBOL_TYPE (sym) = builtin_type_int;
-      else if (SYMBOL_TYPE (sym) == builtin_type_unsigned_char
-	       || SYMBOL_TYPE (sym) == builtin_type_unsigned_short)
-	SYMBOL_TYPE (sym) = builtin_type_unsigned_int;
+      if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (builtin_type_int)
+       && TYPE_CODE (SYMBOL_TYPE (sym) == TYPE_CODE_INT) {
+	SYMBOL_TYPE (sym) = TYPE_UNSIGNED (SYMBOL_TYPE (sym))?
+				builtin_type_unsigned_int:
+				builtin_type_int;
+      }
       break;
 
 #endif /* no BELIEVE_PCC_PROMOTION_TYPE.  */
@@ -1386,45 +1404,86 @@ add_undefined_type (type)
   undef_types[undef_types_length++] = type;
 }
 
-/* Add here something to go through each undefined type, see if it's
-   still undefined, and do a full lookup if so.  */
+/* Go through each undefined type, see if it's still undefined, and fix it
+   up if possible.  We have two kinds of undefined types:
+
+   TYPE_CODE_ARRAY:  Array whose target type wasn't defined yet.
+			Fix:  update array length using the element bounds
+			and the target type's length.
+   TYPE_CODE_STRUCT, TYPE_CODE_UNION:  Structure whose fields were not
+			yet defined at the time a pointer to it was made.
+   			Fix:  Do a full lookup on the struct/union tag.  */
 static void
 cleanup_undefined_types ()
 {
   struct type **type;
 
-  for (type = undef_types; type < undef_types + undef_types_length; type++)
-    {
-      /* Reasonable test to see if it's been defined since.  */
-      if (TYPE_NFIELDS (*type) == 0)
+  for (type = undef_types; type < undef_types + undef_types_length; type++) {
+      switch (TYPE_CODE (*type)) {
+
+      case TYPE_CODE_STRUCT:
+      case TYPE_CODE_UNION:
 	{
-	  struct pending *ppt;
-	  int i;
-	  /* Name of the type, without "struct" or "union" */
-	  char *typename = TYPE_NAME (*type);
+	  /* Reasonable test to see if it's been defined since.  */
+	  if (TYPE_NFIELDS (*type) == 0)
+	    {
+	      struct pending *ppt;
+	      int i;
+	      /* Name of the type, without "struct" or "union" */
+	      char *typename = TYPE_NAME (*type);
 
-	  if (!strncmp (typename, "struct ", 7))
-	    typename += 7;
-	  if (!strncmp (typename, "union ", 6))
-	    typename += 6;
+	      if (!strncmp (typename, "struct ", 7))
+		typename += 7;
+	      if (!strncmp (typename, "union ", 6))
+		typename += 6;
 
-	  for (ppt = file_symbols; ppt; ppt = ppt->next)
-	    for (i = 0; i < ppt->nsyms; i++)
-	      {
-		struct symbol *sym = ppt->symbol[i];
+	      for (ppt = file_symbols; ppt; ppt = ppt->next)
+		for (i = 0; i < ppt->nsyms; i++)
+		  {
+		    struct symbol *sym = ppt->symbol[i];
 
-		if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-		    && SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE
-		    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
-			TYPE_CODE (*type))
-		    && !strcmp (SYMBOL_NAME (sym), typename))
-		  bcopy (SYMBOL_TYPE (sym), *type, sizeof (struct type));
-	      }
+		    if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
+			&& SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE
+			&& (TYPE_CODE (SYMBOL_TYPE (sym)) ==
+			    TYPE_CODE (*type))
+			&& !strcmp (SYMBOL_NAME (sym), typename))
+		      bcopy (SYMBOL_TYPE (sym), *type, sizeof (struct type));
+		  }
+	    }
+	  else
+	    /* It has been defined; don't mark it as a stub.  */
+	    TYPE_FLAGS (*type) &= ~TYPE_FLAG_STUB;
 	}
-      else
-	/* It has been defined; don't mark it as a stub.  */
-	TYPE_FLAGS (*type) &= ~TYPE_FLAG_STUB;
+	break;
+
+      case TYPE_CODE_ARRAY:
+	{
+	  struct type *range_type;
+	  int lower, upper;
+
+	  if (TYPE_LENGTH (*type) != 0)		/* Better be unknown */
+	    goto badtype;
+	  if (TYPE_NFIELDS (*type) != 1)
+	    goto badtype;
+	  range_type = TYPE_FIELD_TYPE (*type, 0);
+	  if (TYPE_CODE (range_type) != TYPE_CODE_RANGE)
+	    goto badtype;
+
+	  /* Now recompute the length of the array type, based on its
+	     number of elements and the target type's length.  */
+	  lower = TYPE_FIELD_BITPOS (range_type, 0);
+	  upper = TYPE_FIELD_BITPOS (range_type, 1);
+	  TYPE_LENGTH (*type) = (upper - lower + 1)
+			  * TYPE_LENGTH (TYPE_TARGET_TYPE (*type));
+	}
+	break;
+
+      default:
+      badtype:
+	error ("GDB internal error.  cleanup_undefined_types with bad type.");
+	break;
     }
+  }
   undef_types_length = 0;
 }
 
@@ -2579,6 +2638,11 @@ read_array_type (pp, type)
 				    sizeof (struct field));
   TYPE_FIELD_TYPE (type, 0) = range_type;
 
+  /* If we have an array whose element type is not yet known, but whose
+     bounds *are* known, record it to be adjusted at the end of the file.  */
+  if (TYPE_LENGTH (element_type) == 0 && !adjustable)
+    add_undefined_type (type);
+
   return type;
 }
 
@@ -2881,7 +2945,9 @@ read_range_type (pp, typenums)
      and they give no way to distinguish between double and single-complex!
      We don't have complex types, so we would lose on all fortran files!
      So return type `double' for all of those.  It won't work right
-     for the complex values, but at least it makes the file loadable.  */
+     for the complex values, but at least it makes the file loadable.
+
+     FIXME, we may be able to distinguish these by their names. FIXME.  */
 
   if (n3 == 0 && n2 > 0)
     {
@@ -2894,11 +2960,15 @@ read_range_type (pp, typenums)
 
   else if (n2 == 0 && n3 == -1)
     {
-      /* FIXME -- this confuses host and target type sizes.  */
-      if (sizeof (int) == sizeof (long))
-	return builtin_type_unsigned_int;
-      else
+      /* FIXME -- the only way to distinguish `unsigned int' from `unsigned
+         long' is to look at its name!  */
+      if (
+       long_kludge_name && ((long_kludge_name[0] == 'u' /* unsigned */ &&
+       			     long_kludge_name[9] == 'l' /* long */)
+			 || (long_kludge_name[0] == 'l' /* long unsigned */)))
 	return builtin_type_unsigned_long;
+      else
+	return builtin_type_unsigned_int;
     }
 
   /* Special case: char is defined (Who knows why) as a subrange of
@@ -2908,6 +2978,8 @@ read_range_type (pp, typenums)
 
   /* Assumptions made here: Subrange of self is equivalent to subrange
      of int.  FIXME:  Host and target type-sizes assumed the same.  */
+  /* FIXME:  This is the *only* place in GDB that depends on comparing
+     some type to a builtin type with ==.  Fix it! */
   else if (n2 == 0
 	   && (self_subrange ||
 	       *dbx_lookup_type (rangenums) == builtin_type_int))
@@ -2917,10 +2989,15 @@ read_range_type (pp, typenums)
       if (n3 == - sizeof (long long))
 	return builtin_type_unsigned_long_long;
 #endif
+      /* FIXME -- the only way to distinguish `unsigned int' from `unsigned
+	 long' is to look at its name!  */
+      if (n3 == (unsigned long)~0L &&
+       long_kludge_name && ((long_kludge_name[0] == 'u' /* unsigned */ &&
+       			     long_kludge_name[9] == 'l' /* long */)
+			 || (long_kludge_name[0] == 'l' /* long unsigned */)))
+	return builtin_type_unsigned_long;
       if (n3 == (unsigned int)~0L)
 	return builtin_type_unsigned_int;
-      if (n3 == (unsigned long)~0L)
-	return builtin_type_unsigned_long;
       if (n3 == (unsigned short)~0L)
 	return builtin_type_unsigned_short;
       if (n3 == (unsigned char)~0L)
@@ -2933,10 +3010,13 @@ read_range_type (pp, typenums)
   else if (n2 == -n3 -1)
     {
       /* a signed type */
+      /* FIXME -- the only way to distinguish `int' from `long' is to look
+	 at its name!  */
+      if ((n3 == (1 << (8 * sizeof (long) - 1)) - 1) &&
+       long_kludge_name && long_kludge_name[0] == 'l' /* long */)
+	 return builtin_type_long;
       if (n3 == (1 << (8 * sizeof (int) - 1)) - 1)
 	return builtin_type_int;
-      if (n3 == (1 << (8 * sizeof (long) - 1)) - 1)
-	 return builtin_type_long;
       if (n3 == (1 << (8 * sizeof (short) - 1)) - 1)
 	return builtin_type_short;
       if (n3 == (1 << (8 * sizeof (char) - 1)) - 1)
@@ -2971,26 +3051,6 @@ read_range_type (pp, typenums)
   bzero (TYPE_FIELDS (result_type), 2 * sizeof (struct field));
   TYPE_FIELD_BITPOS (result_type, 0) = n2;
   TYPE_FIELD_BITPOS (result_type, 1) = n3;
-
-#if 0
-/* Note that TYPE_LENGTH (result_type) is just overridden a few
-   statements down.  What do we really need here?  */
-  /* We have to figure out how many bytes it takes to hold this
-     range type.  I'm going to assume that anything that is pushing
-     the bounds of a long was taken care of above.  */
-  if (n2 >= MIN_OF_C_TYPE(char) && n3 <= MAX_OF_C_TYPE(char))
-    TYPE_LENGTH (result_type) = 1;
-  else if (n2 >= MIN_OF_C_TYPE(short) && n3 <= MAX_OF_C_TYPE(short))
-    TYPE_LENGTH (result_type) = sizeof (short);
-  else if (n2 >= MIN_OF_C_TYPE(int) && n3 <= MAX_OF_C_TYPE(int))
-    TYPE_LENGTH (result_type) = sizeof (int);
-  else if (n2 >= MIN_OF_C_TYPE(long) && n3 <= MAX_OF_C_TYPE(long))
-    TYPE_LENGTH (result_type) = sizeof (long);
-  else
-    /* Ranged type doesn't fit within known sizes.  */
-    /* FIXME -- use "long long" here.  */
-    return error_type (pp);
-#endif
 
   TYPE_LENGTH (result_type) = TYPE_LENGTH (TYPE_TARGET_TYPE (result_type));
 

@@ -977,10 +977,11 @@ parse_number (p, len, parsed_float, putithere)
 	}
       if (i >= base)
 	return ERROR;		/* Invalid digit in this base */
-      if(!unsigned_p && (prevn >= n))
+      /* Portably test for overflow (only works for nonzero values, so make
+	 a second check for zero).  */
+      if((prevn >= n) && n != 0)
 	 unsigned_p=1;		/* Try something unsigned */
-      /* Don't do the range check if n==i and i==0, since that special
-	 case will give an overflow error. */
+      /* If range checking enabled, portably test for unsigned overflow.  */
       if(RANGE_CHECK && n!=0)
       {	
 	 if((unsigned_p && (unsigned)prevn >= (unsigned)n))

@@ -1,3 +1,32 @@
+Thu Dec  5 03:34:21 1991  John Gilmore  (gnu at cygnus.com)
+
+	* inflow.c:  Remember whether GDB has a terminal.  Avoid switching
+	terminals back and forth if we don't have one.
+
+	* c-exp.y (parse_number):  Zero is not an unsigned int constant!
+	* dbxread.c (read_dbx_symtab):  Enum type numbers can be in (1,2) form.
+
+	Improve type parsing.
+	* buildsym.c (define_symbol, read_range_type): Add
+	long_kludge_name that passes the names of range types being
+	defined, down to where we must choose between 'int' and 'long'
+	variants.  This fails on Sun C anyway since the compiler itself is
+	confused between int and long.
+	(read_array_type, cleanup_undefined_types):  Correct the size of
+	array type whose element-type size isn't immediately known.
+
+	Early preparation to blow away many builtin types, building them
+	on the fly as needed.  Don't compare types to builtin types with
+	==; examine the relevant fields instead.
+	* coffread.c (process_coff_symbol: C_ARG, C_REGPARM):  Avoid ==.
+	* buildsym.c (define_symbol, case 'p'):  Avoid ==.
+	* valops.c (value_arg_coerce):  Avoid ==.  Don't assume host and
+	target types are the same.
+	* valprint.c (val_print):  I finally understand arrays, remove FIXME.
+
+	* symmisc.c (printpsyms_command):  Reduce redundancy, and put all
+	addresses in GDB itself into parens for easy cleanup and diffing.
+
 Wed Dec  4 21:05:30 1991  Fred Fish  (fnf at cygnus.com)
 
 	* dwarfread (enum_type):  Arrange for the order of enumeration

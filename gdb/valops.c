@@ -69,7 +69,7 @@ value_cast (type, arg2)
 	     offset the pointer rather than just change its type.  */
 	  struct type *t1 = TYPE_TARGET_TYPE (type);
 	  struct type *t2 = TYPE_TARGET_TYPE (VALUE_TYPE (arg2));
-	  if (TYPE_CODE (t1) == TYPE_CODE_STRUCT
+	  if (   TYPE_CODE (t1) == TYPE_CODE_STRUCT
 	      && TYPE_CODE (t2) == TYPE_CODE_STRUCT
 	      && TYPE_NAME (t1) != 0) /* if name unknown, can't have supercl */
 	    {
@@ -565,10 +565,11 @@ value_arg_coerce (arg)
   type = VALUE_TYPE (arg);
 
   if (TYPE_CODE (type) == TYPE_CODE_INT
-      && TYPE_LENGTH (type) < sizeof (int))
+      && TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
     return value_cast (builtin_type_int, arg);
 
-  if (type == builtin_type_float)
+  if (TYPE_CODE (type) == TYPE_CODE_FLT
+      && TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
     return value_cast (builtin_type_double, arg);
 
   return arg;
@@ -949,7 +950,7 @@ value_string (ptr, len)
 
 /* Helper function used by value_struct_elt to recurse through baseclasses.
    Look for a field NAME in ARG1. Adjust the address of ARG1 by OFFSET bytes,
-   and treat the result as having type TYPE.
+   and search in it assuming it has (class) type TYPE.
    If found, return value, else return NULL.
 
    If LOOKING_FOR_BASECLASS, then instead of looking for struct fields,
@@ -1019,7 +1020,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 
 /* Helper function used by value_struct_elt to recurse through baseclasses.
    Look for a field NAME in ARG1. Adjust the address of ARG1 by OFFSET bytes,
-   and treat the result as having type TYPE.
+   and search in it assuming it has (class) type TYPE.
    If found, return value, else return NULL. */
 
 static value
@@ -1127,7 +1128,7 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
   if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
     error ("not implemented: member type in value_struct_elt");
 
-  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
+  if (   TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
     error ("Attempt to extract a component of a value that is not a %s.", err);
 
@@ -1275,7 +1276,7 @@ check_field (arg1, name)
   if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
     error ("not implemented: member type in check_field");
 
-  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
+  if (   TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
     error ("Internal error: `this' is not an aggregate");
 
@@ -1283,10 +1284,11 @@ check_field (arg1, name)
 }
 
 /* C++: Given an aggregate type DOMAIN, and a member name NAME,
-   return the address of this member as a pointer to member
+   return the address of this member as a "pointer to member"
    type.  If INTYPE is non-null, then it will be the type
    of the member we are looking for.  This will help us resolve
-   pointers to member functions.  */
+   "pointers to member functions".  This function is only used
+   to resolve user expressions of the form "&class::member".  */
 
 value
 value_struct_elt_for_address (domain, intype, name)
@@ -1299,7 +1301,7 @@ value_struct_elt_for_address (domain, intype, name)
 
   struct type *baseclass;
 
-  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
+  if (   TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
     error ("Internal error: non-aggregate type to value_struct_elt_for_address");
 
@@ -1310,6 +1312,7 @@ value_struct_elt_for_address (domain, intype, name)
       for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); i--)
 	{
 	  char *t_field_name = TYPE_FIELD_NAME (t, i);
+
 	  if (t_field_name && !strcmp (t_field_name, name))
 	    {
 	      if (TYPE_FIELD_STATIC (t, i))
@@ -1317,7 +1320,10 @@ value_struct_elt_for_address (domain, intype, name)
 		  char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (t, i);
 		  struct symbol *sym =
 		      lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
-		  if (! sym) error ("Internal error: could not find physical static variable named %s", phys_name);
+		  if (! sym)
+		    error (
+	"Internal error: could not find physical static variable named %s",
+			   phys_name);
 		  return value_from_longest (
 			lookup_pointer_type (TYPE_FIELD_TYPE (t, i)),
 				      (LONGEST)SYMBOL_BLOCK_VALUE (sym));
@@ -1345,7 +1351,7 @@ value_struct_elt_for_address (domain, intype, name)
   /* Destructors are a special case.  */
   if (destructor_name_p (name, t))
     {
-      error ("pointers to destructors not implemented yet");
+      error ("member pointers to destructors not implemented yet");
     }
 
   /* Perform all necessary dereferencing.  */
@@ -1374,7 +1380,8 @@ value_struct_elt_for_address (domain, intype, name)
 	      else
 		j = 0;
 
-	      check_stub_method (t, i, j);
+	      if (TYPE_FLAGS (TYPE_FN_FIELD_TYPE (f, j)) & TYPE_FLAG_STUB)
+	        check_stub_method (t, i, j);
 	      if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
 		{
 		  return value_from_longest (
@@ -1388,7 +1395,9 @@ value_struct_elt_for_address (domain, intype, name)
 		  struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
 						    0, VAR_NAMESPACE, 0, NULL);
 		  v = locate_var_value (s, 0);
-	          VALUE_TYPE (v) = lookup_pointer_type (lookup_member_type (TYPE_FN_FIELD_TYPE (f, j), baseclass));
+	          VALUE_TYPE (v) = lookup_pointer_type (
+			lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
+					    baseclass));
 	          return v;
 		}
 	    }
