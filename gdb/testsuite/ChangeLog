@@ -1,5 +1,7 @@
 Wed Mar  5 00:00:43 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* config/vr5000.exp: New file.
+
 	* config/monitor.exp(gdb_target_monitor): Add pattern for
 	"Ending remote" to detect errors in connecting.
 
