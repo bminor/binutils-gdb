@@ -8,6 +8,7 @@
 #	OTHER_TEXT_SECTIONS - these get put in .text when relocating
 #	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
 #		(e.g., .PARISC.global)
+#	OTHER_BSS_SECTIONS - other than .bss .sbss ...
 #	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
@@ -26,6 +27,10 @@
 #		start address of shared library.
 #	INPUT_FILES - INPUT command of files to always include
 #	WRITABLE_RODATA - if set, the .rodata section should be writable
+#	INIT_START, INIT_END -  statements just before and just after
+# 	combination of .init sections.
+#	FINI_START, FINI_END - statements just before and just after
+# 	combination of .fini sections.
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
@@ -169,7 +174,13 @@ SECTIONS
   .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
 
-  .init        ${RELOCATING-0} : { KEEP (*(.init))	} =${NOP-0}
+  .init        ${RELOCATING-0} : 
+  { 
+    ${INIT_START}
+    KEEP (*(.init))
+    ${INIT_END}
+  } =${NOP-0}
+
   ${DATA_PLT-${PLT}}
   .text    ${RELOCATING-0} :
   {
@@ -184,7 +195,12 @@ SECTIONS
   } =${NOP-0}
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
-  .fini    ${RELOCATING-0} : { KEEP (*(.fini))		} =${NOP-0}
+  .fini    ${RELOCATING-0} :
+  {
+    ${FINI_START}
+    KEEP (*(.fini))
+    ${FINI_END}
+  } =${NOP-0}
   ${WRITABLE_RODATA-${RODATA}}
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
@@ -233,6 +249,7 @@ SECTIONS
       .bss section disappears because there are no input sections.  */
    ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   }
+  ${RELOCATING+${OTHER_BSS_SECTIONS}}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${RELOCATING+_end = .;}
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
