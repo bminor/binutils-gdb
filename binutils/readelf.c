@@ -1023,6 +1023,7 @@ struct option options [] =
   {"sections", no_argument, 0, 'S'},
   {"section-headers", no_argument, 0, 'S'},
   {"symbols", no_argument, 0, 's'},
+  {"syms", no_argument, 0, 's'},
   {"relocs", no_argument, 0, 'r'},
   {"dynamic", no_argument, 0, 'd'},
   {"version-info", no_argument, 0, 'V'},
@@ -1051,7 +1052,7 @@ usage ()
   fprintf (stdout, _("  -S or --section-headers or --sections\n"));
   fprintf (stdout, _("                            Display the sections' header\n"));
   fprintf (stdout, _("  -e or --headers           Equivalent to: -h -l -S\n"));
-  fprintf (stdout, _("  -s or --symbols           Display the symbol table\n"));
+  fprintf (stdout, _("  -s or --syms or --symbols Display the symbol table\n"));
   fprintf (stdout, _("  -r or --relocs            Display the relocations (if present)\n"));
   fprintf (stdout, _("  -d or --dynamic           Display the dynamic segment (if present)\n"));
   fprintf (stdout, _("  -V or --version-info      Display the version sections (if present)\n"));
@@ -3200,9 +3201,16 @@ process_section_contents (file)
 	  unsigned char * data;
 	  char *          start;
 
-	  printf (_("\nHex dump of section '%s':\n"), SECTION_NAME (section));
-
 	  bytes = section->sh_size;
+
+	  if (bytes == 0)
+	    {
+	      printf (_("\nSection %d has no data to dump.\n"), i);
+	      continue;
+	    }
+	  else
+	    printf (_("\nHex dump of section '%s':\n"), SECTION_NAME (section));
+
 	  addr  = section->sh_addr;
 
 	  GET_DATA_ALLOC (section->sh_offset, bytes, start, char *,

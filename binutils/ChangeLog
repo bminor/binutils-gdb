@@ -1,3 +1,8 @@
+Sun Sep  6 16:15:47 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (process_section_contents): Do not try to dump empty
+	sections. 
+
 Sat Sep  5 19:17:10 1998  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* dlltool.c (scan_all_symbols): Don't re-export symbols exported
