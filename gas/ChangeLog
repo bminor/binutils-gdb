@@ -1,3 +1,14 @@
+Wed Aug 31 17:43:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in (prefix, exec_prefix): Use @-subtitutions.
+
+	* aclocal.m4 (AC_OUTPUT_LINKS): Deleted redefinition, since
+	autoconf 1.109 has this fixed.
+	* configure.in: Don't change quote characters around AC_MSG_ERROR
+	invocation.  Don't use AC_HEADER_STDC, since it requires running a
+	program.  Cache NEED_*_DECLARATION values.
+	* configure, conf.in: Regenerated with a modified autoconf 1.109.
+
 Wed Aug 31 11:20:48 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/obj-coff.h (S_IS_DEFINED): Absolute symbols are defined

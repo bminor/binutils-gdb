@@ -22,9 +22,6 @@
  */
 #undef STACK_DIRECTION
 
-/* Define if you have the ANSI C header files.  */
-#undef STDC_HEADERS
-
 /* Should gas use high-level BFD interfaces?  */
 #undef BFD_ASSEMBLER
 

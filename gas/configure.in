@@ -196,17 +196,13 @@ dnl
 dnl Make sure the desired support files exist.
 dnl
 
-changequote(<<<,>>>)dnl
-
-if [ ! -r ${srcdir}/config/tc-${cpu_type}.c ]; then
+if test ! -r ${srcdir}/config/tc-${cpu_type}.c; then
   AC_MSG_ERROR(GAS does not support target CPU ${cpu_type})
 fi
 
-if [ ! -r ${srcdir}/config/obj-${obj_format}.c ]; then
+if test ! -r ${srcdir}/config/obj-${obj_format}.c; then
   AC_MSG_ERROR(GAS does not have support for object file format ${obj_format})
 fi
-
-changequote([,])dnl
 
 # and target makefile frag
 
@@ -295,7 +291,6 @@ esac
 AC_PROG_CC
 AC_PROG_INSTALL
 
-AC_HEADER_STDC
 AC_CHECK_HEADERS(string.h stdlib.h memory.h strings.h unistd.h stdarg.h varargs.h errno.h sys/types.h)
 
 dnl ansidecl.h will deal with const
@@ -306,7 +301,8 @@ AC_C_INLINE
 # Some non-ANSI preprocessors botch requoting inside strings.  That's bad
 # enough, but on some of those systems, the assert macro relies on requoting
 # working properly!
-AC_CHECKING([for working assert macro])
+AC_MSG_CHECKING([for working assert macro])
+AC_CACHE_VAL(gas_cv_assert_ok,
 AC_TRY_LINK([#include <assert.h>
 #include <stdio.h>], [
 /* check for requoting problems */
@@ -316,12 +312,15 @@ assert (!strcmp(s, "foo bar baz quux"));
 /* check for newline handling */
 assert (a == b
         || c == d);
-], , AC_DEFINE(BROKEN_ASSERT))
+], gas_cv_assert_ok=yes, gas_cv_assert_ok=no))dnl
+AC_MSG_RESULT($gas_cv_assert_ok)
+test $gas_cv_assert_ok = yes || AC_DEFINE(BROKEN_ASSERT)
 
 # On some systems, the system header files may not declare malloc, realloc,
 # and free.  There are places where gas needs these functions to have been
 # declared -- such as when taking their addresses.
-AC_CHECKING([whether malloc declaration is required])
+AC_MSG_CHECKING([whether a malloc declaration is required])
+AC_CACHE_VAL(gas_cv_malloc_decl_needed,
 AC_TRY_LINK([
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
@@ -338,8 +337,12 @@ AC_TRY_LINK([
 ], [
 char *(*f) ();
 f = (char *(*)()) malloc;
-], , AC_DEFINE(NEED_MALLOC_DECLARATION))
-AC_CHECKING([free declaration required])
+], gas_cv_malloc_decl_needed=no, gas_cv_malloc_decl_needed=yes))dnl
+AC_MSG_RESULT($gas_cv_malloc_decl_needed)
+test $gas_cv_malloc_decl_needed = no || AC_DEFINE(NEED_MALLOC_DECLARATION)
+
+AC_MSG_CHECKING([whether a free declaration is required])
+AC_CACHE_VAL(gas_cv_free_decl_needed,
 AC_TRY_LINK([
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
@@ -356,11 +359,14 @@ AC_TRY_LINK([
 ], [
 int (*f) ();
 f = (int (*)()) free;
-], , AC_DEFINE(NEED_FREE_DECLARATION))
+], gas_cv_free_decl_needed=no, gas_cv_free_decl_needed=yes))
+AC_MSG_RESULT($gas_cv_free_decl_needed)
+test $gas_cv_free_decl_needed = no || AC_DEFINE(NEED_FREE_DECLARATION)
 
 # Does errno.h declare errno, or do we have to add a separate declaration
 # for it?
-AC_CHECKING([errno declaration required])
+AC_MSG_CHECKING([whether an errno declaration is required])
+AC_CACHE_VAL(gas_cv_errno_decl_needed,
 AC_TRY_LINK([
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -368,7 +374,9 @@ AC_TRY_LINK([
 ], [
 int x;
 x = errno;
-], , AC_DEFINE(NEED_ERRNO_DECLARATION))
+], gas_cv_errno_decl_needed=no, gas_cv_errno_decl_needed=yes))
+AC_MSG_RESULT($gas_cv_errno_decl_needed)
+test $gas_cv_errno_decl_needed = no || AC_DEFINE(NEED_ERRNO_DECLARATION)
 
 AC_CONFIG_SUBDIRS(testsuite)
 

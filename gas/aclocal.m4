@@ -1,36 +1,4 @@
 dnl
-dnl The autoconf 1.107 version of this doesn't substitute variables
-dnl in the names of the links or their targets.  This is a problem...
-dnl
-undefine([AC_OUTPUT_LINKS])dnl
-define(AC_OUTPUT_LINKS,
-[EOF
-
-cat >> ${CONFIG_STATUS} <<EOF
-ac_links="$1"
-ac_files="$2"
-EOF
-
-cat >> ${CONFIG_STATUS} <<\EOF
-while test -n "${ac_files}"; do
-  set ${ac_links}; ac_link=[$]1; shift; ac_links=[$]*
-  set ${ac_files}; ac_file=[$]1; shift; ac_files=[$]*
-
-  echo "linking ${ac_link} to ${srcdir}/${ac_file}"
-
-  if test ! -r ${srcdir}/${ac_file}; then
-    AC_MSG_ERROR(${srcdir}/${ac_file}: File not found)
-  fi
-  rm -f ${ac_link}
-  # Make a symlink if possible; otherwise try a hard link.
-  if ln -s ${srcdir}/${ac_file} ${ac_link} 2>/dev/null ||
-    ln ${srcdir}/${ac_file} ${ac_link}; then :
-  else
-    AC_MSG_ERROR(can not link ${ac_link} to ${srcdir}/${ac_file})
-  fi
-done
-])dnl
-dnl
 dnl This ugly hack is needed because the Cygnus configure script won't
 dnl tell us what CC is going to be, and "cc" isn't always right.  (The
 dnl top-level Makefile will always override anything we choose here, so
