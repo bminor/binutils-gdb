@@ -55,6 +55,7 @@ libiberty
 libgcc
 libg++
 make
+mmalloc
 newlib
 prms
 rcs
