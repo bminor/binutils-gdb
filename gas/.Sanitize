@@ -15,12 +15,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="mpw-config.in mpw-make.in ChangeLog.mpw"
-else
-	lose_these_too="mpw-config.in mpw-make.in ChangeLog.mpw"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -81,6 +75,8 @@ listing.c
 listing.h
 literal.c
 messages.c
+mpw-config.in
+mpw-make.in
 obj.h
 output-file.c
 output-file.h
