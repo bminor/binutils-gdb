@@ -1,3 +1,28 @@
+Tue Oct  8 12:18:54 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* reloc.c, section.c, syms.c, targets.c: correct info-node
+	structure in *doc* comments.
+	doc/Makefile: stop hiding complaints from makeinfo.
+
+Sun Oct  6 19:10:06 1991  John Gilmore  (gnu at cygnus.com)
+
+	* aoutx.h (...some_aout_object_p):  Take a third parameter,
+	the internal_exec struct, and avoid ever looking at an
+	external_exec.  All callers changed to read the entire
+	external_exec struct, swap and check its magic number, 
+	swap in the whole structure, and pass the swapped-in version to
+	some_aout_object_p.
+	* bout.c:  Bring into modern era.  Use single _object_p routine
+	for big- aand little-endian.  Provide internal and external
+	exec header structs.  Use separate swap-in and swap-out routines.
+
+	* libaout.h:  Move struct internal_exec from ../include/aout64.h
+	to here.  Add obj_symbol_entry_size to struct aoutdata.
+	* aoutx.h (...some_aout_object_p):  Set obj_symbol_entry_size.
+
+	* ../include/aout64.h:  Change EXTERNAL_LIST_SIZE to
+	EXTERNAL_NLIST_SIZE.  Callers changed.
+	
 Fri Oct  4 18:18:46 1991  John Gilmore  (gnu at cygnus.com)
 
 	* bfd.c:  Remove strerror() to libiberty.

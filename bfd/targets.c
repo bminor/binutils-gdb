@@ -63,11 +63,15 @@ Once the BFD has been opened and the target selected, the file format
 may be determined. This is done by calling @code{bfd_check_format} on
 the BFD with a suggested format. The routine returns @code{true} when
 the application guesses right.
+
+@menu
+* bfd_target::
+@end menu
 */
 
 
 /*proto* bfd_target
-@node bfd_target
+@node bfd_target,  , Targets, Targets
 @subsection bfd_target
 This structure contains everything that BFD knows about a target.
 It includes things like its byte order, name, what routines to call
@@ -119,13 +123,14 @@ $  char *name;
 The "flavour" of a back end is a general indication about the contents
 of a file.
 
-$  enum target_flavour_enum {
-$    bfd_target_aout_flavour_enum,
-$    bfd_target_coff_flavour_enum,
-$    bfd_target_elf_flavour_enum,
-$    bfd_target_ieee_flavour_enum,
-$    bfd_target_oasys_flavour_enum,
-$    bfd_target_srec_flavour_enum} flavour;
+$  enum target_flavour {
+$    bfd_target_unknown_flavour,
+$    bfd_target_aout_flavour,
+$    bfd_target_coff_flavour,
+$    bfd_target_elf_flavour,
+$    bfd_target_ieee_flavour,
+$    bfd_target_oasys_flavour,
+$    bfd_target_srec_flavour} flavour;
 
 The order of bytes within the data area of a file.
 
@@ -233,7 +238,7 @@ $  SDEF (unsigned int, _bfd_canonicalize_reloc, (bfd *, sec_ptr, arelent **,
 $                                               struct symbol_cache_entry**));
 $  SDEF (struct symbol_cache_entry  *, _bfd_make_empty_symbol, (bfd *));
 $  SDEF (void,     _bfd_print_symbol, (bfd *, PTR, struct symbol_cache_entry  *,
-$                                      bfd_print_symbol_enum_type));
+$                                      bfd_print_symbol_type));
 $#define bfd_print_symbol(b,p,s,e) BFD_SEND(b, _bfd_print_symbol, (b,p,s,e))
 $  SDEF (alent *,   _get_lineno, (bfd *, struct symbol_cache_entry  *));
 $
@@ -325,7 +330,14 @@ extern bfd_target DEFAULT_VECTOR;
 #define ZB_OUT_VEC_BIG_HOST     b_out_vec_big_host
 #define SUNOS_VEC_BIG_HOST      sunos_big_vec
 #define DEMO_64_VEC             demo_64_vec
+
+/* We have no oasys tools anymore, so we can't test any of this
+   anymore. If you want to test the stuff yourself, go ahead...
+   steve@cygnus.com */
+#if 0
 #define OASYS_VEC               oasys_vec
+#endif
+
 #define IEEE_VEC                ieee_vec
 #define M88K_BCS_VEC            m88k_bcs_vec
 #define SREC_VEC                srec_vec
@@ -338,11 +350,11 @@ bfd_target *target_vector[] = {
 
 #ifdef DEFAULT_VECTOR
         &DEFAULT_VECTOR,
-#endif /* DEFAULT_VECTOR */
+#endif
 
 #ifdef  I386COFF_VEC
         &I386COFF_VEC,
-#endif  /* I386COFF_VEC */
+#endif
 
 #ifdef ECOFF_LITTLE_VEC
         &ECOFF_LITTLE_VEC,
@@ -351,18 +363,18 @@ bfd_target *target_vector[] = {
 #ifdef ECOFF_BIG_VEC
         &ECOFF_BIG_VEC,
 #endif
+
 #ifdef IEEE_VEC
         &IEEE_VEC,
-#endif /* IEEE_VEC */
+#endif
 
 #ifdef OASYS_VEC
         &OASYS_VEC,
-#endif /* OASYS_VEC */
+#endif
 
 #ifdef SUNOS_VEC_BIG_HOST
         &SUNOS_VEC_BIG_HOST,
-#endif /* SUNOS_BIG_VEC */
-
+#endif
 
 #ifdef HOST_64_BIT
 #ifdef DEMO_64_VEC
@@ -372,43 +384,48 @@ bfd_target *target_vector[] = {
 
 #ifdef M88K_BCS_VEC
         &M88K_BCS_VEC,
-#endif /* M88K_BCS_VEC */
+#endif
 
 #ifdef SREC_VEC
         &SREC_VEC,
-#endif /* SREC_VEC */
+#endif
         
 #ifdef ICOFF_LITTLE_VEC
         &ICOFF_LITTLE_VEC,
-#endif /* ICOFF_LITTLE_VEC */
+#endif
 
 #ifdef ICOFF_BIG_VEC
         &ICOFF_BIG_VEC,
-#endif /* ICOFF_BIG_VEC */
+#endif
 
 #ifdef ELF_LITTLE_VEC
         &ELF_LITTLE_VEC,
-#endif /* ELF_LITTLE_VEC */
+#endif
 
 #ifdef ELF_BIG_VEC
         &ELF_BIG_VEC,
-#endif /* ELF_BIG_VEC */
+#endif
 
 #ifdef B_OUT_VEC_LITTLE_HOST
         &B_OUT_VEC_LITTLE_HOST,
-#endif /* B_OUT_VEC_LITTLE_HOST */
+#endif
 
 #ifdef B_OUT_VEC_BIG_HOST
         &B_OUT_VEC_BIG_HOST,
-#endif /* B_OUT_VEC_BIG_HOST */
+#endif
 
 #ifdef  M68KCOFF_VEC
         &M68KCOFF_VEC,
-#endif  /* M68KCOFF_VEC */
+#endif
 
 #ifdef	A29KCOFF_BIG_VEC
 	&A29KCOFF_BIG_VEC,
-#endif	/* A29KCOFF_BIG_VEC */
+#endif
+
+#ifdef	TRAD_CORE
+	&trad_core_big_vec,
+	&trad_core_little_vec,
+#endif
 
         NULL, /* end of list marker */
 };
