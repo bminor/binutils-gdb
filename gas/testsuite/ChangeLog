@@ -1,6 +1,9 @@
 start-sanitize-v850
 Fri Aug 30 00:37:55 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/v850/misc.s: Tweak register numbers for better testing.
+	* gas/v850/basic.exp (misc_tests): Corresponding changes.
+
 	* gas/v850/hilo.s: New testfile.
 	* gas/v850/basic.exp: Run hilo tests.
 
