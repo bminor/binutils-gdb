@@ -1,3 +1,8 @@
+Tue Jul 14 11:00:16 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* doc/c-i386.texi: Fix a typo.  Use the term 80-bit real rather
+	than temporary real.
+
 Mon Jul 13 13:55:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (subsegs_finish): Don't align the segments if there were

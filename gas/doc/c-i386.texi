@@ -77,7 +77,7 @@ reversed order.  @ref{i386-Bugs}.
 In AT&T syntax the size of memory operands is determined from the last
 character of the opcode name.  Opcode suffixes of @samp{b}, @samp{w},
 and @samp{l} specify byte (8-bit), word (16-bit), and long (32-bit)
-memory references.  Intel syntax accomplishes this by prefixes memory
+memory references.  Intel syntax accomplishes this by prefixing memory
 operands (@emph{not} the opcodes themselves) with @samp{byte ptr},
 @samp{word ptr}, and @samp{dword ptr}.  Thus, Intel @samp{mov al, byte
 ptr @var{foo}} is @samp{movb @var{foo}, %al} in AT&T syntax.
@@ -215,18 +215,17 @@ to repeat string instructions, to provide section overrides, to perform
 bus lock operations, and to give operand and address size (16-bit
 operands are specified in an instruction by prefixing what would
 normally be 32-bit operands with a ``operand size'' opcode prefix).
-Opcode prefixes are usually given as single-line instructions with no
-operands, and must directly precede the instruction they act upon.  For
-example, the @samp{scas} (scan string) instruction is repeated with:
+Opcode prefixes are best written on the same line as the instruction
+they act upon. For example, the @samp{scas} (scan string) instruction is
+repeated with:
+
 @smallexample
-        repne
-        scas
+        repne scas %es:(%edi),%al
 @end smallexample
-@noindent
-or
-@smallexample
-        repne/scas
-@end smallexample
+
+You may also place prefixes on the lines immediately preceding the
+opcode, but this circumvents checks that @code{@value{AS}} does with
+prefixes, and will not work with all prefixes.
 
 Here is a list of opcode prefixes:
 
@@ -242,7 +241,13 @@ using the @var{section}:@var{memory-operand} form for memory references.
 Operand/Address size prefixes @samp{data16} and @samp{addr16}
 change 32-bit operands/addresses into 16-bit operands/addresses,
 while @samp{data32} and @samp{addr32} change 16-bit ones (in a
-@code{.code16} section) into 32-bit operands/addresses.
+@code{.code16} section) into 32-bit operands/addresses.  These prefixes
+@emph{must} appear on the same line of code as the opcode they modify.
+For example, in a 16-bit @code{.code16} section, you might write:
+
+@smallexample
+        addr32 jmpl *(%ebx)
+@end smallexample
 
 @cindex bus lock prefixes, i386
 @cindex inhibiting interrupts, i386
@@ -289,7 +294,7 @@ to calculate the address of the operand.  If no @var{scale} is
 specified, @var{scale} is taken to be 1.  @var{section} specifies the
 optional section register for the memory operand, and may override the
 default section register (see a 80386 manual for section register
-defaults). Note that section overrides in AT&T syntax @emph{must} have
+defaults). Note that section overrides in AT&T syntax @emph{must}
 be preceded by a @samp{%}.  If you specify a section override which
 coincides with the default section register, @code{@value{AS}} does @emph{not}
 output any section register override prefixes to assemble the given
@@ -376,9 +381,9 @@ types.  Constructors build these data types into memory.
 Floating point constructors are @samp{.float} or @samp{.single},
 @samp{.double}, and @samp{.tfloat} for 32-, 64-, and 80-bit formats.
 These correspond to opcode suffixes @samp{s}, @samp{l}, and @samp{t}.
-@samp{t} stands for temporary real, and that the 80387 only supports
-this format via the @samp{fldt} (load temporary real to stack top) and
-@samp{fstpt} (store temporary real and pop stack) instructions.
+@samp{t} stands for 80-bit real.  The 80387 only supports this format
+via the @samp{fldt} (load 80-bit real to stack top) and @samp{fstpt}
+(store 80-bit real and pop stack) instructions.
 
 @cindex @code{word} directive, i386
 @cindex @code{long} directive, i386
@@ -386,11 +391,12 @@ this format via the @samp{fldt} (load temporary real to stack top) and
 @cindex @code{quad} directive, i386
 @item
 Integer constructors are @samp{.word}, @samp{.long} or @samp{.int}, and
-@samp{.quad} for the 16-, 32-, and 64-bit integer formats.  The corresponding
-opcode suffixes are @samp{s} (single), @samp{l} (long), and @samp{q}
-(quad).  As with the temporary real format the 64-bit @samp{q} format is
-only present in the @samp{fildq} (load quad integer to stack top) and
-@samp{fistpq} (store quad integer and pop stack) instructions.
+@samp{.quad} for the 16-, 32-, and 64-bit integer formats.  The
+corresponding opcode suffixes are @samp{s} (single), @samp{l} (long),
+and @samp{q} (quad).  As with the 80-bit real format, the 64-bit
+@samp{q} format is only present in the @samp{fildq} (load quad integer
+to stack top) and @samp{fistpq} (store quad integer and pop stack)
+instructions.
 @end itemize
 
 Register to register operations should not use opcode suffixes.
