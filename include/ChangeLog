@@ -1,3 +1,7 @@
+Tue Oct  1 04:58:42 1991  John Gilmore  (gnu at cygnus.com)
+
+	* sys/h-vaxult.h:  Make it work.  (David Taylor <taylor@think.com>)
+
 Mon Sep 30 12:52:35 1991  Per Bothner  (bothner at cygnus.com)
 
 	* sysdep.h: Define NEWSOS3_SYS, and use it.
