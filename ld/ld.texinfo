@@ -380,6 +380,7 @@ specified.
 @cindex search directory, from cmd line
 @kindex -L@var{dir}
 @item -L@var{searchdir} 
+@itemx -L @var{searchdir} 
 Add path @var{searchdir} to the list of paths that @code{ld} will search
 for archive libraries and @code{ld} control scripts.  You may use this
 option any number of times.
@@ -512,7 +513,8 @@ Omit all symbol information from the output file.
 Normally, when @code{ld} places the global common symbols in the
 appropriate output sections, it sorts them by size.  First come all the
 one byte symbols, then all the two bytes, then all the four bytes, and
-then everything else.  This option disables that sorting.
+then everything else.  This is to prevent gaps between symbols due to
+alignment constraints.  This option disables that sorting.
 
 @item -Tbss @var{org}
 @kindex -Tbss @var{org}
@@ -1404,7 +1406,7 @@ section names by either commas or whitespace.
 
 @item * (@var{section})
 @itemx * (@var{section}, @var{section}, @dots{})
-@itemx * (@var{section} @var{section} @dots{}
+@itemx * (@var{section} @var{section} @dots{})
 @cindex input sections to output section
 @kindex *(@var{section})
 Instead of explicitly naming particular input files in a link control
@@ -1431,9 +1433,14 @@ SECTIONS @{
 @}
 @end example
 
+@samp{[ @var{section} @dots{} ]} used to be accepted as an alternate way
+to specify named sections from all unallocated input files.  Because
+some operating systems (VMS) allow brackets in file names, that notation
+is no longer supported.
+
 @item @var{filename}@code{( COMMON )}
-@itemx ( COMMON )
-@kindex ( COMMON )
+@itemx *( COMMON )
+@kindex *( COMMON )
 @cindex uninitialized data
 @cindex commons in output
 Specify where in your output file to place uninitialized data
@@ -1445,11 +1452,6 @@ mechanisms for specifying where to place input-file sections:
 @code{ld} permits you to refer to uninitialized data as if it
 were in an input-file section named @code{COMMON}, regardless of the
 input file's format.
-
-@samp{[ @var{section} @dots{} ]} used to be accepted as an alternate way
-to specify named sections from all unallocated input files.  Because
-some operating systems (VMS) allow brackets in file names, this notation
-is no longer supported.
 @end table
 
 For example, the following command script arranges the output file into
