@@ -1239,7 +1239,10 @@ get_prev_frame (struct frame_info *next_frame)
     return next_frame->prev;
   next_frame->prev_p = 1;
 
-  /* If we're inside the entry file, it isn't valid.  */
+  /* If we're inside the entry file, it isn't valid.  Don't apply this
+     test to a dummy frame - dummy frame PC's typically land in the
+     entry file.  Don't apply this test to the sentinel frame.
+     Sentinel frames should always be allowed to unwind.  */
   /* NOTE: drow/2002-12-25: should there be a way to disable this
      check?  It assumes a single small entry file, and the way some
      debug readers (e.g.  dbxread) figure out which object is the
@@ -1247,11 +1250,29 @@ get_prev_frame (struct frame_info *next_frame)
   /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
      then it should probably be moved to before the ->prev_p test,
      above.  */
-  if (inside_entry_file (get_frame_pc (next_frame)))
+  if (next_frame->type != DUMMY_FRAME && next_frame->level >= 0
+      && inside_entry_file (get_frame_pc (next_frame)))
     {
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "Outermost frame - inside entry file\n");
+      return NULL;
+    }
+
+  /* If we're already inside the entry function for the main objfile,
+     then it isn't valid.  Don't apply this test to a dummy frame -
+     dummy frame PC's typically land in the entry func.  Don't apply
+     this test to the sentinel frame.  Sentinel frames should always
+     be allowed to unwind.  */
+  /* NOTE: cagney/2003-02-25: Don't enable until someone has found
+     hard evidence that this is needed.  */
+  if (0
+      && next_frame->type != DUMMY_FRAME && next_frame->level >= 0
+      && inside_entry_func (get_frame_pc (next_frame)))
+    {
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - inside entry func\n");
       return NULL;
     }
 
@@ -1324,6 +1345,9 @@ get_prev_frame (struct frame_info *next_frame)
     /* FIXME: cagney/2002-12-18: Instead of this hack, should just
        save the frame ID directly.  */
     struct frame_id id = frame_id_unwind (next_frame);
+    /* Check that the unwound ID is valid.  As of 2003-02-24 the
+       x86-64 was returning an invalid frame ID when trying to do an
+       unwind a sentinel frame that belonged to a frame dummy.  */
     if (!frame_id_p (id))
       {
 	if (frame_debug)
@@ -1331,6 +1355,20 @@ get_prev_frame (struct frame_info *next_frame)
 			      "Outermost frame - unwound frame ID invalid\n");
 	return NULL;
       }
+    /* Check that the new frame isn't inner to (younger, below, next)
+       the old frame.  If that happens the frame unwind is going
+       backwards.  */
+    /* FIXME: cagney/2003-02-25: Ignore the sentinel frame since that
+       doesn't have a valid frame ID.  Should instead set the sentinel
+       frame's frame ID to a `sentinel'.  Leave it until after the
+       switch to storing the frame ID, instead of the frame base, in
+       the frame object.  */
+    if (next_frame->level >= 0
+	&& frame_id_inner (id, get_frame_id (next_frame)))
+      error ("Unwound frame inner-to selected frame (corrupt stack?)");
+    /* Note that, due to frameless functions, the stronger test of the
+       new frame being outer to the old frame can't be used -
+       frameless functions differ by only their PC value.  */
     prev_frame->frame = id.base;
   }
 

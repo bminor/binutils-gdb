@@ -1,5 +1,12 @@
 2003-02-25  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_prev_frame): Add comment on check for
+	inside_entry_func. Only check for inside_entry_file when not a
+	dummy and not a sentinel.  Check that the new frame is not inner
+	to the old frame.
+
+2003-02-25  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (frame_debug): New variable.
 	(_initialize_frame): Add "set/show debug frame" command.
 	(get_prev_frame): When frame_debug, print reason why unwind
