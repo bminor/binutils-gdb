@@ -1,3 +1,17 @@
+2003-06-18  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c: Replace "Hitachi" with "Renesas".
+	(decode): Distinguish AV_H8S from AV_H8H.
+	(sim_resume): H8SX can use any register for TAS.
+	(decode): Add support for VECIND.
+	(sim_resume): Implement rte/l and rts/l.
+	(GETSR): New macro (actually old macro reincarnated).
+	(decode): Add handling for IMM2.
+	(sim_resume): Drop extra block around jmp, jsr, rts.
+	Add handling for trapa and rte.
+	For divxu.b, change 0xffff mask to 0xff.
+	(set_h8300h): Add bfd_mach_h8300sxn machine.
+
 2003-06-18  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sim-main.h (enum h8_regnum): Turn around order of MACH, MACL

@@ -1,5 +1,5 @@
 /*
- * Simulator for the Hitachi H8/300 architecture.
+ * Simulator for the Renesas (formerly Hitachi) H8/300 architecture.
  *
  * Written by Steve Chamberlain of Cygnus Support. sac@cygnus.com
  *
@@ -484,6 +484,18 @@ enum { POLL_QUIT_INTERVAL = 0x80000 };
   h8_set_ccr (SD, (I << 7) | (UI << 6) | (H << 5) | (U << 4)	\
 	     | (N << 3) | (Z << 2) | (V << 1) | C)
 
+#define GETSR(SD) \
+  /* Get Status Register (flags).  */		\
+  c = (h8_get_ccr (sd) >> 0) & 1;		\
+  v = (h8_get_ccr (sd) >> 1) & 1;		\
+  nz = !((h8_get_ccr (sd) >> 2) & 1);		\
+  n = (h8_get_ccr (sd) >> 3) & 1;		\
+  u = (h8_get_ccr (sd) >> 4) & 1;		\
+  h = (h8_get_ccr (sd) >> 5) & 1;		\
+  ui = ((h8_get_ccr (sd) >> 6) & 1);		\
+  intMaskBit = (h8_get_ccr (sd) >> 7) & 1
+
+
 #ifdef __CHAR_IS_SIGNED__
 #define SEXTCHAR(x) ((char) (x))
 #endif
@@ -590,6 +602,7 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
       unsigned int len = 0;
 
       if ((q->available == AV_H8SX && !h8300sxmode) ||
+	  (q->available == AV_H8S  && !h8300smode)  ||
 	  (q->available == AV_H8H  && !h8300hmode))
 	continue;
 
@@ -831,6 +844,12 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 		{
 		  cst[opnum] = data[1];
 		}
+	      else if ((looking_for & MODE) == VECIND)
+		{
+		  /* FIXME: Multiplier should be 2 for "normal" mode.  */
+		  cst[opnum] = ((data[1] & 0x7f) + 0x80) * 4;
+		  cst[opnum] += h8_get_vbr (sd); /* Add vector base reg.  */
+		}
 	      else if ((looking_for & SIZE) == L_32)
 		{
 		  int i = len / 2;
@@ -884,6 +903,10 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 		    {
 		      cst[opnum] = data[len / 2] & 0xff;
 		    }
+		}
+	      else if ((looking_for & SIZE) == L_2)
+		{
+		  cst[opnum] = thisnib & 3;
 		}
 	      else if ((looking_for & SIZE) == L_3 ||
 		       (looking_for & SIZE) == L_3NZ)
@@ -1025,7 +1048,8 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 			    else
 			      p->reg = ZERO_REGNUM;;
 			  }
-			else if ((x & MODE) == MEMIND)
+			else if ((x & MODE) == MEMIND ||
+				 (x & MODE) == VECIND)
 			  {
 			    /* Size doesn't matter.  */
 			    p->type = X (OP_MEM, SB);
@@ -1104,7 +1128,7 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 			    p->type = OP_EXR;
 			  }
 			else
-			  printf ("Hmmmm %x...\n", x);
+			  printf ("Hmmmm 0x%x...\n", x);
 
 			args++;
 		      }
@@ -1158,7 +1182,7 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 		  return;
 		}
 	      else
-		printf ("Don't understand %x \n", looking_for);
+		printf ("Don't understand 0x%x \n", looking_for);
 	    }
 
 	  len++;
@@ -1893,14 +1917,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
     }
 
   /* Get Status Register (flags).  */
-  c = (h8_get_ccr (sd) >> 0) & 1;
-  v = (h8_get_ccr (sd) >> 1) & 1;
-  nz = !((h8_get_ccr (sd) >> 2) & 1);
-  n = (h8_get_ccr (sd) >> 3) & 1;
-  u = (h8_get_ccr (sd) >> 4) & 1;
-  h = (h8_get_ccr (sd) >> 5) & 1;
-  ui = ((h8_get_ccr (sd) >> 6) & 1);
-  intMaskBit = (h8_get_ccr (sd) >> 7) & 1;
+  GETSR (sd);
 
   if (h8300smode)	/* Get exr.  */
     {
@@ -2197,7 +2214,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    goto end;
 	  goto just_flags_log32;
 
-	case O (O_MOVMD, SB):		/* movsd.b */
+	case O (O_MOVMD, SB):		/* movmd.b */
 	  ea = GET_W_REG (4);
 	  if (ea == 0)
 	    ea = 0x10000;
@@ -2212,7 +2229,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    }
 	  goto next;
 
-	case O (O_MOVMD, SW):		/* movsd.b */
+	case O (O_MOVMD, SW):		/* movmd.w */
 	  ea = GET_W_REG (4);
 	  if (ea == 0)
 	    ea = 0x10000;
@@ -2227,7 +2244,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    }
 	  goto next;
 
-	case O (O_MOVMD, SL):		/* movsd.b */
+	case O (O_MOVMD, SL):		/* movmd.l */
 	  ea = GET_W_REG (4);
 	  if (ea == 0)
 	    ea = 0x10000;
@@ -3463,36 +3480,31 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
         case O (O_JMP, SL):
         case O (O_JMP, SB):		/* jmp */
         case O (O_JMP, SW):
-	  {
-	    fetch (sd, &code->src, &pc);
-	    goto end;
-	  }
+	  fetch (sd, &code->src, &pc);
+	  goto end;
 
 	case O (O_JSR, SN):
 	case O (O_JSR, SL):
 	case O (O_JSR, SB):		/* jsr, jump to subroutine */
 	case O (O_JSR, SW):
-	  {
-	    int tmp;
-	    if (fetch (sd, &code->src, &pc))
-	      goto end;
-	  call:
-	    tmp = h8_get_reg (sd, SP_REGNUM);
-
-	    if (h8300hmode)
-	      {
-		tmp -= 4;
-		SET_MEMORY_L (tmp, code->next_pc);
-	      }
-	    else
-	      {
-		tmp -= 2;
-		SET_MEMORY_W (tmp, code->next_pc);
-	      }
-	    h8_set_reg (sd, SP_REGNUM, tmp);
-
+	  if (fetch (sd, &code->src, &pc))
 	    goto end;
-	  }
+	call:
+	  tmp = h8_get_reg (sd, SP_REGNUM);
+
+	  if (h8300hmode)
+	    {
+	      tmp -= 4;
+	      SET_MEMORY_L (tmp, code->next_pc);
+	    }
+	  else
+	    {
+	      tmp -= 2;
+	      SET_MEMORY_W (tmp, code->next_pc);
+	    }
+	  h8_set_reg (sd, SP_REGNUM, tmp);
+
+	  goto end;
 
 	case O (O_BSR, SW):
 	case O (O_BSR, SL):
@@ -3502,26 +3514,52 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  pc = code->next_pc + res;
 	  goto call;
 
+	case O (O_RTE, SN):		/* rte, return from exception */
+	rte:
+	  /* Pops exr and ccr before pc -- otherwise identical to rts.  */
+	  tmp = h8_get_reg (sd, SP_REGNUM);
+
+	  if (h8300smode)			/* pop exr */
+	    {
+	      h8_set_exr (sd, GET_MEMORY_L (tmp));
+	      tmp += 4;
+	    }
+	  if (h8300hmode)
+	    {
+	      h8_set_ccr (sd, GET_MEMORY_L (tmp));
+	      tmp += 4;
+	      pc = GET_MEMORY_L (tmp);
+	      tmp += 4;
+	    }
+	  else
+	    {
+	      h8_set_ccr (sd, GET_MEMORY_W (tmp));
+	      tmp += 2;
+	      pc = GET_MEMORY_W (tmp);
+	      tmp += 2;
+	    }
+
+	  GETSR (sd);
+	  h8_set_reg (sd, SP_REGNUM, tmp);
+	  goto end;
+
 	case O (O_RTS, SN):		/* rts, return from subroutine */
-	  {
-	    int tmp;
+	rts:
+	  tmp = h8_get_reg (sd, SP_REGNUM);
 
-	    tmp = h8_get_reg (sd, SP_REGNUM);
+	  if (h8300hmode)
+	    {
+	      pc = GET_MEMORY_L (tmp);
+	      tmp += 4;
+	    }
+	  else
+	    {
+	      pc = GET_MEMORY_W (tmp);
+	      tmp += 2;
+	    }
 
-	    if (h8300hmode)
-	      {
-		pc = GET_MEMORY_L (tmp);
-		tmp += 4;
-	      }
-	    else
-	      {
-		pc = GET_MEMORY_W (tmp);
-		tmp += 2;
-	      }
-
-	    h8_set_reg (sd, SP_REGNUM, tmp);
-	    goto end;
-	  }
+	  h8_set_reg (sd, SP_REGNUM, tmp);
+	  goto end;
 
 	case O (O_ILL, SB):		/* illegal */
 	  sim_engine_set_run_state (sd, sim_stopped, SIGILL);
@@ -3542,6 +3580,30 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      /* Treat it as a sigtrap.  */
 	      sim_engine_set_run_state (sd, sim_stopped, SIGTRAP);
 	    }
+	  goto end;
+
+	case O (O_TRAPA, SB):		/* trapa */
+	  if (fetch (sd, &code->src, &res))
+	    goto end;			/* res is vector number.  */
+
+	  tmp = h8_get_reg (sd, SP_REGNUM);
+	  tmp -= 4;
+	  SET_MEMORY_L (tmp, code->next_pc);
+	  tmp -= 4; 
+	  SET_MEMORY_L (tmp, h8_get_ccr (sd));
+	  intMaskBit = 1;
+	  BUILDSR (sd);
+
+	  if (h8300smode)
+	    {
+	      tmp -= 4;
+	      SET_MEMORY_L (tmp, h8_get_exr (sd));
+	    }
+
+	  h8_set_reg (sd, SP_REGNUM, tmp);
+
+	  /* FIXME: "normal" mode should use 2-byte ptrs.  */
+	  pc = GET_MEMORY_L (0x20 + res * 4);
 	  goto end;
 
 	case O (O_BPT, SN):
@@ -3898,19 +3960,19 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
 	  goto next;
 
-	case O (O_TAS, SB):		/* tas, (test and set?) */
-	  if (!h8300smode || code->src.type != X (OP_REG, SL))
-	    goto illegal;
-	  switch (code->src.reg)
-	    {
-	    case R0_REGNUM:
-	    case R1_REGNUM:
-	    case R4_REGNUM:
-	    case R5_REGNUM:
-	      break;
-	    default:
-	      goto illegal;
-	    }
+	case O (O_TAS, SB):		/* tas (test and set) */
+	  if (!h8300sxmode)		/* h8sx can use any register. */
+	    switch (code->src.reg)
+	      {
+	      case R0_REGNUM:
+	      case R1_REGNUM:
+	      case R4_REGNUM:
+	      case R5_REGNUM:
+		break;
+	      default:
+		goto illegal;
+	      }
+
 	  if (fetch (sd, &code->src, &res))
 	    goto end;
 	  if (store (sd, &code->src, res | 0x80))
@@ -4023,7 +4085,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      res = 0;
 	    }
 
-	  if (store (sd, &code->dst, (res & 0xffff) | (tmp << 8)))
+	  if (store (sd, &code->dst, (res & 0xff) | (tmp << 8)))
 	    goto end;
 	  goto next;
 
@@ -4190,25 +4252,33 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  goto next;
 
 	case O (O_LDM, SL):			/* ldm,  load from memory */
+	case O (O_RTEL, SN):			/* rte/l, ldm plus rte */
+	case O (O_RTSL, SN):			/* rts/l, ldm plus rts */
 	  {
 	    int nregs, firstreg, i;
 
-	    nregs = GET_MEMORY_B (pc + 1);
-	    nregs >>= 4;
-	    nregs &= 0xf;
-	    firstreg = code->dst.reg;
-	    firstreg &= 0xf;
+	    nregs = ((GET_MEMORY_B (pc + 1) >> 4) & 0xf);
+	    firstreg = code->dst.reg & 0xf;
 	    for (i = firstreg; i >= firstreg - nregs; i--)
 	      {
 		h8_set_reg (sd, i, GET_MEMORY_L (h8_get_reg (sd, SP_REGNUM)));
 		h8_set_reg (sd, SP_REGNUM, h8_get_reg (sd, SP_REGNUM) + 4);
 	      }
 	  }
-	  goto next;
+	  switch (code->opcode) {
+	  case O (O_RTEL, SN):
+	    goto rte;
+	  case O (O_RTSL, SN):
+	    goto rts;
+	  case O (O_LDM, SL):
+	    goto next;
+	  default:
+	    goto illegal;
+	  }
 
 	case O (O_DAA, SB):
 	  /* Decimal Adjust Addition.  This is for BCD arithmetic.  */
-	  res = GET_B_REG (code->src.reg);
+	  res = GET_B_REG (code->src.reg);	/* FIXME fetch? */
 	  if (!c && (0 <= (res >>  4) && (res >>  4) <= 9) && 
 	      !h && (0 <= (res & 0xf) && (res & 0xf) <= 9))
 	    res = res;		/* Value added == 0.  */
@@ -4274,15 +4344,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  code->dst.type == X (OP_CCR, SW))
 	{
 	  h8_set_ccr (sd, res);
-	  /* Get Status Register (flags).  */
-	  c = (h8_get_ccr (sd) >> 0) & 1;
-	  v = (h8_get_ccr (sd) >> 1) & 1;
-	  nz = !((h8_get_ccr (sd) >> 2) & 1);
-	  n = (h8_get_ccr (sd) >> 3) & 1;
-	  u = (h8_get_ccr (sd) >> 4) & 1;
-	  h = (h8_get_ccr (sd) >> 5) & 1;
-	  ui = ((h8_get_ccr (sd) >> 6) & 1);
-	  intMaskBit = (h8_get_ccr (sd) >> 7) & 1;
+	  GETSR (sd);
 	}
       else if (h8300smode &&
 	       (code->dst.type == X (OP_EXR, SB) ||
@@ -4569,6 +4631,9 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
   init_pointers (sd);
   switch (rn)
     {
+    case PC_REGNUM:
+      h8_set_pc (sd, intval);
+      break;
     default:
       (*sim_callback->printf_filtered) (sim_callback, 
 					"sim_store_register: bad regnum %d.\n",
@@ -4582,9 +4647,6 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
     case R6_REGNUM:
     case R7_REGNUM:
       h8_set_reg (sd, rn, intval);
-      break;
-    case PC_REGNUM:
-      h8_set_pc (sd, intval);
       break;
     case CCR_REGNUM:
       h8_set_ccr (sd, intval);
@@ -4607,9 +4669,11 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
     case CYCLE_REGNUM:
       h8_set_cycles (sd, longval);
       break;
+
     case INST_REGNUM:
       h8_set_insts (sd, longval);
       break;
+
     case TICK_REGNUM:
       h8_set_ticks (sd, longval);
       break;
@@ -4776,7 +4840,7 @@ set_h8300h (unsigned long machine)
      This function being replaced by a sim_open:ARGV configuration
      option.  */
 
-  if (machine == bfd_mach_h8300sx)
+  if (machine == bfd_mach_h8300sx || machine == bfd_mach_h8300sxn)
     h8300sxmode = 1;
 
   if (machine == bfd_mach_h8300s || machine == bfd_mach_h8300sn || h8300sxmode)
