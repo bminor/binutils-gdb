@@ -1,3 +1,8 @@
+Tue Apr 16 10:25:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.tgt (powerpc*-*-{sysv,linux}): Add aliases.
+	(powerpcle*-*-{sysv,solaris}): Ditto.
+
 Mon Apr 15 14:50:56 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
 
 	* scripttempl/aout.sc: Add PROVIDE (__stack = 0) so I can use it
