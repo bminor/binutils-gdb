@@ -1,3 +1,13 @@
+Wed May  4 06:56:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (proceed, normal_stop, wait_for_inferior), breakpoint.c
+	(print_it_normal): Add annotations for the inferior starting and
+	stopping, and for all the various messages related to how it
+	stopped.
+
+	* printcmd.c (do_one_display): Annotate.
+	* stack.c (print_frame_info): Annotate printing of stack frames.
+
 Wed May  4 18:15:51 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* remote.c (get_offsets):  Handle case where stub doesn't support
