@@ -4,6 +4,7 @@ start-sanitize-arc
 	* gas/arc: Testsuite for ARC.
 	* gas/arc/{arc.exp,math.[sd],flag.[sd],j.[sd]}: New files.
 	* gas/arc/{branch.[sd],alias.[sd],sshift.[sd]}: New files.
+	* gas/arc/{insn3.[sd],mul64.[sd]}: New files.
 end-sanitize-arc
 
 	* lib/gas-defs.exp (run_dump_test): Handle arguments with paths.
