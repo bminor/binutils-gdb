@@ -486,6 +486,22 @@ case $basic_machine in
 		basic_machine=sparclite-fujitsu
 		os=-none
 		;;
+	sparcfrw)
+		basic_machine=sparcfrw-sun
+		os=-sunos4
+		;;
+	sparcfrwcompat)
+		basic_machine=sparcfrwcompat-sun
+		os=-sunos4
+		;;
+	sparclitefrw)
+		basic_machine=sparclitefrw-fujitsu
+		os=-none
+		;;
+	sparclitefrwcompat)
+		basic_machine=sparclitefrwcompat-fujitsu
+		os=-none
+		;;
 
 	none)
 		basic_machine=none-none
