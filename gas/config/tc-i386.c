@@ -2635,7 +2635,6 @@ i386_immediate (imm_start)
 #endif
           )
     {
-    seg_unimplemented:
       as_bad (_("Unimplemented segment type %d in operand"), exp_seg);
       return 0;
     }
