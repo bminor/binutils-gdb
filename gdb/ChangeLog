@@ -1,3 +1,7 @@
+2004-09-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* language.c (language_gdbarch_post_init): Fix off-by one error.
+
 2004-09-21  Daniel Jacobowitz  <dan@debian.org>
 
 	* dwarf2read.c (struct dwarf2_per_cu_data): New field type_hash.

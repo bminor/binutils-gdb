@@ -1286,7 +1286,7 @@ language_gdbarch_post_init (struct gdbarch *gdbarch)
   int i;
 
   l = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct language_gdbarch);
-  for (i = 0; i <= languages_size; i++)
+  for (i = 0; i < languages_size; i++)
     {
       if (languages[i] != NULL
 	  && languages[i]->la_language_arch_info != NULL)
