@@ -54,7 +54,7 @@ MAKEINFO = makeinfo
 RANLIB = ranlib
 
 INCDIR = $(srcdir)/../../include 
-CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I$(srcdir)/../../bfd
+CSEARCH = -I.-I$(srcdir)  -I../../include  -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd  
 DEP = mkdep
 
 #### host, target, and site specific Makefile frags come in here.
@@ -76,8 +76,10 @@ table.c:gencode
 	./gencode -s >table.c
 	indent table.c
 
-gencode:gencode.c
-	cc -o gencode -g gencode.c
+gencode.o:gencode.c
+
+gencode:gencode.o
+
 
 #### host and target dependent Makefile fragments come in here.
 ###
