@@ -45,7 +45,7 @@ static reloc_howto_type x86_64_elf_howto_table[] =
   HOWTO(R_X86_64_GLOB_DAT, 0,4,64,false,0,complain_overflow_bitfield,0,"R_X86_64_GLOB_DAT",false,MINUS_ONE ,MINUS_ONE ,false),
   HOWTO(R_X86_64_RELATIVE ,0,4,64,false,0,complain_overflow_bitfield,0,"R_X86_64_RELATIVE",false,MINUS_ONE ,MINUS_ONE ,false),
   HOWTO(R_X86_64_JUMP_SLOT,0,4,64,false,0,complain_overflow_bitfield,0,"R_X86_64_JUMP_SLOT",false,MINUS_ONE,MINUS_ONE ,false),
-  HOWTO(R_X86_64_GOTPCREL, 0,4,32,true, 0,complain_overflow_signed  ,0, "R_X86_64_PCREL",  false,0xffffffff,0xffffffff,true),
+  HOWTO(R_X86_64_GOTPCREL, 0,4,32,true, 0,complain_overflow_signed  ,0, "R_X86_64_GOTPCREL",false,0xffffffff,0xffffffff,true),
   HOWTO(R_X86_64_32,    0,4,32,false,0,complain_overflow_unsigned,0, "R_X86_64_32",     false,0xffffffff,0xffffffff,false),
   HOWTO(R_X86_64_32S,   0,4,32,false,0,complain_overflow_signed,  0, "R_X86_64_32S",    false,0xffffffff,0xffffffff,false),
   HOWTO(R_X86_64_16,    0,1,16,false,0,complain_overflow_bitfield,0, "R_X86_64_16",     false,0xffff    ,0xffff,    false),
