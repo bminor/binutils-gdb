@@ -1,3 +1,15 @@
+Tue Mar 14 00:52:57 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	Sat Feb 11 17:22:41 1995  Klaus Kaempf  (kkaempf@didymus.rmi.de)
+
+	* alpha-opc.h (OSF_ASMCODE): define
+	print pal-code names as defined in App C of the
+	Alpha Architecture Reference Manual
+
+	* alpha-dis.c: cleaned up output
+	print stylized code forms as defined in App A.4.3 of the
+	Alpha Architecture Reference Manual
+
 Wed Mar  8 15:21:14 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-opc.c: Add new mips4 instructions.  Don't set INSN_RFE for
