@@ -309,7 +309,12 @@ print_formatted (val, format, size)
       break;
 
     case 'i':
-      wrap_here ("");	/* Force output out, print_insn not using _filtered */
+      /* The old comment says
+	 "Force output out, print_insn not using _filtered".
+	 I'm not completely sure what that means, I suspect most print_insn
+	 now do use _filtered, so I guess it's obsolete.  */
+      /* We often wrap here if there are long symbolic names.  */
+      wrap_here ("\t");
       next_address = VALUE_ADDRESS (val)
 	+ print_insn (VALUE_ADDRESS (val), stdout);
       break;

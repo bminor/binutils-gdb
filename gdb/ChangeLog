@@ -1,5 +1,10 @@
 Tue May 25 20:44:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* printcmd.c (print_formatted, case 'i'): Pass a tab to wrap_here.
+
+	* source.c (line_info): Change "pc" to "address" in messages and
+	use print_address for addresses.
+
 	* source.c (line_info): If we don't find a symtab, print more useful
 	output, including the symbolic address.
 
