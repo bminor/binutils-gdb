@@ -1,3 +1,8 @@
+2002-01-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ldlang.c (walk_wild_section): Exclude object file if enclosing
+	archive is excluded.
+
 2002-01-07  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eshelf_nbsd.o and eshlelf_nbsd.o.

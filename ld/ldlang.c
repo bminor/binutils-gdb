@@ -1,6 +1,6 @@
 /* Linker command language support.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -269,6 +269,21 @@ walk_wild_section (ptr, file, callback, data)
 		skip = fnmatch (list_tmp->name, file->filename, 0) == 0;
 	      else
 		skip = strcmp (list_tmp->name, file->filename) == 0;
+
+	      /* If this file is part of an archive, and the archive is
+		 excluded, exclude this file.  */
+	      if (! skip && file->the_bfd != NULL
+		  && file->the_bfd->my_archive != NULL
+		  && file->the_bfd->my_archive->filename != NULL)
+		{
+		  if (wildcardp (list_tmp->name))
+		    skip = fnmatch (list_tmp->name,
+				    file->the_bfd->my_archive->filename,
+				    0) == 0;
+		  else
+		    skip = strcmp (list_tmp->name,
+				   file->the_bfd->my_archive->filename) == 0;
+		}
 
 	      if (skip)
 		break;
