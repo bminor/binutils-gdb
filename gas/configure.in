@@ -121,6 +121,16 @@ case ${target_cpu} in
   *)		cpu_type=${target_cpu} ;;
 esac
 
+# do we need the opcodes library?
+case ${cpu_type} in
+  alpha | vax)
+    opcodes=
+    ;;
+  *)
+    opcodes="../opcodes/libopcodes.a"
+    ;;
+esac
+
 gas_target=${cpu_type}
 generic_target=${cpu_type}-${target_vendor}-${target_os}
 dev=no
@@ -129,7 +139,6 @@ dev=no
 case ${generic_target} in
   a29k-amd-udi)		obj_format=coffbfd gas_target=ebmon29k ;;
   a29k-amd-ebmon)	obj_format=coffbfd gas_target=ebmon29k ;;
-  a29k-amd-ebmonold)	obj_format=coff gas_target=ebmon29k ;;
 
   alpha-*-netware*)	obj_format=ecoff ;;
   alpha-*-osf*)		obj_format=ecoff ;;
@@ -171,6 +180,15 @@ case ${generic_target} in
 
   m68k-wrs-vxworks | m68k-ericsson-ose | m68k-*-sunos*)
 			obj_format=aout emulation=sun3 ;;
+# The dpx2-specific support has apparently not been used in a while, or
+# it's not currently required.  Either way, I've heard nothing about it,
+# and the configure.in code that would've selected te-dpx2.h wasn't being
+# reached because of the m68k-*-sysv* line below.  This was (I think) the
+# last target using obj-coff.c without BFD_ASSEMBLER.  I want to blast that
+# code.  So if you really need te-dpx2.h, start with this for now, and try
+# to make it work:
+# m68k-bull-sysv3*)	obj_format=coffbfd gas_target=m68kcoff emulation=dpx2 ;;
+
   m68k-*-coff | m68k-*-sysv*)
 			obj_format=coffbfd gas_target=m68kcoff ;;
   m68k-*-hpux)		obj_format=hp300 emulation=hp300 ;;
@@ -211,7 +229,7 @@ case ${generic_target} in
   sparc*-*-aout | sparc*-*-vxworks)
 			obj_format=aout bfd_gas=yes ;;
   sparc*-*-coff)	obj_format=coff bfd_gas=yes ;;
-  sparc*-*-lynxos)	obj_format=coff bfd_gas=yes ;;
+  sparc*-*-lynxos*)	obj_format=coff bfd_gas=yes emulation=lynx ;;
   sparc*-fujitsu-none)	obj_format=aout bfd_gas=yes ;;
   sparc*-*-elf | sparc*-*-solaris*)
 			obj_format=elf ;;
@@ -232,18 +250,10 @@ case ${generic_target} in
 			obj_format=aout emulation=sun3 ;;
   *-*-generic)		obj_format=generic ;;
   *-*-xray | *-*-hms)	obj_format=coffbfd ;;
-  *-*-sysv32)		obj_format=coff emulation=sysv32 ;;
   *-*-sim)		obj_format=coffbfd ;;
   *-*-elf | *-*-sysv4* | *-*-solaris*)
 	echo '*** Warning: GAS support for ELF format is incomplete' 1>&2
 			obj_format=elf dev=yes ;;
-  *-*-coff* | *-sysv* | *-*-sco*)
-			obj_format=coff
-			case ${target_vendor} in
-			  bull)  emulation=dpx2 ;;
-			  sun)   emulation=sun3 ;;
-			esac
-			;;
   *-*-vxworks)		obj_format=aout ;;
   *-*-netware)		obj_format=elf ;;
 esac
@@ -339,10 +349,11 @@ case "x${host}" in
 esac
 
 rm -f Makefile.tem
-echo $bfddef >  Makefile.tem
-echo $bfdlib >> Makefile.tem
-echo $cross  >> Makefile.tem
-cat Makefile >> Makefile.tem
+echo $bfddef			>  Makefile.tem
+echo $bfdlib			>> Makefile.tem
+echo $cross			>> Makefile.tem
+echo "OPCODES_LIB=$opcodes"	>> Makefile.tem
+cat Makefile			>> Makefile.tem
 mv -f Makefile.tem Makefile
 
 # end of gas/configure.in

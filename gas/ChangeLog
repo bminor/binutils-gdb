@@ -1,3 +1,14 @@
+Fri Mar 18 20:09:16 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* configure.in: Eliminated all targets using obj-coff but not
+	defining BFD_ASSEMBLER; I think all such targets that are
+	supported will be matched by real CPU-OS combinations earlier in
+	the case statement.
+	(targets *-*-coff*, *-sysv*, *-*-sco*, *-*-sysv32): Deleted.  Made
+	some comments about the dpx2 configuration, but left it disabled,
+	since it couldn't be reached before.
+	(target a29k-amd-ebmonold): Deleted.
+
 Thu Mar 17 13:36:09 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_import): Correctly handle importing of an
