@@ -1,3 +1,9 @@
+2002-02-10  Richard Henderson  <rth@redhat.com>
+
+	* doc/c-alpha.texi: New file.
+	* doc/Makefile.am (CPU_DOCS): Add it.
+	* doc/all.texi, doc/as.texinfo: Add hooks for Alpha.
+
 2002-02-09  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-alpha.c (O_samegp): New.
