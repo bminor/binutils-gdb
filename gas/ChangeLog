@@ -1,3 +1,8 @@
+2001-03-28  H.J. Lu  <hjl@gnu.org>
+
+	* read.c (equals): Set to local for COFF only if it hasn't been
+	defined before.
+
 2001-03-28  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (DEFAULT_LEVEL): Define.
