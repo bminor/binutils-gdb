@@ -1,3 +1,11 @@
+2002-12-18  Ralf Habacker  <ralf.habacker@freenet.de>
+
+	* ld-auto-import: New directory.
+	* ld-auto-import/auto-import.exp: Test the auto importing direct
+	from a dll functionality.
+	* ld-auto-import/client.c: Source code for test.
+	* ld-auto-import/dll.c: Likewise.
+
 2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-mips-elf/mips-elf.exp: Remove branch-misc-2 test.
