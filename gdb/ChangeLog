@@ -1,5 +1,8 @@
 2000-06-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* NEWS: Mention FreeBSD/Alpha and FreeBSD/i386 3.x and up as new
+	native configurations.
+
 	* i386bsd-nat.c: Include "gregset.h".
 	(CANNOT_STORE_REGISTER): Define to cannot_fetch_register instead
 	of CANNOT_FETCH_REGISTER, if not already defined.

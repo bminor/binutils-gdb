@@ -1,6 +1,15 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes since GDB 5.0:
+
+* New native configurations
+
+Alpha FreeBSD					alpha*-*-freebsd*
+x86 FreeBSD 3.x and 4.x				i[3456]86*-freebsd[34]*
+
+FreeBSD versions before 2.2 are no longer supported.
+
 *** Changes in GDB 5.0:
 
 * Improved support for debugging FP programs on x86 targets
