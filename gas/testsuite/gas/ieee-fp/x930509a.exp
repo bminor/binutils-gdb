@@ -19,6 +19,8 @@ proc dotest {} {
     if !$x then { fail "$testname (listing didn't match)" }
 }
 
-if ![istarget vax*-*-*] then {
+# C54x alignment/addressing is different, so the listing looks different
+# float encoding is tested in c54x-specific tests
+if { ![istarget vax*-*-*] && ![istarget *c54x*-*-*] } then {
     dotest
 }
