@@ -267,12 +267,30 @@ static int n_undef_symbols, n_undef_labels, n_undef_vars, n_undef_procs;
 
 static char stabs_symbol[] = STABS_SYMBOL;
 
-/* Types corresponding to btComplex, btDComplex, etc.  These are here
-   rather than in gdbtypes.c or some such, because the meaning of codes
-   like btComplex is specific to the mdebug debug format.  FIXME:  We should
-   be using our own types thoughout this file, instead of sometimes using
-   builtin_type_*.  */
+/* Types corresponding to mdebug format bt* basic types.  */
 
+static struct type *mdebug_type_void;
+static struct type *mdebug_type_char;
+static struct type *mdebug_type_short;
+static struct type *mdebug_type_int_32;
+#define mdebug_type_int mdebug_type_int_32
+static struct type *mdebug_type_int_64;
+static struct type *mdebug_type_long_32;
+static struct type *mdebug_type_long_64;
+static struct type *mdebug_type_long_long_64;
+static struct type *mdebug_type_unsigned_char;
+static struct type *mdebug_type_unsigned_short;
+static struct type *mdebug_type_unsigned_int_32;
+static struct type *mdebug_type_unsigned_int_64;
+static struct type *mdebug_type_unsigned_long_32;
+static struct type *mdebug_type_unsigned_long_64;
+static struct type *mdebug_type_unsigned_long_long_64;
+static struct type *mdebug_type_adr_32;
+static struct type *mdebug_type_adr_64;
+static struct type *mdebug_type_float;
+static struct type *mdebug_type_double;
+static struct type *mdebug_type_complex;
+static struct type *mdebug_type_double_complex;
 static struct type *mdebug_type_fixed_dec;
 static struct type *mdebug_type_float_dec;
 static struct type *mdebug_type_string;
@@ -805,7 +823,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;	/* so that it can be used */
       SYMBOL_CLASS (s) = LOC_LABEL;	/* but not misused */
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
-      SYMBOL_TYPE (s) = builtin_type_int;
+      SYMBOL_TYPE (s) = mdebug_type_int;
       add_symbol (s, top_stack->cur_block);
       break;
 
@@ -816,7 +834,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Type of the return value */
       if (sh->sc == scUndefined || sh->sc == scNil)
-	t = builtin_type_int;
+	t = mdebug_type_int;
       else
 	t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
       b = top_stack->cur_block;
@@ -1160,7 +1178,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	  s = new_symbol (MIPS_EFI_SYMBOL_NAME);
 	  SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
 	  SYMBOL_CLASS (s) = LOC_CONST;
-	  SYMBOL_TYPE (s) = builtin_type_void;
+	  SYMBOL_TYPE (s) = mdebug_type_void;
 	  e = ((struct mips_extra_func_info *)
 	       obstack_alloc (&current_objfile->symbol_obstack,
 			      sizeof (struct mips_extra_func_info)));
@@ -1376,43 +1394,43 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
   /* Null entries in this map are treated specially */
   static struct type **map_bt[] =
   {
-    &builtin_type_void,		/* btNil */
-    0,				/* btAdr */
-    &builtin_type_char,		/* btChar */
-    &builtin_type_unsigned_char,/* btUChar */
-    &builtin_type_short,	/* btShort */
-    &builtin_type_unsigned_short,	/* btUShort */
-    &builtin_type_int,		/* btInt */
-    &builtin_type_unsigned_int,	/* btUInt */
-    &builtin_type_long,		/* btLong */
-    &builtin_type_unsigned_long,/* btULong */
-    &builtin_type_float,	/* btFloat */
-    &builtin_type_double,	/* btDouble */
-    0,				/* btStruct */
-    0,				/* btUnion */
-    0,				/* btEnum */
-    0,				/* btTypedef */
-    0,				/* btRange */
-    0,				/* btSet */
-    &builtin_type_complex,	/* btComplex */
-    &builtin_type_double_complex,/* btDComplex */
-    0,				/* btIndirect */
-    &mdebug_type_fixed_dec,	/* btFixedDec */
-    &mdebug_type_float_dec,	/* btFloatDec */
-    &mdebug_type_string,	/* btString */
-    0,				/* btBit */
-    0,				/* btPicture */
-    &builtin_type_void,		/* btVoid */
-    0,				/* DEC C++:  Pointer to member */
-    0,				/* DEC C++:  Virtual function table */
-    0,				/* DEC C++:  Class (Record) */
-    &builtin_type_long,		/* btLong64  */
-    &builtin_type_unsigned_long, /* btULong64 */
-    &builtin_type_long_long,	/* btLongLong64  */
-    &builtin_type_unsigned_long_long, /* btULongLong64 */
-    &builtin_type_unsigned_long, /* btAdr64 */
-    &builtin_type_long,		/* btInt64  */
-    &builtin_type_unsigned_long, /* btUInt64 */
+    &mdebug_type_void,			/* btNil */
+    &mdebug_type_adr_32,		/* btAdr */
+    &mdebug_type_char,			/* btChar */
+    &mdebug_type_unsigned_char,		/* btUChar */
+    &mdebug_type_short,			/* btShort */
+    &mdebug_type_unsigned_short,	/* btUShort */
+    &mdebug_type_int_32,		/* btInt */
+    &mdebug_type_unsigned_int_32,	/* btUInt */
+    &mdebug_type_long_32,		/* btLong */
+    &mdebug_type_unsigned_long_32,	/* btULong */
+    &mdebug_type_float,			/* btFloat */
+    &mdebug_type_double,		/* btDouble */
+    0,					/* btStruct */
+    0,					/* btUnion */
+    0,					/* btEnum */
+    0,					/* btTypedef */
+    0,					/* btRange */
+    0,					/* btSet */
+    &mdebug_type_complex,		/* btComplex */
+    &mdebug_type_double_complex,	/* btDComplex */
+    0,					/* btIndirect */
+    &mdebug_type_fixed_dec,		/* btFixedDec */
+    &mdebug_type_float_dec,		/* btFloatDec */
+    &mdebug_type_string,		/* btString */
+    0,					/* btBit */
+    0,					/* btPicture */
+    &mdebug_type_void,			/* btVoid */
+    0,					/* DEC C++:  Pointer to member */
+    0,					/* DEC C++:  Virtual function table */
+    0,					/* DEC C++:  Class (Record) */
+    &mdebug_type_long_64,		/* btLong64  */
+    &mdebug_type_unsigned_long_64,	/* btULong64 */
+    &mdebug_type_long_long_64,		/* btLongLong64  */
+    &mdebug_type_unsigned_long_long_64,	/* btULongLong64 */
+    &mdebug_type_adr_64,		/* btAdr64 */
+    &mdebug_type_int_64,		/* btInt64  */
+    &mdebug_type_unsigned_int_64,	/* btUInt64 */
   };
 
   TIR t[1];
@@ -1421,13 +1439,13 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
 
   /* Handle undefined types, they have indexNil. */
   if (aux_index == indexNil)
-    return builtin_type_int;
+    return mdebug_type_int;
 
   /* Handle corrupt aux indices.  */
   if (aux_index >= (debug_info->fdr + fd)->caux)
     {
       complain (&index_complaint, sym_name);
-      return builtin_type_int;
+      return mdebug_type_int;
     }
   ax += aux_index;
 
@@ -1436,7 +1454,7 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
   if (t->bt >= (sizeof (map_bt) / sizeof (*map_bt)))
     {
       complain (&basic_type_complaint, t->bt, sym_name);
-      return builtin_type_int;
+      return mdebug_type_int;
     }
   if (map_bt[t->bt])
     {
@@ -1448,9 +1466,6 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
       /* Cannot use builtin types -- build our own */
       switch (t->bt)
 	{
-	case btAdr:
-	  tp = lookup_pointer_type (builtin_type_void);
-	  break;
 	case btStruct:
 	  type_code = TYPE_CODE_STRUCT;
 	  break;
@@ -1473,7 +1488,7 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
 	  break;
 	default:
 	  complain (&basic_type_complaint, t->bt, sym_name);
-	  return builtin_type_int;
+	  return mdebug_type_int;
 	}
     }
 
@@ -1487,7 +1502,7 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
       if (bs == (int *)NULL)
 	{
 	  complain (&bad_fbitfield_complaint, sym_name);
-	  return builtin_type_int;
+	  return mdebug_type_int;
 	}
       *bs = AUX_GET_WIDTH (bigend, ax);
       ax++;
@@ -1602,7 +1617,7 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
       if (tp == (struct type *) NULL)
 	{
 	  complain (&unable_to_cross_ref_complaint, sym_name);
-	  tp = builtin_type_int;
+	  tp = mdebug_type_int;
 	}
     }
 
@@ -1718,7 +1733,7 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
       if (TYPE_CODE (indx) != TYPE_CODE_INT)
 	{
 	  complain (&array_index_type_complaint, sym_name);
-	  indx = builtin_type_int;
+	  indx = mdebug_type_int;
 	}
 
       /* Get the bounds, and create the array type.  */
@@ -1868,7 +1883,7 @@ parse_procedure (pr, search_symtab, first_off, pst)
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Donno its type, hope int is ok */
-      SYMBOL_TYPE (s) = lookup_function_type (builtin_type_int);
+      SYMBOL_TYPE (s) = lookup_function_type (mdebug_type_int);
       add_symbol (s, top_stack->cur_block);
       /* Wont have symbols for this one */
       b = new_block (2);
@@ -3160,7 +3175,7 @@ psymtab_to_symtab_1 (pst, filename)
 		  memset ((PTR) e, 0, sizeof (struct mips_extra_func_info));
 		  SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
 		  SYMBOL_CLASS (s) = LOC_CONST;
-		  SYMBOL_TYPE (s) = builtin_type_void;
+		  SYMBOL_TYPE (s) = mdebug_type_void;
 		  SYMBOL_VALUE (s) = (long) e;
 		  e->pdr.framereg = -1;
 		  add_symbol_to_list (s, &local_symbols);
@@ -4061,7 +4076,7 @@ fixup_sigtramp ()
   SYMBOL_CLASS (s) = LOC_BLOCK;
   SYMBOL_TYPE (s) = init_type (TYPE_CODE_FUNC, 4, 0, (char *) NULL,
 			       st->objfile);
-  TYPE_TARGET_TYPE (SYMBOL_TYPE (s)) = builtin_type_void;
+  TYPE_TARGET_TYPE (SYMBOL_TYPE (s)) = mdebug_type_void;
 
   /* Need a block to allocate MIPS_EFI_SYMBOL_NAME in */
   b = new_block (1);
@@ -4103,7 +4118,7 @@ fixup_sigtramp ()
     SYMBOL_VALUE (s) = (long) e;
     SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
     SYMBOL_CLASS (s) = LOC_CONST;
-    SYMBOL_TYPE (s) = builtin_type_void;
+    SYMBOL_TYPE (s) = mdebug_type_void;
     current_objfile = NULL;
   }
 
@@ -4113,7 +4128,94 @@ fixup_sigtramp ()
 void
 _initialize_mdebugread ()
 {
-  /* Missing basic types */
+  mdebug_type_void =
+    init_type (TYPE_CODE_VOID, 1,
+	       0,
+	       "void", (struct objfile *) NULL);
+  mdebug_type_char =
+    init_type (TYPE_CODE_INT, 1,
+	       0,
+	       "char", (struct objfile *) NULL);
+  mdebug_type_unsigned_char =
+    init_type (TYPE_CODE_INT, 1,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned char", (struct objfile *) NULL);
+  mdebug_type_short =
+    init_type (TYPE_CODE_INT, 2,
+	       0,
+	       "short", (struct objfile *) NULL);
+  mdebug_type_unsigned_short =
+    init_type (TYPE_CODE_INT, 2,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned short", (struct objfile *) NULL);
+  mdebug_type_int_32 =
+    init_type (TYPE_CODE_INT, 4,
+	       0,
+	       "int", (struct objfile *) NULL);
+  mdebug_type_unsigned_int_32 =
+    init_type (TYPE_CODE_INT, 4,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned int", (struct objfile *) NULL);
+  mdebug_type_int_64 =
+    init_type (TYPE_CODE_INT, 8,
+	       0,
+	       "int", (struct objfile *) NULL);
+  mdebug_type_unsigned_int_64 =
+    init_type (TYPE_CODE_INT, 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned int", (struct objfile *) NULL);
+  mdebug_type_long_32 =
+    init_type (TYPE_CODE_INT, 4,
+	       0,
+	       "long", (struct objfile *) NULL);
+  mdebug_type_unsigned_long_32 =
+    init_type (TYPE_CODE_INT, 4,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned long", (struct objfile *) NULL);
+  mdebug_type_long_64 =
+    init_type (TYPE_CODE_INT, 8,
+	       0,
+	       "long", (struct objfile *) NULL);
+  mdebug_type_unsigned_long_64 =
+    init_type (TYPE_CODE_INT, 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned long", (struct objfile *) NULL);
+  mdebug_type_long_long_64 =
+    init_type (TYPE_CODE_INT, 8,
+	       0,
+	       "long long", (struct objfile *) NULL);
+  mdebug_type_unsigned_long_long_64 = 
+    init_type (TYPE_CODE_INT, 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "unsigned long long", (struct objfile *) NULL);
+  mdebug_type_adr_32 =
+    init_type (TYPE_CODE_PTR, 4,
+	       TYPE_FLAG_UNSIGNED,
+	       "adr_32", (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (mdebug_type_adr_32) = mdebug_type_void;
+  mdebug_type_adr_64 =
+    init_type (TYPE_CODE_PTR, 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "adr_64", (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (mdebug_type_adr_64) = mdebug_type_void;
+  mdebug_type_float =
+    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "float", (struct objfile *) NULL);
+  mdebug_type_double =
+    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "double", (struct objfile *) NULL);
+  mdebug_type_complex =
+    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "complex", (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (mdebug_type_complex) = mdebug_type_float;
+  mdebug_type_double_complex =
+    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "double complex", (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (mdebug_type_double_complex) = mdebug_type_double;
 
   /* Is a "string" the way btString means it the same as TYPE_CODE_STRING?
      FIXME.  */
@@ -4140,7 +4242,7 @@ _initialize_mdebugread ()
 
   nodebug_func_symbol_type = init_type (TYPE_CODE_FUNC, 1, 0,
 					"<function, no debug info>", NULL);
-  TYPE_TARGET_TYPE (nodebug_func_symbol_type) = builtin_type_int;
+  TYPE_TARGET_TYPE (nodebug_func_symbol_type) = mdebug_type_int;
   nodebug_var_symbol_type =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / HOST_CHAR_BIT, 0,
 	       "<variable, no debug info>", NULL);

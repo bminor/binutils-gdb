@@ -1,5 +1,5 @@
 /* DWARF debugging format support for GDB.
-   Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.  Portions based on dbxread.c,
    mipsread.c, coffread.c, and dwarfread.c from a Data General SVR4 gdb port.
 
@@ -327,6 +327,7 @@ static int dbsize;	/* Size of dwarf info in bytes */
 static int dbroff;	/* Relative offset from start of .debug section */
 static char *lnbase;	/* Base pointer to line section */
 static int isreg;	/* Kludge to identify register variables */
+static int optimized_out;  /* Kludge to identify optimized out variables */
 /* Kludge to identify basereg references.  Nonzero if we have an offset
    relative to a basereg.  */
 static int offreg;
@@ -2151,6 +2152,9 @@ DESCRIPTION
 
 	Given pointer to a string of bytes that define a location, compute
 	the location and return the value.
+	A location description containing no atoms indicates that the
+	object is optimized out. The global optimized_out flag is set for
+	those, the return value is meaningless.
 
 	When computing values involving the current value of the frame pointer,
 	the value zero is used, which results in a value relative to the frame
@@ -2189,9 +2193,11 @@ locval (loc)
   stack[stacki] = 0;
   isreg = 0;
   offreg = 0;
+  optimized_out = 1;
   loc_value_size = TARGET_FT_LONG_SIZE (current_objfile);
   while (loc < end)
     {
+      optimized_out = 0;
       loc_atom_code = target_to_host (loc, SIZEOF_LOC_ATOM_CODE, GET_UNSIGNED,
 				      current_objfile);
       loc += SIZEOF_LOC_ATOM_CODE;
@@ -2934,7 +2940,11 @@ new_symbol (dip, objfile)
 	    {
 	      SYMBOL_VALUE (sym) = locval (dip -> at_location);
 	      add_symbol_to_list (sym, list_in_scope);
-	      if (isreg)
+	      if (optimized_out)
+		{
+		  SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
+		}
+	      else if (isreg)
 		{
 		  SYMBOL_CLASS (sym) = LOC_REGISTER;
 		}

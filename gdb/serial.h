@@ -43,8 +43,6 @@ struct _serial_t
 
 typedef struct _serial_t *serial_t;
 
-serial_t scb_base;		/* Pointer to list of scb's */
-
 struct serial_ops {
   char *name;
   struct serial_ops *next;
@@ -161,13 +159,12 @@ serial_t serial_fdopen PARAMS ((const int fd));
 
 /* Push out all buffers, close the device and destroy SERIAL_T. */
 
-void serial_close PARAMS ((serial_t));
+void serial_close PARAMS ((serial_t, int));
 
-#define SERIAL_CLOSE(SERIAL_T) serial_close(SERIAL_T)
+#define SERIAL_CLOSE(SERIAL_T) serial_close(SERIAL_T, 1)
 
-/* Destroy SERIAL_T without doing the rest of the stuff that SERIAL_CLOSE
-   does.  */
+/* Push out all buffers and destroy SERIAL_T without closing the device.  */
 
-#define SERIAL_UN_FDOPEN(SERIAL_T) (free (SERIAL_T))
+#define SERIAL_UN_FDOPEN(SERIAL_T) serial_close(SERIAL_T, 0)
 
 #endif /* SERIAL_H */

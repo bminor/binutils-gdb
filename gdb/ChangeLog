@@ -1,3 +1,23 @@
+Wed Jul 19 22:42:43 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/m68k/tm-m68kv4.h (DWARF_REG_TO_REGNUM):  Define to
+	correctly map floating point registers numbers.
+
+	* dwarfread.c (locval, new_symbol):  Handle variables that are
+	optimized out.
+
+	* mdebugread.c:  Replace all uses of builtin_type_* with
+	mdebug_type_*. Define and initialize mdebug_type_*.
+
+	* serial.h (serial_close):  Add additional argument `really_close'.
+	(SERIAL_CLOSE):  Update serial_close call accordingly.
+	(SERIAL_UN_FDOPEN):  Use serial_close to handle refcnt properly.
+	* serial.c (serial_close):  Handle `really_close'.
+	* serial.h (scb_base):  Moved to serial.c, made static.
+
+	* valops.c (value_addr):  Don't coerce arrays.
+	(typecmp):  Coerce arrays instead of calling value_addr if necessary.
+
 Wed Jul 19 18:19:28 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From Richard Earnshaw (rearnsha@armltd.co.uk):

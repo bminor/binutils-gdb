@@ -28,6 +28,10 @@ static struct serial_ops *serial_ops_list = NULL;
 
 static serial_t last_serial_opened = NULL;
 
+/* Pointer to list of scb's. */
+
+static serial_t scb_base;
+
 static struct serial_ops *
 serial_interface_lookup (name)
      char *name;
@@ -137,8 +141,9 @@ serial_fdopen (fd)
 }
 
 void
-serial_close(scb)
+serial_close(scb, really_close)
      serial_t scb;
+     int really_close;
 {
   serial_t tmp_scb;
 
@@ -154,7 +159,8 @@ serial_close(scb)
   if (scb->refcnt > 0)
     return;
 
-  scb->ops->close (scb);
+  if (really_close)
+    scb->ops->close (scb);
 
   if (scb->name)
     free (scb->name);
