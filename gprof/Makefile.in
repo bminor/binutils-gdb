@@ -2,6 +2,20 @@
 
 srcdir = .
 
+prefix = /usr/local
+
+program_prefix =
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+tooldir = $(libdir)
+
+datadir = $(prefix)/lib
+
+INSTALL = install -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL)
+
 #### host and target dependent Makefile fragments come in here.
 ###
 
@@ -22,10 +36,10 @@ all:	${PROG}
 .PHONY: check
 check:
 
-beforeinstall:
-	install -c -o ${BINOWN} -g ${BINGRP} -m ${BINMODE} \
-	    ${.CURDIR}/gprof.flat ${.CURDIR}/gprof.callg \
-	    ${DESTDIR}/usr/share/misc
+install: all
+	$(INSTALL_DATA) ${srcdir}/gprof.flat ${DESTDIR}$(datadir)
+	$(INSTALL_DATA) ${srcdir}/gprof.callg ${DESTDIR}$(datadir)
+	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(bindir)
 
 $(PROG):	$(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROG) $(LIBS)
