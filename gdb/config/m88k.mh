@@ -17,5 +17,5 @@
 # along with GDB; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-XDEPFILES= 
+XDEPFILES= infptrace.o m88k-xdep.o
 XM_FILE= xm-88k.h
