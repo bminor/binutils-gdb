@@ -51,7 +51,7 @@
 .*:98: Warning: This is the location of the conflicting usage
 .*:104: Warning: Use of 'ld8\.fill' .* RAW dependency 'AR\[UNAT\]{%}, % in 0 - 63' \(impliedf\)
 .*:103: Warning: This is the location of the conflicting usage
-.*:111: Warning: Use of 'mov' .* RAW dependency 'BR%, % in 0 - 7' \(impliedf\)
+.*:111: Warning: Use of 'mov' .* RAW dependency 'BR%, % in 0 - 7' \(impliedf\), specific resource number is 0
 .*:110: Warning: This is the location of the conflicting usage
 .*:116: Warning: Use of 'fadd' .* RAW dependency 'CFM' \(impliedf\)
 .*:115: Warning: This is the location of the conflicting usage

@@ -51,6 +51,10 @@
 
 #include "elf/ia64.h"
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
 #define NELEMS(a)	((int) (sizeof (a)/sizeof ((a)[0])))
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
 
@@ -627,7 +631,17 @@ static struct gr {
   unsigned known:1;
   int path;
   valueT value;
-} gr_values[128] = {{ 1, 0, 0 }};
+} gr_values[128] = {
+  {
+    1,
+#ifdef INT_MAX
+    INT_MAX,
+#else
+    (((1 << (8 * sizeof(gr_values->path) - 2)) - 1) << 1) + 1,
+#endif
+    0
+  }
+};
 
 /* Remember the alignment frag.  */
 static fragS *align_frag;
@@ -4913,7 +4927,7 @@ dot_reg_val (dummy)
     {
       valueT value = get_absolute_expression ();
       int regno = reg.X_add_number;
-      if (regno < REG_GR || regno > REG_GR + 128)
+      if (regno <= REG_GR || regno > REG_GR + 127)
 	as_warn (_("Register value annotation ignored"));
       else
 	{
@@ -8060,7 +8074,7 @@ specify_resource (dep, idesc, type, specs, note, path)
   tmpl.link_to_qp_branch = 1;
   tmpl.mem_offset.hint = 0;
   tmpl.specific = 1;
-  tmpl.index = 0;
+  tmpl.index = -1;
   tmpl.cmp_type = CMP_NONE;
 
 #define UNHANDLED \
@@ -9303,8 +9317,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	      if (idesc->operands[0] == IA64_OPND_AR3
 		  && CURR_SLOT.opnd[0].X_add_number - REG_AR == AR_BSPSTORE)
 		{
-		  specs[count] = tmpl;
-		  specs[count++].index = 0; /* IA64_RSE_BSPLOAD/RNATBITINDEX */
+		  specs[count++] = tmpl;
 		}
 	    }
 	  else
@@ -9758,6 +9771,7 @@ note_register_values (idesc)
   else if (idesc->operands[0] == IA64_OPND_R1
 	   && (idesc->operands[1] == IA64_OPND_IMM22
 	       || idesc->operands[1] == IA64_OPND_IMMU64)
+	   && CURR_SLOT.opnd[1].X_op == O_constant
 	   && (strcmp (idesc->name, "mov") == 0
 	       || strcmp (idesc->name, "movl") == 0))
     {
@@ -9766,6 +9780,30 @@ note_register_values (idesc)
 	{
 	  gr_values[regno].known = 1;
 	  gr_values[regno].value = CURR_SLOT.opnd[1].X_add_number;
+	  gr_values[regno].path = md.path;
+	  if (md.debug_dv)
+	    {
+	      fprintf (stderr, "  Know gr%d = ", regno);
+	      fprintf_vma (stderr, gr_values[regno].value);
+	      fputs ("\n", stderr);
+	    }
+	}
+    }
+  /* Look for dep.z imm insns.  */
+  else if (idesc->operands[0] == IA64_OPND_R1
+	   && idesc->operands[1] == IA64_OPND_IMM8
+	   && strcmp (idesc->name, "dep.z") == 0)
+    {
+      int regno = CURR_SLOT.opnd[0].X_add_number - REG_GR;
+      if (regno > 0 && regno < NELEMS (gr_values))
+	{
+	  valueT value = CURR_SLOT.opnd[1].X_add_number;
+
+	  if (CURR_SLOT.opnd[3].X_add_number < 64)
+	    value &= ((valueT)1 << CURR_SLOT.opnd[3].X_add_number) - 1;
+	  value <<= CURR_SLOT.opnd[2].X_add_number;
+	  gr_values[regno].known = 1;
+	  gr_values[regno].value = value;
 	  gr_values[regno].path = md.path;
 	  if (md.debug_dv)
 	    {
@@ -9995,7 +10033,7 @@ print_dependency (action, depind)
       fprintf (stderr, "  %s %s '%s'",
 	       action, dv_mode[(regdeps[depind].dependency)->mode],
 	       (regdeps[depind].dependency)->name);
-      if (regdeps[depind].specific && regdeps[depind].index != 0)
+      if (regdeps[depind].specific && regdeps[depind].index >= 0)
 	fprintf (stderr, " (%d)", regdeps[depind].index);
       if (regdeps[depind].mem_offset.hint)
 	{
@@ -10193,7 +10231,7 @@ check_dependencies (idesc)
 	      if (path != 0)
 		sprintf (pathmsg, " when entry is at label '%s'",
 			 md.entry_labels[path - 1]);
-	      if (rs->specific && rs->index != 0)
+	      if (matchtype == 1 && rs->index >= 0)
 		sprintf (indexmsg, ", specific resource number is %d",
 			 rs->index);
 	      sprintf (msg, "Use of '%s' %s %s dependency '%s' (%s)%s%s",

@@ -1,5 +1,18 @@
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c: Include limits.h (if available).
+	(gr_values[0]): Set path to INT_MAX.
+	(dot_reg_val): Don't allow changing value of r0. Limit range of
+	general registers at r127.
+	(specify_resource): Default resource index is -1. Don't set resource
+	index (in case IA64_RS_RSE) without setting the specific flag.
+	(note_register_values): Check operand is O_constant before tracking
+	input value of moves. Add tracking for dep.z with constant inputs.
+	(print_dependency): Resource index of specific resource may be zero.
+	(check_dependencies): Likewise.
+
+2005-02-15  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (parse_operands): New local variables reg1, reg2,
 	reg_class. Check operands and emit diagnostics for illegal use of
 	registers.

@@ -41,6 +41,7 @@ if [istarget "ia64-*"] then {
     gas_test "pred-rel.s" "" "" ".pred.rel alternative forms"
     run_dump_test "dv-safe"
     run_dump_test "dv-srlz"
+    run_list_test "regval" ""
     run_dump_test "tls"
     run_dump_test "ldxmov-1"
     run_list_test "ldxmov-2" ""
