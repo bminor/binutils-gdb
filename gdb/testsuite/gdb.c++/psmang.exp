@@ -48,6 +48,8 @@
 #   Breakpoint 1 at 0x804841b: file psmang1.cc, line 13.
 #   (gdb) 
 #
+# We observed this bug first using Stabs, and then using Dwarf 2.
+#
 # The problem was in lookup_symbol_aux: when looking up s::method1, it
 # would fail to find it in any symtabs, find the minsym with the
 # corresponding mangled name (say, `_ZN1S7method1Ev'), pass the
@@ -117,6 +119,14 @@
 #
 # Note that #including any header file at all into both compilation
 # units --- say, <stdio.h> --- could create this sort of dependency.
+#
+# This is the aspect of the test which the debug format is most likely
+# to affect, I think.  The different formats create different kinds of
+# inter-CU dependencies, which could mask the bug.  It might be
+# possible for the test to check that at least one of the partial
+# symtabs remains unread, and fail otherwise --- the failure
+# indicating that the test itself isn't going to catch the bug it was
+# meant to, not that GDB is misbehaving.
 #
 # Third twist: given the way lookup_block_symbol is written, it's
 # possible to find the symbol even when it gets passed a mangled name
