@@ -1,5 +1,11 @@
 Mon Jul  3 11:30:45 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Correct
+	BFD_ASSERT to handle __start_SECNAME symbols automatically defined
+	by the linker.
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Likewise.
+	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Likewise.
+
 	* Makefile.in: Rebuild dependencies.
 	(BFD32_BACKENDS): Add versados.o.
 	(CFILES): Add pe-i386.c, pei-i386.c, and versados.c.

@@ -102,7 +102,7 @@ static reloc_howto_type elf_sparc_howto_table[] =
   HOWTO(R_SPARC_13,      0,2,13,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,"R_SPARC_13",      false,0,0x00001fff,true),
   HOWTO(R_SPARC_LO10,    0,2,10,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,"R_SPARC_LO10",    false,0,0x000003ff,true),
   HOWTO(R_SPARC_GOT10,   0,2,10,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,"R_SPARC_GOT10",   false,0,0x000003ff,true),
-  HOWTO(R_SPARC_GOT13,   0,2,13,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,"R_SPARC_GOT13",   false,0,0x00001fff,true),
+  HOWTO(R_SPARC_GOT13,   0,2,13,false,0,complain_overflow_signed,  bfd_elf_generic_reloc,"R_SPARC_GOT13",   false,0,0x00001fff,true),
   HOWTO(R_SPARC_GOT22,  10,2,22,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,"R_SPARC_GOT22",   false,0,0x003fffff,true),
   HOWTO(R_SPARC_PC10,    0,2,10,true, 0,complain_overflow_dont,    bfd_elf_generic_reloc,"R_SPARC_PC10",    false,0,0x000003ff,true),
   HOWTO(R_SPARC_PC22,   10,2,22,true, 0,complain_overflow_bitfield,bfd_elf_generic_reloc,"R_SPARC_PC22",    false,0,0x003fffff,true),
@@ -573,21 +573,22 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
   dynobj = elf_hash_table (info)->dynobj;
 
   /* Make sure we know what is going on here.  */
-  BFD_ASSERT (dynobj != NULL
-	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
-		  || ((h->elf_link_hash_flags
-		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_REF_REGULAR) != 0
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0
-		      && (h->root.type == bfd_link_hash_defined
-			  || h->root.type == bfd_link_hash_defweak)
-		      && (bfd_get_flavour (h->root.u.def.section->owner)
-			  == bfd_target_elf_flavour)
-		      && (elf_elfheader (h->root.u.def.section->owner)->e_type
-			  == ET_DYN)
-		      && h->root.u.def.section->output_section == NULL)));
+  BFD_ASSERT (dynobj != NULL);
+  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
+	      || ((h->elf_link_hash_flags
+		   & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		  && (h->elf_link_hash_flags
+		      & ELF_LINK_HASH_REF_REGULAR) != 0
+		  && (h->elf_link_hash_flags
+		      & ELF_LINK_HASH_DEF_REGULAR) == 0
+		  && (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak)
+		  && (h->root.u.def.section->owner == NULL
+		      || ((elf_elfheader (h->root.u.def.section->owner)->e_type
+			   == ET_DYN)
+			  && (bfd_get_flavour (h->root.u.def.section->owner)
+			      == bfd_target_elf_flavour)
+			  && h->root.u.def.section->output_section == NULL))));
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later
