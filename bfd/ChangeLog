@@ -34,12 +34,16 @@ Fri Oct 27 14:42:15 1995  Niklas Hallqvist  <niklas@appli.se>
 	configurations.  Add support for m68k4k NetBSD object format.
 
 	* libaout.h: Added M_68K4K_NETBSD magic.
+
+	* m68k4knetbsd.c: New file.
 	
 	* hosts/{m68k,sparc}nbsd.h: Don't define HOST_BIG_ENDIAN_P.
 
 	* hosts/nbsd.h: Define HOST_BIG_ENDIAN_P according to
 	<machine/endian.h>.
 
+	* hosts/mipsnbsd.h: New file.
+	
 start-sanitize-gm
 Fri Oct 27 09:41:51 1995  Stu Grossman  (grossman@cygnus.com)
 
