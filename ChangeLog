@@ -1,3 +1,8 @@
+Wed Dec  1 17:00:33 1993  Jason Merrill  (jason@deneb.cygnus.com)
+
+	* Makefile.in (GZIPPROG): Renamed from GZIP, which gzip uses for
+	default arguments -- so it tried to compress itself.
+
 Tue Nov 30 13:45:15 1993  david d `zoo' zuhn  (zoo@andros.cygnus.com)
 
 	* configure.in (notsupp): ensure that a space is always at the end
