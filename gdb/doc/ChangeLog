@@ -1,3 +1,11 @@
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Replace @include with
+	chapter body.  Use @smallexample instead of @example.
+	(Annotations): Ditto.
+	* Makefile.in (GDB_DOC_SOURCE_INCLUDES): Remove gdbmi.texinfo and
+	annotate.texi.
+
 2003-03-26  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Replace

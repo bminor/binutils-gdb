@@ -1,3 +1,8 @@
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbmi.texinfo: Delete file.  Contents moved to
+	../doc/gdb.texinfo.
+
 2003-03-12  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-main.c (get_register): Use frame_register instead of
