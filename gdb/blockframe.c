@@ -75,7 +75,7 @@ struct symbol *mainsym;
     return 0;
 
   if (symfile_objfile -> ei.main_func_lowpc == 0 &&
-      symfile_objfile -> ei.main_func_highpc > pc == 0)
+      symfile_objfile -> ei.main_func_highpc == 0)
     {
       mainsym = lookup_symbol ("main", NULL, VAR_NAMESPACE, NULL, NULL);
       if (mainsym && SYMBOL_CLASS(mainsym) == LOC_BLOCK)
