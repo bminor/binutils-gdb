@@ -1,7 +1,7 @@
 /* BFD back-end for MIPS Extended-Coff files.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Original version by Per Bothner.
-   Full support by Ian Lance Taylor, ian@cygnus.com.
+   Full support added by Ian Lance Taylor, ian@cygnus.com.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -133,7 +133,106 @@ typedef struct ecoff_symbol_struct
    of the swapping routines from coffswap.h, and some of the generic
    COFF routines in coffgen.c, but, unlike the real COFF targets, does
    not use coffcode.h itself.  */
+
+/* Prototypes for static functions.  */
 
+static boolean ecoff_bad_format_hook PARAMS ((bfd *abfd, PTR filehdr));
+static asection *ecoff_make_section_hook PARAMS ((bfd *abfd, char *name));
+static boolean ecoff_new_section_hook PARAMS ((bfd *abfd, asection *section));
+static boolean ecoff_mkobject PARAMS ((bfd *abfd));
+static PTR ecoff_mkobject_hook PARAMS ((bfd *abfd, PTR filehdr, PTR aouthdr));
+static boolean ecoff_set_arch_mach_hook PARAMS ((bfd *abfd, PTR filehdr));
+static long ecoff_sec_to_styp_flags PARAMS ((CONST char *name,
+					     flagword flags));
+static flagword ecoff_styp_to_sec_flags PARAMS ((bfd *abfd, PTR hdr));
+static boolean ecoff_slurp_symbolic_info PARAMS ((bfd *abfd));
+static asymbol *ecoff_make_empty_symbol PARAMS ((bfd *abfd));
+static void ecoff_set_symbol_info PARAMS ((bfd *abfd, SYMR *ecoff_sym,
+					   asymbol *asym, int ext));
+static boolean ecoff_slurp_symbol_table PARAMS ((bfd *abfd));
+static unsigned int ecoff_get_symtab_upper_bound PARAMS ((bfd *abfd));
+static unsigned int ecoff_get_symtab PARAMS ((bfd *abfd,
+					      asymbol **alocation));
+static void ecoff_emit_aggregate PARAMS ((bfd *abfd, char *string,
+					  RNDXR *rndx, long isym,
+					  CONST char *which));
+static char *ecoff_type_to_string PARAMS ((bfd *abfd, union aux_ext *aux_ptr,
+					   int indx, int bigendian));
+static void ecoff_print_symbol PARAMS ((bfd *abfd, PTR filep,
+					asymbol *symbol,
+					bfd_print_symbol_type how));
+static void ecoff_swap_reloc_in PARAMS ((bfd *abfd, RELOC *ext,
+					 struct internal_reloc *intern));
+static unsigned int ecoff_swap_reloc_out PARAMS ((bfd *abfd, PTR src,
+						  PTR dst));
+static bfd_reloc_status_type ecoff_generic_reloc PARAMS ((bfd *abfd,
+							  arelent *reloc,
+							  asymbol *symbol,
+							  PTR data,
+							  asection *section,
+							  bfd *output_bfd));
+static bfd_reloc_status_type ecoff_refhi_reloc PARAMS ((bfd *abfd,
+							arelent *reloc,
+							asymbol *symbol,
+							PTR data,
+							asection *section,
+							bfd *output_bfd));
+static bfd_reloc_status_type ecoff_gprel_reloc PARAMS ((bfd *abfd,
+							arelent *reloc,
+							asymbol *symbol,
+							PTR data,
+							asection *section,
+							bfd *output_bfd));
+static boolean ecoff_slurp_reloc_table PARAMS ((bfd *abfd, asection *section,
+						asymbol **symbols));
+static unsigned int ecoff_canonicalize_reloc PARAMS ((bfd *abfd,
+						      asection *section,
+						      arelent **relptr,
+						      asymbol **symbols));
+static boolean ecoff_find_nearest_line PARAMS ((bfd *abfd,
+						asection *section,
+						asymbol **symbols,
+						bfd_vma offset,
+						CONST char **filename_ptr,
+						CONST char **fnname_ptr,
+						unsigned int *retline_ptr));
+static void ecoff_clear_output_flags PARAMS ((bfd *abfd));
+static boolean ecoff_rel PARAMS ((bfd *output_bfd, bfd_seclet_type *seclet,
+				  asection *output_section, PTR data,
+				  boolean relocateable));
+static boolean ecoff_dump_seclet PARAMS ((bfd *abfd, bfd_seclet_type *seclet,
+					  asection *section, PTR data,
+					  boolean relocateable));
+static long ecoff_add_string PARAMS ((bfd *output_bfd, FDR *fdr,
+				      CONST char *string, boolean external));
+static boolean ecoff_get_debug PARAMS ((bfd *output_bfd,
+					bfd_seclet_type *seclet,
+					asection *section,
+					boolean relocateable));
+static boolean ecoff_bfd_seclet_link PARAMS ((bfd *abfd, PTR data,
+					      boolean relocateable));
+static boolean ecoff_set_arch_mach PARAMS ((bfd *abfd,
+					    enum bfd_architecture arch,
+					    unsigned long machine));
+static int ecoff_sizeof_headers PARAMS ((bfd *abfd, boolean reloc));
+static void ecoff_compute_section_file_positions PARAMS ((bfd *abfd));
+static boolean ecoff_set_section_contents PARAMS ((bfd *abfd,
+						   asection *section,
+						   PTR location,
+						   file_ptr offset,
+						   bfd_size_type count));
+static boolean ecoff_write_object_contents PARAMS ((bfd *abfd));
+static unsigned int ecoff_armap_hash PARAMS ((CONST char *s,
+					      unsigned int *rehash,
+					      unsigned int size,
+					      unsigned int hlog));
+static boolean ecoff_slurp_armap PARAMS ((bfd *abfd));
+static boolean ecoff_write_armap PARAMS ((bfd *abfd, unsigned int elength,
+					  struct orl *map,
+					  unsigned int orl_count,
+					  int stridx));
+static bfd_target *ecoff_archive_p PARAMS ((bfd *abfd));
+
 /* Get the generic COFF swapping routines, except for the reloc,
    symbol, and lineno ones.  Give them ecoff names.  */
 #define MIPSECOFF
@@ -155,9 +254,9 @@ static asection bfd_debug_section = { "*DEBUG*" };
 /* See whether the magic number matches.  */
 
 static boolean
-DEFUN(ecoff_bad_format_hook, (abfd, filehdr),
-      bfd *abfd AND
-      PTR filehdr)
+ecoff_bad_format_hook (abfd, filehdr)
+     bfd *abfd;
+     PTR filehdr;
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
@@ -170,9 +269,9 @@ DEFUN(ecoff_bad_format_hook, (abfd, filehdr),
 /* This is a hook needed by SCO COFF, but we have nothing to do.  */
 
 static asection *
-DEFUN (ecoff_make_section_hook, (abfd, name),
-       bfd *abfd AND
-       char *name)
+ecoff_make_section_hook (abfd, name)
+     bfd *abfd;
+     char *name;
 {
   return (asection *) NULL;
 }
@@ -180,9 +279,9 @@ DEFUN (ecoff_make_section_hook, (abfd, name),
 /* Initialize a new section.  */
 
 static boolean
-DEFUN (ecoff_new_section_hook, (abfd, section),
-       bfd *abfd AND
-       asection *section)
+ecoff_new_section_hook (abfd, section)
+     bfd *abfd;
+     asection *section;
 {
   section->alignment_power = abfd->xvec->align_power_min;
 
@@ -206,12 +305,16 @@ DEFUN (ecoff_new_section_hook, (abfd, section),
   return true;
 }
 
+/* Set the alignment of a section; we have nothing to do.  */
+
 #define ecoff_set_alignment_hook \
   ((void (*) PARAMS ((bfd *, asection *, PTR))) bfd_void)
 
+/* Create an ECOFF object.  */
+
 static boolean
-DEFUN (ecoff_mkobject, (abfd),
-       bfd *abfd)
+ecoff_mkobject (abfd)
+     bfd *abfd;
 {
   abfd->tdata.ecoff_obj_data = ((struct ecoff_tdata *)
 				bfd_zalloc (abfd, sizeof(ecoff_data_type)));
@@ -228,7 +331,7 @@ DEFUN (ecoff_mkobject, (abfd),
   return true;
 }
 
-/* Create the COFF backend specific information.  */
+/* Create the ECOFF backend specific information.  */
 
 static PTR
 ecoff_mkobject_hook (abfd, filehdr, aouthdr)
@@ -260,39 +363,39 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
 }
 
 /* Determine the machine architecture and type.  */
+
 static boolean
-DEFUN (ecoff_set_arch_mach_hook, (abfd, filehdr),
-       bfd *abfd AND
-       PTR filehdr)
+ecoff_set_arch_mach_hook (abfd, filehdr)
+     bfd *abfd;
+     PTR filehdr;
 {
-  long machine;
-  enum bfd_architecture arch;
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
+  enum bfd_architecture arch;
 
-  machine = 0;
-  switch (internal_f->f_magic) {
-  case  MIPS_MAGIC_1:
-  case  MIPS_MAGIC_2:
-  case  MIPS_MAGIC_3:
-    arch = bfd_arch_mips;
-    machine = 0;
-    break;
+  switch (internal_f->f_magic)
+    {
+    case MIPS_MAGIC_1:
+    case MIPS_MAGIC_2:
+    case MIPS_MAGIC_3:
+      arch = bfd_arch_mips;
+      break;
 
-  default:			/* Unreadable input file type */
-    arch = bfd_arch_obscure;
-    break;
-  }
+    default:
+      arch = bfd_arch_obscure;
+      break;
+    }
 
-  bfd_default_set_arch_mach(abfd, arch, machine);
+  bfd_default_set_arch_mach (abfd, arch, (unsigned long) 0);
+
   return true;
 }
 
 /* Get the section s_flags to use for a section.  */
 
 static long
-DEFUN (sec_to_styp_flags, (name, flags),
-       CONST char *name AND
-       flagword flags)
+ecoff_sec_to_styp_flags (name, flags)
+     CONST char *name;
+     flagword flags;
 {
   long styp;
 
@@ -334,9 +437,9 @@ DEFUN (sec_to_styp_flags, (name, flags),
 /* Get the BFD flags to use for a section.  */
 
 static flagword
-DEFUN (styp_to_sec_flags, (abfd, hdr),
-       bfd *abfd AND
-       PTR hdr)
+ecoff_styp_to_sec_flags (abfd, hdr)
+     bfd *abfd;
+     PTR hdr;
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
@@ -391,8 +494,8 @@ DEFUN (styp_to_sec_flags, (abfd, hdr),
    object file.  */
 
 static boolean
-DEFUN (ecoff_slurp_symbolic_info, (abfd),
-       bfd *abfd)
+ecoff_slurp_symbolic_info (abfd)
+     bfd *abfd;
 {
   struct hdr_ext external_symhdr;
   HDRR *internal_symhdr;
@@ -553,8 +656,8 @@ static asymbol *ecoff_scom_symbol_ptr;
 /* Create an empty symbol.  */
 
 static asymbol *
-DEFUN (ecoff_make_empty_symbol, (abfd),
-       bfd *abfd)
+ecoff_make_empty_symbol (abfd)
+     bfd *abfd;
 {
   ecoff_symbol_type *new;
 
@@ -575,11 +678,11 @@ DEFUN (ecoff_make_empty_symbol, (abfd),
 /* Set the BFD flags and section for an ECOFF symbol.  */
 
 static void
-DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
-       bfd *abfd AND
-       SYMR *ecoff_sym AND
-       asymbol *asym AND
-       int ext)
+ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext)
+     bfd *abfd;
+     SYMR *ecoff_sym;
+     asymbol *asym;
+     int ext;
 {
   asym->the_bfd = abfd;
   asym->value = ecoff_sym->value;
@@ -729,8 +832,8 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
 /* Read an ECOFF symbol table.  */
 
 static boolean
-DEFUN (ecoff_slurp_symbol_table, (abfd),
-       bfd *abfd)
+ecoff_slurp_symbol_table (abfd)
+     bfd *abfd;
 {
   bfd_size_type internal_size;
   ecoff_symbol_type *internal;
@@ -808,8 +911,8 @@ DEFUN (ecoff_slurp_symbol_table, (abfd),
 }
 
 static unsigned int
-DEFUN (ecoff_get_symtab_upper_bound, (abfd),
-       bfd *abfd)
+ecoff_get_symtab_upper_bound (abfd)
+     bfd *abfd;
 {
   if (ecoff_slurp_symbolic_info (abfd) == false
       || bfd_get_symcount (abfd) == 0)
@@ -819,9 +922,9 @@ DEFUN (ecoff_get_symtab_upper_bound, (abfd),
 }
 
 static unsigned int
-DEFUN (ecoff_get_symtab, (abfd, alocation),
-       bfd *abfd AND
-       asymbol **alocation)
+ecoff_get_symtab (abfd, alocation)
+     bfd *abfd;
+     asymbol **alocation;
 {
   unsigned int counter = 0;
   ecoff_symbol_type *symbase;
@@ -842,18 +945,18 @@ DEFUN (ecoff_get_symtab, (abfd, alocation),
 }
 
 /* Turn ECOFF type information into a printable string.
-   emit_aggregate and type_to_string are from gcc/mips-tdump.c, with
-   swapping added and used_ptr removed.  */
+   ecoff_emit_aggregate and ecoff_type_to_string are from
+   gcc/mips-tdump.c, with swapping added and used_ptr removed.  */
 
 /* Write aggregate information to a string.  */
 
 static void
-DEFUN (emit_aggregate, (abfd, string, rndx, isym, which),
-       bfd *abfd AND
-       char *string AND
-       RNDXR *rndx AND
-       long isym AND
-       CONST char *which)
+ecoff_emit_aggregate (abfd, string, rndx, isym, which)
+     bfd *abfd;
+     char *string;
+     RNDXR *rndx;
+     long isym;
+     CONST char *which;
 {
   int ifd = rndx->rfd;
   int indx = rndx->index;
@@ -888,11 +991,11 @@ DEFUN (emit_aggregate, (abfd, string, rndx, isym, which),
 /* Convert the type information to string format.  */
 
 static char *
-DEFUN (type_to_string, (abfd, aux_ptr, indx, bigendian),
-       bfd *abfd AND
-       union aux_ext *aux_ptr AND
-       int indx AND
-       int bigendian)
+ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
+     bfd *abfd;
+     union aux_ext *aux_ptr;
+     int indx;
+     int bigendian;
 {
   AUXU u;
   struct qual {
@@ -989,9 +1092,9 @@ DEFUN (type_to_string, (abfd, aux_ptr, indx, bigendian),
 
     case btStruct:		/* Structure (Record) */
       ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
-      emit_aggregate (abfd, p1, &rndx,
-		      AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
-		      "struct");
+      ecoff_emit_aggregate (abfd, p1, &rndx,
+			    AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
+			    "struct");
       indx++;			/* skip aux words */
       break;
 
@@ -1001,9 +1104,9 @@ DEFUN (type_to_string, (abfd, aux_ptr, indx, bigendian),
 
     case btUnion:		/* Union */
       ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
-      emit_aggregate (abfd, p1, &rndx,
-		      AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
-		      "union");
+      ecoff_emit_aggregate (abfd, p1, &rndx,
+			    AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
+			    "union");
       indx++;			/* skip aux words */
       break;
 
@@ -1013,9 +1116,9 @@ DEFUN (type_to_string, (abfd, aux_ptr, indx, bigendian),
 
     case btEnum:		/* Enumeration */
       ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
-      emit_aggregate (abfd, p1, &rndx,
-		      AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
-		      "enum");
+      ecoff_emit_aggregate (abfd, p1, &rndx,
+			    AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
+			    "enum");
       indx++;			/* skip aux words */
       break;
 
@@ -1194,11 +1297,11 @@ DEFUN (type_to_string, (abfd, aux_ptr, indx, bigendian),
 /* Print information about an ECOFF symbol.  */
 
 static void
-DEFUN (ecoff_print_symbol, (abfd, filep, symbol, how),
-       bfd *abfd AND
-       PTR filep AND
-       asymbol *symbol AND
-       bfd_print_symbol_type how)
+ecoff_print_symbol (abfd, filep, symbol, how)
+     bfd *abfd;
+     PTR filep;
+     asymbol *symbol;
+     bfd_print_symbol_type how;
 {
   FILE *file = (FILE *)filep;
 
@@ -1341,8 +1444,8 @@ DEFUN (ecoff_print_symbol, (abfd, filep, symbol, how),
 			  (AUX_GET_ISYM (bigendian,
 					 &aux_base[ecoff_ext.asym.index])
 			   + sym_base),
-			  type_to_string (abfd, aux_base, indx + 1,
-					  bigendian));
+			  ecoff_type_to_string (abfd, aux_base, indx + 1,
+						bigendian));
 		else
 		  printf ("\n      Local symbol: %d",
 			  (indx
@@ -1353,7 +1456,8 @@ DEFUN (ecoff_print_symbol, (abfd, filep, symbol, how),
 	      default:
 		if (!MIPS_IS_STAB (&ecoff_ext.asym))
 		  printf ("\n      Type: %s",
-			  type_to_string (abfd, aux_base, indx, bigendian));
+			  ecoff_type_to_string (abfd, aux_base, indx,
+						bigendian));
 		break;
 	      }
 	  }
@@ -1369,10 +1473,10 @@ DEFUN (ecoff_print_symbol, (abfd, filep, symbol, how),
 /* Swap a reloc in.  */
 
 static void
-DEFUN (ecoff_swap_reloc_in, (abfd, ext, intern),
-       bfd *abfd AND
-       RELOC *ext AND
-       struct internal_reloc *intern)
+ecoff_swap_reloc_in (abfd, ext, intern)
+     bfd *abfd;
+     RELOC *ext;
+     struct internal_reloc *intern;
 {
   intern->r_vaddr = bfd_h_get_32 (abfd, (bfd_byte *) ext->r_vaddr);
   if (abfd->xvec->header_byteorder_big_p != false)
@@ -1404,10 +1508,10 @@ DEFUN (ecoff_swap_reloc_in, (abfd, ext, intern),
 /* Swap a reloc out.  */
 
 static unsigned int
-DEFUN (ecoff_swap_reloc_out, (abfd, src, dst),
-       bfd *abfd AND
-       PTR src AND
-       PTR dst)
+ecoff_swap_reloc_out (abfd, src, dst)
+     bfd *abfd;
+     PTR src;
+     PTR dst;
 {
   struct internal_reloc *intern = (struct internal_reloc *) src;
   RELOC *ext = (RELOC *) dst;
@@ -1813,10 +1917,10 @@ static reloc_howto_type ecoff_howto_table[] =
 /* Read in the relocs for a section.  */
 
 static boolean
-DEFUN (ecoff_slurp_reloc_table, (abfd, section, symbols),
-       bfd *abfd AND
-       asection *section AND
-       asymbol **symbols)
+ecoff_slurp_reloc_table (abfd, section, symbols)
+     bfd *abfd;
+     asection *section;
+     asymbol **symbols;
 {
   RELOC *external_relocs;
   arelent *internal_relocs;
@@ -1918,11 +2022,11 @@ DEFUN (ecoff_slurp_reloc_table, (abfd, section, symbols),
 /* Get a canonical list of relocs.  */
 
 static unsigned int
-DEFUN (ecoff_canonicalize_reloc, (abfd, section, relptr, symbols),
-       bfd *abfd AND
-       asection *section AND
-       arelent **relptr AND
-       asymbol **symbols)
+ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
+     bfd *abfd;
+     asection *section;
+     arelent **relptr;
+     asymbol **symbols;
 {
   unsigned int count;
 
@@ -1963,20 +2067,20 @@ DEFUN (ecoff_canonicalize_reloc, (abfd, section, relptr, symbols),
    wanted location.  */
 
 static boolean
-DEFUN (ecoff_find_nearest_line, (abfd,
-				 section,
-				 ignore_symbols,
-				 offset,
-				 filename_ptr,
-				 functionname_ptr,
-				 retline_ptr),
-       bfd *abfd AND
-       asection *section AND
-       asymbol **ignore_symbols AND
-       bfd_vma offset AND
-       CONST char **filename_ptr AND
-       CONST char **functionname_ptr AND
-       unsigned int *retline_ptr)
+ecoff_find_nearest_line (abfd,
+			 section,
+			 ignore_symbols,
+			 offset,
+			 filename_ptr,
+			 functionname_ptr,
+			 retline_ptr)
+     bfd *abfd;
+     asection *section;
+     asymbol **ignore_symbols;
+     bfd_vma offset;
+     CONST char **filename_ptr;
+     CONST char **functionname_ptr;
+     unsigned int *retline_ptr;
 {
   FDR *fdr_ptr;
   FDR *fdr_start;
@@ -2137,8 +2241,8 @@ DEFUN (ecoff_find_nearest_line, (abfd,
    once.  */
 
 static void
-DEFUN (ecoff_clear_output_flags, (abfd),
-       bfd *abfd)
+ecoff_clear_output_flags (abfd)
+     bfd *abfd;
 {
   register asection *o;
   register bfd_seclet_type *p;
@@ -2156,18 +2260,16 @@ DEFUN (ecoff_clear_output_flags, (abfd),
    any.  */
 
 static boolean
-DEFUN (ecoff_rel, (output_bfd, seclet, output_section, data, relocateable),
-       bfd *output_bfd AND
-       bfd_seclet_type *seclet AND
-       asection *output_section AND
-       PTR data AND
-       boolean relocateable)
+ecoff_rel (output_bfd, seclet, output_section, data, relocateable)
+     bfd *output_bfd;
+     bfd_seclet_type *seclet;
+     asection *output_section;
+     PTR data;
+     boolean relocateable;
 {
   bfd *input_bfd;
   HDRR *output_symhdr;
   HDRR *input_symhdr;
-  ecoff_symbol_type *sym_ptr;
-  ecoff_symbol_type *sym_end;
 
   if ((output_section->flags & SEC_HAS_CONTENTS)
       && !(output_section->flags & SEC_NEVER_LOAD)
@@ -2274,12 +2376,12 @@ DEFUN (ecoff_rel, (output_bfd, seclet, output_section, data, relocateable),
 /* Handle an arbitrary seclet on the first pass.  */
 
 static boolean
-DEFUN (ecoff_dump_seclet, (abfd, seclet, section, data, relocateable),
-       bfd *abfd AND
-       bfd_seclet_type *seclet AND
-       asection *section AND
-       PTR data AND
-       boolean relocateable)
+ecoff_dump_seclet (abfd, seclet, section, data, relocateable)
+     bfd *abfd;
+     bfd_seclet_type *seclet;
+     asection *section;
+     PTR data;
+     boolean relocateable;
 {
   switch (seclet->type) 
     {
@@ -2325,11 +2427,11 @@ DEFUN (ecoff_dump_seclet, (abfd, seclet, section, data, relocateable),
    external string base.  */
 
 static long
-DEFUN (ecoff_add_string, (output_bfd, fdr, string, external),
-       bfd *output_bfd AND
-       FDR *fdr AND
-       CONST char *string AND
-       boolean external)
+ecoff_add_string (output_bfd, fdr, string, external)
+     bfd *output_bfd;
+     FDR *fdr;
+     CONST char *string;
+     boolean external;
 {
   HDRR *symhdr;
   size_t len;
@@ -2356,11 +2458,11 @@ DEFUN (ecoff_add_string, (output_bfd, fdr, string, external),
 /* Accumulate the debugging information from an input section.  */
 
 static boolean
-DEFUN (ecoff_get_debug, (output_bfd, seclet, section, relocateable),
-       bfd *output_bfd AND
-       bfd_seclet_type *seclet AND
-       asection *section AND
-       boolean relocateable)
+ecoff_get_debug (output_bfd, seclet, section, relocateable)
+     bfd *output_bfd;
+     bfd_seclet_type *seclet;
+     asection *section;
+     boolean relocateable;
 {
   bfd *input_bfd;
   HDRR *output_symhdr;
@@ -2369,7 +2471,6 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section, relocateable),
   ecoff_data_type *input_ecoff;
   unsigned int count;
   struct sym_ext *sym_out;
-  struct ext_ext *ext_out;
   ecoff_symbol_type *esym_ptr;
   ecoff_symbol_type *esym_end;
   FDR *fdr_ptr;
@@ -2698,10 +2799,10 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section, relocateable),
    seclets.  */
 
 static boolean
-DEFUN (ecoff_bfd_seclet_link, (abfd, data, relocateable),
-       bfd *abfd AND
-       PTR data AND
-       boolean relocateable)
+ecoff_bfd_seclet_link (abfd, data, relocateable)
+     bfd *abfd;
+     PTR data;
+     boolean relocateable;
 {
   HDRR *symhdr;
   int ipass;
@@ -2970,10 +3071,10 @@ DEFUN (ecoff_bfd_seclet_link, (abfd, data, relocateable),
    the return value.  */
 
 static boolean
-DEFUN (ecoff_set_arch_mach, (abfd, arch, machine),
-       bfd *abfd AND
-       enum bfd_architecture arch AND
-       unsigned long machine)
+ecoff_set_arch_mach (abfd, arch, machine)
+     bfd *abfd;
+     enum bfd_architecture arch;
+     unsigned long machine;
 {
   bfd_default_set_arch_mach (abfd, arch, machine);
   return arch == bfd_arch_mips;
@@ -2994,8 +3095,8 @@ ecoff_sizeof_headers (abfd, reloc)
    reloc_filepos.  */
 
 static void
-DEFUN (ecoff_compute_section_file_positions, (abfd),
-       bfd *abfd)
+ecoff_compute_section_file_positions (abfd)
+     bfd *abfd;
 {
   asection *current;
   file_ptr sofar;
@@ -3050,12 +3151,12 @@ DEFUN (ecoff_compute_section_file_positions, (abfd),
 /* Set the contents of a section.  */
 
 static boolean
-DEFUN (ecoff_set_section_contents, (abfd, section, location, offset, count),
-       bfd *abfd AND
-       asection *section AND
-       PTR location AND
-       file_ptr offset AND
-       bfd_size_type count)
+ecoff_set_section_contents (abfd, section, location, offset, count)
+     bfd *abfd;
+     asection *section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
 {
   if (abfd->output_has_begun == false)
     ecoff_compute_section_file_positions (abfd);
@@ -3071,8 +3172,8 @@ DEFUN (ecoff_set_section_contents, (abfd, section, location, offset, count),
 /* Write out an ECOFF file.  */
 
 static boolean
-DEFUN (ecoff_write_object_contents, (abfd),
-       bfd *abfd)
+ecoff_write_object_contents (abfd)
+     bfd *abfd;
 {
   asection *current;
   unsigned int count;
@@ -3193,7 +3294,8 @@ DEFUN (ecoff_write_object_contents, (abfd),
 
       section.s_nreloc = current->reloc_count;
       section.s_nlnno = 0;
-      section.s_flags = sec_to_styp_flags (current->name, current->flags);
+      section.s_flags = ecoff_sec_to_styp_flags (current->name,
+						 current->flags);
 
       {
 	SCNHDR buff;
@@ -3267,8 +3369,9 @@ DEFUN (ecoff_write_object_contents, (abfd),
   /* Set up the ``optional'' header.  */
   internal_a.magic = ZMAGIC;
 
-  /* FIXME: What should this be?  */
-  internal_a.vstamp = 0;
+  /* FIXME: This is what Ultrix puts in, and it makes the Ultrix
+     linker happy.  But, is it right?  */
+  internal_a.vstamp = 0x20a;
 
   /* At least on Ultrix, these have to be rounded to page boundaries.
      FIXME: Is this true on other platforms?  */
@@ -3515,8 +3618,8 @@ ecoff_armap_hash (s, rehash, size, hlog)
 /* Read in the armap.  */
 
 static boolean
-DEFUN (ecoff_slurp_armap, (abfd),
-       bfd *abfd)
+ecoff_slurp_armap (abfd)
+     bfd *abfd;
 {
   char nextname[17];
   unsigned int i;
@@ -3665,12 +3768,12 @@ DEFUN (ecoff_slurp_armap, (abfd),
 /* Write out an armap.  */
 
 static boolean
-DEFUN (ecoff_write_armap, (abfd, elength, map, orl_count, stridx),
-       bfd *abfd AND
-       unsigned int elength AND
-       struct orl *map AND
-       unsigned int orl_count AND
-       int stridx)
+ecoff_write_armap (abfd, elength, map, orl_count, stridx)
+     bfd *abfd;
+     unsigned int elength;
+     struct orl *map;
+     unsigned int orl_count;
+     int stridx;
 {
   unsigned int hashsize, hashlog;
   unsigned int symdefsize;
@@ -3720,8 +3823,7 @@ DEFUN (ecoff_write_armap, (abfd, elength, map, orl_count, stridx),
      complain that the index is out of date.  Actually, the Ultrix
      linker just checks the archive name; the GNU linker may check the
      date.  */
-  if (stat (abfd->filename, &statbuf) < 0)
-    statbuf.st_mtime = time ((PTR) NULL);
+  stat (abfd->filename, &statbuf);
   sprintf (hdr.ar_date, "%ld", (long) (statbuf.st_mtime + 60));
 
   /* The DECstation uses zeroes for the uid, gid and mode of the
@@ -3837,8 +3939,8 @@ DEFUN (ecoff_write_armap, (abfd, elength, map, orl_count, stridx),
    and the extended name table.  */
 
 static bfd_target *
-DEFUN (ecoff_archive_p, (abfd),
-       bfd *abfd)
+ecoff_archive_p (abfd)
+     bfd *abfd;
 {
   char armag[SARMAG + 1];
 
@@ -3874,6 +3976,10 @@ DEFUN (ecoff_archive_p, (abfd),
   return abfd->xvec;
 }
 
+/* This is the COFF backend structure.  The backend_data field of the
+   bfd_target structure is set to this.  The section reading code in
+   coffgen.c uses this structure.  */
+
 static CONST bfd_coff_backend_data bfd_ecoff_std_swap_table = {
   (void (*) PARAMS ((bfd *,PTR,int,int,PTR))) bfd_void, /* aux_in */
   (void (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* sym_in */
@@ -3886,7 +3992,7 @@ static CONST bfd_coff_backend_data bfd_ecoff_std_swap_table = {
   FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, true,
   ecoff_swap_filehdr_in, ecoff_swap_aouthdr_in, ecoff_swap_scnhdr_in,
   ecoff_bad_format_hook, ecoff_set_arch_mach_hook, ecoff_mkobject_hook,
-  styp_to_sec_flags, ecoff_make_section_hook, ecoff_set_alignment_hook,
+  ecoff_styp_to_sec_flags, ecoff_make_section_hook, ecoff_set_alignment_hook,
   ecoff_slurp_symbol_table
 };
 
@@ -3896,9 +4002,12 @@ static CONST bfd_coff_backend_data bfd_ecoff_std_swap_table = {
 #define ecoff_get_lineno \
   ((alent *(*) PARAMS ((bfd *, asymbol *))) bfd_nullvoidptr)
 
+/* These bfd_target functions are defined in other files.  */
+
 #define ecoff_core_file_failing_command	_bfd_dummy_core_file_failing_command
 #define ecoff_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
-#define ecoff_core_file_matches_executable_p	_bfd_dummy_core_file_matches_executable_p
+#define ecoff_core_file_matches_executable_p \
+  _bfd_dummy_core_file_matches_executable_p
 #define ecoff_truncate_arname		bfd_dont_truncate_arname
 #define ecoff_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define ecoff_generic_stat_arch_elt	bfd_generic_stat_arch_elt
@@ -3909,7 +4018,8 @@ static CONST bfd_coff_backend_data bfd_ecoff_std_swap_table = {
 #define ecoff_bfd_debug_info_end	bfd_void
 #define ecoff_bfd_debug_info_accumulate	\
   ((void (*) PARAMS ((bfd *, struct sec *))) bfd_void)
-#define ecoff_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
+#define ecoff_bfd_get_relocated_section_contents \
+  bfd_generic_get_relocated_section_contents
 #define ecoff_bfd_relax_section		bfd_generic_relax_section
 
 bfd_target ecoff_little_vec =
