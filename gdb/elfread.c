@@ -281,9 +281,18 @@ elf_symfile_read (objfile, addr, mainline)
   bfd *abfd = objfile->obfd;
   struct elfinfo ei;
   struct cleanup *back_to;
+  asection *text_sect;
 
   init_minimal_symbol_collection ();
   back_to = make_cleanup (discard_minimal_symbols, 0);
+
+  /* Compute the amount to relocate all symbols by.  The value passed in
+     as ADDR is typically either the actual address of the text section,
+     or a user specified address.  By subtracting off the actual address
+     of the text section, we can compute the relocation amount. */
+
+  text_sect = bfd_get_section_by_name (objfile -> obfd, ".text");
+  addr -= bfd_section_vma (objfile -> obfd, text_sect);
 
   /* Process the normal ELF symbol table first. */
 
