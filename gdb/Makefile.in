@@ -583,14 +583,6 @@ readline_headers = \
 	$(READLINE_SRC)/keymaps.h \
 	$(READLINE_SRC)/readline.h
 
-udiheaders = \
-	$(srcdir)/29k-share/udi/udiproc.h \
-	$(srcdir)/29k-share/udi/udiphcfg.h \
-	$(srcdir)/29k-share/udi/udiphunix.h \
-	$(srcdir)/29k-share/udi/udiptcfg.h \
-	$(srcdir)/29k-share/udi/udipt29k.h \
-	$(srcdir)/29k-share/udi/udisoc.h
-
 xm_h =		@xm_h@
 tm_h =		@tm_h@
 nm_h =		@nm_h@
@@ -693,7 +685,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	jv-lang.h \
 	m2-lang.h  p-lang.h \
 	complaints.h valprint.h \
-	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
+	nindy-share/b.out.h \
 	nindy-share/block_io.h nindy-share/coff.h \
 	nindy-share/env.h nindy-share/stop.h \
 	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
@@ -703,7 +695,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 
 # Header files that already have srcdir in them, or which are in objdir.
 
-HFILES_WITH_SRCDIR = $(udiheaders) ../bfd/bfd.h
+HFILES_WITH_SRCDIR = ../bfd/bfd.h
 
 
 # GDB "info" files, which should be included in their entirety
@@ -1206,9 +1198,7 @@ MAKEOVERRIDES=
 ## with no dependencies and no actions.
 unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 
-ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
-	29k-share/udi/udi2go32.c \
-	a29k-tdep.c a68v-nat.c \
+ALLDEPFILES = a68v-nat.c \
 	alpha-nat.c alphabsd-nat.c \
 	alpha-tdep.c alpha-linux-tdep.c alphabsd-tdep.c alphanbsd-tdep.c \
 	alpha-osf1-tdep.c alphafbsd-tdep.c \
@@ -1231,7 +1221,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	lynx-nat.c m3-nat.c \
 	m68hc11-tdep.c \
 	m68k-tdep.c \
-	m88k-nat.c m88k-tdep.c mac-nat.c \
+	m88k-nat.c m88k-tdep.c \
 	mcore-tdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-nat.c \
@@ -1245,11 +1235,11 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	ppc-sysv-tdep.o ppc-linux-nat.c ppc-linux-tdep.c \
 	ppcnbsd-nat.o ppcnbsd-tdep.o \
 	procfs.c \
-	remote-adapt.c remote-array.c remote-bug.c remote-e7000.c remote-eb.c \
+	remote-array.c remote-bug.c remote-e7000.c \
 	remote-es.c remote-hms.c remote-mips.c \
-	remote-mm.c remote-nindy.c remote-os9k.c remote-rdp.c remote-sim.c \
+	remote-nindy.c remote-os9k.c remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
-	remote-udi.c remote-vx.c remote-vx29k.c \
+	remote-vx.c \
 	rs6000-nat.c rs6000-tdep.c \
 	s390-tdep.c s390-nat.c \
 	ser-go32.c ser-pipe.c ser-tcp.c \
@@ -1265,15 +1255,6 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	xcoffread.c xcoffsolib.c \
 	xstormy16-tdep.c \
 	z8k-tdep.c
-
-udip2soc.o: $(srcdir)/29k-share/udi/udip2soc.c $(udiheaders)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udip2soc.c
-
-udi2go32.o: $(srcdir)/29k-share/udi/udi2go32.c $(udiheaders)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udi2go32.c
-
-udr.o: $(srcdir)/29k-share/udi/udr.c $(udiheaders) 
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udr.c
 
 a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h)
