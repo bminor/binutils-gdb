@@ -766,7 +766,7 @@ md_begin ()
 			      && strcmp (op->name, "cmpi") != 0
 			      && strcmp (op->name, "cmp") != 0
 			      && strcmp (op->name, "cmpl") != 0))))
-		abort ();
+		as_fatal ("Internal assembler error for instruction %s", op->name);
 	    }
 	}
     }
