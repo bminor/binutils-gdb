@@ -1,3 +1,11 @@
+2003-04-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ld-m68hc11/far-hc11.s: New file.
+	* ld-m68hc11/far-hc11.d: New test for HC11 trampoline generation.
+	* ld-m68hc11/far-hc12.s: New file.
+	* ld-m68hc11/far-hc12.d: New test for HC12 trampoline generation.
+	* ld-m68hc11/far-hc12.ld: New file.
+
 2003-04-15  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfcom/elfcom.exp: Fix a typo.
