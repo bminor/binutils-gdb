@@ -1,3 +1,8 @@
+Wed Apr 30 12:27:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (copy_private_bfd_data): Cast csecs to avoid sign
+	extension problems.
+
 Tue Apr 22 12:06:08 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (do_maintainer_clean): Don't remove bfd-in2.h.
