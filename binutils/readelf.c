@@ -6940,6 +6940,7 @@ get_note_type (e_type)
     case NT_PSINFO:	return _("NT_PSINFO (psinfo structure)");
     case NT_LWPSTATUS:	return _("NT_LWPSTATUS (lwpstatus_t structure)");
     case NT_LWPSINFO:	return _("NT_LWPSINFO (lwpsinfo_t structure)");
+    case NT_WIN32PSTATUS: return _("NT_WIN32PSTATUS (win32_pstatus strcuture)");
     default:
       sprintf (buff, _("Unknown note type: (0x%08x)"), e_type);
       return buff;
