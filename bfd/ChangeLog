@@ -1,3 +1,8 @@
+2000-03-13  Kazu Hirata  <kazu@hxi.com>
+
+	* coff-h8300.c (h8300_reloc16_extra_cases): Fix the sanity
+	check for R_MOVL2.
+
 2000-03-11  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* ieee.c (ieee_archive_p): Return bfd_error_wrong_format on 

@@ -796,7 +796,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
       /* Sanity check.  */
-      if (value < 0x8000 || value > 0xff8000)
+      if (value <= 0x7fff || value >= 0xff8000)
 	{
 	  /* Insert the 16bit value into the proper location.  */
 	  bfd_put_16 (abfd, value, data + dst_address);
