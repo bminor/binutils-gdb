@@ -271,6 +271,32 @@ CGEN_KEYWORD fr30_cgen_opval_h_gr =
   19
 };
 
+CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_cr_entries[] = 
+{
+  { "cr0", 0 },
+  { "cr1", 1 },
+  { "cr2", 2 },
+  { "cr3", 3 },
+  { "cr4", 4 },
+  { "cr5", 5 },
+  { "cr6", 6 },
+  { "cr7", 7 },
+  { "cr8", 8 },
+  { "cr9", 9 },
+  { "cr10", 10 },
+  { "cr11", 11 },
+  { "cr12", 12 },
+  { "cr13", 13 },
+  { "cr14", 14 },
+  { "cr15", 15 }
+};
+
+CGEN_KEYWORD fr30_cgen_opval_h_cr = 
+{
+  & fr30_cgen_opval_h_cr_entries[0],
+  16
+};
+
 CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_dr_entries[] = 
 {
   { "tbr", 0 },
@@ -344,6 +370,7 @@ static const CGEN_HW_ENTRY fr30_cgen_hw_entries[] =
   { HW_H_ADDR, & HW_ENT (HW_H_ADDR + 1), "h-addr", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { HW_H_IADDR, & HW_ENT (HW_H_IADDR + 1), "h-iaddr", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { HW_H_GR, & HW_ENT (HW_H_GR + 1), "h-gr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_gr, { 0, 0|(1<<CGEN_HW_CACHE_ADDR)|(1<<CGEN_HW_PROFILE), { 0 } } },
+  { HW_H_CR, & HW_ENT (HW_H_CR + 1), "h-cr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_cr, { 0, 0|(1<<CGEN_HW_CACHE_ADDR)|(1<<CGEN_HW_PROFILE), { 0 } } },
   { HW_H_DR, & HW_ENT (HW_H_DR + 1), "h-dr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_dr, { 0, 0, { 0 } } },
   { HW_H_PS, & HW_ENT (HW_H_PS + 1), "h-ps", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_ps, { 0, 0|(1<<CGEN_HW_FUN_ACCESS), { 0 } } },
   { HW_H_R13, & HW_ENT (HW_H_R13 + 1), "h-r13", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_r13, { 0, 0, { 0 } } },
@@ -374,6 +401,18 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 /* Rj: source register */
   { "Rj", & HW_ENT (HW_H_GR), 8, 4,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* Ric: target register coproc insn */
+  { "Ric", & HW_ENT (HW_H_GR), 28, 4,
+    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* Rjc: source register coproc insn */
+  { "Rjc", & HW_ENT (HW_H_GR), 24, 4,
+    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* CRi: coprocessor register */
+  { "CRi", & HW_ENT (HW_H_CR), 28, 4,
+    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* CRj: coprocessor register */
+  { "CRj", & HW_ENT (HW_H_CR), 24, 4,
+    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
 /* Rs1: dedicated register */
   { "Rs1", & HW_ENT (HW_H_DR), 8, 4,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
@@ -394,6 +433,9 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
     { 0, 0, { 0 } }  },
 /* u4: 4  bit unsigned immediate */
   { "u4", & HW_ENT (HW_H_UINT), 8, 4,
+    { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* u4c: 4  bit unsigned immediate */
+  { "u4c", & HW_ENT (HW_H_UINT), 12, 4,
     { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
 /* m4: 4  bit negative immediate */
   { "m4", & HW_ENT (HW_H_UINT), 8, 4,
@@ -440,9 +482,18 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 /* label12: 12 bit pc relative address */
   { "label12", & HW_ENT (HW_H_SINT), 5, 11,
     { 0, 0|(1<<CGEN_OPERAND_SIGNED), { 0 } }  },
+/* reglist_low: 8 bit register mask */
+  { "reglist_low", & HW_ENT (HW_H_UINT), 8, 8,
+    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* reglist_hi: 8 bit register mask */
+  { "reglist_hi", & HW_ENT (HW_H_UINT), 8, 8,
+    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
 /* cc: condition codes */
   { "cc", & HW_ENT (HW_H_UINT), 4, 4,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* ccc: coprocessor calc */
+  { "ccc", & HW_ENT (HW_H_UINT), 16, 8,
+    { 0, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
 /* nbit: negative  bit */
   { "nbit", & HW_ENT (HW_H_NBIT), 0, 0,
     { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
@@ -1443,24 +1494,6 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* call $label12 */
-  {
-    { 1, 1, 1, 1 },
-    FR30_INSN_CALL, "call", "call",
-    { { MNEM, ' ', OP (LABEL12), 0 } },
-    { 16, 16, 0xf400 }, 0xd000,
-    (PTR) 0,
-    { 0, 0, { 0 } }
-  },
-/* call:D $label12 */
-  {
-    { 1, 1, 1, 1 },
-    FR30_INSN_CALLD, "calld", "call:D",
-    { { MNEM, ' ', OP (LABEL12), 0 } },
-    { 16, 16, 0xf400 }, 0xd400,
-    (PTR) 0,
-    { 0, 0, { 0 } }
-  },
 /* call @$Ri */
   {
     { 1, 1, 1, 1 },
@@ -1476,6 +1509,24 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     FR30_INSN_CALLRD, "callrd", "call:D",
     { { MNEM, ' ', '@', OP (RI), 0 } },
     { 16, 16, 0xfff0 }, 0x9f10,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* call $label12 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_CALL, "call", "call",
+    { { MNEM, ' ', OP (LABEL12), 0 } },
+    { 16, 16, 0xf400 }, 0xd000,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* call:D $label12 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_CALLD, "calld", "call:D",
+    { { MNEM, ' ', OP (LABEL12), 0 } },
+    { 16, 16, 0xf400 }, 0xd400,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
@@ -1812,33 +1863,6 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmov @$dir10,$R13 */
-  {
-    { 1, 1, 1, 1 },
-    FR30_INSN_DMOV2R13, "dmov2r13", "dmov",
-    { { MNEM, ' ', '@', OP (DIR10), ',', OP (R13), 0 } },
-    { 16, 16, 0xff00 }, 0x800,
-    (PTR) 0,
-    { 0, 0, { 0 } }
-  },
-/* dmovh @$dir9,$R13 */
-  {
-    { 1, 1, 1, 1 },
-    FR30_INSN_DMOV2R13H, "dmov2r13h", "dmovh",
-    { { MNEM, ' ', '@', OP (DIR9), ',', OP (R13), 0 } },
-    { 16, 16, 0xff00 }, 0x900,
-    (PTR) 0,
-    { 0, 0, { 0 } }
-  },
-/* dmovb @$dir8,$R13 */
-  {
-    { 1, 1, 1, 1 },
-    FR30_INSN_DMOV2R13B, "dmov2r13b", "dmovb",
-    { { MNEM, ' ', '@', OP (DIR8), ',', OP (R13), 0 } },
-    { 16, 16, 0xff00 }, 0xa00,
-    (PTR) 0,
-    { 0, 0, { 0 } }
-  },
 /* dmov $R13,@$dir10 */
   {
     { 1, 1, 1, 1 },
@@ -1863,33 +1887,6 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     FR30_INSN_DMOVR13B, "dmovr13b", "dmovb",
     { { MNEM, ' ', OP (R13), ',', '@', OP (DIR8), 0 } },
     { 16, 16, 0xff00 }, 0x1a00,
-    (PTR) 0,
-    { 0, 0, { 0 } }
-  },
-/* dmov @$dir10,@$R13+ */
-  {
-    { 1, 1, 1, 1 },
-    FR30_INSN_DMOV2R13PI, "dmov2r13pi", "dmov",
-    { { MNEM, ' ', '@', OP (DIR10), ',', '@', OP (R13), '+', 0 } },
-    { 16, 16, 0xff00 }, 0xc00,
-    (PTR) 0,
-    { 0, 0, { 0 } }
-  },
-/* dmovh @$dir9,@$R13+ */
-  {
-    { 1, 1, 1, 1 },
-    FR30_INSN_DMOV2R13PIH, "dmov2r13pih", "dmovh",
-    { { MNEM, ' ', '@', OP (DIR9), ',', '@', OP (R13), '+', 0 } },
-    { 16, 16, 0xff00 }, 0xd00,
-    (PTR) 0,
-    { 0, 0, { 0 } }
-  },
-/* dmovb @$dir8,@$R13+ */
-  {
-    { 1, 1, 1, 1 },
-    FR30_INSN_DMOV2R13PIB, "dmov2r13pib", "dmovb",
-    { { MNEM, ' ', '@', OP (DIR8), ',', '@', OP (R13), '+', 0 } },
-    { 16, 16, 0xff00 }, 0xe00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
@@ -1920,21 +1917,75 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmov @$dir10,@-$R15 */
-  {
-    { 1, 1, 1, 1 },
-    FR30_INSN_DMOV2R15PD, "dmov2r15pd", "dmov",
-    { { MNEM, ' ', '@', OP (DIR10), ',', '@', '-', OP (R15), 0 } },
-    { 16, 16, 0xff00 }, 0xb00,
-    (PTR) 0,
-    { 0, 0, { 0 } }
-  },
 /* dmov @$R15+,@$dir10 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOVR15PI, "dmovr15pi", "dmov",
     { { MNEM, ' ', '@', OP (R15), '+', ',', '@', OP (DIR10), 0 } },
     { 16, 16, 0xff00 }, 0x1b00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* dmov @$dir10,$R13 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_DMOV2R13, "dmov2r13", "dmov",
+    { { MNEM, ' ', '@', OP (DIR10), ',', OP (R13), 0 } },
+    { 16, 16, 0xff00 }, 0x800,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* dmovh @$dir9,$R13 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_DMOV2R13H, "dmov2r13h", "dmovh",
+    { { MNEM, ' ', '@', OP (DIR9), ',', OP (R13), 0 } },
+    { 16, 16, 0xff00 }, 0x900,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* dmovb @$dir8,$R13 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_DMOV2R13B, "dmov2r13b", "dmovb",
+    { { MNEM, ' ', '@', OP (DIR8), ',', OP (R13), 0 } },
+    { 16, 16, 0xff00 }, 0xa00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* dmov @$dir10,@$R13+ */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_DMOV2R13PI, "dmov2r13pi", "dmov",
+    { { MNEM, ' ', '@', OP (DIR10), ',', '@', OP (R13), '+', 0 } },
+    { 16, 16, 0xff00 }, 0xc00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* dmovh @$dir9,@$R13+ */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_DMOV2R13PIH, "dmov2r13pih", "dmovh",
+    { { MNEM, ' ', '@', OP (DIR9), ',', '@', OP (R13), '+', 0 } },
+    { 16, 16, 0xff00 }, 0xd00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* dmovb @$dir8,@$R13+ */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_DMOV2R13PIB, "dmov2r13pib", "dmovb",
+    { { MNEM, ' ', '@', OP (DIR8), ',', '@', OP (R13), '+', 0 } },
+    { 16, 16, 0xff00 }, 0xe00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* dmov @$dir10,@-$R15 */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_DMOV2R15PD, "dmov2r15pd", "dmov",
+    { { MNEM, ' ', '@', OP (DIR10), ',', '@', '-', OP (R15), 0 } },
+    { 16, 16, 0xff00 }, 0xb00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
@@ -1953,6 +2004,42 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     FR30_INSN_STRES, "stres", "stres",
     { { MNEM, ' ', OP (U4), ',', '@', OP (RI), '+', 0 } },
     { 16, 16, 0xff00 }, 0xbd00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* copop $u4c,$ccc,$CRj,$CRi */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_COPOP, "copop", "copop",
+    { { MNEM, ' ', OP (U4C), ',', OP (CCC), ',', OP (CRJ), ',', OP (CRI), 0 } },
+    { 16, 32, 0xfff0 }, 0x9fc0,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* copld $u4c,$ccc,$Rjc,$CRi */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_COPLD, "copld", "copld",
+    { { MNEM, ' ', OP (U4C), ',', OP (CCC), ',', OP (RJC), ',', OP (CRI), 0 } },
+    { 16, 32, 0xfff0 }, 0x9fd0,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* copst $u4c,$ccc,$CRj,$Ric */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_COPST, "copst", "copst",
+    { { MNEM, ' ', OP (U4C), ',', OP (CCC), ',', OP (CRJ), ',', OP (RIC), 0 } },
+    { 16, 32, 0xfff0 }, 0x9fe0,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* copsv $u4c,$ccc,$CRj,$Ric */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_COPSV, "copsv", "copsv",
+    { { MNEM, ' ', OP (U4C), ',', OP (CCC), ',', OP (CRJ), ',', OP (RIC), 0 } },
+    { 16, 32, 0xfff0 }, 0x9ff0,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
@@ -2034,6 +2121,42 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     FR30_INSN_EXTUH, "extuh", "extuh",
     { { MNEM, ' ', OP (RI), 0 } },
     { 16, 16, 0xfff0 }, 0x97b0,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* ldm0 ($reglist_low) */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_LDM0, "ldm0", "ldm0",
+    { { MNEM, ' ', '(', OP (REGLIST_LOW), ')', 0 } },
+    { 16, 16, 0xff00 }, 0x8c00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* ldm1 ($reglist_hi) */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_LDM1, "ldm1", "ldm1",
+    { { MNEM, ' ', '(', OP (REGLIST_HI), ')', 0 } },
+    { 16, 16, 0xff00 }, 0x8d00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* stm0 ($reglist_low) */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_STM0, "stm0", "stm0",
+    { { MNEM, ' ', '(', OP (REGLIST_LOW), ')', 0 } },
+    { 16, 16, 0xff00 }, 0x8e00,
+    (PTR) 0,
+    { 0, 0, { 0 } }
+  },
+/* stm1 ($reglist_hi) */
+  {
+    { 1, 1, 1, 1 },
+    FR30_INSN_STM1, "stm1", "stm1",
+    { { MNEM, ' ', '(', OP (REGLIST_HI), ')', 0 } },
+    { 16, 16, 0xff00 }, 0x8f00,
     (PTR) 0,
     { 0, 0, { 0 } }
   },
@@ -2235,6 +2358,18 @@ fr30_cgen_get_int_operand (opindex, fields)
     case FR30_OPERAND_RJ :
       value = fields->f_Rj;
       break;
+    case FR30_OPERAND_RIC :
+      value = fields->f_Ric;
+      break;
+    case FR30_OPERAND_RJC :
+      value = fields->f_Rjc;
+      break;
+    case FR30_OPERAND_CRI :
+      value = fields->f_CRi;
+      break;
+    case FR30_OPERAND_CRJ :
+      value = fields->f_CRj;
+      break;
     case FR30_OPERAND_RS1 :
       value = fields->f_Rs1;
       break;
@@ -2255,6 +2390,9 @@ fr30_cgen_get_int_operand (opindex, fields)
       break;
     case FR30_OPERAND_U4 :
       value = fields->f_u4;
+      break;
+    case FR30_OPERAND_U4C :
+      value = fields->f_u4c;
       break;
     case FR30_OPERAND_M4 :
       value = fields->f_m4;
@@ -2301,8 +2439,17 @@ fr30_cgen_get_int_operand (opindex, fields)
     case FR30_OPERAND_LABEL12 :
       value = fields->f_rel12;
       break;
+    case FR30_OPERAND_REGLIST_LOW :
+      value = fields->f_reglist_low;
+      break;
+    case FR30_OPERAND_REGLIST_HI :
+      value = fields->f_reglist_hi;
+      break;
     case FR30_OPERAND_CC :
       value = fields->f_cc;
+      break;
+    case FR30_OPERAND_CCC :
+      value = fields->f_ccc;
       break;
 
     default :
@@ -2330,6 +2477,18 @@ fr30_cgen_get_vma_operand (opindex, fields)
     case FR30_OPERAND_RJ :
       value = fields->f_Rj;
       break;
+    case FR30_OPERAND_RIC :
+      value = fields->f_Ric;
+      break;
+    case FR30_OPERAND_RJC :
+      value = fields->f_Rjc;
+      break;
+    case FR30_OPERAND_CRI :
+      value = fields->f_CRi;
+      break;
+    case FR30_OPERAND_CRJ :
+      value = fields->f_CRj;
+      break;
     case FR30_OPERAND_RS1 :
       value = fields->f_Rs1;
       break;
@@ -2350,6 +2509,9 @@ fr30_cgen_get_vma_operand (opindex, fields)
       break;
     case FR30_OPERAND_U4 :
       value = fields->f_u4;
+      break;
+    case FR30_OPERAND_U4C :
+      value = fields->f_u4c;
       break;
     case FR30_OPERAND_M4 :
       value = fields->f_m4;
@@ -2396,8 +2558,17 @@ fr30_cgen_get_vma_operand (opindex, fields)
     case FR30_OPERAND_LABEL12 :
       value = fields->f_rel12;
       break;
+    case FR30_OPERAND_REGLIST_LOW :
+      value = fields->f_reglist_low;
+      break;
+    case FR30_OPERAND_REGLIST_HI :
+      value = fields->f_reglist_hi;
+      break;
     case FR30_OPERAND_CC :
       value = fields->f_cc;
+      break;
+    case FR30_OPERAND_CCC :
+      value = fields->f_ccc;
       break;
 
     default :
@@ -2429,6 +2600,18 @@ fr30_cgen_set_int_operand (opindex, fields, value)
     case FR30_OPERAND_RJ :
       fields->f_Rj = value;
       break;
+    case FR30_OPERAND_RIC :
+      fields->f_Ric = value;
+      break;
+    case FR30_OPERAND_RJC :
+      fields->f_Rjc = value;
+      break;
+    case FR30_OPERAND_CRI :
+      fields->f_CRi = value;
+      break;
+    case FR30_OPERAND_CRJ :
+      fields->f_CRj = value;
+      break;
     case FR30_OPERAND_RS1 :
       fields->f_Rs1 = value;
       break;
@@ -2449,6 +2632,9 @@ fr30_cgen_set_int_operand (opindex, fields, value)
       break;
     case FR30_OPERAND_U4 :
       fields->f_u4 = value;
+      break;
+    case FR30_OPERAND_U4C :
+      fields->f_u4c = value;
       break;
     case FR30_OPERAND_M4 :
       fields->f_m4 = value;
@@ -2495,8 +2681,17 @@ fr30_cgen_set_int_operand (opindex, fields, value)
     case FR30_OPERAND_LABEL12 :
       fields->f_rel12 = value;
       break;
+    case FR30_OPERAND_REGLIST_LOW :
+      fields->f_reglist_low = value;
+      break;
+    case FR30_OPERAND_REGLIST_HI :
+      fields->f_reglist_hi = value;
+      break;
     case FR30_OPERAND_CC :
       fields->f_cc = value;
+      break;
+    case FR30_OPERAND_CCC :
+      fields->f_ccc = value;
       break;
 
     default :
@@ -2521,6 +2716,18 @@ fr30_cgen_set_vma_operand (opindex, fields, value)
     case FR30_OPERAND_RJ :
       fields->f_Rj = value;
       break;
+    case FR30_OPERAND_RIC :
+      fields->f_Ric = value;
+      break;
+    case FR30_OPERAND_RJC :
+      fields->f_Rjc = value;
+      break;
+    case FR30_OPERAND_CRI :
+      fields->f_CRi = value;
+      break;
+    case FR30_OPERAND_CRJ :
+      fields->f_CRj = value;
+      break;
     case FR30_OPERAND_RS1 :
       fields->f_Rs1 = value;
       break;
@@ -2541,6 +2748,9 @@ fr30_cgen_set_vma_operand (opindex, fields, value)
       break;
     case FR30_OPERAND_U4 :
       fields->f_u4 = value;
+      break;
+    case FR30_OPERAND_U4C :
+      fields->f_u4c = value;
       break;
     case FR30_OPERAND_M4 :
       fields->f_m4 = value;
@@ -2587,8 +2797,17 @@ fr30_cgen_set_vma_operand (opindex, fields, value)
     case FR30_OPERAND_LABEL12 :
       fields->f_rel12 = value;
       break;
+    case FR30_OPERAND_REGLIST_LOW :
+      fields->f_reglist_low = value;
+      break;
+    case FR30_OPERAND_REGLIST_HI :
+      fields->f_reglist_hi = value;
+      break;
     case FR30_OPERAND_CC :
       fields->f_cc = value;
+      break;
+    case FR30_OPERAND_CCC :
+      fields->f_ccc = value;
       break;
 
     default :

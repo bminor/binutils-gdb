@@ -53,6 +53,39 @@ static const char * insert_insn_normal
 	      CGEN_FIELDS *, CGEN_INSN_BYTES_PTR, bfd_vma));
 
 /* -- assembler routines inserted here */
+/* -- asm.c */
+/* Handle register lists for LDMx and STMx  */
+
+static const char *
+parse_reglist_low (od, strp, opindex, valuep)
+     CGEN_OPCODE_DESC od;
+     const char **strp;
+     int opindex;
+     unsigned long *valuep;
+{
+  *valuep = 0;
+  while (**strp && **strp != ')')
+    {
+      ++*strp;
+    }
+
+  if (!*strp)
+    return "Register list is not valid";
+
+  return NULL;
+}
+
+static const char *
+parse_reglist_hi (od, strp, opindex, valuep)
+     CGEN_OPCODE_DESC od;
+     const char **strp;
+     int opindex;
+     unsigned long *valuep;
+{
+  return parse_reglist_low (od, strp, opindex, valuep);
+}
+
+/* -- */
 
 /* Main entry point for operand parsing.
 
@@ -85,6 +118,18 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
     case FR30_OPERAND_RJ :
       errmsg = cgen_parse_keyword (od, strp, & fr30_cgen_opval_h_gr, & fields->f_Rj);
       break;
+    case FR30_OPERAND_RIC :
+      errmsg = cgen_parse_keyword (od, strp, & fr30_cgen_opval_h_gr, & fields->f_Ric);
+      break;
+    case FR30_OPERAND_RJC :
+      errmsg = cgen_parse_keyword (od, strp, & fr30_cgen_opval_h_gr, & fields->f_Rjc);
+      break;
+    case FR30_OPERAND_CRI :
+      errmsg = cgen_parse_keyword (od, strp, & fr30_cgen_opval_h_cr, & fields->f_CRi);
+      break;
+    case FR30_OPERAND_CRJ :
+      errmsg = cgen_parse_keyword (od, strp, & fr30_cgen_opval_h_cr, & fields->f_CRj);
+      break;
     case FR30_OPERAND_RS1 :
       errmsg = cgen_parse_keyword (od, strp, & fr30_cgen_opval_h_dr, & fields->f_Rs1);
       break;
@@ -105,6 +150,9 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
       break;
     case FR30_OPERAND_U4 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_U4, &fields->f_u4);
+      break;
+    case FR30_OPERAND_U4C :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_U4C, &fields->f_u4c);
       break;
     case FR30_OPERAND_M4 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_M4, &fields->f_m4);
@@ -151,8 +199,17 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
     case FR30_OPERAND_LABEL12 :
       errmsg = cgen_parse_signed_integer (od, strp, FR30_OPERAND_LABEL12, &fields->f_rel12);
       break;
+    case FR30_OPERAND_REGLIST_LOW :
+      errmsg = parse_reglist_low (od, strp, FR30_OPERAND_REGLIST_LOW, &fields->f_reglist_low);
+      break;
+    case FR30_OPERAND_REGLIST_HI :
+      errmsg = parse_reglist_hi (od, strp, FR30_OPERAND_REGLIST_HI, &fields->f_reglist_hi);
+      break;
     case FR30_OPERAND_CC :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_CC, &fields->f_cc);
+      break;
+    case FR30_OPERAND_CCC :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_CCC, &fields->f_ccc);
       break;
 
     default :
@@ -197,6 +254,18 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
     case FR30_OPERAND_RJ :
       errmsg = insert_normal (od, fields->f_Rj, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
       break;
+    case FR30_OPERAND_RIC :
+      errmsg = insert_normal (od, fields->f_Ric, 0|(1<<CGEN_OPERAND_UNSIGNED), 28, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_RJC :
+      errmsg = insert_normal (od, fields->f_Rjc, 0|(1<<CGEN_OPERAND_UNSIGNED), 24, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_CRI :
+      errmsg = insert_normal (od, fields->f_CRi, 0|(1<<CGEN_OPERAND_UNSIGNED), 28, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_CRJ :
+      errmsg = insert_normal (od, fields->f_CRj, 0|(1<<CGEN_OPERAND_UNSIGNED), 24, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
     case FR30_OPERAND_RS1 :
       errmsg = insert_normal (od, fields->f_Rs1, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
       break;
@@ -217,6 +286,9 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
       break;
     case FR30_OPERAND_U4 :
       errmsg = insert_normal (od, fields->f_u4, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_U4C :
+      errmsg = insert_normal (od, fields->f_u4c, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
       break;
     case FR30_OPERAND_M4 :
       {
@@ -303,8 +375,17 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
         errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
+    case FR30_OPERAND_REGLIST_LOW :
+      errmsg = insert_normal (od, fields->f_reglist_low, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_REGLIST_HI :
+      errmsg = insert_normal (od, fields->f_reglist_hi, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
     case FR30_OPERAND_CC :
       errmsg = insert_normal (od, fields->f_cc, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_CCC :
+      errmsg = insert_normal (od, fields->f_ccc, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 16, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
       break;
 
     default :

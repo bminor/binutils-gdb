@@ -1,3 +1,12 @@
+start-sanitize-fr30
+Thu Nov 19 16:02:46 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* fr30-opc.c: Regenerated.
+	* fr30-opc.h: Regenerated.
+	* fr30-dis.c: Regenerated.
+	* fr30-asm.c: Regenerated.
+
+end-sanitize-fr30
 Thu Nov 19 07:54:15 1998  Doug Evans  <devans@charmed.cygnus.com>
 
 	* mips-opc.c (sync.p,sync.l): Swap insn values.
