@@ -2251,6 +2251,8 @@ get_section_type_name (sh_type)
     }
 }
 
+#define OPTION_DEBUG_DUMP	512
+
 struct option options [] =
 {
   {"all",              no_argument, 0, 'a'},
@@ -2270,7 +2272,7 @@ struct option options [] =
   {"version-info",     no_argument, 0, 'V'},
   {"use-dynamic",      no_argument, 0, 'D'},
   {"hex-dump",         required_argument, 0, 'x'},
-  {"debug-dump",       optional_argument, 0, 'w'},
+  {"debug-dump",       optional_argument, 0, OPTION_DEBUG_DUMP},
   {"unwind",	       no_argument, 0, 'u'},
 #ifdef SUPPORT_DISASSEMBLY
   {"instruction-dump", required_argument, 0, 'i'},
@@ -2305,7 +2307,8 @@ usage ()
   -A --arch-specific     Display architecture specific information (if any).\n\
   -D --use-dynamic       Use the dynamic section info when displaying symbols\n\
   -x --hex-dump=<number> Dump the contents of section <number>\n\
-  -w --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str,=loc]\n\
+  -w[liaprmfFso] or\n\
+  --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str,=loc]\n\
                          Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stdout, _("\
@@ -2501,6 +2504,88 @@ parse_args (argc, argv)
 		    warn (_("Unrecognized debug option '%s'\n"), optarg);
 		    break;
 		  }
+	    }
+	  break;
+	case OPTION_DEBUG_DUMP:
+	  do_dump ++;
+	  if (optarg == 0)
+	    do_debugging = 1;
+	  else
+	    {
+	      const char *debug_dump_opt[]
+		= { "line", "info", "abbrev", "pubnames", "ranges",
+		    "macro", "frames", "frames-interp", "str", "loc", NULL };
+	      unsigned int index;
+	      const char *p;
+
+	      do_debugging = 0;
+
+	      p = optarg;
+	      while (*p)
+		{
+		  for (index = 0; debug_dump_opt[index]; index++)
+		    {
+		      size_t len = strlen (debug_dump_opt[index]);
+
+		      if (strncmp (p, debug_dump_opt[index], len) == 0
+			  && (p[len] == ',' || p[len] == '\0'))
+			{
+			  switch (p[0])
+			    {
+			    case 'i':
+			      do_debug_info = 1;
+			      break;
+
+			    case 'a':
+			      do_debug_abbrevs = 1;
+			      break;
+
+			    case 'l':
+			      if (p[1] == 'i')
+				do_debug_lines = 1;
+			      else
+				do_debug_loc = 1;
+			      break;
+
+			    case 'p':
+			      do_debug_pubnames = 1;
+			      break;
+
+			    case 'r':
+			      do_debug_aranges = 1;
+			      break;
+
+			    case 'f':
+			      if (len > 6)
+				do_debug_frames_interp = 1;
+			      do_debug_frames = 1;
+			      break;
+
+			    case 'm':
+			      do_debug_macinfo = 1;
+			      break;
+
+			    case 's':
+			      do_debug_str = 1;
+			      break;
+			    }
+
+			  p += len;
+			  break;
+			}
+		    }
+
+		  if (debug_dump_opt[index] == NULL)
+		    {
+		      warn (_("Unrecognized debug option '%s'\n"), p);
+		      p = strchr (p, ',');
+		      if (p == NULL)
+			break;
+		    }
+
+		  if (*p == ',')
+		    p++;
+		}
 	    }
 	  break;
 #ifdef SUPPORT_DISASSEMBLY

@@ -1,3 +1,11 @@
+2002-07-30  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (OPTION_DEBUG_DUMP): Define.
+	(options): Use it.
+	(usage): Update help.
+	(parse_args): Handle --debug-dump separately from -w.
+	* doc/binutils.texi (readelf): Update documentation.
+
 2002-07-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
