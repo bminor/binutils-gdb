@@ -369,7 +369,7 @@ extern int coff_n_line_nos;
 extern void coff_add_linesym PARAMS ((symbolS *));
 
 
-void c_dot_file_symbol PARAMS ((char *filename));
+void c_dot_file_symbol PARAMS ((const char *filename));
 #define obj_app_file c_dot_file_symbol
 
 extern void coff_frob_symbol PARAMS ((symbolS *, int *));

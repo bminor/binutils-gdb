@@ -105,7 +105,7 @@ const pseudo_typeS aout_pseudo_table[] =
 void
 obj_aout_frob_symbol (sym, punt)
      symbolS *sym;
-     int *punt;
+     int *punt ATTRIBUTE_UNUSED;
 {
   flagword flags;
   asection *sec;
@@ -355,7 +355,7 @@ obj_emit_symbols (where, symbol_rootP)
 
 static void
 obj_aout_line (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* Assume delimiter is part of expression.
      BSD4.2 as fails with delightful bug, so we
@@ -368,7 +368,7 @@ obj_aout_line (ignore)
 
 static void
 obj_aout_weak (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int c;
@@ -401,7 +401,7 @@ obj_aout_weak (ignore)
 
 static void
 obj_aout_type (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int c;
@@ -641,7 +641,14 @@ DEFUN_VOID (s_sect)
 
 static void aout_pop_insert PARAMS ((void));
 static int obj_aout_s_get_other PARAMS ((symbolS *));
+static void obj_aout_s_set_other PARAMS ((symbolS *, int));
 static int obj_aout_s_get_desc PARAMS ((symbolS *));
+static void obj_aout_s_set_desc PARAMS ((symbolS *, int));
+static int obj_aout_s_get_type PARAMS ((symbolS *));
+static void obj_aout_s_set_type PARAMS ((symbolS *, int));
+static int obj_aout_separate_stab_sections PARAMS ((void));
+static int obj_aout_sec_sym_ok_for_reloc PARAMS ((asection *));
+static void obj_aout_process_stab PARAMS ((segT, int, const char *, int, int, int));
 
 static void
 aout_pop_insert ()
@@ -656,6 +663,33 @@ obj_aout_s_get_other (sym)
   return aout_symbol (symbol_get_bfdsym (sym))->other;
 }
 
+static void
+obj_aout_s_set_other (sym, o)
+     symbolS *sym;
+     int o;
+{
+  aout_symbol (symbol_get_bfdsym (sym))->other = o;
+}
+
+static int
+obj_aout_sec_sym_ok_for_reloc (sec)
+     asection *sec ATTRIBUTE_UNUSED;
+{
+  return obj_sec_sym_ok_for_reloc (sec);
+}
+
+static void
+obj_aout_process_stab (seg, w, s, t, o, d)
+     segT seg ATTRIBUTE_UNUSED;
+     int w;
+     const char *s;
+     int t;
+     int o;
+     int d;
+{
+  aout_process_stab (w, s, t, o, d);
+}
+
 static int
 obj_aout_s_get_desc (sym)
      symbolS *sym;
@@ -663,12 +697,44 @@ obj_aout_s_get_desc (sym)
   return aout_symbol (symbol_get_bfdsym (sym))->desc;
 }
 
+static void
+obj_aout_s_set_desc (sym, d)
+     symbolS *sym;
+     int d;
+{
+  aout_symbol (symbol_get_bfdsym (sym))->desc = d;
+}
 
+static int
+obj_aout_s_get_type (sym)
+     symbolS *sym;
+{
+  return aout_symbol (symbol_get_bfdsym (sym))->type;
+}
+
+static void
+obj_aout_s_set_type (sym, t)
+     symbolS *sym;
+     int t;
+{
+  aout_symbol (symbol_get_bfdsym (sym))->type = t;
+}
+
+static int
+obj_aout_separate_stab_sections ()
+{
+  return 0;
+}
+
+/* When changed, make sure these table entries match the single-format
+   definitions in obj-aout.h.  */
 const struct format_ops aout_format_ops =
 {
   bfd_target_aout_flavour,
   1,	/* dfl_leading_underscore */
   0,	/* emit_section_symbols */
+  0,	/* begin */
+  0,	/* app_file */
   obj_aout_frob_symbol,
   obj_aout_frob_file,
   0,	/* frob_file_after_relocs */
@@ -677,11 +743,17 @@ const struct format_ops aout_format_ops =
   0,	/* s_get_align */
   0,	/* s_set_align */
   obj_aout_s_get_other,
+  obj_aout_s_set_other,
   obj_aout_s_get_desc,
+  obj_aout_s_set_desc,
+  obj_aout_s_get_type,
+  obj_aout_s_set_type,
   0,	/* copy_symbol_attributes */
   0,	/* generate_asm_lineno */
-  0,	/* process_stab */
-  0,	/* sec_sym_ok_for_reloc */
+  obj_aout_process_stab,
+  obj_aout_separate_stab_sections,
+  0,	/* init_stab_section */
+  obj_aout_sec_sym_ok_for_reloc,
   aout_pop_insert,
   0,	/* ecoff_set_ext */
   0,	/* read_begin_hook */

@@ -6,7 +6,7 @@
 
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    GAS is distributed in the hope that it will be useful,
@@ -27,6 +27,9 @@
 #define _OBJ_ELF_H
 
 #define OBJ_ELF 1
+
+/* Note that all macros in this file should be wrapped in #ifndef, for
+   sake of obj-multi.h which includes this file.  */
 
 #ifndef OUTPUT_FLAVOR
 #define OUTPUT_FLAVOR bfd_target_elf_flavour
@@ -88,7 +91,9 @@ struct elf_obj_sy
 #define TRUE  !FALSE
 #endif
 
+#ifndef obj_begin
 #define obj_begin() elf_begin ()
+#endif
 extern void elf_begin PARAMS ((void));
 
 /* should be conditional on address size! */
@@ -133,8 +138,10 @@ extern void elf_frob_file PARAMS ((void));
 #endif
 extern void elf_frob_file_after_relocs PARAMS ((void));
 
+#ifndef obj_app_file
 #define obj_app_file elf_file_symbol
-extern void elf_file_symbol PARAMS ((char *));
+#endif
+extern void elf_file_symbol PARAMS ((const char *));
 
 extern void obj_elf_section_change_hook PARAMS ((void));
 
@@ -189,6 +196,12 @@ do								\
 while (0)
 #endif
 
+#ifndef SEPARATE_STAB_SECTIONS
+/* Avoid ifndef each separate macro setting by wrapping the whole of the
+   stab group on the assumption that whoever sets SEPARATE_STAB_SECTIONS
+   caters to ECOFF_DEBUGGING and the right setting of INIT_STAB_SECTIONS
+   and OBJ_PROCESS_STAB too, without needing the tweaks below.  */
+
 /* Stabs go in a separate section.  */
 #define SEPARATE_STAB_SECTIONS 1
 
@@ -213,6 +226,8 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
   if (ECOFF_DEBUGGING)							\
     ecoff_stab ((seg), (what), (string), (type), (other), (desc))
 #endif /* ECOFF_DEBUGGING */
+
+#endif /* SEPARATE_STAB_SECTIONS not defined. */
 
 extern void elf_frob_symbol PARAMS ((symbolS *, int *));
 #ifndef obj_frob_symbol

@@ -346,7 +346,7 @@ c_symbol_merge (debug, normal)
 
 void
 c_dot_file_symbol (filename)
-     char *filename;
+     const char *filename;
 {
   symbolS *symbolP;
 
@@ -4582,6 +4582,7 @@ const pseudo_typeS coff_pseudo_table[] =
 /* Support for a COFF emulation.  */
 
 static void coff_pop_insert PARAMS ((void));
+static int coff_separate_stab_sections PARAMS ((void));
 
 static void
 coff_pop_insert ()
@@ -4589,11 +4590,19 @@ coff_pop_insert ()
   pop_insert (coff_pseudo_table);
 }
 
+static int
+coff_separate_stab_sections ()
+{
+  return 1;
+}
+
 const struct format_ops coff_format_ops =
 {
   bfd_target_coff_flavour,
   0,	/* dfl_leading_underscore */
   1,	/* emit_section_symbols */
+  0,    /* begin */
+  c_dot_file_symbol,
   coff_frob_symbol,
   0,	/* frob_file */
   coff_frob_file_after_relocs,
@@ -4602,10 +4611,16 @@ const struct format_ops coff_format_ops =
   0,	/* s_get_align */
   0,	/* s_set_align */
   0,	/* s_get_other */
+  0,	/* s_set_other */
   0,	/* s_get_desc */
+  0,	/* s_set_desc */
+  0,	/* s_get_type */
+  0,	/* s_set_type */
   0,	/* copy_symbol_attributes */
   0,	/* generate_asm_lineno */
   0,	/* process_stab */
+  coff_separate_stab_sections,
+  obj_coff_init_stab_section,
   0,	/* sec_sym_ok_for_reloc */
   coff_pop_insert,
   0,	/* ecoff_set_ext */

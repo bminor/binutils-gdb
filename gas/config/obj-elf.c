@@ -54,9 +54,12 @@ static bfd_vma elf_s_get_size PARAMS ((symbolS *));
 static void elf_s_set_size PARAMS ((symbolS *, bfd_vma));
 static bfd_vma elf_s_get_align PARAMS ((symbolS *));
 static void elf_s_set_align PARAMS ((symbolS *, bfd_vma));
+static void elf_s_set_other PARAMS ((symbolS *, int));
 static void elf_copy_symbol_attributes PARAMS ((symbolS *, symbolS *));
 static int elf_sec_sym_ok_for_reloc PARAMS ((asection *));
 static void adjust_stab_sections PARAMS ((bfd *, asection *, PTR));
+static int elf_separate_stab_sections PARAMS ((void));
+static void elf_init_stab_section PARAMS ((segT));
 
 #ifdef NEED_ECOFF_DEBUG
 static boolean elf_get_extr PARAMS ((asymbol *, EXTR *));
@@ -234,6 +237,14 @@ elf_s_get_other (sym)
 }
 
 static void
+elf_s_set_other (sym, other)
+     symbolS *sym;
+     int other;
+{
+  S_SET_OTHER (sym, other);
+}
+
+static void
 elf_copy_symbol_attributes (dest, src)
      symbolS *dest, *src;
 {
@@ -249,7 +260,7 @@ elf_sec_sym_ok_for_reloc (sec)
 
 void
 elf_file_symbol (s)
-     char *s;
+     const char *s;
 {
   symbolS *sym;
 
@@ -1910,18 +1921,44 @@ sco_id ()
 
 #endif /* SCO_ELF */
 
+static int
+elf_separate_stab_sections ()
+{
+#ifdef NEED_ECOFF_DEBUG
+  return (!ECOFF_DEBUGGING);
+#else
+  return 1;
+#endif
+}
+
+static void
+elf_init_stab_section (seg)
+     segT seg;
+{
+#ifdef NEED_ECOFF_DEBUG
+  if (!ECOFF_DEBUGGING)
+#endif
+    obj_elf_init_stab_section (seg);
+}
+
 const struct format_ops elf_format_ops =
 {
   bfd_target_elf_flavour,
   0,	/* dfl_leading_underscore */
   1,	/* emit_section_symbols */
+  elf_begin,
+  elf_file_symbol,
   elf_frob_symbol,
   elf_frob_file,
   elf_frob_file_after_relocs,
   elf_s_get_size, elf_s_set_size,
   elf_s_get_align, elf_s_set_align,
   elf_s_get_other,
+  elf_s_set_other,
   0,	/* s_get_desc */
+  0,	/* s_set_desc */
+  0,	/* s_get_type */
+  0,	/* s_set_type */
   elf_copy_symbol_attributes,
 #ifdef NEED_ECOFF_DEBUG
   ecoff_generate_asm_lineno,
@@ -1930,6 +1967,8 @@ const struct format_ops elf_format_ops =
   0,	/* generate_asm_lineno */
   0,	/* process_stab */
 #endif
+  elf_separate_stab_sections,
+  elf_init_stab_section,
   elf_sec_sym_ok_for_reloc,
   elf_pop_insert,
 #ifdef NEED_ECOFF_DEBUG
@@ -1938,5 +1977,5 @@ const struct format_ops elf_format_ops =
   0,	/* ecoff_set_ext */
 #endif
   elf_obj_read_begin_hook,
-  elf_obj_symbol_new_hook,
+  elf_obj_symbol_new_hook
 };

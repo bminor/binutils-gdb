@@ -1,3 +1,59 @@
+Mon May 22 22:43:32 2000  Hans-Peter Nilsson  <hp@axis.com>
+
+	* obj.h (struct format_ops): New members begin, app_file,
+	s_set_other, s_set_desc, s_get_type, s_set_type,
+	separate_stab_sections, init_stab_section.
+
+	* config/obj-multi.h: Update GPL notice to v2.
+	(obj_begin): New.
+	(obj_app_file): New.
+	(S_SET_SIZE): Test s_set_size for NULL before calling.
+	(S_SET_ALIGN): Similar for s_set_align.
+	(S_SET_OTHER): New.
+	(S_SET_DESC): New.
+	(S_GET_TYPE): New.
+	(S_SET_TYPE): New.
+	(SEPARATE_STAB_SECTIONS): New.
+	(INIT_STAB_SECTION): New.
+	(EMIT_SECTION_SYMBOLS): New.
+	(AOUT_STABS) [OBJ_MAYBE_AOUT]: Define.
+
+	* config/obj-elf.h: Update GPL notice to v2.
+	Mention that this file is included from obj-multi.h.
+	(obj_begin): Wrap definition in ifndef.
+	(elf_file_symbol): Constify declaration.
+	(obj_app_file): Ditto.
+	(SEPARATE_STAB_SECTIONS, INIT_STAB_SECTION, OBJ_PROCESS_STAB):
+	Wrap in ifndef SEPARATE_STAB_SECTIONS.
+
+	* config/obj-elf.c (elf_s_set_other): New.
+	(elf_file_symbol): Constify argument.
+	(elf_separate_stab_sections): New.
+	(elf_init_stab_section): New.
+	(elf_format_ops): Add new members.  Remove comma at end.
+
+	* config/obj-ecoff.c (ecoff_separate_stab_sections): New.
+	(ecoff_format_ops): Add new fields.  Remove comma at end.
+	Mention inconsistency for emit_section_symbols.
+
+	* config/obj-coff.h (c_dot_file_symbol): Constify declaration.
+
+	* config/obj-coff.c (c_dot_file_symbol): Constify argument.
+	(coff_separate_stab_sections): New.
+	(coff_format_ops): Add new members.
+
+	* config/obj-aout.c (obj_aout_sec_sym_ok_for_reloc): New.
+	(obj_aout_s_set_other): New.
+	(obj_aout_s_set_desc): New.
+	(obj_aout_s_get_type): New.
+	(obj_aout_s_set_type): New.
+	(obj_aout_separate_stab_sections): New.
+	(aout_format_ops): New members added.  Use obj_aout_process_stab,
+	not 0.  Use obj_aout_sec_sym_ok_for_reloc, not 0.
+	(obj_aout_frob_symbol): Add ATTRIBUTE_UNUSED to args as
+	appropriate.
+	(obj_aout_line, obj_aout_weak, obj_aout_type): Ditto.
+
 2000-05-22  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (tc_i386_fix_adjustable): Prevent adjustment
