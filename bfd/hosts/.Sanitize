@@ -40,6 +40,7 @@ i386v.h
 i386v4.h
 irix3.h
 irix4.h
+ncr3000.h
 news.h
 rs6000.h
 rtbsd.h
