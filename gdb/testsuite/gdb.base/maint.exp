@@ -200,7 +200,7 @@ set keep_looking 1
 while {$keep_looking} {
     gdb_expect  {
 
-	-re ".*Object file.*break$EXEEXT:  Objfile at $hex, bfd at $hex, \[0-9\]* minsyms\[\r\t \]+\n" { set header 1 }
+	-re ".*Object file.*break($EXEEXT)?:  Objfile at $hex, bfd at $hex, \[0-9\]* minsyms\[\r\t \]+\n" { set header 1 }
 	-re ".*Psymtabs:\[\r\t \]+\n" { set psymtabs 1 }
 	-re ".*Symtabs:\[\r\t \]+\n" { set symtabs 1 }
 
@@ -379,7 +379,7 @@ set timeout [expr $timeout + 300]
 #
 send_gdb "maint info sections\n"
 gdb_expect  {
-        -re "Exec file:\r\n.*break$EXEEXT., file type.*$gdb_prompt $"\
+        -re "Exec file:\r\n.*break($EXEEXT)?., file type.*$gdb_prompt $"\
                         { pass "maint info sections" }
         -re ".*$gdb_prompt $"       { fail "maint info sections" }
         timeout         { fail "(timeout) maint info sections" }
