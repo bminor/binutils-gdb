@@ -1,3 +1,7 @@
+2001-11-14  Andreas Jaeger  <aj@suse.de>
+
+	* doc/binutils.texi (objdump): Fix description to use x86-64.
+
 2001-11-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* bucomm.c (make_tempname): Use mkstemps instead of mkstemp, since

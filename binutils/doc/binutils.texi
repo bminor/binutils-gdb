@@ -1572,12 +1572,12 @@ compilers.
 For the x86, some of the options duplicate functions of the @option{-m}
 switch, but allow finer grained control.  Multiple selections from the
 following may be specified as a comma separated string.
-@option{x86_64}, @option{i386} and @option{i8086} select disassembly for
+@option{x86-64}, @option{i386} and @option{i8086} select disassembly for
 the given architecture.  @option{intel} and @option{att} select between
 intel syntax mode and AT&T syntax mode.  @option{addr32},
 @option{addr16}, @option{data32} and @option{data16} specify the default
 address size and operand size.  These four options will be overridden if
-@option{x86_64}, @option{i386} or @option{i8086} appear later in the
+@option{x86-64}, @option{i386} or @option{i8086} appear later in the
 option string.  Lastly, @option{suffix}, when in AT&T mode,
 instructs the dissassembler to print a mnemonic suffix even when the
 suffix could be inferred by the operands.
