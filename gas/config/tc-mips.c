@@ -83,6 +83,10 @@ static char *mips_regmask_frag;
 
 extern int target_big_endian;
 
+/* 1 is we should use the 64 bit MIPS ELF ABI, 0 if we should use the
+   32 bit ABI.  This has no meaning for ECOFF.  */
+static int mips_64;
+
 /* The default target format to use.  */
 const char *
 mips_target_format ()
@@ -94,7 +98,9 @@ mips_target_format ()
     case bfd_target_ecoff_flavour:
       return target_big_endian ? "ecoff-bigmips" : "ecoff-littlemips";
     case bfd_target_elf_flavour:
-      return target_big_endian ? "elf32-bigmips" : "elf32-littlemips";
+      return (target_big_endian
+	      ? (mips_64 ? "elf64-bigmips" : "elf32-bigmips")
+	      : (mips_64 ? "elf64-littlemips" : "elf32-littlemips"));
     default:
       abort ();
     }
@@ -5933,11 +5939,15 @@ struct option md_longopts[] = {
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
 #define OPTION_XGOT (OPTION_MD_BASE + 19)
+#define OPTION_32 (OPTION_MD_BASE + 20)
+#define OPTION_64 (OPTION_MD_BASE + 21)
 #ifdef OBJ_ELF
   {"KPIC", no_argument, NULL, OPTION_CALL_SHARED},
   {"xgot", no_argument, NULL, OPTION_XGOT},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
   {"non_shared", no_argument, NULL, OPTION_NON_SHARED},
+  {"32", no_argument, NULL, OPTION_32},
+  {"64", no_argument, NULL, OPTION_64},
 #endif
 
   {NULL, no_argument, NULL, 0}
@@ -6208,6 +6218,16 @@ md_parse_option (c, arg)
       g_switch_seen = 1;
       break;
 
+      /* The -32 and -64 options tell the assembler to output the 32
+         bit or the 64 bit MIPS ELF format.  */
+    case OPTION_32:
+      mips_64 = 0;
+      break;
+
+    case OPTION_64:
+      mips_64 = 1;
+      break;
+
     default:
       return 0;
     }
@@ -6249,7 +6269,9 @@ MIPS options:\n\
   fprintf(stream, "\
 -KPIC, -call_shared	generate SVR4 position independent code\n\
 -non_shared		do not generate position independent code\n\
--xgot			assume a 32 bit GOT\n");
+-xgot			assume a 32 bit GOT\n\
+-32			create 32 bit object file (default)\n\
+-64			create 64 bit object file\n");
 #endif
 }
 
@@ -6291,21 +6313,21 @@ cons_fix_new_mips (frag, where, nbytes, exp)
      expressionS *exp;
 {
   /* If we are assembling in 32 bit mode, turn an 8 byte reloc into a
-     4 byte reloc.  
-     FIXME: There is no way to select anything but 32 bit mode right
-     now.  */
-  if (nbytes == 8)
+     4 byte reloc.  */
+  if (nbytes == 8 && ! mips_64)
     {
       if (byte_order == BIG_ENDIAN)
 	where += 4;
       nbytes = 4;
     }
 
-  if (nbytes != 2 && nbytes != 4)
+  if (nbytes != 2 && nbytes != 4 && nbytes != 8)
     as_bad ("Unsupported reloc size %d", nbytes);
 
   fix_new_exp (frag_now, where, (int) nbytes, exp, 0,
-	       nbytes == 2 ? BFD_RELOC_16 : BFD_RELOC_32);
+	       (nbytes == 2
+		? BFD_RELOC_16
+		: (nbytes == 4 ? BFD_RELOC_32 : BFD_RELOC_64)));
 }
 
 /* Sort any unmatched HI16_S relocs so that they immediately precede
