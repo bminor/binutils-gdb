@@ -1,5 +1,5 @@
 /* run front end support for all the simulators.
-   Copyright (C) 1992, 1993 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93-96, 1997 Free Software Foundation, Inc.
 
 GNU CC is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -52,10 +52,6 @@ static void usage PARAMS ((void));
 extern int optind;
 extern char *optarg;
 
-bfd *exec_bfd;
-
-int target_byte_order;
-
 extern host_callback default_callback;
 
 static char *myname;
@@ -74,13 +70,12 @@ main (ac, av)
      char **av;
 {
   bfd *abfd;
-  bfd_vma start_address;
   asection *s;
   int i;
   int verbose = 0;
   int trace = 0;
   char *name;
-  static char *no_args[2];
+  static char *no_args[4];
   char **sim_argv = &no_args[0];
   char **prog_args;
   enum sim_stop reason;
@@ -93,6 +88,8 @@ main (ac, av)
 
   /* The first element of sim_open's argv is the program name.  */
   no_args[0] = av[0];
+  no_args[1] = "-E";
+  no_args[2] = "set-later";
 
   /* FIXME: This is currently being rewritten to have each simulator
      do all argv processing.  */
@@ -108,8 +105,11 @@ main (ac, av)
 	/* FIXME: Temporary hack.  */
 	{
 	  int len = strlen (av[0]) + strlen (optarg);
-	  char *argbuf = (char *) alloca (len + 2);
-	  sprintf (argbuf, "%s %s", av[0], optarg);
+	  char *argbuf = (char *) alloca (len + 2 + 50);
+	  /* The desired endianness must be passed to sim_open.
+	     The value for "set-later" is set when we know what it is.
+	     -e support isn't yet part of the published interface.  */
+	  sprintf (argbuf, "%s %s -E set-later", av[0], optarg);
 	  sim_argv = buildargv (argbuf);
 	}
 	break;
@@ -154,16 +154,21 @@ main (ac, av)
 
   ac -= optind;
   av += optind;
+  if (ac <= 0)
+    usage ();
 
   name = *av;
-  prog_args = av + 1;
+  prog_args = av;
 
   if (verbose)
     {
       printf ("%s %s\n", myname, name);
     }
 
-  exec_bfd = abfd = bfd_openr (name, 0);
+  sim_set_callbacks (NULL, &default_callback);
+  default_callback.init (&default_callback);
+
+  abfd = bfd_openr (name, 0);
   if (!abfd) 
     {
       fprintf (stderr, "%s: can't open %s: %s\n", 
@@ -178,43 +183,27 @@ main (ac, av)
       exit (1);
     }
 
-  /* This must be set before sim_open is called, because gdb assumes that
-     the simulator endianness is known immediately after the sim_open call.  */
-  target_byte_order = bfd_big_endian (abfd) ? 4321 : 1234;
-
-  sim_set_callbacks (NULL, &default_callback);
-  default_callback.init (&default_callback);
+  /* The endianness must be passed to sim_open because one may wish to
+     examine/set registers before calling sim_load [which is the other
+     place where one can determine endianness].  We previously passed the
+     endianness via global `target_byte_order' but that's not a clean
+     interface.  */
+  for (i = 1; sim_argv[i + 1] != NULL; ++i)
+    continue;
+  if (bfd_big_endian (abfd))
+    sim_argv[i] = "big";
+  else
+    sim_argv[i] = "little";
 
   /* Ensure that any run-time initialisation that needs to be
      performed by the simulator can occur. */
   sd = sim_open (SIM_OPEN_STANDALONE, sim_argv);
 
-  for (s = abfd->sections; s; s = s->next)
-    {
-      if (s->flags & SEC_LOAD)
-	{
-	  unsigned char *buffer = (unsigned char *)malloc ((size_t)(bfd_section_size (abfd, s)));
-	  if (buffer != NULL)
-	    {
-	      bfd_get_section_contents (abfd,
-					s,
-					buffer,
-					0,
-					bfd_section_size (abfd, s));
-	      sim_write (sd, s->vma, buffer, bfd_section_size (abfd, s));
-	      /* FIXME: How come we don't free buffer?  */
-	    }
-	  else
-	    {
-	      fprintf (stderr, "%s: failed to allocate section buffer: %s\n", 
-		       myname, bfd_errmsg (bfd_get_error ()));
-	      exit (1);
-	    }
-	}
-    }
+  if (sim_load (sd, name, abfd, 0) == SIM_RC_FAIL)
+    exit (1);
 
-  start_address = bfd_get_start_address (abfd);
-  sim_create_inferior (sd, start_address, prog_args, NULL);
+  if (sim_create_inferior (sd, prog_args, NULL) == SIM_RC_FAIL)
+    exit (1);
 
   if (trace)
     {
@@ -228,6 +217,7 @@ main (ac, av)
     {
       sim_resume (sd, 0, 0);
     }
+
   if (verbose)
     sim_info (sd, 0);
 

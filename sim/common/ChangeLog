@@ -1,3 +1,18 @@
+Thu Apr 17 02:25:11 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Make-common.in (sim-options.o, sim-load.o): Add rules for.
+	(sim_main_headers): Add sim-trace.h.
+	* run.c (exec_bfd, target_byte_order): Delete.
+	(main): Pass -E <endian> to sim_open.  Delete code to load sections,
+	call sim_load instead.  Check return code of sim_create_inferior.
+	* sim-base.h (CURRENT_STATE): Define.
+	(sim_state_base): Make typedef.  New members options, prog_argv,
+	prog_bfd, text_{section,start,end}, start_addr, simcache_size,
+	mem_size, memory [+ corresponding access macros].
+	(sim_cpu_base): New typedef.
+	* sim-trace.h: New file.
+	* sim-basics.h: #include it.
+
 Tue Apr 15 15:10:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Make-common.in (INSTALL): Set to @INSTALL@.

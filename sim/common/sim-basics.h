@@ -107,6 +107,7 @@ typedef enum _attach_type {
 #include "sim-config.h"
 
 #include "sim-base.h"
+#include "sim-trace.h"
 
 #include "sim-inline.h"
 
