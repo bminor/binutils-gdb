@@ -1,5 +1,5 @@
 /* Motorola 68k series support for 32-bit ELF
-   Copyright 1993, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -29,6 +29,10 @@ static void rtype_to_howto
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 static void rtype_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+static struct bfd_hash_entry *elf_m68k_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+static struct bfd_link_hash_table *elf_m68k_link_hash_table_create
+  PARAMS ((bfd *));
 static boolean elf_m68k_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
@@ -204,6 +208,115 @@ static const bfd_byte elf_m68k_plt_entry[PLT_ENTRY_SIZE] =
   0x60, 0xff,		  /* bra.l .plt */
   0, 0, 0, 0		  /* replaced with offset to start of .plt.  */
 };
+
+/* The m68k linker needs to keep track of the number of relocs that it
+   decides to copy in check_relocs for each symbol.  This is so that it
+   can discard PC relative relocs if it doesn't need them when linking
+   with -Bsymbolic.  We store the information in a field extending the
+   regular ELF linker hash table.  */
+
+/* This structure keeps track of the number of PC relative relocs we have
+   copied for a given symbol.  */
+
+struct elf_m68k_pcrel_relocs_copied
+{
+  /* Next section.  */
+  struct elf_m68k_pcrel_relocs_copied *next;
+  /* A section in dynobj.  */
+  asection *section;
+  /* Number of relocs copied in this section.  */
+  bfd_size_type count;
+};
+
+/* m68k ELF linker hash entry.  */
+
+struct elf_m68k_link_hash_entry
+{
+  struct elf_link_hash_entry root;
+
+  /* Number of PC relative relocs copied for this symbol.  */
+  struct elf_m68k_pcrel_relocs_copied *pcrel_relocs_copied;
+};
+
+/* m68k ELF linker hash table.  */
+
+struct elf_m68k_link_hash_table
+{
+  struct elf_link_hash_table root;
+};
+
+/* Declare this now that the above structures are defined.  */
+
+static boolean elf_m68k_discard_copies
+  PARAMS ((struct elf_m68k_link_hash_entry *, PTR));
+
+/* Traverse an m68k ELF linker hash table.  */
+
+#define elf_m68k_link_hash_traverse(table, func, info)			\
+  (elf_link_hash_traverse						\
+   (&(table)->root,							\
+    (boolean (*) PARAMS ((struct elf_link_hash_entry *, PTR))) (func),	\
+    (info)))
+
+/* Get the m68k ELF linker hash table from a link_info structure.  */
+
+#define elf_m68k_hash_table(p) \
+  ((struct elf_m68k_link_hash_table *) (p)->hash)
+
+/* Create an entry in an m68k ELF linker hash table.  */
+
+static struct bfd_hash_entry *
+elf_m68k_link_hash_newfunc (entry, table, string)
+     struct bfd_hash_entry *entry;
+     struct bfd_hash_table *table;
+     const char *string;
+{
+  struct elf_m68k_link_hash_entry *ret =
+    (struct elf_m68k_link_hash_entry *) entry;
+
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (ret == (struct elf_m68k_link_hash_entry *) NULL)
+    ret = ((struct elf_m68k_link_hash_entry *)
+	   bfd_hash_allocate (table,
+			      sizeof (struct elf_m68k_link_hash_entry)));
+  if (ret == (struct elf_m68k_link_hash_entry *) NULL)
+    return (struct bfd_hash_entry *) ret;
+
+  /* Call the allocation method of the superclass.  */
+  ret = ((struct elf_m68k_link_hash_entry *)
+	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
+				     table, string));
+  if (ret != (struct elf_m68k_link_hash_entry *) NULL)
+    {
+      ret->pcrel_relocs_copied = NULL;
+    }
+
+  return (struct bfd_hash_entry *) ret;
+}
+
+/* Create an m68k ELF linker hash table.  */
+
+static struct bfd_link_hash_table *
+elf_m68k_link_hash_table_create (abfd)
+     bfd *abfd;
+{
+  struct elf_m68k_link_hash_table *ret;
+
+  ret = ((struct elf_m68k_link_hash_table *)
+	 bfd_alloc (abfd, sizeof (struct elf_m68k_link_hash_table)));
+  if (ret == (struct elf_m68k_link_hash_table *) NULL)
+    return NULL;
+
+  if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
+				       elf_m68k_link_hash_newfunc))
+    {
+      bfd_release (abfd, ret);
+      return NULL;
+    }
+
+  return &ret->root.root;
+}
 
 /* Look through the relocs for a section during the first phase, and
    allocate space in the global offset table or procedure linkage
@@ -398,20 +511,31 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	case R_68K_PC8:
 	case R_68K_PC16:
 	case R_68K_PC32:
-	  if (h == NULL)
+	  /* If we are creating a shared library and this is not a local
+	     symbol, we need to copy the reloc into the shared library.
+	     However when linking with -Bsymbolic and this is a global
+	     symbol which is defined in an object we are including in the
+	     link (i.e., DEF_REGULAR is set), then we can resolve the
+	     reloc directly.  At this point we have not seen all the input
+	     files, so it is possible that DEF_REGULAR is not set now but
+	     will be set later (it is never cleared).  We account for that
+	     possibility below by storing information in the
+	     pcrel_relocs_copied field of the hash table entry.  */
+	  if (!(info->shared
+		&& (sec->flags & SEC_ALLOC) != 0
+		&& h != NULL
+		&& (!info->symbolic
+		    || (h->elf_link_hash_flags
+			& ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	    break;
 	  /* Fall through.  */
 	case R_68K_8:
 	case R_68K_16:
 	case R_68K_32:
+	  /* If we are creating a shared library, we need to copy the
+	     reloc into the shared library.  */
 	  if (info->shared
-	      && (sec->flags & SEC_ALLOC) != 0
-	      && ((ELF32_R_TYPE (rel->r_info) != R_68K_PC8
-		   && ELF32_R_TYPE (rel->r_info) != R_68K_PC16
-		   && ELF32_R_TYPE (rel->r_info) != R_68K_PC32)
-		  || (!info->symbolic
-		      || (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
+	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
 	      /* When creating a shared object, we must copy these
 		 reloc types into the output file.  We create a reloc
@@ -449,6 +573,42 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		}
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rela);
+
+	      /* If we are linking with -Bsymbolic, we count the number of
+		 PC relative relocations we have entered for this symbol,
+		 so that we can discard them again if the symbol is later
+		 defined by a regular object.  Note that this function is
+		 only called if we are using an m68kelf linker hash table,
+		 which means that h is really a pointer to an
+		 elf_m68k_link_hash_entry.  */
+	      if ((ELF32_R_TYPE (rel->r_info) == R_68K_PC8
+ 		   || ELF32_R_TYPE (rel->r_info) == R_68K_PC16
+ 		   || ELF32_R_TYPE (rel->r_info) == R_68K_PC32)
+		  && info->symbolic)
+		{
+		  struct elf_m68k_link_hash_entry *eh;
+		  struct elf_m68k_pcrel_relocs_copied *p;
+
+		  eh = (struct elf_m68k_link_hash_entry *) h;
+
+		  for (p = eh->pcrel_relocs_copied; p != NULL; p = p->next)
+		    if (p->section == sreloc)
+		      break;
+
+		  if (p == NULL)
+		    {
+		      p = ((struct elf_m68k_pcrel_relocs_copied *)
+			   bfd_alloc (dynobj, sizeof *p));
+		      if (p == NULL)
+			return false;
+		      p->next = eh->pcrel_relocs_copied;
+		      eh->pcrel_relocs_copied = p;
+		      p->section = sreloc;
+		      p->count = 0;
+		    }
+
+		  ++p->count;
+		}
 	    }
 
 	  break;
@@ -595,14 +755,11 @@ elf_m68k_adjust_dynamic_symbol (info, h)
   s = bfd_get_section_by_name (dynobj, ".dynbss");
   BFD_ASSERT (s != NULL);
 
-  /* If the symbol is currently defined in the .bss section of the
-     dynamic object, then it is OK to simply initialize it to zero.
-     If the symbol is in some other section, we must generate a
-     R_68K_COPY reloc to tell the dynamic linker to copy the initial
-     value out of the dynamic object and into the runtime process
-     image.  We need to remember the offset into the .rela.bss section
-     we are going to use.  */
-  if ((h->root.u.def.section->flags & SEC_LOAD) != 0)
+  /* We must generate a R_68K_COPY reloc to tell the dynamic linker to
+     copy the initial value out of the dynamic object and into the
+     runtime process image.  We need to remember the offset into the
+     .rela.bss section we are going to use.  */
+  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
       asection *srel;
 
@@ -676,6 +833,15 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 	s->_raw_size = 0;
     }
 
+  /* If this is a -Bsymbolic shared link, then we need to discard all PC
+     relative relocs against symbols defined in a regular object.  We
+     allocated space for them in the check_relocs routine, but we will not
+     fill them in in the relocate_section routine.  */
+  if (info->shared && info->symbolic)
+    elf_m68k_link_hash_traverse (elf_m68k_hash_table (info),
+				 elf_m68k_discard_copies,
+				 (PTR) NULL);
+
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
@@ -733,13 +899,17 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
                  than .rela.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
 		{
+		  const char *outname;
+
 		  relocs = true;
 
 		  /* If this relocation section applies to a read only
 		     section, then we probably need a DT_TEXTREL
 		     entry.  .rela.plt is actually associated with
 		     .got.plt, which is never readonly.  */
-		  target = bfd_get_section_by_name (output_bfd, name + 5);
+		  outname = bfd_get_section_name (output_bfd,
+						  s->output_section);
+		  target = bfd_get_section_by_name (output_bfd, outname + 5);
 		  if (target != NULL
 		      && (target->flags & SEC_READONLY) != 0)
 		    reltext = true;
@@ -813,6 +983,30 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
     }
+
+  return true;
+}
+
+/* This function is called via elf_m68k_link_hash_traverse if we are
+   creating a shared object with -Bsymbolic.  It discards the space
+   allocated to copy PC relative relocs against symbols which are defined
+   in regular objects.  We allocated space for them in the check_relocs
+   routine, but we won't fill them in in the relocate_section routine.  */
+
+/*ARGSUSED*/
+static boolean
+elf_m68k_discard_copies (h, ignore)
+     struct elf_m68k_link_hash_entry *h;
+     PTR ignore;
+{
+  struct elf_m68k_pcrel_relocs_copied *s;
+
+  /* We only discard relocs for symbols defined in a regular object.  */
+  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+    return true;
+
+  for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
+    s->section->_raw_size -= s->count * sizeof (Elf32_External_Rela);
 
   return true;
 }
@@ -935,7 +1129,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		  || (info->shared
-		      && (! info->symbolic
+		      && ((! info->symbolic && h->dynindx != -1)
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
 		      && (input_section->flags & SEC_ALLOC) != 0
@@ -1149,7 +1343,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	    {
 	      Elf_Internal_Rela outrel;
-	      int relocate;
+	      boolean skip, relocate;
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
@@ -1175,13 +1369,38 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 		  BFD_ASSERT (sreloc != NULL);
 		}
 
-	      outrel.r_offset = (rel->r_offset
-				 + input_section->output_section->vma
-				 + input_section->output_offset);
-	      if (h != NULL
-		  && (! info->symbolic
-		      || (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0))
+	      skip = false;
+
+	      if (elf_section_data (input_section)->stab_info == NULL)
+		outrel.r_offset = rel->r_offset;
+	      else
+		{
+		  bfd_vma off;
+
+		  off = (_bfd_stab_section_offset
+			 (output_bfd, &elf_hash_table (info)->stab_info,
+			  input_section,
+			  &elf_section_data (input_section)->stab_info,
+			  rel->r_offset));
+		  if (off == (bfd_vma) -1)
+		    skip = true;
+		  outrel.r_offset = off;
+		}
+
+	      outrel.r_offset += (input_section->output_section->vma
+				  + input_section->output_offset);
+
+	      if (skip)
+		{
+		  memset (&outrel, 0, sizeof outrel);
+		  relocate = false;
+		}
+	      /* h->dynindx may be -1 if the symbol was marked to
+                 become local.  */
+	      else if (h != NULL
+		       && ((! info->symbolic && h->dynindx != -1)
+			   || (h->elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		{
 		  BFD_ASSERT (h->dynindx != -1);
 		  relocate = false;
@@ -1585,6 +1804,8 @@ elf_m68k_finish_dynamic_sections (output_bfd, info)
 #define ELF_MAXPAGESIZE			0x2000
 #define elf_backend_create_dynamic_sections \
 					_bfd_elf_create_dynamic_sections
+#define bfd_elf32_bfd_link_hash_table_create \
+					elf_m68k_link_hash_table_create
 #define elf_backend_check_relocs	elf_m68k_check_relocs
 #define elf_backend_adjust_dynamic_symbol \
 					elf_m68k_adjust_dynamic_symbol

@@ -643,7 +643,8 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
                  is only called if we are using an elf_i386 linker
                  hash table, which means that h is really a pointer to
                  an elf_i386_link_hash_entry.  */
-	      if (h != NULL && info->symbolic)
+	      if (h != NULL && info->symbolic
+		  && ELF32_R_TYPE (rel->r_info) == R_386_PC32)
 		{
 		  struct elf_i386_link_hash_entry *eh;
 		  struct elf_i386_pcrel_relocs_copied *p;
@@ -1182,7 +1183,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		  || (info->shared
-		      && (! info->symbolic
+		      && ((! info->symbolic && h->dynindx != -1)
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
 		      && (r_type == R_386_32
