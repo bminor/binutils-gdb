@@ -1,3 +1,8 @@
+Sun Aug 11 14:59:09 1996  Fred Fish  <fnf@cygnus.com>
+
+	* rldefs.h:  If __osf__is defined, include <termio.h> instead of
+	<sgtty.h>.
+
 Fri Aug  9 08:54:26 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* bind.c complete.c history.c readline.c:  Don't include sys/file.h.

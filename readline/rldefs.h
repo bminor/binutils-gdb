@@ -65,15 +65,16 @@
 
 /* System V machines use termio. */
 #if !defined (_POSIX_VERSION)
-/* CYGNUS LOCAL accept __hpux as well as hpux for HP compiler in ANSI mode.  */
-#  if defined (USG) || defined (hpux) || defined (__hpux) || defined (Xenix) || defined (sgi) || defined (DGUX)
+/* CYGNUS LOCAL accept __hpux as well as hpux for HP compiler in ANSI mode.
+   Add __osf__ to list of machines to force use of termio.h */
+#  if defined (USG) || defined (hpux) || defined (__hpux) || defined (Xenix) || defined (sgi) || defined (DGUX) || defined (__osf__)
 #    undef NEW_TTY_DRIVER
 #    define TERMIO_TTY_DRIVER
 #    include <termio.h>
 #    if !defined (TCOON)
 #      define TCOON 1
 #    endif
-#  endif /* USG || hpux || Xenix || sgi || DUGX */
+#  endif /* USG || hpux || Xenix || sgi || DUGX || __osf__ */
 #endif /* !_POSIX_VERSION */
 
 /* Posix systems use termios and the Posix signal functions. */
