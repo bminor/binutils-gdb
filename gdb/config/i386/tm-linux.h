@@ -1,5 +1,5 @@
 /* Definitions to target GDB to GNU/Linux on 386.
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,7 +23,7 @@
 
 #define I386_GNULINUX_TARGET
 #define HAVE_I387_REGS
-#ifdef HAVE_PTRACE_GETXFPREGS
+#ifdef HAVE_PTRACE_GETFPXREGS
 #define HAVE_SSE_REGS
 #endif
 

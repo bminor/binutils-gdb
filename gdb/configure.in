@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+dnl Copyright 1995, 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl 
@@ -159,22 +159,16 @@ if test $gdb_cv_have_ptrace_getregs = yes; then
   AC_DEFINE(HAVE_PTRACE_GETREGS)
 fi
 
-dnl See if ptrace.h provides the PTRACE_GETXFPREGS request.
-dnl PTRACE_GETXFPREGS is a Cygnus invention, since we wrote our own
-dnl Linux kernel patch for SSE support.  That patch may or may not
-dnl actually make it into the official distribution.  If you find that
-dnl years have gone by since this configure test was added, and Linux
-dnl isn't using PTRACE_GETXFPREGS, that means that our patch didn't
-dnl make it, and you can delete this code.
-AC_MSG_CHECKING(for PTRACE_GETXFPREGS)
-AC_CACHE_VAL(gdb_cv_have_ptrace_getxfpregs,
+dnl See if ptrace.h provides the PTRACE_GETFPXREGS request.
+AC_MSG_CHECKING(for PTRACE_GETFPXREGS)
+AC_CACHE_VAL(gdb_cv_have_ptrace_getfpxregs,
 [AC_TRY_COMPILE([#include <sys/ptrace.h>],
-		[PTRACE_GETXFPREGS;],
-		[gdb_cv_have_ptrace_getxfpregs=yes],
-		[gdb_cv_have_ptrace_getxfpregs=no])])
-AC_MSG_RESULT($gdb_cv_have_ptrace_getxfpregs)
-if test $gdb_cv_have_ptrace_getxfpregs = yes; then
-  AC_DEFINE(HAVE_PTRACE_GETXFPREGS)
+		[PTRACE_GETFPXREGS;],
+		[gdb_cv_have_ptrace_getfpxregs=yes],
+		[gdb_cv_have_ptrace_getfpxregs=no])])
+AC_MSG_RESULT($gdb_cv_have_ptrace_getfpxregs)
+if test $gdb_cv_have_ptrace_getfpxregs = yes; then
+  AC_DEFINE(HAVE_PTRACE_GETFPXREGS)
 fi
 
 AC_CHECK_LIB(socket, socketpair)
