@@ -229,7 +229,7 @@ LIB_INSTALL_DIR = $(libdir)
 LIB_RUNTIME_DIR = $(libdir)
 TCL = @TCL_LD_SEARCH_FLAGS@ @TCL_BUILD_LIB_SPEC@
 TCL_CFLAGS = @TCLHDIR@
-TCL_DEPS =
+TCL_DEPS = @TCL_DEPS@
 GDBTKLIBS = @GDBTKLIBS@
 # Extra flags that the GDBTK files need:
 GDBTK_CFLAGS = @GDBTK_CFLAGS@
@@ -237,7 +237,7 @@ GDBTK_CFLAGS = @GDBTK_CFLAGS@
 # Where is the TK library?  Typically in ../tk.
 TK = @TK_BUILD_LIB_SPEC@
 TK_CFLAGS = @TKHDIR@ @TK_BUILD_INCLUDES@
-TK_DEPS =
+TK_DEPS = @TK_DEPS@
 
 # Where is Itcl?  Typically in ../itcl/itcl.
 ITCL_CFLAGS = @ITCLHDIR@

@@ -929,6 +929,19 @@ if test "${enable_gdbtk}" = "yes"; then
 	CY_AC_LOAD_TCLCONFIG
 	CY_AC_PATH_TKCONFIG
 
+	# now look for Tcl library stuff
+
+	case "${host}" in
+	*-*-cygwin*)
+	    tcldir=../tcl/win/
+	    ;;
+	*)
+	    tcldir=../tcl/unix/
+	    ;;
+	esac
+
+	TCL_DEPS="${tcldir}${TCL_LIB_FILE}"
+
 	# If $no_tk is nonempty, then we can't do Tk, and there is no
 	# point to doing Tcl.
 	if test -z "${no_tk}"; then
@@ -938,6 +951,20 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CY_AC_PATH_ITCLH
 	   CY_AC_PATH_ITKH
 	   CY_AC_PATH_TIXH
+
+
+	   # now look for Tk library stuff
+
+	   case "${host}" in
+	   *-*-cygwin*)
+	       tkdir=../tk/win/
+	       ;;
+	   *)
+	       tkdir=../tk/unix/
+	       ;;
+	   esac
+
+	   TK_DEPS="${tkdir}${TK_LIB_FILE}"
 
 	   # now look for Itcl library stuff
 
@@ -1026,6 +1053,8 @@ fi
 AC_SUBST(X_CFLAGS)
 AC_SUBST(X_LDFLAGS)
 AC_SUBST(X_LIBS)
+AC_SUBST(TCL_DEPS)
+AC_SUBST(TK_DEPS)
 AC_SUBST(ITCLLIB)
 AC_SUBST(ITCL_DEPS)
 AC_SUBST(ITKLIB)
