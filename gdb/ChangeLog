@@ -1,3 +1,10 @@
+2002-01-23  Elena Zannoni  <ezannoni@redhat.com>
+
+	* ppc-linux-nat.c (ppc_register_u_addr, supply_gregset,
+	fill_gregset): Call gdbarch_tdep() just once, assign result to
+	variable and use that, instead of calling the function several
+	times.
+
 2002-01-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	* configure.host: Accept sparcv9 as alias for sparc64.

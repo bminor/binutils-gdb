@@ -73,10 +73,10 @@ static int
 ppc_register_u_addr (int regno)
 {
   int u_addr = -1;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   /* General purpose registers occupy 1 slot each in the buffer */
-  if (regno >= gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum
-      && regno <= gdbarch_tdep (current_gdbarch)->ppc_gplast_regnum )
+  if (regno >= tdep->ppc_gp0_regnum && regno <= tdep->ppc_gplast_regnum )
     u_addr =  ((PT_R0 + regno) * 4);
 
   /* Floating point regs: 2 slots each */
@@ -86,17 +86,17 @@ ppc_register_u_addr (int regno)
   /* UISA special purpose registers: 1 slot each */
   if (regno == PC_REGNUM)
     u_addr = PT_NIP * 4;
-  if (regno == gdbarch_tdep (current_gdbarch)->ppc_lr_regnum)
+  if (regno == tdep->ppc_lr_regnum)
     u_addr = PT_LNK * 4;
-  if (regno == gdbarch_tdep (current_gdbarch)->ppc_cr_regnum)
+  if (regno == tdep->ppc_cr_regnum)
     u_addr = PT_CCR * 4;
-  if (regno == gdbarch_tdep (current_gdbarch)->ppc_xer_regnum)
+  if (regno == tdep->ppc_xer_regnum)
     u_addr = PT_XER * 4;
-  if (regno == gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum)
+  if (regno == tdep->ppc_ctr_regnum)
     u_addr = PT_CTR * 4;
-  if (regno == gdbarch_tdep (current_gdbarch)->ppc_mq_regnum)
+  if (regno == tdep->ppc_mq_regnum)
     u_addr = PT_MQ * 4;
-  if (regno == gdbarch_tdep (current_gdbarch)->ppc_ps_regnum)
+  if (regno == tdep->ppc_ps_regnum)
     u_addr = PT_MSR * 4;
 
   return u_addr;
@@ -229,23 +229,18 @@ supply_gregset (gdb_gregset_t *gregsetp)
 {
   int regi;
   register elf_greg_t *regp = (elf_greg_t *) gregsetp;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
 
   for (regi = 0; regi < 32; regi++)
     supply_register (regi, (char *) (regp + regi));
 
   supply_register (PC_REGNUM, (char *) (regp + PT_NIP));
-  supply_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum,
-		   (char *) (regp + PT_LNK));
-  supply_register (gdbarch_tdep (current_gdbarch)->ppc_cr_regnum,
-		   (char *) (regp + PT_CCR));
-  supply_register (gdbarch_tdep (current_gdbarch)->ppc_xer_regnum,
-		   (char *) (regp + PT_XER));
-  supply_register (gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum,
-		   (char *) (regp + PT_CTR));
-  supply_register (gdbarch_tdep (current_gdbarch)->ppc_mq_regnum,
-		   (char *) (regp + PT_MQ));
-  supply_register (gdbarch_tdep (current_gdbarch)->ppc_ps_regnum,
-		   (char *) (regp + PT_MSR));
+  supply_register (tdep->ppc_lr_regnum, (char *) (regp + PT_LNK));
+  supply_register (tdep->ppc_cr_regnum, (char *) (regp + PT_CCR));
+  supply_register (tdep->ppc_xer_regnum, (char *) (regp + PT_XER));
+  supply_register (tdep->ppc_ctr_regnum, (char *) (regp + PT_CTR));
+  supply_register (tdep->ppc_mq_regnum, (char *) (regp + PT_MQ));
+  supply_register (tdep->ppc_ps_regnum, (char *) (regp + PT_MSR));
 }
 
 void
@@ -253,6 +248,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 {
   int regi;
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
 
   for (regi = 0; regi < 32; regi++)
     {
@@ -263,29 +259,23 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
   if ((regno == -1) || regno == PC_REGNUM)
     regcache_collect (PC_REGNUM, regp + PT_NIP);
   if ((regno == -1) 
-      || regno == gdbarch_tdep (current_gdbarch)->ppc_lr_regnum)
-    regcache_collect (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum,
-		      regp + PT_LNK);
+      || regno == tdep->ppc_lr_regnum)
+    regcache_collect (tdep->ppc_lr_regnum, regp + PT_LNK);
   if ((regno == -1)
-      || regno == gdbarch_tdep (current_gdbarch)->ppc_cr_regnum)
-    regcache_collect (gdbarch_tdep (current_gdbarch)->ppc_cr_regnum,
-		      regp + PT_CCR);
+      || regno == tdep->ppc_cr_regnum)
+    regcache_collect (tdep->ppc_cr_regnum, regp + PT_CCR);
   if ((regno == -1)
-      || regno == gdbarch_tdep (current_gdbarch)->ppc_xer_regnum)
-    regcache_collect (gdbarch_tdep (current_gdbarch)->ppc_xer_regnum,
-		      regp + PT_XER);
+      || regno == tdep->ppc_xer_regnum)
+    regcache_collect (tdep->ppc_xer_regnum, regp + PT_XER);
   if ((regno == -1)
-      || regno == gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum)
-    regcache_collect (gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum,
-		      regp + PT_CTR);
+      || regno == tdep->ppc_ctr_regnum)
+    regcache_collect (tdep->ppc_ctr_regnum, regp + PT_CTR);
   if ((regno == -1)
-      || regno == gdbarch_tdep (current_gdbarch)->ppc_mq_regnum)
-    regcache_collect (gdbarch_tdep (current_gdbarch)->ppc_mq_regnum,
-		      regp + PT_MQ);
+      || regno == tdep->ppc_mq_regnum)
+    regcache_collect (tdep->ppc_mq_regnum, regp + PT_MQ);
   if ((regno == -1)
-      || regno == gdbarch_tdep (current_gdbarch)->ppc_ps_regnum)
-    regcache_collect (gdbarch_tdep (current_gdbarch)->ppc_ps_regnum,
-		      regp + PT_MSR);
+      || regno == tdep->ppc_ps_regnum)
+    regcache_collect (tdep->ppc_ps_regnum, regp + PT_MSR);
 }
 
 void
