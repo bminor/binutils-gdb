@@ -1,4 +1,8 @@
 start-sanitize-m32rx
+Thu Apr  2 16:49:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.d: Fix SATB and SAT bit patterns.
+
 Wed Apr  1 14:59:29 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/m32rx.d: Fix SATB bit pattern.
