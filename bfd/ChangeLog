@@ -1,3 +1,11 @@
+2004-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Warn overflow
+	relocation symbol.
+	(elf64_x86_64_relocate_section): Issue an error for
+	R_X86_64_PC8, R_X86_64_PC16 and R_X86_64_PC32 relocations
+	against global symbols when building shared library.
+
 2004-06-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* section.c (struct sec): Rename "_cooked_size" to "size".

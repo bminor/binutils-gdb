@@ -663,9 +663,10 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	  if (info->shared)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: relocation %s can not be used when making a shared object; recompile with -fPIC"),
+		(_("%s: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
 		 bfd_archive_filename (abfd),
-		 x86_64_elf_howto_table[r_type].name);
+		 x86_64_elf_howto_table[r_type].name,
+		 (h) ? h->root.root.string : "a local symbol");
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -788,9 +789,10 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	      && (sec->flags & SEC_READONLY) != 0)
 	    {
 	      (*_bfd_error_handler)
-		(_("%s: relocation %s can not be used when making a shared object; recompile with -fPIC"),
+		(_("%s: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
 		 bfd_archive_filename (abfd),
-		 x86_64_elf_howto_table[r_type].name);
+		 x86_64_elf_howto_table[r_type].name,
+		 (h) ? h->root.root.string : "a local symbol");
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -1946,6 +1948,21 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_X86_64_PC8:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
+	  if (info->shared
+	      && !SYMBOL_REFERENCES_LOCAL (info, h)
+	      && (sec->flags & SEC_ALLOC) != 0
+	      && (sec->flags & SEC_READONLY) != 0)
+	    {
+	      (*_bfd_error_handler)
+		(_("%s: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
+		 bfd_archive_filename (input_bfd),
+		 x86_64_elf_howto_table[r_type].name,
+		 (h) ? h->root.root.string : "a local symbol");
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	  /* Fall through.  */
+
 	case R_X86_64_8:
 	case R_X86_64_16:
 	case R_X86_64_32:
