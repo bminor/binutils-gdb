@@ -1,5 +1,5 @@
 /* mips.h.  Mips opcode list for GDB, the GNU debugger.
-   Copyright 1993, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Contributed by Ralph Campbell and OSF
    Commented and modified by Ian Lance Taylor, Cygnus Support
 
@@ -120,7 +120,16 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define OP_SH_MMI               0       /* Multimedia (parallel) op */
 #define OP_MASK_MMI             0x3f 
 #define OP_SH_MMISUB            6
-#define OP_MASK_MMISUB          0x1f 
+#define OP_MASK_MMISUB          0x1f
+/* start-sanitize-vr5400 */
+#define OP_MASK_PERFREG		0x1f	/* Performance monitoring */
+#define OP_SH_PERFREG		1
+#define OP_MASK_VECBYTE		0x7	/* Selector field is really 4 bits,
+					   but 0x8-0xf don't select bytes.  */
+#define OP_SH_VECBYTE		22
+#define OP_MASK_VECALIGN	0x7	/* Vector byte-align (alni.ob) op.  */
+#define OP_SH_VECALIGN		21
+/* end-sanitize-vr5400 */
 
 /* This structure holds information for a particular instruction.  */
 
@@ -146,6 +155,9 @@ struct mips_opcode
      of bits describing the instruction, notably any relevant hazard
      information.  */
   unsigned long pinfo;
+  /* A collection of bits describing the instruction sets of which this
+     instruction is a member. */
+  unsigned long membership;
 };
 
 /* These are the characters which may appears in the args field of an
@@ -166,6 +178,9 @@ struct mips_opcode
    "i" 16 bit unsigned immediate (OP_*_IMMEDIATE)
    "j" 16 bit signed immediate (OP_*_DELTA)
    "k" 5 bit cache opcode in target register position (OP_*_CACHE)
+start-sanitize-vr5400
+	     also vr5400 vector ops immediate operand
+end-sanitize-vr5400
    "o" 16 bit signed offset (OP_*_DELTA)
    "p" 16 bit PC relative branch target address (OP_*_DELTA)
    "r" 5 bit same register used as both source and target (OP_*_RS)
@@ -192,6 +207,12 @@ struct mips_opcode
    Coprocessor instructions:
    "E" 5 bit target register (OP_*_RT)
    "G" 5 bit destination register (OP_*_RD)
+start-sanitize-vr5400
+   "P" 5 bit performance-monitor register (OP_*_PERFREG)
+   "e" 5 bit vector register byte specifier (OP_*_VECBYTE)
+   "%" 3 bit immediate vr5400 vector alignment operand (OP_*_VECALIGN)
+   see also "k" above
+end-sanitize-vr5400
 
    Macro instructions:
    "A" General 32 bit expression
@@ -200,6 +221,14 @@ struct mips_opcode
    "L" 64 bit floating point constant in .lit8
    "f" 32 bit floating point constant
    "l" 32 bit floating point constant in .lit4
+
+   Characters used so far, for quick reference when adding more:
+start-sanitize-vr5400
+   "Pe%" plus...
+end-sanitize-vr5400
+   "<>"
+   "ABCDEFGILMNSTRVW"
+   "abcdfhijkloprstuvwxz"
 */
 
 /* These are the bits which may be set in the pinfo field of an
@@ -261,28 +290,52 @@ struct mips_opcode
 #define INSN_TRAP                   0x04000000
 /* Instruction stores value into memory.  */
 #define INSN_STORE_MEMORY	    0x08000000
-/* MIPS ISA field--CPU level at which insn is supported.  */
-#define INSN_ISA		    0x70000000
-/* MIPS ISA 2 instruction (R6000 or R4000).  */
-#define INSN_ISA2		    0x10000000
-/* MIPS ISA 3 instruction (R4000).  */
-#define INSN_ISA3		    0x20000000
-/* MIPS R4650 instruction.  */
-#define INSN_4650		    0x30000000
-/* MIPS ISA 4 instruction (R8000).  */
-#define INSN_ISA4		    0x40000000
-/* LSI R4010 instruction.  */
-#define INSN_4010		    0x50000000
-/* NEC VR4100 instruction. */
-#define INSN_4100                   0x60000000
-/* start-sanitize-r5900 */
-/* Toshiba R5900 instruction */
-#define INSN_5900                   0x70000000
-/* end-sanitize-r5900 */
+/* Instruction uses single precision floating point.  */
+#define FP_S			    0x10000000
+/* Instruction uses double precision floating point.  */
+#define FP_D			    0x20000000
+
+/* As yet unused bits:              0x40000000 */
 
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
 #define INSN_MACRO                  0xffffffff
+
+
+
+
+
+/* MIPS ISA field--CPU level at which insn is supported.  */
+#define INSN_ISA		    0x0000000F
+/* An instruction which is not part of any basic MIPS ISA.
+   (ie it is a chip specific instruction)  */
+#define INSN_NO_ISA		    0x00000000
+/* MIPS ISA 1 instruction.  */
+#define INSN_ISA1		    0x00000001
+/* MIPS ISA 2 instruction (R6000 or R4000).  */
+#define INSN_ISA2		    0x00000002
+/* MIPS ISA 3 instruction (R4000).  */
+#define INSN_ISA3		    0x00000003
+/* MIPS ISA 4 instruction (R8000).  */
+#define INSN_ISA4		    0x00000004
+
+/* Chip specific instructions.  These are bitmasks.  */
+/* MIPS R4650 instruction.  */
+#define INSN_4650		    0x00000010
+/* LSI R4010 instruction.  */
+#define INSN_4010		    0x00000020
+/* NEC VR4100 instruction. */
+#define INSN_4100                   0x00000040
+/* Toshiba R3900 instruction.  */
+#define INSN_3900                   0x00000080
+/* start-sanitize-vr5400 */
+/* NEC VR5400 instruction.  */
+#define INSN_5400		    0x00001000
+/* end-sanitize-vr5400 */
+/* start-sanitize-r5900 */
+/* Toshiba R5900 instruction */
+#define INSN_5900                   0x00000100
+/* end-sanitize-r5900 */
 
 /* This is a list of macro expanded instructions.
  *
