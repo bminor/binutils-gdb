@@ -530,7 +530,7 @@ else
 	raw[7] = len_2;
       }
     if (output_section == &bfd_com_section 
-	output_section == &bfd_abs_section
+	|| output_section == &bfd_abs_section
 	|| output_section == &bfd_und_section) 
     {
       /* Fill in symbol */
