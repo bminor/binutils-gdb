@@ -1,3 +1,9 @@
+1998-12-15  Mark Salter  <msalter@cygnus.com>
+
+	* configure.in: Added target-bsp for several target architectures.
+
+	* Makefile.in: Added rules for bsp.
+
 start-sanitize-cygnus
 1998-12-14  Gavin Romig-Koch  <gavin@cygnus.com>
 
