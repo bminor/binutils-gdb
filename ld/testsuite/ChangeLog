@@ -1,3 +1,7 @@
+2005-01-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-elf/group1.d: Accept OBJECT symbols.
+
 2005-01-31  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-mips-elf/eh-frame1.s: Create a .gcc_compiled_long32 if using
