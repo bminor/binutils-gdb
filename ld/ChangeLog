@@ -1,5 +1,7 @@
 Tue Dec 31 14:48:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (ALL_CFLAGS): Add -D_GNU_SOURCE.
+
 	* ld.h (args_type): Add filter_shlib and auxiliary_filter_shlib
 	fields.
 	* lexsup.c (parse_args): Recognize --auxiliary/-f and

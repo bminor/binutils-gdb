@@ -1,3 +1,7 @@
+Tue Dec 31 15:42:54 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (ALL_CFLAGS): Add -D_GNU_SOURCE.
+
 Fri Dec 27 11:19:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Work around bug in AC_FUNC_VFORK in autoconf 2.12.

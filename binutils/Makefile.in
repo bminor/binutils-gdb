@@ -71,8 +71,7 @@ NM = $(NM_FOR_TARGET)
 SYMLINK = ln -s
 
 BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
-# Comment these out if using lex.
-LEX_OPTIONS = -I -Cem 
+LEX_OPTIONS =
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
 # Distribution version
@@ -126,7 +125,7 @@ INCDIR	= $(BASEDIR)/include
 INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR)
 DEP = mkdep
 
-ALL_CFLAGS = $(INCLUDES) @HDEFINES@ $(CFLAGS)
+ALL_CFLAGS = -D_GNU_SOURCE $(INCLUDES) @HDEFINES@ $(CFLAGS)
 
 HFILES = arsup.h bucomm.h budbg.h coffgrok.h debug.h nlmconv.h
 
@@ -555,6 +554,7 @@ install: all
 	    k=`echo $$j | sed '$(program_transform_name)'`; \
 	    ln $(bindir)/$$k $(tooldir)/bin/$$j >/dev/null 2>/dev/null \
 		|| $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$j; \
+	  else true; \
 	  fi; \
 	done
 
@@ -577,7 +577,6 @@ clean-info:
 # Making a dist:
 # cvs rtag binutils-x-yy ld+utils
 # cvs co -r binutils-x-yy ld+utils
-# Sanitize
 # cd {HERE}; make dist [-f Makefile.in]
 
 dist: $(DIST_NAME).tar.z

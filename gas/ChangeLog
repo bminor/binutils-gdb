@@ -8,6 +8,8 @@ Tue Dec 31 15:12:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 end-sanitize-v850
 Tue Dec 31 12:56:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (ALL_CFLAGS): Add -D_GNU_SOURCE.
+
 	* config/tc-sparc.c (md_apply_fix3): Rename from md_apply_fix, and
  	add segment argument.  If OBJ_ELF, treat a relocation against a
  	symbol in a linkonce section like a relocation against an external

@@ -227,7 +227,7 @@ stamp-mk.com: vmsconf.sh Makefile
 # Now figure out from those variables how to compile and link.
 
 # This is the variable actually used when we compile.
-ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
+ALL_CFLAGS = -D_GNU_SOURCE $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
