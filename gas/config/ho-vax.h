@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define M_VAX 1
-
 #if __STDC__ != 1
 #define NO_STDARG
 #endif /* not ansi */
