@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998
+@c Copyright 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header 
@@ -35,7 +35,7 @@
 @set EDITION Sixth
 
 @c !!set GDB manual's revision date
-@set DATE April 1998
+@set DATE January 1999
 @end ifclear
 
 @c THIS MANUAL REQUIRES TEXINFO-2 macros and info-makers to format properly.
@@ -70,7 +70,7 @@ This is the @value{EDITION} Edition, @value{DATE},
 of @cite{Debugging with @value{GDBN}: the @sc{gnu} Source-Level Debugger}
 for @value{GDBN} Version @value{GDBVN}.
 
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999
 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
@@ -131,7 +131,7 @@ into another language, under the above conditions for modified versions.
 @end ifset
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998
+Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999
 Free Software Foundation, Inc. 
 @sp 2
 @ifclear HPPA
@@ -268,26 +268,11 @@ Running Programs Under @value{GDBN}
 
 Stopping and Continuing
 
-@ifclear CONLY
-@ifclear HPPA
-* Breakpoints::                 Breakpoints, watchpoints, and exceptions
-@end ifclear
-
-@ifset HPPA
 * Breakpoints::                 Breakpoints, watchpoints, and catchpoints
-@end ifset
-
-@end ifclear
-
-@ifset CONLY
-* Breakpoints::                 Breakpoints and watchpoints
-@end ifset
-
 * Continuing and Stepping::     Resuming execution
 @ifset POSIX
 * Signals::                     Signals
 @end ifset
-
 @ifclear BARETARGET
 * Thread Stops::                Stopping and starting multi-thread programs
 @end ifclear
@@ -296,17 +281,7 @@ Breakpoints and watchpoints
 
 * Set Breaks::                  Setting breakpoints
 * Set Watchpoints::             Setting watchpoints
-@ifclear CONLY
-@ifclear HPPA
-* Exception Handling::          Breakpoints and exceptions
-@end ifclear
-
-@ifset HPPA
 * Set Catchpoints::             Setting catchpoints
-@end ifset
-
-@end ifclear
-
 * Delete Breaks::               Deleting breakpoints
 * Disabling::                   Disabling breakpoints
 * Conditions::                  Break conditions
@@ -331,7 +306,6 @@ Examining Source Files
 @ifclear DOSHOST
 * Search::                      Searching source files
 @end ifclear
-
 * Source Path::                 Specifying source directories
 * Machine Code::                Source and machine code
 
@@ -416,7 +390,6 @@ Altering Execution
 @ifclear BARETARGET
 * Signaling::                   Giving your program a signal
 @end ifclear
-
 * Returning::                   Returning from a function
 * Calling::                     Calling your program's functions
 * Patching::                    Patching your program
@@ -689,10 +662,6 @@ Stu Grossman wrote gdbserver.
 Jim Kingdon, Peter Schauer, Ian Taylor, and Stu Grossman made
 nearly innumerable bug fixes and cleanups throughout GDB.
 
-Cygnus Solutions has sponsored GDB maintenance and much of its
-development since 1991.
-
-@ifset HPPA
 The following people at the Hewlett-Packard Company contributed
 support for the PA-RISC 2.0 architecture, HP-UX 10.20, 10.30, and 11.0
 (narrow mode), HP's implementation of kernel threads, HP's aC++
@@ -700,7 +669,9 @@ compiler, and the terminal user interface: Ben Krepp, Richard Title,
 John Bishop, Susan Macchia, Kathy Mann, Satish Pai, India Paul, Steve
 Rehrauer, and Elena Zannoni.  Kim Haase provided HP-specific
 information in this manual.
-@end ifset
+
+Cygnus Solutions has sponsored GDB maintenance and much of its
+development since 1991.
 
 @ifclear BARETARGET
 @node Sample Session, Invocation, Summary, Top
@@ -2569,21 +2540,7 @@ and why it stopped.
 @end table
 
 @menu
-@ifclear CONLY
-@ifclear HPPA
-* Breakpoints::                 Breakpoints, watchpoints, and exceptions
-@end ifclear
-
-@ifset HPPA
 * Breakpoints::                 Breakpoints, watchpoints, and catchpoints
-@end ifset
-
-@end ifclear
-
-@ifset CONLY
-* Breakpoints::                 Breakpoints and watchpoints
-@end ifset
-
 * Continuing and Stepping::     Resuming execution
 @ifset POSIX
 * Signals::                     Signals
@@ -2595,23 +2552,8 @@ and why it stopped.
 
 @end menu
 
-@c makeinfo node-defaulting requires adjacency of @node and sectioning cmds
-@c ...hence distribute @node Breakpoints over two possible @if expansions.
-@c
-@ifclear CONLY
-@ifclear HPPA
-@node Breakpoints, Continuing and Stepping, Stopping, Stopping
-@section Breakpoints, watchpoints, and exceptions
-@end ifclear
-@ifset HPPA
 @node Breakpoints, Continuing and Stepping, Stopping, Stopping
 @section Breakpoints, watchpoints, and catchpoints
-@end ifset
-@end ifclear
-@ifset CONLY
-@node Breakpoints, Continuing and Stepping, Stopping, Stopping
-@section Breakpoints and watchpoints
-@end ifset
 
 @cindex breakpoints
 A @dfn{breakpoint} makes your program stop whenever a certain point in
@@ -2623,20 +2565,18 @@ your program should stop by line number, function name or exact address
 in the program.  
 @ifclear CONLY
 @ifclear HPPA
-In languages with exception handling (such as @sc{gnu} C++), you can also set
-breakpoints where an exception is raised (@pxref{Exception Handling,,
-Breakpoints and exceptions}).
+In languages with exception handling (such as @sc{gnu} C++), you can
+also set catchpoints where an exception is raised (@pxref{Set
+Catchpoints, , Setting catchpoints}).
 @end ifclear
 @end ifclear
 
 In HP-UX, SunOS 4.x, SVR4, and Alpha OSF/1 configurations, you can set
 breakpoints in shared libraries before the executable is run.
-@ifset HPPA
 There is a minor limitation on HP-UX systems: you must wait until the
 executable is run in order to set breakpoints in shared library routines
 that are not called directly by the program (for example, routines that
 are arguments in a @code{pthread_create} call).
-@end ifset
 
 @cindex watchpoints
 @cindex memory tracing
@@ -2665,33 +2605,18 @@ other breakpoint.  (To stop when your program receives a signal, use the
 
 @cindex breakpoint numbers
 @cindex numbers for breakpoints
-@ifclear HPPA
-@value{GDBN} assigns a number to each breakpoint or watchpoint when you
-@end ifclear
-@ifset HPPA
 @value{GDBN} assigns a number to each breakpoint, watchpoint, or
-catchpoint when you
-@end ifset
-create it; these numbers are successive integers starting with one.  In
-many of the commands for controlling various features of breakpoints you
-use the breakpoint number to say which breakpoint you want to change.
-Each breakpoint may be @dfn{enabled} or @dfn{disabled}; if disabled, it has
-no effect on your program until you enable it again.
+catchpoint when you create it; these numbers are successive integers
+starting with one.  In many of the commands for controlling various
+features of breakpoints you use the breakpoint number to say which
+breakpoint you want to change.  Each breakpoint may be @dfn{enabled} or
+@dfn{disabled}; if disabled, it has no effect on your program until you
+enable it again.
 
 @menu
 * Set Breaks::                  Setting breakpoints
 * Set Watchpoints::             Setting watchpoints
-@ifclear CONLY
-@ifclear HPPA
-* Exception Handling::          Breakpoints and exceptions
-@end ifclear
-
-@ifset HPPA
 * Set Catchpoints::             Setting catchpoints
-@end ifset
-
-@end ifclear
-
 * Delete Breaks::               Deleting breakpoints
 * Disabling::                   Disabling breakpoints
 * Conditions::                  Break conditions
@@ -2843,24 +2768,13 @@ classes.
 @item info breakpoints @r{[}@var{n}@r{]}
 @itemx info break @r{[}@var{n}@r{]}
 @itemx info watchpoints @r{[}@var{n}@r{]}
-@ifclear HPPA
-Print a table of all breakpoints and watchpoints set and not
-deleted, with the following columns for each breakpoint:
-@end ifclear
-@ifset HPPA
 Print a table of all breakpoints, watchpoints, and catchpoints set and
 not deleted, with the following columns for each breakpoint:
-@end ifset
 
 @table @emph
 @item Breakpoint Numbers
 @item Type
-@ifclear HPPA
-Breakpoint or watchpoint.
-@end ifclear
-@ifset HPPA
 Breakpoint, watchpoint, or catchpoint.
-@end ifset
 @item Disposition
 Whether the breakpoint is marked to be disabled or deleted when hit.
 @item Enabled or Disabled
@@ -2946,19 +2860,13 @@ Shared library events.
 @end table
 
 
-@ifclear HPPA
-@node Set Watchpoints, Exception Handling, Set Breaks, Breakpoints
-@subsection Setting watchpoints
-@end ifclear
-@ifset HPPA
 @node Set Watchpoints, Set Catchpoints, Set Breaks, Breakpoints
 @subsection Setting watchpoints
-@end ifset
-@cindex setting watchpoints
 
+@cindex setting watchpoints
 You can use a watchpoint to stop execution whenever the value of an
-expression changes, without having to predict a particular place
-where this may happen.
+expression changes, without having to predict a particular place where
+this may happen.
 
 @ifclear HPPA
 Watchpoints currently execute two orders of magnitude more slowly than
@@ -3006,14 +2914,8 @@ by the program.  If you use both watchpoints, both must be set with the
 
 @kindex info watchpoints
 @item info watchpoints
-@ifclear HPPA
-This command prints a list of watchpoints and breakpoints; it is the
-same as @code{info break}.
-@end ifclear
-@ifset HPPA
 This command prints a list of watchpoints, breakpoints, and catchpoints;
 it is the same as @code{info break}.
-@end ifset
 @end table
 
 @ifset HPPA
@@ -3066,78 +2968,6 @@ watch an expression in all threads.)
 @end quotation
 @end ifclear
 
-@ifclear CONLY
-@ifclear HPPA
-@node Exception Handling, Delete Breaks, Set Watchpoints, Breakpoints
-@subsection Breakpoints and exceptions
-@cindex exception handlers
-
-Some languages, such as @sc{gnu} C++, implement exception handling.  You can
-use @value{GDBN} to examine what caused your program to raise an exception,
-and to list the exceptions your program is prepared to handle at a
-given point in time.
-
-@table @code
-@kindex catch
-@item catch @var{exceptions}
-You can set breakpoints at active exception handlers by using the
-@code{catch} command.  @var{exceptions} is a list of names of exceptions
-to catch. 
-@end table
-
-You can use @code{info catch} to list active exception handlers.
-@xref{Frame Info, ,Information about a frame}.
-
-There are currently some limitations to exception handling in @value{GDBN}:
-
-@itemize @bullet
-@item
-If you call a function interactively, @value{GDBN} normally returns
-control to you when the function has finished executing.  If the call
-raises an exception, however, the call may bypass the mechanism that
-returns control to you and cause your program to simply continue
-running until it hits a breakpoint, catches a signal that @value{GDBN} is
-listening for, or exits.
-
-@item
-You cannot raise an exception interactively.
-
-@item
-You cannot install an exception handler interactively.
-@end itemize
-
-@cindex raise exceptions
-Sometimes @code{catch} is not the best way to debug exception handling:
-if you need to know exactly where an exception is raised, it is better to
-stop @emph{before} the exception handler is called, since that way you
-can see the stack before any unwinding takes place.  If you set a
-breakpoint in an exception handler instead, it may not be easy to find
-out where the exception was raised.
-
-To stop just before an exception handler is called, you need some
-knowledge of the implementation.  In the case of @sc{gnu} C++, exceptions are
-raised by calling a library function named @code{__raise_exception}
-which has the following ANSI C interface:
-
-@example
-    /* @var{addr} is where the exception identifier is stored.
-       ID is the exception identifier.  */
-    void __raise_exception (void **@var{addr}, void *@var{id});
-@end example
-
-@noindent
-To make the debugger catch all exceptions before any stack
-unwinding takes place, set a breakpoint on @code{__raise_exception}
-(@pxref{Breakpoints, ,Breakpoints; watchpoints; and exceptions}).
-
-With a conditional breakpoint (@pxref{Conditions, ,Break conditions})
-that depends on the value of @var{id}, you can stop your program when
-a specific exception is raised.  You can use multiple conditional
-breakpoints to stop your program when any of a number of exceptions are
-raised.
-@end ifclear
-
-@ifset HPPA
 @node Set Catchpoints, Delete Breaks, Set Watchpoints, Breakpoints
 @subsection Setting catchpoints
 @cindex catchpoints
@@ -3214,37 +3044,52 @@ You cannot raise an exception interactively.
 @item
 You cannot install an exception handler interactively.
 @end itemize
-@end ifset
-@end ifclear
+
+@cindex raise exceptions
+Sometimes @code{catch} is not the best way to debug exception handling:
+if you need to know exactly where an exception is raised, it is better to
+stop @emph{before} the exception handler is called, since that way you
+can see the stack before any unwinding takes place.  If you set a
+breakpoint in an exception handler instead, it may not be easy to find
+out where the exception was raised.
+
+To stop just before an exception handler is called, you need some
+knowledge of the implementation.  In the case of @sc{gnu} C++, exceptions are
+raised by calling a library function named @code{__raise_exception}
+which has the following ANSI C interface:
+
+@example
+    /* @var{addr} is where the exception identifier is stored.
+       ID is the exception identifier.  */
+    void __raise_exception (void **@var{addr}, void *@var{id});
+@end example
+
+@noindent
+To make the debugger catch all exceptions before any stack
+unwinding takes place, set a breakpoint on @code{__raise_exception}
+(@pxref{Breakpoints, ,Breakpoints; watchpoints; and exceptions}).
+
+With a conditional breakpoint (@pxref{Conditions, ,Break conditions})
+that depends on the value of @var{id}, you can stop your program when
+a specific exception is raised.  You can use multiple conditional
+breakpoints to stop your program when any of a number of exceptions are
+raised.
+
 
 @node Delete Breaks, Disabling, Set Catchpoints, Breakpoints
 @subsection Deleting breakpoints
 
-@ifclear HPPA
-@cindex clearing breakpoints, watchpoints
-@cindex deleting breakpoints, watchpoints
-It is often necessary to eliminate a breakpoint or watchpoint once it
-@end ifclear
-@ifset HPPA
 @cindex clearing breakpoints, watchpoints, catchpoints
 @cindex deleting breakpoints, watchpoints, catchpoints
 It is often necessary to eliminate a breakpoint, watchpoint, or
-catchpoint once it
-@end ifset
-has done its job and you no longer want your program to stop there.  This
-is called @dfn{deleting} the breakpoint.  A breakpoint that has been
-deleted no longer exists; it is forgotten.
+catchpoint once it has done its job and you no longer want your program
+to stop there.  This is called @dfn{deleting} the breakpoint.  A
+breakpoint that has been deleted no longer exists; it is forgotten.
 
 With the @code{clear} command you can delete breakpoints according to
 where they are in your program.  With the @code{delete} command you can
-@ifclear HPPA
-delete individual breakpoints or watchpoints by specifying their
-@end ifclear
-@ifset HPPA
 delete individual breakpoints, watchpoints, or catchpoints by specifying
-their
-@end ifset
-breakpoint numbers.
+their breakpoint numbers.
 
 It is not necessary to delete a breakpoint to proceed past it.  @value{GDBN}
 automatically ignores breakpoints on the first instruction to be executed
@@ -3270,16 +3115,10 @@ Delete any breakpoints set at or within the code of the specified line.
 @kindex delete
 @kindex d
 @item delete @r{[}breakpoints@r{]} @r{[}@var{bnums}@dots{}@r{]}
-@ifclear HPPA
-Delete the breakpoints or watchpoints of the numbers specified as
-@end ifclear
-@ifset HPPA
 Delete the breakpoints, watchpoints, or catchpoints of the numbers
-specified as
-@end ifset
-arguments.  If no argument is specified, delete all breakpoints (@value{GDBN}
-asks confirmation, unless you have @code{set confirm off}).  You
-can abbreviate this command as @code{d}.
+specified as arguments.  If no argument is specified, delete all
+breakpoints (@value{GDBN} asks confirmation, unless you have @code{set
+confirm off}).  You can abbreviate this command as @code{d}.
 @end table
 
 @node Disabling, Conditions, Delete Breaks, Breakpoints
@@ -3287,43 +3126,19 @@ can abbreviate this command as @code{d}.
 
 @kindex disable breakpoints
 @kindex enable breakpoints
-@ifclear HPPA
-Rather than deleting a breakpoint or watchpoint, you might prefer to
-@end ifclear
-@ifset HPPA
 Rather than deleting a breakpoint, watchpoint, or catchpoint, you might
-prefer to
-@end ifset
-@dfn{disable} it.  This makes the breakpoint inoperative as if it had
-been deleted, but remembers the information on the breakpoint so that
-you can @dfn{enable} it again later.
+prefer to @dfn{disable} it.  This makes the breakpoint inoperative as if
+it had been deleted, but remembers the information on the breakpoint so
+that you can @dfn{enable} it again later.
 
-@ifclear HPPA
-You disable and enable breakpoints and watchpoints with the
-@end ifclear
-@ifset HPPA
 You disable and enable breakpoints, watchpoints, and catchpoints with
-the
-@end ifset
-@code{enable} and @code{disable} commands, optionally specifying one or
-more breakpoint numbers as arguments.  Use @code{info break} or
-@ifclear HPPA
-@code{info watch} to print a list of breakpoints or watchpoints if you
-@end ifclear
-@ifset HPPA
+the @code{enable} and @code{disable} commands, optionally specifying one
+or more breakpoint numbers as arguments.  Use @code{info break} or
 @code{info watch} to print a list of breakpoints, watchpoints, and
-catchpoints if you
-@end ifset
-do not know which numbers to use.
+catchpoints if you do not know which numbers to use.
 
-@ifclear HPPA
-A breakpoint or watchpoint can have any of four different states of
-@end ifclear
-@ifset HPPA
 A breakpoint, watchpoint, or catchpoint can have any of four different
-states of
-@end ifset
-enablement:
+states of enablement:
 
 @itemize @bullet
 @item
@@ -3340,14 +3155,8 @@ Enabled for deletion.  The breakpoint stops your program, but
 immediately after it does so it is deleted permanently.
 @end itemize
 
-@ifclear HPPA
-You can use the following commands to enable or disable breakpoints and
-watchpoints:
-@end ifclear
-@ifset HPPA
 You can use the following commands to enable or disable breakpoints,
 watchpoints, and catchpoints:
-@end ifset
 
 @table @code
 @kindex disable breakpoints
@@ -3441,20 +3250,13 @@ catchpoint.
 @table @code
 @kindex condition
 @item condition @var{bnum} @var{expression}
-@ifclear HPPA
-Specify @var{expression} as the break condition for breakpoint or
-watchpoint number @var{bnum}.  After you set a condition, breakpoint
-@end ifclear
-@ifset HPPA
 Specify @var{expression} as the break condition for breakpoint,
 watchpoint, or catchpoint number @var{bnum}.  After you set a condition,
-breakpoint
-@end ifset
-@var{bnum} stops your program only if the value of @var{expression} is
-true (nonzero, in C).  When you use @code{condition}, @value{GDBN}
-checks @var{expression} immediately for syntactic correctness, and to
-determine whether symbols in it have referents in the context of your
-breakpoint.
+breakpoint @var{bnum} stops your program only if the value of
+@var{expression} is true (nonzero, in C).  When you use
+@code{condition}, @value{GDBN} checks @var{expression} immediately for
+syntactic correctness, and to determine whether symbols in it have
+referents in the context of your breakpoint.
 @c FIXME so what does GDB do if there is no referent?  Moreover, what
 @c about watchpoints?
 @value{GDBN} does
@@ -3504,25 +3306,17 @@ is decremented each time.  @xref{Convenience Vars, ,Convenience
 variables}.
 @end table
 
-@ifset HPPA
 Ignore counts apply to breakpoints, watchpoints, and catchpoints.
-@end ifset
 
 
 @node Break Commands, Breakpoint Menus, Conditions, Breakpoints
 @subsection Breakpoint command lists
 
 @cindex breakpoint commands
-@ifclear HPPA
-You can give any breakpoint (or watchpoint) a series of commands to
-@end ifclear
-@ifset HPPA
 You can give any breakpoint (or watchpoint or catchpoint) a series of
-commands to
-@end ifset
-execute when your program stops due to that breakpoint.  For example, you
-might want to print the values of certain expressions, or enable other
-breakpoints.
+commands to execute when your program stops due to that breakpoint.  For
+example, you might want to print the values of certain expressions, or
+enable other breakpoints.
 
 @table @code
 @kindex commands
@@ -3538,14 +3332,8 @@ To remove all commands from a breakpoint, type @code{commands} and
 follow it immediately with @code{end}; that is, give no commands.
 
 With no @var{bnum} argument, @code{commands} refers to the last
-@ifclear HPPA
-breakpoint or watchpoint set (not to the breakpoint most recently
-@end ifclear
-@ifset HPPA
 breakpoint, watchpoint, or catchpoint set (not to the breakpoint most
-recently
-@end ifset
-encountered).
+recently encountered).
 @end table
 
 Pressing @key{RET} as a means of repeating the last @value{GDBN} command is
@@ -3728,22 +3516,11 @@ calling function; or @code{jump} (@pxref{Jumping, ,Continuing at a
 different address}) to go to an arbitrary location in your program.
 
 A typical technique for using stepping is to set a breakpoint
-@ifclear CONLY
-@ifclear HPPA
-(@pxref{Breakpoints, ,Breakpoints; watchpoints; and exceptions})
-@end ifclear
-@ifset HPPA
-(@pxref{Breakpoints, ,Breakpoints; watchpoints; and catchpoints})
-@end ifset
-@end ifclear
-@ifset CONLY
-(@pxref{Breakpoints, ,Breakpoints and watchpoints})
-@end ifset
-at the
-beginning of the function or the section of your program where a
-problem is believed to lie, run your program until it stops at that
-breakpoint, and then step through the suspect area, examining the
-variables that are interesting, until you see the problem happen.
+(@pxref{Breakpoints, ,Breakpoints; watchpoints; and catchpoints}) at the
+beginning of the function or the section of your program where a problem
+is believed to lie, run your program until it stops at that breakpoint,
+and then step through the suspect area, examining the variables that are
+interesting, until you see the problem happen.
 
 @table @code
 @kindex step
@@ -4395,7 +4172,7 @@ Print a list of all the exception handlers that are active in the
 current stack frame at the current point of execution.  To see other
 exception handlers, visit the associated frame (using the @code{up},
 @code{down}, or @code{frame} commands); then type @code{info catch}.
-@xref{Exception Handling, ,Breakpoints and exceptions}.
+@xref{Set Catchpoints, , Setting catchpoints}.
 @end ifclear
 @end ifclear
 @end table
@@ -4746,26 +4523,22 @@ surrounding this value.  Two arguments specify a range of addresses
 @end table
 
 @ifclear H8EXCLUSIVE
-@ifclear HPPA
-We can use @code{disassemble} to inspect the object code
-range shown in the last @code{info line} example (the example
-shows SPARC machine instructions):
-
+The following example shows the disassembly of a range of addresses of
+HP PA-RISC 2.0 code:
 
 @smallexample
-(@value{GDBP}) disas 0x63e4 0x6404
-Dump of assembler code from 0x63e4 to 0x6404:
-0x63e4 <builtin_init+5340>:     ble 0x63f8 <builtin_init+5360>
-0x63e8 <builtin_init+5344>:     sethi %hi(0x4c00), %o0
-0x63ec <builtin_init+5348>:     ld [%i1+4], %o0
-0x63f0 <builtin_init+5352>:     b 0x63fc <builtin_init+5364>
-0x63f4 <builtin_init+5356>:     ld [%o0+4], %o0
-0x63f8 <builtin_init+5360>:     or %o0, 0x1a4, %o0
-0x63fc <builtin_init+5364>:     call 0x9288 <path_search>
-0x6400 <builtin_init+5368>:     nop
+(@value{GDBP}) disas 0x32c4 0x32e4
+Dump of assembler code from 0x32c4 to 0x32e4:
+0x32c4 <main+204>:      addil 0,dp
+0x32c8 <main+208>:      ldw 0x22c(sr0,r1),r26
+0x32cc <main+212>:      ldil 0x3000,r31
+0x32d0 <main+216>:      ble 0x3f8(sr4,r31)
+0x32d4 <main+220>:      ldo 0(r31),rp
+0x32d8 <main+224>:      addil -0x800,dp
+0x32dc <main+228>:      ldo 0x588(r1),r26
+0x32e0 <main+232>:      ldil 0x3000,r31
 End of assembler dump.
 @end smallexample
-@end ifclear
 @end ifclear
 
 @ifset H8EXCLUSIVE
@@ -4804,25 +4577,6 @@ Currently it is only defined for the Intel x86 family.  You can set @var{instruc
 to either @code{i386} or @code{i8086}.  The default is @code{i386}.
 @end table
 
-
-@ifset HPPA
-The following example shows the disassembly of a range of addresses of
-HP PA-RISC 2.0 code:
-
-@smallexample
-(@value{GDBP}) disas 0x32c4 0x32e4
-Dump of assembler code from 0x32c4 to 0x32e4:
-0x32c4 <main+204>:      addil 0,dp
-0x32c8 <main+208>:      ldw 0x22c(sr0,r1),r26
-0x32cc <main+212>:      ldil 0x3000,r31
-0x32d0 <main+216>:      ble 0x3f8(sr4,r31)
-0x32d4 <main+220>:      ldo 0(r31),rp
-0x32d8 <main+224>:      addil -0x800,dp
-0x32dc <main+228>:      ldo 0x588(r1),r26
-0x32e0 <main+232>:      ldil 0x3000,r31
-End of assembler dump.
-@end smallexample
-@end ifset
 
 @node Data, Languages, Source, Top
 @chapter Examining Data
@@ -5680,10 +5434,8 @@ Decode based on the @sc{gnu} C++ compiler (@code{g++}) encoding algorithm.
 This is the default.
 @end ifclear
 
-@ifset HPPA
 @item hp
 Decode based on the HP ANSI C++ (@code{aCC}) encoding algorithm.
-@end ifset
 
 @item lucid
 Decode based on the Lucid C++ compiler (@code{lcc}) encoding algorithm.
@@ -7039,20 +6791,11 @@ breakpoints on overloaded functions that are not members of any special
 classes.
 @xref{Set Breaks, ,Setting breakpoints}.
 
-@ifclear HPPA
-@cindex C++ exception handling
-@item catch @var{exceptions}
-@itemx info catch
-Debug C++ exception handling using these commands.  @xref{Exception
-Handling, ,Breakpoints and exceptions}.
-@end ifclear
-@ifset HPPA
 @cindex C++ exception handling
 @item catch throw
 @itemx catch catch
 Debug C++ exception handling using these commands.  @xref{Set
-Catchpoints, ,Setting catchpoints}.
-@end ifset
+Catchpoints, , Setting catchpoints}.
 
 @cindex inheritance
 @item ptype @var{typename}
@@ -7946,11 +7689,9 @@ an address of your own choosing, with the following commands:
 Resume execution at line @var{linespec}.  Execution stops again
 immediately if there is a breakpoint there.  @xref{List, ,Printing
 source lines}, for a description of the different forms of
-@var{linespec}.
-@ifset HPPA
-It is common practice to use the @code{tbreak} command in conjunction
-with @code{jump}.  @xref{Set Breaks, ,Setting breakpoints}.
-@end ifset
+@var{linespec}.  It is common practice to use the @code{tbreak} command
+in conjunction with @code{jump}.  @xref{Set Breaks, ,Setting
+breakpoints}.
 
 The @code{jump} command does not change the current stack frame, or
 the stack pointer, or the contents of any memory location or any
@@ -9789,7 +9530,9 @@ development tools that Energize integrates with @value{GDBN}.
 
 @end ifset
 
-@node GDB Bugs, Command Line Editing, Emacs, Top
+@node GDB Bugs
+@c links whacked to pacify makeinfo
+@c , Command Line Editing, Emacs, Top
 @chapter Reporting Bugs in @value{GDBN}
 @cindex bugs in @value{GDBN}
 @cindex reporting bugs in @value{GDBN}
@@ -10175,7 +9918,9 @@ unset                     &&\rm(No longer an alias for delete)\cr
 
 @ifclear PRECONFIGURED
 @ifclear HPPA
-@node Formatting Documentation, Installing GDB, Renamed Commands, Top
+@node Formatting Documentation
+@c links whacked to pacify makeinfo
+@c , Installing GDB, Renamed Commands, Top
 @appendix Formatting Documentation
 
 @cindex @value{GDBN} reference card

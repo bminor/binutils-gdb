@@ -1,3 +1,10 @@
+Wed Jan 20 17:47:45 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.texinfo: Make many HPPA conditionals unconditional,
+	including catchpoint description, since now on for all configs.
+	* all-cfg.texi: @clear HPPA, since is mainly for very HP-specific
+	specializations.
+
 Thu Jan 14 17:10:12 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* Makefile.in (GDBvn.texi): Fix match expression to work with

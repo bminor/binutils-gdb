@@ -18,8 +18,8 @@
 @c PLATFORM FLAGS:
 @set GENERIC
 @c
-@c HP PA-RISC target:
-@set HPPA
+@c HP PA-RISC target ONLY:
+@clear HPPA
 @c
 @c Hitachi H8/300 target:
 @set H8
