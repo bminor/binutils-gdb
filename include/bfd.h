@@ -416,6 +416,11 @@ typedef enum
 #define BFD_SEND_FMT(bfd, message, arglist) \
                  (((bfd)->xvec->message[(int)((bfd)->format)]) arglist)
 
+/*  This is the struct which defines the type of BFD this is.  The
+    "xvec" member of the struct bfd itself points here.  Each module
+    that implements access to a different target under BFD, defines
+    one of these.  */
+
 /* FIXME, these names should be rationalised with the names of the entry points
    which call them.  Too bad we can't have one macro to define them both! */
 typedef struct bfd_target
@@ -458,7 +463,8 @@ typedef struct bfd_target
 
   /* Format-dependent */
   SDEF_FMT (struct bfd_target *, _bfd_check_format, (bfd *));/* file fmt or 0 */
-  SDEF_FMT (boolean, _bfd_set_format, (bfd *)); /* make it an object file. */
+  SDEF_FMT (boolean, _bfd_set_format, (bfd *)); /* make it an object file */
+  SDEF_FMT (boolean, _bfd_write_contents, (bfd *)); /* write it out at close */
 
   /* All these are defined in JUMP_TABLE */
   /* Core files */

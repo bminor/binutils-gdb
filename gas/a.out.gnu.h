@@ -82,41 +82,55 @@ enum machine_type {
 /* Code indicating demand-paged executable.  */
 #define ZMAGIC 0413
 
-/* Address of text segment in memory after it is loaded.  */
-/* Don't load things at zero, it encourages zero-pointer bugs */
-#ifndef TEXT_START_ADDR
-#define	TEXT_START_ADDR 0x10000
-#endif
-
 /* Virtual Address of text segment from the a.out file.  For OMAGIC,
    (almost always "unlinked .o's" these days), should be zero.
-   Sun added a kludge so that shared libraries linked ZMAGIC get
-   an address of zero if a_entry (!!!) is lower than the otherwise
-   expected text address.  These kludges have gotta go!
    For linked files, should reflect reality if we know it.  */
 
 #ifndef N_TXTADDR
-#define N_TXTADDR(x) \
-    (N_MAGIC(x)==OMAGIC? 0 \
-     : (N_MAGIC(x) == ZMAGIC && (x).a_entry < TEXT_START_ADDR)? 0 \
-     : TEXT_START_ADDR)
+#define N_TXTADDR(x)	(N_MAGIC(x)==OMAGIC? 0 : TEXT_START_ADDR)
 #endif
 
-/* Address of data segment in memory after it is loaded.
-   Note that it is up to you to define SEGMENT_SIZE
-   on machines not listed here.  */
-#if defined(hp300) || defined(pyr)
-#define SEGMENT_SIZE page_size
+#ifndef N_BADMAG
+#define N_BADMAG(x)	  (N_MAGIC(x) != OMAGIC		\
+			&& N_MAGIC(x) != NMAGIC		\
+  			&& N_MAGIC(x) != ZMAGIC)
 #endif
-#ifdef	sony
-#define	SEGMENT_SIZE	0x2000
-#endif	/* Sony.  */
-#ifdef is68k
-#define SEGMENT_SIZE 0x20000
+
+/* This complexity is for encapsulated COFF support */
+#ifndef _N_HDROFF
+#define _N_HDROFF(x)	(SEGMENT_SIZE - sizeof (struct exec))
 #endif
-#if defined(m68k) && defined(PORTAR)
-#define PAGE_SIZE 0x400
-#define SEGMENT_SIZE PAGE_SIZE
+
+#ifndef N_TXTOFF
+#define N_TXTOFF(x)	(N_MAGIC(x) == ZMAGIC ?	\
+				_N_HDROFF((x)) + sizeof (struct exec) :	\
+				sizeof (struct exec))
+#endif
+
+
+#ifndef N_DATOFF
+#define N_DATOFF(x)	( N_TXTOFF(x) + (x).a_text )
+#endif
+
+#ifndef N_TRELOFF
+#define N_TRELOFF(x)	( N_DATOFF(x) + (x).a_data )
+#endif
+
+#ifndef N_DRELOFF
+#define N_DRELOFF(x)	( N_TRELOFF(x) + (x).a_trsize )
+#endif
+
+#ifndef N_SYMOFF
+#define N_SYMOFF(x)	( N_DRELOFF(x) + (x).a_drsize )
+#endif
+
+#ifndef N_STROFF
+#define N_STROFF(x)	( N_SYMOFF(x) + (x).a_syms )
+#endif
+
+/* Address of text segment in memory after it is loaded.  */
+#ifndef N_TXTADDR
+#define	N_TXTADDR(x)	0
 #endif
 
 #ifndef N_DATADDR
