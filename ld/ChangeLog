@@ -1,3 +1,8 @@
+2001-11-01  NIIBE Yutaka  <gniibe@m17n.org>
+
+	* configure.tgt (sh-*-linux): Set targ_emul, targ_extra_emuls
+	as little endian default and to support big endian.
+	
 2001-11-01  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld.texinfo (Options): Document new option, -nostdlib.
