@@ -217,7 +217,7 @@ struct elf_link_hash_entry
    it's necessary for shared libs to also reference the .plt even
    though the symbol is really local to the shared lib.  */
 #define SYMBOL_REFERENCES_LOCAL(INFO, H)				\
-  ((! (INFO)->shared							\
+  (((INFO)->executable							\
     || (INFO)->symbolic							\
     || (H)->dynindx == -1						\
     || ELF_ST_VISIBILITY ((H)->other) == STV_INTERNAL			\
@@ -227,7 +227,7 @@ struct elf_link_hash_entry
 
 /* Will _calls_ to this symbol always call the version in this object?  */
 #define SYMBOL_CALLS_LOCAL(INFO, H)					\
-  ((! (INFO)->shared							\
+  (((INFO)->executable							\
     || (INFO)->symbolic							\
     || (H)->dynindx == -1						\
     || ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT			\

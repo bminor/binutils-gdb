@@ -1,5 +1,10 @@
 2003-07-04  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf-bfd.h (SYMBOL_REFERENCES_LOCAL, SYMBOL_CALLS_LOCAL): Return
+	true even if -pie.
+
+2003-07-04  Jakub Jelinek  <jakub@redhat.com>
+
 	* elfxx-ia64.c (struct elfNN_ia64_link_hash_table): Add rel_fptr_sec.
 	(elfNN_ia64_dynamic_symbol_p): Change info->shared into
 	!info->executable.
