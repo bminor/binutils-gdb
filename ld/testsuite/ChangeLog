@@ -1,3 +1,10 @@
+2002-04-19  Richard Henderson  <rth@redhat.com>
+
+	* ld-elfvsb/elfvsb.exp: Mirror ia64 non-pic xfails for alpha.
+	* ld-shared/shared.exp: Likewise.
+	* ld-selective/selective.exp: Disable for alpha.
+	* ld-undefined/undefined.exp: Add alpha to dwarf2 xfails.
+
 2002-04-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/libdso-2.d, ld-cris/dso-2.s, ld-cris/hide1: New test.

@@ -32,6 +32,11 @@ if {[istarget "*-*-pe"]} {
     return
 }
 
+# Alpha does not support selective linking
+if {[istarget "alpha*-*-*"]} {
+    return
+}
+
 # List contains test-items with three items followed by four lists:
 # 1:name 2:test-type (CC or C++; add as needed) 3:filename 4:ld-flags
 # 5:must-have-symbols 6:must-not-have-symbols 7:xfail-targets.

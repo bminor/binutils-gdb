@@ -74,6 +74,7 @@ setup_xfail "hppa*-*-*elf*"
 
 # With dwarf-2, we can't get the function in which the reference
 # occurs; see below.
+setup_xfail "alpha*-*-linux*"
 setup_xfail "hppa*64*-*-*"
 setup_xfail "mn10300-*-elf"
 setup_xfail "sh-*-*"
