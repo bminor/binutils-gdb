@@ -1,3 +1,10 @@
+2001-09-26  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* input-file.c (input_file_open): When reading the
+	first line looking for #NO_APP, prepare for the possibility
+	of finding #APP instead.  Also fix algorithm to allow
+	white-space to follow either #NO_APP or #APP directives.
+
 2001-09-25  Geoff Berry  <geoff.berry@bops.com>
 
 	* listing.c (buffer_line): Don't write past the end of `line' when
