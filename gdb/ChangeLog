@@ -1,5 +1,13 @@
 2002-12-13  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.h (get_frame_saved_regs): Declare.
+	(frame_saved_regs_zalloc): Change return type to CORE_ADDR
+	pointer.
+	* frame.c (get_frame_saved_regs): New function.
+	(frame_saved_regs_zalloc): Return the allocated saved_regs.
+
+2002-12-13  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.c (deprecated_update_current_frame_pc_hack): New
 	function.
 	* frame.h (deprecated_update_current_frame_pc_hack): Declare.

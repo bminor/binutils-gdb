@@ -473,7 +473,6 @@ enum print_what
         (sizeof (CORE_ADDR) * (NUM_REGS+NUM_PSEUDO_REGS))
 
 extern void *frame_obstack_alloc (unsigned long size);
-extern void frame_saved_regs_zalloc (struct frame_info *);
 
 /* Define a default FRAME_CHAIN_VALID, in the form that is suitable for most
    targets.  If FRAME_CHAIN_VALID returns zero it means that the given frame
@@ -653,6 +652,13 @@ extern struct frame_info *create_new_frame (CORE_ADDR base, CORE_ADDR pc);
 extern struct frame_extra_info *frame_extra_info_zalloc (struct frame_info *fi,
 							 long size);
 extern struct frame_extra_info *get_frame_extra_info (struct frame_info *fi);
+
+/* Create/access the frame's `saved_regs'.  The saved regs are used by
+   older code to store the address of each register (except for
+   SP_REGNUM where the value of the register in the previous frame is
+   stored).  */
+extern CORE_ADDR *frame_saved_regs_zalloc (struct frame_info *);
+extern CORE_ADDR *get_frame_saved_regs (struct frame_info *);
 
 /* FIXME: cagney/2002-12-06: Has the PC in the current frame changed?
    "infrun.c", Thanks to DECR_PC_AFTER_BREAK, can change the PC after

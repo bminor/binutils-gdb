@@ -461,14 +461,20 @@ frame_obstack_alloc (unsigned long size)
   return obstack_alloc (&frame_cache_obstack, size);
 }
 
-void
+CORE_ADDR *
 frame_saved_regs_zalloc (struct frame_info *fi)
 {
   fi->saved_regs = (CORE_ADDR *)
     frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
   memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+  return fi->saved_regs;
 }
 
+CORE_ADDR *
+get_frame_saved_regs (struct frame_info *fi)
+{
+  return fi->saved_regs;
+}
 
 /* Return the innermost (currently executing) stack frame.  */
 
