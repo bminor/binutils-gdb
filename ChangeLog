@@ -1,3 +1,9 @@
+Tue Jul 13 20:10:58 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config.sub: Recognize h8300hhms as h8300h-hitachi-hms.
+	(h8300hhms is temporary until multi-libraries are implemented).
+	* configure.in: Handle h8300h too.
+
 Sun Jul 11 17:35:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.guess: Recognize dpx/2 as m68k-bull-sysv3.

@@ -171,7 +171,7 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/gdb//;s/emacs//;s/fileutils//'`
     configdirs=`echo ${configdirs} | sed -e 's/grep//;s/libg++//'`
     ;;	
-  h8300-*-*)
+  h8300*-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/libg++//'`
 ## start-sanitize-chill
     configdirs=`echo ${configdirs} | sed -e 's/chillrt//'`

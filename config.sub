@@ -77,6 +77,9 @@ case $os in
 		os=
 		basic_machine=$1
 		;;
+	-lynx)
+		os=-lynxos
+		;;
 	-scout)						# CYGNUS LOCAL
 		;;
 	-wrs)						# CYGNUS LOCAL
@@ -444,7 +447,10 @@ case $basic_machine in
 		basic_machine=h8300-hitachi
 		os=-hms
 		;;
-
+	h8300hhms)					# CYGNUS LOCAL
+		basic_machine=h8300h-hitachi
+		os=-hms
+		;;
 	sh)						# CYGNUS LOCAL
 		basic_machine=sh-hitachi
 		os=-hms
@@ -633,6 +639,9 @@ case $os in
 	-solaris1 | -solaris1.*)
 		os=`echo $os | sed -e 's|solaris1|sunos4|'`
 		;;
+	-solaris)
+		os=-solaris2
+		;;
 	# First accept the basic system types.
 	# The portable systems comes first.
 	# Each alternative must end in a *, to match a version number.
@@ -644,7 +653,7 @@ case $os in
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -go32 | -sim | -es1800* | -udi | -hms* | -xray \
 	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf | -bosx* \
-	      | -ecoff* | -lynx )
+	      | -ecoff* | -lynxos* )
 				# The last three lines above are CYGNUS LOCAL
 	;;
 # start-sanitize-v9
@@ -809,6 +818,9 @@ case $basic_machine in
 				;;
 			-bosx*)			# CYGNUS LOCAL
 				vendor=bull
+				;;
+			-lynxos*)
+				vendor=lynx
 				;;
 			-aix*)
 				vendor=ibm
