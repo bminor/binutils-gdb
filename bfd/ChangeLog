@@ -1,3 +1,19 @@
+2003-09-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* acinclude.m4: Include ../config/accross.m4.
+	* aclocal.m4: Regenerated.
+
+	* configure.host (HOST_64BIT_TYPE): Remove if it is set to long
+	or long long.
+	(HOST_U_64BIT_TYPE): Remove if it is set to unsigned long long.
+	(host64): Remove if HOST_64BIT_TYPE is set to long.
+
+	* configure.in (HOST_64BIT_TYPE): Set according to the size of
+	long and long long.
+	(HOST_U_64BIT_TYPE): Likewise.
+	(host64): Likewise.
+	* configure: Regenerated.
+
 2003-09-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (elfcore_write_note): Don't use sizeof(Elf_External_note)
