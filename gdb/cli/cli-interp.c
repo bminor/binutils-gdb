@@ -53,8 +53,25 @@ cli_interpreter_init (void)
 static int
 cli_interpreter_resume (void *data)
 {
+  struct ui_file *stream;
+
   /*sync_execution = 1; */
+
+  /* gdb_setup_readline will change gdb_stdout.  If the CLI was previously
+     writing to gdb_stdout, then set it to the new gdb_stdout afterwards.  */
+
+  stream = cli_out_set_stream (cli_uiout, gdb_stdout);
+  if (stream != gdb_stdout)
+    {
+      cli_out_set_stream (cli_uiout, stream);
+      stream = NULL;
+    }
+
   gdb_setup_readline ();
+
+  if (stream != NULL)
+    cli_out_set_stream (cli_uiout, gdb_stdout);
+
   return 1;
 }
 

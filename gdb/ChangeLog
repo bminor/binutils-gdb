@@ -1,3 +1,8 @@
+2003-07-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cli/cli-interp.c (cli_interpreter_resume): Update the
+	cli_uiout's stream to gdb_stdout.
+
 2003-07-03  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (REGISTER_RAW_SIZE, REGISTER_VIRTUAL_SIZE): Add
