@@ -2028,6 +2028,12 @@ ppc_csect (ignore)
 
   *input_line_pointer = endc;
 
+  if (S_GET_NAME (sym)[0] == '\0')
+    {
+      /* An unnamed csect is assumed to be [PR].  */
+      sym->sy_tc.class = XMC_PR;
+    }
+
   ppc_change_csect (sym);
 
   if (*input_line_pointer == ',')
