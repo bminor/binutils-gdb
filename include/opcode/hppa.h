@@ -31,7 +31,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* There are two kinds of delay slot nullification: normal which is
  * controled by the nullification bit, and conditional, which depends
  * on the direction of the branch and its success or failure.
+ *
+ * NONE is unfortunately #defined in the hiux system include files.  
+ * #undef it away.
  */
+#undef NONE
 enum delay_type {NONE, NORMAL, CONDITIONAL};
 struct pa_opcode
 {
@@ -66,7 +70,7 @@ struct pa_opcode
    In the args field, the following characters are unused:
 
 	'  "#$%    *+- ./   3      :; =  @'
-	' B         L N            [\] _'
+	' B         L              [\] _'
 	'    e gh   lm   qr        { } '
 
    Here are all the characters:
@@ -98,6 +102,7 @@ Kinds of operands:
    j    14 bit immediate value at 31
    k    21 bit immediate value at 31
    n	nullification for branch instructions
+   N	nullification for spop and copr instructions
    w    12 bit branch displacement
    W    17 bit branch displacement (PC relative)
    z    17 bit branch displacement (just a number, not an address)
@@ -137,7 +142,7 @@ Also these:
    r	5 bit immediate value at 31 (for the break instruction)
 	(very similar to V above, except the value is unsigned instead of
 	low_sign_ext)
-   R	5 bit immediate value at 15 (for the ssm, rsm instruction)
+   R	5 bit immediate value at 15 (for the ssm, rsm, probei instructions)
 	(same as r above, except the value is in a different location)
    Q	5 bit immediate value at 10 (a bit position specified in
 	the bb instruction. It's the same as r above, except the
@@ -328,12 +333,12 @@ static const struct pa_opcode pa_opcodes[] =
 { "sync",       0x00000400, 0xffffffff, ""},
 { "prober",     0x04001180, 0xfc003fe0, "(s,b),x,t"},
 { "prober",     0x04001180, 0xfc003fe0, "(b),x,t"},
-{ "proberi",    0x04003180, 0xfc003fe0, "(s,b),5,t"},
-{ "proberi",    0x04003180, 0xfc003fe0, "(b),5,t"},
+{ "proberi",    0x04003180, 0xfc003fe0, "(s,b),R,t"},
+{ "proberi",    0x04003180, 0xfc003fe0, "(b),R,t"},
 { "probew",     0x040011c0, 0xfc003fe0, "(s,b),x,t"},
 { "probew",     0x040011c0, 0xfc003fe0, "(b),x,t"},
-{ "probewi",    0x040031c0, 0xfc003fe0, "(s,b),5,t"},
-{ "probewi",    0x040031c0, 0xfc003fe0, "(b),5,t"},
+{ "probewi",    0x040031c0, 0xfc003fe0, "(s,b),R,t"},
+{ "probewi",    0x040031c0, 0xfc003fe0, "(b),R,t"},
 { "lpa",        0x04001340, 0xfc003fc0, "Zx(s,b),t"},
 { "lpa",        0x04001340, 0xfc003fc0, "Zx(b),t"},
 { "lha",        0x04001300, 0xfc003fc0, "Zx(s,b),t"},
@@ -365,6 +370,9 @@ static const struct pa_opcode pa_opcodes[] =
 { "fice",       0x040002c0, 0xfc003fdf, "Zx(s,b)"},
 { "fice",       0x040002c0, 0xfc003fdf, "Zx(b)"},
 { "diag",       0x14000000, 0xfc000000, "D"},
+
+/* gfw and gfr are not in the HP PA 1.1 manual, but they are in either
+   the Timex FPU or the Mustang ERS (not sure which) manual.  */
 { "gfw",	0x04001680, 0xfc003fdf, "Zx(s,b)"},
 { "gfw",	0x04001680, 0xfc003fdf, "Zx(b)"},
 { "gfr",	0x04001a80, 0xfc003fdf, "Zx(s,b)"},
@@ -380,6 +388,8 @@ static const struct pa_opcode pa_opcodes[] =
 { "fstwx",      0x24000200, 0xfc001fc0, "cv,x(b)"},
 { "fstdx",      0x2c000200, 0xfc001fc0, "cy,x(s,b)"},
 { "fstdx",      0x2c000200, 0xfc001fc0, "cy,x(b)"},
+{ "fstqx",      0x3c000200, 0xfc001fc0, "cy,x(s,b)"},
+{ "fstqx",      0x3c000200, 0xfc001fc0, "cy,x(b)"},
 { "fldws",      0x24001000, 0xfc001f80, "C5(s,b),v"},
 { "fldws",      0x24001000, 0xfc001f80, "C5(b),v"},
 { "fldds",      0x2c001000, 0xfc001fc0, "C5(s,b),y"},
@@ -388,6 +398,8 @@ static const struct pa_opcode pa_opcodes[] =
 { "fstws",      0x24001200, 0xfc001f80, "Cy,5(b)"},
 { "fstds",      0x2c001200, 0xfc001fc0, "Cy,5(s,b)"},
 { "fstds",      0x2c001200, 0xfc001fc0, "Cy,5(b)"},
+{ "fstqs",      0x3c001200, 0xfc001fc0, "Cy,5(s,b)"},
+{ "fstqs",      0x3c001200, 0xfc001fc0, "Cy,5(b)"},
 { "fadd",       0x30000600, 0xfc00e7e0, "FE,X,v"},
 { "fadd",       0x38000600, 0xfc00e720, "IJ,K,v"},
 { "fsub",       0x30002600, 0xfc00e7e0, "FE,X,v"},
@@ -424,27 +436,27 @@ static const struct pa_opcode pa_opcodes[] =
 
 /* Assist Instructions */
 
-{ "spop0",      0x10000000, 0xfc000600, ",f,On", NORMAL},
-{ "spop1",      0x10000200, 0xfc000600, ",f,ont", NORMAL},
-{ "spop2",      0x10000400, 0xfc000600, ",f,1nb", NORMAL},
-{ "spop3",      0x10000600, 0xfc000600, ",f,0nx,b", NORMAL},
-{ "copr",       0x30000000, 0xfc000000, ",u,2n", NORMAL},
-{ "cldwx",      0x24000000, 0xfc001e00, ",u,Zx(s,b),t"},
-{ "cldwx",      0x24000000, 0xfc001e00, ",u,Zx(b),t"},
-{ "clddx",      0x2c000000, 0xfc001e00, ",u,Zx(s,b),t"},
-{ "clddx",      0x2c000000, 0xfc001e00, ",u,Zx(b),t"},
-{ "cstwx",      0x24000200, 0xfc001e00, ",u,Zt,x(s,b)"},
-{ "cstwx",      0x24000200, 0xfc001e00, ",u,Zt,x(b)"},
-{ "cstdx",      0x2c000200, 0xfc001e00, ",u,Zt,x(s,b)"},
-{ "cstdx",      0x2c000200, 0xfc001e00, ",u,Zt,x(b)"},
-{ "cldws",      0x24001000, 0xfc001e00, ",u,Z5(s,b),t"},
-{ "cldws",      0x24001000, 0xfc001e00, ",u,Z5(b),t"},
-{ "cldds",      0x2c001000, 0xfc001e00, ",u,Z5(s,b),t"},
-{ "cldds",      0x2c001000, 0xfc001e00, ",u,Z5(b),t"},
-{ "cstws",      0x24001200, 0xfc001e00, ",u,Zt,5(s,b)"},
-{ "cstws",      0x24001200, 0xfc001e00, ",u,Zt,5(b)"},
-{ "cstds",      0x2c001200, 0xfc001e00, ",u,Zt,5(s,b)"},
-{ "cstds",      0x2c001200, 0xfc001e00, ",u,Zt,5(b)"},
+{ "spop0",      0x10000000, 0xfc000600, ",f,ON", NORMAL},
+{ "spop1",      0x10000200, 0xfc000600, ",f,oNt", NORMAL},
+{ "spop2",      0x10000400, 0xfc000600, ",f,1Nb", NORMAL},
+{ "spop3",      0x10000600, 0xfc000600, ",f,0Nx,b", NORMAL},
+{ "copr",       0x30000000, 0xfc000000, ",u,2N", NORMAL},
+{ "cldwx",      0x24000000, 0xfc001e00, ",ucx(s,b),t"},
+{ "cldwx",      0x24000000, 0xfc001e00, ",ucx(b),t"},
+{ "clddx",      0x2c000000, 0xfc001e00, ",ucx(s,b),t"},
+{ "clddx",      0x2c000000, 0xfc001e00, ",ucx(b),t"},
+{ "cstwx",      0x24000200, 0xfc001e00, ",uct,x(s,b)"},
+{ "cstwx",      0x24000200, 0xfc001e00, ",uct,x(b)"},
+{ "cstdx",      0x2c000200, 0xfc001e00, ",uct,x(s,b)"},
+{ "cstdx",      0x2c000200, 0xfc001e00, ",uct,x(b)"},
+{ "cldws",      0x24001000, 0xfc001e00, ",uC5(s,b),t"},
+{ "cldws",      0x24001000, 0xfc001e00, ",uC5(b),t"},
+{ "cldds",      0x2c001000, 0xfc001e00, ",uC5(s,b),t"},
+{ "cldds",      0x2c001000, 0xfc001e00, ",uC5(b),t"},
+{ "cstws",      0x24001200, 0xfc001e00, ",uCt,5(s,b)"},
+{ "cstws",      0x24001200, 0xfc001e00, ",uCt,5(b)"},
+{ "cstds",      0x2c001200, 0xfc001e00, ",uCt,5(s,b)"},
+{ "cstds",      0x2c001200, 0xfc001e00, ",uCt,5(b)"},
 };
 
 #define NUMOPCODES ((sizeof pa_opcodes)/(sizeof pa_opcodes[0]))

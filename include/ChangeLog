@@ -1,3 +1,30 @@
+Mon Jan 17 00:12:19 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* opcode/hppa.h: Fix templates for all the sfu and copr
+	instructions.
+
+Thu Jan  6 14:15:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bfdlink.h (struct bfd_link_callbacks): Add bitsize argument to
+	add_to_set field.  Add new callback named constructor.
+
+Thu Dec 30 10:44:06 1993  Ian Lance Taylor  (ian@rtl.cygnus.com)
+
+	* bfdlink.h: New file for new BFD linker backend routines.
+
+Mon Nov 29 10:43:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* dis-asm.h (enum dis_insn_tyupe): Remove non-ANSI trailing comma.
+
+Sat Oct  2 20:42:26 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dis-asm.h: Move comment to right place.
+
+Mon Aug  9 19:03:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* obstack.h (obstack_chunkfun, obstack_freefun): Add defns from
+	previous version.  Are these Cygnus local changes?
+
 Fri Aug  6 17:05:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* getopt.h, obstack.h: Update to latest FSF version.
