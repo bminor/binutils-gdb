@@ -402,7 +402,7 @@ CODE_FRAGMENT
 .  {* Nonzero if this section has a gp reloc.  *}
 .  unsigned int has_gp_reloc:1;
 .
-.  {* Usused bits.  *}
+.  {* Unused bits.  *}
 .  unsigned int flag13:1;
 .  unsigned int flag14:1;
 .  unsigned int flag15:1;

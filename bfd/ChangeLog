@@ -1,3 +1,7 @@
+2003-10-23  Michael Snyder  <msnyder@redhat.com>
+
+	* section.c (asection): Fix typo in comment.
+
 2003-10-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (get_tls_mask): Add toc_symndx param, save toc
