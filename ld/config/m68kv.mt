@@ -1,1 +1,2 @@
-EMUL=m68kv_EMULATION_NAME
+# This emulation seems not to exist.
+EMUL=m68kv

@@ -3,5 +3,5 @@ YACC=yacc -tvd
 #stuff for self hosting
 HOSTING_CRT0=/lib/crt0.o
 HOSTING_LIBS=/usr/latest/lib/gcc/sun4/libgcc.a  -lc
-HOSTING_EMU=LDEMULATION=gld; export LDEMULATION
+HOSTING_EMU=LDEMULATION=sun4; export LDEMULATION
 

@@ -1,1 +1,2 @@
-EMUL=i386v_EMULATION_NAME
+# This doesn't seem to exist.
+EMUL=i386v

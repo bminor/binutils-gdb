@@ -1,1 +1,2 @@
-EMUL=GLD_EMULATION_NAME
+# This seems somewhat bogus.
+EMUL=sun3
