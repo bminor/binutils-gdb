@@ -1,3 +1,8 @@
+2002-07-26  Bernd Schmidt  <bernds@redhat.com>
+
+	* emulparams/elf32frv.sh (OTHER_RELOCATING_SECTIONS): Delete.
+	(STACK_ADDR): New.
+
 2002-07-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

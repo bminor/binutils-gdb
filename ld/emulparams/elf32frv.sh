@@ -9,9 +9,7 @@ EMBEDDED=yes
 OTHER_EXCLUDE_FILES='*frvend.o'
 OTHER_BSS_END_SYMBOLS='__end = .;'
 DATA_START_SYMBOLS='__data_start = . ;'
-OTHER_RELOCATING_SECTIONS='
-  PROVIDE (_stack = 0x200000);
-  PROVIDE (__stack = 0x200000);'
+STACK_ADDR=0x200000
 OTHER_GOT_SYMBOLS='
   . = ALIGN(8);  _gp = . + 2048;
   PROVIDE (gp = _gp);'
