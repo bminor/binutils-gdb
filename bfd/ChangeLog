@@ -1,3 +1,10 @@
+Sun Dec  3 19:00:27 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* peicode.h (pe_print_idata): Minor format fixes
+	(pe_print_edata): New function. Under private printing, this formats
+	the edata section of a PE file.
+	(pe_print_private_bfd_data): Added call to pe_print_edata.
+
 Sun Dec  3 16:46:54 1995  Richard Earnshaw (rearnsha@armltd.co.uk)
 
 	* aout-arm.c (MY_swap_std_reloc_out): Use KEEPIT to get the symbol

@@ -1164,6 +1164,7 @@ pe_print_idata(abfd, vfile)
 								 rel_section));
       if (data == NULL && bfd_section_size (abfd, rel_section) != 0)
 	return false;
+
       datasize = bfd_section_size (abfd, rel_section);
   
       bfd_get_section_contents (abfd, 
@@ -1176,11 +1177,12 @@ pe_print_idata(abfd, vfile)
       start_address = bfd_get_32(abfd, data+offset);
       loadable_toc_address = bfd_get_32(abfd, data+offset+4);
       toc_address = loadable_toc_address - 32768;
+
       fprintf(file,
-	      "\nFunction descriptor located at the start address:\n");
+	      "\nFunction descriptor located at the start address: %04lx\n",
+	      (unsigned long int) (abfd->start_address));
       fprintf (file,
-	       " %04lx code-base %08lx toc (loadable) %08lx toc (actual) %08lx\n", 
-	       (unsigned long int) (abfd->start_address),
+	       "\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n", 
 	       start_address, loadable_toc_address, toc_address);
     }
   else
@@ -1327,9 +1329,185 @@ pe_print_idata(abfd, vfile)
 
     }
 
+  free (data);
+}
+
+static boolean
+pe_print_edata(abfd, vfile)
+     bfd*abfd;
+     void *vfile;
+{
+  FILE *file = vfile;
+  bfd_byte *data = 0;
+  asection *section = bfd_get_section_by_name (abfd, ".edata");
+
+  bfd_size_type datasize = 0;
+  bfd_size_type i;
+
+  int adj;
+  struct EDT_type 
+    {
+      long export_flags;             /* reserved - should be zero */
+      long time_stamp;
+      short major_ver;
+      short minor_ver;
+      bfd_vma name;                  /* rva - relative to image base */
+      long base;                     /* ordinal base */
+      long num_functions;        /* Number in the export address table */
+      long num_names;            /* Number in the name pointer table */
+      bfd_vma eat_addr;    /* rva to the export address table */
+      bfd_vma npt_addr;        /* rva to the Export Name Pointer Table */
+      bfd_vma ot_addr; /* rva to the Ordinal Table */
+    } edt;
+
+  pe_data_type *pe = pe_data (abfd);
+  struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
+
+  if (section == 0)
+    return true;
+
+  data = (bfd_byte *) bfd_malloc ((size_t) bfd_section_size (abfd, 
+							     section));
+  datasize = bfd_section_size (abfd, section);
+
+  if (data == NULL && datasize != 0)
+    return false;
+
+  bfd_get_section_contents (abfd, 
+			    section, 
+			    (PTR) data, 0, 
+			    bfd_section_size (abfd, section));
+
+  /* Go get Export Directory Table */
+  edt.export_flags   = bfd_get_32(abfd, data+0); 
+  edt.time_stamp     = bfd_get_32(abfd, data+4);
+  edt.major_ver      = bfd_get_16(abfd, data+8);
+  edt.minor_ver      = bfd_get_16(abfd, data+10);
+  edt.name           = bfd_get_32(abfd, data+12);
+  edt.base           = bfd_get_32(abfd, data+16);
+  edt.num_functions  = bfd_get_32(abfd, data+20); 
+  edt.num_names      = bfd_get_32(abfd, data+24); 
+  edt.eat_addr       = bfd_get_32(abfd, data+28);
+  edt.npt_addr       = bfd_get_32(abfd, data+32); 
+  edt.ot_addr        = bfd_get_32(abfd, data+36);
+
+  adj = extra->ImageBase - section->vma;
+
+
+  /* Dump the EDT first first */
+  fprintf(file,
+	  "\nThe Export Tables (interpreted .edata section contents)\n\n");
+
+  fprintf(file,
+	  "Export Flags \t\t\t%x\n",edt.export_flags);
+
+  fprintf(file,
+	  "Time/Date stamp \t\t%x\n",edt.time_stamp);
+
+  fprintf(file,
+	  "Major/Minor \t\t\t%d/%d\n", edt.major_ver, edt.minor_ver);
+
+  fprintf(file,
+	  "Name \t\t\t\t%x %s\n", edt.name, data + edt.name + adj);
+
+  fprintf(file,
+	  "Ordinal Base \t\t\t%d\n", edt.base);
+
+  fprintf(file,
+	  "Number in:\n");
+
+  fprintf(file,
+	  "\tExport Address Table \t\t%x\n", edt.num_functions);
+
+  fprintf(file,
+	  "\t[Name Pointer/Ordinal] Table\t%d\n", edt.num_names);
+
+  fprintf(file,
+	  "Table Addresses\n");
+
+  fprintf(file,
+	  "\tExport Address Table \t\t%x\n",
+	  edt.eat_addr);
+
+  fprintf(file,
+	  "\tName Pointer Table \t\t%x\n",
+	  edt.npt_addr);
+
+  fprintf(file,
+	  "\tOrdinal Table \t\t\t%x\n",
+	  edt.ot_addr);
+
+  
+  /* The next table to find si the Export Address Table. It's basically
+     a list of pointers that either locate a function in this dll, or
+     forward the call to another dll. Something like:
+      typedef union 
+      {
+        long export_rva;
+        long forwarder_rva;
+      } export_address_table_entry;
+  */
+
+  fprintf(file,
+	  "\nExport Address Table -- Ordinal Base %d\n",
+	  edt.base);
+
+  for (i = 0; i < edt.num_functions; ++i)
+    {
+      bfd_vma eat_member = bfd_get_32(abfd, 
+				      data + edt.eat_addr + (i*4) + adj);
+      bfd_vma eat_actual = extra->ImageBase + eat_member;
+      bfd_vma edata_start = bfd_get_section_vma(abfd,section);
+      bfd_vma edata_end = edata_start + bfd_section_size (abfd, section);
+
+
+      if (eat_member == 0)
+	continue;
+
+      if (edata_start < eat_actual && eat_actual < edata_end) 
+	{
+	  /* this rva is to a name (forwarding function) in our section */
+	  /* Should locate a function descriptor */
+	  fprintf(file,
+		  "\t[%4d] +base[%4d] %04lx %s -- %s\n", 
+		  i, i+edt.base, eat_member, "Forwarder RVA",
+		  data + eat_member + adj);
+	}
+      else
+	{
+	  /* Should locate a function descriptor in the reldata section */
+	  fprintf(file,
+		  "\t[%4d] +base[%4d] %04lx %s\n", 
+		  i, i+edt.base, eat_member, "Export RVA");
+	}
+    }
+
+  /* The Export Name Pointer Table is paired with the Export Ordinal Table */
+  /* Dump them in parallel for clarity */
+  fprintf(file,
+	  "\n[Ordinal/Name Pointer] Table\n");
+
+  for (i = 0; i < edt.num_names; ++i)
+    {
+      bfd_vma name_ptr = bfd_get_32(abfd, 
+				    data + 
+				    edt.npt_addr
+				    + (i*4) + adj);
+      
+      char *name = data + name_ptr + adj;
+
+      bfd_vma ord = bfd_get_16(abfd, 
+				    data + 
+				    edt.ot_addr
+				    + (i*2) + adj);
+      fprintf(file,
+	      "\t[%4d] %s\n", ord, name);
+
+    }
 
   free (data);
 }
+
 static boolean
 pe_print_pdata(abfd, vfile)
      bfd*abfd;
@@ -1350,9 +1528,9 @@ pe_print_pdata(abfd, vfile)
   fprintf(file,
 	  "\nThe Function Table (interpreted .pdata section contents)\n");
   fprintf(file,
-	  " vma:   Begin    End      EH       EH       PrologEnd\n");
+	  " vma:\t\tBegin    End      EH       EH       PrologEnd\n");
   fprintf(file,
-	  "        Address  Address  Handler  Data     Address\n");
+	  "     \t\tAddress  Address  Handler  Data     Address\n");
 
   if (bfd_section_size (abfd, section) == 0)
     return true;
@@ -1396,7 +1574,7 @@ pe_print_pdata(abfd, vfile)
 	}
 
       fprintf (file,
-	       " %04lx\t", 
+	       " %08lx\t", 
 	       (unsigned long int) (i + section->vma));
 
       fprintf(file, "%08lx %08lx %08lx %08lx %08lx",
@@ -1488,6 +1666,7 @@ pe_print_private_bfd_data (abfd, vfile)
     }
 
   pe_print_idata(abfd, vfile);
+  pe_print_edata(abfd, vfile);
   pe_print_pdata(abfd, vfile);
 
   return true;
