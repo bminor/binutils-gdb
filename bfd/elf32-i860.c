@@ -709,20 +709,15 @@ elf32_i860_relocate_splitn (input_bfd, rello, contents, value)
      bfd_byte *contents;
      bfd_vma value;
 {
-  bfd_vma insn, t;
+  bfd_vma insn;
   reloc_howto_type *howto;
   howto  = lookup_howto (ELF32_R_TYPE (rello->r_info));
   insn = bfd_get_32 (input_bfd, contents + rello->r_offset);
 
-  /* Remove encode bits and intervening bits.  Then concatenate the
-     two fields into one 16-bit quantity.  */
-  t = (insn & howto->src_mask);
-  t = ((t >> 5) & 0xf8) | (t & 0x7ff);
-
   /* Relocate.  */
-  value += (rello->r_addend + t);
+  value += rello->r_addend;
 
-  /* Separate the fields and re-insert.  */
+  /* Separate the fields and insert.  */
   value = (((value & 0xf8) << 5) | (value & 0x7ff)) & howto->dst_mask;
   insn = (insn & ~howto->dst_mask) | value;
 
@@ -742,7 +737,7 @@ elf32_i860_relocate_pc16 (input_bfd, input_section, rello, contents, value)
      bfd_byte *contents;
      bfd_vma value;
 {
-  bfd_vma insn, t;
+  bfd_vma insn;
   reloc_howto_type *howto;
   howto  = lookup_howto (ELF32_R_TYPE (rello->r_info));
   insn = bfd_get_32 (input_bfd, contents + rello->r_offset);
@@ -752,15 +747,10 @@ elf32_i860_relocate_pc16 (input_bfd, input_section, rello, contents, value)
 	    + input_section->output_offset);
   value -= rello->r_offset;
 
-  /* Remove encode bits and intervening bits.  Then concatenate the
-     two fields into one 16-bit quantity.  */
-  t = (insn & howto->src_mask);
-  t = ((t >> 5) & 0xf8) | (t & 0x7ff);
-
   /* Relocate.  */
-  value += (rello->r_addend + t);
+  value += rello->r_addend;
 
-  /* Separate the fields and re-insert.  */
+  /* Separate the fields and insert.  */
   value = (((value & 0xf8) << 5) | (value & 0x7ff)) & howto->dst_mask;
   insn = (insn & ~howto->dst_mask) | value;
 
@@ -785,7 +775,6 @@ elf32_i860_relocate_highadj (input_bfd, rel, contents, value)
   value += ((rel->r_addend & 0x8000) << 1);
   value += rel->r_addend;
   value = ((value >> 16) & 0xffff);
-  value = (value + (insn & 0xffff)) & 0xffff;
 
   insn = (insn & 0xffff0000) | value;
 

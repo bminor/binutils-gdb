@@ -1,3 +1,11 @@
+2000-08-21  Jason Eckhardt  <jle@cygnus.com>
+
+	* elf32-i860.c (elf32_i860_relocate_pc16): Just write the immediate
+	field with the newly relocated value instead of adding it to the
+	existing immediate field.
+	(elf32_i860_relocate_splitn): Likewise.
+	(elf32_i860_relocate_highadj): Likewise.
+
 2000-08-16  Jason Eckhardt  <jle@cygnus.com>
 
 	* elf32-i860.c (elf32_i860_relocate_pc16): Implemented function (it

@@ -1298,10 +1298,15 @@ md_apply_fix3 (fix, valuep, seg)
       fix->fx_r_type = obtain_reloc_for_imm16 (fix, &val);
 
       /* Insert the immediate.  */
-      insn |= val & 0xffff;
-      bfd_putl32 (insn, buf);
-
-      fix->fx_done = (fix->fx_addsy == 0);
+      if (fix->fx_addsy)
+	fix->fx_done = 0;
+      else
+	{
+	  insn |= val & 0xffff;
+	  bfd_putl32 (insn, buf);
+	  fix->fx_r_type = BFD_RELOC_NONE;
+	  fix->fx_done = 1;
+	}
     }
   else if (fup & OP_IMM_U16)
     {
@@ -1312,11 +1317,16 @@ md_apply_fix3 (fix, valuep, seg)
       fix->fx_r_type = obtain_reloc_for_imm16 (fix, &val);
 
       /* Insert the immediate.  */
-      insn |= val & 0x7ff;
-      insn |= (val & 0xf800) << 5;
-      bfd_putl32 (insn, buf);
-
-      fix->fx_done = (fix->fx_addsy == 0);
+      if (fix->fx_addsy)
+	fix->fx_done = 0;
+      else
+	{
+	  insn |= val & 0x7ff;
+	  insn |= (val & 0xf800) << 5;
+	  bfd_putl32 (insn, buf);
+	  fix->fx_r_type = BFD_RELOC_NONE;
+	  fix->fx_done = 1;
+	}
     } 
   else if (fup & OP_IMM_BR16)
     {
@@ -1327,12 +1337,19 @@ md_apply_fix3 (fix, valuep, seg)
       val = val >> 2;
 
       /* Insert the immediate.  */
-      insn |= (val & 0x7ff);
-      insn |= ((val & 0xf800) << 5);
-      bfd_putl32 (insn, buf);
-
-      fix->fx_r_type = BFD_RELOC_860_PC16;
-      fix->fx_done = (fix->fx_addsy == 0);
+      if (fix->fx_addsy)
+	{
+	  fix->fx_done = 0;
+	  fix->fx_r_type = BFD_RELOC_860_PC16;
+	}
+      else
+	{
+	  insn |= (val & 0x7ff);
+	  insn |= ((val & 0xf800) << 5);
+	  bfd_putl32 (insn, buf);
+	  fix->fx_r_type = BFD_RELOC_NONE;
+	  fix->fx_done = 1;
+	}
     }
   else if (fup & OP_IMM_BR26)
     {
@@ -1343,11 +1360,18 @@ md_apply_fix3 (fix, valuep, seg)
       val >>= 2;
 
       /* Insert the immediate.  */
-      insn |= (val & 0x3ffffff);
-      bfd_putl32 (insn, buf);
-
-      fix->fx_r_type = BFD_RELOC_860_PC26;
-      fix->fx_done = (fix->fx_addsy == 0);
+      if (fix->fx_addsy)
+	{
+	  fix->fx_r_type = BFD_RELOC_860_PC26;
+	  fix->fx_done = 0;
+	}
+      else
+	{
+	  insn |= (val & 0x3ffffff);
+	  bfd_putl32 (insn, buf);
+	  fix->fx_r_type = BFD_RELOC_NONE;
+	  fix->fx_done = 1;
+	}
     }
   else if (fup != OP_NONE)
     {
@@ -1359,10 +1383,18 @@ md_apply_fix3 (fix, valuep, seg)
     {
       /* I believe only fix-ups such as ".long .ep.main-main+0xc8000000"
  	 reach here (???).  */
-      insn |= (val & 0xffffffff);
-      bfd_putl32 (insn, buf);
-      fix->fx_r_type = BFD_RELOC_32;
-      fix->fx_done = (fix->fx_addsy == 0);
+      if (fix->fx_addsy)
+	{
+	  fix->fx_r_type = BFD_RELOC_32;
+	  fix->fx_done = 0;
+	}
+      else
+	{
+	  insn |= (val & 0xffffffff);
+	  bfd_putl32 (insn, buf);
+	  fix->fx_r_type = BFD_RELOC_NONE;
+	  fix->fx_done = 1;
+	}
     }
 
   /* Return value ignored.  */
