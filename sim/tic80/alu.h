@@ -41,6 +41,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define IMEM(CIA) \
 (sim_core_read_aligned_4(STATE_CPU (sd, 0), CIA, sim_core_execute_map, (CIA).ip))
 
+#define IMEM_IMMED(CIA, N) \
+(sim_core_read_aligned_4 (STATE_CPU (sd, 0), CIA, sim_core_execute_map, (CIA).ip + 4 * (N)))
+
 #define MEM(SIGN, EA, NR_BYTES) \
 ((SIGN##_##NR_BYTES) sim_core_read_unaligned_##NR_BYTES (STATE_CPU (sd, 0), cia, \
                                                          sim_core_read_map, \

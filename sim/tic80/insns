@@ -988,7 +988,7 @@ void::function::do_subu:unsigned32 *rDest, unsigned32 Source1, signed32 Source2
 	TRACE_ALU3 (MY_INDEX, result, Source1, Source2);
 	*rDest = result;
 // NOTE - the book has 15.1 which conflicts with subu.
-31.Dest,26.Source2,21.0b101101,15.1,14.UnsignedImmediate::::subu i
+31.Dest,26.Source2,21.0b101101,15.1,14.SignedImmediate::::subu i
 	do_subu (_SD, rDest, vSource1, vSource2);
 31.Dest,26.Source2,21.0b11101101,13.1,12.0,11./,4.Source1::::subu r
 	do_subu (_SD, rDest, vSource1, vSource2);

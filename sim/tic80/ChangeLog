@@ -1,3 +1,9 @@
+Thu May 29 12:09:13 1997  Andrew Cagney  <cagney@b2.cygnus.com>
+
+	* alu.h (IMEM_IMMED): New macro, fetch 32bit immediate operand N.
+
+	* insns (subu i): Immediate is signed not unsigned.
+
 Tue May 27 13:22:13 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-calls.c (sim_read): Pass NULL cpu to sim_core_read_buffer.
