@@ -8,8 +8,9 @@
 	* doublest.c (floatformat_from_length): Accept also
 	the real size of 'long double' type.
 
-2003-03-10  Klee Dienes  <kdienes@apple.com>
+2003-03-10  Daniel Jacobowitz  <drow@mvista.com>
 
+	From Klee Dienes <kdienes@apple.com>:
 	* breakpoint.c (bpstat_copy): Copy the command lines as well
 	as the old value, to match what is freed in bpstat_clear.
 
