@@ -1,3 +1,8 @@
+2000-04-03  H.J. Lu  <hjl@gnu.org>
+
+	* cache.c (bfd_open_file): Unlink the output file only if
+	it has none zero size.
+
 2000-04-01  Ken Block USG  <block@zk3.dec.com>
 
 	* elf64-alpha.c (elf64_alpha_relocate_section): Don't emit
