@@ -2,6 +2,7 @@ Wed Apr 13 20:29:54 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* gdb.texinfo: Refer to file names, not path names, per rms
 	convention.
+	(Arguments): Fix typo.
 
 Thu Mar 24 08:09:12 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 

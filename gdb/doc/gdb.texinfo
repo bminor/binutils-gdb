@@ -1518,8 +1518,8 @@ The arguments to your program can be specified by the arguments of the
 @code{run} command.  They are passed to a shell, which expands wildcard
 characters and performs redirection of I/O, and thence to your program.
 Your @code{SHELL} environment variable (if it exists) specifies what
-shell @value{GDBN} if you do not define @code{SHELL}, @value{GDBN} uses
-@code{/bin/sh}.
+shell @value{GDBN} uses.  If you do not define @code{SHELL},
+@value{GDBN} uses @code{/bin/sh}.
 
 @code{run} with no arguments uses the same arguments used by the previous
 @code{run}, or those set by the @code{set args} command.
