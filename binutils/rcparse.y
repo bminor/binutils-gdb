@@ -395,7 +395,7 @@ styles:
 	    dialog.class = $3;
 	  }
 	| styles STYLE
-	    { style = dialog.style }
+	    { style = dialog.style; }
 	    styleexpr
 	  {
 	    dialog.style = style;
@@ -716,7 +716,7 @@ control:
 	  }
 	| USERBUTTON QUOTEDSTRING ',' numexpr ',' numexpr ',' numexpr ','
 	    numexpr ',' numexpr ',' 
-	    { style = WS_CHILD | WS_VISIBLE }
+	    { style = WS_CHILD | WS_VISIBLE; }
 	    styleexpr optcnumexpr
 	  {
 	    $$ = define_control ($2, $4, $6, $8, $10, $12, CTL_BUTTON,
