@@ -1,3 +1,7 @@
+Wed Nov  4 16:25:55 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Add support for the FR30. 
+
 Mon Nov  2 14:59:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure.in: detect cygwin* instead of cygwin32*
