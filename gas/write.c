@@ -2663,7 +2663,12 @@ fixup_segment (fixP, this_segment_type)
 #endif /* TC_I960  */
 	      add_number += (S_GET_VALUE (add_symbolP)
 			     - S_GET_VALUE (sub_symbolP));
-	      if (pcrel)
+	      if (1
+#ifdef TC_M68K
+		  /* See the comment below about 68k weirdness.  */
+		  && 0
+#endif
+		  && pcrel)
 		add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment_type);
 
 	      add_symbolP = NULL;
@@ -2689,21 +2694,26 @@ fixup_segment (fixP, this_segment_type)
 		add_number -= S_GET_VALUE (sub_symbolP);
 
 #ifdef DIFF_EXPR_OK
-	      else if (S_GET_SEGMENT (sub_symbolP) == this_segment_type
-#if 0
-		       /* Do this even if it's already described as
-			  pc-relative.  For example, on the m68k, an
-			  operand of "pc@(foo-.-2)" should address
-			  "foo" in a pc-relative mode.  */
-		       && pcrel
-#endif
-		       )
+	      else if (S_GET_SEGMENT (sub_symbolP) == this_segment_type)
 		{
 		  /* Make it pc-relative.  */
-		  add_number += (MD_PCREL_FROM_SECTION (fixP, this_segment_type)
-				 - S_GET_VALUE (sub_symbolP));
-		  pcrel = 1;
-		  fixP->fx_pcrel = 1;
+		  if (0
+#ifdef TC_M68K
+		      /* Do this for m68k even if it's already described
+			 as pc-relative.  On the m68k, an operand of
+			 "pc@(foo-.-2)" should address "foo" in a
+			 pc-relative mode.  */
+		      || 1
+#endif
+		      || !pcrel)
+		    {
+		      add_number += MD_PCREL_FROM_SECTION (fixP,
+							   this_segment_type);
+		      pcrel = 1;
+		      fixP->fx_pcrel = 1;
+		    }
+
+		  add_number -= S_GET_VALUE (sub_symbolP);
 		  sub_symbolP = 0;
 		  fixP->fx_subsy = 0;
 		}
