@@ -1319,7 +1319,6 @@ type_print_method_args (args, prefix, varstring, staticp, stream)
 {
   int i;
 
-  fputs_filtered (" ", stream);
   fputs_demangled (prefix, stream, 1);
   fputs_demangled (varstring, stream, 1);
   fputs_filtered (" (", stream);
@@ -1698,7 +1697,8 @@ type_print_base (type, stream, show, level)
 	    {
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 	      int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
-
+	      char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
+	      int is_constructor = strcmp(method_name, TYPE_NAME (type)) == 0;
 	      for (j = 0; j < len2; j++)
 		{
 		  QUIT;
@@ -1714,20 +1714,24 @@ type_print_base (type, stream, show, level)
 			       TYPE_FN_FIELD_PHYSNAME (f, j));
 		      break;
 		    }
-		  else
-		    type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)), "", stream, 0);
-		  if (TYPE_FLAGS (TYPE_FN_FIELD_TYPE (f, j)) & TYPE_FLAG_STUB)
+		  else if (!is_constructor)
+		    {
+		      type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
+				  "", stream, 0);
+		      fputs_filtered (" ", stream);
+		    }
+		  if (TYPE_FN_FIELD_STUB (f, j))
 		    {
 		      /* Build something we can demangle.  */
 		      char *strchr (), *gdb_mangle_name (), *cplus_demangle ();
 		      char *mangled_name = gdb_mangle_name (type, i, j);
 		      char *demangled_name = cplus_demangle (mangled_name, 1);
 		      if (demangled_name == 0)
-			fprintf_filtered (stream, " <badly mangled name %s>",
+			fprintf_filtered (stream, "<badly mangled name %s>",
 			    mangled_name);
 		      else 
 			{
-			  fprintf_filtered (stream, " %s",
+			  fprintf_filtered (stream, "%s",
 			      strchr (demangled_name, ':') + 2);
 			  free (demangled_name);
 			}
@@ -1737,11 +1741,11 @@ type_print_base (type, stream, show, level)
 		        && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == CPLUS_MARKER)
 		    type_print_method_args
 		      (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
-		       TYPE_FN_FIELDLIST_NAME (type, i), 0, stream);
+		       method_name, 0, stream);
 		  else
 		    type_print_method_args
 		      (TYPE_FN_FIELD_ARGS (f, j), "",
-		       TYPE_FN_FIELDLIST_NAME (type, i),
+		       method_name,
 		       TYPE_FN_FIELD_STATIC_P (f, j), stream);
 
 		  fprintf_filtered (stream, ";\n");

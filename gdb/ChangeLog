@@ -1,3 +1,8 @@
+Sun Jan 26 19:05:40 1992  Per Bothner  (bothner at cygnus.com)
+
+	* valprint.c (type_print_base, type_print_method_args):
+	Print C++ constructor methods without bogus "return type."
+
 Sat Jan 25 15:57:59 1992  Fred Fish  (fnf at cygnus.com)
 
 	* infptrace.c (child_xfer_memory):  Parameter "target" should
