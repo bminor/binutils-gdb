@@ -168,12 +168,8 @@ xcoff_symfile_init PARAMS ((struct objfile *));
 static void
 xcoff_new_init PARAMS ((struct objfile *));
 
-#ifdef __STDC__
-struct section_offset;
-#endif
-
 static void
-xcoff_symfile_read PARAMS ((struct objfile *, struct section_offset *, int));
+xcoff_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
 
 static void
 xcoff_symfile_finish PARAMS ((struct objfile *));
@@ -2017,7 +2013,7 @@ free_debugsection()
 static void
 xcoff_symfile_read (objfile, section_offset, mainline)
   struct objfile *objfile;
-  struct section_offset *section_offset;
+  struct section_offsets *section_offset;
   int mainline;
 {
   int num_symbols;			/* # of symbols */
