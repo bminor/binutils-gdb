@@ -542,6 +542,8 @@ command enough times to get back to the beginning.
 @node Readline Vi Mode
 @subsection Readline Vi Mode
 
+@cindex @code{vi} style command editing
+@kindex toggle-editing-mode
 While the Readline library does not have a full set of Vi editing
 functions, it does contain enough to allow simple editing of the line.
 
