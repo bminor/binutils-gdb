@@ -318,16 +318,19 @@ earcelf.c: $(srcdir)/emulparams/arcelf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} arcelf "$(tdir_arcelf)"
 earmelf.c: $(srcdir)/emulparams/armelf.sh \
-  $(srcdir)/emultempl/armelf.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf "$(tdir_armelf)"
 earmelf_oabi.c: $(srcdir)/emulparams/armelf_oabi.sh \
   $(srcdir)/emultempl/armelf_oabi.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf_oabi "$(tdir_armelf)"
 earmelf_linux.c: $(srcdir)/emulparams/armelf_linux.sh \
-  $(srcdir)/emultempl/armelf.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf_linux "$(tdir_armelf_linux)"
 earmelf_linux26.c: $(srcdir)/emulparams/armelf_linux26.sh \
-  $(srcdir)/emultempl/armelf.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf_linux26 "$(tdir_armelf_linux26)"
 earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
@@ -533,10 +536,12 @@ ehp3hpux.c: $(srcdir)/emulparams/hp3hpux.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hp3hpux "$(tdir_hp3hpux)"
 ehppaelf.c: $(srcdir)/emulparams/hppaelf.sh \
-  $(srcdir)/emultempl/hppaelf.em $(srcdir)/scripttempl/hppaelf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/hppaelf.em \
+  $(srcdir)/scripttempl/hppaelf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hppaelf "$(tdir_hppaelf)"
 ehppalinux.c: $(srcdir)/emulparams/hppalinux.sh \
-  $(srcdir)/emultempl/hppaelf.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/hppaelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hppalinux "$(tdir_hppalinux)"
 ei386aout.c: $(srcdir)/emulparams/i386aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}

@@ -1,5 +1,16 @@
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
+	* ldlang.c: Add missing prototypes, and tidy others.  Change CONST
+	to const throughout.  Change `void *' to `PTR' throughout.
+	(lang_memory_default): Function is local to file, add `static'.
+
+	* Makefile.am (ehppaelf.c): Depend on emultempl/elf32.em.
+	(ehppalinux.c): Likewise.
+	(earmelf.c): Likewise.
+	(earmelf_linux.c): Likewise.
+	(earmelf_linux26.c): Likewise.
+	* Makefile.in: Regenerate.
+
 	* ld.h (ld_config_type): Add unique_orphan_sections.
 	* lexsup.c (OPTION_UNIQUE): Define.
 	(ld_options): Add "--unique".

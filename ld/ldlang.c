@@ -51,80 +51,79 @@ static struct obstack stat_obstack;
 
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
-static CONST char *startup_file;
+static const char *startup_file;
 static lang_statement_list_type input_file_chain;
 static boolean placed_commons = false;
 static lang_output_section_statement_type *default_common_section;
 static boolean map_option_f;
 static bfd_vma print_dot;
 static lang_input_statement_type *first_file;
-static CONST char *current_target;
-static CONST char *output_target;
+static const char *current_target;
+static const char *output_target;
 static lang_statement_list_type statement_list;
 static struct lang_phdr *lang_phdr_list;
 
 static void lang_for_each_statement_worker
-  PARAMS ((void (*func) (lang_statement_union_type *),
-	   lang_statement_union_type *s));
+  PARAMS ((void (*) (lang_statement_union_type *),
+	   lang_statement_union_type *));
 static lang_input_statement_type *new_afile
-  PARAMS ((const char *name, lang_input_file_enum_type file_type,
-	   const char *target, boolean add_to_list));
-static void init_os PARAMS ((lang_output_section_statement_type *s));
+  PARAMS ((const char *, lang_input_file_enum_type, const char *, boolean));
+static lang_memory_region_type *lang_memory_default PARAMS ((asection *));
+static void lang_map_flags PARAMS ((flagword));
+static void init_os PARAMS ((lang_output_section_statement_type *));
 static void exp_init_os PARAMS ((etree_type *));
 static void section_already_linked PARAMS ((bfd *, asection *, PTR));
 static struct bfd_hash_entry *already_linked_newfunc
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *,
-	   const char *string));
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static void already_linked_table_init PARAMS ((void));
 static void already_linked_table_free PARAMS ((void));
 static boolean wildcardp PARAMS ((const char *));
 static lang_statement_union_type *wild_sort
   PARAMS ((lang_wild_statement_type *, lang_input_statement_type *,
 	   asection *));
-static lang_input_statement_type *lookup_name PARAMS ((const char *name));
-static void load_symbols PARAMS ((lang_input_statement_type *entry,
-				  lang_statement_list_type *));
-static void wild PARAMS ((lang_wild_statement_type *s,
-			  const char *section, const char *file,
-			  const char *target,
-			  lang_output_section_statement_type *output));
-static bfd *open_output PARAMS ((const char *name));
-static void ldlang_open_output PARAMS ((lang_statement_union_type *statement));
-static void open_input_bfds
-  PARAMS ((lang_statement_union_type *statement, boolean));
+static void output_section_callback
+  PARAMS ((lang_wild_statement_type *, asection *,
+	   lang_input_statement_type *, PTR));
+static lang_input_statement_type *lookup_name PARAMS ((const char *));
+static void load_symbols
+  PARAMS ((lang_input_statement_type *, lang_statement_list_type *));
+static void wild
+  PARAMS ((lang_wild_statement_type *, const char *, const char *,
+	   const char *, lang_output_section_statement_type *));
+static bfd *open_output PARAMS ((const char *));
+static void ldlang_open_output PARAMS ((lang_statement_union_type *));
+static void open_input_bfds PARAMS ((lang_statement_union_type *, boolean));
 static void lang_reasonable_defaults PARAMS ((void));
 static void lang_place_undefineds PARAMS ((void));
 static void map_input_to_output_sections
-  PARAMS ((lang_statement_union_type *s,
-	   const char *target,
-	   lang_output_section_statement_type *output_section_statement));
+  PARAMS ((lang_statement_union_type *, const char *,
+	   lang_output_section_statement_type *));
 static void print_output_section_statement
-  PARAMS ((lang_output_section_statement_type *output_section_statement));
+  PARAMS ((lang_output_section_statement_type *));
 static void print_assignment
-  PARAMS ((lang_assignment_statement_type *assignment,
-	   lang_output_section_statement_type *output_section));
-static void print_input_statement PARAMS ((lang_input_statement_type *statm));
+  PARAMS ((lang_assignment_statement_type *,
+	   lang_output_section_statement_type *));
+static void print_input_statement PARAMS ((lang_input_statement_type *));
 static boolean print_one_symbol PARAMS ((struct bfd_link_hash_entry *, PTR));
-static void print_input_section PARAMS ((lang_input_section_type *in));
-static void print_fill_statement PARAMS ((lang_fill_statement_type *fill));
-static void print_data_statement PARAMS ((lang_data_statement_type *data));
+static void print_input_section PARAMS ((lang_input_section_type *));
+static void print_fill_statement PARAMS ((lang_fill_statement_type *));
+static void print_data_statement PARAMS ((lang_data_statement_type *));
 static void print_address_statement PARAMS ((lang_address_statement_type *));
-static void print_reloc_statement PARAMS ((lang_reloc_statement_type *reloc));
-static void print_padding_statement PARAMS ((lang_padding_statement_type *s));
+static void print_reloc_statement PARAMS ((lang_reloc_statement_type *));
+static void print_padding_statement PARAMS ((lang_padding_statement_type *));
 static void print_wild_statement
-  PARAMS ((lang_wild_statement_type *w,
-	   lang_output_section_statement_type *os));
+  PARAMS ((lang_wild_statement_type *, lang_output_section_statement_type *));
 static void print_group
   PARAMS ((lang_group_statement_type *, lang_output_section_statement_type *));
-static void print_statement PARAMS ((lang_statement_union_type *s,
-				     lang_output_section_statement_type *os));
-static void print_statement_list PARAMS ((lang_statement_union_type *s,
-					  lang_output_section_statement_type *os));
+static void print_statement
+  PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *));
+static void print_statement_list
+  PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *));
 static void print_statements PARAMS ((void));
-static bfd_vma insert_pad PARAMS ((lang_statement_union_type **this_ptr,
-				   fill_type fill, unsigned int power,
-				   asection *output_section_statement,
-				   bfd_vma dot));
+static bfd_vma insert_pad
+  PARAMS ((lang_statement_union_type **this_ptr, fill_type fill,
+	   unsigned int power, asection *output_section_statement,
+	   bfd_vma dot));
 static bfd_vma size_input_section
   PARAMS ((lang_statement_union_type **this_ptr,
 	   lang_output_section_statement_type *output_section_statement,
@@ -138,31 +137,46 @@ static void lang_place_orphans PARAMS ((void));
 static int topower PARAMS ((int));
 static void lang_set_startof PARAMS ((void));
 static void reset_memory_regions PARAMS ((void));
+static void gc_section_callback
+  PARAMS ((lang_wild_statement_type *, asection *,
+	   lang_input_statement_type *, PTR));
 static void lang_record_phdrs PARAMS ((void));
 static void lang_gc_wild
   PARAMS ((lang_wild_statement_type *, const char *, const char *));
 static void lang_gc_sections_1 PARAMS ((lang_statement_union_type *));
 static void lang_gc_sections PARAMS ((void));
+static int lang_vers_match_lang_c
+  PARAMS ((struct bfd_elf_version_expr *, const char *));
+static int lang_vers_match_lang_cplusplus
+  PARAMS ((struct bfd_elf_version_expr *, const char *));
+static int lang_vers_match_lang_java
+  PARAMS ((struct bfd_elf_version_expr *, const char *));
 static void lang_do_version_exports_section PARAMS ((void));
 static void lang_check_section_addresses PARAMS ((void));
+static void os_region_check
+  PARAMS ((lang_output_section_statement_type *,
+	   struct memory_region_struct *, etree_type *, bfd_vma));
 
 typedef void (*callback_t) PARAMS ((lang_wild_statement_type *,
 				    asection *, lang_input_statement_type *,
-				    void *));
+				    PTR));
+static void walk_wild
+  PARAMS ((lang_wild_statement_type *, const char *, const char *,
+	 callback_t, PTR));
 static void walk_wild_section
   PARAMS ((lang_wild_statement_type *, const char *,
-	   lang_input_statement_type *, callback_t, void *));
+	   lang_input_statement_type *, callback_t, PTR));
 static void walk_wild_file
   PARAMS ((lang_wild_statement_type *, const char *,
-	   lang_input_statement_type *, callback_t, void *));
+	   lang_input_statement_type *, callback_t, PTR));
 
-static int    get_target PARAMS ((const bfd_target *, void *));
+static int    get_target PARAMS ((const bfd_target *, PTR));
 static void   stricpy PARAMS ((char *, char *));
 static void   strcut PARAMS ((char *, char *));
 static int    name_compare PARAMS ((char *, char *));
-static int    closest_target_match PARAMS ((const bfd_target *, void *));
+static int    closest_target_match PARAMS ((const bfd_target *, PTR));
 static char * get_first_input_target PARAMS ((void));
-					
+
 /* EXPORTS */
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type lang_output_section_statement;
@@ -210,7 +224,7 @@ walk_wild_section (ptr, section, file, callback, data)
      const char *section;
      lang_input_statement_type *file;
      callback_t callback;
-     void *data;
+     PTR data;
 {
   /* Don't process sections from files which were excluded. */
   if (ptr->exclude_filename_list != NULL)
@@ -271,7 +285,7 @@ walk_wild_file (s, section, f, callback, data)
      const char *section;
      lang_input_statement_type *f;
      callback_t callback;
-     void *data;
+     PTR data;
 {
   if (f->the_bfd == NULL
       || ! bfd_check_format (f->the_bfd, bfd_archive))
@@ -308,7 +322,7 @@ walk_wild (s, section, file, callback, data)
      const char *section;
      const char *file;
      callback_t callback;
-     void *data;
+     PTR data;
 {
   if (file == (char *) NULL)
     {
@@ -334,8 +348,8 @@ walk_wild (s, section, file, callback, data)
       f = lookup_name (file);
       walk_wild_file (s, section, f, callback, data);
     }
-}  
-     
+}
+
 /*----------------------------------------------------------------------
   lang_for_each_statement walks the parse tree and calls the provided
   function for each node
@@ -440,9 +454,9 @@ new_statement (type, size, list)
  */
 static lang_input_statement_type *
 new_afile (name, file_type, target, add_to_list)
-     CONST char *name;
+     const char *name;
      lang_input_file_enum_type file_type;
-     CONST char *target;
+     const char *target;
      boolean add_to_list;
 {
   lang_input_statement_type *p;
@@ -527,9 +541,9 @@ new_afile (name, file_type, target, add_to_list)
 
 lang_input_statement_type *
 lang_add_input_file (name, file_type, target)
-     CONST char *name;
+     const char *name;
      lang_input_file_enum_type file_type;
-     CONST char *target;
+     const char *target;
 {
   lang_has_input_file = true;
   return new_afile (name, file_type, target, true);
@@ -573,7 +587,7 @@ static lang_memory_region_type **lang_memory_region_list_tail = &lang_memory_reg
 
 lang_memory_region_type *
 lang_memory_region_lookup (name)
-     CONST char *CONST name;
+     const char *const name;
 {
   lang_memory_region_type *p;
 
@@ -624,7 +638,7 @@ lang_memory_region_lookup (name)
 }
 
 
-lang_memory_region_type *
+static lang_memory_region_type *
 lang_memory_default (section)
      asection *section;
 {
@@ -651,7 +665,7 @@ lang_memory_default (section)
 
 lang_output_section_statement_type *
 lang_output_section_find (name)
-     CONST char *CONST name;
+     const char *const name;
 {
   lang_statement_union_type *u;
   lang_output_section_statement_type *lookup;
@@ -671,7 +685,7 @@ lang_output_section_find (name)
 
 lang_output_section_statement_type *
 lang_output_section_statement_lookup (name)
-     CONST char *CONST name;
+     const char *const name;
 {
   lang_output_section_statement_type *lookup;
 
@@ -694,7 +708,7 @@ lang_output_section_statement_lookup (name)
       lookup->addr_tree = (etree_type *) NULL;
       lang_list_init (&lookup->children);
 
-      lookup->memspec = (CONST char *) NULL;
+      lookup->memspec = (const char *) NULL;
       lookup->flags = 0;
       lookup->subsection_alignment = -1;
       lookup->section_alignment = -1;
@@ -883,13 +897,13 @@ exp_init_os (exp)
    the same name.  It's possible to get more than one element in a
    list if the COMDAT sections have different names.  */
 
-struct already_linked_hash_entry 
+struct already_linked_hash_entry
 {
   struct bfd_hash_entry root;
   struct already_linked *entry;
 };
 
-struct already_linked 
+struct already_linked
 {
   struct already_linked *next;
   asection *sec;
@@ -945,7 +959,7 @@ section_already_linked (abfd, sec, data)
 
   name = bfd_get_section_name (abfd, sec);
 
-  already_linked_list = 
+  already_linked_list =
     ((struct already_linked_hash_entry *)
      bfd_hash_lookup (&already_linked_table, name, true, false));
 
@@ -1005,7 +1019,7 @@ section_already_linked (abfd, sec, data)
   /* This is the first section with this name.  Record it.  Allocate
      the memory from the same obstack as the hash table is kept in.  */
 
-  l = ((struct already_linked *) 
+  l = ((struct already_linked *)
        bfd_hash_allocate (&already_linked_table, sizeof *l));
 
   l->sec = sec;
@@ -1022,7 +1036,7 @@ already_linked_newfunc (entry, table, string)
      struct bfd_hash_table *table;
      const char *string ATTRIBUTE_UNUSED;
 {
-  struct already_linked_hash_entry *ret = 
+  struct already_linked_hash_entry *ret =
     bfd_hash_allocate (table, sizeof (struct already_linked_hash_entry));
 
   ret->entry = NULL;
@@ -1315,47 +1329,47 @@ output_section_callback (ptr, section, file, output)
      lang_wild_statement_type *ptr;
      asection *section;
      lang_input_statement_type *file;
-     void *output;
+     PTR output;
 {
   lang_statement_union_type *before;
-  
+
   /* If the wild pattern was marked KEEP, the member sections
      should be as well.  */
   if (ptr->keep_sections)
     section->flags |= SEC_KEEP;
-  
+
   before = wild_sort (ptr, file, section);
-  
+
   /* Here BEFORE points to the lang_input_section which
      should follow the one we are about to add.  If BEFORE
      is NULL, then the section should just go at the end
      of the current list.  */
-  
+
   if (before == NULL)
-    wild_doit (&ptr->children, section, 
-	       (lang_output_section_statement_type *) output, 
+    wild_doit (&ptr->children, section,
+	       (lang_output_section_statement_type *) output,
 	       file);
   else
     {
       lang_statement_list_type list;
       lang_statement_union_type **pp;
-      
+
       lang_list_init (&list);
-      wild_doit (&list, section, 
-		 (lang_output_section_statement_type *) output, 
+      wild_doit (&list, section,
+		 (lang_output_section_statement_type *) output,
 		 file);
-      
+
       /* If we are discarding the section, LIST.HEAD will
 	 be NULL.  */
       if (list.head != NULL)
 	{
 	  ASSERT (list.head->next == NULL);
-	  
+
 	  for (pp = &ptr->children.head;
 	       *pp != before;
 	       pp = &(*pp)->next)
 	    ASSERT (*pp != NULL);
-	  
+
 	  list.head->next = *pp;
 	  *pp = list.head;
 	}
@@ -1510,7 +1524,7 @@ load_symbols (entry, place)
   entry->loaded = true;
 }
 
-     
+
 
 /* Handle a wild statement.  SECTION or FILE or both may be NULL,
    indicating that it is a wildcard.  Separate lang_input_section
@@ -1525,7 +1539,7 @@ wild (s, section, file, target, output)
      const char *target ATTRIBUTE_UNUSED;
      lang_output_section_statement_type *output;
 {
-  walk_wild (s, section, file, output_section_callback, (void *) output);
+  walk_wild (s, section, file, output_section_callback, (PTR) output);
 
   if (section != (char *) NULL
       && strcmp (section, "COMMON") == 0
@@ -1541,10 +1555,10 @@ wild (s, section, file, target, output)
 static int
 get_target (target, data)
      const bfd_target * target;
-     void * data;
+     PTR data;
 {
   const char * sought = (const char *) data;
-  
+
   return strcmp (target->name, sought) == 0;
 }
 
@@ -1555,7 +1569,7 @@ stricpy (dest, src)
      char * src;
 {
   char c;
-  
+
   while ((c = * src ++) != 0)
     {
       if (isupper ((unsigned char) c))
@@ -1575,14 +1589,14 @@ strcut (haystack, needle)
      char * needle;
 {
   haystack = strstr (haystack, needle);
-  
+
   if (haystack)
     {
       char * src;
 
       for (src = haystack + strlen (needle); * src;)
 	* haystack ++ = * src ++;
-      
+
       * haystack = 0;
     }
 }
@@ -1597,7 +1611,7 @@ name_compare (first, second)
   char * copy1;
   char * copy2;
   int    result;
-  
+
   copy1 = xmalloc (strlen (first) + 1);
   copy2 = xmalloc (strlen (second) + 1);
 
@@ -1620,7 +1634,7 @@ name_compare (first, second)
 	result *= 10;
 	break;
       }
-  
+
   free (copy1);
   free (copy2);
 
@@ -1636,13 +1650,13 @@ static const bfd_target * winner;
 static int
 closest_target_match (target, data)
      const bfd_target * target;
-     void * data;
+     PTR data;
 {
   const bfd_target * original = (const bfd_target *) data;
-  
+
   if (command_line.endian == ENDIAN_BIG && target->byteorder != BFD_ENDIAN_BIG)
     return 0;
-  
+
   if (command_line.endian == ENDIAN_LITTLE && target->byteorder != BFD_ENDIAN_LITTLE)
     return 0;
 
@@ -1678,18 +1692,18 @@ get_first_input_target ()
 	  && s->real)
 	{
 	  ldfile_open_file (s);
-	  
+
 	  if (s->the_bfd != NULL
 	      && bfd_check_format (s->the_bfd, bfd_object))
 	    {
 	      target = bfd_get_target (s->the_bfd);
-	  
+
 	      if (target != NULL)
 		break;
 	    }
 	}
     }
-  
+
   return target;
 }
 
@@ -1718,7 +1732,7 @@ open_output (name)
 	    output_target = default_target;
 	}
     }
-  
+
   /* Has the user requested a particular endianness on the command line ?  */
   if (command_line.endian != ENDIAN_UNSET)
     {
@@ -1726,7 +1740,7 @@ open_output (name)
       enum bfd_endian desired_endian;
 
       /* Get the chosen target.  */
-      target = bfd_search_for_target (get_target, (void *) output_target);
+      target = bfd_search_for_target (get_target, (PTR) output_target);
 
       /* If the target is not supported, we cannot do anything.  */
       if (target != NULL)
@@ -1735,10 +1749,11 @@ open_output (name)
 	    desired_endian = BFD_ENDIAN_BIG;
 	  else
 	    desired_endian = BFD_ENDIAN_LITTLE;
-	  
-	  /* See if the target has the wrong endianness.  This should not happen
-	     if the linker script has provided big and little endian alternatives,
-	     but some scrips don't do this.  */
+
+	  /* See if the target has the wrong endianness.  This should
+	     not happen if the linker script has provided big and
+	     little endian alternatives, but some scrips don't do
+	     this.  */
 	  if (target->byteorder != desired_endian)
 	    {
 	      /* If it does, then see if the target provides
@@ -1748,12 +1763,13 @@ open_output (name)
 		output_target = target->alternative_target->name;
 	      else
 		{
-		  /* Try to find a target as similar as possible to the default
-		     target, but which has the desired endian characteristic.  */
-		  (void) bfd_search_for_target (closest_target_match, (void *) target);
-		  
-		  /* Oh dear - we could not find any targets that satisfy our
-		     requirements.  */
+		  /* Try to find a target as similar as possible to
+		     the default target, but which has the desired
+		     endian characteristic.  */
+		  (void) bfd_search_for_target (closest_target_match, (PTR) target);
+
+		  /* Oh dear - we could not find any targets that
+		     satisfy our requirements.  */
 		  if (winner == NULL)
 		    einfo (_("%P: warning: could not find any targets that match endianness requirement\n"));
 		  else
@@ -1762,7 +1778,7 @@ open_output (name)
 	    }
 	}
     }
-      
+
   output = bfd_openw (name, output_target);
 
   if (output == (bfd *) NULL)
@@ -1943,7 +1959,7 @@ static ldlang_undef_chain_list_type *ldlang_undef_chain_list_head;
 
 void
 ldlang_add_undef (name)
-     CONST char *CONST name;
+     const char *const name;
 {
   ldlang_undef_chain_list_type *new =
     ((ldlang_undef_chain_list_type *)
@@ -1986,7 +2002,7 @@ lang_place_undefineds ()
 static void
 map_input_to_output_sections (s, target, output_section_statement)
      lang_statement_union_type * s;
-     CONST char *target;
+     const char *target;
      lang_output_section_statement_type * output_section_statement;
 {
   for (; s != (lang_statement_union_type *) NULL; s = s->next)
@@ -2149,7 +2165,7 @@ print_input_statement (statm)
 /* Print all symbols defined in a particular section.  This is called
    via bfd_link_hash_traverse.  */
 
-static boolean 
+static boolean
 print_one_symbol (hash_entry, ptr)
      struct bfd_link_hash_entry *hash_entry;
      PTR ptr;
@@ -2183,7 +2199,7 @@ print_input_section (in)
 {
   asection *i = in->section;
   bfd_size_type size = i->_cooked_size != 0 ? i->_cooked_size : i->_raw_size;
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 						ldfile_output_machine);
   if (size != 0)
     {
@@ -2250,7 +2266,7 @@ print_data_statement (data)
   bfd_vma addr;
   bfd_size_type size;
   const char *name;
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 						ldfile_output_machine);
 
   for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
@@ -2321,8 +2337,8 @@ print_reloc_statement (reloc)
   int i;
   bfd_vma addr;
   bfd_size_type size;
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-						ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
+						ldfile_output_machine);
 
   for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
     print_space ();
@@ -2345,7 +2361,7 @@ print_reloc_statement (reloc)
   print_nl ();
 
   print_dot = addr + size / opb;
-}  
+}
 
 static void
 print_padding_statement (s)
@@ -2353,8 +2369,8 @@ print_padding_statement (s)
 {
   int len;
   bfd_vma addr;
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-						ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
+						ldfile_output_machine);
 
   minfo (" *fill*");
 
@@ -2570,8 +2586,8 @@ insert_pad (this_ptr, fill, power, output_section_statement, dot)
      inserting a magic 'padding' statement.
      */
 
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-						ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
+						ldfile_output_machine);
   unsigned int alignment_needed = align_power (dot, power) - dot;
 
   if (alignment_needed != 0)
@@ -2613,8 +2629,8 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
 {
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-						ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
+						ldfile_output_machine);
 
   if (is->ifile->just_syms_flag == false)
     {
@@ -2635,7 +2651,7 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
 	dot += i->_cooked_size / opb;
       else
 	dot += i->_raw_size / opb;
-      output_section_statement->bfd_section->_raw_size = 
+      output_section_statement->bfd_section->_raw_size =
         (dot - output_section_statement->bfd_section->vma) * opb;
     }
   else
@@ -2663,11 +2679,11 @@ lang_check_section_addresses ()
   for (s = output_bfd->sections; s != NULL; s = s->next)
     {
       asection * os;
-      
+
       /* Ignore sections which are not loaded or which have no contents.  */
       if (IGNORE_SECTION (output_bfd, s))
 	continue;
-      
+
       /* Once we reach section 's' stop our seach.  This prevents two
 	 warning messages from being produced, one for 'section A overlaps
 	 section B' and one for 'section B overlaps section A'.  */
@@ -2677,7 +2693,7 @@ lang_check_section_addresses ()
 	  bfd_vma s_end;
 	  bfd_vma os_start;
 	  bfd_vma os_end;
-	  
+
 	  /* Only consider loadable sections with real contents.  */
 	  if (IGNORE_SECTION (output_bfd, os))
 	    continue;
@@ -2689,15 +2705,15 @@ lang_check_section_addresses ()
 	  os_start = bfd_section_lma (output_bfd, os);
 	  s_end    = s_start  + bfd_section_size (output_bfd, s) / opb - 1;
 	  os_end   = os_start + bfd_section_size (output_bfd, os) / opb - 1;
-	  
+
 	  /* Look for an overlap.  */
 	  if ((s_end < os_start) || (s_start > os_end))
 	    continue;
-	  
+
 	  einfo (
 _("%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"),
 		 s->name, s_start, s_end, os->name, os_start, os_end);
-	  
+
 	  /* Once we have found one overlap for this section,
 	     stop looking for others.  */
 	  break;
@@ -2713,7 +2729,7 @@ static boolean relax_again;
 /* Make sure the new address is within the region.  We explicitly permit the
    current address to be at the exact end of the region when the address is
    non-zero, in case the region is at the end of addressable memory and the
-   calculation wraps around.  */ 
+   calculation wraps around.  */
 
 static void
 os_region_check (os, region, tree, base)
@@ -2758,7 +2774,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      bfd_vma dot;
      boolean relax;
 {
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 						ldfile_output_machine);
 
   /* Size up the sections from their constituent parts.  */
@@ -2831,7 +2847,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 			     bfd_get_section_name (output_bfd, os->bfd_section));
 
 		    dot = os->region->current;
- 
+
 		    if (os->section_alignment == -1)
 		      {
 			bfd_vma olddot;
@@ -2859,7 +2875,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 		      }
 		    dot = r.value + r.section->bfd_section->vma;
 		  }
-		
+
 		/* The section starts here.
 		   First, align to what the section needs.  */
 
@@ -2867,13 +2883,13 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 		  dot = align_power (dot, os->section_alignment);
 
 		bfd_set_section_vma (0, os->bfd_section, dot);
-		
+
 		os->bfd_section->output_offset = 0;
 	      }
 
 	    (void) lang_size_sections (os->children.head, os, &os->children.head,
 				       os->fill, dot, relax);
-	    
+
             /* put the section within the requested block size, or align at
                the block boundary */
 	    after = ALIGN_N (os->bfd_section->vma
@@ -2884,7 +2900,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	    if (bfd_is_abs_section (os->bfd_section))
 	      ASSERT (after == os->bfd_section->vma);
 	    else
-	      os->bfd_section->_raw_size = 
+	      os->bfd_section->_raw_size =
                 (after - os->bfd_section->vma) * opb;
 	    dot = os->bfd_section->vma + os->bfd_section->_raw_size / opb;
 	    os->processed = true;
@@ -2893,7 +2909,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	       We only do this if the section is going to be allocated,
 	       since unallocated sections do not contribute to the region's
 	       overall size in memory.
-	       
+
 	       If the SEC_NEVER_LOAD bit is not set, it will affect the
 	       addresses of sections after it. We have to update
 	       dot.  */
@@ -2904,9 +2920,9 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 			& (SEC_ALLOC | SEC_LOAD))))
 	      {
 		os->region->current = dot;
-		
+
 		/* Make sure the new address is within the region.  */
-                os_region_check (os, os->region, os->addr_tree, 
+                os_region_check (os, os->region, os->addr_tree,
                                  os->bfd_section->vma);
 
                 /* if there's no load address specified, use the run region as
@@ -2927,7 +2943,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
                           {
                             /* set load_base, which will be handled later */
                             os->load_base = exp_intop (os->lma_region->current);
-                            os->lma_region->current += 
+                            os->lma_region->current +=
                               os->bfd_section->_raw_size / opb;
                             os_region_check (os, os->lma_region, NULL,
                                              os->bfd_section->lma);
@@ -2998,7 +3014,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	    output_section_statement->bfd_section->_raw_size += size;
 	  }
 	  break;
-     
+
 	case lang_wild_statement_enum:
 
 	  dot = lang_size_sections (s->wild_statement.children.head,
@@ -3133,8 +3149,8 @@ lang_do_assignments (s, output_section_statement, fill, dot)
      fill_type fill;
      bfd_vma dot;
 {
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-						ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
+						ldfile_output_machine);
 
   for (; s != (lang_statement_union_type *) NULL; s = s->next)
     {
@@ -3164,9 +3180,9 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	      {
 		/* If nothing has been placed into the output section then
 		   it won't have a bfd_section. */
-		if (os->bfd_section) 
+		if (os->bfd_section)
 		  {
-		    os->bfd_section->lma 
+		    os->bfd_section->lma
 		      = exp_get_abs_int(os->load_base, 0,"load base",
 					lang_final_phase_enum);
 		  }
@@ -3324,7 +3340,7 @@ lang_set_startof ()
       h = bfd_link_hash_lookup (link_info.hash, buf, false, false, true);
       if (h != NULL && h->type == bfd_link_hash_undefined)
 	{
-          unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+          unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 							ldfile_output_machine);
 	  h->type = bfd_link_hash_defined;
 	  if (s->_cooked_size != 0)
@@ -3375,7 +3391,7 @@ lang_finish ()
   else
     {
       bfd_vma val;
-      CONST char *send;
+      const char *send;
 
       /* We couldn't find the entry symbol.  Try parsing it as a
          number.  */
@@ -3435,7 +3451,7 @@ lang_check ()
 {
   lang_statement_union_type *file;
   bfd *input_bfd;
-  CONST bfd_arch_info_type *compatible;
+  const bfd_arch_info_type *compatible;
 
   for (file = file_chain.head;
        file != (lang_statement_union_type *) NULL;
@@ -3507,8 +3523,8 @@ lang_one_common (h, info)
   unsigned int power_of_two;
   bfd_vma size;
   asection *section;
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-						ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
+						ldfile_output_machine);
 
   if (h->type != bfd_link_hash_common)
     return true;
@@ -3666,7 +3682,7 @@ lang_place_orphans ()
 void
 lang_set_flags (ptr, flags, invert)
      lang_memory_region_type *ptr;
-     CONST char *flags;
+     const char *flags;
      int invert;
 {
   flagword *ptr_flags;
@@ -3794,7 +3810,7 @@ ldlang_add_file (entry)
 
 void
 lang_add_output (name, from_script)
-     CONST char *name;
+     const char *name;
      int from_script;
 {
   /* Make -o on command line override OUTPUT in script.  */
@@ -3818,7 +3834,7 @@ topower (x)
   if (x < 0)
     return -1;
 
-  for (l = 0; l < 32; l++) 
+  for (l = 0; l < 32; l++)
     {
       if (i >= (unsigned int) x)
 	return l;
@@ -3911,7 +3927,7 @@ gc_section_callback (ptr, section, file, data)
      lang_wild_statement_type *ptr;
      asection *section;
      lang_input_statement_type *file ATTRIBUTE_UNUSED;
-     void *data ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
 {
   /* If the wild pattern was marked KEEP, the member sections
      should be as well.  */
@@ -3973,7 +3989,7 @@ lang_gc_sections ()
 
   /* Keep all sections containing symbols undefined on the command-line.
      Handle the entry symbol at the same time.  */
-  
+
   if (entry_symbol != NULL)
     {
       fake_list_start.next = ldlang_undef_chain_list_head;
@@ -3985,7 +4001,7 @@ lang_gc_sections ()
 
   for (; ulist; ulist = ulist->next)
     {
-      h = bfd_link_hash_lookup (link_info.hash, ulist->name, 
+      h = bfd_link_hash_lookup (link_info.hash, ulist->name,
 				false, false, false);
 
       if (h != (struct bfd_link_hash_entry *) NULL
@@ -4121,7 +4137,7 @@ lang_process ()
   if (! link_info.relocateable
       && command_line.check_section_addresses)
     lang_check_section_addresses ();
-  
+
   /* Final stuffs */
 
   ldemul_finish ();
@@ -4162,7 +4178,7 @@ lang_add_wild (section_name, sections_sorted, filename, filenames_sorted,
 
 void
 lang_section_start (name, address)
-     CONST char *name;
+     const char *name;
      etree_type * address;
 {
   lang_address_statement_type *ad = new_stat (lang_address_statement, stat_ptr);
@@ -4178,7 +4194,7 @@ lang_section_start (name, address)
 
 void
 lang_add_entry (name, cmdline)
-     CONST char *name;
+     const char *name;
      boolean cmdline;
 {
   if (entry_symbol == NULL
@@ -4192,7 +4208,7 @@ lang_add_entry (name, cmdline)
 
 void
 lang_add_target (name)
-     CONST char *name;
+     const char *name;
 {
   lang_target_statement_type *new = new_stat (lang_target_statement,
 					      stat_ptr);
@@ -4203,7 +4219,7 @@ lang_add_target (name)
 
 void
 lang_add_map (name)
-     CONST char *name;
+     const char *name;
 {
   while (*name)
     {
@@ -4257,7 +4273,7 @@ lang_add_reloc (reloc, howto, section, name, addend)
      union etree_union *addend;
 {
   lang_reloc_statement_type *p = new_stat (lang_reloc_statement, stat_ptr);
-  
+
   p->reloc = reloc;
   p->howto = howto;
   p->section = section;
@@ -4289,7 +4305,7 @@ lang_add_attribute (attribute)
 
 void
 lang_startup (name)
-     CONST char *name;
+     const char *name;
 {
   if (startup_file != (char *) NULL)
     {
@@ -4704,7 +4720,7 @@ lang_leave_overlay_section (fill, phdrs)
 
   name = current_section->name;
 
-  lang_leave_output_section_statement (fill, "*default*", 
+  lang_leave_output_section_statement (fill, "*default*",
                                        phdrs, "*default*");
 
   /* Define the magic symbols.  */
