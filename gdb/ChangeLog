@@ -1,5 +1,12 @@
 2003-02-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.host (i[3456]86-*-isc*): Set gdb_host to i386v.
+	Remove i[3456]86-*-sysv3.2* and i[3456]86-*-sysv32* entries since
+	they're identical to i[3456]86-*-sysv* now.
+	* config/i386/i386v32.mh: Removed.
+	* config/i386/xm-i386v32.h: Removed.
+	* config/i386/xm-i386sco.h (U_FPSTATE): Remove macro.
+
 	* config/i386/i386mk.mt, config/i386/i386mk.mh: Removed.
 
 	* config/i386/i386dgux.mh: Removed.
