@@ -1,3 +1,10 @@
+Thu Feb 12 16:12:07 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* remote-mips.c (mips_enter_debug): Sleep before sending CR to
+ 	monitor.
+	(mips_exit_debug): Accept any whitespace / verbiage before monitor
+ 	prompt reappears.
+
 Thu Feb 12 18:25:42 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* d10v-tdep.c (show_regs): Avoid use of %llx when printing 8 byte

@@ -1346,6 +1346,7 @@ mips_enter_debug ()
   else /* assume IDT monitor by default */
     mips_send_command ("db tty0\r", 0);
 
+  sleep(1);
   SERIAL_WRITE (mips_desc, "\r", sizeof "\r" - 1);
 
   /* We don't need to absorb any spurious characters here, since the
@@ -1384,18 +1385,6 @@ mips_exit_debug ()
   else
     mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err,
                   mips_receive_wait, NULL);
-
-  if (mips_monitor == MON_IDT && !mips_expect ("Exiting remote debug"))
-    return -1;
-    
-  if (mips_monitor == MON_DDB)
-    {
-      if (!mips_expect ("\n"))
-        return -1;
-    }
-  else
-    if (!mips_expect ("\r\n"))
-      return -1;
 
   if (!mips_expect (mips_monitor_prompt))
     return -1;
