@@ -385,7 +385,7 @@ static void
 unconditionally_kill_inferior PARAMS ((struct procinfo *));
 
 static NORETURN void
-proc_init_failed PARAMS ((struct procinfo *, char *));
+proc_init_failed PARAMS ((struct procinfo *, char *)) ATTR_NORETURN;
 
 static void
 info_proc PARAMS ((char *, int));

@@ -1,3 +1,10 @@
+Mon Aug  1 18:48:47 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* defs.h: Change two-line declarations to one-line form.
+	(NORETURN): Define as "volatile" only for older GCCs.
+	(ATTR_NORETURN): Define for newer GCCs.
+	* procfs.c (proc_init_filed): Add ATTR_NORETURN to declaration.
+
 Mon Aug  1 16:43:24 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.c (mention), main.c (fputs_unfiltered): Add comments.
