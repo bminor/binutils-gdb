@@ -145,11 +145,10 @@ output file.  (See @ref{Makefiles, , , make, Makefiles}.)
 @item Generate @file{.gdbinit}
 If the source directory contains a @file{.gdbinit} file and the build
 directory is not the same as the source directory, a @file{.gdbinit}
-file is created in the build directory.  (see @ref{Command Files, , ,
-gdb, Command Files}.)
-@c There doesn't seem to be anything else about this.  Is the build-dir
-@c .gdbinit identical with the source-dir one?  If so should say "copy"
-@c rather than "create" to make it clear.
+file is created in the build directory.  This @file{.gdbinit} file
+contains just a @code{source} command, which will cause the @file{.gdbinit} 
+file from the source directory to be read by GDB.  (see
+@ref{Command Files, , , gdb, Command Files}.)
 
 @item Make symbolic links
 Most directories have some symbolic links with generic names built
@@ -1006,10 +1005,15 @@ fragment.
 A @file{configure.in} file for Cygnus configure consists of a
 @dfn{per-invocation} section, followed by a @dfn{per-host} section,
 followed by a @dfn{per-target} section, optionally followed by a
-@dfn{post-target} section.  Each section is a shell script fragment sourced by
-configure at the appropriate time.  The interface between configure and
-the shell fragments is through a set of shell variables.  All sections
-are sourced in the build directory.
+@dfn{post-target} section.  Each section is a shell script fragment,
+which is sourced by the configure shell script at an appropriate time.
+Values are passed among configure and the shell fragments through a
+set of shell variables.  When each section is being interpreted
+(sourced) by the shell, the shell's current directory is the build
+directory, and any files created by the section (or referred to by the
+section) will be relative to the build directory.  To reference files
+in other places (such as the source directory), prepend a shell
+variable such as @code{srcdir} to the desired file name.
 
 @cindex Per-invocation section
 The beginning of the @file{configure.in} file begins the per-invocation
