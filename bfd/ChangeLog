@@ -1,3 +1,11 @@
+Mon Nov 22 14:17:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_mkobject): Don't create .scommon section; linker
+	no longer requires it.
+	(ecoff_bfd_seclet_link, ecoff_sizeof_headers,
+	ecoff_write_object_contents): Don't treat .scommon section
+	specially.
+
 Mon Nov 22 10:54:27 1993  Fred Fish  (fnf@cygnus.com)
 
 	Merged changes from kev@spuds.geg.mot.com (Kevin A. Buettner):
