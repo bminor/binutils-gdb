@@ -289,25 +289,23 @@ struct value * h8500_value_of_trapped_internalvar (/* struct internalvar *var */
 void h8500_set_trapped_internalvar (/* struct internalvar *var, value newval, int bitpos, int bitsize, int offset */);
 #define SET_TRAPPED_INTERNALVAR h8500_set_trapped_internalvar
 
-
-
 int regoff[NUM_REGS];
 
-CORE_ADDR target_read_sp();
-void target_write_sp PARAMS ((CORE_ADDR ));
+CORE_ADDR h8500_read_sp PARAMS ((void));
+void h8500_write_sp PARAMS ((CORE_ADDR));
 
-CORE_ADDR target_read_fp();
-void target_write_fp PARAMS ((CORE_ADDR ));
+CORE_ADDR h8500_read_fp PARAMS ((void));
+void h8500_write_fp PARAMS ((CORE_ADDR));
 
-CORE_ADDR target_read_pc();
-void target_write_pc PARAMS ((CORE_ADDR, INT ));
+CORE_ADDR h8500_read_pc PARAMS ((int));
+void h8500_write_pc PARAMS ((CORE_ADDR, int));
 
+#define TARGET_READ_SP() h8500_read_sp()
+#define TARGET_WRITE_SP(x) h8500_write_sp(x)
 
-#define TARGET_READ_SP() target_read_sp()
-#define TARGET_WRITE_SP(x) target_write_sp(x)
-#define TARGET_READ_PC() target_read_pc()
-#define TARGET_WRITE_PC(x,y) target_write_pc(x,y)
+#define TARGET_READ_PC(pid) h8500_read_pc(pid)
+#define TARGET_WRITE_PC(x,pid) h8500_write_pc(x,pid)
 
-#define TARGET_READ_FP() target_read_fp()
-#define TARGET_WRITE_FP(x) target_write_fp(x)
+#define TARGET_READ_FP() h8500_read_fp()
+#define TARGET_WRITE_FP(x) h8500_write_fp(x)
 #define GDB_TARGET_IS_H8500

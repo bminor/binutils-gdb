@@ -1,3 +1,13 @@
+Fri Oct 14 14:54:37 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* h8500-tdep.c (target_read_sp, target_write_sp, target_read_pc,
+	target_write_pc, target_read_fp, target_write_fp): Rename to
+	h8500_read_sp, etc.
+	(h8500_read_pc, h8500_write_pc): Add pid argument.
+	* config/h8500/tm-h8500.h (TARGET_READ_SP, TARGET_WRITE_SP,
+	TARGET_READ_PC, TARGET_WRITE_PC, TARGET_READ_FP, TARGET_WRITE_FP):
+	Change to match functions above.
+
 Thu Oct 13 13:24:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* NEWS: Add item about if and while.

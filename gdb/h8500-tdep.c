@@ -645,39 +645,41 @@ _initialize_h8500_tdep ()
 }
 
 CORE_ADDR
-target_read_sp ()
+h8500_read_sp ()
 {
   return read_register (PR7_REGNUM);
 }
 
 void
-target_write_sp (v)
+h8500_write_sp (v)
      CORE_ADDR v;
 {
   write_register (PR7_REGNUM, v);
 }
 
 CORE_ADDR
-target_read_pc ()
+h8500_read_pc (pid)
+     int pid;
 {
   return read_register (PC_REGNUM);
 }
 
 void
-target_write_pc (v)
+h8500_write_pc (v, pid)
      CORE_ADDR v;
+     int pid;
 {
   write_register (PC_REGNUM, v);
 }
 
 CORE_ADDR
-target_read_fp ()
+h8500_read_fp ()
 {
   return read_register (PR6_REGNUM);
 }
 
 void
-target_write_fp (v)
+h8500_write_fp (v)
      CORE_ADDR v;
 {
   write_register (PR6_REGNUM, v);
