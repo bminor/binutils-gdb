@@ -1,3 +1,14 @@
+Fri Oct 11 16:03:49 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (mn10300_opcodes): Fix typo in opcode
+	field for movhu instruction.
+start-sanitize-v850
+
+	* v850-dis.c (disassemble): For V850_OPERAND_SIGNED operands,
+	cast value to "long" not "signed long" to keep hpux10
+	compiler quiet.
+end-sanitize-v850
+
 Thu Oct 10 10:25:58 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_opcodes): Fix typo in opcode field

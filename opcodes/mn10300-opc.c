@@ -211,7 +211,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movhu",	0xfabc0000,	0xfffc0000,	FMT_D2, {MEM2(D16, SP), DN0}},
 { "movhu",	0xfcbc0000,	0xfffc0000,	FMT_D4, {MEM2(D32, SP), DN0}},
 { "movhu",	0xf480,		0xffc0,		FMT_D0, {MEM2(DI, AM0), DN0}},
-{ "movhu",	0xc80000,	0xfc0000,	FMT_S2, {MEM(ABS16), DN0}},
+{ "movhu",	0x380000,	0xfc0000,	FMT_S2, {MEM(ABS16), DN0}},
 { "movhu",	0xfcac0000,	0xfffc0000,	FMT_D4, {MEM(ABS32), DN0}},
 { "movhu",	0xf070,		0xfff0,		FMT_D0, {DM1, MEM(AN0)}},
 { "movhu",	0xf87000,	0xfff000,	FMT_D1, {DM1, MEM2(SD8, AN0)}},
