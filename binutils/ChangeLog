@@ -1,3 +1,7 @@
+2005-04-04  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* doc/binutils.texi (readelf): Remove a duplicate paragraph.
+
 2005-04-04  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
 	PR binutils/813

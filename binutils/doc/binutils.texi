@@ -3318,12 +3318,6 @@ Displays the contents of the file's relocation section, if it has one.
 Displays the contents of the file's unwind section, if it has one.  Only
 the unwind sections for IA64 ELF files are currently supported.
 
-@item -u
-@itemx --unwind
-@cindex unwind information
-Displays the contents of the file's unwind section, if it has one.  Only
-the unwind sections for IA64 ELF files are currently supported.
-
 @item -d
 @itemx --dynamic
 @cindex ELF dynamic section information
