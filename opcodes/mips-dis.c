@@ -27,8 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* FIXME: These are needed to figure out if the code is mips16 or
    not. The low bit of the address is often a good indicator.  No
    symbol table is available when this code runs out in an embedded
-   system as when it is used for disassembler support in a monitor.
-*/
+   system as when it is used for disassembler support in a monitor. */
+
 #if !defined(EMBEDDED_ENV)
 #define SYMTAB_AVAILABLE 1
 #include "elf-bfd.h"
@@ -376,14 +376,12 @@ print_insn_arg (d, l, pc, info)
     }
 }
 
-/* Print the mips instruction at address MEMADDR in debugged memory,
-   on using INFO.  Returns length of the instruction, in bytes, which is
-   always 4.  BIGENDIAN must be 1 if this is big-endian code, 0 if
-   this is little-endian code.  */
+
 
 #if SYMTAB_AVAILABLE
 
-static set_mips_isa_type(int mach,int * isa, int *cputype ) 
+static
+void set_mips_isa_type (int mach, int * isa, int *cputype) 
 {
     switch (info->mach)
     {
@@ -485,6 +483,11 @@ static set_mips_isa_type(int mach,int * isa, int *cputype )
 }
 #endif /* symbol table available */
 
+/* Print the mips instruction at address MEMADDR in debugged memory,
+   on using INFO.  Returns length of the instruction, in bytes, which is
+   always 4.  BIGENDIAN must be 1 if this is big-endian code, 0 if
+   this is little-endian code.  */
+
 static int
 _print_insn_mips (memaddr, word, info)
      bfd_vma memaddr;
@@ -522,7 +525,7 @@ _print_insn_mips (memaddr, word, info)
   target_processor = mips_target_info.processor ;
   mips_isa = mips_target_info.isa ;
 #else  
-  set_mips_isa_type(info->mach,&target_processor,&mips_isa) ;
+  set_mips_isa_type(info->mach, &target_processor, &mips_isa) ;
 #endif  
 
   info->bytes_per_chunk = 4;
@@ -616,8 +619,7 @@ _print_insn_mips (memaddr, word, info)
    we are forces to assumd the low order bit of the instructions address
    may mark it as a mips16 instruction. If we are sincle stepping or the
    pc is within the disassembled function, this works. Otherwise,
-   we need a clue. Sometimes.
-   */
+   we need a clue. Sometimes. */
    
 
 int
@@ -631,7 +633,8 @@ print_insn_big_mips (memaddr, info)
 #if 1
   /* FIXME: If odd address, this is CLEARLY a mips 16 instruction */
   /* Only a few tools will work this way */
-  if (memaddr & 0x01)  return print_insn_mips16 (memaddr, info);
+  if (memaddr & 0x01)
+    return print_insn_mips16 (memaddr, info);
 #endif  
 
 #if SYMTAB_AVAILABLE
