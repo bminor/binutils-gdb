@@ -1321,9 +1321,8 @@ ps_err_e
 ps_pdmodel (gdb_ps_prochandle_t ph, int *data_model)
 {
   if (exec_bfd == 0)
-    return PS_ERR;
-
-  if (bfd_get_arch_size (exec_bfd) == 32)
+    *data_model = PR_MODEL_UNKNOWN;
+  else if (bfd_get_arch_size (exec_bfd) == 32)
     *data_model = PR_MODEL_ILP32;
   else
     *data_model = PR_MODEL_LP64;

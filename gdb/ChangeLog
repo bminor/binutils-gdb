@@ -1,5 +1,10 @@
 2000-09-28  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
+	* sol-thread.c (ps_pdmodel):  Return PR_MODEL_UNKNOWN instead of
+	PS_ERR if exec_bfd is not yet open.
+
+2000-09-28  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
 	* target.c (target_signal_from_host, do_target_signal_to_host):
 	Add support for Solaris realtime signals.
 
