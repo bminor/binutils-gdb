@@ -14,7 +14,6 @@ case "${target_cpu}" in
 
 alpha*)			gdb_target_cpu=alpha ;;
 arm*)			gdb_target_cpu=arm ;;
-# OBSOLETE c[12])		gdb_target_cpu=convex ;;
 hppa*)			gdb_target_cpu=pa ;;
 i[3456]86*)		gdb_target_cpu=i386 ;;
 m68hc11*|m6811*)	gdb_target_cpu=m68hc11 ;;
@@ -22,7 +21,6 @@ m68*)			gdb_target_cpu=m68k ;;
 m88*)			gdb_target_cpu=m88k ;;
 mips*)			gdb_target_cpu=mips ;;
 powerpc*)		gdb_target_cpu=powerpc ;;
-# OBSOLETE pyramid)		gdb_target_cpu=pyr ;;
 sparc*)			gdb_target_cpu=sparc ;;
 thumb*)			gdb_target_cpu=arm ;;
 strongarm*)		gdb_target_cpu=arm ;;
@@ -63,8 +61,6 @@ arm*-*-* | thumb*-*-* | strongarm*-*-*)
 xscale-*-*)		gdb_target=embed
                         configdirs="$configdirs rdi-share"
                         ;;
-# OBSOLETE c1-*-*)		gdb_target=convex ;;
-# OBSOLETE c2-*-*)		gdb_target=convex ;;
 
 d10v-*-*)		gdb_target=d10v ;;
 d30v-*-*)		gdb_target=d30v ;;
@@ -149,7 +145,6 @@ m68*-apollo*-bsd*)	gdb_target=apollo68b ;;
 m68*-bull-sysv*)	gdb_target=dpx2 ;;
 m68*-hp-bsd*)		gdb_target=hp300bsd ;;
 m68*-hp-hpux*)		gdb_target=hp300hpux ;;
-# OBSOLETE m68*-altos-*)	gdb_target=altos ;;
 m68*-att-*)		gdb_target=3b1 ;;
 m68*-cisco*-*)		gdb_target=cisco ;;
 m68*-ericsson-*)	gdb_target=es1800 ;;
@@ -255,8 +250,6 @@ powerpcle-*-eabi* | powerpcle-*-sysv* | powerpcle-*-elf*)
 powerpc-*-linux*)	gdb_target=linux ;;
 powerpc-*-vxworks*)	gdb_target=vxworks ;;
 
-# OBSOLETE pyramid-*-*)		gdb_target=pyramid ;;
-
 rs6000-*-lynxos*)	gdb_target=rs6000lynx
 		configdirs="${configdirs} gdbserver" ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
@@ -291,8 +284,6 @@ sparc86x-*-*)		gdb_target=sparclite ;;
 # deleted though presumably it should be eventually.
 #sparc64-*-solaris2*)	gdb_target=sp64sol2 ;;
 sparc64-*-*)		gdb_target=sp64 ;;
-
-# OBSOLETE tahoe-*-*)		gdb_target=tahoe ;;
 
 tic80-*-*)		gdb_target=tic80
 			configdirs="${configdirs} gdbserver" ;;

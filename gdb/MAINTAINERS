@@ -62,8 +62,6 @@ maintainer works with the native maintainer when resolving API issues.
 			Jim Ingham		jingham@apple.com
 			Scott Bambrough		scottb@netwinder.org
 
-	convex		OBSOLETE
-
 	d10v		--target=d10v-elf ,-Werror
 			Andrew Cagney		cagney@cygnus.com
 
@@ -125,8 +123,6 @@ maintainer works with the native maintainer when resolving API issues.
 			Kevin Buettner		kevinb@cygnus.com
 			Nick Duffek		nsd@cygnus.com
 
-	pyramid		OBSOLETE
-
 	romp		(?)
 			Maintenance only
 
@@ -138,8 +134,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	sparc		--target=sparc-elf,sparc64-elf ,-Werror
 			David Taylor		taylor@cygnus.com
-
-	tahoe		OBSOLETE
 
 	tic80		(--target=tic80-coff broken)
 			Maintenance only

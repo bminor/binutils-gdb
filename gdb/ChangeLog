@@ -1,3 +1,41 @@
+Wed Feb  7 22:28:31 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.tgt: Remove references to convex, pyramid, altos and
+ 	tahoe.
+ 	* configure.host: Ditto.
+	* MAINTAINERS: Ditto.
+	* NEWS: Update.
+
+	* tahoe-tdep.c: Delete obsolete file.
+	* pyr-xdep.c: Ditto.
+	* pyr-tdep.c: Ditto.
+	* convex-tdep.c: Ditto.
+	* convex-xdep.c: Ditto.
+	* config/tahoe/xm-tahoe.h: Ditto.
+	* config/tahoe/tm-tahoe.h: Ditto.
+	* config/tahoe/tahoe.mt: Ditto.
+	* config/tahoe/tahoe.mh: Ditto.
+	* config/pyr/xm-pyr.h: Ditto.
+	* config/pyr/tm-pyr.h: Ditto.
+	* config/pyr/pyramid.mt: Ditto.
+	* config/pyr/pyramid.mh: Ditto.
+	* config/m68k/xm-altos.h: Ditto.
+	* config/m68k/tm-altos.h: Ditto.
+	* config/m68k/altos.mt: Ditto.
+	* config/m68k/altos.mh: Ditto.
+	* config/convex/xm-convex.h: Ditto.
+	* config/convex/tm-convex.h: Ditto.
+	* config/convex/convex.mt: Ditto.
+	* config/convex/convex.mh: Ditto.
+	* config/convex/Convex.notes: Ditto.
+	* config/arm/xm-arm.h: Ditto.
+	* config/arm/nm-arm.h: Ditto.
+	* config/arm/arm.mt: Ditto.
+	* config/arm/arm.mh: Ditto.
+	* arm-convert.s: Ditto.
+	* arm-xdep.c: Ditto.
+	* altos-xdep.c: Ditto.
+
 Wed Feb  7 19:41:21 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* defs.h (internal_error, internal_verror): Add __FILE__ and

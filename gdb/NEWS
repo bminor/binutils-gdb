@@ -14,7 +14,18 @@ x86 FreeBSD 3.x and 4.x				i[3456]86*-freebsd[34]*
 
 x86 FreeBSD before 2.2				i[3456]86*-freebsd{1,2.[01]}*, 
 
-* Deleted configurations
+Configurations that have been declared obsolete in this release have
+been commented out.  Unless there is activity to revive these
+configurations, the next release of GDB will have their sources
+permanently REMOVED.
+
+* REMOVED configurations
+
+Altos 3068					m68*-altos-*
+Convex						c1-*-*, c2-*-*
+Pyramid						pyramid-*-*
+ARM RISCix					arm-*-* (as host)
+Tahoe						tahoe-*-*
 
 * Other news:
 
