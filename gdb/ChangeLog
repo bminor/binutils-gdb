@@ -5,7 +5,7 @@
 	* config/sparc/sol64.mh: New file.
 	* config/sparc/sol64.mt: New file.
 	* Makefile.in (sparc64-sol2-nat.o): Fix typo.
-
+	(sparc64-sol2-tdep.o): Fix typo.
 
 	* lin-lwp.c (lin_lwp_thread_alive): Use PTRACE_PEEKDATA instead of
 	PTRACE_PEEKUSER.  Return zero if the call failed with ESRCH.
