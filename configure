@@ -658,7 +658,7 @@ for host in ${hosts} ; do
 			mv Makefile.tem ${Makefile}
 
 			# set srcdir
-			sed "s@^srcdir[ 	]*=.*$@srcdir = ${srcdir}@" ${Makefile} > Makefile.tem
+			sed "s:^srcdir[ 	]*=.*$:srcdir = ${srcdir}:" ${Makefile} > Makefile.tem
 			mv Makefile.tem ${Makefile}
 
 			# set prefix
