@@ -27,6 +27,8 @@
  * cc +e +DA2.0 -g -o long_long long_long.c
  */
 
+#include <string.h>
+
 enum { MAX_BYTES = 16 };
 
 void
