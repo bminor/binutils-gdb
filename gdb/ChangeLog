@@ -1,13 +1,18 @@
+Fri Oct  6 17:08:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* top.c (execute_control_command): Use 0/1 instead of BFD's
+	true/false.
+
 Fri Oct  6 14:43:19 1995  Stu Grossman  (grossman@cygnus.com)
 
-	* sparcl-stub.c:  include sparclite.h to get access to register
+	* sparcl-stub.c:  Include sparclite.h to get access to register
 	fondling macros.
 	* (trap_low):  Save and restore FP regs if necessary.  Also, clean
 	up save and restore of debug unit regs.
 	* (hard_trap_info):  Add more architecturally defined traps.
 	* (set_debug_traps):  Only set FP disabled trap if FP is disabled.
 	* (get_in_break_mode):  Clean up.  Get rid of calls to
-	set_hw_breakpoint_trap().  Also, use write_asi macro
+	set_hw_breakpoint_trap().  Also, use write_asi macro.
 	* (handle_exception):  Clean up `g' and `G' commands.  Add `P'
 	command.
 	* (hw_breakpoint):  Why was this here!?  It's gone now...
@@ -15,12 +20,12 @@ Fri Oct  6 14:43:19 1995  Stu Grossman  (grossman@cygnus.com)
 Fri Oct  6 11:56:49 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* callback.c (fdbad): Fix typo in comment.
-	(os_close, os_isatty, os_lseek, os_read, os_write): Use if statements
-	rather than || to get correct return value.
+	(os_close, os_isatty, os_lseek, os_read, os_write): Use if
+ 	statements rather than || to get correct return value.
 	(os_write_stdout): Pass missing first argument to os_write.
 	* remote-sim.c: Include callback.h.
-	(_initialize_remote_sim): Call sim_set_callbacks and then initialize
-	the callbacks.
+	(_initialize_remote_sim): Call sim_set_callbacks and then
+ 	initialize the callbacks.
 
 Thu Oct  5 17:28:09 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
@@ -29,19 +34,22 @@ Thu Oct  5 17:28:09 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 	* value.h (struct value):  Remove fields repetitions and repeated.
 	(VALUE_REPEATED, VALUE_REPETITIONS):  Removed, no longer used.
 	* c-valprint.c, ch-valprint.c, eval.c, printcmd.c, valops.c,
-	value.h, values.c:  Simplify, since now VALUE_REPEATED is never used.
-	* valprint.c (value_print_array_elemen):  Removed never-used function.
+	value.h, values.c: Simplify, since now VALUE_REPEATED is never
+ 	used.
+	* valprint.c (value_print_array_elemen): Removed never-used
+ 	function.
 	
 Thu Oct  5 15:14:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* parse.c (write_dollar_variable):  New function.
-	* c-exp.y (yylex):  Replace code for recognizing '$' pseudo-variables
-	with a call to write_dollar_variable.
+
+	* c-exp.y (yylex): Replace code for recognizing '$'
+ 	pseudo-variables with a call to write_dollar_variable.
 	Simplify grammar correspondingly.
 	* f-exp.y:  Likewise.
 	* m2-exp.y:  Likewise.
 	* ch-exp.y:  Likewise.  (Remove function match_dollar_tokens.)
-	* scm-exp.c (scm_lreadr):  Call write_dollar_variable to handle '$'.
+	* scm-exp.c (scm_lreadr): Call write_dollar_variable to handle '$'.
 
 Thu Oct  5 13:27:30 1995  steve chamberlain  <sac@slash.cygnus.com>
 
@@ -82,7 +90,7 @@ Wed Oct  4 17:23:03 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 Tue Oct  3 16:54:56 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-nrom.c (nrom_ops): Add value for to_thread_alive,
-	add comment naming slots.
+	add comments naming slots.
 
 Mon Oct  2 21:45:44 1995  Jeff Law  (law@hurl)
 

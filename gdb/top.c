@@ -818,10 +818,10 @@ execute_control_command (cmd)
 	make_cleanup (free_current_contents, &expr);
 	
 	ret = simple_control;
-	loop = true;
+	loop = 1;
 
 	/* Keep iterating so long as the expression is true.  */
-	while (loop == true)
+	while (loop == 1)
 	  {
 	    /* Evaluate the expression.  */
 	    val = evaluate_expression (expr);
@@ -840,7 +840,7 @@ execute_control_command (cmd)
 		   looping.  */
 		if (ret == invalid_control || ret == break_control)
 		  {
-		    loop = false;
+		    loop = 0;
 		    break;
 		  }
 
