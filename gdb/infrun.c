@@ -92,17 +92,7 @@ int sync_execution = 0;
    when the inferior stopped in a different thread than it had been
    running in.  */
 
-static int switched_from_inferior_pid;
-
-/* This will be true for configurations that may actually report an
-   inferior pid different from the original.  At present this is only
-   true for HP-UX native.  */
-
-#ifndef MAY_SWITCH_FROM_INFERIOR_PID
-#define MAY_SWITCH_FROM_INFERIOR_PID (0)
-#endif
-
-static int may_switch_from_inferior_pid = MAY_SWITCH_FROM_INFERIOR_PID;
+static int previous_inferior_pid;
 
 /* This is true for configurations that may follow through execl() and
    similar functions.  At present this is only true for HP-UX native.  */
@@ -1250,8 +1240,7 @@ wait_for_inferior (void)
   thread_step_needed = 0;
 
   /* We'll update this if & when we switch to a new thread. */
-  if (may_switch_from_inferior_pid)
-    switched_from_inferior_pid = inferior_pid;
+  previous_inferior_pid = inferior_pid;
 
   overlay_cache_invalid = 1;
 
@@ -1312,8 +1301,7 @@ fetch_inferior_event (client_data)
       thread_step_needed = 0;
 
       /* We'll update this if & when we switch to a new thread. */
-      if (may_switch_from_inferior_pid)
-	switched_from_inferior_pid = inferior_pid;
+      previous_inferior_pid = inferior_pid;
 
       overlay_cache_invalid = 1;
 
@@ -1944,15 +1932,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 			       &ecs->stepping_through_solib_catchpoints,
 			       &ecs->stepping_through_sigtramp);
 	  }
-	if (may_switch_from_inferior_pid)
-	  switched_from_inferior_pid = inferior_pid;
 
 	inferior_pid = ecs->pid;
 
 	if (context_hook)
 	  context_hook (pid_to_thread_id (ecs->pid));
 
-	printf_filtered ("[Switching to %s]\n", target_pid_to_str (ecs->pid));
 	flush_cached_frames ();
       }
 
@@ -3300,14 +3285,13 @@ normal_stop (void)
 
      (Note that there's no point in saying anything if the inferior
      has exited!) */
-  if (may_switch_from_inferior_pid
-      && (switched_from_inferior_pid != inferior_pid)
+  if ((previous_inferior_pid != inferior_pid)
       && target_has_execution)
     {
       target_terminal_ours_for_output ();
-      printf_filtered ("[Switched to %s]\n",
+      printf_filtered ("[Switching to %s]\n",
 		       target_pid_or_tid_to_str (inferior_pid));
-      switched_from_inferior_pid = inferior_pid;
+      previous_inferior_pid = inferior_pid;
     }
 
   /* Make sure that the current_frame's pc is correct.  This

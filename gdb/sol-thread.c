@@ -1446,6 +1446,7 @@ sol_find_new_threads ()
       printf_filtered ("No process.\n");
       return;
     }
+  procfs_find_new_threads ();	/* first find new kernel threads. */
   p_td_ta_thr_iter (main_ta, sol_find_new_threads_callback, (void *) 0,
 		    TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
 		    TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);

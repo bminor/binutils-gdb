@@ -60,6 +60,29 @@ TESTS = \
 	t-sub2w.ok \
 	t-sub.ok \
 	t-subi.ok \
+	t-ae-ld-d.ok \
+	t-ae-ld-i.ok \
+	t-ae-ld-id.ok \
+	t-ae-ld-im.ok \
+	t-ae-ld-ip.ok \
+	t-ae-ld2w-d.ok \
+	t-ae-ld2w-i.ok \
+	t-ae-ld2w-id.ok \
+	t-ae-ld2w-im.ok \
+	t-ae-ld2w-ip.ok \
+	t-ae-st-d.ok \
+	t-ae-st-i.ok \
+	t-ae-st-id.ok \
+	t-ae-st-im.ok \
+	t-ae-st-ip.ok \
+	t-ae-st-is.ok \
+	t-ae-st2w-d.ok \
+	t-ae-st2w-i.ok \
+	t-ae-st2w-id.ok \
+	t-ae-st2w-im.ok \
+	t-ae-st2w-ip.ok \
+	t-ae-st2w-is.ok \
+	t-mod-ld-pre.ok \
 #
 
 AS_FOR_TARGET = `\

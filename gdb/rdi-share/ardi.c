@@ -392,6 +392,7 @@ static void (*old_handler)();
 #endif
 
 static bool boot_interrupted = FALSE;
+static volatile bool interrupt_request = FALSE;
 
 static void ardi_sigint_handler(int sig) {
 #ifdef DEBUG
@@ -401,6 +402,7 @@ static void ardi_sigint_handler(int sig) {
     IGNORE(sig);
 #endif
     boot_interrupted = TRUE;
+    interrupt_request = TRUE;
 #ifndef __unix
     signal(SIGINT, ardi_sigint_handler);
 #endif
@@ -1306,7 +1308,6 @@ static int HandleStoppedMessage(Packet *packet, void *stateptr) {
   return RDIError_NoError;
 }
 
-static volatile bool interrupt_request = FALSE;
 
 static void interrupt_target( void )
 {
@@ -1397,6 +1398,7 @@ static int angel_RDI_ExecuteOrStep(PointHandle *handle, word type,
   angel_DebugPrint("Waiting for program to finish...\n");
 #endif
 
+  signal(SIGINT, ardi_sigint_handler);
   while( executing )
   {
       if (interrupt_request)
@@ -1406,6 +1408,8 @@ static int angel_RDI_ExecuteOrStep(PointHandle *handle, word type,
       }
       Adp_AsynchronousProcessing( async_block_on_nothing );
   }
+  signal(SIGINT, SIG_IGN);
+
 
 #ifdef TEST_DC_APPL
   Adp_Install_DC_Appl_Handler( NULL );

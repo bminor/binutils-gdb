@@ -144,33 +144,24 @@ AC_MSG_RESULT($gdb_cv_hpux_sswide)
 
 # If we are configured native on GNU/Linux, work around problems with
 # sys/procfs.h
-# Also detect which type of /proc is in use, such as for Unixware.
+# Also detect which type of /proc is in use, such as for Unixware or Solaris.
 
 if test "${target}" = "${host}"; then
-  gdb_cv_hostos_is_solaris=no
   case "${host}" in
   i[[3456]]86-*-linux*)
 	AC_DEFINE(START_INFERIOR_TRAPS_EXPECTED,2)
 	AC_DEFINE(sys_quotactl)
 	;;
-  *-*-solaris*)
-	gdb_cv_hostos_is_solaris=yes ;;
+  *-*-unixware* | *-*-sysv4.2uw2.* | *-*-sysv4.2uw7.*)
+      AC_DEFINE(NEW_PROC_API)
+      ;;
+  # FIXME: we would like to define NEW_PROC_API for all versions of
+  # Solaris from 2.6 on... but it isn't quite working yet.  Seems
+  # to work on sparc 2.6, so let's try it out there.
+  sparc-sun-solaris2.6)
+      AC_DEFINE(NEW_PROC_API)
+      ;;
   esac
-  AC_MSG_CHECKING(for directory proc entries)
-# The [gdb_host != sun4sol2] hack is because Solaris does provide the
-# multiple procfs files as of Solaris 2.6, but GDB can't use it right now.
-  if test "$ac_cv_header_sys_procfs_h" = yes -a \
-          "$gdb_cv_hostos_is_solaris" = no \
-  -a -d /proc/$$ \
-  -a -f /proc/$$/ctl \
-  -a -f /proc/$$/as \
-  -a -f /proc/$$/map \
-  -a -f /proc/$$/status; then
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(HAVE_MULTIPLE_PROC_FDS)
-  else
-    AC_MSG_RESULT(no)
-  fi
 fi
 
 if test "$ac_cv_header_sys_procfs_h" = yes; then

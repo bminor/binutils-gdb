@@ -4345,7 +4345,7 @@ $1 = @{0x1234, 0x5678@}
 @end example
 
 As a convenience, if you leave the array length out (as in
-@samp{(@var{type}[])@var{value}}) gdb calculates the size to fill
+@samp{(@var{type}[])@var{value}}) @value{GDBN} calculates the size to fill
 the value (as @samp{sizeof(@var{value})/sizeof(@var{type})}:
 @example
 (@value{GDBP}) p/x (short[])0x12345678
@@ -5621,8 +5621,8 @@ each language.
 @itemx set check range off
 Set range checking on or off, overriding the default setting for the
 current working language.  A warning is issued if the setting does not
-match the language default.  If a range error occurs, then a message
-is printed and evaluation of the expression is aborted.
+match the language default.  If a range error occurs and range checking is on,
+then a message is printed and evaluation of the expression is aborted.
 
 @item set check range warn
 Output messages when the @value{GDBN} range checker detects a range error,
@@ -6373,13 +6373,13 @@ Returns the absolute value of @var{n}.
 
 @item CAP(@var{c})
 If @var{c} is a lower case letter, it returns its upper case
-equivalent, otherwise it returns its argument
+equivalent, otherwise it returns its argument.
 
 @item CHR(@var{i})
 Returns the character whose ordinal value is @var{i}.
 
 @item DEC(@var{v})
-Decrements the value in the variable @var{v}.  Returns the new value.
+Decrements the value in the variable @var{v} by one.  Returns the new value.
 
 @item DEC(@var{v},@var{i})
 Decrements the value in the variable @var{v} by @var{i}.  Returns the
@@ -6396,7 +6396,7 @@ Returns the floating point equivalent of the integer @var{i}.
 Returns the index of the last member of @var{a}.
 
 @item INC(@var{v})
-Increments the value in the variable @var{v}.  Returns the new value.
+Increments the value in the variable @var{v} by one.  Returns the new value.
 
 @item INC(@var{v},@var{i})
 Increments the value in the variable @var{v} by @var{i}.  Returns the
@@ -6417,8 +6417,8 @@ Returns boolean TRUE if @var{i} is an odd number.
 
 @item ORD(@var{x})
 Returns the ordinal value of its argument.  For example, the ordinal
-value of a character is its ASCII value (on machines supporting the
-ASCII character set).  @var{x} must be of an ordered type, which include
+value of a character is its @sc{ascii} value (on machines supporting the
+@sc{ascii} character set).  @var{x} must be of an ordered type, which include
 integral, character and enumerated types.
 
 @item SIZE(@var{x})
@@ -6463,7 +6463,7 @@ digits.
 @item
 Character constants consist of a single character enclosed by a pair of
 like quotes, either single (@code{'}) or double (@code{"}).  They may
-also be expressed by their ordinal value (their ASCII value, usually)
+also be expressed by their ordinal value (their @sc{ascii} value, usually)
 followed by a @samp{C}.
 
 @item
@@ -6790,7 +6790,7 @@ set result := EXPR
 
 @noindent
 This does the same as the Chill action @code{RESULT EXPR} (which
-is not available in gdb).
+is not available in @value{GDBN}).
 
 Values of reference mode locations are printed by @code{PTR(<hex
 value>)} in case of a free reference mode, and by @code{(REF <reference
@@ -8684,7 +8684,7 @@ otherwise noted all numbers are represented in HEX with leading zeros
 suppressed.
 
 Response @var{data} can be run-length encoded to save space.  A @samp{*}
-means that the next character is an ASCII encoding giving a repeat count
+means that the next character is an @sc{ascii} encoding giving a repeat count
 which stands for that many repetitions of the character preceding the
 @samp{*}.  The encoding is @code{n+29}, yielding a printable character
 where @code{n >=3} (which is where rle starts to win).  The printable
@@ -9179,7 +9179,7 @@ host debugger.}
 
 @item @code{O}@var{XX...}
 @tab
-@var{XX...} is hex encoding of ASCII data.  This can happen at any time
+@var{XX...} is hex encoding of @sc{ascii} data.  This can happen at any time
 while the program is running and the debugger should continue to wait
 for 'W', 'T', etc.
 

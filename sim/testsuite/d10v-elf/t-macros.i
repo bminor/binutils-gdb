@@ -21,6 +21,20 @@ _start:
 	.endm
 
 
+	.macro exit1
+	ldi r4, 1
+	ldi r0, 1
+	trap 15
+	.endm
+
+
+	.macro exit2
+	ldi r4, 1
+	ldi r0, 2
+	trap 15
+	.endm
+
+
 	.macro load reg val
 	ldi \reg, #\val
 	.endm
@@ -128,6 +142,53 @@ _start:
 	.endm
 
 
+;;; Blat our DMAP registers so that they point at on-chip imem
+	.macro point_dmap_at_imem
+	.text
+	ldi r2, MAP_INSN | 0xf
+	st r2, @(DMAP_REG,r0)
+	ldi r2, MAP_INSN
+	st r2, @(IMAP1_REG,r0)
+	.endm
+
+;;; Patch VEC so that it jumps back to code that checks PSW
+;;; and then exits with success.
+	.macro check_interrupt vec psw src
+;;; Patch the interrupt vector's AE entry with a jmp to success
+	.text
+	ldi r4, #1f
+	ldi r5, \vec
+	;; 	
+	ld2w r2, @(0,r4)
+	st2w r2, @(0,r5)
+	ld2w r2, @(4,r4)
+	st2w r2, @(4,r5)
+	;; 	
+	bra 9f
+	nop
+;;; Code that gets patched into the interrupt vector
+	.data
+1:	ldi r1, 2f@word
+	jmp r1
+;;; Successfull trap jumps back to here
+	.text
+;;; Verify the PSW
+2:	mvfc	r2, cr0
+	cmpeqi	r2, #\psw
+	brf0t	3f
+	nop
+	exit1
+;;; Verify the original addr
+3:	mvfc	r2, bpc
+	cmpeqi	r2, #\src@word
+	brf0t	4f
+	exit2
+4:	exit0
+;;; continue as normal
+9:	
+	.endm
+
+
 	PSW_SM = 0x8000
 	PSW_01 = 0x4000
 	PSW_EA = 0x2000
@@ -159,12 +220,14 @@ _start:
 
 ;;;
 
-	VEC_RI   = 0x3fc00
-	VEC_BAE  = 0x3fc04
-	VEC_RIE  = 0x3fc08
-	VEC_AE   = 0x3fc0c
-	VEC_TRAP = 0x3fc10
+	VEC_RI   = 0x3ff00
+	VEC_BAE  = 0x3ff04
+	VEC_RIE  = 0x3ff08
+	VEC_AE   = 0x3ff0c
+	VEC_TRAP = 0x3ff10
 	VEC_DBT  = 0x3ff50
 	VEC_SDBT = 0x3fff4
 	VEC_DBI  = 0x3ff58
 	VEC_EI   = 0x3ff5c
+
+

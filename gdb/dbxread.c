@@ -2379,6 +2379,13 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		function_start_offset = valu;
 
 	      within_function = 1;
+
+	      if (context_stack_depth > 1)
+		{
+		  complain (&lbrac_unmatched_complaint, symnum);
+		  break;
+		}
+
 	      if (context_stack_depth > 0)
 		{
 		  new = pop_context ();
@@ -2386,9 +2393,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		  finish_block (new->name, &local_symbols, new->old_blocks,
 				new->start_addr, valu, objfile);
 		}
-	      /* Stack must be empty now.  */
-	      if (context_stack_depth != 0)
-		complain (&lbrac_unmatched_complaint, symnum);
 
 	      new = push_context (0, valu);
 	      new->name = define_symbol (valu, name, desc, type, objfile);

@@ -160,7 +160,7 @@ AdpErrs DevSW_Match(const DeviceDescr *device, const char *name,
  *          OK: adp_ok
  *       Error: adp_device_not_open
  */
-AdpErrs DevSW_Close(const DeviceDescr *device, const DevChanID type);
+AdpErrs DevSW_Close(DeviceDescr *device, const DevChanID type);
 
 /*
  *  Function: DevSW_Read

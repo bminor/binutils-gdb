@@ -13,4 +13,5 @@ XM_FILE= xm-i386v4.h
 XDEPFILES= 
 
 NAT_FILE= nm-i386v4.h
-NATDEPFILES= corelow.o core-regset.o procfs.o fork-child.o i386v4-nat.o
+NATDEPFILES= corelow.o core-regset.o fork-child.o i386v4-nat.o procfs.o \
+	proc_api.o proc_events.o proc_flags.o proc_why.o

@@ -57,6 +57,10 @@ extern int procfs_stopped_by_watchpoint PARAMS ((int));
 
 /* Use these macros for watchpoint insertion/deletion.  */
 /* type can be 0: write watch, 1: read watch, 2: access watch (read/write) */
-#define target_insert_watchpoint(addr, len, type) procfs_set_watchpoint (inferior_pid, addr, len, 2)
-#define target_remove_watchpoint(addr, len, type) procfs_set_watchpoint (inferior_pid, addr, 0, 0)
-extern int procfs_set_watchpoint PARAMS ((int, CORE_ADDR, int, int));
+#define target_insert_watchpoint(ADDR, LEN, TYPE) \
+     procfs_set_watchpoint (inferior_pid, ADDR, LEN, TYPE, 0)
+#define target_remove_watchpoint(ADDR, LEN, TYPE) \
+     procfs_set_watchpoint (inferior_pid, ADDR, 0, 0, 0)
+extern int procfs_set_watchpoint PARAMS ((int, CORE_ADDR, int, int, int));
+
+#define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(SIZE) 1

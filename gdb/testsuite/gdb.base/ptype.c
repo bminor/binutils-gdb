@@ -212,6 +212,8 @@ enum colors {yellow, purple, pink} nonprimary;
 enum {chevy, ford} clunker;
 enum cars {bmw, porsche} sportscar;
 
+#undef FALSE
+#undef TRUE
 typedef enum {FALSE, TRUE} boolean;
 boolean v_boolean;
 /*note: aCC has bool type predefined with 'false' and 'true'*/

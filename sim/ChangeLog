@@ -1,3 +1,8 @@
+1999-12-30  Chandra Chavva   <cchavva@cygnus.com>
+	
+	* d10v/d10v_sim.h (INC_ADDR): Added code to assign
+	proper address for loads with predec operations.
+
 1999-11-18  Ben Elliston  <bje@cygnus.com>
 
 	* configure.in: Require autoconf 2.13 and remove obsolete

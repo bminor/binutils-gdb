@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "adp.h"
+#include "sys.h"
 #include "hsys.h"
 #include "rxtx.h"
 #include "drivers.h"
@@ -107,6 +108,7 @@ static void dumpPacket(FILE *fp, char *label, struct data_packet *p)
 {
   unsigned r;
   int i;
+  unsigned char channel;
   
   if (!fp)
     return;
@@ -116,12 +118,14 @@ static void dumpPacket(FILE *fp, char *label, struct data_packet *p)
     fprintf(fp,"%02x ",p->data[i]);
   fprintf(fp,"\n");
 
+  channel = p->data[0];
+
   r = WordAt(p->data+4);
   
   fprintf(fp,"R=%08x ",r);
   fprintf(fp,"%s ", r&0x80000000 ? "H<-T" : "H->T");
 
-  switch ((r>>16) & 0xff)
+  switch (channel)
     {
      case CI_PRIVATE: fprintf(fp,"CI_PRIVATE: "); break;
      case CI_HADP: fprintf(fp,"CI_HADP: "); break;
@@ -176,6 +180,28 @@ static void dumpPacket(FILE *fp, char *label, struct data_packet *p)
      case ADP_Stopped: fprintf(fp," ADP_Stopped "); break;
      case ADP_TDCC_ToHost: fprintf(fp," ADP_TDCC_ToHost "); break;
      case ADP_TDCC_FromHost: fprintf(fp," ADP_TDCC_FromHost "); break;
+
+     case CL_Unrecognised: fprintf(fp," CL_Unrecognised "); break;
+     case CL_WriteC: fprintf(fp," CL_WriteC "); break;
+     case CL_Write0: fprintf(fp," CL_Write0 "); break;
+     case CL_ReadC: fprintf(fp," CL_ReadC "); break;
+     case CL_System: fprintf(fp," CL_System "); break;
+     case CL_GetCmdLine: fprintf(fp," CL_GetCmdLine "); break;
+     case CL_Clock: fprintf(fp," CL_Clock "); break;
+     case CL_Time: fprintf(fp," CL_Time "); break;
+     case CL_Remove: fprintf(fp," CL_Remove "); break;
+     case CL_Rename: fprintf(fp," CL_Rename "); break;
+     case CL_Open: fprintf(fp," CL_Open "); break;
+     case CL_Close: fprintf(fp," CL_Close "); break;
+     case CL_Write: fprintf(fp," CL_Write "); break;
+     case CL_WriteX: fprintf(fp," CL_WriteX "); break;
+     case CL_Read: fprintf(fp," CL_Read "); break;
+     case CL_ReadX: fprintf(fp," CL_ReadX "); break;
+     case CL_Seek: fprintf(fp," CL_Seek "); break;
+     case CL_Flen: fprintf(fp," CL_Flen "); break;
+     case CL_IsTTY: fprintf(fp," CL_IsTTY "); break;
+     case CL_TmpNam: fprintf(fp," CL_TmpNam "); break;
+
      default: fprintf(fp," BadReason "); break;
     }
 
@@ -410,7 +436,7 @@ AdpErrs DevSW_Match(const DeviceDescr *device, const char *name,
     return (device->DeviceMatch(name, arg) == -1) ? adp_failed : adp_ok;
 }
 
-AdpErrs DevSW_Close(const DeviceDescr *device, const DevChanID type)
+AdpErrs DevSW_Close (DeviceDescr *device, const DevChanID type)
 {
     DevSWState *ds = (DevSWState *)(device->SwitcherState);
     Packet *pk;

@@ -271,7 +271,7 @@ if { $hp_aCC_compiler } {
     }
 }
 
-gdb_test "next" ".*"
+gdb_test "next" "t_structs_c\\(struct_val1\\);.*"
 do_function_calls
 
 return 0

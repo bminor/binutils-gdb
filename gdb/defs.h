@@ -1341,4 +1341,9 @@ enum gdb_rc {
    function will ``print'' the object on ``output''). */
 enum gdb_rc gdb_breakpoint_query (/* struct {ui,gdb}_out *output, */ int bnum);
 
+/* Create a breakpoint at ADDRESS (a GDB source and line). */
+enum gdb_rc gdb_breakpoint (char *address, char *condition,
+			    int hardwareflag, int tempflag,
+			    int thread, int ignore_count);
+
 #endif /* #ifndef DEFS_H */

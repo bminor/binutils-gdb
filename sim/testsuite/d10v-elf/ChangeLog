@@ -1,3 +1,15 @@
+Mon Jan  3 00:17:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-ae-ld-d.s, t-ae-ld-i.s, t-ae-ld-id.s, t-ae-ld-im.s ,
+ 	t-ae-ld-ip.s, t-ae-ld2w-d.s, t-ae-ld2w-i.s, t-ae-ld2w-id.s ,
+ 	t-ae-ld2w-im.s, t-ae-ld2w-ip.s, t-ae-st-d.s, t-ae-st-i.s ,
+ 	t-ae-st-id.s, t-ae-st-im.s, t-ae-st-ip.s, t-ae-st-is.s ,
+ 	t-ae-st2w-d.s, t-ae-st2w-i.s, t-ae-st2w-id.s, t-ae-st2w-im.s ,
+ 	t-ae-st2w-ip.s, t-ae-st2w-is.s: New tests.  Check that an address
+ 	exception occures when a word/two-word load/store is not word
+ 	aligned.
+	* Makefile.in (TESTS): Update.
+
 Fri Oct 29 18:36:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* t-mvtc.s: Check that the user can not modify the DM bit in the

@@ -118,6 +118,16 @@ move_to_cr (int cr, reg_t mask, reg_t val, int psw_hw_p)
   return val;
 }
 
+/* Modify registers according to an AE - address exception. */
+static void
+address_exception (void)
+{
+  SET_BPC (PC);
+  SET_BPSW (PSW);
+  SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
+  JMP (AE_VECTOR_START);
+}
+
 #ifdef DEBUG
 static void trace_input_func PARAMS ((char *name,
 				      enum op_types in1,
@@ -1313,8 +1323,15 @@ void
 OP_30000000 ()
 {
   uint16 tmp;
+  uint16 addr = OP[1] + GPR (OP[2]);
   trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
-  tmp = RW (OP[1] + GPR (OP[2]));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  tmp = RW (addr);
   SET_GPR (OP[0], tmp);
   trace_output_16 (tmp);
 }
@@ -1324,8 +1341,15 @@ void
 OP_6401 ()
 {
   uint16 tmp;
+  uint16 addr = GPR (OP[1]);
   trace_input ("ld", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
-  tmp = RW (GPR (OP[1]));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  tmp = RW (addr);
   SET_GPR (OP[0], tmp);
   if (OP[0] != OP[1])
     INC_ADDR (OP[1], -2);
@@ -1337,8 +1361,15 @@ void
 OP_6001 ()
 {
   uint16 tmp;
+  uint16 addr = GPR (OP[1]);
   trace_input ("ld", OP_REG_OUTPUT, OP_POSTINC, OP_VOID);
-  tmp = RW (GPR (OP[1]));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  tmp = RW (addr);
   SET_GPR (OP[0], tmp);
   if (OP[0] != OP[1])
     INC_ADDR (OP[1], 2);
@@ -1350,8 +1381,15 @@ void
 OP_6000 ()
 {
   uint16 tmp;
+  uint16 addr = GPR (OP[1]);
   trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
-  tmp = RW (GPR (OP[1]));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  tmp = RW (addr);
   SET_GPR (OP[0], tmp);
   trace_output_16 (tmp);
 }
@@ -1361,9 +1399,15 @@ void
 OP_32010000 ()
 {
   uint16 tmp;
-  
+  uint16 addr = OP[1];
   trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF3, OP_VOID);
-  tmp = RW (OP[1]);
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  tmp = RW (addr);
   SET_GPR (OP[0], tmp);
   trace_output_16 (tmp);
 }
@@ -1373,9 +1417,15 @@ void
 OP_31000000 ()
 {
   int32 tmp;
-  uint16 addr = GPR (OP[2]);
+  uint16 addr = OP[1] + GPR (OP[2]);
   trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
-  tmp = RLW (OP[1] + addr);
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
   trace_output_32 (tmp);
 }
@@ -1387,6 +1437,12 @@ OP_6601 ()
   uint16 addr = GPR (OP[1]);
   int32 tmp;
   trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
   if (OP[0] != OP[1] && ((OP[0] + 1) != OP[1]))
@@ -1401,6 +1457,12 @@ OP_6201 ()
   int32 tmp;
   uint16 addr = GPR (OP[1]);
   trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTINC, OP_VOID);
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
   if (OP[0] != OP[1] && ((OP[0] + 1) != OP[1]))
@@ -1415,7 +1477,13 @@ OP_6200 ()
   uint16 addr = GPR (OP[1]);
   int32 tmp;
   trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
-  tmp = RLW (addr + 0);
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
   trace_output_32 (tmp);
 }
@@ -1425,9 +1493,15 @@ void
 OP_33010000 ()
 {
   int32 tmp;
-  
+  uint16 addr = OP[1];
   trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF3, OP_VOID);
-  tmp = RLW (OP[1]);
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
   trace_output_32 (tmp);
 }
@@ -2663,8 +2737,15 @@ OP_4609 ()
 void
 OP_34000000 ()
 {
+  uint16 addr = OP[1] + GPR (OP[2]);
   trace_input ("st", OP_REG, OP_MEMREF2, OP_VOID);
-  SW (OP[1] + GPR (OP[2]), GPR (OP[0]));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  SW (addr, GPR (OP[0]));
   trace_output_void ();
 }
 
@@ -2672,12 +2753,20 @@ OP_34000000 ()
 void
 OP_6800 ()
 {
+  uint16 addr = GPR (OP[1]);
   trace_input ("st", OP_REG, OP_MEMREF, OP_VOID);
-  SW (GPR (OP[1]), GPR (OP[0]));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  SW (addr, GPR (OP[0]));
   trace_output_void ();
 }
 
 /* st */
+/* st Rsrc1,@-SP */
 void
 OP_6C1F ()
 {
@@ -2689,6 +2778,12 @@ OP_6C1F ()
       State.exception = SIGILL;
       return;
     }
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
   SW (addr, GPR (OP[0]));
   SET_GPR (OP[1], addr);
   trace_output_void ();
@@ -2698,8 +2793,15 @@ OP_6C1F ()
 void
 OP_6801 ()
 {
+  uint16 addr = GPR (OP[1]);
   trace_input ("st", OP_REG, OP_POSTINC, OP_VOID);
-  SW (GPR (OP[1]), GPR (OP[0]));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  SW (addr, GPR (OP[0]));
   INC_ADDR (OP[1], 2);
   trace_output_void ();
 }
@@ -2708,6 +2810,7 @@ OP_6801 ()
 void
 OP_6C01 ()
 {
+  uint16 addr = GPR (OP[1]);
   trace_input ("st", OP_REG, OP_POSTDEC, OP_VOID);
   if ( OP[1] == 15 )
     {
@@ -2715,7 +2818,13 @@ OP_6C01 ()
       State.exception = SIGILL;
       return;
     }
-  SW (GPR (OP[1]), GPR (OP[0]));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  SW (addr, GPR (OP[0]));
   INC_ADDR (OP[1], -2);
   trace_output_void ();
 }
@@ -2724,8 +2833,15 @@ OP_6C01 ()
 void
 OP_36010000 ()
 {
+  uint16 addr = OP[1];
   trace_input ("st", OP_REG, OP_MEMREF3, OP_VOID);
-  SW (OP[1], GPR (OP[0]));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  SW (addr, GPR (OP[0]));
   trace_output_void ();
 }
 
@@ -2733,9 +2849,16 @@ OP_36010000 ()
 void
 OP_35000000 ()
 {
+  uint16 addr = GPR (OP[2])+ OP[1];
   trace_input ("st2w", OP_DREG, OP_MEMREF2, OP_VOID);
-  SW (GPR (OP[2])+ OP[1] + 0, GPR (OP[0] + 0));
-  SW (GPR (OP[2])+ OP[1] + 2, GPR (OP[0] + 1));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  SW (addr + 0, GPR (OP[0] + 0));
+  SW (addr + 2, GPR (OP[0] + 1));
   trace_output_void ();
 }
 
@@ -2743,9 +2866,16 @@ OP_35000000 ()
 void
 OP_6A00 ()
 {
+  uint16 addr = GPR (OP[1]);
   trace_input ("st2w", OP_DREG, OP_MEMREF, OP_VOID);
-  SW (GPR (OP[1]) + 0, GPR (OP[0] + 0));
-  SW (GPR (OP[1]) + 2, GPR (OP[0] + 1));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  SW (addr + 0, GPR (OP[0] + 0));
+  SW (addr + 2, GPR (OP[0] + 1));
   trace_output_void ();
 }
 
@@ -2761,6 +2891,12 @@ OP_6E1F ()
       State.exception = SIGILL;
       return;
     }
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
   SET_GPR (OP[1], addr);
@@ -2771,9 +2907,16 @@ OP_6E1F ()
 void
 OP_6A01 ()
 {
+  uint16 addr = GPR (OP[1]);
   trace_input ("st2w", OP_DREG, OP_POSTINC, OP_VOID);
-  SW (GPR (OP[1]) + 0, GPR (OP[0] + 0));
-  SW (GPR (OP[1]) + 2, GPR (OP[0] + 1));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  SW (addr + 0, GPR (OP[0] + 0));
+  SW (addr + 2, GPR (OP[0] + 1));
   INC_ADDR (OP[1], 4);
   trace_output_void ();
 }
@@ -2782,6 +2925,7 @@ OP_6A01 ()
 void
 OP_6E01 ()
 {
+  uint16 addr = GPR (OP[1]);
   trace_input ("st2w", OP_DREG, OP_POSTDEC, OP_VOID);
   if ( OP[1] == 15 )
     {
@@ -2789,8 +2933,14 @@ OP_6E01 ()
       State.exception = SIGILL;
       return;
     }
-  SW (GPR (OP[1]) + 0, GPR (OP[0] + 0));
-  SW (GPR (OP[1]) + 2, GPR (OP[0] + 1));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  SW (addr + 0, GPR (OP[0] + 0));
+  SW (addr + 2, GPR (OP[0] + 1));
   INC_ADDR (OP[1], -4);
   trace_output_void ();
 }
@@ -2799,9 +2949,16 @@ OP_6E01 ()
 void
 OP_37010000 ()
 {
+  uint16 addr = OP[1];
   trace_input ("st2w", OP_DREG, OP_MEMREF3, OP_VOID);
-  SW (OP [1] + 0, GPR (OP[0] + 0));
-  SW (OP [1] + 2, GPR (OP[0] + 1));
+  if ((addr & 1))
+    {
+      address_exception ();
+      trace_output_void ();
+      return;
+    }
+  SW (addr + 0, GPR (OP[0] + 0));
+  SW (addr + 2, GPR (OP[0] + 1));
   trace_output_void ();
 }
 

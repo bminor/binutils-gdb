@@ -1,3 +1,16 @@
+2000-01-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From Jim Kingdon <kingdon@redhat.com>:
+
+	* gdb.c++/annota2.exp: Fix "delete bps" test to wait for the
+ 	prompt (cleanup rather than necessity, but still might keep output
+ 	from spilling to next test).
+
+2000-01-02  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/ptype.c (FALSE, TRUE): #undef these to avoid clash on
+	AIX, which defines them in <sys/types.h>.
+
 1999-12-16  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/default.exp: Match arm* etc instead of arm in "info

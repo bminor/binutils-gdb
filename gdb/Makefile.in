@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19991221
+VERSION = 20000105
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1414,6 +1414,14 @@ printcmd.o: printcmd.c $(breakpoint_h) $(defs_h) $(expression_h) \
 procfs.o: procfs.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h gdb_string.h
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
+
+proc_api.o: proc_api.c $(defs_h) $(gdbcmd_h)
+
+proc_events.o: proc_events.c $(defs_h)
+
+proc_flags.o: proc_flags.c $(defs_h)
+
+proc_why.o: proc_why.c $(defs_h)
 
 sol-thread.o: sol-thread.c $(defs_h) gdbthread.h target.h $(inferior_h) \
 	$(gdbcmd_h)

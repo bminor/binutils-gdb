@@ -102,6 +102,7 @@ lookup_hash (ins, size)
 	  (*d10v_callback->printf_filtered)
 	    (d10v_callback, "ERROR: Illegal instruction %x at PC %x\n", ins, PC);
 	  State.exception = SIGILL;
+	  State.pc_changed = 1; /* Don't increment the PC. */
 	  return NULL;
 	}
       h = h->next;

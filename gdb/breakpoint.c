@@ -4164,107 +4164,135 @@ mention (b)
 }
 
 
-/* Set a breakpoint according to ARG (function, linenum or *address)
-   flag: first bit  : 0 non-temporary, 1 temporary.
-   second bit : 0 normal breakpoint, 1 hardware breakpoint. */
+/* Add SALS.nelts breakpoints to the breakpoint table.  For each
+   SALS.sal[i] breakpoint, include the corresponding ADDR_STRING[i],
+   COND[i] and COND_STRING[i] values.
+
+   NOTE: If the function succeeds, the caller is expected to cleanup
+   the arrays ADDR_STRING, COND_STRING, COND and SALS (but not the
+   array contents).  If the function fails (error() is called), the
+   caller is expected to cleanups both the ADDR_STRING, COND_STRING,
+   COND and SALS arrays and each of those arrays contents. */
 
 static void
-break_command_1 (arg, flag, from_tty)
-     char *arg;
-     int flag, from_tty;
+create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
+		    struct expression **cond, char **cond_string,
+		    enum bptype type, enum bpdisp disposition,
+		    int thread, int ignore_count, int from_tty)
 {
-  int tempflag, hardwareflag;
-  struct symtabs_and_lines sals;
-  struct symtab_and_line sal;
-  register struct expression *cond = 0;
-  register struct breakpoint *b;
+  if (type == bp_hardware_breakpoint)
+    {
+      int i = hw_breakpoint_used_count ();
+      int target_resources_ok = 
+	TARGET_CAN_USE_HARDWARE_WATCHPOINT (bp_hardware_breakpoint, 
+					    i + sals.nelts, 0);
+      if (target_resources_ok == 0)
+	error ("No hardware breakpoint support in the target.");
+      else if (target_resources_ok < 0)
+	error ("Hardware breakpoints used exceeds limit.");
+    }
 
-  /* Pointers in arg to the start, and one past the end, of the condition.  */
-  char *cond_start = NULL;
-  char *cond_end = NULL;
-  /* Pointers in arg to the start, and one past the end,
-     of the address part.  */
-  char *addr_start = NULL;
-  char *addr_end = NULL;
-  struct cleanup *old_chain;
-  struct cleanup *canonical_strings_chain = NULL;
-  char **canonical = (char **) NULL;
-  int i;
-  int thread;
+  /* Now set all the breakpoints.  */
+  {
+    int i;
+    for (i = 0; i < sals.nelts; i++)
+      {
+	struct breakpoint *b;
+	struct symtab_and_line sal = sals.sals[i];
 
-  hardwareflag = flag & BP_HARDWAREFLAG;
-  tempflag = flag & BP_TEMPFLAG;
+	if (from_tty)
+	  describe_other_breakpoints (sal.pc, sal.section);
+	
+	b = set_raw_breakpoint (sal);
+	set_breakpoint_count (breakpoint_count + 1);
+	b->number = breakpoint_count;
+	b->type = type;
+	b->cond = cond[i];
+	b->thread = thread;
+	b->addr_string = addr_string[i];
+	b->cond_string = cond_string[i];
+	b->ignore_count = ignore_count;
+	b->enable = enabled;
+	b->disposition = disposition;
+	mention (b);
+      }
+  }    
+}
 
-  sals.sals = NULL;
-  sals.nelts = 0;
+/* Parse ARG which is assumed to be a SAL specification possibly
+   followed by conditionals.  On return, SALS contains an array of SAL
+   addresses found. ADDR_STRING contains a vector of (canonical)
+   address strings. ARG points to the end of the SAL. */
 
-  INIT_SAL (&sal);		/* initialize to zeroes */
-
-  /* If no arg given, or if first arg is 'if ', use the default breakpoint. */
-
-  if (!arg || (arg[0] == 'i' && arg[1] == 'f'
-	       && (arg[2] == ' ' || arg[2] == '\t')))
+void
+parse_breakpoint_sals (char **address,
+		       struct symtabs_and_lines *sals,
+		       char ***addr_string)
+{
+  char *addr_start = *address;
+  *addr_string = NULL;
+  /* If no arg given, or if first arg is 'if ', use the default
+     breakpoint. */
+  if ((*address) == NULL
+      || (strncmp ((*address), "if", 2) == 0 && isspace ((*address)[2])))
     {
       if (default_breakpoint_valid)
 	{
-	  sals.sals = (struct symtab_and_line *)
+	  struct symtab_and_line sal;
+	  INIT_SAL (&sal);		/* initialize to zeroes */
+	  sals->sals = (struct symtab_and_line *)
 	    xmalloc (sizeof (struct symtab_and_line));
 	  sal.pc = default_breakpoint_address;
 	  sal.line = default_breakpoint_line;
 	  sal.symtab = default_breakpoint_symtab;
 	  sal.section = find_pc_overlay (sal.pc);
-	  sals.sals[0] = sal;
-	  sals.nelts = 1;
+	  sals->sals[0] = sal;
+	  sals->nelts = 1;
 	}
       else
 	error ("No default breakpoint address now.");
     }
   else
     {
-      addr_start = arg;
-
       /* Force almost all breakpoints to be in terms of the
          current_source_symtab (which is decode_line_1's default).  This
          should produce the results we want almost all of the time while
          leaving default_breakpoint_* alone.  */
       if (default_breakpoint_valid
 	  && (!current_source_symtab
-	      || (arg && (*arg == '+' || *arg == '-'))))
-	sals = decode_line_1 (&arg, 1, default_breakpoint_symtab,
-			      default_breakpoint_line, &canonical);
+	      || (strchr ("+-", (*address)[0]) != NULL)))
+	*sals = decode_line_1 (address, 1, default_breakpoint_symtab,
+			       default_breakpoint_line, addr_string);
       else
-	sals = decode_line_1 (&arg, 1, (struct symtab *) NULL, 0, &canonical);
-
-      addr_end = arg;
+	*sals = decode_line_1 (address, 1, (struct symtab *) NULL, 0, addr_string);
     }
-
-  if (!sals.nelts)
-    return;
-
-  /* Make sure that all storage allocated in decode_line_1 gets freed
-     in case the following `for' loop errors out.  */
-  old_chain = make_cleanup (free, sals.sals);
-  if (canonical != (char **) NULL)
+  /* For any SAL that didn't have a canonical string, fill one in. */
+  if (sals->nelts > 0 && *addr_string == NULL)
+    *addr_string = xcalloc (sals->nelts, sizeof (char **));
+  if (addr_start != (*address))
     {
-      make_cleanup (free, canonical);
-      canonical_strings_chain = make_cleanup (null_cleanup, 0);
-      for (i = 0; i < sals.nelts; i++)
+      int i;
+      for (i = 0; i < sals->nelts; i++)
 	{
-	  if (canonical[i] != NULL)
-	    make_cleanup (free, canonical[i]);
+	  /* Add the string if not present. */
+	  if ((*addr_string)[i] == NULL)
+	    (*addr_string)[i] = savestring (addr_start, (*address) - addr_start);
 	}
     }
+}
 
-  thread = -1;			/* No specific thread yet */
 
-  /* Resolve all line numbers to PC's, and verify that conditions
-     can be parsed, before setting any breakpoints.  */
-  for (i = 0; i < sals.nelts; i++)
+/* Convert each SAL into a real PC.  Verify that the PC can be
+   inserted as a breakpoint.  If it can't throw an error. */
+
+void
+breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
+		       char *address)
+{    
+  int i;
+  for (i = 0; i < sals->nelts; i++)
     {
-      char *tok, *end_tok;
-      int toklen;
-
-      resolve_sal_pc (&sals.sals[i]);
+      resolve_sal_pc (&sals->sals[i]);
 
       /* It's possible for the PC to be nonzero, but still an illegal
          value on some targets.
@@ -4279,16 +4307,100 @@ break_command_1 (arg, flag, from_tty)
 
          Give the target a chance to bless sals.sals[i].pc before we
          try to make a breakpoint for it. */
-      if (PC_REQUIRES_RUN_BEFORE_USE (sals.sals[i].pc))
+      if (PC_REQUIRES_RUN_BEFORE_USE (sals->sals[i].pc))
 	{
-	  error ("Cannot break on %s without a running program.", 
-		 addr_start);
+	  if (address == NULL)
+	    error ("Cannot break without a running program.");
+	  else
+	    error ("Cannot break on %s without a running program.", 
+		   address);
 	}
+    }
+}
 
-      tok = arg;
+/* Set a breakpoint according to ARG (function, linenum or *address)
+   flag: first bit  : 0 non-temporary, 1 temporary.
+   second bit : 0 normal breakpoint, 1 hardware breakpoint. */
 
+static void
+break_command_1 (arg, flag, from_tty)
+     char *arg;
+     int flag, from_tty;
+{
+  int tempflag, hardwareflag;
+  struct symtabs_and_lines sals;
+  register struct expression **cond = 0;
+  /* Pointers in arg to the start, and one past the end, of the
+     condition.  */
+  char **cond_string = (char **) NULL;
+  char *addr_start = arg;
+  char **addr_string;
+  struct cleanup *old_chain;
+  struct cleanup *breakpoint_chain = NULL;
+  int i;
+  int thread = -1;
+  int ignore_count = 0;
+
+  hardwareflag = flag & BP_HARDWAREFLAG;
+  tempflag = flag & BP_TEMPFLAG;
+
+  sals.sals = NULL;
+  sals.nelts = 0;
+  addr_string = NULL;
+  parse_breakpoint_sals (&arg, &sals, &addr_string);
+
+  if (!sals.nelts)
+    return;
+
+  /* Create a chain of things that always need to be cleaned up. */
+  old_chain = make_cleanup (null_cleanup, 0);
+
+  /* Make sure that all storage allocated to SALS gets freed.  */
+  make_cleanup (free, sals.sals);
+
+  /* Cleanup the addr_string array but not its contents. */
+  make_cleanup (free, addr_string);
+
+  /* Allocate space for all the cond expressions. */
+  cond = xcalloc (sals.nelts, sizeof (struct expression *));
+  make_cleanup (free, cond);
+
+  /* Allocate space for all the cond strings. */
+  cond_string = xcalloc (sals.nelts, sizeof (char **));
+  make_cleanup (free, cond_string);
+
+  /* ----------------------------- SNIP -----------------------------
+     Anything added to the cleanup chain beyond this point is assumed
+     to be part of a breakpoint.  If the breakpoint create succeeds
+     then the memory is not reclaimed. */
+  breakpoint_chain = make_cleanup (null_cleanup, 0);
+
+  /* Mark the contents of the addr_string for cleanup.  These go on
+     the breakpoint_chain and only occure if the breakpoint create
+     fails. */
+  for (i = 0; i < sals.nelts; i++)
+    {
+      if (addr_string[i] != NULL)
+	make_cleanup (free, addr_string[i]);
+    }
+
+  /* Resolve all line numbers to PC's and verify that the addresses
+     are ok for the target.  */
+  breakpoint_sals_to_pc (&sals, addr_start);
+
+  /* Verify that condition can be parsed, before setting any
+     breakpoints.  Allocate a separate condition expression for each
+     breakpoint. */
+  thread = -1;			/* No specific thread yet */
+  for (i = 0; i < sals.nelts; i++)
+    {
+      char *tok = arg;
       while (tok && *tok)
 	{
+	  char *end_tok;
+	  int toklen;
+	  char *cond_start = NULL;
+	  char *cond_end = NULL;
 	  while (*tok == ' ' || *tok == '\t')
 	    tok++;
 
@@ -4302,8 +4414,11 @@ break_command_1 (arg, flag, from_tty)
 	  if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
 	    {
 	      tok = cond_start = end_tok + 1;
-	      cond = parse_exp_1 (&tok, block_for_pc (sals.sals[i].pc), 0);
+	      cond[i] = parse_exp_1 (&tok, block_for_pc (sals.sals[i].pc), 0);
+	      make_cleanup (free, cond[i]);
 	      cond_end = tok;
+	      cond_string[i] = savestring (cond_start, cond_end - cond_start);
+	      make_cleanup (free, cond_string[i]);
 	    }
 	  else if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)
 	    {
@@ -4321,60 +4436,148 @@ break_command_1 (arg, flag, from_tty)
 	    error ("Junk at end of arguments.");
 	}
     }
-  if (hardwareflag)
-    {
-      int i, target_resources_ok;
 
-      i = hw_breakpoint_used_count ();
-      target_resources_ok = 
-	TARGET_CAN_USE_HARDWARE_WATCHPOINT (bp_hardware_breakpoint, 
-					    i + sals.nelts, 0);
-      if (target_resources_ok == 0)
-	error ("No hardware breakpoint support in the target.");
-      else if (target_resources_ok < 0)
-	error ("Hardware breakpoints used exceeds limit.");
-    }
-
-  /* Remove the canonical strings from the cleanup, they are needed below.  */
-  if (canonical != (char **) NULL)
-    discard_cleanups (canonical_strings_chain);
-
-  /* Now set all the breakpoints.  */
-  for (i = 0; i < sals.nelts; i++)
-    {
-      sal = sals.sals[i];
-
-      if (from_tty)
-	describe_other_breakpoints (sal.pc, sal.section);
-
-      b = set_raw_breakpoint (sal);
-      set_breakpoint_count (breakpoint_count + 1);
-      b->number = breakpoint_count;
-      b->type = hardwareflag ? bp_hardware_breakpoint : bp_breakpoint;
-      b->cond = cond;
-      b->thread = thread;
-
-      /* If a canonical line spec is needed use that instead of the
-         command string.  */
-      if (canonical != (char **) NULL && canonical[i] != NULL)
-	b->addr_string = canonical[i];
-      else if (addr_start)
-	b->addr_string = savestring (addr_start, addr_end - addr_start);
-      if (cond_start)
-	b->cond_string = savestring (cond_start, cond_end - cond_start);
-
-      b->enable = enabled;
-      b->disposition = tempflag ? del : donttouch;
-      mention (b);
-    }
+  create_breakpoints (sals, addr_string, cond, cond_string,
+		      hardwareflag ? bp_hardware_breakpoint : bp_breakpoint,
+		      tempflag ? del : donttouch,
+		      thread, ignore_count, from_tty);
 
   if (sals.nelts > 1)
     {
       warning ("Multiple breakpoints were set.");
       warning ("Use the \"delete\" command to delete unwanted breakpoints.");
     }
+  /* That's it. Discard the cleanups for data inserted into the
+     breakpoint. */
+  discard_cleanups (breakpoint_chain);
+  /* But cleanup everything else. */
   do_cleanups (old_chain);
 }
+
+/* Set a breakpoint of TYPE/DISPOSITION according to ARG (function,
+   linenum or *address) with COND and IGNORE_COUNT. */
+
+struct captured_breakpoint_args
+  {
+    char *address;
+    char *condition;
+    int hardwareflag;
+    int tempflag;
+    int thread;
+    int ignore_count;
+  };
+
+static int
+do_captured_breakpoint (void *data)
+{
+  struct captured_breakpoint_args *args = data;
+  struct symtabs_and_lines sals;
+  register struct expression **cond;
+  struct cleanup *old_chain;
+  struct cleanup *breakpoint_chain = NULL;
+  int i;
+  char **addr_string;
+  char **cond_string;
+
+  char *address_end;
+
+  /* Parse the source and lines spec.  Delay check that the expression
+     didn't contain trailing garbage until after cleanups are in
+     place. */
+  sals.sals = NULL;
+  sals.nelts = 0;
+  address_end = args->address;
+  addr_string = NULL;
+  parse_breakpoint_sals (&address_end, &sals, &addr_string);
+
+  if (!sals.nelts)
+    return GDB_RC_NONE;
+
+  /* Create a chain of things at always need to be cleaned up. */
+  old_chain = make_cleanup (null_cleanup, 0);
+
+  /* Always have a addr_string array, even if it is empty. */
+  make_cleanup (free, addr_string);
+
+  /* Make sure that all storage allocated to SALS gets freed.  */
+  make_cleanup (free, sals.sals);
+
+  /* Allocate space for all the cond expressions. */
+  cond = xcalloc (sals.nelts, sizeof (struct expression *));
+  make_cleanup (free, cond);
+
+  /* Allocate space for all the cond strings. */
+  cond_string = xcalloc (sals.nelts, sizeof (char **));
+  make_cleanup (free, cond_string);
+
+  /* ----------------------------- SNIP -----------------------------
+     Anything added to the cleanup chain beyond this point is assumed
+     to be part of a breakpoint.  If the breakpoint create goes
+     through then that memory is not cleaned up. */
+  breakpoint_chain = make_cleanup (null_cleanup, 0);
+
+  /* Mark the contents of the addr_string for cleanup.  These go on
+     the breakpoint_chain and only occure if the breakpoint create
+     fails. */
+  for (i = 0; i < sals.nelts; i++)
+    {
+      if (addr_string[i] != NULL)
+	make_cleanup (free, addr_string[i]);
+    }
+
+  /* Wait until now before checking for garbage at the end of the
+     address. That way cleanups can take care of freeing any
+     memory. */
+  if (*address_end != '\0')
+    error ("Garbage %s following breakpoint address", address_end);
+
+  /* Resolve all line numbers to PC's.  */
+  breakpoint_sals_to_pc (&sals, args->address);
+
+  /* Verify that conditions can be parsed, before setting any
+     breakpoints.  */
+  for (i = 0; i < sals.nelts; i++)
+    {
+      if (args->condition != NULL)
+	{
+	  char *tok = args->condition;
+	  cond[i] = parse_exp_1 (&tok, block_for_pc (sals.sals[i].pc), 0);
+	  if (*tok != '\0')
+	    error ("Garbage %s follows condition", tok);
+	  make_cleanup (free, cond[i]);
+	  cond_string[i] = xstrdup (args->condition);
+	}
+    }
+
+  create_breakpoints (sals, addr_string, cond, cond_string,
+		      args->hardwareflag ? bp_hardware_breakpoint : bp_breakpoint,
+		      args->tempflag ? del : donttouch,
+		      args->thread, args->ignore_count, 0/*from-tty*/);
+
+  /* That's it. Discard the cleanups for data inserted into the
+     breakpoint. */
+  discard_cleanups (breakpoint_chain);
+  /* But cleanup everything else. */
+  do_cleanups (old_chain);
+  return GDB_RC_OK;
+}
+
+enum gdb_rc
+gdb_breakpoint (char *address, char *condition,
+		int hardwareflag, int tempflag,
+		int thread, int ignore_count)
+{
+  struct captured_breakpoint_args args;
+  args.address = address;
+  args.condition = condition;
+  args.hardwareflag = hardwareflag;
+  args.tempflag = tempflag;
+  args.thread = thread;
+  args.ignore_count = ignore_count;
+  return catch_errors (do_captured_breakpoint, &args,
+		       NULL, RETURN_MASK_ALL);
+}
+
 
 static void
 break_at_finish_at_depth_command_1 (arg, flag, from_tty)

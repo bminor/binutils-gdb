@@ -432,7 +432,8 @@ enum
 #define INC_ADDR(x,i) \
 do \
   { \
-    if (PSW_MD && GPR (x) == (MOD_E & ~((i) - 1))) \
+    int test_i = i < 0 ? i : ~((i) - 1); \
+    if (PSW_MD && GPR (x) == (MOD_E & test_i)) \
       SET_GPR (x, MOD_S); \
     else \
       SET_GPR (x, GPR (x) + (i)); \

@@ -1,3 +1,7 @@
+2000-01-05  Dmitry Sivachenko <dima@Chg.RU>
+
+	* gdb.texinfo:  Wrap "ASCII" in @sc{}; clarify a few sentences.
+
 Wed Dec  8 19:53:08 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (FRAME_CHAIN_VALID): Add the generic frame-chain

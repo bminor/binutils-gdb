@@ -139,7 +139,7 @@ gdb_expect {
   -re ".*Delete all breakpoints. \\(y or n\\) \r\n\032\032query.*$" {
            send_gdb "y\n"
            gdb_expect {
-	     -re " " { pass "delete bps" }
+	     -re " .*$gdb_prompt$" { pass "delete bps" }
 	     -re ".*$gdb_prompt$" { fail "delete bps" }
 	     timeout  { fail "delete bps (timeout)" }
 	 }

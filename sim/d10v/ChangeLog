@@ -1,3 +1,17 @@
+Mon Jan  3 02:06:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (lookup_hash): Stop the update of the PC when there was
+ 	an illegal instruction exception.
+
+Mon Jan  3 00:14:33 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (address_exception): New function.
+	(OP_30000000, OP_6401, OP_6001, OP_6000, OP_32010000, OP_31000000,
+ 	OP_6601, OP_6201, OP_6200, OP_33010000, OP_34000000, OP_6800,
+ 	OP_6C1F, OP_6801, OP_6C01, OP_36010000, OP_35000000, OP_6A00,
+ 	OP_6E1F, OP_6A01, OP_6E01, OP_37010000): For "ld", "ld2w", "st"
+ 	and "st2w" check that the address is aligned.
+
 1999-11-25  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c (OP_4E0F): New function: Simulate new bit pattern for

@@ -266,9 +266,12 @@ static int open_socket(void)
 static void fetch_ports(void)
 {
     int i;
-    const char ctrlpacket[] = CTRL_MAGIC;
-        CtrlResponse response;
+    char ctrlpacket[10];
+    CtrlResponse response;
 
+    memset (ctrlpacket, 0, 10);
+    strcpy (ctrlpacket, CTRL_MAGIC);
+    memset (response, 0, sizeof(CtrlResponse));
     /*
      * we will try 3 times to elicit a response from the target
      */

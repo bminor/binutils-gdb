@@ -62,9 +62,9 @@
 /* Define if ioctl argument PIOCSET is available. */
 #undef HAVE_PROCFS_PIOCSET
 
-/* /proc PID entries are directories containing the files
-   ctl as map status */
-#undef HAVE_MULTIPLE_PROC_FDS
+/* Define if you want to use new multi-fd /proc interface
+   (replaces HAVE_MULTIPLE_PROC_FDS as well as other macros). */
+#undef NEW_PROC_API
 
 /* Define if the `long long' type works.  */
 #undef CC_HAS_LONG_LONG
