@@ -1,9 +1,11 @@
+start-sanitize-v850
 Fri Oct 11 21:13:43 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in: Only build the V850 simulator if
 	we are using gcc.
 	* configure: Rebuild.
 
+end-sanitize-v850
 Sun Sep  8 17:22:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Do build erc32 for DOS and Windows hosts.
