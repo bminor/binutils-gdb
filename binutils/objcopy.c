@@ -958,11 +958,16 @@ copy_object (ibfd, obfd)
     start = bfd_get_start_address (ibfd);
   start += change_start;
 
-  if (!bfd_set_start_address (obfd, start)
-      || !bfd_set_file_flags (obfd,
-			      (bfd_get_file_flags (ibfd)
-			       & bfd_applicable_file_flags (obfd))))
-    RETURN_NONFATAL (bfd_get_filename (ibfd));
+  /* Neither the start address nor the flags 
+     need to be set for a core file. */
+  if (bfd_get_format (obfd) != bfd_core)
+    {
+      if (!bfd_set_start_address (obfd, start)
+	  || !bfd_set_file_flags (obfd,
+				  (bfd_get_file_flags (ibfd)
+				   & bfd_applicable_file_flags (obfd))))
+	RETURN_NONFATAL (bfd_get_filename (ibfd));
+    }
 
   /* Copy architecture of input file to output file.  */
   if (!bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
@@ -1403,7 +1408,8 @@ copy_file (input_filename, output_filename, input_target, output_target)
 
       copy_archive (ibfd, obfd, output_target);
     }
-  else if (bfd_check_format_matches (ibfd, bfd_object, &matching))
+  else if (bfd_check_format_matches (ibfd, bfd_object, &matching)
+	   || bfd_check_format_matches (ibfd, bfd_core, &matching))
     {
       bfd *obfd;
 
@@ -1674,7 +1680,12 @@ copy_section (ibfd, isection, obfdarg)
   if (size == 0 || osection == 0)
     return;
 
-  relsize = bfd_get_reloc_upper_bound (ibfd, isection);
+  /* Core files do not need to be relocated. */
+  if (bfd_get_format (obfd) == bfd_core)
+    relsize = 0;
+  else
+    relsize = bfd_get_reloc_upper_bound (ibfd, isection);
+
   if (relsize < 0)
     RETURN_NONFATAL (bfd_get_filename (ibfd));
 
@@ -1713,7 +1724,8 @@ copy_section (ibfd, isection, obfdarg)
   isection->_cooked_size = isection->_raw_size;
   isection->reloc_done = true;
 
-  if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS)
+  if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS 
+      && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
     {
       PTR memhunk = (PTR) xmalloc ((unsigned) size);
 

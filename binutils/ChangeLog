@@ -1,3 +1,12 @@
+2001-12-18  Michael Snyder  <msnyder@redhat.com>
+
+	* objcopy.c (copy_file): Accept corefiles (format bfd_core).
+	(copy_object): Don't set the start address or flags of a core file.
+	(copy_section): Don't relocate a core file.  Don't copy contents
+	if the input section has the contents flag set, but the output
+	section does not (which happens with the fake 'note' pseudo-
+	sections that BFD creates for corefiles).
+
 2001-12-18  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* readelf.c (get_machine_flags): Recognize header flags for ABI and
