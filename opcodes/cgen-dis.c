@@ -1,31 +1,25 @@
 /* CGEN generic disassembler support code.
 
-Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
-This file is part of the GNU Binutils and GDB, the GNU debugger.
+   This file is part of the GNU Binutils and GDB, the GNU debugger.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "config.h"
+#include "sysdep.h"
 #include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
 #include "ansidecl.h"
 #include "libiberty.h"
 #include "bfd.h"
@@ -61,6 +55,7 @@ build_dis_hash_table ()
   int count = cgen_insn_count ();
   CGEN_OPCODE_DATA *data = cgen_current_opcode_data;
   CGEN_INSN_TABLE *insn_table = data->insn_table;
+  unsigned int entry_size = insn_table->entry_size;
   unsigned int hash_size = insn_table->dis_hash_table_size;
   const CGEN_INSN *insn;
   CGEN_INSN_LIST *insn_lists,*new_insns;
@@ -79,16 +74,21 @@ build_dis_hash_table ()
   /* Add compiled in insns.
      The table is scanned backwards as later additions are inserted in
      front of earlier ones and we want earlier ones to be prefered.
-     We stop at the first one as it is a reserved entry.  */
+     We stop at the first one as it is a reserved entry.
+     This is a bit tricky as the attribute member of CGEN_INSN is variable
+     among architectures.  This code could be moved to cgen-asm.in, but
+     I prefer to keep it here for now.  */
 
-  for (insn = insn_table->init_entries + insn_table->num_init_entries - 1;
+  for (insn = (CGEN_INSN *)
+       ((char *) insn_table->init_entries
+	+ entry_size * (insn_table->num_init_entries - 1));
        insn > insn_table->init_entries;
-       --insn, ++insn_lists)
+       insn = (CGEN_INSN *) ((char *) insn - entry_size), ++insn_lists)
     {
       /* We don't know whether the target uses the buffer or the base insn
 	 to hash on, so set both up.  */
-      value = insn->syntax.value;
-      switch (CGEN_INSN_BITSIZE (insn))
+      value = CGEN_INSN_VALUE (insn);
+      switch (CGEN_INSN_MASK_BITSIZE (insn))
 	{
 	case 8:
 	  buf[0] = value;
@@ -123,8 +123,8 @@ build_dis_hash_table ()
     {
       /* We don't know whether the target uses the buffer or the base insn
 	 to hash on, so set both up.  */
-      value = new_insns->insn->syntax.value;
-      switch (CGEN_INSN_BITSIZE (new_insns->insn))
+      value = CGEN_INSN_VALUE (new_insns->insn);
+      switch (CGEN_INSN_MASK_BITSIZE (new_insns->insn))
 	{
 	case 8:
 	  buf[0] = value;

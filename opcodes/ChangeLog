@@ -1,3 +1,14 @@
+Mon Jan 12 14:43:54 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-asm.c (build_asm_hash_table): Traverse compiled in table using
+	table provided entry size.  Use CGEN_INSN_MNEMONIC.
+	(cgen_parse_keyword): Rewrite.
+	* cgen-dis.c (build_dis_hash_table): Traverse compiled in table using
+	table provided entry size.  Use CGEN_INSN_MASK_BITSIZE.
+	* cgen-opc.c: Clean up pass over `struct foo' usage.
+	(cgen_keyword_lookup_value): Handle "" entry.
+	(cgen_keyword_add): Likewise.
+
 start-sanitize-sky
 Tue Jan  6 13:08:14 1998  Doug Evans  <devans@seba.cygnus.com>
 
