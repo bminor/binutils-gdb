@@ -40,6 +40,7 @@
 
 #include "elf-bfd.h"
 
+#include "solib-svr4.h"
 #include "ppc-tdep.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
@@ -2333,6 +2334,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       set_gdbarch_memory_remove_breakpoint (gdbarch,
 	                                    ppc_linux_memory_remove_breakpoint);
+      set_solib_svr4_fetch_link_map_offsets 
+	(gdbarch, ppc_linux_svr4_fetch_link_map_offsets);
     }
   else
     {

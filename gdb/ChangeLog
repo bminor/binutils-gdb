@@ -1,5 +1,26 @@
 2001-11-30  Kevin Buettner  <kevinb@redhat.com>
 
+	* ppc-linux-tdep.c (solib-svr4.h): Include.
+	(ppc_linux_svr4_fetch_link_map_offsets): New function.
+	* ppc-tdep.h (ppc_linux_svr4_fetch_link_map_offsets): Declare.
+	* rs6000-tdep.c (solib-svr4.h): Include.
+	(rs6000_gdbarch_init): Set up ppc_linux_svr4_fetch_link_map_offsets()
+	as the link map offsets fetcher.
+
+	* config/powerpc/aix.mt (TDEPFILES): Add solib-svr4.o.
+	* config/powerpc/macos.mt (TDEPFILES): Likewise.
+	* config/powerpc/nbsd.mt (TDEPFILES): Likewise.
+	* config/powerpc/ppc-eabi.mt (TDEPFILES): Likewise.
+	* config/powerpc/ppc-sim.mt (TDEPFILES): Likewise.
+	* config/powerpc/ppcle-eabi.mt (TDEPFILES): Likewise.
+	* config/powerpc/ppcle-sim.mt (TDEPFILES): Likewise.
+	* config/powerpc/vxworks.mt (TDEPFILES): Likewise.
+	* config/rs6000/aix4.mt (TDEPFILES): Likewise.
+	* config/rs6000/rs6000.mt (TDEPFILES): Likewise.
+	* config/rs6000/rs6000lynx.mt (TDEPFILES): Likewise.
+
+2001-11-30  Kevin Buettner  <kevinb@redhat.com>
+
 	From Louis Hamilton  <hamilton@redhat.com>:
 	* arm-tdep.c (solib-svr4.h): Include.
 	(arm_linux_svr4_fetch_link_map_offsets): New function.
