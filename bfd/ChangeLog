@@ -1,5 +1,19 @@
 2001-06-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-i386.c (struct elf_i386_pcrel_relocs_copied): Rename to
+	elf_i386_dyn_relocs.  Update comment.
+	(struct elf_i386_link_hash_entry): Rename pcrel_relocs_copied to
+	dyn_relocs.
+	(elf_i386_adjust_dynamic_symbol): Remove a BFD_ASSERT, change
+	others to aborts.
+	(allocate_plt_and_got_and_discard_relocs): Replace BFD_ASSERT with
+	abort.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(elf_i386_finish_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.  Tidy R_386_GOT32 and error
+	handling code.
+
 	Avoid creating COPY relocs if possible.
 	* elf32-i386.c (elf_i386_check_relocs): Tweak condition under
 	which .got created.  Mark symbols used by R_386_32 and R_386_PC32
