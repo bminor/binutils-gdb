@@ -1,3 +1,8 @@
+2002-11-25  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (scan_partial_symbols): Descend into namespace
+	pdi's with no name.
+
 2002-11-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Mark h8500 as broken.  Breakage occured Fri Nov 5
