@@ -1,3 +1,7 @@
+2001-03-12  Michael Chastain  <chastain@redhat.com>
+
+	* gdb.c++/annota2.exp: Fix regular expression for "post-query".
+
 2001-02-24  Michael Chastain  <chastain@redhat.com>
 
 	* gdb.c++/ref-types.exp: Change handwritten code to library
