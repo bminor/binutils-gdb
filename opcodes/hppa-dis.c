@@ -508,18 +508,6 @@ print_insn_hppa (memaddr, info)
 		      (*info->fprintf_func) (info->stream, "%s ",
 					     short_ldst_compl_names[GET_COMPL (insn)]);
 		      break;
-		    case 'q':
-		      (*info->fprintf_func)
-			(info->stream, "%s ",
-			 short_ldst_compl_names[(GET_FIELD (insn, 28, 28)
-						 | GET_FIELD (insn, 29, 29))]);
-		      break;
-		    case 'J':
-		      if (insn & 0x4)
-		        (*info->fprintf_func) (info->stream, ",mb ");
-		      else
-		        (*info->fprintf_func) (info->stream, ",ma ");
-		      break;
 		    case 's':
 		      (*info->fprintf_func) (info->stream, "%s ",
 					     short_bytes_compl_names[GET_COMPL (insn)]);
@@ -617,6 +605,62 @@ print_insn_hppa (memaddr, info)
 			   GET_FIELD (insn, 17, 18), GET_FIELD (insn, 20, 21),
 			   GET_FIELD (insn, 22, 23), GET_FIELD (insn, 24, 25));
 		      break;
+
+		    case 'q':
+		      {
+			int m, a;
+
+			m = GET_FIELD (insn, 28, 28);
+			a = GET_FIELD (insn, 29, 29);
+
+			if (m && !a)
+			  fputs_filtered (",ma ", info);
+			else if (m && a)
+			  fputs_filtered (",mb ", info);
+			else
+			  fputs_filtered (" ", info);
+			break;
+		      }
+
+		    case 'J':
+		      {
+			int opcode = GET_FIELD (insn, 0, 5);
+
+			if (opcode == 0x16 || opcode == 0x1e)
+			  {
+			    if (GET_FIELD (insn, 29, 29) == 0)
+			      fputs_filtered (",ma ", info);
+			    else
+			      fputs_filtered (",mb ", info);
+			  }
+			else
+			  fputs_filtered (" ", info);
+			break;
+		      }
+
+		    case 'c':
+		      {
+			int opcode = GET_FIELD (insn, 0, 5);
+
+			if (opcode == 0x13 || opcode == 0x1b)
+			  {
+			    if (GET_FIELD (insn, 18, 18) == 1)
+			      fputs_filtered (",mb ", info);
+			    else
+			      fputs_filtered (",ma ", info);
+			  }
+			else if (opcode == 0x17 || opcode == 0x1f)
+			  {
+			    if (GET_FIELD (insn, 31, 31) == 1)
+			      fputs_filtered (",ma ", info);
+			    else
+			      fputs_filtered (",mb ", info);
+			  }
+			else
+			  fputs_filtered (" ", info);
+
+			break;
+		      }
 		    }
 		  break;
 
