@@ -73,128 +73,52 @@ expect {
 # Here and elsewhere, we accept
 # "long", "long int", or "int" for long variables (whatis.exp already
 # has an XFAIL for "int" (Sun cc bug), so no need to fail it here).
-send_gdb "ptype struct t_struct\n"
-expect {
-    -re "type = struct t_struct \{.*
-    (unsigned |)char v_char_member;.*
-    (short|short int) v_short_member;.*
-    int v_int_member;.*
-    (long|long int|int) v_long_member;.*
-    float v_float_member;.*
-    double v_double_member;.*
-\}.*$gdb_prompt $"                      { pass "ptype structure" }
-    -re ".*$gdb_prompt $"	{ fail "ptype structure" }
-    timeout		{ fail "(timeout) ptype structure" }
-}
+gdb_test "ptype struct t_struct" "type = struct t_struct \{.*\[\r\n\]    (unsigned |)char v_char_member;.*\[\r\n\]    (short|short int) v_short_member;.*\[\r\n\]    int v_int_member;.*\[\r\n\]    (long|long int|int) v_long_member;.*\[\r\n\]    float v_float_member;.*\[\r\n\]    double v_double_member;.*\[\r\n\]\}.*" "ptype structure" 
+
 
 # Test the equivalence between '.' and '->' for struct member references.
 
 if [gdb_test "ptype v_struct1.v_float_member"	"type = float"]<0 then {
-    gdb_exit
-    gdb_start
     return -1
 }
 if [gdb_test "ptype v_struct1->v_float_member"	"type = float"]<0 then {
-    gdb_exit
-    gdb_start
     return -1
 }
 if [gdb_test "ptype v_t_struct_p.v_float_member"	"type = float"]<0 then {
-    gdb_exit
-    gdb_start
     return -1
 }
 if [gdb_test "ptype v_t_struct_p->v_float_member"	"type = float"]<0 then {
-    gdb_exit
-    gdb_start
     return -1
 }
 
 
-send_gdb "ptype struct link\n"
-expect {
-    -re "type = struct link \{.*
-    struct link \[*\]next;.*
-    struct link \[*(\]+linkfunc\[)(\]+(struct link \[*\], int\[)\]|);.*
-    struct t_struct stuff.1..2..3.;.*
-\}.*$gdb_prompt $"                      { pass "ptype linked list structure" }
-    -re ".*$gdb_prompt $"	{ 
+# IBM's xlc puts out bogus stabs--the stuff field is type 42,
+# which isn't defined.
 
-	# IBM's xlc puts out bogus stabs--the stuff field is type 42,
-	# which isn't defined.
-
-	fail "ptype linked list structure (compiler bug in IBM's xlc)"
-    }
-    timeout		{ fail "(timeout) ptype linked list structure" }
-}
-
+gdb_test "ptype struct link" "type = struct link \{.*\[\r\n\]    struct link \[*\]next;.*\[\r\n\]    struct link \[*(\]+linkfunc\[)(\]+(struct link \[*\], int\[)\]|);.*\[\r\n\]    struct t_struct stuff.1..2..3.;.*\[\r\n\]\}.*" "ptype linked list structure" 
 
 #
 # test ptype command with unions
 #
-send_gdb "ptype union t_union\n"
-expect {
-    -re "type = union t_union \{.*
-    (unsigned |)char v_char_member;.*
-    (short|short int) v_short_member;.*
-    int v_int_member;.*
-    (long|long int|int) v_long_member;.*
-    float v_float_member;.*
-    double v_double_member;.*
-\}.*$gdb_prompt $"                      { pass "ptype union" }
-    -re ".*$gdb_prompt $"	{ fail "ptype union" }
-    timeout		{ fail "(timeout) ptype union" }
-}
+gdb_test "ptype union t_union" "type = union t_union \{.*\[\r\n\]    (unsigned |)char v_char_member;.*\[\r\n\]    (short|short int) v_short_member;.*\[\r\n\]    int v_int_member;.*\[\r\n\]    (long|long int|int) v_long_member;.*\[\r\n\]    float v_float_member;.*\[\r\n\]    double v_double_member;.*\[\r\n\]\}.*" "ptype union" 
 
-
-send_gdb "ptype union tu_link\n"
-expect {
-    -re "type = union tu_link .*
-    struct link \[*\]next;.*
-    struct link \[(\*\]+linkfunc\[)(\]+(struct link \[*\], int\[)\]|);.*
-    struct t_struct stuff.1..2..3.;.*
-\}.*$gdb_prompt $"                      { pass "ptype linked list union" }
-    -re ".*$gdb_prompt $" {
-
-	# IBM's xlc puts out bogus stabs--the stuff field is type 42,
-	# which isn't defined.
-
-	fail "ptype linked list union (compiler bug in IBM's xlc)"
-    }
-    timeout		{ fail "(timeout) ptype linked list union" }
-}
-
+# IBM's xlc puts out bogus stabs--the stuff field is type 42,
+# which isn't defined.
+gdb_test "ptype union tu_link" "type = union tu_link .*\[\r\n\]    struct link \[*\]next;.*\[\r\n\]    struct link \[(\*\]+linkfunc\[)(\]+(struct link \[*\], int\[)\]|);.*\[\r\n\]    struct t_struct stuff.1..2..3.;.*\[\r\n\]\}.*" "ptype linked list union" 
 
 #
 # test ptype command with enums
 #
 
-send_gdb "ptype primary\n"
-expect {
-    -re "type = enum .red, green, blue.*$gdb_prompt $"       { pass "ptype unnamed enumeration" }
-    -re ".*$gdb_prompt $"	{ fail "ptype unnamed enumeration" }
-    timeout		{ fail "(timeout) ptype unnamed enumeration" }
-}
+gdb_test "ptype primary" "type = enum .red, green, blue.*" "ptype unnamed enumeration" 
 
-
-send_gdb "ptype enum colors\n"
-expect {
-    -re "type = enum colors \{yellow, purple, pink\}.*$gdb_prompt $"\
-	{ pass "ptype named enumeration" }
-    -re ".*$gdb_prompt $"	{ fail "ptype named enumeration" }
-    timeout		{ fail "(timeout) ptype named enumeration" }
-}
+gdb_test "ptype enum colors" "type = enum colors \{yellow, purple, pink\}.*" "ptype named enumeration" 
 
 
 #
 # test ptype command with enums as typedef
 #
-send_gdb "ptype boolean\n"
-expect {
-    -re "type = enum \{FALSE, TRUE\}.*$gdb_prompt $"   { pass "ptype unnamed typedef'd enumeration" }
-    -re ".*$gdb_prompt $"	{ fail "ptype unnamed typedef'd enumeration" }
-    timeout		{ fail "(timeout) ptype unnamed typedef'd enumeration" }
-}
+gdb_test "ptype boolean" "type = enum \{FALSE, TRUE\}.*" "ptype unnamed typedef'd enumeration" 
 
 # And check that whatis shows the name, not "enum {...}".
 
@@ -218,46 +142,19 @@ gdb_test "ptype t_union3" "type = union \{.*
  *double v_double_member;.*
  *int v_int_member;.*\}" "printing typedef'd union"
 
-send_gdb "ptype enum bvals\n"
-expect {
-    -re "type = enum bvals \{false, true\}.*$gdb_prompt $"   { pass "ptype named typedef'd enumf'd enum" }
-    -re ".*$gdb_prompt $"	{ fail "ptype named typedef'd enumeration" }
-    timeout		{ fail "(timeout) ptype named typedef'd enumeration" }
-}
-
+gdb_test "ptype enum bvals" "type = enum bvals \{false, true\}.*" "ptype named typedef'd enumf'd enum" 
 
 #
 # test ptype command with out-of-order enum values
 #
-send_gdb "ptype enum misordered\n"
-expect {
-    -re "type = enum misordered \{two = 2, one = 1, zero = 0, three = 3\}.*$gdb_prompt $"\
-	{ pass "ptype misordered enumeration" }
-    -re ".*$gdb_prompt $"	{ fail "ptype misordered  enumeration" }
-    timeout		{ fail "(timeout) ptype misordered enumeration" }
-}
-
+gdb_test "ptype enum misordered" "type = enum misordered \{two = 2, one = 1, zero = 0, three = 3\}.*" "ptype misordered enumeration" 
 
 #
 # test ptype command with a named enum's value
 #
-send_gdb "ptype three\n"
-expect {
-    -re "type = enum misordered \{two = 2, one = 1, zero = 0, three = 3\}.*$gdb_prompt $"\
-	{ pass "ptype named enumeration member" }
-    -re ".*$gdb_prompt $"	{ fail "ptype named enumeration member" }
-    timeout		{ fail "(timeout) ptype named enumeration member" }
-}
+gdb_test "ptype three" "type = enum misordered \{two = 2, one = 1, zero = 0, three = 3\}.*" "ptype named enumeration member" 
 
-
-send_gdb "ptype red\n"
-expect {
-    -re "type = enum \{red, green, blue\}.*$gdb_prompt $"\
-	{ pass "ptype unnamed enumeration member" }
-    -re ".*$gdb_prompt $"	{ fail "ptype unnamed enumeration member" }
-    timeout		{ fail "(timeout) ptype unnamed enumeration member" }
-}
-
+gdb_test "ptype red" "type = enum \{red, green, blue\}.*" "ptype unnamed enumeration member" 
 
 #
 # test ptype command with basic C types
@@ -293,14 +190,7 @@ expect {
 #    timeout		{ fail "(timeout) ptype unsigned char" }
 #}
 
-
-send_gdb "ptype v_short\n"
-expect {
-    -re "type = short(| int).*$gdb_prompt $"	{ pass "ptype short" }
-    -re ".*$gdb_prompt $"	{ fail "ptype short" }
-    timeout		{ fail "(timeout) ptype short" }
-}
-
+gdb_test "ptype v_short" "type = short(| int).*" "ptype short" 
 
 #send "ptype v_signed_short\n"
 #expect {
@@ -318,13 +208,7 @@ expect {
 #}
 
 
-send_gdb "ptype v_int\n"
-expect {
-    -re "type = int.*$gdb_prompt $"	{ pass "ptype int" }
-    -re ".*$gdb_prompt $"	{ fail "ptype int" }
-    timeout		{ fail "(timeout) ptype int" }
-}
-
+gdb_test "ptype v_int" "type = int.*" "ptype int" 
 
 #send "ptype v_signed_int\n"
 #expect {
@@ -604,90 +488,21 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 # test ptype command with nested structure and union
 #
-send_gdb "ptype struct outer_struct\n"
-expect {
-    -re "type = struct outer_struct \{.*
-    int outer_int;.*
-    struct inner_struct inner_struct_instance;.*
-    union inner_union inner_union_instance;.*
-    (long|long int|int) outer_long;.*
-\}.*$gdb_prompt $"                { pass "ptype outer structure" }
-    -re ".*$gdb_prompt $"	{ fail "ptype outer structure" }
-    timeout		{ fail "(timeout) ptype outer structure" }
-}
+gdb_test "ptype struct outer_struct" "type = struct outer_struct \{.*\[\r\n\]    int outer_int;.*\[\r\n\]    struct inner_struct inner_struct_instance;.*\[\r\n\]    union inner_union inner_union_instance;.*\[\r\n\]    (long|long int|int) outer_long;.*\[\r\n\]\}.*" "ptype outer structure" 
 
+gdb_test "ptype struct inner_struct" "type = struct inner_struct \{.*\[\r\n\]    int inner_int;.*\[\r\n\]    (long|long int|int) inner_long;.*\[\r\n\]\}.*" "ptype inner structure" 
 
-send_gdb "ptype struct inner_struct\n"
-expect {
-    -re "type = struct inner_struct \{.*
-    int inner_int;.*
-    (long|long int|int) inner_long;.*
-\}.*$gdb_prompt $"                { pass "ptype inner structure" }
-    -re ".*$gdb_prompt $"	{ fail "ptype inner structure" }
-    timeout		{ fail "(timeout) ptype inner structure" }
-}
+gdb_test "ptype union inner_union" "type = union inner_union \{.*\[\r\n\]    int inner_union_int;.*\[\r\n\]    (long|long int|int) inner_union_long;.*\[\r\n\]\}.*" "ptype inner union" 
 
+gdb_test "ptype nested_su" "type = struct outer_struct \{.*\[\r\n\]    int outer_int;.*\[\r\n\]    struct inner_struct inner_struct_instance;.*\[\r\n\]    union inner_union inner_union_instance;.*\[\r\n\]    (long|long int|int) outer_long;.*\[\r\n\]\}.*" "ptype nested structure" 
 
-send_gdb "ptype union inner_union\n"
-expect {
-    -re "type = union inner_union \{.*
-    int inner_union_int;.*
-    (long|long int|int) inner_union_long;.*
-\}.*$gdb_prompt $"                { pass "ptype inner union" }
-    -re ".*$gdb_prompt $"	{ fail "ptype inner union" }
-    timeout		{ fail "(timeout) ptype inner union" }
-}
+gdb_test "ptype nested_su.outer_int" "type = int.*" "ptype outer int" 
 
+gdb_test "ptype nested_su.inner_struct_instance" "type = struct inner_struct \{.*\[\r\n\]    int inner_int;.*\[\r\n\]    (long|long int|int) inner_long;.*\[\r\n\]\}.*" "ptype nested structure" 
 
-send_gdb "ptype nested_su\n"
-expect {
-    -re "type = struct outer_struct \{.*
-    int outer_int;.*
-    struct inner_struct inner_struct_instance;.*
-    union inner_union inner_union_instance;.*
-    (long|long int|int) outer_long;.*
-\}.*$gdb_prompt $"                { pass "ptype nested structure" }
-    -re ".*$gdb_prompt $"	{ fail "ptype nested structure" }
-    timeout		{ fail "(timeout) ptype nested structure" }
-}
+gdb_test "ptype nested_su.inner_struct_instance.inner_int" "type = int.*" "ptype inner int" 
 
-
-send_gdb "ptype nested_su.outer_int\n"
-expect {
-    -re "type = int.*$gdb_prompt $"           { pass "ptype outer int" }
-    -re ".*$gdb_prompt $"	{ fail "ptype outer int" }
-    timeout		{ fail "(timeout) ptype outer int" }
-}
-
-
-send_gdb "ptype nested_su.inner_struct_instance\n"
-expect {
-    -re "type = struct inner_struct \{.*
-    int inner_int;.*
-    (long|long int|int) inner_long;.*
-\}.*$gdb_prompt $"                { pass "ptype nested structure" }
-    -re ".*$gdb_prompt $"	{ fail "ptype nested structure" }
-    timeout		{ fail "(timeout) ptype nested structure" }
-}
-
-
-send_gdb "ptype nested_su.inner_struct_instance.inner_int\n"
-expect {
-    -re "type = int.*$gdb_prompt $"           { pass "ptype inner int" }
-    -re ".*$gdb_prompt $"	{ fail "ptype inner int" }
-    timeout		{ fail "(timeout) ptype inner int" }
-}
-
-
-send_gdb "ptype nested_su.inner_union_instance\n"
-expect {
-    -re "type = union inner_union \{.*
-    int inner_union_int;.*
-    (long|long int|int) inner_union_long;.*
-\}.*$gdb_prompt $"                { pass "ptype nested union" }
-    -re ".*$gdb_prompt $"	{ fail "ptype nested union" }
-    timeout		{ fail "(timeout) ptype nested union" }
-}
+gdb_test "ptype nested_su.inner_union_instance" "type = union inner_union \{.*\[\r\n\]    int inner_union_int;.*\[\r\n\]    (long|long int|int) inner_union_long;.*\[\r\n\]\}.*" "ptype nested union" 
 
 # Test printing type of string constants and array constants, but
 # requires a running process.  These call malloc, and can take a long
@@ -696,23 +511,20 @@ expect {
 # UDI can't do this (PR 2416).  XFAIL is not suitable, because attempting
 # the operation causes a slow painful death rather than a nice simple failure.
 
-if ![istarget "*-*-udi*"] then {
-  if [runto_main] then {
-    setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype \"abc\""	"type = char \\\[4\\\]"
-    setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype {'a','b','c'}"	"type = char \\\[3\\\]"
-    setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype {0,1,2}"		"type = int \\\[3\\\]"
-    setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype {(long)0,(long)1,(long)2}"	  "type = long \\\[3\\\]"
-    setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype {(float)0,(float)1,(float)2}" "type = float \\\[3\\\]"
-    setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype {{0,1,2},{3,4,5}}"	"type = int \\\[2\\\]\\\[3\\\]"
-    setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype {4,5,6}\[2\]"	"type = int"
-    setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype *&{4,5,6}\[1\]"	"type = int"
+if [runto_main] then {
+
+  if [target_info exists gdb,cannot_call_functions] {
+    setup_xfail "*-*-*" 2416
+    fail "This target can not call functions"
+    continue
   }
+
+  gdb_test "ptype \"abc\""	"type = char \\\[4\\\]"
+  gdb_test "ptype {'a','b','c'}"	"type = char \\\[3\\\]"
+  gdb_test "ptype {0,1,2}"		"type = int \\\[3\\\]"
+  gdb_test "ptype {(long)0,(long)1,(long)2}"	  "type = long \\\[3\\\]"
+  gdb_test "ptype {(float)0,(float)1,(float)2}" "type = float \\\[3\\\]"
+  gdb_test "ptype {{0,1,2},{3,4,5}}"	"type = int \\\[2\\\]\\\[3\\\]"
+  gdb_test "ptype {4,5,6}\[2\]"	"type = int"
+  gdb_test "ptype *&{4,5,6}\[1\]"	"type = int"
 }

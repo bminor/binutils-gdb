@@ -1,3 +1,11 @@
+Thu Feb 20 13:57:01 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/scope.exp: Use gdb_test.
+
+	* gdb.base/ptype.exp: Don't call "gdb_exit; gdb_start" if we're
+	aborting; the testsuite driver will do that for us (see
+	gdb_finish). Also, use gdb_test in a few more places.
+
 Thu Feb 20 13:32:24 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/help.exp: Fix syntax of "help info all-registers" test.
