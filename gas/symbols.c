@@ -38,31 +38,9 @@ symbolS *symbol_rootP;
 symbolS *symbol_lastP;
 symbolS abs_symbol;
 
-symbolS *dot_text_symbol;
-symbolS *dot_data_symbol;
-symbolS *dot_bss_symbol;
-
 struct obstack notes;
 
 static void fb_label_init PARAMS ((void));
-
-void
-symbol_begin ()
-{
-  symbol_lastP = NULL;
-  symbol_rootP = NULL;		/* In case we have 0 symbols (!!) */
-  sy_hash = hash_new ();
-  memset ((char *) (&abs_symbol), '\0', sizeof (abs_symbol));
-#ifdef BFD_ASSEMBLER
-  abs_symbol.bsym = bfd_abs_section.symbol;
-#else
-  /* Can't initialise a union. Sigh. */
-  S_SET_SEGMENT (&abs_symbol, absolute_section);
-#endif
-#ifdef LOCAL_LABELS_FB
-  fb_label_init ();
-#endif /* LOCAL_LABELS_FB */
-}
 
 /*
  *			symbol_new()
@@ -896,8 +874,8 @@ dollar_label_name (n, augend)
 static long fb_low_counter[FB_LABEL_SPECIAL];
 static long *fb_labels;
 static long *fb_label_instances;
-static long fb_label_count = 0;
-static long fb_label_max = 0;
+static long fb_label_count;
+static long fb_label_max;
 
 /* this must be more than FB_LABEL_SPECIAL */
 #define FB_LABEL_BUMP_BY (FB_LABEL_SPECIAL + 6)
@@ -1242,5 +1220,23 @@ S_SET_NAME (s, name)
   s->bsym->name = name;
 }
 #endif /* BFD_ASSEMBLER */
+
+void
+symbol_begin ()
+{
+  symbol_lastP = NULL;
+  symbol_rootP = NULL;		/* In case we have 0 symbols (!!) */
+  sy_hash = hash_new ();
+  memset ((char *) (&abs_symbol), '\0', sizeof (abs_symbol));
+#ifdef BFD_ASSEMBLER
+  abs_symbol.bsym = bfd_abs_section.symbol;
+#else
+  /* Can't initialise a union. Sigh. */
+  S_SET_SEGMENT (&abs_symbol, absolute_section);
+#endif
+#ifdef LOCAL_LABELS_FB
+  fb_label_init ();
+#endif /* LOCAL_LABELS_FB */
+}
 
 /* end of symbols.c */
