@@ -6556,7 +6556,7 @@ frame_display_row (fc, need_col_headers, max_regs)
 	  strcpy (tmp, "u");
 	  break;
 	case DW_CFA_same_value:
-	  strcpy (tmp, "u");
+	  strcpy (tmp, "s");
 	  break;
 	case DW_CFA_offset:
 	  sprintf (tmp, "c%+d", fc->col_offset[r]);

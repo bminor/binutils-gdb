@@ -1,3 +1,7 @@
+2000-11-30  Richard Earnshaw  <rearnsha@arm.com>
+
+	* readelf.c (frame_display_row): Output 's' for DW_CFA_same_value.
+
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* MAINTAINERS: Add Jörn Rennecke and self as SH maintainers.
