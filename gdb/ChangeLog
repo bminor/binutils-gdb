@@ -1,5 +1,9 @@
 2003-12-29  Eli Zaretskii  <eliz@elta.co.il>
 
+	* go32-nat.c (go32_sldt, go32_sgdt, go32_sidt, go32_pte): Fix
+	mismatches between format string and arguments (avoids compiler
+	warnings).
+
 	* configure.in: Set ac_cv_search_tgetent to "none required" for
 	"*djgpp*" targets as well (DJGPP doesn't have termcap and doesn't
 	need one).
