@@ -1,5 +1,9 @@
 Thu Jun  1 16:15:16 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* archive.c (_bfd_write_archive_contents): Disable extended name
+	table until it can be made optional, so that native AR has half a
+	chance on SunOS and HP/UX.
+
 	* linker.c (_bfd_generic_link_output_symbols, case
 	bfd_link_hash_indirect): Add cast to correct pointer types.
 
