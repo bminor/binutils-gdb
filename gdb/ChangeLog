@@ -1,3 +1,9 @@
+2004-06-07  Guy Martin  <gmsoft@gentoo.org>
+
+	Committed by Randolph Chung.
+	* hppa-linux-nat.c: Include the correct version of the header file
+	depending on the kernel version.
+
 2004-06-06  Randolph Chung  <tausq@debian.org>
 
 	* infrun.c (trap_expected_after_continue): Remove HP_OS_BUG workaround.
