@@ -13,6 +13,11 @@ Wed Dec  6 14:33:50 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 Wed Dec  6 14:59:06 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/aix.em (unix_ld): New static variable.
+	(gld${EMULATION_NAME}_parse_args): Handle -unix.
+	(gld${EMULATION_NAME}_before_allocation): If unix_ld, pass
+	gc as false and export_defineds as true to size_dynamic_sections.
+
 	* ldexp.c (exp_fold_tree): Permit assignments to dot in the final
 	phase if the current section is abs_output_section.
 
