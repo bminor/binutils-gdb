@@ -443,7 +443,8 @@ cached_iconv_convert (struct cached_iconv *ci, int from_char, int *to_char)
         return 0;
 
       /* Anything else is mysterious.  */
-      internal_error ("Error converting character `%d' from `%s' to `%s' "
+      internal_error (__FILE__, __LINE__,
+		      "Error converting character `%d' from `%s' to `%s' "
                       "character set: %s",
                       from_char, ci->from->name, ci->to->name,
                       safe_strerror (errno));
