@@ -6,10 +6,10 @@ _dnl__ $Id$
 @c %**start of header 
 @setfilename _GDBP__.info
 _if__(_GENERIC__)
-@settitle _GDBN__, The GNU Debugger 
+@settitle Debugging with _GDBN__
 _fi__(_GENERIC__)
 _if__(!_GENERIC__)
-@settitle _GDB__, The GNU Debugger (_HOST__)
+@settitle Debugging with _GDBN__ (_HOST__)
 _fi__(!_GENERIC__)
 @setchapternewpage odd
 @c @smallbook
@@ -64,8 +64,8 @@ _fi__(0)
 This file documents the GNU debugger _GDBN__.
 
 @c !!set edition, date, version
-This is Edition 4.05, June 1992, 
-of @cite{Using GDB: A Guide to the GNU Source-Level Debugger}
+This is Edition 4.06, July 1992, 
+of @cite{Debugging with _GDBN__: the GNU Source-Level Debugger}
 for GDB Version _GDB_VN__.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
@@ -96,21 +96,21 @@ instead of in the original English.
 @end ifinfo
 
 @titlepage
-@title Using _GDBN__
+@title Debugging with _GDBN__
 @subtitle The GNU Source-Level Debugger
 _if__(!_GENERIC__)
 @subtitle on _HOST__ Systems
 _fi__(!_GENERIC__)
 @sp 1
 @c !!set edition, date, version
-@subtitle Edition 4.05, for _GDBN__ version _GDB_VN__
-@subtitle June 1992
+@subtitle Edition 4.06, for _GDBN__ version _GDB_VN__
+@subtitle July 1992
 @author by Richard M. Stallman and Roland H. Pesch
 @page
 @tex
 {\parskip=0pt
 \hfill pesch\@cygnus.com\par
-\hfill {\it Using _GDBN__}, \manvers\par
+\hfill {\it Debugging with _GDBN__}, \manvers\par
 \hfill \TeX{}info \texinfoversion\par
 }
 @end tex
@@ -139,12 +139,12 @@ instead of in the original English.
 
 @ifinfo
 @node Top, Summary, (dir), (dir)
-@top _GDBN__, the GNU symbolic debugger
+@top Debugging with _GDBN__
 
 This file describes _GDBN__, the GNU symbolic debugger.
 
 @c !!set edition, date, version
-This is Edition 4.05, June 1992, for GDB Version _GDB_VN__.
+This is Edition 4.06, July 1992, for GDB Version _GDB_VN__.
 @end ifinfo
 
 @menu
