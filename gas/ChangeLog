@@ -1,3 +1,52 @@
+Sat Feb  5 00:15:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in (rs6000*): Use cpu_type ppc.
+	(ppc-*-aix*): New target; use coff and force bfd_gas.
+	* config/tc-ppc.h, config/tc-ppc.c: New files for PowerPC/POWER
+	(RS/6000) support.  At the moment, only XCOFF is supported.
+
+	* config/obj-coff.c (SA_SET_SYM_ENDNDX): Made non-static.
+	(S_SET_DATA_TYPE): Likewise.
+	(coff_last_function): Renamed from local static last_functionP in
+	coff_frob_symbol and made externally visible.
+	(coff_frob_symbol): New local static set_end; use it to try to
+	avoid calling SA_SET_SYM_ENDNDX on a symbol that will be punted.
+	* config/obj-coff.h (S_SET_DATA_TYPE): Declare.
+	(SA_SET_SYM_ENDNDX): Declare.
+	(coff_last_function): Declare.
+
+	* expr.c (operand): If DOLLAR_DOT is defined, accept `$' as
+	equivalent to `.' to mean the current location.
+
+	* read.c (LEX_BR): If not defined, define as 0.
+	(lex_type): Use LEX_BR as the type of `{',`}',`[',`]'.
+
+	* symbols.c (symbol_new): If tc_canonicalize_symbol_name is
+	defined, call it with preserved_copy_of_name.  If
+	tc_symbol_new_hook is defined, call it on the new symbol.
+	(symbol_find_base): If tc_canonicalize_symbol_name is defined,
+	call it on a copy of the name argument.
+
+	* write.c (write_object_file): Simplified usage of obj_frob_symbol
+	and tc_frob_symbol.  Always call both if the symbol is going to be
+	output.
+
+	* write.c (relax_segment): Use %ld rather than %d when printing
+	fragP->fr_var, and cast it to long.
+
+	Changed relocs to be based on subsegments (when BFD_ASSEMBLER).
+	* subsegs.h (struct frchain): If BFD_ASSEMBLER, added new fields
+	fix_root and fix_tail.
+	(segment_info_type): If BFD_ASSEMBLER, don't define fix_tail
+	field.
+	* write.c (fix_new_internal): If BFD_ASSEMBLER, set fix_rootP and
+	fix_tailP based on frchain_now, not seg_info (now_seg).
+	(chain_frchains_together_1): Chain the subsegment relocs together.
+	* subsegs.c (subseg_change): Don't clear fix_tail field.
+	(subseg_get): Likewise.
+	* literal.c (add_to_literal_pool): Look through the relocs via
+	frchain_now, not seginfo.
+
 Thu Feb  3 23:07:30 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-ecoff.h (TARGET_SYMBOL_FIELDS): Changed

@@ -1,6 +1,6 @@
 # This file is configure.in
 #
-#   Copyright (C) 1987-1992 Free Software Foundation, Inc.
+#   Copyright (C) 1987-1992,1993,1994 Free Software Foundation, Inc.
 #
 #  This file is part of GAS, the GNU Assembler.
 #
@@ -112,6 +112,7 @@ case ${target_cpu} in
   m8*)		cpu_type=m88k ;;
   mips*el)	cpu_type=mips endian=little;;
   mips*)	cpu_type=mips ;;
+  rs6000*)	cpu_type=ppc ;;
   sparc64)	cpu_type=sparc64 obj_format=elf ;; # v9
   sparclite*)   cpu_type=sparc ;;
   *)		cpu_type=${target_cpu} ;;
@@ -189,6 +190,8 @@ case ${generic_target} in
 			  gas_target=mips-lit
 			fi
 			;;
+
+  ppc-*-aix*)		obj_format=coff bfd_gas=yes ;;
 
   sh-*-coff)		obj_format=coffbfd ;;
 
