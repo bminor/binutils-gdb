@@ -424,6 +424,7 @@ install_minimal_symbols (objfile)
   register struct msym_bunch *bunch;
   register struct minimal_symbol *msymbols;
   int alloc_count;
+  register char leading_char;
 
   if (msym_count > 0)
     {
@@ -451,24 +452,17 @@ install_minimal_symbols (objfile)
 	 each bunch is full. */
       
       mcount = objfile->minimal_symbol_count;
+      leading_char = bfd_get_symbol_leading_char (objfile->obfd);
       
       for (bunch = msym_bunch; bunch != NULL; bunch = bunch -> next)
 	{
 	  for (bindex = 0; bindex < msym_bunch_index; bindex++, mcount++)
 	    {
 	      msymbols[mcount] = bunch -> contents[bindex];
-#ifdef NAMES_HAVE_UNDERSCORE
-	      if (msymbols[mcount].name[0] == '_')
+	      if (msymbols[mcount].name[0] == leading_char)
 		{
 		  msymbols[mcount].name++;
 		}
-#endif
-#ifdef SOME_NAMES_HAVE_DOT
-	      if (msymbols[mcount].name[0] == '.')
-		{
-		  msymbols[mcount].name++;
-		}
-#endif
 	    }
 	  msym_bunch_index = BUNCH_SIZE;
 	}

@@ -90,7 +90,6 @@ struct so_list {
   char so_name[MAX_PATH_SIZE];		/* shared object lib name (FIXME) */
   char symbols_loaded;			/* flag: symbols read in yet? */
   char from_tty;			/* flag: print msgs? */
-  bfd *so_bfd;				/* bfd for so_name */
   struct objfile *objfile;		/* objfile for loaded lib */
   struct section_table *sections;
   struct section_table *sections_end;
@@ -186,9 +185,11 @@ solib_map_sections (so)
   char *scratch_pathname;
   int scratch_chan;
   struct section_table *p;
+  struct cleanup *old_chain;
+  bfd *abfd;
   
   filename = tilde_expand (so -> so_name);
-  make_cleanup (free, filename);
+  old_chain = make_cleanup (free, filename);
   
   scratch_chan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
 			&scratch_pathname);
@@ -201,19 +202,24 @@ solib_map_sections (so)
     {
       perror_with_name (filename);
     }  
+  make_cleanup (free, scratch_pathname);
 
-  so -> so_bfd = bfd_fdopenr (scratch_pathname, NULL, scratch_chan);
-  if (!so -> so_bfd)
+  abfd = bfd_fdopenr (scratch_pathname, NULL, scratch_chan);
+  if (!abfd)
     {
+      close (scratch_chan);
       error ("Could not open `%s' as an executable file: %s",
 	     scratch_pathname, bfd_errmsg (bfd_error));
     }
-  if (!bfd_check_format (so -> so_bfd, bfd_object))
+
+  make_cleanup (bfd_close, abfd);	/* Zap bfd, close scratch_chan. */
+
+  if (!bfd_check_format (abfd, bfd_object))
     {
       error ("\"%s\": not in executable format: %s.",
 	     scratch_pathname, bfd_errmsg (bfd_error));
     }
-  if (build_section_table (so -> so_bfd, &so -> sections, &so -> sections_end))
+  if (build_section_table (abfd, &so -> sections, &so -> sections_end))
     {
       error ("Can't find the file sections in `%s': %s", 
 	     exec_bfd -> filename, bfd_errmsg (bfd_error));
@@ -232,6 +238,9 @@ solib_map_sections (so)
 	  so -> textsection = p;
 	}
     }
+
+  /* Free the file names, close the file now.  */
+  do_cleanups (old_chain);
 }
 
 /* Read all dynamically loaded common symbol definitions from the inferior
@@ -273,12 +282,11 @@ solib_add_common_symbols (rtc_symp, objfile)
 
 	  /* Don't enter the symbol twice if the target is re-run. */
 
-#ifdef NAMES_HAVE_UNDERSCORE
-	  if (*name == '_')
+	  if (name[0] == bfd_get_symbol_leading_char (objfile->obfd))
 	    {
 	      name++;
 	    }
-#endif
+
 	  /* FIXME:  Do we really want to exclude symbols which happen
 	     to match symbols for other locations in the inferior's
 	     address space, even when they are in different linkage units? */
@@ -634,7 +642,7 @@ find_solib (so_list_ptr)
       /* Get next link map structure from inferior image and build a local
 	 abbreviated load_map structure */
       new = (struct so_list *) xmalloc (sizeof (struct so_list));
-      (void) memset ((char *) new, 0, sizeof (struct so_list));
+      memset ((char *) new, 0, sizeof (struct so_list));
       new -> lmaddr = lm;
       /* Add the new node as the next node in the list, or as the root
 	 node if this is the first one. */
@@ -774,9 +782,9 @@ solib_add (arg_string, from_tty, target)
 	      if (so -> so_name[0])
 		{
 		  count = so -> sections_end - so -> sections;
-		  (void) memcpy ((char *) (target -> to_sections + old),
-				 so -> sections, 
-				 (sizeof (struct section_table)) * count);
+		  memcpy ((char *) (target -> to_sections + old),
+			  so -> sections, 
+			  (sizeof (struct section_table)) * count);
 		  old += count;
 		}
 	    }
@@ -891,10 +899,6 @@ clear_solib()
       if (so_list_head -> sections)
 	{
 	  free ((PTR)so_list_head -> sections);
-	}
-      if (so_list_head -> so_bfd)
-	{
-	  bfd_close (so_list_head -> so_bfd);
 	}
       next = so_list_head -> next;
       free((PTR)so_list_head);

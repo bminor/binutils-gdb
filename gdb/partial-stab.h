@@ -117,13 +117,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  SET_NAMESTRING ();
 	  /* Check for __DYNAMIC, which is used by Sun shared libraries. 
 	     Record it even if it's local, not global, so we can find it.
-	     Same with virtual function tables, both global and static.  */
-	  if ((namestring[8] == 'C' && (strcmp ("__DYNAMIC", namestring) == 0))
-	      || VTBL_PREFIX_P ((namestring+HASH_OFFSET)))
-	    {
-	      record_minimal_symbol (namestring, CUR_SYMBOL_VALUE,
-				    CUR_SYMBOL_TYPE, objfile); /* Always */
-	    }
+	     FIXME:  this might want to check for _DYNAMIC and the current
+		     symbol_leading_char.  */
+	  if (namestring[8] == 'C' && !strcmp ("__DYNAMIC", namestring))
+	    goto record_it;
+
+	  /* Same with virtual function tables, both global and static.  */
+	  {
+	    char *tempstring = namestring;
+	    if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
+	      tempstring++;
+	    if (VTBL_PREFIX_P ((tempstring)))
+	      goto record_it;
+	  }
 #endif /* DBXREAD_ONLY */
 	  continue;
 

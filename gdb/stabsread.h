@@ -1,5 +1,5 @@
 /* Include file for stabs debugging format support functions.
-   Copyright (C) 1986-1992 Free Software Foundation, Inc.
+   Copyright 1986-1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -68,15 +68,6 @@ EXTERN int common_block_i;
    Used to detect pairs of N_SO symbols. */
 
 EXTERN int previous_stab_code;
-
-/* Setup a define to deal cleanly with the underscore problem */
-
-#ifdef NAMES_HAVE_UNDERSCORE
-#define HASH_OFFSET 1
-#else
-#define HASH_OFFSET 0
-#endif
-
 
 /* Support for Sun changes to dbx symbol format */
 

@@ -1,5 +1,5 @@
 /* Main loop for the standalone kernel debugger, for GDB, the GNU Debugger.
-   Copyright 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -27,11 +27,7 @@ char **environ;
 
 start ()
 {
-#ifdef NAMES_HAVE_UNDERSCORE
-  INIT_STACK (_kdb_stack_beg, _kdb_stack_end);
-#else /* not NAMES_HAVE_UNDERSCORE */
   INIT_STACK (kdb_stack_beg, kdb_stack_end);
-#endif /* not NAMES_HAVE_UNDERSCORE */
 
   environ = environment;
 

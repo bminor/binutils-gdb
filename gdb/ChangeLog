@@ -1,3 +1,30 @@
+Thu Dec 17 00:44:57 1992  John Gilmore  (gnu@cygnus.com)
+
+	Eliminate uses of NAMES_HAVE_UNDERSCORE, using
+	bfd_get_symbol_leading_char instead.
+
+	* coffread.c (EXTERNAL_NAME):  New macro for removing possible
+	leading character from names.
+	(read_coff_symtab):  Use BFD's FILE *, don't open a second one.
+	(read_coff_symtab):  Complain() about .bb/.eb mismatch, don't error().
+	(process_coff_symbol, coff_read_struct_type, coff_read_enum_type):
+	Replace NAMES_HAVE_UNDERSCORE with EXTERNAL_NAME.
+
+	* kdb-start.c (main):  Remove NAMES_HAVE_UNDERSCORE.
+	* minsyms.c (install_minimal_symbols):  Replace NAMES_HAVE_UNDERSCORE.
+	Remove SOME_NAMES_HAVE_DOT support (apparently unused).
+	* partial-stab.h:  Replace NAMES_HAVE_UNDERSCORE.
+	* solib.c:  Replace NAMES_HAVE_UNDERSCORE.
+	* stabsread.h:  Remove NAMES_HAVE_UNDERSCORE and HASH_OFFSET.
+	* symfile.c (syms_from_objfile):  Insert debugging check to test
+	NAMES_HAVE_UNDERSCORE setting against the BFD support.  FIXME,
+	remove this (and all tm-*.h NAMES_HAVE_UNDERSCORE) soon.
+
+	* doc/gdbint.texinfo (Host Conditionals):  Remove
+	NAMES_HAVE_UNDERSCORE, SOME_NAMES_HAVE_DOT, document
+	MEM_FNS_DECLARED.
+	(Target Conditionals):  Remove all of the above.
+
 Tue Dec 15 10:05:56 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coffread.c (decode_type): catch negative tagndx fields generated

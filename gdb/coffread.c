@@ -1,6 +1,6 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
-   Copyright 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1987, 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -31,8 +31,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <string.h>
 
+#include "libbfd.h"		/* FIXME secret internal data from BFD */
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 #include "libcoff.h"		/* FIXME secret internal data from BFD */
+
+/* Translate an external name string into a user-visible name.  */
+#define	EXTERNAL_NAME(string, abfd) \
+	(string[0] == bfd_get_symbol_leading_char(abfd)? string+1: string)
 
 /* To be an sdb debug type, type must have at least a basic or primary
    derived type.  Using this rather than checking against T_NULL is
@@ -189,6 +194,9 @@ struct complaint misordered_blocks_complaint =
 
 struct complaint tagndx_bad_complaint =
   {"Symbol table entry for %s has bad tagndx value", 0, 0};
+
+struct complaint eb_complaint = 
+  {"Mismatched .eb symbol ignored starting at symnum %d", 0, 0};
 
 /* Simplified internal version of coff symbol table information */
 
@@ -901,7 +909,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
   struct cleanup *old_chain;
   int val;
 
-  stream = fopen (objfile->name, FOPEN_RB);
+  stream = bfd_cache_lookup(objfile->obfd);
   if (!stream)
    perror_with_name(objfile->name);
 
@@ -910,9 +918,8 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
   if (val < 0)
     perror_with_name (objfile->name);
 
-  /* These cleanups will be discarded below if we succeed.  */
+  /* This cleanup will be discarded below if we succeed.  */
   old_chain = make_cleanup (free_objfile, objfile);
-  make_cleanup (fclose, stream);
 
   current_objfile = objfile;
   nlist_stream_global = stream;
@@ -1148,8 +1155,10 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 	      {
 		new = coff_context_stack;
 		if (new == 0 || depth != new->depth)
-		  error ("Invalid symbol data: .bb/.eb symbol mismatch at symbol %d.",
-			 symnum);
+		  {
+		    complain (&eb_complaint, (char *)symnum);
+		    break;
+		  }
 		if (coff_local_symbols && coff_context_stack->next)
 		  {
 		    /* Make a block for the local symbols within.  */
@@ -1567,16 +1576,11 @@ process_coff_symbol (cs, aux, objfile)
   register struct symbol *sym
     = (struct symbol *) obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
   char *name;
-#ifdef NAMES_HAVE_UNDERSCORE
-  int offset = 1;
-#else
-  int offset = 0;
-#endif
   struct type *temptype;
 
   memset (sym, 0, sizeof (struct symbol));
   name = cs->c_name;
-  name = (name[0] == '_' ? name + offset : name);
+  name = EXTERNAL_NAME (name, objfile->obfd);
   SYMBOL_NAME (sym) = obstack_copy0 (&objfile->symbol_obstack, name, strlen (name));
 
   /* default assumptions */
@@ -1976,11 +1980,6 @@ coff_read_struct_type (index, length, lastsym)
   int nfields = 0;
   register int n;
   char *name;
-#ifdef NAMES_HAVE_UNDERSCORE
-  int offset = 1;
-#else
-  int offset = 0;
-#endif
   struct coff_symbol member_sym;
   register struct coff_symbol *ms = &member_sym;
   struct internal_syment sub_sym;
@@ -1996,7 +1995,7 @@ coff_read_struct_type (index, length, lastsym)
     {
       read_one_sym (ms, &sub_sym, &sub_aux);
       name = ms->c_name;
-      name = (name[0] == '_' ? name + offset : name);
+      name = EXTERNAL_NAME (name, current_objfile->obfd);
 
       switch (ms->c_sclass)
 	{
@@ -2074,11 +2073,6 @@ coff_read_enum_type (index, length, lastsym)
   struct coff_pending *osyms, *syms;
   register int n;
   char *name;
-#ifdef NAMES_HAVE_UNDERSCORE
-  int offset = 1;
-#else
-  int offset = 0;
-#endif
 
   type = coff_alloc_type (index);
   if (within_function)
@@ -2091,7 +2085,7 @@ coff_read_enum_type (index, length, lastsym)
     {
       read_one_sym (ms, &sub_sym, &sub_aux);
       name = ms->c_name;
-      name = (name[0] == '_' ? name + offset : name);
+      name = EXTERNAL_NAME (name, current_objfile->obfd);
 
       switch (ms->c_sclass)
 	{

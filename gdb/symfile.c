@@ -439,6 +439,22 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 	addr -= bfd_section_vma (objfile->obfd, lowest_sect);
     }
 
+  /* Debugging check inserted for testing elimination of NAMES_HAVE_UNDERSCORE.
+     Complain if the dynamic setting of NAMES_HAVE_UNDERSCORE from BFD
+     doesn't match the static setting from the GDB config files.
+     FIXME:  Remove this check after a round of testing.  
+						-- gnu@cygnus.com, 16dec92 */
+#ifdef NAMES_HAVE_UNDERSCORE
+  if (bfd_get_symbol_leading_char(objfile->obfd) != '_')
+#else
+  if (bfd_get_symbol_leading_char(objfile->obfd) != 0)
+#endif
+    fprintf (stderr,
+ "GDB internal error!  NAMES_HAVE_UNDERSCORE set wrong for %s BFD:\n%s\n",
+             objfile->obfd->xvec->name,
+             objfile->obfd->filename);
+  /* End of debugging check.  FIXME.  */
+
   /* Initialize symbol reading routines for this objfile, allow complaints to
      appear for this new file, and record how verbose to be, then do the
      initial symbol reading for this file. */
