@@ -993,8 +993,10 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	else
 	  t = pend->t;
 
-	/* Alpha cc unnamed structs do not get a tag name.  */
-	if (sh->iss == 0)
+	/* Do not set the tag name if it is a compiler generated tag name
+	   (.Fxx or .xxfake or empty) for unnamed struct/union/enums.
+	   Alpha cc puts out an sh->iss of zero for those.  */
+	if (sh->iss == 0 || name[0] == '.' || name[0] == '\0')
 	  TYPE_TAG_NAME (t) = NULL;
 	else
 	  TYPE_TAG_NAME (t) = obconcat (&current_objfile->symbol_obstack,
@@ -1011,7 +1013,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	  {
 	    /* This is a non-empty enum. */
 
-	    /* c89 has the number of enumerators in the sh.value field,
+	    /* DEC c89 has the number of enumerators in the sh.value field,
 	       not the type length, so we have to compensate for that
 	       incompatibility quirk.
 	       This might do the wrong thing for an enum with one or two
@@ -1424,6 +1426,12 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
       ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
       if (tp == (struct type *) NULL)
 	tp = init_type (type_code, 0, 0, (char *) NULL, current_objfile);
+
+      /* DEC c89 produces cross references to qualified aggregate types,
+	 dereference them.  */
+      while (TYPE_CODE (tp) == TYPE_CODE_PTR
+	     || TYPE_CODE (tp) == TYPE_CODE_ARRAY)
+	tp = tp->target_type;
 
       /* Make sure that TYPE_CODE(tp) has an expected type code.
 	 Any type may be returned from cross_ref if file indirect entries

@@ -1,3 +1,16 @@
+Wed Jan 12 13:23:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (parse_symbol):  Do not set TYPE_TAG_NAME for
+	compiler generated tag names.
+	* mdebugread.c (parse_type):  Handle cross references to qualified
+	aggregate types.
+	* valops.c (value_struct_elt):  Improve error message if the
+	address of a method is requested from an object instance.
+	* valops.c (search_struct_method):  Make name_matched non-static
+	to get it initialized correctly.
+	* config/i386/nm-i386sco.h (CANNOT_STORE_REGISTER):  Define to
+	exclude segment register which are not writable on newer SCO versions.
+
 Wed Jan 12 14:44:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* go32-xdep.c: Remove unused function uerror.
