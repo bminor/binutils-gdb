@@ -1,11 +1,23 @@
 /* config.in.  Generated automatically from configure.in by autoheader.  */
 
+/* Whether malloc must be declared even if <stdlib.h> is included.  */
+#undef NEED_DECLARATION_MALLOC
+
+/* Whether realloc must be declared even if <stdlib.h> is included.  */
+#undef NEED_DECLARATION_REALLOC
+
+/* Whether free must be declared even if <stdlib.h> is included.  */
+#undef NEED_DECLARATION_FREE
+
 /* Define if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
 #ifndef _ALL_SOURCE
 #undef _ALL_SOURCE
 #endif
+
+/* Define to empty if the keyword does not work.  */
+#undef const
 
 /* Define if the `long double' type works.  */
 #undef HAVE_LONG_DOUBLE
@@ -76,6 +88,9 @@
 
 /* Define if you have the <stddef.h> header file.  */
 #undef HAVE_STDDEF_H
+
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
 
 /* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H

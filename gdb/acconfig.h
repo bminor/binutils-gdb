@@ -1,4 +1,14 @@
 
+/* Whether malloc must be declared even if <stdlib.h> is included.  */
+#undef NEED_DECLARATION_MALLOC
+
+/* Whether realloc must be declared even if <stdlib.h> is included.  */
+#undef NEED_DECLARATION_REALLOC
+
+/* Whether free must be declared even if <stdlib.h> is included.  */
+#undef NEED_DECLARATION_FREE
+@TOP@
+
 /* Define if fpregset_t type is available. */
 #undef HAVE_FPREGSET_T
 

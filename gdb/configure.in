@@ -39,7 +39,7 @@ AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h sys/procfs.h link.h endian.h)
+AC_CHECK_HEADERS(limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h stdlib.h sys/procfs.h link.h endian.h)
 AC_HEADER_STAT
 
 AC_C_CONST
@@ -132,6 +132,10 @@ fi
 AC_MSG_RESULT($gdb_cv_printf_has_long_double)
 
 AC_FUNC_MMAP
+
+BFD_NEED_DECLARATION(malloc)
+BFD_NEED_DECLARATION(realloc)
+BFD_NEED_DECLARATION(free)
 
 dnl See if thread_db library is around for Solaris thread debugging.  Note that
 dnl we must explicitly test for version 1 of the library because version 0

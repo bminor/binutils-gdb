@@ -1,3 +1,15 @@
+Tue Aug 20 17:59:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aclocal.m4: Include ../bfd/aclocal.m4.
+	* configure.in: Add stdlib.h to AC_CHECK_HEADERS.  Call
+	BFD_NEED_DECLARATION on malloc, realloc, and free.
+	* acconfig.h: Add NEED_DECLARATION_MALLOC,
+	NEED_DECLARATION_REALLOC, and NEED_DECLARATION_FREE.
+	* configure, config.in: Rebuild.
+	* defs.h: Include <stddef.h> and <stdlib.h> based on HAVE_*_H
+	rather than __STDC__.  Only declare malloc, realloc, and free if
+	NEED_DECLARATION_* is defined.
+
 Tue Aug 20 15:37:03 1996  Fred Fish  <fnf@taarna.cygnus.com>
 
 	* solib.c (_initialize_solib): Add missing '\' chars at ends of

@@ -1,6 +1,8 @@
 dnl written by Rob Savoye <rob@cygnus.com> for Cygnus Support
 dnl major rewriting for Tcl 7.5 by Don Libes <libes@nist.gov>
 
+sinclude(../bfd/aclocal.m4)
+
 dnl CY_AC_PATH_TCLCONFIG and CY_AC_LOAD_TCLCONFIG should be invoked
 dnl (in that order) before any other TCL macros.  Similarly for TK.
 
