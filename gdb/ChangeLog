@@ -1,3 +1,8 @@
+2002-06-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* ppcnbsd-tdep.c (ppcnbsd_init_abi): Set frame_chain_valid to
+	generic_func_frame_chain_valid.
+
 2002-06-28  David O'Brien  <obrien@FreeBSD.org>
 
 	* config/i386/nm-fbsd.h: Include <sys/param.h>.
