@@ -195,10 +195,12 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 /* index_base_byte.base for no base register addressing */
 #define NO_BASE_REGISTER EBP_REG_NUM
 
-/* these are the att as opcode suffixes, making movl --> mov, for example */
+/* these are the opcode suffixes, making movl --> mov, for example */
 #define DWORD_OPCODE_SUFFIX 'l'
 #define WORD_OPCODE_SUFFIX  'w'
 #define BYTE_OPCODE_SUFFIX  'b'
+#define SHORT_OPCODE_SUFFIX 's'
+#define LONG_OPCODE_SUFFIX  'l'
 
 /* modrm.mode = REGMEM_FIELD_HAS_REG when a register is in there */
 #define REGMEM_FIELD_HAS_REG 0x3/* always = 0x3 */
@@ -235,44 +237,41 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #define Disp8		 0x200	/* 8 bit displacement */
 #define Disp16		 0x400	/* 16 bit displacement */
 #define Disp32		 0x800	/* 32 bit displacement */
-/* Mem8,16,32 are used to limit the allowed sizes of memory operands */
-#define Mem8		0x1000
-#define Mem16		0x2000
-#define Mem32		0x4000
 /* specials */
-#define InOutPortReg   0x10000	/* register to hold in/out port addr = dx */
-#define ShiftCount     0x20000	/* register to hold shift cound = cl */
-#define Control	       0x40000	/* Control register */
-#define Debug	       0x80000	/* Debug register */
-#define Test	      0x100000	/* Test register */
-#define FloatReg      0x200000	/* Float register */
-#define FloatAcc      0x400000	/* Float stack top %st(0) */
-#define SReg2	      0x800000	/* 2 bit segment register */
-#define SReg3	     0x1000000	/* 3 bit segment register */
-#define Acc	     0x2000000	/* Accumulator %al or %ax or %eax */
-#define JumpAbsolute 0x4000000
-#define Abs8	     0x8000000
-#define Abs16	    0x10000000
-#define Abs32	    0x20000000
-#define RegMMX	    0x40000000	/* MMX register */
-#define EsSeg	    0x80000000	/* String insn operand with fixed es segment */
+#define InOutPortReg	0x1000	/* register to hold in/out port addr = dx */
+#define ShiftCount	0x2000	/* register to hold shift cound = cl */
+#define Control	        0x4000	/* Control register */
+#define Debug	        0x8000	/* Debug register */
+#define Test	       0x10000	/* Test register */
+#define FloatReg       0x20000	/* Float register */
+#define FloatAcc       0x40000	/* Float stack top %st(0) */
+#define SReg2	       0x80000	/* 2 bit segment register */
+#define SReg3	      0x100000	/* 3 bit segment register */
+#define Acc	      0x200000	/* Accumulator %al or %ax or %eax */
+#define JumpAbsolute  0x400000
+#define RegMMX	      0x800000	/* MMX register */
+#define EsSeg	     0x1000000	/* String insn operand with fixed es segment */
 
 #define Reg	(Reg8|Reg16|Reg32)	/* gen'l register */
 #define WordReg (Reg16|Reg32)
+#define ImplicitRegister (InOutPortReg|ShiftCount|Acc|FloatAcc)
 #define Imm	(Imm8|Imm8S|Imm16|Imm32) /* gen'l immediate */
 #define Disp	(Disp8|Disp16|Disp32)	/* General displacement */
-#define Mem	(Mem8|Mem16|Mem32|Disp|BaseIndex)	/* General memory */
-#define WordMem (Mem16|Mem32|Disp|BaseIndex)
-#define ByteMem (Mem8|Disp|BaseIndex)
-#define ImplicitRegister (InOutPortReg|ShiftCount|Acc|FloatAcc)
-#define Abs	(Abs8|Abs16|Abs32)
-
-#define Byte (Reg8|Imm8|Imm8S)
-#define Word (Reg16|Imm16)
-#define DWord (Reg32|Imm32)
+#define AnyMem	(Disp|BaseIndex)	/* General memory */
+/* The following aliases are defined because the opcode table
+   carefully specifies the allowed memory types for each instruction.
+   At the moment we can only tell a memory reference size by the
+   instruction suffix, so there's not much point in defining Mem8,
+   Mem16, Mem32 and Mem64 opcode modifiers - We might as well just use
+   the suffix directly to check memory operands.  */
+#define LLongMem AnyMem		/* 64 bits (or more) */
+#define LongMem AnyMem		/* 32 bit memory ref */
+#define ShortMem AnyMem		/* 16 bit memory ref */
+#define WordMem AnyMem		/* 16 or 32 bit memory ref */
+#define ByteMem AnyMem		/* 8 bit memory ref */
 
 #define SMALLEST_DISP_TYPE(num) \
-    fits_in_signed_byte(num) ? (Disp8|Disp32|Abs8|Abs32) : (Disp32|Abs32)
+    (fits_in_signed_byte(num) ? (Disp8|Disp32) : Disp32)
 
 typedef struct
 {
@@ -282,7 +281,8 @@ typedef struct
   /* how many operands */
   unsigned int operands;
 
-  /* base_opcode is the fundamental opcode byte with a optional prefix(es). */
+  /* base_opcode is the fundamental opcode byte without optional
+     prefix(es).  */
   unsigned int base_opcode;
 
   /* extension_opcode is the 3 bit extension for group <n> insns.
@@ -297,33 +297,32 @@ typedef struct
 
   /* opcode_modifier bits: */
 #define W		   0x1	/* set if operands can be words or dwords
-				   encoded the canonical way:  MUST BE 0x1 */
+				   encoded the canonical way */
 #define D		   0x2	/* D = 0 if Reg --> Regmem;
 				   D = 1 if Regmem --> Reg:    MUST BE 0x2 */
 #define Modrm		   0x4
-#define ReverseRegRegmem   0x8
+#define ReverseRegRegmem   0x8  /* swap reg,regmem fields for 2 reg case */
+#define FloatR		   0x8	/* src/dest swap for floats:   MUST BE 0x8 */
 #define ShortForm	  0x10	/* register is in low 3 bits of opcode */
-#define ShortFormW	  0x20	/* ShortForm and W bit is 0x8 */
-#define Seg2ShortForm	  0x40	/* encoding of load segment reg insns */
-#define Seg3ShortForm	  0x80	/* fs/gs segment register insns. */
-#define Jump		 0x100	/* special case for jump insns. */
+#define FloatMF		  0x20	/* FP insn memory format bit, sized by 0x4 */
+#define Jump		  0x40	/* special case for jump insns. */
+#define JumpDword	  0x80  /* call and jump */
+#define JumpByte	 0x100  /* loop and jecxz */
 #define JumpInterSegment 0x200	/* special case for intersegment leaps/calls */
 #define FloatD		 0x400	/* direction for float insns:  MUST BE 0x400 */
-#define JumpByte	 0x800
-#define JumpDword	0x1000
-#define FWait		0x2000	/* instruction needs FWAIT */
-#define Data16		0x4000	/* needs data prefix if in 32-bit mode */
-#define Data32		0x8000	/* needs data prefix if in 16-bit mode */
-#define IsString      0x100000	/* quick test for string instructions */
-#define regKludge     0x200000	/* fake an extra reg operand for clr, imul */
-
-#define DW (D|W)		/* shorthand */
-
-  /* (opcode_modifier & COMES_IN_BOTH_DIRECTIONS) indicates that the
-     source and destination operands can be reversed by setting either
-     the D (for integer insns) or the FloatD (for floating insns) bit
-     in base_opcode. */
-#define COMES_IN_BOTH_DIRECTIONS (D|FloatD)
+#define Seg2ShortForm	 0x800	/* encoding of load segment reg insns */
+#define Seg3ShortForm	0x1000	/* fs/gs segment register insns. */
+#define Data16		0x2000	/* needs data prefix if in 32-bit mode */
+#define Data32		0x4000	/* needs data prefix if in 16-bit mode */
+#define IgnoreDataSize	0x8000  /* instruction ignores operand size prefix */
+#define No_bSuf	       0x10000	/* b suffix on instruction illegal */
+#define No_wSuf	       0x20000	/* w suffix on instruction illegal */
+#define No_lSuf	       0x40000	/* l suffix on instruction illegal */
+#define No_sSuf	       0x80000	/* s suffix on instruction illegal */
+#define FWait	      0x100000	/* instruction needs FWAIT */
+#define IsString      0x200000	/* quick test for string instructions */
+#define regKludge     0x400000	/* fake an extra reg operand for clr, imul */
+#define Ugh	    0x80000000	/* deprecated fp insn, gets a warning */
 
   /* operand_types[i] describes the type of operand i.  This is made
      by OR'ing together all of the possible type masks.  (e.g.

@@ -1,3 +1,49 @@
+Fri Jun  5 23:27:04 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (mode_from_disp_size): Disp16 is mode 2.
+	(i386_operand): Simplify checks for valid base/index combinations.
+	Disallow `in 4(%dx),%al'.
+
+	* config/tc-i386.c (struct _i386_insn): Make regs, base_reg, and
+	index_reg const.
+	(add_prefix): Change parameter from char to int.
+
+	* config/tc-i386.h (Ugh): Define opcode modifier.
+	* config/tc-i386.c (md_assemble): Print warnings for Ugh insns.
+
+	* config/tc-i386.c (md_assemble): Rewrite MATCH and
+	CONSISTENT_REGISTER_MATCH macros to check register types more
+	thoroughly.  Check for illegal suffix/operand combinations
+	when matching insns with operands.  Handle new `s' suffix, and
+	associated FloatMF opcode modifier for float insns with memory
+	operands.
+	* config/tc-i386.h (FloatMF): Define new opcode modifier.
+	(No_sSuf, No_bSuf, No_wSuf, No_lSuf): Likewise.
+	(SHORT_OPCODE_SUFFIX, LONG_OPCODE_SUFFIX): Define.
+	* config/tc-i386.c: Rename WORD_PREFIX_OPCODE to
+	DATA_PREFIX_OPCODE throughout.
+
+	* config/tc-i386.c (REGISTER_WARNINGS): Define.
+	(md_assemble): Rewrite suffix/register operand checking code to be
+	more thorough.  Remove Abs8,16,32.  Change occurrences of Mem to
+	AnyMem, the better to grep.
+	(pi): Remove Abs.
+	(i386_operand): Don't set Mem bits in i.types[this_operand] when
+	given a memory operand.  Don't set Abs bits either.
+	(type_names): Remove Mem*, Abs*.
+	* config/tc-i386.h (Mem8, Mem16, Mem32, Abs8, Abs16, Abs32): Don't
+	define opcode_modifiers as these cases are handled by Disp8,
+	Disp16, Disp32 and suffix checks.
+	(COMES_IN_BOTH_DIRECTIONS): Remove.
+	(FloatR): Define. It's OK to share the bit with ReverseRegRegmem.
+
+	* config/tc-i386.c (md_assemble): Don't emit operand size prefix
+	if IgnoreDataSize modifier given.  Remove ShortformW modifier
+	test.  Add test for ShortForm in W base_opcode modification.
+	Merge Seg2ShortForm and Seg3ShortForm code.
+	* config/tc-i386.h (ShortFormW): Remove.
+	(IgnoreDataSize): Define.
+
 Fri Jun  5 10:50:53 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (md_assemble): Store previous segment state
