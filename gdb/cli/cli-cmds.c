@@ -1,6 +1,6 @@
 /* GDB CLI commands.
 
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -484,7 +484,8 @@ echo_command (char *text, int from_tty)
 static void
 shell_escape (char *arg, int from_tty)
 {
-#ifdef CANT_FORK
+#if defined(CANT_FORK) || \
+      (!defined(HAVE_WORKING_VFORK) && !defined(HAVE_WORKING_FORK))
   /* If ARG is NULL, they want an inferior shell, but `system' just
      reports if the shell is available when passed a NULL arg.  */
   int rc = system (arg ? arg : "");

@@ -1,6 +1,6 @@
 /* Remote File-I/O communications
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -162,18 +162,28 @@ remote_fileio_mode_to_host (long mode, int open_call)
     hmode |= S_IWUSR;
   if (mode & FILEIO_S_IXUSR)
     hmode |= S_IXUSR;
+#ifdef S_IRGRP
   if (mode & FILEIO_S_IRGRP)
     hmode |= S_IRGRP;
+#endif
+#ifdef S_IWGRP
   if (mode & FILEIO_S_IWGRP)
     hmode |= S_IWGRP;
+#endif
+#ifdef S_IXGRP
   if (mode & FILEIO_S_IXGRP)
     hmode |= S_IXGRP;
+#endif
   if (mode & FILEIO_S_IROTH)
     hmode |= S_IROTH;
+#ifdef S_IWOTH
   if (mode & FILEIO_S_IWOTH)
     hmode |= S_IWOTH;
+#endif
+#ifdef S_IXOTH
   if (mode & FILEIO_S_IXOTH)
     hmode |= S_IXOTH;
+#endif
   return hmode;
 }
 
@@ -194,18 +204,28 @@ remote_fileio_mode_to_target (mode_t mode)
     tmode |= FILEIO_S_IWUSR;
   if (mode & S_IXUSR)
     tmode |= FILEIO_S_IXUSR;
+#ifdef S_IRGRP
   if (mode & S_IRGRP)
     tmode |= FILEIO_S_IRGRP;
+#endif
+#ifdef S_IWRGRP
   if (mode & S_IWGRP)
     tmode |= FILEIO_S_IWGRP;
+#endif
+#ifdef S_IXGRP
   if (mode & S_IXGRP)
     tmode |= FILEIO_S_IXGRP;
+#endif
   if (mode & S_IROTH)
     tmode |= FILEIO_S_IROTH;
+#ifdef S_IWOTH
   if (mode & S_IWOTH)
     tmode |= FILEIO_S_IWOTH;
+#endif
+#ifdef S_IXOTH
   if (mode & S_IXOTH)
     tmode |= FILEIO_S_IXOTH;
+#endif
   return tmode;
 }
 

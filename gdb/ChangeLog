@@ -1,3 +1,14 @@
+2005-03-15  Mark Mitchell  <mark@codesourcery.com>
+
+	* utils.c (internal_vproblem): Guard call to fork with 
+	HAVE_WORKING_FORK.
+	* cli/cli-cmds.c (shell_escape): Guard call to vfork with
+	HAVE_WORKING_VFORK and HAVE_WORKING_FORK. 
+
+	* remote-fileo.c (remote_fileio_mode_to_host): Accomodate lack of
+	S_IRGRP and related macros.
+	(remote_fileio_mode_to_target): Likewise.
+
 2005-03-14  Ben Elliston  <bje@au.ibm.com>
 
 	* Makefile.in (CLIBS): Link libbfd after libopcodes, as it is a

@@ -789,8 +789,10 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
     {
       if (dump_core_p)
 	{
+#ifdef HAVE_WORKING_FORK
 	  if (fork () == 0)
 	    abort ();		/* NOTE: GDB has only three calls to abort().  */
+#endif
 	}
     }
 
