@@ -1,3 +1,14 @@
+start-sanitize-tic80
+Sun Dec 29 10:48:57 1996  Fred Fish  <fnf@toadfish.ninemoons.com>
+
+	* Makefile.in (BFD32_BACKENDS): Add coff-tic80.o
+	(ALL_MACHINES): Add cpu-tic80.o
+	(cpu-tic80.o, coff-tic80.o): Add dependencies.
+	* coff-tic80.c: Add skeleton, cloned from another coff config.
+	* coffcode.h (coff_write_object_contents): Set magic to TIC80MAGIC
+ 	for TIc80.
+
+end-sanitize-tic80
 Fri Dec 27 20:56:41 1996  Fred Fish  <fnf@ninemoons.com>
 
 	* TODO: Correct a misspelling.

@@ -138,6 +138,9 @@ ALL_MACHINES = \
 	cpu-rs6000.o \
 	cpu-sh.o \
 	cpu-sparc.o \
+	$(start-sanitize-tic80) \
+	cpu-tic80.o \
+	$(end-sanitize-tic80) \
 	$(start-sanitize-v850) \
 	cpu-v850.o \
 	$(end-sanitize-v850) \
@@ -201,6 +204,9 @@ BFD32_BACKENDS = \
 	coff-rs6000.o \
 	coff-sh.o \
 	coff-sparc.o \
+	$(start-sanitize-tic80) \
+	coff-tic80.o \
+	$(end-sanitize-tic80) \
 	coff-u68k.o \
 	coff-we32k.o \
 	coff-w65.o \
@@ -863,6 +869,12 @@ elf32-v850.o: elf32-v850.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elf32-target.h
 end-sanitize-v850:
+
+start-sanitize-tic80:
+cpu-tic80.o: cpu-tic80.c
+coff-tic80.o: coff-tic80.c $(INCDIR)/bfdlink.h elf-bfd.h \
+  $(INCDIR)/coff/internal.h
+end-sanitize-tic80:
 
 $(OFILES): stamp-picdir
 

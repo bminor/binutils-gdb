@@ -2721,6 +2721,10 @@ coff_write_object_contents (abfd)
       internal_a.magic = NMAGIC; /* Assume separate i/d */
 #define __A_MAGIC_SET__
 #endif /* A29K */
+#ifdef TIC80
+    internal_a.magic = TIC80MAGIC;
+#define __A_MAGIC_SET__
+#endif /* TIC80 */
 #ifdef I860
     /* FIXME: What are the a.out magic numbers for the i860?  */
     internal_a.magic = 0;
