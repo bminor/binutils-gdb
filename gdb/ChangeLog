@@ -1,7 +1,26 @@
+Wed Oct 16 12:19:51 1991  John Gilmore  (gnu at cygnus.com)
+
+	GDB-4.2 release!
+
+	* Makefile.in:  Roll VERSION to 4.2.
+
+	* core.c (core_open):  Improve error message for bad file.
+	Pass .reg virtual memory address to fetch_core_registers to help
+	it find the registers in the core-file header.
+	* coredep.c (fetch_core_registers):  Take new argument, use it,
+	and pass it to register_addr to locate the block of registers.
+
+	* dbxread.c (read_dbx_symtab, process_one_symbol):  Handle
+	Sequent N_FN_SEQ like everybody else's N_FN.
+
+	* main.c:  Circumvent SCO cc bug with #if !!defined(USG).
+	* tm-i386v.h:  #endif guck.
+	* xconfig/i386*:  Remove -Dgetpagesize()=4096 kludge.
+
 Tue Oct 15 20:12:32 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 
 	* doc/refcard.tex (sec "Working Files"): consistent metavars, due
-	to Franc,ois Pinard (pinard@iro.umontreal.ca)
+	to François Pinard (pinard@iro.umontreal.ca)
 
 	* doc/gdb.texinfo (appendix "Installing GDB"): changes in configure.
 
