@@ -346,7 +346,7 @@ void sprint_address (addr, buffer)
 	    name = SYMBOL_NAME (msymbol);
 	    name_location = SYMBOL_VALUE_ADDRESS (msymbol);
 	} else {
-	    name = fs->name;
+	    name = SYMBOL_NAME (fs);
 	    name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (fs));
 	}
 
