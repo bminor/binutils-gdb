@@ -149,9 +149,12 @@ void OP_F80000 ()
 		 + SEXT8 (insn & 0xff)), 4);
 }
 
-/* mov */
+/* mov (d16,am), dn */
 void OP_FA000000 ()
 {
+  State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]
+    = load_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+		 + SEXT16 (insn & 0xffff)), 4);
 }
 
 /* mov */
@@ -163,12 +166,14 @@ void OP_FC000000 ()
 void OP_5800 ()
 {
   State.regs[REG_D0 + ((insn & 0x300) >> 8)]
-    = load_mem (State.regs[REG_SP] + insn & 0xff, 4);
+    = load_mem (State.regs[REG_SP] + (insn & 0xff), 4);
 }
 
-/* mov */
+/* mov (d16,sp), dn */
 void OP_FAB40000 ()
 {
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)]
+    = load_mem (State.regs[REG_SP] + (insn & 0xffff), 4);
 }
 
 /* mov */
@@ -187,7 +192,7 @@ void OP_F300 ()
 /* mov (abs16), dn */
 void OP_300000 ()
 {
-  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = load_mem (insn & 0xffff, 4);
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = load_mem ((insn & 0xffff), 4);
 }
 
 /* mov */
@@ -210,9 +215,12 @@ void OP_F82000 ()
 		 + SEXT8 (insn & 0xff)), 4);
 }
 
-/* mov */
+/* mov (d16,am), an */
 void OP_FA200000 ()
 {
+  State.regs[REG_A0 + ((insn & 0xc0000) >> 18)]
+    = load_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+		 + SEXT16 (insn & 0xffff)), 4);
 }
 
 /* mov */
@@ -224,12 +232,14 @@ void OP_FC200000 ()
 void OP_5C00 ()
 {
   State.regs[REG_A0 + ((insn & 0x300) >> 8)]
-    = load_mem (State.regs[REG_SP] + insn & 0xff, 4);
+    = load_mem (State.regs[REG_SP] + (insn & 0xff), 4);
 }
 
-/* mov */
+/* mov (d16,sp), an */
 void OP_FAB00000 ()
 {
+  State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+    = load_mem (State.regs[REG_SP] + (insn & 0xffff), 4);
 }
 
 /* mov */
@@ -245,9 +255,10 @@ void OP_F380 ()
 		 + State.regs[REG_D0 + ((insn & 0xc) >> 2)]), 4);
 }
 
-/* mov */
+/* mov (abs16), an */
 void OP_FAA00000 ()
 {
+  State.regs[REG_A0 + ((insn & 0x30000) >> 16)] = load_mem ((insn & 0xffff), 4);
 }
 
 /* mov */
@@ -278,9 +289,12 @@ void OP_F81000 ()
 	     State.regs[REG_D0 + ((insn & 0xc00) >> 10)]);
 }
 
-/* mov */
+/* mov dm (d16,an) */
 void OP_FA100000 ()
 {
+  store_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+	      + SEXT16 (insn & 0xffff)), 4,
+	     State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* mov */
@@ -291,13 +305,15 @@ void OP_FC100000 ()
 /* mov dm, (d8,sp) */
 void OP_4200 ()
 {
-  store_mem (State.regs[REG_SP] + insn & 0xff, 4,
+  store_mem (State.regs[REG_SP] + (insn & 0xff), 4,
 	     State.regs[REG_D0 + ((insn & 0xc00) >> 10)]);
 }
 
-/* mov */
+/* mov dm, (d16,sp) */
 void OP_FA910000 ()
 {
+  store_mem (State.regs[REG_SP] + (insn & 0xffff), 4,
+	     State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* mov */
@@ -339,9 +355,12 @@ void OP_F83000 ()
 	     State.regs[REG_A0 + ((insn & 0xc00) >> 10)]);
 }
 
-/* mov */
+/* mov am (d16,an) */
 void OP_FA300000 ()
 {
+  store_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 17)]
+	      + SEXT16 (insn & 0xffff)), 4,
+	     State.regs[REG_A0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* mov */
@@ -352,13 +371,15 @@ void OP_FC300000 ()
 /* mov am, (d8,sp) */
 void OP_4300 ()
 {
-  store_mem (State.regs[REG_SP] + insn & 0xff, 4,
+  store_mem (State.regs[REG_SP] + (insn & 0xff), 4,
 	     State.regs[REG_A0 + ((insn & 0xc00) >> 10)]);
 }
 
-/* mov */
+/* mov am, (d16,sp) */
 void OP_FA900000 ()
 {
+  store_mem (State.regs[REG_SP] + (insn & 0xffff), 4,
+	     State.regs[REG_A0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* mov */
@@ -374,9 +395,10 @@ void OP_F3C0 ()
 	     State.regs[REG_A0 + ((insn & 0x300) >> 8)]);
 }
 
-/* mov */
+/* mov am, (abs16) */
 void OP_FA800000 ()
 {
+  store_mem ((insn & 0xffff), 4, State.regs[REG_A0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* mov */
@@ -438,9 +460,12 @@ void OP_F84000 ()
 		 + SEXT8 (insn & 0xff)), 1);
 }
 
-/* movbu */
+/* movbu (d16,am), dn */
 void OP_FA400000 ()
 {
+  State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]
+    = load_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+		 + SEXT16 (insn & 0xffff)), 1);
 }
 
 /* movbu */
@@ -452,12 +477,14 @@ void OP_FC400000 ()
 void OP_F8B800 ()
 {
   State.regs[REG_D0 + ((insn & 0x300) >> 8)]
-    = load_mem ((State.regs[REG_SP] + SEXT8 (insn & 0xff)), 1);
+    = load_mem ((State.regs[REG_SP] + (insn & 0xff)), 1);
 }
 
-/* movbu */
+/* movbu (d16,sp), dn */
 void OP_FAB80000 ()
 {
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)]
+    = load_mem ((State.regs[REG_SP] + (insn & 0xffff)), 1);
 }
 
 /* movbu */
@@ -476,7 +503,7 @@ void OP_F400 ()
 /* movbu (abs16), dn */
 void OP_340000 ()
 {
-  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = load_mem (insn & 0xffff, 1);
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = load_mem ((insn & 0xffff), 1);
 }
 
 /* movbu */
@@ -499,9 +526,12 @@ void OP_F85000 ()
 	     State.regs[REG_D0 + ((insn & 0xc00) >> 10)]);
 }
 
-/* movbu */
+/* movbu dm, (d16,an) */
 void OP_FA500000 ()
 {
+  store_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+	      + SEXT8 (insn & 0xffff)), 1,
+	     State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* movbu */
@@ -512,13 +542,15 @@ void OP_FC500000 ()
 /* movbu dm, (d8,sp) */
 void OP_F89200 ()
 {
-  store_mem ((State.regs[REG_SP] + SEXT8 (insn & 0xff)), 1,
+  store_mem (State.regs[REG_SP] + (insn & 0xff), 1,
 	     State.regs[REG_D0 + ((insn & 0xc00) >> 10)]);
 }
 
-/* movbu */
+/* movbu dm, (d16,sp) */
 void OP_FA920000 ()
 {
+  store_mem (State.regs[REG_SP] + (insn & 0xffff), 2,
+	     State.regs[REG_D0 + ((insn & 0xc00) >> 10)]);
 }
 
 /* movbu */
@@ -560,9 +592,12 @@ void OP_F86000 ()
 		 + SEXT8 (insn & 0xff)), 2);
 }
 
-/* movhu */
+/* movhu (d16,am), dn */
 void OP_FA600000 ()
 {
+  State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]
+    = load_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+		 + SEXT16 (insn & 0xffff)), 2);
 }
 
 /* movhu */
@@ -574,12 +609,14 @@ void OP_FC600000 ()
 void OP_F8BC00 ()
 {
   State.regs[REG_D0 + ((insn & 0x300) >> 8)]
-    = load_mem ((State.regs[REG_SP] + SEXT8 (insn & 0xff)), 2);
+    = load_mem ((State.regs[REG_SP] + (insn & 0xff)), 2);
 }
 
-/* movhu */
+/* movhu (d16,sp), dn */
 void OP_FABC0000 ()
 {
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)]
+    = load_mem ((State.regs[REG_SP] + (insn & 0xffff)), 2);
 }
 
 /* movhu */
@@ -598,7 +635,7 @@ void OP_F480 ()
 /* movhu (abs16), dn */
 void OP_380000 ()
 {
-  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = load_mem (insn & 0xffff, 2);
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = load_mem ((insn & 0xffff), 2);
 }
 
 /* movhu */
@@ -621,9 +658,12 @@ void OP_F87000 ()
 	     State.regs[REG_D0 + ((insn & 0xc00) >> 10)]);
 }
 
-/* movhu */
+/* movhu dm, (d16,an) */
 void OP_FA700000 ()
 {
+  store_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+	      + SEXT16 (insn & 0xffff)), 2,
+	     State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* movhu */
@@ -634,13 +674,15 @@ void OP_FC700000 ()
 /* movhu dm,(d8,sp) */
 void OP_F89300 ()
 {
-  store_mem ((State.regs[REG_SP] + SEXT8 (insn & 0xff)), 2,
+  store_mem (State.regs[REG_SP] + (insn & 0xff), 2,
 	     State.regs[REG_D0 + ((insn & 0xc00) >> 10)]);
 }
 
-/* movhu */
+/* movhu dm,(d16,sp) */
 void OP_FA930000 ()
 {
+  store_mem (State.regs[REG_SP] + (insn & 0xffff), 2,
+	     State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]);
 }
 
 /* movhu */
@@ -1608,9 +1650,16 @@ void OP_F8E000 ()
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
-/* and */
+/* and imm16, dn */
 void OP_FAE00000 ()
 {
+  int n, z;
+
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] &= (insn & 0xffff);
+  z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
+  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* and */
@@ -1618,9 +1667,10 @@ void OP_FCE00000 ()
 {
 }
 
-/* and */
+/* and imm16, psw */
 void OP_FAFC0000 ()
 {
+  PSW &= (insn & 0xffff);
 }
 
 /* or dm, dn*/
@@ -1647,9 +1697,16 @@ void OP_F8E400 ()
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
-/* or */
+/* or imm16, dn*/
 void OP_FAE40000 ()
 {
+  int n, z;
+
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] |= insn & 0xffff;
+  z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
+  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* or */
@@ -1657,9 +1714,10 @@ void OP_FCE40000 ()
 {
 }
 
-/* or */
+/* or imm16,psw */
 void OP_FAFD0000 ()
 {
+  PSW |= (insn & 0xffff);
 }
 
 /* xor dm, dn*/
@@ -1674,9 +1732,16 @@ void OP_F220 ()
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
-/* xor */
+/* xor imm16, dn */
 void OP_FAE80000 ()
 {
+  int n, z;
+
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] ^= insn & 0xffff;
+  z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
+  n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x8000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
 /* xor */
@@ -1710,9 +1775,18 @@ void OP_F8EC00 ()
   PSW |= (z ? PSW_Z : 0) | (n ? PSW_N : 0);
 }
 
-/* btst */
+/* btst imm16, dn */
 void OP_FAEC0000 ()
 {
+  unsigned long temp;
+  int z, n;
+
+  temp = State.regs[REG_D0 + ((insn & 0x30000) >> 16)];
+  temp &= (insn & 0xffff);
+  n = (temp & 0x80000000) != 0;
+  z = (temp == 0);
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= (z ? PSW_Z : 0) | (n ? PSW_N : 0);
 }
 
 /* btst */
@@ -1725,9 +1799,19 @@ void OP_FE020000 ()
 {
 }
 
-/* btst */
+/* btst imm8,(d8,an) */
 void OP_FAF80000 ()
 {
+  unsigned long temp;
+  int n, z;
+
+  temp = load_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+                    + SEXT8 ((insn & 0xff00) >> 8)), 1);
+  temp &= (insn & 0xff);
+  n = (temp & 0x80000000) != 0;
+  z = (temp == 0);
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= (z ? PSW_Z : 0) | (n ? PSW_N : 0);
 }
 
 /* bset dm, (an) */
@@ -1749,9 +1833,19 @@ void OP_FE000000 ()
 {
 }
 
-/* bset */
+/* bset imm8,(d8,an) */
 void OP_FAF00000 ()
 {
+  unsigned long temp;
+  int z;
+
+  temp = load_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+                    + SEXT8 ((insn & 0xff00) >> 8)), 1);
+  z = (temp & (insn & 0xff)) == 0;
+  temp |= (insn & 0xff);
+  store_mem (State.regs[REG_A0 + ((insn & 30000)>> 16)], 1, temp);
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= (z ? PSW_Z : 0);
 }
 
 /* bclr dm, (an) */
@@ -1773,9 +1867,19 @@ void OP_FE010000 ()
 {
 }
 
-/* bclr */
+/* bclr imm8,(d8,an) */
 void OP_FAF40000 ()
 {
+  unsigned long temp;
+  int z;
+
+  temp = load_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
+                    + SEXT8 ((insn & 0xff00) >> 8)), 1);
+  z = (temp & (insn & 0xff)) == 0;
+  temp = ~temp & (insn & 0xff);
+  store_mem (State.regs[REG_A0 + ((insn & 30000)>> 16)], 1, temp);
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= (z ? PSW_Z : 0);
 }
 
 /* asr dm, dn */
