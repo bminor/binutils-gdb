@@ -669,6 +669,14 @@ set_scripts_dir ()
   if (dir)
     free (dir);
 
+  dir = make_relative_prefix (program_name, TOOLBINDIR, SCRIPTDIR);
+  if (dir && check_for_scripts_dir (dir))
+    /* Success.  Don't free dir.  */
+    return;
+
+  if (dir)
+    free (dir);
+
   if (check_for_scripts_dir (SCRIPTDIR))
     /* We've been installed normally.  */
     return;

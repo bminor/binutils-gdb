@@ -1,5 +1,8 @@
 2003-03-03  Alexandre Oliva  <aoliva@redhat.com>
 
+	* ldmain.c (set_scripts_dir): Look for relative to TOOLBINDIR as
+	well.
+
 	* ldfile.h (struct search_dirs): Added sysrooted field.
 	* ldlang.h (struct lang_input_statement_struct): Likewise.
 	* ldfile.c (ldfile_add_library_path): Mark sysrooted paths.
