@@ -33,13 +33,12 @@ Boston, MA 02111-1307, USA.  */
    returns non-zero.
    The values are indices into `sparc_opcode_archs' defined in sparc-opc.c.
    Don't change this without updating sparc-opc.c.  */
-/* ??? May wish to allow for anonymous architectures for variants that have
-   a common but unnamed subset.  */
 
 enum sparc_opcode_arch_val {
   SPARC_OPCODE_ARCH_V6 = 0,
   SPARC_OPCODE_ARCH_V7,
   SPARC_OPCODE_ARCH_V8,
+  SPARC_OPCODE_ARCH_SPARCLET,
   SPARC_OPCODE_ARCH_SPARCLITE,
   /* v9 variants must appear last */
   SPARC_OPCODE_ARCH_V9,
@@ -54,28 +53,38 @@ enum sparc_opcode_arch_val {
 
 struct sparc_opcode_arch {
   const char *name;
-  int conflicts;
+  /* Mask of sparc_opcode_arch_val's supported.
+     EG: For v7 this would be ((1 << v6) | (1 << v7)).  */
+  /* These are short's because sparc_opcode.architecture is.  */
+  short supported;
 };
 
 extern const struct sparc_opcode_arch sparc_opcode_archs[];
 
-extern const enum sparc_opcode_arch_val sparc_opcode_lookup_arch ();
+/* Given architecture name, look up it's sparc_opcode_arch_val value.  */
+extern enum sparc_opcode_arch_val sparc_opcode_lookup_arch ();
 
-/* Non-zero if ARCH1 conflicts with ARCH2.  */
+/* Return the bitmask of supported architectures for ARCH.  */
+#define SPARC_OPCODE_SUPPORTED(ARCH) (sparc_opcode_archs[ARCH].supported)
 
+/* Non-zero if ARCH1 conflicts with ARCH2.
+   IE: ARCH1 as a supported bit set that ARCH2 doesn't, and vice versa.  */
 #define SPARC_OPCODE_CONFLICT_P(ARCH1, ARCH2) \
-((1 << (ARCH1)) & sparc_opcode_archs[ARCH2].conflicts)
+(((SPARC_OPCODE_SUPPORTED (ARCH1) & SPARC_OPCODE_SUPPORTED (ARCH2)) \
+  != SPARC_OPCODE_SUPPORTED (ARCH1)) \
+ && ((SPARC_OPCODE_SUPPORTED (ARCH1) & SPARC_OPCODE_SUPPORTED (ARCH2)) \
+     != SPARC_OPCODE_SUPPORTED (ARCH2)))
 
 /* Structure of an opcode table entry.  */
 
 struct sparc_opcode {
-	const char *name;
-	unsigned long match;	/* Bits that must be set. */
-	unsigned long lose;	/* Bits that must not be set. */
-	const char *args;
- /* This was called "delayed" in versions before the flags. */
-	char flags;
-	enum sparc_opcode_arch_val architecture;
+  const char *name;
+  unsigned long match;	/* Bits that must be set. */
+  unsigned long lose;	/* Bits that must not be set. */
+  const char *args;
+  /* This was called "delayed" in versions before the flags. */
+  char flags;
+  short architecture;	/* Bitmask of sparc_opcode_arch_val's.  */
 };
 
 #define	F_DELAYED	1	/* Delayed branch */
@@ -83,9 +92,6 @@ struct sparc_opcode {
 #define	F_UNBR		4	/* Unconditional branch */
 #define	F_CONDBR	8	/* Conditional branch */
 #define	F_JSR		16	/* Subroutine call */
-/* ??? One can argue this shouldn't be here and the architecture
-   field should be used instead.  */
-#define F_NOTV9		32	/* Doesn't exist in v9 */
 /* FIXME: Add F_ANACHRONISTIC flag for v9.  */
 
 /*
@@ -144,6 +150,8 @@ Kinds of operands:
 	t	Trap base register.
 	w	Window invalid mask register.
 	y	Y register.
+	u	sparclet coprocessor registers in rd position
+	U	sparclet coprocessor registers in rs1 position
 	E	%ccr. (v9)
 	s	%fprs. (v9)
 	P	%pc.  (v9)
@@ -159,7 +167,7 @@ Kinds of operands:
 	x	OPF field (v9 impdep).
 
 The following chars are unused: (note: ,[] are used as punctuation)
-[uOUXY3450]
+[OXY3450]
 
 */
 
@@ -198,6 +206,8 @@ int sparc_encode_membar ();
 char *sparc_decode_membar ();
 int sparc_encode_prefetch ();
 char *sparc_decode_prefetch ();
+int sparc_encode_sparclet_cpreg ();
+char *sparc_decode_sparclet_cpreg ();
 
 /*
  * Local Variables:

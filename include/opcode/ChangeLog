@@ -1,3 +1,16 @@
+Tue Feb 20 20:46:21 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc.h (sparc_{encode,decode}_sparclet_cpreg): Declare.
+	Mark operand letters uU as in use.
+
+Mon Feb 19 01:59:08 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc.h (sparc_opcode_arch_val): Add SPARC_OPCODE_ARCH_SPARCLET.
+	(sparc_opcode_arch): Delete member `conflicts'.  Add `supported'.
+	(SPARC_OPCODE_SUPPORTED): New macro.
+	(SPARC_OPCODE_CONFLICT_P): Rewrite.
+	(F_NOTV9): Delete.
+
 Fri Feb 16 12:23:34 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* sparc.h (sparc_opcode_lookup_arch) Make return type in
