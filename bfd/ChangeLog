@@ -1,3 +1,20 @@
+Thu Apr  7 14:23:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coff-mips.c (mips_howto_table): Add entry for MIPS_R_SWITCH.
+	(mips_ecoff_swap_reloc_in): For MIPS_R_SWTICH, copy r_symndx into
+	r_offset and set r_symndx to RELOC_SECTION_TEXT.
+	(mips_ecoff_swap_reloc_out): For MIPS_R_SWITCH, get the r_symndx
+	value from the r_offset field.
+	(mips_adjust_reloc_in): Maximum r_type value is now MIPS_R_SWITCH.
+	For MIPS_R_SWITCH, copy the r_offset field into the addend field.
+	(mips_adjust_reloc_out): For MIPS_R_SWITCH, copy the addend field
+	into the r_offset field.
+	(mips_switch_reloc): New function.
+	(mips_bfd_reloc_type_lookup): Translate BFD_RELOC_GPREL32 into
+	MIPS_R_SWITCH.
+	(mips_relocate_section): Handle MIPS_R_SWITCH.
+	(mips_relax_section): Adjust MIPS_R_SWITCH offset if necessary.
+
 Thu Apr  7 11:10:51 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* elfcode.h (elf_set_section_contents): Support calling the backend
