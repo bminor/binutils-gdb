@@ -1,6 +1,6 @@
 /* Macro definitions for i386, Unix System V.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1998, 1999,
-   2000 Free Software Foundation, Inc.
+   2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -80,11 +80,5 @@
 
 #undef  FRAME_NUM_ARGS
 #define FRAME_NUM_ARGS(fi) (-1)
-
-/* Forward decl's for prototypes */
-struct frame_info;
-struct frame_saved_regs;
-
-extern int i386_frame_num_args (struct frame_info *);
 
 #endif /* ifndef TM_I386V_H */
