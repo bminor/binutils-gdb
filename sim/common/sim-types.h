@@ -23,10 +23,8 @@
 
 /* Basic type sizes for the PowerPC */
 
-#ifndef _SIM_TYPES_H_
-#define _SIM_TYPES_H_
-
-
+#ifndef SIM_TYPES_H
+#define SIM_TYPES_H
 
 
 /* INTEGER QUANTITIES:
@@ -45,6 +43,16 @@
      		word size (32/64 bits)
      *_cell     Size based on the target architecture's
      		IEEE 1275 cell size (almost always 32 bits)
+     *_address  Fits target address
+
+   NONSPECIFIC
+
+     address_word
+		Alias for unsigned_address
+
+     cell_word  Alias for signed_cell
+
+     fp_word    Holds a floating point word.
 
 */
 
@@ -170,4 +178,4 @@ typedef unsigned32 fp_word;
 #endif
 
 
-#endif /* _SIM_TYPES_H_ */
+#endif
