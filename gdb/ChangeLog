@@ -2,7 +2,7 @@ Thu Aug 22 16:20:27 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* doc/refcard.tex: permuted Essential Commands sec
 
-	* doc/gdb.texinfo: new C++ chapter.
+	* doc/gdb.texinfo: new C++ chapter; revised installation appendix.
 
 Thu Aug 22 14:05:47 1991  Stu Grossman  (grossman at cygint.cygnus.com)
 
