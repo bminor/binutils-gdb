@@ -59,6 +59,7 @@ demo64.c
 elf.c
 filemode.c
 format.c
+gen-aout.c
 host-aout.c
 hosts
 i386aout.c
@@ -119,7 +120,12 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.33  1991/12/12 03:19:36  sac
+# Revision 1.34  1991/12/18 23:01:48  bothner
+# Use aout-target.h more extensively.
+# Replace Berkeley functions (e.g. bcopy) with ANSI ones (e.g. memcpy).
+# Other improvements (see ChangeLog).
+#
+# Revision 1.33  1991/12/12  03:19:36  sac
 # Added configdos.bat makefile.dos
 #
 # Revision 1.32  1991/11/27  16:58:22  sac
