@@ -1,3 +1,9 @@
+2003-05-22  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* infptrace.c (detach): Call print_sys_errmsg rather than
+	perror_with_name to issue warning message when errno is non-zero
+	after calling ptrace detach.
+
 2003-05-21  J. Brobecker  <brobecker@gnat.com>
 
 	* config/pa/tm-hppa.h: Delete some unused macros. Move some
