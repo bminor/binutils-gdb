@@ -793,7 +793,7 @@ md_begin ()
 	  mips_isa = 3;
 	  if (mips_cpu == -1)
 	    mips_cpu = 5900;
-          if (mips_5900 = -1)
+          if (mips_5900 == -1)
             mips_5900 = 1;
 	}
       /* end-sanitize-r5900 */
@@ -1533,8 +1533,13 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	}
     }
 
-  if (! mips16 || reloc_type == BFD_RELOC_MIPS16_JMP)
+  if (! mips16)
     md_number_to_chars (f, ip->insn_opcode, 4);
+  else if (reloc_type == BFD_RELOC_MIPS16_JMP)
+    {
+      md_number_to_chars (f, ip->insn_opcode >> 16, 2);
+      md_number_to_chars (f + 2, ip->insn_opcode & 0xffff, 2);
+    }
   else
     {
       if (ip->use_extend)
@@ -6132,17 +6137,18 @@ mips_ip (str, ip)
 	insn_isa = 1;
 
       if (insn_isa > mips_isa
-	  || ((insn->pinfo & INSN_ISA) == INSN_4650
-	      && ! mips_4650)
-	  || ((insn->pinfo & INSN_ISA) == INSN_4010
-	      && ! mips_4010)
-	  || ((insn->pinfo & INSN_ISA) == INSN_4100
-	      && ! mips_4100)
-          /* start-sanitize-r5900 */
-	  || ((insn->pinfo & INSN_ISA) == INSN_5900
-	      && ! mips_5900)
-          /* end-sanitize-r5900 */
-          )
+	  || (insn->pinfo != INSN_MACRO
+	      && (((insn->pinfo & INSN_ISA) == INSN_4650
+		   && ! mips_4650)
+		  || ((insn->pinfo & INSN_ISA) == INSN_4010
+		      && ! mips_4010)
+		  || ((insn->pinfo & INSN_ISA) == INSN_4100
+		      && ! mips_4100)
+		  /* start-sanitize-r5900 */
+		  || ((insn->pinfo & INSN_ISA) == INSN_5900
+		      && ! mips_5900)
+		  /* end-sanitize-r5900 */
+		  )))
 	{
 	  if (insn + 1 < &mips_opcodes[NUMOPCODES]
 	      && strcmp (insn->name, insn[1].name) == 0)
@@ -7191,7 +7197,31 @@ mips16_ip (str, ip)
 		  continue;
 		}
 
-	      my_getExpression (&imm_expr, s);
+	      if (s[0] == '%'
+		  && strncmp (s + 1, "gprel(", sizeof "gprel(" - 1) == 0)
+		{
+		  /* This is %gprel(SYMBOL).  We need to read SYMBOL,
+                     and generate the appropriate reloc.  If the text
+                     inside %gprel is not a symbol name with an
+                     optional offset, then we generate a normal reloc
+                     and will probably fail later.  */
+		  my_getExpression (&imm_expr, s + sizeof "%gprel" - 1);
+		  if (imm_expr.X_op == O_symbol)
+		    {
+		      mips16_ext = true;
+		      imm_reloc = BFD_RELOC_MIPS16_GPREL;
+		      s = expr_end;
+		      ip->use_extend = true;
+		      ip->extend = 0;
+		      continue;
+		    }
+		}
+	      else
+		{
+		  /* Just pick up a normal expression.  */
+		  my_getExpression (&imm_expr, s);
+		}
+
 	      /* We need to relax this instruction.  */
 	      imm_reloc = (int) BFD_RELOC_UNUSED + c;
 	      s = expr_end;
@@ -8341,6 +8371,7 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_MIPS_GOT_LO16:
     case BFD_RELOC_MIPS_CALL_HI16:
     case BFD_RELOC_MIPS_CALL_LO16:
+    case BFD_RELOC_MIPS16_GPREL:
       if (fixP->fx_pcrel)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      "Invalid PC relative reloc");

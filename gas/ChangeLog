@@ -1,3 +1,17 @@
+Tue Feb 11 15:52:22 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips16_ip): Handle %gprel modifier.
+	(md_apply_fix): Handle BFD_RELOC_MIPS16_GPREL.
+
+	* config/tc-mips.c (append_insn): Output jump instruction as a
+	pair of 2 byte instructions, rather than as a single 4 byte
+	instruction.
+
+start-sanitize-r5900
+	* config/tc-mips.c (md_begin): Correct test of mips_5900.
+	(mips_ip): Don't check INSN_ISA for a macro.
+
+end-sanitize-r5900
 start-sanitize-r5900
 Fri Feb  7 11:11:06 1997  Gavin Koch  <gavin@cygnus.com>
         
