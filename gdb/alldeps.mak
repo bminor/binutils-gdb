@@ -1,6 +1,5 @@
 # Start of "alldeps.mak" definitions
 ALLDEPFILES=\
-${srcdir}/#\
 ${srcdir}/29k-share/udi/udip2soc.c\
 ${srcdir}/29k-share/udi/udr.c\
 ${srcdir}/a29k-pinsn.c\
@@ -317,6 +316,7 @@ ${srcdir}/config/mips/bigmips.mt\
 ${srcdir}/config/mips/decstation.mh\
 ${srcdir}/config/mips/decstation.mt\
 ${srcdir}/config/mips/idt.mt\
+${srcdir}/config/mips/idtl.mt\
 ${srcdir}/config/mips/irix3.mh\
 ${srcdir}/config/mips/irix3.mt\
 ${srcdir}/config/mips/irix4.mh\
