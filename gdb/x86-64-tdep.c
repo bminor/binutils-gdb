@@ -1246,7 +1246,7 @@ x86_64_fill_fxsave (char *fxsave, int regnum)
   i387_fill_fxsave (fxsave, regnum);
 
   if (regnum == -1 || regnum == I387_FISEG_REGNUM)
-    regcache_collect (regnum, fxsave + 12);
+    regcache_collect (I387_FISEG_REGNUM, fxsave + 12);
   if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
-    regcache_collect (regnum, fxsave + 20);
+    regcache_collect (I387_FOSEG_REGNUM, fxsave + 20);
 }
