@@ -1,5 +1,5 @@
-/* tc-mips.c -- header file for tc-mips.c.
-   Copyright (C) 1993 Free Software Foundation, Inc.
+/* tc-mips.h -- header file for tc-mips.c.
+   Copyright (C) 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF support by Ian Lance Taylor of Cygnus Support.
@@ -17,8 +17,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #ifndef TC_MIPS
 
@@ -34,6 +35,11 @@
 #define MAX_RELOC_EXPANSION 3
 #define LOCAL_LABELS_FB 1
 
+/* We don't want to define LOCAL_LABELS_DOLLAR, because $0 is really a
+   reference to a register, not a label.  */
+#undef LOCAL_LABELS_DOLLAR
+#define LOCAL_LABELS_DOLLAR 0
+
 /* Maximum symbol offset that can be encoded in a BFD_RELOC_MIPS_GPREL
    relocation: */
 #define MAX_GPREL_OFFSET (0x7FF4)
@@ -41,7 +47,9 @@
 #define LOCAL_LABEL(name) mips_local_label (name)
 extern int mips_local_label PARAMS ((const char *));
 
-#define md_relax_frag(fragp, stretch)	(0)
+#define md_relax_frag(fragp, stretch) mips_relax_frag(fragp, stretch)
+extern int mips_relax_frag PARAMS ((struct frag *, long));
+
 #define md_undefined_symbol(name)	(0)
 #define md_operand(x)
 
@@ -63,9 +71,13 @@ extern int mips_local_label PARAMS ((const char *));
 #define TARGET_FORMAT mips_target_format()
 extern const char *mips_target_format ();
 
-struct mips_cl_insn {
-    unsigned long		insn_opcode;
-    const struct mips_opcode	*insn_mo;
+struct mips_cl_insn
+{
+  unsigned long insn_opcode;
+  const struct mips_opcode *insn_mo;
+  /* The next two fields are used when generating mips16 code.  */
+  boolean use_extend;
+  unsigned short extend;
 };
 
 extern int tc_get_register PARAMS ((int frame));
@@ -79,8 +91,17 @@ extern void mips_define_label PARAMS ((struct symbol *));
 #define tc_frob_file() mips_frob_file ()
 extern void mips_frob_file PARAMS ((void));
 
+#ifdef OBJ_ELF
+#define tc_frob_file_after_relocs mips_frob_file_after_relocs
+extern void mips_frob_file_after_relocs PARAMS ((void));
+#endif
+
 #define TC_CONS_FIX_NEW cons_fix_new_mips
 extern void cons_fix_new_mips ();
+
+/* Don't adjust MIPS16 jump relocations to section addresses, so we
+   don't have to worry about the format of the offset in the .o file.  */
+#define tc_fix_adjustable(fixp) ((fixp)->fx_r_type != BFD_RELOC_MIPS16_JMP)
 
 /* When generating embedded PIC code we must keep PC relative
    relocations.  */

@@ -259,9 +259,6 @@ static int byte_order;
 
 static int auto_align = 1;
 
-/* Symbol labelling the current insn.  */
-static symbolS *insn_label;
-
 /* When outputting SVR4 PIC code, the assembler needs to know the
    offset in the stack frame from which to restore the $gp register.
    This is set by the .cprestore pseudo-op, and saved in this
@@ -504,7 +501,7 @@ static void append_insn PARAMS ((char *place,
 				 bfd_reloc_code_real_type r,
 				 boolean));
 static void mips_no_prev_insn PARAMS ((void));
-static void mips_emit_delays PARAMS ((void));
+static void mips_emit_delays PARAMS ((boolean));
 #ifdef USE_STDARG
 static void macro_build PARAMS ((char *place, int *counter, expressionS * ep,
 				 const char *name, const char *fmt,
@@ -642,6 +639,30 @@ mips_pop_insert ()
   pop_insert (mips_pseudo_table);
   if (! ECOFF_DEBUGGING)
     pop_insert (mips_nonecoff_pseudo_table);
+}
+
+/* Symbols labelling the current insn.  */
+
+struct insn_label_list
+{
+  struct insn_label_list *next;
+  symbolS *label;
+};
+
+static struct insn_label_list *insn_labels;
+static struct insn_label_list *free_insn_labels;
+
+static void mips_clear_insn_labels PARAMS ((void));
+
+static inline void
+mips_clear_insn_labels ()
+{
+  register struct insn_label_list **pl;
+
+  for (pl = &free_insn_labels; *pl != NULL; pl = &(*pl)->next)
+    ;
+  *pl = insn_labels;
+  insn_labels = NULL;
 }
 
 static char *expr_end;
@@ -1172,6 +1193,27 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
   else
     record_alignment (now_seg, 2);
 
+  /* Mark instruction labels in mips16 mode.  This permits the linker
+     to handle them specially, such as generating jalx instructions
+     when needed.  We also make them odd for the duration of the
+     assembly, in order to generate the right sort of code.  We will
+     make them even in the adjust_symtab routine, while leaving them
+     marked.  This is convenient for the debugger and the
+     disassembler.  The linker knows to make them odd again.  */
+  if (mips16)
+    {
+      struct insn_label_list *l;
+
+      for (l = insn_labels; l != NULL; l = l->next)
+	{
+#ifdef S_SET_OTHER
+	  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	    S_SET_OTHER (l->label, STO_MIPS16);
+#endif
+	  ++l->label->sy_value.X_add_number;
+	}
+    }
+
   prev_pinfo = prev_insn.insn_mo->pinfo;
   pinfo = ip->insn_mo->pinfo;
 
@@ -1350,6 +1392,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  fragS *old_frag;
 	  unsigned long old_frag_offset;
 	  int i;
+	  struct insn_label_list *l;
 
 	  old_frag = frag_now;
 	  old_frag_offset = frag_now_fix ();
@@ -1371,11 +1414,14 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      frag_grow (40);
 	    }
 
-	  if (insn_label != NULL)
+	  for (l = insn_labels; l != NULL; l = l->next)
 	    {
-	      assert (S_GET_SEGMENT (insn_label) == now_seg);
-	      insn_label->sy_frag = frag_now;
-	      S_SET_VALUE (insn_label, (valueT) frag_now_fix ());
+	      assert (S_GET_SEGMENT (l->label) == now_seg);
+	      l->label->sy_frag = frag_now;
+	      S_SET_VALUE (l->label, (valueT) frag_now_fix ());
+	      /* mips16 text labels are stored as odd.  */
+	      if (mips16)
+		++l->label->sy_value.X_add_number;
 	    }
 
 #ifndef NO_ECOFF_DEBUGGING
@@ -1580,7 +1626,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		 whether there is a label on this instruction.  If
 		 there are any branches to anything other than a
 		 label, users must use .set noreorder.  */
-	      || insn_label != NULL
+	      || insn_labels != NULL
 	      /* If the previous instruction is in a variant frag, we
 		 can not do the swap.  This does not apply to the
 		 mips16, which uses variant frags for different
@@ -1878,9 +1924,9 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       prev_insn_where = f - frag_now->fr_literal;
       prev_insn_valid = 1;
     }
-  else
+  else if (place == NULL)
     {
-      /* We need to record a bit of uninformation even when we are not
+      /* We need to record a bit of information even when we are not
          reordering, in order to determine the base address for mips16
          PC relative relocs.  */
       prev_insn = *ip;
@@ -1888,7 +1934,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
     }
 
   /* We just output an insn, so the next one doesn't have a label.  */
-  insn_label = NULL;
+  mips_clear_insn_labels ();
 }
 
 /* This function forgets that there was any previous instruction or
@@ -1905,16 +1951,18 @@ mips_no_prev_insn ()
   prev_insn_extended = 0;
   prev_insn_reloc_type = BFD_RELOC_UNUSED;
   prev_prev_insn_unreordered = 0;
-  insn_label = NULL;
+  mips_clear_insn_labels ();
 }
 
 /* This function must be called whenever we turn on noreorder or emit
    something other than instructions.  It inserts any NOPS which might
    be needed by the previous instruction, and clears the information
-   kept for the previous instructions.  */
+   kept for the previous instructions.  The INSNS parameter is true if
+   instructions are to follow. */
 
 static void
-mips_emit_delays ()
+mips_emit_delays (insns)
+     boolean insns;
 {
   if (! mips_noreorder)
     {
@@ -1958,13 +2006,40 @@ mips_emit_delays ()
 	nop = 1;
       if (nop)
 	{
+	  struct insn_label_list *l;
+
 	  emit_nop ();
-	  if (insn_label != NULL)
+	  for (l = insn_labels; l != NULL; l = l->next)
 	    {
-	      assert (S_GET_SEGMENT (insn_label) == now_seg);
-	      insn_label->sy_frag = frag_now;
-	      S_SET_VALUE (insn_label, (valueT) frag_now_fix ());
+	      assert (S_GET_SEGMENT (l->label) == now_seg);
+	      l->label->sy_frag = frag_now;
+	      S_SET_VALUE (l->label, (valueT) frag_now_fix ());
+	      /* mips16 text labels are stored as odd.  */
+	      if (mips16)
+		++l->label->sy_value.X_add_number;
 	    }
+	}
+    }
+
+  /* Mark instruction labels in mips16 mode.  This permits the linker
+     to handle them specially, such as generating jalx instructions
+     when needed.  We also make them odd for the duration of the
+     assembly, in order to generate the right sort of code.  We will
+     make them even in the adjust_symtab routine, while leaving them
+     marked.  This is convenient for the debugger and the
+     disassembler.  The linker knows to make them odd again.  */
+  if (mips16 && insns)
+    {
+      struct insn_label_list *l;
+
+      for (l = insn_labels; l != NULL; l = l->next)
+	{
+#ifdef S_SET_OTHER
+	  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	    S_SET_OTHER (l->label, STO_MIPS16);
+#endif
+	  if ((l->label->sy_value.X_add_number & 1) == 0)
+	    ++l->label->sy_value.X_add_number;
 	}
     }
 
@@ -2914,7 +2989,7 @@ macro (ip)
 	 sub v0,$zero,$a0
 	 */
 
-      mips_emit_delays ();
+      mips_emit_delays (true);
       ++mips_noreorder;
       mips_any_noreorder = 1;
 
@@ -3372,7 +3447,7 @@ macro (ip)
 	  return;
 	}
 
-      mips_emit_delays ();
+      mips_emit_delays (true);
       ++mips_noreorder;
       mips_any_noreorder = 1;
       macro_build ((char *) NULL, &icnt, NULL,
@@ -3512,7 +3587,7 @@ macro (ip)
       s = "ddivu";
       s2 = "mfhi";
     do_divu3:
-      mips_emit_delays ();
+      mips_emit_delays (true);
       ++mips_noreorder;
       mips_any_noreorder = 1;
       macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, treg);
@@ -5091,7 +5166,7 @@ macro2 (ip)
     case M_DMULO:
       dbl = 1;
     case M_MULO:
-      mips_emit_delays ();
+      mips_emit_delays (true);
       ++mips_noreorder;
       mips_any_noreorder = 1;
       macro_build ((char *) NULL, &icnt, NULL,
@@ -5118,7 +5193,7 @@ macro2 (ip)
     case M_DMULOU:
       dbl = 1;
     case M_MULOU:
-      mips_emit_delays ();
+      mips_emit_delays (true);
       ++mips_noreorder;
       mips_any_noreorder = 1;
       macro_build ((char *) NULL, &icnt, NULL,
@@ -5464,7 +5539,7 @@ macro2 (ip)
        * Is the double cfc1 instruction a bug in the mips assembler;
        * or is there a reason for it?
        */
-      mips_emit_delays ();
+      mips_emit_delays (true);
       ++mips_noreorder;
       mips_any_noreorder = 1;
       macro_build ((char *) NULL, &icnt, NULL, "cfc1", "t,G", treg, 31);
@@ -5735,7 +5810,7 @@ mips16_macro (ip)
     case M_REM_3:
       s = "mfhi";
     do_div3:
-      mips_emit_delays ();
+      mips_emit_delays (true);
       ++mips_noreorder;
       mips_any_noreorder = 1;
       macro_build ((char *) NULL, &icnt, NULL,
@@ -5768,7 +5843,7 @@ mips16_macro (ip)
       s = "ddivu";
       s2 = "mfhi";
     do_divu3:
-      mips_emit_delays ();
+      mips_emit_delays (true);
       ++mips_noreorder;
       mips_any_noreorder = 1;
       macro_build ((char *) NULL, &icnt, NULL, s, "0,x,y", xreg, yreg);
@@ -7257,11 +7332,7 @@ mips16_immed (file, line, type, val, warn, small, ext, insn, use_extend,
 
   /* Branch offsets have an implicit 0 in the lowest bit.  */
   if (type == 'p' || type == 'q')
-    {
-      if ((val & 1) != 0)
-	as_bad_where (file, line, "branch to odd address");
-      val /= 2;
-    }
+    val /= 2;
 
   if ((val & ((1 << op->shift) - 1)) != 0
       || val < (mintiny << op->shift)
@@ -8235,8 +8306,7 @@ md_apply_fix (fixP, valueP)
        * might be deleting the relocation entry (i.e., a branch within
        * the current segment).
        */
-      /* TinyRISC can branch to odd addresses */
-      if ((value & (mips16 ? 0x1 : 0x3)) != 0)
+      if ((value & 0x3) != 0)
 	as_warn_where (fixP->fx_file, fixP->fx_line,
 		       "Branch to odd address (%lx)", value);
       value >>= 2;
@@ -8418,7 +8488,7 @@ mips_align (to, fill, label)
      int fill;
      symbolS *label;
 {
-  mips_emit_delays ();
+  mips_emit_delays (false);
   frag_align (to, fill);
   record_alignment (now_seg, to);
   if (label != NULL)
@@ -8470,7 +8540,8 @@ s_align (x)
   if (temp)
     {
       auto_align = 1;
-      mips_align (temp, (int) temp_fill, insn_label);
+      mips_align (temp, (int) temp_fill,
+		  insn_labels != NULL ? insn_labels->label : NULL);
     }
   else
     {
@@ -8483,8 +8554,8 @@ s_align (x)
 void
 mips_flush_pending_output ()
 {
-  mips_emit_delays ();
-  insn_label = NULL;
+  mips_emit_delays (false);
+  mips_clear_insn_labels ();
 }
 
 static void
@@ -8500,7 +8571,7 @@ s_change_sec (sec)
       && (sec == 'd' || sec == 'r'))
     sec = 's';
 
-  mips_emit_delays ();
+  mips_emit_delays (false);
   switch (sec)
     {
     case 't':
@@ -8578,11 +8649,11 @@ s_cons (log_size)
 {
   symbolS *label;
 
-  label = insn_label;
-  mips_emit_delays ();
+  label = insn_labels != NULL ? insn_labels->label : NULL;
+  mips_emit_delays (false);
   if (log_size > 0 && auto_align)
     mips_align (log_size, 0, label);
-  insn_label = NULL;
+  mips_clear_insn_labels ();
   cons (1 << log_size);
 }
 
@@ -8592,9 +8663,9 @@ s_float_cons (type)
 {
   symbolS *label;
 
-  label = insn_label;
+  label = insn_labels != NULL ? insn_labels->label : NULL;
 
-  mips_emit_delays ();
+  mips_emit_delays (false);
 
   if (auto_align)
     if (type == 'd')
@@ -8602,7 +8673,7 @@ s_float_cons (type)
     else
       mips_align (2, 0, label);
 
-  insn_label = NULL;
+  mips_clear_insn_labels ();
 
   float_cons (type);
 }
@@ -8717,7 +8788,7 @@ s_mipsset (x)
     }
   else if (strcmp (name, "noreorder") == 0)
     {
-      mips_emit_delays ();
+      mips_emit_delays (true);
       mips_noreorder = 1;
       mips_any_noreorder = 1;
     }
@@ -8901,11 +8972,11 @@ s_gpword (ignore)
       return;
     }
 
-  label = insn_label;
-  mips_emit_delays ();
+  label = insn_labels != NULL ? insn_labels->label : NULL;
+  mips_emit_delays (true);
   if (auto_align)
     mips_align (2, 0, label);
-  insn_label = NULL;
+  mips_clear_insn_labels ();
 
   expression (&ex);
 
@@ -9213,7 +9284,13 @@ mips16_extended_frag (fragp, sec, stretch)
          case it can not be extended) use the address of the
          instruction whose delay slot it is in.  */
       if (type == 'p' || type == 'q')
-	addr += 2;
+	{
+	  addr += 2;
+	  /* Ignore the low bit in the target, since it will be set
+             for a text label.  */
+	  if ((val & 1) != 0)
+	    --val;
+	}
       else if (RELAX_MIPS16_JAL_DSLOT (fragp->fr_subtype))
 	addr -= 4;
       else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
@@ -9617,7 +9694,13 @@ md_convert_frag (abfd, asec, fragp)
 	  /* The rules for the base address of a PC relative reloc are
              complicated; see mips16_extended_frag.  */
 	  if (type == 'p' || type == 'q')
-	    addr += 2;
+	    {
+	      addr += 2;
+	      /* Ignore the low bit in the target, since it will be
+                 set for a text label.  */
+	      if ((val & 1) != 0)
+		--val;
+	    }
 	  else if (RELAX_MIPS16_JAL_DSLOT (fragp->fr_subtype))
 	    addr -= 4;
 	  else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
@@ -9678,6 +9761,39 @@ md_convert_frag (abfd, asec, fragp)
     }
 }
 
+#ifdef OBJ_ELF
+
+/* This function is called after the relocs have been generated.
+   We've been storing mips16 text labels as odd.  Here we convert them
+   back to even for the convenience of the debugger.  */
+
+void
+mips_frob_file_after_relocs ()
+{
+  asymbol **syms;
+  unsigned int count, i;
+
+  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+    return;
+
+  syms = bfd_get_outsymbols (stdoutput);
+  count = bfd_get_symcount (stdoutput);
+  for (i = 0; i < count; i++, syms++)
+    {
+      if (elf_symbol (*syms)->internal_elf_sym.st_other == STO_MIPS16
+	  && ((*syms)->value & 1) != 0)
+	{
+	  (*syms)->value &= ~1;
+	  /* If the symbol has an odd size, it was probably computed
+	     incorrectly, so adjust that as well.  */
+	  if ((elf_symbol (*syms)->internal_elf_sym.st_size & 1) != 0)
+	    ++elf_symbol (*syms)->internal_elf_sym.st_size;
+	}
+    }
+}
+
+#endif
+
 /* This function is called whenever a label is defined.  It is used
    when handling branch delays; if a branch has a label, we assume we
    can not move it.  */
@@ -9686,11 +9802,19 @@ void
 mips_define_label (sym)
      symbolS *sym;
 {
-  insn_label = sym;
-#ifdef OBJ_ELF
-  if (mips16)
-    S_SET_OTHER (insn_label, STO_MIPS16);
-#endif
+  struct insn_label_list *l;
+
+  if (free_insn_labels == NULL)
+    l = (struct insn_label_list *) xmalloc (sizeof *l);
+  else
+    {
+      l = free_insn_labels;
+      free_insn_labels = l->next;
+    }
+
+  l->label = sym;
+  l->next = insn_labels;
+  insn_labels = l;
 }
 
 /* Decide whether a label is local.  This is called by LOCAL_LABEL.

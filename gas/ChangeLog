@@ -1,5 +1,34 @@
 Tue Dec 17 10:59:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (insn_label): Remove.
+	(struct insn_label_list): Define.
+	(insn_labels, free_insn_labels): New static variables.
+	(mips_clear_insn_labels): New static function.
+	(append_insn): Mark all mips16 text labels, and make them odd.
+	Handle all labels after emitting a nop, not just one.  Call
+	mips_clear_insn_labels rather than just clearing insn_label.
+	(mips_emit_delays): Add insns parameter, and use it to decide
+	whether to mark mips16 labels.  Handle all labels, not just one.
+	Force mips16 labels to be odd.  Change all callers.
+	(mips16_immed): Don't check for an odd branch target.
+	(md_apply_fix): Don't check mips16 mode for a branch reloc.
+	(mips16_extended_frag): Ignore the low bit in a branch target.
+	(md_convert_frag): Likewise.
+	(mips_no_prev_insn): Call mips_clear_insn_labels rather than just
+	clearing insn_label.
+	(mips_align, mips_flush_pending_output, s_cons): Likewise.
+	(s_float_cons, s_gpword): Likewise.
+	(s_align): Use insn_labels rather than insn_label.
+	(s_cons, s_float_cons, s_gpword): Likewise.
+	(mips_frob_file_after_relocs): New function.
+	(mips_define_label): Rewrite to add to insn_labels list.
+	* config/tc-mips.h (tc_frob_file_after_relocs): Define.
+	* ecoff.c (ecoff_build_symbols): If the size of a function comes
+	out odd, increment it.
+
+	* config/tc-mips.c (append_insn): Only update prev_insn when not
+	reordering if place is NULL.
+
 	* config/tc-mips.c (mips16_ip): Check for a missing expression
 	when using the register indirect addressing mode.
 
