@@ -57,6 +57,24 @@ struct coff_exec {
 	struct external_aouthdr a;
 };
 
+/* Each partial symbol table entry contains a pointer to private data for the
+   read_symtab() function to use when expanding a partial symbol table entry
+   to a full symbol table entry.
+
+   For mipsread this structure contains the index of the FDR that this psymtab
+   represents and a pointer to the symbol table header HDRR from the symbol
+   file that the psymtab was created from.
+
+   Note: This code is currently untested.  -fnf */
+
+#define FDR_IDX(p) (((struct symloc *)((p)->read_symtab_private))->fdr_idx)
+#define CUR_HDR(p) (((struct symloc *)((p)->read_symtab_private))->cur_hdr)
+
+struct symloc {
+  int fdr_idx;
+  HDRR *cur_hdr;
+};
+
 /* Things we import explicitly from other modules */
 
 extern int	     info_verbose;
@@ -305,8 +323,7 @@ mipscoff_psymtab_to_symtab(pst)
 		fflush(stdout);
 	}
 	/* Restore the header and list of pending typedefs */
-	/* FIXME, we should use private data that is a proper pointer. */
-	cur_hdr = (HDRR *) pst->ldsymlen;
+	cur_hdr = CUR_HDR(pst);
 
 	psymtab_to_symtab_1(pst, pst->filename);
 
@@ -1497,6 +1514,8 @@ parse_lines(fh, lt)
 				delta -= 16;
 			if (delta == -8) {
 				delta = (base[0] << 8) | base[1];
+				if (delta >= 0x8000)
+					delta -= 0x10000;
 				base += 2;
 			}
 			lineno += delta;/* first delta is 0 */
@@ -1556,7 +1575,6 @@ parse_partial_symbols(end_of_text_seg)
 	int end_of_text_seg;
 {
 	int             f_idx, s_idx, h_max, stat_idx;
-	CORE_ADDR	dummy, *prevhigh;
 	HDRR		*hdr;
 	/* Running pointers */
 	FDR		*fh;
@@ -1586,7 +1604,7 @@ parse_partial_symbols(end_of_text_seg)
 	{
 		struct partial_symtab * pst = new_psymtab("");
 		fdr_to_pst[-1].pst = pst;
-		pst->ldsymoff = -1;
+		FDR_IDX(pst) = -1;
 	}
 
 	/* Now scan the FDRs, mostly for dependencies */
@@ -1696,6 +1714,7 @@ parse_partial_symbols(end_of_text_seg)
 	for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++) {
 		fh = f_idx + (FDR *)(cur_hdr->cbFdOffset);
 		pst = fdr_to_pst[f_idx].pst;
+		pst->texthigh = pst->textlow;
 		
 		for (s_idx = 0; s_idx < fh->csym; ) {
 			register struct partial_symbol *p;
@@ -1723,6 +1742,17 @@ parse_partial_symbols(end_of_text_seg)
 				/* Skip over procedure to next one. */
 				s_idx = (sh->index + (AUXU *)fh->iauxBase)
 					  ->isym;
+					{
+					long high;
+					long procaddr = sh->value;
+
+					sh = s_idx + (SYMR *) fh->isymBase - 1;
+					if (sh->st != stEnd)
+						continue;
+					high = procaddr + sh->value;
+					if (high > pst->texthigh)
+						pst->texthigh = high;
+					}
 				continue;
 			case stStatic:			/* Variable */
 				SYMBOL_CLASS(p) = LOC_STATIC;
@@ -1734,9 +1764,12 @@ parse_partial_symbols(end_of_text_seg)
 			case stConstant:		/* Constant decl */
 				SYMBOL_CLASS(p) = LOC_CONST;
 				break;
-			case stBlock:			/* { }, str, un, enum */
-				/* Eventually we want struct names and enum
-				   values out of here.  FIXME */
+			case stBlock:			/* { }, str, un, enum*/
+				if (sh->sc == scInfo) {
+                                      SYMBOL_NAMESPACE(p) = STRUCT_NAMESPACE;
+                                      SYMBOL_CLASS(p) = LOC_TYPEDEF;
+                                      pst->n_static_syms++;
+				}
 				/* Skip over the block */
 				s_idx = sh->index;
 				continue;
@@ -1762,40 +1795,19 @@ parse_partial_symbols(end_of_text_seg)
 		}
 	}
 
-	/* The array (of lists) of globals must be sorted.
-	   Take care, since we are at it, of pst->texthigh.
-
-	   NOTE: The way we handle textlow/high is incorrect, but good
-	   enough for a first approximation. The case we fail is on a
-	   file "foo.c" that looks like
-	   	proc1() {...}
-		#include "bar.c"	-- this contains proc2()
-		proc3() {...}
-	   where proc3() is attributed to bar.c.  But since this is a
-	   dependent file it will cause loading of foo.c as well, so
-	   everything will be fine at the end.  */
-
-	/* First, sort the psymtabs by their textlow addresses.  */
+	/* The array (of lists) of globals must be sorted. */
 	reorder_psymtabs();
 
-	/* Now, rip through and fill in "texthigh" from the textlow
-	   of the following psymtab.  Slimy but it might work.
-	   Sort the global psymbols while we're at it.  */
-	prevhigh = &dummy;
+	/* Now sort the global psymbols.  */
 	for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++) {
 		struct partial_symtab *pst = fdr_to_pst[f_idx].pst;
 		if (pst->n_global_syms > 1)
 			qsort (global_psymbols.list + pst->globals_offset,
 				pst->n_global_syms, sizeof (struct partial_symbol),
 				compare_psymbols);
-		if (pst->textlow) {
-			*prevhigh = pst->textlow;
-			prevhigh = &pst->texthigh;
-		}
 	}
 
 	/* Mark the last code address, and remember it for later */
-	*prevhigh = end_of_text_seg;
 	hdr->cbDnOffset = end_of_text_seg;
 
 	free(&fdr_to_pst[-1]);
@@ -1837,7 +1849,7 @@ parse_fdr(f_idx, lev)
 	}
 
 	/* Make everything point to everything. */
-	pst->ldsymoff = f_idx;
+	FDR_IDX(pst) = f_idx;
 	fdr_to_pst[f_idx].pst = pst;
 	fh->ioptBase = (int)pst;
 
@@ -1900,11 +1912,11 @@ psymtab_to_symtab_1(pst, filename)
 	/* How many symbols will we need */
 	/* FIXME, this does not count enum values. */
 	f_max = pst->n_global_syms + pst->n_static_syms;
-	if (pst->ldsymoff == -1) {
+	if (FDR_IDX(pst) == -1) {
 		fh = 0;
 		st = new_symtab( "unknown", f_max, 0);
 	} else {
-		fh = (FDR *) (cur_hdr->cbFdOffset) + pst->ldsymoff;
+		fh = (FDR *) (cur_hdr->cbFdOffset) + FDR_IDX(pst);
 		f_max += fh->csym + fh->cpd;
 		st = new_symtab(pst->filename, 2 * f_max, 2 * fh->cline);
 	}
@@ -1934,7 +1946,7 @@ psymtab_to_symtab_1(pst, filename)
 
 	/* Now read the symbols for this symtab */
 
-	cur_fd = pst->ldsymoff;
+	cur_fd = FDR_IDX(pst);
 	cur_fdr = fh;
 	cur_stab = st;
 
@@ -2405,8 +2417,9 @@ new_psymtab(name)
 	partial_symtab_list = pst;
 
 	/* Keep a backpointer to the file's symbols */
-	/* FIXME, we should use private data that is a proper pointer. */
-	pst->ldsymlen = (int)cur_hdr;
+	pst->read_symtab_private = (char *) obstack_alloc (psymbol_obstack,
+						  sizeof (struct symloc));
+	CUR_HDR(pst) = cur_hdr;
 
 	/* The way to turn this into a symtab is to call... */
 	pst->read_symtab = mipscoff_psymtab_to_symtab;
@@ -2527,6 +2540,7 @@ new_type(name)
 		obstack_alloc (symbol_obstack, sizeof (struct type));
 
 	bzero (t, sizeof (*t));
+	TYPE_VPTR_FIELDNO (t) = -1;
 	TYPE_NAME(t) = name;
 	return t;
 }
@@ -2549,6 +2563,7 @@ make_type(code, length, uns, name)
 	TYPE_LENGTH(type) = length;
 	TYPE_FLAGS(type) = uns ? TYPE_FLAG_UNSIGNED : 0;
 	TYPE_NAME(type) = name;
+	TYPE_VPTR_FIELDNO (type) = -1;
 
 	return type;
 }

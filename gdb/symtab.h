@@ -1,21 +1,21 @@
 /* Symbol table definitions for GDB.
-   Copyright (C) 1986, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if !defined (SYMTAB_H)
 #define SYMTAB_H 1
@@ -59,7 +59,7 @@ extern void free ();
 /* Actually, the misc function list is used to store *all* of the
    global symbols (text, data, bss, and abs).  It is sometimes used
    to figure out what symtabs to read in.  The "type" field is used
-   occasionally.
+   occasionally.  Calling it the misc "function" vector is now a misnomer.
 
    The misc_info field is available for machine-specific information
    that can be cached along with a misc function vector entry.  The
@@ -83,19 +83,6 @@ struct misc_function
 struct misc_function *misc_function_vector;
 int misc_function_count;
 
-enum language {language_unknown, language_c};
-
-/* All data types of symbols in the compiled program
-   are represented by `struct type' objects.
-   All of these objects are pointed to by the typevector.
-   The type vector may have empty slots that contain zero.  */
-
-struct typevector
-{
-  int length;			/* Number of types described */
-  struct type *type[1];
-};
-
 /* Different kinds of data types are distinguished by the `code' field.  */
 
 enum type_code
@@ -119,6 +106,10 @@ enum type_code
   TYPE_CODE_MEMBER,		/* Member type */
   TYPE_CODE_METHOD,		/* Method type */
   TYPE_CODE_REF,		/* C++ Reference types */
+
+  /* Modula-2 */
+  TYPE_CODE_CHAR,		/* *real* character type */
+  TYPE_CODE_BOOL,		/* Builtin Modula-2 BOOLEAN */
 };
 
 /* This appears in a type's flags word for an unsigned integer type.  */
@@ -403,11 +394,6 @@ enum address_class
   LOC_LABEL,		/* Value is address SYMBOL_VALUE_ADDRESS in the code */
   LOC_BLOCK,		/* Value is address SYMBOL_VALUE_BLOCK of a
 			   `struct block'.  Function names have this class. */
-  LOC_EXTERNAL,		/* Value is at address SYMBOL_VALUE_ADDRESS not in
-			   this compilation.
-			   This is used only in psymtabs; in symtabs
-			   LOC_STATIC is used instead (since in that case
-			   we take the time to find the address).  */
   LOC_CONST_BYTES,	/* Value is a constant byte-sequence pointed to by
 			   SYMBOL_VALUE_ADDRESS, in target byte order.  */
   LOC_LOCAL_ARG,	/* Value is arg at spec'd offset in stack frame.
@@ -442,7 +428,7 @@ struct symbol
 				   LOC_REF_ARG, LOC_REGPARM, LOC_LOCAL */
       struct block *block;      /* for LOC_BLOCK */
       char *bytes;		/* for LOC_CONST_BYTES */
-      CORE_ADDR address;	/* for LOC_STATIC, LOC_LABEL, LOC_EXTERNAL */
+      CORE_ADDR address;	/* for LOC_STATIC, LOC_LABEL */
       struct symbol *chain;	/* for opaque typedef struct chain */
     }
   value;
@@ -528,8 +514,6 @@ struct symtab
     struct blockvector *blockvector;
     /* Table mapping core addresses to line numbers for this file.  */
     struct linetable *linetable;
-    /* Vector containing all types defined for this symtab.  */
-    struct typevector *typevector;
     /* Name of this source file.  */
     char *filename;
     /* Directory in which it was compiled, or NULL if we don't know.  */
@@ -587,15 +571,6 @@ struct partial_symtab
      relocate by this amount when reading in symbols from the symbol
      file.  */
   CORE_ADDR addr;
-
-  /* Offset within loader symbol table of first local symbol for this
-     file and length (in bytes) of the section of the symbol table
-     devoted to this file's symbols (actually, the section bracketed
-     may contain more than just this files symbols
-     If ldsymlen is 0, the only reason for this things existence is
-     the dependency list below.  Nothing else will happen when it is
-     read in.  */
-  int ldsymoff, ldsymlen;
   /* Range of text addresses covered by this file; texthigh is the
      beginning of the next section. */
   CORE_ADDR textlow, texthigh;
@@ -608,14 +583,15 @@ struct partial_symtab
   /* Global symbol list.  This list will be sorted after readin to
      improve access.  Binary search will be the usual method of
      finding a symbol within it. globals_offset is an integer offset
-     within ps_globals */
+     within global_psymbols[].  */
   int globals_offset, n_global_syms;
   /* Static symbol list.  This list will *not* be sorted after readin;
      to find a symbol in it, exhaustive search must be used.  This is
      reasonable because searches through this list will eventually
      lead to either the read in of a files symbols for real (assumed
      to take a *lot* of time; check) or an error (and we don't care
-     how long errors take). */
+     how long errors take).  This is an offset and size within
+     static_psymbols[].  */
   int statics_offset, n_static_syms;
   /* Pointer to symtab eventually allocated for this source file, 0 if
      !readin or if we haven't looked for the symtab after it was readin.  */
@@ -623,6 +599,12 @@ struct partial_symtab
   /* Pointer to function which will read in the symtab corresponding to
      this psymtab.  */
   void (*read_symtab) ();
+  /* Information that lets read_symtab() locate the part of the symbol table
+     that this psymtab corresponds to.  This information is private to the
+     format-dependent symbol reading routines.  For further detail examine
+     the various symbol reading modules.  Should really be (void *) but is
+     (char *) as with other such gdb variables.  (FIXME) */
+  char *read_symtab_private;
   /* Non-zero if the symtab corresponding to this psymtab has been
      readin */
   unsigned char readin;
@@ -652,8 +634,6 @@ int current_source_line;
 #define BLOCKLIST(symtab) (symtab)->blockvector
 #define BLOCKVECTOR(symtab) (symtab)->blockvector
 
-#define TYPEVECTOR(symtab) (symtab)->typevector
-
 #define LINELIST(symtab) (symtab)->linetable
 #define LINETABLE(symtab) (symtab)->linetable
 
@@ -663,9 +643,6 @@ int current_source_line;
 #define BLOCKLIST_BLOCK(blocklist,n) (blocklist)->block[n]
 #define BLOCKVECTOR_NBLOCKS(blocklist) (blocklist)->nblocks
 #define BLOCKVECTOR_BLOCK(blocklist,n) (blocklist)->block[n]
-
-#define TYPEVECTOR_NTYPES(typelist) (typelist)->length
-#define TYPEVECTOR_TYPE(typelist,n) (typelist)->type[n]
 
 #define BLOCK_START(bl) (bl)->startaddr
 #define BLOCK_END(bl) (bl)->endaddr
@@ -809,7 +786,7 @@ extern struct type *create_array_type ();
 extern struct symbol *block_function ();
 extern struct symbol *find_pc_function ();
 extern int find_pc_partial_function ();
-extern void clearpc_function_cache ();
+extern void clear_pc_function_cache ();
 extern struct partial_symtab *lookup_partial_symtab ();
 extern struct partial_symtab *find_pc_psymtab ();
 extern struct symtab *find_pc_symtab ();
@@ -855,6 +832,13 @@ extern struct type *builtin_type_error;
 
 extern struct type *builtin_type_long_long;
 extern struct type *builtin_type_unsigned_long_long;
+
+/* Modula-2 types */
+extern struct type *builtin_type_m2_char;
+extern struct type *builtin_type_m2_int;
+extern struct type *builtin_type_m2_card;
+extern struct type *builtin_type_m2_real;
+extern struct type *builtin_type_m2_bool;
 
 /* LONG_LONG is defined if the host has "long long".  */
 #ifdef LONG_LONG
@@ -929,5 +913,12 @@ char **make_symbol_completion_list ();
 
 /* The entry point of a file we are reading.  */
 extern CORE_ADDR entry_point;
+
+/* Maximum and minimum values of built-in types */
+#define	MAX_OF_TYPE(t)	\
+   TYPE_UNSIGNED(t) ? UMAX_OF_SIZE(TYPE_LENGTH(t)) : MAX_OF_SIZE(TYPE_LENGTH(t))
+
+#define MIN_OF_TYPE(t)	\
+   TYPE_UNSIGNED(t) ? UMIN_OF_SIZE(TYPE_LENGTH(t)) : MIN_OF_SIZE(TYPE_LENGTH(t))
 
 #endif /* symtab.h not already included.  */

@@ -126,6 +126,25 @@ struct dbx_symfile_info {
   int desc;			/* File descriptor of symbol file */
 };
 
+/* Each partial symbol table entry contains a pointer to private data for the
+   read_symtab() function to use when expanding a partial symbol table entry
+   to a full symbol table entry.
+
+   For dbxread this structure contains the offset within the file symbol table
+   of first local symbol for this file, and length (in bytes) of the section
+   of the symbol table devoted to this file's symbols (actually, the section
+   bracketed may contain more than just this file's symbols).  If ldsymlen is
+   0, the only reason for this thing's existence is the dependency list.
+   Nothing else will happen when it is read in. */
+
+#define LDSYMOFF(p) (((struct symloc *)((p)->read_symtab_private))->ldsymoff)
+#define LDSYMLEN(p) (((struct symloc *)((p)->read_symtab_private))->ldsymlen)
+
+struct symloc {
+  int ldsymoff;
+  int ldsymlen;
+};
+
 extern void qsort ();
 extern double atof ();
 extern struct cmd_list_element *cmdlist;
@@ -2017,7 +2036,7 @@ read_dbx_symtab (symfile_name, addr,
 	     things like "break c-exp.y:435" need to work (I
 	     suppose the psymtab_include_list could be hashed or put
 	     in a binary tree, if profiling shows this is a major hog).  */
-	  if (!strcmp (namestring, pst->filename))
+	  if (pst && !strcmp (namestring, pst->filename))
 	    continue;
 	  {
 	    register int i;
@@ -2357,13 +2376,14 @@ read_dbx_symtab (symfile_name, addr,
   discard_cleanups (old_chain);
 }
 
-/*
- * Allocate and partially fill a partial symtab.  It will be
- * completely filled at the end of the symbol list.
+/* Allocate and partially fill a partial symtab.  It will be
+   completely filled at the end of the symbol list.
 
- SYMFILE_NAME is the name of the symbol-file we are reading from, and ADDR
- is the address relative to which its symbols are (incremental) or 0
- (normal).  */
+   SYMFILE_NAME is the name of the symbol-file we are reading from, and ADDR
+   is the address relative to which its symbols are (incremental) or 0
+   (normal). */
+
+
 static struct partial_symtab *
 start_psymtab (symfile_name, addr,
 	       filename, textlow, ldsymoff, global_syms, static_syms)
@@ -2392,7 +2412,9 @@ start_psymtab (symfile_name, addr,
   strcpy (result->filename, filename);
 
   result->textlow = textlow;
-  result->ldsymoff = ldsymoff;
+  result->read_symtab_private = (char *) obstack_alloc (psymbol_obstack,
+					       sizeof (struct symloc));
+  LDSYMOFF(result) = ldsymoff;
 
   result->readin = 0;
   result->symtab = 0;
@@ -2450,7 +2472,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 {
   int i;
 
-  pst->ldsymlen = capping_symbol_offset - pst->ldsymoff;
+  LDSYMLEN(pst) = capping_symbol_offset - LDSYMOFF(pst);
   pst->texthigh = capping_text;
 
   pst->n_global_syms =
@@ -2485,8 +2507,10 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 
       subpst->symfile_name = pst->symfile_name;
       subpst->addr = pst->addr;
-      subpst->ldsymoff =
-	subpst->ldsymlen =
+      subpst->read_symtab_private = (char *) obstack_alloc (psymbol_obstack,
+						   sizeof (struct symloc));
+      LDSYMOFF(subpst) =
+	LDSYMLEN(subpst) =
 	  subpst->textlow =
 	    subpst->texthigh = 0;
 
@@ -2565,7 +2589,7 @@ psymtab_to_symtab_1 (pst, desc, stringtab, stringtab_size, sym_offset)
 			     stringtab, stringtab_size, sym_offset);
       }
 
-  if (pst->ldsymlen)		/* Otherwise it's a dummy */
+  if (LDSYMLEN(pst))		/* Otherwise it's a dummy */
     {
       /* Init stuff necessary for reading in symbols */
       free_pendings = 0;
@@ -2578,8 +2602,8 @@ psymtab_to_symtab_1 (pst, desc, stringtab, stringtab_size, sym_offset)
       lseek (desc, sym_offset, L_SET);
       pst->symtab =
 	read_ofile_symtab (desc, stringtab, stringtab_size,
-			   pst->ldsymoff,
-			   pst->ldsymlen, pst->textlow,
+			   LDSYMOFF(pst),
+			   LDSYMLEN(pst), pst->textlow,
 			   pst->texthigh - pst->textlow, pst->addr);
       sort_symtab_syms (pst->symtab);
 
@@ -2615,7 +2639,7 @@ dbx_psymtab_to_symtab (pst)
       return;
     }
 
-  if (pst->ldsymlen || pst->number_of_dependencies)
+  if (LDSYMLEN(pst) || pst->number_of_dependencies)
     {
       /* Print the message now, before reading the string table,
 	 to avoid disconcerting pauses.  */

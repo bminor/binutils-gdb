@@ -1,3 +1,10 @@
+Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dbxread.c, mipsread.c symmisc.c, symtab.c:  Remove the object
+	file specific fields from the partial symbol table structure and
+	replace them with a pointer to private data for each different
+	flavor of object file reader to initialize appropriately.
+
 Tue Oct 22 18:04:32 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* infrun.c (wait_for_inferior):  Check return value from
