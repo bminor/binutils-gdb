@@ -1,3 +1,13 @@
+Wed May  6 09:46:05 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* elf32-mips.c (elf_mips_mach): New.
+	(_bfd_mips_elf_object_p): Use elf_mips_mach.
+	(_bfd_mips_elf_final_write_processing): Use the names
+	of machines, rather than the numbers.  Set both the ARCH
+	and MACH in e_flags.  Handle a few more specific machines.
+	(_bfd_mips_elf_merge_private_bfd_data): Merge both
+	EF_MIPS_ARCH and EF_MIPS_MACH.
+
 Tue May  5 21:01:53 1998  Richard Henderson  <rth@cygnus.com>
 
 	* syms.c (bfd_is_local_label): Revert last change.
