@@ -334,6 +334,23 @@ struct source
   struct linetable contents;
 };
 
+/* How to relocate the symbols from each section in a symbol file.
+   Each struct contains an array of offsets.
+   The ordering and meaning of the offsets is file-type-dependent;
+   typically it is indexed by section numbers or symbol types or
+   something like that.
+
+   To give us flexibility in changing the internal representation
+   of these offsets, the ANOFFSET macro must be used to insert and
+   extract offset values in the struct.  */
+
+struct section_offsets
+  {
+    CORE_ADDR offsets[1];		/* As many as needed. */
+  };
+
+#define	ANOFFSET(secoff, whichone)	(secoff->offsets[whichone])
+
 /* Each source file is represented by a struct symtab. 
    These objects are chained through the `next' field.  */
 
@@ -404,10 +421,9 @@ struct partial_symtab
   /* Information about the object file from which symbols should be read.  */
   struct objfile *objfile;
 
-  /* Address relative to which the symbols in this file are.  Need to
-     relocate by this amount when reading in symbols from the symbol
-     file.  */
-  CORE_ADDR addr;
+  /* Set of relocation offsets to apply to each section.  */ 
+  struct section_offsets *section_offsets;
+
   /* Range of text addresses covered by this file; texthigh is the
      beginning of the next section. */
   CORE_ADDR textlow, texthigh;

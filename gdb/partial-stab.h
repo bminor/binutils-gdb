@@ -35,16 +35,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	case N_TEXT | N_EXT:
 	case N_NBTEXT | N_EXT:
-	case N_NBDATA | N_EXT:
-	case N_NBBSS | N_EXT:
-	case N_SETV | N_EXT:
-	case N_ABS | N_EXT:
+	  CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	  goto record_it;
+
 	case N_DATA | N_EXT:
+	case N_NBDATA | N_EXT:
+	  CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	  goto record_it;
+
 	case N_BSS | N_EXT:
+	case N_NBBSS | N_EXT:
+        case N_SETV | N_EXT:		/* FIXME, is this in BSS? */
+	  CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_BSS);
+	  goto record_it;
+
+	case N_ABS | N_EXT:
+	record_it:
 #ifdef DBXREAD_ONLY
-
-	  CUR_SYMBOL_VALUE += addr;		/* Relocate */
-
 	  SET_NAMESTRING();
 
 	bss_ext_symbol:
@@ -66,7 +73,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	case N_FN_SEQ:
 	case N_TEXT:
 #ifdef DBXREAD_ONLY
-	  CUR_SYMBOL_VALUE += addr;		/* Relocate */
+	  CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 	  SET_NAMESTRING();
 	  if ((namestring[0] == '-' && namestring[1] == 'l')
 	      || (namestring [(nsl = strlen (namestring)) - 1] == 'o'
@@ -79,8 +86,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    {
 #ifndef hp9000s800
 	      if (objfile -> ei.entry_point <  CUR_SYMBOL_VALUE &&
-		  objfile -> ei.entry_point >= last_o_file_start &&
-		  addr == 0)		/* FIXME nogood nomore */
+		  objfile -> ei.entry_point >= last_o_file_start)
 		{
 		  objfile -> ei.entry_file_lowpc = last_o_file_start;
 		  objfile -> ei.entry_file_highpc = CUR_SYMBOL_VALUE;
@@ -107,7 +113,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	case N_DATA:
 #ifdef DBXREAD_ONLY
-	  CUR_SYMBOL_VALUE += addr;		/* Relocate */
+	  CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
 	  SET_NAMESTRING ();
 	  /* Check for __DYNAMIC, which is used by Sun shared libraries. 
 	     Record it even if it's local, not global, so we can find it.
@@ -115,10 +121,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  if ((namestring[8] == 'C' && (strcmp ("__DYNAMIC", namestring) == 0))
 	      || VTBL_PREFIX_P ((namestring+HASH_OFFSET)))
 	    {
-	      /* Not really a function here, but... */
 	      record_minimal_symbol (namestring, CUR_SYMBOL_VALUE,
 				    CUR_SYMBOL_TYPE, objfile); /* Always */
-	  }
+	    }
 #endif /* DBXREAD_ONLY */
 	  continue;
 
@@ -202,7 +207,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	  SET_NAMESTRING();
 
-	  valu += addr;		/* Relocate */
+	  valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 
 	  if (pst)
 	    {
@@ -239,7 +244,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    tmp = dir_so_symnum;
 	  else
 	    tmp = symnum;
-	  pst = START_PSYMTAB (objfile, addr,
+	  pst = START_PSYMTAB (objfile, section_offsets,
 			       namestring, valu,
 			       tmp * symbol_size,
 			       objfile -> global_psymbols.next,
@@ -320,6 +325,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	case N_LSYM:		/* Typedef or automatic variable. */
 	case N_STSYM:		/* Data seg var -- static  */
 	case N_LCSYM:		/* BSS      "  */
+	case N_ROSYM:		/* Read-only data seg var -- static.  */
 	case N_NBSTS:           /* Gould nobase.  */
 	case N_NBLCS:           /* symbols.  */
 
@@ -430,7 +436,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	case N_FUN:
 	case N_GSYM:		/* Global (extern) variable; can be
-				   data or bss (sigh).  */
+				   data or bss (sigh FIXME).  */
 
 	/* Following may probably be ignored; I'll leave them here
 	   for now (until I do Pascal and Modula 2 extensions).  */
@@ -463,13 +469,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
 	      continue;
 	    case 'S':
-	      CUR_SYMBOL_VALUE += addr;		/* Relocate */
+	      CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
 	      ADD_PSYMBOL_ADDR_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_STATIC,
 				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
 	      continue;
 	    case 'G':
-	      CUR_SYMBOL_VALUE += addr;		/* Relocate */
+	      CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
 	      /* The addresses in these entries are reported to be
 		 wrong.  See the code that reads 'G's for symtabs. */
 	      ADD_PSYMBOL_ADDR_TO_LIST (namestring, p - namestring,

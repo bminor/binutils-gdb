@@ -206,7 +206,13 @@ static char *lnbase;	/* Base pointer to line section */
 static int isreg;	/* Kludge to identify register variables */
 static int offreg;	/* Kludge to identify basereg references */
 
+/* This value is added to each symbol value.  FIXME:  Generalize to 
+   the section_offsets structure used by dbxread.  */
 static CORE_ADDR baseaddr;	/* Add to each symbol value */
+
+/* The section offsets used in the current psymtab or symtab.  FIXME,
+   only used to pass one value (baseaddr) at the moment.  */
+static struct section_offsets *base_section_offsets;
 
 /* Each partial symbol table entry contains a pointer to private data for the
    read_symtab() function to use when expanding a partial symbol table entry
@@ -412,7 +418,8 @@ GLOBAL FUNCTION
 
 SYNOPSIS
 
-	void dwarf_build_psymtabs (int desc, char *filename, CORE_ADDR addr,
+	void dwarf_build_psymtabs (int desc, char *filename, 
+	     struct section_offsets *section_offsets,
 	     int mainline, unsigned int dbfoff, unsigned int dbsize,
 	     unsigned int lnoffset, unsigned int lnsize,
 	     struct objfile *objfile)
@@ -437,11 +444,11 @@ RETURNS
  */
 
 void
-dwarf_build_psymtabs (desc, filename, addr, mainline, dbfoff, dbsize,
+dwarf_build_psymtabs (desc, filename, section_offsets, mainline, dbfoff, dbsize,
 		      lnoffset, lnsize, objfile)
      int desc;
      char *filename;
-     CORE_ADDR addr;
+     struct section_offsets *section_offsets;
      int mainline;
      unsigned int dbfoff;
      unsigned int dbsize;
@@ -474,7 +481,8 @@ dwarf_build_psymtabs (desc, filename, addr, mainline, dbfoff, dbsize,
   
   /* Save the relocation factor where everybody can see it.  */
 
-  baseaddr = addr;
+  base_section_offsets = section_offsets;
+  baseaddr = ANOFFSET (section_offsets, 0);
 
   /* Follow the compilation unit sibling chain, building a partial symbol
      table entry for each one.  Save enough information about each compilation
@@ -1943,7 +1951,8 @@ read_ofile_symtab (pst)
   dbbase = xmalloc (DBLENGTH(pst));
   dbroff = DBROFF(pst);
   foffset = DBFOFF(pst) + dbroff;
-  baseaddr = pst -> addr;
+  base_section_offsets = pst->section_offsets;
+  baseaddr = ANOFFSET (pst->section_offsets, 0);
   if (bfd_seek (abfd, foffset, 0) ||
       (bfd_read (dbbase, DBLENGTH(pst), 1, abfd) != DBLENGTH(pst)))
     {
@@ -2454,7 +2463,7 @@ scan_compilation_units (filename, thisdie, enddie, dbfoff, lnoffset, objfile)
 
 	  /* First allocate a new partial symbol table structure */
 
-	  pst = start_psymtab_common (objfile, baseaddr, di.at_name,
+	  pst = start_psymtab_common (objfile, base_section_offsets, di.at_name,
 				      di.at_low_pc,
 				      objfile -> global_psymbols.next,
 				      objfile -> static_psymbols.next);

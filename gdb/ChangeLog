@@ -1,3 +1,72 @@
+Sat Jul  4 03:43:38 1992  John Gilmore  (gnu at cygnus.com)
+
+	Relocate symbols using an array of section_offsets, rather than a
+	single `addr' or `offset'.  This makes Solaris-2 support work, and
+	permits better VxWorks (and maybe xcoff) support later.
+
+	* symtab.h (struct section_offsets):  New structure for keeping
+	a set of offsets, rather than a single one.
+	(struct objfile):  Replace addr with section_offsets member.
+	* symfile.h:  Add sym_offsets to struct sym_fns.  Conforming changes.
+	* gdb-stabs.h:  New include file with `symbol type specific'
+	parameters for psymtabs and objfiles.
+	* Makefile.in (HFILES):  Add gdb-stabs.h.
+	* buildsym.h (start_psymtab, process_one_symbol):  Fix prototypes.
+	* coffread.c:  Conforming changes.  Fake offset array always 0.
+	* dbxread.c:  Conforming changes.
+	(struct dbx_symfile_info):  Move to gdb-stabs.h.
+	(start_psymtab):  Call elfstab_offset_sections to calculate good
+	offsets for this source file, based on the ELF symbol table info.
+	(read_ofile_symtab):  Yank N_CATCH, which is dead.
+	(process_one_symbol, N_CATCH):  Yank.
+	(", N_FUN, N_FNAME, N_FN, N_FN_SEQ, N_SO, N_SOL, N_ENTRY):
+	Relocate with SECT_OFF_TEXT.
+	(", N_STSYM, N_LCSYM, N_ROSYM):  Grope around in the stab string
+	to distinguish relocatable from absolute symbols.  Then, if not
+	absolute, do:
+	(", N_STSYM, N_DSLINE):  SECT_OFF_DATA.
+	(", N_LCSYM, N_BSLINE):  SECT_OFF_BSS.
+	(", N_ROSYM):  SECT_OFF_RODATA.
+	(elfstab_build_psymtabs):  Caller has allocated dbx_symfile_info.
+	(dbx_symfile_offsets):  Add to translate addr to offset.
+	* dwarfread.c:  Conforming changes.  Single offset currently used.
+	* elfread.c:  Add various complaints about elf/stab stuff.
+	#include gdb-stabs.h.  Conforming changes, using a single offset.
+	(elf_symtab_read):  Record info from BSF_FILE symbols, and local
+	variables called "Bbss.bss", "Ddata.data", and "Drodata.rodata",
+	for later use in building psymtabs.
+	(elf_symfile_read):  Allocate dbx_symfile_info here, to keep
+	the info collected in elf_symtab_read.  Cleanup calls free_elfinfo.
+	(free_elfinfo):  New fn, frees all chained stab_section_infos
+	in an objfile, and zaps the start-of-chain pointer.
+	(elfstab_offset_sections):  New fn, looks in stab_section_info
+	chain to determine section bases to relocate a psymtab's worth
+	of symbols, as they are being read.
+	* mipsread.c:  Conforming changes.  Stabs-reading will relocate
+	using one offset.  MIPS-reading will not relocate at all.
+	* partial-stab.h:  Relocate different symbol types using different
+	offsets from section_offsets.
+	* symfile.c:  Conforming changes.
+	(find_lowest_section):  Unused function to use later
+	to free us from the Tyranny of the Text Section.
+	(syms_from_objfile):  Translate absolute arg ADDR to offsets used
+	in all lower layers of symbol reading.  Call format-specific
+	sym_offsets function to initialize offsets for high speed symbol
+	reading.
+	(symbol_file_add):  Call reinit_frame_cache so callers don't have to.
+	(symbol_file_command, add_symbol_file_command):  Callers changed.
+	* symmisc.c (dump_psymtab):  Print new relocation parameters.
+	* xcoffread.c:  Corresponding changes.
+
+	* buildsym.c:  Tidy innerblock_complaint and blockvector_complaint.
+	* main.c (main):  Read the $HOME/.gdbinit file before processing
+	the argv arguments (e.g. reading symbol files or core
+	files).  This allows global parameters to be set, which will apply
+	during the symbol reading.  The ./.gdbinit is still read after
+	argv processing.
+	* symtab.c (list_symbols):  `i variables' shouldn't show enum values.
+	* xcoffexec.c:  Clean up quote inside comment.
+
 Fri Jul  3 20:18:26 1992  Fred Fish  (fnf@cygnus.com)
 
 	* breakpoint.c, buildsym.c, c-exp.y, coffread.c, command.c,

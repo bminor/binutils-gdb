@@ -264,8 +264,15 @@ dump_psymtab (objfile, psymtab, outfile)
 		"  Full symtab was read (at 0x%x by function at 0x%x)\n",
 			psymtab -> symtab, psymtab -> read_symtab);
     }
-  fprintf_filtered (outfile, "  Relocate symbols by 0x%x\n",
-		    psymtab -> addr);
+
+  /* FIXME, we need to be able to print the relocation stuff. */
+  /* This prints some garbage for anything but stabs right now.  FIXME.  */
+  fprintf_filtered (outfile, "  Relocate symbols by 0x%x, 0x%x, 0x%x, 0x%x.\n",
+		    ANOFFSET (psymtab->section_offsets, 0),
+		    ANOFFSET (psymtab->section_offsets, 1),
+		    ANOFFSET (psymtab->section_offsets, 2),
+		    ANOFFSET (psymtab->section_offsets, 3));
+
   fprintf_filtered (outfile, "  Symbols cover text addresses 0x%x-0x%x\n",
 		    psymtab -> textlow, psymtab -> texthigh);
   fprintf_filtered (outfile, "  Depends on %d other partial symtabs.\n",

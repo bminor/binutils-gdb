@@ -43,7 +43,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 #include "buildsym.h"
 
+#include <sys/types.h>		/* For off_t for gdb-stabs.h */
+#include "gdb-stabs.h"
+
 #define STREQ(a,b) (strcmp((a),(b))==0)
+
+/* The struct elfinfo is available only during ELF symbol table and
+   psymtab reading.  It is destroyed at the complation of psymtab-reading.
+   It's local to elf_symfile_read.  */
 
 struct elfinfo {
   unsigned int dboffset;	/* Offset to dwarf debug section */
@@ -54,6 +61,20 @@ struct elfinfo {
   asection *stabindexsect;	/* Section pointer for .stab.index section */
 };
 
+/* Various things we might complain about... */
+
+struct complaint section_info_complaint = 
+  {"elf/stab section information %s without a preceding file symbol", 0, 0};
+
+struct complaint section_info_dup_complaint = 
+  {"duplicated elf/stab section information for %s", 0, 0};
+
+struct complaint stab_info_mismatch_complaint = 
+  {"elf/stab section information missing for %s", 0, 0};
+
+struct complaint stab_info_questionable_complaint = 
+  {"elf/stab section information questionable for %s", 0, 0};
+
 static void
 elf_symfile_init PARAMS ((struct objfile *));
 
@@ -61,13 +82,19 @@ static void
 elf_new_init PARAMS ((struct objfile *));
 
 static void
-elf_symfile_read PARAMS ((struct objfile *, CORE_ADDR, int));
+elf_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
 
 static void
 elf_symfile_finish PARAMS ((struct objfile *));
 
 static void
 elf_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
+
+static void
+free_elfinfo PARAMS ((PTR));
+
+static struct section_offsets *
+elf_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
 #if 0
 static void
@@ -221,6 +248,12 @@ DESCRIPTION
 	or not (may be shared library for example), add all the global
 	function and data symbols to the minimal symbol table.
 
+	In stabs-in-ELF, as implemented by Sun, there are some local symbols
+	defined in the ELF symbol table, which can be used to locate
+	the beginnings of sections from each ".o" file that was linked to
+	form the executable objfile.  We gather any such info and record it
+	in data structures hung off the objfile's private data.
+
 */
 
 static void
@@ -234,9 +267,18 @@ elf_symtab_read (abfd, addr, objfile)
   asymbol **symbol_table;
   unsigned int number_of_symbols;
   unsigned int i;
+  int index;
   struct cleanup *back_to;
   CORE_ADDR symaddr;
   enum minimal_symbol_type ms_type;
+  /* If sectinfo is nonzero, it contains section info that should end up
+     filed in the objfile.  */
+  struct stab_section_info *sectinfo = 0;
+  /* If filesym is nonzero, it points to a file symbol, but we haven't
+     seen any section info for it yet.  */
+  asymbol *filesym = 0;
+  struct dbx_symfile_info *dbx = (struct dbx_symfile_info *)
+				 objfile->sym_private;
   
   storage_needed = get_symtab_upper_bound (abfd);
 
@@ -248,7 +290,7 @@ elf_symtab_read (abfd, addr, objfile)
   
       for (i = 0; i < number_of_symbols; i++)
 	{
-	  sym = *symbol_table++;
+	  sym = symbol_table[i];
 	  /* Select global/weak symbols that are defined in a specific section.
 	     Note that bfd now puts abs symbols in their own section, so
 	     all symbols we are interested in will have a section. */
@@ -258,9 +300,8 @@ elf_symtab_read (abfd, addr, objfile)
 	      symaddr = sym -> value;
 	      /* Relocate all non-absolute symbols by base address.  */
 	      if (sym -> section != &bfd_abs_section)
-		{
-		  symaddr += addr;
-		}
+		symaddr += addr;
+
 	      /* For non-absolute symbols, use the type of the section
 		 they are relative to, to intuit text/data.  Bfd provides
 		 no way of figuring this out for absolute symbols. */
@@ -285,6 +326,69 @@ elf_symtab_read (abfd, addr, objfile)
 	      record_minimal_symbol_and_info ((char *) sym -> name,
 			 symaddr, ms_type, sym->udata, objfile);
 	    }
+
+	  /* See if this is a debugging symbol that helps Solaris
+	     stabs-in-elf debugging.  */
+
+	  else if (sym->flags & BSF_FILE)
+	    {
+	      /* Chain any old one onto the objfile; remember new sym.  */
+	      if (sectinfo)
+		{
+		    sectinfo->next = dbx->stab_section_info;
+		    dbx->stab_section_info = sectinfo;
+		    sectinfo = 0;
+		}
+	      filesym = sym;
+	    }
+	  else if ((sym->flags & BSF_LOCAL) &&
+		   (sym->section) &&
+		   (sym->section->flags & SEC_DATA) &&
+		   (sym->name))
+	    {
+	      /* Named Local variable in a Data section.  Check its name.  */
+	      index = -1;
+	      switch (sym->name[1])
+		{
+		  case 'b':
+			if (!strcmp ("Bbss.bss", sym->name))
+			  index = SECT_OFF_BSS;
+			break;
+		  case 'd':
+			if (!strcmp ("Ddata.data", sym->name))
+			  index = SECT_OFF_DATA;
+			break;
+		  case 'r':
+			if (!strcmp ("Drodata.rodata", sym->name))
+			  index = SECT_OFF_RODATA;
+			break;
+		}
+	      if (index > 0)
+		{
+		  /* We have some new info.  Allocate a sectinfo, if
+		     needed, and fill it in.  */
+		  if (!sectinfo)
+		    {
+		      sectinfo = (struct stab_section_info *)
+				 xmmalloc (objfile -> md,
+					   sizeof (*sectinfo));
+		      memset ((PTR) sectinfo, 0, sizeof (*sectinfo));
+		      if (!filesym)
+			complain (&section_info_complaint, (char *)sym->name);
+		      else
+			sectinfo->filename = (char *)filesym->name;
+		    }
+		  if (sectinfo->sections[index])
+		    complain (&section_info_dup_complaint,
+			      (char *)sectinfo->filename);
+
+		  symaddr = sym -> value;
+		  /* Relocate all non-absolute symbols by base address.  */
+		  if (sym -> section != &bfd_abs_section)
+		      symaddr += addr;
+		  sectinfo->sections[index] = symaddr;
+		}
+	    }
 	}
       do_cleanups (back_to);
     }
@@ -294,8 +398,9 @@ elf_symtab_read (abfd, addr, objfile)
    We have been initialized by a call to elf_symfile_init, which 
    currently does nothing.
 
-   ADDR is the address relative to which the symbols in it are (e.g.
-   the base address of the text segment).
+   SECTION_OFFSETS is a set of offsets to apply to relocate the symbols
+   in each section.  We simplify it down to a single offset for all
+   symbols.  FIXME.
 
    MAINLINE is true if we are reading the main symbol
    table (as opposed to a shared lib or dynamically loaded file).
@@ -321,13 +426,14 @@ elf_symtab_read (abfd, addr, objfile)
    capability even for files compiled without -g.  */
 
 static void
-elf_symfile_read (objfile, addr, mainline)
+elf_symfile_read (objfile, section_offsets, mainline)
      struct objfile *objfile;
-     CORE_ADDR addr;
+     struct section_offsets *section_offsets;
      int mainline;
 {
   bfd *abfd = objfile->obfd;
   struct elfinfo ei;
+  struct dbx_symfile_info *dbx;
   struct cleanup *back_to;
   asection *text_sect;
   CORE_ADDR offset;
@@ -335,29 +441,32 @@ elf_symfile_read (objfile, addr, mainline)
   init_minimal_symbol_collection ();
   back_to = make_cleanup (discard_minimal_symbols, 0);
 
-  /* Compute the amount to relocate all symbols by.  The value passed in
-     as ADDR is typically either the actual address of the text section,
-     or a user specified address.  By subtracting off the actual address
-     of the text section, we can compute the relocation amount. */
+  memset ((char *) &ei, 0, sizeof (ei));
 
-  text_sect = bfd_get_section_by_name (objfile -> obfd, ".text");
-  offset = addr - bfd_section_vma (objfile -> obfd, text_sect);
+  /* Allocate struct to keep track of the symfile */
+  objfile->sym_private = (PTR)
+    xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
+  memset ((char *) objfile->sym_private, 0, sizeof (struct dbx_symfile_info));
+  make_cleanup (free_elfinfo, (PTR) objfile);
 
-  /* Process the normal ELF symbol table first. */
+  /* Process the normal ELF symbol table first.  This may write some 
+     chain of info into the dbx_symfile_info in objfile->sym_private,
+     which can later be used by elfstab_offset_sections.  */
 
+  /* FIXME, should take a section_offsets param, not just an offset.  */
+  offset = ANOFFSET (section_offsets, 0);
   elf_symtab_read (abfd, offset, objfile);
 
   /* Now process debugging information, which is contained in
      special ELF sections.  We first have to find them... */
 
-  memset ((char *) &ei, 0, sizeof (ei));
   bfd_map_over_sections (abfd, elf_locate_sections, (PTR) &ei);
   if (ei.dboffset && ei.lnoffset)
     {
       /* DWARF sections */
       dwarf_build_psymtabs (fileno ((FILE *)(abfd -> iostream)),
 			    bfd_get_filename (abfd),
-			    offset, mainline,
+			    section_offsets, mainline,
 			    ei.dboffset, ei.dbsize,
 			    ei.lnoffset, ei.lnsize, objfile);
     }
@@ -376,7 +485,7 @@ elf_symfile_read (objfile, addr, mainline)
       elf_sect = bfd_elf_find_section (abfd, ".stabstr");
       if (elf_sect)
 	elfstab_build_psymtabs (objfile,
-	  addr,	/* We really pass the text seg addr, not the offset, here. */
+  	  section_offsets,
 	  mainline,
 	  ei.stabsect->filepos,				/* .stab offset */
 	  bfd_get_section_size_before_reloc (ei.stabsect),/* .stab size */
@@ -398,6 +507,30 @@ elf_symfile_read (objfile, addr, mainline)
 
   do_cleanups (back_to);
 }
+
+/* This cleans up the objfile's sym_private pointer, and the chain of
+   stab_section_info's, that might be dangling from it.  */
+
+static void
+free_elfinfo (objp)
+     PTR objp;
+{
+  struct objfile *objfile = (struct objfile *)objp;
+  struct dbx_symfile_info *dbxinfo = (struct dbx_symfile_info *)
+				     objfile->sym_private;
+  struct stab_section_info *ssi, *nssi;
+
+  ssi = dbxinfo->stab_section_info;
+  while (ssi)
+    {
+      nssi = ssi->next;
+      mfree (objfile->md, ssi);
+      ssi = nssi;
+    }
+
+  dbxinfo->stab_section_info = 0;	/* Just say No mo info about this.  */
+}
+
 
 /* Initialize anything that needs initializing when a completely new symbol
    file is specified (not just adding some symbols from another file, e.g. a
@@ -442,6 +575,96 @@ elf_symfile_init (ignore)
 {
 }
 
+/* ELF specific parsing routine for section offsets.
+
+   Plain and simple for now.  */
+
+static
+struct section_offsets *
+elf_symfile_offsets (objfile, addr)
+     struct objfile *objfile;
+     CORE_ADDR addr;
+{
+  struct section_offsets *section_offsets;
+  int i;
+ 
+  section_offsets = (struct section_offsets *)
+    obstack_alloc (&objfile -> psymbol_obstack,
+		   sizeof (struct section_offsets) +
+		          sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
+
+  for (i = 0; i < SECT_OFF_MAX; i++)
+    ANOFFSET (section_offsets, i) = addr;
+  
+  return section_offsets;
+}
+
+/* When handling an ELF file that contains Sun STABS debug info,
+   some of the debug info is relative to the particular chunk of the
+   section that was generated in its individual .o file.  E.g.
+   offsets to static variables are relative to the start of the data
+   segment *for that module before linking*.  This information is
+   painfully squirreled away in the ELF symbol table as local symbols
+   with wierd names.  Go get 'em when needed.  */
+
+void
+elfstab_offset_sections (objfile, pst)
+     struct objfile *objfile;
+     struct partial_symtab *pst;
+{
+  char *filename = pst->filename;
+  struct dbx_symfile_info *dbx = (struct dbx_symfile_info *)
+				 objfile->sym_private;
+  struct stab_section_info *maybe = dbx->stab_section_info;
+  struct stab_section_info *questionable = 0;
+  int i;
+  char *p;
+
+  /* The ELF symbol info doesn't include path names, so strip the path
+     (if any) from the psymtab filename.  */
+  while (0 != (p = strchr (filename, '/')))
+    filename = p+1;
+
+  /* FIXME:  This linear search could speed up significantly
+     if it was chained in the right order to match how we search it,
+     and if we unchained when we found a match. */
+  for (; maybe; maybe = maybe->next)
+    {
+      if (filename[0] == maybe->filename[0]
+	  && !strcmp (filename, maybe->filename))
+	{
+	  /* We found a match.  But there might be several source files
+	     (from different directories) with the same name.  */
+	  if (0 == maybe->found)
+	    break;
+	  questionable = maybe;		/* Might use it later.  */
+	}
+    }
+
+  if (maybe == 0 && questionable != 0)
+    {
+      complain (&stab_info_questionable_complaint, filename);
+      maybe = questionable;
+    }
+
+  if (maybe)
+    {
+      /* Found it!  Allocate a new psymtab struct, and fill it in.  */
+      maybe->found++;
+      pst->section_offsets = (struct section_offsets *)
+	obstack_alloc (&objfile -> psymbol_obstack,
+		       sizeof (struct section_offsets) +
+	       sizeof (pst->section_offsets->offsets) * (SECT_OFF_MAX-1));
+
+      for (i = 0; i < SECT_OFF_MAX; i++)
+	ANOFFSET (pst->section_offsets, i) = maybe->sections[i];
+      return;
+    }
+
+  /* We were unable to find any offsets for this file.  Complain.  */
+  if (dbx->stab_section_info)		/* If there *is* any info, */
+    complain (&stab_info_mismatch_complaint, filename);
+}
 
 /*  Register that we are able to handle ELF object file formats and DWARF
     debugging formats.
@@ -467,6 +690,7 @@ static struct sym_fns elf_sym_fns =
   elf_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   elf_symfile_read,	/* sym_read: read a symbol file into symtab */
   elf_symfile_finish,	/* sym_finish: finished with file, cleanup */
+  elf_symfile_offsets,	/* sym_offsets:  Translate ext. to int. relocation */
   NULL			/* next: pointer to next struct sym_fns */
 };
 
