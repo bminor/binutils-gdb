@@ -1,3 +1,8 @@
+Sat Jun 22 11:39:01 1996  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* Makefile.in (TARGET_SUBDIR): Move comment to previous line so we
+ 	don't get ". ".
+
 Fri Jun 21 17:24:48 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* configure.in (mips*-sgi-irix6*): Set noconfigdirs appropriately.
