@@ -59,8 +59,11 @@ else
   SKIPDIR=`pwd | sed -e "s|${srcdir}|.|"`
   SKIPFILES="${SKIPDIR}/*"
 fi
+
+# We use explicit /dev/env/DJDIR/bin/find to avoid catching
+# an incompatible DOS/Windows version that might be on their PATH.
 for fix_dir in \
-  `cd $srcdir && find . -type d ! -ipath "${SKIPDIR}" ! -ipath "${SKIPFILES}"`
+  `cd $srcdir && /dev/env/DJDIR/bin/find . -type d ! -ipath "${SKIPDIR}" ! -ipath "${SKIPFILES}"`
 do
   if test ! -f ${fix_dir}/configure.orig ; then
     if test -f ${srcdir}/${fix_dir}/configure ; then

@@ -1,5 +1,8 @@
 2001-02-04  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* config/djgpp/djconfig.sh: Use explicit absolute file name when
+	invoking `find'.
+
 	* ser-go32.c (dos_write) [UART_FIFO_WORKS]: Use outportsb only if
 	UART_FIFO_WORKS is defined.  Otherwise use outportb.
 	From Francisco Pastor <fpastor.etra-id@etra.es>
