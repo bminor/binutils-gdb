@@ -1,3 +1,8 @@
+Tue Dec 12 11:52:57 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (local-distclean): Remove $(TARGET_SUBDIR).  From
+	Ronald F. Guilmette <rfg@monkeys.com>.
+
 Mon Dec 11 15:31:58 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in (host==powerpc-pe): Add many directories to noconfigdirs

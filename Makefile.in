@@ -700,6 +700,9 @@ local-clean:
 
 local-distclean:
 	-rm -f Makefile config.status
+	-if [ "$(TARGET_SUBDIR)" != "." ]; then \
+	  rm -rf $(TARGET_SUBDIR); \
+	else true; fi
 
 local-maintainer-clean:
 	@echo "This command is intended for maintainers to use;"
