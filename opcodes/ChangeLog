@@ -1,3 +1,9 @@
+2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* opcodes/arc-dis.c:Add enum a4_decoding_class. 
+	  (dsmOneArcInst): Use the enum values for the decoding class
+	  Remove redundant case in the switch for decodingClass value 11
+
 2005-03-02  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (print_insn): Suppress lock prefix printing for cr8...15
