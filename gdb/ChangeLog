@@ -1,5 +1,11 @@
 Wed Oct 20 11:35:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* target.h: Put remote_debug declaration back here.  Add baud_rate.
+	* remote.c, remote-udi.c, remote-utils.h: Let target.h take care of
+	declaring these.  Those random externs all over are error prone.
+	* Move "set remotebaud" from remote-utils.c to main.c to it applies
+	to remote.c as well.
+
 	* xcoffread.c (xcoff_symfile_read), coffread.c (coff_symfile_read):
 	Sort symtabs for this objfile only, not for all objfiles.
 	* symfile.c, symfile.h (sort_all_symtab_syms): Remove; no longer used.

@@ -39,8 +39,6 @@ struct _sr_settings {
 };
 
 extern struct _sr_settings sr_settings;
-extern int remote_debug;
-extern int baud_rate;
 
 /* get and set debug value. */
 #define sr_get_debug()			(remote_debug)

@@ -50,7 +50,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* access the register store directly, without going through
    the normal handler functions. This avoids an extra data copy.  */
 
-extern int remote_debug;
 extern int stop_soon_quietly;           /* for wait_for_inferior */
 extern struct value *call_function_by_hand();
 static void udi_resume PARAMS ((int pid, int step, int sig));

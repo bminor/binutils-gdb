@@ -213,10 +213,6 @@ interrupt_query PARAMS ((void));
 
 extern struct target_ops remote_ops;	/* Forward decl */
 
-extern int baud_rate;
-
-extern int remote_debug;
-
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
    other form of hairy serial connection, I would think 2 seconds would
