@@ -24,6 +24,7 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
+alpha.mt
 aout.mt
 configure.in
 ecoff.mt

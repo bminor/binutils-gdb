@@ -1,3 +1,38 @@
+Tue Oct  5 10:43:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.stabs/alpha.mt:  New configuration file for alpha.
+	* gdb.stabs/configure.in:  Use it.
+	* gdb.stabs/ecoff.mt, weird-ecoff.sed:  Change sed script to enable
+	sharing with alpha.mt, redefine long to word via preprocessor.
+	* gdb.stabs/weird.def:  Conditionally adapt storage layout of v_comb
+	for alpha.
+	* gdb.stabs/weird.exp:  Handle compilation of weird.s by alpha
+	native cc.
+	* gdb.t00/teststrategy.exp:  Change expect string so that we
+	consume the `(xgdb)' from the command echo and from the gdb prompt.
+	* gdb.t05/expr.exp:  xfail "print unsigned int == (~0)" on the alpha.
+	gdb currently compares all values as long, so this failure probably
+	applies to any configuration where LONGEST is bigger than a target int.
+	* gdb.t08/comp-info.c:  New file to determine if gdbme is compiled
+	with gcc.
+	* gdb.t08/Makefile.in, opaque.exp:  Use it. Alpha native cc is unable
+	to handle opaque pointers, gcc is.
+	* gdb.t21/gdbme.cc, gdb.t23/gdbme.cc:  operator new takes a size_t
+	as first argument. Include <sys/types.h> and change all operator
+	new definitions to use size_t.
+	* gdb.t21/cplusfuncs.exp:  Handle changes in output for operator new
+	now that we use size_t.
+
+Wed Sep 29 00:55:49 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+        * gdb.t03/ptype.exp, gdb.t15/printcmds.exp:  When constructing
+	a long or float array cast all array members to the same type.
+        * gdb.t04/setvar.exp:  Handle the decimal output of an unsigned long
+	with 64 bit longs.
+        * gdb.t07/watchpoint.exp:  Add finish and until variations encountered
+	on alpha.
+        * gdb.t08/opaque.exp, gdb.t17/interrupt.exp:  Add xfails for alpha.
+
 Tue Sep 28 17:26:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t24 (demangle.exp): Constructors of templates have names like
