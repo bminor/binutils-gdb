@@ -590,6 +590,18 @@ proc mi_run_cmd {args} {
 	    }
 	    return;
 	}
+
+	if [target_info exists gdb,start_symbol] {
+	    set start [target_info gdb,start_symbol];
+	} else {
+	    set start "start";
+	}
+
+	# HACK: Should either use 000-jump or fix the target code
+	# to better handle RUN.
+	send_gdb  "jump *$start\n"
+	warning "Using CLI jump command, expect run-to-main FAIL"
+	return
     }
 
     send_gdb "000-exec-run $args\n"
@@ -636,6 +648,9 @@ proc mi_run_to_main { } {
 	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"main\",args=\(\\\[\\\]\|\{\}\),file=\".*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
 	    pass "$test"
 	    return 0
+	}
+	-re ".*$mi_gdb_prompt$" {
+	    fail "$test (2)"
 	}
 	timeout {
 	    fail "$test (timeout)"

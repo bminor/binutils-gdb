@@ -1,5 +1,11 @@
 2001-08-18  Andrew Cagney  <ac131313@redhat.com>
 
+	* lib/mi-support.exp (mi_gdb_start): If a remote target, use the
+	CLI jump command to start it.
+	(mi_run_to_main): Fail immediatly when unexpected output.
+
+2001-08-18  Andrew Cagney  <ac131313@redhat.com>
+
 	* lib/mi-support.exp (mi_gdb_start): Move call to sid_start to
 	beginning of function.  Fix PR gdb/191.
 
