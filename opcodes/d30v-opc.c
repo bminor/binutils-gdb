@@ -1,5 +1,5 @@
 /* d30v-opc.c -- D30V opcode list
-   Copyright 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998, 2000 Free Software Foundation, Inc.
    Written by Martin Hunt, Cygnus Support
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -222,20 +222,20 @@ const struct d30v_opcode d30v_opcode_table[] = {
   { "avg2h", IALU1, 0xb, { SHORT_A, LONG}, EITHER, 0, 0, 0 },
   { "bclr", LOGIC, 0x3, { SHORT_A }, EITHER_BUT_PREFER_MU, 0, 0, 0 },
   { "bnot", LOGIC, 0x1, { SHORT_A }, EITHER_BUT_PREFER_MU, 0, 0, 0 },
-  { "bra", BRA, 0, { SHORT_B1, SHORT_B2, LONG_U }, MU, FLAG_JMP, 0, RELOC_PCREL },
-  { "bratnz", BRA, 0x4, { SHORT_B3b, LONG_2b }, MU, FLAG_JMP, 0, RELOC_PCREL },
-  { "bratzr", BRA, 0x4, { SHORT_B3, LONG_2 }, MU, FLAG_JMP, 0, RELOC_PCREL },
+  { "bra", BRA, 0, { SHORT_B1, SHORT_B2r, LONG_Ur }, MU, FLAG_JMP, 0, RELOC_PCREL },
+  { "bratnz", BRA, 0x4, { SHORT_B3br, LONG_2br }, MU, FLAG_JMP, 0, RELOC_PCREL },
+  { "bratzr", BRA, 0x4, { SHORT_B3r, LONG_2r }, MU, FLAG_JMP, 0, RELOC_PCREL },
   { "bset", LOGIC, 0x2, { SHORT_A }, EITHER_BUT_PREFER_MU, 0, 0, 0 },
-  { "bsr", BRA, 0x2, { SHORT_B1, SHORT_B2, LONG_U }, MU, FLAG_JSR, 0, RELOC_PCREL },
-  { "bsrtnz", BRA, 0x6, { SHORT_B3b, LONG_2b }, MU, FLAG_JSR, 0, RELOC_PCREL },
-  { "bsrtzr", BRA, 0x6, { SHORT_B3, LONG_2 }, MU, FLAG_JSR, 0, RELOC_PCREL },
+  { "bsr", BRA, 0x2, { SHORT_B1, SHORT_B2r, LONG_Ur }, MU, FLAG_JSR, 0, RELOC_PCREL },
+  { "bsrtnz", BRA, 0x6, { SHORT_B3br, LONG_2br }, MU, FLAG_JSR, 0, RELOC_PCREL },
+  { "bsrtzr", BRA, 0x6, { SHORT_B3r, LONG_2r }, MU, FLAG_JSR, 0, RELOC_PCREL },
   { "btst", LOGIC, 0, { SHORT_AF }, EITHER_BUT_PREFER_MU, 0, 0, 0 },
   { "cmp", LOGIC, 0xC, { SHORT_CMP, LONG_CMP }, EITHER, 0, 0, 0 },
   { "cmpu", LOGIC, 0xD, { SHORT_CMPU, LONG_CMP }, EITHER, 0, 0, 0 },
-  { "dbra", BRA, 0x10, { SHORT_B3, LONG_2 }, MU, FLAG_JMP | FLAG_DELAY, FLAG_RP, RELOC_PCREL },
-  { "dbrai", BRA, 0x14, { SHORT_D2, LONG_D }, MU, FLAG_JMP | FLAG_DELAY, FLAG_RP, RELOC_PCREL },
-  { "dbsr", BRA, 0x12, { SHORT_B3, LONG_2 }, MU, FLAG_JSR | FLAG_DELAY, FLAG_RP, RELOC_PCREL },
-  { "dbsri", BRA, 0x16, { SHORT_D2, LONG_D }, MU, FLAG_JSR | FLAG_DELAY, FLAG_RP, RELOC_PCREL },
+  { "dbra", BRA, 0x10, { SHORT_B3r, LONG_2r }, MU, FLAG_JMP | FLAG_DELAY, FLAG_RP, RELOC_PCREL },
+  { "dbrai", BRA, 0x14, { SHORT_D2r, LONG_Dr }, MU, FLAG_JMP | FLAG_DELAY, FLAG_RP, RELOC_PCREL },
+  { "dbsr", BRA, 0x12, { SHORT_B3r, LONG_2r }, MU, FLAG_JSR | FLAG_DELAY, FLAG_RP, RELOC_PCREL },
+  { "dbsri", BRA, 0x16, { SHORT_D2r, LONG_Dr }, MU, FLAG_JSR | FLAG_DELAY, FLAG_RP, RELOC_PCREL },
   { "dbt", BRA, 0xb, { SHORT_NONE }, MU, FLAG_JSR, FLAG_LKR, 0 },
   { "djmp", BRA, 0x11, { SHORT_B3, LONG_2 }, MU, FLAG_JMP | FLAG_DELAY, FLAG_RP, RELOC_ABS },
   { "djmpi", BRA, 0x15, { SHORT_D2, LONG_D }, MU, FLAG_JMP | FLAG_DELAY, FLAG_RP, RELOC_ABS },
@@ -290,8 +290,8 @@ const struct d30v_opcode d30v_opcode_table[] = {
   { "or", LOGIC, 0x1a, { SHORT_A, LONG }, EITHER, 0, 0, 0 },
   { "orfg", LOGIC, 0xa, { SHORT_F }, EITHER, 0, 0, 0 },
   { "reit", BRA, 0x8, { SHORT_NONE }, MU, FLAG_SM | FLAG_JMP, FLAG_SM | FLAG_LKR, 0 },
-  { "repeat", BRA, 0x18, { SHORT_D1, LONG_2 }, MU, FLAG_RP, FLAG_RP, RELOC_PCREL },
-  { "repeati", BRA, 0x1a, { SHORT_D2B, LONG_Db }, MU, FLAG_RP, FLAG_RP, RELOC_PCREL },
+  { "repeat", BRA, 0x18, { SHORT_D1r, LONG_2r }, MU, FLAG_RP, FLAG_RP, RELOC_PCREL },
+  { "repeati", BRA, 0x1a, { SHORT_D2Br, LONG_Dbr }, MU, FLAG_RP, FLAG_RP, RELOC_PCREL },
   { "rot", LOGIC, 0x14, { SHORT_A }, EITHER, 0, 0, 0 },
   { "rot2h", LOGIC, 0x15, { SHORT_A }, EITHER, 0, 0, 0 },
   { "rtd", BRA, 0xa, { SHORT_NONE }, MU, FLAG_JMP, FLAG_LKR, 0 },
@@ -357,25 +357,29 @@ const struct d30v_operand d30v_operand_table[] =
   { 6, 1, 6, OPERAND_ACC|OPERAND_REG },
 #define IMM5	(Ab + 1)
   { 6, 5, 12, OPERAND_NUM },
-#define IMM5U	(IMM5 + 1)
-  { 6, 5, 12, OPERAND_NUM|OPERAND_SIGNED },
-#define IMM5S3	(IMM5U + 1)
-  { 6, 5, 12, OPERAND_NUM|OPERAND_SIGNED },
-#define IMM6	(IMM5S3 + 1)
+#define IMM5U (IMM5 + 1)
+  { 6, 5, 12, OPERAND_NUM|OPERAND_SIGNED }, /* not used */
+#define IMM5S3        (IMM5U + 1)
+  { 6, 5, 12, OPERAND_NUM|OPERAND_SIGNED }, /* not used */
+#define IMM6  (IMM5S3 + 1)
   { 6, 6, 12, OPERAND_NUM|OPERAND_SIGNED },
-#define IMM6U	(IMM6 + 1)
+#define IMM6U (IMM6 + 1)
   { 6, 6, 0, OPERAND_NUM },
-#define IMM6U2	(IMM6U + 1)
+#define IMM6U2        (IMM6U + 1)
   { 6, 6, 12, OPERAND_NUM },
-#define IMM6S3	(IMM6U2 + 1)
-  { 6, 6, 0, OPERAND_NUM|OPERAND_SHIFT },
-#define IMM12S3	(IMM6S3 + 1)
+#define REL6S3        (IMM6U2 + 1)
+  { 6, 6, 0, OPERAND_NUM|OPERAND_SHIFT|OPERAND_PCREL },
+#define REL12S3       (REL6S3 + 1)
+  { 12, 12, 12, OPERAND_NUM|OPERAND_SIGNED|OPERAND_SHIFT|OPERAND_PCREL },
+#define IMM12S3       (REL12S3 + 1)
   { 12, 12, 12, OPERAND_NUM|OPERAND_SIGNED|OPERAND_SHIFT },
-#define IMM12S3U (IMM12S3 + 1)
-  { 12, 12, 12, OPERAND_NUM|OPERAND_SHIFT },
-#define IMM18S3	(IMM12S3U + 1)
+#define REL18S3       (IMM12S3 + 1)
+  { 18, 18, 12, OPERAND_NUM|OPERAND_SIGNED|OPERAND_SHIFT|OPERAND_PCREL },
+#define IMM18S3       (REL18S3 + 1)
   { 18, 18, 12, OPERAND_NUM|OPERAND_SIGNED|OPERAND_SHIFT },
-#define IMM32	(IMM18S3 + 1)
+#define REL32 (IMM18S3 + 1)
+  { 32, 32, 0, OPERAND_NUM|OPERAND_PCREL },
+#define IMM32 (REL32 + 1)
   { 32, 32, 0, OPERAND_NUM },
 #define Fa	(IMM32 + 1)
   { 6, 3, 0, OPERAND_REG | OPERAND_FLAG | OPERAND_DEST },
@@ -414,25 +418,31 @@ const struct d30v_format d30v_format_table[] =
   { SHORT_M, 2, { Ra, ATPAR, Rb, IMM6 } },	/* Ra,@(Rb,imm6) */
   { SHORT_M, 3, { Ra, ATPAR, Rb, MINUS, Rc } },	/* Ra,@(Rb-,Rc) */
   { SHORT_M2, 0, { Ra2, ATPAR, Rb, Rc } },	/* Ra,@(Rb,Rc) */
-  { SHORT_M2, 1, { Ra2, ATPAR, Rb, PLUS, Rc } },	/* Ra,@(Rb+,Rc) */
+  { SHORT_M2, 1, { Ra2, ATPAR, Rb, PLUS, Rc } },/* Ra,@(Rb+,Rc) */
   { SHORT_M2, 2, { Ra2, ATPAR, Rb, IMM6 } },	/* Ra,@(Rb,imm6) */
-  { SHORT_M2, 3, { Ra2, ATPAR, Rb, MINUS, Rc } },	/* Ra,@(Rb-,Rc) */
+  { SHORT_M2, 3, { Ra2, ATPAR, Rb, MINUS, Rc } },/* Ra,@(Rb-,Rc) */
   { SHORT_A, 0, { Ra, Rb, Rc } },		/* Ra,Rb,Rc */
   { SHORT_A, 2, { Ra, Rb, IMM6 } },		/* Ra,Rb,imm6 */
   { SHORT_B1, 0, { Rc } },			/* Rc */
   { SHORT_B2, 2, { IMM18S3 } },			/* imm18 */
+  { SHORT_B2r, 2, { REL18S3 } },		/* rel18 */
   { SHORT_B3, 0, { Ra3, Rc } },			/* Ra,Rc */
   { SHORT_B3, 2, { Ra3, IMM12S3 } },		/* Ra,imm12 */
+  { SHORT_B3r, 0, { Ra3, Rc } },		/* Ra,Rc */
+  { SHORT_B3r, 2, { Ra3, REL12S3 } },		/* Ra,rel12 */
   { SHORT_B3b, 1, { Ra3, Rc } },		/* Ra,Rc */
   { SHORT_B3b, 3, { Ra3, IMM12S3 } },		/* Ra,imm12 */
-  { SHORT_D1, 0, { Ra, Rc } },			/* Ra,Rc */
-  { SHORT_D1, 2, { Ra, IMM12S3 } },		/* Ra,imm12s3 */
-  { SHORT_D2, 0, { IMM6S3, Rc } },		/* imm6s3,Rc */
-  { SHORT_D2, 2, { IMM6S3, IMM12S3 } },		/* imm6s3,imm12s3 */
-  { SHORT_D2B, 0, { IMM6U, Rc } },		/* imm6u,Rc */
-  { SHORT_D2B, 2, { IMM6U, IMM12S3U } },	/* imm6u,imm12s3u */
+  { SHORT_B3br, 1, { Ra3, Rc } },		/* Ra,Rc */
+  { SHORT_B3br, 3, { Ra3, REL12S3 } },		/* Ra,rel12 */
+  { SHORT_D1r, 0, { Ra, Rc } },			/* Ra,Rc */
+  { SHORT_D1r, 2, { Ra, REL12S3 } },		/* Ra,rel12s3 */
+  { SHORT_D2, 0, { REL6S3, Rc } },		/* rel6s3,Rc */
+  { SHORT_D2, 2, { REL6S3, IMM12S3 } },		/* rel6s3,imm12s3 */
+  { SHORT_D2r, 0, { REL6S3, Rc } },		/* rel6s3,Rc */
+  { SHORT_D2r, 2, { REL6S3, REL12S3 } },	/* rel6s3,rel12s3 */
+  { SHORT_D2Br, 0, { IMM6U, Rc } },		/* imm6u,Rc */
+  { SHORT_D2Br, 2, { IMM6U, REL12S3 } },	/* imm6u,rel12s3 */
   { SHORT_U, 0, { Ra, Rb } },			/* Ra,Rb */
-  { SHORT_U, 2, { Ra, IMM12S3 } },		/* Ra,imm12 (repeat) */
   { SHORT_F, 0, { Fa, Fb, Fc } },		/* Fa,Fb,Fc  (orfg, xorfg) */
   { SHORT_F, 2, { Fa, Fb, IMM6 } },		/* Fa,Fb,imm6 */
   { SHORT_AF, 0, { Fa, Rb, Rc } },		/* Fa,Rb,Rc */
@@ -457,19 +467,20 @@ const struct d30v_format d30v_format_table[] =
   { SHORT_UF, 0, { Fa, Fb } },			/* Fa,Fb  (notfg) */
   { SHORT_A2, 0, { Ra2, Rb, Rc } },		/* Ra2,Rb,Rc */
   { SHORT_A2, 2, { Ra2, Rb, IMM6 } },		/* Ra2,Rb,imm6 */
-  { SHORT_A5S, 0, { Ra, Rb, Rc } },		/* Ra,Rb,Rc */
-  { SHORT_A5S, 2, { Ra, Rb, IMM5U } },		/* Ra,Rb,imm5u   (shifts) */
   { SHORT_NONE, 0, { 0 } },			/* no operands (nop, reit) */
   { LONG, 2, { Ra, Rb, IMM32 } },		/* Ra,Rb,imm32 */
   { LONG_U, 2, { IMM32 } },			/* imm32 */
-  { LONG_AF, 2, { Fa, Rb, IMM32 } },		/* Fa,Rb,imm32 */
+  { LONG_Ur, 2, { REL32 } },			/* rel32 */
   { LONG_CMP, 2, { CC, Fa2, Rb, IMM32} },	/* CC  Fa2,Rb,imm32 */
   { LONG_M, 2, { Ra, ATPAR, Rb, IMM32 } },	/* Ra,@(Rb,imm32) */
   { LONG_M2, 2, { Ra2, ATPAR, Rb, IMM32 } },	/* Ra,@(Rb,imm32) */
   { LONG_2, 2, { Ra3, IMM32 } },		/* Ra,imm32 */
+  { LONG_2r, 2, { Ra3, REL32 } },		/* Ra,rel32 */
   { LONG_2b, 3, { Ra3, IMM32 } },		/* Ra,imm32 */
-  { LONG_D, 2, { IMM6S3, IMM32 } },		/* imm6s3,imm32 */
-  { LONG_Db, 2, { IMM6U, IMM32 } },		/* imm6,imm32 */
+  { LONG_2br, 3, { Ra3, REL32 } },		/* Ra,rel32 */
+  { LONG_D, 2, { REL6S3, IMM32 } },		/* rel6s3,imm32 */
+  { LONG_Dr, 2, { REL6S3, REL32 } },		/* rel6s3,rel32 */
+  { LONG_Dbr, 2, { IMM6U, REL32 } },		/* imm6,rel32 */
   { SHORT_AR, 0, { Aa, Rb, Rc } },		/* Aa,Rb,Rc */
   { 0, 0, { 0 } },
 };

@@ -1,3 +1,24 @@
+2000-03-02  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+        * d30v-dis.c (print_insn): Remove d*i hacks.  Use per-operand
+        flag to determine if operand is pc-relative.
+        * d30v-opc.c:
+        (d30v_format_table):
+        (REL6S3): Renamed from IMM6S3.
+        Added flag OPERAND_PCREL.
+        (REL12S3, REL18S3, REL32): Split from IMM12S3, IMM18S3, REL32, with
+        added flag OPERAND_PCREL.
+        (IMM12S3U): Replaced with REL12S3.
+        (SHORT_D2, LONG_D): Delay target is pc-relative.
+        (SHORT_B2r, SHORT_B3r, SHORT_B3br, SHORT_D2r, LONG_Ur, LONG_2r):
+        Split from SHORT_B2, SHORT_D2, SHORT_B3b, SHORT_D2, LONG_U, LONG_2r,
+        using the REL* operands.
+        (LONG_2br, LONG_Dr): Likewise, from LONG_2b, LONG_D.
+        (SHORT_D1r, SHORT_D2Br, LONG_Dbr): Renamed from SHORT_D1, SHORT_D2B,
+        LONG_Db, using REL* operands.
+        (SHORT_U, SHORT_A5S): Removed stray alternatives.
+        (d30v_opcode_table): Use new *r formats.
+
 2000-02-28  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r-desc.c (m32r_cgen_cpu_open): Replace 'flags' with
