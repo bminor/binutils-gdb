@@ -123,10 +123,6 @@
 static void
 add_bfd_to_link PARAMS ((bfd *, const char *, struct bfd_link_info *));
 
-/* Defined in emultempl/pe.em.  */
-extern char *
-pe_get_data_import_dll_name PARAMS ((void));
-
 /* For emultempl/pe.em.  */
 
 def_file * pe_def_file = 0;
