@@ -3270,8 +3270,28 @@ are being passed.  If the number of arguments is not known, return
 
 @item FRAME_SAVED_PC(@var{frame})
 @findex FRAME_SAVED_PC
-Given @var{frame}, return the pc saved there.  This is the return
-address.
+@anchor{FRAME_SAVED_PC} Given @var{frame}, return the pc saved there.
+This is the return address.
+
+This method is deprecated. @xref{unwind_pc}.
+
+@item CORE_ADDR unwind_pc (struct frame_info *@var{this_frame})
+@findex unwind_pc
+@anchor{unwind_pc} Return the instruction address, in @var{this_frame}'s
+caller, at which execution will resume after @var{this_frame} returns.
+This is commonly refered to as the return address.
+
+The implementation, which must be frame agnostic (work with any frame),
+is typically no more than:
+
+@smallexample
+ULONGEST pc;
+frame_unwind_unsigned_register (this_frame, D10V_PC_REGNUM, &pc);
+return d10v_make_iaddr (pc);
+@end smallexample
+
+@noindent
+@xref{FRAME_SAVED_PC}, which this method replaces.
 
 @item FUNCTION_EPILOGUE_SIZE
 @findex FUNCTION_EPILOGUE_SIZE

@@ -2228,6 +2228,8 @@ extern void set_gdbarch_frame_chain_valid (struct gdbarch *gdbarch, gdbarch_fram
 #endif
 #endif
 
+/* NOTE: FRAME_SAVED_PC is replaced by UNWIND_PC */
+
 #if defined (FRAME_SAVED_PC)
 /* Legacy for systems yet to multi-arch FRAME_SAVED_PC */
 #if !defined (FRAME_SAVED_PC_P)
@@ -2264,6 +2266,12 @@ extern void set_gdbarch_frame_saved_pc (struct gdbarch *gdbarch, gdbarch_frame_s
 #define FRAME_SAVED_PC(fi) (gdbarch_frame_saved_pc (current_gdbarch, fi))
 #endif
 #endif
+
+extern int gdbarch_unwind_pc_p (struct gdbarch *gdbarch);
+
+typedef CORE_ADDR (gdbarch_unwind_pc_ftype) (struct gdbarch *gdbarch, struct frame_info *next_frame);
+extern CORE_ADDR gdbarch_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame);
+extern void set_gdbarch_unwind_pc (struct gdbarch *gdbarch, gdbarch_unwind_pc_ftype *unwind_pc);
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (FRAME_ARGS_ADDRESS)

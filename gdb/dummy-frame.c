@@ -370,23 +370,6 @@ dummy_frame_register_unwind (struct frame_info *frame, void **cache,
     }
 }
 
-/* Assuming that FRAME is a dummy, return the resume address for the
-   previous frame.  */
-
-static CORE_ADDR
-dummy_frame_pc_unwind (struct frame_info *frame,
-		       void **cache)
-{
-  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
-  /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
-     that the frame doesn't unwind.  Should this function instead
-     return a has-no-caller indication?  */
-  if (dummy == NULL)
-    return 0;
-  return dummy->pc;
-}
-
-
 /* Assuming that FRAME is a dummy, return the ID of the calling frame
    (the frame that the dummy has the saved state of).  */
 
@@ -408,7 +391,6 @@ dummy_frame_id_unwind (struct frame_info *frame,
 static struct frame_unwind dummy_frame_unwind =
 {
   dummy_frame_pop,
-  dummy_frame_pc_unwind,
   dummy_frame_id_unwind,
   dummy_frame_register_unwind
 };

@@ -70,17 +70,6 @@ sentinel_frame_register_unwind (struct frame_info *frame,
     }
 }
 
-CORE_ADDR
-sentinel_frame_pc_unwind (struct frame_info *frame,
-			  void **cache)
-{
-  /* FIXME: cagney/2003-01-08: This should be using a per-architecture
-     method that doesn't suffer from DECR_PC_AFTER_BREAK problems.
-     Such a method would take unwind_cache, regcache and stop reason
-     parameters.  */
-  return read_pc ();
-}
-
 void
 sentinel_frame_id_unwind (struct frame_info *frame,
 			  void **cache,
@@ -105,7 +94,6 @@ sentinel_frame_pop (struct frame_info *frame,
 const struct frame_unwind sentinel_frame_unwinder =
 {
   sentinel_frame_pop,
-  sentinel_frame_pc_unwind,
   sentinel_frame_id_unwind,
   sentinel_frame_register_unwind
 };

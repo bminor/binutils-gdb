@@ -1445,13 +1445,12 @@ display_trace (int low, int high)
     }
 }
 
-
 static CORE_ADDR
-d10v_frame_pc_unwind (struct frame_info *frame,
-		      void **cache)
+d10v_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  struct d10v_unwind_cache *info = d10v_frame_unwind_cache (frame, cache);
-  return info->return_pc;
+  ULONGEST pc;
+  frame_unwind_unsigned_register (next_frame, PC_REGNUM, &pc);
+  return d10v_make_iaddr (pc);
 }
 
 /* Given a GDB frame, determine the address of the calling function's
@@ -1612,7 +1611,6 @@ d10v_frame_pop (struct frame_info *fi, void **unwind_cache,
 
 static struct frame_unwind d10v_frame_unwind = {
   d10v_frame_pop,
-  d10v_frame_pc_unwind,
   d10v_frame_id_unwind,
   d10v_frame_register_unwind
 };
@@ -1779,6 +1777,9 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Methods for saving / extracting a dummy frame's ID.  */
   set_gdbarch_unwind_dummy_id (gdbarch, d10v_unwind_dummy_id);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+
+  /* Return the unwound PC value.  */
+  set_gdbarch_unwind_pc (gdbarch, d10v_unwind_pc);
 
   return gdbarch;
 }

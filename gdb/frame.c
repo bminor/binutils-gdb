@@ -135,14 +135,54 @@ frame_find_by_id (struct frame_id id)
 }
 
 CORE_ADDR
-frame_pc_unwind (struct frame_info *frame)
+frame_pc_unwind (struct frame_info *this_frame)
 {
-  if (!frame->pc_unwind_cache_p)
+  if (!this_frame->pc_unwind_cache_p)
     {
-      frame->pc_unwind_cache = frame->unwind->pc (frame, &frame->unwind_cache);
-      frame->pc_unwind_cache_p = 1;
+      CORE_ADDR pc;
+      if (gdbarch_unwind_pc_p (current_gdbarch))
+	{
+	  /* The right way.  The `pure' way.  The one true way.  This
+	     method depends solely on the register-unwind code to
+	     determine the value of registers in THIS frame, and hence
+	     the value of this frame's PC (resume address).  A typical
+	     implementation is no more than:
+	   
+	     frame_unwind_register (this_frame, ISA_PC_REGNUM, buf);
+	     return extract_address (buf, size of ISA_PC_REGNUM);
+
+	     Note: this method is very heavily dependent on a correct
+	     register-unwind implementation, it pays to fix that
+	     method first; this method is frame type agnostic, since
+	     it only deals with register values, it works with any
+	     frame.  This is all in stark contrast to the old
+	     FRAME_SAVED_PC which would try to directly handle all the
+	     different ways that a PC could be unwound.  */
+	  pc = gdbarch_unwind_pc (current_gdbarch, this_frame);
+	}
+      else if (this_frame->level < 0)
+	{
+	  /* FIXME: cagney/2003-03-06: Old code and and a sentinel
+             frame.  Do like was always done.  Fetch the PC's value
+             direct from the global registers array (via read_pc).
+             This assumes that this frame belongs to the current
+             global register cache.  The assumption is dangerous.  */
+	  pc = read_pc ();
+	}
+      else if (FRAME_SAVED_PC_P ())
+	{
+	  /* FIXME: cagney/2003-03-06: Old code, but not a sentinel
+             frame.  Do like was always done.  Note that this method,
+             unlike unwind_pc(), tries to handle all the different
+             frame cases directly.  It fails.  */
+	  pc = FRAME_SAVED_PC (this_frame);
+	}
+      else
+	internal_error (__FILE__, __LINE__, "No gdbarch_unwind_pc method");
+      this_frame->pc_unwind_cache = pc;
+      this_frame->pc_unwind_cache_p = 1;
     }
-  return frame->pc_unwind_cache;
+  return this_frame->pc_unwind_cache;
 }
 
 void
@@ -667,13 +707,6 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 		  bufferp);
 }
 
-static CORE_ADDR
-frame_saved_regs_pc_unwind (struct frame_info *frame, void **cache)
-{
-  gdb_assert (FRAME_SAVED_PC_P ());
-  return FRAME_SAVED_PC (frame);
-}
-	
 static void
 frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
 			    struct frame_id *id)
@@ -745,7 +778,6 @@ frame_saved_regs_pop (struct frame_info *fi, void **cache,
 
 const struct frame_unwind trad_frame_unwinder = {
   frame_saved_regs_pop,
-  frame_saved_regs_pc_unwind,
   frame_saved_regs_id_unwind,
   frame_saved_regs_register_unwind
 };

@@ -69,12 +69,6 @@ typedef void (frame_unwind_reg_ftype) (struct frame_info * frame,
 				       CORE_ADDR *addrp,
 				       int *realnump, void *valuep);
 
-/* Same as for registers above, but return the address at which the
-   calling frame would resume.  */
-
-typedef CORE_ADDR (frame_unwind_pc_ftype) (struct frame_info * frame,
-					   void **unwind_cache);
-
 /* Same as for registers above, but return the ID of the frame that
    called this one.  */
 
@@ -103,7 +97,6 @@ struct frame_unwind
   /* Should an attribute indicating the frame's address-in-block go
      here?  */
   frame_unwind_pop_ftype *pop;
-  frame_unwind_pc_ftype *pc;
   frame_unwind_id_ftype *id;
   frame_unwind_reg_ftype *reg;
 };

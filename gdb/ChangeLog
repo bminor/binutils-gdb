@@ -1,5 +1,24 @@
 2003-03-10  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (gdbarch_unwind_pc): New method.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* frame.c (frame_pc_unwind): Rewrite.  Prefer gdbarch_unwind_pc,
+	but use read_pc and FRAME_SAVED_PC as fall backs.
+	(frame_saved_regs_pc_unwind): Delete function.
+	(trad_frame_unwinder): Update.
+	* frame-unwind.h (frame_unwind_pc_ftype): Delete declaration.
+	(struct frame_unwind): Update.
+	* dummy-frame.c (dummy_frame_pc_unwind): Delete function.
+	(dummy_frame_unwind): Update.
+	* sentinel-frame.c (sentinel_frame_pc_unwind): Delete function.
+	(sentinel_frame_unwinder): Update.
+	* d10v-tdep.c (d10v_frame_pc_unwind): Delete function.
+	(d10v_frame_unwind): Update.
+	(d10v_unwind_pc): New function.
+	(d10v_gdbarch_init): Set unwind_pc.
+
+2003-03-10  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.h: Re-generate.
 
 	* d10v-tdep.c (d10v_frame_register_unwind): Correctly unwind the
