@@ -1,3 +1,8 @@
+2001-06-19  H.J. Lu  <hjl@gnu.org>
+
+	* ld.texinfo (-E, --export-dynamic): Mention --version-script.
+	(--version-script): Mention the language support.
+
 2001-06-19  H.J. Lu <hjl@gnu.org>
 
 	* ldlang.c (lang_check): Revert the change mode on 2001-06-15.
