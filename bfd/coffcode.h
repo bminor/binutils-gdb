@@ -1840,7 +1840,9 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
 #endif
 	
   default:			/* Unknown architecture */
-    return false;
+    /* return false;  -- fall through to "return false" below, to avoid
+			 "statement never reached" errors on the one below. */	
+    break;
   }
     
   return false;
