@@ -1,3 +1,8 @@
+Tue May 28 13:29:39 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* symbols.c (symbol_create): If bfd_make_empty_symbol fails, call
+	as_perror rather than assert.
+
 Fri May 24 18:24:11 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips_ip): Mark sections created to hold
