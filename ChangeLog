@@ -1,3 +1,9 @@
+Mon Feb 23 14:46:06 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL_MODULES): Move install-tcl before
+	install-itcl.
+	(install-itcl): Remove dependency on install-tcl.
+
 Mon Feb 23 09:53:28 1998  Mark Alexander  <marka@cygnus.com>
 
 	* configure.in: Remove libgloss from noconfigdirs for MN10300.
