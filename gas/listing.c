@@ -119,7 +119,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 
 
-/* This structure remembers which files were used */
+/* This structure remembers which .s were used */
 typedef struct file_info_struct 
 {
   char *filename;
@@ -144,6 +144,14 @@ typedef struct list_info_struct
   /* Next in list */
   struct list_info_struct *next;
 
+
+  /* Pointer to the file info struct for the high level language
+     source line that belongs here */
+  file_info_type *hll_file;
+  
+  /* High level language source line */
+  unsigned int hll_line;
+  
 
   /* Pointer to any error message associated with this line */
   char *message;
@@ -218,11 +226,12 @@ DEFUN(listing_error,(message),
 
 
 
- extern char *file_name;
+
 static file_info_type *file_info_head;
 
 static file_info_type *
-DEFUN_VOID(file_info)
+DEFUN(file_info, (file_name),
+	   char *file_name)
 {
   /* Find an entry with this file name */
   file_info_type *p = file_info_head;
@@ -248,12 +257,21 @@ DEFUN_VOID(file_info)
 }
 
 
+static void 
+DEFUN_VOID(new_frag)
+{
+  
+    frag_wane(frag_now);
+    frag_new(0);
+
+}
+
 void 
 DEFUN(listing_newline,(ps),
       char *ps)
 {
   char *s = ps;
-
+  extern char *file_name;
   static unsigned int last_line =0xffff ;  
 
   
@@ -261,12 +279,12 @@ DEFUN(listing_newline,(ps),
   if (physical_input_line != last_line) 
   {
     last_line = physical_input_line;
-    frag_wane(frag_now);
-    frag_new(0);
+    new_frag();
+    
     new  = (list_info_type *)malloc(sizeof(list_info_type));
     new->frag = frag_now;
     new->line = physical_input_line ;
-    new->file = file_info();
+    new->file = file_info(file_name);
     
     if (listing_tail) 
     {
@@ -280,8 +298,7 @@ DEFUN(listing_newline,(ps),
     new->next = (list_info_type *)NULL;
     new->message = (char *)NULL;
     new->edict = EDICT_NONE;    
-    frag_wane(frag_now);
-    frag_new(0);
+    new_frag();
   }  
 }
 
@@ -289,14 +306,21 @@ DEFUN(listing_newline,(ps),
 
 
 static char *
-DEFUN(buffer_line,(ptr,line, size),
-      list_info_type *ptr AND
+DEFUN(buffer_line,(file, line, size),
+      file_info_type *file AND
       char *line AND
       unsigned int size)
 {
   unsigned int count = 0;
+  int c;
+  
   char *p = line;
-  int c = fgetc(ptr->file->file);
+  if  (file->file == (FILE*)NULL) 
+  {
+    return "";
+  }
+  
+  c = fgetc(file->file);
   size -= 1;			/* leave room for null */
   while (c != EOF && c != '\n') 
   {
@@ -304,13 +328,15 @@ DEFUN(buffer_line,(ptr,line, size),
      *p++ = c;
     count++;
     
-    c= fgetc(ptr->file->file);
+    c= fgetc(file->file);
   }
   if (c == EOF) 
   {
-    rewind(ptr->file->file);
+    rewind(file->file);
+    file->linenum = 0;
+    
   }
-  
+  file->linenum++;  
   *p++ = 0;
   return line;
 }
@@ -575,15 +601,35 @@ DEFUN_VOID(list_symbol_table)
   
   for (ptr = symbol_rootP; ptr != (symbolS*)NULL; ptr = symbol_next(ptr))
   {
-    if (ptr->sy_frag->line == 0) 
+    if (strlen(S_GET_NAME(ptr)) != 0) 
     {
+      if (ptr->sy_frag->line == 0) 
+      {
       
-      printf("%s\n",	     S_GET_NAME(ptr));
-      on_page++;
-      listing_page(0);
-      
+	printf("%s\n",	     S_GET_NAME(ptr));
+	on_page++;
+	listing_page(0);
+      }
     }
   }
+}
+
+void 
+DEFUN(print_source,(current_file, list, buffer, width),
+      file_info_type *current_file AND
+      list_info_type *list AND
+      char *buffer AND
+      unsigned int width)
+{
+  if (current_file->file) {  
+      while (current_file->linenum < list->hll_line)
+      {
+	char*    p = buffer_line(current_file, buffer, width);
+	printf("%4d:%-13s **** %s\n", current_file->linenum,  current_file->filename, p);
+	on_page++;
+	listing_page(list);	
+      }
+    }
 }
 
 void 
@@ -591,6 +637,8 @@ DEFUN(listing_listing,(name),
       char *name)
 {
   list_info_type *list = head;
+  file_info_type *current_hll_file = (file_info_type *)NULL;
+  
   unsigned  int page= 1;
   unsigned int prev  = 0;
   char *message;
@@ -599,7 +647,8 @@ DEFUN(listing_listing,(name),
   unsigned int addr = 0;  
   int on_page = 0;
   int show_listing = 1;
-    
+  unsigned int width;
+  
   buffer = malloc(LISTING_RHS_WIDTH);
   eject = 1;
   list = head;
@@ -617,29 +666,29 @@ DEFUN(listing_listing,(name),
 
   while ( list)
   {
-    p = buffer_line(list, buffer, LISTING_RHS_WIDTH > paper_width ?
-		    paper_width : LISTING_RHS_WIDTH);
-
-    switch (list->edict) {
-      case EDICT_LIST:
-	show_listing++;
-	break;
-      case EDICT_NOLIST:
-	show_listing--;
-	break;
-      case EDICT_EJECT:
-	break;
-      case EDICT_NONE:
-	break;
-      case EDICT_TITLE:
-	title = list->edict_arg;
-	break;
-      case EDICT_SBTTL:
-	subtitle = list->edict_arg;
-	break;
-      default:
-	abort();
-      }
+    width =  LISTING_RHS_WIDTH > paper_width ?  paper_width :
+     LISTING_RHS_WIDTH;
+    
+     switch (list->edict) {
+       case EDICT_LIST:
+	 show_listing++;
+	 break;
+       case EDICT_NOLIST:
+	 show_listing--;
+	 break;
+       case EDICT_EJECT:
+	 break;
+       case EDICT_NONE:
+	 break;
+       case EDICT_TITLE:
+	 title = list->edict_arg;
+	 break;
+       case EDICT_SBTTL:
+	 subtitle = list->edict_arg;
+	 break;
+       default:
+	 abort();
+       }
     
     if (show_listing > 0) 
     {
@@ -647,6 +696,17 @@ DEFUN(listing_listing,(name),
 	 with this line (or lines) */
       message = 0;
 
+      if (list->hll_file) 
+      {
+	current_hll_file = list->hll_file;
+      }
+
+      if (current_hll_file && list->hll_line && listing & LISTING_HLL)
+      {
+	print_source(current_hll_file, list, buffer, width);
+      }
+   
+      p = buffer_line(list->file, buffer, width);      
 
       print_lines(list, p,      calc_hex(list));
 
@@ -655,6 +715,12 @@ DEFUN(listing_listing,(name),
 	eject = 1;
       }    
     }
+    else 
+    {
+         
+      p = buffer_line(list->file, buffer, width);      
+    }
+    
     list = list->next;
   }
   free(buffer);
@@ -774,6 +840,26 @@ DEFUN(listing_title,(depth),
 }
 
 
+
+void
+DEFUN(listing_source_line,(line),
+	   unsigned int line)
+{
+  new_frag();
+  listing_tail->hll_line = line;
+  new_frag();
+  
+}
+
+void
+DEFUN(listing_source_file,(file),
+	 char *file)
+{
+  listing_tail->hll_file = file_info(file);
+}
+
+
+	   
 #else
 
 
@@ -817,5 +903,18 @@ char *name)
   
 }
 
+void DEFUN(listing_source_line,(n),
+unsigned int n)
+{
+  
+}
+void DEFUN(listing_source_file, (n),
+char *n)
+{
+  
+}
+
+
 
 #endif
+

@@ -1,3 +1,8 @@
+Fri Jan 24 16:48:32 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* listing.c, config/obj-aout.c: added intermixed
+	source/assembler file listings to files with stabs in them.
+
 Thu Jan 23 17:30:08 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* symbols.c(colon): if a symbol is being multiply defined as exactly
