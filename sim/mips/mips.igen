@@ -4994,17 +4994,6 @@
 }
 
 
-010000,1,0000000000000000000,111001:COP0:32::DI
-"di"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
-*mipsV:
-*vr4100:
-*vr5000:
-
-
 010000,00001,5.RT,5.RD,00000000000:COP0:64::DMFC0
 "dmfc0 r<RT>, r<RD>"
 *mipsIII:
@@ -5027,18 +5016,6 @@
   check_u64 (SD_, instruction_0);
   DecodeCoproc (instruction_0);
 }
-
-
-010000,1,0000000000000000000,111000:COP0:32::EI
-"ei"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
-*mipsV:
-*mips64:
-*vr4100:
-*vr5000:
 
 
 010000,1,0000000000000000000,011000:COP0:32::ERET

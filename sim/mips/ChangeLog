@@ -1,3 +1,7 @@
+2003-01-14  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (EI, DI): Remove.
+
 2003-01-05  Richard Sandiford  <rsandifo@redhat.com>
 
 	* Makefile.in (tmp-run-multi): Fix mips16 filter.
