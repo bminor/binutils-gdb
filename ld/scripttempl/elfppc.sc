@@ -24,8 +24,10 @@ test -z "$ENTRY" && ENTRY=_start
 test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test "$LD_FLAG" = "N" && DATA_ADDR=.
-INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
-PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
+SBSS2=".sbss2 ${RELOCATING-0} : { *(.sbss2) }"
+SDATA2=".sdata2 ${RELOCATING-0} : { *(.sdata2) }"
+INTERP=".interp ${RELOCATING-0} : { *(.interp) }"
+PLT=".plt ${RELOCATING-0} : { *(.plt) }"
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
 	      "${LITTLE_OUTPUT_FORMAT}")
@@ -79,9 +81,8 @@ SECTIONS
   .fini		${RELOCATING-0} : { *(.fini)    } =${NOP-0}
   .rodata	${RELOCATING-0} : { *(.rodata)  }
   .rodata1	${RELOCATING-0} : { *(.rodata1) }
-  ${CREATE_SHLIB-
-    .sdata2	${RELOCATING-0} : { *(.sdata2) }
-    .sbss2	${RELOCATING-0} : { *(.sbss2) } }
+  ${CREATE_SHLIB-${SDATA2}}
+  ${CREATE_SHLIB-${SBSS2}}
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
 
   /* Adjust the address for the data segment.  We want to adjust up to
@@ -136,9 +137,8 @@ SECTIONS
 		${RELOCATING+PROVIDE (_GLOBAL_OFFSET_TABLE_ = .);}
   .got		${RELOCATING-0} : { *(.got) }
   .got.plt	${RELOCATING-0} : { *(.got.plt) }
-  ${CREATE_SHLIB+
-    .sdata2	${RELOCATING-0} : { *(.sdata2) }
-    .sbss2	${RELOCATING-0} : { *(.sbss2) } }
+  ${CREATE_SHLIB+${SDATA2}}
+  ${CREATE_SHLIB+${SBSS2}}
 		${RELOCATING+PROVIDE (_GOT_END_ = .);}
 
   ${DATA_PLT+${PLT}}
