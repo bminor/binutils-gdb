@@ -1,3 +1,8 @@
+2001-11-22  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.in: Regenerated with automake based on automake
+	1.4-8 in RedHat 7.1.
+
 2001-11-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Define.
