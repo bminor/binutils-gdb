@@ -53,12 +53,13 @@ SHELL = /bin/sh
 INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM1 = $(INSTALL) -b $(program_transform_name) .1
 
 AR = ar
 AR_FLAGS = qv
 BISON = bison
 MAKEINFO = makeinfo
-TEXI2DVI = TEXINPUTS=$$TEXINPUTS:$(TEXIDIR) texi2dvi
+TEXI2DVI = TEXINPUTS=$(TEXIDIR):$$TEXINPUTS texi2dvi
 RANLIB = ranlib
 
 # What version of the manual you want; "all" includes everything
@@ -72,67 +73,84 @@ TEXIDIR = $(srcdir)/../../texinfo
 
 all:
 install:
-	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	$(INSTALL_DATA) $(srcdir)/as.1 $(man1dir)/`t='$(program_transform_name)'; echo as | sed -e "" $$t`.1
+	$(INSTALL_XFORM1) $(srcdir)/as.1 $(man1dir)/as.1
 
-info: as.info
-dvi: as.dvi
+info: as.info gasp.info
+dvi: as.dvi gasp.dvi
 
 asdoc-config.texi: $(CONFIG).texi
+	rm -f asdoc-config.texi
 	ln -s $(srcdir)/$(CONFIG).texi ./asdoc-config.texi || \
 	ln $(srcdir)/$(CONFIG).texi ./asdoc-config.texi || \
 	cp $(srcdir)/$(CONFIG).texi ./asdoc-config.texi
 
-as.info: as.texinfo asdoc-config.texi
-	$(MAKEINFO) -o as.info as.texinfo
+as.info: $(srcdir)/as.texinfo asdoc-config.texi
+	$(MAKEINFO) -I$(TEXIDIR) -o as.info $(srcdir)/as.texinfo
 
-install-info: as.info
-	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
-	for i in as.info* ; do \
+gasp.info: $(srcdir)/gasp.texi
+	$(MAKEINFO) -o gasp.info $(srcdir)/gasp.texi
+
+install-info: install-info-as install-info-gasp
+install-info-as: as.info
+	if [ -r as.info ]; then \
+	  dir=. ; \
+	else \
+	  dir=$(srcdir) ; \
+	fi ; \
+	for i in $$dir/as.info* ; do \
+		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
+	done
+install-info-gasp: gasp.info
+	if [ -r gasp.info ]; then \
+	  dir=. ; \
+	else \
+	  dir=$(srcdir) ; \
+	fi ; \
+	for i in $$dir/gasp.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
-dvi: as.dvi
+as.dvi:	$(srcdir)/as.texinfo asdoc-config.texi
+	$(TEXI2DVI) $(srcdir)/as.texinfo
 
-as.dvi:	as.texinfo asdoc-config.texi
-	$(TEXI2DVI) as.texinfo
+gasp.dvi: $(srcdir)/gasp.texi
+	$(TEXI2DVI) $(srcdir)/gasp.texi
 
 # ROFF doc targets as.ms, as.mm, as.me
 # (we don't use a variable because we don't trust all makes to handle
 # a var in the target name right).
 # roff output (-ms)
 # THESE ARE PROBABLY BROKEN until texi2roff extended for Texinfo conditionals
-as.ms: as.texinfo asdoc-config.texi
+as.ms: $(srcdir)/as.texinfo asdoc-config.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e 's/{.*,,/{/' \
-		as.texinfo | \
+		$(srcdir)/as.texinfo | \
 	texi2roff -ms >as.ms 
 
 # roff output (-mm)
-as.mm: as.texinfo asdoc-config.texi
+as.mm: $(srcdir)/as.texinfo asdoc-config.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e 's/{.*,,/{/' \
 		-e '/@noindent/d' \
-		as.texinfo | \
+		$(srcdir)/as.texinfo | \
 	texi2roff -mm | \
 	sed -e 's/---/\\(em/g' \
 	>as.mm 
 
 # roff output (-me)
-as.me: as.texinfo asdoc-config.texi
+as.me: $(srcdir)/as.texinfo asdoc-config.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e 's/{.*,,/{/' \
-		as.texinfo | \
+		$(srcdir)/as.texinfo | \
 	texi2roff -me >as.me 
 
 clean: clean-dvi clean-info
+
+distclean:
+	rm -f Makefile config.status as.?? as.??s as.aux as.log as.toc
 
 clean-dvi:
 	rm -f as.?? as.???
