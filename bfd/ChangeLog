@@ -24,6 +24,7 @@ start-sanitize-v8plus
 	(bfd_mach_sparc_{v8plus,v8plusa}): Define.
 end-sanitize-v8plus
 	(bfd_mach_sparc_v9a): Define.
+	(bfd_mach_sparc_v9_p): Define.
 	* bfd-in2.h: Regenerated.
 	* aoutx.h (aout,machine_type): bfd_mach_sparc64 renamed to
 	bfd_mach_sparc_v9.

@@ -99,6 +99,8 @@ DESCRIPTION
 . {* end-sanitize-v8plus *}
 .#define bfd_mach_sparc_v9		4
 .#define bfd_mach_sparc_v9a		5 {* v9 with ultrasparc add'ns *}
+.{* Nonzero if MACH has the v9 instruction set.  *}
+.#define bfd_mach_sparc_v9_p(mach) ((mach) != bfd_mach_sparc)
 .  bfd_arch_mips,      {* MIPS Rxxxx *}
 .  bfd_arch_i386,      {* Intel 386 *}
 .  bfd_arch_we32k,     {* AT&T WE32xxx *}
