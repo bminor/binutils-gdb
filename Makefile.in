@@ -659,7 +659,10 @@ $(DO_X):
 			$${target}); \
 	    then true; else exit 1; fi; \
 	  else true; fi; \
-	done;\
+	done
+	@target=`echo $@ | sed -e 's/^do-//'`; \
+	r=`pwd`; export r; \
+	srcroot=`cd $(srcdir); pwd`; export srcroot; \
 	for i in $(TARGET_CONFIGDIRS) -dummy-; do \
 	  if [ -f $(TARGET_SUBDIR)/$$i/Makefile ]; then \
 	    for flag in $(EXTRA_TARGET_FLAGS); do \

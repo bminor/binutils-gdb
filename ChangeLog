@@ -1,3 +1,9 @@
+Thu Nov  2 13:24:56 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (DO_X): Split rule to decrease command line length
+	for systems with small ARG_MAX values.  From phdm@info.ucl.ac.be
+	(Philippe De Muyter).
+
 Wed Nov  1 15:18:35 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* Makefile.in (all-patch): depend on all-libiberty.
