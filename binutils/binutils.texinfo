@@ -20,8 +20,9 @@
 @settitle GNU Binary Utilities
 @titlepage
 @title{The GNU Binary Utilities}
+@subtitle{Version 1.9}
 @sp 1
-@subtitle January 1991
+@subtitle October 1991
 @author{Roland H. Pesch}
 @author{Cygnus Support}
 @page
@@ -49,12 +50,14 @@ Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions.
 @end titlepage
 
-@ifinfo
 @node Top, ar, (dir), (dir)
-This file documents the GNU binary utilities @samp{ar}, @samp{ld},
-@samp{objdump}, @samp{nm}, @samp{size}, @samp{strip}, and
-@samp{ranlib}.@refill 
+@chapter Introduction
 
+This brief manual contains preliminary documentation for the GNU binary
+utilities (collectively version 1.9): @samp{ar}, @samp{objdump},
+@samp{nm}, @samp{size}, @samp{strip}, and @samp{ranlib}. @refill
+
+@ifinfo
 Copyright @copyright{} 1991 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
@@ -86,14 +89,13 @@ into another language, under the above conditions for modified versions.
 * ranlib::			ranlib
 * size::			size
 * strip::			strip
-
 @end menu
 
 @node ar, ld, Top, Top
 @chapter ar
 
 @smallexample
-  ar [-]@var{Op}@var{Mod} [ @var{membername} ] @var{archive} @var{files}@dots{}
+  ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{files}@dots{}
 @end smallexample
 
 The GNU @code{ar} program creates, modifies, and extracts
@@ -106,7 +108,7 @@ group are preserved in the archive, and may be reconstituted on
 extraction.  
 
 Only the first fifteen characters of a file name are kept in archives.
-@c Note: with next (BFD) version, this will depend on obj format.
+@c FIXME: with BFD version, this depends on obj format.
 
 @code{ar} is considered a binary utility because archives of this sort
 are most often used as @dfn{libraries} holding commonly needed
@@ -118,10 +120,10 @@ Once created, this index is updated in the archive whenever @code{ar}
 makes a change to its contents.  An archive with such an index speeds up
 linking to the library, and allows routines in the library to call each
 other without regard to their placement in the archive.
-@c This auto-update may happen-always only for WRS version; Gumby says, for
-@c instance, that it doesn't happen with 'q' updates elsewhere.
+@c FIXME This auto-update may happen-always only for WRS version; Gumby
+@c says, for instance, that it doesn't happen with 'q' updates elsewhere.
 
-You may use @samp{nm -s} or @samp{nm +print-symdefs} to list this index
+You may use @samp{nm -s} or @samp{nm +print-armap} to list this index
 table.  If an archive lacks the table, another form of @code{ar} called
 @code{ranlib} can be used to add just the table.
 
@@ -135,10 +137,10 @@ specifying particular files to operate on.
 GNU @code{ar} allows you to mix the operation code and modifier flags in
 any order, within the first command-line argument.
 
-If you wish, you may precede the first command-line argument with a
+If you wish, you may prefix the first command-line argument with a
 dash.
 
-The @var{Op} keyletter specifies what operation to execute; it may be
+The @var{p} keyletter specifies what operation to execute; it may be
 any of the following, but you must specify only one of them:
 
 @table @code
@@ -184,7 +186,7 @@ operation; new members are always placed at the end of the archive.
 
 The option @samp{v} makes @code{ar} list each file as it is appended.
 
-@c per Gumby, versions other than WRS of this will *not* auto-update
+@c FIXME: per Gumby, versions other than WRS of this will *not* auto-update
 @c SYMDEF index on 'q' updates.
 
 @item r
@@ -225,18 +227,20 @@ listing---in our example, @samp{ar t b.a}.
 @c recent case in fact works the other way.
 
 @item x
-@emph{Extract} a member from the archive.  The @samp{v} option flag
-requests that @code{ar} list each name as it extracts it.
+@emph{Extract} members (named @var{files}) from the archive.  You can
+use the @samp{v} option flag with this operation, to request that
+@code{ar} list each name as it extracts it.
 
 If you do not specify any @var{files}, all files in the archive
 are extracted; but the index to symbols from relocatable modules, called
 @samp{__.SYMDEF}, is not extracted unless you explicitly request it by
 name.
+@c FIXME: does __.SYMDEF appear in all BFD arch formats?  If not, which?
 
 @end table
 
-A number of modifiers may immediately follow the @var{Op} keyletter, to
-specify variations on an operation's behavior:
+A number of modifiers (@var{mod}) may immediately follow the @var{p}
+keyletter, to specify variations on an operation's behavior:
 
 @table @code
 @item a
@@ -266,7 +270,7 @@ member must be present as the @var{membername} argument, before the
 @item l
 This option flag is recognized but not used; it is permitted for
 compatibility with other forms of @code{ar}.
-@c ???---pesch@@cygnus.com, 25jan91
+@c FIXME ar l modifier???---pesch@@cygnus.com, 25jan91
 
 @item o
 Preserve the @emph{original} dates of members when extracting them.  If
@@ -288,10 +292,6 @@ equivalent to @samp{ru}; checking the timestamps loses any speed
 advantage, so @code{ar} treats both commands as replace operations with
 the @samp{u} option appended.
 
-@c u actually turns *anything* into a replace.  I claim this is a bug;
-@c 'du' and 'tu' for example should either be rejected or equivalent to
-@c plain 'd' and 't'.  ---pesch@@cygnus.com, 25jan91
-
 @item v
 This option requests the @emph{verbose} version of an operations.  Many
 operations display additional information, such as filenames processed,
@@ -309,15 +309,16 @@ The GNU linker @code{ld} is now described in a separate manual.
 
 @smallexample
   nm [ -a | +debug-syms ]  [ -g | +extern-only ]
-      [ -n | +numeric-sort ]  [ -o | +print-file-name ]  
-      [ -p | +no-sort ]  [ -r | +reverse-sort ]  
-      [ -s | +print-symdefs ]  [ -u | +undefined-only ]  
+      [ -s | +print-armap ]  [ -o | +print-file-name ]  
+      [ -n | +numeric-sort ]  [ -p | +no-sort ]
+      [ -r | +reverse-sort ]  [ -u | +undefined-only ]  
+      [ +target [@var{bfdname}] ]
       [ @var{objfiles}@dots{} ]
 @end smallexample
 
 GNU @code{nm} will list the symbols from object files @var{objfiles}.
-Any command-line options must precede all object files; no option takes
-an argument.
+Any command-line options must precede all object files; only the
+@samp{+target} option can be further specified with an argument.
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.
@@ -327,35 +328,50 @@ equivalent.
 Object files whose symbols are to be listed.  If no object files are
 listed as arguments, @code{nm} assumes @samp{a.out}.
 
-@item -a | +debug-syms 
+@item +debug-syms 
+@itemx -a
 Display debugger-only symbols; normally these are not listed.
 
-@item -g | +extern-only 
+@item +extern-only 
+@itemx -g
 Display only external symbols.
 
-@item -n | +numeric-sort 
-Sort symbols numerically by their addresses, not alphabetically by their
-names. 
-
-@item -o | +print-file-name 
-Precede each symbol by the name of the input file where it was found,
-rather than identifying the input file once only before all of its
-symbols. 
-
-@item -p | +no-sort 
+@item +no-sort 
+@itemx -p
 Don't bother to sort the symbols in any order; just print them in the
 order encountered.
 
-@item -r | +reverse-sort 
-Reverse the sense of the sort (whether numeric or alphabetic); let the
-last come first.
+@item +numeric-sort 
+@itemx -n
+Sort symbols numerically by their addresses, not alphabetically by their
+names. 
 
-@item -s | +print-symdefs 
+@item +print-armap
+@itemx -s
 When listing symbols from archives, list the index: a mapping (stored in
 the archive by @code{ar} or @code{ranlib} of what modules contain
 definitions for what names.
 
-@item -u | +undefined-only 
+@item +print-file-name 
+@itemx -o
+Precede each symbol by the name of the input file where it was found,
+rather than identifying the input file once only before all of its
+symbols. 
+
+@item +reverse-sort 
+@itemx -r
+Reverse the sense of the sort (whether numeric or alphabetic); let the
+last come first.
+
+@item +target @var{bfdname}
+@c @item +target
+Specify an object code format other than your system's default format.
+@xref{objdump}, for information on listing available formats.
+@c FIXME what *does* +target/no arg do?
+
+
+@item +undefined-only 
+@itemx -u
 Display only undefined symbols (those external to each object file).
 
 @end table
@@ -364,7 +380,11 @@ Display only undefined symbols (those external to each object file).
 @chapter objdump
 
 @smallexample
-  objdump [ -h | +header ]  [ -n | +nstuff ]  [ -r | +reloc ]  
+  objdump [ -a ]  [ -b @var{bfdname} ]  [ -d ]  [ -f ]  [ -i ]
+          [ -j @var{section} ]  [ -l ]
+          [ -m @var{machine} ]  [ -s ]  [ -x ]
+
+           [ -h | +header ]  [ -r | +reloc ]  
            [ -t | +syms ]   @var{objfiles}@dots{}
 @end smallexample
 
@@ -381,19 +401,72 @@ equivalent.
 @item @var{objfiles}@dots{}
 The object files to be examined.
 
-@item -h | +header
-Header.  Print summary information from the header of the object file.
+@item -a
+@c print_arelt_descr
+If any files from @var{objfiles} are archives, display the archive
+header information (in a format similar to @samp{ls -l}).
 
-@item -n | +nstuff
-@samp{N_} symbols.  Print the values of various macros from @file{a.out.h}
-as applied to the object file; e.g. @code{N_TXTOFF}.
+@c suggest longname +target or +format or +bfd
+@item -b @var{bfdname}
+You can specify a particular object-code format for your object files as
+@var{bfdname}.  This may not be necessary; @var{objdump} can
+automatically recognize many formats.  For example,
+@example
+objdump -b oasys -m vax -h fu.o
+@end example
+@noindent
+Displays summary information from the section headers (@samp{-h}) of
+@file{fu.o}, which is explicitly identified as a Vax (@samp{-m}) object
+file in the format produced by Oasys compilers.  You can list the
+formats available with the @var{-i} option.
 
-@item -r | +reloc
+@item -d
+Disassemble.  Display the assembler mnemonics for the machine
+instructions from @var{objfiles}.
+
+@item -f
+File header.  Display summary information from the overall header of
+each file in @var{objfiles}.
+
+@item +header
+@itemx -h
+Header.  Display summary information from the section headers of the
+object file.
+
+@item -i
+Display a list showing all architectures and object formats available
+for specification with @code{-b} or @code{-m}.
+
+@c suggest longname +section
+@item -j @var{name}
+Display information only for section @var{name}
+
+@c suggest longname +label or +linespec
+@item -l
+Label the display (using debugging information) with the source filename
+and line numbers corresponding to the object code shown.
+
+@c suggest longname +architecture
+@item -m @var{machine}
+Specify the object files @var{objfiles} are for architecture
+@var{machine}.  You can list available architectures using the @samp{-i}
+option. 
+
+@item +reloc
+@itemx -r
 Relocation.  Print the relocation entries of the file.
 
-@item -t | +syms
+@item -s
+Display the full contents of any sections requested.
+
+@item +syms
+@itemx -t
 Symbol Table.  Print the symbol table entries of the file.
 This is similar to the information provided by the @samp{nm} program.
+
+@item -x
+Display all available header information, including the symbol table and
+relocation entries.  @samp{-x} is equivalent to @samp{-f -a -h -r -t}.
 
 @end table
 
@@ -401,22 +474,27 @@ This is similar to the information provided by the @samp{nm} program.
 @chapter ranlib
 
 @smallexample
-  ranlib  [ -t | +touch ]  [ -v | +verbose ] @var{archive}
+  ranlib @var{archive}
 @end smallexample
 
 @code{ranlib} generates the an index to the contents of an archive, and
 stores it in the archive.  The index lists each symbol defined by a
 member of an archive that is a relocatable object file.  
 
-You may use @code{nm -s} or @code{nm +print-symdefs} to list this table.
+You may use @code{nm -s} or @code{nm +print-armap} to list this table.
 The index is internally stored in the archive under the name
 @samp{__.SYMDEF}.
+@c FIXME does __.SYMDEF exist in archives in all flavors? (ranlib)
 
 An archive with such an index speeds up linking to the library, and
 allows routines in the library to call each other without regard to
 their placement in the archive.
 
 The GNU @code{ranlib} program is another form of GNU @code{ar}.
+
+@ignore
+@c FIXME vintage ranlib had options [ -t | +touch ]  [ -v | +verbose ] 
+@c which are gone here.  Good or evil?
 
 @code{ranlib}'s options make it report on what it's doing and fake an
 update of a particular archive's index.
@@ -438,45 +516,99 @@ Use this option if you'd like informational messages about what
 @code{ranlib} is up to, while it loops through the specified archives.
 
 @end table
+@end ignore
 
 @node size, strip, ranlib, Top
 @chapter size
 
 @smallexample
-  size @var{objfiles}@dots{}
+  size [ -d | -o | -x | +radix @var{number} ]  
+       [ -A | -B | +format @var{compatibility} ]  [ +help ]  
+       [ +target [@var{bfdname}]  [ -V | +version ]  
+       @var{objfiles}@dots{}
 @end smallexample
 
-The GNU @code{size} utility lists the segment (@code{text}, @code{data},
-@code{bss} sizes ---and the total size--- for the object files
-@var{objfiles} in its argument list.  For archives, one line of output
-is generated for each module.
+The GNU @code{size} utility lists the section sizes---and the total
+size---for each of the object files @var{objfiles} in its argument list.
+By default, one line of output is generated for each object file or each
+module in an archive.
 
-@code{size} has no command-line options.
+The command line options have the following meanings:
+@table @code
+@item +radix @var{number}
+@itemx -d
+@itemx -o
+@itemx -x
+Using one of these options, you can control whether the size of each
+section is given in decimal (@samp{-d}, or @samp{+radix 10}); octal
+(@samp{-o}, or @samp{+radix 8}); or hexadecimal (@samp{-x}, or
+@samp{+radix 16}).  In @samp{+radix @var{number}}, only the three
+values (8, 10, 16) are supported.  The total size is always given in two
+radices; decimal and hexadecimal for @samp{-d} or @samp{-x} output, or
+octal and hexadecimal if you're using @samp{-o}.
 
-If more than one object module is listed, @code{size} labels each line
-of output with the module's name:
+@item +format @var{compatibility}
+@itemx -A
+@itemx -B
+Using one of these options, you can choose whether the output from GNU
+@code{size} resembles output from System V @code{size} (using @samp{-A},
+or @samp{+format sysv}, or Berkeley @code{size} (using @samp{-B}, or
+@samp{+format berkeley}.  The default is the one-line format similar to
+Berkeley's.  
+@c Bonus for doc-source readers: you can also say +format=strange (or
+@c anything else that starts with 's') for sysv, and +format=boring (or
+@c anything else that starts with 'b') for Berkeley.
+
+Here is an example of the Berkeley (default) format of output from
+@code{size}: 
 @smallexample
-% size a.out libX11.a
-text    data    bss     dec     hex
-49152   49152   0       98304   18000   a.out
-1256    16      0       1272    4f8     libX11.a(Context.o)
-176     0       0       176     b0      libX11.a(Depths.o)
-1360    56      0       1416    588     libX11.a(ParseCmd.o)
-904     24      4096    5024    13a0    libX11.a(Quarks.o)
-216     0       0       216     d8      libX11.a(XAllCells.o)
-        .
-        .
-        .
-
+ eg$  size +format Berkeley ranlib size
+text	data	bss	dec	hex	filename
+294880 	81920  	11592  	388392 	5ed28  	ranlib
+294880 	81920  	11888  	388688 	5ee50  	size
 @end smallexample
-[sample output truncated]
+
+@noindent
+This is the same data, but displayed closer to System V conventions:
+
+@smallexample
+@end smallexample
+ eg$  size +format SysV ranlib size
+ranlib  :
+section		size	     addr
+.text         294880	     8192	
+.data          81920	   303104	
+.bss           11592	   385024	
+Total         388392	
+
+
+size  :
+section		size	     addr
+.text         294880	     8192	
+.data          81920	   303104	
+.bss           11888	   385024	
+Total         388688	
+
+@item +target @var{bfdname}
+You can specify a particular object-code format for @var{objfiles} as
+@var{bfdname}.  This may not be necessary; @var{size} can
+automatically recognize many formats.  @xref{objdump}, for information
+on listing available formats.
+
+@item +version
+@itemx -V
+Display version number information on @code{size} itself.
+
+@end table
+
 
 @node strip,  , size, Top
 @chapter strip
 
 @smallexample
-  strip [ -s | +strip-all ]  [ -S | +strip-debug ]
+  strip [ -s | +strip-all ]  [ -g | -S | +strip-debug ]
          [ -x | +discard-all ]  [ -X | +discard-locals ]
+         [ -T @var{bfdname} ]
          @var{objfiles}@dots{}
 @end smallexample
 
@@ -493,23 +625,33 @@ The long and short forms of options, shown here as alternatives, are
 equivalent.
 
 @table @code
-@item -s | +strip-all 
+@item +strip-all 
+@itemx -s
 This is the default case: strip all symbol entries from @var{objfiles}.
 
-@item -S | +strip-debug 
+@item +strip-debug 
+@itemx -g
+@itemx -S
 Discard only debugging symbol information from @var{objfiles}.
 
-@item -x | +discard-all 
+@item +discard-all 
+@itemx -x
 Discard all symbols local to each file in @var{objfiles}.
 @emph{WARNING:} Note that @code{+discard-all} discards only @emph{local}
 symbols, in spite of its name.
 
-@item -X | +discard-locals 
+@item +discard-locals 
+@itemx -X
 Discard local symbols starting with @samp{L} from each file in
 @var{objfiles}.  (Some compilers produce internally-used symbols that
 begin with @samp{L}.)
-@end table
 
+@item -T @var{bfdname}
+You can specify a particular object-code format @var{bfdname} for
+@var{objfiles}.  This may not be necessary; @var{strip} can automatically
+recognize many formats.  @xref{objdump}, for information on listing
+available formats.
+@end table
 
 @contents
 @bye
