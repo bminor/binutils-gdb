@@ -1,6 +1,30 @@
-Wed Dec  4 10:14:17 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+Fri Dec  6 22:58:48 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
-	* bout.c: (b_out_callback): replace the text size, since aout
+	* Makefile.in: install using INSTALL_DATA, added standards.text
+	  support.
+
+	* configure.in: mark directory as target dependent.  configure
+	  nows works in objdir always so make file existence checks
+	  against ${srcdir}.
+
+Thu Dec  5 22:46:19 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: idestdir and ddestdir go away.  Added copyrights
+	  and shift gpl to v2.  Added ChangeLog if it didn't exist. docdir
+	  and mandir now keyed off datadir by default.
+
+Wed Dec  4 10:14:17 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+	* aoutf1.h (sunos_<size>_object_p, sunos4_callback): moved the
+	computation of arch and machine type so it's worked out before
+	some_aout_object_p is called. 
+	* aoutx.h: (some_aout_object_p): don't set arch and mach to
+	unknown.
+	* archures.c: add extra field 'section_align_power' to hold
+	default section alignment in object files.
+	* cpu-a29k.c, cpu-h8300.c, cpu-i386.c, cpu-i960.c, cpu-m68k.c,
+	cpu-m88k.c, cpu-mips.c, cpu-rs6000.c, cpu-sparc.c, cpu-vax.c:
+	initialize the new field.
+	* bout.c (b_out_callback): replace the text size, since aout
 	fries them.
 	* aoutx.h: Documentation in the new style
 
