@@ -408,6 +408,11 @@ nrun.o: $(srccom)/nrun.c config.h tconfig.h \
 	  $(sim_main_headers)
 	$(CC) -c $(srccom)/nrun.c $(ALL_CFLAGS)
 
+# Devices.
+
+dv-sockser.o: $(srccom)/dv-sockser.h $(sim_main_headers)
+	$(CC) -c $(srccom)/dv-sockser.c $(ALL_CFLAGS)
+
 # CGEN support.
 
 cgen-run.o: $(srccom)/cgen-run.c $(sim_main_headers) \
@@ -448,8 +453,12 @@ MAKEOVERRIDES=
 
 tags etags: TAGS
 
+# Macros like EXTERN_SIM_CORE confuse tags.
+# And the sim-n-foo.h files create functions that can't be found either.
 TAGS: force
-	etags --regex '/^\/[*] TAGS: .*/' *.c *.h
+	cd $(srcdir) && \
+	etags --regex '/^\([a-z_]+\) (/\1/' --regex '/^\/[*] TAGS: .*/' \
+		*.[ch] ../common/*.[ch]
 
 clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core

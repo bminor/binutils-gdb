@@ -46,6 +46,8 @@ cgen-utils.c
 config.in
 configure.in
 configure
+dv-sockser.c
+dv-sockser.h
 gdbinit.in
 genmloop.sh
 gennltvals.sh

@@ -1,3 +1,15 @@
+Sat Mar 14 18:36:12 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* dv-sockser.c, dv-sockser.h: New files.
+	* Make-common.in (dv-sockser.o): Add rule for.
+	* aclocal.m4: Check for fcntl.h.
+	* config.h: Add HAVE_FCNTL_H.
+
+	* sim-break.c (remove_breakpoint): Fix thinko.
+
+	* sim-hload.c (sim_load): Provide default value of SIM_HANDLES_LMA.
+	Use SIM_HANDLES_LMA for lma_p arg to sim_load_file.
+
 1998-03-13  Fred Fish  <fnf@cygnus.com>
 
 	* sim-base.h (struct sim_state_base): Add prog_syms and

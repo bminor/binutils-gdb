@@ -82,7 +82,7 @@ remove_breakpoint (sd, bp)
 
   sim_core_write_buffer (sd, NULL, exec_map, bp->loc_contents,
 			 bp->addr, SIM_BREAKPOINT_SIZE);
-  bp->flags &= SIM_BREAK_INSERTED;
+  bp->flags &= ~SIM_BREAK_INSERTED;
 }
 
 /* Come here when a breakpoint insn is hit.  If it's really a breakpoint, we
@@ -161,7 +161,7 @@ sim_set_breakpoint (sd, addr)
     if (bp->addr == addr)
       return SIM_RC_DUPLICATE_BREAKPOINT; /* Already there */
     else
-      break;
+      break; /* FIXME: why not scan all bp's? */
 
   bp = ZALLOC (struct sim_breakpoint);
 

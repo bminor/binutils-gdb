@@ -46,7 +46,9 @@ AC_PROG_RANLIB
 # Check for common headers.
 # FIXME: Seems to me this can cause problems for i386-windows hosts.
 # At one point there were hardcoded AC_DEFINE's if ${host} = i386-*-windows*.
-AC_CHECK_HEADERS(stdlib.h string.h strings.h unistd.h time.h sys/time.h sys/resource.h)
+AC_CHECK_HEADERS(stdlib.h string.h strings.h unistd.h time.h)
+AC_CHECK_HEADERS(sys/time.h sys/resource.h)
+AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_FUNCS(getrusage time sigaction)
 
 . ${srcdir}/../../bfd/configure.host
@@ -60,10 +62,11 @@ dnl all shall eventually behave the same way.
 
 dnl We don't use automake, but we still want to support
 dnl --enable-maintainer-mode.
+USE_MAINTAINER_MODE=no
 AC_ARG_ENABLE(maintainer-mode,
 [  --enable-maintainer-mode		Enable developer functionality.],
 [case "${enableval}" in
-  yes)	MAINT="" ;;
+  yes)	MAINT="" USE_MAINTAINER_MODE=yes ;;
   no)	MAINT="#" ;;
   *)	AC_MSG_ERROR("--enable-maintainer-mode does not take a value"); MAINT="#" ;;
 esac
@@ -472,19 +475,35 @@ fi])dnl
 AC_SUBST(sim_hostendian)
 
 
+dnl --enable-sim-float is for developers of the simulator
+dnl It specifies the presence of hardware floating point
+dnl And optionally the bitsize of the floating point register.
+dnl arg[1] specifies the presence (or absence) of floating point hardware
+dnl arg[2] specifies the number of bits in a floating point register
 AC_DEFUN(SIM_AC_OPTION_FLOAT,
 [
-default_sim_floating_point="ifelse([$1],,0,[$1])"
+default_sim_float="[$1]"
+default_sim_float_bitsize="[$2]"
 AC_ARG_ENABLE(sim-float,
 [  --enable-sim-float			Specify that the target processor has floating point hardware.],
 [case "${enableval}" in
   yes | hard)	sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT";;
   no | soft)	sim_float="-DWITH_FLOATING_POINT=SOFT_FLOATING_POINT";;
+  32)           sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT -DWITH_TARGET_FLOATING_POINT_BITSIZE=32";;
+  64)           sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT -DWITH_TARGET_FLOATING_POINT_BITSIZE=64";;
   *)		AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-float"); sim_float="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_float" != x""; then
   echo "Setting float flags = $sim_float" 6>&1
-fi],[sim_float="-DWITH_FLOATING_POINT=${default_sim_floating_point}"])dnl
+fi],[
+sim_float=
+if test x"${default_sim_float}" != x""; then
+  sim_float="-DWITH_FLOATING_POINT=${default_sim_float}"
+fi
+if test x"${default_sim_float_bitsize}" != x""; then
+  sim_float="$sim_float -DWITH_TARGET_FLOATING_POINT_BITSIZE=${default_sim_float_bitsize}"
+fi
+])dnl
 ])
 AC_SUBST(sim_float)
 
