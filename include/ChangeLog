@@ -1,3 +1,11 @@
+Sun Feb 27 21:52:26 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* floatformat.h: New file, intended to replace ieee-float.h.
+
+Sun Feb 20 17:15:42 1994  Ian Lance Taylor  (ian@lisa.cygnus.com)
+
+	* ansidecl.h (ANSI_PROTOTYPES): Define if using ANSI prototypes.
+
 Wed Feb 16 01:07:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* libiberty.h: Don't declare strsignal, to avoid conflicts with
