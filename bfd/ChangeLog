@@ -1,3 +1,12 @@
+2004-10-15  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.c (struct already_linked_section): Removed.
+	(try_match_symbols_in_sections, already_linked): Removed.
+	(_bfd_elf_section_already_linked): Skip ^\.gnu\.linkonce\.[^.]*\.
+	prefix of section names when finding already_linked_table
+	chain.  Compare section names.  Instead of calling already_linked,
+	do it inline and only for sections in the same already_linked_list.
+
 2004-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-eh-frame.c (_bfd_elf_eh_frame_section_offset): Add "info"
