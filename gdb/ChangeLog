@@ -1,3 +1,8 @@
+Tue Feb 29 15:14:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-02-22 Stephane Carrez <stcarrez@worldnet.fr>:
+        * dwarf2read.c (read_address): Read 16-bits addresses.
+
 2000-02-28  Scott Bambrough <scottb@netwinder.org>
 
 	* arm-linux-nat.c (fetch_nw_fpe_*):

@@ -3487,6 +3487,9 @@ read_address (abfd, buf)
 
   switch (address_size)
     {
+    case 2:
+      retval = bfd_get_16 (abfd, (bfd_byte *) buf);
+      break;
     case 4:
       retval = bfd_get_32 (abfd, (bfd_byte *) buf);
       break;
