@@ -1305,7 +1305,7 @@ elf32_hppa_bfd_final_link_relocate (howto, input_bfd, output_bfd,
       r_field = e_lrsel;
       if (sym_sec->flags & SEC_CODE)
 	{
-	  if ((insn & 0xfc) >> 26 == 0xa
+	  if ((insn & 0xfc000000) >> 26 == 0xa
 	       && (insn & 0x03e00000) >> 21 == 0x1b)
 	    insn &= ~0x03e00000;
 	}
