@@ -18,5 +18,3 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
-
-#define PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)

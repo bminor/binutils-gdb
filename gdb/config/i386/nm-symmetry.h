@@ -22,6 +22,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define FETCH_INFERIOR_REGISTERS
 
+/* We must fetch all the regs before storing, since we store all at once.  */
+
+#define CHILD_PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)
+
 #ifdef _SEQUENT_
 #define CHILD_WAIT
 extern int child_wait PARAMS ((int, struct target_waitstatus *));

@@ -19,10 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define HOST_BYTE_ORDER BIG_ENDIAN
 
-/* We have to grab the regs since we store all regs at once.  */
-
-#define CHILD_PREPARE_TO_STORE() \
-	read_register_bytes (0, (char *)NULL, REGISTER_BYTES)
 
 /* Interface definitions for kernel debugger KDB.  */
 

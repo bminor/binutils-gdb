@@ -24,3 +24,4 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 #define FETCH_INFERIOR_REGISTERS
 
+#define CHILD_PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)

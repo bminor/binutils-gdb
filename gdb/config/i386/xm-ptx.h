@@ -1,6 +1,7 @@
 /* Definitions to make GDB run on a Sequent Symmetry under ptx, with
-   Weitek 1167 and i387 support.  Copyright 1986, 1987, 1989, 1992,
-   1993 Free Software Foundation, Inc.
+   Weitek 1167 and i387 support.
+   Copyright 1986, 1987, 1989, 1992, 1993, 1996
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -38,7 +39,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define USE_O_NOCTTY
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
-
-/* We must fetch all the regs before storing, since we store all at once.  */
-
-#define CHILD_PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)

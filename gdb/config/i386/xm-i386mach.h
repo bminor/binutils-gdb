@@ -29,8 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define KERNEL_U_ADDR (0x80000000 - (UPAGES * NBPG))
 
-#define PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)
-
 /* <errno.h> only defines this if __STDC__!!! */
 extern int errno;
 
