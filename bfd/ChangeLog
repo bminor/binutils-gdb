@@ -1,3 +1,8 @@
+2005-02-28  Ross Ridge  <rridge@csclub.uwaterloo.ca>
+
+	* peicode.h (pe_ILF_build_a_bfd): Do not assume that an @ will be
+	present when IMPORT_NAME_UNDOECRATE is used.
+
 2005-02-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 757

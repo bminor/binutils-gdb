@@ -865,6 +865,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   else
     {
       char * symbol;
+      unsigned int len;
 
       /* Create .idata$6 - the Hint Name Table.  */
       id6 = pe_ILF_make_a_section (& vars, ".idata$6", SIZEOF_IDATA6, 0);
@@ -909,19 +910,21 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 	  while (check_again);
 	}
       
+      len = strlen (symbol);
       if (import_name_type == IMPORT_NAME_UNDECORATE)
 	{
-	  /* Truncate at the first '@'  */
-	  while (* symbol != 0 && * symbol != '@')
-	    symbol ++;
+	  /* Truncate at the first '@'.  */
+	  char *at = strchr (symbol, '@');
 
-	  * symbol = 0;
+	  if (at != NULL)
+	    len = at - symbol;
 	}
 
       id6->contents[0] = ordinal & 0xff;
       id6->contents[1] = ordinal >> 8;
 
-      strcpy ((char *) id6->contents + 2, symbol);
+      memcpy ((char *) id6->contents + 2, symbol, len);
+      id6->contents[len + 2] = '\0';
     }
 
   if (import_name_type != IMPORT_ORDINAL)
