@@ -1,5 +1,9 @@
 2004-04-04  Andrew Cagney  <cagney@redhat.com>
 
+	GDB 6.1 release created from 6.1 branch.
+
+2004-04-04  Andrew Cagney  <cagney@redhat.com>
+
 	* gnu-nat.c (gnu_wait): Use memcpy instead of bcopy.
 	* remote-vxmips.c (vx_read_register, vx_write_register): Ditto.
 	* remote-vx68.c (vx_read_register, vx_write_register): Ditto.
