@@ -1,3 +1,11 @@
+2002-05-23  Jim Blandy  <jimb@redhat.com>
+
+	* macrotab.c (check_for_redefinition): Don't complain if the new
+	definition is the same as the previous one.  Take more arguments
+	to allow the comparison.
+	(macro_define_object, macro_define_function): Pass more arguments
+	to check_for_redefinition.
+
 2002-05-22  Michael Snyder  <msnyder@redhat.com>
 
 	* d10v-tdep.c: Change a few macros to enums for ease of debugging.
