@@ -548,25 +548,25 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"macc",    "d,s,t",	0x000000A8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
   /* end-sanitize-vr4320 */
   /* start-sanitize-vr5400 */
-{"macc",    "d,s,t",	0x00000158, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N5},
+{"macc",    "d,s,t",	0x00000158, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,N5},
   /* end-sanitize-vr5400 */
   /* start-sanitize-vr4320 */
 {"maccu",   "d,s,t",	0x000000E8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
   /* end-sanitize-vr4320 */
   /* start-sanitize-vr5400 */
-{"maccu",   "d,s,t",	0x00000159, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N5},
+{"maccu",   "d,s,t",	0x00000159, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,N5},
   /* end-sanitize-vr5400 */
   /* start-sanitize-vr4320 */
 {"macchi",  "d,s,t",	0x000002A8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
   /* end-sanitize-vr4320 */
   /* start-sanitize-vr5400 */
-{"macchi",  "d,s,t",	0x00000358, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N5},
+{"macchi",  "d,s,t",	0x00000358, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,N5},
   /* end-sanitize-vr5400 */
   /* start-sanitize-vr4320 */
 {"macchiu", "d,s,t",	0x000002E8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N4},
   /* end-sanitize-vr4320 */
   /* start-sanitize-vr5400 */
-{"macchiu", "d,s,t",	0x00000359, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,N5},
+{"macchiu", "d,s,t",	0x00000359, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,N5},
   /* end-sanitize-vr5400 */
 {"mad",	    "s,t",	0x70000000, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	P3	},
 {"madu",    "s,t",	0x70000001, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO,	P3	},
@@ -677,10 +677,10 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"movz.d",  "D,S,t",	0x46200012, 0xffe0003f, WR_D|RD_S|RD_t|FP_D,	I4	},
 {"movz.s",  "D,S,t",	0x46000012, 0xffe0003f, WR_D|RD_S|RD_t|FP_S,	I4	},
   /* start-sanitize-vr5400 */
-{"msac",    "d,s,t",	0x000001d8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
-{"msacu",   "d,s,t",	0x000001d9, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
-{"msachi",  "d,s,t",	0x000003d8, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
-{"msachiu", "d,s,t",	0x000003d9, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
+{"msac",    "d,s,t",	0x000001d8, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+{"msacu",   "d,s,t",	0x000001d9, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+{"msachi",  "d,s,t",	0x000003d8, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
+{"msachiu", "d,s,t",	0x000003d9, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
   /* end-sanitize-vr5400 */
 /* move is at the top of the table.  */
 {"msub.d",  "D,R,S,T",	0x4c000029, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_D,	I4	},
@@ -757,6 +757,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"multu",   "s,t",	0x00000019, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
 {"multu",   "d,s,t",	0x00000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, G1},
   /* start-sanitize-r5900 */
+{"multu1",  "s,t",	0x70000019, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO, 	    T5},
 {"multu1",  "d,s,t",	0x70000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, T5},
   /* end-sanitize-r5900 */
 {"neg",     "d,w",	0x00000022, 0xffe007ff,	WR_d|RD_t,	I1	}, /* sub 0 */
@@ -932,7 +933,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"rsqrt.d", "D,S",	0x46200016, 0xffff003f, WR_D|RD_S|FP_D,	I4	},
 {"rsqrt.s", "D,S",	0x46000016, 0xffff003f, WR_D|RD_S|FP_S,	I4	},
 /* start-sanitize-r5900 */
-{"rsqrt.s", "D,S",	0x46000016, 0xffff003f, WR_D|RD_S|FP_S,	T5	},
+{"rsqrt.s", "D,S,T",	0x46000016, 0xffe0003f, WR_D|RD_S|FP_S, T5      },
 /* end-sanitize-r5900 */
 {"sb",      "t,o(b)",	0xa0000000, 0xfc000000,	SM|RD_t|RD_b,	I1	},
 {"sb",      "t,A(b)",	0,    (int) M_SB_AB,	INSN_MACRO,	I1	},
@@ -995,6 +996,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"sq",	    "t,o(b)",	0x7c000000, 0xfc000000,	SM|RD_t|RD_b,	T5	},
   /* end-sanitize-r5900 */
 {"sqrt.d",  "D,S",	0x46200004, 0xffff003f, WR_D|RD_S|FP_D,	I2	},
+/* start-sanitize-r5900 */
+{"sqrt.s",  "D,T",	0x46000004, 0xffe0f83f, WR_D|RD_S|FP_S, T5      },
+/* end-sanitize-r5900 */
 {"sqrt.s",  "D,S",	0x46000004, 0xffff003f, WR_D|RD_S|FP_S,	I2	},
 {"srav",    "d,t,s",	0x00000007, 0xfc0007ff,	WR_d|RD_t|RD_s,	I1	},
 {"sra",     "d,w,s",	0x00000007, 0xfc0007ff,	WR_d|RD_t|RD_s,	I1	}, /* srav */

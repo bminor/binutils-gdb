@@ -1,3 +1,24 @@
+start-sanitize-r5900
+Mon Jun  1 10:27:26 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * mips-opc.c (rsqrt.s): Update based on r5900 ISA manual version 2.1
+        (sqrt.s): Likewise.
+
+end-sanitize-r5900
+start-sanitize-vr5400
+Thu May 28 08:46:09 1998  Catherine Moore <clm@cygnus.com>
+ 
+       * mips-opc.c (macc, maccu, macchi, macchiu, msac, msacu, msachi, msachiu):
+       Change pinfo to use WR_HILO.
+
+end-sanitize-vr5400 
+start-sanitize-d30v
+Wed May 27 15:29:13 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* d30v-opc.c: Add new operand: Ra3.  Change SHORT_B3, SHORT_B3b,
+	LONG_2, LONG_2b formats to use this new operand.
+
+end-sanitize-d30v
 Tue May 26 20:47:48 1998  Stan Cox  <scox@cygnus.com>
 
 	* sparc-dis.c (compute_arch_mask): Added bfd_mach_sparc_sparclite_le.
@@ -7,6 +28,7 @@ Tue May 26 20:45:33 1998  Mark Alexander  <marka@cygnus.com>
 	* sparc-dis.c (print_insn_sparc): big endian instruction / little
 	endian data support.
 
+start-sanitize-d30v
 Tue May 26 16:14:39 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c (d30v_format_table): Change definition of SHORT_B3
@@ -17,6 +39,7 @@ Tue May 26 16:14:39 1998  Nick Clifton  <nickc@cygnus.com>
 	Add FLAG_ADDSUBppp to SRC and SATHp opcodes to implement extension
 	to existing 1.1.1 parallelisation prohibition procedure.
 
+end-sanitize-d30v
 Fri May 22 16:00:00 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen-asm.in (insert_normal): Handle empty fields and 64 bit hosts.
@@ -80,10 +103,12 @@ Tue May 12 13:39:51 1998  Nick Clifton  <nickc@cygnus.com>
 	insns.
 	
 end-sanitize-m32rx
+start-sanitize-d30v
 Tue May 12 11:46:31 1998  Richard Henderson  <rth@cygnus.com>
 
 	* d30v-opc.c (pre_defined_register): Remove alias for r0.
 
+end-sanitize-d30v
 start-sanitize-r5900
 Mon May 11 13:12:15 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	
