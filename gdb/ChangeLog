@@ -1,3 +1,8 @@
+2003-02-12  Jason Molenda  (jmolenda@apple.com)
+
+        * symmisc.c (print_objfile_statistics): Include information about
+        the number of psymtabs and symtabs in each object file.
+
 2003-02-13  Keith R Seitz  <keiths@redhat.com>
 
 	* main.h (struct captured_main_args): Add interpreter_p.

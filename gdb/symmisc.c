@@ -179,6 +179,9 @@ void
 print_objfile_statistics (void)
 {
   struct objfile *objfile;
+  struct symtab *s;
+  struct partial_symtab *ps;
+  int i, linetables, blockvectors;
 
   immediate_quit++;
   ALL_OBJFILES (objfile)
@@ -199,6 +202,28 @@ print_objfile_statistics (void)
     if (OBJSTAT (objfile, n_types) > 0)
       printf_filtered ("  Number of \"types\" defined: %d\n",
 		       OBJSTAT (objfile, n_types));
+    i = 0;
+    ALL_OBJFILE_PSYMTABS (objfile, ps)
+      {
+        if (ps->readin == 0)
+          i++;
+      }
+    printf_filtered ("  Number of psym tables (not yet expanded): %d\n", i);
+    i = linetables = blockvectors = 0;
+    ALL_OBJFILE_SYMTABS (objfile, s)
+      {
+        i++;
+        if (s->linetable != NULL)
+          linetables++;
+        if (s->primary == 1)
+          blockvectors++;
+      }
+    printf_filtered ("  Number of symbol tables: %d\n", i);
+    printf_filtered ("  Number of symbol tables with line tables: %d\n", 
+                     linetables);
+    printf_filtered ("  Number of symbol tables with blockvectors: %d\n", 
+                     blockvectors);
+    
     if (OBJSTAT (objfile, sz_strtab) > 0)
       printf_filtered ("  Space used by a.out string tables: %d\n",
 		       OBJSTAT (objfile, sz_strtab));
