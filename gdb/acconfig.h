@@ -91,3 +91,6 @@
 
 /* Define if <sys/ptrace.h> defines the PTRACE_GETXFPREGS request.  */
 #undef HAVE_PTRACE_GETXFPREGS
+
+/* Define if gnu-regex.c included with GDB should be used. */
+#undef USE_INCLUDED_REGEX

@@ -117,7 +117,6 @@ MMALLOC_CFLAGS = @MMALLOC_CFLAGS@
 # We are using our own version of REGEX now to be consistent across
 # machines.
 REGEX = @REGEX@
-REGEX_CFLAGS = @REGEX_CFLAGS@
 
 # Where is the BFD library?  Typically in ../bfd.
 BFD_DIR = ../bfd
@@ -277,7 +276,7 @@ INTERNAL_WARN_CFLAGS = \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
 	$(INTL_CFLAGS) $(TUI_CFLAGS) $(ENABLE_CFLAGS) \
-	$(REGEX_CFLAGS) $(GDB_WARN_CFLAGS)
+	$(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
@@ -954,7 +953,7 @@ copying.txt:
 
 # Make copying.c from COPYING
 copying.c: copying.txt copying.awk
-	awk -f $(srcdir)/copying.awk < $(srcdir)/copying.txt > copying.c
+	awk -f $(srcdir)/copying.awk < copying.txt > copying.c
 
 version.c: Makefile
 	rm -f version.c

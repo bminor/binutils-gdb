@@ -1,3 +1,10 @@
+Mon Apr 10 21:58:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* acconfig.h (USE_INCLUDED_REGEX): Add.
+	* Makefile.in (REGEX_CFLAGS): Delete
+	* configure.in (REGEX_CFLAGS): Delete. Use AC_DEFINE instead.
+	* configure, config.in: Re-generate.
+
 2000-04-10  Philip Blundell <philb@gnu.org>
 
 	* arm-linux-nat.c (arm_skip_solib_resolver): Remove and move to
