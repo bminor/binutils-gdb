@@ -1,3 +1,21 @@
+Wed Feb 14 13:43:24 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips_big_got): New static variable.
+	(s_extern): Don't declare.
+	(reg_needs_delay): New static function.
+	(macro_build): Permit GOT/CALL_HI/LO relocs.
+	(macro_build_lui): If place is not NULL, use the number in the
+	expression.
+	(load_address): Handle mips_big_got case.
+	(macro): Handle mips_big_got for M_LA_AB, M_JAL_A, and load and
+	store macros.
+	(OPTION_XGOT): Define.
+	(md_longopts): Add "xgot" if OBJ_ELF.
+	(md_parse_option): Handle -xgot.
+	(md_show_usage): Mention -xgot.
+	(md_apply_fix): Permit GOT/CALL_HI/LO relocs.
+	(tc_gen_reloc): Handle GOT/CALL_HI/LO relocs.
+
 Wed Feb 14 11:22:27 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* config/tc-m68k.c (m68k_ip) [operand kind '#']: When fixing
