@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -40,8 +40,11 @@ static unsigned int dis_hash_insn PARAMS ((const char *, CGEN_INSN_INT));
 
 /* Instruction formats.  */
 
-#define F(f) & fr30_cgen_ifld_table[CONCAT2 (FR30_,f)]
-
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define F(f) & fr30_cgen_ifld_table[FR30_##f]
+#else
+#define F(f) & fr30_cgen_ifld_table[FR30_/**/f]
+#endif
 static const CGEN_IFMT ifmt_empty = {
   0, 0, 0x0, { { 0 } }
 };
@@ -164,9 +167,17 @@ static const CGEN_IFMT ifmt_enter = {
 
 #undef F
 
-#define A(a) (1 << CONCAT2 (CGEN_INSN_,a))
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define A(a) (1 << CGEN_INSN_##a)
+#else
+#define A(a) (1 << CGEN_INSN_/**/a)
+#endif
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define OPERAND(op) FR30_OPERAND_##op
+#else
+#define OPERAND(op) FR30_OPERAND_/**/op
+#endif
 #define MNEM CGEN_SYNTAX_MNEMONIC /* syntax value for mnemonic */
-#define OPERAND(op) CONCAT2 (FR30_OPERAND_,op)
 #define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
 
 /* The instruction table.  */
@@ -1170,14 +1181,17 @@ static const CGEN_OPCODE fr30_cgen_insn_opcode_table[MAX_INSNS] =
 };
 
 #undef A
-#undef MNEM
 #undef OPERAND
+#undef MNEM
 #undef OP
 
 /* Formats for ALIAS macro-insns.  */
 
-#define F(f) & fr30_cgen_ifld_table[CONCAT2 (FR30_,f)]
-
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define F(f) & fr30_cgen_ifld_table[FR30_##f]
+#else
+#define F(f) & fr30_cgen_ifld_table[FR30_/**/f]
+#endif
 static const CGEN_IFMT ifmt_ldi8m = {
   16, 16, 0xf000, { { F (F_OP1) }, { F (F_I8) }, { F (F_RI) }, { 0 } }
 };
@@ -1194,9 +1208,17 @@ static const CGEN_IFMT ifmt_ldi32m = {
 
 /* Each non-simple macro entry points to an array of expansion possibilities.  */
 
-#define A(a) (1 << CONCAT2 (CGEN_INSN_,a))
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define A(a) (1 << CGEN_INSN_##a)
+#else
+#define A(a) (1 << CGEN_INSN_/**/a)
+#endif
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define OPERAND(op) FR30_OPERAND_##op
+#else
+#define OPERAND(op) FR30_OPERAND_/**/op
+#endif
 #define MNEM CGEN_SYNTAX_MNEMONIC /* syntax value for mnemonic */
-#define OPERAND(op) CONCAT2 (FR30_OPERAND_,op)
 #define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
 
 /* The macro instruction table.  */
@@ -1245,8 +1267,8 @@ static const CGEN_OPCODE fr30_cgen_macro_insn_opcode_table[] =
 };
 
 #undef A
-#undef MNEM
 #undef OPERAND
+#undef MNEM
 #undef OP
 
 #ifndef CGEN_ASM_HASH_P

@@ -1,3 +1,21 @@
+2001-03-05  Dave Brolley  <brolley@redhat.com>
+
+	* opcodes/fr30-asm.c: Regenerate.
+	* opcodes/fr30-desc.c: Regenerate.
+	* opcodes/fr30-desc.h: Regenerate.
+	* opcodes/fr30-dis.c: Regenerate.
+	* opcodes/fr30-ibld.c: Regenerate.
+	* opcodes/fr30-opc.c: Regenerate.
+	* opcodes/fr30-opc.h: Regenerate.
+	* opcodes/m32r-asm.c: Regenerate.
+	* opcodes/m32r-desc.c: Regenerate.
+	* opcodes/m32r-desc.h: Regenerate.
+	* opcodes/m32r-dis.c: Regenerate.
+	* opcodes/m32r-ibld.c: Regenerate.
+	* opcodes/m32r-opc.c: Regenerate.
+	* opcodes/m32r-opc.h: Regenerate.
+	* opcodes/m32r-opinst.c: Regenerate.
+
 2001-02-28  Igor Shevlyakov  <igor@windriver.com>
 
 	* m68k-opc.c: fix cpushl according to Motorola. Enable

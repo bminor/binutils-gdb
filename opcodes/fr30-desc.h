@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -28,7 +28,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define CGEN_ARCH fr30
 
 /* Given symbol S, return fr30_cgen_<S>.  */
-#define CGEN_SYM(s) CONCAT3 (fr30,_cgen_,s)
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define CGEN_SYM(s) fr30##_cgen_##s
+#else
+#define CGEN_SYM(s) fr30/**/_cgen_/**/s
+#endif
+
 
 /* Selected cpu families.  */
 #define HAVE_CPU_FR30BF
@@ -43,7 +48,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define CGEN_INT_INSN_P 0
 
-/* Maximum nymber of syntax bytes in an instruction.  */
+/* Maximum number of syntax elements in an instruction.  */
 #define CGEN_ACTUAL_MAX_SYNTAX_ELEMENTS 15
 
 /* CGEN_MNEMONIC_OPERANDS is defined if mnemonics have operands.

@@ -4,7 +4,7 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 - the resultant file is machine generated, cgen-dis.in isn't
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2001 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -68,12 +68,12 @@ do { \
 
 static void
 print_hash (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
+     CGEN_CPU_DESC cd;
      PTR dis_info;
-     long value ATTRIBUTE_UNUSED;
-     unsigned int attrs ATTRIBUTE_UNUSED;
-     bfd_vma pc ATTRIBUTE_UNUSED;
-     int length ATTRIBUTE_UNUSED;
+     long value;
+     unsigned int attrs;
+     bfd_vma pc;
+     int length;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
   (*info->fprintf_func) (info->stream, "#");
@@ -156,7 +156,7 @@ m32r_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
      int opindex;
      PTR xinfo;
      CGEN_FIELDS *fields;
-     void const *attrs ATTRIBUTE_UNUSED;
+     void const *attrs;
      bfd_vma pc;
      int length;
 {
@@ -263,12 +263,21 @@ m32r_cgen_init_dis (cd)
 
 static void
 print_normal (cd, dis_info, value, attrs, pc, length)
+#ifdef CGEN_PRINT_NORMAL
+     CGEN_CPU_DESC cd;
+#else
      CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
+#endif
      PTR dis_info;
      long value;
      unsigned int attrs;
+#ifdef CGEN_PRINT_NORMAL
+     bfd_vma pc;
+     int length;
+#else
      bfd_vma pc ATTRIBUTE_UNUSED;
      int length ATTRIBUTE_UNUSED;
+#endif
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
@@ -289,12 +298,21 @@ print_normal (cd, dis_info, value, attrs, pc, length)
 
 static void
 print_address (cd, dis_info, value, attrs, pc, length)
+#ifdef CGEN_PRINT_NORMAL
+     CGEN_CPU_DESC cd;
+#else
      CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
+#endif
      PTR dis_info;
      bfd_vma value;
      unsigned int attrs;
+#ifdef CGEN_PRINT_NORMAL
+     bfd_vma pc;
+     int length;
+#else
      bfd_vma pc ATTRIBUTE_UNUSED;
      int length ATTRIBUTE_UNUSED;
+#endif
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
@@ -351,7 +369,7 @@ print_insn_normal (cd, dis_info, insn, fields, pc, length)
 {
   const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
   disassemble_info *info = (disassemble_info *) dis_info;
-  const unsigned char *syn;
+  const CGEN_SYNTAX_CHAR_TYPE *syn;
 
   CGEN_INIT_PRINT (cd);
 
@@ -379,7 +397,7 @@ print_insn_normal (cd, dis_info, insn, fields, pc, length)
    Returns 0 if all is well, non-zero otherwise.  */
 static int
 read_insn (cd, pc, info, buf, buflen, ex_info, insn_value)
-     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
+     CGEN_CPU_DESC cd;
      bfd_vma pc;
      disassemble_info *info;
      char *buf;
@@ -398,21 +416,7 @@ read_insn (cd, pc, info, buf, buflen, ex_info, insn_value)
   ex_info->valid = (1 << buflen) - 1;
   ex_info->insn_bytes = buf;
 
-  switch (buflen)
-    {
-    case 1:
-      *insn_value = buf[0];
-      break;
-    case 2:
-      *insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb16 (buf) : bfd_getl16 (buf);
-      break;
-    case 4:
-      *insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb32 (buf) : bfd_getl32 (buf);
-      break;
-    default:
-      abort ();
-    }
-
+  *insn_value = bfd_get_bits (buf, buflen * 8, info->endian == BFD_ENDIAN_BIG);
   return 0;
 }
 
@@ -433,30 +437,11 @@ print_insn (cd, pc, info, buf, buflen)
   unsigned long insn_value;
   const CGEN_INSN_LIST *insn_list;
   CGEN_EXTRACT_INFO ex_info;
-#if 0
+
   int rc = read_insn (cd, pc, info, buf, buflen, & ex_info, & insn_value);
   if (rc != 0)
     return rc;
-#else
-  ex_info.dis_info = info;
-  ex_info.valid = (1 << buflen) - 1;
-  ex_info.insn_bytes = buf;
 
-  switch (buflen)
-    {
-    case 1:
-      insn_value = buf[0];
-      break;
-    case 2:
-      insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb16 (buf) : bfd_getl16 (buf);
-      break;
-    case 4:
-      insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb32 (buf) : bfd_getl32 (buf);
-      break;
-    default:
-      abort ();
-    }
-#endif
   /* The instructions are stored in hash lists.
      Pick the first one and keep trying until we find the right one.  */
 
@@ -489,8 +474,8 @@ print_insn (cd, pc, info, buf, buflen)
 
 	  /* Make sure the entire insn is loaded into insn_value, if it
 	     can fit.  */
-	  if ((unsigned) CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize &&
-	      (unsigned) (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
+	  if (CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize &&
+	      (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
 	    {
 	      unsigned long full_insn_value;
 	      int rc = read_insn (cd, pc, info, buf,
@@ -504,6 +489,7 @@ print_insn (cd, pc, info, buf, buflen)
 	  else
 	    length = CGEN_EXTRACT_FN (cd, insn)
 	      (cd, insn, &ex_info, insn_value, &fields, pc);
+
 	  /* length < 0 -> error */
 	  if (length < 0)
 	    return length;
@@ -527,6 +513,7 @@ print_insn (cd, pc, info, buf, buflen)
 
 #ifndef CGEN_PRINT_INSN
 #define CGEN_PRINT_INSN default_print_insn
+#endif
 
 static int
 default_print_insn (cd, pc, info)
@@ -548,7 +535,6 @@ default_print_insn (cd, pc, info)
 
   return print_insn (cd, pc, info, buf, cd->base_insn_bitsize / 8);
 }
-#endif
 
 /* Main entry point.
    Print one instruction from PC on INFO->STREAM.

@@ -3,7 +3,7 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN: Cpu tools GENerator.
 - the resultant file is machine generated, cgen-ibld.in isn't
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -78,34 +78,7 @@ insert_1 (cd, value, start, length, word_length, bufp)
   int shift;
   int big_p = CGEN_CPU_INSN_ENDIAN (cd) == CGEN_ENDIAN_BIG;
 
-  switch (word_length)
-    {
-    case 8:
-      x = *bufp;
-      break;
-    case 16:
-      if (big_p)
-	x = bfd_getb16 (bufp);
-      else
-	x = bfd_getl16 (bufp);
-      break;
-    case 24:
-      /* ??? This may need reworking as these cases don't necessarily
-	 want the first byte and the last two bytes handled like this.  */
-      if (big_p)
-	x = (bufp[0] << 16) | bfd_getb16 (bufp + 1);
-      else
-	x = bfd_getl16 (bufp) | (bufp[2] << 16);
-      break;
-    case 32:
-      if (big_p)
-	x = bfd_getb32 (bufp);
-      else
-	x = bfd_getl32 (bufp);
-      break;
-    default :
-      abort ();
-    }
+  x = bfd_get_bits (bufp, word_length, big_p);
 
   /* Written this way to avoid undefined behaviour.  */
   mask = (((1L << (length - 1)) - 1) << 1) | 1;
@@ -115,40 +88,7 @@ insert_1 (cd, value, start, length, word_length, bufp)
     shift = (word_length - (start + length));
   x = (x & ~(mask << shift)) | ((value & mask) << shift);
 
-  switch (word_length)
-    {
-    case 8:
-      *bufp = x;
-      break;
-    case 16:
-      if (big_p)
-	bfd_putb16 (x, bufp);
-      else
-	bfd_putl16 (x, bufp);
-      break;
-    case 24:
-      /* ??? This may need reworking as these cases don't necessarily
-	 want the first byte and the last two bytes handled like this.  */
-      if (big_p)
-	{
-	  bufp[0] = x >> 16;
-	  bfd_putb16 (x, bufp + 1);
-	}
-      else
-	{
-	  bfd_putl16 (x, bufp);
-	  bufp[2] = x >> 16;
-	}
-      break;
-    case 32:
-      if (big_p)
-	bfd_putb32 (x, bufp);
-      else
-	bfd_putl32 (x, bufp);
-      break;
-    default :
-      abort ();
-    }
+  bfd_put_bits ((bfd_vma) x, bufp, word_length, big_p);
 }
 
 #endif /* ! CGEN_INT_INSN_P */
@@ -278,7 +218,7 @@ insert_insn_normal (cd, insn, fields, buffer, pc)
 {
   const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
   unsigned long value;
-  const unsigned char * syn;
+  const CGEN_SYNTAX_CHAR_TYPE * syn;
 
   CGEN_INIT_INSERT (cd);
   value = CGEN_INSN_BASE_VALUE (insn);
@@ -304,7 +244,7 @@ insert_insn_normal (cd, insn, fields, buffer, pc)
      e.g. storing a branch displacement that got resolved later.
      Needs more thought first.  */
 
-  for (syn = CGEN_SYNTAX_STRING (syntax); * syn != '\0'; ++ syn)
+  for (syn = CGEN_SYNTAX_STRING (syntax); * syn; ++ syn)
     {
       const char *errmsg;
 
@@ -406,46 +346,17 @@ extract_1 (cd, ex_info, start, length, word_length, bufp, pc)
      unsigned char *bufp;
      bfd_vma pc;
 {
-  unsigned long x,mask;
+  unsigned long x;
   int shift;
   int big_p = CGEN_CPU_INSN_ENDIAN (cd) == CGEN_ENDIAN_BIG;
 
-  switch (word_length)
-    {
-    case 8:
-      x = *bufp;
-      break;
-    case 16:
-      if (big_p)
-	x = bfd_getb16 (bufp);
-      else
-	x = bfd_getl16 (bufp);
-      break;
-    case 24:
-      /* ??? This may need reworking as these cases don't necessarily
-	 want the first byte and the last two bytes handled like this.  */
-      if (big_p)
-	x = (bufp[0] << 16) | bfd_getb16 (bufp + 1);
-      else
-	x = bfd_getl16 (bufp) | (bufp[2] << 16);
-      break;
-    case 32:
-      if (big_p)
-	x = bfd_getb32 (bufp);
-      else
-	x = bfd_getl32 (bufp);
-      break;
-    default :
-      abort ();
-    }
+  x = bfd_get_bits (bufp, word_length, big_p);
 
-  /* Written this way to avoid undefined behaviour.  */
-  mask = (((1L << (length - 1)) - 1) << 1) | 1;
   if (CGEN_INSN_LSB0_P)
     shift = (start + 1) - length;
   else
     shift = (word_length - (start + length));
-  return (x >> shift) & mask;
+  return x >> shift;
 }
 
 #endif /* ! CGEN_INT_INSN_P */
@@ -489,7 +400,7 @@ extract_normal (cd, ex_info, insn_value, attrs, word_offset, start, length,
 #endif
      long *valuep;
 {
-  CGEN_INSN_INT value;
+  CGEN_INSN_INT value, mask;
 
   /* If LENGTH is zero, this operand doesn't contribute to the value
      so give it a standard value of zero.  */
@@ -521,18 +432,10 @@ extract_normal (cd, ex_info, insn_value, attrs, word_offset, start, length,
 
   if (CGEN_INT_INSN_P || word_offset == 0)
     {
-      /* Written this way to avoid undefined behaviour.  */
-      CGEN_INSN_INT mask = (((1L << (length - 1)) - 1) << 1) | 1;
-
       if (CGEN_INSN_LSB0_P)
 	value = insn_value >> ((word_offset + start + 1) - length);
       else
 	value = insn_value >> (total_length - ( word_offset + start + length));
-      value &= mask;
-      /* sign extend? */
-      if (CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGNED)
-	  && (value & (1L << (length - 1))))
-	value |= ~mask;
     }
 
 #if ! CGEN_INT_INSN_P
@@ -551,6 +454,15 @@ extract_normal (cd, ex_info, insn_value, attrs, word_offset, start, length,
     }
 
 #endif /* ! CGEN_INT_INSN_P */
+
+  /* Written this way to avoid undefined behaviour.  */
+  mask = (((1L << (length - 1)) - 1) << 1) | 1;
+
+  value &= mask;
+  /* sign extend? */
+  if (CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGNED)
+      && (value & (1L << (length - 1))))
+    value |= ~mask;
 
   *valuep = value;
 
@@ -576,7 +488,7 @@ extract_insn_normal (cd, insn, ex_info, insn_value, fields, pc)
      bfd_vma pc;
 {
   const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
-  const unsigned char *syn;
+  const CGEN_SYNTAX_CHAR_TYPE *syn;
 
   CGEN_FIELDS_BITSIZE (fields) = CGEN_INSN_BITSIZE (insn);
 

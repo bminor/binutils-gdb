@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -249,10 +249,13 @@ CGEN_KEYWORD fr30_cgen_opval_h_r15 =
 };
 
 
-
 /* The hardware table.  */
 
-#define A(a) (1 << CONCAT2 (CGEN_HW_,a))
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define A(a) (1 << CGEN_HW_##a)
+#else
+#define A(a) (1 << CGEN_HW_/**/a)
+#endif
 
 const CGEN_HW_ENTRY fr30_cgen_hw_table[] =
 {
@@ -286,9 +289,14 @@ const CGEN_HW_ENTRY fr30_cgen_hw_table[] =
 
 #undef A
 
+
 /* The instruction field table.  */
 
-#define A(a) (1 << CONCAT2 (CGEN_IFLD_,a))
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define A(a) (1 << CGEN_IFLD_##a)
+#else
+#define A(a) (1 << CGEN_IFLD_/**/a)
+#endif
 
 const CGEN_IFLD fr30_cgen_ifld_table[] =
 {
@@ -338,10 +346,19 @@ const CGEN_IFLD fr30_cgen_ifld_table[] =
 
 #undef A
 
+
 /* The operand table.  */
 
-#define A(a) (1 << CONCAT2 (CGEN_OPERAND_,a))
-#define OPERAND(op) CONCAT2 (FR30_OPERAND_,op)
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define A(a) (1 << CGEN_OPERAND_##a)
+#else
+#define A(a) (1 << CGEN_OPERAND_/**/a)
+#endif
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define OPERAND(op) FR30_OPERAND_##op
+#else
+#define OPERAND(op) FR30_OPERAND_/**/op
+#endif
 
 const CGEN_OPERAND fr30_cgen_operand_table[] =
 {
@@ -497,10 +514,15 @@ const CGEN_OPERAND fr30_cgen_operand_table[] =
 
 #undef A
 
-#define A(a) (1 << CONCAT2 (CGEN_INSN_,a))
-#define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
 
 /* The instruction table.  */
+
+#define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define A(a) (1 << CGEN_INSN_##a)
+#else
+#define A(a) (1 << CGEN_INSN_/**/a)
+#endif
 
 static const CGEN_IBASE fr30_cgen_insn_table[MAX_INSNS] =
 {
@@ -1335,9 +1357,8 @@ static const CGEN_IBASE fr30_cgen_insn_table[MAX_INSNS] =
   },
 };
 
-#undef A
-#undef MNEM
 #undef OP
+#undef A
 
 /* Initialize anything needed to be done once, before any cpu_open call.  */
 

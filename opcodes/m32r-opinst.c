@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -31,11 +31,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Operand references.  */
 
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#define OP_ENT(op) M32R_OPERAND_##op
+#else
+#define OP_ENT(op) M32R_OPERAND_/**/op
+#endif
 #define INPUT CGEN_OPINST_INPUT
 #define OUTPUT CGEN_OPINST_OUTPUT
 #define END CGEN_OPINST_END
 #define COND_REF CGEN_OPINST_COND_REF
-#define OP_ENT(op) CONCAT2 (M32R_OPERAND_,op)
 
 static const CGEN_OPINST sfmt_empty_ops[] = {
   { END }
@@ -513,11 +517,11 @@ static const CGEN_OPINST sfmt_sc_ops[] = {
   { END }
 };
 
+#undef OP_ENT
 #undef INPUT
 #undef OUTPUT
 #undef END
 #undef COND_REF
-#undef OP_ENT
 
 /* Operand instance lookup table.  */
 

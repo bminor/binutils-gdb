@@ -4,7 +4,7 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 - the resultant file is machine generated, cgen-asm.in isn't
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2001 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -359,7 +359,7 @@ parse_insn_normal (cd, insn, strp, fields)
   const char *str = *strp;
   const char *errmsg;
   const char *p;
-  const unsigned char * syn;
+  const CGEN_SYNTAX_CHAR_TYPE * syn;
 #ifdef CGEN_MNEMONIC_OPERANDS
   /* FIXME: wip */
   int past_opcode_p;
@@ -409,19 +409,28 @@ parse_insn_normal (cd, insn, strp, fields)
 	  if (tolower (*str) == tolower (CGEN_SYNTAX_CHAR (* syn)))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS
-	      if (* syn == ' ')
+	      if (CGEN_SYNTAX_CHAR(* syn) == ' ')
 		past_opcode_p = 1;
 #endif
 	      ++ syn;
 	      ++ str;
 	    }
-	  else
+	  else if (*str)
 	    {
 	      /* Syntax char didn't match.  Can't be this insn.  */
 	      static char msg [80];
 	      /* xgettext:c-format */
 	      sprintf (msg, _("syntax error (expected char `%c', found `%c')"),
-		       *syn, *str);
+		       CGEN_SYNTAX_CHAR(*syn), *str);
+	      return msg;
+	    }
+	  else
+	    {
+	      /* Ran out of input.  */
+	      static char msg [80];
+	      /* xgettext:c-format */
+	      sprintf (msg, _("syntax error (expected char `%c', found end of instruction)"),
+		       CGEN_SYNTAX_CHAR(*syn));
 	      return msg;
 	    }
 	  continue;
@@ -438,7 +447,7 @@ parse_insn_normal (cd, insn, strp, fields)
     }
 
   /* If we're at the end of the syntax string, we're done.  */
-  if (* syn == '\0')
+  if (* syn == 0)
     {
       /* FIXME: For the moment we assume a valid `str' can only contain
 	 blanks now.  IE: We needn't try again with a longer version of
@@ -488,7 +497,8 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
 {
   const char *start;
   CGEN_INSN_LIST *ilist;
-  const char *tmp_errmsg = NULL;
+  const char *parse_errmsg = NULL;
+  const char *insert_errmsg = NULL;
 
   /* Skip leading white space.  */
   while (isspace (* str))
@@ -523,14 +533,14 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
       /* Allow parse/insert handlers to obtain length of insn.  */
       CGEN_FIELDS_BITSIZE (fields) = CGEN_INSN_BITSIZE (insn);
 
-      tmp_errmsg = CGEN_PARSE_FN (cd, insn) (cd, insn, & str, fields);
-      if (tmp_errmsg != NULL)
+      parse_errmsg = CGEN_PARSE_FN (cd, insn) (cd, insn, & str, fields);
+      if (parse_errmsg != NULL)
 	continue;
 
       /* ??? 0 is passed for `pc' */
-      tmp_errmsg = CGEN_INSERT_FN (cd, insn) (cd, insn, fields, buf,
-					      (bfd_vma) 0);
-      if (tmp_errmsg != NULL)
+      insert_errmsg = CGEN_INSERT_FN (cd, insn) (cd, insn, fields, buf,
+						 (bfd_vma) 0);
+      if (insert_errmsg != NULL)
         continue;
 
       /* It is up to the caller to actually output the insn and any
@@ -538,15 +548,17 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
       return insn;
     }
 
-  /* Make sure we leave this with something at this point. */
-  if (tmp_errmsg == NULL)
-    tmp_errmsg = "unknown mnemonic";
-
   {
     static char errbuf[150];
+    const char *tmp_errmsg;
 
 #ifdef CGEN_VERBOSE_ASSEMBLER_ERRORS
-    /* if verbose error messages, use errmsg from CGEN_PARSE_FN */
+    /* If requesting verbose error messages, use insert_errmsg.
+       Failing that, use parse_errmsg */
+    tmp_errmsg = (insert_errmsg ? insert_errmsg :
+		  parse_errmsg ? parse_errmsg :
+		  _("unrecognized instruction"));
+
     if (strlen (start) > 50)
       /* xgettext:c-format */
       sprintf (errbuf, "%s `%.50s...'", tmp_errmsg, start);
