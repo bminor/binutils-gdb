@@ -27,6 +27,7 @@ echo Sanitizing `pwd`...
 
 Things-to-keep:
 
+h-amix.h
 h-dec3100.h
 h-dgux.h
 h-hp9000.h
@@ -51,7 +52,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.8  1991/10/04 08:27:36  gnu
+# Revision 1.9  1991/10/05 06:18:50  gnu
+# h-amix.h
+#
+# Revision 1.8  1991/10/04  08:27:36  gnu
 # Add 386 Mach host support.
 #
 # Revision 1.7  1991/09/20  03:42:22  gnu
