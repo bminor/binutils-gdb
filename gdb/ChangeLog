@@ -1,3 +1,9 @@
+2000-03-24  Jonathan Larmour  <jlarmour@redhat.co.uk>
+
+	* arm-tdep.c (thumb_skip_prologue): Take function end addr argument
+	so that we can stop searching for the prologue past the function end
+	(arm_skip_prologue): Call thumb_skip_prologue with function end addr
+
 2000-03-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* linux-thread.c, lin-thread.c (save_inferior_pid,

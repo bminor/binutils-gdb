@@ -328,7 +328,7 @@ arm_frameless_function_invocation (struct frame_info *fi)
    */
 
 static CORE_ADDR
-thumb_skip_prologue (CORE_ADDR pc)
+thumb_skip_prologue (CORE_ADDR pc, CORE_ADDR func_end)
 {
   CORE_ADDR current_pc;
   int findmask = 0;  	/* findmask:
@@ -337,7 +337,7 @@ thumb_skip_prologue (CORE_ADDR pc)
       			   bit 2 - sub sp, #simm  OR  add sp, #simm  (adjusting of sp)
 			*/
 
-  for (current_pc = pc; current_pc < pc + 40; current_pc += 2)
+  for (current_pc = pc; current_pc + 2 < func_end && current_pc < pc + 40; current_pc += 2)
     {
       unsigned short insn = read_memory_unsigned_integer (current_pc, 2);
 
@@ -399,7 +399,7 @@ arm_skip_prologue (CORE_ADDR pc)
 
   /* Check if this is Thumb code.  */
   if (arm_pc_is_thumb (pc))
-    return thumb_skip_prologue (pc);
+    return thumb_skip_prologue (pc, func_end);
 
   /* Can't find the prologue end in the symbol table, try it the hard way
      by disassembling the instructions. */
