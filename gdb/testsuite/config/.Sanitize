@@ -47,6 +47,7 @@ mt-unix
 mt-vxworks
 netware.exp
 nind.exp
+proelf.exp
 rom68k.exp
 sh.exp
 sim.exp
