@@ -1,3 +1,10 @@
+2002-07-11  Andrew Cagney  <cagney@redhat.com>
+
+	* cris-tdep.c (cris_saved_pc_after_call): Fix parameter type.
+	Make static.
+
+	* arm-tdep.c (arm_register_name): Make return type constant.
+
 2002-07-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* win32-nat.c (has_detach_ability): Convert to strict ISO C

@@ -774,8 +774,8 @@ cris_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 /* Returns the register SRP (subroutine return pointer) which must contain 
    the content of the register PC after a function call.  */
 
-CORE_ADDR
-cris_saved_pc_after_call (void)
+static CORE_ADDR
+cris_saved_pc_after_call (struct frame_info *frame)
 {
   return read_register (SRP_REGNUM);
 }
