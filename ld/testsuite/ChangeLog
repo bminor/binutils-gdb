@@ -1,3 +1,9 @@
+2004-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/overlay-size.d: Update for changed orphan section
+	placement.
+	* ld-mmix/bpo-18.d: Likewise.
+
 2004-10-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* ld-xtensa/lcall1.s: Use .literal directive.

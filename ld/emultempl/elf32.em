@@ -1172,12 +1172,11 @@ fi
 if test x"$LDEMUL_PLACE_ORPHAN" != xgld"$EMULATION_NAME"_place_orphan; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
-/* A variant of lang_output_section_find.  Used by place_orphan.  */
+/* A variant of lang_output_section_find used by place_orphan.  */
 
 static lang_output_section_statement_type *
 output_rel_find (asection *sec, int isdyn)
 {
-  lang_statement_union_type *u;
   lang_output_section_statement_type *lookup;
   lang_output_section_statement_type *last = NULL;
   lang_output_section_statement_type *last_alloc = NULL;
@@ -1185,9 +1184,10 @@ output_rel_find (asection *sec, int isdyn)
   lang_output_section_statement_type *last_rel_alloc = NULL;
   int rela = sec->name[4] == 'a';
 
-  for (u = lang_output_section_statement.head; u; u = lookup->next)
+  for (lookup = &lang_output_section_statement.head->output_section_statement;
+       lookup != NULL;
+       lookup = lookup->next)
     {
-      lookup = &u->output_section_statement;
       if (lookup->constraint != -1
 	  && strncmp (".rel", lookup->name, 4) == 0)
 	{
@@ -1229,63 +1229,52 @@ output_rel_find (asection *sec, int isdyn)
   return last;
 }
 
-/* Find the last output section before given output statement.
-   Used by place_orphan.  */
-
-static asection *
-output_prev_sec_find (lang_output_section_statement_type *os)
-{
-  asection *s = (asection *) NULL;
-  lang_statement_union_type *u;
-  lang_output_section_statement_type *lookup;
-
-  for (u = lang_output_section_statement.head;
-       u != (lang_statement_union_type *) NULL;
-       u = lookup->next)
-    {
-      lookup = &u->output_section_statement;
-      if (lookup == os)
-	return s;
-
-      if (lookup->bfd_section != NULL && lookup->bfd_section->owner != NULL)
-	s = lookup->bfd_section;
-    }
-
-  return NULL;
-}
-
 /* Place an orphan section.  We use this to put random SHF_ALLOC
    sections in the right segment.  */
-
-struct orphan_save {
-  lang_output_section_statement_type *os;
-  asection **section;
-  lang_statement_union_type **stmt;
-  lang_statement_union_type **os_tail;
-};
 
 static bfd_boolean
 gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
 {
-  static struct orphan_save hold_text;
-  static struct orphan_save hold_rodata;
-  static struct orphan_save hold_data;
-  static struct orphan_save hold_bss;
-  static struct orphan_save hold_rel;
-  static struct orphan_save hold_interp;
-  static struct orphan_save hold_sdata;
-  static int count = 1;
+  static struct orphan_save hold[] =
+    {
+      { ".text",
+	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE,
+	0, 0, 0, 0 },
+      { ".rodata",
+	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA,
+	0, 0, 0, 0 },
+      { ".data",
+	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_DATA,
+	0, 0, 0, 0 },
+      { ".bss",
+	SEC_ALLOC,
+	0, 0, 0, 0 },
+      { 0,
+	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA,
+	0, 0, 0, 0 },
+      { ".interp",
+	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA,
+	0, 0, 0, 0 },
+      { ".sdata",
+	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_SMALL_DATA,
+	0, 0, 0, 0 }
+    };
+  enum orphan_save_index
+    {
+      orphan_text = 0,
+      orphan_rodata,
+      orphan_data,
+      orphan_bss,
+      orphan_rel,
+      orphan_interp,
+      orphan_sdata
+    };
+  static int orphan_init_done = 0;
   struct orphan_save *place;
-  lang_statement_list_type *old;
-  lang_statement_list_type add;
-  etree_type *address;
   const char *secname;
-  const char *ps = NULL;
+  lang_output_section_statement_type *after;
   lang_output_section_statement_type *os;
-  lang_statement_union_type **os_tail;
-  etree_type *load_base;
   int isdyn = 0;
-  asection *sec;
 
   secname = bfd_get_section_name (s->owner, s);
 
@@ -1308,27 +1297,42 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
 
       if (os != NULL
 	  && (os->bfd_section == NULL
+	      || os->bfd_section->flags == 0
 	      || ((s->flags ^ os->bfd_section->flags)
 		  & (SEC_LOAD | SEC_ALLOC)) == 0))
 	{
 	  /* We already have an output section statement with this
-	     name, and its bfd section, if any, has compatible flags.  */
+	     name, and its bfd section, if any, has compatible flags.
+	     If the section already exists but does not have any flags
+	     set, then it has been created by the linker, probably as a
+	     result of a --section-start command line switch.  */
 	  lang_add_section (&os->children, s, os, file);
 	  return TRUE;
 	}
     }
 
-  if (hold_text.os == NULL)
-    hold_text.os = lang_output_section_find (".text");
+  if (!orphan_init_done)
+    {
+      struct orphan_save *ho;
+      for (ho = hold; ho < hold + sizeof (hold) / sizeof (hold[0]); ++ho)
+	if (ho->name != NULL)
+	  {
+	    ho->os = lang_output_section_find (ho->name);
+	    if (ho->os != NULL && ho->os->flags == 0)
+	      ho->os->flags = ho->flags;
+	  }
+      orphan_init_done = 1;
+    }
 
   /* If this is a final link, then always put .gnu.warning.SYMBOL
      sections into the .text section to get them out of the way.  */
   if (link_info.executable
       && ! link_info.relocatable
       && strncmp (secname, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0
-      && hold_text.os != NULL)
+      && hold[orphan_text].os != NULL)
     {
-      lang_add_section (&hold_text.os->children, s, hold_text.os, file);
+      lang_add_section (&hold[orphan_text].os->children, s,
+			hold[orphan_text].os, file);
       return TRUE;
     }
 
@@ -1337,220 +1341,57 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
      right after the .interp section, so that the PT_NOTE segment is
      stored right after the program headers where the OS can read it
      in the first page.  */
-#define HAVE_SECTION(hold, name) \
-(hold.os != NULL || (hold.os = lang_output_section_find (name)) != NULL)
 
   place = NULL;
   if ((s->flags & SEC_ALLOC) == 0)
     ;
   else if ((s->flags & SEC_LOAD) != 0
-	   && strncmp (secname, ".note", 5) == 0
-	   && HAVE_SECTION (hold_interp, ".interp"))
-    place = &hold_interp;
-  else if ((s->flags & SEC_HAS_CONTENTS) == 0
-	   && HAVE_SECTION (hold_bss, ".bss"))
-    place = &hold_bss;
-  else if ((s->flags & SEC_SMALL_DATA) != 0
-	   && HAVE_SECTION (hold_sdata, ".sdata"))
-    place = &hold_sdata;
-  else if ((s->flags & SEC_READONLY) == 0
-	   && HAVE_SECTION (hold_data, ".data"))
-    place = &hold_data;
+	   && strncmp (secname, ".note", 5) == 0)
+    place = &hold[orphan_interp];
+  else if ((s->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+    place = &hold[orphan_bss];
+  else if ((s->flags & SEC_SMALL_DATA) != 0)
+    place = &hold[orphan_sdata];
+  else if ((s->flags & SEC_READONLY) == 0)
+    place = &hold[orphan_data];
   else if (strncmp (secname, ".rel", 4) == 0
-	   && (s->flags & SEC_LOAD) != 0
-	   && (hold_rel.os != NULL
-	       || (hold_rel.os = output_rel_find (s, isdyn)) != NULL))
-    place = &hold_rel;
-  else if ((s->flags & (SEC_CODE | SEC_READONLY)) == SEC_READONLY
-	   && HAVE_SECTION (hold_rodata, ".rodata"))
-    place = &hold_rodata;
-  else if ((s->flags & (SEC_CODE | SEC_READONLY)) == (SEC_CODE | SEC_READONLY)
-	   && hold_text.os != NULL)
-    place = &hold_text;
+	   && (s->flags & SEC_LOAD) != 0)
+    place = &hold[orphan_rel];
+  else if ((s->flags & SEC_CODE) == 0)
+    place = &hold[orphan_rodata];
+  else
+    place = &hold[orphan_text];
 
-#undef HAVE_SECTION
+  after = NULL;
+  if (place != NULL)
+    {
+      if (place->os == NULL)
+	{
+	  if (place->name != NULL)
+	    place->os = lang_output_section_find (place->name);
+	  else
+	    place->os = output_rel_find (s, isdyn);
+	}
+      after = place->os;
+      if (after == NULL)
+	after = lang_output_section_find_by_flags (s, &place->os);
+      if (after == NULL)
+	/* *ABS* is always the first output section statement.  */
+	after = &lang_output_section_statement.head->output_section_statement;
+    }
 
   /* Choose a unique name for the section.  This will be needed if the
      same section name appears in the input file with different
-     loadable or allocatable characteristics.  But if the section
-     already exists but does not have any flags set, then it has been
-     created by the linker, probably as a result of a --section-start
-     command line switch.  */
-  if ((sec = bfd_get_section_by_name (output_bfd, secname)) != NULL
-      && bfd_get_section_flags (output_bfd, sec) != 0)
+     loadable or allocatable characteristics.  */
+  if (bfd_get_section_by_name (output_bfd, secname) != NULL)
     {
+      static int count = 1;
       secname = bfd_get_unique_section_name (output_bfd, secname, &count);
       if (secname == NULL)
 	einfo ("%F%P: place_orphan failed: %E\n");
     }
 
-  /* Start building a list of statements for this section.
-     First save the current statement pointer.  */
-  old = stat_ptr;
-
-  /* If we have found an appropriate place for the output section
-     statements for this orphan, add them to our own private list,
-     inserting them later into the global statement list.  */
-  if (place != NULL)
-    {
-      stat_ptr = &add;
-      lang_list_init (stat_ptr);
-    }
-
-  if (config.build_constructors)
-    {
-      /* If the name of the section is representable in C, then create
-	 symbols to mark the start and the end of the section.  */
-      for (ps = secname; *ps != '\0'; ps++)
-	if (! ISALNUM (*ps) && *ps != '_')
-	  break;
-      if (*ps == '\0')
-	{
-	  char *symname;
-	  etree_type *e_align;
-
-	  symname = (char *) xmalloc (ps - secname + sizeof "__start_");
-	  sprintf (symname, "__start_%s", secname);
-	  e_align = exp_unop (ALIGN_K,
-			      exp_intop ((bfd_vma) 1 << s->alignment_power));
-	  lang_add_assignment (exp_assop ('=', symname, e_align));
-	}
-    }
-
-  address = NULL;
-  if (link_info.relocatable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
-    address = exp_intop ((bfd_vma) 0);
-
-  load_base = NULL;
-  if (place != NULL && place->os->load_base != NULL)
-    {
-      etree_type *lma_from_vma;
-      lma_from_vma = exp_binop ('-', place->os->load_base,
-				exp_nameop (ADDR, place->os->name));
-      load_base = exp_binop ('+', lma_from_vma,
-			     exp_nameop (ADDR, secname));
-    }
-
-  os_tail = lang_output_section_statement.tail;
-  os = lang_enter_output_section_statement (secname, address, 0,
-					    (etree_type *) NULL,
-					    (etree_type *) NULL,
-					    load_base, 0);
-
-  lang_add_section (&os->children, s, os, file);
-
-  lang_leave_output_section_statement
-    ((bfd_vma) 0, "*default*",
-     (struct lang_output_section_phdr_list *) NULL, NULL);
-
-  if (config.build_constructors && *ps == '\0')
-    {
-      char *symname;
-
-      /* lang_leave_ouput_section_statement resets stat_ptr.  Put
-	 stat_ptr back where we want it.  */
-      if (place != NULL)
-	stat_ptr = &add;
-
-      symname = (char *) xmalloc (ps - secname + sizeof "__stop_");
-      sprintf (symname, "__stop_%s", secname);
-      lang_add_assignment (exp_assop ('=', symname,
-				      exp_nameop (NAME, ".")));
-    }
-
-  /* Restore the global list pointer.  */
-  stat_ptr = old;
-
-  if (place != NULL && os->bfd_section != NULL)
-    {
-      asection *snew, **pps;
-
-      snew = os->bfd_section;
-
-      /* Shuffle the bfd section list to make the output file look
-	 neater.  This is really only cosmetic.  */
-      if (place->section == NULL)
-	{
-	  asection *bfd_section = place->os->bfd_section;
-
-	  /* If the output statement hasn't been used to place
-	     any input sections (and thus doesn't have an output
-	     bfd_section), look for the closest prior output statement
-	     having an output section.  */
-	  if (bfd_section == NULL)
-	    bfd_section = output_prev_sec_find (place->os);
-
-	  if (bfd_section != NULL && bfd_section != snew)
-	    place->section = &bfd_section->next;
-	}
-
-      if (place->section != NULL)
-	{
-	  /* Unlink the section.  */
-	  for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
-	    ;
-	  bfd_section_list_remove (output_bfd, pps);
-
-	  /* Now tack it on to the "place->os" section list.  */
-	  bfd_section_list_insert (output_bfd, place->section, snew);
-	}
-
-      /* Save the end of this list.  Further ophans of this type will
-	 follow the one we've just added.  */
-      place->section = &snew->next;
-
-      /* The following is non-cosmetic.  We try to put the output
-	 statements in some sort of reasonable order here, because
-	 they determine the final load addresses of the orphan
-	 sections.  In addition, placing output statements in the
-	 wrong order may require extra segments.  For instance,
-	 given a typical situation of all read-only sections placed
-	 in one segment and following that a segment containing all
-	 the read-write sections, we wouldn't want to place an orphan
-	 read/write section before or amongst the read-only ones.  */
-      if (add.head != NULL)
-	{
-	  lang_statement_union_type *newly_added_os;
-
-	  if (place->stmt == NULL)
-	    {
-	      /* Put the new statement list right at the head.  */
-	      *add.tail = place->os->header.next;
-	      place->os->header.next = add.head;
-
-	      place->os_tail = &place->os->next;
-	    }
-	  else
-	    {
-	      /* Put it after the last orphan statement we added.  */
-	      *add.tail = *place->stmt;
-	      *place->stmt = add.head;
-	    }
-
-	  /* Fix the global list pointer if we happened to tack our
-	     new list at the tail.  */
-	  if (*old->tail == add.head)
-	    old->tail = add.tail;
-
-	  /* Save the end of this list.  */
-	  place->stmt = add.tail;
-
-	  /* Do the same for the list of output section statements.  */
-	  newly_added_os = *os_tail;
-	  *os_tail = NULL;
-	  newly_added_os->output_section_statement.next = *place->os_tail;
-	  *place->os_tail = newly_added_os;
-	  place->os_tail = &newly_added_os->output_section_statement.next;
-
-	  /* Fixing the global list pointer here is a little different.
-	     We added to the list in lang_enter_output_section_statement,
-	     trimmed off the new output_section_statment above when
-	     assigning *os_tail = NULL, but possibly added it back in
-	     the same place when assigning *place->os_tail.  */
-	  if (*os_tail == NULL)
-	    lang_output_section_statement.tail = os_tail;
-	}
-    }
+  lang_insert_orphan (file, s, secname, after, place, NULL, NULL);
 
   return TRUE;
 }
@@ -1603,49 +1444,49 @@ cat >>e${EMULATION_NAME}.c <<EOF
   if (link_info.relocatable && config.build_constructors)
     return
 EOF
-sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocatable) return'     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xu			>> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocatable) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xr			>> e${EMULATION_NAME}.c
+echo '  ; else if (!config.text_read_only) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xbn			>> e${EMULATION_NAME}.c
 if cmp -s ldscripts/${EMULATION_NAME}.x ldscripts/${EMULATION_NAME}.xn; then : ; else
-echo '  ; else if (!config.magic_demand_paged) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xn                 >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.magic_demand_paged) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xn			>> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_PIE_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 echo '  ; else if (link_info.pie && link_info.combreloc' >> e${EMULATION_NAME}.c
 echo '             && link_info.relro' >> e${EMULATION_NAME}.c
 echo '             && (link_info.flags & DT_BIND_NOW)) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xdw                >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xdw			>> e${EMULATION_NAME}.c
 echo '  ; else if (link_info.pie && link_info.combreloc) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xdc                >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xdc			>> e${EMULATION_NAME}.c
 fi
-echo '  ; else if (link_info.pie) return'	       >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xd                 >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.pie) return'		>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xd			>> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 echo '  ; else if (link_info.shared && link_info.combreloc' >> e${EMULATION_NAME}.c
 echo '             && link_info.relro' >> e${EMULATION_NAME}.c
 echo '             && (link_info.flags & DT_BIND_NOW)) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xsw                >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xsw			>> e${EMULATION_NAME}.c
 echo '  ; else if (link_info.shared && link_info.combreloc) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xsc                >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xsc			>> e${EMULATION_NAME}.c
 fi
-echo '  ; else if (link_info.shared) return'	       >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xs                 >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.shared) return'		>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xs			>> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 echo '  ; else if (link_info.combreloc && link_info.relro' >> e${EMULATION_NAME}.c
 echo '             && (link_info.flags & DT_BIND_NOW)) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xw                 >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.combreloc) return'        >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xc                 >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xw			>> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.combreloc) return'		>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xc			>> e${EMULATION_NAME}.c
 fi
-echo '  ; else return'                                 >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.x                  >> e${EMULATION_NAME}.c
-echo '; }'                                             >> e${EMULATION_NAME}.c
+echo '  ; else return'					>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.x			>> e${EMULATION_NAME}.c
+echo '; }'						>> e${EMULATION_NAME}.c
 
 else
 # Scripts read from the filesystem.

@@ -612,13 +612,12 @@ lang_memory_default (asection *section)
 static lang_output_section_statement_type *
 lang_output_section_find_1 (const char *const name, int constraint)
 {
-  lang_statement_union_type *u;
   lang_output_section_statement_type *lookup;
 
-  for (u = lang_output_section_statement.head; u != NULL; u = lookup->next)
+  for (lookup = &lang_output_section_statement.head->output_section_statement;
+       lookup != NULL;
+       lookup = lookup->next)
     {
-      lookup = &u->output_section_statement;
-      
       if (strcmp (name, lookup->name) == 0
 	  && lookup->constraint != -1
 	  && (constraint == 0 || constraint == lookup->constraint))
@@ -666,7 +665,7 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
 
       lang_statement_append (&lang_output_section_statement,
 			     (lang_statement_union_type *) lookup,
-			     &lookup->next);
+			     (lang_statement_union_type **) &lookup->next);
     }
   return lookup;
 }
@@ -675,6 +674,389 @@ lang_output_section_statement_type *
 lang_output_section_statement_lookup (const char *const name)
 {
   return lang_output_section_statement_lookup_1 (name, 0);
+}
+
+/* A variant of lang_output_section_find used by place_orphan.
+   Returns the output statement that should precede a new output
+   statement for SEC.  If an exact match is found on certain flags,
+   sets *EXACT too.  */
+
+lang_output_section_statement_type *
+lang_output_section_find_by_flags (const asection *sec,
+				   lang_output_section_statement_type **exact)
+{
+  lang_output_section_statement_type *first, *look, *found;
+  flagword flags;
+
+  /* We know the first statement on this list is *ABS*.  May as well
+     skip it.  */
+  first = &lang_output_section_statement.head->output_section_statement;
+  first = first->next;
+
+  /* First try for an exact match.  */
+  found = NULL;
+  for (look = first; look; look = look->next)
+    {
+      flags = look->flags;
+      if (look->bfd_section != NULL)
+	flags = look->bfd_section->flags;
+      flags ^= sec->flags;
+      if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY
+		     | SEC_CODE | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
+	found = look;
+    }
+  if (found != NULL)
+    {
+      *exact = found;
+      return found;
+    }
+
+  if (sec->flags & SEC_CODE)
+    {
+      /* Try for a rw code section.  */
+      for (look = first; look; look = look->next)
+	{
+	  flags = look->flags;
+	  if (look->bfd_section != NULL)
+	    flags = look->bfd_section->flags;
+	  flags ^= sec->flags;
+	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			 | SEC_CODE | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
+	    found = look;
+	}
+      return found;
+    }
+
+  if (sec->flags & (SEC_READONLY | SEC_THREAD_LOCAL))
+    {
+      /* .rodata can go after .text, .sdata2 after .rodata.  */
+      for (look = first; look; look = look->next)
+	{
+	  flags = look->flags;
+	  if (look->bfd_section != NULL)
+	    flags = look->bfd_section->flags;
+	  flags ^= sec->flags;
+	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			 | SEC_READONLY))
+	      && !(look->flags & (SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
+	    found = look;
+	}
+      return found;
+    }
+
+  if (sec->flags & SEC_SMALL_DATA)
+    {
+      /* .sdata goes after .data, .sbss after .sdata.  */
+      for (look = first; look; look = look->next)
+	{
+	  flags = look->flags;
+	  if (look->bfd_section != NULL)
+	    flags = look->bfd_section->flags;
+	  flags ^= sec->flags;
+	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			 | SEC_THREAD_LOCAL))
+	      || ((look->flags & SEC_SMALL_DATA)
+		  && !(sec->flags & SEC_HAS_CONTENTS)))
+	    found = look;
+	}
+      return found;
+    }
+
+  if (sec->flags & SEC_HAS_CONTENTS)
+    {
+      /* .data goes after .rodata.  */
+      for (look = first; look; look = look->next)
+	{
+	  flags = look->flags;
+	  if (look->bfd_section != NULL)
+	    flags = look->bfd_section->flags;
+	  flags ^= sec->flags;
+	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			 | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
+	    found = look;
+	}
+      return found;
+    }
+
+  /* .bss goes last.  */
+  for (look = first; look; look = look->next)
+    {
+      flags = look->flags;
+      if (look->bfd_section != NULL)
+	flags = look->bfd_section->flags;
+      flags ^= sec->flags;
+      if (!(flags & SEC_ALLOC))
+	found = look;
+    }
+
+  return found;
+}
+
+/* Find the last output section before given output statement.
+   Used by place_orphan.  */
+
+static asection *
+output_prev_sec_find (lang_output_section_statement_type *os)
+{
+  asection *s = (asection *) NULL;
+  lang_output_section_statement_type *lookup;
+
+  for (lookup = &lang_output_section_statement.head->output_section_statement;
+       lookup != NULL;
+       lookup = lookup->next)
+    {
+      if (lookup->constraint == -1)
+	continue;
+      if (lookup == os)
+	return s;
+
+      if (lookup->bfd_section != NULL && lookup->bfd_section->owner != NULL)
+	s = lookup->bfd_section;
+    }
+
+  return NULL;
+}
+
+lang_output_section_statement_type *
+lang_insert_orphan (lang_input_statement_type *file,
+		    asection *s,
+		    const char *secname,
+		    lang_output_section_statement_type *after,
+		    struct orphan_save *place,
+		    etree_type *address,
+		    lang_statement_list_type *add_child)
+{
+  lang_statement_list_type *old;
+  lang_statement_list_type add;
+  const char *ps;
+  etree_type *load_base;
+  lang_output_section_statement_type *os;
+  lang_output_section_statement_type **os_tail;
+
+  /* Start building a list of statements for this section.
+     First save the current statement pointer.  */
+  old = stat_ptr;
+
+  /* If we have found an appropriate place for the output section
+     statements for this orphan, add them to our own private list,
+     inserting them later into the global statement list.  */
+  if (after != NULL)
+    {
+      stat_ptr = &add;
+      lang_list_init (stat_ptr);
+    }
+
+  ps = NULL;
+  if (config.build_constructors)
+    {
+      /* If the name of the section is representable in C, then create
+	 symbols to mark the start and the end of the section.  */
+      for (ps = secname; *ps != '\0'; ps++)
+	if (! ISALNUM ((unsigned char) *ps) && *ps != '_')
+	  break;
+      if (*ps == '\0')
+	{
+	  char *symname;
+	  etree_type *e_align;
+
+	  symname = (char *) xmalloc (ps - secname + sizeof "__start_" + 1);
+	  symname[0] = bfd_get_symbol_leading_char (output_bfd);
+	  sprintf (symname + (symname[0] != 0), "__start_%s", secname);
+	  e_align = exp_unop (ALIGN_K,
+			      exp_intop ((bfd_vma) 1 << s->alignment_power));
+	  lang_add_assignment (exp_assop ('=', ".", e_align));
+	  lang_add_assignment (exp_assop ('=', symname,
+					  exp_nameop (NAME, ".")));
+	}
+    }
+
+  if (link_info.relocatable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
+    address = exp_intop (0);
+
+  load_base = NULL;
+  if (after != NULL && after->load_base != NULL)
+    {
+      etree_type *lma_from_vma;
+      lma_from_vma = exp_binop ('-', after->load_base,
+				exp_nameop (ADDR, after->name));
+      load_base = exp_binop ('+', lma_from_vma,
+			     exp_nameop (ADDR, secname));
+    }
+
+  os_tail = ((lang_output_section_statement_type **)
+	     lang_output_section_statement.tail);
+  os = lang_enter_output_section_statement (secname, address, 0, NULL, NULL,
+					    load_base, 0);
+
+  if (add_child == NULL)
+    add_child = &os->children;
+  lang_add_section (add_child, s, os, file);
+
+  lang_leave_output_section_statement (0, "*default*", NULL, NULL);
+
+  if (config.build_constructors && *ps == '\0')
+    {
+      char *symname;
+
+      /* lang_leave_ouput_section_statement resets stat_ptr.
+	 Put stat_ptr back where we want it.  */
+      if (after != NULL)
+	stat_ptr = &add;
+
+      symname = (char *) xmalloc (ps - secname + sizeof "__stop_" + 1);
+      symname[0] = bfd_get_symbol_leading_char (output_bfd);
+      sprintf (symname + (symname[0] != 0), "__stop_%s", secname);
+      lang_add_assignment (exp_assop ('=', symname,
+				      exp_nameop (NAME, ".")));
+    }
+
+  /* Restore the global list pointer.  */
+  if (after != NULL)
+    stat_ptr = old;
+
+  if (after != NULL && os->bfd_section != NULL)
+    {
+      asection *snew, **pps;
+
+      snew = os->bfd_section;
+
+      /* Shuffle the bfd section list to make the output file look
+	 neater.  This is really only cosmetic.  */
+      if (place->section == NULL
+	  && after != (&lang_output_section_statement.head
+		       ->output_section_statement))
+	{
+	  asection *bfd_section = after->bfd_section;
+
+	  /* If the output statement hasn't been used to place any input
+	     sections (and thus doesn't have an output bfd_section),
+	     look for the closest prior output statement having an
+	     output section.  */
+	  if (bfd_section == NULL)
+	    bfd_section = output_prev_sec_find (after);
+
+	  if (bfd_section != NULL && bfd_section != snew)
+	    place->section = &bfd_section->next;
+	}
+
+      if (place->section == NULL)
+	place->section = &output_bfd->sections;
+
+      /* Unlink the section.  */
+      for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
+	continue;
+      bfd_section_list_remove (output_bfd, pps);
+
+      /* Now tack it back on in the right place.  */
+      bfd_section_list_insert (output_bfd, place->section, snew);
+
+      /* Save the end of this list.  Further ophans of this type will
+	 follow the one we've just added.  */
+      place->section = &snew->next;
+
+      /* The following is non-cosmetic.  We try to put the output
+	 statements in some sort of reasonable order here, because they
+	 determine the final load addresses of the orphan sections.
+	 In addition, placing output statements in the wrong order may
+	 require extra segments.  For instance, given a typical
+	 situation of all read-only sections placed in one segment and
+	 following that a segment containing all the read-write
+	 sections, we wouldn't want to place an orphan read/write
+	 section before or amongst the read-only ones.  */
+      if (add.head != NULL)
+	{
+	  lang_output_section_statement_type *newly_added_os;
+
+	  if (place->stmt == NULL)
+	    {
+	      lang_statement_union_type **where;
+	      lang_statement_union_type **assign = NULL;
+
+	      /* Look for a suitable place for the new statement list.
+		 The idea is to skip over anything that might be inside
+		 a SECTIONS {} statement in a script, before we find
+		 another output_section_statement.  Assignments to "dot"
+		 before an output section statement are assumed to
+		 belong to it.  */
+	      for (where = &after->header.next;
+		   *where != NULL;
+		   where = &(*where)->header.next)
+		{
+		  switch ((*where)->header.type)
+		    {
+		    case lang_assignment_statement_enum:
+		      if (assign == NULL)
+			{
+			  lang_assignment_statement_type *ass;
+			  ass = &(*where)->assignment_statement;
+			  if (ass->exp->type.node_class != etree_assert
+			      && ass->exp->assign.dst[0] == '.'
+			      && ass->exp->assign.dst[1] == 0)
+			    assign = where;
+			}
+		      continue;
+		    case lang_wild_statement_enum:
+		    case lang_input_section_enum:
+		    case lang_object_symbols_statement_enum:
+		    case lang_fill_statement_enum:
+		    case lang_data_statement_enum:
+		    case lang_reloc_statement_enum:
+		    case lang_padding_statement_enum:
+		    case lang_constructors_statement_enum:
+		      assign = NULL;
+		      continue;
+		    case lang_output_section_statement_enum:
+		      if (assign != NULL)
+			where = assign;
+		    case lang_input_statement_enum:
+		    case lang_address_statement_enum:
+		    case lang_target_statement_enum:
+		    case lang_output_statement_enum:
+		    case lang_group_statement_enum:
+		    case lang_afile_asection_pair_statement_enum:
+		      break;
+		    }
+		  break;
+		}
+
+	      *add.tail = *where;
+	      *where = add.head;
+
+	      place->os_tail = &after->next;
+	    }
+	  else
+	    {
+	      /* Put it after the last orphan statement we added.  */
+	      *add.tail = *place->stmt;
+	      *place->stmt = add.head;
+	    }
+
+	  /* Fix the global list pointer if we happened to tack our
+	     new list at the tail.  */
+	  if (*old->tail == add.head)
+	    old->tail = add.tail;
+
+	  /* Save the end of this list.  */
+	  place->stmt = add.tail;
+
+	  /* Do the same for the list of output section statements.  */
+	  newly_added_os = *os_tail;
+	  *os_tail = NULL;
+	  newly_added_os->next = *place->os_tail;
+	  *place->os_tail = newly_added_os;
+	  place->os_tail = &newly_added_os->next;
+
+	  /* Fixing the global list pointer here is a little different.
+	     We added to the list in lang_enter_output_section_statement,
+	     trimmed off the new output_section_statment above when
+	     assigning *os_tail = NULL, but possibly added it back in
+	     the same place when assigning *place->os_tail.  */
+	  if (*os_tail == NULL)
+	    lang_output_section_statement.tail
+	      = (lang_statement_union_type **) os_tail;
+	}
+    }
+  return os;
 }
 
 static void
@@ -792,7 +1174,7 @@ sort_def_symbol (hash_entry, info)
 	}
       else if  (!ud->map_symbol_def_tail)
 	ud->map_symbol_def_tail = &ud->map_symbol_def_head;
-      
+
       def = obstack_alloc (&map_obstack, sizeof *def);
       def->entry = hash_entry;
       *(ud->map_symbol_def_tail) = def;
@@ -867,7 +1249,7 @@ exp_init_os (etree_type *exp)
     case etree_assert:
       exp_init_os (exp->assert_s.child);
       break;
-      
+
     case etree_unary:
       exp_init_os (exp->unary.child);
       break;
@@ -991,32 +1373,32 @@ lang_add_section (lang_statement_list_type *ptr,
 	flags &= ~ (SEC_LINK_ONCE | SEC_LINK_DUPLICATES);
 
       /* If this is not the first input section, and the SEC_READONLY
-         flag is not currently set, then don't set it just because the
-         input section has it set.  */
+	 flag is not currently set, then don't set it just because the
+	 input section has it set.  */
 
-      if (! first && (section->output_section->flags & SEC_READONLY) == 0)
+      if (! first && (output->bfd_section->flags & SEC_READONLY) == 0)
 	flags &= ~ SEC_READONLY;
 
       /* Keep SEC_MERGE and SEC_STRINGS only if they are the same.  */
       if (! first
-	  && ((section->output_section->flags & (SEC_MERGE | SEC_STRINGS))
+	  && ((output->bfd_section->flags & (SEC_MERGE | SEC_STRINGS))
 	      != (flags & (SEC_MERGE | SEC_STRINGS))
 	      || ((flags & SEC_MERGE)
-		  && section->output_section->entsize != section->entsize)))
+		  && output->bfd_section->entsize != section->entsize)))
 	{
-	  section->output_section->flags &= ~ (SEC_MERGE | SEC_STRINGS);
+	  output->bfd_section->flags &= ~ (SEC_MERGE | SEC_STRINGS);
 	  flags &= ~ (SEC_MERGE | SEC_STRINGS);
 	}
 
-      section->output_section->flags |= flags;
+      output->bfd_section->flags |= flags;
 
       if (flags & SEC_MERGE)
-	section->output_section->entsize = section->entsize;
+	output->bfd_section->entsize = section->entsize;
 
       /* If SEC_READONLY is not set in the input section, then clear
-         it from the output section.  */
+	 it from the output section.  */
       if ((section->flags & SEC_READONLY) == 0)
-	section->output_section->flags &= ~SEC_READONLY;
+	output->bfd_section->flags &= ~SEC_READONLY;
 
       switch (output->sectype)
 	{
@@ -1036,7 +1418,7 @@ lang_add_section (lang_statement_list_type *ptr,
 
       /* Copy over SEC_SMALL_DATA.  */
       if (section->flags & SEC_SMALL_DATA)
-	section->output_section->flags |= SEC_SMALL_DATA;
+	output->bfd_section->flags |= SEC_SMALL_DATA;
 
       if (section->alignment_power > output->bfd_section->alignment_power)
 	output->bfd_section->alignment_power = section->alignment_power;
@@ -1047,7 +1429,7 @@ lang_add_section (lang_statement_list_type *ptr,
 
       if (section->flags & SEC_BLOCK)
 	{
-	  section->output_section->flags |= SEC_BLOCK;
+	  output->bfd_section->flags |= SEC_BLOCK;
 	  /* FIXME: This value should really be obtained from the bfd...  */
 	  output->block_value = 128;
 	}
@@ -1122,7 +1504,7 @@ wild_sort (lang_wild_statement_type *wild,
       ls = &l->input_section;
 
       /* Sorting by filename takes precedence over sorting by section
-         name.  */
+	 name.  */
 
       if (wild->filenames_sorted)
 	{
@@ -1131,9 +1513,9 @@ wild_sort (lang_wild_statement_type *wild,
 	  int i;
 
 	  /* The PE support for the .idata section as generated by
-             dlltool assumes that files will be sorted by the name of
-             the archive and then the name of the file within the
-             archive.  */
+	     dlltool assumes that files will be sorted by the name of
+	     the archive and then the name of the file within the
+	     archive.  */
 
 	  if (file->the_bfd != NULL
 	      && bfd_my_archive (file->the_bfd) != NULL)
@@ -1181,7 +1563,7 @@ wild_sort (lang_wild_statement_type *wild,
 	}
 
       /* Here either the files are not sorted by name, or we are
-         looking at the sections for this file.  */
+	 looking at the sections for this file.  */
 
       if (sec != NULL && sec->spec.sorted != none)
 	{
@@ -1832,8 +2214,8 @@ open_input_bfds (lang_statement_union_type *s, bfd_boolean force)
 	      s->input_statement.target = current_target;
 
 	      /* If we are being called from within a group, and this
-                 is an archive which has already been searched, then
-                 force it to be researched unless the whole archive
+		 is an archive which has already been searched, then
+		 force it to be researched unless the whole archive
 		 has been loaded already.  */
 	      if (force
 		  && !s->input_statement.whole_archive
@@ -2125,19 +2507,19 @@ update_wild_statements (lang_statement_union_type *s)
 static void
 map_input_to_output_sections
   (lang_statement_union_type *s, const char *target,
-   lang_output_section_statement_type *output_section_statement)
+   lang_output_section_statement_type *os)
 {
   for (; s != NULL; s = s->header.next)
     {
       switch (s->header.type)
 	{
 	case lang_wild_statement_enum:
-	  wild (&s->wild_statement, target, output_section_statement);
+	  wild (&s->wild_statement, target, os);
 	  break;
 	case lang_constructors_statement_enum:
 	  map_input_to_output_sections (constructor_list.head,
 					target,
-					output_section_statement);
+					os);
 	  break;
 	case lang_output_section_statement_enum:
 	  if (s->output_section_statement.constraint)
@@ -2169,27 +2551,32 @@ map_input_to_output_sections
 	case lang_group_statement_enum:
 	  map_input_to_output_sections (s->group_statement.children.head,
 					target,
-					output_section_statement);
+					os);
 	  break;
 	case lang_data_statement_enum:
 	  /* Make sure that any sections mentioned in the expression
 	     are initialized.  */
 	  exp_init_os (s->data_statement.exp);
-	  /* FALLTHROUGH */
+	  if (os != NULL && os->bfd_section == NULL)
+	    init_os (os);
+	  /* The output section gets contents, and then we inspect for
+	     any flags set in the input script which override any ALLOC.  */
+	  os->bfd_section->flags |= SEC_HAS_CONTENTS;
+	  if (!(os->flags & SEC_NEVER_LOAD))
+	    os->bfd_section->flags |= SEC_ALLOC | SEC_LOAD;
+	  break;
 	case lang_fill_statement_enum:
 	case lang_input_section_enum:
 	case lang_object_symbols_statement_enum:
 	case lang_reloc_statement_enum:
 	case lang_padding_statement_enum:
 	case lang_input_statement_enum:
-	  if (output_section_statement != NULL
-	      && output_section_statement->bfd_section == NULL)
-	    init_os (output_section_statement);
+	  if (os != NULL && os->bfd_section == NULL)
+	    init_os (os);
 	  break;
 	case lang_assignment_statement_enum:
-	  if (output_section_statement != NULL
-	      && output_section_statement->bfd_section == NULL)
-	    init_os (output_section_statement);
+	  if (os != NULL && os->bfd_section == NULL)
+	    init_os (os);
 
 	  /* Make sure that any sections mentioned in the assignment
 	     are initialized.  */
@@ -2201,13 +2588,13 @@ map_input_to_output_sections
 	case lang_address_statement_enum:
 	  /* Mark the specified section with the supplied address.  */
 	  {
-	    lang_output_section_statement_type *os =
-	      lang_output_section_statement_lookup
-		(s->address_statement.section_name);
+	    lang_output_section_statement_type *aos
+	      = (lang_output_section_statement_lookup
+		 (s->address_statement.section_name));
 
-	    if (os->bfd_section == NULL)
-	      init_os (os);
-	    os->addr_tree = s->address_statement.address;
+	    if (aos->bfd_section == NULL)
+	      init_os (aos);
+	    aos->addr_tree = s->address_statement.address;
 	  }
 	  break;
 	}
@@ -2221,16 +2608,14 @@ map_input_to_output_sections
 static void
 strip_excluded_output_sections (void)
 {
-  lang_statement_union_type *u;
+  lang_output_section_statement_type *os;
 
-  for (u = lang_output_section_statement.head;
-       u != NULL;
-       u = u->output_section_statement.next)
+  for (os = &lang_output_section_statement.head->output_section_statement;
+       os != NULL;
+       os = os->next)
     {
-      lang_output_section_statement_type *os;
       asection *s;
 
-      os = &u->output_section_statement;
       if (os->constraint == -1)
 	continue;
       s = os->bfd_section;
@@ -2302,23 +2687,35 @@ print_assignment (lang_assignment_statement_type *assignment,
 		  lang_output_section_statement_type *output_section)
 {
   int i;
+  int is_dot;
+  etree_type *tree;
   etree_value_type result;
 
   for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
     print_space ();
 
-  result = exp_fold_tree (assignment->exp->assign.src, output_section,
-			  lang_final_phase_enum, print_dot, &print_dot);
+  if (assignment->exp->type.node_class == etree_assert)
+    {
+      is_dot = 0;
+      tree = assignment->exp->assert_s.child;
+    }
+  else
+    {
+      const char *dst = assignment->exp->assign.dst;
+      is_dot = dst[0] == '.' && dst[1] == 0;
+      tree = assignment->exp->assign.src;
+    }
+
+  result = exp_fold_tree (tree, output_section, lang_final_phase_enum,
+			  print_dot, &print_dot);
   if (result.valid_p)
     {
-      const char *dst;
       bfd_vma value;
 
       value = result.value + result.section->bfd_section->vma;
-      dst = assignment->exp->assign.dst;
 
       minfo ("0x%V", value);
-      if (dst[0] == '.' && dst[1] == 0)
+      if (is_dot)
 	print_dot = value;
     }
   else
@@ -2330,9 +2727,7 @@ print_assignment (lang_assignment_statement_type *assignment,
     }
 
   minfo ("                ");
-
   exp_print_tree (assignment->exp);
-
   print_nl ();
 }
 
@@ -2378,6 +2773,9 @@ print_all_symbols (sec)
 {
   struct fat_user_section_struct *ud = get_userdata (sec);
   struct map_symbol_def *def;
+
+  if (!ud)
+    return;
 
   *ud->map_symbol_def_tail = 0;
   for (def = ud->map_symbol_def_head; def; def = def->next)
@@ -2863,14 +3261,15 @@ size_input_section
 }
 
 #define IGNORE_SECTION(s) \
-  (((s->flags & SEC_THREAD_LOCAL) != 0				\
-    ? (s->flags & (SEC_LOAD | SEC_NEVER_LOAD)) != SEC_LOAD	\
-    : (s->flags & (SEC_ALLOC | SEC_NEVER_LOAD)) != SEC_ALLOC)	\
+  ((s->flags & SEC_NEVER_LOAD) != 0				\
+   || (s->flags & SEC_ALLOC) == 0				\
+   || ((s->flags & SEC_THREAD_LOCAL) != 0			\
+	&& (s->flags & SEC_LOAD) == 0)				\
    || s->size == 0)
 
 /* Check to see if any allocated sections overlap with other allocated
-   sections.  This can happen when the linker script specifically specifies
-   the output section addresses of the two sections.  */
+   sections.  This can happen if a linker script specifies the output
+   section addresses of the two sections.  */
 
 static void
 lang_check_section_addresses (void)
@@ -3090,7 +3489,7 @@ lang_size_sections_1
 				       lang_allocating_phase_enum,
 				       dot, &dot);
 		    os->processed = 0;
-		    
+
 		    if (!r.valid_p)
 		      einfo (_("%F%S: non constant or forward reference"
 			       " address expression for section %s\n"),
@@ -3220,14 +3619,6 @@ lang_size_sections_1
 	      size = TO_SIZE ((unsigned) 1);
 	    dot += TO_ADDR (size);
 	    output_section_statement->bfd_section->size += size;
-	    /* The output section gets contents, and then we inspect for
-	       any flags set in the input script which override any ALLOC.  */
-	    output_section_statement->bfd_section->flags |= SEC_HAS_CONTENTS;
-	    if (!(output_section_statement->flags & SEC_NEVER_LOAD))
-	      {
-		output_section_statement->bfd_section->flags |=
-		  SEC_ALLOC | SEC_LOAD;
-	      }
 	  }
 	  break;
 
@@ -3714,7 +4105,7 @@ lang_finish (void)
       const char *send;
 
       /* We couldn't find the entry symbol.  Try parsing it as a
-         number.  */
+	 number.  */
       val = bfd_scan_vma (entry_symbol.name, &send, 0);
       if (*send == '\0')
 	{
@@ -3815,10 +4206,10 @@ lang_check (void)
 	  bfd_error_handler_type pfn = NULL;
 
 	  /* If we aren't supposed to warn about mismatched input
-             files, temporarily set the BFD error handler to a
-             function which will do nothing.  We still want to call
-             bfd_merge_private_bfd_data, since it may set up
-             information which is needed in the output file.  */
+	     files, temporarily set the BFD error handler to a
+	     function which will do nothing.  We still want to call
+	     bfd_merge_private_bfd_data, since it may set up
+	     information which is needed in the output file.  */
 	  if (! command_line.warn_mismatch)
 	    pfn = bfd_set_error_handler (ignore_bfd_errors);
 	  if (! bfd_merge_private_bfd_data (input_bfd, output_bfd))
@@ -3965,7 +4356,7 @@ lang_place_orphans (void)
 	  if (s->output_section == NULL)
 	    {
 	      /* This section of the file is not attached, root
-	         around for a sensible place for it to go.  */
+		 around for a sensible place for it to go.  */
 
 	      if (file->just_syms_flag)
 		abort ();
@@ -3984,8 +4375,8 @@ lang_place_orphans (void)
 			{
 #if 0
 			  /* This message happens when using the
-                             svr3.ifile linker script, so I have
-                             disabled it.  */
+			     svr3.ifile linker script, so I have
+			     disabled it.  */
 			  info_msg (_("%P: no [COMMON] command,"
 				      " defaulting to .bss\n"));
 #endif
@@ -4855,7 +5246,7 @@ lang_record_phdrs (void)
   asection **secs;
   lang_output_section_phdr_list *last;
   struct lang_phdr *l;
-  lang_statement_union_type *u;
+  lang_output_section_statement_type *os;
 
   alc = 10;
   secs = xmalloc (alc * sizeof (asection *));
@@ -4867,14 +5258,12 @@ lang_record_phdrs (void)
       bfd_vma at;
 
       c = 0;
-      for (u = lang_output_section_statement.head;
-	   u != NULL;
-	   u = u->output_section_statement.next)
+      for (os = &lang_output_section_statement.head->output_section_statement;
+	   os != NULL;
+	   os = os->next)
 	{
-	  lang_output_section_statement_type *os;
 	  lang_output_section_phdr_list *pl;
 
-	  os = &u->output_section_statement;
 	  if (os->constraint == -1)
 	    continue;
 
@@ -4930,22 +5319,22 @@ lang_record_phdrs (void)
   free (secs);
 
   /* Make sure all the phdr assignments succeeded.  */
-  for (u = lang_output_section_statement.head;
-       u != NULL;
-       u = u->output_section_statement.next)
+  for (os = &lang_output_section_statement.head->output_section_statement;
+       os != NULL;
+       os = os->next)
     {
       lang_output_section_phdr_list *pl;
 
-      if (u->output_section_statement.constraint == -1
-	  || u->output_section_statement.bfd_section == NULL)
+      if (os->constraint == -1
+	  || os->bfd_section == NULL)
 	continue;
 
-      for (pl = u->output_section_statement.phdrs;
+      for (pl = os->phdrs;
 	   pl != NULL;
 	   pl = pl->next)
 	if (! pl->used && strcmp (pl->name, "NONE") != 0)
 	  einfo (_("%X%P: section `%s' assigned to non-existent phdr `%s'\n"),
-		 u->output_section_statement.name, pl->name);
+		 os->name, pl->name);
     }
 }
 

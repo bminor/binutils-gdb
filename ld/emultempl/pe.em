@@ -1485,33 +1485,6 @@ gld_${EMULATION_NAME}_finish (void)
 }
 
 
-/* Find the last output section before given output statement.
-   Used by place_orphan.  */
-
-static asection *
-output_prev_sec_find (lang_output_section_statement_type *os)
-{
-  asection *s = (asection *) NULL;
-  lang_statement_union_type *u;
-  lang_output_section_statement_type *lookup;
-
-  for (u = lang_output_section_statement.head;
-       u != (lang_statement_union_type *) NULL;
-       u = lookup->next)
-    {
-      lookup = &u->output_section_statement;
-      if (lookup->constraint == -1)
-	continue;
-      if (lookup == os)
-	return s;
-
-      if (lookup->bfd_section != NULL && lookup->bfd_section->owner != NULL)
-	s = lookup->bfd_section;
-    }
-
-  return NULL;
-}
-
 /* Place an orphan section.
 
    We use this to put sections in a reasonable place in the file, and
@@ -1525,280 +1498,132 @@ output_prev_sec_find (lang_output_section_statement_type *os)
    default linker script using wildcards, and are sorted by
    sort_sections.  */
 
-struct orphan_save
-{
-  lang_output_section_statement_type *os;
-  asection **section;
-  lang_statement_union_type **stmt;
-  lang_statement_union_type **os_tail;
-};
-
 static bfd_boolean
 gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
 {
   const char *secname;
-  char *hold_section_name;
+  const char *orig_secname;
   char *dollar = NULL;
-  const char *ps = NULL;
   lang_output_section_statement_type *os;
   lang_statement_list_type add_child;
 
   secname = bfd_get_section_name (s->owner, s);
 
   /* Look through the script to see where to place this section.  */
-  hold_section_name = xstrdup (secname);
-  if (!link_info.relocatable)
+  orig_secname = secname;
+  if (!link_info.relocatable
+      && (dollar = strchr (secname, '$')) != NULL)
     {
-      dollar = strchr (hold_section_name, '$');
-      if (dollar != NULL)
-	*dollar = '\0';
+      size_t len = dollar - orig_secname;
+      char *newname = xmalloc (len + 1);
+      memcpy (newname, orig_secname, len);
+      newname[len] = '\0';
+      secname = newname;
     }
 
-  os = lang_output_section_find (hold_section_name);
+  os = lang_output_section_find (secname);
 
   lang_list_init (&add_child);
 
   if (os != NULL
       && (os->bfd_section == NULL
+	  || os->bfd_section->flags == 0
 	  || ((s->flags ^ os->bfd_section->flags)
 	      & (SEC_LOAD | SEC_ALLOC)) == 0))
     {
       /* We already have an output section statement with this
-	 name, and its bfd section, if any, has compatible flags.  */
+	 name, and its bfd section, if any, has compatible flags.
+	 If the section already exists but does not have any flags set,
+	 then it has been created by the linker, probably as a result of
+	 a --section-start command line switch.  */
       lang_add_section (&add_child, s, os, file);
     }
   else
     {
+      static struct orphan_save hold[] =
+	{
+	  { ".text",
+	    SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE,
+	    0, 0, 0, 0 },
+	  { ".rdata",
+	    SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA,
+	    0, 0, 0, 0 },
+	  { ".data",
+	    SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_DATA,
+	    0, 0, 0, 0 },
+	  { ".bss",
+	    SEC_ALLOC,
+	    0, 0, 0, 0 }
+	};
+      enum orphan_save_index
+	{
+	  orphan_text = 0,
+	  orphan_rodata,
+	  orphan_data,
+	  orphan_bss
+	};
+      static int orphan_init_done = 0;
       struct orphan_save *place;
-      static struct orphan_save hold_text;
-      static struct orphan_save hold_rdata;
-      static struct orphan_save hold_data;
-      static struct orphan_save hold_bss;
-      static int count = 1;
-      char *outsecname;
-      lang_statement_list_type *old;
-      lang_statement_list_type add;
-      lang_statement_union_type **os_tail;
+      lang_output_section_statement_type *after;
       etree_type *address;
-      etree_type *load_base;
-      asection *sec;
+
+      if (!orphan_init_done)
+	{
+	  struct orphan_save *ho;
+	  for (ho = hold; ho < hold + sizeof (hold) / sizeof (hold[0]); ++ho)
+	    if (ho->name != NULL)
+	      {
+		ho->os = lang_output_section_find (ho->name);
+		if (ho->os != NULL && ho->os->flags == 0)
+		  ho->os->flags = ho->flags;
+	      }
+	  orphan_init_done = 1;
+	}
 
       /* Try to put the new output section in a reasonable place based
 	 on the section name and section flags.  */
-#define HAVE_SECTION(hold, name) \
-(hold.os != NULL || (hold.os = lang_output_section_find (name)) != NULL)
 
       place = NULL;
       if ((s->flags & SEC_ALLOC) == 0)
 	;
-      else if ((s->flags & SEC_HAS_CONTENTS) == 0
-	       && HAVE_SECTION (hold_bss, ".bss"))
-	place = &hold_bss;
-      else if ((s->flags & SEC_READONLY) == 0
-	       && HAVE_SECTION (hold_data, ".data"))
-	place = &hold_data;
-      else if ((s->flags & SEC_CODE) == 0
-	       && (s->flags & SEC_READONLY) != 0
-	       && HAVE_SECTION (hold_rdata, ".rdata"))
-	place = &hold_rdata;
-      else if ((s->flags & SEC_CODE) != 0
-	       && (s->flags & SEC_READONLY) != 0
-	       && HAVE_SECTION (hold_text, ".text"))
-	place = &hold_text;
+      else if ((s->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+	place = &hold[orphan_bss];
+      else if ((s->flags & SEC_READONLY) == 0)
+	place = &hold[orphan_data];
+      else if ((s->flags & SEC_CODE) == 0)
+	place = &hold[orphan_rodata];
+      else
+	place = &hold[orphan_text];
 
-#undef HAVE_SECTION
+      after = NULL;
+      if (place != NULL)
+	{
+	  if (place->os == NULL)
+	    place->os = lang_output_section_find (place->name);
+	  after = place->os;
+	  if (after == NULL)
+	    after = lang_output_section_find_by_flags (s, &place->os);
+	  if (after == NULL)
+	    /* *ABS* is always the first output section statement.  */
+	    after = (&lang_output_section_statement.head
+		     ->output_section_statement);
+	}
 
       /* Choose a unique name for the section.  This will be needed if the
 	 same section name appears in the input file with different
-	 loadable or allocatable characteristics.  But if the section
-	 already exists but does not have any flags set, then it has been
-	 created by the linker, probably as a result of a --section-start
-	 command line switch.  */
-      sec = bfd_get_section_by_name (output_bfd, hold_section_name);
-      if (sec != NULL
-	  && bfd_get_section_flags (output_bfd, sec) != 0)
+	 loadable or allocatable characteristics.  */
+      if (bfd_get_section_by_name (output_bfd, secname) != NULL)
 	{
-	  outsecname = bfd_get_unique_section_name (output_bfd,
-						    hold_section_name, &count);
-	  if (outsecname == NULL)
+	  static int count = 1;
+	  secname = bfd_get_unique_section_name (output_bfd, secname, &count);
+	  if (secname == NULL)
 	    einfo ("%F%P: place_orphan failed: %E\n");
 	}
-      else
-	outsecname = xstrdup (hold_section_name);
 
-      /* Start building a list of statements for this section.  */
-      old = stat_ptr;
-
-      /* If we have found an appropriate place for the output section
-	 statements for this orphan, add them to our own private list,
-	 inserting them later into the global statement list.  */
-      if (place != NULL)
-	{
-	  stat_ptr = &add;
-	  lang_list_init (stat_ptr);
-	}
-
-      if (config.build_constructors)
-	{
-	  /* If the name of the section is representable in C, then create
-	     symbols to mark the start and the end of the section.  */
-	  for (ps = outsecname; *ps != '\0'; ps++)
-	    if (! ISALNUM ((unsigned char) *ps) && *ps != '_')
-	      break;
-	  if (*ps == '\0')
-	    {
-	      char *symname;
-	      etree_type *e_align;
-
-	      symname = (char *) xmalloc (ps - outsecname + sizeof "___start_");
-	      sprintf (symname, "___start_%s", outsecname);
-	      e_align = exp_unop (ALIGN_K,
-				  exp_intop ((bfd_vma) 1 << s->alignment_power));
-	      lang_add_assignment (exp_assop ('=', symname, e_align));
-	    }
-	}
-
-      if (link_info.relocatable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
-	address = exp_intop ((bfd_vma) 0);
-      else
-	{
-	  /* All sections in an executable must be aligned to a page
-	     boundary.  */
-	  address = exp_unop (ALIGN_K,
-			      exp_nameop (NAME, "__section_alignment__"));
-	}
-
-      load_base = NULL;
-      if (place != NULL && place->os->load_base != NULL)
-	{
-	  etree_type *lma_from_vma;
-	  lma_from_vma = exp_binop ('-', place->os->load_base,
-				    exp_nameop (ADDR, place->os->name));
-	  load_base = exp_binop ('+', lma_from_vma,
-				 exp_nameop (ADDR, secname));
-	}
-
-      os_tail = lang_output_section_statement.tail;
-      os = lang_enter_output_section_statement (outsecname, address, 0,
-						(etree_type *) NULL,
-						(etree_type *) NULL,
-						load_base, 0);
-
-      lang_add_section (&add_child, s, os, file);
-
-      lang_leave_output_section_statement
-	((bfd_vma) 0, "*default*",
-	 (struct lang_output_section_phdr_list *) NULL, NULL);
-
-      if (config.build_constructors && *ps == '\0')
-	{
-	  char *symname;
-
-	  /* lang_leave_ouput_section_statement resets stat_ptr.
-	     Put stat_ptr back where we want it.  */
-	  if (place != NULL)
-	    stat_ptr = &add;
-
-	  symname = (char *) xmalloc (ps - outsecname + sizeof "___stop_");
-	  sprintf (symname, "___stop_%s", outsecname);
-	  lang_add_assignment (exp_assop ('=', symname,
-					  exp_nameop (NAME, ".")));
-	}
-
-      stat_ptr = old;
-
-      if (place != NULL && os->bfd_section != NULL)
-	{
-	  asection *snew, **pps;
-
-	  snew = os->bfd_section;
-
-	  /* Shuffle the bfd section list to make the output file look
-	     neater.  This is really only cosmetic.  */
-	  if (place->section == NULL)
-	    {
-	      asection *bfd_section = place->os->bfd_section;
-
-	      /* If the output statement hasn't been used to place
-		 any input sections (and thus doesn't have an output
-		 bfd_section), look for the closest prior output statement
-		 having an output section.  */
-	      if (bfd_section == NULL)
-		bfd_section = output_prev_sec_find (place->os);
-
-	      if (bfd_section != NULL && bfd_section != snew)
-		place->section = &bfd_section->next;
-	    }
-
-	  if (place->section != NULL)
-	    {
-	      /* Unlink the section.  */
-	      for (pps = &output_bfd->sections;
-		   *pps != snew;
-		   pps = &(*pps)->next)
-		;
-	      bfd_section_list_remove (output_bfd, pps);
-
-	      /* Now tack it on to the "place->os" section list.  */
-	      bfd_section_list_insert (output_bfd, place->section, snew);
-	    }
-
-	  /* Save the end of this list.  Further ophans of this type will
-	     follow the one we've just added.  */
-	  place->section = &snew->next;
-
-	  /* The following is non-cosmetic.  We try to put the output
-	     statements in some sort of reasonable order here, because
-	     they determine the final load addresses of the orphan
-	     sections.  In addition, placing output statements in the
-	     wrong order may require extra segments.  For instance,
-	     given a typical situation of all read-only sections placed
-	     in one segment and following that a segment containing all
-	     the read-write sections, we wouldn't want to place an orphan
-	     read/write section before or amongst the read-only ones.  */
-	  if (add.head != NULL)
-	    {
-	      lang_statement_union_type *newly_added_os;
-
-	      if (place->stmt == NULL)
-		{
-		  /* Put the new statement list right at the head.  */
-		  *add.tail = place->os->header.next;
-		  place->os->header.next = add.head;
-
-		  place->os_tail = &place->os->next;
-		}
-	      else
-		{
-		  /* Put it after the last orphan statement we added.  */
-		  *add.tail = *place->stmt;
-		  *place->stmt = add.head;
-		}
-
-	      /* Fix the global list pointer if we happened to tack our
-		 new list at the tail.  */
-	      if (*old->tail == add.head)
-		old->tail = add.tail;
-
-	      /* Save the end of this list.  */
-	      place->stmt = add.tail;
-
-	      /* Do the same for the list of output section statements.  */
-	      newly_added_os = *os_tail;
-	      *os_tail = NULL;
-	      newly_added_os->output_section_statement.next = *place->os_tail;
-	      *place->os_tail = newly_added_os;
-	      place->os_tail = &newly_added_os->output_section_statement.next;
-
-	      /* Fixing the global list pointer here is a little different.
-		 We added to the list in lang_enter_output_section_statement,
-		 trimmed off the new output_section_statment above when
-		 assigning *os_tail = NULL, but possibly added it back in
-		 the same place when assigning *place->os_tail.  */
-	      if (*os_tail == NULL)
-		lang_output_section_statement.tail = os_tail;
-	    }
-	}
+      /* All sections in an executable must be aligned to a page boundary.  */
+      address = exp_unop (ALIGN_K, exp_nameop (NAME, "__section_alignment__"));
+      os = lang_insert_orphan (file, s, secname, after, place, address,
+			       &add_child);
     }
 
   {
@@ -1830,7 +1655,7 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 	    else
 	      {
 		found_dollar = TRUE;
-		if (strcmp (secname, lname) < 0)
+		if (strcmp (orig_secname, lname) < 0)
 		  break;
 	      }
 	  }
@@ -1842,8 +1667,6 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 	*pl = add_child.head;
       }
   }
-
-  free (hold_section_name);
 
   return TRUE;
 }

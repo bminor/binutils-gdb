@@ -1,3 +1,48 @@
+2004-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 63
+	* ldlang.h (lang_output_section_statement_type): Make "next" a
+	struct lang_output_section_statement_struct *.
+	(struct orphan_save): Move from elf32.em.  Add "name" and "flags".
+	(lang_output_section_find_by_flags, lang_insert_orphan): Declare.
+	* ldlang.c (lang_output_section_find_1): Adjust for changed
+	output_section_statement "next".
+	(strip_excluded_output_sections): Likewise.
+	(lang_record_phdrs): Likewise.
+	(lang_output_section_find_by_flags): New function.
+	(output_prev_sec_find): Move from pe.em.  Adjust iterator.
+	(lang_insert_orphan): New function.  Tail end of elf32.em's
+	place_orphan merged with that from pe.em.  Allow bfd_section to
+	be placed first.  New heuristic for placing new output section
+	statement in existing script, and accompanying split of __start
+	symbol alignment into a separate assignment to dot.
+	(lang_add_section): Consistently use output->bfd_section rather than
+	an alias, section->output_section.
+	(map_input_to_output_sections): Rename overly long arg.  Move
+	initialization of data_statement output section to here..
+	(lang_check_section_addresses): ..from here.
+	(print_assignment): Correct printing of etree_assert.
+	(print_all_symbols): Don't bomb if userdata is NULL.
+	(IGNORE_SECTION): Rearrange.
+	* emultempl/elf32.em (output_rel_find): Adjust interator.
+	(output_prev_sec_find): Delete.
+	(struct orphan_save): Delete.
+	(gld${EMULATION_NAME}_place_orphan): Cater for zero bfd_section
+	flags without creating a duplicate output section statement.
+	Revise code holding history of various orphan section placements.
+	Allow orphan sections to place before script specified output
+	sections.  Call lang_output_section_find_by_flags when placement
+	by name fails.  Use lang_insert_orphan.
+	* emultempl/mmo.em (output_prev_sec_find): Delete.
+	(struct orphan_save): Delete.
+	(mmo_place_orphan): Revise code holding history of orphan placement.
+	Allow orphans to place before existing output sections.  Use
+	lang_insert_orphan.
+	* emultempl/pe.em (output_prev_sec_find): Delete.
+	(struct orphan_save): Delete.
+	(gld_${EMULATION_NAME}_place_orphan): Revise to suit use of
+	lang_insert_orphan.
+
 2004-10-13  Mark Mitchell  <mark@codesourcery.com>
 
 	* scripttempl/armbpabi.sc: Do not put .gnu.version.* into a

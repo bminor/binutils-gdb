@@ -131,7 +131,7 @@ typedef struct lang_output_section_statement_struct
   union etree_union *addr_tree;
   lang_statement_list_type children;
   const char *memspec;
-  union lang_statement_union *next;
+  struct lang_output_section_statement_struct *next;
   const char *name;
 
   int processed;
@@ -410,6 +410,17 @@ struct lang_definedness_hash_entry
   int iteration;
 };
 
+/* Used by place_orphan to keep track of orphan sections and statements.  */
+
+struct orphan_save {
+  const char *name;
+  flagword flags;
+  lang_output_section_statement_type *os;
+  asection **section;
+  lang_statement_union_type **stmt;
+  lang_output_section_statement_type **os_tail;
+};
+
 extern struct unique_sections *unique_section_list;
 
 extern lang_output_section_statement_type *abs_output_section;
@@ -501,6 +512,12 @@ extern void ldlang_add_file
   (lang_input_statement_type *);
 extern lang_output_section_statement_type *lang_output_section_find
   (const char * const);
+extern lang_output_section_statement_type *lang_output_section_find_by_flags
+  (const asection *, lang_output_section_statement_type **exact);
+extern lang_output_section_statement_type *lang_insert_orphan
+  (lang_input_statement_type *, asection *, const char *,
+   lang_output_section_statement_type *, struct orphan_save *,
+   etree_type *, lang_statement_list_type *);
 extern lang_input_statement_type *lang_add_input_file
   (const char *, lang_input_file_enum_type, const char *);
 extern void lang_add_keepsyms_file

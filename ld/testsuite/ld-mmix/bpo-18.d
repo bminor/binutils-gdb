@@ -12,9 +12,9 @@
 SYMBOL TABLE:
 0+100 l    d  \.text	0+ 
 4000000000001060 l    d  \.text\.away	0+ 
+400000000000106c l    d  \.data	0+ 
+400000000000106c l    d  \.bss	0+ 
 0+7e0 l    d  \.MMIX\.reg_contents	0+ 
-4000000000001088 l    d  \.data	0+ 
-4000000000001088 l    d  \.bss	0+ 
 0+ l    d  \*ABS\*	0+ 
 0+ l    d  \*ABS\*	0+ 
 0+ l    d  \*ABS\*	0+ 
