@@ -73,6 +73,9 @@ int flag_reg_prefix_optional = REGISTER_PREFIX_OPTIONAL;
 int flag_reg_prefix_optional;
 #endif
 
+/* The floating point coprocessor to use by default.  */
+static enum m68k_register m68k_float_copnum = COP1;
+
 /* Its an arbitrary name:  This means I don't approve of it */
 /* See flames below */
 static struct obstack robyn;
@@ -276,6 +279,7 @@ static void s_even PARAMS ((int));
 static void s_proc PARAMS ((int));
 static void mri_chip PARAMS ((void));
 static void s_chip PARAMS ((int));
+static void s_fopt PARAMS ((int));
 
 static int current_architecture;
 
@@ -404,6 +408,8 @@ CONST pseudo_typeS md_pseudo_table[] =
   /* The following pseudo-ops are supported for MRI compatibility.  */
   {"chip", s_chip, 0},
   {"comline", s_space, 1},
+  {"fopt", s_fopt, 0},
+  {"mask2", s_ignore, 0},
 
   {0, 0, 0}
 };
@@ -670,7 +676,7 @@ m68k_ip (instring)
       memset ((char *) (&the_ins.operands[0]), '\0',
 	      sizeof (the_ins.operands[0]));
       the_ins.operands[0].mode = CONTROL;
-      the_ins.operands[0].reg = COPNUM;	/* COP #1 */
+      the_ins.operands[0].reg = m68k_float_copnum;
       opsfound++;
     }
 
@@ -953,8 +959,8 @@ m68k_ip (instring)
 
 		case 'I':
 		  if (opP->mode != CONTROL
-		      || opP->reg < COPNUM
-		      || opP->reg >= COPNUM + 7)
+		      || opP->reg < COP0
+		      || opP->reg > COP7)
 		    losing++;
 		  break;
 
@@ -1927,9 +1933,7 @@ m68k_ip (instring)
 	  break;
 
 	case 'I':
-	  tmpreg = 1 + opP->reg - COPNUM;
-	  if (tmpreg == 8)
-	    tmpreg = 0;
+	  tmpreg = opP->reg - COP0;
 	  install_operand (s[1], tmpreg);
 	  break;
 
@@ -4032,6 +4036,35 @@ s_chip (ignore)
      int ignore;
 {
   mri_chip ();
+  demand_empty_rest_of_line ();
+}
+
+/* The MRI FOPT pseudo-op.  */
+
+static void
+s_fopt (ignore)
+     int ignore;
+{
+  SKIP_WHITESPACE ();
+
+  if (strncasecmp (input_line_pointer, "ID=", 3) == 0)
+    {
+      int temp;
+
+      input_line_pointer += 3;
+      temp = get_absolute_expression ();
+      if (temp < 0 || temp > 7)
+	as_bad ("bad coprocessor id");
+      else
+	m68k_float_copnum = COP0 + temp;
+    }
+  else
+    {
+      as_bad ("unrecognized fopt option");
+      ignore_rest_of_line ();
+      return;
+    }
+
   demand_empty_rest_of_line ();
 }
 

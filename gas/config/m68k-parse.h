@@ -38,7 +38,6 @@
 #define DATA DATA0
 #define ADDR ADDR0
 #define SP ADDR7
-#define COPNUM  COP0
 #define BAD BAD0
 #define BAC BAC0
 
@@ -71,10 +70,7 @@ enum m68k_register
   FP6,
   FP7,
 
-  /* Note that COP0==processor #1 -- COP0+7==#8, which stores as 000 */
-  /* I think. . .  */
-
-  COP0,				/* Co-processor #1-#8 */
+  COP0,				/* Co-processor #0-#7 */
   COP1,
   COP2,
   COP3,
