@@ -53,6 +53,9 @@ static boolean coff_write_alien_symbol
 static boolean coff_write_native_symbol
   PARAMS ((bfd *, coff_symbol_type *, unsigned int *, bfd_size_type *,
 	   asection **, bfd_size_type *));
+static void coff_pointerize_aux
+  PARAMS ((bfd *, combined_entry_type *, combined_entry_type *,
+	   unsigned int, combined_entry_type *));
 
 #define STRING_SIZE_SIZE (4)
 
@@ -77,16 +80,7 @@ make_a_section_from_file (abfd, hdr, target_index)
   strncpy (name, (char *) &hdr->s_name[0], sizeof (hdr->s_name));
   name[sizeof (hdr->s_name)] = 0;
 
-  return_section = bfd_make_section (abfd, name);
-  if (return_section == NULL)
-    return_section = bfd_coff_make_section_hook (abfd, name);
-
-  /* Handle several sections of the same name.  For example, if an executable
-     has two .bss sections, GDB better be able to find both of them
-     (PR 3562).  */
-  if (return_section == NULL)
-    return_section = bfd_make_section_anyway (abfd, name);
-
+  return_section = bfd_make_section_anyway (abfd, name);
   if (return_section == NULL)
     return false;
 
@@ -1195,13 +1189,23 @@ coff_section_symbol (abfd, name)
    pointers to syments.  */
 
 static void
-coff_pointerize_aux (abfd, table_base, type, class, auxent)
+coff_pointerize_aux (abfd, table_base, symbol, indaux, auxent)
      bfd *abfd;
      combined_entry_type *table_base;
-     unsigned int type;
-     unsigned int class;
+     combined_entry_type *symbol;
+     unsigned int indaux;
      combined_entry_type *auxent;
 {
+  int type = symbol->u.syment.n_type;
+  int class = symbol->u.syment.n_sclass;
+
+  if (coff_backend_info (abfd)->_bfd_coff_pointerize_aux_hook)
+    {
+      if ((*coff_backend_info (abfd)->_bfd_coff_pointerize_aux_hook)
+	  (abfd, table_base, symbol, indaux, auxent))
+	return;
+    }
+
   /* Don't bother if this is a file or a section */
   if (class == C_STAT && type == T_NULL)
     return;
@@ -1215,8 +1219,7 @@ coff_pointerize_aux (abfd, table_base, type, class, auxent)
       && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l > 0)
     {
       auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p =
-	(table_base
-	 + auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l);
+	table_base + auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l;
       auxent->fix_end = 1;
     }
   /* A negative tagndx is meaningless, but the SCO 3.2v4 cc can
@@ -1492,17 +1495,8 @@ coff_get_normalized_symtab (abfd)
 				symbol_ptr->u.syment.n_sclass,
 				i, symbol_ptr->u.syment.n_numaux,
 				&(internal_ptr->u.auxent));
-	  /* Remember that bal entries arn't pointerized */
-	  if (i != 1 || symbol_ptr->u.syment.n_sclass != C_LEAFPROC)
-	    {
-
-	      coff_pointerize_aux (abfd,
-				   internal,
-				   symbol_ptr->u.syment.n_type,
-				   symbol_ptr->u.syment.n_sclass,
-				   internal_ptr);
-	    }
-
+	  coff_pointerize_aux (abfd, internal, symbol_ptr, i,
+			       internal_ptr);
 	}
     }
 

@@ -8,6 +8,19 @@ Fri Oct  6 12:24:47 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Fri Oct  6 12:04:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (bfd_coff_backend_data): Add new field
+	_bfd_coff_pointerize_aux_hook.
+	(coff_pointerize_aux_hook): Define as a function if RS6000COFF_C
+	or I960, and as 0 otherwise.
+	(bfd_coff_std_swap_table): Initialize new field.
+	* libcoff.h: Rebuild.
+	* coffgen.c (coff_pointerize_aux): Change parameters  to take
+	symbol pointer instead of type and class, and to take aux index.
+	Call _bfd_coff_pointerize_aux_hook if it is defined.
+	(coff_get_normalized_symtab): Always call coff_pointerize_aux.
+	* coff-alpha.c (alpha_ecoff_backend_data): Initialize all fields.
+	* coff-mips.c (mips_ecoff_backend_data): Likewise.
+
 	* coff-rs6000.c: Add full support for AIX archives.  Rewrite old
 	read-only/host-only support.
 

@@ -649,6 +649,12 @@ dependent COFF routines:
 . boolean (*_bfd_coff_symname_in_debug) PARAMS ((
 .       bfd     *abfd,
 .       struct internal_syment *sym));
+. boolean (*_bfd_coff_pointerize_aux_hook) PARAMS ((
+.       bfd *abfd,
+.       combined_entry_type *table_base,
+.       combined_entry_type *symbol,
+.       unsigned int indaux,
+.       combined_entry_type *aux));
 . void (*_bfd_coff_reloc16_extra_cases) PARAMS ((
 .       bfd     *abfd,
 .       struct bfd_link_info *link_info,
@@ -1168,6 +1174,63 @@ symname_in_debug_hook (abfd, sym)
   (boolean (*) PARAMS ((bfd *, struct internal_syment *))) bfd_false
 
 #endif
+
+#ifdef RS6000COFF_C
+
+/* We don't want to pointerize the csect auxent of a C_EXT or C_HIDEXT
+   symbol.  */
+
+static boolean coff_pointerize_aux_hook
+  PARAMS ((bfd *, combined_entry_type *, combined_entry_type *,
+	   unsigned int, combined_entry_type *));
+
+/*ARGSUSED*/
+static boolean
+coff_pointerize_aux_hook (abfd, table_base, symbol, indaux, aux)
+     bfd *abfd;
+     combined_entry_type *table_base;
+     combined_entry_type *symbol;
+     unsigned int indaux;
+     combined_entry_type *aux;
+{
+  int class = symbol->u.syment.n_sclass;
+
+  /* Return true if we don't want to pointerize this aux entry, which
+     is the case for the last aux entry for a C_EXT or C_HIDEXT
+     symbol.  */
+  return ((class == C_EXT || class == C_HIDEXT)
+	  && indaux + 1 == symbol->u.syment.n_numaux);
+}
+
+#else
+#ifdef I960
+
+/* We don't want to pointerize bal entries.  */
+
+static boolean coff_pointerize_aux_hook
+  PARAMS ((bfd *, combined_entry_type *, combined_entry_type *,
+	   unsigned int, combined_entry_type *));
+
+/*ARGSUSED*/
+static boolean
+coff_pointerize_aux_hook (abfd, table_base, symbol, indaux, aux)
+     bfd *abfd;
+     combined_entry_type *table_base;
+     combined_entry_type *symbol;
+     unsigned int indaux;
+     combined_entry_type *aux;
+{
+  /* Return true if we don't want to pointerize this aux entry, which
+     is the case for the lastfirst aux entry for a C_LEAFPROC symbol.  */
+  return indaux == 1 && symbol->u.syment.n_sclass == C_LEAFPROC;
+}
+
+#else /* ! I960 */
+
+#define coff_pointerize_aux_hook 0
+
+#endif /* ! I960 */
+#endif /* ! RS6000COFF_C */
 
 /*
 SUBSUBSECTION
@@ -2837,7 +2900,7 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
   coff_swap_filehdr_in, coff_swap_aouthdr_in, coff_swap_scnhdr_in,
   coff_swap_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
-  coff_slurp_symbol_table, symname_in_debug_hook,
+  coff_slurp_symbol_table, symname_in_debug_hook, coff_pointerize_aux_hook,
   coff_reloc16_extra_cases, coff_reloc16_estimate,
   coff_sym_is_global, coff_compute_section_file_positions,
   coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,

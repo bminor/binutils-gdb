@@ -391,9 +391,6 @@ typedef struct
        bfd     *abfd,
        PTR     internal_scnhdr,
        const char *name));
- asection *(*_bfd_make_section_hook) PARAMS ((
-       bfd     *abfd,
-       char    *name));
  void (*_bfd_set_alignment_hook) PARAMS ((
        bfd     *abfd,
        asection *sec,
@@ -403,6 +400,12 @@ typedef struct
  boolean (*_bfd_coff_symname_in_debug) PARAMS ((
        bfd     *abfd,
        struct internal_syment *sym));
+ boolean (*_bfd_coff_pointerize_aux_hook) PARAMS ((
+       bfd *abfd,
+       combined_entry_type *table_base,
+       combined_entry_type *symbol,
+       unsigned int indaux,
+       combined_entry_type *aux));
  void (*_bfd_coff_reloc16_extra_cases) PARAMS ((
        bfd     *abfd,
        struct bfd_link_info *link_info,
@@ -513,9 +516,6 @@ typedef struct
 
 #define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name)\
         ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook) (abfd, scnhdr, name))
-
-#define bfd_coff_make_section_hook(abfd, name)\
-        ((coff_backend_info (abfd)->_bfd_make_section_hook) (abfd, name))
 
 #define bfd_coff_set_alignment_hook(abfd, sec, scnhdr)\
         ((coff_backend_info (abfd)->_bfd_set_alignment_hook) (abfd, sec, scnhdr))
