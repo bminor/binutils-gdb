@@ -1,5 +1,7 @@
 2003-05-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* dwarf-frame.c (dwarf2_frame_cache): Assert that we have a FDE.
+
 	* i386-cygwin-tdep.c: Don't include "gdbcore.h", "frame.h" and
 	"dummy-frame.h".
 	(i386_cygwin_frame_chain_valid, i386_cygwin_frame_chain): Removed.

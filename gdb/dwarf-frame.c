@@ -483,6 +483,7 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   /* Find the correct FDE.  */
   fde = dwarf2_frame_find_fde (&fs->pc);
+  gdb_assert (fde != NULL);
 
   /* Extract any interesting information from the CIE.  */
   fs->data_align = fde->cie->data_alignment_factor;
