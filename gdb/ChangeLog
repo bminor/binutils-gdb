@@ -1,3 +1,9 @@
+Thu Feb 12 17:10:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* valops.c (value_at): For d10v, make read pointers with
+ 	read_target_unsigned_integer, keep addresses unsigned.
+	(value_fetch_lazy): Ditto.
+
 Thu Feb 12 12:14:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-d10v.c: New file.  Layer the d10v GDB->remote memory map
