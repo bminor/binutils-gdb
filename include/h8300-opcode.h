@@ -171,7 +171,7 @@ struct h8_opcode h8_opcodes[]
     {  2,  2,13,  "mov.b",	{ABS8SRC, RD8, E},	{ Hex2, RD8, ABS8SRC,IGNORE, E}},
     {  2,  2,13,  "mov.b", 	{RS8, RDIND|B30, E},	{ Hex6, Hex8, RDIND|B31, RS8, E}},
     {  4,  2,13,  "mov.b",	{RS8, DISPDST, E},	{ Hex6, HexE, DISPREG|B31, RS8,DISPDST, IGNORE, IGNORE, IGNORE, E}},
-    {  2,  2,13,  "mov.b",	{RS8, RDDEC|B30, E},	{ Hex6, HexC, RDDEC|B30, RS8, E}},
+    {  2,  2,13,  "mov.b",	{RS8, RDDEC|B31, E},	{ Hex6, HexC, RDDEC|B31, RS8, E}},
 /* Put the 16 bit one in first so it matches first */
     {  4,  2,13,  "mov.b",	{RS8, ABS16DST, E},	{ Hex6, HexA, Hex8, RS8, ABS16DST,IGNORE,IGNORE,IGNORE, E}},
     {  2,  2,13,  "mov.b",	{RS8, ABS8DST, E},	{ Hex3, RS8, ABS8DST,IGNORE, E}},
