@@ -4,5 +4,5 @@ OUTPUT_FORMAT="coff-m68k-lynx"
 ENTRY=__main
 # following are dubious
 TEXT_START_ADDR=0
-PAGE_SIZE=0x1000
+TARGET_PAGE_SIZE=0x1000
 ARCH=m68k

@@ -1,3 +1,30 @@
+Fri Oct 27 18:03:17 1995  Niklas Hallqvist  <niklas@appli.se>
+
+	*  Makefile.in (ALL_EMULATIONS): Added support for the NetBSD
+	m68k4k arch.
+	(em68k4knbsd.c): New rule.
+
+	* configure.tgt: Added support for the NetBSD m68k4k arch.
+
+	* genscripts.sh, ldint.texinfo,
+	emulparams/{a29k,armaoutb,armaoutl,coff_sparc,ebmon29k,gld960,
+	gld960coff,go32,h8300,h8300h,h8500,h8500b,h8500c,h8500m,h8500s,
+	hp300bsd,hp3hpux,hppaelf.sh,i386aout,i386bsd,i386coff,i386go32,
+	i386linux,i386lynx,i386nbsd,lnk960,m68kaout,m68kcoff,m68klynx,
+	m88kbcs,mipsbig,mipsbsd,mipsidt,mipsidtl,mipslit,news,ns32knbsd,
+	pc532machaout,rce,riscix,sa29200,sh,shl,sparclynx,sparcnbsd,
+	st2000,sun3,sun4,vanilla,vax,vsta,w65,z8001,z8002}.sh: Changed
+	PAGE_SIZE to TARGET_PAGE_SIZE. 
+
+	* emulparams/m68knbsd.h: Ditto.
+	(TEXT_START_ADDR, NONPAGED_TEXT_START_ADDR): We have 8K pagesize.
+	(EXECUTABLE_SYMBOLS): Hardcode __DYNAMIC to zero for the time
+	being.
+
+	* emulparams/m68k4knbsd.sh: New file.
+
+	* scripttempl/aout.sc: Expand EXECUTABLE_SYMBOLS if relocating.
+	
 Fri Oct 27 17:59:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/aix.em: Include ldctor.h.
