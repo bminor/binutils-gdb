@@ -1,3 +1,9 @@
+Thu Nov 30 11:23:42 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
+
+	* config/obj-coff.c (fixup_segment): If TC_M88K is defined, do not
+	add section's paddr to add_number; compatibility to native as and
+	ld forbids.
+
 Wed Nov 29 23:14:27 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: Treat m68k-sysv4 like m68k-elf, not m68k-sysv3.

@@ -3006,7 +3006,10 @@ write_object_file ()
 #define SUB_SEGMENT_ALIGN(SEG) 1
 #endif
 #ifdef md_do_align
-      md_do_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE, alignment_done);
+      {
+	static char nop = NOP_OPCODE;
+	md_do_align (SUB_SEGMENT_ALIGN (now_seg), &nop, alignment_done);
+      }
 #endif
       frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE);
 #ifdef md_do_align
@@ -3850,7 +3853,7 @@ fixup_segment (segP, this_segment_type)
 		default:
 
 
-#if defined(TC_A29K) || (defined(TE_PE) && defined(TC_I386))
+#if defined(TC_A29K) || (defined(TE_PE) && defined(TC_I386)) || defined(TC_M88K)
 		  /* This really should be handled in the linker, but
 		     backward compatibility forbids.  */
 		  add_number += S_GET_VALUE (add_symbolP);
@@ -3893,7 +3896,7 @@ fixup_segment (segP, this_segment_type)
 
       if (pcrel)
 	{
-#if !defined(TC_M88K) && !(defined(TE_PE) && defined(TC_I386))
+#if !defined(TC_M88K) && !(defined(TE_PE) && defined(TC_I386)) && !defined(TC_A29K)
 	  /* This adjustment is not correct on the m88k, for which the
 	     linker does all the computation.  */
 	  add_number -= md_pcrel_from (fixP);
