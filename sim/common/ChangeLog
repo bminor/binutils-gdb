@@ -1,3 +1,7 @@
+2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* sim-core.c (sim_core_trans_addr): Added for m32r-linux-run.
+
 2003-11-22  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* sim-options.c (standard_options): Fix the names of H8

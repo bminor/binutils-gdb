@@ -801,6 +801,25 @@ sim_core_xor_write_buffer (SIM_DESC sd,
 }
 #endif
 
+#if EXTERN_SIM_CORE_P
+void *
+sim_core_trans_addr (SIM_DESC sd,
+                     sim_cpu *cpu,
+                     unsigned map,
+                     address_word addr)
+{
+  sim_core_common *core = (cpu == NULL ? &STATE_CORE (sd)->common : &CPU_CORE (cpu)->common);
+  sim_core_mapping *mapping =
+    sim_core_find_mapping (core, map,
+                           addr, /*nr-bytes*/1,
+                           write_transfer,
+                           0 /*dont-abort*/, NULL, NULL_CIA);
+  if (mapping == NULL)
+    return NULL;
+  return sim_core_translate(mapping, addr);
+}
+#endif
+
 
 
 /* define the read/write 1/2/4/8/16/word functions */

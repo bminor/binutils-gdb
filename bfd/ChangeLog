@@ -1,3 +1,42 @@
+2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	Adfd m32r-linux and PIC support.  Add new ABI that uses RELA.
+	* config.bfd (m32r*-*-linux*, m32r*le-*-linux*, m32r*le-*-*): Added.
+	* configure.in (bfd_elf32_m32rlin_vec, bfd_elf32_m32rlelin_vec,
+	bfd_elf32_m32rle_vec): Added
+	* configure: Regenerated.
+	* elf32-m32r.c (m32r_info_to_howto, m32r_elf_adjust_dynamic_symbol,
+	m32r_elf_size_dynamic_sections, m32r_elf_create_dynamic_sections,
+	m32r_elf_finish_dynamic_sections, m32r_elf_finish_dynamic_symbol,
+	allocate_dynrelocs, readonly_dynrelocs, m32r_elf_reloc_type_class,
+	m32r_elf_fake_sections): Added.
+	(m32r_elf_howto_table): Added
+	R_M32R_16_RELA, R_M32R_32_RELA, R_M32R_24_RELA,
+	R_M32R_10_PCREL_RELA, R_M32R_18_PCREL_RELA,
+	R_M32R_26_PCREL_RELA, R_M32R_HI16_ULO_RELA,
+	R_M32R_HI16_SLO_RELA, R_M32R_LO16_RELA,
+	R_M32R_SDA16_RELA, R_M32R_RELA_GNU_VTINHERIT,
+	R_M32R_RELA_GNU_VTENTRY, R_M32R_GOT24,
+	R_M32R_26_PLTREL, R_M32R_COPY, R_M32R_GLOB_DAT,
+	R_M32R_JMP_SLOT, R_M32R_RELATIVE, R_M32R_GOTOFF,
+	R_M32R_GOTPC24, R_M32R_GOT16_HI_ULO,
+	R_M32R_GOT16_HI_SLO, R_M32R_GOT16_LO,
+	R_M32R_GOTPC_HI_ULO, R_M32R_GOTPC_HI_SLO,
+	R_M32R_GOTPC_LO.
+	(m32r_elf_relocate_section, m32r_elf_check_relocs): Changed for
+	New ABI.
+	* reloc.c: Add BFD_RELOC_M32R_GOT24, BFD_RELOC_M32R_26_PLTREL,
+	BFD_RELOC_M32R_COPY, BFD_RELOC_M32R_GLOB_DAT,
+	BFD_RELOC_M32R_JMP_SLOT, BFD_RELOC_M32R_RELATIVE,
+	BFD_RELOC_M32R_GOTOFF, BFD_RELOC_M32R_GOTPC24,
+	BFD_RELOC_M32R_GOT16_HI_ULO, BFD_RELOC_M32R_GOT16_HI_SLO,
+	BFD_RELOC_M32R_GOT16_LO, BFD_RELOC_M32R_GOTPC_HI_ULO,
+	BFD_RELOC_M32R_GOTPC_HI_SLO, BFD_RELOC_M32R_GOTPC_LO.
+	* targets.c (bfd_elf32_m32rlin_vec, bfd_elf32_m32rlelin_vec,
+	bfd_elf32_m32rle_vec): Added.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+
 2003-12-19  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* coffcode.h (styp_to_sec_flags): Don't treat .reloc section

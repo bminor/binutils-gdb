@@ -1,3 +1,16 @@
+2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* gas/m32r/m32rx.s: Changed pattern bncl to bncl.s.
+	* gas/m32r/allinsn.d: Update for New RELA-ABI.
+	* gas/m32r/high-1.d: Likewise.
+	* gas/m32r/relax-1.d: Likewise.
+	* gas/m32r/uppercase.d: Likewise.
+	* gas/m32r/m32rx.d: Likewise.
+	* gas/vtable/vtable.exp: Likewise.
+	* gas/m32r/pic.exp: New file for PIC.
+	* gas/m32r/pic.s: Likewise.
+	* gas/m32r/pic.d: Likewise.
+
 2003-12-18  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/mips16-jalx.d: Use -mabi=o64.

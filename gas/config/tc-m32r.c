@@ -70,6 +70,9 @@ static m32r_insn prev_insn;
    alignment request.  */
 static int seen_relaxable_p = 0;
 
+/* Non-zero if we are generating PIC code.  */
+int pic_code;
+
 /* Non-zero if -relax specified, in which case sufficient relocs are output
    for the linker to do relaxing.
    We do simple forms of relaxing internally, but they are always done.
@@ -194,7 +197,7 @@ allow_m32rx (int on)
     gas_cgen_cpu_desc->machs = mach_table[on].mach_flags;
 }
 
-#define M32R_SHORTOPTS "O"
+#define M32R_SHORTOPTS "O::K:"
 
 const char *md_shortopts = M32R_SHORTOPTS;
 
@@ -362,6 +365,13 @@ md_parse_option (c, arg)
       warn_unmatched_high = 0;
       break;
 
+    case 'K':
+      if (strcmp (arg, "PIC") != 0)
+        as_warn (_("Unrecognized option following -K"));
+      else
+        pic_code = 1;
+      break;
+
 #if 0
     /* Not supported yet.  */
     case OPTION_RELAX:
@@ -435,6 +445,9 @@ md_show_usage (stream)
   -Wuh                    synonym for -warn-unmatched-high\n"));
   fprintf (stream, _("\
   -Wnuh                   synonym for -no-warn-unmatched-high\n"));
+
+  fprintf (stream, _("\
+  -KPIC                   generate PIC\n"));
 
 #if 0
   fprintf (stream, _("\
@@ -558,7 +571,9 @@ debug_sym (ignore)
     }
 
   symbol_table_insert (symbolP);
-  if (S_IS_DEFINED (symbolP) && S_GET_SEGMENT (symbolP) != reg_section)
+  if (S_IS_DEFINED (symbolP) && (S_GET_SEGMENT (symbolP) != reg_section
+                                 || S_IS_EXTERNAL (symbolP)
+                                 || S_IS_WEAK (symbolP)))
     /* xgettext:c-format */
     as_bad (_("symbol `%s' already defined"), S_GET_NAME (symbolP));
 
@@ -1710,7 +1725,9 @@ md_estimate_size_before_relax (fragP, segment)
      However, we can't finish the fragment here and emit the reloc as insn
      alignment requirements may move the insn about.  */
 
-  if (S_GET_SEGMENT (fragP->fr_symbol) != segment)
+  if (S_GET_SEGMENT (fragP->fr_symbol) != segment
+      || S_IS_EXTERNAL (fragP->fr_symbol)
+      || S_IS_WEAK (fragP->fr_symbol))
     {
 #if 0
       int old_fr_fix = fragP->fr_fix;
@@ -1816,12 +1833,18 @@ md_convert_frag (abfd, sec, fragP)
       abort ();
     }
 
-  if (S_GET_SEGMENT (fragP->fr_symbol) != sec)
+  if (S_GET_SEGMENT (fragP->fr_symbol) != sec
+      || S_IS_EXTERNAL (fragP->fr_symbol)
+      || S_IS_WEAK (fragP->fr_symbol))
     {
       /* Symbol must be resolved by linker.  */
       if (fragP->fr_offset & 3)
 	as_warn (_("Addend to unresolved symbol not on word boundary."));
-      addend = fragP->fr_offset >> 2;
+#ifdef USE_M32R_OLD_RELOC
+      addend = fragP->fr_offset >> 2; /* Old M32R used USE_REL. */
+#else
+      addend = 0;
+#endif
     }
   else
     {
@@ -1833,7 +1856,9 @@ md_convert_frag (abfd, sec, fragP)
   /* Create a relocation for symbols that must be resolved by the linker.
      Otherwise output the completed insn.  */
 
-  if (S_GET_SEGMENT (fragP->fr_symbol) != sec)
+  if (S_GET_SEGMENT (fragP->fr_symbol) != sec
+      || S_IS_EXTERNAL (fragP->fr_symbol)
+      || S_IS_WEAK (fragP->fr_symbol))
     {
       assert (fragP->fr_subtype != 1);
       assert (fragP->fr_cgen.insn != 0);
@@ -1874,7 +1899,9 @@ md_pcrel_from_section (fixP, sec)
 {
   if (fixP->fx_addsy != (symbolS *) NULL
       && (! S_IS_DEFINED (fixP->fx_addsy)
-	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
+	  || S_GET_SEGMENT (fixP->fx_addsy) != sec
+          || S_IS_EXTERNAL (fixP->fx_addsy)
+          || S_IS_WEAK (fixP->fx_addsy)))
     {
       /* The symbol is undefined (or is defined but not in this section).
 	 Let the linker figure it out.  */
@@ -2189,6 +2216,23 @@ m32r_fix_adjustable (fixP)
   else
     reloc_type = fixP->fx_r_type;
 
+  if (fixP->fx_addsy == NULL)
+    return 1;
+
+  /* Prevent all adjustments to global symbols.  */
+  if (S_IS_EXTERN (fixP->fx_addsy))
+    return 0;
+  if (S_IS_WEAK (fixP->fx_addsy))
+    return 0;
+
+  if (pic_code
+      && (reloc_type == BFD_RELOC_M32R_24
+          || reloc_type == BFD_RELOC_M32R_26_PCREL
+          || reloc_type == BFD_RELOC_M32R_HI16_SLO
+          || reloc_type == BFD_RELOC_M32R_HI16_ULO
+          || reloc_type == BFD_RELOC_M32R_LO16))
+    return 0;
+
   /* We need the symbol name for the VTABLE entries.  */
   if (reloc_type == BFD_RELOC_VTABLE_INHERIT
       || reloc_type == BFD_RELOC_VTABLE_ENTRY)
@@ -2203,4 +2247,100 @@ m32r_elf_final_processing ()
   if (use_parallel)
     m32r_flags |= E_M32R_HAS_PARALLEL;
   elf_elfheader (stdoutput)->e_flags |= m32r_flags;
+}
+
+#define GOT_NAME "_GLOBAL_OFFSET_TABLE_"
+ 
+/* Translate internal representation of relocation info to BFD target
+   format. */
+arelent *
+tc_gen_reloc (section, fixP)
+     asection * section;
+     fixS *     fixP;
+{
+  arelent * reloc;
+  bfd_reloc_code_real_type code;
+ 
+  reloc = (arelent *) xmalloc (sizeof (arelent));
+ 
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
+  reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
+ 
+  code = fixP->fx_r_type;
+  if (pic_code)
+    {
+#ifdef DEBUG_PIC
+printf("%s",bfd_get_reloc_code_name(code));
+#endif
+      switch (code)
+        {
+        case BFD_RELOC_M32R_26_PCREL:
+            code = BFD_RELOC_M32R_26_PLTREL;
+          break;
+        case BFD_RELOC_M32R_24:
+          if (fixP->fx_addsy != NULL
+              && strcmp (S_GET_NAME (fixP->fx_addsy), GOT_NAME) == 0)
+            code = BFD_RELOC_M32R_GOTPC24;
+          else
+            code = BFD_RELOC_M32R_GOT24;
+          break;
+        case BFD_RELOC_M32R_HI16_ULO:
+          if (fixP->fx_addsy != NULL
+              && strcmp (S_GET_NAME (fixP->fx_addsy), GOT_NAME) == 0)
+            code = BFD_RELOC_M32R_GOTPC_HI_ULO;
+          else
+            code = BFD_RELOC_M32R_GOT16_HI_ULO;
+          break;
+        case BFD_RELOC_M32R_HI16_SLO:
+          if (fixP->fx_addsy != NULL
+              && strcmp (S_GET_NAME (fixP->fx_addsy), GOT_NAME) == 0)
+            code = BFD_RELOC_M32R_GOTPC_HI_SLO;
+          else
+            code = BFD_RELOC_M32R_GOT16_HI_SLO;
+          break;
+        case BFD_RELOC_M32R_LO16:
+          if (fixP->fx_addsy != NULL
+              && strcmp (S_GET_NAME (fixP->fx_addsy), GOT_NAME) == 0)
+            code = BFD_RELOC_M32R_GOTPC_LO;
+          else
+            code = BFD_RELOC_M32R_GOT16_LO;
+          break;
+        default:
+          break;
+        }
+#ifdef DEBUG_PIC
+printf(" => %s",bfd_get_reloc_code_name(code));
+#endif
+    }
+ 
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
+#ifdef DEBUG_PIC
+printf(" => %s\n",reloc->howto->name);
+#endif
+  if (reloc->howto == (reloc_howto_type *) NULL)
+    {
+      as_bad_where (fixP->fx_file, fixP->fx_line,
+            _("internal error: can't export reloc type %d (`%s')"),
+            fixP->fx_r_type, bfd_get_reloc_code_name (code));
+      return NULL;
+    }
+ 
+  /* Use fx_offset for these cases */
+  if (   fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT)
+    reloc->addend  = fixP->fx_offset;
+  else if (!pic_code
+           && fixP->fx_pcrel
+           && fixP->fx_addsy != NULL
+           && (S_GET_SEGMENT(fixP->fx_addsy) != section)
+           && S_IS_DEFINED (fixP->fx_addsy)
+           && ! S_IS_EXTERNAL(fixP->fx_addsy)
+           && ! S_IS_WEAK(fixP->fx_addsy))
+    /* already used fx_offset in the opcode field itseld. */
+    reloc->addend  = 0;
+  else
+    reloc->addend  = fixP->fx_addnumber;
+ 
+  return reloc;
 }

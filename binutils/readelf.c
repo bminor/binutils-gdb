@@ -618,7 +618,6 @@ guess_is_rela (unsigned long e_machine)
     case EM_DLX:
     case EM_OPENRISC:
     case EM_OR32:
-    case EM_M32R:
     case EM_CYGNUS_M32R:
     case EM_D10V:
     case EM_CYGNUS_D10V:
@@ -668,6 +667,7 @@ guess_is_rela (unsigned long e_machine)
     case EM_IQ2000:
     case EM_XTENSA:
     case EM_XTENSA_OLD:
+    case EM_M32R:
       return TRUE;
 
     case EM_MMA:

@@ -1,3 +1,7 @@
+2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* readelf.c (guess_is_rela): Changed m32r's default type to RELA.
+
 2003-12-11  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (strip_usage): Add --only-keep-debug.

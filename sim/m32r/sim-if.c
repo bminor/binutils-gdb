@@ -214,6 +214,13 @@ sim_create_inferior (sd, abfd, argv, envp)
     addr = 0;
   sim_pc_set (current_cpu, addr);
 
+#ifdef M32R_LINUX
+  m32rbf_h_cr_set (current_cpu,
+                    m32r_decode_gdb_ctrl_regnum(SPI_REGNUM), 0x1f00000);
+  m32rbf_h_cr_set (current_cpu,
+                    m32r_decode_gdb_ctrl_regnum(SPU_REGNUM), 0x1f00000);
+#endif
+
 #if 0
   STATE_ARGV (sd) = sim_copy_argv (argv);
   STATE_ENVP (sd) = sim_copy_argv (envp);

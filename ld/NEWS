@@ -1,5 +1,7 @@
 -*- text -*-
 
+* m32r Linux (ELF) support added by Renesas.
+
 * Improved linker's handling of unresolved symbols.  The switch
   --unresolved-symbols=<method> has been added to tell the linker when it
   should report them and the switch --warn-unresolved-symbols has been added to

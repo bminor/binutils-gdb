@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -344,6 +344,9 @@ ALL_EMULATIONS = \
 	ei386pe_posix.o \
 	elnk960.o \
 	em32relf.o \
+	em32rlelf.o \
+	em32relf_linux.o \
+	em32rlelf_linux.o \
 	em68hc11elf.o \
 	em68hc11elfb.o \
 	em68hc12elf.o \
@@ -598,7 +601,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1080,7 +1083,7 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "ldlex.cdeffilep.hdeffilep.cldgram.hldgram.c$(MAINTAINERCLEANFILES)" || rm -f ldlex.c deffilep.h deffilep.c ldgram.h ldgram.c $(MAINTAINERCLEANFILES)
+	-test -z "ldlexldeffilephdeffilepcldgramhldgramc$(MAINTAINERCLEANFILES)" || rm -f ldlexl deffileph deffilepc ldgramh ldgramc $(MAINTAINERCLEANFILES)
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic \
@@ -1329,6 +1332,15 @@ eelf32mcore.c: $(srcdir)/emulparams/elf32mcore.sh \
 em32relf.c: $(srcdir)/emulparams/m32relf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m32relf "$(tdir_m32r)"
+em32rlelf.c: $(srcdir)/emulparams/m32rlelf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m32rlelf "$(tdir_m32rlelf)"
+em32relf_linux.c: $(srcdir)/emulparams/m32relf_linux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m32relf_linux "$(tdir_m32relf_linux)"
+em32rlelf_linux.c: $(srcdir)/emulparams/m32rlelf_linux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m32rlelf_linux "$(tdir_m32rlelf_linux)"
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc "$(tdir_elf32_sparc)"

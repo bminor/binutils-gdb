@@ -75,6 +75,12 @@ data.
 @cindex @code{-EB} option, M32R
 This is a synonum for @emph{-big}.
 
+@item -KPIC
+@cindex @code{-KPIC} option, M32R
+@cindex PIC code generation for M32R
+This option specifies that the output of the assembler should be
+marked as position-independent code (PIC).
+
 @item -parallel
 @cindex @code{-parallel} option, M32RX
 This option tells the assembler to attempts to combine two sequential

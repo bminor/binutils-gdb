@@ -1,3 +1,18 @@
+2003-12-19  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+        Add m32r-linux and PIC support.  Add new ABI that uses RELA.
+        * configure.in: Add m32r-linux targets.
+	* configure: Regenerate.
+        * config/tc-m32r.c (md_parse_option): Add -KPIC option.
+        (tc_gen_reloc): Added.
+        (debug_sym, md_estimate_size_before_relax, md_convert_frag,
+        md_pcrel_from_section, m32r_fix_adjustable): Changed for PIC.
+        * config/tc-m32r.h (tc_gen_reloc, EXTERN_FORCE_RELOC): Undefined.
+        (TC_HANDLES_FX_DONE, TC_FIX_ADJUSTABLE, TC_RELOC_RTSYM_LOC_FIXUP):
+	Defined.
+	* doc/c-m32r.texi: Document -KPIC option.
+	* NEWS: Mention the support m32r Linux and PIC.
+
 2003-12-18  Nick Clifton  <nickc@redhat.com>
 
 	* input-file.c (input_file_open): Remove call to stat().

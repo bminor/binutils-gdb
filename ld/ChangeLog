@@ -1,3 +1,15 @@
+2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	Add m32r-linux and PIC support.  Add new ABI that uses RELA.
+	* Makefile.am: Added em32rlelf.c, em32relf_linux.c,
+	em32rlelf_linux.c.
+	* Makefile.in: Regenerate.
+	* configure.tgt (m32r*-*-linux*, m32r*le-*-linux*, m32r*le-*-*):Added.
+	* emulparams/m32relf_linux.sh: Added.
+	* emulparams/m32rlelf.sh: Ditto.
+	* emulparams/m32rlelf_linux.sh: Ditto.
+	* NEWS: Mention support m32r Linux.
+
 2003-12-18  Eric Youngdale  <eric@mkssoftware.com>
             Nick Clifton  <nickc@redhat.com>
 

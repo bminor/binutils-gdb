@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Added PIC m32r Linux (ELF) and support to M32R assembler.
+
 * Added support for ARM V6.
 
 * Added support for sh4a and variants.

@@ -230,6 +230,9 @@ ALL_EMULATIONS = \
 	ei386pe_posix.o \
 	elnk960.o \
 	em32relf.o \
+	em32rlelf.o \
+	em32relf_linux.o \
+	em32rlelf_linux.o \
 	em68hc11elf.o \
 	em68hc11elfb.o \
 	em68hc12elf.o \
@@ -603,6 +606,15 @@ eelf32mcore.c: $(srcdir)/emulparams/elf32mcore.sh \
 em32relf.c: $(srcdir)/emulparams/m32relf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m32relf "$(tdir_m32r)"
+em32rlelf.c: $(srcdir)/emulparams/m32rlelf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m32rlelf "$(tdir_m32rlelf)"
+em32relf_linux.c: $(srcdir)/emulparams/m32relf_linux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m32relf_linux "$(tdir_m32relf_linux)"
+em32rlelf_linux.c: $(srcdir)/emulparams/m32rlelf_linux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m32rlelf_linux "$(tdir_m32rlelf_linux)"
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc "$(tdir_elf32_sparc)"

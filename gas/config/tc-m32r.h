@@ -87,14 +87,31 @@ bfd_boolean m32r_fix_adjustable PARAMS ((struct fix *));
    HI16 relocs and queue them up for later sorting.  */
 #define md_cgen_record_fixup_exp m32r_cgen_record_fixup_exp
 
-#define tc_gen_reloc gas_cgen_tc_gen_reloc
+/* #define tc_gen_reloc gas_cgen_tc_gen_reloc */
+
+#define TC_HANDLES_FX_DONE
+
+extern int pic_code;
+
+extern bfd_boolean m32r_fix_adjustable PARAMS ((struct fix *));
+
+/* This arranges for gas/write.c to not apply a relocation if
+   obj_fix_adjustable() says it is not adjustable.  */
+#define TC_FIX_ADJUSTABLE(fixP) obj_fix_adjustable (fixP)
+
+#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)                           \
+   ((FIX)->fx_addsy == NULL                                     \
+    || (! S_IS_EXTERNAL ((FIX)->fx_addsy)                       \
+        && ! S_IS_WEAK ((FIX)->fx_addsy)                        \
+        && S_IS_DEFINED ((FIX)->fx_addsy)                       \
+        && ! S_IS_COMMON ((FIX)->fx_addsy)))
 
 #define tc_frob_file_before_fix() m32r_frob_file ()
 extern void m32r_frob_file PARAMS ((void));
 
 /* No shared lib support, so we don't need to ensure externally
-   visible symbols can be overridden.  */
-#define EXTERN_FORCE_RELOC 0
+   visible symbols can be overridden.
+#define EXTERN_FORCE_RELOC 0 */
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) m32r_force_relocation (fix)

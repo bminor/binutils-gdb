@@ -4000,6 +4000,8 @@ for this_target in $target $canon_targets ; do
       sparc*)		cpu_type=sparc arch=sparclite ;; # ??? See tc-sparc.c.
       v850*)		cpu_type=v850 ;;
       xtensa*)		cpu_type=xtensa arch=xtensa ;;
+      m32r)             cpu_type=m32r target_cpu=m32r endian=big ;;
+      m32rle)           cpu_type=m32r target_cpu=m32r endian=little ;;
       *)		cpu_type=${cpu} ;;
     esac
 
@@ -4180,7 +4182,8 @@ echo "$as_me: WARNING: GAS support for ${generic_target} is preliminary and a wo
 
       iq2000-*-elf)         		fmt=elf bfd_gas=yes ;;
 
-      m32r-*-*)				fmt=elf ;;
+      m32r-*-elf*)			fmt=elf ;;
+      m32r-*-linux*)			fmt=elf em=linux;;
 
       m68hc11-*-* | m6811-*-*)		fmt=elf ;;
       m68hc12-*-* | m6812-*-*)		fmt=elf ;;

@@ -115,7 +115,10 @@ ia64-*-freebsd* | ia64-*-kfreebsd*-gnu)
 ia64-*-netbsd*)		targ_emul=elf64_ia64 ;;
 ia64-*-linux*)		targ_emul=elf64_ia64 ;;
 ia64-*-aix*)		targ_emul=elf64_aix ;;
-m32r-*-*)		targ_emul=m32relf ;;
+m32r*le-*-elf*)         targ_emul=m32rlelf ;;
+m32r*-*-elf*)           targ_emul=m32relf ;;
+m32r*le-*-linux-gnu*)   targ_emul=m32rlelf_linux ;;
+m32r*-*-linux-gnu*)     targ_emul=m32relf_linux ;;
 m68hc11-*-*|m6811-*-*)	targ_emul=m68hc11elf 
 			targ_extra_emuls="m68hc11elfb m68hc12elf m68hc12elfb" ;;
 m68hc12-*-*|m6812-*-*)	targ_emul=m68hc12elf 
