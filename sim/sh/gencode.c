@@ -750,9 +750,10 @@ op tab[] =
     "R0 = ((i + 4 + PH2T (PC)) & ~0x3);",
   },
 
-  { "0", "", "movca.l @R0, <REG_N>", "0000nnnn11000011",
-    "/* FIXME: Not implemented */",
-    "RAISE_EXCEPTION (SIGILL);",
+  { "", "n0", "movca.l R0, @<REG_N>", "0000nnnn11000011",
+    "/* We don't simulate cache, so this insn is identical to mov.  */",
+    "MA (1);",
+    "WLAT (R[n], R[0]);",
   },
 
   { "n", "", "movt <REG_N>", "0000nnnn00101001",
