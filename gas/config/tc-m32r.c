@@ -1,4 +1,4 @@
-/* tc-m32r.c -- Assembler for the Mitsubishi M32R.
+/* tc-m32r.c -- Assembler for the Mitsubishi M32R/X.
    Copyright (C) 1996, 1997 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
@@ -42,6 +42,11 @@ static int m32r_relax;
    This allows runtime additions to the assembler.  */
 static char *m32r_cpu_desc;
 
+/* Non-zero if -m32rx has been specified, in which case support for the
+   extended M32RX instruction set should be enabled.  */
+/* Indicates the target BFD machine number.  */
+static int enable_m32rx = 0;
+
 /* stuff for .scomm symbols.  */
 static segT sbss_section;
 static asection scom_section;
@@ -79,16 +84,31 @@ struct m32r_hi_fixup
 static struct m32r_hi_fixup *m32r_hi_fixup_list;
 
 static void m32r_record_hi16 PARAMS ((int, fixS *, segT seg));
+
+
+static void
+allow_m32rx (int on)
+{
+  enable_m32rx = on;
+
+  if (stdoutput != NULL)
+    bfd_set_arch_mach (stdoutput, TARGET_ARCH, enable_m32rx ? bfd_mach_m32rx : bfd_mach_m32r);
+}
 
 const char *md_shortopts = "";
 
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
+#define OPTION_M32RX	(OPTION_MD_BASE)
+  {"m32rx", no_argument, NULL, OPTION_M32RX},
+
 #if 0 /* not supported yet */
-#define OPTION_RELAX  (OPTION_MD_BASE)
+#define OPTION_RELAX  (OPTION_MD_BASE + 1)
   {"relax", no_argument, NULL, OPTION_RELAX},
-#define OPTION_CPU_DESC (OPTION_MD_BASE + 1)
+#define OPTION_CPU_DESC (OPTION_MD_BASE + 2)
   {"cpu-desc", required_argument, NULL, OPTION_CPU_DESC},
 #endif
+
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);       
@@ -100,6 +120,10 @@ md_parse_option (c, arg)
 {
   switch (c)
     {
+    case OPTION_M32RX:
+      allow_m32rx (1);
+      break;
+      
 #if 0 /* not supported yet */
     case OPTION_RELAX:
       m32r_relax = 1;
@@ -118,14 +142,15 @@ void
 md_show_usage (stream)
   FILE *stream;
 {
-  fprintf (stream, "M32R options:\n");
+  fprintf (stream, "M32R/X options:\n");
+  fprintf (stream, "\
+--m32rx			support the extended m32rx instruction set\n");
+
 #if 0
   fprintf (stream, "\
 --relax			create linker relaxable code\n");
   fprintf (stream, "\
 --cpu-desc		provide runtime cpu description file\n");
-#else
-  fprintf (stream, "[none]\n");
 #endif
 } 
 
@@ -142,6 +167,8 @@ const pseudo_typeS md_pseudo_table[] =
   { "word", cons, 4 },
   { "fillinsn", fill_insn, 0 },
   { "scomm", m32r_scomm, 0 },
+  { "m32r",  allow_m32rx, 0},
+  { "m32rx", allow_m32rx, 1},
   { NULL, NULL, 0 }
 };
 
@@ -254,7 +281,7 @@ md_begin ()
   /* Initialize the `cgen' interface.  */
 
   /* This is a callback from cgen to gas to parse operands.  */
-  cgen_asm_parse_operand_fn = cgen_asm_parse_operand;
+  cgen_parse_operand_fn = cgen_parse_operand;
   /* Set the machine number and endian.  */
   CGEN_SYM (init_asm) (0 /* mach number */,
 		       target_big_endian ? CGEN_ENDIAN_BIG : CGEN_ENDIAN_LITTLE);
@@ -297,6 +324,8 @@ md_begin ()
   scom_symbol = *bfd_com_section.symbol;
   scom_symbol.name = ".scommon";
   scom_symbol.section = &scom_section;
+
+  allow_m32rx (enable_m32rx);
 }
 
 void
@@ -634,7 +663,27 @@ md_estimate_size_before_relax (fragP, segment)
       /* Mark this fragment as finished.  */
       frag_wane (fragP);
 #else
-      return 2;
+      {
+	const struct cgen_insn *insn;
+	int i;
+
+	/* Update the recorded insn.
+	   Fortunately we don't have to look very far.
+	   FIXME: Change this to record in the instruction the next higher
+	   relaxable insn to use.  */
+	for (i = 0, insn = fragP->fr_cgen.insn; i < 4; i++, insn++)
+	  {
+	    if ((strcmp (CGEN_INSN_SYNTAX (insn)->mnemonic,
+			CGEN_INSN_SYNTAX (fragP->fr_cgen.insn)->mnemonic)
+		 == 0)
+		&& CGEN_INSN_ATTR (insn, CGEN_INSN_RELAX))
+	      break;
+	  }
+	if (i == 4)
+	  abort ();
+	fragP->fr_cgen.insn = insn;
+	return 2;
+      }
 #endif
     }
 
@@ -705,19 +754,19 @@ md_convert_frag (abfd, sec, fragP)
   if (S_GET_SEGMENT (fragP->fr_symbol) != sec)
     {
       assert (fragP->fr_subtype != 1);
-      assert (fragP->fr_targ.cgen.insn != 0);
+      assert (fragP->fr_cgen.insn != 0);
       cgen_record_fixup (fragP,
 			 /* Offset of branch insn in frag.  */
 			 fragP->fr_fix + extension - 4,
-			 fragP->fr_targ.cgen.insn,
+			 fragP->fr_cgen.insn,
 			 4 /*length*/,
 			 /* FIXME: quick hack */
 #if 0
-			 CGEN_OPERAND_ENTRY (fragP->fr_targ.cgen.opindex),
+			 CGEN_OPERAND_ENTRY (fragP->fr_cgen.opindex),
 #else
 			 CGEN_OPERAND_ENTRY (M32R_OPERAND_DISP24),
 #endif
-			 fragP->fr_targ.cgen.opinfo,
+			 fragP->fr_cgen.opinfo,
 			 fragP->fr_symbol, fragP->fr_offset);
     }
 

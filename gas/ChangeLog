@@ -1,3 +1,11 @@
+Mon Dec 15 15:20:32 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (allow_m32rx): New function.
+	(enable_m32rx): New variable.
+	(md_pseudo_table): Added .m32r and .m32rx pseudo ops
+	(md_show_usage): Document new --m32rx command line option.
+	(md_parse_option): Implement new --m32rx command line option.
+
 Mon Dec 15 10:32:28 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mips.c (mips_ip): Correctly insert 'P' operands into
