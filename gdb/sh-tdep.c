@@ -74,27 +74,6 @@ struct sh_frame_cache
 };
 
 static const char *
-sh_generic_register_name (int reg_nr)
-{
-  static char *register_names[] = {
-    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
-    "fpul", "fpscr",
-    "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7",
-    "fr8", "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
-    "ssr", "spc",
-    "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
-    "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
-  };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
-  return register_names[reg_nr];
-}
-
-static const char *
 sh_sh_register_name (int reg_nr)
 {
   static char *register_names[] = {
@@ -2332,7 +2311,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     default:
-      set_gdbarch_register_name (gdbarch, sh_generic_register_name);
+      set_gdbarch_register_name (gdbarch, sh_sh_register_name);
       break;
     }
 

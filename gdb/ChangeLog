@@ -1,3 +1,8 @@
+2004-02-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_generic_register_name): Remove.
+	(sh_gdbarch_init): Use sh_sh_register_name in default case.
+
 2004-02-15  Andrew Cagney  <cagney@redhat.com>
 
 	* configure.in (build_warnings): Add -Wunused-function.
