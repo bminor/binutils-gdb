@@ -1,3 +1,13 @@
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiStack.c (tui_make_status_line): New function to create the
+	status line.
+	(tuiShowLocatorContent): Use it instead of displayableWinContentAt.
+	* tuiData.h (PROC_PREFIX): Use "In:" to reduce length of prefix.
+	(PC_PREFIX): Use upper case.
+	(SINGLE_KEY, MIN_LINE_WIDTH, MIN_PROC_WIDTH): Define.
+	(MAX_TARGET_WIDTH, MAX_PID_WIDTH): Define.
+
 2002-08-31  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tuiSourceWin.h (tuiUpdateAllExecInfos): Don't declare.

@@ -71,10 +71,18 @@ TuiGenWinInfo, *TuiGenWinInfoPtr;
 #define MIN_WIN_HEIGHT                 3
 #define MIN_CMD_WIN_HEIGHT             3
 
+/* Strings to display in the TUI status line.  */
 #define FILE_PREFIX                    "File: "
-#define PROC_PREFIX                    "Procedure: "
+#define PROC_PREFIX                    "In: "
 #define LINE_PREFIX                    "Line: "
-#define PC_PREFIX                      "pc: "
+#define PC_PREFIX                      "PC: "
+#define SINGLE_KEY                     "(SingleKey)"
+
+/* Minimum/Maximum length of some fields displayed in the TUI status line.  */
+#define MIN_LINE_WIDTH     4 /* Use at least 4 digits for line numbers.  */
+#define MIN_PROC_WIDTH    12
+#define MAX_TARGET_WIDTH  10
+#define MAX_PID_WIDTH     14
 
 #define TUI_FLOAT_REGS_NAME                  "$FREGS"
 #define TUI_FLOAT_REGS_NAME_LOWER            "$fregs"
