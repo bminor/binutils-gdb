@@ -1,3 +1,7 @@
+Mon Jun 10 11:45:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gasp.c (do_align): Permit a fill value for .align.
+
 Wed Jun  5 17:09:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (next_char_of_string): Warn if a newline is seen in the
