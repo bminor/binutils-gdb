@@ -4443,6 +4443,16 @@ macro (ip)
       if (! dbl && HAVE_64BIT_OBJECTS)
 	as_warn (_("la used to load 64-bit address"));
 
+      if (offset_expr.X_op == O_constant
+	  && offset_expr.X_add_number >= -0x8000
+	  && offset_expr.X_add_number < 0x8000)
+	{
+	  macro_build ((char *) NULL, &icnt, &offset_expr,
+		       (dbl || HAVE_64BIT_ADDRESSES) ? "daddiu" : "addiu",
+		       "t,r,j", treg, sreg, (int) BFD_RELOC_LO16);
+	  return;
+	}
+
       if (treg == breg)
 	{
 	  tempreg = AT;

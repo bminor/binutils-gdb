@@ -1,3 +1,8 @@
+2002-08-08  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* mips-opc.c (mips_builtin_opcodes): Remove "dla" and "la" as
+	aliases to "daddiu" and "addiu".
+
 2002-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
