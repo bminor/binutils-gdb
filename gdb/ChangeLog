@@ -1,3 +1,9 @@
+Thu Mar 19 11:32:15 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* minsyms.c (compare_minimal_symbols): If addresses are identical,
+	then compare on names.  Sorted list should have symbols with 
+	identical addresses AND names adjacent, so dups can be discarded.
+
 Wed Mar 18 12:50:17 1998  Jeff Law  (law@cygnus.com)
 
 	* stabsread.c (define_symbol): Don't look for ',' as a LRS

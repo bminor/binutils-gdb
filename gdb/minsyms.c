@@ -585,7 +585,8 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
 }
 
 /* Compare two minimal symbols by address and return a signed result based
-   on unsigned comparisons, so that we sort into unsigned numeric order.  */
+   on unsigned comparisons, so that we sort into unsigned numeric order.  
+   Within groups with the same address, sort by name.  */
 
 static int
 compare_minimal_symbols (fn1p, fn2p)
@@ -600,15 +601,25 @@ compare_minimal_symbols (fn1p, fn2p)
 
   if (SYMBOL_VALUE_ADDRESS (fn1) < SYMBOL_VALUE_ADDRESS (fn2))
     {
-      return (-1);
+      return (-1);	/* addr 1 is less than addr 2 */
     }
   else if (SYMBOL_VALUE_ADDRESS (fn1) > SYMBOL_VALUE_ADDRESS (fn2))
     {
-      return (1);
+      return (1);	/* addr 1 is greater than addr 2 */
     }
-  else
+  else			/* addrs are equal: sort by name */
     {
-      return (0);
+      char *name1 = SYMBOL_NAME (fn1);
+      char *name2 = SYMBOL_NAME (fn2);
+
+      if (name1 && name2)	/* both have names */
+	return strcmp (name1, name2);
+      else if (name2)
+	return 1;	/* fn1 has no name, so it is "less" */
+      else if (name1)	/* fn2 has no name, so it is "less" */
+	return -1;
+      else
+	return (0);	/* neither has a name, so they're equal. */
     }
 }
 
