@@ -967,7 +967,7 @@ RCS file: /local/cvsfiles/devo/gdb/config/ncr3000.mh,v
 retrieving revision 1.4
 diff -c -r1.4 config/ncr3000.mh
 *** 1.4	1992/06/15 19:25:13
---- ncr3000.mh	1992/06/16 01:28:40
+--- config/ncr3000.mh	1992/06/16 01:28:40
 ***************
 *** 38,40 ****
 --- 38,46 ----
