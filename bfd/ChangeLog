@@ -1,3 +1,8 @@
+1999-01-29  Nick Clifton  <nickc@cygnus.com>
+
+	* dwarf2.c (read_unsigned_leb128): Remove unused variables.
+	* dwarf2.c (read_signed_leb128): Remove unused variables.
+
 Fri Jan 29 00:47:21 1999  H.J. Lu  <hjl@gnu.org>
 
 	* elf.c (assign_file_positions_for_segments): Only adjust
