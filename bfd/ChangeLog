@@ -1,5 +1,7 @@
 Tue Oct  1 05:02:53 1991  John Gilmore  (gnu at cygnus.com)
 
+	* cpu-i960.c:  Avoid numerical count of initializers.
+
 	Vax Ultrix changes from David Taylor <taylor@think.com>:
 	* host-aout.c:  Make little-endian vector really little-endian.
 	* configure.in:  Separate vax and tahoe cases, handle ultrix.
