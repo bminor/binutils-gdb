@@ -118,14 +118,14 @@ b_out_object_p (abfd)
 
   if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
       != EXEC_BYTES_SIZE) {
-    bfd_error = wrong_format;
+    bfd_set_error (bfd_error_wrong_format);
     return 0;
   }
 
   anexec.a_info = bfd_h_get_32 (abfd, exec_bytes.e_info);
 
   if (N_BADMAG (anexec)) {
-    bfd_error = wrong_format;
+    bfd_set_error (bfd_error_wrong_format);
     return 0;
   }
 
@@ -199,7 +199,7 @@ b_out_mkobject (abfd)
 
   rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, sizeof (struct bout_data_struct));
   if (rawptr == NULL) {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -465,7 +465,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     goto doit;
   }
 
-  bfd_error = invalid_operation;
+  bfd_set_error (bfd_error_invalid_operation);
   return false;
 
  doit:
@@ -474,18 +474,18 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
 
   relocs = (struct relocation_info *) malloc (reloc_size);
   if (!relocs) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return false;
   }
   reloc_cache = (arelent *) malloc ((count+1) * sizeof (arelent));
   if (!reloc_cache) {
     free ((char*)relocs);
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return false;
   }
 
   if (bfd_read ((PTR) relocs, 1, reloc_size, abfd) != reloc_size) {
-    bfd_error = system_call_error;
+    bfd_set_error (bfd_error_system_call);
     free (reloc_cache);
     free (relocs);
     return false;
@@ -670,7 +670,7 @@ b_out_squirt_out_relocs (abfd, section)
   generic   = section->orelocation;
   native = ((struct relocation_info *) malloc (natsize));
   if (!native) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return false;
   }
 
@@ -821,7 +821,7 @@ b_out_get_reloc_upper_bound (abfd, asect)
      sec_ptr asect;
 {
   if (bfd_get_format (abfd) != bfd_object) {
-    bfd_error = invalid_operation;
+    bfd_set_error (bfd_error_invalid_operation);
     return 0;
   }
 
@@ -838,7 +838,7 @@ b_out_get_reloc_upper_bound (abfd, asect)
   if (asect == obj_bsssec (abfd))
     return 0;
 
-  bfd_error = invalid_operation;
+  bfd_set_error (bfd_error_invalid_operation);
   return 0;
 }
 
@@ -854,7 +854,7 @@ b_out_set_section_contents (abfd, section, location, offset, count)
   if (abfd->output_has_begun == false) { /* set by bfd.c handler */
     if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL) /*||
         (obj_textsec (abfd)->_cooked_size == 0) || (obj_datasec (abfd)->_cooked_size == 0)*/) {
-      bfd_error = invalid_operation;
+      bfd_set_error (bfd_error_invalid_operation);
       return false;
     }
 
@@ -1083,13 +1083,19 @@ b_out_relax_section (abfd, i, link_info, symbols)
   asection *input_section = i;
   int shrink = 0 ;
   boolean new = false;
+  arelent **reloc_vector = NULL;
 
   bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
 						       input_section);
 
   if (reloc_size)
     {
-      arelent **reloc_vector = (arelent **)alloca(reloc_size);
+      reloc_vector = (arelent **) malloc (reloc_size);
+      if (reloc_vector == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
 
       /* Get the relocs and think about them */
       if (bfd_canonicalize_reloc(input_bfd, input_section, reloc_vector,
@@ -1120,7 +1126,13 @@ b_out_relax_section (abfd, i, link_info, symbols)
     }
   input_section->_cooked_size = input_section->_raw_size - shrink;
 
+  if (reloc_vector != NULL)
+    free (reloc_vector);
   return new;
+ error_return:
+  if (reloc_vector != NULL)
+    free (reloc_vector);
+  return false;
 }
 
 static bfd_byte *
@@ -1138,7 +1150,7 @@ b_out_get_relocated_section_contents (in_abfd, link_info, link_order, data,
   asection *input_section = link_order->u.indirect.section;
   bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
 						       input_section);
-  arelent **reloc_vector = (arelent **)alloca(reloc_size);
+  arelent **reloc_vector = NULL;
 
   /* If producing relocateable output, don't bother to relax.  */
   if (relocateable)
@@ -1146,6 +1158,13 @@ b_out_get_relocated_section_contents (in_abfd, link_info, link_order, data,
 						       link_order,
 						       data, relocateable,
 						       symbols);
+
+  reloc_vector = (arelent **) malloc (reloc_size);
+  if (reloc_vector == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
 
   input_section->reloc_done = 1;
 
@@ -1280,7 +1299,13 @@ b_out_get_relocated_section_contents (in_abfd, link_info, link_order, data,
 	    }
 	}
     }
+  if (reloc_vector != NULL)
+    free (reloc_vector);
   return data;
+ error_return:
+  if (reloc_vector != NULL)
+    free (reloc_vector);
+  return NULL;
 }
 /***********************************************************************/
 

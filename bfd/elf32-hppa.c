@@ -1933,7 +1933,13 @@ hppa_elf_stub_finish (output_bfd)
 
 	  /* Make space to hold the relocations for the stub section.  */
 	  reloc_size = bfd_get_reloc_upper_bound (stub_bfd, stub_sec);
-	  reloc_vector = (arelent **) alloca (reloc_size);
+	  reloc_vector = (arelent **) malloc (reloc_size);
+	  if (reloc_vector == NULL)
+	    {
+	      /* FIXME: should be returning an error so the caller can
+		 clean up */
+	      abort ();
+	    }
 
 	  /* If we have relocations, do them.  */
 	  if (bfd_canonicalize_reloc (stub_bfd, stub_sec, reloc_vector,
@@ -1988,6 +1994,7 @@ hppa_elf_stub_finish (output_bfd)
 		    }
 		}
 	    }
+	  free (reloc_vector);
 
 	  /* All done with the relocations.  Set the final contents
 	     of the stub section.  FIXME: no check of return value!  */
@@ -2704,6 +2711,7 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
   asymbol *new_syms = NULL;
   int new_cnt = 0;
   int new_max = 0;
+  arelent **reloc_vector = NULL;
 
   /* Relocations are in different places depending on whether this is
      an output section or an input section.  Also, the relocations are
@@ -2711,8 +2719,13 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
      to straighten this out for us . */
   if (asec->reloc_count > 0)
     {
-      arelent **reloc_vector
-	= (arelent **) alloca (asec->reloc_count * (sizeof (arelent *) + 1));
+      reloc_vector
+	= (arelent **) malloc (asec->reloc_count * (sizeof (arelent *) + 1));
+      if (reloc_vector == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
 
       /* Make sure the canonical symbols are hanging around in a convient
 	 location.  */
@@ -2725,7 +2738,7 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 	  if (!abfd->outsymbols)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
-	      abort ();
+	      goto error_return;
 	    }
 	  abfd->symcount = bfd_canonicalize_symtab (abfd, abfd->outsymbols);
 	}
@@ -2802,7 +2815,10 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 			new_syms = (asymbol *)
 			  realloc (new_syms, new_max * sizeof (asymbol));
 			if (new_syms == NULL)
-			  abort ();
+			  {
+			    bfd_set_error (bfd_error_no_memory);
+			    goto error_return;
+			  }
 		      }
 
 		    /* Build the argument relocation stub.  */
@@ -2827,7 +2843,10 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 			new_syms = (asymbol *)
 			  realloc (new_syms, (new_max * sizeof (asymbol)));
 			if (! new_syms)
-			  abort ();
+			  {
+			    bfd_set_error (bfd_error_no_memory);
+			    goto error_return;
+			  }
 		      }
 
 		    /* Build the long-call stub.  */
@@ -2910,9 +2929,18 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 	}
     }
 
+  if (reloc_vector != NULL)
+    free (reloc_vector);
   /* Return the new symbols and update the counters.  */
   *new_sym_cnt = new_cnt;
   return new_syms;
+
+ error_return:
+  if (reloc_vector != NULL)
+    free (reloc_vector);
+  /* FIXME: This is bogus.  We should be returning NULL.  But do the callers
+     check for that?  */
+  abort ();
 }
 
 /* Set the contents of a particular section at a particular location.  */

@@ -3482,13 +3482,6 @@ NAME(aout,final_link) (abfd, info, callback)
 	   p != (struct bfd_link_order *) NULL;
 	   p = p->next)
 	{
-	  /* If we might be using the C based alloca function, we need
-	     to dump the memory allocated by aout_link_input_bfd.  */
-#ifndef __GNUC__
-#ifndef alloca
-	  (void) alloca (0);
-#endif
-#endif
 	  if (p->type == bfd_indirect_link_order
 	      && (bfd_get_flavour (p->u.indirect.section->owner)
 		  == bfd_target_aout_flavour))
@@ -3541,7 +3534,7 @@ aout_link_input_bfd (finfo, input_bfd)
      bfd *input_bfd;
 {
   bfd_size_type sym_count;
-  int *symbol_map;
+  int *symbol_map = NULL;
 
   BFD_ASSERT (bfd_get_format (input_bfd) == bfd_object);
 
@@ -3551,11 +3544,16 @@ aout_link_input_bfd (finfo, input_bfd)
     return false;
 
   sym_count = obj_aout_external_sym_count (input_bfd);
-  symbol_map = (int *) alloca ((size_t) sym_count * sizeof (int));
+  symbol_map = (int *) malloc ((size_t) sym_count * sizeof (int));
+  if (symbol_map == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
 
   /* Write out the symbols and get a map of the new indices.  */
   if (! aout_link_write_symbols (finfo, input_bfd, symbol_map))
-    return false;
+    goto error_return;
 
   /* Relocate and write out the sections.  */
   if (! aout_link_input_section (finfo, input_bfd,
@@ -3568,7 +3566,7 @@ aout_link_input_bfd (finfo, input_bfd)
 				    &finfo->dreloff,
 				    exec_hdr (input_bfd)->a_drsize,
 				    symbol_map))
-    return false;
+    goto error_return;
 
   /* If we are not keeping memory, we don't need the symbols any
      longer.  We still need them if we are keeping memory, because the
@@ -3576,10 +3574,16 @@ aout_link_input_bfd (finfo, input_bfd)
   if (! finfo->info->keep_memory)
     {
       if (! aout_link_free_symbols (input_bfd))
-	return false;
+	goto error_return;
     }
 
+  if (symbol_map != NULL)
+    free (symbol_map);
   return true;
+ error_return:
+  if (symbol_map != NULL)
+    free (symbol_map);
+  return false;
 }
 
 /* Adjust and write out the symbols for an a.out file.  Set the new
@@ -3596,7 +3600,7 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
   char *strings;
   enum bfd_link_strip strip;
   enum bfd_link_discard discard;
-  struct external_nlist *output_syms;
+  struct external_nlist *output_syms = NULL;
   struct external_nlist *outsym;
   register struct external_nlist *sym;
   struct external_nlist *sym_end;
@@ -3610,7 +3614,12 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
   strip = finfo->info->strip;
   discard = finfo->info->discard;
   output_syms = ((struct external_nlist *)
-		 alloca ((size_t) (sym_count + 1) * EXTERNAL_NLIST_SIZE));
+		 malloc ((size_t) (sym_count + 1) * EXTERNAL_NLIST_SIZE));
+  if (output_syms == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
   outsym = output_syms;
 
   /* First write out a symbol for this object file, unless we are
@@ -3876,16 +3885,22 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
       bfd_size_type outsym_count;
 
       if (bfd_seek (output_bfd, finfo->symoff, SEEK_SET) != 0)
-	return false;
+	goto error_return;
       outsym_count = outsym - output_syms;
       if (bfd_write ((PTR) output_syms, (bfd_size_type) EXTERNAL_NLIST_SIZE,
 		     (bfd_size_type) outsym_count, output_bfd)
 	  != outsym_count * EXTERNAL_NLIST_SIZE)
-	return false;
+	goto error_return;
       finfo->symoff += outsym_count * EXTERNAL_NLIST_SIZE;
     }
 
+  if (output_syms != NULL)
+    free (output_syms);
   return true;
+ error_return:
+  if (output_syms != NULL)
+    free (output_syms);
+  return false;
 }
 
 /* Write out a symbol that was not associated with an a.out input
@@ -3993,21 +4008,31 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
      int *symbol_map;
 {
   bfd_size_type input_size;
-  bfd_byte *contents;
-  PTR relocs;
+  bfd_byte *contents = NULL;
+  PTR relocs = NULL;
 
   /* Get the section contents.  */
   input_size = bfd_section_size (input_bfd, input_section);
-  contents = (bfd_byte *) alloca (input_size);
+  contents = (bfd_byte *) malloc (input_size);
+  if (contents == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
   if (! bfd_get_section_contents (input_bfd, input_section, (PTR) contents,
 				  (file_ptr) 0, input_size))
-    return false;
+    goto error_return;
 
   /* Read in the relocs.  */
-  relocs = (PTR) alloca (rel_size);
+  relocs = (PTR) malloc (rel_size);
+  if (relocs == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
   if (bfd_seek (input_bfd, input_section->rel_filepos, SEEK_SET) != 0
       || bfd_read (relocs, 1, rel_size, input_bfd) != rel_size)
-    return false;
+    goto error_return;
 
   /* Relocate the section contents.  */
   if (obj_reloc_entry_size (input_bfd) == RELOC_STD_SIZE)
@@ -4015,7 +4040,7 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
       if (! aout_link_input_section_std (finfo, input_bfd, input_section,
 					 (struct reloc_std_external *) relocs,
 					 rel_size, contents, symbol_map))
-	return false;
+	goto error_return;
     }
   else
     {
@@ -4031,17 +4056,17 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
 				  (PTR) contents,
 				  input_section->output_offset,
 				  input_size))
-    return false;
+    goto error_return;
 
   /* If we are producing relocateable output, the relocs were
      modified, and we now write them out.  */
   if (finfo->info->relocateable)
     {
       if (bfd_seek (finfo->output_bfd, *reloff_ptr, SEEK_SET) != 0)
-	return false;
+	goto error_return;
       if (bfd_write (relocs, (bfd_size_type) 1, rel_size, finfo->output_bfd)
 	  != rel_size)
-	return false;
+	goto error_return;
       *reloff_ptr += rel_size;
 
       /* Assert that the relocs have not run into the symbols, and
@@ -4053,7 +4078,17 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
 			  <= obj_datasec (finfo->output_bfd)->rel_filepos)));
     }
 
+  if (relocs != NULL)
+    free (relocs);
+  if (contents != NULL)
+    free (contents);
   return true;
+ error_return:
+  if (relocs != NULL)
+    free (relocs);
+  if (contents != NULL)
+    free (contents);
+  return false;
 }
 
 /* Get the section corresponding to a reloc index.  */

@@ -1607,27 +1607,34 @@ bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
   bfd *input_bfd = link_order->u.indirect.section->owner;
   asection *input_section = link_order->u.indirect.section;
 
-
-
   size_t reloc_size = bfd_get_reloc_upper_bound(input_bfd, input_section);
-  arelent **reloc_vector = (arelent **) alloca(reloc_size);
+  arelent **reloc_vector = NULL;
+
+  reloc_vector = (arelent **) malloc (reloc_size);
+  if (reloc_vector == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
   
   /* read in the section */
-  bfd_get_section_contents(input_bfd,
-			   input_section,
-			   (PTR) data,
-			   0,
-			   input_section->_raw_size);
-  
-/* We're not relaxing the section, so just copy the size info */
+  if (!bfd_get_section_contents(input_bfd,
+				input_section,
+				(PTR) data,
+				0,
+				input_section->_raw_size))
+    goto error_return;
+
+  /* We're not relaxing the section, so just copy the size info */
   input_section->_cooked_size = input_section->_raw_size;
   input_section->reloc_done = true;
-  
 
-  if (bfd_canonicalize_reloc(input_bfd, 
-			     input_section,
-			     reloc_vector,
-			     symbols) )
+  if (!bfd_canonicalize_reloc (input_bfd, 
+			       input_section,
+			       reloc_vector,
+			       symbols))
+    goto error_return;
+
   {
     arelent **parent;
     for (parent = reloc_vector;  * parent != (arelent *)NULL;
@@ -1659,21 +1666,21 @@ bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
 	  if (! ((*link_info->callbacks->undefined_symbol)
 		 (link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
 		  input_bfd, input_section, (*parent)->address)))
-	    return NULL;
+	    goto error_return;
 	  break;
 	case bfd_reloc_dangerous: 
 	  BFD_ASSERT (error_message != (char *) NULL);
 	  if (! ((*link_info->callbacks->reloc_dangerous)
 		 (link_info, error_message, input_bfd, input_section,
 		  (*parent)->address)))
-	    return NULL;
+	    goto error_return;
 	  break;
 	case bfd_reloc_overflow:
 	  if (! ((*link_info->callbacks->reloc_overflow)
 		 (link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
 		  (*parent)->howto->name, (*parent)->addend,
 		  input_bfd, input_section, (*parent)->address)))
-	    return NULL;
+	    goto error_return;
 	  break;
 	case bfd_reloc_outofrange:
 	default:
@@ -1684,9 +1691,12 @@ bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
       }
     }    
   }
-
-
+  if (reloc_vector != NULL)
+    free (reloc_vector);
   return data;
 
-  
+ error_return:
+  if (reloc_vector != NULL)
+    free (reloc_vector);
+  return NULL;
 }

@@ -1227,10 +1227,14 @@ fix_up_strtabs (abfd, asect, obj)
       && !strcmp ("str", asect->name + strlen (asect->name) - 3))
     {
       size_t len = strlen (asect->name) + 1;
-      char *s = (char *) alloca (len);
+      char *s = (char *) malloc (len);
+      if (s == NULL)
+	/* FIXME: Should deal more gracefully with errors.  */
+	abort ();
       strcpy (s, asect->name);
       s[len - 4] = 0;
       asect = bfd_get_section_by_name (abfd, s);
+      free (s);
       if (!asect)
 	abort ();
       elf_section_data(asect)->this_hdr.sh_link = this_idx;
@@ -1675,12 +1679,17 @@ map_program_segments (abfd)
   Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
   Elf_Internal_Shdr *i_shdrp;
   Elf_Internal_Phdr *phdr;
-  char *done;
+  char *done = NULL;
   unsigned int i, n_left = 0;
   file_ptr lowest_offset = 0;
   struct seg_info *seg = NULL;
 
-  done = (char *) alloca (i_ehdrp->e_shnum);
+  done = (char *) malloc (i_ehdrp->e_shnum);
+  if (done == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
   memset (done, 0, i_ehdrp->e_shnum);
   for (i = 1; i < i_ehdrp->e_shnum; i++)
     {
@@ -1733,7 +1742,7 @@ map_program_segments (abfd)
       if (!snew)
 	{
 	  bfd_set_error (bfd_error_no_memory);
-	  return false;
+	  goto error_return;
 	}
       s_ptr = &seg;
       while (*s_ptr != (struct seg_info *) NULL)
@@ -1844,7 +1853,13 @@ map_program_segments (abfd)
     i_ehdrp->e_phnum = n_segs;
   }
   elf_write_phdrs (abfd, i_ehdrp, elf_tdata (abfd)->phdr, i_ehdrp->e_phnum);
+  if (done != NULL)
+    free (done);
   return true;
+ error_return:
+  if (done != NULL)
+    free (done);
+  return false;
 }
 
 static boolean
@@ -2543,7 +2558,7 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
   elf_symbol_type *sym;		/* Pointer to current bfd symbol */
   elf_symbol_type *symbase;	/* Buffer for generated bfd symbols */
   Elf_Internal_Sym i_sym;
-  Elf_External_Sym *x_symp;
+  Elf_External_Sym *x_symp = NULL;
 
   /* this is only valid because there is only one symtab... */
   /* FIXME:  This is incorrect, there may also be a dynamic symbol
@@ -2593,13 +2608,18 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
 
       /* Temporarily allocate room for the raw ELF symbols.  */
       x_symp = ((Elf_External_Sym *)
-		alloca (symcount * sizeof (Elf_External_Sym)));
+		malloc (symcount * sizeof (Elf_External_Sym)));
+      if (x_symp == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
 
       if (bfd_read ((PTR) x_symp, sizeof (Elf_External_Sym), symcount, abfd)
 	  != symcount * sizeof (Elf_External_Sym))
 	{
 	  bfd_set_error (bfd_error_system_call);
-	  return false;
+	  goto error_return;
 	}
       /* Skip first symbol, which is a null dummy.  */
       for (i = 1; i < symcount; i++)
@@ -2703,7 +2723,13 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
       *symptrs = 0;		/* Final null pointer */
     }
 
+  if (x_symp != NULL)
+    free (x_symp);
   return true;
+ error_return:
+  if (x_symp != NULL)
+    free (x_symp);
+  return false;
 }
 
 /* Return the number of bytes required to hold the symtab vector.

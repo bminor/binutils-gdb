@@ -19,13 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Use builtin alloca for gcc.  */
-#ifdef __GNUC__
-#ifndef alloca
-#define alloca __builtin_alloca
-#endif
-#endif
-
 /* Align an address upward to a boundary, expressed as a number of bytes.
    E.g. align to an 8-byte boundary with argument of 8.  */
 #define BFD_ALIGN(this, boundary) \
@@ -73,17 +66,7 @@ struct areltdata {
 
 #define arelt_size(bfd) (((struct areltdata *)((bfd)->arelt_data))->parsed_size)
 
-/* There is major inconsistency in how running out of memory is handled.
-   Some routines return a NULL, and set bfd_error to no_memory.
-   However, obstack routines can't do this ... */
-
 char *bfd_zmalloc PARAMS ((bfd_size_type size));
-/* From libiberty.  */
-extern PTR xmalloc PARAMS ((size_t));
-/* SIZE is bfd_size_type.  */
-#define bfd_xmalloc(size) xmalloc ((size_t) size)
-/* Defined without an argument so its address can be used.  */
-#define bfd_xmalloc_by_size_t xmalloc
 
 /* These routines allocate and free things on the BFD's obstack.  Note
    that realloc can never occur in place.  */
@@ -292,7 +275,7 @@ bfd_open_file PARAMS ((bfd *abfd));
 FILE *
 bfd_cache_lookup_worker PARAMS ((bfd *abfd));
 
-void 
+boolean 
 bfd_constructor_entry PARAMS ((bfd *abfd, 
     asymbol **symbol_ptr_ptr,
     CONST char*type));

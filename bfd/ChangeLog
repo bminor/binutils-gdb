@@ -1,3 +1,19 @@
+Wed Mar  9 17:17:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* libbfd-in.h: Remove alloca cruft.  It was missing some necessary
+	cruft (like the #pragma alloca for AIX).
+	In addition to that problem, the C alloca calls xmalloc, which
+	means checking for being out of memory can't work right.  The
+	following changes remove all uses of alloca from BFD.
+	* hosts/solaris2.h: Remove alloca cruft.
+	* som.c: Replace alloca with a fixed size auto array.
+	* aoutx.h, elfcode.h, nlmcode.h, bout.c, coff-alpha.c, ecoff.c,
+	ecofflink.c, elf32-hppa.c, elf32-mips.c, linker.c, reloc.c, som.c:
+	Replace alloca with malloc and appropriate error checking and
+	freeing.
+	* linker.c: Replace alloca with obstack_alloc.
+	* libbfd.h: Rebuilt.
+
 Tue Mar  8 12:10:38 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c (mips_relocate_section): Handle MIPS_R_LITERAL like

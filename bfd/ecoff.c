@@ -606,7 +606,7 @@ ecoff_slurp_symbolic_header (abfd)
 {
   const struct ecoff_backend_data * const backend = ecoff_backend (abfd);
   bfd_size_type external_hdr_size;
-  PTR raw;
+  PTR raw = NULL;
   HDRR *internal_symhdr;
 
   /* See if we've already read it in.  */
@@ -633,13 +633,19 @@ ecoff_slurp_symbolic_header (abfd)
     }
 
   /* Read the symbolic information header.  */
-  raw = (PTR) alloca ((size_t) external_hdr_size);
+  raw = (PTR) malloc ((size_t) external_hdr_size);
+  if (raw == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
   if (bfd_seek (abfd, ecoff_data (abfd)->sym_filepos, SEEK_SET) == -1
       || (bfd_read (raw, external_hdr_size, 1, abfd)
 	  != external_hdr_size))
     {
       bfd_set_error (bfd_error_system_call);
-      return false;
+      goto error_return;
     }
   internal_symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
   (*backend->debug_swap.swap_hdr_in) (abfd, raw, internal_symhdr);
@@ -647,14 +653,20 @@ ecoff_slurp_symbolic_header (abfd)
   if (internal_symhdr->magic != backend->debug_swap.sym_magic)
     {
       bfd_set_error (bfd_error_bad_value);
-      return false;
+      goto error_return;
     }
 
   /* Now we can get the correct number of symbols.  */
   bfd_get_symcount (abfd) = (internal_symhdr->isymMax
 			     + internal_symhdr->iextMax);
 
+  if (raw != NULL)
+    free (raw);
   return true;
+ error_return:
+  if (raw != NULL)
+    free (raw);
+  return false;
 }
 
 /* Read in and swap the important symbolic information for an ECOFF
@@ -2484,7 +2496,8 @@ ecoff_write_object_contents (abfd)
   bfd_size_type data_size;
   bfd_vma data_start;
   bfd_size_type bss_size;
-  PTR buff;
+  PTR buff = NULL;
+  PTR reloc_buff = NULL;
   struct internal_filehdr internal_f;
   struct internal_aouthdr internal_a;
   int i;
@@ -2517,10 +2530,26 @@ ecoff_write_object_contents (abfd)
 
   /* Write section headers to the file.  */
 
-  buff = (PTR) alloca (scnhsz);
+  /* Allocate buff big enough to hold a section header,
+     file header, or a.out header.  */
+  {
+    bfd_size_type siz;
+    siz = scnhsz;
+    if (siz < filhsz)
+      siz = filhsz;
+    if (siz < aoutsz)
+      siz = aoutsz;
+    buff = (PTR) malloc (siz);
+    if (buff == NULL)
+      {
+	bfd_set_error (bfd_error_no_memory);
+	goto error_return;
+      }
+  }
+
   internal_f.f_nscns = 0;
   if (bfd_seek (abfd, (file_ptr) (filhsz + aoutsz), SEEK_SET) != 0)
-    return false;
+    goto error_return;
   for (current = abfd->sections;
        current != (asection *) NULL;
        current = current->next)
@@ -2581,7 +2610,7 @@ ecoff_write_object_contents (abfd)
 
       bfd_coff_swap_scnhdr_out (abfd, (PTR) &section, buff);
       if (bfd_write (buff, 1, scnhsz, abfd) != scnhsz)
-	return false;
+	goto error_return;
 
       if ((section.s_flags & STYP_TEXT) != 0
 	  || ((section.s_flags & STYP_RDATA) != 0
@@ -2700,17 +2729,15 @@ ecoff_write_object_contents (abfd)
   /* Write out the file header and the optional header.  */
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
-    return false;
+    goto error_return;
 
-  buff = (PTR) alloca (filhsz);
   bfd_coff_swap_filehdr_out (abfd, (PTR) &internal_f, buff);
   if (bfd_write (buff, 1, filhsz, abfd) != filhsz)
-    return false;
+    goto error_return;
 
-  buff = (PTR) alloca (aoutsz);
   bfd_coff_swap_aouthdr_out (abfd, (PTR) &internal_a, buff);
   if (bfd_write (buff, 1, aoutsz, abfd) != aoutsz)
-    return false;
+    goto error_return;
 
   /* Build the external symbol information.  This must be done before
      writing out the relocs so that we know the symbol indices.  The
@@ -2728,7 +2755,7 @@ ecoff_write_object_contents (abfd)
 				      ? true : false),
 				     ecoff_get_extr, ecoff_set_index)
 	  == false)
-	return false;
+	goto error_return;
 
       /* Write out the relocs.  */
       for (current = abfd->sections;
@@ -2742,16 +2769,17 @@ ecoff_write_object_contents (abfd)
 	  if (current->reloc_count == 0)
 	    continue;
 
-	  buff = bfd_alloc (abfd, current->reloc_count * external_reloc_size);
-	  if (buff == NULL)
+	  reloc_buff =
+	    bfd_alloc (abfd, current->reloc_count * external_reloc_size);
+	  if (reloc_buff == NULL)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
-	      return false;
+	      goto error_return;
 	    }
 
 	  reloc_ptr_ptr = current->orelocation;
 	  reloc_end = reloc_ptr_ptr + current->reloc_count;
-	  out_ptr = (char *) buff;
+	  out_ptr = (char *) reloc_buff;
 	  for (;
 	       reloc_ptr_ptr < reloc_end;
 	       reloc_ptr_ptr++, out_ptr += external_reloc_size)
@@ -2818,11 +2846,13 @@ ecoff_write_object_contents (abfd)
 	    }
 
 	  if (bfd_seek (abfd, current->rel_filepos, SEEK_SET) != 0)
-	    return false;
-	  if (bfd_write (buff, external_reloc_size, current->reloc_count, abfd)
+	    goto error_return;
+	  if (bfd_write (reloc_buff,
+			 external_reloc_size, current->reloc_count, abfd)
 	      != external_reloc_size * current->reloc_count)
-	    return false;
-	  bfd_release (abfd, buff);
+	    goto error_return;
+	  bfd_release (abfd, reloc_buff);
+	  reloc_buff = NULL;
 	}
 
       /* Write out the symbolic debugging information.  */
@@ -2832,7 +2862,7 @@ ecoff_write_object_contents (abfd)
 	  if (bfd_ecoff_write_debug (abfd, debug, &backend->debug_swap,
 				     ecoff_data (abfd)->sym_filepos)
 	      == false)
-	    return false;
+	    goto error_return;
 	}
     }
 
@@ -2848,17 +2878,27 @@ ecoff_write_object_contents (abfd)
 
       if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
 		    SEEK_SET) != 0)
-	return false;
+	goto error_return;
       if (bfd_read (&c, 1, 1, abfd) == 0)
 	c = 0;
       if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
 		    SEEK_SET) != 0)
-	return false;
+	goto error_return;
       if (bfd_write (&c, 1, 1, abfd) != 1)
-	return false;      
+	goto error_return;
     }
 
+  if (reloc_buff != NULL)
+    bfd_release (abfd, reloc_buff);
+  if (buff != NULL)
+    free (buff);
   return true;
+ error_return:
+  if (reloc_buff != NULL)
+    bfd_release (abfd, reloc_buff);
+  if (buff != NULL)
+    free (buff);
+  return false;
 }
 
 /* Archive handling.  ECOFF uses what appears to be a unique type of
@@ -3589,35 +3629,47 @@ ecoff_link_check_archive_element (abfd, info, pneeded)
     = backend->debug_swap.swap_ext_in;
   HDRR *symhdr;
   bfd_size_type external_ext_size;
-  PTR external_ext;
+  PTR external_ext = NULL;
   size_t esize;
-  char *ssext;
+  char *ssext = NULL;
   char *ext_ptr;
   char *ext_end;
 
   *pneeded = false;
 
   if (! ecoff_slurp_symbolic_header (abfd))
-    return false;
+    goto error_return;
 
   /* If there are no symbols, we don't want it.  */
   if (bfd_get_symcount (abfd) == 0)
-    return true;
+    goto successful_return;
 
   symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
 
   /* Read in the external symbols and external strings.  */
   external_ext_size = backend->debug_swap.external_ext_size;
   esize = symhdr->iextMax * external_ext_size;
-  external_ext = (PTR) alloca (esize);
+  external_ext = (PTR) malloc (esize);
+  if (external_ext == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
   if (bfd_seek (abfd, symhdr->cbExtOffset, SEEK_SET) != 0
       || bfd_read (external_ext, 1, esize, abfd) != esize)
-    return false;
+    goto error_return;
 
-  ssext = (char *) alloca (symhdr->issExtMax);
+  ssext = (char *) malloc (symhdr->issExtMax);
+  if (ssext == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
   if (bfd_seek (abfd, symhdr->cbSsExtOffset, SEEK_SET) != 0
       || bfd_read (ssext, 1, symhdr->issExtMax, abfd) != symhdr->issExtMax)
-    return false;
+    goto error_return;
 
   /* Look through the external symbols to see if they define some
      symbol that is currently undefined.  */
@@ -3672,15 +3724,26 @@ ecoff_link_check_archive_element (abfd, info, pneeded)
 
       /* Include this element.  */
       if (! (*info->callbacks->add_archive_element) (info, abfd, name))
-	return false;
+	goto error_return;
       if (! ecoff_link_add_externals (abfd, info, external_ext, ssext))
-	return false;
+	goto error_return;
 
       *pneeded = true;
-      return true;
+      goto successful_return;
     }
 
+ successful_return:
+  if (external_ext != NULL)
+    free (external_ext);
+  if (ssext != NULL)
+    free (ssext);
   return true;
+ error_return:
+  if (external_ext != NULL)
+    free (external_ext);
+  if (ssext != NULL)
+    free (ssext);
+  return false;
 }
 
 /* Add symbols from an ECOFF object file to the global linker hash
@@ -3693,9 +3756,10 @@ ecoff_link_add_object_symbols (abfd, info)
 {
   HDRR *symhdr;
   bfd_size_type external_ext_size;
-  PTR external_ext;
+  PTR external_ext = NULL;
   size_t esize;
-  char *ssext;
+  char *ssext = NULL;
+  boolean result;
 
   if (! ecoff_slurp_symbolic_header (abfd))
     return false;
@@ -3709,17 +3773,42 @@ ecoff_link_add_object_symbols (abfd, info)
   /* Read in the external symbols and external strings.  */
   external_ext_size = ecoff_backend (abfd)->debug_swap.external_ext_size;
   esize = symhdr->iextMax * external_ext_size;
-  external_ext = (PTR) alloca (esize);
+  external_ext = (PTR) malloc (esize);
+  if (external_ext == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
   if (bfd_seek (abfd, symhdr->cbExtOffset, SEEK_SET) != 0
       || bfd_read (external_ext, 1, esize, abfd) != esize)
-    return false;
+    goto error_return;
 
-  ssext = (char *) alloca (symhdr->issExtMax);
+  ssext = (char *) malloc (symhdr->issExtMax);
+  if (ssext == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
   if (bfd_seek (abfd, symhdr->cbSsExtOffset, SEEK_SET) != 0
       || bfd_read (ssext, 1, symhdr->issExtMax, abfd) != symhdr->issExtMax)
-    return false;
+    goto error_return;
 
-  return ecoff_link_add_externals (abfd, info, external_ext, ssext);
+  result = ecoff_link_add_externals (abfd, info, external_ext, ssext);
+
+  if (ssext != NULL)
+    free (ssext);
+  if (external_ext != NULL)
+    free (external_ext);
+  return result;
+
+ error_return:
+  if (ssext != NULL)
+    free (ssext);
+  if (external_ext != NULL)
+    free (external_ext);
+  return false;
 }
 
 /* Add the external symbols of an object file to the global linker
@@ -3978,14 +4067,6 @@ ecoff_bfd_final_link (abfd, info)
     {
       boolean ret;
 
-      /* If we might be using the C based alloca function, dump memory
-	 allocated by ecoff_final_link_debug_accumulate.  */
-#ifndef __GNUC__
-#ifndef alloca
-      (void) alloca (0);
-#endif
-#endif
-
       if (bfd_get_flavour (input_bfd) == bfd_target_ecoff_flavour)
 	{
 	  /* Abitrarily set the symbolic header vstamp to the vstamp
@@ -4101,14 +4182,6 @@ ecoff_bfd_final_link (abfd, info)
 	   p != (struct bfd_link_order *) NULL;
 	   p = p->next)
 	{
-	  /* If we might be using the C based alloca function, we need
-	     to dump the memory allocated by the function
-	     ecoff_indirect_link_order.  */
-#ifndef __GNUC__
-#ifndef alloca
-	  (void) alloca (0);
-#endif
-#endif
 	  if (p->type == bfd_indirect_link_order
 	      && (bfd_get_flavour (p->u.indirect.section->owner)
 		  == bfd_target_ecoff_flavour))
@@ -4151,12 +4224,21 @@ ecoff_final_link_debug_accumulate (output_bfd, input_bfd, info, handle)
     debug->ptr = NULL;							\
   else									\
     {									\
-      debug->ptr = (type) alloca (size * symhdr->count);		\
+      debug->ptr = (type) malloc (size * symhdr->count);		\
+      if (debug->ptr == NULL)						\
+	{								\
+          bfd_set_error (bfd_error_no_memory);				\
+          ret = false;							\
+          goto return_something;					\
+	}								\
       if ((bfd_seek (input_bfd, (file_ptr) symhdr->offset, SEEK_SET)	\
 	   != 0)							\
 	  || (bfd_read (debug->ptr, size, symhdr->count,		\
 			input_bfd) != size * symhdr->count))		\
-	return false;							\
+	{								\
+          ret = false;							\
+          goto return_something;					\
+	}								\
     }
 
   READ (line, cbLineOffset, cbLine, sizeof (unsigned char), unsigned char *);
@@ -4177,6 +4259,26 @@ ecoff_final_link_debug_accumulate (output_bfd, input_bfd, info, handle)
 	 (handle, output_bfd, &ecoff_data (output_bfd)->debug_info,
 	  &ecoff_backend (output_bfd)->debug_swap,
 	  input_bfd, debug, swap, info));
+
+ return_something:
+  if (debug->line != NULL)
+    free (debug->line);
+  if (debug->external_dnr != NULL)
+    free (debug->external_dnr);
+  if (debug->external_pdr != NULL)
+    free (debug->external_pdr);
+  if (debug->external_sym != NULL)
+    free (debug->external_sym);
+  if (debug->external_opt != NULL)
+    free (debug->external_opt);
+  if (debug->external_aux != NULL)
+    free (debug->external_aux);
+  if (debug->ss != NULL)
+    free (debug->ss);
+  if (debug->external_fdr != NULL)
+    free (debug->external_fdr);
+  if (debug->external_rfd != NULL)
+    free (debug->external_rfd);
 
   /* Make sure we don't accidentally follow one of these pointers on
      to the stack.  */
@@ -4293,10 +4395,10 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
   asection *input_section;
   bfd *input_bfd;
   bfd_size_type input_size;
-  bfd_byte *contents;
+  bfd_byte *contents = NULL;
   bfd_size_type external_reloc_size;
   bfd_size_type external_relocs_size;
-  PTR external_relocs;
+  PTR external_relocs = NULL;
 
   BFD_ASSERT ((output_section->flags & SEC_HAS_CONTENTS) != 0);
 
@@ -4312,25 +4414,36 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
 
   /* Get the section contents.  */
   input_size = bfd_section_size (input_bfd, input_section);
-  contents = (bfd_byte *) alloca (input_size);
+  contents = (bfd_byte *) malloc (input_size);
+  if (contents == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
   if (! bfd_get_section_contents (input_bfd, input_section, (PTR) contents,
 				  (file_ptr) 0, input_size))
-    return false;
+    goto error_return;
 
   /* Get the relocs.  */
   external_reloc_size = ecoff_backend (input_bfd)->external_reloc_size;
   external_relocs_size = external_reloc_size * input_section->reloc_count;
-  external_relocs = (PTR) alloca (external_relocs_size);
+  external_relocs = (PTR) malloc (external_relocs_size);
+  if (external_relocs == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
   if (bfd_seek (input_bfd, input_section->rel_filepos, SEEK_SET) != 0
       || (bfd_read (external_relocs, 1, external_relocs_size, input_bfd)
 	  != external_relocs_size))
-    return false;
+    goto error_return;
 
   /* Relocate the section contents.  */
   if (! ((*ecoff_backend (input_bfd)->relocate_section)
 	 (output_bfd, info, input_bfd, input_section, contents,
 	  external_relocs)))
-    return false;
+    goto error_return;
 
   /* Write out the relocated section.  */
   if (! bfd_set_section_contents (output_bfd,
@@ -4338,7 +4451,7 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
 				  (PTR) contents,
 				  input_section->output_offset,
 				  input_size))
-    return false;
+    goto error_return;
 
   /* If we are producing relocateable output, the relocs were
      modified, and we write them out now.  We use the reloc_count
@@ -4352,9 +4465,20 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
 		    SEEK_SET) != 0
 	  || (bfd_write (external_relocs, 1, external_relocs_size, output_bfd)
 	      != external_relocs_size))
-	return false;
+	goto error_return;
       output_section->reloc_count += input_section->reloc_count;
     }
 
+  if (contents != NULL)
+    free (contents);
+  if (external_relocs != NULL)
+    free (external_relocs);
   return true;
+
+ error_return:
+  if (contents != NULL)
+    free (contents);
+  if (external_relocs != NULL)
+    free (external_relocs);
+  return false;
 }
