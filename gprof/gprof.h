@@ -21,7 +21,7 @@
 #ifndef gprof_h
 #define gprof_h
 
-#include <ansidecl.h>
+#include "ansidecl.h"
 
 /* Include the BFD sysdep.h file.  */
 #include "sysdep.h"
@@ -30,8 +30,6 @@
    gprof config.h file.  */
 #undef PACKAGE
 #undef VERSION
-/* Also undefine BFD's `_' macro; we have our own definition.  */
-#undef _
 
 #include "gconfig.h"
 
@@ -49,7 +47,7 @@
 #define PATH_MAX	1024
 #endif
 
-#define	A_OUTNAME	"a.out"	/* default core filename */
+#define	A_OUTNAME	"a.out"		/* default core filename */
 #define	GMONNAME	"gmon.out"	/* default profile filename */
 #define	GMONSUM		"gmon.sum"	/* profile summary filename */
 
@@ -58,22 +56,9 @@
 #endif
 
 #ifdef ENABLE_NLS
-# include <libintl.h>
-# define _(String) gettext (String)
-# ifdef gettext_noop
-#  define N_(String) gettext_noop (String)
-# else
-#  define N_(String) (String)
-# endif
-#else
-/* Stubs that do something close enough.  */
-# define textdomain(String) (String)
-# define gettext(String) (String)
-# define dgettext(Domain,Message) (Message)
-# define dcgettext(Domain,Message,Type) (Message)
-# define bindtextdomain(Domain,Directory) (Domain)
-# define _(String) (String)
-# define N_(String) (String)
+/* Undefine BFD's `_' macro; we have our own definition.  */
+#undef _
+#define _(String) gettext (String)
 #endif
 
 #include "bin-bugs.h"
