@@ -2414,7 +2414,7 @@ _bfd_mips_elf_set_section_contents (abfd, section, location, offset, count)
 	    size = section->_cooked_size;
 	  else
 	    size = section->_raw_size;
-	  c = (PTR) bfd_zalloc (abfd, size);
+	  c = (bfd_byte *) bfd_zalloc (abfd, size);
 	  if (c == NULL)
 	    return false;
 	  elf_section_data (section)->tdata = (PTR) c;
@@ -3711,7 +3711,7 @@ mips_elf_create_procedure_table (handle, abfd, info, s, debug)
 
   /* Set the size and contents of .rtproc section.  */
   s->_raw_size = size;
-  s->contents = rtproc;
+  s->contents = (bfd_byte *) rtproc;
 
   /* Skip this section later on (I don't think this currently
      matters, but someday it might).  */
@@ -5412,8 +5412,8 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 }
 
 /* This hook function is called before the linker writes out a global
-   symbol.  This is where we undo the increment of the value for a
-   mips16 symbol.  */
+   symbol.  We mark symbols as small common if appropriate.  This is
+   also where we undo the increment of the value for a mips16 symbol.  */
 
 /*ARGSIGNORED*/
 static boolean
@@ -5424,9 +5424,17 @@ mips_elf_link_output_symbol_hook (abfd, info, name, sym, input_sec)
      Elf_Internal_Sym *sym;
      asection *input_sec;
 {
+  /* If we see a common symbol, which implies a relocatable link, then
+     if a symbol was small common in an input file, mark it as small
+     common in the output file.  */
+  if (sym->st_shndx == SHN_COMMON
+      && strcmp (input_sec->name, ".scommon") == 0)
+    sym->st_shndx = SHN_MIPS_SCOMMON;
+
   if (sym->st_other == STO_MIPS16
       && (sym->st_value & 1) != 0)
     --sym->st_value;
+
   return true;
 }
 

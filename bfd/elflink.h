@@ -4277,7 +4277,7 @@ elf_link_output_extsym (h, data)
       break;
 
     case bfd_link_hash_common:
-      input_sec = bfd_com_section_ptr;
+      input_sec = h->root.u.c.p->section;
       sym.st_shndx = SHN_COMMON;
       sym.st_value = 1 << h->root.u.c.p->alignment_power;
       break;
