@@ -1,3 +1,12 @@
+Mon Jun  1 17:25:16 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Use && rather than using -a in test, because odd
+	strings can confuse test.
+
+Thu May 28 19:31:13 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltconfig, ltmain.sh: Bring in Visual C++ support.
+
 Mon May 11 23:11:34 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* COPYING.LIB: Update FSF address.
@@ -91,6 +100,7 @@ Tue Apr 21 23:06:54 1998  Tom Tromey  <tromey@cygnus.com>
 	(all-gprof): Likewise.
 	(all-ld): Likewise.
 
+start-sanitize-java
 Mon Apr 20 14:26:26 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* Makefile.in (ALL_TARGET_MODULES): Added libjava, boehm-gc.
@@ -101,6 +111,7 @@ Mon Apr 20 14:26:26 1998  Tom Tromey  <tromey@cygnus.com>
 	(all-target-libjava): New target.
 	(all-target-boehm-gc): Likewise.
 	* configure.in (target_libs): Added libjava, boehm-gc.
+end-sanitize-java
 
 1998-04-19  Brendan Kehoe  <brendan@cygnus.com>
 
@@ -229,6 +240,10 @@ Tue Mar  3 11:01:52 1998  Gavin Koch  <gavin@cygnus.com>
 	* config.sub (mips64vr4320-unknown-elf) : Added.
 
 end-sanitize-vr4320
+
+Mon Feb 23 15:09:18 1998  Bruno Haible <bruno@linuix.mathematik.uni-karlsruhe.de>
+
+        * config.sub (sco5): Fix typo.
 
 Mon Feb 23 14:46:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
