@@ -1674,15 +1674,15 @@ rs6000_builtin_type (typenum)
 			   "character", NULL);
       break;
     case 21:
-      rettype = init_type (TYPE_CODE_INT, 1, TYPE_FLAG_UNSIGNED,
+      rettype = init_type (TYPE_CODE_BOOL, 1, TYPE_FLAG_UNSIGNED,
 			   "logical*1", NULL);
       break;
     case 22:
-      rettype = init_type (TYPE_CODE_INT, 2, TYPE_FLAG_UNSIGNED,
+      rettype = init_type (TYPE_CODE_BOOL, 2, TYPE_FLAG_UNSIGNED,
 			   "logical*2", NULL);
       break;
     case 23:
-      rettype = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED,
+      rettype = init_type (TYPE_CODE_BOOL, 4, TYPE_FLAG_UNSIGNED,
 			   "logical*4", NULL);
       break;
     case 24:
