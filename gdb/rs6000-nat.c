@@ -407,6 +407,9 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
     / sizeof (int);
 
   /* Allocate word transfer buffer. */
+  /* FIXME (alloca): This code, cloned from infptrace.c, is unsafe
+     because it uses alloca to allocate a buffer of arbitrary size.
+     For very large xfers, this could crash GDB's stack.  */
   int *buf = (int *) alloca (count * sizeof (int));
 
   int arch64 = ARCH64 ();
