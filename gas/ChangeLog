@@ -1,3 +1,8 @@
+Tue Oct 20 10:49:42 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (md_apply_fix3): Change handling of PCREL reloc
+ 	for BFD_ASSEMBLER to only change value when COFF if TE_PE.
+
 Mon Oct 19 20:20:42 1998  Catherine Moore  <clm@cygnus.com>
 
         * config/tc-sh.h (obj_fix_adjustable):  Define.

@@ -1511,6 +1511,28 @@ md_assemble (line)
 	  }
       }
 
+    if (i.tm.base_opcode == AMD_3DNOW_OPCODE)
+      {
+	/* These AMD specific instructions have an opcode suffix which
+	   is coded in the same place as an 8-bit immediate field
+	   would be.  Here we fake an 8-bit immediate operand from the
+	   opcode suffix stored in tm.extension_opcode.
+	   Note: this "opcode suffix" has nothing to do with what gas
+	   calls opcode suffixes.  gas opcode suffixes should really
+	   be called instruction mnemonic suffixes.  FIXME maybe.  */
+
+	expressionS *exp;
+
+	assert(i.imm_operands == 0 && i.operands <= 2);
+
+	exp = &im_expressions[i.imm_operands++];
+	i.imms[i.operands] = exp;
+	i.types[i.operands++] = Imm8;
+	exp->X_op = O_constant;
+	exp->X_add_number = i.tm.extension_opcode;
+	i.tm.extension_opcode = None;
+      }
+
     /* For insns with operands there are more diddles to do to the opcode. */
     if (i.operands)
       {
@@ -2283,7 +2305,7 @@ i386_operand (operand_string)
       op_string = end_op;
       if (is_space_char (*op_string))
 	++op_string;
-      if (*op_string)
+      if (*op_string == ':')
 	{
 	  if (r->reg_type & (SReg2 | SReg3))
 	    {
@@ -3090,7 +3112,10 @@ md_apply_fix3 (fixP, valp, seg)
     {
 #ifndef OBJ_AOUT
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour
-	  || OUTPUT_FLAVOR == bfd_target_coff_flavour)
+#ifdef TE_PE
+	  || OUTPUT_FLAVOR == bfd_target_coff_flavour
+#endif
+	  )
 	value += fixP->fx_where + fixP->fx_frag->fr_address;
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
