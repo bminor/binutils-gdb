@@ -1,3 +1,9 @@
+Tue Aug  3 11:29:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-ecoff.c: Updated for BFD ECOFF changes.  Now gets the
+	swapping routines and external structure sizes via the
+	ecoff_backend information.  No longer includes coff/mips.h.
+
 Mon Aug  2 17:35:48 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-ecoff.c (get_tag): Save tag name in permanent memory

@@ -23,10 +23,9 @@
 
 #include "as.h"
 #include "coff/internal.h"
-#include "coff/mips.h"
 #include "coff/sym.h"
 #include "coff/symconst.h"
-#include "coff/ecoff-ext.h"
+#include "coff/ecoff.h"
 #include "aout/stab_gnu.h"
 #include "../bfd/libecoff.h"
 
@@ -1461,7 +1460,7 @@ static void obj_ecoff_mask PARAMS ((int));
 static void mark_stabs PARAMS ((int));
 static char *ecoff_add_bytes PARAMS ((char **buf, char **bufend,
 				      char *bufptr, long need));
-static long ecoff_longword_adjust PARAMS ((char **buf, char **bufend,
+static long ecoff_padding_adjust PARAMS ((char **buf, char **bufend,
 					   long offset, char **bufptrptr));
 static long ecoff_build_lineno PARAMS ((char **buf, char **bufend,
 					long offset, long *linecntptr));
@@ -1727,7 +1726,7 @@ add_ecoff_symbol (str, type, storage, sym_value, value, indx)
 
   ++vp->num_allocated;
 
-  if (MIPS_IS_STAB (&psym->ecoff_sym))
+  if (ECOFF_IS_STAB (&psym->ecoff_sym))
     return psym;
 
   /* Save the symbol within the hash table if this is a static
@@ -2285,7 +2284,7 @@ add_file (file_name, indx)
       (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
 			       symbol_new ("L0\001", now_seg,
 					   frag_now_fix (), frag_now),
-			       0, MIPS_MARK_STAB (N_SOL));
+			       0, ECOFF_MARK_STAB (N_SOL));
       return;
     }
 
@@ -3305,7 +3304,7 @@ mark_stabs (ignore)
       stabs_seen = 1;
       (void) add_ecoff_symbol (stabs_symbol, stNil, scInfo,
 			       (symbolS *) NULL,
-			       (symint_t) -1, MIPS_MARK_STAB (0));
+			       (symint_t) -1, ECOFF_MARK_STAB (0));
     }
 }
 
@@ -3511,7 +3510,7 @@ obj_ecoff_stab (type)
 	    }
 	}
 
-      code = MIPS_MARK_STAB (code);
+      code = ECOFF_MARK_STAB (code);
     }
 
   (void) add_ecoff_symbol (string, st, sc, sym, value, code);
@@ -3542,20 +3541,24 @@ ecoff_add_bytes (buf, bufend, bufptr, need)
   return *buf + at;
 }
 
-/* Adjust the symbolic information buffer to a longword boundary.  */
+/* Adjust the symbolic information buffer to the alignment required
+   for the ECOFF target debugging information.  */
 
 static long
-ecoff_longword_adjust (buf, bufend, offset, bufptrptr)
+ecoff_padding_adjust (buf, bufend, offset, bufptrptr)
      char **buf;
      char **bufend;
      long offset;
      char **bufptrptr;
 {
-  if ((offset & 3) != 0)
+  bfd_size_type align;
+
+  align = ecoff_backend (stdoutput)->debug_align;
+  if ((offset & (align - 1)) != 0)
     {
       long add;
 
-      add = 4 - (offset & 3);
+      add = align - (offset & (align - 1));
       if (*bufend - (*buf + offset) < add)
 	(void) ecoff_add_bytes (buf, bufend, *buf + offset, add);
       memset (*buf + offset, 0, add);
@@ -3753,7 +3756,7 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
   if (linecntptr != (long *) NULL)
     *linecntptr += totcount;
 
-  c = ecoff_longword_adjust (buf, bufend, c, &bufptr);
+  c = ecoff_padding_adjust (buf, bufend, c, &bufptr);
 
   return c;
 }
@@ -3778,14 +3781,22 @@ ecoff_build_symbols (buf,
      varray_t *ext_strings;
      struct hash_control *ext_str_hash;
 {
-  struct sym_ext *sym_out;
-  struct ext_ext *ext_out;
+  const bfd_size_type external_sym_size =
+    ecoff_backend (stdoutput)->external_sym_size;
+  const bfd_size_type external_ext_size =
+    ecoff_backend (stdoutput)->external_ext_size;
+  void (* const swap_sym_out) PARAMS ((bfd *, const SYMR *, PTR))
+    = ecoff_backend (stdoutput)->swap_sym_out;
+  void (* const swap_ext_out) PARAMS ((bfd *, const EXTR *, PTR))
+    = ecoff_backend (stdoutput)->swap_ext_out;
+  char *sym_out;
+  char *ext_out;
   long isym;
   long iext;
   vlinks_t *file_link;
 
-  sym_out = (struct sym_ext *) (*buf + offset);
-  ext_out = (struct ext_ext *) (*extbuf + *extoffset);
+  sym_out = *buf + offset;
+  ext_out = *extbuf + *extoffset;
 
   isym = 0;
   iext = 0;
@@ -3885,9 +3896,9 @@ ecoff_build_symbols (buf,
 		      indx = sym_ptr->ecoff_sym.index;
 		      if (sym_ptr->ecoff_sym.st == st_Nil
 			  && sym_ptr->ecoff_sym.sc == sc_Nil
-			  && (! MIPS_IS_STAB (&sym_ptr->ecoff_sym)
-			      || ((MIPS_UNMARK_STAB (indx) != N_LBRAC)
-				  && (MIPS_UNMARK_STAB (indx) != N_RBRAC))))
+			  && (! ECOFF_IS_STAB (&sym_ptr->ecoff_sym)
+			      || ((ECOFF_UNMARK_STAB (indx) != N_LBRAC)
+				  && (ECOFF_UNMARK_STAB (indx) != N_RBRAC))))
 			{
 			  segT seg;
 			  const char *segname;
@@ -3955,7 +3966,7 @@ ecoff_build_symbols (buf,
 			   || ! S_IS_DEFINED (as_sym))
 			  && sym_ptr->proc_ptr == (proc_t *) NULL
 			  && sym_ptr->ecoff_sym.st != (int) st_Nil
-			  && ! MIPS_IS_STAB (&sym_ptr->ecoff_sym))
+			  && ! ECOFF_IS_STAB (&sym_ptr->ecoff_sym))
 			local = 0;
 
 		      /* If an st_end symbol has an associated gas
@@ -3992,11 +4003,12 @@ ecoff_build_symbols (buf,
 			  || begin_type == st_Block)
 			{
 			  begin_ptr->ecoff_sym.index = isym - ifilesym + 1;
-			  ecoff_swap_sym_out (stdoutput,
-					      &begin_ptr->ecoff_sym,
-					      (((struct sym_ext *)
-						(*buf + offset))
-					       + begin_ptr->sym_index));
+			  (*swap_sym_out) (stdoutput,
+					   &begin_ptr->ecoff_sym,
+					   (*buf
+					    + offset
+					    + (begin_ptr->sym_index
+					       * external_sym_size)));
 			}
 		      else
 			{
@@ -4048,14 +4060,13 @@ ecoff_build_symbols (buf,
 
 		  if (local)
 		    {
-		      if (*bufend - (char *) sym_out < sizeof (struct sym_ext))
-			sym_out = ((struct sym_ext *)
-				   ecoff_add_bytes (buf, bufend,
-						    (char *) sym_out,
-						    sizeof (struct sym_ext)));
-		      ecoff_swap_sym_out (stdoutput, &sym_ptr->ecoff_sym,
-					  sym_out);
-		      ++sym_out;
+		      if (*bufend - sym_out < external_sym_size)
+			sym_out = ecoff_add_bytes (buf, bufend,
+						   sym_out,
+						   external_sym_size);
+		      (*swap_sym_out) (stdoutput, &sym_ptr->ecoff_sym,
+				       sym_out);
+		      sym_out += external_sym_size;
 
 		      sym_ptr->sym_index = isym;
 
@@ -4070,7 +4081,7 @@ ecoff_build_symbols (buf,
 		  if (as_sym != (symbolS *) NULL
 		      && (S_IS_EXTERNAL (as_sym)
 			  || ! S_IS_DEFINED (as_sym))
-		      && ! MIPS_IS_STAB (&sym_ptr->ecoff_sym))
+		      && ! ECOFF_IS_STAB (&sym_ptr->ecoff_sym))
 		    {
 		      EXTR ext;
 
@@ -4087,15 +4098,13 @@ ecoff_build_symbols (buf,
 						 ext_str_hash,
 						 S_GET_NAME (as_sym),
 						 (shash_t **) NULL);
-		      if (*extbufend - (char *) ext_out
-			  < sizeof (struct ext_ext))
-			ext_out = ((struct ext_ext *)
-				   ecoff_add_bytes (extbuf, extbufend,
-						    (char *) ext_out,
-						    sizeof (struct ext_ext)));
-		      ecoff_swap_ext_out (stdoutput, &ext, ext_out);
+		      if (*extbufend - ext_out < external_ext_size)
+			ext_out = ecoff_add_bytes (extbuf, extbufend,
+						   ext_out,
+						   external_ext_size);
+		      (*swap_ext_out) (stdoutput, &ext, ext_out);
 		      ecoff_set_sym_index (as_sym->bsym, iext);
-		      ++ext_out;
+		      ext_out += external_ext_size;
 		      ++iext;
 		    }
 		}
@@ -4104,8 +4113,8 @@ ecoff_build_symbols (buf,
 	}
     }
 
-  *extoffset += iext * sizeof (struct ext_ext);
-  return offset + isym * sizeof (struct sym_ext);
+  *extoffset += iext * external_ext_size;
+  return offset + isym * external_sym_size;
 }
 
 /* Swap out the procedure information.  */
@@ -4116,12 +4125,16 @@ ecoff_build_procs (buf, bufend, offset)
      char **bufend;
      long offset;
 {
-  struct pdr_ext *pdr_out;
+  const bfd_size_type external_pdr_size
+    = ecoff_backend (stdoutput)->external_pdr_size;
+  void (* const swap_pdr_out) PARAMS ((bfd *, const PDR *, PTR))
+    = ecoff_backend (stdoutput)->swap_pdr_out;
+  char *pdr_out;
   int first_fil;
   long iproc;
   vlinks_t *file_link;
 
-  pdr_out = (struct pdr_ext *) (*buf + offset);
+  pdr_out = *buf + offset;
   
   first_fil = 1;
   iproc = 0;
@@ -4180,13 +4193,12 @@ ecoff_build_procs (buf, bufend, offset)
 		      first = 0;
 		    }
 		  proc_ptr->pdr.adr = adr - fil_ptr->fdr.adr;
-		  if (*bufend - (char *) pdr_out < sizeof (struct pdr_ext))
-		    pdr_out = ((struct pdr_ext *)
-			       ecoff_add_bytes (buf, bufend,
-						(char *) pdr_out,
-						sizeof (struct pdr_ext)));
-		  ecoff_swap_pdr_out (stdoutput, &proc_ptr->pdr, pdr_out);
-		  ++pdr_out;
+		  if (*bufend - pdr_out < external_pdr_size)
+		    pdr_out = ecoff_add_bytes (buf, bufend,
+					       pdr_out,
+					       external_pdr_size);
+		  (*swap_pdr_out) (stdoutput, &proc_ptr->pdr, pdr_out);
+		  pdr_out += external_pdr_size;
 		  ++iproc;
 		}
 	    }
@@ -4194,7 +4206,7 @@ ecoff_build_procs (buf, bufend, offset)
 	}
     }
 
-  return offset + iproc * sizeof (struct pdr_ext);
+  return offset + iproc * external_pdr_size;
 }
 
 /* Swap out the aux information.  */
@@ -4384,7 +4396,7 @@ ecoff_build_ss (buf, bufend, offset)
 	}
     }
 
-  return ecoff_longword_adjust (buf, bufend, offset + iss, (char **) NULL);
+  return ecoff_padding_adjust (buf, bufend, offset + iss, (char **) NULL);
 }
 
 /* Swap out the file descriptors.  */
@@ -4395,13 +4407,17 @@ ecoff_build_fdr (buf, bufend, offset)
      char **bufend;
      long offset;
 {
+  const bfd_size_type external_fdr_size
+    = ecoff_backend (stdoutput)->external_fdr_size;
+  void (* const swap_fdr_out) PARAMS ((bfd *, const FDR *, PTR))
+    = ecoff_backend (stdoutput)->swap_fdr_out;
   long ifile;
-  struct fdr_ext *fdr_out;
+  char *fdr_out;
   vlinks_t *file_link;
 
   ifile = 0;
 
-  fdr_out = (struct fdr_ext *) (*buf + offset);
+  fdr_out = *buf + offset;
 
   for (file_link = file_desc.first;
        file_link != (vlinks_t *) NULL;
@@ -4419,17 +4435,16 @@ ecoff_build_fdr (buf, bufend, offset)
       fil_end = fil_ptr + fil_cnt;
       for (; fil_ptr < fil_end; fil_ptr++)
 	{
-	  if (*bufend - (char *) fdr_out < sizeof (struct fdr_ext))
-	    fdr_out = ((struct fdr_ext *)
-		       ecoff_add_bytes (buf, bufend, (char *) fdr_out,
-					sizeof (struct fdr_ext)));
-	  ecoff_swap_fdr_out (stdoutput, &fil_ptr->fdr, fdr_out);
-	  ++fdr_out;
+	  if (*bufend - fdr_out < external_fdr_size)
+	    fdr_out = ecoff_add_bytes (buf, bufend, fdr_out,
+				       external_fdr_size);
+	  (*swap_fdr_out) (stdoutput, &fil_ptr->fdr, fdr_out);
+	  fdr_out += external_fdr_size;
 	  ++ifile;
 	}
     }
 
-  return offset + ifile * sizeof (struct fdr_ext);
+  return offset + ifile * external_fdr_size;
 }
 
 /* Swap out the symbols and debugging information for BFD.  */
@@ -4437,6 +4452,8 @@ ecoff_build_fdr (buf, bufend, offset)
 void
 ecoff_frob_file ()
 {
+  const struct ecoff_backend_data * const backend = ecoff_backend (stdoutput);
+  const bfd_size_type external_pdr_size = backend->external_pdr_size;
   tag_t *ptag;
   tag_t *ptag_next;
   efdr_t *fil_ptr;
@@ -4549,10 +4566,10 @@ ecoff_frob_file ()
      space at this point.  */
   hdr->ipdMax = proc_cnt;
   hdr->cbPdOffset = offset;
-  if (bufend - (buf + offset) < proc_cnt * sizeof (struct pdr_ext))
+  if (bufend - (buf + offset) < proc_cnt * external_pdr_size)
     (void) ecoff_add_bytes (&buf, &bufend, buf + offset,
-			    proc_cnt * sizeof (struct pdr_ext));
-  offset += proc_cnt * sizeof (struct pdr_ext);
+			    proc_cnt * external_pdr_size);
+  offset += proc_cnt * external_pdr_size;
 
   /* Build the symbols.  It's convenient to build both the local and
      external symbols at the same time.  We can put the local symbols
@@ -4567,7 +4584,7 @@ ecoff_frob_file ()
   offset = ecoff_build_symbols (&buf, &bufend, offset,
 				&extbuf, &extbufend, &extoffset,
 				&ext_strings, ext_str_hash);
-  hdr->isymMax = (offset - hdr->cbSymOffset) / sizeof (struct sym_ext);
+  hdr->isymMax = (offset - hdr->cbSymOffset) / backend->external_sym_size;
 
   /* Building the symbols initializes the symbol index in the PDR's.
      Now we can swap out the PDR's.  */
@@ -4590,7 +4607,7 @@ ecoff_frob_file ()
   /* Copy out the external strings.  */
   hdr->cbSsExtOffset = offset;
   offset += ecoff_build_strings (&buf, &bufend, offset, &ext_strings);
-  offset = ecoff_longword_adjust (&buf, &bufend, offset, (char **) NULL);
+  offset = ecoff_padding_adjust (&buf, &bufend, offset, (char **) NULL);
   hdr->issExtMax = offset - hdr->cbSsExtOffset;
 
   /* We don't use relative file descriptors.  */
@@ -4600,7 +4617,7 @@ ecoff_frob_file ()
   /* Swap out the file descriptors.  */
   hdr->cbFdOffset = offset;
   offset = ecoff_build_fdr (&buf, &bufend, offset);
-  hdr->ifdMax = (offset - hdr->cbFdOffset) / sizeof (struct fdr_ext);
+  hdr->ifdMax = (offset - hdr->cbFdOffset) / backend->external_fdr_size;
 
   /* Copy out the external symbols.  */
   hdr->cbExtOffset = offset;
@@ -4608,28 +4625,28 @@ ecoff_frob_file ()
     (void) ecoff_add_bytes (&buf, &bufend, buf + offset, extoffset);
   memcpy (buf + offset, extbuf, extoffset);
   offset += extoffset;
-  hdr->iextMax = (offset - hdr->cbExtOffset) / sizeof (struct ext_ext);
+  hdr->iextMax = (offset - hdr->cbExtOffset) / backend->external_ext_size;
 
-  know ((offset & 3) == 0);
+  know ((offset & (backend->debug_align - 1)) == 0);
 
   /* That completes the symbolic debugging information.  We must now
      finish up the symbolic header and the ecoff_tdata structure.  */
   set = buf;
-#define SET(ptr, count, type) \
-  ecoff_data (stdoutput)->ptr = (type *) set; \
-  set += hdr->count * sizeof (type)
+#define SET(ptr, count, type, size) \
+  ecoff_data (stdoutput)->ptr = (type) set; \
+  set += hdr->count * size
 
-  SET (line, cbLine, unsigned char);
-  SET (external_dnr, idnMax, struct dnr_ext);
-  SET (external_pdr, ipdMax, struct pdr_ext);
-  SET (external_sym, isymMax, struct sym_ext);
-  SET (external_opt, ioptMax, struct opt_ext);
-  SET (external_aux, iauxMax, union aux_ext);
-  SET (ss, issMax, char);
-  SET (ssext, issExtMax, char);
-  SET (external_rfd, crfd, struct rfd_ext);
-  SET (external_fdr, ifdMax, struct fdr_ext);
-  SET (external_ext, iextMax, struct ext_ext);
+  SET (line, cbLine, unsigned char *, sizeof (unsigned char));
+  SET (external_dnr, idnMax, PTR, backend->external_dnr_size);
+  SET (external_pdr, ipdMax, PTR, backend->external_pdr_size);
+  SET (external_sym, isymMax, PTR, backend->external_sym_size);
+  SET (external_opt, ioptMax, PTR, backend->external_opt_size);
+  SET (external_aux, iauxMax, union aux_ext *, sizeof (union aux_ext));
+  SET (ss, issMax, char *, sizeof (char));
+  SET (ssext, issExtMax, char *, sizeof (char));
+  SET (external_rfd, crfd, PTR, backend->external_rfd_size);
+  SET (external_fdr, ifdMax, PTR, backend->external_fdr_size);
+  SET (external_ext, iextMax, PTR, backend->external_ext_size);
 
 #undef SET
 
