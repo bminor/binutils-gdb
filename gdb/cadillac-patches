@@ -2,13 +2,23 @@
 # To apply these patches, first cd to gdb-XX/gdb, then run patch -p0 < thisfile.
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/.Sanitize,v
-retrieving revision 2.53
-diff -c -r2.53 .Sanitize
-*** 2.53	1992/06/20 00:59:25
---- .Sanitize	1992/06/23 04:47:40
+retrieving revision 2.55
+diff -c -r2.55 .Sanitize
+*** 2.55	1992/06/23 05:03:32
+--- .Sanitize	1992/06/23 05:03:51
+***************
+*** 53,58 ****
+--- 53,59 ----
+  buildsym.c
+  buildsym.h
+  c-exp.y
++ cadillac.c
+  call-cmds.h
+  coffread.c
+  command.c
 ***************
 *** 70,75 ****
---- 70,76 ----
+--- 71,77 ----
   cplus-dem.c
   createtags
   dbxread.c
@@ -945,7 +955,7 @@ diff -c -r1.42 valprint.c
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/config/ncr3000.mh,v
 retrieving revision 1.4
-diff -c -r1.4 ncr3000.mh
+diff -c -r1.4 config/ncr3000.mh
 *** 1.4	1992/06/15 19:25:13
 --- ncr3000.mh	1992/06/16 01:28:40
 ***************
