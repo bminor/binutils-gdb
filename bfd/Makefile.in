@@ -115,6 +115,7 @@ BFD32_BACKENDS = \
 	aout32.o \
 	bout.o \
 	coff-a29k.o \
+	coff-apollo.o \
 	coff-h8300.o \
 	coff-h8500.o \
 	coff-i386.o \
@@ -212,7 +213,7 @@ ALL_CFLAGS=$(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES)
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 archures.c coff-i386.c aout64.c aout32.c sunos.c demo64.c \
 	 coff-i960.c srec.c tekhex.c oasys.c ieee.c \
-	 ecoff.c coff-m68k.c coff-u68k.c \
+	 ecoff.c coff-m68k.c coff-u68k.c coff-apollo.c \
 	 coff-a29k.c coff-rs6000.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
 	 seclet.c coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \
@@ -221,7 +222,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c \
 	 cpu-rs6000.c coff-h8300.c som.c cpu-hppa.c cpu-we32k.c reloc16.c \
 	 mipsbsd.c cpu-sh.c \
-	 elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
+	 elf.c elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
 	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c \
 	 elf64.c elf64-gen.c \
 	 nlm32.c nlm32-gen.c nlm32-i386.c nlm64.c nlm64-gen.c \
@@ -405,7 +406,7 @@ Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
 	rm -f .dep1 .dep2
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
 	$(DEP) -f .dep2 $(ALL_CFLAGS) $?
-	mv -f .dep2 .dep1
+	$(srcdir)/../move-if-change .dep2 .dep1
 
 dep.sed: dep-in.sed Makefile
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
@@ -419,7 +420,12 @@ dep.sed: dep-in.sed Makefile
 dep: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
 	cat .dep >> tmp-Makefile
-	mv -f tmp-Makefile Makefile
+	$(srcdir)/../move-if-change tmp-Makefile Makefile
+
+dep-in: .dep
+	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
+	cat .dep >> tmp-Makefile.in
+	$(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
 
 host-aout.o: Makefile
 
@@ -525,6 +531,10 @@ coff-u68k.o : coff-u68k.c coff-m68k.c \
  $(INCDIR)/coff/m68k.h \
  $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
  seclet.h coffswap.h
+coff-apollo.o : coff-apollo.c \
+ $(INCDIR)/coff/apollo.h \
+ $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
+ seclet.h coffswap.h
 coff-a29k.o : coff-a29k.c \
  $(INCDIR)/coff/a29k.h \
  $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
@@ -628,6 +638,10 @@ mipsbsd.o : mipsbsd.c \
  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 cpu-sh.o : cpu-sh.c
+elf.o : elf.c elfcode.h \
+ libelf.h \
+ $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+ $(INCDIR)/elf/external.h
 elf32.o : elf32.c elfcode.h \
  libelf.h \
  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
