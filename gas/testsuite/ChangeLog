@@ -1,3 +1,8 @@
+Mon Jul  8 14:23:26 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* gas/m68k/schwab.d: Correct for ELF format.
+	* gas/m68k/all.exp: Run "schwab" test for all targets.
+
 Thu Jul  4 14:23:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Avoid DOS file naming problems:

@@ -10,7 +10,7 @@ Contents of section .text:
  0030 0920ffd2 41fb0920 ffcc41fb 0930ffff  . ..A.. ..A..0..
  0040 ffc641fb 0930ffff ffbe4e71 61ff0000  ..A..0....Nqa...
  0050 00586100 0052614e 614c4e71 41f90000  .Xa..RaNaLNqA...
- 0060 00a641fa 004241fa 00be41fb 083a41fb  ..A..BA...A..:A.
+ 0060 00(a6|00)41fa 004241fa 00be41fb 083a41fb  ..A..BA...A..:A.
  0070 083641fb 083241fb 0920002e 41fb0920  .6A..2A.. ..A.. 
  0080 002841fb 09300000 002241fb 09300000  .\(A..0..."A..0..
  0090 001a41fb 09300000 001241fb 0920000a  ..A..0....A.. ..
@@ -19,8 +19,8 @@ Contents of section .text:
  00c0 7fff4e71 41fb087f 41fb0920 008041fb  ..NqA...A.. ..A.
  00d0 09207fff 41fb0930 00008000 4e7141fa  . ..A..0....NqA.
  00e0 800041fb 0170ffff 7fff4e71 41fa7fff  ..A..p....NqA...
- 00f0 41fb0170 00008000 4e7141fb 0170ffff  A..p....NqA..p..
- 0100 ff0441fb 0930ffff fefc4e71 41f90000  ..A..0....NqA...
+ 00f0 41fb0170 00008000 4e7141fb 0170(ffff|0000)  A..p....NqA..p..
+ 0100 (ff04|0000)41fb 0930(ffff|0000) (fefc|0000)4e71 41f90000  ..A..0....NqA...
  0110 0000...............................  ................
 Disassembly of section \.text:
 0+0000 <.*> nop
@@ -44,8 +44,8 @@ Disassembly of section \.text:
 0+0056 <lbl_b\+54> bsrs 0+00a6 <lbl_a>
 0+0058 <lbl_b\+56> bsrs 0+00a6 <lbl_a>
 0+005a <lbl_b\+58> nop
-0+005c <lbl_b\+5a> lea 0+00a6 <lbl_a>,%a0
-		RELOC: 0+005e (R_68K_)?32 \.text
+0+005c <lbl_b\+5a> lea (0+00a6 <lbl_a>|0+0 <.*>),%a0
+		RELOC: 0+005e (32 \.text|R_68K_32 \.text\+0x0+00a6)
 0+0062 <lbl_b\+60> lea 0+00a6 <lbl_a>,%a0
 0+0066 <lbl_b\+64> lea 0+0126 <.*>,%a0
 0+006a <lbl_b\+68> lea %pc@\(0+a6 <lbl_a>,%d0:l\),%a0
@@ -77,12 +77,12 @@ Disassembly of section \.text:
 0+00ec <lbl_a\+46> lea 0+80ed <.*>,%a0
 0+00f0 <lbl_a\+4a> lea %pc@\(0+80f2 <.*>\),%a0
 0+00f8 <lbl_a\+52> nop
-0+00fa <lbl_a\+54> lea %pc@\(0+0 <.*>\),%a0
-		RELOC: 0+00fe (R_68K_PC|DISP)32 undef
-0+0102 <lbl_a\+5c> lea %pc@\(0+0 <.*>,%d0:l\),%a0
-		RELOC: 0+0106 (R_68K_PC|DISP)32 undef
+0+00fa <lbl_a\+54> lea %pc@\((0+0 <.*>|0+0fc <lbl_a\+56>)\),%a0
+		RELOC: 0+00fe (DISP32 undef|R_68K_PC32 undef\+0x0+02)
+0+0102 <lbl_a\+5c> lea %pc@\((0+0 <.*>|0+0104 <lbl_a\+5e>),%d0:l\),%a0
+		RELOC: 0+0106 (DISP32 undef|R_68K_PC32 undef\+0x0+02)
 0+010a <lbl_a\+64> nop
-0+010c <lbl_a\+66> lea 0+0+ <.*>,%a0
+0+010c <lbl_a\+66> lea 0+0 <.*>,%a0
 		RELOC: 0+010e (R_68K_)?32 undef
 0+0112 <lbl_a\+6c> nop
 \.\.\.
