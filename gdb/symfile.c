@@ -66,8 +66,8 @@ void (*deprecated_show_load_progress) (const char *section,
 			    unsigned long section_size,
 			    unsigned long total_sent,
 			    unsigned long total_size);
-void (*pre_add_symbol_hook) (const char *);
-void (*post_add_symbol_hook) (void);
+void (*deprecated_pre_add_symbol_hook) (const char *);
+void (*deprecated_post_add_symbol_hook) (void);
 void (*deprecated_target_new_objfile_hook) (struct objfile *);
 
 static void clear_symtab_users_cleanup (void *ignore);
@@ -805,8 +805,8 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
      performed, or need to read an unmapped symbol table. */
   if (from_tty || info_verbose)
     {
-      if (pre_add_symbol_hook)
-	pre_add_symbol_hook (name);
+      if (deprecated_pre_add_symbol_hook)
+	deprecated_pre_add_symbol_hook (name);
       else
 	{
 	  printf_unfiltered ("Reading symbols from %s...", name);
@@ -871,8 +871,8 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
 
   if (from_tty || info_verbose)
     {
-      if (post_add_symbol_hook)
-	post_add_symbol_hook ();
+      if (deprecated_post_add_symbol_hook)
+	deprecated_post_add_symbol_hook ();
       else
 	{
 	  printf_unfiltered ("done.\n");

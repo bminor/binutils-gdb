@@ -1217,8 +1217,8 @@ struct cmd_list_element;
    event-loop) be enabled? */
 extern int event_loop_p;
 
-extern void (*pre_add_symbol_hook) (const char *);
-extern void (*post_add_symbol_hook) (void);
+extern void (*deprecated_pre_add_symbol_hook) (const char *);
+extern void (*deprecated_post_add_symbol_hook) (void);
 extern void (*selected_frame_level_changed_hook) (int);
 extern int (*ui_loop_hook) (int signo);
 extern void (*deprecated_init_ui_hook) (char *argv0);
