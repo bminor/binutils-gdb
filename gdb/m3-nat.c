@@ -4521,6 +4521,12 @@ char	*p;
 }
 #endif  DUMP_SYSCALL
 
+static void
+m3_stop ()
+{
+  error ("to_stop target function not implemented");
+}
+
 struct target_ops m3_ops = {
   "mach",			/* to_shortname */
   "Mach child process",	/* to_longname */
@@ -4551,6 +4557,7 @@ struct target_ops m3_ops = {
   m3_mourn_inferior,	/* to_mourn_inferior */
   m3_can_run,		/* to_can_run */
   0,				/* to_notice_signals */
+  m3_stop,			/* to_stop */
   process_stratum,		/* to_stratum */
   0,				/* to_next */
   1,				/* to_has_all_memory */

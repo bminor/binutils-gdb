@@ -327,23 +327,45 @@ ignore (addr, contents)
 }
 
 struct target_ops core_ops = {
-	"core", "Local core dump file",
-	"Use a core file as a target.  Specify the filename of the core file.",
-	core_open, core_close,
-	find_default_attach, core_detach, 0, 0, /* resume, wait */
-	get_core_registers, 
-	0, 0, /* store_regs, prepare_to_store */
-	xfer_memory, core_files_info,
-	ignore, ignore, /* core_insert_breakpoint, core_remove_breakpoint, */
-	0, 0, 0, 0, 0, /* terminal stuff */
-	0, 0, 0, /* kill, load, lookup sym */
-	find_default_create_inferior, 0, /* mourn_inferior */
-	0, /* can_run */
-	0, /* notice_signals */
-	core_stratum, 0, /* next */
-	0, 1, 1, 1, 0,	/* all mem, mem, stack, regs, exec */
-	0, 0,			/* section pointers */
-	OPS_MAGIC,		/* Always the last thing */
+  "core",			/* to_shortname */
+  "Local core dump file",	/* to_longname */
+  "Use a core file as a target.  Specify the filename of the core file.", /* to_doc */
+  core_open,			/* to_open */
+  core_close,			/* to_close */
+  find_default_attach,		/* to_attach */
+  core_detach,			/* to_detach */
+  0,				/* to_resume */
+  0,				/* to_wait */
+  get_core_registers,		/* to_fetch_registers */
+  0,				/* to_store_registers */
+  0,				/* to_prepare_to_store */
+  xfer_memory,			/* to_xfer_memory */
+  core_files_info,		/* to_files_info */
+  ignore,			/* to_insert_breakpoint */
+  ignore,			/* to_remove_breakpoint */
+  0,				/* to_terminal_init */
+  0,				/* to_terminal_inferior */
+  0,				/* to_terminal_ours_for_output */
+  0,				/* to_terminal_ours */
+  0,				/* to_terminal_info */
+  0,				/* to_kill */
+  0,				/* to_load */
+  0,				/* to_lookup_symbol */
+  find_default_create_inferior,	/* to_create_inferior */
+  0,				/* to_mourn_inferior */
+  0,				/* to_can_run */
+  0,				/* to_notice_signals */
+  0,				/* to_stop */
+  core_stratum,			/* to_stratum */
+  0,				/* to_next */
+  0,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
+  0,				/* to_has_execution */
+  0,				/* to_sections */
+  0,				/* to_sections_end */
+  OPS_MAGIC,			/* to_magic */
 };
 
 void

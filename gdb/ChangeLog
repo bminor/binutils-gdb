@@ -1,3 +1,13 @@
+Thu Nov  3 14:25:24 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* corelow.c, exec.c, inftarg.c, m3-nat.c, op50-rom.c, procfs.c,
+	remote-adapt.c, remote-e7000.c, remote-eb.c, remote-es.c,
+	remote-hms.c, remote-mips.c, remote-mm.c, remote-mon.c,
+	remote-nindy.c, remote-os9k.c, remote-pa.c, remote-sim.c,
+	remote-st.c, remote-udi.c, remote-vx.c, remote-z8k.c, remote.c,
+	w89k-rom.c, target.c, target.h:  Add support for target_stop().
+	* gdbtk.c (gdb_stop):  Switch to target_stop().
+
 Thu Nov  3 01:23:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* osfsolib.c (solib_map_sections, first_link_map_member,
@@ -26,8 +36,7 @@ Tue Nov  1 16:41:12 1994  Stu Grossman  (grossman@cygnus.com)
 	* gdbtk.c:  Get rid of lots of unnecessary #includes.
 	* (gdbtk_init):  Use ConnectionNumber macro instead of referencing
 	Display structure directly.
-	* gdbtk.tcl:  Change exit button to quit button (makes shebs
-	happy).
+	* gdbtk.tcl:  Change exit button to quit button.
 
 Tue Nov  1 13:00:46 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 

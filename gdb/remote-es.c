@@ -2074,7 +2074,8 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   es1800_create_inferior,	/* to_create_inferior */
   NULL,				/* to_mourn_inferior */
   0,				/* to_can_run */
-  0,				/* notice_signals */
+  0,				/* to_notice_signals */
+  ignore,			/* to_stop */
   core_stratum,			/* to_stratum */
   0,				/* to_next */
   0,				/* to_has_all_memory */
@@ -2122,6 +2123,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   es1800_mourn_inferior,	/* to_mourn_inferior */
   0,				/* to_can_run */
   0,				/* notice_signals */
+  0,				/* to_stop */
   process_stratum,		/* to_stratum */
   0,				/* to_next */
   1,				/* to_has_all_memory */

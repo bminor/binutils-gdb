@@ -1032,6 +1032,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   monitor_mourn_inferior,
   0,				/* can_run */
   0, 				/* notice_signals */
+  0,				/* to_stop */
   process_stratum,
   0,				/* next */
   1,
@@ -1074,6 +1075,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   monitor_mourn_inferior,
   0,				/* can_run */
   0, 				/* notice_signals */
+  0,				/* to_stop */
   process_stratum,
   0,				/* next */
   1,
@@ -1116,6 +1118,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   monitor_mourn_inferior,
   0,				/* can_run */
   0, 				/* notice_signals */
+  0,				/* to_stop */
   process_stratum,
   0,				/* next */
   1,

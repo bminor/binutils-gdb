@@ -3656,6 +3656,20 @@ procfs_stopped_by_watchpoint(pid)
 }
 #endif
 
+/* Send a SIGINT to the process group.  This acts just like the user typed a
+   ^C on the controlling terminal.
+
+   XXX - This may not be correct for all systems.  Some may want to use
+   killpg() instead of kill (-pgrp). */
+
+void
+child_stop ()
+{
+  extern pid_t inferior_process_group;
+
+  kill (-inferior_process_group, SIGINT);
+}
+
 
 struct target_ops procfs_ops = {
   "procfs",			/* to_shortname */
@@ -3686,6 +3700,7 @@ struct target_ops procfs_ops = {
   procfs_mourn_inferior,	/* to_mourn_inferior */
   procfs_can_run,		/* to_can_run */
   procfs_notice_signals,	/* to_notice_signals */
+  child_stop,			/* to_stop */
   process_stratum,		/* to_stratum */
   0,				/* to_next */
   1,				/* to_has_all_memory */

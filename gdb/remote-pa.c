@@ -1520,6 +1520,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya) or telnet port.", 
   remote_mourn,			/* to_mourn_inferior */
   0,				/* to_can_run */
   0,				/* to_notice_signals */
+  0,				/* to_stop */
   process_stratum,		/* to_stratum */
   NULL,				/* to_next */
   1,				/* to_has_all_memory */

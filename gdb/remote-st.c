@@ -809,6 +809,7 @@ the speed to connect at in bits per second.",
   st2000_mourn_inferior,
   0,				/* can_run */
   0, 				/* notice_signals */
+  0,				/* to_stop */
   process_stratum,
   0,				/* next */
   1,
