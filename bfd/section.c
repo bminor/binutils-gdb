@@ -1081,6 +1081,11 @@ bfd_set_section_contents (abfd, section, location, offset, count)
       break;
     }
 
+  /* Record a copy of the data in memory if desired.  */
+  if (section->contents
+      && location != section->contents + offset)
+    memcpy (section->contents + offset, location, count);
+
   if (BFD_SEND (abfd, _bfd_set_section_contents,
 		(abfd, section, location, offset, count)))
     {

@@ -2998,6 +2998,8 @@ elfNN_ia64_final_link (abfd, info)
      struct bfd_link_info *info;
 {
   struct elfNN_ia64_link_hash_table *ia64_info;
+  asection *unwind_output_sec;
+
   ia64_info = elfNN_ia64_hash_table (info);
 
   /* Make sure we've got ourselves a nice fat __gp value.  */
@@ -3152,33 +3154,37 @@ elfNN_ia64_final_link (abfd, info)
         }
     }
 
-  /* Invoke the regular ELF backend linker to do all the work.  */
-  if (!bfd_elfNN_bfd_final_link (abfd, info))
-    return false;
-
   /* If we're producing a final executable, we need to sort the contents
-     of the .IA_64.unwind section.  */
+     of the .IA_64.unwind section.  Force this section to be relocated
+     into memory rather than written immediately to the output file.  */
+  unwind_output_sec = NULL;
   if (!info->relocateable)
     {
       asection *s = bfd_get_section_by_name (abfd, ELF_STRING_ia64_unwind);
       if (s)
 	{
-	  bfd_size_type size = s->output_section->_raw_size;
-	  char *contents = bfd_malloc (size);
-
-	  if (contents == NULL)
-	    return false;
-	  if (! bfd_get_section_contents (abfd, s->output_section,
-					  contents, (file_ptr) 0, size))
-	    return false;
-
-	  elfNN_ia64_unwind_entry_compare_bfd = abfd;
-	  qsort (contents, size / 24, 24, elfNN_ia64_unwind_entry_compare);
-
-	  if (! bfd_set_section_contents (abfd, s->output_section,
-					  contents, (file_ptr) 0, size))
+	  unwind_output_sec = s->output_section;
+	  unwind_output_sec->contents
+	    = bfd_malloc (unwind_output_sec->_raw_size);
+	  if (unwind_output_sec->contents == NULL)
 	    return false;
 	}
+    }
+
+  /* Invoke the regular ELF backend linker to do all the work.  */
+  if (!bfd_elfNN_bfd_final_link (abfd, info))
+    return false;
+
+  if (unwind_output_sec)
+    {
+      elfNN_ia64_unwind_entry_compare_bfd = abfd;
+      qsort (unwind_output_sec->contents, unwind_output_sec->_raw_size / 24,
+	     24, elfNN_ia64_unwind_entry_compare);
+
+      if (! bfd_set_section_contents (abfd, unwind_output_sec,
+				      unwind_output_sec->contents, 0,
+				      unwind_output_sec->_raw_size))
+	return false;
     }
 
   return true;
@@ -3885,8 +3891,6 @@ elfNN_ia64_finish_dynamic_sections (abfd, info)
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
-	  const char *name;
-	  asection *s;
 
 	  bfd_elfNN_swap_dyn_in (dynobj, dyncon, &dyn);
 

@@ -1,3 +1,10 @@
+2000-11-07  Richard Henderson  <rth@redhat.com>
+
+	* elfxx-ia64.c (elf64_ia64_final_link): New local unwind_output_sec.
+	Set it before bfd_elf64_bfd_final_link call.  Use it after the call.
+	* section.c (bfd_set_section_contents): Call memcpy if
+	section->contents set and location not equal to contents plus offset.
+
 2000-11-08  Kazu Hirata  <kazu@hxi.com>
 
 	* bfd.c: Fix formatting.
