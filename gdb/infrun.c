@@ -1478,24 +1478,9 @@ handle_inferior_event (struct execution_control_state *ecs)
       stop_signal = TARGET_SIGNAL_TRAP;
       pending_follow.kind = ecs->ws.kind;
 
-      /* Ignore fork events reported for the parent; we're only
-         interested in reacting to forks of the child.  Note that
-         we expect the child's fork event to be available if we
-         waited for it now. */
-      if (ptid_equal (inferior_ptid, ecs->ptid))
-	{
-	  pending_follow.fork_event.saw_parent_fork = 1;
-	  pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
-	  pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
-	  prepare_to_wait (ecs);
-	  return;
-	}
-      else
-	{
-	  pending_follow.fork_event.saw_child_fork = 1;
-	  pending_follow.fork_event.child_pid = PIDGET (ecs->ptid);
-	  pending_follow.fork_event.parent_pid = ecs->ws.value.related_pid;
-	}
+      pending_follow.fork_event.saw_child_fork = 1;
+      pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
+      pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
 
       stop_pc = read_pc_pid (ecs->ptid);
       ecs->saved_inferior_ptid = inferior_ptid;
@@ -1703,13 +1688,15 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       /* We had an event in the inferior, but we are not interested
          in handling it at this level. The lower layers have already
-         done what needs to be done, if anything. This case can
-         occur only when the target is async or extended-async. One
-         of the circumstamces for this to happen is when the
-         inferior produces output for the console. The inferior has
-         not stopped, and we are ignoring the event. */
+         done what needs to be done, if anything.
+	 
+	 One of the possible circumstances for this is when the
+	 inferior produces output for the console. The inferior has
+	 not stopped, and we are ignoring the event.  Another possible
+	 circumstance is any event which the lower level knows will be
+	 reported multiple times without an intervening resume.  */
     case TARGET_WAITKIND_IGNORE:
-      ecs->wait_some_more = 1;
+      prepare_to_wait (ecs);
       return;
     }
 

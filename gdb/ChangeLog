@@ -1,3 +1,11 @@
+2002-12-06  Daniel Jacobowitz  <drow@mvista.com>
+
+	* hppah-nat.c (child_wait): Return TARGET_WAITKIND_IGNORE
+	for the parent's fork event.
+	* infrun.c (handle_inferior_event): Only expect one fork event.
+	Call prepare_to_wait for TARGET_WAITKIND_IGNORE.  Update comment.
+	* target.h: Update comment for TARGET_WAITKIND_IGNORE.
+
 2002-12-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* PROBLEMS: Delete reference to PR gdb/725.

@@ -112,8 +112,8 @@ enum target_waitkind
        inferior.  */
     TARGET_WAITKIND_SPURIOUS,
 
-    /* This is used for target async and extended-async
-       only. Remote_async_wait() returns this when there is an event
+    /* An event has occured, but we should wait again.
+       Remote_async_wait() returns this when there is an event
        on the inferior, but the rest of the world is not interested in
        it. The inferior has not stopped, but has just sent some output
        to the console, for instance. In this case, we want to go back

@@ -524,13 +524,23 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  return pid_to_ptid (pid);
 	}
 
-      if (hpux_has_forked (pid, &related_pid)
-	  && ((pid == PIDGET (inferior_ptid)) 
-	      || (related_pid == PIDGET (inferior_ptid))))
+      if (hpux_has_forked (pid, &related_pid))
 	{
-	  ourstatus->kind = TARGET_WAITKIND_FORKED;
-	  ourstatus->value.related_pid = related_pid;
-	  return pid_to_ptid (pid);
+	  /* Ignore the parent's fork event.  */
+	  if (pid == PIDGET (inferior_ptid))
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	      return inferior_ptid;
+	    }
+
+	  /* If this is the child's fork event, report that the
+	     process has forked.  */
+	  if (related_pid == PIDGET (inferior_ptid))
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_FORKED;
+	      ourstatus->value.related_pid = pid;
+	      return inferior_ptid;
+	    }
 	}
 
       if (hpux_has_vforked (pid, &related_pid)
