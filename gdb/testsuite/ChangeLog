@@ -1,3 +1,12 @@
+Thu Oct 14 11:40:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t02/Makefile.in, gdb.t08/Makefile.in: Make all depend on
+	comp-info.exp so it gets built if it doesn't exist.
+
+	* gdb.t13/{Makefile.in,bitfields.exp}: Remove comp-info.exp stuff;
+	it is no longer used.
+	* gdb.t13/comp-info.c: Removed.
+
 Wed Oct 13 22:54:06 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* gdb.t06/signals.exp: Add xfail for sun3.
