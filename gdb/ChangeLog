@@ -1,3 +1,10 @@
+Tue Jul 20 12:53:47 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* symtab.c (find_line_symtab): New function, to deal with multiple
+	symtabs with the same name.
+	(find_line_pc{,_range}): Use it.
+	(find_pc_symtab): Add comment about overlapping symtabs.
+
 Mon Jul 19 21:29:14 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* Makefile.in (SFILES):  Add nlmread.c.
