@@ -102,6 +102,7 @@ array_open(args, from_tty)
   tmp_mips_processor_type = "lsi33k";	/* change the default from r3051 */
   mips_set_processor_type_command ("lsi33k", 0);
 
+  baud_rate = 4800;			/* this is the only supported baud rate */
   monitor_open (args, &array_cmds, from_tty);
 }
 
@@ -120,7 +121,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   array_ops.to_open = array_open;
 
   add_target (&array_ops);
-  baud_rate = 4800;			/* this is the only supported baud rate */
 }
 
 

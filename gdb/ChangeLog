@@ -1,3 +1,9 @@
+Fri Apr 28 23:30:00 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* array-rom.c (_initialize_array array_open):  Move baud_rate
+	initialization from _initxxx to array_open to fix bug with
+	overriding -b command line option.
+
 Thu Apr 27 20:29:34 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (RUNTEST): Fix reference of `srcdir'.
