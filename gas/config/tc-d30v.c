@@ -879,8 +879,8 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       else
 	{
 	  if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
-	    as_warn (_("Executing %s in IU in parallel with %s may not work"),
-		     opcode1->op->name, opcode2->op->name);
+	    as_warn (_("Executing %s in IU may not work in parallel execution"),
+		     opcode2->op->name);
 	  
 	  insn = FM00 | (insn1 << 32) | insn2;  
 	  fx = fx->next;
@@ -902,10 +902,12 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
     case EXEC_REVSEQ:	/* reverse sequential */
       if (opcode2->op->unit == MU)
 	as_bad (_("MU instruction may not be in the right container"));
-      if (opcode1->op->unit == EITHER_BUT_PREFER_MU
-	  || opcode2->op->unit == EITHER_BUT_PREFER_MU)
+      if (opcode1->op->unit == EITHER_BUT_PREFER_MU)
 	as_warn (_("Executing %s in reverse serial with %s may not work"),
 		 opcode1->op->name, opcode2->op->name);
+      else if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
+	as_warn (_("Executing %s in IU in reverse serial may not work"),
+		 opcode2->op->name);
       insn = FM10 | (insn1 << 32) | insn2;  
       fx = fx->next;
       break;
