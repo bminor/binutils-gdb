@@ -1,5 +1,7 @@
 2002-06-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-nbsd.h (HAVE_SSE_REGS): Remove define.
+
 	* configure.tgt (i[3456]86-*-openbsd*): Fold into
 	i[3456]86-*-netbsd* case.
 	* config/i386/tm-obsd.h: Removed.
