@@ -1,3 +1,7 @@
+Wed Oct 20 10:28:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hosts/i386bsd.h [__bsdi__]: Define HOST_DATA_START_ADDR.
+
 Tue Oct 19 15:26:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coff-alpha.c: Implemented reloc handling for the linker, made
