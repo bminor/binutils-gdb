@@ -1,3 +1,20 @@
+Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+start-sanitize-am30
+Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (hw): Delete variable, moved to SIM_DESC.
+	(sim_open): Delete calls to hw_tree_create, hw_tree_finish.
+  	Handled by sim-module.
+	(sim_open): Do not anotate tree with trace properties, handled by
+ 	sim-hw.c
+	(sim_open): Call sim_hw_parse instead of hw_tree_parse.
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+end-sanitize-am30
 start-sanitize-am30
 Thu Mar 26 20:46:18 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 

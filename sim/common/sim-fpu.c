@@ -139,7 +139,7 @@ typedef union {
 #define PADMASK     (is_double ? 0 : LSMASK64 (NR_PAD32 - 1, 0))
 
 #define NR_GUARDS32 (7 + NR_PAD32)
-#define NR_GUARDS64 (8 + NR_PAD32)
+#define NR_GUARDS64 (8 + NR_PAD64)
 #define NR_GUARDS  (is_double ? NR_GUARDS64 : NR_GUARDS32)
 #define GUARDMASK  LSMASK64 (NR_GUARDS - 1, 0)
 
@@ -2401,12 +2401,24 @@ sim_fpu_gt (int *is,
 
 /* A number of useful constants */
 
-const sim_fpu sim_fpu_zero = { sim_fpu_class_zero, };
-const sim_fpu sim_fpu_qnan = { sim_fpu_class_qnan, };
-const sim_fpu sim_fpu_one = { sim_fpu_class_number, 0, IMPLICIT_1, 1 };
-const sim_fpu sim_fpu_two = { sim_fpu_class_number, 0, IMPLICIT_1, 2 };
-const sim_fpu sim_fpu_max32 = { sim_fpu_class_number, 0, LSMASK64 (NR_FRAC_GUARD, NR_GUARDS32), NORMAL_EXPMAX32 };
-const sim_fpu sim_fpu_max64 = { sim_fpu_class_number, 0, LSMASK64 (NR_FRAC_GUARD, NR_GUARDS64), NORMAL_EXPMAX64 };
+EXTERN_SIM_FPU (const sim_fpu) sim_fpu_zero = {
+  sim_fpu_class_zero,
+};
+EXTERN_SIM_FPU (const sim_fpu) sim_fpu_qnan = {
+  sim_fpu_class_qnan,
+};
+EXTERN_SIM_FPU (const sim_fpu) sim_fpu_one = {
+  sim_fpu_class_number, 0, IMPLICIT_1, 1
+};
+EXTERN_SIM_FPU (const sim_fpu) sim_fpu_two = {
+  sim_fpu_class_number, 0, IMPLICIT_1, 2
+};
+EXTERN_SIM_FPU (const sim_fpu) sim_fpu_max32 = {
+  sim_fpu_class_number, 0, LSMASK64 (NR_FRAC_GUARD, NR_GUARDS32), NORMAL_EXPMAX32
+};
+EXTERN_SIM_FPU (const sim_fpu) sim_fpu_max64 = {
+  sim_fpu_class_number, 0, LSMASK64 (NR_FRAC_GUARD, NR_GUARDS64), NORMAL_EXPMAX64
+};
 
 
 /* For debugging */

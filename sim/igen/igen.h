@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1998, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -59,6 +59,9 @@ struct _igen_gen_options {
   /* should multiple simulators be generated? */
   int multi_sim;
 
+  /* name of the default multi-sim model */
+  char *default_model;
+
   /* should the simulator support multi word instructions and if so,
      what is the max nr of words. */
   int multi_word;
@@ -87,20 +90,24 @@ struct _igen_trace_options {
   int combine;
 };
 
-typedef struct _igen_prefix_name {
-  char *name;
-  char *uname;
-} igen_prefix_name;
+typedef struct _igen_name {
+  char *u;
+  char *l;
+} igen_name;
+typedef struct _igen_module {
+  igen_name prefix;
+  igen_name suffix;
+} igen_module;
 
-typedef struct _igen_prefix_options {
-  igen_prefix_name global;
-  igen_prefix_name engine;
-  igen_prefix_name icache;
-  igen_prefix_name idecode;
-  igen_prefix_name itable;
-  igen_prefix_name semantics;
-  igen_prefix_name support;
-} igen_prefix_options;
+typedef struct _igen_module_options {
+  igen_module global;
+  igen_module engine;
+  igen_module icache;
+  igen_module idecode;
+  igen_module itable;
+  igen_module semantics;
+  igen_module support;
+} igen_module_options;
 
 typedef struct _igen_decode_options igen_decode_options ;
 struct _igen_decode_options {
@@ -131,8 +138,14 @@ struct _igen_decode_options {
 
 typedef struct _igen_warn_options igen_warn_options;
 struct _igen_warn_options {
+
+  /* Issue warning about discarded instructions */
   int discard;
+
+  /* Issue warning about invalid instruction widths */
+  int width;
 };
+
 
 
 typedef struct _igen_options igen_options;
@@ -145,13 +158,16 @@ struct _igen_options {
   int insn_specifying_widths;
 
   /* what should global names be prefixed with? */
-  igen_prefix_options prefix;
+  igen_module_options module;
 
   /* See above for options and flags */
   igen_gen_options gen;
 
   /* See above for trace options */
   igen_trace_options trace;
+
+  /* See above for include options */
+  table_include *include;
 
   /* See above for decode options */
   igen_decode_options decode;
@@ -176,22 +192,37 @@ struct _igen_options {
 extern igen_options options;
 
 /* default options - hopefully backward compatible */ \
-#define INIT_OPTIONS(OPTIONS) \
+#define INIT_OPTIONS() \
 do { \
-  memset (&(OPTIONS), 0, sizeof (OPTIONS)); \
-  memset (&(OPTIONS).warn, -1, sizeof ((OPTIONS).warn)); \
-  (OPTIONS).hi_bit_nr = 0; \
-  (OPTIONS).insn_bit_size = default_insn_bit_size; \
-  (OPTIONS).insn_specifying_widths = 0; \
-  (OPTIONS).prefix.global.name = ""; \
-  (OPTIONS).prefix.global.uname = ""; \
-  (OPTIONS).prefix.engine = (OPTIONS).prefix.global; \
-  (OPTIONS).prefix.icache = (OPTIONS).prefix.global; \
-  (OPTIONS).prefix.idecode = (OPTIONS).prefix.global; \
-  (OPTIONS).prefix.itable = (OPTIONS).prefix.global; \
-  (OPTIONS).prefix.semantics = (OPTIONS).prefix.global; \
-  (OPTIONS).prefix.support = (OPTIONS).prefix.global; \
-  (OPTIONS).gen.code = generate_calls; \
-  (OPTIONS).gen.icache_size = 1024; \
-  (OPTIONS).warning = warning; \
+  memset (&options, 0, sizeof options); \
+  memset (&options.warn, -1, sizeof (options.warn)); \
+  options.hi_bit_nr = 0; \
+  options.insn_bit_size = default_insn_bit_size; \
+  options.insn_specifying_widths = 0; \
+  options.module.global.prefix.u = ""; \
+  options.module.global.prefix.l = ""; \
+  /* the prefixes */ \
+  options.module.engine = options.module.global; \
+  options.module.icache = options.module.global; \
+  options.module.idecode = options.module.global; \
+  options.module.itable = options.module.global; \
+  options.module.semantics = options.module.global; \
+  options.module.support = options.module.global; \
+  /* the suffixes */ \
+  options.module.engine.suffix.l = "engine"; \
+  options.module.engine.suffix.u = "ENGINE"; \
+  options.module.icache.suffix.l = "icache"; \
+  options.module.icache.suffix.u = "ICACHE"; \
+  options.module.idecode.suffix.l = "idecode"; \
+  options.module.idecode.suffix.u = "IDECODE"; \
+  options.module.itable.suffix.l = "itable"; \
+  options.module.itable.suffix.u = "ITABLE"; \
+  options.module.semantics.suffix.l = "semantics"; \
+  options.module.semantics.suffix.u = "SEMANTICS"; \
+  options.module.support.suffix.l = "support"; \
+  options.module.support.suffix.u = "SUPPORT"; \
+  /* misc stuff */ \
+  options.gen.code = generate_calls; \
+  options.gen.icache_size = 1024; \
+  options.warning = warning; \
 } while (0)

@@ -1,3 +1,19 @@
+Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Apr  1 21:19:18 1998  Mark Alexander  <marka@cygnus.com>
+
+	* end.c: Update to version 2.7.5, fix compiler warnings and bugs.
+	* erc32.c: Ditto.
+	* exec.c: Ditto.
+	* float.c: Ditto.
+	* func.c: Ditto.
+	* help.c: Ditto.
+	* interf.c: Ditto.
+	* sis.c: Ditto.
+	* sis.h: Ditto.
+
 Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

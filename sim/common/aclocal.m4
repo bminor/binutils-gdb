@@ -94,7 +94,7 @@ AC_SUBST(sim_bswap)
 AC_ARG_ENABLE(sim-cflags,
 [  --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator],
 [case "${enableval}" in
-  yes)	 sim_cflags="-O2";;
+  yes)	 sim_cflags="-O2 -fomit-frame-pointer";;
   trace) AC_MSG_ERROR("Please use --enable-sim-debug instead."); sim_cflags="";;
   no)	 sim_cflags="";;
   *)	 sim_cflags=`echo "${enableval}" | sed -e "s/,/ /g"`;;
@@ -551,7 +551,7 @@ dnl arg[2] is a space separated list of extra target specific devices.
 AC_DEFUN(SIM_AC_OPTION_HARDWARE,
 [
 sim_hardware="-DWITH_HW=1"
-sim_hw_obj="hw-device.o hw-ports.o hw-properties.o hw-base.o hw-tree.o"
+sim_hw_obj="hw-device.o hw-ports.o hw-properties.o hw-base.o hw-tree.o sim-hw.o"
 hardware="ifelse([$1],,[core pal glue],[$1]) ifelse([$2],,,[$2])"
 AC_ARG_ENABLE(sim-hardware,
 [  --enable-sim-hardware=LIST		Specify the hardware to be included in the build.],
@@ -572,12 +572,12 @@ for i in x $hardware ; do
     *) sim_hw="$sim_hw $i" ;;
   esac
 done
-sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([[^ ]]*\)/dv-\1.o/g'`"
+sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/dv-\1.o/g'`"
 if test x"$silent" != x"yes" && test x"$hardware" != x""; then
   echo "Setting hardware to $sim_hardware, $sim_hw, $sim_hw_obj"
 fi],[
 sim_hw="$hardware"
-sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([[^ ]]*\)/dv-\1.o/g'`"
+sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/dv-\1.o/g'`"
 if test x"$silent" != x"yes"; then
   echo "Setting hardware to $sim_hardware, $sim_hw, $sim_hw_obj"
 fi])dnl
@@ -589,6 +589,8 @@ AC_SUBST(sim_hw)
 
 dnl --enable-sim-inline is for users that wish to ramp up the simulator's
 dnl performance by inlining functions.
+dnl Guarantee that unconfigured simulators do not do any inlining
+sim_inline="-DDEFAULT_INLINE=0"
 AC_DEFUN(SIM_AC_OPTION_INLINE,
 [
 default_sim_inline="ifelse([$1],,,-DDEFAULT_INLINE=[$1])"
@@ -598,15 +600,15 @@ AC_ARG_ENABLE(sim-inline,
 case "$enableval" in
   no)		sim_inline="-DDEFAULT_INLINE=0";;
   0)		sim_inline="-DDEFAULT_INLINE=0";;
-  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_INLINE";;
+  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_C_INLINE";;
   1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
   *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
        new_flag=""
        case "$x" in
 	 *_INLINE=*)	new_flag="-D$x";;
 	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
-	 *_INLINE)	new_flag="-D$x=ALL_INLINE";;
-	 *)		new_flag="-D$x""_INLINE=ALL_INLINE";;
+	 *_INLINE)	new_flag="-D$x=ALL_C_INLINE";;
+	 *)		new_flag="-D$x""_INLINE=ALL_C_INLINE";;
        esac
        if test x"$sim_inline" = x""; then
 	 sim_inline="$new_flag"

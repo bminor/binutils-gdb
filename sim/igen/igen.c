@@ -61,9 +61,9 @@ print_semantic_function_formal (lf *file,
     {
       nr += lf_printf (file, "SIM_DESC sd,\n");
       nr += lf_printf (file, "%sidecode_cache *cache_entry,\n",
-		       options.prefix.global.name);
+		       options.module.global.prefix.l);
       nr += lf_printf (file, "%sinstruction_address cia",
-		       options.prefix.global.name);
+		       options.module.global.prefix.l);
     }
   else if (options.gen.smp)
     {
@@ -71,11 +71,11 @@ print_semantic_function_formal (lf *file,
       for (word_nr = 0; word_nr < nr_prefetched_words; word_nr++)
 	{
 	  nr += lf_printf (file, "%sinstruction_word instruction_%d,\n",
-			   options.prefix.global.name,
+			   options.module.global.prefix.l,
 			   word_nr);
 	}
       nr += lf_printf (file, "%sinstruction_address cia",
-		       options.prefix.global.name);
+		       options.module.global.prefix.l);
     }
   else
     {
@@ -83,11 +83,11 @@ print_semantic_function_formal (lf *file,
       for (word_nr = 0; word_nr < nr_prefetched_words; word_nr++)
 	{
 	  nr += lf_printf (file, "%sinstruction_word instruction_%d,\n",
-			   options.prefix.global.name,
+			   options.module.global.prefix.l,
 			   word_nr);
 	}
       nr += lf_printf (file, "%sinstruction_address cia",
-		       options.prefix.global.name);
+		       options.module.global.prefix.l);
     }
   return nr;
 }
@@ -120,7 +120,7 @@ print_semantic_function_type (lf *file)
 {
   int nr = 0;
   nr += lf_printf (file, "%sinstruction_address",
-		   options.prefix.global.name);
+		   options.module.global.prefix.l);
   return nr;
 }
 
@@ -139,11 +139,11 @@ print_icache_function_formal (lf *file,
       nr += lf_printf (file, "SIM_DESC sd,\n");
   for (word_nr = 0; word_nr < nr_prefetched_words; word_nr++)
     nr += lf_printf (file, " %sinstruction_word instruction_%d,\n",
-		     options.prefix.global.name, word_nr);
+		     options.module.global.prefix.l, word_nr);
   nr += lf_printf (file, " %sinstruction_address cia,\n",
-		   options.prefix.global.name);
+		   options.module.global.prefix.l);
   nr += lf_printf (file, " %sidecode_cache *cache_entry",
-		   options.prefix.global.name);
+		   options.module.global.prefix.l);
   return nr;
 }
 
@@ -174,7 +174,7 @@ print_icache_function_type (lf *file)
   else
     {
       nr = lf_printf (file, "%sidecode_semantic *",
-		      options.prefix.global.name);
+		      options.module.global.prefix.l);
     }
   return nr;
 }
@@ -241,22 +241,22 @@ print_function_name (lf *file,
   switch (prefix)
     {
     case function_name_prefix_semantics:
-      nr += lf_printf (file, "%s", options.prefix.semantics.name);
+      nr += lf_printf (file, "%s", options.module.semantics.prefix.l);
       nr += lf_printf (file, "semantic_");
       break;
     case function_name_prefix_idecode:
-      nr += lf_printf (file, "%s", options.prefix.idecode.name);
+      nr += lf_printf (file, "%s", options.module.idecode.prefix.l);
       nr += lf_printf (file, "idecode_");
       break;
     case function_name_prefix_itable:
-      nr += lf_printf (file, "%sitable_", options.prefix.itable.name);
+      nr += lf_printf (file, "%sitable_", options.module.itable.prefix.l);
       break;
     case function_name_prefix_icache:
-      nr += lf_printf (file, "%s", options.prefix.icache.name);
+      nr += lf_printf (file, "%s", options.module.icache.prefix.l);
       nr += lf_printf (file, "icache_");
       break;
     case function_name_prefix_engine:
-      nr += lf_printf (file, "%s", options.prefix.engine.name);
+      nr += lf_printf (file, "%s", options.module.engine.prefix.l);
       nr += lf_printf (file, "engine_");
     default:
       break;
@@ -339,8 +339,8 @@ print_itrace_prefix (lf *file)
   int indent = strlen (prefix);
   lf_printf (file, "%sSD, CPU, cia, CIA, TRACE_LINENUM_P (CPU), \\\n", prefix);
   lf_indent (file, +indent);
-  lf_printf (file, "%sitable[MY_INDEX].file, \\\n", options.prefix.itable.name);
-  lf_printf (file, "%sitable[MY_INDEX].line_nr, \\\n", options.prefix.itable.name);
+  lf_printf (file, "%sitable[MY_INDEX].file, \\\n", options.module.itable.prefix.l);
+  lf_printf (file, "%sitable[MY_INDEX].line_nr, \\\n", options.module.itable.prefix.l);
   lf_printf (file, "\"");
   return indent;
 }
@@ -427,7 +427,7 @@ print_itrace_format (lf *file,
 		    lf_printf (file, "%%s");
 		  else
 		    {
-		      lf_printf (file, "%sstr_", options.prefix.global.name);
+		      lf_printf (file, "%sstr_", options.module.global.prefix.l);
 		      lf_write (file, func, strlen_func);
 		      lf_printf (file, " (SD_, ");
 		      lf_write (file, param, strlen_param);
@@ -567,6 +567,39 @@ print_sim_engine_abort (lf *file,
 }
 
 
+void
+print_include (lf *file,
+	       igen_module module)
+{
+  lf_printf (file, "#include \"%s%s.h\"\n", module.prefix.l, module.suffix.l);
+}
+
+void
+print_include_inline (lf *file,
+		      igen_module module)
+{
+  lf_printf (file, "#if C_REVEALS_MODULE_P (%s_INLINE)\n", module.suffix.u);
+  lf_printf (file, "#include \"%s%s.c\"\n", module.prefix.l, module.suffix.l);
+  lf_printf (file, "#else\n");
+  print_include (file, module);
+  lf_printf (file, "#endif\n");
+  lf_printf (file, "\n");
+}
+
+void
+print_includes (lf *file)
+{
+  lf_printf (file, "\n");
+  lf_printf (file, "#include \"sim-inline.c\"\n");
+  lf_printf (file, "\n");
+  lf_printf (file, "#include \"sim-main.h\"\n");
+  lf_printf (file, "\n");
+  print_include_inline (file, options.module.itable);
+  print_include_inline (file, options.module.idecode);
+  print_include_inline (file, options.module.support);
+}
+
+
 /****************************************************************/
 
 
@@ -582,7 +615,7 @@ gen_semantics_h (lf *file,
       lf_printf (file, "typedef ");
       print_semantic_function_type (file);
       lf_printf (file, " %sidecode_semantic",
-		 options.prefix.global.name);
+		 options.module.global.prefix.l);
       if (word_nr >= 0)
 	lf_printf (file, "_%d", word_nr);
       lf_printf (file, "\n(");
@@ -622,17 +655,10 @@ gen_semantics_c (lf *file,
   if (options.gen.code == generate_calls)
     {
       insn_list *semantic;
+      print_includes (file);
+      print_include (file, options.module.semantics);
       lf_printf (file, "\n");
-      lf_printf (file, "#include \"sim-main.h\"\n");
-      lf_printf (file, "#include \"%sitable.h\"\n",
-		 options.prefix.itable.name);
-      lf_printf (file, "#include \"%sidecode.h\"\n",
-		 options.prefix.idecode.name);
-      lf_printf (file, "#include \"%ssemantics.h\"\n",
-		 options.prefix.semantics.name);
-      lf_printf (file, "#include \"%ssupport.h\"\n",
-		 options.prefix.support.name);
-      lf_printf (file, "\n");
+
       for (semantic = semantics; semantic != NULL; semantic = semantic->next)
 	{
 	  /* Ignore any special/internal instructions */
@@ -668,7 +694,7 @@ gen_icache_h (lf *file,
       lf_printf (file, "typedef ");
       print_icache_function_type(file);
       lf_printf (file, " %sidecode_icache_%d\n(",
-		 options.prefix.global.name,
+		 options.module.global.prefix.l,
 		 word_nr);
       print_icache_function_formal(file, word_nr);
       lf_printf (file, ");\n");
@@ -746,27 +772,27 @@ gen_idecode_h (lf *file,
 	       cache_entry *cache_rules)
 {
   lf_printf (file, "typedef unsigned%d %sinstruction_word;\n",
-	     options.insn_bit_size, options.prefix.global.name);
+	     options.insn_bit_size, options.module.global.prefix.l);
   if (options.gen.delayed_branch)
     {
       lf_printf (file, "typedef struct _%sinstruction_address {\n",
-		 options.prefix.global.name);
+		 options.module.global.prefix.l);
       lf_printf (file, "  address_word ip; /* instruction pointer */\n");
       lf_printf (file, "  address_word dp; /* delayed-slot pointer */\n");
-      lf_printf (file, "} %sinstruction_address;\n", options.prefix.global.name);
+      lf_printf (file, "} %sinstruction_address;\n", options.module.global.prefix.l);
     }
   else
     {
       lf_printf (file, "typedef address_word %sinstruction_address;\n",
-		 options.prefix.global.name);
+		 options.module.global.prefix.l);
       
     }
   if (options.gen.nia == nia_is_invalid
-      && strlen (options.prefix.global.uname) > 0)
+      && strlen (options.module.global.prefix.u) > 0)
     {
       lf_indent_suppress (file);
       lf_printf (file, "#define %sINVALID_INSTRUCTION_ADDRESS ",
-		 options.prefix.global.uname);
+		 options.module.global.prefix.u);
       lf_printf (file, "INVALID_INSTRUCTION_ADDRESS\n");
     }
   lf_printf (file, "\n");
@@ -806,12 +832,8 @@ gen_idecode_c (lf *file,
 	       cache_entry *cache_rules)
 {
   /* the intro */
-  lf_printf (file, "#include \"sim-main.h\"\n");
-  lf_printf (file, "#include \"%sidecode.h\"\n", options.prefix.global.name);
-  lf_printf (file, "#include \"%ssemantics.h\"\n", options.prefix.global.name);
-  lf_printf (file, "#include \"%sicache.h\"\n", options.prefix.global.name);
-  lf_printf (file, "#include \"%ssupport.h\"\n", options.prefix.global.name);
-  lf_printf (file, "\n");
+  print_includes (file);
+  print_include_inline (file, options.module.semantics);
   lf_printf (file, "\n");
 
   print_idecode_globals (file);
@@ -838,7 +860,7 @@ gen_idecode_c (lf *file,
 		lf_printf (file, "{\n");
 		lf_indent (file, +2);
 		lf_printf (file, "%sinstruction_address nia;\n",
-			   options.prefix.global.name);
+			   options.module.global.prefix.l);
 		print_idecode_body (file, entry->table, "nia =");
 		lf_printf (file, "return nia;");
 		lf_indent (file, -2);
@@ -995,7 +1017,7 @@ main (int argc,
   int ch;
   lf *standard_out = lf_open ("-", "stdout", lf_omit_references, lf_is_text, "igen");
 
-  INIT_OPTIONS (options);
+  INIT_OPTIONS ();
 
   if (argc == 1)
     {
@@ -1182,12 +1204,12 @@ main (int argc,
 	  
 	case 'P':
 	  {
-	    igen_prefix_name *names;
+	    igen_module *names;
 	    char *chp;
 	    chp = strchr (optarg, '=');
 	    if (chp == NULL)
 	      {
-		names = &options.prefix.global;
+		names = &options.module.global;
 		chp = optarg;
 	      }
 	    else
@@ -1195,31 +1217,31 @@ main (int argc,
 		chp = chp + 1; /* skip `=' */
 		if (strncmp (optarg, "global=", chp - optarg) == 0)
 		  {
-		    names = &options.prefix.global;
+		    names = &options.module.global;
 		  }
 		if (strncmp (optarg, "engine=", chp - optarg) == 0)
 		  {
-		    names = &options.prefix.engine;
+		    names = &options.module.engine;
 		  }
 		if (strncmp (optarg, "icache=", chp - optarg) == 0)
 		  {
-		    names = &options.prefix.icache;
+		    names = &options.module.icache;
 		  }
 		if (strncmp (optarg, "idecode=", chp - optarg) == 0)
 		  {
-		    names = &options.prefix.idecode;
+		    names = &options.module.idecode;
 		  }
 		if (strncmp (optarg, "itable=", chp - optarg) == 0)
 		  {
-		    names = &options.prefix.itable;
+		    names = &options.module.itable;
 		  }
 		if (strncmp (optarg, "semantics=", chp - optarg) == 0)
 		  {
-		    names = &options.prefix.semantics;
+		    names = &options.module.semantics;
 		  }
 		if (strncmp (optarg, "support=", chp - optarg) == 0)
 		  {
-		    names = &options.prefix.support;
+		    names = &options.module.support;
 		  }
 		else
 		  {
@@ -1227,22 +1249,22 @@ main (int argc,
 		    error (NULL, "Prefix `%s' unreconized\n", optarg);
 		  }
 	      }
-	    names->name = strdup (chp);
-	    names->uname = strdup (chp);
-	    chp = names->uname;
+	    names->prefix.u = strdup (chp);
+	    names->prefix.l = strdup (chp);
+	    chp = names->prefix.u;
 	    while (*chp) {
 	      if (islower(*chp))
 		*chp = toupper(*chp);
 	      chp++;
 	    }
-	    if (names == &options.prefix.global)
+	    if (names == &options.module.global)
 	      {
-		options.prefix.engine = options.prefix.global;
-		options.prefix.icache = options.prefix.global;
-		options.prefix.idecode = options.prefix.global;
-		/* options.prefix.itable = options.prefix.global; */
-		options.prefix.semantics = options.prefix.global;
-		options.prefix.support = options.prefix.global;
+		options.module.engine.prefix = options.module.global.prefix;
+		options.module.icache.prefix = options.module.global.prefix;
+		options.module.idecode.prefix = options.module.global.prefix;
+		/* options.module.itable.prefix = options.module.global.prefix; */
+		options.module.semantics.prefix = options.module.global.prefix;
+		options.module.support.prefix = options.module.global.prefix;
 	      }
 	    break;
 	  }

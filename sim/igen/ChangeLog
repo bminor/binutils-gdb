@@ -1,3 +1,23 @@
+Fri Apr  3 18:08:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen.h, igen.c (print_include_inline, print_includes,
+ 	print_includes): New functions.  Generate include list.  For for
+ 	semantics et.al. generate CPP code to inline when
+ 	C_REVEALS_MODULE_P.
+	
+	* igen.c (gen_semantics_c): Call print_includes.
+	* gen-engine.c (gen_engine_c): Ditto.
+
+Sat Apr  4 21:09:11 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.h: (struct _igen_name_option): Replace with struct
+ 	igen_module_option. Contains both module prefix and suffix.
+	(INIT_OPTIONS): Initialize.
+	
+	* igen.c (main): Update -P option to fill in full module info.
+	(gen-engine.c, gen-icache.c, gen-itable.c, gen-semantics.c,
+ 	gen-support.c): Update.
+
 Sat Apr  4 02:15:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* igen.c (print_itrace): Use TRACE_ANY_P macro to determine if any

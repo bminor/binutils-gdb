@@ -24,7 +24,7 @@
 #define _SIM_BITS_H_
 
 
-/* bit manipulation routines:
+/* Bit manipulation routines:
 
    Bit numbering: The bits are numbered according to the target ISA's
    convention.  That being controlled by WITH_TARGET_WORD_MSB.  For
@@ -42,15 +42,17 @@
    NB: Use EXTRACTED, MSEXTRACTED and LSEXTRACTED as a guideline for
    naming.  LSMASK and LSMASKED are wrong.
 
-   BIT*(POS): Constant with just 1 bit set.
+   BIT*(POS): `*' bit constant with just 1 bit set.
 
-   LSBIT*(OFFSET): Constant with just 1 bit set - LS bit is zero.
+   LSBIT*(OFFSET): `*' bit constant with just 1 bit set - LS bit is
+   zero.
 
-   MSBIT*(OFFSET): Constant with just 1 bit set - MS bit is zero.
+   MSBIT*(OFFSET): `*' bit constant with just 1 bit set - MS bit is
+   zero.
 
-   MASK*(FIRST, LAST): Constant with bits [FIRST .. LAST] set. The
-   <MACRO> (no size) version permits FIRST >= LAST and generates a
-   wrapped bit mask vis ([0..LAST] | [FIRST..LSB]).
+   MASK*(FIRST, LAST): `*' bit constant with bits [FIRST .. LAST]
+   set. The <MACRO> (no size) version permits FIRST >= LAST and
+   generates a wrapped bit mask vis ([0..LAST] | [FIRST..LSB]).
 
    LSMASK*(FIRST, LAST): Like MASK - LS bit is zero.
 
@@ -87,18 +89,26 @@
    IEA_MASKED(SHOULD_MASK, ADDR): Convert the address to the targets
    natural size.  If in 32bit mode, discard the high 32bits.
 
-   EXTENDED*(VALUE): Convert the `*' bit value to the targets natural
-   word size.  Sign extned the value if needed.
+   EXTEND*(VALUE): Convert the `*' bit value to the targets natural
+   word size.  Sign extend the value if needed.
 
-   ALIGN_*(VALUE): Round upwards the value so that it is aligned.
+   ALIGN_*(VALUE): Round the value upwards so that it is aligned to a
+   `_*' byte boundary.
 
-   FLOOR_*(VALUE): Truncate the value so that it is aligned.
+   FLOOR_*(VALUE): Truncate the value so that it is aligned to a `_*'
+   byte boundary.
 
-   ROTL*(VALUE, NR_BITS): Return the value rotated by NR_BITS left.
+   ROT*(VALUE, NR_BITS): Return the `*' bit VALUE rotated by NR_BITS
+   right (positive) or left (negative).
 
-   ROTR*(VALUE, NR_BITS): Return the value rotated by NR_BITS right.
+   ROTL*(VALUE, NR_BITS): Return the `*' bit value rotated by NR_BITS
+   left.  0 <= NR_BITS <= `*'.
 
-   SEXT*(VAL, SIGN_BIT): Treat SIGN_BIT as the sign, extend it.
+   ROTR*(VALUE, NR_BITS): Return the `*' bit value rotated by NR_BITS
+   right.  0 <= NR_BITS <= N.
+
+   SEXT*(VALUE, SIGN_BIT): Treat SIGN_BIT as VALUEs sign, extend it ti
+   `*' bits.
 
    Note: Only the BIT* and MASK* macros return a constant that can be
    used in variable declarations.
@@ -542,7 +552,7 @@ INLINE_SIM_BITS(unsigned_word) MSSEXT (signed_word val, int sign_bit);
 
 
 
-#if ((SIM_BITS_INLINE & INCLUDE_MODULE) && (SIM_BITS_INLINE & INCLUDED_BY_MODULE))
+#if H_REVEALS_MODULE_P (SIM_BITS_INLINE)
 #include "sim-bits.c"
 #endif
 

@@ -1,3 +1,35 @@
+Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* aclocal.m4 (sim-cflags): Add -fomit-frame-pointer to defaults.
+	(sim-inline): Update to match sim-inline.[hc]
+	
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+	* Make-common.in (sim_main_headers): Add sim-inline.h
+
+	* sim-bits.h (sim-bits.c): Include when H_REVEALS_MODULE_P.
+ 	selected.
+	* sim-endian.h (sim-endian.c): Ditto.
+	
+	* sim-events.h (_SIM_EVENTS_H_): Replace with SIM_EVENTS_H.
+	(sim_events_set_trace): Delete unused prototype.
+	
+	* sim-core.h (_SIM_CORE_H_): Replace with SIM_CORE_H.
+	* sim-core.c (_SIM_CORE_C_): Ditto for SIM_CORE_C.
+
+	* sim-fpu.h (sim-fpu.c): Include when H_REVEALS_MODULE_P.
+	(sim_fpu_to232i, sim_fpu_to232u, sim_fpu_i232to, sim_fpu_u232to):
+ 	Comment out, not yet implemented in sim-fpu.c.
+	(sim_fpu_zero, sim_fpu_one, sim_fpu_two, sim_fpu_qnan,
+ 	sim_fpu_max32, sim_fpu_max64): Mark as EXTERN_SIM_FPU.
+	
+	* sim-inline.h: Rewrite description.
+	(H_REVEALS_MODULE_P, C_REVEALS_MODULE_P): Define.
+	(SIM_MAIN_INLINE): Add inline option.
+	
+	* sim-inline.c (semantics.c, idecode.c, engine.c, ...): Do not
+ 	include generated files. Handled by generator directly.
+	
 Sat Apr  4 01:07:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-trace.c (set_trace_option_mask): Keep TRACE_ANY_P

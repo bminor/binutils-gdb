@@ -1,3 +1,29 @@
+Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Fri Apr  3 04:32:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen: Include tx.igen.
+	* Makefile.in (IGEN_INCLUDE): Add tx.igen.
+	* tx.igen: New file, contains MADD and MADDU.
+
+	* interp.c (load_memory): When shifting bytes, use LOADDRMASK not
+ 	the hardwired constant `7'.
+	(store_memory): Ditto.
+	(LOADDRMASK): Move definition to sim-main.h.
+
+	mips.igen (MTC0): Enable for r3900.
+	(ADDU): Add trace.
+
+	mips.igen (do_load_byte): Delete.
+	(do_load, do_store, do_load_left, do_load_write, do_store_left,
+ 	do_store_right): New functions.
+	(SW*, LW*, SD*, LD*, SH, LH, SB, LB): Use.
+
+	configure.in: Let the tx39 use igen again.
+	configure: Update.
+	
 Thu Apr  2 10:59:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_monitor): get_mem_info returns a 4 byte quantity,
