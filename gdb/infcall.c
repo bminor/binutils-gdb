@@ -1101,12 +1101,9 @@ the function call).", name);
     }
   else
     {
-      /* This call to value_being_returned is never made when the
-         function uses "struct return convention".  Hence, pass "0"
-         instead of STRUCT_RETURN.  Besides, VALUE_TYPE, in
-         combination with RETURN_VALUE() (nee USE_STRUCT_CONVENTION)
-         can be used to re-construct the value of STRUCT_RETURN. */
-      struct value *retval = value_being_returned (value_type, retbuf, 0);
+      /* The non-register case was handled above.  */
+      struct value *retval = register_value_being_returned (value_type,
+							    retbuf);
       do_cleanups (retbuf_cleanup);
       return retval;
     }

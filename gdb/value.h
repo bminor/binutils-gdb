@@ -416,9 +416,8 @@ extern struct value *value_repeat (struct value *arg1, int count);
 
 extern struct value *value_subscript (struct value *array, struct value *idx);
 
-extern struct value *value_being_returned (struct type *valtype,
-					   struct regcache *retbuf,
-					   int struct_return);
+extern struct value *register_value_being_returned (struct type *valtype,
+						    struct regcache *retbuf);
 
 extern struct value *value_in (struct value *element, struct value *set);
 

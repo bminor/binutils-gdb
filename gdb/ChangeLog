@@ -1,4 +1,15 @@
-2003-09-24  Elena Zannoni  <ezannoni@redhat.com>
+2003-10-01  Andrew Cagney  <cagney@redhat.com>
+
+	* value.h (register_value_being_returned): Declare.  Replace
+	"value_being_returned".
+	* infcall.c (call_function_by_hand): Use
+	register_value_being_returned.
+	* infcmd.c (print_return_value): Call
+	"register_value_being_returned", handle struct return locally.
+	* values.c (register_value_being_returned): New function.  Replace
+	"value_being_returned".
+	
+2003-09-30  Elena Zannoni  <ezannoni@redhat.com>
 
 	* linux-proc.c (linux_do_registers): New function.
 	(linux_make_note_section): Use linux_do_registers in case of

@@ -1070,7 +1070,7 @@ print_return_value (int structure_return, struct type *value_type)
 
   if (!structure_return)
     {
-      value = value_being_returned (value_type, stop_registers, 0);
+      value = register_value_being_returned (value_type, stop_registers);
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
@@ -1081,11 +1081,6 @@ print_return_value (int structure_return, struct type *value_type)
     }
   else
     {
-      /* FIXME: 2003-09-27: This code block should be handling the
-         "use struct convention" case, and not the function
-         value_being_returned.  This would allow the dramatic
-         simplification of value_being_returned (perhaphs renamed to
-         register_value_being_returned).  */
       /* FIXME: 2003-09-27: When returning from a nested inferior
          function call, it's possible (with no help from the
          architecture vector) to locate and return/print a "struct
@@ -1103,7 +1098,34 @@ print_return_value (int structure_return, struct type *value_type)
       ui_out_text (uiout, ".");
       ui_out_text (uiout, " Cannot determine contents\n");
 #else
-      value = value_being_returned (value_type, stop_registers, 1);
+      if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+	{
+	  CORE_ADDR addr = EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
+	  if (!addr)
+	    error ("Function return value unknown.");
+	  value = value_at (value_type, addr, NULL);
+	}
+      else if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+	{
+	  char *buf = deprecated_grub_regcache_for_registers (stop_registers);
+	  CORE_ADDR addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (buf);
+	  if (!addr)
+	    error ("Function return value unknown.");
+	  value = value_at (value_type, addr, NULL);
+	}
+      else
+	{
+	  /* It is "struct return" yet the value is being extracted,
+             presumably from registers, using EXTRACT_RETURN_VALUE.
+             This doesn't make sense.  Unfortunatly, the legacy
+             interfaces allowed this behavior.  Sigh!  */
+	  value = allocate_value (value_type);
+	  CHECK_TYPEDEF (value_type);
+	  /* If the function returns void, don't bother fetching the
+	     return value.  */
+	  EXTRACT_RETURN_VALUE (value_type, stop_registers,
+				VALUE_CONTENTS_RAW (value));
+	}
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));

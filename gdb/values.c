@@ -1202,60 +1202,25 @@ value_from_double (struct type *type, DOUBLEST num)
   return val;
 }
 
-/* Deal with the value that is "about to be returned".  */
+/* Deal with the value that is "about to be returned".
 
-/* Return the value that a function returning now
-   would be returning to its caller, assuming its type is VALTYPE.
-   RETBUF is where we look for what ought to be the contents
-   of the registers (in raw form).  This is because it is often
-   desirable to restore old values to those registers
-   after saving the contents of interest, and then call
-   this function using the saved values.
-   struct_return is non-zero when the function in question is
-   using the structure return conventions on the machine in question;
-   0 when it is using the value returning conventions (this often
-   means returning pointer to where structure is vs. returning value). */
-
-/* FIXME: cagney/2003-09-27: Should move the "struct return
-   convention" code to the only call site in print_return_value that
-   needs it.  This function can then be renamed to
-   "register_value_being_returned" and with the "struct_return"
-   parameter dropped.  */
+   Return the value that a function, using the register convention,
+   returning now would be returning to its caller, assuming its type
+   is VALTYPE.  RETBUF is where we look for what ought to be the
+   contents of the registers (in raw form).  This is because it is
+   often desirable to restore old values to those registers after
+   saving the contents of interest, and then call this function using
+   the saved values.  */
 
 struct value *
-value_being_returned (struct type *valtype, struct regcache *retbuf,
-		      int struct_return)
+register_value_being_returned (struct type *valtype, struct regcache *retbuf)
 {
-  struct value *val;
-  CORE_ADDR addr;
-
-  /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
-  if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-    if (struct_return)
-      {
-	addr = EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);
-	if (!addr)
-	  error ("Function return value unknown.");
-	return value_at (valtype, addr, NULL);
-      }
-
-  /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
-  if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-    if (struct_return)
-      {
-	char *buf = deprecated_grub_regcache_for_registers (retbuf);
-	addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (buf);
-	if (!addr)
-	  error ("Function return value unknown.");
-	return value_at (valtype, addr, NULL);
-      }
-
-  val = allocate_value (valtype);
+  struct value *val = allocate_value (valtype);
   CHECK_TYPEDEF (valtype);
-  /* If the function returns void, don't bother fetching the return value.  */
+  /* If the function returns void, don't bother fetching the return
+     value.  */
   if (TYPE_CODE (valtype) != TYPE_CODE_VOID)
     EXTRACT_RETURN_VALUE (valtype, retbuf, VALUE_CONTENTS_RAW (val));
-
   return val;
 }
 
