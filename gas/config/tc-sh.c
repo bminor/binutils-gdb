@@ -2587,6 +2587,7 @@ md_assemble (char *str)
   sh_operand_info operand[3];
   sh_opcode_info *opcode;
   unsigned int size = 0;
+  char *initial_str = str;
 
 #ifdef HAVE_SH64
   if (sh64_isa_mode == sh64_isa_shmedia)
@@ -2613,7 +2614,45 @@ md_assemble (char *str)
 
   if (opcode == NULL)
     {
-      as_bad (_("unknown opcode"));
+      /* The opcode is not in the hash table.
+	 This means we definately have an assembly failure,
+	 but the instruction may be valid in another CPU variant.
+	 In this case emit something better than 'unknown opcode'.
+	 Search the full table in sh-opc.h to check. */
+
+      char *name = initial_str;
+      int name_length = 0;
+      const sh_opcode_info *op;
+      int found = 0;
+
+      /* identify opcode in string */
+      while (isspace (*name))
+	{
+	  name++;
+	}
+      while (!isspace (name[name_length]))
+	{
+	  name_length++;
+	}
+
+      /* search for opcode in full list */
+      for (op = sh_table; op->name; op++)
+	{
+	  if (strncasecmp (op->name, name, name_length) == 0)
+	    {
+	      found = 1;
+	      break;
+	    }
+	}
+
+      if ( found )
+	{
+	  as_bad (_("opcode not valid for this cpu variant"));
+	}
+      else
+	{
+	  as_bad (_("unknown opcode"));
+	}
       return;
     }
 
@@ -2895,6 +2934,10 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
     case OPTION_ISA:
       if (strcasecmp (arg, "sh4") == 0)
 	preset_target_arch = arch_sh4;
+      else if (strcasecmp (arg, "sh4-nofpu") == 0)
+	preset_target_arch = arch_sh4_nofpu;
+      else if (strcasecmp (arg, "sh4-nommu-nofpu") == 0)
+	preset_target_arch = arch_sh4_nommu_nofpu;
       else if (strcasecmp (arg, "sh4a") == 0)
 	preset_target_arch = arch_sh4a;
       else if (strcasecmp (arg, "dsp") == 0)
@@ -2976,17 +3019,20 @@ SH options:\n\
 -big			generate big endian code\n\
 -relax			alter jump instructions for long displacements\n\
 -small			align sections to 4 byte boundaries, not 16\n\
--dsp			enable sh-dsp insns, and disable floating-point ISAs.\n"));
+-dsp			enable sh-dsp insns, and disable floating-point ISAs.\n\
+-isa=[sh4\n\
+    | sh4-nofpu		sh4 with fpu disabled\n\
+    | sh4-nommu-nofpu   sh4 with no MMU or FPU\n\
+    | sh4a\n\ 
+    | dsp               same as '-dsp'\n\
+    | fp\n\
+    | any]		use most appropriate isa\n"));
 #ifdef HAVE_SH64
   fprintf (stream, _("\
--isa=[sh4\n\
-    | sh4a\n\
-    | dsp		same as '-dsp'\n\
-    | fp\n\
-    | shmedia		set as the default instruction set for SH64\n\
+-isa=[shmedia		set as the default instruction set for SH64\n\
     | SHmedia\n\
     | shcompact\n\
-    | SHcompact\n"));
+    | SHcompact]\n"));
   fprintf (stream, _("\
 -abi=[32|64]		set size of expanded SHmedia operands and object\n\
 			file type\n\
@@ -2997,13 +3043,6 @@ SH options:\n\
 -no-expand		do not expand MOVI, PT, PTA or PTB instructions\n\
 -expand-pt32		with -abi=64, expand PT, PTA and PTB instructions\n\
 			to 32 bits only\n"));
-#else
-  fprintf (stream, _("\
--isa=[sh4\n\
-    | sh4a\n\
-    | dsp		same as '-dsp'\n\
-    | fp\n\
-    | any]\n"));
 #endif /* HAVE_SH64 */
 }
 
@@ -3563,6 +3602,8 @@ sh_elf_final_processing (void)
     val = EF_SH3_DSP;
   else if (valid_arch & arch_sh3e)
     val = EF_SH3E;
+  else if (valid_arch & arch_sh4_nommu_nofpu)
+    val = EF_SH4_NOMMU_NOFPU;
   else if (valid_arch & arch_sh4_nofpu)
     val = EF_SH4_NOFPU;
   else if (valid_arch & arch_sh4)

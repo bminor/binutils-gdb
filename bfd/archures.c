@@ -1,6 +1,6 @@
 /* BFD library support routines for architectures.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
@@ -230,6 +230,7 @@ DESCRIPTION
 .#define bfd_mach_sh3e       0x3e
 .#define bfd_mach_sh4        0x40
 .#define bfd_mach_sh4_nofpu  0x41
+.#define bfd_mach_sh4_nommu_nofpu  0x42
 .#define bfd_mach_sh4a       0x4a
 .#define bfd_mach_sh4a_nofpu 0x4b
 .#define bfd_mach_sh4al_dsp  0x4d

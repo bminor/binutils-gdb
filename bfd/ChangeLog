@@ -1,3 +1,10 @@
+2003-03-03  Andrew Stubbs  <andrew.stubbs@superh.com>
+
+	* archures.c: Add bfd_mach_sh4_nommu_nofpu.
+	* cpu-sh.c: Ditto.
+	* elf32-sh.c: Ditto.
+	* bfd-in2.h: Regenerate.
+
 2004-03-02  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-frv.c (struct frv_pic_relocs_info): Added fixups and

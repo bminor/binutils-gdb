@@ -1,3 +1,12 @@
+2003-03-03  Andrew Stubbs  <andrew.stubbs@superh.com>
+
+	* config/tc-sh.c (md_parse_option): Add -isa=sh4-nofpu and
+	-isa=sh4-nommu-nofpu options. Adjust help messages accordingly.
+	(sh_elf_final_processing): Output BFD type sh4_nofpu if that is
+	the most general type or the user specifically requested it.
+	(md_assemble): Add a new error message for when an instruction
+	is understood, but is not allowed due to an -isa option.
+
 2004-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (align_frag): New.
