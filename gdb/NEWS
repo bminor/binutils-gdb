@@ -7,6 +7,10 @@
 
 Alpha Linux					alpha-*-linux*
 
+* New targets
+
+M68K with dBUG monitor				m68*-*-{aout,coff,elf}
+
 *** Changes in GDB-4.16:
 
 * New native configurations
