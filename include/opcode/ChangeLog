@@ -1,3 +1,7 @@
+Tue Apr  7 13:38:47 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* rs6k.h:  Move from ../../gdb/rs6k-opcode.h.
+
 Fri Apr  3 11:30:20 1992  Fred Fish  (fnf@cygnus.com)
 
 	* m68k.h (one, two):  Cast macro args to unsigned to suppress
