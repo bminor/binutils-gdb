@@ -592,11 +592,7 @@ linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len, int write,
   /* If pread64 is available, use it.  It's faster if the kernel
      supports it (only one syscall), and it's 64-bit safe even
      on 32-bit platforms (for instance, SPARC debugging a SPARC64
-     application).
-
-     We play some autoconf and CFLAGS games to get this declaration
-     exposed: -D_XOPEN_SOURCE=500 -D_LARGEFILE64_SOURCE.  And then
-     a -D_BSD_SOURCE to counteract the defaults for _XOPEN_SOURCE.  */
+     application).  */
 #ifdef HAVE_PREAD64
   if (pread64 (fd, myaddr, len, addr) != len)
 #else

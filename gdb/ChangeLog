@@ -1,3 +1,8 @@
+2003-08-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* linux-proc.c (linux_proc_xfer_memory): Remove comment about
+	CFLAGS games to reflect reality.
+
 2003-08-24  Andrew Cagney  <cagney@redhat.com>
 
 	* arm-tdep.c (_initialize_arm_tdep): Simplify by assuming
