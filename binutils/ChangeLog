@@ -1,3 +1,14 @@
+Sat Dec 23 11:03:16 1995  Michael Meissner  <meissner@tiktok.cgynsu.com>
+
+	* configure.in (DLLTOOL_DEFS): Build dlltool for PowerPC if target
+	is powerpc*-*-win* in addition to powerpc*-*-*pe*.
+
+Fri Dec 15 16:30:57 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (endian_string): New static function.
+	(display_target_list): Use it.
+	* nlmconv.c (main): Use new bfd_big_endian macro.
+
 Fri Dec 15 07:51:34 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c (fill_ordinals): Start from 1 if no other instructions
