@@ -1,3 +1,13 @@
+2002-06-15  H.J. Lu  (hjl@gnu.org)
+
+	* nm.c (print_size): New variable. Initialize to 0.
+	(long_options): Add 'S'/"print-size".
+	(main): Handle 'S'.
+	(print_symbol_info_bsd): Print size only if print_size is not
+	0.
+
+	* doc/binutils.texi: Document -S/--print-size.
+
 2002-6-13  Elias Athanasopoulos  <eathan@otenet.gr>
 
 	* nm.c (struct extended_symbol_info): New strcuture: Add the size

@@ -161,6 +161,7 @@ static int defined_only = 0;	/* Print defined symbols only.  */
 static int no_sort = 0;		/* Don't sort; print syms in order found.  */
 static int print_debug_syms = 0;/* Print debugger-only symbols too.  */
 static int print_armap = 0;	/* Describe __.SYMDEF data in archive files.  */
+static int print_size = 0;	/* Print size of defined symbols.  */
 static int reverse_sort = 0;	/* Sort in downward(alpha or numeric) order.  */
 static int sort_numerically = 0;/* Sort in numeric rather than alpha order.  */
 static int sort_by_size = 0;	/* Sort by size of symbol.  */
@@ -218,6 +219,7 @@ static struct option long_options[] =
   {"portability", no_argument, 0, 'P'},
   {"print-armap", no_argument, &print_armap, 1},
   {"print-file-name", no_argument, 0, 'o'},
+  {"print-size", no_argument, 0, 'S'},
   {"radix", required_argument, 0, 't'},
   {"reverse-sort", no_argument, &reverse_sort, 1},
   {"size-sort", no_argument, &sort_by_size, 1},
@@ -259,6 +261,7 @@ usage (stream, status)
   -p, --no-sort          Do not sort the symbols\n\
   -P, --portability      Same as --format=posix\n\
   -r, --reverse-sort     Reverse the sense of the sort\n\
+  -S, --print-size       Print size of defined symbols\n\
   -s, --print-armap      Include index for symbols from archive members\n\
       --size-sort        Sort symbols by size\n\
   -t, --radix=RADIX      Use RADIX for printing symbol values\n\
@@ -360,7 +363,7 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "aABCDef:gHhlnopPrst:uvVvX:",
+  while ((c = getopt_long (argc, argv, "aABCDef:gHhlnopPrSst:uvVvX:",
 			   long_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -422,6 +425,9 @@ main (argc, argv)
 	  break;
 	case 's':
 	  print_armap = 1;
+	  break;
+	case 'S':
+	  print_size = 1;
 	  break;
 	case 't':
 	  set_print_radix (optarg);
@@ -1454,7 +1460,7 @@ print_symbol_info_bsd (info, abfd)
     {
       print_value (abfd, SYM_VALUE (info));
 
-      if (SYM_SIZE (info))
+      if (print_size && SYM_SIZE (info))
 	{
 	  printf(" ");
 	  print_value (abfd, SYM_SIZE (info));

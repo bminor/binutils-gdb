@@ -659,7 +659,8 @@ The @sc{gnu} linker @command{ld} is now described in a separate manual.
 @c man begin SYNOPSIS nm
 nm [@option{-a}|@option{--debug-syms}] [@option{-g}|@option{--extern-only}]
    [@option{-B}] [@option{-C}|@option{--demangle}[=@var{style}]] [@option{-D}|@option{--dynamic}]
-   [@option{-s}|@option{--print-armap}] [@option{-A}|@option{-o}|@option{--print-file-name}]
+   [@option{-S}|@option{--print-size}] [@option{-s}|@option{--print-armap}]
+   [@option{-A}|@option{-o}|@option{--print-file-name}]
    [@option{-n}|@option{-v}|@option{--numeric-sort}] [@option{-p}|@option{--no-sort}]
    [@option{-r}|@option{--reverse-sort}] [@option{--size-sort}] [@option{-u}|@option{--undefined-only}]
    [@option{-t} @var{radix}|@option{--radix=}@var{radix}] [@option{-P}|@option{--portability}]
@@ -850,6 +851,10 @@ encountered.
 @itemx --portability
 Use the POSIX.2 standard output format instead of the default format.
 Equivalent to @samp{-f posix}.
+
+@item -S
+@itemx --print-size
+Print size of defined symbols for the @code{bsd} output format.
 
 @item -s
 @itemx --print-armap
