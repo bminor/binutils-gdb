@@ -1,3 +1,36 @@
+Thu Feb 17 16:25:18 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Some support for PowerPC ELF, although it isn't in BFD yet.
+	* configure.in: If cpu is powerpc*, use ppc.
+	(ppc-*-sysv4*): Use object format elf.
+	* config/tc-ppc.h: Only declare a number of things if OBJ_COFF is
+	defined.
+	(TARGET_ARCH): Make it call ppc_arch.
+	(ppc_arch): Declare.
+	(TARGET_FORMAT): Set based on OBJ_COFF or OBJ_ELF.
+	(NO_STRING_ESCAPES): Define.
+	(LOCAL_LABEL, FAKE_LABEL_NAME): Define for OBJ_ELF.
+	* config/tc-ppc.c: Only define a number of functions of OBJ_COFF
+	is defined.
+	(md_pseudo_table): Most pseudo-ops are OBJ_COFF specific.  Added
+	OBJ_COFF specific "bi" and "ei".
+	(md_parse_option): Fix handling of -u.  Make -m601 set
+	PPC_OPCODE_601.  If OBJ_ELF, accept -V and -Q.
+	(ppc_set_cpu): New function.
+	(ppc_arch): New function.
+	(md_begin): Call ppc_set_cpu.
+	(ppc_insert_operand): For a signed operand accept an unsigned
+	value, for IBM compatibility.
+	(ppc_byte): Don't call stringer for strings; instead, treat two
+	double quotes as a single double quote.
+	(ppc_comm): Set sy_tc.output for a .lcomm symbol.
+	(ppc_biei): New function.
+	(ppc_tc): If not OBJ_COFF, ignore first argument.
+	(ppc_fix_adjustable): Call as_bad_where, not as_bad.
+	(ppc_is_toc_sym): New function.
+	(md_apply_fix): Use ppc_is_toc_sym.  Handle BFD_RELOC_16 and
+	BFD_RELOC_8.
+
 Thu Feb 17 09:29:37 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* messages.c (as_perror) [BFD_ASSEMBLER]: Use bfd_get_error and
