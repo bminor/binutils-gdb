@@ -648,6 +648,9 @@ enum bfd_architecture
   bfd_arch_h8300,      /* Hitachi H8/300 */
   bfd_arch_rs6000,     /* IBM RS/6000 */
   bfd_arch_hppa,       /* HP PA RISC */
+  bfd_arch_z8k,        /* Zilog Z8000 */
+#define bfd_mach_z8001		1
+#define bfd_mach_z8002		2
   bfd_arch_last
   };
 
@@ -847,6 +850,7 @@ EXFUN(bfd_perform_relocation
     asection *input_section,
     bfd *output_bfd));
 typedef enum bfd_reloc_code_real 
+
 {
         /* 16 bits wide, simple reloc */
   BFD_RELOC_16,        
