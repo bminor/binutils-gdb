@@ -1,3 +1,9 @@
+Thu Apr  1 16:44:41 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* sparc-tdep.c (in_solib_trampoline), symfile.c (find_pc_section):
+	  ifdef protect using BAD_RICH_HACK.  This should be removed soon.
+	* config/sparc/tm-sun4sol2.h (BAD_RICH_HACK): define.
+
 Thu Apr  1 09:01:38 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* i960-pinsn.c, a29k-pinsn.c: Much abridged, just use libopcodes.a.
