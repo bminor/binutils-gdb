@@ -441,18 +441,6 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	    result = dwarf_expr_fetch (ctx, 0);
 	    if (ctx->in_reg)
 	      result = (ctx->read_reg) (ctx->baton, result);
-	    else
-	      {
-		char *buf = alloca (TARGET_ADDR_BIT / TARGET_CHAR_BIT);
-		int bytes_read;
-
-		(ctx->read_mem) (ctx->baton, buf, result,
-				 TARGET_ADDR_BIT / TARGET_CHAR_BIT);
-		result = dwarf2_read_address (buf,
-					      buf + (TARGET_ADDR_BIT
-						     / TARGET_CHAR_BIT),
-					      &bytes_read);
-	      }
 	    result = result + offset;
 	    ctx->stack_len = before_stack_len;
 	    ctx->in_reg = 0;

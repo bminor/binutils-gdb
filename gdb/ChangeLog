@@ -1,3 +1,8 @@
+2003-10-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2expr.c (execute_stack_op): Don't treat the frame base as
+	a memory pointer.
+
 2003-10-04  GDB Administrator  <gdbadmin@sourceware.org>
 
 	* version.in:  Bump toversion 6.0.0.90.
