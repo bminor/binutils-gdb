@@ -220,8 +220,13 @@ coff_swap_filehdr_in (abfd, src, dst)
      correctly for a PEI file, check the e_magic number here, and, if
      it doesn't match, clobber the f_magic number so that we don't get
      a false match.  */
+#if 0
+  /* We can't assume that the PE header is at offset 0x80.  When it
+     isn't, the DOS header isn't read correctly, so we can't assume
+     e_magic is set even for valid PE files. */
   if (bfd_h_get_16 (abfd, (bfd_byte *) filehdr_src->e_magic) != DOSMAGIC)
     filehdr_dst->f_magic = -1;
+#endif
 #endif
 
   /* Other people's tools sometimes generate headers with an nsyms but
