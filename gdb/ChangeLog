@@ -1,3 +1,15 @@
+Tue Mar 29 16:06:01 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* os9kread.c (record_minmal_symbol): add section_offset to
+	relocate minimal symbol table.
+	* os9kread.c (read_minimal_symbols): ditto.
+	* os9kread.c (os9k_symfile_init): increase size of dbg and stb
+	file names.
+	* os9kread.c (read_os9k_psymtab): if there's no dbg file, just
+	return. Also if file addr is 0 leave it 0, not to relocate.
+	* remote-os9k.c (_initialize_remote_os9k): add 'set remotexon',
+	'set remotexoff' and 'set remotelog' commands.
+
 Tue Mar 29 12:38:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote.c (remote_store_registers): Add 'P' request to set an

@@ -181,7 +181,8 @@ os9k_end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
                      struct partial_symtab **, int));
 
 static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR, int, struct objfile *));
+record_minimal_symbol PARAMS ((char *, CORE_ADDR, int, struct objfile *, 
+	             struct section_offsets *));
 
 #define HANDLE_RBRAC(val) \
   if ((val) > pst->texthigh) pst->texthigh = (val);
@@ -207,23 +208,38 @@ record_minimal_symbol PARAMS ((char *, CORE_ADDR, int, struct objfile *));
 #define N_ABS 6
 
 static void
-record_minimal_symbol (name, address, type, objfile)
+record_minimal_symbol (name, address, type, objfile, section_offsets)
      char *name;
      CORE_ADDR address;
      int type;
      struct objfile *objfile;
+     struct section_offsets *section_offsets;
 {
   enum minimal_symbol_type ms_type;
 
   switch (type)
     {
-    case N_TEXT:  ms_type = mst_text; break;
-    case N_DATA:  ms_type = mst_data; break;
-    case N_BSS:   ms_type = mst_bss;  break;
-    case N_RDATA: ms_type = mst_bss; break;
-    case N_IDATA: ms_type = mst_data; break;
-    case N_ABS:   ms_type = mst_abs;  break;
-    default:      ms_type = mst_unknown; break;
+    case N_TEXT:
+	  ms_type = mst_text;
+	  address += ANOFFSET(section_offsets, SECT_OFF_TEXT);
+	  break;
+    case N_DATA:
+	  ms_type = mst_data;
+	  break;
+    case N_BSS:
+          ms_type = mst_bss;
+	  break;
+    case N_RDATA:
+	  ms_type = mst_bss;
+	  break;
+    case N_IDATA:	
+	  ms_type = mst_data;
+	  break;
+    case N_ABS:
+	  ms_type = mst_abs;
+	  break;
+    default:
+          ms_type = mst_unknown; break;
   }
 
   prim_record_minimal_symbol
@@ -250,8 +266,9 @@ struct stbsymbol {
 #define STBSYMSIZE 10
 
 static int 
-read_minimal_symbols(objfile)
+read_minimal_symbols(objfile, section_offsets)
      struct objfile *objfile;
+     struct section_offsets *section_offsets;
 {
 FILE *fp;
 bfd *abfd;
@@ -299,7 +316,7 @@ char buf[64], buf1[128];
 	if (ch == 0) break;
 	ch = getc(fp);
     };
-    record_minimal_symbol(buf1, sym.value, sym.type&7, objfile);
+    record_minimal_symbol(buf1, sym.value, sym.type&7, objfile, section_offsets);
     off += STBSYMSIZE;
   };
   install_minimal_symbols (objfile);
@@ -337,7 +354,7 @@ os9k_symfile_read (objfile, section_offsets, mainline)
   back_to = make_cleanup (really_free_pendings, 0);
 
   make_cleanup (discard_minimal_symbols, 0);
-  read_minimal_symbols (objfile);
+  read_minimal_symbols (objfile, section_offsets);
 
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
@@ -387,7 +404,7 @@ os9k_symfile_init (objfile)
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
-  char dbgname[64], stbname[64];
+  char dbgname[512], stbname[512];
   FILE *symfile = 0;
   FILE *minfile = 0;
 
@@ -633,6 +650,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 
   abfd = objfile->obfd;
   fp = objfile->auxf2; 
+  if (!fp) return;
 		
   fread(&dbghdr.sync, sizeof(dbghdr.sync), 1, fp);
   fread(&dbghdr.rev, sizeof(dbghdr.rev), 1, fp);
@@ -702,8 +720,9 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 		unsigned long valu;
             	enum language tmp_language;
 		
-		valu = CUR_SYMBOL_VALUE + 
-		  ANOFFSET (section_offsets, SECT_OFF_TEXT);
+		valu = CUR_SYMBOL_VALUE;
+		if (valu)
+		  valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 		past_first_source_file = 1;
 
 		if (psymfile_depth == 0) {

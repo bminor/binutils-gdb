@@ -49,6 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
+#include <termio.h>
 
 #ifdef HAVE_TERMIO
 #  define TERMINAL struct termios
@@ -78,6 +79,8 @@ static int rombug_is_open = 0;
 #define LOG_FILE "monitor.log"
 FILE *log_file;
 static int monitor_log = 0;
+static int tty_xon = 0;
+static int tty_xoff = 0;
 
 static int timeout = 5;
 static int is_trace_mode = 0;
@@ -339,6 +342,15 @@ rombug_open(args, from_tty)
       perror_with_name ("RomBug");
     }
   SERIAL_RAW(monitor_desc);
+  if (tty_xon || tty_xoff)
+    {
+    struct hardware_ttystate { struct termios t;} *tty_s;
+
+      tty_s =(struct hardware_ttystate  *)SERIAL_GET_TTY_STATE(monitor_desc);
+      if (tty_xon) tty_s->t.c_iflag |= IXON; 
+      if (tty_xoff) tty_s->t.c_iflag |= IXOFF;
+      SERIAL_SET_TTY_STATE(monitor_desc, (serial_ttystate) tty_s);
+    }
 
   rombug_is_open = 1;
 
@@ -1164,12 +1176,25 @@ _initialize_remote_os9k ()
         &showlist);
 
   add_show_from_set (
-        add_set_cmd ("monitor_log", no_class, var_zinteger,
+        add_set_cmd ("remotelog", no_class, var_zinteger,
                  (char *) &monitor_log,
                  "Set monitor activity log on(=1) or off(=0).",
                  &setlist),
         &showlist);
 
+  add_show_from_set (
+        add_set_cmd ("remotexon", no_class, var_zinteger,
+                 (char *) &tty_xon,
+                 "Set remote tty line XON control",
+                 &setlist),
+        &showlist);
+
+  add_show_from_set (
+        add_set_cmd ("remotexoff", no_class, var_zinteger,
+                 (char *) &tty_xoff,
+                 "Set remote tty line XOFF control",
+                 &setlist),
+        &showlist);
 
   add_com ("rombug <command>", class_obscure, rombug_command,
 	   "Send a command to the debug monitor."); 
