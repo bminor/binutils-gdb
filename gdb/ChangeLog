@@ -1,5 +1,10 @@
 2004-09-24  Paul Hilfinger  <hilfingr@nile.gnat.com>
 
+	* Makefile.in (.y.c): Revert previous change.  ../ylwrap was 
+	rolled back instead.
+
+2004-09-24  Paul Hilfinger  <hilfingr@nile.gnat.com>
+
 	* Makefile.in (.y.c): Modify $(YLWRAP) invocation to use
 	the new argument order.
 

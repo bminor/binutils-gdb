@@ -1564,7 +1564,7 @@ po/$(PACKAGE).pot: force
 
 .SUFFIXES: .y .l
 .y.c: 
-	$(SHELL) $(YLWRAP) $< y.tab.c $@.tmp -- "$(YACC)" $(YFLAGS)
+	$(SHELL) $(YLWRAP) "$(YACC)" $< y.tab.c $@.tmp -- $(YFLAGS)
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
