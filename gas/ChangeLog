@@ -1,3 +1,15 @@
+Wed Aug  7 14:19:03 1996  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* configure.in: Make GAS_CHECK_DECL_NEEDED include <string.h> or
+	<strings.h> if they exist.  Call GAS_CHECK_DECL_NEEDED on strstr
+	and sbrk.
+	* acconfig.h (NEED_DECLARATION_STRSTR): New macro.
+	(NEED_DECLARATION_SBRK): New macro.
+	* configure, conf.in: Rebuild.
+	* as.h: Only include <strings.h> if HAVE_STRINGS_H.
+	(strstr): Declare if NEED_DECLARATION_STRSTR.
+	* as.c: If HAVE_SBRK and NEED_DECLARATION_SBRK, declare sbrk.
+
 Wed Aug  7 11:50:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_section_align): Do align if OBJ_ELF, but

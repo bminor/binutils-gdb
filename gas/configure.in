@@ -656,6 +656,10 @@ gas_test_headers="
 #endif
 #ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 #endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -664,8 +668,10 @@ gas_test_headers="
 #include <unistd.h>
 #endif
 "
+GAS_CHECK_DECL_NEEDED(strstr, f, char *(*f)(), $gas_test_headers)
 GAS_CHECK_DECL_NEEDED(malloc, f, char *(*f)(), $gas_test_headers)
 GAS_CHECK_DECL_NEEDED(free, f, void (*f)(), $gas_test_headers)
+GAS_CHECK_DECL_NEEDED(sbrk, f, char *(*f)(), $gas_test_headers)
 
 # Does errno.h declare errno, or do we have to add a separate declaration
 # for it?

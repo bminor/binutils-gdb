@@ -79,7 +79,9 @@ void *alloca ();
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
+#ifdef HAVE_STRINGS_H
 #include <strings.h>
+#endif
 #endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -145,6 +147,9 @@ void *alloca ();
 #endif /* !__MWERKS__ */
 
 /* Other stuff from config.h.  */
+#ifdef NEED_DECLARATION_STRSTR
+extern char *strstr ();
+#endif
 #ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();
 extern PTR realloc ();
@@ -212,11 +217,6 @@ extern PTR bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t sz));
       as_fatal("Case value %ld unexpected at line %d of file \"%s\"\n", \
 	       (long) val, __LINE__, __FILE__); \
 	   }
-
-/* Version 2.1 of Solaris had problems with this declaration, but I
-   think that bug has since been fixed.  If it causes problems on your
-   system, just delete it.  */
-extern char *strstr ();
 
 #include "flonum.h"
 

@@ -2104,6 +2104,10 @@ gas_test_headers="
 #endif
 #ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 #endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -2113,12 +2117,48 @@ gas_test_headers="
 #endif
 "
 
+echo $ac_n "checking whether declaration is required for strstr""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'gas_cv_decl_needed_strstr'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 2126 "configure"
+#include "confdefs.h"
+$gas_test_headers
+int main() { return 0; }
+int t() {
+
+typedef char *(*f)();
+f x;
+x = (f) strstr;
+
+; return 0; }
+EOF
+if { (eval echo configure:2138: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  rm -rf conftest*
+  gas_cv_decl_needed_strstr=no
+else
+  rm -rf conftest*
+  gas_cv_decl_needed_strstr=yes
+fi
+rm -f conftest*
+
+fi
+echo "$ac_t""$gas_cv_decl_needed_strstr" 1>&6
+test $gas_cv_decl_needed_strstr = no || {
+ cat >> confdefs.h <<\EOF
+#define NEED_DECLARATION_STRSTR 1
+EOF
+
+}
+
+
 echo $ac_n "checking whether declaration is required for malloc""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'gas_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2122 "configure"
+#line 2162 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -2130,7 +2170,7 @@ x = (f) malloc;
 
 ; return 0; }
 EOF
-if { (eval echo configure:2134: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2174: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   gas_cv_decl_needed_malloc=no
 else
@@ -2154,7 +2194,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2158 "configure"
+#line 2198 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -2166,7 +2206,7 @@ x = (f) free;
 
 ; return 0; }
 EOF
-if { (eval echo configure:2170: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2210: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   gas_cv_decl_needed_free=no
 else
@@ -2185,6 +2225,42 @@ EOF
 }
 
 
+echo $ac_n "checking whether declaration is required for sbrk""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'gas_cv_decl_needed_sbrk'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 2234 "configure"
+#include "confdefs.h"
+$gas_test_headers
+int main() { return 0; }
+int t() {
+
+typedef char *(*f)();
+f x;
+x = (f) sbrk;
+
+; return 0; }
+EOF
+if { (eval echo configure:2246: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  rm -rf conftest*
+  gas_cv_decl_needed_sbrk=no
+else
+  rm -rf conftest*
+  gas_cv_decl_needed_sbrk=yes
+fi
+rm -f conftest*
+
+fi
+echo "$ac_t""$gas_cv_decl_needed_sbrk" 1>&6
+test $gas_cv_decl_needed_sbrk = no || {
+ cat >> confdefs.h <<\EOF
+#define NEED_DECLARATION_SBRK 1
+EOF
+
+}
+
+
 # Does errno.h declare errno, or do we have to add a separate declaration
 # for it?
 
@@ -2193,7 +2269,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_errno'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2197 "configure"
+#line 2273 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_ERRNO_H
@@ -2209,7 +2285,7 @@ x = (f) errno;
 
 ; return 0; }
 EOF
-if { (eval echo configure:2213: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2289: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   gas_cv_decl_needed_errno=no
 else
