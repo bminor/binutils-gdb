@@ -1,3 +1,7 @@
+Sun Jun 13 12:52:39 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in (realclean): Remove info and dvi files too.
+
 Sat Jun 12 16:09:22 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* {all,h8}-config.texi: Rename to *-cfg.texi for 14 char filenames.
