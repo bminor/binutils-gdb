@@ -1,3 +1,7 @@
+Tue Nov 26 17:21:37 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Rebuild with autoconf 2.12.
+
 Mon Nov 25 13:17:16 1996  Fred Fish  <fnf@ninemoons.com>
 
 	From: Paul Eggert <eggert@twinsun.com>
