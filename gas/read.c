@@ -1,5 +1,5 @@
 /* read.c - read a source file -
-   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -165,12 +165,12 @@ static char *old_buffer;	/* JF a hack */
 static char *old_input;
 static char *old_limit;
 
-/* Variables for handling include file directory list. */
+/* Variables for handling include file directory table. */
 
-char **include_dirs;	/* List of pointers to directories to
+char **include_dirs;	/* Table of pointers to directories to
 			   search for .include's */
-int include_dir_count;	/* How many are in the list */
-int include_dir_maxlen = 1;/* Length of longest in list */
+int include_dir_count;	/* How many are in the table */
+int include_dir_maxlen = 1;/* Length of longest in table */
 
 #ifndef WORKING_DOT_WORD
 struct broken_word *broken_words;
@@ -196,6 +196,15 @@ symbolS *mri_common_symbol;
    dc.b, ds.b, or dcb.b.  This variable is set to 1 if an alignment
    may be needed.  */
 static int mri_pending_align;
+
+#ifndef NO_LISTING
+#ifdef OBJ_ELF
+/* This variable is set to be non-zero if the next string we see might
+   be the name of the source file in DWARF debugging information.  See
+   the comment in emit_expr for the format we look for.  */
+static int dwarf_file_string;
+#endif
+#endif
 
 static void cons_worker PARAMS ((int, int));
 static int scrub_from_string PARAMS ((char **));
@@ -3263,6 +3272,45 @@ emit_expr (exp, nbytes)
     else
       dwarf_line = -1;
   }
+
+  /* When gcc emits DWARF 1 debugging pseudo-ops, a file name will
+     appear as a 2 byte TAG_compile_unit (0x11) followed by a 2 byte
+     AT_sibling (0x12) followed by a four byte address of the sibling
+     followed by a 2 byte AT_name (0x38) followed by the name of the
+     file.  We look for that case here.  */
+  {
+    static int dwarf_file = 0;
+
+    if (strcmp (segment_name (now_seg), ".debug") != 0)
+      dwarf_file = 0;
+    else if (dwarf_file == 0
+	     && nbytes == 2
+	     && exp->X_op == O_constant
+	     && exp->X_add_number == 0x11)
+      dwarf_file = 1;
+    else if (dwarf_file == 1
+	     && nbytes == 2
+	     && exp->X_op == O_constant
+	     && exp->X_add_number == 0x12)
+      dwarf_file = 2;
+    else if (dwarf_file == 2
+	     && nbytes == 4)
+      dwarf_file = 3;
+    else if (dwarf_file == 3
+	     && nbytes == 2
+	     && exp->X_op == O_constant
+	     && exp->X_add_number == 0x38)
+      dwarf_file = 4;
+    else
+      dwarf_file = 0;
+
+    /* The variable dwarf_file_string tells stringer that the string
+       may be the name of the source file.  */
+    if (dwarf_file == 4)
+      dwarf_file_string = 1;
+    else
+      dwarf_file_string = 0;
+  }
 #endif
 #endif
 
@@ -4328,11 +4376,14 @@ stringer (append_zero)		/* Worker to do .ascii etc statements. */
 #ifndef NO_LISTING
 #ifdef OBJ_ELF
 	  /* In ELF, when gcc is emitting DWARF 1 debugging output, it
-             will emit .string with a filename in the .debug_sfnames
-             section to indicate a file name.  I don't know if this
-             will work for compilers other than gcc, and I don't know
-             if it will work for DWARF 2.  */
-	  if (strcmp (segment_name (now_seg), ".debug_sfnames") == 0)
+             will emit .string with a filename in the .debug section
+             after a sequence of constants.  See the comment in
+             emit_expr for the sequence.  emit_expr will set
+             dwarf_file_string to non-zero if this string might be a
+             source file name.  */
+	  if (strcmp (segment_name (now_seg), ".debug") != 0)
+	    dwarf_file_string = 0;
+	  else if (dwarf_file_string)
 	    {
 	      c = input_line_pointer[-1];
 	      input_line_pointer[-1] = '\0';
@@ -4699,7 +4750,15 @@ s_include (arg)
   char *path;
 
   if (! flag_m68k_mri)
-    filename = demand_copy_string (&i);
+    {
+      filename = demand_copy_string (&i);
+      if (filename == NULL)
+	{
+	  /* demand_copy_string has already printed an error and
+             called ignore_rest_of_line.  */
+	  return;
+	}
+    }
   else
     {
       SKIP_WHITESPACE ();

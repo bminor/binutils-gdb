@@ -1,3 +1,8 @@
+Fri Jan 30 11:02:35 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* read.h (include_dirs): Declare.
+	(include_dir_count,include_dir_maxlen): Declare.
+
 Fri Jan 30 11:47:02 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* listing.c (buffer_line): If we can't open the file, set at_end.
