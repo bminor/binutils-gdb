@@ -449,118 +449,127 @@ remote_wait (status)
      WAITTYPE *status;
 {
   unsigned char buf[PBUFSIZ];
-  unsigned char *p;
-  int i;
-  long regno;
-  char regs[MAX_REGISTER_RAW_SIZE];
 
   WSETEXIT ((*status), 0);
 
-  ofunc = (void (*)()) signal (SIGINT, remote_interrupt);
-  getpkt ((char *) buf, 1);
-  signal (SIGINT, ofunc);
-
-  if (buf[0] == 'E')
-    error ("Remote failure reply: %s", buf);
-  if (buf[0] == 'T')
+  while (1)
     {
-      /* Expedited reply, containing Signal, {regno, reg} repeat */
-      /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
-	  ss = signal number
-	  n... = register number
-	  r... = register contents
-	  */
+      unsigned char *p;
 
-      p = &buf[3];		/* after Txx */
+      ofunc = (void (*)()) signal (SIGINT, remote_interrupt);
+      getpkt ((char *) buf, 1);
+      signal (SIGINT, ofunc);
 
-      while (*p)
+      if (buf[0] == 'E')
+	warning ("Remote failure reply: %s", buf);
+      else if (buf[0] == 'T')
+	{
+	  int i;
+	  long regno;
+	  char regs[MAX_REGISTER_RAW_SIZE];
+
+	  /* Expedited reply, containing Signal, {regno, reg} repeat */
+	  /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
+	      ss = signal number
+	      n... = register number
+	      r... = register contents
+	      */
+
+	  p = &buf[3];		/* after Txx */
+
+	  while (*p)
+	    {
+	      unsigned char *p1;
+
+	      regno = strtol (p, &p1, 16); /* Read the register number */
+
+	      if (p1 == p)
+		warning ("Remote sent badly formed register number: %s\nPacket: '%s'\n",
+			 p1, buf);
+
+	      p = p1;
+
+	      if (*p++ != ':')
+		warning ("Malformed packet (missing colon): %s\nPacket: '%s'\n",
+			 p, buf);
+
+	      if (regno >= NUM_REGS)
+		warning ("Remote sent bad register number %d: %s\nPacket: '%s'\n",
+			 regno, p, buf);
+
+	      for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
+		{
+		  if (p[0] == 0 || p[1] == 0)
+		    warning ("Remote reply is too short: %s", buf);
+		  regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+		  p += 2;
+		}
+
+	      if (*p++ != ';')
+		warning ("Remote register badly formatted: %s", buf);
+
+	      supply_register (regno, regs);
+	    }
+	  break;
+	}
+      else if (buf[0] == 'N')
 	{
 	  unsigned char *p1;
+	  bfd_vma text_addr, data_addr, bss_addr;
 
-	  regno = strtol (p, &p1, 16); /* Read the register number */
-
+	  /* Relocate object file.  Format is NAATT;DD;BB where AA is
+	     the signal number, TT is the new text address, DD is the
+	     new data address, and BB is the new bss address.  This is
+	     used by the NLM stub; gdb may see more sections.  */
+	  p = &buf[3];
+	  text_addr = strtol (p, &p1, 16);
+	  if (p1 == p || *p1 != ';')
+	    warning ("Malformed relocation packet: Packet '%s'", buf);
+	  p = p1 + 1;
+	  data_addr = strtol (p, &p1, 16);
+	  if (p1 == p || *p1 != ';')
+	    warning ("Malformed relocation packet: Packet '%s'", buf);
+	  p = p1 + 1;
+	  bss_addr = strtol (p, &p1, 16);
 	  if (p1 == p)
-	    error ("Remote sent badly formed register number: %s\nPacket: '%s'\n",
-		   p1, buf);
+	    warning ("Malformed relocation packet: Packet '%s'", buf);
 
-	  p = p1;
-
-	  if (*p++ != ':')
-	    error ("Malformed packet (missing colon): %s\nPacket: '%s'\n",
-		   p, buf);
-
-	  if (regno >= NUM_REGS)
-	    error ("Remote sent bad register number %d: %s\nPacket: '%s'\n",
-		   regno, p, buf);
-
-	  for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
+	  if (symfile_objfile != NULL)
 	    {
-	      if (p[0] == 0 || p[1] == 0)
-		error ("Remote reply is too short: %s", buf);
-	      regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
-	      p += 2;
+	      struct section_offsets *offs;
+
+	      /* FIXME: Why don't the various symfile_offsets routines
+		 in the sym_fns vectors set this?  */
+	      if (symfile_objfile->num_sections == 0)
+		symfile_objfile->num_sections = SECT_OFF_MAX;
+
+	      offs = ((struct section_offsets *)
+		      alloca (sizeof (struct section_offsets)
+			      + (symfile_objfile->num_sections
+				 * sizeof (offs->offsets))));
+	      memcpy (offs, symfile_objfile->section_offsets,
+		      (sizeof (struct section_offsets)
+		       + (symfile_objfile->num_sections
+			  * sizeof (offs->offsets))));
+	      ANOFFSET (offs, SECT_OFF_TEXT) = text_addr;
+	      ANOFFSET (offs, SECT_OFF_DATA) = data_addr;
+	      ANOFFSET (offs, SECT_OFF_BSS) = bss_addr;
+
+	      objfile_relocate (symfile_objfile, offs);
 	    }
-
-	  if (*p++ != ';')
-	    error("Remote register badly formatted: %s", buf);
-
-	  supply_register (regno, regs);
+	  break;
 	}
-    }
-  else if (buf[0] == 'N')
-    {
-      unsigned char *p1;
-      bfd_vma text_addr, data_addr, bss_addr;
-
-      /* Relocate object file.  Format is NAATT;DD;BB where AA is the
-	 signal number, TT is the new text address, DD is the new data
-	 address, and BB is the new bss address.  This is used by the
-	 NLM stub; gdb may see more sections.  */
-      p = &buf[3];
-      text_addr = strtol (p, &p1, 16);
-      if (p1 == p || *p1 != ';')
-	error ("Malformed relocation packet: Packet '%s'", buf);
-      p = p1 + 1;
-      data_addr = strtol (p, &p1, 16);
-      if (p1 == p || *p1 != ';')
-	error ("Malformed relocation packet: Packet '%s'", buf);
-      p = p1 + 1;
-      bss_addr = strtol (p, &p1, 16);
-      if (p1 == p)
-	error ("Malformed relocation packet: Packet '%s'", buf);
-
-      if (symfile_objfile != NULL)
+      else if (buf[0] == 'W')
 	{
-	  struct section_offsets *offs;
-
-	  /* FIXME: Why don't the various symfile_offsets routines in
-	     the sym_fns vectors set this?  */
-	  if (symfile_objfile->num_sections == 0)
-	    symfile_objfile->num_sections = SECT_OFF_MAX;
-
-	  offs = ((struct section_offsets *)
-		  alloca (sizeof (struct section_offsets)
-			  + (symfile_objfile->num_sections
-			     * sizeof (offs->offsets))));
-	  memcpy (offs, symfile_objfile->section_offsets,
-		  (sizeof (struct section_offsets)
-		   + (symfile_objfile->num_sections
-		      * sizeof (offs->offsets))));
-	  ANOFFSET (offs, SECT_OFF_TEXT) = text_addr;
-	  ANOFFSET (offs, SECT_OFF_DATA) = data_addr;
-	  ANOFFSET (offs, SECT_OFF_BSS) = bss_addr;
-
-	  objfile_relocate (symfile_objfile, offs);
+	  /* The remote process exited.  */
+	  WSETEXIT (*status, (fromhex (buf[1]) << 4) + fromhex (buf[2]));
+	  return 0;
 	}
+      else if (buf[0] == 'S')
+	break;
+      else
+	warning ("Invalid remote reply: %s", buf);
     }
-  else if (buf[0] == 'W')
-    {
-      /* The remote process exited.  */
-      WSETEXIT (*status, (fromhex (buf[1]) << 4) + fromhex (buf[2]));
-      return 0;
-    }
-  else if (buf[0] != 'S')
-    error ("Invalid remote reply: %s", buf);
 
   WSETSTOP ((*status), (((fromhex (buf[1])) << 4) + (fromhex (buf[2]))));
 
