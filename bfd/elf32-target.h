@@ -66,6 +66,7 @@ static CONST struct elf_backend_data elf32_bed =
 #else
   0,				/* elf_info_to_howto_rel */
 #endif
+  bfd_elf32__write_relocs,	/* write_relocs */
 };
 
 #ifdef TARGET_BIG_SYM

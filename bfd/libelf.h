@@ -88,17 +88,6 @@ typedef struct
   Elf64_External_Sym native_elf_sym;
 } elf64_symbol_type;
 
-/* Lacking nested functions and nested types, set up for mapping over
-   BFD sections to produce ELF sections.  */
-typedef struct
-{
-  Elf_Internal_Ehdr * i_ehdr;
-  Elf_Internal_Shdr * i_shdrp;
-  struct strtab *shstrtab;
-  int symtab_section;
-}
-elf_sect_thunk;
-
 struct elf_backend_data
 {
   int use_rela_p;
@@ -108,6 +97,7 @@ struct elf_backend_data
 				     Elf_Internal_Rela *));
   void (*elf_info_to_howto_rel) PARAMS ((bfd *, arelent *,
 					 Elf_Internal_Rel *));
+  void (*write_relocs) PARAMS ((bfd *, asection *, PTR));
 
   /* @@ I really don't think this should be here.  I don't know what
      global_sym is supposed to be used for, but I doubt it's something
@@ -119,13 +109,95 @@ struct elf_backend_data
   PTR global_sym;
 };
 
-extern boolean elf_get_sect_thunk PARAMS ((bfd *, elf_sect_thunk *));
+struct bfd_elf_arch_map {
+  enum bfd_architecture bfd_arch;
+  int elf_arch;
+};
+
+extern const struct bfd_elf_arch_map bfd_elf_arch_map[];
+extern const int bfd_elf_arch_map_size;
+
+struct bfd_elf_section_data {
+  Elf_Internal_Shdr this_hdr;
+  Elf_Internal_Shdr rel_hdr;
+  int this_idx, rel_idx;
+#if 0
+  Elf_Internal_Shdr str_hdr;
+  int str_idx;
+#endif
+};
+#define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
+#define shdr_name(abfd,shdr)	(elf_shstrtab (abfd)->tab + (shdr)->sh_name)
+
+#define get_elf_backend_data(abfd) \
+  ((struct elf_backend_data *) (abfd)->xvec->backend_data)
+
+struct strtab
+{
+  char *tab;
+  int nentries;
+  int length;
+};
+
+/* Some private data is stashed away for future use using the tdata pointer
+   in the bfd structure.  */
+
+struct elf_obj_tdata
+{
+  Elf_Internal_Ehdr elf_header[1];	/* Actual data, but ref like ptr */
+  Elf_Internal_Shdr **elf_sect_ptr;
+  struct strtab *strtab_ptr;
+  int num_locals;
+  int num_globals;
+  int *symtab_map;
+  PTR raw_syms;			/* Elf_External_Sym* */
+  Elf_Internal_Sym *internal_syms;
+  PTR symbols;			/* elf_symbol_type */
+/*  struct strtab *shstrtab;*/
+  Elf_Internal_Shdr symtab_hdr;
+  Elf_Internal_Shdr shstrtab_hdr;
+  Elf_Internal_Shdr strtab_hdr;
+  int symtab_section, shstrtab_section, strtab_section;
+  file_ptr next_file_pos;
+  void *prstatus;		/* The raw /proc prstatus structure */
+  void *prpsinfo;		/* The raw /proc prpsinfo structure */
+};
+
+#define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
+#define elf_elfheader(bfd)	(elf_tdata(bfd) -> elf_header)
+#define elf_elfsections(bfd)	(elf_tdata(bfd) -> elf_sect_ptr)
+#define elf_shstrtab(bfd)	(elf_tdata(bfd) -> strtab_ptr)
+#define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
+#define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
+#define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
+#define elf_symtab_map(bfd)	(elf_tdata(bfd) -> symtab_map)
+#define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)
+#define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
+#define obj_symbols(bfd)	((elf_symbol_type*)(elf_tdata(bfd) -> symbols))
+#define obj_raw_syms(bfd)	((Elf_External_Sym*)(elf_tdata(bfd) -> raw_syms))
+#define obj_internal_syms(bfd)	(elf_tdata(bfd) -> internal_syms)
+
+extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
+extern char * elf_get_str_section PARAMS ((bfd *, unsigned));
+
+#define bfd_elf32_mkobject	bfd_elf_mkobject
+#define bfd_elf64_mkobject	bfd_elf_mkobject
+#define elf_mkobject		bfd_elf_mkobject
+
 extern unsigned long elf_hash PARAMS ((CONST unsigned char *));
+
+extern bfd_reloc_status_type bfd_elf_generic_reloc PARAMS ((bfd *,
+							    arelent *,
+							    asymbol *,
+							    PTR,
+							    asection *,
+							    bfd *));
+extern boolean bfd_elf_mkobject PARAMS ((bfd *));
+extern boolean bfd_elf32_write_object_contents PARAMS ((bfd *));
+extern boolean bfd_elf64_write_object_contents PARAMS ((bfd *));
 
 extern bfd_target *bfd_elf32_object_p PARAMS ((bfd *));
 extern bfd_target *bfd_elf32_core_file_p PARAMS ((bfd *));
-extern boolean bfd_elf_mkobject PARAMS ((bfd *));
-extern boolean bfd_elf32_write_object_contents PARAMS ((bfd *));
 extern char *bfd_elf32_core_file_failing_command PARAMS ((bfd *));
 extern int bfd_elf32_core_file_failing_signal PARAMS ((bfd *));
 extern boolean bfd_elf32_core_file_matches_executable_p PARAMS ((bfd *,
@@ -154,6 +226,7 @@ extern boolean bfd_elf32_find_nearest_line PARAMS ((bfd *, asection *,
 						    CONST char **,
 						    unsigned int *));
 extern int bfd_elf32_sizeof_headers PARAMS ((bfd *, boolean));
+extern void bfd_elf32__write_relocs PARAMS ((bfd *, asection *, PTR));
 extern boolean bfd_elf32_new_section_hook PARAMS ((bfd *, asection *));
 
 /* If the target doesn't have reloc handling written yet:  */
@@ -162,7 +235,6 @@ extern void bfd_elf32_no_info_to_howto PARAMS ((bfd *, arelent *,
 
 extern bfd_target *bfd_elf64_object_p PARAMS ((bfd *));
 extern bfd_target *bfd_elf64_core_file_p PARAMS ((bfd *));
-extern boolean bfd_elf64_write_object_contents PARAMS ((bfd *));
 extern char *bfd_elf64_core_file_failing_command PARAMS ((bfd *));
 extern int bfd_elf64_core_file_failing_signal PARAMS ((bfd *));
 extern boolean bfd_elf64_core_file_matches_executable_p PARAMS ((bfd *,
@@ -191,61 +263,11 @@ extern boolean bfd_elf64_find_nearest_line PARAMS ((bfd *, asection *,
 						    CONST char **,
 						    unsigned int *));
 extern int bfd_elf64_sizeof_headers PARAMS ((bfd *, boolean));
+extern void bfd_elf64__write_relocs PARAMS ((bfd *, asection *, PTR));
 extern boolean bfd_elf64_new_section_hook PARAMS ((bfd *, asection *));
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void bfd_elf64_no_info_to_howto PARAMS ((bfd *, arelent *,
 						Elf64_Internal_Rela *));
-
-#define get_elf_backend_data(abfd) \
-  ((struct elf_backend_data *) (abfd)->xvec->backend_data)
-
-struct strtab
-{
-  char *tab;
-  int nentries;
-  int length;
-};
-
-/* Some private data is stashed away for future use using the tdata pointer
-   in the bfd structure.  */
-
-struct elf_obj_tdata
-{
-  Elf_Internal_Ehdr elf_header[1];	/* Actual data, but ref like ptr */
-  Elf_Internal_Shdr *elf_sect_ptr;
-  struct strtab *strtab_ptr;
-  int symtab_section;
-  int num_locals;
-  int num_globals;
-  int *symtab_map;
-  void *prstatus;		/* The raw /proc prstatus structure */
-  void *prpsinfo;		/* The raw /proc prpsinfo structure */
-  PTR raw_syms;			/* Elf_External_Sym* */
-  Elf_Internal_Sym *internal_syms;
-  PTR symbols;			/* elf_symbol_type */
-  elf_sect_thunk thunk;
-};
-
-#define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
-#define elf_elfheader(bfd)	(elf_tdata(bfd) -> elf_header)
-#define elf_elfsections(bfd)	(elf_tdata(bfd) -> elf_sect_ptr)
-#define elf_shstrtab(bfd)	(elf_tdata(bfd) -> strtab_ptr)
-#define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
-#define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
-#define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
-#define elf_symtab_map(bfd)	(elf_tdata(bfd) -> symtab_map)
-#define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)
-#define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
-#define obj_symbols(bfd)	((elf_symbol_type*)(elf_tdata(bfd) -> symbols))
-#define obj_raw_syms(bfd)	((Elf_External_Sym*)(elf_tdata(bfd) -> raw_syms))
-#define obj_internal_syms(bfd)	(elf_tdata(bfd) -> internal_syms)
-
-extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
-extern char * elf_get_str_section PARAMS ((bfd *, unsigned));
-
-#define bfd_elf32_mkobject	bfd_elf_mkobject
-#define bfd_elf64_mkobject	bfd_elf_mkobject
-#define elf_mkobject		bfd_elf_mkobject
 
 #endif /* _LIBELF_H_ */

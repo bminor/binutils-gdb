@@ -37,14 +37,6 @@ enum reloc_type
     R_SPARC_GLOB_DAT,	R_SPARC_JMP_SLOT,
     R_SPARC_RELATIVE,
     R_SPARC_UA32,
-
-    /* v9 relocs */
-    R_SPARC_10, R_SPARC_11, R_SPARC_64,
-    R_SPARC_OLO10, R_SPARC_HH22, R_SPARC_HM10, R_SPARC_LM22,
-    R_SPARC_PC_HH22, R_SPARC_PC_HM10, R_SPARC_PC_LM22,
-    R_SPARC_WDISP16, R_SPARC_WDISP19,
-    R_SPARC_GLOB_JMP, R_SPARC_LO7,
-
     R_SPARC_max
   };
 
@@ -64,17 +56,8 @@ static CONST char *CONST reloc_type_names[] =
   "R_SPARC_GLOB_DAT",	"R_SPARC_JMP_SLOT",
   "R_SPARC_RELATIVE",
   "R_SPARC_UA32",
-
-  "R_SPARC_10", "R_SPARC_11", "R_SPARC_64",
-  "R_SPARC_OLO10", "R_SPARC_HH22", "R_SPARC_HM10", "R_SPARC_LM22",
-  "R_SPARC_PC_HH22", "R_SPARC_PC_HM10", "R_SPARC_PC_LM22",
-  "R_SPARC_WDISP16", "R_SPARC_WDISP19",
-  "R_SPARC_GLOB_JMP", "R_SPARC_LO7",
 };
 #endif
-
-extern void abort ();
-#define DIE	((bfd_reloc_status_type(*)())abort)
 
 static reloc_howto_type elf_sparc_howto_table[] = 
 {
@@ -85,7 +68,7 @@ static reloc_howto_type elf_sparc_howto_table[] =
   HOWTO(R_SPARC_DISP8,  0,0, 8,true, 0,false, true, &bfd_elf_generic_reloc,"R_SPARC_DISP8",  false,0,0x000000ff,false),
   HOWTO(R_SPARC_DISP16, 0,1,16,true, 0,false, true, &bfd_elf_generic_reloc,"R_SPARC_DISP16", false,0,0x0000ffff,false),
   HOWTO(R_SPARC_DISP32, 0,2,32,true, 0,false, true, &bfd_elf_generic_reloc,"R_SPARC_DISP32", false,0,0x00ffffff,false),
-  HOWTO(R_SPARC_WDISP30,2,2,30,true, 0,false, true, &bfd_elf_generic_reloc,"R_SPARC_WDISP30",false,0,0x3fffffff,true),
+  HOWTO(R_SPARC_WDISP30,2,2,30,true, 0,false, true, &bfd_elf_generic_reloc,"R_SPARC_WDISP30",false,0,0x3fffffff,false),
   HOWTO(R_SPARC_WDISP22,2,2,22,true, 0,false, true, &bfd_elf_generic_reloc,"R_SPARC_WDISP22",false,0,0x003fffff,false),
   HOWTO(R_SPARC_HI22,  10,2,22,false,0,true, false, &bfd_elf_generic_reloc,"R_SPARC_HI22",   false,0,0x003fffff,false),
   HOWTO(R_SPARC_22,     0,2,22,false,0,true,  true, &bfd_elf_generic_reloc,"R_SPARC_22",     false,0,0x003fffff,false),
@@ -102,20 +85,6 @@ static reloc_howto_type elf_sparc_howto_table[] =
   HOWTO(R_SPARC_JMP_SLOT,0,0,00,false,0,false,false,&bfd_elf_generic_reloc,"R_SPARC_JMP_SLOT",false,0,0x00000000,false),
   HOWTO(R_SPARC_RELATIVE,0,0,00,false,0,false,false,&bfd_elf_generic_reloc,"R_SPARC_RELATIVE",false,0,0x00000000,false),
   HOWTO(R_SPARC_UA32,    0,0,00,false,0,false,false,&bfd_elf_generic_reloc,"R_SPARC_UA32",    false,0,0x00000000,false),
-  HOWTO(R_SPARC_10,      0,1,10,false,0,true,  true, &bfd_elf_generic_reloc,"R_SPARC_10",	 false,0,0x000003ff,false),
-  HOWTO(R_SPARC_11,	 0,1,11,false,0,true,  true, &bfd_elf_generic_reloc,"R_SPARC_11",     false,0,0x000007ff,false),
-  HOWTO(R_SPARC_64,	 0,4,00,false,0,true,  true, &bfd_elf_generic_reloc,"R_SPARC_64",     false,0,(((bfd_vma)0xffffffff)<<32)+0xffffffff,false),
-  HOWTO(R_SPARC_OLO10,   0,1,10,false,0,true,false, &bfd_elf_generic_reloc,"R_SPARC_OLO10",false,0,0x000003ff,false),
-  HOWTO(R_SPARC_HH22,   42,2,22,false,0,true, false, &bfd_elf_generic_reloc,"R_SPARC_HH22",   false,0,0x003fffff,false),
-  HOWTO(R_SPARC_HM10,   32,1,10,false,0,true,false, &bfd_elf_generic_reloc,"R_SPARC_HM10",    false,0,0x000003ff,false),
-  HOWTO(R_SPARC_LM22,   10,2,22,false,0,true,false, &bfd_elf_generic_reloc,"R_SPARC_LM22",    false,0,0x003fffff,false),
-  HOWTO(R_SPARC_PC_HH22,42,2,22, true,0,true, false, &bfd_elf_generic_reloc,"R_SPARC_HH22",   false,0,0x003fffff,false),
-  HOWTO(R_SPARC_PC_HM10,32,1,10, true,0,true,false, &bfd_elf_generic_reloc,"R_SPARC_HM10",    false,0,0x000003ff,false),
-  HOWTO(R_SPARC_PC_LM22,10,2,22,true, 0,true,false, &bfd_elf_generic_reloc,"R_SPARC_LM22",    false,0,0x003fffff,false),
-  HOWTO(R_SPARC_WDISP16, 2,2,16,true, 0,false, true,&bfd_elf_generic_reloc,"R_SPARC_WDISP16",false,0,0,false),
-  HOWTO(R_SPARC_WDISP19, 2,2,22,true, 0,false, true, &bfd_elf_generic_reloc,"R_SPARC_WDISP19",false,0,0x0007ffff,false),
-  HOWTO(R_SPARC_GLOB_JMP,0,0,00,false,0,false,false,&bfd_elf_generic_reloc,"R_SPARC_GLOB_DAT",false,0,0x00000000,false),
-  HOWTO(R_SPARC_LO7,     0,1, 7,false,0,false,false,&bfd_elf_generic_reloc,"R_SPARC_LO7",     false,0,0x0000007f,false),
 };
 
 struct elf_reloc_map {
@@ -148,25 +117,11 @@ static CONST struct elf_reloc_map sparc_reloc_map[] =
   { BFD_RELOC_SPARC_JMP_SLOT, R_SPARC_JMP_SLOT },
   { BFD_RELOC_SPARC_RELATIVE, R_SPARC_RELATIVE },
   { BFD_RELOC_SPARC_WDISP22, R_SPARC_WDISP22 },
-/*  { BFD_RELOC_SPARC_UA32, R_SPARC_UA32 }, not used?? */
-  { BFD_RELOC_SPARC_10, R_SPARC_10 },
-  { BFD_RELOC_SPARC_11, R_SPARC_11 },
-  { BFD_RELOC_SPARC_64, R_SPARC_64 },
-  { BFD_RELOC_SPARC_OLO10, R_SPARC_OLO10 },
-  { BFD_RELOC_SPARC_HH22, R_SPARC_HH22 },
-  { BFD_RELOC_SPARC_HM10, R_SPARC_HM10 },
-  { BFD_RELOC_SPARC_LM22, R_SPARC_LM22 },
-  { BFD_RELOC_SPARC_PC_HH22, R_SPARC_PC_HH22 },
-  { BFD_RELOC_SPARC_PC_HM10, R_SPARC_PC_HM10 },
-  { BFD_RELOC_SPARC_PC_LM22, R_SPARC_PC_LM22 },
-  { BFD_RELOC_SPARC_WDISP16, R_SPARC_WDISP16 },
-  { BFD_RELOC_SPARC_WDISP19, R_SPARC_WDISP19 },
-  { BFD_RELOC_SPARC_GLOB_JMP, R_SPARC_GLOB_JMP },
-  { BFD_RELOC_SPARC_LO7, R_SPARC_LO7 },
+  /*  { BFD_RELOC_SPARC_UA32, R_SPARC_UA32 }, not used?? */
 };
 
 static CONST struct reloc_howto_struct *
-DEFUN (bfd_elf64_bfd_reloc_type_lookup, (abfd, code),
+DEFUN (bfd_elf32_bfd_reloc_type_lookup, (abfd, code),
        bfd *abfd AND
        bfd_reloc_code_real_type code)
 {
@@ -183,14 +138,14 @@ static void
 DEFUN (elf_info_to_howto, (abfd, cache_ptr, dst),
        bfd *abfd AND
        arelent *cache_ptr AND
-       Elf64_Internal_Rela *dst)
+       Elf32_Internal_Rela *dst)
 {
-  BFD_ASSERT (ELF64_R_TYPE(dst->r_info) < (unsigned int) R_SPARC_max);
-  cache_ptr->howto = &elf_sparc_howto_table[ELF64_R_TYPE(dst->r_info)];
+  BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_SPARC_max);
+  cache_ptr->howto = &elf_sparc_howto_table[ELF32_R_TYPE(dst->r_info)];
 }
 
-#define TARGET_BIG_SYM	bfd_elf64_sparc_vec
-#define TARGET_BIG_NAME	"elf64-sparc"
+#define TARGET_BIG_SYM	bfd_elf32_sparc_vec
+#define TARGET_BIG_NAME	"elf32-sparc"
 #define ELF_ARCH	bfd_arch_sparc
 
-#include "elf64-target.h"
+#include "elf32-target.h"

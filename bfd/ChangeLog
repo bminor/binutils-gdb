@@ -1,3 +1,25 @@
+Mon Jul 19 14:53:30 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* elf.c, elfcode.h, libelf.h: Serious reorganization.
+	Deleted `thunk' structure, merged into tdata, duplicate data
+	eliminated.
+	Rearranged functions, grouping by function.
+	Broke up many functions in elfcode.h, re-ordered many parts of
+	file writing to handle unpredictable state of section relocation
+	table as provided by various applications.
+	Still needs cleanup: Merge functions back together, split out
+	data structure with only data that is used only when writing out
+	object file.
+
+	* elf.c (bfd_elf_generic_reloc): New function, taken from
+	coff-mips.c.
+	* elf32-sparc.c (elf_sparc_howto_table): Use it, to work around
+	bfd_perform_relocation lossage.
+
+	* Makefile.in (BFD_LIBS): Include coff-mips.o and coff-msym.o, so
+	that gdb will link.
+	(ofiles): Don't use sort or uniq; do it with sh constructs.
+
 Sun Jul 18 19:42:14 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* coffcode.h: Recognize I386PTXMAGIC.
