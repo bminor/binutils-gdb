@@ -1,3 +1,7 @@
+2001-05-11  Jim Blandy  <jimb@redhat.com>
+
+	* gnu-v2-abi.c: Don't #include "gdb_regex.h".  We don't use it.
+
 2001-05-11  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2001-03-26 Rodney Brown <RodneyBrown@mynd.com>
