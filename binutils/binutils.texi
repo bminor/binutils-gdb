@@ -4,11 +4,8 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-
-* Binutils: (binutils).	
-		The GNU binary utilities "ar", "ld", "objdump", "nm",
-		"size", "strip", and "ranlib".
-
+* Binutils: (binutils).		The GNU binary utilities "ar", "ld", "objdump",
+				"nm", "size", "strip", and "ranlib".
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
